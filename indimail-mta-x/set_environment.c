@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.6  2021-07-13 23:15:03+05:30  Cprogrammer
+ * minor refactoring to make code smaller
+ *
  * Revision 1.5  2021-07-05 21:18:24+05:30  Cprogrammer
  * new argument root_rc to allow root to load $HOME/.defaultqueue
  *
@@ -46,8 +49,8 @@ set_environment(char *warn, char *fatal, int root_rc)
 				!stralloc_0(&tmp))
 			strerr_die2x(111, fatal, "out of memory");
 		if (!access(tmp.s, X_OK)) {
-			if ((i = envdir(tmp.s, 0)))
-				strerr_warn3(warn, envdir_str(i), ":", &strerr_sys);
+			if ((i = envdir(tmp.s, &err)))
+				strerr_warn5(warn, envdir_str(i), ": ", err, ": ", &strerr_sys);
 			if ((e = pathexec(0)))
 				environ = e;
 		}
@@ -62,21 +65,8 @@ set_environment(char *warn, char *fatal, int root_rc)
 				!stralloc_0(&tmp))
 			strerr_die2x(111, fatal, "out of memory");
 		if (!access(tmp.s, X_OK)) {
-			switch(envdir(tmp.s, &err))
-			{
-			case -1:
-				strerr_die4sys(111, fatal, "unable to read environment file defaultqueue/", err, ": ");
-			case -2:
-				strerr_die2sys(111, fatal, "unable to open current directory: ");
-			case -3:
-				strerr_die2sys(111, fatal, "unable to switch to environment directory defaultqueue: ");
-			case -4:
-				strerr_die2sys(111, fatal, "unable to read environment directory defaultqueue: ");
-			case -5:
-				strerr_die2sys(111, fatal, "unable to switch back to original directory: ");
-			case -6:
-				strerr_die2x(111, fatal, "out of memory");
-			}
+			if ((i = envdir(tmp.s, &err)))
+				strerr_die5sys(111, fatal, envdir_str(i), ": ", err, ": ");
 			if ((e = pathexec(0)))
 				environ = e;
 		} else
@@ -89,7 +79,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.5 2021-07-05 21:18:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: set_environment.c,v 1.6 2021-07-13 23:15:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
