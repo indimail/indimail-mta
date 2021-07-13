@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.329 2021-07-12 18:21:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.330 2021-07-13 10:06:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -131,7 +131,7 @@ PreReq: permissions
 %endif
 
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
-Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
+Requires: procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: diffutils sed findutils pkgconfig
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -1531,10 +1531,11 @@ elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service ]
 else
   if [ -f %{_prefix}/sbin/initsvc ] ; then
   echo "1. Execute %{_prefix}/sbin/initsvc -on"
-  else
+  elif [ -f %{_sysconfdir}/init.d/svscan ] ; then
   echo "1. Execute %{_sysconfdir}/init.d/svscan start"
+  else
+  echo "1. Execute /sbin/init q to start services"
   fi
-  echo "2. Execute /sbin/init q to start services"
   count=2
 fi
 default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
@@ -1599,7 +1600,7 @@ do
   fi
 done
 
-if [ -f %{_sysconfdir}/init.d/svscan ] ; then
+if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
   if [ -f /sbin/chkconfig ] ; then
     /sbin/chkconfig --add sendmail
   fi

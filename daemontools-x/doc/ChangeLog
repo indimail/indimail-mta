@@ -57,6 +57,8 @@ Release 1.1 Start 27/02/2021
 - 12/07/2021
 30. envdir: added feature to process .envfile and .envdir as a file containing
     list of directories
+- 13/07/2021
+31. daemontools.spec: removed /sbin/chkconfig from Requires
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

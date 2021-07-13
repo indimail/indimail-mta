@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.19 2021-04-28 10:12:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.20 2021-07-13 10:06:35+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -85,7 +85,7 @@ BuildRequires: -post-build-checks
 ##############################################################################
 
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
-Requires: /sbin/chkconfig procps /usr/bin/awk /usr/bin/which
+Requires: procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc
 Requires: diffutils sed findutils
 %if %{undefined suse_version} && %{undefined sles_version}
@@ -563,6 +563,8 @@ nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl stop nscd.service
   fi
 fi
 echo "Removing user qmaill"
@@ -572,7 +574,9 @@ echo "Removing group nofiles"
 
 if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
-    %{_sysconfdir}/init.d/nscd start
+    %{_sysconfdir}/init.d/nscd stop
+  elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
+    /bin/systemctl stop nscd.service
   fi
 fi
 echo "removing logs"
