@@ -148,9 +148,11 @@ Requires: policycoreutils-python
 
 %if 0%{?suse_version} && 0%{?suse_version} < 1550
 Requires: insserv-compat
-%else
+%endif
+%if %{undefined suse_version}
 Requires: initscripts
 %endif
+
 Requires: daemontools >= 1.0
 Requires: ucspi-tcp >= 1.0
 #
