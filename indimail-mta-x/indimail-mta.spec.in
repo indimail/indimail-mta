@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.330 2021-07-13 10:06:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.331 2021-07-13 11:20:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -146,7 +146,7 @@ Requires: policycoreutils-python
 %endif
 %endif
 
-%if 0%{?suse_version}
+%if 0%{?suse_version} && 0%{?suse_version} < 1550
 Requires: insserv-compat
 %else
 Requires: initscripts

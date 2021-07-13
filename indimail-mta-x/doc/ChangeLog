@@ -192,6 +192,7 @@ Release 2.13 Start 14/02/2021
      svscan services
 - 13/07/2021
 130. indimail-mta.spec: removed /sbin/chkconfig from Requires
+131. indimail-mta.spec: insserv-compat removed from Tumbleweed
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
