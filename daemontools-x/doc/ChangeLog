@@ -59,6 +59,9 @@ Release 1.1 Start 27/02/2021
     list of directories
 - 13/07/2021
 31. daemontools.spec: removed /sbin/chkconfig from Requires
+- 14/07/2021
+32. envdir.c: added options i, w to ignore read errors and warn instead of
+    exit on error
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

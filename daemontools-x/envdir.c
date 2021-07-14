@@ -1,5 +1,8 @@
 /*
  * $Log: envdir.c,v $
+ * Revision 1.6  2021-07-14 13:08:21+05:30  Cprogrammer
+ * added options i, w to ignore read errors and warn instead of exit on error
+ *
  * Revision 1.5  2021-06-30 19:27:53+05:30  Cprogrammer
  * added -c option to clear existing env variables
  *
@@ -16,6 +19,7 @@
  * Initial revision
  *
  */
+#include <unistd.h>
 #include <sgetopt.h>
 #include <envdir.h>
 #include <strerr.h>
@@ -25,14 +29,17 @@
 #include <pathexec.h>
 
 #define FATAL "envdir: fatal: "
+#define WARN  "envdir: warn: "
+
+static char   **orig_env;
 
 void
 die_usage(char *str)
 {
 	if (str)
-		strerr_die3x(100, FATAL, str, "\nusage: envdir dir child");
+		strerr_die3x(100, FATAL, str, "\nusage: envdir [-cwi] dir child");
 	else
-		strerr_die2x(100, FATAL, "\nusage: envdir dir child");
+		strerr_die2x(100, FATAL, "\nusage: envdir [-cwi] dir child");
 }
 
 int
@@ -40,13 +47,20 @@ main(int argc, char **argv)
 {
 	char           *fn, *err = (char *) 0;
 	char          **e;
-	int             tmperrno, opt;
+	int             i, opt, warn_on_error = 0, ignore_unreadable = 0,
+					unreadable_count = 0;
 
-	while ((opt = getopt(argc, argv, "c")) != opteof) {
+	while ((opt = getopt(argc, argv, "cwi")) != opteof) {
 		switch (opt)
 		{
 		case 'c':
 			env_clear();
+			break;
+		case 'w':
+			warn_on_error = 1;
+			break;
+		case 'i':
+			ignore_unreadable = 1;
 			break;
 		default:
 			die_usage(0);
@@ -59,30 +73,22 @@ main(int argc, char **argv)
 		die_usage("directory not specified");
 	if (!argv[optind + 1] || !*argv[optind + 1])
 		die_usage("program to run not specified");
+	orig_env = environ;
 	fn = argv[optind];
-	switch (envdir(fn, &err))
-	{
-		case -1:
-			strerr_die6sys(111, FATAL, "unable to read environment file ", fn, "/", err, ": ");
-		case -2:
-			strerr_die2sys(111, FATAL, "unable to open current directory: ");
-		case -3:
-			strerr_die4sys(111, FATAL, "unable to switch to environment directory ", fn, ": ");
-		case -4:
-			strerr_die4sys(111, FATAL, "unable to read environment directory ", fn, ": ");
-		case -5:
-			strerr_die2sys(111, FATAL, "unable to switch back to original directory: ");
-		case -6:
-			strerr_die2x(111, FATAL, "out of memory");
-		case -7:
-			strerr_die2x(111, FATAL, "recursive loop");
+	if ((i = envdir(fn, &err, ignore_unreadable, &unreadable_count))) {
+		if (!warn_on_error)
+			strerr_die5sys(111, FATAL, envdir_str(i), ": ", err, ": ");
+		strerr_warn5(WARN, envdir_str(i), ": ", err, ": ", &strerr_sys);
+	}
+	if (i || (!ignore_unreadable && unreadable_count)) { /*- original envdir behaviour */
+		pathexec_clear(); /*- clear environment variables picked by pathexec */
+		environ = orig_env;
 	}
 	if ((e = pathexec(argv + optind + 1))) {
-		tmperrno = errno;
+		strerr_warn4(FATAL, "unable to run ", argv[optind + 1], ": ", &strerr_sys);
 		alloc_free((char *) e);
-		errno = tmperrno;
+		_exit(111);
 	}
-	strerr_die4sys(111, FATAL, "unable to run ", argv[optind + 1], ": ");
 	/*- Not reached */
 	return(1);
 }
@@ -90,7 +96,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.5 2021-06-30 19:27:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envdir.c,v 1.6 2021-07-14 13:08:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
