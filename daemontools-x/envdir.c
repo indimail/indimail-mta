@@ -1,6 +1,6 @@
 /*
  * $Log: envdir.c,v $
- * Revision 1.6  2021-07-14 13:08:21+05:30  Cprogrammer
+ * Revision 1.6  2021-07-14 19:28:02+05:30  Cprogrammer
  * added options i, w to ignore read errors and warn instead of exit on error
  *
  * Revision 1.5  2021-06-30 19:27:53+05:30  Cprogrammer
@@ -50,6 +50,7 @@ main(int argc, char **argv)
 	int             i, opt, warn_on_error = 0, ignore_unreadable = 0,
 					unreadable_count = 0;
 
+	orig_env = environ;
 	while ((opt = getopt(argc, argv, "cwi")) != opteof) {
 		switch (opt)
 		{
@@ -73,7 +74,6 @@ main(int argc, char **argv)
 		die_usage("directory not specified");
 	if (!argv[optind + 1] || !*argv[optind + 1])
 		die_usage("program to run not specified");
-	orig_env = environ;
 	fn = argv[optind];
 	if ((i = envdir(fn, &err, ignore_unreadable, &unreadable_count))) {
 		if (!warn_on_error)
@@ -94,9 +94,9 @@ main(int argc, char **argv)
 }
 
 void
-getversion_envdir_c()
+getversion_envdir_main_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.6 2021-07-14 13:08:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envdir.c,v 1.6 2021-07-14 19:28:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
