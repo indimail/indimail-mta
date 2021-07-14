@@ -62,6 +62,8 @@ Release 1.1 Start 27/02/2021
 - 14/07/2021
 32. envdir.c: added options i, w to ignore read errors and warn instead of
     exit on error
+33. Makefile: use openreadclose from libqmail.
+34. removed openreadclose.[c,h]
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

@@ -128,8 +128,8 @@ auto_sysconfdir.c: auto-str conf-sysconfdir
 auto_sysconfdir.o: compile auto_sysconfdir.c
 	./compile auto_sysconfdir.c
 
-envdir: load envdir.o openreadclose.o
-	./load envdir openreadclose.o -lqmail
+envdir: load envdir.o
+	./load envdir -lqmail
 
 envdir.o: compile envdir.c
 	./compile envdir.c
@@ -284,9 +284,6 @@ compile recordio.c iopause.h
 recordio: \
 load recordio.o iopause.o
 	./load recordio iopause.o -lqmail
-
-openreadclose.o: compile openreadclose.c openreadclose.h
-	./compile openreadclose.c
 
 spipe: load spipe.o svcfns.o
 	./load spipe svcfns.o
