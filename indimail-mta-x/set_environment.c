@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.7  2021-07-14 13:10:55+05:30  Cprogrammer
+ * change for change in envdir function
+ *
  * Revision 1.6  2021-07-13 23:15:03+05:30  Cprogrammer
  * minor refactoring to make code smaller
  *
@@ -37,7 +40,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 {
 	char           *qbase, *home, *err;
 	char           **e;
-	int             i;
+	int             i, unreadable = 0;
 
 	/*- 
 	 * allow $HOME/.defaultqueue for non-root
@@ -49,8 +52,10 @@ set_environment(char *warn, char *fatal, int root_rc)
 				!stralloc_0(&tmp))
 			strerr_die2x(111, fatal, "out of memory");
 		if (!access(tmp.s, X_OK)) {
-			if ((i = envdir(tmp.s, &err)))
+			if ((i = envdir(tmp.s, &err, 0, &unreadable))) {
 				strerr_warn5(warn, envdir_str(i), ": ", err, ": ", &strerr_sys);
+				pathexec_clear();
+			} else
 			if ((e = pathexec(0)))
 				environ = e;
 		}
@@ -65,7 +70,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 				!stralloc_0(&tmp))
 			strerr_die2x(111, fatal, "out of memory");
 		if (!access(tmp.s, X_OK)) {
-			if ((i = envdir(tmp.s, &err)))
+			if ((i = envdir(tmp.s, &err, 1, &unreadable)))
 				strerr_die5sys(111, fatal, envdir_str(i), ": ", err, ": ");
 			if ((e = pathexec(0)))
 				environ = e;
@@ -79,7 +84,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.6 2021-07-13 23:15:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: set_environment.c,v 1.7 2021-07-14 13:10:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
