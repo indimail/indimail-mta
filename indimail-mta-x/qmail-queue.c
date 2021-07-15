@@ -1,8 +1,9 @@
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.75  2021-06-27 10:37:27+05:30  Cprogrammer
+ * Revision 1.75  2021-07-15 12:43:03+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  * moved conf_split to fmtqfn.c
+ * removed auto_qmail.h
  *
  * Revision 1.74  2021-06-24 12:16:59+05:30  Cprogrammer
  * use uidinit function proto from auto_uids.h
@@ -235,7 +236,6 @@
 #include "variables.h"
 #include "fmtqfn.h"
 #include "triggerpull.h"
-#include "auto_qmail.h"
 #include "auto_uids.h"
 #include "matchregex.h"
 #include "auto_split.h"
@@ -1256,7 +1256,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.75 2021-06-27 10:37:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.75 2021-07-15 12:43:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
