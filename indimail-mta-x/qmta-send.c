@@ -1,5 +1,9 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.5  2021-07-15 09:47:21+05:30  Cprogrammer
+ * removed chdir auto_qmail as qmta-send just needs queuedir
+ * block sigchild after qmail_open
+ *
  * Revision 1.4  2021-07-07 15:59:54+05:30  Cprogrammer
  * log lspawn, rspawn die events
  *
@@ -191,12 +195,7 @@ static void
 sigint()
 {
 	if (loglock_fd == -1) {
-		if (chdir(auto_qmail) == -1) {
-			log5("alert: unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-			return;
-		}
 		loglock_open(1);
-		chdir_toqueue();
 	} else {
 		sig_block(sig_int);
 		sig_block(sig_child);
@@ -1624,15 +1623,10 @@ injectbounce(unsigned long id)
 			log1("alert: out of memory; will try again later\n");
 			return (0);
 		}
-		/*-
-		 * Allow bounces to have different rules, queue, controls, etc
-		 */
-		if (chdir(auto_qmail) == -1) {
-			log5("alert: unable to read controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-			return (0);
-		}
+		sig_block(sig_child);
 		if (qmail_open(&qqt) == -1) {
 			log1("warning: unable to start qmail-queue, will try later\n");
+			sig_unblock(sig_child);
 			return 0;
 		}
 		qp = qmail_qp(&qqt);
@@ -1665,11 +1659,6 @@ injectbounce(unsigned long id)
 								nomem();
 							break;
 						}
-						while (chdir(auto_qmail) == -1) {
-							log5("alert: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-							sleep(10);
-						}
-						chdir_toqueue();
 					}
 				}
 			}
@@ -1814,9 +1803,11 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_from(&qqt, bouncesender);
 		qmail_to(&qqt, bouncerecip);
 		if (*qmail_close(&qqt)) {
+			sig_unblock(sig_child);
 			log1("warning: trouble injecting bounce message, will try later\n");
 			return 0;
 		}
+		sig_unblock(sig_child);
 		strnum2[fmt_ulong(strnum2, id)] = 0;
 		log2_noflush("bounce msg ", strnum2);
 		strnum2[fmt_ulong(strnum2, qp)] = 0;
@@ -1954,10 +1945,14 @@ fix_queue()
 	case -1:
 		_exit(111);
 	case 0:
+		if (chdir(auto_qmail) == -1) {
+			log5("alert: queue-fix: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
+			_exit(111);
+		}
 		strnum1[fmt_int(strnum1, conf_split)] = 0;
 		qfargs[2] = strnum1;
 		qfargs[3] = queuedir;
-		execvp(*qfargs, qfargs); /*- qmail-lspawn */
+		execvp(*qfargs, qfargs); /*- queue-fix */
 		_exit(111);
 	}
 	sig_unblock(sig_int);
@@ -2353,12 +2348,7 @@ regetcontrols()
 static void
 reread()
 {
-	if (chdir(auto_qmail) == -1) {
-		log5("alert: unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-		return;
-	}
 	regetcontrols();
-	chdir_toqueue();
 }
 
 static void
@@ -2509,16 +2499,9 @@ main(int argc, char **argv)
 #ifdef LOGLOCK
 	loglock_open(0);
 #endif
-	if (chdir(auto_qmail) == -1) {
-		log5("alert: cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-		_exit(111);
-	}
 	if (flagqfix)
 		fix_queue();
-	if (chdir(queuedir) == -1) {
-		log5("alert: cannot start: unable to switch to ", queuedir, ": ", error_str(errno), "\n");
-		_exit(111);
-	}
+	chdir_toqueue();
 	if ((fd = open_write("lock/sendmutex")) == -1) {
 		log1("alert: cannot start: unable to open mutex\n");
 		_exit(111);
@@ -2544,8 +2527,13 @@ main(int argc, char **argv)
 	sig_termcatch(sigterm);
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
-	if (!_qmail_clean)
-		sig_childcatch(sigchld);
+	/*- 
+	 * this will cause problem with
+	 * qmail-close when doing bounces.
+	 * So we need to block SIGCHLD before
+	 * qmail_open
+	 */
+	sig_childcatch(sigchld);
 #ifdef LOGLOCK
 	sig_intcatch(sigint);
 #endif
@@ -2625,7 +2613,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.4 2021-07-07 15:59:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.5 2021-07-15 09:47:21+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
