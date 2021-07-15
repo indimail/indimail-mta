@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.11  2021-07-15 22:37:20+05:30  Cprogrammer
+ * corrected data type of comm_pos to int
+ *
  * Revision 1.10  2021-07-15 13:23:32+05:30  Cprogrammer
  * organize bounce related control files together
  *
@@ -348,7 +351,7 @@ static substdio ssfromqc;
 static char     sstoqcbuf[1024];
 static char     ssfromqcbuf[1024];
 static stralloc comm_buf[CHANNELS] = { {0}, {0} };
-static char     comm_pos[CHANNELS];
+static int      comm_pos[CHANNELS];
 
 static void
 comm_init()
@@ -2537,7 +2540,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.10 2021-07-15 13:23:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.11 2021-07-15 22:37:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

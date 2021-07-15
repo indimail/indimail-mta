@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.88  2021-07-15 22:37:28+05:30  Cprogrammer
+ * corrected data type of comm_pos to int
+ *
  * Revision 1.87  2021-07-15 13:23:04+05:30  Cprogrammer
  * organize bounce related control files together
  *
@@ -578,7 +581,7 @@ static substdio ssfromqc;
 static char     sstoqcbuf[1024];
 static char     ssfromqcbuf[1024];
 static stralloc comm_buf[CHANNELS] = { {0}, {0} };
-static char     comm_pos[CHANNELS];
+static int      comm_pos[CHANNELS];
 
 static void
 comm_init()
@@ -3058,7 +3061,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.87 2021-07-15 13:23:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.88 2021-07-15 22:37:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

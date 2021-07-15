@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.7  2021-07-15 22:37:04+05:30  Cprogrammer
+ * corrected data type of comm_pos to int
+ *
  * Revision 1.6  2021-07-15 13:23:20+05:30  Cprogrammer
  * added missing bounce related control files
  *
@@ -124,7 +127,7 @@ static substdio ssfromqc;
 static char     sstoqcbuf[1024];
 static char     ssfromqcbuf[1024];
 static stralloc comm_buf[CHANNELS] = { {0}, {0} };
-static char     comm_pos[CHANNELS];
+static int      comm_pos[CHANNELS];
 
 static int      bouncemaxbytes = 50000;
 #ifdef BOUNCELIFETIME
@@ -2624,7 +2627,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.6 2021-07-15 13:23:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.7 2021-07-15 22:37:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

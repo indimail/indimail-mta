@@ -202,6 +202,8 @@ Release 2.13 Start 14/02/2021
 135. qmta-send.c: added missing bounce related control files
 136. slowq-send.c, qmail-send.c: organize bounce related control files
      together.
+137. qmail-send.c, slowq-send.c, qmta-send.c: corrected data type of comm_pos
+     to int (changed to char from int in 1.74 qmail-send.c by mistake).
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
