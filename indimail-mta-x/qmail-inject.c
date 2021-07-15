@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.43  2021-07-15 09:22:02+05:30  Cprogrammer
+ * removed unused function
+ *
  * Revision 1.42  2021-07-05 21:27:47+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root
  *
@@ -280,16 +283,6 @@ void
 die_qqt()
 {
 	substdio_putsflush(subfderr, "qmail-inject: fatal: unable to run qmail-queue\n");
-	temp();
-}
-
-void
-die_chdir(char *dir)
-{
-	substdio_puts(subfderr, "qmail-inject: fatal: unable to chdir to [");
-	substdio_puts(subfderr, dir);
-	substdio_puts(subfderr, "]\n");
-	substdio_flush(subfderr);
 	temp();
 }
 
@@ -1230,7 +1223,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.42 2021-07-05 21:27:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.43 2021-07-15 09:22:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
