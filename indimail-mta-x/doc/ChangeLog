@@ -195,6 +195,10 @@ Release 2.13 Start 14/02/2021
 131. indimail-mta.spec: insserv-compat removed from Tumbleweed
 - 14/07/2021
 132. set_environment.c: envdir function now requires additional parameters.
+- 15/07/2021
+133. qmail-inject.c: removed unused function die_chdir
+134. qmta-send.c: block sigchild to avoid waitpid surprise when doing
+     qmail_close.
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
