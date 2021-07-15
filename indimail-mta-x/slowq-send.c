@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.10  2021-07-15 13:23:32+05:30  Cprogrammer
+ * organize bounce related control files together
+ *
  * Revision 1.9  2021-06-27 10:45:38+05:30  Cprogrammer
  * moved conf_split variable to fmtqfn.c
  * fixed error handling in injectbounce
@@ -2102,14 +2105,6 @@ getcontrols()
 		return 0;
 	if (control_readint(&bouncemaxbytes, "bouncemaxbytes") == -1)
 		return 0;
-	if (control_readint((int *) &lifetime, "queuelifetime") == -1)
-		return 0;
-#ifdef BOUNCELIFETIME
-	if (control_readint(&bouncelifetime, "bouncelifetime") == -1)
-		return 0;
-	if (bouncelifetime > lifetime)
-		bouncelifetime = lifetime;
-#endif
 	if (!queuedesc) {
 		for (queuedesc = queuedir; *queuedesc; queuedesc++);
 		for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -2165,18 +2160,26 @@ getcontrols()
 			return 0;
 	}
 #endif
-	if (control_rldef(&bouncefrom, "bouncefrom", 0, "MAILER-DAEMON") != 1)
-		return 0;
-	if (control_rldef(&bouncehost, "bouncehost", 1, "bouncehost") != 1)
-		return 0;
-	if (control_rldef(&doublebouncehost, "doublebouncehost", 1, "doublebouncehost") != 1)
-		return 0;
 #ifdef HAVESRS
 	if (control_readline(&srs_domain, "srs_domain") == -1)
 		return 0;
 	if (srs_domain.len && !stralloc_0(&srs_domain))
 		return 0;
 #endif
+	if (control_readint((int *) &lifetime, "queuelifetime") == -1)
+		return 0;
+#ifdef BOUNCELIFETIME
+	if (control_readint(&bouncelifetime, "bouncelifetime") == -1)
+		return 0;
+	if (bouncelifetime > lifetime)
+		bouncelifetime = lifetime;
+#endif
+	if (control_rldef(&bouncefrom, "bouncefrom", 0, "MAILER-DAEMON") != 1)
+		return 0;
+	if (control_rldef(&bouncehost, "bouncehost", 1, "bouncehost") != 1)
+		return 0;
+	if (control_rldef(&doublebouncehost, "doublebouncehost", 1, "doublebouncehost") != 1)
+		return 0;
 	if (control_rldef(&doublebounceto, "doublebounceto", 0, "postmaster") != 1)
 		return 0;
 	if (!stralloc_cats(&doublebounceto, "@"))
@@ -2185,8 +2188,6 @@ getcontrols()
 		return 0;
 	if (!stralloc_0(&doublebounceto))
 		return 0;
-	if (control_readfile(&locals, "locals", 1) != 1)
-		return 0;
 	if (control_readnativefile(&bouncemessage, "bouncemessage", 0) == -1)
 		return 0;
 	if (control_readnativefile(&doublebouncemessage, "doublebouncemessage", 0) == -1)
@@ -2194,6 +2195,8 @@ getcontrols()
 	if (control_rldef(&bouncesubject, "bouncesubject", 0, "failure notice") != 1)
 		return 0;
 	if (control_rldef(&doublebouncesubject, "doublebouncesubject", 0, "failure notice") != 1)
+		return 0;
+	if (control_readfile(&locals, "locals", 1) != 1)
 		return 0;
 	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
 		return 0;
@@ -2534,7 +2537,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.9 2021-06-27 10:45:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.10 2021-07-15 13:23:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

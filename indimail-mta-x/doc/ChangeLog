@@ -199,6 +199,9 @@ Release 2.13 Start 14/02/2021
 133. qmail-inject.c: removed unused function die_chdir
 134. qmta-send.c: block sigchild to avoid waitpid surprise when doing
      qmail_close.
+135. qmta-send.c: added missing bounce related control files
+136. slowq-send.c, qmail-send.c: organize bounce related control files
+     together.
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
