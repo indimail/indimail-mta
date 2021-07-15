@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.6  2021-07-15 13:23:20+05:30  Cprogrammer
+ * added missing bounce related control files
+ *
  * Revision 1.5  2021-07-15 09:47:21+05:30  Cprogrammer
  * removed chdir auto_qmail as qmta-send just needs queuedir
  * block sigchild after qmail_open
@@ -1726,7 +1729,7 @@ injectbounce(unsigned long id)
 			qmail_put(&qqt, doublebouncemessage.s, doublebouncemessage.len);
 			qmail_puts(&qqt, "\n");
 		} else {
-			qmail_puts(&qqt, "Hi. This is the slowq-send program at ");
+			qmail_puts(&qqt, "Hi. This is the qmta-send program at ");
 			qmail_put(&qqt, bouncehost.s, bouncehost.len);
 			qmail_puts(&qqt, *sender.s ? ".\n\
 I'm afraid I wasn't able to deliver your message to the following addresses.\n\
@@ -2177,9 +2180,9 @@ do_controls()
 {
 	if (control_init() == -1)
 		return 0;
-	if (control_readint(&bouncemaxbytes, "bouncemaxbytes") == -1)
-		return 0;
 	if (control_readint((int *) &lifetime, "queuelifetime") == -1)
+		return 0;
+	if (control_readint(&bouncemaxbytes, "bouncemaxbytes") == -1)
 		return 0;
 #ifdef BOUNCELIFETIME
 	if (control_readint(&bouncelifetime, "bouncelifetime") == -1)
@@ -2200,6 +2203,14 @@ do_controls()
 	if (!stralloc_cat(&doublebounceto, &doublebouncehost))
 		return 0;
 	if (!stralloc_0(&doublebounceto))
+		return 0;
+	if (control_readnativefile(&bouncemessage, "bouncemessage", 0) == -1)
+		return 0;
+	if (control_readnativefile(&doublebouncemessage, "doublebouncemessage", 0) == -1)
+		return 0;
+	if (control_rldef(&bouncesubject, "bouncesubject", 0, "failure notice") != 1)
+		return 0;
+	if (control_rldef(&doublebouncesubject, "doublebouncesubject", 0, "failure notice") != 1)
 		return 0;
 
 	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1)
@@ -2264,11 +2275,11 @@ do_controls()
 /*
  * The reason for DJB using newlocals and newvdoms is so that
  * the original variables locals and vdoms do not get screwed
- * in regetcontrols. This will allow slowq-send to serve domains
+ * in regetcontrols. This will allow qmta-send to serve domains
  * already being served (inspite of memory problems during regetcontrols).
  * new domains added will not get served till another sighup causes
  * regetcontrols to get executed without problems. This is much
- * better than having slowq-send come to a grinding halt.
+ * better than having qmta-send come to a grinding halt.
  * Another way could be to set flagexitasap to 1
  */
 static stralloc newlocals = { 0 };
@@ -2613,7 +2624,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.5 2021-07-15 09:47:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.6 2021-07-15 13:23:20+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
