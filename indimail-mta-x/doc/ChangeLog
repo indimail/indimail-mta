@@ -234,6 +234,8 @@ o use glibc wrappers for qgetpwent, setpwent, endpwent, qgetpwent_r,
 140. svctool: added --print-all-variables option
 - 17/07/2021
 141. svctool: added option to specify qmailqueue and qmail-smtpd binaries
+142. svctool: added option to set envdir options used for loading service
+     environment variables
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
