@@ -1,5 +1,29 @@
 * 
 Release 2.13 Start 14/02/2021
+======= Release Highlights ================================================
+o qmail-direct for delivering local mails directly to a user without using
+  the queue.
+o new function set_environment() to load environment variables from
+$HOME/.defaultqueue and sysconfdir/control/defaultqueue
+o Configurable directory split
+o qmail-send ability to rate limit. New service slowq-send
+o qmta-send - tiny self sufficient daemon based on
+o qmail-send+qmail-lspawn+qmail-lspawn+qmail-clean code
+o split qmail-multi into qmail-multi and qmail-spamfilter
+o complete rewrite of qmail-showctl.
+o moved date822fmt, pathexec_run, pathexec_env, envdir, makeargs, mktempfile
+  cdbmss, token822, openreadclose, prot_uid, prot_gid functions to libqmail
+o qmail-local.c: add S=message_size in filename
+o qmail-local.c: move maildir delivery code to maildir_deliver.c
+o maildirdeliver: complete rewrite using maildir_deliver() function.
+o prioq.c: added feature to get prioq list in both descending and ascending
+  order
+o log current delivery rate and configured delivery rate in qmail-send logs
+o document all indimail-mta environment variable in indimail-env man page
+o use glibc wrappers for qgetpwent, setpwent, endpwent, qgetpwent_r,
+  qgetpwnam, qgetpwuid, qgetpwnam_r, qgetpwuid_r, qgetgrent, qsetgrent,
+  qendgrent, qgetgrnam, qgetgrgid, qgetgrnam_r, qgetgrgid_r
+===========================================================================
 - 26/02/2021
 01. svctool: added options to set, unset, remove env variables for supervised
     services
@@ -28,7 +52,7 @@ Release 2.13 Start 14/02/2021
 - 09/03/2021
 18. svctool: added timeout parameter for indisrvr
 - 17/03/2021
-19. Open Build Service integration
+19. Open Build Service integration with github using action scripts
 - 22/03/2021
 20. svctool: removed IMAP_ENHANCEDIDLE variable for courier-imap-5.1.1
 - 29/03/2021
@@ -75,8 +99,8 @@ Release 2.13 Start 14/02/2021
 46. indimail-mini-preinst: added missing 'upgrade' case
 - 12/05/2021
 47. inotify.c: added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
-48. removed pathexec_run.c, pathexec_env.c, pathexec.h and moved functions to
-    libqmail
+48. removed pathexec_run.c, pathexec_env.c, pathexec.h and moved functions
+    to libqmail
 49. renamed envdir_set() to envdir() and moved it to libqmail
 50. new function set_environment() to set environment variables from
     $HOME/.defaultqueue and sysconfdir/control/defaultqueue
@@ -84,7 +108,7 @@ Release 2.13 Start 14/02/2021
 51. maildir.c: include strerr.h explicitly
 52. qmail-clean.c, qmail-qread.c, qmail-queue.c, qmail-rm.c,
     qmail-send.c, qmail-showctl.c, qmail-todo.c, queue-fix.c: have
-    auto_split as the max limit for conf_splitk
+    auto_split as the max limit for conf_split
 53. svctool: create env variables in service directory as links to
     defaultqueue
 54. svctool: fixed TMPDIR creation
@@ -124,7 +148,7 @@ Release 2.13 Start 14/02/2021
 76. moved makeargs.c, mktempfile.c to libqmail
 77. svctool: replace qmail-multi with qmail-spamfilter for spam filter
 - 11/06/2021
-78. remove usage of auto_qmail, auto_control for locating files
+78. remove dependency on auto_qmail, auto_control for locating files
 - 13/06/2021
 79. svctool: simplified generation of clamav, freshclam config
 80. fixed debian scripts for indimail-mini
@@ -205,6 +229,8 @@ Release 2.13 Start 14/02/2021
 137. qmail-send.c, slowq-send.c, qmta-send.c: corrected data type of comm_pos
      to int (changed to char from int in 1.74 qmail-send.c by mistake).
 138. qmail-todo: fixed first digit missing for bytes in qmail-send logs
+- 16/07/2021
+139. Fixed missing first digit of bytes display in qmail-send logs
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

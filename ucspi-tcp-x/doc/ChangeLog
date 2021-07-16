@@ -1,5 +1,10 @@
 *
 Release 1.1 Start 14/02/2021
+======= Release Highlights ================================================
+o added SSL/TLS support in tcpclient
+o added STARTTLS support in tcpclient for POP3s
+o dotls transparent SSL/TLS wrapper for tcpserver
+===========================================================================
 - 02/03/2021
 01. tcpserver.c renamed SSL_CIPHER to TLS_CIPHER_LIST
 - 03/03/2021

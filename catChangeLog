@@ -130,6 +130,8 @@ fi
 
 flag=0
 nonewline=0
+bullet=0
+highlights=0
 exec 0<$file
 while read line
 do
@@ -165,6 +167,12 @@ do
 		flag=2
 		continue
 	fi
+	echo $line | egrep "^o " > /dev/null
+	if [ $? -eq 0 ] ; then
+		bullet=1
+	else
+		bullet=0
+	fi
 	echo "$line" |egrep "^[0-9]|^[0-9][0-9]|^[0-9][0-9][0-9]" > /dev/null
 	if [ $? -eq 0 ] ; then
 		if [ $option -eq 2 -a $nonewline -eq 1 ] ; then
@@ -182,6 +190,45 @@ do
 			echo -n "  * $*"
 		fi
 	elif [ -n "$line" ] ; then
+		if [ $highlights -eq 0 ] ; then
+			nonewline=0
+			echo "$line" | grep "Release Highlights" >/dev/null
+			if [ $? -eq 0 ] ; then
+				highlights=1
+				echo $line
+				continue
+			fi
+		fi
+		if [ $highlights -eq 1 ] ; then
+			echo "$line" | grep "^====" >/dev/null
+			if [ $? -eq 0 ] ; then
+				highlights=2
+				if [ $nonewline -eq 1 ] ; then
+					echo
+					nonewline=0
+				fi
+				echo $line
+				continue
+			fi
+		fi
+		if [ $highlights -eq 1 ] ; then
+			if [ $bullet -eq 1 ] ; then
+				if [ $nonewline -eq 1 ] ; then
+					echo ""
+					nonewline=0
+				fi
+				echo "$line"
+				bullet=0
+			else
+				if [ $nonewline -eq 1 ] ; then
+					echo ""
+					nonewline=0
+				fi
+				echo -n "  $line"
+				nonewline=1
+			fi
+			continue
+		fi
 		if [ $option -eq 1 -o $option -eq 3 ] ; then
 			echo "  $line"
 		elif [ $option -eq 2 ] ; then
@@ -197,5 +244,7 @@ if [ $option -eq 2 ] ; then
 	echo
 	echo " -- $email  `date -u +'%a, %d %b %Y %H:%M:%S %z'`"
 elif [ $option -eq 3 ] ; then
-	echo
+	if [ $nonewline -eq 1 ] ; then
+		echo
+	fi
 fi

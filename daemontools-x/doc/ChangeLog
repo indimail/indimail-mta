@@ -1,5 +1,18 @@
 *
 Release 1.1 Start 27/02/2021
+======= Release Highlights ================================================
+o svscan: run log supervise process with parent directory as argv2, allow
+  supervise proceses to run with three arguments
+o systemd.override.conf: added systemd override unit file for systems and
+  added systemd-time-wait-sync.service in After=
+  without battery backed RTC
+o supervise.c: indicate service name (instead of just the pid) in logs when
+  supervised service exits/crashes
+o added RestartSec & PrivateTmp to main unit file and override.conf
+o svscan_rc: implemented addtional rc commands for FreeBSD
+o envdir: complete recode. Added -c option to clear, -i option to ignore
+  unreadable files and -w option to treat temporary errors as warning
+===========================================================================
 - 27/02/2021
 01. minisvc: added options to set, unset, remove env variables for supervised
     services
@@ -42,8 +55,8 @@ Release 1.1 Start 27/02/2021
 - 17/05/2021
 23. systemd.override.conf: added systemd-time-wait-sync.service in After=
 - 06/06/2021
-24. supervise.c: indicate service name in logs when supervised service
-    exits/crashes
+24. supervise.c: indicate service name in logs, instead of just the pid
+    when supervised service exits/crashes
 - 22/06/2021
 25. added RestartSec & PrivateTmp to main unit file and override.conf
 - 30/05/2021
