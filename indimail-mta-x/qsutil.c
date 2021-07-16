@@ -403,7 +403,7 @@ log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, size_t bytes)
 	char            strnum1[FMT_ULONG + 1], strnum2[FMT_ULONG + 1];
 
 	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
-	strnum2[fmt_ulong(strnum2, bytes) + 1] = 0;
+	strnum2[fmt_ulong(strnum2 + 1, bytes) + 1] = 0;
 	*strnum1 = ' ';
 	*strnum2 = ' ';
 	for (ptr = mailto->s; ptr < mailto->s + mailto->len;) {
