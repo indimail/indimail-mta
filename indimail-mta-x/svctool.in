@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.572 2021-07-13 10:34:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.573 2021-07-16 18:51:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.572 2021-07-13 10:34:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.573 2021-07-16 18:51:40+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -894,11 +894,19 @@ Known values for OPTION are:
 
 --print-variables
   --servicedir=service_path
-  --service-name=service_name
+  --service-name=service_name | --envdir=dir
 
+  Print environment variables for a service
   service_path   - Path where supervise service will be installed
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
+  dir            - Environment variables directory
+
+--print-all-variables
+  --servicedir=service_path
+
+  Print environment variables all services
+  service_path   - Path where supervise service will be installed
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|qselinux|iselinux|inittab
@@ -8607,6 +8615,11 @@ force=$old
 if test $# -eq 0; then
     usage 1
 fi
+if [ $(id -u) -ne 0 ] ; then
+	echo "svctool is not meant to be run by mere mortals. Use sudo to get superpowers"
+	exit 100
+fi
+
 if [ -x /bin/chown ] ; then
 	chown=/bin/chown
 elif [ -x /usr/sbin/chown ] ; then
@@ -8618,8 +8631,15 @@ else
 fi
 
 if [ -f $sysconfdir/svctool.cnf ] ; then
-	$chown root:0 $sysconfdir/svctool.cnf
-	/bin/chmod 400 $sysconfdir/svctool.cnf
+	perms=$(stat -c "%u:%g:%a" $sysconfdir/svctool.cnf)
+	if [ $? -ne 0 ] ; then
+		exit 100
+	fi
+	if [ ! $perms = "0:0:400" ] ; then
+		echo "fixing permissions of svctool.cnf"
+		$chown root:0 $sysconfdir/svctool.cnf
+		/bin/chmod 400 $sysconfdir/svctool.cnf
+	fi
 	. $sysconfdir/svctool.cnf
 fi
 [ -z "$MYSQL_PASS" ] && MYSQL_PASS="ssh-1.5-"
@@ -9356,6 +9376,9 @@ while test $# -gt 0; do
 	--group=*)
 	group=$optarg
 	;;
+	--envdir=*)
+	envdir=$optarg
+	;;
 	--service-name=*)
 	service_name=$optarg
 	;;
@@ -9398,8 +9421,11 @@ while test $# -gt 0; do
 	--print-variables)
 	option=45
 	;;
-	--slowq)
+	--print-all-variables)
 	option=46
+	;;
+	--slowq)
+	option=47
 	;;
 
 	--version)
@@ -10843,23 +10869,136 @@ case $option in
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
-	if [ -z "$service_name" ] ; then
-		echo "service name not specified" 1>&2
+	if [ -n "$service_name" -a -n "$envdir" ] ; then
+		echo "you cannot specify both service name and envdir both" 1>&2
+		exit 1
+	fi
+	if [ -z "$service_name" -a -z "$envdir" ] ; then
+		echo "service name or envdir has to be specified" 1>&2
 		usage 1
 	fi
-	if [ ! -d $servicedir/$service_name ] ; then
+	if [ -n "$service_name" -a ! -d $servicedir/$service_name ] ; then
 		echo "$servicedir/$service_name: No such file or directory" 1>&2
 		exit 1
 	fi
-	if [ ! -d $servicedir/$service_name/variables ] ; then
-		echo "$servicedir/$service_name: This service has no configured variables" 1>&2
+	if [ -n "$envdir" -a ! -d "$envdir" ] ; then
+		echo "$envdir: No such directory" 1>&2
 		exit 1
 	fi
-	echo "------ environment variables for $servicedir/$service_name ------------"
-	envdir -c $servicedir/$service_name/variables env
+	if [ -n "$service_name" ] ; then
+		i=$servicedir/$service_name/variables
+	elif [ -n "$envdir" ] ; then
+		i=$envdir
+	fi
+	if [ ! -d $i ] ; then
+		(
+		echo "------ $servicedir/$service_name ------------" 
+		echo "NOTE: This service has no configured variables"
+		) 1>&2
+		exit 1
+	fi
+	if [ -L $i/.envdir -o -f $i/.envdir -o -f $i/.envfile ] ; then
+		if [ -n "$service_name" ] ; then
+			echo "------ $servicedir/$service_name ------------"
+		elif [ -n "$envdir" ] ; then
+			echo "------ $envdir ------------"
+		fi
+	fi
+	if [ -L $i/.envdir ] ; then
+		link_name=$(readlink $i/.envdir)
+		echo "NOTE: additional variables were obtained from $link_name"
+		echo
+	elif [ -f $i/.envdir ] ; then
+		echo "NOTE: additional variables were obtained from .envdir"
+		cat $i/.envdir
+		echo
+	fi
+	if [ -f $i/.envfile ] ; then
+		echo "NOTE: additional variables were obtained from .envfile"
+		cat $i/.envfile
+		echo
+	fi
+	if [ -n "$service_name" ] ; then
+		echo "------ environment variables for $servicedir/$service_name ------------"
+	elif [ -n "$envdir" ] ; then
+		echo "------ environment variables for $envdir ------------"
+	fi
+	envdir -c $i env
 	;;
 
-	46) # crete_delivery
+	46)
+	if [ -z "$servicedir" ] ; then
+		echo "Supervise Directory not specified" 1>&2
+		usage 1
+	fi
+	for i in $servicedir/*
+	do
+		if [ -d $i/variables ] ; then
+			vars=$(envdir -c $i/variables env 2>/dev/null)
+			if [ -n "$vars" ] ; then
+				if [ -L $i/variables/.envdir -o -f $i/variables/.envdir -o -f $i/variables/.envfile ] ; then
+					echo "------ $i ------------"
+				fi
+				if [ -L $i/variables/.envdir ] ; then
+					link_name=$(readlink $i/variables/.envdir)
+					echo "NOTE: additional variables were obtained from $link_name"
+					echo
+				elif [ -f $i/variables/.envdir ] ; then
+					echo "NOTE: additional variables were obtained from .envdir"
+					cat $i/variables/.envdir
+					echo
+				fi
+				if [ -f $i/variables/.envfile ] ; then
+					echo "NOTE: additional variables were obtained from .envfile"
+					cat $i/variables/.envfile
+					echo
+				fi
+				echo "------ environment variables for $i ------------"
+				envdir -c $i/variables env
+				echo
+			else
+				echo "------ $i ------------"
+				echo "NOTE: This service has no configured variables"
+				echo
+			fi
+		fi
+	done
+	for i in $sysconfdir/control/defaultqueue $sysconfdir/control/global_vars \
+		$sysconfdir/ezmlm/global_vars
+	do
+		if [ -d $i ] ; then
+			vars=$(envdir -c $i env 2>/dev/null)
+			if [ -n "$vars" ] ; then
+				if [ -L $i/.envdir -o -f $i/.envdir -o -f $i/.envfile ] ; then
+					echo "------ $i ------------"
+				fi
+				if [ -L $i/.envdir ] ; then
+					link_name=$(readlink $i/.envdir)
+					echo "NOTE: additional variables were obtained from $link_name"
+					echo
+				elif [ -f $i/.envdir ] ; then
+					echo "NOTE: additional variables were obtained from .envdir"
+					cat $i/.envdir
+					echo
+				fi
+				if [ -f $i/.envfile ] ; then
+					echo "NOTE: additional variables were obtained from .envfile"
+					cat $i/.envfile
+					echo
+				fi
+				echo "------ environment variables for $i ------------"
+				envdir -c $i env
+				echo
+			else
+				echo "------ $i ------------"
+				echo "NOTE: This directory has no configured variables"
+				echo
+			fi
+		fi
+	done
+	;;
+
+	47) # create_delivery
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then

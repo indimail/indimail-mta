@@ -77,6 +77,8 @@ o envdir: complete recode. Added -c option to clear, -i option to ignore
     exit on error
 33. Makefile: use openreadclose from libqmail.
 34. removed openreadclose.[c,h]
+- 16/07/2021
+35. minisvc: added --print-all-variables option
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
