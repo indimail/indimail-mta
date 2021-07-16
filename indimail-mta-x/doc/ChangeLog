@@ -231,7 +231,9 @@ o use glibc wrappers for qgetpwent, setpwent, endpwent, qgetpwent_r,
 138. qmail-todo: fixed first digit missing for bytes in qmail-send logs
 - 16/07/2021
 139. Fixed missing first digit of bytes display in qmail-send logs
-140. minisvc: added --print-all-variables option
+140. svctool: added --print-all-variables option
+- 17/07/2021
+141. svctool: added option to specify qmailqueue and qmail-smtpd binaries
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020

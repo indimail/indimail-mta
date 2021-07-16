@@ -124,6 +124,7 @@ Known values for OPTION are:
   [--cntrldir=cntrl_path]
   --localip=a --maxdaemons=m --maxperip=i
   [--no-multi]
+  [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
   [--dnscheck]
@@ -180,6 +181,7 @@ Known values for OPTION are:
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qmailq         - Path to any qmail-queue compatabile binary
   Port           - Bind on this port for SMTP
   service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
@@ -261,6 +263,7 @@ Known values for OPTION are:
   --servicedir=service_path
   [--cntrldir=cntrl_path]
   [--no-multi]
+  [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
   [--fsync --syncdir]
@@ -272,7 +275,7 @@ Known values for OPTION are:
   [--cname-lookup]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--logfilter=logfifo]
-  [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
+  [--localfilter --remotefilter]
   [--dkverify=dk|dkim|both|none]
   [--dksign=dk|dkim|both|none --private_key=private_key]
   [--remote-authsmtp=b]
@@ -290,6 +293,7 @@ Known values for OPTION are:
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qmailq         - Path to any qmail-queue compatabile binary
   service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
                    @qmaildir@ appropriate links will be created in
@@ -328,59 +332,6 @@ Known values for OPTION are:
   b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
   ssl            - Use SSL encrypted communication in qmail-remote
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
-
---queueParam=dir --qbase=queue_path --qcount=N --qstart=I
-  [--cntrldir=cntrl_path]
-  [--min-free=M]
-  [--no-multi]
-  [--fsync --syncdir]
-  [--qregex]
-  [--content-filter=c]
-  [--virus-filter=v]
-  [--qhpsi=q]
-  [--spamfilter=spamfilter_args]
-  [--logfilter=logfifo]
-  [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
-
- Installs a new queue without a SMTP Listener
-  dir            - dir where to install queuedef environment variable directory
-  queue_path     - Path where the queues are installed. If this is different from
-                   @qmaildir@ appropriate links will be created in
-                   @qmaildir@
-  N              - No of Queues
-  I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
-  cntrl_path     - Path where Qmail control files are stored
-  M              - Minimum Disk Space to maintain in queue after which
-                   Temporary error will be returned
-  no-multi       - Do not set QMAILQUEUE to qmail-multi
-  qregex         - Use regular expressions for matching entries in
-                   badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
-  q              - Full path to an external virus scanner (like clamdscan)
-  v              - Enable Virus/Attachment scanner. v can have following values
-                   1 - Internal Scanner
-                   2 - Internal + External + Attachment Scan
-                   3 - Internal + Attachment Scan
-                   4 - External + Attachment Scan
-                   5 - External Scanner
-                   6 - Attachment Scan
-  content-filter - Enable content filtering against regex in bodycheck control
-                   file or the filename given as argument to content-filter
-  c              - Optional filename passed to content-filter argument
-  spamfilter     - Spamfilter program along with arguments
-  logfifo        - Capture additional status message from spamfilter in 
-                   qmail-logfifo logfile via logfifo
-  r              - Mails get rejected as spam if exit status of spamfilter
-                   equals the value of spamexitcode. r can have following values
-                   0 - Do not reject SPAM mails
-                   1 - Bounce SPAM Mails.
-                   2 - Blackhole SPAM Mails
-  e              - Exit value of spamfilter that should be treated as spam
-  fsync          - Sync files and directories when writing files
-  syncdir        - Use BSD style sync semantics for flushing directories
-  private_key    - Path to Private key created by dknewkey
 
 --slowq --qbase=queue_path
   --servicedir=service_path
@@ -444,6 +395,7 @@ Known values for OPTION are:
   [--cntrldir=cntrl_path]
   [--min-free=M]
   [--no-multi]
+  [--qmailqueue=qmailq]
   [--fsync --syncdir]
   [--qregex]
   [--content-filter=c]
@@ -466,6 +418,7 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qmailq         - Path to any qmail-queue compatabile binary
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
                    relaymailfrom, authdomains, chkuserdomains
@@ -920,7 +873,7 @@ Known values for OPTION are:
 
 --set-variable=n --variable-value=v
   --servicedir=service_path
-  --service-name=service_name | --envdir=dir
+  --service-name=service_name
   [--force]
 
   Set a new variable for a supervise service
@@ -928,7 +881,6 @@ Known values for OPTION are:
   v              - variable value
   service_path   - Path where supervise service will be installed
   service_name   - Service name
-  dir            - Environment variables directory
   force          - Overwrite variable if it exists
 
 --modify-variable=n --variable-value=v
@@ -1011,12 +963,13 @@ Known values for OPTION are:
 
 --print-variables
   --servicedir=service_path
-  --service-name=service_name
+  --service-name=service_name | --envdir=dir
 
   Print environment variables for a service
   service_path   - Path where supervise service will be installed
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
+  dir            - Environment variables directory
 
 --print-all-variables
   --servicedir=service_path
