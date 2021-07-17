@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.8  2021-07-17 14:39:37+05:30  Cprogrammer
+ * fix split dir of messages queued with wrong split value
+ *
  * Revision 1.7  2021-07-15 22:37:04+05:30  Cprogrammer
  * corrected data type of comm_pos to int
  *
@@ -797,6 +800,10 @@ static void
 todo_do(fd_set *rfds)
 {
 	unsigned long   id;
+	char           *ptr;
+	char            oldfn[FMTQFN];
+	char           *fix_dirs[] = {"todo/", "intd/", "mess/", 0};
+	int             i, split;
 
 	if (flagexitasap)
 		return;
@@ -823,6 +830,25 @@ todo_do(fd_set *rfds)
 		/*- flow through */
 	default:
 		return;
+	}
+	ptr = readsubdir_name(&todosubdir);
+	scan_int(ptr, &split);
+	fnmake_todo(id); /*- todo/split/id */
+	scan_int(fn1.s + 5, &i);
+	log5("qmta-send: subdir=todo/", ptr, " fn=", fn1.s, split != i ? " fix split\n" : "\n");
+	if (split != i) {
+		for (i = 0; fix_dirs[i]; i++) {
+			fix_split(oldfn, fix_dirs[i], ptr, id);
+			byte_copy(fn1.s, 4, fix_dirs[i]);
+			if (link(oldfn, fn1.s) == -1) {
+				log5("warning: qmta-send: unable to link ", oldfn, " to ", fn1.s, "\n");
+				return;
+			} else
+			if (unlink(oldfn)) {
+				log3("warning: qmta-send: unable to unlink wrong split ", oldfn, "\n");
+				return;
+			}
+		}
 	}
 	process_todo(id);
 }
@@ -2302,7 +2328,7 @@ regetcontrols()
 		return;
 	}
 	if (control_readint(&todo_interval, "todointerval") == -1) {
-		log1("alert: qmail-todo: unable to reread todointerval\n");
+		log1("alert: unable to reread todointerval\n");
 		return;
 	}
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1) {
@@ -2607,11 +2633,6 @@ main(int argc, char **argv)
 			 * fd 4 - pi4[0] - data from qmail-rspawn
 			 */
 			del_do(&rfds);
-			/* read data from fd 8 from qmail-todo
-			 * 'D' - Do deliver
-			 * 'L' - Write to log (fd 0) for logging
-			 * 'X' - set flagtodoalive = 0, flagexitasap = 1
-			 */
 			todo_do(&rfds);
 			pass_do();
 			cleanup_do(&wfds);
@@ -2627,7 +2648,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.7 2021-07-15 22:37:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.8 2021-07-17 14:39:37+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

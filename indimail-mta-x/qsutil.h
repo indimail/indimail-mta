@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.19  2021-07-17 14:40:40+05:30  Cprogrammer
+ * add fix_split function to generate file name for any split value
+ *
  * Revision 1.18  2021-06-27 11:33:49+05:30  Cprogrammer
  * added loglock_open function
  *
@@ -78,6 +81,7 @@ void            pausedir(char *);
 void            logsafe(char *);
 void            logsafe_noflush(char *);
 void            flush();
+int             fix_split(char *s, char *path, char *client_split, unsigned long id);
 
 extern int      loglock_fd;
 

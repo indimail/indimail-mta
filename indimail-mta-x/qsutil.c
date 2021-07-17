@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.20  2021-07-17 14:40:06+05:30  Cprogrammer
+ * add fix_split function to generate file name for any split value
+ *
  * Revision 1.19  2021-06-29 09:30:25+05:30  Cprogrammer
  * fixed handling of closed lock descriptor
  *
@@ -123,6 +126,24 @@ loglock_open(int preopen)
 	log1(loglock_fd == -1 ? "info: loglock: disabled\n" : "info: loglock: enabled\n");
 }
 #endif
+
+int
+fix_split(char *s, char *path, char *client_split, unsigned long id)
+{
+	int             i, len;
+	
+	len = 0;
+	s += (i = fmt_str(s, path));
+	len += i;
+	s += (i = fmt_str(s, client_split));
+	len += i;
+	s += (i = fmt_str(s, "/"));
+	len += i;
+	s += (i = fmt_ulong(s, id));
+	len += (i + 1);
+	*s = 0;
+	return len;
+}
 
 void
 flush(void)
@@ -479,7 +500,7 @@ logsafe(char *s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.19 2021-06-29 09:30:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.20 2021-07-17 14:40:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

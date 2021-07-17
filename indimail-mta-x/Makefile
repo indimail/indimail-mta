@@ -1662,6 +1662,27 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-send.8
 
+qmail-todo: \
+load qmail-todo.o control.o trigger.o fmtqfn.o \
+readsubdir.o auto_qmail.o auto_split.o \
+auto_control.o variables.o libsyncdir.a
+	./load qmail-todo control.o trigger.o fmtqfn.o \
+	auto_control.o readsubdir.o auto_qmail.o auto_split.o \
+	variables.o -L. -lsyncdir -lqmail
+
+qmail-todo.o: \
+compile qmail-todo.c auto_qmail.h control.h syncdir.h \
+fmtqfn.h readsubdir.h trigger.h variables.h \
+auto_control.h auto_split.h conf-sync conf-todo
+	./compile `grep -h -v "^#" conf-sync conf-todo` qmail-todo.c
+
+qmail-todo.8: \
+qmail-todo.9 conf-qmail conf-sysconfdir
+	cat qmail-todo.9 \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> qmail-todo.8
+
 slowq-send: \
 load slowq-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
@@ -1931,13 +1952,6 @@ qmail-nullqueue.o: \
 compile qmail-nullqueue.c
 	./compile qmail-nullqueue.c
 
-qmail-todo.8: \
-qmail-todo.9 conf-qmail conf-sysconfdir
-	cat qmail-todo.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> qmail-todo.8
-
 plugin_init.3: \
 plugin_init.9 conf-prefix
 	cat plugin_init.9 \
@@ -2028,20 +2042,6 @@ process_queue.h conf-tls conf-ip conf-queue
 	else \
 		./compile -DQUEUE_COUNT=10 qmail-tcpto.c; \
 	fi
-
-qmail-todo: \
-load qmail-todo.o control.o trigger.o fmtqfn.o \
-readsubdir.o auto_qmail.o auto_split.o \
-auto_control.o variables.o libsyncdir.a
-	./load qmail-todo control.o trigger.o fmtqfn.o \
-	auto_control.o readsubdir.o auto_qmail.o auto_split.o \
-	variables.o -L. -lsyncdir -lqmail
-
-qmail-todo.o: \
-compile qmail-todo.c auto_qmail.h control.h syncdir.h \
-fmtqfn.h readsubdir.h trigger.h variables.h \
-auto_control.h auto_split.h conf-sync conf-todo
-	./compile `grep -h -v "^#" conf-sync conf-todo` qmail-todo.c
 
 qmail-upq: \
 warn-auto.sh qmail-upq.sh conf-qmail conf-split

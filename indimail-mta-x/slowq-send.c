@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.12  2021-07-17 14:38:09+05:30  Cprogrammer
+ * skip processing of for messages queued with wrong split dir
+ *
  * Revision 1.11  2021-07-15 22:37:20+05:30  Cprogrammer
  * corrected data type of comm_pos to int
  *
@@ -1858,9 +1861,10 @@ todo_do(fd_set *rfds)
 	struct prioq_elt pe;
 	substdio        ss, ssinfo;
 	substdio        sschan[CHANNELS];
-	int             fd, fdinfo, match, c;
+	int             fd, fdinfo, match, i, c, split;
 	int             fdchan[CHANNELS], flagchan[CHANNELS];
 	char            ch;
+	char           *ptr;
 	unsigned long   id, uid, pid;
 
 	if (flagexitasap)
@@ -1892,7 +1896,15 @@ todo_do(fd_set *rfds)
 	default:
 		return;
 	}
+	ptr = readsubdir_name(&todosubdir);
+	scan_int(ptr, &split);
 	fnmake_todo(id);
+	scan_int(fn1.s + 5, &i);
+	log7(split != i ? "warning: slowq-send: " : "info: slowq-send: ",
+			queuedesc, ": subdir=todo/", ptr, " fn=",
+			fn1.s, split != i ? " incorrect split\n" : "\n");
+	if (split != i)
+		return;
 	if ((fd = open_read(fn1.s)) == -1) {
 		log3("warning: unable to open ", fn1.s, "\n");
 		return;
@@ -2540,7 +2552,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.11 2021-07-15 22:37:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.12 2021-07-17 14:38:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

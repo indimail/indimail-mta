@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.89  2021-07-17 14:37:07+05:30  Cprogrammer
+ * skip processing of for messages queued with wrong split dir
+ *
  * Revision 1.88  2021-07-15 22:37:28+05:30  Cprogrammer
  * corrected data type of comm_pos to int
  *
@@ -2260,9 +2263,10 @@ todo_do(fd_set *rfds)
 	struct prioq_elt pe;
 	substdio        ss, ssinfo;
 	substdio        sschan[CHANNELS];
-	int             fd, fdinfo, match, c;
+	int             fd, fdinfo, match, i, c, split;
 	int             fdchan[CHANNELS], flagchan[CHANNELS];
 	char            ch;
+	char           *ptr;
 	unsigned long   id, uid, pid;
 
 	if (flagexitasap)
@@ -2294,7 +2298,15 @@ todo_do(fd_set *rfds)
 	default:
 		return;
 	}
+	ptr = readsubdir_name(&todosubdir);
+	scan_int(ptr, &split);
 	fnmake_todo(id); /*- todo/split/id */
+	scan_int(fn.s + 5, &i);
+	log7(split != i ? "warning: todo: " : "info: todo: ", queuedesc, 
+			": subdir=todo/", ptr, " fn=", fn.s,
+			split != i ? " incorrect split\n" : "\n");
+	if (split != i)
+		return;
 	if ((fd = open_read(fn1.s)) == -1) {
 		log3("warning: unable to open ", fn1.s, "\n");
 		return;
@@ -3061,7 +3073,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.88 2021-07-15 22:37:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.89 2021-07-17 14:37:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

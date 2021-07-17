@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.50  2021-07-17 14:39:28+05:30  Cprogrammer
+ * skip processing of for messages queued with wrong split dir
+ *
  * Revision 1.49  2021-06-27 10:45:15+05:30  Cprogrammer
  * moved conf_split variable to fmtqfn.c
  *
@@ -720,7 +723,7 @@ todo_do(fd_set * rfds)
 {
 	struct stat     st;
 	substdio        ss, ssinfo, sschan[CHANNELS];
-	int             fd, fdinfo, match, c;
+	int             fd, fdinfo, match, i, c, split;
 	int             fdchan[CHANNELS], flagchan[CHANNELS];
 	char            ch;
 	char           *ptr;
@@ -759,8 +762,14 @@ todo_do(fd_set * rfds)
 		return;
 	}
 	ptr = readsubdir_name(&todosubdir);
+	scan_int(ptr, &split);
 	fnmake_todo(id); /*- set fn as todo/split/id */
-	log7("todo: ", queuedesc, ": subdir=todo/", ptr, " fn=", fn.s, "\n");
+	scan_int(fn.s + 5, &i);
+	log7(split != i ? "warning: todo: " : "info: todo: ", queuedesc, 
+			": subdir=todo/", ptr, " fn=", fn.s,
+			split != i ? " incorrect split\n" : "\n");
+	if (split != i)
+		return;
 	if ((fd = open_read(fn.s)) == -1) { /*- envelope */
 		log5("warning: ", queuedesc, ": qmail-todo: unable to open ", fn.s, "\n");
 		return;
@@ -1229,7 +1238,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.49 2021-06-27 10:45:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.50 2021-07-17 14:39:28+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

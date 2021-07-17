@@ -23,6 +23,8 @@ o document all indimail-mta environment variable in indimail-env man page
 o use glibc wrappers for qgetpwent, setpwent, endpwent, qgetpwent_r,
   qgetpwnam, qgetpwuid, qgetpwnam_r, qgetpwuid_r, qgetgrent, qsetgrent,
   qendgrent, qgetgrnam, qgetgrgid, qgetgrnam_r, qgetgrgid_r
+o ability of qmta-send to process messages queued by clients with any split
+  value
 ===========================================================================
 - 26/02/2021
 01. svctool: added options to set, unset, remove env variables for supervised
@@ -236,6 +238,11 @@ o use glibc wrappers for qgetpwent, setpwent, endpwent, qgetpwent_r,
 141. svctool: added option to specify qmailqueue and qmail-smtpd binaries
 142. svctool: added option to set envdir options used for loading service
      environment variables
+143. qmail- todo.c, qmail-send.c, slowq-send.c: skip processing of for
+     messages queued with wrong split dir
+144. qmta-send.c: fix split dir of messages queued with wrong split value
+145. qsutil.[c,h]: add fix_split function to generate file name for any split
+     value
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 2.12 Start 21/05/2020
