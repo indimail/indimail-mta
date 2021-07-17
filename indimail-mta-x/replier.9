@@ -109,7 +109,7 @@ NB: These environment variables are not quoted. They are under the control of th
 If running as non-root, \fBreplier\fR uses environment set according
 to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
 variable is not set, it additionally uses environment set according to
-files in @controldir@/defaultqueue directory.
+files in @controldir@/defaultqueue directory (for any uid).
 
 .SH "SEE ALSO"
 bouncesaying(1),

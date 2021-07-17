@@ -64,7 +64,7 @@ variable. If a different queue program is desired for bounces, it can be set
 by using \fBBOUNCEQUEUE\fR environment variable.
 
 When injecting a bounce for a previously forwarded email, whose sender was
-rewritten using \fISRS\fB, \fBslowq-send\fR rewrites the recipient to the
+rewritten using \fISRS\fB, \fBqmta-send\fR rewrites the recipient to the
 original sender using Sender Rewriting Scheme, if \fISRS\fB has been
 configured. see \fBqmail-srs\fR(5) for information on how to do this.
 
@@ -105,9 +105,10 @@ split directory value. The only required is that \fBqmta-send\fR should
 be running with a higher split dir value than that of the client. You
 can use the \fB-s\fR option to run with any split dir value.
 
-If running as non-root, and if QUEUE_BASE environment variable is not set,
-\fBqmta-send\fR uses environment set according to files
-@controldir@/defaultqueue directory.
+If running as non-root \fBqmta-send\fR uses environment set according to
+files $HOME/.defaultqueue directory. If running as root and if
+\fBQUEUE_BASE\fR environment variable is not set, environment variables
+from @controldir@/defaultqueue are additionally set.
 
 .SH OPTIONS
 .TP
@@ -642,9 +643,9 @@ qmail-multi(8),
 drate(1),
 qmail-start(8),
 slowq-start(8),
+slowq-send(8),
 qmail-daemon(8),
 qmail-send(8),
-slowq-send(8),
 qmail-todo(8),
 qmail-clean(8),
 qmail-lspawn(8),
