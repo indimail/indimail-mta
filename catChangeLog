@@ -195,7 +195,9 @@ do
 			echo "$line" | grep "Release Highlights" >/dev/null
 			if [ $? -eq 0 ] ; then
 				highlights=1
-				echo $line
+				if [ $option -eq 3 ] ; then
+					echo $line
+				fi
 				continue
 			fi
 		fi
@@ -203,6 +205,9 @@ do
 			echo "$line" | grep "^====" >/dev/null
 			if [ $? -eq 0 ] ; then
 				highlights=2
+				if [ $option -ne 3 ] ; then
+					continue
+				fi
 				if [ $nonewline -eq 1 ] ; then
 					echo
 					nonewline=0
@@ -212,6 +217,9 @@ do
 			fi
 		fi
 		if [ $highlights -eq 1 ] ; then
+			if [ $option -ne 3 ] ; then
+				continue
+			fi
 			if [ $bullet -eq 1 ] ; then
 				if [ $nonewline -eq 1 ] ; then
 					echo ""
