@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.332 2021-07-13 11:47:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.333 2021-07-17 08:40:56+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1506,7 +1506,7 @@ do
     --export-variables=%{servicedir}/$i/variables/.variables  --force
 done
 svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --norefreshsvc="0 $svc_list"
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list"
 
 # selinux
 %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux

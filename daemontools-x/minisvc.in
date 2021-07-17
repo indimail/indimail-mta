@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.21 2021-07-16 18:50:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.22 2021-07-17 08:44:48+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.21 2021-07-16 18:50:05+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.22 2021-07-17 08:44:48+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -71,7 +71,7 @@ Known values for OPTION are:
   NOTE: if the file .norefreshsvc is present in the variable or the config
   directory, refresh is skipped
 
---norefreshsvc="0|1 service_name"
+--autorefresh="0|1 service_name"
 
   Disable/Enable auto refresh of supervise scripts for service
   0              - Disable autorefresh (create .norefreshsvc in variables directory)
@@ -594,10 +594,10 @@ else
 fi
 }
 
-norefreshsvc()
+autorefresh()
 {
 if [ $# -lt 2 ] ; then
-	echo "norefreshsvc=0|1 service_with_full_path" 1>&2
+	echo "autorefresh=0|1 service_with_full_path" 1>&2
 	return 1
 fi
 svc_opt=$1
@@ -1286,7 +1286,7 @@ while test $# -gt 0; do
 	service=$optarg
 	;;
 
-	--norefreshsvc=*)
+	--autorefresh=*)
 	option=5
 	service=$optarg
 	;;
@@ -1480,7 +1480,7 @@ case $option in
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
-	norefreshsvc $service
+	autorefresh $service
 	;;
 
 	6)
@@ -1807,6 +1807,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.22  2021-07-17 08:44:48+05:30  Cprogrammer
+# --norefreshsvc renamed to --autorefresh
+#
 # Revision 1.21  2021-07-16 18:50:05+05:30  Cprogrammer
 # added --print-all-variables option
 #
