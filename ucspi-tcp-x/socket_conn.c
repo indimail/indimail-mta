@@ -1,5 +1,8 @@
 /*
  * $Log: socket_conn.c,v $
+ * Revision 1.9  2021-07-19 12:55:31+05:30  Cprogrammer
+ * fixed compiler warning on alpine linux
+ *
  * Revision 1.8  2020-09-16 20:50:03+05:30  Cprogrammer
  * fix compiler warnings
  *
@@ -48,7 +51,7 @@ int
 socket_connected(int s)
 {
 	struct sockaddr_in sa;
-#if defined(__socklen_t_defined) || defined(_SOCKLEN_T) || defined(_SOCKLEN_T_DECLARED)
+#if defined(__socklen_t_defined) || defined(_SOCKLEN_T) || defined(_SOCKLEN_T_DECLARED) || defined(__NEED_socklen_t)
 	socklen_t       dummy;
 #else
 	int             dummy;

@@ -43,6 +43,8 @@ o dotls transparent SSL/TLS wrapper for tcpserver
 - 18/07/2021
 20. installer.c: fixed setting setuid/setgid bits by calling chmod after
     chown
+- 19/07/2021
+21. fixed compiler warning on alpine linux
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 21/05/2020
