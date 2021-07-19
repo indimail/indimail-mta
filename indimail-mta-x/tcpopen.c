@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.9  2021-07-19 17:17:28+05:30  Cprogrammer
+ * rresvport deprecated
+ *
  * Revision 1.8  2021-05-26 10:47:47+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -187,10 +190,19 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				if ((fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1)
 					break; /*- Try the next address record in the list. */
 			} else { /*- if (port < 0) */
+#ifndef IPPORT_RESERVED
+#ifdef EPROTONOSUPPORT
+				errno = EPROTONOSUPPORT;
+#else
+				errno = EINVAL;
+#endif
+				return -1;
+#else
 				resvport = IPPORT_RESERVED - 1;
 				if ((fd = rresvport_af(&resvport, res->ai_family)) < 0) /*- RFC 2292 */ {
 					freeaddrinfo(res0);
 					return (-1);
+#endif
 				}
 			}
 			for (errno = 0;;) {
@@ -279,9 +291,18 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 				return (-1);
 		} else { /*- if (port < 0) */
+#ifndef IPPORT_RESERVED
+#ifdef EPROTONOSUPPORT
+			errno = EPROTONOSUPPORT;
+#else
+			errno = EINVAL;
+#endif
+			return (-1);
+#else
 			resvport = IPPORT_RESERVED - 1;
 			if ((fd = rresvport(&resvport)) < 0)
 				return (-1);
+#endif
 		}
 #if !defined(linux) && !defined(CYGWIN) && !defined(WindowsNT)
 		if (!str_diffn(hostptr, "localhost", 10)) {
@@ -351,6 +372,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.8 2021-05-26 10:47:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.9 2021-07-19 17:17:28+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
