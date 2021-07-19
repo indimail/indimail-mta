@@ -3,8 +3,6 @@
 #
 # Files in @prefix@/sbin
 #
-f:::0755:/sbin/:qmail-dk:qmail-dk
-f:::0755:/sbin/:qmail-dkim:qmail-dkim
 f:::0755:/sbin/:qmail-popbull:qmail-popbull
 f:::0755:/sbin/:qmail-poppass:qmail-poppass
 f:::0755:/sbin/:spawn-filter:spawn-filter
@@ -53,14 +51,16 @@ f:::0755:/sbin/:cdb-database:cdb-database
 f:::0755:/sbin/:qmail-cdb:qmail-cdb
 f:::0755:/sbin/:ctrlenv:ctrlenv
 f:::0755:/sbin/:udplogger:udplogger
+f:::0755:/sbin/:qmail-direct:qmail-direct
 f:::0751:/sbin/:ofmipd:ofmipd
-f:qmailq:qmail:06551:/sbin/:qmail-queue:qmail-queue
-f:root:qmail:04551:/sbin/:qmail-direct:qmail-direct
-f:qscand:qmail:06551:/sbin/:qhpsi:qhpsi
-f:qscand:qscand:04551:/sbin/:qscanq:qscanq
-f:root:qscand:02551:/sbin/:run-cleanq:run-cleanq
-f:root::04551:/sbin/:sys-checkpwd:sys-checkpwd
 f:::0755:/sbin/:qmail-multi:qmail-multi
 f:::0755:/sbin/:qmail-spamfilter:qmail-spamfilter
 f:::0755:/sbin/:qmail-nullqueue:qmail-nullqueue
 f:::0755:/sbin/:ldap-checkpwd:ldap-checkpwd
+f:qmailq:qmail:06551:/sbin/:qmail-queue:qmail-queue
+f:qscand:qmail:06551:/sbin/:qhpsi:qhpsi
+f:qscand:qscand:04551:/sbin/:qscanq:qscanq
+f:root:qscand:02551:/sbin/:run-cleanq:run-cleanq
+f:root::04551:/sbin/:sys-checkpwd:sys-checkpwd
+f::qmail:02551:/sbin/:qmail-dk:qmail-dk
+f::qmail:02551:/sbin/:qmail-dkim:qmail-dkim
