@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.10  2021-07-19 17:27:33+05:30  Cprogrammer
+ * use hasrresvport.h to conditionally compile rresvport
+ *
  * Revision 1.9  2021-07-19 17:17:28+05:30  Cprogrammer
  * rresvport deprecated
  *
@@ -47,6 +50,7 @@
 #ifdef sun
 #include <sys/systeminfo.h>
 #endif
+#include "hasrresvport.h"
 
 #define MAXSLEEP                0
 #define MAX_BUFF                300
@@ -190,7 +194,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				if ((fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1)
 					break; /*- Try the next address record in the list. */
 			} else { /*- if (port < 0) */
-#ifndef IPPORT_RESERVED
+#ifndef HASRRESVPORT
 #ifdef EPROTONOSUPPORT
 				errno = EPROTONOSUPPORT;
 #else
@@ -291,7 +295,7 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 			if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 				return (-1);
 		} else { /*- if (port < 0) */
-#ifndef IPPORT_RESERVED
+#ifndef HASRRESVPORT
 #ifdef EPROTONOSUPPORT
 			errno = EPROTONOSUPPORT;
 #else
@@ -372,6 +376,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.9 2021-07-19 17:17:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.10 2021-07-19 17:27:33+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

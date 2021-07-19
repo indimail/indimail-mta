@@ -685,6 +685,13 @@ trysgprm.c compile load
 	&& echo \#define HASSIGPROCMASK 1 || exit 0 ) > hassgprm.h
 	rm -f trysgprm.o trysgprm
 
+hasrresvport.h: \
+tryrresvport.c compile load
+	( ( ./compile tryrresvport.c && ./load tryrresvport ) >/dev/null \
+	2>&1 \
+	&& echo \#define HASRRESVPORT 1 || exit 0 ) > hasrresvport.h
+	rm -f tryrresvport.o tryrresvport
+
 headerbody.o: \
 compile headerbody.c hfield.h headerbody.h
 	./compile headerbody.c
@@ -3575,7 +3582,8 @@ udpclient: load udpclient.o udpopen.o
 udpopen.o: compile udpopen.c udpopen.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` udpopen.c
 
-tcpopen.o: compile tcpopen.c tcpopen.h haveip6.h conf-ip
+tcpopen.o: compile tcpopen.c tcpopen.h haveip6.h conf-ip \
+hasrresvport.h
 	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` tcpopen.c
 
 udpclient.o: compile udpclient.c
