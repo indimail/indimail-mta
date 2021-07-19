@@ -1650,7 +1650,7 @@ quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
 conf-mime conf-sync conf-batv conf-srs conf-todo conf-bounce conf-loglock
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-srs conf-todo conf-bounce conf-loglock` qmail-send.c
+	conf-todo conf-bounce conf-loglock` qmail-send.c
 
 qmail-send.8: \
 qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1702,7 +1702,7 @@ quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
 conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-srs conf-loglock conf-bounce` slowq-send.c
+	conf-loglock conf-bounce` slowq-send.c
 
 slowq-send.8: \
 slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1757,7 +1757,7 @@ variables.h prioq.h qmail.h newfield.h quote.h \
 auto_qmail.h auto_split.h auto_uids.h conf-mime conf-sync \
 conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-srs conf-loglock conf-bounce` qmta-send.c
+	conf-loglock conf-bounce` qmta-send.c
 
 qmta-send.8: \
 qmta-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir \
@@ -2219,6 +2219,13 @@ trylsock.c compile load
 	&& echo -lsocket -lnsl || exit 0 ) > socket.lib
 	rm -f trylsock.o trylsock
 
+fts.lib: \
+trylsock.c compile load
+	( ( ./compile trylsock.c && \
+	./load trylsock -lfts ) >/dev/null 2>&1 \
+	&& echo -lfts || exit 0 ) > fts.lib
+	rm -f trylsock.o trylsock
+
 tls.lib: \
 trytls.c compile conf-tls load conf-ld-$(SYSTEM)
 	( ( ./compile `grep -v "^#" conf-tls` trytls.c && \
@@ -2441,9 +2448,10 @@ maildirdeliver.o: compile maildirdeliver.c maildir_deliver.h
 	./compile maildirdeliver.c
 
 qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o \
-control.o auto_control.o variables.o
+control.o auto_control.o variables.o fts.lib
 	./load qmail-rm auto_split.o auto_qmail.o \
-	control.o auto_control.o variables.o -lqmail
+	control.o auto_control.o variables.o \
+	`cat fts.lib` -lqmail
 
 qmail-rm.o: \
 compile qmail-rm.c auto_split.h auto_qmail.h \
