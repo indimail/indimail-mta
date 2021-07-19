@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.34  2021-07-19 07:57:58+05:30  Cprogrammer
+ * fixed compiler warning on _XOPEN_SOURCE redefinition
+ *
  * Revision 1.33  2021-06-14 00:37:37+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -93,8 +96,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "substdio.h"
+#ifndef _XOPEN_SOURCE
 #define __USE_XOPEN
 #define _XOPEN_SOURCE
+#endif
 #include <time.h>
 #include "now.h"
 #include "sgetopt.h"
@@ -1285,7 +1290,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.33 2021-06-14 00:37:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.34 2021-07-19 07:57:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
