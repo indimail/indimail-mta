@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.12  2021-07-19 07:55:39+05:30  Cprogrammer
+ * fixed setuid, setguid bits getting lost by doing chmod after chown
+ *
  * Revision 1.11  2021-07-01 21:03:13+05:30  Cprogrammer
  * copy mode of original file if uid is non-root
  *
@@ -395,10 +398,6 @@ doit(stralloc *line, int uninstall, int ign_dir)
 		if (fsync(fdout) == -1)
 			strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 		close(fdout);
-		if (mode == -1)
-			mode = 0644;
-		if (chmod(target.s, (mode_t) mode) == -1)
-			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		if (!my_uid && (uid != -1 || gid != -1)) {
 			if (uid == -1)
 				uid = 0;
@@ -407,6 +406,10 @@ doit(stralloc *line, int uninstall, int ign_dir)
 			if (chown(target.s, (uid_t) uid, (gid_t) gid) == -1)
 				strerr_die4sys(111, FATAL, "unable to chown ", target.s, ": ");
 		}
+		if (mode == -1)
+			mode = 0644;
+		if (chmod(target.s, (mode_t) mode) == -1)
+			strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 		break;
 
 	default:
@@ -457,7 +460,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.11 2021-07-01 21:03:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: installer.c,v 1.12 2021-07-19 07:55:39+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
