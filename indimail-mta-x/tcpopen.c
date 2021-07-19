@@ -1,10 +1,7 @@
 /*
  * $Log: tcpopen.c,v $
- * Revision 1.10  2021-07-19 17:27:33+05:30  Cprogrammer
- * use hasrresvport.h to conditionally compile rresvport
- *
- * Revision 1.9  2021-07-19 17:17:28+05:30  Cprogrammer
- * rresvport deprecated
+ * Revision 1.9  2021-07-19 17:34:47+05:30  Cprogrammer
+ * deprecated rresvport
  *
  * Revision 1.8  2021-05-26 10:47:47+05:30  Cprogrammer
  * handle access() error other than ENOENT
@@ -206,8 +203,8 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 				if ((fd = rresvport_af(&resvport, res->ai_family)) < 0) /*- RFC 2292 */ {
 					freeaddrinfo(res0);
 					return (-1);
-#endif
 				}
+#endif
 			}
 			for (errno = 0;;) {
 				if (!(retval = connect(fd, res->ai_addr, res->ai_addrlen)))
@@ -376,6 +373,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.10 2021-07-19 17:27:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.9 2021-07-19 17:34:47+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
