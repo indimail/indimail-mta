@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.94 2021-05-30 08:10:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.95 2021-07-19 07:58:55+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -586,6 +586,7 @@ if [ $clamav_os -eq 1 ] ; then
   $svctool --qscanq --servicedir=$servicedir --clamdPrefix=$prefix \
     --scanint=200 $extra_opt
   $svctool --config=clamd $extra_opt
+  $svctool --config=foxhole
   $svctool --clamd --servicedir=$servicedir --clamdPrefix=$prefix \
     --sysconfdir=$sysconfdir
   if [ $clamav_os -eq 1 ] ; then
@@ -593,6 +594,32 @@ if [ $clamav_os -eq 1 ] ; then
     touch $dir_prefix$servicedir/freshclam/down
   fi
 fi
+
+cat <<EOF > "$dir_prefix"$sysconfdir/control/signatures
+# Windows executables seen in active virii
+TVqQAAMAA:
+TVpQAAIAA
+# Additional windows executable signatures not yet seen in virii
+TVpAALQAc
+TVpyAXkAX
+TVrmAU4AA
+TVrhARwAk
+TVoFAQUAA
+TVoAAAQAA
+TVoIARMAA
+TVouARsAA
+TVrQAT8AA
+# .ZIPfile signature seen in SoBig.E and mydoom:
+#UEsDBBQAA:SoBig.e Virus
+#UEsDBAoAAA:mydoom Virus
+# .GIF file found in a previous Microsoft virus making the rounds.
+R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Virus in .gif files
+# http://www.gossamer-threads.com/lists/qmail/users/114447
+UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
+EOF
+
+$chown qscand:qscand "$dir_prefix"$sysconfdir/control/signatures
+
 if [ $nobogofilter -eq 0 ] ; then
   $svctool --config=bogofilter $extra_opt
 fi
@@ -615,6 +642,9 @@ fi
 
 # fifolog service
 $svctool --fifologger=$logfifo --servicedir=$servicedir $extra_opt
+
+# udplogger service
+#svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=$servicedir
 
 # mrtg service
 if [ ! -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
@@ -639,6 +669,9 @@ do
   if [ -d "$dir_prefix"$servicedir/$i ] ; then
     svc_list="$svc_list $servicedir/$i"
   fi
+  # save variables
+  $svctool --servicedir=$servicedir --service-name=$i \
+    --export-variables=$servicedir/$i/variables/.variables  --force
 done
 if [ -d "$dir_prefix"$sysconfdir/control/defaultqueue ] ; then
   svc_list="$svc_list $sysconfdir/control/defaultqueue"
@@ -671,6 +704,7 @@ if [ $add_boot -eq 1 ] ; then
   # Install IndiMail to be started on system boot
   echo "adding svscan startup"
   $svctool --config=add-boot $extra_opt
+  echo "configuring indimail-mta as alternatives"
   $svctool --config=add-alt
 fi
 
