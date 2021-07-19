@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.5  2021-07-19 12:53:06+05:30  Cprogrammer
+# --norefreshsvc changed to --autorefresh
+#
 # Revision 1.4  2021-07-01 18:02:41+05:30  Cprogrammer
 # renamed maildirmake to qmaildirmake to avoid clash with courier-imap
 #
@@ -14,7 +17,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.4 2021-07-01 18:02:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.5 2021-07-19 12:53:06+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -623,7 +626,7 @@ EOF
       --export-variables=${_servicedir}/$i/variables/.variables --force
   done
   svc_list="$svc_list ${_sysconfdir}/control/defaultqueue"
-  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --norefreshsvc="0 $svc_list"
+  ${_prefix}/sbin/svctool --servicedir=${_servicedir} --autorefresh="0 $svc_list"
 
   echo "configuring indimail-mta as alternatives"
   ${_prefix}/sbin/svctool --config=add-alt
