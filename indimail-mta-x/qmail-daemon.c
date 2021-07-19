@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.23  2021-07-19 12:54:19+05:30  Cprogrammer
+ * exit 0 if flagexitasap is set
+ *
  * Revision 1.22  2021-05-29 23:49:06+05:30  Cprogrammer
  * fixed qbase path
  *
@@ -507,7 +510,7 @@ main(int argc, char **argv)
 			break;
 	}
 	logerrf("qmail-daemon: exiting\n");
-	_exit(111);
+	_exit(flagexitasap ? 0 : 111);
 	/*- Not reached */
 	return (0);
 }
@@ -515,7 +518,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.22 2021-05-29 23:49:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.23 2021-07-19 12:54:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
