@@ -1420,7 +1420,7 @@ if [ $have_clamav -eq 1 ] ; then
   %{_prefix}/sbin/svctool --config=clamd
   %{_prefix}/sbin/svctool --config=foxhole
   # create clamd, freshclam service
- eval %{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
+  eval %{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
     --sysconfdir=${mysysconfdir}
   if [ $have_clamav -eq 1 ] ; then
     echo "Checking if clamd/freshclam is running"
@@ -1436,9 +1436,6 @@ if [ $have_clamav -eq 1 ] ; then
     fi
   fi
 fi
-
-# udplogger service
-%{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=%{servicedir}
 
 %{__cat} <<EOF > %{qsysconfdir}/control/signatures
 # Windows executables seen in active virii
@@ -1463,6 +1460,9 @@ R0lGODlhaAA7APcAAP///+rp6puSp6GZrDUjUUc6Zn53mFJMdbGvvVtXh2xre8bF1x8cU4yLprOy:Vir
 UEsDBAoAAQAAAEBHYzCf4kJRDDAAAAAwAAAKAAAAc3ZtaXhlLmV4ZcuI1rOkjfn48VwCkMYHRTfM
 EOF
 %{__chown} qscand:qscand %{qsysconfdir}/control/signatures
+
+# udplogger service
+%{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=%{servicedir}
 
 # Recreate ld.so links and cache
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
