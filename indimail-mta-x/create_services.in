@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.95 2021-07-19 07:58:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.96 2021-07-19 13:51:52+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -263,10 +263,6 @@ fi
 if [ ! -x $dir_prefix$libexecdir/imapmodules/authindi -a ! -x $libexecdir/imapmodues/authindi ] ; then
   noproxy=1
 fi
-echo "Creating @logdir@"
-if [ ! -d $dir_prefix"@logdir@" ] ; then
-  $mkdir -p $dir_prefix"@logdir@"
-fi
 #
 # create users
 #
@@ -276,7 +272,6 @@ else
   echo "Creating indimail-mta Users"
 fi
 $svctool --config=users $extra_opt
-[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
 #
 # MySQL
 #
@@ -336,10 +331,51 @@ fi
 # create qmail config
 $svctool --config=qmail --postmaster=postmaster@$default_domain \
   --default-domain=$default_domain $extra_opt
+# rebuild cdb
+for i in smtp qmtp qmqp
+do
+  for j in `/bin/ls $sysconfdir/tcp/tcp*.$i 2>/dev/null`
+  do
+    t1=`date +'%s' -r $j`
+    if [ -f $j.cdb ] ; then
+      t2=`date +'%s' -r $j.cdb`
+    else
+      t2=0
+    fi
+    if [ $t1 -gt $t2 ] ; then
+      echo "Creating CDB $j.cdb"
+      $dir_prefix"$prefix"/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+        && chown indimail:indimail $j.cdb
+    fi
+  done
+done
 if [ $noindimail -eq 0 ] ; then
   $svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
     --mysqlpass=ssh-1.5- --mysqlsocket=$mysql_socket \
     --default-domain=$default_domain $extra_opt
+fi
+
+echo "Creating @logdir@"
+if [ ! -d $dir_prefix"@logdir@" ] ; then
+  $mkdir -p $dir_prefix"@logdir@"
+fi
+[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
+
+if [ $nodksignatures -eq 0 ] ; then
+  if [ -x $dir_prefix$prefix/bin/dknewkey ] ; then
+    ver_opt="both"
+    sign_opt="both"
+    mkdir -p "$dir_prefix"$controldir/domainkeys
+    $dir_prefix$prefix/bin/dknewkey $dir_prefix"$controldir"/domainkeys/$dkimkeyfn 1024
+    $chown indimail:qmail $dir_prefix"$controldir"/domainkeys/$dkimkeyfn
+    /bin/chmod 640 $dir_prefix"$controldir"/domainkeys/$dkimkeyfn
+  else
+    ver_opt="none"
+    sign_opt="none"
+  fi
+else
+  ver_opt="none"
+  sign_opt="none"
 fi
 
 a_arch=`uname -m`
@@ -374,20 +410,6 @@ fi
 #
 # SMTP
 #
-if [ $nodksignatures -eq 0 ] ; then
-  if [ -x $dir_prefix$prefix/bin/dknewkey ] ; then
-    ver_opt="both"
-    sign_opt="both"
-    mkdir -p "$dir_prefix"$controldir/domainkeys
-    $dir_prefix$prefix/bin/dknewkey $dir_prefix"$controldir"/domainkeys/$dkimkeyfn 1024
-  else
-    ver_opt="none"
-    sign_opt="none"
-  fi
-else
-  ver_opt="none"
-  sign_opt="none"
-fi
 orig_bogofilter=$nobogofilter
 
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
@@ -678,7 +700,7 @@ if [ -d "$dir_prefix"$sysconfdir/control/defaultqueue ] ; then
 fi
 if [ -n "$svc_list" ] ; then
   echo "Setting nofreshsvc options"
-  $svctool --servicedir=$servicedir --norefreshsvc="0 $svc_list" $extra_opt
+  $svctool --servicedir=$servicedir --autorefresh="0 $svc_list" $extra_opt
 fi
 
 $svctool --servicedir=$servicedir --config=qselinux $extra_opt
