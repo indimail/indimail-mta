@@ -70,7 +70,7 @@ include Makefile.$(SYSTEM)
 
 default: all
 
-all: $(it) $(man)
+all: $(it) $(man) indimail-mta-release
 
 make-compile: \
 make-compile.sh auto-ccld.sh
@@ -3794,4 +3794,6 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) $@.in > $@
 indimail-mta-permissions.paranoid: indimail-mta-permissions.paranoid.in \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
+	$(edit) $@.in > $@
+indimail-mta-release: indimail-mta-release.in conf-version conf-email
 	$(edit) $@.in > $@

@@ -1,0 +1,6 @@
+NAME=indimail-mta
+Description="IndiMail MTA"
+MTA_version=@version@
+ID=indimail-mta
+HOME_URL="https://github.com/mbhangui/indimail-mta"
+PACKAGE_BUGREPORT="'@email@'"

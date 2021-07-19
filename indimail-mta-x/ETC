@@ -21,6 +21,7 @@ d:indimail:qmail:02775:/tcp::
 # 
 f:root:qmail:0644:/:leapsecs.dat:leapsecs.dat
 f:root:qmail:0644:/:leapsecs.txt:leapsecs.txt
+f:root:qmail:0644:/:indimail-mta-release:indimail-mta-release
 f:root:root:0444:/:cronlist.q:cronlist.q
 f:root:qmail:0644:/:foxhole_all.cdb:foxhole_all.cdb
 f:root:qmail:0644:/control/:nodnscheck:nodnscheck

@@ -655,3 +655,4 @@ qmta-send.service
 indimail-env.5
 mini-smtpd
 mini-smtpd.o
+indimail-mta-release
