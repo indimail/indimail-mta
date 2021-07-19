@@ -1,4 +1,18 @@
 * 
+Release 2.14.0 Start 18/07/2021
+======= Release Highlights ================================================
+===========================================================================
+- 18/07/2021
+1.  autoresponder.c: conditional define of _XOPEN_SOURCE to avoid
+    compilation warning on alpine
+2. Makefile: Fix compilation of qmail-rm target by check for fts lib
+3. qmail-qfilter.c: Corrected by using fcntl.h instead of sys/fcntl.h
+4. installer.c: fixed setting setuid/setgid bits by calling chmod after
+   chown
+5. svctool: fixes for alpine linux
+6. svctool: recoded create_users function
+
+* 
 Release 2.13 Start 14/02/2021
 ======= Release Highlights ================================================
 o qmail-direct for delivering local mails directly to a user without using
