@@ -19,6 +19,8 @@ Release 2.14.0 Start 18/07/2021
 10. ported create_users for alpine linux
 11. create_service: use tcprules to generate cdb. changed --norefreshsvc to
     --autorefresh
+12. tcpopen.c, Makefile: use hasrresvport.h to conditionally compile rresvport
+
 * 
 Release 2.13 Start 14/02/2021
 ======= Release Highlights ================================================
