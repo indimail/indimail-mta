@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.334 2021-07-19 07:59:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.335 2021-07-19 12:52:08+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -242,15 +242,6 @@ echo Building %{name}-%{version}-%{release} Build %{_build} OS %{_os} Dist %dist
 echo "------------------------------------------------------"
 ) > %{name}-rpm.info
 
-(
-echo "NAME=%{name}"
-echo "Description=\"IndiMail MTA\""
-echo "MTA_version="%{version}""
-echo "ID=%{name}"
-echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
-echo "PACKAGE_BUGREPORT=\"'@email@'\""
-) > %{name}-release
-
 #### qmail ######################
 %{__sed} 's{PREFIX{%{_prefix}{'         conf-prefix.in     > conf-prefix
 %{__sed} 's{QMAIL{%{qmaildir}{'         conf-qmail.in      > conf-qmail
@@ -338,7 +329,6 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 %{__mkdir_p} %{buildroot}%{libexecdir}
 %{__mkdir_p} %{buildroot}%{qsysconfdir}
 #copy files not copied by setup
-install -m 0644 %{name}-release  %{buildroot}%{qsysconfdir}/%{name}-release
 install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog-indimail-mta %{buildroot}%{shareddir}/doc/ChangeLog-indimail-mta
 if [ -f qupgrade.sh ] ; then
@@ -353,7 +343,7 @@ fi
 if [ -f indimail-mta.te ] ; then
   install -m 0644 indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
 fi
-/bin/rm -f ChangeLog %{name}-release %{name}-rpm.info
+/bin/rm -f ChangeLog %{name}-rpm.info
 
 %if 0%{?suse_version} >= 1120
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
