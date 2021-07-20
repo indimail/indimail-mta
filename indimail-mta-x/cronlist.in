@@ -1,5 +1,5 @@
 #
-# $Id: cronlist.in,v 1.6 2021-07-10 22:55:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: cronlist.in,v 1.7 2021-07-20 23:09:01+05:30 Cprogrammer Exp mbhangui $
 #
 # Rotate the logs at midnight
 5 01 * * * root @prefix@/bin/svc -a @servicedir@/*/log > /dev/null 2>&1
@@ -7,7 +7,7 @@
 #
 # qmail-smtpd TLS
 #
-01 01 * * * root LIBEXEC/update_tmprsadh > /dev/null 2>&1
+01 01 * * * root @libexecdir@/update_tmprsadh > /dev/null 2>&1
 #
 # Clean Temp directories created by qscanq
 #
