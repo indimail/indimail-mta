@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.578 2021-07-20 08:58:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.579 2021-07-20 23:09:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.578 2021-07-20 08:58:39+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.579 2021-07-20 23:09:20+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -5573,7 +5573,7 @@ fi
 (
 dump_run_header
 echo "exec 2>&1"
-echo "exec $QmailBinPrefix/bin/svc -Gdx ../* ../*/log ./log"
+echo "exec $QmailBinPrefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 
@@ -10360,36 +10360,6 @@ case $option in
 		usage 1
 	fi
 	check_installation "$qbase" "$qcount" "$qstart" "$servicedir" "$verbose"
-	;;
-
-	12) # create_svscan
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
-	if [ " $servicedir" = " " ] ; then
-		echo "Supervise Directory not specified" 1>&2
-		usage 1
-	fi
-	grep "svscanboot" /etc/inittab >/dev/null
-	if [ $? -ne 0 ]; then
-		if [ -f /etc/debian_release ] ; then
-			echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
-		else
-			echo "SV:345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
-		fi
-		create_svscan $servicedir
-	else
-		grep "svscanboot" /etc/inittab |grep respawn >/dev/null
-		if [ $? -ne 0 ]; then
-			grep -v "svscanboot" /etc/inittab > /etc/inittab.svctool.$$
-			if [ -f /etc/debian_release ] ; then
-				echo "SV:345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
-			else
-				echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
-			fi
-			/bin/mv /etc/inittab.svctool.$$ /etc/inittab
-			create_svscan $servicedir
-		fi
-	fi
 	;;
 
 	13) # mysqldump
