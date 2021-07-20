@@ -39,7 +39,7 @@ case "$host" in
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	CXXFLAGS="$CXXFLAGS -DLINUX -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wno-register -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -DLINUX -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
 	LDFLAGS="$LDFLAGS -pie"
 	;;
 *-*-freebsd*)
