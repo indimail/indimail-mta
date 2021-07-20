@@ -1,7 +1,7 @@
 /*
  * $Log: queue-fix.c,v $
- * Revision 1.25  2021-07-20 08:58:34+05:30  Cprogrammer
- * fixed usage
+ * Revision 1.25  2021-07-20 09:04:36+05:30  Cprogrammer
+ * added missing options in usage string
  *
  * Revision 1.24  2021-07-05 21:36:52+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root
@@ -154,8 +154,8 @@ usage()
 			"                 -i - Interactive Mode\n"
 			"                 -r - create ratelimit directory\n"
 			"                 -m - qmta mode\n"
+			"                 -v - Verbose Mode\n"
 			"                 -N - Test Mode", 0);
-			"                 -v - Verbose Mode", 0);
 	_exit(100);
 }
 
@@ -1049,7 +1049,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.25 2021-07-20 08:58:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.25 2021-07-20 09:04:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
