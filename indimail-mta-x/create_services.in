@@ -14,7 +14,7 @@ sysconfdir=@sysconfdir@
 controldir=@sysconfdir@/control
 libexecdir=@libexecdir@
 mysql_socket=/var/run/mysqld/mysqld.sock
-default_domain=`uname -n`
+default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 chown=$(which chown)
 mkdir=$(which mkdir)
 cp=$(which cp)
@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.97 2021-07-20 08:57:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.98 2021-07-20 10:04:47+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
