@@ -6,3 +6,6 @@ Release 1.0.18 Start 05/06/2004
 02. FreeBSD, Darwin Port
 - 13/10/2020 indimail-mta-2.12
 03. added debuginfo package
+- 18/07/2021 indimail-mta-2.13
+- 20/07/2021
+04. updated configure.ac

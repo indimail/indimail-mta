@@ -67,6 +67,9 @@ Release 1.5 Start 19/03/2009
 33. configure.ac: changes for FreeBSD, Darwin
 - 13/10/2020 indimail-mta-2.12
 34. added debuginfo package
+- 18/07/2021 indimail-mta-2.13
+- 20/07/2021
+35. updated configure.ac by doing autoupdate
 
 *
 ----------------------
