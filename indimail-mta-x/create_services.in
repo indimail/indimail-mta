@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.100 2021-07-20 11:31:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.100 2021-07-21 00:01:42+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -737,12 +737,9 @@ if [ $check_install -eq 1 ] ; then
     --qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
 fi
 
-/*
- * $Log: create_services.in,v $
- * Revision 2.100  2021-07-20 11:31:12+05:30  Cprogrammer
- * skip cert if already existing
- *
- * Revision 2.99  2021-07-20 11:24:52+05:30  Cprogrammer
- * create postmaster as alias/Maildir to prevent loop
- *
- */
+#
+# $Log: create_services.in,v $
+# Revision 2.100  2021-07-21 00:01:42+05:30  Cprogrammer
+# skip cert creation if existing
+#
+#
