@@ -1,4 +1,7 @@
 # $Log: svscan_rc.in,v $
+# Revision 1.4  2021-07-20 23:23:12+05:30  Cprogrammer
+# removed shut command
+#
 # Revision 1.3  2021-06-30 11:10:25+05:30  Cprogrammer
 # added extra commands for FreeBSD rc
 #
@@ -13,7 +16,7 @@
 # REQUIRE: DAEMON
 # KEYWORD: nojail shutdown
 # 
-# $Id: svscan_rc.in,v 1.3 2021-06-30 11:10:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscan_rc.in,v 1.4 2021-07-20 23:23:12+05:30 Cprogrammer Exp mbhangui $
 #
 
 . /etc/rc.subr
@@ -23,7 +26,6 @@ start_cmd="@prefix@/bin/qmailctl start"
 stop_cmd="@prefix@/bin/qmailctl stop"
 status_cmd="/usr/local/bin/qmailctl status"
 kill_cmd="/usr/local/bin/qmailctl kill"
-shut_cmd="/usr/local/bin/qmailctl shut"
 restart_cmd="/usr/local/bin/qmailctl restart"
 flush_cmd="/usr/local/bin/qmailctl flush"
 reload_cmd="/usr/local/bin/qmailctl reload"
@@ -33,7 +35,7 @@ cont_cmd="/usr/local/bin/qmailctl cont"
 cdb_cmd="/usr/local/bin/qmailctl cdb"
 help_cmd="/usr/local/bin/qmailctl help"
 describe_cmd="echo qmailctl - tool to manage svscan services"
-extra_commands="status restart kill shut restart flush reload rotate queue cont cdb help"
+extra_commands="status restart kill restart flush reload rotate queue cont cdb help"
 
 load_rc_config $name
 : ${svscan_enable="NO"}
