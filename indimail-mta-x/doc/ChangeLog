@@ -20,6 +20,9 @@ Release 2.14.0 Start 18/07/2021
 11. create_service: use tcprules to generate cdb. changed --norefreshsvc to
     --autorefresh
 12. tcpopen.c, Makefile: use hasrresvport.h to conditionally compile rresvport
+- 20/07/2021
+13. queue-fix.c: fixed usage string
+14. create_services: fixed udplogger service not getting created
 
 * 
 Release 2.13 Start 14/02/2021
