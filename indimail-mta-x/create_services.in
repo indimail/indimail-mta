@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.98 2021-07-20 10:04:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.99 2021-07-20 10:20:38+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -329,7 +329,7 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
 fi
 #
 # create qmail config
-$svctool --config=qmail --postmaster=postmaster@$default_domain \
+$svctool --config=qmail --postmaster=$indimaildir/alias/Maildir/
   --default-domain=$default_domain $extra_opt
 # rebuild cdb
 for i in smtp qmtp qmqp
