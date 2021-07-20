@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.67 2020-11-29 17:53:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.68 2021-07-20 23:06:03+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -21,6 +21,8 @@ if [ -f /etc/lsb-release -o -f /etc/debian_version ] ; then
 	SYSTEM=Debian
 elif [ -f /etc/SuSE-release ] ; then
 	SYSTEM=SuSE
+elif [ -f /etc/alpine-release ] ; then
+	SYSTEM=alpine
 else
 	if [ -f /etc/os-release ] ; then
 		NAME=`grep -w NAME /etc/os-release | cut -d= -f2 | sed -e 's{"{{g'`
@@ -38,7 +40,7 @@ else
 fi
 ECHO=echo
 case "$SYSTEM" in
-	Darwin*|Debian|SuSE|FreeBSD)
+	Darwin*|Debian|SuSE|FreeBSD|alpine)
 		RES_COL=60
 		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
 		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
@@ -68,7 +70,7 @@ myecho_failure() {
 	$MOVE_TO_COL
 	$ECHO -n "["
 	$SETCOLOR_FAILURE
-	$ECHO -n $"FAILED"
+	$ECHO -n "FAILED"
 	$SETCOLOR_NORMAL
 	$ECHO -n "]"
 	$ECHO -ne "\r"
@@ -77,7 +79,7 @@ myecho_failure() {
 
 noqmail() {
 	if [ $have_qmail -ne 1 ] ; then
-		echo "Usage: `basename $0` {start|stop|restart|shut|stat|rotate|help}"
+		echo "Usage: `basename $0` {start|stop|restart|stat|rotate|help}"
 		myhelp
 		exit 1
 	fi
@@ -159,7 +161,7 @@ if [ -x /usr/bin/systemctl ] ; then
 		elif [ -f /lib/lsb/init-functions ] ; then
 			. /lib/lsb/init-functions
 		fi
-		$ECHO -n $"svscan is disabled: "
+		$ECHO -n "svscan is disabled: "
 		$fail
 		$ECHO -ne "\n"
 		exit 1
@@ -176,7 +178,6 @@ if [ $qmail -eq 1 ] ; then
    stop -- stops mail service (smtp connections refused, nothing goes out)
 restart -- stops and restarts smtp, sends qmail-send a TERM & restarts it
    kill -- Send kill signal to tcpserver, supvervise, qmail-send processes.
-   shut -- Shutdown entire svscan service.
   flush -- Schedules queued messages for immediate delivery
  reload -- sends qmail-send HUP, rereading locals and virtualdomains
  status -- status of svscan process & IndiMail services
@@ -191,7 +192,6 @@ else
   start -- starts svscan service
    stop -- stops  svscan service
 restart -- stops and restarts svscan service
-   shut -- Shutdown entire svscan service.
  status -- status of svscan process and configured services
  rotate -- rotate all logfiles (sending ALRM to multilog)
 HELP
@@ -201,12 +201,11 @@ fi
 stop()
 {
 	if [ -d /var/lock/subsys -a ! -f /var/lock/subsys/svscan ] ; then
-		exit 0
+		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null || exit 0
 	fi
 	local ret=0
 	case "$SYSTEM" in
-		FreeBSD)
-		$ECHO -n $"Stopping svscan: "
+		FreeBSD|alpine)
 		if [ -d /run ] ; then
 			sv_pid=/run/svscan/.svscan.pid
 			daemon_pid=/run/sv_daemon.pid
@@ -218,22 +217,21 @@ stop()
 			daemon_pid=/tmp/sv_daemon.pid
 		fi
 		if [ ! -f $sv_pid -a ! -f $daemon_pid ] ; then
-			$succ
-			echo
+			echo "WARNING: svscan is already stopped"
 			return $ret
 		fi
 		;;
 	esac
 	for i in `echo $SERVICE/*`
 	do
-		$ECHO -n $"Stopping $i: "
+		$ECHO -n "Stopping $i: "
 		@prefix@/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
 		RETVAL=$?
 		echo
 		let ret+=$RETVAL
 	done
 	if [ ! -f /usr/bin/systemctl ] ; then
-		$ECHO -n $"Stopping svscan: "
+		$ECHO -n "Stopping svscan: "
 		if [ -f /sbin/initctl ] ; then
 			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
@@ -241,23 +239,57 @@ stop()
 				kill `cat /var/run/sv_daemon.pid` && $succ || $fail
 			fi
 		elif [ -f /etc/inittab ] ; then
-  			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
-			if [ $? -ne 0 ]; then
+			if [ "$SYSTEM" = "alpine" ] ; then
+  				grep "svscan" /etc/inittab | grep respawn >/dev/null 2>&1
+			else
+  				grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
+			fi
+			if [ $? -eq 0 ] ; then
+				sed -i '/svscan/d' /etc/inittab
+				if [ $? -eq 0 ] ; then
+					#$ECHO -n "Stopping svscan: "
+					kill -1 1
+					if [ -d /run ] ; then
+						sv_pid=/run/svscan/.svscan.pid
+					elif [ -d /var/run ] ; then
+						sv_pid=/var/run/svscan/.svscan.pid
+					else
+						sv_pid=/service/.svscan.pid
+					fi
+					if [ -f $sv_pid ] ; then
+						sleep 4
+						if [ -f $sv_pid ] ; then
+							kill -0 `sed -n 2p $sv_pid` && $fail || $succ && rm -f $sv_pid
+						else
+							$succ
+						fi
+					else
+						ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && $fail || $succ
+					fi
+					RETVAL=1
+				else
+					echo "failed to remove svscan from /etc/inittab" 1>&2
+					RETVAL=1
+				fi
+			else
+				$ECHO -n "Stopping svscan: "
 				case "$SYSTEM" in
 					FreeBSD)
 					/usr/bin/killall -c svscan && $succ || $fail
+					;;
+					alpine)
+					/usr/bin/killall svscan && $succ || $fail
 					;;
 					*)
 					/usr/bin/killall -e -w svscan && $succ || $fail
 					;;
 				esac
-			else
-				RETVAL=0
+				RETVAL=$?
 			fi
 		else
 			/usr/bin/killall svscan && $succ || $fail
+			RETVAL=$?
 		fi
-		RETVAL=$?
 		echo
 		if [ -s /tmp/sv.err ] ; then
 			/bin/cat /tmp/sv.err
@@ -274,11 +306,16 @@ start()
 {
 	local ret=0
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
-		exit 0
+		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && exit 0 || rm -f /var/lock/subsys/svscan
 	fi
-	@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null
-	if [ $? -ne 0 ] ; then
-		$ECHO -n $"Starting svscan: "
+	if [ -f $SERVICE/.svscan/log ] ; then
+		@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null
+		status=$?
+	else
+		status=1
+	fi
+	if [ $status -ne 0 ] ; then
+		$ECHO -n "Starting svscan: "
 		if [ -f /sbin/initctl ] ; then
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
@@ -299,16 +336,37 @@ start()
 			fi
 			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				grep -v "svscan" /etc/inittab > /etc/inittab.qmailctl.$$ 2>&1
+				grep -v "svscanboot" /etc/inittab > /etc/inittab.qmailctl.$$ 2>&1
 				if [ " $SYSTEM" = " Debian" ] ; then
-					echo "SV:2345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
+					echo "SV:2345:respawn:@libexecdir@/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
+				elif [ " $SYSTEM" = " alpine" ] ; then
+					echo "::respawn:@libexecdir@/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
 				else
-					echo "SV:345:respawn:@prefix@/sbin/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
+					echo "SV:345:respawn:@libexecdir@/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
 				fi
 				if [ $? -eq 0 ] ; then
 					/bin/mv /etc/inittab.qmailctl.$$ /etc/inittab
 				fi
-				/sbin/init q
+				if [ " $SYSTEM" = " alpine" ] ; then
+					kill -1 1
+				else
+					/sbin/init q
+				fi
+				if [ -d /run ] ; then
+					sv_pid=/run/svscan/.svscan.pid
+				elif [ -d /var/run ] ; then
+					sv_pid=/var/run/svscan/.svscan.pid
+				else
+					sv_pid=/service/.svscan.pid
+				fi
+				if [ -f $sv_pid ] ; then
+					echo 1
+					if [ -f $sv_pid ] ; then
+						kill -0 `sed -n 2p $sv_pid` && $succ || $fail
+					fi
+				else
+					ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && $succ || $fail
+				fi
 			fi
 		fi
 		RETVAL=$?
@@ -318,7 +376,7 @@ start()
 		for i in `echo $SERVICE/*`
 		do
 			if [ ! -f $i/down ] ; then
-				$ECHO -n $"Starting $i: "
+				$ECHO -n "Starting $i: "
 				@prefix@/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
 				RETVAL=$?
 				echo
@@ -359,7 +417,7 @@ case "$1" in
 		ret=0
 		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 		do
-			$ECHO -n $"Stopping $i: "
+			$ECHO -n "Stopping $i: "
 			@prefix@/bin/svc -d $i && $succ || $fail
 			RETVAL=$?
 			echo
@@ -367,7 +425,7 @@ case "$1" in
 		done
 		for i in `echo $SERVICE/qmail-send.*`
 		do
-			$ECHO -n $"Terminating $i: "
+			$ECHO -n "Terminating $i: "
 			@prefix@/bin/svc -t $i && $succ || $fail
 			RETVAL=$?
 			echo
@@ -376,7 +434,7 @@ case "$1" in
 		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 		do
 			if [ ! -f $i/down ] ; then
-			$ECHO -n $"Starting $i: "
+			$ECHO -n "Starting $i: "
 				@prefix@/bin/svc -u $i && $succ || $fail
 				RETVAL=$?
 				echo
@@ -385,23 +443,10 @@ case "$1" in
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
-	shut)
-		$ECHO -n $"shutdown svscan: "
-		if [ -f /sbin/initctl ] ; then
-			/sbin/initctl stop svscan >/dev/null && $succ || $fail
-		elif [ -f /bin/systemctl ] ; then
-			/bin/systemctl stop svscan && $succ || $fail
-		else
-			/usr/bin/killall -e -w svscan && $succ || $fail
-		fi
-		ret=$?
-		echo
-		[ $ret -eq 0 ] && exit 0 || exit 1
-		;;
 	kill)
 		noqmail
-		$ECHO -n $"killing tcpserver,supervise,qmail-send: "
-		kill `ps -ef| egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $2}'` && $succ || $fail
+		$ECHO -n "killing tcpserver,supervise,qmail-send: "
+		kill `ps ax| egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $1}'` && $succ || $fail
 		ret=$?
 		echo
 		[ $ret -eq 0 ] && exit 0 || exit 1
@@ -411,7 +456,7 @@ case "$1" in
 		for i in `echo $SERVICE/* $SERviCE/.svscan`
 		do
 			if [ -d $i/log ] ; then
-				$ECHO -n $"Rotating $i: "
+				$ECHO -n "Rotating $i: "
 				@prefix@/bin/svc -a $i/log && $succ || $fail
 				RETVAL=$?
 				echo
@@ -423,12 +468,12 @@ case "$1" in
 	flush)
 		noqmail
 		ret=0
-		$ECHO -n $"Flushing timeout table + ALRM signal to qmail-send."
+		$ECHO -n "Flushing timeout table + ALRM signal to qmail-send."
 		@prefix@/sbin/qmail-tcpok > /dev/null && $succ || $fail
 		echo
 		for i in `echo $SERVICE/qmail-send.*`
 		do
-			$ECHO -n $"Flushing $i: "
+			$ECHO -n "Flushing $i: "
 			@prefix@/bin/svc -a $i && $succ || $fail
 			RETVAL=$?
 			echo
@@ -441,7 +486,7 @@ case "$1" in
 		if [ -x /sbin/initctl ] ; then
 			/sbin/initctl status svscan
 		else
-			ps -ef| grep svscanboot| grep -v grep
+			ps ax| grep svscanboot| grep -v grep
 		fi
 		RETVAL=$?
 		@prefix@/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
@@ -459,7 +504,7 @@ case "$1" in
 		ret=0
 		for i in `echo $SERVICE/qmail-send.*`
 		do
-			$ECHO -n $"sending HUP signal to $i: "
+			$ECHO -n "sending HUP signal to $i: "
 			@prefix@/bin/svc -h $i && $succ || $fail
 			RETVAL=$?
 			echo
@@ -472,7 +517,7 @@ case "$1" in
 		ret=0
 		for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 		do
-			$ECHO -n $"pausing $i: "
+			$ECHO -n "pausing $i: "
 			@prefix@/bin/svc -p $i && $succ || $fail
 			RETVAL=$?
 			echo
@@ -485,7 +530,7 @@ case "$1" in
 		ret=0
 		for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 		do
-			$ECHO -n $"continuing $i: "
+			$ECHO -n "continuing $i: "
 			@prefix@/bin/svc -c $i && $succ || $fail
 			RETVAL=$?
 			echo
@@ -502,7 +547,7 @@ case "$1" in
 			do
 				t_file=`echo $j | cut -d. -f1,2`
 				if [ ! -f $t_file ] ; then
-					$ECHO -n $"deleting $j: "
+					$ECHO -n "deleting $j: "
 					/bin/rm -f $j && $succ || $fail
 					RETVAL=$?
 					echo
@@ -518,7 +563,7 @@ case "$1" in
 					t2=0
 				fi
 				if [ $t1 -gt $t2 ] ; then
-					$ECHO -n $"building $j.cdb: "
+					$ECHO -n "building $j.cdb: "
 					@prefix@/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
 						&& /bin/chown indimail:indimail $j.cdb && $succ || $fail
 					RETVAL=$?
@@ -537,9 +582,9 @@ case "$1" in
 		;;
 	*)
 		if [ $have_qmail -eq 1 ] ; then
-			echo "Usage: `basename $0` {start|stop|condrestart|restart|shut|kill|flush|rotate|reload|stat|queue|pause|cont|cdb|help}"
+			echo "Usage: `basename $0` {start|stop|condrestart|restart|kill|flush|rotate|reload|stat|queue|pause|cont|cdb|help}"
 		else
-			echo "Usage: `basename $0` {start|stop|restart|shut|stat|rotate|help}"
+			echo "Usage: `basename $0` {start|stop|restart|stat|rotate|help}"
 		fi
 		myhelp
 		exit 1
