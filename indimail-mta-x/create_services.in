@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.99 2021-07-20 10:20:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.100 2021-07-20 11:31:12+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -329,7 +329,7 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
 fi
 #
 # create qmail config
-$svctool --config=qmail --postmaster=$indimaildir/alias/Maildir/
+$svctool --config=qmail --postmaster=$indimaildir/alias/Maildir/ \
   --default-domain=$default_domain $extra_opt
 # rebuild cdb
 for i in smtp qmtp qmqp
@@ -650,14 +650,14 @@ fi
 #
 
 # create certs
-if [ ! -f "$dir_prefix"$sysconfdir/certs/servercert.pem ] ; then
+if [ ! -f $sysconfdir/certs/servercert.pem ] ; then
+  create_ssl_cnf "" $postmaster@$default_domain $default_domain > \
+    "$dir_prefix"$sysconfdir"/certs/servercert.cnf"
   if [ -n "$dir_prefix" ] ; then
     create_ssl_cnf $dir_prefix $postmaster@$default_domain $default_domain > \
       "$dir_prefix"$sysconfdir"/certs/servercert.cnf"
     $svctool --postmaster=postmaster@$default_domain --config=cert \
       --common_name=$default_domain $extra_opt
-    create_ssl_cnf "" $postmaster@$default_domain $default_domain > \
-      "$dir_prefix"$sysconfdir"/certs/servercert.cnf"
   else
     $svctool --postmaster=postmaster@$default_domain --config=cert \
       --common_name=$default_domain $extra_opt
@@ -736,3 +736,13 @@ if [ $check_install -eq 1 ] ; then
   $svctool --check-install --servicedir=$servicedir \
     --qbase=$qbase --qcount=$qcount --qstart=1 $extra_opt
 fi
+
+/*
+ * $Log: create_services.in,v $
+ * Revision 2.100  2021-07-20 11:31:12+05:30  Cprogrammer
+ * skip cert if already existing
+ *
+ * Revision 2.99  2021-07-20 11:24:52+05:30  Cprogrammer
+ * create postmaster as alias/Maildir to prevent loop
+ *
+ */
