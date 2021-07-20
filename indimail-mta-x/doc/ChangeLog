@@ -26,6 +26,8 @@ Release 2.14.0 Start 18/07/2021
 15. create_services: use HOSTNAME env variable if set for default_domain (like
     svctool)
 16. create_services: create postmaster as alias/Maildir to prevent loop
+17. svctool: removed redundant option for inittab
+18. cronlist.in: fixed libexec path
 
 * 
 Release 2.13 Start 14/02/2021
