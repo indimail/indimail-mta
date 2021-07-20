@@ -11,7 +11,6 @@ AC_USE_SYSTEM_EXTENSIONS
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_CC_C99
 PKG_PROG_PKG_CONFIG
 PKG_INSTALLDIR
 AC_PROG_INSTALL
@@ -34,7 +33,6 @@ AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(unsigned long)
 
 dnl Checks for header files.
-AC_HEADER_STDC
 AC_CHECK_HEADERS(strings.h time.h sys/time.h sys/types.h unistd.h)
 AC_CHECK_HEADERS(errno.h sys/select.h sys/socket.h stdarg.h getopt.h)
 AC_CHECK_HEADERS(alloca.h)
@@ -44,7 +42,6 @@ AC_CHECK_LIB(socket, socket)
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
 
 case "$host" in
 *-*-sunos4.1.1*)
