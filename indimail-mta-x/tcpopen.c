@@ -1,5 +1,8 @@
 /*
  * $Log: tcpopen.c,v $
+ * Revision 1.10  2021-07-20 08:59:02+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.9  2021-07-19 17:34:47+05:30  Cprogrammer
  * deprecated rresvport
  *
@@ -105,7 +108,10 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
  *           if > 0, it is the port# of server (host-byte-order)
  */
 {
-	int             resvport, fd = -1, optval, retval, i;
+#ifdef HASRRESVPORT
+	int             resvport;
+#endif
+	int             fd = -1, optval, retval, i;
 	char           *ptr, *hostptr;
 	struct servent *sp;
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
@@ -373,6 +379,6 @@ tcpopen(host, service, port) /*- Thanks to Richard's Steven */
 void
 getversion_tcpopen_c()
 {
-	static char    *x = "$Id: tcpopen.c,v 1.9 2021-07-19 17:34:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpopen.c,v 1.10 2021-07-20 08:59:02+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
