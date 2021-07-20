@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.27  2021-07-20 23:20:09+05:30  Cprogrammer
+ * removed use of register
+ *
  * Revision 1.26  2020-10-01 14:14:34+05:30  Cprogrammer
  * Darwin Port
  *
@@ -172,8 +175,8 @@ usage()
 
 unsigned int str_chr(char *s, int c)
 {
-	register char   ch;
-	register char  *t;
+	char            ch;
+	char           *t;
 
 	ch = c;
 	t = s;
@@ -884,7 +887,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.26 2020-10-01 14:14:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.27 2021-07-20 23:20:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

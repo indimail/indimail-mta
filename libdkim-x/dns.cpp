@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.13  2021-07-20 23:20:18+05:30  Cprogrammer
+ * removed use of register
+ *
  * Revision 1.12  2020-09-30 20:46:38+05:30  Cprogrammer
  * Darwin Port
  *
@@ -121,7 +124,7 @@ resolve(char *domain, int type)
 }
 
 void
-byte_copy(register char *to, register unsigned int n, register char *from)
+byte_copy(char *to, unsigned int n, char *from)
 {
 	for (;;) {
 		if (!n)
@@ -334,7 +337,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.12 2020-09-30 20:46:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.13 2021-07-20 23:20:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
