@@ -7,8 +7,7 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([foreign])
 
 dnl Weird Unix variants
-AC_AIX
-AC_MINIX
+AC_USE_SYSTEM_EXTENSIONS
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -17,11 +16,11 @@ PKG_PROG_PKG_CONFIG
 PKG_INSTALLDIR
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_PROG_LIBTOOL
+LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
 
 dnl More weird Unix variants
-AC_ISC_POSIX
+AC_SEARCH_LIBS([strerror],[cposix])
 
 AC_C_CONST
 AC_C_INLINE
@@ -90,4 +89,5 @@ AC_SUBST([LIBTOOL_DEPS])
 AC_SUBST(LIBVER)
 AC_SUBST(VERSION)
 AC_CONFIG_FILES([libsrs2.pc:libsrs2.pc.in],[], [])
-AC_OUTPUT(libsrs2/Makefile tools/Makefile Makefile)
+AC_CONFIG_FILES([libsrs2/Makefile tools/Makefile Makefile])
+AC_OUTPUT

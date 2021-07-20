@@ -12,7 +12,7 @@ LT_INIT
 AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_LN_S
 AC_PROG_AWK
 AC_PROG_CXX
@@ -39,7 +39,7 @@ case "$host" in
 *-*-linux*)
 	CPPFLAGS="$CPPFLAGS -DLINUX"
 	CFLAGS="$CFLAGS -O4 -Wall -fPIC"
-	CXXFLAGS="$CXXFLAGS -DLINUX -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wall -fPIC"
+	CXXFLAGS="$CXXFLAGS -DLINUX -O4 -Wno-delete-non-virtual-dtor -Wno-reorder -Wno-register -Wall -fPIC"
 	LDFLAGS="$LDFLAGS -pie"
 	;;
 *-*-freebsd*)
