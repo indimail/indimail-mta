@@ -1,7 +1,6 @@
-#!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.582 2021-07-21 22:27:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.581 2021-07-21 23:33:31+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.582 2021-07-21 22:27:45+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.581 2021-07-21 23:33:31+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1606,14 +1605,16 @@ if [ ! -f "$DESTDIR"$CONTROLDIR/host.mysql ] ; then
 		echo "$mysql_host:$mysql_user:$mysql_pass:$mysqlSocket" > \
 			"$DESTDIR"$CONTROLDIR/host.mysql
 	else
-		if [ -d /run/mysqld ] ; then
+		if [ -n "$MYSQL_SOCKET" ] ; then
+			mysqlSocket=$MYSQL_SOCKET
+		elif [ -d /run/mysqld ] ; then
 			mysqlSocket=/run/mysqld/mysqld.sock
 		elif [ -d /var/run/mysqld ] ; then
 			mysqlSocket=/var/run/mysqld/mysqld.sock
 		elif [ -d /var/lib/mysql ] ; then
 			mysqlSocket=/var/lib/mysql/mysql.sock
 		else
-			mysqlSocket=/var/run/mysqld/mysqld.sock
+			mysqlSocket=/run/mysqld/mysqld.sock
 		fi
 		echo "mysql socket|port not specified: using $mysqlSocket" 1>&1
 		echo "$mysql_host:$mysql_user:$mysql_pass:$mysqlSocket" > \
@@ -4445,6 +4446,17 @@ mysql_user=$2
 mysql_pass=$3
 mysql_port=$4
 mysqlSocket=$5
+if [ -n "$MYSQL_SOCKET" ] ; then
+	mysqlSocket=$MYSQL_SOCKET
+elif [ -d /run/mysqld ] ; then
+	mysqlSocket=/run/mysqld/mysqld.sock
+elif [ -d /var/run/mysqld ] ; then
+	mysqlSocket=/var/run/mysqld/mysqld.sock
+elif [ -d /var/lib/mysql ] ; then
+	mysqlSocket=/var/lib/mysql/mysql.sock
+else
+	mysqlSocket=/run/mysqld/mysqld.sock
+fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
 	Linux)
@@ -4809,6 +4821,19 @@ if [ $# -ne 2 ] ; then
 fi
 databasedir=$1
 mysqlSocket=$2
+if [ -z "$mysqlSocket" ] ; then
+	if [ -n "$MYSQL_SOCKET" ] ; then
+		mysqlSocket=$MYSQL_SOCKET	
+	elif [ -d /run ] ; then
+		mysqlSocket=/run/mysqld/mysqld.sock
+	elif [ -d /var/run ] ; then
+		mysqlSocket=/var/run/mysqld/mysqld.sock
+	elif [ -d /var/lib/mysql ] ; then
+		mysqlSocket=/var/lib/mysql/mysql.sock
+	else
+		mysqlSocket=/run/mysqld/mysqld.sock
+	fi
+fi
 if [ -x $mysqlPrefix/libexec/mysqld ] ; then
 	mysqld=libexec/mysqld
 elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
@@ -5291,12 +5316,16 @@ fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 if [ -z "$mysqlSocket" ]; then
-	if [ -d /run ] ; then
+	if [ -n "$MYSQL_SOCKET" ] ; then
+		mysqlSocket=$MYSQL_SOCKET
+	elif [ -d /run/mysqld ] ; then
 		mysqlSocket=/run/mysqld/mysqld.sock
-	elif [ -d /var/run ] ; then
+	elif [ -d /var/run/mysqld ] ; then
 		mysqlSocket=/var/run/mysqld/mysqld.sock
 	elif [ -d /var/lib/mysql ] ; then
 		mysqlSocket=/var/lib/mysql/mysql.sock
+	else
+		mysqlSocket=/run/mysqld/mysqld.sock
 	fi
 fi
 (
@@ -5387,6 +5416,17 @@ elif [ -x $mysqlPrefix/bin/mysqld ] ; then
 else
 	echo "mysqld: No such File or directory" 1>&2
 	return 1
+fi
+if [ -n "$MYSQL_SOCKET" ] ; then
+	mysqlSocket=$MYSQL_SOCKET
+elif [ -d /run/mysqld ] ; then
+	mysqlSocket=/run/mysqld/mysqld.sock
+elif [ -d /var/run/mysqld ] ; then
+	mysqlSocket=/var/run/mysqld/mysqld.sock
+elif [ -d /var/lib/mysql ] ; then
+	mysqlSocket=/var/lib/mysql/mysql.sock
+else
+	mysqlSocket=/run/mysqld/mysqld.sock
 fi
 
 mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
@@ -9857,12 +9897,16 @@ case $option in
 			mysql_port=3306
 		fi
 		if [ -z "$mysqlSocket" ]; then
-			if [ -d /run ] ; then
+			if [ -n "$MYSQL_SOCKET" ] ; then
+				mysqlSocket=$MYSQL_SOCKET
+			elif [ -d /run ] ; then
 				mysqlSocket=/run/mysqld/mysqld.sock
 			elif [ -d /var/run ] ; then
 				mysqlSocket=/var/run/mysqld/mysqld.sock
 			elif [ -d /var/lib/mysql ] ; then
 				mysqlSocket=/var/lib/mysql/mysql.sock
+			else
+				mysqlSocket=/run/mysqld/mysqld.sock
 			fi
 		fi
 		if [ -x $mysqlPrefix/libexec/mysqld ] ; then
@@ -9954,13 +9998,17 @@ case $option in
 			echo "default domain not specified" 1>&2
 			exit 1
 		fi
-		if [ -z "$mysqlSocket" = " " ]; then
-			if [ -d /run ] ; then
+		if [ -z "$mysqlSocket" ]; then
+			if [ -n "$MYSQL_SOCKET" ] ; then
+				mysqlSocket=$MYSQL_SOCKET
+			elif [ -d /run ] ; then
 				mysqlSocket=/run/mysqld/mysqld.sock
 			elif [ -d /var/run ] ; then
 				mysqlSocket=/var/run/mysqld/mysqld.sock
 			elif [ -d /var/lib/mysql ] ; then
 				mysqlSocket=/var/lib/mysql/mysql.sock
+			else
+				mysqlSocket=/run/mysqld/mysqld.sock
 			fi
 		fi
 		create_mysql_db "$databasedir" "$mysqlSocket"

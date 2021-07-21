@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.102 2021-07-21 22:27:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.102 2021-07-21 23:35:09+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -349,7 +349,9 @@ do
   done
 done
 if [ $noindimail -eq 0 ] ; then
-  if [ -d /run ] ; then
+  if [ -n "$MYSQL_SOCKET" ] ; then
+    mysqlSocket=$MYSQL_SOCKET
+  elif [ -d /run ] ; then
     mysqlSocket=/run/mysqld/mysqld.sock
   elif [ -d /var/run ] ; then
     mysqlSocket=/var/run/mysqld/mysqld.sock
@@ -596,7 +598,9 @@ if [ $noindimail -eq 0 ] ; then
     else
       nssd_sock=/tmp/nssd.sock
     fi
-    if [ -d /run ] ; then
+	if [ -n "$MYSQL_SOCKET" ] ; then
+      mysqlSocket=$MYSQL_SOCKET
+    elif [ -d /run ] ; then
       mysqlSocket=/run/mysqld/mysqld.sock
     elif [ -d /var/run ] ; then
       mysqlSocket=/var/run/mysqld/mysqld.sock
@@ -761,6 +765,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.102  2021-07-21 23:35:09+05:30  Cprogrammer
+# fixed for mysql socket
+#
 # Revision 2.102  2021-07-21 22:27:28+05:30  Cprogrammer
 # use common variable for mysql socket
 #
