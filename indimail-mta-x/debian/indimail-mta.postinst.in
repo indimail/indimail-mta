@@ -145,10 +145,11 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	fi
 	# refresh indimail-mta services
 	svc_list=""
-	for i in greylist.1999 qmail-qmqpd.628 \
+	for i in clamd greylist.1999 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
-		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
-		qscanq udplogger.3000 clamd freshclam
+		qmail-smtpd.465 qmail-smtpd.587 slowq-send \
+		qmail-daned.1998 qscanq udplogger.3000 \
+		qmail-logfifo .svscan
 	do
 		if [ -d ${servicedir}/$i ] ; then
 			if [ -z "$svc_list" ] ; then
@@ -173,7 +174,8 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
 		qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-		slowq-send qscanq resolvconf udplogger.3000
+		slowq-send qscanq resolvconf udplogger.3000 \
+		qmail-logfifo
 	do
 		${prefix}/bin/svok ${servicedir}/$i 2>&1
 		if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
@@ -480,7 +482,8 @@ svc_list=""
 for i in clamd greylist.1999 qmail-qmqpd.628 \
 	qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 	qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
-	qmail-daned.1998
+	qmail-daned.1998 qmail-send.25 slowq-send qmail-logfifo \
+	resolvconf
 do
 	if [ -d ${servicedir}/$i ] ; then
 		svc_list="$svc_list ${servicedir}/$i"
@@ -490,7 +493,7 @@ do
 	fi
 done
 svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
-${prefix}/sbin/svctool --servicedir=${servicedir} --norefreshsvc="0 $svc_list"
+${prefix}/sbin/svctool --servicedir=${servicedir} --autorefresh="0 $svc_list"
 
 echo "compressing man pages"
 find ${mandir} -type f -exec gzip -q {} \;

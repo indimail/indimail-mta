@@ -43,8 +43,9 @@ case "$1" in
 	echo "shutting down indimail services"
 	for i in greylist.1999 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
-		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
-		qscanq udplogger.3000
+		qmail-smtpd.465 qmail-smtpd.587 qmail-send.25 \
+		qmail-daned.1998 qscanq slowq-send \
+		resolvconf udplogger.3000 qmail-logfifo
 	do
 		${prefix}/bin/svstat ${servicedir}/$i
 		if [ $? -eq 0 ] ; then

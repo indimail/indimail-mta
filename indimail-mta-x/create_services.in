@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.100 2021-07-21 00:01:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.101 2021-07-21 16:15:00+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -688,7 +688,12 @@ svc_list=""
 for i in clamd greylist.1999 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
-  qmail-daned.1998
+  qmail-daned.1998 qmail-imapd.143 qmail-imapd-ssl.993 \
+  qmail-pop3d.110 qmail-pop3d-ssl.995 qmail-poppass.106
+  fetchmail slowq-send qmail-send.25 qmail-logfifo freshclam
+  indisrvr.4000 inlookup.infifo mrtg mysql.3306 proxy-imapd.4143 \
+  proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110 \
+  pwdlookup
 do
   if [ -d "$dir_prefix"$servicedir/$i ] ; then
     svc_list="$svc_list $servicedir/$i"
@@ -739,6 +744,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.101  2021-07-21 16:15:00+05:30  Cprogrammer
+# added services to no autorefresh list
+#
 # Revision 2.100  2021-07-21 00:01:42+05:30  Cprogrammer
 # skip cert creation if existing
 #
