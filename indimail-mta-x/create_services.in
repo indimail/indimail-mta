@@ -13,7 +13,6 @@ prefix=@prefix@
 sysconfdir=@sysconfdir@
 controldir=@sysconfdir@/control
 libexecdir=@libexecdir@
-mysql_socket=/var/run/mysqld/mysqld.sock
 default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 chown=$(which chown)
 mkdir=$(which mkdir)
@@ -23,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.101 2021-07-21 16:15:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.102 2021-07-21 22:27:28+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -350,8 +349,17 @@ do
   done
 done
 if [ $noindimail -eq 0 ] ; then
+  if [ -d /run ] ; then
+    mysqlSocket=/run/mysqld/mysqld.sock
+  elif [ -d /var/run ] ; then
+    mysqlSocket=/var/run/mysqld/mysqld.sock
+  elif [ -d /var/lib/mysql ] ; then
+    mysqlSocket=/var/mysql/mysql.sock
+  else
+    mysqlSocket=/run/mysqld/mysqld.sock
+  fi
   $svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-    --mysqlpass=ssh-1.5- --mysqlsocket=$mysql_socket \
+    --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket \
     --default-domain=$default_domain $extra_opt
 fi
 
@@ -588,9 +596,18 @@ if [ $noindimail -eq 0 ] ; then
     else
       nssd_sock=/tmp/nssd.sock
     fi
+    if [ -d /run ] ; then
+      mysqlSocket=/run/mysqld/mysqld.sock
+    elif [ -d /var/run ] ; then
+      mysqlSocket=/var/run/mysqld/mysqld.sock
+    elif [ -d /var/lib/mysql ] ; then
+      mysqlSocket=/var/mysql/mysql.sock
+    else
+      mysqlSocket=/run/mysqld/mysqld.sock
+    fi
     $svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
       --mysqlhost=localhost --mysqluser=indimail \
-      --mysqlpass=ssh-1.5- --mysqlsocket=$mysql_socket \
+      --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket \
       --servicedir=$servicedir $extra_opt
   fi
   #
@@ -744,6 +761,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.102  2021-07-21 22:27:28+05:30  Cprogrammer
+# use common variable for mysql socket
+#
 # Revision 2.101  2021-07-21 16:15:00+05:30  Cprogrammer
 # added services to no autorefresh list
 #

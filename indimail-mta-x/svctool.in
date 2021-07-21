@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.581 2021-07-21 21:31:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.582 2021-07-21 22:27:45+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,17 +28,8 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.581 2021-07-21 21:31:24+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.582 2021-07-21 22:27:45+05:30 Cprogrammer Exp mbhangui $"
 
-if [ -d /run/mysqld ] ; then
-	mysqlSocket=/run/mysqld/mysqld.sock
-elif [ -d /var/run/mysqld ] ; then
-	mysqlSocket=/var/run/mysqld/mysqld.sock
-elif [ -d /var/lib/mysql ] ; then
-	mysqlSocket=/var/lib/mysql/mysql.sock
-else
-	mysqlSocket=/var/run/mysqld/mysqld.sock
-fi
 #
 # End of User Configuration
 #
@@ -1594,7 +1585,7 @@ if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.poppass ] ; then
 fi
 if [ ! -f "$DESTDIR"$CONTROLDIR/host.mysql ] ; then
 	echo "host.mysql"
-	if [ -n "$mysql_socket" -o -n "$mysql_port" ] ; then
+	if [ -n "$mysqlSocket" -o -n "$mysql_port" ] ; then
 		if [ -z "$mysql_host" ]; then
 			mysql_host=$MYSQL_HOST
 		fi
@@ -1604,8 +1595,8 @@ if [ ! -f "$DESTDIR"$CONTROLDIR/host.mysql ] ; then
 		if [ -z "$mysql_pass" ]; then
 			mysql_pass=$MYSQL_PASS
 		fi
-		if [ -n "$mysql_socket" ] ; then
-			echo "$mysql_host:$mysql_user:$mysql_pass:$mysql_socket" > \
+		if [ -n "$mysqlSocket" ] ; then
+			echo "$mysql_host:$mysql_user:$mysql_pass:$mysqlSocket" > \
 				"$DESTDIR"$CONTROLDIR/host.mysql
 		else
 			echo "$mysql_host:$mysql_user:$mysql_pass:$mysql_port" > \
@@ -4453,7 +4444,7 @@ mysql_host=$1
 mysql_user=$2
 mysql_pass=$3
 mysql_port=$4
-mysql_socket=$5
+mysqlSocket=$5
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
 	Linux)
@@ -4484,8 +4475,8 @@ echo "host        $mysql_host"
 echo "database    indimail"
 echo "username    $mysql_user"
 echo "password    $mysql_pass"
-if [ " $mysql_socket" != " " ] ; then
-	echo "socket      $mysql_socket"
+if [ -n "$mysqlSocket" ] ; then
+	echo "socket      $mysqlSocket"
 else
 	if [ " $mysql_port" = " " ] ; then
 		echo "port       3306"
@@ -4817,7 +4808,7 @@ if [ $# -ne 2 ] ; then
 	return 1
 fi
 databasedir=$1
-mysql_socket=$2
+mysqlSocket=$2
 if [ -x $mysqlPrefix/libexec/mysqld ] ; then
 	mysqld=libexec/mysqld
 elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
@@ -4903,11 +4894,11 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 			/bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str" 1>&2
 			/bin/echo -n " --skip-networking" 1>&2
 			/bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"  1>&2
-			/bin/echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket" 1>&2
+			/bin/echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket" 1>&2
 			$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str \
 				--skip-networking \
 				--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-				--datadir="$DESTDIR"$databasedir/data --socket=$mysql_socket
+				--datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket
 			if [ $? -ne 0 ] ; then
 				if [ -z $install_db ] ; then
 					echo "couldn't locate db installation program" 1>&2
@@ -4979,11 +4970,11 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 		/bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
 		/bin/echo -n " --skip-networking --datadir="$DESTDIR"$databasedir/data" 1>&2
 		/bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 1>&2
-		/bin/echo    " $opt_str --socket=$mysql_socket" 1>&2
+		/bin/echo    " $opt_str --socket=$mysqlSocket" 1>&2
 		$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid \
 			--skip-networking --datadir="$DESTDIR"$databasedir/data \
 			--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-			$opt_str --socket=$mysql_socket &
+			$opt_str --socket=$mysqlSocket &
 		wait_for_mysqld
 		if [ -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
 			pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
@@ -4993,7 +4984,7 @@ if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
 			create_mysql_rootuser $mysql_version $mariadb $mysql_community_server $pass_str $auth_str $plugin_str
 			echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data" 1>&2
 			create_mysql_user $mysql_version
-			) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysql_socket
+			) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysqlSocket
 			kill $pid
 			wait_for_mysqld 1
 			$chown -R mysql:mysql "$DESTDIR"$databasedir
@@ -5299,15 +5290,13 @@ if [ $down_state -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-if [ " $mysql_socket" = " " ]; then
-	if [ -n "$mysqlSocket" ] ; then
-		mysql_socket=$mysqlSocket
-	elif [ -d /run ] ; then
-		mysql_socket=/run/mysqld/mysqld.sock
+if [ -z "$mysqlSocket" ]; then
+	if [ -d /run ] ; then
+		mysqlSocket=/run/mysqld/mysqld.sock
 	elif [ -d /var/run ] ; then
-		mysql_socket=/var/run/mysqld/mysqld.sock
+		mysqlSocket=/var/run/mysqld/mysqld.sock
 	elif [ -d /var/lib/mysql ] ; then
-		mysql_socket=/var/lib/mysql/mysql.sock
+		mysqlSocket=/var/lib/mysql/mysql.sock
 	fi
 fi
 (
@@ -5315,7 +5304,7 @@ dump_run_header
 echo "exec 2>&1"
 echo "socket_dir=\`dirname \$(grep socket $sysconfdir/indimail.cnf 2>/dev/null| head -1 | cut -d= -f2) 2>/dev/null\`"
 echo "if [ -z \"\$socket_dir\" ] ; then"
-echo "    socket_dir=`dirname $mysql_socket`"
+echo "    socket_dir=`dirname $mysqlSocket`"
 echo "fi"
 echo "if [ ! -d \$socket_dir ] ; then"
 echo "    /bin/mkdir \$socket_dir"
@@ -5432,7 +5421,7 @@ echo "# $prog_args"
 echo ""
 echo "[client]"
 echo "port      = $mysql_port"
-echo "socket    = $mysql_socket"
+echo "socket    = $mysqlSocket"
 check_mysqld_ini_variable "default_character_set=utf8mb4" 1
 if [ $mariadb_client -eq 1 -a -d "$DESTDIR"$databasedir/ssl ] ; then
 	echo ""
@@ -5479,7 +5468,7 @@ fi
 check_mysqld_ini_variable "require_secure_transport = ON" 1
 check_mysqld_ini_variable "explicit_defaults_for_timestamp=TRUE" 1
 echo "user     = mysql"
-echo "socket   = $mysql_socket"
+echo "socket   = $mysqlSocket"
 echo "port     = $mysql_port"
 echo "basedir  = $mysqlPrefix"
 echo "datadir  = $databasedir/data"
@@ -9114,7 +9103,7 @@ while test $# -gt 0; do
 	mysql_port=$optarg
 	;;
 	--mysqlsocket=*)
-	mysql_socket=$optarg
+	mysqlSocket=$optarg
 	;;
 	--avguserquota=*)
 	avg_user_quota=$optarg
@@ -9867,15 +9856,13 @@ case $option in
 		if [ " $mysql_port" = " " ]; then
 			mysql_port=3306
 		fi
-		if [ " $mysql_socket" = " " ]; then
-			if [ -n "$mysqlSocket" ] ; then
-				mysql_socket=$mysqlSocket
-			elif [ -d /run ] ; then
-				mysql_socket=/run/mysqld/mysqld.sock
+		if [ -z "$mysqlSocket" ]; then
+			if [ -d /run ] ; then
+				mysqlSocket=/run/mysqld/mysqld.sock
 			elif [ -d /var/run ] ; then
-				mysql_socket=/var/run/mysqld/mysqld.sock
+				mysqlSocket=/var/run/mysqld/mysqld.sock
 			elif [ -d /var/lib/mysql ] ; then
-				mysql_socket=/var/lib/mysql/mysql.sock
+				mysqlSocket=/var/lib/mysql/mysql.sock
 			fi
 		fi
 		if [ -x $mysqlPrefix/libexec/mysqld ] ; then
@@ -9967,18 +9954,16 @@ case $option in
 			echo "default domain not specified" 1>&2
 			exit 1
 		fi
-		if [ " $mysql_socket" = " " ]; then
-			if [ -n "$mysqlSocket" ] ; then
-				mysql_socket=$mysqlSocket
-			elif [ -d /run ] ; then
-				mysql_socket=/run/mysqld/mysqld.sock
+		if [ -z "$mysqlSocket" = " " ]; then
+			if [ -d /run ] ; then
+				mysqlSocket=/run/mysqld/mysqld.sock
 			elif [ -d /var/run ] ; then
-				mysql_socket=/var/run/mysqld/mysqld.sock
+				mysqlSocket=/var/run/mysqld/mysqld.sock
 			elif [ -d /var/lib/mysql ] ; then
-				mysql_socket=/var/lib/mysql/mysql.sock
+				mysqlSocket=/var/lib/mysql/mysql.sock
 			fi
 		fi
-		create_mysql_db "$databasedir" "$mysql_socket"
+		create_mysql_db "$databasedir" "$mysqlSocket"
 		;;
 
 		ssl_rsa)
@@ -10524,13 +10509,13 @@ case $option in
 	elif [ " $mysql_pass" = " " ] ; then
 		echo "MySQL Passwd not specified" 1>&2
 		usage 1
-	elif [ " $mysql_port" = " " -a " $mysql_socket" = " " ] ; then
+	elif [ " $mysql_port" = " " -a -z "$mysqlSocket" = " " ] ; then
 		echo "MySQL Port/Socket not specified" 1>&2
 		usage 1
 	fi
 	echo "Creating pwdLookup Daemon on socket $socket_path, Service $servicedir, Threads $thread_count"
 	create_pwdlookup "$socket_path" "$thread_count" "$timeout" "$servicedir" "$mysql_host" "$mysql_user" \
-	"$mysql_pass" "$mysql_port" "$mysql_socket"
+	"$mysql_pass" "$mysql_port" "$mysqlSocket"
 	;;
 
 	21) # dump config
