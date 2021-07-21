@@ -689,8 +689,8 @@ for i in clamd greylist.1999 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 .svscan \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
   qmail-daned.1998 qmail-imapd.143 qmail-imapd-ssl.993 \
-  qmail-pop3d.110 qmail-pop3d-ssl.995 qmail-poppass.106
-  fetchmail slowq-send qmail-send.25 qmail-logfifo freshclam
+  qmail-pop3d.110 qmail-pop3d-ssl.995 qmail-poppass.106 \
+  fetchmail slowq-send qmail-send.25 qmail-logfifo freshclam \
   indisrvr.4000 inlookup.infifo mrtg mysql.3306 proxy-imapd.4143 \
   proxy-imapd-ssl.9143 proxy-pop3d.4110 proxy-pop3d-ssl.9110 \
   pwdlookup
