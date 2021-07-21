@@ -1,7 +1,7 @@
 #!/bin/sh
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.580 2021-07-21 18:16:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.581 2021-07-21 21:31:24+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -28,7 +28,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.580 2021-07-21 18:16:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.581 2021-07-21 21:31:24+05:30 Cprogrammer Exp mbhangui $"
 
 if [ -d /run/mysqld ] ; then
 	mysqlSocket=/run/mysqld/mysqld.sock
@@ -1594,24 +1594,37 @@ if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.poppass ] ; then
 fi
 if [ ! -f "$DESTDIR"$CONTROLDIR/host.mysql ] ; then
 	echo "host.mysql"
-	if [ ! " $mysql_socket" = " " -o ! " $mysql_port" = " " ] ; then
-		if [ " $mysql_host" = " " ]; then
+	if [ -n "$mysql_socket" -o -n "$mysql_port" ] ; then
+		if [ -z "$mysql_host" ]; then
 			mysql_host=$MYSQL_HOST
 		fi
-		if [ " $mysql_user" = " " ]; then
+		if [ -z "$mysql_user" ]; then
 			mysql_user=$MYSQL_USER
 		fi
-		if [ " $mysql_pass" = " " ]; then
+		if [ -z "$mysql_pass" ]; then
 			mysql_pass=$MYSQL_PASS
 		fi
-		if [ " $mysql_port" = " " ] ; then
+		if [ -n "$mysql_socket" ] ; then
 			echo "$mysql_host:$mysql_user:$mysql_pass:$mysql_socket" > \
 				"$DESTDIR"$CONTROLDIR/host.mysql
 		else
 			echo "$mysql_host:$mysql_user:$mysql_pass:$mysql_port" > \
 				"$DESTDIR"$CONTROLDIR/host.mysql
 		fi
+	elif [ -n "$mysqlSocket" ] ;then
+		echo "$mysql_host:$mysql_user:$mysql_pass:$mysqlSocket" > \
+			"$DESTDIR"$CONTROLDIR/host.mysql
 	else
+		if [ -d /run/mysqld ] ; then
+			mysqlSocket=/run/mysqld/mysqld.sock
+		elif [ -d /var/run/mysqld ] ; then
+			mysqlSocket=/var/run/mysqld/mysqld.sock
+		elif [ -d /var/lib/mysql ] ; then
+			mysqlSocket=/var/lib/mysql/mysql.sock
+		else
+			mysqlSocket=/var/run/mysqld/mysqld.sock
+		fi
+		echo "mysql socket|port not specified: using $mysqlSocket" 1>&1
 		echo "$mysql_host:$mysql_user:$mysql_pass:$mysqlSocket" > \
 			"$DESTDIR"$CONTROLDIR/host.mysql
 	fi
@@ -5287,14 +5300,14 @@ fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
 if [ " $mysql_socket" = " " ]; then
-	if [ -d /run/mysqld ] ; then
+	if [ -n "$mysqlSocket" ] ; then
+		mysql_socket=$mysqlSocket
+	elif [ -d /run ] ; then
 		mysql_socket=/run/mysqld/mysqld.sock
-	elif [ -d /var/run/mysqld ] ; then
+	elif [ -d /var/run ] ; then
 		mysql_socket=/var/run/mysqld/mysqld.sock
 	elif [ -d /var/lib/mysql ] ; then
 		mysql_socket=/var/lib/mysql/mysql.sock
-	else
-		mysql_socket=$mysqlSocket
 	fi
 fi
 (
@@ -9855,14 +9868,14 @@ case $option in
 			mysql_port=3306
 		fi
 		if [ " $mysql_socket" = " " ]; then
-			if [ -d /run/mysqld ] ; then
+			if [ -n "$mysqlSocket" ] ; then
+				mysql_socket=$mysqlSocket
+			elif [ -d /run ] ; then
 				mysql_socket=/run/mysqld/mysqld.sock
-			elif [ -d /var/run/mysqld ] ; then
+			elif [ -d /var/run ] ; then
 				mysql_socket=/var/run/mysqld/mysqld.sock
 			elif [ -d /var/lib/mysql ] ; then
 				mysql_socket=/var/lib/mysql/mysql.sock
-			else
-				mysql_socket=$mysqlSocket
 			fi
 		fi
 		if [ -x $mysqlPrefix/libexec/mysqld ] ; then
@@ -9955,14 +9968,14 @@ case $option in
 			exit 1
 		fi
 		if [ " $mysql_socket" = " " ]; then
-			if [ -d /run/mysqld ] ; then
+			if [ -n "$mysqlSocket" ] ; then
+				mysql_socket=$mysqlSocket
+			elif [ -d /run ] ; then
 				mysql_socket=/run/mysqld/mysqld.sock
-			elif [ -d /var/run/mysqld ] ; then
+			elif [ -d /var/run ] ; then
 				mysql_socket=/var/run/mysqld/mysqld.sock
 			elif [ -d /var/lib/mysql ] ; then
 				mysql_socket=/var/lib/mysql/mysql.sock
-			else
-				mysql_socket=$mysqlSocket
 			fi
 		fi
 		create_mysql_db "$databasedir" "$mysql_socket"
