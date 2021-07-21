@@ -28,8 +28,10 @@ Release 2.14.0 Start 18/07/2021
 16. create_services: create postmaster as alias/Maildir to prevent loop
 17. svctool: removed redundant option for inittab
 18. cronlist.in: fixed libexec path
+- 21/07/2021
 19. indimail-mta.spec, debian/pre/post scripts: updated services for startup,
     shutdown on upgrade and norefresh list
+20. svctool: display commands when adding/removing alternatives
 
 * 
 Release 2.13 Start 14/02/2021
