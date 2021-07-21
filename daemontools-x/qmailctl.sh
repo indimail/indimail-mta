@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.68 2021-07-20 23:06:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.68 2021-07-21 11:04:04+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -329,7 +329,7 @@ start()
 			env SETSID=1 /usr/sbin/daemon -cS -P $daemon_pid -R 5 \
 				-t "$SYSTEM"_svscan @libexecdir@/svscanboot && $succ || $fail
 		else
-			if [ -w /dev/console ] ; then
+			if [ -c /dev/console -a -w /dev/console ] ; then
 				device=/dev/console
 			else
 				device=/dev/null
@@ -340,7 +340,7 @@ start()
 				if [ " $SYSTEM" = " Debian" ] ; then
 					echo "SV:2345:respawn:@libexecdir@/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
 				elif [ " $SYSTEM" = " alpine" ] ; then
-					echo "::respawn:@libexecdir@/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
+					echo "::respawn:@libexecdir@/svscanboot $SERVICE" >> /etc/inittab.qmailctl.$$
 				else
 					echo "SV:345:respawn:@libexecdir@/svscanboot $SERVICE <>$device 2<>$device" >> /etc/inittab.qmailctl.$$
 				fi
