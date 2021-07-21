@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.102 2021-07-21 23:35:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.103 2021-07-21 23:59:29+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -312,7 +312,7 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
   else
     echo "Couldn't automatically stop mysqld process" 1>&2
   fi
-  ps_list=`ps -ax|grep mysqld|grep -v grep`
+  ps_list=`ps ax|grep mysqld|grep -v grep`
   if [ -n "$count" ] ; then
     echo "mysqld process is running. Please stop before resuming this script" 1>&2
     exit 0
@@ -765,6 +765,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.103  2021-07-21 23:59:29+05:30  Cprogrammer
+# fixed ps command for alpine/busybox
+#
 # Revision 2.102  2021-07-21 23:35:09+05:30  Cprogrammer
 # fixed for mysql socket
 #
