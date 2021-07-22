@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.581 2021-07-21 23:33:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.582 2021-07-22 10:45:15+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.581 2021-07-21 23:33:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.582 2021-07-22 10:45:15+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1724,6 +1724,11 @@ check_libmysqlclient_lib()
 			mysqlPrefix=/usr/local/mysql
 		elif [ -L /usr/local/mysql/lib ] ; then
 			mysqlPrefix=/usr/local/mysql
+		elif [ -x /usr/bin/mysqld -o -x /usr/sbin/mysqld ] ; then
+			mysqlPrefix=/usr
+		else
+			echo "Couldn't figure out mysqlPrefix. Specify --mysqlPrefixx" 1>&2
+			return 1
 		fi
 	fi
 	if [ -z "$CONTROLDIR" ] ; then
@@ -1870,8 +1875,11 @@ check_libmysqlclient_lib()
 	if [ -n "$mysqllib" ] ; then
 		check_update_if_diff "$DESTDIR"$CONTROLDIR/mysql_lib $mysqllib
 	else
-		echo "removing "$DESTDIR"$CONTROLDIR/mysql_lib"
-		/bin/rm -f "$DESTDIR"$CONTROLDIR/mysql_lib
+		echo "Sorry: Couldn't figure out mysql shared library. Manually edit "$DESTDIR"$CONTROLDIR/mysql_lib" 1>&2
+		if [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
+			echo "removing "$DESTDIR"$CONTROLDIR/mysql_lib"
+			/bin/rm -f "$DESTDIR"$CONTROLDIR/mysql_lib
+		fi
 	fi
 	return 0
 }

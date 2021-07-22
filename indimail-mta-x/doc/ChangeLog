@@ -33,6 +33,8 @@ Release 2.14.0 Start 18/07/2021
     shutdown on upgrade and norefresh list
 20. svctool: display commands when adding/removing alternatives
 21. svctool: fixed mysql socket setting
+- 22/07/2021
+22. svctool: fixed setting mysqlPrefix on alpine
 
 * 
 Release 2.13 Start 14/02/2021
