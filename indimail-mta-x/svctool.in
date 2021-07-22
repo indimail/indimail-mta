@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.583 2021-07-22 14:08:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.584 2021-07-22 17:12:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.583 2021-07-22 14:08:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.584 2021-07-22 17:12:47+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1136,8 +1136,9 @@ else
   while true
   do
     "$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null 2>&1
-    if [ $? -ne 0 ] ; then
-      echo "status $? ! queue"$QUEUE_NO" should be fixed. Run queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" !" 1>&2
+    status=$?
+    if [ $status -ne 0 ] ; then
+      echo "status $status ! queue"$QUEUE_NO" should be fixed. Run queue-fix -v "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" !" 1>&2
       OK=0
     elif [ "$VERB" = y ]; then
       echo "queue "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" looks OK"
@@ -1155,8 +1156,9 @@ else
 	else
     	"$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/$i > /dev/null 2>&1
 	fi
-    if [ $? -ne 0 ] ; then
-      echo "status $? ! $i should be fixed. Run queue-fix "$DESTDIR"$QUEUE_BASE/$i !" 1>&2
+	status=$?
+    if [ $status -ne 0 ] ; then
+      echo "status $status ! $i should be fixed. Run queue-fix -v "$DESTDIR"$QUEUE_BASE/$i !" 1>&2
       OK=0
     elif [ "$VERB" = y ]; then
       echo "queue "$DESTDIR"$QUEUE_BASE/$i looks OK"
@@ -1267,6 +1269,7 @@ elif [ "$VERB" = y ]; then
   echo "$servicedir directory exists"
 fi
 
+PS="ps ax"
 echo "Checking IndiMail Startup (svscan)"
 if [ -f /etc/init/svscan.conf -a -f /sbin/initctl ] ; then
   /sbin/initctl status svscan
@@ -1276,7 +1279,6 @@ if [ -f /etc/init/svscan.conf -a -f /sbin/initctl ] ; then
   else
     echo "svscan service is configured to run via upstart"
   fi
-  PS="ps ax"
 elif [ -d /etc/event.d -a -f /sbin/initctl ] ; then
   /sbin/initctl list svscan
   if [ $? -ne 0 ]; then
@@ -1285,7 +1287,6 @@ elif [ -d /etc/event.d -a -f /sbin/initctl ] ; then
   else
     echo "svscan service is configured to run via upstart"
   fi
-  PS="ps ax"
 elif [ -f /lib/systemd/system/svscan.service -a -f /bin/systemctl ] ; then
   /bin/systemctl is-enabled svscan > /dev/null
   if [ $? -ne 0 ] ; then
@@ -1310,24 +1311,22 @@ elif [ -d /Library/LaunchDaemons ] ; then
   else
     echo "svscan service is configured to run via launchd" 1>&2
   fi
-  PS="ps ax"
 else
   echo "Checking /etc/inittab"
   if [ -f /etc/inittab ]; then
-    grep "^SV:" /etc/inittab >/dev/null
+	grep ".*:.*:respawn:.*svscanboot" /etc/inittab >/dev/null
     if [ $? -ne 0 ]; then
-      echo "! Couldn't find SV entry in inittab" 1>&2
+      echo "! Couldn't find svscanboot entry in inittab" 1>&2
       OK=0
     else
-      grep "^SV:" /etc/inittab |grep respawn >/dev/null
+	  grep ".*:.*:respawn:.*svscanboot" /etc/inittab |grep respawn >/dev/null
       if [ $? -ne 0 ]; then
-        echo "! SV entry in inittab is not set to respawn" 1>&2
+        echo "! svscanboot entry in inittab is not set to respawn" 1>&2
         OK=0
       elif [ "$VERB" = y ]; then
         echo "svscan is configured to run via /etc/inittab"
       fi
     fi
-    PS="ps ax"
   else
     if [ -x /sbin/chkconfig -a -f /etc/init.d/svscan ] ; then
       /sbin/chkconfig --list svscan|grep on > /dev/null
@@ -1366,8 +1365,7 @@ else
   echo "Checking svscan"
   SVRUN=`$PS | grep "svscan $servicedir" | grep -v grep`
   if [ -z "$SVRUN" ]; then
-    echo "'! svscan $servicedir' doesn't seem to be running" 1>&2
-    OK=0
+    echo "'! svscan $servicedir' doesn't seem to be running. ignoring..." 1>&2
   elif [ "$VERB" = y ]; then
     echo "svscan $servicedir is running"
   fi
@@ -1378,7 +1376,10 @@ if [ -x "$DESTDIR"$QmailBinPrefix/sbin/nssd ] ; then
 LIST="pwdlookup"
 fi
 LIST="$LIST qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587"
-LIST="$LIST qmail-daned.1998 qmail-logfifo udplogger.3000 qscanq greylist.1999"
+LIST="$LIST qmail-daned.1998 qmail-logfifo udplogger.3000 greylist.1999"
+if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
+LIST="$LIST qscanq"
+fi
 if [ $indimail_installed -eq 1 ] ; then
 LIST="$LIST inlookup.infifo indisrvr.4000 mysql.3306 qmail-poppass.106 mrtg"
 LIST="$LIST qmail-imapd.143 qmail-pop3d.110 qmail-imapd-ssl.993 qmail-pop3d-ssl.995"
@@ -10440,16 +10441,16 @@ case $option in
 	11) # check install
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
-	if [ " $qbase" = " " ] ; then
-		echo "Queue Directory not specified" 1>&2
-		usage 1
-	elif [ " $qcount" = " " ] ; then
-		echo "Queue Count not specified" 1>&2
-		usage 1
-	elif [ " $qstart" = " " ] ; then
-		echo "Start Queue Number not specified" 1>&2
-		usage 1
-	elif [ " $servicedir" = " " ] ; then
+	if [ -z "$qbase" ] ; then
+		qbase=$indimaildir/queue
+	fi
+	if [ -z "$qcount" ] ; then
+		qcount=5
+	fi
+	if [ -z "$qstart" ] ; then
+		qstart=1
+	fi
+	if [ -z "$servicedir" ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
