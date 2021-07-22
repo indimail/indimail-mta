@@ -797,8 +797,8 @@ For latest details refer to [README](https://github.com/mbhangui/docker/blob/mas
 
 ![Matrix](https://img.shields.io/matrix/indimail:matrix.org)
 
-* Join me [#indimail:matrix.org](https://matrix.to/#/#indimail:matrix.org)
-* IndiMail has an IRC channel #indimail-mta
+* [Matrix Invite Link #indimail:matrix.org](https://matrix.to/#/#indimail:matrix.org)
+* IndiMail has an [IRC channel on libera](https://libera.chat/) #indimail-mta
 
 ## Mailing list
 
