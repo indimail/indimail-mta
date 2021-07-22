@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.585 2021-07-22 18:15:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.586 2021-07-22 21:05:24+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.585 2021-07-22 18:15:54+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.586 2021-07-22 21:05:24+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6626,6 +6626,11 @@ conf_dir="$DESTDIR"$SERVICEDIR/mrtg/variables
 if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 	return 0
 fi
+indexmaker=$(which indexmaker)
+if [ -z "$indexmaker" -o ! -f /usr/bin/mrtg ] ; then
+	echo "mrtg or indexmaker missing: Have you installed mrgt?" 1>2
+	return 1
+fi
 /bin/mkdir -p $htmldir
 $chown root:0 $htmldir
 /bin/chmod 755 $htmldir
@@ -6646,7 +6651,6 @@ sed "s{MRTGHOSTNAME{`hostname`{;  s{HTMLDIR{$htmldir\/{" \
 #
 # Create index.html in htmldir
 #
-indexmaker=$(which indexmaker)
 $indexmaker --title="IndiMail Statistics" --section=title \
 	--output=$htmldir/index.html  $conf_dir/../etc/indimail.mrtg.cfg
 # mrtg run script
@@ -10599,7 +10603,7 @@ case $option in
 	elif [ " $mysql_pass" = " " ] ; then
 		echo "MySQL Passwd not specified" 1>&2
 		usage 1
-	elif [ " $mysql_port" = " " -a -z "$mysqlSocket" = " " ] ; then
+	elif [ " $mysql_port" = " " -a -z "$mysqlSocket" ] ; then
 		echo "MySQL Port/Socket not specified" 1>&2
 		usage 1
 	fi
