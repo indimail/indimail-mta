@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.584 2021-07-22 17:12:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.585 2021-07-22 18:15:54+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.584 2021-07-22 17:12:47+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.585 2021-07-22 18:15:54+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6979,6 +6979,8 @@ enable_service()
 				else
 					/sbin/chkconfig --add $i
 				fi
+			elif [ -f /sbin/rc-update ] ; then
+				/sbin/rc-update add svscan
 			elif [ -f /usr/sbin/update-rc.d ] ; then
 				/usr/sbin/update-rc.d $i defaults
 				/usr/sbin/update-rc.d $i enable
@@ -7630,7 +7632,7 @@ create_startup()
 		fi
 		;;
 	esac
-	if [ -x "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
+	if [ -x "$DESTDIR"$QmailBinPrefix/sbin/initsvc -a ! -x /bin/busybox ] ; then
 		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -status
 	else
 		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
@@ -7673,6 +7675,16 @@ create_startup()
 				echo "svscan startup enabled in /Library/LaunchDaemons/org.indimail.svscan.plist"
 				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
 			fi
+		elif [ -f /etc/inittab ] ; then
+			grep ".*:.*:respawn:.*svscanboot" /etc/inittab >/dev/null
+			if [ $? -eq 0 ] ; then
+	  			grep ".*:.*:respawn:.*svscanboot" /etc/inittab |grep respawn >/dev/null
+				if [ $? -eq 0 ] ; then
+					echo "svscan startup enabled in /etc/inittab"
+				else
+					echo "svscan startup configured in /etc/inittab but not enabled"
+				fi
+			fi
 		fi
 	fi
 	if [ -d /etc/init.d ] ; then
@@ -7692,15 +7704,12 @@ create_startup()
 			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
 		fi
 	fi
-	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools
-		return 0
-	fi
 }
 
 remove_startup()
 {
 	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
-	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc ] ; then
+	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc -a ! -x /bin/busybox ] ; then
 		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -off
 	fi
 	if [ -f /lib/systemd/system/svscan.service -a -x /bin/systemctl ] ; then
@@ -7719,6 +7728,10 @@ remove_startup()
 	elif [ -f /etc/event.d/svscan ] ; then
 		/sbin/initctl emit qmailstop > /dev/null
 		/bin/rm -f /etc/event.d/svscan
+	elif [ -f /etc/inittab ] ; then
+		service svscan stop
+		sed -i '/svscan/d' /etc/inittab
+		kill -1 1
 	elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
 		service svscan stop
 		service svscan disable
@@ -7736,13 +7749,12 @@ remove_startup()
 			else
 				/sbin/chkconfig --del svscan
 			fi
+		elif [ -f /sbin/rc-update ] ; then
+			/sbin/rc-update del svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d -f svscan remove
 		fi
 		/bin/rm -f /etc/init.d/svscan
-	fi
-	if [ ! -f $QmailBinPrefix/bin/qmail-inject ] ; then # daemontools. This should be called before removing package
-		return 0
 	fi
 }
 

@@ -36,6 +36,7 @@ Release 2.14.0 Start 18/07/2021
 - 22/07/2021
 22. svctool: fixed setting mysqlPrefix on alpine
 23. svctool: use --resolvconf option to generate /service/resolvconf service
+24. svctool: use rc-update for addinng, deleting services on alpine
 
 * 
 Release 2.13 Start 14/02/2021
