@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.22 2021-07-17 08:44:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.23 2021-07-22 14:08:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.22 2021-07-17 08:44:48+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.23 2021-07-22 14:08:20+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -29,11 +29,13 @@ Usage: minisvc [OPTION]
 
 Known values for OPTION are:
 
---svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
+--svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n --resolvconf]
 
   service_path - Path where supervise service will be installed
   cmmd         - Program/Script to run instead of .svscan/run
   n            - Scan interval for svscan command
+  --resolvconf - mount /etc/indimail/resolv.conf as /etc/resolv.conf
+                 Use if you have dnscache installed in $servicedir/dnscache
 
 --unshare
   Use unshare to mount private /etc/resolv.conf for using local dns
@@ -242,12 +244,22 @@ if [ $# -lt 1 ] ; then
 fi
 SERVICEDIR=$1
 if [ $# -eq 2 ] ; then
-init_cmd=$2
+	init_cmd=$2
 else
-init_cmd=""
+	init_cmd=""
 fi
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/.svscan/log ] ; then
 	return 0
+fi
+if [ $mount_resolvconf -eq 1 ] ; then
+	if [ ! -x /usr/bin/unshare ] ; then
+		echo "/usr/bin/unshare: No access or unshare command missing" 1>&2
+		return 1
+	fi
+	if [ ! -x "$DESTDIR"$SERVICEDIR/dnscache/run ] ; then
+		echo "djb dnscache service is required for --resolvconf" 1>&2
+		return 1
+	fi
 fi
 # Setup variables INITCMD, SCANINTERVAL, SCANLOG, UNSHARE
 conf_dir="$DESTDIR"$SERVICEDIR/.svscan/variables
@@ -260,38 +272,39 @@ fi
 /bin/chmod 500 $conf_dir
 echo "$prog_args" > $conf_dir/.options
 if [ -z $init_cmd ] ; then
-echo           > $conf_dir/INITCMD
+	echo           > $conf_dir/INITCMD
 else
-echo $init_cmd > $conf_dir/INITCMD
+	echo $init_cmd > $conf_dir/INITCMD
 fi
 echo "/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin" > $conf_dir/PATH
 if [ " $scan_interval" = " " ] ; then
-echo           "300"  > $conf_dir/SCANINTERVAL
-else
-echo "$scan_interval" > $conf_dir/SCANINTERVAL
+	echo           "300"  > $conf_dir/SCANINTERVAL
+	else
+	echo "$scan_interval" > $conf_dir/SCANINTERVAL
 fi
 echo > $conf_dir/SCANLOG
 if [ -x /usr/bin/unshare -a $use_unshare -eq 1 ] ; then
-echo > $conf_dir/UNSHARE
+	echo > $conf_dir/UNSHARE
 else
      > $conf_dir/UNSHARE
 fi
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 /bin/mkdir -p "$DESTDIR"$sysconfdir
-if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run ] ; then
+if [ $mount_resolvconf -eq 1 ] ; then
 	# svscan run script
+	(
+	dump_run_header
+	echo "echo svscan \$PPID initialization PID \$\$"
+	echo "exec 2>&1"
+	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
+	echo "/usr/bin/mount -l"
+	) > "$DESTDIR"$SERVICEDIR/.svscan/run
 	(
 	echo "# $prog_args"
 	echo "search `uname -n`"
 	echo "nameserver 127.0.0.1"
 	) > "$DESTDIR"$sysconfdir/resolv.conf
-	(
-	dump_run_header
-	echo "echo svscan \$PPID initialization PID \$\$"
-	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
-	echo "/usr/bin/mount -l"
-	) > "$DESTDIR"$SERVICEDIR/.svscan/run
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
 else
 	if [ -x "$DESTDIR"$SERVICEDIR/.svscan/run ] ; then
@@ -301,6 +314,7 @@ fi
 
 (
 dump_run_header
+echo "exec 2>&1"
 echo "exec $prefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
@@ -321,73 +335,77 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 
 # resolvconf script using inotify
-if [ -x /usr/bin/unshare -a -x "$DESTDIR"$SERVICEDIR/dnscache/run -a -x $prefix/bin/inotify ] ; then
-conf_dir="$DESTDIR"$SERVICEDIR/resolvconf/variables
-if [ $run_file_only -eq 1 ] ; then
-	if [ -d $conf_dir ] ; then
-		/bin/mv $conf_dir "$conf_dir".bak
+if [ $mount_resolvconf -eq 1 -a \
+		-x /usr/bin/unshare -a \
+		-x "$DESTDIR"$SERVICEDIR/dnscache/run -a \
+		-x "$DESTDIR"$QmailBinPrefix/bin/inotify ] ; then
+	conf_dir="$DESTDIR"$SERVICEDIR/resolvconf/variables
+	if [ $run_file_only -eq 1 ] ; then
+		if [ -d $conf_dir ] ; then
+			/bin/mv $conf_dir "$conf_dir".bak
+		fi
 	fi
-fi
-/bin/mkdir -p "$DESTDIR"$SERVICEDIR/resolvconf/log
-if [ $down_state -eq 1 ] ; then
-	$TOUCH "$DESTDIR"$SERVICEDIR/resolvconf/down
-fi
-/bin/mkdir -p $conf_dir
-/bin/chmod 500 $conf_dir
-echo "$prog_args" > $conf_dir/.options
-# resolvconf run script
-(
-dump_run_header
-echo "trap clean_up 1 2 15"
-echo ""
-echo "function clean_up"
-echo "{"
-echo "	echo \"shutting down\""
-echo "	pkill -P \`jobs -p\` inotify"
-echo "	exit"
-echo "}"
-echo ""
-echo "if [ -f /etc/resolv.conf -a ! -L /etc/resolv.conf ] ; then"
-echo "	file=/etc/resolv.conf"
-echo "else"
-echo "	file=\`file /etc/resolv.conf |awk '{print \$5}'\`"
-echo "fi"
-echo "dir=\`dirname \$file\`"
-echo "echo \"starting with resolv_conf_dir=\$dir\""
-echo "/bin/cat /etc/resolv.conf"
-echo "exec 2>&1"
-echo "("
-echo "/usr/bin/inotify -n \$dir | while read line"
-echo "do"
-echo "	set \$line"
-echo "	if [ \" \$1\" != \" file\" ] ; then"
-echo "		continue"
-echo "	fi"
-echo "	file=\$2"
-echo "	event=\$3"
-echo "	if [ \" \$file\" != \" resolv.conf\" ] ; then"
-echo "		continue"
-echo "	fi"
-echo "	if [ \" \$event\" != \" closed\" ] ; then"
-echo "		continue"
-echo "	fi"
-echo "	list=\`grep nameserver /etc/resolv.conf\` > /dev/null"
-echo "	if [ \$? -eq 0 ] ; then"
-echo "		echo \$list"
-echo "		echo \"/usr/bin/umount /etc/resolv.conf\""
-echo "		/usr/bin/umount /etc/resolv.conf"
-echo "		echo \"/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf\""
-echo "		/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf"
-echo "	fi"
-echo "done"
-echo ") &"
-echo "wait"
-) > "$DESTDIR"$SERVICEDIR/resolvconf/run
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/run
+	/bin/mkdir -p "$DESTDIR"$SERVICEDIR/resolvconf/log
+	if [ $down_state -eq 1 ] ; then
+		$TOUCH "$DESTDIR"$SERVICEDIR/resolvconf/down
+	fi
+	/bin/mkdir -p $conf_dir
+	/bin/chmod 500 $conf_dir
+	echo "$prog_args" > $conf_dir/.options
+	# resolvconf run script
+	(
+	dump_run_header
+	echo "trap clean_up 1 2 15"
+	echo ""
+	echo "function clean_up"
+	echo "{"
+	echo "	echo \"shutting down\""
+	echo "	pkill -P \`jobs -p\` inotify"
+	echo "	exit"
+	echo "}"
+	echo ""
+	echo "exec 2>&1"
+	echo "if [ -f /etc/resolv.conf -a ! -L /etc/resolv.conf ] ; then"
+	echo "	file=/etc/resolv.conf"
+	echo "else"
+	echo "	file=\`file /etc/resolv.conf |awk '{print \$5}'\`"
+	echo "fi"
+	echo "dir=\`dirname \$file\`"
+	echo "echo \"starting with resolv_conf_dir=\$dir\""
+	echo "/bin/cat /etc/resolv.conf"
+	echo "exec 2>&1"
+	echo "("
+	echo "/usr/bin/inotify -n \$dir | while read line"
+	echo "do"
+	echo "	set \$line"
+	echo "	if [ \" \$1\" != \" file\" ] ; then"
+	echo "		continue"
+	echo "	fi"
+	echo "	file=\$2"
+	echo "	event=\$3"
+	echo "	if [ \" \$file\" != \" resolv.conf\" ] ; then"
+	echo "		continue"
+	echo "	fi"
+	echo "	if [ \" \$event\" != \" closed\" ] ; then"
+	echo "		continue"
+	echo "	fi"
+	echo "	list=\`grep nameserver /etc/resolv.conf\` > /dev/null"
+	echo "	if [ \$? -eq 0 ] ; then"
+	echo "		echo \$list"
+	echo "		echo \"/usr/bin/umount /etc/resolv.conf\""
+	echo "		/usr/bin/umount /etc/resolv.conf"
+	echo "		echo \"/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf\""
+	echo "		/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf"
+	echo "	fi"
+	echo "done"
+	echo ") &"
+	echo "wait"
+	) > "$DESTDIR"$SERVICEDIR/resolvconf/run
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/run
 
-# resolvconf log script
-dump_log_header resolvconf > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/log/run
+	# resolvconf log script
+	dump_log_header resolvconf > "$DESTDIR"$SERVICEDIR/resolvconf/log/run
+	/bin/chmod +x "$DESTDIR"$SERVICEDIR/resolvconf/log/run
 fi
 
 if [ $run_file_only -eq 1 ] ; then
@@ -1184,6 +1202,7 @@ down_state=0
 use_unshare=0
 nooverwrite=0
 run_file_only=0
+mount_resolvconf=0
 verbose=""
 
 if [ " $CONTROLDIR" = " " ] ; then
@@ -1297,6 +1316,10 @@ while test $# -gt 0; do
 
 	--svscanlog)
 	option=6
+	;;
+
+	--resolvconf)
+	mount_resolvconf=1
 	;;
 
 	--initcmd=*)
@@ -1807,6 +1830,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.23  2021-07-22 14:08:20+05:30  Cprogrammer
+# added --resolvconf option for having choice of mounting /etc/indimail/resolv.conf as /etc/resolv.conf
+#
 # Revision 1.22  2021-07-17 08:44:48+05:30  Cprogrammer
 # --norefreshsvc renamed to --autorefresh
 #

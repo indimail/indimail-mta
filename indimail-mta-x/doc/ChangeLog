@@ -35,6 +35,7 @@ Release 2.14.0 Start 18/07/2021
 21. svctool: fixed mysql socket setting
 - 22/07/2021
 22. svctool: fixed setting mysqlPrefix on alpine
+23. svctool: use --resolvconf option to generate /service/resolvconf service
 
 * 
 Release 2.13 Start 14/02/2021

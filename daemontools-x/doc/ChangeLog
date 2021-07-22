@@ -86,6 +86,8 @@ o envdir: complete re-code. Added -c option to clear, -i option to ignore
 26. installer.c: fixed setting setuid/setgid bits by calling chmod after
     chown
 27. qmailctl.sh: ported for alpine linux
+- 22/07/2021
+28. minisvc: use --resolvconf option to generate /service/resolvconf service
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

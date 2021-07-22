@@ -789,11 +789,13 @@ Known values for OPTION are:
                  service
   service_path - Path where supervise service will be installed
 
---svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n]
+--svscanlog --servicedir=service_path [--initcmd=cmmd --scanint=n --resolvconf]
 
   service_path - Path where supervise service will be installed
   cmmd         - Program/Script to run instead of .svscan/run
   n            - Scan interval for svscan command
+  --resolvconf - mount /etc/indimail/resolv.conf as /etc/resolv.conf
+                 Use if you have dnscache installed in $servicedir/dnscache
 
 --unshare
   use unshare to mount private /etc/resolv.conf for using local dns
