@@ -107,9 +107,11 @@ to locally running \fBdnscache\fR(8).  A typical \fIrun\fR to exploit \fBINITCMD
 /usr/bin/mount -l
 .EE
 
-On Linux, svscan is started using a systemd(1) unit file /usr/lib/systemd/system/svscan.service.
-On FreeBSD, it is started using rc script in /usr/local/etc/rc.d/svscan.
-On Darwin, it is started by launchd(8) using /Library/LaunchDaemons/org.indimail.svscan.plist.
+On most Linux distros, svscan is started using a systemd(1) unit file
+/usr/lib/systemd/system/svscan.service. On FreeBSD, it is started using rc
+script in /usr/local/etc/rc.d/svscan. On Darwin, it is started by
+launchd(8) using /Library/LaunchDaemons/org.indimail.svscan.plist. On
+alpine linux, it is started by init by having an entry in /etc/inittab.
 
 .SH SEE ALSO
 proc(5),

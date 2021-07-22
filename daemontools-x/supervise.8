@@ -23,11 +23,13 @@ first argument to \fIalert\fR. The exit value or signal (if killed by
 signal) is passed as the second argument to \fIalert\fR. The third argument
 is either \fIexited\fR or \fIstopped / signalled\fR.
 
-directory /run/svscan/\fIs\fR/supervise, /var/run/svscan/\fIs\fR/supervise
+supervises uses directory \fIrun\fR/svscan/\fIs\fR/supervise where\fIrun\fR
+is either /run or /var/run, depending on your operating system.
 
 \fBsupervise\fR maintains status information in a binary format in the
-directory \fIs\fR/supervise. This directory \fIs\fR must be writable to
-\fBsupervise\fR. The status information can be read by \fBsvstat\fR(8).
+directory \fIrun\fR\fIs\fR/supervise. This directory \fIrun\fR\fIs\fR must
+be writable to \fBsupervise\fR. The status information can be read by
+\fBsvstat\fR(8).
 
 \fBsupervise\fR may exit immediately after startup if it cannot find the
 files it needs in \fIs\fR or if another copy of \fBsupervise\fR is already
