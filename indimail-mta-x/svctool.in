@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.587 2021-07-23 12:16:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.588 2021-07-23 22:42:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.587 2021-07-23 12:16:09+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.588 2021-07-23 22:42:26+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7189,6 +7189,7 @@ linuxuseradd()
 	shell=""
 	password=""
 	create_home=1
+	nolastlog=0
 	args=""
 
 	case "$host" in
@@ -7236,6 +7237,11 @@ linuxuseradd()
 		-p)
 		password=$2
 		;;
+		-l)
+		if [ ! -f /bin/busybox ] ; then
+			nolastlog=1
+		fi
+		;;
 		esac
 		shift
 	done
@@ -7280,8 +7286,10 @@ linuxuseradd()
 			echo $pw useradd $opt2 $args $opt3 $1
 			eval $pw useradd $opt2 $args $opt3 $1
 		else
-			echo useradd $opt1 $opt2 $args $1
-			eval /usr/sbin/useradd $opt1 $opt2 $args $1
+			[ $nolastlog -eq 1 ] && echo /usr/sbin/useradd -l $opt1 $opt2 $args $1 || \
+				echo /usr/sbin/useradd $opt1 $opt2 $args $1
+			[ $nolastlog -eq 1 ] && eval /usr/sbin/useradd -l $opt1 $opt2 $args $1 || \
+				eval /usr/sbin/useradd $opt1 $opt2 $args $1
 		fi
 	fi
 	return $?
@@ -7346,6 +7354,7 @@ create_users()
 		safe_shell=/usr/bin/false
 	fi
 	(
+	# mysql
 	case "$host" in
 		*-*-darwin*)
 		/usr/bin/dscl . -list Groups/mysql >/dev/null 2>&1
@@ -7407,6 +7416,7 @@ create_users()
 		;;
 	esac
 
+	# qmail, nofiles, qscand group
 	for i in qmail nofiles qscand; do
 		case "$host" in
 		*-*-darwin*)
@@ -7423,6 +7433,7 @@ create_users()
 		;;
 		esac
 	done
+	# alias user
 	case "$host" in
 		*-*-darwin*)
 		userid=`expr $userid + 1`
@@ -7436,6 +7447,7 @@ create_users()
 		linuxuseradd -c "indimail alias user" -M -g nofiles -d $QmailHOME/alias -s $safe_shell alias
 		;;
 	esac
+	# qmaill user
 	case "$host" in
 		*-*-darwin*)
 		userid=`dscl . -list /Users UniqueID | awk '{print $2}' | sort -n |tail -1`
@@ -7450,6 +7462,7 @@ create_users()
 		linuxuseradd -c "indimail log user" -M -g nofiles -d $LOGDIR -s $safe_shell qmaill
 		;;
 	esac
+	# qmaild, qmailp user
 	for i in qmaild qmailp; do
 		case "$host" in
 			*-*-darwin*)
@@ -7466,6 +7479,7 @@ create_users()
 			;;
 		esac
 	done
+	# qmailq, qmailr, qmails user
 	for i in qmailq qmailr qmails; do
 		case "$host" in
 			*-*-darwin*)
@@ -7482,6 +7496,7 @@ create_users()
 			;;
 		esac
 	done
+	# qscand user
 	case "$host" in
 		*-*-darwin*)
 		userid=`dscl . -list /Users UniqueID | awk '{print $2}' | sort -n |tail -1`
@@ -8836,7 +8851,7 @@ do
 		sed -e "s{$orig{$defaultDomain{g" "$DESTDIR"$CONTROLDIR/$i > $out
 		diff "$DESTDIR"$CONTROLDIR/$i $out > /dev/null
 		if [ $? -ne 0 ] ; then
-			echo "updating $DESTDIR$""CONTROLDIR/$i with $defaultDomain"
+			echo "updating $DESTDIR""$CONTROLDIR/$i with $defaultDomain"
 			sed -i "s{$orig{$defaultDomain{g" "$DESTDIR"$CONTROLDIR/$i
 		fi
 		/bin/rm -f $out
