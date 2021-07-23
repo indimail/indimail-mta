@@ -1878,11 +1878,11 @@ else
 fi
 
 # a copy of following control files from your central server
-# /var/indimail/control/me
-# /var/indimail/control/defaultdomain,
-# /var/indimail/control/plusdomain
+# /etc/indimail/control/me
+# /etc/indimail/control/defaultdomain,
+# /etc/indimail/control/plusdomain
 # so that qmail-inject uses appropriate host names in outgoing mail; and
-# this host's name in /var/indimail/control/idhost, so that qmail-inject
+# this host's name in /etc/indimail/control/idhost, so that qmail-inject
 # generates Message-ID without any risk of collision
 if [ ! -f %{qsysconfdir}/control/idhost ] ; then
   default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
