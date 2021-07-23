@@ -128,10 +128,12 @@ Known values for OPTION are:
                    e.g. (@servicedir@/qmail-smtpd.25)
                    service_name can be "all" to act on all services
 
---config=add-boot|rm-boot
+--config=add-boot|rm-boot|users|rmusers
 
   add-boot       - Add startup scripts for IndiMail to get started during boot
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
+  users          - Create Internal System Users needed by svscan
+  rmusers        - Delete Internal System Users needed by svscan
 
 --set-variable=n --variable-value=v
   --servicedir=service_path

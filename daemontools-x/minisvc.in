@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.23 2021-07-22 14:08:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.24 2021-07-23 22:40:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -10,7 +10,7 @@ sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.23 2021-07-22 14:08:20+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.24 2021-07-23 22:40:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -82,10 +82,12 @@ Known values for OPTION are:
                    e.g. (@servicedir@/qmail-smtpd.25)
                    service_name can be "all" to act on all services
 
---config=add-boot|rm-boot
+--config=add-boot|rm-boot|users|rmusers
 
   add-boot       - Add startup scripts for IndiMail to get started during boot
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
+  users          - Create Internal System Users needed by svscan
+  rmusers        - Delete Internal System Users needed by svscan
 
 --set-variable=n --variable-value=v
   --servicedir=service_path
@@ -1157,6 +1159,433 @@ echo "IndiMail Assign File:"
 echo
 }
 
+macOSgroupadd()
+{
+	echo "groupadd $*"
+	groupid=""
+	while test $# -gt 1; do
+		case "$1" in
+		-g)
+		groupid=$2
+		for i in `dscl . -list /Groups PrimaryGroupID | awk '{print $2}'`
+		do
+			if [ $i -eq $groupid ] ; then
+				echo "groupid $groupid not unique" 1>&2
+				return 1
+			fi
+		done
+		;;
+		esac
+		shift
+	done
+	/usr/bin/dscl . -list /Groups/$1 > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		echo "group $1 exists"
+		return 1
+	fi
+	if [ -n "$groupid" ] ; then
+		echo "dscl . -create /Groups/$1 PrimaryGroupID $groupid"
+		/usr/bin/dscl . -create /Groups/$1 PrimaryGroupID $groupid
+	else
+		echo "dseditgroup -o create $1"
+		/usr/sbin/dseditgroup -o create $1
+	fi
+	return $?
+}
+
+macOSuseradd()
+{
+	echo "useradd $*"
+	userid=""
+	group=""
+	members=""
+	homedir=""
+	shell=""
+	password=""
+	create_home=1
+	while test $# -gt 1; do
+		case "$1" in
+		-M)
+		create_home=0
+		;;
+		-u)
+		userid=$2
+		for i in `dscl . -list /Users UniqueID | awk '{print $2}'`
+		do
+			if [ $i -eq $userid ] ; then
+				echo "userid $userid not unique" 1>&2
+				return 1
+			fi
+		done
+		;;
+		-g)
+		group=$2
+		dscl . -read /Groups/$group PrimaryGroupID >/dev/null 2>&1
+		if [ $? -ne 0 ] ; then
+			echo "error with Group $group" 1>&2
+			return 1
+		fi
+		groupid=`dscl . -read /Groups/$group PrimaryGroupID | grep -v "No such key"| awk '{print $2}'`
+		;;
+		-G)
+		members=$2
+		;;
+		-d)
+		homedir=$2
+		;;
+		-s)
+		shell=$2
+		;;
+		-p)
+		password=$2
+		;;
+		esac
+		shift
+	done
+	dscl . -list /Users/$1 > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		echo "user $1 exists"
+		return 1
+	fi
+	echo "dscl . -create /Users/$1 UniqueID $userid"
+	dscl . -create /Users/$1 UniqueID $userid
+	echo "dscl . -create /Users/$1 home $homedir"
+	dscl . -create /Users/$1 home $homedir
+	echo "dscl . -create /Users/$1 PrimaryGroupID $groupid"
+	dscl . -create /Users/$1 PrimaryGroupID $groupid
+	echo "dscl . -create /Users/$1 UserShell $shell"
+	dscl . -create /Users/$1 UserShell $shell
+	echo "dscl . -create /Users/$1 RealName $1"
+	dscl . -create /Users/$1 RealName $1
+	if [ ! " $password" = " " ] ; then
+		echo "dscl . -passwd /Users/$1 xxxxxxxx"
+		dscl . -passwd /Users/$1 $password
+	fi
+	if [ ! " $members" = " " ] ; then
+		IFS=,
+		j=`echo $members`
+		unset IFS
+		for i in $j
+		do
+			echo "dscl . -append /Groups/$i GroupMembership $1"
+			dscl . -append /Groups/$i GroupMembership $1 >/dev/null 2>&1
+		done
+	fi
+	if [ $create_home -eq 1 ] ; then
+		if [ ! -d $homedir ] ; then
+			mkdir -p $homedir
+			chmod 700 $homedir
+			chown $homedir $userid:$groupid
+		fi
+	fi
+}
+
+linuxuseradd()
+{
+	userid=""
+	group=""
+	gecos=""
+	members=""
+	homedir=""
+	shell=""
+	password=""
+	create_home=1
+	nolastlog=0
+	args=""
+
+	case "$host" in
+		*-*-freebsd*)
+		pw=/usr/sbin/pw
+		opt1=""
+		opt3="-n"
+		;;
+		*)
+		pw=""
+		opt1="-r -M"
+		opt3=""
+		;;
+	esac
+
+	while test $# -gt 1; do
+		case "$1" in
+		-M)
+		if [ -f /etc/debian_version -o -n "$pw"] ; then
+			opt2=""
+		elif [ -f /bin/busybox ] ; then
+			opt2="-H"
+		else
+			opt2="-M"
+		fi
+		;;
+		-u)
+		userid=$2
+		;;
+		-g)
+		group=$2
+		;;
+		-G)
+		members=$2
+		;;
+		-c)
+		gecos=$2
+		;;
+		-d)
+		homedir=$2
+		;;
+		-s)
+		shell=$2
+		;;
+		-p)
+		password=$2
+		;;
+		-l)
+		if [ ! -f /bin/busybox ] ; then
+			nolastlog=1
+		fi
+		;;
+		esac
+		shift
+	done
+	getent passwd $1 >/dev/null && echo "user $1 exists" 1>&2 && return 0
+	echo "creating user $1"
+	if [ -n "$userid" ] ; then
+		args="$args -u $userid"
+	fi
+	if [ -n "$shell" ] ; then
+		args="$args -s $shell"
+	fi
+	if [ -x /bin/busybox ] ; then
+		if [ -n "$group" ] ; then
+			args="$args -G $group"
+		fi
+		if [ -n "$homedir" ] ; then
+			args="$args -h $homedir"
+		fi
+		if [ -n "$gecos" ] ; then
+			args="$args -g \"$gecos\""
+		fi
+		echo /usr/sbin/adduser $opt2 $args -D -S $1
+		eval /usr/sbin/adduser $opt2 $args -D -S $1
+		if [ $? -eq 0 -a -n "$members" ] ; then
+			echo /usr/sbin/adduser $1 $members
+			eval /usr/sbin/adduser $1 $members
+		fi
+	else
+		if [ -n "$group" ] ; then
+			args="$args -g $group"
+		fi
+		if [ -n "$homedir" ] ; then
+			args="$args -d $homedir"
+		fi
+		if [ -n "$members" ] ; then
+			args="$args -G $members"
+		fi
+		if [ -n "$gecos" ] ; then
+			args="$args -c \"$gecos\""
+		fi
+		if [ -n "$pw" ] ; then
+			echo $pw useradd $opt2 $args $opt3 $1
+			eval $pw useradd $opt2 $args $opt3 $1
+		else
+			[ $nolastlog -eq 1 ] && echo /usr/sbin/useradd -l $opt1 $opt2 $args $1 || \
+				echo /usr/sbin/useradd $opt1 $opt2 $args $1
+			[ $nolastlog -eq 1 ] && eval /usr/sbin/useradd -l $opt1 $opt2 $args $1 || \
+				eval /usr/sbin/useradd $opt1 $opt2 $args $1
+		fi
+	fi
+	return $?
+}
+
+linuxgroupadd()
+{
+	args=""
+	case "$host" in
+		*-*-freebsd*)
+		pw=/usr/sbin/pw
+		opt1=""
+		opt2=""
+		opt3="-n"
+		;;
+		*)
+		pw=""
+		opt1="-r"
+		opt2=""
+		opt3=""
+		;;
+	esac
+
+	groupid=""
+	while test $# -gt 1; do
+		case "$1" in
+		-g)
+		groupid=$2
+		;;
+		esac
+		shift
+	done
+	if [ -n "$groupid" ] ; then
+		args="$args -g $groupid"
+	fi
+	getent group $1 >/dev/null && echo "group $1 exists" 1>&2 && return 0
+	echo "creating group $1"
+	if [ -x /bin/busybox ] ; then
+		echo /usr/sbin/addgroup -S $args $1
+		/usr/sbin/addgroup -S $args $1
+	else
+		if [ -n "$pw" ] ; then
+			echo $pw groupadd $args $opt3 $1
+			$pw groupadd $args $opt3 $1
+		else
+			echo /usr/sbin/groupadd $opt1 $args $1
+			/usr/sbin/groupadd $opt1 $args $1
+		fi
+	fi
+	return $?
+}
+
+create_users()
+{
+	if [ -f /sbin/nologin ] ; then
+		safe_shell=/sbin/nologin
+	elif [ -f /usr/bin/false ] ; then
+		safe_shell=/usr/bin/false
+	elif [ -f /bin/false ] ; then
+		safe_shell=/bin/false
+	else
+		safe_shell=/usr/bin/false
+	fi
+	(
+	for i in nofiles; do
+		case "$host" in
+		*-*-darwin*)
+		groupid=`dscl . -list /Groups PrimaryGroupID | awk '{print $2}' | sort -n | tail -1`
+		groupid=`expr $groupid + 1`
+		/usr/bin/dscl . -list Groups/$i >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			echo "creating group $i"
+			macOSgroupadd -g $groupid $i
+		fi
+		;;
+		*)
+		linuxgroupadd $i
+		;;
+		esac
+	done
+	case "$host" in
+		*-*-darwin*)
+		userid=`dscl . -list /Users UniqueID | awk '{print $2}' | sort -n |tail -1`
+		userid=`expr $userid + 1`
+		/usr/bin/dscl . -list Users/qmaill >/dev/null 2>&1
+		if [ $? -ne 0 ]; then
+			echo "creating user qmaill"
+			macOSuseradd -M -u $userid -g nofiles -d $LOGDIR -s $safe_shell qmaill
+		fi
+		;;
+		*)
+		linuxuseradd -c "indimail log user" -M -g nofiles -d $LOGDIR -s $safe_shell qmaill
+		;;
+	esac
+	case "$host" in
+		*-*-darwin*)
+		loginwindow="/Library/Preferences/com.apple.loginwindow"
+		defaults read $loginwindow HiddenUsersList | while read line
+		do
+			if [ " $line" = " (" -o " $line" = " )" ] ; then
+				continue
+			fi
+			line=`echo $line | cut -d, -f1`
+			case "$line" in
+				qmaill)
+				echo $line
+				;;
+				*)
+				defaults write $loginwindow HiddenUsersList -array-add $line
+				;;
+			esac
+		done
+		;;
+	esac
+	) 2>$TMPDIR/minisvc.user.$$
+	if [ -s $TMPDIR/minisvc.user.$$ ] ; then
+		/bin/cat $TMPDIR/minisvc.user.$$
+		/bin/rm -f $TMPDIR/minisvc.user.$$
+		return 1
+	else
+		/bin/rm -f $TMPDIR/minisvc.user.$$
+		return 0
+	fi
+}
+
+linuxuserdel()
+{
+	case "$host" in
+		*-*-freebsd*)
+		pw=/usr/sbin/pw
+		;;
+		*)
+		pw=""
+		;;
+	esac
+	echo "deleting user $1"
+	$pw userdel $i
+}
+
+linuxgroupdel()
+{
+	case "$host" in
+		*-*-freebsd*)
+		pw=/usr/sbin/pw
+		;;
+		*)
+		pw=""
+		;;
+	esac
+	echo "deleting group $1"
+	$pw groupdel $i
+}
+
+delUsers()
+{
+	case "$host" in
+		*-*-freebsd*)
+		pw=/usr/sbin/pw
+		;;
+		*)
+		pw=""
+		;;
+	esac
+	(
+	case "$host" in
+		*-*-darwin*)
+		for i in nofiles; do
+			echo "deleting group $i"
+			dscl . -delete /Groups/$i
+		done
+		for i in qmaill; do
+			echo "deleting user $i"
+			dscl . -delete /Users/$i
+		done
+		;;
+		*)
+		for i in nofiles; do
+			$linuxgroupdel $i
+		done
+		for i in qmaill; do
+			linuxuserdel $i
+		done
+		;;
+	esac
+	) 2>$TMPDIR/minisvc.user.$$
+	if [ -s $TMPDIR/minisvc.user.$$ ] ; then
+		/bin/cat $TMPDIR/minisvc.user.$$
+		/bin/rm -f $TMPDIR/minisvc.user.$$
+		return 1
+	else
+		/bin/rm -f $TMPDIR/minisvc.user.$$
+		return 0
+	fi
+}
+
 ################################# Main ##################################
 if test $# -eq 0; then
     usage 1
@@ -1468,6 +1897,30 @@ case $option in
 		remove_startup
 		;;
 
+		users)
+		nscd_up=`ps ax |grep nscd |grep -v grep|wc -l`
+		if [ $nscd_up -ge 1 ] ; then
+			if [ -x /etc/init.d/nscd ] ; then
+				/etc/init.d/nscd stop
+  			elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+    			/bin/systemctl stop nscd.service
+			fi
+		fi
+		create_users
+		status=$?
+		if [ $nscd_up -ge 1 ] ; then
+			if [ -x /etc/init.d/nscd ] ; then
+				/etc/init.d/nscd start
+  			elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+    			/bin/systemctl start nscd.service
+			fi
+		fi
+		exit $status
+		;;
+
+		rmusers)
+		delUsers
+		;;
 
 		*)
 		echo "Invalid configuration option $optarg" 1>&2
@@ -1830,6 +2283,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.24  2021-07-23 22:40:14+05:30  Cprogrammer
+# added option to add qmaill user and nofile group
+#
 # Revision 1.23  2021-07-22 14:08:20+05:30  Cprogrammer
 # added --resolvconf option for having choice of mounting /etc/indimail/resolv.conf as /etc/resolv.conf
 #
