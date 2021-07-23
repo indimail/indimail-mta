@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.586 2021-07-22 21:05:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.587 2021-07-23 12:16:09+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -22,12 +22,11 @@ MASTER_HOST=localhost
 MYSQL_HOST=localhost
 MYSQL_USER=indimail
 PRIV_USER=mysql
-default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.586 2021-07-22 21:05:24+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.587 2021-07-23 12:16:09+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -907,7 +906,7 @@ Known values for OPTION are:
   service_path   - Path where supervise service will be installed
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
---config=add-alt|remove-alt|qselinux|iselinux|inittab
+--config=add-alt|remove-alt|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--capath=ca_path_dir]
@@ -938,6 +937,8 @@ Known values for OPTION are:
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
   inittab        - Install svscan started by configuration in /etc/inittab
+  recontrol      - Update control files having domain name configured with a
+                   new domain
   postmaster     - name of the user who will recieve bounces on the local host.
                    This can also be a remote user i.e. &postmaster@indi.com
   common_name    - Common Name (CN) for server
@@ -1554,6 +1555,9 @@ fi
 
 default_indimail_control()
 {
+if [ -z "$CONTROLDIR" ] ; then
+	CONTROLDIR=$sysconfdir/control
+fi
 if [ ! -d "$DESTDIR"$CONTROLDIR ] ; then
 	/bin/mkdir -p "$DESTDIR"$CONTROLDIR
 	if [ $? -ne 0 ] ; then
@@ -1686,12 +1690,23 @@ if [ ! -d "$DESTDIR"$QmailHOME/inquery ] ; then
 	$chown indimail:qmail "$DESTDIR"$QmailHOME/inquery
 	/bin/chmod 770 "$DESTDIR"$QmailHOME/inquery
 fi
-if [ ! -d "$DESTDIR"$QmailHOME/domains/$default_domain ] ; then
-	/bin/mkdir -p "$DESTDIR"$QmailHOME/domains/$default_domain
+if [ -n "$default_domain" ] ; then
+	defaultDomain=$default_domain
+else
+	if [ -f "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+		defaultDomain=`cat "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN`
+	elif [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+		defaultDomain=`cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN`
+	else
+		defaultDomain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+	fi
+fi
+if [ ! -d "$DESTDIR"$QmailHOME/domains/$defaultDomain ] ; then
+	/bin/mkdir -p "$DESTDIR"$QmailHOME/domains/$defaultDomain
 	if [ $? -ne 0 ] ; then
 		return 1
 	fi
-	$chown indimail:indimail "$DESTDIR"$QmailHOME/domains/$default_domain
+	$chown indimail:indimail "$DESTDIR"$QmailHOME/domains/$defaultDomain
 fi
 }
 
@@ -1889,6 +1904,9 @@ check_libmysqlclient_lib()
 
 default_qmail_control()
 {
+if [ -z "$CONTROLDIR" ] ; then
+	CONTROLDIR=$sysconfdir/control
+fi
 if [ ! -d "$DESTDIR"$CONTROLDIR ] ; then
 	/bin/mkdir -p "$DESTDIR"$CONTROLDIR
 	if [ $? -ne 0 ] ; then
@@ -2152,6 +2170,7 @@ if [ $# -ne 1 ] ; then
 	echo "USAGE: link_with_global conf_dir" 1>&2
 	return 1
 fi
+conf_dir=$1
 if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 	return 0
 fi
@@ -2335,17 +2354,7 @@ if [ " $query_cache" = " " ] ; then
 else
 	echo > $conf_dir/QUERY_CACHE
 fi
-if [ " $default_domain" = " " ] ; then
-	if [ ! " $CONTROLDIR" = " " ] ; then
-		if [ -f $CONTROLDIR/defaulthost ] ; then
-			ln -sf $CONTROLDIR/defaulthost $conf_dir/DEFAULT_DOMAIN
-		else
-			> $conf_dir/DEFAULT_DOMAIN
-		fi
-	else
-		> $conf_dir/DEFAULT_DOMAIN
-	fi
-else
+if [ -n "$default_domain" ] ; then
 	echo "$default_domain" > $conf_dir/DEFAULT_DOMAIN
 fi
 if [ ! " $memory" = " " ] ; then
@@ -2771,8 +2780,8 @@ if [ " $CONTROLDIR" = " " ] ; then
 else
 	cntrldir=$CONTROLDIR
 fi
-conf_dir="$DESTDIR"$CONTROLDIR/$QUEUE_DEF
-if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$CONTROLDIR/$QUEUE_DEF ] ; then
+conf_dir="$DESTDIR"$cntrldir/$QUEUE_DEF
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$cntrldir/$QUEUE_DEF ] ; then
 	return 0
 fi
 /bin/mkdir -p $conf_dir
@@ -2790,6 +2799,22 @@ else
 	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
 	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
+fi
+defaultDomain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+if [ ! -d "$DESTDIR"$cntrldir/global_vars ] ; then
+	mkdir -p "$DESTDIR"$cntrldir/global_vars
+	$chown root:qmail "$DESTDIR"$cntrldir/global_vars
+	/bin/chmod 755 "$DESTDIR"$cntrldir/global_vars
+	echo "$cntrldir/global_vars" > $conf_dir/.envdir
+elif [ ! -f $conf_dir/.envdir ] ; then
+	echo "$cntrldir/global_vars" > $conf_dir/.envdir
+fi
+if [ ! -f "$DESTDIR"$cntrldir/global_vars/DEFAULT_DOMAIN ] ; then
+	echo $defaultDomain > "$DESTDIR"$cntrldir/global_vars/DEFAULT_DOMAIN
+fi
+if [ ! -f "$DESTDIR"$cntrldir/global_vars/QMAILDEFAULTHOST ] ; then
+	ln "$DESTDIR"$cntrldir/global_vars/DEFAULT_DOMAIN \
+		"$DESTDIR"$cntrldir/global_vars/QMAILDEFAULTHOST
 fi
 if [ " $qregex" = " " ] ; then
 	> $conf_dir/QREGEX
@@ -3629,7 +3654,10 @@ echo "$prog_args" > $conf_dir/.options
 create_imap_config()
 {
 echo "#--------- IndiMail ---------------------------"
-echo "DEFAULT_DOMAIN=$default_domain"
+if [ -n "$default_domain" ] ; then
+	echo "DEFAULT_DOMAIN=$default_domain"
+	echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
+fi
 echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
 echo "TCP_FILE=$sysconfdir/tcp/tcp.imap"
@@ -3660,7 +3688,6 @@ if [ ! " $nolastauth" = " " ] ; then
 else
 	echo "NOLASTAUTHLOGGING="
 fi
-echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
 if [ ! " $proxy_port" = " " ] ;then
 	echo "#--------- ADDED FOR Proxy IMAP ---------------"
 	echo "ADMIN_HOST=localhost"
@@ -3838,7 +3865,9 @@ echo "cert = $sysconfdir/certs/servercert.pem"
 create_pop3_config()
 {
 echo "#--------- IndiMail ---------------------------"
+if [ -n "$default_domain" ] ; then
 echo "DEFAULT_DOMAIN=$default_domain"
+fi
 echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
 echo "TCP_FILE=$sysconfdir/tcp/tcp.pop3"
@@ -6301,14 +6330,8 @@ echo "startup.so" > $conf_dir/START_PLUGIN
 #
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
 #
-if [ ! " $CONTROLDIR" = " " ] ; then
-	if [ -f $CONTROLDIR/defaulthost ] ; then
-		ln -sf $CONTROLDIR/defaulthost $conf_dir/DEFAULT_DOMAIN
-	else
-		> $conf_dir/DEFAULT_DOMAIN
-	fi
-else
-	> $conf_dir/DEFAULT_DOMAIN
+if [ -n "$default_domain" ] ; then
+	echo $default_domain > $conf_dir/DEFAULT_DOMAIN
 fi
 echo > $conf_dir/LOGLOCK
 case "$dksign_option" in
@@ -6533,14 +6556,8 @@ fi
 #
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
 #
-if [ ! " $CONTROLDIR" = " " ] ; then
-	if [ -f $CONTROLDIR/defaulthost ] ; then
-		ln -sf $CONTROLDIR/defaulthost $conf_dir/DEFAULT_DOMAIN
-	else
-		> $conf_dir/DEFAULT_DOMAIN
-	fi
-else
-	> $conf_dir/DEFAULT_DOMAIN
+if [ -n "$default_domain" ] ; then
+	echo $default_domain > $conf_dir/DEFAULT_DOMAIN
 fi
 case "$dksign_option" in
 	dkim)
@@ -8376,8 +8393,12 @@ report ()
 				) > $TMPDIR/descfile.$$
 				/usr/bin/zip -q -j -m $TMPDIR/report.$$.zip $TMPDIR/report.$$
 				QMAILUSER=postmaster
-				if [ ! " $default_domain" = " " ] ; then
-					QMAILHOST=$default_domain
+				if [ -z "$default_domain" ] ; then
+					if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+						QMAILHOST=`cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN`
+					else
+						QMAILHOST=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+					fi
 				fi
 				QMAILNAME="IndiMail Reporter"
 				export QMAILNAME
@@ -8793,6 +8814,34 @@ done
 dir="$DESTDIR"$sysconfdir/control/defaultqueue
 import_variables $dir $dir/.variables 1 "indimail" "qmail" 0644
 force=$old
+}
+
+do_recontrol()
+{
+if [ -z "$CONTROLDIR" ] ; then
+	CONTROLDIR=$sysconfdir/control
+fi
+if [ -n "$default_domain" ] ; then
+	defaultDomain=$default_domain
+else
+	defaultDomain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+fi
+orig=$(cat "$DESTDIR"$CONTROLDIR/me)
+out=$(mktemp -t recontrolXXXXXX)
+for i in defaultdomain defaulthost envnoathost locals me nodnscheck \
+	plusdomain rcpthosts smtpgreeting global_vars/DEFAULT_DOMAIN \
+	global_vars/QMAILDEFAULTHOST
+do
+	if [ -f "$DESTDIR"$CONTROLDIR/$i ] ; then
+		sed -e "s{$orig{$defaultDomain{g" "$DESTDIR"$CONTROLDIR/$i > $out
+		diff "$DESTDIR"$CONTROLDIR/$i $out > /dev/null
+		if [ $? -ne 0 ] ; then
+			echo "updating $DESTDIR$""CONTROLDIR/$i with $defaultDomain"
+			sed -i "s{$orig{$defaultDomain{g" "$DESTDIR"$CONTROLDIR/$i
+		fi
+		/bin/rm -f $out
+	fi
+done
 }
 
 ################################# Main ##################################
@@ -9733,9 +9782,6 @@ case $option in
 	elif [ $imap_port -lt 1 ] ; then
 		echo "IMAP PORT should be a positive number" 1>&2
 		usage 1
-	elif [ " $default_domain" = " " ] ; then
-		echo "Default Domain not specified" 1>&2
-		usage 1
 	fi
 	if [ ! " $proxy" = " " ] ; then
 		if [ " $hard_quota" = " " ] ; then
@@ -9761,9 +9807,6 @@ case $option in
 		usage 1
 	elif [ $pop3_port -lt 1 ] ; then
 		echo "POP3 PORT should be a positive number" 1>&2
-		usage 1
-	elif [ " $default_domain" = " " ] ; then
-		echo "Default Domain not specified" 1>&2
 		usage 1
 	fi
 	if [ ! " $proxy" = " " ] ; then
@@ -9858,9 +9901,6 @@ case $option in
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
-	elif [ " $default_domain" = " " ] ; then
-		echo "default domain not specified" 1>&2
-		exit 1
 	elif [ " $databasedir" = " " ] ; then
 		echo "Database directory not specified" 1>&2
 		usage 1
@@ -9896,9 +9936,6 @@ case $option in
 	elif [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
-	elif [ " $default_domain" = " " ] ; then
-		echo "Default Domain not specified" 1>&2
-		usage 1
 	elif [ $qcount -lt 1 ] ; then
 		echo "No of Queues should be a positive number" 1>&2
 		usage 1
@@ -9914,6 +9951,7 @@ case $option in
 	# config creation for MySQL, MySQL Database creation, imap, 
 	# 1  MySQL Config creation
 	# 2  MySQL Database creation
+	# 3  MariaDB SSL/RSA cert creation
 	# 4  IMAP config creation
 	# 5  POP3 config creation
 	# 6  qmail config creation
@@ -9926,6 +9964,7 @@ case $option in
 	# 13 remove startup for indimail from boot
 	# 14 enable selinux module
 	# 15 enable svscan in inittab
+	# 16 recontrol
 
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
@@ -10039,9 +10078,6 @@ case $option in
 		elif [ " $base_path" = " " ] ; then
 			echo "Base Path not specified" 1>&2
 			usage 1
-			exit 1
-		elif [ " $default_domain" = " " ] ; then
-			echo "default domain not specified" 1>&2
 			exit 1
 		fi
 		if [ -z "$mysqlSocket" ]; then
@@ -10445,6 +10481,11 @@ case $option in
 				create_svscan $servicedir
 			fi
 		fi
+		;;
+
+		recontrol)
+		[ `id -u` = 0 ] || exit 4
+		do_recontrol
 		;;
 
 		*)
