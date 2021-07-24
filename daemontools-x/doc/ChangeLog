@@ -90,6 +90,8 @@ o envdir: complete re-code. Added -c option to clear, -i option to ignore
 28. minisvc: use --resolvconf option to generate /service/resolvconf service
 - 23/07/2021
 29. minisvc: added option to add qmaill user and nofile group
+- 24/07/2021
+30. minisvc: added --enable-service, --disable-service and --config=inittab
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
