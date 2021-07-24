@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.6  2021-07-24 17:54:36+05:30  Cprogrammer
+# added slowq service
+#
 # Revision 1.5  2021-07-19 12:53:06+05:30  Cprogrammer
 # --norefreshsvc changed to --autorefresh
 #
@@ -17,7 +20,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.5 2021-07-19 12:53:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.6 2021-07-24 17:54:36+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -507,6 +510,14 @@ post_install() {
     --private_key=${_sysconfdir}/control/domainkeys/%/${_dkimkeyfn} \
     $extra_opt
 
+  # slowq service
+  eval ${_prefix}/sbin/svctool --slowq --servicedir=${_servicedir} --qbase=${_qbase} \
+	--cntrldir=control --persistdb --starttls --fsync --syncdir \
+    --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
+	--dksign=${sign_opt} --private_key=${_sysconfdir}/control/domainkeys/%/${dkimkeyfn} \
+	--remote-authsmtp=plain --localfilter --remotefilter \
+	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+
   # ODMR service
   ${_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${_servicedir} \
     --infifo="" --query-cache --password-cache --skipsend --memory=${smtp_soft_mem}
@@ -616,14 +627,15 @@ EOF
   for i in clamd greylist.1999 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
     qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
-    qmail-daned.1998
+    qmail-daned.1998 qmail-send.25 slowq-send qmail-logfifo \
+    resolvconf
   do
     if [ -d ${_servicedir}/$i ] ; then
       svc_list="$svc_list ${_servicedir}/$i"
+      # save variables
+      ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
+        --export-variables=${_servicedir}/$i/variables/.variables --force
     fi
-    # save variables
-    ${_prefix}/sbin/svctool --servicedir=${_servicedir} --service-name=$i \
-      --export-variables=${_servicedir}/$i/variables/.variables --force
   done
   svc_list="$svc_list ${_sysconfdir}/control/defaultqueue"
   ${_prefix}/sbin/svctool --servicedir=${_servicedir} --autorefresh="0 $svc_list"
@@ -700,8 +712,9 @@ post_upgrade() {
   svc_list=""
   for i in clamd greylist.1999 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
-    qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
-    qmail-daned.1998
+    qmail-smtpd.465 qmail-smtpd.587 slowq-send \
+    qmail-daned.1998 qscanq udplogger.3000 \
+    qmail-logfifo .svscan
   do
     if [ -d ${_servicedir}/$i ] ; then
       if [ -z "$svc_list" ] ; then
