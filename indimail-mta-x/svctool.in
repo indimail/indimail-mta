@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.588 2021-07-23 22:42:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.589 2021-07-24 17:55:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.588 2021-07-23 22:42:26+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.589 2021-07-24 17:55:47+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7001,7 +7001,7 @@ enable_service()
 					/sbin/chkconfig --add $i
 				fi
 			elif [ -f /sbin/rc-update ] ; then
-				/sbin/rc-update add svscan
+				/sbin/rc-update add $i
 			elif [ -f /usr/sbin/update-rc.d ] ; then
 				/usr/sbin/update-rc.d $i defaults
 				/usr/sbin/update-rc.d $i enable
@@ -7050,6 +7050,8 @@ disable_service()
 				else
 					/sbin/chkconfig --del $i
 				fi
+			elif [ -f /sbin/rc-update ] ; then
+				/sbin/rc-update del $i
 			elif [ -f /usr/sbin/update-rc.d ] ; then
 				/usr/sbin/update-rc.d -f $i disable
 				/usr/sbin/update-rc.d -f $i remove
@@ -7736,6 +7738,10 @@ create_startup()
 			else
 				/sbin/chkconfig --add svscan
 			fi
+		elif [ -f /usr/sbin/chkconfig ] ; then
+			/usr/sbin/chkconfig --add svscan 2>/dev/null
+		elif [ -f /sbin/rc-update ] ; then
+			/sbin/rc-update add svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
 		fi
@@ -7785,6 +7791,8 @@ remove_startup()
 			else
 				/sbin/chkconfig --del svscan
 			fi
+		elif [ -f /usr/sbin/chkconfig ] ; then
+			/usr/sbin/chkconfig --del svscan 2>/dev/null
 		elif [ -f /sbin/rc-update ] ; then
 			/sbin/rc-update del svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
@@ -10478,22 +10486,32 @@ case $option in
 		grep "svscanboot" /etc/inittab >/dev/null
 		if [ $? -ne 0 ]; then
 			if [ -f /etc/debian_release ] ; then
-				echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
+				echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
+			elif [ -f /etc/alpine-release ] ; then
+				echo "::respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
 			else
-				echo "SV:345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab
+				echo "SV:345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
 			fi
-			create_svscan $servicedir
+			if [ $? -eq 0 ] ; then
+				kill -1 1
+			fi
 		else
 			grep "svscanboot" /etc/inittab |grep respawn >/dev/null
 			if [ $? -ne 0 ]; then
 				grep -v "svscanboot" /etc/inittab > /etc/inittab.svctool.$$
-				if [ -f /etc/debian_release ] ; then
-					echo "SV:345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
-				else
-					echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir <>/dev/console 2<>/dev/console" >> /etc/inittab.svctool.$$
+				if [ $? -eq 0 ] ; then
+					if [ -f /etc/debian_release ] ; then
+						echo "SV:345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab.svctool.$$
+					elif [ -f /etc/alpine-release ] ; then
+						echo "::respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
+					else
+						echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab.svctool.$$
+					fi
 				fi
-				/bin/mv /etc/inittab.svctool.$$ /etc/inittab
-				create_svscan $servicedir
+				if [ $? -eq 0 ] ; then
+					/bin/mv /etc/inittab.svctool.$$ /etc/inittab
+					kill -1 1
+				fi
 			fi
 		fi
 		;;
