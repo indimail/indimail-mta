@@ -74,3 +74,6 @@ svps
 svscan.plist
 PKGBUILD
 archpkg*.install
+inotify
+inotify.o
+hasinotify.h

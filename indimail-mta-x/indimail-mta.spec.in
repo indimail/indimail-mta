@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.336 2021-07-21 16:15:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.337 2021-07-24 10:32:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -404,9 +404,9 @@ echo ../resolv.conf 1>&3
 %if %{undefined suse_version} && %{undefined sles_version}
   %{__mkdir_p} %{buildroot}%{logdir}
   for i in deliver.25 greylist.1999 \
-    qmqpd.628 qmtpd.209 qscanq smtpd.25 resolvconf \
-    smtpd.366 smtpd.465 smtpd.587 qmail-daned.1998 \
-    udplogger.3000
+    qmqpd.628 qmtpd.209 qscanq smtpd.25 \
+    smtpd.366 smtpd.465 smtpd.587 \
+	qmail-daned.1998 udplogger.3000
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     touch %{buildroot}%{logdir}/$i/current
@@ -581,7 +581,6 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/bin/qmail-qfilter
 %attr(755,root,root)                    %{_prefix}/bin/spfquery
 %attr(755,root,root)                    %{_prefix}/bin/srsfilter
-%attr(755,root,root)                    %{_prefix}/bin/inotify
 %attr(0755,root,root)                   %{_prefix}/bin/udpclient
 %attr(0755,root,root)                   %{_prefix}/bin/sslerator
 %if %notlsarr == 0
@@ -1067,8 +1066,7 @@ echo "shutting down indimail-mta services"
 for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
   qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-  slowq-send qscanq resolvconf udplogger.3000 \
-  qmail-logfifo
+  slowq-send qscanq udplogger.3000 qmail-logfifo
 do
   %{_prefix}/bin/svstat %{servicedir}/$i >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
@@ -1212,7 +1210,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-    slowq-send qscanq resolvconf udplogger.3000
+    slowq-send qscanq udplogger.3000
   do
     %{_prefix}/bin/svok %{servicedir}/$i
     if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
@@ -1488,8 +1486,7 @@ svc_list=""
 for i in clamd greylist.1999 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
-  qmail-daned.1998 qmail-send.25 slowq-send qmail-logfifo \
-  resolvconf
+  qmail-daned.1998 qmail-send.25 slowq-send qmail-logfifo
 do
   if [ -d %{servicedir}/$i ] ; then
     svc_list="$svc_list %{servicedir}/$i"

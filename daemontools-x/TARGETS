@@ -67,3 +67,6 @@ auto_shared.c
 svps
 svscan.plist
 PKGBUILD
+inotify
+inotify.o
+hasinotify.h

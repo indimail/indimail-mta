@@ -1,1 +1,1 @@
-it += daemontools.spec PKGBUILD
+it += daemontools.spec PKGBUILD inotify

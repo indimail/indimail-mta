@@ -3647,19 +3647,6 @@ trytlsv1_2_client.c compile load
 	&& echo \#define TLSV1_2_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_2_client.h
 	rm -f trytlsv1_2_client.o trytlsv1_2_client
 
-hasinotify.h: \
-tryinotify.c compile load
-	( ( ./compile tryinotify.c && ./load tryinotify ) >/dev/null \
-	2>&1 \
-	&& echo \#define HASINOTIFY 1 || exit 0 ) > hasinotify.h
-	rm -f tryinotify.o tryinotify
-
-inotify: load inotify.o
-	./load inotify -lqmail
-
-inotify.o: compile inotify.c hasinotify.h
-	./compile inotify.c
-
 maildirsize: \
 load maildirsize.o qcount_dir.o
 	./load maildirsize qcount_dir.o -lqmail

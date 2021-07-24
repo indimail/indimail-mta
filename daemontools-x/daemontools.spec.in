@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.21 2021-07-13 11:47:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.22 2021-07-24 10:34:48+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -191,8 +191,12 @@ install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemontools
 
 %if %{undefined suse_version} && %{undefined sles_version}
-%{__mkdir_p} %{buildroot}%{logdir}/svscan
-touch %{buildroot}%{logdir}/svscan/current
+  %{__mkdir_p} %{buildroot}%{logdir}
+  for i in svscan resolvconf
+  do
+    %{__mkdir_p} %{buildroot}%{logdir}/$i
+    touch %{buildroot}%{logdir}/$i/current
+  done
 %endif
 
 # Compress the man pages
@@ -245,6 +249,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{_prefix}/bin/logselect
 %attr(0755,root,root)                    %{_prefix}/bin/qlogselect
 %attr(0755,root,root)                    %{_prefix}/bin/qmailctl
+%attr(0755,root,root)                    %{_prefix}/bin/inotify
 %attr(0751,root,root)                    %{_prefix}/sbin/svscan
 %attr(0755,root,root)                    %{_prefix}/sbin/supervise
 %attr(0755,root,root)                    %{_prefix}/sbin/readproctitle
@@ -275,6 +280,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0644,root,root)                    %{mandir}/man1/tai2tai64n.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/tai64n2tai.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/svps.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/inotify.1.gz
 %attr(0644,root,root)                    %{mandir}/man8/envdir.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/fghack.8.gz
@@ -314,45 +320,43 @@ if [ -f %{_prefix}/sbin/initsvc ] ; then
   %{_prefix}/sbin/initsvc -status
 fi
 
-if [ -f %{_prefix}/bin/svok ] ; then
-  # shutdown svscan before upgrade
-  # create .svscan.down so that we
-  # can restore state after upgrade in postinst
-  %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
-  if [ $? -eq 0 ] ; then
-    touch %{servicedir}/.svscan.down
-    echo "Giving svscan exactly 5 seconds to exit nicely"
-    if test -f %{_sysconfdir}/init/svscan.conf
-    then
-      /sbin/initctl emit qmailstop > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/event.d/svscan
-    then
-      /sbin/initctl emit qmailstop > /dev/null 2>&1
-    elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
-    then
-      /bin/systemctl stop svscan > /dev/null 2>&1
-    elif test -x %{_prefix}/sbin/initsvc
-    then
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
-      else
-        %{_prefix}/sbin/initsvc -status || true
-      fi
-      %{_prefix}/sbin/initsvc -off || true
+# shutdown svscan before upgrade
+# create .svscan.down so that we
+# can restore state after upgrade in postinst
+%{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
+if [ $? -eq 0 ] ; then
+  touch %{servicedir}/.svscan.down
+  echo "Giving svscan exactly 5 seconds to exit nicely"
+  if test -f %{_sysconfdir}/init/svscan.conf
+  then
+    /sbin/initctl emit qmailstop > /dev/null 2>&1
+  elif test -f %{_sysconfdir}/event.d/svscan
+  then
+    /sbin/initctl emit qmailstop > /dev/null 2>&1
+  elif test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service
+  then
+    /bin/systemctl stop svscan > /dev/null 2>&1
+  elif test -x %{_prefix}/sbin/initsvc
+  then
+    if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+      %{_prefix}/sbin/initsvc -status || %{_sysconfdir}/init.d/svscan stop || true
     else
-      if [ -x %{_sysconfdir}/init.d/svscan ] ; then
-        %{_sysconfdir}/init.d/svscan stop
-      fi
-      /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+      %{_prefix}/sbin/initsvc -status || true
+    fi
+    %{_prefix}/sbin/initsvc -off || true
+  else
+    if [ -x %{_sysconfdir}/init.d/svscan ] ; then
+      %{_sysconfdir}/init.d/svscan stop
+    fi
+    /bin/grep "^SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
+    if [ $? -eq 0 ] ; then
+      %{__sed} -i 's{^SV:{#SV:{' %{_sysconfdir}/inittab
       if [ $? -eq 0 ] ; then
-        %{__sed} -i 's{^SV:{#SV:{' %{_sysconfdir}/inittab
-        if [ $? -eq 0 ] ; then
-          /sbin/init q
-        fi
+        /sbin/init q
       fi
     fi
-    sleep 5
   fi
+  sleep 5
 fi
 
 ### SCRIPTLET ###############################################################################
@@ -452,6 +456,8 @@ if [ $argv1 -eq 2 ] ; then # upgrade
       fi
     fi
   fi
+  # refresh svscanlog services
+  %{_prefix}/sbin/minisvc --servicedir=%{servicedir} --refreshsvc="/service/.svscan"
   ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
@@ -466,6 +472,8 @@ fi
 # save variables
 %{_prefix}/sbin/minisvc --servicedir=%{servicedir} --service-name=.svscan \
   --export-variables=%{servicedir}/.svscan/variables/.variables --force
+# turn off automatic refresh for svscan service during first time installation
+%{_prefix}/sbin/minisvc --servicedir=%{servicedir} --autorefresh="0 /service/.svscan"
 if [ -x /bin/systemctl ] ; then
   /bin/systemctl enable svscan
 fi

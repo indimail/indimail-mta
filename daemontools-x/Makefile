@@ -338,6 +338,19 @@ qlogselect: qlogselect.pl conf-prefix
 	> qlogselect
 	chmod 755 qlogselect
 
+hasinotify.h: \
+tryinotify.c compile load
+	( ( ./compile tryinotify.c && ./load tryinotify ) >/dev/null \
+	2>&1 \
+	&& echo \#define HASINOTIFY 1 || exit 0 ) > hasinotify.h
+	rm -f tryinotify.o tryinotify
+
+inotify: load inotify.o
+	./load inotify -lqmail
+
+inotify.o: compile inotify.c hasinotify.h
+	./compile inotify.c
+
 svps: svps.in conf-prefix conf-servicedir
 	cat warn-auto.sh $@.in  | $(edit) > $@
 	chmod +x $@
@@ -459,6 +472,10 @@ compile installer.c
 
 DIRS: DIRS.in
 	$(edit) $@.in > $@
+
+BIN: BIN.in
+	([ -f BIN.$(SYSTEM) ] && \
+	cat BIN.in BIN.$(SYSTEM) || cat BIN.in) > BIN
 
 SBIN: SBIN.in
 	([ -f SBIN.$(SYSTEM) ] && \
