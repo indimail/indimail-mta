@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.22 2021-07-17 08:44:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.23 2021-07-24 18:11:54+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -9,8 +9,9 @@ prefix=@prefix@
 sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
+libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.22 2021-07-17 08:44:48+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.23 2021-07-24 18:11:54+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -82,12 +83,25 @@ Known values for OPTION are:
                    e.g. (@servicedir@/qmail-smtpd.25)
                    service_name can be "all" to act on all services
 
---config=add-boot|rm-boot|users|rmusers
+--enable-service name1 name2 ..
+
+  Add a service to be started at system boot. The unit file for the service should exist
+  name1 name2 .. - name of a service or list of services to be added
+                   This should be a SYSV style service, systemd, event.d unit file
+
+--disable-service name1 name2 ..
+
+  Remove a service to be started at system boot. The unit file for the service should exist
+  name1 name2 .. - name of a service or list of services to be removed
+                   This should be a SYSV style service, systemd, event.d unit file
+
+--config=add-boot|rm-boot|users|rmusers|inittab
 
   add-boot       - Add startup scripts for IndiMail to get started during boot
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
   users          - Create Internal System Users needed by svscan
   rmusers        - Delete Internal System Users needed by svscan
+  inittab        - Install svscan started by configuration in /etc/inittab
 
 --set-variable=n --variable-value=v
   --servicedir=service_path
@@ -786,6 +800,18 @@ create_startup()
 				fi
 				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
 			fi
+		elif [ -f /etc/inittab ] ; then
+			grep ".*:.*:respawn:.*svscanboot" /etc/inittab >/dev/null
+			if [ $? -eq 0 ] ; then
+				grep ".*:.*:respawn:.*svscanboot" /etc/inittab |grep respawn >/dev/null
+				if [ $? -eq 0 ] ; then
+					if [ $silent -eq 0 ] ; then
+						echo "svscan startup enabled in /etc/inittab"
+					fi
+				else
+					echo "svscan startup configured in /etc/inittab but not enabled"
+				fi
+			fi
 		fi
 	fi
 	if [ -d /etc/init.d ] ; then
@@ -803,12 +829,11 @@ create_startup()
 			fi
 		elif [ -f /usr/sbin/chkconfig ] ; then
 			/usr/sbin/chkconfig --add svscan
+		elif [ -f /sbin/rc-update ] ; then
+			/sbin/rc-update add svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
 		fi
-	fi
-	if [ ! -f $prefix/bin/qmail-inject ] ; then # daemontools
-		return 0
 	fi
 }
 
@@ -834,6 +859,10 @@ remove_startup()
 	elif [ -f /etc/event.d/svscan ] ; then
 		/sbin/initctl emit qmailstop > /dev/null
 		/bin/rm -f /etc/event.d/svscan
+	elif [ -f /etc/inittab ] ; then
+		service svscan stop
+		sed -i '/svscan/d' /etc/inittab
+		kill -1 1
 	elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
 		service svscan stop
 		service svscan disable
@@ -851,15 +880,14 @@ remove_startup()
 			else
 				/sbin/chkconfig --del svscan
 			fi
-		elif [ -f /sbin/chkconfig ] ; then
+		elif [ -f /usr/sbin/chkconfig ] ; then
 			/usr/sbin/chkconfig --del svscan 2>/dev/null
+		elif [ -f /sbin/rc-update ] ; then
+			/sbin/rc-update del svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d -f svscan remove
 		fi
 		/bin/rm -f /etc/init.d/svscan
-	fi
-	if [ ! -f $prefix/bin/qmail-inject ] ; then # daemontools. This should be called before removing package
-		return 0
 	fi
 }
 
@@ -1157,6 +1185,96 @@ echo
 echo "IndiMail Assign File:"
 /bin/cat "$DESTDIR"$sysconfdir/users/assign
 echo
+}
+
+enable_service()
+{
+	for i in $*
+	do
+		#
+		# upstart/systemd
+		#
+		if [ -f /lib/systemd/system/$i.service -a -f /bin/systemctl ] ; then
+			/bin/systemctl enable "$i".service
+		elif [ -f /usr/lib/systemd/system/$i.service -a -f /bin/systemctl ] ; then
+			/bin/systemctl enable "$i".service
+		elif [ -f /Library/LaunchDaemons/org.indimail.svscan.plist ] ; then
+			launchctl load -w /Library/LaunchDaemons/org.indimail.svscan.plist
+		elif [ -f /sbin/initctl -a -f /etc/init/$i.override ] ; then
+			/bin/rm -f /etc/init/$i.override
+		elif [ -f /etc/event.d/$i.override ] ; then
+			/bin/rm -f /etc/event.d/$i.override
+		elif [ -f $QmailBinPrefix/etc/rc.d/svscan ] ; then
+			service svscan enable
+		fi
+		#
+		# traditional sys v
+		#
+		if [ -f /etc/init.d/$i ] ; then
+			if [ -f /sbin/chkconfig ] ; then
+				if [ -f /etc/debian_version ] ; then
+					/sbin/chkconfig --add $i 2>/dev/null
+				else
+					/sbin/chkconfig --add $i
+				fi
+			elif [ -f /sbin/rc-update ] ; then
+				/sbin/rc-update add $i
+			elif [ -f /usr/sbin/update-rc.d ] ; then
+				/usr/sbin/update-rc.d $i defaults
+				/usr/sbin/update-rc.d $i enable
+			fi
+		fi
+	done
+}
+
+disable_service()
+{
+	for i in $*
+	do
+		#
+		# upstart/systemd
+		#
+		if [ -d /lib/systemd/system -a -f /bin/systemctl ] ; then
+			/bin/systemctl stop "$i".service
+			/bin/systemctl disable "$i".service
+		elif [ -d /usr/lib/systemd/system -a -f /bin/systemctl ] ; then
+			/bin/systemctl stop "$i".service
+			/bin/systemctl disable "$i".service
+		elif [ -f /Library/LaunchDaemons/org.indimail.svscan.plist ] ; then
+			launchctl unload -w /Library/LaunchDaemons/org.indimail.svscan.plist 2>/dev/null
+			launchctl remove /Library/LaunchDaemons/org.indimail.svscan.plist
+		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
+			/sbin/initctl stop $i
+			if [ -f /etc/init/$i.conf ] ; then
+				echo "manual" > /etc/init/$i.override
+			fi
+		elif [ -d /etc/event.d ] ; then
+			/sbin/initctl stop $i
+			echo "manual" > /etc/event.d/$i.override
+		elif [ -f $QmailBinPrefix/etc/rc.d/svscan ] ; then
+			service svscan disable
+		else
+			/usr/sbin/service $i stop
+		fi
+		#
+		# traditional sys v
+		#
+		if [ -f /etc/init.d/$i ] ; then
+			/etc/init.d/$i stop
+			if [ -f /sbin/chkconfig ] ; then
+				if [ -f /etc/debian_version ] ; then
+					/sbin/chkconfig --del $i 2>/dev/null
+				else
+					/sbin/chkconfig --del $i
+				fi
+			elif [ -f /sbin/rc-update ] ; then
+				/sbin/rc-update del $i
+			elif [ -f /usr/sbin/update-rc.d ] ; then
+				/usr/sbin/update-rc.d -f $i disable
+				/usr/sbin/update-rc.d -f $i remove
+			fi
+		fi
+	done
 }
 
 macOSgroupadd()
@@ -1826,6 +1944,18 @@ while test $# -gt 0; do
 	option=18
 	;;
 
+	--enable-service)
+	option=19
+	service=$optarg
+	break
+	;;
+
+	--disable-service)
+	option=20
+	service=$optarg
+	break
+	;;
+
 	--version)
 	echo "$RCSID"
 	exit 0
@@ -1921,6 +2051,47 @@ case $option in
 		rmusers)
 		delUsers
 		;;
+
+		inittab)
+		# Check that we're a privileged user
+		[ `id -u` = 0 ] || exit 4
+		if [ " $servicedir" = " " ] ; then
+			echo "Supervise Directory not specified" 1>&2
+			usage 1
+		fi
+		grep "svscanboot" /etc/inittab >/dev/null
+		if [ $? -ne 0 ]; then
+			if [ -f /etc/debian_release ] ; then
+				echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
+			elif [ -f /etc/alpine-release ] ; then
+				echo "::respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
+			else
+				echo "SV:345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
+			fi
+			if [ $? -eq 0 ] ; then
+				kill -1 1
+			fi
+		else
+			grep "svscanboot" /etc/inittab |grep respawn >/dev/null
+			if [ $? -ne 0 ]; then
+				grep -v "svscanboot" /etc/inittab > /etc/inittab.minisvc.$$
+				if [ $? -eq 0 ] ; then
+					if [ -f /etc/debian_release ] ; then
+						echo "SV:345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab.minisvc.$$
+					elif [ -f /etc/alpine-release ] ; then
+						echo "::respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab
+					else
+						echo "SV:2345:respawn:$libexecdir/svscanboot $servicedir" >> /etc/inittab.minisvc.$$
+					fi
+				fi
+				if [ $? -eq 0 ] ; then
+					/bin/mv /etc/inittab.minisvc.$$ /etc/inittab
+					kill -1 1
+				fi
+			fi
+		fi
+		;;
+
 
 		*)
 		echo "Invalid configuration option $optarg" 1>&2
@@ -2262,6 +2433,16 @@ case $option in
 	done
 	;;
 
+	19) # enable service
+	shift
+	enable_service $*
+	;;
+
+	20) # disable service
+	shift
+	disable_service $*
+	;;
+
 	*)
 	if [ " $option" = " " ] ; then
 		echo "No Options Provided" 1>&2
@@ -2283,6 +2464,11 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.23  2021-07-24 18:11:54+05:30  Cprogrammer
+# added --config for users rmusers inittab
+# added --resolvconf option
+# added --enable-service --disable-service
+#
 # Revision 1.22  2021-07-17 08:44:48+05:30  Cprogrammer
 # --norefreshsvc renamed to --autorefresh
 #
