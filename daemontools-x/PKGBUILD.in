@@ -127,6 +127,8 @@ post_install() {
   # save variables
   ${_prefix}/sbin/minisvc --servicedir=${_servicedir} --service-name=.svscan \
     --export-variables=${_servicedir}/.svscan/variables/.variables --force
+  # turn off automatic refresh for svscan service during first time installation
+  ${_prefix}/sbin/minisvc --servicedir=${_servicedir} --autorefresh="0 /service/.svscan"
   if [ -x /bin/systemctl ] ; then
     /bin/systemctl enable svscan
   fi
@@ -210,6 +212,8 @@ post_upgrade() {
       fi
     fi
   fi
+  # refresh svscanlog services
+  ${_prefix}/sbin/minisvc --servicedir=${servicedir} --refreshsvc="/service/.svscan"
   ) >> /var/log/${pkgname}-setup.log 2>&1
 }
 
