@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.22  2021-07-24 20:27:00+05:30  Cprogrammer
+ * display in logs if child is stopped
+ *
  * Revision 1.21  2021-06-06 10:14:57+05:30  Cprogrammer
  * indicate service name in logs when supervised service exits/crashes
  *
@@ -430,9 +433,13 @@ doit(void)
 				announce(0);
 				t = str_rchr(dir, '/');
 				ptr = dir[t] ? dir + t + 1 : dir;
-				if (wait_crashed(wstat))
+				if (wait_stopped(wstat)) {
+					t = wait_stopsig(wstat);
+					strerr_warn7(WARNING, "pid: ", strnum1, " service ", ptr, " stopped by signal ", strnum2, 0);
+				} else
+				if (wait_crashed(wstat)) {
 					strerr_warn6(WARNING, "pid: ", strnum1, " service ", ptr, " crashed", 0);
-				else {
+				} else {
 					t = wait_exitcode(wstat);
 					strnum2[fmt_ulong(strnum2, t)] = 0;
 					strerr_warn7(WARNING, "pid: ", strnum1, " service ", ptr, " exited with status=", strnum2, 0);
@@ -774,7 +781,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.21 2021-06-06 10:14:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.22 2021-07-24 20:27:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
