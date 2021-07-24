@@ -128,7 +128,19 @@ Known values for OPTION are:
                    e.g. (@servicedir@/qmail-smtpd.25)
                    service_name can be "all" to act on all services
 
---config=add-boot|rm-boot|users|rmusers
+--enable-service name1 name2 ..
+
+  Add a service to be started at system boot. The unit file for the service should exist
+  name1 name2 .. - name of a service or list of services to be added
+                   This should be a SYSV style service, systemd, event.d unit file
+
+--disable-service name1 name2 ..
+
+  Remove a service to be started at system boot. The unit file for the service should exist
+  name1 name2 .. - name of a service or list of services to be removed
+                   This should be a SYSV style service, systemd, event.d unit file
+
+--config=add-boot|rm-boot|users|rmusers|inittab
 
   add-boot       - Add startup scripts for IndiMail to get started during boot
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
