@@ -1271,7 +1271,7 @@ elif [ "$VERB" = y ]; then
 fi
 
 PS="ps ax"
-echo "Checking IndiMail Startup (svscan)"
+echo "Checking svscan Startup"
 if [ -f /etc/init/svscan.conf -a -f /sbin/initctl ] ; then
   /sbin/initctl status svscan
   if [ $? -ne 0 ]; then
@@ -7758,7 +7758,7 @@ create_startup()
 
 remove_startup()
 {
-	echo "Giving IndiMail exactly 5 seconds to exit nicely" 1>&2
+	echo "Giving svscan exactly 5 seconds to exit nicely" 1>&2
 	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/initsvc -a ! -x /bin/busybox ] ; then
 		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -off
 	fi
