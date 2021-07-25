@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.25 2021-07-25 15:48:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.26 2021-07-25 23:05:42+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.25 2021-07-25 15:48:41+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.26 2021-07-25 23:05:42+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2396,9 +2396,9 @@ case $option in
 		if [ -d $i/variables ] ; then
 			vars=$(envdir -c $i/variables env 2>/dev/null)
 			if [ -n "$vars" ] ; then
-				if [ -L $i/variables/.envdir -o -f $i/variables/.envdir -o -f $i/variables/.envfile ] ; then
-					echo "------ $i ------------"
-				fi
+				echo "------ environment variables for $i ------------"
+				envdir -c $i/variables env
+				echo
 				if [ -L $i/variables/.envdir ] ; then
 					link_name=$(readlink $i/variables/.envdir)
 					echo "NOTE: additional variables were obtained from $link_name"
@@ -2413,9 +2413,6 @@ case $option in
 					cat $i/variables/.envfile
 					echo
 				fi
-				echo "------ environment variables for $i ------------"
-				envdir -c $i/variables env
-				echo
 			else
 				echo "------ $i ------------"
 				echo "NOTE: This service has no configured variables"
@@ -2429,9 +2426,9 @@ case $option in
 		if [ -d $i ] ; then
 			vars=$(envdir -c $i env 2>/dev/null)
 			if [ -n "$vars" ] ; then
-				if [ -L $i/.envdir -o -f $i/.envdir -o -f $i/.envfile ] ; then
-					echo "------ $i ------------"
-				fi
+				echo "------ environment variables for $i ------------"
+				envdir -c $i env
+				echo
 				if [ -L $i/.envdir ] ; then
 					link_name=$(readlink $i/.envdir)
 					echo "NOTE: additional variables were obtained from $link_name"
@@ -2446,9 +2443,6 @@ case $option in
 					cat $i/.envfile
 					echo
 				fi
-				echo "------ environment variables for $i ------------"
-				envdir -c $i env
-				echo
 			else
 				echo "------ $i ------------"
 				echo "NOTE: This directory has no configured variables"
@@ -2489,6 +2483,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.26  2021-07-25 23:05:42+05:30  Cprogrammer
+# minor change in print-all-variables output
+#
 # Revision 1.25  2021-07-25 15:48:41+05:30  Cprogrammer
 # install openrc script for alpine linux
 #
