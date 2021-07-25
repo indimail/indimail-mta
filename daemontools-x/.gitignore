@@ -77,3 +77,4 @@ archpkg*.install
 inotify
 inotify.o
 hasinotify.h
+openrc

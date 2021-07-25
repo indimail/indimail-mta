@@ -41,6 +41,8 @@ Release 2.14.0 Start 18/07/2021
 25. svctool: added --config=recontrol
 26. svctool: create DEFAULT_DOMAIN, QMAILDEFAULTHOST as a global variable
 27. svctool: added -l (nolastlog) option to linuxadduser
+- 25/07/2021
+28. svctool: install openrc script for alpine linux
 
 * 
 Release 2.13 Start 14/02/2021

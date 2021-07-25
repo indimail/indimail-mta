@@ -10,13 +10,13 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.68 2021-07-21 11:04:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.69 2021-07-25 15:49:14+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
-#
-#
-#
+
+init()
+{
 if [ -f /etc/lsb-release -o -f /etc/debian_version ] ; then
 	SYSTEM=Debian
 elif [ -f /etc/SuSE-release ] ; then
@@ -54,52 +54,6 @@ if [ -f /etc/indimail/indimail-mta-release ] ; then
 else
 	have_qmail=0
 fi
-
-myecho_success() {
-	$MOVE_TO_COL
-	$ECHO -n "["
-	$SETCOLOR_SUCCESS
-	$ECHO -n "  OK  "
-	$SETCOLOR_NORMAL
-	$ECHO -n "]"
-	$ECHO -ne "\r"
-	return 0
-}
-
-myecho_failure() {
-	$MOVE_TO_COL
-	$ECHO -n "["
-	$SETCOLOR_FAILURE
-	$ECHO -n "FAILED"
-	$SETCOLOR_NORMAL
-	$ECHO -n "]"
-	$ECHO -ne "\r"
-	return 1
-}
-
-noqmail() {
-	if [ $have_qmail -ne 1 ] ; then
-		echo "Usage: `basename $0` {start|stop|restart|stat|rotate|help}"
-		myhelp
-		exit 1
-	fi
-}
-
-# Log that something succeeded
-mysuccess() {
-	myecho_success
-	return 0
-}
-
-# Log that something failed
-myfailure() {
-	local rc=$?
-	myecho_failure
-	return $rc
-}
-
-# Check that we're a privileged user
-[ `id -u` = 0 ] || exit 4
 # Source function library.
 if [ -f /etc/rc.d/init.d/functions ] ; then
 	. /etc/rc.d/init.d/functions
@@ -142,37 +96,55 @@ case "$SYSTEM" in
 	fail=myfailure
 	;;
 esac
+}
 
-if [ -x /usr/bin/systemctl ] ; then
-	/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
-	if [ $? -ne 0 ] ; then
-		if [ -f @prefix@/sbin/initsvc ] ; then
-			@prefix@/sbin/initsvc -on > /dev/null && $succ || $fail
-			$ECHO -ne "\n"
-		fi
-		/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
-	fi
-	if [ $? -ne 0 ] ; then
-		SYSTEMCTL_SKIP_REDIRECT=1
-		if [ -f /etc/rc.d/init.d/functions ] ; then
-			. /etc/rc.d/init.d/functions
-		elif [ -f /etc/init.d/functions ] ; then
-			. /etc/init.d/functions
-		elif [ -f /lib/lsb/init-functions ] ; then
-			. /lib/lsb/init-functions
-		fi
-		$ECHO -n "svscan is disabled: "
-		$fail
-		$ECHO -ne "\n"
+myecho_success() {
+	$MOVE_TO_COL
+	$ECHO -n "["
+	$SETCOLOR_SUCCESS
+	$ECHO -n "  OK  "
+	$SETCOLOR_NORMAL
+	$ECHO -n "]"
+	$ECHO -ne "\r"
+	return 0
+}
+
+myecho_failure() {
+	$MOVE_TO_COL
+	$ECHO -n "["
+	$SETCOLOR_FAILURE
+	$ECHO -n "FAILED"
+	$SETCOLOR_NORMAL
+	$ECHO -n "]"
+	$ECHO -ne "\r"
+	return 1
+}
+
+noqmail() {
+	if [ $have_qmail -ne 1 ] ; then
+		echo "qmail binaries not present" 1>&2
+		echo "Usage: `basename $0` {start|stop|restart|status|rotate|help}" 1>&2
+		myhelp
 		exit 1
 	fi
-fi
+}
 
-PATH=$PATH:@prefix@/bin:@prefix@/sbin:/usr/bin:/bin
-export PATH
+# Log that something succeeded
+mysuccess() {
+	myecho_success
+	return 0
+}
+
+# Log that something failed
+myfailure() {
+	local rc=$?
+	myecho_failure
+	return $rc
+}
+
 myhelp()
 {
-if [ $qmail -eq 1 ] ; then
+if [ $have_qmail -eq 1 ] ; then
 /bin/cat <<HELP
   start -- starts mail service (smtp connection accepted, mail can go out)
    stop -- stops mail service (smtp connections refused, nothing goes out)
@@ -203,129 +175,154 @@ stop()
 	if [ -d /var/lock/subsys -a ! -f /var/lock/subsys/svscan ] ; then
 		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null || exit 0
 	fi
+	if [ -d /run ] ; then
+		rundir=/run
+	elif [ -d /var/run ] ; then
+		rundir=/var/run
+	else
+		rundir=/service
+	fi
 	local ret=0
 	case "$SYSTEM" in
 		FreeBSD|alpine)
-		if [ -d /run ] ; then
-			sv_pid=/run/svscan/.svscan.pid
-			daemon_pid=/run/sv_daemon.pid
-		elif [ -d /var/run ] ; then
-			sv_pid=/var/run/svscan/.svscan.pid
-			daemon_pid=/var/run/sv_daemon.pid
-		else
-			sv_pid=/tmp/svscan.pid
-			daemon_pid=/tmp/sv_daemon.pid
-		fi
+		sv_pid=$rundir/svscan/.svscan.pid
+		daemon_pid=$rundir/svscan/sv_daemon.pid
 		if [ ! -f $sv_pid -a ! -f $daemon_pid ] ; then
 			echo "WARNING: svscan is already stopped"
 			return $ret
 		fi
 		;;
 	esac
-	for i in `echo $SERVICE/*`
-	do
-		$ECHO -n "Stopping $i: "
-		@prefix@/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
-		RETVAL=$?
-		echo
-		let ret+=$RETVAL
-	done
-	if [ ! -f /usr/bin/systemctl ] ; then
-		$ECHO -n "Stopping svscan: "
-		if [ -f /sbin/initctl ] ; then
-			/sbin/initctl stop svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
-		elif [ -f /usr/sbin/daemon ] ; then
-			if [ -f /var/run/sv_daemon.pid ] ; then
-				kill `cat /var/run/sv_daemon.pid` && $succ || $fail
-			fi
-		elif [ -f /etc/inittab ] ; then
-			if [ "$SYSTEM" = "alpine" ] ; then
-  				grep "svscan" /etc/inittab | grep respawn >/dev/null 2>&1
-			else
-  				grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
-			fi
+	sv_all_down
+	if [ -s /tmp/sv.err ] ; then
+		/bin/cat /tmp/sv.err
+	fi
+	/bin/rm -f /tmp/sv.err
+	$ECHO -n "Stopping svscan: "
+	if [ -f /usr/bin/systemctl ] ; then
+		systemctl stop svscan && $succ || $fail
+	elif [ -f /sbin/initctl ] ; then
+		/sbin/initctl stop svscan && $succ || $fail
+	elif [ -f /usr/sbin/daemon ] ; then
+		if [ -f $rundir/sv_daemon.pid ] ; then
+			kill `cat $rundir/sv_daemon.pid` && $succ || $fail
+		else
+			ps ax|grep svscan|egrep -v "grep" >/dev/null && $fail || $succ
+		fi
+	elif [ -f /etc/inittab ] ; then
+		if [ "$SYSTEM" = "alpine" ] ; then
+  			grep "svscan" /etc/inittab | grep respawn >/dev/null 2>&1
+		else
+  			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
+		fi
+		if [ $? -eq 0 ] ; then
+			sed -i '/svscan/d' /etc/inittab
 			if [ $? -eq 0 ] ; then
-				sed -i '/svscan/d' /etc/inittab
-				if [ $? -eq 0 ] ; then
-					#$ECHO -n "Stopping svscan: "
-					kill -1 1
-					if [ -d /run ] ; then
-						sv_pid=/run/svscan/.svscan.pid
-					elif [ -d /var/run ] ; then
-						sv_pid=/var/run/svscan/.svscan.pid
-					else
-						sv_pid=/service/.svscan.pid
-					fi
+				kill -1 1
+				sv_pid=$rundir/svscan/.svscan.pid
+				if [ -f $sv_pid ] ; then
+					sleep 4
 					if [ -f $sv_pid ] ; then
-						sleep 4
-						if [ -f $sv_pid ] ; then
-							kill -0 `sed -n 2p $sv_pid` && $fail || $succ && rm -f $sv_pid
-						else
-							$succ
-						fi
+						kill -0 `sed -n 2p $sv_pid` && $fail || $succ && rm -f $sv_pid
 					else
-						ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && $fail || $succ
+						$succ
 					fi
-					RETVAL=1
 				else
-					echo "failed to remove svscan from /etc/inittab" 1>&2
-					RETVAL=1
+					ps ax|grep svscan|egrep -v "grep" >/dev/null && $fail || $succ
 				fi
+				RETVAL=1
 			else
-				$ECHO -n "Stopping svscan: "
-				case "$SYSTEM" in
-					FreeBSD)
-					/usr/bin/killall -c svscan && $succ || $fail
-					;;
-					alpine)
-					/usr/bin/killall svscan && $succ || $fail
-					;;
-					*)
-					/usr/bin/killall -e -w svscan && $succ || $fail
-					;;
-				esac
-				RETVAL=$?
+				echo "failed to remove svscan from /etc/inittab" 1>&2
+				RETVAL=1
 			fi
 		else
-			/usr/bin/killall svscan && $succ || $fail
+			$ECHO -n "Stopping svscan: "
+			case "$SYSTEM" in
+				FreeBSD)
+				/usr/bin/killall -c svscan && $succ || $fail
+				;;
+				alpine)
+				/usr/bin/killall svscan && $succ || $fail
+				;;
+				*)
+				/usr/bin/killall -e -w svscan && $succ || $fail
+				;;
+			esac
 			RETVAL=$?
 		fi
-		echo
-		if [ -s /tmp/sv.err ] ; then
-			/bin/cat /tmp/sv.err
-		fi
-		/bin/rm -f /tmp/sv.err
 	fi
+	echo ""
 	if [ -d /var/lock/subsys ] ; then
 		[ $ret -eq 0 ] && rm -f /var/lock/subsys/svscan
 	fi
 	return $ret
 }
 
+sv_all_up()
+{
+	for i in `echo $SERVICE/*`
+	do
+		if [ -d $i -a ! -f $i/down ] ; then
+			@prefix@/bin/svstat $i >/dev/null 2>&1
+			if [ $? -eq 0 ] ; then
+				continue
+			fi
+			$ECHO -n "Starting $i: "
+			@prefix@/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		fi
+	done
+}
+
+sv_all_down()
+{
+	for i in `echo $SERVICE/*`
+	do
+		if [ -d $i ] ; then
+			@prefix@/bin/svstat $i >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
+				continue
+			fi
+			$ECHO -n "Stopping $i: "
+			@prefix@/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
+			RETVAL=$?
+			echo
+			let ret+=$RETVAL
+		fi
+	done
+}
+
 start()
 {
+	if [ -d /run ] ; then
+		rundir=/run
+	elif [ -d /var/run ] ; then
+		rundir=/var/run
+	else
+		rundir=/service
+	fi
 	local ret=0
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
-		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && exit 0 || rm -f /var/lock/subsys/svscan
+		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && sv_all_up && return $ret || rm -f /var/lock/subsys/svscan
 	fi
+	$ECHO -n "Starting svscan: "
 	if [ -f $SERVICE/.svscan/log ] ; then
 		@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null
 		status=$?
 	else
 		status=1
 	fi
-	if [ $status -ne 0 ] ; then
-		$ECHO -n "Starting svscan: "
-		if [ -f /sbin/initctl ] ; then
+	if [ $status -eq 0 ] ; then
+		sv_all_up
+	else
+		if [ -f /usr/bin/systemctl ] ; then
+			systemctl start svscan
+		elif [ -f /sbin/initctl ] ; then
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
-			if [ -d /run ] ; then
-				daemon_pid=/run/sv_daemon.pid
-			elif [ -d /var/run ] ; then
-				daemon_pid=/var/run/sv_daemon.pid
-			else
-				daemon_pid=/tmp/sv_daemon.pid
-			fi
+			daemon_pid=$rundir/sv_daemon.pid
 			env SETSID=1 /usr/sbin/daemon -cS -P $daemon_pid -R 5 \
 				-t "$SYSTEM"_svscan @libexecdir@/svscanboot && $succ || $fail
 		else
@@ -334,7 +331,11 @@ start()
 			else
 				device=/dev/null
 			fi
-			grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
+			if [ "$SYSTEM" = "alpine" ] ; then
+				grep "svscanboot" /etc/inittab | grep respawn >/dev/null 2>&1
+			else
+				grep "^SV:" /etc/inittab | grep svscan | grep respawn >/dev/null 2>&1
+			fi
 			if [ $? -ne 0 ]; then
 				grep -v "svscanboot" /etc/inittab > /etc/inittab.qmailctl.$$ 2>&1
 				if [ " $SYSTEM" = " Debian" ] ; then
@@ -347,20 +348,18 @@ start()
 				if [ $? -eq 0 ] ; then
 					/bin/mv /etc/inittab.qmailctl.$$ /etc/inittab
 				fi
-				if [ " $SYSTEM" = " alpine" ] ; then
-					kill -1 1
-				else
-					/sbin/init q
-				fi
-				if [ -d /run ] ; then
-					sv_pid=/run/svscan/.svscan.pid
-				elif [ -d /var/run ] ; then
-					sv_pid=/var/run/svscan/.svscan.pid
-				else
-					sv_pid=/service/.svscan.pid
+				sv_pid=$rundir/svscan/.svscan.pid
+				if [ ! -f $sv_pid ] ; then
+					echo $0 | egrep "qmailctl" > /dev/null
+					if [ $? -eq 0 ] ;then
+						if [ "$SYSTEM" = "alpine" ] ; then
+							kill -1 1
+						else
+							/sbin/init q
+						fi
+					fi
 				fi
 				if [ -f $sv_pid ] ; then
-					echo 1
 					if [ -f $sv_pid ] ; then
 						kill -0 `sed -n 2p $sv_pid` && $succ || $fail
 					fi
@@ -370,19 +369,9 @@ start()
 			fi
 		fi
 		RETVAL=$?
-		echo
+		[ $RETVAL -eq 0 ] && $succ || $fail
+		echo ""
 		let ret+=$RETVAL
-	else
-		for i in `echo $SERVICE/*`
-		do
-			if [ ! -f $i/down ] ; then
-				$ECHO -n "Starting $i: "
-				@prefix@/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
-				RETVAL=$?
-				echo
-				let ret+=$RETVAL
-			fi
-		done
 	fi
 	if [ -s /tmp/sv.err ] ; then
 		/bin/cat /tmp/sv.err
@@ -394,12 +383,47 @@ start()
 	return $ret
 }
 
-case "$1" in
+# Check that we're a privileged user
+[ `id -u` = 0 ] || exit 4
+init
+
+if [ -x /usr/bin/systemctl ] ; then
+	/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		if [ -f @prefix@/sbin/initsvc ] ; then
+			@prefix@/sbin/initsvc -on > /dev/null && $succ || $fail
+			$ECHO -ne "\n"
+		fi
+		/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
+	fi
+	if [ $? -ne 0 ] ; then
+		SYSTEMCTL_SKIP_REDIRECT=1
+		if [ -f /etc/rc.d/init.d/functions ] ; then
+			. /etc/rc.d/init.d/functions
+		elif [ -f /etc/init.d/functions ] ; then
+			. /etc/init.d/functions
+		elif [ -f /lib/lsb/init-functions ] ; then
+			. /lib/lsb/init-functions
+		fi
+		$ECHO -n "svscan is disabled: "
+		$fail
+		$ECHO -ne "\n"
+		exit 1
+	fi
+fi
+
+PATH=$PATH:@prefix@/bin:@prefix@/sbin:/usr/bin:/bin
+export PATH
+cmmd=$1
+if [ "$0" = "/lib/rc/sh/gendepends.sh" -a -z "$cmmd" ] ; then #alpine linux
+	cmmd="start"
+fi
+case "$cmmd" in
 	stop)
 		stop
 		[ $? -eq 0 ] && exit 0 || exit 1
 		;;
-		start)
+	start)
 		start
 		[ $? -eq 0 ] && exit 0 || exit 1
 		;;
@@ -453,7 +477,7 @@ case "$1" in
 		;;
 	rotate)
 		ret=0
-		for i in `echo $SERVICE/* $SERviCE/.svscan`
+		for i in `echo $SERVICE/* $SERVICE/.svscan`
 		do
 			if [ -d $i/log ] ; then
 				$ECHO -n "Rotating $i: "
@@ -489,7 +513,12 @@ case "$1" in
 			ps ax| grep svscanboot| grep -v grep
 		fi
 		RETVAL=$?
-		@prefix@/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
+		args=`ls -d $SERVICE/* $SERVICE/*/log $SERVICE/.svscan/log`
+		if [ -n "$args" ] ; then
+			@prefix@/bin/svstat $SERVICE/.svscan/log $SERVICE/* $SERVICE/*/log
+		else
+			echo "No services configured under svscan"
+		fi
 		let ret+=$RETVAL
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;

@@ -25,7 +25,7 @@ it = envdir envuidgid setlock setuidgid softlimit svc svok \
 	svstat tai64n tai64nlocal tai64nunix tai2tai64n tai64n2tai \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
-	pgrphack svps svscanboot upstart systemd qmailctl \
+	pgrphack svps svscanboot upstart systemd qmailctl openrc \
 	minisvc instcheck installer daemontools.perms daemontools.changes
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
@@ -370,6 +370,14 @@ systemd: systemd.in conf-libexec conf-servicedir
 	echo "#"; \
 	$(edit) systemd.in \
 	) > systemd
+openrc: openrc.in conf-libexec conf-servicedir
+	( \
+	echo "#!/sbin/openrc-run"; \
+	echo "# svscan - openrc script"; \
+	echo "# WARNING: This file was auto-generated. Do not edit!"; \
+	echo "#"; \
+	$(edit) openrc.in \
+	) > openrc
 
 svscanboot: \
 warn-auto.sh svscanboot.sh conf-prefix conf-sysconfdir \

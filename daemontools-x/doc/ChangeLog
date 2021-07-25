@@ -94,6 +94,8 @@ o envdir: complete re-code. Added -c option to clear, -i option to ignore
 30. minisvc: added --enable-service, --disable-service and --config=inittab
 31. minisvc: removed hardcoding of mount, umount
 32. supervise.c: display in logs if child is stopped
+- 25/07/2021
+33. svctool: install openrc script for alpine linux
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

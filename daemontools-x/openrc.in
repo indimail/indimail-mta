@@ -1,0 +1,66 @@
+#
+# $Id: openrc.in,v 1.1 2021-07-25 14:19:18+05:30 Cprogrammer Exp mbhangui $
+#
+name="$SVCNAME"
+command="@libexecdir@/svscanboot"
+command_args="@servicedir@"
+pidfile="/var/run/$SVCNAME.pid"
+command_background=true
+extra_commands="status restart rotate kill flush cdb enable disable help"
+extra_started_commands="reload queue pause cont"
+proname="svscan"
+description="Start svscan supervisor and associated services"
+
+depend()
+{
+	need localmount
+}
+
+reload() {
+	ebegin "Reloading ${RC_SVCNAME}"
+	start-stop-daemon --signal HUP --pidfile "${pidfile}"
+	eend $?
+}
+
+kill() {
+	@prefix@/bin/qmailctl kill
+}
+
+flush() {
+	@prefix@/bin/qmailctl flush
+}
+
+rotate() {
+	@prefix@/bin/qmailctl rotate
+}
+
+queue() {
+	@prefix@/bin/qmailctl queue
+}
+
+cont() {
+	@prefix@/bin/qmailctl cont
+}
+
+cdb() {
+	@prefix@/bin/qmailctl cdb
+}
+
+enable() {
+	/sbin/rc-update add svscan default
+}
+
+disable() {
+	/sbin/rc-update del svscan
+}
+
+help() {
+	@prefix@/bin/qmailctl help
+}
+
+#
+# $Log: openrc.in,v $
+# Revision 1.1  2021-07-25 14:19:18+05:30  Cprogrammer
+# Initial revision
+#
+#

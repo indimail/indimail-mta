@@ -70,3 +70,4 @@ PKGBUILD
 inotify
 inotify.o
 hasinotify.h
+openrc

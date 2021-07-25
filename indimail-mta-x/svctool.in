@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.589 2021-07-24 17:55:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.590 2021-07-25 15:50:54+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.589 2021-07-24 17:55:47+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.590 2021-07-25 15:50:54+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7713,6 +7713,16 @@ create_startup()
 				echo "svscan startup enabled in /Library/LaunchDaemons/org.indimail.svscan.plist"
 				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
 			fi
+		elif [ -f /sbin/openrc-run -a -d /etc/init.d ] ; then
+			cmp -s "$DESTDIR"$shareddir/boot/svscan /etc/init.d/svscan >/dev/null 2>&1
+			if [ $? -ne 0 ] ; then
+				if [ $silent -eq 0 ] ; then
+					echo "svscan startup enabled in rc /etc/init.d/svscan"
+				fi
+				/bin/cp "$DESTDIR"$shareddir/boot/svscan /etc/init.d/svscan
+				/bin/chmod 755 /etc/init.d/svscan
+				service svscan enable
+			fi
 		elif [ -f /etc/inittab ] ; then
 			grep ".*:.*:respawn:.*svscanboot" /etc/inittab >/dev/null
 			if [ $? -eq 0 ] ; then
@@ -7725,7 +7735,7 @@ create_startup()
 			fi
 		fi
 	fi
-	if [ -d /etc/init.d ] ; then
+	if [ ! -f /sbin/openrc-run -a -d /etc/init.d ] ; then
 		cmp -s "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1
 		if [ $? -ne 0 ] ; then
 			/bin/cp "$DESTDIR"$QmailBinPrefix/bin/qmailctl /etc/init.d/svscan
@@ -7740,8 +7750,6 @@ create_startup()
 			fi
 		elif [ -f /usr/sbin/chkconfig ] ; then
 			/usr/sbin/chkconfig --add svscan 2>/dev/null
-		elif [ -f /sbin/rc-update ] ; then
-			/sbin/rc-update add svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d svscan start 14 2 3 4 5 . stop 91 0 1 6 .
 		fi
@@ -7770,19 +7778,22 @@ remove_startup()
 	elif [ -f /etc/event.d/svscan ] ; then
 		/sbin/initctl emit qmailstop > /dev/null
 		/bin/rm -f /etc/event.d/svscan
+	elif [ -f /sbin/openrc-run ] ; then
+		service svscan stop
+		if [ -f /etc/init.d/svscan ] ; then
+			service svscan disable
+		fi
+		/bin/rm -f /etc/init.d/svscan
 	elif [ -f /etc/inittab ] ; then
 		service svscan stop
 		sed -i '/svscan/d' /etc/inittab
 		kill -1 1
 	elif [ -d /etc/rc.d -a -f /etc/rc.subr ] ; then
 		service svscan stop
-		service svscan disable
-		service svscan delete
-		/bin/rm -f $QmailBinPrefix/etc/rc.d/svscan
-	fi
-	if [ -f ${shareddir}/boot/rpm.init ] ; then
-		echo "Running Custom Un-Installation Script for preun" 1>&2
-		/bin/sh ${shareddir}/boot/rpm.init preun
+		if [ -f $prefix/etc/rc.d/svscan ] ; then
+			service svscan disable && service svscan delete
+			/bin/rm -f $QmailBinPrefix/etc/rc.d/svscan
+		fi
 	fi
 	if [ -f /etc/init.d/svscan ] ; then
 		if [ -f /sbin/chkconfig ] ; then
@@ -7793,8 +7804,6 @@ remove_startup()
 			fi
 		elif [ -f /usr/sbin/chkconfig ] ; then
 			/usr/sbin/chkconfig --del svscan 2>/dev/null
-		elif [ -f /sbin/rc-update ] ; then
-			/sbin/rc-update del svscan
 		elif [ -f /usr/sbin/update-rc.d ] ; then
 			/usr/sbin/update-rc.d -f svscan remove
 		fi
