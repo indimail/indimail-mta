@@ -1,4 +1,7 @@
 # $Log: svscan_rc.in,v $
+# Revision 1.5  2021-07-25 15:49:40+05:30  Cprogrammer
+# added pause command
+#
 # Revision 1.4  2021-07-20 23:23:12+05:30  Cprogrammer
 # removed shut command
 #
@@ -16,7 +19,7 @@
 # REQUIRE: DAEMON
 # KEYWORD: nojail shutdown
 # 
-# $Id: svscan_rc.in,v 1.4 2021-07-20 23:23:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svscan_rc.in,v 1.5 2021-07-25 15:49:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 . /etc/rc.subr
@@ -31,11 +34,12 @@ flush_cmd="/usr/local/bin/qmailctl flush"
 reload_cmd="/usr/local/bin/qmailctl reload"
 rotate_cmd="/usr/local/bin/qmailctl rotate"
 queue_cmd="/usr/local/bin/qmailctl queue"
+pause_cmd="/usr/local/bin/qmailctl pause"
 cont_cmd="/usr/local/bin/qmailctl cont"
 cdb_cmd="/usr/local/bin/qmailctl cdb"
 help_cmd="/usr/local/bin/qmailctl help"
 describe_cmd="echo qmailctl - tool to manage svscan services"
-extra_commands="status restart kill restart flush reload rotate queue cont cdb help"
+extra_commands="status restart kill reload rotate flush queue pause cont cdb help"
 
 load_rc_config $name
 : ${svscan_enable="NO"}
