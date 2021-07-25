@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.591 2021-07-25 21:49:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.592 2021-07-25 22:40:49+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.591 2021-07-25 21:49:18+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.592 2021-07-25 22:40:49+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6218,6 +6218,7 @@ if [ $down_state -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
+link_with_globals
 if [ $no_multi -eq 1 ] ; then
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	> $conf_dir/QMAILQUEUE
@@ -6452,6 +6453,7 @@ if [ $down_state -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
+link_with_globals
 echo "$QUEUE_BASE/slowq" > $conf_dir/QUEUEDIR
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
@@ -11156,13 +11158,13 @@ case $option in
 		) 1>&2
 		exit 1
 	fi
-	if [ -L $i/.envdir -o -f $i/.envdir -o -f $i/.envfile ] ; then
-		if [ -n "$service_name" ] ; then
-			echo "------ $servicedir/$service_name ------------"
-		elif [ -n "$envdir" ] ; then
-			echo "------ $envdir ------------"
-		fi
+	if [ -n "$service_name" ] ; then
+		echo "------ environment variables for $servicedir/$service_name ------------"
+	elif [ -n "$envdir" ] ; then
+		echo "------ environment variables for $envdir ------------"
 	fi
+	envdir -c $i env
+	echo
 	if [ -L $i/.envdir ] ; then
 		link_name=$(readlink $i/.envdir)
 		echo "NOTE: additional variables were obtained from $link_name"
@@ -11177,12 +11179,6 @@ case $option in
 		cat $i/.envfile
 		echo
 	fi
-	if [ -n "$service_name" ] ; then
-		echo "------ environment variables for $servicedir/$service_name ------------"
-	elif [ -n "$envdir" ] ; then
-		echo "------ environment variables for $envdir ------------"
-	fi
-	envdir -c $i env
 	;;
 
 	46)
@@ -11195,9 +11191,9 @@ case $option in
 		if [ -d $i/variables ] ; then
 			vars=$(envdir -c $i/variables env 2>/dev/null)
 			if [ -n "$vars" ] ; then
-				if [ -L $i/variables/.envdir -o -f $i/variables/.envdir -o -f $i/variables/.envfile ] ; then
-					echo "------ $i ------------"
-				fi
+				echo "------ environment variables for $i ------------"
+				envdir -c $i/variables env
+				echo
 				if [ -L $i/variables/.envdir ] ; then
 					link_name=$(readlink $i/variables/.envdir)
 					echo "NOTE: additional variables were obtained from $link_name"
@@ -11212,9 +11208,6 @@ case $option in
 					cat $i/variables/.envfile
 					echo
 				fi
-				echo "------ environment variables for $i ------------"
-				envdir -c $i/variables env
-				echo
 			else
 				echo "------ $i ------------"
 				echo "NOTE: This service has no configured variables"

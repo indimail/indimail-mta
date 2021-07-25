@@ -43,6 +43,7 @@ Release 2.14.0 Start 18/07/2021
 27. svctool: added -l (nolastlog) option to linuxadduser
 - 25/07/2021
 28. svctool: install openrc script for alpine linux
+29. svctool: link qmail-send, slowq-send variables with global_vars
 
 * 
 Release 2.13 Start 14/02/2021
