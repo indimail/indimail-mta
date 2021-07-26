@@ -109,6 +109,13 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 # emerge -a openldap
 ```
 
+**alpine Linux**
+
+```
+# apk add gcc g++ make git autoconf automake libtool m4 sed
+# apk add openssl-dev openssl-dev mysql-dev libidn2-dev fts-dev
+```
+
 **NOTES**
 
 You need libidn2, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
