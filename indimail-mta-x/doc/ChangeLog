@@ -53,6 +53,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 - 26/07/2021
 30. svctool: link svscan, resolvconf, fetchmail, poppass env variables with
     global_vars
+31. qmail-send.c, qmail-todo.c, slowq-send.c qmta-send.c: log when log sighup,
+    sigalrm is caught
 
 * 
 Release 2.13 Start 14/02/2021

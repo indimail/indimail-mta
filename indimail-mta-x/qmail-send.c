@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.90  2021-07-26 23:24:22+05:30  Cprogrammer
+ * log when log sighup, sigalrm is caught
+ *
  * Revision 1.89  2021-07-17 14:37:07+05:30  Cprogrammer
  * skip processing of for messages queued with wrong split dir
  *
@@ -379,12 +382,14 @@ static void
 sigalrm()
 {
 	flagrunasap = 1;
+	log3("info: qmail-send: Got ALRM: ", queuedesc, "\n");
 }
 
 static void
 sighup()
 {
 	flagreadasap = 1;
+	log3("info: qmail-send: Got HUP: ", queuedesc, "\n");
 }
 
 static void
@@ -3073,7 +3078,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.89 2021-07-17 14:37:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.90 2021-07-26 23:24:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

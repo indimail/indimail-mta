@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.51  2021-07-26 23:24:53+05:30  Cprogrammer
+ * log when log sighup, sigalrm is caught
+ *
  * Revision 1.50  2021-07-17 14:39:28+05:30  Cprogrammer
  * skip processing of for messages queued with wrong split dir
  *
@@ -190,6 +193,7 @@ void            log9(char *r, char *s, char *t, char *u, char *v, char *w, char 
 void
 sigterm(void)
 {
+	log3("info: qmail-todo: Got ALRM: ", queuedesc, "\n");
 	if (!flagstopasap)
 		log3("status: ", queuedesc, " qmail-todo stop processing asap\n");
 	flagstopasap = 1;
@@ -200,6 +204,7 @@ void
 sighup(void)
 {
 	flagreadasap = 1;
+	log3("info: qmail-todo: Got HUP: ", queuedesc, "\n");
 }
 
 int             flagsendalive = 1;
@@ -1238,7 +1243,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.50 2021-07-17 14:39:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.51 2021-07-26 23:24:53+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

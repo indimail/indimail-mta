@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.13  2021-07-26 23:25:36+05:30  Cprogrammer
+ * log when log sighup, sigalrm is caught
+ *
  * Revision 1.12  2021-07-17 14:38:09+05:30  Cprogrammer
  * skip processing of for messages queued with wrong split dir
  *
@@ -168,12 +171,14 @@ static void
 sigalrm()
 {
 	flagrunasap = 1;
+	log3("info: slowq-send: Got ALRM: ", queuedesc, "\n");
 }
 
 static void
 sighup()
 {
 	flagreadasap = 1;
+	log3("info: slowq-send: Got HUP: ", queuedesc, "\n");
 }
 
 static void
@@ -2552,7 +2557,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.12 2021-07-17 14:38:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.13 2021-07-26 23:25:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

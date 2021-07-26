@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.9  2021-07-26 23:25:32+05:30  Cprogrammer
+ * log when log sighup, sigalrm is caught
+ *
  * Revision 1.8  2021-07-17 14:39:37+05:30  Cprogrammer
  * fix split dir of messages queued with wrong split value
  *
@@ -192,11 +195,13 @@ sigterm()
 void sigalrm()
 {
 	flagrunasap = 1;
+	log1("info: qmail-send: Got ALRM\n");
 }
 
 void sighup()
 {
 	flagreadasap = 1;
+	log1("info: qmail-send: Got HUP\n");
 }
 
 #ifdef LOGLOCK
@@ -2648,7 +2653,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.8 2021-07-17 14:39:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.9 2021-07-26 23:25:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
