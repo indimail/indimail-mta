@@ -6221,7 +6221,7 @@ if [ $down_state -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_globals
+link_with_global
 if [ $no_multi -eq 1 ] ; then
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	> $conf_dir/QMAILQUEUE
@@ -6456,7 +6456,7 @@ if [ $down_state -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
-link_with_globals
+link_with_global
 echo "$QUEUE_BASE/slowq" > $conf_dir/QUEUEDIR
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
