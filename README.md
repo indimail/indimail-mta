@@ -113,7 +113,7 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 
 ```
 # apk add gcc g++ make git autoconf automake libtool m4 sed
-# apk add openssl-dev openssl-dev mysql-dev libidn2-dev fts-dev
+# apk add openssl-dev mysql-dev libidn2-dev fts-dev
 ```
 
 **NOTES**
