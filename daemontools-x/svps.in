@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.11  2021-07-26 11:31:08+05:30  Cprogrammer
+# added --no-pager, -n option to disable pager
+#
 # Revision 1.10  2020-11-29 16:26:02+05:30  Cprogrammer
 # use portable way to use while loop
 #
@@ -30,7 +33,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.10 2020-11-29 16:26:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.11 2021-07-26 11:31:08+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -121,6 +124,11 @@ if [ "$option" = "all" -o "$option" = "logs" ] ; then
 fi
 }
 
+if [ -x /usr/bin/less ] ; then
+	PAGER=/usr/bin/less
+elif [ -x /usr/bin/more ] ; then
+	PAGER=/usr/bin/more
+fi
 option=main
 while test $# -gt 0; do
     case "$1" in
@@ -140,6 +148,9 @@ while test $# -gt 0; do
     -l|--logs)
 	option=logs
     ;;
+    -n|--no-pager)
+	PAGER=""
+    ;;
     *)
     echo "invalid option [$1]" 1>&2
 	echo "svps [--all | --main | --logs]" 1>&2
@@ -150,11 +161,6 @@ while test $# -gt 0; do
 
     shift
 done
-if [ -x /usr/bin/less ] ; then
-	PAGER=/usr/bin/less
-elif [ -x /usr/bin/more ] ; then
-	PAGER=/usr/bin/more
-fi
 
 ID=$(id -u)
 
