@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.592 2021-07-25 22:40:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.593 2021-07-26 08:36:04+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.592 2021-07-25 22:40:49+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.593 2021-07-26 08:36:04+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3329,7 +3329,7 @@ SAVE_INTERVAL=$5
 HASH_SIZE=$6
 WHITELIST=$7
 if [ " $DANE_PORT" = " " ] ; then
-	GREY_PORT=1998
+	DANE_PORT=1998
 fi
 if [ " $servicetag" = " " ] ; then
 	tag=$DANE_PORT
@@ -3358,12 +3358,12 @@ if [ " $ipaddress" = " " ] ; then
 else
 	echo $ipaddress > $conf_dir/LOCALIP
 fi
-echo $DANE_PORT > $conf_dir/PORT
 if [ ! " $CONTROLDIR" = " " ] ; then
 	echo "$CONTROLDIR" > $conf_dir/CONTROLDIR
 else
 	> $conf_dir/CONTROLDIR
 fi
+echo $DANE_PORT > $conf_dir/PORT
 if [ ! " $memory" = " " ] ; then
 	echo $memory > $conf_dir/SOFT_MEM
 else
@@ -4207,8 +4207,7 @@ if [ $run_file_only -eq 1 ] ; then
 	fi
 fi
 /bin/mkdir -p $conf_dir
-/bin/chmod 500 $conf_dir
-link_with_global $conf_dir
+/bin/chmod 555 $conf_dir
 
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/clamd/log
 if [ $down_state -eq 1 ] ; then
@@ -4298,7 +4297,7 @@ if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/freshclam/down
 fi
 /bin/mkdir -p $conf_dir
-/bin/chmod 500 $conf_dir
+/bin/chmod 555 $conf_dir
 qsysconfdir=/etc # weird tha clamd and freshclam do not share the same dir for config files
 # freshclam script
 (
@@ -5620,6 +5619,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
+link_with_global $conf_dir
 echo "$prog_args" > $conf_dir/.options
 if [ -z $init_cmd ] ; then
 	echo           > $conf_dir/INITCMD
@@ -5701,6 +5701,7 @@ if [ $mount_resolvconf -eq 1 -a \
 	fi
 	/bin/mkdir -p $conf_dir
 	/bin/chmod 500 $conf_dir
+	link_with_global $conf_dir
 	echo "$prog_args" > $conf_dir/.options
 	# resolvconf run script
 	(
@@ -5792,6 +5793,7 @@ if [ $down_state -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
+link_with_global $conf_dir
 if [ $no_multi -eq 1 ] ; then
 	echo $qmailqueue > $conf_dir/QMAILQUEUE
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
@@ -6048,6 +6050,7 @@ fi
 /bin/mkdir -p $conf_dir
 $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
+link_with_global $conf_dir
 
 if [ " $ipaddress" = " " ] ; then
 	echo 0 > $conf_dir/LOCALIP
