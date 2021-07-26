@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.23  2021-07-26 22:28:09+05:30  Cprogrammer
+ * added feature to run init
+ *
  * Revision 1.22  2021-07-24 20:27:00+05:30  Cprogrammer
  * display in logs if child is stopped
  *
@@ -175,6 +178,7 @@ trigger(void)
 		;
 }
 
+char           *init[2] =      { "./init", 0 };
 char           *run[2] =      { "./run", 0 };
 char           *shutdown[3] = { "./shutdown", 0, 0 };
 char           *alert[5] = { "./alert", 0, 0, 0, 0 }; /*- alert pid chilld_exit_value signal_value */
@@ -301,11 +305,81 @@ do_wait()
 	return;
 }
 
+int
+do_init()
+{
+	int             t, f;
+
+	switch (f = fork())
+	{
+	case -1:
+#ifdef USE_RUNFS
+		strerr_warn4(WARNING, "unable to fork for ", sdir, ", sleeping 60 seconds: ", &strerr_sys);
+#else
+		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
+#endif
+		deepsleep(60);
+		trigger();
+		flagfailed = 1;
+		return -1;
+	case 0:
+		sig_uncatch(sig_child);
+		sig_unblock(sig_child);
+#ifdef USE_RUNFS
+		if (fchdir(fddir) == -1)
+			strerr_die2sys(111, FATAL, "unable to set current directory: ");
+#endif
+		execve(*init, init, environ);
+#ifdef USE_RUNFS
+		strerr_die4sys(111, FATAL, "unable to start ", sdir, "/init: ");
+#else
+		strerr_die4sys(111, FATAL, "unable to start ", dir, "/init: ");
+#endif
+	}
+	if (wait_pid(&t, f) == -1) {
+#ifdef USE_RUNFS
+		strerr_warn4(WARNING, "wait failed ", sdir, "/init: ", &strerr_sys);
+#else
+		strerr_warn4(WARNING, "wait failed ", dir, "/init: ", &strerr_sys);
+		return -1;
+#endif
+	}
+	if (WIFSTOPPED(t) || WIFSIGNALED(t))
+		return -1;
+	else
+	if (WIFEXITED(t))
+		return (WEXITSTATUS(t));
+	return -1;
+}
+
 void
 trystart(void)
 {
 	int             f;
+	static int      init_flag;
 
+#ifdef USE_RUNFS
+	if (fchdir(fddir) == -1)
+		strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+	if (access(*init, F_OK))
+		init_flag = 1;
+	if (chdir(dir) == -1)
+		strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+#endif
+	if (!init_flag) {
+		if (do_init()) {
+#ifdef USE_RUNFS
+			strerr_warn4(WARNING, "initialization failed for ", sdir, ", sleeping 60 seconds: ", 0);
+#else
+			strerr_warn4(WARNING, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
+#endif
+			deepsleep(60);
+			trigger();
+			flagfailed = 1;
+			return;
+		}
+	} else
+		init_flag++;
 	do_wait();
 	switch (f = fork())
 	{
@@ -781,7 +855,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.22 2021-07-24 20:27:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.23 2021-07-26 22:28:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
