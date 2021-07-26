@@ -100,6 +100,7 @@ o alpine linux ready
 33. svctool: install openrc script for alpine linux
 - 26/07/2021
 34. svps: added --no-pager, -n option to disable pager
+35. supervise: added feature to run init script
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

@@ -6,9 +6,15 @@ supervise \- starts and monitors a service.
 \fBsupervise\fR \fIs\fR
 
 .SH DESCRIPTION
-\fBsupervise\fR switches to the directory named \fIs\fR and starts ./run.
-It restarts ./run if ./run exits. It pauses for a second after starting
-./run, so that it does not loop too quickly if ./run exits immediately. 
+\fBsupervise\fR switches to the directory named \fIs\fR and starts ./init.
+It starts ./init if ./init exits with non-zero status. It pauses for a
+second after starting ./init, so that it does not loop to quickly if ./init
+exits immediately.
+
+After ./init exits with zero exit status, \fBsupervise\fR starts ./run.
+It restarts ./run if ./run exits. It pauses for a second after
+starting ./run, so that it does not loop too quickly if ./run exits
+immediately. 
 
 If the file \fIs\fR/down exists, \fBsupervise\fR does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run and to give other
