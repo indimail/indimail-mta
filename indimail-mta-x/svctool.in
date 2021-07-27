@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.593 2021-07-26 08:36:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.594 2021-07-27 12:55:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.593 2021-07-26 08:36:04+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.594 2021-07-27 12:55:26+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2297,7 +2297,7 @@ if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/down
 fi
 if [ -n "$infifo" ] ; then
-	base_fifo_name=`basename $infifo`
+	fifo_name=`basename $infifo`
 	fifo_dir=`dirname $infifo`
 	if [ $fifo_dir = "." ] ; then
 		fifo_dir=$QmailHOME/inquery
@@ -2315,7 +2315,7 @@ else
 	echo $CONCURRENCYINCOMING > $conf_dir/MAXDAEMONS
 fi
 if [ -n "$infifo" ] ; then
-echo $base_fifo_name > $conf_dir/INFIFO
+echo $fifo_name > $conf_dir/INFIFO
 echo $fifo_dir > $conf_dir/FIFODIR
 fi
 
@@ -3670,12 +3670,12 @@ if [ " $IMAP_PORT" = " " ] ; then
 else
 	echo "PORT=$IMAP_PORT"
 fi
-base_fifo_name=`basename $2`
+fifo_name=`basename $2`
 fifo_dir=`dirname $2`
 if [ $fifo_dir = "." ] ; then
 	fifo_dir=$QmailHOME/inquery
 fi
-echo "INFIFO=$base_fifo_name"
+echo "INFIFO=$fifo_name"
 echo "FIFODIR=$fifo_dir"
 
 if [ " $ipaddress" = " " ] ; then
@@ -3880,12 +3880,12 @@ if [ " $POP3_PORT" = " " ] ; then
 else
 	echo "PORT=$POP3_PORT"
 fi
-base_fifo_name=`basename $2`
+fifo_name=`basename $2`
 fifo_dir=`dirname $2`
 if [ $fifo_dir = "." ] ; then
 	fifo_dir=$QmailHOME/inquery
 fi
-echo "INFIFO=$base_fifo_name"
+echo "INFIFO=$fifo_name"
 echo "FIFODIR=$fifo_dir"
 
 if [ " $ipaddress" = " " ] ; then
@@ -4558,16 +4558,16 @@ INFIFO_PATH=$1
 THREAD_COUNT=$2
 activeDays=$3
 SERVICEDIR=$4
-base_fifo_name=`basename $INFIFO_PATH`
+fifo_name=`basename $INFIFO_PATH`
 fifo_dir=`dirname $INFIFO_PATH`
 if [ $fifo_dir = "." ] ; then
 	fifo_dir=$QmailHOME/inquery
 fi
 
-if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/variables ] ; then
+if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/variables ] ; then
 	return 0
 fi
-conf_dir="$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/variables
+conf_dir="$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/variables
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
 		/bin/mv $conf_dir "$conf_dir".bak
@@ -4577,23 +4577,23 @@ fi
 /bin/chmod 500 $conf_dir
 link_with_global $conf_dir
 
-/bin/mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/log
 if [ $down_state -eq 1 ] ; then
-	$TOUCH "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/down
+	$TOUCH "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/down
 fi
 #
 # do this so that vdeluser can run libexec script vdeluser
 # which can send sighup to inlookup service using the svc command
 #
-/bin/mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/supervise
-$chown root:0 "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/supervise
-if [ ! -f "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/supervise/control ] ; then
-/usr/bin/mkfifo      "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/supervise/control > /dev/null 2>&1
+/bin/mkdir -p "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/supervise
+$chown root:0 "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/supervise
+if [ ! -f "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/supervise/control ] ; then
+	/usr/bin/mkfifo      "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/supervise/control > /dev/null 2>&1
 fi
-/bin/chmod 660       "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/supervise/control
-$chown root:indimail "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/supervise/control
+/bin/chmod 660       "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/supervise/control
+$chown root:indimail "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/supervise/control
 
-echo "$base_fifo_name" > $conf_dir/INFIFO
+echo "$fifo_name" > $conf_dir/INFIFO
 echo "$fifo_dir" > $conf_dir/FIFODIR
 echo $THREAD_COUNT > $conf_dir/THREAD_COUNT
 if [ " $activeDays"  = " " ] ; then
@@ -4634,6 +4634,7 @@ fi
 echo $sysconfdir/indimail.cnf > $conf_dir/MYSQL_READ_DEFAULT_FILE
 echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
 echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
+
 (
 dump_run_header
 echo "exec 2>&1"
@@ -4641,20 +4642,38 @@ echo ""
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/inlookup \\"
 echo "  -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
-) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/run
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/run
+) > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
+
 (
 echo "30"
 echo "mysql.3306"
-) > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/wait
+) > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/wait
+
+(
+dump_run_header
+echo "exec 2>&1"
+echo "set -e"
+echo ""
+echo "if [ -d /run ] ; then"
+echo "  svdir=/run/svscan"
+echo "elif [ -d /var/run ] ; then"
+echo "  svdir=/var/run/svscan"
+echo "else"
+echo "  svdir=$SERVICEDIR"
+echo "fi"
+echo "$chown -R indimail:indimail \$svdir/inlookup.$fifo_name/supervise"
+echo "echo \"Finished initialization\""
+) > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/init
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/init
 
 if [ ! -d $LOGDIR ] ; then
 	/bin/mkdir -p $LOGDIR
 	$chown qmaill:nofiles $LOGDIR
 fi
 # inlookup log script
-dump_log_header inlookup.$base_fifo_name > "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
-/bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$base_fifo_name/log/run
+dump_log_header inlookup.$fifo_name > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/log/run
+/bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/log/run
 echo "$prog_args" > $conf_dir/.options
 
 if [ $run_file_only -eq 1 ] ; then
@@ -5649,10 +5668,14 @@ if [ $mount_resolvconf -eq 1 ] ; then
 	echo "exec 2>&1"
 	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
 	echo "/usr/bin/mount -l"
+	echo ""
+	echo "echo \"Environment Variable List\""
+	env
 	) > "$DESTDIR"$SERVICEDIR/.svscan/run
+	hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 	(
 	echo "# $prog_args"
-	echo "search `uname -n`"
+	echo "search $hostname"
 	echo "nameserver 127.0.0.1"
 	) > "$DESTDIR"$sysconfdir/resolv.conf
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
