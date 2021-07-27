@@ -1,7 +1,7 @@
 /*
  * $Log: supervise.c,v $
- * Revision 1.23  2021-07-26 23:19:04+05:30  Cprogrammer
- * added initialization feature
+ * Revision 1.23  2021-07-27 09:15:16+05:30  Cprogrammer
+ * add feature to run ./init once before ./run
  *
  * Revision 1.22  2021-07-24 20:27:00+05:30  Cprogrammer
  * display in logs if child is stopped
@@ -178,8 +178,7 @@ trigger(void)
 		;
 }
 
-char           *init[2] =      { "./init", 0 };
-char           *run[2] =      { "./run", 0 };
+char           *run[2] = { "./run", 0 };
 char           *shutdown[3] = { "./shutdown", 0, 0 };
 char           *alert[5] = { "./alert", 0, 0, 0, 0 }; /*- alert pid chilld_exit_value signal_value */
 
@@ -305,81 +304,11 @@ do_wait()
 	return;
 }
 
-int
-do_init()
-{
-	int             t, f;
-
-	switch (f = fork())
-	{
-	case -1:
-#ifdef USE_RUNFS
-		strerr_warn4(WARNING, "unable to fork for ", sdir, ", sleeping 60 seconds: ", &strerr_sys);
-#else
-		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
-#endif
-		deepsleep(60);
-		trigger();
-		flagfailed = 1;
-		return -1;
-	case 0:
-		sig_uncatch(sig_child);
-		sig_unblock(sig_child);
-#ifdef USE_RUNFS
-		if (fchdir(fddir) == -1)
-			strerr_die2sys(111, FATAL, "unable to set current directory: ");
-#endif
-		execve(*init, init, environ);
-#ifdef USE_RUNFS
-		strerr_die4sys(111, FATAL, "unable to start ", sdir, "/init: ");
-#else
-		strerr_die4sys(111, FATAL, "unable to start ", dir, "/init: ");
-#endif
-	}
-	if (wait_pid(&t, f) == -1) {
-#ifdef USE_RUNFS
-		strerr_warn4(WARNING, "wait failed ", sdir, "/init: ", &strerr_sys);
-#else
-		strerr_warn4(WARNING, "wait failed ", dir, "/init: ", &strerr_sys);
-		return -1;
-#endif
-	}
-	if (WIFSTOPPED(t) || WIFSIGNALED(t))
-		return -1;
-	else
-	if (WIFEXITED(t))
-		return (WEXITSTATUS(t));
-	return -1;
-}
-
 void
 trystart(void)
 {
 	int             f;
-	static int      init_flag;
 
-#ifdef USE_RUNFS
-	if (fchdir(fddir) == -1)
-		strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
-	if (access(*init, F_OK))
-		init_flag = 1;
-	if (chdir(dir) == -1)
-		strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
-#endif
-	if (!init_flag) {
-		if (do_init()) {
-#ifdef USE_RUNFS
-			strerr_warn4(WARNING, "initialization failed for ", sdir, ", sleeping 60 seconds: ", 0);
-#else
-			strerr_warn4(WARNING, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
-#endif
-			deepsleep(60);
-			trigger();
-			flagfailed = 1;
-			return;
-		}
-	} else
-		init_flag++;
 	do_wait();
 	switch (f = fork())
 	{
@@ -790,6 +719,40 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 }
 #endif
 
+char           *init[2] = { 0, 0 };
+static stralloc init_sv_path = {0};
+
+int
+do_init()
+{
+	int             t, f;
+
+	switch (f = fork())
+	{
+	case -1:
+		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
+		deepsleep(60);
+		trigger();
+		flagfailed = 1;
+		return -1;
+	case 0:
+		sig_uncatch(sig_child);
+		sig_unblock(sig_child);
+		execve(*init, init, environ);
+		strerr_die4sys(111, FATAL, "unable to start ", dir, "/init: ");
+	}
+	if (wait_pid(&t, f) == -1) {
+		strerr_warn4(WARNING, "wait failed ", dir, "/init: ", &strerr_sys);
+		return -1;
+	}
+	if (WIFSTOPPED(t) || WIFSIGNALED(t))
+		return -1;
+	else
+	if (WIFEXITED(t))
+		return (WEXITSTATUS(t));
+	return -1;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -812,6 +775,7 @@ main(int argc, char **argv)
 	else
 	if (errno != error_noent)
 		strerr_die4sys(111, FATAL, "unable to stat ", dir, "/down: ");
+
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 #ifdef USE_RUNFS
@@ -848,6 +812,24 @@ main(int argc, char **argv)
 	if ((fdok = open_read("supervise/ok")) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", dir, "/supervise/ok: ");
 	coe(fdok);
+
+	while (1) {
+		if (!stralloc_copys(&init_sv_path, sdir) ||
+				!stralloc_append(&init_sv_path, "/") ||
+				!stralloc_catb(&init_sv_path, "init", 4) ||
+				!stralloc_0(&init_sv_path))
+			strerr_die2x(111, FATAL, "out of memory");
+		init[0] = init_sv_path.s;
+		if (!access(*init, X_OK)) {
+			if (do_init()) {
+				strerr_warn4(WARNING, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
+				deepsleep(60);
+			} else
+				break;
+		} else
+			break;
+	}
+
 	if (!flagwant || flagwantup)
 		trystart();
 	doit();
@@ -858,7 +840,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.23 2021-07-26 23:19:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.23 2021-07-27 09:15:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

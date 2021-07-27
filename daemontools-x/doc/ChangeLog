@@ -16,6 +16,7 @@ o envdir: complete re-code. Added -c option to clear, -i option to ignore
   unreadable files and -w option to treat temporary errors as warning
 o openrc script for starting svscan
 o alpine linux ready
+o superise: add feature to run ./init once before ./run
 ===========================================================================
 - 27/02/2021
 01. minisvc: added options to set, unset, remove env variables for supervised
@@ -100,7 +101,8 @@ o alpine linux ready
 33. svctool: install openrc script for alpine linux
 - 26/07/2021
 34. svps: added --no-pager, -n option to disable pager
-35. supervise: added feature to run init script
+- 27/07/2021
+35. supervise: add feature to run ./init once before ./run
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
