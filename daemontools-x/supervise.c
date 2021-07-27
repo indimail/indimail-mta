@@ -1,6 +1,6 @@
 /*
  * $Log: supervise.c,v $
- * Revision 1.23  2021-07-27 09:15:16+05:30  Cprogrammer
+ * Revision 1.23  2021-07-27 12:36:03+05:30  Cprogrammer
  * add feature to run ./init once before ./run
  *
  * Revision 1.22  2021-07-24 20:27:00+05:30  Cprogrammer
@@ -114,7 +114,8 @@ static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
 static char     waited, flagfailed;
-char            status[21];
+static char     status[21];
+static char     pwdbuf[256];
 static stralloc wait_sv_file = {0};
 #ifdef USE_RUNFS
 static char    *sdir;
@@ -649,7 +650,6 @@ void
 initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 {
 	char           *run_dir, *parent_dir = (char *) 0;
-	char            buf[256];
 	int             i;
 
 	if (!access("/run", F_OK)) {
@@ -668,12 +668,12 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 	if (!str_diff(service_dir, "log")) {
 		/*- SV_PWD is the dirname of directory in /service e.g. qmail-smtpd.25 or log */
 		if (!(parent_dir = env_get("SV_PWD"))) {
-			if (!getcwd(buf, 255))
+			if (!getcwd(pwdbuf, 255))
 				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
-			i = str_rchr(buf, '/');
-			if (!buf[i])
+			i = str_rchr(pwdbuf, '/');
+			if (!pwdbuf[i])
 				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
-			parent_dir = buf + i + 1;
+			parent_dir = pwdbuf + i + 1;
 		}
 		if (!stralloc_cats(&run_service_dir, parent_dir) ||
 				!stralloc_append(&run_service_dir, "/"))
@@ -757,9 +757,12 @@ int
 main(int argc, char **argv)
 {
 	struct stat     st;
+	char           *ptr;
 
 	if (!(dir = argv[1]) || argc > 3)
 		strerr_die1x(100, "supervise: usage: supervise dir [log_parent]");
+	if (*dir == '/' || *dir == '.')
+		strerr_die1x(100, "supervise: dir cannot start with '/' or '.'");
 	if (pipe(selfpipe) == -1)
 		strerr_die4sys(111, FATAL, "unable to create pipe for ", dir, ": ");
 	coe(selfpipe[0]);
@@ -768,6 +771,21 @@ main(int argc, char **argv)
 	ndelay_on(selfpipe[1]);
 	sig_block(sig_child);
 	sig_catch(sig_child, trigger);
+
+	if (!(ptr = env_get("SERVICEDIR"))) {
+		if (!getcwd(pwdbuf, 255))
+			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+		ptr = pwdbuf;
+	}
+	if (!stralloc_copys(&init_sv_path, ptr) ||
+			!stralloc_append(&init_sv_path, "/") ||
+			!stralloc_cats(&init_sv_path, dir) ||
+			!stralloc_append(&init_sv_path, "/") ||
+			!stralloc_catb(&init_sv_path, "init", 4) ||
+			!stralloc_0(&init_sv_path))
+		strerr_die2x(111, FATAL, "out of memory");
+	init[0] = init_sv_path.s;
+
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", dir, ": ");
 	if (stat("down", &st) != -1)
@@ -781,7 +799,11 @@ main(int argc, char **argv)
 #ifdef USE_RUNFS
 	if (stat(".", &st) == -1)
 		strerr_die2sys(111, FATAL, "unable to stat current directory: ");
-	sdir = dir; /*- original service direcory */
+	/*-
+	 * save original directory in sdir since
+	 * dir gets modified in initialize_run()
+	 */
+	sdir = dir;
 	initialize_run(dir, st.st_mode, st.st_uid, st.st_gid); /*- this will set dir to new service directory in /run, /var/run */
 #endif
 	if (mkdir("supervise", 0700) && errno != error_exist) 
@@ -813,13 +835,12 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to read ", dir, "/supervise/ok: ");
 	coe(fdok);
 
+	/*
+	 * By now we have finished initialization of /run. We
+	 * can now run scripts that will not fail due to absense of
+	 * directories/files in /run
+	 */
 	while (1) {
-		if (!stralloc_copys(&init_sv_path, sdir) ||
-				!stralloc_append(&init_sv_path, "/") ||
-				!stralloc_catb(&init_sv_path, "init", 4) ||
-				!stralloc_0(&init_sv_path))
-			strerr_die2x(111, FATAL, "out of memory");
-		init[0] = init_sv_path.s;
 		if (!access(*init, X_OK)) {
 			if (do_init()) {
 				strerr_warn4(WARNING, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
@@ -840,7 +861,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.23 2021-07-27 09:15:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.23 2021-07-27 12:36:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

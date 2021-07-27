@@ -9,7 +9,9 @@ supervise \- starts and monitors a service.
 \fBsupervise\fR switches to the directory named \fIs\fR and starts ./init.
 It starts ./init if ./init exits with non-zero status. It pauses for a
 second after starting ./init, so that it does not loop to quickly if ./init
-exits immediately.
+exits immediately. \fIdirectory\fR has to be relative to the current
+working directory and cannot start with the dot (\fB.\fR) or the 
+slash (\fB/\fR) character.
 
 After ./init exits with zero exit status, \fBsupervise\fR starts ./run.
 It restarts ./run if ./run exits. It pauses for a second after

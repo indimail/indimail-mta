@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.21  2021-07-27 12:33:28+05:30  Cprogrammer
+ * set SERVICEDIR, PWD environment variable to service directory
+ *
  * Revision 1.20  2021-04-16 12:24:13+05:30  Cprogrammer
  * disable service in run filesystem when disabled in original service directory
  *
@@ -166,13 +169,12 @@ init_cmd(char *cmmd, int dowait, int shutdown)
 }
 
 void
-start(char *fn)
+start(char *fn, char *sdir)
 {
 	unsigned int    fnlen;
 	struct stat     st;
 	int             child, i, fdsource;
-	char           *run_dir, *sdir;
-	char            dirbuf[256];
+	char           *run_dir;
 	char           *args[4];
 
 	if (fn[0] == '.' && str_diff(fn, SVSCANINFO)) {
@@ -192,14 +194,18 @@ start(char *fn)
 			close(fdsource);
 			return;
 		}
-		if (!(sdir = getcwd(dirbuf, 255)))
-			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
 		if (!access(fn, F_OK)) { /*- no need to rename */
 			if (fchdir(fdsource) == -1)
 				strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
 			close(fdsource);
 			return;
 		}
+		/*
+		 * if if rename a directory in orignal /service, we should rename
+		 * it here.
+		 * e.g. if /service/qmail-smtpd.25 is renamed to /service/.qmail-smtpd.25
+		 * then rename /run/svscan/qmail-smtpd.25 to /run/svscan/.qmail-smtpd.25
+		 */
 		if (!access(fn + 1, F_OK) && rename(fn + 1, fn))
 			strerr_warn6(WARNING, "unable to rename ", fn + 1, " to ", fn, ": ", &strerr_sys);
 		if (fchdir(fdsource) == -1)
@@ -285,7 +291,7 @@ start(char *fn)
 			if (chdir(fn) == -1)
 				strerr_die4sys(111, WARNING, "unable to switch to ", fn, ": ");
 			if (!env_put2("SV_PWD", fn))
-				strerr_die4sys(111, WARNING, "out of memory for ", fn, "/log: ");
+				strerr_die4x(111, WARNING, "out of memory for ", fn, "/log");
 			args[0] = "supervise";
 			args[1] = "log";
 			args[2] = fn;
@@ -305,7 +311,7 @@ direrror(void)
 }
 
 void
-doit(void)
+doit(char *sdir)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -342,7 +348,7 @@ doit(void)
 		errno = 0;
 		if (!(d = readdir(dir)))
 			break;
-		start(d->d_name);
+		start(d->d_name, sdir);
 	}
 	if (errno) {
 		direrror();
@@ -386,7 +392,7 @@ sigterm(int i)
 }
 
 static void
-open_svscan_log(void)
+open_svscan_log(char *sdir)
 {
 	const int       i = numx;
 	struct stat     st;
@@ -400,7 +406,7 @@ open_svscan_log(void)
 	if (fstat(STDERR_FILENO, &st) != 0 && errno == EBADF)
 		(void) open("/dev/null", O_WRONLY);
 	if (stat(fn, &st) == 0) {
-		start(fn);
+		start(fn, sdir);
 		if (i + 1 == numx && x[i].pidlog != 0) {
 			(void) dup2(x[i].pi[1], STDOUT_FILENO);
 			(void) dup2(x[i].pi[1], STDERR_FILENO);
@@ -410,12 +416,11 @@ open_svscan_log(void)
 }
 
 int
-get_lock()
+get_lock(char *sdir)
 {
 	int             fd, n, fdsource;
 	pid_t           pid;
-	char            strnum[FMT_ULONG], buf[8], dirbuf[256];
-	char           *sdir;
+	char            strnum[FMT_ULONG], buf[8];
 
 	if (1 == getpid()) { /*- we are running under a docker container as init */
 		if (unlink(pidfile) == -1 && errno != error_noent)
@@ -454,8 +459,6 @@ get_lock()
 	/*- let us find out if the process is svscan */
 	strnum[fmt_ulong(strnum, pid)] = 0;
 
-	if (!(sdir = env_get("PWD")) && !((sdir = getcwd(dirbuf, 255))))
-		strerr_die2sys(111, FATAL, "unable to get current working directory: ");
 	if ((fdsource = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	/*- use the /proc filesystem to figure out command name */
@@ -507,7 +510,8 @@ int
 main(int argc, char **argv)
 {
 	unsigned long   wait;
-	char           *s;
+	char           *s, *sdir;
+	char            dirbuf[256];
 
 	/*- save the current dir */
 #ifdef USE_RUNFS
@@ -518,13 +522,22 @@ main(int argc, char **argv)
 	if (argc > 1 && argv[1]) {
 		if (chdir(argv[1]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[1], ": ");
-		while (get_lock()) ;
+		if (!((sdir = getcwd(dirbuf, 255))))
+			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+		while (get_lock(sdir)) ;
 	} else {
 #ifdef USE_RUNFS
 		pidfile = PIDFILE;
 #endif
-		while (get_lock()) ;
+		if (!((sdir = getcwd(dirbuf, 255))))
+			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+		while (get_lock(sdir)) ;
 	}
+	if (!env_put2("SERVICEDIR", sdir))
+		strerr_die2x(111, WARNING, "out of memory");
+	else
+	if (!env_put2("PWD", sdir))
+		strerr_die2x(111, WARNING, "out of memory");
 	if (env_get("SETSID"))
 		(void) setsid();
 	signal(SIGHUP, sighup);
@@ -534,11 +547,11 @@ main(int argc, char **argv)
 	else
 		wait = 5;
 	if (env_get("SCANLOG"))
-		open_svscan_log();
+		open_svscan_log(sdir);
 	if ((s = env_get("INITCMD")))
 		init_cmd(s, env_get("WAIT_INITCMD") ? 1 : 0, 0);
 	for (;;) {
-		doit();
+		doit(sdir);
 		if (wait)
 			sleep(wait);
 		else
@@ -550,7 +563,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.20 2021-04-16 12:24:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.21 2021-07-27 12:33:28+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
