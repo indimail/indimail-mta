@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.104 2021-07-22 17:12:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.105 2021-07-27 18:33:59+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -321,10 +321,10 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
       --databasedir=$indimaildir/mysqldb $extra_opt
   $svctool --config=mysqldb --mysqlPrefix=$mysql_base \
     --databasedir=$indimaildir/mysqldb --base_path=$mail_path \
-    --default-domain=$default_domain $extra_opt
+    $extra_opt
   $svctool --mysql=3306 --servicedir=$servicedir \
     --mysqlPrefix=$mysql_base --databasedir=$indimaildir/mysqldb \
-    --config=$sysconfdir/indimail.cnf --default-domain=$default_domain $extra_opt
+    --config=$sysconfdir/indimail.cnf $extra_opt
 fi
 #
 # create qmail config
@@ -361,8 +361,7 @@ if [ $noindimail -eq 0 ] ; then
     mysqlSocket=/run/mysqld/mysqld.sock
   fi
   $svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-    --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket \
-    --default-domain=$default_domain $extra_opt
+    --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket $extra_opt
 fi
 
 echo "Creating @logdir@"
@@ -536,8 +535,8 @@ if [ $nofetchmail -eq 0 ] ; then
   fi
   eval $svctool --fetchmail --servicedir=$servicedir \
     --qbase=$qbase --qcount=$qcount --qstart=1 \
-    --cntrldir=control --default-domain=$default_domain \
-    --memory=$fetchmail_mem --fsync --syncdir --dkverify=$ver_opt \
+    --cntrldir=control --memory=$fetchmail_mem --fsync \
+	--syncdir --dkverify=$ver_opt \
     $append_opt $extra_opt
   touch $dir_prefix$servicedir/fetchmail/down
 fi
@@ -548,31 +547,31 @@ fi
 if [ $nocourierimap -eq 0 ] ; then
   $svctool --imap=143 --servicedir=$servicedir \
     --starttls --localip=0 --maxdaemons=40 --maxperip=25 --infifo=infifo \
-    --query-cache --default-domain=$default_domain --memory=$imap_pop3_mem $extra_opt
+    --query-cache --memory=$imap_pop3_mem $extra_opt
   $svctool --imap=993 --servicedir=$servicedir --localip=0 \
     --maxdaemons=40 --maxperip=25 --infifo=infifo \
-    --query-cache --default-domain=$default_domain --memory=$imapspop3_mem --ssl $extra_opt
+    --query-cache --memory=$imapspop3_mem --ssl $extra_opt
   $svctool --pop3=110 --servicedir=$servicedir --localip=0 \
     --starttls --maxdaemons=40 --maxperip=25 --infifo=infifo \
-    --query-cache --default-domain=$default_domain --memory=$imap_pop3_mem $extra_opt
+    --query-cache --memory=$imap_pop3_mem $extra_opt
   $svctool --pop3=995 --servicedir=$servicedir --localip=0 \
     --maxdaemons=40 --maxperip=25 --infifo=infifo \
-    --query-cache --default-domain=$default_domain --memory=$imapspop3_mem --ssl $extra_opt
+    --query-cache --memory=$imapspop3_mem --ssl $extra_opt
 fi
 if [ $noproxy -eq 0 ] ; then
   $svctool --imap=4143 --servicedir=$servicedir --localip=0 --infifo=infifo \
-    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --maxdaemons=40 --maxperip=25 --query-cache \
     --memory=$imap_pop3_mem --proxy=143 --starttls --tlsprog=$prefix/bin/sslerator \
     $extra_opt
   $svctool --imap=9143 --servicedir=$servicedir --localip=0 --infifo=infifo \
-    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --maxdaemons=40 --maxperip=25 --query-cache \
     --memory=$imapspop3_mem --proxy=143 --ssl $extra_opt
   $svctool --pop3=4110 --servicedir=$servicedir --localip=0 --infifo=infifo \
-    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --maxdaemons=40 --maxperip=25 --query-cache \
     --memory=$imap_pop3_mem --proxy=110 --starttls --tlsprog=$prefix/bin/sslerator \
     $extra_opt
   $svctool --pop3=9110 --servicedir=$servicedir --localip=0 --infifo=infifo \
-    --maxdaemons=40 --maxperip=25 --query-cache --default-domain=$default_domain \
+    --maxdaemons=40 --maxperip=25 --query-cache \
     --memory=$imapspop3_mem --proxy=110 --ssl $extra_opt
 fi
 
@@ -762,6 +761,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.105  2021-07-27 18:33:59+05:30  Cprogrammer
+# removed use of --default-domain to set local variable. Use global_vars for default domain
+#
 # Revision 2.104  2021-07-22 17:12:17+05:30  Cprogrammer
 # removed use if initsvc to add boot entry
 #
