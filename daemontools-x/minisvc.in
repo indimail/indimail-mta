@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.26 2021-07-25 23:05:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.27 2021-07-28 12:36:58+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.26 2021-07-25 23:05:42+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.27 2021-07-28 12:36:58+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -817,12 +817,12 @@ create_startup()
 				/bin/cp "$DESTDIR"$shareddir/boot/svscan.plist /Library/LaunchDaemons/org.indimail.svscan.plist
 			fi
 		elif [ -f /sbin/openrc-run -a -d /etc/init.d ] ; then
-			cmp -s "$DESTDIR"$shareddir/boot/svscan /etc/init.d/svscan >/dev/null 2>&1
+			cmp -s "$DESTDIR"$shareddir/boot/openrc /etc/init.d/svscan >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
 				if [ $silent -eq 0 ] ; then
 					echo "svscan startup enabled in rc /etc/init.d/svscan"
 				fi
-				/bin/cp "$DESTDIR"$shareddir/boot/svscan /etc/init.d/svscan
+				/bin/cp "$DESTDIR"$shareddir/boot/openrc /etc/init.d/svscan
 				/bin/chmod 755 /etc/init.d/svscan
 				service svscan enable
 			fi
@@ -2483,6 +2483,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.27  2021-07-28 12:36:58+05:30  Cprogrammer
+# renamed boot/svscan to boot/openrc for alpine
+#
 # Revision 1.26  2021-07-25 23:05:42+05:30  Cprogrammer
 # minor change in print-all-variables output
 #

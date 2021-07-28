@@ -58,6 +58,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 - 27/07/2021
 32. svctool: create init script for inlookup service to allow indimail to
     control inlookup service
+- 28/07/2021
+33. svctool: renamed rc script boot/svscan to boot/openrc for alpine
 
 * 
 Release 2.13 Start 14/02/2021
