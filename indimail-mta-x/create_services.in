@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.105 2021-07-27 18:33:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.106 2021-07-28 10:28:04+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -272,6 +272,35 @@ else
 fi
 $svctool --config=users $extra_opt
 #
+# create qmail config
+$svctool --config=qmail --postmaster=$indimaildir/alias/Maildir/ \
+  --default-domain=$default_domain $extra_opt
+# rebuild cdb
+for i in smtp qmtp qmqp
+do
+  for j in `/bin/ls $sysconfdir/tcp/tcp*.$i 2>/dev/null`
+  do
+    t1=`date +'%s' -r $j`
+    if [ -f $j.cdb ] ; then
+      t2=`date +'%s' -r $j.cdb`
+    else
+      t2=0
+    fi
+    if [ $t1 -gt $t2 ] ; then
+      echo "Creating CDB $j.cdb"
+      $dir_prefix"$prefix"/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
+        && chown indimail:indimail $j.cdb
+    fi
+  done
+done
+
+echo "Creating @logdir@"
+if [ ! -d $dir_prefix"@logdir@" ] ; then
+  $mkdir -p $dir_prefix"@logdir@"
+fi
+[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
+
+#
 # MySQL
 #
 if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
@@ -326,28 +355,6 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
     --mysqlPrefix=$mysql_base --databasedir=$indimaildir/mysqldb \
     --config=$sysconfdir/indimail.cnf $extra_opt
 fi
-#
-# create qmail config
-$svctool --config=qmail --postmaster=$indimaildir/alias/Maildir/ \
-  --default-domain=$default_domain $extra_opt
-# rebuild cdb
-for i in smtp qmtp qmqp
-do
-  for j in `/bin/ls $sysconfdir/tcp/tcp*.$i 2>/dev/null`
-  do
-    t1=`date +'%s' -r $j`
-    if [ -f $j.cdb ] ; then
-      t2=`date +'%s' -r $j.cdb`
-    else
-      t2=0
-    fi
-    if [ $t1 -gt $t2 ] ; then
-      echo "Creating CDB $j.cdb"
-      $dir_prefix"$prefix"/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
-        && chown indimail:indimail $j.cdb
-    fi
-  done
-done
 if [ $noindimail -eq 0 ] ; then
   if [ -n "$MYSQL_SOCKET" ] ; then
     mysqlSocket=$MYSQL_SOCKET
@@ -363,12 +370,6 @@ if [ $noindimail -eq 0 ] ; then
   $svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
     --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket $extra_opt
 fi
-
-echo "Creating @logdir@"
-if [ ! -d $dir_prefix"@logdir@" ] ; then
-  $mkdir -p $dir_prefix"@logdir@"
-fi
-[ $ID -eq 0 ] && $chown -R qmaill:nofiles @logdir@
 
 if [ $nodksignatures -eq 0 ] ; then
   if [ -x $dir_prefix$prefix/bin/dknewkey ] ; then
@@ -761,6 +762,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.106  2021-07-28 10:28:04+05:30  Cprogrammer
+# reordered commands
+#
 # Revision 2.105  2021-07-27 18:33:59+05:30  Cprogrammer
 # removed use of --default-domain to set local variable. Use global_vars for default domain
 #
