@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.69 2021-07-25 15:49:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.70 2021-07-28 18:34:57+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -198,18 +198,26 @@ stop()
 		/bin/cat /tmp/sv.err
 	fi
 	/bin/rm -f /tmp/sv.err
-	$ECHO -n "Stopping svscan: "
 	if [ -f /usr/bin/systemctl ] ; then
-		systemctl stop svscan && $succ || $fail
+		if [ $PPID -ne 1 ] ; then
+			$ECHO -n "Stopping svscan: "
+			/usr/bin/systemctl stop svscan && $succ || $fail
+			echo ""
+		fi
 	elif [ -f /sbin/initctl ] ; then
+		$ECHO -n "Stopping svscan: "
 		/sbin/initctl stop svscan && $succ || $fail
+		echo ""
 	elif [ -f /usr/sbin/daemon ] ; then
+		$ECHO -n "Stopping svscan: "
 		if [ -f $rundir/sv_daemon.pid ] ; then
 			kill `cat $rundir/sv_daemon.pid` && $succ || $fail
 		else
 			ps ax|grep svscan|egrep -v "grep" >/dev/null && $fail || $succ
 		fi
+		echo ""
 	elif [ -f /etc/inittab ] ; then
+		$ECHO -n "Stopping svscan: "
 		if [ "$SYSTEM" = "alpine" ] ; then
   			grep "svscan" /etc/inittab | grep respawn >/dev/null 2>&1
 		else
@@ -250,8 +258,8 @@ stop()
 			esac
 			RETVAL=$?
 		fi
+		echo ""
 	fi
-	echo ""
 	if [ -d /var/lock/subsys ] ; then
 		[ $ret -eq 0 ] && rm -f /var/lock/subsys/svscan
 	fi
@@ -307,9 +315,8 @@ start()
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
 		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && sv_all_up && return $ret || rm -f /var/lock/subsys/svscan
 	fi
-	$ECHO -n "Starting svscan: "
-	if [ -f $SERVICE/.svscan/log ] ; then
-		@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null
+	if [ -d $SERVICE/.svscan/log ] ; then
+		@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null 2>&1
 		status=$?
 	else
 		status=1
@@ -318,14 +325,20 @@ start()
 		sv_all_up
 	else
 		if [ -f /usr/bin/systemctl ] ; then
-			systemctl start svscan
+			if [ $PPID -ne 1 ] ; then
+				$ECHO -n "Starting svscan: "
+				systemctl start svscan
+			fi
 		elif [ -f /sbin/initctl ] ; then
+			$ECHO -n "Starting svscan: "
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
+			$ECHO -n "Starting svscan: "
 			daemon_pid=$rundir/sv_daemon.pid
 			env SETSID=1 /usr/sbin/daemon -cS -P $daemon_pid -R 5 \
 				-t "$SYSTEM"_svscan @libexecdir@/svscanboot && $succ || $fail
 		else
+			$ECHO -n "Starting svscan: "
 			if [ -c /dev/console -a -w /dev/console ] ; then
 				device=/dev/console
 			else
