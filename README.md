@@ -789,12 +789,9 @@ ucspi-tcp:
         100 /var/lib/dpkg/status
 ```
 
-# Docker / Podman Repository
+# Docker / Podman Containers
 
-The [docker repository](https://hub.docker.com/r/cprogrammer/indimail-mta) can be used to pull docker/podman images
-for indimail-mta (This is no longer valid. Docker no longer allows me to connect my github account unless I pay them. I cannot afford that. It will be better that you build the images yourself.
-
-For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md)
+Earlier I used to provide docker / podman container images on docker hub. But recently docker has removed the ability (without any warning) to connect with a github account unless you pay them a hefty sum every month. As a principle, I no longer support docker. You can build your own images instead.  Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images.
 
 # SUPPORT INFORMATION
 
