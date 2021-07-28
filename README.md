@@ -791,7 +791,7 @@ ucspi-tcp:
 
 # Docker / Podman Containers
 
-Earlier I used to provide docker / podman container images on docker hub. But recently docker has removed the ability (without any warning) to connect with a github account unless you pay them a hefty sum every month. As a principle, I no longer support docker. You can build your own images instead.  Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images.
+Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently docker has removed the ability (without any warning) to connect with a github account unless you pay them a hefty sum every month. As a principle, I no longer support docker. I have deleted all containers that were hosted there. You can build your own images instead.  Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
 
 # SUPPORT INFORMATION
 
