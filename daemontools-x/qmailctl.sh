@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.70 2021-07-28 18:34:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.70 2021-07-28 19:45:44+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -398,7 +398,12 @@ start()
 
 # Check that we're a privileged user
 [ `id -u` = 0 ] || exit 4
-init
+if [ "x$1" = "xstop" ] ; then
+	if [ $PPID -ne 1 ] ; then
+		SYSTEMCTL_SKIP_REDIRECT=1
+	fi
+fi
+init $1
 
 if [ -x /usr/bin/systemctl ] ; then
 	/usr/bin/systemctl is-enabled svscan > /dev/null 2>&1
