@@ -791,10 +791,8 @@ ucspi-tcp:
 
 # Docker / Podman Repository
 
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/cprogrammer/indimail-mta)
-
-The [docker repository](https://hub.docker.com/r/cprogrammer/indimail) can be used to pull docker/podman images
-for indimail.
+The [docker repository](https://hub.docker.com/r/cprogrammer/indimail-mta) can be used to pull docker/podman images
+for indimail-mta (This is no longer valid. Docker no longer allows me to connect my github account unless I pay them. I cannot afford that. It will be better that you build the images yourself.
 
 For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md)
 
