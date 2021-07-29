@@ -791,7 +791,11 @@ ucspi-tcp:
 
 # Docker / Podman Containers
 
-Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently docker has removed the ability (without any warning) to connect with a github account unless you pay them a hefty sum every month. As a principle, I no longer support docker. I have deleted all containers that were hosted there. You can build your own images instead.  Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
+The [docker repository](https://github.com/mbhangui?tab=packages) can be used to pull docker/podman images for indimail/indimail-mta
+
+For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md "Docker README ")
+
+Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently (Jul 25, 2021) docker, without any warning or communication, on the sly, has removed the ability to connect with a github account unless you pay them dollars every month - a questionable business practice. As a principle, I no longer support docker. I have deleted all container images that were hosted there. Instead of the Docker Container Registry, I now use the [Github Container Registry](https://github.blog/2020-09-01-introducing-github-container-registry/). You can also build your own images. Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
 
 # SUPPORT INFORMATION
 
