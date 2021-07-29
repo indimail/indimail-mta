@@ -94,9 +94,11 @@ Requires: /usr/bin /usr/sbin
 
 %if 0%{?suse_version} && 0%{?suse_version} < 1550
 Requires: insserv-compat
+Requires: /sbin/chkconfig
 %endif
 %if %{undefined suse_version}
 Requires: initscripts
+Requires: /sbin/chkconfig
 %endif
 
 %if %build_on_obs == 1
