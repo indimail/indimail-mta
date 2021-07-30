@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.4  2021-07-30 12:27:45+05:30  Cprogrammer
+ * added inotify for instcheck
+ *
  * Revision 1.3  2021-04-07 18:41:28+05:30  Cprogrammer
  * 1. added dotls
  * 2. set owner, group to root as default
@@ -92,6 +95,7 @@ hier(inst_dir, fatal)
 	c(auto_tools_home, "bin",      "tai64nunix", 0, 0, 0755);
 	c(auto_tools_home, "bin",      "teepipe", 0, 0, 0755);
 #ifdef LINUX
+	c(auto_tools_home, "bin",      "inotify", 0, 0, 0755);
 	c(auto_tools_home, "sbin",     "docker-entrypoint", 0, 0, 0755);
 #endif
 	c(auto_tools_home, "sbin",     "fghack", 0, 0, 0755);
@@ -101,6 +105,9 @@ hier(inst_dir, fatal)
 	c(auto_tools_home, "sbin",     "readproctitle", 0, 0, 0755);
 	c(auto_tools_home, "sbin",     "supervise", 0, 0, 0755);
 	c(auto_tools_home, "sbin",     "svscan", 0, 0, 0751);
+#ifdef LINUX
+	c(mandir_base,     "man/man1", "inotify.1", 0, 0, 0644);
+#endif
 	c(mandir_base,     "man/man1", "multipipe.1", 0, 0, 0644);
 	c(mandir_base,     "man/man1", "qfilelog.1", 0, 0, 0644);
 	c(mandir_base,     "man/man1", "qlogselect.1", 0, 0, 0644);
