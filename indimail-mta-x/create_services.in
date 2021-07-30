@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.106 2021-07-28 10:28:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.107 2021-07-30 12:21:54+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -316,26 +316,30 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
   elif [ -f /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist ] ; then
     launchctl unload -w /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist 2>/dev/null
     launchctl remove /Library/LaunchDaemons/com.oracle.oss.mysql.mysqld.plist
-  elif [ -f /lib/systemd/system/mysqld.service ] ; then
-    systemctl stop mysqld.service
-    systemctl disable mysqld.service
-  elif [ -f /lib/systemd/system/mariadb.service ] ; then
-    systemctl stop mariadb.service
-    systemctl disable mariadb.service
+  elif [ -x /bin/systemctl -a -f /lib/systemd/system/mysqld.service ] ; then
+    /bin/systemctl stop mysqld.service
+    /bin/systemctl disable mysqld.service
+  elif [ -x /bin/systemctl -a -f /lib/systemd/system/mariadb.service ] ; then
+    /bin/systemctl stop mariadb.service
+    /bin/systemctl disable mariadb.service
   elif [ -f /etc/init.d/mysqld ] ; then
     /etc/init.d/mysqld stop
     if [ -x /sbin/chkconfig ] ; then
       chkconfig mysqld off
     elif [ -x /sbin/update-rc.d ] ; then
       update-rc.d -f mysqld disable
+	elif [ -f /sbin/rc-update ] ; then
+		/sbin/rc-update del mysqld
     #else bhagwan bharose
     fi
-  elif [ -f /etc/init.d/mysqld ] ; then
+  elif [ -f /etc/init.d/mysql ] ; then
     /etc/init.d/mysql stop
     if [ -x /sbin/chkconfig ] ; then
       chkconfig mysql off
     elif [ -x /sbin/update-rc.d ] ; then
       update-rc.d -f mysql disable
+	elif [ -f /sbin/rc-update ] ; then
+		/sbin/rc-update del mysql
     #else bhagwan bharose
     fi
   else
@@ -762,6 +766,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.107  2021-07-30 12:21:54+05:30  Cprogrammer
+# use rc-update to add delete services with openrc
+#
 # Revision 2.106  2021-07-28 10:28:04+05:30  Cprogrammer
 # reordered commands
 #
