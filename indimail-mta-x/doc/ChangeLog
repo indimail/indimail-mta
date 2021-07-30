@@ -60,6 +60,9 @@ o use global variables directory /etc/indimail/control/global_vars for
     control inlookup service
 - 28/07/2021
 33. svctool: renamed rc script boot/svscan to boot/openrc for alpine
+- 30/07/2021
+34. create_services: use rc-update to add delete services with openrc
+35. svctool: use stored procedure to remove users with null passwords
 
 * 
 Release 2.13 Start 14/02/2021
