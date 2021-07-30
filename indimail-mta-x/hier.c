@@ -1,5 +1,8 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.290  2021-07-29 22:16:00+05:30  Cprogrammer
+ * removed inotify
+ *
  * Revision 1.289  2021-07-10 00:56:48+05:30  Cprogrammer
  * removed idedit
  *
@@ -995,9 +998,6 @@ hier(inst_dir, fatal, dev_package)
 	c(auto_prefix, "bin", "qnotify", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "rrt", auto_uido, 0, moder_x);
 	c(auto_prefix, "bin", "qarf", auto_uido, 0, moder_x);
-#ifdef LINUX
-	c(auto_prefix, "bin", "inotify", auto_uido, 0, moder_x);
-#endif
 #if defined(HASDKIM) || defined(DOMAIN_KEYS)
 	c(auto_prefix, "bin", "dk-filter", auto_uido, 0, moder_x);
 #endif
@@ -1312,9 +1312,6 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man1", "qnotify.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "rrt.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "qarf.1", uidr, gidr, moder_f);
-#ifdef LINUX
-	c(mandir_base,     "man/man1", "inotify.1", uidr, gidr, moder_f);
-#endif
 #ifdef HAVESRS
 	c(mandir_base,     "man/man1", "srsfilter.1", uidr, gidr, moder_f);
 #endif
@@ -1520,7 +1517,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.289 2021-07-10 00:56:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.290 2021-07-29 22:16:00+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
