@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.596 2021-07-28 12:38:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.597 2021-07-30 12:25:55+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.596 2021-07-28 12:38:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.597 2021-07-30 12:25:55+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5190,11 +5190,19 @@ create_mysql_rootuser()
 		fi
 	fi
 	mecho "use mysql;"
-	if [ $mysql_community_server -eq 1 ] ; then
-		mecho "DELETE from user where user='';"
-	else
-		mecho "DELETE from user where user='' or password='';"
-	fi
+	mecho "drop procedure if exists remove_unsafe;"
+	mecho "delimiter ';;'"
+	mecho "create procedure remove_unsafe()"
+	mecho "begin"
+    mecho "  if exists (select * from information_schema.columns where table_name = 'user' and column_name = 'password') then"
+	mecho "    DELETE FROM user where user='' or password='';"
+	mecho "  ELSE"
+	mecho "    DELETE FROM user where user='';"
+    mecho "  end if;"
+	mecho "end;;"
+	mecho "delimiter \';\'"
+	mecho "call remove_unsafe();"
+	mecho "drop procedure if exists remove_unsafe;"
 	mecho "DROP database if exists test;"
 	mecho "DELETE from db where db like 'test%';"
 }
@@ -6666,7 +6674,7 @@ if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 fi
 indexmaker=$(which indexmaker)
 if [ -z "$indexmaker" -o ! -f /usr/bin/mrtg ] ; then
-	echo "mrtg or indexmaker missing: Have you installed mrgt?" 1>2
+	echo "mrtg or indexmaker missing: Have you installed mrtg?" 1>&2
 	return 1
 fi
 /bin/mkdir -p $htmldir
@@ -6998,9 +7006,9 @@ enable_service()
 		#
 		# upstart/systemd
 		#
-		if [ -f /lib/systemd/system/$i.service -a -f /bin/systemctl ] ; then
+		if [ -x /bin/systemctl -a -f /lib/systemd/system/$i.service -a -f /bin/systemctl ] ; then
 			/bin/systemctl enable "$i".service
-		elif [ -f /usr/lib/systemd/system/$i.service -a -f /bin/systemctl ] ; then
+		elif [ -x /bin/systemctl -a -f /usr/lib/systemd/system/$i.service -a -f /bin/systemctl ] ; then
 			/bin/systemctl enable "$i".service
 		elif [ -f /Library/LaunchDaemons/org.indimail.svscan.plist ] ; then
 			launchctl load -w /Library/LaunchDaemons/org.indimail.svscan.plist
@@ -7038,10 +7046,10 @@ disable_service()
 		#
 		# upstart/systemd
 		#
-		if [ -d /lib/systemd/system -a -f /bin/systemctl ] ; then
+		if [ -x /bin/systemctl -a -d /lib/systemd/system -a -f /bin/systemctl ] ; then
 			/bin/systemctl stop "$i".service
 			/bin/systemctl disable "$i".service
-		elif [ -d /usr/lib/systemd/system -a -f /bin/systemctl ] ; then
+		elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system -a -f /bin/systemctl ] ; then
 			/bin/systemctl stop "$i".service
 			/bin/systemctl disable "$i".service
 		elif [ -f /Library/LaunchDaemons/org.indimail.svscan.plist ] ; then
@@ -7233,7 +7241,7 @@ linuxuseradd()
 		-M)
 		if [ -f /etc/debian_version -o -n "$pw"] ; then
 			opt2=""
-		elif [ -f /bin/busybox ] ; then
+		elif [ -f /etc/alpine-release ] ; then
 			opt2="-H"
 		else
 			opt2="-M"
@@ -7261,7 +7269,7 @@ linuxuseradd()
 		password=$2
 		;;
 		-l)
-		if [ ! -f /bin/busybox ] ; then
+		if [ ! -f /etc/alpine-release ] ; then
 			nolastlog=1
 		fi
 		;;
@@ -7276,7 +7284,7 @@ linuxuseradd()
 	if [ -n "$shell" ] ; then
 		args="$args -s $shell"
 	fi
-	if [ -x /bin/busybox ] ; then
+	if [ -f /etc/alpine-release ] ; then
 		if [ -n "$group" ] ; then
 			args="$args -G $group"
 		fi
@@ -7350,7 +7358,7 @@ linuxgroupadd()
 	fi
 	getent group $1 >/dev/null && echo "group $1 exists" 1>&2 && return 0
 	echo "creating group $1"
-	if [ -x /bin/busybox ] ; then
+	if [ -f /etc/alpine-release ] ; then
 		echo /usr/sbin/addgroup -S $args $1
 		/usr/sbin/addgroup -S $args $1
 	else
@@ -7834,15 +7842,15 @@ remove_startup()
 
 add_alternatives()
 {
-    move="/usr/lib/sendmail"
-    if [ -L /usr/sbin ] ; then
-        link=$(readlink /usr/sbin)
-        if [ ! " $link" = " bin" -a ! " $link" = " /usr/bin" ] ; then
-            move="$move /usr/sbin/sendmail"
-        fi
-    else
-        move="$move /usr/sbin/sendmail"
-    fi
+	move="/usr/lib/sendmail"
+	if [ -L /usr/sbin ] ; then
+		link=$(readlink /usr/sbin)
+		if [ ! " $link" = " bin" -a ! " $link" = " /usr/bin" ] ; then
+			move="$move /usr/sbin/sendmail"
+		fi
+	else
+		move="$move /usr/sbin/sendmail"
+	fi
 	if [ -x /usr/sbin/alternatives -o -x /usr/sbin/update-alternatives -o -x /usr/bin/update-alternatives ] ; then
 		for i in $move; do
 			if [ -f $i -a ! -L $i ]; then
@@ -7924,10 +7932,13 @@ add_alternatives()
 				/bin/mv $i $i.old
 				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
 			elif [ -L $i ];then
-				echo /bin/mv $i $i.old
-				echo /bin/ln -s $QmailBinPrefix/bin/sendmail $i
-				/bin/mv $i $i.old
-				/bin/ln -s $QmailBinPrefix/bin/sendmail $i
+				link=$(readlink $i)
+				if [ x"$link" != x"$QmailBinPrefix/bin/sendmail" ] ; then
+					echo /bin/mv $i $i.old
+					echo /bin/ln -s $QmailBinPrefix/bin/sendmail $i
+					/bin/mv $i $i.old
+					/bin/ln -s $QmailBinPrefix/bin/sendmail $i
+				fi
 			elif [ ! -f $i ];then
 				echo "! $i is missing. Fixing..."
 				echo /bin/ln -s $QmailBinPrefix/bin/sendmail $i
