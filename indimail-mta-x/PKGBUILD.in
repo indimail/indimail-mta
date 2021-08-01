@@ -330,7 +330,7 @@ shutdown_service() {
     echo "Running Custom Upgrade Script for pretrans"
     /bin/sh ${_libexecdir}/qupgrade.sh pretrans noargs ${pkgver} $*
   fi
-  ) > /var/log/${pkgname}-setup.log 2>&1
+  ) >> /var/log/${pkgname}-setup.log 2>&1
 }
 
 # indimail-mta
@@ -403,13 +403,13 @@ post_install() {
   echo "15. Configure tcprules database for SMTP, QMTP, QMQP"
   echo ""
 
+  (
   if [ ! -d ${_logdir} ] ; then
     echo "Creating ${_logdir}"
     mkdir -p ${_logdir}
   fi
   chown -R qmaill:nofiles ${_logdir}
 
-  (
   ${_prefix}/sbin/svctool --config=qmail --postmaster=${_qmaildir}/alias/Maildir/
 
   if [ ${_nodksignatures} -eq 0 ] ; then
@@ -740,6 +740,9 @@ post_upgrade() {
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
     qscanq resolvconf udplogger.3000
   do
+    if [ ! -d ${_servicedir/$i ] ; then
+      continue
+    fi
     ${_prefix}/bin/svok ${_servicedir}/$i
     if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
       rm -f ${rundir}/$i/.down
@@ -762,7 +765,7 @@ pre_remove() {
   for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
     qscanq qmail-smtpd.465 qmail-smtpd.587 \
     qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
-    qmail-daned.1998 resolvconf udplogger.3000
+    qmail-daned.1998 resolvconf udplogger.3000 slowq-send
   do
     if [ -d ${_servicedir}/$i -o -L ${_servicedir}/$i ] ; then
       touch ${_servicedir}/$i/down
