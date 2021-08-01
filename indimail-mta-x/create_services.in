@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.107 2021-07-30 12:21:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.108 2021-08-01 09:55:10+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -696,12 +696,7 @@ $svctool --fifologger=$logfifo --servicedir=$servicedir $extra_opt
 svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=$servicedir
 
 # mrtg service
-if [ ! -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
-  if [ -f $sysconfdir/indimail.mrtg.cfg ] ; then
-    cp $sysconfdir/indimail.mrtg.cfg "$dir_prefix"$sysconfdir/indimail.mrtg.cfg
-  fi
-fi
-if [ -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
+if [ -x /usr/bin/mrtg -a -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
   $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir $extra_opt
 fi
 
@@ -766,6 +761,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.108  2021-08-01 09:55:10+05:30  Cprogrammer
+# install mrtg service only if mrtg binary is present
+#
 # Revision 2.107  2021-07-30 12:21:54+05:30  Cprogrammer
 # use rc-update to add delete services with openrc
 #

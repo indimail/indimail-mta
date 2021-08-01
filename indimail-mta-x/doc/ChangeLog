@@ -63,6 +63,9 @@ o use global variables directory /etc/indimail/control/global_vars for
 - 30/07/2021
 34. create_services: use rc-update to add delete services with openrc
 35. svctool: use stored procedure to remove users with null passwords
+- 01/08/2021
+36. svctool: use HOSTNAME variable if set for mrtg service
+37. qupgrade.sh: added case for arch linux
 
 * 
 Release 2.13 Start 14/02/2021
