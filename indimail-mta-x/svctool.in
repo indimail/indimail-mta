@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.598 2021-08-01 09:56:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.599 2021-08-01 13:22:06+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.598 2021-08-01 09:56:55+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.599 2021-08-01 13:22:06+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9989,16 +9989,16 @@ case $option in
 	9) # fetchmail service
 	# Check that we're a privileged user
 	[ `id -u` = 0 ] || exit 4
-	if [ " $qbase" = " " ] ; then
-		echo "Queue Directory not specified" 1>&2
-		usage 1
-	elif [ " $qcount" = " " ] ; then
-		echo "Queue Count not specified" 1>&2
-		usage 1
-	elif [ " $qstart" = " " ] ; then
-		echo "Start Queue Number not specified" 1>&2
-		usage 1
-	elif [ " $servicedir" = " " ] ; then
+	if [ -z "$qbase" ] ; then
+		qbase=$indimaildir/queue
+	fi
+	if [ -z "$qcount" ] ; then
+		qcount=5
+	fi
+	if [ -z "$qstart" ] ; then
+		qstart=1
+	fi
+	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	elif [ $qcount -lt 1 ] ; then
