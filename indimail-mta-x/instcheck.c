@@ -1,5 +1,8 @@
 /*
  * $Log: instcheck.c,v $
+ * Revision 1.34  2021-08-01 18:44:30+05:30  Cprogrammer
+ * do chmod after chown to prevent losing setuid bit
+ *
  * Revision 1.33  2021-06-27 10:36:45+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -192,8 +195,12 @@ perm(char *prefix1, char *prefix2, char *prefix3, char *file, int type, int uid,
 		err = 1;
 		strerr_warn7(WARNING, prefix1, slashd, prefix2, prefix3, tfile, " has wrong group (will fix)", 0);
 	}
-	if (err && chown(tfile, uid, gid) == -1)
-		strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
+	if (err) { /*- If we do chown, we could lose the setuid bit. So we do a chmod too */
+		if (chown(tfile, uid, gid) == -1)
+			strerr_die4sys(111, FATAL, "unable to chown ", tfile, ": ");
+		if (chmod(tfile, mode) == -1)
+			strerr_die4sys(111, FATAL, "unable to chmod ", tfile, ": ");
+	}
 	err = 0;
 	if (mode != -1 && (st.st_mode & 07777) != mode) {
 		err = 1;
@@ -296,7 +303,7 @@ main(int argc, char **argv)
 void
 getversion_instcheck_c()
 {
-	static char    *x = "$Id: instcheck.c,v 1.33 2021-06-27 10:36:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: instcheck.c,v 1.34 2021-08-01 18:44:30+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
