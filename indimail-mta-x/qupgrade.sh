@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: qupgrade.sh,v $
+# Revision 1.11  2021-08-01 09:56:31+05:30  Cprogrammer
+# added case for arch linux
+#
 # Revision 1.10  2020-07-30 11:30:07+05:30  Cprogrammer
 # reverted interpreter back to /bin/sh
 #
@@ -37,7 +40,7 @@
 # generic upgrade script for indimail
 #
 #
-# $Id: qupgrade.sh,v 1.10 2020-07-30 11:30:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.11 2021-08-01 09:56:31+05:30 Cprogrammer Exp mbhangui $
 
 do_upgrade()
 {
@@ -52,8 +55,13 @@ do_pre()
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
 		if [ -f /bin/rpm -o -f /usr/bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
-		else
+		elif [ -f /usr/bin/dpkg ] ; then
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
+		elif [ -f /usr/sbin/pacman ] ; then
+			PKG_VER=`pacman -Qo /etc/indimail/indimail-mta-release|awk '{print $6}'`
+		else
+			echo "Unknown binary package" 1>&2
+			return
 		fi
 		echo "RPM/DEB Version $PKG_VER"
 		. /etc/indimail/indimail-mta-release
@@ -74,8 +82,13 @@ do_post()
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
 		if [ -f /bin/rpm -o -f /usr/bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
-		else
+		elif [ -f /usr/bin/dpkg ] ; then
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
+		elif [ -f /usr/sbin/pacman ] ; then
+			PKG_VER=`pacman -Qo /etc/indimail/indimail-mta-release|awk '{print $6}'`
+		else
+			echo "Unknown binary package" 1>&2
+			return
 		fi
 		echo "RPM/DEB Version  $PKG_VER"
 		. /etc/indimail/indimail-mta-release
@@ -97,8 +110,13 @@ do_preun()
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
 		if [ -f /bin/rpm -o -f /usr/bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
-		else
+		elif [ -f /usr/bin/dpkg ] ; then
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
+		elif [ -f /usr/sbin/pacman ] ; then
+			PKG_VER=`pacman -Qo /etc/indimail/indimail-mta-release|awk '{print $6}'`
+		else
+			echo "Unknown binary package" 1>&2
+			return
 		fi
 		echo "RPM/DEB Version  $PKG_VER"
 		echo $PKG_VER > /tmp/indimail-mta-pkg.old
@@ -128,8 +146,13 @@ do_postun()
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
 		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
-		else
+		elif [ -f /usr/bin/dpkg ] ; then
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
+		elif [ -f /usr/sbin/pacman ] ; then
+			PKG_VER=`pacman -Qo /etc/indimail/indimail-mta-release|awk '{print $6}'`
+		else
+			echo "Unknown binary package" 1>&2
+			return
 		fi
 		echo "RPM/DEB Version  $PKG_VER"
 		. /etc/indimail/indimail-mta-release
@@ -153,8 +176,13 @@ do_prettrans()
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
 		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
-		else
+		elif [ -f /usr/bin/dpkg ] ; then
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
+		elif [ -f /usr/sbin/pacman ] ; then
+			PKG_VER=`pacman -Qo /etc/indimail/indimail-mta-release|awk '{print $6}'`
+		else
+			echo "Unknown binary package" 1>&2
+			return
 		fi
 		echo "RPM/DEB Version  $PKG_VER"
 		. /etc/indimail/indimail-mta-release
@@ -175,8 +203,13 @@ do_posttrans()
 	if [ -f /etc/indimail/indimail-mta-release ] ; then
 		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
 			PKG_VER=`rpm -qf /etc/indimail/indimail-mta-release`
-		else
+		elif [ -f /usr/bin/dpkg ] ; then
 			PKG_VER=`dpkg -S /etc/indimail/indimail-mta-release`
+		elif [ -f /usr/sbin/pacman ] ; then
+			PKG_VER=`pacman -Qo /etc/indimail/indimail-mta-release|awk '{print $6}'`
+		else
+			echo "Unknown binary package" 1>&2
+			return
 		fi
 		echo "RPM/DEB Version old [$OLD_PKG_VER] new [$PKG_VER]"
 		. /etc/indimail/indimail-mta-release
