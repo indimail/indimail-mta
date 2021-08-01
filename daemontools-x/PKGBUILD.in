@@ -109,9 +109,11 @@ stop_service()
 }
 
 pre_install() {
+  (
   stop_service
   /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
   /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles -d ${_qmaildir} -s /bin/nologin qmaill || true
+  ) >> /var/log/${pkgname}-setup.log 2>&1
 }
 
 post_install() {
@@ -132,7 +134,7 @@ post_install() {
   if [ -x /bin/systemctl ] ; then
     /bin/systemctl enable svscan
   fi
-  ) >> /var/log/${pkgname}-install.log 2>&1
+  ) >> /var/log/${pkgname}-setup.log 2>&1
 }
 
 pre_upgrade() {
