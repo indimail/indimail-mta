@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.7  2021-08-01 11:54:08+05:30  Cprogrammer
+# skip service if dir doesn't exist
+#
 # Revision 1.6  2021-07-24 17:54:36+05:30  Cprogrammer
 # added slowq service
 #
@@ -20,7 +23,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.6 2021-07-24 17:54:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.7 2021-08-01 11:54:08+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -319,6 +322,9 @@ shutdown_service() {
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
     qscanq resolvconf udplogger.3000
   do
+    if [ ! -d ${_servicedir}/$i ] ; then
+      continue
+    fi
     ${_prefix}/bin/svstat ${_servicedir}/$i >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
       mkdir -p ${rundir}/$i
@@ -512,18 +518,18 @@ post_install() {
 
   # slowq service
   eval ${_prefix}/sbin/svctool --slowq --servicedir=${_servicedir} --qbase=${_qbase} \
-	--cntrldir=control --persistdb --starttls --fsync --syncdir \
+    --cntrldir=control --persistdb --starttls --fsync --syncdir \
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
-	--dksign=${sign_opt} --private_key=${_sysconfdir}/control/domainkeys/%/${dkimkeyfn} \
-	--remote-authsmtp=plain --localfilter --remotefilter \
-	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+    --dksign=${sign_opt} --private_key=${_sysconfdir}/control/domainkeys/%/${dkimkeyfn} \
+    --remote-authsmtp=plain --localfilter --remotefilter \
+    --deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
 
   # ODMR service
-  ${_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${_servicedir} \
+  eval ${_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${_servicedir} \
     --infifo="" --query-cache --password-cache --skipsend --memory=${smtp_soft_mem}
 
   # Greylist daemon
-  ${_prefix}/sbin/svctool --greylist=1999 --servicedir=${_servicedir} --min-resend-min=2 \
+  eval ${_prefix}/sbin/svctool --greylist=1999 --servicedir=${_servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65535 --save-interval=5 --whitelist=greylist.white
   if [ ${_notlsarr} -eq 0 ] ; then
@@ -740,7 +746,7 @@ post_upgrade() {
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
     qscanq resolvconf udplogger.3000
   do
-    if [ ! -d ${_servicedir/$i ] ; then
+    if [ ! -d ${_servicedir}/$i ] ; then
       continue
     fi
     ${_prefix}/bin/svok ${_servicedir}/$i

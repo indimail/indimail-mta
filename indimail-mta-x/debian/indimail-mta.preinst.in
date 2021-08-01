@@ -47,6 +47,9 @@ case "$1" in
 		qmail-daned.1998 qscanq slowq-send \
 		resolvconf udplogger.3000 qmail-logfifo
 	do
+		if [ ! -d ${servicedir}/$i ] ; then
+			continue
+		fi
 		${prefix}/bin/svstat ${servicedir}/$i
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/$i

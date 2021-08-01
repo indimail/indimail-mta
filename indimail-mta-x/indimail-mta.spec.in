@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.337 2021-07-24 10:32:34+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.338 2021-08-01 11:53:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -406,7 +406,7 @@ echo ../resolv.conf 1>&3
   for i in deliver.25 greylist.1999 \
     qmqpd.628 qmtpd.209 qscanq smtpd.25 \
     smtpd.366 smtpd.465 smtpd.587 \
-	qmail-daned.1998 udplogger.3000
+    qmail-daned.1998 udplogger.3000
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     touch %{buildroot}%{logdir}/$i/current
@@ -1068,6 +1068,9 @@ for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
   slowq-send qscanq udplogger.3000 qmail-logfifo
 do
+  if [ ! -d %{servicedir}/$i ] ; then
+    continue
+  fi
   %{_prefix}/bin/svstat %{servicedir}/$i >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
     %{__mkdir_p} ${rundir}/$i
@@ -1212,6 +1215,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
     slowq-send qscanq udplogger.3000
   do
+    if [ ! -d %{servicedir}/$i ] ; then
+      continue
+    fi
     %{_prefix}/bin/svok %{servicedir}/$i
     if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
       %{__rm} -f ${rundir}/$i/.down
@@ -1488,9 +1494,10 @@ for i in clamd greylist.1999 qmail-qmqpd.628 \
   qmail-smtpd.465 qmail-smtpd.587 qscanq udplogger.3000 \
   qmail-daned.1998 qmail-send.25 slowq-send qmail-logfifo
 do
-  if [ -d %{servicedir}/$i ] ; then
-    svc_list="$svc_list %{servicedir}/$i"
+  if [ ! -d %{servicedir}/$i ] ; then
+    continue
   fi
+  svc_list="$svc_list %{servicedir}/$i"
   # save variables
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force

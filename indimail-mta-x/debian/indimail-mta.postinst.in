@@ -177,6 +177,9 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 		slowq-send qscanq resolvconf udplogger.3000 \
 		qmail-logfifo
 	do
+		if [ ! -d ${servicedir}/$i ] ; then
+			continue
+		fi
 		${prefix}/bin/svok ${servicedir}/$i 2>&1
 		if [ $? -eq 0 -a -f ${rundir}/$i/.down ] ; then
 			${rm} -f ${rundir}/$i/.down
