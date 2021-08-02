@@ -240,12 +240,15 @@ if [ " $1" = " purge" ] ; then
 		${rmdir} --ignore-fail-on-non-empty ${servicedir} || true
 	fi
 	echo "removing logs"
-	if [ -h ${logdir} ] ; then
-		log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`
-	else
-		log_dir=${logdir}
-	fi
-	[ "$log_dir" != "/" ] && ${rm} -fr $log_dir
+	for i in deliver.25 smtpd.25 smtpd.366 smtpd.465 \
+		smtpd.587 qmtpd.209 qmqpd.628 greylist.1999 \
+		daned.1998 resolvconf udplogger.3000 slowq-send \
+		logfifo
+	do
+		if [ -d ${logdir}/$i ] ; then
+			rm -fr ${logdir}/$i
+		fi
+	done
 	) >> /var/log/indimail-mta-setup.log 2>&1
 fi
 if [ ! "${prefix}" = "/usr" ] ; then

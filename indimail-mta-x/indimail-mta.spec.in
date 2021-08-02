@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.338 2021-08-01 11:53:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.339 2021-08-02 09:42:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -403,10 +403,10 @@ echo ../resolv.conf 1>&3
 
 %if %{undefined suse_version} && %{undefined sles_version}
   %{__mkdir_p} %{buildroot}%{logdir}
-  for i in deliver.25 greylist.1999 \
-    qmqpd.628 qmtpd.209 qscanq smtpd.25 \
-    smtpd.366 smtpd.465 smtpd.587 \
-    qmail-daned.1998 udplogger.3000
+  for i in deliver.25 greylist.1999 qmqpd.628 qmtpd.209 \
+    qscanq smtpd.25 smtpd.366 smtpd.465 smtpd.587 \
+    daned.1998 resolvconf udplogger.3000 slowq-send \
+    logfifo
   do
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     touch %{buildroot}%{logdir}/$i/current
@@ -1688,14 +1688,16 @@ if [ -d %{_sysconfdir}/cron.d ] ; then
   echo "removing cron entries"
   %{__rm} -f %{_sysconfdir}/cron.d/cronlist.q
 fi
-
 echo "removing logs"
-if [ -h %{logdir} ] ; then
-  log_dir=`/bin/ls -ld %{logdir} | /usr/bin/awk '{print $10}'`
-else
-  log_dir=%{logdir}
-fi
-[ "$log_dir" != "/" ] && %{__rm} -fr $log_dir
+for i in deliver.25 greylist.1999 qmqpd.628 qmtpd.209 \
+  qscanq smtpd.25 smtpd.366 smtpd.465 smtpd.587 \
+  daned.1998 resolvconf udplogger.3000 slowq-send \
+  logfifo
+do
+  if [ -d ${logdir}/$i ] ; then
+    %{__rm} -fr %{logdir}/$i
+  fi
+done
 
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
   echo "recreating ld.so cache"
