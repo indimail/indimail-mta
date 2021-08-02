@@ -70,6 +70,13 @@ o use global variables directory /etc/indimail/control/global_vars for
     exist
 39. svctool: allow default queue parameters for fetchmail service
 40. instcheck.c: do chmod after chown to prevent losing setuid bit
+- 02/08/2021
+41. installer.c: added check (-c) and fix (-f) options to check, fix
+    permissions after installation
+42. post removal scripts: remove indimail specfic logs instead of the entire
+    log directory
+43. PKGBUILD: fix permissions of installed files in destdir
+44. Makefile: create directories using installer instead of Makefile
 
 * 
 Release 2.13 Start 14/02/2021

@@ -112,6 +112,12 @@ o svscan: set SERVICEDIR, PWD environment variable
 39. daemontools.spec.in: added back /sbin/chkconfig in Requires
 - 30/07/2021
 40. hier.c: added inotify.c
+- 02/08/2021
+41. installer.c: added check (-c) and fix (-f) options to check, fix
+    permissions after installation
+42. Makefile: create directories using installer instead of Makefile
+43. PKGBUILD: fix permissions of installed files in destdir
+44. debian/postrm: remove log directory on package removal
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
