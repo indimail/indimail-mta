@@ -677,11 +677,6 @@ conf-email ucspi-tcp.changes
 	cat $@.in | $(edit) > PKGBUILD
 
 install: it installer DIRS BIN SHARED PLUGINS MAN
-	mkdir -p $(DESTDIR)$(prefix)
-	mkdir -p $(DESTDIR)$(prefix)/lib
-	mkdir -p $(DESTDIR)$(shareddir)
-	mkdir -p $(DESTDIR)$(libexecdir)
-	mkdir -p $(DESTDIR)$(mandir)
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(shareddir)             < SHARED
