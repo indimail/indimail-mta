@@ -80,30 +80,29 @@ my_puts(char *s, int len)
 int
 main(int argc, char **argv)
 {
-	stralloc        user = { 0 };
-	int             match, ignore_newline = 0;
+	stralloc        line = { 0 };
+	int             match;
 	char           *ptr;
-	char            tmp[1+8+8+8+1];
 	tai            *t;
 
+	if (!stralloc_ready(&line, 26))
+		my_error("tai64n2tai: mem", 0, MEM_ERR);
 	for (;;) {
-		if (getln(&ssin, &user, &match, '\n') == -1)
+		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("tai64n2tai: read", 0, READ_ERR);
-		if (!match && user.len == 0)
+		if (!match && line.len == 0)
 			break;
-		if (match && ignore_newline)
-			user.len--; /*- remove new line */
-		*ptr = 0;
-		t = tai64n_decode(&user, &ptr);
+		if (!stralloc_0(&line))
+			my_error("tai64n2tai: mem", 0, MEM_ERR);
+		ptr = 0;
+		t = tai64n_decode(&line, &ptr);
 		if (ptr) {
 		    /*- tai is 20 bytes, tai64n is 25 */
-			if (!stralloc_0(&user))
-				my_error("tai64n2tai: mem", 0, MEM_ERR);
-			tai_encode(t, tmp);
-			my_puts(tmp, 0);
+			tai_encode(t, line.s);
+			my_puts(line.s, 0);
 			my_puts(ptr, 0);
 		} else
-			my_puts(user.s, user.len);
+			my_puts(line.s, line.len);
 	}
 	if (substdio_flush(&ssout) == -1)
 		_exit(1);
@@ -113,7 +112,7 @@ main(int argc, char **argv)
 void
 getversion_tai64n2tai_c()
 {
-	static char    *x = "$Id: tai64n2tai.c,v 1.1 2016-01-02 19:21:19+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tai64n2tai.c,v 1.2 2021-08-03 00:32:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
