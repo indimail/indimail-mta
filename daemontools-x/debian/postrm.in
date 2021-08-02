@@ -85,6 +85,13 @@ if [ " $1" = " purge" ] ; then
 			/etc/init.d/nscd start
 		fi
 	fi
+	echo "removing logs"
+	if [ -h ${logdir} ] ; then
+		log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`
+	else
+		log_dir=${logdir}
+	fi
+	[ "$log_dir" != "/" ] && $rm -fr $log_dir
 	) >> /var/log/daemontools-setup.log 2>&1
 fi
 exit 0
