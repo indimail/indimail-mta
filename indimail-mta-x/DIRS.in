@@ -1,6 +1,15 @@
 # installer input files for Universal directories
 #
-d:::0755:::
+d::::::
+d::::/var::
+d::::/var/log::
+d::::@prefix@::
+d::::@prefix@/bin::
+d::::@prefix@/sbin::
+d::::@prefix@/lib::
+d::::@prefix@/libexec::
+d::::@prefix@/share::
+d::::/etc::
 d:root:qmail:0555:@indimaildir@::
 d:alias:qmail:02775:@indimaildir@/alias::
 d:indimail:qmail:02775:@indimaildir@/autoturn::
@@ -19,12 +28,8 @@ d::::@mandir@/man7::
 d::::@mandir@/man8::
 d:::0555:@libexecdir@::
 d:::0555:@libexecdir@/qfilters::
-d:::0755:@prefix@::
-d::::@prefix@/lib::
 d:::0755:@prefix@/lib/indimail::
 d:::0755:@prefix@/lib/indimail/plugins::
-d:::0555:@prefix@/bin::
-d:::0555:@prefix@/sbin::
 d:root:qmail:02755:@qsysconfdir@::
 d:indimail:qmail:02775:@qsysconfdir@/control::
 d:indimail:qmail:02775:@qsysconfdir@/control/cache::
