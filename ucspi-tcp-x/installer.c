@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.14  2021-08-02 13:30:11+05:30  Cprogrammer
+ * set default permissions when mode=-1
+ *
  * Revision 1.13  2021-08-02 09:41:42+05:30  Cprogrammer
  * added check and fix mode
  *
@@ -43,6 +46,7 @@
  * Initial revision
  *
  */
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -99,7 +103,7 @@ get_octal(mode_t mode)
 }
 
 void
-print_info(char *str, char *source, char *dest, int mode, int uid, int gid)
+print_info(const char *str, char *source, char *dest, int mode, int uid, int gid)
 {
 	struct passwd  *pw;
 	struct group   *gr;
@@ -173,21 +177,31 @@ set_perms(char *dest, char *uidstr, char *gidstr, char *modestr, uid_t uid,
 				strerr_warn7(WARN, dest, " has wrong mode  [", get_octal(st.st_mode & 07777), "] needs to be [", modestr, "]", 0);
 		}
 	}
-	if (!fix_perms)
+	if (!fix_perms && my_uid)
 		return;
 	if (!my_uid && ((uid != -1 && st.st_uid != uid) || (gid != -1 && st.st_gid != gid))) {
-		if (uid != -1 && st.st_uid != uid) {
+		if (fix_perms && uid != -1 && st.st_uid != uid) {
 			if (!(pw = getpwuid(st.st_uid))) {
 				strnum[fmt_ulong(strnum, uid)] = 0;
 				strerr_warn4(WARN, "unable to get uid entry for ", strnum, ": ", &strerr_sys);
 			}
+			substdio_put(subfdout, "\tchown ", 7);
+			substdio_puts(subfdout, uidstr);
+			substdio_put(subfdout, " ", 1);
+			substdio_puts(subfdout, dest);
+			substdio_put(subfdout, "\n", 1);
 			strerr_warn7(WARN, dest, " has wrong owner [", pw->pw_name, "], will change it to [", uidstr, "]", 0);
 		}
-		if (gid != -1 && st.st_gid != gid) {
+		if (fix_perms && gid != -1 && st.st_gid != gid) {
 			if (!(gr = getgrgid(st.st_gid))) {
 				strnum[fmt_ulong(strnum, gid)] = 0;
 				strerr_warn4(WARN, "unable to get gid entry for ", strnum, ": ", &strerr_sys);
 			}
+			substdio_put(subfdout, "\tchgrp ", 7);
+			substdio_puts(subfdout, gidstr);
+			substdio_put(subfdout, " ", 1);
+			substdio_puts(subfdout, dest);
+			substdio_put(subfdout, "\n", 1);
 			strerr_warn7(WARN, dest, " has wrong group [", gr->gr_name, "], will change it to [", gidstr, "]", 0);
 		}
 		if (chown(dest, (uid_t) uid, (gid_t) gid) == -1)
@@ -198,7 +212,13 @@ set_perms(char *dest, char *uidstr, char *gidstr, char *modestr, uid_t uid,
 		}
 	}
 	if (mode != -1 && (st.st_mode & 07777) != mode) {
-		strerr_warn7(WARN, dest, " has wrong mode  [", get_octal(st.st_mode & 07777), "], will change it to [", modestr, "]", 0);
+		if (fix_perms)
+			strerr_warn7(WARN, dest, " has wrong mode  [", get_octal(st.st_mode & 07777), "], will change it to [", modestr, "]", 0);
+		substdio_put(subfdout, "\tchmod ", 7);
+		substdio_puts(subfdout, modestr);
+		substdio_put(subfdout, " ", 1);
+		substdio_puts(subfdout, dest);
+		substdio_put(subfdout, "\n", 1);
 		if (chmod(dest, (mode_t) mode) == -1)
 			strerr_die4sys(111, FATAL, "unable to chmod ", dest, ": ");
 	}
@@ -369,9 +389,9 @@ doit(stralloc *line, int uninstall, int ignore_dirs, int check)
 	{
 	case 'c':
 		if (!check) {
-			print_info("mknod", 0, target.s, mode, uid, gid);
+			print_info("mknod", 0, target.s, mode == -1 ? 0644 : mode, uid, gid);
 			scan_ulong(name, (unsigned long *) &dev);
-			if (mknod(target.s, mode, dev) == -1) {
+			if (mknod(target.s, mode == -1 ? 0644 : mode, dev) == -1) {
 				if (errno != error_exist)
 					strerr_die4sys(111, FATAL, "mknod ", target.s, ": ");
 			} 
@@ -380,8 +400,8 @@ doit(stralloc *line, int uninstall, int ignore_dirs, int check)
 			set_perms(target.s, uidstr, gidstr, modestr, (uid_t) uid, (gid_t) gid, mode, check);
 	case 'p':
 		if (!check) {
-			print_info("mkfifo", 0, target.s, mode, uid, gid);
-			if (fifo_make(target.s, mode) == -1) {
+			print_info("mkfifo", 0, target.s, mode == -1 ? 0644 : mode, uid, gid);
+			if (fifo_make(target.s, mode == -1 ? 0644 : mode) == -1) {
 				if (errno != error_exist)
 					strerr_die4sys(111, FATAL, "fifo_make: ", target.s, ": ");
 			}
@@ -397,13 +417,20 @@ doit(stralloc *line, int uninstall, int ignore_dirs, int check)
 		break;
 	case 'd':
 		if (!check) {
-			print_info("makedir", 0, target.s, mode, uid, gid);
-			if (mkdir(target.s, my_uid ? 0755 : mode) == -1) {
+			print_info("makedir", 0, target.s, my_uid || mode == -1 ? 0755 : mode, uid, gid);
+			if (mkdir(target.s, my_uid || mode == -1 ? 0755 : mode) == -1) {
 				if (errno != error_exist)
 					strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
 			}
-			if (my_uid && chmod(target.s, my_uid ? 0755 : mode) == -1)
-				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
+			if (my_uid) {
+				substdio_put(subfdout, "\tchmod ", 7);
+				substdio_puts(subfdout, modestr);
+				substdio_put(subfdout, " ", 1);
+				substdio_puts(subfdout, target.s);
+				substdio_put(subfdout, "\n", 1);
+				if (chmod(target.s, my_uid || mode == -1 ? 0755 : mode) == -1)
+					strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
+			}
 		}
 		if (uid != -1 || gid != -1 || mode != -1)
 			set_perms(target.s, uidstr, gidstr, modestr, (uid_t) uid, (gid_t) gid, mode, check);
@@ -416,7 +443,7 @@ doit(stralloc *line, int uninstall, int ignore_dirs, int check)
 			mode = st.st_mode;
 		}
 		if (!check) {
-			print_info("install file", name, target.s, mode, uid, gid);
+			print_info("install file", name, target.s, mode == -1 ? 0644 : mode, uid, gid);
 			if ((fdin = open_read(name)) == -1) {
 				if (opt)
 					return;
@@ -440,8 +467,15 @@ doit(stralloc *line, int uninstall, int ignore_dirs, int check)
 			if (fsync(fdout) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 			close(fdout);
-			if (my_uid && chmod(target.s, (mode_t) mode) == -1)
-				strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
+			if (my_uid) {
+				substdio_put(subfdout, "\tchmod ", 7);
+				substdio_puts(subfdout, modestr);
+				substdio_put(subfdout, " ", 1);
+				substdio_puts(subfdout, target.s);
+				substdio_put(subfdout, "\n", 1);
+				if (chmod(target.s, mode == -1 ? 0644 : mode) == -1)
+					strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
+			}
 		}
 		if (uid != -1 || gid != -1 || mode != -1)
 			set_perms(target.s, uidstr, gidstr, modestr, (uid_t) uid, (gid_t) gid, mode, check);
@@ -505,7 +539,7 @@ main(argc, argv)
 void
 getversion_installer_c()
 {
-	static char    *x = "$Id: installer.c,v 1.13 2021-08-02 09:41:42+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.14 2021-08-02 13:30:11+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
