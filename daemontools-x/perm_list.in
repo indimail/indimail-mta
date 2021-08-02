@@ -31,7 +31,7 @@
 %attr(0755,root,root) @prefix@/sbin/multilog
 %attr(0755,root,root) @prefix@/sbin/readproctitle
 %attr(0755,root,root) @prefix@/sbin/supervise
-%attr(0755,root,root) @prefix@/sbin/svscan
+%attr(0751,root,root) @prefix@/sbin/svscan
 
 %attr(0755,root,root) @libexecdir@/svscanboot
 

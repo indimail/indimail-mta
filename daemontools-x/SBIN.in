@@ -1,4 +1,4 @@
-f:::0755:/sbin/:svscan:svscan
+f:::0751:/sbin/:svscan:svscan
 f:::0755:/sbin/:supervise:supervise
 f:::0755:/sbin/:readproctitle:readproctitle
 f:::0755:/sbin/:multilog:multilog
