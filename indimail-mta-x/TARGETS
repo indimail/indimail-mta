@@ -1173,3 +1173,5 @@ mini-smtpd
 mini-smtpd.o
 indimail-mta-release
 hasrresvport.h
+qfrontend.1
+qf-log-subject

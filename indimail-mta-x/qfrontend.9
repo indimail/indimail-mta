@@ -1,0 +1,13 @@
+.TH qfrontend 1
+.SH NAME
+qfrontend \- frontend for executing qmail-qfilter filters
+
+.SH SYNOPSIS
+\fBqfrontend\fR(1) is a frontend for \fBqmail-qfilter\fR(1) that can be
+called as qmail-queue by setting \fBQMAILQUEUE\fR environment variable.
+It looks for filters in @libexecdir@/qfilters. A filter is any file which is
+prefixed with \fBqf\fR-. If there are multiple scripts, they will be
+executed in alphabetical order.
+
+.SH SEE ALSO
+qmail-qfilter(1)

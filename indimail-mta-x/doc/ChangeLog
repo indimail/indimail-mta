@@ -79,6 +79,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 44. Makefile: create directories using installer instead of Makefile
 45. PKGBUILD: replaced DESTDIR with pkgdir
 46. installer.c: set default permissions when mode=-1
+47. qf-smtp-ratelimit: multiply by 3600 to convert to hourly rate
+48. qf-log-subject: qmail-qfilter script to log subject in syslog
 
 * 
 Release 2.13 Start 14/02/2021

@@ -1,0 +1,44 @@
+#
+# $Log: qf-log-subject.in,v $
+# Revision 1.1  2021-08-03 01:18:06+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: qf-log-subject.in,v 1.1 2021-08-03 01:18:06+05:30 Cprogrammer Exp mbhangui $
+#
+
+# read headers
+while read line
+do
+	if [ -z "$line" ] ; then
+		break
+	fi
+	echo $line | grep "^Subject:" > /dev/null
+	if [ $? -eq 0 ] ; then
+		subject=$(echo $line | cut -d: -f2-)
+	fi
+	echo $line | grep "^Date:" > /dev/null
+	if [ $? -eq 0 ] ; then
+		date=$(echo $line | cut -d: -f2-)
+	fi
+done
+
+# read envelope
+var=`tr ["\0"] ["\n"] 0<&3`
+for i in $var
+do
+	first=$(echo $i|cut -c1)
+	case "$first" in
+		F)
+		FROM=$(echo $i | cut -c2-)
+		;;
+		T)
+		TO=$(echo $i|cut -c2-)
+		if [ -n "$LOGFILTER" ] ; then
+			echo "Date:$date, Subject:$subject, From: $FROM, To: $TO" > $LOGFILTER
+		else
+			echo "Date:$date, Subject:$subject, From: $FROM, To: $TO" | @prefix@/sbin/splogger
+		fi
+		;;
+	esac
+done

@@ -1,5 +1,9 @@
 /*
  * $Log: hier.c,v $
+ * Revision 1.291  2021-08-03 01:18:27+05:30  Cprogrammer
+ * added qf-log-subject filter for qmail-qfilter
+ * added man page for qfrontend
+ *
  * Revision 1.290  2021-07-29 22:16:00+05:30  Cprogrammer
  * removed inotify
  *
@@ -1160,6 +1164,7 @@ hier(inst_dir, fatal, dev_package)
 #endif
 
 	c(auto_libexec, "qfilters", "qf-smtp-ratelimit", auto_uido, 0, moder_x);
+	c(auto_libexec, "qfilters", "qf-log-subject", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qfrontend", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qpq", auto_uido, 0, moder_x);
 	c(auto_libexec_dir, auto_libexec_base, "qsmhook", auto_uido, 0, moder_x);
@@ -1456,6 +1461,7 @@ hier(inst_dir, fatal, dev_package)
 	c(mandir_base,     "man/man8", "qmail-spamfilter.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "drate.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man1", "qmail-qfilter.1", uidr, gidr, moder_f);
+	c(mandir_base,     "man/man1", "qfrontend.1", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "surblfilter.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "spawn-filter.8", uidr, gidr, moder_f);
 	c(mandir_base,     "man/man8", "qmail-inject.8", uidr, gidr, moder_f);
@@ -1517,7 +1523,7 @@ hier(inst_dir, fatal, dev_package)
 void
 getversion_install_big_c()
 {
-	static char    *x = "$Id: hier.c,v 1.290 2021-07-29 22:16:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: hier.c,v 1.291 2021-08-03 01:18:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

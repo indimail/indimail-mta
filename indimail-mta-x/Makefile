@@ -34,9 +34,9 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	mailsubj mbox2maildir mini-smtpd multirotate newinclude new-inject \
 	nowutc ofmipd ofmipname parsedate plugtest predate preline \
 	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
-	qfrontend qf-smtp-ratelimit qmail-cat qmail-cdb qmail-clean \
-	qmailconfig qmail-daemon qmail-daned qmail-direct qmaildirmake \
-	qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
+	qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat qmail-cdb \
+	qmail-clean qmailconfig qmail-daemon qmail-daned qmail-direct \
+	qmaildirmake qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
 	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newmrh \
 	qmail-newu qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u \
 	qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread \
@@ -55,12 +55,12 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dktest.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.5 forward.1 maildirserial.1 mlmatchup.8 new-inject.1 \
-	plugin_init.3 plugtest.1 predate.1 qarf.1 qmail-cdb.8 qmail-clean.8 \
-	qmail-control.5 qmail-daned.8 qmail-direct.8 qmail-dk.8 qmail-dkim.8 \
-	qmail-getpw.8 qmail-inject.8 qmail-limits.7 qmail-local.8 \
-	qmail-multi.8 qmail-newmrh.8 qmail-newu.8 qmail-poppass.8 \
-	qmail-pw2u.8 qmail-qread.8 qmail-queue.8 qmail-remote.8 \
-	qmail-rm.1 qmail-send.8 qmail-showctl.8 qmail-smtpd.8 \
+	plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 qmail-cdb.8 \
+	qmail-clean.8 qmail-control.5 qmail-daned.8 qmail-direct.8 \
+	qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 qmail-limits.7 \
+	qmail-local.8 qmail-multi.8 qmail-newmrh.8 qmail-newu.8 \
+	qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 qmail-queue.8 \
+	qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 qmail-smtpd.8 \
 	qmail-spamfilter.8 qmail-srs.5 qmail-start.8 qmail-todo.8 \
 	qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 \
 	recipient-cdb.8 replier.1 rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 \
@@ -419,6 +419,12 @@ warn-auto.sh qf-smtp-ratelimit.in conf-libexec
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> qf-smtp-ratelimit
 	chmod 755 qf-smtp-ratelimit
+
+qf-log-subject: \
+warn-auto.sh qf-log-subject.in conf-prefix
+	cat warn-auto.sh qf-log-subject.in | \
+	$(edit) > qf-log-subject
+	chmod 755 qf-log-subject
 
 config-fast: \
 warn-auto.sh config-fast.sh conf-prefix conf-break \
@@ -3329,6 +3335,9 @@ variables.o
 qmail-qfilter.o: \
 compile qmail-qfilter.c qmail.h qmulti.h
 	./compile qmail-qfilter.c
+
+qfrontend.1: qfrontend.9 conf-libexec
+	$(edit) qfrontend.9 > $@
 
 qmail-greyd: load qmail-greyd.o ip.o socket_v6any.o \
 socket_v4mappedprefix.o variables.o auto_control.o \

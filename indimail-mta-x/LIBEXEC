@@ -7,6 +7,7 @@ d:::0555:::
 
 # scripts/programs
 f:::0755:/qfilters/:qf-smtp-ratelimit:qf-smtp-ratelimit
+f:::0755:/qfilters/:qf-log-subject:qf-log-subject
 f:::0755:/:qfrontend:qfrontend
 f:::0755:/:qpq:qpq
 f:::0755:/:qsmhook:qsmhook
