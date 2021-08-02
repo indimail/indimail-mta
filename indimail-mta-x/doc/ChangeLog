@@ -77,6 +77,7 @@ o use global variables directory /etc/indimail/control/global_vars for
     log directory
 43. PKGBUILD: fix permissions of installed files in destdir
 44. Makefile: create directories using installer instead of Makefile
+45. PKGBUILD: replaced DESTDIR with pkgdir
 
 * 
 Release 2.13 Start 14/02/2021

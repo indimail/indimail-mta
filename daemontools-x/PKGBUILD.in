@@ -1,10 +1,13 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.2  2021-08-02 11:17:25+05:30  Cprogrammer
+# replaced DESTDIR with pkgdir
+#
 # Revision 1.1  2021-08-02 09:59:47+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.1 2021-08-02 09:59:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.2 2021-08-02 11:17:25+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=daemontools
 pkgver=@version@
@@ -47,12 +50,12 @@ package() {
   sed -i 's|/sbin/|/bin/|g' SBIN.LINUX
   sed -i '/\/sbin/d' DIRS.in
   ./qmake DESTDIR=${pkgdir} install
-  ./installer -fc ${DESTDIR}               < DIRS
-  ./installer -fc ${DESTDIR}${_prefix}     < BIN
-  ./installer -fc ${DESTDIR}${_prefix}     < SBIN
-  ./installer -fc ${DESTDIR}${_shareddir}  < SHARED
-  ./installer -fc ${DESTDIR}${_libexecdir} < LIBEXEC
-  ./installer -fc ${DESTDIR}${_mandir}     < MAN
+  ./installer -fc ${pkgdir}               < DIRS
+  ./installer -fc ${pkgdir}${_prefix}     < BIN
+  ./installer -fc ${pkgdir}${_prefix}     < SBIN
+  ./installer -fc ${pkgdir}${_shareddir}  < SHARED
+  ./installer -fc ${pkgdir}${_libexecdir} < LIBEXEC
+  ./installer -fc ${pkgdir}${_mandir}     < MAN
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   cd $srcdir
   (

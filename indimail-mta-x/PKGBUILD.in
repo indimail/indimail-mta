@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.9  2021-08-02 11:19:37+05:30  Cprogrammer
+# replaced DESTDIR with pkgdir
+#
 # Revision 1.8  2021-08-02 09:46:15+05:30  Cprogrammer
 # fix permissions of installed files in DESTDIR
 # remove only indimail-mta specific logs instead of entire logdir on package removal
@@ -27,7 +30,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.8 2021-08-02 09:46:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.9 2021-08-02 11:19:37+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -135,14 +138,14 @@ package_indimail-mta() {
   sed -i 's|/sbin/|/bin/|g' SBIN.sql
   sed -i '/\/sbin/d' DIRS.in
   ./qmake DESTDIR=${pkgdir} install
-  ./installer -fc ${DESTDIR}                          < DIRS
-  ./installer -fc ${DESTDIR}${_prefix}                < BIN
-  ./installer -fc ${DESTDIR}${_prefix}                < SBIN
-  ./installer -fc ${DESTDIR}${_shareddir}             < SHARED
-  ./installer -fc ${DESTDIR}${_sysconfdir}            < ETC
-  ./installer -fc ${DESTDIR}${_prefix}"/lib/indimail" < PLUGINS
-  ./installer -fc ${DESTDIR}${_libexecdir}            < LIBEXEC
-  ./installer -fc ${DESTDIR}${_mandir}                < MAN
+  ./installer -fc ${pkgdir}                          < DIRS
+  ./installer -fc ${pkgdir}${_prefix}                < BIN
+  ./installer -fc ${pkgdir}${_prefix}                < SBIN
+  ./installer -fc ${pkgdir}${_shareddir}             < SHARED
+  ./installer -fc ${pkgdir}${_sysconfdir}            < ETC
+  ./installer -fc ${pkgdir}${_prefix}"/lib/indimail" < PLUGINS
+  ./installer -fc ${pkgdir}${_libexecdir}            < LIBEXEC
+  ./installer -fc ${pkgdir}${_mandir}                < MAN
   if [ -f qupgrade.sh ] ; then
     install -D -m 0755 qupgrade.sh ${pkgdir}${_libexecdir}/qupgrade.sh
   fi

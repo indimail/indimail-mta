@@ -118,6 +118,7 @@ o svscan: set SERVICEDIR, PWD environment variable
 42. Makefile: create directories using installer instead of Makefile
 43. PKGBUILD: fix permissions of installed files in destdir
 44. debian/postrm: remove log directory on package removal
+45. PKGBUILD: replaced DESTDIR with pkgdir
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
