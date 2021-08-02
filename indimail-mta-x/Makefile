@@ -2188,14 +2188,6 @@ MAN: MAN.in MAN.sql
 
 install: \
 $(it) $(man) installer DIRS BIN SBIN SHARED MAN
-	mkdir -p $(DESTDIR)$(prefix)
-	mkdir -p $(DESTDIR)$(prefix)/lib
-	mkdir -p $(DESTDIR)$(qmaildir)
-	mkdir -p $(DESTDIR)$(shareddir)
-	mkdir -p $(DESTDIR)$(qsysconfdir)
-	mkdir -p $(DESTDIR)$(libexecdir)
-	mkdir -p $(DESTDIR)$(mandir)
-	mkdir -p $(DESTDIR)$(logdir)
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(prefix)                < SBIN
