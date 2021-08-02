@@ -1,5 +1,8 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.3  2021-08-02 18:08:27+05:30  Cprogrammer
+# create qmaill with logdir as home directory
+#
 # Revision 1.2  2021-08-02 11:17:25+05:30  Cprogrammer
 # replaced DESTDIR with pkgdir
 #
@@ -7,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.2 2021-08-02 11:17:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.3 2021-08-02 18:08:27+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=daemontools
 pkgver=@version@
@@ -129,7 +132,7 @@ pre_install() {
   (
   stop_service
   /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-  /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles -d ${_qmaildir} -s /bin/nologin qmaill || true
+  /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles -d ${_logdir} -s /bin/nologin qmaill || true
   ) >> /var/log/${pkgname}-setup.log 2>&1
 }
 

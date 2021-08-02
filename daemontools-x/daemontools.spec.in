@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.25 2021-08-01 11:55:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.26 2021-08-02 18:08:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -366,7 +366,7 @@ fi
 %pre
 (
 /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir} -s /sbin/nologin qmaill || true
+/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{logdir} -s /sbin/nologin qmaill || true
 ) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
