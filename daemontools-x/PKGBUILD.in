@@ -1,4 +1,11 @@
 # Maintainer: @email@
+# $Log: PKGBUILD.in,v $
+# Revision 1.1  2021-08-02 09:59:47+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: PKGBUILD.in,v 1.1 2021-08-02 09:59:47+05:30 Cprogrammer Exp mbhangui $
+#
 pkgname=daemontools
 pkgver=@version@
 pkgrel=@release@
@@ -20,6 +27,7 @@ _servicedir=@servicedir@
 _qmaildir=@qmaildir@
 _libexecdir=@libexecdir@
 _shareddir=@shareddir@
+_mandir=@mandir@
 
 build() {
   cd $srcdir/$pkgname-${pkgver}
@@ -39,6 +47,12 @@ package() {
   sed -i 's|/sbin/|/bin/|g' SBIN.LINUX
   sed -i '/\/sbin/d' DIRS.in
   ./qmake DESTDIR=${pkgdir} install
+  ./installer -fc ${DESTDIR}               < DIRS
+  ./installer -fc ${DESTDIR}${_prefix}     < BIN
+  ./installer -fc ${DESTDIR}${_prefix}     < SBIN
+  ./installer -fc ${DESTDIR}${_shareddir}  < SHARED
+  ./installer -fc ${DESTDIR}${_libexecdir} < LIBEXEC
+  ./installer -fc ${DESTDIR}${_mandir}     < MAN
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   cd $srcdir
   (
@@ -261,7 +275,7 @@ post_remove() {
     fi
   fi
   echo "removing logs"
-    if [ -h ${_logdir} ] ; then
+  if [ -h ${_logdir} ] ; then
     log_dir=`/bin/ls -ld ${_logdir} | /usr/bin/awk '{print $10}'`
   else
     log_dir=${_logdir}

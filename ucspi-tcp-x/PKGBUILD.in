@@ -1,3 +1,11 @@
+#
+# $Log: PKGBUILD.in,v $
+# Revision 1.1  2021-08-02 10:00:56+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: PKGBUILD.in,v 1.1 2021-08-02 10:00:56+05:30 Cprogrammer Exp mbhangui $
+#
 # Maintainer: @email@
 pkgname=ucspi-tcp
 pkgver=@version@
@@ -19,6 +27,7 @@ _prefix=@prefix@
 _servicedir=@servicedir@
 _libexecdir=@libexecdir@
 _shareddir=@shareddir@
+_mandir=@mandir@
 _tcpserver_plugin=1
 
 build() {
@@ -40,6 +49,13 @@ package() {
   depends=('shadow' 'libqmail>0.3')
   cd $srcdir/$pkgname-${pkgver}
   ./qmake -s DESTDIR=${pkgdir} install
+  ./installer -fc ${DESTDIR}                          < DIRS
+  ./installer -fc ${DESTDIR}${_prefix}                < BIN
+  ./installer -fc ${DESTDIR}${_shareddir}             < SHARED
+  ./installer -fc ${DESTDIR}${_prefix}"/lib/indimail" < PLUGINS
+  ./installer -fc ${DESTDIR}${_libexecdir}            < LIBEXEC
+  ./installer -fc ${DESTDIR}${_mandir}                < MAN
+
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   cd $srcdir
   (
