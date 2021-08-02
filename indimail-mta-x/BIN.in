@@ -1,6 +1,6 @@
 # installer input files for Universal programs in @prefix@/bin
 # @prefix@/bin
-d:::0555:/bin::
+#d:::0555:/bin::
 #
 # Files in @prefix@/bin
 #
