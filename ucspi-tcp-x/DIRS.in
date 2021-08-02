@@ -1,6 +1,12 @@
 d::::::
+d::::@prefix@::
+d::::@prefix@/bin::
+d::::@prefix@/share::
+d::::@prefix@/lib::
+d::::@prefix@/libexec::
 d:::0555:@shareddir@::
 d:::0555:@shareddir@/doc::
+d:::0555:@libexecdir@::
 d::::@mandir@::
 d::::@mandir@/man1::
 d::::@prefix@/lib/indimail::
