@@ -8,7 +8,8 @@ edit = sed \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@prefix\@,$(prefix),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
-	-e 's,@qsysconfdir\@,$(sysconfdir),g' \
+	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
+	-e 's,@sysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@servicedir\@,$(servicedir),g' \
 	-e 's,@DATE\@,$(DATE),g' \
 	-e 's,@email\@,$(email),g' \

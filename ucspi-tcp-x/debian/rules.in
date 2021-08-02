@@ -10,7 +10,6 @@ DPKG_EXPORT_BUILDFLAGS = 1
 include /usr/share/dpkg/buildflags.mk
 
 prefix=@prefix@
-sysconfdir=@sysconfdir@
 qsysconfdir=@qsysconfdir@
 shareddir=@shareddir@
 libexecdir=@libexecdir@

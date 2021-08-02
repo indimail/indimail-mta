@@ -11,3 +11,5 @@ d::::@mandir@::
 d::::@mandir@/man1::
 d::::@prefix@/lib/indimail::
 d::::@prefix@/lib/indimail/plugins::
+d::::/etc::
+d:root::02755:@qsysconfdir@::
