@@ -1,6 +1,10 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.8  2021-08-02 09:46:15+05:30  Cprogrammer
+# fix permissions of installed files in DESTDIR
+# remove only indimail-mta specific logs instead of entire logdir on package removal
+#
 # Revision 1.7  2021-08-01 11:54:08+05:30  Cprogrammer
 # skip service if dir doesn't exist
 #
@@ -23,7 +27,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.7 2021-08-01 11:54:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.8 2021-08-02 09:46:15+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -46,6 +50,7 @@ _servicedir=@servicedir@
 _qmaildir=@qmaildir@
 _libexecdir=@libexecdir@
 _shareddir=@shareddir@
+_mandir=@mandir@
 _tcpserver_plugin=1
 _notlsarr=0
 _username=indimail
@@ -130,6 +135,14 @@ package_indimail-mta() {
   sed -i 's|/sbin/|/bin/|g' SBIN.sql
   sed -i '/\/sbin/d' DIRS.in
   ./qmake DESTDIR=${pkgdir} install
+  ./installer -fc ${DESTDIR}                          < DIRS
+  ./installer -fc ${DESTDIR}${_prefix}                < BIN
+  ./installer -fc ${DESTDIR}${_prefix}                < SBIN
+  ./installer -fc ${DESTDIR}${_shareddir}             < SHARED
+  ./installer -fc ${DESTDIR}${_sysconfdir}            < ETC
+  ./installer -fc ${DESTDIR}${_prefix}"/lib/indimail" < PLUGINS
+  ./installer -fc ${DESTDIR}${_libexecdir}            < LIBEXEC
+  ./installer -fc ${DESTDIR}${_mandir}                < MAN
   if [ -f qupgrade.sh ] ; then
     install -D -m 0755 qupgrade.sh ${pkgdir}${_libexecdir}/qupgrade.sh
   fi
@@ -158,7 +171,9 @@ package_indimail-mini() {
   provides=('indimail-mini')
   cd $srcdir/indimail-mta-${pkgver}
   (
-  echo "d:::0755:::"
+  echo "d::::::"
+  echo "d::::@prefix@::"
+  echo "d::::@prefix@/share::"
   echo "d:::0555:@shareddir@::"
   echo "d:::0555:@shareddir@/doc::"
   echo "d::::@mandir@::"
@@ -214,6 +229,8 @@ package_qmta() {
   cd $srcdir/indimail-mta-${pkgver}
   (
   echo "d:::0755:::"
+  echo "d:::0555:@prefix@::"
+  echo "d:::0555:@prefix@/share::"
   echo "d:::0555:@shareddir@::"
   echo "d:::0555:@shareddir@/boot::"
   echo "d:::0555:@shareddir@/doc::"
@@ -846,12 +863,15 @@ post_remove() {
   fi
 
   echo "removing logs"
-  if [ -h ${_logdir} ] ; then
-    log_dir=`/bin/ls -ld ${_logdir} | /usr/bin/awk '{print $10}'`
-  else
-    log_dir=${_logdir}
-  fi
-  [ "$log_dir" != "/" ] && rm -fr $log_dir
+  for i in deliver.25 smtpd.25 smtpd.366 smtpd.465 \
+    smtpd.587 qmtpd.209 qmqpd.628 greylist.1999 \
+    daned.1998 resolvconf udplogger.3000 slowq-send \
+    logfifo
+  do
+    if [ -d ${_logdir}/$i ] ; then
+      rm -fr ${_logdir}/$i
+    fi
+  done
 
   if [ "${_prefix}" != "/usr" ] ; then
     echo "recreating ld.so cache"
