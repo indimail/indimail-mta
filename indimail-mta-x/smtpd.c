@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.244 $";
+char           *revision = "$Revision: 1.245 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -369,6 +369,7 @@ int             smtputf8 = 0, smtputf8_enable = 0;
 
 int             smtp_port;
 void           *phandle;
+char           *no_help;
 
 extern char   **environ;
 
@@ -1312,6 +1313,9 @@ err_unimpl(char *arg)
 {
 	if (!case_diffs(arg, "unimplemented"))
 		out("502 unimplemented (#5.5.1)\r\n");
+	else
+	if (!case_diffs(arg, "help"))
+		out("502 disabled by the lord in her infinite wisdom (#5.5.1)\r\n");
 	else {
 		out("500 command ");
 		out(arg);
@@ -2063,6 +2067,10 @@ smtp_help(char *arg)
 {
 	char           *ptr;
 
+	if (no_help) {
+		err_unimpl("help");
+		return;
+	}
 	ptr = revision + 11;
 	if (*ptr) {
 		out("214-This is IndiMail SMTP Version ");
@@ -2913,7 +2921,7 @@ smtp_ehlo(char *arg)
 		out("250-SMTPUTF8\r\n");
 	}
 #endif
-	out("250 HELP\r\n");
+	out("250 HELP");
 	if (!arg || !*arg)
 		dohelo(remotehost);
 	else
@@ -5936,6 +5944,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		hostname = argv[1];
 		childargs = argv + 2;
 	}
+	no_help = env_get("DISABLE_HELP");
 	setup_state = 0;
 	if ((ptr = env_get("TCPLOCALPORT")))
 		scan_int(ptr, &smtp_port);
@@ -6201,6 +6210,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.245  2021-08-03 15:50:21+05:30  Cprogrammer
+ * disable help if DISABLE_HELP is set
+ *
  * Revision 1.244  2021-07-03 14:01:42+05:30  Cprogrammer
  * replaced getpwent() with in-build check for user in /etc/passwd
  *
@@ -6372,7 +6384,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.244 2021-07-03 14:01:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.245 2021-08-03 15:50:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
