@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.10  2021-08-03 21:25:17+05:30  Cprogrammer
+# remove creation of indimail-mta-release (done in Makefile)
+#
 # Revision 1.9  2021-08-02 11:19:37+05:30  Cprogrammer
 # replaced DESTDIR with pkgdir
 #
@@ -30,7 +33,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.9 2021-08-02 11:19:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.10 2021-08-03 21:25:17+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -155,15 +158,6 @@ package_indimail-mta() {
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   install -D -m 0644 controlfiles.q "$pkgdir"${_sysconfdir}/controlfiles.q
   cd $srcdir
-  (
-  echo "NAME=${pkgname}"
-  echo "Description=\"IndiMail MTA\""
-  echo "version="${pkgver}-${pkgrel}""
-  echo "ID=${pkgname}"
-  echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
-  echo "PACKAGE_BUGREPORT=\"'@email@'\""
-  ) > ${pkgname}-release
-  install -D -m 0644 ${pkgname}-release "$pkgdir"${_sysconfdir}/${pkgname}-release
 }
 
 package_indimail-mini() {

@@ -54,14 +54,6 @@ build-stamp:
 	sed 's{LIBEXECDIR{${libexecdir}{'  conf-libexec.in    > conf-libexec
 	sed 's{SERVICEDIR{${servicedir}{'  conf-servicedir.in > conf-servicedir
 	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
-	( \
-	echo NAME=indimail-mta; \
-	echo Description=\"IndiMail MTA\"; \
-	echo MTA_version=$(version); \
-	echo ID=indimail-mta; \
-	echo HOME_URL="https://github.com/mbhangui/indimail-mta"; \
-	echo PACKAGE_BUGREPORT=\"'@email@'\"; \
-	) > indimail-mta-release
 	touch build-stamp
 
 clean:
@@ -127,8 +119,6 @@ install: build
 		mkdir -p $(DESTDIR)$(libexecdir); \
 		install -m 0755 qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
 	fi
-	install -m 0644 indimail-mta-release "$(DESTDIR)$(qsysconfdir)"/indimail-mta-release
-	/bin/rm -f indimail-mta-release indimail-mta-x
 
 binary-indep: build install
 	dh_testdir
