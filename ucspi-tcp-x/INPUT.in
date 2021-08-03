@@ -1,0 +1,4 @@
+@prefix@                  BIN
+@shareddir@   SHARED
+@libexecdir@ LIBEXEC
+@sysconfdir@         ETC

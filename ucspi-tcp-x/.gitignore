@@ -67,3 +67,4 @@ dotls.o
 dotls
 PKGBUILD
 archpkg*.install
+INPUT

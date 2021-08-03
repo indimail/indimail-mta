@@ -1,9 +1,7 @@
 #
-# indimail programs for @libexecdir@
+# ucspi-tcp programs for @libexecdir@
 #
-
-# Base directory
-d:::0555:::
 
 # scripts/programs
 f:::0755:/:instcheck.ucspi-tcp:instcheck
+f:::0755:/:uinstaller:installer

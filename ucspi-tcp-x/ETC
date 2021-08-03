@@ -1,0 +1,12 @@
+#
+# perms.d installation input for installer
+#
+# Permissions for instcheck
+#
+f:root:root:0644:/perms.d/ucspi-tcp/:INPUT:INPUT
+f:root:root:0644:/perms.d/ucspi-tcp/:DIR:DIRS
+f:root:root:0644:/perms.d/ucspi-tcp/:BIN:BIN
+f:root:root:0644:/perms.d/ucspi-tcp/:SHARED:SHARED
+f:root:root:0644:/perms.d/ucspi-tcp/:ETC:ETC
+f:root:root:0644:/perms.d/ucspi-tcp/:LIBEXEC:LIBEXEC
+f:root:root:0644:/perms.d/ucspi-tcp/:MAN:MAN

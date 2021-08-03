@@ -83,9 +83,6 @@ auto_shared.o: \
 compile auto_shared.c
 	./compile auto_shared.c
 
-check: it instcheck
-	./instcheck
-
 ucspi-tcp.perms: perm_list.in \
 conf-prefix conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
@@ -201,24 +198,12 @@ haswaitp.h: \
 choose compile load trywaitp.c haswaitp.h1 haswaitp.h2
 	./choose cl trywaitp haswaitp.h1 haswaitp.h2 > haswaitp.h
 
-hier.o: \
-compile hier.c auto_home.h auto_shared.h conf-dlopen
-	./compile `grep -h -v "^#" conf-dlopen 2>/dev/null` hier.c
-
 http@: \
 warn-auto.sh http@.sh conf-prefix
 	cat warn-auto.sh http@.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> http@
 	chmod 755 http@
-
-instcheck: \
-load instcheck.o hier.o auto_home.o auto_shared.o
-	./load instcheck hier.o auto_home.o auto_shared.o -lqmail
-
-instcheck.o: \
-compile instcheck.c
-	./compile instcheck.c
 
 ip4_bit.o: \
 compile ip4_bit.c ip4_bit.h ip4.h
@@ -653,6 +638,11 @@ clean:
 install-strip: install
 distclean: clean
 
+instcheck: \
+warn-auto.sh instcheck.in conf-libexec conf-sysconfdir
+	cat warn-auto.sh instcheck.in | $(edit) > $@
+	chmod +x $@
+
 installer: \
 load installer.o
 	./load installer -lqmail
@@ -660,6 +650,10 @@ load installer.o
 installer.o: \
 compile installer.c
 	./compile installer.c
+
+INPUT: INPUT.in \
+conf-prefix conf-libexec conf-sysconfdir conf-shared
+	$(edit) INPUT.in > $@
 
 DIRS: DIRS.in
 	$(edit) $@.in > $@
@@ -677,17 +671,19 @@ conf-version conf-prefix conf-sysconfdir conf-shared \
 conf-email ucspi-tcp.changes
 	cat $@.in | $(edit) > PKGBUILD
 
-install: it installer DIRS BIN SHARED PLUGINS MAN
+install: it installer DIRS BIN SHARED PLUGINS MAN INPUT
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(shareddir)             < SHARED
 	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
+	./installer $(DESTDIR)$(qsysconfdir)           < ETC
 	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
 	./installer $(DESTDIR)$(mandir)                < MAN
 
 uninstall: installer DIRS BIN SHARED PLUGINS MAN
 	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
 	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$$p' ETC   C | ./installer -ui $(DESTDIR)$(qsysconfdir)
 	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
 	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
 	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
