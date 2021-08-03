@@ -1,12 +1,10 @@
-# $Log: instcheck.in,v $
-# Revision 1.2  2021-08-03 19:38:21+05:30  Cprogrammer
-# cd to package permissions directory
 #
-# Revision 1.1  2021-08-03 16:43:01+05:30  Cprogrammer
+# $Log: instcheck.in,v $
+# Revision 1.1  2021-08-03 21:22:32+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: instcheck.in,v 1.2 2021-08-03 19:38:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: instcheck.in,v 1.1 2021-08-03 21:22:32+05:30 Cprogrammer Exp mbhangui $
 #
 if [ $# -eq 0 ] ; then
 	name=$(basename $0)
@@ -26,21 +24,25 @@ else
 	echo "USAGE: $0 package [options]" 1>&2
 	exit 100
 fi
-conf_dir=@qsysconfdir@
-if [ ! -d $conf_dir/perms.d/$package ] ; then
-	echo "$package: missing permission files" 1>&2
-	exit 111
+if [ -f INPUT ] ; then
+	dir="./"
 else
-	cd $conf_dir/perms.d/$package
-	if [ $? -ne 0 ] ; then
+	dir=@libexecdir@
+	conf_dir=@qsysconfdir@
+	if [ ! -d $conf_dir/perms.d/$package ] ; then
+		echo "$package: missing permission files" 1>&2
+		exit 111
+	else
+		cd $conf_dir/perms.d/$package
+		if [ $? -ne 0 ] ; then
+			exit 111
+		fi
+	fi
+	if [ ! -f INPUT ] ; then
+		echo "$package: missing INPUT definition" 1>&2
 		exit 111
 	fi
 fi
-if [ ! -f $conf_dir/perms.d/$package/INPUT ] ; then
-	echo "$package: missing INPUT definition" 1>&2
-	exit 111
-fi
-dir=$(dirname $0)
 status=0
 set -e
 while read line
@@ -50,4 +52,4 @@ do
 	if [ $? -ne 0 ] ; then
 		break
 	fi
-done < $conf_dir/perms.d/$package/INPUT
+done < INPUT
