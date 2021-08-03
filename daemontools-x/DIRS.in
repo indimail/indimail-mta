@@ -15,6 +15,8 @@ d::::@mandir@/man1::
 d::::@mandir@/man8::
 d::::/etc::
 d:root::02755:@qsysconfdir@::
+d:::0755:@qsysconfdir@/perms.d::
+d:::0755:@qsysconfdir@/perms.d/daemontools::
 d::::/var::
 d::::/var/log::
 d:qmaill:nofiles:0755:@logdir@::

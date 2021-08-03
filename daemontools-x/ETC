@@ -1,0 +1,17 @@
+#
+# Plugins installation input for installer
+#
+# Base Directory
+d:root:qmail:02755:::
+
+#
+# Permissions for instcheck
+#
+f:root:root:0644:/perms.d/daemontools/:INPUT:INPUT
+f:root:root:0644:/perms.d/daemontools/:DIR:DIRS
+f:root:root:0644:/perms.d/daemontools/:BIN:BIN
+f:root:root:0644:/perms.d/daemontools/:SBIN:SBIN
+f:root:root:0644:/perms.d/daemontools/:SHARED:SHARED
+f:root:root:0644:/perms.d/daemontools/:ETC:ETC
+f:root:root:0644:/perms.d/daemontools/:LIBEXEC:LIBEXEC
+f:root:root:0644:/perms.d/daemontools/:MAN:MAN

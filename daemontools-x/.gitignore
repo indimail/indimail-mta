@@ -78,3 +78,5 @@ inotify
 inotify.o
 hasinotify.h
 openrc
+BIN
+INPUT

@@ -45,6 +45,7 @@ svscanboot.8
 svscan.8
 daemontools.perms
 daemontools.spec
+BIN
 SHARED
 SBIN
 DIRS
@@ -71,3 +72,4 @@ inotify
 inotify.o
 hasinotify.h
 openrc
+INPUT

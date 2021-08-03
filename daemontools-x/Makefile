@@ -457,18 +457,10 @@ conf-sysconfdir conf-shared conf-servicedir conf-email \
 daemontools.changes
 	cat $@.in | $(edit) > PKGBUILD
 
-instcheck: load instcheck.o hier.o auto_home.o \
-auto_shared.o auto_sysconfdir.o
-	./load instcheck hier.o auto_home.o auto_shared.o \
-		auto_sysconfdir.o -lqmail
-
-instcheck.o: \
-compile instcheck.c
-	./compile instcheck.c
-
-hier.o: \
-compile hier.c auto_home.h auto_shared.h 
-	./compile hier.c
+instcheck: \
+warn-auto.sh instcheck.in conf-libexec conf-sysconfdir
+	cat warn-auto.sh instcheck.in | $(edit) > $@
+	chmod +x $@
 
 installer: \
 load installer.o
@@ -477,6 +469,11 @@ load installer.o
 installer.o: \
 compile installer.c
 	./compile installer.c
+
+INPUT: INPUT.in \
+conf-prefix conf-libexec conf-qmail \
+conf-sysconfdir conf-shared
+	$(edit) INPUT.in > $@
 
 DIRS: DIRS.in
 	$(edit) $@.in > $@
@@ -504,12 +501,14 @@ install: $(it) $(man) installer DIRS BIN SBIN MAN SHARED LIBEXEC
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(prefix)                < SBIN
 	./installer $(DESTDIR)$(shareddir)             < SHARED
+	./installer $(DESTDIR)$(qsysconfdir)           < ETC
 	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
 	./installer $(DESTDIR)$(mandir)                < MAN
 
 uninstall: installer DIRS BIN SBIN SHARED MAN
 	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
 	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$$p' ETC     | ./installer -ui $(DESTDIR)$(qsysconfdir)
 	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
 	sed -n '1!G;h;$$p' SBIN    | ./installer -ui $(DESTDIR)$(prefix)
 	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)

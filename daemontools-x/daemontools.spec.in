@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.26 2021-08-02 18:08:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.27 2021-08-03 19:49:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -224,6 +224,8 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %dir %attr(0555,root,root)               %{shareddir}
 %dir %attr(0555,root,root)               %{shareddir}/boot
 %dir %attr(0555,root,root)               %{shareddir}/doc
+%dir %attr(0755,root,root)               %{qsysconfdir}/perms.d
+%dir %attr(0755,root,root)               %{qsysconfdir}/perms.d/%{name}
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)               %{mandir}
 %dir %attr(0755,root,root)               %{mandir}/man1
@@ -262,9 +264,11 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{_prefix}/sbin/minisvc
 
 %attr(0755,root,root)                    %{libexecdir}/svscanboot
+%attr(0755,root,root)                    %{libexecdir}/installer
 %attr(0755,root,root)                    %{libexecdir}/instcheck.daemontools
 %attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
 %attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
+%attr(644,root,root)                     %{qsysconfdir}/perms.d/%{name}/*
 
 %attr(0644,root,root)                    %{shareddir}/boot/upstart
 %attr(0644,root,root)                    %{shareddir}/boot/systemd
