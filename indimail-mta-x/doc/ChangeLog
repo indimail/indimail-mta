@@ -81,6 +81,11 @@ o use global variables directory /etc/indimail/control/global_vars for
 46. installer.c: set default permissions when mode=-1
 47. qf-smtp-ratelimit: multiply by 3600 to convert to hourly rate
 48. qf-log-subject: qmail-qfilter script to log subject in syslog
+- 04/08/2021
+49. smtpd.c: disable help if DISABLE_HELP is defined
+50. installer.c: added -m option to ignore missing files
+51. indimail-mta.spec.in: added permission files for indimail-mta
+52. qf-smtp-ratelimit: replaced /bin/cat with exit 0 which does the same thing
 
 * 
 Release 2.13 Start 14/02/2021
