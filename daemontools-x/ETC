@@ -1,9 +1,5 @@
 #
-# Plugins installation input for installer
-#
-# Base Directory
-d:root:qmail:02755:::
-
+# perms.d installation input for installer
 #
 # Permissions for instcheck
 #

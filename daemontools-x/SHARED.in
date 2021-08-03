@@ -1,7 +1,5 @@
 # installer input file for shared directories (universal)
 # @shareddir@
-d:::0555:::
-d:::0555:/boot::
 #
 # files in @shared@/doc
 #
