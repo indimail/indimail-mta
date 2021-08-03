@@ -86,6 +86,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 50. installer.c: added -m option to ignore missing files
 51. indimail-mta.spec.in: added permission files for indimail-mta
 52. qf-smtp-ratelimit: replaced /bin/cat with exit 0 which does the same thing
+53. qfrontend: use control file control/qfilters to configure qmail-qfilter
+    filters
 
 * 
 Release 2.13 Start 14/02/2021

@@ -406,10 +406,8 @@ conf-split conf-sysconfdir conf-libexec
 	chmod 755 qmailconfig
 
 qfrontend: \
-warn-auto.sh qfrontend.sh conf-libexec
-	cat warn-auto.sh qfrontend.sh \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	> qfrontend
+warn-auto.sh qfrontend.sh conf-libexec conf-sysconfdir
+	cat warn-auto.sh qfrontend.sh | $(edit) > qfrontend
 	chmod 755 qfrontend
 
 qf-smtp-ratelimit: \
