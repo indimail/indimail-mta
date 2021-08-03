@@ -706,16 +706,6 @@ hfield.o: \
 compile hfield.c hfield.h
 	./compile hfield.c
 
-hier.o: \
-compile hier.c auto_qmail.h auto_split.h auto_uids.h \
-tcpto.h hassrs.h conf-domainkeys conf-srs \
-conf-spf conf-dkim conf-batv auto_shared.h auto_control.h \
-auto_assign.h auto_sysconfdir.h auto_prefix.h conf-plugin \
-conf-dlopen conf-todo
-	./compile `grep -h -v "^#" conf-tls conf-spf conf-domainkeys \
-	conf-dkim conf-batv conf-plugin conf-dlopen conf-tlsa \
-	conf-todo` hier.c
-
 home: \
 home.sh conf-prefix
 	cat home.sh \
@@ -736,12 +726,9 @@ compile hostname.c
 	./compile hostname.c
 
 instcheck: \
-load instcheck.o hier.o auto_qmail.o get_uid.o auto_uids.o \
-auto_sysconfdir.o auto_shared.o auto_control.o \
-auto_assign.o auto_prefix.o auto_libexec.o
-	./load instcheck hier.o auto_qmail.o get_uid.o \
-	auto_sysconfdir.o auto_prefix.o auto_shared.o \
-	auto_control.o auto_assign.o auto_uids.o auto_libexec.o -lqmail
+instcheck.in conf-libexec conf-sysconfdir
+	$(edit) instcheck.in > $@
+	chmod +x $@
 
 instcheck.o: \
 compile instcheck.c auto_uids.h
@@ -2167,6 +2154,11 @@ installer.o: \
 compile installer.c
 	./compile installer.c
 
+INPUT: INPUT.in \
+conf-prefix conf-libexec conf-qmail \
+conf-sysconfdir conf-shared
+	$(edit) INPUT.in > $@
+
 DIRS: DIRS.in \
 conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared
@@ -2193,7 +2185,7 @@ MAN: MAN.in MAN.sql
 
 
 install: \
-$(it) $(man) installer DIRS BIN SBIN SHARED MAN
+$(it) $(man) installer DIRS BIN SBIN SHARED MAN INPUT
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(prefix)                < SBIN
