@@ -725,19 +725,6 @@ hostname.o: \
 compile hostname.c
 	./compile hostname.c
 
-instcheck: \
-warn-auto.sh instcheck.in conf-libexec conf-sysconfdir
-	cat warn-auto.sh instcheck.in | $(edit) > $@
-	chmod +x $@
-
-instcheck.o: \
-compile instcheck.c auto_uids.h
-	if test -f conf-logdir ; then \
-		./compile instcheck.c -DLOGDIR="\"`cat conf-logdir`\""; \
-	else \
-		./compile instcheck.c -DLOGDIR=\"/var/log/svc\"; \
-	fi
-
 ip.o: \
 compile ip.c ip.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` ip.c
@@ -2145,6 +2132,11 @@ install-strip: install
 
 distclean: clean
 	/bin/rm -f Makefile. Makevars.
+
+instcheck: \
+warn-auto.sh instcheck.in conf-libexec conf-sysconfdir
+	cat warn-auto.sh instcheck.in | $(edit) > $@
+	chmod +x $@
 
 installer: \
 load installer.o
