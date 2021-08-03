@@ -27,3 +27,15 @@ f:root:qmail:0644:/:foxhole_all.cdb:foxhole_all.cdb
 f:root:qmail:0644:/control/:nodnscheck:nodnscheck
 f:root:qmail:0644:/control/:level2-tlds:level2-tlds
 f:root:qmail:0644:/control/:level3-tlds:level3-tlds
+#
+# Permissions for instcheck
+#
+f:root:root:0444:/perms.d/indimail-mta/:INPUT:INPUT
+f:root:root:0444:/perms.d/indimail-mta/:DIR:DIRS
+f:root:root:0444:/perms.d/indimail-mta/:BIN:BIN
+f:root:root:0444:/perms.d/indimail-mta/:SBIN:SBIN
+f:root:root:0444:/perms.d/indimail-mta/:SHARED:SHARED
+f:root:root:0444:/perms.d/indimail-mta/:ETC:ETC
+f:root:root:0444:/perms.d/indimail-mta/:PLUGINS:PLUGINS
+f:root:root:0444:/perms.d/indimail-mta/:LIBEXEC:LIBEXEC
+f:root:root:0444:/perms.d/indimail-mta/:MAN:MAN

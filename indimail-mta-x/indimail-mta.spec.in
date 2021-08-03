@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.340 2021-08-03 01:19:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.341 2021-08-03 15:51:15+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -456,6 +456,8 @@ echo ../resolv.conf 1>&3
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/tcp
 %dir %attr(755,indimail,qmail)                     %{qsysconfdir}/control/defaultqueue
 %dir %attr(755,root,qmail)                         %{qsysconfdir}/control/global_vars
+%dir %attr(2755,root,qmail)                        %{qsysconfdir}/perms.d
+%dir %attr(2755,root,qmail)                        %{qsysconfdir}/perms.d/%{name}
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(755,root,root)                          %{mandir}
 %dir %attr(755,root,root)                          %{mandir}/man1
@@ -483,6 +485,7 @@ echo ../resolv.conf 1>&3
 %ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.pp
 %ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.mod
 
+%attr(644,root,root)                               %{qsysconfdir}/perms.d/%{name}/*
 %attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.te
 %attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.fc
 %attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/cronlist.q

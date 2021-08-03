@@ -1,0 +1,39 @@
+#!/bin/sh
+if [ $# -eq 0 ] ; then
+	name=$(basename $0)
+	package=$(echo $name | cut -d. -f2)
+	if [ x"$package" = x"$name" ] ; then
+		echo "package name must be specified" 1>&2
+		exit 1
+	fi
+	opt=-cfm
+elif [ $# -eq 1 ] ; then
+	package=$1
+	opt=-cfm
+elif [ $# -eq 2 ] ; then
+	package=$1
+	opt=$2
+else
+	echo "USAGE: $0 package [options]" 1>&2
+	exit 1
+fi
+conf_dir=@qsysconfdir@
+if [ ! -d $conf_dir/permissions.d/$package ] ; then
+	echo "$package: missing permission files" 1>&2
+	exit 1
+fi
+if [ ! -f $conf_dir/permissions.d/$package/INPUT ] ; then
+	echo "$package: missing INPUT definition" 1>&2
+	exit 1
+fi
+dir=$(dirname $0)
+status=0
+set -e
+while read line
+do
+	set $line
+	eval $dir/installer $opt $DESTDIR"$1" < $2
+	if [ $? -ne 0 ] ; then
+		break
+	fi
+done < $conf_dir/permissions.d/$package/INPUT

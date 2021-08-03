@@ -1,0 +1,6 @@
+@prefix@                  BIN
+@prefix@                  SBIN
+@shareddir@   SHARED
+@qsysconfdir@             ETC
+@prefix@/lib/indimail     PLUGINS
+@libexecdir@ LIBEXEC

@@ -74,4 +74,5 @@ f:::0755:/:hostname:hostname
 f:::0755:/:qmailconfig:qmailconfig
 f:::0755:/:config-fast:config-fast
 f:::0755:/:instcheck.indimail-mta:instcheck
+f:::0755:/:installer:installer
 f:::0755:/:whois:whois

@@ -346,7 +346,6 @@ hassrs.h
 headerbody.o
 help.t
 hfield.o
-hier.o
 home
 home+df
 hostname
@@ -362,8 +361,6 @@ iftoccfrom.o
 iftocc.o
 indimail.lib
 instcheck
-inst_check
-instcheck.o
 iopause.h
 iopause.o
 ipalloc.o
@@ -1175,3 +1172,4 @@ indimail-mta-release
 hasrresvport.h
 qfrontend.1
 qf-log-subject
+INPUT
