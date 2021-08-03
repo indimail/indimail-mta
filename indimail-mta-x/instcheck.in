@@ -1,16 +1,19 @@
 # $Log: instcheck.in,v $
+# Revision 1.2  2021-08-03 19:38:21+05:30  Cprogrammer
+# cd to package permissions directory
+#
 # Revision 1.1  2021-08-03 16:43:01+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: instcheck.in,v 1.1 2021-08-03 16:43:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: instcheck.in,v 1.2 2021-08-03 19:38:21+05:30 Cprogrammer Exp mbhangui $
 #
 if [ $# -eq 0 ] ; then
 	name=$(basename $0)
 	package=$(echo $name | cut -d. -f2)
 	if [ x"$package" = x"$name" ] ; then
 		echo "package name must be specified" 1>&2
-		exit 1
+		exit 100
 	fi
 	opt=-cfm
 elif [ $# -eq 1 ] ; then
@@ -21,16 +24,21 @@ elif [ $# -eq 2 ] ; then
 	opt=$2
 else
 	echo "USAGE: $0 package [options]" 1>&2
-	exit 1
+	exit 100
 fi
 conf_dir=@qsysconfdir@
 if [ ! -d $conf_dir/perms.d/$package ] ; then
 	echo "$package: missing permission files" 1>&2
-	exit 1
+	exit 111
+else
+	cd $conf_dir/perms.d/$package
+	if [ $? -ne 0 ] ; then
+		exit 111
+	fi
 fi
 if [ ! -f $conf_dir/perms.d/$package/INPUT ] ; then
 	echo "$package: missing INPUT definition" 1>&2
-	exit 1
+	exit 111
 fi
 dir=$(dirname $0)
 status=0
