@@ -726,8 +726,8 @@ compile hostname.c
 	./compile hostname.c
 
 instcheck: \
-instcheck.in conf-libexec conf-sysconfdir
-	$(edit) instcheck.in > $@
+warn-auto.sh instcheck.in conf-libexec conf-sysconfdir
+	cat warn-auto.sh instcheck.in | $(edit) > $@
 	chmod +x $@
 
 instcheck.o: \
