@@ -496,7 +496,7 @@ MAN: MAN.in
 
 install-strip: install
 
-install: $(it) $(man) installer DIRS BIN SBIN MAN SHARED LIBEXEC
+install: $(it) $(man) installer DIRS BIN SBIN MAN SHARED LIBEXEC INPUT
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(prefix)                < SBIN
