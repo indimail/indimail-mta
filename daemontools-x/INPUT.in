@@ -3,4 +3,3 @@
 @shareddir@   SHARED
 @libexecdir@ LIBEXEC
 @qsysconfdir@         ETC
-@mandir@        MAN
