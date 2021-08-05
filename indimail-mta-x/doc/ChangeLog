@@ -90,6 +90,7 @@ o use global variables directory /etc/indimail/control/global_vars for
     filters
 - 05/08/2021
 54. installer.c: added -p option to create directories as needed
+55. installer.c: allow installation for missing source if -m is specified
 
 * 
 Release 2.13 Start 14/02/2021
