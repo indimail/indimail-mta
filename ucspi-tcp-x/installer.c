@@ -1,8 +1,8 @@
 /*
  * $Log: installer.c,v $
- * Revision 1.16  2021-08-05 13:03:45+05:30  Cprogrammer
+ * Revision 1.16  2021-08-05 14:07:45+05:30  Cprogrammer
  * added -p option to create parent directories as needed
- * display usage for wrong usage
+ * display usage for wrong options/usage
  *
  * Revision 1.15  2021-08-03 15:51:43+05:30  Cprogrammer
  * added -m option to ignore missing files
@@ -513,7 +513,7 @@ doit(stralloc *line, int uninstall, int check)
 void
 die_usage()
 {
-	char           *usage_str =
+	const char     *usage_str =
 		"USAGE: installer [options] dest_dir\n"
 		"options\n"
 		"       -c check permissions of dir/files\n"
@@ -563,7 +563,7 @@ main(int argc, char **argv)
 	if ((my_uid = getuid()))
 		umask(077);
 	if (dofix && my_uid)
-		strerr_warn2(WARN, "installer not running as uid 0", &strerr_sys);
+		strerr_warn2(WARN, "installer not running as uid 0", 0);
 	for (;;) {
 		if (getln(&in, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input");
@@ -578,7 +578,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.16 2021-08-05 13:03:45+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.16 2021-08-05 14:07:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
