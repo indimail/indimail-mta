@@ -27,15 +27,17 @@ case "$1" in
 		fi
 	fi
 	echo "Adding IndiMail users/groups"
-	/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
+	set +e
+	/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail
 	if [ $? = 4 ] ; then
-		/usr/sbin/groupadd indimail
+		/usr/sbin/groupadd indimail || true
 	fi
 	/usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
-	/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail || true
+	/usr/bin/getent passwd indimail > /dev/null || /usr/sbin/useradd -r -g indimail -u 555 -d ${qmaildir} indimail
 	if [ $? = 4 ] ; then
 		/usr/sbin/useradd -r -g indimail -d ${prefix} indimail
 	fi
+	set -e
 	${rm} -f /var/spool/mail/indimail
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then

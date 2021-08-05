@@ -122,18 +122,26 @@ if [ -f ${qsysconfdir}/ucspi-tcp.perms ] ; then
 fi
 
 if [ $upgrade -eq 1 ] ; then # upgrade
-	for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
+	(
+	echo "checking services using tcpclient, tcpserver"
+	set +e
+	for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run`
 	do
 		i=$(dirname $i)
 		if [ -f $i.down ] ; then
 			${rm} -f $i.down
-			${prefix}/bin/svc -u $i || true
+			${prefix}/bin/svc -u $i 2>/dev/null || true
 		fi
 	done
+	set -e
+	) >> /var/log/ucspi-tcp-setup.log 2>&1
 	exit 0
 fi
 
+(
+echo "checking permissions"
 if [ -x ${libexecdir}/instcheck.ucspi-tcp ] ; then
 	${libexecdir}/instcheck.ucspi-tcp > /dev/null 2>&1
 fi
+) >> /var/log/ucspi-tcp-setup.log
 exit 0

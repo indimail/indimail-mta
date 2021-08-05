@@ -25,7 +25,9 @@ fi
 case "$1" in
     install|upgrade)
 	if [ " $1" = " upgrade" ] ; then
-		for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run 2>/dev/null`
+	(
+		set +e
+		for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run`
 		do
 			i=$(dirname $i)
 			${prefix}/bin/svok $i
@@ -34,7 +36,9 @@ case "$1" in
 				${prefix}/bin/svc -d $i || true
 			fi
 		done
+		set -e
 		exit 0
+	) >> /var/log/ucspi-tcp-setup.log 2>&1
 	fi
 	;;
 

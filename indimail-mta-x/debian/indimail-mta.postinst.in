@@ -187,7 +187,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 		fi
 	done
 	set -e
-	) >> /var/log/indimail-mta-setup.log
+	) >> /var/log/indimail-mta-setup.log 2>&1
 	exit 0
 fi
 if [ ! "${prefix}" = "/usr" ] ; then
