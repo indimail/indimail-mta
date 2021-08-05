@@ -88,6 +88,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 52. qf-smtp-ratelimit: replaced /bin/cat with exit 0 which does the same thing
 53. qfrontend: use control file control/qfilters to configure qmail-qfilter
     filters
+- 05/08/2021
+54. installer.c: added -p option to create directories as needed
 
 * 
 Release 2.13 Start 14/02/2021
