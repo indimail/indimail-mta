@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.19 2021-08-03 21:50:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.20 2021-08-05 17:46:41+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -219,7 +219,7 @@ chmod -R 755 %{buildroot}%{plugindir}
 
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
 %attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
-%attr(0644,root,root)                     %{qsysconfdir}/perms.d/%{name}/*
+%attr(0644,root,root)  %config(noreplace) %{qsysconfdir}/perms.d/%{name}/*
 %attr(0755,root,root)                     %{plugindir}/rblsmtpd.so
 %attr(0755,root,root)                     %{libexecdir}/instcheck.ucspi-tcp
 %attr(0755,root,root)                     %{libexecdir}/uinstaller

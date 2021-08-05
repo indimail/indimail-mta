@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.343 2021-08-03 19:25:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.344 2021-08-05 17:52:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -485,7 +485,7 @@ echo ../resolv.conf 1>&3
 %ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.pp
 %ghost %attr(0644,root,root)                       %{qsysconfdir}/indimail-mta.mod
 
-%attr(644,root,root)                               %{qsysconfdir}/perms.d/%{name}/*
+%attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/perms.d/%{name}/*
 %attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.te
 %attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.fc
 %attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/cronlist.q
