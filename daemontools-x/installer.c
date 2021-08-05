@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.18  2021-08-05 20:52:44+05:30  Cprogrammer
+ * fixed bug of skipping files in check mode
+ *
  * Revision 1.17  2021-08-05 17:16:22+05:30  Cprogrammer
  * allow installation for missig source if -m is specified
  *
@@ -455,21 +458,21 @@ doit(stralloc *line, int uninstall, int check)
 		break;
 
 	case 'f':
-		if (access(name, F_OK)) {
-			if (errno == error_noent) {
-				if (!missing_ok)
-					strerr_die3sys(111, FATAL, target.s, ": ");
-				print_info("skipping file", name, target.s, mode == -1 ? 0644 : mode, uid, gid);
-				return;
-			} else
-				strerr_die3sys(111, FATAL, name, ": ");
-		}
-		if (mode == -1) {
-			if (lstat(name, &st) == -1)
-				strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
-			mode = st.st_mode;
-		}
 		if (!check) {
+			if (access(name, F_OK)) {
+				if (errno == error_noent) {
+					if (!missing_ok)
+						strerr_die3sys(111, FATAL, target.s, ": ");
+					print_info("skipping file", name, target.s, mode == -1 ? 0644 : mode, uid, gid);
+					return;
+				} else
+					strerr_die3sys(111, FATAL, name, ": ");
+			}
+			if (mode == -1) {
+				if (lstat(name, &st) == -1)
+					strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
+				mode = st.st_mode;
+			}
 			print_info("install file", name, target.s, mode == -1 ? 0644 : mode, uid, gid);
 			if ((fdin = open_read(name)) == -1) {
 				if (opt)
@@ -592,7 +595,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.17 2021-08-05 17:16:22+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.18 2021-08-05 20:52:44+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
