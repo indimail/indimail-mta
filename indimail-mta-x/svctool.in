@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.601 2021-08-08 19:04:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.602 2021-08-08 23:14:07+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.601 2021-08-08 19:04:23+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.602 2021-08-08 23:14:07+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7701,7 +7701,7 @@ create_startup()
 		;;
 	esac
 	if [ -x "$DESTDIR"$QmailBinPrefix/sbin/initsvc -a ! -x /bin/busybox ] ; then
-		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -status
+		"$DESTDIR"$QmailBinPrefix/sbin/initsvc -on
 	else
 		if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1
@@ -7710,12 +7710,20 @@ create_startup()
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /lib/systemd/system/svscan.service
 				/bin/systemctl daemon-reload && echo "installed new svscan service"
 			fi
+			state=$(/bin/systemctl is-enabled svscan.service)
+			if [ $? -ne 0 -a "$state" = "disabled" ] ; then
+				/bin/systemctl enable svscan.service
+			fi
 		elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1
 			if [ $? -ne 0 ] ; then
 				echo "svscan startup enabled in systemd /usr/lib/systemd/system/svscan.service"
 				/bin/cp "$DESTDIR"$shareddir/boot/systemd /usr/lib/systemd/system/svscan.service
 				/bin/systemctl daemon-reload && echo "installed new svscan service"
+			fi
+			state=$(/bin/systemctl is-enabled svscan.service)
+			if [ $? -ne 0 -a "$state" = "disabled" ] ; then
+				/bin/systemctl enable svscan.service
 			fi
 		elif [ -f /sbin/initctl -a -d /etc/init ] ; then
 			cmp -s "$DESTDIR"$shareddir/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1
