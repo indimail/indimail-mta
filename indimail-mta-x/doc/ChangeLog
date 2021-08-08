@@ -91,6 +91,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 - 05/08/2021
 54. installer.c: added -p option to create directories as needed
 55. installer.c: allow installation for missing source if -m is specified
+- 08/08/2021
+56. svctool: fixed call to link_with_global in create_delivery, create_slowq
 
 * 
 Release 2.13 Start 14/02/2021
