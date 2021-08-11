@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.8 2020-10-08 22:53:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.9 2021-08-11 23:23:15+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.9  2021-08-11 23:23:15+05:30  Cprogrammer
+# use getopt to get options to set domain, timezone
+#
 # Revision 1.8  2020-10-08 22:53:43+05:30  Cprogrammer
 # use variables from Makefile
 #
@@ -27,6 +30,55 @@
 # Revision 1.1  2019-12-08 18:07:36+05:30  Cprogrammer
 # Initial revision
 #
+set -e
+
+usage()
+{
+	echo "Usage: svscan|indimail|indimail-mta|webmail"
+	echo "              [ -d | --domain   domain]"
+	echo "              [ -t | --timezone timezone ]"
+	echo "              [command] [args]"
+	echo "default command is svscan"
+	exit 100
+}
+
+set +e
+options=$(getopt -a -n entrypoint -o "d:t:" -l domain:,timezone: -- "$@")
+if [ $? != 0 ]; then
+	usage
+fi
+
+eval set -- "$options"
+while :
+do
+	case "$1" in
+	-d | --domain)
+		domain="$2"
+		/usr/sbin/svctool --default-domain=$domain --config=recontrol
+		shift 2
+	;;
+	-t | --timezone)
+		timezone="$2"
+		shift 2
+		if [ -x /usr/bin/timedatectl ] ; then
+			timedatectl set-timezone $timezone
+		elif [ -f /usr/share/zoneinfo/$timezone ] ; then
+			cp /usr/share/zoneinfo/$timezone /etc/localtime
+			echo $timezone > /etc/timezone
+		else
+			echo "WARNING: unable to set timezone $timezone" 1>&2
+		fi
+	;;
+	--) # end of options
+		shift
+		break
+	;;
+	*)
+		echo "Unexpected option: $1 - this should not happen."
+		usage
+	;;
+	esac
+done
 set -e
 
 case "$1" in
