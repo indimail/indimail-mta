@@ -37,13 +37,13 @@ needs two free descriptors for each pipe. The \fIlog\fR supervise process
 additionally sets argv2 as \fIs\fR to easily locate the process in ps
 output.
 
-Every five seconds, \fBsvscan\fR checks for subdirectories again. If it
+Every 60 seconds, \fBsvscan\fR checks for subdirectories again. If it
 sees a new subdirectory, it starts a new \fBsupervise\fR(8) process. If it
 sees an old subdirectory where a \fBsupervise\fR(8) process has exited, it
 restarts the \fBsupervise\fR(8) process. In the \fBlog\fR case it reuses
 the same pipe so that no data is lost.
 
-The default scan interval of 5 secs can be changed by setting
+The default scan interval of 60 secs can be changed by setting
 \fBSCANINTERVAL\fR environment variable. Set \fBSCANINTERVAL\fR to 0 to
 disable the automatic scanning of the service directory completely. You
 can also send a HUP signal to svscan to force a directory scan.
@@ -78,7 +78,17 @@ console, causing problems to go undetected for a long time.
 \fBsvscan\fR sets environment variable \fBSERVICEDIR\fR=\fIdirectory\fR.
 If \fIdirectory\fR is omitted than it uses current working directory for
 the value of \fBSERVICEDIR\fR. For every \fBsupervise\fR log process it
-runs, \fBsvscan\fR also sets \fBSV_PWD\fR=\fBs\fR environment variable
+runs, \fBsvscan\fR also sets \fBSV_PWD\fR=\fBs\fR environment variable.
+\fBsvscan\fR also sets PPID for supervise proceses and any initialization
+command it runs.
+
+\fBsvscan\fR is designed to run even with a PID of 1 and reap child
+processes. This is exploited in docker/podman/kubernates environment. The
+\fBINITCMD\fR environment variable can be used to do service management.
+The biggest advantage of \fBsvscan\fR is its simplicity. Unlike
+systemd(1), it is not complex and tied with multiple pieces of software to
+make it work. You can also use openrc from Gentoo to create a decent,
+simple service manager to start only the processes that you require.
 
 If \fBINITCMD\fR environment variable is defined and set to an empty string
 and if \fI@servicedir@\fR/.svscan/\fIrun\fR exists and has the executable
@@ -95,13 +105,17 @@ this
 #!/bin/sh
 /usr/bin/mount --bind @sysconfdir@/resolv.conf /etc/resolv.conf
 /usr/bin/mount -l
+if [ $PPID -eq 1 ] ; then
+	openrc indimail
+fi
 .EE
 
 On most Linux distros, svscan is started using a systemd(1) unit file
 /usr/lib/systemd/system/svscan.service. On FreeBSD, it is started using rc
 script in /usr/local/etc/rc.d/svscan. On Darwin, it is started by
 launchd(8) using /Library/LaunchDaemons/org.indimail.svscan.plist. On
-alpine linux, it is started by openrc using /etc/init.d/svscan.
+alpine linux, it is started by openrc using /etc/init.d/svscan. In a
+container environment, it is the entrypoint and starts as PID 1.
 
 .SH SEE ALSO
 proc(5),
