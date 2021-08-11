@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.24  2021-08-11 18:12:15+05:30  Cprogrammer
+ * fix for using of uninitialized value of signal in error log
+ *
  * Revision 1.23  2021-07-27 12:36:03+05:30  Cprogrammer
  * add feature to run ./init once before ./run
  *
@@ -442,11 +445,12 @@ doit(void)
 				ptr = dir[t] ? dir + t + 1 : dir;
 				if (wait_stopped(wstat)) {
 					t = wait_stopsig(wstat);
+					strnum2[fmt_ulong(strnum2, t)] = 0;
 					strerr_warn7(WARNING, "pid: ", strnum1, " service ", ptr, " stopped by signal ", strnum2, 0);
 				} else
-				if (wait_crashed(wstat)) {
+				if (wait_crashed(wstat))
 					strerr_warn6(WARNING, "pid: ", strnum1, " service ", ptr, " crashed", 0);
-				} else {
+				else {
 					t = wait_exitcode(wstat);
 					strnum2[fmt_ulong(strnum2, t)] = 0;
 					strerr_warn7(WARNING, "pid: ", strnum1, " service ", ptr, " exited with status=", strnum2, 0);
@@ -861,7 +865,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.23 2021-07-27 12:36:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.24 2021-08-11 18:12:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
