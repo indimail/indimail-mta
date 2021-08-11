@@ -76,7 +76,8 @@ connection to mailin-01.mx.aol.com. The point is that QMTP is faster than
 SMTP. If the QMTP connection attempt fails, the client tries a SMTP
 connection to port 25 as usual. \fBqmail-remote\fR does not try SMTP if the
 QMTP connection attempt succeeds but mail delivery through that connection
-fails.
+fails. You can disable MXPS by setting \fBDISABLE_MXPS\R environment
+variable.
 
 \fBqmail-remote\fR will issue the STARTTLS command if it finds the remote
 server supports STARTTLS and it finds a valid certificate in
