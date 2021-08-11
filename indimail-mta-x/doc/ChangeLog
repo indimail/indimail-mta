@@ -95,6 +95,10 @@ o use global variables directory /etc/indimail/control/global_vars for
 56. svctool: fixed call to link_with_global in create_delivery, create_slowq
 57. svctool: fixed svscan run script generation
 58. svctool: enable svscan service in create_startup
+- 11/08/2021
+59. qmail-remote.c: disable MXPS using DISABLE_MXPS
+60. qmail-remote.c: disable quoting (required for SMTP) when using MXPS
+61. smtpd.c: collapse multiple stralloc
 
 * 
 Release 2.13 Start 14/02/2021
