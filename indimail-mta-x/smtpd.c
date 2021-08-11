@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.245 $";
+char           *revision = "$Revision: 1.246 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2134,9 +2134,8 @@ int
 badipcheck(char *arg)
 {
 	/*- badip */
-	if (!stralloc_copys(&ipaddr, arg))
-		die_nomem();
-	if (!stralloc_0(&ipaddr))
+	if (!stralloc_copys(&ipaddr, arg) ||
+			!stralloc_0(&ipaddr))
 		die_nomem();
 	switch (address_match((badipfn && *badipfn) ? badipfn : "badip", &ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr))
 	{
@@ -2195,9 +2194,8 @@ dohelo(char *arg)
 	int             i;
 
 	seenhelo = 0;
-	if (!stralloc_copys(&helohost, arg))
-		die_nomem();
-	if (!stralloc_0(&helohost))
+	if (!stralloc_copys(&helohost, arg) ||
+			!stralloc_0(&helohost))
 		die_nomem();
 	if (!relayclient) { /*- turn on helo check if user not authenticated */
 		if (env_get("ENFORCE_FQDN_HELO")) {
@@ -2571,9 +2569,8 @@ setup()
 	unsigned int    i, len;
 	char           *x;
 
-	if (!stralloc_copys(&Revision, revision + 11))
-		die_nomem();
-	if (!stralloc_0(&Revision))
+	if (!stralloc_copys(&Revision, revision + 11) ||
+			!stralloc_0(&Revision))
 		die_nomem();
 	for (x = Revision.s; *x && *x != ' '; x++);
 	if (*x == ' ')
@@ -2697,9 +2694,8 @@ addrparse(char *arg)
 				if (!addr.s[i + 1 + ip4_scanbracket(addr.s + i + 1, &ip)]) {
 					if (ipme_is(&ip)) {
 						addr.len = i + 1;
-						if (!stralloc_cat(&addr, &liphost))
-							die_nomem();
-						if (!stralloc_0(&addr))
+						if (!stralloc_cat(&addr, &liphost) ||
+								!stralloc_0(&addr))
 							die_nomem();
 					}
 				}
@@ -2901,14 +2897,12 @@ smtp_ehlo(char *arg)
 			if (!(certdir = env_get("CERTDIR")))
 				certdir = auto_control;
 		}
-		if (!stralloc_copys(&filename, certdir))
-			die_nomem();
-		if (!stralloc_catb(&filename, "/", 1))
+		if (!stralloc_copys(&filename, certdir) ||
+				!stralloc_catb(&filename, "/", 1))
 			die_nomem();
 		servercert = ((servercert = env_get("SERVERCERT")) ? servercert : "servercert.pem");
-		if (!stralloc_cats(&filename, servercert))
-			die_nomem();
-		if (!stralloc_0(&filename))
+		if (!stralloc_cats(&filename, servercert) ||
+				!stralloc_0(&filename))
 			die_nomem();
 		if (!stat(filename.s, &st))
 			out("250-STARTTLS\r\n");
@@ -3346,11 +3340,9 @@ smtp_mail(char *arg)
 			return;
 		}
 	}
-	if (!stralloc_copys(&rcptto, ""))
-		die_nomem();
-	if (!stralloc_copys(&mailfrom, addr.s))
-		die_nomem();
-	if (!stralloc_0(&mailfrom))
+	if (!stralloc_copys(&rcptto, "") ||
+			!stralloc_copys(&mailfrom, addr.s) ||
+			!stralloc_0(&mailfrom))
 		die_nomem();
 	if ((x = env_get("MAX_RCPT_ERRCOUNT")))
 		scan_int(x, &max_rcpt_errcount);
@@ -3764,9 +3756,8 @@ smtp_rcpt(char *arg)
 		allowed_rcpthosts = addrallowed(addr.s);
 	if (relayclient) {
 		--addr.len;
-		if (!stralloc_cats(&addr, relayclient))
-			die_nomem();
-		if (!stralloc_0(&addr))
+		if (!stralloc_cats(&addr, relayclient) ||
+				!stralloc_0(&addr))
 			die_nomem();
 	} else /*- RELAYCLIENT not set */
 	if (!allowed_rcpthosts) { /*- not in rcpthosts - delivery to remote domains */
@@ -3933,11 +3924,9 @@ smtp_rcpt(char *arg)
 			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, d_envret, 1);
 	}
 	rcptcount++;
-	if (!stralloc_cats(&rcptto, "T"))
-		die_nomem();
-	if (!stralloc_cats(&rcptto, addr.s))
-		die_nomem();
-	if (!stralloc_0(&rcptto))
+	if (!stralloc_cats(&rcptto, "T") ||
+			!stralloc_cats(&rcptto, addr.s) ||
+			!stralloc_0(&rcptto))
 		die_nomem();
 	out("250 ok\r\n");
 }
@@ -4077,9 +4066,8 @@ put(char *ch)
 							if (!stralloc_0(&boundary))
 								die_nomem();
 							boundary_start = boundary.len;
-							if (!stralloc_cats(&boundary, "--"))
-								die_nomem();
-							if (!stralloc_catb(&boundary, cpstart, cp - cpstart))
+							if (!stralloc_cats(&boundary, "--") ||
+									!stralloc_catb(&boundary, cpstart, cp - cpstart))
 								die_nomem();
 							break;
 						}
@@ -4279,13 +4267,10 @@ spfreceived()
 
 	if (!spfbehavior || relayclient)
 		return;
-	if (!stralloc_copys(&rcvd_spf, "Received-SPF: "))
-		die_nomem();
-	if (!spfinfo(&sa))
-		die_nomem();
-	if (!stralloc_cat(&rcvd_spf, &sa))
-		die_nomem();
-	if (!stralloc_append(&rcvd_spf, "\n"))
+	if (!stralloc_copys(&rcvd_spf, "Received-SPF: ") ||
+			!spfinfo(&sa) ||
+			!stralloc_cat(&rcvd_spf, &sa) ||
+			!stralloc_append(&rcvd_spf, "\n"))
 		die_nomem();
 	if (BytesToOverflow) {
 		BytesToOverflow -= rcvd_spf.len;
@@ -4321,13 +4306,10 @@ create_logfilter()
 	if (env_get("LOGFILTER")) {
 		if (!(tmpdir = env_get("TMPDIR")))
 			tmpdir = "/tmp";
-		if (!stralloc_copys(&tmpFile, tmpdir))
-			die_nomem();
-		if (!stralloc_cats(&tmpFile, "/smtpFilterXXX"))
-			die_nomem();
-		if (!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())))
-			die_nomem();
-		if (!stralloc_0(&tmpFile))
+		if (!stralloc_copys(&tmpFile, tmpdir) ||
+				!stralloc_cats(&tmpFile, "/smtpFilterXXX") ||
+				!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())) ||
+				!stralloc_0(&tmpFile))
 			die_nomem();
 		if ((x = env_get("LOGFD")))
 			scan_int(x, &logfd);
@@ -4555,11 +4537,9 @@ authenticate(int method)
 	char            pwd_in_buf[1024];
 	struct substdio pwd_in;
 
-	if (!stralloc_0(&user))
-		die_nomem();
-	if (!stralloc_0(&pass))
-		die_nomem();
-	if (!stralloc_0(&resp))
+	if (!stralloc_0(&user) ||
+			!stralloc_0(&pass) ||
+			!stralloc_0(&resp))
 		die_nomem();
 	if (pipe(pi) == -1) /*- password input data */
 		return err_pipe();
@@ -4642,9 +4622,8 @@ authenticate(int method)
 	if (method == AUTH_DIGEST_MD5) {
 		if (!n)
 			return (1);
-		if (!stralloc_copys(&slop, "rspauth="))
-			die_nomem();
-		if (!stralloc_catb(&slop, respbuf, n))
+		if (!stralloc_copys(&slop, "rspauth=") ||
+				!stralloc_catb(&slop, respbuf, n))
 			die_nomem();
 		slop.s[slop.len] = 0;
 		if (b64encode(&slop, &resp) < 0)
@@ -4750,17 +4729,13 @@ auth_cram(int method)
 	*s++ = '@';
 	*s++ = 0;
 
-	if (!stralloc_copys(&pass, "<")) /*- generate challenge */
-		die_nomem();
-	if (!stralloc_cats(&pass, unique))
-		die_nomem();
-	if (!stralloc_cats(&pass, hostname))
-		die_nomem();
-	if (!stralloc_cats(&pass, ">"))
-		die_nomem();
-	if (b64encode(&pass, &slop) < 0)
-		die_nomem();
-	if (!stralloc_0(&slop))
+	/*- generate challenge */
+	if (!stralloc_copys(&pass, "<") ||
+			!stralloc_cats(&pass, unique) ||
+			!stralloc_cats(&pass, hostname) ||
+			!stralloc_cats(&pass, ">") ||
+			b64encode(&pass, &slop) < 0 ||
+			!stralloc_0(&slop))
 		die_nomem();
 
 	out("334 "); /*- "334 mychallenge \r\n" */
@@ -4891,23 +4866,15 @@ auth_digest_md5()
 		++x;
 	}
 	*x = 0;
-	if (!stralloc_copys(&tmp, (char *) encrypted))
-		die_nomem();
-	if (b64encode(&tmp, &nonce) != 0)
-		die_nomem();
-	if (!stralloc_cats(&slop, "realm=\""))
-		die_nomem();
-	if (!stralloc_cats(&slop, hostname))
-		die_nomem();
-	if (!stralloc_cats(&slop, "\",nonce=\""))
-		die_nomem();
-	if (!stralloc_cat(&slop, &nonce))
-		die_nomem();
-	if (!stralloc_cats(&slop, "\",qop=\"auth\""))
-		die_nomem();
-	if (!stralloc_cats(&slop, ",algorithm=md5-sess"))
-		die_nomem();
-	if (b64encode(&slop, &tmp) != 0)
+	if (!stralloc_copys(&tmp, (char *) encrypted) ||
+			b64encode(&tmp, &nonce) != 0 ||
+			!stralloc_cats(&slop, "realm=\"") ||
+			!stralloc_cats(&slop, hostname) ||
+			!stralloc_cats(&slop, "\",nonce=\"") ||
+			!stralloc_cat(&slop, &nonce) ||
+			!stralloc_cats(&slop, "\",qop=\"auth\"") ||
+			!stralloc_cats(&slop, ",algorithm=md5-sess") ||
+			b64encode(&slop, &tmp) != 0)
 		die_nomem();
 	out("334 ");
 	if (substdio_put(&ssout, tmp.s, tmp.len) == -1)
@@ -4928,9 +4895,8 @@ auth_digest_md5()
 		return (err_input());
 	if (scan_response(&tmp, &slop, "digest-uri") == 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "digest-uri="))
-		die_nomem();
-	if (!stralloc_cat(&resp, &tmp))
+	if (!stralloc_cats(&resp, "digest-uri=") ||
+			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- check nc field */
@@ -4940,9 +4906,8 @@ auth_digest_md5()
 		return (err_input());
 	if (case_diffb("00000001", 8, tmp.s) != 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "\nnc="))
-		die_nomem();
-	if (!stralloc_cat(&resp, &tmp))
+	if (!stralloc_cats(&resp, "\nnc=") ||
+			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- check nonce */
@@ -4952,17 +4917,15 @@ auth_digest_md5()
 		return (err_input());
 	if (case_diffb(nonce.s, tmp.len, tmp.s) != 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "\nnonce="))
-		die_nomem();
-	if (!stralloc_cat(&resp, &tmp))
+	if (!stralloc_cats(&resp, "\nnonce=") ||
+			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- check cnonce */
 	if (scan_response(&tmp, &slop, "cnonce") == 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "\ncnonce="))
-		die_nomem();
-	if (!stralloc_cat(&resp, &tmp))
+	if (!stralloc_cats(&resp, "\ncnonce=") ||
+			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- check qop */
@@ -4985,17 +4948,15 @@ auth_digest_md5()
 	default:
 		return (err_input());
 	}
-	if (!stralloc_cats(&resp, "\nqop="))
-		die_nomem();
-	if (!stralloc_cat(&resp, &tmp))
+	if (!stralloc_cats(&resp, "\nqop=") ||
+			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- xxx: todo / check realm against control/realms or so ?!  */
 	if (scan_response(&tmp, &slop, "realm") == 0)
 		return (err_input());
-	if (!stralloc_cats(&resp, "\nrealm="))
-		die_nomem();
-	if (!stralloc_cat(&resp, &tmp))
+	if (!stralloc_cats(&resp, "\nrealm=") ||
+			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- check response */
@@ -5065,11 +5026,9 @@ smtp_auth(char *arg)
 		err_transaction("auth");
 		return;
 	}
-	if (!stralloc_copys(&user, ""))
-		die_nomem();
-	if (!stralloc_copys(&pass, ""))
-		die_nomem();
-	if (!stralloc_copys(&resp, ""))
+	if (!stralloc_copys(&user, "") ||
+			!stralloc_copys(&pass, "") ||
+			!stralloc_copys(&resp, ""))
 		die_nomem();
 	i = str_chr(cmd, ' ');
 	arg = cmd + i;
@@ -5401,11 +5360,9 @@ tmp_rsa_cb(SSL *ssl_p, int export, int keylen)
 			if (!(certdir = env_get("CERTDIR")))
 				certdir = auto_control;
 		}
-		if (!stralloc_copys(&filename, certdir))
-			die_nomem();
-		if (!stralloc_catb(&filename, "/rsa512.pem", 11))
-			die_nomem();
-		if (!stralloc_0(&filename))
+		if (!stralloc_copys(&filename, certdir) ||
+				!stralloc_catb(&filename, "/rsa512.pem", 11) ||
+				!stralloc_0(&filename))
 			die_nomem();
 		if ((in = fopen(filename.s, "r"))) {
 			RSA            *rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL);
@@ -5445,11 +5402,9 @@ tmp_dh_cb(SSL *ssl_p, int export, int keylen)
 	}
 	if (keylen == 512) {
 		FILE           *in;
-		if (!stralloc_copys(&filename, certdir))
-			die_nomem();
-		if (!stralloc_catb(&filename, "/dh512.pem", 10))
-			die_nomem();
-		if (!stralloc_0(&filename))
+		if (!stralloc_copys(&filename, certdir) ||
+				!stralloc_catb(&filename, "/dh512.pem", 10) ||
+				!stralloc_0(&filename))
 			die_nomem();
 		if ((in = fopen(filename.s, "r"))) {
 			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
@@ -5462,11 +5417,9 @@ tmp_dh_cb(SSL *ssl_p, int export, int keylen)
 	}
 	if (keylen == 1024) {
 		FILE           *in;
-		if (!stralloc_copys(&filename, certdir))
-			die_nomem();
-		if (!stralloc_catb(&filename, "/dh1024.pem", 11))
-			die_nomem();
-		if (!stralloc_0(&filename))
+		if (!stralloc_copys(&filename, certdir) ||
+				!stralloc_catb(&filename, "/dh1024.pem", 11) ||
+				!stralloc_0(&filename))
 			die_nomem();
 		if ((in = fopen(filename.s, "r"))) {
 			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
@@ -5559,14 +5512,12 @@ tls_verify()
 			if (!(certdir = env_get("CERTDIR")))
 				certdir = auto_control;
 		}
-		if (!stralloc_copys(&filename, certdir))
-			die_nomem();
-		if (!stralloc_catb(&filename, "/", 1))
+		if (!stralloc_copys(&filename, certdir) ||
+				!stralloc_catb(&filename, "/", 1))
 			die_nomem();
 		clientca = ((clientca = env_get("CLIENTCA")) ? clientca : "clientca.pem");
-		if (!stralloc_cats(&filename, clientca))
-			die_nomem();
-		if (!stralloc_0(&filename))
+		if (!stralloc_cats(&filename, clientca) ||
+				!stralloc_0(&filename))
 			die_nomem();
 		STACK_OF(X509_NAME) *sk = SSL_load_client_CA_file(filename.s);
 		alloc_free(filename.s);
@@ -5622,9 +5573,9 @@ tls_verify()
 		if (!constmap(&mapclients, email.s, email.len))
 			ssl_verify_err = "email address not in my list of tlsclients";
 		else { /*- add the cert email to the proto if it helped allow relaying */
-			if (!stralloc_cats(&proto, "\n  (cert ")		/*- continuation line */
-				|| !stralloc_catb(&proto, email.s, email.len)
-				|| !stralloc_cats(&proto, ")"))
+			if (!stralloc_cats(&proto, "\n  (cert ") || /*- continuation line */
+					!stralloc_catb(&proto, email.s, email.len) ||
+					!stralloc_cats(&proto, ")"))
 				die_nomem();
 			authenticated = 1;
 			if (!env_put2("AUTHENTICATED", "1"))
@@ -5737,14 +5688,12 @@ tls_init()
 		if (!(certdir = env_get("CERTDIR")))
 			certdir = auto_control;
 	}
-	if (!stralloc_copys(&filename, certdir))
-		die_nomem();
-	if (!stralloc_catb(&filename, "/", 1))
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/", 1))
 		die_nomem();
 	servercert = ((servercert = env_get("SERVERCERT")) ? servercert : "servercert.pem");
-	if (!stralloc_cats(&filename, servercert))
-		die_nomem();
-	if (!stralloc_0(&filename))
+	if (!stralloc_cats(&filename, servercert) ||
+			!stralloc_0(&filename))
 		die_nomem();
 	if (!SSL_CTX_use_certificate_chain_file(ctx, filename.s)) {
 		alloc_free(filename.s);
@@ -5752,27 +5701,23 @@ tls_init()
 		tls_err("missing certificate");
 		return;
 	}
-	if (!stralloc_copys(&filename, certdir))
-		die_nomem();
-	if (!stralloc_catb(&filename, "/", 1))
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/", 1))
 		die_nomem();
 	clientca = ((clientca = env_get("CLIENTCA")) ? clientca : "clientca.pem");
-	if (!stralloc_cats(&filename, clientca))
-		die_nomem();
-	if (!stralloc_0(&filename))
+	if (!stralloc_cats(&filename, clientca) ||
+			!stralloc_0(&filename))
 		die_nomem();
 	SSL_CTX_load_verify_locations(ctx, filename.s, NULL);
 #if OPENSSL_VERSION_NUMBER >= 0x00907000L
 	/*- crl checking */
 	store = SSL_CTX_get_cert_store(ctx);
-	if (!stralloc_copys(&filename, certdir))
-		die_nomem();
-	if (!stralloc_catb(&filename, "/", 1))
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/", 1))
 		die_nomem();
 	clientcrl = ((clientcrl = env_get("CLIENTCRL")) ? clientcrl : "clientcrl.pem");
-	if (!stralloc_cats(&filename, clientcrl))
-		die_nomem();
-	if (!stralloc_0(&filename))
+	if (!stralloc_cats(&filename, clientcrl) ||
+			!stralloc_0(&filename))
 		die_nomem();
 	if ((lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))
 		&& (X509_load_crl_file(lookup, filename.s, X509_FILETYPE_PEM) == 1))
@@ -5789,14 +5734,12 @@ tls_init()
 		return;
 	}
 	/*- this will also check whether public and private keys match */
-	if (!stralloc_copys(&filename, certdir))
-		die_nomem();
-	if (!stralloc_catb(&filename, "/", 1))
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/", 1))
 		die_nomem();
 	servercert = ((servercert = env_get("SERVERCERT")) ? servercert : "servercert.pem");
-	if (!stralloc_cats(&filename, servercert))
-		die_nomem();
-	if (!stralloc_0(&filename))
+	if (!stralloc_cats(&filename, servercert) ||
+			!stralloc_0(&filename))
 		die_nomem();
 	if (!SSL_use_RSAPrivateKey_file(myssl, filename.s, SSL_FILETYPE_PEM)) {
 		SSL_free(myssl);
@@ -5843,15 +5786,11 @@ tls_init()
 	}
 	ssl = myssl;
 	/*- populate the protocol string, used in Received */
-	if (!stralloc_append(&proto, "("))
-		die_nomem();
-	if (!stralloc_cats(&proto, (char *) SSL_get_version(ssl)))
-		die_nomem();
-	if (!stralloc_catb(&proto, " ", 1))
-		die_nomem();
-	if (!stralloc_cats(&proto, (char *) SSL_CIPHER_get_name(SSL_get_current_cipher(ssl))))
-		die_nomem();
-	if (!stralloc_catb(&proto, " encrypted) ", 12))
+	if (!stralloc_append(&proto, "(") ||
+			!stralloc_cats(&proto, (char *) SSL_get_version(ssl)) ||
+			!stralloc_catb(&proto, " ", 1) ||
+			!stralloc_cats(&proto, (char *) SSL_CIPHER_get_name(SSL_get_current_cipher(ssl))) ||
+			!stralloc_catb(&proto, " encrypted) ", 12))
 		die_nomem();
 }
 #endif
@@ -5965,11 +5904,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				controldir = auto_control;
 		}
 		if (!libfn.len) {
-			if (!stralloc_copys(&libfn, controldir))
-				die_nomem();
-			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
-				die_nomem();
-			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+			if (!stralloc_copys(&libfn, controldir) ||
+					(libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/")) ||
+					!stralloc_catb(&libfn, "libindimail", 11) ||
 					!stralloc_0(&libfn))
 				die_nomem();
 		}
@@ -6070,24 +6007,21 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		plugin_symb = "plugin_init";
 
 	if (!(plugindir = env_get("PLUGINDIR"))) {
-		if (!stralloc_copys(&plugin, auto_prefix))
-			die_nomem();
-		if (!stralloc_catb(&plugin, "/lib/indimail/plugins/", 22))
+		if (!stralloc_copys(&plugin, auto_prefix) ||
+				!stralloc_catb(&plugin, "/lib/indimail/plugins/", 22))
 			die_nomem();
 	} else {
 		if (*plugindir != '/')
 			die_plugin(plugindir, "plugindir must have an absolute path", 0, 0);
-		if (!stralloc_copys(&plugin, plugindir))
-			die_nomem();
-		if (!stralloc_append(&plugin, "/"))
+		if (!stralloc_copys(&plugin, plugindir) ||
+				!stralloc_append(&plugin, "/"))
 			die_nomem();
 	}
 
 	if (!(start_plugin = env_get("SMTP_PLUGIN")))
 		start_plugin = "smtpd-plugin.so";
-	if (!stralloc_cats(&plugin, start_plugin))
-		die_nomem();
-	if (!stralloc_0(&plugin))
+	if (!stralloc_cats(&plugin, start_plugin) ||
+			!stralloc_0(&plugin))
 		die_nomem();
 	len = plugin.len;
 	/*- figure out plugin count */
@@ -6098,11 +6032,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 				plugin.len -= 4;
 				strnum[fmt_ulong(strnum, i++)] = 0;
-				if (!stralloc_catb(&plugin, strnum, 1))
-					die_nomem();
-				if (!stralloc_cats(&plugin, ".so"))
-					die_nomem();
-				if (!stralloc_0(&plugin))
+				if (!stralloc_catb(&plugin, strnum, 1) ||
+						!stralloc_cats(&plugin, ".so") ||
+						!stralloc_0(&plugin))
 					die_nomem();
 				if (access(plugin.s, R_OK)) {
 					if (errno != error_noent)
@@ -6113,11 +6045,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		} else {
 			plugin.len = len - 4;
 			strnum[fmt_ulong(strnum, i++)] = 0;
-			if (!stralloc_catb(&plugin, strnum, 1))
-				die_nomem();
-			if (!stralloc_cats(&plugin, ".so"))
-				die_nomem();
-			if (!stralloc_0(&plugin))
+			if (!stralloc_catb(&plugin, strnum, 1) ||
+					!stralloc_cats(&plugin, ".so") ||
+					!stralloc_0(&plugin))
 				die_nomem();
 			if (access(plugin.s, R_OK)) {
 				if (errno != error_noent)
@@ -6131,9 +6061,8 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if (!(plug = (PLUGIN **) alloc(sizeof (PLUGIN *) * plugin_count)))
 		die_nomem();
 	plugin.len = len - 4;
-	if (!stralloc_cats(&plugin, ".so"))
-		die_nomem();
-	if (!stralloc_0(&plugin))
+	if (!stralloc_cats(&plugin, ".so") ||
+			!stralloc_0(&plugin))
 		die_nomem();
 	for (i = j = 0; i < plugin_count;) {
 		if (!j) {
@@ -6142,11 +6071,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
 				plugin.len -= 4;
 				strnum[fmt_ulong(strnum, i)] = 0;
-				if (!stralloc_catb(&plugin, strnum, 1))
-					die_nomem();
-				if (!stralloc_cats(&plugin, ".so"))
-					die_nomem();
-				if (!stralloc_0(&plugin))
+				if (!stralloc_catb(&plugin, strnum, 1) ||
+						!stralloc_cats(&plugin, ".so") ||
+						!stralloc_0(&plugin))
 					die_nomem();
 				if (access(plugin.s, R_OK)) {		/*- smtpd-plugin0.so */
 					if (errno != error_noent)
@@ -6160,11 +6087,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		} else { /*- smtpd-plugin1.so, smtpd-plugin2.so, ... */
 			plugin.len = len - 4;
 			strnum[fmt_ulong(strnum, i)] = 0;
-			if (!stralloc_catb(&plugin, strnum, 1))
-				die_nomem();
-			if (!stralloc_cats(&plugin, ".so"))
-				die_nomem();
-			if (!stralloc_0(&plugin))
+			if (!stralloc_catb(&plugin, strnum, 1) ||
+					!stralloc_cats(&plugin, ".so") ||
+					!stralloc_0(&plugin))
 				die_nomem();
 			if (access(plugin.s, R_OK)) {
 				if (errno != error_noent)
@@ -6210,6 +6135,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.246  2021-08-11 21:55:00+05:30  Cprogrammer
+ * collapsed multiple stralloc statements
+ *
  * Revision 1.245  2021-08-03 15:50:21+05:30  Cprogrammer
  * disable help if DISABLE_HELP is set
  *
@@ -6384,7 +6312,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.245 2021-08-03 15:50:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.246 2021-08-11 21:55:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
