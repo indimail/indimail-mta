@@ -11,7 +11,6 @@ ucspitcp_version = $(shell [ -f ../ucspi-tcp-x/conf-version ] && cat ../ucspi-tc
 DATE = $(shell date)
 HOST = $(shell echo "`uname -m`-pc-`uname -s`-`uname -o|cut -d/ -f1`"|tr "[:upper:]" "[:lower:]")
 logdir = $(shell cat conf-logdir)
-USE_SQL = $(shell [ -n "`head -1 conf-sql`" ] && echo "1" || echo "")
 bash = $(shell [ -f /usr/local/bin/bash ] && echo "/usr/local/bin/bash" || echo "/bin/bash")
 SYSTEM = $(shell uname -s | tr "[:lower:]" "[:upper:]")
 email = $(shell cat conf-email)
