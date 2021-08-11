@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.108 2021-08-01 09:55:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.109 2021-08-11 18:15:25+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -595,10 +595,8 @@ if [ $noindimail -eq 0 ] ; then
   if [ $nonssd -eq 0 -a $nomysql -eq 0 ] ; then
     if [ -d /run ] ; then
       nssd_sock=/run/indimail/nssd.sock
-      mkdir -p /run/indimail
     elif [ -d /var/run ] ; then
       nssd_sock=/var/run/indimail/nssd.sock
-      mkdir -p /var/run/indimail
     else
       nssd_sock=/tmp/nssd.sock
     fi
@@ -761,6 +759,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.109  2021-08-11 18:15:25+05:30  Cprogrammer
+# removed not needed mkdir during build process
+#
 # Revision 2.108  2021-08-01 09:55:10+05:30  Cprogrammer
 # install mrtg service only if mrtg binary is present
 #
