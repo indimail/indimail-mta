@@ -2915,7 +2915,7 @@ smtp_ehlo(char *arg)
 		out("250-SMTPUTF8\r\n");
 	}
 #endif
-	out("250 HELP");
+	out("250 HELP\r\n");
 	if (!arg || !*arg)
 		dohelo(remotehost);
 	else
@@ -6135,12 +6135,6 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.246  2021-08-11 21:55:00+05:30  Cprogrammer
- * collapsed multiple stralloc statements
- *
- * Revision 1.245  2021-08-03 15:50:21+05:30  Cprogrammer
- * disable help if DISABLE_HELP is set
- *
  * Revision 1.244  2021-07-03 14:01:42+05:30  Cprogrammer
  * replaced getpwent() with in-build check for user in /etc/passwd
  *
@@ -6312,7 +6306,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.246 2021-08-11 21:55:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.244 2021-07-03 14:01:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
