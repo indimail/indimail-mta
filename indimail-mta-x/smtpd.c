@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.246 $";
+char           *revision = "$Revision: 1.245 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1581,7 +1581,7 @@ err_noauth()
 int
 err_noauthallowed()
 {
-	out("530 auth type prohibited (#5.7.0)\r\n");
+	out("530 auth type prohibited without TLS (#5.7.0)\r\n");
 	return -2;
 }
 
@@ -6135,6 +6135,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.245  2021-08-12 22:36:22+05:30  Cprogrammer
+ * disable help if DISABLE_HELP is set
+ *
  * Revision 1.244  2021-07-03 14:01:42+05:30  Cprogrammer
  * replaced getpwent() with in-build check for user in /etc/passwd
  *
@@ -6306,7 +6309,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.244 2021-07-03 14:01:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.245 2021-08-12 22:36:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
