@@ -2,10 +2,11 @@
 Release 2.14.0 Start 18/07/2021
 ======= Release Highlights ================================================
 o alpine linux ready - openrc script, svctool, minisvc
-o docker/podman images for [docker/podman](https://hub.docker.com/repository/docker/cprogrammer/indimail-mta)
+o github packages - docker/podman images for [docker/podman](https://ghcr.io/mbhangui/indimail-mta)
 o instant reconfiguration of domain for docker/podman containers
 o use global variables directory /etc/indimail/control/global_vars for
   DEFAULT_DOMAIN, QMAILDEFAULTHOST
+o installer can now install, uninstall and set permissions
 ===========================================================================
 - 18/07/2021
 1.  autoresponder.c: conditional define of _XOPEN_SOURCE to avoid
