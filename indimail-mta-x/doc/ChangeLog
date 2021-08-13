@@ -99,6 +99,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 59. qmail-remote.c: disable MXPS using DISABLE_MXPS
 60. qmail-remote.c: disable quoting (required for SMTP) when using MXPS
 61. smtpd.c: collapse multiple stralloc
+- 13/08/2021
+62. qmail-remote.c: Fixed getting incorrect smtp code in get3() function
 
 * 
 Release 2.13 Start 14/02/2021

@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.147 2021-08-11 21:45:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.148 2021-08-13 15:12:46+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -821,15 +821,9 @@ get3()
 	int             i;
 	unsigned long   code;
 
-	substdio_get(&smtpfrom, str, 3);
-	str[3] = 0;
-	for (i = 0; i < 3; i++) {
-		if (str[i] == '\r')
-			continue;
-		if (smtptext.len < HUGESMTPTEXT &&
-				!stralloc_append(&smtptext, str + i))
-			temp_nomem();
-	}
+	for (i = 0; i < 3; i++)
+		get1(str + i);
+	str[i] = 0;
 	scan_ulong(str, &code);
 	return code;
 }
@@ -853,8 +847,7 @@ smtpcode()
 			break;
 		while (ch != '\n')
 			get1((char *) &ch);
-		if (get3() != code)
-			err = 1;
+		get3();
 	}
 	while (ch != '\n')
 		get1((char *) &ch);
@@ -3608,7 +3601,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.147 2021-08-11 21:45:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.148 2021-08-13 15:12:46+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3616,6 +3609,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.148  2021-08-13 15:12:46+05:30  Cprogrammer
+ * fixed get3()
+ *
  * Revision 1.147  2021-08-11 21:45:53+05:30  Cprogrammer
  * disable MXPS using DISABLE_MXPS
  * disable quoting (required for SMTP) when using MXPS
