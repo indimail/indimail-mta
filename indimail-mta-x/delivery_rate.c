@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.6  2021-08-13 18:25:53+05:30  Cprogrammer
+ * turn off ratelimit if RATELIMIT_DIR is set but empty
+ *
  * Revision 1.5  2021-06-05 12:43:43+05:30  Cprogrammer
  * set do_ratelimit
  *
@@ -46,8 +49,11 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 	double          rate, conf_rate;
 
 	if ((rate_dir = env_get("RATELIMIT_DIR"))) {
-		if (!*rate_dir)
+		if (!*rate_dir) {
+			if (do_ratelimit)
+				*do_ratelimit = 0;
 			return 1;
+		}
 		while (!stralloc_copys(&ratelimit_file, rate_dir))
 			nomem();
 		s = ratelimit_file.len;
@@ -184,7 +190,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.5 2021-06-05 12:43:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.6 2021-08-13 18:25:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

@@ -101,6 +101,8 @@ o use global variables directory /etc/indimail/control/global_vars for
 61. smtpd.c: collapse multiple stralloc
 - 13/08/2021
 62. qmail-remote.c: Fixed getting incorrect smtp code in get3() function
+63. qmail-send.c, slowq-send.c, ratelimit.c: turn off ratelimit if
+    RATELIMIT_DIR is set but empty
 
 * 
 Release 2.13 Start 14/02/2021

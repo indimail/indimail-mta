@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.14  2021-08-13 18:26:02+05:30  Cprogrammer
+ * turn off ratelimit if RATELIMIT_DIR is set but empty
+ *
  * Revision 1.13  2021-07-26 23:25:36+05:30  Cprogrammer
  * log when log sighup, sigalrm is caught
  *
@@ -2381,7 +2384,8 @@ main()
 
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/slowq"; /*- single queue like qmail */
-	do_ratelimit = env_get("RATELIMIT_DIR") ? 1 : 0;
+	ptr = env_get("RATELIMIT_DIR");
+	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -2557,7 +2561,7 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.13 2021-07-26 23:25:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.14 2021-08-13 18:26:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)

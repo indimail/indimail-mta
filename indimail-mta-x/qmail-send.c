@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.91  2021-08-13 18:25:59+05:30  Cprogrammer
+ * turn off ratelimit if RATELIMIT_DIR is set but empty
+ *
  * Revision 1.90  2021-07-26 23:24:22+05:30  Cprogrammer
  * log when log sighup, sigalrm is caught
  *
@@ -2878,13 +2881,12 @@ main()
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	struct timeval  tv;
-#ifndef EXTERNAL_TODO
 	char           *ptr;
-#endif
 
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
-	do_ratelimit = env_get("RATELIMIT_DIR") ? 1 : 0;
+	ptr = env_get("RATELIMIT_DIR");
+	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	/*- get basename of queue directory to define qmail-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -3078,7 +3080,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.90 2021-07-26 23:24:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.91 2021-08-13 18:25:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	if (x)
