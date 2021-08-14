@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.27 2021-07-28 12:36:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.28 2021-08-15 01:37:05+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.27 2021-07-28 12:36:58+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.28 2021-08-15 01:37:05+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1452,7 +1452,7 @@ linuxuseradd()
 	while test $# -gt 1; do
 		case "$1" in
 		-M)
-		if [ -f /etc/debian_version -o -n "$pw"] ; then
+		if [ -f /etc/debian_version -o -n "$pw" ] ; then
 			opt2=""
 		elif [ -f /bin/busybox ] ; then
 			opt2="-H"
@@ -2483,6 +2483,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.28  2021-08-15 01:37:05+05:30  Cprogrammer
+# fixed missing wsp in test condition
+#
 # Revision 1.27  2021-07-28 12:36:58+05:30  Cprogrammer
 # renamed boot/svscan to boot/openrc for alpine
 #
