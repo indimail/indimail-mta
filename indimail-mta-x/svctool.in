@@ -7240,7 +7240,7 @@ linuxuseradd()
 	while test $# -gt 1; do
 		case "$1" in
 		-M)
-		if [ -f /etc/debian_version -o -n "$pw"] ; then
+		if [ -f /etc/debian_version -o -n "$pw" ] ; then
 			opt2=""
 		elif [ -f /etc/alpine-release ] ; then
 			opt2="-H"
