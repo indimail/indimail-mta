@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.602 2021-08-08 23:14:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.603 2021-08-15 01:36:05+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.602 2021-08-08 23:14:07+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.603 2021-08-15 01:36:05+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1614,9 +1614,9 @@ if [ ! -f "$DESTDIR"$CONTROLDIR/host.mysql ] ; then
 	else
 		if [ -n "$MYSQL_SOCKET" ] ; then
 			mysqlSocket=$MYSQL_SOCKET
-		elif [ -d /run/mysqld ] ; then
+		elif [ -d /run ] ; then
 			mysqlSocket=/run/mysqld/mysqld.sock
-		elif [ -d /var/run/mysqld ] ; then
+		elif [ -d /var/run ] ; then
 			mysqlSocket=/var/run/mysqld/mysqld.sock
 		elif [ -d /var/lib/mysql ] ; then
 			mysqlSocket=/var/lib/mysql/mysql.sock
@@ -4478,16 +4478,18 @@ mysql_user=$2
 mysql_pass=$3
 mysql_port=$4
 mysqlSocket=$5
-if [ -n "$MYSQL_SOCKET" ] ; then
-	mysqlSocket=$MYSQL_SOCKET
-elif [ -d /run/mysqld ] ; then
-	mysqlSocket=/run/mysqld/mysqld.sock
-elif [ -d /var/run/mysqld ] ; then
-	mysqlSocket=/var/run/mysqld/mysqld.sock
-elif [ -d /var/lib/mysql ] ; then
-	mysqlSocket=/var/lib/mysql/mysql.sock
-else
-	mysqlSocket=/run/mysqld/mysqld.sock
+if [ -z "$mysqlSocket" ]; then
+	if [ -n "$MYSQL_SOCKET" ] ; then
+		mysqlSocket=$MYSQL_SOCKET
+	elif [ -d /run ] ; then
+		mysqlSocket=/run/mysqld/mysqld.sock
+	elif [ -d /var/run ] ; then
+		mysqlSocket=/var/run/mysqld/mysqld.sock
+	elif [ -d /var/lib/mysql ] ; then
+		mysqlSocket=/var/lib/mysql/mysql.sock
+	else
+		mysqlSocket=/run/mysqld/mysqld.sock
+	fi
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
@@ -5377,9 +5379,9 @@ fi
 if [ -z "$mysqlSocket" ]; then
 	if [ -n "$MYSQL_SOCKET" ] ; then
 		mysqlSocket=$MYSQL_SOCKET
-	elif [ -d /run/mysqld ] ; then
+	elif [ -d /run ] ; then
 		mysqlSocket=/run/mysqld/mysqld.sock
-	elif [ -d /var/run/mysqld ] ; then
+	elif [ -d /var/run ] ; then
 		mysqlSocket=/var/run/mysqld/mysqld.sock
 	elif [ -d /var/lib/mysql ] ; then
 		mysqlSocket=/var/lib/mysql/mysql.sock
@@ -5476,16 +5478,18 @@ else
 	echo "mysqld: No such File or directory" 1>&2
 	return 1
 fi
-if [ -n "$MYSQL_SOCKET" ] ; then
-	mysqlSocket=$MYSQL_SOCKET
-elif [ -d /run/mysqld ] ; then
-	mysqlSocket=/run/mysqld/mysqld.sock
-elif [ -d /var/run/mysqld ] ; then
-	mysqlSocket=/var/run/mysqld/mysqld.sock
-elif [ -d /var/lib/mysql ] ; then
-	mysqlSocket=/var/lib/mysql/mysql.sock
-else
-	mysqlSocket=/run/mysqld/mysqld.sock
+if [ -z "$mysqlSocket" ]; then
+	if [ -n "$MYSQL_SOCKET" ] ; then
+		mysqlSocket=$MYSQL_SOCKET
+	elif [ -d /run ] ; then
+		mysqlSocket=/run/mysqld/mysqld.sock
+	elif [ -d /var/run ] ; then
+		mysqlSocket=/var/run/mysqld/mysqld.sock
+	elif [ -d /var/lib/mysql ] ; then
+		mysqlSocket=/var/lib/mysql/mysql.sock
+	else
+		mysqlSocket=/run/mysqld/mysqld.sock
+	fi
 fi
 
 mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
