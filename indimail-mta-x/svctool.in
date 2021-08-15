@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.603 2021-08-15 01:36:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.604 2021-08-15 09:43:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.603 2021-08-15 01:36:05+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.604 2021-08-15 09:43:28+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1008,18 +1008,32 @@ exit $1
 
 change_config()
 {
-if [ $# -ne 2 ] ; then
-	echo "USAGE: change_config old_config_file new_config_file" 1>&2
+if [ $# -lt 2 ] ; then
+	echo "USAGE: change_config old_config_file new_config_file [overwrite]" 1>&2
 	return 1
 fi
 conf_file=$1
 temp_file=$2
+if [ $# -eq 3 ] ; then
+	if [ " $3" = " 0" -o " $3" = " no" -o " $3" = " NO" ] ; then
+		overwrite=0
+	else
+		overwrite=1
+	fi
+else
+	overwrite=0
+fi
 if [ -f $conf_file ] ; then
 	if ! cmp -s $conf_file $temp_file ; then
-		echo "saving $temp_file as $conf_file.rpmnew"
-		/bin/mv $temp_file "$conf_file".rpmnew
+		if [ $overwrite -eq 0 ] ; then
+			echo "Saving $temp_file as $conf_file.rpmnew"
+			/bin/mv $temp_file "$conf_file".rpmnew
+		else
+			"Updating $conf_file"
+			/bin/mv $temp_file $conf_file
+		fi
 	else
-		echo "$conf_file not changed" 1>&2
+		echo "no difference between previous and new - $conf_file not changed" 1>&2
 		/bin/rm -f $temp_file
 	fi
 else
@@ -10066,6 +10080,7 @@ case $option in
 			elif [ -d /var/run ] ; then
 				mysqlSocket=/var/run/mysqld/mysqld.sock
 			elif [ -d /var/lib/mysql ] ; then
+				echo "svctool: possible wrong MySQL socket selected" 1>&2
 				mysqlSocket=/var/lib/mysql/mysql.sock
 			else
 				mysqlSocket=/run/mysqld/mysqld.sock
@@ -10083,13 +10098,13 @@ case $option in
 		fi
 		conf_file="$DESTDIR"$sysconfdir/indimail.cnf
 		mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
-		echo "creating mysql config MySQL version $mysql_version"
+		echo "Creating MySQL config for MySQL $mysql_version prefix=$mysqlPrefix socket=$mysqlSocket port=$mysql_port dbdir=$databasedir"
 		create_mysql_config > $TMPDIR/config.cnf.$$
 		conf_dir=`dirname $conf_file`
 		if [ ! -d $conf_dir ] ; then
 			mkdir -p $conf_dir
 		fi
-		change_config $conf_file $TMPDIR/config.cnf.$$
+		change_config $conf_file $TMPDIR/config.cnf.$$ 1
 		echo $mysql_version |grep MariaDB > /dev/null 2>&1
 		if [ $? -eq 0 ] ; then
 			mysql_version=`echo $mysql_version|cut -d- -f1`
