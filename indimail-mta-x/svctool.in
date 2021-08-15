@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.604 2021-08-15 09:43:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.605 2021-08-15 11:39:38+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.604 2021-08-15 09:43:28+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.605 2021-08-15 11:39:38+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1752,7 +1752,7 @@ check_libmysqlclient_lib()
 		elif [ -x /usr/bin/mysqld -o -x /usr/sbin/mysqld ] ; then
 			mysqlPrefix=/usr
 		else
-			echo "Couldn't figure out mysqlPrefix. Specify --mysqlPrefixx" 1>&2
+			echo "check_libmysqlclient_lib: Couldn't figure out mysqlPrefix. Specify --mysqlPrefix" 1>&2
 			return 1
 		fi
 	fi
