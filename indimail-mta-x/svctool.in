@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.606 2021-08-16 08:59:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.607 2021-08-16 12:10:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.606 2021-08-16 08:59:27+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.607 2021-08-16 12:10:43+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -119,7 +119,7 @@ Known values for OPTION are:
                    (qmail-smtpd)
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
-  authsmtp       - Enable Authenticated SMTP 
+  authsmtp       - Enable Authenticated SMTP
   forceauthsmtp  - Enforce Authenticated SMTP before accepting MAIL FROM
   authall        - Accept mails to both remote & local domains only after
                    AUTH SMTP or POP/IMAP before SMTP
@@ -140,7 +140,7 @@ Known values for OPTION are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  logfifo        - Capture additional status message from spamfilter in 
+  logfifo        - Capture additional status message from spamfilter in
                    qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
@@ -157,7 +157,7 @@ Known values for OPTION are:
   skipsend       - Skip creation of send script
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
-  dnscheck       - Check if mails can be sent to the sender domain 
+  dnscheck       - Check if mails can be sent to the sender domain
                    (domain should have a proper MX record)
   helofqdn       - Enforce . in the argument to HELO/EHLO
   helocheck      - Check validity of HELO domain
@@ -230,7 +230,7 @@ Known values for OPTION are:
                    badmailfrom, badrcptto, blackholedsenders, spamignore
                    relaymailfrom, authdomains, chkuserdomains
   spamfilter     - Spamfilter program along with arguments
-  logfifo        - Capture additional status message from spamfilter in 
+  logfifo        - Capture additional status message from spamfilter in
                    qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
@@ -360,7 +360,7 @@ Known values for OPTION are:
                    file or the filename given as argument to content-filter
   c              - Optional filename passed to content-filter argument
   spamfilter     - Spamfilter program along with arguments
-  logfifo        - Capture additional status message from spamfilter in 
+  logfifo        - Capture additional status message from spamfilter in
                    qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
@@ -441,7 +441,7 @@ Known values for OPTION are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  logfifo        - Capture additional status message from spamfilter in 
+  logfifo        - Capture additional status message from spamfilter in
                    qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
@@ -452,7 +452,7 @@ Known values for OPTION are:
   private_key    - Path to Private key created by dknewkey
 
 --qmqp=Port --qbase=queue_path --qcount=N --qstart=I
-  --servicedir=service_path 
+  --servicedir=service_path
   [--cntrldir=cntrl_path]
   --localip=a --maxdaemons=m --maxperip=i
   [--fsync --syncdir]
@@ -485,7 +485,7 @@ Known values for OPTION are:
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
 
-  logfifo        - Capture additional status message from spamfilter in 
+  logfifo        - Capture additional status message from spamfilter in
                    qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
@@ -664,8 +664,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   q              - Full path to an external virus scanner (like clamdscan)
   spamfilter     - Spamfilter program along with arguments
-  logfifo        - Capture additional status message from spamfilter in 
-                   qmail-logfifo logfile via logfifo  
+  logfifo        - Capture additional status message from spamfilter in
+                   qmail-logfifo logfile via logfifo
   r              - Mails get rejected as spam if exit status of spamfilter
                    equals the value of spamexitcode. r can have following values
                    0 - Do not reject SPAM mails
@@ -1588,13 +1588,13 @@ echo "Creating Default IndiMail Control Files"
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.imap ] ; then
 	(
 	echo "127.:allow,IMAPCLIENT=\"\""
-	echo "::1:allow,IMAPCLIENT=\"\"" 
+	echo "::1:allow,IMAPCLIENT=\"\""
 	) > "$DESTDIR"$sysconfdir/tcp/tcp.imap
 fi
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.pop3 ] ; then
 	(
 	echo "127.:allow,POP3CLIENT=\"\""
-	echo "::1:allow,POP3CLIENT=\"\"" 
+	echo "::1:allow,POP3CLIENT=\"\""
 	) > "$DESTDIR"$sysconfdir/tcp/tcp.pop3
 fi
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.poppass ] ; then
@@ -2036,19 +2036,19 @@ done
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.smtp ] ; then
 	(
 	echo "#127.:allow,RELAYCLIENT=\"\""
-	echo "#::1:allow,RELAYCLIENT=\"\"" 
+	echo "#::1:allow,RELAYCLIENT=\"\""
 	echo "#=:allow,GREYIP=\"127.0.0.1:1999\""
 	echo "#:allow,GREYIP=\"127.0.0.1:1999\",RBLSMTPD=\"-No DNS PTR Record - MTA Misconfigured.\""
 	) > "$DESTDIR"$sysconfdir/tcp/tcp.smtp
 fi
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.qmtp ] ; then
 	(
-	echo ":deny" 
+	echo ":deny"
 	) > "$DESTDIR"$sysconfdir/tcp/tcp.qmtp
 fi
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.qmqp ] ; then
 	(
-	echo ":deny" 
+	echo ":deny"
 	) > "$DESTDIR"$sysconfdir/tcp/tcp.qmqp
 fi
 LIST="tcp.smtp tcp.qmtp tcp.qmqp"
@@ -4745,7 +4745,7 @@ if [ ! -f $ca_path/ca.pem -o ! -f $ca_path/ca-key.pem ] ; then
 		/bin/rm -f $ca_path/cav3.ext
 		return 1
 	fi
-	/usr/bin/openssl rsa -in $ca_path/ca-key.pem -out $ca_path/ca-key.pem 
+	/usr/bin/openssl rsa -in $ca_path/ca-key.pem -out $ca_path/ca-key.pem
 	if [ $? -ne 0 ] ; then
 		echo "failed to create ca-key.pem" 1>&2
 		/bin/rm -f $ca_path/cav3.ext
@@ -4890,7 +4890,7 @@ databasedir=$1
 mysqlSocket=$2
 if [ -z "$mysqlSocket" ] ; then
 	if [ -n "$MYSQL_SOCKET" ] ; then
-		mysqlSocket=$MYSQL_SOCKET	
+		mysqlSocket=$MYSQL_SOCKET
 	elif [ -d /run ] ; then
 		mysqlSocket=/run/mysqld/mysqld.sock
 	elif [ -d /var/run ] ; then
@@ -4952,144 +4952,140 @@ else
 	install_db=""
 fi
 
-if [ ! -d "$DESTDIR"$databasedir/data -o "$force" -eq 1 ] ; then
-	if [ $force -eq 1 ] ; then
-		/bin/rm -rf "$DESTDIR"$databasedir/data
-	fi
-	if [ -d /run ] ; then
-		rundir=/run
-	elif [ -d /var/run ] ; then
-		rundir=/var/run
-	fi
-	if [ ! -d $rundir/mysqld ] ; then
-		/bin/mkdir -p $rundir/mysqld
-		$chown mysql:mysql $rundir/mysqld
-	fi
-	if ( /bin/mkdir -p "$DESTDIR"$databasedir/data && /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
-		(
-		echo "$RCSID"
-		echo "# generated on $host on `date`"
-		echo "# $prog_args"
-		echo ""
-		) > "$DESTDIR"$databasedir/README
-		$chown -R mysql:mysql "$DESTDIR"$databasedir
-		echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
-		if [ $mariadb -eq 1 ] ; then
-			echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
-			$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
-		else
-			if [ $mysql_version_8 -eq 1 ] ; then
-				opt_str="--user=root"
-			else
-				opt_str="--user=mysql"
-			fi
-			/bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str" 1>&2
-			/bin/echo -n " --skip-networking" 1>&2
-			/bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"  1>&2
-			/bin/echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket" 1>&2
-			$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str \
-				--skip-networking \
-				--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-				--datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket
-			if [ $? -ne 0 ] ; then
-				if [ -z $install_db ] ; then
-					echo "couldn't locate db installation program" 1>&2
-					return 1
-				else
-					echo "WARNING!!! mysqld --initialize-insecure failed. Running $install_db" 1>&2
-					echo "$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
-					$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
-				fi
-			fi
-		fi
-		if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
-			if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
-				echo "Creating MySQL SSL Certs" 1>&2
-				echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
-				$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
-			fi
-		elif [ $mariadb -eq 1 ] ; then
-			echo "Creating MariaDB SSL/TLS Certificates" 1>&2
-			mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
-		fi
-		$chown -R mysql:mysql "$DESTDIR"$databasedir
-		#
-		# Pretty Dumb stuff in packing MySQL on openSUSE, creating /usr/my.cnf.
-		#
-		if [ -f /usr/my.cnf ] ; then
-			/bin/rm /usr/my.cnf
-		fi
-		if [ $mysql_version_8 -eq 1 ] ; then
-			pass_str=0
-			auth_str=0
-			plugin_str=0
-		elif [ -f "$DESTDIR"$databasedir/data/mysql/user.frm ] ; then
-			# Create user mysql with all privileges
-			/usr/bin/strings "$DESTDIR"$databasedir/data/mysql/user.frm | grep "^Password" > /dev/null 2>&1
-			if [ $? -eq 0 ] ; then
-				pass_str=1
-			else
-				pass_str=0
-			fi
-			/usr/bin/strings "$DESTDIR"$databasedir/data/mysql/user.frm | grep "^authentication_string" > /dev/null 2>&1
-			if [ $? -eq 0 ] ; then
-				auth_str=1
-			else
-				auth_str=0
-			fi
-			if [ $mariadb -eq 1 ] ; then
-				/usr/bin/strings "$DESTDIR"$databasedir/data/mysql/user.frm | grep "^plugin" > /dev/null 2>&1
-				if [ $? -eq 0 ] ; then
-					plugin_str=1
-				else
-					plugin_str=0
-				fi
-			else # from another monkey at oracle
-					plugin_str=2
-			fi
-		else # hope for the best
-			echo "Unable to create MySQL db in "$DESTDIR"$databasedir/data" 1>&2
-			return 1
-		fi
-		if [ $mysql_version_8 -eq 1 ] ; then
-			opt_str="--user=root"
-		else
-			opt_str="--user=mysql"
-		fi
-		#
-		# Start MySQL daemon
-		#
-		/bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
-		/bin/echo -n " --skip-networking --datadir="$DESTDIR"$databasedir/data" 1>&2
-		/bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 1>&2
-		/bin/echo    " $opt_str --socket=$mysqlSocket" 1>&2
-		$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid \
-			--skip-networking --datadir="$DESTDIR"$databasedir/data \
-			--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-			$opt_str --socket=$mysqlSocket &
-		wait_for_mysqld
-		if [ -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
-			pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
-			(
-			# Create user mysql with all privileges
-			echo "Creating MySQL admin User for Database in "$DESTDIR"$databasedir/data" 1>&2
-			create_mysql_rootuser $mysql_version $mariadb $mysql_community_server $pass_str $auth_str $plugin_str
-			echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data" 1>&2
-			create_mysql_user $mysql_version
-			) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysqlSocket
-			kill $pid
-			wait_for_mysqld 1
-			$chown -R mysql:mysql "$DESTDIR"$databasedir
-		else
-			echo "did not find running mysqld: "$DESTDIR"$databasedir/mysqld.pid not found" 1>&2
-			return 1
-		fi
-	else
-		echo "Unable to create "$DESTDIR"$databasedir/data or "$DESTDIR"$databasedir/logs" 1>&2
-		return 1
-	fi
+if [ -d "$DESTDIR"$databasedir/data -a "$force" -eq 0 ] ; then
 	return 0
 fi
+t=$(dirname $mysqlSocket)
+if [ ! -d $t ] ; then
+	/bin/mkdir -p $t
+	$chown mysql:mysql $t
+fi
+if [ $force -eq 1 ] ; then
+	/bin/rm -rf "$DESTDIR"$databasedir/data
+fi
+if ( ! /bin/mkdir -p "$DESTDIR"$databasedir/data || ! /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
+	echo "Unable to create "$DESTDIR"$databasedir/data or "$DESTDIR"$databasedir/logs" 1>&2
+	return 1
+fi
+(
+echo "$RCSID"
+echo "# generated on $host on `date`"
+echo "set -x"
+echo "$prog_args"
+echo ""
+) > "$DESTDIR"$databasedir/.create_db
+chmod +x "$DESTDIR"$databasedir/.create_db
+$chown -R mysql:mysql "$DESTDIR"$databasedir
+echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
+if [ $mariadb -eq 1 ] ; then
+	echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
+	$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
+else
+	if [ $mysql_version_8 -eq 1 ] ; then
+		opt_str="--user=root"
+	else
+		opt_str="--user=mysql"
+	fi
+	/bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str" 1>&2
+	/bin/echo -n " --skip-networking" 1>&2
+	/bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"  1>&2
+	/bin/echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket" 1>&2
+	$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str \
+		--skip-networking \
+		--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
+		--datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket
+	if [ $? -ne 0 ] ; then
+		if [ -z $install_db ] ; then
+			echo "couldn't locate db installation program" 1>&2
+			return 1
+		else
+			echo "WARNING!!! mysqld --initialize-insecure failed. Running $install_db" 1>&2
+			echo "$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
+			$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
+		fi
+	fi
+fi
+if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
+	if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
+		echo "Creating MySQL SSL Certs" 1>&2
+		echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
+		$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
+	fi
+elif [ $mariadb -eq 1 ] ; then
+	echo "Creating MariaDB SSL/TLS Certificates" 1>&2
+	mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
+fi
+$chown -R mysql:mysql "$DESTDIR"$databasedir
+#
+# Pretty Dumb stuff in packing MySQL on openSUSE, creating /usr/my.cnf.
+#
+if [ -f /usr/my.cnf ] ; then
+	/bin/rm /usr/my.cnf
+fi
+if [ $mysql_version_8 -eq 1 ] ; then
+	pass_str=0
+	auth_str=0
+	plugin_str=0
+elif [ -f "$DESTDIR"$databasedir/data/mysql/user.frm ] ; then
+	# Create user mysql with all privileges
+	/usr/bin/strings "$DESTDIR"$databasedir/data/mysql/user.frm | grep "^Password" > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		pass_str=1
+	else
+		pass_str=0
+	fi
+	/usr/bin/strings "$DESTDIR"$databasedir/data/mysql/user.frm | grep "^authentication_string" > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		auth_str=1
+	else
+		auth_str=0
+	fi
+	if [ $mariadb -eq 1 ] ; then
+		/usr/bin/strings "$DESTDIR"$databasedir/data/mysql/user.frm | grep "^plugin" > /dev/null 2>&1
+		if [ $? -eq 0 ] ; then
+			plugin_str=1
+		else
+			plugin_str=0
+		fi
+	else # from another monkey at oracle
+			plugin_str=2
+	fi
+else # hope for the best
+	echo "Unable to create MySQL db in "$DESTDIR"$databasedir/data" 1>&2
+	return 1
+fi
+if [ $mysql_version_8 -eq 1 ] ; then
+	opt_str="--user=root"
+else
+	opt_str="--user=mysql"
+fi
+#
+# Start MySQL daemon
+#
+/bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
+/bin/echo -n " --skip-networking --datadir="$DESTDIR"$databasedir/data" 1>&2
+/bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 1>&2
+/bin/echo    " $opt_str --socket=$mysqlSocket" 1>&2
+$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid \
+	--skip-networking --datadir="$DESTDIR"$databasedir/data \
+	--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
+	$opt_str --socket=$mysqlSocket &
+wait_for_mysqld
+if [ ! -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
+	echo "did not find running mysqld: "$DESTDIR"$databasedir/mysqld.pid not found" 1>&2
+	return 1
+fi
+pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
+(
+# Create user mysql with all privileges
+echo "Creating MySQL admin User for Database in "$DESTDIR"$databasedir/data" 1>&2
+create_mysql_rootuser $mysql_version $mariadb $mysql_community_server $pass_str $auth_str $plugin_str
+echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data" 1>&2
+create_mysql_user $mysql_version
+) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysqlSocket
+kill $pid
+wait_for_mysqld 1
+$chown -R mysql:mysql "$DESTDIR"$databasedir
 }
 
 check_mysqld_variable()
@@ -6846,7 +6842,7 @@ do
 		if [ -n "$rundir" ] ; then
 			/bin/rm -rf $rundir/"."${svcname}
 		fi
-		echo "Enabled Service ${svcname}" 
+		echo "Enabled Service ${svcname}"
 	else
 		echo "Service $i is not disabled (should have a '.' as the first char in ${svcname})" 1>&2
 	fi
@@ -7558,7 +7554,7 @@ create_users()
 		fi
 		;;
 		*)
-		linuxuseradd -c "indimail virus scan user" -M -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell qscand 
+		linuxuseradd -c "indimail virus scan user" -M -g qscand -d $QmailHOME/qscanq -G qmail -s $safe_shell qscand
 		;;
 	esac
 	case "$host" in
@@ -8040,7 +8036,7 @@ status=0
 		fi
 		if [ -x /usr/sbin/semodule -a $status -eq 0 ] ; then
 			echo "enabling selinux module "$policy_file".pp `date`"
-			/usr/sbin/semodule -i "$policy_file".pp 
+			/usr/sbin/semodule -i "$policy_file".pp
 			if [ $status -eq 0 ] ; then
 				status=$?
 			fi
@@ -8339,7 +8335,7 @@ report ()
 		/bin/cat $LOGDIR/reports/send_pend
 		/bin/rm -f $LOGDIR/reports/send_pend
 	fi
-	/bin/cat $LOGDIR/deliver.25/current 
+	/bin/cat $LOGDIR/deliver.25/current
 	) | "$DESTDIR"$libexecdir/matchup 5>$LOGDIR/reports/pend_tmp > $LOGDIR/reports/deliver25
 	if [ -s $LOGDIR/reports/pend_tmp ] ; then
 		/bin/mv $LOGDIR/reports/pend_tmp $LOGDIR/reports/send_pend
@@ -8471,7 +8467,7 @@ report ()
 				(
 				echo ATTENTION: Mail Administrators
 				echo
-				echo Mail Statistics for `/usr/bin/head -1 $CONTROLDIR/me` 
+				echo Mail Statistics for `/usr/bin/head -1 $CONTROLDIR/me`
 				echo on $date
 				echo from host `"$DESTDIR"$libexecdir/hostname`
 				echo
@@ -8704,7 +8700,7 @@ do
 				if [ $? -eq 0 ] ; then
 					echo "$cert is NOT a client cert. Disabled" 1>&2
 				fi
-			fi		
+			fi
 		fi
 	fi
 done
@@ -8868,9 +8864,9 @@ do
 	if [ $silent -eq 0 ] ; then
 		printf "export %-35s %s %s %s\n" "`dirname $i`" $owner $group $mode
 	fi
-	export_variables $i $i/.variables $owner $group $mode 
+	export_variables $i $i/.variables $owner $group $mode
 done
-dir="$DESTDIR"$sysconfdir/control/defaultqueue 
+dir="$DESTDIR"$sysconfdir/control/defaultqueue
 if [ -d $dir ] ; then
 	if [ $silent -eq 0 ] ; then
 		printf "export %-35s %s %s %s\n" $dir $owner $group $mode
@@ -10039,7 +10035,7 @@ case $option in
 	;;
 
 	10) # --config
-	# config creation for MySQL, MySQL Database creation, imap, 
+	# config creation for MySQL, MySQL Database creation, imap,
 	# 1  MySQL Config creation
 	# 2  MySQL Database creation
 	# 3  MariaDB SSL/RSA cert creation
@@ -10253,7 +10249,7 @@ case $option in
 			if [ $? ne 0 ] ; then
 				exit 1
 			fi
-			/bin/ln -sr $sysconfdir/scan.conf 
+			/bin/ln -sr $sysconfdir/scan.conf
 				/etc/clamd.d/scan.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				cd /etc/clamd.d
@@ -10263,7 +10259,7 @@ case $option in
 			if [ ! -f $sysconfdir/scan.conf ] ; then
 				create_clamd_conf > $sysconfdir/scan.conf
 			fi
-			/bin/ln -sr $sysconfdir/scan.conf 
+			/bin/ln -sr $sysconfdir/scan.conf
 				/etc/clamd.d/scan.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				cd /etc/clamd.d
@@ -10304,7 +10300,7 @@ case $option in
 		if [ -f /etc/clamd.d/scan.conf -a ! -L /etc/clamd.d/scan.conf ] ; then
 			mv /etc/clamd.d/scan.conf /etc/clamd.d/scan.conf.BAK
 			if [ -f $sysconfdir/scan.conf ] ; then
-				/bin/ln -sr $sysconfdir/scan.conf 
+				/bin/ln -sr $sysconfdir/scan.conf
 					/etc/clamd.d/scan.conf 2>/dev/null
 				if [ $? -ne 0 ] ; then
 					cd /etc/clamd.d
@@ -11211,7 +11207,7 @@ case $option in
 	fi
 	if [ ! -d $i ] ; then
 		(
-		echo "------ $servicedir/$service_name ------------" 
+		echo "------ $servicedir/$service_name ------------"
 		echo "NOTE: This service has no configured variables"
 		) 1>&2
 		exit 1

@@ -112,6 +112,7 @@ o installer can now install, uninstall and set permissions
     mysql config
 - 16/08/2021
 65. svctool: fixed create_fifologger function
+66. svctool: create mysql socket directory before creating mysql db
 
 * 
 Release 2.13 Start 14/02/2021
