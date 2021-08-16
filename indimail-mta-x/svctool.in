@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.605 2021-08-15 11:39:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.606 2021-08-16 08:59:27+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.605 2021-08-15 11:39:38+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.606 2021-08-16 08:59:27+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2204,10 +2204,10 @@ if [ " $fifo_path" = " " ] ; then
 	echo "fifo_path cannot be null" 1>&2
 	return 1
 fi
+conf_dir="$DESTDIR"$SERVICEDIR/qmail-logfifo/variables
 if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 	return 0
 fi
-conf_dir="$DESTDIR"$SERVICEDIR/qmail-logfifo/variables
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
 		mv $conf_dir "$conf_dir".bak

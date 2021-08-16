@@ -110,6 +110,8 @@ o installer can now install, uninstall and set permissions
 - 15/08/2021
 64. svctool: display version, socket, port, database dir when creating
     mysql config
+- 16/08/2021
+65. svctool: fixed create_fifologger function
 
 * 
 Release 2.13 Start 14/02/2021
