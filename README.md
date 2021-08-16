@@ -44,7 +44,7 @@ To install you need to do the following
 
 The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Create Local Binary Packages](.github/CREATE-Packages.md)
 
-You can also use docker / podman images to deploy indimail-mta. Look at the chapter [Docker / Podman Repository](#docker-/-podman-repository) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
+You can also use docker / podman images to deploy indimail-mta. Look at the chapter [Docker / Podman Repository](#docker-/-podman-containers) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
 Doing a source build can be daunting for many. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
 
@@ -793,9 +793,9 @@ ucspi-tcp:
 
 The [docker repository](https://github.com/mbhangui?tab=packages) can be used to pull docker/podman images for indimail/indimail-mta
 
-For latest details refer to [README](https://github.com/mbhangui/docker/blob/master/README.md "Docker README ")
+For latest details refer to [README](https://github.com/mbhangui/indimail-docker/blob/master/README.md "Docker README ")
 
-Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently (Jul 25, 2021) docker, without any warning or communication, on the sly, has removed the ability to connect with a github account unless you pay them dollars every month - a questionable business practice. As a principle, I no longer support docker. I have deleted all container images that were hosted there. Instead of the Docker Container Registry, I now use the [Github Container Registry](https://github.blog/2020-09-01-introducing-github-container-registry/). You can also build your own images. Refer to [README](https://github.com/mbhangui/docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
+Earlier I used to provide docker / podman container images on [docker hub](https://hub.docker.com/u/cprogrammer). But recently (Jul 25, 2021) docker, without any warning or communication, on the sly, has removed the ability to connect with a github account unless you pay them dollars every month - a questionable business practice. As a principle, I no longer support docker. I have deleted all container images that were hosted there. Instead of the Docker Container Registry, I now use the [Github Container Registry](https://github.blog/2020-09-01-introducing-github-container-registry/). You can also build your own images. Refer to [README](https://github.com/mbhangui/indimail-docker/blob/master/README.md) on how to build your own container images. If you cannot build it on your own, ping me and I will be happy to build it for you.
 
 # SUPPORT INFORMATION
 
