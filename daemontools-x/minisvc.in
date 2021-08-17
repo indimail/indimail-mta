@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.28 2021-08-15 01:37:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.29 2021-08-17 13:19:27+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.28 2021-08-15 01:37:05+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.29 2021-08-17 13:19:27+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -95,13 +95,29 @@ Known values for OPTION are:
   name1 name2 .. - name of a service or list of services to be removed
                    This should be a SYSV style service, systemd, event.d unit file
 
---config=add-boot|rm-boot|users|rmusers|inittab
+--config=add-boot|rm-boot|users|rmusers|inittab|cert
+  [--postmaster=user[@domain]]
+  [--common_name=CN]
+  [--validity_days=days]
+  [--capath=ca_path_dir]
+  [--certdir=certdir]
 
   add-boot       - Add startup scripts for IndiMail to get started during boot
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
   users          - Create Internal System Users needed by svscan
   rmusers        - Delete Internal System Users needed by svscan
   inittab        - Install svscan started by configuration in /etc/inittab
+  cert           - Generate SSL Certificate
+  postmaster     - name of the user who will recieve bounces on the local host.
+                   This can also be a remote user i.e. &postmaster@indimail.org
+  common_name    - Common Name (CN) for server
+  days           - Number of days for which the Certificate should be valid
+  ca_path_dir    - Directory having CA certificate
+  certdir        - Directory in which new certificates will be placed
+
+--check-certs=[full path of certificate]
+  Check certificate given as argument or
+  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
 --set-variable=n --variable-value=v
   --servicedir=service_path
@@ -723,7 +739,7 @@ create_startup()
 	case "$host" in
 		*-*-darwin*)
 		if [ -n "$DESTDIR" ] ; then
-			mkdir -p "$DESTDIR"/etc
+			/bin/mkdir -p "$DESTDIR"/etc
 		fi
 		if [ ! -f /etc/synthetic.conf ] ; then
 			if [ $silent -eq 0 ] ; then
@@ -1416,9 +1432,9 @@ macOSuseradd()
 	fi
 	if [ $create_home -eq 1 ] ; then
 		if [ ! -d $homedir ] ; then
-			mkdir -p $homedir
-			chmod 700 $homedir
-			chown $homedir $userid:$groupid
+			/bin/mkdir -p $homedir
+			/bin/chmod 700 $homedir
+			$chown $homedir $userid:$groupid
 		fi
 	fi
 }
@@ -1729,6 +1745,227 @@ delUsers()
 	fi
 }
 
+create_cert()
+{
+	if [ $# -ne 3 ] ; then
+		echo "svctool: create_cert postmaster common_name validity_days" 1>&2
+			exit 1
+	fi
+	postmaster=$1
+	common_name=$2
+	no_of_days=$3
+	if [ -z "$postmaster" ] ; then
+		echo "postmaster not specified" 1>&2
+		exit 1
+	fi
+	if [ -z "$common_name" ] ; then
+		echo "CN not specified" 1>&2
+		exit 1
+	fi
+	if [ ! -x /usr/bin/openssl ] ; then
+		echo "/usr/bin/openssl: No such file or directory" 1>&2
+		exit 1
+	fi
+	echo "Creating SSL Configuration email=$postmaster cn=$common_name"
+	create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
+	/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
+	conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
+	/bin/rm -f $conf_file
+	change_config $conf_file $TMPDIR/config.cnf.$$
+	/bin/chmod 640 $conf_file
+	$chown indimail:qmail $conf_file
+	if [ -f "$DESTDIR"$sysconfdir/certs/servercert.pem -a $force -ne 1 ] ; then
+		echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
+		exit 1
+	fi
+	echo "Creating openssl Certificate for $no_of_days days in $sysconfdir/certs/servercert.pem"
+	/usr/bin/openssl req -new -x509 -nodes -days $no_of_days -out "$DESTDIR"$sysconfdir/certs/servercert.pem \
+		-keyout "$DESTDIR"$sysconfdir/certs/servercert.pem -config $conf_file
+	if [ $? -ne 0 ] ; then
+		echo "Failed to create openssl x509 certificate" 1>&2
+		exit 1
+	fi
+	/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
+	$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
+	/bin/ln -sr "$DESTDIR"$sysconfdir/certs/servercert.pem \
+		"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
+	if [ $? -ne 0 ] ; then
+		cd "$DESTDIR"$sysconfdir/certs
+		/bin/ln -s servercert.pem clientcert.pem
+	fi
+	echo "Updating temporary RSA and DH keys"
+	"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$sysconfdir/certs
+
+	svc_list=""
+	echo "Fixing CERTDIR variable for services"
+	for i in @servicedir@/*/variables/CERTDIR
+	do
+		j=`/bin/cat $i 2>/dev/null`
+		if [ ! " $j" = " $sysconfdir/certs" ] ; then
+			echo "Fixed $i"
+			echo $sysconfdir/certs > $i
+			x=$(echo $i | cut -d'/' -f1,2,3)
+			if [ -z "$svc_list" ] ; then
+				svc_list="$x"
+			else
+				svc_list="$svc_list $x"
+			fi
+		else
+			echo "$i: OK"
+		fi
+	done
+	echo "Updating CERT as $sysconfdir/certs/servercert.pem"
+	for i in `ls @servicedir@/*/variables/*CERTFILE \
+		@servicedir@/*/variables/CLIENTCERT \
+		@servicedir@/*/variables/SERVERCERT \
+		@servicedir@/*/variables/CERTDIR 2>/dev/null`
+	do
+		x=$(echo $i | cut -d'/' -f1,2,3)
+		echo $svc_list | grep $x >/dev/null
+		if [ $? -ne 0 ] ; then
+			if [ -z "$svc_list" ] ; then
+				svc_list="$x"
+			else
+				svc_list="$svc_list $x"
+			fi
+		fi
+		j=`/bin/cat $i`
+		if [ ! " $j" = " $sysconfdir/certs/servercert.pem" ] ; then
+			echo "Fixed $i"
+			echo "$sysconfdir/certs/servercert.pem" > $i
+		else
+			echo "$i: OK"
+		fi
+	done
+	echo "Updating TLS CACHE as $sysconfdir/certs/couriersslcache"
+	for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
+	do
+		j=`/bin/cat $i`
+		if [ ! " $j" = " $sysconfdir/certs/couriersslcache" ] ; then
+			echo "Fixed $i"
+			echo "$sysconfdir/certs/couriersslcache" > $i
+			x=$(echo $i | cut -d'/' -f1,2,3)
+			echo $svc_list | grep $x >/dev/null
+			if [ $? -ne 0 ] ; then
+				if [ -z "$svc_list" ] ; then
+					svc_list="$x"
+				else
+					svc_list="$svc_list $x"
+				fi
+			fi
+		else
+			echo "$i: OK"
+		fi
+	done
+	echo "====== Certificate $sysconfdir/certs/servercert.pem ========="
+	/usr/bin/openssl x509 -in "$DESTDIR"$sysconfdir/certs/servercert.pem -noout -text
+	echo "================================================================"
+	# restart services
+	echo "Restarting services using $sysconfdir/certs/servercert.pem"
+	for i in $svc_list; do echo "Restarting service $i"; done
+	svc -r $svc_list
+}
+
+tls_cert_check()
+{
+if [ ! -x /usr/bin/openssl ] ; then
+	echo "/usr/bin/openssl: No such file or directory" 1>&2
+	return 1
+fi
+error=0
+if [ $# -eq 1 ] ; then
+	files=$1
+else
+	files="$sysconfdir/certs/servercert.pem $sysconfdir/certs/clientcert.pem"
+fi
+for cert in $files
+do
+	if [ -f $cert ]; then
+		echo "Checking $cert"
+		#First, check that it's a valid cert for the task
+		TEMP_PURPOSE=`/usr/bin/openssl x509 -in $cert -noout -purpose 2>/dev/null`
+		if [ "$?" != "0" ]; then
+			error=1
+			dir=`dirname $cert`
+			fil=`basename $cert`
+			$mv -f $cert $dir/BROKEN-${fil}
+			if [ $? -eq 0 ] ; then
+				echo $TEMP_PURPOSE 1>&2
+				echo "$cert is a broken cert. Disabled" 1>&2
+			fi
+		fi
+
+		#Now check it hasn't expired
+		TEMP_DATE=`/usr/bin/openssl x509 -in $cert -noout -dates 2>/dev/null|grep -i after|cut -d= -f2`
+		case "$host" in
+			*-*-darwin*|*-*-freebsd*)
+			EXPIRE_IN_SECS=`date -j -f "%b %d %T %Y %Z" "$TEMP_DATE" "+%s"`
+			;;
+			*)
+			EXPIRE_IN_SECS=`date +%s --date $TEMP_DATE 2>/dev/null`
+			;;
+		esac
+		if [ "`echo $EXPIRE_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+			NOW_IN_SECS=`date +%s 2>/dev/null`
+			if [ "`echo $NOW_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+				if [ $NOW_IN_SECS -gt $EXPIRE_IN_SECS ]; then
+					error=1
+					echo expiry $TEMP_DATE 1>&2
+					dir=`dirname $cert`
+					fil=`basename $cert`
+					$mv -f $cert $dir/EXPIRED-${fil}
+					if [ $? -eq 0 ] ; then
+						echo "$cert has EXPIRED. Disabling" 1>&2
+					fi
+				fi
+			fi
+		fi
+
+		if [ "`echo $cert|grep server`" != "" ];then
+			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|server).* yes'`" = "" ]; then
+				error=1
+				echo "Purpose $TEMP_PURPOSE" 1>&2
+				dir=`dirname $cert`
+				fil=`basename $cert`
+				$mv -f $cert $dir/NOT-A-SERVER-CERT-${fil}
+				if [ $? -eq 0 ] ; then
+					echo "$cert is NOT a server cert. Disabled" 1>&2
+				fi
+			fi
+		fi
+		if [ "`echo $cert|grep client`" != "" ];then
+			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|client).* yes'`" = "" ]; then
+				error=1
+				echo "Purpose $TEMP_PURPOSE" 1>&2
+				dir=`dirname $cert`
+				fil=`basename $cert`
+				$mv -f $cert $dir/NOT-A-CLIENT-CERT-${fil}
+				if [ $? -eq 0 ] ; then
+					echo "$cert is NOT a client cert. Disabled" 1>&2
+				fi
+			fi
+		fi
+	fi
+done
+if [ $error -eq 0 ] ; then
+	echo "All Certificates found OK. Press ENTER to view Certificates"
+	read key
+	(
+	for cert in $files; do
+		echo "==== Certificate $cert ========="
+		if [ -L $cert ] ; then
+			echo "Linked to $(readlink $cert)"
+			ls -ld $cert
+		else
+	 		openssl x509 -in $cert -text
+		fi
+	 	echo ================================================================
+		echo
+	done
+	) | $MORE
+fi
+}
+
 ################################# Main ##################################
 if test $# -eq 0; then
     usage 1
@@ -1775,6 +2012,7 @@ use_unshare=0
 nooverwrite=0
 run_file_only=0
 mount_resolvconf=0
+valid_for=366
 verbose=""
 
 if [ " $CONTROLDIR" = " " ] ; then
@@ -1981,6 +2219,31 @@ while test $# -gt 0; do
 	break
 	;;
 
+	--capath=*)
+	ca_path=$optarg
+	;;
+	--certdir=*)
+	certdir=$optarg
+	;;
+	--postmaster=*)
+	postmaster=$optarg
+	;;
+	--common_name=*)
+	common_name=$optarg
+	;;
+	--validity_days=*)
+	valid_for=$optarg
+	;;
+	--check-certs)
+	cert_file=""
+	option=21
+	;;
+
+	--check-certs=*)
+	cert_file=$optarg
+	option=21
+	;;
+
 	--version)
 	echo "$RCSID"
 	exit 0
@@ -2016,26 +2279,10 @@ CONTROLDIR=$cntrldir
 export CONTROLDIR
 case $option in
 	1)
-	# config creation for MySQL, MySQL Database creation, imap, 
-	# 1  MySQL Config creation
-	# 2  MySQL Database creation
-	# 4  IMAP config creation
-	# 5  POP3 config creation
-	# 6  qmail config creation
-	# 7  create indimail users from system (/etc/passwd,etc)
-	# 8  remove indimail users from system (/etc/passwd, etc)
-	# 9  create clamd, freschclam config, foxhole_all.cdb
-	# 10 create bogofilter config and wordlist.db
-	# 11 create CERTS
-	# 12 add startup for indimail at boot
-	# 13 remove startup for indimail from boot
-	# 14 enable selinux module
-
+	# config creation for --config option
 	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	case $config_name in
 		add-boot)
-		[ `id -u` = 0 ] || exit 4
 		case "$host" in
 			*-*-darwin*)
 			if [ -z "$servicedir" ] ; then
@@ -2048,7 +2295,6 @@ case $option in
 		;;
 
 		rm-boot)
-		[ `id -u` = 0 ] || exit 4
 		remove_startup
 		;;
 
@@ -2079,7 +2325,6 @@ case $option in
 
 		inittab)
 		# Check that we're a privileged user
-		[ `id -u` = 0 ] || exit 4
 		if [ " $servicedir" = " " ] ; then
 			echo "Supervise Directory not specified" 1>&2
 			usage 1
@@ -2117,6 +2362,10 @@ case $option in
 		fi
 		;;
 
+		cert)
+		create_cert "$postmaster" "$common_name" $valid_for
+		;;
+
 
 		*)
 		echo "Invalid configuration option $optarg" 1>&2
@@ -2127,18 +2376,15 @@ case $option in
 
 	2) # remove service
 	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	rmsvc "$service"
 	;;
 
 	3) # enable servie
 	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	ensvc "$service"
 	;;
 
 	4)
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -2147,7 +2393,6 @@ case $option in
 	;;
 
 	5)
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -2157,7 +2402,6 @@ case $option in
 
 	6)
 	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -2320,8 +2564,6 @@ case $option in
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	dump_config "$servicedir" "$cntrldir"
 	;;
 	17)
@@ -2462,6 +2704,14 @@ case $option in
 	disable_service $*
 	;;
 
+	21) # check-certs
+	if [ -z "$cert_file" ] ; then
+		tls_cert_check
+	else
+		tls_cert_check $cert_file
+	fi
+	;;
+
 	*)
 	if [ " $option" = " " ] ; then
 		echo "No Options Provided" 1>&2
@@ -2483,6 +2733,10 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.29  2021-08-17 13:19:27+05:30  Cprogrammer
+# added --config=cert option
+# added --check-certs option
+#
 # Revision 1.28  2021-08-15 01:37:05+05:30  Cprogrammer
 # fixed missing wsp in test condition
 #

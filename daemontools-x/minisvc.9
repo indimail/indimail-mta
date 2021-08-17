@@ -143,6 +143,7 @@ Known values for OPTION are:
 --config=add-boot|rm-boot|users|rmusers|inittab|cert
   [--postmaster=user[@domain]]
   [--common_name=CN]
+  [--validity_days=days]
   [--capath=ca_path_dir]
   [--certdir=certdir]
 
@@ -152,6 +153,12 @@ Known values for OPTION are:
   rmusers        - Delete Internal System Users needed by svscan
   inittab        - Install svscan started by configuration in /etc/inittab
   cert           - Generate SSL Certificate
+  postmaster     - name of the user who will recieve bounces on the local host.
+                   This can also be a remote user i.e. &postmaster@indimail.org
+  common_name    - Common Name (CN) for server
+  days           - Number of days for which the Certificate should be valid
+  ca_path_dir    - Directory having CA certificate
+  certdir        - Directory in which new certificates will be placed
 
 --check-certs=[full path of certificate]
   Check certificate given as argument or
