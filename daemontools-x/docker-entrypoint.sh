@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.10 2021-08-17 13:27:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.11 2021-08-17 23:33:44+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.11  2021-08-17 23:33:44+05:30  Cprogrammer
+# changed hotfix for named piped bug
+#
 # Revision 1.10  2021-08-17 13:27:21+05:30  Cprogrammer
 # added hotfix for podman named pipe bug
 #
@@ -82,10 +85,9 @@ do
 	;;
 	esac
 done
-set -e
 # fix for podman bug which drops fifos
 if [ ! -p /var/indimail/queue/queue1/lock/trigger ] ; then
-	echo "Your podman/docker suffers from named pipe bug. Applying hotfix" 1>&2
+	echo "Your podman/docker container suffers from named pipe bug. Applying hotfix" 1>&2
 	if [ -f /usr/sbin/inlookup -a -d /var/indimail/inquery ] ; then
 		cd /var/indimail/inquery
 		for i in 1 2 3 4 5; do if [ ! -p infifo.$i ] ; then echo creating infifo.$i; \
@@ -94,12 +96,13 @@ if [ ! -p /var/indimail/queue/queue1/lock/trigger ] ; then
 	fi
 	if [ -d /var/indimail/queue -a ! -f /service/.svscan/run ] ; then
 		cd /var/indimail/queue
-		for i in queue*; do queue-fix -v $i; done
+		for i in queue*; do if [ ! -p $i/lock/trigger ] ; then queue-fix -v $i; fi; done
 		for i in slowq nqueue; do if [ -d $i ] ; then queue-fix -v $i; fi; done
 		for i in qmta; do if [ -d $i ] ; then queue-fix -mv $i; fi; done
 	fi
 fi
 # end fix for podman
+set -e
 cd /
 
 case "$1" in
