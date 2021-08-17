@@ -140,12 +140,22 @@ Known values for OPTION are:
   name1 name2 .. - name of a service or list of services to be removed
                    This should be a SYSV style service, systemd, event.d unit file
 
---config=add-boot|rm-boot|users|rmusers|inittab
+--config=add-boot|rm-boot|users|rmusers|inittab|cert
+  [--postmaster=user[@domain]]
+  [--common_name=CN]
+  [--capath=ca_path_dir]
+  [--certdir=certdir]
 
   add-boot       - Add startup scripts for IndiMail to get started during boot
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
   users          - Create Internal System Users needed by svscan
   rmusers        - Delete Internal System Users needed by svscan
+  inittab        - Install svscan started by configuration in /etc/inittab
+  cert           - Generate SSL Certificate
+
+--check-certs=[full path of certificate]
+  Check certificate given as argument or
+  Check IndiMail Certificates in @sysconfdir@/certs without any arguments
 
 --set-variable=n --variable-value=v
   --servicedir=service_path
@@ -239,12 +249,13 @@ Known values for OPTION are:
 
 --print-variables
   --servicedir=service_path
-  --service-name=service_name
+  --service-name=service_name | --envdir=dir
 
   Print environment variables for a service
   service_path   - Path where supervise service will be installed
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
+  dir            - Environment variables directory
 
 --print-all-variables
   --servicedir=service_path
