@@ -808,6 +808,11 @@ substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtp
 void
 get1(char *ch)
 {
+	/*-
+	 * substdio_get(&smtpfrom, ...) can either return here with exactly 1 byte
+	 * or
+	 * via calling dropped() in saferead()
+	 */
 	substdio_get(&smtpfrom, ch, 1);
 	if (*ch != '\r' && smtptext.len < HUGESMTPTEXT &&
 			!stralloc_append(&smtptext, ch))
@@ -821,6 +826,13 @@ get3()
 	int             i;
 	unsigned long   code;
 
+	/*-
+	 * substdio_get(&smtpfrom, ...) can either return here with exactly 1 byte
+	 * or
+	 * via calling dropped() in saferead()
+	 * calling substdio_get(&smtpfrom xxx, n) where n != 1 is unsafe unless
+	 * you check the return value for bytes returned
+	 */
 	for (i = 0; i < 3; i++)
 		get1(str + i);
 	str[i] = 0;

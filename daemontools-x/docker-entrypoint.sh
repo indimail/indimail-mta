@@ -1,11 +1,8 @@
 #
-# $Id: docker-entrypoint.sh,v 1.11 2021-08-17 23:33:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.10 2021-08-18 00:10:16+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
-# Revision 1.11  2021-08-17 23:33:44+05:30  Cprogrammer
-# changed hotfix for named piped bug
-#
-# Revision 1.10  2021-08-17 13:27:21+05:30  Cprogrammer
+# Revision 1.10  2021-08-18 00:10:16+05:30  Cprogrammer
 # added hotfix for podman named pipe bug
 #
 # Revision 1.9  2021-08-11 23:23:15+05:30  Cprogrammer
@@ -86,7 +83,7 @@ do
 	esac
 done
 # fix for podman bug which drops fifos
-if [ ! -p /var/indimail/queue/queue1/lock/trigger ] ; then
+if [ -f /usr/sbin/qmail-queue -a ! -p /var/indimail/queue/queue1/lock/trigger ] ; then
 	echo "Your podman/docker container suffers from named pipe bug. Applying hotfix" 1>&2
 	if [ -f /usr/sbin/inlookup -a -d /var/indimail/inquery ] ; then
 		cd /var/indimail/inquery
