@@ -577,7 +577,6 @@ Known values for OPTION are:
   [--infifo=fifo_path]
   [--legacyserver]
   [--postmaster=user[@domain]]
-  [--common_name=CN]
   [--query-cache]
   [--ssl|--tlsprog|--starttls]
 
@@ -983,6 +982,8 @@ Known values for OPTION are:
 --config=add-alt|remove-alt|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
   [--common_name=CN]
+  [--common_name=CN]
+  [--validity_days=days]
   [--capath=ca_path_dir]
   [--certdir=certdir]
   [--servicedir=service_path]
@@ -1014,8 +1015,9 @@ Known values for OPTION are:
   recontrol      - Update control files having domain name configured with a
                    new domain
   postmaster     - name of the user who will recieve bounces on the local host.
-                   This can also be a remote user i.e. &postmaster@indi.com
+                   This can also be a remote user i.e. &postmaster@indimail.org
   common_name    - Common Name (CN) for server
+  days           - Number of days for which the Certificate should be valid
   ca_path_dir    - Directory having CA certificate
   certdir        - Directory in which new certificates will be placed
   service_path   - Path where supervise service have been installed

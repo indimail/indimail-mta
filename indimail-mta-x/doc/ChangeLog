@@ -113,6 +113,10 @@ o installer can now install, uninstall and set permissions
 - 16/08/2021
 65. svctool: fixed create_fifologger function
 66. svctool: create mysql socket directory before creating mysql db
+- 17/08/2021
+67. svctool: refactored --config=cert (added cert validity option)          
+68. svctool: --check-certs now displays certificate details in addition to
+    state of certificate
 
 * 
 Release 2.13 Start 14/02/2021

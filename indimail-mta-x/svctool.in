@@ -1,6 +1,6 @@
 # WARNING: This file was auto-generated. Do not edit!
 #
-# $Id: svctool.in,v 2.607 2021-08-16 12:10:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.608 2021-08-17 13:16:29+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.607 2021-08-16 12:10:43+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.608 2021-08-17 13:16:29+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -503,7 +503,6 @@ Known values for OPTION are:
   [--infifo=fifo_path]
   [--legacyserver]
   [--postmaster=user[@domain]]
-  [--common_name=CN]
   [--query-cache]
   [--ssl|--tlsprog|--starttls]
 
@@ -909,6 +908,8 @@ Known values for OPTION are:
 --config=add-alt|remove-alt|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
   [--common_name=CN]
+  [--common_name=CN]
+  [--validity_days=days]
   [--capath=ca_path_dir]
   [--certdir=certdir]
   [--servicedir=service_path]
@@ -940,8 +941,9 @@ Known values for OPTION are:
   recontrol      - Update control files having domain name configured with a
                    new domain
   postmaster     - name of the user who will recieve bounces on the local host.
-                   This can also be a remote user i.e. &postmaster@indi.com
+                   This can also be a remote user i.e. &postmaster@indimail.org
   common_name    - Common Name (CN) for server
+  days           - Number of days for which the Certificate should be valid
   ca_path_dir    - Directory having CA certificate
   certdir        - Directory in which new certificates will be placed
   service_path   - Path where supervise service have been installed
@@ -8705,7 +8707,21 @@ do
 	fi
 done
 if [ $error -eq 0 ] ; then
-	echo "All Certificates found OK"
+	echo "All Certificates found OK. Press ENTER to view Certificates"
+	read key
+	(
+	for cert in $files; do
+		echo "==== Certificate $cert ========="
+		if [ -L $cert ] ; then
+			echo "Linked to $(readlink $cert)"
+			ls -ld $cert
+		else
+	 		openssl x509 -in $cert -text
+		fi
+	 	echo ================================================================
+		echo
+	done
+	) | $MORE
 fi
 }
 
@@ -8931,6 +8947,127 @@ do
 done
 }
 
+create_cert()
+{
+	if [ $# -ne 3 ] ; then
+		echo "svctool: create_cert postmaster common_name validity_days" 1>&2
+			exit 1
+	fi
+	postmaster=$1
+	common_name=$2
+	no_of_days=$3
+	if [ -z "$postmaster" ] ; then
+		echo "postmaster not specified" 1>&2
+		exit 1
+	fi
+	if [ -z "$common_name" ] ; then
+		echo "CN not specified" 1>&2
+		exit 1
+	fi
+	if [ ! -x /usr/bin/openssl ] ; then
+		echo "/usr/bin/openssl: No such file or directory" 1>&2
+		exit 1
+	fi
+	echo "Creating SSL Configuration email=$postmaster cn=$common_name"
+	create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
+	/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
+	conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
+	/bin/rm -f $conf_file
+	change_config $conf_file $TMPDIR/config.cnf.$$
+	/bin/chmod 640 $conf_file
+	$chown indimail:qmail $conf_file
+	if [ -f "$DESTDIR"$sysconfdir/certs/servercert.pem -a $force -ne 1 ] ; then
+		echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
+		exit 1
+	fi
+	echo "Creating openssl Certificate for $no_of_days days in $sysconfdir/certs/servercert.pem"
+	/usr/bin/openssl req -new -x509 -nodes -days $no_of_days -out "$DESTDIR"$sysconfdir/certs/servercert.pem \
+		-keyout "$DESTDIR"$sysconfdir/certs/servercert.pem -config $conf_file
+	if [ $? -ne 0 ] ; then
+		echo "Failed to create openssl x509 certificate" 1>&2
+		exit 1
+	fi
+	/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
+	$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
+	/bin/ln -sr "$DESTDIR"$sysconfdir/certs/servercert.pem \
+		"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
+	if [ $? -ne 0 ] ; then
+		cd "$DESTDIR"$sysconfdir/certs
+		/bin/ln -s servercert.pem clientcert.pem
+	fi
+	echo "Updating temporary RSA and DH keys"
+	"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$sysconfdir/certs
+
+	svc_list=""
+	echo "Fixing CERTDIR variable for services"
+	for i in @servicedir@/*/variables/CERTDIR
+	do
+		j=`/bin/cat $i 2>/dev/null`
+		if [ ! " $j" = " $sysconfdir/certs" ] ; then
+			echo "Fixed $i"
+			echo $sysconfdir/certs > $i
+			x=$(echo $i | cut -d'/' -f1,2,3)
+			if [ -z "$svc_list" ] ; then
+				svc_list="$x"
+			else
+				svc_list="$svc_list $x"
+			fi
+		else
+			echo "$i: OK"
+		fi
+	done
+	echo "Updating CERT as $sysconfdir/certs/servercert.pem"
+	for i in `ls @servicedir@/*/variables/*CERTFILE \
+		@servicedir@/*/variables/CLIENTCERT \
+		@servicedir@/*/variables/SERVERCERT \
+		@servicedir@/*/variables/CERTDIR 2>/dev/null`
+	do
+		x=$(echo $i | cut -d'/' -f1,2,3)
+		echo $svc_list | grep $x >/dev/null
+		if [ $? -ne 0 ] ; then
+			if [ -z "$svc_list" ] ; then
+				svc_list="$x"
+			else
+				svc_list="$svc_list $x"
+			fi
+		fi
+		j=`/bin/cat $i`
+		if [ ! " $j" = " $sysconfdir/certs/servercert.pem" ] ; then
+			echo "Fixed $i"
+			echo "$sysconfdir/certs/servercert.pem" > $i
+		else
+			echo "$i: OK"
+		fi
+	done
+	echo "Updating TLS CACHE as $sysconfdir/certs/couriersslcache"
+	for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
+	do
+		j=`/bin/cat $i`
+		if [ ! " $j" = " $sysconfdir/certs/couriersslcache" ] ; then
+			echo "Fixed $i"
+			echo "$sysconfdir/certs/couriersslcache" > $i
+			x=$(echo $i | cut -d'/' -f1,2,3)
+			echo $svc_list | grep $x >/dev/null
+			if [ $? -ne 0 ] ; then
+				if [ -z "$svc_list" ] ; then
+					svc_list="$x"
+				else
+					svc_list="$svc_list $x"
+				fi
+			fi
+		else
+			echo "$i: OK"
+		fi
+	done
+	echo "====== Certificate $sysconfdir/certs/servercert.pem ========="
+	/usr/bin/openssl x509 -in "$DESTDIR"$sysconfdir/certs/servercert.pem -noout -text
+	echo "================================================================"
+	# restart services
+	echo "Restarting services using $sysconfdir/certs/servercert.pem"
+	for i in $svc_list; do echo "Restarting service $i"; done
+	svc -r $svc_list
+}
+
 ################################# Main ##################################
 if test $# -eq 0; then
     usage 1
@@ -8985,6 +9122,7 @@ nooverwrite=0
 run_file_only=0
 utf8=0
 mount_resolvconf=0
+valid_for=366
 databytes=$DATABYTES
 qmailqueue="/usr/sbin/qmail-queue"
 qmailsmtpd=$QmailBinPrefix"/sbin/qmail-smtpd"
@@ -9361,6 +9499,9 @@ while test $# -gt 0; do
 	;;
 	--common_name=*)
 	common_name=$optarg
+	;;
+	--validity_days=*)
+	valid_for=$optarg
 	;;
 	--attach)
 	if [ -f /usr/bin/zip ] ; then
@@ -9787,8 +9928,6 @@ done
 #
 case $option in
 	1) # SMTP Service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -9858,8 +9997,6 @@ case $option in
 	;;
 
 	2) # IMAP Service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $imap_port" = " " ] ; then
 		echo "IMAP PORT not specified" 1>&2
 		usage 1
@@ -9884,8 +10021,6 @@ case $option in
 	;;
 
 	3) # POP3 Service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $pop3_port" = " " ] ; then
 		echo "POP3 PORT not specified" 1>&2
 		usage 1
@@ -9910,20 +10045,14 @@ case $option in
 	;;
 
 	4) # remove service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	rmsvc "$service"
 	;;
 
 	5) # enable servie
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	ensvc "$service"
 	;;
 
 	6) # inlookup service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -9941,8 +10070,6 @@ case $option in
 	;;
 
 	7) # indisrvr service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -9983,8 +10110,6 @@ case $option in
 	;;
 
 	8) # MySQL service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10009,8 +10134,6 @@ case $option in
 	;;
 
 	9) # fetchmail service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ -z "$qbase" ] ; then
 		qbase=$indimaildir/queue
 	fi
@@ -10053,8 +10176,6 @@ case $option in
 	# 15 enable svscan in inittab
 	# 16 recontrol
 
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	case $config_name in
 		mysql)
 		if [ " $mysqlPrefix" = " " ] ; then
@@ -10421,92 +10542,10 @@ case $option in
 		;;
 
 		cert)
-		if [ ! -x /usr/bin/openssl ] ; then
-			echo "/usr/bin/openssl: No such file or directory" 1>&2
-			exit 1
-		fi
-		if [ " $postmaster" = " " ] ; then
-			echo "postmaster not specified" 1>&2
-			exit 1
-		fi
-		if [ " $common_name" = " " ] ; then
-			echo "CN not specified" 1>&2
-			exit 1
-		fi
-		echo "Creating SSL Configuration"
-		create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
-		/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
-		conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
-		/bin/rm -f $conf_file
-		change_config $conf_file $TMPDIR/config.cnf.$$
-		/bin/chmod 640 $conf_file
-		$chown indimail:qmail $conf_file
-		if [ ! -f "$DESTDIR"$sysconfdir/certs/servercert.pem ] ; then
-			/usr/bin/openssl req -new -x509 -nodes -days 366 -out "$DESTDIR"$sysconfdir/certs/servercert.pem \
-				-keyout "$DESTDIR"$sysconfdir/certs/servercert.pem -config $conf_file
-			if [ $? = 0 ] ; then
-				# qmail-smtpd, qmail-remote
-				echo "Creating Private Key, Certificate"
-				/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
-				$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
-				/bin/ln -sr "$DESTDIR"$sysconfdir/certs/servercert.pem \
-					"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
-				if [ $? -ne 0 ] ; then
-					cd "$DESTDIR"$sysconfdir/certs
-					/bin/ln -s servercert.pem clientcert.pem
-				fi
-				echo "Updating temporary RSA and DH keys"
-				"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$sysconfdir/certs
-
-				echo "Fixing CERTDIR variable for qmail-smtpd.25 and qmail-smtpd.465"
-				for i in @servicedir@/qmail-smtpd.25/variables @servicedir@/qmail-smtpd.465/variables
-				do
-					j=`/bin/cat $i/CERTDIR 2>/dev/null`
-					if [ ! " $j" = " $sysconfdir/certs" ] ; then
-						echo $sysconfdir/certs > $i/CERTDIR
-					fi
-				done
-				echo "Updating certfile as $sysconfdir/certs/servercert.pem"
-				for i in `ls @servicedir@/*/variables/*CERTFILE 2>/dev/null`
-				do
-					j=`/bin/cat $i`
-					if [ ! " $j" = " $sysconfdir/certs/servercert.pem" ] ; then
-						echo "Fixed $i"
-						echo "$sysconfdir/certs/servercert.pem" > $i
-					fi
-				done
-				echo "Updating tls cachefile as $sysconfdir/certs/couriersslcache"
-				for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
-				do
-					j=`/bin/cat $i`
-					if [ ! " $j" = " $sysconfdir/certs/couriersslcache" ] ; then
-						echo "Fixed $i"
-						echo "$sysconfdir/certs/couriersslcache" > $i
-					fi
-				done
-				# restart services
-				for i in `ls @servicedir@/*-ssl.* @servicedir@/indisrvr.* @servicedir@/qmail-poppass.* 2>/dev/null`
-				do
-					if [ -d $i ] ; then
-						echo $QmailBinPrefix/bin/svc -d $i
-						"$DESTDIR"$QmailBinPrefix/bin/svc -d $i
-						echo $QmailBinPrefix/bin/svc -u $i
-						"$DESTDIR"$QmailBinPrefix/bin/svc -u $i
-					fi
-				done
-			else
-				echo "Failed to create openssl x509 certificate" 1>&2
-				exit 1
-			fi
-			/usr/bin/openssl x509 -in "$DESTDIR"$sysconfdir/certs/servercert.pem -noout -text
-		else
-			echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
-			exit 1
-		fi
+		create_cert "$postmaster" "$common_name" $valid_for
 		;;
 
 		add-boot)
-		[ `id -u` = 0 ] || exit 4
 		case "$host" in
 			*-*-darwin*)
 			if [ -z "$servicedir" ] ; then
@@ -10519,31 +10558,24 @@ case $option in
 		;;
 
 		rm-boot)
-		[ `id -u` = 0 ] || exit 4
 		remove_startup
 		;;
 
 		add-alt)
-		[ `id -u` = 0 ] || exit 4
 		add_alternatives
 		;;
 		remove-alt)
-		[ `id -u` = 0 ] || exit 4
 		remove_alternatives
 		;;
 
 		iselinux)
-		[ `id -u` = 0 ] || exit 4
 		selinux_module $config_name $sysconfdir/indimail
 		;;
 		qselinux)
-		[ `id -u` = 0 ] || exit 4
 		selinux_module $config_name $sysconfdir/indimail-mta
 		;;
 
 		inittab)
-		# Check that we're a privileged user
-		[ `id -u` = 0 ] || exit 4
 		if [ " $servicedir" = " " ] ; then
 			echo "Supervise Directory not specified" 1>&2
 			usage 1
@@ -10582,7 +10614,6 @@ case $option in
 		;;
 
 		recontrol)
-		[ `id -u` = 0 ] || exit 4
 		do_recontrol
 		;;
 
@@ -10594,8 +10625,6 @@ case $option in
 	;;
 
 	11) # check install
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ -z "$qbase" ] ; then
 		qbase=$indimaildir/queue
 	fi
@@ -10613,8 +10642,6 @@ case $option in
 	;;
 
 	13) # mysqldump
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10651,14 +10678,10 @@ case $option in
 	;;
 
 	15) # reports
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	report $report_option
 	;;
 
 	16) # create_qscanq
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10668,8 +10691,6 @@ case $option in
 	;;
 
 	17) # --clamd
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10685,8 +10706,6 @@ case $option in
 	;;
 
 	18) # create_poppass
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $poppass_port" = " " ] ; then
 		echo "poppass PORT not specified" 1>&2
 		usage 1
@@ -10708,8 +10727,6 @@ case $option in
 	;;
 
 	19) # create_svscan
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10719,8 +10736,6 @@ case $option in
 	;;
 
 	20) # create_pwdlookup service
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10756,14 +10771,10 @@ case $option in
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	dump_config "$servicedir" "$cntrldir"
 	;;
 
 	22) # create_greylist
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10772,8 +10783,6 @@ case $option in
 	;;
 
 	23) # create_qmtp
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10805,8 +10814,6 @@ case $option in
 	;;
 
 	24) # create_qmqp
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10838,8 +10845,6 @@ case $option in
 	;;
 
 	25) # create_queuedef
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $queuedef" = " " ] ; then
 		echo "queue environment directory not specified" 1>&2
 		usage 1
@@ -10888,8 +10893,6 @@ case $option in
 	;;
 
 	26) # crete_delivery
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10946,7 +10949,6 @@ case $option in
 	;;
 
 	27) # create_udplogger
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10958,7 +10960,6 @@ case $option in
 	;;
 
 	28) # create_fifologger
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10971,7 +10972,6 @@ case $option in
 	;;
 
 	29) # create mrtg
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -10984,7 +10984,6 @@ case $option in
 	;;
 
 	30) # tls certificate check
-	[ `id -u` = 0 ] || exit 4
 	if [ -z "$cert_file" ] ; then
 		tls_cert_check
 	else
@@ -11003,8 +11002,6 @@ case $option in
 	;;
 
 	33) # create dane
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -11013,7 +11010,6 @@ case $option in
 	;;
 
 	34) # refresh services
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -11022,7 +11018,6 @@ case $option in
 	;;
 
 	35) # set norefresh service flag
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -11305,8 +11300,6 @@ case $option in
 	;;
 
 	47) # create_delivery
-	# Check that we're a privileged user
-	[ `id -u` = 0 ] || exit 4
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
