@@ -135,6 +135,11 @@ o svscan: ability to run as PID 1 and reap dead children
 54. supervise.c: fix for using of uninitialized value of signal in error log
 55. svscan.c: run as PID1 and reap dead processes
 57. docker-entrypoint: use getopt to get options to set domain, timezone
+- 17/08/2021
+58. minisvc: added config=cert (create_cert function)
+59. minisvc: added --check-certs
+    state of certificate
+60. docker-entrypoint: added hotfix for podman named pipe bug
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
