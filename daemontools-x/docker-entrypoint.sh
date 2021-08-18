@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.10 2021-08-18 00:10:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.11 2021-08-18 15:28:19+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.11  2021-08-18 15:28:19+05:30  Cprogrammer
+# removed timedatectl as it doesn't work without systemd
+#
 # Revision 1.10  2021-08-18 00:10:16+05:30  Cprogrammer
 # added hotfix for podman named pipe bug
 #
@@ -63,10 +66,10 @@ do
 	-t | --timezone)
 		timezone="$2"
 		shift 2
-		if [ -x /usr/bin/timedatectl ] ; then
-			timedatectl set-timezone $timezone
-		elif [ -f /usr/share/zoneinfo/$timezone ] ; then
-			cp /usr/share/zoneinfo/$timezone /etc/localtime
+		if [ -f /usr/share/zoneinfo/$timezone ] ; then
+			cd /etc
+			/bin/rm -f localtime
+			ln -s /usr/share/zoneinfo/$timezone localtime
 			echo $timezone > /etc/timezone
 		else
 			echo "WARNING: unable to set timezone $timezone" 1>&2
