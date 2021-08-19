@@ -90,7 +90,13 @@ header fields. The default value of 100 hops can be changed by having a control 
 .IR maxhops .
 
 .B qmail-smtpd
-supports ESMTP, including the 8BITMIME, DATA, PIPELINING, SIZE, ETRN, ODMR and AUTH options.
+supports ESMTP, including the 8BITMIME, DATA, PIPELINING, SIZE, VRFY,
+ETRN, ODMR and AUTH options. You can disable VRFY by setting environment
+variable \fBDISABLE_VRFY\fR.
+
+.B qmail-smtpd
+supports basic help usage when you use the HELP command. You can disable
+HELP by setteing environment variable \fBDISABLE_HELP\fR
 
 .B qmail-smtpd
 includes a \'MAIL FROM:\' parameter parser and obeys \'Auth\' and \'Size\' advertisements.

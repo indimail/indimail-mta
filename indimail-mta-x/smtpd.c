@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.245 $";
+char           *revision = "$Revision: 1.246 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -369,7 +369,7 @@ int             smtputf8 = 0, smtputf8_enable = 0;
 
 int             smtp_port;
 void           *phandle;
-char           *no_help;
+char           *no_help, *no_vrfy;
 
 extern char   **environ;
 
@@ -1317,7 +1317,7 @@ err_unimpl(char *arg)
 	if (!case_diffs(arg, "help"))
 		out("502 disabled by the lord in her infinite wisdom (#5.5.1)\r\n");
 	else {
-		out("500 command ");
+		out("502 command ");
 		out(arg);
 		out(" not recognized (#5.5.2)\r\n");
 	}
@@ -1438,6 +1438,10 @@ smtp_noop(char *arg)
 void
 smtp_vrfy(char *arg)
 {
+	if (no_vrfy) {
+		err_unimpl("unimplimented");
+		return;
+	}
 	switch (setup_state)
 	{
 	case 0:
@@ -2091,20 +2095,20 @@ smtp_help(char *arg)
 			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
 			if (hostname && *hostname && childargs && *childargs)
 				out("AUTH ");
-			out("VRFY ETRN HELP QUIT\r\n");
+			out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n");
 		}
 		break;
 	case SUBM_PORT:/*- RFC 2476 */
 		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
 		if (hostname && *hostname && childargs && *childargs)
 			out("AUTH ");
-		out("VRFY HELP QUIT\r\n");
+		out(no_vrfy ? "HELP QUIT\r\n" : "VRFY HELP QUIT\r\n");
 		break;
 	default:
 		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
 		if (hostname && *hostname && childargs && *childargs)
 			out("AUTH ");
-		out("VRFY ETRN HELP QUIT\r\n");
+		out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n");
 		break;
 	}
 }
@@ -5884,6 +5888,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		childargs = argv + 2;
 	}
 	no_help = env_get("DISABLE_HELP");
+	no_vrfy = env_get("DISABLE_VRFY");
 	setup_state = 0;
 	if ((ptr = env_get("TCPLOCALPORT")))
 		scan_int(ptr, &smtp_port);
@@ -6135,6 +6140,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.246  2021-08-19 20:22:49+05:30  Cprogrammer
+ * disable VRFY using DISABLE_VRFY env variable
+ *
  * Revision 1.245  2021-08-12 22:36:22+05:30  Cprogrammer
  * disable help if DISABLE_HELP is set
  *
@@ -6309,7 +6317,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.245 2021-08-12 22:36:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.246 2021-08-19 20:22:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
