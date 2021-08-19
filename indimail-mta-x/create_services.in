@@ -22,7 +22,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.109 2021-08-11 18:15:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.110 2021-08-19 19:54:16+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -380,9 +380,7 @@ if [ $nodksignatures -eq 0 ] ; then
     ver_opt="both"
     sign_opt="both"
     mkdir -p "$dir_prefix"$controldir/domainkeys
-    $dir_prefix$prefix/bin/dknewkey $dir_prefix"$controldir"/domainkeys/$dkimkeyfn 1024
-    $chown indimail:qmail $dir_prefix"$controldir"/domainkeys/$dkimkeyfn
-    /bin/chmod 640 $dir_prefix"$controldir"/domainkeys/$dkimkeyfn
+    $dir_prefix$prefix/bin/dknewkey -b 1024 $dkimkeyfn
   else
     ver_opt="none"
     sign_opt="none"
@@ -759,6 +757,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.110  2021-08-19 19:54:16+05:30  Cprogrammer
+# changes for modified dknewkey
+#
 # Revision 2.109  2021-08-11 18:15:25+05:30  Cprogrammer
 # removed not needed mkdir during build process
 #

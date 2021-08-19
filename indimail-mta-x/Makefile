@@ -52,7 +52,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	viruscanner whois yearcal
 
 man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
-	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dktest.8 \
+	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 dktest.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.5 forward.1 maildirserial.1 mlmatchup.8 new-inject.1 \
 	plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 qmail-cdb.8 \
@@ -1462,9 +1462,13 @@ dns_text.o: compile dns_text.c dns.h
 testtrace.o: compile testtrace.c dktrace.h
 	./compile testtrace.c
 
-dknewkey: dknewkey.sh warn-auto.sh
+dknewkey: dknewkey.sh warn-auto.sh conf-sysconfdir
 	rm -f dknewkey
-	cat warn-auto.sh dknewkey.sh > dknewkey
+	(cat warn-auto.sh; $(edit) dknewkey.sh) > $@
+	chmod +x $@
+
+dknewkey.8: dknewkey.9
+	$(edit) dknewkey.9 > $@
 
 qmail-dk: \
 load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o \

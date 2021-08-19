@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.344 2021-08-05 17:52:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.345 2021-08-19 19:55:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1268,9 +1268,7 @@ if [ %nodksignatures -eq 0 ] ; then
     if [ " $key_bit" = " " ] ; then
       key_bit=1024
     fi
-    %{_prefix}/bin/dknewkey %{qsysconfdir}/control/domainkeys/%{dkimkeyfn} $key_bit
-    %{__chown} indimail:qmail %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}
-    /bin/chmod 640 %{qsysconfdir}/control/domainkeys/%{dkimkeyfn}
+    %{_prefix}/bin/dknewkey -b $key_bit %{dkimkeyfn}
   else
     ver_opt="none"
     sign_opt="none"

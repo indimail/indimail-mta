@@ -117,6 +117,10 @@ o installer can now install, uninstall and set permissions
 67. svctool: refactored --config=cert (added cert validity option)          
 68. svctool: --check-certs now displays certificate details in addition to
     state of certificate
+- 19/08/2021
+69. dknewkey: added options to print, remove, generate DKIM keys
+70. indimail-mta.spec, PKGBUILD.in, create_services.in,
+	debian/indimail-mta.postinst - changes for modified dknewkey
 
 * 
 Release 2.13 Start 14/02/2021

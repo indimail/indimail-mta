@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.11  2021-08-19 19:55:29+05:30  Cprogrammer
+# changes for modifed dknewkey
+#
 # Revision 1.10  2021-08-03 21:25:17+05:30  Cprogrammer
 # remove creation of indimail-mta-release (done in Makefile)
 #
@@ -33,7 +36,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.10 2021-08-03 21:25:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.11 2021-08-19 19:55:29+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -440,9 +443,7 @@ post_install() {
       if [ " $key_bit" = " " ] ; then
         key_bit=1024
       fi
-      ${_prefix}/bin/dknewkey ${_sysconfdir}/control/domainkeys/${_dkimkeyfn} $key_bit
-      chown indimail:qmail ${_sysconfdir}/control/domainkeys/${_dkimkeyfn}
-      /bin/chmod 640 ${_sysconfdir}/control/domainkeys/${_dkimkeyfn}
+      ${_prefix}/bin/dknewkey -b $key_bit ${_dkimkeyfn}
     else
       ver_opt="none"
       sign_opt="none"

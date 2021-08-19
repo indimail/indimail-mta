@@ -1,0 +1,83 @@
+.TH dknewkey 8
+.SH NAME
+dknewkey \- create a new domain key
+
+.SH SYNOPSIS
+\fBdknewkey\fR [-\fBd\fR | --\fBdomain\fR \fIdomain\fR]
+[-\fBb\fR | --\fBbits\fR \fIbits\fR] [-\fBf\fR | --\fBforce\fR]
+\fIselector\fR
+
+or
+
+\fBdknewkey\fR [-\fBp\fR | --\fBprint\fR]
+[-\fBd\fR | --\fBdomain\fR \fIdomain\fR] [\fIselector\fR]
+
+or
+
+\fBdknewkey\fR [-\fBr\fR | --\fBremove\fR]
+[-\fBd\fR | --\fBdomain\fR \fIdomain\fR] \fIselector\fR
+
+.SH DESCRIPTION
+.B dknewkey
+creates a new key, and prints the associated DNS record (public key) on stdout.
+.I selector
+is the file which will hold the private key. Additionally \fIselector.pub\fR
+containing the public key will be created.
+.I bits
+is the number of bits in the key. If not specified, defaults to 1024.
+To implement domainkeys you can use
+.B envrules
+in
+.B qmail-smtpd
+or
+.B spawn-filter
+to set the DKSIGN, DKIMSIGN variable to the path of the signature file holding
+the private key.
+
+.B dknewkey
+uses the following
+.B openssl
+command to generate the private/public keys
+.IP \[bu] 2
+openssl -genrsa -out \fIselector\fR \fIbits\fR
+.IP \[bu]
+openssl rsa -in \fIselector\fR -out \fIselector.pub\fR -pubout -outform PEM
+
+.SH OPTIONS
+.TP
+-\fBp\fR | --\fBprint\fR
+print DKIM public key for selector \fIselector\fR, domain \fIdomain\fR. If
+\fIselector\fR is not provided, all selectors will be printed. If
+\fIdomain\fR is not provided, all selectors for all domains will be printed.
+
+.TP
+-\fBr\fR | --\fBremove\fR
+remove DKIM keys for selector \fIselector\fR, domain \fIdomain\fR
+
+.TP
+-\fBd\fR | --\fBdomain\fR \fIdomain\fR
+domain name for the DKIM key. The private key \fIselector\fR, public key
+\fIselector.pub\fR will be created in the directory
+@qsysconfdir@/control/domainkeys/\fIdomain\fR.
+
+If this is not specified, the private key \fIselector\fR, public key
+\fIselector.pub\fR will be created  in the directory
+@qsysconfdir@/control/domainkeys.
+
+.TP
+-\fBb\fR | --\fBbits\fR \fIkeysize\fR
+Specify the key size for the DKIM record. Default is 1024
+
+.TP
+-\fBf\fR | --\fBforce\fR
+Force creation of DKIM key even if it exists. Without this, \fBdknewkey\fR will not
+overwrite an existing DKIM key
+
+.SH "SEE ALSO"
+qmail-dk(8),
+qmail-smtpd(8),
+qmail-queue(8),
+spawn-filter(8),
+dktest(8),
+domain-keys(5),
+openssl(1)
