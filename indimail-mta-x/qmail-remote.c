@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.148 2021-08-13 15:12:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.149 2021-08-19 19:55:42+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -3613,7 +3613,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.148 2021-08-13 15:12:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.149 2021-08-19 19:55:42+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3621,6 +3621,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.149  2021-08-19 19:55:42+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.148  2021-08-13 15:12:46+05:30  Cprogrammer
  * fixed get3()
  *
