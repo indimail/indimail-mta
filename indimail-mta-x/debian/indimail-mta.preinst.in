@@ -79,7 +79,7 @@ case "$1" in
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
 		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-			/bin/systemctl stop nscd.service
+			/bin/systemctl stop nscd.service >/dev/null 2>&1 || true
 		fi
 	fi
 	/usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || \

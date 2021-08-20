@@ -23,7 +23,7 @@ case "$1" in
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
 		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-			/bin/systemctl stop nscd.service
+			/bin/systemctl stop nscd.service >/dev/null 2>&1 || true
 		fi
 	fi
 	echo "Adding IndiMail users/groups"
@@ -43,7 +43,7 @@ case "$1" in
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
 		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-			/bin/systemctl start nscd.service
+			/bin/systemctl start nscd.service >/dev/null 2>&1 || true
 		fi
 	fi
 	;;

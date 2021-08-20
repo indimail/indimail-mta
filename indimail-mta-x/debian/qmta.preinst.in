@@ -31,7 +31,7 @@ case "$1" in
 	fi
 	if test -f /etc/systemd/system/multi-user.target.wants/qmta-send.service
 	then
-		systemctl stop qmta-send >/dev/null 2>&1
+		systemctl stop qmta-send >/dev/null 2>&1 || true
 	fi
 	set -e
 	sleep 5
@@ -42,7 +42,7 @@ case "$1" in
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
 		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-			/bin/systemctl stop nscd.service
+			/bin/systemctl stop nscd.service >/dev/null 2>&1 || true
 		fi
 	fi
 	mkdir -p ${qmaildir}
@@ -68,7 +68,7 @@ case "$1" in
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
 		elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-			/bin/systemctl start nscd.service
+			/bin/systemctl start nscd.service >/dev/null 2>&1 || true
 		fi
 	fi
 	;;
