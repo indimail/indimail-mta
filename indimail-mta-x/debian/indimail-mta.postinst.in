@@ -543,7 +543,7 @@ else
 	echo "2. Execute /sbin/init q to start services"
 	count=2
 fi
-default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 echo "   You can also use the 'service' command to start indimail-mta"
 echo "   sudo service svscan start"
 count=`expr $count + 1`

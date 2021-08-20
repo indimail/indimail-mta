@@ -186,7 +186,7 @@ else
 	done
 fi
 if [ ! -f ${qsysconfdir}/control/idhost ] ; then
-	default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+	default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 	echo $default_domain > ${qsysconfdir}/control/idhost
 fi
 mkdir -p ${qmaildir}/queue
