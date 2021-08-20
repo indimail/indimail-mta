@@ -151,7 +151,7 @@ else
 fi
 
 if [ ! -f ${qsysconfdir}/control/idhost ] ; then
-	default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+	default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 	echo $default_domain > ${qsysconfdir}/control/idhost
 fi
 exit 0

@@ -186,10 +186,12 @@ else
 	done
 fi
 if [ ! -f ${qsysconfdir}/control/idhost ] ; then
-	default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+	default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 	echo $default_domain > ${qsysconfdir}/control/idhost
 fi
-mkdir -p ${qmaildir}/queue
-queue-fix -m ${qmaildir}/queue/qmta
+if [ ! -d ${qmaildir}/queue/qmta ] ; then
+	mkdir -p ${qmaildir}/queue
+	queue-fix -m ${qmaildir}/queue/qmta
+fi
 ) >> /var/log/qmta-setup.log 2>&1
 exit 0

@@ -1,9 +1,9 @@
 #
-# $Id: docker-entrypoint.sh,v 1.12 2021-08-20 13:27:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.12 2021-08-20 18:13:44+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
-# Revision 1.12  2021-08-20 13:27:40+05:30  Cprogrammer
-# remove host component from default domain
+# Revision 1.12  2021-08-20 18:13:44+05:30  Cprogrammer
+# removed host component from domain name
 #
 # Revision 1.11  2021-08-18 15:28:19+05:30  Cprogrammer
 # removed timedatectl as it doesn't work without systemd
@@ -105,7 +105,7 @@ fi
 set -e
 cd /
 if [ -z "$domain" ] ; then
-	domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+	domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 fi
 orig=$(cat /etc/indimail/control/defaultdomain)
 if [ ! "$orig" = "$domain" ] ; ; then

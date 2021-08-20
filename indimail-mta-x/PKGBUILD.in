@@ -1,9 +1,6 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
-# Revision 1.12  2021-08-20 13:09:18+05:30  Cprogrammer
-# remove host component from default domain
-#
 # Revision 1.11  2021-08-19 19:55:29+05:30  Cprogrammer
 # changes for modifed dknewkey
 #
@@ -39,7 +36,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.12 2021-08-20 13:09:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.11 2021-08-19 19:55:29+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -224,7 +221,7 @@ package_indimail-mini() {
 
 package_qmta() {
   backup=(${_myconfdir}/{'defaultdomain'}
-    ${_myconfdir}/{'leapsecs.dat','leapsecs.txt'})
+	  ${_myconfdir}/{'leapsecs.dat','leapsecs.txt'})
   pkgdesc="qmta - A minimal Mail Transport Agent"
   depends=('shadow' 'coreutils' 'libqmail' 'libsrs2')
   install=archpkg3.install
@@ -692,7 +689,7 @@ EOF
     echo "2. Execute /sbin/init q to start services"
     count=2
   fi
-  default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+  default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || `uname -n`)
   count=`expr $count + 1`
   echo "$count. Change your default domain in ${_sysconfdir}/control/defaultdomain"
   count=`expr $count + 1`
@@ -1144,7 +1141,7 @@ post_install() {
     fi
   done
   if [ ! -f ${_sysconfdir}/control/idhost ] ; then
-    default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+    default_domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
     echo $default_domain > ${_sysconfdir}/control/idhost
   fi
   mkdir -p ${_qmaildir}/queue
