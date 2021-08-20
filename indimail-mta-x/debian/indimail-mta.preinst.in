@@ -62,6 +62,9 @@ case "$1" in
 	exit 0
 	;;
 	install)
+	mkdir -p /tmp/indimail-mta
+	chmod 700 /tmp/indimail-mta
+	touch /tmp/indimail-mta/.install
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
 		(
 		echo "Running Custom Upgrade Script for pre $1"

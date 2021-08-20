@@ -37,6 +37,9 @@ case "$1" in
 	sleep 5
 	;;
     install)
+	mkdir -p /tmp/qmta
+	chmod 700 /tmp/qmta
+	touch /tmp/qmta/.install
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then

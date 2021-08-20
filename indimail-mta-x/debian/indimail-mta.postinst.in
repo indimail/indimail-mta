@@ -97,9 +97,14 @@ fi
 upgrade=0
 case "$1" in
 	configure)
+	if [ -f /tmp/indimail-mta/.install ] ; then
+		upgrade=0
+		/bin/rm -rf /tmp/indimail-mta
+	else
 		if [ -n "$2" ] ; then
 			upgrade=1
 		fi
+	fi
 	;;
 
 	abort-upgrade|abort-remove|abort-deconfigure)
@@ -107,8 +112,8 @@ case "$1" in
 	;;
 
 	*)
-		echo "postinst called with unknown argument \`$1'" >&2
-		exit 1
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 1
 	;;
 esac
 

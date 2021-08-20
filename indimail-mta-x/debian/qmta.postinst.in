@@ -68,19 +68,24 @@ fi
 upgrade=0
 case "$1" in
     configure)
+	if [ -f /tmp/qmta/.install ] ; then
+		upgrade=0
+		/bin/rm -rf /tmp/qmta
+	else
 		if [ -n "$2" ] ; then
 			upgrade=1
 		fi
+	fi
     ;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
+	abort-upgrade|abort-remove|abort-deconfigure)
 	exit 0
-    ;;
+   	;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
