@@ -110,11 +110,11 @@ fi
 echo "shutting down and removing .svscan service"
 if [ -d ${servicedir}/.svscan -o -L ${servicedir}/.svscan ] ; then
   touch ${servicedir}/.svscan/down
-  svc -dx ${servicedir}/.svscan || true
+  svc -dx ${servicedir}/.svscan >/dev/null 2<&1 || true
 fi
 if [ -d ${servicedir}/.svscan/log -o -L ${servicedir}/.svscan/log ] ; then
   touch ${servicedir}/.svscan/log/down
-  svc -dx ${servicedir}/.svscan/log || true
+  svc -dx ${servicedir}/.svscan/log >/dev/null 2<&1 || true
 fi
 if [ -d ${servicedir}/.svscan -o -L ${servicedir}/.svscan ] ; then
   ${rm} -rf ${servicedir}/.svscan

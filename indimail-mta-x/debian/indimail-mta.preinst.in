@@ -54,7 +54,7 @@ case "$1" in
 		if [ $? -eq 0 ] ; then
 			mkdir -p ${rundir}/$i
 			touch ${rundir}/$i/.down
-			${prefix}/bin/svc -d ${servicedir}/$i || true
+			${prefix}/bin/svc -d ${servicedir}/$i >/dev/null 2<&1 || true
 		fi
 	done
 	set -e

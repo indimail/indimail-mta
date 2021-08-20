@@ -224,11 +224,11 @@ if [ " $1" = " purge" ] ; then
 	do
 		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 			touch ${servicedir}/$i/down
-			svc -dx ${servicedir}/$i || true
+			svc -dx ${servicedir}/$i >/dev/null 2<&1 || true
 		fi
 		if [ -d ${servicedir}/$i/log -o -L ${servicedir}/$i/log ] ; then
 			touch ${servicedir}/$i/log/down
-			svc -dx ${servicedir}/$i/log || true
+			svc -dx ${servicedir}/$i/log >/dev/null 2<&1 || true
 		fi
 		if [ -d ${servicedir}/$i -o -L ${servicedir}/$i ] ; then
 			${rm} -rf ${servicedir}/$i >/dev/null 2>&1 || true

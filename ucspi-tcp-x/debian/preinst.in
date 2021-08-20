@@ -33,7 +33,7 @@ case "$1" in
 			${prefix}/bin/svok $i
 			if [ $? -eq 0 ] ; then
 				touch $i.down
-				${prefix}/bin/svc -d $i || true
+				${prefix}/bin/svc -d $i >/dev/null 2>&1 || true
 			fi
 		done
 		set -e
