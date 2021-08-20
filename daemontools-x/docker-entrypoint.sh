@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.11 2021-08-18 15:28:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.12 2021-08-20 13:27:40+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.12  2021-08-20 13:27:40+05:30  Cprogrammer
+# remove host component from default domain
+#
 # Revision 1.11  2021-08-18 15:28:19+05:30  Cprogrammer
 # removed timedatectl as it doesn't work without systemd
 #
@@ -36,7 +39,6 @@
 # Revision 1.1  2019-12-08 18:07:36+05:30  Cprogrammer
 # Initial revision
 #
-set -e
 
 usage()
 {
@@ -48,7 +50,6 @@ usage()
 	exit 100
 }
 
-set +e
 options=$(getopt -a -n entrypoint -o "d:t:" -l domain:,timezone: -- "$@")
 if [ $? != 0 ]; then
 	usage
@@ -60,7 +61,6 @@ do
 	case "$1" in
 	-d | --domain)
 		domain="$2"
-		/usr/sbin/svctool --default-domain=$domain --config=recontrol
 		shift 2
 	;;
 	-t | --timezone)
@@ -104,6 +104,13 @@ fi
 # end fix for podman
 set -e
 cd /
+if [ -z "$domain" ] ; then
+	domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+fi
+orig=$(cat /etc/indimail/control/defaultdomain)
+if [ ! "$orig" = "$domain" ] ; ; then
+	/usr/sbin/svctool --default-domain=$domain --config=recontrol
+fi
 
 case "$1" in
 indimail|indimail-mta|svscan|webmail)
