@@ -88,19 +88,24 @@ fi
 upgrade=0
 case "$1" in
     configure)
-    if [ -n "$2" ] ; then
-      upgrade=1
-    fi
-    ;;
+	if [ -f /tmp/daemontools/.install ] ; then
+		upgrade=0
+		/bin/rm -rf /tmp/daemontools
+	else
+		if [ -n "$2" ] ; then
+			upgrade=1
+		fi
+	fi
+	;;
 
-    abort-upgrade|abort-remove|abort-deconfigure)
-  exit 0
-    ;;
+	abort-upgrade|abort-remove|abort-deconfigure)
+	exit 0
+	;;
 
-    *)
-        echo "postinst called with unknown argument \`$1'" >&2
-        exit 1
-    ;;
+	*)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 1
+	;;
 esac
 
 # dh_installdeb will replace this with shell code automatically
@@ -127,6 +132,7 @@ if [ -f ${qsysconfdir}/daemontools.perms ] ; then
 fi
 
 if [ $upgrade -eq 1 ] ; then # upgrade
+  set +e
   (
   echo "checking if system boot scripts need upgrade"
   if [ -f /etc/init.d/svscan ] ; then

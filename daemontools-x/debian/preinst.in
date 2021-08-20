@@ -82,6 +82,9 @@ case "$1" in
 	#
 	echo "Doing install"
 	(
+	mkdir -p /tmp/daemontools
+	chmod 700 /tmp/daemontools
+	touch /tmp/daemontools/.install
 	echo "Adding IndiMail users/groups"
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
