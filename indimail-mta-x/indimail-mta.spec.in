@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.346 2021-08-20 18:05:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.347 2021-08-20 22:12:12+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1119,7 +1119,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl stop nscd.service
+    /bin/systemctl stop nscd.service >/dev/null 2>&1
   fi
 fi
 echo "Adding indimail-mta users/groups"
@@ -1152,7 +1152,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
+    /bin/systemctl start nscd.service >/dev/null 2>&1
   fi
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
@@ -1642,7 +1642,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl stop nscd.service
+    /bin/systemctl stop nscd.service >/dev/null 2>&1
   fi
 fi
 for i in alias qmaild qmailp qmailq qmailr qmails qscand indimail
@@ -1659,7 +1659,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
+    /bin/systemctl start nscd.service >/dev/null 2>&1
   fi
 fi
 
@@ -1773,7 +1773,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl stop nscd.service
+    /bin/systemctl stop nscd.service >/dev/null 2>&1
   fi
 fi
 echo "Adding IndiMail users/groups"
@@ -1792,7 +1792,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
+    /bin/systemctl start nscd.service >/dev/null 2>&1
   fi
 fi
 ) >> /var/log/%{name}-setup.log
@@ -1975,7 +1975,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
+    /bin/systemctl start nscd.service >/dev/null 2>&1
   fi
 fi
 for i in idhost defaulthost defaultdomain plusdomain
@@ -2020,7 +2020,7 @@ else
 fi
 if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
 then
-    /bin/systemctl stop qmta-send > /dev/null 2>&1
+    /bin/systemctl stop qmta-send >/dev/null 2>&1
 elif test -x %{_sysconfdir}/init.d/qmta-send
 then
     %{_sysconfdir}/init.d/qmta-send stop
@@ -2066,7 +2066,7 @@ if [ $argv1 -eq 2 ] ; then
     echo "Starting qmta-send"
     if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
     then
-      /bin/systemctl start qmta-send > /dev/null 2>&1
+      /bin/systemctl start qmta-send >/dev/null 2>&1
     fi
   fi
   ) >> /var/log/qmta-setup.log 2>&1
@@ -2083,7 +2083,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd stop
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl stop nscd.service
+    /bin/systemctl stop nscd.service >/dev/null 2>&1
   fi
 fi
 echo "Adding IndiMail users/groups"
@@ -2109,7 +2109,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
+    /bin/systemctl start nscd.service >/dev/null 2>&1
   fi
 fi
 ) >> /var/log/%{name}-setup.log
@@ -2246,7 +2246,7 @@ fi
 echo "Giving qmta-send exactly 5 seconds to exit nicely"
 if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
 then
-  /bin/systemctl stop qmta-send > /dev/null 2>&1
+  /bin/systemctl stop qmta-send >/dev/null 2>&1
 fi
 sleep 5
 ) >> /var/log/qmta-setup.log 2>&1
@@ -2326,7 +2326,7 @@ if [ $nscd_up -ge 1 ] ; then
   if [ -x %{_sysconfdir}/init.d/nscd ] ; then
     %{_sysconfdir}/init.d/nscd start
   elif [ -f %{_sysconfdir}/systemd/system/multi-user.target/nscd.service ] ; then
-    /bin/systemctl start nscd.service
+    /bin/systemctl start nscd.service >/dev/null 2>&1
   fi
 fi
 for i in idhost defaulthost defaultdomain plusdomain
