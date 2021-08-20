@@ -25,8 +25,8 @@ fi
 case "$1" in
     install|upgrade)
 	if [ " $1" = " upgrade" ] ; then
-	(
 		set +e
+		(
 		for i in `grep -l -E "tcpserver|tcpclient" ${servicedir}/*/run`
 		do
 			i=$(dirname $i)
@@ -36,10 +36,12 @@ case "$1" in
 				${prefix}/bin/svc -d $i >/dev/null 2>&1 || true
 			fi
 		done
-		set -e
+		) >> /var/log/ucspi-tcp-setup.log 2>&1
 		exit 0
-	) >> /var/log/ucspi-tcp-setup.log 2>&1
 	fi
+	mkdir -p /tmp/ucspi-tcp
+	chmod 700 /tmp/ucspi-tcp
+	touch /tmp/ucspi-tcp/.install
 	;;
 
     abort-upgrade)
