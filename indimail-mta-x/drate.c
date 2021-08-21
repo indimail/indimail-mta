@@ -1,5 +1,10 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.17  2021-08-21 21:32:01+05:30  Cprogrammer
+ * added list option
+ * added option to display times in UTC
+ * added domain name validation
+ *
  * Revision 1.16  2021-06-10 10:52:41+05:30  Cprogrammer
  * fixed uninitialized variables in do_test()
  *
@@ -633,7 +638,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.16 2021-06-10 10:52:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.17 2021-08-21 21:32:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
