@@ -125,6 +125,10 @@ o installer can now install, uninstall and set permissions
 - 20/08/2021
 72. svctool, indimail-mta.spec, PKGBUILD, debian postinst: remove host
     component from default domain
+- 21/08/2021
+73. matchregexex.c: handle regexec() error
+74. drate: added list option, added option to display time in UTC, added
+    domain name validation
 
 * 
 Release 2.13 Start 14/02/2021

@@ -10,6 +10,7 @@ drate \- indimail domain rate control
 ]
 .B \-r \fIrate_expression\fR
 [
+.B \-u
 .B \-c
 .B \-R
 ]
@@ -23,6 +24,7 @@ or
 ]
 [
 .B \-s
+.B \-l
 ]
 
 or
@@ -57,6 +59,11 @@ reset the interval using \fB-R\fR option of \fBdrate\fR(1).
 .PP
 
 .TP
+\fB-l\fR
+List domains have rate control definitions. Use \fB-s\fR to additionally
+display the configured rate and delivery statistics for listed domains.
+
+.TP
 \fB-t\fR
 Run in test mode as if mail is getting delivered. Every invocation will
 update the email count and the end time. It will calculate the current rate
@@ -74,7 +81,7 @@ Force update email counts and end time.
 
 .TP
 \fB-s\fR
-Display statistics for deliveries to \fIdomain\fR.
+Display configured rate and delivery statistics for \fIdomain\fR.
 
 .TP
 \fB-d\fR \fIdomain\fR
@@ -105,6 +112,10 @@ mathematical computation. It is valid to have an expression
 \fB-R\fR
 Reset all statistics in \fIratelimit_dir/domain\fR. This will cause
 \fBslowq-send\fR(8) to start counting from start.
+
+.TP
+\fB-u\fR
+Display time in UTC instead of local time zone.
 
 .SH "SEE ALSO"
 slowq-send(8), qmail-remote(8)

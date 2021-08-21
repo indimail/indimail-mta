@@ -52,6 +52,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <time.h>
+#include <dirent.h>
+#include <regex.h>
 #include <substdio.h>
 #include <error.h>
 #include <fmt.h>
@@ -66,6 +68,7 @@
 #include <scan.h>
 #include <str.h>
 #include <date822fmt.h>
+#include <no_of_days.h>
 #include "variables.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
@@ -77,14 +80,20 @@
 #define WARN      "drate: warn: "
 
 dtype           delivery;
-int             local_time;
-char            strnum1[FMT_ULONG], strnum2[FMT_LONG];
+static int      local_time = 1;
+static char     strnum1[FMT_ULONG], strnum2[FMT_LONG];
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-stralloc        qdir = { 0 };
-char           *usage = "usage: drate [-scR] -d domain -r deliveryRate [-D ratelimit_dir]\n";
+static stralloc qdir = { 0 };
+static char    *usage = "usage: drate [-sulcR] [-t -C count] -d domain -r deliveryRate [-D ratelimit_dir]\n";
+static char    *daytab[7] = {
+	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
+};
+static char    *montab[12] = {
+	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+};
 
 void
 logerr(char *s)
@@ -119,6 +128,33 @@ cleanup(char *file, char *str, int e)
 		strerr_die5sys(111, FATAL, str, ": ", file, ": ");
 	else
 		strerr_die3sys(111, FATAL, str, ": ");
+}
+
+char           *
+qtime_mess822(datetime_sec t)
+{
+	struct datetime dt;
+	unsigned int    len;
+	static char     result[33];
+
+	datetime_tai(&dt, t);
+	len = 0;
+	len += fmt_str(result + len, daytab[dt.wday]);
+	len += fmt_strn(result + len, ", ", 2);
+	len += fmt_uint0(result + len, dt.mday, 2);
+	result[len++] = ' ';
+	len += fmt_str(result + len, montab[dt.mon]);
+	result[len++] = ' ';
+	len += fmt_uint(result + len, 1900 + dt.year);
+	result[len++] = ' ';
+	len += fmt_uint0(result + len, dt.hour, 2);
+	result[len++] = ':';
+	len += fmt_uint0(result + len, dt.min, 2);
+	result[len++] = ':';
+	len += fmt_uint0(result + len, dt.sec, 2);
+	len += fmt_strn(result + len, " +0000\n", 7);
+	result[len++] = 0;
+	return result;
 }
 
 stralloc        line = { 0 }, rexpr = { 0 };
@@ -172,39 +208,56 @@ do_display(char *domain)
 			scan_ulong(line.s, (unsigned long *) &starttime);
 			if (substdio_put(&ssout, "Start  Time: ", 13) == -1)
 				strerr_die1sys(111, "unable to write: ");
-			datetime_tai(&dt, starttime);
-			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
-				strerr_die1sys(111, "unable to write: ");
+			if (local_time) {
+				datetime_tai(&dt, starttime);
+				if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
+					strerr_die1sys(111, "unable to write: ");
+			} else {
+				if (substdio_puts(&ssout, qtime_mess822(starttime)))
+					strerr_die1sys(111, "unable to write: ");
+			}
 			break;
 		case 4:
 			scan_ulong(line.s, (unsigned long *) &endtime);
 			if (substdio_put(&ssout, "LastUpdated: ", 13) == -1)
 				strerr_die1sys(111, "unable to write: ");
+			if (local_time) {
 			datetime_tai(&dt, endtime);
 			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
 				strerr_die1sys(111, "unable to write: ");
+			} else {
+				if (substdio_puts(&ssout, qtime_mess822(endtime)))
+					strerr_die1sys(111, "unable to write: ");
+			}
 			endtime = now();
 			if (substdio_put(&ssout, "CurrentTime: ", 13) == -1)
 				strerr_die1sys(111, "unable to write: ");
-			datetime_tai(&dt, endtime);
-			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
-				strerr_die1sys(111, "unable to write: ");
+			if (local_time) {
+				datetime_tai(&dt, endtime);
+				if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
+					strerr_die1sys(111, "unable to write: ");
+			} else {
+				if (substdio_puts(&ssout, qtime_mess822(endtime)))
+					strerr_die1sys(111, "unable to write: ");
+			}
 			rate = (double) email_count / (double) (endtime - starttime);
 			time_needed = (long int) email_count/conf_rate - endtime + starttime;
 			strdouble[fmt_double(strdouble, rate, 10)] = 0;
 			if (substdio_put(&ssout, "CurrentRate: ", 13) == -1 ||
-					substdio_puts(&ssout, strdouble) == -1)
+					substdio_puts(&ssout, strdouble) == -1 ||
+					substdio_put(&ssout, "\n", 1) == -1)
 				strerr_die1sys(111, "unable to write: ");
 			strnum1[fmt_int(strnum1, time_needed)] = 0;
 			if (rate > conf_rate) {
-				if (substdio_put(&ssout, " High; need ", 12) == -1 ||
+				if (substdio_put(&ssout, "High; need ", 11) == -1 ||
 						substdio_puts(&ssout, strnum1) == -1 ||
 						substdio_put(&ssout, " secs", 5) == -1)
 					strerr_die1sys(111, "unable to write: ");
 			} else {
-				if (substdio_put(&ssout, " OK since ", 10) ||
-						substdio_puts(&ssout, strnum1 + 1) ||
-						substdio_put(&ssout, " secs", 5))
+				if (substdio_put(&ssout, "OK since ", 9) == -1 ||
+						substdio_puts(&ssout, (0 - time_needed) > 86400 ? no_of_days(0 - time_needed) : strnum1 + 1) == -1)
+					strerr_die1sys(111, "unable to write: ");
+				if ((0 - time_needed) <= 86400 && substdio_put(&ssout, " secs", 5) == -1)
 					strerr_die1sys(111, "unable to write: ");
 			}
 			if (substdio_put(&ssout, "\n", 1) == -1)
@@ -214,6 +267,54 @@ do_display(char *domain)
 	}
 	if (substdio_flush(&ssout) == -1)
 		strerr_die1sys(111, "unable to write: ");
+}
+
+void
+do_list(int display)
+{
+	DIR            *dir;
+	struct dirent  *dp;
+
+	if (!(dir = opendir(".")))
+		strerr_die1sys(111, "opendir: ");
+	for (;;) {
+		if(!(dp = readdir(dir)))
+			break;
+		if (!str_diff(dp->d_name, ".") || !str_diff(dp->d_name, ".."))
+			continue;
+		if (substdio_put(&ssout, "domain     : ", 13) == -1 ||
+				substdio_puts(&ssout, dp->d_name) == -1 ||
+				substdio_put(&ssout, "\n", 1) == -1)
+			strerr_die1sys(111, "unable to write: ");
+		if (display)
+			do_display(dp->d_name);
+		if (substdio_put(&ssout, "--------------------------------------------\n", 45) == -1)
+			strerr_die1sys(111, "unable to write: ");
+	}
+	if (substdio_flush(&ssout) == -1)
+		strerr_die1sys(111, "unable to write: ");
+}
+
+int
+check_domain(char *domain)
+{
+	regex_t         re;
+	int             r;
+	char            buf[128];
+	char           *reg_exp = "^[0-9a-zA-Z_-]+(\\.[0-9a-zA-Z_-]+)*(\\.[a-zA-Z]+)$";
+
+	if ((r = regcomp(&re, reg_exp, REG_EXTENDED|REG_NEWLINE))) {
+		regerror(r, &re, buf, sizeof(buf));
+		regfree(&re);
+		strerr_die3x(111, FATAL, "regcomp: ", buf);
+	}
+	if ((r = regexec(&re, domain, 0, NULL, 0)) == -1) {
+		regerror(r, &re, buf, sizeof(buf));
+		regfree(&re);
+		strerr_die3x(111, FATAL, "regexec: ", buf);
+	}
+	regfree(&re);
+	return (r == REG_NOMATCH ? 0 : 1);
 }
 
 void
@@ -237,10 +338,12 @@ update_mode(char *domain, char *rate_expr, int reset_mode, int consolidate, int 
 		strerr_die3sys(111, "unable to read: ", domain, ": ");
 	else {
 		if (rfd == -1) {
-			if (reset_mode && !rate_expr)
+			if (reset_mode)
 				strerr_die3sys(111, "unable to read: ", domain, ": ");
 			if (!stralloc_cats(&rexpr, rate_expr))
-				strerr_die1sys(111, "out of mem1: ");
+				strerr_die1sys(111, "out of memory: ");
+			if (!check_domain(domain))
+				strerr_die3x(100, WARN, "invalid domain: ", domain);
 			starttime = endtime = now();
 			ecount[fmt_ulong(ecount, 0)] = 0;
 			stime[fmt_ulong(stime, starttime)] = 0;
@@ -405,16 +508,17 @@ do_test(char *domain, int force)
 int
 main(int argc, char **argv)
 {
-	int             i, ch, display = 1, incr = 0, consolidate = 0, 
-					reset_mode = 0, test_mode = 0, force = 0, count = 1;
+	int             i, ch, display = 0, listing = 0, incr = 0, count = 1,
+					consolidate = 0, reset_mode = 0, test_mode = 0,
+					force = 0;
 	char           *qbase, *domain = 0, *rate_expr = 0,
 				   *ptr, *ratelimit_dir = "ratelimit";
 
-	while ((ch = getopt(argc, argv, "fltscRd:r:D:C:")) != sgoptdone) {
+	while ((ch = getopt(argc, argv, "flutscRd:r:D:C:")) != sgoptdone) {
 		switch (ch)
 		{
-		case 'l':
-			local_time = 1;
+		case 'u':
+			local_time = 0;
 			break;
 		case 't':
 			display = 0;
@@ -422,6 +526,9 @@ main(int argc, char **argv)
 			break;
 		case 'f':
 			force = 1;
+			break;
+		case 'l':
+			listing = 1;
 			break;
 		case 's':
 			display = 1;
@@ -495,12 +602,17 @@ main(int argc, char **argv)
 	if (chdir(ratelimit_dir))
 		strerr_die4sys(111, FATAL, "unable to switch to ", ratelimit_dir, ": ");
 
-	if (!domain) {
+	if (!listing && !domain) {
 		logerrf("domain not specified\n");
 		logerrf(usage);
 		_exit (111);
 	}
 
+	if (!listing && !display && !test_mode && !reset_mode)
+		display = 1;
+	if (listing)
+		do_list(display);
+	else
 	if (display)
 		do_display(domain);
 	else
