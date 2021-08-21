@@ -1,5 +1,8 @@
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.8  2021-08-21 21:33:14+05:30  Cprogrammer
+# fixed syntax error
+#
 # Revision 1.7  2021-08-19 19:54:39+05:30  Cprogrammer
 # added options to print, remove, generate DKIM keys
 #
@@ -37,7 +40,7 @@ usage()
 
 # This function comes from Tatsuya Yokota
 # https://github.com/kotaroman/domainkey
-function split_str()
+split_str()
 {
 	local STR="$1"
 	local START=0
@@ -186,9 +189,9 @@ elif [ $remove -eq 1 ] ; then
 else
 	if [ -f $selector -a $force -eq 0 ] ; then
 		echo "DKIM private key $selector exists. Skipping private key generation" 1>&2
-		skip_private_key=1
+		skip_priv_key=1
 	else
-		skip_private_key=0
+		skip_priv_key=0
 	fi
 	err=$(mktemp -t dkkeyXXXXXXXXXX)
 	if [ $? -ne 0 ] ; then
