@@ -1,5 +1,8 @@
 /*
  * $Log: matchregex.c,v $
+ * Revision 1.5  2021-08-21 18:50:43+05:30  Cprogrammer
+ * handle regexec error
+ *
  * Revision 1.4  2020-09-16 19:02:25+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -19,6 +22,8 @@
 #include "error.h"
 #include "qregex.h"
 
+#define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
+
 int
 matchregex(char *text, char *regex, char **errStr)
 {
@@ -27,24 +32,18 @@ matchregex(char *text, char *regex, char **errStr)
 	int             retval = 0;
 	static stralloc err_str = { 0 };
 
-#define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
 	if (errStr)
 		*errStr = 0;
 	/*- build the regex */
-	if ((retval = REGCOMP(qreg, regex)) != 0) {
+	if ((retval = regcomp(&qreg, regex, REG_EXTENDED|REG_ICASE)) != 0) {
 		regerror(retval, &qreg, errbuf, sizeof(errbuf));
 		regfree(&qreg);
-		if (!stralloc_copys(&err_str, text))
-			return(AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, ": "))
-			return (AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, regex))
-			return (AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, ": "))
-			return (AM_MEMORY_ERR);
-		if (!stralloc_cats(&err_str, errbuf))
-			return (AM_MEMORY_ERR);
-		if (!stralloc_0(&err_str))
+		if (!stralloc_copys(&err_str, text) ||
+				!stralloc_cats(&err_str, ": ") ||
+				!stralloc_cats(&err_str, regex) ||
+				!stralloc_cats(&err_str, ": ") ||
+				!stralloc_cats(&err_str, errbuf) ||
+				!stralloc_0(&err_str))
 			return (AM_MEMORY_ERR);
 		if (errStr)
 			*errStr = err_str.s;
@@ -73,8 +72,18 @@ matchregex(char *text, char *regex, char **errStr)
 		}
 	}
 	/*- execute the regex */
-#define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
-	retval = REGEXEC(qreg, text);
+	if ((retval = regexec(&qreg, text, (size_t) NULL, (regmatch_t *) NULL, 0)) == -1) {
+		if (!stralloc_copys(&err_str, text) ||
+				!stralloc_cats(&err_str, ": ") ||
+				!stralloc_cats(&err_str, regex) ||
+				!stralloc_cats(&err_str, ": ") ||
+				!stralloc_cats(&err_str, errbuf) ||
+				!stralloc_0(&err_str))
+			return (AM_MEMORY_ERR);
+		if (errStr)
+			*errStr = err_str.s;
+		return -1;
+	}
 	regfree(&qreg);
 	return (retval == REG_NOMATCH ? 0 : 1);
 }
@@ -82,7 +91,7 @@ matchregex(char *text, char *regex, char **errStr)
 void
 getversion_matchregex_c()
 {
-	static char    *x = "$Id: matchregex.c,v 1.4 2020-09-16 19:02:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchregex.c,v 1.5 2021-08-21 18:50:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
