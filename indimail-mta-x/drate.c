@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.18  2021-08-22 00:12:29+05:30  Cprogrammer
+ * fixed display variable setting
+ *
  * Revision 1.17  2021-08-21 21:32:01+05:30  Cprogrammer
  * added list option
  * added option to display times in UTC
@@ -613,8 +616,6 @@ main(int argc, char **argv)
 		_exit (111);
 	}
 
-	if (!listing && !display && !test_mode && !reset_mode)
-		display = 1;
 	if (listing)
 		do_list(display);
 	else
@@ -638,7 +639,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.17 2021-08-21 21:32:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.18 2021-08-22 00:12:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
