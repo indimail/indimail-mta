@@ -117,7 +117,7 @@ fi
 if [ -f /etc/indimail/control/defaultdomain ] ; then
 	orig=$(cat /etc/indimail/control/defaultdomain)
 fi
-if [ ! "$orig" = "$domain" ] ; ; then
+if [ ! "$orig" = "$domain" ] ; then
 	/usr/sbin/svctool --default-domain=$domain --config=recontrol
 fi
 
