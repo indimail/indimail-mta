@@ -1,7 +1,10 @@
 #
-# $Id: docker-entrypoint.sh,v 1.12 2021-08-20 18:13:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.13 2021-08-22 22:53:17+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.13  2021-08-22 22:53:17+05:30  Cprogrammer
+# fix queue-fix and check for defaultdomain
+#
 # Revision 1.12  2021-08-20 18:13:44+05:30  Cprogrammer
 # removed host component from domain name
 #
@@ -96,7 +99,7 @@ if [ -f /usr/sbin/qmail-queue -a ! -p /var/indimail/queue/queue1/lock/trigger ] 
 	fi
 	if [ -d /var/indimail/queue -a ! -f /service/.svscan/run ] ; then
 		cd /var/indimail/queue
-		for i in queue*; do if [ ! -p $i/lock/trigger ] ; then queue-fix -v $i; fi; done
+		for i in queue1 queue2 queue3 queue4 queue5; do if [ -d $i -a ! -p $i/lock/trigger ] ; then queue-fix -v $i; fi; done
 		for i in slowq nqueue; do if [ -d $i ] ; then queue-fix -v $i; fi; done
 		for i in qmta; do if [ -d $i ] ; then queue-fix -mv $i; fi; done
 	fi
@@ -107,7 +110,9 @@ cd /
 if [ -z "$domain" ] ; then
 	domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 fi
-orig=$(cat /etc/indimail/control/defaultdomain)
+if [ -f /etc/indimail/control/defaultdomain ] ; then
+	orig=$(cat /etc/indimail/control/defaultdomain)
+fi
 if [ ! "$orig" = "$domain" ] ; ; then
 	/usr/sbin/svctool --default-domain=$domain --config=recontrol
 fi
