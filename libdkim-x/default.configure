@@ -55,5 +55,11 @@ case "$SYSTEM" in
   pkgconfigdir=$libdir/pkgconfig
   ;;
 esac
+if [ -f Makefile ] ; then
+	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
+		echo "Already configured"
+		exit 0
+	fi
+fi
 ./configure --prefix=$prefix --bindir=$bindir --mandir=$mandir \
   --libdir=$libdir --with-pkgconfigdir=$pkgconfigdir
