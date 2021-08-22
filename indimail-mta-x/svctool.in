@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.610 2021-08-23 00:05:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.609 2021-08-23 00:43:57+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.610 2021-08-23 00:05:30+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.609 2021-08-23 00:43:57+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -8938,6 +8938,10 @@ if [ -n "$default_domain" ] ; then
 	defaultDomain=$default_domain
 else
 	defaultDomain=$(echo $defaultHost | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+fi
+if [ -z "$defaultHost" -o -z "$defaultDomain" ] ; then
+	echo "host or domain cannot be null" 1>&2
+	exit 1
 fi
 # config-fast - me, defaulthost, envnoathost, defaultdomain,
 # plusdomain, locals, rcpthosts, virtualdomains
