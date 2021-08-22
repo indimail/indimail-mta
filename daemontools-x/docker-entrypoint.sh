@@ -1,9 +1,9 @@
 #
-# $Id: docker-entrypoint.sh,v 1.13 2021-08-22 22:53:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.13 2021-08-22 23:03:36+05:30 Cprogrammer Exp mbhangui $
 #
 # $Log: docker-entrypoint.sh,v $
-# Revision 1.13  2021-08-22 22:53:17+05:30  Cprogrammer
-# fix queue-fix and check for defaultdomain
+# Revision 1.13  2021-08-22 23:03:36+05:30  Cprogrammer
+# added -r, --repair option to drop to shell
 #
 # Revision 1.12  2021-08-20 18:13:44+05:30  Cprogrammer
 # removed host component from domain name
@@ -46,6 +46,7 @@
 usage()
 {
 	echo "Usage: svscan|indimail|indimail-mta|webmail"
+	echo "              [ -r | --repair"
 	echo "              [ -d | --domain   domain]"
 	echo "              [ -t | --timezone timezone ]"
 	echo "              [command] [args]"
@@ -53,7 +54,7 @@ usage()
 	exit 100
 }
 
-options=$(getopt -a -n entrypoint -o "d:t:" -l domain:,timezone: -- "$@")
+options=$(getopt -a -n entrypoint -o "rd:t:" -l repair,domain:,timezone: -- "$@")
 if [ $? != 0 ]; then
 	usage
 fi
@@ -77,6 +78,9 @@ do
 		else
 			echo "WARNING: unable to set timezone $timezone" 1>&2
 		fi
+	;;
+	-r | --repair)
+	/bin/sh
 	;;
 	--) # end of options
 		shift
