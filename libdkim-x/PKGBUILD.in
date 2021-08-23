@@ -13,11 +13,13 @@ source=("$pkgname-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 provides=("$pkgname")
 options=('strip' '!libtool' 'docs' 'staticlibs' 'zipman' 'debug')
+_prefix=@prefix@
 changelog=$pkgname.changes
 
 build() {
   cd $srcdir/$pkgname-${pkgver}
-  ./default.configure
+  ./configure --prefix=${_prefix} --bindir=${_prefix}/bin --mandir=${_prefix}/share/man \
+    --libdir=${_prefix}/lib --with-pkgconfigdir=${_prefix}/lib/pkgconfig
   make -s
   cd $srcdir
 }
