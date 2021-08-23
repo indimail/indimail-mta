@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.609 2021-08-23 00:43:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.610 2021-08-23 22:41:54+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.609 2021-08-23 00:43:57+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.610 2021-08-23 22:41:54+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2372,7 +2372,14 @@ else
 	echo > $conf_dir/QUERY_CACHE
 fi
 if [ -n "$default_domain" ] ; then
-	echo "$default_domain" > $conf_dir/DEFAULT_DOMAIN
+	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		if [ ! "$t" = "$default_domain" ] ; then
+			echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+		fi
+	else
+		echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+	fi
 fi
 if [ ! " $memory" = " " ] ; then
 	echo $memory > $conf_dir/SOFT_MEM
@@ -3673,8 +3680,22 @@ create_imap_config()
 {
 echo "#--------- IndiMail ---------------------------"
 if [ -n "$default_domain" ] ; then
-	echo "DEFAULT_DOMAIN=$default_domain"
-	echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
+	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		if [ ! "$t" = "$default_domain" ] ; then
+			echo "DEFAULT_DOMAIN=$default_domain"
+		fi
+	else
+		echo "DEFAULT_DOMAIN=$default_domain"
+	fi
+	if [ -f $sysconfdir/control/global_vars/QMAILDEFAULTHOST ] ; then
+		t=$(cat $sysconfdir/control/global_vars/QMAILDEFAULTHOST)
+		if [ ! "$t" = "$default_domain" ] ; then
+			echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
+		fi
+	else
+		echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
+	fi
 fi
 echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
@@ -3884,7 +3905,22 @@ create_pop3_config()
 {
 echo "#--------- IndiMail ---------------------------"
 if [ -n "$default_domain" ] ; then
-echo "DEFAULT_DOMAIN=$default_domain"
+	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		if [ ! "$t" = "$default_domain" ] ; then
+			echo "DEFAULT_DOMAIN=$default_domain"
+		fi
+	else
+		echo "DEFAULT_DOMAIN=$default_domain"
+	fi
+	if [ -f $sysconfdir/control/global_vars/QMAILDEFAULTHOST ] ; then
+		t=$(cat $sysconfdir/control/global_vars/QMAILDEFAULTHOST)
+		if [ ! "$t" = "$default_domain" ] ; then
+			echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
+		fi
+	else
+		echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
+	fi
 fi
 echo "MIGRATEUSER=$QmailBinPrefix/bin/migrateuser"
 echo "MIGRATEFLAG=indi.txt"
@@ -6384,7 +6420,14 @@ echo "startup.so" > $conf_dir/START_PLUGIN
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
 #
 if [ -n "$default_domain" ] ; then
-	echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		if [ ! "$t" = "$default_domain" ] ; then
+			echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+		fi
+	else
+		echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+	fi
 fi
 echo > $conf_dir/LOGLOCK
 case "$dksign_option" in
@@ -6611,7 +6654,14 @@ fi
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
 #
 if [ -n "$default_domain" ] ; then
-	echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
+		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		if [ ! "$t" = "$default_domain" ] ; then
+			echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+		fi
+	else
+		echo $default_domain > $conf_dir/DEFAULT_DOMAIN
+	fi
 fi
 case "$dksign_option" in
 	dkim)

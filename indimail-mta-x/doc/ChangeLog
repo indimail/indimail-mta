@@ -129,6 +129,9 @@ o installer can now install, uninstall and set permissions
 73. matchregexex.c: handle regexec() error
 74. drate: added list option, added option to display time in UTC, added
     domain name validation
+- 23/08/2021
+75. svctool: service specific DEFAULT_DOMAIN only if different from global
+    DEFAULT_DOMAIN
 
 * 
 Release 2.13 Start 14/02/2021
