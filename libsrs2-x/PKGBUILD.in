@@ -21,7 +21,7 @@ build() {
   cd $srcdir/$pkgname-${pkgver}
   ./default.configure
   ./configure --prefix=${_prefix} --bindir=${_prefix}/bin \
-    --mandir=${_prefix}/share/man --libdir=$libdir \
+    --mandir=${_prefix}/share/man --libdir=${_libdir} \
     --with-pkgconfigdir=${_libdir}/pkgconfig
   make -s
   cd $srcdir
