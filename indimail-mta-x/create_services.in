@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.111 2021-08-20 13:08:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.112 2021-08-23 17:34:11+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -95,7 +95,7 @@ elif [ -x /usr/local/libexec/mysqld ] ; then # FreeBSD
 elif [ -x /usr/local/mysql/bin/mysqld ] ; then # Darwin
   mysql_base=/usr/local/mysql
 fi
-default_domain=$(([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 ID=`id -u`
 while test $# -gt 0; do
     case "$1" in
@@ -757,6 +757,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.112  2021-08-23 17:34:11+05:30  Cprogrammer
+# fixed default_domain variable
+#
 # Revision 2.111  2021-08-20 13:08:28+05:30  Cprogrammer
 # remove host component from default domain
 #

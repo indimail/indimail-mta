@@ -1,5 +1,8 @@
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.9  2021-08-23 17:34:19+05:30  Cprogrammer
+# fixed default_domain variable
+#
 # Revision 1.8  2021-08-21 21:33:14+05:30  Cprogrammer
 # fixed syntax error
 #
@@ -138,7 +141,7 @@ if [ -z "$domain" ] ; then
 	if [ -f $controldir/defaultdomain ] ; then
 		domain=$(cat $controldir/defaultdomain)
 	else
-		domain=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+		domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 	fi
 else
 	dir=$controldir/domainkeys/$domain
