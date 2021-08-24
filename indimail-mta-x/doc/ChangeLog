@@ -132,6 +132,10 @@ o installer can now install, uninstall and set permissions
 - 23/08/2021
 75. svctool: service specific DEFAULT_DOMAIN only if different from global
     DEFAULT_DOMAIN
+- 24/08/2021
+76. dknewkey: check if domain exists in rcpthosts before creating a key for
+    it
+77. drate: moved check_domain to libqmail
 
 * 
 Release 2.13 Start 14/02/2021
