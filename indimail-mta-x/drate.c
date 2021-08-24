@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.19  2021-08-24 11:29:33+05:30  Cprogrammer
+ * moved check_domain function to libqmail
+ *
  * Revision 1.18  2021-08-22 00:12:29+05:30  Cprogrammer
  * fixed display variable setting
  *
@@ -75,6 +78,7 @@
 #include <now.h>
 #include <scan.h>
 #include <str.h>
+#include <check_domain.h>
 #include <date822fmt.h>
 #include <no_of_days.h>
 #include "variables.h"
@@ -303,28 +307,6 @@ do_list(int display)
 		strerr_die1sys(111, "unable to write: ");
 }
 
-int
-check_domain(char *domain)
-{
-	regex_t         re;
-	int             r;
-	char            buf[128];
-	char           *reg_exp = "^[0-9a-zA-Z_-]+(\\.[0-9a-zA-Z_-]+)*(\\.[a-zA-Z]+)$";
-
-	if ((r = regcomp(&re, reg_exp, REG_EXTENDED|REG_NEWLINE))) {
-		regerror(r, &re, buf, sizeof(buf));
-		regfree(&re);
-		strerr_die3x(111, FATAL, "regcomp: ", buf);
-	}
-	if ((r = regexec(&re, domain, 0, NULL, 0)) == -1) {
-		regerror(r, &re, buf, sizeof(buf));
-		regfree(&re);
-		strerr_die3x(111, FATAL, "regexec: ", buf);
-	}
-	regfree(&re);
-	return (r == REG_NOMATCH ? 0 : 1);
-}
-
 void
 update_mode(char *domain, char *rate_expr, int reset_mode, int consolidate, int incr)
 {
@@ -351,7 +333,7 @@ update_mode(char *domain, char *rate_expr, int reset_mode, int consolidate, int 
 			if (!stralloc_cats(&rexpr, rate_expr))
 				strerr_die1sys(111, "out of memory: ");
 			if (!check_domain(domain))
-				strerr_die3x(100, WARN, "invalid domain: ", domain);
+				strerr_die3(111, FATAL, "invalid domain: ", domain, &check_domain_err);
 			starttime = endtime = now();
 			ecount[fmt_ulong(ecount, 0)] = 0;
 			stime[fmt_ulong(stime, starttime)] = 0;
@@ -639,7 +621,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.18 2021-08-22 00:12:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.19 2021-08-24 11:29:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
