@@ -1,5 +1,8 @@
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.10  2021-08-24 11:29:21+05:30  Cprogrammer
+# check if domain exists in rcpthosts
+#
 # Revision 1.9  2021-08-23 17:34:19+05:30  Cprogrammer
 # fixed default_domain variable
 #
@@ -110,6 +113,11 @@ do
 	shift 1
 	;;
 	-d | --domain)
+	grep -w "$2" $controldir/rcpthosts >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		echo "$domain not in rcpthsots" 1>&2
+		exit 1
+	fi
 	domain="$2"
 	shift 2
 	;;
