@@ -1,7 +1,7 @@
 /*
  * $Log: qmta-send.c,v $
  * Revision 1.9  2021-07-26 23:25:32+05:30  Cprogrammer
- * log when log sighup, sigalrm is caught
+ * log when sighup, sigalrm is caught
  *
  * Revision 1.8  2021-07-17 14:39:37+05:30  Cprogrammer
  * fix split dir of messages queued with wrong split value
