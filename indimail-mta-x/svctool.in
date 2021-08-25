@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.611 2021-08-25 19:46:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.612 2021-08-25 20:43:51+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.611 2021-08-25 19:46:52+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.612 2021-08-25 20:43:51+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1923,8 +1923,9 @@ default_qmail_control()
 if [ -z "$CONTROLDIR" ] ; then
 	CONTROLDIR=$sysconfdir/control
 fi
-if [ ! -d "$DESTDIR"$CONTROLDIR ] ; then
-	/bin/mkdir -p "$DESTDIR"$CONTROLDIR
+t="$DESTDIR"$CONTROLDIR
+if [ ! -d $t ] ; then
+	/bin/mkdir -p $t
 	if [ $? -ne 0 ] ; then
 		return 1
 	fi
@@ -1951,15 +1952,15 @@ else
 fi
 
 echo "Setting Following Files to Reasonable Defaults"
-if [ ! -f "$DESTDIR"$CONTROLDIR/servicedir.conf ] ; then
+if [ ! -f $t/servicedir.conf ] ; then
 	echo "servicedir.conf"
-	echo "$servicedir" > "$DESTDIR"$CONTROLDIR/servicedir.conf
+	echo "$servicedir" > $t/servicedir.conf
 fi
-if [ ! -f "$DESTDIR"$CONTROLDIR/defaultdelivery ] ; then
+if [ ! -f $t/defaultdelivery ] ; then
 	echo "defaultdelivery"
-	echo "./Maildir/" > "$DESTDIR"$CONTROLDIR/defaultdelivery
+	echo "./Maildir/" > $t/defaultdelivery
 fi
-if [ ! -f "$DESTDIR"$CONTROLDIR/nodnscheck ] ; then
+if [ ! -f $t/nodnscheck ] ; then
 	# qmail-smtpd
 	echo "nodnscheck"
 	(
@@ -1969,11 +1970,11 @@ if [ ! -f "$DESTDIR"$CONTROLDIR/nodnscheck ] ; then
 	echo "@outlook.com"
 	echo "@aol.com"
 	echo "@$hostname"
-	) > "$DESTDIR"$CONTROLDIR/nodnscheck
+	) > $t/nodnscheck
 else
-	grep "$hostname" "$DESTDIR"$CONTROLDIR/nodnscheck >/dev/null
+	grep "$hostname" $t/nodnscheck >/dev/null
 	if [ $? -ne 0 ]; then
-		echo "@$hostname" >> "$DESTDIR"$CONTROLDIR/nodnscheck
+		echo "@$hostname" >> $t/nodnscheck
 	fi
 fi
 
@@ -1982,46 +1983,45 @@ fi
 	head -1|awk '{print $3}'> $TMPDIR/localiphost.$$
 if [ -s $TMPDIR/localiphost.$$ ] ; then
 	echo "localiphost"
-	/bin/mv $TMPDIR/localiphost.$$ "$DESTDIR"$CONTROLDIR/localiphost
+	/bin/mv $TMPDIR/localiphost.$$ $t/localiphost
 else
 	echo "localiphost"
-	echo 127.0.0.1 > "$DESTDIR"$CONTROLDIR/localiphost
+	echo 127.0.0.1 > $t/localiphost
 fi
-if [ ! -f "$DESTDIR"$CONTROLDIR/hostip ] ; then
+if [ ! -f $t/hostip ] ; then
 	echo "hostip"
-	/bin/ln -sr "$DESTDIR"$CONTROLDIR/localiphost \
-		"$DESTDIR"$CONTROLDIR/hostip 2>/dev/null
+	/bin/ln -sr $t/localiphost $t/hostip 2>/dev/null
 	if [ $? -ne 0 ] ; then
-		cd "$DESTDIR"$CONTROLDIR
+		cd $t
 		/bin/ln -s localiphost hostip
 	fi
 fi
 
-if [ ! -f "$DESTDIR"$CONTROLDIR/smtpgreeting ] ; then
+if [ ! -f $t/smtpgreeting ] ; then
 	echo "smtpgreeting"
-	echo "$hostname"            > "$DESTDIR"$CONTROLDIR/smtpgreeting
+	echo "$hostname"            > $t/smtpgreeting
 fi
 
-if [ ! -f "$DESTDIR"$CONTROLDIR/databytes ] ; then
+if [ ! -f $t/databytes ] ; then
 	echo "databytes"
-	echo "$databytes"           > "$DESTDIR"$CONTROLDIR/databytes
+	echo "$databytes"           > $t/databytes
 fi
 
-if [ ! -f "$DESTDIR"$CONTROLDIR/timeoutsmtpd ] ; then
+if [ ! -f $t/timeoutsmtpd ] ; then
 	echo "timeoutsmtpd"
-	echo 300                    > "$DESTDIR"$CONTROLDIR/timeoutsmtpd
+	echo 300                    > $t/timeoutsmtpd
 fi
 
-if [ ! -f "$DESTDIR"$CONTROLDIR/timeoutremote ] ; then
+if [ ! -f $t/timeoutremote ] ; then
 	echo "timeoutremote"
-	echo 300                    > "$DESTDIR"$CONTROLDIR/timeoutremote
+	echo 300                    > $t/timeoutremote
 fi
 
 echo "chkrcptdomains"
-$touch "$DESTDIR"$CONTROLDIR/chkrcptdomains
-if [ ! -f "$DESTDIR"$CONTROLDIR/greylist.white ] ; then
+$touch $t/chkrcptdomains
+if [ ! -f $t/greylist.white ] ; then
 	echo "greylist.white"
-	/bin/cat "$DESTDIR"$CONTROLDIR/localiphost > "$DESTDIR"$CONTROLDIR/greylist.white
+	/bin/cat $t/localiphost > $t/greylist.white
 fi
 
 if [ " $wipe_option" = " 1" -o ! -f "$DESTDIR"/$sysconfdir/users/assign ] ; then
@@ -2032,9 +2032,9 @@ if [ " $wipe_option" = " 1" -o ! -f "$DESTDIR"/$sysconfdir/users/assign ] ; then
 	fi
 fi
 
-if [ ! -f "$DESTDIR"$CONTROLDIR/dnsbllist ] ; then
+if [ ! -f $t/dnsbllist ] ; then
 	echo "dnsbllist"
-	echo "dnsbl.njabl.org"      > "$DESTDIR"$CONTROLDIR/dnsbllist
+	echo "dnsbl.njabl.org"      > $t/dnsbllist
 fi
 
 for i in smtp qmtp qmqp
@@ -2092,41 +2092,52 @@ fi
 
 for i in locals rcpthosts
 do
-	if [ ! -f "$DESTDIR"$CONTROLDIR/$i ] ; then
+	if [ ! -f $t/$i ] ; then
 		echo $i
-		echo "localhost" > "$DESTDIR"$CONTROLDIR/$i
-		sort -u "$DESTDIR"$CONTROLDIR/$i -o "$DESTDIR"$CONTROLDIR/$i
+		echo "localhost" > $t/$i
+		sort -u $t/$i -o $t/$i
 	else
-			grep "localhost" "$DESTDIR"$CONTROLDIR/$i >/dev/null
+			grep "localhost" $t/$i >/dev/null
 			if [ $? -ne 0 ]; then
 				echo $i
-				echo "localhost" >> "$DESTDIR"$CONTROLDIR/$i
-				sort -u "$DESTDIR"$CONTROLDIR/$i -o "$DESTDIR"$CONTROLDIR/$i
+				echo "localhost" >> $t/$i
+				sort -u $t/$i -o $t/$i
 			fi
 	fi
-	chmod 644 "$DESTDIR"$CONTROLDIR/$i
+	chmod 644 $t/$i
 done
 
-if [ ! -f "$DESTDIR"$CONTROLDIR/tlsserverciphers ] ; then
+if [ ! -f $t/tlsserverciphers ] ; then
 	echo "tlsserverciphers"
 	(
 	/bin/echo -n "ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:"
 	/bin/echo -n "-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA:"
-	/bin/echo -n "-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2"
+	/bin/echo -n "-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2:!DES:!MD5:!PSK:!RC4:"
+	/bin/echo -n "!3DES:!SHA1:!SHA256:!SHA384"
 	echo
-	) > "$DESTDIR"$CONTROLDIR/tlsserverciphers
+	) > $t/tlsserverciphers
+	if [ ! -d $t/global_vars ] ; then
+		mkdir -p $t/global_vars
+	fi
+	if [ ! -f $t/global_vars/TLS_CIPHER_LIST -a ! -L $t/global_vars/TLS_CIPHER_LIST ] ; then
+		/bin/ln -sr $t/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST
+		if [ $? -ne 0 ] ; then
+			cd $t/global_vars
+			ln -s ../tlsserverciphers TLS_CIPHER_LIST
+		fi
+	fi
 fi
-if [ ! -f "$DESTDIR"$CONTROLDIR/tlsservermethod ] ; then
+if [ ! -f $t/tlsservermethod ] ; then
 	echo tlsservermethod
-	echo TLSv1_2 > "$DESTDIR"$CONTROLDIR/tlsservermethod
+	echo TLSv1_2 > $t/tlsservermethod
 fi
-if [ ! -f "$DESTDIR"$CONTROLDIR/tlsclientciphers ] ; then
+if [ ! -f $t/tlsclientciphers ] ; then
 	echo "tlsclientciphers"
-	echo "ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP" > "$DESTDIR"$CONTROLDIR/tlsclientciphers
+	echo "ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP" > $t/tlsclientciphers
 fi
-if [ ! -f "$DESTDIR"$CONTROLDIR/tlsclientmethod ] ; then
+if [ ! -f $t/tlsclientmethod ] ; then
 	echo tlsclientmethod
-	echo TLSv1_2 > "$DESTDIR"$CONTROLDIR/tlsclientmethod
+	echo TLSv1_2 > $t/tlsclientmethod
 fi
 
 if [ ! -f "$DESTDIR"$sysconfdir/procmailrc ] ; then
@@ -2147,10 +2158,10 @@ else
 	indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
 fi
 if [ -n "$indlib" ] ; then
-	check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
+	check_update_if_diff $t/libindimail $indlib
 else
-	echo "removing "$DESTDIR"$CONTROLDIR/libindimail"
-	/bin/rm -f "$DESTDIR"$CONTROLDIR/libindimail
+	echo "removing $t/libindimail"
+	/bin/rm -f $t/libindimail
 fi
 check_libmysqlclient_lib
 }
