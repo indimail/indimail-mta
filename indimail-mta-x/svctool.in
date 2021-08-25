@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.612 2021-08-25 20:43:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.613 2021-08-25 21:47:46+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.612 2021-08-25 20:43:51+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.613 2021-08-25 21:47:46+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1990,7 +1990,7 @@ else
 fi
 if [ ! -f $t/hostip ] ; then
 	echo "hostip"
-	/bin/ln -sr $t/localiphost $t/hostip 2>/dev/null
+	/bin/ln -sr $CONTROLDIR/localiphost $t/hostip 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $t
 		/bin/ln -s localiphost hostip
@@ -2120,7 +2120,7 @@ if [ ! -f $t/tlsserverciphers ] ; then
 		mkdir -p $t/global_vars
 	fi
 	if [ ! -f $t/global_vars/TLS_CIPHER_LIST -a ! -L $t/global_vars/TLS_CIPHER_LIST ] ; then
-		/bin/ln -sr $t/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST
+		/bin/ln -sr $CONTROLDIR/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST
 		if [ $? -ne 0 ] ; then
 			cd $t/global_vars
 			ln -s ../tlsserverciphers TLS_CIPHER_LIST
@@ -9069,7 +9069,7 @@ create_cert()
 	fi
 	/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
 	$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
-	/bin/ln -sr "$DESTDIR"$sysconfdir/certs/servercert.pem \
+	/bin/ln -sr "$sysconfdir/certs/servercert.pem \
 		"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd "$DESTDIR"$sysconfdir/certs
