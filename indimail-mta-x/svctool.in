@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.610 2021-08-23 22:41:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.611 2021-08-25 19:46:52+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.610 2021-08-23 22:41:54+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.611 2021-08-25 19:46:52+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9088,8 +9088,7 @@ create_cert()
 	echo "Updating CERT as $sysconfdir/certs/servercert.pem"
 	for i in `ls @servicedir@/*/variables/*CERTFILE \
 		@servicedir@/*/variables/CLIENTCERT \
-		@servicedir@/*/variables/SERVERCERT \
-		@servicedir@/*/variables/CERTDIR 2>/dev/null`
+		@servicedir@/*/variables/SERVERCERT 2>/dev/null`
 	do
 		x=$(echo $i | cut -d'/' -f1,2,3)
 		echo $svc_list | grep $x >/dev/null

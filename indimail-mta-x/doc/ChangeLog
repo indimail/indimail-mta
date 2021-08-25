@@ -136,6 +136,8 @@ o installer can now install, uninstall and set permissions
 76. dknewkey: check if domain exists in rcpthosts before creating a key for
     it
 77. drate: moved check_domain to libqmail
+- 25/08/2021
+78. svctool: fixed value of CERTDIR in create_cert
 
 * 
 Release 2.13 Start 14/02/2021
