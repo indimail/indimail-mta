@@ -246,7 +246,7 @@ dump_run_header()
 {
 echo "#!/bin/sh"
 echo "$RCSID"
-echo "# generated run script for $host on `date`"
+echo "# generated run script for $host at `date`"
 echo "# by the below command"
 echo "# $prog_args"
 echo ""
@@ -260,7 +260,7 @@ if [ $# -ne 1 ] ; then
 fi
 echo "#!/bin/sh"
 echo "$RCSID"
-echo "# generated log script for $host on `date`"
+echo "# generated log script for $host at `date`"
 echo "# by the below command"
 echo "# $prog_args"
 echo ""
