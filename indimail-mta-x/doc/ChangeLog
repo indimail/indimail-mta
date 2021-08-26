@@ -140,6 +140,8 @@ o installer can now install, uninstall and set permissions
 78. svctool: fixed value of CERTDIR in create_cert
 79. svctool: updated cipher list by to fix warnings from testssl.sh from
     https://github.com/drwetter/testssl.sh
+- 26/08/2021
+80. svctool: use /usr/local/etc/indimail/sv for servicedir on OSX/Darwin
 
 * 
 Release 2.13 Start 14/02/2021

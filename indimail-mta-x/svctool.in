@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.612 2021-08-25 23:35:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.613 2021-08-26 12:39:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.612 2021-08-25 23:35:17+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.613 2021-08-26 12:39:40+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7756,16 +7756,16 @@ create_startup()
 		fi
 		if [ ! -f /etc/synthetic.conf ] ; then
 			echo "Creating /service in /etc/synthetic.conf"
-			printf "service\t/private/var/run/svscan\n" > /etc/synthetic.conf
+			printf "service\t/System/Volumes/data@qsysconfdir@/sv\n" > /etc/synthetic.conf
 		else
 			grep "^service" /etc/synthetic.conf >/dev/null
 			if [ $? -ne 0 ] ; then
 				echo "Creating /service in /etc/synthetic.conf"
 				if [ -z "$DESTDIR" ] ; then
-					printf "service\t/private/var/run/svscan\n" >> /etc/synthetic.conf
+					printf "service\t/System/Volumes/data@qsysconfdir@/sv\n" >> /etc/synthetic.conf
 				else
 				(
-					printf "service\t/private/var/run/svscan\n"
+					printf "service\t/System/Volumes/data@qsysconfdir@/sv\n"
 					cat /etc/synthetic.conf
 				) > "$DESTDIR"/etc/synthetic.conf
 				fi

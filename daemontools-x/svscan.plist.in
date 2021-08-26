@@ -18,7 +18,7 @@
             <string>@libexecdir@/svscanboot</string>
             <string>@servicedir@</string>
         </array>
-    <key>WorkingDirectory</key>  <string>@sysconfdir@/service</string>
+    <key>WorkingDirectory</key>  <string>@sysconfdir@/sv</string>
     <key>EnvironmentVariables</key>
         <dict>
             <key>SCANINTERVAL</key>
