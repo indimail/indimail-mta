@@ -142,6 +142,8 @@ o installer can now install, uninstall and set permissions
     https://github.com/drwetter/testssl.sh
 - 26/08/2021
 80. svctool: use /usr/local/etc/indimail/sv for servicedir on OSX/Darwin
+81. svctool: link global variables DEFAULT_DOMAIN, QMAILDEFAULTHOST to
+    control files defaultdomain, defaulthost
 
 * 
 Release 2.13 Start 14/02/2021

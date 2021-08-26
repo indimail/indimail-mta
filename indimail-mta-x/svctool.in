@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.613 2021-08-26 12:39:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.614 2021-08-26 22:56:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.613 2021-08-26 12:39:40+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.614 2021-08-26 22:56:20+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1705,25 +1705,6 @@ if [ ! -d "$DESTDIR"$QmailHOME/inquery ] ; then
 	$chown indimail:qmail "$DESTDIR"$QmailHOME/inquery
 	/bin/chmod 770 "$DESTDIR"$QmailHOME/inquery
 fi
-if [ -n "$default_domain" ] ; then
-	defaultDomain=$default_domain
-else
-	if [ -f "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-		defaultDomain=`cat "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN`
-	elif [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-		defaultDomain=`cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN`
-	else
-		defaultDomain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
-	fi
-fi
-if [ -f "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-	t=$(cat "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN)
-	if [ ! "$t" = "$defaultDomain" ] ; then
-		echo $defaultDomain > "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN
-	fi
-else
-	echo $defaultDomain > "$DESTDIR"$sysconfdir/control/global_vars/DEFAULT_DOMAIN
-fi
 }
 
 check_update_if_diff()
@@ -1950,7 +1931,22 @@ if [ -f ./config-fast ] ; then
 else
 	"$DESTDIR"$libexecdir/config-fast $hostname $DESTDIR
 fi
-
+if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] ; then
+	echo "global variable DEFAULT_DOMAIN"
+	/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN
+	if [ $? -ne 0 ] ; then
+		cd $t/global_vars
+		ln -s ../defaultdomain DEFAULT_DOMAIN
+	fi
+fi
+if [ ! -f $t/global_vars/QMAILDEFAULTHOSt -a ! -L $t/global_vars/QMAILDEFAULTHOSt ] ; then
+	echo "global variable QMAILDEFAULTHOST"
+	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOSt
+	if [ $? -ne 0 ] ; then
+		cd $t/global_vars
+		ln -s ../defaulthost QMAILDEFAULTHOSt
+	fi
+fi
 echo "Setting Following Files to Reasonable Defaults"
 if [ ! -f $t/servicedir.conf ] ; then
 	echo "servicedir.conf"
@@ -2844,13 +2840,6 @@ if [ ! -d "$DESTDIR"$cntrldir/global_vars ] ; then
 	echo "$cntrldir/global_vars" > $conf_dir/.envdir
 elif [ ! -f $conf_dir/.envdir ] ; then
 	echo "$cntrldir/global_vars" > $conf_dir/.envdir
-fi
-if [ ! -f "$DESTDIR"$cntrldir/global_vars/DEFAULT_DOMAIN ] ; then
-	echo $defaultDomain > "$DESTDIR"$cntrldir/global_vars/DEFAULT_DOMAIN
-fi
-if [ ! -f "$DESTDIR"$cntrldir/global_vars/QMAILDEFAULTHOST ] ; then
-	ln "$DESTDIR"$cntrldir/global_vars/DEFAULT_DOMAIN \
-		"$DESTDIR"$cntrldir/global_vars/QMAILDEFAULTHOST
 fi
 if [ " $qregex" = " " ] ; then
 	> $conf_dir/QREGEX
@@ -9009,7 +8998,7 @@ fi
 /usr/libexec/indimail/config-fast $defaultDomain
 orig=$(cat "$DESTDIR"$CONTROLDIR/me)
 out=$(mktemp -t recontrolXXXXXX)
-for i in nodnscheck locals rcpthosts smtpgreeting global_vars/QMAILDEFAULTHOST
+for i in nodnscheck locals rcpthosts smtpgreeting
 do
 	if [ -f "$DESTDIR"$CONTROLDIR/$i ] ; then
 		sed -e "s{$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i > $out
@@ -9021,10 +9010,6 @@ do
 		/bin/rm -f $out
 	fi
 done
-orig=$(cat "$DESTDIR"$CONTROLDIR/global_vars/DEFAULT_DOMAIN)
-if [ ! " $orig" = "$defaultDomain" ] ; then
-	echo $defaultDomain > "$DESTDIR"$CONTROLDIR/global_vars/DEFAULT_DOMAIN
-fi
 }
 
 create_cert()
