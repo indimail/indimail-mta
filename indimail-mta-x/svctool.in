@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.614 2021-08-26 22:56:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.615 2021-08-26 23:54:38+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.614 2021-08-26 22:56:20+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.615 2021-08-26 23:54:38+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1579,6 +1579,13 @@ if [ ! -d "$DESTDIR"$CONTROLDIR ] ; then
 		return 1
 	fi
 fi
+(
+echo "$RCSID"
+echo "# generated on $host at `date`"
+echo "# by the below command"
+echo "$prog_args"
+echo ""
+) > "$DESTDIR"$CONTROLDIR/.indimail_control
 if [ ! -d "$DESTDIR"$sysconfdir/tcp ] ; then
 	/bin/mkdir -p "$DESTDIR"$sysconfdir/tcp
 	if [ $? -ne 0 ] ; then
@@ -1917,6 +1924,13 @@ if [ ! -d "$DESTDIR"$sysconfdir/tcp ] ; then
 		return 1
 	fi
 fi
+(
+echo "$RCSID"
+echo "# generated on $host at `date`"
+echo "# by the below command"
+echo "$prog_args"
+echo ""
+) > $t/.qmail_control
 echo "Creating Default qmail Control Files"
 hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 echo "me"
@@ -2166,7 +2180,7 @@ dump_run_header()
 {
 echo "#!/bin/sh"
 echo "$RCSID"
-echo "# generated run script for $host on `date`"
+echo "# generated run script for $host at `date`"
 echo "# by the below command"
 echo "# $prog_args"
 echo ""
@@ -2180,7 +2194,7 @@ if [ $# -ne 1 ] ; then
 fi
 echo "#!/bin/sh"
 echo "$RCSID"
-echo "# generated log script for $host on `date`"
+echo "# generated log script for $host at `date`"
 echo "# by the below command"
 echo "# $prog_args"
 echo ""
@@ -5016,8 +5030,8 @@ if ( ! /bin/mkdir -p "$DESTDIR"$databasedir/data || ! /bin/mkdir -p "$DESTDIR"$d
 fi
 (
 echo "$RCSID"
-echo "# generated on $host on `date`"
-echo "set -x"
+echo "# generated on $host at `date`"
+echo "# by the below command"
 echo "$prog_args"
 echo ""
 ) > "$DESTDIR"$databasedir/.create_db
@@ -5576,7 +5590,8 @@ if [ -d "$DESTDIR"$databasedir ] ; then
 fi
 
 echo "$RCSID"
-echo "# generated on $host on `date`"
+echo "# generated on $host at `date`"
+echo "# by the below command"
 echo "# $prog_args"
 echo ""
 echo "[client]"
