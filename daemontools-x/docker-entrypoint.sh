@@ -65,7 +65,6 @@ do
 	case "$1" in
 	-d | --domain)
 		domain="$2"
-		echo $domain
 		shift 2
 	;;
 	-t | --timezone)
