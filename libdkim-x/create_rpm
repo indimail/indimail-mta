@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.4  2021-08-28 21:39:21+05:30  Cprogrammer
+# sign devel package
+#
 # Revision 1.3  2021-04-03 22:13:15+05:30  Cprogrammer
 # fixed indentation
 #
@@ -10,7 +13,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.3 2021-04-03 22:13:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.4 2021-08-28 21:39:21+05:30 Cprogrammer Exp mbhangui $
 #
 curdir=`pwd`
 version=$(cat conf-version)
@@ -146,7 +149,10 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
   if [ $? -eq 0 ] ; then
     /bin/rm /tmp/libdkim.spec
     build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
-    rpm --addsign $rpmbuild/RPMS/$build_arch/libdkim-"$version"-"1.$release".$dist.$build_arch.rpm
+    rpm --addsign $rpmbuild/RPMS/$build_arch/libdkim-"$version"-"1.$release".$dist.$build_arch.rpm >/dev/null
+    rpm --addsign $rpmbuild/RPMS/$build_arch/libdkim-devel-"$version"-"1.$release".$dist.$build_arch.rpm >/dev/null
+    echo $rpmbuild/RPMS/$build_arch/libdkim-"$version"-"1.$release".$dist.$build_arch.rpm
+    echo $rpmbuild/RPMS/$build_arch/libdkim-devel-"$version"-"1.$release".$dist.$build_arch.rpm
     echo -n "RPM lint for libdkim-"$version"-1."$release" (Y/N) - "
     read key
     if [ " $key" = " Y" -o " $key" = " y" ] ; then
