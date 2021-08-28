@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.55  2021-08-28 23:13:58+05:30  Cprogrammer
+ * control file dkimkeys for domain specific private key, selector
+ *
  * Revision 1.54  2021-06-15 22:14:47+05:30  Cprogrammer
  * pass tmpdir argument to pidopen
  *
@@ -192,6 +195,7 @@
 #include "control.h"
 #include "variables.h"
 #include "domainkeys.h"
+#include "getDomainToken.h"
 #include "qmulti.h"
 #include "auto_control.h"
 #include "pidopen.h"
@@ -213,6 +217,7 @@ unsigned long   uid;
 int             readfd;
 char           *dksign = 0;
 char           *dkverify = 0;
+void            die(int) __attribute__((noreturn));
 
 void
 die(e)
@@ -305,25 +310,31 @@ maybe_die_dk(e)
 	}
 }
 
-char            tmp[FMT_ULONG];
-DK_LIB         *dklib;
-DK             *dk;
-DK_STAT         st;
-stralloc        dkoutput = { 0 };    /*- Domainkey-Signature */
-stralloc        dksignature = { 0 }; /*- content of private signature */
-stralloc        dkopts = { 0 };
-char           *dkexcludeheaders;
+static char    *dkexcludeheaders;
+static DK_LIB  *dklib;
+static DK      *dk;
+static DK_STAT  st;
+static stralloc dkoutput = { 0 };    /*- Domainkey-Signature */
+static stralloc dksignature = { 0 }; /*- content of private signature */
+static stralloc dkopts = { 0 };
+static stralloc dkimkeys = { 0 };
 
 static void
-write_signature(DK *dka, char *dk_selector, char *keyfn,
+write_signature(DK *dka, char *dk_selector,
 	int advicelen, int opth, char *canon)
 {
 	unsigned char   advice[ADVICE_BUF];
-	char           *selector, *from, *ptr;
+	char           *selector, *from, *ptr, *keyfn;
 	static stralloc keyfnfrom = { 0 };
 	int             i;
 
 	from = dk_from(dka);
+	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1) {
+		custom_error("Z", "Unable to read dkimkeys. (#4.3.0)", 0);
+		die(88);
+	} else
+	if (!i || !(keyfn = getDomainToken(from, &dkimkeys)))
+		keyfn = dksign;
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -339,8 +350,9 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51);
 		} else
-		if (!stralloc_catb(&keyfnfrom, keyfn, i) ||
-				!stralloc_cats(&keyfnfrom, from) ||
+		if (!stralloc_catb(&keyfnfrom, keyfn, i))
+			die(51);
+		if (!stralloc_cats(&keyfnfrom, from) ||
 				!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
 				!stralloc_0(&keyfnfrom))
 			die(51);
@@ -423,8 +435,9 @@ write_signature(DK *dka, char *dk_selector, char *keyfn,
 		if (!stralloc_cats(&dkoutput, ptr ? ptr : from))
 			die(51);
 	} else
-	if (!stralloc_cats(&dkoutput, "unknown") ||
-			!stralloc_cats(&dkoutput, ";\n") ||
+	if (!stralloc_cats(&dkoutput, "unknown"))
+		die(51);
+	if (!stralloc_cats(&dkoutput, ";\n") ||
 			!stralloc_cats(&dkoutput, "    b=") ||
 			!stralloc_cats(&dkoutput, (char *) advice))
 		die(51);
@@ -669,15 +682,17 @@ main(int argc, char *argv[])
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 	if (dksign || dkverify) {
+		st = dk_eom(dk, (void *) 0);
+		maybe_die_dk(st);
 		if (dksign)
-			write_signature(dk, selector, dksign, advicelen, opth, canon);
+			write_signature(dk, selector, advicelen, opth, canon);
 		else
 		if (dkverify) {
 			char           *status = 0, *code = 0;
 
 			if (!stralloc_copys(&dkoutput, "DomainKey-Status: "))
 				die(51);
-			switch ((st = dk_eom(dk, (void *) 0)))
+			switch (st)
 			{
 			case DK_STAT_OK:
 				status = "good        ";
@@ -805,12 +820,13 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.54 2021-06-15 22:14:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.55 2021-08-28 23:13:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
 	x = sccsidqmultih;
 	x = sccsidpidopenh;
+	x = sccsidgetdomainth;
 #endif
 	x++;
 }

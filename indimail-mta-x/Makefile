@@ -1473,17 +1473,19 @@ dknewkey.8: dknewkey.9
 qmail-dk: \
 load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o \
 auto_qmail.o variables.o dns.o strsalloc.o ip.o pidopen.o \
-ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
-domainkeys.o dktrace.o control.o dns_text.o dns.lib
+ipalloc.o socket_v4mappedprefix.o socket_v6any.o wildmat.o \
+domainkeys.o dktrace.o control.o dns_text.o getDomainToken.o \
+dns.lib
 	./load qmail-dk auto_control.o auto_qmail.o qmulti.o \
 	variables.o socket_v4mappedprefix.o tlsarralloc.o \
-	socket_v6any.o dns.o strsalloc.o ip.o ipalloc.o \
-	domainkeys.o dktrace.o control.o dns_text.o pidopen.o \
-	`cat dns.lib` -lcrypto -lqmail
+	socket_v6any.o dns.o strsalloc.o ip.o ipalloc.o wildmat.o \
+	domainkeys.o dktrace.o control.o dns_text.o getDomainToken.o \
+	pidopen.o `cat dns.lib` -lcrypto -lqmail
 
 qmail-dk.o: \
 compile qmail-dk.c qmail.h auto_qmail.h control.h domainkeys.h \
-variables.h conf-domainkeys auto_control.h qmulti.h pidopen.h
+variables.h conf-domainkeys auto_control.h qmulti.h pidopen.h \
+getDomainToken.h
 	./compile `grep -h -v "^#" conf-domainkeys` qmail-dk.c
 
 qmail-dk.8: qmail-dk.9 conf-sysconfdir
@@ -1520,16 +1522,16 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 
 qmail-dkim: qmail-dkim.o auto_control.o pidopen.o \
 auto_qmail.o variables.o control.o dns_text.o \
-qmulti.o dns.lib dkim.lib conf-ld-$(SYSTEM) load
+wildmat.o getDomainToken.o qmulti.o dns.lib dkim.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o \
 	auto_qmail.o variables.o control.o pidopen.o \
 	dns_text.o -L../libdkim-x/.libs `cat dns.lib dkim.lib` \
-	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
+	wildmat.o getDomainToken.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	-lcrypto -lqmail
 
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h auto_qmail.h control.h domainkeys.h \
-hasdkim.h variables.h auto_control.h qmulti.h pidopen.h
+hasdkim.h variables.h auto_control.h qmulti.h pidopen.h getDomainToken.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
 		-I../libdkim-x -I/opt/local/include/dkim qmail-dkim.c
 
@@ -2693,110 +2695,130 @@ successes: \
 warn-auto.sh successes.sh
 	cat warn-auto.sh successes.sh \
 	> successes
+	chmod +x $@
 
 suids: \
 warn-auto.sh suids.sh
 	cat warn-auto.sh suids.sh \
 	> suids
+	chmod +x $@
 
 xqp: \
 warn-auto.sh xqp.sh
 	cat warn-auto.sh xqp.sh \
 	> xqp
+	chmod +x $@
 
 xrecipient: \
 warn-auto.sh xrecipient.sh
 	cat warn-auto.sh xrecipient.sh \
 	> xrecipient
+	chmod +x $@
 
 xsender: \
 warn-auto.sh xsender.sh
 	cat warn-auto.sh xsender.sh \
 	> xsender
+	chmod +x $@
 
 zddist: \
 warn-auto.sh zddist.sh conf-libexec
 	cat warn-auto.sh zddist.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zddist
+	chmod +x $@
 
 ddist: \
 warn-auto.sh ddist.sh
 	cat warn-auto.sh ddist.sh \
 	> ddist
+	chmod +x $@
 
 zdeferrals: \
 warn-auto.sh zdeferrals.sh conf-libexec
 	cat warn-auto.sh zdeferrals.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zdeferrals
+	chmod +x $@
 
 deferrals: warn-auto.sh deferrals.sh
 	cat warn-auto.sh deferrals.sh \
 	> deferrals
+	chmod +x $@
 
 zfailures: \
 warn-auto.sh zfailures.sh conf-libexec
 	cat warn-auto.sh zfailures.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zfailures
+	chmod +x $@
 
 failures: \
 warn-auto.sh failures.sh
 	cat warn-auto.sh failures.sh \
 	> failures
+	chmod +x $@
 
 zoverall: \
 warn-auto.sh zoverall.sh
 	cat warn-auto.sh zoverall.sh \
 	> zoverall
+	chmod +x $@
 
 zrecipients: \
 warn-auto.sh zrecipients.sh conf-libexec
 	cat warn-auto.sh zrecipients.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrecipients
+	chmod +x $@
 
 zrhosts: \
 warn-auto.sh zrhosts.sh conf-libexec
 	cat warn-auto.sh zrhosts.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrhosts
+	chmod +x $@
 
 zsmtp: \
 warn-auto.sh zsmtp.sh conf-libexec
 	cat warn-auto.sh zsmtp.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsmtp
+	chmod +x $@
 
 zrxdelay: \
 warn-auto.sh zrxdelay.sh conf-libexec
 	cat warn-auto.sh zrxdelay.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zrxdelay
+	chmod +x $@
 
 zsenders: \
 warn-auto.sh zsenders.sh conf-libexec
 	cat warn-auto.sh zsenders.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsenders
+	chmod +x $@
 
 zsendmail: \
 warn-auto.sh zsendmail.sh
 	cat warn-auto.sh zsendmail.sh \
 	> zsendmail
+	chmod +x $@
 
 zsuccesses: \
 warn-auto.sh zsuccesses.sh conf-libexec
 	cat warn-auto.sh zsuccesses.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsuccesses
+	chmod +x $@
 
 zsuids: \
 warn-auto.sh zsuids.sh conf-libexec
 	cat warn-auto.sh zsuids.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsuids
+	chmod +x $@
 
 multilog-matchup: \
 warn-auto.sh multilog-matchup.sh conf-prefix
@@ -2804,79 +2826,93 @@ warn-auto.sh multilog-matchup.sh conf-prefix
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> multilog-matchup
+	chmod +x $@
 
 smtp-matchup: \
 warn-auto.sh smtp-matchup.sh
 	cat warn-auto.sh smtp-matchup.sh \
 	> smtp-matchup
+	chmod +x $@
 
 recipients: \
 warn-auto.sh recipients.sh
 	cat warn-auto.sh recipients.sh \
 	> recipients
+	chmod +x $@
 
 rhosts: \
 warn-auto.sh rhosts.sh
 	cat warn-auto.sh rhosts.sh \
 	> rhosts
+	chmod +x $@
 
 rsmtp: \
 warn-auto.sh rsmtp.sh conf-sysconfdir
 	cat warn-auto.sh rsmtp.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtp
+	chmod +x $@
 
 rsmtpfailures: \
 warn-auto.sh rsmtpfailures.sh
 	cat warn-auto.sh rsmtpfailures.sh \
 	> rsmtpfailures
+	chmod +x $@
 
 rsmtpsdomains: \
 warn-auto.sh rsmtpsdomains.sh conf-sysconfdir
 	cat warn-auto.sh rsmtpsdomains.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtpsdomains
+	chmod +x $@
 
 rsmtprdomains: \
 warn-auto.sh rsmtprdomains.sh conf-sysconfdir
 	cat warn-auto.sh rsmtprdomains.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtprdomains
+	chmod +x $@
 
 rsmtprecipients: \
 warn-auto.sh rsmtprecipients.sh conf-sysconfdir
 	cat warn-auto.sh rsmtprecipients.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtprecipients
+	chmod +x $@
 
 rsmtpsenders: \
 warn-auto.sh rsmtpsenders.sh conf-sysconfdir
 	cat warn-auto.sh rsmtpsenders.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rsmtpsenders
+	chmod +x $@
 
 rxdelay: \
 warn-auto.sh rxdelay.sh
 	cat warn-auto.sh rxdelay.sh \
 	> rxdelay
+	chmod +x $@
 
 rspamrdomain: \
 warn-auto.sh rspamrdomain.sh conf-sysconfdir
 	cat warn-auto.sh rspamrdomain.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamrdomain
+	chmod +x $@
 
 rspamsdomain: \
 warn-auto.sh rspamsdomain.sh conf-sysconfdir
 	cat warn-auto.sh rspamsdomain.sh \
 	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
 	> rspamsdomain
+	chmod +x $@
 
 zspam: \
 warn-auto.sh zspam.sh conf-libexec
 	cat warn-auto.sh zspam.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zspam
+	chmod +x $@
 
 dk-filter: \
 warn-auto.sh dk-filter.sh conf-prefix conf-sysconfdir
@@ -2885,11 +2921,13 @@ warn-auto.sh dk-filter.sh conf-prefix conf-sysconfdir
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> dk-filter
+	chmod +x $@
 
 senders: \
 warn-auto.sh senders.sh conf-qmail
 	cat warn-auto.sh senders.sh \
 	> senders
+	chmod +x $@
 
 fmt_ushort.o: \
 compile fmt_ushort.c fmt.h

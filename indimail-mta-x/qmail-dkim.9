@@ -22,15 +22,27 @@ supports DKIM signing and verification and can optionally use
 .B Sender Signing Practice (SSP)
 or
 .B Author Domain Signing Practice.
-It uses the libdkim and OpenSSL libraries.  To sign a message, set the
+It uses the libdkim and OpenSSL libraries.
+
+To sign a message, set the
 .B DKIMSIGN
 environment variable to the pathname of the private key that will be
 used to sign the message. If there is a % character in the environment
-variable, it is removed and replaced by the domain name in the From: header.
-If, after substituting the %, that file does not exist, the % character will be
-removed. If a private key file does not exist and does not have a % character,
-the message will be rejected with error 35. The selector (s=) will be taken from
-the basename of the file. The private key should be created by 
+variable, it is removed and replaced by the domain name in the
+From: header. The selector (s=) will be taken from the basename of the
+file. If, after substituting the %, that file does not exist, the
+% character will be removed to check if the file exists. In addition to
+\fBDKIMSIGN\fR environment variable, you can have the domain and the
+pathname of the private key in the control file \fIdkimkeys\fR which has
+the following format
+.EX
+domain:private_key_path
+.EE
+If an entry for \fIdomain\fR exists in \fIdkimkeys\fR, the value of
+\fBDKIMSIGN\fR environment variable is ignored.
+
+If a private key file does not exist and does not have a % character, the
+message will be rejected with error 35. The private key should be created by 
 .BR dknewkey(8) .
 
 In the absense of DKSIGN and DKVERIFY environment variable, qmail-dkim will sign the

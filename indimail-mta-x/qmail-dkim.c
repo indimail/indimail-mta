@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.60  2021-08-28 23:16:06+05:30  Cprogrammer
+ * control file dkimkeys for domain specific private key, selector
+ *
  * Revision 1.59  2021-06-15 22:15:14+05:30  Cprogrammer
  * pass tmpdir argument to pidopen
  *
@@ -92,7 +95,7 @@
  * remove '%' sign from private key if key not found
  *
  * Revision 1.29  2011-06-04 14:22:29+05:30  Cprogrammer
- * added DKIM_UNSIGNED_FROM error code for dkimadspverify
+ * added DKIM_UNSIGNED_FROM error code for dkimpractice
  *
  * Revision 1.28  2011-06-04 14:07:41+05:30  Cprogrammer
  * added DKIM_UNSIGNED_FROM
@@ -208,6 +211,7 @@
 #include "control.h"
 #include "auto_control.h"
 #include "qmail.h"
+#include "getDomainToken.h"
 #include "variables.h"
 #include "qmulti.h"
 #include "pidopen.h"
@@ -230,6 +234,7 @@ struct datetime dt;
 unsigned long   uid;
 int             readfd;
 DKIMContext     ctxt;
+void            die(int, int) __attribute__((noreturn));
 
 void
 die(int e, int what)
@@ -295,7 +300,7 @@ custom_error(char *flag, char *status, char *code)
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
-	if ((!strncasecmp((char *) szHeader, "X-", 2) 
+	if ((!strncasecmp((char *) szHeader, "X-", 2)
 			&& strncasecmp((char *) szHeader, "X-Mailer", 8))
 		|| strncasecmp((char *) szHeader, "Received:", 9) == 0
 		|| strncasecmp((char *) szHeader, "Authentication-Results:", 23) == 0
@@ -328,22 +333,29 @@ maybe_die_dkim(e)
 	}
 }
 
-char           *dkimsign = 0;
-char           *dkimverify = 0;
-char           *dkimadspverify = 0, *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
-stralloc        dkimoutput = { 0 };  /*- DKIM-Signature */
-stralloc        dksignature = { 0 }; /*- content of private signature */
-stralloc        sigdomains = { 0 };  /*- domains which must have signatures */
-stralloc        nsigdomains = { 0 }; /*- domains which do not have signatures */
-stralloc        dkimopts = { 0 };
+static char    *dkimsign = 0;
+static char    *dkimverify = 0;
+static char    *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
+static stralloc dkimoutput = { 0 };  /*- DKIM-Signature */
+static stralloc dksignature = { 0 }; /*- content of private signature */
+static stralloc sigdomains = { 0 };  /*- domains which must have signatures */
+static stralloc nsigdomains = { 0 }; /*- domains which do not have signatures */
+static stralloc dkimopts = { 0 };
+static stralloc dkimkeys = { 0 };
 
 static void
-write_signature(char *domain, char *keyfn)
+write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 {
-	char           *pSig;
+	char           *pSig, *keyfn, *ptr, *selector;
 	int             i;
 	static stralloc keyfnfrom = { 0 };
 
+	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1) {
+		custom_error("Z", "Unable to read dkimkeys. (#4.3.0)", 0);
+		die(88, 0);
+	} else
+	if (!i || !(keyfn = getDomainToken(domain, &dkimkeys)))
+		keyfn = dkimsign;
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -353,21 +365,33 @@ write_signature(char *domain, char *keyfn)
 				!stralloc_append(&keyfnfrom, "/"))
 			die(51, 1);
 	}
+	if (i) {
+		selector = ptr = keyfn;
+		while (*ptr) {
+			if (*ptr == '/' && *(ptr + 1))
+				selector = ptr + 1;
+			ptr++;
+		}
+	} else
+		selector = opts->szSelector;
 	i = str_chr(keyfn, '%');
 	if (keyfn[i]) {
 		if (keyfn[0] == '/') {
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51, 1);
 		} else
-		if (!stralloc_catb(&keyfnfrom, keyfn, i) ||
-				!stralloc_cats(&keyfnfrom, domain) ||
-				!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
-				!stralloc_0(&keyfnfrom))
+		if (!stralloc_catb(&keyfnfrom, keyfn, i))
+			die(51, 1);
+		if (!stralloc_cats(&keyfnfrom, domain))
+			die(51, 1);
+		if (keyfn[i + 1] && !stralloc_cats(&keyfnfrom, keyfn + i + 1))
+			die(51, 1);
+		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
 		if (access(keyfnfrom.s, F_OK)) {
 			if (errno != error_noent) {
 				custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
-				_exit(88);
+				die(88, 1);
 			}
 			/*- since file does not exists remove '%' sign */
 			keyfnfrom.len = 8;
@@ -382,7 +406,7 @@ write_signature(char *domain, char *keyfn)
 			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
 					!stralloc_0(&keyfnfrom))
 				die(51, 1);
-		} 
+		}
 	} else {
 		if (keyfn[0] == '/') {
 			if (!stralloc_copys(&keyfnfrom, keyfn))
@@ -409,8 +433,7 @@ write_signature(char *domain, char *keyfn)
 		break;
 	default:
 		custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
-		DKIMSignFree(&ctxt);
-		_exit(88);
+		die(88, 1);
 	}
 	for (i = 0; i < dksignature.len; i++) {
 		if (dksignature.s[i] == '\0')
@@ -418,6 +441,10 @@ write_signature(char *domain, char *keyfn)
 	}
 	if (!stralloc_0(&dksignature))
 		die(51, 1);
+	if (selector != opts->szSelector) {
+		str_copyb(opts->szSelector, selector, selector_size);
+		DKIMSignReplaceSelector(&ctxt, opts);
+	}
 	i = DKIMSignGetSig2(&ctxt, dksignature.s, &pSig);
 	maybe_die_dkim(i);
 	if (pSig) {
@@ -512,7 +539,7 @@ checkSSP(char *domain, int *bTesting)
 		}
 		bIsParentSSP = 1;
 	}
-	/* 
+	/*-
 	 * PG.1 2013-01-03
 	 * Bug fix by Piotr Gronek, Faculy of Physics & Applied Computer Science, Poland 2013-01-03
 	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
@@ -543,7 +570,7 @@ checkSSP(char *domain, int *bTesting)
 			else
 			if (!str_diff(s, "s")) {
 				if (bIsParentSSP) {
-					/* 
+					/*-
 					 * this is a parent's SSP record that should not apply to subdomains
 					 * the message is non-suspicious
 					 */
@@ -588,7 +615,7 @@ checkADSP(char *domain)
 		DKIM_MFREE(results);
 		return DKIM_ADSP_TEMPFAIL;
 	}
-	/* 
+	/*-
 	 * PG.1 2013-01-03
 	 * Bug fix by Piotr Gronek, Faculy of Physics & Applied Computer Science, Poland 2013-01-03
 	 *
@@ -900,7 +927,7 @@ checkPractice(int dkimRet, int useADSP, int useSSP)
 
 	if (!(ptr = env_get("DKIMPRACTICE"))) {
 		/*- if SIGN_PRACTICE="local" then you can use DKIMVERIFY env variable too */
-		if (!useADSP && !useSSP) 
+		if (!useADSP && !useSSP)
 			dkimpractice = dkimverify; /*- DKIMVERIFY env variable */
 		else
 			return (0);
@@ -1055,7 +1082,7 @@ main(int argc, char *argv[])
 	int             sCount = 0, sSize = 0;
 	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
 	unsigned long   pid;
-	char           *selector, *ptr;
+	char           *selector = NULL, *ptr;
 	stralloc        dkimfn = {0};
 	DKIMSignOptions opts = { 0 };
 	DKIMVerifyDetails *pDetails;
@@ -1198,7 +1225,7 @@ main(int argc, char *argv[])
 				DKIMSignFree(&ctxt);
 				maybe_die_dkim(DKIM_INVALID_CONTEXT);
 			}
-			write_signature(t, dkimsign); /*- calls DKIMSignFree(&ctxt) */
+			write_signature(t, &opts, sizeof(opts.szSelector) - 1); /*- calls DKIMSignFree(&ctxt) */
 		} else
 		if (dkimverify) {
 			char            szPolicy[512];
@@ -1272,7 +1299,7 @@ main(int argc, char *argv[])
 					if (sCount > 0) {
 						if (resDKIMADSP == DKIM_ADSP_UNKNOWN || resDKIMADSP == DKIM_ADSP_ALL)
 							ret = (sCount == sSize ? DKIM_SUCCESS : DKIM_PARTIAL_SUCCESS);
-					} 
+					}
 					/* if the message should be signed, return fail */
 					if (resDKIMADSP == DKIM_ADSP_DISCARDABLE)
 						ret = DKIM_FAIL;
@@ -1364,12 +1391,13 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.59 2021-06-15 22:15:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.60 2021-08-28 23:16:06+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
 	x = sccsidqmultih;
 	x = sccsidpidopenh;
+	x = sccsidgetdomainth;
 #endif
 	x++;
 }
