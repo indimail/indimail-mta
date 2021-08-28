@@ -1,5 +1,8 @@
 /*
  * $Log: variables.h,v $
+ * Revision 1.8  2021-08-28 23:08:41+05:30  Cprogrammer
+ * moved dtype enum delivery variable from variables.h to getDomainToken.h
+ *
  * Revision 1.7  2021-05-30 00:18:42+05:30  Cprogrammer
  * added enum dtype for delivery type
  *
@@ -24,10 +27,5 @@ extern char    *controldir;
 extern char    *certdir;
 extern int      use_fsync, use_syncdir;
 extern int      noipv6;
-typedef enum {
-	local_delivery,
-	remote_delivery,
-	local_or_remote,
-} dtype;
 
 #endif

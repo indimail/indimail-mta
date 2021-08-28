@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.15  2021-08-28 23:08:17+05:30  Cprogrammer
+ * moved dtype enum delivery variable from variables.h to getDomainToken.h
+ *
  * Revision 1.14  2021-08-13 18:26:02+05:30  Cprogrammer
  * turn off ratelimit if RATELIMIT_DIR is set but empty
  *
@@ -38,7 +41,7 @@
  * use new prioq functions
  *
  * Revision 1.2  2021-06-01 01:52:35+05:30  Cprogrammer
- * moved delivery_report to delivery_report.c
+ * moved delivery_rate to delivery_rate.c
  *
  * Revision 1.1  2021-05-31 17:06:24+05:30  Cprogrammer
  * Initial revision
@@ -94,6 +97,7 @@
 #include "syncdir.h"
 #endif
 #include "delivery_rate.h"
+#include "getDomainToken.h"
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -158,7 +162,7 @@ static int      flagexitasap = 0;
 static int      flagrunasap = 0;
 static int      flagreadasap = 0;
 
-dtype           delivery;
+extern dtype    delivery;
 int             do_ratelimit;
 unsigned long   delayed_jobs;
 
@@ -1644,7 +1648,7 @@ pass_dochan(int c)
 	switch (line.s[0])
 	{
 	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
-		delivery = c;
+		delivery = c ? remote_delivery : local_delivery;
 		if (!(i = delivery_rate(line.s + 1, pe.id, &t, &_do_ratelimit))) {
 			if (t && (t < time_needed || !time_needed))
 				time_needed = t + SLEEP_FUZZ; /*- earliest delayed job */
@@ -2561,9 +2565,10 @@ main()
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.14 2021-08-13 18:26:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.15 2021-08-28 23:08:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
+	x = sccsidgetdomainth;
 	if (x)
 		x++;
 }

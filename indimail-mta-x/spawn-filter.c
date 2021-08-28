@@ -1,5 +1,8 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.82  2021-08-28 23:08:25+05:30  Cprogrammer
+ * moved dtype enum delivery variable from variables.h to getDomainToken.h
+ *
  * Revision 1.81  2021-08-28 21:48:46+05:30  Cprogrammer
  * match sender domain for remote delivery
  * match recipient domain for local delivery
@@ -296,7 +299,7 @@ static void     create_logfilter();
 static int      check_size(char *);
 static void     set_environ(char *, char *, char *, char *, char *);
 
-dtype           delivery;
+extern dtype    delivery;
 static int      spfok = 0;
 static stralloc spf = { 0 };
 static int      sppok = 0;
@@ -910,7 +913,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.81 2021-08-28 21:48:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.82 2021-08-28 23:08:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;

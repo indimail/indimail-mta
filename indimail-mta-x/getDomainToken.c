@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.3  2021-08-28 23:05:10+05:30  Cprogrammer
+ * moved dtype enum delivery variable from variables.h to getDomainToken.h
+ *
  * Revision 1.2  2021-05-29 23:37:58+05:30  Cprogrammer
  * refactored for slowq-send
  *
@@ -13,7 +16,7 @@
 #include <env.h>
 #include <regex.h>
 #include "wildmat.h"
-#include "variables.h"
+#include "getDomainToken.h"
 
 #define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
 #define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
@@ -21,7 +24,7 @@
 #define REG_NOERROR 0
 #endif
 
-extern dtype    delivery;
+dtype           delivery;
 
 /*
  * read control file filterargs which can be one of the three
@@ -87,8 +90,9 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.2 2021-05-29 23:37:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getDomainToken.c,v 1.3 2021-08-28 23:05:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
+	x = sccsidgetdomainth;
 	x++;
 }

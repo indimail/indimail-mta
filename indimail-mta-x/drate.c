@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.20  2021-08-28 23:02:52+05:30  Cprogrammer
+ * moved delivery variable to getDomainToken.c
+ *
  * Revision 1.19  2021-08-24 11:29:33+05:30  Cprogrammer
  * moved check_domain function to libqmail
  *
@@ -91,7 +94,7 @@
 #define FATAL     "drate: fatal: "
 #define WARN      "drate: warn: "
 
-dtype           delivery;
+extern dtype    delivery;
 static int      local_time = 1;
 static char     strnum1[FMT_ULONG], strnum2[FMT_LONG];
 static char     ssoutbuf[512];
@@ -621,7 +624,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.19 2021-08-24 11:29:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.20 2021-08-28 23:02:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;

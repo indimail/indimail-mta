@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.92  2021-08-28 23:07:00+05:30  Cprogrammer
+ * moved dtype enum delivery variable from variables.h to getDomainToken.h
+ *
  * Revision 1.91  2021-08-13 18:25:59+05:30  Cprogrammer
  * turn off ratelimit if RATELIMIT_DIR is set but empty
  *
@@ -41,7 +44,7 @@
  * use new prioq functions
  *
  * Revision 1.79  2021-06-01 01:52:23+05:30  Cprogrammer
- * moved delivery_report() to delivery_report.c
+ * moved delivery_rate() to delivery_rate.c
  *
  * Revision 1.78  2021-05-30 00:12:42+05:30  Cprogrammer
  * added email rate limiting feature
@@ -301,6 +304,7 @@
 #include "syncdir.h"
 #endif
 #include "delivery_rate.h"
+#include "getDomainToken.h"
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -361,7 +365,7 @@ static int      chanskip[CHANNELS] = { 10, 20 };
 
 char           *queuedesc;
 
-dtype           delivery;
+extern dtype    delivery;
 int             do_ratelimit;
 unsigned long   delayed_jobs;
 
@@ -1878,7 +1882,7 @@ pass_dochan(int c)
 	switch (line.s[0])
 	{
 	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
-		delivery = c;
+		delivery = c ? remote_delivery : local_delivery;
 		if (!(i = delivery_rate(line.s + 1, pe.id, &t, &_do_ratelimit))) {
 			if (t && (t < time_needed || !time_needed))
 				time_needed = t + SLEEP_FUZZ; /*- earliest delayed job */
@@ -3080,9 +3084,10 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.91 2021-08-13 18:25:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.92 2021-08-28 23:07:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
+	x = sccsidgetdomainth;
 	if (x)
 		x++;
 }
