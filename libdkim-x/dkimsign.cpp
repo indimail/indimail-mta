@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.19  2021-08-28 21:42:23+05:30  Cprogrammer
+ * added ReplaceSelector to replace selector
+ *
  * Revision 1.18  2020-04-11 08:37:12+05:30  Cprogrammer
  * renamed DKKIMDOMAIN to BOUNCEDOMAIN
  *
@@ -148,12 +151,12 @@ CDKIMSign::~CDKIMSign()
 //
 ////////////////////////////////////////////////////////////////////////////////
 int
-CDKIMSign::Init(DKIMSignOptions * pOptions)
+CDKIMSign::Init(DKIMSignOptions *pOptions)
 {
 	int             nRet = CDKIMBase::Init();
 	m_Canon = pOptions->nCanon;
 
-// as of draft 01, these are the only allowed signing types:
+	/*- as of draft 01, these are the only allowed signing types: */
 	if ((m_Canon != DKIM_SIGN_SIMPLE_RELAXED) && (m_Canon != DKIM_SIGN_RELAXED) && (m_Canon != DKIM_SIGN_RELAXED_SIMPLE)) {
 		m_Canon = DKIM_SIGN_SIMPLE;
 	}
@@ -169,11 +172,13 @@ CDKIMSign::Init(DKIMSignOptions * pOptions)
 	m_nIncludeCopiedHeaders = pOptions->nIncludeCopiedHeaders;
 	m_nIncludeBodyHash = pOptions->nIncludeBodyHash;
 
-// NOTE: the following line is not backwards compatible with MD 8.0.3
-// because the szRequiredHeaders member was added after the release
-//sRequiredHeaders.assign( pOptions->szRequiredHeaders );
+	/*-
+	 * NOTE: the following line is not backwards compatible with MD 8.0.3
+	 * because the szRequiredHeaders member was added after the release
+	 * sRequiredHeaders.assign( pOptions->szRequiredHeaders );
+	 */
 
-//make sure there is a colon after the last header in the list
+	/*- make sure there is a colon after the last header in the list */
 	if ((sRequiredHeaders.size() > 0) && sRequiredHeaders.at(sRequiredHeaders.size() - 1) != ':')
 		sRequiredHeaders.append(":");
 	m_nHash = pOptions->nHash;
@@ -182,6 +187,11 @@ CDKIMSign::Init(DKIMSignOptions * pOptions)
 	return nRet;
 }
 
+void
+CDKIMSign::ReplaceSelector(DKIMSignOptions *pOptions)
+{
+	sSelector.assign(pOptions->szSelector);
+}
 
 // Hash - update the hash
 void
@@ -264,10 +274,8 @@ ConvertHeaderToQuotedPrintable(const char *source, char *dest)
 	static unsigned char hexchars[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 	unsigned char  *d = (unsigned char *) dest;
 	for (const unsigned char *s = (const unsigned char *)source; *s != '\0'; s++) {
-		if (*s >= 33 && *s <= 126 && *s != '=' && *s != ':' && *s != ';' && *s != '|') {
+		if (*s >= 33 && *s <= 126 && *s != '=' && *s != ':' && *s != ';' && *s != '|')
 			*d++ = *s;
-		}
-
 		else {
 			bConvert = true;
 			*d++ = '=';
@@ -307,9 +315,8 @@ CDKIMSign::GetHeaderParams(const string & sHdr)
 			sTag.assign(sHdr.substr(0, pos));
 			sValue.assign(sHdr.substr(pos + 1, string::npos));
 			ConvertHeaderToQuotedPrintable(sTag.c_str(), workBuffer);
-			if (!m_sCopiedHeaders.empty()) {
+			if (!m_sCopiedHeaders.empty())
 				m_sCopiedHeaders.append("|");
-			}
 			m_sCopiedHeaders.append(workBuffer);
 			m_sCopiedHeaders.append(":");
 			ConvertHeaderToQuotedPrintable(sValue.c_str(), workBuffer);
@@ -319,7 +326,7 @@ CDKIMSign::GetHeaderParams(const string & sHdr)
 	}
 }
 
-// ProcessHeaders - sign headers and save needed parameters
+/* ProcessHeaders - sign headers and save needed parameters */
 int
 CDKIMSign::ProcessHeaders(void)
 {
@@ -330,22 +337,22 @@ CDKIMSign::ProcessHeaders(void)
 	string          sTag;
 	bool            bFromHeaderFound = false;
 
-	// walk the header list
+	/* walk the header list */
 	for (iter = HeaderList.begin(); iter != HeaderList.end(); iter++) {
 		sTag.assign(*iter);
-		// look for a colon
+		/* look for a colon */
 		string::size_type pos = sTag.find(':');
 		if (pos != string::npos) {
 			int             nSignThisTag = 1;
-			// hack off anything past the colon
+			/* hack off anything past the colon */
 			sTag.erase(pos + 1, string::npos);
-			// is this the From: header?
+			/* is this the From: header? */
 			if (_stricmp(sTag.c_str(), "From:") == 0) {
 				bFromHeaderFound = true;
 				nSignThisTag = 1;
 				IsRequiredHeader(sTag);	// remove from required header list
 			}
-			// is this in the list of headers that must be signed?
+			/* is this in the list of headers that must be signed? */
 			else
 			if (IsRequiredHeader(sTag))
 				nSignThisTag = 1;
@@ -408,7 +415,7 @@ CDKIMSign::ProcessHeader(const string & sHdr)
 		{
 		string sTemp = sHdr;
 		RemoveSWSP(sTemp);
-		// convert characters before ':' to lower case
+		/* convert characters before ':' to lower case */
 		for (char *s = (char *)sTemp.c_str(); *s != '\0' && *s != ':'; s++) {
 			if (*s >= 'A' && *s <= 'Z')
 				*s += 'a' - 'A';
@@ -551,8 +558,8 @@ CDKIMSign::InitSig(void)
 ////////////////////////////////////////////////////////////////////////////////
 void CDKIMSign::AddTagToSig(char *Tag, const string & sValue, char cbrk, bool bFold)
 {
-	int
-	                nTagLen = strlen(Tag);
+	int             nTagLen = strlen(Tag);
+
 	AddInterTagSpace((!bFold) ? sValue.size() + nTagLen + 2 : nTagLen + 2);
 	m_sSig.append(Tag);
 	m_sSig.append("=");
@@ -560,11 +567,8 @@ void CDKIMSign::AddTagToSig(char *Tag, const string & sValue, char cbrk, bool bF
 	if (!bFold) {
 		m_sSig.append(sValue);
 		m_nSigPos += sValue.size();
-	}
-
-	else {
+	} else
 		AddFoldedValueToSig(sValue, cbrk);
-	}
 	m_sSig.append(";");
 	m_nSigPos++;
 }
@@ -592,9 +596,7 @@ void CDKIMSign::AddInterTagSpace(int nSizeOfNextTag)
 	if (m_nSigPos + nSizeOfNextTag + 1 > OptimalHeaderLineLength) {
 		m_sSig.append("\n\t");
 		m_nSigPos = 1;
-	}
-
-	else {
+	} else {
 		m_sSig.append(" ");
 		m_nSigPos++;
 	}
@@ -611,8 +613,7 @@ void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
 {
 	string::size_type pos = 0;
 	if (cbrk == 0) {
-
-	// fold anywhere
+		/* fold anywhere */
 		while (pos < sValue.size()) {
 			string::size_type len = OptimalHeaderLineLength - m_nSigPos;
 			if (len > sValue.size() - pos)
@@ -625,21 +626,15 @@ void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
 				m_nSigPos = 1;
 			}
 		}
-	}
-
-	else {
-
-	// fold only at cbrk
+	} else {
+		/* fold only at cbrk */
 		while (pos < sValue.size()) {
 			string::size_type len = OptimalHeaderLineLength - m_nSigPos;
 			string::size_type brkpos;
-			if (sValue.size() - pos < len) {
+			if (sValue.size() - pos < len)
 				brkpos = sValue.size() - 1;
-			}
-
-			else {
+			else
 				brkpos = sValue.rfind(cbrk, pos + len);
-			}
 			if (brkpos == string::npos || brkpos < pos) {
 				brkpos = sValue.find(cbrk, pos);
 				if (brkpos == string::npos) {
@@ -651,8 +646,6 @@ void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
 			m_nSigPos += len;
 			pos += len;
 			if (pos < sValue.size()) {
-
-			//m_sSig.append( "\r\n\t" );
 				m_sSig.append("\n\t");
 				m_nSigPos = 1;
 			}
@@ -668,12 +661,10 @@ void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
 ////////////////////////////////////////////////////////////////////////////////
 int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength)
 {
-	if (szPrivKey == NULL) {
+	if (szPrivKey == NULL)
 		return DKIM_BAD_PRIVATE_KEY;
-	}
-	if (szSignature == NULL) {
+	if (szSignature == NULL)
 		return DKIM_BUFFER_TOO_SMALL;
-	}
 	int             nRet = AssembleReturnedSig(szPrivKey);
 	if (nRet != DKIM_SUCCESS)
 		return nRet;
@@ -692,12 +683,10 @@ int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLengt
 ////////////////////////////////////////////////////////////////////////////////
 int CDKIMSign::GetSig2(char *szPrivKey, char **pszSignature)
 {
-	if (szPrivKey == NULL) {
+	if (szPrivKey == NULL)
 		return DKIM_BAD_PRIVATE_KEY;
-	}
-	if (pszSignature == NULL) {
+	if (pszSignature == NULL)
 		return DKIM_BUFFER_TOO_SMALL;
-	}
 	int             nRet = AssembleReturnedSig(szPrivKey);
 	if (nRet != DKIM_SUCCESS)
 		return nRet;
@@ -717,21 +706,15 @@ bool CDKIMSign::IsRequiredHeader(const string & sTag)
 	string::size_type start = 0;
 	string::size_type end = sRequiredHeaders.find(':');
 	while (end != string::npos) {
-
-	// check for a zero-length header
-		if (start == end) {
+		/* check for a zero-length header */
+		if (start == end)
 			sRequiredHeaders.erase(start, 1);
-		}
-
 		else {
 			if (_stricmp(sTag.c_str(), sRequiredHeaders.substr(start, end - start + 1).c_str()) == 0) {
 				sRequiredHeaders.erase(start, end - start + 1);
 				return true;
-			}
-
-			else {
+			} else
 				start = end + 1;
-			}
 		}
 		end = sRequiredHeaders.find(':', start);
 	}
@@ -763,11 +746,10 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 	p5 = &m_Bdy_ietf_sha256ctx;
 #endif
 
-// construct the DKIM-Signature: header and add to hash
+	/*- construct the DKIM-Signature: header and add to hash */
 	InitSig();
-	if (bUseIetfBodyHash) {
-		AddTagToSig((char *) "v", (char *) "1", 0, false);
-	}
+	if (bUseIetfBodyHash)
+		AddTagToSig((char *) "v", "1", 0, false);
 #ifdef HAVE_EVP_SHA256
 	AddTagToSig((char *) "a", bUseSha256 ? "rsa-sha256" : "rsa-sha1", 0, false);
 #else
@@ -812,27 +794,22 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		delete[]buf;
 	}
 	AddTagToSig((char *) "s", sSelector, 0, false);
-	if (m_IncludeBodyLengthTag) {
+	if (m_IncludeBodyLengthTag)
 		AddTagToSig((char *) "l", m_nBodyLength);
-	}
 	if (m_nIncludeTimeStamp != 0) {
 		time_t t;
 		time(&t);
 		AddTagToSig((char *) "t", t);
 	}
-	if (m_ExpireTime != 0) {
+	if (m_ExpireTime != 0)
 		AddTagToSig((char *) "x", m_ExpireTime);
-	}
-	if (!sIdentity.empty()) {
+	if (!sIdentity.empty())
 		AddTagToSig((char *) "i", sIdentity, 0, false);
-	}
-	if (m_nIncludeQueryMethod) {
+	if (m_nIncludeQueryMethod)
 		AddTagToSig((char *) "q", bUseIetfBodyHash ? "dns/txt" : "dns", 0, false);
-	}
 	AddTagToSig((char *) "h", hParam, ':', true);
-	if (m_nIncludeCopiedHeaders) {
+	if (m_nIncludeCopiedHeaders)
 		AddTagToSig((char *) "z", m_sCopiedHeaders, 0, true);
-	}
 	if (bUseIetfBodyHash) {
 		unsigned char Hash[EVP_MAX_MD_SIZE];
 		unsigned int nHashLen = 0;
@@ -842,9 +819,8 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		EVP_DigestFinal(p4, Hash, &nHashLen);
 #endif
 		bio = BIO_new(BIO_s_mem());
-		if (!bio) {
+		if (!bio)
 			return DKIM_OUT_OF_MEMORY;
-		}
 		b64 = BIO_new(BIO_f_base64());
 		if (!b64) {
 			BIO_free(bio);
@@ -865,7 +841,7 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		}
 		size = BIO_read(bio, buf, len);
 		BIO_free_all(b64);
-		// this should never happen
+		/* this should never happen */
 		if (size >= len) {
 			delete[]buf;
 			return DKIM_OUT_OF_MEMORY;
@@ -877,10 +853,12 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 	AddInterTagSpace(3);
 	m_sSig.append("b=");
 	m_nSigPos += 2;
-	// Force a full copy - no reference copies please
+	/* Force a full copy - no reference copies please */
 	sSignedSig.assign(m_sSig.c_str());
-	// note that since we're not calling hash here, need to dump this
-	// to the debug file if you want the full canonical form
+	/*-
+	 * note that since we're not calling hash here, need to dump this
+	 * to the debug file if you want the full canonical form
+	 */
 	string          sTemp;
 	if (HIWORD(m_Canon) == DKIM_CANON_RELAXED)
 		sTemp = RelaxHeader(sSignedSig);
@@ -898,9 +876,8 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		return DKIM_OUT_OF_MEMORY;
 	pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
 	BIO_free(bio);
-	if (!pkey) {
+	if (!pkey)
 		return DKIM_BAD_PRIVATE_KEY;
-	}
 	siglen = EVP_PKEY_size(pkey);
 	int             nSignRet;
 	sig = (unsigned char *) OPENSSL_malloc(siglen);
@@ -921,12 +898,9 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 		OPENSSL_free(sig);
 		return DKIM_BAD_PRIVATE_KEY;	// key too small
 	}
-	bio = BIO_new(BIO_s_mem());
-	if (!bio) {
+	if (!(bio = BIO_new(BIO_s_mem())))
 		return DKIM_OUT_OF_MEMORY;
-	}
-	b64 = BIO_new(BIO_f_base64());
-	if (!b64) {
+	if (!(b64 = BIO_new(BIO_f_base64()))) {
 		BIO_free(bio);
 		return DKIM_OUT_OF_MEMORY;
 	}
@@ -940,14 +914,13 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 	BIO_flush(b64);
 	OPENSSL_free(sig);
 	len = siglen * 2;
-	buf = new char[len];
-	if (buf == NULL) {
+	if (!(buf = new char[len])) {
 		BIO_free_all(b64);
 		return DKIM_OUT_OF_MEMORY;
 	}
 	size = BIO_read(bio, buf, len);
 	BIO_free_all(b64);
-	// this should never happen
+	/* this should never happen */
 	if (size >= len) {
 		delete[]buf;
 		return DKIM_OUT_OF_MEMORY;
@@ -961,13 +934,14 @@ int CDKIMSign::ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool b
 int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 {
 	int             nRet;
+
 	if (m_bReturnedSigAssembled)
 		return DKIM_SUCCESS;
 	ProcessFinal();
 	if (ParseFromAddress() == false) {
 		//return DKIM_NO_SENDER;
 	}
-	Hash("\r\n", 2, true, true);	// only for Allman sig
+	Hash("\r\n", 2, true, true); /* only for Allman sig */
 	string allmansha1sig,
 #ifdef HAVE_EVP_SHA256
 		ietfsha256Sig,
@@ -1027,7 +1001,7 @@ int CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.18 2020-04-11 08:37:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.19 2021-08-28 21:42:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

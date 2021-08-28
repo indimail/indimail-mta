@@ -1,5 +1,8 @@
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.6  2021-08-28 21:42:40+05:30  Cprogrammer
+ * added ReplaceSelector to replace selector
+ *
  * Revision 1.5  2019-06-26 19:09:07+05:30  Cprogrammer
  * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
  *
@@ -45,7 +48,8 @@ public:
 
 	CDKIMSign();
 	~CDKIMSign();
-	int             Init(DKIMSignOptions * pOptions);
+	int             Init(DKIMSignOptions *pOptions);
+	void            ReplaceSelector(DKIMSignOptions *pOptions);
 	int             GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength);
 	int             GetSig2(char *szPrivKey, char **pszSignature);
 	virtual int     ProcessHeaders(void);

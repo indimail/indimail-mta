@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.h,v $
+ * Revision 1.9  2021-08-28 21:41:40+05:30  Cprogrammer
+ * added DKIMSignReplaceSelector to replace selector
+ *
  * Revision 1.8  2015-12-15 16:03:18+05:30  Cprogrammer
  * use time_t for expireTime
  *
@@ -124,10 +127,10 @@ extern          "C" {
 
 // This function is called once for each header in the message
 // return 1 to include this header in the signature and 0 to exclude.
-typedef int     (DKIM_CALL * DKIMHEADERCALLBACK) (const char *szHeader);
+typedef int     (DKIM_CALL *DKIMHEADERCALLBACK) (const char *szHeader);
 
 // This function is called to retrieve a TXT record from DNS
-typedef int     (DKIM_CALL * DKIMDNSCALLBACK) (const char *szFQDN, char *szBuffer, int nBufLen);
+typedef int     (DKIM_CALL *DKIMDNSCALLBACK) (const char *szFQDN, char *szBuffer, int nBufLen);
 
 typedef struct DKIMContext_t {
 	unsigned int    reserved1;
@@ -172,14 +175,14 @@ typedef struct DKIMVerifyDetails_t {
 	int             nResult;
 } DKIMVerifyDetails;
 
-int DKIM_CALL   DKIMSignInit(DKIMContext *pSignContext, DKIMSignOptions * pOptions);
+int DKIM_CALL   DKIMSignInit(DKIMContext *pSignContext, DKIMSignOptions *pOptions);
 int DKIM_CALL   DKIMSignProcess(DKIMContext *pSignContext, char *szBuffer, int nBufLength);
 int DKIM_CALL   DKIMSignGetSig(DKIMContext *pSignContext, char *szPrivKey, char *szSignature, int nSigLength);
 int DKIM_CALL   DKIMSignGetSig2(DKIMContext *pSignContext, char *szPrivKey, char **pszSignature);
 void DKIM_CALL  DKIMSignFree(DKIMContext *pSignContext);
 char           *DKIM_CALL DKIMSignGetDomain(DKIMContext *pSignContext);
 
-int DKIM_CALL   DKIMVerifyInit(DKIMContext *pVerifyContext, DKIMVerifyOptions * pOptions);
+int DKIM_CALL   DKIMVerifyInit(DKIMContext *pVerifyContext, DKIMVerifyOptions *pOptions);
 int DKIM_CALL   DKIMVerifyProcess(DKIMContext *pVerifyContext, char *szBuffer, int nBufLength);
 int DKIM_CALL   DKIMVerifyResults(DKIMContext *pVerifyContext , int *sCount, int *sSize);
 int DKIM_CALL   DKIMVerifyGetDetails(DKIMContext *pVerifyContext, int *nSigCount, DKIMVerifyDetails **pDetails, char *szPractices);
@@ -187,6 +190,7 @@ char           *DKIM_CALL DKIMVerifyGetDomain(DKIMContext *pVerifyContext);
 void DKIM_CALL  DKIMVerifyFree(DKIMContext *pVerifyContext);
 char           *DKIM_CALL DKIMVersion();
 char           *DKIM_CALL DKIMGetErrorString(int ErrorCode);
+int  DKIM_CALL  DKIMSignReplaceSelector(DKIMContext *pSignContext, DKIMSignOptions *pOptions);
 #include "macros.h"
 #ifdef __cplusplus
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: dkimfuncs.cpp,v $
+ * Revision 1.5  2021-08-28 21:41:03+05:30  Cprogrammer
+ * added function to replace selector
+ *
  * Revision 1.4  2011-06-04 10:06:33+05:30  Cprogrammer
  * unified error strings for signing & verification
  *
@@ -73,6 +76,16 @@ DKIMSignInit(DKIMContext *pSignContext, DKIMSignOptions *pOptions)
 	if (nRet == DKIM_SUCCESS)
 		InitContext(pSignContext, true, pSign);
 	return nRet;
+}
+
+int             DKIM_CALL
+DKIMSignReplaceSelector(DKIMContext *pSignContext, DKIMSignOptions *pOptions)
+{
+	CDKIMSign      *pSign = (CDKIMSign *) ValidateContext(pSignContext, true);
+
+	if (pSign)
+		pSign->ReplaceSelector(pOptions);
+	return DKIM_INVALID_CONTEXT;
 }
 
 int             DKIM_CALL
@@ -230,7 +243,7 @@ DKIMGetErrorString(int ErrorCode)
 void
 getversion_dkimfuncs_cpp()
 {
-	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.4 2011-06-04 10:06:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.5 2021-08-28 21:41:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
