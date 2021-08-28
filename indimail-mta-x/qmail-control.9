@@ -40,6 +40,7 @@ in
 .IR badrcptpatterns ,
 .IR bodycheck ,
 .IR chkrcptdomains ,
+.IR dkimkeys ,
 .IR domainbindings,
 .IR earlytalkerdroptime ,
 .IR etrnhosts ,
@@ -152,12 +153,10 @@ and
 Once you define QREGEX, the corresponding pattern file gets disabled
 (e.g. badhelopatterns, badhostpatterns, badmailfrompatterns, etc).
 
-The following table lists all control files
-other than
-.IR me .
+The following table lists all control files other than \fIme\fR.
 See the corresponding man pages for further details.
 
-.RS
+.RS 0
 .nf
 .ta 8c 12c
 control	default	used by
