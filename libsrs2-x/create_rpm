@@ -138,6 +138,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
     /bin/rm /tmp/libsrs2.spec
     build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
     rpm --addsign $rpmbuild/RPMS/$build_arch/libsrs2-"$version"-"1.$release".$dist.$build_arch.rpm
+    rpm --addsign $rpmbuild/RPMS/$build_arch/libsrs2-devel-"$version"-"1.$release".$dist.$build_arch.rpm
     echo -n "RPM lint for libsrs2-"$version"-1."$release" (Y/N) - "
     read key
     if [ " $key" = " Y" -o " $key" = " y" ] ; then
