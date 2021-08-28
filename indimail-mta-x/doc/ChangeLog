@@ -144,6 +144,16 @@ o installer can now install, uninstall and set permissions
 80. svctool: use /usr/local/etc/indimail/sv for servicedir on OSX/Darwin
 81. svctool: link global variables DEFAULT_DOMAIN, QMAILDEFAULTHOST to
     control files defaultdomain, defaulthost
+- 28/08/2021
+82. spawn-filter.c: filterargs processing changes
+    match sender domain for remote delivery 
+    match recipient domain for local delivery
+    allow overrides with MATCH_SENDER_DOMAIN, MATCH_RECIPIENT_DOMAIN
+83. qmail-send.c, slowq-send.c, drate.c, report.c, variables.h,
+	getDomainToken.h, getDomainToken.c, delivery_rate.c, spawn-filter.c:
+    moved dtype enum delivery variable from variables.h to getDomainToken.h
+84. qmail-dkim.c, qmail-dk.c, dk-filter.sh: Added control file dkimkeys to
+    have domain specific private key, selector
 
 * 
 Release 2.13 Start 14/02/2021
