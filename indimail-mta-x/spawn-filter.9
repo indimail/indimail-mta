@@ -52,30 +52,39 @@ or \fBqmail-remote\fR. \fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER before r
 
 .TP 5
 .I filterargs
-The format of this file is of the form
+This control file can be used to setup additional filters after running the
+SPAM filters (See Section on Spam Filtering). The format of this file is of
+the form
 
 .EX
 \fBdomain:args\fR
 .EE
 
-for both local and remote mails.
+for both local and remote deliveries
 
 .EX
 \fBdomain:remote:args\fR
 .EE
 
-for remote mails and
+for remote deliveries and
 
 .EX
 \fBdomain:local:args\fR
 .EE
 
-for local mails. Here \fIdomain\fR refers to the recipient domain.
+for local deliveries.
+
 \fIdomain\fR can be a wildcard or a regular expression (if QREGEX
 environment variable is defined). If there are multiple lines which match
-\fIdomain\fR, the first line that matches \fIdomain\fR will be used. This
-control file can be used to setup additional filters after running the SPAM
-filters (See Section on Spam Filtering).
+\fIdomain\fR, the first line that matches \fIdomain\fR will be used.
+
+For local deliveries, \fIdomain\fR refers to the recipient domain.
+You can have the match done on sender domain by setting
+\fBMATCH_SENDER_DOMAIN\fR.
+
+For remote deliveries, \fIdomain\fR refers to the sender domain.
+You can have the match done on recipient domain by setting
+\fBMATCH_RECIPIENT_DOMAIN\fR.
 
 .EX
 indimail.org:remote:PREFIX/bin/dk-filter

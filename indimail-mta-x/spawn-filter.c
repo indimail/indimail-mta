@@ -1,5 +1,10 @@
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.81  2021-08-28 21:48:46+05:30  Cprogrammer
+ * match sender domain for remote delivery
+ * match recipient domain for local delivery
+ * allow overrides with MATCH_SENDER_DOMAIN, MATCH_RECIPIENT_DOMAIN
+ *
  * Revision 1.80  2021-06-15 12:21:12+05:30  Cprogrammer
  * moved makeargs.h to libqmail
  *
@@ -592,7 +597,7 @@ redirect_mail(char *notifyaddress, char *domain, char *ext, char *qqeh)
 		if (!env_put2("SPAMREDIRECT", notifyaddress))
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 		set_environ(domain, ext, qqeh, sender.s, recipient.s);
-		/*- 
+		/*-
 		 * we do not want notifications to be
 		 * caught by spamfilter :)
 		 * unset SPAMFILTER
@@ -660,7 +665,7 @@ int
 main(int argc, char **argv)
 {
 	char           *ptr, *mailprog, *domain, *errStr = 0, *size = "0", *qqeh, *ext;
-	int             len;
+	int             at, len;
 	char            sizebuf[FMT_ULONG];
 	struct stat     statbuf;
 	int             wstat, filt_exitcode;
@@ -672,6 +677,7 @@ main(int argc, char **argv)
 	stralloc        spamfilterdefs = { 0 };
 	stralloc        rejectspamlist = { 0 };
 	stralloc        addresslist = { 0 };
+	stralloc        defaultdomain = { 0 };
 	stralloc        line = { 0 };
 	int             spamcode = 0, hamcode = 1, unsurecode = 2;
 
@@ -682,7 +688,19 @@ main(int argc, char **argv)
 	ptr += 6;
 	if (*ptr == 'l') { /*- qmail-local Filter */
 		mailprog = "sbin/qmail-local";
-		domain = argv[7];
+		if (env_get("MATCH_SENDER_DOMAIN")) {
+			at = str_rchr(argv[8], '@');
+			if (argv[8][at] && argv[8][at + 1])
+				domain = argv[8] + at + 1;
+			else {
+				if (!(domain = env_get("DEFAULT_DOMAIN"))) {
+					if (control_readfile(&defaultdomain, "defaultdomain", 0) == -1)
+						report(111, "spawn: Unable to read defaultdomain: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+					domain = defaultdomain.s;
+				}
+			}
+		} else /*- default for qmail-local is to match on recipient domain */
+			domain = argv[7]; /*- recipient domain */
 		ext = argv[6];
 		qqeh = argv[10];
 		delivery = local_delivery;
@@ -703,13 +721,26 @@ main(int argc, char **argv)
 		} else /*- user */
 		if (!stralloc_copys(&recipient, argv[2]) ||
 				!stralloc_cats(&recipient, "@") ||
-				!stralloc_cats(&recipient, domain) ||
+				!stralloc_cats(&recipient, argv[7]) ||
 				!stralloc_0(&recipient))
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 	} else
 	if (*ptr == 'r') { /*- qmail-remote Filter */
 		mailprog = "sbin/qmail-remote";
-		domain = argv[1];
+		if (env_get("MATCH_RECIPIENT_DOMAIN")) {
+			domain = argv[1];
+		} else { /*- default for qmail-remote is to match on sender domain */
+			at = str_rchr(argv[2], '@');
+			if (argv[2][at] && argv[2][at + 1])
+				domain = argv[2] + at + 1;
+			else {
+				if (!(domain = env_get("DEFAULT_DOMAIN"))) {
+					if (control_readfile(&defaultdomain, "defaultdomain", 0) == -1)
+						report(111, "spawn: Unable to read defaultdomain: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+					domain = defaultdomain.s;
+				}
+			}
+		}
 		ext = argv[5];
 		qqeh = argv[3];
 		size = argv[4];
@@ -755,6 +786,7 @@ main(int argc, char **argv)
 			report(111, "spawn: could not exec ", mailprog, ": ", error_str(errno), ". (#4.3.0)", 0);
 		}
 	}
+	/*- spam filter code */
 	if (!(spf_fn = env_get("SPAMIGNORE")))
 		spf_fn = "spamignore";
 	if ((spfok = control_readfile(&spf, spf_fn, 0)) == -1)
@@ -833,7 +865,7 @@ main(int argc, char **argv)
 		report(111, "spawn: filter crashed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	/* write data to spamlogger */
 	log_spam(sender.s, recipient.s, size, &line);
-	if ((ptr = env_get("SPAMEXITCODE"))) 
+	if ((ptr = env_get("SPAMEXITCODE")))
 		scan_int(ptr, &spamcode);
 	else
 		report(111, "spawn: SPAMEXITCODE undefined. (#4.3.0)", 0, 0, 0, 0, 0);
@@ -878,7 +910,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.80 2021-06-15 12:21:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.81 2021-08-28 21:48:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
