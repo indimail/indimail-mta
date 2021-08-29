@@ -1,19 +1,21 @@
 /*
  * $Log: do_ripmime.c,v $
+ * Revision 1.2  2021-08-30 01:07:47+05:30  Cprogrammer
+ * renamed pid as cmd_pid
+ *
  * Revision 1.1  2008-08-03 18:27:30+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include <sys/types.h>
 #include <unistd.h>
-#include "wait.h"
-#include "sig.h"
+#include <wait.h>
+#include <sig.h>
+#include <strerr.h>
 #include "exitcodes.h"
-#include "strerr.h"
 
 extern int      flaglog;
-extern int      alarm_flag;
-extern pid_t    pid;
+extern pid_t    cmd_pid;
 extern char    *auto_ripmime_cmd[];
 
 int
@@ -24,7 +26,7 @@ do_ripmime()
 	/*- Defer alarms */
 	sig_alarmblock();
 	/*- Launch ripmime */
-	switch (pid = vfork())
+	switch ((cmd_pid = vfork()))
 	{
 	case -1:
 		if (flaglog)
@@ -41,9 +43,9 @@ do_ripmime()
 	/*- Allow alarms */
 	sig_alarmunblock();
 	/*- Catch the exit status */
-	if (wait_pid(&rmstat, pid) == -1)
+	if (wait_pid(&rmstat, cmd_pid) == -1)
 		return 0;
-	pid = 0;
+	cmd_pid = 0;
 	if (wait_crashed(rmstat))
 		return 0;
 	if (wait_exitcode(rmstat) != 0)
@@ -54,7 +56,7 @@ do_ripmime()
 void
 getversion_do_ripmime_c()
 {
-	static char    *x = "$Id: do_ripmime.c,v 1.1 2008-08-03 18:27:30+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: do_ripmime.c,v 1.2 2021-08-30 01:07:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
