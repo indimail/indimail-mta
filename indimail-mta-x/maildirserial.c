@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.17  2021-07-05 21:26:29+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root
  *
@@ -57,31 +60,32 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "env.h"
-#include "envdir.h"
-#include "pathexec.h"
-#include "sgetopt.h"
-#include "scan.h"
-#include "stralloc.h"
-#include "fd.h"
-#include "open.h"
-#include "getln.h"
-#include "subfd.h"
-#include "strerr.h"
-#include "substdio.h"
-#include "maildir.h"
-#include "prioq.h"
-#include "wait.h"
-#include "sig.h"
-#include "str.h"
-#include "fmt.h"
-#include "tai.h"
-#include "mess822.h"
-#include "now.h"
-#include "sconfig.h"
+#include <env.h>
+#include <envdir.h>
+#include <pathexec.h>
+#include <sgetopt.h>
+#include <scan.h>
+#include <stralloc.h>
+#include <fd.h>
+#include <open.h>
+#include <getln.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <wait.h>
+#include <sig.h>
+#include <str.h>
+#include <fmt.h>
+#include <tai.h>
+#include <mess822.h>
+#include <now.h>
+#include <sconfig.h>
+#include <byte.h>
+#include <noreturn.h>
 #include "qmail.h"
 #include "quote.h"
-#include "byte.h"
+#include "maildir.h"
+#include "prioq.h"
 #include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "variables.h"
@@ -91,56 +95,72 @@
 #define WARNING "maildirserial: warning: "
 #define INFO "maildirserial: info: "
 
-void
+static char    *prefix;
+static char    *qqx;
+static char   **client;
+static char     messbuf[256];
+static char     buf[1024];
+static char     num[FMT_ULONG];
+static int      pid;			/*- in parent, pid of scanner; in scanner, pid of child */
+static int      wstat;
+static int      pis2c[2];
+static int      flagbounce = 0;
+static int      flaglifetime = 0;
+static int      flagtimeout;
+static int      pic2p[2];
+static substdio ssmess;
+static substdio ss;				/*- in parent, reading from child; in scanner, writing to child */
+static stralloc line = { 0 };
+static stralloc recipient = { 0 };
+static stralloc fn = {0};
+static stralloc deadfiles = { 0 };
+static stralloc datestr = { 0 };
+static stralloc sender = { 0 };
+static stralloc quoted = { 0 };
+static stralloc filenames = { 0 };
+static stralloc err = { 0 };
+#ifdef MIME
+static stralloc boundary = { 0 };
+#endif
+static config_str    me = CONFIG_STR;
+static config_str    bouncefrom = CONFIG_STR;
+static config_str    bouncehost = CONFIG_STR;
+static config_str    doublebounceto = CONFIG_STR;
+static config_str    doublebouncehost = CONFIG_STR;
+static struct qmail  qq;
+static unsigned long qp;
+static unsigned long lifetime;
+static struct tai    datetai;
+static mess822_time  date;
+static prioq         pq = { 0 };
+
+no_return void
 die_usage()
 {
 	strerr_die1x(100, "maildirserial: usage: maildirserial [ -b ] [ -t lifetime ] dir prefix client [ arg ... ]");
 }
 
-void
+no_return void
 die_readclient()
 {
 	strerr_die2sys(111, FATAL, "unable to read from client: ");
 }
 
-void
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_qq()
 {
 	strerr_die2sys(111, FATAL, "unable to run qq: ");
 }
 
-char           *prefix;
-char          **client;
-char            messbuf[256];
-substdio        ssmess;
-stralloc        line = { 0 };
-stralloc        recipient = { 0 };
-stralloc        fn = {0};
-char            buf[1024];
-substdio        ss;				/*- in parent, reading from child; in scanner, writing to child */
-int             pid;			/*- in parent, pid of scanner; in scanner, pid of child */
-int             wstat;
-stralloc        deadfiles = { 0 };
-
-
 /*
  * ---------------------------------------------------------------- BOUNCING 
  */
-
-config_str      me = CONFIG_STR;
-config_str      bouncefrom = CONFIG_STR;
-config_str      bouncehost = CONFIG_STR;
-config_str      doublebounceto = CONFIG_STR;
-config_str      doublebouncehost = CONFIG_STR;
-#ifdef MIME
-stralloc        boundary = { 0 };
-#endif
 
 static void
 my_config_readline(config_str *c, char *fname)
@@ -183,8 +203,6 @@ readcontrols()
 		die_nomem();
 }
 
-struct qmail    qq;
-
 void
 put(char *buffer, int len)
 {
@@ -197,19 +215,8 @@ my_puts(char *buffer)
 	qmail_puts(&qq, buffer);
 }
 
-char           *qqx;
-unsigned long   qp;
-char            num[FMT_ULONG];
-
-struct tai      datetai;
-mess822_time    date;
-stralloc        datestr = { 0 };
-
-stralloc        sender = { 0 };
-stralloc        quoted = { 0 };
-
 int
-bounce(int fd, stralloc *why, int flagtimeout) /*- why must end with \n; must not contain \n\n */
+bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must not contain \n\n */
 {
 	int             match, n;
 	char           *bouncesender, *bouncerecip, *x;
@@ -308,7 +315,7 @@ bounce(int fd, stralloc *why, int flagtimeout) /*- why must end with \n; must no
 		put(recipient.s, recipient.len);
 	my_puts(">:\n");
 	put(why->s, why->len);
-	if (flagtimeout)
+	if (_flagtimeout)
 		my_puts("This message is too old. Giving up.\n");
 	my_puts("\n");
 #ifdef MIME
@@ -400,12 +407,7 @@ usable(char *filename)
 	return i == 1;
 }
 
-stralloc        filenames = { 0 };
-prioq           pq = { 0 };
-
-int             pis2c[2];
-
-void
+no_return void
 scanner()
 {
 	struct prioq_elt pe;
@@ -455,16 +457,6 @@ scanner()
  * ------------------------------------------------------------------ PARENT 
  */
 
-int             flagbounce = 0;
-int             flaglifetime = 0;
-unsigned long   lifetime;
-int             flagtimeout;
-
-int             pic2p[2];
-
-stralloc        err = { 0 };
-int             match;
-
 void
 info(char *result)
 {
@@ -478,7 +470,7 @@ info(char *result)
 int
 main(int argc, char **argv)
 {
-	int             opt, r, progress;
+	int             opt, r, progress, match;
 	char           *dir;
 	char            status;
 	struct stat     st;
@@ -627,7 +619,7 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.17 2021-07-05 21:26:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.18 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

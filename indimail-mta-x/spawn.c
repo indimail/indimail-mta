@@ -1,5 +1,8 @@
 /*
  * $Log: spawn.c,v $
+ * Revision 1.33  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.32  2021-06-29 09:29:20+05:30  Cprogrammer
  * modularize spawn code
  *
@@ -80,19 +83,20 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <sig.h>
+#include <wait.h>
+#include <substdio.h>
+#include <byte.h>
+#include <str.h>
+#include <stralloc.h>
+#include <select.h>
+#include <coe.h>
+#include <open.h>
+#include <env.h>
+#include <error.h>
+#include <alloc.h>
+#include <noreturn.h>
 #include "indimail_stub.h"
-#include "sig.h"
-#include "wait.h"
-#include "substdio.h"
-#include "byte.h"
-#include "str.h"
-#include "stralloc.h"
-#include "select.h"
-#include "coe.h"
-#include "open.h"
-#include "env.h"
-#include "error.h"
-#include "alloc.h"
 #include "variables.h"
 #include "auto_uids.h"
 #include "auto_spawn.h"
@@ -115,9 +119,26 @@ typedef struct delivery
 } delivery;
 
 static delivery *d;
+static int      flagwriting = 1;
 #ifdef ENABLE_VIRTUAL_PKG
 void            *phandle;
 #endif
+static int      flagreading = 1;
+static char     outbuf[1024];
+static substdio ssout;
+static int      stage = 0;	/*- reading 0:delnum 1:delnum 2:messid 3:sender 4:qqeh 5:envh 6:recip */
+static int      flagabort = 0;	/*- if 1, everything except delnum is garbage */
+static int      delnum;
+static stralloc messid = { 0 };
+static stralloc sender = { 0 };
+static stralloc qqeh = { 0 };
+static stralloc envh = { 0 };
+static stralloc recip = { 0 };
+#ifdef ENABLE_VIRTUAL_PKG
+static stralloc libfn = { 0 };
+#endif
+static char     inbuf[128];
+static char     cmdbuf[1024];
 
 static void
 sigchld()
@@ -140,13 +161,8 @@ sigchld()
 	}
 }
 
-static int      flagwriting = 1;
-
 static ssize_t
-okwrite(fd, buf, n)
-	int             fd;
-	char           *buf;
-	ssize_t         n;
+okwrite(int fd, char *buf, ssize_t n)
 {
 	ssize_t         w;
 
@@ -160,22 +176,6 @@ okwrite(fd, buf, n)
 	close(fd);
 	return n;
 }
-
-static int      flagreading = 1;
-static char     outbuf[1024];
-static substdio ssout;
-
-static int      stage = 0;	/*- reading 0:delnum 1:delnum 2:messid 3:sender 4:qqeh 5:envh 6:recip */
-static int      flagabort = 0;	/*- if 1, everything except delnum is garbage */
-static int      delnum;
-static stralloc messid = { 0 };
-static stralloc sender = { 0 };
-static stralloc qqeh = { 0 };
-static stralloc envh = { 0 };
-static stralloc recip = { 0 };
-#ifdef ENABLE_VIRTUAL_PKG
-static stralloc libfn = { 0 };
-#endif
 
 static void
 err(char *s)
@@ -354,8 +354,6 @@ docmd()
 	d[delnum].used = 1;
 }
 
-static char     cmdbuf[1024];
-
 static void
 getcmd()
 {
@@ -430,9 +428,7 @@ getcmd()
 	}
 }
 
-static char     inbuf[128];
-
-int
+no_return int
 QSPAWN(int argc, char **argv)
 {
 	char            ch;
@@ -446,19 +442,13 @@ QSPAWN(int argc, char **argv)
 		_exit(111);
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
-	if (chdir(queuedir) == -1)
+	if (chdir(queuedir) == -1 || chdir("mess") == -1)
 		_exit(111);
-	if (chdir("mess") == -1)
-		_exit(111);
-	if (!stralloc_copys(&messid, ""))
-		_exit(111);
-	if (!stralloc_copys(&sender, ""))
-		_exit(111);
-	if (!stralloc_copys(&qqeh, ""))
-		_exit(111);
-	if (!stralloc_copys(&envh, ""))
-		_exit(111);
-	if (!stralloc_copys(&recip, ""))
+	if (!stralloc_copys(&messid, "") ||
+			!stralloc_copys(&sender, "") ||
+			!stralloc_copys(&qqeh, "") ||
+			!stralloc_copys(&envh, "") ||
+			!stralloc_copys(&recip, ""))
 		_exit(111);
 	if (!(d = (struct delivery *) alloc((auto_spawn + 10) * sizeof(struct delivery))))
 		_exit(111);
@@ -517,49 +507,47 @@ QSPAWN(int argc, char **argv)
 		}
 		r = select(nfds, &rfds, (fd_set *) 0, (fd_set *) 0, (struct timeval *) 0);
 		sig_childblock();
-		if (r != -1) {
-			if (flagreading && FD_ISSET(0, &rfds))
-				getcmd();
-			for (i = 0; i < auto_spawn; ++i) {
-				if (d[i].used) {
-					if (FD_ISSET(d[i].fdin, &rfds)) {
-						if ((r = read(d[i].fdin, inbuf, 128)) == -1)
-							continue;	/*- read error on a readable pipe? be serious */
-						if (r == 0) {
-							ch = i;
-							substdio_put(&ssout, &ch, 1);
-							ch = i >> 8;
-							substdio_put(&ssout, &ch, 1);
-							report_SPAWN(&ssout, d[i].wstat, d[i].output.s, d[i].output.len);
-							substdio_put(&ssout, "", 1);
-							substdio_flush(&ssout);
-							close(d[i].fdin);
-							d[i].used = 0;
-							continue;
-						}
-						while (!stralloc_readyplus(&d[i].output, r))
-							sleep(10); /*XXX*/
-						byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
-						d[i].output.len += r;
-						if (truncreport_SPAWN > 100 && d[i].output.len > truncreport_SPAWN) {
-							char           *truncmess = "\nError report too long, sorry.\n";
-							d[i].output.len = truncreport_SPAWN - str_len(truncmess) - 3;
-							stralloc_cats(&d[i].output, truncmess);
-						}
+		if (r == -1)
+			continue;
+		if (flagreading && FD_ISSET(0, &rfds))
+			getcmd();
+		for (i = 0; i < auto_spawn; ++i) {
+			if (d[i].used) {
+				if (FD_ISSET(d[i].fdin, &rfds)) {
+					if ((r = read(d[i].fdin, inbuf, 128)) == -1)
+						continue;	/*- read error on a readable pipe? be serious */
+					if (r == 0) {
+						ch = i;
+						substdio_put(&ssout, &ch, 1);
+						ch = i >> 8;
+						substdio_put(&ssout, &ch, 1);
+						report_SPAWN(&ssout, d[i].wstat, d[i].output.s, d[i].output.len);
+						substdio_put(&ssout, "", 1);
+						substdio_flush(&ssout);
+						close(d[i].fdin);
+						d[i].used = 0;
+						continue;
+					}
+					while (!stralloc_readyplus(&d[i].output, r))
+						sleep(10); /*XXX*/
+					byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
+					d[i].output.len += r;
+					if (truncreport_SPAWN > 100 && d[i].output.len > truncreport_SPAWN) {
+						char           *truncmess = "\nError report too long, sorry.\n";
+						d[i].output.len = truncreport_SPAWN - str_len(truncmess) - 3;
+						stralloc_cats(&d[i].output, truncmess);
 					}
 				}
 			}
-		}
-	}
-	/*- Not reached */
-	return(0);
+		} /*- for (i = 0; i < auto_spawn; ++i) */
+	} /* for (;;) */
 }
 
 #ifdef MAIN
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.32 2021-06-29 09:29:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.33 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: srsfilter.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2020-11-24 13:48:31+05:30  Cprogrammer
  * removed exit.h
  *
@@ -13,32 +16,28 @@
 #include "hassrs.h"
 #ifdef HAVESRS
 #include <unistd.h>
-#include "sig.h"
-#include "env.h"
+#include <sig.h>
+#include <env.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <fmt.h>
+#include <stralloc.h>
+#include <noreturn.h>
 #include "qmail.h"
-#include "strerr.h"
-#include "substdio.h"
-#include "fmt.h"
-#include "stralloc.h"
 #include "srs.h"
 
 #define FATAL  "srsfilter: fatal: "
 #define IGNORE "srsfilter: ignore: "
 
-void
+static struct qmail    qqt;
+static stralloc line = { 0 };
+static int      flagbody = 0, flagnewline = 0, flagto = 0, seento = 0;
+
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
-
-struct qmail    qqt;
-
-stralloc        line = { 0 };
-
-int             flagbody = 0;
-int             flagnewline = 0;
-int             flagto = 0;
-int             seento = 0;
 
 void
 newheader()
@@ -120,37 +119,25 @@ mywrite(fd, buf, len)
 	}
 }
 
-char            inbuf[SUBSTDIO_INSIZE];
-char            outbuf[1];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
-
-char            num[FMT_ULONG];
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	char           *ext2;
-	char           *host;
-	char           *sender;
-	char           *qqx;
+	char           *ext2, *host, *sender, *qqx;
+	char            inbuf[SUBSTDIO_INSIZE], outbuf[1], num[FMT_ULONG];
+	substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+	substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
 
 	sig_pipeignore();
 	if (!(sender = env_get("SENDER")))
 		strerr_die2x(100, FATAL, "SENDER not set");
-	if (*sender) {
-	/*
-	 * Return zero, the message will not bounce back 
-	 */
+	if (*sender) /*- Return zero, the message will not bounce back */
 		strerr_die2x(0, IGNORE, "SENDER must be empty");
-	}
 	if (!(ext2 = env_get("EXT2")))
 		strerr_die2x(100, FATAL, "EXT2 not set");
 	if (!(host = env_get("HOST")))
 		strerr_die2x(100, FATAL, "HOST not set");
-	switch (srsreverse(ext2)) {
+	switch (srsreverse(ext2))
+	{
 	case -3:
 		strerr_die2x(100, FATAL, srs_error.s);
 		break;
@@ -207,7 +194,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.3 2020-11-24 13:48:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srsfilter.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

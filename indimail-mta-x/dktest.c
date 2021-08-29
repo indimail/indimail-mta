@@ -1,5 +1,8 @@
 /*
  * $Log: dktest.c,v $
+ * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.17  2019-06-07 11:25:58+05:30  Cprogrammer
  * replaced getopt() with subgetopt()
  *
@@ -59,13 +62,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <sgetopt.h>
+#include <noreturn.h>
 #include "domainkeys.h"
-#include "sgetopt.h"
 
 #ifdef DOMAIN_KEYS
 int             optf = 0;
 
-void
+no_return void
 errorout(DK *dk, DK_STAT st)
 {
 	if (optf && dk)
@@ -431,7 +435,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.17 2019-06-07 11:25:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.18 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

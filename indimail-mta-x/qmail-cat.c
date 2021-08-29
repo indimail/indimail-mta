@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cat.c,v $
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.7  2009-10-03 15:02:59+05:30  Cprogrammer
  * process all arguments on command line
  * bug fix in my_error - 2nd arg never printed
@@ -27,16 +30,17 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "substdio.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "error.h"
+#include <substdio.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <error.h>
+#include <noreturn.h>
 
 static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
@@ -55,7 +59,7 @@ logerrf(char *s)
 		_exit(1);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -115,7 +119,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	static char    *x = "$Id: qmail-cat.c,v 1.7 2009-10-03 15:02:59+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-cat.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

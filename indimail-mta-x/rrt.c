@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.10  2021-07-05 21:11:47+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -33,24 +36,25 @@
  */
 #include <unistd.h>
 #include <errno.h>
-#include "sgetopt.h"
+#include <sgetopt.h>
+#include <case.h>
+#include <fmt.h>
+#include <str.h>
+#include <now.h>
+#include <datetime.h>
+#include <mess822.h>
+#include <date822fmt.h>
+#include <getln.h>
+#include <stralloc.h>
+#include <error.h>
+#include <envdir.h>
+#include <env.h>
+#include <strerr.h>
+#include <pathexec.h>
+#include <noreturn.h>
+#include "variables.h"
 #include "control.h"
 #include "qmail.h"
-#include "case.h"
-#include "fmt.h"
-#include "str.h"
-#include "now.h"
-#include "datetime.h"
-#include "mess822.h"
-#include "date822fmt.h"
-#include "getln.h"
-#include "stralloc.h"
-#include "error.h"
-#include "envdir.h"
-#include "env.h"
-#include "strerr.h"
-#include "pathexec.h"
-#include "variables.h"
 #include "set_environment.h"
 
 #define FATAL     "rrt: fatal: "
@@ -67,31 +71,29 @@
 #define USAGE_ERR 7
 #define PARSE_ERR 8
 
-char            strnum[FMT_ULONG];
-static char     ssoutbuf[512];
+static char     ssoutbuf[512], sserrbuf[512], strnum[FMT_ULONG];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: rrt [-n][-b]\n";
-struct qmail    qqt;
-int             flagqueue = 1;
-stralloc        line = { 0 };
+static char    *usage = "usage: rrt [-n][-b]\n";
+static struct qmail    qqt;
+static int      flagqueue = 1;
+static stralloc line = { 0 };
 
-void
+no_return void
 die_fork()
 {
 	substdio_putsflush(&sserr, "rrt: fatal: unable to fork\n");
 	_exit (WRITE_ERR);
 }
 
-void
+no_return void
 die_qqperm()
 {
 	substdio_putsflush(&sserr, "rrt: fatal: permanent qmail-queue error\n");
 	_exit (100);
 }
 
-void
+no_return void
 die_qqtemp()
 {
 	substdio_putsflush(&sserr, "rrt: fatal: temporary qmail-queue error\n");
@@ -114,7 +116,7 @@ logerrf(char *s)
 		_exit (WRITE_ERR);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -238,8 +240,7 @@ parse_email()
 			break;
 		if (!mess822_ok(&line))
 			break;
-		if (!got_from && !str_diffn(line.s, "From: ", 6))
-		{
+		if (!got_from && !str_diffn(line.s, "From: ", 6)) {
 			got_from = 1;
 			line.s[line.len - 1] = 0;
 			if (!addrparse(line.s)) /*- sets addr */
@@ -488,7 +489,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.10 2021-07-05 21:11:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

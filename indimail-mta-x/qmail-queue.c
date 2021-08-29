@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.76  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.75  2021-07-15 12:43:03+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  * moved conf_split to fmtqfn.c
@@ -232,6 +235,7 @@
 #include <wait.h>
 #include <makeargs.h>
 #include <getEnvConfig.h>
+#include <noreturn.h>
 #include "control.h"
 #include "variables.h"
 #include "fmtqfn.h"
@@ -245,33 +249,41 @@
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
-
-char            inbuf[2048], outbuf[256], logbuf[2048];
-char           *pidfn, *messfn, *todofn, *intdfn;
-int             messfd, intdfd, match;
-int             flagmademess = 0;
-int             flagmadeintd = 0;
-int             flagquarantine = 0;
-int             flagblackhole = 0;
-struct substdio ssin, ssout, sslog;
-datetime_sec    starttime;
-struct datetime dt;
-struct stat     pidst;
-unsigned long   mypid, uid;
-unsigned long   messnum;
-stralloc        extraqueue = { 0 };
-stralloc        quarantine = { 0 };
-stralloc        qqehextra = { 0 };
-stralloc        line = { 0 };
-stralloc        excl = { 0 };
-stralloc        incl = { 0 };
-stralloc        logh = { 0 };
-#if defined(MAILARCHIVE)
-stralloc        ar_rules = { 0 };
-stralloc        arch_email = {0};
-int             flagarchive = 0;
+#ifndef INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
 #endif
-stralloc        envheaders = { 0 };
+
+static char    *tcpremoteip;
+static char    *received;
+static char    *pidfn, *messfn, *todofn, *intdfn;
+static char    *origin; /* "X-Originating-IP: 10.0.0.1\n" */
+static char     inbuf[2048], outbuf[256], logbuf[2048];
+static int      messfd, intdfd, match;
+static int      flagmademess = 0;
+static int      flagmadeintd = 0;
+static int      flagquarantine = 0;
+static int      flagblackhole = 0;
+static int      flagarchive = 0;
+static struct substdio ssin, ssout, sslog;
+static datetime_sec    starttime;
+static struct datetime dt;
+static struct stat     pidst;
+static unsigned int    receivedlen;
+static unsigned int    originlen;
+static unsigned long   mypid, uid;
+static unsigned long   messnum;
+static stralloc extraqueue = { 0 };
+static stralloc quarantine = { 0 };
+static stralloc qqehextra = { 0 };
+static stralloc line = { 0 };
+static stralloc excl = { 0 };
+static stralloc incl = { 0 };
+static stralloc logh = { 0 };
+#if defined(MAILARCHIVE)
+static stralloc ar_rules = { 0 };
+static stralloc arch_email = {0};
+#endif
+static stralloc envheaders = { 0 };
 
 void
 cleanup()
@@ -286,45 +298,40 @@ cleanup()
 	}
 }
 
-void
+no_return void
 die(e)
 	int             e;
 {
 	_exit(e);
 }
 
-void
+no_return void
 die_write()
 {
 	cleanup();
 	die(53);
 }
 
-void
+no_return void
 die_read()
 {
 	cleanup();
 	die(54);
 }
 
-void
+no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
 	die(52);
 }
 
-void
+no_return void
 sigbug()
 {
 	die(81);
 }
 
-#ifndef INET_ADDRSTRLEN
-#define INET_ADDRSTRLEN 16
-#endif
-
-char           *tcpremoteip;
 void
 tcpgetremoteip()
 {
@@ -377,8 +384,6 @@ tcpgetremoteip()
  * "Received: (indimail-mta 37166 invoked from network from w.x.y.z by host q.r.s.t by uid 123); 26 Sep 1995 04:46:54 -0000\n"
  * "Received: (indimail-mta 37166 invoked for bounce); 26 Sep 1995 04:46:54 -0000\n"
  */
-unsigned int    receivedlen;
-char           *received;
 
 static unsigned int
 receivedfmt(char *s)
@@ -496,9 +501,6 @@ originfmt(char *s)
 		s += i;
 	return len;
 }
-
-unsigned int    originlen;
-char           *origin; /* "X-Originating-IP: 10.0.0.1\n" */
 
 void
 origin_setup()
@@ -1256,7 +1258,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.75 2021-07-15 12:43:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.76 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2020-09-16 19:09:07+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -28,30 +31,16 @@
 #define __USE_GNU
 #include <netdb.h>
 #include <errno.h>
+#include <sgetopt.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <sig.h>
+#include <fmt.h>
+#include <scan.h>
+#include <byte.h>
+#include <error.h>
+#include <noreturn.h>
 #include "haveip6.h"
-#include "sgetopt.h"
-#include "subfd.h"
-#include "strerr.h"
-#include "sig.h"
-#include "fmt.h"
-#include "scan.h"
-#include "byte.h"
-#include "error.h"
-
-union sockunion
-{
-	struct sockaddr     sa;
-	struct sockaddr_in  sa4;
-#ifdef IPV6
-	struct sockaddr_in6 sa6;
-#endif
-};
-
-#if defined(LIBC_HAS_IP6) && defined(IPV6)
-int             noipv6 = 0;
-#else
-int             noipv6 = 1;
-#endif
 
 #define DYNAMIC_BUF 1
 #define MAXLOGDATASIZE 2000
@@ -62,9 +51,17 @@ int             noipv6 = 1;
 #define FATAL "udplogger: fatal: "
 #define WARN  "udplogger: warning: "
 
-unsigned long   seqno;
+union sockunion
+{
+	struct sockaddr     sa;
+	struct sockaddr_in  sa4;
+#ifdef IPV6
+	struct sockaddr_in6 sa6;
+#endif
+};
+static unsigned long seqno;
 
-void
+no_return void
 die_nomem()
 {
 	if (substdio_flush(subfdout) == -1)
@@ -78,7 +75,7 @@ die_nomem()
 	_exit(1);
 }
 
-void
+no_return void
 die_write()
 {
 	if (substdio_flush(subfdout) == -1)
@@ -149,7 +146,7 @@ sigusr1()
 	return;
 }
 
-void
+no_return void
 sigterm()
 {
 	sig_block(SIGTERM);
@@ -158,8 +155,6 @@ sigterm()
 	_exit(0);
 }
 
-char           *usage = "usage: udplogger [-t timeout] [-p port] ipaddr:port";
-
 int
 main(int argc, char **argv)
 {
@@ -167,7 +162,13 @@ main(int argc, char **argv)
 	char            strnum[FMT_ULONG];
 	unsigned long   timeout;
 	char           *ipaddr = 0;
+	char           *usage = "usage: udplogger [-t timeout] [-p port] ipaddr:port";
 	char            serv[FMT_ULONG];
+#if defined(LIBC_HAS_IP6) && defined(IPV6)
+	int             noipv6 = 0;
+#else
+	int             noipv6 = 1;
+#endif
 #ifdef DYNAMIC_BUF
 	char           *rdata = 0, *buf = 0;
 	int             bufsize = MAXLOGDATASIZE;
@@ -393,7 +394,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	static char    *x = "$Id: udplogger.c,v 1.5 2020-09-16 19:09:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udplogger.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

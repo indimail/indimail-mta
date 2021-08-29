@@ -1,5 +1,8 @@
 /*
  * $Log: maildir.h,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2004-10-11 13:55:06+05:30  Cprogrammer
  * added function prototypes
  *
@@ -9,7 +12,7 @@
  */
 #ifndef MAILDIR_H
 #define MAILDIR_H
-#include "strerr.h"
+#include <strerr.h>
 #include "prioq.h"
 
 extern struct strerr maildir_chdir_err;

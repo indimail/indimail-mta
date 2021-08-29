@@ -1,5 +1,8 @@
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.15  2021-06-14 01:22:01+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -60,34 +63,35 @@
 #include <resolv.h>
 #include <netdb.h>
 
-#include "alloc.h"
-#include "sgetopt.h"
-#include "error.h"
-#include "scan.h"
-#include "str.h"
-#include "case.h"
-#include "constmap.h"
+#include <alloc.h>
+#include <sgetopt.h>
+#include <error.h>
+#include <scan.h>
+#include <str.h>
+#include <case.h>
+#include <constmap.h>
+#include <stralloc.h>
+#include <env.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <getln.h>
+#include <byte.h>
+#include <mess822.h>
+#include <base64.h>
+#include <noreturn.h>
+
 #include "auto_control.h"
-#include "stralloc.h"
-#include "env.h"
 #include "control.h"
-#include "strerr.h"
-#include "substdio.h"
-#include "getln.h"
-#include "byte.h"
 #include "dns.h"
 #include "ip.h"
 #include "qmail.h"
 #include "ipalloc.h"
-#include "mess822.h"
-#include "base64.h"
 #include "variables.h"
 
 #define FATAL "surblfilter: fatal: "
 
 char           *dns_text(char *);
 
-stralloc        line = { 0 };
 int             debug = 0, do_text = 0, do_cache = 1;
 static int      cachelifetime = 300;
 stralloc        whitelist = { 0 };
@@ -109,6 +113,19 @@ struct constmap mapl3;
 
 struct substdio ssin, ssout, sserr;
 static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512];
+
+static struct
+{
+	unsigned char  *buf;
+} response;
+static int      responsebuflen = 0;
+static int      responselen;
+static unsigned char *responseend;
+static unsigned char *responsepos;
+static u_long   saveresoptions;
+static int      (*lookup) () = res_query;
+static int      numanswers;
+static char     name[MAXDNAME];
 
 void
 out(char *str)
@@ -137,11 +154,10 @@ print_debug(char *arg1, char *arg2, char *arg3)
 		_exit(1);
 }
 
-void
+no_return void
 die_write()
 {
 	strerr_die2sys(111, FATAL, "write: ");
-	return;
 }
 
 void
@@ -168,7 +184,7 @@ logerrf(char *s)
 		_exit(1);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -184,7 +200,7 @@ my_error(char *s1, char *s2, int exit_val)
 	_exit(exit_val > 0 ? exit_val : 0 - exit_val);
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_flush(&ssout);
@@ -193,7 +209,7 @@ die_nomem()
 	_exit(1);
 }
 
-void
+no_return void
 die_soft()
 {
 	substdio_flush(&ssout);
@@ -202,7 +218,7 @@ die_soft()
 	_exit(1);
 }
 
-void
+no_return void
 die_hard()
 {
 	substdio_flush(&ssout);
@@ -211,7 +227,7 @@ die_hard()
 	_exit(1);
 }
 
-void
+no_return void
 die_control()
 {
 	substdio_flush(&ssout);
@@ -226,23 +242,8 @@ getshort(unsigned char *cp)
 	return (cp[0] << 8) | cp[1];
 }
 
-static struct
-{
-	unsigned char  *buf;
-} response;
-static int      responsebuflen = 0;
-static int      responselen;
-static unsigned char *responseend;
-static unsigned char *responsepos;
-static u_long   saveresoptions;
-static int      (*lookup) () = res_query;
-static int      numanswers;
-static char     name[MAXDNAME];
-
 static int
-resolve(domain, type)
-	char           *domain;
-	int             type;
+resolve(char *domain, int type)
 {
 	int             n;
 	int             i;
@@ -884,6 +885,7 @@ int
 main(int argc, char **argv)
 {
 	stralloc        base64out = { 0 }, boundary = { 0 };
+	stralloc        line = { 0 };
 	stralloc       *ptr;
 	char           *x, *reason = 0;
 	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match, html_plain_text,
@@ -1003,7 +1005,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.15 2021-06-14 01:22:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.16 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

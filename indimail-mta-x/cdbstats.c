@@ -1,5 +1,8 @@
 /*
  * $Log: cdbstats.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2020-11-24 13:44:16+05:30  Cprogrammer
  * removed exit.h
  *
@@ -11,29 +14,30 @@
  *
  */
 #include <unistd.h>
-#include "uint32.h"
-#include "fmt.h"
-#include "str.h"
-#include "subfd.h"
-#include "strerr.h"
-#include "seek.h"
-#include "cdb.h"
+#include <uint32.h>
+#include <fmt.h>
+#include <str.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <seek.h>
+#include <cdb.h>
+#include <noreturn.h>
 
 #define FATAL "cdbstats: fatal: "
 
-void
+no_return void
 die_read(void)
 {
 	strerr_die2sys(111, FATAL, "unable to read input: ");
 }
 
-void
+no_return void
 die_readformat(void)
 {
 	strerr_die2x(111, FATAL, "unable to read input: truncated file");
 }
 
-void
+no_return void
 die_write(void)
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
@@ -165,7 +169,7 @@ main()
 void
 getversion_cdbstats_c()
 {
-	static char    *x = "$Id: cdbstats.c,v 1.3 2020-11-24 13:44:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdbstats.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

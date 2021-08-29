@@ -1,5 +1,8 @@
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.7  2020-11-24 13:48:10+05:30  Cprogrammer
  * removed exit.h
  *
@@ -22,84 +25,90 @@
  * Initial revision
  *
  */
-#include "strerr.h"
-#include "getln.h"
-#include "subfd.h"
-#include "substdio.h"
-#include "open.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
-#include "stralloc.h"
-#include "sig.h"
-#include "str.h"
-#include "byte.h"
-#include "case.h"
-#include "quote.h"
-#include "scan.h"
-#include "env.h"
 #include <unistd.h>
+#include <strerr.h>
+#include <getln.h>
+#include <subfd.h>
+#include <substdio.h>
+#include <open.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <stralloc.h>
+#include <sig.h>
+#include <str.h>
+#include <byte.h>
+#include <case.h>
+#include <scan.h>
+#include <env.h>
+#include <noreturn.h>
+#include "quote.h"
 
 #define FATAL "serialsmtp: fatal: "
 
-void
+ssize_t         saferead(int fd, char *buf, size_t len);
+ssize_t         safewrite(int fd, char *buf, size_t len);
+
+static char     buf6[2048], buf7[2048];
+static substdio ss6 = SUBSTDIO_FDBUF(saferead,  6, buf6, sizeof buf6);
+static substdio ss7 = SUBSTDIO_FDBUF(safewrite, 7, buf7, sizeof buf7);
+static stralloc dataline = { 0 };
+
+no_return void
 die_usage()
 {
 	strerr_die1x(100, "serialsmtp: usage: serialsmtp prefix helohost");
 }
 
-void
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_output()
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
 }
 
-void
+no_return void
 die_readmess()
 {
 	strerr_die2sys(111, FATAL, "unable to read file: ");
 }
 
-void
+no_return void
 die_smtppathetic()
 {
 	strerr_die2x(111, FATAL, "SMTP cannot transfer messages with partial final lines");
 }
 
-void
+no_return void
 die_neteof()
 {
 	strerr_die2x(111, FATAL, "network read error: end of file");
 }
 
-void
+no_return void
 die_netread()
 {
 	strerr_die2sys(111, FATAL, "network read error: ");
 }
 
-void
+no_return void
 die_netwrite()
 {
 	strerr_die2sys(111, FATAL, "network write error: ");
 }
 
-void
+no_return void
 die_proto()
 {
 	strerr_die2x(111, FATAL, "protocol violation");
 }
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
 	if(!(r = timeoutread(81, fd, buf, len)))
@@ -110,10 +119,7 @@ saferead(fd, buf, len)
 }
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, size_t len)
 {
 	int             r;
 
@@ -122,25 +128,15 @@ safewrite(fd, buf, len)
 	return r;
 }
 
-char            buf6[2048];
-char            buf7[2048];
-substdio        ss6 = SUBSTDIO_FDBUF(saferead,  6, buf6, sizeof buf6);
-substdio        ss7 = SUBSTDIO_FDBUF(safewrite, 7, buf7, sizeof buf7);
-
-stralloc        dataline = { 0 };
-
 void
-blast(ssfrom)
-	substdio       *ssfrom;
+blast(substdio *ssfrom)
 {
 	int             match;
 
-	for (;;)
-	{
+	for (;;) {
 		if (getln(ssfrom, &dataline, &match, '\n') == -1)
 			die_readmess();
-		if (!match && !dataline.len)
-		{
+		if (!match && !dataline.len) {
 			substdio_put(&ss7, ".\r\n", 3);
 			substdio_flush(&ss7);
 			return;
@@ -168,8 +164,7 @@ smtpcode(flagehlo)
 	char            num[4];
 
 	flagfirst = 1;
-	do
-	{
+	do {
 		if (getln(&ss6, &smtpline, &match, '\n') != 0)
 			die_proto();
 		if (!match)
@@ -223,17 +218,14 @@ result(code)
 	char            ch;
 	int             i;
 
-	if (code >= 500)
-	{
+	if (code >= 500) {
 		if (!stralloc_copyb(&line, "D", 1))
 			die_nomem();
 	} else
-	if (code >= 400)
-	{
+	if (code >= 400) {
 		if (!stralloc_copyb(&line, "Z", 1))
 			die_nomem();
-	} else
-	{
+	} else {
 		if (!stralloc_copyb(&line, "K", 1))
 			die_nomem();
 	}
@@ -247,8 +239,7 @@ result(code)
 		die_nomem();
 	if (!stralloc_cats(&line, ">, "))
 		die_nomem();
-	if (remoteip)
-	{
+	if (remoteip) {
 		if (!stralloc_cats(&line, remoteip))
 			die_nomem();
 		if (!stralloc_cats(&line, " said: "))
@@ -258,8 +249,7 @@ result(code)
 		die_nomem();
 	if (line.len > 2000)
 		line.len = 2000;
-	for (i = 0; i < line.len; ++i)
-	{
+	for (i = 0; i < line.len; ++i) {
 		ch = line.s[i];
 		if ((ch < 32) || (ch > 126))
 			line.s[i] = '?';
@@ -314,11 +304,9 @@ doit(fd)
 		die_nomem();
 	if (!quote2(&quorecip, recipient.s + str_len(prefix)))
 		die_nomem();
-	if (flagneedrset)
-	{
+	if (flagneedrset) {
 		substdio_puts(&ss7, "RSET\r\n");	/*- what a stupid protocol */
-		if (!flagpipelining)
-		{
+		if (!flagpipelining) {
 			substdio_flush(&ss7);
 			code = smtpcode(0);
 			if (code >= 400)
@@ -328,12 +316,10 @@ doit(fd)
 	substdio_puts(&ss7, "MAIL FROM:<");
 	substdio_put(&ss7, quosender.s, quosender.len);
 	substdio_puts(&ss7, ">\r\n");
-	if (!flagpipelining)
-	{
+	if (!flagpipelining) {
 		substdio_flush(&ss7);
 		code = smtpcode(0);
-		if (code >= 400)
-		{
+		if (code >= 400) {
 			result(code);
 			return;
 		}
@@ -341,29 +327,24 @@ doit(fd)
 	substdio_puts(&ss7, "RCPT TO:<");
 	substdio_put(&ss7, quorecip.s, quorecip.len);
 	substdio_puts(&ss7, ">\r\n");
-	if (!flagpipelining)
-	{
+	if (!flagpipelining) {
 		substdio_flush(&ss7);
 		code = smtpcode(0);
-		if (code >= 400)
-		{
+		if (code >= 400) {
 			result(code);
 			return;
 		}
 	}
 	substdio_puts(&ss7, "DATA\r\n");
 	substdio_flush(&ss7);
-	if (flagpipelining)
-	{
-		if (flagneedrset)
-		{
+	if (flagpipelining) {
+		if (flagneedrset) {
 			code = smtpcode(0);
 			if (code >= 400)
 				die_proto();
 		}
 		code = smtpcode(0);
-		if (code >= 400)
-		{
+		if (code >= 400) {
 			result(code);
 			if (smtpcode(0) < 400)
 				die_proto();	/*- rejected MAIL, accepted RCPT */
@@ -372,8 +353,7 @@ doit(fd)
 			return;
 		}
 		code = smtpcode(0);
-		if (code >= 400)
-		{
+		if (code >= 400) {
 			result(code);
 			if (smtpcode(0) < 400)
 				die_proto();
@@ -381,8 +361,7 @@ doit(fd)
 		}
 	}
 	code = smtpcode(0);
-	if (code >= 400)
-	{
+	if (code >= 400) {
 		result(code);
 		return;
 	}
@@ -412,8 +391,7 @@ main(argc, argv)
 #else
 	remoteip = env_get("TCPREMOTEIP");
 #endif
-	if (smtpcode(0) != 220)
-	{
+	if (smtpcode(0) != 220) {
 		quit();
 		strerr_die2x(111, FATAL, "connected but greeting failed");
 	}
@@ -421,20 +399,17 @@ main(argc, argv)
 	substdio_puts(&ss7, helohost);
 	substdio_puts(&ss7, "\r\n");
 	substdio_flush(&ss7);
-	if (smtpcode(1) != 250)
-	{
+	if (smtpcode(1) != 250) {
 		substdio_puts(&ss7, "HELO ");
 		substdio_puts(&ss7, helohost);
 		substdio_puts(&ss7, "\r\n");
 		substdio_flush(&ss7);
-		if (smtpcode(0) != 250)
-		{
+		if (smtpcode(0) != 250) {
 			quit();
 			strerr_die2x(111, FATAL, "connected but my name was rejected");
 		}
 	}
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &fn, &match, '\0') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!match)
@@ -455,7 +430,7 @@ main(argc, argv)
 void
 getversion_serialsmtp_c()
 {
-	static char    *x = "$Id: serialsmtp.c,v 1.7 2020-11-24 13:48:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialsmtp.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

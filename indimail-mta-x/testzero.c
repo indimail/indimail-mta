@@ -1,5 +1,8 @@
 /*
  * $Log: testzero.c,v $
+ * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.2  2020-11-24 13:48:40+05:30  Cprogrammer
  * removed exit.h
  *
@@ -8,27 +11,28 @@
  *
  */
 #include <unistd.h>
-#include "uint32.h"
-#include "scan.h"
-#include "strerr.h"
-#include "cdb_make.h"
+#include <uint32.h>
+#include <scan.h>
+#include <strerr.h>
+#include <cdb_make.h>
+#include <noreturn.h>
 
 #define FATAL "testzero: fatal: "
 
-void
+no_return void
 die_write(void)
 {
 	strerr_die2sys(111, FATAL, "unable to write: ");
 }
 
-static char     key[4];
-static char     data[65536];
-struct cdb_make c;
 
 int
 main(int argc, char **argv)
 {
 	unsigned long   loop;
+	char            key[4];
+	char            data[65536];
+	struct          cdb_make c;
 
 	if (!*argv)
 		_exit(0);
@@ -50,7 +54,7 @@ main(int argc, char **argv)
 void
 getversion_testzero_c()
 {
-	static char    *x = "$Id: testzero.c,v 1.2 2020-11-24 13:48:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: testzero.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

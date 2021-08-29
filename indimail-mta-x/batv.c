@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2015-08-20 18:34:28+05:30  Cprogrammer
  * added usage for invalid option
  *
@@ -21,16 +24,17 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <openssl/md5.h>
-#include "sgetopt.h"
-#include "stralloc.h"
-#include "now.h"
-#include "env.h"
-#include "str.h"
-#include "scan.h"
-#include "constmap.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "byte.h"
+#include <sgetopt.h>
+#include <stralloc.h>
+#include <now.h>
+#include <env.h>
+#include <str.h>
+#include <scan.h>
+#include <constmap.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <byte.h>
+#include <noreturn.h>
 
 #define FATAL "batv: fatal: "
 #define BATVLEN 3 /*- number of bytes */
@@ -60,7 +64,7 @@ flush()
 	return;
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_flush(subfdout);
@@ -272,7 +276,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.5 2015-08-20 18:34:28+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

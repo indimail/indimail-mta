@@ -1,5 +1,8 @@
 /*
  * $Log: printforward.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2005-08-23 17:33:32+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -11,29 +14,29 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "subfd.h"
-#include "strerr.h"
-#include "stralloc.h"
-#include "cdb.h"
+#include <substdio.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <cdb.h>
+#include <noreturn.h>
 
 #define FATAL "printmaillist: fatal: "
 
-void
+no_return void
 badformat()
 {
 	strerr_die2x(100, FATAL, "bad database format");
 }
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
 void
-getch(ch)
-	char           *ch;
+getch(char *ch)
 {
 	int             r;
 
@@ -44,30 +47,25 @@ getch(ch)
 }
 
 void
-putch(ch)
-	char           *ch;
+putch(char *ch)
 {
 	if (substdio_put(subfdoutsmall, ch, 1) == -1)
 		strerr_die2x(111, FATAL, "unable to write output: ");
 }
 
 void
-print(buf)
-	char           *buf;
+print(char *buf)
 {
 	while (*buf)
 		putch(buf++);
 }
 
 void
-printsafe(buf, len)
-	char           *buf;
-	int             len;
+printsafe(char *buf, int len)
 {
 	char            ch;
 
-	while (len)
-	{
+	while (len) {
 		ch = *buf;
 		if ((ch <= 32) || (ch == ',') || (ch == ':') || (ch == ';') || (ch == '\\') || (ch == '#'))
 			putch("\\");
@@ -76,9 +74,6 @@ printsafe(buf, len)
 		--len;
 	}
 }
-
-stralloc        key = { 0 };
-stralloc        data = { 0 };
 
 int
 main()
@@ -91,6 +86,8 @@ main()
 	char            ch;
 	int             i;
 	int             j;
+	stralloc        key = { 0 };
+	stralloc        data = { 0 };
 
 	for (i = 0; i < 4; ++i)
 		getch(buf + i);
@@ -98,8 +95,7 @@ main()
 	for (i = 4; i < 2048; ++i)
 		getch(&ch);
 	pos = 2048;
-	while (pos < eod)
-	{
+	while (pos < eod) {
 		if (eod - pos < 8)
 			badformat();
 		pos += 8;
@@ -112,8 +108,7 @@ main()
 		if (eod - pos < klen)
 			badformat();
 		pos += klen;
-		while (klen)
-		{
+		while (klen) {
 			--klen;
 			getch(&ch);
 			if (!stralloc_append(&key, &ch))
@@ -124,8 +119,7 @@ main()
 		pos += dlen;
 		if (!stralloc_copys(&data, ""))
 			nomem();
-		while (dlen)
-		{
+		while (dlen) {
 			--dlen;
 			getch(&ch);
 			if (!stralloc_append(&data, &ch))
@@ -133,37 +127,30 @@ main()
 		}
 		if (!key.len)
 			badformat();
-		if (key.s[0] == '?')
-		{
+		if (key.s[0] == '?') {
 			printsafe(key.s + 1, key.len - 1);
 			print(": ?");
 			printsafe(data.s, data.len);
 			print(";\n");
 		} else
-		if (key.s[0] == ':')
-		{
+		if (key.s[0] == ':') {
 			printsafe(key.s + 1, key.len - 1);
 			print(":\n");
 
 			i = 0;
-			for (j = 0; j < data.len; ++j)
-			{
-				if (!data.s[j])
-				{
-					if ((data.s[i] == '.') || (data.s[i] == '/'))
-					{
+			for (j = 0; j < data.len; ++j) {
+				if (!data.s[j]) {
+					if ((data.s[i] == '.') || (data.s[i] == '/')) {
 						print(", ");
 						printsafe(data.s + i, j - i);
 						print("\n");
 					} else
-					if ((data.s[i] == '|') || (data.s[i] == '!'))
-					{
+					if ((data.s[i] == '|') || (data.s[i] == '!')) {
 						print(", ");
 						printsafe(data.s + i, j - i);
 						print("\n");
 					} else
-					if ((data.s[i] == '&') && (j - i < 900))
-					{
+					if ((data.s[i] == '&') && (j - i < 900)) {
 						print(", ");
 						printsafe(data.s + i, j - i);
 						print("\n");
@@ -188,7 +175,7 @@ main()
 void
 getversion_printforward_c()
 {
-	static char    *x = "$Id: printforward.c,v 1.3 2005-08-23 17:33:32+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: printforward.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

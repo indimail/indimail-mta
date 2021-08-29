@@ -1,5 +1,8 @@
 /*
  * $Log: 822addr.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2020-11-24 13:41:57+05:30  Cprogrammer
  * removed exit.h
  *
@@ -11,35 +14,35 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "alloc.h"
-#include "strerr.h"
-#include "getln.h"
-#include "mess822.h"
-#include "case.h"
-#include "stralloc.h"
+#include <substdio.h>
+#include <alloc.h>
+#include <strerr.h>
+#include <getln.h>
+#include <mess822.h>
+#include <case.h>
+#include <stralloc.h>
+#include <noreturn.h>
 
 #define FATAL "822addr: fatal: "
 
 static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[512];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-int             flag;
-stralloc        addr = { 0 };
+static int      flag;
+static int      match;
+static stralloc addr = { 0 };
+static stralloc line = { 0 };
 
-mess822_header  h = MESS822_HEADER;
-mess822_action *a;
-mess822_action  a0[] = {
-	{"to", &flag, 0, 0, &addr, 0}
-	, {"cc", &flag, 0, 0, &addr, 0}
-	, {0, 0, 0, 0, 0, 0}
+static mess822_header  h = MESS822_HEADER;
+static mess822_action *a;
+static mess822_action  a0[] = {
+	{"to", &flag, 0, 0, &addr, 0},
+	{"cc", &flag, 0, 0, &addr, 0},
+	{0, 0, 0, 0, 0, 0}
 };
 
-stralloc        line = { 0 };
-int             match;
-
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
@@ -55,12 +58,9 @@ init(int n, char **s)
 	if (!n)
 		return a0;
 
-	a1 = (mess822_action *) alloc((n + 1) * sizeof(mess822_action));
-	if (!a1)
+	if (!(a1 = (mess822_action *) alloc((n + 1) * sizeof(mess822_action))))
 		nomem();
-
-	for (i = 0; i < n; i++)
-	{
+	for (i = 0; i < n; i++) {
 		a1[i].name = *s;
 		a1[i].flag = &flag;
 		a1[i].copy = 0;
@@ -75,7 +75,6 @@ init(int n, char **s)
 	a1[n].value = 0;
 	a1[n].addr = 0;
 	a1[n].when = 0;
-
 	return a1;
 }
 
@@ -85,11 +84,9 @@ main(int argc, char **argv)
 	a = init(argc - 1, ++argv);
 	if (!mess822_begin(&h, a))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
-
 		if (!mess822_ok(&line))
 			break;
 		if (!mess822_line(&h, &line))
@@ -109,7 +106,7 @@ main(int argc, char **argv)
 void
 getversion_822addr_c()
 {
-	static char    *x = "$Id: 822addr.c,v 1.3 2020-11-24 13:41:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822addr.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

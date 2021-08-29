@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.26  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.25  2021-07-20 09:04:36+05:30  Cprogrammer
  * added missing options in usage string
  *
@@ -85,11 +88,12 @@
 #include <env.h>
 #include <sgetopt.h>
 #include <strmsg.h>
-#include "direntry.h"
+#include <direntry.h>
+#include <pathexec.h>
+#include <envdir.h>
+#include <getEnvConfig.h>
+#include <noreturn.h>
 #include "tcpto.h"
-#include "pathexec.h"
-#include "envdir.h"
-#include "getEnvConfig.h"
 #include "auto_split.h"
 #include "auto_uids.h"
 #include "set_environment.h"
@@ -99,15 +103,14 @@
 
 extern int rename (const char *, const char *);
 
-stralloc        queue_dir = { 0 };	/*- the root queue dir with trailing slash */
-stralloc        check_dir = { 0 };	/*- the current directory being checked */
-stralloc        temp_filename = { 0 };	/*- temporary used for checking individuals */
-stralloc        temp_dirname = { 0 };	/*- temporary used for checking individuals */
-stralloc        old_name = { 0 };	/*- used in rename */
-stralloc        new_name = { 0 };	/*- used in rename */
-stralloc        mess_dir = { 0 };	/*- used for renaming in mess dir */
-stralloc        query = { 0 };	/*- used in interactive query function */
-
+static stralloc queue_dir = { 0 };	/*- the root queue dir with trailing slash */
+static stralloc check_dir = { 0 };	/*- the current directory being checked */
+static stralloc temp_filename = { 0 };	/*- temporary used for checking individuals */
+static stralloc temp_dirname = { 0 };	/*- temporary used for checking individuals */
+static stralloc old_name = { 0 };	/*- used in rename */
+static stralloc new_name = { 0 };	/*- used in rename */
+static stralloc mess_dir = { 0 };	/*- used for renaming in mess dir */
+static stralloc query = { 0 };	/*- used in interactive query function */
 static char     name_num[FMT_ULONG];
 static int      flag_interactive = 0;
 static int      flag_doit = 1;
@@ -141,7 +144,7 @@ flush()
 	return;
 }
 
-void
+no_return void
 usage()
 {
 	char            strnum[FMT_ULONG];
@@ -159,7 +162,7 @@ usage()
 	_exit(100);
 }
 
-void
+no_return void
 die_check()
 {
 	strerr_warn2(WARN, "Failed while checking directory structure.\n"
@@ -168,7 +171,7 @@ die_check()
 	_exit(111);
 }
 
-void
+no_return void
 die_recon()
 {
 	strerr_warn2(WARN, "Failed to reconstruct queue.\n"
@@ -177,7 +180,7 @@ die_recon()
 	_exit(111);
 }
 
-void
+no_return void
 die_rerun()
 {
 	strerr_warn2(WARN, ".tmp files exist in the queue.\n"
@@ -1049,7 +1052,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.25 2021-07-20 09:04:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.26 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

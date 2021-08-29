@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.9  2021-06-12 18:26:58+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -20,54 +23,50 @@
  *
  */
 #include <unistd.h>
+#include <sig.h>
+#include <byte.h>
+#include <str.h>
+#include <substdio.h>
+#include <now.h>
+#include <fmt.h>
+#include <env.h>
+#include <noreturn.h>
 #include "qmail.h"
 #include "received.h"
-#include "sig.h"
-#include "byte.h"
-#include "str.h"
-#include "substdio.h"
-#include "now.h"
-#include "fmt.h"
-#include "env.h"
 
-void
+ssize_t         saferead(int fd, char *_buf, size_t len);
+ssize_t         safewrite(int fd, char *_buf, size_t len);
+
+static char     ssinbuf[512];
+static char     ssoutbuf[256];
+static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
+static unsigned long   bytesleft = 100;
+
+no_return void
 resources()
 {
 	_exit(111);
 }
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, size_t len)
 {
 	int             r;
-	r = write(fd, buf, len);
-	if (r <= 0)
+
+	if((r = write(fd, buf, len)) <= 0)
 		_exit(0);
 	return r;
 }
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
-	r = read(fd, buf, len);
-	if (r <= 0)
+	if ((r = read(fd, buf, len)) <=0)
 		_exit(0);
 	return r;
 }
-
-char            ssinbuf[512];
-substdio        ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
-char            ssoutbuf[256];
-substdio        ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
-
-unsigned long   bytesleft = 100;
 
 void
 getbyte(ch)
@@ -228,7 +227,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.9 2021-06-12 18:26:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpd.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

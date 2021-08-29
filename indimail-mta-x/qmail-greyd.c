@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.32  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.31  2021-06-12 18:07:02+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -110,27 +113,28 @@
 #include <netdb.h>
 #include <sys/select.h>
 #include "sgetopt.h"
+#include <sig.h>
+#include <getln.h>
+#include <fmt.h>
+#include <str.h>
+#include <subfd.h>
+#include <byte.h>
+#include <strerr.h>
+#include <scan.h>
+#include <env.h>
+#include <stralloc.h>
+#include <constmap.h>
+#include <error.h>
+#include <uint32.h>
+#include <open.h>
+#include <cdb.h>
+#include <noreturn.h>
+#include "ip.h"
 #ifdef NETQMAIL
 #include "auto_qmail.h"
 #endif
 #include "auto_control.h"
-#include "ip.h"
-#include "sig.h"
-#include "getln.h"
-#include "fmt.h"
-#include "str.h"
-#include "subfd.h"
-#include "byte.h"
-#include "strerr.h"
-#include "scan.h"
-#include "env.h"
-#include "stralloc.h"
-#include "constmap.h"
 #include "control.h"
-#include "error.h"
-#include "uint32.h"
-#include "open.h"
-#include "cdb.h"
 #include "tablematch.h"
 #ifndef NETQMAIL /*- netqmail does not have configurable control directory */
 #include "variables.h"
@@ -165,8 +169,6 @@ union sockunion
 #endif
 };
 
-int             verbose = 0;
-
 struct greylst
 {
 	union v46addr   ip;
@@ -180,13 +182,6 @@ struct greylst
 	struct greylst *prev, *next; /*- prev, next of linked list of greylst structures */
 	struct greylst *ip_prev, *ip_next; /*- group records for an ip address+rpath+rcpt together */
 };
-struct greylst *head;
-struct greylst *tail;
-int             grey_count, hcount;
-int             hash_size, h_allocated = 0;
-unsigned long   timeout;
-char           *whitefn = 0;
-stralloc        context_file = { 0 };
 
 struct netspec
 {
@@ -194,7 +189,16 @@ struct netspec
 	unsigned int    max;
 };
 
-void
+static struct greylst *head;
+static struct greylst *tail;
+static unsigned long   timeout;
+static int      verbose = 0;
+static int      grey_count, hcount;
+static int      hash_size, h_allocated = 0;
+static char    *whitefn = 0;
+static stralloc context_file = { 0 };
+
+no_return void
 die_nomem()
 {
 	substdio_flush(subfdout);
@@ -204,7 +208,7 @@ die_nomem()
 	_exit(1);
 }
 
-void
+no_return void
 die_control(char *arg)
 {
 	substdio_flush(subfdout);
@@ -1110,7 +1114,7 @@ sigusr2()
 	return;
 }
 
-void
+no_return void
 sigterm()
 {
 	sig_block(SIGTERM);
@@ -1559,7 +1563,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.31 2021-06-12 18:07:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.32 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

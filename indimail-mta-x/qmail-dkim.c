@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.61  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.60  2021-08-28 23:16:06+05:30  Cprogrammer
  * control file dkimkeys for domain specific private key, selector
  *
@@ -208,6 +211,7 @@
 #include <error.h>
 #include <dkim.h>
 #include <makeargs.h>
+#include <noreturn.h>
 #include "control.h"
 #include "auto_control.h"
 #include "qmail.h"
@@ -234,9 +238,8 @@ struct datetime dt;
 unsigned long   uid;
 int             readfd;
 DKIMContext     ctxt;
-void            die(int, int) __attribute__((noreturn));
 
-void
+no_return void
 die(int e, int what)
 {
 	if (!what)
@@ -245,26 +248,26 @@ die(int e, int what)
 	_exit(e);
 }
 
-void
+no_return void
 die_write()
 {
 	die(53, 0);
 }
 
-void
+no_return void
 die_read()
 {
 	die(54, 0);
 }
 
-void
+no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
 	die(52, 0);
 }
 
-void
+no_return void
 sigbug()
 {
 	die(81, 0);
@@ -1391,7 +1394,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.60 2021-08-28 23:16:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.61 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;

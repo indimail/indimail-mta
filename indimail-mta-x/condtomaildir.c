@@ -1,5 +1,8 @@
 /*
  * $Log: condtomaildir.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2020-11-24 13:44:40+05:30  Cprogrammer
  * removed exit.h
  *
@@ -19,36 +22,36 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <signal.h>
-#include "sig.h"
-#include "byte.h"
-#include "open.h"
-#include "substdio.h"
-#include "strerr.h"
-#include "error.h"
-#include "fmt.h"
-#include "env.h"
-#include "str.h"
-#include "wait.h"
-#include "seek.h"
-#include "now.h"
-#include "env.h"
-#include "pathexec.h"
-void            (*sig_ignorehandler) () = SIG_IGN;
-#define sig_ignore(s) (sig_catch((s),sig_ignorehandler))
+#include <sig.h>
+#include <byte.h>
+#include <open.h>
+#include <substdio.h>
+#include <strerr.h>
+#include <error.h>
+#include <fmt.h>
+#include <env.h>
+#include <str.h>
+#include <wait.h>
+#include <seek.h>
+#include <now.h>
+#include <env.h>
+#include <pathexec.h>
+#include <noreturn.h>
 
+#define sig_ignore(s) (sig_catch((s),sig_ignorehandler))
 #define FATAL "condtomaildir: fatal: "
 
-char            buf[SUBSTDIO_INSIZE];
-char            outbuf[SUBSTDIO_OUTSIZE];
-char            fntmptph[80 + FMT_ULONG * 2];
-char            fnnewtph[80 + FMT_ULONG * 2];
+void            (*sig_ignorehandler) () = SIG_IGN;
+
+static char     fntmptph[80 + FMT_ULONG * 2];
+
 void
 tryunlinktmp()
 {
 	unlink(fntmptph);
 }
 
-void
+no_return void
 sigalrm()
 {
 	tryunlinktmp();
@@ -56,24 +59,19 @@ sigalrm()
 }
 
 int
-doit(dir)
-	char           *dir;
+doit(char *dir)
 {
-	unsigned long   pid;
-	unsigned long   time;
-	char            host[64];
-	char           *s;
-	int             loop;
+	pid_t           pid;
+	time_t          tm;
+	int             loop, fd;
 	struct stat     st;
-	int             fd;
-	substdio        ss;
-	substdio        ssout;
-	char           *rpline;
-	char           *dtline;
+	substdio        ss, ssout;
+	char           *rpline, *dtline, *s;
+	char            buf[SUBSTDIO_INSIZE], outbuf[SUBSTDIO_OUTSIZE], host[64],
+					fnnewtph[80 + FMT_ULONG * 2];
 
 	sig_catch(SIGALRM, sigalrm);
-	if (chdir(dir) == -1)
-	{
+	if (chdir(dir) == -1) {
 		if (error_temp(errno))
 			return (1);
 		return (2);
@@ -81,12 +79,11 @@ doit(dir)
 	pid = getpid();
 	host[0] = '\0';
 	gethostname(host, sizeof(host));
-	for (loop = 0;; ++loop)
-	{
-		time = now();
+	for (loop = 0;; ++loop) {
+		tm = now();
 		s = fntmptph;
 		s += fmt_str(s, "tmp/");
-		s += fmt_ulong(s, time);
+		s += fmt_ulong(s, tm);
 		*s++ = '.';
 		s += fmt_ulong(s, pid);
 		*s++ = '.';
@@ -157,11 +154,9 @@ main(int argc, char **argv, char **envp)
 	if (!argv[1] || !argv[2])
 		strerr_die1x(100, "condtomaildir: usage: condtomaildir dir program [ arg ... ]");
 
-	pid = fork();
-	if (pid == -1)
+	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
-	if (pid == 0)
-	{
+	if (pid == 0) {
 		pathexec_run(argv[2], argv + 2, envp);
 		if (error_temp(errno))
 			_exit(111);
@@ -180,16 +175,12 @@ main(int argc, char **argv, char **envp)
 	default:
 		_exit(0);
 	}
-
 	if (seek_begin(0) == -1)
 		strerr_die2sys(111, FATAL, "unable to rewind: ");
 	umask(077);
 	sig_ignore(SIGPIPE);
-
 	dir = argv[1];
-
-	r = doit(dir);
-	switch (r)
+	switch ((r = doit(dir)))
 	{
 	case 0:
 		break;
@@ -205,13 +196,12 @@ main(int argc, char **argv, char **envp)
 	strerr_die1x(99, "condtomaildir");
 	/*- Not reached */
 	return (0);
-
 }
 
 void
 getversion_condtomaildir_c()
 {
-	static char    *x = "$Id: condtomaildir.c,v 1.5 2020-11-24 13:44:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: condtomaildir.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-popbull.c,v $
+ * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.10  2021-05-26 10:44:34+05:30  Cprogrammer
  * replaced strerror() with error_str()
  *
@@ -25,67 +28,66 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
-#include "direntry.h"
-#include "substdio.h"
-#include "stralloc.h"
-#include "subfd.h"
-#include "open.h"
-#include "fmt.h"
-#include "error.h"
-#include "datetime.h"
-#include "now.h"
-#include "str.h"
+#include <direntry.h>
+#include <substdio.h>
+#include <stralloc.h>
+#include <subfd.h>
+#include <open.h>
+#include <fmt.h>
+#include <error.h>
+#include <datetime.h>
+#include <now.h>
+#include <str.h>
+#include <noreturn.h>
 
-void
+static char     fntmptph[80 + FMT_ULONG * 2];
+
+no_return void
 die()
 {
 	_exit(100);
 }
 
-void
+no_return void
 die_temp()
 {
 	_exit(111);
 }
 
-void
+no_return void
 die_usage()
 {
 	substdio_putsflush(subfderr, "qmail-popbull: usage: qmail-popbull bulldir pop3d maildir\n");
 	die_temp();
 }
 
-void
+no_return void
 die_nobulldir()
 {
 	substdio_putsflush(subfderr, "qmail-popbull: fatal: unable to read bulldir\n");
 	die_temp();
 }
 
-void
+no_return void
 die_nomaildir()
 {
 	substdio_putsflush(subfderr, "qmail-popbull: fatal: unable to write to maildir\n");
 	die_temp();
 }
 
-void
+no_return void
 die_nocdmaildir()
 {
 	substdio_putsflush(subfderr, "qmail-popbull: fatal: unable to change to maildir\n");
 	die_temp();
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_putsflush(subfderr, "qmail-popbull: fatal: out of memory\n");
 	die_temp();
 }
-
-stralloc        fn = { 0 };
-stralloc        fn2 = { 0 };
-char            fntmptph[80 + FMT_ULONG * 2];
 
 void
 fnmake_maildir()
@@ -122,22 +124,17 @@ fnmake_maildir()
 	}
 }
 
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             fd;
 	struct stat     st;
 	datetime_sec    ts_date;
-	char           *bulldirname;
-	char           *programname;
-	char           *maildirname;
+	char           *bulldirname, *programname, *maildirname;
+	char          **childargs;
 	DIR            *bulldir;
 	direntry       *d;
-	char          **childargs;
-	stralloc        errorstr = { 0 };
+	stralloc        errorstr = { 0 }, fn = { 0 };
 
 	if (!(bulldirname = argv[1]))
 		die_usage();
@@ -199,7 +196,7 @@ main(argc, argv)
 void
 getversion_qmail_popbull_c()
 {
-	static char    *x = "$Id: qmail-popbull.c,v 1.10 2021-05-26 10:44:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-popbull.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

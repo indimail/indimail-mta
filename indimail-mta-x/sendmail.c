@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.12  2020-11-24 13:48:05+05:30  Cprogrammer
  * removed exit.h
  *
@@ -26,32 +29,34 @@
  *
  */
 #include <unistd.h>
-#include "sgetopt.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "alloc.h"
+#include <sgetopt.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <alloc.h>
+#include <env.h>
+#include <str.h>
+#include <noreturn.h>
 #include "auto_qmail.h"
-#include "env.h"
-#include "str.h"
 
-void
+no_return void
 nomem()
 {
 	substdio_putsflush(subfderr, "sendmail: fatal: out of memory\n");
 	_exit(111);
 }
 
-void
+no_return void
 die_usage()
 {
 	substdio_putsflush(subfderr, "sendmail: usage: sendmail [ -t ] [ -fsender ] [ -Fname ] [ -bp ] [ -bs ] [ arg ... ]\n");
 	_exit(100);
 }
 
-char           *smtpdarg[] = { "sbin/qmail-smtpd", 0 };
-void
+no_return void
 smtpd()
 {
+	char           *smtpdarg[] = { "sbin/qmail-smtpd", 0 };
+
 	if (!env_get("PROTO")) {
 		if (!env_put("RELAYCLIENT="))
 			nomem();
@@ -75,11 +80,11 @@ smtpd()
 	_exit(111);
 }
 
-char           *qreadarg[] = { "bin/qmail-qread", 0 };
-
-void
+no_return void
 mailq()
 {
+	char           *qreadarg[] = { "bin/qmail-qread", 0 };
+
 	execv(*qreadarg, qreadarg);
 	substdio_putsflush(subfderr, "sendmail: fatal: unable to run qmail-qread\n");
 	_exit(111);
@@ -113,17 +118,15 @@ do_sender(const char *s)
 	alloc_free(x);
 }
 
-int             flagh;
-char           *sender;
 
 int
 main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             opt, i;
-	char          **qiargv;
-	char          **arg;
+	int             opt, i, flagh;
+	char          **qiargv, **arg;
+	char           *sender;
 
 	if (chdir(auto_qmail) == -1) {
 		substdio_putsflush(subfderr, "sendmail: fatal: unable to switch to qmail home directory\n");
@@ -258,7 +261,7 @@ main(argc, argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.12 2020-11-24 13:48:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

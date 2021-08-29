@@ -1,5 +1,8 @@
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.56  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.55  2021-06-12 18:52:06+05:30  Cprogrammer
  * added chdir(auto_qmail) for qmail-queue
  *
@@ -167,6 +170,7 @@
 #include <fmt.h>
 #include <scan.h>
 #include <error.h>
+#include <noreturn.h>
 #ifdef sun
 #include <sys/types.h>
 #include <sys/statvfs.h>
@@ -210,7 +214,7 @@ getfreespace(char *filesystem)
 	return (0);
 }
 
-int
+no_return int
 qmulti(char *queue_env, int argc, char **argv)
 {
 	datetime_sec    queueNo;
@@ -276,8 +280,6 @@ qmulti(char *queue_env, int argc, char **argv)
 		qqargs[0] = "sbin/qmail-queue";
 	execv(*qqargs, argv);
 	_exit(120);
-	/*- Not reached */
-	return (0);
 }
 
 int
@@ -342,7 +344,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.55 2021-06-12 18:52:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.56 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;

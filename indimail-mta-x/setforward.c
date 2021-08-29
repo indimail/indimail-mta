@@ -1,5 +1,8 @@
 /*
  * $Log: setforward.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2021-06-15 12:19:19+05:30  Cprogrammer
  * moved cdbmss.h to libqmail
  *
@@ -24,79 +27,75 @@
 #include <open.h>
 #include <case.h>
 #include <cdbmss.h>
+#include <noreturn.h>
 
 #define FATAL "setforward: fatal: "
 
 int             rename(const char *, const char *);
 
-void
+static char    *fncdb, *fntmp;
+static int      fd, flagtarget = 0;
+static struct cdbmss   cdbmss;
+static stralloc key = { 0 };
+static stralloc target = { 0 };		/*- always initialized; no NUL */
+static stralloc command = { 0 };	/*- always initialized; no NUL */
+static stralloc instr = { 0 };		/*- always initialized */
+
+no_return void
 usage()
 {
 	strerr_die1x(100, "setforward: usage: setforward data.cdb data.tmp");
 }
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 missingsemicolon()
 {
 	strerr_die2x(100, FATAL, "final instruction must end with semicolon");
 }
 
-void
+no_return void
 extracolon()
 {
 	strerr_die2x(100, FATAL, "double colons are not permitted");
 }
 
-void
+no_return void
 extracomma()
 {
 	strerr_die2x(100, FATAL, "commas are not permitted before colons");
 }
 
-void
+no_return void
 nulbyte()
 {
 	strerr_die2x(100, FATAL, "NUL bytes are not permitted");
 }
 
-void
+no_return void
 longaddress()
 {
 	strerr_die2x(100, FATAL, "addresses over 800 bytes are not permitted");
 }
-
-char           *fncdb;
-char           *fntmp;
-int             fd;
-struct cdbmss   cdbmss;
-stralloc        key = { 0 };
-stralloc        target = { 0 };		/*- always initialized; no NUL */
-stralloc        command = { 0 };	/*- always initialized; no NUL */
-stralloc        instr = { 0 };		/*- always initialized */
-int             flagtarget = 0;
 
 /*
  * 0: reading target; command is empty; instr is empty 
  * 1: target is complete; instr still has to be written; reading command 
  */
 
-void
+no_return void
 writeerr()
 {
 	strerr_die4sys(111, FATAL, "unable to write to ", fntmp, ": ");
 }
 
 void
-doit(prepend, data, datalen)
-	char           *prepend;
-	char           *data;
-	int             datalen;
+doit(char *prepend, char *data, int datalen)
 {
 	if (!stralloc_copys(&key, prepend))
 		nomem();
@@ -139,12 +138,10 @@ main(argc, argv)
 		strerr_die4sys(111, FATAL, "unable to create ", fntmp, ": ");
 	if (cdbmss_start(&cdbmss, fd) == -1)
 		writeerr();
-	for (;;)
-	{
+	for (;;) {
 		if (!getch(&ch))
 			goto eof;
-		if (ch == '#')
-		{
+		if (ch == '#') {
 			while (ch != '\n')
 				if (!getch(&ch))
 					goto eof;
@@ -152,37 +149,31 @@ main(argc, argv)
 		}
 		if (ch == ' ' || ch == '\n' || ch == '\t')
 			continue;
-		if (ch == ':')
-		{
+		if (ch == ':') {
 			if (flagtarget)
 				extracolon();
 			flagtarget = 1;
 			continue;
 		}
-		if ((ch == ',') || (ch == ';'))
-		{
+		if ((ch == ',') || (ch == ';')) {
 			if (!flagtarget)
 				extracomma();
-			if (command.len)
-			{
+			if (command.len) {
 				if (command.s[0] == '?')
 					doit("?", command.s + 1, command.len - 1);
 				else
-				if ((command.s[0] == '|') || (command.s[0] == '!'))
-				{
+				if ((command.s[0] == '|') || (command.s[0] == '!')) {
 					if (!stralloc_cat(&instr, &command))
 						nomem();
 					if (!stralloc_0(&instr))
 						nomem();
 				} else
-				if ((command.s[0] == '.') || (command.s[0] == '/'))
-				{
+				if ((command.s[0] == '.') || (command.s[0] == '/')) {
 					if (!stralloc_cat(&instr, &command))
 						nomem();
 					if (!stralloc_0(&instr))
 						nomem();
-				} else
-				{
+				} else {
 					if (command.len > 800)
 						longaddress();
 					if (command.s[0] != '&' && !stralloc_cats(&instr, "&"))
@@ -195,8 +186,7 @@ main(argc, argv)
 			}
 			if (!stralloc_copys(&command, ""))
 				nomem();
-			if (ch == ';')
-			{
+			if (ch == ';') {
 				if (instr.len)
 					doit(":", instr.s, instr.len);
 				if (!stralloc_copys(&target, ""))
@@ -233,7 +223,7 @@ eof:
 void
 getversion_setforward_c()
 {
-	static char    *x = "$Id: setforward.c,v 1.5 2021-06-15 12:19:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setforward.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

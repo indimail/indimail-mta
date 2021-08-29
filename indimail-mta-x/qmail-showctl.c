@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.2  2021-07-05 21:28:04+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root
  *
@@ -28,6 +31,7 @@
 #include <error.h>
 #include <strerr.h>
 #include <qprintf.h>
+#include <noreturn.h>
 #include "control.h"
 #include "auto_uids.h"
 #include "auto_qmail.h"
@@ -49,13 +53,13 @@
 #define FATAL "qmail-showctl: fatal: "
 #define WARN  "qmail-showctl: warn: "
 
-stralloc        me = { 0 };
-stralloc        line = { 0 };
-stralloc        libfn = { 0 };
-int             meok, conf_split;
-char            num[FMT_ULONG];
+static stralloc me = { 0 };
+static stralloc line = { 0 };
+static stralloc libfn = { 0 };
+static int      meok, conf_split;
+static char     num[FMT_ULONG];
 
-void
+no_return void
 die_nomem()
 {
 	substdio_puts(subfderr, "Out of memory\n");
@@ -178,7 +182,7 @@ print_concurrency()
 	}
 }
 
-void
+no_return void
 die_chdir(char *dir)
 {
 	substdio_puts(subfdout, "Oops! Unable to chdir to ");
@@ -826,7 +830,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.2 2021-07-05 21:28:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

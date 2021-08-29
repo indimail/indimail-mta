@@ -7,6 +7,9 @@
  * Saju Pillai (saju.pillai@gmail.com)
  *
  * $Log: qaes.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2017-08-08 23:56:21+05:30  Cprogrammer
  * openssl 1.1.0 port
  *
@@ -27,15 +30,17 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <openssl/evp.h>
-#include "substdio.h"
-#include "fmt.h"
-#include "str.h"
-#include "stralloc.h"
-#include "base64.h"
-#include "getln.h"
-#include "scan.h"
-#include "sgetopt.h"
-#include "error.h"
+#include <substdio.h>
+#include <fmt.h>
+#include <str.h>
+#include <stralloc.h>
+#include <base64.h>
+#include <getln.h>
+#include <scan.h>
+#include <sgetopt.h>
+#include <error.h>
+#include <strerr.h>
+#include <noreturn.h>
 
 #define READ_ERR  1
 #define WRITE_ERR 2
@@ -44,13 +49,13 @@
 #define AES_BLOCK_SIZE 512
 
 static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
+static char    *usage = "usage: qaes -k key [ -i -d -e -s salt ]\n";
+static char     strnum[FMT_ULONG];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: qaes -k key [ -i -d -e -s salt ]\n";
-char            strnum[FMT_ULONG];
 
 void
 logerr(char *s)
@@ -68,7 +73,7 @@ logerrf(char *s)
 		_exit(1);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -203,7 +208,8 @@ main(int argc, char **argv)
 #endif
 
 	while ((opt = getopt(argc, argv, "k:s:ide")) != opteof) {
-		switch (opt) {
+		switch (opt)
+		{
 		case 'k':
 			/*
 			 * 8 bytes to salt the key_data during key generation. This is an example of
@@ -229,11 +235,13 @@ main(int argc, char **argv)
 		case 'i':
 			ignore_newline = 1;
 			break;
+		default:
+			strerr_die1x(100, usage);
 		}
 	}
 	if (!key_data) {
 		logerrf("encryption key not specified\n");
-		_exit(111);
+		strerr_die1x(100, usage);
 	}
 	/*
 	 * gen key and iv. init the cipher ctx object 
@@ -335,7 +343,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.5 2017-08-08 23:56:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qaes.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

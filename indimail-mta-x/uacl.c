@@ -1,5 +1,8 @@
 /*
  * $Log: uacl.c,v $
+ * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.6  2021-06-13 17:36:34+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -26,6 +29,7 @@
 #include <env.h>
 #include <subfd.h>
 #include <strerr.h>
+#include <noreturn.h>
 #include "qregex.h"
 #include "control.h"
 #include "matchregex.h"
@@ -33,11 +37,6 @@
 #include "wildmat.h"
 
 #define FATAL "uacl: fatal: "
-
-/*- accesslist */
-int             acclistok = 0;
-static stralloc acclist = { 0 };
-int             qregex = 0;
 
 void
 out(char *str)
@@ -57,7 +56,7 @@ flush()
 	return;
 }
 
-void
+no_return void
 die_control()
 {
 	substdio_putsflush(subfderr, "uacl: unable to read controls (#4.3.0)\n");
@@ -65,7 +64,7 @@ die_control()
 	_exit(111);
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_putsflush(subfderr, "uacl: out of memory\n");
@@ -73,7 +72,7 @@ die_nomem()
 	_exit(111);
 }
 
-void
+no_return void
 die_usage()
 {
 	substdio_putsflush(subfderr, "usage: uacl sender recipient\n");
@@ -81,7 +80,7 @@ die_usage()
 	_exit(111);
 }
 
-void
+no_return void
 die_regex(char *str)
 {
 	substdio_puts(subfderr, "uacl: regex failed: ");
@@ -96,7 +95,8 @@ int
 main(int argc, char **argv)
 {
 	char           *x;
-	int             i;
+	int             i, qregex = 0, acclistok = 0;
+	stralloc        acclist = { 0 };
 
 	if (argc != 3)
 		die_usage();
@@ -117,7 +117,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.6 2021-06-13 17:36:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

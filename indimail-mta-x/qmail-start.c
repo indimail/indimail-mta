@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.23  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.22  2021-06-27 10:40:10+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -52,22 +55,23 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <str.h>
-#include "fd.h"
-#include "env.h"
-#include "alloc.h"
-#include "prot.h"
+#include <fd.h>
+#include <env.h>
+#include <alloc.h>
+#include <prot.h>
+#include <noreturn.h>
 #include "auto_uids.h"
 #include "setuserid.h"
 
-char           *(qsargs[]) = { "qmail-send", 0};
-char           *(qcargs[]) = { "qmail-clean", 0};
-char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0};
-char           *(qrargs[]) = { "qmail-rspawn", 0};
+static char    *(qsargs[]) = { "qmail-send", 0};
+static char    *(qcargs[]) = { "qmail-clean", 0};
+static char    *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0};
+static char    *(qrargs[]) = { "qmail-rspawn", 0};
 #ifdef EXTERNAL_TODO
-char           *(qtargs[]) = { "qmail-todo", 0};
+static char    *(qtargs[]) = { "qmail-todo", 0};
 #endif
 
-void
+no_return void
 die()
 {
 	_exit(111);
@@ -404,7 +408,7 @@ main(argc, argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.22 2021-06-27 10:40:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.23 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

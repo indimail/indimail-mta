@@ -1,5 +1,8 @@
 /*
  * $Log: generic.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2021-06-15 11:36:51+05:30  Cprogrammer
  * moved makeargs.h to libqmail
  *
@@ -21,10 +24,11 @@
 #include <env.h>
 #include <wait.h>
 #include <makeargs.h>
+#include <noreturn.h>
 
 extern char    *auto_scancmd[];
 
-int
+no_return int
 virusscan(char *messfn)
 {
 	int             wstat, child;
@@ -38,20 +42,17 @@ virusscan(char *messfn)
 	case -1:
 		_exit(121);
 	case 0:
-		if ((ptr = env_get("SCANCMD")))
-		{
+		if ((ptr = env_get("SCANCMD"))) {
 			if (!(argv = makeargs(ptr)))
 				_exit(51);
 		} else
 			argv = auto_scancmd;
-		if (!argv[1])
-		{
+		if (!argv[1]) {
 			scancmd[0] = argv[0];
 			scancmd[1] = messfn;
 			argv = scancmd;
 		} else
-		for (u = 1; argv[u]; u++)
-		{
+		for (u = 1; argv[u]; u++) {
 			if (!str_diffn(argv[u], "%s", 2))
 				argv[u] = messfn;
 		}
@@ -72,7 +73,7 @@ virusscan(char *messfn)
 void
 getversion_generic_c()
 {
-	static char    *x = "$Id: generic.c,v 1.5 2021-06-15 11:36:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: generic.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

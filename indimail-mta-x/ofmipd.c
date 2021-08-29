@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.20  2021-06-14 00:59:59+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
@@ -64,49 +67,56 @@
  *
  */
 #include <unistd.h>
-#include "commands.h"
+#include <sig.h>
+#include <open.h>
+#include <leapsecs.h>
+#include <byte.h>
+#include <rewritehost.h>
+#include <getln.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <sconfig.h>
+#include <env.h>
+#include <error.h>
+#include <str.h>
+#include <fmt.h>
+#include <now.h>
+#include <case.h>
+#include <base64.h>
+#include <wait.h>
+#include <mess822.h>
+#include <tai.h>
+#include <caltime.h>
+#include <cdb.h>
+#include <commands.h>
+#include <strerr.h>
+#include <noreturn.h>
 #include "rwhconfig.h"
-#include "sig.h"
-#include "open.h"
-#include "leapsecs.h"
-#include "byte.h"
-#include "rewritehost.h"
-#include "getln.h"
 #include "auto_sysconfdir.h"
 #include "qmail.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
-#include "stralloc.h"
-#include "substdio.h"
-#include "sconfig.h"
-#include "env.h"
-#include "error.h"
-#include "str.h"
-#include "fmt.h"
-#include "now.h"
-#include "case.h"
-#include "base64.h"
-#include "wait.h"
-#include "mess822.h"
-#include "tai.h"
-#include "caltime.h"
-#include "cdb.h"
 #include "control.h"
 
 int             auth_login(char *);
 int             auth_plain(char *);
 int             auth_cram();
 int             err_noauth();
+void            logerr(char *);
+void            logerrf(char *);
+void            logerr_start();
+ssize_t         saferead(int fd, char *buf, size_t len);
+ssize_t         safewrite(int fd, char *buf, size_t len);
 
-int             timeout = 1200, auth_smtp = 0;
-int             authd = 0;
-int             rcptcount = 0;
-unsigned int    databytes = 0;
+static int      timeout = 1200, auth_smtp = 0;
+static int      authd = 0;
+static int      rcptcount = 0;
+static int      match;
 static char     strnum[FMT_ULONG], pid_str[FMT_ULONG], accept_buf[FMT_ULONG];
-char           *protocol = "SMTP";
-char           *hostname, *remoteip, *relayclient, *remoteinfo;
-char          **childargs;
-struct authcmd
+static char    *protocol = "SMTP";
+static char    *hostname, *remoteip, *relayclient, *remoteinfo;
+static char   **childargs;
+static struct authcmd
 {
 	char           *text;
 	int             (*fun) ();
@@ -116,16 +126,17 @@ struct authcmd
 	{"cram-md5", auth_cram},
 	{0, err_noauth}
 };
-
 static stralloc authin = { 0 };
 static stralloc user = { 0 };
 static stralloc pass = { 0 };
 static stralloc resp = { 0 };
 static stralloc slop = { 0 };
-
-void            logerr(char *);
-void            logerrf(char *);
-void            logerr_start();
+static stralloc line = { 0 };
+static unsigned int    databytes = 0;
+static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512];
+static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF(safewrite, 2, sserrbuf, sizeof sserrbuf);
 
 ssize_t
 safewrite(int fd, char *buf, size_t len)
@@ -139,10 +150,6 @@ safewrite(int fd, char *buf, size_t len)
 	}
 	return r;
 }
-
-char            ssoutbuf[512], sserrbuf[512];
-substdio        ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
-substdio        sserr = SUBSTDIO_FDBUF(safewrite, 2, sserrbuf, sizeof sserrbuf);
 
 void
 flush()
@@ -284,7 +291,7 @@ err_queue(char *arg1, char *arg2, int len, char *arg3, char *qqx,
 		_exit(1);
 }
 
-void
+no_return void
 die_control(char *arg)
 {
 	logerr_start();
@@ -294,7 +301,7 @@ die_control(char *arg)
 	_exit(1);
 }
 
-void
+no_return void
 die_read()
 {
 	logerr_start();
@@ -363,7 +370,7 @@ err_fork()
 	return -1;
 }
 
-void
+no_return void
 nomem()
 {
 	out("451 out of memory (#4.3.0)\r\n");
@@ -373,7 +380,7 @@ nomem()
 	_exit(1);
 }
 
-void
+no_return void
 die_config()
 {
 	out("451 unable to read configuration (#4.3.0)\r\n");
@@ -383,7 +390,7 @@ die_config()
 	_exit(1);
 }
 
-void
+no_return void
 smtp_quit()
 {
 	out("221 ofmipd.local\r\n");
@@ -774,12 +781,6 @@ saferead(int fd, char *buf, size_t len)
 		die_read();
 	return r;
 }
-
-char            ssinbuf[1024];
-substdio        ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
-
-stralloc        line = { 0 };
-int             match;
 
 void
 blast()
@@ -1218,7 +1219,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.20 2021-06-14 00:59:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.21 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

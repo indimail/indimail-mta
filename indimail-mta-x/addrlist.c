@@ -1,5 +1,8 @@
 /*
  * $Log: addrlist.c,v $
+ * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.2  2004-10-22 20:16:53+05:30  Cprogrammer
  * added RCS id
  *
@@ -8,15 +11,16 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "getln.h"
-#include "mess822.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <getln.h>
+#include <mess822.h>
+#include <noreturn.h>
 
 #define FATAL "addrlist: fatal: "
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
@@ -107,7 +111,7 @@ main()
 void
 getversion_addrlist_c()
 {
-	static char    *x = "$Id: addrlist.c,v 1.2 2004-10-22 20:16:53+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: addrlist.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

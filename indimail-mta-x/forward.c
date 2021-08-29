@@ -1,5 +1,8 @@
 /*
  * $Log: forward.c,v $
+ * Revision 1.15  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.14  2021-07-05 21:10:35+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -38,24 +41,25 @@
  *
  */
 #include <unistd.h>
-#include "envdir.h"
-#include "pathexec.h"
-#include "sig.h"
-#include "env.h"
-#include "qmail.h"
-#include "strerr.h"
-#include "substdio.h"
-#include "fmt.h"
+#include <envdir.h>
+#include <pathexec.h>
+#include <sig.h>
+#include <env.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <fmt.h>
 #ifdef HAVESRS
-#include "stralloc.h"
-#include "srs.h"
+#include <stralloc.h>
+#include <srs.h>
 #endif
+#include <noreturn.h>
+#include "qmail.h"
 #include "set_environment.h"
 
 #define FATAL "forward: fatal: "
 #define WARN  "forward: warn: "
 
-void
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
@@ -64,10 +68,7 @@ die_nomem()
 struct qmail    qqt;
 
 ssize_t
-mywrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+mywrite(int fd, char *buf, int len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
@@ -81,9 +82,7 @@ substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
 char            num[FMT_ULONG];
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *sender, *dtline, *qqeh, *qqx;
 
@@ -137,7 +136,7 @@ main(argc, argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.14 2021-07-05 21:10:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: forward.c,v 1.15 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

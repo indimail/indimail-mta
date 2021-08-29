@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.17  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.16  2021-07-05 21:27:11+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root
  *
@@ -50,54 +53,119 @@
  *
  */
 #include <unistd.h>
-#include "auto_sysconfdir.h"
-#include "env.h"
-#include "envdir.h"
-#include "pathexec.h"
-#include "sgetopt.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "str.h"
-#include "getln.h"
-#include "mess822.h"
-#include "strerr.h"
-#include "caltime.h"
-#include "leapsecs.h"
-#include "tai.h"
-#include "stralloc.h"
-#include "sconfig.h"
-#include "case.h"
-#include "constmap.h"
+#include <env.h>
+#include <envdir.h>
+#include <pathexec.h>
+#include <sgetopt.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <str.h>
+#include <getln.h>
+#include <mess822.h>
+#include <strerr.h>
+#include <caltime.h>
+#include <leapsecs.h>
+#include <tai.h>
+#include <stralloc.h>
+#include <sconfig.h>
+#include <case.h>
+#include <constmap.h>
+#include <sig.h>
+#include <rewritehost.h>
+#include <noreturn.h>
 #include "qmail.h"
-#include "sig.h"
-#include "rewritehost.h"
 #include "rwhconfig.h"
+#include "auto_sysconfdir.h"
 #include "set_environment.h"
 
 #define FATAL "new-inject: fatal: "
 #define WARN  "new-inject: warn: "
 
-void
+static config_str      qmailinject = CONFIG_STR;
+static config_str      name = CONFIG_STR;
+static config_str      user = CONFIG_STR;
+static config_str      host = CONFIG_STR;
+static config_str      suser = CONFIG_STR;
+static config_str      shost = CONFIG_STR;
+static config_str      fnmft = CONFIG_STR;
+static config_str      mft = CONFIG_STR;
+static config_str      fnrewrite = CONFIG_STR;
+static config_str      rewrite = CONFIG_STR;
+static struct constmap mapmft;
+static struct tai      start;
+static struct qmail    qq;
+static mess822_time    date;
+static stralloc idappend = { 0 };
+static stralloc tmp = { 0 };
+static stralloc tmp2 = { 0 };
+static stralloc sender = { 0 };
+static stralloc recipients = { 0 };
+static stralloc enveloperecipients = { 0 };
+static stralloc envelopesender = { 0 };
+static stralloc to = { 0 };
+static stralloc cc = { 0 };
+static stralloc bcc = { 0 };
+static stralloc nrudt = { 0 };
+static stralloc returnpath = { 0 };
+static stralloc from = { 0 };
+static stralloc headersender = { 0 };
+static stralloc replyto = { 0 };
+static stralloc mailreplyto = { 0 };
+static stralloc followupto = { 0 };
+static stralloc msgid = { 0 };
+static stralloc top = { 0 };
+static stralloc bottom = { 0 };
+static stralloc line = { 0 };
+static int      recipstrategy = 'A';
+static int      flagkillfrom = 0;
+static int      flagkillmsgid = 0;
+static int      flagkillreturnpath = 0;
+static int      flagverpmess = 0;
+static int      flagverprecip = 0;
+static int      flagqueue = 1;
+static int      flagenveloperecipients;
+static int      flagenvelopesender;
+static int      match;
+static char    *argsender = 0;
+
+static mess822_header  h = MESS822_HEADER;
+static mess822_action  a[] = {
+	{"date", 0, 0, 0, 0, &date}
+	, {"to", 0, 0, 0, &to, 0}
+	, {"cc", 0, 0, 0, &cc, 0}
+	, {"bcc", 0, 0, 0, &bcc, 0}
+	, {"apparently-to", 0, 0, 0, &bcc, 0}
+	, {"notice-requested-upon-delivery-to", 0, 0, 0, &nrudt, 0}
+	, {"from", 0, 0, 0, &from, 0}
+	, {"sender", 0, 0, 0, &headersender, 0}
+	, {"reply-to", 0, 0, 0, &replyto, 0}
+	, {"mail-reply-to", 0, 0, 0, &mailreplyto, 0}
+	, {"mail-followup-to", 0, 0, 0, &followupto, 0}
+	, {"return-path", 0, 0, 0, &returnpath, 0}
+	, {"envelope-recipients", &flagenveloperecipients, 0, 0, &enveloperecipients, 0}
+	, {"envelope-sender", &flagenvelopesender, 0, 0, &envelopesender, 0}
+	, {"message-id", 0, &msgid, 0, 0, 0}
+	, {"received", 0, &top, 0, 0, 0}
+	, {"delivered-to", 0, &top, 0, 0, 0}
+	, {"errors-to", 0, &top, 0, 0, 0}
+	, {"return-receipt-to", 0, &top, 0, 0, 0}
+	, {"resent-sender", 0, &top, 0, 0, 0}
+	, {"resent-from", 0, &top, 0, 0, 0}
+	, {"resent-reply-to", 0, &top, 0, 0, 0}
+	, {"resent-to", 0, &top, 0, 0, 0}
+	, {"resent-cc", 0, &top, 0, 0, 0}
+	, {"resent-bcc", 0, &top, 0, 0, 0}
+	, {"resent-date", 0, &top, 0, 0, 0}
+	, {"resent-message-id", 0, &top, 0, 0, 0}
+	, {"content-length", 0, 0, 0, 0, 0}
+	, {0, 0, &bottom, 0, 0, 0}
+};
+
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
-
-config_str      qmailinject = CONFIG_STR;
-config_str      name = CONFIG_STR;
-config_str      user = CONFIG_STR;
-config_str      host = CONFIG_STR;
-config_str      suser = CONFIG_STR;
-config_str      shost = CONFIG_STR;
-config_str      fnmft = CONFIG_STR;
-config_str      mft = CONFIG_STR;
-struct constmap mapmft;
-config_str      fnrewrite = CONFIG_STR;
-config_str      rewrite = CONFIG_STR;
-stralloc        idappend = { 0 };
-struct tai      start;
-stralloc        tmp = { 0 };
-stralloc        tmp2 = { 0 };
 
 void
 rewritelist(stralloc *list)
@@ -107,15 +175,6 @@ rewritelist(stralloc *list)
 	if (!stralloc_copy(list, &tmp))
 		nomem();
 }
-
-int             recipstrategy = 'A';
-int             flagkillfrom = 0;
-int             flagkillmsgid = 0;
-int             flagkillreturnpath = 0;
-int             flagverpmess = 0;
-int             flagverprecip = 0;
-stralloc        sender = { 0 };
-stralloc        recipients = { 0 };
 
 void
 recipient_add(char *addr)
@@ -156,9 +215,6 @@ sender_get(stralloc *list)
 	}
 }
 
-int             flagqueue = 1;
-struct qmail    qq;
-
 void
 myput(char *buf, int len)
 {
@@ -184,58 +240,6 @@ putlist(char *name_t, stralloc *list)
 		nomem();
 	myput(tmp2.s, tmp2.len);
 }
-
-mess822_time    date;
-stralloc        enveloperecipients = { 0 };
-int             flagenveloperecipients;
-stralloc        envelopesender = { 0 };
-int             flagenvelopesender;
-stralloc        to = { 0 };
-stralloc        cc = { 0 };
-stralloc        bcc = { 0 };
-stralloc        nrudt = { 0 };
-stralloc        returnpath = { 0 };
-stralloc        from = { 0 };
-stralloc        headersender = { 0 };
-stralloc        replyto = { 0 };
-stralloc        mailreplyto = { 0 };
-stralloc        followupto = { 0 };
-stralloc        msgid = { 0 };
-stralloc        top = { 0 };
-stralloc        bottom = { 0 };
-
-mess822_header  h = MESS822_HEADER;
-mess822_action  a[] = {
-	{"date", 0, 0, 0, 0, &date}
-	, {"to", 0, 0, 0, &to, 0}
-	, {"cc", 0, 0, 0, &cc, 0}
-	, {"bcc", 0, 0, 0, &bcc, 0}
-	, {"apparently-to", 0, 0, 0, &bcc, 0}
-	, {"notice-requested-upon-delivery-to", 0, 0, 0, &nrudt, 0}
-	, {"from", 0, 0, 0, &from, 0}
-	, {"sender", 0, 0, 0, &headersender, 0}
-	, {"reply-to", 0, 0, 0, &replyto, 0}
-	, {"mail-reply-to", 0, 0, 0, &mailreplyto, 0}
-	, {"mail-followup-to", 0, 0, 0, &followupto, 0}
-	, {"return-path", 0, 0, 0, &returnpath, 0}
-	, {"envelope-recipients", &flagenveloperecipients, 0, 0, &enveloperecipients, 0}
-	, {"envelope-sender", &flagenvelopesender, 0, 0, &envelopesender, 0}
-	, {"message-id", 0, &msgid, 0, 0, 0}
-	, {"received", 0, &top, 0, 0, 0}
-	, {"delivered-to", 0, &top, 0, 0, 0}
-	, {"errors-to", 0, &top, 0, 0, 0}
-	, {"return-receipt-to", 0, &top, 0, 0, 0}
-	, {"resent-sender", 0, &top, 0, 0, 0}
-	, {"resent-from", 0, &top, 0, 0, 0}
-	, {"resent-reply-to", 0, &top, 0, 0, 0}
-	, {"resent-to", 0, &top, 0, 0, 0}
-	, {"resent-cc", 0, &top, 0, 0, 0}
-	, {"resent-bcc", 0, &top, 0, 0, 0}
-	, {"resent-date", 0, &top, 0, 0, 0}
-	, {"resent-message-id", 0, &top, 0, 0, 0}
-	, {"content-length", 0, 0, 0, 0, 0}
-	, {0, 0, &bottom, 0, 0, 0}
-};
 
 void
 envelope_make()
@@ -408,7 +412,7 @@ finishheader()
 	myput(bottom.s, bottom.len);
 }
 
-void
+no_return void
 finishmessage()
 {
 	char           *qqx;
@@ -431,10 +435,6 @@ finishmessage()
 	}
 	_exit(0);
 }
-
-char           *argsender = 0;
-stralloc        line = { 0 };
-int             match;
 
 int
 main(int argc, char **argv)
@@ -626,7 +626,7 @@ main(int argc, char **argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.16 2021-07-05 21:27:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.17 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qbase64.c,v $
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.7  2010-03-03 11:00:41+05:30  Cprogrammer
  * remove newline
  *
@@ -14,17 +17,18 @@
  *
  */
 #include <unistd.h>
-#include "stralloc.h"
-#include "base64.h"
-#include "getln.h"
-#include "sgetopt.h"
-#include "error.h"
+#include <stralloc.h>
+#include <base64.h>
+#include <getln.h>
+#include <sgetopt.h>
+#include <error.h>
+#include <noreturn.h>
 
 static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
@@ -43,13 +47,12 @@ logerrf(char *s)
 		_exit(1);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
-	if (s2)
-	{
+	if (s2) {
 		logerr(s2);
 		logerr(": ");
 	}
@@ -99,7 +102,7 @@ main(int argc, char **argv)
 void
 getversion_qbase64_c()
 {
-	static char    *x = "$Id: qbase64.c,v 1.7 2010-03-03 11:00:41+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qbase64.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newu.c,v $
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.11  2021-06-15 11:57:21+05:30  Cprogrammer
  * moved cdbmss.h to libqmail
  *
@@ -38,17 +41,18 @@
 #include <open.h>
 #include <error.h>
 #include <case.h>
+#include <noreturn.h>
 #include "auto_assign.h"
 
 int             rename(const char *, const char *);
 
-void
+no_return void
 die_temp()
 {
 	_exit(111);
 }
 
-void
+no_return void
 die_chdir(char *home)
 {
 	substdio_puts(subfderr, "qmail-newu: fatal: unable to chdir to ");
@@ -57,76 +61,64 @@ die_chdir(char *home)
 	die_temp();
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_putsflush(subfderr, "qmail-newu: fatal: out of memory\n");
 	die_temp();
 }
 
-void
+no_return void
 die_opena()
 {
 	substdio_putsflush(subfderr, "qmail-newu: fatal: unable to open users/assign\n");
 	die_temp();
 }
 
-void
+no_return void
 die_reada()
 {
 	substdio_putsflush(subfderr, "qmail-newu: fatal: unable to read users/assign\n");
 	die_temp();
 }
 
-void
+no_return void
 die_format()
 {
 	substdio_putsflush(subfderr, "qmail-newu: fatal: bad format in users/assign\n");
 	die_temp();
 }
 
-void
+no_return void
 die_opent()
 {
 	substdio_putsflush(subfderr, "qmail-newu: fatal: unable to open users/cdb.tmp\n");
 	die_temp();
 }
 
-void
+no_return void
 die_writet()
 {
 	substdio_putsflush(subfderr, "qmail-newu: fatal: unable to write users/cdb.tmp\n");
 	die_temp();
 }
 
-void
+no_return void
 die_rename()
 {
 	substdio_putsflush(subfderr, "qmail-newu: fatal: unable to move users/cdb.tmp to users/cdb\n");
 	die_temp();
 }
 
-struct cdbmss   cdbmss;
-stralloc        key = { 0 };
-stralloc        data = { 0 };
-
-char            inbuf[1024];
-substdio        ssin;
-
-int             fd;
-int             fdtemp;
-
-stralloc        line = { 0 };
-int             match;
-
-stralloc        wildchars = { 0 };
-
 int
 main(int argc, char **argv)
 {
-	int             i;
-	int             numcolons;
+	int             i, numcolons, fd, fdtemp, match;
 	char           *assigndir;
+	struct cdbmss   cdbmss;
+	stralloc        key = { 0 }, data = { 0 }, line = { 0 }, wildchars = { 0 };
+	char            inbuf[1024];
+	substdio        ssin;
 
 	assigndir = (assigndir = env_get("ASSIGNDIR")) ? assigndir : auto_assign;
 	if (chdir(argc == 1 ? assigndir : argv[1]) == -1)
@@ -214,7 +206,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	static char    *x = "$Id: qmail-newu.c,v 1.11 2021-06-15 11:57:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newu.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: whois.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2018-05-30 12:10:23+05:30  Cprogrammer
  * fixed newline getting appended to whois server variable
  *
@@ -22,19 +25,22 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include "subfd.h"
-#include "sgetopt.h"
-#include "strerr.h"
-#include "str.h"
+#include <subfd.h>
+#include <sgetopt.h>
+#include <strerr.h>
+#include <str.h>
+#include <stralloc.h>
+#include <noreturn.h>
 #include "tcpopen.h"
-#include "stralloc.h"
 
 #define FATAL "whois: fatal: "
 
-int     verbose;
-
 int		get_whois_data(char *);
 int		whois_query(char *, char *, stralloc *);
+
+static int      verbose;
+static stralloc whois_server = {0}, response_1 = {0},
+				response_2 = {0}, message = {0};
 
 void
 out(char *str)
@@ -54,7 +60,7 @@ flush()
 	return;
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_flush(subfdout);
@@ -102,13 +108,11 @@ main(int argc, char **argv)
 	return (get_whois_data(arg));
 }
 
-stralloc whois_server = {0};
-
 char *
 str_whois(char *resp, int resp_len)
 {
-	char		*pch, *wch;
-	int          len;
+	char		   *pch, *wch;
+	int             len;
 
 	whois_server.len = 0;
 	if ((pch = strstr(resp, "whois."))) {
@@ -128,8 +132,6 @@ str_whois(char *resp, int resp_len)
 /*
  * Get the whois data of a domain
  */
-stralloc response_1 = {0}, response_2 = {0};
-
 int
 get_whois_data(char *domain)
 {
@@ -217,8 +219,6 @@ get_whois_data(char *domain)
 /*
  * Perform a whois query to a server and record the response
  */
-stralloc        message = {0};
-
 int
 whois_query(char *server, char *query, stralloc *response)
 {
@@ -255,7 +255,7 @@ whois_query(char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	static char    *x = "$Id: whois.c,v 1.3 2018-05-30 12:10:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: whois.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

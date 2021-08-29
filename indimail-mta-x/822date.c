@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.9  2021-06-13 17:27:04+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
@@ -39,11 +42,12 @@
 #include "leapsecs.h"
 #include "caltime.h"
 #include "tai.h"
+#include "noreturn.h"
 #include "auto_sysconfdir.h"
 
 #define FATAL "822date: fatal: "
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
@@ -123,7 +127,7 @@ main(argc, argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.9 2021-06-13 17:27:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

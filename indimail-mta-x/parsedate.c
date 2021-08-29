@@ -1,5 +1,8 @@
 /*
  * $Log: parsedate.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2021-06-13 17:28:51+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
@@ -17,40 +20,38 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "getln.h"
-#include "mess822.h"
-#include "leapsecs.h"
-#include "caltime.h"
-#include "tai.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <getln.h>
+#include <mess822.h>
+#include <leapsecs.h>
+#include <caltime.h>
+#include <tai.h>
+#include <noreturn.h>
 #include "auto_sysconfdir.h"
 
 #define FATAL "parsedate: fatal: "
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-stralloc        line = { 0 };
-int             match;
-
-mess822_time    t;
-struct tai      sec;
 
 int
 main()
 {
-	int             i;
+	int             i, match;
+	struct tai      sec;
+	stralloc        line = { 0 };
+	mess822_time    t;
 
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!line.len)
@@ -68,8 +69,7 @@ main()
 		if (!mess822_when(&t, line.s))
 			nomem();
 
-		if (t.known)
-		{
+		if (t.known) {
 			if (!stralloc_ready(&line, caltime_fmt((char *) 0, &t.ct)))
 				nomem();
 			substdio_put(subfdoutsmall, line.s, caltime_fmt(line.s, &t.ct));
@@ -97,7 +97,7 @@ main()
 void
 getversion_parsedate_c()
 {
-	static char    *x = "$Id: parsedate.c,v 1.5 2021-06-13 17:28:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: parsedate.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

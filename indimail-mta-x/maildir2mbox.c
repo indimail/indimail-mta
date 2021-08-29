@@ -1,5 +1,8 @@
 /*
  * $Log: maildir2mbox.c,v $
+ * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.8  2021-06-03 18:12:04+05:30  Cprogrammer
  * use new prioq functions
  *
@@ -19,37 +22,38 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "prioq.h"
-#include "env.h"
-#include "stralloc.h"
-#include "subfd.h"
-#include "substdio.h"
-#include "getln.h"
-#include "error.h"
-#include "open.h"
-#include "lock.h"
-#include "gfrom.h"
-#include "str.h"
-#include "qtime.h"
+#include <env.h>
+#include <stralloc.h>
+#include <subfd.h>
+#include <substdio.h>
+#include <getln.h>
+#include <error.h>
+#include <open.h>
+#include <lock.h>
+#include <str.h>
+#include <qtime.h>
+#include <strerr.h>
+#include <noreturn.h>
 #include "maildir.h"
+#include "prioq.h"
+#include "gfrom.h"
+
+#define FATAL   "maildir2mbox: fatal: "
+#define WARNING "maildir2mbox: warning: "
 
 int             rename(const char *, const char *);
 
-char           *mbox;
-char           *mboxtmp;
+static char    *mbox;
+static char    *mboxtmp;
+static char     inbuf[SUBSTDIO_INSIZE];
+static char     outbuf[SUBSTDIO_OUTSIZE];
+static stralloc filenames = { 0 };
+static stralloc line = { 0 };
+static stralloc ufline = { 0 };
+static prioq    pq = { 0 };
+static prioq    pq2 = { 0 };
 
-stralloc        filenames = { 0 };
-prioq           pq = { 0 };
-prioq           pq2 = { 0 };
-stralloc        line = { 0 };
-stralloc        ufline = { 0 };
-char            inbuf[SUBSTDIO_INSIZE];
-char            outbuf[SUBSTDIO_OUTSIZE];
-
-#define FATAL "maildir2mbox: fatal: "
-#define WARNING "maildir2mbox: warning: "
-
-void
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
@@ -170,7 +174,7 @@ main()
 void
 getversion_maildir2mbox_c()
 {
-	static char    *x = "$Id: maildir2mbox.c,v 1.8 2021-06-03 18:12:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir2mbox.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

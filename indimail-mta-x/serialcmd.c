@@ -1,5 +1,8 @@
 /*
  * $Log: serialcmd.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2021-07-05 21:24:39+05:30  Cprogrammer
  * use qgetpw interface from libqmail if USE_QPWGR is set
  *
@@ -39,88 +42,82 @@
 #include <byte.h>
 #include <env.h>
 #include <qgetpwgr.h>
+#include <noreturn.h>
 #include "quote.h"
 
 #define FATAL "serialcmd: fatal: "
 
 static int      use_pwgr;
+static stralloc line = { 0 };
+static stralloc quosender = { 0 };
+static stralloc recipient = { 0 };
+static stralloc sender = { 0 };
 
-void
+no_return void
 die_usage()
 {
 	strerr_die1x(100, "serialcmd: usage: serialcmd prefix command");
 }
 
-void
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_nohomedir()
 {
 	strerr_die2x(111, FATAL, "no home directory");
 }
 
-void
+no_return void
 die_nousername()
 {
 	strerr_die2x(111, FATAL, "no user name");
 }
 
-void
+no_return void
 die_badexit()
 {
 	strerr_die2x(111, FATAL, "child exited abnormally");
 }
 
-void
+no_return void
 die_output()
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
 }
 
-void
+no_return void
 die_readmess()
 {
 	strerr_die2sys(111, FATAL, "unable to read file: ");
 }
 
-void
+no_return void
 die_openmess()
 {
 	strerr_die2sys(111, FATAL, "unable to open file: ");
 }
 
-void
+no_return void
 die_statmess()
 {
 	strerr_die2sys(111, FATAL, "unable to stat file: ");
 }
 
-void
+no_return void
 die_readstdin()
 {
 	strerr_die2sys(111, FATAL, "unable to read stdin: ");
 }
 
-char           *prefix;
-
-stralloc        line = { 0 };
-stralloc        quorecip = { 0 };
-stralloc        quosender = { 0 };
-stralloc        recipient = { 0 };
-stralloc        sender = { 0 };
-
 void
-result(fnam, code, statmsg)
-	stralloc        fnam;
-	int             code;
-	char           *statmsg;
+result(stralloc *fnam, int code, char *statmsg)
 {
 
-	if (!stralloc_copyb(&line, fnam.s, fnam.len))
+	if (!stralloc_copyb(&line, fnam->s, fnam->len))
 		die_nomem();
 	switch (code)
 	{
@@ -251,7 +248,7 @@ makeenv(void)
 }
 
 void
-runcmd(char **cmd, int fd, stralloc fnam)
+runcmd(char **cmd, int fd, stralloc *fnam)
 {
 	int             pid;
 	int             pipedesc[2];
@@ -263,8 +260,7 @@ runcmd(char **cmd, int fd, stralloc fnam)
 	if (status == -1)
 		strerr_die2sys(111, FATAL, "unable to open pipe: ");
 	lseek(fd, (off_t) 0, SEEK_SET);
-	pid = fork();
-	if (pid == -1)
+	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	if (pid == 0) {
 		if (dup2(fd, 0) == -1)
@@ -305,10 +301,7 @@ runcmd(char **cmd, int fd, stralloc fnam)
 }
 
 void
-doit(fd, argv, fnam)
-	int             fd;
-	char           *argv[];
-	stralloc        fnam;
+doit(int fd, char **argv, stralloc *fnam)
 {
 	char            messbuf[4096];
 	substdio        ssmess;
@@ -411,11 +404,10 @@ main(int argc, char *argv[])
 		die_readstdin();
 	if (!match)
 		die_readstdin();
-	fd = open_read(fname.s);
-	if (fd == -1)
+	if ((fd = open_read(fname.s)) == -1)
 		die_openmess();
 
-	doit(fd, argv, fname);
+	doit(fd, argv, &fname);
 	/*- Not reached */
 	return(0);
 }
@@ -423,7 +415,7 @@ main(int argc, char *argv[])
 void
 getversion_serialcmd_c()
 {
-	static char    *x = "$Id: serialcmd.c,v 1.5 2021-07-05 21:24:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialcmd.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

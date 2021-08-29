@@ -1,5 +1,8 @@
 /*
  * $Log: preline.c,v $
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.9  2020-11-24 13:46:31+05:30  Cprogrammer
  * removed exit.h
  *
@@ -18,40 +21,37 @@
  *
  */
 #include <unistd.h>
-#include "fd.h"
-#include "sgetopt.h"
-#include "strerr.h"
-#include "substdio.h"
-#include "wait.h"
-#include "env.h"
-#include "sig.h"
-#include "error.h"
+#include <fd.h>
+#include <sgetopt.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <wait.h>
+#include <env.h>
+#include <sig.h>
+#include <error.h>
+#include <noreturn.h>
 
 #define FATAL "preline: fatal: "
 
-void
+no_return void
 die_usage()
 {
 	strerr_die1x(100, "preline: usage: preline cmd [ arg ... ]");
 }
 
-int             flagufline = 1, flagrpline = 1, flagdtline = 1, flagqqeh = 1;
-char           *ufline, *rpline, *dtline, *qqeh;
-
-char            outbuf[SUBSTDIO_OUTSIZE];
-char            inbuf[SUBSTDIO_INSIZE];
-substdio        ssout = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
 
 int
 main(argc, argv)
 	int             argc;
 	char          **argv;
 {
-	int             opt;
 	int             pi[2];
-	int             pid;
-	int             wstat;
+	int             flagufline = 1, flagrpline = 1, flagdtline = 1,
+					flagqqeh = 1, opt, pid, wstat;
+	char           *ufline, *rpline, *dtline, *qqeh;
+	char            outbuf[SUBSTDIO_OUTSIZE], inbuf[SUBSTDIO_INSIZE];
+	substdio        ssout = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
+	substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
 
 	sig_pipeignore();
 
@@ -61,8 +61,7 @@ main(argc, argv)
 		die_usage();
 	if (!(dtline = env_get("DTLINE")))
 		die_usage();
-	while ((opt = getopt(argc, argv, "frde")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "frde")) != opteof) {
 		switch (opt)
 		{
 		case 'f':
@@ -90,8 +89,7 @@ main(argc, argv)
 	pid = fork();
 	if (pid == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
-	if (pid == 0)
-	{
+	if (pid == 0) {
 		close(pi[1]);
 		if (fd_move(0, pi[0]) == -1)
 			strerr_die2sys(111, FATAL, "unable to set up fds: ");
@@ -128,7 +126,7 @@ main(argc, argv)
 void
 getversion_preline_c()
 {
-	static char    *x = "$Id: preline.c,v 1.9 2020-11-24 13:46:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: preline.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
