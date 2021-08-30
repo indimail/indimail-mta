@@ -1,5 +1,8 @@
 /*
  * $Log: envuidgid.c,v $
+ * Revision 1.4  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2010-06-08 21:58:33+05:30  Cprogrammer
  * pathexec now returns allocated environment on failure which should be freed
  *
@@ -12,28 +15,28 @@
  */
 #include <sys/types.h>
 #include <pwd.h>
-#include "fmt.h"
-#include "error.h"
-#include "alloc.h"
-#include "strerr.h"
-#include "pathexec.h"
+#include <fmt.h>
+#include <error.h>
+#include <alloc.h>
+#include <strerr.h>
+#include <pathexec.h>
+#include <noreturn.h>
 
 #define FATAL "envuidgid: fatal: "
 
-void
+no_return void
 nomem(void)
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-char            strnum[FMT_ULONG];
-char           *account;
-struct passwd  *pw;
-
 int
 main(int argc, char **argv)
 {
 	char          **e;
+	char            strnum[FMT_ULONG];
+	char           *account;
+	struct passwd  *pw;
 	int             tmperrno;
 
 	account = *++argv;
@@ -61,7 +64,7 @@ main(int argc, char **argv)
 void
 getversion_envuidgid_c()
 {
-	static char    *x = "$Id: envuidgid.c,v 1.3 2010-06-08 21:58:33+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: envuidgid.c,v 1.4 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

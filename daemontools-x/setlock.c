@@ -1,5 +1,8 @@
 /*
  * $Log: setlock.c,v $
+ * Revision 1.3  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.2  2004-10-22 20:30:16+05:30  Cprogrammer
  * added RCS id
  *
@@ -8,32 +11,28 @@
  *
  */
 #include <unistd.h>
-#include "lock.h"
-#include "open.h"
-#include "strerr.h"
-#include "pathexec.h"
-#include "sgetopt.h"
+#include <lock.h>
+#include <open.h>
+#include <strerr.h>
+#include <pathexec.h>
+#include <sgetopt.h>
+#include <noreturn.h>
 
 #define FATAL "setlock: fatal: "
 
-void
+no_return void
 usage()
 {
 	strerr_die1x(100, "setlock: usage: setlock [ -nNxX ] file program [ arg ... ]");
 }
 
-int             flagndelay = 0;
-int             flagx = 0;
-
 int
 main(int argc, char **argv, char **envp)
 {
-	int             opt;
-	int             fd;
+	int             opt, fd, flagndelay = 0, flagx = 0;
 	char           *file;
 
-	while ((opt = getopt(argc, argv, "nNxX")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "nNxX")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -79,7 +78,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setlock_c()
 {
-	static char    *x = "$Id: setlock.c,v 1.2 2004-10-22 20:30:16+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setlock.c,v 1.3 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: teepipe.c,v $
+ * Revision 1.5  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2020-09-16 19:08:05+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -36,8 +39,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <noreturn.h>
 
-void
+no_return void
 err(const char *msg)
 {
 	if (write(2, "teepipe: Error: ", 16) == -1 
@@ -47,7 +51,7 @@ err(const char *msg)
 	exit(1);
 }
 
-void
+no_return void
 err2(const char *msg1, const char *msg2)
 {
 	if (write(2, "teepipe: Error: ", 16) == -1
@@ -75,7 +79,7 @@ main_loop(int fd)
 	}
 }
 
-void
+no_return void
 exec_child(char **argv, int fd[2])
 {
 	if (close(fd[1]) || close(0) || dup2(fd[0], 0) || close(fd[0]))
@@ -96,8 +100,7 @@ main(int argc, char **argv)
 		err("usage: teepipe program [args ...]");
 	if (pipe(fd) == -1)
 		err("Could not create pipe");
-	pid = fork();
-	if (pid == -1)
+	if ((pid = fork()) == -1)
 		err("Could not fork");
 	if (!pid)
 		exec_child(argv + 1, fd);
@@ -115,7 +118,7 @@ main(int argc, char **argv)
 void
 getversion_teepipe_c()
 {
-	static char    *x = "$Id: teepipe.c,v 1.4 2020-09-16 19:08:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: teepipe.c,v 1.5 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

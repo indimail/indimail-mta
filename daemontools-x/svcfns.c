@@ -1,5 +1,8 @@
 /*
  * $Log: svcfns.c,v $
+ * Revision 1.4  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2005-08-23 17:39:17+05:30  Cprogrammer
  * gcc 4 compliance
  *
@@ -32,20 +35,19 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <noreturn.h>
 #include "bool.h"
 #include "svcfns.h"
 
-void
+no_return void
 exec_supervise(const char *dir, int fdin, int fdout)
 {
-	if (fdin != FD_STDIN)
-	{
+	if (fdin != FD_STDIN) {
 		close(FD_STDIN);
 		dup2(fdin, FD_STDIN);
 		close(fdin);
 	}
-	if (fdout != FD_STDOUT)
-	{
+	if (fdout != FD_STDOUT) {
 		close(FD_STDOUT);
 		dup2(fdout, FD_STDOUT);
 		close(fdout);
@@ -127,7 +129,7 @@ stop_supervise(const char *dir, pid_t svcpid)
 void
 getversion_svcfns_c()
 {
-	static char    *x = "$Id: svcfns.c,v 1.3 2005-08-23 17:39:17+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: svcfns.c,v 1.4 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

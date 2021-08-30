@@ -1,5 +1,8 @@
 /*
  * $Log: spipe.c,v $
+ * Revision 1.5  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2020-09-16 19:07:34+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -38,6 +41,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <noreturn.h>
 #include "bool.h"
 #include "svcfns.h"
 
@@ -54,7 +58,7 @@ err(const char *msg)
 	fputc('\n', stderr);
 }
 
-void
+no_return void
 die(const char *msg)
 {
 	err(msg);
@@ -67,7 +71,7 @@ is_pipe(const char *p)
 	return p[0] == '|' && p[1] == 0;
 }
 
-void
+no_return void
 usage(const char *msg)
 {
 	if (msg)
@@ -136,7 +140,7 @@ handle_intr(int sig)
 		;
 }
 
-void
+no_return void
 mainloop()
 {
 	char            buf[1];
@@ -161,7 +165,7 @@ main(int argc, char **argv)
 void
 getversion_spipe_c()
 {
-	static char    *x = "$Id: spipe.c,v 1.4 2020-09-16 19:07:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spipe.c,v 1.5 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

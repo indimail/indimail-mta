@@ -1,5 +1,8 @@
 /*
  * $Log: envdir.c,v $
+ * Revision 1.7  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.6  2021-07-14 19:28:02+05:30  Cprogrammer
  * added options i, w to ignore read errors and warn instead of exit on error
  *
@@ -27,13 +30,14 @@
 #include <alloc.h>
 #include <env.h>
 #include <pathexec.h>
+#include <noreturn.h>
 
 #define FATAL "envdir: fatal: "
 #define WARN  "envdir: warn: "
 
 static char   **orig_env;
 
-void
+no_return void
 die_usage(char *str)
 {
 	if (str)
@@ -96,7 +100,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_main_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.6 2021-07-14 19:28:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envdir.c,v 1.7 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
