@@ -1,5 +1,8 @@
 /*
  * $Log: softlimit.c,v $
+ * Revision 1.3  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.2  2004-10-22 20:30:29+05:30  Cprogrammer
  * added RCS id
  *
@@ -11,15 +14,16 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#include "pathexec.h"
-#include "sgetopt.h"
-#include "strerr.h"
-#include "scan.h"
-#include "str.h"
+#include <pathexec.h>
+#include <sgetopt.h>
+#include <strerr.h>
+#include <scan.h>
+#include <str.h>
+#include <noreturn.h>
 
 #define FATAL "softlimit: fatal: "
 
-void
+no_return void
 die_usage(void)
 {
 	strerr_die1x(100,
@@ -37,8 +41,7 @@ doit(int resource, char *arg)
 
 	if (str_equal(arg, "="))
 		r.rlim_cur = r.rlim_max;
-	else
-	{
+	else {
 		if (arg[scan_ulong(arg, &u)])
 			die_usage();
 		r.rlim_cur = u;
@@ -148,7 +151,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_softlimit_c()
 {
-	static char    *x = "$Id: softlimit.c,v 1.2 2004-10-22 20:30:29+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: softlimit.c,v 1.3 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

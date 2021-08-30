@@ -1,5 +1,8 @@
 /*
  * $Log: qfilelog.c,v $
+ * Revision 1.5  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2020-09-16 19:03:09+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -19,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <noreturn.h>
 
 #define PAUSE sleep(60)
 
@@ -47,7 +51,7 @@ warn(const char *m)
 	errmsg(".\n");
 }
 
-void
+no_return void
 fatal(const char *m)
 {
 	errmsg("qfilelog: fatal error: ");
@@ -113,13 +117,12 @@ do_open(void)
 	while (fd == -1);
 }
 
-void
+no_return void
 loop(void)
 {
 	ssize_t         rd;
 	for (;;) {
-		rd = do_read();
-		if (rd)
+		if ((rd = do_read()))
 			do_write(rd);
 	}
 }
@@ -132,7 +135,7 @@ catch_hup(int flag)
 	do_open();
 }
 
-void
+no_return void
 catch_int(int flag)
 {
 	do_close();
@@ -153,13 +156,12 @@ main(int argc, char *argv[])
 	fd = -1;
 	do_open();
 	loop();
-	return 0;	/*- Never reached!  */
 }
 
 void
 getversion_qfilelog_c()
 {
-	static char    *x = "$Id: qfilelog.c,v 1.4 2020-09-16 19:03:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qfilelog.c,v 1.5 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

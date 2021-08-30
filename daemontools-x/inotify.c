@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.10  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.9  2021-05-16 01:42:32+05:30  Cprogrammer
  * display full path of directory
  *
@@ -43,6 +46,7 @@
 #include <error.h>
 #include <fmt.h>
 #include <sgetopt.h>
+#include <noreturn.h>
 
 #define EVENT_SIZE        ( sizeof (struct inotify_event) )
 #define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
@@ -68,7 +72,7 @@ out(char *str)
 	return;
 }
 
-void
+no_return void
 sigterm()
 {
 	substdio_flush(subfdout);
@@ -277,7 +281,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.9 2021-05-16 01:42:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inotify.c,v 1.10 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

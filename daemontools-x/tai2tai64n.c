@@ -3,6 +3,9 @@
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
  *
  * $Log: tai2tai64n.c,v $
+ * Revision 1.2  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.1  2016-01-02 19:21:03+05:30  Cprogrammer
  * Initial revision
  *
@@ -21,12 +24,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#include "tai2.h"
-#include "substdio.h"
-#include "getln.h"
-#include "stralloc.h"
-#include "error.h"
 #include <unistd.h>
+#include <tai2.h>
+#include <substdio.h>
+#include <getln.h>
+#include <stralloc.h>
+#include <error.h>
+#include <noreturn.h>
 
 #define READ_ERR  1
 #define WRITE_ERR 2
@@ -56,7 +60,7 @@ logerrf(char *s)
 		_exit(1);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -119,7 +123,7 @@ main(int argc, char **argv)
 void
 getversion_tai2tai64n_c()
 {
-	static char    *x = "$Id: tai2tai64n.c,v 1.1 2016-01-02 19:21:03+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tai2tai64n.c,v 1.2 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
