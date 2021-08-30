@@ -154,6 +154,10 @@ o installer can now install, uninstall and set permissions
     moved dtype enum delivery variable from variables.h to getDomainToken.h
 84. qmail-dkim.c, qmail-dk.c, dk-filter.sh: Added control file dkimkeys to
     have domain specific private key, selector
+- 30/08/2021
+85. include noreturn.h from libqmail defining macro no_return
+    use no_return macro to declare funtions that do not return back to
+    caller
 
 * 
 Release 2.13 Start 14/02/2021
