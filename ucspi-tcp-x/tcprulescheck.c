@@ -1,5 +1,8 @@
 /*
  * $Log: tcprulescheck.c,v $
+ * Revision 1.5  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2020-08-03 17:27:59+05:30  Cprogrammer
  * replaced buffer with substdio
  *
@@ -20,9 +23,10 @@
 #include <env.h>
 #include <open.h>
 #include <unistd.h>
+#include <noreturn.h>
 #include "rules.h"
 
-void
+no_return void
 found(char *data, unsigned int datalen)
 {
 	unsigned int    next0;

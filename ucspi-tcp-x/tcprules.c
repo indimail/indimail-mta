@@ -1,5 +1,8 @@
 /*
  * $Log: tcprules.c,v $
+ * Revision 1.8  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.7  2020-09-16 20:50:26+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -33,35 +36,35 @@
 #include <open.h>
 #include <scan.h>
 #include <unistd.h>
+#include <noreturn.h>
 
 #define FATAL "tcprules: fatal: "
 
-unsigned long   linenum = 0;
-char           *fntemp;
-char           *fn;
-stralloc        line = { 0 };
-stralloc        address = { 0 };
-stralloc        data = { 0 };
-stralloc        key = { 0 };
-struct cdb_make c;
+static struct cdb_make c;
+static char    *fntemp;
+static stralloc line = { 0 };
+static stralloc address = { 0 };
+static stralloc data = { 0 };
+static stralloc key = { 0 };
+static stralloc sanum = { 0 };
 
 #if defined(linux) || defined(DARWIN) || defined(FREEBSD)
 extern int      rename(const char *, const char *);
 #endif
 
-void
+no_return void
 nomem(void)
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 usage(void)
 {
 	strerr_die1x(100, "tcprules: usage: tcprules rules.cdb rules.tmp");
 }
 
-void
+no_return void
 die_bad(void)
 {
 	if (!stralloc_0(&line))
@@ -69,21 +72,17 @@ die_bad(void)
 	strerr_die3x(100, FATAL, "unable to parse this line: ", line.s);
 }
 
-void
+no_return void
 die_write(void)
 {
 	strerr_die4sys(111, FATAL, "unable to write to ", fntemp, ": ");
 }
 
-char            strnum[FMT_ULONG];
-stralloc        sanum = { 0 };
-
 void
 getnum(char *buf, int len, unsigned long *u)
 {
-	if (!stralloc_copyb(&sanum, buf, len))
-		nomem();
-	if (!stralloc_0(&sanum))
+	if (!stralloc_copyb(&sanum, buf, len) ||
+			!stralloc_0(&sanum))
 		nomem();
 	if (sanum.s[scan_ulong(sanum.s, u)])
 		die_bad();
@@ -96,6 +95,7 @@ doaddressdata(void)
 	int             left;
 	int             right;
 	unsigned long   bot;
+	char            strnum[FMT_ULONG];
 	unsigned long   top;
 
 	if (byte_chr(address.s, address.len, '=') == address.len) {
@@ -113,11 +113,9 @@ doaddressdata(void)
 				if (top > 255)
 					top = 255;
 				while (bot <= top) {
-					if (!stralloc_copyb(&key, address.s, left))
-						nomem();
-					if (!stralloc_catb(&key, strnum, fmt_ulong(strnum, bot)))
-						nomem();
-					if (!stralloc_catb(&key, address.s + right, address.len - right))
+					if (!stralloc_copyb(&key, address.s, left) ||
+							!stralloc_catb(&key, strnum, fmt_ulong(strnum, bot)) ||
+							!stralloc_catb(&key, address.s + right, address.len - right))
 						nomem();
 					if (cdb_make_add(&c, key.s, key.len, data.s, data.len) == -1)
 						die_write();
@@ -134,7 +132,7 @@ doaddressdata(void)
 int
 main(int argc, char **argv)
 {
-	char           *x;
+	char           *x, *fn;
 	char            ch;
 	int             len, fd, i, e, colon, match = 1;
 
@@ -183,9 +181,8 @@ main(int argc, char **argv)
 #endif
 		if (colon == len)
 			continue;
-		if (!stralloc_copyb(&address, x, colon))
-			nomem();
-		if (!stralloc_copys(&data, ""))
+		if (!stralloc_copyb(&address, x, colon) ||
+				!stralloc_copys(&data, ""))
 			nomem();
 		x += colon + 1;
 		len -= colon + 1;
@@ -209,19 +206,16 @@ main(int argc, char **argv)
 				if (i > e) {
 					if (e < 2 || x[1] != '!')
 						die_bad();
-					if (!stralloc_catb(&data, "-", 1))
-						nomem();
-					if (!stralloc_catb(&data, x + 2, e - 1))
-						nomem();
-					if (!stralloc_0(&data))
+					if (!stralloc_catb(&data, "-", 1) ||
+							!stralloc_catb(&data, x + 2, e - 1) ||
+							!stralloc_0(&data))
 						nomem();
 					x += e + 1;
 					len -= e + 1;
 					break;
 				}
-				if (!stralloc_catb(&data, "+", 1))
-					nomem();
-				if (!stralloc_catb(&data, x + 1, i))
+				if (!stralloc_catb(&data, "+", 1) ||
+						!stralloc_catb(&data, x + 1, i))
 					nomem();
 				x += i + 1;
 				len -= i + 1;
@@ -233,9 +227,8 @@ main(int argc, char **argv)
 				i = byte_chr(x, len, ch);
 				if (i == len)
 					die_bad();
-				if (!stralloc_catb(&data, x, i))
-					nomem();
-				if (!stralloc_0(&data))
+				if (!stralloc_catb(&data, x, i) ||
+						!stralloc_0(&data))
 					nomem();
 				x += i + 1;
 				len -= i + 1;
