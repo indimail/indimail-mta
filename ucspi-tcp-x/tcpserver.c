@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.76  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.75  2021-06-15 08:24:25+05:30  Cprogrammer
  * renamed pathexec.. functions to upathexec to avoid clash with libqmail
  *
@@ -235,6 +238,7 @@
 #include <error.h>
 #include <strerr.h>
 #include <sig.h>
+#include <noreturn.h>
 #ifdef DARWIN
 #define opteof -1
 #else
@@ -255,7 +259,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.75 2021-06-15 08:24:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.76 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -345,7 +349,7 @@ static int      flagdeny;
 static int      flagallownorules;
 static char    *fnrules;
 
-void
+no_return void
 drop_nomem(void)
 {
 	strerr_die2sys(111, DROP, "out of memory");
@@ -398,7 +402,7 @@ env(char *s, char *t)
 		drop_nomem();
 }
 
-void
+no_return void
 drop_rules(void)
 {
 	strerr_die4sys(111, DROP, "unable to read ", fnrules, ": ");
@@ -1078,7 +1082,7 @@ done:
 }
 #endif /*- #ifdef HAS_MYSQL */
 
-void
+no_return void
 usage(void)
 {
 	strerr_warn1(
@@ -1270,7 +1274,7 @@ print_ip()
 	return;
 }
 
-void
+no_return void
 sigterm()
 {
 	_exit(0);

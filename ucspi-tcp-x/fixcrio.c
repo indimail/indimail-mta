@@ -1,5 +1,8 @@
 /*
  * $Log: fixcrio.c,v $
+ * Revision 1.4  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2021-05-12 21:01:51+05:30  Cprogrammer
  * replace pathexec() with upathexec()
  *
@@ -12,28 +15,29 @@
  */
 #include <unistd.h>
 #include <signal.h>
-#include "sig.h"
-#include "strerr.h"
-#include "byte.h"
+#include <sig.h>
+#include <strerr.h>
+#include <byte.h>
+#include <fd.h>
+#include <noreturn.h>
 #include "iopause.h"
 #include "upathexec.h"
-#include "fd.h"
 
 #define FATAL "fixcrio: fatal: "
 
-char            prebuf[256];
-int             leftstatus = 0;
-char            leftbuf[512];
-int             leftlen;
-int             leftpos;
-int             leftflagcr = 0;
-int             rightstatus = 0;
-char            rightbuf[512];
-int             rightlen;
-int             rightpos;
-int             rightflagcr = 0;
+static char     prebuf[256];
+static char     leftbuf[512];
+static char     rightbuf[512];
+static int      leftstatus = 0;
+static int      leftlen;
+static int      leftpos;
+static int      leftflagcr = 0;
+static int      rightstatus = 0;
+static int      rightlen;
+static int      rightpos;
+static int      rightflagcr = 0;
 
-void
+no_return void
 doit(int fdleft, int fdright)
 {
 	struct taia     stamp;
@@ -48,33 +52,28 @@ doit(int fdleft, int fdright)
 	int             i;
 	char            ch;
 
-	for (;;)
-	{
+	for (;;) {
 		xlen = 0;
 		io0 = 0;
-		if (leftstatus == 0)
-		{
+		if (leftstatus == 0) {
 			io0 = &x[xlen++];
 			io0->fd = 0;
 			io0->events = IOPAUSE_READ;
 		}
 		ioleft = 0;
-		if (leftstatus == 1)
-		{
+		if (leftstatus == 1) {
 			ioleft = &x[xlen++];
 			ioleft->fd = fdleft;
 			ioleft->events = IOPAUSE_WRITE;
 		}
 		ioright = 0;
-		if (rightstatus == 0)
-		{
+		if (rightstatus == 0) {
 			ioright = &x[xlen++];
 			ioright->fd = fdright;
 			ioright->events = IOPAUSE_READ;
 		}
 		io1 = 0;
-		if (rightstatus == 1)
-		{
+		if (rightstatus == 1) {
 			io1 = &x[xlen++];
 			io1->fd = 1;
 			io1->events = IOPAUSE_WRITE;
@@ -83,20 +82,15 @@ doit(int fdleft, int fdright)
 		taia_uint(&deadline, 3600);
 		taia_add(&deadline, &stamp, &deadline);
 		iopause(x, xlen, &deadline, &stamp);
-		if (io0 && io0->revents)
-		{
-			r = read(0, prebuf, sizeof prebuf);
-			if (r <= 0)
-			{
+		if (io0 && io0->revents) {
+			if ((r = read(0, prebuf, sizeof prebuf)) <= 0) {
 				leftstatus = -1;
 				close(fdleft);
-			} else
-			{
+			} else {
 				leftstatus = 1;
 				leftpos = 0;
 				leftlen = 0;
-				for (i = 0; i < r; ++i)
-				{
+				for (i = 0; i < r; ++i) {
 					ch = prebuf[i];
 					if (ch == '\n')
 						if (!leftflagcr)
@@ -106,25 +100,20 @@ doit(int fdleft, int fdright)
 				}
 			}
 		}
-		if (ioleft && ioleft->revents)
-		{
-			r = write(fdleft, leftbuf + leftpos, leftlen - leftpos);
-			if (r == -1)
+		if (ioleft && ioleft->revents) {
+			if ((r = write(fdleft, leftbuf + leftpos, leftlen - leftpos)) == -1)
 				break;
 			leftpos += r;
 			if (leftpos == leftlen)
 				leftstatus = 0;
 		}
-		if (ioright && ioright->revents)
-		{
-			r = read(fdright, prebuf, sizeof prebuf);
-			if (r <= 0)
+		if (ioright && ioright->revents) {
+			if ((r = read(fdright, prebuf, sizeof prebuf)) <= 0)
 				break;
 			rightstatus = 1;
 			rightpos = 0;
 			rightlen = 0;
-			for (i = 0; i < r; ++i)
-			{
+			for (i = 0; i < r; ++i) {
 				ch = prebuf[i];
 				if (ch == '\n')
 					if (!rightflagcr)
@@ -133,10 +122,8 @@ doit(int fdleft, int fdright)
 				rightflagcr = (ch == '\r');
 			}
 		}
-		if (io1 && io1->revents)
-		{
-			r = write(1, rightbuf + rightpos, rightlen - rightpos);
-			if (r == -1)
+		if (io1 && io1->revents) {
+			if ((r = write(1, rightbuf + rightpos, rightlen - rightpos)) == -1)
 				break;
 			rightpos += r;
 			if (rightpos == rightlen)
@@ -183,7 +170,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fixcrio_c()
 {
-	static char    *x = "$Id: fixcrio.c,v 1.3 2021-05-12 21:01:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fixcrio.c,v 1.4 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

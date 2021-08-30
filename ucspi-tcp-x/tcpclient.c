@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.21  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.20  2021-05-12 21:04:42+05:30  Cprogrammer
  * replaced pathexec with upathexec
  *
@@ -104,22 +107,23 @@
 #include <getln.h>
 #include <ndelay.h>
 #endif
+#include <noreturn.h>
 
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.20 2021-05-12 21:04:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.21 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
 
-void
+no_return void
 nomem(void)
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 usage(void)
 {
 	strerr_die1x(100, "usage: tcpclient"
@@ -146,39 +150,39 @@ usage(void)
 	 " host port [program]");
 }
 
-int             verbosity = 1;
-int             flagdelay = 1;
-int             flagremoteinfo = 1;
-int             flagremotehost = 1;
-unsigned long   itimeout = 26;
-unsigned long   ctimeout[2] = { 2, 58 };
-unsigned long   dtimeout = 300;
+static int      verbosity = 1;
+static int      flagdelay = 1;
+static int      flagremoteinfo = 1;
+static int      flagremotehost = 1;
+static unsigned long   itimeout = 26;
+static unsigned long   ctimeout[2] = { 2, 58 };
+static unsigned long   dtimeout = 300;
 #ifdef IPV6
-int             forcev6;
-char            iplocal[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
-char            ipremote[16];
-char            ipstr[IP6_FMT];
-uint32          netif;
+static int      forcev6;
+static char     iplocal[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+static char     ipremote[16];
+static char     ipstr[IP6_FMT];
+static uint32   netif;
 #else
-char            iplocal[4] = {0, 0, 0, 0};
-char            ipremote[4];
-char            ipstr[IP4_FMT];
+static char     iplocal[4] = {0, 0, 0, 0};
+static char     ipremote[4];
+static char     ipstr[IP4_FMT];
 #endif
-uint16          portlocal;
-char           *forcelocal;
-uint16          portremote;
-char           *hostname;
+static uint16   portlocal;
+static uint16   portremote;
+static char    *forcelocal;
+static char    *hostname;
 static stralloc addresses;
 static stralloc moreaddresses;
 static stralloc tmp;
 static stralloc fqdn;
-char            strnum[FMT_ULONG], strnum2[FMT_ULONG];
-char            seed[128];
+static char     strnum[FMT_ULONG], strnum2[FMT_ULONG];
+static char     seed[128];
 #ifdef TLS
-struct stralloc certfile;
+static struct stralloc certfile;
 #endif
 
-void
+no_return void
 sigterm()
 {
 	_exit(0);

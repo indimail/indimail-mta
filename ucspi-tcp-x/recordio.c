@@ -1,5 +1,8 @@
 /*
  * $Log: recordio.c,v $
+ * Revision 1.4  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2021-05-12 21:03:45+05:30  Cprogrammer
  * replace pathexec with upathexec
  *
@@ -11,38 +14,44 @@
  *
  */
 #include <unistd.h>
-#include "sig.h"
-#include "substdio.h"
-#include "strerr.h"
-#include "str.h"
-#include "byte.h"
-#include "fmt.h"
+#include <sig.h>
+#include <substdio.h>
+#include <strerr.h>
+#include <str.h>
+#include <byte.h>
+#include <fmt.h>
+#include <fd.h>
+#include <noreturn.h>
 #include "iopause.h"
-#include "fd.h"
 #include "upathexec.h"
 
 #define FATAL "recordio: fatal: "
 
-char            pid[FMT_ULONG];
-
-char            recordbuf[512];
-substdio        ssrecord = SUBSTDIO_FDBUF(write, 2, recordbuf, sizeof recordbuf);
+static char     pid[FMT_ULONG];
+static char     recordbuf[512];
+static char     leftbuf[256];
+static char     rightbuf[256];
+static substdio ssrecord = SUBSTDIO_FDBUF(write, 2, recordbuf, sizeof recordbuf);
+static int      leftstatus = 0;
+static int      leftlen;
+static int      leftpos;
+static int      rightstatus = 0;
+static int      rightlen;
+static int      rightpos;
 
 void
 record(char *buf, int len, char *direction)	/*- 1 <= len <= 256 */
 {
 	int             i;
 
-	while (len)
-	{
+	while (len) {
 		substdio_puts(&ssrecord, pid);
 		substdio_puts(&ssrecord, direction);
 
 		i = byte_chr(buf, len, '\n');
 		substdio_put(&ssrecord, buf, i);
 
-		if (i == len)
-		{
+		if (i == len) {
 			substdio_puts(&ssrecord, "+\n");
 			substdio_flush(&ssrecord);
 			return;
@@ -55,18 +64,8 @@ record(char *buf, int len, char *direction)	/*- 1 <= len <= 256 */
 	}
 }
 
-int             leftstatus = 0;
-char            leftbuf[256];
-int             leftlen;
-int             leftpos;
-
-int             rightstatus = 0;
-char            rightbuf[256];
-int             rightlen;
-int             rightpos;
-
 /*- copy 0 -> fdleft, copy fdright -> 1 */
-void
+no_return void
 doit(int fdleft, int fdright)
 {
 	struct taia     stamp;
@@ -211,7 +210,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_recordio_c()
 {
-	static char    *x = "$Id: recordio.c,v 1.3 2021-05-12 21:03:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recordio.c,v 1.4 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.24  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.23  2021-05-12 21:03:37+05:30  Cprogrammer
  * replace pathexec with upathexec
  *
@@ -23,7 +26,7 @@
  * replace environ with envp to pass full environment variable list in tcpserver to rbl()
  *
  * Revision 1.16  2017-03-30 22:59:08+05:30  Cprogrammer
- * prefix rbl with ip6_scan(), dns_txt(), smtp_mail(), smtp_rcpt(), smtpcommands - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ * prefix ip6_scan(), dns_txt(), smtp_mail(), smtp_rcpt(), smtpcommands with rbl - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
  *
  * Revision 1.15  2017-03-01 22:52:13+05:30  Cprogrammer
  * reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as shared object
@@ -93,27 +96,28 @@
 #ifdef IPV6
 #include "ip6.h"
 #endif
+#include <noreturn.h>
 
 #define FATAL "rblsmtpd: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.23 2021-05-12 21:03:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: rblsmtpd.c,v 1.24 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-void
+no_return void
 nomem(void)
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 usage(void)
 {
 	strerr_die1x(100, "usage: rblsmtpd -r base [ -b ] [ -R ] [ -t timeout ] [ -a base ] [-W] [-w delay] smtpd [ arg ... ]");
 }
 
-char           *ip_env, *rbl_greeting, *rbl_ehlo;
-char            pid_str[FMT_ULONG] = "?PID?";
+static char    *ip_env, *rbl_greeting, *rbl_ehlo;
+static char     pid_str[FMT_ULONG] = "?PID?";
 static stralloc addr = { 0 };
 static stralloc ip_reverse;
 
@@ -497,7 +501,7 @@ greet()
 }
 
 void
-quit()
+no_return quit()
 {
   substdio_put(&out, "221 ", 4);
   substdio_puts(&out, rbl_greeting);
@@ -505,7 +509,7 @@ quit()
   _exit(0);
 }
 
-void
+no_return void
 drop()
 {
 	_exit(0);
@@ -523,7 +527,7 @@ struct commands rbl_smtpcommands[] = {
 	{0, reject, 0}
 };
 
-void
+no_return void
 rblsmtpd_f(void)
 {
 	int             i;
@@ -560,7 +564,7 @@ rblsmtpd_f(void)
 	_exit(0);
 }
 
-int
+no_return void
 rblsmtpd(int argc, char **argv, char **envp)
 {
 	int             flagwantdefaultrbl = 1;
@@ -661,15 +665,13 @@ rblsmtpd(int argc, char **argv, char **envp)
 		rblsmtpd_f();
 	upathexec_run(*argv, argv, envp);
 	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
-	/*- Not reached */
-	return (0);
 }
 
 #ifdef MAIN
 int
 main(int argc, char **argv, char **envp)
 {
-	return (rblsmtpd(argc, argv, envp));
+	rblsmtpd(argc, argv, envp);
 }
 #endif
 

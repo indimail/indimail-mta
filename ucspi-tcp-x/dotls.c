@@ -1,5 +1,8 @@
 /*
  * $Log: dotls.c,v $
+ * Revision 1.7  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.6  2021-05-12 21:01:23+05:30  Cprogrammer
  * replace pathexec() with upathexec()
  *
@@ -42,6 +45,7 @@
 #include <gen_allocdefs.h>
 #include <getln.h>
 #include <timeoutwrite.h>
+#include <noreturn.h>
 #include "upathexec.h"
 #include "tls.h"
 
@@ -49,7 +53,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.6 2021-05-12 21:01:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.7 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_bulk();
@@ -62,22 +66,22 @@ void            flush_data();
 void            flush_io();
 void            flush();
 
-struct substdio ssin, ssto, smtpin, smtpto;
-unsigned long   dtimeout = 60;
-stralloc        certfile;
-stralloc        capatext;
-stralloc        sauninit;
-stralloc        line;
-char            strnum[FMT_ULONG];
-int             linemode = 1;
 struct scommd
 {
 	char           *text;
 	int             (*fun) (char *, char *, int);
 	void            (*flush) (void);
 };
+static substdio ssin, ssto, smtpin, smtpto;
+static unsigned long   dtimeout = 60;
+static stralloc certfile;
+static stralloc capatext;
+static stralloc sauninit;
+static stralloc line;
+static char     strnum[FMT_ULONG];
+static int      linemode = 1;
 
-void
+no_return void
 usage(void)
 {
 	strerr_die1x(100, "usage: dotls"
