@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.11  2021-06-27 10:35:07+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -38,26 +41,27 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "substdio.h"
-#include "subfd.h"
-#include "sgetopt.h"
-#include "error.h"
-#include "strerr.h"
-#include "direntry.h"
+#include <time.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <sgetopt.h>
+#include <error.h>
+#include <strerr.h>
+#include <direntry.h>
+#include <wait.h>
+#include <str.h>
+#include <scan.h>
+#include <sig.h>
+#include <noreturn.h>
 #include "auto_ageout.h"
 #include "auto_uids.h"
-#include "wait.h"
-#include "str.h"
-#include "scan.h"
-#include <time.h>
-#include "sig.h"
 
 #define FATAL "cleanq: fatal: "
 #define WARNING "cleanq: warning: "
 
 static int      flaglog = 0, dir_flag = 0;
 
-void
+no_return void
 die_usage(void)
 {
 	strerr_die1x(100, "cleanq: usage: cleanq [-l] [-s interval] [directory]");
@@ -190,7 +194,7 @@ tryclean(const char *d)
 	remove_files(d);
 }
 
-void
+no_return void
 sigterm()
 {
 	if (flaglog)
@@ -270,7 +274,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.11 2021-06-27 10:35:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

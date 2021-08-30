@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.9  2021-06-27 10:37:09+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -30,16 +33,17 @@
  */
 #include <unistd.h>
 #include <dlfcn.h>
-#include "strerr.h"
-#include "env.h"
-#include "str.h"
-#include "stralloc.h"
+#include <strerr.h>
+#include <env.h>
+#include <str.h>
+#include <stralloc.h>
+#include <noreturn.h>
 #include "auto_qmail.h"
 #include "auto_uids.h"
 
 #define FATAL "qhpsi: fatal: "
 
-void
+no_return void
 nomem(int flaglog)
 {
 	if (flaglog)
@@ -136,6 +140,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.9 2021-06-27 10:37:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

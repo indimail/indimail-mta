@@ -1,5 +1,8 @@
 /*
  * $Log: spfquery.c,v $
+ * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.6  2020-11-24 13:49:42+05:30  Cprogrammer
  * removed exit.h
  *
@@ -19,25 +22,31 @@
  * Initial revision
  *
  */
-#include "substdio.h"
-#include "subfd.h"
-#include "stralloc.h"
-#include "alloc.h"
+#include <unistd.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <stralloc.h>
+#include <alloc.h>
 #include "dns.h"
+#include <noreturn.h>
 #ifdef USE_SPF
 #include "spf.h"
-#include <unistd.h>
 
-void
-die(e, s)
-	int             e;
-	char           *s;
+char           *local = "localhost";
+stralloc        addr = { 0 };
+stralloc        helohost = { 0 };
+stralloc        spflocal = { 0 };
+stralloc        spfguess = { 0 };
+stralloc        spfexp = { 0 };
+
+no_return void
+die(int e, char *s)
 {
 	substdio_putsflush(subfderr, s);
 	_exit(e);
 }
 
-void
+no_return void
 die_usage()
 {
 	die(100,
@@ -46,31 +55,20 @@ die_usage()
 		"[<local rules>] [<best guess rules>]\n");
 }
 
-void
+no_return void
 die_nomem()
 {
 	die(111, "fatal: out of memory\n");
 }
 
-stralloc        addr = { 0 };
-stralloc        helohost = { 0 };
-stralloc        spflocal = { 0 };
-stralloc        spfguess = { 0 };
-stralloc        spfexp = { 0 };
-
-char           *local = "localhost";
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	stralloc        sa = { 0 };
 	int             r;
 
 	if (argc < 4)
 		die_usage();
-
 	if (!stralloc_copys(&helohost, argv[2]))
 		die_nomem();
 	if (!stralloc_0(&helohost))
@@ -81,24 +79,21 @@ main(argc, argv)
 	if (!stralloc_0(&addr))
 		die_nomem();
 
-	if (argc > 4)
-	{
+	if (argc > 4) {
 		if (!stralloc_copys(&spflocal, argv[4]))
 			die_nomem();
 		if (spflocal.len && !stralloc_0(&spflocal))
 			die_nomem();
 	}
 
-	if (argc > 5)
-	{
+	if (argc > 5) {
 		if (!stralloc_copys(&spfguess, argv[5]))
 			die_nomem();
 		if (spfguess.len && !stralloc_0(&spfguess))
 			die_nomem();
 	}
 
-	if (argc > 6)
-	{
+	if (argc > 6) {
 		if (!stralloc_copys(&spfexp, argv[6]))
 			die_nomem();
 	} else
@@ -136,8 +131,7 @@ main(argc, argv)
 		break;
 	}
 
-	if (r == SPF_FAIL)
-	{
+	if (r == SPF_FAIL) {
 		substdio_puts(subfdout, ": ");
 		if (!spfexplanation(&sa))
 			die_nomem();
@@ -168,7 +162,7 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.6 2020-11-24 13:49:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spfquery.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

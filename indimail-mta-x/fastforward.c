@@ -1,5 +1,8 @@
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.12  2021-07-05 21:10:17+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -40,59 +43,57 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "envdir.h"
-#include "pathexec.h"
-#include "stralloc.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "open.h"
-#include "cdb.h"
-#include "str.h"
-#include "byte.h"
-#include "slurpclose.h"
-#include "strset.h"
-#include "strerr.h"
-#include "env.h"
-#include "sig.h"
+#include <envdir.h>
+#include <pathexec.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <open.h>
+#include <cdb.h>
+#include <str.h>
+#include <byte.h>
+#include <strerr.h>
+#include <env.h>
+#include <sig.h>
+#include <fmt.h>
+#include <case.h>
+#include <alloc.h>
+#include <coe.h>
+#include <seek.h>
+#include <wait.h>
+#include <sgetopt.h>
+#include <noreturn.h>
 #include "qmail.h"
-#include "fmt.h"
-#include "case.h"
-#include "alloc.h"
-#include "coe.h"
-#include "seek.h"
-#include "wait.h"
-#include "sgetopt.h"
+#include "strset.h"
+#include "slurpclose.h"
 #include "set_environment.h"
 
 #define FATAL "fastforward: fatal: "
 #define WARN  "fastforward: warn: "
 
-void
+no_return void
 usage()
 {
 	strerr_die1x(100, "fastforward: usage: fastforward [ -nNpP ] data.cdb");
 }
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
 void
-print(s)
-	char           *s;
+print(char *s)
 {
 	char            ch;
 
-	while ((ch = *s++)) {
+	while ((ch = *s++))
 		substdio_put(subfderr, &ch, 1);
-	}
 }
 
 void
-printsafe(s)
-	char           *s;
+printsafe(char *s)
 {
 	char            ch;
 
@@ -108,10 +109,7 @@ char            qp[FMT_ULONG];
 char            qqbuf[1];
 
 ssize_t
-qqwrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+qqwrite(int fd, char *buf, int len)
 {
 	qmail_put(&qq, buf, len);
 	return len;
@@ -131,8 +129,7 @@ stralloc        todo = { 0 };
 stralloc        mailinglist = { 0 };
 
 void
-dofile(fn)
-	char           *fn;
+dofile(char *fn)
 {
 	int             fd;
 	struct stat     st;
@@ -175,17 +172,14 @@ stralloc        key = { 0 };
 uint32          dlen;
 stralloc        data = { 0 };
 
-void
+no_return void
 cdbreaderror()
 {
 	strerr_die4sys(111, FATAL, "unable to read ", fncdb, ": ");
 }
 
 int
-findtarget(flagwild, prepend, addr)
-	int             flagwild;
-	char           *prepend;
-	char           *addr;
+findtarget(int flagwild, char *prepend, char *addr)
 {
 	int             r;
 	int             at;
@@ -226,10 +220,7 @@ findtarget(flagwild, prepend, addr)
 }
 
 int
-gettarget(flagwild, prepend, addr)
-	int             flagwild;
-	char           *prepend;
-	char           *addr;
+gettarget(int flagwild, char *prepend, char *addr)
 {
 	if (!findtarget(flagwild, prepend, addr))
 		return 0;
@@ -242,8 +233,7 @@ gettarget(flagwild, prepend, addr)
 }
 
 void
-doprogram(arg)
-	char           *arg;
+doprogram(char *arg)
 {
 	char           *args[5];
 	int             child;
@@ -330,8 +320,7 @@ dodata()
 }
 
 void
-dorecip(addr)
-	char           *addr;
+dorecip(char *addr)
 {
 
 	if (!findtarget(0, "?", addr) && gettarget(0, ":", addr)) {
@@ -345,8 +334,7 @@ dorecip(addr)
 }
 
 void
-doorigrecip(addr)
-	char           *addr;
+doorigrecip(char *addr)
 {
 	if (sender.len) {
 		if ((sender.len != 4) || byte_diff(sender.s, 4, "#@[]")) {
@@ -367,9 +355,7 @@ stralloc        recipient = { 0 };
 int             flagdefault = 0;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             opt, i;
 	char           *x;
@@ -512,7 +498,7 @@ main(argc, argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.12 2021-07-05 21:10:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

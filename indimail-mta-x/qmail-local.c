@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.40  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.39  2021-06-12 18:19:53+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -98,114 +101,117 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "sig.h"
-#include "env.h"
-#include "byte.h"
-#include "open.h"
-#include "wait.h"
-#include "lock.h"
-#include "seek.h"
-#include "substdio.h"
-#include "getln.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "sgetopt.h"
-#include "alloc.h"
-#include "error.h"
-#include "stralloc.h"
-#include "fmt.h"
-#include "str.h"
-#include "now.h"
-#include "case.h"
-#include "quote.h"
-#include "qmail.h"
-#include "slurpclose.h"
-#include "qtime.h"
-#include "gfrom.h"
-#include "constmap.h"
-#include "control.h"
-#include "variables.h"
+#include <sig.h>
+#include <env.h>
+#include <byte.h>
+#include <open.h>
+#include <wait.h>
+#include <lock.h>
+#include <seek.h>
+#include <substdio.h>
+#include <getln.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <sgetopt.h>
+#include <alloc.h>
+#include <error.h>
+#include <stralloc.h>
+#include <fmt.h>
+#include <str.h>
+#include <now.h>
+#include <case.h>
+#include <qtime.h>
+#include <constmap.h>
 #include "hassrs.h"
-#include "maildir_deliver.h"
-#ifdef USE_FSYNC
-#include "syncdir.h"
-#endif
 #ifdef HAVESRS
 #include "srs.h"
 #endif
+#include <noreturn.h>
+#ifdef USE_FSYNC
+#include "syncdir.h"
+#endif
+#include "quote.h"
+#include "qmail.h"
+#include "slurpclose.h"
+#include "gfrom.h"
+#include "control.h"
+#include "variables.h"
+#include "maildir_deliver.h"
 #include "auto_patrn.h"
 
-void
+static char    *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
+static char    *user, *homedir, *local, *dash, *ext, *host, *sender, *aliasempty, *qqeh;
+static char     buf[1024], outbuf[1024];
+static int      flagdoit, flag99;
+static stralloc safeext = { 0 };
+static stralloc ufline = { 0 };
+static stralloc rpline = { 0 };
+static stralloc envrecip = { 0 };
+static stralloc dtline = { 0 };
+static stralloc qme = { 0 };
+static stralloc ueo = { 0 };
+static stralloc cmds = { 0 };
+static stralloc messline = { 0 };
+static stralloc foo = { 0 };
+
+no_return void
 usage()
 {
 	strerr_die1x(100, "qmail-local: usage: qmail-local [ -nN ] user homedir local dash ext domain sender aliasempty qqeh");
 }
 
-void
+no_return void
 temp_nomem()
 {
 	strerr_die1x(111, "Out of memory. (#4.3.0)");
 }
 
-void
+no_return void
 temp_rewind()
 {
 	strerr_die1x(111, "Unable to rewind message. (#4.3.0)");
 }
 
-void
+no_return void
 temp_childcrashed()
 {
 	strerr_die1x(111, "Aack, child crashed. (#4.3.0)");
 }
 
-void
+no_return void
 temp_fork()
 {
 	strerr_die3x(111, "Unable to fork: ", error_str(errno), ". (#4.3.0)");
 }
 
-void
+no_return void
 temp_read()
 {
 	strerr_die3x(111, "Unable to read message: ", error_str(errno), ". (#4.3.0)");
 }
 
-void
+no_return void
 temp_slowlock()
 {
 	strerr_die1x(111, "File has been locked for 30 seconds straight. (#4.3.0)");
 }
 
-void
+no_return void
 temp_qmail(fn)
 	char           *fn;
 {
 	strerr_die5x(111, "Unable to open ", fn, ": ", error_str(errno), ". (#4.3.0)");
 }
 
-char           *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
-char           *user, *homedir, *local, *dash, *ext, *host, *sender, *aliasempty, *qqeh;
-char            buf[1024], outbuf[1024];
-int             flagdoit, flag99;
-stralloc        safeext = { 0 };
-stralloc        ufline = { 0 };
-stralloc        rpline = { 0 };
-stralloc        envrecip = { 0 };
-stralloc        dtline = { 0 };
-stralloc        qme = { 0 };
-stralloc        ueo = { 0 };
-stralloc        cmds = { 0 };
-stralloc        messline = { 0 };
-stralloc        foo = { 0 };
-
 #ifdef HAVESRS
-void die_control()
+no_return void
+die_control()
 {
 	strerr_die1x(111, "Unable to read controls (#4.3.0)");
 }
 
-void die_srs()
+no_return void
+die_srs()
 {
 	if (!stralloc_copys(&foo, srs_error.s)
 			|| !stralloc_cats(&foo, " (#4.3.0)")
@@ -957,7 +963,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.39 2021-06-12 18:19:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.40 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

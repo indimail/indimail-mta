@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.35  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.34  2021-07-19 07:57:58+05:30  Cprogrammer
  * fixed compiler warning on _XOPEN_SOURCE redefinition
  *
@@ -101,29 +104,30 @@
 #define _XOPEN_SOURCE
 #endif
 #include <time.h>
-#include "now.h"
-#include "sgetopt.h"
-#include "subfd.h"
-#include "mess822.h"
-#include "date822fmt.h"
-#include "getln.h"
-#include "stralloc.h"
-#include "env.h"
-#include "case.h"
-#include "auto_qmail.h"
-#include "str.h"
-#include "strerr.h"
-#include "control.h"
-#include "error.h"
-#include "alloc.h"
-#include "fmt.h"
-#include "quote.h"
-#include "byte.h"
+#include <now.h>
+#include <sgetopt.h>
+#include <subfd.h>
+#include <mess822.h>
+#include <date822fmt.h>
+#include <getln.h>
+#include <stralloc.h>
+#include <env.h>
+#include <case.h>
+#include <str.h>
+#include <strerr.h>
+#include <error.h>
+#include <alloc.h>
+#include <fmt.h>
+#include <byte.h>
+#include <tai.h>
+#include <constmap.h>
+#include <noreturn.h>
+#include "qregex.h"
 #include "ip.h"
 #include "ipme.h"
-#include "tai.h"
-#include "constmap.h"
-#include "qregex.h"
+#include "quote.h"
+#include "control.h"
+#include "auto_qmail.h"
 
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -204,7 +208,7 @@ char           *usage_str =
 	" This program must be run by qmail";
 
 /*- Ignore message and do not respond */
-void
+no_return void
 ignore(char *msg)
 {
 	if (opt_quiet)
@@ -356,7 +360,7 @@ match_addr(stralloc *addrlist, char *email_addr)
 	return(0);
 }
 
-void
+no_return void
 usage(char *msg)
 {
 	if (msg) {
@@ -1290,7 +1294,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.34 2021-07-19 07:57:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.35 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

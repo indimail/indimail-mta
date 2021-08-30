@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.11  2021-07-05 21:11:27+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -38,21 +41,22 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include "stralloc.h"
+#include <case.h>
+#include <str.h>
+#include <getln.h>
+#include <substdio.h>
+#include <datetime.h>
+#include <date822fmt.h>
+#include <mess822.h>
+#include <now.h>
+#include <env.h>
+#include <fmt.h>
+#include <error.h>
+#include <envdir.h>
+#include <pathexec.h>
+#include <strerr.h>
+#include <noreturn.h>
 #include "qmail.h"
-#include "case.h"
-#include "str.h"
-#include "getln.h"
-#include "substdio.h"
-#include "datetime.h"
-#include "date822fmt.h"
-#include "mess822.h"
-#include "now.h"
-#include "env.h"
-#include "fmt.h"
-#include "error.h"
-#include "envdir.h"
-#include "pathexec.h"
-#include "strerr.h"
 #include "sgetopt.h"
 #include "set_environment.h"
 
@@ -97,30 +101,30 @@
  *
  */
 
-char            strnum[FMT_ULONG];
+static char     strnum[FMT_ULONG];
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
+static char    *usage = "usage: qnotify [-n][-h]\n";
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: qnotify [-n][-h]\n";
-struct qmail    qqt;
-int             flagqueue = 1;
+static int      flagqueue = 1;
+static struct qmail    qqt;
 
-void
+no_return void
 die_fork()
 {
 	substdio_putsflush(&sserr, "qnotify: fatal: unable to fork\n");
 	_exit (WRITE_ERR);
 }
 
-void
+no_return void
 die_qqperm()
 {
 	substdio_putsflush(&sserr, "qnotify: fatal: permanent qmail-queue error\n");
 	_exit (100);
 }
 
-void
+no_return void
 die_qqtemp()
 {
 	substdio_putsflush(&sserr, "qnotify: fatal: temporary qmail-queue error\n");
@@ -143,7 +147,7 @@ logerrf(char *s)
 		_exit (WRITE_ERR);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -576,7 +580,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.11 2021-07-05 21:11:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

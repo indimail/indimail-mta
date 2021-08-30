@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipname.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2021-06-15 11:42:52+05:30  Cprogrammer
  * moved cdbmss.h to libqmail
  *
@@ -27,49 +30,45 @@
 #include <subfd.h>
 #include <stralloc.h>
 #include <getln.h>
+#include <noreturn.h>
 
 #define FATAL "ofmipname: fatal: "
 
-char           *fncdb;
-char           *fntmp;
 int             rename(char *, char *);
 
-void
+static char    *fncdb;
+static char    *fntmp;
+static stralloc line = { 0 };
+static stralloc key = { 0 };
+static stralloc data = { 0 };
+static struct cdbmss   cdbmss;
+
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_read()
 {
 	strerr_die2sys(111, FATAL, "unable to read input: ");
 }
 
-void
+no_return void
 die_write()
 {
 	strerr_die4sys(111, FATAL, "unable to create ", fntmp, ": ");
 }
 
-void
+no_return void
 usage()
 {
 	strerr_die1x(100, "ofmipname: usage: ofmipname cdb tmp");
 }
 
-struct cdbmss   cdbmss;
-
-stralloc        line = { 0 };
-int             match;
-
-stralloc        key = { 0 };
-stralloc        data = { 0 };
-
 void
-doit(x, len)
-	char           *x;
-	unsigned int    len;
+doit(char *x, unsigned int len)
 {
 	unsigned int    colon;
 
@@ -112,29 +111,21 @@ doit(x, len)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	int             fd;
+	int             fd, match;
 
 	umask(033);
 
-	fncdb = argv[1];
-	if (!fncdb)
+	if (!(fncdb = argv[1]))
 		usage();
-	fntmp = argv[2];
-	if (!fntmp)
+	if (!(fntmp = argv[2]))
 		usage();
-
-	fd = open_trunc(fntmp);
-	if (fd == -1)
+	if ((fd = open_trunc(fntmp)) == -1)
 		die_write();
 	if (cdbmss_start(&cdbmss, fd) == -1)
 		die_write();
-
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdin, &line, &match, '\n') == -1)
 			die_read();
 		doit(line.s, line.len);
@@ -147,10 +138,8 @@ main(argc, argv)
 	if (fsync(fd) == -1)
 		die_write();
 	if (close(fd) == -1)
-		die_write();			/*
-								 * NFS stupidity 
-								 */
-	if (rename(fntmp, fncdb) == -1)
+		die_write();		
+	if (rename(fntmp, fncdb) == -1) /*- NFS stupidity */
 		strerr_die5sys(111, FATAL, "unable to move ", fntmp, " to ", fncdb);
 	_exit(0);
 }
@@ -158,7 +147,7 @@ main(argc, argv)
 void
 getversion_ofmipname_c()
 {
-	static char    *x = "$Id: ofmipname.c,v 1.5 2021-06-15 11:42:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipname.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

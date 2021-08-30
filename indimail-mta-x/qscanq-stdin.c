@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq-stdin.c,v $
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.7  2021-06-12 19:25:48+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -35,6 +38,7 @@
 #include <sig.h>
 #include <env.h>
 #include <strerr.h>
+#include <noreturn.h>
 #include "mkfn.h"
 #include "exitcodes.h"
 #include "auto_fnlen.h"
@@ -47,20 +51,20 @@ int             do_ripmime();
 int             do_scan();
 int             do_cleanq();
 
-char            buf1[256];
-substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+static char     buf1[256];
+static substdio ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+static int      alarm_flag;
 int             flaglog = 0;
-int             alarm_flag;
-pid_t           pid;
+pid_t           cmd_pid;
 
-void
+no_return void
 die_write()
 {
 	do_cleanq();
 	_exit(53);
 }
 
-void
+no_return void
 die_read()
 {
 	do_cleanq();
@@ -81,8 +85,8 @@ err(s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
 void
 alarm_handler(int sig)
 {
-	if (pid)
-		kill(pid, SIGKILL);
+	if (cmd_pid)
+		kill(cmd_pid, SIGKILL);
 	else
 		_exit(QQ_XTEMP);
 }
@@ -96,15 +100,11 @@ alarm_handler(int sig)
 int
 main(int argc, char *argv[])
 {
-	int             fdout = -1;
-	int             n = 0;
-	char            inbuf[2048];
-	struct substdio ssin;
-	char            outbuf[256];
-	struct substdio ssout;
-	char            fn[FN_BYTES];
-	pid = 0;
+	int             fdout = -1, n = 0;
+	char            inbuf[2048], outbuf[256], fn[FN_BYTES];
+	struct substdio ssin, ssout;
 
+	cmd_pid = 0;
 	/*- Set an alarm handler */
 	alarm_flag = 0;
 	sig_alarmcatch(alarm_handler);
@@ -116,12 +116,10 @@ main(int argc, char *argv[])
 	 * Set up stdin with seekable copy of message
 	 * [ fn := timestamp.ppid.n ]
 	 */
-	for(;;)
-	{
+	for(;;) {
 		mkfn(fn, n++);
 		/*- [ stdin := copied to a file named timestamp.ppid.n in cwd ] */
-		if ((fdout = open(fn, O_RDWR|O_EXCL|O_CREAT, 0644)) < 0)
-		{
+		if ((fdout = open(fn, O_RDWR|O_EXCL|O_CREAT, 0644)) < 0) {
 			if (flaglog)
 				strerr_die2sys(QQ_XTEMP, FATAL, "could not create file 'msg': ");
 			do_cleanq();
@@ -140,13 +138,11 @@ main(int argc, char *argv[])
 		}
 		if (substdio_flush(&ssout) == -1)
 			die_write();
-		if (n == 2)
-		{
+		if (n == 2) {
 			close(fdout);
 			break;
 		}
-		if (fd_move(0, fdout) < 0)
-		{
+		if (fd_move(0, fdout) < 0) {
 			if (flaglog)
 				strerr_die2sys(QQ_XTEMP, FATAL, "fdmove failed: ");
 			do_cleanq();
@@ -159,8 +155,7 @@ main(int argc, char *argv[])
 	 * [ stdin := extracted to files under cwd ]
 	 */
 	seek_begin(0);
-	if (!do_ripmime())
-	{
+	if (!do_ripmime()) {
 		err("MIME extraction failed\n");
 		do_cleanq();
 		_exit(QQ_XREAD);
@@ -204,7 +199,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_stdin_c()
 {
-	static char    *x = "$Id: qscanq-stdin.c,v 1.7 2021-06-12 19:25:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq-stdin.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;

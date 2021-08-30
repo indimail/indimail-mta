@@ -1,5 +1,8 @@
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.1  2021-07-09 21:50:06+05:30  Cprogrammer
  * Initial revision
  *
@@ -21,6 +24,7 @@
 #include <case.h>
 #include <env.h>
 #include <now.h>
+#include <noreturn.h>
 #include "auto_qmail.h"
 #include "control.h"
 #include "received.h"
@@ -30,14 +34,35 @@
 #include "rcpthosts.h"
 
 #define MAXHOPS 100
-int             databytes = 0;
-int             timeout = 1200;
-
-ssize_t         safewrite(int, char *, int);
-ssize_t         saferead(int, char *, int);
+static int      databytes = 0;
+static int      timeout = 1200;
+static int      liphostok = 0;
+static int      seenmail = 0;
+static int      flagsize = 0;
+static stralloc greeting = { 0 };
+static stralloc helohost = { 0 };
+static stralloc liphost = { 0 };
+static stralloc addr = { 0 };	/* will be 0-terminated, if addrparse returns 1 */
+static stralloc mailfrom = { 0 };
+static stralloc rcptto = { 0 };
+static stralloc mfparms = { 0 };
+static char    *remoteip;
+static char    *remotehost;
+static char    *remoteinfo;
+static char    *local;
+static char    *relayclient;
+static char    *fakehelo;		/* pointer into helohost, or 0 */
+static char     ssinbuf[1024];
+static char     ssoutbuf[512];
+static ssize_t  safewrite(int, char *, size_t);
+static ssize_t  saferead(int, char *, size_t);
+static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
+static struct qmail    qqt;
+static unsigned int    bytestooverflow = 0;
 
 ssize_t
-safewrite(int fd, char *buf, int len)
+safewrite(int fd, char *buf, size_t len)
 {
 	ssize_t         r;
 	r = timeoutwrite(timeout, fd, buf, len);
@@ -45,9 +70,6 @@ safewrite(int fd, char *buf, int len)
 		_exit(1);
 	return r;
 }
-
-char            ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 
 void
 flush()
@@ -62,13 +84,13 @@ out(s)
 	substdio_puts(&ssout, s);
 }
 
-void
+no_return void
 die_read()
 {
 	_exit(1);
 }
 
-void
+no_return void
 die_alarm()
 {
 	out("451 timeout (#4.4.2)\r\n");
@@ -76,7 +98,7 @@ die_alarm()
 	_exit(1);
 }
 
-void
+no_return void
 die_nomem()
 {
 	out("421 out of memory (#4.3.0)\r\n");
@@ -84,7 +106,7 @@ die_nomem()
 	_exit(1);
 }
 
-void
+no_return void
 die_control()
 {
 	out("421 unable to read controls (#4.3.0)\r\n");
@@ -92,7 +114,7 @@ die_control()
 	_exit(1);
 }
 
-void
+no_return void
 die_ipme()
 {
 	out("421 unable to figure out my IP addresses (#4.3.0)\r\n");
@@ -100,7 +122,7 @@ die_ipme()
 	_exit(1);
 }
 
-void
+no_return void
 straynewline()
 {
 	out("451 See http://pobox.com/~djb/docs/smtplf.html.\r\n");
@@ -165,9 +187,6 @@ err_qqt()
 	out("451 qqt failure (#4.3.0)\r\n");
 }
 
-
-stralloc        greeting = { 0 };
-
 void
 smtp_greet(char *code)
 {
@@ -181,7 +200,7 @@ smtp_help(char *arg)
 	out("214 netqmail home page: http://qmail.org/netqmail\r\n");
 }
 
-void
+no_return void
 smtp_quit(char *arg)
 {
 	smtp_greet("221 ");
@@ -189,16 +208,6 @@ smtp_quit(char *arg)
 	flush();
 	_exit(0);
 }
-
-char           *remoteip;
-char           *remotehost;
-char           *remoteinfo;
-char           *local;
-char           *relayclient;
-
-stralloc        helohost = { 0 };
-
-char           *fakehelo;		/* pointer into helohost, or 0 */
 
 void
 dohelo(char *arg)
@@ -209,9 +218,6 @@ dohelo(char *arg)
 		die_nomem();
 	fakehelo = case_diffs(remotehost, helohost.s) ? helohost.s : 0;
 }
-
-int             liphostok = 0;
-stralloc        liphost = { 0 };
 
 void
 setup()
@@ -254,9 +260,6 @@ setup()
 	relayclient = env_get("RELAYCLIENT");
 	dohelo(remotehost);
 }
-
-
-stralloc        addr = { 0 };	/* will be 0-terminated, if addrparse returns 1 */
 
 int
 addrparse(char *arg)
@@ -348,11 +351,6 @@ addrallowed()
 	return r;
 }
 
-
-int             seenmail = 0;
-stralloc        mailfrom = { 0 };
-stralloc        rcptto = { 0 };
-
 void
 smtp_helo(char *arg)
 {
@@ -386,9 +384,6 @@ smtp_rset(char *arg)
 	seenmail = 0;
 	out("250 flushed\r\n");
 }
-
-int             flagsize = 0;
-stralloc        mfparms = { 0 };
 
 int
 mailfrom_size(char *arg)
@@ -481,9 +476,8 @@ smtp_rcpt(char *arg)
 	out("250 ok\r\n");
 }
 
-
 ssize_t
-saferead(int fd, char *buf, int len)
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
 	flush();
@@ -495,12 +489,6 @@ saferead(int fd, char *buf, int len)
 		die_read();
 	return r;
 }
-
-char            ssinbuf[1024];
-substdio        ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
-
-struct qmail    qqt;
-unsigned int    bytestooverflow = 0;
 
 void
 put(char *ch)
@@ -707,7 +695,7 @@ smtp_data(char *arg)
 	out("\r\n");
 }
 
-struct commands smtpcommands[] = {
+static struct commands smtpcommands[] = {
 	{ "rcpt", smtp_rcpt, 0 },
 	{ "mail", smtp_mail, 0 },
 	{ "data", smtp_data, flush },
@@ -743,7 +731,7 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.1 2021-07-09 21:50:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.2 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

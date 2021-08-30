@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.11  2021-05-29 23:44:46+05:30  Cprogrammer
  * replace str_chr with str_rchr to get domain correctly from email address
  *
@@ -45,16 +48,16 @@
 #include <string.h>
 #include <ldap.h>
 #include <sys/types.h>
-#include "error.h"
-#include "pathexec.h"
-#include "str.h"
-#include "env.h"
-#include "scan.h"
-/*----*/
-#include "subfd.h"
-#include "substdio.h"
-#include "strerr.h"
-#include "stralloc.h"
+#include <error.h>
+#include <pathexec.h>
+#include <str.h>
+#include <env.h>
+#include <scan.h>
+#include <subfd.h>
+#include <substdio.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <noreturn.h>
 
 /*-
  * Customise these or set these as environment variables
@@ -126,7 +129,7 @@ logerrf(char *s)
 
 static int      debug;
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -572,7 +575,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.11 2021-05-29 23:44:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

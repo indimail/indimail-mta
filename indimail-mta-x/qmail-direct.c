@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.8  2021-07-05 21:23:10+05:30  Cprogrammer
  * use qgetpw interface from libqmail if USE_QPWGR is set
  *
@@ -46,6 +49,7 @@
 #include <now.h>
 #include <date822fmt.h>
 #include <qgetpwgr.h>
+#include <noreturn.h>
 #include "pidopen.h"
 
 #define DEATH 86400				/* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
@@ -58,11 +62,13 @@ static struct substdio ssin, ssout;
 static datetime_sec starttime;
 static struct datetime dt;
 static unsigned long   mypid, myuid, messnum;
+static unsigned int    receivedlen;
 static struct stat pidst;
 static char    *messfn, *intdfn, *tmp_fn;
 static int      intdfd, mailfd, flagmademess = 0, flagmadeintd = 0;
+static char    *received;
 
-void
+no_return void
 die(int e)
 {
 	_exit(e);
@@ -78,39 +84,37 @@ cleanup()
 	}
 }
 
-void
+no_return void
 die_write()
 {
 	die(53);
 }
 
-void
+no_return void
 die_read()
 {
 	die(54);
 }
 
-void
+no_return void
 die_nomem()
 {
 	cleanup();
 	die(51);
 }
 
-void
+no_return void
 sigalrm()
 {								/* thou shalt not clean up here */
 	die(52);
 }
 
-void
+no_return void
 sigbug()
 {
 	die(81);
 }
 
-unsigned int    receivedlen;
-char           *received;
 /*
  * "Received: (qmail-queue invoked by alias); 26 Sep 1995 04:46:54 -0000\n" 
  */
@@ -479,7 +483,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.8 2021-07-05 21:23:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)

@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.11  2021-07-05 21:11:41+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -38,27 +41,28 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "alloc.h"
-#include "envdir.h"
-#include "stralloc.h"
-#include "byte.h"
-#include "strerr.h"
-#include "error.h"
-#include "qmail.h"
-#include "env.h"
-#include "sig.h"
-#include "open.h"
-#include "getln.h"
-#include "case.h"
-#include "scan.h"
-#include "str.h"
-#include "fmt.h"
-#include "substdio.h"
+#include <alloc.h>
+#include <envdir.h>
+#include <stralloc.h>
+#include <byte.h>
+#include <strerr.h>
+#include <error.h>
+#include <env.h>
+#include <sig.h>
+#include <open.h>
+#include <getln.h>
+#include <case.h>
+#include <scan.h>
+#include <str.h>
+#include <fmt.h>
+#include <substdio.h>
+#include <constmap.h>
+#include <fd.h>
+#include <wait.h>
+#include <pathexec.h>
+#include <noreturn.h>
 #include "getconf.h"
-#include "constmap.h"
-#include "fd.h"
-#include "wait.h"
-#include "pathexec.h"
+#include "qmail.h"
 #include "set_environment.h"
 
 #define FATAL "replier: fatal: "
@@ -67,85 +71,64 @@
 void (*sig_defaulthandler)() = SIG_DFL;
 void (*sig_ignorehandler)() = SIG_IGN;
 
-
-void
+no_return void
 usage()
 {
 	strerr_die1x(100, "replier: usage: replier dir addr prog [ args ]");
 }
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 badaddr()
 {
 	strerr_die2x(100, FATAL, "I do not accept messages at this address (#5.1.1)");
 }
 
-char            strnum[FMT_ULONG];
-
-stralloc        fnadir = { 0 };
-stralloc        fnaf = { 0 };
-stralloc        fnsub = { 0 };
-stralloc        line = { 0 };
-
-stralloc        mailinglist = { 0 };
-stralloc        inlocal = { 0 };
-stralloc        outlocal = { 0 };
-stralloc        outhost = { 0 };
-stralloc        headerremove = { 0 };
-struct constmap headerremovemap;
-stralloc        headeradd = { 0 };
-
-struct qmail    qq;
-static char     inbuf[1024];
-static char     outbuf[512];
-static substdio ssin, ssout;
+static struct qmail qq;
 
 ssize_t
-mywrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	unsigned int    len;
+mywrite(int fd, char *buf, unsigned int len)
 {
 	qmail_put(&qq, buf, len);
 	return len;
 }
 
 void
-put(buf, len)
-	char           *buf;
-	int             len;
+put(char *buf, int len)
 {
 	qmail_put(&qq, buf, len);
 }
 
 void
-myputs(buf)
-	char           *buf;
+myputs(char *buf)
 {
 	qmail_puts(&qq, buf);
 }
 
-void
+no_return void
 sigalrm()
 {
 	strerr_die1x(111, "Timeout on maildir delivery. (#4.3.0)");
 }
 
-stralloc        mydtline = { 0 };
-
 int
 main(int argc, char **argv)
 {
+	stralloc        mydtline = { 0 }, line = { 0 }, mailinglist = { 0 },
+					inlocal = { 0 }, outlocal = { 0 }, outhost = { 0 },
+					headerremove = { 0 }, headeradd = { 0 };
+	struct constmap headerremovemap;
+	char            inbuf[1024], outbuf[512], strnum[FMT_ULONG];
+	substdio        ssin, ssout;
 	char           *dir, *addr, *sender, *local, *action, *qqx;
+	char          **e;
 	int             flagmlwasthere, match, i, flaginheader, flagbadfield, pid, wstat,
 					tmperrno;
-	char          **e;
 	int             pf[2];
 
 	if (!(dir = argv[1]))
@@ -307,7 +290,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.11 2021-07-05 21:11:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.19  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.18  2021-08-05 20:52:44+05:30  Cprogrammer
  * fixed bug of skipping files in check mode
  *
@@ -76,6 +79,7 @@
 #include <byte.h>
 #include <scan.h>
 #include <fmt.h>
+#include <noreturn.h>
 
 static stralloc target = { 0 };
 static char    *user, *group, *to;
@@ -86,7 +90,7 @@ static substdio ssin, ssout;
 static uid_t    my_uid;
 static int      dofix, missing_ok, create_paths;
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
@@ -527,7 +531,7 @@ doit(stralloc *line, int uninstall, int check)
 
 }
 
-void
+no_return void
 die_usage()
 {
 	const char     *usage_str =
@@ -595,7 +599,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.18 2021-08-05 20:52:44+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.19 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

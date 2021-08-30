@@ -1,5 +1,8 @@
 /*
  * $Log: columnt.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2020-11-24 13:44:34+05:30  Cprogrammer
  * removed exit.h
  *
@@ -17,30 +20,31 @@
  *
  */
 #include <unistd.h>
-#include "stralloc.h"
-#include "alloc.h"
+#include <stralloc.h>
+#include <alloc.h>
+#include <strerr.h>
+#include <substdio.h>
 #include "slurpclose.h"
-#include "strerr.h"
-#include "substdio.h"
+#include <noreturn.h>
 
 #define FATAL "columnt: fatal: "
 
 char            outbuf[4096];
 substdio        ssout = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_read()
 {
 	strerr_die2sys(111, FATAL, "unable to read input: ");
 }
 
-void
+no_return void
 die_write()
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
@@ -171,7 +175,7 @@ main()
 void
 getversion_columnt_c()
 {
-	static char    *x = "$Id: columnt.c,v 1.5 2020-11-24 13:44:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: columnt.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

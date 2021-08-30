@@ -1,5 +1,8 @@
 /*
  * $Log: qmaildirwatch.c,v $
+ * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.8  2021-06-03 18:15:46+05:30  Cprogrammer
  * use new prioq functions
  *
@@ -17,29 +20,31 @@
  *
  */
 #include <unistd.h>
-#include "getln.h"
-#include "substdio.h"
-#include "subfd.h"
+#include <getln.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <stralloc.h>
+#include <str.h>
+#include <open.h>
+#include <strerr.h>
+#include <noreturn.h>
 #include "prioq.h"
-#include "stralloc.h"
-#include "str.h"
 #include "hfield.h"
-#include "open.h"
 #include "headerbody.h"
 #include "maildir.h"
 
 #define FATAL "qmaildirwatch: fatal: "
 
-void
+static stralloc recipient = { 0 };
+static stralloc sender = { 0 };
+static stralloc fromline = { 0 };
+static stralloc text = { 0 };
+
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
-
-stralloc        recipient = { 0 };
-stralloc        sender = { 0 };
-stralloc        fromline = { 0 };
-stralloc        text = { 0 };
 
 void
 addtext(char *s, int n)
@@ -161,7 +166,7 @@ main()
 void
 getversion_qmaildirwatch_c()
 {
-	static char    *x = "$Id: qmaildirwatch.c,v 1.8 2021-06-03 18:15:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmaildirwatch.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

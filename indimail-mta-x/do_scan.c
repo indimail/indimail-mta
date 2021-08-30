@@ -1,5 +1,8 @@
 /*
  * $Log: do_scan.c,v $
+ * Revision 1.19  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.18  2021-06-15 11:32:24+05:30  Cprogrammer
  * remove creation of link for /etc/indimail/control in scanq directory
  *
@@ -67,6 +70,7 @@
 #include <strerr.h>
 #include <str.h>
 #include <makeargs.h>
+#include <noreturn.h>
 #include "control.h"
 #include "qregex.h"
 #include "exitcodes.h"
@@ -74,31 +78,29 @@
 #include "variables.h"
 
 extern int      flaglog;
-extern pid_t    pid;
+extern pid_t    cmd_pid;
 extern int      alarm_flag;
 extern char    *auto_scancmd[];
 
-int             extok = 0;
 static stralloc ext = { 0 };
-struct constmap mapext;
-int             brpok = 0;
+static struct constmap mapext;
+static int      brpok = 0, extok = 0;
 static stralloc brp = { 0 };
 
-void
+no_return void
 die_nomem()
 {
 	_exit(51);
 }
 
-void
+no_return void
 die_control()
 {
 	_exit(55);
 }
 
-void
-die(e)
-	int             e;
+no_return void
+die(int e)
 {
 	_exit(e);
 }
@@ -187,7 +189,7 @@ do_scan()
 	case 5:
 	case 6:
 		/*- Launch antivir */
-		switch (pid = vfork())
+		switch ((cmd_pid = vfork()))
 		{
 		case -1: /*- Can't launch; temporary failure */
 			if (flaglog)
@@ -213,7 +215,7 @@ do_scan()
 		/*- Allow alarms */
 		sig_alarmunblock();
 		/*- Catch the exit status */
-		if (wait_pid(&avstat, pid) == -1) {
+		if (wait_pid(&avstat, cmd_pid) == -1) {
 			if (flaglog)
 				strerr_warn1("qscanq-stdin: waitpid failed: ", &strerr_sys);
 			return EX_TMPERR;
@@ -234,7 +236,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.18 2021-06-15 11:32:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_scan.c,v 1.19 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2021-06-27 10:39:22+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -16,19 +19,15 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <str.h>
-#include "fd.h"
-#include "env.h"
-#include "alloc.h"
-#include "prot.h"
+#include <fd.h>
+#include <env.h>
+#include <alloc.h>
+#include <prot.h>
+#include <setuserid.h>
+#include <noreturn.h>
 #include "auto_uids.h"
-#include "setuserid.h"
 
-char           *(qsargs[]) = { "slowq-send", 0};
-char           *(qcargs[]) = { "qmail-clean", 0};
-char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0};
-char           *(qrargs[]) = { "qmail-rspawn", 0};
-
-void
+no_return void
 die()
 {
 	_exit(111);
@@ -101,16 +100,16 @@ closepipes()
 	close(pi6[1]);
 }
 
-int             verbose;
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *set_supplementary_groups;
 	gid_t          *gidset;
 	int             ngroups;
+	char           *(qsargs[]) = { "slowq-send", 0};
+	char           *(qcargs[]) = { "qmail-clean", 0};
+	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0};
+	char           *(qrargs[]) = { "qmail-rspawn", 0};
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
@@ -276,7 +275,7 @@ main(argc, argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.3 2021-06-27 10:39:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-start.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

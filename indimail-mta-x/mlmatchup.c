@@ -1,5 +1,8 @@
 /*
  * $Log: mlmatchup.c,v $
+ * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2020-11-24 13:46:14+05:30  Cprogrammer
  * removed exit.h
  *
@@ -13,41 +16,42 @@
  * Initial revision
  *
  */
-#include "stralloc.h"
-#include "gen_alloc.h"
-#include "gen_allocdefs.h"
-#include "alloc.h"
-#include "strerr.h"
-#include "getln.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "str.h"
-#include "fmt.h"
-#include "scan.h"
-#include "case.h"
 #include <unistd.h>
+#include <stralloc.h>
+#include <gen_alloc.h>
+#include <gen_allocdefs.h>
+#include <alloc.h>
+#include <strerr.h>
+#include <getln.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <str.h>
+#include <fmt.h>
+#include <scan.h>
+#include <case.h>
+#include <noreturn.h>
 
 #define FATAL "matchup: fatal: "
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_read()
 {
 	strerr_die2sys(111, FATAL, "unable to read input: ");
 }
 
-void
+no_return void
 die_write()
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
 }
 
-void
+no_return void
 die_write5()
 {
 	strerr_die2sys(111, FATAL, "unable to write fd 5: ");
@@ -728,7 +732,7 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	static char    *x = "$Id: mlmatchup.c,v 1.4 2020-11-24 13:46:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mlmatchup.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

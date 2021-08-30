@@ -1,5 +1,8 @@
 /*
  * $Log: mbox2maildir.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2020-05-11 11:00:57+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -27,17 +30,18 @@
 #include <sys/time.h>
 #include <sys/file.h>
 #include <signal.h>
-#include "fmt.h"
-#include "lock.h"
-#include "substdio.h"
-
-char            host[68], filename[96], filenamen[96];
-char            buf_1_space[1024];
-char            buf_f_space[8192];	/*- buffer for disk writing */
-int             flagsleep = 0, state = 1, tmpfd = -1, seenat = 0;
-substdio        buf_1, buf_f;
+#include <fmt.h>
+#include <lock.h>
+#include <substdio.h>
+#include <noreturn.h>
 
 int             gettmpfd(char *, char *);
+
+static char     host[68], filename[96], filenamen[96];
+static char     buf_1_space[1024];
+static char     buf_f_space[8192];	/*- buffer for disk writing */
+static int      flagsleep = 0, state = 1, tmpfd = -1, seenat = 0;
+static substdio buf_1, buf_f;
 
 void
 w2f()
@@ -45,7 +49,7 @@ w2f()
 	substdio_flush(&buf_1);
 }
 
-void
+no_return void
 die_clean()
 {
 	if (tmpfd >= 0)
@@ -73,7 +77,7 @@ put(char *s, int i)
 	substdio_put(&buf_f, s, i);
 }
 
-void
+no_return void
 handler(int i)
 {
 	w2nl("Mbox has been locked 30 seconds straight");
@@ -84,8 +88,7 @@ void
 safe_close(int fd)
 {
 	substdio_flush(&buf_f);
-	if (fsync(fd) || close(fd) || link(filename, filenamen))
-	{
+	if (fsync(fd) || close(fd) || link(filename, filenamen)) {
 		w2(filename);
 		w2nl(": close/link error");
 		die_clean();
@@ -104,15 +107,12 @@ safe_write(int fd, char *s, int len)
 	w2(filename);
 	w2nl(": write error");
 	die_clean();
-	return (-1);
 }
 
 void
 safe_open()
 {
-	tmpfd = gettmpfd(filename, filenamen);
-	if (tmpfd < 0)
-	{
+	if ((tmpfd = gettmpfd(filename, filenamen)) < 0) {
 		w2nl("unable to open tmpfd");
 		die_clean();
 	}
@@ -128,8 +128,7 @@ blast(char *ch, int r)
 	char           *prefix = ">From ";
 	char           *from = prefix + 1;
 
-	for (i = 0; i < r; i++, ch++)
-	{
+	for (i = 0; i < r; i++, ch++) {
 		switch (state)
 		{
 		case 0:			/*- .  */
@@ -139,13 +138,11 @@ blast(char *ch, int r)
 		case 1:			/*- \n */
 			if (*ch == '\n')
 				break;
-			if (*ch == 'F')
-			{
+			if (*ch == 'F') {
 				state = 11;
 				continue;
 			}
-			if (*ch == '>')
-			{
+			if (*ch == '>') {
 				state = 21;
 				continue;
 			}
@@ -155,8 +152,7 @@ blast(char *ch, int r)
 			substdio_put(&buf_1, ch, 1);
 			if (*ch == '@')
 				seenat = 1;
-			if (*ch == '\n')
-			{
+			if (*ch == '\n') {
 				if (!seenat)
 					w2nl("**** WARNING: no at sing ****\n");
 				state = 1;
@@ -166,11 +162,9 @@ blast(char *ch, int r)
 		case 12:
 		case 13:
 		case 14:
-			if (*ch == from[state - 10])
-			{
+			if (*ch == from[state - 10]) {
 				state += 1;
-				if (state == 15)
-				{
+				if (state == 15) {
 					state = 2;
 					seenat = 0;
 					if (tmpfd >= 0)
@@ -187,11 +181,9 @@ blast(char *ch, int r)
 		case 23:
 		case 24:
 		case 25:
-			if (*ch == prefix[state - 20])
-			{
+			if (*ch == prefix[state - 20]) {
 				state += 1;
-				if (state == 26)
-				{
+				if (state == 26) {
 					state = 0;
 					put(from, 5);
 				}
@@ -209,9 +201,9 @@ unsigned int
 fmt_ulong0(char *s, unsigned long u, unsigned int n)
 {
 	unsigned int    len;		/*- DJB */
+
 	len = fmt_ulong(0, u);
-	while (len < n)
-	{
+	while (len < n) {
 		if (s)
 			*s++ = '0';
 		++len;
@@ -224,13 +216,11 @@ fmt_ulong0(char *s, unsigned long u, unsigned int n)
 void
 normalize(struct timeval *now)
 {
-	while (now->tv_usec < 0)
-	{
+	while (now->tv_usec < 0) {
 		now->tv_sec -= 1;
 		now->tv_usec += 1000000;
 	}
-	while (now->tv_usec > 999999)
-	{
+	while (now->tv_usec > 999999) {
 		now->tv_sec += 1;
 		now->tv_usec -= 1000000;
 	}
@@ -271,10 +261,9 @@ main(int argc, char **argv)
 	char            buf[8192];
 
 	substdio_fdbuf(&buf_1, write, 1, buf_1_space, sizeof(buf_1_space));
-	while (argv[1] && argv[1][0] == '-')
-	{
+	while (argv[1] && argv[1][0] == '-') {
 		char           *p = argv[1] + 1;
-		for (; *p; p++)
+		for (; *p; p++) {
 			switch (*p)
 			{
 			case 'k':
@@ -286,11 +275,11 @@ main(int argc, char **argv)
 			default:
 				goto usage;
 			}
+		}
 		argc--;
 		argv++;
 	}
-	if (argc < 3)
-	{
+	if (argc < 3) {
 usage:
 		w2("usage: mbox2maildir [-ks] mbox Maildir\n");
 		die_clean();
@@ -298,15 +287,12 @@ usage:
 	strcpy(filename, "tmp/");
 	strcpy(filenamen, "new/");
 
-	fd = open(argv[1], O_RDWR);
-	if (fd == -1)
-	{
+	if ((fd = open(argv[1], O_RDWR)) == -1) {
 		w2(argv[1]);
 		w2nl(": open error");
 		die_clean();
 	}
-	if (chdir(argv[2]))
-	{
+	if (chdir(argv[2])) {
 		w2("chdir error: ");
 		w2nl(argv[2]);
 		die_clean();
@@ -314,8 +300,7 @@ usage:
 
 	signal(SIGALRM, handler);
 	alarm(30);
-	if (lock_ex(fd) == -1)
-	{
+	if (lock_ex(fd) == -1) {
 		w2(argv[1]);
 		w2nl(": lock error");
 		die_clean();
@@ -327,11 +312,8 @@ usage:
 	gethostname(host, sizeof(host) - 1);
 	host[sizeof(host) - 1] = '\0';
 
-	for (;;)
-	{
-		r = read(fd, buf, sizeof(buf));
-		if (r == -1)
-		{
+	for (;;) {
+		if ((r = read(fd, buf, sizeof(buf))) == -1) {
 			w2(argv[1]);
 			w2nl(": reading error");
 			die_clean();
@@ -346,31 +328,24 @@ usage:
 	/*
 	 * power off 
 	 */
-	ds = open("new/", O_RDONLY);
-	if (ds == -1)
-	{
+	if ((ds = open("new/", O_RDONLY)) == -1) {
 		w2nl("open new/ error\n");
 		die_clean();
 	}
-	if (fsync(ds) && errno == EIO)
-	{
+	if (fsync(ds) && errno == EIO) {
 		w2nl("fsync new/ error\n");
 		die_clean();
 	}
 	close(ds);
 
-	if (!flagkeep)
-	{
-		if (ftruncate(fd, 0) || fsync(fd) || close(fd))
-		{
+	if (!flagkeep) {
+		if (ftruncate(fd, 0) || fsync(fd) || close(fd)) {
 			w2(argv[1]);
 			w2nl(": fsync/close error");
 			die_clean();
 		}
 	} else
-	{
 		close(fd);
-	}
 
 	w2f();
 	if (flagsleep == 1)
@@ -381,7 +356,7 @@ usage:
 void
 getversion_mbox2maildir_c()
 {
-	static char    *x = "$Id: mbox2maildir.c,v 1.5 2020-05-11 11:00:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mbox2maildir.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

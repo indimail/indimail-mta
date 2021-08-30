@@ -1,5 +1,8 @@
 /*
  * $Log: report.c,v $
+ * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2021-08-28 23:07:59+05:30  Cprogrammer
  * moved dtype enum delivery variable from variables.h to getDomainToken.h
  *
@@ -17,12 +20,13 @@
 #include <substdio.h>
 #include <subfd.h>
 #include <strerr.h>
+#include <noreturn.h>
 #include "report.h"
 #include "getDomainToken.h"
 
 extern dtype    delivery;
 
-void
+no_return void
 report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
 	if (delivery == local_delivery) /*- strerr_die does not return */
@@ -69,7 +73,7 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 void
 getversion_report_c()
 {
-	static char    *x = "$Id: report.c,v 1.4 2021-08-28 23:07:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: report.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;

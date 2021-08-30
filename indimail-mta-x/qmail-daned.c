@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.28  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.27  2021-06-15 11:50:15+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -113,6 +116,7 @@
 #include <sgetopt.h>
 #include <env.h>
 #include <makeargs.h>
+#include <noreturn.h>
 #include "control.h"
 #include "tlsacheck.h"
 #include "haveip6.h"
@@ -145,24 +149,23 @@ struct danerec
 	char            status; /*- dane verification status */
 	struct danerec *prev, *next; /*- prev, next of linked list of danerec structures */
 };
-struct danerec *head;
-struct danerec *tail;
-int             dane_count, hcount;
-int             hash_size, h_allocated = 0;
-int             verbose = 0;
-unsigned long   timeout;
+static struct danerec *head;
+static struct danerec *tail;
+static unsigned long   timeout;
+static struct constmap mapwhite;
+static struct constmap maptlsadomains;
+static int      dane_count, hcount;
+static int      hash_size, h_allocated = 0;
+static int      whitelistok = 0;
+static int      tlsadomainsok = 0;
+static char    *whitefn = 0, *tlsadomainsfn = 0;
+static stralloc context_file = { 0 };
+static stralloc line = { 0 };
+static stralloc whitelist = { 0 };
+static stralloc tlsadomains = { 0 };
 int             timeoutconnect = 60;
+int             verbose = 0;
 int             timeoutssl = 300;
-char           *whitefn = 0, *tlsadomainsfn = 0;
-stralloc        context_file = { 0 };
-stralloc        line = { 0 };
-
-int             whitelistok = 0;
-stralloc        whitelist = { 0 };
-struct constmap mapwhite;
-int             tlsadomainsok = 0;
-stralloc        tlsadomains = { 0 };
-struct constmap maptlsadomains;
 stralloc        helohost = { 0 };
 
 extern stralloc save;
@@ -609,7 +612,6 @@ save_context()
 	return;
 }
 
-stralloc        context = { 0 };
 /*-
  * load records on startup from a context file which
  * was saved on shutdown (SIGTERM)
@@ -765,7 +767,7 @@ sigusr2()
 	return;
 }
 
-void
+no_return void
 sigterm()
 {
 	sig_block(SIGTERM);
@@ -1360,7 +1362,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.27 2021-06-15 11:50:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.28 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidstarttlsh;
 	x = sccsidmakeargsh;

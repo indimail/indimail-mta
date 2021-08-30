@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.23  2021-07-19 12:54:19+05:30  Cprogrammer
  * exit 0 if flagexitasap is set
  *
@@ -74,41 +77,41 @@
  *
  */
 #include <stdlib.h>
-#include <string.h>
-#include "substdio.h"
-#include "error.h"
-#include "control.h"
-#include "fmt.h"
-#include "env.h"
-#include "scan.h"
-#include "wait.h"
-#include "sig.h"
-#include "lock.h"
-#include "open.h"
-#include "stralloc.h"
-#include "alloc.h"
-#include "str.h"
-#include "auto_qmail.h"
 #include <signal.h>
 #include <unistd.h>
+#include <substdio.h>
+#include <error.h>
+#include <fmt.h>
+#include <env.h>
+#include <scan.h>
+#include <wait.h>
+#include <sig.h>
+#include <lock.h>
+#include <open.h>
+#include <stralloc.h>
+#include <alloc.h>
+#include <str.h>
+#include <noreturn.h>
+#include "control.h"
+#include "auto_qmail.h"
 
 #ifndef QUEUE_COUNT
 #define QUEUE_COUNT 10
 #endif
 
-char            ssoutbuf[512];
-substdio        ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
-char            sserrbuf[512];
-substdio        sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-int             flagexitasap = 0;
-char            strnum[FMT_ULONG];
-char           *(qlargs[]) = { "sbin/qmail-start", "./Mailbox", 0};
+static char     ssoutbuf[512];
+static char     sserrbuf[512];
+static char     strnum[FMT_ULONG];
+static char    *(qlargs[]) = { "sbin/qmail-start", "./Mailbox", 0};
+static int      flagexitasap = 0;
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
+static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 struct pidtab
 {
 	int pid;
 	char *queuedir;
 };
-struct pidtab  *pid_table;
+static struct pidtab  *pid_table;
 
 void
 sigterm()
@@ -180,7 +183,7 @@ sigint()
 	}
 }
 
-void
+no_return void
 die()
 {
 	sleep(5);
@@ -518,7 +521,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.23 2021-07-19 12:54:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.24 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: 822field.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2020-11-28 12:43:07+05:30  Cprogrammer
  * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
  *
@@ -17,47 +20,39 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "getln.h"
-#include "mess822.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <getln.h>
+#include <mess822.h>
+#include <noreturn.h>
 
 #define FATAL "822field: fatal: "
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-int             flag;
-stralloc        value = { 0 };
-
-mess822_header  h = MESS822_HEADER;
-mess822_action  a[] = {
-	{"subject", &flag, 0, &value, 0, 0}
-	, {0, 0, 0, 0, 0, 0}
-};
-
-stralloc        line = { 0 };
-int             match;
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	int             t = 0;
+	int             t = 0, flag, match;
+	stralloc        value = { 0 }, line = { 0 };
+	mess822_header  h = MESS822_HEADER;
+	mess822_action  a[] = {
+		{"subject", &flag, 0, &value, 0, 0},
+		{0, 0, 0, 0, 0, 0}
+	};
 
 	if (argv[1]) {
 		if (*argv[1] == '+') {
 			t = 1;
 			if (!*(argv[1] + 1))
 				a[0].name = "subject";
-			else {
+			else
 				a[0].name = argv[1] + 1;
-			}
 		} else
 			a[0].name = argv[1];
 	}
@@ -85,7 +80,7 @@ main(argc, argv)
 void
 getversion_822field_c()
 {
-	static char    *x = "$Id: 822field.c,v 1.5 2020-11-28 12:43:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822field.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

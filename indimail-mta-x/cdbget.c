@@ -1,5 +1,8 @@
 /*
  * $Log: cdbget.c,v $
+ * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2020-11-24 13:44:14+05:30  Cprogrammer
  * removed exit.h
  *
@@ -14,27 +17,28 @@
  *
  */
 #include <unistd.h>
-#include "scan.h"
-#include "str.h"
-#include "subfd.h"
-#include "strerr.h"
-#include "cdb.h"
+#include <scan.h>
+#include <str.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <cdb.h>
+#include <noreturn.h>
 
 #define FATAL "cdbget: fatal: "
 
-void
+no_return void
 die_read(void)
 {
 	strerr_die2sys(111, FATAL, "unable to read input: ");
 }
 
-void
+no_return void
 die_write(void)
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
 }
 
-void
+no_return void
 die_usage(void)
 {
 	strerr_die1x(111, "cdbget: usage: cdbget key [skip]");
@@ -99,7 +103,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.4 2020-11-24 13:44:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdbget.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

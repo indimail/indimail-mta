@@ -1,5 +1,8 @@
 /*
  * $Log: setmaillist.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2004-10-22 20:30:17+05:30  Cprogrammer
  * added RCS id
  *
@@ -12,54 +15,48 @@
  */
 #include <unistd.h>
 #include <sys/stat.h>
-#include "substdio.h"
-#include "subfd.h"
-#include "byte.h"
-#include "strerr.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "open.h"
+#include <substdio.h>
+#include <subfd.h>
+#include <byte.h>
+#include <strerr.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <open.h>
+#include <noreturn.h>
 
 #define FATAL "setmaillist: fatal: "
 
 int             rename(const char *, const char *);
 
-void
+no_return void
 usage()
 {
 	strerr_die1x(100, "setmaillist: usage: setmaillist list.bin list.tmp");
 }
 
-stralloc        line = { 0 };
-int             match;
-char           *fnbin;
-char           *fntmp;
-int             fd;
-substdio        ss;
-char            buf[1024];
-
-void
-writeerr()
+no_return void
+writeerr(char *s)
 {
-	strerr_die4sys(111, FATAL, "unable to write to ", fntmp, ": ");
+	strerr_die4sys(111, FATAL, "unable to write to ", s, ": ");
 }
 
 void
-out(s, len)
-	char           *s;
-	int             len;
+out(substdio *ss, char *s, int len, char *fntmp)
 {
-	if (substdio_put(&ss, s, len) == -1)
-		writeerr();
+	if (substdio_put(ss, s, len) == -1)
+		writeerr(fntmp);
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	umask(033);
+	stralloc        line = { 0 };
+	int             match, fd;
+	char           *fnbin, *fntmp;
+	char            buf[1024];
+	substdio        ss;
 
+	umask(033);
 	if (!(fnbin = argv[1]))
 		usage();
 	if (!(fntmp = argv[2]))
@@ -67,12 +64,10 @@ main(argc, argv)
 	if ((fd = open_trunc(fntmp)) == -1)
 		strerr_die4sys(111, FATAL, "unable to create ", fntmp, ": ");
 	substdio_fdbuf(&ss, write, fd, buf, sizeof buf);
-	do
-	{
+	do {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
-		while (line.len)
-		{
+		while (line.len) {
 			if (line.s[line.len - 1] != '\n' && line.s[line.len - 1] != ' ' && line.s[line.len - 1] != '\t')
 				break;
 			--line.len;
@@ -80,29 +75,27 @@ main(argc, argv)
 
 		if (byte_chr(line.s, line.len, '\0') != line.len)
 			strerr_die2x(111, FATAL, "NUL in input");
-		if (line.len && line.s[0] != '#')
-		{
+		if (line.len && line.s[0] != '#') {
 			if ((line.s[0] == '.') || (line.s[0] == '/'))
 			{
-				out(line.s, line.len);
-				out("", 1);
-			} else
-			{
+				out(&ss, line.s, line.len, fntmp);
+				out(&ss, "", 1, fntmp);
+			} else {
 				if (line.len > 800)
 					strerr_die2x(111, FATAL, "addresses must be under 800 bytes");
 				if (line.s[0] != '&')
-					out("&", 1);
-				out(line.s, line.len);
-				out("", 1);
+					out(&ss, "&", 1, fntmp);
+				out(&ss, line.s, line.len, fntmp);
+				out(&ss, "", 1, fntmp);
 			}
 		}
 	} while (match);
 	if (substdio_flush(&ss) == -1)
-		writeerr();
+		writeerr(fntmp);
 	if (fsync(fd) == -1)
-		writeerr();
+		writeerr(fntmp);
 	if (close(fd) == -1)
-		writeerr();				/*- NFS stupidity */
+		writeerr(fntmp);				/*- NFS stupidity */
 	if (rename(fntmp, fnbin) == -1)
 		strerr_die6sys(111, FATAL, "unable to move ", fntmp, " to ", fnbin, ": ");
 	_exit(0);
@@ -113,7 +106,7 @@ main(argc, argv)
 void
 getversion_setmaillist_c()
 {
-	static char    *x = "$Id: setmaillist.c,v 1.3 2004-10-22 20:30:17+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: setmaillist.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

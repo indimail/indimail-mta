@@ -1,5 +1,8 @@
 /*
  * $Log: iftocc.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2020-11-24 13:45:30+05:30  Cprogrammer
  * removed exit.h
  *
@@ -11,17 +14,18 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "getln.h"
-#include "mess822.h"
-#include "case.h"
-#include "env.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <getln.h>
+#include <mess822.h>
+#include <case.h>
+#include <env.h>
+#include <noreturn.h>
 
 #define FATAL "iftocc: fatal: "
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
@@ -43,8 +47,7 @@ char           *recipient;
 char          **recips;
 
 void
-check(addr)
-	char           *addr;
+check(char *addr)
 {
 	int             i;
 
@@ -59,9 +62,7 @@ check(addr)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             i;
 	int             j;
@@ -104,7 +105,7 @@ main(argc, argv)
 void
 getversion_iftocc_c()
 {
-	static char    *x = "$Id: iftocc.c,v 1.3 2020-11-24 13:45:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: iftocc.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

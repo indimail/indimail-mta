@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-pw2u.c,v $
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.9  2020-05-11 11:09:34+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -28,59 +31,86 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "substdio.h"
-#include "byte.h"
-#include "subfd.h"
-#include "sgetopt.h"
+#include <substdio.h>
+#include <byte.h>
+#include <subfd.h>
+#include <sgetopt.h>
+#include <constmap.h>
+#include <stralloc.h>
+#include <fmt.h>
+#include <str.h>
+#include <scan.h>
+#include <open.h>
+#include <error.h>
+#include <getln.h>
+#include <noreturn.h>
 #include "control.h"
-#include "constmap.h"
-#include "stralloc.h"
-#include "fmt.h"
-#include "str.h"
-#include "scan.h"
-#include "open.h"
-#include "error.h"
-#include "getln.h"
 #include "auto_break.h"
 #include "auto_assign.h"
 #include "auto_usera.h"
 
-void
+static char    *dashcolon = "-:";
+static int      flagalias = 0;
+static int      flagnoupper = 1;
+static int      okincl;
+static int      okexcl;
+static int      okmana;
+/*- 2: skip if home does not exist; skip if home is not owned by user */
+/*- 1: stop if home does not exist; skip if home is not owned by user */
+/*- 0: don't worry about home */
+static int      homestrategy = 2;
+static stralloc incl = { 0 };
+static stralloc excl = { 0 };
+static stralloc mana = { 0 };
+static stralloc allusers = { 0 };
+static stralloc uugh = { 0 };
+static stralloc user = { 0 };
+static stralloc uidstr = { 0 };
+static stralloc gidstr = { 0 };
+static stralloc home = { 0 };
+static stralloc line = { 0 };
+static struct constmap mapincl;
+static struct constmap mapexcl;
+static struct constmap mapmana;
+static struct constmap mapuser;
+static unsigned long   uid;
+
+no_return void
 die_chdir()
 {
 	substdio_putsflush(subfderr, "qmail-pw2u: fatal: unable to chdir\n");
 	_exit(111);
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_putsflush(subfderr, "qmail-pw2u: fatal: out of memory\n");
 	_exit(111);
 }
 
-void
+no_return void
 die_read()
 {
 	substdio_putsflush(subfderr, "qmail-pw2u: fatal: unable to read input\n");
 	_exit(111);
 }
 
-void
+no_return void
 die_write()
 {
 	substdio_putsflush(subfderr, "qmail-pw2u: fatal: unable to write output\n");
 	_exit(111);
 }
 
-void
+no_return void
 die_control()
 {
 	substdio_putsflush(subfderr, "qmail-pw2u: fatal: unable to read controls\n");
 	_exit(111);
 }
 
-void
+no_return void
 die_alias()
 {
 	substdio_puts(subfderr, "qmail-pw2u: fatal: unable to find ");
@@ -90,9 +120,8 @@ die_alias()
 	_exit(111);
 }
 
-void
-die_home(fn)
-	char           *fn;
+no_return void
+die_home(char *fn)
 {
 	substdio_puts(subfderr, "qmail-pw2u: fatal: unable to stat ");
 	substdio_puts(subfderr, fn);
@@ -101,10 +130,8 @@ die_home(fn)
 	_exit(111);
 }
 
-void
-die_user(s, len)
-	char           *s;
-	unsigned int    len;
+no_return void
+die_user(char *s, unsigned int len)
 {
 	substdio_puts(subfderr, "qmail-pw2u: fatal: unable to find ");
 	substdio_put(subfderr, s, len);
@@ -112,36 +139,6 @@ die_user(s, len)
 	substdio_flush(subfderr);
 	_exit(111);
 }
-
-char           *dashcolon = "-:";
-int             flagalias = 0;
-int             flagnoupper = 1;
-int             homestrategy = 2;
-/*- 2: skip if home does not exist; skip if home is not owned by user */
-/*- 1: stop if home does not exist; skip if home is not owned by user */
-/*- 0: don't worry about home */
-
-int             okincl;
-stralloc        incl = { 0 };
-struct constmap mapincl;
-int             okexcl;
-stralloc        excl = { 0 };
-struct constmap mapexcl;
-int             okmana;
-stralloc        mana = { 0 };
-struct constmap mapmana;
-
-stralloc        allusers = { 0 };
-struct constmap mapuser;
-
-stralloc        uugh = { 0 };
-stralloc        user = { 0 };
-stralloc        uidstr = { 0 };
-stralloc        gidstr = { 0 };
-stralloc        home = { 0 };
-unsigned long   uid;
-
-stralloc        line = { 0 };
 
 void
 doaccount()
@@ -514,7 +511,7 @@ main(argc, argv)
 void
 getversion_qmail_pw2u_c()
 {
-	static char    *x = "$Id: qmail-pw2u.c,v 1.9 2020-05-11 11:09:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-pw2u.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

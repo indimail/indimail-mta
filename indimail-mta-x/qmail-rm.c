@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.23  2021-05-29 23:50:55+05:30  Cprogrammer
  * fixed qbase path
  *
@@ -182,19 +185,22 @@
 #include <time.h>
 #include <unistd.h>
 #include <fts.h>
-#include "stralloc.h"
-#include "substdio.h"
-#include "lock.h"
-#include "error.h"
-#include "open.h"
-#include "fmt.h"
-#include "env.h"
-#include "scan.h"
+#include <stralloc.h>
+#include <substdio.h>
+#include <lock.h>
+#include <error.h>
+#include <open.h>
+#include <fmt.h>
+#include <env.h>
+#include <scan.h>
+#include <sgetopt.h>
+#include <noreturn.h>
 #include "control.h"
-#include "sgetopt.h"
 #include "auto_split.h"
 #include "getEnvConfig.h"
 #include "auto_qmail.h"
+
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.24 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 /*- many linux fcntl.h's seem to be broken */
 #ifndef O_NOFOLLOW
@@ -218,28 +224,28 @@ char           *mk_nohashpath(char *, int);
 char           *mk_hashpath(char *, int);
 char           *mk_newpath(char *, int);
 int             rename(const char *, const char *);
-
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.23 2021-05-29 23:50:55+05:30 Cprogrammer Exp mbhangui $";
+char           *strptime(const char *s, const char *format, struct tm *tm);
 
 /*- globals */
 extern const char *__progname;
-const char     *default_pattern = ".*";
-int             regex_flags = 0, verbosity = 0, conf_split, remove_files = 0, delete_files = 0;
-char           *yank_dir = "trash";
-unsigned long   read_bytes = 0;
+static const char     *default_pattern = ".*";
+static unsigned long   read_bytes = 0;
+static int      regex_flags = 0, verbosity = 0, conf_split, remove_files = 0, delete_files = 0;
+static char    *yank_dir = "trash";
 
-char           *strptime(const char *s, const char *format, struct tm *tm);
 /*- if the eXpire option is specified on the command line, this will reflect that */
-int             expire_files = 0;
+static int      expire_files = 0;
 /*- one week in seconds -- this can be changed in the future by a parameter passed to us */
-time_t          expire_offset = 60 * 60 * 24 * 7;
+static time_t   expire_offset = 60 * 60 * 24 * 7;
 /*- if specified, this is the timestamp the file will be stamped with */
-time_t          expire_date = 0;
-char            sserrbuf[512];
-char            ssoutbuf[512];
-substdio        ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
-substdio        sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char            strnum[FMT_ULONG];
+static time_t   expire_date = 0;
+static char     sserrbuf[512];
+static char     ssoutbuf[512];
+static char     strnum[FMT_ULONG];
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
+static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static stralloc QueueBase = { 0 };
+static stralloc Queuedir = { 0 };
 
 /*
  * queues i
@@ -247,7 +253,7 @@ char            strnum[FMT_ULONG];
  * NOTE: the first queue must be mess as it is used as a key
  *
  */
-const char     *queues[] = { "mess", "local", "remote", "info", "intd", "todo", "bounce", NULL };
+static const char     *queues[] = { "mess", "local", "remote", "info", "intd", "todo", "bounce", NULL };
 
 void
 flush()
@@ -256,23 +262,20 @@ flush()
 }
 
 void
-out(s)
-	char           *s;
+out(char *s)
 {
 	substdio_puts(&ssout, s);
 }
 
 void
-logerr(s)
-	char           *s;
+logerr(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(s)
-	char           *s;
+logerrf(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -280,14 +283,14 @@ logerrf(s)
 		_exit(1);
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_puts(&sserr, "fatal: out of memory\n");
 	_exit(111);
 }
 
-void
+no_return void
 die_chdir(char *dir)
 {
 	logerr("chdir: ");
@@ -351,9 +354,6 @@ check_send(char *queuedir)
 	}
 	return(fd);
 }
-
-stralloc        QueueBase = { 0 };
-stralloc        Queuedir = { 0 };
 
 int
 main(int argc, char **argv)
@@ -570,7 +570,7 @@ main(int argc, char **argv)
 }
 
 
-void
+no_return void
 usage(void)
 {
 	logerr((char *) __progname);
@@ -1208,7 +1208,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.23 2021-05-29 23:50:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.24 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: tokenize.c,v $
+ * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.2  2004-10-22 20:31:49+05:30  Cprogrammer
  * added RCS id
  *
@@ -8,24 +11,23 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "getln.h"
-#include "mess822.h"
+#include <substdio.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <getln.h>
+#include <mess822.h>
+#include <noreturn.h>
 
 #define FATAL "tokenize: fatal: "
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
 void
-myput(buf, len)
-	char           *buf;
-	int             len;
+myput(char *buf, int len)
 {
 	char            ch;
 
@@ -40,19 +42,14 @@ myput(buf, len)
 	}
 }
 
-stralloc        line = { 0 };
-int             match;
-
-stralloc        tokens = { 0 };
 
 int
 main()
 {
-	int             i;
-	int             j;
+	int             i, j, match;
+	stralloc        line = { 0 }, tokens = { 0 };
 
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!line.len)
@@ -69,40 +66,35 @@ main()
 		if (!mess822_token(&tokens, line.s))
 			nomem();
 
-		for (j = i = 0; j < tokens.len; ++j)
-			if (!tokens.s[j])
-			{
+		for (j = i = 0; j < tokens.len; ++j) {
+			if (!tokens.s[j]) {
 				if (tokens.s[i] == ' ')
 					substdio_puts(subfdout, "space\n");
 				else
 				if (tokens.s[i] == '\t')
 					substdio_puts(subfdout, "tab\n");
 				else
-				if (tokens.s[i] == '=')
-				{
+				if (tokens.s[i] == '=') {
 					substdio_puts(subfdout, "string {");
 					myput(tokens.s + i + 1, j - i - 1);
 					substdio_puts(subfdout, "}\n");
 				} else
-				if (tokens.s[i] == '(')
-				{
+				if (tokens.s[i] == '(') {
 					substdio_puts(subfdout, "comment {");
 					myput(tokens.s + i + 1, j - i - 1);
 					substdio_puts(subfdout, "}\n");
-				} else
-				{
+				} else {
 					substdio_puts(subfdout, "special ");
 					myput(tokens.s + i, j - i);
 					substdio_puts(subfdout, "\n");
 				}
 				i = j + 1;
 			}
-
+		}
 		substdio_puts(subfdout, "\n");
 		if (!match)
 			break;
 	}
-
 	substdio_flush(subfdout);
 	_exit(0);
 }
@@ -110,7 +102,7 @@ main()
 void
 getversion_tokenize_c()
 {
-	static char    *x = "$Id: tokenize.c,v 1.2 2004-10-22 20:31:49+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: tokenize.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

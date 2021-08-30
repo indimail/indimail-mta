@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.8  2021-05-26 10:47:57+05:30  Cprogrammer
  * replaced strerror() with error_str()
  *
@@ -29,13 +32,14 @@
 #include "error.h"
 #include <unistd.h>
 #include <string.h>
+#include <noreturn.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
 int             smtps = 0;
 SSL            *ssl = NULL;
 
-void
+no_return void
 ssl_exit(int status)
 {
 	if (ssl) {
@@ -84,7 +88,7 @@ ssl_strerror()
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 1.8 2021-05-26 10:47:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tls.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.23  2021-06-12 18:26:39+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -64,47 +67,65 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "substdio.h"
-#include "socket.h"
-#include "str.h"
-#include "env.h"
-#include "scan.h"
-#include "getln.h"
-#include "stralloc.h"
-#include "slurpclose.h"
-#include "error.h"
-#include "sig.h"
-#include "ip.h"
+#include <substdio.h>
+#include <str.h>
+#include <env.h>
+#include <scan.h>
+#include <getln.h>
+#include <stralloc.h>
+#include <error.h>
+#include <sig.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <fmt.h>
+#include <now.h>
+#include <noreturn.h>
 #include "timeoutconn.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
+#include "socket.h"
+#include "slurpclose.h"
+#include "ip.h"
 #include "auto_control.h"
 #include "control.h"
-#include "fmt.h"
-#include "now.h"
 #include "variables.h"
 
 #define PORT_QMQP 628
+ssize_t         saferead(int fd, char *_buf, size_t len);
+ssize_t         safewrite(int fd, char *_buf, size_t len);
 
-void
+static int      lasterror = 55;
+static int      timeoutremote = 60;
+static int      timeoutconnect = 10;
+static int      qmqpfd;
+static char     buf[1024];
+static char     strnum[FMT_ULONG];
+static substdio to = SUBSTDIO_FDBUF(safewrite, -1, buf, sizeof buf);
+static substdio from = SUBSTDIO_FDBUF(saferead, -1, buf, sizeof buf);
+static substdio envelope = SUBSTDIO_FDBUF(read, 1, buf, sizeof buf);
+/*- WARNING: can use only one of these at a time!  */
+static stralloc beforemessage = { 0 };
+static stralloc message = { 0 };
+static stralloc aftermessage = { 0 };
+static stralloc line = { 0 };
+
+no_return void
 die_success()
 {
 	_exit(0);
 }
 
-void
+no_return void
 die_perm()
 {
 	_exit(31);
 }
 
-void
+no_return void
 nomem()
 {
 	_exit(51);
 }
 
-void
+no_return void
 die_read()
 {
 	if (errno == error_nomem)
@@ -112,87 +133,61 @@ die_read()
 	_exit(54);
 }
 
-void
+no_return void
 die_control()
 {
 	_exit(55);
 }
 
-void
+no_return void
 die_socket()
 {
 	_exit(56);
 }
 
-void
+no_return void
 die_home()
 {
 	_exit(61);
 }
 
-void
+no_return void
 die_temp()
 {
 	_exit(71);
 }
 
-void
+no_return void
 die_conn()
 {
 	_exit(74);
 }
 
-void
+no_return void
 die_format()
 {
 	_exit(79);
 }
 
-int             lasterror = 55;
-int             timeoutremote = 60;
-int             timeoutconnect = 10;
-int             qmqpfd;
-
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *_buf, size_t len)
 {
 	int             r;
-	r = timeoutread(timeoutremote, qmqpfd, buf, len);
+	r = timeoutread(timeoutremote, qmqpfd, _buf, len);
 	if (r <= 0)
 		die_conn();
 	return r;
 }
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *_buf, size_t len)
 {
 	int             r;
-	r = timeoutwrite(timeoutremote, qmqpfd, buf, len);
+	r = timeoutwrite(timeoutremote, qmqpfd, _buf, len);
 	if (r <= 0)
 		die_conn();
 	return r;
 }
-
-char            buf[1024];
-substdio        to = SUBSTDIO_FDBUF(safewrite, -1, buf, sizeof buf);
-substdio        from = SUBSTDIO_FDBUF(saferead, -1, buf, sizeof buf);
-substdio        envelope = SUBSTDIO_FDBUF(read, 1, buf, sizeof buf);
-/*
- * WARNING: can use only one of these at a time! 
- */
-
-stralloc        beforemessage = { 0 };
-stralloc        message = { 0 };
-stralloc        aftermessage = { 0 };
-
-char            strnum[FMT_ULONG];
-stralloc        line = { 0 };
 
 void
 getmess()
@@ -400,7 +395,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.23 2021-06-12 18:26:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.24 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

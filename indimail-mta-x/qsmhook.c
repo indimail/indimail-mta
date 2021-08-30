@@ -1,5 +1,8 @@
 /*
  * $Log: qsmhook.c,v $
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.9  2020-11-24 13:47:49+05:30  Cprogrammer
  * removed exit.h
  *
@@ -17,68 +20,63 @@
  *
  */
 #include <unistd.h>
-#include "fd.h"
-#include "stralloc.h"
-#include "sgetopt.h"
-#include "wait.h"
-#include "env.h"
-#include "byte.h"
-#include "str.h"
-#include "alloc.h"
-#include "case.h"
-#include "subfd.h"
-#include "error.h"
-#include "substdio.h"
-#include "sig.h"
+#include <fd.h>
+#include <stralloc.h>
+#include <sgetopt.h>
+#include <wait.h>
+#include <env.h>
+#include <byte.h>
+#include <str.h>
+#include <alloc.h>
+#include <case.h>
+#include <subfd.h>
+#include <error.h>
+#include <substdio.h>
+#include <sig.h>
+#include <noreturn.h>
 
-void
+no_return void
 die(int e, char *s)
 {
 	substdio_putsflush(subfderr, s);
 	_exit(e);
 }
 
-void
+no_return void
 die_usage()
 {
 	die(100, "qsmhook: fatal: incorrect usage\n");
 }
 
-void
+no_return void
 die_temp()
 {
 	die(111, "qsmhook: fatal: temporary problem\n");
 }
 
-void
+no_return void
 die_read()
 {
 	die(111, "qsmhook: fatal: unable to read message\n");
 }
 
-void
+no_return void
 die_badcmd()
 {
 	die(100, "qsmhook: fatal: command not found\n");
 }
 
-int             flagrpline = 0, flagufline = 1, flagdtline = 0;
-char           *rpline, *ufline, *dtline;
-char           *host, *sender, *recip;
-stralloc        newarg = { 0 };
-substdio        ssin, ssout;
-char            inbuf[SUBSTDIO_INSIZE], outbuf[SUBSTDIO_OUTSIZE];
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	unsigned int    i;
-	int             pid, wstat, opt, flagesc;
+	int             pid, wstat, opt, flagesc, flagrpline = 0, flagufline = 1, flagdtline = 0;
 	int             pi[2];
 	char          **arg;
-	char           *x;
+	char           *x, *rpline, *ufline, *dtline, *host, *sender, *recip;
+	char            inbuf[SUBSTDIO_INSIZE], outbuf[SUBSTDIO_OUTSIZE];
+	stralloc        newarg = { 0 };
+	substdio        ssin, ssout;
 
 	sig_pipeignore();
 
@@ -208,7 +206,7 @@ main(argc, argv)
 void
 getversion_qsmhook_c()
 {
-	static char    *x = "$Id: qsmhook.c,v 1.9 2020-11-24 13:47:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsmhook.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.1  2021-06-15 12:16:52+05:30  Cprogrammer
  * Initial revision
  *
@@ -17,18 +20,19 @@
 #include "auto_qmail.h"
 #include <makeargs.h>
 #include <mktempfile.h>
+#include <noreturn.h>
 #include "qmulti.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 
-void
+no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
 	_exit(52);
 }
 
-void
+no_return void
 sigbug()
 {
 	_exit(81);
@@ -219,7 +223,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.1 2021-06-15 12:16:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.2 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;

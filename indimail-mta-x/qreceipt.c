@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.15  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.14  2021-07-05 21:11:38+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -52,6 +55,7 @@
 #include <gen_alloc.h>
 #include <gen_allocdefs.h>
 #include <open.h>
+#include <noreturn.h>
 #include "hfield.h"
 #include "headerbody.h"
 #include "quote.h"
@@ -61,60 +65,68 @@
 #define FATAL "qreceipt: fatal: "
 #define WARN  "qreceipt: warn: "
 
-void
+static char    *target;
+static char    *returnpath;
+static int      flagreceipt = 0;
+static stralloc messageid = { 0 };
+static stralloc sanotice = { 0 };
+static stralloc quoted = { 0 };
+static stralloc hfbuf = { 0 };
+
+no_return void
 die_noreceipt()
 {
 	_exit(0);
 }
 
-void
+no_return void
 die()
 {
 	_exit(100);
 }
 
-void
+no_return void
 die_temp()
 {
 	_exit(111);
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_putsflush(subfderr, "qreceipt: fatal: out of memory\n");
 	die_temp();
 }
 
-void
+no_return void
 die_fork()
 {
 	substdio_putsflush(subfderr, "qreceipt: fatal: unable to fork\n");
 	die_temp();
 }
 
-void
+no_return void
 die_qqperm()
 {
 	substdio_putsflush(subfderr, "qreceipt: fatal: permanent qmail-queue error\n");
 	die();
 }
 
-void
+no_return void
 die_qqtemp()
 {
 	substdio_putsflush(subfderr, "qreceipt: fatal: temporary qmail-queue error\n");
 	die_temp();
 }
 
-void
+no_return void
 die_usage()
 {
 	substdio_putsflush(subfderr, "qreceipt: usage: qreceipt deliveryaddress\n");
 	die();
 }
 
-void
+no_return void
 die_read()
 {
 	if (errno == error_nomem)
@@ -123,7 +135,7 @@ die_read()
 	die_temp();
 }
 
-void
+no_return void
 die_control()
 {
 	substdio_putsflush(subfderr, "fatal: unable to read controls\n");
@@ -131,9 +143,7 @@ die_control()
 }
 
 void
-doordie(sa, r)
-	stralloc       *sa;
-	int             r;
+doordie(stralloc *sa, int r)
 {
 	if (r == 1)
 		return;
@@ -144,15 +154,8 @@ doordie(sa, r)
 	die();
 }
 
-char           *target;
-int             flagreceipt = 0;
-char           *returnpath;
-stralloc        messageid = { 0 };
-stralloc        sanotice = { 0 };
-
 int
-rwnotice(addr)
-	token822_alloc *addr;
+rwnotice(token822_alloc *addr)
 {
 	token822_reverse(addr);
 	if (token822_unquote(&sanotice, addr) != 1)
@@ -163,13 +166,11 @@ rwnotice(addr)
 	return 1;
 }
 
-struct qmail    qqt;
-stralloc        quoted = { 0 };
-
 void
 finishheader()
 {
 	char           *qqx;
+	struct qmail    qqt;
 
 	if (!flagreceipt)
 		die_noreceipt();
@@ -208,15 +209,13 @@ following address: ");
 	}
 }
 
-stralloc        hfbuf = { 0 };
-token822_alloc  hfin = { 0 };
-token822_alloc  hfrewrite = { 0 };
-token822_alloc  hfaddr = { 0 };
-
 void
-doheaderfield(h)
-	stralloc       *h;
+doheaderfield(stralloc *h)
 {
+	token822_alloc  hfin = { 0 };
+	token822_alloc  hfrewrite = { 0 };
+	token822_alloc  hfaddr = { 0 };
+
 	switch (hfield_known(h->s, h->len))
 	{
 	case H_MESSAGEID:
@@ -231,17 +230,12 @@ doheaderfield(h)
 }
 
 void
-dobody(h)
-	stralloc       *h;
+dobody(stralloc *h)
 {;
 }
 
-stralloc        QueueBase = { 0 };
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 
 	sig_pipeignore();
@@ -260,7 +254,7 @@ main(argc, argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.14 2021-07-05 21:11:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qreceipt.c,v 1.15 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

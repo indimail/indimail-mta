@@ -1,5 +1,8 @@
 /*
  * $Log: rrforward.c,v $
+ * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.10  2021-07-05 21:11:44+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -34,58 +37,50 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "envdir.h"
-#include "pathexec.h"
-#include "sig.h"
-#include "lock.h"
-#include "str.h"
-#include "scan.h"
-#include "seek.h"
-#include "env.h"
+#include <envdir.h>
+#include <pathexec.h>
+#include <sig.h>
+#include <lock.h>
+#include <str.h>
+#include <scan.h>
+#include <seek.h>
+#include <env.h>
+#include <strerr.h>
+#include <substdio.h>
+#include <fmt.h>
+#include <noreturn.h>
 #include "qmail.h"
-#include "strerr.h"
-#include "substdio.h"
-#include "fmt.h"
 #include "set_environment.h"
 
 #define FATAL "rrforward: fatal: "
 #define WARN  "rrforward: warn: "
-
 #define QRR_FILE ".qmailrr"
-
 #define QRR_LEN (sizeof(QRR_FILE)-1)
 #define QRR_SEPARATOR(S) (*((S)+QRR_LEN))
 #define QRR_EXTENSION(S) ((S)+QRR_LEN+1)
 
-void
+ssize_t         qqtwrite(int fd, char *buf, size_t len);
+
+static struct qmail    qqt;
+static char     inbuf[SUBSTDIO_INSIZE], outbuf[1];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+static substdio ssout = SUBSTDIO_FDBUF(qqtwrite, -1, outbuf, sizeof outbuf);
+
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-struct qmail    qqt;
-
 ssize_t
-qqtwrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	ssize_t         len;
+qqtwrite(int fd, char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
 }
 
-char            inbuf[SUBSTDIO_INSIZE];
-char            outbuf[1];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-substdio        ssout = SUBSTDIO_FDBUF(qqtwrite, -1, outbuf, sizeof outbuf);
-
-void
-rr_forward(rrto, sender, dtline, rrnum)
-	char           *rrto;
-	char           *sender;
-	char           *dtline;
-	char           *rrnum;
+no_return void
+rr_forward(char *rrto, char *sender, char *dtline, char *rrnum)
 {
 	char           *qqx;
 	char            num[FMT_ULONG];
@@ -107,9 +102,7 @@ rr_forward(rrto, sender, dtline, rrnum)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char            strpos[FMT_ULONG + 2];
 	char           *rrfile, *extension, *sender, *dtline;
@@ -162,14 +155,12 @@ main(argc, argv)
 	strpos[r] = '\0';
 	set_environment(WARN, FATAL, 0);
 	rr_forward(argv[pos], sender, dtline, strpos);
-	/*- Not reached */
-	return(0);
 }
 
 void
 getversion_rrforward_c()
 {
-	static char    *x = "$Id: rrforward.c,v 1.10 2021-07-05 21:11:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrforward.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

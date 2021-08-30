@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.56  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.55  2021-08-28 23:13:58+05:30  Cprogrammer
  * control file dkimkeys for domain specific private key, selector
  *
@@ -191,6 +194,7 @@
 #include <scan.h>
 #include <mess822.h>
 #include <makeargs.h>
+#include <noreturn.h>
 #include "qmail.h"
 #include "control.h"
 #include "variables.h"
@@ -217,38 +221,36 @@ unsigned long   uid;
 int             readfd;
 char           *dksign = 0;
 char           *dkverify = 0;
-void            die(int) __attribute__((noreturn));
 
-void
-die(e)
-	int             e;
+no_return void
+die(int e)
 {
 	_exit(e);
 }
 
-void
+no_return void
 die_write()
 {
-	die(53);
+	_exit(53);
 }
 
-void
+no_return void
 die_read()
 {
-	die(54);
+	_exit(54);
 }
 
-void
+no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
-	die(52);
+	_exit(52);
 }
 
-void
+no_return void
 sigbug()
 {
-	die(81);
+	_exit(81);
 }
 
 void
@@ -820,7 +822,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.55 2021-08-28 23:13:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.56 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;

@@ -1,5 +1,8 @@
 /*
  * $Log: tcp-env.c,v $
+ * Revision 1.14  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.13  2021-07-07 08:53:42+05:30  Cprogrammer
  * removed setting of BOUNCEMAIL, WARNMAILx
  *
@@ -35,33 +38,32 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include "sig.h"
-#include "stralloc.h"
-#include "str.h"
+#include <sig.h>
+#include <stralloc.h>
+#include <str.h>
+#include <env.h>
+#include <fmt.h>
+#include <scan.h>
+#include <subgetopt.h>
+#include <byte.h>
+#include <case.h>
+#include <noreturn.h>
+
 #include "socket.h"
-#include "env.h"
-#include "fmt.h"
-#include "scan.h"
-#include "subgetopt.h"
 #include "ip.h"
 #include "hassalen.h"
 #ifdef USE_SPF
 #include "strsalloc.h"
 #endif
 #include "dns.h"
-#include "byte.h"
 #include "remoteinfo.h"
-#include "case.h"
 
-union sockunion salocal;
-unsigned long   localport;
-stralloc        localname = { 0 };
-
-union sockunion saremote;
-unsigned long   remoteport;
-stralloc        remotename = { 0 };
-
-char            temp[IPFMT + FMT_ULONG];
+static union sockunion salocal;
+static union sockunion saremote;
+static unsigned long   localport;
+static unsigned long   remoteport;
+static stralloc localname = { 0 };
+static stralloc remotename = { 0 };
 
 #ifdef IN6_IS_ADDR_V4MAPPED
 void
@@ -86,21 +88,18 @@ mappedtov4(union sockunion *sa)
 #define mappedtov4(A)
 #endif
 
-void
+no_return void
 die()
 {
 	_exit(111);
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char           *argv[];
+main(int argc, char **argv)
 {
-	int             dummy;
 	char           *proto;
-	int             opt;
-	int             flagremoteinfo;
+	int             opt, flagremoteinfo, dummy;
+	char            temp[IPFMT + FMT_ULONG];
 	unsigned long   timeout;
 #ifdef USE_SPF
 	strsalloc       ssa = { 0 };
@@ -334,7 +333,7 @@ main(argc, argv)
 void
 getversion_tcp_env_c()
 {
-	static char    *x = "$Id: tcp-env.c,v 1.13 2021-07-07 08:53:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcp-env.c,v 1.14 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

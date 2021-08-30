@@ -1,5 +1,8 @@
 /*
  * $Log: newinclude.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2021-06-15 11:42:10+05:30  Cprogrammer
  * moved token822.h to libqmail
  *
@@ -26,6 +29,7 @@
 #include <byte.h>
 #include <token822.h>
 #include <env.h>
+#include <noreturn.h>
 #include "control.h"
 #include "variables.h"
 
@@ -33,45 +37,45 @@
 
 int             rename(const char *, const char *);
 
-char           *fnlist;
-substdio        sslist;
-char            listbuf[1024];
-stralloc        bin = { 0 };
-stralloc        tmp = { 0 };
 #define fnbin bin.s
 #define fntmp tmp.s
-substdio        sstmp;
-char            tmpbuf[1024];
-stralloc        cbuf = { 0 };
-token822_alloc  toks = { 0 };
-token822_alloc  tokaddr = { 0 };
-stralloc        address = { 0 };
-stralloc        me = { 0 };
-stralloc        defaulthost = { 0 };
-stralloc        defaultdomain = { 0 };
-stralloc        plusdomain = { 0 };
-stralloc        line = { 0 };
-int             match;
+static char    *fnlist;
+static char     listbuf[1024];
+static char     tmpbuf[1024];
+static int      match;
+static stralloc bin = { 0 };
+static stralloc tmp = { 0 };
+static stralloc cbuf = { 0 };
+static stralloc address = { 0 };
+static stralloc me = { 0 };
+static stralloc defaulthost = { 0 };
+static stralloc defaultdomain = { 0 };
+static stralloc plusdomain = { 0 };
+static stralloc line = { 0 };
+static substdio sslist;
+static substdio sstmp;
+static token822_alloc  toks = { 0 };
+static token822_alloc  tokaddr = { 0 };
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 usage()
 {
 	strerr_die1x(100, "newinclude: usage: newinclude list");
 }
 
-void
+no_return void
 readerr()
 {
 	strerr_die4sys(111, FATAL, "unable to read ", fnlist, ": ");
 }
 
-void
+no_return void
 writeerr()
 {
 	strerr_die4sys(111, FATAL, "unable to write to ", fntmp, ": ");
@@ -87,9 +91,7 @@ out(s, len)
 }
 
 void
-doincl(buf, len)
-	char           *buf;
-	int             len;
+doincl(char *buf, int len)
 {
 	if (!len)
 		strerr_die2x(111, FATAL, "empty :include: filenames not permitted");
@@ -104,9 +106,7 @@ doincl(buf, len)
 }
 
 void
-dorecip(buf, len)
-	char           *buf;
-	int             len;
+dorecip(char *buf, int len)
 {
 	if (!len)
 		strerr_die2x(111, FATAL, "empty recipient addresses not permitted");
@@ -123,7 +123,7 @@ dorecip(buf, len)
 	out("", 1);
 }
 
-void
+no_return void
 die_control()
 {
 	strerr_die2sys(111, FATAL, "unable to read controls: ");
@@ -226,7 +226,7 @@ gotaddr()
 	dorecip(address.s, address.len);
 }
 
-void
+no_return void
 parseerr()
 {
 	if (!stralloc_0(&line))
@@ -317,9 +317,7 @@ parseline()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             fd;
 
@@ -364,7 +362,7 @@ main(argc, argv)
 void
 getversion_newinclude_c()
 {
-	static char    *x = "$Id: newinclude.c,v 1.5 2021-06-15 11:42:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: newinclude.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

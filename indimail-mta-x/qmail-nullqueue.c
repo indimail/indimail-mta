@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-nullqueue.c,v $
+ * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2011-05-17 21:21:11+05:30  Cprogrammer
  * added timeout
  *
@@ -16,20 +19,21 @@
  * Send Mails to Trash
  */
 #include <unistd.h>
-#include "sig.h"
-#include "scan.h"
-#include "env.h"
+#include <sig.h>
+#include <scan.h>
+#include <env.h>
+#include <noreturn.h>
 
 #define DEATH 300	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 
-void
+no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
 	_exit(52);
 }
 
-void
+no_return void
 sigbug()
 {
 	_exit(81);
@@ -71,7 +75,7 @@ main()
 void
 getversion_qmail_nullqueue_c()
 {
-	static char    *x = "$Id: qmail-nullqueue.c,v 1.4 2011-05-17 21:21:11+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: qmail-nullqueue.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

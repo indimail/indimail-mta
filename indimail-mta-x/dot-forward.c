@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.15  2021-07-05 21:10:12+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -65,6 +68,7 @@
 #include <fmt.h>
 #include <token822.h>
 #include <sgetopt.h>
+#include <noreturn.h>
 #include "control.h"
 #include "qmail.h"
 #include "set_environment.h"
@@ -108,31 +112,31 @@ char            qqbuf[256];
 substdio        ssqq = SUBSTDIO_FDBUF(mywrite, -1, qqbuf, sizeof qqbuf);
 char            inbuf[256];
 
-void
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_control()
 {
 	strerr_die2sys(111, FATAL, "unable to read controls: ");
 }
 
-void
+no_return void
 die_qq()
 {
 	strerr_die2sys(111, FATAL, "unable to run qq: ");
 }
 
-void
+no_return void
 die_readmess()
 {
 	strerr_die2sys(111, FATAL, "unable to read message: ");
 }
 
-void
+no_return void
 die_parse()
 {
 	if (!stralloc_0(&line))
@@ -517,7 +521,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.15 2021-07-05 21:10:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.16 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

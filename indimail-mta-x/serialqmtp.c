@@ -1,5 +1,8 @@
 /*
  * $Log: serialqmtp.c,v $
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.7  2020-11-24 13:48:07+05:30  Cprogrammer
  * removed exit.h
  *
@@ -24,43 +27,41 @@
  */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "strerr.h"
-#include "getln.h"
-#include "substdio.h"
-#include "stralloc.h"
-#include "subfd.h"
-#include "sig.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
-#include "fd.h"
-#include "open.h"
-#include "wait.h"
-#include "str.h"
-#include "fmt.h"
-#include "env.h"
 #include <unistd.h>
+#include <strerr.h>
+#include <getln.h>
+#include <substdio.h>
+#include <stralloc.h>
+#include <subfd.h>
+#include <sig.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <fd.h>
+#include <open.h>
+#include <wait.h>
+#include <str.h>
+#include <fmt.h>
+#include <env.h>
+#include <noreturn.h>
 
 #define FATAL "serialqmtp: fatal: "
 
-char           *remoteip;
-char           *prefix;
-unsigned int    prefixlen;
-char            netbuf[2048];
-substdio        ssnet;			/*- in child: write 7; in parent: read 6 */
-stralloc        line = { 0 };
-stralloc        fn = { 0 };
-int             match;
-
+static char    *remoteip, *prefix;
+static unsigned int    prefixlen;
+static char     netbuf[2048], num[FMT_ULONG], num2[FMT_ULONG], inbuf[2048];
+static substdio ssnet;			/*- in child: write 7; in parent: read 6 */
+static stralloc line = { 0 };
+static stralloc fn = { 0 };
+static stralloc recipient = { 0 };
+static stralloc sender = { 0 };
+static int      match;
 
 /*
  * ------------------------------------------------------------------- CHILD 
  */
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, size_t len)
 {
 	int             w;
 	if ((w = timeoutwrite(73, fd, buf, len)) <= 0)
@@ -68,16 +69,8 @@ safewrite(fd, buf, len)
 	return w;
 }
 
-char            num[FMT_ULONG];
-char            num2[FMT_ULONG];
-stralloc        recipient = { 0 };
-stralloc        sender = { 0 };
-
-char            inbuf[2048];
-
 void
-doit(fd)
-	int             fd;
+doit(int fd)
 {
 	struct stat     st;
 	unsigned long   len;
@@ -162,8 +155,7 @@ child()	/*- reading from original stdin, writing to parent */
 	int             fd;
 
 	substdio_fdbuf(&ssnet, safewrite, 7, netbuf, sizeof netbuf);
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &fn, &match, '\0') == -1)
 			_exit(34);
 		if (!match)
@@ -180,29 +172,26 @@ child()	/*- reading from original stdin, writing to parent */
  * ------------------------------------------------------------------ PARENT 
  */
 
-void
+no_return void
 die_proto()
 {
 	strerr_die2x(111, FATAL, "remote protocol violation");
 }
 
-void
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_output()
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
 }
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
 	if (!(r = timeoutread(3600, fd, buf, len)))
@@ -219,15 +208,13 @@ parent()	/*- reading from child, writing to original stdout */
 	unsigned char   ch;
 
 	substdio_fdbuf(&ssnet, saferead, 6, netbuf, sizeof netbuf);
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &fn, &match, '\0') == -1)
 			strerr_die2sys(111, FATAL, "unable to read from child: ");
 		if (!match)
 			return;
 		len = 0;
-		for (;;)
-		{
+		for (;;) {
 			substdio_get(&ssnet, (char *) &ch, 1);
 			if (ch == ':')
 				break;
@@ -245,22 +232,19 @@ parent()	/*- reading from child, writing to original stdout */
 			die_proto();
 		if (!stralloc_copyb(&line, (char *) &ch, 1))
 			die_nomem();
-		if (remoteip)
-		{
+		if (remoteip) {
 			if (!stralloc_cats(&line, remoteip))
 				die_nomem();
 			if (!stralloc_cats(&line, " said: "))
 				die_nomem();
 		}
-		while (len > 0)
-		{
+		while (len > 0) {
 			substdio_get(&ssnet, (char *) &ch, 1);
 			if (line.len < 2000 && !stralloc_append(&line, (char *) &ch))
 				die_nomem();
 			--len;
 		}
-		for (len = 0; len < line.len; ++len)
-		{
+		for (len = 0; len < line.len; ++len) {
 			ch = line.s[len];
 			if ((ch < 32) || (ch > 126))
 				line.s[len] = '?';
@@ -284,15 +268,12 @@ parent()	/*- reading from child, writing to original stdout */
  * -------------------------------------------------------------------- MAIN 
  */
 
-int             pic2p[2];
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	int             wstat;
-	int             pid;
+	int             wstat, pid;
+	int             pic2p[2];
 
 	sig_pipeignore();
 
@@ -306,12 +287,10 @@ main(argc, argv)
 	if (pipe(pic2p) == -1)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 
-	pid = fork();
-	if (pid == -1)
+	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 
-	if (!pid)
-	{
+	if (!pid) {
 		close(pic2p[0]);
 		fd_move(1, pic2p[1]);
 		child();
@@ -349,7 +328,7 @@ main(argc, argv)
 void
 getversion_serialqmtp_c()
 {
-	static char    *x = "$Id: serialqmtp.c,v 1.7 2020-11-24 13:48:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialqmtp.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

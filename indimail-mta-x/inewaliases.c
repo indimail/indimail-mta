@@ -1,5 +1,8 @@
 /*
  * $Log: inewaliases.c,v $
+ * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.6  2021-06-15 11:38:13+05:30  Cprogrammer
  * moved token822 to libqmail
  *
@@ -30,6 +33,7 @@
 #include <byte.h>
 #include <case.h>
 #include <cdbmss.h>
+#include <noreturn.h>
 #include "control.h"
 #include "variables.h"
 
@@ -37,46 +41,61 @@
 
 int             rename(const char *, const char *);
 
-void
+static stralloc me = { 0 };
+static stralloc defaulthost = { 0 };
+static stralloc defaultdomain = { 0 };
+static stralloc plusdomain = { 0 };
+static stralloc target = { 0 };
+static stralloc fulltarget = { 0 };
+static stralloc instr = { 0 };
+static stralloc cbuf = { 0 };
+static stralloc address = { 0 };
+static stralloc line = { 0 };
+static stralloc newline = { 0 };
+static stralloc key = { 0 };
+static token822_alloc toks = { 0 };
+static token822_alloc tokaddr = { 0 };
+static int      match;
+static char     inbuf[1024];
+static substdio ssin;
+static struct cdbmss cdbmss;
+
+
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 nulbyte()
 {
 	strerr_die2x(100, FATAL, "NUL bytes are not permitted");
 }
 
-void
+no_return void
 longaddress()
 {
 	strerr_die2x(100, FATAL, "addresses over 800 bytes are not permitted");
 }
 
-void
+no_return void
 writeerr()
 {
 	strerr_die2sys(111, FATAL, "unable to write to /etc/aliases.tmp: ");
 }
 
-void
+no_return void
 readerr()
 {
 	strerr_die2sys(111, FATAL, "unable to read /etc/aliases: ");
 }
 
-void
+no_return void
 die_control()
 {
 	strerr_die2sys(111, FATAL, "unable to read controls: ");
 }
-
-stralloc        me = { 0 };
-stralloc        defaulthost = { 0 };
-stralloc        defaultdomain = { 0 };
-stralloc        plusdomain = { 0 };
 
 void
 readcontrols()
@@ -100,15 +119,6 @@ readcontrols()
 	if (!r && !stralloc_copy(&plusdomain, &me))
 		nomem();
 }
-
-stralloc        target = { 0 };
-stralloc        fulltarget = { 0 };
-stralloc        instr = { 0 };
-
-stralloc        cbuf = { 0 };
-token822_alloc  toks = { 0 };
-token822_alloc  tokaddr = { 0 };
-stralloc        address = { 0 };
 
 void
 gotincl()
@@ -199,11 +209,7 @@ gotaddr()
 		strerr_die2x(111, FATAL, "NUL not permitted in recipient addresses");
 }
 
-stralloc        line = { 0 };
-stralloc        newline = { 0 };
-int             match;
-
-void
+no_return void
 parseerr()
 {
 	if (!stralloc_0(&line))
@@ -293,11 +299,6 @@ parseline()
 		gotaddr();
 }
 
-char            inbuf[1024];
-substdio        ssin;
-struct cdbmss   cdbmss;
-stralloc        key = { 0 };
-
 void
 doit()
 {
@@ -379,7 +380,7 @@ main()
 void
 getversion_newaliases_c()
 {
-	static char    *x = "$Id: inewaliases.c,v 1.6 2021-06-15 11:38:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inewaliases.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

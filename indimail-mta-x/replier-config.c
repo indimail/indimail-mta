@@ -1,5 +1,8 @@
 /*
  * $Log: replier-config.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2021-06-14 01:08:57+05:30  Cprogrammer
  * removed dependency on auto_qmail.h
  *
@@ -20,41 +23,36 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <unistd.h>
-#include "strerr.h"
-#include "substdio.h"
-#include "stralloc.h"
-#include "open.h"
+#include <strerr.h>
+#include <substdio.h>
+#include <stralloc.h>
+#include <open.h>
+#include <str.h>
+#include <noreturn.h>
 #include "auto_ezmlm.h"
-#include "str.h"
 
 #define FATAL "replier-config: fatal: "
 
-void
+static int      fd;
+static substdio ss;
+static stralloc dirplus = { 0 };
+static stralloc dotplus = { 0 };
+static char    *fn, *dir, *dot, *local, *host, *outlocal, *outhost;
+static char     buf[1024];
+
+no_return void
 usage(void)
 {
 	strerr_die1x(100, "replier-config: usage: replier-config dir dot local host [ outlocal [ outhost ]]");
 }
 
-void
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-char           *dir;
-char           *dot;
-char           *local;
-char           *host;
-char           *outlocal;
-char           *outhost;
-char           *extnum;
-
-char           *fn;
-char            buf[1024];
-int             fd;
-substdio        ss;
-
-void
+no_return void
 fail(void)
 {
 	strerr_die6sys(111, FATAL, "unable to create ", dir, "/", fn, ": ");
@@ -72,8 +70,7 @@ void
 start(char *s)
 {
 	fn = s;
-	fd = open_trunc(fn);
-	if (fd == -1)
+	if ((fd = open_trunc(fn)) == -1)
 		fail();
 	substdio_fdbuf(&ss, write, fd, buf, sizeof buf);
 }
@@ -102,13 +99,8 @@ perm(int mode)
 		fail();
 }
 
-stralloc        dirplus = { 0 };
-stralloc        dotplus = { 0 };
-stralloc        outadmin = { 0 };
-
 void
-dirplusmake(slash)
-	char           *slash;
+dirplusmake(char *slash)
 {
 	if (!stralloc_copys(&dirplus, dir) ||
 			!stralloc_cats(&dirplus, slash) ||
@@ -117,9 +109,7 @@ dirplusmake(slash)
 }
 
 void
-linkdotdir(dash, slash)
-	char           *dash;
-	char           *slash;
+linkdotdir(char *dash, char *slash)
 {
 	if (!stralloc_copys(&dotplus, dot) ||
 			!stralloc_cats(&dotplus, dash) ||
@@ -135,27 +125,20 @@ main(int argc, char **argv)
 {
 	umask(077);
 
-	dir = argv[1];
-	if (!dir)
+	if (!(dir = argv[1]))
 		usage();
 	if (dir[0] != '/')
 		usage();
-	dot = argv[2];
-	if (!dot)
+	if (!(dot = argv[2]))
 		usage();
-	local = argv[3];
-	if (!local)
+	if (!(local = argv[3]))
 		usage();
-	host = argv[4];
-	if (!host)
+	if (!(host = argv[4]))
 		usage();
-	outlocal = argv[5];
-	if (!outlocal)
-	{
+	if (!(outlocal = argv[5])) {
 		outlocal = local;
 		outhost = host;
-	} else
-	{
+	} else {
 		outhost = argv[6];
 		if (!outhost)
 			outhost = host;
@@ -306,7 +289,7 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	static char    *x = "$Id: replier-config.c,v 1.5 2021-06-14 01:08:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier-config.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

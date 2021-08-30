@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.44  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.43  2021-07-15 09:22:02+05:30  Cprogrammer
  * removed unused function
  *
@@ -147,6 +150,7 @@
 #include <case.h>
 #include <byte.h>
 #include <token822.h>
+#include <noreturn.h>
 #include "hfield.h"
 #include "control.h"
 #include "qmail.h"
@@ -168,40 +172,66 @@
 
 datetime_sec    starttime;
 
-char           *qmopts;
-int             flagdeletesender = 0;
-int             flagdeletefrom = 0;
-int             flagdeletemessid = 0;
-int             flagnamecomment = 0;
-int             flaghackmess = 0;
-int             flaghackrecip = 0;
 static unsigned long   databytes = 0;
 static unsigned long   size = 0;
-char           *mailhost;
-char           *mailuser;
-int             mailusertokentype;
-char           *mailrhost;
-char           *mailruser;
-int             rcptcount;
-int             maxrcptcount = -1;
-int             flagrh;
-int             flagqueue;
-stralloc        control_idhost = { 0 };
-stralloc        control_defaultdomain = { 0 };
-stralloc        control_defaulthost = { 0 };
-stralloc        control_plusdomain = { 0 };
-stralloc        sender = { 0 };
-stralloc        envsbuf = { 0 };
-token822_alloc  envs = { 0 };
-struct qmail    qqt;
+static token822_alloc  envs = { 0 };
+static struct qmail    qqt;
+static char    *qmopts;
+static char    *mailhost;
+static char    *mailuser;
+static char    *mailrhost;
+static char    *mailruser;
+static int      flagdeletesender = 0;
+static int      flagdeletefrom = 0;
+static int      flagdeletemessid = 0;
+static int      flagnamecomment = 0;
+static int      flaghackmess = 0;
+static int      flaghackrecip = 0;
+static int      mailusertokentype;
+static int      rcptcount;
+static int      maxrcptcount = -1;
+static int      flagrh;
+static int      flagqueue;
+static int      flagresent;
+static int      htypeseen[H_NUM];
+static stralloc control_idhost = { 0 };
+static stralloc control_defaultdomain = { 0 };
+static stralloc control_defaulthost = { 0 };
+static stralloc control_plusdomain = { 0 };
+static stralloc sender = { 0 };
+static stralloc envsbuf = { 0 };
+static stralloc sauninit = { 0 };
+static stralloc defaultdomainbuf = { 0 };
+static stralloc defaulthostbuf = { 0 };
+static stralloc plusdomainbuf = { 0 };
+static stralloc hfbuf = { 0 };
+static stralloc torecip = { 0 };
+static stralloc defaultfrom = { 0 };
+static stralloc defaultreturnpath = { 0 };
+static stralloc hackedruser = { 0 };
+
+GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
+GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
+
+static saa      savedh = { 0 };
+static saa      hrlist = { 0 };
+static saa      tocclist = { 0 };
+static saa      hrrlist = { 0 };
+static saa      reciplist = { 0 };
+static token822_alloc  defaultdomain = { 0 };
+static token822_alloc  defaulthost = { 0 };
+static token822_alloc  plusdomain = { 0 };
+static token822_alloc  hfin = { 0 };
+static token822_alloc  hfrewrite = { 0 };
+static token822_alloc  hfaddr = { 0 };
+static token822_alloc  tr = { 0 };
+static token822_alloc  df = { 0 };
+static token822_alloc  drp = { 0 };
 
 void
-put(s, len)
-	char           *s;
-	int             len;
+put(char *s, int len)
 {
-	if (flagqueue)
-	{
+	if (flagqueue) {
 		qmail_put(&qqt, s, len);
 		size += len;
 		if (databytes && size > databytes)
@@ -211,32 +241,31 @@ put(s, len)
 }
 
 void
-my_puts(s)
-	char           *s;
+my_puts(char *s)
 {
 	put(s, str_len(s));
 }
 
-void
+no_return void
 perm()
 {
 	_exit(100);
 }
 
-void
+no_return void
 temp()
 {
 	_exit(111);
 }
 
-void
+no_return void
 die_rcpt()
 {
 	substdio_putsflush(subfderr, "qmail-inject: fatal: max number of recipients exceeded\n");
 	perm();
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_putsflush(subfderr, "qmail-inject: fatal: out of memory\n");
@@ -244,7 +273,7 @@ die_nomem()
 }
 
 #ifdef HAVESRS
-void die_srs()
+no_return void die_srs()
 {
 	substdio_puts(subfderr, "qmail-inject: fatal: ");
 	substdio_puts(subfderr, srs_error.s);
@@ -253,14 +282,14 @@ void die_srs()
 }
 #endif
 
-void
+no_return void
 die_regex()
 {
 	substdio_putsflush(subfderr, "qmail-inject: fatal: regex compilation failed\n");
 	temp();
 }
 
-void
+no_return void
 die_control(char *arg)
 {
 	substdio_puts(subfderr, "qmail-inject: fatal: unable to read control file ");
@@ -270,23 +299,22 @@ die_control(char *arg)
 	temp();
 }
 
-void
-die_invalid(sa)
-	stralloc       *sa;
+no_return void
+die_invalid(stralloc *sa)
 {
 	substdio_putsflush(subfderr, "qmail-inject: fatal: invalid header field: ");
 	substdio_putflush(subfderr, sa->s, sa->len);
 	perm();
 }
 
-void
+no_return void
 die_qqt()
 {
 	substdio_putsflush(subfderr, "qmail-inject: fatal: unable to run qmail-queue\n");
 	temp();
 }
 
-void
+no_return void
 die_read()
 {
 	if (errno == error_nomem)
@@ -295,7 +323,7 @@ die_read()
 	temp();
 }
 
-void
+no_return void
 die_stat()
 {
 	char            strnum[FMT_ULONG];
@@ -308,7 +336,7 @@ die_stat()
 	temp();
 }
 
-void
+no_return void
 die_size()
 {
 	substdio_puts(subfderr, "qmail-inject: fatal: ");
@@ -317,9 +345,7 @@ die_size()
 }
 
 void
-doordie(sa, r)
-	stralloc       *sa;
-	int             r;
+doordie(stralloc *sa, int r)
 {
 	if (r == 1)
 		return;
@@ -330,18 +356,7 @@ doordie(sa, r)
 	perm();
 }
 
-GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
-GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
-
-stralloc        sauninit = { 0 };
-saa             savedh = { 0 };
-saa             hrlist = { 0 };
-saa             tocclist = { 0 };
-saa             hrrlist = { 0 };
-saa             reciplist = { 0 };
-int             flagresent;
-
-void
+no_return void
 exitnicely()
 {
 	char           *qqx;
@@ -412,8 +427,7 @@ exitnicely()
 }
 
 void
-savedh_append(h)
-	stralloc       *h;
+savedh_append(stralloc *h)
 {
 	if (!saa_readyplus(&savedh, 1))
 		die_nomem();
@@ -432,16 +446,8 @@ savedh_print()
 		put(savedh.sa[i].s, savedh.sa[i].len);
 }
 
-stralloc        defaultdomainbuf = { 0 };
-token822_alloc  defaultdomain = { 0 };
-stralloc        defaulthostbuf = { 0 };
-token822_alloc  defaulthost = { 0 };
-stralloc        plusdomainbuf = { 0 };
-token822_alloc  plusdomain = { 0 };
-
 void
-rwroute(addr)
-	token822_alloc *addr;
+rwroute(token822_alloc *addr)
 {
 	if (addr->t[addr->len - 1].type == TOKEN822_AT) {
 		while (addr->len) {
@@ -452,8 +458,7 @@ rwroute(addr)
 }
 
 void
-rwextraat(addr)
-	token822_alloc *addr;
+rwextraat(token822_alloc *addr)
 {
 	int             i;
 
@@ -465,8 +470,7 @@ rwextraat(addr)
 }
 
 void
-rwextradot(addr)
-	token822_alloc *addr;
+rwextradot(token822_alloc *addr)
 {
 	int             i;
 
@@ -478,8 +482,7 @@ rwextradot(addr)
 }
 
 void
-rwnoat(addr)
-	token822_alloc *addr;
+rwnoat(token822_alloc *addr)
 {
 	int             i;
 	int             shift;
@@ -499,8 +502,7 @@ rwnoat(addr)
 }
 
 void
-rwnodot(addr)
-	token822_alloc *addr;
+rwnodot(token822_alloc *addr)
 {
 	int             i;
 	int             shift;
@@ -528,8 +530,7 @@ rwnodot(addr)
 }
 
 void
-rwplus(addr)
-	token822_alloc *addr;
+rwplus(token822_alloc *addr)
 {
 	int             i;
 	int             shift;
@@ -552,8 +553,7 @@ rwplus(addr)
 }
 
 void
-rwgeneric(addr)
-	token822_alloc *addr;
+rwgeneric(token822_alloc *addr)
 {
 	if (!addr->len)
 		return;	/*- don't rewrite <> */
@@ -580,8 +580,7 @@ rwgeneric(addr)
 }
 
 int
-setreturn(addr)
-	token822_alloc *addr;
+setreturn(token822_alloc *addr)
 {
 	if (!sender.s) {
 		token822_reverse(addr);
@@ -596,8 +595,7 @@ setreturn(addr)
 }
 
 int
-rwreturn(addr)
-	token822_alloc *addr;
+rwreturn(token822_alloc *addr)
 {
 	rwgeneric(addr);
 	setreturn(addr);
@@ -605,17 +603,14 @@ rwreturn(addr)
 }
 
 int
-rwsender(addr)
-	token822_alloc *addr;
+rwsender(token822_alloc *addr)
 {
 	rwgeneric(addr);
 	return 1;
 }
 
 void
-rwappend(addr, xl)
-	token822_alloc *addr;
-	saa            *xl;
+rwappend(token822_alloc *addr, saa *xl)
 {
 	token822_reverse(addr);
 	if (!saa_readyplus(xl, 1))
@@ -628,8 +623,7 @@ rwappend(addr, xl)
 }
 
 int
-rwhrr(addr)
-	token822_alloc *addr;
+rwhrr(token822_alloc *addr)
 {
 	rwgeneric(addr);
 	rwappend(addr, &hrrlist);
@@ -637,8 +631,7 @@ rwhrr(addr)
 }
 
 int
-rwhr(addr)
-	token822_alloc *addr;
+rwhr(token822_alloc *addr)
 {
 	rwgeneric(addr);
 	rwappend(addr, &hrlist);
@@ -646,8 +639,7 @@ rwhr(addr)
 }
 
 int
-rwtocc(addr)
-	token822_alloc *addr;
+rwtocc(token822_alloc *addr)
 {
 	rwgeneric(addr);
 	rwappend(addr, &hrlist);
@@ -655,15 +647,8 @@ rwtocc(addr)
 	return 1;
 }
 
-int             htypeseen[H_NUM];
-stralloc        hfbuf = { 0 };
-token822_alloc  hfin = { 0 };
-token822_alloc  hfrewrite = { 0 };
-token822_alloc  hfaddr = { 0 };
-
 void
-doheaderfield(h)
-	stralloc       *h;
+doheaderfield(stralloc *h)
 {
 	int             htype;
 	int             (*rw) () = 0;
@@ -730,18 +715,13 @@ doheaderfield(h)
 }
 
 void
-dobody(h)
-	stralloc       *h;
+dobody(stralloc *h)
 {
 	put(h->s, h->len);
 }
 
-stralloc        torecip = { 0 };
-token822_alloc  tr = { 0 };
-
 void
-dorecip(s)
-	char           *s;
+dorecip(char *s)
 {
 	if (!quote2(&torecip, s))
 		die_nomem();
@@ -762,9 +742,6 @@ dorecip(s)
 	rwgeneric(&tr);
 	rwappend(&tr, &reciplist);
 }
-
-stralloc        defaultfrom = { 0 };
-token822_alloc  df = { 0 };
 
 void
 defaultfrommake()
@@ -822,14 +799,11 @@ defaultfrommake()
 		die_nomem();
 }
 
-stralloc        defaultreturnpath = { 0 };
-token822_alloc  drp = { 0 };
-stralloc        hackedruser = { 0 };
-char            strnum[FMT_ULONG];
-
 void
 dodefaultreturnpath()
 {
+	char            strnum[FMT_ULONG];
+
 	if (!stralloc_copys(&hackedruser, mailruser))
 		die_nomem();
 	if (flaghackmess) {
@@ -1095,9 +1069,7 @@ getcontrols()
 #define RECIP_AH 4
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             i;
 	int             opt;
@@ -1223,7 +1195,7 @@ main(argc, argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.43 2021-07-15 09:22:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.44 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.12  2021-05-29 23:47:37+05:30  Cprogrammer
  * replace str_chr with str_rchr to get domain correctly from email address
  *
@@ -40,18 +43,19 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include "stralloc.h"
-#include "str.h"
-#include "getln.h"
-#include "substdio.h"
-#include "datetime.h"
-#include "date822fmt.h"
-#include "mess822.h"
-#include "now.h"
-#include "env.h"
-#include "fmt.h"
-#include "error.h"
-#include "sgetopt.h"
+#include <stralloc.h>
+#include <str.h>
+#include <getln.h>
+#include <substdio.h>
+#include <datetime.h>
+#include <date822fmt.h>
+#include <mess822.h>
+#include <now.h>
+#include <env.h>
+#include <fmt.h>
+#include <error.h>
+#include <sgetopt.h>
+#include <noreturn.h>
 
 #define READ_ERR  1
 #define WRITE_ERR 2
@@ -61,12 +65,12 @@
 #define LSEEK_ERR 6
 #define USAGE_ERR 7
 
-char            strnum[FMT_ULONG];
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
+static char     strnum[FMT_ULONG];
+static char    *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-char           *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
 
 void
 logerr(char *s)
@@ -84,7 +88,7 @@ logerrf(char *s)
 		_exit(1);
 }
 
-void
+no_return void
 my_error(char *s1, char *s2, int exit_val)
 {
 	logerr(s1);
@@ -412,7 +416,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.12 $\n");
+			"X-Mailer: qarf $Revision: 1.13 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -456,7 +460,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.12 2021-05-29 23:47:37+05:30 Cprogrammer Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -516,7 +520,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.12 2021-05-29 23:47:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qarf.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

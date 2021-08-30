@@ -1,5 +1,8 @@
 /*
  * $Log: checkdomain.c,v $
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.3  2020-11-24 13:44:25+05:30  Cprogrammer
  * removed exit.h
  *
@@ -11,41 +14,34 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "str.h"
-#include "strerr.h"
-#include "getln.h"
-#include "mess822.h"
-#include "case.h"
-#include "env.h"
+#include <substdio.h>
+#include <str.h>
+#include <strerr.h>
+#include <getln.h>
+#include <mess822.h>
+#include <case.h>
+#include <env.h>
+#include <noreturn.h>
 
 #define FATAL "checkdomain: fatal: "
 
-void
+char           *recipient;
+char          **recips;
+
+no_return void
 nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-stralloc        addrlist = { 0 };
-int             match;
-static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-
-char           *recipient;
-char          **recips;
-
 void
-check(addr)
-	char           *addr;
+check(char *addr)
 {
 	int             i;
-
 
 	if (recipient)
 		if (case_equals(addr, recipient))
 			_exit(0);
-
 	if (!recipient)
 		for (i = 0; recips[i]; ++i)
 			if (case_equals(addr, recips[i]))
@@ -53,44 +49,40 @@ check(addr)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	int             i;
+	int             i, match;
+	stralloc        addrlist = { 0 };
+	char            ssinbuf[1024];
+	substdio        ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 
 	recipient = env_get("RECIPIENT");
 	recips = argv + 1;
 	if (*recips)
 		recipient = 0;
-	else
-	{
+	else {
 		recipient += str_rchr(recipient, '@');
 		if (recipient)
 			++recipient;
 	}
-
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &addrlist, &match, '\0') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!match)
 			break;
-		if (addrlist.s[0] == '+')
-		{
+		if (addrlist.s[0] == '+') {
 			i = str_rchr(addrlist.s, '@');
 			if (addrlist.s[i])
 				check(addrlist.s + i + 1);
 		}
 	}
-
 	_exit(100);
 }
 
 void
 getversion_checkdomain_c()
 {
-	static char    *x = "$Id: checkdomain.c,v 1.3 2020-11-24 13:44:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: checkdomain.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

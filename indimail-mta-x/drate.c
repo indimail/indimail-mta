@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.20  2021-08-28 23:02:52+05:30  Cprogrammer
  * moved delivery variable to getDomainToken.c
  *
@@ -84,6 +87,7 @@
 #include <check_domain.h>
 #include <date822fmt.h>
 #include <no_of_days.h>
+#include <noreturn.h>
 #include "variables.h"
 #include "auto_qmail.h"
 #include "auto_uids.h"
@@ -126,7 +130,7 @@ logerrf(char *s)
 		_exit(1);
 }
 
-void
+no_return void
 my_error(char *s1, int exit_val)
 {
 	logerr(s1);
@@ -134,7 +138,7 @@ my_error(char *s1, int exit_val)
 	_exit(exit_val);
 }
 
-void
+no_return void
 cleanup(char *file, char *str, int e)
 {
 	if (e == error_noent)
@@ -624,7 +628,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.20 2021-08-28 23:02:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.21 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.4  2021-06-15 12:14:05+05:30  Cprogrammer
  * use makeargs from libqmail
  *
@@ -46,32 +49,31 @@
 #include <getln.h>
 #include <error.h>
 #include <makeargs.h>
+#include <noreturn.h>
 #include "auto_uids.h"
 
 static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-stralloc        user = { 0 };
-stralloc        old_pass = { 0 };
-stralloc        new_pass = { 0 };
-char          **authargs, **passargs;
 static char     upbuf[128];
+static char   **authargs, **passargs;
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static stralloc user = { 0 };
+static stralloc old_pass = { 0 };
+static stralloc new_pass = { 0 };
 static substdio ssup;
 
 void
-errlog(s)
-	char           *s;
+errlog(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(111);
 }
 
 void
-errlogf(s)
-	char           *s;
+errlogf(char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(111);
@@ -80,8 +82,7 @@ errlogf(s)
 }
 
 void
-out(s)
-	char           *s;
+out(char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
 		_exit(111);
@@ -94,7 +95,7 @@ flush()
 		_exit(111);
 }
 
-void
+no_return void
 my_error(char *s1, int exit_val)
 {
 	if (substdio_puts(&sserr, s1))
@@ -355,7 +356,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.4 2021-06-15 12:14:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

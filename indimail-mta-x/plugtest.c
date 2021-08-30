@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.6  2021-05-26 10:43:34+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -21,25 +24,26 @@
  */
 #include <unistd.h>
 #include <dlfcn.h>
-#include "sgetopt.h"
-#include "alloc.h"
-#include "str.h"
-#include "error.h"
-#include "strerr.h"
-#include "env.h"
-#include "stralloc.h"
-#include "fmt.h"
+#include <sgetopt.h>
+#include <alloc.h>
+#include <str.h>
+#include <error.h>
+#include <strerr.h>
+#include <env.h>
+#include <stralloc.h>
+#include <fmt.h>
+#include <subfd.h>
+#include <noreturn.h>
 #include "auto_qmail.h"
 #include "auto_prefix.h"
-#include "subfd.h"
 #include "smtp_plugin.h"
 
 #define FATAL "plugtest: fatal: "
 
-int              authenticated;
-char            *relayclient;
-PLUGIN         **plug = (PLUGIN **) 0;
-void           **handle;
+static int       authenticated;
+static char     *relayclient;
+static PLUGIN  **plug = (PLUGIN **) 0;
+static void    **handle;
 
 void
 out(char *str)
@@ -59,7 +63,7 @@ flush()
 	return;
 }
 
-void
+no_return void
 die_nomem()
 {
 	substdio_flush(subfdout);
@@ -68,7 +72,7 @@ die_nomem()
 	_exit(1);
 }
 
-void
+no_return void
 die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
 {
 	substdio_flush(subfdout);
@@ -381,7 +385,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.6 2021-05-26 10:43:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: plugtest.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: relaytest.c,v $
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
  * Revision 1.5  2016-01-02 19:23:25+05:30  Cprogrammer
  * use indimail.org
  *
@@ -17,66 +20,74 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "strerr.h"
-#include "byte.h"
-#include "scan.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
+#include <substdio.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <strerr.h>
+#include <byte.h>
+#include <scan.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <noreturn.h>
 
 #define FATAL "relaytest: fatal: "
 
-void
+ssize_t         saferead(int fd, char *buf, size_t len);
+ssize_t         safewrite(int fd, char *buf, size_t len);
+
+static char     buf6[2048], buf7[2048], ssoutbuf[512];
+static substdio ss6 = SUBSTDIO_FDBUF(saferead, 6, buf6, sizeof buf6);
+static substdio ss7 = SUBSTDIO_FDBUF(safewrite, 7, buf7, sizeof buf7);
+static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
+static stralloc smtpline = { 0 };
+
+no_return void
 die_nomem()
 {
 	strerr_die2x(111, FATAL, "out of memory");
 }
 
-void
+no_return void
 die_output()
 {
 	strerr_die2sys(111, FATAL, "unable to write output: ");
 }
 
-void
+no_return void
 die_readmess()
 {
 	strerr_die2sys(111, FATAL, "unable to read file: ");
 }
 
-void
+no_return void
 die_neteof()
 {
 	strerr_die2x(111, FATAL, "network read error: end of file");
 }
 
-void
+no_return void
 die_netread()
 {
 	strerr_die2sys(111, FATAL, "network read error: ");
 }
 
-void
+no_return void
 die_netwrite()
 {
 	strerr_die2sys(111, FATAL, "network write error: ");
 }
 
-void
+no_return void
 die_proto()
 {
 	strerr_die2x(111, FATAL, "protocol violation");
 }
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
+
 	if (!(r = timeoutread(81, fd, buf, len)))
 		die_neteof();
 	if (r < 0)
@@ -85,10 +96,7 @@ saferead(fd, buf, len)
 }
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, size_t len)
 {
 	int             r;
 
@@ -96,14 +104,6 @@ safewrite(fd, buf, len)
 		die_netwrite();
 	return r;
 }
-
-char            buf6[2048];
-substdio        ss6 = SUBSTDIO_FDBUF(saferead, 6, buf6, sizeof buf6);
-char            buf7[2048];
-substdio        ss7 = SUBSTDIO_FDBUF(safewrite, 7, buf7, sizeof buf7);
-static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
-stralloc        smtpline = { 0 };
 
 unsigned long
 smtpcode()
@@ -148,13 +148,9 @@ quit()	/*- what a stupid protocol */
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-
-	if (smtpcode() != 220)
-	{
+	if (smtpcode() != 220) {
 		quit();
 		strerr_die2x(111, FATAL, "connected but greeting failed");
 	}
@@ -162,14 +158,12 @@ main(argc, argv)
 	substdio_putsflush(&ssout, "EHLO indimail.org\r\n");
 	if (substdio_putsflush(&ss7, "EHLO indimail.org\r\n"))
 		die_netwrite();
-	if (smtpcode() != 250)
-	{
+	if (smtpcode() != 250) {
 		substdio_puts(&ssout, "client: ");
 		substdio_putsflush(&ssout, "HELO indimail.org\r\n");
 		if (substdio_putsflush(&ss7, "HELO indimail.org\r\n"))
 			die_netwrite();
-		if (smtpcode() != 250)
-		{
+		if (smtpcode() != 250) {
 			quit();
 			_exit(1);
 		}
@@ -178,8 +172,7 @@ main(argc, argv)
 	substdio_putsflush(&ssout, "MAIL FROM: test@indimail.org\r\n");
 	if (substdio_putsflush(&ss7, "MAIL FROM: test@indimail.org\r\n"))
 		die_netwrite();
-	if (smtpcode() != 250)
-	{
+	if (smtpcode() != 250) {
 		quit();
 		_exit(1);
 	}
@@ -187,8 +180,7 @@ main(argc, argv)
 	substdio_putsflush(&ssout, "RCPT TO: test@relay-test-invalid.com\r\n");
 	if (substdio_putsflush(&ss7, "RCPT TO: test@relay-test-invalid.com\r\n"))
 		die_netwrite();
-	if (smtpcode() != 250)
-	{
+	if (smtpcode() != 250) {
 			quit();
 			_exit(1);
 	}
@@ -210,7 +202,7 @@ main(argc, argv)
 void
 getversion_relaytest_c()
 {
-	static char    *x = "$Id: relaytest.c,v 1.5 2016-01-02 19:23:25+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: relaytest.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
