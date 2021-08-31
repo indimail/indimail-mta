@@ -2,11 +2,14 @@
 Release 2.14.0 Start 18/07/2021
 ======= Release Highlights ================================================
 o alpine linux ready - openrc script, svctool, minisvc
-o github packages - docker/podman images for [docker/podman](https://ghcr.io/mbhangui/indimail-mta)
+o github packages - docker/podman images for
+  [docker/podman](https://ghcr.io/mbhangui/indimail-mta)
 o instant reconfiguration of domain for docker/podman containers
 o use global variables directory /etc/indimail/control/global_vars for
   DEFAULT_DOMAIN, QMAILDEFAULTHOST
 o installer can now install, uninstall and set permissions
+o New control file dkimkeys to override DKIMKEY and allow domain specfic
+  keys and selector
 ===========================================================================
 - 18/07/2021
 1.  autoresponder.c: conditional define of _XOPEN_SOURCE to avoid
@@ -138,7 +141,7 @@ o installer can now install, uninstall and set permissions
 77. drate: moved check_domain to libqmail
 - 25/08/2021
 78. svctool: fixed value of CERTDIR in create_cert
-79. svctool: updated cipher list by to fix warnings from testssl.sh from
+79. svctool: updated cipher list to fix warnings from testssl.sh from
     https://github.com/drwetter/testssl.sh
 - 26/08/2021
 80. svctool: use /usr/local/etc/indimail/sv for servicedir on OSX/Darwin
