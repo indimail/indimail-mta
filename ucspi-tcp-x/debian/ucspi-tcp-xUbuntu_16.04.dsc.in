@@ -1,0 +1,14 @@
+Format: 1.0
+Source: ucspi-tcp
+Section: Misc
+Priority: extra
+Binary: ucspi-tcp
+Architecture: any
+Version: @version@-@release@
+Maintainer: @email@
+Homepage: https://github.com/mbhangui/indimail-mta
+Debtransform-Release: 1
+Debtransform-Tar: ucspi-tcp-@version@.tar.gz
+Debtransform-Files-Tar: debian.tar.gz
+Standards-Version: 3.9.1
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, libqmail-dev, libssl-dev, libmysqlclient-dev, m4, gawk

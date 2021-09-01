@@ -11,7 +11,7 @@ release=@release@
 email=@email@
 
 all: rules ucspi-tcp.dsc ucspi-tcp-xUbuntu_18.04.dsc \
-preinst postinst debian.tar.gz
+ucspi-tcp-xUbuntu_16.04.dsc preinst postinst debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -61,6 +61,9 @@ ucspi-tcp-Debian_10.dsc: ucspi-tcp-Debian_10.dsc.in Makefile \
 ../conf-version ../conf-release
 	$(edit) $@.in > $@
 ucspi-tcp-Debian_9.0.dsc: ucspi-tcp-Debian_9.0.dsc.in Makefile \
+../conf-version ../conf-release
+	$(edit) $@.in > $@
+ucspi-tcp-xUbuntu_16.04.dsc: ucspi-tcp-xUbuntu_16.04.dsc.in Makefile \
 ../conf-version ../conf-release
 	$(edit) $@.in > $@
 ucspi-tcp-xUbuntu_18.04.dsc: ucspi-tcp-xUbuntu_18.04.dsc.in Makefile \
