@@ -17,10 +17,9 @@ all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst \
-qmta.prerm qmta.preinst \
-qmta.postrm qmta.postinst \
-indimail-mta.install indimail-mta.dsc \
-indimail-mta-xUbuntu_18.04.dsc debian.tar.gz
+qmta.prerm qmta.preinst qmta.postrm qmta.postinst indimail-mta.install \
+indimail-mta.dsc indimail-mta-xUbuntu_18.04.dsc \
+indimail-mta-xUbuntu_16.04.dsc debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -86,6 +85,9 @@ indimail-mta-Raspbian_9.0.dsc: indimail-mta-Raspbian_9.0.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-mta-xUbuntu_16.04.dsc: indimail-mta-xUbuntu_16.04.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-mta.postrm: indimail-mta.postrm.in Makefile \
