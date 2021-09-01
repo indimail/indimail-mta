@@ -30,9 +30,7 @@ infinite recursive loops, by storing the inode number of directories
 visited and checking against the list. Any directory already processed is
 silently ignored. Files in .\fIenvdir\fR are read first. This prevents
 environment variables in .\fIenvdir\fR from overriding or deleting
-environment variables set in \fId\fR. Apart from .\fIenvdir\fR,
-\fBenvdir\fR skips all files/directories starting with the '.' dot
-character.
+environment variables set in \fId\fR.
 
 if \fBenvdir\fR finds a file named .\fIenvdir\fR, it assumes that a file
 contains a list of additional directories to be processed for environment
@@ -48,6 +46,9 @@ removed. Nulls in \fIt\fR are changed to newlines in the environment
 variable. If \fBenvdir\fR finds a line \fIs\fR, without =, \fBenvdir\fR
 removes an environment variable named \fIs\fR if one exists, without adding
 a new variable.
+
+Apart from .\fIenvdir\fR and \fI.envfile\fR, \fBenvdir\fR skips all
+files/directories starting with the '.' dot character.
 
 In case of any error, \fBenvdir\fR will not modify or add to the existing
 set of environment variables. In case of error, \fBenvdir\fR will exit 111
