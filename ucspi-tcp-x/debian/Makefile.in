@@ -10,9 +10,7 @@ version=@version@
 release=@release@
 email=@email@
 
-all: rules ucspi-tcp.dsc ucspi-tcp-Debian_9.0.dsc \
-ucspi-tcp-Debian_10.dsc ucspi-tcp-xUbuntu_18.04.dsc \
-ucspi-tcp-Raspbian_10.dsc ucspi-tcp-Raspbian_9.0.dsc \
+all: rules ucspi-tcp.dsc ucspi-tcp-xUbuntu_18.04.dsc \
 preinst postinst debian.tar.gz
 
 edit = sed \
@@ -68,12 +66,6 @@ ucspi-tcp-Debian_9.0.dsc: ucspi-tcp-Debian_9.0.dsc.in Makefile \
 ucspi-tcp-xUbuntu_18.04.dsc: ucspi-tcp-xUbuntu_18.04.dsc.in Makefile \
 ../conf-version ../conf-release
 	$(edit) $@.in > $@
-ucspi-tcp-Raspbian_10.dsc: ucspi-tcp-Debian_10.dsc.in Makefile \
-../conf-version ../conf-release
-	$(edit) ucspi-tcp-Debian_10.dsc.in > $@
-ucspi-tcp-Raspbian_9.0.dsc: ucspi-tcp-Debian_9.0.dsc.in Makefile \
-../conf-version ../conf-release
-	$(edit) ucspi-tcp-Debian_9.0.dsc.in > $@
 
 debian.tar.gz: copyright rules changelog compat control ucspi-tcp.install \
 preinst postinst
