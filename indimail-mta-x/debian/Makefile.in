@@ -20,7 +20,6 @@ indimail-mini.postrm indimail-mini.postinst \
 qmta.prerm qmta.preinst \
 qmta.postrm qmta.postinst \
 indimail-mta.install indimail-mta.dsc \
-indimail-mta-Debian_9.0.dsc indimail-mta-Debian_10.dsc \
 indimail-mta-xUbuntu_18.04.dsc indimail-mta-Raspbian_10.dsc \
 indimail-mta-Raspbian_9.0.dsc debian.tar.gz
 
@@ -85,12 +84,6 @@ indimail-mta-Raspbian_10.dsc: indimail-mta-Raspbian_10.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-mta-Raspbian_9.0.dsc: indimail-mta-Raspbian_9.0.dsc.in Makefile \
-../conf-version ../conf-release ../conf-email
-	$(edit) $@.in > $@
-indimail-mta-Debian_10.dsc: indimail-mta-Debian_10.dsc.in Makefile \
-../conf-version ../conf-release ../conf-email
-	$(edit) $@.in > $@
-indimail-mta-Debian_9.0.dsc: indimail-mta-Debian_9.0.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile \
