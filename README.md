@@ -81,8 +81,8 @@ cdbs debhelper gcc g++ automake autoconf libtool libqmail-dev libqmail
 libldap2-dev libssl-dev libidn2-0-dev mime-support m4 gawk openssl 
 procps sed findutils diffutils readline gzip binutils coreutils grep
 
-Debian 9, Debian 10 - default-libmysqlclient-dev
-Remaining - libmysqlclient-dev
+Ubuntu 16.04, Debian 8 - libmysqlclient-dev
+Remaining - default-libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
@@ -736,6 +736,7 @@ Currently, the list of supported distributions for indimail-mta is
     * Debian
           o Debian  9.0
           o Debian 10.0
+          o Debian 11.0
           o Univention_4.3
           o Univention_4.4
 
@@ -785,7 +786,7 @@ ucspi-tcp:
      1:0.88-6 500
         500 http://raspbian.raspberrypi.org/raspbian buster/main armhf Packages
  *** 2.11-1.1+1.1 1001
-       1001 http://download.opensuse.org/repositories/home:/indimail/Debian_9.0/ Packages
+       1001 http://download.opensuse.org/repositories/home:/indimail/Debian_10/ Packages
         100 /var/lib/dpkg/status
 ```
 
