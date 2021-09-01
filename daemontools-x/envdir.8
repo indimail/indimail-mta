@@ -54,6 +54,13 @@ In case of any error, \fBenvdir\fR will not modify or add to the existing
 set of environment variables. In case of error, \fBenvdir\fR will exit 111
 without executing \fIchild\fR unless the \fB-w\fR has been specified.
 
+To see what environment variables are getting set by \fId\fR, you can use
+the command
+
+.EX
+envdir -c \fId\fR /usr/bin/env
+.EE
+
 .SH OPTIONS
 .TP
 .B \-c
