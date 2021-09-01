@@ -20,8 +20,7 @@ indimail-mini.postrm indimail-mini.postinst \
 qmta.prerm qmta.preinst \
 qmta.postrm qmta.postinst \
 indimail-mta.install indimail-mta.dsc \
-indimail-mta-xUbuntu_18.04.dsc indimail-mta-Raspbian_10.dsc \
-indimail-mta-Raspbian_9.0.dsc debian.tar.gz
+indimail-mta-xUbuntu_18.04.dsc debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
