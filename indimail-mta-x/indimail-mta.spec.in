@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.347 2021-08-20 22:12:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.348 2021-09-02 23:10:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -78,6 +78,10 @@ Provides: group(qscand)     > 999
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
 %endif
+%if %{defined suse_version} || %{defined sles_version}
+Requires(post): update-alternatives
+Requires(postun): update-alternatives
+%endif
 
 %if %build_on_obs == 1
 License: GPL-3.0+
@@ -92,7 +96,7 @@ Group: Productivity/Networking/Email/Servers
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/%{name}-rpmlintrc
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} && %{defined sles_version}
 Source2: http://downloads.sourceforge.net/indimail/%{name}-permissions.easy
 Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
 Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
@@ -113,21 +117,19 @@ BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
 
 ##################################### OBS ####################################
 %if %build_on_obs == 1
-%if 0%{?suse_version}
+%if %{defined suse_version} && %{defined sles_version}
 BuildRequires: -post-build-checks
+BuildConflicts: post-build-checks
 #!BuildIgnore: post-build-checks
 %endif
 %endif
 ##############################################################################
 
-%if 0%{?suse_version}
+%if %{defined suse_version} && %{defined sles_version}
+PreReq: permissions
 BuildRequires: openldap2-devel
 %else
 BuildRequires: openldap-devel
-%endif
-
-%if 0%{?suse_version} >= 1120
-PreReq: permissions
 %endif
 
 Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/groupdel
@@ -182,17 +184,21 @@ missing in qmail.
 %{see_base}
 
 %package -n indimail-mini
-Summary: IndiMail - Mini Client Installation
+Summary: QMQP mini client
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: qmta
 Conflicts: indimail-mini < 2.0
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} && %{defined sles_version}
 PreReq: permissions
 %endif
 Requires: coreutils /bin/sh glibc openssl procps
 %if %{undefined suse_version} && %{undefined sles_version}
 Requires: /usr/bin /usr/sbin
+%endif
+%if %{defined suse_version} || %{defined sles_version}
+Requires(post): update-alternatives
+Requires(postun): update-alternatives
 %endif
 
 %description -n indimail-mini
@@ -205,16 +211,20 @@ new message to a central server using QMQP.
 %{see_base}
 
 %package -n qmta
-Summary: qmta - A minimal Mail Transport Agent
+Summary: A minimal Mail Transport Agent
 Group: Productivity/Networking/Email/Clients
 Conflicts: %{name}
 Conflicts: indimail-mini
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 PreReq: permissions
 %endif
 Requires: coreutils /bin/sh glibc openssl procps
 %if %{undefined suse_version} && %{undefined sles_version}
 Requires: /usr/bin /usr/sbin
+%endif
+%if %{defined suse_version} || %{defined sles_version}
+Requires(post): update-alternatives
+Requires(postun): update-alternatives
 %endif
 
 %description -n qmta
@@ -345,7 +355,7 @@ if [ -f indimail-mta.te ] ; then
 fi
 /bin/rm -f ChangeLog %{name}-rpm.info
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/
   install -m 644 %{S:2} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions
   install -m 644 %{S:3} %{buildroot}%{_sysconfdir}/permissions.d/%{name}-permissions.secure
@@ -498,7 +508,7 @@ echo ../resolv.conf 1>&3
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/level3-tlds
 %attr(644,root,qmail) %config(noreplace,missingok) %{qsysconfdir}/foxhole_all.cdb
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/%{name}-permissions
 %attr(644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/%{name}-permissions.secure
 %endif
@@ -794,7 +804,7 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)                   %{shareddir}/doc/PIC.relaygood
 %attr(0644,root,root)                   %{shareddir}/doc/PIC.local2rem
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode caps) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
 %verify (not user group mode caps) %attr(2551, root, qmail)     %{_prefix}/sbin/qmail-dk
@@ -931,7 +941,7 @@ echo ../resolv.conf 1>&3
 %ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QUEUEDIR
 %ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/global_vars/CONFSPLIT
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %attr(0644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions
 %attr(0644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions.secure
 %endif
@@ -989,7 +999,7 @@ echo ../resolv.conf 1>&3
 # this host's name in /var/qmail/control/idhost, so that
 # qmail-inject generates Message-ID without any risk of collision
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
 %else
@@ -1033,12 +1043,14 @@ fi
 %{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %verify_permissions -e %{_prefix}/sbin/qhpsi
 %verify_permissions -e %{_prefix}/sbin/run-cleanq
 %verify_permissions -e %{_prefix}/sbin/qmail-queue
 %verify_permissions -e %{_prefix}/sbin/qscanq
 %verify_permissions -e %{_prefix}/sbin/sys-checkpwd
+%verify_permissions -e %{_prefix}/sbin/qmail-dk
+%verify_permissions -e %{_prefix}/sbin/qmail-dkim
 %verify_permissions -e %{qmaildir}/alias/
 %verify_permissions -e %{qmaildir}/autoturn/
 %verify_permissions -e %{qsysconfdir}/
@@ -1278,13 +1290,15 @@ else
   sign_opt="none"
 fi
 
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %if 0%{?set_permissions:1} > 0
   %set_permissions %{_prefix}/sbin/qhpsi
   %set_permissions %{_prefix}/sbin/qmail-queue
   %set_permissions %{_prefix}/sbin/qscanq
   %set_permissions %{_prefix}/sbin/run-cleanq
   %set_permissions %{_prefix}/sbin/sys-checkpwd
+  %set_permissions %{_prefix}/sbin/qmail-dk
+  %set_permissions %{_prefix}/sbin/qmail-dkim
   %set_permissions %{qmaildir}/alias/
   %set_permissions %{qmaildir}/autoturn/
   %set_permissions %{qsysconfdir}/
@@ -1742,7 +1756,8 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-%if 0%{?suse_version} >= 1120
+
+%if %{defined suse_version} || %{defined sles_version}
 %verify_permissions -e %{qsysconfdir}/
 %verify_permissions -e %{qsysconfdir}/control/
 %endif
@@ -1812,7 +1827,7 @@ if [ $argv1 -eq 2 ] ; then
   exit 0
 fi
 (
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %if 0%{?set_permissions:1} > 0
   %set_permissions %{qsysconfdir}/control/
 %else
@@ -1998,7 +2013,9 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
+%verify_permissions -e %{_prefix}/sbin/qhpsi
+%verify_permissions -e %{_prefix}/sbin/qmail-queue
 %verify_permissions -e %{qsysconfdir}/
 %verify_permissions -e %{qsysconfdir}/control/
 %verify_permissions -e %{qsysconfdir}/users/
@@ -2127,9 +2144,12 @@ fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   exit 0
 fi
+
 (
-%if 0%{?suse_version} >= 1120
+%if %{defined suse_version} || %{defined sles_version}
 %if 0%{?set_permissions:1} > 0
+  %set_permissions %{_prefix}/sbin/qhpsi
+  %set_permissions %{_prefix}/sbin/qmail-queue
   %set_permissions %{qsysconfdir}/control/
   %set_permissions %{qsysconfdir}/users/
 %else
