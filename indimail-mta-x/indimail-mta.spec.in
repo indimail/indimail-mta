@@ -118,6 +118,7 @@ BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
 ##################################### OBS ####################################
 %if %build_on_obs == 1
 %if %{defined suse_version} && %{defined sles_version}
+BuildRequires: rpmlint
 BuildRequires: -post-build-checks
 BuildConflicts: post-build-checks
 #!BuildIgnore: post-build-checks
