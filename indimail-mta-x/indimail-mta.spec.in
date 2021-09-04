@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.349 2021-09-03 20:46:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.350 2021-09-04 10:25:09+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -827,9 +827,11 @@ echo ../resolv.conf 1>&3
 # Directories
 #
 %dir %attr(0555,root,qmail)        %{qmaildir}
+%if %{undefined suse_version} && %{undefined sles_version}
                                    %{qmaildir}/bin
                                    %{qmaildir}/sbin
                                    %{qmaildir}/control
+%endif
 %dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)         %{mandir}
@@ -896,10 +898,12 @@ echo ../resolv.conf 1>&3
 # Directories
 #
 %dir %attr(0555,root,qmail)        %{qmaildir}
+%if %{undefined suse_version} && %{undefined sles_version}
                                    %{qmaildir}/bin
                                    %{qmaildir}/sbin
                                    %{qmaildir}/users
                                    %{qmaildir}/control
+%endif
 %dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
 %dir %attr(2775,indimail,qmail)    %{qsysconfdir}/users
 %if "%{mandir}" != "/usr/share/man"
