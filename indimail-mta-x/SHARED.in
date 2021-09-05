@@ -1,7 +1,7 @@
 # installer input file for shared directories (universal)
 # @shareddir@
-d:::0555:::
-d:::0555:/boot::
+d:::0755:::
+d:::0755:/boot::
 #
 # files in @shared@/boot
 #
@@ -18,7 +18,7 @@ f:::0755:/boot/:binm3+df:binm3+df
 #
 # files in @shared@/doc
 #
-d:::0555:/doc::
+d:::0755:/doc::
 f:::0644:/doc/:COPYING-indimail-mta:doc/COPYING-indimail-mta
 f:::0644:/doc/:LICENSE.qhpsi:doc/LICENSE.qhpsi
 f:::0644:/doc/:softwarelicense1-1.html:doc/softwarelicense1-1.html

@@ -3,5 +3,5 @@
 #
 # files in @shared@/doc
 #
-d:::0555:/doc::
+d:::0755:/doc::
 f:::0644:/doc/:README.logselect:doc/README.logselect

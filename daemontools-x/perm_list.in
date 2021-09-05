@@ -1,6 +1,6 @@
 %dir %attr(0755,qmail,nofiles) @logdir@/svc
-%dir %attr(0555,root,root) @prefix@/share/indimail/doc
-%dir %attr(0555,root,root) @prefix@/share/indimail/boot
+%dir %attr(0755,root,root) @prefix@/share/indimail/doc
+%dir %attr(0755,root,root) @prefix@/share/indimail/boot
 
 %attr(0755,root,root) @prefix@/bin/qmailctl
 %attr(0755,root,root) @prefix@/bin/qlogselect

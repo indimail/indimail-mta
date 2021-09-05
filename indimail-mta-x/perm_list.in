@@ -1,7 +1,7 @@
 #
 #Directories
 #
-%dir %attr(0555,root,qmail)        @qmaildir@ #indimail-mini #qmta
+%dir %attr(0755,root,qmail)        @qmaildir@ #indimail-mini #qmta
 %dir %attr(2775,alias,qmail)       @qmaildir@/alias
 %dir %attr(0775,qscand,qscand)     @qmaildir@/clamd
 %dir %attr(0775,root,indimail)     @qmaildir@/domains
@@ -10,11 +10,11 @@
 %dir %attr(0750,qscand,qscand)     @qmaildir@/qscanq/root
 %dir %attr(0750,qscand,qscand)     @qmaildir@/qscanq/root/scanq
 %dir %attr(0755,root,qmail)        @qmaildir@/queue
-%dir %attr(0555,root,root)         @libexecdir@
-%dir %attr(0555,root,root)         @libexecdir@/qfilters
-%dir %attr(0555,root,root)         @shareddir@
-%dir %attr(0555,root,root)         @shareddir@/boot
-%dir %attr(0555,root,root)         @shareddir@/doc
+%dir %attr(0755,root,root)         @libexecdir@
+%dir %attr(0755,root,root)         @libexecdir@/qfilters
+%dir %attr(0755,root,root)         @shareddir@
+%dir %attr(0755,root,root)         @shareddir@/boot
+%dir %attr(0755,root,root)         @shareddir@/doc
 %dir %attr(0755,root,root)         @mandir@
 %dir %attr(0755,root,root)         @mandir@/man1
 %dir %attr(0755,root,root)         @mandir@/man5
