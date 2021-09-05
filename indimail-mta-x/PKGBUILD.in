@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.13  2021-09-05 10:56:38+05:30  Cprogrammer
+# changed permissions for dirs with 555 to 755
+#
 # Revision 1.12  2021-08-23 17:34:28+05:30  Cprogrammer
 # fixed default_domain variable
 #
@@ -39,7 +42,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.12 2021-08-23 17:34:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.13 2021-09-05 10:56:38+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@

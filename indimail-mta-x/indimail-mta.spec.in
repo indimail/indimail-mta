@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.350 2021-09-04 10:25:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.351 2021-09-05 10:56:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
