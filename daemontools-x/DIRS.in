@@ -6,10 +6,10 @@ d::::@prefix@/bin::
 d::::@prefix@/sbin::
 d::::@prefix@/share::
 d::::@prefix@/libexec::
-d:::0555:@shareddir@::
-d:::0555:@shareddir@/boot::
-d:::0555:@shareddir@/doc::
-d:::0555:@libexecdir@::
+d:::0755:@shareddir@::
+d:::0755:@shareddir@/boot::
+d:::0755:@shareddir@/doc::
+d:::0755:@libexecdir@::
 d::::@mandir@::
 d::::@mandir@/man1::
 d::::@mandir@/man8::

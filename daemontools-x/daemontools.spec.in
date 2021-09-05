@@ -220,10 +220,10 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %ghost      %attr(-,qmaill,nofiles)      %{logdir}/*/*
 %endif
 
-%dir %attr(0555,root,root)               %{libexecdir}
-%dir %attr(0555,root,root)               %{shareddir}
-%dir %attr(0555,root,root)               %{shareddir}/boot
-%dir %attr(0555,root,root)               %{shareddir}/doc
+%dir %attr(0755,root,root)               %{libexecdir}
+%dir %attr(0755,root,root)               %{shareddir}
+%dir %attr(0755,root,root)               %{shareddir}/boot
+%dir %attr(0755,root,root)               %{shareddir}/doc
 %dir %attr(0755,root,root)               %{qsysconfdir}/perms.d
 %dir %attr(0755,root,root)               %{qsysconfdir}/perms.d/%{name}
 %if "%{mandir}" != "/usr/share/man"
