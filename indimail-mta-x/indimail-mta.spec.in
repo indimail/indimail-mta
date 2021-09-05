@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.351 2021-09-05 10:56:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.352 2021-09-05 20:48:11+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1225,10 +1225,11 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   else
     rundir=%{servicedir}
   fi
+
   for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
     qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
     qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
-    slowq-send qscanq udplogger.3000
+    slowq-send qscanq udplogger.3000 qmail-logfifo
   do
     if [ ! -d %{servicedir}/$i ] ; then
       continue
