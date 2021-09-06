@@ -49,11 +49,11 @@ default behavior intentionally violates RFC2553 for security reasons.
 IPv4 traffic may be routed with certain per-socket/per-node configuration,
 however, it is not recommended to do so. Consult ip6(4) for details. Linux,
 however allows connections to any local IPv4 or IPv6 addresses. To overcome
-this limitation, tcpserver creates two sockets, and binds both IPv4 and IPv6
-addresses. It then uses select(2) to carry out operation to accept a
-connection from the right socket.
+this limitation of FreeBSD, tcpserver creates two sockets, and binds both
+IPv4 and IPv6 addresses. It then uses select(2) to carry out operation to
+accept a connection from the right socket.
 
-\fBtcpserver\fR dumps on standard error, list of active connections, when it
+\fBtcpserver\fR dumps the list of active connections on stderr when it
 receives SIGUSR1. \fBtcpserver\fR exits when it receives SIGTERM.
 
 .SH OPTIONS
@@ -339,8 +339,8 @@ djbdns(7), qualification(5)
 
 .SH Loading Shared Objects
 tcpserver can load shared objects by specifying a shared object on the
-command line. In such cases tcpserver will execute the basename of the
-shared object.
+command line. In such cases tcpserver will execute a function whose name
+is the basename of the shared object.
 
 A special case can be setup for qmail-smtpd and rblmstpd
 by specifying the following environment variables
@@ -372,13 +372,24 @@ The function (basename of the shared objec) is passed argc, argv and envp.
 func(int argc, char **argv, char **env)
 .EE
 
-Here argc is the number if arguments passed to the shared object, argv the
+Here argc is the number of arguments passed to the shared object, argv the
 arguments and envp is the modified environment variables set by tcpserver.
 See tcp-env(1). If you want your function to inherit all env variables set
 by tcpserver, just do the following in your function
 
 .EX
 environ = envp;
+.EE
+
+Now with the above set of variables you just need to have an invocation of
+\fBtcpserver\fR(1) similar to below, which will cause tcpserver to execute
+the function \fBrblsmtpd\fR(argc, argv) followed by function
+\fBqmail_smtpd\fR(argc, arg) for every connection. This is almost equivalent
+to executing the binary versions rblsmtpd, qmail-smtpd.
+
+.EX
+tcpserver 127.0.0.1 25 /usr/indimail/lib/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net \
+    /usr/indimail/lib/plugins/qmail_smtpd.so
 .EE
 
 .SH ENVIRONMENT
