@@ -48,13 +48,13 @@ By default, FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The
 default behavior intentionally violates RFC2553 for security reasons.
 IPv4 traffic may be routed with certain per-socket/per-node configuration,
 however, it is not recommended to do so. Consult ip6(4) for details. Linux,
-however allows connections to any local IPv4 or IPv6 addresses. To overcome
-this limitation of FreeBSD, tcpserver creates two sockets, and binds both
-IPv4 and IPv6 addresses. It then uses select(2) to carry out operation to
-accept a connection from the right socket.
+however allows connections to any local IPv4 or IPv6 addresses. So on
+FreeBSD, to overcome this limitation, tcpserver creates two sockets and
+binds both IPv4 and IPv6 addresses. It then uses select(2) to carry out
+operation to accept a connection from the right socket.
 
 \fBtcpserver\fR dumps the list of active connections on stderr when it
-receives SIGUSR1. \fBtcpserver\fR exits when it receives SIGTERM.
+receives SIGUSR1. \fBtcpserver\fR(1) exits when it receives SIGTERM.
 
 .SH OPTIONS
 .B General options:
