@@ -20,40 +20,34 @@ is one argument.
 [.\fIso\fR]
 consists of one or more arguments. 
 
-.B tcpserver
-waits for connections from TCP clients. For each connection, it runs
-.IR prog ,
-with descriptor 0 reading from the network and descriptor 1 writing to the
-network. It also sets up several environment variables.
-if \fIprog.so\fR is specified, it is expected that prog.so points to a shared
-object, which gets loaded using dlopen(3) call. Specifying a shared object can
-significantly improve performance by loading the object only once.
+\fBtcpserver\fR(1) waits for connections from TCP clients. For each
+connection, it runs \fIprog\fR, with descriptor 0 reading from the network
+and descriptor 1 writing to the network. It also sets up several
+environment variables. if \fIprog.so\fR is specified, it is expected that
+prog.so points to a shared object, which gets loaded using dlopen(3) call.
+Specifying a shared object can significantly improve performance by loading
+the object only once.
 
-The server's address is given by
-.I host
-and
-.IR port .
-.I port
-may be a name from /etc/services or a number; if it is 0,
-.B tcpserver
+The server's address is given by \fIhost\fR and \fIport\fR. \fIport\fR may
+be a name from /etc/services or a number; if it is 0, \fBtcpserver\fR(1)
 will choose a free TCP port.
-.I host
-may be 0, allowing connections to any local IP address; or a dotted-decimal IP
-address, allowing connections only to that address; or a host name, allowing
-connections to the first IP address for that host. Host names are fed through
-qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
+\fIhost\fR may be 0, allowing connections to any local IP address; or a
+dotted-decimal IP address, allowing connections only to that address; or a
+host name, allowing connections to the first IP address for that host.
+Host names are fed through qualification using dns_ip4_qualify
+(dns_ip6_qualify for ipv6).
 
-\fBtcpserver(1)\fR works differently on Linux and FreeBSD.
-By default, FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The
-default behavior intentionally violates RFC2553 for security reasons.
-IPv4 traffic may be routed with certain per-socket/per-node configuration,
-however, it is not recommended to do so. Consult ip6(4) for details. Linux,
-however allows connections to any local IPv4 or IPv6 addresses. So on
-FreeBSD, to overcome this limitation, tcpserver creates two sockets and
-binds both IPv4 and IPv6 addresses. It then uses select(2) to carry out
-operation to accept a connection from the right socket.
+\fBtcpserver(1)\fR works differently on Linux and FreeBSD. By default,
+FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The default
+behavior intentionally violates RFC2553 for security reasons. IPv4 traffic
+may be routed with certain per-socket/per-node configuration, however, it
+is not recommended to do so. Consult ip6(4) for details. Linux, however
+allows connections to any local IPv4 or IPv6 addresses. So on FreeBSD, to
+overcome this limitation, \fBtcpserver\fR(1) creates two sockets and binds
+both IPv4 and IPv6 addresses. It then uses select(2) to carry out operation
+to accept a connection from the right socket.
 
-\fBtcpserver\fR dumps the list of active connections on stderr when it
+\fBtcpserver\fR(1) dumps the list of active connections on stderr when it
 receives SIGUSR1. \fBtcpserver\fR(1) exits when it receives SIGTERM.
 
 .SH OPTIONS
@@ -77,227 +71,203 @@ Verbose. Print error messages, status messages and IP connection table.
 |
 .B \fIfile
 
-Do not handle more than
-.I n
-simultaneous connections. If there are
-.I n
-simultaneous copies of prog running, defer acceptance of a new connection
-until one copy finishes.
-.I n
-must be a positive integer. Default: 40. In the second form, 
-.I file
-can be a full path to a filename containing an integer specifying
-.IR n .
-This file will be reread when
-.B tcpserver
-receives SIGHUP.
+Do not handle more than \fIn\fR simultaneous connections. If there are
+\fIn\fR simultaneous copies of prog running, defer acceptance of a new
+connection until one copy finishes. \fIn\fR must be a positive integer.
+Default: 40. In the second form, \fIfile\fR can be a full path to a
+filename containing an integer specifying \fIn\fR. This file will be
+reread when \fBtcpserver\fR(1) receives SIGHUP.
 
 .TP
 .B \-C \fIn
-Do not handle more than
-.I n
-simultaneous connections from a particular host. If there are
-.I n
-simultaneous copies of prog running, defer acceptance of a new connection
-until one copy finishes.
-.I n
-must be a positive integer. Default: 20. This can be also handled by
-having the environment variable MAXPERIP compiled in the
-.I rules
-cdb database. The MAXPERIP environment variables gives
-.B tcpserver
-the ability to have different per host concurrency limit for each and every
-host that is defined in the rules database.
+Do not handle more than \fIn\fR simultaneous connections from a particular
+host. If there are \fIn\fR simultaneous copies of prog running, defer
+acceptance of a new connection until one copy finishes. \fIn\fR must be a
+positive integer. Default: 20. This can be also handled by having the
+environment variable $\fBMAXPERIP\fR compiled in the \fIrules\fR cdb
+database. The $\fBMAXPERIP\fR environment variables gives
+\fBtcpserver\fR(1) the ability to have different per host concurrency limit
+for each and every host that is defined in the rules database.
+
 .TP
 .B \-x \fIcdb
-Follow the rules compiled into
-.I cdb
-by
-.BR tcprules (1).
-These rules may specify setting environment variables or rejecting connections
-from bad sources. You can rerun
-.BR tcprules (1)
-to change the rules while
-.B tcpserver
-is running. 
+Follow the rules compiled into \fIcdb\fR by \fBtcprules\fR(1). These rules
+may specify setting environment variables or rejecting connections from bad
+sources. You can rerun \fBtcprules\fR(1) to change the rules while
+\fBtcpserver\fR(1) is running. 
+
 .TP
 .B \-X
 With
 .B -x \fIcdb,
-allow connections even if
-.I cdb
-does not exist. Normally
-.B tcpserver
-will drop the connection if
-.I cdb
-does not exist.
+allow connections even if \fIcdb\fR does not exist. Normally
+\fBtcpserver\fR(1) will drop the connection if \fIcdb\fR does not exist.
 
 .TP
 .B \-m \fIdb.conf
-Follow rules specified in the MySQL table tcprules. This table has 4 columns. The column
-.I iprules
-contains an IP address which can include wildcards. eg. 202.144.*.?,
-202.144.10-20.1, etc. The column
-.I decision
-can have the value
-.I 'D'
-to deny connections for matching IP addresses. The column
-.I env
-contains a list of comma separated environment variables. e.g HOME=/tmp,SERVER=galaxy.
-The db.conf file has the following layout
+Follow rules specified in the MySQL table tcprules. This table has 4
+columns. The column \fIiprules\fR contains an IP address which can include
+wildcards. eg. 202.144.*.?, 202.144.10-20.1, etc. The column \fIdecision\fR
+can have the value '\fID'\fR' to deny connections for matching IP
+addresses. The column \fIenv\fR contains a list of comma separated
+environment variables. e.g HOME=/tmp,SERVER=galaxy. The \fIdb.conf\fR file
+has the following layout
 
+.EX
 database server ip:database user:database password:database name:table name
+.EE
 
-with this option,
-.I tcpserver
-will connect to the
-.B MySQL(1)
-server specified by parameters in db.conf file. The connect timeout can be
-controlled by the environment variable
-.BR MYSQL_TIMEOUT .
+with this option, \fBtcpserver\fR(1) will connect to the \fBMySQL\fR
+server specified by parameters in \fIdb.conf\fR file. The connect timeout
+can be controlled by the environment variable $\fBMYSQL_TIMEOUT\fR.
 
-To enable the -m option, you have to set MYSQL_LIB variable to point to the
-mysql shared library. e.g.
+To enable the -m option, you have to set $\fBMYSQL_LIB\fR variable to point
+to the mysql shared library. e.g.
 
 .EX
   MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
 .EE
 
-You can set MYSQL_LIB environment variable in
+You can set $\fBMYSQL_LIB\fR environment variable in
 /service/\fIname\fR/variables/MYSQL_LIB (here \fIname\fR refers to a service
 under \fIsupervise\fR(8)). You can also set the value in the control file
 \fImysql_lib\fR. Environment variable takes precedence over the control file.
 
 .TP
 .B \-B \fIbanner
-Write
-.I banner
-to the network immediately after each connection is made.
-.B tcpserver
-writes
-.I banner
-before looking up $TCPREMOTEHOST, before looking up $TCPREMOTEINFO, and before
-checking
-.IR cdb .
-This feature can be used to reduce latency in protocols where the client waits
-for a greeting from the server. 
+Write \fIbanner\fR to the network immediately after each connection is made.
+\fBtcpserver\fR(1) writes \fIbanner\fR before looking up
+$\fBTCPREMOTEHOST\fR, before looking up $TCPREMOTEINFO, and before checking
+\fIcdb\fR. This feature can be used to reduce latency in protocols where
+the client waits for a greeting from the server. 
+
 .TP
 .B \-g \fIgid
-Switch group ID to
-.I gid
-after preparing to receive connections.
-.I gid
-must be a positive integer. 
+Switch group ID to \fIgid\fR after preparing to receive connections.
+\fIgid\fR must be a positive integer. 
+
 .TP
 .B \-u \fIuid
-Switch user ID to
-.I uid
-after preparing to receive connections.
-.I uid
-must be a positive integer. 
+Switch user ID to \fIuid\fR after preparing to receive connections.
+\fIuid\fR must be a positive integer. 
+
 .TP
 .B \-U
 Same as
 .B \-g
-$GID
+\fIGID\fR
 .B \-u
-$UID. Typically $GID and $UID are set by
-.BR envuidgid (8).
+\fIUID\fR. Typically $\fIGID\fR and $\fIUID\fR are set by
+\fBenvuidgid\fR(8).
+
 .TP
 .B \-1
 After preparing to receive connections, print the local port number to
 standard output. 
+
 .TP
 .B \-4
-Fall back to IPv4 sockets.  This is necessary for terminally broken
+Fall back to IPv4 sockets. This is necessary for terminally broken
 systems like OpenBSD which will not let IPv6 sockets connect to
-V4-mapped IPv6 addresses.  Please note that this also applies to DNS
+V4-mapped IPv6 addresses. Please note that this also applies to DNS
 lookups, so you will have to use an DNS resolver with an IPv6 address to
-accept IPv6 connections.  Use \fBDNSCACHEIP\fR to set the DNS resolver
+accept IPv6 connections. Use \fBDNSCACHEIP\fR to set the DNS resolver
 IP dynamically.
+
 .TP
 .B \-6
-Force IPv6 mode in UCSPI environment variables, even for
-IPv4 connections.  This will set \fB$PROTO\fR to \fBTCP6\fR and put
-IPv4-mapped IPv6 addresses in \fBTCP6LOCALIP\fR and \fBTCP6REMOTEIP\fR.
+Force IPv6 mode in \fBUCSPI\fR environment variables, even for
+IPv4 connections. This will set $\fBPROTO\fR to \fBTCP6\fR and put
+IPv4-mapped IPv6 addresses in $\fBTCP6LOCALIP\fR and $\fBTCP6REMOTEIP\fR.
+
 .TP
 .B \-I\fIinterface
-Bind to the network interface
-.I interface
-("eth0" on Linux, for example).  This is only defined and needed for
-IPv6 link-local addresses.
+Bind to the network interface \fIinterface\fR ("eth0" on Linux, for example).
+This is only defined and needed for IPv6 link-local addresses.
+
 .TP
 .B \-b \fIn
-Allow a backlog of approximately
-\I n
-TCP SYNs. On some systems,
-\I n
+Allow a backlog of approximately \fIn\fR TCP SYNs. On some systems, \fIn\fR
 is silently limited to 5. On systems supporting SYN cookies, the backlog is
 irrelevant. 
+
 .TP
 .B \-o
 Leave IP options alone. If the client is sending packets along an IP source
 route, send packets back along the same route.
+
 .TP
 .B \-O
 (Default.) Kill IP options. A client can still use source routing to connect
 and to send data, but packets will be sent back along the default route.
+
 .TP
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
 future; if you want it, set it explicitly. 
+
 .TP
 .B \-D
 Never delay sending data; enable TCP_NODELAY. 
+
 .P
 .B Data-gathering options: 
+
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment variable
-$TCPREMOTEHOST. 
+$\fBTCPREMOTEHOST\fR. 
+
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment variable
-$TCPREMOTEHOST. To avoid loops, you must use this option for servers on TCP
+$\fBTCPREMOTEHOST\fR. To avoid loops, you must use this option for servers on TCP
 port 53. 
+
 .TP
 .B \-p
 Paranoid. After looking up the remote host name in DNS, look up the IP
 addresses in DNS for that host name, and remove the environment variable
 $TCPREMOTEHOST if none of the addresses match the client's IP address. The
-environment variable TCPPARANOID is set if host has a reverse dns but IP
-does not match TCPREMOTEIP
+environment variable $\fBTCPPARANOID\fR is set if host has a reverse dns but IP
+does not match $\fBTCPREMOTEIP\fR
+
 .TP
 .B \-P
 (Default.) Not paranoid. 
+
 .TP
 .B \-l \fIlocalname
-Do not look up the local host name in DNS; use
-.I localname
-for the environment variable $TCPLOCALHOST. A common choice for
-.I localname
-is 0. To avoid loops, you must use this option for servers on TCP port 53. 
+Do not look up the local host name in DNS; use \fIlocalname\fR for the
+environment variable $\fBTCPLOCALHOST\fR. A common choice for
+\fIlocalname\fR is 0. To avoid loops, you must use this option for servers
+on TCP port 53. 
+
 .TP
 .B \-r
-(Default.) Attempt to obtain $TCPREMOTEINFO from the remote host. 
+(Default.) Attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host. 
+
 .TP
 .B  \-R
-Do not attempt to obtain $TCPREMOTEINFO from the remote host. To avoid loops,
-you must use this option for servers on TCP ports 53 and 113.
+Do not attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host. To
+avoid loops, you must use this option for servers on TCP ports 53 and 113.
+
 .TP
 .B \-t \fIn
 Give up on the $TCPREMOTEINFO connection attempt after
-.I n
-seconds. Default: 26.
+\fIn\fR seconds. Default: 26.
+
 .TP
 .B \-s
 Use default cert servercert.pem in @qsysconfdir@/certs. The location
-of certificate directory can be changed by setting \fBCERTDIR\fR
+of certificate directory can be changed by setting $\fBCERTDIR\fR
 environment variable.
+
 .TP
 .B \-n \fIcertfile
 Use \fIcertfile\fR as the default certificate instead of servercert.pem.
+
 .TP
 .B \-a \fIcafile
 Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
@@ -308,8 +278,8 @@ certificates, which will be used during SSL connection negotiation to
 close any gap in the certificate chain.
 
 .SH IPv4-mapped IPv6 addresses
-Setting up tcpserver with simultaneous bindings to IPv4 and IPv6 addresses,
-the Unix kernel employs the mapping
+Setting up \fBtcpserver\fR(1) with simultaneous bindings to IPv4 and IPv6
+addresses, the Unix kernel employs the mapping
 
 .EX
 ::ffff:a.b.c.d
@@ -317,29 +287,28 @@ for the IPv4 address
 a.b.c.d
 .EE
 
-Setting up tcpserver in IPv4 mode (-4) only or in compatibility mode, IPv4
-addresses are considered in their native format without the IPv6 prefix.
-Thus, usual IPv4 addresses can be entered in rules.cdb even in common
-IPv4/IPv6 bindings.
+Setting up \fBtcpserver\fR(1) in IPv4 mode (-4) only or in compatibility
+mode, IPv4 addresses are considered in their native format without the IPv6
+prefix. Thus, usual IPv4 addresses can be entered in rules.cdb even in
+common IPv4/IPv6 bindings.
 
 .SH DNS RESOLVER SETTINGS
-.TP
-DNSCACHEIP
-.TP
-DNSREWRITEFILE
-Use $DNSCACHEIP to set the DNS resolver's IP(s) dynamically irrespectively
+
+\fBDNSCACHEIP\fR, \fBDNSREWRITEFILE\fR
+
+Use $\fBDNSCACHEIP\fR to set the DNS resolver's IP(s) dynamically irrespectively
 from the settings in /etc/resolv.conf. The individual IPs are separated by
 blanks; IPv6 LLU addresses may be appended with the interface name
-following a '%' sign.  If the environment variable $LOCALDOMAIN is
+following a '%' sign. If the environment variable $\fBLOCALDOMAIN\fR is
 populated, this name will be appended to unqualified host names.
 Additional rewriting of local to public names is facilitated in case the
 file /etc/dnsrewrite exists and is populated, or alternatively, the
-environment variable $DNSREWRITEFILE points to a different file. See
+environment variable $\fBDNSREWRITEFILE\fR points to a different file. See
 djbdns(7), qualification(5)
 
 .SH Loading Shared Objects
-tcpserver can load shared objects by specifying a shared object on the
-command line. In such cases tcpserver will execute a function whose name
+\fBtcpserver\fR(1) can load shared objects by specifying a shared object on the
+command line. In such cases \fBtcpserver\fR(1) will execute a function whose name
 is the basename of the shared object.
 
 A special case can be setup for qmail-smtpd and rblmstpd
@@ -352,16 +321,16 @@ PLUGIN0_init=smtp_init
 PLUGIN1=@prefix@/lib/indimail/plugins/rblsmtpd.so
 .EE
 
-The above causes tcpserver to load qmail_smtpd.so and execute the smtp_init(1)
+The above causes \fBtcpserver\fR(1) to load qmail_smtpd.so and execute the smtp_init(1)
 function, after changing directory to /var/indimail, in the parent. smtp_init()
 loads all qmail-smtpd control files. Here PLUGIN0 is defined as
 @prefix@/lib/indimail/plugins/qmail_smtpd.so, which causes the function
 qmail_smtpd() to be preloaded. This improves the perfomance of the smtp 
 service. In the above example, rblsmtpd.so
 is loaded without executing any initialization function and without changing
-directory. On SIGHUP, tcpserver executes the function smtp_init(0). The
+directory. On SIGHUP, \fBtcpserver\fR(1) executes the function smtp_init(0). The
 variable PLUGINn_dir should be used if your function expects to be in a
-particular directory to function properly. PLUGIN1 causes tcpserver to preload
+particular directory to function properly. PLUGIN1 causes \fBtcpserver\fR(1) to preload
 rblsmtpd.so and if \fIprog\fR is @prefix@/lib/indimail/plugins/rblsmtpd.so, it
 will simply execute the function \fIrblsmtpd\fR, from the shared library
 rblsmtpd.so already preloaded in the memory.
@@ -373,22 +342,22 @@ func(int argc, char **argv, char **env)
 .EE
 
 Here argc is the number of arguments passed to the shared object, argv the
-arguments and envp is the modified environment variables set by tcpserver.
+arguments and envp is the modified environment variables set by \fBtcpserver\fR(1).
 See tcp-env(1). If you want your function to inherit all env variables set
-by tcpserver, just do the following in your function
+by \fBtcpserver\fR(1), just do the following in your function
 
 .EX
 environ = envp;
 .EE
 
 Now with the above set of variables you just need to have an invocation of
-\fBtcpserver\fR(1) similar to below, which will cause tcpserver to execute
+\fBtcpserver\fR(1) similar to below, which will cause \fBtcpserver\fR(1) to execute
 the function \fBrblsmtpd\fR(argc, argv) followed by function
 \fBqmail_smtpd\fR(argc, arg) for every connection. This is almost equivalent
 to executing the binary versions rblsmtpd, qmail-smtpd.
 
 .EX
-tcpserver 127.0.0.1 25 /usr/indimail/lib/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net \
+tcpserver 127.0.0.1 25 /usr/indimail/lib/plugins/rblsmtpd.so -rdnsbl-1.uceprotect.net \\
     /usr/indimail/lib/plugins/qmail_smtpd.so
 .EE
 
