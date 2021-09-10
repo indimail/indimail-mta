@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.246 $";
+char           *revision = "$Revision: 1.247 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3224,8 +3224,6 @@ smtp_mail(char *arg)
 		err_syntax();
 		return;
 	}
-	if (!env_put2("SPFRESULT", "unknown"))
-		die_nomem();
 #ifdef SMTPUTF8
 	if (!stralloc_catb(&proto, smtputf8 ? "UTF8ESMTP" : "ESMTP", smtputf8 ? 9 : 5))
 		die_nomem();
@@ -3532,37 +3530,6 @@ nohasvirtual:
 		switch (r = spfcheck(remoteip))
 #endif
 		{
-		case SPF_OK:
-			if (!env_put2("SPFRESULT", "pass"))
-				die_nomem();
-			break;
-		case SPF_NONE:
-			if (!env_put2("SPFRESULT", "none"))
-				die_nomem();
-			break;
-		case SPF_UNKNOWN:
-			if (!env_put2("SPFRESULT", "unknown"))
-				die_nomem();
-			break;
-		case SPF_NEUTRAL:
-			if (!env_put2("SPFRESULT", "neutral"))
-				die_nomem();
-			break;
-		case SPF_SOFTFAIL:
-			if (!env_put2("SPFRESULT", "softfail"))
-				die_nomem();
-			break;
-		case SPF_FAIL:
-			if (!env_put2("SPFRESULT", "fail"))
-				die_nomem();
-			break;
-		case SPF_ERROR:
-			if (!env_put2("SPFRESULT", "error"))
-				die_nomem();
-			break;
-		}
-		switch (r)
-		{
 		case SPF_NOMEM:
 			die_nomem();
 		case SPF_ERROR:
@@ -3589,8 +3556,7 @@ nohasvirtual:
 				die_nomem();
 			flagbarfspf = 1;
 		}
-	} else
-		env_unset("SPFRESULT");
+	}
 	if (flagbarfspf) {
 		err_spf();
 		return;
@@ -6140,6 +6106,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.247  2021-09-10 15:25:23+05:30  Cprogrammer
+ * removed setting of SPFRESULT env variable
+ *
  * Revision 1.246  2021-08-19 20:22:49+05:30  Cprogrammer
  * disable VRFY using DISABLE_VRFY env variable
  *
@@ -6317,7 +6286,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.246 2021-08-19 20:22:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.247 2021-09-10 15:25:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
