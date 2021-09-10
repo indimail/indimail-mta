@@ -1409,24 +1409,33 @@ will wait for writing data to inlookup for fifo query. Default: 4.
 
 .TP 5
 .I spfbehavior
-Set to a value between 1 and 6 to enable SPF checks; 0 to disable.
-1 selects 'annotate-only' mode, where
-.B qmail-smtpd
-will annotate incoming email with
-.B Received-SPF
-fields, but will not reject any messages.  2 will produce temporary
-failures on DNS lookup problems so you can make sure you always have
-meaningful Received-SPF headers.  3 selects 'reject' mode,
-where incoming mail will be rejected if the SPF record says 'fail'.  4
-selects a more stricter rejection mode, which is like 'reject' mode,
-except that incoming mail will also be rejected when the SPF record
-says 'softfail'.  5 will also reject when the SPF record says 'neutral',
-and 6 if no SPF records are available at all (or a syntax error was
-encountered). The contents of this file are overridden by the value of
-the
-.B SPFBEHAVIOR
+.nr step 0 1
+Set to a value between 1 and 6 to enable SPF checks; 0 to disable. The
+contents of this file are overridden by the value of the \fBSPFBEHAVIOR\fR
 environment variable, if set.
-Default: 0.
+.RS 5
+.IP \n[step] 2
+disable spf check
+.IP \n+[step]
+select 'annotate-only' mode, where \fBqmail-smtpd\fR will annotate
+incoming email with \fBReceived-SPF\fR fields, but will not reject any
+messages.
+.IP \n+[step]
+produce temporary failures on DNS lookup problems so you
+can make sure you always have meaningful Received-SPF headers.
+.IP \n+[step]
+select 'reject' mode, where incoming mail will be rejected if the SPF
+record says 'fail'.
+.IP \n+[step]
+select a more stricter rejection mode, which is like 'reject' mode,
+except that incoming mail will also be rejected when the SPF record
+says 'softfail'.
+.IP \n+[step]
+reject when the SPF record says 'neutral'
+.IP \n+[step]
+reject if no SPF records are available at all (or a syntax error was
+encountered).
+.RE
 
 .TP 5
 .I spfexp
