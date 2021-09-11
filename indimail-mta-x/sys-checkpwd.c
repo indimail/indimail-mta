@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.13  2021-09-11 19:03:23+05:30  Cprogrammer
+ * relinquish root privileges
+ *
  * Revision 1.12  2021-07-05 21:24:53+05:30  Cprogrammer
  * use qgetpw interface from libqmail if USE_QPWGR is set
  *
@@ -156,9 +159,11 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 	int             pipe_fd[2];
 	char            strnum[FMT_ULONG];
 
+	if (setuid(getuid()))
+		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 	strnum[fmt_ulong(strnum, getpid())] = 0;
 	if (debug)
-		strerr_warn6(argv[0], ": pid [", strnum, "] executing authmodule [", argv[1], "]", 0);
+		strerr_warn5("sys-checkpwd: pid [", strnum, "] executing authmodule [", argv[1], "]", 0);
 	if (pipe(pipe_fd) == -1)
 		strerr_die2sys(111, FATAL, "pipe: ");
 	if (dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1)
@@ -272,10 +277,11 @@ main(int argc, char **argv)
 	stored = spw->sp_pwdp;
 #endif
 	strnum[fmt_ulong(strnum, getuid())] = 0;
-	if (setuid(getuid()))
-		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
+	
 	if (env_get("DEBUG_LOGIN")) {
-		out(argv[0]);
+		i = str_rchr(argv[0], '/');
+		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
+		out(ptr);
 		out(": ");
 		out("uid (");
 		out(strnum);
@@ -291,7 +297,9 @@ main(int argc, char **argv)
 		flush();
 	} else
 	if (debug) {
-		out(argv[0]);
+		i = str_rchr(argv[0], '/');
+		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
+		out(ptr);
 		out(": ");
 		out("uid (");
 		out(strnum);
@@ -310,11 +318,15 @@ main(int argc, char **argv)
 			if (stralloc_copys(&buf, ptr) || !stralloc_append(&buf, " ")
 					|| !stralloc_cats(&buf, login) || !stralloc_0(&buf))
 				strerr_die2x(111, WARN, "out of memory");
+			if (setuid(getuid()))
+				strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 			status = runcmmd(buf.s);
 		} else
 		if (errno != error_noent)
 			strerr_die4sys(111, FATAL, "unable to access ", ptr, ": ");
 	}
+	if (setuid(getuid()))
+		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 	_exit(status);
 	/*- Not reached */
 	return (0);
@@ -324,7 +336,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.12 2021-07-05 21:24:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.13 2021-09-11 19:03:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
