@@ -1,5 +1,8 @@
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.11  2021-09-11 18:55:36+05:30  Cprogrammer
+# changed owner/permissions of dkim private/public key pairs
+#
 # Revision 1.10  2021-08-24 11:29:21+05:30  Cprogrammer
 # check if domain exists in rcpthosts
 #
@@ -90,6 +93,10 @@ options=$(getopt -a -n dknewkey -o "prfd:b:" -l print,remove,force,domain:,bits:
 if [ $? != 0 ]; then
 	usage 100
 fi
+if [ $(id -u) -ne 0 ] ; then
+	echo "dknewkey is not meant to be run by mere mortals. Use sudo to get superpowers"
+	exit 100
+fi
 
 do_print=0
 remove=0
@@ -155,7 +162,7 @@ else
 	dir=$controldir/domainkeys/$domain
 fi
 if [ ! -d $dir ] ; then
-	if (! mkdir -p $dir || ! chown indimail:qmail $dir || ! chmod 755 $dir) ; then
+	if (! mkdir -p $dir || ! chown root:qmail $dir || ! chmod 755 $dir) ; then
 		exit 1
 	fi
 fi
@@ -232,7 +239,7 @@ else
 	if [ $? -ne 0 ] ; then
 		exit 1
 	fi
-	if ( ! chown indimail:qmail $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
+	if ( ! chown root:qmail $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
 		exit 1
 	fi
 	if [ -f $selector ] ; then
