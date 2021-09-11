@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.10  2021-09-11 19:00:55+05:30  Cprogrammer
+ * replace qmail with indimail-mta in received header
+ *
  * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -125,7 +128,7 @@ receivedfmt(char *s)
 	unsigned int    i;
 	unsigned int    len;
 	len = 0;
-	i = fmt_str(s, "Received: (qmail ");
+	i = fmt_str(s, "Received: (indimail-mta ");
 	len += i;
 	if (s)
 		s += i;
@@ -483,7 +486,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.10 2021-09-11 19:00:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)
