@@ -2,42 +2,35 @@
 .SH NAME
 setuidgid \- runs another program under a specified account's uid and gid.
 .SH SYNOPSIS
-.B setuidgid
-[
-.B \-s
-]
-.I account
-.I child
+\fBsetuidgid\fR [ \fB\-s\fR ] [ \fB\-g\fR \fIgroups\fR] \fIaccount\fR \fIchild\fR
 
 .SH DESCRIPTION
-.I account
-is a single argument.
-.I child
-consists of one or more arguments. 
+\fIaccount\fR is a single argument. \fIchild\fR consists of one or more
+arguments.
 
-.TP
+.TP 3
 \fB-s\fR
 Set supplementary group ids
 
-.PP
-.B setuidgid
-sets its uid and gid to
-.IR account 's
-uid and gid, removing all supplementary groups. It then runs
-.IR child .
-If \-s option is specified, \fBsetuidgid\fR adds all supplementary groups for \fIaccount\fR in group(5).
+.TP
+\fB-g\fR \fIgroups\fR
+Set additional group ids from a comma separated list of groups in
+\fIgroups\fR
 
-.B setuidgid
-cannot be run by anyone other than root.
+.PP
+\fBsetuidgid\fR(8) sets its uid and gid to \fIaccount\fR's uid and gid,
+removing all supplementary groups. It then runs \fIchild\fR. If \-s option
+is specified, \fBsetuidgid\fR adds all supplementary groups for
+\fIaccount\fR in group(5). Additional groups can be supplied using \-g
+option.
+
+\fBsetuidgid\fR(8) cannot be run by anyone other than root.
 
 .SH EXIT CODES
-.B setuidgid
-exits 111 if it cannot find a UNIX account named
-.IB account ,
-if it cannot setgid, if it cannot setgroups, if it cannot setuid, or if it cannot run
-.IR child .
-Otherwise its exit code is the same as that of
-.IR child .
+\fBsetuidgid\fR(8) exits 111 if it cannot find a UNIX account named
+\fIaccount\fR, if it cannot setgid, if it cannot setgroups, if it cannot
+setuid, or if it cannot run \fIchild\fR. Otherwise its exit code is the
+same as that of \fIchild\fR.
 
 .SH SEE ALSO
 supervise(8),
