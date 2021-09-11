@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.11  2021-09-11 19:03:47+05:30  Cprogrammer
+# added read permissions for qmail group
+#
 # Revision 1.10  2020-09-17 11:16:08+05:30  Cprogrammer
 # FreeBSD fixes
 #
@@ -73,13 +76,13 @@ fi
 for i in 512 1024 2048
 do
 	/usr/bin/openssl genrsa -out $CERTDIR/rsa"$i".new $i &&
-	$chmod 600 $CERTDIR/rsa"$i".new &&
+	$chmod 640 $CERTDIR/rsa"$i".new &&
 	$chown indimail:qmail $CERTDIR/rsa"$i".new &&
 	$mv -f $CERTDIR/rsa"$i".new $CERTDIR/rsa"$i".pem
 	echo rsa"$i".pem
 
 	/usr/bin/openssl dhparam -2 -out $CERTDIR/dh"$i".new $i &&
-	$chmod 600 $CERTDIR/dh"$i".new &&
+	$chmod 640 $CERTDIR/dh"$i".new &&
 	$chown indimail:qmail $CERTDIR/dh"$i".new &&
 	$mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
 	echo dh"$i".pem
