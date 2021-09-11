@@ -1,5 +1,8 @@
 /*
  * $Log: received.c,v $
+ * Revision 1.7  2021-09-11 19:02:01+05:30  Cprogrammer
+ * skip remotehost in received headers when value is unknown
+ *
  * Revision 1.6  2020-07-08 09:15:22+05:30  Cprogrammer
  * added square brackets in the list of safe characters
  *
@@ -13,16 +16,16 @@
  * added RCS log
  *
  */
-#include "fmt.h"
+#include <unistd.h>
+#include <fmt.h>
+#include <now.h>
+#include <datetime.h>
+#include <date822fmt.h>
 #include "qmail.h"
-#include "now.h"
-#include "datetime.h"
-#include "date822fmt.h"
 #include "received.h"
 
 static int
-issafe(ch)
-	char            ch;
+issafe(char ch)
 {
 	if (ch == '.' || ch == '@' || ch == '%' || ch == '+'
 			|| ch == '/' || ch == '=' || ch == ':' || ch == '-'
@@ -38,20 +41,16 @@ issafe(ch)
 }
 
 void
-safeput(qqt, s)
-	struct qmail   *qqt;
-	char           *s;
+safeput(struct qmail *qqt, char *s)
 {
 	char            ch;
-	while ((ch = *s++))
-	{
+
+	while ((ch = *s++)) {
 		if (!issafe(ch))
 			ch = '?';
 		qmail_put(qqt, &ch, 1);
 	}
 }
-
-static char     buf[DATE822FMT];
 
 /*
  * "Received: from relay1.uu.net (HELO uunet.uu.net) (7@192.48.96.5)\n" 
@@ -59,28 +58,25 @@ static char     buf[DATE822FMT];
  */
 
 void
-received(qqt, protocol, local, remoteip, remotehost, remoteinfo, helo)
-	struct qmail   *qqt;
-	char           *protocol;
-	char           *local;
-	char           *remoteip;
-	char           *remotehost;
-	char           *remoteinfo;
-	char           *helo;
+received(struct qmail *qqt, char *protocol, char *local, char *remoteip,
+		char *remotehost, char *remoteinfo, char *helo)
 {
 	struct datetime dt;
+	char            strnum[FMT_ULONG], buf[DATE822FMT];
 
-	qmail_puts(qqt, "Received: from ");
-	safeput(qqt, remotehost);
-	if (helo)
-	{
+	qmail_puts(qqt, "Received: indimail-mta ");
+	qmail_put(qqt, strnum, fmt_ulong(strnum, getpid()));
+	if (remotehost) {
+		qmail_puts(qqt, " from ");
+		safeput(qqt, remotehost);
+	}
+	if (helo) {
 		qmail_puts(qqt, " (HELO ");
 		safeput(qqt, helo);
 		qmail_puts(qqt, ")");
 	}
 	qmail_puts(qqt, " (");
-	if (remoteinfo)
-	{
+	if (remoteinfo) {
 		safeput(qqt, remoteinfo);
 		qmail_puts(qqt, "@");
 	}
@@ -97,7 +93,7 @@ received(qqt, protocol, local, remoteip, remotehost, remoteinfo, helo)
 void
 getversion_received_c()
 {
-	static char    *x = "$Id: received.c,v 1.6 2020-07-08 09:15:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: received.c,v 1.7 2021-09-11 19:02:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
