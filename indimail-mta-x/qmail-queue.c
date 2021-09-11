@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.77  2021-09-11 19:01:46+05:30  Cprogrammer
+ * updated received headers
+ *
  * Revision 1.76  2021-08-29 23:27:08+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -390,8 +393,11 @@ receivedfmt(char *s)
 {
 	unsigned int    i;
 	unsigned int    len;
+	char            Hostname[128];
+	char           *host_name;
+
 	len = 0;
-	i = fmt_str(s, "Received: (indimail-mta ");
+	i = fmt_str(s, "Received: indimail-mta queue ");
 	len += i;
 	if (s)
 		s += i;
@@ -399,24 +405,45 @@ receivedfmt(char *s)
 	len += i;
 	if (s)
 		s += i;
-	i = fmt_str(s, " invoked");
+	i = fmt_str(s, " invoked\n ");
 	len += i;
 	if (s)
 		s += i;
 	if (uid == auto_uida) {
-		i = fmt_str(s, " by alias");
+		i = fmt_str(s, "(by alias");
 		len += i;
 		if (s)
 			s += i;
 	} else
 	if (uid == auto_uidd) {
-		i = fmt_str(s, " from network");
+		i = fmt_str(s, "(from network ");
+		len += i;
+		if (s)
+			s += i;
+		if (!tcpremoteip)
+			tcpremoteip = env_get("TCPREMOTEIP");
+		if (!tcpremoteip)
+			tcpgetremoteip();
+		i = fmt_str(s, tcpremoteip);
+		len += i;
+		if (s)
+			s += i;
+		i = fmt_str(s, " to host ");
+		len += i;
+		if (s)
+			s += i;
+		if (!(host_name = env_get("HOSTNAME"))) {
+			if (gethostname(Hostname, sizeof(Hostname)) == -1)
+				str_copy(Hostname, "unknown");
+			host_name = Hostname;
+		}
+		i = fmt_str(s, host_name);
 		len += i;
 		if (s)
 			s += i;
 	} else
 	if (uid == auto_uids) {
-		i = fmt_str(s, " for bounce");
+		i = fmt_str(s, "(for bounce");
 		len += i;
 		if (s)
 			s += i;
@@ -426,10 +453,7 @@ receivedfmt(char *s)
 		if (!tcpremoteip)
 			tcpgetremoteip();
 		if (tcpremoteip) {
-			char            Hostname[128];
-			char           *host_name;
-
-			i = fmt_str(s, " from ");
+			i = fmt_str(s, "(from ");
 			len += i;
 			if (s)
 				s += i;
@@ -437,7 +461,7 @@ receivedfmt(char *s)
 			len += i;
 			if (s)
 				s += i;
-			i = fmt_str(s, " by host ");
+			i = fmt_str(s, " to host ");
 			len += i;
 			if (s)
 				s += i;
@@ -451,7 +475,7 @@ receivedfmt(char *s)
 			if (s)
 				s += i;
 		}
-		i = fmt_str(s, " by uid ");
+		i = fmt_str(s, " uid=");
 		len += i;
 		if (s)
 			s += i;
@@ -1258,7 +1282,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.76 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.77 2021-09-11 19:01:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
