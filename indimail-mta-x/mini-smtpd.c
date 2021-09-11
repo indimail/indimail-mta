@@ -1,5 +1,8 @@
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.3  2021-09-11 18:58:03+05:30  Cprogrammer
+ * pass null remotehost to received when remotehost is unknown
+ *
  * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -661,7 +664,8 @@ smtp_data(char *arg)
 	qp = qmail_qp(&qqt);
 	out("354 go ahead\r\n");
 
-	received(&qqt, "SMTP", local, remoteip, remotehost, remoteinfo, fakehelo);
+	received(&qqt, "SMTP", local, remoteip,
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 	blast(&hops);
 	hops = (hops >= MAXHOPS);
 	if (hops)
@@ -731,7 +735,7 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.2 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.3 2021-09-11 18:58:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

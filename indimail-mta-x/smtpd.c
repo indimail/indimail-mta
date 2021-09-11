@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.247 $";
+char           *revision = "$Revision: 1.248 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -908,7 +908,8 @@ msg_notify()
 		protocol = proto.s;
 	}
 	datetime_tai(&dt, now());
-	received(&qqt, (char *) protocol, local, remoteip, remotehost, remoteinfo, fakehelo);
+	received(&qqt, (char *) protocol, local, remoteip,
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 	strnum[fmt_ulong(strnum, msg_size)] = 0;
 	qmail_puts(&qqt, "X-size-Notification: ");
 	qmail_puts(&qqt, "size=");
@@ -4384,7 +4385,8 @@ smtp_data(char *arg)
 			die_nomem();
 		protocol = proto.s;
 	}
-	received(&qqt, (char *) protocol, local, remoteip, remotehost, remoteinfo, fakehelo);
+	received(&qqt, (char *) protocol, local, remoteip,
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 #ifdef USE_SPF
 	spfreceived();
 #endif
@@ -6106,6 +6108,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.248  2021-09-11 19:02:28+05:30  Cprogrammer
+ * pass null remotehost to received when remotehost is unknown
+ *
  * Revision 1.247  2021-09-10 15:25:23+05:30  Cprogrammer
  * removed setting of SPFRESULT env variable
  *
@@ -6286,7 +6291,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.247 2021-09-10 15:25:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.248 2021-09-11 19:02:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.11  2021-09-11 19:01:18+05:30  Cprogrammer
+ * pass null remotehost to received when remotehost is unknown
+ *
  * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -83,8 +86,7 @@ getlen()
 	unsigned long   len = 0;
 	char            ch;
 
-	for (;;)
-	{
+	for (;;) {
 		getbyte(&ch);
 		if (ch == ':')
 			return len;
@@ -113,19 +115,17 @@ identify()
 	char           *remoteip;
 	char           *local;
 
-	remotehost = env_get("TCPREMOTEHOST");
-	if (!remotehost)
+	if (!(remotehost = env_get("TCPREMOTEHOST")))
 		remotehost = "unknown";
 	remoteinfo = env_get("TCPREMOTEINFO");
-	remoteip = env_get("TCPREMOTEIP");
-	if (!remoteip)
+	if (!(remoteip = env_get("TCPREMOTEIP")))
 		remoteip = "unknown";
-	local = env_get("TCPLOCALHOST");
-	if (!local)
+	if (!(local = env_get("TCPLOCALHOST")))
 		local = env_get("TCPLOCALIP");
 	if (!local)
 		local = "unknown";
-	received(&qq, "QMQP", local, remoteip, remotehost, remoteinfo, (char *) 0);
+	received(&qq, "QMQP", local, remoteip,
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, (char *) 0);
 }
 
 char            buf[1000];
@@ -138,8 +138,7 @@ getbuf()
 	int             i;
 
 	len = getlen();
-	if (len >= 1000)
-	{
+	if (len >= 1000) {
 		for (i = 0; i < len; ++i)
 			getbyte(buf);
 		getcomma();
@@ -177,8 +176,7 @@ main()
 	qp = qmail_qp(&qq);
 	identify();
 
-	while (len > 0)
-	{/*- XXX: could speed this up */
+	while (len > 0) {/*- XXX: could speed this up */
 		getbyte(&ch);
 		--len;
 		qmail_put(&qq, &ch, 1);
@@ -186,18 +184,15 @@ main()
 	getcomma();
 	if (getbuf())
 		qmail_from(&qq, buf);
-	else
-	{
+	else {
 		qmail_from(&qq, "");
 		qmail_fail(&qq);
 		flagok = 0;
 	}
-	while (bytesleft)
-	{
+	while (bytesleft) {
 		if (getbuf())
 			qmail_to(&qq, buf);
-		else
-		{
+		else {
 			qmail_fail(&qq);
 			flagok = 0;
 		}
@@ -205,8 +200,7 @@ main()
 	bytesleft = 1;
 	getcomma();
 	result = qmail_close(&qq);
-	if (!*result)
-	{
+	if (!*result) {
 		len = fmt_str(buf, "Kok ");
 		len += fmt_ulong(buf + len, (unsigned long) now());
 		len += fmt_str(buf + len, " qp ");
@@ -227,7 +221,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpd.c,v 1.11 2021-09-11 19:01:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
