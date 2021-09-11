@@ -165,6 +165,15 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
 86. changed permissions for dirs with 555 to 755
 - 10/09/2021
 87. smtpd.c: removed setting of SPFRESULT env variable
+88. dknewkey.sh: changed owner/permissions of dkim private/public key pairs
+89. mini-smtpd.c, qmail-smtpd.c qmail-qmqpd.c, qmail-qmtpd.c, received.c:
+    pass null remotehost to received when remotehost is unknown
+90. qmail-direct.c: replace qmail with indimail-mta in received header
+91. update_tmprsadh: added read permissions on certs for qmail group
+92. received.c: skip remotehost in received headers when value is unknown
+93. qmail-queue.c: updated received headers with more information
+94. sys-checkpwd.c: relinquish root privileges
+95. svctool.in: run qmail-smtpd, qmail-poppass, inlookup as qmaild
 
 * 
 Release 2.13 Start 14/02/2021
