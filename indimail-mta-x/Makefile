@@ -3138,6 +3138,7 @@ update_tmprsadh: conf-qmail update_tmprsadh.sh conf-sysconfdir
 	@cat update_tmprsadh.sh\
 	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
 	> $@
+	chmod +x $@
 
 tmprsadh: update_tmprsadh
 	echo "Creating new temporary RSA and DH parameters"
