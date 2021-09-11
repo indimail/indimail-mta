@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.615 2021-08-26 23:54:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.616 2021-09-11 19:02:48+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.615 2021-08-26 23:54:38+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.616 2021-09-11 19:02:48+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2716,13 +2716,13 @@ else
 fi
 (
 dump_run_header
-echo "QMAILDUID=\`/usr/bin/id -u indimail\`"
-echo "NOFILESGID=\`/usr/bin/id -g indimail\`"
+echo "MYUID=\`/usr/bin/id -u qmaild\`"
+echo "MYGID=\`/usr/bin/getent group qmail|awk -F: '{print \$3}'\`"
 echo "ME=\`head -1 $CONTROLDIR/me\`"
 echo "HOSTNAME=\`uname -n\`"
 echo
-echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
-echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
+echo "if [ -z \"\$MYUID\" -o -z \"\$MYGID\" -o -z \"\$ME\" ]; then"
+echo "    echo UID, GID, or ME is unset in"
 echo "    echo \`pwd\`/run"
 echo "    sleep 5"
 echo "    exit 1"
@@ -2760,7 +2760,7 @@ else
 fi
 echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
 echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
-echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
+echo "-u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
 if [ -f /bin/false ] ; then
 	false="/bin/false"
 else
@@ -3218,13 +3218,13 @@ else
 fi
 (
 dump_run_header
-echo "QMAILDUID=\`/usr/bin/id -u indimail\`"
-echo "NOFILESGID=\`/usr/bin/id -g indimail\`"
+echo "MYUID=\`/usr/bin/id -u qmaild\`"
+echo "MYGID=\`/usr/bin/id -g qmaild\`"
 echo "ME=\`head -1 $CONTROLDIR/me\`"
 echo "HOSTNAME=\`uname -n\`"
 echo
-echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" -o -z \"\$ME\" ]; then"
-echo "    echo QMAILDUID, NOFILESGID, or ME is unset in"
+echo "if [ -z \"\$MYUID\" -o -z \"\$MYGID\" -o -z \"\$ME\" ]; then"
+echo "    echo UID, GID, or ME is unset in"
 echo "    echo \`pwd\`/run"
 echo "    sleep 5"
 echo "    exit 1"
@@ -3243,7 +3243,7 @@ case $type in
 	;;
 esac
 echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
-echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
+echo "-u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\"
 echo "$QmailBinPrefix/sbin/qmail-$type\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
@@ -3602,6 +3602,7 @@ if [ $run_file_only -ne 1 ] ; then
 		# this will have all variables of "$cdb_f"_config_ssl also
 		create_"$cdb_f"_config $COURIER_PORT $infifo > $conf_dir/.courier_variables
 	fi
+	echo "0660" > $conf_dir/FIFO_MODE
 	if [ ! " $memory" = " " ] ; then
 		echo $memory > $conf_dir/SOFT_MEM
 	else
@@ -3625,8 +3626,8 @@ if [ $run_file_only -ne 1 ] ; then
 fi
 (
 dump_run_header
-echo "INDIUID=\`/usr/bin/id -u indimail\`"
-echo "INDIGID=\`/usr/bin/id -g indimail\`"
+echo "MYUID=\`/usr/bin/id -u indimail\`"
+echo "MYGID=\`/usr/bin/id -g indimail\`"
 echo "HOSTNAME=\`uname -n\`"
 echo ""
 echo "prefix=$QmailBinPrefix"
@@ -3644,10 +3645,10 @@ echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/bin/tcpserver -v -c variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 echo "-x $sysconfdir/tcp/tcp.$cdb_f.cdb -X \\"
 if [ " $imap_ssl" = " 1" ] ; then
-	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$INDIUID -g \$INDIGID \\\$SSLADDRESS \\\$SSLPORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$MYUID -g \$MYGID \\\$SSLADDRESS \\\$SSLPORT \\"
 	echo "\$prefix/bin/couriertls -server -tcpd \\"
 else
-	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$INDIUID -g \$INDIGID \\\$LOCALIP \\\$PORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\"
 fi
 if [ " $proxy_port" = " " ] ;then
 	echo "\$prefix/sbin/"$cdb_f"login \\\$IMAPAUTHMODULES \$bindir/$stype Maildir\""
@@ -4666,6 +4667,7 @@ $chown root:indimail "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/supervise/control
 echo "$fifo_name" > $conf_dir/INFIFO
 echo "$fifo_dir" > $conf_dir/FIFODIR
 echo $THREAD_COUNT > $conf_dir/THREAD_COUNT
+echo "0660" > $conf_dir/FIFO_MODE
 if [ " $activeDays"  = " " ] ; then
 echo 0 > $conf_dir/CACHE_COUNT
 else
@@ -4710,7 +4712,7 @@ dump_run_header
 echo "exec 2>&1"
 echo ""
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
-echo "exec $QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/inlookup \\"
+echo "exec $QmailBinPrefix/bin/setuidgid -g qmail:indimail qmaild $QmailBinPrefix/sbin/inlookup \\"
 echo "  -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
@@ -6191,12 +6193,12 @@ fi
 (
 dump_run_header
 echo "exec 2>&1"
-echo "QMAILDUID=\`/usr/bin/id -u indimail\`"
-echo "NOFILESGID=\`/usr/bin/id -g indimail\`"
+echo "MYUID=\`/usr/bin/id -u qmaild\`"
+echo "MYGID=\`/usr/bin/id -g qmaild\`"
 echo "HOSTNAME=\`uname -n\`"
 echo ""
-echo "if [ -z \"\$QMAILDUID\" -o -z \"\$NOFILESGID\" ]; then"
-echo "    echo QMAILDUID or NOFILESGID is unset in"
+echo "if [ -z \"\$MYUID\" -o -z \"\$MYGID\" ]; then"
+echo "    echo UID or GID is unset in"
 echo "    echo \`pwd\`/run"
 echo "    sleep 5"
 echo "    exit 1"
@@ -6220,7 +6222,7 @@ if [ -f /bin/false ] ; then
 else
 	false="/usr/bin/false"
 fi
-echo "-u \$QMAILDUID -g \$NOFILESGID \\\$LOCALIP \\\$PORT \\"
+echo "-u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\"
 echo "$QmailBinPrefix/sbin/qmail-poppass \$HOSTNAME $QmailBinPrefix/sbin/vchkpass $false\""
 ) > $TMPDIR/poppass-run.$$
 /bin/mv $TMPDIR/poppass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
