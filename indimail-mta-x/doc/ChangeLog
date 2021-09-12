@@ -172,10 +172,10 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
 91. update_tmprsadh: added read permissions on certs for qmail group
 92. received.c: skip remotehost in received headers when value is unknown
 93. qmail-queue.c: updated received headers with more information
-94. sys-checkpwd.c: relinquish root privileges
-95. svctool.in: run qmail-smtpd, qmail-poppass, inlookup as qmaild
+94. svctool.in: run qmail-smtpd, qmail-poppass, inlookup as qmaild
 - 12/09/2021
-96. svctool.in: set inlookup fifo permissions during startup
+95. svctool.in: set inlookup fifo permissions during startup
+96. sys-checkpwd.c: relinquish setuid privileges in pipe_exec()
 
 * 
 Release 2.13 Start 14/02/2021
