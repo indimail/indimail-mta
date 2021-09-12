@@ -174,6 +174,8 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
 93. qmail-queue.c: updated received headers with more information
 94. sys-checkpwd.c: relinquish root privileges
 95. svctool.in: run qmail-smtpd, qmail-poppass, inlookup as qmaild
+- 12/09/2021
+96. svctool.in: set inlookup fifo permissions during startup
 
 * 
 Release 2.13 Start 14/02/2021

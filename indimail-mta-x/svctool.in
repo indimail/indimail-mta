@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.616 2021-09-11 19:02:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.617 2021-09-12 11:56:18+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.616 2021-09-11 19:02:48+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.617 2021-09-12 11:56:18+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4711,8 +4711,25 @@ echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 dump_run_header
 echo "exec 2>&1"
 echo ""
+echo "home=\$(getent passwd indimail|awk -F: '{print \$6}')"
+echo "if [ -z \"\$home\" ] ; then"
+echo "  echo \"unable to get homedir for indimail\" 1>&2"
+echo "  exit 1"
+echo "fi"
+echo "if [ ! -d \$home/inquery ] ; then"
+echo "  /bin/mkdir \$home/inquery"
+echo "  $chown indimail:qmail \$home/inquery"
+echo "fi"
+echo "if [ -f variables/THREAD_COUNT ] ; then"
+echo "  count=\$(cat variables/THREAD_COUNT)"
+echo "else"
+echo "  count=5"
+echo "fi"
+echo "echo \"initializing fifo count=\$count ...\""
+echo "/bin/rm -f \$home/inquery/infifo.*"
+echo "for i in \$(seq 1 \$count); do f=\$home/inquery/infifo.\$i; mkfifo \$f && /bin/chmod 660 \$f && $chown qmaild:indimail \$f; done"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
-echo "exec $QmailBinPrefix/bin/setuidgid -g qmail:indimail qmaild $QmailBinPrefix/sbin/inlookup \\"
+echo "exec $QmailBinPrefix/bin/setuidgid -g qmail,indimail qmaild $QmailBinPrefix/sbin/inlookup \\"
 echo "  -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
@@ -9158,15 +9175,7 @@ if [ $(id -u) -ne 0 ] ; then
 	exit 100
 fi
 
-if [ -x /bin/chown ] ; then
-	chown=/bin/chown
-elif [ -x /usr/sbin/chown ] ; then
-	chown=/usr/sbin/chown
-elif [ -x /usr/bin/chown ] ; then
-	chown=/usr/bin/chown
-else
-	chown=/bin/chown
-fi
+chown=$(which chown)
 
 if [ -f $sysconfdir/svctool.cnf ] ; then
 	perms=$(stat -c "%u:%g:%a" $sysconfdir/svctool.cnf)
