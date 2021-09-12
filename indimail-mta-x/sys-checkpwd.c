@@ -1,7 +1,7 @@
 /*
  * $Log: sys-checkpwd.c,v $
- * Revision 1.13  2021-09-11 19:03:23+05:30  Cprogrammer
- * relinquish root privileges
+ * Revision 1.13  2021-09-12 12:55:30+05:30  Cprogrammer
+ * relinquish setuid in pipe_exec()
  *
  * Revision 1.12  2021-07-05 21:24:53+05:30  Cprogrammer
  * use qgetpw interface from libqmail if USE_QPWGR is set
@@ -159,7 +159,7 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 	int             pipe_fd[2];
 	char            strnum[FMT_ULONG];
 
-	if (setuid(getuid()))
+	if (!geteuid() && setuid(getuid()))
 		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 	strnum[fmt_ulong(strnum, getpid())] = 0;
 	if (debug)
@@ -181,7 +181,6 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 	strerr_die3sys(111, FATAL, "exec: ", argv[1]);
 }
 
-int             authlen = 512;
 
 int
 main(int argc, char **argv)
@@ -189,7 +188,7 @@ main(int argc, char **argv)
 	char           *ptr, *tmpbuf, *login, *response, *challenge, *stored;
 	char            strnum[FMT_ULONG];
 	static stralloc buf = {0};
-	int             i, count, offset, status, save = -1, use_pwgr;
+	int             i, count, offset, status, save = -1, use_pwgr, authlen = 512;
 	struct passwd  *pw;
 #ifdef HASUSERPW
 	struct userpw  *upw;
@@ -276,8 +275,9 @@ main(int argc, char **argv)
 	}
 	stored = spw->sp_pwdp;
 #endif
+	if (setuid(getuid()))
+		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 	strnum[fmt_ulong(strnum, getuid())] = 0;
-	
 	if (env_get("DEBUG_LOGIN")) {
 		i = str_rchr(argv[0], '/');
 		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
@@ -318,15 +318,11 @@ main(int argc, char **argv)
 			if (stralloc_copys(&buf, ptr) || !stralloc_append(&buf, " ")
 					|| !stralloc_cats(&buf, login) || !stralloc_0(&buf))
 				strerr_die2x(111, WARN, "out of memory");
-			if (setuid(getuid()))
-				strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 			status = runcmmd(buf.s);
 		} else
 		if (errno != error_noent)
 			strerr_die4sys(111, FATAL, "unable to access ", ptr, ": ");
 	}
-	if (setuid(getuid()))
-		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 	_exit(status);
 	/*- Not reached */
 	return (0);
@@ -336,7 +332,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.13 2021-09-11 19:03:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.13 2021-09-12 12:55:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
