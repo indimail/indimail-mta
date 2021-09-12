@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.62  2021-09-12 14:17:30+05:30  Cprogrammer
+ * restore gid after reading private key file
+ *
  * Revision 1.61  2021-08-29 23:27:08+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -346,6 +349,15 @@ static stralloc nsigdomains = { 0 }; /*- domains which do not have signatures */
 static stralloc dkimopts = { 0 };
 static stralloc dkimkeys = { 0 };
 
+void
+restore_gid()
+{
+	if (getegid() != getgid() && setgid(getgid()) == -1) {
+		custom_error("Z", "unable to restore gid. (#4.3.0)", 0);
+		die(88, 0);
+	}
+}
+
 static void
 write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 {
@@ -433,6 +445,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 			return;
 		die(35, 0);
 	case 1:
+		restore_gid();
 		break;
 	default:
 		custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
@@ -1102,8 +1115,10 @@ main(int argc, char *argv[])
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
 	ptr = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
-	if (dkimverify && ptr && env_get("RELAYCLIENT_NODKIMVERIFY"))
+	if (dkimverify && ptr && env_get("RELAYCLIENT_NODKIMVERIFY")) {
+		restore_gid();
 		return (qmulti("DKIMQUEUE", argc, argv));
+	}
 	if (!dkimsign && !dkimverify && ptr) {
 		if (!(dkimsign = env_get("DKIMKEY"))) {
 			if (!stralloc_copys(&dkimfn, "domainkeys/%/default") ||
@@ -1144,6 +1159,7 @@ main(int argc, char *argv[])
 	} else {
 		char           *x;
 
+		restore_gid();
 		if (!dkimverify)
 			dkimverify = "";
 		if (!(x = env_get("SIGN_PRACTICE")))
@@ -1233,6 +1249,7 @@ main(int argc, char *argv[])
 		if (dkimverify) {
 			char            szPolicy[512];
 
+			restore_gid();
 			if (!ret) {
 				if ((ret = DKIMVerifyResults(&ctxt, &sCount, &sSize)) != DKIM_SUCCESS)
 					maybe_die_dkim(ret);
@@ -1345,6 +1362,7 @@ main(int argc, char *argv[])
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
 			die(120, 0);
+		restore_gid();
 		return (qmulti("DKIMQUEUE", argc, argv));
 	}
 	close(pim[0]);
@@ -1394,7 +1412,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.61 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.62 2021-09-12 14:17:30+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.57  2021-09-12 14:17:26+05:30  Cprogrammer
+ * restore gid after reading private key file
+ *
  * Revision 1.56  2021-08-29 23:27:08+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -195,6 +198,7 @@
 #include <mess822.h>
 #include <makeargs.h>
 #include <noreturn.h>
+#include <strerr.h>
 #include "qmail.h"
 #include "control.h"
 #include "variables.h"
@@ -312,6 +316,15 @@ maybe_die_dk(e)
 	}
 }
 
+void
+restore_gid()
+{
+	if (getegid() != getgid() && setgid(getgid()) == -1) {
+		custom_error("Z", "unable to restore gid. (#4.3.0)", 0);
+		_exit(88);
+	}
+}
+
 static char    *dkexcludeheaders;
 static DK_LIB  *dklib;
 static DK      *dk;
@@ -399,6 +412,7 @@ write_signature(DK *dka, char *dk_selector,
 			return;
 		die(35);
 	case 1:
+		restore_gid();
 		break;
 	default:
 		custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
@@ -565,8 +579,10 @@ main(int argc, char *argv[])
 	dksign = env_get("DKSIGN");
 	dkverify = env_get("DKVERIFY");
 	relayclient = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
-	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY"))
+	if (dkverify && relayclient && env_get("RELAYCLIENT_NODKVERIFY")) {
+		restore_gid();
 		return (qmulti("DKQUEUE", argc, argv));
+	}
 	if (!dksign && !dkverify && relayclient) {
 		if (!(dksign = env_get("DKKEY"))) {
 			if (!stralloc_copys(&dkfn, "domainkeys/%/default") ||
@@ -692,6 +708,7 @@ main(int argc, char *argv[])
 		if (dkverify) {
 			char           *status = 0, *code = 0;
 
+			restore_gid();
 			if (!stralloc_copys(&dkoutput, "DomainKey-Status: "))
 				die(51);
 			switch (st)
@@ -773,6 +790,7 @@ main(int argc, char *argv[])
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
 			die(120);
+		restore_gid();
 		return (qmulti("DKQUEUE", argc, argv));
 	}
 	close(pim[0]);
@@ -822,7 +840,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.56 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.57 2021-09-12 14:17:26+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;

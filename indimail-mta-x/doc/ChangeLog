@@ -176,6 +176,7 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
 - 12/09/2021
 95. svctool.in: set inlookup fifo permissions during startup
 96. sys-checkpwd.c: relinquish setuid privileges in pipe_exec()
+97. qmail-dk.c, qmail-dkim.c: restore gid after reading private key file
 
 * 
 Release 2.13 Start 14/02/2021
