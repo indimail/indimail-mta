@@ -19,6 +19,7 @@ o alpine linux ready
 o supervise: add feature to run ./init once before ./run
 o svscan: set SERVICEDIR, PWD environment variable
 o svscan: ability to run as PID 1 and reap dead children
+o setuidgid: Feature to set additional groups using -g option
 ===========================================================================
 - 27/02/2021
 01. minisvc: added options to set, unset, remove env variables for supervised
