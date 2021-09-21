@@ -1,0 +1,83 @@
+.TH batv 1
+.SH NAME
+batv \- Bounce Address Tag Validation Tester for indimail-mta
+
+.SH SYNOPSIS
+.B batv
+\fB\-k\fR \fIsignkey\fR
+[
+\fB\-t\fR \fIstale\fR
+]
+\fB\-s\fR \fIaddr\fR | \fB\-r\fR \fIaddr\fR
+
+Where \fIaddr\fR is the Mail From address.
+
+.SH DESCRIPTION
+BATV defines a method for tagging information to be included in the
+local part of the RFC2821 MailFrom address. This permits encoding
+information that authenticates the MailFrom. The encoded information also
+contains DDD as the number of days elapsed since 1970, (applying MOD 1000).
+This can be used by BATV to limit the validity period of the BATV address.
+\fBbatv\fR(1) is a Bounce Address Tag Validation tester. It can be used to
+encode a tag that can be included in \fIaddr\fR or validate a BATV encoded
+address \fIaddr\fR.
+
+.EX
+$ date +%s
+1632203830
+
+$ batv -k 1632203830 -t 1 -s test@example.com
+prvs=0891a9abd5=test@example.com
+
+$ batv -k 1632203830 -v prvs=0891a9abd5=test@example.com
+test@example.com
+
+$ batv -k 1632203831 -v prvs=0891a9abd5=test@example.com
+could not verify prvs=0891a9abd5=test@example.com: bad BATV address encoding
+
+$ batv -k 1632203830 -v prvs=0881a9abd5=test@example.com
+batv: could not verify prvs=0881a9abd5=test@example.com: expired BATV address [10 days]
+.EE
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-s\fR
+Generate a BATV address
+
+.TP
+\fB\-v\fR
+Validate a BATV address
+
+.TP
+\fB\-k\fR \fIsignkey\fR
+An alphanumeric key to be used for generating a BATV tag that will be used
+to encode the Mail From address.
+
+.TP
+\fB\-t\fR \fIstale\fR
+Used for defining the validity in days of the BATV encoded address. A BATV
+encoded address contains the number of days elapsed since 1970, (applying
+MOD 1000). The value of \fIstale\fR is used to limit the validity of the
+tagged address to a maximum of \fIstale\fR days.  Default: 7 days.
+
+.SH RETURN VALUES
+\fBbatv\fR(1) returns 0 for successful signing and validation. It returns
+the following codes if the BATV encoding doesn't validate
+
+.EX
+1 - address doesn't have BATV encoding
+2 - address has an invalid BATV encoding
+3 - address has an expired BATV encoding
+.EE
+
+\fBbatv\fR(1) returns 111 for all system errors.
+
+.SH SEE ALSO
+qmail-smtpd(8),
+qmail-remote(8),
+qmail-send(8),
+slowq-send(8),
+qmta-send(8)
+
+https://mipassoc.org/batv/draft-levine-smtp-batv-01.txt
