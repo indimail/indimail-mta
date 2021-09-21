@@ -1,7 +1,10 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.7  2021-09-21 13:32:31+05:30  Cprogrammer
+ * refactored batv code
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.5  2015-08-20 18:34:28+05:30  Cprogrammer
  * added usage for invalid option
@@ -20,6 +23,7 @@
  * Initial revision
  *
  */
+#include <stdio.h>
 #ifdef BATV
 #include <unistd.h>
 #include <ctype.h>
@@ -34,48 +38,59 @@
 #include <strerr.h>
 #include <subfd.h>
 #include <byte.h>
+#include <fmt.h>
 #include <noreturn.h>
 
 #define FATAL "batv: fatal: "
 #define BATVLEN 3 /*- number of bytes */
 
-stralloc        signkey = {0};
+#define NO_BATV 1
+#define FORMAT_BAD 2
+#define STALE_SIG  3
+
+stralloc        batvkey = {0};
 stralloc        nosign = {0};
-struct constmap mapnosign;
-stralloc        nosigndoms = {0};
-struct constmap mapnosigndoms;
-int             signkeystale = 7; /*- accept signkey for a week */
-
-void
-out(char *str)
-{
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdout, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
-}
-
-void
-flush()
-{
-	if (substdio_flush(subfdout) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
-}
+int             batvkeystale = 7; /*- accept batvkey for a week */
+stralloc        newsender = { 0 };
 
 no_return void
 die_nomem()
 {
-	substdio_flush(subfdout);
 	substdio_puts(subfderr, "batv: out of memory\n");
 	substdio_flush(subfderr);
 	_exit(111);
 }
 
-stralloc        newsender = { 0 };
+void
+print_batv_err(int code, int days)
+{
+	char            strnum[FMT_ULONG];
+
+	switch (code)
+	{
+	case NO_BATV:
+		if (substdio_puts(subfderr, "missing BATV address") == -1)
+			_exit(111);
+		break;
+	case FORMAT_BAD:
+		if (substdio_puts(subfderr, "bad BATV address encoding") == -1)
+			_exit(111);
+		break;
+	case STALE_SIG:
+		strnum[fmt_int(strnum, days)] = 0;
+		if (substdio_puts(subfderr, "expired BATV address [") == -1 ||
+				substdio_puts(subfderr, strnum) == -1 ||
+				substdio_puts(subfderr, " days]") == -1)
+			_exit(111);
+		break;
+	}
+	if (substdio_flush(subfderr) == -1)
+		_exit(111);
+	return;
+}
+
 int
-checkbatv(char *recipient)
+checkbatv(char *sender, int *days)
 {
 	int             daynumber = (now() / 86400) % 1000;
 	int             i, len;
@@ -86,32 +101,36 @@ checkbatv(char *recipient)
 	unsigned char   md5digest[MD5_DIGEST_LENGTH];
 	unsigned long   signday;
 
-	len = str_len(recipient);
-	if (len >= (11 + 2 * BATVLEN) && !str_diffn(recipient, "prvs=", 5)) {
-		atpos = str_rchr(recipient, '@');
-		if (atpos < len)
-			recipient[atpos] = 0;	/*- just for a moment */
-		slpos = str_rchr(recipient, '='); /*- prefer an = sign */
-		if (atpos < len)
-			recipient[atpos] = '@';
-		byte_copy(kdate, 4, recipient + 5);
+	if (!stralloc_copys(&newsender, sender) || !stralloc_0(&newsender))
+		die_nomem();
+	newsender.len--;
+	len = newsender.len;
+	if (len >= (11 + 2 * BATVLEN) && !str_diffn(newsender.s, "prvs=", 5)) {
+		atpos = str_rchr(newsender.s, '@');
+		newsender.s[atpos] = 0;	/*- just for a moment */
+		slpos = str_rchr(newsender.s, '='); /*- prefer an = sign */
+		newsender.s[atpos] = '@'; /*- put back the @ */
+		byte_copy(kdate, 4, newsender.s + 5); /*- string after prvs= */
 		md5pos = 9;
 	} else
-		return 0; /*- no BATV */
+		return NO_BATV; /*- no BATV */
 	if (kdate[0] != '0')
-		return 0; /*- not known format 0 */
+		return FORMAT_BAD; /*- not known format 0 */
 	if (scan_ulong(kdate + 1, &signday) != 3)
-		return 0;
-	if ((unsigned) (daynumber - signday) > signkeystale)
-		return 0; /*- stale bounce */
+		return FORMAT_BAD;
+	if (days)
+		*days = daynumber - signday;
+	if ((unsigned) (daynumber - signday) > batvkeystale)
+		return STALE_SIG; /*- stale bounce */
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4); /* date */
-	MD5_Update(&md5, recipient + slpos + 1, len - slpos - 1);
-	MD5_Update(&md5, signkey.s, signkey.len);
+	MD5_Update(&md5, newsender.s + slpos + 1, len - slpos - 1);
+	MD5_Update(&md5, batvkey.s, batvkey.len);
 	MD5_Final(md5digest, &md5);
 	for (i = 0; i < BATVLEN; i++) {
 		int             c, x;
-		c = recipient[md5pos + 2 * i];
+
+		c = newsender.s[md5pos + 2 * i];
 		if (isdigit(c))
 			x = c - '0';
 		else
@@ -121,9 +140,9 @@ checkbatv(char *recipient)
 		if (c >= 'A' && c <= 'F')
 			x = 10 + c - 'A';
 		else
-			return 0;
+			return FORMAT_BAD;
 		x <<= 4;
-		c = recipient[md5pos + 2 * i + 1];
+		c = newsender.s[md5pos + 2 * i + 1];
 		if (isdigit(c))
 			x += c - '0';
 		else
@@ -133,16 +152,15 @@ checkbatv(char *recipient)
 		if (c >= 'A' && c <= 'F')
 			x += 10 + c - 'A';
 		else
-			return 0;
+			return FORMAT_BAD;
 		if (x != md5digest[i])
-			return 0;
+			return FORMAT_BAD;
 	}
-	/*
-	 * peel off the signature 
-	 */
-	byte_copy(recipient, len - (slpos + 1), recipient + (slpos + 1));
-	recipient[len - slpos - 1] = 0;
-	return 1;
+	/*- peel off the signature */
+	if (!stralloc_copyb(&newsender, newsender.s + slpos + 1, len - (slpos + 1)) ||
+			!stralloc_0(&newsender))
+		die_nomem();
+	return 0;
 }
 
 char *
@@ -157,13 +175,11 @@ signbatv(char *sender)
 
 	if (!str_diffn(sender, "prvs=", 5))
 		return sender; /*- already signed */
-	if (!str_diffn(sender, "sb*-", 4)) { /* don't sign this */
+	if (!str_diffn(sender, "sb*-", 4)) /* don't sign this */
 		return sender + 4;
-	}
 	len = str_len(sender);
-	if (!stralloc_ready(&newsender, len + (2 * BATVLEN + 10)))
-		die_nomem();
-	if (!stralloc_copyb(&newsender, "prvs=", 5))
+	if (!stralloc_ready(&newsender, len + (2 * BATVLEN + 10)) ||
+			!stralloc_copyb(&newsender, "prvs=", 5))
 		die_nomem();
 	/*- only one key so far */
 	kdate[1] = '0' + daynumber / 100;
@@ -174,7 +190,7 @@ signbatv(char *sender)
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4);
 	MD5_Update(&md5, sender, len);
-	MD5_Update(&md5, signkey.s, signkey.len);
+	MD5_Update(&md5, batvkey.s, batvkey.len);
 	MD5_Final(md5digest, &md5);
 	for (i = 0; i < BATVLEN; i++) {
 		char            md5hex[2];
@@ -185,37 +201,36 @@ signbatv(char *sender)
 			die_nomem();
 	}
 	/*-	separator */    
-	if (!stralloc_catb(&newsender, "=", 1))
-		die_nomem();    
-	if (!stralloc_catb(&newsender, sender, len))
-		die_nomem();    
-	if (!stralloc_0(&newsender))
+	if (!stralloc_catb(&newsender, "=", 1) ||
+			!stralloc_catb(&newsender, sender, len) ||
+			!stralloc_0(&newsender))
 		die_nomem();    
 	return newsender.s;
 }
 
 char           *usage =
-				"usage: batv -k key [-s sender | -v recipient]\n"
+				"usage: batv -k key [-t stale ] -s sender | -v recipient\n"
 				"        -k key       (signing key)\n"
+				"        -t stale     (key validity period in days default 7)\n"
 				"        -s sender    (batv signing)\n"
-				"        -t stale     (batv signing key validity period in days\n"
 				"        -v recipient (batv  verify)";
 
 int
 main(int argc, char **argv)
 {
 	char           *ptr = 0, *arg;
-	int             opt, signing;
+	int             opt, signing, i, days;
 
 	signing = 0;
 	while ((opt = getopt(argc, argv, "svk:t:")) != opteof) {
-		switch (opt) {
+		switch (opt)
+		{
 		case 'k':
-			if (!stralloc_copys(&signkey, optarg))
+			if (!stralloc_copys(&batvkey, optarg))
 				die_nomem();
 			break;
 		case 't':
-			scan_int(optarg, &signkeystale);
+			scan_int(optarg, &batvkeystale);
 			break;
 		case 's':
 			signing = 1;
@@ -227,31 +242,31 @@ main(int argc, char **argv)
 			strerr_die1x(100, usage);
 		}
 	}
-	if (optind + 1 != argc)
+	if (optind + 1 != argc || !batvkey.len)
 		strerr_die1x(100, usage);
 	arg = argv[optind++];
 	if (signing)
 		ptr = signbatv(arg);
-	else
-	if (!signing)
-	{
-		if (checkbatv(arg))
-			ptr = arg;
-		else
-			ptr = (char *) 0;
+	else {
+		if (!(i = checkbatv(arg, &days)))
+			ptr = newsender.s;
+		else {
+			if (substdio_puts(subfderr, "batv: could not verify ") == -1 ||
+					substdio_puts(subfderr, arg) == -1 ||
+					substdio_puts(subfderr, ": ") == -1)
+				_exit(111);
+			print_batv_err(i, days);
+			if (substdio_puts(subfderr, "\n") == -1 || substdio_flush(subfderr) == -1)
+				_exit(111);
+			return i;
+		}
 	}
-	if (ptr)
-		out(ptr);
-	else
-	{
-		out("could not ");
-		out(signing ? "sign" : "verify");
-		out(" ");
-		out(arg);
+	if (ptr) {
+		if (substdio_puts(subfdout, ptr) == -1 ||
+				substdio_puts(subfdout, "\n") == -1 ||
+				substdio_flush(subfdout) == -1)
+			_exit(111);
 	}
-	out("\n");
-	flush();
-	return (ptr ? 0 : 111);
 }
 #else
 #warning "not compiled with -DBATV"
@@ -276,7 +291,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.7 2021-09-21 13:32:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
