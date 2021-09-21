@@ -1,7 +1,7 @@
 /*
  * $Log: relaytest.c,v $
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.5  2016-01-02 19:23:25+05:30  Cprogrammer
  * use indimail.org

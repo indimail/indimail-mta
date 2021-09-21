@@ -1,7 +1,7 @@
 /*
  * $Log: tcp-env.c,v $
  * Revision 1.14  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.13  2021-07-07 08:53:42+05:30  Cprogrammer
  * removed setting of BOUNCEMAIL, WARNMAILx

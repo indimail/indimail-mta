@@ -1,7 +1,7 @@
 /*
  * $Log: dot-forward.c,v $
  * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.15  2021-07-05 21:10:12+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root

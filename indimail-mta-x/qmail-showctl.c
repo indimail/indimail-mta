@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-showctl.c,v $
  * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.2  2021-07-05 21:28:04+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root

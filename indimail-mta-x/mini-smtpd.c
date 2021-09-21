@@ -4,7 +4,7 @@
  * pass null remotehost to received when remotehost is unknown
  *
  * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.1  2021-07-09 21:50:06+05:30  Cprogrammer
  * Initial revision

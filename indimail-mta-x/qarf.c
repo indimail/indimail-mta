@@ -1,7 +1,7 @@
 /*
  * $Log: qarf.c,v $
  * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.12  2021-05-29 23:47:37+05:30  Cprogrammer
  * replace str_chr with str_rchr to get domain correctly from email address

@@ -1,7 +1,7 @@
 /*
  * $Log: printforward.c,v $
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.3  2005-08-23 17:33:32+05:30  Cprogrammer
  * gcc 4 compliance

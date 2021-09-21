@@ -1,7 +1,7 @@
 /*
  * $Log: condtomaildir.c,v $
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.5  2020-11-24 13:44:40+05:30  Cprogrammer
  * removed exit.h

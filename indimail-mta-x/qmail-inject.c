@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-inject.c,v $
  * Revision 1.44  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.43  2021-07-15 09:22:02+05:30  Cprogrammer
  * removed unused function

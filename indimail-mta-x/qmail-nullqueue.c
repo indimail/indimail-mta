@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-nullqueue.c,v $
  * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.4  2011-05-17 21:21:11+05:30  Cprogrammer
  * added timeout

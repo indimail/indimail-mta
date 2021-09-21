@@ -1,7 +1,7 @@
 /*
  * $Log: qbase64.c,v $
  * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.7  2010-03-03 11:00:41+05:30  Cprogrammer
  * remove newline

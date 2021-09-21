@@ -1,7 +1,7 @@
 /*
  * $Log: do_scan.c,v $
  * Revision 1.19  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.18  2021-06-15 11:32:24+05:30  Cprogrammer
  * remove creation of link for /etc/indimail/control in scanq directory

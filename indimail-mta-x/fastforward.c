@@ -1,7 +1,7 @@
 /*
  * $Log: fastforward.c,v $
  * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.12  2021-07-05 21:10:17+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root

@@ -1,7 +1,7 @@
 /*
  * $Log: mlmatchup.c,v $
  * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.4  2020-11-24 13:46:14+05:30  Cprogrammer
  * removed exit.h

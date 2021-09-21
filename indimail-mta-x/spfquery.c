@@ -1,7 +1,7 @@
 /*
  * $Log: spfquery.c,v $
  * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.6  2020-11-24 13:49:42+05:30  Cprogrammer
  * removed exit.h

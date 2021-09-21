@@ -1,7 +1,7 @@
 /*
  * $Log: qscanq-stdin.c,v $
  * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.7  2021-06-12 19:25:48+05:30  Cprogrammer
  * removed chdir(auto_qmail)

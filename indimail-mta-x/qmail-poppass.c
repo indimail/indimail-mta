@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-poppass.c,v $
  * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.4  2021-06-15 12:14:05+05:30  Cprogrammer
  * use makeargs from libqmail

@@ -1,7 +1,7 @@
 /*
  * $Log: report.c,v $
  * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.4  2021-08-28 23:07:59+05:30  Cprogrammer
  * moved dtype enum delivery variable from variables.h to getDomainToken.h

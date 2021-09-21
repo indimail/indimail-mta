@@ -1,7 +1,7 @@
 /*
  * $Log: autoresponder.c,v $
  * Revision 1.35  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.34  2021-07-19 07:57:58+05:30  Cprogrammer
  * fixed compiler warning on _XOPEN_SOURCE redefinition

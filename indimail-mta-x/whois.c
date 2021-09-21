@@ -1,7 +1,7 @@
 /*
  * $Log: whois.c,v $
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.3  2018-05-30 12:10:23+05:30  Cprogrammer
  * fixed newline getting appended to whois server variable

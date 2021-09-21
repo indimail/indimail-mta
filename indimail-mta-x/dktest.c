@@ -1,7 +1,7 @@
 /*
  * $Log: dktest.c,v $
  * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.17  2019-06-07 11:25:58+05:30  Cprogrammer
  * replaced getopt() with subgetopt()

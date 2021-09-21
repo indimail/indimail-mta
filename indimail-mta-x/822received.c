@@ -1,7 +1,7 @@
 /*
  * $Log: 822received.c,v $
  * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.9  2021-06-14 00:33:36+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)

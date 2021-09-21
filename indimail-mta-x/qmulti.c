@@ -1,7 +1,7 @@
 /*
  * $Log: qmulti.c,v $
  * Revision 1.56  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.55  2021-06-12 18:52:06+05:30  Cprogrammer
  * added chdir(auto_qmail) for qmail-queue

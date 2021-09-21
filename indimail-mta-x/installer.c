@@ -1,7 +1,7 @@
 /*
  * $Log: installer.c,v $
  * Revision 1.19  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.18  2021-08-05 20:52:44+05:30  Cprogrammer
  * fixed bug of skipping files in check mode

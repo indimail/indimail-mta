@@ -1,7 +1,7 @@
 /*
  * $Log: 822field.c,v $
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.5  2020-11-28 12:43:07+05:30  Cprogrammer
  * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text

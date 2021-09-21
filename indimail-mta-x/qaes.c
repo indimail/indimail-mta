@@ -8,7 +8,7 @@
  *
  * $Log: qaes.c,v $
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.5  2017-08-08 23:56:21+05:30  Cprogrammer
  * openssl 1.1.0 port

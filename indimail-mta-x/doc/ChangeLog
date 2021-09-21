@@ -1,4 +1,13 @@
 * 
+Release 2.14.1 Start 21/09/2021
+======= Release Highlights ================================================
+===========================================================================
+- 21/09/2021
+01. batv.c: refactored code. Return error type during validation
+02. added man pages for batv
+03. Fixed typos
+
+* 
 Release 2.14.0 Start 18/07/2021
 ======= Release Highlights ================================================
 o alpine linux ready - openrc script, svctool, minisvc
@@ -159,7 +168,7 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
     have domain specific private key, selector
 - 30/08/2021
 85. include noreturn.h from libqmail defining macro no_return
-    use no_return macro to declare funtions that do not return back to
+    use no_return macro to declare functions that do not return back to
     caller
 - 05/09/2021
 86. changed permissions for dirs with 555 to 755
@@ -177,6 +186,7 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
 95. svctool.in: set inlookup fifo permissions during startup
 96. sys-checkpwd.c: relinquish setuid privileges in pipe_exec()
 97. qmail-dk.c, qmail-dkim.c: restore gid after reading private key file
+- 12/09/2021 - indimail-mta-2.14.0
 
 * 
 Release 2.13 Start 14/02/2021

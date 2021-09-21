@@ -1,7 +1,7 @@
 /*
  * $Log: tls.c,v $
  * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.8  2021-05-26 10:47:57+05:30  Cprogrammer
  * replaced strerror() with error_str()

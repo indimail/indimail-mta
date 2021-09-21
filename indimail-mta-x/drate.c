@@ -1,7 +1,7 @@
 /*
  * $Log: drate.c,v $
  * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.20  2021-08-28 23:02:52+05:30  Cprogrammer
  * moved delivery variable to getDomainToken.c

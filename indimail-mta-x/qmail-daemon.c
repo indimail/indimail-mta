@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-daemon.c,v $
  * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.23  2021-07-19 12:54:19+05:30  Cprogrammer
  * exit 0 if flagexitasap is set

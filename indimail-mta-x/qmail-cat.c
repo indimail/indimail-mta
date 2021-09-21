@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-cat.c,v $
  * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.7  2009-10-03 15:02:59+05:30  Cprogrammer
  * process all arguments on command line

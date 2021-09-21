@@ -1,7 +1,7 @@
 /*
  * $Log: maildirserial.c,v $
  * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.17  2021-07-05 21:26:29+05:30  Cprogrammer
  * allow processing $HOME/.defaultqueue for root

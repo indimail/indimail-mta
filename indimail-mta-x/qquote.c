@@ -1,7 +1,7 @@
 /*
  * $Log: qquote.c,v $
  * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.2  2004-10-22 20:29:43+05:30  Cprogrammer
  * added RCS id

@@ -1,7 +1,7 @@
 /*
  * $Log: qmail-newu.c,v $
  * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.11  2021-06-15 11:57:21+05:30  Cprogrammer
  * moved cdbmss.h to libqmail

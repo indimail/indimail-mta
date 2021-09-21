@@ -1,7 +1,7 @@
 /*
  * $Log: maildir2mbox.c,v $
  * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.8  2021-06-03 18:12:04+05:30  Cprogrammer
  * use new prioq functions

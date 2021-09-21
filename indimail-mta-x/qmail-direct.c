@@ -4,7 +4,7 @@
  * replace qmail with indimail-mta in received header
  *
  * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.8  2021-07-05 21:23:10+05:30  Cprogrammer
  * use qgetpw interface from libqmail if USE_QPWGR is set

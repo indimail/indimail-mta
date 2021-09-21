@@ -1,7 +1,7 @@
 /*
  * $Log: plugtest.c,v $
  * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.6  2021-05-26 10:43:34+05:30  Cprogrammer
  * handle access() error other than ENOENT

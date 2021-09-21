@@ -1,7 +1,7 @@
 /*
  * $Log: spawn.c,v $
  * Revision 1.33  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.32  2021-06-29 09:29:20+05:30  Cprogrammer
  * modularize spawn code

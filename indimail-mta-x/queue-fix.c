@@ -1,7 +1,7 @@
 /*
  * $Log: queue-fix.c,v $
  * Revision 1.26  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.25  2021-07-20 09:04:36+05:30  Cprogrammer
  * added missing options in usage string

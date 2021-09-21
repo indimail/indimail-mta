@@ -4,7 +4,7 @@
  * updated Received headers
  *
  * Revision 1.76  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.75  2021-07-15 12:43:03+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
