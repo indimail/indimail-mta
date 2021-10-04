@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.617 2021-09-12 11:56:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.618 2021-10-04 09:24:13+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.617 2021-09-12 11:56:18+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.618 2021-10-04 09:24:13+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2859,11 +2859,6 @@ if [ " $qregex" = " " ] ; then
 	> $conf_dir/QREGEX
 else
 	echo > $conf_dir/QREGEX
-fi
-if [ " $query_cache" = " " ] ; then
-	> $conf_dir/QUERY_CACHE
-else
-	echo > $conf_dir/QUERY_CACHE
 fi
 if [ " $viruscheck" = " " ] ; then
 	> $conf_dir/VIRUSCHECK
