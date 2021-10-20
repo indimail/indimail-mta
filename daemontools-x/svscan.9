@@ -93,7 +93,7 @@ simple service manager to start only the processes that you require.
 If \fBINITCMD\fR environment variable is defined and set to an empty string
 and if \fI@servicedir@\fR/.svscan/\fIrun\fR exists and has the executable
 bit set, \fIrun\fR is executed. \fBINITCMD\fR can be set to full path of
-an executable or script to override \fBsvscan\fR running \fIrun\fR. If
+an executable or script to override \fI@servicedir@\fR/.svscan/\fIrun\fR If
 \fBWAIT_INITCMD\fR env variable is set, it will additionally wait for
 \fIrun\fR to exit, before starting the scan of \fIdirectory\fR. Typical use
 of \fBINITCMD\fR is to mount --bind @sysconfdir@/resolv.conf as

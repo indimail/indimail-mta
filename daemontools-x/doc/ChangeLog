@@ -158,6 +158,8 @@ o setuidgid: Feature to set additional groups using -g option
 - 11/09/2021
 67. setuidgid.c: Feature to set additional groups using -g option
 - 12/09/2021 - indimail-mta-2.14.0
+- 20/10/2021
+68. svscan.c: enable scan on SIGCHLD
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

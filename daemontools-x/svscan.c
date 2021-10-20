@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.23  2021-10-20 22:32:20+05:30  Cprogrammer
+ * enable scan on sigchld
+ *
  * Revision 1.22  2021-08-11 21:29:32+05:30  Cprogrammer
  * added handler for SIGCHLD when running as PID 1
  *
@@ -161,7 +164,7 @@ init_cmd(char *cmmd, int dowait, int shutdown)
 		args[3] = 0;
 		strnum[fmt_ulong(strnum, pid)] = 0;
 		if (!env_put2("PPID", strnum))
-			strerr_die2x(111, WARNING, "init_cmd: out of memory");
+			strerr_die3x(111, WARNING, cpath, "init_cmd: out of memory");
 		execv(*args, args);
 		strerr_die4sys(111, WARNING, "unable to run", cpath, ": ");
 	default:
@@ -290,7 +293,7 @@ start(char *fn, char *sdir)
 			args[2] = 0;
 			strnum[fmt_ulong(strnum, pid)] = 0;
 			if (!env_put2("PPID", strnum))
-				strerr_die2x(111, WARNING, "init_cmd: out of memory");
+				strerr_die3x(111, WARNING, fn, ": out of memory");
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, WARNING, "unable to start supervise ", fn, ": ");
 		default:
@@ -316,7 +319,7 @@ start(char *fn, char *sdir)
 			args[3] = 0;
 			strnum[fmt_ulong(strnum, pid)] = 0;
 			if (!env_put2("PPID", strnum))
-				strerr_die2x(111, WARNING, "init_cmd: out of memory");
+				strerr_die3x(111, WARNING, fn, ": out of memory");
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, FATAL, "unable to start supervise ", fn, "/log: ");
 		default:
@@ -384,7 +387,7 @@ doit(char *sdir, pid_t pid)
 		if (r > 1 && i == numx)
 			strerr_warn3(INFO, "completed last rites for orphan ", strnum1, 0);
 	} /*- for (;;) */
-	if (scannow != 1)
+	if (pid == 1 || !scannow)
 		return;
 	for (i = 0; i < numx; ++i)
 		x[i].flagactive = 0;
@@ -636,12 +639,14 @@ main(int argc, char **argv)
 		open_svscan_log(sdir);
 	if ((s = env_get("INITCMD")))
 		init_cmd(s, env_get("WAIT_INITCMD") ? 1 : 0, 0);
+#if 0
 	if (1 != pid)
 		sig_uncatch(sig_child);
+#endif
 	for (scannow = 1;;) {
 		doit(sdir, pid);
 		/* we do not scan service directory unless we get a sighup */
-		scannow=0;
+		scannow = 0;
 		while (!scannow) {
 			sleep(scan_interval ? scan_interval : 60);
 			/* 
@@ -659,7 +664,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.22 2021-08-11 21:29:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.23 2021-10-20 22:32:20+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
