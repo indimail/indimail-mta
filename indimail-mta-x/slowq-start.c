@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.5  2021-10-20 22:51:18+05:30  Cprogrammer
+ * add queue directory as argument for identification in ps list
+ *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -103,13 +106,13 @@ closepipes()
 int
 main(int argc, char **argv)
 {
-	char           *set_supplementary_groups;
+	char           *set_supplementary_groups, *ptr;
 	gid_t          *gidset;
 	int             ngroups;
-	char           *(qsargs[]) = { "slowq-send", 0};
-	char           *(qcargs[]) = { "qmail-clean", 0};
-	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0};
-	char           *(qrargs[]) = { "qmail-rspawn", 0};
+	char           *(qsargs[]) = { "slowq-send", 0, 0};
+	char           *(qcargs[]) = { "qmail-clean", 0, 0, 0};
+	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
+	char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
@@ -132,6 +135,12 @@ main(int argc, char **argv)
 	if (argv[1]) {
 		qlargs[1] = argv[1];
 		++argv;
+	}
+	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
+		qsargs[1] = ptr;
+		qcargs[1] = ptr;
+		qlargs[2] = ptr;
+		qrargs[1] = ptr;
 	}
 	if (argv[1]) {
 		if (pipe(pi0) == -1)
@@ -238,6 +247,7 @@ main(int argc, char **argv)
 			die();
 		close23456();
 		closepipes();
+		qcargs[2] = "slowq-send"; /*- pass qmail-send as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die();
 	}
@@ -275,7 +285,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-start.c,v 1.5 2021-10-20 22:51:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

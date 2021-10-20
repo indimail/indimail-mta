@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.24  2021-10-20 22:45:12+05:30  Cprogrammer
+ * added queue directory as argument for identification in ps list
+ *
  * Revision 1.23  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -63,12 +66,12 @@
 #include "auto_uids.h"
 #include "setuserid.h"
 
-static char    *(qsargs[]) = { "qmail-send", 0};
-static char    *(qcargs[]) = { "qmail-clean", 0};
-static char    *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0};
-static char    *(qrargs[]) = { "qmail-rspawn", 0};
+static char    *(qsargs[]) = { "qmail-send", 0, 0};
+static char    *(qcargs[]) = { "qmail-clean", 0, 0, 0};
+static char    *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
+static char    *(qrargs[]) = { "qmail-rspawn", 0, 0};
 #ifdef EXTERNAL_TODO
-static char    *(qtargs[]) = { "qmail-todo", 0};
+static char    *(qtargs[]) = { "qmail-todo", 0, 0};
 #endif
 
 no_return void
@@ -167,11 +170,9 @@ closepipes()
 int             verbose;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	char           *set_supplementary_groups;
+	char           *set_supplementary_groups, *ptr;
 	gid_t          *gidset;
 	int             ngroups;
 
@@ -199,6 +200,15 @@ main(argc, argv)
 	if (fd_copy(8,0) == -1)
 		die();
 #endif
+	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
+		qsargs[1] = ptr;
+		qcargs[1] = ptr;
+#ifdef EXTERNAL_TODO
+		qtargs[1] = ptr;
+#endif
+		qlargs[2] = ptr;
+		qrargs[1] = ptr;
+	}
 	if (argv[1]) {
 		qlargs[1] = argv[1];
 		++argv;
@@ -318,6 +328,7 @@ main(argc, argv)
 			die();
 		close23456();
 		closepipes();
+		qcargs[2] = "qmail-send"; /*- pass qmail-send as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die();
 	}
@@ -329,17 +340,17 @@ main(argc, argv)
 	case 0:
 		if (prot_uid(auto_uids) == -1)
 			die();
-		if (fd_copy(0,pi7[0]) == -1)
+		if (fd_copy(0, pi7[0]) == -1)
 			die();
-		if (fd_copy(1,pi8[1]) == -1)
+		if (fd_copy(1, pi8[1]) == -1)
 			die();
 		close23456();
-		if (fd_copy(2,pi9[1]) == -1)
+		if (fd_copy(2, pi9[1]) == -1)
 			die();
-		if (fd_copy(3,pi10[0]) == -1)
+		if (fd_copy(3, pi10[0]) == -1)
 			die();
 		closepipes();
-		execvp(*qtargs,qtargs); /*- qmail-todo */
+		execvp(*qtargs, qtargs); /*- qmail-todo */
 		die();
 	}
 
@@ -364,7 +375,8 @@ main(argc, argv)
 			die();
 		close23456();
 		closepipes();
-		execvp(*qcargs,qcargs); /*- qmail-clean */
+		qcargs[2] = "qmail-todo"; /*- pass qmail-todo as argument for the ps command */
+		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die();
 	}
 #endif
@@ -393,12 +405,16 @@ main(argc, argv)
 	if (fd_copy(6, pi6[0]) == -1)
 		die();
 #ifdef EXTERNAL_TODO
-	if (fd_copy(7,pi7[1]) == -1)
+	if (fd_copy(7, pi7[1]) == -1)
 		die();
-	if (fd_copy(8,pi8[0]) == -1)
+	if (fd_copy(8, pi8[0]) == -1)
 		die();
 #endif
 	closepipes();
+	if (argv[1]) {
+		qlargs[1] = argv[1];
+		++argv;
+	}
 	execvp(*qsargs, qsargs); /*- qmail-send */
 	die();
 	/*- Not reached */
@@ -408,7 +424,7 @@ main(argc, argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.23 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.24 2021-10-20 22:45:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

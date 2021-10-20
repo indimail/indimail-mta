@@ -1,5 +1,9 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.10  2021-10-20 22:48:33+05:30  Cprogrammer
+ * display program 'qmta-send' in logs for identification
+ * add queue directory as argument for identification in ps
+ *
  * Revision 1.9  2021-07-26 23:25:32+05:30  Cprogrammer
  * log when sighup, sigalrm is caught
  *
@@ -147,9 +151,9 @@ static stralloc bouncefrom = { 0 };
 static stralloc bouncehost = { 0 };
 static stralloc doublebounceto = { 0 };
 static stralloc doublebouncehost = { 0 };
-char           *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0};
-char           *(qrargs[]) = { "qmail-rspawn", 0};
-char           *(qcargs[]) = { "qmail-clean", 0};
+char           *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0, 0};
+char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
+char           *(qcargs[]) = { "qmail-clean", "qmta", 0};
 char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
 static int      flagspawnalive[CHANNELS];
 static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
@@ -163,14 +167,14 @@ static stralloc srs_domain = { 0 };
 static void
 cleandied()
 {
-	log1("alert: oh no! lost qmail-clean connection! dying...\n");
+	log1("alert: qmta-send: oh no! lost qmail-clean connection! dying...\n");
 	flagexitasap = 1;
 }
 
 static void
 spawndied(int c)
 {
-	log1("alert: oh no! lost spawn connection! dying...\n");
+	log1("alert: qmta-send: oh no! lost spawn connection! dying...\n");
 	flagspawnalive[c] = 0;
 	flagexitasap = 1;
 }
@@ -181,7 +185,7 @@ chdir_toqueue()
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/qmta";
 	while (chdir(queuedir) == -1) {
-		log3("alert: unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
+		log3("alert: qmta-send: unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
 		sleep(10);
 	}
 }
@@ -195,13 +199,13 @@ sigterm()
 void sigalrm()
 {
 	flagrunasap = 1;
-	log1("info: qmail-send: Got ALRM\n");
+	log1("info: qmta-send: Got ALRM\n");
 }
 
 void sighup()
 {
 	flagreadasap = 1;
-	log1("info: qmail-send: Got HUP\n");
+	log1("info: qmta-send: Got HUP\n");
 }
 
 #ifdef LOGLOCK
@@ -346,16 +350,16 @@ cleanup_do(fd_set *wfds)
 			return;
 		}
 		if (ch != '+')
-			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
+			log3("warning: qmta-send: qmail-clean unable to clean up ", fn1.s, "\n");
 	} else {
 		fnmake_intd(id);
 		if (unlink(fn1.s) == -1) {
-			log5("warning: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
+			log5("warning: qmta-send: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
 			return;
 		}
 		fnmake_mess(id);
 		if (unlink(fn1.s) == -1) {
-			log5("warning: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
+			log5("warning: qmta-send: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
 			return;
 		}
 	}
@@ -441,7 +445,7 @@ pqadd(unsigned long id)
 	}
 	return;
 fail:
-	log3("warning: unable to stat ", fn1.s, "; will try again later\n");
+	log3("warning: qmta-send: unable to stat ", fn1.s, "; will try again later\n");
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqfail, &pe))
@@ -475,7 +479,7 @@ pqfinish()
 			fnmake_chanaddr(pe.id, c);
 			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
 			if (utimes(fn1.s, ut) == -1)
-				log3("warning: unable to utime ", fn1.s, "; message will be retried too soon\n");
+				log3("warning: qmta-send: unable to utime ", fn1.s, "; message will be retried too soon\n");
 		}
 	}
 }
@@ -567,20 +571,20 @@ process_todo(unsigned long id)
 		fdchan[c] = -1;
 	fnmake_todo(id);
 	if ((fd = open_read(fn1.s)) == -1) {
-		log3("warning: unable to open ", fn1.s, "\n");
+		log3("warning: qmta-send: unable to open ", fn1.s, "\n");
 		return;
 	}
 	fnmake_mess(id);
 	/*- just for the statistics */
 	if (stat(fn1.s, &st) == -1) {
-		log3("warning: unable to stat ", fn1.s, "\n");
+		log3("warning: qmta-send: unable to stat ", fn1.s, "\n");
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log5("warning: unable to unlink: ", fn1.s, ": ", error_str(errno), "\n");
+				log5("warning: qmta-send: unable to unlink: ", fn1.s, ": ", error_str(errno), "\n");
 				goto fail;
 			}
 		}
@@ -588,12 +592,12 @@ process_todo(unsigned long id)
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
 		if (errno != error_noent) {
-			log5("warning: unable to unlink ", fn1.s, ": ", error_str(errno), "\n");
+			log5("warning: qmta-send: unable to unlink ", fn1.s, ": ", error_str(errno), "\n");
 			goto fail;
 		}
 	}
 	if ((fdinfo = open_excl(fn1.s)) == -1) {
-		log3("warning: unable to create1 ", fn1.s, "\n");
+		log3("warning: qmta-send: unable to create1 ", fn1.s, "\n");
 		goto fail;
 	}
 	strnum1[fmt_ulong(strnum1, id)] = 0;
@@ -606,7 +610,7 @@ process_todo(unsigned long id)
 		if (getln(&ss, &todoline, &match, '\0') == -1) {
 			/*- perhaps we're out of memory, perhaps an I/O error */
 			fnmake_todo(id);
-			log3("warning: trouble reading ", fn1.s, "\n");
+			log3("warning: qmta-send: trouble reading ", fn1.s, "\n");
 			goto fail;
 		}
 		if (!match)
@@ -622,13 +626,13 @@ process_todo(unsigned long id)
 		case 'h':
 		case 'e':
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				log3("warning: trouble writing to ", fn1.s, "\n");
+				log3("warning: qmta-send: trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 			break;
 		case 'F':
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				log3("warning: trouble writing to ", fn1.s, "\n");
+				log3("warning: qmta-send: trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 			log2_noflush("info msg ", strnum1);
@@ -671,7 +675,7 @@ process_todo(unsigned long id)
 				fnmake_chanaddr(id, c);
 				fdchan[c] = open_excl(fn1.s);
 				if (fdchan[c] == -1) {
-					log3("warning: unable to create2 ", fn1.s, "\n");
+					log3("warning: qmta-send: unable to create2 ", fn1.s, "\n");
 					goto fail;
 				}
 				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
@@ -679,34 +683,34 @@ process_todo(unsigned long id)
 			}
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
 				fnmake_chanaddr(id, c);
-				log3("warning: trouble writing to ", fn1.s, "\n");
+				log3("warning: qmta-send: trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 			break;
 		default:
 			fnmake_todo(id);
-			log3("warning: unknown record type in ", fn1.s, "\n");
+			log3("warning: qmta-send: unknown record type in ", fn1.s, "\n");
 			goto fail;
 		}
 	} /*- for (;;) */
 	close(fd);
 	fd = -1;
 	if (substdio_flush(&ssinfo) == -1) {
-		log3("warning: trouble writing to ", fn1.s, "\n");
+		log3("warning: qmta-send: trouble writing to ", fn1.s, "\n");
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 			if (substdio_flush(&sschan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				log3("warning: trouble writing to ", fn1.s, "\n");
+				log3("warning: qmta-send: trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 		}
 	}
 #ifdef USE_FSYNC
 	if (use_fsync > 0 && fsync(fdinfo) == -1) {
-		log3("warning: trouble fsyncing ", fn1.s, "\n");
+		log3("warning: qmta-send: trouble fsyncing ", fn1.s, "\n");
 		goto fail;
 	}
 #endif
@@ -717,7 +721,7 @@ process_todo(unsigned long id)
 #ifdef USE_FSYNC
 			if (use_fsync > 0 && fsync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				log3("warning: trouble fsyncing ", fn1.s, "\n");
+				log3("warning: qmta-send: trouble fsyncing ", fn1.s, "\n");
 				goto fail;
 			}
 #endif
@@ -736,21 +740,21 @@ process_todo(unsigned long id)
 			return;
 		}
 		if (ch != '+') {
-			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
+			log3("warning: qmta-send: qmail-clean unable to clean up ", fn1.s, "\n");
 			return;
 		}
 	} else {
 		fnmake_intd(id);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log5("warning: unable to unlink ", fn1.s, ": ", error_str(errno), "\n");
+				log5("warning: qmta-send: unable to unlink ", fn1.s, ": ", error_str(errno), "\n");
 				goto fail;
 			}
 		}
 		fnmake_todo(id);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log5("warning: unable to unlink ", fn1.s, ": ", error_str(errno), "\n");
+				log5("warning: qmta-send: unable to unlink ", fn1.s, ": ", error_str(errno), "\n");
 				goto fail;
 			}
 		}
@@ -1037,7 +1041,7 @@ job_close(int j)
 	if (jo[j].flaghiteof && !jo[j].numtodo) {
 		fnmake_chanaddr(jo[j].id, jo[j].channel);
 		if (unlink(fn1.s) == -1) {
-			log5("warning: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
+			log5("warning: qmta-send: unable to unlink ", fn1.s, "; will try again later: ", error_str(errno), "\n");
 			pe.dt = now() + SLEEP_SYSFAIL;
 		} else {
 			int             c;
@@ -1047,7 +1051,7 @@ job_close(int j)
 					if (stat(fn1.s, &st) == 0)
 						return;	/*- more channels going */
 					if (errno != error_noent) {
-						log3("warning: unable to stat ", fn1.s, "\n");
+						log3("warning: qmta-send: unable to stat ", fn1.s, "\n");
 						break;	/*- this is the only reason for HOPEFULLY */
 					}
 				}
@@ -1194,7 +1198,7 @@ markdone(int c, unsigned long id, seek_pos pos)
 		close(fd);
 		return;
 	}
-	log3("warning: trouble marking ", fn1.s, "; message will be delivered twice!\n");
+	log3("warning: qmta-send: trouble marking ", fn1.s, "; message will be delivered twice!\n");
 }
 
 /*- strip the virtual domain which is prepended to addresses e.g. xxx.com-user01@xxx.com */
@@ -1268,13 +1272,13 @@ addbounce(unsigned long id, char *recip, char *report)
 	for (;;) {
 		if ((fd = open_append(fn2.s)) != -1)
 			break;
-		log1("alert: unable to append to bounce message; HELP! sleeping...\n");
+		log1("alert: qmta-send: unable to append to bounce message; HELP! sleeping...\n");
 		sleep(10);
 	}
 	pos = 0;
 	while (pos < bouncetext.len) {
 		if ((w = write(fd, bouncetext.s + pos, bouncetext.len - pos)) <= 0) {
-			log1("alert: unable to append to bounce message; HELP! sleeping...\n");
+			log1("alert: qmta-send: unable to append to bounce message; HELP! sleeping...\n");
 			sleep(10);
 		} else
 			pos += w;
@@ -1316,7 +1320,7 @@ del_dochan(int c)
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
-				log1("warning: internal error: delivery report out of range\n");
+				log1("warning: qmta-send: internal error: delivery report out of range\n");
 			else {
 				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
@@ -1570,7 +1574,7 @@ pass_dochan(int c)
 	/*- read local/split/inode or remote/split/inode */
 	if (getln(&pass[c].ss, &line, &match, '\0') == -1) {
 		fnmake_chanaddr(pass[c].id, c);
-		log3("warning: trouble reading ", fn1.s, "; will try again later\n");
+		log3("warning: qmta-send: trouble reading ", fn1.s, "; will try again later\n");
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -1593,7 +1597,7 @@ pass_dochan(int c)
 		break;
 	default:
 		fnmake_chanaddr(pass[c].id, c);
-		log3("warning: unknown record type in ", fn1.s, "!\n");
+		log3("warning: qmta-send: unknown record type in ", fn1.s, "!\n");
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -1603,7 +1607,7 @@ pass_dochan(int c)
 	return;
 
 trouble:
-	log3("warning: trouble opening ", fn1.s, "; will try again later\n");
+	log3("warning: qmta-send: trouble opening ", fn1.s, "; will try again later\n");
 	pe.dt = recent + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqchan[c], &pe))
 		nomem();
@@ -1647,7 +1651,7 @@ injectbounce(unsigned long id)
 	if (stat(fn2.s, &st) == -1) {
 		if (errno == error_noent)
 			return 1;
-		log3("warning: unable to stat ", fn2.s, "\n");
+		log3("warning: qmta-send: unable to stat ", fn2.s, "\n");
 		return 0;
 	}
 	if (str_equal(sender.s, "#@[]"))
@@ -1657,12 +1661,12 @@ injectbounce(unsigned long id)
 		log3("double bounce: discarding ", fn2.s, "\n");
 	else {
 		if ((p = env_get("BOUNCEQUEUE")) && !env_put2("QMAILQUEUE", p)) {
-			log1("alert: out of memory; will try again later\n");
+			log1("alert: qmta-send: out of memory; will try again later\n");
 			return (0);
 		}
 		sig_block(sig_child);
 		if (qmail_open(&qqt) == -1) {
-			log1("warning: unable to start qmail-queue, will try later\n");
+			log1("warning: qmta-send: unable to start qmail-queue, will try later\n");
 			sig_unblock(sig_child);
 			return 0;
 		}
@@ -1686,7 +1690,7 @@ injectbounce(unsigned long id)
 							qmail_fail(&qqt);
 							break;
 						case -1:
-							log1("alert: unable to read controls\n");
+							log1("alert: qmta-send: unable to read controls\n");
 							qmail_fail(&qqt);
 							break;
 						case 0:
@@ -1841,7 +1845,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_to(&qqt, bouncerecip);
 		if (*qmail_close(&qqt)) {
 			sig_unblock(sig_child);
-			log1("warning: trouble injecting bounce message, will try later\n");
+			log1("warning: qmta-send: trouble injecting bounce message, will try later\n");
 			return 0;
 		}
 		sig_unblock(sig_child);
@@ -1851,7 +1855,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		log3(" qp ", strnum2, "\n");
 	}
 	if (unlink(fn2.s) == -1) {
-		log5("warning: unable to unlink ", fn2.s, ": ", error_str(errno), "\n");
+		log5("warning: qmta-send: unable to unlink ", fn2.s, ": ", error_str(errno), "\n");
 		return 0;
 	}
 	return 1;
@@ -1870,7 +1874,7 @@ messdone(unsigned long id)
 		if (stat(fn1.s, &st) == 0)
 			return;	/*- false alarm; consequence of HOPEFULLY */
 		if (errno != error_noent) {
-			log3("warning: unable to stat ", fn1.s, "; will try again later\n");
+			log3("warning: qmta-send: unable to stat ", fn1.s, "; will try again later\n");
 			goto fail;
 		}
 	}
@@ -1878,14 +1882,14 @@ messdone(unsigned long id)
 	if (stat(fn1.s, &st) == 0)
 		return;
 	if (errno != error_noent) {
-		log3("warning: unable to stat ", fn1.s, "; will try again later\n");
+		log3("warning: qmta-send: unable to stat ", fn1.s, "; will try again later\n");
 		goto fail;
 	}
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == -1) {
 		if (errno == error_noent)
 			return;
-		log3("warning: unable to stat ", fn1.s, "; will try again later\n");
+		log3("warning: qmta-send: unable to stat ", fn1.s, "; will try again later\n");
 		goto fail;
 	}
 
@@ -1898,7 +1902,7 @@ messdone(unsigned long id)
 	/*- -todo +info -local -remote -bounce */
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
-		log3("warning: unable to unlink ", fn1.s, "; will try again later\n");
+		log3("warning: qmta-send: unable to unlink ", fn1.s, "; will try again later\n");
 		goto fail;
 	}
 	/*- -todo -info -local -remote -bounce; we can relax */
@@ -1913,19 +1917,19 @@ messdone(unsigned long id)
 			return;
 		}
 		if (ch != '+')
-			log3("warning: qmail-clean unable to clean up ", fn1.s, "\n");
+			log3("warning: qmta-send: qmail-clean unable to clean up ", fn1.s, "\n");
 	} else {
 		fnmake_intd(id);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log3("warning: unable to unlink ", fn1.s, "; will try again later\n");
+				log3("warning: qmta-send: unable to unlink ", fn1.s, "; will try again later\n");
 				goto fail;
 			}
 		}
 		fnmake_mess(id);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log3("warning: unable to unlink ", fn1.s, "; will try again later\n");
+				log3("warning: qmta-send: unable to unlink ", fn1.s, "; will try again later\n");
 				goto fail;
 			}
 		}
@@ -1971,7 +1975,7 @@ close23456()
 }
 
 void
-fix_queue()
+queue_fix()
 {
 	pid_t           pid;
 	int             wstat, exitcode;
@@ -1983,7 +1987,7 @@ fix_queue()
 		_exit(111);
 	case 0:
 		if (chdir(auto_qmail) == -1) {
-			log5("alert: queue-fix: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
+			log5("alert: qmta-send: queue-fix: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 			_exit(111);
 		}
 		strnum1[fmt_int(strnum1, conf_split)] = 0;
@@ -1994,11 +1998,11 @@ fix_queue()
 	}
 	sig_unblock(sig_int);
 	if (wait_pid(&wstat, pid) != pid)
-		strerr_die1sys(111, "alert: waitpid surprise: ");
+		strerr_die1sys(111, "alert: qmta-send: waitpid surprise: ");
 	if (wait_crashed(wstat))
-		strerr_die1sys(111, "alert: queue-fis crashed: ");
+		strerr_die1sys(111, "alert: qmta-send: queue-fix crashed: ");
 	exitcode = wait_exitcode(wstat);
-	log1(exitcode ? "warning: trouble fixing queue directory\n" : "info: queue OK\n");
+	log1(exitcode ? "warning: qmta-send: trouble fixing queue directory\n" : "info: qmta-send: queue OK\n");
 }
 
 void
@@ -2036,7 +2040,7 @@ run_daemons(char **oargv, char **argv)
 	}
 
 	if (pipe(pi1) == -1 || pipe(pi2) == -1) {
-		log1("alert: trouble creating pipes\n");
+		log1("alert: qmta-send: trouble creating pipes\n");
 		_exit(111);
 	}
 	chanfdout[0] = pi1[1];
@@ -2055,9 +2059,10 @@ run_daemons(char **oargv, char **argv)
 		close(pi1[1]);
 		close(pi2[0]);
 		close(pi2[1]);
-		if (_qmail_lspawn)
+		if (_qmail_lspawn) {
+			qlargs[2] = queuedir; /*- pass the queue dir as argument for ps command */
 			execvp(*qlargs, qlargs); /*- qmail-lspawn */
-		else {
+		} else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
 			if (oargv[0][i])
@@ -2072,7 +2077,7 @@ run_daemons(char **oargv, char **argv)
 	close(pi2[1]);
 
 	if (pipe(pi3) == -1 || pipe(pi4) == -1) {
-		log1("alert: trouble creating pipes\n");
+		log1("alert: qmta-send: trouble creating pipes\n");
 		_exit(111);
 	}
 	chanfdout[1] = pi3[1];
@@ -2097,9 +2102,10 @@ run_daemons(char **oargv, char **argv)
 		close(pi3[1]);
 		close(pi4[0]);
 		close(pi4[1]);
-		if (_qmail_rspawn)
+		if (_qmail_rspawn) {
+			qrargs[1] = queuedir; /*- pass the queue dir as argument for ps command */
 			execvp(*qrargs, qrargs); /*- qmail-rspawn */
-		else {
+		} else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
 			if (oargv[0][i])
@@ -2115,7 +2121,7 @@ run_daemons(char **oargv, char **argv)
 
 	if (_qmail_clean) {
 		if (pipe(pi5) == -1 || pipe(pi6) == -1) {
-			log1("alert: trouble creating pipes\n");
+			log1("alert: qmta-send: trouble creating pipes\n");
 			_exit(111);
 		}
 		switch ((cleanuppid = fork()))
@@ -2168,7 +2174,7 @@ qmta_initialize(int *nfds, fd_set *rfds)
 	int             c;
 
 	if (fd_copy(0, 1) == -1) {
-		log1("alert: cannot dup stdout\n");
+		log1("alert: qmta-send: cannot dup stdout\n");
 		_exit(111);
 	}
 	fnmake_init();  /*- initialize fn1, fn2 */
@@ -2185,14 +2191,14 @@ qmta_initialize(int *nfds, fd_set *rfds)
 			r = read(chanfdin[c], &ch1, 1);
 		} while ((r == -1) && (errno == error_intr));
 		if (r < 1) {
-			log1("alert: cannot start: hath the daemon spawn no fire?\n");
+			log1("alert: qmta-send: cannot start: hath the daemon spawn no fire?\n");
 			_exit(111);
 		}
 		do {
 			r = read(chanfdin[c], &ch2, 1);
 		} while ((r == -1) && (errno == error_intr));
 		if (r < 1) {
-			log1("alert: cannot start: hath the daemon spawn no fire?\n");
+			log1("alert: qmta-send: cannot start: hath the daemon spawn no fire?\n");
 			_exit(111);
 		}
 		u = (unsigned int) (unsigned char) ch1;
@@ -2325,27 +2331,27 @@ regetcontrols()
 	int             r;
 
 	if (control_readfile(&newlocals, "locals", 1) != 1) {
-		log1("alert: unable to reread locals\n");
+		log1("alert: qmta-send: unable to reread locals\n");
 		return;
 	}
 	if ((r = control_readfile(&newvdoms, "virtualdomains", 0)) == -1) {
-		log1("alert: unable to reread virtualdomains\n");
+		log1("alert: qmta-send: unable to reread virtualdomains\n");
 		return;
 	}
 	if (control_readint(&todo_interval, "todointerval") == -1) {
-		log1("alert: unable to reread todointerval\n");
+		log1("alert: qmta-send: unable to reread todointerval\n");
 		return;
 	}
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1) {
-		log1("alert: unable to reread concurrencylocal\n");
+		log1("alert: qmta-send: unable to reread concurrencylocal\n");
 		return;
 	}
 	if (control_readint((int *) &concurrency[1], "concurrencyremote") == -1) {
-		log1("alert: unable to reread concurrencyremote\n");
+		log1("alert: qmta-send: unable to reread concurrencyremote\n");
 		return;
 	}
 	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1) {
-		log1("alert: unable to reread envnoathost\n");
+		log1("alert: qmta-send: unable to reread envnoathost\n");
 		return;
 	}
 	constmap_free(&maplocals);
@@ -2364,11 +2370,11 @@ regetcontrols()
 			nomem();
 #ifdef USE_FSYNC
 	if (control_readint(&use_syncdir, "conf-syncdir") == -1) {
-		log1("alert: unable to reread conf-syncdir\n");
+		log1("alert: qmta-send: unable to reread conf-syncdir\n");
 		return;
 	}
 	if (control_readint(&use_fsync, "conf-fsync") == -1) {
-		log1("alert: unable to reread conf-fsync\n");
+		log1("alert: qmta-send: unable to reread conf-fsync\n");
 		return;
 	}
 	if (use_syncdir > 0) {
@@ -2408,13 +2414,13 @@ sigchld()
 			break;
 		} else
 		if (pid == loggerpid)
-			log1("alert: oh no! logger died! dying...\n");
+			log1("alert: qmta-send: oh no! logger died! dying...\n");
 		else
 		if (pid == lspawnpid)
-			log1("alert: oh no! lspawn died! dying...\n");
+			log1("alert: qmta-send: oh no! lspawn died! dying...\n");
 		else
 		if (pid == rspawnpid)
-			log1("alert: oh no! rspawn died! dying...\n");
+			log1("alert: qmta-send: oh no! rspawn died! dying...\n");
 	}
 }
 
@@ -2545,14 +2551,14 @@ main(int argc, char **argv)
 	loglock_open(0);
 #endif
 	if (flagqfix)
-		fix_queue();
+		queue_fix();
 	chdir_toqueue();
 	if ((fd = open_write("lock/sendmutex")) == -1) {
-		log1("alert: cannot start: unable to open mutex\n");
+		log1("alert: qmta-send: cannot start: unable to open mutex\n");
 		_exit(111);
 	}
 	if (lock_exnb(fd) == -1) {
-		log1("alert: cannot start: qmail-send/mta-send is already running\n");
+		log1("alert: qmta-send: cannot start: qmta-send is already running\n");
 		_exit(111);
 	}
 	if (argc - optind > 1)
@@ -2583,7 +2589,7 @@ main(int argc, char **argv)
 	sig_intcatch(sigint);
 #endif
 	if (!do_controls()) {
-		log1("alert: cannot start: unable to read controls\n");
+		log1("alert: qmta-send: cannot start: unable to read controls\n");
 		_exit(111);
 	}
 	qmta_initialize(&nfds, &rfds);
@@ -2623,7 +2629,7 @@ main(int argc, char **argv)
 		if (select(nfds, &rfds, &wfds, NULL, &tv) == -1)
 			if (errno == error_intr);
 			else
-				log1("warning: trouble in select\n");
+				log1("warning: qmta-send: trouble in select\n");
 		else {
 			/*- communicate with qmail-lspawn, qmail-rspawn
 			 * These were created as pi1, pi3 in qmail-start.c
@@ -2643,7 +2649,7 @@ main(int argc, char **argv)
 			cleanup_do(&wfds);
 		}
 		if (!daemon_mode && del_canexit()) {
-			log1("info: no pending deliveries. quitting...\n");
+			log1("info: qmta-send: no pending deliveries. quitting...\n");
 			break;
 		}
 	} /*- while (!flagexitasap || !del_canexit()) */
@@ -2653,7 +2659,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.9 2021-07-26 23:25:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.10 2021-10-20 22:48:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

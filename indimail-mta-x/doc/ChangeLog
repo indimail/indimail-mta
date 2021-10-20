@@ -8,6 +8,11 @@ Release 2.14.1 Start 21/09/2021
 03. Fixed typos
 - 04/10/2021
 04. svctool.in: removed not-needed QUERY_CACHE env variable from defaultqueue
+- 20/10/2021
+05. qmail-send.c, qmail-todo.c, qmta-send: display program 'qmail-send' in
+    logs for identification
+06. qmail-start.c, qmta-send.c, slowq-start.c: added queue directory as
+    argument for identification in ps list
 
 * 
 Release 2.14.0 Start 18/07/2021
