@@ -644,7 +644,7 @@ qhpsiprog(char *program)
 	case 0:
 		/* 
 		 * execute the qhpsi executable for security reasons.
-		 * revoke all privileges and run with indimail uid
+		 * revoke all privileges and run with qmailq uid
 		 */
 		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
 			_exit(50);
