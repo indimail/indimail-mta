@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.248 $";
+char           *revision = "$Revision: 1.249 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5845,8 +5845,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 {
 	char           *ptr, *errstr;
 	struct commands *cmdptr;
+	int             i;
 #ifdef SMTP_PLUGIN
-	int             i, j, len;
+	int             j, len;
 	char           *start_plugin, *plugin_symb, *plugindir;
 	static stralloc plugin = { 0 };
 #endif
@@ -5905,8 +5906,20 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		die_ipme();
 	if (greetdelay)
 		greetdelay_check(greetdelay);
-	if (env_get("SHUTDOWN")) {
-		smtp_greet("554 ");
+	if ((ptr = env_get("SHUTDOWN"))) {
+		if (*ptr) {
+			if (!isdigit(ptr[0]) || !isdigit(ptr[1]) || !isdigit(ptr[2])) {
+				smtp_greet("421 ");
+			} else {
+				str_copyb(strnum, ptr, 4);
+				strnum[4] = 0;
+				smtp_greet(strnum);
+				out(ptr + 3);
+			}
+		} else {
+			smtp_greet("421 ");
+			out(" SMTP service unavailable (#4.3.2)");
+		}
 		setup_state = 1;
 	} else {
 		if (dobadipcheck && badipcheck(remoteip)) {
@@ -6108,6 +6121,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.249  2021-10-20 22:56:20+05:30  Cprogrammer
+ * allow SMTP code to be configured when setting SHUTDOWN env variable
+ *
  * Revision 1.248  2021-09-11 19:02:28+05:30  Cprogrammer
  * pass null remotehost to received when remotehost is unknown
  *
@@ -6291,7 +6307,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.248 2021-09-11 19:02:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.249 2021-10-20 22:56:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;

@@ -13,6 +13,8 @@ Release 2.14.1 Start 21/09/2021
     logs for identification
 06. qmail-start.c, qmta-send.c, slowq-start.c: added queue directory as
     argument for identification in ps list
+07. smtpd.c: allow SMTP code to be configured when setting SHUTDOWN env
+    variable
 
 * 
 Release 2.14.0 Start 18/07/2021
