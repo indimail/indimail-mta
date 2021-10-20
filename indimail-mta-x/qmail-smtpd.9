@@ -251,6 +251,17 @@ For local senders, mail is accepted only if the recipient is an active user and 
 NO_SMTP flag set for the user. If the CUGMAIL environment variable is defined, mails will be
 accepted only from local domains (defined in rcpthosts).
 
+.PP
+qmail-smtpd can greet clients "421 service unavailable" if you set
+environment variable \fBSHUTDOWN\fR.
+.EX
+$ env SHUTDOWN="" ./qmail-smtpd
+421 indimail.org SMTP service unavailable (#4.3.2)
+
+$ env SHUTDOWN="554 service discontinued (#5.1.6)" ./qmail-smtpd
+554 indimail.org service discontinued (#5.1.6)
+.EE
+
 .SH Database Connections
 \fBqmail-smtpd\fR uses \fBinlookup(8)\fR, instead of directly connecting to
 MySQL. This allows very a high queries per seconds to be achieved by avoiding
@@ -282,8 +293,8 @@ needs to connect to, the following lines need to be maintained
  server   localhost
  mdahost  192.9.0.1
  port     3306
- database vpopmail
- user     vpopmail
+ database indimail
+ user     indimail
  pass     passwd
 
 .B domain
