@@ -1,5 +1,8 @@
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.57  2021-10-21 12:41:36+05:30  Cprogrammer
+ * eliminated extra variables
+ *
  * Revision 1.56  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -220,7 +223,7 @@ qmulti(char *queue_env, int argc, char **argv)
 	datetime_sec    queueNo;
 	char            strnum[FMT_ULONG];
 	char           *qqargs[2] = { 0, 0 };
-	char           *ptr, *queue_count_ptr, *queue_start_ptr, *qbase;
+	char           *ptr, *qbase;
 	int             qcount, qstart;
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 	char           *binqqargs[2] = { "sbin/qmail-multi", 0 };
@@ -233,14 +236,14 @@ qmulti(char *queue_env, int argc, char **argv)
 		_exit(120);
 	}
 	if (!(ptr = env_get("QUEUEDIR"))) {
-		if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
+		if (!(ptr = env_get("QUEUE_COUNT")))
 			qcount = QUEUE_COUNT;
 		else
-			scan_int(queue_count_ptr, &qcount);
-		if (!(queue_start_ptr = env_get("QUEUE_START")))
+			scan_int(ptr, &qcount);
+		if (!(ptr = env_get("QUEUE_START")))
 			qstart = 1;
 		else
-			scan_int(queue_start_ptr, &qstart);
+			scan_int(ptr, &qstart);
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			switch (control_readfile(&QueueBase, "queue_base", 0))
 			{
@@ -344,7 +347,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.56 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.57 2021-10-21 12:41:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
