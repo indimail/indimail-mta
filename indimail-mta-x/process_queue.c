@@ -1,6 +1,6 @@
 /*
  * $Log: process_queue.c,v $
- * Revision 1.4  2021-07-09 20:59:42+05:30  Cprogrammer
+ * Revision 1.4  2021-10-21 12:37:54+05:30  Cprogrammer
  * added qmta queue
  *
  * Revision 1.3  2021-07-05 21:27:15+05:30  Cprogrammer
@@ -35,7 +35,7 @@
 void
 process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, int *z)
 {
-	char           *queue_count_ptr, *queue_start_ptr, *qbase;
+	char           *ptr, *qbase;
 	char           *extra_queue[] = {"nqueue", "slowq", "qmta", 0};
 	char            strnum[FMT_ULONG];
 	int             idx, count, qcount, qstart;
@@ -60,14 +60,14 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 			break;
 		}
 	}
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
+	if (!(ptr = env_get("QUEUE_COUNT")))
 		qcount = QUEUE_COUNT;
 	else
-		scan_int(queue_count_ptr, &qcount);
-	if (!(queue_start_ptr = env_get("QUEUE_START")))
+		scan_int(ptr, &qcount);
+	if (!(ptr = env_get("QUEUE_START")))
 		qstart = 1;
 	else
-		scan_int(queue_start_ptr, &qstart);
+		scan_int(ptr, &qstart);
 	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
 		if (!stralloc_copys(&Queuedir, qbase) ||
 				!stralloc_cats(&Queuedir, "/queue") ||
@@ -116,7 +116,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 void
 getversion_process_queue_c()
 {
-	static char    *x = "$Id: process_queue.c,v 1.4 2021-07-09 20:59:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: process_queue.c,v 1.4 2021-10-21 12:37:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
