@@ -1,6 +1,7 @@
-20
+-DMULTI_QUEUE -DQUEUE_START=1 -DQUEUE_COUNT=20
 
-This is the upper limit on the number of queue that
-qmail-qread(8), qmail-multi(8), qmail-daemon(8),
-qmail-tcpok(8), qmail-tcpto(8) will process in the
-abaence of QUEUE_COUNT environment variable.
+# MULTI_QUEUE makes indimail use multiple queues.
+# QUEUE_COUNT is the upper limit on the number of queue that
+# qmail-qread(8), qmail-multi(8), qmail-daemon(8), qmail-tcpok(8),
+# qmail-tcpto(8) will process in the absence of QUEUE_COUNT
+# environment variable.
