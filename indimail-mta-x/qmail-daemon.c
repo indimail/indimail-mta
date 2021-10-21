@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.25  2021-10-21 12:38:47+05:30  Cprogrammer
+ * made qstart, qcount as global variables
+ *
  * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -112,18 +115,14 @@ struct pidtab
 	char *queuedir;
 };
 static struct pidtab  *pid_table;
+static int      qcount, qstart;
 
 void
 sigterm()
 {
-	int             i, qcount;
-	char           *queue_count_ptr;
+	int             i;
 
 	sig_block(SIGTERM);
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(queue_count_ptr, &qcount);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
@@ -135,13 +134,8 @@ sigterm()
 void
 sigalrm()
 {
-	int             i, qcount;
-	char           *queue_count_ptr;
+	int             i;
 
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(queue_count_ptr, &qcount);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
@@ -152,13 +146,8 @@ sigalrm()
 void
 sighup()
 {
-	int             i, qcount;
-	char           *queue_count_ptr;
+	int             i;
 
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(queue_count_ptr, &qcount);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
@@ -169,13 +158,8 @@ sighup()
 void
 sigint()
 {
-	int             i, qcount;
-	char           *queue_count_ptr;
+	int             i;
 
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(queue_count_ptr, &qcount);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
@@ -277,7 +261,7 @@ check_send(char *queuedir)
 }
 
 void
-start_send(char **argv, int qstart, int qcount)
+start_send(char **argv)
 {
 	char           *qbase;
 	int             i, j, child, nqueue;
@@ -419,7 +403,7 @@ start_send(char **argv, int qstart, int qcount)
 }
 
 void
-restart(char **argv, int pid, int qcount)
+restart(char **argv, int pid)
 {
 	int             i, child;
 
@@ -472,17 +456,17 @@ restart(char **argv, int pid, int qcount)
 int
 main(int argc, char **argv)
 {
-	char           *queue_count_ptr, *queue_start_ptr;
-	int             qcount, qstart, wstat, child;
+	char           *ptr;
+	int             wstat, child;
 
-	if (!(queue_count_ptr = env_get("QUEUE_COUNT")))
+	if (!(ptr = env_get("QUEUE_COUNT")))
 		qcount = QUEUE_COUNT;
 	else
-		scan_int(queue_count_ptr, &qcount);
-	if (!(queue_start_ptr = env_get("QUEUE_START")))
+		scan_int(ptr, &qcount);
+	if (!(ptr = env_get("QUEUE_START")))
 		qstart = 1;
 	else
-		scan_int(queue_start_ptr, &qstart);
+		scan_int(ptr, &qstart);
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGALRM, sigalrm);
 	sig_catch(SIGHUP, sighup);
@@ -499,13 +483,13 @@ main(int argc, char **argv)
 		logerrf("qmail-daemon: exiting\n");
 		return(0);
 	}
-	start_send(argv, qstart, qcount);
+	start_send(argv);
 	for (;!flagexitasap;) {
 		if ((child = wait_pid(&wstat, -1)) == -1)
 			break;
 		if (flagexitasap)
 			break;
-		restart(argv, child, qcount);
+		restart(argv, child);
 		sleep(1);
 	} /*- for (child = 0;;) */
 	for (;flagexitasap;) {
@@ -521,7 +505,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.24 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.25 2021-10-21 12:38:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
