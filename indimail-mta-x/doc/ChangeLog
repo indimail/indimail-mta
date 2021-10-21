@@ -20,6 +20,7 @@ Release 2.14.1 Start 21/09/2021
 09. qmail-qread.c process_queue.c qmail-rm.c qmulti.c: eliminated extra
     variables
 10. qmail-daemon.c: made qstart, qcount variables global
+11. qmail-daemon.c: replaced execv with execvp
 
 * 
 Release 2.14.0 Start 18/07/2021
