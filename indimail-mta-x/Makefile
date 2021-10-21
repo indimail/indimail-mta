@@ -1285,8 +1285,8 @@ recipients.h
 
 process_queue.o: \
 compile process_queue.c control.h auto_qmail.h set_environment.h \
-process_queue.h
-	./compile process_queue.c
+process_queue.h conf-queue
+	./compile `grep -h -v "^#" conf-queue` process_queue.c
 
 qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o auto_qmail.o \
@@ -1299,11 +1299,7 @@ auto_control.o set_environment.o process_queue.o
 qmail-qread.o: \
 compile qmail-qread.c auto_qmail.h auto_split.h auto_sysconfdir.h \
 readsubdir.h fmtqfn.h control.h variables.h process_queue.h conf-queue
-	if test -f conf-queue ; then \
-		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-qread.c; \
-	else \
-		./compile -DQUEUE_COUNT=10 qmail-qread.c; \
-	fi
+	./compile `grep -h -v "^#" conf-queue` qmail-qread.c
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
 	cat qmail-qread.9 \
@@ -1319,8 +1315,8 @@ dns.lib socket.lib
 	`cat dns.lib socket.lib` -lqmail
 
 qmail-multi.o: \
-compile qmail-multi.c qmulti.h mailfilter.h
-	./compile qmail-multi.c
+compile qmail-multi.c qmulti.h mailfilter.h conf-queue
+	./compile `grep -h -v "^#" conf-queue` qmulti.c
 
 qmail-multi.8: \
 qmail-multi.9 conf-prefix conf-qmail
@@ -1768,11 +1764,7 @@ load qmail-daemon.o control.o auto_qmail.o auto_control.o variables.o
 	variables.o auto_control.o -lqmail
 
 qmail-daemon.o: compile qmail-daemon.c control.h auto_qmail.h conf-queue
-	if test -f conf-queue ; then \
-		./compile -DQUEUE_COUNT=`head -1 conf-queue` qmail-daemon.c; \
-	else \
-		./compile -DQUEUE_COUNT=10 qmail-daemon.c; \
-	fi
+	./compile `grep -h -v "^#" conf-queue` qmail-daemon.c
 
 get_uid.o: \
 compile get_uid.c auto_uids.h
@@ -2012,11 +2004,7 @@ set_environment.o process_queue.o
 qmail-tcpok.o: \
 compile qmail-tcpok.c auto_qmail.h variables.h control.h tcpto.h \
 process_queue.h conf-queue
-	if test -f conf-queue ; then \
-		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-tcpok.c; \
-	else \
-		./compile -DQUEUE_COUNT=10 qmail-tcpok.c; \
-	fi
+	./compile `grep -h -v "^#" conf-queue` qmail-tcpok.c
 
 qmail-tcpto: \
 load qmail-tcpto.o ip.o auto_qmail.o variables.o control.o auto_control.o \
@@ -2028,11 +2016,7 @@ socket_v4mappedprefix.o socket_v6any.o set_environment.o process_queue.o
 qmail-tcpto.o: \
 compile qmail-tcpto.c auto_qmail.h ip.h variables.h control.h tcpto.h \
 process_queue.h conf-tls conf-ip conf-queue
-	if test -f conf-queue ; then \
-		./compile -DMULTI_QUEUE -DQUEUE_COUNT=`head -1 conf-queue` qmail-tcpto.c; \
-	else \
-		./compile -DQUEUE_COUNT=10 qmail-tcpto.c; \
-	fi
+	./compile `grep -h -v "^#" conf-queue` qmail-tcpto.c
 
 qmail-upq: \
 warn-auto.sh qmail-upq.sh conf-qmail conf-split
@@ -2447,9 +2431,8 @@ control.o auto_control.o variables.o fts.lib
 	`cat fts.lib` -lqmail
 
 qmail-rm.o: \
-compile qmail-rm.c auto_split.h auto_qmail.h \
-control.h
-	./compile qmail-rm.c
+compile qmail-rm.c auto_split.h auto_qmail.h control.h conf-queue
+	./compile `grep -h -v "^#" conf-queue` qmail-rm.c
 
 qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 	cat qmail-rm.9 \
