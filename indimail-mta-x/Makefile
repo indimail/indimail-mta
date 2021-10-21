@@ -1290,15 +1290,15 @@ process_queue.h conf-queue
 
 qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o auto_qmail.o \
-auto_split.o variables.o control.o auto_sysconfdir.o \
-auto_control.o set_environment.o process_queue.o
+auto_split.o variables.o control.o auto_control.o \
+set_environment.o process_queue.o
 	./load qmail-qread fmtqfn.o readsubdir.o control.o \
-	auto_qmail.o auto_split.o variables.o auto_sysconfdir.o \
-	auto_control.o set_environment.o process_queue.o -lqmail
+	auto_qmail.o auto_split.o variables.o auto_control.o \
+	set_environment.o process_queue.o -lqmail
 
 qmail-qread.o: \
-compile qmail-qread.c auto_qmail.h auto_split.h auto_sysconfdir.h \
-readsubdir.h fmtqfn.h control.h variables.h process_queue.h conf-queue
+compile qmail-qread.c auto_qmail.h auto_split.h readsubdir.h fmtqfn.h \
+control.h variables.h process_queue.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-qread.c
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
@@ -1316,7 +1316,7 @@ dns.lib socket.lib
 
 qmail-multi.o: \
 compile qmail-multi.c qmulti.h mailfilter.h conf-queue
-	./compile `grep -h -v "^#" conf-queue` qmulti.c
+	./compile `grep -h -v "^#" conf-queue` qmail-multi.c
 
 qmail-multi.8: \
 qmail-multi.9 conf-prefix conf-qmail
