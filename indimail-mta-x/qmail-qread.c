@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.39  2021-10-21 14:42:22+05:30  Cprogrammer
+ * chdir to auto_qmail instead of auto_sysconfdir
+ *
  * Revision 1.38  2021-06-28 17:06:33+05:30  Cprogrammer
  * use process_queue to process all queues
  *
@@ -109,7 +112,6 @@
 #include "auto_qmail.h"
 #endif
 #include "auto_split.h"
-#include "auto_sysconfdir.h"
 #include "readsubdir.h"
 #include "fmtqfn.h"
 #include "control.h"
@@ -343,8 +345,8 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		return(1);
 	}
-	if (chdir(auto_sysconfdir))
-		strerr_die4sys(111, FATAL, "unable to switch to ", auto_sysconfdir, ": ");
+	if (chdir(auto_qmail) == -1)
+		strerr_die4sys(111, FATAL, "unable to switch to ", auto_qmail, ": ");
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
@@ -540,7 +542,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.38 2021-06-28 17:06:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.39 2021-10-21 14:42:22+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
