@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cat.c,v $
+ * Revision 1.9  2021-10-20 23:30:20+05:30  Cprogrammer
+ * added SIGTERM handler to flush io
+ *
  * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -34,6 +37,7 @@
 #include <stralloc.h>
 #include <getln.h>
 #include <error.h>
+#include <sig.h>
 #include <noreturn.h>
 
 static char     ssinbuf[1024];
@@ -74,6 +78,17 @@ my_error(char *s1, char *s2, int exit_val)
 	_exit(exit_val);
 }
 
+static void
+sigterm()
+{
+	substdio_flush(&ssout);
+	substdio_flush(&sserr);
+	close(0);
+	close(1);
+	close(2);
+	_exit(0);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -87,6 +102,7 @@ main(int argc, char **argv)
 		logerrf(" filename\n");
 		_exit(1);
 	}
+	sig_termcatch(sigterm);
 	for (i = 1;i < argc;i++) {
 		if (stat(argv[i], &st) == -1)
 			my_error("qmail-cat: stat", argv[i], 1);
@@ -119,7 +135,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	static char    *x = "$Id: qmail-cat.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cat.c,v 1.9 2021-10-20 23:30:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

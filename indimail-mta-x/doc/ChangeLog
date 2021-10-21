@@ -15,6 +15,7 @@ Release 2.14.1 Start 21/09/2021
     argument for identification in ps list
 07. smtpd.c: allow SMTP code to be configured when setting SHUTDOWN env
     variable
+08. qmail-cat.c: added SIGTERM handler to flush io
 
 * 
 Release 2.14.0 Start 18/07/2021
