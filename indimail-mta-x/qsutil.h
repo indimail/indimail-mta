@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.20  2021-10-22 14:00:33+05:30  Cprogrammer
+ * added ident argument to loglock_open() for identification in logs
+ *
  * Revision 1.19  2021-07-17 14:40:40+05:30  Cprogrammer
  * add fix_split function to generate file name for any split value
  *
@@ -57,7 +60,7 @@
 #include <stralloc.h>
 #include <sys/types.h>
 
-void            loglock_open(int);
+void            loglock_open(char *, int);
 void            lockerr(void);
 void            log1(char *);
 void            log1_noflush(char *);

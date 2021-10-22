@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.21  2021-10-22 14:00:10+05:30  Cprogrammer
+ * added ident argument to loglock_open() for identification in logs
+ *
  * Revision 1.20  2021-07-17 14:40:06+05:30  Cprogrammer
  * add fix_split function to generate file name for any split value
  *
@@ -96,7 +99,7 @@ lockerr()
 }
 
 void
-loglock_open(int preopen)
+loglock_open(char *ident, int preopen)
 {
 	char           *ptr;
 	int             lock_status;
@@ -117,13 +120,13 @@ loglock_open(int preopen)
 			nomem();
 		if ((loglock_fd = open_read(lockfn.s)) == -1) {
 			if (queuedesc)
-				log3("alert: ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
+				log5("alert: ", ident, ": ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
 			else
-				log1("alert: cannot start: unable to open defaultdelivery\n");
+				log3("alert: ", ident, ": cannot start: unable to open defaultdelivery\n");
 			lockerr();
 		}
 	}
-	log1(loglock_fd == -1 ? "info: loglock: disabled\n" : "info: loglock: enabled\n");
+	/*- log5("info: ", ident, ": ", queuedesc, loglock_fd == -1 ? ": loglock disabled\n" : ": loglock enabled\n"); -*/
 }
 #endif
 
@@ -500,7 +503,7 @@ logsafe(char *s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.20 2021-07-17 14:40:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.21 2021-10-22 14:00:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
