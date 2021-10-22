@@ -663,3 +663,5 @@ qfrontend.1
 qf-log-subject
 INPUT
 dknewkey.8
+qscheduler
+qscheduler.o
