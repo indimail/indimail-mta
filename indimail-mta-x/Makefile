@@ -43,7 +43,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	qmail-queue qmail-remote qmail-rm qmail-rspawn qmail-send \
 	qmail-showctl qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start \
 	qmail-tcpok qmail-tcpto qmail-todo qmail-upq qmta-send qnotify qpq \
-	qquote qreceipt qsmhook qtools queue-fix recipient-cdb relaytest \
+	qquote qreceipt qsmhook qtools qscheduler queue-fix recipient-cdb relaytest \
 	rewind rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
 	setforward setmaillist slowq-send slowq-start smtpd-plugin0.so \
 	smtpd-plugin.so sortedtest spawn-filter spfquery splogger srsfilter \
@@ -1290,15 +1290,15 @@ process_queue.h conf-queue
 
 qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o auto_qmail.o \
-auto_split.o variables.o control.o auto_sysconfdir.o \
-auto_control.o set_environment.o process_queue.o
+auto_split.o variables.o control.o auto_control.o \
+set_environment.o process_queue.o
 	./load qmail-qread fmtqfn.o readsubdir.o control.o \
-	auto_qmail.o auto_split.o variables.o auto_sysconfdir.o \
-	auto_control.o set_environment.o process_queue.o -lqmail
+	auto_qmail.o auto_split.o variables.o auto_control.o \
+	set_environment.o process_queue.o -lqmail
 
 qmail-qread.o: \
-compile qmail-qread.c auto_qmail.h auto_split.h auto_sysconfdir.h \
-readsubdir.h fmtqfn.h control.h variables.h process_queue.h conf-queue
+compile qmail-qread.c auto_qmail.h auto_split.h readsubdir.h fmtqfn.h \
+control.h variables.h process_queue.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-qread.c
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
@@ -1316,7 +1316,7 @@ dns.lib socket.lib
 
 qmail-multi.o: \
 compile qmail-multi.c qmulti.h mailfilter.h conf-queue
-	./compile `grep -h -v "^#" conf-queue` qmulti.c
+	./compile `grep -h -v "^#" conf-queue` qmail-multi.c
 
 qmail-multi.8: \
 qmail-multi.9 conf-prefix conf-qmail
@@ -1757,6 +1757,17 @@ conf-prefix conf-split
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmta-send.8
+
+qscheduler: \
+load qscheduler.o control.o auto_qmail.o auto_control.o variables.o \
+readsubdir.o auto_uids.o get_uid.o auto_split.o
+	./load qscheduler control.o auto_qmail.o auto_uids.o auto_split.o \
+	readsubdir.o get_uid.o variables.o auto_control.o -lqmail -lrt
+
+qscheduler.o: \
+compile qscheduler.c qscheduler.h control.h auto_qmail.h readsubdir.h \
+conf-queue
+	./compile `grep -h -v "^#" conf-queue` qscheduler.c
 
 qmail-daemon: \
 load qmail-daemon.o control.o auto_qmail.o auto_control.o variables.o
