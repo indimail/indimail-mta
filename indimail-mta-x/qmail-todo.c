@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.53  2021-10-22 14:00:03+05:30  Cprogrammer
+ * fixed typo
+ *
  * Revision 1.52  2021-10-20 22:47:41+05:30  Cprogrammer
  * display program 'qmail-todo' in logs for identification
  *
@@ -196,7 +199,8 @@ void            log9(char *r, char *s, char *t, char *u, char *v, char *w, char 
 void
 sigterm(void)
 {
-	log3("info: qmail-todo: Got ALRM: ", queuedesc, "\n");
+	sig_block(sig_term);
+	log3("info: qmail-todo: Got TERM: ", queuedesc, "\n");
 	if (!flagstopasap)
 		log3("status: ", queuedesc, " qmail-todo stop processing asap\n");
 	flagstopasap = 1;
@@ -1246,7 +1250,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.52 2021-10-20 22:47:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.53 2021-10-22 14:00:03+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
