@@ -1,4 +1,4 @@
--DMULTI_QUEUE -DQUEUE_START=1 -DQUEUE_COUNT=20
+-DMULTI_QUEUE -DQUEUE_START=1 -DQUEUE_COUNT=10 -DQUEUE_MAX=20 -DQUEUE_LOAD=50
 
 # MULTI_QUEUE makes indimail use multiple queues.
 # QUEUE_COUNT is the upper limit on the number of queue that
