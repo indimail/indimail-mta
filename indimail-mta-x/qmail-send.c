@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.94  2021-10-22 13:58:12+05:30  Cprogrammer
+ * change for ident argument to loglock_open()
+ *
  * Revision 1.93  2021-10-20 22:36:22+05:30  Cprogrammer
  * display program 'qmail-send' in logs for identification
  *
@@ -422,12 +425,14 @@ sigint()
 			log7("alert: qmail-send: ", queuedesc, ": unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 			return;
 		}
-		loglock_open(1);
+		loglock_open("qmail-send", 1);
 		chdir_toqueue();
 	} else {
-		close(loglock_fd);
-		loglock_fd = -1;
-		log3("loglock: qmail-send: ", queuedesc, loglock_fd == -1 ? ": disabled\n" : ": enabled\n");
+		if (loglock_fd != -1) {
+			close(loglock_fd);
+			loglock_fd = -1;
+			log3("info: qmail-send: ", queuedesc, ": loglock disabled\n");
+		}
 	}
 }
 #endif
@@ -2904,13 +2909,16 @@ main()
 		_exit(111);
 	}
 #ifdef LOGLOCK
-	loglock_open(0);
+	loglock_open("qmail-send", 0);
 #endif
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log7("info: qmail-send: ", queuedesc, ": ratelimit=", do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
+	log7("info: qmail-send: ", queuedesc, ": ratelimit=", 
+			do_ratelimit ? "ON, loglock=" : "OFF, loglock=", 
+			loglock_fd == -1 ? "disabled, conf split=" : "enabled, conf split=",
+			strnum1, "\n");
 #ifndef EXTERNAL_TODO
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
@@ -3087,7 +3095,7 @@ main()
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.93 2021-10-20 22:36:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.94 2021-10-22 13:58:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.11  2021-10-22 13:56:57+05:30  Cprogrammer
+ * removed loglock code
+ *
  * Revision 1.10  2021-10-20 22:48:33+05:30  Cprogrammer
  * display program 'qmta-send' in logs for identification
  * add queue directory as argument for identification in ps
@@ -207,26 +210,6 @@ void sighup()
 	flagreadasap = 1;
 	log1("info: qmta-send: Got HUP\n");
 }
-
-#ifdef LOGLOCK
-static void
-sigint()
-{
-	if (loglock_fd == -1) {
-		loglock_open(1);
-	} else {
-		sig_block(sig_int);
-		sig_block(sig_child);
-		sig_block(sig_hangup);
-		close(loglock_fd);
-		loglock_fd = -1;
-		sig_unblock(sig_int);
-		sig_unblock(sig_child);
-		sig_unblock(sig_hangup);
-		log1(loglock_fd == -1 ? "loglock: disabled\n" : "loglock: enabled\n");
-	}
-}
-#endif
 
 static void
 fnmake_init()
@@ -2544,12 +2527,9 @@ main(int argc, char **argv)
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log3("info: qmta-send: conf split=", strnum1, "\n");
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/qmta"; /*- single queue like qmail */
-#ifdef LOGLOCK
-	loglock_open(0);
-#endif
+	log3("info: qmta-send: conf split=", strnum1, "\n");
 	if (flagqfix)
 		queue_fix();
 	chdir_toqueue();
@@ -2585,9 +2565,6 @@ main(int argc, char **argv)
 	 * qmail_open
 	 */
 	sig_childcatch(sigchld);
-#ifdef LOGLOCK
-	sig_intcatch(sigint);
-#endif
 	if (!do_controls()) {
 		log1("alert: qmta-send: cannot start: unable to read controls\n");
 		_exit(111);
@@ -2659,7 +2636,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.10 2021-10-20 22:48:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.11 2021-10-22 13:56:57+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

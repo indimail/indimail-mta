@@ -16,6 +16,17 @@ Release 2.14.1 Start 21/09/2021
 07. smtpd.c: allow SMTP code to be configured when setting SHUTDOWN env
     variable
 08. qmail-cat.c: added SIGTERM handler to flush io
+- 21/10/2021
+09. qmail-qread.c process_queue.c qmail-rm.c qmulti.c: eliminated extra
+    variables
+10. qmail-daemon.c: made qstart, qcount variables global
+11. qmail-daemon.c: replaced execv with execvp
+- 22/10/2021
+12. qmta-send.c: removed loglock code (not required for signle queue)
+13. qmail-send.c: change for ident argument to loglock_open()
+14. qsutil.[c,h]: added ident argument to loglock_open for identification in
+    logs
+15. mini-smtpd.c: removed extra arguments passed to err_size()
 
 * 
 Release 2.14.0 Start 18/07/2021

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.26  2021-10-21 22:36:20+05:30  Cprogrammer
+ * replaced execv with execvp
+ *
  * Revision 1.25  2021-10-21 12:38:47+05:30  Cprogrammer
  * made qstart, qcount as global variables
  *
@@ -105,7 +108,7 @@
 static char     ssoutbuf[512];
 static char     sserrbuf[512];
 static char     strnum[FMT_ULONG];
-static char    *(qlargs[]) = { "sbin/qmail-start", "./Mailbox", 0};
+static char    *(qlargs[]) = { "qmail-start", "./Mailbox", 0};
 static int      flagexitasap = 0;
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
@@ -375,18 +378,19 @@ start_send(char **argv)
 				if (i == qstart + qcount) /*- don't set this for nqueue */ {
 					if (!env_unset("QMAILLOCAL") || !env_unset("QMAILREMOTE")) {
 						logerrf("alert: out of memory\n");
-						die();
+						_exit(111);
 					}
 				}
 				if (!env_put(queuedir.s)) {
 					logerrf("alert: out of memory\n");
-					die();
+					_exit(111);
 				}
-				if (argv[1])
-					execv(*qlargs, argv);
-				else
-					execv(*qlargs, qlargs);
-				logerrf("alert: execv failed\n");
+				execvp(*qlargs, qlargs);
+				logerr("alert: execv ");
+				logerr(*qlargs);
+				logerr(": ");
+				logerr(error_str(errno));
+				logerrf("\n");
 				_exit(111);
 			default:
 				pid_table[i - qstart].pid = child;
@@ -505,7 +509,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.25 2021-10-21 12:38:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.26 2021-10-21 22:36:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.4  2021-10-22 15:51:41+05:30  Cprogrammer
+ * removed extra arguments to err_size()
+ *
  * Revision 1.3  2021-09-11 18:58:03+05:30  Cprogrammer
  * pass null remotehost to received when remotehost is unknown
  *
@@ -652,7 +655,7 @@ smtp_data(char *arg)
 	seenmail = 0;
 	/*- Return error if incoming SMTP msg exceeds DATABYTES */
 	if (flagsize) {
-		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
+		err_size();
 		return;
 	}
 	if (databytes)
@@ -671,7 +674,7 @@ smtp_data(char *arg)
 	if (hops)
 		qmail_fail(&qqt);
 	if (databytes && !bytestooverflow) {
-		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
+		err_size();
 		return;
 	}
 	qmail_from(&qqt, mailfrom.s);
@@ -735,7 +738,7 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.3 2021-09-11 18:58:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.4 2021-10-22 15:51:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
