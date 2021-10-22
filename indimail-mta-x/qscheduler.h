@@ -15,10 +15,12 @@
 #define QUEUE_LOAD 50
 #endif
 
+#ifndef DARWIN
 typedef enum {
 	fixed,
 	dynamic,
 } q_type;
+#endif
 
 typedef struct
 {

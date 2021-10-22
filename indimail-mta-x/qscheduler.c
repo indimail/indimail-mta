@@ -1,11 +1,12 @@
 /*
  * $Log: $
  */
-
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
+#ifndef DARWIN
 #include <mqueue.h>
+#endif
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -37,13 +38,16 @@ static pid_tab *queue_table;
 static int      qcount, qstart, qmax, qload;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
-static int      flagexitasap = 0, do_mq = 0;
-static q_type   qtype;
+static int      flagexitasap = 0;
 static char  **prog_argv;
+#ifndef DARWIN
+static int      do_mq = 0;
+static q_type   qtype;
 static char    *msgbuf;
 static int      msgbuflen;
 static mqd_t    mqd = -1;
 static int      shm = -1;
+#endif
 static char     strnum[FMT_ULONG];
 static readsubdir todosubdir;
 static char     ssoutbuf[512];
@@ -62,10 +66,12 @@ sigterm()
 	flagexitasap = 1;
 	sig_block(sig_child);
 	sig_block(sig_term);
+#ifndef DARWIN
 	if (mqd != -1)
 		close(mqd);
 	if (shm != -1)
 		close(shm);
+#endif
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
 			continue;
@@ -251,72 +257,6 @@ queuenum_to_dir(int queue_no)
 			nomem();
 	envQueue.len--;
 	return envQueue.s + 9;
-}
-
-void
-create_ipc()
-{
-	int             wstat, child, i = 1;
-
-	switch((child = fork()))
-	{
-	case -1:
-		log_err("alert: qscheduler: unable to fork: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	case 0:
-		sig_catch(sig_term, SIG_DFL);
-		sig_catch(sig_hangup, SIG_DFL);
-		sig_catch(sig_child, SIG_DFL);
-		sig_catch(sig_int, SIG_DFL);
-		if (uidinit(1, 1) == -1 || auto_uidq == -1 || auto_gidq == -1)
-			_exit(111);
-		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
-			_exit(111);
-		if ((mqd = mq_open("/qmail-queue", O_CREAT|O_EXCL|O_RDWR,  0644, NULL)) == -1) {
-			if (errno != error_exist)
-				_exit(111);
-		}
-		close(mqd);
-		if ((shm = shm_open("/qmail-queue", O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
-			if (errno != error_exist)
-				_exit(111);
-		}
-		close(shm);
-		_exit(0);
-	}
-	if (wait_pid(&wstat, child) != child) {
-		log_errf("alert: qscheduler waitpid surprise\n");
-		_exit(111);
-	}
-	if (wait_crashed(wstat)) {
-		log_errf("alert: qscheduler child crashed\n");
-		_exit(111);
-	}
-	if (wait_exitcode(wstat)) {
-		log_errf("alert: qscheduler: failed to create POSIX IPC communication\n");
-		_exit(111);
-	}
-	if ((mqd = mq_open("/qmail-queue", O_RDONLY,  0644, NULL)) == -1) {
-		log_err("alert: qscheduler: failed to create POSIX message queue: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	}
-	if ((shm = shm_open("/qmail-queue", O_WRONLY, 0644)) == -1) {
-		log_err("alert: qscheduler: failed to create POSIX shared memory: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	}
-	if (write(shm, (void *) &i, sizeof(int)) == -1) {
-		log_err("alert: qscheduler: failed to write to POSIX shared memory: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	}
-	return;
 }
 
 int
@@ -605,6 +545,73 @@ queue_fix(char *queuedir)
 	log_errf("\n");
 }
 
+#ifndef DARWIN
+void
+create_ipc()
+{
+	int             wstat, child, i = 1;
+
+	switch((child = fork()))
+	{
+	case -1:
+		log_err("alert: qscheduler: unable to fork: ");
+		log_err(error_str(errno));
+		log_errf("\n");
+		_exit(111);
+	case 0:
+		sig_catch(sig_term, SIG_DFL);
+		sig_catch(sig_hangup, SIG_DFL);
+		sig_catch(sig_child, SIG_DFL);
+		sig_catch(sig_int, SIG_DFL);
+		if (uidinit(1, 1) == -1 || auto_uidq == -1 || auto_gidq == -1)
+			_exit(111);
+		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
+			_exit(111);
+		if ((mqd = mq_open("/qmail-queue", O_CREAT|O_EXCL|O_RDWR,  0644, NULL)) == -1) {
+			if (errno != error_exist)
+				_exit(111);
+		}
+		close(mqd);
+		if ((shm = shm_open("/qmail-queue", O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
+			if (errno != error_exist)
+				_exit(111);
+		}
+		close(shm);
+		_exit(0);
+	}
+	if (wait_pid(&wstat, child) != child) {
+		log_errf("alert: qscheduler waitpid surprise\n");
+		_exit(111);
+	}
+	if (wait_crashed(wstat)) {
+		log_errf("alert: qscheduler child crashed\n");
+		_exit(111);
+	}
+	if (wait_exitcode(wstat)) {
+		log_errf("alert: qscheduler: failed to create POSIX IPC communication\n");
+		_exit(111);
+	}
+	if ((mqd = mq_open("/qmail-queue", O_RDONLY,  0644, NULL)) == -1) {
+		log_err("alert: qscheduler: failed to create POSIX message queue: ");
+		log_err(error_str(errno));
+		log_errf("\n");
+		_exit(111);
+	}
+	if ((shm = shm_open("/qmail-queue", O_WRONLY, 0644)) == -1) {
+		log_err("alert: qscheduler: failed to create POSIX shared memory: ");
+		log_err(error_str(errno));
+		log_errf("\n");
+		_exit(111);
+	}
+	if (write(shm, (void *) &i, sizeof(int)) == -1) {
+		log_err("alert: qscheduler: failed to write to POSIX shared memory: ");
+		log_err(error_str(errno));
+		log_errf("\n");
+		_exit(111);
+	}
+	return;
+}
+
 void
 dynamic_queue(char **argv)
 {
@@ -717,11 +724,14 @@ dynamic_queue(char **argv)
 	log_errf("info: qscheduler: exiting\n");
 	_exit(flagexitasap ? 0 : 111);
 }
+#endif
 
 int
 main(int argc, char **argv)
 {
+#ifndef DARWIN
 	char           *ptr;
+#endif
 	int             fd;
 
 	prog_argv = argv;
@@ -743,6 +753,7 @@ main(int argc, char **argv)
 		log_errf("alert: cannot start: qscheduler is already running\n");
 		_exit(111);
 	}
+#ifndef DARWIN
 	if (!(ptr = env_get("QUEUE")))
 		qtype = fixed;
 	else {
@@ -759,6 +770,10 @@ main(int argc, char **argv)
 		dynamic_queue(argv);
 	else
 		static_queue(argv);
+#else
+	set_queue_variables();
+	static_queue(argv);
+#endif
 	if (flagexitasap)
 		log_errf("qscheduler: exiting\n");
 	return 0;
