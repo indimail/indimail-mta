@@ -1760,9 +1760,9 @@ conf-prefix conf-split
 
 qscheduler: \
 load qscheduler.o control.o auto_qmail.o auto_control.o variables.o \
-readsubdir.o auto_uids.o get_uid.o auto_split.o
+readsubdir.o auto_uids.o get_uid.o auto_split.o rt.lib
 	./load qscheduler control.o auto_qmail.o auto_uids.o auto_split.o \
-	readsubdir.o get_uid.o variables.o auto_control.o -lqmail -lrt
+	readsubdir.o get_uid.o variables.o auto_control.o -lqmail `cat rt.lib`
 
 qscheduler.o: \
 compile qscheduler.c qscheduler.h control.h auto_qmail.h readsubdir.h \
@@ -2212,6 +2212,13 @@ trylsock.c compile load
 	( ( ./compile trylsock.c && \
 	./load trylsock -lfts ) >/dev/null 2>&1 \
 	&& echo -lfts || exit 0 ) > fts.lib
+	rm -f trylsock.o trylsock
+
+rt.lib: \
+trylsock.c compile load
+	( ( ./compile trylsock.c && \
+	./load trylsock -lrt ) >/dev/null 2>&1 \
+	&& echo -lrt || exit 0 ) > rt.lib
 	rm -f trylsock.o trylsock
 
 tls.lib: \
