@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.16  2021-10-25 09:13:01+05:30  Cprogrammer
+ * eliminated mktmpfd() function
+ *
  * Revision 1.15  2021-06-12 18:25:31+05:30  Cprogrammer
  * removed #include "auto_qmail.h"
  *
@@ -103,8 +106,8 @@
 
 #define memcpy(x,y,z)      byte_copy((x), (z), (y))
 
-static size_t   env_len = 0;
-static size_t   msg_len = 0;
+static size_t   env_len;
+static size_t   msg_len;
 char            strnum[FMT_ULONG];
 struct substdio sserr;
 char            errbuf[256];
@@ -144,7 +147,7 @@ parse_sender(char *env)
 	char           *ptr = env;
 	int             at, len;
 
-	for (len = 0;*ptr != 'F' && len < env_len;len++,ptr++);
+	for (len = 0; *ptr != 'F' && len < env_len; len++, ptr++);
 	if (*ptr != 'F') {
 		custom_error("Z", "bad envelope. (#4.3.0)", 0);
 		_exit(88);
@@ -172,7 +175,7 @@ parse_sender(char *env)
 		if (!env_put("QMAILHOST="))
 			_exit(QQ_OOM);
 	}
-	for (;*ptr; len++, ptr++);
+	for (; *ptr; len++, ptr++);
 	return (len + 1);
 }
 
@@ -306,8 +309,8 @@ typedef struct command command;
 command        *
 parse_args(int argc, char *argv[])
 {
-	command        *tail = 0;
-	command        *head = 0;
+	command        *tail = NULL;
+	command        *head = NULL;
 
 	while (argc > 0) {
 		command        *cmd;
@@ -333,15 +336,6 @@ parse_args(int argc, char *argv[])
 }
 
 static void
-mktmpfd(int fd)
-{
-	int             tmp;
-
-	tmp = mktmpfile();
-	move_fd(tmp, fd);
-}
-
-static void
 move_unless_empty(int src, int dst, const void *reopen, size_t *var)
 {
 	struct stat     st;
@@ -352,7 +346,7 @@ move_unless_empty(int src, int dst, const void *reopen, size_t *var)
 		move_fd(src, dst);
 		*var = st.st_size;
 		if (reopen) {
-			mktmpfd(src);
+			move_fd(mktmpfile(), src);
 			if (src == ENVOUT)
 				parse_envelope();
 		}
@@ -393,8 +387,8 @@ run_filters(const command * first)
 {
 	const command  *c;
 
-	mktmpfd(MSGOUT);
-	mktmpfd(ENVOUT);
+	move_fd(mktmpfile(), MSGOUT);
+	move_fd(mktmpfile(), ENVOUT);
 
 	for (c = first; c; c = c->next) {
 		pid_t           pid;
@@ -449,7 +443,7 @@ main(int argc, char *argv[])
 	copy_fd(0, 0, &msg_len);
 	copy_fd(1, ENVIN, &env_len);
 	parse_envelope();
-	mktmpfd(QQFD);
+	move_fd(mktmpfile(), QQFD);
 	run_filters(filters);
 	x = read_qqfd();
 	move_fd(ENVIN, 1);
@@ -464,7 +458,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.15 2021-06-12 18:25:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.16 2021-10-25 09:13:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
