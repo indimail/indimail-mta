@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daemon.c,v $
+ * Revision 1.27  2021-11-27 06:42:28+05:30  Cprogrammer
+ * use sig_block(), sig_unblock() in signal handlers to prevent getting interrupted
+ *
  * Revision 1.26  2021-10-21 22:36:20+05:30  Cprogrammer
  * replaced execv with execvp
  *
@@ -108,7 +111,7 @@
 static char     ssoutbuf[512];
 static char     sserrbuf[512];
 static char     strnum[FMT_ULONG];
-static char    *(qlargs[]) = { "qmail-start", "./Mailbox", 0};
+static char    *(qsargs[]) = { "qmail-start", "./Mailbox", 0};
 static int      flagexitasap = 0;
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
@@ -126,11 +129,13 @@ sigterm()
 	int             i;
 
 	sig_block(SIGTERM);
+	sig_block(SIGCHLD);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGTERM);
 	}
+	sig_unblock(SIGCHLD);
 	flagexitasap = 1;
 }
 
@@ -139,11 +144,13 @@ sigalrm()
 {
 	int             i;
 
+	sig_block(SIGALRM);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGALRM);
 	}
+	sig_unblock(SIGALRM);
 }
 
 void
@@ -151,11 +158,13 @@ sighup()
 {
 	int             i;
 
+	sig_block(SIGHUP);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGHUP);
 	}
+	sig_unblock(SIGHUP);
 }
 
 void
@@ -163,11 +172,13 @@ sigint()
 {
 	int             i;
 
+	sig_block(SIGINT);
 	for (i = 0;i <= qcount;i++) {
 		if (pid_table[i].pid == -1)
 			continue;
 		kill(pid_table[i].pid, SIGINT);
 	}
+	sig_unblock(SIGINT);
 }
 
 no_return void
@@ -271,7 +282,7 @@ start_send(char **argv)
 	static stralloc queuedir = {0}, QueueBase = {0};
 
 	if (argv[1])
-		qlargs[1] = argv[1];
+		qsargs[1] = argv[1];
 	if (!pid_table) {
 		if (!(pid_table = (struct pidtab *) alloc(sizeof(struct pidtab) * (qcount + 1)))) {
 			logerrf("alert: out of memory\n");
@@ -385,9 +396,9 @@ start_send(char **argv)
 					logerrf("alert: out of memory\n");
 					_exit(111);
 				}
-				execvp(*qlargs, qlargs);
+				execvp(*qsargs, qsargs);
 				logerr("alert: execv ");
-				logerr(*qlargs);
+				logerr(*qsargs);
 				logerr(": ");
 				logerr(error_str(errno));
 				logerrf("\n");
@@ -444,9 +455,9 @@ restart(char **argv, int pid)
 				die();
 			}
 			if (argv[1])
-				execv(*qlargs, argv);
+				execvp(*qsargs, argv);
 			else
-				execv(*qlargs, qlargs);
+				execvp(*qsargs, qsargs);
 			logerrf("alert: execv failed\n");
 			_exit(111);
 		default:
@@ -509,7 +520,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_daemon_c()
 {
-	static char    *x = "$Id: qmail-daemon.c,v 1.26 2021-10-21 22:36:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daemon.c,v 1.27 2021-11-27 06:42:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
