@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.54  2021-11-27 22:26:31+05:30  Cprogrammer
+ * use argv0 for program name
+ * transmit messid to qmail-send in TODO_CHUNK_SIZE
+ *
  * Revision 1.53  2021-10-22 14:00:03+05:30  Cprogrammer
  * fixed typo
  *
@@ -1188,7 +1192,7 @@ main(int argc, char **argv)
 		if (todo_interval <= 0)
 			todo_interval = ONCEEVERY;
 	}
-	if (!(ptr = env_get("EMAIL_CHUNK_SIZE")))
+	if (!(ptr = env_get("TODO_CHUNK_SIZE")))
 		email_chunk_size = CHUNK_SIZE;
 	else {
 		scan_int(ptr, &email_chunk_size);
@@ -1292,7 +1296,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.53 2021-10-22 14:00:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.54 2021-11-27 22:26:31+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

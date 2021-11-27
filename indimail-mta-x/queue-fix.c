@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.27  2021-11-27 22:24:03+05:30  Cprogrammer
+ * fixed return status for queue creation
+ *
  * Revision 1.26  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -91,6 +94,8 @@
 #include <direntry.h>
 #include <pathexec.h>
 #include <envdir.h>
+#include <byte.h>
+#include <alloc.h>
 #include <getEnvConfig.h>
 #include <noreturn.h>
 #include "tcpto.h"
@@ -215,6 +220,7 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 {
 	struct stat     st;
 	int             fd;
+	char           *ptr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
 	/*- check for existence and proper credentials */
@@ -342,10 +348,12 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			if (flag_doit) {
 				if ((fd = open_trunc(name)) == -1)
 					strerr_die4sys(111, FATAL, "open_trunc: ", name, ": ");
-				while (size--) {
-					if (write(fd, "", 1) != 1)
-						strerr_die4sys(111, FATAL, "write: ", name, ": ");
-				}
+				if (!(ptr = alloc(sizeof(char) * size)))
+					strerr_die2x(111, FATAL, "out of memory");
+				byte_zero(ptr, size);
+				if (write(fd, ptr, size) != size)
+					strerr_die4sys(111, FATAL, "write: ", name, ": ");
+				alloc_free(ptr);
 				close(fd);
 			}
 			strnum1[fmt_8long(strnum1, perm)] = 0;
@@ -983,6 +991,7 @@ int
 main(int argc, char **argv)
 {
 	int             opt, fdorigdir;
+	char            strnum[FMT_ULONG];
 
 	if ((fdorigdir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
@@ -1043,16 +1052,20 @@ main(int argc, char **argv)
 	/*- check for stray files */
 	if (find_strays())
 		die_check();
-	if (flag_verbose)
-		out("queue-fix finished...\n");
+	if (flag_verbose) {
+		strnum[fmt_int(strnum, queueError)] = 0;
+		out("queue-fix finished with ");
+		out(strnum);
+		out(" errors...\n");
+	}
 	flush();
-	return (queueError);
+	return (flag_doit ? 0 : queueError);
 }
 
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.26 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.27 2021-11-27 22:24:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
