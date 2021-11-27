@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.17  2021-11-02 17:57:22+05:30  Cprogrammer
+ * use argv0 for program name
+ *
  * Revision 1.16  2021-10-20 22:49:43+05:30  Cprogrammer
  * add program 'slowq-send' in logs for identifcation.
  *
@@ -143,6 +146,7 @@ static cmap     maplocals;
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 
+/*- if qmail-send.c changes this has to be updated */
 #define CHANNELS 2
 static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
 static char    *chanstatusmsg[CHANNELS] = { " local ", " remote " };
@@ -160,6 +164,7 @@ static int      chanfdin[CHANNELS] = { 2, 4 };
 static int      chanskip[CHANNELS] = { 10, 20 };
 
 char           *queuedesc;
+static char    *argv0 = "slowq-send";
 
 static int      flagexitasap = 0;
 static int      flagrunasap = 0;
@@ -181,14 +186,14 @@ static void
 sigalrm()
 {
 	flagrunasap = 1;
-	log3("info: slowq-send: Got ALRM: ", queuedesc, "\n");
+	log5("info: ", argv0, ": Got ALRM: ", queuedesc, "\n");
 }
 
 static void
 sighup()
 {
 	flagreadasap = 1;
-	log3("info: slowq-send: Got HUP: ", queuedesc, "\n");
+	log5("info: ", argv0, ": Got HUP: ", queuedesc, "\n");
 }
 
 static void
@@ -197,7 +202,7 @@ chdir_toqueue()
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/slowq";
 	while (chdir(queuedir) == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
 		sleep(10);
 	}
 }
@@ -205,7 +210,7 @@ chdir_toqueue()
 static void
 cleandied()
 {
-	log3("alert: slowq-send: ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n");
+	log5("alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n");
 	flagexitasap = 1;
 }
 
@@ -213,7 +218,7 @@ int             flagspawnalive[CHANNELS];
 static void
 spawndied(int c)
 {
-	log3("alert: slowq-send: ", queuedesc, ": oh no! lost spawn connection! dying...\n");
+	log5("alert: ", argv0, ": ", queuedesc, ": oh no! lost spawn connection! dying...\n");
 	flagspawnalive[c] = 0;
 	flagexitasap = 1;
 }
@@ -557,7 +562,7 @@ cleanup_do()
 		return;
 	}
 	if (ch != '+')
-		log5("warning: slowq-send: ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
 }
 
 
@@ -620,7 +625,7 @@ pqadd(unsigned long id, char delayedflag)
 	}
 	return;
 fail:
-	log5("warning: slowq-send: ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
+	log7("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqfail, &pe))
@@ -669,7 +674,7 @@ pqfinish()
 			fnmake_chanaddr(pe.id, c);
 			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
 			if (utimes(fn1.s, ut) == -1)
-				log5("warning: slowq-send: ", queuedesc, "unable to utime ", fn1.s, "; message will be retried too soon\n");
+				log7("warning: ", argv0, ": ", queuedesc, "unable to utime ", fn1.s, "; message will be retried too soon\n");
 		}
 	}
 }
@@ -757,7 +762,7 @@ job_close(int j)
 	if (jo[j].flaghiteof && !jo[j].numtodo) {
 		fnmake_chanaddr(jo[j].id, jo[j].channel);
 		if (unlink(fn1.s) == -1) {
-			log5("warning: slowq-send: ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n");
+			log7("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n");
 			pe.dt = now() + SLEEP_SYSFAIL;
 		} else {
 			int             c;
@@ -767,7 +772,7 @@ job_close(int j)
 					if (stat(fn1.s, &st) == 0)
 						return;	/*- more channels going */
 					if (errno != error_noent) {
-						log5("warning: slowq-send: ", queuedesc, ": unable to stat ", fn1.s, "\n");
+						log7("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "\n");
 						break;	/*- this is the only reason for HOPEFULLY */
 					}
 				}
@@ -856,13 +861,13 @@ addbounce(unsigned long id, char *recip, char *report)
 	for (;;) {
 		if ((fd = open_append(fn2.s)) != -1)
 			break;
-		log3("alert: slowq-send: ", queuedesc, ": unable to append to bounce message; HELP! sleeping...\n");
+		log5("alert: ", argv0, ": ", queuedesc, ": unable to append to bounce message; HELP! sleeping...\n");
 		sleep(10);
 	}
 	pos = 0;
 	while (pos < bouncetext.len) {
 		if ((w = write(fd, bouncetext.s + pos, bouncetext.len - pos)) <= 0) {
-			log3("alert: slowq-send: ", queuedesc, ": unable to append to bounce message; HELP! sleeping...\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": unable to append to bounce message; HELP! sleeping...\n");
 			sleep(10);
 		} else
 			pos += w;
@@ -884,7 +889,7 @@ bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_re
 	switch (child = fork())
 	{
 	case -1:
-		log5("alert: slowq-send: ", queuedesc, ": Unable to fork: ", error_str(errno), "\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": Unable to fork: ", error_str(errno), "\n");
 		return (111);
 	case 0:
 		args[0] = prog;
@@ -896,17 +901,20 @@ bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_re
 		args[6] = recipient; /*- original sender */
 		args[7] = 0;
 		execv(*args, args);
-		log7("alert: slowq-send: ", queuedesc, ": Unable to run: ", prog, ": ", error_str(errno), "\n");
+		log9("alert: ", argv0, ": ", queuedesc, ": Unable to run: ", prog, ": ",
+				error_str(errno), "\n");
 		_exit(111);
 	}
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat)) {
-		log7("alert: slowq-send: ", queuedesc, ": ", prog, " crashed: ", error_str(errno), "\n");
+		log9("alert: ", argv0, ": ", queuedesc, ": ", prog, " crashed: ",
+				error_str(errno), "\n");
 		return (111);
 	}
 	i = wait_exitcode(wstat);
 	strnum1[fmt_ulong(strnum1, i)] = 0;
-	log13("bounce processor sender <", sender, "> recipient <", recipient, "> messfn <", messfn, "> bouncefn <", bouncefn,
+	log13("bounce processor sender <", sender, "> recipient <", recipient,
+			"> messfn <", messfn, "> bouncefn <", bouncefn,
 		  "> exit=", strnum1, " ", queuedesc, "\n");
 	return (i);
 }
@@ -949,7 +957,7 @@ injectbounce(unsigned long id)
 	if (stat(fn2.s, &st) == -1) {
 		if (errno == error_noent)
 			return 1;
-		log5("warning: slowq-send: ", queuedesc, ": unable to stat ", fn2.s, "\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn2.s, "\n");
 		return 0;
 	}
 	if (str_equal(sender.s, "#@[]"))
@@ -960,7 +968,7 @@ injectbounce(unsigned long id)
 	else {
 		restore_env();
 		if ((p = env_get("BOUNCEQUEUE")) && !env_put2("QMAILQUEUE", p)) {
-			log3("alert: slowq-send: ", queuedesc, ": out of memory; will try again later\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": out of memory; will try again later\n");
 			restore_env();
 			return (0);
 		}
@@ -969,7 +977,7 @@ injectbounce(unsigned long id)
 		 * and set it back after queue-queue returns
 		 */
 		if ((env_get("SPAMFILTER") && !env_unset("SPAMFILTER")) || (env_get("FILTERARGS") && !env_unset("FILTERARGS"))) {
-			log3("alert: slowq-send: ", queuedesc, ": out of memory; will try again later\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": out of memory; will try again later\n");
 			restore_env();
 			return (0);
 		}
@@ -977,26 +985,28 @@ injectbounce(unsigned long id)
 		 * Allow bounces to have different rules, queue, controls, etc
 		 */
 		if (chdir(auto_qmail) == -1) {
-			log7("alert: slowq-send: ", queuedesc, ": unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
+			log9("alert: ", argv0, ": ", queuedesc, 
+					": unable to reread controls: unable to switch to ",
+					auto_qmail, ": ", error_str(errno), "\n");
 			restore_env();
 			return (0);
 		}
 		switch ((ret = envrules(sender.s, "bounce.envrules", "BOUNCERULES", 0)))
 		{
 		case AM_MEMORY_ERR:
-			log3("alert: slowq-send: ", queuedesc, ": out of memory; will try again later\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": out of memory; will try again later\n");
 			restore_env();
 			chdir_toqueue();
 			return (0);
 			break;
 		case AM_FILE_ERR:
-			log3("alert: slowq-send: ", queuedesc, ": cannot start: unable to read bounce.envrules\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": cannot start: unable to read bounce.envrules\n");
 			restore_env();
 			chdir_toqueue();
 			return (0);
 			break;
 		case AM_REGEX_ERR:
-			log3("alert: slowq-send: ", queuedesc, ": cannot start: regex compilation failed\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": cannot start: regex compilation failed\n");
 			restore_env();
 			chdir_toqueue();
 			return (0);
@@ -1009,7 +1019,7 @@ injectbounce(unsigned long id)
 				reread(); /*- this does chdir_toqueue() */
 			else
 			if (ret) {
-				log3("alert: slowq-send: ", queuedesc, ": cannot start: envrules failed\n");
+				log5("alert: ", argv0, ": ", queuedesc, ": cannot start: envrules failed\n");
 				restore_env();
 				chdir_toqueue();
 				return (0);
@@ -1018,7 +1028,7 @@ injectbounce(unsigned long id)
 			break;
 		}
 		if (qmail_open(&qqt) == -1) {
-			log3("warning: slowq-send: ", queuedesc, ": unable to start qmail-queue, will try later\n");
+			log5("warning: ", argv0, ": ", queuedesc, ": unable to start qmail-queue, will try later\n");
 			restore_env();
 			return 0;
 		}
@@ -1043,7 +1053,7 @@ injectbounce(unsigned long id)
 							qmail_fail(&qqt);
 							break;
 						case -1:
-							log3("alert: slowq-send: ", queuedesc, ": unable to read controls\n");
+							log5("alert: ", argv0, ": ", queuedesc, ": unable to read controls\n");
 							qmail_fail(&qqt);
 							break;
 						case 0:
@@ -1054,7 +1064,8 @@ injectbounce(unsigned long id)
 							break;
 						}
 						while (chdir(auto_qmail) == -1) {
-							log7("alert: slowq-send: ", queuedesc, ": unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
+							log9("alert: ", argv0, ": ", queuedesc, ": unable to switch to ",
+									auto_qmail, ": ", error_str(errno), "\n");
 							sleep(10);
 						}
 						chdir_toqueue();
@@ -1125,7 +1136,9 @@ injectbounce(unsigned long id)
 			qmail_put(&qqt, doublebouncemessage.s, doublebouncemessage.len);
 			qmail_puts(&qqt, "\n");
 		} else {
-			qmail_puts(&qqt, "Hi. This is the slowq-send program at ");
+			qmail_puts(&qqt, "Hi. This is the ");
+			qmail_puts(&qqt, argv0);
+			qmail_puts(&qqt, " program at ");
 			qmail_put(&qqt, bouncehost.s, bouncehost.len);
 			qmail_puts(&qqt, *sender.s ? ".\n\
 I'm afraid I wasn't able to deliver your message to the following addresses.\n\
@@ -1210,7 +1223,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			qmail_to(&qqt, bouncerecip);
 			qmail_close(&qqt);
 			if (unlink(fn2.s) == -1) {
-				log5("warning: slowq-send: ", queuedesc, ": unable to unlink ", fn2.s, ". Will try later\n");
+				log7("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, ". Will try later\n");
 				return 0;
 			}
 			log5("delete bounce: discarding ", fn2.s, " ", queuedesc, "\n");
@@ -1222,7 +1235,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_from(&qqt, bouncesender);
 		qmail_to(&qqt, bouncerecip);
 		if (*qmail_close(&qqt)) {
-			log3("warning: slowq-send: ", queuedesc, ": trouble injecting bounce message, will try later\n");
+			log5("warning: ", argv0, ": ", queuedesc, ": trouble injecting bounce message, will try later\n");
 			return 0;
 		}
 		strnum2[fmt_ulong(strnum2, id)] = 0;
@@ -1231,7 +1244,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		log5(" qp ", strnum2, " ", queuedesc, "\n");
 	}
 	if (unlink(fn2.s) == -1) {
-		log5("warning: slowq-send: ", queuedesc, ": unable to unlink ", fn2.s, "\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, "\n");
 		return 0;
 	}
 	return 1;
@@ -1386,7 +1399,7 @@ markdone(int c, unsigned long id, seek_pos pos)
 		close(fd);
 		return;
 	}
-	log5("warning: slowq-send: ", queuedesc, ": trouble marking ", fn1.s, "; message will be delivered twice!\n");
+	log7("warning: ", argv0, ": ", queuedesc, ": trouble marking ", fn1.s, "; message will be delivered twice!\n");
 }
 
 /*
@@ -1423,7 +1436,7 @@ del_dochan(int c)
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
-				log3("warning: slowq-send: ", queuedesc, ": internal error: delivery report out of range\n");
+				log5("warning: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n");
 			else {
 				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
@@ -1635,7 +1648,7 @@ pass_dochan(int c)
 	/*- read local/split/inode or remote/split/inode */
 	if (getln(&pass[c].ss, &line, &match, '\0') == -1) {
 		fnmake_chanaddr(pass[c].id, c);
-		log5("warning: slowq-send: ", queuedesc, ": trouble reading ", fn1.s, "; will try again later\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, "; will try again later\n");
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -1666,7 +1679,7 @@ pass_dochan(int c)
 			return;
 		} else
 		if (i == -1)
-			log5("warning: slowq-send: ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n");
+			log7("warning: ", argv0, ": ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n");
 		else
 		if (_do_ratelimit && delayed_jobs)
 			delayed_jobs = delayed_job_count();
@@ -1677,7 +1690,7 @@ pass_dochan(int c)
 		break;
 	default:
 		fnmake_chanaddr(pass[c].id, c);
-		log5("warning: slowq-send: ", queuedesc, ": unknown record type in ", fn1.s, "!\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "!\n");
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -1686,7 +1699,7 @@ pass_dochan(int c)
 	pass[c].mpos += line.len;
 	return;
 trouble:
-	log5("warning: slowq-send: ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n");
+	log7("warning: ", argv0, ": ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n");
 	pe.dt = recent + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqchan[c], &pe))
 		nomem();
@@ -1705,7 +1718,7 @@ messdone(unsigned long id)
 		if (stat(fn1.s, &st) == 0)
 			return;	/*- false alarm; consequence of HOPEFULLY */
 		if (errno != error_noent) {
-			log5("warning: slowq-send: ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
+			log7("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
 			goto fail;
 		}
 	}
@@ -1713,14 +1726,14 @@ messdone(unsigned long id)
 	if (stat(fn1.s, &st) == 0)
 		return;
 	if (errno != error_noent) {
-		log5("warning: slowq-send: ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
 		goto fail;
 	}
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == -1) {
 		if (errno == error_noent)
 			return;
-		log5("warning: slowq-send: ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n");
 		goto fail;
 	}
 
@@ -1728,12 +1741,12 @@ messdone(unsigned long id)
 	if (!injectbounce(id))
 		goto fail;	/*- injectbounce() produced error message */
 	strnum1[fmt_ulong(strnum1, id)] = 0;
-	log5("end msg ", strnum1, " ", queuedesc, "\n");
+	log7("end msg ", strnum1, " ", argv0, ": ", queuedesc, "\n");
 
 	/*- -todo +info -local -remote -bounce */
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
-		log5("warning: slowq-send: ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n");
 		goto fail;
 	}
 	/*- -todo -info -local -remote -bounce; we can relax */
@@ -1747,7 +1760,7 @@ messdone(unsigned long id)
 		return;
 	}
 	if (ch != '+')
-		log5("warning: slowq-send: ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
 	return;
 fail:
 	pe.id = id;
@@ -1915,26 +1928,26 @@ todo_do(fd_set *rfds)
 	scan_int(ptr, &split);
 	fnmake_todo(id);
 	scan_int(fn1.s + 5, &i);
-	log7(split != i ? "warning: slowq-send: " : "info: slowq-send: ",
-			queuedesc, ": subdir=todo/", ptr, " fn=",
-			fn1.s, split != i ? " incorrect split\n" : "\n");
+	log9(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc,
+			": subdir=todo/", ptr, " fn=", fn1.s,
+			split != i ? " incorrect split\n" : "\n");
 	if (split != i)
 		return;
 	if ((fd = open_read(fn1.s)) == -1) {
-		log3("warning: slowq-send: unable to open ", fn1.s, "\n");
+		log5("warning: ", argv0, ": unable to open ", fn1.s, "\n");
 		return;
 	}
 	fnmake_mess(id);
 	/*- just for the statistics */
 	if (stat(fn1.s, &st) == -1) {
-		log3("warning: slowq-send: unable to stat ", fn1.s, "\n");
+		log5("warning: ", argv0, ": unable to stat ", fn1.s, "\n");
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				log5("warning: slowq-send: unable to unlink: ", fn1.s, ": ", error_str(errno), "\n");
+				log7("warning: ", argv0, ": unable to unlink: ", fn1.s, ": ", error_str(errno), "\n");
 				goto fail;
 			}
 		}
@@ -1942,12 +1955,12 @@ todo_do(fd_set *rfds)
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
 		if (errno != error_noent) {
-			log3("warning: slowq-send: unable to unlink ", fn1.s, "\n");
+			log5("warning: ", argv0, ": unable to unlink ", fn1.s, "\n");
 			goto fail;
 		}
 	}
 	if ((fdinfo = open_excl(fn1.s)) == -1) {
-		log3("warning: slowq-send: unable to create ", fn1.s, "\n");
+		log5("warning: ", argv0, ": unable to create ", fn1.s, "\n");
 		goto fail;
 	}
 	strnum1[fmt_ulong(strnum1, id)] = 0;
@@ -1962,7 +1975,7 @@ todo_do(fd_set *rfds)
 		if (getln(&ss, &todoline, &match, '\0') == -1) {
 			/*- perhaps we're out of memory, perhaps an I/O error */
 			fnmake_todo(id);
-			log3("warning: slowq-send: trouble reading ", fn1.s, "\n");
+			log5("warning: ", argv0, ": trouble reading ", fn1.s, "\n");
 			goto fail;
 		}
 		if (!match)
@@ -1979,14 +1992,14 @@ todo_do(fd_set *rfds)
 		case 'e':
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
 				fnmake_info(id);
-				log3("warning: slowq-send: trouble writing to ", fn1.s, "\n");
+				log5("warning: ", argv0, ": trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 			break;
 		case 'F':
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
 				fnmake_info(id);
-				log3("warning: slowq-send: trouble writing to ", fn1.s, "\n");
+				log5("warning: ", argv0, ": trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 			log2_noflush("info msg ", strnum1);
@@ -2030,7 +2043,7 @@ todo_do(fd_set *rfds)
 				fnmake_chanaddr(id, c);
 				fdchan[c] = open_excl(fn1.s);
 				if (fdchan[c] == -1) {
-					log5("warning: slowq-send: ", queuedesc, ": unable to create ", fn1.s, "\n");
+					log7("warning: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, "\n");
 					goto fail;
 				}
 				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
@@ -2038,13 +2051,13 @@ todo_do(fd_set *rfds)
 			}
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
 				fnmake_chanaddr(id, c);
-				log5("warning: slowq-send: ", queuedesc, ": trouble writing to ", fn1.s, "\n");
+				log7("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 			break;
 		default:
 			fnmake_todo(id);
-			log5("warning: slowq-send: ", queuedesc, ": unknown record type in ", fn1.s, "\n");
+			log7("warning: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "\n");
 			goto fail;
 		}
 	} /*- for (;;) */
@@ -2052,21 +2065,21 @@ todo_do(fd_set *rfds)
 	fd = -1;
 	fnmake_info(id);
 	if (substdio_flush(&ssinfo) == -1) {
-		log5("warning: slowq-send: ", queuedesc, ": trouble writing to ", fn1.s, "\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n");
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 			if (substdio_flush(&sschan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				log5("warning: slowq-send: ", queuedesc, ": trouble writing to ", fn1.s, "\n");
+				log7("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n");
 				goto fail;
 			}
 		}
 	}
 #ifdef USE_FSYNC
 	if (use_fsync > 0 && fsync(fdinfo) == -1) {
-		log5("warning: slowq-send: ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
 		goto fail;
 	}
 #endif
@@ -2077,7 +2090,7 @@ todo_do(fd_set *rfds)
 #ifdef USE_FSYNC
 			if (use_fsync > 0 && fsync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				log5("warning: slowq-send: ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
+				log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
 				goto fail;
 			}
 #endif
@@ -2095,7 +2108,7 @@ todo_do(fd_set *rfds)
 		return;
 	}
 	if (ch != '+') {
-		log5("warning: slowq-send: ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
+		log7("warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
 		return;
 	}
 	pe.id = id;
@@ -2284,45 +2297,45 @@ regetcontrols()
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 	if (control_readfile(&newlocals, "locals", 1) != 1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/locals\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/locals\n");
 		return;
 	}
 	if ((r = control_readfile(&newvdoms, "virtualdomains", 0)) == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/virtualdomains\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/virtualdomains\n");
 		return;
 	}
 	if (control_readint(&todo_interval, "todointerval") == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/todointerval\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/todointerval\n");
 		return;
 	}
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/concurrencylocal\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/concurrencylocal\n");
 		return;
 	}
 	if (control_readint((int *) &concurrency[1], "concurrencyremote") == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/concurrencyremote\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/concurrencyremote\n");
 		return;
 	}
 	/*- Add "holdlocal/holdremote" flags - NJL 1998/05/03 */
 	if (control_readint(&newholdjobs[0], "holdlocal") == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/holdlocal\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdlocal\n");
 		return;
 	}
 	if (control_readint(&newholdjobs[1], "holdremote") == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/holdremote\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdremote\n");
 		return;
 	}
 	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/envnoathost\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/envnoathost\n");
 		return;
 	}
 #ifdef USE_FSYNC
 	if (control_readint(&use_syncdir, "conf-syncdir") == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/conf-syncdir\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-syncdir\n");
 		return;
 	}
 	if (control_readint(&use_fsync, "conf-fsync") == -1) {
-		log5("alert: slowq-send: ", queuedesc, ": unable to reread ", controldir, "/conf-fsync\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fsync\n");
 		return;
 	}
 	if (use_syncdir > 0) {
@@ -2373,7 +2386,9 @@ static void
 reread()
 {
 	if (chdir(auto_qmail) == -1) {
-		log7("alert: slowq-send: ", queuedesc, ": unable to reread controls: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
+		log9("alert: ", argv0, ": ", queuedesc,
+				": unable to reread controls: unable to switch to ", auto_qmail, ": ",
+				error_str(errno), "\n");
 		return;
 	}
 	regetcontrols();
@@ -2381,7 +2396,7 @@ reread()
 }
 
 int
-main()
+main(int argc, char **argv)
 {
 	int             fd, nfds, c;
 	datetime_sec    wakeup;
@@ -2393,20 +2408,25 @@ main()
 		queuedir = "queue/slowq"; /*- single queue like qmail */
 	ptr = env_get("RATELIMIT_DIR");
 	do_ratelimit = (ptr && *ptr) ? 1 : 0;
+	c = str_rchr(argv[0], '/');
+	argv0 = (argv0[c] && argv0[c + 1]) ? argv[0] + c + 1 : argv[0];
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
 	if (*queuedesc == '/')
 		queuedesc++;
 	if (chdir(auto_qmail) == -1) {
-		log7("alert: slowq-send: ", queuedesc, ": cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
+		log9("alert: ", argv0, ": ", queuedesc,
+				": cannot start: unable to switch to ", auto_qmail, ": ",
+				error_str(errno), "\n");
 		_exit(111);
 	}
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log7("info: slowq-send: ", queuedesc, ": ratelimit=", do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
+	log9("info: ", argv0, ": ", queuedesc, ": ratelimit=",
+			do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
 	else
@@ -2418,11 +2438,13 @@ main()
 			todo_interval = ONCEEVERY;
 	}
 	if (!getcontrols()) {
-		log3("alert: slowq-send: ", queuedesc, ": cannot start: unable to read controls\n");
+		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: unable to read controls\n");
 		_exit(111);
 	}
 	if (chdir(queuedir) == -1) {
-		log7("alert: slowq-send: ", queuedesc, ": cannot start: unable to switch to queue directory ", queuedir, ": ", error_str(errno), "\n");
+		log9("alert: ", argv0, ": ", queuedesc,
+				": cannot start: unable to switch to queue directory ", queuedir, ": ",
+				error_str(errno), "\n");
 		_exit(111);
 	}
 	sig_pipeignore();
@@ -2433,11 +2455,11 @@ main()
 	umask(077);
 	/*- prevent multiple copies of slowq-send to run */
 	if ((fd = open_write("lock/sendmutex")) == -1) {
-		log3("alert: slowq-send: ", queuedesc, ": cannot start: unable to open mutex\n");
+		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: unable to open mutex\n");
 		_exit(111);
 	}
 	if (lock_exnb(fd) == -1) {
-		log3("alert: slowq-send: ", queuedesc, ": cannot start: slowq-send is already running\n");
+		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: instance already running\n");
 		_exit(111);
 	}
 #ifdef USE_FSYNC
@@ -2456,14 +2478,14 @@ main()
 			r = read(chanfdin[c], &ch1, 1);
 		} while ((r == -1) && (errno == error_intr));
 		if (r < 1) {
-			log3("alert: slowq-send: ", queuedesc, ": cannot start: hath the daemon spawn no fire?\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": cannot start: hath the daemon spawn no fire?\n");
 			_exit(111);
 		}
 		do {
 			r = read(chanfdin[c], &ch2, 1);
 		} while ((r == -1) && (errno == error_intr));
 		if (r < 1) {
-			log3("alert: slowq-send: ", queuedesc, ": cannot start: hath the daemon spawn no fire?\n");
+			log5("alert: ", argv0, ": ", queuedesc, ": cannot start: hath the daemon spawn no fire?\n");
 			_exit(111);
 		}
 		u = (unsigned int) (unsigned char) ch1;
@@ -2533,7 +2555,7 @@ main()
 		if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
 			if (errno == error_intr);
 			else
-				log3("warning: slowq-send: ", queuedesc, ": trouble in select\n");
+				log5("warning: ", argv0, ": ", queuedesc, ": trouble in select\n");
 		} else {
 			time_needed = 0;
 			recent = now();
@@ -2561,14 +2583,14 @@ main()
 		}
 	} /*- while (!flagexitasap || !del_canexit()) */
 	pqfinish();
-	log3("status: slowq-send: ", queuedesc, " exiting\n");
+	log5("status: ", argv0, ": ", queuedesc, " exiting\n");
 	return (0);
 }
 
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.16 2021-10-20 22:49:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.17 2021-11-02 17:57:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
