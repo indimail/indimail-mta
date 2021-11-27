@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.12  2021-11-02 17:57:09+05:30  Cprogrammer
+ * fixed typo
+ *
  * Revision 1.11  2021-10-22 13:56:57+05:30  Cprogrammer
  * removed loglock code
  *
@@ -96,7 +99,7 @@
 #define ONCEEVERY     10 /*- Run todo maximal once every N seconds */
 #endif
 #define REPORTMAX     10000
-#define FATAL         "qmta-sent: fatal: "
+#define FATAL         "qmta-send: fatal: "
 
 int             qmail_lspawn(int, char **);
 int             qmail_rspawn(int, char **);
@@ -123,6 +126,7 @@ static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 datetime_sec    recent;
 
+/*- if qmail-send.c changes this has to be updated */
 #define CHANNELS 2
 static int      chanfdout[CHANNELS];
 static int      chanfdin[CHANNELS];
@@ -2636,7 +2640,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.11 2021-10-22 13:56:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.12 2021-11-02 17:57:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
