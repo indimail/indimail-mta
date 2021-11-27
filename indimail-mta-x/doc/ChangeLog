@@ -27,6 +27,10 @@ Release 2.14.1 Start 21/09/2021
 14. qsutil.[c,h]: added ident argument to loglock_open for identification in
     logs
 15. mini-smtpd.c: removed extra arguments passed to err_size()
+- 02/11/2021
+16. qmail-send.c, slowq-send.c, qmail-todo.c: use argv0 for program name
+17. qmail-todo.c: optimize by writting to comm_buf all files found in todo
+    before doing comm_do
 
 * 
 Release 2.14.0 Start 18/07/2021
