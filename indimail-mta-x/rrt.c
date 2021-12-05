@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.12  2021-12-05 09:16:37+05:30  Cprogrammer
+ * fixed command line arguments for return-path and recipient
+ *
  * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -298,18 +301,22 @@ main(int argc, char **argv)
 			break;
 		default:
 			logerrf(usage);
-			_exit(1);
+			_exit(USAGE_ERR);
 			break;
 		}
 	}
 	argc -= optind;
 	argv += optind;
+	if (argc < 6) {
+		logerrf(usage);
+		_exit(USAGE_ERR);
+	}
 	birth = now();
 	id = getpid();
 	datetime_tai(&dt, birth);
 
-	rpline = argv[1];
-	recipient = argv[4];
+	rpline = argv[2];
+	recipient = argv[5];
 	if (!addrparse(rpline) && !stralloc_copys(&rpath, rpline))
 		my_error("out of memory", 0, MEM_ERR);
 	if (!stralloc_0(&rpath))
@@ -489,7 +496,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.12 2021-12-05 09:16:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
