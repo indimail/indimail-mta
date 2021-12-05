@@ -2409,7 +2409,7 @@ main(int argc, char **argv)
 	ptr = env_get("RATELIMIT_DIR");
 	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	c = str_rchr(argv[0], '/');
-	argv0 = (argv0[c] && argv0[c + 1]) ? argv[0] + c + 1 : argv[0];
+	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);

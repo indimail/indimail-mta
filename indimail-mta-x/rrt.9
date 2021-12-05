@@ -3,7 +3,7 @@
 rrt \- respond to Return Receipts
 .SH SYNOPSIS
 .B rrt
-[-\fBn\fR]
+[-\fBn\fR] [-\fBb\fR]
 .I host
 .I sender
 .I qqeh
@@ -42,15 +42,17 @@ Print the message rather than feeding it to
 enclose the full email body rather than the headers
 
 .SH RETURN VALUE
- 0 for success
- 1 for read errors
- 2 for write erros
- 3 for memory allocation error
- 4 for file open errors
- 5 for failure to dup file descriptors
- 6 for lseek system call error
- 7 for usage error
- 8 parsing error
+  0 for success
+  1 for read errors
+  2 for write erros
+  3 for memory allocation error
+  4 for file open errors
+  5 for failure to dup file descriptors
+  6 for lseek system call error
+  7 for usage error
+  8 parsing error
+ 111 Temporary Error
+ 100 Permanent Error
 
 .SH "SEE ALSO"
 qmail-remote(8),

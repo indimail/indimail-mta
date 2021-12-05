@@ -1147,7 +1147,7 @@ main(int argc, char **argv)
 	struct timeval  tv;
 
 	c = str_rchr(argv[0], '/');
-	argv0 = (argv0[c] && argv0[c + 1]) ? argv[0] + c + 1 : argv[0];
+	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
