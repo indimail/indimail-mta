@@ -50,7 +50,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 8.  Scott Gifford - 0.0.0.0 patch
 9.  Chuck Foster - binding outgoing connections to local interface
 10. Claudio Jeker <jeker@n-r-g.com and Andre Oppermann ext-todo
-11. Andreas Aardal Hanssen - ext-todo
+11. Andreas Aardal Hanssen - ext-todo + big-todo
 12. Bruce Guenter - QMAILQUEUE, qmail-qstat, big-todo Patch mods
 13. Bruce Guenter - rate limiting autoresponder based on Eric Huss's design
 14. Bruce Guenter - syncdir

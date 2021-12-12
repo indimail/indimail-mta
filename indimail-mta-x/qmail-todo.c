@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-todo.c,v $
- * Revision 1.54  2021-11-27 22:26:31+05:30  Cprogrammer
+ * Revision 1.54  2021-12-12 08:47:50+05:30  Cprogrammer
  * use argv0 for program name
  * transmit messid to qmail-send in TODO_CHUNK_SIZE
  *
@@ -203,7 +203,7 @@ static char     ssfromqcbuf[1024];
 static stralloc comm_buf = { 0 };
 static int      comm_pos;
 static int      comm_count;
-static int      email_chunk_size;
+static int      todo_chunk_size;
 static int      fdout = -1;
 static int      fdin = -1;
 
@@ -765,7 +765,7 @@ todo_scan(fd_set *rfds, unsigned long *id)
  *  0 - stop asap
  *  1 - skip todo run
  *  2 - files in todo > 0
- *  3 - files in todo is a multiple of email_chunk_size
+ *  3 - files in todo is a multiple of todo_chunk_size
  *  4 - files in todo = 0
  * -1 - error
  */
@@ -968,11 +968,11 @@ todo_do(fd_set *rfds)
 	/*- "Llocal: mbhangui@argos.indimail.org mbhangui@argos.indimail.org 798 queue1\n\0" */
 	log_stat(id, st.st_size);
 	/*-
-	 * return in chunks of email_chunk_size
+	 * return in chunks of todo_chunk_size
 	 * so that qmail-todo doesn't spend to much time in building
 	 * comm_buf without sending a single email for delivery
 	 */
-	return (flagtododir && comm_count % email_chunk_size ? 3 : (flagtododir ? 2 : 4));
+	return (flagtododir == 0 ? 4 : (comm_count % todo_chunk_size) == 0 ? 3 : 2);
 
 fail:
 	if (fd != -1)
@@ -1193,11 +1193,11 @@ main(int argc, char **argv)
 			todo_interval = ONCEEVERY;
 	}
 	if (!(ptr = env_get("TODO_CHUNK_SIZE")))
-		email_chunk_size = CHUNK_SIZE;
+		todo_chunk_size = CHUNK_SIZE;
 	else {
-		scan_int(ptr, &email_chunk_size);
-		if (email_chunk_size <= 0)
-			email_chunk_size = CHUNK_SIZE;
+		scan_int(ptr, &todo_chunk_size);
+		if (todo_chunk_size <= 0)
+			todo_chunk_size = CHUNK_SIZE;
 	}
 	fnmake_init(); /*- initialize fn */
 	todo_init();   /*- set lasttodorun, nexttodorun, open lock/trigger */
@@ -1267,7 +1267,7 @@ main(int argc, char **argv)
 			 * If the queue already has files in todo
 			 * comm_buf can be very large. Hence todo_do
 			 * returns 3 when number of files in todo
-			 * is a multiple of email_chunk_size
+			 * is a multiple of todo_chunk_size
 			 */
 			for (;;) {
 				if (todo_do(&rfds) != 2)
@@ -1296,7 +1296,7 @@ main()
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.54 2021-11-27 22:26:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.54 2021-12-12 08:47:50+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

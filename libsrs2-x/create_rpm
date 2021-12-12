@@ -1,10 +1,23 @@
 #!/bin/sh
-# $Log: $
+# $Log: create_rpm,v $
+# Revision 1.4  2021-08-28 21:39:21+05:30  Cprogrammer
+# sign devel package
 #
-# $Id: $
+# Revision 1.3  2021-04-03 22:13:15+05:30  Cprogrammer
+# fixed indentation
+#
+# Revision 1.2  2021-03-26 11:34:58+05:30  Cprogrammer
+# copy catChangeLog as a file instead of link
+#
+# Revision 1.1  2020-09-13 01:33:33+05:30  Cprogrammer
+# Initial revision
+#
+#
+# $Id: create_rpm,v 1.4 2021-08-28 21:39:21+05:30 Cprogrammer Exp mbhangui $
 #
 curdir=`pwd`
 version=$(cat conf-version)
+name=libdkim
 
 if [ -f /etc/debian_version ] ; then
   echo "you can't do rpmbuild on an insane system" 1>&2
@@ -56,7 +69,7 @@ if [ " $key" = " y" -o " $key" = " Y" ] ; then
   copy_src=1
 fi
 
-make -s libsrs2.spec
+make -s $name.spec
 if [ $? -ne 0 ] ; then
   echo "make failed" 1>&2
   exit 1
@@ -68,31 +81,31 @@ fi
 mkdir ../stage
 if [ $copy_src -eq 1 ] ; then
   cd ..
-  /bin/rm -rf stage/libsrs2-"$version"
-  cp -rp libsrs2-x stage/libsrs2-"$version"
-  /bin/rm -f stage/libsrs2-"$version"/catChangeLog
-  /bin/cp libsrs2-x/catChangeLog stage/libsrs2-"$version"
-  cd stage/libsrs2-"$version"
+  /bin/rm -rf stage/$name-"$version"
+  cp -rp $name-x stage/$name-"$version"
+  /bin/rm -f stage/$name-"$version"/catChangeLog
+  /bin/cp $name-x/catChangeLog stage/$name-"$version"
+  cd stage/$name-"$version"
   make -s clean
   make -s distclean
 
   /bin/rm -rf autom4te.cache .deps
   cd ..
-  echo "Archiving libsrs2-"$version".tar.gz in `pwd`"
+  echo "Archiving $name-"$version".tar.gz in `pwd`"
   tar \
-    --exclude="libsrs2-$version/.git" \
-    --exclude="libsrs2-$version/debian"  \
-    --exclude="libsrs2-$version/RCS" \
-    -cf - libsrs2-"$version" \
-      | gzip -c > $rpmbuild/SOURCES/libsrs2-"$version".tar.gz
+    --exclude="$name-$version/.git" \
+    --exclude="$name-$version/debian"  \
+    --exclude="$name-$version/RCS" \
+    -cf - $name-"$version" \
+      | gzip -c > $rpmbuild/SOURCES/$name-"$version".tar.gz
   dist=`uname -r |cut -d . -f4`
   if [ -z "$release" ] ; then
-    if [ -d /usr/include/srs2 ] ; then
-      qdist=$(rpm -qf /usr/include/srs2|cut -d- -f4|cut -d. -f3)
+    if [ -d /usr/include/dkim ] ; then
+      qdist=$(rpm -qf /usr/include/dkim|cut -d- -f4|cut -d. -f3)
       if [ " $dist" = " $qdist" ] ; then
-        qversion=$(rpm -qf /usr/include/srs2|cut -d- -f3)
+        qversion=$(rpm -qf /usr/include/dkim|cut -d- -f3)
         if [ "$qversion" = "$version" ] ; then
-          release=$(rpm -qf /usr/include/srs2 | cut -d- -f4 | cut -d. -f2)
+          release=$(rpm -qf /usr/include/dkim | cut -d- -f4 | cut -d. -f2)
           release=$(expr $release + 1)
         else
           release=1
@@ -105,61 +118,62 @@ if [ $copy_src -eq 1 ] ; then
     fi
   fi
   cd ..
-  /bin/cp -p stage/libsrs2-"$version"/libsrs2-rpmlintrc $rpmbuild/SOURCES
-  /bin/rm -rf stage/libsrs2-"$version"
+  /bin/cp -p stage/$name-"$version"/$name-rpmlintrc $rpmbuild/SOURCES
 else
   cd ..
 fi
-echo -n "Build RPM for libsrs2-"$version"-1."$release" (Y/N) - "
+echo -n "Build RPM for $name-"$version"-1."$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
-  cp stage/libsrs2-"$version"/libsrs2.spec /tmp
-  sed -i -e "s|^Release: .*|Release: 1.$release%{?dist}|g" /tmp/libsrs2.spec
+  cp stage/$name-"$version"/$name.spec /tmp
+  sed -i -e "s|^Release: .*|Release: 1.$release%{?dist}|g" /tmp/$name.spec
   cd $curdir
   if [ $? -eq 0 ] ; then
     tmprel=`cat conf-release 2>/dev/null`
     if [ ! " $tmprel" = " 1.$release" ] ; then
       echo 1.$release > conf-release
-      make -s libsrs2.spec
-      cp libsrs2.spec /tmp
+      make -s $name.spec
+      cp $name.spec /tmp
       cd debian
       make -s
       cd ..
     fi
   fi
   if [ $verbose -eq 0 ] ; then
-    echo "rpmbuild -ba --clean --quiet /tmp/libsrs2.spec"
-    rpmbuild -ba --clean --quiet /tmp/libsrs2.spec
+    echo "rpmbuild -ba --clean --quiet /tmp/$name.spec"
+    rpmbuild -ba --clean --quiet /tmp/$name.spec
   else
-    echo "rpmbuild -ba --clean /tmp/libsrs2.spec"
-    rpmbuild -ba --clean /tmp/libsrs2.spec
+    echo "rpmbuild -ba --clean /tmp/$name.spec"
+    rpmbuild -ba --clean /tmp/$name.spec
   fi
   if [ $? -eq 0 ] ; then
-    /bin/rm /tmp/libsrs2.spec
+    /bin/rm /tmp/$name.spec
     build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
-    rpm --addsign $rpmbuild/RPMS/$build_arch/libsrs2-"$version"-"1.$release".$dist.$build_arch.rpm
-    rpm --addsign $rpmbuild/RPMS/$build_arch/libsrs2-devel-"$version"-"1.$release".$dist.$build_arch.rpm
-    echo -n "RPM lint for libsrs2-"$version"-1."$release" (Y/N) - "
+    rpm --addsign $rpmbuild/RPMS/$build_arch/$name-"$version"-"1.$release".$dist.$build_arch.rpm >/dev/null
+    rpm --addsign $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"1.$release".$dist.$build_arch.rpm >/dev/null
+    echo $rpmbuild/RPMS/$build_arch/$name-"$version"-"1.$release".$dist.$build_arch.rpm
+    echo $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"1.$release".$dist.$build_arch.rpm
+    echo -n "RPM lint for $name-"$version"-1."$release" (Y/N) - "
     read key
     if [ " $key" = " Y" -o " $key" = " y" ] ; then
       (
-      echo libsrs2
-      rpmlint $rpmbuild/RPMS/$build_arch/libsrs2-"$version"-"1.$release".$dist.$build_arch.rpm
+      echo $name
+      rpmlint $rpmbuild/RPMS/$build_arch/$name-"$version"-"1.$release".$dist.$build_arch.rpm
       echo ------------------------
-      echo libsrs2-devel
-      rpmlint $rpmbuild/RPMS/$build_arch/libsrs2-devel-"$version"-"1.$release".$dist.$build_arch.rpm
+      echo $name-devel
+      rpmlint $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"1.$release".$dist.$build_arch.rpm
       echo ------------------------
-      echo libsrs2-"$version"-"1.$release".$dist.src.rpm
-      rpmlint $rpmbuild/SRPMS/libsrs2-"$version"-"1.$release".$dist.src.rpm
+      echo $name-"$version"-"1.$release".$dist.src.rpm
+      rpmlint $rpmbuild/SRPMS/$name-"$version"-"1.$release".$dist.src.rpm
       echo ------------------------
       ) 2>&1 | less
     fi
   else
-    /bin/rm /tmp/libsrs2.spec
+    /bin/rm /tmp/$name.spec
   fi
 fi
 echo -n "Remove Source (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
-  /bin/rm -f $rpmbuild/SOURCES/libsrs2-"$version".tar.gz $rpmbuild/SOURCES/libsrs2-rpmlintrc
+  /bin/rm -f $rpmbuild/SOURCES/$name-"$version".tar.gz $rpmbuild/SOURCES/$name-rpmlintrc
 fi
