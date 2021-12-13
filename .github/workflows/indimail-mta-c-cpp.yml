@@ -32,7 +32,7 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install glibc; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install libc6 libc6-dev; fi
         if [ "${OS}" = "macOS-10.15" ] ; then brew install automake autoconf libtool pkgconfig openssl; fi
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl; fi
       env:
