@@ -1,0 +1,115 @@
+.TH multi-queue 7
+.SH NAME
+multi-queue \- indimail's multi queue architecture
+
+.SH DESCRIPTION
+\fBindimail\fR can be configured to use multiple queues for mail
+deliveries, using the \fBqscheduler\fR(8) daemon. These can be configured
+by setting few environment variables and by specifying command-line
+switches to the \fBqscheduler\fR(8) daemon.
+
+.SH Environment Variables
+
+The following environment variables are used to configure the queues.
+
+QUEUE_START - defines the first queue that should be used. QUEUE_START=1
+implies that INDIMAIL/queue1 be the first queue
+
+QUEUE_COUNT - defines the total number of queues that should be used for
+mail delivries. This is the fixed upper limit when \fBqscheduler\fR(8) is
+passed the -\fIs\fR argument
+
+\fBqscheduler\fR(8) can be used for configuring mail delivery with fixed
+number of queues or load dependent dynamic queues. The following additional
+environment variables are needed when dynamic queues are used.
+
+QUEUE_MAX - defines the maximum queues that qscheduler can use for
+deliveries when dynamic queues is configured (-\fId\fR argument to
+\fBqscheduler\fR(8).
+
+QUEUE_LOAD - defines the max queue load after which \fBqscheduler\fR(8)
+should increment the queue count by starting an additional
+\fBqmail-send\fR(8), \fBqmail-todo\fR(8) instance.
+
+.SH Inter-Process Communication
+.
+\fBqscheduler\fR(8) uses POSIX inter-process communication namely shared
+memory segments and message queues. The various forms of IPC are described
+as below
+
+.PP
+.TP 3
+\fBshared memory\fR /\fIqscheduler\fR
+
+This is created by \fBqscheduler\fR(8) using \fBshm_open\fR(3), owned by
+root:root with perm 0644.
+
+This segment is used to store two integers
+.RS 3
+.LP
+.nr step 1 1
+.IP \n[step] 2
+\fBqueue count\fR - number of queues used by \fBqscheduler\fR(8). This is a
+dynamic number that is incremented when the total concurrency load goes
+beyond a threshold (defined by \fBQUEUE_LOAD\fR environment variable).
+\fBqscheduler\fR(8) will increase the queue count upto a maximum defined by
+the \fBQUEUE_MAX\fR environment variable
+
+.IP \n+[step]
+\fBqueue configured\fR - number of queues configured in the system
+.LP
+.RE
+
+The value stored in the first segment (\fBqueue number\fR) is used by
+\fBqmail-multi\fR(8) to select the queue, set the environment variable
+\fBQUEUEDIR\fR, before calling \fBqmail-queue\fR(8).
+
+.PP
+.TP 3
+\fBshared memory\fR /\fBqueue\fR\fIN\fR
+This is created by \fBqscheduler\fR(8) but used \fBqmail-send\fR(8) to
+write its concurrency value and the total concurrency slot configured for
+both local and remote deliveries. The concurrency is incremented whenever a
+job is opened and decremented whenever a job is closed. This is owned by
+qmails:qmail with perm 0644.
+
+.PP
+.TP 3
+\fBmessage queue\fR /\fIqscheduler\fR
+
+This is created by \fBqscheduler\fR(8) for \fBqmail-send\fR(8) to
+communicate back when its queue reaches the maximum threshold percentage for
+concurrency to total concurrency ratio. When the average concurrency load
+reaches \fBQUEUE_LOAD\fR, \fBqscheduler\fR(8) starts a new
+\fBqmail-send\fR(8), \fBqmail-send\fR(8) instance to install a new queue.
+This is owned by root:root with perm 0600.
+
+.PP
+.TP 3
+\fBmessage queue\fR /\fBqueue\fR\fIN\fR
+
+For each queue, \fBqscheduler\fR(8) creates a message queue using
+\fBmq_open\fR(3). Here \fIN\fR refers to the queue number). This is owned
+by qmailq:qmail with perm 0640.
+
+This message queue is used by \fBqmail-queue\fR(8) to communicate to
+\fBqmail-todo\fR(8) the split dir and the inode number of the message in
+the outgoing queue. This is more efficient than the trigger method for the
+traditional static queue that qmail uses, where the trigger wakes up
+\fBqmail-send\fR(8) to scan the \fItodo\fR directory. Scanning the
+\fItodo\R using \fBopendir\fR(3), \fBreaddir\fR(3), also introduces what is
+known as the Silly Qmail Syndrome, where a single instance of
+\fBqmail-send\fR(8) cannot keep in pace with the injection rate from
+multiple qmail-queue clients. The solution to this problem is to have
+multiple instances of qmail-send. These instances of qmail-send can be a
+fixed number (qscheduler -s) or increased dynamically (qscheduler -d).
+
+.SH SEE ALSO
+qmail-multi(8),
+qmail-queue(8),
+qmail-send(8),
+qmail-todo(8),
+shm_open(3),
+mq_open(3),
+ipcs(1),
+mq_overview(7)
