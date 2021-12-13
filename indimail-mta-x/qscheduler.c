@@ -3,7 +3,8 @@
  */
 #include <stdio.h>
 #include <unistd.h>
-#ifndef DARWIN
+#include "haslibrt.h"
+#ifdef HASLIBRT
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -26,7 +27,7 @@
 #include <wait.h>
 #include <noreturn.h>
 #include <getEnvConfig.h>
-#ifndef DARWIN
+#ifdef HASLIBRT
 #include <sgetopt.h>
 #include "auto_uids.h"
 #endif
@@ -41,7 +42,7 @@ static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
 static char  **prog_argv;
-#ifndef DARWIN
+#ifdef HASLIBRT
 static q_type   qtype = fixed;
 static char    *msgbuf;
 static int      msgbuflen;
@@ -74,7 +75,7 @@ sigterm()
 	flagexitasap = 1;
 	sig_block(sig_child);
 	sig_block(sig_term);
-#ifndef DARWIN
+#ifdef HASLIBRT
 	for (i = 0; i < qcount; i++)
 		close(shm_queue[i]);
 	if (mq_sch != -1)
@@ -485,7 +486,7 @@ queue_fix(char *queuedir)
 	return (exitcode ? 1 : 0);
 }
 
-#ifndef DARWIN
+#ifdef HASLIBRT
 void
 create_ipc()
 {
@@ -687,7 +688,7 @@ dynamic_queue()
 int
 main(int argc, char **argv)
 {
-#ifndef DARWIN
+#ifdef HASLIBRT
 	int             opt;
 #endif
 	int             fd;
@@ -705,7 +706,7 @@ main(int argc, char **argv)
 		strerr_die1sys(111, "alert: qscheduler: cannot start: unable to open queue/qscheduler: ");
 	if (lock_exnb(fd) == -1)
 		strerr_die1x(111, "alert: cannot start: qscheduler is already running\n");
-#ifndef DARWIN
+#ifdef HASLIBRT
 	while ((opt = getopt(argc, argv, "ds")) != opteof) {
 		switch (opt)
 		{

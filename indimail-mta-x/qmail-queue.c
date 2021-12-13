@@ -8,11 +8,12 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sig.h>
-#include <case.h>
-#ifndef DARWIN
+#include "haslibrt.h"
+#ifdef HASLIBRT
 #include <mqueue.h>
 #endif
+#include <sig.h>
+#include <case.h>
 #include <byte.h>
 #include <str.h>
 #include <getln.h>
@@ -43,7 +44,7 @@
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
-#ifndef DARWIN
+#ifdef HASLIBRT
 #include "qscheduler.h"
 #include "qmail.h"
 #endif
@@ -634,7 +635,7 @@ set_archive(char *eaddr)
 }
 #endif
 
-#ifndef DARWIN
+#ifdef HASLIBRT
 static char     errbuf[256];
 static struct substdio sserr;
 
@@ -719,7 +720,7 @@ main()
 	char            ch;
 	char           *ptr, *qqeh, *tmp_ptr;
 	struct stat     st;
-#ifndef DARWIN
+#ifdef HASLIBRT
 	int             i;
 #endif
 
@@ -1132,7 +1133,7 @@ main()
 		}
 	}
 #endif
-#ifndef DARWIN
+#ifdef HASLIBRT
 	if (!(ptr = env_get("DYNAMIC_QUEUE")))
 		triggerpull();
 	else {

@@ -151,7 +151,8 @@
 #include <env.h>
 #include <getEnvConfig.h>
 #include <sgetopt.h>
-#ifndef DARWIN
+#include "haslibrt.h"
+#ifdef HASLIBRT
 #include <mqueue.h>
 #include "qscheduler.h"
 #endif
@@ -225,7 +226,7 @@ static stralloc newlocals = { 0 };
 static stralloc newvdoms = { 0 };
 static int      dynamic_queue = 0;
 static int      do_readsubdir = 1;
-#ifndef DARWIN
+#ifdef HASLIBRT
 static mqd_t    mq_queue = -1;
 static char    *msgbuf;
 static int      msgbuflen;
@@ -749,7 +750,7 @@ todo_init(void)
 	trigger_set(); /*- close & open lock/trigger fifo */
 }
 
-#ifndef DARWIN
+#ifdef HASLIBRT
 void
 mqueue_init(void)
 {
@@ -846,14 +847,14 @@ mqueue_selprep(int *nfds, fd_set *rfds)
 			*nfds = mq_queue + 1;
 	}
 }
-#endif /*- #ifndef DARWIN */
+#endif /*- #ifdef HASLIBRT */
 
 void
 todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
 	if (flagstopasap)
 		return;
-#ifndef DARWIN
+#ifdef HASLIBRT
 	if (dynamic_queue)
 		mqueue_selprep(nfds, rfds);
 	else
@@ -918,7 +919,7 @@ todo_scan(fd_set *rfds, unsigned long *id)
 		break;
 	case 0: /*- no files in todo/split/ */
 		flagtododir = 0;
-#ifndef DARWIN
+#ifdef HASLIBRT
 		if (dynamic_queue) {
 			log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
 			do_readsubdir = 0;
@@ -973,7 +974,7 @@ todo_do(fd_set *rfds)
 	fdinfo = -1;
 	for (c = 0; c < CHANNELS; ++c)
 		fdchan[c] = -1;
-#ifndef DARWIN
+#ifdef HASLIBRT
 	if (flagstopasap)
 		return 0;
 	if (dynamic_queue && !do_readsubdir) {
@@ -1406,8 +1407,8 @@ main(int argc, char **argv)
 		switch (opt)
 		{
 			case 'd':
-#ifdef DARWIN
-				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported on darwin\n");
+#ifdef HASLIBRT
+				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n");
 				comm_die(100);
 #endif
 				dynamic_queue = 1;
@@ -1438,7 +1439,7 @@ main(int argc, char **argv)
 			todo_chunk_size = CHUNK_SIZE;
 	}
 	fnmake_init(); /*- initialize fn */
-#ifndef DARWIN
+#ifdef HASLIBRT
 	if (dynamic_queue)
 		mqueue_init();
 	else

@@ -665,3 +665,5 @@ INPUT
 dknewkey.8
 qscheduler
 qscheduler.o
+rt.lib
+haslibrt.h

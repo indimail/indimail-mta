@@ -1343,7 +1343,7 @@ qmail-spamfilter.9 conf-prefix conf-qmail
 
 qmulti.o: \
 compile qmulti.c auto_qmail.h control.h qmulti.h qmail.h \
-qscheduler.h conf-queue
+qscheduler.h haslibrt.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmulti.c
 
 mailfilter.o: \
@@ -1428,7 +1428,7 @@ qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
 qmail-queue.o: \
 compile qmail-queue.c matchregex.h triggerpull.h \
 control.h auto_qmail.h auto_uids.h fmtqfn.h \
-variables.h qmail.h qscheduler.h syncdir.h \
+variables.h qmail.h qscheduler.h syncdir.h haslibrt.h \
 conf-sync conf-qhpsi conf-ip conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 	qmail-queue.c
@@ -1637,7 +1637,7 @@ qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-bounce conf-loglock
+haslibrt.h conf-mime conf-sync conf-batv conf-srs conf-bounce conf-loglock
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-bounce conf-loglock` qmail-send.c
 
@@ -1662,7 +1662,7 @@ auto_control.o variables.o libsyncdir.a rt.lib
 qmail-todo.o: \
 compile qmail-todo.c auto_qmail.h control.h syncdir.h \
 fmtqfn.h readsubdir.h trigger.h variables.h qscheduler.h \
-auto_control.h auto_split.h auto_uids.h conf-sync
+haslibrt.h auto_control.h auto_split.h auto_uids.h conf-sync
 	./compile `grep -h -v "^#" conf-sync` qmail-todo.c
 
 qmail-todo.8: \
@@ -1768,7 +1768,7 @@ readsubdir.o get_uid.o auto_uids.o auto_split.o rt.lib
 
 qscheduler.o: \
 compile qscheduler.c qscheduler.h control.h auto_qmail.h readsubdir.h \
-auto_split.h auto_uids.h conf-queue
+auto_split.h auto_uids.h haslibrt.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qscheduler.c
 
 get_uid.o: \
@@ -2213,6 +2213,13 @@ trylsock.c compile load
 	( ( ./compile trylsock.c && \
 	./load trylsock -lrt ) >/dev/null 2>&1 \
 	&& echo -lrt || exit 0 ) > rt.lib
+	rm -f trylsock.o trylsock
+
+haslibrt.h: \
+trylsock.c compile load
+	( ( ./compile trylsock.c && \
+	./load trylsock -lrt ) >/dev/null 2>&1 \
+	&& echo \#define HASLIBRT 1 || exit 0 ) > haslibrt.h
 	rm -f trylsock.o trylsock
 
 tls.lib: \

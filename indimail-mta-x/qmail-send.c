@@ -7,7 +7,8 @@
 #include <sys/time.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
-#ifndef DARWIN
+#include "haslibrt.h"
+#ifdef HASLIBRT
 #include <sys/mman.h>
 #include <fcntl.h> /* For O_* constants */
 #endif
@@ -122,7 +123,7 @@ static int      flagexitasap = 0;
 static int      flagrunasap = 0;
 static int      flagreadasap = 0;
 static int      dynamic_queue = 0;
-#ifndef DARWIN
+#ifdef HASLIBRT
 static int      shm_queue = -1;
 #endif
 
@@ -1315,7 +1316,7 @@ static void
 del_start(int j, seek_pos mpos, char *recip)
 {
 	int             i, c;
-#ifndef DARWIN
+#ifdef HASLIBRT
 	int             q, offset;
 #endif
 
@@ -1342,7 +1343,7 @@ del_start(int j, seek_pos mpos, char *recip)
 	del[c][i].mpos = mpos;
 	del[c][i].used = 1;
 	++concurrencyused[c];
-#ifndef DARWIN
+#ifdef HASLIBRT
 	offset = c * sizeof(int);
 	q = concurrencyused[c];
 	if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1)) {
@@ -1401,7 +1402,7 @@ del_dochan(int c)
 {
 	char            ch;
 	int             r, i, delnum;
-#ifndef DARWIN
+#ifdef HASLIBRT
 	int             q, offset;
 #endif
 
@@ -1467,7 +1468,7 @@ del_dochan(int c)
 				job_close(del[c][delnum].j);
 				del[c][delnum].used = 0;
 				--concurrencyused[c];
-#ifndef DARWIN
+#ifdef HASLIBRT
 				offset = c * sizeof(int);
 				q = concurrencyused[c];
 				if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1)) {
@@ -2303,7 +2304,7 @@ run_plugin()
 		_exit(status);
 }
 
-#ifndef DARWIN
+#ifdef HASLIBRT
 void
 shm_init(char *shm_name)
 {
@@ -2342,7 +2343,7 @@ main(int argc, char **argv)
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
 	if (*queuedesc == '/') {
-#ifndef DARWIN
+#ifdef HASLIBRT
 		shm_init(queuedesc);
 #endif
 		queuedesc++;
@@ -2388,8 +2389,8 @@ main(int argc, char **argv)
 		switch (opt)
 		{
 			case 'd':
-#ifdef DARWIN
-				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported on darwin\n");
+#ifdef HASLIBRT
+				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n");
 				_exit(100);
 #endif
 				dynamic_queue = 1;
@@ -2443,7 +2444,7 @@ main(int argc, char **argv)
 			concurrency[c] = u;
 		numjobs += concurrency[c];
 	} /*- for (c = 0; c < CHANNELS; ++c) */
-#ifndef DARWIN
+#ifdef HASLIBRT
 	shm_init(queuedesc);
 #endif
 	fnmake_init();  /*- initialize fn1, fn2 */

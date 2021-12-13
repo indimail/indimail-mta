@@ -165,7 +165,8 @@
  *
  */
 #include <unistd.h>
-#ifndef DARWIN
+#include "haslibrt.h"
+#ifdef HASLIBRT
 #include <sys/mman.h>
 #include <sys/stat.h>  /* For mode constants */
 #include <fcntl.h>     /* For O_* constants */
@@ -191,12 +192,12 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "qmulti.h"
-#ifndef DARWIN
+#ifdef HASLIBRT
 #include "qmail.h"
 #include "qscheduler.h"
 #endif
 
-#ifndef DARWIN
+#ifdef HASLIBRT
 static char     errbuf[256];
 static struct substdio sserr;
 #endif
@@ -227,7 +228,7 @@ getfreespace(char *filesystem)
 	return (0);
 }
 
-#ifndef DARWIN
+#ifdef HASLIBRT
 static void
 custom_error(char *flag, char *status, char *extra, char *code)
 {
@@ -374,7 +375,7 @@ qmulti(char *queue_env, int argc, char **argv)
 				break;
 			}
 		}
-#ifndef DARWIN
+#ifdef HASLIBRT
 		if (!(ptr = env_get("DYNAMIC_QUEUE")))
 			queueNo = queueNo_from_env();
 		else {
