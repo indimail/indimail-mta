@@ -27,11 +27,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        host: [ubuntu-latest, macos-latest]
+        host: [ubuntu-latest, macOS-10.15]
 
     steps:
     - name: extra_packages
-      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
+      run: if [ "${OS}" = "macOS-10.15" ] ; then brew install automake autoconf libtool pkgconfig openssl; fi
       env:
         OS: ${{ matrix.host }}
 
