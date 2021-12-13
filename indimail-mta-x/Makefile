@@ -1326,9 +1326,9 @@ qmail-multi.9 conf-prefix conf-qmail
 	> qmail-multi.8
 
 qmail-spamfilter: load qmail-spamfilter.o qmulti.o \
-auto_control.o auto_qmail.o control.o
+auto_control.o auto_qmail.o control.o rt.lib
 	./load qmail-spamfilter qmulti.o auto_control.o \
-	auto_qmail.o variables.o control.o -lqmail
+	auto_qmail.o variables.o control.o `cat rt.lib` -lqmail
 
 qmail-spamfilter.o: \
 compile qmail-spamfilter.c qmulti.h auto_qmail.h
