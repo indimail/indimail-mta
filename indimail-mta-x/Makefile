@@ -1343,8 +1343,8 @@ qmail-spamfilter.9 conf-prefix conf-qmail
 
 qmulti.o: \
 compile qmulti.c auto_qmail.h control.h qmulti.h qmail.h \
-qscheduler.h
-	./compile qmulti.c
+qscheduler.h conf-queue
+	./compile `grep -h -v "^#" conf-queue` qmulti.c
 
 mailfilter.o: \
 compile mailfilter.c mailfilter.h qmulti.h
