@@ -855,12 +855,12 @@ qscanq-stdin: load qscanq-stdin.o auto_sysconfdir.o auto_qmail.o \
 auto_spool.o mkfn.o do_ripmime.o auto_ripmime_cmd.o \
 do_scan.o auto_scancmd.o do_cleanq.o auto_cleaner.o qregex.o \
 wildmat.o matchregex.o variables.o control.o auto_control.o \
-fmt_xpid.o qmulti.o
+fmt_xpid.o qmulti.o rt.lib
 	./load qscanq-stdin auto_sysconfdir.o auto_qmail.o \
 	matchregex.o auto_spool.o mkfn.o do_ripmime.o \
 	auto_ripmime_cmd.o do_scan.o auto_scancmd.o do_cleanq.o \
 	auto_cleaner.o qregex.o wildmat.o control.o variables.o \
-	auto_control.o fmt_xpid.o qmulti.o -lqmail
+	auto_control.o fmt_xpid.o qmulti.o `cat rt.lib` -lqmail
 
 qscanq-stdin.o: compile qscanq-stdin.c auto_ageout.h \
 exitcodes.h mkfn.h auto_fnlen.h auto_qmail.h qmulti.h
@@ -1309,10 +1309,10 @@ qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
 
 qmail-multi: load qmail-multi.o qmulti.o auto_control.o \
 auto_qmail.o variables.o control.o mailfilter.o \
-dns.lib socket.lib
+dns.lib socket.lib rt.lib
 	./load qmail-multi qmulti.o auto_control.o \
 	auto_qmail.o variables.o control.o mailfilter.o \
-	`cat dns.lib socket.lib` -lqmail
+	`cat dns.lib socket.lib rt.lib` -lqmail
 
 qmail-multi.o: \
 compile qmail-multi.c qmulti.h mailfilter.h conf-queue
@@ -1473,12 +1473,12 @@ load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o \
 auto_qmail.o variables.o dns.o strsalloc.o ip.o pidopen.o \
 ipalloc.o socket_v4mappedprefix.o socket_v6any.o wildmat.o \
 domainkeys.o dktrace.o control.o dns_text.o getDomainToken.o \
-dns.lib
+dns.lib rt.lib
 	./load qmail-dk auto_control.o auto_qmail.o qmulti.o \
 	variables.o socket_v4mappedprefix.o tlsarralloc.o \
 	socket_v6any.o dns.o strsalloc.o ip.o ipalloc.o wildmat.o \
 	domainkeys.o dktrace.o control.o dns_text.o getDomainToken.o \
-	pidopen.o `cat dns.lib` -lcrypto -lqmail
+	pidopen.o `cat dns.lib rt.lib` -lcrypto -lqmail
 
 qmail-dk.o: \
 compile qmail-dk.c qmail.h auto_qmail.h control.h domainkeys.h \
@@ -1518,12 +1518,12 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h; \
 	rm -f trydkim.o trydkim
 
-qmail-dkim: qmail-dkim.o auto_control.o pidopen.o \
-auto_qmail.o variables.o control.o dns_text.o \
-wildmat.o getDomainToken.o qmulti.o dns.lib dkim.lib conf-ld-$(SYSTEM) load
+qmail-dkim: qmail-dkim.o auto_control.o pidopen.o auto_qmail.o \
+variables.o control.o dns_text.o wildmat.o getDomainToken.o \
+qmulti.o dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o \
-	auto_qmail.o variables.o control.o pidopen.o \
-	dns_text.o -L../libdkim-x/.libs `cat dns.lib dkim.lib` \
+	auto_qmail.o variables.o control.o pidopen.o dns_text.o \
+	-L../libdkim-x/.libs `cat dns.lib dkim.lib rt.lib` \
 	wildmat.o getDomainToken.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	-lcrypto -lqmail
 
@@ -3355,9 +3355,9 @@ warn-auto.sh cdbgetm.sh conf-prefix
 
 qmail-qfilter: \
 load qmail-qfilter.o auto_qmail.o qmulti.o control.o auto_control.o \
-variables.o
+variables.o rt.lib
 	./load qmail-qfilter auto_qmail.o qmulti.o control.o \
-	auto_control.o variables.o -lqmail
+	auto_control.o variables.o `cat rt.lib` -lqmail
 
 qmail-qfilter.o: \
 compile qmail-qfilter.c qmail.h qmulti.h
@@ -3551,10 +3551,10 @@ surblfilter.8: surblfilter.9 conf-qmail conf-sysconfdir
 surblfilter: \
 load surblfilter.o control.o tlsarralloc.o auto_control.o variables.o \
 strsalloc.o ip.o dns.o ipalloc.o socket_v6any.o socket_v4mappedprefix.o \
-dns.lib
+dns.lib rt.lib
 	./load surblfilter auto_control.o control.o variables.o tlsarralloc.o \
 	strsalloc.o ip.o dns.o ipalloc.o socket_v6any.o \
-	socket_v4mappedprefix.o `cat dns.lib` -lqmail
+	socket_v4mappedprefix.o `cat dns.lib rt.lib` -lqmail
 
 surblfilter.o: \
 compile surblfilter.c auto_qmail.h control.h dns.h ip.h \
