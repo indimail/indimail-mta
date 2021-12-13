@@ -3,12 +3,12 @@
  */
 #include <stdio.h>
 #include <unistd.h>
-#include <fcntl.h>
 #ifndef DARWIN
-#include <mqueue.h>
-#endif
+#include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <mqueue.h>
+#endif
 #include <sys/types.h>
 #include <substdio.h>
 #include <env.h>
@@ -26,37 +26,45 @@
 #include <wait.h>
 #include <noreturn.h>
 #include <getEnvConfig.h>
-#include "qscheduler.h"
+#ifndef DARWIN
+#include <sgetopt.h>
+#include "auto_uids.h"
+#endif
 #include "qscheduler.h"
 #include "control.h"
 #include "readsubdir.h"
 #include "auto_qmail.h"
-#include "auto_uids.h"
 #include "auto_split.h"
 
-static pid_tab *queue_table;
-static int      qcount, qstart, qmax, qload;
+static int      qstart, qcount, qconf, qmax, qload;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
 static char  **prog_argv;
 #ifndef DARWIN
-static int      do_mq = 0;
-static q_type   qtype;
+static q_type   qtype = fixed;
 static char    *msgbuf;
 static int      msgbuflen;
-static mqd_t    mqd = -1;
-static int      shm = -1;
+static mqd_t    mq_sch = -1;
+static int      shm_conf = -1;
+static int     *shm_queue;
 #endif
 static char     strnum[FMT_ULONG];
 static readsubdir todosubdir;
 static char     ssoutbuf[512];
-static char     sserrbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 int             conf_split;
-static char    *(qsargs[]) = { "qmail-start", "./Mailbox", 0};
+typedef struct
+{
+	pid_t           pid;
+	unsigned int    queue_no;
+	unsigned long   load;      /*- concurrency used percent */
+} qtab;
+static qtab    *queue_table;
+static char    *(qsargs[]) = { "qmail-start", "-s", "./Mailbox", 0};
 char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
+
+void            start_send(int queueNum, pid_t pid);
 
 void
 sigterm()
@@ -67,10 +75,12 @@ sigterm()
 	sig_block(sig_child);
 	sig_block(sig_term);
 #ifndef DARWIN
-	if (mqd != -1)
-		close(mqd);
-	if (shm != -1)
-		close(shm);
+	for (i = 0; i < qcount; i++)
+		close(shm_queue[i]);
+	if (mq_sch != -1)
+		mq_close(mq_sch);
+	if (shm_conf != -1)
+		close(shm_conf);
 #endif
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
@@ -126,7 +136,6 @@ void
 sigchld()
 {
 	int             child, wstat;
-	void            restart_send(int);
 
 	sig_block(sig_child);
 	for (; !flagexitasap;) {
@@ -134,7 +143,7 @@ sigchld()
 			break;
 		if (!child || flagexitasap)
 			break;
-		restart_send(child);
+		start_send(-1, child);
 		sleep(1);
 	} /*- for (child = 0;;) */
 	for (; flagexitasap;) {
@@ -142,22 +151,6 @@ sigchld()
 			break;
 	}
 	sig_unblock(sig_child);
-}
-
-void
-log_err(char *s)
-{
-	if (substdio_puts(&sserr, s) == -1)
-		_exit(1);
-}
-
-void
-log_errf(char *s)
-{
-	if (substdio_puts(&sserr, s) == -1)
-		_exit(1);
-	if (substdio_flush(&sserr) == -1)
-		_exit(1);
 }
 
 void
@@ -177,7 +170,7 @@ log_outf(char *s)
 }
 
 void
-log_announce(int pid, char *qdir, unsigned long load)
+log_announce(int pid, char *qdir, unsigned long load, int died)
 {
 	log_out("info: qscheduler: pid ");
 	strnum[fmt_ulong(strnum, pid)] = 0;
@@ -187,7 +180,7 @@ log_announce(int pid, char *qdir, unsigned long load)
 	log_out(", load=");
 	strnum[fmt_ulong(strnum, load)] = 0;
 	log_out(strnum);
-	log_outf(" started\n");
+	log_outf(died ? " died\n" : " started\n");
 
 }
 
@@ -196,9 +189,14 @@ die()
 {
 	int             i;
 
+	flagexitasap = 1;
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
 			continue;
+		strnum[fmt_ulong(strnum, queue_table[i].pid)] = 0;
+		log_out("info: qscheduler: issue SIGTERM to ");
+		log_out(strnum);
+		log_outf("\n");
 		kill(queue_table[i].pid, sig_term);
 	}
 	sleep(1);
@@ -208,29 +206,21 @@ die()
 void
 die_opendir(char *fn)
 {
-	log_err("alert: qscheduler: unable to opendir ");
-	log_err(fn);
-	log_err(": ");
-	log_err(error_str(errno));
-	log_errf("\n");
+	strerr_warn3("alert: qscheduler: unable to opendir ", fn, ": ", &strerr_sys);
 	die();
 }
 
 void
 die_chdir(char *s)
 {
-	log_err("alert: qcheduler: unable to switch to ");
-	log_err(s);
-	log_err(": ");
-	log_err(error_str(errno));
-	log_errf("\n");
+	strerr_warn3("alert: qcheduler: unable to switch to ", s, ": ", &strerr_sys);
 	die();
 }
 
 void
 nomem()
 {
-	log_errf("alert: qscheduler: out of memory\n");
+	strerr_warn1("alert: qscheduler: out of memory", 0);
 	die();
 }
 
@@ -272,18 +262,12 @@ check_send(int queue_no)
 			!stralloc_0(&lockfile))
 		nomem();
 	if ((fd = open_write(lockfile.s)) == -1) {
-		log_err("alert: qscheduler: cannot start: unable to open ");
-		log_err(lockfile.s);
-		log_err(": ");
-		log_err(error_str(errno));
-		log_errf("\n");
+		strerr_warn3("alert: qscheduler: cannot start: unable to open ", lockfile.s, ": ", &strerr_sys);
 		return 1;
 	} else
 	if (lock_exnb(fd) == -1) {
 		close(fd); /*- send already running */
-		log_err("alert: qscheduler: cannot start: qmail-send with queue ");
-		log_err(qptr);
-		log_errf(" is already running\n");
+		strerr_warn3("alert: qscheduler: cannot start: qmail-send with queue ", qptr, " is already running", 0);
 		return 1;
 	}
 	close(fd);
@@ -308,19 +292,35 @@ get_load(char *qptr)
 }
 
 void
-start_send(int queue_no)
+start_send(int queueNum, pid_t pid)
 {
-	int             child;
+	int             i, queue_no;
+	pid_t           qspid;
 	char           *qptr;
 
-	qptr = queuenum_to_dir(queue_no);
-	queue_table[queue_no].load = get_load(qptr);
-	switch((child = fork()))
+	if (pid != -1) { /*- restart */
+		for (i = 0; i <= qcount; i++) {
+			if (queue_table[i].pid == pid)
+				break;
+		}
+		if (queue_table[i].pid != pid) {
+			strnum[fmt_ulong(strnum, pid)] = 0;
+			strerr_warn2("alert: qscheduler: could not locate pid ", strnum, 0); 
+			die();
+		}
+		queue_no = i;
+		qptr = queuenum_to_dir(queue_no);
+		log_announce(pid, qptr, queue_table[queue_no].load, 1); /*- announce qmail-send died */
+		if (check_send(queue_no)) /*- test lock/sendmutex */
+			die();
+	} else { /*- first instance */
+		queue_no = queueNum;
+		qptr = queuenum_to_dir(queue_no);
+	}
+	switch((qspid = fork()))
 	{
 	case -1:
-		log_err("alert: qscheduler: unable to fork: ");
-		log_err(error_str(errno));
-		log_errf("\n");
+		strerr_warn1("alert: qscheduler: unable to fork: ", &strerr_sys);
 		die();
 	case 0:
 		sig_catch(sig_term, SIG_DFL);
@@ -328,75 +328,17 @@ start_send(int queue_no)
 		sig_catch(sig_child, SIG_DFL);
 		sig_catch(sig_int, SIG_DFL);
 		if (!queue_no) { /*- don't set this for nqueue */
-			if (!env_unset("QMAILLOCAL") || !env_unset("QMAILREMOTE")) {
-				log_errf("alert: qscheduler: out of memory\n");
-				_exit(111);
-			}
+			if (!env_unset("QMAILLOCAL") || !env_unset("QMAILREMOTE"))
+				strerr_die1x(111, "alert: qscheduler: out of memory");
 		}
-		if (!env_put(envQueue.s)) {
-			log_errf("alert: qscheduler: out of memory\n");
-			_exit(111);
-		}
+		if (!env_put(envQueue.s))
+			strerr_die1x(111, "alert: qscheduler: out of memory");
 		execvp(*qsargs, qsargs);
 		strerr_die3sys(111, "alert: qscheduler: execv ", *qsargs, ": ");
 	default:
-		queue_table[queue_no].pid = child;
-		log_announce(child, qptr, queue_table[queue_no].load);
-		break;
-	}
-}
-
-void
-restart_send(int pid)
-{
-	int             i, child;
-	char           *qptr;
-
-	for (i = 0; i <= qcount; i++) {
-		if (queue_table[i].pid == pid)
-			break;
-	}
-	if (queue_table[i].pid != pid) {
-		log_err("alert: qscheduler: could not locate pid "); 
-		strnum[fmt_ulong(strnum, pid)] = 0;
-		log_err(strnum);
-		log_errf("\n");
-		die();
-	}
-	qptr = queuenum_to_dir(queue_table[i].queue_no);
-	queue_table[i].load = get_load(qptr);
-	log_err("alert: qscheduler: pid ");
-	strnum[fmt_ulong(strnum, pid)] = 0;
-	log_err(strnum);
-	log_err(", queue ");
-	log_err(qptr);
-	log_err(", load=");
-	strnum[fmt_ulong(strnum, queue_table[i].load)] = 0;
-	log_err(strnum);
-	log_errf(" died\n");
-	if (check_send(queue_table[i].queue_no))
-		die();
-	switch((child = fork()))
-	{
-	case -1:
-		log_err("alert: qscheduler: unable to fork: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		die();
-	case 0:
-		sig_catch(sig_term, SIG_DFL);
-		sig_catch(sig_hangup, SIG_DFL);
-		sig_catch(sig_child, SIG_DFL);
-		sig_catch(sig_int, SIG_DFL);
-		if (!env_put(envQueue.s)) {
-			log_errf("alert: qscheduler: out of memory\n");
-			die();
-		}
-		execvp(*qsargs, qsargs);
-		strerr_die3sys(111, "alert: qscheduler: execv ", *qsargs, ": ");
-	default:
-		queue_table[i].pid = child;
-		log_announce(child, qptr, queue_table[i].load);
+		queue_table[queue_no].pid = qspid;
+		queue_table[queue_no].load = 0;
+		log_announce(qspid, qptr, queue_table[queue_no].load, 0);
 		break;
 	}
 	return;
@@ -416,9 +358,8 @@ set_queue_variables()
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
-			log_errf("alert: unable to read control file qbase\n");
-			_exit(111);
-			break;
+			strerr_warn1("alert: unable to read control file qbase: ", &strerr_sys);
+			die();
 		case 0:
 			if (!stralloc_copys(&QueueBase, auto_qmail) ||
 					!stralloc_catb(&QueueBase, "/queue", 6) ||
@@ -434,7 +375,7 @@ set_queue_variables()
 }
 
 void
-static_queue(char **argv)
+static_queue()
 {
 	int             i, wstat, child, nqueue;
 	char           *qptr;
@@ -443,11 +384,7 @@ static_queue(char **argv)
 		qptr = queuenum_to_dir(0);
 		nqueue = !access(qptr, F_OK);
 		if (!nqueue && errno != error_noent) {
-			log_err("alert: queue ");
-			log_err(qptr);
-			log_err(": ");
-			log_err(error_str(errno));
-			log_errf("\n");
+			strerr_warn3("alert: queue ", qptr, ": ", &strerr_sys);
 			die();
 		}
 	} else
@@ -462,42 +399,43 @@ static_queue(char **argv)
 	strnum[fmt_ulong(strnum, conf_split)] = 0;
 	log_out(strnum);
 	log_outf("\n");
-	if (!queue_table) {
-		if (!(queue_table = (pid_tab *) alloc(sizeof(pid_tab) * (qcount + 1))))
-			nomem();
-		for (i = 0; i <= qcount; i++) {
-			queue_table[i].pid = -1;
-			queue_table[i].queue_no = i;
-			queue_table[i].load = 0;
-			queue_table[i].queue_fix = 0;
-		}
+	if (!(queue_table = (qtab *) alloc(sizeof(qtab) * (qcount + 1))))
+		nomem();
+	for (i = 0; i <= qcount; i++) {
+		queue_table[i].pid = -1;
+		queue_table[i].queue_no = i;
+		queue_table[i].load = 0;
 	}
-	if (argv[1])
-		qsargs[1] = argv[1]; /*- argument to qmail-start (./Mailbox or ./Maildir) */
+	qsargs[1] = "-s";
 	for (i = 0; i <= qcount; i++) {
 		if (!i && !nqueue)
 			continue;
 		if (check_send(i))
 			die();
-		start_send(i);
+		start_send(i, -1);
 	} /*- for (i = 0; i <= qcount; i++) */
 	for (;!flagexitasap;) {
-		if ((child = wait_pid(&wstat, -1)) == -1)
+		if ((child = wait_pid(&wstat, -1)) == -1) {
+			if (errno == error_intr)
+				continue;
 			break;
+		}
 		if (flagexitasap)
 			break;
-		restart_send(child);
+		start_send(-1, child);
 		sleep(1);
 	} /*- for (; !flagexitasap;) */
 	for (; flagexitasap;) {
-		if ((child = wait_pid(&wstat, -1)) == -1)
+		if ((child = wait_pid(&wstat, -1)) == -1) {
+			if (errno == error_intr)
+				continue;
 			break;
+		}
 	}
-	log_errf("info: qscheduler: exiting\n");
-	_exit(flagexitasap ? 0 : 111);
+	strerr_die1x(flagexitasap ? 0 : 111, "info: qscheduler: exiting");
 }
 
-void
+int
 queue_fix(char *queuedir)
 {
 	pid_t           pid;
@@ -513,9 +451,7 @@ queue_fix(char *queuedir)
 	switch ((pid = fork()))
 	{
 	case -1:
-		log_err("alert: qscheduler: unable to fork: ");
-		log_err(error_str(errno));
-		log_errf("\n");
+		strerr_warn1("alert: qscheduler: unable to fork: ", &strerr_sys);
 		die();
 	case 0:
 		sig_catch(sig_term, SIG_DFL);
@@ -523,7 +459,7 @@ queue_fix(char *queuedir)
 		sig_catch(sig_child, SIG_DFL);
 		sig_catch(sig_int, SIG_DFL);
 		if (chdir(auto_qmail) == -1)
-			_exit(111);
+			strerr_die3sys(111, "alert: qscheduler: queue-fix: chdir ", auto_qmail, ": ");
 		strnum[fmt_int(strnum, conf_split)] = 0;
 		qfargs[2] = strnum;
 		qfargs[3] = queuedir;
@@ -532,128 +468,153 @@ queue_fix(char *queuedir)
 	}
 	sig_unblock(sig_int);
 	if (wait_pid(&wstat, pid) != pid) {
-		log_errf("alert: qscheduler: queue-fix waitpid surprise\n");
-		_exit(111);
+		strerr_warn1("alert: qscheduler: queue-fix waitpid surprise", 0);
+		die();
 	}
 	if (wait_crashed(wstat)) {
-		log_errf("alert: qscheduler: queue-fix crashed\n");
-		_exit(111);
+		strerr_warn1("alert: qscheduler: queue-fix crashed", 0);
+		die();
 	}
 	exitcode = wait_exitcode(wstat);
-	log_err(exitcode ? "warning: qcheduler: trouble fixing queue directory: " : "info: qcheduler: queue OK: ");
-	log_err(queuedir);
-	log_errf("\n");
+	if (exitcode) {
+		strnum[fmt_int(strnum, exitcode)] = 0;
+		strerr_warn4("alert: qscheduler: queue-fix exit code ", strnum, ": trouble fixing queue directory ", queuedir, 0);
+		die();
+	} else
+		strerr_warn2("info: qcheduler: queue-fix: queue OK ", queuedir, 0);
+	return (exitcode ? 1 : 0);
 }
 
 #ifndef DARWIN
 void
 create_ipc()
 {
-	int             wstat, child, i = 1;
+	char            shm_name[FMT_ULONG + 6];
+	char           *s;
+	int             i, j;
+	mqd_t           mq_queue;
 
-	switch((child = fork()))
-	{
-	case -1:
-		log_err("alert: qscheduler: unable to fork: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	case 0:
-		sig_catch(sig_term, SIG_DFL);
-		sig_catch(sig_hangup, SIG_DFL);
-		sig_catch(sig_child, SIG_DFL);
-		sig_catch(sig_int, SIG_DFL);
-		if (uidinit(1, 1) == -1 || auto_uidq == -1 || auto_gidq == -1)
-			_exit(111);
-		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
-			_exit(111);
-		if ((mqd = mq_open("/qmail-queue", O_CREAT|O_EXCL|O_RDWR,  0644, NULL)) == -1) {
-			if (errno != error_exist)
-				_exit(111);
+	if (uidinit(1, 1) == -1 || auto_uidq == -1 || auto_uids == -1 || auto_gidq == -1) {
+		strerr_warn1("alert: qscheduler: failed to get uids, gids: ", &strerr_sys);
+		die();
+	}
+	for (j = 0; j < qcount; j++) {
+		s = shm_name;
+		i = fmt_str(s, "/queue");
+		s += i;
+		i = fmt_int(s, j + 1);
+		s += i;
+		*s++ = 0;
+		i = 0;
+		/*- create shm /queueN for storing concurrency values by qmail-send */
+		if ((shm_queue[j] = shm_open(shm_name, O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
+			if (errno != error_exist) {
+				strerr_warn3("alert: qscheduler: failed to create POSIX shared memory ", shm_name, ": ", &strerr_sys);
+				die();
+			}
+		} else {
+			if (fchown(shm_queue[j], auto_uids, auto_gidq) == -1) {
+				strerr_warn3("alert: qscheduler: failed to set permissions for POSIX shared memory ", shm_name, ": ", &strerr_sys);
+				close(shm_queue[j]);
+				die();
+			}
+			close(shm_queue[j]);
 		}
-		close(mqd);
-		if ((shm = shm_open("/qmail-queue", O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
-			if (errno != error_exist)
-				_exit(111);
+		if ((shm_queue[j] = shm_open(shm_name, O_RDONLY, 0644)) == -1) {
+			strerr_warn2("alert: qscheduler: failed to open POSIX shared memory ", shm_name, &strerr_sys);
+			die();
 		}
-		close(shm);
-		_exit(0);
+		/*- message queue for communication between qmail-todo, qmail-queue */
+		if ((mq_queue = mq_open(shm_name, O_CREAT|O_EXCL|O_RDWR,  0640, NULL)) == -1) {
+			if (errno != error_exist)  {
+				strerr_warn3("alert: qscheduler: failed to create POSIX message queue ", shm_name, ": ", &strerr_sys);
+				die();
+			}
+		} else {
+			if (fchown(mq_queue, auto_uidq, auto_gidq) == -1) {
+				strerr_warn3("alert: qscheduler: failed to set permissions for POSIX message queue ", shm_name, ":", &strerr_sys);
+				close(mq_queue);
+				die();
+			}
+			close(mq_queue);
+		}
 	}
-	if (wait_pid(&wstat, child) != child) {
-		log_errf("alert: qscheduler waitpid surprise\n");
-		_exit(111);
+	/*- message queue /qscheduler for communication between qscheduler, qmail-send */
+	if ((mq_sch = mq_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0600, NULL)) == -1) {
+		if (errno != error_exist)
+			strerr_warn1("alert: qscheduler: failed to create POSIX message queue /qscheduler: ", &strerr_sys);
+	} else
+		mq_close(mq_sch);
+	if ((mq_sch = mq_open("/qscheduler", O_RDONLY,  0600, NULL)) == -1) {
+		strerr_warn1("alert: qscheduler: failed to open POSIX message queue /qscheduler: ", &strerr_sys);
+		die();
 	}
-	if (wait_crashed(wstat)) {
-		log_errf("alert: qscheduler child crashed\n");
-		_exit(111);
-	}
-	if (wait_exitcode(wstat)) {
-		log_errf("alert: qscheduler: failed to create POSIX IPC communication\n");
-		_exit(111);
-	}
-	if ((mqd = mq_open("/qmail-queue", O_RDONLY,  0644, NULL)) == -1) {
-		log_err("alert: qscheduler: failed to create POSIX message queue: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	}
-	if ((shm = shm_open("/qmail-queue", O_WRONLY, 0644)) == -1) {
-		log_err("alert: qscheduler: failed to create POSIX shared memory: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	}
-	if (write(shm, (void *) &i, sizeof(int)) == -1) {
-		log_err("alert: qscheduler: failed to write to POSIX shared memory: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
+	/*- shared memory /qscheduler for storing qcount, qconf */
+	if ((shm_conf = shm_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
+		if (errno != error_exist) {
+			strerr_warn1("alert: qscheduler: failed to create POSIX shared memory /qscheduler: ", &strerr_sys);
+			die();
+		}
+	} else
+		close(shm_conf);
+	if ((shm_conf = shm_open("/qscheduler", O_WRONLY, 0644)) == -1) {
+		strerr_warn1("alert: qscheduler: failed to open POSIX shared memory /qscheduler: ", &strerr_sys);
+		die();
 	}
 	return;
 }
 
 void
-dynamic_queue(char **argv)
+dynamic_queue()
 {
 	struct mq_attr  attr;
 	unsigned int    priority, total_load;
-	pid_tab        *client_tab;
-	int             i, nqueue;
+	int             i, r, nqueue, q[2];
 	char           *qptr;
 
-	if (argv[1])
-		qsargs[1] = argv[1]; /*- argument to qmail-start (./Mailbox or ./Maildir) */
+	qsargs[1] = "-d";
 	if (env_get("SPAMFILTER")) {
 		qptr = queuenum_to_dir(0);
 		nqueue = !access(qptr, F_OK);
-		if (!nqueue && errno != error_noent)
-			strerr_die3sys(111, "alert: qscheduler: queue ", qptr, ": ");
+		if (!nqueue && errno != error_noent) {
+			strerr_warn3("alert: qscheduler: queue ", qptr, ": ", &strerr_sys);
+			die();
+		}
 	} else
 		nqueue = 0;
-	create_ipc();
-	for (qcount = 0; qcount < qmax; qcount++) {
-		qptr = queuenum_to_dir(qcount + 1);
+	for (qconf = 0; qconf < qmax; qconf++) {
+		qptr = queuenum_to_dir(qconf + 1);
 		if (access(qptr, F_OK)) {
 			if (errno == error_noent)
 				break;
-			strerr_die3sys(111, "alert: qscheduler: queue ", qptr, ": ");
+			strerr_warn3("alert: qscheduler: queue ", qptr, ": ", &strerr_sys);
+			die();
 		}
-	} /*- for (qcount = 1; qcount < qmax; qcount++) */
-	if (lseek(shm, 0, SEEK_SET) == -1 || write(shm, &qcount, sizeof(int)) == -1)
-		strerr_die1sys(111, "alert: qscheduler: unable to write to shared memory: ");
+	} /*- for (qconf = 0; qconf < qmax; qconf++) */
+	if (!(shm_queue = (int *) alloc(sizeof(int) * qcount)))
+		nomem();
+	create_ipc();
+	q[0] = qcount; /*- queue count */
+	q[1] = qconf;  /*- total configured queues */
+	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) == -1) {
+		strerr_warn1("alert: qscheduler: unable to write to shared memory: ", &strerr_sys);
+		die();
+	}
 	log_out(nqueue? "info: qscheduler: dynamic queues nqueue+ qcount=" : "info: qscheduler: dynamic queues nqueue- qcount=");
 	strnum[fmt_int(strnum, qcount)] = 0;
+	log_out(strnum);
+	log_out(", qconf=");
+	strnum[fmt_int(strnum, qconf)] = 0;
 	log_out(strnum);
 	log_out(", conf split=");
 	strnum[fmt_ulong(strnum, conf_split)] = 0;
 	log_out(strnum);
 	log_outf("\n");
-	if (!(queue_table = (pid_tab *) alloc(sizeof(pid_tab) * (qcount + 1))))
+	if (!(queue_table = (qtab *) alloc(sizeof(qtab) * (qcount + 1))))
 		nomem();
 	for (i = 0; i <= qcount; i++) {
 		queue_table[i].pid = -1;
 		queue_table[i].queue_no = i;
-		queue_table[i].queue_fix = 0;
 		queue_table[i].load = 0;
 	}
 	/*- start qmail-send */
@@ -662,10 +623,10 @@ dynamic_queue(char **argv)
 			continue;
 		if (check_send(i))
 			die();
-		start_send(i);
+		start_send(i, -1);
 	} /*- for (i = 0; i <= qcount; i++) */
 	for (; !flagexitasap;) {
-		if (mq_getattr(mqd, &attr) == -1) {
+		if (mq_getattr(mq_sch, &attr) == -1) {
 			strerr_warn1("alert: qscheduler: unable to get message queue attributes: ", &strerr_sys);
 			die();
 		}
@@ -679,49 +640,46 @@ dynamic_queue(char **argv)
 		}
 		msgbuflen = attr.mq_msgsize;
 		priority = 0;
-		do_mq = 1;
-		if (mq_receive(mqd, msgbuf, msgbuflen, &priority) == -1) {
-			if (errno == error_intr) {
-				printf("intr %d\n", flagexitasap);
+		if (mq_receive(mq_sch, msgbuf, msgbuflen, &priority) == -1) {
+			if (errno == error_intr)
 				continue;
-			}
 			strerr_warn1("alert: qscheduler: unable to read message queue: ", &strerr_sys);
 			die();
 		}
-		do_mq = 0;
-		client_tab = (pid_tab *) msgbuf;
-		queue_table[client_tab->queue_no].load += client_tab->load;
+		queue_table[((qtab *) msgbuf)->queue_no].load += ((qtab *) msgbuf)->load;
 		for (i = 1, total_load = 0; i <= qcount; i++)
 			total_load += queue_table[i].load;
 		if (total_load > qcount * qload && qcount < qmax) {
-			if (!alloc_re(&queue_table, qcount + 1, qcount + 2))
-				nomem();
-			qcount++;
-			queue_table[qcount].pid = -1;
-			queue_table[qcount].queue_no = i;
-			queue_table[qcount].queue_fix = 0;
-			queue_table[qcount].load = 0;
-			qptr = queuenum_to_dir(qcount);
+			qptr = queuenum_to_dir(qcount + 1);
+			r = 0; /*- flag for queue creation */
 			if (access(qptr, F_OK)) {
+				r = 1;
 				if (errno == error_noent)
-					queue_fix(qptr);
-				log_err("alert: qscheduler: ");
-				log_err(qptr);
-				log_err(": ");
-				log_err(error_str(errno));
-				log_errf("\n");
-				die();
+					r = queue_fix(qptr);
+				else {
+					strerr_warn3("alert: qscheduler: ", qptr, ": ", &strerr_sys);
+					die();
+				}
 			}
-			if (check_send(qcount))
-				die();
-			start_send(qcount);
-			if (lseek(shm, 0, SEEK_SET) == -1 || write(shm, &qcount, sizeof(int)) == -1)
-				strerr_die1sys(111, "alert: qscheduler: unable to write to shared memory: ");
+			if (!r) {
+				if (!alloc_re(&queue_table, qcount + 1, qcount + 2))
+					nomem();
+				qcount++;
+				queue_table[qcount].pid = -1;
+				queue_table[qcount].queue_no = i;
+				queue_table[qcount].load = 0;
+				if (check_send(qcount))
+					die();
+				start_send(qcount, -1);
+				if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) &qcount, sizeof(int)) == -1) {
+					strerr_warn1("alert: qscheduler: unable to write to shared memory: ", &strerr_sys);
+					die();
+				}
+			}
 		}
-		printf("msg[queue_no=%d load=%ld] priority=%d\n", client_tab->queue_no, client_tab->load, priority);
-		sleep(1);
+		printf("msg[queue_no=%d load=%ld] priority=%d qcount=%d\n", ((qtab *) msgbuf)->queue_no, ((qtab *) msgbuf)->load, priority, qcount);
 	} /*- for (; !flagexitasap;) */
-	log_errf("info: qscheduler: exiting\n");
+	strerr_warn1("info: qscheduler: exiting", 0);
 	_exit(flagexitasap ? 0 : 111);
 }
 #endif
@@ -730,7 +688,7 @@ int
 main(int argc, char **argv)
 {
 #ifndef DARWIN
-	char           *ptr;
+	int             opt;
 #endif
 	int             fd;
 
@@ -743,39 +701,37 @@ main(int argc, char **argv)
 	if (chdir(auto_qmail) == -1)
 		die_chdir(auto_qmail);
 	/*- we allow only one copy to run */
-	if ((fd = open_trunc("queue/qscheduler")) == -1) {
-		log_err("alert: qscheduler: cannot start: unable to open queue/qscheduler: ");
-		log_err(error_str(errno));
-		log_errf("\n");
-		_exit(111);
-	}
-	if (lock_exnb(fd) == -1) {
-		log_errf("alert: cannot start: qscheduler is already running\n");
-		_exit(111);
-	}
+	if ((fd = open_trunc("queue/qscheduler")) == -1)
+		strerr_die1sys(111, "alert: qscheduler: cannot start: unable to open queue/qscheduler: ");
+	if (lock_exnb(fd) == -1)
+		strerr_die1x(111, "alert: cannot start: qscheduler is already running\n");
 #ifndef DARWIN
-	if (!(ptr = env_get("QUEUE")))
-		qtype = fixed;
-	else {
-		if (!str_diff(ptr, "static"))
-			qtype = fixed;
-		else
-		if (!str_diff(ptr, "dynamic"))
-			qtype = dynamic;
-		else
-			qtype = fixed;
+	while ((opt = getopt(argc, argv, "ds")) != opteof) {
+		switch (opt)
+		{
+			case 'd':
+				qtype = dynamic;
+				break;
+			case 's':
+				qtype = fixed;
+				break;
+		}
 	}
+	argc -= optind;
+	argv += optind;
+	if (argv[0])
+		qsargs[2] = argv[0]; /*- argument to qmail-start (./Mailbox or ./Maildir) */
 	set_queue_variables();
 	if (qtype == dynamic)
-		dynamic_queue(argv);
+		dynamic_queue();
 	else
-		static_queue(argv);
+		static_queue();
 #else
 	set_queue_variables();
-	static_queue(argv);
+	static_queue();
 #endif
 	if (flagexitasap)
-		log_errf("qscheduler: exiting\n");
+		strerr_warn1("qscheduler: exiting", 0);
 	return 0;
 }
 

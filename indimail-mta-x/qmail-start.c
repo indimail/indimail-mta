@@ -62,17 +62,10 @@
 #include <env.h>
 #include <alloc.h>
 #include <prot.h>
+#include <sgetopt.h>
 #include <noreturn.h>
 #include "auto_uids.h"
 #include "setuserid.h"
-
-static char    *(qsargs[]) = { "qmail-send", 0, 0};
-static char    *(qcargs[]) = { "qmail-clean", 0, 0, 0};
-static char    *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
-static char    *(qrargs[]) = { "qmail-rspawn", 0, 0};
-#ifdef EXTERNAL_TODO
-static char    *(qtargs[]) = { "qmail-todo", 0, 0};
-#endif
 
 no_return void
 die()
@@ -112,19 +105,17 @@ check_user(char *userlist, char *user)
 	return 0;
 }
 
-int             pi0[2];
-int             pi1[2];
-int             pi2[2];
-int             pi3[2];
-int             pi4[2];
-int             pi5[2];
-int             pi6[2];
-#ifdef EXTERNAL_TODO
-int             pi7[2];
-int             pi8[2];
-int             pi9[2];
-int             pi10[2];
-#endif
+static int      pi0[2];
+static int      pi1[2];
+static int      pi2[2];
+static int      pi3[2];
+static int      pi4[2];
+static int      pi5[2];
+static int      pi6[2];
+static int      pi7[2];
+static int      pi8[2];
+static int      pi9[2];
+static int      pi10[2];
 
 void
 close23456()
@@ -134,10 +125,8 @@ close23456()
 	close(4);
 	close(5);
 	close(6); 
-#ifdef EXTERNAL_TODO
 	close(7);
 	close(8);
-#endif
 }
 
 void
@@ -155,7 +144,6 @@ closepipes()
 	close(pi5[1]);
 	close(pi6[0]);
 	close(pi6[1]);
-#ifdef EXTERNAL_TODO
 	close(pi7[0]);
 	close(pi7[1]);
 	close(pi8[0]);
@@ -164,7 +152,6 @@ closepipes()
 	close(pi9[1]);
 	close(pi10[0]);
 	close(pi10[1]);
-#endif
 }
 
 int             verbose;
@@ -173,8 +160,13 @@ int
 main(int argc, char **argv)
 {
 	char           *set_supplementary_groups, *ptr;
+	char           *(qsargs[]) = { "qmail-send", 0, 0, 0};
+	char           *(qcargs[]) = { "qmail-clean", 0, 0, 0};
+	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
+	char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
+	char           *(qtargs[]) = { "qmail-todo", 0, 0, 0};
 	gid_t          *gidset;
-	int             ngroups;
+	int             ngroups, opt, i = 1;
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
@@ -194,26 +186,39 @@ main(int argc, char **argv)
 		die();
 	if (fd_copy(6, 0) == -1)
 		die();
-#ifdef EXTERNAL_TODO
 	if (fd_copy(7,0) == -1)
 		die();
 	if (fd_copy(8,0) == -1)
 		die();
-#endif
+	while ((opt = getopt(argc, argv, "ds")) != opteof) {
+		switch (opt)
+		{
+			case 'd':
+				qsargs[i] = "-d";
+				qtargs[i] = "-d";
+				i++;
+				break;
+			case 's':
+				qsargs[i] = "-s";
+				qtargs[i] = "-s";
+				i++;
+				break;
+		}
+	}
+	argc -= optind;
+	argv += optind; /*- first arg excluding -d, -s will be argv[0] */
 	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
-		qsargs[1] = ptr;
+		qsargs[i] = ptr;
 		qcargs[1] = ptr;
-#ifdef EXTERNAL_TODO
-		qtargs[1] = ptr;
-#endif
+		qtargs[i] = ptr;
 		qlargs[2] = ptr;
 		qrargs[1] = ptr;
 	}
-	if (argv[1]) {
-		qlargs[1] = argv[1];
+	if (argv[0]) { /*- argument to qmail-lspawn, qmail-local */
+		qlargs[1] = argv[0];
 		++argv;
 	}
-	if (argv[1]) {
+	if (argv[0]) {
 		if (pipe(pi0) == -1)
 			die();
 		switch (fork())
@@ -240,7 +245,7 @@ main(int argc, char **argv)
 			if (fd_move(0, pi0[0]) == -1)
 				die();
 			close23456();
-			execvp(argv[1], argv + 1); /*- splogger, etc */
+			execvp(argv[0], argv); /*- splogger, etc */
 			die();
 		}
 		close(pi0[0]);
@@ -259,7 +264,6 @@ main(int argc, char **argv)
 		die();
 	if (pipe(pi6) == -1)
 		die();
-#ifdef EXTERNAL_TODO
 	if (pipe(pi7) == -1)
 		die();
 	if (pipe(pi8) == -1)
@@ -268,7 +272,6 @@ main(int argc, char **argv)
 		die();
 	if (pipe(pi10) == -1)
 		die();
-#endif
 	switch (fork())
 	{
 	case -1:
@@ -328,11 +331,10 @@ main(int argc, char **argv)
 			die();
 		close23456();
 		closepipes();
-		qcargs[2] = "qmail-send"; /*- pass qmail-send as argument for the ps command */
+		qcargs[2] = "qmail-todo"; /*- pass qmail-todo as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die();
 	}
-#ifdef EXTERNAL_TODO
 	switch (fork())
 	{
 	case -1:
@@ -375,11 +377,10 @@ main(int argc, char **argv)
 			die();
 		close23456();
 		closepipes();
-		qcargs[2] = "qmail-todo"; /*- pass qmail-todo as argument for the ps command */
+		qcargs[2] = "qmail-send"; /*- pass qmail-send as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die();
 	}
-#endif
 	if (check_user(set_supplementary_groups, "qmails")) {
 		if (!(gidset = grpscan("qmails", &ngroups)))
 			die();
@@ -404,17 +405,11 @@ main(int argc, char **argv)
 		die();
 	if (fd_copy(6, pi6[0]) == -1)
 		die();
-#ifdef EXTERNAL_TODO
 	if (fd_copy(7, pi7[1]) == -1)
 		die();
 	if (fd_copy(8, pi8[0]) == -1)
 		die();
-#endif
 	closepipes();
-	if (argv[1]) {
-		qlargs[1] = argv[1];
-		++argv;
-	}
 	execvp(*qsargs, qsargs); /*- qmail-send */
 	die();
 	/*- Not reached */

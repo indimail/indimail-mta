@@ -12,7 +12,7 @@ handles messages placed into the outgoing queue by
 .B qmail-send
 by default looks at QMAILHOME/queue for messages. This path can be changed
 by defining the QUEUEDIR environment variable. If you are using
-\fBqmail-daemon\fR(8) to invoke qmail-send, then \fBqmail-daemon\fR will
+\fBqscheduler\fR(8) to invoke qmail-send, then \fBqscheduler\fR will
 use QUEUE_COUNT, QUEUE_START to invoke multiple qmail-send processes, with
 each having its own queue defined by the \fBQUEUEDIR\fR environment variable.
 \fBQUEUEDIR\fR will typically be QMAILHOME/queue/queue1, QMAILHOME/queue/queue2
@@ -670,7 +670,7 @@ qmail-queue(8),
 qmail-multi(8),
 drate(1),
 qmail-start(8),
-qmail-daemon(8),
+qscheduler(8),
 qmail-todo(8),
 qmail-clean(8),
 qmail-lspawn(8),

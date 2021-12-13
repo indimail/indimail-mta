@@ -736,7 +736,7 @@ main()
 		else
 		if (str_equal(line.s + field[1], "remote:"));
 		else
-		if (str_equal(line.s + field[1], "qmail-daemon:"));
+		if (str_equal(line.s + field[1], "qscheduler:"));
 		else
 		if (str_equal(line.s + field[1], "warning:"))
 			out(outline.s, outline.len);

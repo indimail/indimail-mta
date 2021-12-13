@@ -516,8 +516,8 @@ qmail-command.0
 qmail-control.0
 qmail-control.5
 qmailctl
-qmail-daemon
-qmail-daemon.o
+qscheduler
+qscheduler.o
 qmail-dk
 qmail-dk.0
 qmail-dk.o
@@ -1174,5 +1174,3 @@ qfrontend.1
 qf-log-subject
 INPUT
 dknewkey.8
-qscheduler
-qscheduler.o

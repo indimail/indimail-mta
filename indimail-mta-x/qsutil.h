@@ -79,10 +79,10 @@ void            log15(char *, char *, char *, char *, char *, char *, char *, ch
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            log_stat(stralloc *, stralloc *, unsigned long, size_t);
-void            nomem(void);
+void            nomem(char *);
 void            pausedir(char *);
-void            logsafe(char *);
-void            logsafe_noflush(char *);
+void            logsafe(char *, char *);
+void            logsafe_noflush(char *, char *);
 void            flush();
 int             fix_split(char *s, char *path, char *client_split, unsigned long id);
 

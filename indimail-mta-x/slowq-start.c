@@ -68,13 +68,13 @@ check_user(char *userlist, char *user)
 	return 0;
 }
 
-int             pi0[2];
-int             pi1[2];
-int             pi2[2];
-int             pi3[2];
-int             pi4[2];
-int             pi5[2];
-int             pi6[2];
+static int      pi0[2];
+static int      pi1[2];
+static int      pi2[2];
+static int      pi3[2];
+static int      pi4[2];
+static int      pi5[2];
+static int      pi6[2];
 
 void
 close23456()
@@ -132,17 +132,17 @@ main(int argc, char **argv)
 		die();
 	if (fd_copy(6, 0) == -1)
 		die();
-	if (argv[1]) {
-		qlargs[1] = argv[1];
-		++argv;
-	}
 	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
 		qsargs[1] = ptr;
 		qcargs[1] = ptr;
 		qlargs[2] = ptr;
 		qrargs[1] = ptr;
 	}
-	if (argv[1]) {
+	if (argv[1]) { /*- set argument for qmail-local */
+		qlargs[1] = argv[1];
+		++argv;
+	}
+	if (argv[1]) { /*- logger (e.g. splogger) specified on command line */
 		if (pipe(pi0) == -1)
 			die();
 		switch (fork())

@@ -132,6 +132,7 @@ f:::0644:/man5/:tcp-environ.5:tcp-environ.5
 f:::0644:/man7/:forgeries.7:forgeries.7
 f:::0644:/man7/:qmail.7:qmail.7
 f:::0644:/man7/:qmail-limits.7:qmail-limits.7
+f:::0644:/man7/:multi-queue.7:multi-queue.7
 f:::0644:/man8/:cdb-database.8:cdb-database.8
 f:::0644:/man8/:cleanq.8:cleanq.8
 f:::0644:/man8/:ctrlenv.8:ctrlenv.8
@@ -149,7 +150,7 @@ f:::0644:/man8/:qhpsi.8:qhpsi.8
 f:::0644:/man8/:qmail-cdb.8:qmail-cdb.8
 f:::0644:/man8/:qmail-clean.8:qmail-clean.8
 f:::0644:/man8/:qmail-command.8:qmail-command.8
-f:::0644:/man8/:qmail-daemon.8:qmail-daemon.8
+f:::0644:/man8/:qscheduler.8:qscheduler.8
 f:::0644:/man8/:qmail-daned.8:qmail-daned.8
 f:::0644:/man8/:qmail-dk.8:qmail-dk.8
 f:::0644:/man8/:qmail-dkim.8:qmail-dkim.8

@@ -22,12 +22,15 @@ typedef enum {
 } q_type;
 #endif
 
+/*-
+ * queue message
+ * used by qmail-queue to communicate with qmail-todo
+ */
 typedef struct
 {
 	pid_t           pid;
-	unsigned int    queue_no;
-	unsigned long   load;
-	char            queue_fix;
-} pid_tab;
+	int             split;
+	ino_t           inum;      /*- inode number */
+} q_msg;
 
 #endif

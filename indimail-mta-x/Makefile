@@ -35,7 +35,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	nowutc ofmipd ofmipname parsedate plugtest predate preline \
 	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
 	qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat qmail-cdb \
-	qmail-clean qmailconfig qmail-daemon qmail-daned qmail-direct \
+	qmail-clean qmailconfig qmail-daned qmail-direct \
 	qmaildirmake qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
 	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newmrh \
 	qmail-newu qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u \
@@ -540,7 +540,7 @@ compile dnsptr.c strsalloc.h dns.h dnsdoe.h ip.h conf-spf
 
 dnstxt: load dnstxt.o dns_text.o dns.lib socket.lib
 	./load dnstxt dns_text.o `cat dns.lib socket.lib` \
-		-lcrypto -lqmail
+	-lcrypto -lqmail
 
 dnstxt.o: \
 compile dnstxt.c strsalloc.h dns.h dnsdoe.h ip.h
@@ -1342,7 +1342,8 @@ qmail-spamfilter.9 conf-prefix conf-qmail
 	> qmail-spamfilter.8
 
 qmulti.o: \
-compile qmulti.c auto_qmail.h control.h qmulti.h
+compile qmulti.c auto_qmail.h control.h qmulti.h qmail.h \
+qscheduler.h
 	./compile qmulti.c
 
 mailfilter.o: \
@@ -1427,7 +1428,8 @@ qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
 qmail-queue.o: \
 compile qmail-queue.c matchregex.h triggerpull.h \
 control.h auto_qmail.h auto_uids.h fmtqfn.h \
-variables.h conf-sync conf-qhpsi conf-ip conf-mailarch syncdir.h
+variables.h qmail.h qscheduler.h syncdir.h \
+conf-sync conf-qhpsi conf-ip conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 	qmail-queue.c
 
@@ -1635,9 +1637,9 @@ qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-todo conf-bounce conf-loglock
+conf-mime conf-sync conf-batv conf-srs conf-bounce conf-loglock
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-todo conf-bounce conf-loglock` qmail-send.c
+	conf-bounce conf-loglock` qmail-send.c
 
 qmail-send.8: \
 qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1652,16 +1654,16 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 qmail-todo: \
 load qmail-todo.o control.o trigger.o fmtqfn.o \
 readsubdir.o auto_qmail.o auto_split.o \
-auto_control.o variables.o libsyncdir.a
+auto_control.o variables.o libsyncdir.a rt.lib
 	./load qmail-todo control.o trigger.o fmtqfn.o \
 	auto_control.o readsubdir.o auto_qmail.o auto_split.o \
-	variables.o -L. -lsyncdir -lqmail
+	variables.o -L. -lsyncdir -lqmail `cat rt.lib`
 
 qmail-todo.o: \
 compile qmail-todo.c auto_qmail.h control.h syncdir.h \
-fmtqfn.h readsubdir.h trigger.h variables.h \
-auto_control.h auto_split.h conf-sync conf-todo
-	./compile `grep -h -v "^#" conf-sync conf-todo` qmail-todo.c
+fmtqfn.h readsubdir.h trigger.h variables.h qscheduler.h \
+auto_control.h auto_split.h auto_uids.h conf-sync
+	./compile `grep -h -v "^#" conf-sync` qmail-todo.c
 
 qmail-todo.8: \
 qmail-todo.9 conf-qmail conf-sysconfdir
@@ -1760,22 +1762,14 @@ conf-prefix conf-split
 
 qscheduler: \
 load qscheduler.o control.o auto_qmail.o auto_control.o variables.o \
-readsubdir.o auto_uids.o get_uid.o auto_split.o rt.lib
-	./load qscheduler control.o auto_qmail.o auto_uids.o auto_split.o \
-	readsubdir.o get_uid.o variables.o auto_control.o -lqmail `cat rt.lib`
+readsubdir.o get_uid.o auto_uids.o auto_split.o rt.lib
+	./load qscheduler control.o auto_qmail.o auto_split.o get_uid.o \
+	readsubdir.o variables.o auto_uids.o auto_control.o -lqmail `cat rt.lib`
 
 qscheduler.o: \
 compile qscheduler.c qscheduler.h control.h auto_qmail.h readsubdir.h \
-conf-queue
+auto_split.h auto_uids.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qscheduler.c
-
-qmail-daemon: \
-load qmail-daemon.o control.o auto_qmail.o auto_control.o variables.o
-	./load qmail-daemon control.o auto_qmail.o \
-	variables.o auto_control.o -lqmail
-
-qmail-daemon.o: compile qmail-daemon.c control.h auto_qmail.h conf-queue
-	./compile `grep -h -v "^#" conf-queue` qmail-daemon.c
 
 get_uid.o: \
 compile get_uid.c auto_uids.h
@@ -1991,8 +1985,8 @@ qmail-start.9 conf-qmail
 	> qmail-start.8
 
 qmail-start.o: \
-compile qmail-start.c auto_uids.h conf-todo
-	./compile `grep -h -v "^#" conf-todo` qmail-start.c
+compile qmail-start.c auto_uids.h
+	./compile qmail-start.c
 
 slowq-start: \
 load slowq-start.o auto_uids.o get_uid.o
@@ -2003,8 +1997,8 @@ slowq-start.9 conf-qmail conf-servicedir
 	$(edit) slowq-start.9 > $@
 
 slowq-start.o: \
-compile slowq-start.c auto_uids.h conf-todo
-	./compile `grep -h -v "^#" conf-todo` slowq-start.c
+compile slowq-start.c auto_uids.h
+	./compile slowq-start.c
 
 qmail-tcpok: \
 load qmail-tcpok.o auto_qmail.o variables.o control.o auto_control.o \

@@ -236,9 +236,9 @@ static void
 fnmake_init()
 {
 	while (!stralloc_ready(&fn1, FMTQFN))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_ready(&fn2, FMTQFN))
-		nomem();
+		nomem(argv0);
 }
 
 static void
@@ -298,23 +298,23 @@ senderadd(stralloc *sa, char *sender, char *recip)
 			if (recip[k] && (j + 5 <= i)) {
 				/*- owner-@host-@[] -> owner-recipbox=reciphost@host */
 				while (!stralloc_catb(sa, sender, j))
-					nomem();
+					nomem(argv0);
 				while (!stralloc_catb(sa, recip, k))
-					nomem();
+					nomem(argv0);
 				while (!stralloc_cats(sa, "="))
-					nomem();
+					nomem(argv0);
 				while (!stralloc_cats(sa, recip + k + 1))
-					nomem();
+					nomem(argv0);
 				while (!stralloc_cats(sa, "@"))
-					nomem();
+					nomem(argv0);
 				while (!stralloc_catb(sa, sender + j + 1, i - 5 - j))
-					nomem();
+					nomem(argv0);
 				return;
 			}
 		}
 	}
 	while (!stralloc_cats(sa, sender))
-		nomem();
+		nomem(argv0);
 }
 
 
@@ -347,21 +347,21 @@ getinfo(stralloc *sa, stralloc *qh, stralloc *eh, datetime_sec *dt, unsigned lon
 			break;
 		if (line.s[0] == 'F') /*- from */
 			while (!stralloc_copys(sa, line.s + 1))
-				nomem();
+				nomem(argv0);
 		if (line.s[0] == 'e') /*- qqeh */
 			while (!stralloc_copys(qh, line.s + 1))
-				nomem();
+				nomem(argv0);
 		if (line.s[0] == 'h') /*- envheader */
 			while (!stralloc_copys(eh, line.s + 1))
-				nomem();
+				nomem(argv0);
 	}
 	close(fdinfo);
 	while (!stralloc_0(sa))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_0(qh))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_0(eh))
-		nomem();
+		nomem(argv0);
 	*dt = st.st_mtime;
 	return 1;
 }
@@ -418,33 +418,33 @@ comm_write(int c, int delnum, unsigned long id, char *sender, char *qqeh, char *
 	if (comm_buf[c].s && comm_buf[c].len)
 		return;
 	while (!stralloc_copys(&comm_buf[c], ""))
-		nomem();
+		nomem(argv0);
 	ch = delnum;
 	while (!stralloc_append(&comm_buf[c], &ch))
-		nomem();
+		nomem(argv0);
 	ch = delnum >> 8;
 	while (!stralloc_append(&comm_buf[c], &ch))
-		nomem();
+		nomem(argv0);
 	fnmake_split(id);
 	while (!stralloc_cats(&comm_buf[c], fn1.s))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_0(&comm_buf[c]))
-		nomem();
+		nomem(argv0);
 	senderadd(&comm_buf[c], sender, recip);
 	while (!stralloc_0(&comm_buf[c]))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_cats(&comm_buf[c], qqeh))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_0(&comm_buf[c]))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_cats(&comm_buf[c], envh))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_0(&comm_buf[c]))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_cats(&comm_buf[c], recip))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_0(&comm_buf[c]))
-		nomem();
+		nomem(argv0);
 	comm_pos[c] = 0;
 }
 
@@ -610,7 +610,7 @@ pqadd(unsigned long id, char delayedflag)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c]) {
 			while (!prioq_insert(min, &pqchan[c], &pechan[c]))
-				nomem();
+				nomem(argv0);
 		}
 	}
 	for (c = 0; c < CHANNELS; ++c) {
@@ -621,7 +621,7 @@ pqadd(unsigned long id, char delayedflag)
 		pe.id = id;
 		pe.dt = now();
 		while (!prioq_insert(min, &pqdone, &pe))
-			nomem();
+			nomem(argv0);
 	}
 	return;
 fail:
@@ -629,7 +629,7 @@ fail:
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqfail, &pe))
-		nomem();
+		nomem(argv0);
 }
 
 unsigned long
@@ -715,7 +715,7 @@ job_init()
 	int             j;
 
 	while (!(jo = (struct job *) alloc(numjobs * sizeof (struct job))))
-		nomem();
+		nomem(argv0);
 	for (j = 0; j < numjobs; ++j) {
 		jo[j].refs = 0;
 		jo[j].sender.s = 0;
@@ -779,13 +779,13 @@ job_close(int j)
 			}
 			pe.dt = now();
 			while (!prioq_insert(min, &pqdone, &pe))
-				nomem();
+				nomem(argv0);
 			return;
 		}
 	}
 	pe.delayed = do_ratelimit ? 1 : 0;
 	while (!prioq_insert(min, &pqchan[jo[j].channel], &pe))
-		nomem();
+		nomem(argv0);
 }
 
 /*- this file is too long ------------------------------------------- BOUNCES */
@@ -832,31 +832,31 @@ addbounce(unsigned long id, char *recip, char *report)
 	int             fd, pos, w;
 
 	while (!stralloc_copyb(&bouncetext, "<", 1))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_cats(&bouncetext, stripvdomprepend(recip)))
-		nomem();
+		nomem(argv0);
 	for (pos = 0; pos < bouncetext.len; ++pos) {
 		if (bouncetext.s[pos] == '\n')
 			bouncetext.s[pos] = '_';
 	}
 	while (!stralloc_copy(&orig_recip, &bouncetext))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_catb(&orig_recip, ">\n", 2))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_catb(&bouncetext, ">:\n", 3))
-		nomem();
+		nomem(argv0);
 	while (!stralloc_cats(&bouncetext, report))
-		nomem();
+		nomem(argv0);
 	if (report[0] && report[str_len(report) - 1] != '\n') {
 		while (!stralloc_append(&bouncetext, "\n"))
-			nomem();
+			nomem(argv0);
 	}
 	for (pos = bouncetext.len - 2; pos > 0; --pos) {
 		if (bouncetext.s[pos] == '\n' && bouncetext.s[pos - 1] == '\n')
 			bouncetext.s[pos] = '/';
 	}
 	while (!stralloc_append(&bouncetext, "\n"))
-		nomem();
+		nomem(argv0);
 	fnmake2_bounce(id);
 	for (;;) {
 		if ((fd = open_append(fn2.s)) != -1)
@@ -1049,7 +1049,7 @@ injectbounce(unsigned long id)
 							qmail_fail(&qqt);
 							break;
 						case -2:
-							nomem();
+							nomem(argv0);
 							qmail_fail(&qqt);
 							break;
 						case -1:
@@ -1060,7 +1060,7 @@ injectbounce(unsigned long id)
 							break;
 						case 1:
 							while (!stralloc_copy(&sender, &srs_result))
-								nomem();
+								nomem(argv0);
 							break;
 						}
 						while (chdir(auto_qmail) == -1) {
@@ -1089,7 +1089,7 @@ injectbounce(unsigned long id)
 		}
 #endif
 		while (!newfield_datemake(now()))
-			nomem();
+			nomem(argv0);
 		qmail_put(&qqt, newfield_date.s, newfield_date.len);
 		if (orig_recip.len) {
 			qmail_put(&qqt, "X-Bounced-Address: ", 19);
@@ -1097,23 +1097,23 @@ injectbounce(unsigned long id)
 		}
 		qmail_put(&qqt, "From: ", 6);
 		while (!quote(&quoted, &bouncefrom))
-			nomem();
+			nomem(argv0);
 		qmail_put(&qqt, quoted.s, quoted.len);
 		qmail_puts(&qqt, "@");
 		qmail_put(&qqt, bouncehost.s, bouncehost.len);
 		qmail_puts(&qqt, "\nTo: ");
 		while (!quote2(&quoted, bouncerecip))
-			nomem();
+			nomem(argv0);
 		qmail_put(&qqt, quoted.s, quoted.len);
 #ifdef MIME
 		/*- MIME header with boundary */
 		qmail_puts(&qqt, "\nMIME-Version: 1.0\n" "Content-Type: multipart/mixed; " "boundary=\"");
 		while (!stralloc_copyb(&boundary, strnum2, fmt_ulong(strnum2, birth)))
-			nomem();
+			nomem(argv0);
 		while (!stralloc_cat(&boundary, &bouncehost))
-			nomem();
+			nomem(argv0);
 		while (!stralloc_catb(&boundary, strnum2, fmt_ulong(strnum2, id)))
-			nomem();
+			nomem(argv0);
 		qmail_put(&qqt, boundary.s, boundary.len);
 		qmail_puts(&qqt, "\"");
 #endif
@@ -1153,15 +1153,15 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			qmail_fail(&qqt);
 		else {
 			while (!stralloc_copys(&orig_recip, ""))
-				nomem();
+				nomem(argv0);
 			substdio_fdbuf(&ssread, read, fd, inbuf, sizeof (inbuf));
 			while ((r = substdio_get(&ssread, buf, sizeof (buf))) > 0) {
 				while (!stralloc_catb(&orig_recip, buf, r))
-					nomem();
+					nomem(argv0);
 				qmail_put(&qqt, buf, r);
 			}
 			while (!stralloc_0(&orig_recip))
-				nomem();
+				nomem(argv0);
 			/*-
 			 * orig_recip is of the form orig_recipient:\nbounce_recipient
 			 * remove :\nbounce_report from orig_recip to get the original
@@ -1187,7 +1187,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 #endif
 		qmail_put(&qqt, "Return-Path: <", 14);
 		while (!quote2(&quoted, sender.s))
-			nomem();
+			nomem(argv0);
 		qmail_put(&qqt, quoted.s, quoted.len);
 		qmail_put(&qqt, ">\n", 2);
 		if ((fd = open_read(fn1.s)) == -1)
@@ -1304,14 +1304,14 @@ del_init()
 	for (c = 0; c < CHANNELS; ++c) {
 		flagspawnalive[c] = 1;
 		while (!(del[c] = (struct DEL *) alloc(concurrency[c] * sizeof (struct DEL))))
-			nomem();
+			nomem(argv0);
 		for (i = 0; i < concurrency[c]; ++i) {
 			del[c][i].used = 0;
 			del[c][i].recip.s = 0;
 		}
 		dline[c].s = 0;
 		while (!stralloc_copys(&dline[c], ""))
-			nomem();
+			nomem(argv0);
 	}
 	del_status();
 }
@@ -1355,7 +1355,7 @@ del_start(int j, seek_pos mpos, char *recip)
 		return;
 	if (!stralloc_copys(&del[c][i].recip, recip) ||
 			!stralloc_0(&del[c][i].recip)) {
-		nomem();
+		nomem(argv0);
 		return;
 	}
 	del[c][i].j = j;
@@ -1369,7 +1369,7 @@ del_start(int j, seek_pos mpos, char *recip)
 	strnum2[fmt_ulong(strnum2, jo[j].id)] = 0;
 	log2_noflush("starting delivery ", strnum1);
 	log3_noflush(": msg ", strnum2, tochan[c]);
-	logsafe_noflush(recip);
+	logsafe_noflush(recip, argv0);
 	log3(" ", queuedesc, "\n");
 	del_status();
 }
@@ -1425,7 +1425,7 @@ del_dochan(int c)
 	for (i = 0; i < r; ++i) {
 		ch = delbuf[i];
 		while (!stralloc_append(&dline[c], &ch))
-			nomem();
+			nomem(argv0);
 		if (dline[c].len > REPORTMAX)
 			dline[c].len = REPORTMAX;
 		/*-
@@ -1445,28 +1445,28 @@ del_dochan(int c)
 						--dline[c].len;
 						while (!stralloc_cats
 							   (&dline[c], "I'm not going to try again; this message has been in the queue too long.\n"))
-							nomem();
+							nomem(argv0);
 						while (!stralloc_0(&dline[c]))
-							nomem();
+							nomem(argv0);
 					}
 				}
 				switch (dline[c].s[2])
 				{
 				case 'K':
 					log3_noflush("delivery ", strnum1, ": success: ");
-					logsafe_noflush(dline[c].s + 3);
+					logsafe_noflush(dline[c].s + 3, argv0);
 					log3(" ", queuedesc, "\n");
 					markdone(c, jo[del[c][delnum].j].id, del[c][delnum].mpos);
 					--jo[del[c][delnum].j].numtodo;
 					break;
 				case 'Z':
 					log3_noflush("delivery ", strnum1, ": deferral: ");
-					logsafe_noflush(dline[c].s + 3);
+					logsafe_noflush(dline[c].s + 3, argv0);
 					log3(" ", queuedesc, "\n");
 					break;
 				case 'D':
 					log3_noflush("delivery ", strnum1, ": failure: ");
-					logsafe_noflush(dline[c].s + 3);
+					logsafe_noflush(dline[c].s + 3, argv0);
 					log3(" ", queuedesc, "\n");
 					addbounce(jo[del[c][delnum].j].id, del[c][delnum].recip.s, dline[c].s + 3);
 					markdone(c, jo[del[c][delnum].j].id, del[c][delnum].mpos);
@@ -1637,11 +1637,11 @@ pass_dochan(int c)
 			jo[j].flagdying = (recent > birth + bouncelifetime);
 #endif
 		while (!stralloc_copy(&jo[j].sender, &line))
-			nomem();
+			nomem(argv0);
 		while (!stralloc_copy(&jo[j].qqeh, &qqeh))
-			nomem();
+			nomem(argv0);
 		while (!stralloc_copy(&jo[j].envh, &envh))
-			nomem();
+			nomem(argv0);
 	}
 	if (!del_avail(c))
 		return;
@@ -1665,7 +1665,7 @@ pass_dochan(int c)
 	{
 	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
 		delivery = c ? remote_delivery : local_delivery;
-		if (!(i = delivery_rate(line.s + 1, pe.id, &t, &_do_ratelimit))) {
+		if (!(i = delivery_rate(line.s + 1, pe.id, &t, &_do_ratelimit, argv0))) {
 			if (t && (t < time_needed || !time_needed))
 				time_needed = t + SLEEP_FUZZ; /*- earliest delayed job */
 			else
@@ -1702,7 +1702,7 @@ trouble:
 	log7("warning: ", argv0, ": ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n");
 	pe.dt = recent + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqchan[c], &pe))
-		nomem();
+		nomem(argv0);
 }
 
 static void
@@ -1766,7 +1766,7 @@ fail:
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqdone, &pe))
-		nomem();
+		nomem(argv0);
 }
 
 static void
@@ -2006,7 +2006,7 @@ todo_do(fd_set *rfds)
 			strnum2[fmt_ulong(strnum2, (unsigned long) st.st_size)] = 0;
 			log2_noflush(": bytes ", strnum2);
 			log1_noflush(" from <");
-			logsafe_noflush(todoline.s + 1);
+			logsafe_noflush(todoline.s + 1, argv0);
 			strnum2[fmt_ulong(strnum2, pid)] = 0;
 			log2_noflush("> qp ", strnum2);
 			strnum2[fmt_ulong(strnum2, uid)] = 0;
@@ -2014,7 +2014,7 @@ todo_do(fd_set *rfds)
 			log3_noflush(" ", queuedesc, "\n");
 			flush();
 			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom)) {
-				nomem();
+				nomem(argv0);
 				goto fail;
 			}
 			break;
@@ -2022,18 +2022,18 @@ todo_do(fd_set *rfds)
 			switch (rewrite(todoline.s + 1))
 			{
 			case 0:
-				nomem();
+				nomem(argv0);
 				goto fail;
 			case 2: /*- Sea */
 				if (!stralloc_cats(&mailto, "R") || !stralloc_cat(&mailto, &todoline)) {
-					nomem();
+					nomem(argv0);
 					goto fail;
 				}
 				c = 1;
 				break;
 			default: /*- Land */
 				if (!stralloc_cats(&mailto, "L") || !stralloc_cat(&mailto, &todoline)) {
-					nomem();
+					nomem(argv0);
 					goto fail;
 				}
 				c = 0;
@@ -2116,7 +2116,7 @@ todo_do(fd_set *rfds)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c])
 			while (!prioq_insert(min, &pqchan[c], &pe))
-				nomem();
+				nomem(argv0);
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c])
@@ -2124,7 +2124,7 @@ todo_do(fd_set *rfds)
 	}
 	if (c == CHANNELS) {
 		while (!prioq_insert(min, &pqdone, &pe))
-			nomem();
+			nomem(argv0);
 	}
 	log_stat(&mailfrom, &mailto, id, st.st_size);
 	return;
@@ -2340,19 +2340,19 @@ regetcontrols()
 	}
 	if (use_syncdir > 0) {
 		while (!env_put2("USE_SYNCDIR", "1"))
-			nomem();
+			nomem(argv0);
 	} else
 	if (!use_syncdir) {
 		while (!env_unset("USE_SYNCDIR"))
-			nomem();
+			nomem(argv0);
 	}
 	if (use_fsync > 0) {
 		while (!env_put2("USE_FSYNC", "1"))
-			nomem();
+			nomem(argv0);
 	} else
 	if (!use_fsync) {
 		while (!env_unset("USE_FSYNC"))
-			nomem();
+			nomem(argv0);
 	}
 #endif
 	for (c = 0; c < CHANNELS; c++) {
@@ -2368,18 +2368,18 @@ regetcontrols()
 	}
 	constmap_free(&maplocals);
 	while (!stralloc_copy(&locals, &newlocals))
-		nomem();
+		nomem(argv0);
 	while (!constmap_init(&maplocals, locals.s, locals.len, 0))
-		nomem();
+		nomem(argv0);
 	constmap_free(&mapvdoms);
 	if (r) {
 		while (!stralloc_copy(&vdoms, &newvdoms))
-			nomem();
+			nomem(argv0);
 		while (!constmap_init(&mapvdoms, vdoms.s, vdoms.len, 1))
-			nomem();
+			nomem(argv0);
 	} else
 		while (!constmap_init(&mapvdoms, "", 0, 1))
-			nomem();
+			nomem(argv0);
 }
 
 static void

@@ -165,6 +165,11 @@
  *
  */
 #include <unistd.h>
+#ifndef DARWIN
+#include <sys/mman.h>
+#include <sys/stat.h>  /* For mode constants */
+#include <fcntl.h>     /* For O_* constants */
+#endif
 #include <env.h>
 #include <stralloc.h>
 #include <substdio.h>
@@ -186,9 +191,14 @@
 #include "auto_qmail.h"
 #include "control.h"
 #include "qmulti.h"
+#ifndef DARWIN
+#include "qmail.h"
+#include "qscheduler.h"
+#endif
 
-#if !defined(QUEUE_COUNT)
-#define QUEUE_COUNT 10
+#ifndef DARWIN
+static char     errbuf[256];
+static struct substdio sserr;
 #endif
 
 int
@@ -217,14 +227,124 @@ getfreespace(char *filesystem)
 	return (0);
 }
 
+#ifndef DARWIN
+static void
+custom_error(char *flag, char *status, char *extra, char *code)
+{
+	char           *c;
+
+	if (substdio_put(&sserr, flag, 1) == -1)
+		_exit(53);
+	if (substdio_put(&sserr, "qmail-multi: ", 13) == -1)
+		_exit(53);
+	if (substdio_puts(&sserr, status) == -1)
+		_exit(53);
+	if (extra && substdio_puts(&sserr, extra) == -1)
+		_exit(53);
+	if (code) {
+		if (substdio_put(&sserr, " (#", 3) == -1)
+			_exit(53);
+		c = (*flag == 'Z') ? "4" : "5";
+		if (substdio_put(&sserr, c, 1) == -1)
+			_exit(53);
+		if (substdio_put(&sserr, code + 1, 4) == -1)
+			_exit(53);
+		if (substdio_put(&sserr, ")", 1) == -1)
+			_exit(53);
+	}
+	if (substdio_flush(&sserr) == -1)
+		_exit(53);
+	return;
+}
+
+int
+queueNo_from_shm()
+{
+	int             shm, errfd, i, j, x, min, n = 1, qcount;
+	int             q[4];
+	char            shm_name[FMT_ULONG + 6];
+	char           *s, *ptr;
+
+	if (!(ptr = env_get("ERROR_FD")))
+		errfd = CUSTOM_ERR_FD;
+	else
+		scan_int(ptr, &errfd);
+	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
+	/*- get queue count */
+	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1) {
+		custom_error("Z", "unable to open POSIX shared memory segment /qscheduler", 0, "X.3.0");
+		_exit(88);
+	}
+	if (read(shm, (char *) &qcount, sizeof(int)) == -1) {
+		custom_error("Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
+		_exit(88);
+	}
+	close(shm);
+	/*- get queue with lowest concurrency load  */
+	for (j = 0; j < qcount; j++) {
+		s = shm_name;
+		i = fmt_str(s, "/queue");
+		s += i;
+		i = fmt_int(s, j + 1);
+		s += i;
+		*s++ = 0;
+		i = 0;
+		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1) {
+			custom_error("Z", "failed to open POSIX shared memory segment ", shm_name, "X.3.0");
+			_exit(88);
+		}
+		if (read(shm, (char *) q, sizeof(int) * 4) == -1) {
+			custom_error("Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
+			_exit(88);
+		}
+		close(shm);
+		/*-
+		 * q[0] - concurrencyusedlocal
+		 * q[1] - concurrencyusedremote
+		 * q[2] - concurrencylocal
+		 * q[3] - concurrencyremote
+		 */
+		if (!q[2] || !q[3])
+			continue;
+		x = q[0] * 100 /q[2] > q[1] * 100 /q[3] ? q[0] * 100/q[2] : q[1] * 100/q[3];
+		if (!j) {
+			min = x;
+			n = 1;
+			continue;
+		}
+		if (x < min) {
+			min = x;
+			n = j + 1;
+		}
+	}
+	return n;
+}
+#endif
+
+int
+queueNo_from_env()
+{
+	char           *ptr;
+	int             qcount, qstart;
+
+	if (!(ptr = env_get("QUEUE_COUNT")))
+		qcount = QUEUE_COUNT;
+	else
+		scan_int(ptr, &qcount);
+	if (!(ptr = env_get("QUEUE_START")))
+		qstart = 1;
+	else
+		scan_int(ptr, &qstart);
+	return ((now() % qcount) + qstart);
+}
+
 no_return int
 qmulti(char *queue_env, int argc, char **argv)
 {
-	datetime_sec    queueNo;
 	char            strnum[FMT_ULONG];
 	char           *qqargs[2] = { 0, 0 };
 	char           *ptr, *qbase;
-	int             qcount, qstart;
+	int             queueNo;
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 	char           *binqqargs[2] = { "sbin/qmail-multi", 0 };
 
@@ -236,14 +356,6 @@ qmulti(char *queue_env, int argc, char **argv)
 		_exit(120);
 	}
 	if (!(ptr = env_get("QUEUEDIR"))) {
-		if (!(ptr = env_get("QUEUE_COUNT")))
-			qcount = QUEUE_COUNT;
-		else
-			scan_int(ptr, &qcount);
-		if (!(ptr = env_get("QUEUE_START")))
-			qstart = 1;
-		else
-			scan_int(ptr, &qstart);
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			switch (control_readfile(&QueueBase, "queue_base", 0))
 			{
@@ -262,7 +374,16 @@ qmulti(char *queue_env, int argc, char **argv)
 				break;
 			}
 		}
-		queueNo = (now() % qcount) + qstart;
+#ifndef DARWIN
+		if (!(ptr = env_get("DYNAMIC_QUEUE")))
+			queueNo = queueNo_from_env();
+		else {
+			if ((queueNo = queueNo_from_shm()) == -1)
+				queueNo = queueNo_from_env();
+		}
+#else
+		queueNo = queueNo_from_env();
+#endif
 		if (!stralloc_copys(&Queuedir, "QUEUEDIR=") ||
 				!stralloc_cats(&Queuedir, qbase) ||
 				!stralloc_cats(&Queuedir, "/queue") ||

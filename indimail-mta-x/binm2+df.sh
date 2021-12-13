@@ -6,6 +6,6 @@
 # Using SVR4 binmail interface: /bin/mail -r
 
 exec env - PATH="PREFIX/bin:$PATH" \
-qmail-daemon '|dot-forward .forward
+qscheduler '|dot-forward .forward
 |preline -f /bin/mail -r "${SENDER:-MAILER-DAEMON}" -d "$USER"' \
 splogger qmail

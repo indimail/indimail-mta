@@ -99,7 +99,7 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
-  c              - Max Memory that qmail-daemon can allocate
+  c              - Max Memory that qscheduler can allocate
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   D              - Max deliveries allowed per day for a user
@@ -213,7 +213,7 @@ Known values for OPTION are:
   I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
-  c              - Max Memory that qmail-daemon can allocate
+  c              - Max Memory that qscheduler can allocate
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
@@ -6504,7 +6504,7 @@ echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailBinPrefix/sbin/qmail-daemon \$defaultdelivery\""
+echo "$QmailBinPrefix/sbin/qscheduler -s \$defaultdelivery\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 

@@ -19,7 +19,7 @@ static char     sccsiddelivery_rateh[] = "$Id: delivery_rate.h,v 1.3 2021-06-05 
 
 #include <datetime.h>
 
-int             delivery_rate(char *domain, unsigned long id, datetime_sec *, int *);
+int             delivery_rate(char *domain, unsigned long id, datetime_sec *, int *, char *);
 
 #endif
 

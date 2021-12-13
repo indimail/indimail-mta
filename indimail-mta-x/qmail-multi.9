@@ -52,7 +52,7 @@ queue\fI2\fR, ... queue\fIN\fR. \fBqmail-multi\fR does load balancing
 across these \fIN\fR queues by doing exec of \fB qmail-queue\fR with
 QUEUEDIR set to the path of one of these \fIN\fR queues. Each of these
 \fIN\fR queues should be created using \fBqueue-fix(1)\fR program. One
-also needs a program like \fBqmail-daemon(8)\fR which invokes multiple
+also needs a program like \fBqscheduler(8)\fR which invokes multiple
 \fBqmail-send(8)\fR with the \fBQUEUEDIR\fR set individualy to path of
 these \fIN\fR queues.
 

@@ -39,7 +39,7 @@ extern char    *queuedesc;
 
 int
 delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
-		int *do_ratelimit)
+		int *do_ratelimit, char *argv0)
 {
 	char           *rate_dir, *rate_exp, *domain;
 	int             i, s, at;
@@ -55,12 +55,12 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			return 1;
 		}
 		while (!stralloc_copys(&ratelimit_file, rate_dir))
-			nomem();
+			nomem(argv0);
 		s = ratelimit_file.len;
 	} else {
 		while (!stralloc_copys(&ratelimit_file, queuedir) ||
 				!stralloc_catb(&ratelimit_file, "/ratelimit", 10))
-			nomem();
+			nomem(argv0);
 		s = ratelimit_file.len;
 	}
 	if (_domain[at = str_rchr(_domain, '@')])
@@ -70,7 +70,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 	while (!stralloc_append(&ratelimit_file, "/") ||
 			!stralloc_cats(&ratelimit_file, domain) ||
 			!stralloc_0(&ratelimit_file))
-		nomem();
+		nomem(argv0);
 	if (!access(ratelimit_file.s, W_OK)) {
 		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate, time_needed))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
@@ -108,7 +108,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 	ratelimit_file.len = s;
 	while (!stralloc_catb(&ratelimit_file, "/ratecontrol", 12) ||
 			!stralloc_0(&ratelimit_file))
-		nomem();
+		nomem(argv0);
 	if (!access(ratelimit_file.s, R_OK)) {
 		if (control_readfile(&ratedefs, ratelimit_file.s, 0) == -1)
 			return -1;
@@ -149,7 +149,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 	ratelimit_file.len = s;
 	while (!stralloc_catb(&ratelimit_file, "/.global", 8) ||
 			!stralloc_0(&ratelimit_file))
-		nomem();
+		nomem(argv0);
 	if (!access(ratelimit_file.s, W_OK)) {
 		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate, time_needed))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;

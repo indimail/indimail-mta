@@ -148,7 +148,7 @@
 %attr(0755,root,root)  @prefix@/sbin/sys-checkpwd
 %attr(0755,root,root)  @prefix@/sbin/cleanq
 
-%attr(0751,root,root)  @prefix@/sbin/qmail-daemon
+%attr(0751,root,root)  @prefix@/sbin/qscheduler
 %attr(0751,root,root)  @prefix@/sbin/qmail-start
 %attr(0751,root,root)  @prefix@/sbin/qmail-lspawn #qmta
 %attr(0751,root,root)  @prefix@/sbin/qmail-rspawn #qmta
@@ -457,7 +457,7 @@
 %attr(0644,root,root) @mandir@/man8/qmail-cdb.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-clean.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-command.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-daemon.8.gz
+%attr(0644,root,root) @mandir@/man8/qscheduler.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dk.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-getpw.8.gz
