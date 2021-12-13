@@ -853,10 +853,14 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
 	if (flagstopasap)
 		return;
+#ifndef DARWIN
 	if (dynamic_queue)
 		mqueue_selprep(nfds, rfds);
 	else
 		trigger_selprep(nfds, rfds);
+#else
+	trigger_selprep(nfds, rfds);
+#endif
 	if (flagtododir)
 		*wakeup = 0;
 	if (*wakeup > nexttodorun)
