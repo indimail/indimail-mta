@@ -1413,11 +1413,11 @@ qmail-direct.9 conf-sysconfdir
 qmail-queue: \
 load qmail-queue.o triggerpull.o fmtqfn.o get_uid.o \
 auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
-control.o auto_control.o strsalloc.o socket.lib libsyncdir.a
+control.o auto_control.o strsalloc.o socket.lib rt.lib libsyncdir.a
 	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o \
 	auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
 	control.o auto_control.o strsalloc.o \
-	`cat socket.lib` -L. -lsyncdir -lqmail
+	`cat socket.lib rt.lib` -L. -lsyncdir -lqmail
 
 qmail-queue.8: \
 qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
@@ -1625,13 +1625,13 @@ load qmail-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o variables.o \
 getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
-delivery_rate.o libsyncdir.a srs.lib
+delivery_rate.o libsyncdir.a srs.lib rt.lib
 	./load qmail-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
 	auto_split.o variables.o envrules.o matchregex.o srs.o \
 	delivery_rate.o rcpthosts.o auto_control.o -L. -lsyncdir \
-	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib rt.lib` -ldl -lqmail
 
 qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
