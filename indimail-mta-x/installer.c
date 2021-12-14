@@ -182,7 +182,7 @@ myr_mkdir(char *home, mode_t mode)
 
 void
 set_perms(char *dest, char *uidstr, char *gidstr, char *modestr, uid_t uid,
-		gid_t gid, mode_t mode, int check)
+		gid_t gid, int mode, int check)
 {
 	struct stat     st;
 	struct passwd  *pw;

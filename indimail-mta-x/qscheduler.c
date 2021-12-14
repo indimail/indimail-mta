@@ -46,7 +46,7 @@ static char  **prog_argv;
 static q_type   qtype = fixed;
 static char    *msgbuf;
 static int      msgbuflen;
-static mqd_t    mq_sch = -1;
+static mqd_t    mq_sch = (mqd_t) -1;
 static int      shm_conf = -1;
 static int     *shm_queue;
 #endif
@@ -78,7 +78,7 @@ sigterm()
 #ifdef HASLIBRT
 	for (i = 0; i < qcount; i++)
 		close(shm_queue[i]);
-	if (mq_sch != -1)
+	if (mq_sch != (mqd_t) -1)
 		mq_close(mq_sch);
 	if (shm_conf != -1)
 		close(shm_conf);
@@ -567,7 +567,11 @@ create_ipc()
 				}
 			}
 		} else {
+#ifdef FREEBSD
+			if (fchown(mq_getfd_np(mq_queue), auto_uidq, auto_gidq) == -1) {
+#else
 			if (fchown(mq_queue, auto_uidq, auto_gidq) == -1) {
+#endif
 				strerr_warn3("alert: qscheduler: failed to set ownership for POSIX message queue ", ipc_name, ":", &strerr_sys);
 				mq_close(mq_queue);
 				die();

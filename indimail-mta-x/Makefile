@@ -1498,7 +1498,7 @@ dktest.8: dktest.9 conf-sysconfdir
 
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
-	( ( ./compile -I/usr/include/dkim -I/opt/local/include/dkim \
+	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
 	-I/usr/include/dkim -I../libdkim-x \
 	`grep -h -v "^#" conf-dkim` trydkim.c && \
 	c++ -o trydkim trydkim.o dns_text.o \

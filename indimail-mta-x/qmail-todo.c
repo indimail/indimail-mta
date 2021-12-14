@@ -718,14 +718,22 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 void
 mqueue_selprep(int *nfds, fd_set *rfds)
 {
-	if (mq_queue != (mqd_t) -1) {
 #ifdef FREEBSD
-		FD_SET(mq_getfd_np(mq_queue), rfds);
+	int             i;
 #else
-		FD_SET(mq_queue, rfds);
+	mqd_t           i;
 #endif
-		if (*nfds < mq_queue + 1)
-			*nfds = mq_queue + 1;
+
+#ifdef FREEBSD
+	i = mq_getfd_np(mq_queue);
+#else
+	i = mq_queue;
+#endif
+
+	if (i != -1) {
+		FD_SET(i, rfds);
+		if (*nfds < i + 1)
+			*nfds = i + 1;
 	}
 }
 #endif /*- #ifdef HASLIBRT */

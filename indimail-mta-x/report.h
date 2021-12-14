@@ -17,6 +17,6 @@
 static char     sccsidreporth[] = "$Id: report.h,v 1.3 2021-05-30 00:17:09+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-void            report(int, char *, char *, char *, char *, char *, char *);
+no_return void  report(int, char *, char *, char *, char *, char *, char *);
 
 #endif
