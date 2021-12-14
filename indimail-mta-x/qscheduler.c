@@ -490,7 +490,8 @@ queue_fix(char *queuedir)
 void
 create_ipc()
 {
-	char            shm_name[FMT_ULONG + 6];
+	char            ipc_name[FMT_ULONG + 6], shm_dev_name[FMT_ULONG + 6 + 8],
+					mq_dev_name[FMT_ULONG + 6 + 11]; /*- /queue + /dev/mqueue */
 	char           *s;
 	int             i, j;
 	mqd_t           mq_queue;
@@ -500,7 +501,7 @@ create_ipc()
 		die();
 	}
 	for (j = 0; j < qcount; j++) {
-		s = shm_name;
+		s = ipc_name;
 		i = fmt_str(s, "/queue");
 		s += i;
 		i = fmt_int(s, j + 1);
@@ -508,53 +509,112 @@ create_ipc()
 		*s++ = 0;
 		i = 0;
 		/*- create shm /queueN for storing concurrency values by qmail-send */
-		if ((shm_queue[j] = shm_open(shm_name, O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
+		if ((shm_queue[j] = shm_open(ipc_name, O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
 			if (errno != error_exist) {
-				strerr_warn3("alert: qscheduler: failed to create POSIX shared memory ", shm_name, ": ", &strerr_sys);
+				strerr_warn3("alert: qscheduler: failed to create POSIX shared memory ", ipc_name, ": ", &strerr_sys);
 				die();
+			}
+			if (!access("/dev/shm", F_OK)) {
+				s = shm_dev_name;
+				i = fmt_str(s, "/dev/shm/queue");
+				s += i;
+				i = fmt_int(s, j + 1);
+				s += i;
+				*s++ = 0;
+				i = 0;
+				if (chmod(ipc_name, 0644) == -1) {
+					strerr_warn3("alert: qscheduler: failed to set permissions for POSIX shared memory ", ipc_name, ": ", &strerr_sys);
+					die();
+				}
+				if (chown(ipc_name, auto_uids, auto_gidq) == -1) {
+					strerr_warn3("alert: qscheduler: failed to set ownership for POSIX shared memory ", ipc_name, ": ", &strerr_sys);
+					die();
+				}
 			}
 		} else {
 			if (fchown(shm_queue[j], auto_uids, auto_gidq) == -1) {
-				strerr_warn3("alert: qscheduler: failed to set permissions for POSIX shared memory ", shm_name, ": ", &strerr_sys);
+				strerr_warn3("alert: qscheduler: failed to set ownership for POSIX shared memory ", ipc_name, ": ", &strerr_sys);
 				close(shm_queue[j]);
 				die();
 			}
 			close(shm_queue[j]);
 		}
-		if ((shm_queue[j] = shm_open(shm_name, O_RDONLY, 0644)) == -1) {
-			strerr_warn2("alert: qscheduler: failed to open POSIX shared memory ", shm_name, &strerr_sys);
+		if ((shm_queue[j] = shm_open(ipc_name, O_RDONLY, 0644)) == -1) {
+			strerr_warn2("alert: qscheduler: failed to open POSIX shared memory ", ipc_name, &strerr_sys);
 			die();
 		}
 		/*- message queue for communication between qmail-todo, qmail-queue */
-		if ((mq_queue = mq_open(shm_name, O_CREAT|O_EXCL|O_RDWR,  0640, NULL)) == -1) {
+		if ((mq_queue = mq_open(ipc_name, O_CREAT|O_EXCL|O_RDWR,  0640, NULL)) == (mqd_t) -1) {
 			if (errno != error_exist)  {
-				strerr_warn3("alert: qscheduler: failed to create POSIX message queue ", shm_name, ": ", &strerr_sys);
+				strerr_warn3("alert: qscheduler: failed to create POSIX message queue ", ipc_name, ": ", &strerr_sys);
 				die();
+			}
+			if (!access("/dev/mqueue", F_OK)) {
+				s = mq_dev_name;
+				i = fmt_str(s, "/dev/mqueue/queue");
+				s += i;
+				i = fmt_int(s, j + 1);
+				s += i;
+				*s++ = 0;
+				i = 0;
+				if (chmod(ipc_name, 0640) == -1) {
+					strerr_warn3("alert: qscheduler: failed to set permissions for POSIX message queue ", ipc_name, ":", &strerr_sys);
+					die();
+				}
+				if (chown(ipc_name, auto_uidq, auto_gidq) == -1) {
+					strerr_warn3("alert: qscheduler: failed to set ownership for POSIX message queue ", ipc_name, ":", &strerr_sys);
+					die();
+				}
 			}
 		} else {
 			if (fchown(mq_queue, auto_uidq, auto_gidq) == -1) {
-				strerr_warn3("alert: qscheduler: failed to set permissions for POSIX message queue ", shm_name, ":", &strerr_sys);
-				close(mq_queue);
+				strerr_warn3("alert: qscheduler: failed to set ownership for POSIX message queue ", ipc_name, ":", &strerr_sys);
+				mq_close(mq_queue);
 				die();
 			}
-			close(mq_queue);
+			mq_close(mq_queue);
 		}
 	}
+
 	/*- message queue /qscheduler for communication between qscheduler, qmail-send */
-	if ((mq_sch = mq_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0600, NULL)) == -1) {
-		if (errno != error_exist)
+	if ((mq_sch = mq_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0600, NULL)) == (mqd_t) -1) {
+		if (errno != error_exist) {
 			strerr_warn1("alert: qscheduler: failed to create POSIX message queue /qscheduler: ", &strerr_sys);
+			die();
+		}
+		if (!access("/dev/mqueue", F_OK)) {
+			if (chmod("/dev/mqueue/qscheduler", 0600) == -1) {
+				strerr_warn1("alert: qscheduler: failed to set permissions for POSIX message queue /qscheduler: ", &strerr_sys);
+				die();
+			}
+			if (chown("/dev/mqueue/qscheduler", auto_uido, auto_gidq) == -1) {
+				strerr_warn1("alert: qscheduler: failed to set ownership for POSIX message queue /qscheduler: ", &strerr_sys);
+				die();
+			}
+		}
 	} else
 		mq_close(mq_sch);
-	if ((mq_sch = mq_open("/qscheduler", O_RDONLY,  0600, NULL)) == -1) {
+
+	if ((mq_sch = mq_open("/qscheduler", O_RDONLY,  0600, NULL)) == (mqd_t) -1) {
 		strerr_warn1("alert: qscheduler: failed to open POSIX message queue /qscheduler: ", &strerr_sys);
 		die();
 	}
+
 	/*- shared memory /qscheduler for storing qcount, qconf */
 	if ((shm_conf = shm_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
 		if (errno != error_exist) {
 			strerr_warn1("alert: qscheduler: failed to create POSIX shared memory /qscheduler: ", &strerr_sys);
 			die();
+		}
+		if (!access("/dev/shm", F_OK)) {
+			if (chmod("/dev/shm/qscheduler", 0644) == -1) {
+				strerr_warn1("alert: qscheduler: failed to set permissions for POSIX message queue /qscheduler: ", &strerr_sys);
+				die();
+			}
+			if (chown("/dev/shm/qscheduler", auto_uido, auto_gidq) == -1) {
+				strerr_warn1("alert: qscheduler: failed to set ownership for POSIX message queue /qscheduler: ", &strerr_sys);
+				die();
+			}
 		}
 	} else
 		close(shm_conf);

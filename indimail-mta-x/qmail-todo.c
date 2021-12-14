@@ -1,132 +1,5 @@
 /*
- * $Log: qmail-todo.c,v $
- * Revision 1.54  2021-12-12 08:47:50+05:30  Cprogrammer
- * use argv0 for program name
- * transmit messid to qmail-send in TODO_CHUNK_SIZE
- *
- * Revision 1.53  2021-10-22 14:00:03+05:30  Cprogrammer
- * fixed typo
- *
- * Revision 1.52  2021-10-20 22:47:41+05:30  Cprogrammer
- * display program 'qmail-todo' in logs for identification
- *
- * Revision 1.51  2021-07-26 23:24:53+05:30  Cprogrammer
- * log when log sighup, sigalrm is caught
- *
- * Revision 1.50  2021-07-17 14:39:28+05:30  Cprogrammer
- * skip processing of for messages queued with wrong split dir
- *
- * Revision 1.49  2021-06-27 10:45:15+05:30  Cprogrammer
- * moved conf_split variable to fmtqfn.c
- *
- * Revision 1.48  2021-06-23 13:21:18+05:30  Cprogrammer
- * display bytes in log_stat function
- *
- * Revision 1.47  2021-06-05 12:53:13+05:30  Cprogrammer
- * display qmail-todo prefix for startup message
- *
- * Revision 1.46  2021-05-16 01:45:13+05:30  Cprogrammer
- * limit conf_split to compile time value in conf-split
- * added code comments
- *
- * Revision 1.45  2021-05-12 17:51:49+05:30  Cprogrammer
- * display todo filename in logs
- *
- * Revision 1.44  2021-05-12 15:51:36+05:30  Cprogrammer
- * set conf_split from CONFSPLIT env variable
- * added code comments
- *
- * Revision 1.43  2021-05-08 12:26:31+05:30  Cprogrammer
- * added log7() function
- * use /var/indimail/queue if QUEUEDIR is not defined
- *
- * Revision 1.42  2021-04-05 07:19:58+05:30  Cprogrammer
- * added qmail-todo.h
- *
- * Revision 1.41  2020-11-24 13:47:41+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.40  2020-09-30 20:39:44+05:30  Cprogrammer
- * Darwin port for syncdir
- *
- * Revision 1.39  2020-09-15 21:43:40+05:30  Cprogrammer
- * unset USE_SYNCDIR, USE_FSYNC only when use_syncdir, use_fsync is zero
- *
- * Revision 1.38  2020-09-15 21:10:08+05:30  Cprogrammer
- * use control files conf-fsync, conf-syncdir to turn on fsync, bsd style syncdir semantics
- * set / unset USE_FSYNC, USE_SYNCDIR env variables
- *
- * Revision 1.37  2018-07-03 01:59:20+05:30  Cprogrammer
- * reread envnoathost on HUP
- *
- * Revision 1.36  2018-01-09 11:55:07+05:30  Cprogrammer
- * removed non-indimail code
- *
- * Revision 1.35  2017-03-31 21:10:34+05:30  Cprogrammer
- * log null addresses in log_stat as <>
- *
- * Revision 1.34  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.33  2016-01-29 18:31:23+05:30  Cprogrammer
- * include queue name in logs
- *
- * Revision 1.32  2013-09-23 22:14:20+05:30  Cprogrammer
- * display queue directory for qmail-todo process
- *
- * Revision 1.31  2013-05-16 23:32:53+05:30  Cprogrammer
- * added log_stat part of non-indimail code
- *
- * Revision 1.30  2011-07-29 09:29:54+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.29  2010-06-27 09:08:55+05:30  Cprogrammer
- * report all recipients in log_stat for single transaction multiple recipient emails
- *
- * Revision 1.28  2007-12-20 13:50:59+05:30  Cprogrammer
- * removed compiler warning
- *
- * Revision 1.27  2005-12-29 23:02:51+05:30  Cprogrammer
- * option for passing headers through queue
- *
- * Revision 1.26  2005-03-03 16:11:48+05:30  Cprogrammer
- * minimum interval in secs for todo run
- *
- * Revision 1.25  2004-10-22 20:29:42+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.24  2004-10-22 15:38:20+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.23  2004-07-17 21:21:55+05:30  Cprogrammer
- * added qqeh code
- *
- * Revision 1.22  2004-01-14 23:40:50+05:30  Cprogrammer
- * delay fsync()
- *
- * Revision 1.21  2004-01-02 10:17:10+05:30  Cprogrammer
- * prevent segmentation fault in log_stat when to or from is null
- * reset to and from
- *
- * Revision 1.20  2003-12-31 20:03:33+05:30  Cprogrammer
- * added use_fsync to turn on/off use_fsync
- *
- * Revision 1.19  2003-12-09 21:27:24+05:30  Cprogrammer
- * corrected flagsendalive check
- *
- * Revision 1.18  2003-10-28 20:02:34+05:30  Cprogrammer
- * conditional compilation for INDIMAIL
- *
- * Revision 1.17  2003-10-23 01:26:54+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.16  2003-10-17 21:06:48+05:30  Cprogrammer
- * added log_stat function
- *
- * Revision 1.15  2003-10-01 19:06:12+05:30  Cprogrammer
- * changed return type to int
- * added code for future log_stat
- *
+ * $Id: $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -227,7 +100,7 @@ static stralloc newvdoms = { 0 };
 static int      dynamic_queue = 0;
 static int      do_readsubdir = 1;
 #ifdef HASLIBRT
-static mqd_t    mq_queue = -1;
+static mqd_t    mq_queue = (mqd_t)-1;
 static char    *msgbuf;
 static int      msgbuflen;
 static stralloc qfn = { 0 };
@@ -766,7 +639,7 @@ mqueue_init(void)
 	*s++ = 0;
 	i = 0;
 	/*- message queue /queueN for communication between qmail-todo, qmail-queue */
-	if ((mq_queue = mq_open(mq_name, O_RDONLY,  0600, NULL)) == -1) {
+	if ((mq_queue = mq_open(mq_name, O_RDONLY,  0600, NULL)) == (mqd_t)-1) {
 		log7("alert: ", argv0, ": failed to open POSIX message queue ",
 			mq_name, ": ", error_str(errno), "\n");
 		comm_die(111);
@@ -790,9 +663,13 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 	unsigned int    priority;
 	int             i;
 
-	if (mq_queue == -1)
+	if (mq_queue == (mqd_t)-1)
 		mqueue_init();
+#ifdef FREEBSD
+	if (!FD_ISSET(mq_getfd_np(mq_queue), rfds))
+#else
 	if (!FD_ISSET(mq_queue, rfds))
+#endif
 		return 4;
 	if (mq_getattr(mq_queue, &attr) == -1) {
 		log7("warning: ", argv0, ": ", queuedesc,
@@ -820,7 +697,7 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 			log7("warning: ", argv0, ": ", queuedesc,
 				": unable to read message queue: ", error_str(errno), "\n");
 			mq_close(mq_queue);
-			mq_queue = -1;
+			mq_queue = (mqd_t)-1;
 			do_readsubdir = 1;
 			return -1;
 		} else
@@ -841,8 +718,12 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 void
 mqueue_selprep(int *nfds, fd_set *rfds)
 {
-	if (mq_queue != -1) {
+	if (mq_queue != (mqd_t) -1) {
+#ifdef FREEBSD
+		FD_SET(mq_getfd_np(mq_queue), rfds);
+#else
 		FD_SET(mq_queue, rfds);
+#endif
 		if (*nfds < mq_queue + 1)
 			*nfds = mq_queue + 1;
 	}
@@ -1525,3 +1406,134 @@ getversion_qmail_todo_c()
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: qmail-todo.c,v $
+ * Revision 1.54  2021-12-12 08:47:50+05:30  Cprogrammer
+ * use argv0 for program name
+ * transmit messid to qmail-send in TODO_CHUNK_SIZE
+ *
+ * Revision 1.53  2021-10-22 14:00:03+05:30  Cprogrammer
+ * fixed typo
+ *
+ * Revision 1.52  2021-10-20 22:47:41+05:30  Cprogrammer
+ * display program 'qmail-todo' in logs for identification
+ *
+ * Revision 1.51  2021-07-26 23:24:53+05:30  Cprogrammer
+ * log when log sighup, sigalrm is caught
+ *
+ * Revision 1.50  2021-07-17 14:39:28+05:30  Cprogrammer
+ * skip processing of for messages queued with wrong split dir
+ *
+ * Revision 1.49  2021-06-27 10:45:15+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ *
+ * Revision 1.48  2021-06-23 13:21:18+05:30  Cprogrammer
+ * display bytes in log_stat function
+ *
+ * Revision 1.47  2021-06-05 12:53:13+05:30  Cprogrammer
+ * display qmail-todo prefix for startup message
+ *
+ * Revision 1.46  2021-05-16 01:45:13+05:30  Cprogrammer
+ * limit conf_split to compile time value in conf-split
+ * added code comments
+ *
+ * Revision 1.45  2021-05-12 17:51:49+05:30  Cprogrammer
+ * display todo filename in logs
+ *
+ * Revision 1.44  2021-05-12 15:51:36+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ * added code comments
+ *
+ * Revision 1.43  2021-05-08 12:26:31+05:30  Cprogrammer
+ * added log7() function
+ * use /var/indimail/queue if QUEUEDIR is not defined
+ *
+ * Revision 1.42  2021-04-05 07:19:58+05:30  Cprogrammer
+ * added qmail-todo.h
+ *
+ * Revision 1.41  2020-11-24 13:47:41+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.40  2020-09-30 20:39:44+05:30  Cprogrammer
+ * Darwin port for syncdir
+ *
+ * Revision 1.39  2020-09-15 21:43:40+05:30  Cprogrammer
+ * unset USE_SYNCDIR, USE_FSYNC only when use_syncdir, use_fsync is zero
+ *
+ * Revision 1.38  2020-09-15 21:10:08+05:30  Cprogrammer
+ * use control files conf-fsync, conf-syncdir to turn on fsync, bsd style syncdir semantics
+ * set / unset USE_FSYNC, USE_SYNCDIR env variables
+ *
+ * Revision 1.37  2018-07-03 01:59:20+05:30  Cprogrammer
+ * reread envnoathost on HUP
+ *
+ * Revision 1.36  2018-01-09 11:55:07+05:30  Cprogrammer
+ * removed non-indimail code
+ *
+ * Revision 1.35  2017-03-31 21:10:34+05:30  Cprogrammer
+ * log null addresses in log_stat as <>
+ *
+ * Revision 1.34  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.33  2016-01-29 18:31:23+05:30  Cprogrammer
+ * include queue name in logs
+ *
+ * Revision 1.32  2013-09-23 22:14:20+05:30  Cprogrammer
+ * display queue directory for qmail-todo process
+ *
+ * Revision 1.31  2013-05-16 23:32:53+05:30  Cprogrammer
+ * added log_stat part of non-indimail code
+ *
+ * Revision 1.30  2011-07-29 09:29:54+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
+ * Revision 1.29  2010-06-27 09:08:55+05:30  Cprogrammer
+ * report all recipients in log_stat for single transaction multiple recipient emails
+ *
+ * Revision 1.28  2007-12-20 13:50:59+05:30  Cprogrammer
+ * removed compiler warning
+ *
+ * Revision 1.27  2005-12-29 23:02:51+05:30  Cprogrammer
+ * option for passing headers through queue
+ *
+ * Revision 1.26  2005-03-03 16:11:48+05:30  Cprogrammer
+ * minimum interval in secs for todo run
+ *
+ * Revision 1.25  2004-10-22 20:29:42+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.24  2004-10-22 15:38:20+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.23  2004-07-17 21:21:55+05:30  Cprogrammer
+ * added qqeh code
+ *
+ * Revision 1.22  2004-01-14 23:40:50+05:30  Cprogrammer
+ * delay fsync()
+ *
+ * Revision 1.21  2004-01-02 10:17:10+05:30  Cprogrammer
+ * prevent segmentation fault in log_stat when to or from is null
+ * reset to and from
+ *
+ * Revision 1.20  2003-12-31 20:03:33+05:30  Cprogrammer
+ * added use_fsync to turn on/off use_fsync
+ *
+ * Revision 1.19  2003-12-09 21:27:24+05:30  Cprogrammer
+ * corrected flagsendalive check
+ *
+ * Revision 1.18  2003-10-28 20:02:34+05:30  Cprogrammer
+ * conditional compilation for INDIMAIL
+ *
+ * Revision 1.17  2003-10-23 01:26:54+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.16  2003-10-17 21:06:48+05:30  Cprogrammer
+ * added log_stat function
+ *
+ * Revision 1.15  2003-10-01 19:06:12+05:30  Cprogrammer
+ * changed return type to int
+ * added code for future log_stat
+ *
+ */

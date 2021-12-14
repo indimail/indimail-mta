@@ -679,7 +679,7 @@ mq_todo(char *queue_ident, unsigned int priority)
 	else
 		scan_int(ptr, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
-	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == -1) {
+	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == (mqd_t) -1) {
 		if (!stralloc_copyb(&line, "unable to open message queue ", 29) ||
 				!stralloc_cats(&line, queue_ident) || !stralloc_0(&line))
 			die(51);
