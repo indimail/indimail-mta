@@ -372,6 +372,9 @@ fi
 if [ -s $servicedir/qmail-send.25/variables/QMAILREMOTE ] ; then
 	check_update_if_diff $servicedir/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote
 fi
+if [ ! -f $sysconfdir/control/defaultqueue/DYNAMIC_QUEUE ] ; then
+	> $sysconfdir/control/defaultqueue/DYNAMIC_QUEUE
+fi
 
 default_host=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 default_domain=$(echo $default_host | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
@@ -384,6 +387,9 @@ fi
 
 # qmail-greyd, greydaemon path changed to /usr/sbin
 $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' $servicedir/greylist.1999/run
+
+# qmail-daemon changed to qscheduler -s
+$sed -i 's{/sbin/qmail-daemon{/sbin/qscheduler -s{' $servicedir/qmail-send.25/run
 
 # remove STATUSFILE as .svlock serves the same purpose
 rm -f $servicedir/.svscan/variables/STATUSFILE
