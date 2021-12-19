@@ -98,8 +98,8 @@ static stralloc mailto = { 0 };
 static stralloc newlocals = { 0 };
 static stralloc newvdoms = { 0 };
 static int      dynamic_queue = 0;
-static int      do_readsubdir = 1;
 #ifdef HASLIBRT
+static int      do_readsubdir = 1;
 static mqd_t    mq_queue = (mqd_t)-1;
 static char    *msgbuf;
 static int      msgbuflen;

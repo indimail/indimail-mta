@@ -37,12 +37,13 @@
 #include "auto_qmail.h"
 #include "auto_split.h"
 
-static int      qstart, qcount, qconf, qmax, qload;
+static int      qstart, qcount;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
 static char  **prog_argv;
 #ifdef HASLIBRT
+static int      qconf, qmax, qload;
 static q_type   qtype = fixed;
 static char    *msgbuf;
 static int      msgbuflen;
@@ -353,8 +354,10 @@ set_queue_variables()
 		conf_split = auto_split;
 	getEnvConfigInt(&qcount, "QUEUE_COUNT", QUEUE_COUNT);
 	getEnvConfigInt(&qstart, "QUEUE_START", QUEUE_START);
+#ifdef HASLIBRT
 	getEnvConfigInt(&qmax,   "QUEUE_MAX",   QUEUE_MAX);
 	getEnvConfigInt(&qload,  "QUEUE_LOAD",  QUEUE_LOAD);
+#endif
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
