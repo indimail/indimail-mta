@@ -772,10 +772,14 @@ log_stat(unsigned long id, size_t bytes)
 	*strnum1 = ' ';
 	*strnum2 = ' ';
 	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
+#ifdef HASLIBRT
 		if (compat_mode)
 			mode = " compat mode\n";
 		else
 			mode = do_readsubdir ? " opendir mode\n" : " mqueue mode\n";
+#else
+		mode = " opendir mode\n";
+#endif
 		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>",
 				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2,
 				" bytes ", queuedesc, mode);
