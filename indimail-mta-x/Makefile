@@ -2195,31 +2195,27 @@ slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
 
 socket.lib: \
-trylsock.c compile load
-	( ( ./compile trylsock.c && \
-	./load trylsock -lsocket -lnsl ) >/dev/null 2>&1 \
+trylsock.c
+	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lsocket -lnsl ) >/dev/null 2>&1 \
 	&& echo -lsocket -lnsl || exit 0 ) > socket.lib
 	rm -f trylsock.o trylsock
 
 fts.lib: \
-trylsock.c compile load
-	( ( ./compile trylsock.c && \
-	./load trylsock -lfts ) >/dev/null 2>&1 \
+trylsock.c
+	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lfts ) >/dev/null 2>&1 \
 	&& echo -lfts || exit 0 ) > fts.lib
 	rm -f trylsock.o trylsock
 
 rt.lib: \
-trylsock.c compile load
-	( ( ./compile trylsock.c && \
-	./load trylsock -lrt ) >/dev/null 2>&1 \
+trylsock.c
+	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lrt ) >/dev/null 2>&1 \
 	&& echo -lrt || exit 0 ) > rt.lib
 	rm -f trylsock.o trylsock
 
 haslibrt.h: \
-trylsock.c compile load
-	( ( ./compile trylsock.c && \
-	./load trylsock -lrt ) >/dev/null 2>&1 \
-	&& echo \#define HASLIBRT 1 || exit 0 ) > haslibrt.h
+trylsock.c
+	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lrt ) >/dev/null 2>&1 \
+	&& echo "#define HASLIBRT 1" || exit 0 ) > haslibrt.h
 	rm -f trylsock.o trylsock
 
 tls.lib: \
