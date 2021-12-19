@@ -2389,7 +2389,7 @@ main(int argc, char **argv)
 		switch (opt)
 		{
 			case 'd':
-#ifdef HASLIBRT
+#ifndef HASLIBRT
 				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n");
 				_exit(100);
 #endif
