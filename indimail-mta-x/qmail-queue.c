@@ -639,34 +639,7 @@ set_archive(char *eaddr)
 static char     errbuf[256];
 static struct substdio sserr;
 
-static void
-custom_error(char *flag, char *status, char *code)
-{
-	char           *c;
-
-	if (substdio_put(&sserr, flag, 1) == -1)
-		die(53);
-	if (substdio_put(&sserr, "qmail-queue: ", 13) == -1)
-		die(53);
-	if (substdio_puts(&sserr, status) == -1)
-		die(53);
-	if (code) {
-		if (substdio_put(&sserr, " (#", 3) == -1)
-			die(53);
-		c = (*flag == 'Z') ? "4" : "5";
-		if (substdio_put(&sserr, c, 1) == -1)
-			die(53);
-		if (substdio_put(&sserr, code + 1, 4) == -1)
-			die(53);
-		if (substdio_put(&sserr, ")", 1) == -1)
-			die(53);
-	}
-	if (substdio_flush(&sserr) == -1)
-		die(53);
-	return;
-}
-
-void
+int
 mq_todo(char *queue_ident, unsigned int priority)
 {
 	mqd_t           mqd;
@@ -679,13 +652,8 @@ mq_todo(char *queue_ident, unsigned int priority)
 	else
 		scan_int(ptr, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
-	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == (mqd_t) -1) {
-		if (!stralloc_copyb(&line, "unable to open message queue ", 29) ||
-				!stralloc_cats(&line, queue_ident) || !stralloc_0(&line))
-			die(51);
-		custom_error("Z", line.s, "X.3.0");
-		die(88);
-	}
+	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == (mqd_t) -1)
+		return -1;
 	qmsg.inum = messnum;
 	qmsg.split = messnum % conf_split;
 	for (;;) {
@@ -694,15 +662,9 @@ mq_todo(char *queue_ident, unsigned int priority)
 				continue;
 		} else
 			break;
-		if (!stralloc_copyb(&line, "unable to write to message queue ", 33) ||
-				!stralloc_cats(&line, queue_ident) || !stralloc_0(&line))
-			die(51);
-		custom_error("Z", line.s, "X.3.0");
-		mq_close(mqd);
-		die(88);
+		return -1;
 	}
-	mq_close(mqd);
-	return;
+	return (mq_close(mqd));
 }
 #endif
 
@@ -1138,9 +1100,10 @@ main()
 		triggerpull();
 	else {
 		i = str_rchr(queuedir, '/');
-		if (queuedir[i])
-			mq_todo(queuedir + i, 10);
+		if (!queuedir[i])
+			triggerpull();
 		else
+		if (mq_todo(queuedir + i, 10) == -1)
 			triggerpull();
 	}
 #else

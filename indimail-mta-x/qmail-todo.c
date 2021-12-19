@@ -104,6 +104,7 @@ static mqd_t    mq_queue = (mqd_t)-1;
 static char    *msgbuf;
 static int      msgbuflen;
 static stralloc qfn = { 0 };
+static int      compat_mode = 0;
 #endif
 
 void            log1(char *w);
@@ -663,8 +664,10 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 	unsigned int    priority;
 	int             i;
 
-	if (mq_queue == (mqd_t)-1)
+	if (mq_queue == (mqd_t)-1) {
 		mqueue_init();
+		return 4;
+	}
 #ifdef FREEBSD
 	if (!FD_ISSET(mq_getfd_np(mq_queue), rfds))
 #else
@@ -706,8 +709,9 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 	*id = ((q_msg *) msgbuf)->inum;
 	strnum[i = fmt_ulong(strnum, ((q_msg *) msgbuf)->split)] = 0;
 	if (!stralloc_copyb(&qfn, strnum, i) || !stralloc_0(&qfn)) {
-		log5("warning: ", argv0, ": ", queuedesc,
-			": out of memory. Resetting to opendir mode\n");
+		if (!do_readsubdir)
+			log5("warning: ", argv0, ": ", queuedesc,
+				": out of memory. Resetting to opendir mode\n");
 		do_readsubdir = 1;
 		return -1;
 	}
@@ -746,8 +750,7 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 #ifdef HASLIBRT
 	if (dynamic_queue)
 		mqueue_selprep(nfds, rfds);
-	else
-		trigger_selprep(nfds, rfds);
+	trigger_selprep(nfds, rfds);
 #else
 	trigger_selprep(nfds, rfds);
 #endif
@@ -761,6 +764,7 @@ void
 log_stat(unsigned long id, size_t bytes)
 {
 	char           *ptr;
+	char           *mode;
 	char            strnum1[FMT_ULONG + 1], strnum2[FMT_ULONG + 1];
 
 	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
@@ -768,9 +772,13 @@ log_stat(unsigned long id, size_t bytes)
 	*strnum1 = ' ';
 	*strnum2 = ' ';
 	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
+		if (compat_mode)
+			mode = " compat mode\n";
+		else
+			mode = do_readsubdir ? " opendir mode\n" : " mqueue mode\n";
 		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>",
 				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2,
-				" bytes ", queuedesc, do_readsubdir ? " opendir mode\n" : " mqueue mode\n");
+				" bytes ", queuedesc, mode);
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom.len = mailto.len = 0;
@@ -787,10 +795,10 @@ log_stat(unsigned long id, size_t bytes)
  * -1 - error
  */
 int
-todo_scan(fd_set *rfds, unsigned long *id)
+todo_scan(fd_set *rfds, unsigned long *id, int mq_flag)
 {
 	/*- run todo maximal once every N seconds */
-	if (todo_interval > 0 && recent < nexttodorun)
+	if (!mq_flag && todo_interval > 0 && recent < nexttodorun)
 		return 1;	/* skip todo run this time */
 	if (!flagtododir) {
 		/*- we come here at the beginning or after end of a todo scan */
@@ -810,7 +818,8 @@ todo_scan(fd_set *rfds, unsigned long *id)
 		flagtododir = 0;
 #ifdef HASLIBRT
 		if (dynamic_queue) {
-			log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
+			if (do_readsubdir)
+				log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
 			do_readsubdir = 0;
 		}
 #endif
@@ -867,16 +876,28 @@ todo_do(fd_set *rfds)
 	if (flagstopasap)
 		return 0;
 	if (dynamic_queue && !do_readsubdir) {
-		if ((i = mqueue_scan(rfds, &id)))
-			return i;
-		ptr = qfn.s; /*- split name */
+		/*- if trigger is pulled, set flagtododir to 0 */
+		if (trigger_pulled(rfds) && !(flagtododir = 0) &&
+				!todo_scan(rfds, &id, 1)) { /*- found message without using mq_queue as trigger */
+			if (!compat_mode)
+				log5("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n");
+			compat_mode = 1;
+			ptr = readsubdir_name(&todosubdir);
+		} else {
+			if (compat_mode)
+				log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
+			compat_mode = 0;
+			if ((i = mqueue_scan(rfds, &id))) /*- message pushed and intimated through mq_queue */
+				return i;
+			ptr = qfn.s; /*- split name */
+		}
 	} else {
-		if ((i = todo_scan(rfds, &id))) /*- skip todo run if this returns 1 */
+		if ((i = todo_scan(rfds, &id, 0))) /*- skip todo run if this returns 1 */
 			return i;
 		ptr = readsubdir_name(&todosubdir); /*- split name */
 	}
 #else
-	if ((i = todo_scan(rfds, &id))) /*- skip todo run if this returns 1 */
+	if ((i = todo_scan(rfds, &id, 0))) /*- skip todo run if this returns 1 */
 		return i;
 	ptr = readsubdir_name(&todosubdir); /*- split/id */
 #endif
@@ -1296,7 +1317,7 @@ main(int argc, char **argv)
 		switch (opt)
 		{
 			case 'd':
-#ifdef HASLIBRT
+#ifndef HASLIBRT
 				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n");
 				comm_die(100);
 #endif
@@ -1331,8 +1352,7 @@ main(int argc, char **argv)
 #ifdef HASLIBRT
 	if (dynamic_queue)
 		mqueue_init();
-	else
-		todo_init();   /*- set nexttodorun, open lock/trigger */
+	todo_init();   /*- set nexttodorun, open lock/trigger */
 #else
 	todo_init();   /*- set nexttodorun, open lock/trigger */
 #endif
@@ -1391,7 +1411,12 @@ main(int argc, char **argv)
 			else
 				log5("warning: ", argv0, ": ", queuedesc, ": trouble in select\n");
 		} else {
-			/* we come here on select timeout out or when trigger is pulled */
+			/*-
+			 * we come here on 
+			 * 1. select timeout out 
+			 * 2. when trigger is pulled
+			 * 3. when message using mq_queue is received
+			 */
 			recent = now();
 			/*-
 			 * todo_do returns 2 until files are present in todo subdir
