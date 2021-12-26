@@ -9,23 +9,43 @@ by setting few environment variables and by specifying command-line
 switches to the \fBqscheduler\fR(8) daemon. The command line options can be
 used to configure a set of fixed static queues or increased dynamically
 with load. The load is the ratio of concurrency used and total concurrency
-for a queue. These are actually two ratios - one for local deliveries and
-one for remote deliveries
+configured for a queue. These are actually two ratios - one for local
+deliveries and one for remote deliveries.
 
-.SH Environment Variables
+A queue in \fBindimail\fR is denoted by a number and a base path. The
+compile time default is \fIINDIMAIL/queue\fR, but can be changed by the
+control file \fI@controldir@/queue_base\fR or the environment variable
+\fBQUEUE_BASE\fR. The environment variable takes precedence. The queue
+number and the base path constitutes the actual path for the queue. e.g.
+
+.EX
+queue numbered 1, means INDIMAIL/queue/queue1
+queue numbered 2, means INDIMAIL/queue/queue2
+...
+queue numbered n, means INDIMAIL/queue/queuen
+.EE
+
+The compile time default for the first queue of the multi-queue environment
+is \fIqueue1\fR. This can be changed by setting \fBQUEUE_START\fR
+environment variable. The compile time default for the number of queues
+that indimail uses is 5, which can be changed by setting \fBQUEUE_COUNT\fR
+environment variable.
+
+.SH ENVIRONMENT VARIABLES
 
 The following environment variables are used to configure the queues.
 
 QUEUE_START - defines the first queue that should be used. QUEUE_START=1
-implies that INDIMAIL/queue1 be the first queue
+implies that INDIMAIL/queue/queue1 be the first queue
 
 QUEUE_COUNT - defines the total number of queues that should be used for
-mail delivries. This is the fixed upper limit when \fBqscheduler\fR(8) is
+mail deliveries. This is the fixed upper limit when \fBqscheduler\fR(8) is
 passed the -\fIs\fR argument
 
-\fBqscheduler\fR(8) can be used for configuring mail delivery with fixed
-number of queues or load dependent dynamic queues. The following additional
-environment variables are needed when dynamic queues are used.
+As explained earlier, \fBqscheduler\fR(8) can be used for configuring mail
+delivery with fixed number of queues or load dependent dynamic queues. The
+following additional environment variables are needed when dynamic queues
+are used.
 
 QUEUE_MAX - defines the maximum queues that qscheduler can use for
 deliveries when dynamic queues is configured (-\fId\fR argument to
@@ -53,29 +73,28 @@ This segment is used to store two integers
 .LP
 .nr step 1 1
 .IP \n[step] 2
-\fBqueue count\fR - number of queues used by \fBqscheduler\fR(8). This is a
-dynamic number that is incremented when the total concurrency load goes
-beyond a threshold (defined by \fBQUEUE_LOAD\fR environment variable).
-\fBqscheduler\fR(8) will increase the queue count upto a maximum defined by
-the \fBQUEUE_MAX\fR environment variable
+\fBqueue count\fR - number of queues used by \fBqscheduler\fR(8).
+This value will be the value of \fBQUEUE_COUNT\fR environment variable when
+\fBqscheduler\fR(8) starts. This is a dynamic number that is incremented
+when the total concurrency load goes beyond a threshold (defined by
+\fBQUEUE_LOAD\fR environment variable). \fBqscheduler\fR(8) will increase
+the queue count upto a maximum defined by the \fBQUEUE_MAX\fR environment
+variable.
 
 .IP \n+[step]
 \fBqueue configured\fR - number of queues configured in the system
 .LP
 .RE
 
-The value stored in the first segment (\fBqueue number\fR) is used by
-\fBqmail-multi\fR(8) to select the queue, set the environment variable
-\fBQUEUEDIR\fR, before calling \fBqmail-queue\fR(8).
-
 .PP
 .TP 3
 \fBshared memory\fR /\fBqueue\fR\fIN\fR
-This is created by \fBqscheduler\fR(8) but used \fBqmail-send\fR(8) to
-write its concurrency value and the total concurrency slot configured for
-both local and remote deliveries. The concurrency is incremented whenever a
-job is opened and decremented whenever a job is closed. This is owned by
-qmails:qmail with perm 0644.
+This is created by \fBqscheduler\fR(8) but used by \fBqmail-send\fR(8) to
+write its current concurrency value and the maximum concurrency configured
+(for both local and remote deliveries). The concurrency is incremented
+whenever a job is opened and decremented whenever a job is closed. This is
+owned by qmails:qmail with perm 0644. The queue load is the ratio of
+current concurrency and the maximum concurrency.
 
 .PP
 .TP 3
@@ -87,6 +106,12 @@ concurrency to total concurrency ratio. When the average concurrency load
 reaches \fBQUEUE_LOAD\fR, \fBqscheduler\fR(8) starts a new
 \fBqmail-send\fR(8), \fBqmail-send\fR(8) instance to install a new queue.
 This is owned by root:root with perm 0600.
+
+.PP
+The value stored in the first segment (\fBqueue count\fR) is used by
+\fBqmail-multi\fR(8) to select the queues with the least concurrency and
+set the environment variable \fBQUEUEDIR\fR, before calling
+\fBqmail-queue\fR(8).
 
 .PP
 .TP 3

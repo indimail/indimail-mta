@@ -650,6 +650,10 @@ dynamic_queue()
 		}
 	} else
 		nqueue = 0;
+	/*-
+	 * qmax is QUEUE_MAX compile time default in conf-queue
+	 * or value of QUEUE_MAX env variable if set
+	 */
 	for (qconf = 0; qconf < qmax; qconf++) {
 		qptr = queuenum_to_dir(qconf + 1);
 		if (access(qptr, F_OK)) {
@@ -659,11 +663,15 @@ dynamic_queue()
 			die();
 		}
 	} /*- for (qconf = 0; qconf < qmax; qconf++) */
+	/*- 
+	 * qcount is QUEUE_COUNT compile time default in conf-queue
+	 * or value of QUEUE_COUNT env variable if set
+	 */
 	if (!(shm_queue = (int *) alloc(sizeof(int) * qcount)))
 		nomem();
 	create_ipc();
 	q[0] = qcount; /*- queue count */
-	q[1] = qconf;  /*- total configured queues */
+	q[1] = qconf;  /*- existing no of queues in /var/indimail/queue dir */
 	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) == -1) {
 		strerr_warn1("alert: qscheduler: unable to write to shared memory: ", &strerr_sys);
 		die();

@@ -54,17 +54,17 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 dktest.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
-	indimail-env.5 forward.1 maildirserial.1 mlmatchup.8 new-inject.1 \
-	plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 qmail-cdb.8 \
-	qmail-clean.8 qmail-control.5 qmail-daned.8 qmail-direct.8 \
-	qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 qmail-limits.7 \
-	qmail-local.8 qmail-multi.8 qmail-newmrh.8 qmail-newu.8 \
-	qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 qmail-queue.8 \
-	qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 qmail-smtpd.8 \
-	qmail-spamfilter.8 qmail-srs.5 qmail-start.8 qmail-todo.8 \
-	qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 \
-	recipient-cdb.8 replier.1 rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 \
-	slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8
+	indimail-env.5 forward.1 maildirserial.1 mlmatchup.8 multi-queue.7 \
+	new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 \
+	qmail-cdb.8 qmail-clean.8 qmail-control.5 qmail-daned.8 \
+	qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
+	qmail-limits.7 qmail-local.8 qmail-multi.8 qmail-newmrh.8 \
+	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 \
+	qmail-queue.8 qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 \
+	qmail-smtpd.8 qmail-spamfilter.8 qmail-srs.5 qmail-start.8 \
+	qmail-todo.8 qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
+	queue-fix.8 recipient-cdb.8 replier.1 rrforward.1 rrt.1 run-cleanq.8 \
+	slowq-send.8 slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8
 
 include Makefile.$(SYSTEM)
 
@@ -1770,6 +1770,13 @@ qscheduler.o: \
 compile qscheduler.c qscheduler.h control.h auto_qmail.h readsubdir.h \
 auto_split.h auto_uids.h haslibrt.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qscheduler.c
+
+multi-queue.7: \
+multi-queue.9 conf-sysconfdir conf-qmail
+	cat multi-queue.9 \
+	| sed s}INDIMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> multi-queue.7
 
 get_uid.o: \
 compile get_uid.c auto_uids.h

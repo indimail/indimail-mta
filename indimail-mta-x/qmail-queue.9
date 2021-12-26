@@ -41,6 +41,27 @@ Using FSYNC -
 \fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the fsync(2)
 call to flush data buffers to the disk
 
+.PP
+\fBqmail-queue\fR(8) communicates with \fBqmail-todo\fR(8) when it places a
+message in the outgoing queue using either of the two below methods.
+
+\fBtrigger\fR method - This is used when the environment variable
+\fBDYNAMIC_QUEUE\fR is not set. Every queue in indimail has the path
+\fIlock/trigger\fR pointing to a named pipe. When a message is queued,
+\fBqmail-queue\fR writes a null byte to the pipe which causes
+\fBqmail-todo\fR to wake up and scan the \fItodo\fR subdirectory of the
+queue. This is a disk intensive operation and can overwhelm
+\fBqmail-todo\fR / \fBqmail-send\fR under high injection rate conditions.
+
+\fBmessage queue\fR method - This is used when the environment variable
+\fBDYNAMIC_QUEUE\fR is set. Here \fBqmail-queue\fR communicates the inode
+number and the todo subdirectory name using POSIX message queue
+/queue\fIN\fR. Here \fIN\fR refers to the queue number (See
+\fBmulti-queue\fR(7). qmail-queue uses mq_open(3) to open the message
+queue. This method avoids the need for \fBqmail-todo\fR / \fBqmail-send\fR
+to scan the queue subdirectories for new messages, thereby saving on disk
+IO for better filesystem performance.
+
 .SH CONTROL FILES
 \fBqmail-queue\fR use many control files to provide various features.
 
@@ -899,4 +920,6 @@ qmail-internals(8),
 qmail-multi(8),
 qmail-spamfilter(8),
 qmail-nullqueue(8),
-qmail-direct(8)
+qmail-direct(8),
+multi-queue(7),
+mq_open(3)

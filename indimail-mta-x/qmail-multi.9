@@ -1,32 +1,33 @@
 .TH qmail-multi 8
+
 .SH NAME
 qmail-multi \- queue multiplexor and filter
+
 .SH SYNOPSIS
-.B qmail-multi
+\fBqmail-multi\fR
+
 .SH DESCRIPTION
 \fBqmail-multi(8)\fR is a queue multiplexor and filter for
-\fBIndiMail(7)\fR. The multiplexor can be turned on by defining
-environment variable \fBQMAILQUEUE\fR=PREFIX/sbin/qmail-multi
+\fBqmail-queue(8)\fR. The multiplexor can be turned on by defining
+environment variable \fBQMAILQUEUE\fR=PREFIX/sbin/qmail-multi.
 
 The deposition and balancing of mail across multiple queues is controlled
 by the following environment variables.
 
 .TP 5
-.B QUEUE_BASE
-The base directory having all the indimail queues. If this is not defined,
+\fBQUEUE_BASE\fR The base directory having all the indimail queues. If this is not defined,
 the control file \fIqueue_base\fR is used. This is typically
 QMAILHOME/queue.
 
 .TP 5
-.B QUEUE_START
-This is a number which defines the first queue that should be used.
+\fBQUEUE_START\fR This is a number which defines the first queue that
+should be used.
 
 e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue/queue1
 
 .TP 5
-.B QUEUE_COUNT
-This defines the number of queues that should be used for load
-balancing.
+\fBQUEUE_COUNT\fR This defines the number of queues that should be used for
+load balancing.
 
 e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue/queue1,
 QMAILHOME/queue/queue2, ..., QMAILHOME/queue/queue5
@@ -46,6 +47,20 @@ by accepting mails only when disk space greater than MIN_FREE is present.
 It uses \fBstatfs(2)\fR (\fBstatvfs\fR on solaris) to get the free space on
 the filesystem.
 
+.TP 5
+.B DYNAMIC_QUEUE
+If this is set, \fBqmail-multi\fR(8) uses a queue with the lowest
+concurrency to total concurrency ratio. It uses shm_open(3) to open shared
+memory /\fBqscheduler\fR and /\fBqueue\fR\fIN\fR, where \fIN\fR refers to
+the queue number. The shared memory /\fBqscheduler\fR has the total number
+of queue \fIqcount\fR, written by \fBqscheduler\fR(8). The shared memory
+/\fBqueue\fR\fIN\fR has the current concurrency \fIC\fR, and the maximum
+concurrency \fIM\fR configured for the queue. The concurrency details are
+written to /\fBqueue\fR\fIN\fR shared memory by \fBqmail-send\fR(8)
+\fBqmail-queue\fR cycles through \fIqcount\fR queues and selects the queue
+with the lowest \fIC\fR / \fIM\fR ratio.
+
+.PP
 \fBqmail-multi\fR is actually a wrapper for \fBqmail-queue\fR to manage
 multiple queues. \fIN\fR queues can be set up in QMAILHOME as queue\fI1\fR,
 queue\fI2\fR, ... queue\fIN\fR. \fBqmail-multi\fR does load balancing
@@ -151,7 +166,9 @@ qscanq(8),
 cleanq(8),
 bogofilter(1),
 queue-fix(8),
-spawn-filter(8)
+spawn-filter(8),
+qscheduler(8),
+multi-queue(7)
 
 .SH "AUTHORS"
 
