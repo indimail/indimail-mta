@@ -754,11 +754,13 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 #else
 	trigger_selprep(nfds, rfds);
 #endif
+#ifdef HASLIBRT
 	if (!do_readsubdir) {
 		if (*wakeup < recent + SLEEP_FOREVER)
 			*wakeup = recent + SLEEP_FOREVER;
 		return;
 	}
+#endif
 	if (flagtododir)
 		*wakeup = 0;
 	if (*wakeup > nexttodorun)
