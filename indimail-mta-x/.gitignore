@@ -667,3 +667,4 @@ qscheduler
 qscheduler.o
 rt.lib
 haslibrt.h
+multi-queue.7
