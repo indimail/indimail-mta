@@ -134,7 +134,7 @@ static char     fnbounce[FMTQFN];
 static char     inbuf[1024];
 static stralloc sender = { 0 };
 static datetime_sec curtime;
-static int      flagbounce, doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0;
+static int      flagbounce, doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0, silent = 0;
 static unsigned long   id;
 static unsigned long   size;
 static stralloc stats = { 0 };
@@ -217,6 +217,8 @@ fmtstats(char *s)
 void
 out(char *s, unsigned int n)
 {
+	if (silent)
+		return;
 	while (n > 0) {
 		substdio_put(subfdout, ((*s >= 32) && (*s <= 126)) ? s : "_", 1);
 		--n;
@@ -227,6 +229,8 @@ out(char *s, unsigned int n)
 void
 putstats()
 {
+	if (silent)
+		return;
 	if (!stralloc_ready(&stats, fmtstats(FMT_LEN)))
 		strerr_die2x(111, FATAL, "out of memory");
 	stats.len = fmtstats(stats.s);
@@ -253,9 +257,12 @@ get_arguments(int argc, char **argv)
 
 	errflag = 0;
 	doTodo = doCount = doLocal = doRemote = 0;
-	while (!errflag && (c = getopt(argc, argv, "calrt")) != opteof) {
+	while (!errflag && (c = getopt(argc, argv, "calrst")) != opteof) {
 		switch (c)
 		{
+		case 's':
+			silent = 1;
+			break;
 		case 'c':
 			doCount = 1;
 			break;
@@ -420,7 +427,8 @@ main(int argc, char **argv)
 						case 'D':
 							if (!flag++)
 								putstats();
-							substdio_puts(subfdout, "  done");
+							if (!silent)
+								substdio_puts(subfdout, "  done");
 						case 'T':
 							if (!flag++)
 								putstats();
@@ -428,9 +436,11 @@ main(int argc, char **argv)
 								rCount++;
 							else
 								lCount++;
-							substdio_puts(subfdout, channel ? "\tremote\t" : "\tlocal\t");
-							substdio_puts(subfdout, line.s + 1);
-							substdio_puts(subfdout, "\n");
+							if (!silent) {
+								substdio_puts(subfdout, channel ? "\tremote\t" : "\tlocal\t");
+								substdio_puts(subfdout, line.s + 1);
+								substdio_puts(subfdout, "\n");
+							}
 							break;
 						}
 					}
@@ -440,7 +450,8 @@ main(int argc, char **argv)
 		}
 	} /*- while (x = readsubdir_next(&rs, &id)) */
 	if (!doTodo && !doCount) {
-		substdio_flush(subfdout);
+		if (!silent)
+			substdio_flush(subfdout);
 		return(0);
 	}
 	flagbounce = 0;
@@ -486,14 +497,17 @@ main(int argc, char **argv)
 						case 'D':
 							if (!flag++)
 								putstats();
-							substdio_puts(subfdout, "  done");
+							if (!silent)
+								substdio_puts(subfdout, "  done");
 						case 'T':
 							if (!flag++)
 								putstats();
 							tCount++;
-							substdio_puts(subfdout, "\ttodo\t");
-							substdio_puts(subfdout, line.s + 1);
-							substdio_puts(subfdout, "\n");
+							if (!silent) {
+								substdio_puts(subfdout, "\ttodo\t");
+								substdio_puts(subfdout, line.s + 1);
+								substdio_puts(subfdout, "\n");
+							}
 							break;
 						}
 					}
