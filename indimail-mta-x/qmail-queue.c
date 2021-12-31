@@ -248,12 +248,16 @@ receivedfmt(char *s)
 		if (s)
 			s += i;
 	} else {
+		i = fmt_str(s, "(");
+		len += i;
+		if (s)
+			s += i;
 		if (!tcpremoteip)
 			tcpremoteip = env_get("TCPREMOTEIP");
 		if (!tcpremoteip)
 			tcpgetremoteip();
 		if (tcpremoteip) {
-			i = fmt_str(s, "(from ");
+			i = fmt_str(s, "from ");
 			len += i;
 			if (s)
 				s += i;
@@ -261,8 +265,12 @@ receivedfmt(char *s)
 			len += i;
 			if (s)
 				s += i;
+			i = fmt_str(s, ", ");
+			len += i;
+			if (s)
+				s += i;
 		}
-		i = fmt_str(s, " uid=");
+		i = fmt_str(s, "uid=");
 		len += i;
 		if (s)
 			s += i;
