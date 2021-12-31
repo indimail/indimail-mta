@@ -104,7 +104,7 @@ static mqd_t    mq_queue = (mqd_t)-1;
 static char    *msgbuf;
 static int      msgbuflen;
 static stralloc qfn = { 0 };
-static int      compat_mode = 0;
+static int      compat_mode = 2; /*- default is to not run in compat mode */
 #endif
 
 void            log1(char *w);
@@ -780,7 +780,7 @@ log_stat(unsigned long id, size_t bytes)
 	*strnum2 = ' ';
 	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
 #ifdef HASLIBRT
-		if (compat_mode)
+		if (compat_mode == 1)
 			mode = " compat mode\n";
 		else
 			mode = do_readsubdir ? " opendir mode\n" : " mqueue mode\n";
@@ -888,16 +888,17 @@ todo_do(fd_set *rfds)
 		return 0;
 	if (dynamic_queue && !do_readsubdir) {
 		/*- if trigger is pulled, set flagtododir to 0 */
-		if (trigger_pulled(rfds) && !(flagtododir = 0) &&
+		if (compat_mode < 2 && trigger_pulled(rfds) && !(flagtododir = 0) &&
 				!todo_scan(rfds, &id, 1)) { /*- found message without using mq_queue as trigger */
 			if (!compat_mode)
 				log5("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n");
 			compat_mode = 1;
 			ptr = readsubdir_name(&todosubdir);
 		} else {
-			if (compat_mode)
+			if (compat_mode == 1) {
+				compat_mode = 0;
 				log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
-			compat_mode = 0;
+			}
 			if ((i = mqueue_scan(rfds, &id))) /*- message pushed and intimated through mq_queue */
 				return i;
 			ptr = qfn.s; /*- split name */
@@ -1306,6 +1307,10 @@ main(int argc, char **argv)
 		conf_split = auto_split;
 	strnum[fmt_ulong(strnum, conf_split)] = 0;
 	log7("info: ", argv0, ": ", queuedesc, ": conf split=", strnum, "\n");
+#ifdef USE_FSYNC
+	if (env_get("USE_FSYNC"))
+		use_fsync = 1;
+#endif
 	if (!getcontrols()) {
 		log5("alert: ", argv0, ": ", queuedesc,
 				": cannot start: unable to read controls or out of memory\n");
@@ -1317,16 +1322,17 @@ main(int argc, char **argv)
 				queuedir, ": ", error_str(errno), "\n");
 		comm_die(111);
 	}
-#ifdef USE_FSYNC
-	if (env_get("USE_FSYNC"))
-		use_fsync = 1;
-#endif
 	sig_pipeignore();
 	umask(077);
 
-	while ((opt = getopt(argc, argv, "sd")) != opteof) {
+	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
+			case 'c':
+#ifdef HASLIBRT
+				compat_mode = 0; /*- run in compat mode */
+#endif
+				break;
 			case 'd':
 #ifndef HASLIBRT
 				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n");
