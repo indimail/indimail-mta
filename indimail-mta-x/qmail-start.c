@@ -64,6 +64,7 @@
 #include <prot.h>
 #include <sgetopt.h>
 #include <noreturn.h>
+#include "haslibrt.h"
 #include "auto_uids.h"
 #include "setuserid.h"
 
@@ -190,9 +191,13 @@ main(int argc, char **argv)
 		die();
 	if (fd_copy(8,0) == -1)
 		die();
-	while ((opt = getopt(argc, argv, "ds")) != opteof) {
+#ifdef HASLIBRT
+	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
+			case 'c':
+				qtargs[i++] = "-c";
+				break;
 			case 'd':
 				qsargs[i] = "-d";
 				qtargs[i] = "-d";
@@ -205,6 +210,7 @@ main(int argc, char **argv)
 				break;
 		}
 	}
+#endif
 	argc -= optind;
 	argv += optind; /*- first arg excluding -d, -s will be argv[0] */
 	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
