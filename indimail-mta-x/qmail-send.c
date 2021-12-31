@@ -1344,12 +1344,11 @@ del_start(int j, seek_pos mpos, char *recip)
 	del[c][i].used = 1;
 	++concurrencyused[c];
 #ifdef HASLIBRT
+	/*- write the concurrency used for local/remote at offset 0, 1 */
 	offset = c * sizeof(int);
 	q = concurrencyused[c];
-	if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1)) {
-		log5("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory, sleeping...\n");
-		sleep(10);
-	}
+	if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1))
+		log5("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory\n");
 #endif
 	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
 	strnum1[fmt_ulong(strnum1, del[c][i].delid)] = 0;
@@ -1469,6 +1468,7 @@ del_dochan(int c)
 				del[c][delnum].used = 0;
 				--concurrencyused[c];
 #ifdef HASLIBRT
+				/*- write the concurrency used for local/remote at offset 0, 1 */
 				offset = c * sizeof(int);
 				q = concurrencyused[c];
 				if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1)) {
@@ -2344,6 +2344,7 @@ main(int argc, char **argv)
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
 	if (*queuedesc == '/') {
 #ifdef HASLIBRT
+	if (dynamic_queue)
 		shm_init(queuedesc);
 #endif
 		queuedesc++;
@@ -2385,9 +2386,11 @@ main(int argc, char **argv)
 #endif
 	umask(077);
 
-	while ((opt = getopt(argc, argv, "sd")) != opteof) {
+	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
+			case 'c':
+				break;
 			case 'd':
 #ifndef HASLIBRT
 				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n");
@@ -2444,9 +2447,6 @@ main(int argc, char **argv)
 			concurrency[c] = u;
 		numjobs += concurrency[c];
 	} /*- for (c = 0; c < CHANNELS; ++c) */
-#ifdef HASLIBRT
-	shm_init(queuedesc);
-#endif
 	fnmake_init();  /*- initialize fn1, fn2 */
 	comm_init();    /*- assign fd 5 to queue comm to, 6 to queue comm from */
 	pqstart();      /*- add files from info/split for processing */
