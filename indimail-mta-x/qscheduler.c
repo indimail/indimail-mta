@@ -50,8 +50,9 @@ static int      msgbuflen;
 static mqd_t    mq_sch = (mqd_t) -1;
 static int      shm_conf = -1;
 static int     *shm_queue;
+static int      compat_mode;
 #endif
-static char     strnum[FMT_ULONG];
+static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static readsubdir todosubdir;
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
@@ -67,93 +68,6 @@ static char    *(qsargs[]) = { "qmail-start", "-s", "./Mailbox", 0};
 char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
 
 void            start_send(int queueNum, pid_t pid);
-
-void
-sigterm()
-{
-	int             i;
-
-	flagexitasap = 1;
-	sig_block(sig_child);
-	sig_block(sig_term);
-#ifdef HASLIBRT
-	for (i = 0; i < qcount; i++)
-		close(shm_queue[i]);
-	if (mq_sch != (mqd_t) -1)
-		mq_close(mq_sch);
-	if (shm_conf != -1)
-		close(shm_conf);
-#endif
-	for (i = 0; queue_table && i <= qcount;i++) {
-		if (queue_table[i].pid == -1)
-			continue;
-		kill(queue_table[i].pid, sig_term);
-	}
-	sig_unblock(sig_child);
-}
-
-void
-sigalrm()
-{
-	int             i;
-
-	sig_block(sig_alarm);
-	for (i = 0; queue_table && i <= qcount;i++) {
-		if (queue_table[i].pid == -1)
-			continue;
-		kill(queue_table[i].pid, sig_alarm);
-	}
-	sig_unblock(sig_alarm);
-}
-
-void
-sighup()
-{
-	int             i;
-
-	sig_block(sig_child);
-	for (i = 0; queue_table && i <= qcount;i++) {
-		if (queue_table[i].pid == -1)
-			continue;
-		kill(queue_table[i].pid, sig_hangup);
-	}
-	sig_unblock(sig_child);
-}
-
-void
-sigint()
-{
-	int             i;
-
-	sig_block(sig_int);
-	for (i = 0; queue_table && i <= qcount;i++) {
-		if (queue_table[i].pid == -1)
-			continue;
-		kill(queue_table[i].pid, sig_int);
-	}
-	sig_unblock(sig_int);
-}
-
-void
-sigchld()
-{
-	int             child, wstat;
-
-	sig_block(sig_child);
-	for (; !flagexitasap;) {
-		if ((child = wait_nohang(&wstat)) == -1)
-			break;
-		if (!child || flagexitasap)
-			break;
-		start_send(-1, child);
-		sleep(1);
-	} /*- for (child = 0;;) */
-	for (; flagexitasap;) {
-		if ((child = wait_nohang(&wstat)) == -1)
-			break;
-	}
-	sig_unblock(sig_child);
-}
 
 void
 log_out(char *s)
@@ -175,15 +89,134 @@ void
 log_announce(int pid, char *qdir, unsigned long load, int died)
 {
 	log_out("info: qscheduler: pid ");
-	strnum[fmt_ulong(strnum, pid)] = 0;
-	log_out(strnum);
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	log_out(strnum1);
 	log_out(", queue ");
 	log_out(qdir);
 	log_out(", load=");
-	strnum[fmt_ulong(strnum, load)] = 0;
-	log_out(strnum);
+	strnum1[fmt_ulong(strnum1, load)] = 0;
+	log_out(strnum1);
 	log_outf(died ? " died\n" : " started\n");
 
+}
+
+void
+sigterm()
+{
+	int             i;
+
+	flagexitasap = 1;
+	sig_block(sig_child);
+	sig_block(sig_term);
+	log_outf("alert: qscheduler: got SIGTERM\n");
+#ifdef HASLIBRT
+	if (shm_queue) {
+		for (i = 0; i < qcount; i++)
+			close(shm_queue[i]);
+	}
+	if (mq_sch != (mqd_t) -1)
+		mq_close(mq_sch);
+	if (shm_conf != -1)
+		close(shm_conf);
+#endif
+	for (i = 0; queue_table && i <= qcount;i++) {
+		if (queue_table[i].pid == -1)
+			continue;
+		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
+		log_out("info: qscheduler: issue SIGTERM to ");
+		log_out(strnum1);
+		log_outf("\n");
+		kill(queue_table[i].pid, sig_term);
+	}
+	sig_unblock(sig_child);
+}
+
+void
+sigalrm()
+{
+	int             i;
+
+	sig_block(sig_alarm);
+	log_outf("alert: qscheduler: got SIGALARM\n");
+	for (i = 0; queue_table && i <= qcount;i++) {
+		if (queue_table[i].pid == -1)
+			continue;
+		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
+		log_out("info: qscheduler: issue SIGALRM to ");
+		log_out(strnum1);
+		log_outf("\n");
+		kill(queue_table[i].pid, sig_alarm);
+	}
+	sig_unblock(sig_alarm);
+}
+
+void
+sighup()
+{
+	int             i;
+
+	sig_block(sig_child);
+	log_outf("alert: qscheduler: got SIGHUP\n");
+	for (i = 0; queue_table && i <= qcount;i++) {
+		if (queue_table[i].pid == -1)
+			continue;
+		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
+		log_out("info: qscheduler: issue SIGHUP to ");
+		log_out(strnum1);
+		log_outf("\n");
+		kill(queue_table[i].pid, sig_hangup);
+	}
+	sig_unblock(sig_child);
+}
+
+void
+sigint()
+{
+	int             i;
+
+	sig_block(sig_int);
+	log_outf("alert: qscheduler: got SIGINT\n");
+	for (i = 0; queue_table && i <= qcount;i++) {
+		if (queue_table[i].pid == -1)
+			continue;
+		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
+		log_out("info: qscheduler: issue SIGINT to ");
+		log_out(strnum1);
+		log_outf("\n");
+		kill(queue_table[i].pid, sig_int);
+	}
+	sig_unblock(sig_int);
+}
+
+void
+sigchld()
+{
+	int             child, wstat;
+
+	sig_block(sig_child);
+	log_outf("alert: qscheduler: got SIGCHLD\n");
+	for (; !flagexitasap;) {
+		if ((child = wait_nohang(&wstat)) == -1)
+			break;
+		if (!child || flagexitasap)
+			break;
+		start_send(-1, child);
+		sleep(1);
+	} /*- for (child = 0;;) */
+	for (; flagexitasap;) {
+		if ((child = wait_nohang(&wstat)) == -1) {
+			if (errno == error_intr)
+				continue;
+			break;
+		}
+		if (child) {
+			strnum1[fmt_ulong(strnum1, child)] = 0;
+			log_out("info: qscheduler: Reaping pid ");
+			log_out(strnum1);
+			log_outf("\n");
+		}
+	}
+	sig_unblock(sig_child);
 }
 
 no_return void
@@ -195,9 +228,9 @@ die()
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
 			continue;
-		strnum[fmt_ulong(strnum, queue_table[i].pid)] = 0;
+		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
 		log_out("info: qscheduler: issue SIGTERM to ");
-		log_out(strnum);
+		log_out(strnum1);
 		log_outf("\n");
 		kill(queue_table[i].pid, sig_term);
 	}
@@ -240,7 +273,7 @@ queuenum_to_dir(int queue_no)
 		envQueue.len = save;
 	if (queue_no) {
 		if (!stralloc_catb(&envQueue, "/queue", 6) ||
-				!stralloc_catb(&envQueue, strnum, fmt_ulong(strnum, (unsigned long) queue_no)) ||
+				!stralloc_catb(&envQueue, strnum1, fmt_ulong(strnum1, (unsigned long) queue_no)) ||
 				!stralloc_0(&envQueue))
 			nomem();
 	} else
@@ -306,8 +339,8 @@ start_send(int queueNum, pid_t pid)
 				break;
 		}
 		if (queue_table[i].pid != pid) {
-			strnum[fmt_ulong(strnum, pid)] = 0;
-			strerr_warn2("alert: qscheduler: could not locate pid ", strnum, 0); 
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_warn2("alert: qscheduler: could not locate pid ", strnum1, 0); 
 			die();
 		}
 		queue_no = i;
@@ -394,14 +427,14 @@ static_queue()
 	} else
 		nqueue = 0;
 	log_out("info: qscheduler: static queues qStart/qCount ");
-	strnum[fmt_ulong(strnum, qstart)] = 0;
-	log_out(strnum);
+	strnum1[fmt_ulong(strnum1, qstart)] = 0;
+	log_out(strnum1);
 	log_out("/");
-	strnum[fmt_ulong(strnum, qcount)] = 0;
-	log_out(strnum);
+	strnum1[fmt_ulong(strnum1, qcount)] = 0;
+	log_out(strnum1);
 	log_out(nqueue ? " nqueue+ conf split=" : " nqueue- conf split=");
-	strnum[fmt_ulong(strnum, conf_split)] = 0;
-	log_out(strnum);
+	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
+	log_out(strnum1);
 	log_outf("\n");
 	if (!(queue_table = (qtab *) alloc(sizeof(qtab) * (qcount + 1))))
 		nomem();
@@ -446,9 +479,9 @@ queue_fix(char *queuedir)
 	int             wstat, exitcode;
 
 	sig_block(sig_int);
-	strnum[fmt_ulong(strnum, conf_split)] = 0;
+	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	log_out("info: queue-fix: conf split=");
-	log_out(strnum);
+	log_out(strnum1);
 	log_out(", queuedir=");
 	log_out(queuedir);
 	log_outf("\n");
@@ -464,8 +497,8 @@ queue_fix(char *queuedir)
 		sig_catch(sig_int, SIG_DFL);
 		if (chdir(auto_qmail) == -1)
 			strerr_die3sys(111, "alert: qscheduler: queue-fix: chdir ", auto_qmail, ": ");
-		strnum[fmt_int(strnum, conf_split)] = 0;
-		qfargs[2] = strnum;
+		strnum1[fmt_int(strnum1, conf_split)] = 0;
+		qfargs[2] = strnum1;
 		qfargs[3] = queuedir;
 		execvp(*qfargs, qfargs); /*- queue-fix */
 		strerr_die3sys(111, "alert: qscheduler: execv ", *qfargs, ": ");
@@ -481,8 +514,8 @@ queue_fix(char *queuedir)
 	}
 	exitcode = wait_exitcode(wstat);
 	if (exitcode) {
-		strnum[fmt_int(strnum, exitcode)] = 0;
-		strerr_warn4("alert: qscheduler: queue-fix exit code ", strnum, ": trouble fixing queue directory ", queuedir, 0);
+		strnum1[fmt_int(strnum1, exitcode)] = 0;
+		strerr_warn4("alert: qscheduler: queue-fix exit code ", strnum1, ": trouble fixing queue directory ", queuedir, 0);
 		die();
 	} else
 		strerr_warn2("info: qcheduler: queue-fix: queue OK ", queuedir, 0);
@@ -581,7 +614,7 @@ create_ipc()
 			}
 			mq_close(mq_queue);
 		}
-	}
+	} /*- for (j = 0; j < qcount; j++) */
 
 	/*- message queue /qscheduler for communication between qscheduler, qmail-send */
 	if ((mq_sch = mq_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0600, NULL)) == (mqd_t) -1) {
@@ -640,7 +673,7 @@ dynamic_queue()
 	int             i, r, nqueue, q[2];
 	char           *qptr;
 
-	qsargs[1] = "-d";
+	qsargs[1] = compat_mode ? "-cd" : "-d";
 	if (env_get("SPAMFILTER")) {
 		qptr = queuenum_to_dir(0);
 		nqueue = !access(qptr, F_OK);
@@ -677,14 +710,14 @@ dynamic_queue()
 		die();
 	}
 	log_out(nqueue? "info: qscheduler: dynamic queues nqueue+ qcount=" : "info: qscheduler: dynamic queues nqueue- qcount=");
-	strnum[fmt_int(strnum, qcount)] = 0;
-	log_out(strnum);
+	strnum1[fmt_int(strnum1, qcount)] = 0;
+	log_out(strnum1);
 	log_out(", qconf=");
-	strnum[fmt_int(strnum, qconf)] = 0;
-	log_out(strnum);
+	strnum1[fmt_int(strnum1, qconf)] = 0;
+	log_out(strnum1);
 	log_out(", conf split=");
-	strnum[fmt_ulong(strnum, conf_split)] = 0;
-	log_out(strnum);
+	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
+	log_out(strnum1);
 	log_outf("\n");
 	if (!(queue_table = (qtab *) alloc(sizeof(qtab) * (qcount + 1))))
 		nomem();
@@ -722,10 +755,17 @@ dynamic_queue()
 			strerr_warn1("alert: qscheduler: unable to read message queue: ", &strerr_sys);
 			die();
 		}
-		queue_table[((qtab *) msgbuf)->queue_no].load += ((qtab *) msgbuf)->load;
+		queue_table[((qtab *) msgbuf)->queue_no].load = ((qtab *) msgbuf)->load;
 		for (i = 1, total_load = 0; i <= qcount; i++)
 			total_load += queue_table[i].load;
+		strnum1[fmt_int(strnum1, total_load)] = 0;
+		strnum2[fmt_int(strnum2, qcount * qload)] = 0;
 		if (total_load > qcount * qload && qcount < qmax) {
+			log_out("alert: qscheduler: average load ");
+			log_out(strnum1);
+			log_out(" exceeds threshold (> ");
+			log_out(strnum2);
+			log_outf(")\n");
 			qptr = queuenum_to_dir(qcount + 1);
 			r = 0; /*- flag for queue creation */
 			if (access(qptr, F_OK)) {
@@ -752,6 +792,12 @@ dynamic_queue()
 					die();
 				}
 			}
+		} else {
+			log_out("info: qscheduler: average load ");
+			log_out(strnum1);
+			log_out(" within limits (<= ");
+			log_out(strnum2);
+			log_outf(")\n");
 		}
 		printf("msg[queue_no=%d load=%ld] priority=%d qcount=%d\n", ((qtab *) msgbuf)->queue_no, ((qtab *) msgbuf)->load, priority, qcount);
 	} /*- for (; !flagexitasap;) */
@@ -782,9 +828,12 @@ main(int argc, char **argv)
 	if (lock_exnb(fd) == -1)
 		strerr_die1x(111, "alert: cannot start: qscheduler is already running\n");
 #ifdef HASLIBRT
-	while ((opt = getopt(argc, argv, "ds")) != opteof) {
+	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
+			case 'c':
+				compat_mode = 1;
+				break;
 			case 'd':
 				qtype = dynamic;
 				break;
