@@ -1982,7 +1982,7 @@ compile fn_handler.c
 	./compile fn_handler.c
 
 qmail-start: \
-load qmail-start.o auto_uids.o get_uid.o
+load qmail-start.o auto_uids.o get_uid.o haslibrt.h
 	./load qmail-start auto_uids.o get_uid.o -lqmail
 
 qmail-start.8: \
