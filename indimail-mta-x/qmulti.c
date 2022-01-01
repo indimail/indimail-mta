@@ -295,7 +295,7 @@ queueNo_from_shm()
 			_exit(88);
 		}
 		if (read(shm, (char *) q, sizeof(int) * 4) == -1) {
-			custom_error("Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
+			custom_error("Z", "failed to read POSIX shared memory segment ", shm_name, "X.3.0");
 			_exit(88);
 		}
 		close(shm);
@@ -343,11 +343,11 @@ no_return int
 qmulti(char *queue_env, int argc, char **argv)
 {
 	char            strnum[FMT_ULONG];
-	char           *qqargs[2] = { 0, 0 };
 	char           *ptr, *qbase;
 	int             queueNo;
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
-	char           *binqqargs[2] = { "sbin/qmail-multi", 0 };
+	char           *qqargs[3] = { "sbin/qmail-queue", 0, NULL };
+	char           *binqqargs[2] = { "sbin/qmail-multi", NULL };
 
 	if (chdir(auto_qmail) == -1)
 		_exit(61);
@@ -394,6 +394,7 @@ qmulti(char *queue_env, int argc, char **argv)
 		env_put(Queuedir.s);
 		ptr = Queuedir.s + 9;
 	}
+	qqargs[1] = ptr;
 	switch (getfreespace(ptr))
 	{
 	case -1:
@@ -401,9 +402,11 @@ qmulti(char *queue_env, int argc, char **argv)
 	case 1: /*- Disk full */
 		_exit(53);
 	}
-	if (!(qqargs[0] = env_get("QUEUEPROG")))
-		qqargs[0] = "sbin/qmail-queue";
-	execv(*qqargs, argv);
+	if ((ptr = env_get("QUEUEPROG"))) {
+		argv[0] = qqargs[0] = ptr;
+		execv(*qqargs, argv);
+	} else
+		execv(*qqargs, qqargs);
 	_exit(120);
 }
 
