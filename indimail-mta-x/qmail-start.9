@@ -5,7 +5,7 @@ qscheduler \- Turn on mail delivery with fixed number of queues or load dependen
 
 .SH SYNOPSIS
 .B qmail-start
-[ -\fBs\fR | -\fBd\fR
+[ -\fBs\fR] | [-\fBc\fR]-\fBd\fR
 [ \fIdefaultdelivery\fR ]
 [
 .I logger arg ...
@@ -13,7 +13,7 @@ qscheduler \- Turn on mail delivery with fixed number of queues or load dependen
 ]
 
 .B qscheduler
-[ -\fBs\fR | -\fBd\fR
+[ -\fBs\fR | [-\fBc\fR]-\fBd\fR
 [ \fIdefaultdelivery\fR ]
 [
 .I logger arg ...
@@ -83,6 +83,17 @@ complete overview.
 
 .PP
 .TP 3
+\fB\-c\fR
+When using dynamic queues, this enables compatability mode with the
+traditional method of using the \fIlock/trigger\fR fifo in the queue
+directory. This allows \fBqmail-queue\fR running in non-dynamic mode to
+trigger scan of the todo directory by \fBqmail-todo\fR. Use this when your
+system has qmail, netqmail or old qmail-queue clients injecting emails.
+Using compatability mode doesn't give you the full performance benefits
+when system is configured to use POSIX IPC for dynamic queues.
+
+.PP
+.TP 3
 \fIdefaultdelivery\fR
 If \fIdefaultdelivery\fR is supplied, \fBqmail-start\fR or
 \fBqscheduler\fR passes it to \fBqmail-lspawn\fR.
@@ -129,6 +140,18 @@ environment if you run \fBqmail-start\fR manually:
 .br
    (all on one line)
 .EE
+
+.SH CONTROL FILES
+.PP
+.TP 3
+\fBmsgqueuelen\fR
+The maximum message queue length of POSIX message queue /queue\fIN\fR,
+where \fIN\fR is the queue number of the queue.
+
+.TP 3
+\fBmsgqueuesize\fR
+The maximum message size of POSIX message queue /queue\fIN\fR, where
+\fIN\fR is the queue number of the queue
 
 .SH Supplementary Groups
 If you set the environment variable \fBUSE_SETGROUPS\fR, \fBqmail-start\fR
