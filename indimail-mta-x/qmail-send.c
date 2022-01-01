@@ -2310,6 +2310,7 @@ shm_init(char *shm_name)
 {
 	int             q[4];
 
+	/*- /queue1, /queue2, etc */
 	if ((shm_queue = shm_open(shm_name, O_WRONLY, 0600)) == -1) {
 		log9("alert: ", argv0, ": ", queuedesc, ": failed to open POSIX shared memory ", shm_name, ": ", error_str(errno), "\n");
 		_exit(111);
@@ -2342,13 +2343,8 @@ main(int argc, char **argv)
 	/*- get basename of queue directory to define qmail-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
-	if (*queuedesc == '/') {
-#ifdef HASLIBRT
-	if (dynamic_queue)
-		shm_init(queuedesc);
-#endif
+	if (*queuedesc == '/')
 		queuedesc++;
-	}
 	if (chdir(auto_qmail) == -1) {
 		log9("alert: ", argv0, ": ", queuedesc, ": cannot start: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
 		_exit(111);
@@ -2447,6 +2443,10 @@ main(int argc, char **argv)
 			concurrency[c] = u;
 		numjobs += concurrency[c];
 	} /*- for (c = 0; c < CHANNELS; ++c) */
+#ifdef HASLIBRT
+	if (dynamic_queue)
+		shm_init(queuedesc - 1);
+#endif
 	fnmake_init();  /*- initialize fn1, fn2 */
 	comm_init();    /*- assign fd 5 to queue comm to, 6 to queue comm from */
 	pqstart();      /*- add files from info/split for processing */
