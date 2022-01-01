@@ -167,7 +167,10 @@ main(int argc, char **argv)
 	char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
 	char           *(qtargs[]) = { "qmail-todo", 0, 0, 0};
 	gid_t          *gidset;
-	int             ngroups, opt, i = 1;
+	int             ngroups, i = 1;
+#ifdef HASLIBRT
+	int             opt;
+#endif
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
