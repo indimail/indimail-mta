@@ -42,6 +42,7 @@ static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
 static char  **prog_argv;
+static char     strnum1[FMT_ULONG];
 #ifdef HASLIBRT
 static int      qconf, qmax, qload;
 static q_type   qtype = fixed;
@@ -51,8 +52,8 @@ static mqd_t    mq_sch = (mqd_t) -1;
 static int      shm_conf = -1;
 static int     *shm_queue;
 static int      compat_mode;
+static char     strnum2[FMT_ULONG];
 #endif
-static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static readsubdir todosubdir;
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
@@ -524,18 +525,35 @@ queue_fix(char *queuedir)
 
 #ifdef HASLIBRT
 void
-create_ipc()
+create_ipc(int *msgqueue_len, int *msgqueue_size)
 {
 	char            ipc_name[FMT_ULONG + 6], shm_dev_name[FMT_ULONG + 6 + 8],
 					mq_dev_name[FMT_ULONG + 6 + 11]; /*- /queue + /dev/mqueue */
 	char           *s;
 	int             i, j;
+	struct mq_attr  attr;
 	mqd_t           mq_queue;
 
 	if (uidinit(1, 1) == -1 || auto_uidq == -1 || auto_uids == -1 || auto_gidq == -1) {
 		strerr_warn1("alert: qscheduler: failed to get uids, gids: ", &strerr_sys);
 		die();
 	}
+	if ((i = control_readint(msgqueue_len, "msgqueuelen")) == -1) {
+		strerr_warn1("alert: qscheduler: failed to open control file msgqueuelen: ", &strerr_sys);
+		die();
+	} else
+	if (!i)
+		*msgqueue_len = 65534;
+	if ((i = control_readint(msgqueue_size, "msgqueuesize")) == -1) {
+		strerr_warn1("alert: qscheduler: failed to open control file msgqueuelen: ", &strerr_sys);
+		die();
+	} else
+	if (!i)
+		*msgqueue_size = 1024;
+	attr.mq_flags = 0;
+	attr.mq_maxmsg = *msgqueue_len;
+	attr.mq_msgsize = *msgqueue_size;
+	attr.mq_curmsgs = 0;
 	for (j = 0; j < qcount; j++) {
 		s = ipc_name;
 		i = fmt_str(s, "/queue");
@@ -580,7 +598,7 @@ create_ipc()
 			die();
 		}
 		/*- message queue for communication between qmail-todo, qmail-queue */
-		if ((mq_queue = mq_open(ipc_name, O_CREAT|O_EXCL|O_RDWR,  0640, NULL)) == (mqd_t) -1) {
+		if ((mq_queue = mq_open(ipc_name, O_CREAT|O_EXCL|O_RDWR,  0640, &attr)) == (mqd_t) -1) {
 			if (errno != error_exist)  {
 				strerr_warn3("alert: qscheduler: failed to create POSIX message queue ", ipc_name, ": ", &strerr_sys);
 				die();
@@ -670,7 +688,7 @@ dynamic_queue()
 {
 	struct mq_attr  attr;
 	unsigned int    priority, total_load;
-	int             i, r, nqueue, q[2];
+	int             i, r, nqueue, q[2], qlen, qsize;
 	char           *qptr;
 
 	qsargs[1] = compat_mode ? "-cd" : "-d";
@@ -702,7 +720,7 @@ dynamic_queue()
 	 */
 	if (!(shm_queue = (int *) alloc(sizeof(int) * qcount)))
 		nomem();
-	create_ipc();
+	create_ipc(&qlen, &qsize);
 	q[0] = qcount; /*- queue count */
 	q[1] = qconf;  /*- existing no of queues in /var/indimail/queue dir */
 	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) == -1) {
@@ -717,6 +735,12 @@ dynamic_queue()
 	log_out(strnum1);
 	log_out(", conf split=");
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
+	log_out(strnum1);
+	log_out(", msgqueue_len=");
+	strnum1[fmt_ulong(strnum1, qlen)] = 0;
+	log_out(strnum1);
+	log_out(", msgqueue_size=");
+	strnum1[fmt_ulong(strnum1, qsize)] = 0;
 	log_out(strnum1);
 	log_outf("\n");
 	if (!(queue_table = (qtab *) alloc(sizeof(qtab) * (qcount + 1))))
