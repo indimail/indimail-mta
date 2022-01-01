@@ -218,18 +218,19 @@ receivedfmt(char *s)
 	if (s)
 		s += i;
 
-	i = fmt_str(s, " invoked\n ");
+	i = fmt_str(s, "\n ");
 	len += i;
 	if (s)
 		s += i;
+
 	if (uid == auto_uida) {
-		i = fmt_str(s, "(by alias");
+		i = fmt_str(s, "(invoked by alias");
 		len += i;
 		if (s)
 			s += i;
 	} else
 	if (uid == auto_uidd) {
-		i = fmt_str(s, "(from network ");
+		i = fmt_str(s, "(invoked from network ");
 		len += i;
 		if (s)
 			s += i;
@@ -243,12 +244,12 @@ receivedfmt(char *s)
 			s += i;
 	} else
 	if (uid == auto_uids) {
-		i = fmt_str(s, "(for bounce");
+		i = fmt_str(s, "(invoked for bounce");
 		len += i;
 		if (s)
 			s += i;
 	} else {
-		i = fmt_str(s, "(");
+		i = fmt_str(s, "(invoked ");
 		len += i;
 		if (s)
 			s += i;
@@ -257,7 +258,7 @@ receivedfmt(char *s)
 		if (!tcpremoteip)
 			tcpgetremoteip();
 		if (tcpremoteip) {
-			i = fmt_str(s, "from ");
+			i = fmt_str(s, "from network ");
 			len += i;
 			if (s)
 				s += i;
@@ -270,7 +271,7 @@ receivedfmt(char *s)
 			if (s)
 				s += i;
 		}
-		i = fmt_str(s, "uid=");
+		i = fmt_str(s, "by uid ");
 		len += i;
 		if (s)
 			s += i;
@@ -740,8 +741,11 @@ main()
 	if (chdir(queuedir) == -1)
 		die(62);
 #ifdef USE_FSYNC
-	if (env_get("USE_FSYNC"))
+	use_fsync = use_syncdir = 0;
+	if ((ptr = env_get("USE_FSYNC")) && *ptr)
 		use_fsync = 1;
+	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
+		use_syncdir = 1;
 #endif
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
@@ -1096,7 +1100,7 @@ main()
 		die(66);
 	}
 #ifdef USE_FSYNC
-	if (!env_get("USE_SYNCDIR") && use_fsync > 0) {
+	if (use_syncdir > 0) {
 		if ((fd = open(todofn, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0) {
 			cleanup();
 			die(66);

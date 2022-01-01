@@ -1308,8 +1308,10 @@ main(int argc, char **argv)
 	strnum[fmt_ulong(strnum, conf_split)] = 0;
 	log7("info: ", argv0, ": ", queuedesc, ": conf split=", strnum, "\n");
 #ifdef USE_FSYNC
-	if (env_get("USE_FSYNC"))
+	if ((ptr = env_get("USE_FSYNC")) && *ptr)
 		use_fsync = 1;
+	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
+		use_syncdir = 1;
 #endif
 	if (!getcontrols()) {
 		log5("alert: ", argv0, ": ", queuedesc,

@@ -269,8 +269,7 @@ mailfile(char *fn)
 
 	if (seek_begin(0) == -1)
 		temp_rewind();
-	fd = open_append(fn);
-	if (fd == -1)
+	if ((fd = open_append(fn)) == -1)
 		strerr_die5x(111, "Unable to open ", fn, ": ", error_str(errno), ". (#4.2.1)");
 	sig_alarmcatch(temp_slowlock);
 	alarm(30);
@@ -841,9 +840,10 @@ main(int argc, char **argv)
 	flag99 = 0;
 	i = 0;
 #ifdef USE_FSYNC
-	if (env_get("USE_FSYNC"))
+	use_fsync = use_syncdir = 0;
+	if ((x = env_get("USE_FSYNC")) && *x)
 		use_fsync = 1;
-	if (env_get("USE_SYNCDIR"))
+	if ((x = env_get("USE_SYNCDIR")) && *x)
 		use_syncdir = 1;
 #endif
 	for (j = 0; j < cmds.len; ++j) {

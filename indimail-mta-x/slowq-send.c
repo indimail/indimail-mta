@@ -2437,6 +2437,12 @@ main(int argc, char **argv)
 		if (todo_interval <= 0)
 			todo_interval = ONCEEVERY;
 	}
+#ifdef USE_FSYNC
+	if ((ptr = env_get("USE_FSYNC")) && *ptr)
+		use_fsync = 1;
+	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
+		use_syncdir = 1;
+#endif
 	if (!getcontrols()) {
 		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: unable to read controls\n");
 		_exit(111);

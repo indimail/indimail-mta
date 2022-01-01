@@ -2568,6 +2568,12 @@ main(int argc, char **argv)
 		if (todo_interval <= 0)
 			todo_interval = ONCEEVERY;
 	}
+#ifdef USE_FSYNC
+	if ((ptr = env_get("USE_FSYNC")) && *ptr)
+		use_fsync = 1;
+	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
+		use_syncdir = 1;
+#endif
 	sig_pipeignore();
 	sig_termcatch(sigterm);
 	sig_alarmcatch(sigalrm);
