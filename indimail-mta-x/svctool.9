@@ -124,6 +124,7 @@ Known values for OPTION are:
   [--cntrldir=cntrl_path]
   --localip=a --maxdaemons=m --maxperip=i
   [--no-multi]
+  [--qtype=static|dynamic|compat]
   [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
@@ -133,6 +134,7 @@ Known values for OPTION are:
   [--qregex]
   [--memory=b]
   [--dmemory=c]
+  [--msgqsize=q]
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
@@ -175,12 +177,14 @@ Known values for OPTION are:
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
   c              - Max Memory that qscheduler can allocate
+  q              - Max number of bytes in POSIX message queues
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qtype          - Set multi-queue as static, dynamic or dynamic in compat mode
   qmailq         - Path to any qmail-queue compatabile binary
   Port           - Bind on this port for SMTP
   service_path   - Path where supervise service will be installed
@@ -263,12 +267,14 @@ Known values for OPTION are:
   --servicedir=service_path
   [--cntrldir=cntrl_path]
   [--no-multi]
+  [--qtype=static|dynamic|compat]
   [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
   [--fsync --syncdir]
   [--qregex]
   [--dmemory=c]
+  [--msgqsize=q]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--routes=smtp|qmtp|static]
@@ -289,10 +295,12 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   c              - Max Memory that qscheduler can allocate
+  q              - Max number of bytes in POSIX message queues
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qtype          - Set multi-queue as static, dynamic or dynamic in compat mode
   qmailq         - Path to any qmail-queue compatabile binary
   service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from

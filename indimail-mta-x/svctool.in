@@ -49,6 +49,7 @@ Known values for OPTION are:
   [--cntrldir=cntrl_path]
   --localip=a --maxdaemons=m --maxperip=i
   [--no-multi]
+  [--qtype=static|dynamic|compat]
   [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
@@ -58,6 +59,7 @@ Known values for OPTION are:
   [--qregex]
   [--memory=b]
   [--dmemory=c]
+  [--msgqsize=q]
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
@@ -100,12 +102,14 @@ Known values for OPTION are:
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
   c              - Max Memory that qscheduler can allocate
+  q              - Max number of bytes in POSIX message queues
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qtype          - Set multi-queue as static, dynamic or dynamic in compat mode
   qmailq         - Path to any qmail-queue compatabile binary
   Port           - Bind on this port for SMTP
   service_path   - Path where supervise service will be installed
@@ -188,12 +192,14 @@ Known values for OPTION are:
   --servicedir=service_path
   [--cntrldir=cntrl_path]
   [--no-multi]
+  [--qtype=static|dynamic|compat]
   [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
   [--fsync --syncdir]
   [--qregex]
   [--dmemory=c]
+  [--msgqsize=q]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--routes=smtp|qmtp|static]
@@ -214,10 +220,12 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   c              - Max Memory that qscheduler can allocate
+  q              - Max number of bytes in POSIX message queues
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qtype          - Set multi-queue as static, dynamic or dynamic in compat mode
   qmailq         - Path to any qmail-queue compatabile binary
   service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
@@ -6351,6 +6359,11 @@ if [ " $min_free" = " " ] ; then
 else
 	echo $min_free > $conf_dir/MIN_FREE
 fi
+if [ -z "$msgqsize" ] ; then
+	echo 819200 > $conf_dir/MSGQSIZE
+else
+	echo $msgqsize > $conf_dir/MSGQSIZE
+fi
 if [ " $QmailBinPrefix" = " /usr" ] ; then
 	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 else
@@ -6503,8 +6516,18 @@ echo "else"
 echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
-echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailBinPrefix/sbin/qscheduler -s \$defaultdelivery\""
+echo "exec $QmailBinPrefix/bin/softlimit -q \\\$MSGQSIZE -m \\\$SOFT_MEM -o 1024 \\"
+case $qtype in
+	static|*)
+	echo "$QmailBinPrefix/sbin/qscheduler -s \$defaultdelivery\""
+	;;
+	dynamic)
+	echo "$QmailBinPrefix/sbin/qscheduler -d \$defaultdelivery\""
+	;;
+	compat)
+	echo "$QmailBinPrefix/sbin/qscheduler -cd \$defaultdelivery\""
+	;;
+esac
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 
@@ -9197,6 +9220,7 @@ fi
 prog_args="$QmailBinPrefix/sbin/svctool"
 force=0
 no_multi=0
+qtype="static"
 silent=0
 down_state=0
 use_unshare=0
@@ -9311,6 +9335,9 @@ while test $# -gt 0; do
 	--dmemory=*)
 	dmemory=$optarg
 	;;
+	--msgqsize=*)
+	msgqsize=$optarg
+	;;
 	--password-cache)
 	password_cache=1
 	;;
@@ -9340,6 +9367,17 @@ while test $# -gt 0; do
 	;;
 	--no-multi)
 	no_multi=1
+	;;
+	--qtype=*)
+	case $qtype in
+		static|dynamic|compat)
+		qtype=$optarg
+		;;
+		*)
+		echo qtype must be static, dynamic or compat 1>&2
+		exit 1
+		;;
+	esac
 	;;
 	--content-filter=*)
 	bodycheck=$optarg
