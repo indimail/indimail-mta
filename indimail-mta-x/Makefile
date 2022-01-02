@@ -1992,7 +1992,7 @@ qmail-start.9 conf-qmail
 	> qmail-start.8
 
 qmail-start.o: \
-compile qmail-start.c auto_uids.h haslibrt.h
+compile qmail-start.c auto_uids.h
 	./compile qmail-start.c
 
 slowq-start: \
