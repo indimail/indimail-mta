@@ -168,9 +168,7 @@ main(int argc, char **argv)
 	char           *(qtargs[]) = { "qmail-todo", 0, 0, 0};
 	gid_t          *gidset;
 	int             ngroups, i = 1;
-#ifdef HASLIBRT
 	int             opt;
-#endif
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
@@ -194,7 +192,6 @@ main(int argc, char **argv)
 		die();
 	if (fd_copy(8,0) == -1)
 		die();
-#ifdef HASLIBRT
 	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
@@ -213,7 +210,6 @@ main(int argc, char **argv)
 				break;
 		}
 	}
-#endif
 	argc -= optind;
 	argv += optind; /*- first arg excluding -d, -s will be argv[0] */
 	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
