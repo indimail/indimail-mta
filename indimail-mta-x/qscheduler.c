@@ -834,9 +834,7 @@ dynamic_queue()
 int
 main(int argc, char **argv)
 {
-#ifdef HASLIBRT
 	int             opt;
-#endif
 	int             fd;
 
 	prog_argv = argv;
