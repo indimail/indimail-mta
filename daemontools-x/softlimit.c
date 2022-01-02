@@ -58,7 +58,7 @@ main(int argc, char **argv, char **envp)
 {
 	int             opt;
 
-	while ((opt = getopt(argc, argv, "a:c:d:f:l:m:o:p:r:s:t:")) != opteof)
+	while ((opt = getopt(argc, argv, "a:c:d:f:l:m:o:p:q:r:s:t:")) != opteof)
 		switch (opt)
 		{
 		case '?':
@@ -119,6 +119,11 @@ main(int argc, char **argv, char **envp)
 		case 'p':
 #ifdef RLIMIT_NPROC
 			doit(RLIMIT_NPROC, optarg);
+#endif
+			break;
+		case 'q':
+#ifdef RLIMIT_MSGQUEUE 
+			doit(RLIMIT_MSGQUEUE, optarg);
 #endif
 			break;
 		case 'r':
