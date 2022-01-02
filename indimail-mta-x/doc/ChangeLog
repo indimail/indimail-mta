@@ -27,13 +27,41 @@ Release 2.14.1 Start 21/09/2021
 14. qsutil.[c,h]: added ident argument to loglock_open for identification in
     logs
 15. mini-smtpd.c: removed extra arguments passed to err_size()
+16. Makefile: added target rt.lib for qscheduler
+17. mini-smtpd.c: removed extra arguments passed to err_size()
+18. Makefile: added target for qscheduler
+19. added qscheduler for running dynamic queues
+20. conf-queue: added definition for QUEUE_MAX, QUEUE_LOAD
+- 25/10/2021
+21. eliminated mktmpfd() function
 - 02/11/2021
-16. qmail-send.c, slowq-send.c, qmail-todo.c: use argv0 for program name
-17. qmail-todo.c: optimize by writting to comm_buf all files found in todo
+22. qmail-send.c, slowq-send.c, qmail-todo.c: use argv0 for program name
+23. qmail-todo.c: optimize by writting to comm_buf all files found in todo
+    using TODO_CHUNK_SIZE variable
     in chunks before doing comm_do
+- 27/11/2021
+24. qmail-daemon.c: use sig_block(), sig_unblock() to prevent interruptions
+25. queue-fix.c: return exit status for queue-creation
 - 05/12/2021
-18. rrt.c: fixed command line args for return-path, receipient
-19. qmail-send.c, qmail-todo.c, slowq-send.c: fixed argv0
+26. rrt.c: fixed command line args for return-path, receipient
+27. qmail-send.c, qmail-todo.c, slowq-send.c: fixed argv0
+- 13/12/2021
+28. added man page for multi-queue.7
+29. removed qmail-daemon
+- 20/12/2021
+30. qlocal_upgrade.in: added command to fix qmail-send run script
+- 31/12/2021
+31. qmail-todo.c, qmail-send.c, qmail-start.c: added compat mode option to
+    scan on lock/trigger in addition to message queue
+32. qmail-qread.c: added -s option to display only counts with -c option
+- 01/01/2022
+33. qmail-multi: Make queue directory as second argument to qmail-queue
+34. qscheduler.c: use control files msgqueuelen, msgqueuesize for configuring
+    POSIX message queue
+35. qmail-queue.c: Minor formatting changes to Received lines
+- 02/01/2022
+36. qmail-local.c, qmail-queue.c, qmail-todo.c, qmta-send.c, slowq-send.c
+    USE_FSYNC, USE_SYNCDIR consistent
 
 * 
 Release 2.14.0 Start 18/07/2021
