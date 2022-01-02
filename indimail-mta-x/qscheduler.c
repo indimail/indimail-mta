@@ -27,8 +27,8 @@
 #include <wait.h>
 #include <noreturn.h>
 #include <getEnvConfig.h>
-#ifdef HASLIBRT
 #include <sgetopt.h>
+#ifdef HASLIBRT
 #include "auto_uids.h"
 #endif
 #include "qscheduler.h"
@@ -854,16 +854,23 @@ main(int argc, char **argv)
 		switch (opt)
 		{
 			case 'c':
+#ifdef HASLIBRT
 				compat_mode = 1;
-				break;
-			case 'd':
-#ifndef HASLIBRT
+#else
 				strerr_die1x(111, "alert: qscheduler: cannot start: dynamic mode not supported\n");
 #endif
+				break;
+			case 'd':
+#ifdef HASLIBRT
 				qtype = dynamic;
+#else
+				strerr_die1x(111, "alert: qscheduler: cannot start: dynamic mode not supported\n");
+#endif
 				break;
 			case 's':
+#ifdef HASLIBRT
 				qtype = fixed;
+#endif
 				break;
 		}
 	}
@@ -872,10 +879,14 @@ main(int argc, char **argv)
 	if (argv[0])
 		qsargs[2] = argv[0]; /*- argument to qmail-start (./Mailbox or ./Maildir) */
 	set_queue_variables();
+#ifdef HASLIBRT
 	if (qtype == dynamic)
 		dynamic_queue();
 	else
 		static_queue();
+#else
+	static_queue();
+#endif
 	if (flagexitasap)
 		strerr_warn1("qscheduler: exiting", 0);
 	return 0;
