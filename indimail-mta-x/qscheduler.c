@@ -802,12 +802,13 @@ dynamic_queue()
 				}
 			}
 			if (!r) {
-				if (!alloc_re(&queue_table, qcount + 1, qcount + 2))
+				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2)))
 					nomem();
 				qcount++;
 				queue_table[qcount].pid = -1;
 				queue_table[qcount].queue_no = i;
 				queue_table[qcount].load = 0;
+				create_ipc(&qlen, &qsize);
 				if (check_send(qcount))
 					die();
 				start_send(qcount, -1);
@@ -851,7 +852,6 @@ main(int argc, char **argv)
 		strerr_die1sys(111, "alert: qscheduler: cannot start: unable to open queue/qscheduler: ");
 	if (lock_exnb(fd) == -1)
 		strerr_die1x(111, "alert: cannot start: qscheduler is already running\n");
-#ifdef HASLIBRT
 	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
@@ -859,6 +859,9 @@ main(int argc, char **argv)
 				compat_mode = 1;
 				break;
 			case 'd':
+#ifndef HASLIBRT
+				strerr_die1x(111, "alert: qscheduler: cannot start: dynamic mode not supported\n");
+#endif
 				qtype = dynamic;
 				break;
 			case 's':
@@ -875,10 +878,6 @@ main(int argc, char **argv)
 		dynamic_queue();
 	else
 		static_queue();
-#else
-	set_queue_variables();
-	static_queue();
-#endif
 	if (flagexitasap)
 		strerr_warn1("qscheduler: exiting", 0);
 	return 0;
