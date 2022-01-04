@@ -657,8 +657,8 @@ static int
 spf_a(char *spec, char *mask)
 {
 #ifdef IPV6
-	int             ip4mask;
-	int             ip6mask;
+	int             ip4mask = 0;
+	int             ip6mask = 0;
 #else
 	int             ipmask;
 #endif
@@ -721,8 +721,8 @@ static int
 spf_mx(char *spec, char *mask)
 {
 #ifdef IPV6
-	int             ip4mask;
-	int             ip6mask;
+	int             ip4mask = 0;
+	int             ip6mask = 0;
 #else
 	int             ipmask = getipmask(mask, 1);
 #endif
