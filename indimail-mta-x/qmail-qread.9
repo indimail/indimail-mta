@@ -41,7 +41,9 @@ and group id
 
 \fBqmail-qread\fR uses DIRSPLIT as the directory split. It can be
 overriden by environment variable \fICONFSPLIT\fR upto a max of
-DIRSPLIT
+DIRSPLIT. \fBqmail-qread\fR can process a queue created with \fItodo\fR,
+\fIintd\fR with subdirectory split instead of without any split. This
+can be done by setting the \fBBIGTODO\fR environment variable.
 
 \fBqmail-qread\fR uses the environment variable QUEUE_BASE or the conrol file \fBqbase\fR if
 present to use the queue base. If the environment variables QUEUE_START and QUEUE_COUNT are set,

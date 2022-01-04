@@ -637,17 +637,21 @@ void
 show_queues()
 {
 	char           *qbase;
-	int             save, i, j, k, l;
+	int             save, i, j, k, l, bigtodo;
 	char            strnum[FMT_ULONG];
 	char         **ptr;
 	char           *extra_queue[] = {"slowq", "nqueue", "qmta", 0};
 
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	substdio_puts(subfdout, "subdirectory split      : ");
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) conf_split));
 	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "big todo / big intd     : ");
+	substdio_puts(subfdout, bigtodo ? "Yes\n" : "No\n");
 
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&qdir, "queue_base", 0))

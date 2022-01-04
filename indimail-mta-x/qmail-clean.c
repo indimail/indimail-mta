@@ -95,8 +95,7 @@ respond(s)
 int
 main()
 {
-	int             i;
-	int             match;
+	int             i, match, bigtodo;
 	int             cleanuploop;
 	unsigned long   id;
 
@@ -106,6 +105,7 @@ main()
 		_exit(111);
 	sig_pipeignore();
 
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
@@ -152,13 +152,13 @@ main()
 		if (byte_equal(line.s, 5, "foop/")) {
 #define U(prefix,flag) fmtqfn(fnbuf,prefix,id,flag); \
 if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
-			U("intd/", 1)
+			U("intd/", bigtodo)
 			U("mess/", 1)
 			respond("+");
 		} else
 		if (byte_equal(line.s, 4, "todo/")) {
-			U("intd/", 1)
-			U("todo/", 1)
+			U("intd/", bigtodo)
+			U("todo/", bigtodo)
 			respond("+");
 		} else
 			respond("x");

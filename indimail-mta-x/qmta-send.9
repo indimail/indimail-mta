@@ -104,6 +104,9 @@ used for doing this.
 split directory value. The only required is that \fBqmta-send\fR should
 be running with a higher split dir value than that of the client. You
 can use the \fB-s\fR option to run with any split dir value.
+\fBqmta-send\fR can process queues with or without the \fItodo\fR,
+\fIintd\fR having subdirectory split. Set the environment variable
+\fBBIGTODO\fR to process a big \fItodo\fR, \fIintd\fR subdirectory.
 
 If running as non-root \fBqmta-send\fR uses environment set according to
 files $HOME/.defaultqueue directory. If running as root and if
@@ -119,6 +122,10 @@ daemon mode. Run continuously in the background.
 \fB\-l\fR
 use qmail-lspawn to spawn local deliveries instead of built-in spawn
 function
+
+.TP
+\fB\-b\fR
+Process \fItodo\fR, \fIintd\fR as having subdirectory split.
 
 .TP
 \fB\-r\fR

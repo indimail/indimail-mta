@@ -52,6 +52,7 @@ static mqd_t    mq_sch = (mqd_t) -1;
 static int      shm_conf = -1;
 static int     *shm_queue;
 static int      compat_mode;
+static int      bigtodo;
 static char     strnum2[FMT_ULONG];
 #endif
 static readsubdir todosubdir;
@@ -318,7 +319,7 @@ get_load(char *qptr)
 
 	if (chdir(qptr) == -1)
 		die_chdir(qptr);
-	readsubdir_init(&todosubdir, "todo", die_opendir);
+	readsubdir_init(&todosubdir, "todo", bigtodo, die_opendir);
 	i = 0;
 	while ((x = readsubdir_next(&todosubdir, &id))) {
 		if (x > 0)
@@ -383,6 +384,7 @@ start_send(int queueNum, pid_t pid)
 void
 set_queue_variables()
 {
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;

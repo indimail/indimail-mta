@@ -112,6 +112,7 @@ static readsubdir todosubdir;
 static datetime_sec nexttodorun, lasttodorun;
 static int      flagtododir = 0;	/*- if 0, have to readsubdir_init again */
 static int      todo_interval = -1;
+static int      bigtodo;
 static stralloc fn1 = { 0 };
 static stralloc fn2 = { 0 };
 static stralloc envnoathost = { 0 };
@@ -233,13 +234,13 @@ fnmake_info(unsigned long id)
 static void
 fnmake_intd(unsigned long id)
 {
-	fn1.len = fmtqfn(fn1.s, "intd/", id, 1);
+	fn1.len = fmtqfn(fn1.s, "intd/", id, bigtodo);
 }
 
 static void
 fnmake_todo(unsigned long id)
 {
-	fn1.len = fmtqfn(fn1.s, "todo/", id, 1);
+	fn1.len = fmtqfn(fn1.s, "todo/", id, bigtodo);
 }
 
 static void
@@ -297,7 +298,7 @@ cleanup_do(fd_set *wfds)
 	if (!flagcleanup) {
 		if (recent < cleanuptime)
 			return;
-		readsubdir_init(&cleanupdir, "mess", pausedir);
+		readsubdir_init(&cleanupdir, "mess", 1, pausedir);
 		flagcleanup = 1;
 	}
 	switch (readsubdir_next(&cleanupdir, &id))
@@ -446,7 +447,7 @@ pqstart()
 	int             x;
 	unsigned long   id;
 
-	readsubdir_init(&rs, "info", pausedir); /*- pausedir is a function in qsutil */
+	readsubdir_init(&rs, "info", 1, pausedir); /*- pausedir is a function in qsutil */
 	while ((x = readsubdir_next(&rs, &id))) { /*- here id is the filename too */
 		if (x > 0)
 			pqadd(id);
@@ -812,7 +813,7 @@ todo_do(fd_set *rfds)
 		if (!trigger_pulled(rfds) && recent < nexttodorun)
 			return;
 		trigger_set(); /*- open lock/trigger */
-		readsubdir_init(&todosubdir, "todo", pausedir);
+		readsubdir_init(&todosubdir, "todo", bigtodo, pausedir);
 		flagtododir = 1;
 		lasttodorun = recent;
 		nexttodorun = recent + SLEEP_TODO;
@@ -827,25 +828,27 @@ todo_do(fd_set *rfds)
 	default:
 		return;
 	}
-	ptr = readsubdir_name(&todosubdir);
-	scan_int(ptr, &split);
-	fnmake_todo(id); /*- todo/split/id */
-	scan_int(fn1.s + 5, &i);
-	log7("info: ", argv0, ": subdir=todo/", ptr, " fn=", fn1.s, split != i ? " fix split\n" : "\n");
-	if (split != i) {
-		for (i = 0; fix_dirs[i]; i++) {
-			fix_split(oldfn, fix_dirs[i], ptr, id);
-			byte_copy(fn1.s, 4, fix_dirs[i]);
-			if (link(oldfn, fn1.s) == -1) {
-				log7("warning: ", argv0, ": unable to link ", oldfn, " to ", fn1.s, "\n");
-				return;
-			} else
-			if (unlink(oldfn)) {
-				log5("warning: ", argv0, ": unable to unlink wrong split ", oldfn, "\n");
-				return;
+	if ((ptr = readsubdir_name(&todosubdir))) {
+		scan_int(ptr, &split);
+		fnmake_todo(id); /*- todo/split/id */
+		scan_int(fn1.s + 5, &i);
+		log7("info: ", argv0, ": subdir=todo/", ptr, " fn=", fn1.s, split != i ? " fix split\n" : "\n");
+		if (split != i) {
+			for (i = 0; fix_dirs[i]; i++) {
+				fix_split(oldfn, fix_dirs[i], ptr, id);
+				byte_copy(fn1.s, 4, fix_dirs[i]);
+				if (link(oldfn, fn1.s) == -1) {
+					log7("warning: ", argv0, ": unable to link ", oldfn, " to ", fn1.s, "\n");
+					return;
+				} else
+				if (unlink(oldfn)) {
+					log5("warning: ", argv0, ": unable to unlink wrong split ", oldfn, "\n");
+					return;
+				}
 			}
 		}
-	}
+	} else
+		fnmake_todo(id); /*- todo/split/id */
 	process_todo(id);
 }
 
@@ -2424,6 +2427,7 @@ check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 		"OPTIONS\n"
 		"       -d Run as a daemon\n"
 		"       -f fix queue\n"
+		"       -b use Big Todo\n"
 		"       -s queue_split";
 	char           *u_str1 =
 		"       -l Use qmail-lspawn for spawning local  deliveries";
@@ -2457,7 +2461,7 @@ check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 			}
 		}
 	}
-	str_copy(opt_str, "dfs:");
+	str_copy(opt_str, "bdfs:");
 	if (!_qmail_lspawn) {
 		i = str_len(opt_str);
 		str_copy(opt_str + i, "l");
@@ -2478,6 +2482,9 @@ check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 			break;
 		case 'f':
 			*flagqfix = 1;
+			break;
+		case 'b':
+			bigtodo = 1;
 			break;
 		case 'l':
 			_qmail_lspawn = 1;
@@ -2529,13 +2536,17 @@ main(int argc, char **argv)
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
 	check_usage(argc, argv, &daemon_mode, &flagqfix);
 	umask(077);
+	if (uidinit(1, 0) == -1)
+		strerr_die3sys(111, "alert: ", argv0, ": unable to initialize uids/gids: ");
 	if (prot_gid(auto_gidq) == -1) /*- qmail group */
-		strerr_die3sys(111, "alert: ", argv0, ": unable to set qmail gid");
+		strerr_die3sys(111, "alert: ", argv0, ": unable to set qmail gid: ");
 	if (!stralloc_copys(&fn1, argv0) || !stralloc_cats(&fn1, ": warn: ") || !stralloc_0(&fn1))
 		log3("alert: ", argv0, ": out of memory; quitting...\n");
 	if (!stralloc_copys(&fn2, argv0) || !stralloc_cats(&fn2, ": fatal: ") || !stralloc_0(&fn2))
 		log3("alert: ", argv0, ": out of memory; quitting...\n");
 	set_environment(fn1.s, fn2.s, 0);
+	if (!bigtodo)
+		getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	if (!conf_split)
 		getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)

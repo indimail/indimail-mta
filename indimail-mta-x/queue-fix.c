@@ -133,6 +133,7 @@ static uid_t    qmailr_uid;
 static gid_t    qmail_gid;
 static int      queueError = 0;
 static int      split;
+static int      bigtodo;
 
 void
 out(char *str)
@@ -152,12 +153,16 @@ flush()
 no_return void
 usage()
 {
-	char            strnum[FMT_ULONG];
+	char            strnum1[FMT_ULONG];
+	char            strnum2[FMT_ULONG];
 
-	strnum[fmt_int(strnum, auto_split)] = 0;
-	strerr_warn4(WARN,
+	strnum1[fmt_int(strnum1, auto_split)] = 0;
+	strnum2[fmt_int(strnum2, bigtodo)] = 0;
+	strerr_warn6(WARN,
 			"usage: queue-fix [-irmNv] [-s split] queue_dir\n"
-			"                 -s - queue split number (default ", strnum,
+			"                 -s - queue split number (default ", strnum1,
+			")\n"
+			"                 -b - Big Todo (default ", strnum2,
 			")\n"
 			"                 -i - Interactive Mode\n"
 			"                 -r - create ratelimit directory\n"
@@ -168,9 +173,9 @@ usage()
 }
 
 no_return void
-die_check()
+die_check(char *arg)
 {
-	strerr_warn2(WARN, "Failed while checking directory structure.\n"
+	strerr_warn3(WARN, arg, ": Failed while checking directory structure.\n"
 		"Make sure the given queue exists and you have permission to access it.\n"
 		"Exiting...\n", 0);
 	_exit(111);
@@ -766,8 +771,8 @@ fix_names()
 				clean_tmp("info/", name_num) ||
 				clean_tmp("local/", name_num) ||
 				clean_tmp("remote/", name_num) ||
-				clean_tmp("intd/", name_num) ||
-				clean_tmp("todo/", name_num))
+				clean_tmp("intd/", bigtodo ? name_num : "") ||
+				clean_tmp("todo/", bigtodo ? name_num : ""))
 			return -1;
 	}
 	if (clean_tmp("bounce", ""))
@@ -796,8 +801,8 @@ check_dirs()
 		{"mess",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 1, 0750, 0644},
 		{"remote", "qmails", "qmail", qmails_uid, qmail_gid, 0700, 1, 0700, 0600},
 		{"local",  "qmails", "qmail", qmails_uid, qmail_gid, 0700, 1, 0700, 0600},
-		{"todo",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, 1, 0750, 0644},
-		{"intd",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 1, 0700, 0644},
+		{"todo",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0750, bigtodo, 0750, 0644},
+		{"intd",   "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, bigtodo, 0700, 0644},
 		{"bounce", "qmails", "qmail", qmails_uid, qmail_gid, 0700, 0, 0700, 0600},
 		{0},
 	};
@@ -965,25 +970,44 @@ check_stray_parts()
 int
 find_strays()
 {
-	char           *dir_s[] = {"info", "local", "remote", "todo", "intd", 0};
+	char           *dir_s1[] = {"info", "local", "remote", 0};
+	char           *dir_s2[] = {"todo", "intd", 0};
+	char           *dir_s3[] = {"bounce", 0};
 	char          **ptr;
 	int             save;
 
 	if (!stralloc_copy(&check_dir, &queue_dir))
 		strerr_die2x(111, FATAL, "out of memory");
 	save = check_dir.len;
-	for (ptr = dir_s; *ptr; ptr++) {
+	for (ptr = dir_s1; *ptr; ptr++) {
 		if (!stralloc_cats(&check_dir, *ptr))
 			strerr_die2x(111, FATAL, "out of memory");
 		if (check_stray_parts())
 			return -1;
 		check_dir.len = save;
 	}
+	for (ptr = dir_s2; *ptr; ptr++) {
+		if (!stralloc_cats(&check_dir, *ptr))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (bigtodo) {
+			if (check_stray_parts())
+				return -1;
+		} else {
+			if (!stralloc_0(&check_dir))
+				strerr_die2x(111, FATAL, "out of memory");
+			if (check_strays(check_dir.s))
+				return -1;
+		}
+		check_dir.len = save;
+	}
+	for (ptr = dir_s3; *ptr; ptr++) {
+		if (!stralloc_cats(&check_dir, *ptr) || !stralloc_0(&check_dir))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (check_strays(check_dir.s))
+			return -1;
+		check_dir.len = save;
+	}
 
-	if (!stralloc_cats(&check_dir, "bounce") || !stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_strays(check_dir.s))
-		return -1;
 	return 0;
 }
 
@@ -998,12 +1022,16 @@ main(int argc, char **argv)
 	set_environment(WARN, FATAL, 1);
 	if (fchdir(fdorigdir) == -1)
 		strerr_die1sys(111, "unable to switch to original directory: ");
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
 		split = auto_split;
-	while ((opt = getopt(argc, argv, "imNvs:r")) != opteof) {
+	while ((opt = getopt(argc, argv, "bimNvs:r")) != opteof) {
 		switch (opt)
 		{
+		case 'b':
+			bigtodo = 1;
+			break;
 		case 'i':
 			flag_interactive = 1;
 			break;
@@ -1045,13 +1073,13 @@ main(int argc, char **argv)
 	qmail_gid = auto_gidq;
 	/*- check that all the proper directories exist with proper credentials */
 	if (check_dirs())
-		die_check();
+		die_check("check dirs");
 	/*- rename inode filenames */
 	if (fix_names())
-		die_check();
+		die_check("fix names");
 	/*- check for stray files */
 	if (find_strays())
-		die_check();
+		die_check("fix strays");
 	if (flag_verbose) {
 		strnum[fmt_int(strnum, queueError)] = 0;
 		out("queue-fix finished with ");

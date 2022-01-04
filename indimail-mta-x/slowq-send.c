@@ -169,9 +169,10 @@ static char    *argv0 = "slowq-send";
 static int      flagexitasap = 0;
 static int      flagrunasap = 0;
 static int      flagreadasap = 0;
+static int      bigtodo;
 
 extern dtype    delivery;
-int             do_ratelimit;
+static int      do_ratelimit;
 unsigned long   delayed_jobs;
 
 static void     reread();
@@ -250,7 +251,7 @@ fnmake_info(unsigned long id)
 static void
 fnmake_todo(unsigned long id)
 {
-	fn1.len = fmtqfn(fn1.s, "todo/", id, 1);
+	fn1.len = fmtqfn(fn1.s, "todo/", id, bigtodo);
 }
 
 static void
@@ -524,7 +525,7 @@ cleanup_do()
 	if (!flagcleanup) {
 		if (recent < cleanuptime)
 			return;
-		readsubdir_init(&cleanupdir, "mess", pausedir);
+		readsubdir_init(&cleanupdir, "mess", 1, pausedir);
 		flagcleanup = 1;
 	}
 	switch (readsubdir_next(&cleanupdir, &id))
@@ -653,7 +654,7 @@ pqstart()
 	int             x;
 	unsigned long   id;
 
-	readsubdir_init(&rs, "info", pausedir); /*- pausedir is a function in qsutil */
+	readsubdir_init(&rs, "info", 1, pausedir); /*- pausedir is a function in qsutil */
 	while ((x = readsubdir_next(&rs, &id))) { /*- here id is the filename too */
 		if (x > 0)
 			pqadd(id, do_ratelimit);
@@ -1910,7 +1911,7 @@ todo_do(fd_set *rfds)
 		if (!trigger_pulled(rfds) && recent < nexttodorun)
 			return;
 		trigger_set();
-		readsubdir_init(&todosubdir, "todo", pausedir);
+		readsubdir_init(&todosubdir, "todo", bigtodo, pausedir);
 		flagtododir = 1;
 		lasttodorun = recent;
 		nexttodorun = recent + SLEEP_TODO;
@@ -1925,14 +1926,17 @@ todo_do(fd_set *rfds)
 		return;
 	}
 	ptr = readsubdir_name(&todosubdir);
-	scan_int(ptr, &split);
-	fnmake_todo(id);
-	scan_int(fn1.s + 5, &i);
-	log9(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc,
-			": subdir=todo/", ptr, " fn=", fn1.s,
-			split != i ? " incorrect split\n" : "\n");
-	if (split != i)
-		return;
+	if (ptr) {
+		scan_int(ptr, &split);
+		fnmake_todo(id);
+		scan_int(fn1.s + 5, &i);
+		log9(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc,
+				": subdir=todo/", ptr, " fn=", fn1.s,
+				split != i ? " incorrect split\n" : "\n");
+		if (split != i)
+			return;
+	} else
+		fnmake_todo(id);
 	if ((fd = open_read(fn1.s)) == -1) {
 		log5("warning: ", argv0, ": unable to open ", fn1.s, "\n");
 		return;
@@ -2421,6 +2425,7 @@ main(int argc, char **argv)
 				error_str(errno), "\n");
 		_exit(111);
 	}
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;

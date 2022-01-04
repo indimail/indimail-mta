@@ -66,6 +66,7 @@ static int      flagmadeintd = 0;
 static int      flagquarantine = 0;
 static int      flagblackhole = 0;
 static int      flagarchive = 0;
+static int      bigtodo = 0;
 static struct substdio ssin, ssout, sslog;
 static datetime_sec    starttime;
 static struct datetime dt;
@@ -661,10 +662,14 @@ mq_todo(char *queue_ident, unsigned int priority)
 	else
 		scan_int(ptr, &errfd);
 	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
+	/*- 
+	 * send inode and split number for big todo
+	 * send inode and conf_split for small todo
+	 */
 	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == (mqd_t) -1)
 		return -1;
 	qmsg.inum = messnum;
-	qmsg.split = messnum % conf_split;
+	qmsg.split = bigtodo ? messnum % conf_split : conf_split;
 	for (;;) {
 		if (mq_send(mqd, (char *) &qmsg, sizeof(q_msg), priority) == -1) {
 			if (errno == error_intr)
@@ -720,7 +725,7 @@ main()
 	} else
 	if (!stralloc_copys(&quarantine, ptr))
 		die(51);
-	/*
+	/*-
 	 * These control files will cause qmail-queue to 
 	 * read one line at a time
 	 */
@@ -747,6 +752,7 @@ main()
 	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
 		use_syncdir = 1;
 #endif
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
@@ -766,8 +772,8 @@ main()
 		die(63);
 	messnum = pidst.st_ino;
 	messfn = fnnum("mess/", 1);
-	todofn = fnnum("todo/", 1);
-	intdfn = fnnum("intd/", 1);
+	todofn = fnnum("todo/", bigtodo);
+	intdfn = fnnum("intd/", bigtodo);
 	if (link(pidfn, messfn) == -1) {
 		unlink(pidfn);
 		die(64);

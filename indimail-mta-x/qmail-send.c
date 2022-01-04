@@ -116,7 +116,7 @@ char           *queuedesc;
 static char    *argv0 = "qmail-send";
 
 extern dtype    delivery;
-int             do_ratelimit;
+static int      do_ratelimit;
 unsigned long   delayed_jobs;
 
 static int      flagexitasap = 0;
@@ -502,7 +502,7 @@ cleanup_do()
 	if (!flagcleanup) {
 		if (recent < cleanuptime)
 			return;
-		readsubdir_init(&cleanupdir, "mess", pausedir);
+		readsubdir_init(&cleanupdir, "mess", 1, pausedir);
 		flagcleanup = 1;
 	}
 	switch (readsubdir_next(&cleanupdir, &id))
@@ -631,7 +631,7 @@ pqstart()
 	int             x;
 	unsigned long   id;
 
-	readsubdir_init(&rs, "info", pausedir); /*- pausedir is a function in qsutil */
+	readsubdir_init(&rs, "info", 1, pausedir); /*- pausedir is a function in qsutil */
 	while ((x = readsubdir_next(&rs, &id))) { /*- here id is the filename too */
 		if (x > 0)
 			pqadd(id, do_ratelimit);

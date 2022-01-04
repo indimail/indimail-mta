@@ -13,18 +13,20 @@
  * added RCS log
  *
  */
+#include <stddef.h>
 #include "readsubdir.h"
 #include "fmt.h"
 #include "scan.h"
 #include "str.h"
 
 void
-readsubdir_init(readsubdir *rs, char *name, void (*pause)())
+readsubdir_init(readsubdir *rs, char *name, int flagsplit, void (*pause)())
 {
 	rs->name = name;
 	rs->pause = pause;
 	rs->dir = 0;
 	rs->pos = 0;
+	rs->split = flagsplit;
 }
 
 static char     namepos[FMT_ULONG + 4 + READSUBDIR_NAMELEN];
@@ -38,8 +40,10 @@ opensubdir(readsubdir *rs)
 
 	len = 0;
 	len += fmt_str(namepos + len, rs->name);
-	namepos[len++] = '/';
-	len += fmt_ulong(namepos + len, (unsigned long) rs->pos);
+	if (rs->split) {
+		namepos[len++] = '/';
+		len += fmt_ulong(namepos + len, (unsigned long) rs->pos);
+	}
 	namepos[len] = 0;
 	while (!(rs->dir = opendir(namepos)))
 		rs->pause(namepos);
@@ -49,7 +53,8 @@ opensubdir(readsubdir *rs)
 char           *
 readsubdir_name(readsubdir *rs)
 {
-	return namepos + rslen + 1;
+
+	return rs->split ? namepos + rslen + 1 : (char *) NULL;
 }
 
 int
@@ -66,6 +71,8 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 		if (!(d = readdir(rs->dir))) {
 			closedir(rs->dir);
 			rs->dir = 0;
+			if (!rs->split)
+				return 0;
 			rs->pos++;
 			if (rs->pos == conf_split)
 				return 0; /*- no more files in any directory */

@@ -1416,8 +1416,8 @@ auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
 control.o auto_control.o strsalloc.o socket.lib rt.lib libsyncdir.a
 	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o \
 	auto_qmail.o auto_split.o auto_uids.o variables.o matchregex.o \
-	control.o auto_control.o strsalloc.o \
-	`cat socket.lib rt.lib` -L. -lsyncdir -lqmail
+	control.o auto_control.o strsalloc.o `cat socket.lib rt.lib` \
+	-L. -lqmail -lsyncdir
 
 qmail-queue.8: \
 qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
@@ -1631,7 +1631,7 @@ delivery_rate.o libsyncdir.a srs.lib rt.lib
 	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
 	auto_split.o variables.o envrules.o matchregex.o srs.o \
 	delivery_rate.o rcpthosts.o auto_control.o -L. -lsyncdir \
-	-L../libsrs2-x/libsrs2/.libs `cat srs.lib rt.lib` -ldl -lqmail
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib rt.lib` -ldl -lm -lqmail
 
 qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
@@ -1648,6 +1648,7 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-send.8
 
@@ -1669,6 +1670,7 @@ qmail-todo.8: \
 qmail-todo.9 conf-qmail conf-sysconfdir
 	cat qmail-todo.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-todo.8
 
@@ -1683,7 +1685,7 @@ do_rate.o delivery_rate.o libsyncdir.a srs.lib
 	do_rate.o wildmat.o qmail.o auto_qmail.o auto_split.o \
 	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
 	delivery_rate.o auto_control.o getDomainToken.o -L. -lsyncdir \
-	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` -ldl -lqmail -lm
 
 slowq-send.o: \
 compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
@@ -1700,6 +1702,7 @@ slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> slowq-send.8
 
@@ -1989,6 +1992,7 @@ qmail-start.8: \
 qmail-start.9 conf-qmail
 	cat qmail-start.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
+	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	> qmail-start.8
 
 qmail-start.o: \
@@ -3486,9 +3490,9 @@ sql-database.9 conf-sysconfdir
 	> sql-database.8
 	
 sys-checkpwd: load sys-checkpwd.o \
-shadow.lib
+shadow.lib tls.lib
 	./load sys-checkpwd \
-	`cat shadow.lib` -lqmail
+	`cat shadow.lib` -lqmail -lcrypt `cat tls.lib`
 
 sys-checkpwd.o: \
 compile sys-checkpwd.c hasspnam.h \

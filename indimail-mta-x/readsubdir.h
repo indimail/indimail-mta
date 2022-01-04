@@ -21,11 +21,12 @@ typedef struct readsubdir
 {
 	DIR            *dir;
 	int             pos;
+	int             split;
 	char           *name;
 	void            (*pause) ();
 } readsubdir;
 
-void            readsubdir_init(readsubdir *, char *, void (*pause) ());
+void            readsubdir_init(readsubdir *, char *, int, void (*pause) ());
 int             readsubdir_next(readsubdir *, unsigned long *);
 char           *readsubdir_name(readsubdir *);
 

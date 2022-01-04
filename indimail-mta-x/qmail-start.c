@@ -64,13 +64,15 @@
 #include <prot.h>
 #include <sgetopt.h>
 #include <noreturn.h>
+#include <strerr.h>
 #include "haslibrt.h"
 #include "auto_uids.h"
 #include "setuserid.h"
 
 no_return void
-die()
+die(char *arg)
 {
+	strerr_die3sys(111, "fatal: qmail-start: ", arg, ": ");
 	_exit(111);
 }
 
@@ -119,7 +121,7 @@ static int      pi9[2];
 static int      pi10[2];
 
 void
-close23456()
+close2345678()
 { 
 	close(2);
 	close(3);
@@ -172,26 +174,26 @@ main(int argc, char **argv)
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
-		die();
-	if (uidinit(1, 1) == -1)
-		die();
+		die("chdir");
 	umask(077);
-	if (prot_gid(auto_gidq) == -1) /*- qmail unix group */
-		die();
 	if (fd_copy(2, 0) == -1)
-		die();
+		die("unable to copy fd2");
 	if (fd_copy(3, 0) == -1)
-		die();
+		die("unable to copy fd3");
 	if (fd_copy(4, 0) == -1)
-		die();
+		die("unable to copy fd4");
 	if (fd_copy(5, 0) == -1)
-		die();
+		die("unable to copy fd5");
 	if (fd_copy(6, 0) == -1)
-		die();
+		die("unable to copy fd6");
 	if (fd_copy(7,0) == -1)
-		die();
+		die("unable to copy fd7");
 	if (fd_copy(8,0) == -1)
-		die();
+		die("unable to copy fd8");
+	if (uidinit(1, 1) == -1)
+		die("unable to initialize uids/gids");
+	if (prot_gid(auto_gidq) == -1) /*- qmail unix group */
+		die("unable to set qmail group");
 	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
@@ -225,198 +227,203 @@ main(int argc, char **argv)
 	}
 	if (argv[0]) {
 		if (pipe(pi0) == -1)
-			die();
+			die("unable to move read end of pipe to fd 0");
 		switch (fork())
 		{
 		case -1:
-			die();
+			die("unable to fork logger");
 		case 0: /* execute logger */
 			if (check_user(set_supplementary_groups, "qmaill")) {
-				if (!(gidset = grpscan("qmaill", &ngroups)))
-					die();
-				gidset[0] = auto_gidq;
-				gidset[ngroups] = auto_gidn;
-				if (prot_gid(auto_gidn) == -1) /*- nofiles unix group */
-					die();
-				if (setgroups(ngroups + 1, gidset))
-					die();
-				alloc_free((char *) gidset);
+				if ((gidset = grpscan("qmaill", &ngroups))) {
+					gidset[0] = auto_gidq;
+					gidset[ngroups] = auto_gidn;
+					if (prot_gid(auto_gidn) == -1) /*- nofiles unix group */
+						die("unable to set nofiles group");
+					if (setgroups(ngroups + 1, gidset))
+						die("unable to set supplementary group(s) for logger");
+					alloc_free((char *) gidset);
+				} else
+					strerr_warn1("qmail-start: warn: no supplementary groups defined for qmaill (logger)", 0);
 			} else
 			if (prot_gid(auto_gidn) == -1) /*- nofiles unix group */
-				die();
+				die("unable to set nofiles group");
 			if (prot_uid(auto_uidl) == -1) /*- qmaill unix user */
-				die();
+				die("unable to set qmaill group");
 			close(pi0[1]);
 			if (fd_move(0, pi0[0]) == -1)
-				die();
-			close23456();
+				die("unable to move fd0 for logger");
+			close2345678();
 			execvp(argv[0], argv); /*- splogger, etc */
-			die();
+			die("unable to exec logger");
 		}
 		close(pi0[0]);
 		if (fd_move(1, pi0[1]) == -1)
-			die();
+			die("unable to move write end of pipe to fd 1");
 	}
 	if (pipe(pi1) == -1)
-		die();
+		die("failed to create pipe1");
 	if (pipe(pi2) == -1)
-		die();
+		die("failed to create pipe2");
 	if (pipe(pi3) == -1)
-		die();
+		die("failed to create pipe3");
 	if (pipe(pi4) == -1)
-		die();
+		die("failed to create pipe4");
 	if (pipe(pi5) == -1)
-		die();
+		die("failed to create pipe5");
 	if (pipe(pi6) == -1)
-		die();
+		die("failed to create pipe6");
 	if (pipe(pi7) == -1)
-		die();
+		die("failed to create pipe7");
 	if (pipe(pi8) == -1)
-		die();
+		die("failed to create pipe9");
 	if (pipe(pi9) == -1)
-		die();
+		die("failed to create pipe9");
 	if (pipe(pi10) == -1)
-		die();
+		die("failed to create pipe10");
 	switch (fork())
 	{
 	case -1:
-		die();
+		die("unable to fork qmail-lspawn");
 	case 0:
 		if (fd_copy(0, pi1[0]) == -1)
-			die();
+			die("unable to copy fd0 to pipe1");
 		if (fd_copy(1, pi2[1]) == -1)
-			die();
-		close23456();
+			die("unable to copy fd1 to pipe2");
+		close2345678();
 		closepipes();
 		execvp(*qlargs, qlargs); /*- qmail-lspawn */
-		die();
+		die("unable to exec qmail-lspawn");
 	}
 	switch (fork())
 	{
 	case -1:
-		die();
+		die("unable to fork qmail-rspawn");
 	case 0:
 		if (check_user(set_supplementary_groups, "qmailr")) {
-			if (!(gidset = grpscan("qmailr", &ngroups)))
-				die();
-			gidset[0] = auto_gidq;
-			if (setgroups(ngroups, gidset))
-				die();
-			alloc_free((char *) gidset);
+			if ((gidset = grpscan("qmailr", &ngroups))) {
+				gidset[0] = auto_gidq;
+				if (setgroups(ngroups, gidset))
+					die("unable to set supplementary group(s) for qmail-rspawn");
+				alloc_free((char *) gidset);
+			} else
+				strerr_warn1("qmail-start: warn: no supplementary groups defined for qmailr (qmail-rspawn)", 0);
 		}
 		if (prot_uid(auto_uidr) == -1) /*- qmailr unix user */
-			die();
+			die("unable to set qmailr uid");
 		if (fd_copy(0, pi3[0]) == -1)
-			die();
+			die("unable to copy fd0 to pipe3");
 		if (fd_copy(1, pi4[1]) == -1)
-			die();
-		close23456();
+			die("unable to copy fd1 to pipe4");
+		close2345678();
 		closepipes();
 		execvp(*qrargs, qrargs); /*- qmail-rspawn */
-		die();
+		die("unable to exec qmail-rspawn");
 	}
 	switch (fork())
 	{
 	case -1:
-		die();
+		die("unable to fork qmail-clean (qmail-todo)");
 	case 0:
 		if (check_user(set_supplementary_groups, "qmailq")) {
-			if (!(gidset = grpscan("qmailq", &ngroups)))
-				die();
-			gidset[0] = auto_gidq;
-			if (setgroups(ngroups, gidset))
-				die();
-			alloc_free((char *) gidset);
+			if ((gidset = grpscan("qmailq", &ngroups))) {
+				gidset[0] = auto_gidq;
+				if (setgroups(ngroups, gidset))
+					die("unable to set supplementary group(s) for qmail-clean");
+				alloc_free((char *) gidset);
+			} else
+				strerr_warn1("qmail-start: warn: no supplementary groups defined for qmailq (qmail-clean)", 0);
 		}
 		if (prot_uid(auto_uidq) == -1) /*- qmailq unix user */
-			die();
+			die("unable to set qmailq uid");
 		if (fd_copy(0, pi5[0]) == -1)
-			die();
+			die("unable to copy fd0 to pipe5");
 		if (fd_copy(1, pi6[1]) == -1)
-			die();
-		close23456();
+			die("unable to copy fd1 to pipe6");
+		close2345678();
 		closepipes();
 		qcargs[2] = "qmail-todo"; /*- pass qmail-todo as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
-		die();
+		die("unable to exec qmail-clean (qmail-todo)");
 	}
 	switch (fork())
 	{
 	case -1:
-		die();
+		die("unable to fork qmail-todo");
 	case 0:
 		if (prot_uid(auto_uids) == -1)
-			die();
+			die("unable to set qmails uid");
 		if (fd_copy(0, pi7[0]) == -1)
-			die();
+			die("unable to copy fd0 to pipe7");
 		if (fd_copy(1, pi8[1]) == -1)
-			die();
-		close23456();
+			die("unable to copy fd1 to pipe8");
+		close2345678();
 		if (fd_copy(2, pi9[1]) == -1)
-			die();
+			die("unable to copy fd2 to pipe9");
 		if (fd_copy(3, pi10[0]) == -1)
-			die();
+			die("unable to copy fd3 to pipe10");
 		closepipes();
 		execvp(*qtargs, qtargs); /*- qmail-todo */
-		die();
+		die("unable to exec qmail-todo");
 	}
 
 	switch (fork())
 	{
 	case -1:
-		die();
+		die("unable to fork qmail-clean (qmail-send)");
 	case 0:
 		if (check_user(set_supplementary_groups, "qmailq")) {
-			if (!(gidset = grpscan("qmailq", &ngroups)))
-				die();
-			gidset[0] = auto_gidq;
-			if (setgroups(ngroups, gidset))
-				die();
-			alloc_free((char *) gidset);
+			if ((gidset = grpscan("qmailq", &ngroups))) {
+				gidset[0] = auto_gidq;
+				if (setgroups(ngroups, gidset))
+					die("unable to set supplementary group(s) for qmail-clean");
+				alloc_free((char *) gidset);
+			} else
+				strerr_warn1("qmail-start: warn: no supplementary groups defined for qmailq (qmail-clean)", 0);
 		}
 		if (prot_uid(auto_uidq) == -1)
-			die();
-		if (fd_copy(0,pi9[0]) == -1)
-			die();
-		if (fd_copy(1,pi10[1]) == -1)
-			die();
-		close23456();
+			die("unable to set qmailq uid");
+		if (fd_copy(0, pi9[0]) == -1)
+			die("unable to copy fd0 to pipe9");
+		if (fd_copy(1, pi10[1]) == -1)
+			die("unable to copy fd1 to pipe10");
+		close2345678();
 		closepipes();
 		qcargs[2] = "qmail-send"; /*- pass qmail-send as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
-		die();
+		die("unable to exec qmail-clean (qmail-send)");
 	}
 	if (check_user(set_supplementary_groups, "qmails")) {
-		if (!(gidset = grpscan("qmails", &ngroups)))
-			die();
-		gidset[0] = auto_gidq;
-		if (setgroups(ngroups, gidset))
-			die();
-		alloc_free((char *) gidset);
+		if ((gidset = grpscan("qmails", &ngroups))) {
+			gidset[0] = auto_gidq;
+			if (setgroups(ngroups, gidset))
+				die("unable to set supplementary group(s) for qmail-send");
+			alloc_free((char *) gidset);
+		} else
+			strerr_warn1("qmail-start: warn: no supplementary groups defined for qmails", 0);
 	}
 	if (prot_uid(auto_uids) == -1) /*- qmails unix user */
-		die();
+		die("unable to set qmails uid");
 	if (fd_copy(0, 1) == -1)
-		die();
+		die("unable to copy fd0 to fd1");
 	if (fd_copy(1, pi1[1]) == -1)
-		die();
+		die("unable to copy fd0 to pipe1");
 	if (fd_copy(2, pi2[0]) == -1)
-		die();
+		die("unable to copy fd2 to pipe2");
 	if (fd_copy(3, pi3[1]) == -1)
-		die();
+		die("unable to copy fd3 to pipe3");
 	if (fd_copy(4, pi4[0]) == -1)
-		die();
+		die("unable to copy fd4 to pipe4");
 	if (fd_copy(5, pi5[1]) == -1)
-		die();
+		die("unable to copy fd5 to pipe5");
 	if (fd_copy(6, pi6[0]) == -1)
-		die();
+		die("unable to copy fd6 to pipe6");
 	if (fd_copy(7, pi7[1]) == -1)
-		die();
+		die("unable to copy fd7 to pipe7");
 	if (fd_copy(8, pi8[0]) == -1)
-		die();
+		die("unable to copy fd8 to pipe8");
 	closepipes();
 	execvp(*qsargs, qsargs); /*- qmail-send */
-	die();
+	die("unable to exec qmail-send");
 	/*- Not reached */
 	return(0);
 }

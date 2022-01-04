@@ -88,6 +88,7 @@ static int      fdin = -1;
 static int      flagsendalive = 1;
 static int      flagtododir = 0; /*- if 0, have to readsubdir_init again */
 static int      todo_interval = -1;
+static int      bigtodo;
 static readsubdir todosubdir;
 static stralloc todoline = { 0 };
 static char     todobuf[SUBSTDIO_INSIZE];
@@ -180,7 +181,7 @@ fnmake_info(unsigned long id)
 void
 fnmake_todo(unsigned long id)
 {
-	fn.len = fmtqfn(fn.s, "todo/", id, 1);
+	fn.len = fmtqfn(fn.s, "todo/", id, bigtodo);
 }
 
 void
@@ -707,13 +708,17 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 			break;
 	}
 	*id = ((q_msg *) msgbuf)->inum;
-	strnum[i = fmt_ulong(strnum, ((q_msg *) msgbuf)->split)] = 0;
-	if (!stralloc_copyb(&qfn, strnum, i) || !stralloc_0(&qfn)) {
-		if (!do_readsubdir)
-			log5("warning: ", argv0, ": ", queuedesc,
-				": out of memory. Resetting to opendir mode\n");
-		do_readsubdir = 1;
-		return -1;
+	if (((q_msg *) msgbuf)->split == conf_split)
+		qfn.len = 0;
+	else {
+		strnum[i = fmt_ulong(strnum, ((q_msg *) msgbuf)->split)] = 0;
+		if (!stralloc_copyb(&qfn, strnum, i) || !stralloc_0(&qfn)) {
+			if (!do_readsubdir)
+				log5("warning: ", argv0, ": ", queuedesc,
+					": out of memory. Resetting to opendir mode\n");
+			do_readsubdir = 1;
+			return -1;
+		}
 	}
 	nexttodorun = recent + (todo_interval > 0 ? todo_interval : SLEEP_TODO);
 	return 0;
@@ -817,7 +822,7 @@ todo_scan(fd_set *rfds, unsigned long *id, int mq_flag)
 			return 1;
 		trigger_set(); /*- close & open lock/trigger fifo */
 		/*- initialize todosubdir */
-		readsubdir_init(&todosubdir, "todo", pausedir);
+		readsubdir_init(&todosubdir, "todo", bigtodo, pausedir);
 		flagtododir = 1;
 		nexttodorun = recent + (todo_interval > 0 ? todo_interval : SLEEP_TODO);
 	}
@@ -901,7 +906,7 @@ todo_do(fd_set *rfds)
 			}
 			if ((i = mqueue_scan(rfds, &id))) /*- message pushed and intimated through mq_queue */
 				return i;
-			ptr = qfn.s; /*- split name */
+			ptr = qfn.len ? qfn.s : NULL; /*- split name */
 		}
 	} else {
 		if ((i = todo_scan(rfds, &id, 0))) /*- skip todo run if this returns 1 */
@@ -913,14 +918,17 @@ todo_do(fd_set *rfds)
 		return i;
 	ptr = readsubdir_name(&todosubdir); /*- split/id */
 #endif
-	scan_int(ptr, &split); /*- actual split value from filename */
-	fnmake_todo(id); /*- set fn as todo/split/id */
-	scan_int(fn.s + 5, &i); /*- split as per calculation by fnmake using auto_split */
-	log9(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc, 
+	if (ptr) {
+		scan_int(ptr, &split); /*- actual split value from filename */
+		fnmake_todo(id); /*- set fn as todo/split/id */
+		scan_int(fn.s + 5, &i); /*- split as per calculation by fnmake using auto_split */
+		log9(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc, 
 			": subdir=todo/", ptr, " fn=", fn.s,
 			split != i ? " incorrect split\n" : "\n");
-	if (split != i) /*- split doesn't match with split calculation in fnmake_todo() */
-		return -1;
+		if (split != i) /*- split doesn't match with split calculation in fnmake_todo() */
+			return -1;
+	} else
+		fnmake_todo(id); /*- set fn as todo/id */
 	if ((fd = open_read(fn.s)) == -1) { /*- envelope in todo/split/id */
 		log9("warning: ", argv0, ": ", queuedesc, ": open ", fn.s, ": ",
 			error_str(errno), "\n");
@@ -1302,6 +1310,7 @@ main(int argc, char **argv)
 				error_str(errno), "\n");
 		comm_die(111);
 	}
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;

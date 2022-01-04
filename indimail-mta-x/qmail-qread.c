@@ -337,8 +337,8 @@ int
 main(int argc, char **argv)
 #endif
 {
-	int             channel, match, fd, x, flag;
-	int             bCount, lCount, rCount, tCount;
+	int             channel, match, fd, x, flag, bigtodo,
+					bCount, lCount, rCount, tCount;
 	struct stat     st;
 	substdio        ss;
 	static stralloc line = { 0 };
@@ -379,10 +379,11 @@ main(int argc, char **argv)
 #endif
 	if (chdir(queuedir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, ": ");
+	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
-	readsubdir_init(&rs, "info", die_opendir);
+	readsubdir_init(&rs, "info", 1, die_opendir);
 	bCount = lCount = rCount = tCount = 0;
 	while ((x = readsubdir_next(&rs, &id))) {
 		if (x > 0) {
@@ -455,7 +456,7 @@ main(int argc, char **argv)
 		return(0);
 	}
 	flagbounce = 0;
-	readsubdir_init(&rs, "todo", die_opendir);
+	readsubdir_init(&rs, "todo", bigtodo, die_opendir);
 	while ((x = readsubdir_next(&rs, &id))) {
 		if (x > 0) {
 			fmtqfn(fnmess, "mess/", id, 1);
