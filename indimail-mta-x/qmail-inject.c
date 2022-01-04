@@ -233,9 +233,11 @@ put(char *s, int len)
 {
 	if (flagqueue) {
 		qmail_put(&qqt, s, len);
-		size += len;
-		if (databytes && size > databytes)
-			qmail_fail(&qqt);
+		if (databytes > 0) {
+			size += len;
+			if (size > databytes)
+				qmail_fail(&qqt);
+		}
 	} else
 		substdio_put(subfdout, s, len);
 }
@@ -414,7 +416,7 @@ exitnicely()
 		}
 		qqx = qmail_close(&qqt);
 		if (*qqx) {
-			if (databytes && size > databytes)
+			if (databytes > 0 && size > databytes)
 				die_size();
 			substdio_puts(subfderr, "qmail-inject: fatal: ");
 			substdio_puts(subfderr, qqx + 1);
@@ -1048,8 +1050,6 @@ getcontrols()
 			die_read();
 	} else
 		scan_ulong(x, &databytes);
-	if (!(databytes + 1))
-		--databytes;
 	if (!(x = env_get("MAXRECIPIENTS"))) {
 		if (control_readint(&maxrcptcount,"maxrecipients") == -1)
 			die_read();
@@ -1057,10 +1057,12 @@ getcontrols()
 			maxrcptcount = 0;
 	} else
 		scan_int(x, &maxrcptcount);
-	if (fstat(0, &statbuf))
-		die_stat();
-	if (databytes && statbuf.st_size > databytes)
-		die_size();
+	if (databytes > 0) {
+		if (fstat(0, &statbuf))
+			die_stat();
+		if (statbuf.st_size > databytes)
+			die_size();
+	}
 }
 
 #define RECIP_DEFAULT 1

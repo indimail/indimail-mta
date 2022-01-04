@@ -2295,8 +2295,6 @@ databytes_setup()
 			die_control();
 	} else
 		scan_ulong(x, &databytes);
-	if (!(databytes + 1))
-		--databytes;
 }
 
 void
@@ -2871,7 +2869,7 @@ smtp_ehlo(char *arg)
 		if (smtp_port != ODMR_PORT) {
 			out("250-PIPELINING\r\n");
 			out("250-8BITMIME\r\n");
-			if (databytes) {
+			if (databytes > 0) {
 				size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
 				out("250-SIZE ");
 				out(size_buf);
@@ -2884,7 +2882,7 @@ smtp_ehlo(char *arg)
 	} else {
 		out("250-PIPELINING\r\n");
 		out("250-8BITMIME\r\n");
-		if (databytes) {
+		if (databytes > 0) {
 			size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
 			out("250-SIZE ");
 			out(size_buf);
@@ -3079,7 +3077,7 @@ mailfrom_size(char *arg)
 	scan_ulong(arg, (unsigned long *) &r);
 	sizebytes = r;
 	msg_size = r;
-	if (databytes && (sizebytes > databytes))
+	if (databytes > 0 && sizebytes > databytes)
 		return 1;
 	return 0;
 }
@@ -4343,7 +4341,7 @@ smtp_data(char *arg)
 		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
-	if (databytes)
+	if (databytes > 0)
 		BytesToOverflow = databytes + 1;
 	if (sigsok) {
 		boundary.len = 0;
@@ -4449,7 +4447,7 @@ smtp_data(char *arg)
 		err_hops();
 		return;
 	}
-	if (databytes && !BytesToOverflow) {
+	if (databytes > 0 && !BytesToOverflow) {
 		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
