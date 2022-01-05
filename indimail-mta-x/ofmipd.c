@@ -971,7 +971,7 @@ authenticate(void)
 			close(pi[0]);
 		}
 		sig_pipedefault();
-		execvp(*childargs, childargs);
+		execv(*childargs, childargs);
 		_exit(1);
 	}
 	close(pi[0]);
