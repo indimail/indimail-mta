@@ -177,7 +177,7 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 	if (write(4, tmpbuf, len) != len)
 		strerr_die2sys(111, FATAL, "write: ");
 	close(4);
-	execvp(argv[1], argv + 1);
+	execv(argv[1], argv + 1);
 	strerr_die3sys(111, FATAL, "exec: ", argv[1]);
 }
 

@@ -356,7 +356,7 @@ noroutes:
 		ptr = setup_qrargs();
 		if (chdir(auto_qmail))
 			_exit(111);
-		execvp(ptr, args);
+		execv(ptr, args);
 		if (error_temp(errno))
 			_exit(111);
 		_exit(100);

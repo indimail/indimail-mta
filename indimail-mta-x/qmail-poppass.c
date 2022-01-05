@@ -137,7 +137,7 @@ authenticate()
 			close(pi[0]);
 		}
 		sig_pipedefault();
-		execvp(*authargs, authargs);
+		execv(*authargs, authargs);
 		_exit(1);
 	}
 	close(pi[0]);
@@ -181,7 +181,7 @@ change_pass()
 			close(pi[0]);
 		}
 		sig_pipedefault();
-		execvp(*passargs, passargs);
+		execv(*passargs, passargs);
 		_exit(1);
 	}
 	close(pi[0]);
