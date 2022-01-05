@@ -738,7 +738,7 @@ main(int argc, char **argv)
 	char           *ptr;
 	int             opt, do_control = 0, do_internals = 0, do_concurrency = 0,
 					do_queue = 0, do_errors = 0;
-	char           *svctool[] = { "svctool", "--dumpconfig", 0};
+	char           *svctool[] = { "/usr/bin/svctool", "--dumpconfig", 0};
 
 	while ((opt = getopt(argc, argv, "acCiqes")) != opteof) {
 		switch(opt)
@@ -762,7 +762,7 @@ main(int argc, char **argv)
 			do_errors = 1;
 			break;
 		case 's':
-			execvp(*svctool, svctool); /*- run svctool */
+			execv(*svctool, svctool); /*- run svctool */
 			strerr_die4sys(111, FATAL, "execv: ", *svctool, ": ");
 			break;
 		default:
