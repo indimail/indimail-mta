@@ -62,6 +62,14 @@ Release 2.14.1 Start 21/09/2021
 - 02/01/2022
 36. qmail-local.c, qmail-queue.c, qmail-todo.c, qmta-send.c, slowq-send.c
     USE_FSYNC, USE_SYNCDIR consistent
+- 04/01/2022
+37. qmail-inject.c, smtpd.c - configurable DATABYTES
+38. qmail-clean.c, qmail-qread.c, qmail-queue.c, qmail-rm.c, qmail-send.c,
+    qmail-todo.c, qmail-showctl.c, qmail-start.c, qmta-send.c, slowq-send.c
+    qscheduler.c, queue-fix.c, readsubdir.c, readsubdir.h configurable bigtodo
+- 05/01/2022
+39. smtpd.c, ofmipd.c, etrn.c, atrn.c, qmail-showctl,c ldap-checkpwd.c,
+	sys-checkpwd.c, qmail-rspawn.c, qmail-poppass.c: replace execvp with execv
 
 * 
 Release 2.14.0 Start 18/07/2021
@@ -188,7 +196,7 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
 - 19/08/2021
 69. dknewkey: added options to print, remove, generate DKIM keys
 70. indimail-mta.spec, PKGBUILD.in, create_services.in,
-	debian/indimail-mta.postinst - changes for modified dknewkey
+    debian/indimail-mta.postinst - changes for modified dknewkey
 71. qmail-smtpd.c - disable VRFY using DISABLE_VRFY env variable
 - 20/08/2021
 72. svctool, indimail-mta.spec, PKGBUILD, debian postinst: remove host
@@ -218,7 +226,7 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
     match recipient domain for local delivery
     allow overrides with MATCH_SENDER_DOMAIN, MATCH_RECIPIENT_DOMAIN
 83. qmail-send.c, slowq-send.c, drate.c, report.c, variables.h,
-	getDomainToken.h, getDomainToken.c, delivery_rate.c, spawn-filter.c:
+    getDomainToken.h, getDomainToken.c, delivery_rate.c, spawn-filter.c:
     moved dtype enum delivery variable from variables.h to getDomainToken.h
 84. qmail-dkim.c, qmail-dk.c, dk-filter.sh: Added control file dkimkeys to
     have domain specific private key, selector
