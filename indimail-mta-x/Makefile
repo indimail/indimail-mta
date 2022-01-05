@@ -2223,6 +2223,12 @@ trylsock.c
 	&& echo -lrt || exit 0 ) > rt.lib
 	rm -f trylsock.o trylsock
 
+crypt.lib: \
+trylsock.c
+	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lcrypt ) >/dev/null 2>&1 \
+	&& echo -lcrypt || exit 0 ) > crypt.lib
+	rm -f trylsock.o trylsock
+
 haslibrt.h: \
 trylsock.c
 	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lrt ) >/dev/null 2>&1 \
@@ -3490,9 +3496,9 @@ sql-database.9 conf-sysconfdir
 	> sql-database.8
 	
 sys-checkpwd: load sys-checkpwd.o \
-shadow.lib tls.lib
+shadow.lib tls.lib crypt.lib
 	./load sys-checkpwd \
-	`cat shadow.lib` -lqmail `cat tls.lib`
+	`cat shadow.lib crypt.lib` -lqmail `cat tls.lib`
 
 sys-checkpwd.o: \
 compile sys-checkpwd.c hasspnam.h \
@@ -3542,8 +3548,8 @@ tryshadow.c compile load
 	rm -f tryshadow.o tryshadow
 
 ldap-checkpwd: \
-load ldap-checkpwd.o ldap.lib
-	./load ldap-checkpwd `cat ldap.lib` -lqmail
+load ldap-checkpwd.o ldap.lib crypt.lib
+	./load ldap-checkpwd `cat crypt.lib ldap.lib` -lqmail
 
 ldap-checkpwd.o: \
 compile ldap-checkpwd.c hasldap.h
