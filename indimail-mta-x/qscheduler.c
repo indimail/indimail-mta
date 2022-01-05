@@ -43,6 +43,7 @@ static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
 static char  **prog_argv;
 static char     strnum1[FMT_ULONG];
+static int      bigtodo;
 #ifdef HASLIBRT
 static int      qconf, qmax, qload;
 static q_type   qtype = fixed;
@@ -52,7 +53,6 @@ static mqd_t    mq_sch = (mqd_t) -1;
 static int      shm_conf = -1;
 static int     *shm_queue;
 static int      compat_mode;
-static int      bigtodo;
 static char     strnum2[FMT_ULONG];
 #endif
 static readsubdir todosubdir;
