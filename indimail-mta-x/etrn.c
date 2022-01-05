@@ -140,7 +140,7 @@ etrn_queue(char *arg, char *remoteip)
 		sig_pipedefault();
 		close(1);
 		dup2(2, 1);
-		binetrnargs[0] = "bin/etrn";
+		binetrnargs[0] = "etrn";
 		binetrnargs[1] = arg;
 		binetrnargs[2] = remoteip;
 		execvp(*binetrnargs, binetrnargs);

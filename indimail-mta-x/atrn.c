@@ -86,7 +86,7 @@ atrn_queue(char *arg, char *remoteip)
 		sig_pipedefault();
 		dup2(1, 7);
 		dup2(0, 6);
-		binetrnargs[0] = "bin/atrn";
+		binetrnargs[0] = "atrn";
 		binetrnargs[1] = arg;
 		binetrnargs[2] = remoteip;
 		execvp(*binetrnargs, binetrnargs);
