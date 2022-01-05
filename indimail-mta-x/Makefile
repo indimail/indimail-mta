@@ -3492,7 +3492,7 @@ sql-database.9 conf-sysconfdir
 sys-checkpwd: load sys-checkpwd.o \
 shadow.lib tls.lib
 	./load sys-checkpwd \
-	`cat shadow.lib` -lqmail -lcrypt `cat tls.lib`
+	`cat shadow.lib` -lqmail `cat tls.lib`
 
 sys-checkpwd.o: \
 compile sys-checkpwd.c hasspnam.h \
