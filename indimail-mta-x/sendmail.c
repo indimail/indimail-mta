@@ -36,7 +36,6 @@
 #include <env.h>
 #include <str.h>
 #include <noreturn.h>
-#include "auto_qmail.h"
 
 no_return void
 nomem()
@@ -128,7 +127,7 @@ main(argc, argv)
 	char          **qiargv, **arg;
 	char           *sender;
 
-	if (chdir(auto_qmail) == -1) {
+	if (chdir("/") == -1) {
 		substdio_putsflush(subfderr, "sendmail: fatal: unable to switch to qmail home directory\n");
 		_exit(111);
 	}

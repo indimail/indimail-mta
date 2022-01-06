@@ -84,7 +84,6 @@
 #endif
 #include "variables.h"
 #include "auto_prefix.h"
-#include "auto_qmail.h"
 #include "auto_split.h"
 #include "auto_uids.h"
 #include "set_environment.h"
@@ -162,7 +161,7 @@ static stralloc doublebouncehost = { 0 };
 char           *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0, 0};
 char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
 char           *(qcargs[]) = { "qmail-clean", "qmta", 0};
-char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
+char           *(qfargs[]) = { "bin/queue-fix", "-s", 0, 0, 0, 0};
 static int      flagspawnalive[CHANNELS];
 static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
 static readsubdir cleanupdir;
@@ -1978,14 +1977,14 @@ queue_fix()
 	case -1:
 		_exit(111);
 	case 0:
-		if (chdir(auto_qmail) == -1) {
-			log7("alert: ", argv0, ": queue-fix: unable to switch to ", auto_qmail, ": ", error_str(errno), "\n");
-			_exit(111);
-		}
 		strnum1[fmt_int(strnum1, conf_split)] = 0;
 		qfargs[2] = strnum1;
-		qfargs[3] = queuedir;
-		execvp(*qfargs, qfargs); /*- queue-fix */
+		if (getuid() == auto_uidq) {
+			qfargs[3] = "-m";
+			qfargs[4] = queuedir;
+		} else
+			qfargs[3] = queuedir;
+		execv(*qfargs, qfargs); /*- queue-fix */
 		_exit(111);
 	}
 	sig_unblock(sig_int);

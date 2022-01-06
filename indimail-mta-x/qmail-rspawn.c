@@ -137,9 +137,7 @@
 #include "stralloc.h"
 #include "auto_control.h"
 #include "variables.h"
-#include "auto_qmail.h"
 #include "indimail_stub.h"
-
 
 static char *setup_qrargs()
 {
@@ -354,7 +352,7 @@ noroutes:
 		if (fd_copy(2, 1) == -1)
 			_exit(111);
 		ptr = setup_qrargs();
-		if (chdir(auto_qmail))
+		if (chdir("/"))
 			_exit(111);
 		execv(ptr, args);
 		if (error_temp(errno))

@@ -131,7 +131,6 @@
 #include "cdb.h"
 #include "case.h"
 #include "slurpclose.h"
-#include "auto_qmail.h"
 #include "auto_assign.h"
 #include "auto_control.h"
 #include "variables.h"
@@ -191,6 +190,9 @@ report_SPAWN(substdio *ss, int wstat, char *s, int len)
 		return;
 	case QLX_ROOT:
 		substdio_puts(ss, "ZNot allowed to perform deliveries as root.\n");
+		return;
+	case QLX_DIR:
+		substdio_puts(ss, "ZUnable to cd to root directory.\n");
 		return;
 	case QLX_USAGE:
 		substdio_puts(ss, "ZInternal qmail-lspawn bug.\n");
@@ -543,8 +545,8 @@ noauthself: /*- deliver to local user in control/locals */
 		recip[at] = 0;
 		if (!recip[0])
 			_exit(0);/*- <> */
-		if (chdir(auto_qmail) == -1)
-			_exit(QLX_USAGE);
+		if (chdir("/") == -1)
+			_exit(QLX_DIR);
 		nughde_get(recip);
 		x = nughde.s;
 		xlen = nughde.len;

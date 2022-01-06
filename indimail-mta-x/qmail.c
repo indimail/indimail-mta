@@ -69,7 +69,6 @@
 #include "scan.h"
 #include "fd.h"
 #include "qmail.h"
-#include "auto_qmail.h"
 #include "env.h"
 
 /*- open the queue */
@@ -119,8 +118,8 @@ qmail_open(struct qmail *qq)
 			scan_int(x, &errfd);
 		if (fd_move(errfd, pic[1]) == -1)
 			_exit(120);
-		if (chdir(auto_qmail) == -1)
-			_exit(61);
+		if (chdir("/") == -1)
+			_exit(63);
 		if (!binqqargs[0] && env_get("NULLQUEUE"))
 			binqqargs[0] = "sbin/qmail-nullqueue";
 		if (!binqqargs[0])
@@ -261,6 +260,7 @@ qmail_close(struct qmail *qq)
 	case 62: /*-*/
 		return "Zqq unable to access mess file (#4.3.0)";
 	case 63:
+		return "Zqq trouble doing cd to root directory (#4.3.0)";
 	case 64:
 	case 65:
 	case 66:

@@ -127,7 +127,7 @@
 #include "ipme.h"
 #include "quote.h"
 #include "control.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
 
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -721,8 +721,8 @@ popen_inject(char *sender)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 		break;
 	case 0:
-		if (chdir(auto_qmail))
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+		if (chdir("/"))
+			strerr_die2sys(111, FATAL, "unable to chdir to root: ");
 		args[0] = "bin/qmail-inject";
 		args[1] = "-a";
 		args[2] = "-f";
@@ -1049,8 +1049,8 @@ main(int argc, char *argv[])
 #endif
 	struct datetime dt;
 
-	if (chdir(auto_qmail))
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir))
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	if (control_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to read init controls: ");
 	if (control_rldef(&bouncefrom, "bouncefrom", 0, "MAILER-DAEMON") != 1)

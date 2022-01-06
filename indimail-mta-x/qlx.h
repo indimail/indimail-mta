@@ -19,6 +19,7 @@
 #define QLX_NOMEM 119
 #define QLX_EXECSOFT 120
 #define QLX_EXECPW 121
+#define QLX_DIR 122
 #define QLX_EXECHARD 126
 
 #endif

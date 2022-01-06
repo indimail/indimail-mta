@@ -17,7 +17,6 @@
 #include <fmt.h>
 #include <wait.h>
 #include <error.h>
-#include "auto_qmail.h"
 #include <makeargs.h>
 #include <mktempfile.h>
 #include <noreturn.h>
@@ -50,8 +49,8 @@ main(int argc, char **argv)
 	char           *ptr, *makeseekable, *spamf;
 	char          **Argv;
 
-	if (chdir(auto_qmail) == -1)
-		_exit(61);
+	if (chdir("/") == -1)
+		_exit(63);
 	sig_pipeignore();
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);

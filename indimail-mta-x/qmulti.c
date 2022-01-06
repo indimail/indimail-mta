@@ -349,8 +349,8 @@ qmulti(char *queue_env, int argc, char **argv)
 	char           *qqargs[3] = { "sbin/qmail-queue", 0, NULL };
 	char           *binqqargs[2] = { "sbin/qmail-multi", NULL };
 
-	if (chdir(auto_qmail) == -1)
-		_exit(61);
+	if (chdir("/") == -1)
+		_exit(63);
 	if (queue_env && (ptr = env_get(queue_env)) && *ptr) {
 		binqqargs[0] = ptr;
 		execv(*binqqargs, binqqargs);
