@@ -146,12 +146,6 @@ die_socket()
 }
 
 no_return void
-die_home()
-{
-	_exit(61);
-}
-
-no_return void
 die_temp()
 {
 	_exit(71);
