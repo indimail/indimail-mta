@@ -133,20 +133,24 @@ static void
 sigterm()
 {
 	flagexitasap = 1;
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("info: ", argv0, ": ", strnum1, ": Got TERM: ", queuedesc, "\n");
 }
 
 static void
 sigalrm()
 {
 	flagrunasap = 1;
-	log5("info: ", argv0, ": Got ALRM: ", queuedesc, "\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("info: ", argv0, ": ", strnum1, ": Got ALRM: ", queuedesc, "\n");
 }
 
 static void
 sighup()
 {
 	flagreadasap = 1;
-	log5("info: ", argv0, ": Got HUP: ", queuedesc, "\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("info: ", argv0, ": ", strnum1, ": Got HUP: ", queuedesc, "\n");
 }
 
 static void
@@ -2505,8 +2509,10 @@ main(int argc, char **argv)
 			tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
 		tv.tv_usec = 0;
 		if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
-			if (errno == error_intr);
-			else
+			if (errno == error_intr) {
+				if (flagexitasap)
+					break;
+			} else
 				log5("warning: ", argv0, ": ", queuedesc, ": trouble in select\n");
 		} else {
 			time_needed = 0;

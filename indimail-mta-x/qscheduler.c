@@ -110,7 +110,7 @@ sigterm()
 	flagexitasap = 1;
 	sig_block(sig_child);
 	sig_block(sig_term);
-	log_outf("alert: qscheduler: got SIGTERM\n");
+	log_outf("alert: qscheduler: got TERM\n");
 #ifdef HASLIBRT
 	if (shm_queue) {
 		for (i = 0; i < qcount; i++)
@@ -125,9 +125,7 @@ sigterm()
 		if (queue_table[i].pid == -1)
 			continue;
 		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
-		log_out("info: qscheduler: issue SIGTERM to ");
-		log_out(strnum1);
-		log_outf("\n");
+		strerr_warn2("info: qscheduler: issue SIGTERM to ", strnum1, 0);
 		kill(queue_table[i].pid, sig_term);
 	}
 	sig_unblock(sig_child);
@@ -139,14 +137,12 @@ sigalrm()
 	int             i;
 
 	sig_block(sig_alarm);
-	log_outf("alert: qscheduler: got SIGALARM\n");
+	log_outf("alert: qscheduler: got ALARM\n");
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
 			continue;
 		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
-		log_out("info: qscheduler: issue SIGALRM to ");
-		log_out(strnum1);
-		log_outf("\n");
+		strerr_warn2("info: qscheduler: issue SIGALRM to ", strnum1, 0);
 		kill(queue_table[i].pid, sig_alarm);
 	}
 	sig_unblock(sig_alarm);
@@ -158,14 +154,12 @@ sighup()
 	int             i;
 
 	sig_block(sig_child);
-	log_outf("alert: qscheduler: got SIGHUP\n");
+	log_outf("alert: qscheduler: got HUP\n");
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
 			continue;
 		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
-		log_out("info: qscheduler: issue SIGHUP to ");
-		log_out(strnum1);
-		log_outf("\n");
+		strerr_warn2("info: qscheduler: issue SIGHUP to ", strnum1, 0);
 		kill(queue_table[i].pid, sig_hangup);
 	}
 	sig_unblock(sig_child);
@@ -177,14 +171,12 @@ sigint()
 	int             i;
 
 	sig_block(sig_int);
-	log_outf("alert: qscheduler: got SIGINT\n");
+	log_outf("alert: qscheduler: got INT\n");
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
 			continue;
 		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
-		log_out("info: qscheduler: issue SIGINT to ");
-		log_out(strnum1);
-		log_outf("\n");
+		strerr_warn2("info: qscheduler: issue SIGINT to ", strnum1, 0);
 		kill(queue_table[i].pid, sig_int);
 	}
 	sig_unblock(sig_int);
@@ -205,19 +197,6 @@ sigchld()
 		start_send(-1, child);
 		sleep(1);
 	} /*- for (child = 0;;) */
-	for (; flagexitasap;) {
-		if ((child = wait_nohang(&wstat)) == -1) {
-			if (errno == error_intr)
-				continue;
-			break;
-		}
-		if (child) {
-			strnum1[fmt_ulong(strnum1, child)] = 0;
-			log_out("info: qscheduler: Reaping pid ");
-			log_out(strnum1);
-			log_outf("\n");
-		}
-	}
 	sig_unblock(sig_child);
 }
 
@@ -231,9 +210,7 @@ die()
 		if (queue_table[i].pid == -1)
 			continue;
 		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
-		log_out("info: qscheduler: issue SIGTERM to ");
-		log_out(strnum1);
-		log_outf("\n");
+		strerr_warn2("info: qscheduler: issue SIGTERM to ", strnum1, 0);
 		kill(queue_table[i].pid, sig_term);
 	}
 	sleep(1);
@@ -331,7 +308,7 @@ get_load(char *qptr)
 void
 start_send(int queueNum, pid_t pid)
 {
-	int             i, queue_no;
+	int             i, queue_no, count;
 	pid_t           qspid;
 	char           *qptr;
 
@@ -348,8 +325,15 @@ start_send(int queueNum, pid_t pid)
 		queue_no = i;
 		qptr = queuenum_to_dir(queue_no);
 		log_announce(pid, qptr, queue_table[queue_no].load, 1); /*- announce qmail-send died */
-		if (check_send(queue_no)) /*- test lock/sendmutex */
+		for (count = 0;count < 20; count++) {
+			if (!(i = check_send(queue_no))) /*- test lock/sendmutex */
+				break;
+			sleep(5);
+		}
+		if (i) {
+			strerr_warn2("alert: qscheduler: could not shutdown pid ", strnum1, 0); 
 			die();
+		}
 	} else { /*- first instance */
 		queue_no = queueNum;
 		qptr = queuenum_to_dir(queue_no);
@@ -471,6 +455,8 @@ static_queue()
 				continue;
 			break;
 		}
+		strnum1[fmt_ulong(strnum1, child)] = 0;
+		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
 	}
 	strerr_die1x(flagexitasap ? 0 : 111, "info: qscheduler: exiting");
 }
@@ -483,11 +469,7 @@ queue_fix(char *queuedir)
 
 	sig_block(sig_int);
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log_out("info: queue-fix: conf split=");
-	log_out(strnum1);
-	log_out(", queuedir=");
-	log_out(queuedir);
-	log_outf("\n");
+	strerr_warn4("info: queue-fix: conf split=", strnum1, ", queuedir=", queuedir, 0);
 	switch ((pid = fork()))
 	{
 	case -1:
@@ -690,7 +672,7 @@ dynamic_queue()
 {
 	struct mq_attr  attr;
 	unsigned int    priority, total_load;
-	int             i, r, nqueue, q[2], qlen, qsize;
+	int             i, r, nqueue, q[2], qlen, qsize, child, wstat;
 	char           *qptr;
 
 	qsargs[1] = compat_mode ? "-cd" : "-d";
@@ -787,11 +769,7 @@ dynamic_queue()
 		strnum1[fmt_int(strnum1, total_load)] = 0;
 		strnum2[fmt_int(strnum2, qcount * qload)] = 0;
 		if (total_load > qcount * qload && qcount < qmax) {
-			log_out("alert: qscheduler: average load ");
-			log_out(strnum1);
-			log_out(" exceeds threshold (> ");
-			log_out(strnum2);
-			log_outf(")\n");
+			strerr_warn5("alert: qscheduler: average load ",strnum1, " exceeds threshold (> ", strnum2, ")", 0);
 			qptr = queuenum_to_dir(qcount + 1);
 			r = 0; /*- flag for queue creation */
 			if (access(qptr, F_OK)) {
@@ -819,15 +797,20 @@ dynamic_queue()
 					die();
 				}
 			}
-		} else {
-			log_out("info: qscheduler: average load ");
-			log_out(strnum1);
-			log_out(" within limits (<= ");
-			log_out(strnum2);
-			log_outf(")\n");
-		}
+		} else
+			strerr_warn5("info: qscheduler: average load ", strnum1, " within limits (<= ", strnum2, ")", 0);
 		printf("msg[queue_no=%d load=%ld] priority=%d qcount=%d\n", ((qtab *) msgbuf)->queue_no, ((qtab *) msgbuf)->load, priority, qcount);
 	} /*- for (; !flagexitasap;) */
+
+	for (; flagexitasap;) {
+		if ((child = wait_pid(&wstat, -1)) == -1) {
+			if (errno == error_intr)
+				continue;
+			break;
+		}
+		strnum1[fmt_ulong(strnum1, child)] = 0;
+		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
+	}
 	strerr_warn1("info: qscheduler: exiting", 0);
 	_exit(flagexitasap ? 0 : 111);
 }

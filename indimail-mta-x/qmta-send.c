@@ -201,18 +201,22 @@ static void
 sigterm()
 {
 	flagexitasap = 1;
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("info: ", argv0, ": ", strnum1, ": Got TERM: ", queuedesc, "\n");
 }
 
 void sigalrm()
 {
 	flagrunasap = 1;
-	log3("info: ", argv0, ": Got ALRM\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("info: ", argv0, ": ", strnum1, ": Got ALRM: ", queuedesc, "\n");
 }
 
 void sighup()
 {
 	flagreadasap = 1;
-	log3("info: ", argv0, ": Got HUP\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("info: ", argv0, ": ", strnum1, ": Got HUP: ", queuedesc, "\n");
 }
 
 static void
@@ -2634,8 +2638,10 @@ main(int argc, char **argv)
 			tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
 		tv.tv_usec = 0;
 		if (select(nfds, &rfds, &wfds, NULL, &tv) == -1)
-			if (errno == error_intr);
-			else
+			if (errno == error_intr) {
+				if (flagexitasap)
+					break;
+			} else
 				log3("warning: ", argv0, ": trouble in select\n");
 		else {
 			/*- communicate with qmail-lspawn, qmail-rspawn
