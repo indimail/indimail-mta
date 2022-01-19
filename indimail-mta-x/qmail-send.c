@@ -134,7 +134,7 @@ sigterm()
 {
 	flagexitasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": Got TERM: ", queuedesc, "\n");
+	log7("info: ", argv0, ": ", strnum1, " Got TERM: ", queuedesc, "\n");
 }
 
 static void
@@ -142,7 +142,7 @@ sigalrm()
 {
 	flagrunasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": Got ALRM: ", queuedesc, "\n");
+	log7("info: ", argv0, ": ", strnum1, " Got ALRM: ", queuedesc, "\n");
 }
 
 static void
@@ -150,7 +150,7 @@ sighup()
 {
 	flagreadasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": Got HUP: ", queuedesc, "\n");
+	log7("info: ", argv0, ": ", strnum1, " Got HUP: ", queuedesc, "\n");
 }
 
 static void
@@ -2541,7 +2541,8 @@ main(int argc, char **argv)
 		}
 	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
 	pqfinish();
-	log5("status: ", argv0, ": ", queuedesc, " exiting\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("status: ", argv0, ": ", strnum1, " ", queuedesc, " exiting\n");
 	return (0);
 }
 
