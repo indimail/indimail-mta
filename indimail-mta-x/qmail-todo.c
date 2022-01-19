@@ -713,10 +713,12 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 	else {
 		strnum[i = fmt_ulong(strnum, ((q_msg *) msgbuf)->split)] = 0;
 		if (!stralloc_copyb(&qfn, strnum, i) || !stralloc_0(&qfn)) {
-			if (!do_readsubdir)
+			if (!do_readsubdir) {
 				log5("warning: ", argv0, ": ", queuedesc,
 					": out of memory. Resetting to opendir mode\n");
-			do_readsubdir = 1;
+				do_readsubdir = 1;
+				trigger_set();
+			}
 			return -1;
 		}
 	}
@@ -755,7 +757,8 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 #ifdef HASLIBRT
 	if (dynamic_queue)
 		mqueue_selprep(nfds, rfds);
-	trigger_selprep(nfds, rfds);
+	if (do_readsubdir || compat_mode != 2 || !dynamic_queue)
+		trigger_selprep(nfds, rfds);
 #else
 	trigger_selprep(nfds, rfds);
 #endif
@@ -811,7 +814,7 @@ log_stat(unsigned long id, size_t bytes)
  * -1 - error
  */
 int
-todo_scan(fd_set *rfds, unsigned long *id, int mq_flag)
+todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 {
 	/*- run todo maximal once every N seconds */
 	if (!mq_flag && todo_interval > 0 && recent < nexttodorun)
@@ -833,9 +836,12 @@ todo_scan(fd_set *rfds, unsigned long *id, int mq_flag)
 	case 0: /*- no files in todo/split/ */
 		flagtododir = 0;
 #ifdef HASLIBRT
-		if (dynamic_queue) {
-			if (do_readsubdir)
+		if (dynamic_queue && do_readsubdir) {
+			if (compat_mode == 2) {
 				log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
+				trigger_clear(nfds, rfds);
+			} else
+				log5("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n");
 			do_readsubdir = 0;
 		}
 #endif
@@ -874,7 +880,7 @@ todo_scan(fd_set *rfds, unsigned long *id, int mq_flag)
  * -1 - error
  */
 int
-todo_do(fd_set *rfds)
+todo_do(int *nfds, fd_set *rfds)
 {
 	struct stat     st;
 	substdio        ss, ssinfo, sschan[CHANNELS];
@@ -894,7 +900,7 @@ todo_do(fd_set *rfds)
 	if (dynamic_queue && !do_readsubdir) {
 		/*- if trigger is pulled, set flagtododir to 0 */
 		if (compat_mode < 2 && trigger_pulled(rfds) && !(flagtododir = 0) &&
-				!todo_scan(rfds, &id, 1)) { /*- found message without using mq_queue as trigger */
+				!todo_scan(nfds, rfds, &id, 1)) { /*- found message without using mq_queue as trigger */
 			if (!compat_mode)
 				log5("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n");
 			compat_mode = 1;
@@ -909,12 +915,12 @@ todo_do(fd_set *rfds)
 			ptr = qfn.len ? qfn.s : NULL; /*- split name */
 		}
 	} else {
-		if ((i = todo_scan(rfds, &id, 0))) /*- skip todo run if this returns 1 */
+		if ((i = todo_scan(nfds, rfds, &id, 0))) /*- skip todo run if this returns 1 */
 			return i;
 		ptr = readsubdir_name(&todosubdir); /*- split name */
 	}
 #else
-	if ((i = todo_scan(rfds, &id, 0))) /*- skip todo run if this returns 1 */
+	if ((i = todo_scan(nfds, rfds, &id, 0))) /*- skip todo run if this returns 1 */
 		return i;
 	ptr = readsubdir_name(&todosubdir); /*- split/id */
 #endif
@@ -1451,11 +1457,12 @@ main(int argc, char **argv)
 			 * todo_do keeps building comm_buf, which is used by
 			 * comm_do to communicate the file list to qmail-send.
 			 */
-			while (todo_do(&rfds) == 2);
+			while (todo_do(&nfds, &rfds) == 2);
 			comm_do(&wfds, &rfds); /*- communicate with qmail-send on fd 0, fd 1 */
 		}
 	} /*- for (;;) */
-	log5("status: ", argv0, ": ", queuedesc, " exiting\n");
+	strnum[fmt_ulong(strnum, getpid())] = 0;
+	log7("status: ", argv0, ": ", strnum, " ", queuedesc, " exiting\n");
 	_exit(0);
 }
 

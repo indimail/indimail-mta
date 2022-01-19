@@ -49,6 +49,17 @@ trigger_pulled(fd_set *rfds)
 }
 
 void
+trigger_clear(int *nfds, fd_set *rfds)
+{
+	if (fd != -1) {
+		FD_CLR(fd, rfds);
+		close(fd);
+		if (*nfds == fd + 1)
+			*nfds = fd;
+	}
+}
+
+void
 getversion_trigger_c()
 {
 	static char    *x = "$Id: trigger.c,v 1.2 2021-06-23 10:02:37+05:30 Cprogrammer Exp mbhangui $";
