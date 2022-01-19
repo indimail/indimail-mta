@@ -70,6 +70,12 @@ Release 2.14.1 Start 21/09/2021
 - 05/01/2022
 39. smtpd.c, ofmipd.c, etrn.c, atrn.c, qmail-showctl,c ldap-checkpwd.c,
 	sys-checkpwd.c, qmail-rspawn.c, qmail-poppass.c: replace execvp with execv
+- 19/01/2022
+40. qscheduler.c: use log_out functions instead of strerr_warn for logging
+    messages
+41. qmail-send.c: display pid when exiting
+42. qmail-todo.c, trigger.c, trigger.h: remove/add lock/trigger based on
+    dynamic/compat mode
 
 * 
 Release 2.14.0 Start 18/07/2021
