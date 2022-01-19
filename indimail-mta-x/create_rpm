@@ -234,10 +234,10 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	if [ $verbose -eq 0 ] ; then
 		echo "rpmbuild -ba $clean --quiet /tmp/indimail-mta.spec"
-		rpmbuild -ba --clean --quiet /tmp/indimail-mta.spec
+		rpmbuild -ba $clean --quiet /tmp/indimail-mta.spec
 	else
 		echo "rpmbuild -ba $clean /tmp/indimail-mta.spec"
-		rpmbuild -ba --clean /tmp/indimail-mta.spec
+		rpmbuild -ba $clean /tmp/indimail-mta.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail-mta.spec
