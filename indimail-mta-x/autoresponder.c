@@ -128,6 +128,7 @@
 #include "quote.h"
 #include "control.h"
 #include "auto_sysconfdir.h"
+#include "auto_prefix.h"
 
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -710,6 +711,7 @@ int
 popen_inject(char *sender)
 {
 	char           *(args[6]);
+	stralloc        bin = {0};
 	int             fds[2];
 
 	if (pipe(fds) == -1)
@@ -723,7 +725,11 @@ popen_inject(char *sender)
 	case 0:
 		if (chdir("/"))
 			strerr_die2sys(111, FATAL, "unable to chdir to root: ");
-		args[0] = "bin/qmail-inject";
+		if (!stralloc_copys(&bin, auto_prefix) ||
+				!stralloc_catb(&bin, "/bin/qmail-inject", 17) ||
+				!stralloc_0(&bin))
+			strerr_die2x(111, FATAL, "out of memory");
+		args[0] = bin.s;
 		args[1] = "-a";
 		args[2] = "-f";
 		args[3] = "";
