@@ -161,7 +161,7 @@ static stralloc doublebouncehost = { 0 };
 char           *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0, 0};
 char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
 char           *(qcargs[]) = { "qmail-clean", "qmta", 0};
-char           *(qfargs[]) = { "bin/queue-fix", "-s", 0, 0, 0, 0};
+char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0, 0};
 static int      flagspawnalive[CHANNELS];
 static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
 static readsubdir cleanupdir;
@@ -1988,7 +1988,7 @@ queue_fix()
 			qfargs[4] = queuedir;
 		} else
 			qfargs[3] = queuedir;
-		execv(*qfargs, qfargs); /*- queue-fix */
+		execvp(*qfargs, qfargs); /*- queue-fix */
 		_exit(111);
 	}
 	sig_unblock(sig_int);
