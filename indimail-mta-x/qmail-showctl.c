@@ -42,6 +42,7 @@
 #include "auto_split.h"
 #include "auto_control.h"
 #include "auto_sysconfdir.h"
+#include "auto_prefix.h"
 #include "variables.h"
 #include "hassrs.h"
 #include "indimail_stub.h"
@@ -738,7 +739,8 @@ main(int argc, char **argv)
 	char           *ptr;
 	int             opt, do_control = 0, do_internals = 0, do_concurrency = 0,
 					do_queue = 0, do_errors = 0;
-	char           *svctool[] = { "/usr/bin/svctool", "--dumpconfig", 0};
+	char           *svctool[] = { "svctool", "--dumpconfig", 0};
+	stralloc        bin = {0};
 
 	while ((opt = getopt(argc, argv, "acCiqes")) != opteof) {
 		switch(opt)
@@ -762,7 +764,11 @@ main(int argc, char **argv)
 			do_errors = 1;
 			break;
 		case 's':
-			execv(*svctool, svctool); /*- run svctool */
+			if (!stralloc_copys(&bin, auto_prefix) ||
+					!stralloc_catb(&bin, "/sbin/svctool", 13) ||
+					!stralloc_0(&bin))
+				strerr_die2x(111, FATAL, "out of memory");
+			execv(bin.s, svctool); /*- run svctool */
 			strerr_die4sys(111, FATAL, "execv: ", *svctool, ": ");
 			break;
 		default:
