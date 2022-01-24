@@ -76,6 +76,11 @@ Release 2.14.1 Start 21/09/2021
 41. qmail-send.c: display pid when exiting
 42. qmail-todo.c, trigger.c, trigger.h: remove/add lock/trigger based on
     dynamic/compat mode
+- 24/01/2022
+43. autorepsonder.c: use prefix for qmail-inject
+44. qmail-showctl.c: use previx for svctool
+45. qmta-send.c: Replaced execv with execvp
+46. svctool: prevent overwriting servercert.cnf
 
 * 
 Release 2.14.0 Start 18/07/2021
