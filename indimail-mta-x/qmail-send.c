@@ -1475,10 +1475,8 @@ del_dochan(int c)
 				/*- write the concurrency used for local/remote at offset 0, 1 */
 				offset = c * sizeof(int);
 				q = concurrencyused[c];
-				if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1)) {
-					log5("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory, sleeping...\n");
-					sleep(10);
-				}
+				if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1))
+					log5("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory\n");
 #endif
 				del_status();
 			}
