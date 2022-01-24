@@ -1788,16 +1788,18 @@ compile get_uid.c auto_uids.h
 qmail-showctl: \
 load qmail-showctl.o auto_uids.o control.o auto_qmail.o auto_break.o \
 indimail_stub.o auto_patrn.o auto_spawn.o auto_split.o variables.o \
-get_uid.o auto_control.o auto_sysconfdir.o auto_assign.o set_environment.o
+get_uid.o auto_control.o auto_sysconfdir.o auto_assign.o set_environment.o \
+auto_prefix.o
 	./load qmail-showctl auto_uids.o control.o auto_qmail.o \
 	auto_break.o auto_patrn.o auto_spawn.o auto_control.o \
 	auto_split.o variables.o get_uid.o indimail_stub.o \
-	auto_sysconfdir.o auto_assign.o set_environment.o -ldl $(QMAILLIB)
+	auto_sysconfdir.o auto_assign.o set_environment.o \
+	auto_prefix.o -ldl $(QMAILLIB)
 
 qmail-showctl.o: compile qmail-showctl.c control.h auto_sysconfdir.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
-hassrs.h conf-srs conf-spf conf-batv
+hassrs.h auto_prefix.h conf-srs conf-spf conf-batv
 	./compile `grep -h -v "^#" conf-spf conf-batv` \
 	qmail-showctl.c
 
@@ -2475,15 +2477,15 @@ qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 autoresponder: load autoresponder.o auto_sysconfdir.o \
 variables.o control.o quote.o auto_control.o \
 ip.o ipme.o ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
-qregex.o matchregex.o wildmat.o
+qregex.o matchregex.o wildmat.o auto_prefix.o
 	./load autoresponder auto_control.o auto_sysconfdir.o \
 	variables.o control.o quote.o ip.o ipme.o ipalloc.o \
 	socket_v4mappedprefix.o socket_v6any.o qregex.o \
-	matchregex.o wildmat.o $(QMAILLIB)
+	matchregex.o wildmat.o auto_prefix.o $(QMAILLIB)
 
 autoresponder.o: \
 compile autoresponder.c auto_sysconfdir.h control.h ip.h ipme.h \
-quote.h qregex.h conf-mime
+auto_prefix.h quote.h qregex.h conf-mime
 	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` autoresponder.c
 
 822field: \
