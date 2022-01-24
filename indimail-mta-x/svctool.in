@@ -9086,13 +9086,14 @@ create_cert()
 		exit 1
 	fi
 	echo "Creating SSL Configuration email=$postmaster cn=$common_name"
-	create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
-	/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
 	conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
-	/bin/rm -f $conf_file
-	change_config $conf_file $TMPDIR/config.cnf.$$
-	/bin/chmod 640 $conf_file
-	$chown indimail:qmail $conf_file
+	if [ ! -f $conf_file ] ; then
+		create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
+		/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
+		change_config $conf_file $TMPDIR/config.cnf.$$
+		/bin/chmod 640 $conf_file
+		$chown indimail:qmail $conf_file
+	fi
 	if [ -f "$DESTDIR"$sysconfdir/certs/servercert.pem -a $force -ne 1 ] ; then
 		echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
 		exit 1
