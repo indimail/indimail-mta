@@ -36,7 +36,7 @@ int             err_child();
 void            die_nomem();
 void            die_control();
 
-static char    *binetrnargs[3] = { 0, 0, 0 };
+static char    *binatrnargs[3] = { 0, 0, 0 };
 
 int
 atrn_queue(char *arg, char *remoteip)
@@ -86,10 +86,10 @@ atrn_queue(char *arg, char *remoteip)
 		sig_pipedefault();
 		dup2(1, 7);
 		dup2(0, 6);
-		binetrnargs[0] = "atrn";
-		binetrnargs[1] = arg;
-		binetrnargs[2] = remoteip;
-		execvp(*binetrnargs, binetrnargs);
+		binatrnargs[0] = "atrn";
+		binatrnargs[1] = arg;
+		binatrnargs[2] = remoteip;
+		execvp(*binatrnargs, binatrnargs);
 		_exit(1);
 	}
 	if (wait_pid(&wstat, child) == -1)
