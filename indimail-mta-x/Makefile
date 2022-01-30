@@ -1042,8 +1042,9 @@ srs.lib
 	./load qmail-inject headerbody.o hfield.o newfield.o \
 	quote.o control.o qmail.o matchregex.o envrules.o \
 	wildmat.o srs.o rcpthosts.o auto_control.o variables.o \
-	auto_sysconfdir.o set_environment.o \
-	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB)
+	auto_sysconfdir.o set_environment.o $(static_option) \
+	$(QMAILLIB) $(dynamic_option) -L../libsrs2-x/libsrs2/.libs \
+	`cat srs.lib`
 
 qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 	cat qmail-inject.9 \
@@ -1256,8 +1257,8 @@ auto_control.o socket.lib
 	./load qmail-qmqpc slurpclose.o socket_tcp.o socket_tcp6.o \
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 	auto_control.o socket_v4mappedprefix.o timeoutconn.o ip.o \
-	control.o variables.o \
-	`cat socket.lib` $(QMAILLIB)
+	control.o variables.o $(static_option) $(QMAILLIB) \
+	$(dynamic_option) `cat socket.lib`
 
 qmail-qmqpc.o: \
 compile qmail-qmqpc.c auto_control.h slurpclose.h ip.h \
@@ -1267,8 +1268,8 @@ haveip6.h socket.h conf-ip
 
 qmail-qmqpd: \
 load qmail-qmqpd.o received.o qmail.o auto_qmail.o
-	./load qmail-qmqpd received.o qmail.o \
-	auto_qmail.o $(QMAILLIB)
+	./load qmail-qmqpd received.o qmail.o auto_qmail.o \
+	$(static_option) $(QMAILLIB) $(dynamic_option)
 
 qmail-qmqpd.o: \
 compile qmail-qmqpd.c qmail.h received.h
@@ -1279,7 +1280,7 @@ load qmail-qmtpd.o rcpthosts.o control.o received.o \
 qmail.o auto_qmail.o auto_control.o variables.o
 	./load qmail-qmtpd rcpthosts.o control.o auto_control.o \
 	auto_qmail.o received.o qmail.o variables.o \
-	$(QMAILLIB)
+	$(static_option) $(QMAILLIB) $(dynamic_option)
 
 qmail-qmtpd.o: \
 compile qmail-qmtpd.c qmail.h rcpthosts.h control.h received.h \
@@ -3085,7 +3086,7 @@ load new-inject.o qmail.o auto_sysconfdir.o rwhconfig.o \
 variables.o auto_qmail.o auto_control.o set_environment.o
 	./load new-inject qmail.o auto_sysconfdir.o variables.o \
 	auto_qmail.o auto_control.o rwhconfig.o set_environment.o \
-	$(QMAILLIB)
+	$(static_option) $(QMAILLIB) $(dynamic_option)
 
 new-inject.1: new-inject.9 conf-sysconfdir
 	cat new-inject.9 \
