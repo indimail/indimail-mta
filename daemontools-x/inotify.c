@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.11  2022-01-30 09:53:48+05:30  Cprogrammer
+ * added missing '/' in display
+ *
  * Revision 1.10  2021-08-30 12:04:53+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -218,6 +221,7 @@ main(int argc, char **argv)
 				else
 					out("file ");
 				print_dir(event->wd);
+				out("/");
 				out(event->name);
 				if (event->mask & IN_CREATE)
 					out(" created\n");
@@ -281,7 +285,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.10 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: inotify.c,v 1.11 2022-01-30 09:53:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
