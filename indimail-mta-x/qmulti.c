@@ -1,5 +1,11 @@
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.58  2022-01-30 09:26:31+05:30  Cprogrammer
+ * use IPC as another method for queues in addition to lock/trigger
+ * added haslibrt.h to configure dynamic queue
+ * make queue directory as the second argument to qmail-queue
+ * removed chdir auto_qmail
+ *
  * Revision 1.57  2021-10-21 12:41:36+05:30  Cprogrammer
  * eliminated extra variables
  *
@@ -472,7 +478,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.57 2021-10-21 12:41:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.58 2022-01-30 09:26:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;

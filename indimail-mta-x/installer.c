@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.20  2022-01-30 09:51:34+05:30  Cprogrammer
+ * changed datatype of mode for comparision with -1
+ *
  * Revision 1.19  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -599,7 +602,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.19 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.20 2022-01-30 09:51:34+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

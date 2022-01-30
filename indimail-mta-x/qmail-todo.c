@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: qmail-todo.c,v 1.55 2022-01-30 09:17:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -1469,7 +1469,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.54 2021-11-27 22:26:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.55 2022-01-30 09:17:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1477,6 +1477,16 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.55  2022-01-30 09:17:33+05:30  Cprogrammer
+ * fixes for FreeBSD
+ * revert to trigger method if using message queue fails
+ * fix for OSX
+ * fixed select timeout for dynamic queue
+ * added compat mode to wakeup on lock/trigger
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ * allow configurable big/small todo/intd
+ * remove/added use of lock/trigger based on dynamic/static mode
+ *
  * Revision 1.54  2021-12-12 08:47:50+05:30  Cprogrammer
  * use argv0 for program name
  * transmit messid to qmail-send in TODO_CHUNK_SIZE

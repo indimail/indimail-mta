@@ -1,4 +1,7 @@
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.48  2022-01-30 08:37:23+05:30  Cprogrammer
+# replaced qmail-daemon with qscheduler
+#
 # Revision 1.47  2021-08-23 17:34:36+05:30  Cprogrammer
 # fixed default_domain variable
 #
@@ -138,7 +141,7 @@
 # Initial revision
 #
 #
-# $Id: qlocal_upgrade.in,v 1.47 2021-08-23 17:34:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.48 2022-01-30 08:37:23+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -166,7 +169,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.47 2021-08-23 17:34:36+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.48 2022-01-30 08:37:23+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -175,7 +178,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.47 2021-08-23 17:34:36+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.47 2021-08-23 17:34:36+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.48 2022-01-30 08:37:23+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then

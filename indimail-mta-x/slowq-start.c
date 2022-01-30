@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.6  2022-01-30 09:42:10+05:30  Cprogrammer
+ * made global variables as static
+ *
  * Revision 1.5  2021-10-20 22:51:18+05:30  Cprogrammer
  * add queue directory as argument for identification in ps list
  *
@@ -285,7 +288,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.5 2021-10-20 22:51:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-start.c,v 1.6 2022-01-30 09:42:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.41  2022-01-30 08:40:26+05:30  Cprogrammer
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ *
  * Revision 1.40  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -963,7 +966,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.40 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.41 2022-01-30 08:40:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

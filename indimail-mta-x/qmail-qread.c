@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.40  2022-01-30 08:42:40+05:30  Cprogrammer
+ * added -s option to display only counts with -c option
+ * allow configurable big/small todo/intd
+ *
  * Revision 1.39  2021-10-21 14:42:22+05:30  Cprogrammer
  * chdir to auto_qmail instead of auto_sysconfdir
  *
@@ -557,7 +561,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.39 2021-10-21 14:42:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.40 2022-01-30 08:42:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

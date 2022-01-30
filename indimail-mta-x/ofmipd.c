@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.22  2022-01-30 08:36:54+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
  * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -1219,7 +1222,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.21 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.22 2022-01-30 08:36:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

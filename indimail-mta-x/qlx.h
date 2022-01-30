@@ -1,5 +1,8 @@
 /*
  * $Log: qlx.h,v $
+ * Revision 1.3  2022-01-30 08:37:29+05:30  Cprogrammer
+ * added QLX_DIR definition
+ *
  * Revision 1.2  2004-06-18 23:01:24+05:30  Cprogrammer
  * added RCS log
  *

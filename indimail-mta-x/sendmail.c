@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.14  2022-01-30 09:38:33+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
  * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -260,7 +263,7 @@ main(argc, argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.14 2022-01-30 09:38:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

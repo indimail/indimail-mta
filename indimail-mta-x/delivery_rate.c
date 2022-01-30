@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.7  2022-01-30 08:30:55+05:30  Cprogrammer
+ * added additional argument in nomem()
+ *
  * Revision 1.6  2021-08-13 18:25:53+05:30  Cprogrammer
  * turn off ratelimit if RATELIMIT_DIR is set but empty
  *
@@ -190,7 +193,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.6 2021-08-13 18:25:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.7 2022-01-30 08:30:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

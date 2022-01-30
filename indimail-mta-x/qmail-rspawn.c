@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.44  2022-01-30 08:45:26+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
  * Revision 1.43  2021-06-29 09:29:09+05:30  Cprogrammer
  * modularize spawn code
  *
@@ -365,7 +368,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.43 2021-06-29 09:29:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rspawn.c,v 1.44 2022-01-30 08:45:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

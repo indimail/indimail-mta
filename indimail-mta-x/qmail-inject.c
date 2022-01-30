@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.45  2022-01-30 08:39:45+05:30  Cprogrammer
+ * allow disabling of databytes check
+ *
  * Revision 1.44  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -1197,7 +1200,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.44 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.45 2022-01-30 08:39:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

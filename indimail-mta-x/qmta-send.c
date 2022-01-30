@@ -1,5 +1,12 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.13  2022-01-30 09:24:30+05:30  Cprogrammer
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ * allow configurable big/small todo/intd
+ * removed chdir auto_qmail
+ * fixed signal sent to child
+ * replaced execv with execvp
+ *
  * Revision 1.12  2021-11-02 17:57:09+05:30  Cprogrammer
  * fixed typo
  *
@@ -2672,7 +2679,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.12 2021-11-02 17:57:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.13 2022-01-30 09:24:30+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

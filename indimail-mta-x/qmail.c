@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.c,v $
+ * Revision 1.29  2022-01-30 08:38:40+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
  * Revision 1.28  2020-12-07 16:08:20+05:30  Cprogrammer
  * added exit code 79 as duplicate to 91 for Envelope format error
  *
@@ -313,7 +316,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.28 2020-12-07 16:08:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.29 2022-01-30 08:38:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.4  2022-01-30 09:14:04+05:30  Cprogrammer
+ * made big-todo configurable
+ * replaced execvp with execv
+ *
  * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -840,7 +844,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.4 2022-01-30 09:14:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

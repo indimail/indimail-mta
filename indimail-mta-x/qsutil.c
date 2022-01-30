@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.22  2022-01-30 09:28:08+05:30  Cprogrammer
+ * print program name in logs
+ *
  * Revision 1.21  2021-10-22 14:00:10+05:30  Cprogrammer
  * added ident argument to loglock_open() for identification in logs
  *
@@ -503,7 +506,7 @@ logsafe(char *s, char *argv0)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.21 2021-10-22 14:00:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.22 2022-01-30 09:28:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

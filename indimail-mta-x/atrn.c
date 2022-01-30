@@ -1,5 +1,8 @@
 /*
  * $Log: atrn.c,v $
+ * Revision 1.7  2022-01-30 08:26:55+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
  * Revision 1.6  2008-05-26 22:19:31+05:30  Cprogrammer
  * removed auto_qmail.h
  *
@@ -109,7 +112,7 @@ atrn_queue(char *arg, char *remoteip)
 void
 getversion_atrn_c()
 {
-	static char    *x = "$Id: atrn.c,v 1.6 2008-05-26 22:19:31+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: atrn.c,v 1.7 2022-01-30 08:26:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

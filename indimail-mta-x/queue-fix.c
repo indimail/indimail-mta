@@ -1,5 +1,9 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.28  2022-01-30 09:29:09+05:30  Cprogrammer
+ * fixed return status when creating a queue
+ * allow configurable big/small todo/intd
+ *
  * Revision 1.27  2021-11-27 22:24:03+05:30  Cprogrammer
  * fixed return status for queue creation
  *
@@ -1093,7 +1097,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.27 2021-11-27 22:24:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.28 2022-01-30 09:29:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

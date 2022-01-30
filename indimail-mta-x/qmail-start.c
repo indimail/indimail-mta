@@ -1,5 +1,10 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.25  2022-01-30 09:15:36+05:30  Cprogrammer
+ * added qscheduler, removed qmail-daemon
+ * added compat mode option (support trigger mode in ipc mode)
+ * allow configurable big/small todo/intd
+ *
  * Revision 1.24  2021-10-20 22:45:12+05:30  Cprogrammer
  * added queue directory as argument for identification in ps list
  *
@@ -431,7 +436,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.24 2021-10-20 22:45:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.25 2022-01-30 09:15:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

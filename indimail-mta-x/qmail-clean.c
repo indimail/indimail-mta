@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.14  2022-01-30 08:37:53+05:30  Cprogrammer
+ * made bigtodo configurable
+ *
  * Revision 1.13  2021-06-27 10:45:02+05:30  Cprogrammer
  * moved conf_split variable to fmtqfn.c
  *
@@ -169,7 +172,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.13 2021-06-27 10:45:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.14 2022-01-30 08:37:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

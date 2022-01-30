@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.36  2022-01-30 08:28:42+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
  * Revision 1.35  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -1300,7 +1303,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.35 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.36 2022-01-30 08:28:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,10 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.18  2022-01-30 09:40:18+05:30  Cprogrammer
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ * allow configurable big/small todo/intd
+ * fixed signal sent to child
+ *
  * Revision 1.17  2021-11-02 17:57:22+05:30  Cprogrammer
  * use argv0 for program name
  *
@@ -2607,7 +2612,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.17 2021-11-02 17:57:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.18 2022-01-30 09:40:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

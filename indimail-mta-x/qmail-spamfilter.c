@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.3  2022-01-30 09:14:32+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
  * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -222,7 +225,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.2 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.3 2022-01-30 09:14:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;

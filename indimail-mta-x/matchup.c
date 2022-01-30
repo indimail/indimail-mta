@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.12  2022-01-30 08:36:42+05:30  Cprogrammer
+ * replaced qmail-daemon with qscheduler
+ *
  * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -763,7 +766,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.12 2022-01-30 08:36:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

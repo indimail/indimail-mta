@@ -1,5 +1,8 @@
 /*
  * $Log: etrn.c,v $
+ * Revision 1.18  2022-01-30 08:31:52+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
  * Revision 1.17  2021-05-26 10:36:55+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -212,7 +215,7 @@ valid_hostname(char *name)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.17 2021-05-26 10:36:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.18 2022-01-30 08:31:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

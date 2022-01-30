@@ -2431,12 +2431,13 @@ variables.o: \
 compile variables.c variables.h haveip6.h conf-ip
 	./compile variables.c
 
-etrn.o: compile etrn.c etrn.h rcpthosts.h auto_qmail.h \
-control.h indimail_stub.h auto_control.h variables.h
+etrn.o: compile etrn.c etrn.h rcpthosts.h control.h \
+indimail_stub.h variables.h auto_control.h auto_qmail.h \
+auto_prefix.h
 	./compile etrn.c
 
 atrn.o: \
-compile atrn.c etrn.h rcpthosts.h control.h
+compile atrn.c etrn.h rcpthosts.h control.h auto_prefix.h
 	./compile atrn.c
 
 ############### Begin queue-fix

@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.h,v $
+ * Revision 1.5  2022-01-30 09:38:08+05:30  Cprogrammer
+ * allow configurable big/small todo/intd
+ *
  * Revision 1.4  2021-05-12 17:50:29+05:30  Cprogrammer
  * added readsubdir_name()
  *

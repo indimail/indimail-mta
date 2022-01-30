@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: qmail-queue.c,v 1.78 2022-01-30 08:43:56+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1136,7 +1136,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.77 2021-09-11 23:21:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.78 2022-01-30 08:43:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1144,6 +1144,15 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.78  2022-01-30 08:43:56+05:30  Cprogrammer
+ * added qscheduler, removed qmail-daemon
+ * added haslibrt.h to configure dynamic queue
+ * fix for FreeBSD
+ * revert to trigger method if using message queue fails
+ * fixed formatting of Received line
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ * allow configurable big/small todo/intd
+ *
  * Revision 1.77  2021-09-11 23:21:45+05:30  Cprogrammer
  * updated Received headers
  *

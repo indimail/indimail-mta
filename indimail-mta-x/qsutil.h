@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.21  2022-01-30 09:28:18+05:30  Cprogrammer
+ * print program name in logs
+ *
  * Revision 1.20  2021-10-22 14:00:33+05:30  Cprogrammer
  * added ident argument to loglock_open() for identification in logs
  *

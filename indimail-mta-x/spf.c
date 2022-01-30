@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.19  2022-01-30 09:43:47+05:30  Cprogrammer
+ * initialize ip4mask, ip6mask variables
+ *
  * Revision 1.18  2020-09-16 19:07:04+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -1426,7 +1429,7 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.18 2020-09-16 19:07:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.19 2022-01-30 09:43:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

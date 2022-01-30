@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.c,v $
+ * Revision 1.6  2022-01-30 09:38:02+05:30  Cprogrammer
+ * allow configurable big/small todo/intd
+ *
  * Revision 1.5  2021-05-12 17:50:21+05:30  Cprogrammer
  * added readsubdir_name()
  *
@@ -90,7 +93,7 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	static char    *x = "$Id: readsubdir.c,v 1.5 2021-05-12 17:50:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: readsubdir.c,v 1.6 2022-01-30 09:38:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
