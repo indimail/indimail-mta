@@ -19,34 +19,36 @@
  * Initial revision
  *
  */
-#include "rcpthosts.h"
-#include "etrn.h"
-#include "case.h"
-#include "sig.h"
-#include "stralloc.h"
-#include "constmap.h"
-#include "control.h"
-#include "str.h"
-#include "wait.h"
+#include <case.h>
+#include <sig.h>
+#include <stralloc.h>
+#include <constmap.h>
+#include <str.h>
+#include <wait.h>
 #include <ctype.h>
+#include <strerr.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "etrn.h"
+#include "rcpthosts.h"
+#include "control.h"
+#include "auto_prefix.h"
 
 int             err_child();
 void            die_nomem();
 void            die_control();
 
-static char    *binatrnargs[3] = { 0, 0, 0 };
+static char    *binatrnargs[4] = { 0, 0, 0, 0 };
+static stralloc etrn = { 0 };
 
 int
 atrn_queue(char *arg, char *remoteip)
 {
-	int             child, flagetrn, len, exitcode, wstat;
-	stralloc        etrn = { 0 };
+	int             child, flagetrn, len, exitcode, wstat, end_flag;
 	char           *cptr, *domain_ptr;
-	int             end_flag;
-	struct constmap mapetrn;
 	static int      flagrcpt = 1;
+	struct constmap mapetrn;
+	stralloc        bin = {0};
 
 	if(flagrcpt)
 		flagrcpt = rcpthosts_init();
@@ -56,12 +58,9 @@ atrn_queue(char *arg, char *remoteip)
 		return(-2);
 	if (!constmap_init(&mapetrn, etrn.s, etrn.len, 0))
 		die_nomem();
-	for(cptr = domain_ptr = arg;;cptr++)
-	{
-		if(*cptr == ' ' || *cptr == ',' || !*cptr)
-		{
-			if(*cptr)
-			{
+	for(cptr = domain_ptr = arg;;cptr++) {
+		if(*cptr == ' ' || *cptr == ',' || !*cptr) {
+			if(*cptr) {
 				end_flag = 0;
 				*cptr = 0;
 			} else
@@ -86,18 +85,21 @@ atrn_queue(char *arg, char *remoteip)
 		sig_pipedefault();
 		dup2(1, 7);
 		dup2(0, 6);
-		binatrnargs[0] = "atrn";
+		if (!stralloc_copys(&bin, auto_prefix) ||
+				!stralloc_catb(&bin, "/bin/atrn", 9) ||
+				!stralloc_0(&bin))
+			strerr_die1x(111, "atrn: fatal: out of memory");
+		binatrnargs[0] = bin.s;
 		binatrnargs[1] = arg;
 		binatrnargs[2] = remoteip;
-		execvp(*binatrnargs, binatrnargs);
+		execv(*binatrnargs, binatrnargs);
 		_exit(1);
 	}
 	if (wait_pid(&wstat, child) == -1)
 		return err_child();
 	if (wait_crashed(wstat))
 		return err_child();
-	if ((exitcode = wait_exitcode(wstat)))
-	{
+	if ((exitcode = wait_exitcode(wstat))) {
 		exitcode = 0 - exitcode;
 		return(exitcode); /*- no */
 	}

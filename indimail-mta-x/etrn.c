@@ -52,42 +52,45 @@
  * Initial revision
  *
  */
-#include "rcpthosts.h"
-#include "etrn.h"
-#include "case.h"
-#include "sig.h"
-#include "stralloc.h"
-#include "constmap.h"
-#include "control.h"
-#include "auto_control.h"
-#include "variables.h"
-#include "str.h"
-#include "fmt.h"
-#include "auto_qmail.h"
-#include "env.h"
-#include "wait.h"
-#include "error.h"
-#include "qcount_dir.h"
 #include <ctype.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <case.h>
+#include <sig.h>
+#include <stralloc.h>
+#include <constmap.h>
+#include <str.h>
+#include <fmt.h>
+#include <env.h>
+#include <wait.h>
+#include <error.h>
+#include <strerr.h>
+#include "rcpthosts.h"
+#include "etrn.h"
+#include "control.h"
+#include "variables.h"
+#include "auto_control.h"
+#include "auto_qmail.h"
+#include "auto_prefix.h"
+#include "qcount_dir.h"
 
 int             err_child();
 int             err_library();
 void            die_nomem();
 void            die_control();
+static stralloc etrn = { 0 };
 
-static char    *binetrnargs[3] = { 0, 0, 0 };
+static char    *binetrnargs[4] = { 0, 0, 0, 0 };
 
 int
 etrn_queue(char *arg, char *remoteip)
 {
 	int             child, r, flagetrn, len, exitcode, wstat;
 	size_t          mailcount;
-	static stralloc etrn = { 0 };
 	char            maildir1[1024], maildir2[1024];
 	struct constmap mapetrn;
 	static int      flagrcpt = 1;
+	stralloc        bin = {0};
 
 	if (flagrcpt)
 		flagrcpt = rcpthosts_init();
@@ -140,10 +143,14 @@ etrn_queue(char *arg, char *remoteip)
 		sig_pipedefault();
 		close(1);
 		dup2(2, 1);
-		binetrnargs[0] = "etrn";
+		if (!stralloc_copys(&bin, auto_prefix) ||
+				!stralloc_catb(&bin, "/bin/etrn", 9) ||
+				!stralloc_0(&bin))
+			strerr_die1x(111, "etrn: fatal: out of memory");
+		binetrnargs[0] = bin.s;
 		binetrnargs[1] = arg;
 		binetrnargs[2] = remoteip;
-		execvp(*binetrnargs, binetrnargs);
+		execv(*binetrnargs, binetrnargs);
 		_exit(1);
 	}
 	if (wait_pid(&wstat, child) == -1)
