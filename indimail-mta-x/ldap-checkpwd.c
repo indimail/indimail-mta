@@ -241,8 +241,8 @@ main(int argc, char *argv[])
 	/*- authenticaion did not succeed */
 	if (native_checkpassword)
 		_exit (1);
-	execvp(argv[1], argv + 1);
-	my_error("execvp", argv[1], -1);
+	execv(argv[1], argv + 1);
+	my_error("execv", argv[1], -1);
 	/*- Not reached */
 	_exit (111);
 }
