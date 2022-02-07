@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.621 2022-02-07 10:39:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.622 2022-02-07 11:28:49+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.621 2022-02-07 10:39:45+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.622 2022-02-07 11:28:49+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2443,17 +2443,14 @@ if [ " $odmr" = " " ] ; then
 			/bin/rm -f $conf_dir/$i
 		done
 		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
-		echo "t=$t QUEUE_BASE=$QUEUE_BASE"
 		if [ ! "$t" = "$QUEUE_BASE" ] ; then
 			echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 		fi
 		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
-		echo "t=$t QUEUE_COUNT=$QUEUE_COUNT"
 		if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 			echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 		fi
 		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
-		echo "t=$t QUEUE_START=$QUEUE_START"
 		if [ ! "$t" = "$QUEUE_START" ] ; then
 			echo $QUEUE_START  > $conf_dir/QUEUE_START
 		fi
@@ -2878,7 +2875,7 @@ else
 			val=$(eval "echo \${$i}")
 			echo $val > $conf_dir/$i
 			if [ ! -f "$DESTDIR"$cntrldir/global_vars/$i -a ! -L "$DESTDIR"$cntrldir/global_vars/$i ] ; then
-				ln -sf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i
+				ln -srf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i
 			fi
 	done
 fi
