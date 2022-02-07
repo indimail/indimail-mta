@@ -81,6 +81,12 @@ Release 2.14.1 Start 21/09/2021
 44. qmail-showctl.c: use previx for svctool
 45. qmta-send.c: Replaced execv with execvp
 46. svctool: prevent overwriting servercert.cnf
+- 06/02/2022
+47. svctool: create local queue variables if different from global variable
+    value
+- 07/02/2022
+48. svctool: create CONFSPLIT, QUEUE_COUNT, QUEUE_BASE, QUEUE_START as global
+    vars
 
 * 
 Release 2.14.0 Start 18/07/2021

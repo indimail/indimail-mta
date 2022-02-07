@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.619 2022-01-30 09:44:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.621 2022-02-07 10:39:45+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.619 2022-01-30 09:44:32+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.621 2022-02-07 10:39:45+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1078,8 +1078,8 @@ if [ $# -lt 5 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 OK=1
 
@@ -1155,7 +1155,7 @@ else
     echo ""$DESTDIR"$libexecdir exists"
   fi
   echo "Checking IndiMail queues"
-  QUEUE_NO=$FIRST_QUEUE
+  QUEUE_NO=$QUEUE_START
   COUNT=1
   while true
   do
@@ -1167,7 +1167,7 @@ else
     elif [ "$VERB" = y ]; then
       echo "queue "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" looks OK"
     fi
-    if [ $COUNT -eq $NO_OF_QUEUES ] ; then
+    if [ $COUNT -eq $QUEUE_COUNT ] ; then
       break
     fi
     COUNT=`expr $COUNT + 1`
@@ -1961,12 +1961,12 @@ if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] 
 		ln -s ../defaultdomain DEFAULT_DOMAIN
 	fi
 fi
-if [ ! -f $t/global_vars/QMAILDEFAULTHOSt -a ! -L $t/global_vars/QMAILDEFAULTHOSt ] ; then
+if [ ! -f $t/global_vars/QMAILDEFAULTHOST -a ! -L $t/global_vars/QMAILDEFAULTHOST ] ; then
 	echo "global variable QMAILDEFAULTHOST"
-	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOSt
+	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOST
 	if [ $? -ne 0 ] ; then
 		cd $t/global_vars
-		ln -s ../defaulthost QMAILDEFAULTHOSt
+		ln -s ../defaulthost QMAILDEFAULTHOST
 	fi
 fi
 echo "Setting Following Files to Reasonable Defaults"
@@ -2225,6 +2225,10 @@ if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
 	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
 	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
 	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+else
+	if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
+		echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+	fi
 fi
 if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then
 	echo $sysconfdir/control/global_vars > $conf_dir/.envdir
@@ -2307,8 +2311,8 @@ if [ $# -ne 11 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 SMTP_PORT=$5
 chkrecipient=$6
@@ -2433,10 +2437,26 @@ if [ " $odmr" = " " ] ; then
 		echo $qmailqueue > $conf_dir/QMAILQUEUE
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	else
-		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-		echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-		echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
 		> $conf_dir/QUEUEDIR
+		for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+		do
+			/bin/rm -f $conf_dir/$i
+		done
+		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+		echo "t=$t QUEUE_BASE=$QUEUE_BASE"
+		if [ ! "$t" = "$QUEUE_BASE" ] ; then
+			echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+		fi
+		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+		echo "t=$t QUEUE_COUNT=$QUEUE_COUNT"
+		if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+			echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+		fi
+		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+		echo "t=$t QUEUE_START=$QUEUE_START"
+		if [ ! "$t" = "$QUEUE_START" ] ; then
+			echo $QUEUE_START  > $conf_dir/QUEUE_START
+		fi
 	fi
 	if [ $use_starttls -eq 0 ] ; then
 		> $conf_dir/STARTTLS
@@ -2825,8 +2845,8 @@ if [ $# -ne 4 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 QUEUE_DEF=$4
 
 if [ " $CONTROLDIR" = " " ] ; then
@@ -2842,6 +2862,9 @@ fi
 $chown indimail:qmail $conf_dir
 /bin/chmod 755 $conf_dir
 link_with_global $conf_dir
+if [ ! -f $conf_dir/.envdir ] ; then
+	echo "$cntrldir/global_vars" > $conf_dir/.envdir
+fi
 
 if [ -n "$base_path" ] ; then
 	echo $base_path    > $conf_dir/BASE_PATH
@@ -2850,18 +2873,14 @@ if [ $no_multi -eq 1 ] ; then
 	echo $qmailqueue > $conf_dir/QMAILQUEUE
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 else
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
-fi
-defaultDomain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
-if [ ! -d "$DESTDIR"$cntrldir/global_vars ] ; then
-	mkdir -p "$DESTDIR"$cntrldir/global_vars
-	$chown root:qmail "$DESTDIR"$cntrldir/global_vars
-	/bin/chmod 755 "$DESTDIR"$cntrldir/global_vars
-	echo "$cntrldir/global_vars" > $conf_dir/.envdir
-elif [ ! -f $conf_dir/.envdir ] ; then
-	echo "$cntrldir/global_vars" > $conf_dir/.envdir
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+			val=$(eval "echo \${$i}")
+			echo $val > $conf_dir/$i
+			if [ ! -f "$DESTDIR"$cntrldir/global_vars/$i -a ! -L "$DESTDIR"$cntrldir/global_vars/$i ] ; then
+				ln -sf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i
+			fi
+	done
 fi
 if [ " $qregex" = " " ] ; then
 	> $conf_dir/QREGEX
@@ -2973,6 +2992,7 @@ case "$dksign_option" in
 	;;
 esac
 echo "$prog_args" > $conf_dir/.options
+echo "$prog_args" > "$DESTDIR"$cntrldir/global_vars/.options
 if [ ! " $logfilter" = " " ] ; then
 	echo  $logfilter > $conf_dir/LOGFILTER
 	if [ ! -f $SERVICEDIR/qmail-logfifo/run ] ; then
@@ -2997,8 +3017,8 @@ elif [ " $1" != " qmtpd" -a " $1" != " qmqpd" ] ; then
 fi
 type=$1
 QUEUE_BASE=$2
-NO_OF_QUEUES=$3
-FIRST_QUEUE=$4
+QUEUE_COUNT=$3
+QUEUE_START=$4
 SERVICEDIR=$5
 QMTP_PORT=$6
 
@@ -3057,9 +3077,23 @@ if [ $no_multi -eq 1 ] ; then
 	echo $qmailqueue > $conf_dir/QMAILQUEUE
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 else
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
+	> $conf_dir/QUEUEDIR
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+		/bin/rm -f $conf_dir/$i
+	done
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_BASE" ] ; then
+		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+	fi
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+	fi
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_START" ] ; then
+		echo $QUEUE_START  > $conf_dir/QUEUE_START
+	fi
 fi
 case "$dkverify_option" in
 	dkimstrict)
@@ -5896,8 +5930,8 @@ if [ $# -ne 4 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/fetchmail/variables ] ; then
@@ -5920,10 +5954,23 @@ if [ $no_multi -eq 1 ] ; then
 	echo $qmailqueue > $conf_dir/QMAILQUEUE
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 else
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
 	> $conf_dir/QUEUEDIR
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+		/bin/rm -f $conf_dir/$i
+	done
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_BASE" ] ; then
+		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+	fi
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+	fi
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_START" ] ; then
+		echo $QUEUE_START  > $conf_dir/QUEUE_START
+	fi
 fi
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
@@ -6273,8 +6320,8 @@ if [ $# -ne 8 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 QUEUE_IDENT=$5
 routes=$6
@@ -6309,7 +6356,7 @@ else
 	./queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 fi
 
-QUEUE_NO=$FIRST_QUEUE
+QUEUE_NO=$QUEUE_START
 COUNT=1
 while true
 do
@@ -6322,7 +6369,7 @@ do
 	else
 		./queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
 	fi
-	if [ $COUNT -eq $NO_OF_QUEUES ] ; then
+	if [ $COUNT -eq $QUEUE_COUNT ] ; then
 		break
 	fi
 	COUNT=`expr $COUNT + 1`
@@ -6349,10 +6396,23 @@ if [ $no_multi -eq 1 ] ; then
 	> $conf_dir/QMAILQUEUE
 else
 	echo "$QmailBinPrefix/sbin/qmail-multi" > $conf_dir/QMAILQUEUE
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
 	> $conf_dir/QUEUEDIR
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+		/bin/rm -f $conf_dir/$i
+	done
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_BASE" ] ; then
+		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+	fi
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+	fi
+	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_START" ] ; then
+		echo $QUEUE_START  > $conf_dir/QUEUE_START
+	fi
 fi
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
