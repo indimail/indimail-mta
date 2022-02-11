@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.78 2022-01-30 08:43:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.79 2022-02-11 11:52:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -682,6 +682,38 @@ mq_todo(char *queue_ident, unsigned int priority)
 }
 #endif
 
+/*-
+ * 1. setting env to any empty string turns off
+ *    reading of control file f.
+ * 2. If env is not set, control file f is read
+ * 3. if flag is non-zero and env is set and non-empty,
+ *    use value of env as the control filename
+ *    If flag is zero and env is set and non-empty,
+ *    use value of env as the value in s.
+ */
+void
+read_control(stralloc *s, char *env, char *f, int flag)
+{
+	char           *ptr;
+
+	ptr = env_get(env);
+	if (!ptr) {
+		if (control_readfile(s, f, 0) == -1)
+			die(55);
+	} else
+	if (ptr && *ptr) {
+		if (flag) {
+			if (control_readfile(s, ptr, 0) == -1)
+				die(55);
+		} else {
+			if (!stralloc_copys(s, ptr) || !stralloc_0(s))
+				die(51);
+			s->len--;
+		}
+	}
+	return;
+}
+
 int
 main()
 {
@@ -704,40 +736,19 @@ main()
 	umask(033);
 	if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1)
 		die(67);
-	if (control_readint((int *) &originipfield, "originipfield") == -1)
-		die(55);
-	if ((ptr = env_get("ORIGINIPFIELD"))) {
-		scan_ulong(ptr, (unsigned long *) &field_len);
-		originipfield = field_len;
-	}
-	if (!(ptr = env_get("EXTRAQUEUE"))) {
-		if (control_readfile(&extraqueue, "extraqueue", 0) == -1)
-			die(55);
-	} else {
-		if (!stralloc_copys(&extraqueue, ptr) ||
-				!stralloc_0(&extraqueue))
-			die(51);
-		extraqueue.len--;
-	}
-	if (!(ptr = env_get("QUARANTINE"))) {
-		if (control_readline(&quarantine, "quarantine") == -1)
-			die(55);
-	} else
-	if (!stralloc_copys(&quarantine, ptr))
-		die(51);
+	if ((ptr = env_get("ORIGINIPFIELD")))
+		scan_ulong(ptr, (unsigned long *) &originipfield);
+	read_control(&extraqueue, "EXTRAQUEUE", "extraqueue", 0);
+	read_control(&quarantine, "QUARANTINE", "quarantine", 0);
 	/*-
 	 * These control files will cause qmail-queue to 
 	 * read one line at a time
 	 */
-	if (control_readfile(&excl, (ptr = env_get("REMOVEHEADERS")) && *ptr ? ptr : "removeheaders", 0) == -1)
-		die(55);
-	if (control_readfile(&incl, (ptr = env_get("ENVHEADERS")) && *ptr ? ptr : "envheaders", 0) == -1)
-		die(55);
-	if (control_readfile(&logh, (ptr = env_get("LOGHEADERS")) && *ptr ? ptr : "logheaders", 0) == -1)
-		die(55);
+	read_control(&excl, "REMOVEHEADERS", "removeheaders", 1);
+	read_control(&incl, "ENVHEADERS", "envheaders", 1);
+	read_control(&logh, "LOGHEADERS", "logheaders", 1);
 #if defined(MAILARCHIVE)
-	if (control_readfile(&ar_rules, (ptr = env_get("MAILARCHIVE")) && *ptr ? ptr : "mailarchive", 0) == -1)
-		die(55);
+	read_control(&ar_rules, "MAILARCHIVE", "mailarchive", 1);
 	if (ar_rules.s && ar_rules.len)
 		flagarchive = 1;
 #endif
@@ -1136,7 +1147,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.78 2022-01-30 08:43:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.79 2022-02-11 11:52:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1144,6 +1155,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.79  2022-02-11 11:52:01+05:30  Cprogrammer
+ * new function read_control() for loading extraqueue, quarantine, removehaders, envheaders, logheaders control files.
+ *
  * Revision 1.78  2022-01-30 08:43:56+05:30  Cprogrammer
  * added qscheduler, removed qmail-daemon
  * added haslibrt.h to configure dynamic queue

@@ -69,7 +69,7 @@ Release 2.14.1 Start 21/09/2021
     qscheduler.c, queue-fix.c, readsubdir.c, readsubdir.h configurable bigtodo
 - 05/01/2022
 39. smtpd.c, ofmipd.c, etrn.c, atrn.c, qmail-showctl,c ldap-checkpwd.c,
-	sys-checkpwd.c, qmail-rspawn.c, qmail-poppass.c: replace execvp with execv
+    sys-checkpwd.c, qmail-rspawn.c, qmail-poppass.c: replace execvp with execv
 - 19/01/2022
 40. qscheduler.c: use log_out functions instead of strerr_warn for logging
     messages
@@ -87,6 +87,9 @@ Release 2.14.1 Start 21/09/2021
 - 07/02/2022
 48. svctool: create CONFSPLIT, QUEUE_COUNT, QUEUE_BASE, QUEUE_START as global
     vars
+- 11/02/2022
+49. qmail-queue.c: New function read_control() to read extraqueue, quarantine,
+    removeheaders, envheaders, logheaders, mailarchive control files.
 
 * 
 Release 2.14.0 Start 18/07/2021

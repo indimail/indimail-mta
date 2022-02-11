@@ -62,6 +62,9 @@ queue. This method avoids the need for \fBqmail-todo\fR / \fBqmail-send\fR
 to scan the queue subdirectories for new messages, thereby saving on disk
 IO for better filesystem performance.
 
+If the environment variable \fBORIGINIPFIELD\fR is set, a
+"X-Originating-IP" header will be added to every relayed mail.
+
 .SH CONTROL FILES
 \fBqmail-queue\fR use many control files to provide various features.
 
@@ -74,15 +77,86 @@ also does the same thing. The value of the environment variable overrides
 the value in the control file. Also the environment variable can be just one
 recipient. There is a potential for loops in case the recipient is local and
 the local delivery has any kind of forwarding rule which results in
-qmail-queue being invoked.
+qmail-queue being invoked. If \fBEXTRAQUEUE\fR is set but empty, the
+control will not be read.
+
+.TP
+.B quarantine
+If this control file exists, recipient list is replaced with its content.
+The environment variable
+.B QUARANTINE
+also does the same thing. The value of the environment variable overrides
+the value in the control file. Additionally, comma separated list of
+original recipient list is added to the header \fBX-Quarantine-ID\fR. If
+\fBQUARANTINE\fR is set but empty, the control will not be read.
+
+.TP
+.B envheaders
+If this control file exists, \fBqmail-queue\fR passes all headers listed
+in the control file to the queue along with the value. \fBqmail-local\fR
+and \fBqmail-remote\fR will set environment variables corresponding to the
+headers with the values. An optional length, separated by a ':', can be
+appended to the name of the header. If length is specified, the
+environment variable will be set only if the actual length of the header
+value is less than or equal to this value. This will prevent emails with
+extra long headers or malicious headers to exploit memory allocation on
+the system. The environment variable \fBENVHEADERS\fR can be set to use
+a different name for this control file. If \fBENVHEADERS\fR is set but
+empty, the control file will not be read.
+
+.TP
+.B logheaders
+If this control file exists, \fBqmail-queue\fR writes all headers (along
+with values) listed in the control file to file descriptor defined by
+\fBLOGHEADERFD\fR environment variable. The file descriptor needs to be open
+for write. You can open the file descriptor in the startup scripts for
+\fBqmail-smtpd\fR, for example. If \fBLOGHEADERS\fR is set but empty, the
+control file will not be read.
+
+.EX
+ touch /tmp/header.log
+ exec 45 >/tmp/header.log
+ LOGHEADERFD=45
+.EE
+
+If the file descriptor is not open, logging of header will be silently
+ignored. Logging of headers can be useful for debugging or logging specific
+headers in log files. The environment variable \fBLOGHEADERS\fR can be set
+to use a different name for this control file.
+
+.TP
+.B removeheaders
+If this control file
+exists, \fBqmail-queue\fR removes all headers listed in the control file
+from the mail message on descriptor 0 before writing it to the disk. The
+environment variable \fBREMOVEHEADERS\fR can be set to use a different
+name for this control file. If \fBREMOVEHEADERS\fR is set but empty, the
+control will not be read.
+
+Every envelope recipient address should contain a username, an @ sign,
+and a fully qualified domain name.
+
+.B qmail-queue
+always adds a
+.B Received
+line to the top of the message.
+.B qmail-queue
+keeps a copy of the
+.B QQEH
+environment variable (if set), and passes it into the queue.
+.B qmail-local
+and
+.B qmail-remote
+will prepend it to the headers of the email when it is delivered.
 
 .TP
 .B mailarchive
 if this control file exists, its content can be used for rule based
 archival. The environment variable
 .B MAILARCHIVE
-overrides the name of the \fImailarchive\fR control file. A line in
-this control file can be of the form
+overrides the name of the \fImailarchive\fR control file. if
+\fBMAILARCHIVE\fR is set but empty, the control file will not be read. A
+line in this control file can be of the form
 
 .EX
  type:regexp:dest_mailbox
@@ -131,71 +205,6 @@ The environment variable
 .B ORIGINIPFIELD
 overrides the control file 
 .BR originipfield .
-
-.TP
-.B quarantine
-If this control file exists, recipient list is replaced with its content.
-The environment variable
-.B QUARANTINE
-also does the same thing. The value of the environment variable overrides
-the value in the control file. Additionally, comma separated list of
-original recipient list is added to the header \fBX-Quarantine-ID\fR.
-
-.TP
-.B removeheaders
-If this control file
-exists, \fBqmail-queue\fR removes all headers listed in the control file
-from the mail message on descriptor 0 before writing it to the disk. The
-environment variable \fBREMOVEHEADERS\fR can be set to use a different
-name for this control file.
-
-Every envelope recipient address should contain a username, an @ sign,
-and a fully qualified domain name.
-
-.B qmail-queue
-always adds a
-.B Received
-line to the top of the message.
-.B qmail-queue
-keeps a copy of the
-.B QQEH
-environment variable (if set), and passes it into the queue.
-.B qmail-local
-and
-.B qmail-remote
-will prepend it to the headers of the email when it is delivered.
-
-.TP
-.B envheaders
-If this control file exists, \fBqmail-queue\fR passes all headers listed
-in the control file to the queue along with the value. \fBqmail-local\fR
-and \fBqmail-remote\fR will set environment variables corresponding to the
-headers with the values. An optional length, separated by a ':', can be
-appended to the name of the header. If length is specified, the
-environment variable will be set only if the actual length of the header
-value is less than or equal to this value. This will prevent emails with
-extra long headers or malicious headers to exploit memory allocation on
-the system. The environment variable \fBENVHEADERS\fR can be set to use
-a different name for this control file.
-
-.TP
-.B logheaders
-If this control file exists, \fBqmail-queue\fR writes all headers (along
-with values) listed in the control file to file descriptor defined by
-\fBLOGHEADERFD\fR environment variable. The file descriptor needs to be open
-for write. You can open the file descriptor in the startup scripts for
-\fBqmail-smtpd\fR, for example.
-
-.EX
- touch /tmp/header.log
- exec 45 >/tmp/header.log
- LOGHEADERFD=45
-.EE
-
-If the file descriptor is not open, logging of header will be silently
-ignored. Logging of headers can be useful for debugging or logging specific
-headers in log files. The environment variable \fBLOGHEADERS\fR can be set
-to use a different name for this control file.
 
 .PP
 .B qmail-queue
