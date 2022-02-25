@@ -1,5 +1,9 @@
 /*
  * $Log: softlimit.c,v $
+ * Revision 1.4  2022-02-25 09:51:51+05:30  Cprogrammer
+ * added option to set message queue limit
+ * use -1 to set resource limit as unlimited
+ *
  * Revision 1.3  2021-08-30 12:04:53+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -33,7 +37,7 @@ die_usage(void)
 void
 doit(int resource, char *arg)
 {
-	unsigned long   u;
+	long            u;
 	struct rlimit   r;
 
 	if (getrlimit(resource, &r) == -1)
@@ -42,11 +46,15 @@ doit(int resource, char *arg)
 	if (str_equal(arg, "="))
 		r.rlim_cur = r.rlim_max;
 	else {
-		if (arg[scan_ulong(arg, &u)])
+		if (arg[scan_long(arg, &u)])
 			die_usage();
-		r.rlim_cur = u;
-		if (r.rlim_cur > r.rlim_max)
-			r.rlim_cur = r.rlim_max;
+		if (u == -1) {
+			r.rlim_cur = r.rlim_max = RLIM_INFINITY;
+		} else {
+			r.rlim_cur = u;
+			if (r.rlim_cur > r.rlim_max)
+				r.rlim_cur = r.rlim_max;
+		}
 	}
 
 	if (setrlimit(resource, &r) == -1)
@@ -156,7 +164,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_softlimit_c()
 {
-	static char    *x = "$Id: softlimit.c,v 1.3 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: softlimit.c,v 1.4 2022-02-25 09:51:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

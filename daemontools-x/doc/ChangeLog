@@ -163,7 +163,9 @@ o setuidgid: Feature to set additional groups using -g option
 - 02/01/2022
 69. softlimit.c: added -q option for setting message queue size
 - 30/01/2022
-70. added missing '/' in display
+70. inotify.c: added missing '/' in display
+- 25/02/2022
+71. softlimit.c: Use -1 to set resource limit as unlimited
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
