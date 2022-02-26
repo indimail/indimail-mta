@@ -90,6 +90,8 @@ Release 2.14.1 Start 21/09/2021
 - 11/02/2022
 49. qmail-queue.c: New function read_control() to read extraqueue, quarantine,
     removeheaders, envheaders, logheaders, mailarchive control files.
+- 26/02/2022
+50. qmail-smtpd.c: fix ehlo greating for local connections
 
 * 
 Release 2.14.0 Start 18/07/2021
