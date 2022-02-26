@@ -106,7 +106,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.249 $";
+char           *revision = "$Revision: 1.251 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -447,6 +447,41 @@ die_nohelofqdn(char *arg)
 	out("451 unable to accept non-FQDN HELO (#4.3.0)\r\n");
 	flush();
 	_exit(1);
+}
+
+void
+err_localhelo(char *l, char *lip, char *arg)
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" invalid HELO greeting: HELO <");
+	logerr(arg);
+	logerr("> for local ");
+	logerr(l);
+	logerr(", ");
+	logerr(lip);
+	logerrf("\n");
+	out("451 invalid HELO greeting for local (#4.3.0)\r\n");
+	flush();
+}
+
+void
+err_badhelo(char *arg1, char *arg2)
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" Invalid HELO greeting: HELO <");
+	logerr(arg1);
+	logerr("> FQDN <");
+	logerr(arg2);
+	logerrf(">\n");
+	out("553 sorry, your HELO/EHLO greeting is in my badhelo list (#5.7.1)\r\n");
+	flush();
+#ifdef QUITASAP
+	_exit(1);
+#endif
 }
 
 void
@@ -988,24 +1023,6 @@ err_hmf(char *arg1, char *arg2, int arg3)
 		out("553 Bad sender's system address (#5.1.8)\r\n");
 	else
 		out("553 sorry, helo domain must exist (#5.1.8)\r\n");
-}
-
-void
-err_badhelo(char *arg1, char *arg2, char *arg3)
-{
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Invalid HELO greeting: HELO <");
-	logerr(arg2);
-	logerr("> FQDN <");
-	logerr(arg3);
-	logerrf(">\n");
-	out("553 sorry, your HELO/EHLO greeting is in my badhelo list (#5.7.1)\r\n");
-#ifdef QUITASAP
-	flush();
-	_exit(1);
-#endif
 }
 
 void
@@ -2208,20 +2225,18 @@ dohelo(char *arg)
 			if (!arg[i])
 				die_nohelofqdn(arg);
 		}
-		if (local && case_equals(local, helohost.s))
-			return;
-		if (localip && case_equals(localip, helohost.s))
-			return;
 	}
 	/*- badhelo */
 	if (dohelocheck) {
+		if (!case_diffs(localip, remoteip) && case_diffs(local, helohost.s) && case_diffs(localip, helohost.s))
+			err_localhelo(local, localip, arg);
 		switch (address_match
 				((badhelofn
 				  && *badhelofn) ? badhelofn : "badhelo", &helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0,
 				 &errStr))
 		{
 		case 1:
-			err_badhelo(remoteip, helohost.s, remotehost);
+			err_badhelo(helohost.s, remotehost);
 			return;
 		case 0:
 			break;
@@ -2295,8 +2310,6 @@ databytes_setup()
 			die_control();
 	} else
 		scan_ulong(x, &databytes);
-	if (!(databytes + 1))
-		--databytes;
 }
 
 void
@@ -2588,19 +2601,16 @@ setup()
 		remoteip = "unknown";
 	if (!(localip = env_get("TCP6LOCALIP")))
 		localip = env_get("TCPLOCALIP");
-	if (!(local = env_get("TCPLOCALHOST")))
-		local = localip;
+	if (!localip)
+		localip = "unknown";
 #else
 	if (!(remoteip = env_get("TCPREMOTEIP")))
 		remoteip = "unknown";
-	localip = env_get("TCPLOCALIP");
-	if (!(local = env_get("TCPLOCALHOST")))
-		local = localip;
+	if (!(localip = env_get("TCPLOCALIP")))
+		localip = "unknown";
 #endif
-	if (!local && hostname && *hostname)
-		local = hostname;
-	if (!local)
-		local = "unknown";
+	if (!(local = env_get("TCPLOCALHOST")))
+		local = hostname && *hostname ? hostname : "unknown";
 	if (!(remotehost = env_get("TCPREMOTEHOST")))
 		remotehost = "unknown";
 	remoteinfo = env_get("TCPREMOTEINFO");
@@ -2871,7 +2881,7 @@ smtp_ehlo(char *arg)
 		if (smtp_port != ODMR_PORT) {
 			out("250-PIPELINING\r\n");
 			out("250-8BITMIME\r\n");
-			if (databytes) {
+			if (databytes > 0) {
 				size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
 				out("250-SIZE ");
 				out(size_buf);
@@ -2884,7 +2894,7 @@ smtp_ehlo(char *arg)
 	} else {
 		out("250-PIPELINING\r\n");
 		out("250-8BITMIME\r\n");
-		if (databytes) {
+		if (databytes > 0) {
 			size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
 			out("250-SIZE ");
 			out(size_buf);
@@ -3079,7 +3089,7 @@ mailfrom_size(char *arg)
 	scan_ulong(arg, (unsigned long *) &r);
 	sizebytes = r;
 	msg_size = r;
-	if (databytes && (sizebytes > databytes))
+	if (databytes > 0 && sizebytes > databytes)
 		return 1;
 	return 0;
 }
@@ -4343,7 +4353,7 @@ smtp_data(char *arg)
 		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
-	if (databytes)
+	if (databytes > 0)
 		BytesToOverflow = databytes + 1;
 	if (sigsok) {
 		boundary.len = 0;
@@ -4449,7 +4459,7 @@ smtp_data(char *arg)
 		err_hops();
 		return;
 	}
-	if (databytes && !BytesToOverflow) {
+	if (databytes > 0 && !BytesToOverflow) {
 		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
@@ -4543,7 +4553,7 @@ authenticate(int method)
 			close(pe[1]);
 		}
 		sig_pipedefault();
-		execvp(*childargs, childargs);
+		execv(*childargs, childargs);
 		_exit(1);
 	}
 	close(pi[0]);
@@ -6121,6 +6131,13 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.251  2022-02-26 09:05:54+05:30  Cprogrammer
+ * fix ehlo greating for local connections
+ *
+ * Revision 1.250  2022-01-30 09:42:52+05:30  Cprogrammer
+ * allow disabling of databytes check
+ * replaced execvp with execv
+ *
  * Revision 1.249  2021-10-20 22:56:20+05:30  Cprogrammer
  * allow SMTP code to be configured when setting SHUTDOWN env variable
  *
@@ -6307,7 +6324,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.249 2021-10-20 22:56:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.251 2022-02-26 09:05:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
