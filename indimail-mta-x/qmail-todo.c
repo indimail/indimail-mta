@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.55 2022-01-30 09:17:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.56 2022-03-01 23:05:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -105,7 +105,14 @@ static mqd_t    mq_queue = (mqd_t)-1;
 static char    *msgbuf;
 static int      msgbuflen;
 static stralloc qfn = { 0 };
-static int      compat_mode = 2; /*- default is to not run in compat mode */
+/*-
+ * compat_mode_flag
+ * 0 - indicator of being in mqueue mode
+ * 1 - indicator of being in readsubdir mode
+ * 2 - pure dynamic mode
+ * default is to run dynamic mode without compat
+ */
+static int      compat_mode_flag = 2;
 #endif
 
 void            log1(char *w);
@@ -757,7 +764,7 @@ todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 #ifdef HASLIBRT
 	if (dynamic_queue)
 		mqueue_selprep(nfds, rfds);
-	if (do_readsubdir || compat_mode != 2 || !dynamic_queue)
+	if (do_readsubdir || compat_mode_flag != 2 || !dynamic_queue)
 		trigger_selprep(nfds, rfds);
 #else
 	trigger_selprep(nfds, rfds);
@@ -788,7 +795,7 @@ log_stat(unsigned long id, size_t bytes)
 	*strnum2 = ' ';
 	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
 #ifdef HASLIBRT
-		if (compat_mode == 1)
+		if (compat_mode_flag == 1)
 			mode = " compat mode\n";
 		else
 			mode = do_readsubdir ? " opendir mode\n" : " mqueue mode\n";
@@ -837,7 +844,7 @@ todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 		flagtododir = 0;
 #ifdef HASLIBRT
 		if (dynamic_queue && do_readsubdir) {
-			if (compat_mode == 2) {
+			if (compat_mode_flag == 2) {
 				log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
 				trigger_clear(nfds, rfds);
 			} else
@@ -899,15 +906,15 @@ todo_do(int *nfds, fd_set *rfds)
 		return 0;
 	if (dynamic_queue && !do_readsubdir) {
 		/*- if trigger is pulled, set flagtododir to 0 */
-		if (compat_mode < 2 && trigger_pulled(rfds) && !(flagtododir = 0) &&
+		if (compat_mode_flag < 2 && trigger_pulled(rfds) && !(flagtododir = 0) &&
 				!todo_scan(nfds, rfds, &id, 1)) { /*- found message without using mq_queue as trigger */
-			if (!compat_mode)
+			if (!compat_mode_flag)
 				log5("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n");
-			compat_mode = 1;
+			compat_mode_flag = 1;
 			ptr = readsubdir_name(&todosubdir);
 		} else {
-			if (compat_mode == 1) {
-				compat_mode = 0;
+			if (compat_mode_flag == 1) {
+				compat_mode_flag = 0;
 				log5("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n");
 			}
 			if ((i = mqueue_scan(rfds, &id))) /*- message pushed and intimated through mq_queue */
@@ -1347,7 +1354,7 @@ main(int argc, char **argv)
 		{
 			case 'c':
 #ifdef HASLIBRT
-				compat_mode = 0; /*- run in compat mode */
+				compat_mode_flag = 0; /*- run in compat mode */
 #endif
 				break;
 			case 'd':
@@ -1469,7 +1476,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.55 2022-01-30 09:17:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.56 2022-03-01 23:05:34+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1477,6 +1484,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.56  2022-03-01 23:05:34+05:30  Cprogrammer
+ * renamed compat_mode variable to compat_mode_flag
+ *
  * Revision 1.55  2022-01-30 09:17:33+05:30  Cprogrammer
  * fixes for FreeBSD
  * revert to trigger method if using message queue fails
