@@ -4,6 +4,7 @@ qmail-send \- deliver mail messages from the queue with rate control
 
 .SH SYNOPSIS
 .B qmail-send
+[ -\fBs\fR] | -\fBd\fR
 
 .SH DESCRIPTION
 .B qmail-send
@@ -93,6 +94,28 @@ conf-syncdir are present, \fBqmail-send\fR will additionally set
 or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
 is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is used
 for doing this.
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-s\fR
+This implies \fBqmail-send\fR will use static queue mode. In this mode
+qmail-send doesn't create shared memory segments for maintaining the
+local/remote concurrency values See multi-queue(7) for a complete overview.
+
+.PP
+.TP 3
+\fB\-d\fR
+This implements dynamic queue mode where qmail-send is responsible for
+creating shared a shared memory segment for writing the current local and
+remote concurrency value.
+
+.PP
+.TP 3
+\fB\-c\fR
+This options does nothing and is a dummy option used by qscheduler when
+running in dynamic queue mode with compatibility with older qmail-queue
+clients or with qmail-queue clients for qmail/netqmail.
 
 .SH "CONTROL FILES"
 .B WARNING:

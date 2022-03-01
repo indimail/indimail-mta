@@ -3,7 +3,8 @@
 qmail-todo \- process todo messages from the queue
 
 .SH SYNOPSIS
-\fBqmail-todo\fR [\-\fId\fR]
+\fBqmail-todo\fR
+[ -\fBs\fR] | [-\fBc\fR]-\fBd\fR
 
 .SH DESCRIPTION
 \fBqmail-todo\fR handles todo messages placed into the outgoing queue by
@@ -27,7 +28,7 @@ extreme short time. But because of many file system calls (fsync and
 \fBqmail-todo\fR solves this by having the todo run done by itself rather
 than by \fBqmail-send\fR This reduces the run time in \fBqmail-send.\fR
 
-\fBqmail-todo\fR prepares incoming messages for local and remote delivering
+\fBqmail-todo\fR prepares incoming messages for local and remote deliveries
 (by creating info/<messid> local/<messid> and remote/<messid> and removing
 todo/<messid> See also INTERNALS). Next \fBqmail-todo\fR transmits the
 <messid> to qmail-send which will add this message into the priority queue
@@ -98,6 +99,30 @@ environment variable counterparts. If the control conf-fsync, conf-syncdir
 are present, \fBqmail-send\fR will additionally set or unset the
 environment variables USE_FSYNC, USE_SYNCDIR. This feature is exploited by
 \fBqmail-local(8)\fR. The fsync(2) system call is used for doing this.
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-s\fR
+This implies \fBqmail-todo\fR will use static queue mode described
+previously.
+
+.PP
+.TP 3
+\fB\-d\fR
+This implements dynamic queue mode described previously. See multi-queue(7)
+for a complete overview.
+
+.PP
+.TP 3
+\fB\-c\fR
+When using dynamic queue mode, this enables compatability mode with the
+traditional method of using the \fIlock/trigger\fR fifo in the queue
+directory. This allows \fBqmail-queue\fR running in non-dynamic mode to
+trigger scan of the todo directory. This method can be used when the system
+has qmail-queue clients from qmail or netqmail on the system.
+Using compatability mode doesn't give you the full performance benefits
+when system is configured to use POSIX IPC for dynamic queues.
 
 .SH INTERNALS
 Communication between qmail-send and qmail-todo
