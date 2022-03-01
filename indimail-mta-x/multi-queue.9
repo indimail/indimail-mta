@@ -7,10 +7,11 @@ multi-queue \- indimail's multi queue architecture
 deliveries, using the \fBqscheduler\fR(8) daemon. These can be configured
 by setting few environment variables and by specifying command-line
 switches to the \fBqscheduler\fR(8) daemon. The command line options can be
-used to configure a set of fixed static queues or increased dynamically
-with load. The load is the ratio of concurrency used and total concurrency
-configured for a queue. These are actually two ratios - one for local
-deliveries and one for remote deliveries.
+used either to configure a set of fixed static queues or have the queue
+increased dynamically with load. The load is the ratio of concurrency used
+and total concurrency configured for a queue. These are actually two
+ratios. One ratio for local deliveries and another ratio for remote
+deliveries.
 
 A queue in \fBindimail\fR is denoted by a number and a base path. The
 compile time default is \fIINDIMAIL/queue\fR, but can be changed by the
