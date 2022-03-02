@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.96 2022-01-30 08:45:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.96 2022-03-02 07:59:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2387,8 +2387,6 @@ main(int argc, char **argv)
 	while ((opt = getopt(argc, argv, "cds")) != opteof) {
 		switch (opt)
 		{
-			case 'c':
-				break;
 			case 'd':
 #ifndef HASLIBRT
 				log5("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n");
@@ -2547,7 +2545,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.96 2022-01-30 08:45:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.96 2022-03-02 07:59:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2557,6 +2555,16 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.96  2022-03-02 07:59:20+05:30  Cprogrammer
+ * use ipc - added qscheduler, removed qmail-daemon
+ * added haslibrt.h to configure dynamic queue
+ * added compat mode option (support trigger mode in ipc mode)
+ * call shm_init after setting concurrency
+ * allow configurable big/small todo/intd
+ * fixed signal sent to child
+ * display pid when exiting
+ * removed usless sleep
+ *
  * Revision 1.96  2022-01-30 08:45:41+05:30  Cprogrammer
  * use ipc - added qscheduler, removed qmail-daemon
  * added haslibrt.h to configure dynamic queue
