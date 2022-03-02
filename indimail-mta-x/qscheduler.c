@@ -20,7 +20,6 @@
 #include <sig.h>
 #include <str.h>
 #include <fmt.h>
-#include <scan.h>
 #include <alloc.h>
 #include <error.h>
 #include <strerr.h>
@@ -37,7 +36,9 @@
 #include "auto_qmail.h"
 #include "auto_split.h"
 
-static int      qstart, qcount;
+#define ERROR_INTERVAL 5
+
+static int      qstart, qcount, error_interval = ERROR_INTERVAL;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
@@ -409,6 +410,7 @@ set_queue_variables()
 #ifdef HASLIBRT
 	getEnvConfigInt(&qmax,   "QUEUE_MAX",   QUEUE_MAX);
 	getEnvConfigInt(&qload,  "QUEUE_LOAD",  QUEUE_LOAD);
+	getEnvConfigInt(&error_interval, "ERROR_INTERVAL", ERROR_INTERVAL);
 #endif
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
@@ -784,15 +786,15 @@ dynamic_queue()
 	for (; !flagexitasap;) {
 		if (mq_getattr(mq_sch, &attr) == -1) {
 			strerr_warn1("alert: qscheduler: unable to get message queue attributes: ", &strerr_sys);
-			die();
+			sleep(error_interval);
 		}
 		if (!msgbuflen) {
 			if (!(msgbuf = (char *) alloc(attr.mq_msgsize)))
-				nomem();
+				sleep(error_interval);
 		} else
 		if (msgbuflen < attr.mq_msgsize) {
 			if (!alloc_re((char *) &msgbuf, msgbuflen, attr.mq_msgsize))
-				nomem();
+				sleep(error_interval);
 		}
 		msgbuflen = attr.mq_msgsize;
 		priority = 0;
@@ -800,7 +802,7 @@ dynamic_queue()
 			if (errno == error_intr)
 				continue;
 			strerr_warn1("alert: qscheduler: unable to read message queue: ", &strerr_sys);
-			die();
+			sleep(error_interval);
 		}
 		queue_table[((qtab *) msgbuf)->queue_no].load = ((qtab *) msgbuf)->load;
 		for (i = 1, total_load = 0; i <= qcount; i++)
@@ -817,23 +819,29 @@ dynamic_queue()
 					r = queue_fix(qptr);
 				else {
 					strerr_warn3("alert: qscheduler: ", qptr, ": ", &strerr_sys);
-					die();
+					sleep(error_interval);
 				}
 			}
 			if (!r) {
 				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2)))
-					nomem();
-				qcount++;
+					sleep(error_interval);
+				if (++qcount > qconf)
+					qconf++;
 				queue_table[qcount].pid = -1;
 				queue_table[qcount].queue_no = i;
 				queue_table[qcount].load = 0;
 				create_ipc(&qlen, &qsize);
-				if (check_send(qcount))
-					die();
+				if (check_send(qcount)) {
+					qcount--;
+					sleep(error_interval);
+				}
 				start_send(qcount, -1);
-				if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) &qcount, sizeof(int)) == -1) {
+				q[0] = qcount;
+				q[1] = qconf;
+				if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) == -1) {
 					strerr_warn1("alert: qscheduler: unable to write to shared memory: ", &strerr_sys);
-					die();
+					qcount--;
+					sleep(error_interval);
 				}
 			}
 		} else {
