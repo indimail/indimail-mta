@@ -1790,7 +1790,7 @@ auto_split.h auto_uids.h haslibrt.h conf-queue
 multi-queue.7: \
 multi-queue.9 conf-sysconfdir conf-qmail
 	cat multi-queue.9 \
-	| sed s}INDIMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> multi-queue.7
 
