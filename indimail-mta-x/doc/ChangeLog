@@ -94,12 +94,13 @@ Release 2.14.1 Start 21/09/2021
 50. qmail-smtpd.c: fix ehlo greating for local connections
 01/03/2022
 51. qmail-todo.c: renamed compat_mode variable to compat_mode_flag
-02/03/2022
+- 02/03/2022
 52. qscheduler.c: continue to let current deliveries happen instead of exit
     on error
-05/03/2022
+- 05/03/2022
 53. use auto_prefix/bin or auto_prefix/sbin for binary paths
 54. qscheduler.c: Fix for mq_open. shm_open on FreeBSD
+55. qmali-send.c: shm_open with O_RDWR on FreeBSD
 
 * 
 Release 2.14.0 Start 18/07/2021
