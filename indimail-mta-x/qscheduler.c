@@ -38,7 +38,7 @@
 
 #define ERROR_INTERVAL 5
 
-static int      qstart, qcount, error_interval = ERROR_INTERVAL;
+static int      qstart, qcount;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
@@ -46,7 +46,7 @@ static char  **prog_argv;
 static char     strnum1[FMT_ULONG];
 static int      bigtodo;
 #ifdef HASLIBRT
-static int      qconf, qmax, qload;
+static int      qconf, qmax, qload, error_interval = ERROR_INTERVAL;
 static q_type   qtype = fixed;
 static char    *msgbuf;
 static int      msgbuflen;
