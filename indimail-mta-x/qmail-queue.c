@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.79 2022-02-11 11:52:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,6 +41,7 @@
 #include "auto_uids.h"
 #include "matchregex.h"
 #include "auto_split.h"
+#include "auto_prefix.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -413,18 +414,14 @@ char           *qhpsi;
 void
 qhpsiprog(char *program)
 {
-	int             wstat, child, rejectvirus = 0;
+	int             wstat, child, rejectvirus = 0, childrc = -1,
+	                qhpsirc = 1, qhpsirn = 0;
+	unsigned long   u;
+	unsigned int    size, qhpsiminsize = 0, qhpsimaxsize = 0;
 	char          **argv;
 	char           *scancmd[3] = { 0, 0, 0 };
 	char           *x;
-	char            qhpsibin[] = "/usr/sbin/qhpsi";
-	unsigned long   u;
-	int             childrc = -1;
-	int             qhpsirc = 1, qhpsirn = 0;
-	unsigned int    size;
-	unsigned int    qhpsiminsize = 0;
-	unsigned int    qhpsimaxsize = 0;
-	stralloc        plugin = { 0 };
+	stralloc        plugin = { 0 }, qhpsibin = { 0 };
 	struct stat     st;
 
 	if (stat(messfn, &st) == -1) {
@@ -476,7 +473,11 @@ qhpsiprog(char *program)
 					argv[u] = messfn;
 			}
 		}
-		execv(qhpsibin, argv);
+		if (!stralloc_copys(&qhpsibin, auto_prefix) ||
+				!stralloc_catb(&qhpsibin, "/sbin/qhpsi", 11) ||
+				!stralloc_0(&qhpsibin))
+			die(51);
+		execv(qhpsibin.s, argv);
 		_exit(75);
 	} /*- switch (child = fork()) */
 	if (wait_pid(&wstat, child) == -1) {
@@ -1147,7 +1148,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.79 2022-02-11 11:52:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1155,6 +1156,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.80  2022-03-05 13:33:33+05:30  Cprogrammer
+ * use auto_prefix/sbin for qhpsi path
+ *
  * Revision 1.79  2022-02-11 11:52:01+05:30  Cprogrammer
  * new function read_control() for loading extraqueue, quarantine, removehaders, envheaders, logheaders control files.
  *
