@@ -601,6 +601,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 				strerr_warn3("alert: qscheduler: failed to create POSIX shared memory ", ipc_name, ": ", &strerr_sys);
 				die();
 			}
+#ifdef LINUX
 			if (!access("/dev/shm", F_OK)) {
 				s = shm_dev_name;
 				i = fmt_str(s, "/dev/shm/queue");
@@ -618,6 +619,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 					die();
 				}
 			}
+#endif
 		} else {
 			if (fchown(shm_queue[j], auto_uids, auto_gidq) == -1) {
 				strerr_warn3("alert: qscheduler: failed to set ownership for POSIX shared memory ", ipc_name, ": ", &strerr_sys);
@@ -647,6 +649,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 				strerr_warn3("alert: qscheduler: failed to create POSIX message queue ", ipc_name, ": ", &strerr_sys);
 				die();
 			}
+#ifdef LINUX
 			if (!access("/dev/mqueue", F_OK)) {
 				s = mq_dev_name;
 				i = fmt_str(s, "/dev/mqueue/queue");
@@ -663,6 +666,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 					strerr_warn3("alert: qscheduler: failed to set ownership for POSIX message queue ", mq_dev_name, ":", &strerr_sys);
 					die();
 				}
+#endif
 			}
 		} else {
 #ifdef FREEBSD
@@ -684,6 +688,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 			strerr_warn1("alert: qscheduler: failed to create POSIX message queue /qscheduler: ", &strerr_sys);
 			die();
 		}
+#ifdef LINUX
 		if (!access("/dev/mqueue", F_OK)) {
 			if (chmod("/dev/mqueue/qscheduler", 0600) == -1) {
 				strerr_warn1("alert: qscheduler: failed to set permissions for POSIX message queue /dev/mqueue/qscheduler: ", &strerr_sys);
@@ -694,6 +699,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 				die();
 			}
 		}
+#endif
 	} else
 		mq_close(mq_sch);
 
@@ -713,6 +719,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 			strerr_warn1("alert: qscheduler: failed to create POSIX shared memory /qscheduler: ", &strerr_sys);
 			die();
 		}
+#ifdef LINUX
 		if (!access("/dev/shm", F_OK)) {
 			if (chmod("/dev/shm/qscheduler", 0644) == -1) {
 				strerr_warn1("alert: qscheduler: failed to set permissions for POSIX message queue /dev/shm/qscheduler: ", &strerr_sys);
@@ -723,6 +730,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 				die();
 			}
 		}
+#endif
 	} else
 		close(shm_conf);
 #ifdef FREEBSD
