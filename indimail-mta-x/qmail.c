@@ -1,7 +1,7 @@
 /*
  * $Log: qmail.c,v $
- * Revision 1.29  2022-01-30 08:38:40+05:30  Cprogrammer
- * removed chdir auto_qmail
+ * Revision 1.29  2022-03-05 13:31:03+05:30  Cprogrammer
+ * use auto_prefix for binary paths
  *
  * Revision 1.28  2020-12-07 16:08:20+05:30  Cprogrammer
  * added exit code 79 as duplicate to 91 for Envelope format error
@@ -67,12 +67,14 @@
  *
  */
 #include <unistd.h>
-#include "substdio.h"
-#include "wait.h"
-#include "scan.h"
-#include "fd.h"
+#include <substdio.h>
+#include <wait.h>
+#include <scan.h>
+#include <fd.h>
+#include <env.h>
+#include <stralloc.h>
 #include "qmail.h"
-#include "env.h"
+#include "auto_prefix.h"
 
 /*- open the queue */
 int
@@ -82,6 +84,7 @@ qmail_open(struct qmail *qq)
 	int             pie[2];
 	int             pic[2], errfd; /* custom message */
 	char           *x, *binqqargs[2] = { 0, 0 };
+	stralloc        q = {0};
 
 	if (pipe(pim) == -1)
 		return -1;
@@ -123,12 +126,23 @@ qmail_open(struct qmail *qq)
 			_exit(120);
 		if (chdir("/") == -1)
 			_exit(63);
-		if (!binqqargs[0] && env_get("NULLQUEUE"))
-			binqqargs[0] = "sbin/qmail-nullqueue";
-		if (!binqqargs[0])
-			binqqargs[0] = env_get("QMAILQUEUE");
-		if (!binqqargs[0])
-			binqqargs[0] = "sbin/qmail-queue";
+		if (!(x = env_get("NULLQUEUE"))) {
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/sbin/qmail-nullqueue", 21) ||
+					!stralloc_0(&q))
+				_exit(51);
+			binqqargs[0] = q.s;
+		}
+		if (!x)
+			x = env_get("QMAILQUEUE");
+		if (!x) {
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/sbin/qmail-queue", 17) ||
+					!stralloc_0(&q))
+				_exit(51);
+			binqqargs[0] = q.s;
+		} else
+			binqqargs[0] = x;
 		execv(*binqqargs, binqqargs);
 		_exit(120);
 	}
@@ -316,7 +330,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.29 2022-01-30 08:38:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.29 2022-03-05 13:31:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
