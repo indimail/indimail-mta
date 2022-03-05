@@ -1,7 +1,6 @@
 /*
  * $Log: $
  */
-#include <stdio.h>
 #include <unistd.h>
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -592,7 +591,12 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 		*s++ = 0;
 		i = 0;
 		/*- create shm /queueN for storing concurrency values by qmail-send */
-		if ((shm_queue[j] = shm_open(ipc_name, O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
+#ifdef FREEBSD
+		shm_queue[j] = shm_open(ipc_name, O_CREAT|O_TRUNC|O_EXCL|O_RDWR, 0644);
+#else
+		shm_queue[j] = shm_open(ipc_name, O_CREAT|O_EXCL|O_RDWR, 0644);
+#endif
+		if (shm_queue[j] == -1) {
 			if (errno != error_exist) {
 				strerr_warn3("alert: qscheduler: failed to create POSIX shared memory ", ipc_name, ": ", &strerr_sys);
 				die();
@@ -699,7 +703,12 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 	}
 
 	/*- shared memory /qscheduler for storing qcount, qconf */
-	if ((shm_conf = shm_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0644)) == -1) {
+#ifdef FREEBSD
+	shm_conf = shm_open("/qscheduler", O_CREAT|O_TRUNC|O_EXCL|O_RDWR, 0644);
+#else
+	shm_conf = shm_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0644);
+#endif
+	if (shm_conf == -1) {
 		if (errno != error_exist) {
 			strerr_warn1("alert: qscheduler: failed to create POSIX shared memory /qscheduler: ", &strerr_sys);
 			die();
@@ -773,8 +782,8 @@ dynamic_queue()
 	create_ipc(&qlen, &qsize);
 	q[0] = qcount; /*- queue count */
 	q[1] = qconf;  /*- existing no of queues in /var/indimail/queue dir */
-	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) == -1) {
-		strerr_warn1("alert: qscheduler: unable to write to shared memory: ", &strerr_sys);
+	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) <= 0) {
+		strerr_warn1("alert: qscheduler: unable to write to shared memory /qscheduler: ", &strerr_sys);
 		die();
 	}
 	log_out(nqueue? "info: qscheduler: dynamic queues nqueue+ qcount=" : "info: qscheduler: dynamic queues nqueue- qcount=");
@@ -863,8 +872,8 @@ dynamic_queue()
 				start_send(qcount, -1);
 				q[0] = qcount;
 				q[1] = qconf;
-				if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) == -1) {
-					strerr_warn1("alert: qscheduler: unable to write to shared memory: ", &strerr_sys);
+				if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) <= 0) {
+					strerr_warn1("alert: qscheduler: unable to write to shared memory:  /qscheduler", &strerr_sys);
 					qcount--;
 					sleep(error_interval);
 				}
@@ -876,7 +885,9 @@ dynamic_queue()
 			log_out(strnum2);
 			log_outf(")\n");
 		}
-		printf("msg[queue_no=%d load=%ld] priority=%d qcount=%d\n", ((qtab *) msgbuf)->queue_no, ((qtab *) msgbuf)->load, priority, qcount);
+		/*-
+		 * queue_no load priority qcount -> ((qtab *) msgbuf)->queue_no, ((qtab *) msgbuf)->load, priority, qcount);
+		 */ 
 	} /*- for (; !flagexitasap;) */
 
 	for (; flagexitasap;) {
