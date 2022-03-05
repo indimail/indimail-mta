@@ -1,152 +1,34 @@
 /*
- * $Log: qmail-lspawn.c,v $
- * Revision 1.39  2022-01-30 08:40:36+05:30  Cprogrammer
- * added case QLX_DIR for chdir failure
- *
- * Revision 1.38  2021-06-29 09:27:49+05:30  Cprogrammer
- * modularize spawn code
- *
- * Revision 1.37  2021-06-05 23:15:16+05:30  Cprogrammer
- * converted function prototypes to ansi
- *
- * Revision 1.36  2021-02-07 23:13:32+05:30  Cprogrammer
- * avoid use of compat functions
- *
- * Revision 1.35  2020-11-24 13:46:58+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.34  2020-03-31 13:17:52+05:30  Cprogrammer
- * fixed bug with setup_qlargs()
- *
- * Revision 1.33  2019-07-29 21:16:59+05:30  Cprogrammer
- * use setup_qlargs() to setup arguments once and cache the args
- *
- * Revision 1.32  2019-05-27 20:29:31+05:30  Cprogrammer
- * use VIRTUAL_PKG_LIB env variable if defined
- *
- * Revision 1.31  2019-05-27 12:38:14+05:30  Cprogrammer
- * set libfn with full path of libindimail control file
- *
- * Revision 1.30  2019-05-26 12:32:02+05:30  Cprogrammer
- * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
- *
- * Revision 1.29  2019-04-20 19:52:02+05:30  Cprogrammer
- * changed interface for loadLibrary(), closeLibrary() and getlibObject()
- *
- * Revision 1.28  2018-07-15 12:27:36+05:30  Cprogrammer
- * env variable ROUTE_NULL_USER to redirect double bounces to a mailbox
- * use -3 return for error loading libindimail
- *
- * Revision 1.27  2018-07-01 11:51:01+05:30  Cprogrammer
- * renamed getFunction() to getlibObject()
- * get value of variables userNotFound, is_inactive using getlibObject()
- *
- * Revision 1.26  2018-06-29 23:54:11+05:30  Cprogrammer
- * fixed length of user variable
- *
- * Revision 1.25  2018-01-31 12:06:54+05:30  Cprogrammer
- * moved qmail-getpw, qmail-local to sbin
- *
- * Revision 1.24  2018-01-09 11:47:38+05:30  Cprogrammer
- * use loadLibrary() to load vauth_open(), vauth_getpw(), vclose(), isvirtualdomain() functions
- *
- * Revision 1.23  2017-04-11 03:45:52+05:30  Cprogrammer
- * unset QMAILREMOTE in parent
- *
- * Revision 1.22  2017-01-09 19:36:15+05:30  Cprogrammer
- * use postmaster@virtualdomain for null user (bounce)
- *
- * Revision 1.21  2016-05-18 15:16:10+05:30  Cprogrammer
- * use env variable ASSIGNDIR or auto_assign for users/cdb file
- *
- * Revision 1.20  2014-11-04 23:12:54+05:30  Cprogrammer
- * BUG - fixed incorrect parsing of users with hyphen in username
- *
- * Revision 1.19  2011-07-29 09:29:34+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.18  2011-06-19 09:08:42+05:30  Cprogrammer
- * unset QMAILREMOTE
- *
- * Revision 1.17  2009-12-10 10:56:06+05:30  Cprogrammer
- * return -2 for MySQL error
- *
- * Revision 1.16  2009-03-15 13:26:25+05:30  Cprogrammer
- * BUG - user was incorrectly extracted on domains having '-' in the name
- *
- * Revision 1.15  2007-12-20 13:54:10+05:30  Cprogrammer
- * Made QMAILLOCAL functionality generic
- *
- * Revision 1.14  2005-12-29 13:57:10+05:30  Cprogrammer
- * PWSTRUCT not set when user not found
- *
- * Revision 1.13  2005-06-17 21:52:05+05:30  Cprogrammer
- * removed compilation warning
- *
- * Revision 1.12  2004-10-22 20:28:24+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.11  2004-07-17 21:20:49+05:30  Cprogrammer
- * added qqeh code
- * added RCS log
- *
- * Revision 1.10  2003-12-09 00:15:12+05:30  Cprogrammer
- * execute spawn-filter with argv[0] as qmail-local
- *
- * Revision 1.9  2003-12-07 13:03:49+05:30  Cprogrammer
- * added checks for return values of env_put() and env_unset()
- *
- * Revision 1.8  2003-11-29 23:39:15+05:30  Cprogrammer
- * QMAILLOCAL environment variable to execute different qmail-local
- *
- * Revision 1.7  2003-11-25 20:40:00+05:30  Cprogrammer
- * removed fork.h
- *
- * Revision 1.6  2003-10-23 01:23:59+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.5  2003-10-13 10:00:41+05:30  Cprogrammer
- * added msgsize as argument to spawn
- *
- * Revision 1.4  2003-07-20 17:06:04+05:30  Cprogrammer
- * *** empty log message ***
- *
- * Revision 1.3  2002-09-07 20:21:14+05:30  Cprogrammer
- * removed stdio.h
- *
- * Revision 1.2  2002-09-04 01:49:56+05:30  Cprogrammer
- * conditional compilation of indimail code
- *
- * Revision 1.1  2002-08-15 14:43:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-lspawn.c,v 1.40 2022-03-05 13:31:55+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include "fd.h"
-#include "wait.h"
-#include "prot.h"
-#include "substdio.h"
-#include "stralloc.h"
-#include "scan.h"
-#include "error.h"
-#include "cdb.h"
-#include "case.h"
-#include "slurpclose.h"
+#include <fd.h>
+#include <wait.h>
+#include <prot.h>
+#include <substdio.h>
+#include <stralloc.h>
+#include <scan.h>
+#include <error.h>
+#include <cdb.h>
+#include <case.h>
+#include <open.h>
+#include <byte.h>
+#include <env.h>
+#include <str.h>
+#include <fmt.h>
 #include "auto_assign.h"
 #include "auto_control.h"
+#include "auto_uids.h"
+#include "auto_prefix.h"
+#include "slurpclose.h"
+#include "qlx.h"
 #include "variables.h"
 #include "indimail_stub.h"
-#include "auto_uids.h"
-#include "qlx.h"
-#include "open.h"
-#include "byte.h"
-#include "env.h"
-#include "str.h"
-#include "fmt.h"
 
-char           *aliasempty;
+static char    *aliasempty;
+static stralloc q = {0};
 
 static char *setup_qlargs()
 {
@@ -154,8 +36,13 @@ static char *setup_qlargs()
 
 	if (!qlargs)
 		qlargs= env_get("QMAILLOCAL");
-	if (!qlargs)
-		qlargs = "sbin/qmail-local";
+	if (!qlargs) {
+		if (!stralloc_copys(&q, auto_prefix) ||
+				!stralloc_catb(&q, "/sbin/qmail-local", 17) ||
+				!stralloc_0(&q))
+			_exit(QLX_NOMEM);
+		qlargs = q.s;
+	}
 	return qlargs;
 }
 
@@ -233,10 +120,10 @@ report_SPAWN(substdio *ss, int wstat, char *s, int len)
 	substdio_put(ss, s, i);
 }
 
-stralloc        lower = { 0 };
-stralloc        nughde = { 0 };
-stralloc        wildchars = { 0 };
-stralloc        cdbfile = { 0 };
+static stralloc lower = { 0 };
+static stralloc nughde = { 0 };
+static stralloc wildchars = { 0 };
+static stralloc cdbfile = { 0 };
 #ifdef ENABLE_VIRTUAL_PKG
 static stralloc libfn = { 0 };
 #endif
@@ -309,7 +196,11 @@ nughde_get(char *local)
 	}
 	if (pipe(pi) == -1)
 		_exit(QLX_SYS);
-	args[0] = "sbin/qmail-getpw";
+	if (!stralloc_copys(&q, auto_prefix) ||
+			!stralloc_catb(&q, "/sbin/qmail-getpw", 17) ||
+			!stralloc_0(&q))
+		_exit(QLX_NOMEM);
+	args[0] = q.s;
 	args[1] = local;
 	args[2] = 0;
 	switch (gpwpid = vfork())
@@ -553,7 +444,11 @@ noauthself: /*- deliver to local user in control/locals */
 		nughde_get(recip);
 		x = nughde.s;
 		xlen = nughde.len;
-		args[0] = "sbin/qmail-local";
+		if (!stralloc_copys(&q, auto_prefix) ||
+				!stralloc_catb(&q, "/sbin/qmail-local", 17) ||
+				!stralloc_0(&q))
+			_exit(QLX_NOMEM);
+		args[0] = q.s;
 		args[1] = "--";
 		args[2] = x; /*- user */
 		n = byte_chr(x, xlen, 0);
@@ -623,8 +518,135 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.39 2022-01-30 08:40:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.40 2022-03-05 13:31:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: qmail-lspawn.c,v $
+ * Revision 1.40  2022-03-05 13:31:55+05:30  Cprogrammer
+ * use auto_prefix/sbin for qmail-getpw, qmail-local path
+ *
+ * Revision 1.39  2022-01-30 08:40:36+05:30  Cprogrammer
+ * added case QLX_DIR for chdir failure
+ *
+ * Revision 1.38  2021-06-29 09:27:49+05:30  Cprogrammer
+ * modularize spawn code
+ *
+ * Revision 1.37  2021-06-05 23:15:16+05:30  Cprogrammer
+ * converted function prototypes to ansi
+ *
+ * Revision 1.36  2021-02-07 23:13:32+05:30  Cprogrammer
+ * avoid use of compat functions
+ *
+ * Revision 1.35  2020-11-24 13:46:58+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.34  2020-03-31 13:17:52+05:30  Cprogrammer
+ * fixed bug with setup_qlargs()
+ *
+ * Revision 1.33  2019-07-29 21:16:59+05:30  Cprogrammer
+ * use setup_qlargs() to setup arguments once and cache the args
+ *
+ * Revision 1.32  2019-05-27 20:29:31+05:30  Cprogrammer
+ * use VIRTUAL_PKG_LIB env variable if defined
+ *
+ * Revision 1.31  2019-05-27 12:38:14+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
+ * Revision 1.30  2019-05-26 12:32:02+05:30  Cprogrammer
+ * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
+ *
+ * Revision 1.29  2019-04-20 19:52:02+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
+ * Revision 1.28  2018-07-15 12:27:36+05:30  Cprogrammer
+ * env variable ROUTE_NULL_USER to redirect double bounces to a mailbox
+ * use -3 return for error loading libindimail
+ *
+ * Revision 1.27  2018-07-01 11:51:01+05:30  Cprogrammer
+ * renamed getFunction() to getlibObject()
+ * get value of variables userNotFound, is_inactive using getlibObject()
+ *
+ * Revision 1.26  2018-06-29 23:54:11+05:30  Cprogrammer
+ * fixed length of user variable
+ *
+ * Revision 1.25  2018-01-31 12:06:54+05:30  Cprogrammer
+ * moved qmail-getpw, qmail-local to sbin
+ *
+ * Revision 1.24  2018-01-09 11:47:38+05:30  Cprogrammer
+ * use loadLibrary() to load vauth_open(), vauth_getpw(), vclose(), isvirtualdomain() functions
+ *
+ * Revision 1.23  2017-04-11 03:45:52+05:30  Cprogrammer
+ * unset QMAILREMOTE in parent
+ *
+ * Revision 1.22  2017-01-09 19:36:15+05:30  Cprogrammer
+ * use postmaster@virtualdomain for null user (bounce)
+ *
+ * Revision 1.21  2016-05-18 15:16:10+05:30  Cprogrammer
+ * use env variable ASSIGNDIR or auto_assign for users/cdb file
+ *
+ * Revision 1.20  2014-11-04 23:12:54+05:30  Cprogrammer
+ * BUG - fixed incorrect parsing of users with hyphen in username
+ *
+ * Revision 1.19  2011-07-29 09:29:34+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
+ * Revision 1.18  2011-06-19 09:08:42+05:30  Cprogrammer
+ * unset QMAILREMOTE
+ *
+ * Revision 1.17  2009-12-10 10:56:06+05:30  Cprogrammer
+ * return -2 for MySQL error
+ *
+ * Revision 1.16  2009-03-15 13:26:25+05:30  Cprogrammer
+ * BUG - user was incorrectly extracted on domains having '-' in the name
+ *
+ * Revision 1.15  2007-12-20 13:54:10+05:30  Cprogrammer
+ * Made QMAILLOCAL functionality generic
+ *
+ * Revision 1.14  2005-12-29 13:57:10+05:30  Cprogrammer
+ * PWSTRUCT not set when user not found
+ *
+ * Revision 1.13  2005-06-17 21:52:05+05:30  Cprogrammer
+ * removed compilation warning
+ *
+ * Revision 1.12  2004-10-22 20:28:24+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.11  2004-07-17 21:20:49+05:30  Cprogrammer
+ * added qqeh code
+ * added RCS log
+ *
+ * Revision 1.10  2003-12-09 00:15:12+05:30  Cprogrammer
+ * execute spawn-filter with argv[0] as qmail-local
+ *
+ * Revision 1.9  2003-12-07 13:03:49+05:30  Cprogrammer
+ * added checks for return values of env_put() and env_unset()
+ *
+ * Revision 1.8  2003-11-29 23:39:15+05:30  Cprogrammer
+ * QMAILLOCAL environment variable to execute different qmail-local
+ *
+ * Revision 1.7  2003-11-25 20:40:00+05:30  Cprogrammer
+ * removed fork.h
+ *
+ * Revision 1.6  2003-10-23 01:23:59+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.5  2003-10-13 10:00:41+05:30  Cprogrammer
+ * added msgsize as argument to spawn
+ *
+ * Revision 1.4  2003-07-20 17:06:04+05:30  Cprogrammer
+ * *** empty log message ***
+ *
+ * Revision 1.3  2002-09-07 20:21:14+05:30  Cprogrammer
+ * removed stdio.h
+ *
+ * Revision 1.2  2002-09-04 01:49:56+05:30  Cprogrammer
+ * conditional compilation of indimail code
+ *
+ * Revision 1.1  2002-08-15 14:43:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
