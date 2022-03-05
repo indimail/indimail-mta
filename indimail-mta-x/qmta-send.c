@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.14  2022-03-05 13:36:16+05:30  Cprogrammer
+ * use auto_prefix/sbin for queue-fix, qmail-lspawn, qmail-rspawn, qmail-clean paths
+ *
  * Revision 1.13  2022-01-30 09:24:30+05:30  Cprogrammer
  * make USE_FSYNC, USE_SYNCDIR consistent across programs
  * allow configurable big/small todo/intd
@@ -125,6 +128,7 @@ static stralloc envnoathost = { 0 };
 static stralloc percenthack = { 0 };
 static stralloc locals = { 0 };
 static stralloc vdoms = { 0 };
+static stralloc q = { 0 };
 typedef struct constmap cmap;
 static cmap     mappercenthack;
 static cmap     maplocals;
@@ -1995,7 +1999,12 @@ queue_fix()
 			qfargs[4] = queuedir;
 		} else
 			qfargs[3] = queuedir;
-		execvp(*qfargs, qfargs); /*- queue-fix */
+		if (!stralloc_copys(&q, auto_prefix) ||
+				!stralloc_catb(&q, "/bin/queue-fix", 14) ||
+				!stralloc_0(&q))
+			nomem(argv0);
+		qfargs[0] = q.s;
+		execv(*qfargs, qfargs); /*- queue-fix */
 		_exit(111);
 	}
 	sig_unblock(sig_int);
@@ -2063,7 +2072,12 @@ run_daemons(char **oargv, char **argv)
 		close(pi2[1]);
 		if (_qmail_lspawn) {
 			qlargs[2] = queuedir; /*- pass the queue dir as argument for ps command */
-			execvp(*qlargs, qlargs); /*- qmail-lspawn */
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/bin/qmail-lspawn", 17) ||
+					!stralloc_0(&q))
+				nomem(argv0);
+			qlargs[0] = q.s;
+			execv(*qlargs, qlargs); /*- qmail-lspawn */
 		} else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
@@ -2106,7 +2120,12 @@ run_daemons(char **oargv, char **argv)
 		close(pi4[1]);
 		if (_qmail_rspawn) {
 			qrargs[1] = queuedir; /*- pass the queue dir as argument for ps command */
-			execvp(*qrargs, qrargs); /*- qmail-rspawn */
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/bin/qmail-rspawn", 17) ||
+					!stralloc_0(&q))
+				nomem(argv0);
+			qrargs[0] = q.s;
+			execv(*qrargs, qrargs); /*- qmail-rspawn */
 		} else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
@@ -2150,7 +2169,12 @@ run_daemons(char **oargv, char **argv)
 			close(pi5[1]);
 			close(pi6[0]);
 			close(pi6[1]);
-			execvp(*qcargs, qcargs); /*- qmail-clean */
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/bin/qmail-clean", 16) ||
+					!stralloc_0(&q))
+				nomem(argv0);
+			qcargs[0] = q.s;
+			execv(*qcargs, qcargs); /*- qmail-clean */
 			_exit(111);
 		}
 		close(pi5[0]);
@@ -2679,7 +2703,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.13 2022-01-30 09:24:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.14 2022-03-05 13:36:16+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
