@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.96 2022-03-02 07:59:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.97 2022-03-05 22:12:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1351,8 +1351,8 @@ del_start(int j, seek_pos mpos, char *recip)
 	/*- write the concurrency used for local/remote at offset 0, 1 */
 	offset = c * sizeof(int);
 	q = concurrencyused[c];
-	if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1))
-		log5("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory\n");
+	if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) <= 0))
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory: ", error_str(errno), "\n");
 #endif
 	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
 	strnum1[fmt_ulong(strnum1, del[c][i].delid)] = 0;
@@ -1475,8 +1475,8 @@ del_dochan(int c)
 				/*- write the concurrency used for local/remote at offset 0, 1 */
 				offset = c * sizeof(int);
 				q = concurrencyused[c];
-				if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) == -1))
-					log5("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory\n");
+				if (shm_queue != -1 && (lseek(shm_queue, offset, SEEK_SET) == -1 || write(shm_queue, (char *) &q, sizeof(int)) <= 0))
+					log7("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory: ", error_str(errno), "\n");
 #endif
 				del_status();
 			}
@@ -2312,8 +2312,13 @@ shm_init(char *shm_name)
 {
 	int             q[4];
 
-	/*- /queue1, /queue2, etc */
-	if ((shm_queue = shm_open(shm_name, O_WRONLY, 0600)) == -1) {
+	/*- open shm /queueN for storing concurrency values */
+#ifdef FREEBSD
+	shm_queue = shm_open(shm_name, O_RDWR, 0600);
+#else
+	shm_queue = shm_open(shm_name, O_WRONLY, 0600);
+#endif
+	if (shm_queue == -1) {
 		log9("alert: ", argv0, ": ", queuedesc, ": failed to open POSIX shared memory ", shm_name, ": ", error_str(errno), "\n");
 		_exit(111);
 	}
@@ -2321,7 +2326,7 @@ shm_init(char *shm_name)
 	q[2] = concurrency[0];
 	q[3] = concurrency[1];
 	if (write(shm_queue, (char *) q, 4 * sizeof(int)) == -1) {
-		log9("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory ", shm_name, ": ", error_str(errno), "\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory: ", error_str(errno), "\n");
 		_exit(111);
 	}
 }
@@ -2545,7 +2550,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.96 2022-03-02 07:59:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.97 2022-03-05 22:12:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2555,6 +2560,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.97  2022-03-05 22:12:15+05:30  Cprogrammer
+ * open shared memory with O_RDWR on FreeBSD
+ *
  * Revision 1.96  2022-03-02 07:59:20+05:30  Cprogrammer
  * use ipc - added qscheduler, removed qmail-daemon
  * added haslibrt.h to configure dynamic queue
