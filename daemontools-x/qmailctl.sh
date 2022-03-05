@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.70 2021-07-28 19:45:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.71 2022-03-05 13:53:43+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -40,19 +40,30 @@ else
 fi
 ECHO=echo
 case "$SYSTEM" in
-	Darwin*|Debian|SuSE|FreeBSD|alpine)
+	Darwin*|Debian|SuSE|alpine)
 		RES_COL=60
 		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
 		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
 		SETCOLOR_FAILURE="$ECHO -en \\033[1;31m"
 		SETCOLOR_WARNING="$ECHO -en \\033[1;33m"
 		SETCOLOR_NORMAL="$ECHO -en \\033[0;39m"
+		CR="$ECHO -n -e \r"
+		;;
+	FreeBSD)
+		ECHO=/bin/echo
+		RES_COL=60
+		MOVE_TO_COL="printf \\033[${RES_COL}G"
+		SETCOLOR_SUCCESS="printf \\033[1;32m"
+		SETCOLOR_FAILURE="printf \\033[1;31m"
+		SETCOLOR_WARNING="printf \\033[1;33m"
+		SETCOLOR_NORMAL="printf \\033[0;39m"
+		CR="printf \r"
 		;;
 esac
 if [ -f /etc/indimail/indimail-mta-release ] ; then
-	have_qmail=1
+	have_indimail=1
 else
-	have_qmail=0
+	have_indimail=0
 fi
 # Source function library.
 if [ -f /etc/rc.d/init.d/functions ] ; then
@@ -105,7 +116,9 @@ myecho_success() {
 	$ECHO -n "  OK  "
 	$SETCOLOR_NORMAL
 	$ECHO -n "]"
-	$ECHO -ne "\r"
+	#$ECHO -n -e "\r"
+	#printf "\r"
+	$CR
 	return 0
 }
 
@@ -116,13 +129,15 @@ myecho_failure() {
 	$ECHO -n "FAILED"
 	$SETCOLOR_NORMAL
 	$ECHO -n "]"
-	$ECHO -ne "\r"
+	#$ECHO -n -e "\r"
+	#printf "\r"
+	$CR
 	return 1
 }
 
-noqmail() {
-	if [ $have_qmail -ne 1 ] ; then
-		echo "qmail binaries not present" 1>&2
+noindimail() {
+	if [ $have_indimail -ne 1 ] ; then
+		echo "indimail-mta binaries not present" 1>&2
 		echo "Usage: `basename $0` {start|stop|restart|status|rotate|help}" 1>&2
 		myhelp
 		exit 1
@@ -144,7 +159,7 @@ myfailure() {
 
 myhelp()
 {
-if [ $have_qmail -eq 1 ] ; then
+if [ $have_indimail -eq 1 ] ; then
 /bin/cat <<HELP
   start -- starts mail service (smtp connection accepted, mail can go out)
    stop -- stops mail service (smtp connections refused, nothing goes out)
@@ -193,7 +208,7 @@ stop()
 		fi
 		;;
 	esac
-	sv_all_down
+	sv_down_all
 	if [ -s /tmp/sv.err ] ; then
 		/bin/cat /tmp/sv.err
 	fi
@@ -266,7 +281,7 @@ stop()
 	return $ret
 }
 
-sv_all_up()
+sv_up_all()
 {
 	for i in `echo $SERVICE/*`
 	do
@@ -279,12 +294,12 @@ sv_all_up()
 			@prefix@/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		fi
 	done
 }
 
-sv_all_down()
+sv_down_all()
 {
 	for i in `echo $SERVICE/*`
 	do
@@ -297,7 +312,7 @@ sv_all_down()
 			@prefix@/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		fi
 	done
 }
@@ -313,7 +328,7 @@ start()
 	fi
 	local ret=0
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
-		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && sv_all_up && return $ret || rm -f /var/lock/subsys/svscan
+		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && sv_up_all && return $ret || rm -f /var/lock/subsys/svscan
 	fi
 	if [ -d $SERVICE/.svscan/log ] ; then
 		@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null 2>&1
@@ -322,7 +337,7 @@ start()
 		status=1
 	fi
 	if [ $status -eq 0 ] ; then
-		sv_all_up
+		sv_up_all
 	else
 		if [ -f /usr/bin/systemctl ] ; then
 			if [ $PPID -ne 1 ] ; then
@@ -384,7 +399,7 @@ start()
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && $succ || $fail
 		echo ""
-		let ret+=$RETVAL
+		let ret+=$RETVAL >/dev/null
 	fi
 	if [ -s /tmp/sv.err ] ; then
 		/bin/cat /tmp/sv.err
@@ -448,14 +463,14 @@ case "$cmmd" in
 	restart|force-reload)
 		stop
 		RETVAL=$?
-		let ret+=$RETVAL
+		let ret+=$RETVAL >/dev/null
 		start
 		RETVAL=$?
-		let ret+=$RETVAL
+		let ret+=$RETVAL >/dev/null
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	condrestart|try-restart)
-		noqmail
+		noindimail
 		ret=0
 		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 		do
@@ -463,7 +478,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -d $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		done
 		for i in `echo $SERVICE/qmail-send.*`
 		do
@@ -471,7 +486,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -t $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		done
 		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 		do
@@ -480,13 +495,13 @@ case "$cmmd" in
 				@prefix@/bin/svc -u $i && $succ || $fail
 				RETVAL=$?
 				echo
-				let ret+=$RETVAL
+				let ret+=$RETVAL >/dev/null
 			fi
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	kill)
-		noqmail
+		noindimail
 		$ECHO -n "killing tcpserver,supervise,qmail-send: "
 		kill `ps ax| egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $1}'` && $succ || $fail
 		ret=$?
@@ -502,13 +517,13 @@ case "$cmmd" in
 				@prefix@/bin/svc -a $i/log && $succ || $fail
 				RETVAL=$?
 				echo
-				let ret+=$RETVAL
+				let ret+=$RETVAL >/dev/null
 			fi
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	flush)
-		noqmail
+		noindimail
 		ret=0
 		$ECHO -n "Flushing timeout table + ALRM signal to qmail-send."
 		@prefix@/sbin/qmail-tcpok > /dev/null && $succ || $fail
@@ -519,7 +534,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -a $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
@@ -537,17 +552,17 @@ case "$cmmd" in
 		else
 			echo "No services configured under svscan"
 		fi
-		let ret+=$RETVAL
+		let ret+=$RETVAL >/dev/null
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	queue)
-		noqmail
+		noindimail
 		@prefix@/bin/qmail-qread -c
 		ret=$?
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	reload)
-		noqmail
+		noindimail
 		ret=0
 		for i in `echo $SERVICE/qmail-send.*`
 		do
@@ -555,12 +570,12 @@ case "$cmmd" in
 			@prefix@/bin/svc -h $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	pause)
-		noqmail
+		noindimail
 		ret=0
 		for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 		do
@@ -568,12 +583,12 @@ case "$cmmd" in
 			@prefix@/bin/svc -p $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	cont)
-		noqmail
+		noindimail
 		ret=0
 		for i in `echo $SERVICE/qmail-send.* $SERVICE/qmail-smtpd.*`
 		do
@@ -581,12 +596,12 @@ case "$cmmd" in
 			@prefix@/bin/svc -c $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL
+			let ret+=$RETVAL >/dev/null
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	cdb)
-		noqmail
+		noindimail
 		ret=0
 		for i in smtp qmtp qmqp imap pop3 poppass
 		do
@@ -598,7 +613,7 @@ case "$cmmd" in
 					/bin/rm -f $j && $succ || $fail
 					RETVAL=$?
 					echo
-					let ret+=$RETVAL
+					let ret+=$RETVAL >/dev/null
 				fi
 			done
 			for j in `/bin/ls @sysconfdir@/tcp/tcp*.$i 2>/dev/null`
@@ -618,7 +633,7 @@ case "$cmmd" in
 				else
 					RETVAL=0
 				fi
-				let ret+=$RETVAL
+				let ret+=$RETVAL >/dev/null
 			done
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
@@ -628,7 +643,7 @@ case "$cmmd" in
 		exit 0
 		;;
 	*)
-		if [ $have_qmail -eq 1 ] ; then
+		if [ $have_indimail -eq 1 ] ; then
 			echo "Usage: `basename $0` {start|stop|condrestart|restart|kill|flush|rotate|reload|stat|queue|pause|cont|cdb|help}"
 		else
 			echo "Usage: `basename $0` {start|stop|restart|stat|rotate|help}"
