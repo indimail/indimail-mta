@@ -575,10 +575,14 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 	} else
 	if (!i)
 		*msgqueue_size = 1024;
+#ifdef FREEBSD
+	attr.mq_flags = 0;
+#else
 	attr.mq_flags = 0;
 	attr.mq_maxmsg = *msgqueue_len;
 	attr.mq_msgsize = *msgqueue_size;
 	attr.mq_curmsgs = 0;
+#endif
 	for (j = 0; j < qcount; j++) {
 		s = ipc_name;
 		i = fmt_str(s, "/queue");
@@ -623,7 +627,18 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 			die();
 		}
 		/*- message queue for communication between qmail-todo, qmail-queue */
-		if ((mq_queue = mq_open(ipc_name, O_CREAT|O_EXCL|O_RDWR,  0640, &attr)) == (mqd_t) -1) {
+#ifdef FREEBSD
+		if ((mq_queue = mq_open(ipc_name, O_CREAT|O_EXCL|O_RDWR,  0640, NULL)) != (mqd_t) -1) {
+			if (mq_setattr(mq_queue, &attr, 0) == -1) {
+				strerr_warn3("alert: qscheduler: failed to set POSIX message attributes ", ipc_name, ": ", &strerr_sys);
+				mq_close(mq_queue);
+				mq_queue = (mqd_t) -1;
+			}
+		}
+#else
+		mq_queue = mq_open(ipc_name, O_CREAT|O_EXCL|O_RDWR,  0640, &attr);
+#endif
+		if (mq_queue == (mqd_t) -1) {
 			if (errno != error_exist)  {
 				strerr_warn3("alert: qscheduler: failed to create POSIX message queue ", ipc_name, ": ", &strerr_sys);
 				die();
@@ -701,7 +716,17 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 		}
 	} else
 		close(shm_conf);
-	if ((shm_conf = shm_open("/qscheduler", O_WRONLY, 0644)) == -1) {
+#ifdef FREEBSD
+		/*-
+		 * FreeBSD nonsense.
+		 * A flag other than O_RDONLY, O_RDWR, O_CREAT,
+		 * O_EXCL, or O_TRUNC causes EINVAL
+		 */
+	shm_conf = shm_open("/qscheduler", O_RDWR, 0644);
+#else
+	shm_conf = shm_open("/qscheduler", O_WRONLY, 0644);
+#endif
+	if (shm_conf == -1) {
 		strerr_warn1("alert: qscheduler: failed to open POSIX shared memory /qscheduler: ", &strerr_sys);
 		die();
 	}
