@@ -666,8 +666,8 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 					strerr_warn3("alert: qscheduler: failed to set ownership for POSIX message queue ", mq_dev_name, ":", &strerr_sys);
 					die();
 				}
-#endif
 			}
+#endif
 		} else {
 #ifdef FREEBSD
 			if (fchown(mq_getfd_np(mq_queue), auto_uidq, auto_gidq) == -1) {
