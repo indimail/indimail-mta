@@ -100,7 +100,10 @@ Release 2.14.1 Start 21/09/2021
 - 05/03/2022
 53. use auto_prefix/bin or auto_prefix/sbin for binary paths
 54. qscheduler.c: Fix for mq_open. shm_open on FreeBSD
-55. qmali-send.c: shm_open with O_RDWR on FreeBSD
+55. qmail-send.c: shm_open with O_RDWR on FreeBSD
+- 06/03/2022
+56. qmail-send.c, qscheduler.c: Use ftruncate on shared mem on FreeBSD
+57. qmail-send.c, qscheduler.c: unlink shared memory on exit
 
 * 
 Release 2.14.0 Start 18/07/2021
