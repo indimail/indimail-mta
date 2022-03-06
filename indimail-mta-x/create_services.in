@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.112 2021-08-23 17:34:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.113 2022-03-06 18:48:10+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -280,9 +280,9 @@ for i in smtp qmtp qmqp
 do
   for j in `/bin/ls $sysconfdir/tcp/tcp*.$i 2>/dev/null`
   do
-    t1=`date +'%s' -r $j`
+    t1=`date -r $j +'%s'`
     if [ -f $j.cdb ] ; then
-      t2=`date +'%s' -r $j.cdb`
+      t2=`date -r $j.cdb +'%s'`
     else
       t2=0
     fi
@@ -757,6 +757,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.113  2022-03-06 18:48:10+05:30  Cprogrammer
+# fix for FreeBSD (date usage)
+#
 # Revision 2.112  2021-08-23 17:34:11+05:30  Cprogrammer
 # fixed default_domain variable
 #
