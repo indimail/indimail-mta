@@ -2226,34 +2226,34 @@ slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
 
 socket.lib: \
-trylsock.c
-	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lsocket -lnsl ) >/dev/null 2>&1 \
+trylib.c
+	( ( $(CC) -c trylib.c -o trylib.o && $(CC) -o trylib trylib.o -lsocket -lnsl ) >/dev/null 2>&1 \
 	&& echo -lsocket -lnsl || exit 0 ) > socket.lib
-	rm -f trylsock.o trylsock
+	rm -f trylib.o trylib
 
 fts.lib: \
-trylsock.c
-	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lfts ) >/dev/null 2>&1 \
+trylib.c
+	( ( $(CC) -c trylib.c -o tryfts.o && $(CC) -o tryfts tryfts.o -lfts ) >/dev/null 2>&1 \
 	&& echo -lfts || exit 0 ) > fts.lib
-	rm -f trylsock.o trylsock
+	rm -f trytfs.o trytfs
 
 rt.lib: \
-trylsock.c
-	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lrt ) >/dev/null 2>&1 \
+trylib.c
+	( ( $(CC) -c trylib.c -o tryrt.o && $(CC) -o tryrt tryrt.o -lrt ) >/dev/null 2>&1 \
 	&& echo -lrt || exit 0 ) > rt.lib
-	rm -f trylsock.o trylsock
+	rm -f tryrt.o tryrt
 
 crypt.lib: \
-trylsock.c
-	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lcrypt ) >/dev/null 2>&1 \
+trylib.c
+	( ( $(CC) -c trylib.c -o trycrypt.o && $(CC) -o trycrypt trycrypt.o -lcrypt ) >/dev/null 2>&1 \
 	&& echo -lcrypt || exit 0 ) > crypt.lib
-	rm -f trylsock.o trylsock
+	rm -f trycrypt.o trycrypt
 
 haslibrt.h: \
-trylsock.c
-	( ( $(CC) -c trylsock.c && $(CC) -o trylsock trylsock.o -lrt ) >/dev/null 2>&1 \
+trylib.c
+	( ( $(CC) -c trylib.c -o trylibrt.o && $(CC) -o trylibrt trylibrt.o -lrt ) >/dev/null 2>&1 \
 	&& echo "#define HASLIBRT 1" || exit 0 ) > haslibrt.h
-	rm -f trylsock.o trylsock
+	rm -f trylibrt.o trylibrt
 
 tls.lib: \
 trytls.c compile conf-tls load conf-ld-$(SYSTEM)
