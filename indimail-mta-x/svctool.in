@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.622 2022-02-07 11:28:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.623 2022-03-06 19:02:49+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.622 2022-02-07 11:28:49+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.623 2022-03-06 19:02:49+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1953,9 +1953,12 @@ if [ -f ./config-fast ] ; then
 else
 	"$DESTDIR"$libexecdir/config-fast $hostname $DESTDIR
 fi
+if [ ! -d $t/global_vars ] ; then
+	mkdir -p $t/global_vars
+fi
 if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] ; then
 	echo "global variable DEFAULT_DOMAIN"
-	/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN
+	/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $t/global_vars
 		ln -s ../defaultdomain DEFAULT_DOMAIN
@@ -1963,7 +1966,7 @@ if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] 
 fi
 if [ ! -f $t/global_vars/QMAILDEFAULTHOST -a ! -L $t/global_vars/QMAILDEFAULTHOST ] ; then
 	echo "global variable QMAILDEFAULTHOST"
-	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOST
+	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOST 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $t/global_vars
 		ln -s ../defaulthost QMAILDEFAULTHOST
@@ -2138,7 +2141,7 @@ if [ ! -f $t/tlsserverciphers ] ; then
 		mkdir -p $t/global_vars
 	fi
 	if [ ! -f $t/global_vars/TLS_CIPHER_LIST -a ! -L $t/global_vars/TLS_CIPHER_LIST ] ; then
-		/bin/ln -sr $CONTROLDIR/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST
+		/bin/ln -sr $CONTROLDIR/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST 2>/dev/null
 		if [ $? -ne 0 ] ; then
 			cd $t/global_vars
 			ln -s ../tlsserverciphers TLS_CIPHER_LIST
@@ -2442,15 +2445,15 @@ if [ " $odmr" = " " ] ; then
 		do
 			/bin/rm -f $conf_dir/$i
 		done
-		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
 		if [ ! "$t" = "$QUEUE_BASE" ] ; then
 			echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 		fi
-		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
 		if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 			echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 		fi
-		t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
 		if [ ! "$t" = "$QUEUE_START" ] ; then
 			echo $QUEUE_START  > $conf_dir/QUEUE_START
 		fi
@@ -2875,7 +2878,11 @@ else
 			val=$(eval "echo \${$i}")
 			echo $val > $conf_dir/$i
 			if [ ! -f "$DESTDIR"$cntrldir/global_vars/$i -a ! -L "$DESTDIR"$cntrldir/global_vars/$i ] ; then
-				ln -srf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i
+				ln -srf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i 2>/dev/null
+				if [ $? -ne 0 ] ; then
+					cd "$DESTDIR"$cntrldir/global_vars
+					ln -s $conf_dir/$i $i
+				fi
 			fi
 	done
 fi
@@ -3079,15 +3086,15 @@ else
 	do
 		/bin/rm -f $conf_dir/$i
 	done
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_BASE" ] ; then
 		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 	fi
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 	fi
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_START" ] ; then
 		echo $QUEUE_START  > $conf_dir/QUEUE_START
 	fi
@@ -5956,15 +5963,15 @@ else
 	do
 		/bin/rm -f $conf_dir/$i
 	done
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_BASE" ] ; then
 		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 	fi
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 	fi
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_START" ] ; then
 		echo $QUEUE_START  > $conf_dir/QUEUE_START
 	fi
@@ -6398,15 +6405,15 @@ else
 	do
 		/bin/rm -f $conf_dir/$i
 	done
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_BASE" ] ; then
 		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 	fi
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 	fi
-	t=$(/usr/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_START" ] ; then
 		echo $QUEUE_START  > $conf_dir/QUEUE_START
 	fi
@@ -6572,6 +6579,18 @@ echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
 echo "else"
 echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	FreeBSD)
+	echo "if [ ! -d $QmailHOME/queue/mqueue ] ; then"
+	echo "  mkdir -p $QmailHOME/queue/mqueue"
+	echo "fi"
+	echo "mq=\$(df $QmailHOME/queue/mqueue|grep mqueue >/dev/null)"
+	echo "if [ \$? -ne 0 ] ; then"
+  	echo "  mount -t mqueuefs null $QmailHOME/queue/mqueue"
+	echo "fi"
+	;;
+esac
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -q \\\$MSGQSIZE -m \\\$SOFT_MEM -o 1024 \\"
 case $qtype in

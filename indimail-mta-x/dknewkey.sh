@@ -1,5 +1,8 @@
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.12  2022-03-06 18:49:17+05:30  Cprogrammer
+# fix for FreeBSD (getopt usage).
+#
 # Revision 1.11  2021-09-11 18:55:36+05:30  Cprogrammer
 # changed owner/permissions of dkim private/public key pairs
 #
@@ -87,9 +90,13 @@ print_key()
 		printf ")\n"
 	fi
 }
-
 controldir=@qsysconfdir@/control
-options=$(getopt -a -n dknewkey -o "prfd:b:" -l print,remove,force,domain:,bits: -- "$@")
+SYSTEM=$(uname -s)
+if [ "$SYSTEM" = "FreeBSD" ] ; then
+	options=$(getopt prfd:b: "$@")
+else
+	options=$(getopt -a -n dknewkey -o "prfd:b:" -l print,remove,force,domain:,bits: -- "$@")
+fi
 if [ $? != 0 ]; then
 	usage 100
 fi
@@ -104,8 +111,7 @@ force=0
 bits=1024
 domain=""
 eval set -- "$options"
-while :
-do
+while :; do
 	case "$1" in
 	-f | --force)
 	force=1

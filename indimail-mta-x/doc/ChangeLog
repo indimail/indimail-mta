@@ -92,7 +92,7 @@ Release 2.14.1 Start 21/09/2021
     removeheaders, envheaders, logheaders, mailarchive control files.
 - 26/02/2022
 50. qmail-smtpd.c: fix ehlo greating for local connections
-01/03/2022
+- 01/03/2022
 51. qmail-todo.c: renamed compat_mode variable to compat_mode_flag
 - 02/03/2022
 52. qscheduler.c: continue to let current deliveries happen instead of exit
@@ -104,6 +104,12 @@ Release 2.14.1 Start 21/09/2021
 - 06/03/2022
 56. qmail-send.c, qscheduler.c: Use ftruncate on shared mem on FreeBSD
 57. qmail-send.c, qscheduler.c: unlink shared memory on exit
+58. qmail-smtpd.c: fix ehlo greating for local connections
+- 06/03/2022
+59. create_services.in: fix for FreeBSD (date usage)
+60. dknewkey.sh: fix for FreeBSD (getopt usage)
+61. svctool.in: fix for FreeBSD (ln -sr)
+62. svctool.in: mount mqueuefs directory in qmail-send run script
 
 * 
 Release 2.14.0 Start 18/07/2021
