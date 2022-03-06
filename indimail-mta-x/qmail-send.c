@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.97 2022-03-05 22:12:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.97 2022-03-06 11:05:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2325,6 +2325,12 @@ shm_init(char *shm_name)
 	q[0] = q[1] = 0;
 	q[2] = concurrency[0];
 	q[3] = concurrency[1];
+#ifdef FREEBSD /*- another FreeBSD idiosyncrasies */
+	if (ftruncate(shm_queue, getpagesize()) < 0) {
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to truncate shared memory: ", error_str(errno), "\n");
+		_exit(111);
+	}
+#endif
 	if (write(shm_queue, (char *) q, 4 * sizeof(int)) == -1) {
 		log7("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory: ", error_str(errno), "\n");
 		_exit(111);
@@ -2544,13 +2550,16 @@ main(int argc, char **argv)
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	log7("status: ", argv0, ": ", strnum1, " ", queuedesc, " exiting\n");
+#ifdef LIBRT
+	shm_unlink(queuedesc);
+#endif
 	return (0);
 }
 
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.97 2022-03-05 22:12:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.97 2022-03-06 11:05:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2560,8 +2569,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.97  2022-03-05 22:12:15+05:30  Cprogrammer
- * open shared memory with O_RDWR on FreeBSD
+ * Revision 1.97  2022-03-06 11:05:09+05:30  Cprogrammer
+ * open shm with O_RDWR for FreeBSD
+ * use ftruncate on shm for FreeBSD
  *
  * Revision 1.96  2022-03-02 07:59:20+05:30  Cprogrammer
  * use ipc - added qscheduler, removed qmail-daemon
