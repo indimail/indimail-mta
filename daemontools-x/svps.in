@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.12  2022-03-06 18:50:50+05:30  Cprogrammer
+# fix for FreeBSD (stat command usage)
+#
 # Revision 1.11  2021-07-26 11:31:08+05:30  Cprogrammer
 # added --no-pager, -n option to disable pager
 #
@@ -33,7 +36,7 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.11 2021-07-26 11:31:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.12 2022-03-06 18:50:50+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -49,7 +52,14 @@ else
 	pidfile=@servicedir@/.svscan.pid
 fi
 
-mod=$(stat --printf="%Y\n" $pidfile)
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	Darwin|FreeBSD)
+	mod=$(stat -f "%m" $pidfile)
+	;;
+	*)
+	mod=$(stat --printf="%Y\n" $pidfile)
+esac
 now=$(date +%s)
 diff=$(expr $now - $mod)
 
