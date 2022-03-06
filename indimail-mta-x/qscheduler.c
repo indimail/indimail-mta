@@ -491,6 +491,9 @@ static_queue()
 		strnum1[fmt_ulong(strnum1, child)] = 0;
 		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
 	}
+#ifdef LIBRT
+	shm_unlink("/qscheduler");
+#endif
 	strerr_die1x(flagexitasap ? 0 : 111, "info: qscheduler: exiting");
 }
 
@@ -551,8 +554,11 @@ queue_fix(char *queuedir)
 void
 create_ipc(int *msgqueue_len, int *msgqueue_size)
 {
-	char            ipc_name[FMT_ULONG + 6], shm_dev_name[FMT_ULONG + 6 + 8],
+	char            ipc_name[FMT_ULONG + 6];
+#ifdef LINUX
+	char            shm_dev_name[FMT_ULONG + 6 + 8],
 					mq_dev_name[FMT_ULONG + 6 + 11]; /*- /queue + /dev/mqueue */
+#endif
 	char           *s;
 	int             i, j;
 	struct mq_attr  attr;
@@ -747,6 +753,12 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 		strerr_warn1("alert: qscheduler: failed to open POSIX shared memory /qscheduler: ", &strerr_sys);
 		die();
 	}
+#ifdef FREEBSD /*- another FreeBSD idiosyncrasies */
+	if (ftruncate(shm_conf, getpagesize()) < 0) {
+		strerr_warn1("alert: qscheduler: failed to truncate POSIX shared memory /qscheduler: ", &strerr_sys);
+		die();
+	}
+#endif
 	return;
 }
 
