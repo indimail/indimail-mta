@@ -1070,8 +1070,8 @@ if [ $# -lt 5 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 OK=1
 
@@ -1147,7 +1147,7 @@ else
     echo ""$DESTDIR"$libexecdir exists"
   fi
   echo "Checking IndiMail queues"
-  QUEUE_NO=$FIRST_QUEUE
+  QUEUE_NO=$QUEUE_START
   COUNT=1
   while true
   do
@@ -1159,7 +1159,7 @@ else
     elif [ "$VERB" = y ]; then
       echo "queue "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" looks OK"
     fi
-    if [ $COUNT -eq $NO_OF_QUEUES ] ; then
+    if [ $COUNT -eq $QUEUE_COUNT ] ; then
       break
     fi
     COUNT=`expr $COUNT + 1`
@@ -1945,20 +1945,23 @@ if [ -f ./config-fast ] ; then
 else
 	"$DESTDIR"$libexecdir/config-fast $hostname $DESTDIR
 fi
+if [ ! -d $t/global_vars ] ; then
+	mkdir -p $t/global_vars
+fi
 if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] ; then
 	echo "global variable DEFAULT_DOMAIN"
-	/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN
+	/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $t/global_vars
 		ln -s ../defaultdomain DEFAULT_DOMAIN
 	fi
 fi
-if [ ! -f $t/global_vars/QMAILDEFAULTHOSt -a ! -L $t/global_vars/QMAILDEFAULTHOSt ] ; then
+if [ ! -f $t/global_vars/QMAILDEFAULTHOST -a ! -L $t/global_vars/QMAILDEFAULTHOST ] ; then
 	echo "global variable QMAILDEFAULTHOST"
-	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOSt
+	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOST 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $t/global_vars
-		ln -s ../defaulthost QMAILDEFAULTHOSt
+		ln -s ../defaulthost QMAILDEFAULTHOST
 	fi
 fi
 echo "Setting Following Files to Reasonable Defaults"
@@ -2130,7 +2133,7 @@ if [ ! -f $t/tlsserverciphers ] ; then
 		mkdir -p $t/global_vars
 	fi
 	if [ ! -f $t/global_vars/TLS_CIPHER_LIST -a ! -L $t/global_vars/TLS_CIPHER_LIST ] ; then
-		/bin/ln -sr $CONTROLDIR/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST
+		/bin/ln -sr $CONTROLDIR/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST 2>/dev/null
 		if [ $? -ne 0 ] ; then
 			cd $t/global_vars
 			ln -s ../tlsserverciphers TLS_CIPHER_LIST
@@ -2217,6 +2220,10 @@ if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
 	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
 	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
 	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+else
+	if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
+		echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+	fi
 fi
 if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then
 	echo $sysconfdir/control/global_vars > $conf_dir/.envdir
@@ -2299,8 +2306,8 @@ if [ $# -ne 11 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 SMTP_PORT=$5
 chkrecipient=$6
@@ -2425,10 +2432,23 @@ if [ " $odmr" = " " ] ; then
 		echo $qmailqueue > $conf_dir/QMAILQUEUE
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	else
-		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-		echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-		echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
 		> $conf_dir/QUEUEDIR
+		for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+		do
+			/bin/rm -f $conf_dir/$i
+		done
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+		if [ ! "$t" = "$QUEUE_BASE" ] ; then
+			echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+		fi
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+		if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+			echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+		fi
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+		if [ ! "$t" = "$QUEUE_START" ] ; then
+			echo $QUEUE_START  > $conf_dir/QUEUE_START
+		fi
 	fi
 	if [ $use_starttls -eq 0 ] ; then
 		> $conf_dir/STARTTLS
@@ -2817,8 +2837,8 @@ if [ $# -ne 4 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 QUEUE_DEF=$4
 
 if [ " $CONTROLDIR" = " " ] ; then
@@ -2834,6 +2854,9 @@ fi
 $chown indimail:qmail $conf_dir
 /bin/chmod 755 $conf_dir
 link_with_global $conf_dir
+if [ ! -f $conf_dir/.envdir ] ; then
+	echo "$cntrldir/global_vars" > $conf_dir/.envdir
+fi
 
 if [ -n "$base_path" ] ; then
 	echo $base_path    > $conf_dir/BASE_PATH
@@ -2842,18 +2865,18 @@ if [ $no_multi -eq 1 ] ; then
 	echo $qmailqueue > $conf_dir/QMAILQUEUE
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 else
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
-fi
-defaultDomain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
-if [ ! -d "$DESTDIR"$cntrldir/global_vars ] ; then
-	mkdir -p "$DESTDIR"$cntrldir/global_vars
-	$chown root:qmail "$DESTDIR"$cntrldir/global_vars
-	/bin/chmod 755 "$DESTDIR"$cntrldir/global_vars
-	echo "$cntrldir/global_vars" > $conf_dir/.envdir
-elif [ ! -f $conf_dir/.envdir ] ; then
-	echo "$cntrldir/global_vars" > $conf_dir/.envdir
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+			val=$(eval "echo \${$i}")
+			echo $val > $conf_dir/$i
+			if [ ! -f "$DESTDIR"$cntrldir/global_vars/$i -a ! -L "$DESTDIR"$cntrldir/global_vars/$i ] ; then
+				ln -srf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i 2>/dev/null
+				if [ $? -ne 0 ] ; then
+					cd "$DESTDIR"$cntrldir/global_vars
+					ln -s $conf_dir/$i $i
+				fi
+			fi
+	done
 fi
 if [ " $qregex" = " " ] ; then
 	> $conf_dir/QREGEX
@@ -2965,6 +2988,7 @@ case "$dksign_option" in
 	;;
 esac
 echo "$prog_args" > $conf_dir/.options
+echo "$prog_args" > "$DESTDIR"$cntrldir/global_vars/.options
 if [ ! " $logfilter" = " " ] ; then
 	echo  $logfilter > $conf_dir/LOGFILTER
 	if [ ! -f $SERVICEDIR/qmail-logfifo/run ] ; then
@@ -2989,8 +3013,8 @@ elif [ " $1" != " qmtpd" -a " $1" != " qmqpd" ] ; then
 fi
 type=$1
 QUEUE_BASE=$2
-NO_OF_QUEUES=$3
-FIRST_QUEUE=$4
+QUEUE_COUNT=$3
+QUEUE_START=$4
 SERVICEDIR=$5
 QMTP_PORT=$6
 
@@ -3049,9 +3073,23 @@ if [ $no_multi -eq 1 ] ; then
 	echo $qmailqueue > $conf_dir/QMAILQUEUE
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 else
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
+	> $conf_dir/QUEUEDIR
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+		/bin/rm -f $conf_dir/$i
+	done
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_BASE" ] ; then
+		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+	fi
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+	fi
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_START" ] ; then
+		echo $QUEUE_START  > $conf_dir/QUEUE_START
+	fi
 fi
 case "$dkverify_option" in
 	dkimstrict)
@@ -5888,8 +5926,8 @@ if [ $# -ne 4 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/fetchmail/variables ] ; then
@@ -5912,10 +5950,23 @@ if [ $no_multi -eq 1 ] ; then
 	echo $qmailqueue > $conf_dir/QMAILQUEUE
 	echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 else
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
 	> $conf_dir/QUEUEDIR
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+		/bin/rm -f $conf_dir/$i
+	done
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_BASE" ] ; then
+		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+	fi
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+	fi
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_START" ] ; then
+		echo $QUEUE_START  > $conf_dir/QUEUE_START
+	fi
 fi
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
@@ -6265,8 +6316,8 @@ if [ $# -ne 8 ] ; then
 	return 1
 fi
 QUEUE_BASE=$1
-NO_OF_QUEUES=$2
-FIRST_QUEUE=$3
+QUEUE_COUNT=$2
+QUEUE_START=$3
 SERVICEDIR=$4
 QUEUE_IDENT=$5
 routes=$6
@@ -6301,7 +6352,7 @@ else
 	./queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 fi
 
-QUEUE_NO=$FIRST_QUEUE
+QUEUE_NO=$QUEUE_START
 COUNT=1
 while true
 do
@@ -6314,7 +6365,7 @@ do
 	else
 		./queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
 	fi
-	if [ $COUNT -eq $NO_OF_QUEUES ] ; then
+	if [ $COUNT -eq $QUEUE_COUNT ] ; then
 		break
 	fi
 	COUNT=`expr $COUNT + 1`
@@ -6341,10 +6392,23 @@ if [ $no_multi -eq 1 ] ; then
 	> $conf_dir/QMAILQUEUE
 else
 	echo "$QmailBinPrefix/sbin/qmail-multi" > $conf_dir/QMAILQUEUE
-	echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
-	echo $NO_OF_QUEUES > $conf_dir/QUEUE_COUNT
-	echo $FIRST_QUEUE  > $conf_dir/QUEUE_START
 	> $conf_dir/QUEUEDIR
+	for i in QUEUE_BASE QUEUE_COUNT QUEUE_START
+	do
+		/bin/rm -f $conf_dir/$i
+	done
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_BASE" ] ; then
+		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
+	fi
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
+		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
+	fi
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	if [ ! "$t" = "$QUEUE_START" ] ; then
+		echo $QUEUE_START  > $conf_dir/QUEUE_START
+	fi
 fi
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
@@ -9063,13 +9127,14 @@ create_cert()
 		exit 1
 	fi
 	echo "Creating SSL Configuration email=$postmaster cn=$common_name"
-	create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
-	/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
 	conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
-	/bin/rm -f $conf_file
-	change_config $conf_file $TMPDIR/config.cnf.$$
-	/bin/chmod 640 $conf_file
-	$chown indimail:qmail $conf_file
+	if [ ! -f $conf_file ] ; then
+		create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
+		/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
+		change_config $conf_file $TMPDIR/config.cnf.$$
+		/bin/chmod 640 $conf_file
+		$chown indimail:qmail $conf_file
+	fi
 	if [ -f "$DESTDIR"$sysconfdir/certs/servercert.pem -a $force -ne 1 ] ; then
 		echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
 		exit 1
