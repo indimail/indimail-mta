@@ -36,6 +36,9 @@ Release 2.14.1 Start 21/09/2021
 19. qmail-send.c, qmail-todo.c, slowq-send.c: fixed argv0
 - 26/02/2022
 20. qmail-smtpd.c: fix ehlo greating for local connections
+- 06/03/2022
+21. create_services.in: fix for FreeBSD (date usage)
+22. dknewkey.sh: fix for FreeBSD (getopt usage)
 
 * 
 Release 2.14.0 Start 18/07/2021
