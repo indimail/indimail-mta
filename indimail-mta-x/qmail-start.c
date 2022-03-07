@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.26  2022-03-07 22:38:09+05:30  Cprogrammer
+ * fixed qmail-send arguments
+ *
  * Revision 1.25  2022-01-30 09:15:36+05:30  Cprogrammer
  * added qscheduler, removed qmail-daemon
  * added compat mode option (support trigger mode in ipc mode)
@@ -168,13 +171,13 @@ int
 main(int argc, char **argv)
 {
 	char           *set_supplementary_groups, *ptr;
-	char           *(qsargs[]) = { "qmail-send", 0, 0, 0};
-	char           *(qcargs[]) = { "qmail-clean", 0, 0, 0};
-	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
-	char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
-	char           *(qtargs[]) = { "qmail-todo", 0, 0, 0};
+	char           *(qsargs[]) = { "qmail-send", 0, (char *) NULL, (char *) NULL};
+	char           *(qcargs[]) = { "qmail-clean", 0, 0, (char *) NULL};
+	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, (char *) NULL};
+	char           *(qrargs[]) = { "qmail-rspawn", 0, (char *) NULL};
+	char           *(qtargs[]) = { "qmail-todo", 0, 0, 0, (char *) NULL};
 	gid_t          *gidset;
-	int             ngroups, i = 1;
+	int             ngroups, i = 1, j = 1;
 	int             opt;
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
@@ -206,23 +209,21 @@ main(int argc, char **argv)
 				qtargs[i++] = "-c";
 				break;
 			case 'd':
-				qsargs[i] = "-d";
-				qtargs[i] = "-d";
-				i++;
+				qsargs[j++] = "-d";
+				qtargs[i++] = "-d";
 				break;
 			case 's':
-				qsargs[i] = "-s";
-				qtargs[i] = "-s";
-				i++;
+				qsargs[j++] = "-s";
+				qtargs[i++] = "-s";
 				break;
 		}
 	}
 	argc -= optind;
 	argv += optind; /*- first arg excluding -d, -s will be argv[0] */
 	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
-		qsargs[i] = ptr;
+		qsargs[j++] = ptr;
 		qcargs[1] = ptr;
-		qtargs[i] = ptr;
+		qtargs[i++] = ptr;
 		qlargs[2] = ptr;
 		qrargs[1] = ptr;
 	}
@@ -436,7 +437,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.25 2022-01-30 09:15:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.26 2022-03-07 22:38:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
