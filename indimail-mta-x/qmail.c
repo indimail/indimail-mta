@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.c,v $
+ * Revision 1.30  2022-03-08 22:58:36+05:30  Cprogrammer
+ * added code 69 for todo syncdir error
+ *
  * Revision 1.29  2022-03-05 13:31:03+05:30  Cprogrammer
  * use auto_prefix for binary paths
  *
@@ -286,6 +289,8 @@ qmail_close(struct qmail *qq)
 		return "Zqq trouble getting uids/gids (#4.3.0)";
 	case 68: /*-*/
 		return "Zqq trouble creating temporary files (#4.3.0)";
+	case 69: /*-*/
+		return "Zqq syncing todo dir (#4.3.0)";
 	case 71:
 		return "Zmail server temporarily rejected message (#4.3.0)";
 	case 72:
@@ -330,7 +335,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.29 2022-03-05 13:31:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.30 2022-03-08 22:58:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
