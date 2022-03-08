@@ -203,7 +203,11 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 		goto fail;
 #ifdef USE_FSYNC
 	if (use_syncdir && use_fsync > 0) {
-		if ((fd = open(fnnewtph.s, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
+		if ((fd = open(fnnewtph.s, O_RDONLY)) == -1) {
+			if (errno != error_noent)
+				goto fail;
+		} else
+		if (fsync(fd) < 0 || close(fd) < 0)
 			goto fail;
 	}
 #endif

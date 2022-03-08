@@ -1255,7 +1255,13 @@ main()
 	}
 #ifdef USE_FSYNC
 	if (!env_get("USE_SYNCDIR") && use_fsync > 0) {
-		if ((fd = open(todofn, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0) {
+		if ((fd = open(todofn, O_RDONLY)) == -1) {
+			if (errno != error_noent) {
+				cleanup();
+				die(66);
+			}
+		} else
+		if (fsync(fd) < 0 || close(fd) < 0) {
 			cleanup();
 			die(66);
 		}
