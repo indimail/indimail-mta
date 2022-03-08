@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.17  2022-03-08 22:59:54+05:30  Cprogrammer
+ * use custom_error() from custom_error.c
+ *
  * Revision 1.16  2021-10-25 09:13:01+05:30  Cprogrammer
  * eliminated mktmpfd() function
  *
@@ -82,6 +85,7 @@
 #include <byte.h>
 #include "qmail.h"
 #include "qmulti.h"
+#include "custom_error.h"
 
 #ifndef TMPDIR
 #define TMPDIR "/tmp"
@@ -109,35 +113,7 @@
 static size_t   env_len;
 static size_t   msg_len;
 char            strnum[FMT_ULONG];
-struct substdio sserr;
-char            errbuf[256];
 
-void
-custom_error(char *flag, char *status, char *code)
-{
-	char           *c;
-
-	if (substdio_put(&sserr, flag, 1) == -1)
-		_exit(QQ_WRITE_ERROR);
-	if (substdio_put(&sserr, "qmail-qfilter: ", 15) == -1)
-		_exit(QQ_WRITE_ERROR);
-	if (substdio_puts(&sserr, status) == -1)
-		_exit(QQ_WRITE_ERROR);
-	if (code) {
-		if (substdio_put(&sserr, " (#", 3) == -1)
-			_exit(QQ_WRITE_ERROR);
-		c = (*flag == 'Z') ? "4" : "5";
-		if (substdio_put(&sserr, c, 1) == -1)
-			_exit(QQ_WRITE_ERROR);
-		if (substdio_put(&sserr, code + 1, 4) == -1)
-			_exit(QQ_WRITE_ERROR);
-		if (substdio_put(&sserr, ")", 1) == -1)
-			_exit(QQ_WRITE_ERROR);
-	}
-	if (substdio_flush(&sserr) == -1)
-		_exit(QQ_WRITE_ERROR);
-	return;
-}
 /*
  * Parse the sender address into user and host portions 
  */
@@ -148,10 +124,8 @@ parse_sender(char *env)
 	int             at, len;
 
 	for (len = 0; *ptr != 'F' && len < env_len; len++, ptr++);
-	if (*ptr != 'F') {
-		custom_error("Z", "bad envelope. (#4.3.0)", 0);
-		_exit(88);
-	}
+	if (*ptr != 'F')
+		custom_error("qmail-qfilter", "Z", "bad envelope.", 0, "X.3.0");
 	ptr++;
 	len++;
 	if (!env_unset("QMAILNAME"))
@@ -212,10 +186,8 @@ parse_envelope(void)
 	char           *env;
 	size_t          offset;
 
-	if ((env = mmap(0, env_len, PROT_READ|PROT_WRITE, MAP_PRIVATE, ENVIN, 0)) == MAP_FAILED) {
-		custom_error("Z", "mmap failed. (#4.3.0)", 0);
-		_exit(88);
-	}
+	if ((env = mmap(0, env_len, PROT_READ|PROT_WRITE, MAP_PRIVATE, ENVIN, 0)) == MAP_FAILED)
+		custom_error("qmail-qfilter", "Z", "mmap failed.", 0, "X.3.0");
 	offset = parse_sender(env);
 	parse_rcpts(env, offset);
 	munmap((void *) env, env_len);
@@ -230,18 +202,15 @@ mktmpfile()
 	char            filename[sizeof (TMPDIR) + 19] = TMPDIR "/fixheaders.XXXXXX";
 	int             fd = mkstemp(filename);
 
-	if (fd == -1) {
-		custom_error("Z", "unable to create temp file. (#4.3.0)", 0);
-		_exit(88);
-	}
+	if (fd == -1)
+		custom_error("qmail-qfilter", "Z", "unable to create temp file.", 0, "X.3.0");
 	/*
 	 * The following makes the temporary file disappear immediately on
 	 * program exit. 
 	 */
 	if (unlink(filename) == -1) {
-		custom_error("Z", "unable to unlink temp file. (#4.3.0)", 0);
 		close(fd);
-		_exit(88);
+		custom_error("qmail-qfilter", "Z", "unable to unlink temp file.", 0, "X.3.0");
 	}
 	return fd;
 }
@@ -254,14 +223,10 @@ move_fd(int currfd, int newfd)
 {
 	if (currfd == newfd)
 		return;
-	if (dup2(currfd, newfd) != newfd) {
-		custom_error("Z", "move_fd: dup2 failed. (#4.3.0)", 0);
-		_exit(88);
-	}
-	if (close(currfd) != 0) {
-		custom_error("Z", "move_fd: close failed. (#4.3.0)", 0);
-		_exit(88);
-	}
+	if (dup2(currfd, newfd) != newfd)
+		custom_error("qmail-qfilter", "Z", "move_fd: dup2 failed.", 0, "X.3.0");
+	if (close(currfd) != 0)
+		custom_error("qmail-qfilter", "Z", "move_fd: close failed.", 0, "X.3.0");
 }
 
 /*
@@ -289,10 +254,8 @@ copy_fd(int fdin, int fdout, size_t * var)
 		bytes += rd;
 	}
 	close(fdin);
-	if (lseek(tmp, 0, SEEK_SET) != 0) {
-		custom_error("Z", "unable to lseek. (#4.3.0)", 0);
-		_exit(88);
-	}
+	if (lseek(tmp, 0, SEEK_SET) != 0)
+		custom_error("qmail-qfilter", "Z", "unable to lseek.", 0, "X.3.0");
 	move_fd(tmp, fdout);
 	*var = bytes;
 }
@@ -353,10 +316,8 @@ move_unless_empty(int src, int dst, const void *reopen, size_t *var)
 	} else
 	if (!reopen)
 		close(src);
-	if (lseek(dst, 0, SEEK_SET) != 0) {
-		custom_error("Z", "unable to lseek. (#4.3.0)", 0);
-		_exit(88);
-	}
+	if (lseek(dst, 0, SEEK_SET) != 0)
+		custom_error("qmail-qfilter", "Z", "unable to lseek.", 0, "X.3.0");
 }
 
 char *
@@ -400,10 +361,8 @@ run_filters(const command * first)
 		strnum[fmt_ulong(strnum, msg_len)] = 0;
 		if (!env_put2("MSGSIZE", strnum))
 			_exit(QQ_OOM);
-		if (lseek(1, 0, SEEK_SET) != 0) {
-			custom_error("Z", "unable to lseek envelope. (#4.3.0)", 0);
-			_exit(88);
-		}
+		if (lseek(1, 0, SEEK_SET) != 0)
+			custom_error("qmail-qfilter", "Z", "unable to lseek envelope.", 0, "X.3.0");
 		switch ((pid = fork()))
 		{
 		case -1:
@@ -420,10 +379,8 @@ run_filters(const command * first)
 			exit((WEXITSTATUS(status) == QQ_DROP_MSG) ? 0 : WEXITSTATUS(status));
 		move_unless_empty(MSGOUT, MSGIN, c->next, &msg_len);
 		move_unless_empty(ENVOUT, ENVIN, c->next, &env_len);
-		if (lseek(QQFD, 0, SEEK_SET) != 0) {
-			custom_error("Z", "unable to lseek qqfd. (#4.3.0)", 0);
-			_exit(88);
-		}
+		if (lseek(QQFD, 0, SEEK_SET) != 0)
+			custom_error("qmail-qfilter", "Z", "unable to lseek qqfd.", 0, "X.3.0");
 	}
 }
 
@@ -431,14 +388,8 @@ int
 main(int argc, char *argv[])
 {
 	const command  *filters;
-	int             errfd;
 	char           *x;
 
-	if (!(x = env_get("ERROR_FD")))
-		errfd = CUSTOM_ERR_FD;
-	else
-		scan_int(x, &errfd);
-	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	filters = parse_args(argc - 1, argv + 1);
 	copy_fd(0, 0, &msg_len);
 	copy_fd(1, ENVIN, &env_len);
@@ -458,7 +409,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.16 2021-10-25 09:13:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.17 2022-03-08 22:59:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;

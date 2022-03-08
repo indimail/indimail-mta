@@ -1,193 +1,5 @@
 /*
- * $Log: qmail-dkim.c,v $
- * Revision 1.62  2021-09-12 14:17:30+05:30  Cprogrammer
- * restore gid after reading private key file
- *
- * Revision 1.61  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.60  2021-08-28 23:16:06+05:30  Cprogrammer
- * control file dkimkeys for domain specific private key, selector
- *
- * Revision 1.59  2021-06-15 22:15:14+05:30  Cprogrammer
- * pass tmpdir argument to pidopen
- *
- * Revision 1.58  2021-06-15 11:53:44+05:30  Cprogrammer
- * moved pidopen out to its own file
- *
- * Revision 1.57  2021-06-09 21:14:33+05:30  Cprogrammer
- * use qmulti() instead of exec of qmail-multi
- *
- * Revision 1.56  2021-05-26 10:44:21+05:30  Cprogrammer
- * handle access() error other than ENOENT
- *
- * Revision 1.55  2020-05-11 11:06:35+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.54  2020-04-01 16:14:36+05:30  Cprogrammer
- * added header for makeargs() function
- *
- * Revision 1.53  2019-06-14 21:26:37+05:30  Cprogrammer
- * added env variable HONOR_BODYLENGTHTAG to honor body length tag during verification
- *
- * Revision 1.52  2019-02-18 22:18:12+05:30  Cprogrammer
- * allow DKIMVERIFY env variable in place of DKIMPRACTICE when SIGN_PRACTICE="local"
- *
- * Revision 1.51  2019-02-17 11:38:51+05:30  Cprogrammer
- * set original DKIM error for SIGN_PRACTICE=local
- *
- * Revision 1.50  2019-02-15 21:25:04+05:30  Cprogrammer
- * skip nosignaturedomains if domain is present in signaturedomains
- *
- * Revision 1.49  2018-08-08 23:58:01+05:30  Cprogrammer
- * issue success if at lease one one good signature is found
- *
- * Revision 1.48  2017-09-05 12:37:16+05:30  Cprogrammer
- * added missing DKIM_MFREE()
- *
- * Revision 1.47  2016-06-03 09:57:59+05:30  Cprogrammer
- * moved qmail-multi to sbin
- *
- * Revision 1.46  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.45  2016-03-01 18:48:02+05:30  Cprogrammer
- * added env variable UNSIGNED_SUBJECT to verify dkim without subject field
- *
- * Revision 1.44  2015-12-15 16:05:58+05:30  Cprogrammer
- * increased buffer size for long header issue
- *
- * Revision 1.43  2014-01-22 22:45:01+05:30  Cprogrammer
- * treat AUTHINFO environment like RELAYCLIENT environment variable
- *
- * Revision 1.42  2013-10-01 17:11:24+05:30  Cprogrammer
- * fixed QMAILQUEUE recursion
- *
- * Revision 1.41  2013-09-16 22:16:35+05:30  Cprogrammer
- * corrected logic for RELAYCLIENT_NODKIMVERIFY
- *
- * Revision 1.40  2013-09-13 16:34:35+05:30  Cprogrammer
- * turn off verification if RELAYCLIENT, DKIMVERIFY and RELAYCLIENT_NODKIMVERIFY is set
- *
- * Revision 1.39  2013-08-18 15:53:30+05:30  Cprogrammer
- * revert back to default verification mode if both dksign, dkverify are not set
- *
- * Revision 1.38  2013-08-17 15:00:33+05:30  Cprogrammer
- * BUG - corrected location of private key when % sign is removed
- *
- * Revision 1.37  2013-01-24 22:37:22+05:30  Cprogrammer
- * BUG (fix by Piotr Gronek) - DKIM_FREE(results) called before call to ParseTagValues()
- * alternate code for DKIMSIGN selector file name
- *
- * Revision 1.36  2012-08-16 08:01:46+05:30  Cprogrammer
- * do not skip X-Mailer headers
- *
- * Revision 1.35  2011-11-10 14:32:08+05:30  Cprogrammer
- * BUG ssout to be assigned only after pidopen
- *
- * Revision 1.34  2011-11-07 09:35:59+05:30  Cprogrammer
- * set ssout, sserr, ssin before executing other functions
- *
- * Revision 1.33  2011-07-29 09:29:17+05:30  Cprogrammer
- * fixed key file name
- *
- * Revision 1.32  2011-07-28 19:36:36+05:30  Cprogrammer
- * BUG - fixed opening of private key with absolute path
- *
- * Revision 1.31  2011-07-22 14:40:05+05:30  Cprogrammer
- * fixed checking of private key file
- *
- * Revision 1.30  2011-06-04 14:49:48+05:30  Cprogrammer
- * remove '%' sign from private key if key not found
- *
- * Revision 1.29  2011-06-04 14:22:29+05:30  Cprogrammer
- * added DKIM_UNSIGNED_FROM error code for dkimpractice
- *
- * Revision 1.28  2011-06-04 14:07:41+05:30  Cprogrammer
- * added DKIM_UNSIGNED_FROM
- *
- * Revision 1.27  2011-02-10 23:39:59+05:30  Cprogrammer
- * use DKIMKEY to override defult control/domainkeys/%/default
- *
- * Revision 1.26  2011-02-06 10:13:50+05:30  Cprogrammer
- * BUG - signature was wrongly freed before being accessed.
- *
- * Revision 1.25  2011-02-05 09:47:47+05:30  Cprogrammer
- * fixed SIGSEGV occuring for messages without body
- *
- * Revision 1.24  2010-11-02 18:45:14+05:30  Cprogrammer
- * Improve DKIM signing/verification speed
- *
- * Revision 1.23  2010-07-21 08:59:57+05:30  Cprogrammer
- * use CONTROLDIR environment variable instead of a hardcoded control directory
- *
- * Revision 1.22  2009-04-22 13:42:51+05:30  Cprogrammer
- * made fd for custom error configurable through env variable ERROR_FD
- *
- * Revision 1.21  2009-04-21 09:05:48+05:30  Cprogrammer
- * return relevant error message for reading private key
- *
- * Revision 1.20  2009-04-21 08:55:41+05:30  Cprogrammer
- * return temporary error for temp failures
- *
- * Revision 1.19  2009-04-20 22:19:01+05:30  Cprogrammer
- * made dkimopts global
- *
- * Revision 1.18  2009-04-16 13:48:32+05:30  Cprogrammer
- * added dkim_setoptions() to set all DKIM options
- *
- * Revision 1.17  2009-04-07 11:36:56+05:30  Cprogrammer
- * use TMPDIR env variable for tmp directory
- *
- * Revision 1.16  2009-04-05 12:52:17+05:30  Cprogrammer
- * added preprocessor warning
- *
- * Revision 1.15  2009-04-04 00:33:44+05:30  Cprogrammer
- * removed dk_strdup()
- *
- * Revision 1.14  2009-03-31 08:21:58+05:30  Cprogrammer
- * set dkimsign when RELAYCLIENT is defined when both dkimsign and dkimverify are undefined
- *
- * Revision 1.13  2009-03-30 22:25:54+05:30  Cprogrammer
- * made DKIM messages friendlier
- *
- * Revision 1.12  2009-03-30 14:47:59+05:30  Cprogrammer
- * added descriptive text for original dkim error
- *
- * Revision 1.11  2009-03-29 19:20:43+05:30  Cprogrammer
- * added nosignaturedomains
- *
- * Revision 1.10  2009-03-28 22:27:02+05:30  Cprogrammer
- * use DKIMSIGN, DKIMVERIFY if RELAYCLIENT is not set
- *
- * Revision 1.9  2009-03-28 22:03:05+05:30  Cprogrammer
- * fixed DKIM return codes
- *
- * Revision 1.8  2009-03-28 13:37:37+05:30  Cprogrammer
- * call DKIMVerifyGetDetails() always
- *
- * Revision 1.7  2009-03-28 11:39:23+05:30  Cprogrammer
- * set automatic setting of dkimsign, dkimverify variables based on RELAYCLIENT
- *
- * Revision 1.6  2009-03-28 11:35:58+05:30  Cprogrammer
- * added ADSP/SSP
- *
- * Revision 1.5  2009-03-22 17:39:38+05:30  Cprogrammer
- * set identity using basename of signature or environment variable DKIMIDENTITY
- *
- * Revision 1.4  2009-03-22 16:58:38+05:30  Cprogrammer
- * fixed bug with verification
- * report custom errors to qmail-queue through custom error interface
- *
- * Revision 1.3  2009-03-21 12:34:38+05:30  Cprogrammer
- * use hasdkim.h for conditional compilation of dkim
- *
- * Revision 1.2  2009-03-20 22:35:57+05:30  Cprogrammer
- * set error to DKIM_NO_SIGNATURE when DKIM-Signature is not present
- *
- * Revision 1.1  2009-03-18 13:54:49+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-dkim.c,v 1.63 2022-03-08 22:59:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -222,6 +34,7 @@
 #include "variables.h"
 #include "qmulti.h"
 #include "pidopen.h"
+#include "custom_error.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
@@ -231,10 +44,8 @@
 
 char            inbuf[4096];
 char            outbuf[256];
-char            errbuf[256];
 struct substdio ssin;
 struct substdio ssout;
-struct substdio sserr;
 
 datetime_sec    starttime;
 struct datetime dt;
@@ -276,33 +87,6 @@ sigbug()
 	die(81, 0);
 }
 
-void
-custom_error(char *flag, char *status, char *code)
-{
-	char           *c;
-
-	if (substdio_put(&sserr, flag, 1) == -1)
-		die_write();
-	if (substdio_put(&sserr, "qmail-dkim: ", 12) == -1)
-		die_write();
-	if (substdio_puts(&sserr, status) == -1)
-		die_write();
-	if (code) {
-		if (substdio_put(&sserr, " (#", 3) == -1)
-			die_write();
-		c = (*flag == 'Z') ? "4" : "5";
-		if (substdio_put(&sserr, c, 1) == -1)
-			die_write();
-		if (substdio_put(&sserr, code + 1, 4) == -1)
-			die_write();
-		if (substdio_put(&sserr, ")", 1) == -1)
-			die_write();
-	}
-	if (substdio_flush(&sserr) == -1)
-		die_write();
-	return;
-}
-
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
@@ -326,14 +110,11 @@ maybe_die_dkim(e)
 	case DKIM_BUFFER_TOO_SMALL:
 		_exit (51);
 	case DKIM_INVALID_CONTEXT:
-		custom_error("Z", "DKIMContext structure invalid for this operation (#4.3.0)", 0);
-		_exit(88);
+		custom_error("qmail-dkim", "Z", "DKIMContext structure invalid for this operation", 0, "X.3.0");
 	case DKIM_NO_SENDER:
-		custom_error("Z", "Could not find From: or Sender: header in message (#5.1.7)", 0);
-		_exit(88);
+		custom_error("qmail-dkim", "Z", "Could not find From: or Sender: header in message", 0, "X.1.7");
 	case DKIM_BAD_PRIVATE_KEY:
-		custom_error("D", "Could not parse private key (#5.7.5)", 0);
-		_exit(88);
+		custom_error("qmail-dkim", "D", "Could not parse private key", 0, "X.7.5");
 	default:
 		return;
 	}
@@ -352,10 +133,8 @@ static stralloc dkimkeys = { 0 };
 void
 restore_gid()
 {
-	if (getegid() != getgid() && setgid(getgid()) == -1) {
-		custom_error("Z", "unable to restore gid. (#4.3.0)", 0);
-		die(88, 0);
-	}
+	if (getegid() != getgid() && setgid(getgid()) == -1)
+		custom_error("qmail-dkim", "Z", "unable to restore gid.", 0, "X.3.0");
 }
 
 static void
@@ -365,10 +144,9 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 	int             i;
 	static stralloc keyfnfrom = { 0 };
 
-	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1) {
-		custom_error("Z", "Unable to read dkimkeys. (#4.3.0)", 0);
-		die(88, 0);
-	} else
+	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
+		custom_error("qmail-dkim", "Z", "Unable to read dkimkeys.", 0, "X.3.0");
+	else
 	if (!i || !(keyfn = getDomainToken(domain, &dkimkeys)))
 		keyfn = dkimsign;
 	if (keyfn[0] != '/') {
@@ -404,10 +182,8 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
 		if (access(keyfnfrom.s, F_OK)) {
-			if (errno != error_noent) {
-				custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
-				die(88, 1);
-			}
+			if (errno != error_noent)
+				custom_error("qmail-dkim", "Z", "Unable to read private key.", 0, "X.3.0");
 			/*- since file does not exists remove '%' sign */
 			keyfnfrom.len = 8;
 			if (keyfn[0] == '/') {
@@ -448,8 +224,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		restore_gid();
 		break;
 	default:
-		custom_error("Z", "Unable to read private key. (#4.3.0)", 0);
-		die(88, 1);
+		custom_error("qmail-dkim", "Z", "Unable to read private key.", 0, "X.3.0");
 	}
 	for (i = 0; i < dksignature.len; i++) {
 		if (dksignature.s[i] == '\0')
@@ -657,23 +432,15 @@ void
 dkimverify_exit(int dkimRet, char *status, char *code)
 {
 	if (dkimRet < 0) {
-		if (dkimverify[str_chr(dkimverify, 'F' - dkimRet)]) {
-			custom_error("D", status, code);
-			die(88, 0);
-		}
-		if (dkimverify[str_chr(dkimverify, 'f' - dkimRet)]) {
-			custom_error("Z", status, code);
-			die(88, 0);
-		}
+		if (dkimverify[str_chr(dkimverify, 'F' - dkimRet)])
+			custom_error("qmail-dkim", "D", status, 0, code);
+		if (dkimverify[str_chr(dkimverify, 'f' - dkimRet)])
+			custom_error("qmail-dkim", "Z", status, 0, code);
 	} else {
-		if (dkimverify[str_chr(dkimverify, 'A' + dkimRet)]) {
-			custom_error("D", status, code);
-			die(88, 0);
-		}
-		if (dkimverify[str_chr(dkimverify, 'a' + dkimRet)]) {
-			custom_error("Z", status, code);
-			die(88, 0);
-		}
+		if (dkimverify[str_chr(dkimverify, 'A' + dkimRet)])
+			custom_error("qmail-dkim", "D", status, 0, code);
+		if (dkimverify[str_chr(dkimverify, 'a' + dkimRet)])
+			custom_error("qmail-dkim", "Z", status, 0, code);
 	}
 }
 
@@ -1092,7 +859,7 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 int
 main(int argc, char *argv[])
 {
-	int             errfd, pim[2];
+	int             pim[2];
 	int             wstat;
 	int             resDKIMSSP = -1, resDKIMADSP = -1, useSSP = 0, useADSP = 0, accept3ps = 0;
 	int             sCount = 0, sSize = 0;
@@ -1107,11 +874,6 @@ main(int argc, char *argv[])
 	starttime = now();
 	sig_blocknone();
 	umask(033);
-	if (!(ptr = env_get("ERROR_FD")))
-		errfd = CUSTOM_ERR_FD;
-	else
-		scan_int(ptr, &errfd);
-	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	dkimsign = env_get("DKIMSIGN");
 	dkimverify = env_get("DKIMVERIFY");
 	ptr = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
@@ -1138,10 +900,8 @@ main(int argc, char *argv[])
 		}
 		str_copyb(opts.szSelector, selector, sizeof(opts.szSelector) - 1);
 
-		if (dkim_setoptions(&opts, env_get("DKIMSIGNOPTIONS"))) {
-			custom_error("Z", "Invalid DKIMSIGNOPTIONS (#4.3.0)", 0);
-			_exit(88);
-		}
+		if (dkim_setoptions(&opts, env_get("DKIMSIGNOPTIONS")))
+			custom_error("qmail-dkim", "Z", "Invalid DKIMSIGNOPTIONS", 0, "X.3.0");
 		ptr = env_get("DKIMIDENTITY");
 		if (ptr && *ptr)
 			str_copyb(opts.szIdentity, ptr, sizeof(opts.szIdentity) - 1);
@@ -1152,10 +912,8 @@ main(int argc, char *argv[])
 		if (ptr)
 			opts.expireTime = 0;
 		opts.pfnHeaderCallback = SignThisHeader;
-		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) { /*- failed to initialize signature */
-			custom_error("Z", "dkim initialization failed (#4.3.0)", 0);
-			_exit(88);
-		}
+		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) /*- failed to initialize signature */
+			custom_error("qmail-dkim", "Z", "dkim initialization failed", 0, "X.3.0");
 	} else {
 		char           *x;
 
@@ -1412,7 +1170,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.62 2021-09-12 14:17:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.63 2022-03-08 22:59:35+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1423,3 +1181,198 @@ getversion_qmail_dkim_c()
 	x++;
 }
 #endif
+
+/*
+ * $Log: qmail-dkim.c,v $
+ * Revision 1.63  2022-03-08 22:59:35+05:30  Cprogrammer
+ * use custom_error() from custom_error.c
+ *
+ * Revision 1.62  2021-09-12 14:17:30+05:30  Cprogrammer
+ * restore gid after reading private key file
+ *
+ * Revision 1.61  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.60  2021-08-28 23:16:06+05:30  Cprogrammer
+ * control file dkimkeys for domain specific private key, selector
+ *
+ * Revision 1.59  2021-06-15 22:15:14+05:30  Cprogrammer
+ * pass tmpdir argument to pidopen
+ *
+ * Revision 1.58  2021-06-15 11:53:44+05:30  Cprogrammer
+ * moved pidopen out to its own file
+ *
+ * Revision 1.57  2021-06-09 21:14:33+05:30  Cprogrammer
+ * use qmulti() instead of exec of qmail-multi
+ *
+ * Revision 1.56  2021-05-26 10:44:21+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
+ * Revision 1.55  2020-05-11 11:06:35+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.54  2020-04-01 16:14:36+05:30  Cprogrammer
+ * added header for makeargs() function
+ *
+ * Revision 1.53  2019-06-14 21:26:37+05:30  Cprogrammer
+ * added env variable HONOR_BODYLENGTHTAG to honor body length tag during verification
+ *
+ * Revision 1.52  2019-02-18 22:18:12+05:30  Cprogrammer
+ * allow DKIMVERIFY env variable in place of DKIMPRACTICE when SIGN_PRACTICE="local"
+ *
+ * Revision 1.51  2019-02-17 11:38:51+05:30  Cprogrammer
+ * set original DKIM error for SIGN_PRACTICE=local
+ *
+ * Revision 1.50  2019-02-15 21:25:04+05:30  Cprogrammer
+ * skip nosignaturedomains if domain is present in signaturedomains
+ *
+ * Revision 1.49  2018-08-08 23:58:01+05:30  Cprogrammer
+ * issue success if at lease one one good signature is found
+ *
+ * Revision 1.48  2017-09-05 12:37:16+05:30  Cprogrammer
+ * added missing DKIM_MFREE()
+ *
+ * Revision 1.47  2016-06-03 09:57:59+05:30  Cprogrammer
+ * moved qmail-multi to sbin
+ *
+ * Revision 1.46  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.45  2016-03-01 18:48:02+05:30  Cprogrammer
+ * added env variable UNSIGNED_SUBJECT to verify dkim without subject field
+ *
+ * Revision 1.44  2015-12-15 16:05:58+05:30  Cprogrammer
+ * increased buffer size for long header issue
+ *
+ * Revision 1.43  2014-01-22 22:45:01+05:30  Cprogrammer
+ * treat AUTHINFO environment like RELAYCLIENT environment variable
+ *
+ * Revision 1.42  2013-10-01 17:11:24+05:30  Cprogrammer
+ * fixed QMAILQUEUE recursion
+ *
+ * Revision 1.41  2013-09-16 22:16:35+05:30  Cprogrammer
+ * corrected logic for RELAYCLIENT_NODKIMVERIFY
+ *
+ * Revision 1.40  2013-09-13 16:34:35+05:30  Cprogrammer
+ * turn off verification if RELAYCLIENT, DKIMVERIFY and RELAYCLIENT_NODKIMVERIFY is set
+ *
+ * Revision 1.39  2013-08-18 15:53:30+05:30  Cprogrammer
+ * revert back to default verification mode if both dksign, dkverify are not set
+ *
+ * Revision 1.38  2013-08-17 15:00:33+05:30  Cprogrammer
+ * BUG - corrected location of private key when % sign is removed
+ *
+ * Revision 1.37  2013-01-24 22:37:22+05:30  Cprogrammer
+ * BUG (fix by Piotr Gronek) - DKIM_FREE(results) called before call to ParseTagValues()
+ * alternate code for DKIMSIGN selector file name
+ *
+ * Revision 1.36  2012-08-16 08:01:46+05:30  Cprogrammer
+ * do not skip X-Mailer headers
+ *
+ * Revision 1.35  2011-11-10 14:32:08+05:30  Cprogrammer
+ * BUG ssout to be assigned only after pidopen
+ *
+ * Revision 1.34  2011-11-07 09:35:59+05:30  Cprogrammer
+ * set ssout, sserr, ssin before executing other functions
+ *
+ * Revision 1.33  2011-07-29 09:29:17+05:30  Cprogrammer
+ * fixed key file name
+ *
+ * Revision 1.32  2011-07-28 19:36:36+05:30  Cprogrammer
+ * BUG - fixed opening of private key with absolute path
+ *
+ * Revision 1.31  2011-07-22 14:40:05+05:30  Cprogrammer
+ * fixed checking of private key file
+ *
+ * Revision 1.30  2011-06-04 14:49:48+05:30  Cprogrammer
+ * remove '%' sign from private key if key not found
+ *
+ * Revision 1.29  2011-06-04 14:22:29+05:30  Cprogrammer
+ * added DKIM_UNSIGNED_FROM error code for dkimpractice
+ *
+ * Revision 1.28  2011-06-04 14:07:41+05:30  Cprogrammer
+ * added DKIM_UNSIGNED_FROM
+ *
+ * Revision 1.27  2011-02-10 23:39:59+05:30  Cprogrammer
+ * use DKIMKEY to override defult control/domainkeys/%/default
+ *
+ * Revision 1.26  2011-02-06 10:13:50+05:30  Cprogrammer
+ * BUG - signature was wrongly freed before being accessed.
+ *
+ * Revision 1.25  2011-02-05 09:47:47+05:30  Cprogrammer
+ * fixed SIGSEGV occuring for messages without body
+ *
+ * Revision 1.24  2010-11-02 18:45:14+05:30  Cprogrammer
+ * Improve DKIM signing/verification speed
+ *
+ * Revision 1.23  2010-07-21 08:59:57+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
+ * Revision 1.22  2009-04-22 13:42:51+05:30  Cprogrammer
+ * made fd for custom error configurable through env variable ERROR_FD
+ *
+ * Revision 1.21  2009-04-21 09:05:48+05:30  Cprogrammer
+ * return relevant error message for reading private key
+ *
+ * Revision 1.20  2009-04-21 08:55:41+05:30  Cprogrammer
+ * return temporary error for temp failures
+ *
+ * Revision 1.19  2009-04-20 22:19:01+05:30  Cprogrammer
+ * made dkimopts global
+ *
+ * Revision 1.18  2009-04-16 13:48:32+05:30  Cprogrammer
+ * added dkim_setoptions() to set all DKIM options
+ *
+ * Revision 1.17  2009-04-07 11:36:56+05:30  Cprogrammer
+ * use TMPDIR env variable for tmp directory
+ *
+ * Revision 1.16  2009-04-05 12:52:17+05:30  Cprogrammer
+ * added preprocessor warning
+ *
+ * Revision 1.15  2009-04-04 00:33:44+05:30  Cprogrammer
+ * removed dk_strdup()
+ *
+ * Revision 1.14  2009-03-31 08:21:58+05:30  Cprogrammer
+ * set dkimsign when RELAYCLIENT is defined when both dkimsign and dkimverify are undefined
+ *
+ * Revision 1.13  2009-03-30 22:25:54+05:30  Cprogrammer
+ * made DKIM messages friendlier
+ *
+ * Revision 1.12  2009-03-30 14:47:59+05:30  Cprogrammer
+ * added descriptive text for original dkim error
+ *
+ * Revision 1.11  2009-03-29 19:20:43+05:30  Cprogrammer
+ * added nosignaturedomains
+ *
+ * Revision 1.10  2009-03-28 22:27:02+05:30  Cprogrammer
+ * use DKIMSIGN, DKIMVERIFY if RELAYCLIENT is not set
+ *
+ * Revision 1.9  2009-03-28 22:03:05+05:30  Cprogrammer
+ * fixed DKIM return codes
+ *
+ * Revision 1.8  2009-03-28 13:37:37+05:30  Cprogrammer
+ * call DKIMVerifyGetDetails() always
+ *
+ * Revision 1.7  2009-03-28 11:39:23+05:30  Cprogrammer
+ * set automatic setting of dkimsign, dkimverify variables based on RELAYCLIENT
+ *
+ * Revision 1.6  2009-03-28 11:35:58+05:30  Cprogrammer
+ * added ADSP/SSP
+ *
+ * Revision 1.5  2009-03-22 17:39:38+05:30  Cprogrammer
+ * set identity using basename of signature or environment variable DKIMIDENTITY
+ *
+ * Revision 1.4  2009-03-22 16:58:38+05:30  Cprogrammer
+ * fixed bug with verification
+ * report custom errors to qmail-queue through custom error interface
+ *
+ * Revision 1.3  2009-03-21 12:34:38+05:30  Cprogrammer
+ * use hasdkim.h for conditional compilation of dkim
+ *
+ * Revision 1.2  2009-03-20 22:35:57+05:30  Cprogrammer
+ * set error to DKIM_NO_SIGNATURE when DKIM-Signature is not present
+ *
+ * Revision 1.1  2009-03-18 13:54:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

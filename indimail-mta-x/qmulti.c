@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.58 2022-03-05 13:07:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.59 2022-03-08 23:00:22+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -31,13 +31,10 @@
 #include "control.h"
 #include "qmulti.h"
 #ifdef HASLIBRT
+#include <str.h>
 #include "qmail.h"
 #include "qscheduler.h"
-#endif
-
-#ifdef HASLIBRT
-static char     errbuf[256];
-static struct substdio sserr;
+#include "custom_error.h"
 #endif
 
 int
@@ -67,57 +64,21 @@ getfreespace(char *filesystem)
 }
 
 #ifdef HASLIBRT
-static void
-custom_error(char *flag, char *status, char *extra, char *code)
-{
-	char           *c;
-
-	if (substdio_put(&sserr, flag, 1) == -1)
-		_exit(53);
-	if (substdio_put(&sserr, "qmail-multi: ", 13) == -1)
-		_exit(53);
-	if (substdio_puts(&sserr, status) == -1)
-		_exit(53);
-	if (extra && substdio_puts(&sserr, extra) == -1)
-		_exit(53);
-	if (code) {
-		if (substdio_put(&sserr, " (#", 3) == -1)
-			_exit(53);
-		c = (*flag == 'Z') ? "4" : "5";
-		if (substdio_put(&sserr, c, 1) == -1)
-			_exit(53);
-		if (substdio_put(&sserr, code + 1, 4) == -1)
-			_exit(53);
-		if (substdio_put(&sserr, ")", 1) == -1)
-			_exit(53);
-	}
-	if (substdio_flush(&sserr) == -1)
-		_exit(53);
-	return;
-}
-
 int
-queueNo_from_shm()
+queueNo_from_shm(char **argv)
 {
-	int             shm, errfd, i, j, x, min, n = 1, qcount;
+	int             shm, i, j, x, min, n = 1, qcount;
 	int             q[4];
 	char            shm_name[FMT_ULONG + 6];
 	char           *s, *ptr;
 
-	if (!(ptr = env_get("ERROR_FD")))
-		errfd = CUSTOM_ERR_FD;
-	else
-		scan_int(ptr, &errfd);
-	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
+	i = str_rchr(argv[0], '/');
+	ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
 	/*- get queue count */
-	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1) {
-		custom_error("Z", "unable to open POSIX shared memory segment /qscheduler", 0, "X.3.0");
-		_exit(88);
-	}
-	if (read(shm, (char *) &qcount, sizeof(int)) == -1) {
-		custom_error("Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
-		_exit(88);
-	}
+	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1)
+		custom_error(ptr, "Z", "unable to open POSIX shared memory segment /qscheduler", 0, "X.3.0");
+	if (read(shm, (char *) &qcount, sizeof(int)) == -1)
+		custom_error(ptr, "Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
 	close(shm);
 	/*- get queue with lowest concurrency load  */
 	for (j = 0; j < qcount; j++) {
@@ -128,14 +89,10 @@ queueNo_from_shm()
 		s += i;
 		*s++ = 0;
 		i = 0;
-		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1) {
-			custom_error("Z", "failed to open POSIX shared memory segment ", shm_name, "X.3.0");
-			_exit(88);
-		}
-		if (read(shm, (char *) q, sizeof(int) * 4) == -1) {
-			custom_error("Z", "failed to read POSIX shared memory segment ", shm_name, "X.3.0");
-			_exit(88);
-		}
+		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1)
+			custom_error(ptr, "Z", "failed to open POSIX shared memory segment ", shm_name, "X.3.0");
+		if (read(shm, (char *) q, sizeof(int) * 4) == -1)
+			custom_error(ptr, "Z", "failed to read POSIX shared memory segment ", shm_name, "X.3.0");
 		close(shm);
 		/*-
 		 * q[0] - concurrencyusedlocal
@@ -218,7 +175,7 @@ qmulti(char *queue_env, int argc, char **argv)
 		if (!(ptr = env_get("DYNAMIC_QUEUE")))
 			queueNo = queueNo_from_env();
 		else {
-			if ((queueNo = queueNo_from_shm()) == -1)
+			if ((queueNo = queueNo_from_shm(argv)) == -1)
 				queueNo = queueNo_from_env();
 		}
 #else
@@ -318,7 +275,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.58 2022-03-05 13:07:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.59 2022-03-08 23:00:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -327,6 +284,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.59  2022-03-08 23:00:22+05:30  Cprogrammer
+ * use custom_error() from custom_error.c
+ *
  * Revision 1.58  2022-03-05 13:07:14+05:30  Cprogrammer
  * use IPC as another method for queues in addition to lock/trigger
  * added haslibrt.h to configure dynamic queue
