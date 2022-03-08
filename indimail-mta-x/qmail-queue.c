@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.81 2022-03-08 23:07:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1096,20 +1096,16 @@ main()
 			die_write();
 	}
 	if (envheaders.s && envheaders.len) {
-		if (substdio_bput(&ssout, "h", 1) == -1)
-			die_write();
-		if (substdio_bput(&ssout, envheaders.s, envheaders.len) == -1)
-			die_write();
-		if (substdio_bput(&ssout, "\0", 1) == -1)
+		if (substdio_bput(&ssout, "h", 1) == -1 ||
+				substdio_bput(&ssout, envheaders.s, envheaders.len) == -1 ||
+				substdio_bput(&ssout, "\0", 1) == -1)
 			die_write();
 	}
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 #ifdef USE_FSYNC
 	if (use_fsync > 0) {
-		if (fsync(messfd) == -1)
-			die_write();
-		if (fsync(intdfd) == -1)
+		if (fsync(messfd) == -1 || fsync(intdfd) == -1)
 			die_write();
 	}
 #endif
@@ -1119,9 +1115,20 @@ main()
 	}
 #ifdef USE_FSYNC
 	if (use_syncdir > 0) {
-		if ((fd = open(todofn, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0) {
+		if ((fd = open(todofn, O_RDONLY)) == -1) {
+			/*- 
+			 * check if todofn has been picked up by qmail-todo
+			 * and moved to local or remote folder. In such
+			 * a case you will get error_noent
+			 */
+			if (errno != error_noent) {
+				cleanup();
+				die(69);
+			} 
+		} else
+		if (fsync(fd) == -1 || close(fd) == -1) {
 			cleanup();
-			die(66);
+			die(69);
 		}
 	}
 #endif
@@ -1148,7 +1155,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.81 2022-03-08 23:07:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1156,6 +1163,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.81  2022-03-08 23:07:17+05:30  Cprogrammer
+ * do not treat error_noent as an error
+ *
  * Revision 1.80  2022-03-05 13:33:33+05:30  Cprogrammer
  * use auto_prefix/sbin for qhpsi path
  *

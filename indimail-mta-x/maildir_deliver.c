@@ -1,5 +1,8 @@
 /*
  * $Log: maildir_deliver.c,v $
+ * Revision 1.2  2022-03-08 22:57:00+05:30  Cprogrammer
+ * syncdir: do not treat error_noent as an error
+ *
  * Revision 1.1  2021-05-16 22:53:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -203,7 +206,11 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 		goto fail;
 #ifdef USE_FSYNC
 	if (use_syncdir && use_fsync > 0) {
-		if ((fd = open(fnnewtph.s, O_RDONLY)) < 0 || fsync(fd) < 0 || close(fd) < 0)
+		if ((fd = open(fnnewtph.s, O_RDONLY)) == -1) {
+			if (errno != error_noent)
+				goto fail;
+		} else
+		if (fsync(fd) == -1 || close(fd) == -1)
 			goto fail;
 	}
 #endif
@@ -225,7 +232,7 @@ fail:
 void
 getversion_maildir_deliver_c()
 {
-	static char    *x = "$Id: maildir_deliver.c,v 1.1 2021-05-16 22:53:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir_deliver.c,v 1.2 2022-03-08 22:57:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
