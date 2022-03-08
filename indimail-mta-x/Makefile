@@ -852,16 +852,20 @@ run-cleanq.o: compile run-cleanq.c auto_libexec.h \
 conf-servicedir
 	./compile -DSERVICEDIR=\"`head -1 conf-servicedir`\" run-cleanq.c
 
+custom_error.o: compile custom_error.c qmail.h
+	./compile custom_error.c
+
 qscanq-stdin: load qscanq-stdin.o auto_sysconfdir.o auto_qmail.o \
 auto_prefix.o auto_spool.o mkfn.o do_ripmime.o auto_ripmime_cmd.o \
 do_scan.o auto_scancmd.o do_cleanq.o auto_cleaner.o qregex.o \
 wildmat.o matchregex.o variables.o control.o auto_control.o \
-fmt_xpid.o qmulti.o rt.lib
+fmt_xpid.o qmulti.o custom_error.o rt.lib
 	./load qscanq-stdin auto_sysconfdir.o auto_qmail.o \
 	auto_prefix.o matchregex.o auto_spool.o mkfn.o do_ripmime.o \
 	auto_ripmime_cmd.o do_scan.o auto_scancmd.o do_cleanq.o \
 	auto_cleaner.o qregex.o wildmat.o control.o variables.o \
-	auto_control.o fmt_xpid.o qmulti.o `cat rt.lib` $(QMAILLIB)
+	auto_control.o fmt_xpid.o qmulti.o custom_error.o \
+	`cat rt.lib` $(QMAILLIB)
 
 qscanq-stdin.o: compile qscanq-stdin.c auto_ageout.h \
 exitcodes.h mkfn.h auto_fnlen.h qmulti.h
@@ -1312,11 +1316,11 @@ qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
 
 qmail-multi: load qmail-multi.o qmulti.o auto_control.o \
 variables.o control.o mailfilter.o auto_prefix.o \
-auto_qmail.o dns.lib socket.lib rt.lib
+auto_qmail.o custom_error.o dns.lib socket.lib rt.lib
 	./load qmail-multi qmulti.o auto_control.o auto_qmail.o \
 	variables.o control.o mailfilter.o auto_prefix.o \
-	$(static_option) $(QMAILLIB) $(dynamic_option) \
-	`cat dns.lib socket.lib rt.lib`
+	custom_error.o $(static_option) $(QMAILLIB) \
+	$(dynamic_option) `cat dns.lib socket.lib rt.lib`
 
 qmail-multi.o: \
 compile qmail-multi.c qmulti.h mailfilter.h conf-queue
@@ -1330,9 +1334,11 @@ qmail-multi.9 conf-prefix conf-qmail
 	> qmail-multi.8
 
 qmail-spamfilter: load qmail-spamfilter.o qmulti.o \
-auto_prefix.o auto_qmail.o auto_control.o control.o rt.lib
+auto_prefix.o auto_qmail.o auto_control.o control.o \
+custom_error.o rt.lib
 	./load qmail-spamfilter qmulti.o auto_control.o \
-	auto_prefix.o auto_qmail.o variables.o control.o `cat rt.lib` $(QMAILLIB)
+	auto_prefix.o auto_qmail.o variables.o control.o \
+	custom_error.o `cat rt.lib` $(QMAILLIB)
 
 qmail-spamfilter.o: \
 compile qmail-spamfilter.c qmulti.h
@@ -1347,7 +1353,7 @@ qmail-spamfilter.9 conf-prefix conf-qmail
 
 qmulti.o: \
 compile qmulti.c auto_qmail.h control.h qmulti.h qmail.h \
-auto_prefix.h qscheduler.h haslibrt.h conf-queue
+auto_prefix.h qscheduler.h custom_error.h haslibrt.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmulti.c
 
 mailfilter.o: \
@@ -1475,20 +1481,20 @@ dknewkey.8: dknewkey.9
 qmail-dk: \
 load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o \
 variables.o dns.o strsalloc.o ip.o pidopen.o ipalloc.o \
-socket_v4mappedprefix.o socket_v6any.o wildmat.o \
+socket_v4mappedprefix.o socket_v6any.o wildmat.o custom_error.o \
 domainkeys.o dktrace.o control.o dns_text.o getDomainToken.o \
 auto_prefix.o auto_qmail.o dns.lib rt.lib
-	./load qmail-dk auto_control.o qmulti.o variables.o \
+	./load qmail-dk auto_control.o qmulti.o variables.o custom_error.o \
 	socket_v4mappedprefix.o tlsarralloc.o socket_v6any.o dns.o \
 	strsalloc.o ip.o ipalloc.o wildmat.o domainkeys.o dktrace.o \
 	control.o dns_text.o getDomainToken.o pidopen.o auto_qmail.o \
-	auto_prefix.o $(static_option) $(QMAILLIB) $(dynamic_option) \
-	`cat dns.lib rt.lib` -lcrypto \
+	auto_prefix.o $(static_option) $(QMAILLIB) \
+	$(dynamic_option) `cat dns.lib rt.lib` -lcrypto
 
 qmail-dk.o: \
 compile qmail-dk.c qmail.h control.h domainkeys.h \
 variables.h conf-domainkeys auto_control.h qmulti.h pidopen.h \
-getDomainToken.h
+custom_error.h getDomainToken.h
 	./compile `grep -h -v "^#" conf-domainkeys` qmail-dk.c
 
 qmail-dk.8: qmail-dk.9 conf-sysconfdir
@@ -1525,9 +1531,10 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 
 qmail-dkim: qmail-dkim.o auto_control.o pidopen.o auto_prefix.o \
 variables.o control.o dns_text.o wildmat.o getDomainToken.o \
-qmulti.o auto_qmail.o dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
+qmulti.o auto_qmail.o custom_error.o dns.lib dkim.lib rt.lib \
+conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o auto_prefix.o \
-	variables.o control.o pidopen.o dns_text.o \
+	variables.o control.o pidopen.o dns_text.o custom_error.o \
 	-L../libdkim-x/.libs `cat dkim.lib` wildmat.o \
 	getDomainToken.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	auto_qmail.o $(static_option) $(QMAILLIB) \
@@ -1535,7 +1542,8 @@ qmulti.o auto_qmail.o dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
 
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h control.h domainkeys.h \
-hasdkim.h variables.h auto_control.h qmulti.h pidopen.h getDomainToken.h
+hasdkim.h variables.h auto_control.h qmulti.h pidopen.h \
+custom_error.h getDomainToken.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
 		-I../libdkim-x -I/opt/local/include/dkim qmail-dkim.c
 
@@ -3389,12 +3397,13 @@ warn-auto.sh cdbgetm.sh conf-prefix
 
 qmail-qfilter: \
 load qmail-qfilter.o qmulti.o control.o auto_control.o \
-auto_prefix.o auto_qmail.o variables.o rt.lib
+custom_error.o auto_prefix.o auto_qmail.o variables.o rt.lib
 	./load qmail-qfilter qmulti.o control.o auto_qmail.o \
-	auto_prefix.o auto_control.o variables.o `cat rt.lib` $(QMAILLIB)
+	auto_prefix.o auto_control.o variables.o custom_error.o \
+	`cat rt.lib` $(QMAILLIB)
 
 qmail-qfilter.o: \
-compile qmail-qfilter.c qmail.h qmulti.h
+compile qmail-qfilter.c qmail.h qmulti.h custom_error.h
 	./compile qmail-qfilter.c
 
 qfrontend.1: qfrontend.9 conf-libexec

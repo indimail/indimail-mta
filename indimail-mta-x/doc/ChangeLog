@@ -110,6 +110,10 @@ Release 2.14.1 Start 21/09/2021
 60. dknewkey.sh: fix for FreeBSD (getopt usage)
 61. svctool.in: fix for FreeBSD (ln -sr)
 62. svctool.in: mount mqueuefs directory in qmail-send run script
+- 08/03/2022
+63. qmail-dk.c, qmail-dkim.c, qmail-qfilter.c, qmulti.c: use custom_error()
+    from custom_error.c
+64. qmail-queue.c, maildir_deliver.c: do
 
 * 
 Release 2.14.0 Start 18/07/2021
