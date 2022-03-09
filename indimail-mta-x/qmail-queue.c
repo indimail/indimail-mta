@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.81 2022-03-08 23:07:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -647,22 +647,12 @@ set_archive(char *eaddr)
 #endif
 
 #ifdef HASLIBRT
-static char     errbuf[256];
-static struct substdio sserr;
-
 int
 mq_todo(char *queue_ident, unsigned int priority)
 {
 	mqd_t           mqd;
 	q_msg           qmsg;
-	char           *ptr;
-	int             errfd;
 
-	if (!(ptr = env_get("ERROR_FD")))
-		errfd = CUSTOM_ERR_FD;
-	else
-		scan_int(ptr, &errfd);
-	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
 	/*- 
 	 * send inode and split number for big todo
 	 * send inode and conf_split for small todo
@@ -697,8 +687,7 @@ read_control(stralloc *s, char *env, char *f, int flag)
 {
 	char           *ptr;
 
-	ptr = env_get(env);
-	if (!ptr) {
+	if (!(ptr = env_get(env))) {
 		if (control_readfile(s, f, 0) == -1)
 			die(55);
 	} else
@@ -911,8 +900,7 @@ main()
 	if (flagblackhole && flagquarantine)
 		flagblackhole = 0;
 	/*- write the envelope */
-	if ((intdfd = open_excl(intdfn)) == -1)
-	{
+	if ((intdfd = open_excl(intdfn)) == -1) {
 		cleanup();
 		die(65);
 	}
@@ -1106,7 +1094,7 @@ main()
 #ifdef USE_FSYNC
 	if (use_fsync > 0) {
 		if (fsync(messfd) == -1 || fsync(intdfd) == -1)
-			die_write();
+			die(64);
 	}
 #endif
 	if (link(intdfn, todofn) == -1) {
@@ -1155,7 +1143,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.81 2022-03-08 23:07:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1163,9 +1151,6 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.81  2022-03-08 23:07:17+05:30  Cprogrammer
- * do not treat error_noent as an error
- *
  * Revision 1.80  2022-03-05 13:33:33+05:30  Cprogrammer
  * use auto_prefix/sbin for qhpsi path
  *
