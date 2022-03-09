@@ -113,7 +113,10 @@ Release 2.14.1 Start 21/09/2021
 - 08/03/2022
 63. qmail-dk.c, qmail-dkim.c, qmail-qfilter.c, qmulti.c: use custom_error()
     from custom_error.c
-64. qmail-queue.c, maildir_deliver.c: do
+64. qmail-queue.c, maildir_deliver.c: do not treat error_noent as an error
+- 09/03/2022
+65. get_uid.c: use qendpwent(), qendgrent() when using functions from
+    qgetpwgr.c
 
 * 
 Release 2.14.0 Start 18/07/2021
