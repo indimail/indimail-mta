@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.13  2022-03-10 19:59:36+05:30  Cprogrammer
+ * update for qmail-send, qmail-todo, slowq-send, qmta-send, qscheduler logs
+ *
  * Revision 1.12  2022-01-30 08:36:42+05:30  Cprogrammer
  * replaced qmail-daemon with qscheduler
  *
@@ -721,6 +724,33 @@ main()
 		if (str_equal(line.s + field[1], "end"))
 			endmsg();
 		else
+		if (str_start(line.s + field[4], "ratelimit="));
+		else
+		if (str_equal(line.s + field[4], "conf") || str_equal(line.s + field[5], "split"));
+		else
+		if (str_equal(line.s + field[3], "got") || str_equal(line.s + field[4], "got"));
+		else
+		if (str_equal(line.s + field[5], "has") && str_equal(line.s + field[6], "shutdown"));
+		else
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[8], "started"));
+		else
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "static"));
+		else
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "dynamic"));
+		else
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "issue"));
+		else
+		if (str_equal(line.s + field[2], "qmail-todo:") || str_equal(line.s + field[4], "Resetting"));
+		else
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "exiting"))
+			clear();
+		else
+		if (str_equal(line.s + field[2], "slowq-send:") && str_equal(line.s + field[4], "exiting"))
+			clear();
+		else
+		if (str_equal(line.s + field[2], "qmta-send:") && str_equal(line.s + field[6], "quitting..."))
+			clear();
+		else
 		if (str_equal(line.s + field[1], "info"))
 			info();
 		else
@@ -766,7 +796,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.12 2022-01-30 08:36:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.13 2022-03-10 19:59:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
