@@ -1,10 +1,7 @@
 /*
  * $Log: matchup.c,v $
- * Revision 1.13  2022-03-10 19:59:36+05:30  Cprogrammer
+ * Revision 1.12  2022-03-10 20:22:06+05:30  Cprogrammer
  * update for qmail-send, qmail-todo, slowq-send, qmta-send, qscheduler logs
- *
- * Revision 1.12  2022-01-30 08:36:42+05:30  Cprogrammer
- * replaced qmail-daemon with qscheduler
  *
  * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
@@ -740,7 +737,9 @@ main()
 		else
 		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "issue"));
 		else
-		if (str_equal(line.s + field[2], "qmail-todo:") || str_equal(line.s + field[4], "Resetting"));
+		if (str_equal(line.s + field[2], "qmail-todo:") && str_equal(line.s + field[4], "Resetting"));
+		else
+		if (str_equal(line.s + field[2], "qmail-todo:") && str_start(line.s + field[4], "subdir="));
 		else
 		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "exiting"))
 			clear();
@@ -796,7 +795,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.13 2022-03-10 19:59:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.12 2022-03-10 20:22:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
