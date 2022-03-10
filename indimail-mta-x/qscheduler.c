@@ -283,7 +283,7 @@ sigchld()
 	int             child, wstat;
 
 	sig_block(sig_child);
-	log_outf("alert: qscheduler: got SIGCHLD\n");
+	log_outf("alert: qscheduler: got CHLD\n");
 	for (; !flagexitasap;) {
 		if ((child = wait_nohang(&wstat)) == -1)
 			break;

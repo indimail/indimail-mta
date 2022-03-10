@@ -126,7 +126,7 @@ void
 sigterm(void)
 {
 	sig_block(sig_term);
-	log5("info: ", argv0, ": Got TERM: ", queuedesc, "\n");
+	log5("alert: ", argv0, ": got TERM: ", queuedesc, "\n");
 	if (!flagstopasap)
 		log5("status: ", argv0, ": ", queuedesc, " stop processing asap\n");
 	flagstopasap = 1;
@@ -137,7 +137,7 @@ void
 sighup(void)
 {
 	flagreadasap = 1;
-	log5("info: ", argv0, ": Got HUP: ", queuedesc, "\n");
+	log5("alert: ", argv0, ": got HUP: ", queuedesc, "\n");
 }
 
 void

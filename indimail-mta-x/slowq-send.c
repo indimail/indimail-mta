@@ -187,7 +187,7 @@ sigterm()
 {
 	flagexitasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": Got TERM: ", queuedesc, "\n");
+	log7("alert: ", argv0, ": ", strnum1, ": got TERM: ", queuedesc, "\n");
 }
 
 static void
@@ -195,7 +195,7 @@ sigalrm()
 {
 	flagrunasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": Got ALRM: ", queuedesc, "\n");
+	log7("alert: ", argv0, ": ", strnum1, ": got ALRM: ", queuedesc, "\n");
 }
 
 static void
@@ -203,7 +203,7 @@ sighup()
 {
 	flagreadasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": Got HUP: ", queuedesc, "\n");
+	log7("alert: ", argv0, ": ", strnum1, ": got HUP: ", queuedesc, "\n");
 }
 
 static void
