@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.81 2022-03-10 19:57:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1143,7 +1143,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.80 2022-03-05 13:33:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.81 2022-03-10 19:57:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1151,6 +1151,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.81  2022-03-10 19:57:44+05:30  Cprogrammer
+ * do not treat error_noent as an error
+ *
  * Revision 1.80  2022-03-05 13:33:33+05:30  Cprogrammer
  * use auto_prefix/sbin for qhpsi path
  *
