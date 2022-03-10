@@ -117,6 +117,9 @@ Release 2.14.1 Start 21/09/2021
 - 09/03/2022
 65. get_uid.c: use qendpwent(), qendgrent() when using functions from
     qgetpwgr.c
+- 10/03/2022
+66. matchup.c: update for qmail-send, qmail-todo, slowq-send, qmta-send,
+    qscheduler logs (qmailanalog)
 
 * 
 Release 2.14.0 Start 18/07/2021
