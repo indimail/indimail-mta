@@ -2550,7 +2550,7 @@ main(int argc, char **argv)
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	log7("status: ", argv0, ": ", strnum1, " ", queuedesc, " exiting\n");
-#ifdef LIBRT
+#ifdef HASLIBRT
 	shm_unlink(queuedesc);
 #endif
 	return (0);
