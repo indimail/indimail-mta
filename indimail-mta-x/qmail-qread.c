@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.41  2022-03-12 13:56:22+05:30  Cprogrammer
+ * added -i option to display dynamic queue information
+ *
  * Revision 1.40  2022-01-30 08:42:40+05:30  Cprogrammer
  * added -s option to display only counts with -c option
  * allow configurable big/small todo/intd
@@ -115,6 +118,11 @@
 #include <env.h>
 #include "auto_qmail.h"
 #endif
+#include "haslibrt.h"
+#ifdef HASLIBRT
+#include <fcntl.h>
+#include <sys/mman.h>
+#endif
 #include "auto_split.h"
 #include "readsubdir.h"
 #include "fmtqfn.h"
@@ -139,6 +147,9 @@ static char     inbuf[1024];
 static stralloc sender = { 0 };
 static datetime_sec curtime;
 static int      flagbounce, doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0, silent = 0;
+#ifdef HASLIBRT
+static int      doshm = 0;
+#endif
 static unsigned long   id;
 static unsigned long   size;
 static stralloc stats = { 0 };
@@ -253,6 +264,94 @@ usage()
 	substdio_flush(subfdout);
 }
 
+void
+read_shm(int flag)
+{
+	int             shm, i, j, x, min = -1, n = 1, qcount, len;
+	int             q[4];
+	char            shm_name[256], strnum[FMT_ULONG];
+	char           *s;
+
+	/*- get queue count */
+	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1) {
+		if (errno == error_noent) {
+			if (flag)
+				strerr_die2sys(111, FATAL, "dynamic queue disabled / qscheduler not running\n");
+			else {
+				substdio_puts(subfdout, "no active dynamic queue\n");
+				return;
+			}
+		}
+		strerr_die2x(111, FATAL, "unable to open POSIX shared memory segment /qscheduler");
+	}
+	if (read(shm, (char *) q, sizeof(int)) == -1)
+		strerr_die2x(111, FATAL, "unable to read POSIX shared memory segment /qscheduler");
+	close(shm);
+	substdio_put(subfdout, "queue count=", 12);
+	strnum[i = fmt_ulong(strnum, q[0])] = 0;
+	substdio_put(subfdout, strnum, i);
+	substdio_put(subfdout, "\n", 1);
+	/*- get queue with lowest concurrency load  */
+	for (j = 0, qcount=q[0]; j < qcount; j++) {
+		len = 0;
+		s = shm_name;
+		s += (i = fmt_str(s, "/queue"));
+		len += i;
+		s += (i = fmt_uint(s, j + 1));
+		len += i;
+		*s++ = 0;
+		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1)
+			strerr_die4sys(111, FATAL, "failed to open POSIX shared memory segment ", shm_name, ": ");
+		if (read(shm, (char *) q, sizeof(int) * 4) == -1)
+			strerr_die4sys(111, FATAL, "failed to read POSIX shared memory segment ", shm_name, ": ");
+		close(shm);
+		substdio_put(subfdout, shm_name + 1, len - 1);
+		substdio_put(subfdout, " ", 1);
+		strnum[i = fmt_ulong(strnum, q[0])] = 0;
+		substdio_put(subfdout, strnum, i);
+		substdio_put(subfdout, "/", 1);
+		strnum[i = fmt_ulong(strnum, q[2])] = 0;
+		substdio_put(subfdout, strnum, i);
+		substdio_put(subfdout, " ", 1);
+		strnum[i = fmt_ulong(strnum, q[1])] = 0;
+		substdio_put(subfdout, strnum, i);
+		substdio_put(subfdout, "/", 1);
+		strnum[i = fmt_ulong(strnum, q[3])] = 0;
+		substdio_put(subfdout, strnum, i);
+		substdio_put(subfdout, "\n", 1);
+		/*-
+		 * q[0] - concurrencyusedlocal
+		 * q[1] - concurrencyusedremote
+		 * q[2] - concurrencylocal
+		 * q[3] - concurrencyremote
+		 */
+		if (!q[2] || !q[3]) {
+			substdio_put(subfderr, "invalid concurrency\n", 20);
+			continue;
+		}
+		x = q[0] * 100 /q[2] > q[1] * 100 /q[3] ? q[0] * 100/q[2] : q[1] * 100/q[3];
+		if (!j) {
+			min = x;
+			n = 1;
+			continue;
+		}
+		if (x < min) {
+			min = x;
+			n = j + 1;
+		}
+	}
+	substdio_put(subfdout, "queue with minimum load (", 25);
+	strnum[i = fmt_ulong(strnum, min)] = 0;
+	substdio_put(subfdout, strnum, i);
+	substdio_put(subfdout, ") = ", 4);
+	substdio_put(subfdout, "queue", 5);
+	strnum[i = fmt_ulong(strnum, n)] = 0;
+	substdio_put(subfdout, strnum, i);
+	substdio_put(subfdout, "\n", 1);
+	substdio_flush(subfdout);
+	return;
+}
+
 static int
 get_arguments(int argc, char **argv)
 {
@@ -261,7 +360,12 @@ get_arguments(int argc, char **argv)
 
 	errflag = 0;
 	doTodo = doCount = doLocal = doRemote = 0;
+#ifdef HASLIBRT
+	doshm = 0;
+	while (!errflag && (c = getopt(argc, argv, "calrsti")) != opteof) {
+#else
 	while (!errflag && (c = getopt(argc, argv, "calrst")) != opteof) {
+#endif
 		switch (c)
 		{
 		case 's':
@@ -274,6 +378,9 @@ get_arguments(int argc, char **argv)
 			doTodo = 1;
 			doLocal = 1;
 			doRemote = 1;
+#ifdef HASLIBRT
+			doshm = 2;
+#endif
 			break;
 		case 'l':
 			doLocal = 1;
@@ -284,6 +391,11 @@ get_arguments(int argc, char **argv)
 		case 't':
 			doTodo = 1;
 			break;
+#ifdef HASLIBRT
+		case 'i':
+			doshm = 1;
+			break;
+#endif
 		case 'h':
 		default:
 			usage();
@@ -291,7 +403,7 @@ get_arguments(int argc, char **argv)
 			break;
 		}
 	}
-	if (!doTodo && !doLocal && !doRemote)
+	if (!doTodo && !doLocal && !doRemote && !doshm)
 		doLocal = doRemote = 1;
 	return(0);
 }
@@ -383,7 +495,7 @@ main(int argc, char **argv)
 #endif
 	if (chdir(queuedir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, ": ");
-	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
@@ -535,6 +647,10 @@ main(int argc, char **argv)
 #else
 	if (doCount)
 		putcounts("Total ", lCount, rCount, bCount, tCount);
+#ifdef HASLIBRT
+	if (doshm)
+		read_shm(doshm == 1 ? 0 : 1);
+#endif
 #endif
 	substdio_flush(subfdout);
 	return(0);
@@ -550,10 +666,16 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 		return(1);
 	}
-	process_queue(WARN, FATAL, main_function, &lcount, &rcount, &bcount, &tcount);
-	if (doCount)
-		putcounts("Total ", lcount, rcount, bcount, tcount);
-	substdio_flush(subfdout);
+	if (doLocal || doRemote || doTodo || doCount) {
+		process_queue(WARN, FATAL, main_function, &lcount, &rcount, &bcount, &tcount);
+		if (doCount)
+			putcounts("Total ", lcount, rcount, bcount, tcount);
+		substdio_flush(subfdout);
+	}
+#ifdef HASLIBRT
+	if (doshm)
+		read_shm(doshm == 1 ? 0 : 1);
+#endif
 	return(0);
 }
 #endif
@@ -561,7 +683,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.40 2022-01-30 08:42:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-03-12 13:56:22+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

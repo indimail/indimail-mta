@@ -1298,14 +1298,15 @@ process_queue.h conf-queue
 qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o auto_qmail.o \
 auto_split.o variables.o control.o auto_control.o \
-set_environment.o process_queue.o
+set_environment.o process_queue.o rt.lib
 	./load qmail-qread fmtqfn.o readsubdir.o control.o \
 	auto_qmail.o auto_split.o variables.o auto_control.o \
-	set_environment.o process_queue.o $(QMAILLIB)
+	set_environment.o process_queue.o $(QMAILLIB) \
+	`cat rt.lib`
 
 qmail-qread.o: \
-compile qmail-qread.c auto_qmail.h auto_split.h readsubdir.h fmtqfn.h \
-control.h variables.h process_queue.h conf-queue
+compile qmail-qread.c auto_qmail.h auto_split.h readsubdir.h \
+fmtqfn.h haslibrt.h control.h variables.h process_queue.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-qread.c
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
