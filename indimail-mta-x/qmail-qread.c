@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.41  2022-03-12 15:30:31+05:30  Cprogrammer
+ * added -i option to display dynamic queue information
+ *
  * Revision 1.41  2022-03-12 15:19:41+05:30  Cprogrammer
  * added -i option to display dynamic queue information
  *
@@ -405,7 +408,11 @@ get_arguments(int argc, char **argv)
 			break;
 		}
 	}
+#ifdef HASLIBRT
 	if (!doTodo && !doLocal && !doRemote && !doshm)
+#else
+	if (!doTodo && !doLocal && !doRemote)
+#endif
 		doLocal = doRemote = 1;
 	return(0);
 }
@@ -685,7 +692,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-03-12 15:19:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-03-12 15:30:31+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
