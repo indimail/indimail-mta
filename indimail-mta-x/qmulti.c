@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.59 2022-03-08 23:00:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.60 2022-03-12 13:58:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -75,8 +75,11 @@ queueNo_from_shm(char **argv)
 	i = str_rchr(argv[0], '/');
 	ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
 	/*- get queue count */
-	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1)
+	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1) {
+		if (errno == error_noent)
+			return -1;
 		custom_error(ptr, "Z", "unable to open POSIX shared memory segment /qscheduler", 0, "X.3.0");
+	}
 	if (read(shm, (char *) &qcount, sizeof(int)) == -1)
 		custom_error(ptr, "Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
 	close(shm);
@@ -275,7 +278,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.59 2022-03-08 23:00:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.60 2022-03-12 13:58:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -284,6 +287,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.60  2022-03-12 13:58:23+05:30  Cprogrammer
+ * use static queue if /qscheduler shared memory doesn't exist
+ *
  * Revision 1.59  2022-03-08 23:00:22+05:30  Cprogrammer
  * use custom_error() from custom_error.c
  *
