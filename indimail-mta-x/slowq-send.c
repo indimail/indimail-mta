@@ -2434,7 +2434,7 @@ main(int argc, char **argv)
 				error_str(errno), "\n");
 		_exit(111);
 	}
-	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;

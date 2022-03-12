@@ -647,7 +647,7 @@ show_queues()
 	char         **ptr;
 	char           *extra_queue[] = {"slowq", "nqueue", "qmta", 0};
 
-	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;

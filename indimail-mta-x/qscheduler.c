@@ -400,7 +400,7 @@ start_send(int queueNum, pid_t pid)
 void
 set_queue_variables()
 {
-	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
@@ -431,7 +431,7 @@ set_queue_variables()
 	}
 }
 
-void
+no_return void
 static_queue()
 {
 	int             i, wstat, child, nqueue;
@@ -491,9 +491,6 @@ static_queue()
 		strnum1[fmt_ulong(strnum1, child)] = 0;
 		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
 	}
-#ifdef LIBRT
-	shm_unlink("/qscheduler");
-#endif
 	strerr_die1x(flagexitasap ? 0 : 111, "info: qscheduler: exiting");
 }
 
@@ -762,7 +759,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 	return;
 }
 
-void
+no_return void
 dynamic_queue()
 {
 	struct mq_attr  attr;
@@ -919,7 +916,10 @@ dynamic_queue()
 		strnum1[fmt_ulong(strnum1, child)] = 0;
 		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
 	}
-	log_outf("info: qscheduler: exiting\n");
+#ifdef HASLIBRT
+	shm_unlink("/qscheduler");
+#endif
+	log_outf("info: qscheduler: exiting1\n");
 	_exit(flagexitasap ? 0 : 111);
 }
 #endif
@@ -981,9 +981,7 @@ main(int argc, char **argv)
 #else
 	static_queue();
 #endif
-	if (flagexitasap)
-		log_outf("info: qscheduler: exiting\n");
-	return 0;
+	/*- not reached */
 }
 
 void

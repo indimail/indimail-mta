@@ -2580,7 +2580,7 @@ main(int argc, char **argv)
 		log3("alert: ", argv0, ": out of memory; quitting...\n");
 	set_environment(fn1.s, fn2.s, 0);
 	if (!bigtodo)
-		getEnvConfigInt(&bigtodo, "BIGTODO", 0);
+		getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	if (!conf_split)
 		getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)

@@ -1026,7 +1026,7 @@ main(int argc, char **argv)
 	set_environment(WARN, FATAL, 1);
 	if (fchdir(fdorigdir) == -1)
 		strerr_die1sys(111, "unable to switch to original directory: ");
-	getEnvConfigInt(&bigtodo, "BIGTODO", 0);
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
 		split = auto_split;
