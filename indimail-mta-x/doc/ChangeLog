@@ -120,6 +120,12 @@ Release 2.14.1 Start 21/09/2021
 - 10/03/2022
 66. matchup.c: update for qmail-send, qmail-todo, slowq-send, qmta-send,
     qscheduler logs (qmailanalog)
+- 12/03/2022
+67. qmail-qread.c: added -i option to display /qscheduler queue information
+    - dynamic queue information
+68. qmail-multi.c: use static queue if /qscheduler shared memory doesn't exist
+69. qmail-clean.c, qmail-queue.c, qmail-showctl.c, qmail-todo.c, qmta-send.c,
+    qscheduler.c, queue-fix.c, slowq-send.c: Use default for BIGTODO as 1.
 
 * 
 Release 2.14.0 Start 18/07/2021
