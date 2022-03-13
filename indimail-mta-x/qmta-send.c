@@ -1,6 +1,6 @@
 /*
  * $Log: qmta-send.c,v $
- * Revision 1.15  2022-03-13 19:55:41+05:30  Cprogrammer
+ * Revision 1.15  2022-03-13 20:58:59+05:30  Cprogrammer
  * display bigtodo value in logs on startup
  * fixed SIGSEGV
  *
@@ -116,7 +116,7 @@
 int             qmail_lspawn(int, char **);
 int             qmail_rspawn(int, char **);
 
-char           *queuedesc;
+char           *queuedesc = "qmta";
 static char    *argv0 = "qmta-send";
 static int      lifetime = 604800;
 static int      flagexitasap = 0, flagrunasap = 1, flagreadasap = 0;
@@ -217,21 +217,21 @@ sigterm()
 {
 	flagexitasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": got TERM: ", queuedesc, "\n");
+	log5("info: ", argv0, ": ", strnum1, ": got TERM\n");
 }
 
 void sigalrm()
 {
 	flagrunasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": got ALRM: ", queuedesc, "\n");
+	log5("info: ", argv0, ": ", strnum1, ": got ALRM\n");
 }
 
 void sighup()
 {
 	flagreadasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("info: ", argv0, ": ", strnum1, ": got HUP: ", queuedesc, "\n");
+	log5("info: ", argv0, ": ", strnum1, ": got HUP\n");
 }
 
 static void
@@ -2704,7 +2704,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.15 2022-03-13 19:55:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.15 2022-03-13 20:58:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
