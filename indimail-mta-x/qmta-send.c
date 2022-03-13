@@ -1,5 +1,9 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.15  2022-03-13 19:55:41+05:30  Cprogrammer
+ * display bigtodo value in logs on startup
+ * fixed SIGSEGV
+ *
  * Revision 1.14  2022-03-05 13:36:16+05:30  Cprogrammer
  * use auto_prefix/sbin for queue-fix, qmail-lspawn, qmail-rspawn, qmail-clean paths
  *
@@ -169,10 +173,10 @@ static stralloc bouncefrom = { 0 };
 static stralloc bouncehost = { 0 };
 static stralloc doublebounceto = { 0 };
 static stralloc doublebouncehost = { 0 };
-char           *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0, 0};
-char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
-char           *(qcargs[]) = { "qmail-clean", "qmta", 0};
-char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0, 0};
+char           *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0, (char *) 0};
+char           *(qrargs[]) = { "qmail-rspawn", 0, (char *) 0};
+char           *(qcargs[]) = { "qmail-clean", "qmta", (char *) 0};
+char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0, (char *) 0};
 static int      flagspawnalive[CHANNELS];
 static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
 static readsubdir cleanupdir;
@@ -2199,10 +2203,6 @@ qmta_initialize(int *nfds, fd_set *rfds)
 {
 	int             c;
 
-	if (fd_copy(0, 1) == -1) {
-		log3("alert: ", argv0, ": cannot dup stdout\n");
-		_exit(111);
-	}
 	fnmake_init();  /*- initialize fn1, fn2 */
 	comm_init();
 	pqstart();      /*- add files earlier processed and now in info/split for processing */
@@ -2455,7 +2455,7 @@ check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 {
 	int             i, j, opt;
 	char          *bin_programs[] = {"sbin/qmail-lspawn", "sbin/qmail-rspawn", "sbin/qmail-clean", 0};
-	char           opt_str[8];
+	char           opt_str[9];
 	char           *usage_str =
 		"USAGE: qmta-send [options] [ defaultdelivery [logger arg...] ]\n"
 		"OPTIONS\n"
@@ -2570,14 +2570,16 @@ main(int argc, char **argv)
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
 	check_usage(argc, argv, &daemon_mode, &flagqfix);
 	umask(077);
+	if (fd_copy(0, 1) == -1)
+		strerr_die3sys(111, "alert: ", argv0, ": cannot dup stdout\n");
 	if (uidinit(1, 0) == -1)
 		strerr_die3sys(111, "alert: ", argv0, ": unable to initialize uids/gids: ");
 	if (prot_gid(auto_gidq) == -1) /*- qmail group */
 		strerr_die3sys(111, "alert: ", argv0, ": unable to set qmail gid: ");
 	if (!stralloc_copys(&fn1, argv0) || !stralloc_cats(&fn1, ": warn: ") || !stralloc_0(&fn1))
-		log3("alert: ", argv0, ": out of memory; quitting...\n");
+		strerr_die3sys(111, "alert: ", argv0, ": out of memory; quitting...");
 	if (!stralloc_copys(&fn2, argv0) || !stralloc_cats(&fn2, ": fatal: ") || !stralloc_0(&fn2))
-		log3("alert: ", argv0, ": out of memory; quitting...\n");
+		strerr_die3sys(111, "alert: ", argv0, ": out of memory; quitting...");
 	set_environment(fn1.s, fn2.s, 0);
 	if (!bigtodo)
 		getEnvConfigInt(&bigtodo, "BIGTODO", 1);
@@ -2588,21 +2590,22 @@ main(int argc, char **argv)
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/qmta"; /*- single queue like qmail */
-	log5("info: ", argv0, ": conf split=", strnum1, "\n");
+	if (substdio_put(subfdout, "info: ", 6) == -1 ||
+			substdio_puts(subfdout, argv0) == -1 ||
+			substdio_put(subfdout, ": conf split=", 13) == -1 ||
+			substdio_puts(subfdout, strnum1) == -1 ||
+			substdio_put(subfdout, bigtodo ? ", bigtodo=1\n" : ", bigtodo=0\n", 12) || substdio_flush(subfdout) == -1)
+		_exit(1);
 	if (flagqfix)
 		queue_fix();
 	chdir_toqueue();
-	if ((fd = open_write("lock/sendmutex")) == -1) {
-		log3("alert: ", argv0, ": cannot start: unable to open mutex\n");
-		_exit(111);
-	}
-	if (lock_exnb(fd) == -1) {
-		log3("alert: ", argv0, " is already running\n");
-		_exit(111);
-	}
-	if (argc - optind > 1)
+	if ((fd = open_write("lock/sendmutex")) == -1)
+		strerr_die3x(111, "alert: ", argv0, ": cannot start: unable to open mutex");
+	if (lock_exnb(fd) == -1)
+		strerr_die3x(111, "alert: ", argv0, " is already running");
+	if (argc - optind > 0)
 		qlargs[1] = argv[optind];
-	run_daemons(argv, argc - optind > 2 ? argv + optind + 1 : 0);
+	run_daemons(argv, argc - optind > 1 ? argv + optind + 1 : 0);
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
 	else
@@ -2630,10 +2633,8 @@ main(int argc, char **argv)
 	 * qmail_open
 	 */
 	sig_childcatch(sigchld);
-	if (!do_controls()) {
-		log3("alert: ", argv0, ": cannot start: unable to read controls\n");
-		_exit(111);
-	}
+	if (!do_controls())
+		strerr_die3x(111, "alert: ", argv0, ": cannot start: unable to read controls\n");
 	qmta_initialize(&nfds, &rfds);
 	while (!flagexitasap || !del_canexit()) { /*- stay alive if delivery jobs are present */
 		recent = now();
@@ -2703,7 +2704,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.14 2022-03-05 13:36:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.15 2022-03-13 19:55:41+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

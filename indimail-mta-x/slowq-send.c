@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.19  2022-03-13 19:54:51+05:30  Cprogrammer
+ * display bigtodo value in logs on startup
+ *
  * Revision 1.18  2022-01-30 09:40:18+05:30  Cprogrammer
  * make USE_FSYNC, USE_SYNCDIR consistent across programs
  * allow configurable big/small todo/intd
@@ -2440,7 +2443,7 @@ main(int argc, char **argv)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	log9("info: ", argv0, ": ", queuedesc, ": ratelimit=",
-			do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, "\n");
+			do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, bigtodo ? ", bigtodo=1\n" : ", bigtodo=0\n");
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
 	else
@@ -2612,7 +2615,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.18 2022-01-30 09:40:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.19 2022-03-13 19:54:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

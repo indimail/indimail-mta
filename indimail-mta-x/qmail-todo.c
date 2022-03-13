@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.56 2022-03-01 23:05:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.57 2022-03-13 19:55:26+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -1328,7 +1328,7 @@ main(int argc, char **argv)
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum[fmt_ulong(strnum, conf_split)] = 0;
-	log7("info: ", argv0, ": ", queuedesc, ": conf split=", strnum, "\n");
+	log7("info: ", argv0, ": ", queuedesc, ": conf split=", strnum, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n");
 #ifdef USE_FSYNC
 	if ((ptr = env_get("USE_FSYNC")) && *ptr)
 		use_fsync = 1;
@@ -1476,7 +1476,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.56 2022-03-01 23:05:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.57 2022-03-13 19:55:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1484,6 +1484,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.57  2022-03-13 19:55:26+05:30  Cprogrammer
+ * display bigtodo value in logs on startup
+ *
  * Revision 1.56  2022-03-01 23:05:34+05:30  Cprogrammer
  * renamed compat_mode variable to compat_mode_flag
  *
