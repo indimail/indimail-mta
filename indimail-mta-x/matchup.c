@@ -723,7 +723,7 @@ main()
 		else
 		if (str_start(line.s + field[4], "ratelimit="));
 		else
-		if (str_equal(line.s + field[4], "conf") || str_equal(line.s + field[5], "split"));
+		if (str_equal(line.s + field[4], "conf") && str_start(line.s + field[5], "split="));
 		else
 		if (str_equal(line.s + field[3], "got") || str_equal(line.s + field[4], "got"));
 		else
