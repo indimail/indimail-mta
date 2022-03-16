@@ -128,7 +128,12 @@ Release 2.14.1 Start 21/09/2021
     qscheduler.c, queue-fix.c, slowq-send.c: Use default for BIGTODO as 1.
 70. slowq-send.c, qmta-send.c, qmail-todo.c: display bigtodo value in logs on
     startup
-71.
+- 16/03/2022
+71. qmail-send.c: added queue ident in logs for matchup (qmailanalog to handle
+    multi-queue)
+72. matchup.c: handle multi-queue format
+73. qmail-lspawn.c: made copy_pwstruct return type void
+74. qmail-queue.c: added FASTQUEUE to bypass features for speeding delivery
 
 * 
 Release 2.14.0 Start 18/07/2021
