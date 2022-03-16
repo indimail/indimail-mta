@@ -1027,7 +1027,7 @@ qmail-srs.9 conf-sysconfdir
 qmail-getpw: \
 load qmail-getpw.o auto_break.o auto_usera.o
 	./load qmail-getpw auto_break.o auto_usera.o \
-	$(static_option) $(QMAILLIB)
+	$(static_option) $(QMAILLIB) $(dynamic_option)
 
 qmail-getpw.8: \
 qmail-getpw.9 conf-break
