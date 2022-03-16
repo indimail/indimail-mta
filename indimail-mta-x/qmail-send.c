@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.97 2022-03-06 11:05:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.98 2022-03-16 19:58:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -95,6 +95,7 @@ static cmap     maplocals;
 
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
+static char    *qident;
 
 #define CHANNELS 2
 static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
@@ -1357,7 +1358,10 @@ del_start(int j, seek_pos mpos, char *recip)
 	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
 	strnum1[fmt_ulong(strnum1, del[c][i].delid)] = 0;
 	strnum2[fmt_ulong(strnum2, jo[j].id)] = 0;
-	log2_noflush("starting delivery ", strnum1);
+	if (qident)
+		log4_noflush("starting delivery ", strnum1, ".", qident);
+	else
+		log2_noflush("starting delivery ", strnum1);
 	log3_noflush(": msg ", strnum2, tochan[c]);
 	logsafe_noflush(recip, argv0);
 	log3(" ", queuedesc, "\n");
@@ -1446,19 +1450,28 @@ del_dochan(int c)
 				switch (dline[c].s[2])
 				{
 				case 'K':
-					log3_noflush("delivery ", strnum1, ": success: ");
+					if (qident)
+						log5_noflush("delivery ", strnum1, ".", qident, ": success: ");
+					else
+						log3_noflush("delivery ", strnum1, ": success: ");
 					logsafe_noflush(dline[c].s + 3, argv0);
 					log3(" ", queuedesc, "\n");
 					markdone(c, jo[del[c][delnum].j].id, del[c][delnum].mpos);
 					--jo[del[c][delnum].j].numtodo;
 					break;
 				case 'Z':
-					log3_noflush("delivery ", strnum1, ": deferral: ");
+					if (qident)
+						log5_noflush("delivery ", strnum1, ".", qident, ": deferral: ");
+					else
+						log3_noflush("delivery ", strnum1, ": deferral: ");
 					logsafe_noflush(dline[c].s + 3, argv0);
 					log3(" ", queuedesc, "\n");
 					break;
 				case 'D':
-					log3_noflush("delivery ", strnum1, ": failure: ");
+					if (qident)
+						log5_noflush("delivery ", strnum1, ".", qident, ": failure: ");
+					else
+						log3_noflush("delivery ", strnum1, ": failure: ");
 					logsafe_noflush(dline[c].s + 3, argv0);
 					log3(" ", queuedesc, "\n");
 					addbounce(jo[del[c][delnum].j].id, del[c][delnum].recip.s, dline[c].s + 3);
@@ -2365,6 +2378,7 @@ main(int argc, char **argv)
 #ifdef LOGLOCK
 	loglock_open(argv0, 0);
 #endif
+	qident = env_get("QIDENT");
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
@@ -2559,7 +2573,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.97 2022-03-06 11:05:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.98 2022-03-16 19:58:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2569,6 +2583,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.98  2022-03-16 19:58:33+05:30  Cprogrammer
+ * added queue ident in logs for matchup (qmailanalog to handle multi-queue)
+ *
  * Revision 1.97  2022-03-06 11:05:09+05:30  Cprogrammer
  * open shm with O_RDWR for FreeBSD
  * use ftruncate on shm for FreeBSD
