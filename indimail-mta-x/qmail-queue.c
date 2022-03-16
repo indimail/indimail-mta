@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.81 2022-03-10 19:57:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.82 2022-03-16 21:37:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -709,7 +709,7 @@ main()
 {
 	int             token_len, exclude = 0, include = 0, loghead = 0, line_brk_excl = 1,
 					line_brk_incl = 1, in_header = 1, line_brk_log = 1, logfd = -1, field_len,
-					itoken_len;
+					itoken_len, fastqueue;
 #ifdef USE_FSYNC
 	int             fd;
 #endif
@@ -724,28 +724,46 @@ main()
 
 	sig_blocknone();
 	umask(033);
-	if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1)
-		die(67);
-	if ((ptr = env_get("ORIGINIPFIELD")))
-		scan_ulong(ptr, (unsigned long *) &originipfield);
-	read_control(&extraqueue, "EXTRAQUEUE", "extraqueue", 0);
-	read_control(&quarantine, "QUARANTINE", "quarantine", 0);
-	/*-
-	 * These control files will cause qmail-queue to 
-	 * read one line at a time
-	 */
-	read_control(&excl, "REMOVEHEADERS", "removeheaders", 1);
-	read_control(&incl, "ENVHEADERS", "envheaders", 1);
-	read_control(&logh, "LOGHEADERS", "logheaders", 1);
+	if (!(ptr = env_get("FASTQUEUE"))) {
+		fastqueue = 0;
+		if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1)
+			die(67);
+	} else {
+		scan_int(ptr, &fastqueue);
+		auto_uidq = fastqueue;
+		if (setreuid(auto_uidq, auto_uidq))
+			_exit(50);
+	}
+	if (!fastqueue) {
+		if ((ptr = env_get("ORIGINIPFIELD")))
+			scan_ulong(ptr, (unsigned long *) &originipfield);
+		read_control(&extraqueue, "EXTRAQUEUE", "extraqueue", 0);
+		read_control(&quarantine, "QUARANTINE", "quarantine", 0);
+		/*-
+	 	* These control files will cause qmail-queue to 
+	 	* read one line at a time
+	 	*/
+		read_control(&excl, "REMOVEHEADERS", "removeheaders", 1);
+		read_control(&incl, "ENVHEADERS", "envheaders", 1);
+		read_control(&logh, "LOGHEADERS", "logheaders", 1);
 #if defined(MAILARCHIVE)
-	read_control(&ar_rules, "MAILARCHIVE", "mailarchive", 1);
-	if (ar_rules.s && ar_rules.len)
-		flagarchive = 1;
+		read_control(&ar_rules, "MAILARCHIVE", "mailarchive", 1);
+		if (ar_rules.s && ar_rules.len)
+			flagarchive = 1;
 #endif
+	}
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
 	if (chdir(queuedir) == -1)
 		die(62);
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
+	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	if (conf_split > auto_split)
+		conf_split = auto_split;
+	if (fastqueue)
+		qqeh = (char *) NULL;
+	else
+		qqeh = env_get("QQEH");
 #ifdef USE_FSYNC
 	use_fsync = use_syncdir = 0;
 	if ((ptr = env_get("USE_FSYNC")) && *ptr)
@@ -753,11 +771,6 @@ main()
 	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
 		use_syncdir = 1;
 #endif
-	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
-	if (conf_split > auto_split)
-		conf_split = auto_split;
-	qqeh = env_get("QQEH");
 	mypid = getpid();
 	uid = getuid();
 	starttime = now();
@@ -891,14 +904,16 @@ main()
 		die_write();
 	if (logfd > 0 && substdio_flush(&sslog) == -1)
 		die_write();
+	if (!fastqueue) {
 #if defined(QHPSI)
-	if ((qhpsi = env_get("QHPSI")))
-		qhpsiprog(qhpsi);
+		if ((qhpsi = env_get("QHPSI")))
+			qhpsiprog(qhpsi);
 #endif
-	if (quarantine.s && quarantine.len)
-		flagquarantine = 1;
-	if (flagblackhole && flagquarantine)
-		flagblackhole = 0;
+		if (quarantine.len && quarantine.s)
+			flagquarantine = 1;
+		if (flagblackhole && flagquarantine)
+			flagblackhole = 0;
+	}
 	/*- write the envelope */
 	if ((intdfd = open_excl(intdfn)) == -1) {
 		cleanup();
@@ -906,17 +921,12 @@ main()
 	}
 	flagmadeintd = 1;
 	substdio_fdbuf(&ssout, write, intdfd, outbuf, sizeof(outbuf));
-	if (substdio_bput(&ssout, "u", 1) == -1)
-		die_write();
-	if (substdio_bput(&ssout, tmp, fmt_ulong(tmp, uid)) == -1)
-		die_write();
-	if (substdio_bput(&ssout, "", 1) == -1)
-		die_write();
-	if (substdio_bput(&ssout, "p", 1) == -1)
-		die_write();
-	if (substdio_bput(&ssout, tmp, fmt_ulong(tmp, mypid)) == -1)
-		die_write();
-	if (substdio_bput(&ssout, "", 1) == -1)
+	if (substdio_bput(&ssout, "u", 1) == -1 ||
+			substdio_bput(&ssout, tmp, fmt_ulong(tmp, uid)) == -1 ||
+			substdio_bput(&ssout, "", 1) == -1 ||
+			substdio_bput(&ssout, "p", 1) == -1 ||
+			substdio_bput(&ssout, tmp, fmt_ulong(tmp, mypid)) == -1 ||
+			substdio_bput(&ssout, "", 1) == -1)
 		die_write();
 	/*- read the message envelope */
 	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof(inbuf));
@@ -952,27 +962,21 @@ main()
 		cleanup();
 		die(11);
 	}
-	if (extraqueue.s && extraqueue.len) {
+	if (extraqueue.len && extraqueue.s) {
 		for (len = 0, ptr = extraqueue.s;len < extraqueue.len;) {
 			len += ((token_len = str_len(ptr)) + 1);
-			if (substdio_bput(&ssout, "T", 1) == -1)
-				die_write();
-			if (substdio_bput(&ssout, ptr, token_len) == -1)
-				die_write();
-			if (substdio_bput(&ssout, "\0", 1) == -1)
+			if (substdio_bput(&ssout, "T", 1) == -1 ||
+					substdio_bput(&ssout, ptr, token_len) == -1 ||
+					substdio_bput(&ssout, "\0", 1) == -1)
 				die_write();
 			ptr = extraqueue.s + len;
 		}
 	}
 	if (flagquarantine) {
-		if (substdio_bput(&ssout, "T", 1) == -1)
+		if (substdio_bput(&ssout, "T", 1) == -1 ||
+				substdio_bput(&ssout, quarantine.s, quarantine.len) == -1 ||
+				substdio_bput(&ssout, "\0", 1) == -1)
 			die_write();
-		if (substdio_bput(&ssout, quarantine.s, quarantine.len) == -1)
-			die_write();
-		if (substdio_bput(&ssout, "\0", 1) == -1)
-			die_write();
-	}
-	if (flagquarantine) {
 		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: ") ||
 				!stralloc_cat(&qqehextra, &quarantine)) {
 			cleanup();
@@ -997,7 +1001,7 @@ main()
 		if (!ch)
 			break;
 #if defined(QHPSI)
-		if (ch == 'Q') {
+		if (!fastqueue && ch == 'Q') {
 			qhpsi = 0;
 			break;
 		}
@@ -1143,7 +1147,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.81 2022-03-10 19:57:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.82 2022-03-16 21:37:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1151,6 +1155,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.82  2022-03-16 21:37:36+05:30  Cprogrammer
+ * FASTQUEUE to bypass features for faster inject speed
+ *
  * Revision 1.81  2022-03-10 19:57:44+05:30  Cprogrammer
  * do not treat error_noent as an error
  *
