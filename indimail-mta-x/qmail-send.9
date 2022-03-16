@@ -17,7 +17,13 @@ by defining the QUEUEDIR environment variable. If you are using
 use QUEUE_COUNT, QUEUE_START to invoke multiple qmail-send processes, with
 each having its own queue defined by the \fBQUEUEDIR\fR environment variable.
 \fBQUEUEDIR\fR will typically be QMAILHOME/queue/queue1, QMAILHOME/queue/queue2
-and so on. This manual will refer \fIqueue\fR as the value of \fBQUEUEDIR\fR.
+and so on. This manual will refer \fIqueue\fR as the value of
+\fBQUEUEDIR\fR. For each delivery, qmail-send puts a delivery number in the
+logs. In a multi-queue environment, qmail-send will append the queue
+identifier to the delivery number. It uses the value of \fBQIDENT\fR
+environment variable set by \fBqscheduler\fR. This allows the
+\fBmatchup\fR(1) program to process the logs in a multi-queue environment.
+The \fBmatchup\fR(1) program is used by qmailanalog scripts.
 
 \fBqmail-send\fR can load startup plugins from PREFIX/lib/indimail/plugins
 directory. This directory can be changed by defining the \fBPLUGINDIR\fR
