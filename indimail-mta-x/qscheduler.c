@@ -384,7 +384,8 @@ start_send(int queueNum, pid_t pid)
 			if (!env_unset("QMAILLOCAL") || !env_unset("QMAILREMOTE"))
 				strerr_die1x(111, "alert: qscheduler: out of memory");
 		}
-		if (!env_put(envQueue.s))
+		strnum1[fmt_ulong(strnum1, queue_no)] = 0;
+		if (!env_put(envQueue.s) || !env_put2("QIDENT", strnum1))
 			strerr_die1x(111, "alert: qscheduler: out of memory");
 		execvp(*qsargs, qsargs);
 		strerr_die3sys(111, "alert: qscheduler: execv ", *qsargs, ": ");
