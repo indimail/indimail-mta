@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.23  2022-03-16 20:01:53+05:30  Cprogrammer
+ * added log5_noflush() function
+ *
  * Revision 1.22  2022-01-30 09:28:08+05:30  Cprogrammer
  * print program name in logs
  *
@@ -223,6 +226,16 @@ log4_noflush(char *s1, char *s2, char *s3, char *s4)
 	substdio_puts(&sserr, s2);
 	substdio_puts(&sserr, s3);
 	substdio_puts(&sserr, s4);
+}
+
+void
+log5_noflush(char *s1, char *s2, char *s3, char *s4, char *s5)
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
 }
 
 void
@@ -506,7 +519,7 @@ logsafe(char *s, char *argv0)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.22 2022-01-30 09:28:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.23 2022-03-16 20:01:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
