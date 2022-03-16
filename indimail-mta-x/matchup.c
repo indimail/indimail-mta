@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.13  2022-03-16 19:56:21+05:30  Cprogrammer
+ * handle multi-queue format
+ *
  * Revision 1.12  2022-03-10 20:22:06+05:30  Cprogrammer
  * update for qmail-send, qmail-todo, slowq-send, qmta-send, qscheduler logs
  *
@@ -53,6 +56,37 @@
 #include <noreturn.h>
 
 #define FATAL "matchup: fatal: "
+char            buf5[512];
+char            datebuf[FMT_ULONG + FMT_ULONG + 2]; /*- ssssssssss.ffffffffff\n */
+char            strnum[FMT_ULONG];
+substdio        ss5 = SUBSTDIO_FDBUF(write, 5, buf5, sizeof buf5);
+GEN_ALLOC_typedef(ulongalloc, unsigned long, u, len, a)
+GEN_ALLOC_readyplus(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_readyplus)
+GEN_ALLOC_ready(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_ready)
+stralloc        pool = { 0 };
+stralloc        pool2 = { 0 };
+stralloc        line = { 0 };
+unsigned int    poolbytes = 0;
+int             nummsg = 0;
+int             numdel = 0;
+int             match;
+ulongalloc      msg = { 0 };
+ulongalloc      qid = { 0 };
+ulongalloc      bytes = { 0 };
+ulongalloc      qp = { 0 };
+ulongalloc      uid = { 0 };
+ulongalloc      numk = { 0 };
+ulongalloc      numd = { 0 };
+ulongalloc      numz = { 0 };
+ulongalloc      sender = { 0 };
+ulongalloc      birth = { 0 };
+ulongalloc      del = { 0 };
+ulongalloc      dmsg = { 0 };
+ulongalloc      dchan = { 0 };
+ulongalloc      drecip = { 0 };
+ulongalloc      dstart = { 0 };
+#define FIELDS 20
+int             field[FIELDS];
 
 no_return void
 nomem()
@@ -79,64 +113,38 @@ die_write5()
 }
 
 void
-out(buf, len)
-	char           *buf;
-	int             len;
+out(char *buf, int len)
 {
 	if (substdio_put(subfdout, buf, len) == -1)
 		die_write();
 }
 
 void
-outs(buf)
-	char           *buf;
+outs(char *buf)
 {
 	if (substdio_puts(subfdout, buf) == -1)
 		die_write();
 }
 
-char            buf5[512];
-substdio        ss5 = SUBSTDIO_FDBUF(write, 5, buf5, sizeof buf5);
-
 void
-out5(buf, len)
-	char           *buf;
-	int             len;
+out5(char *buf, int len)
 {
 	if (substdio_put(&ss5, buf, len) == -1)
 		die_write5();
 }
 
 void
-outs5(buf)
-	char           *buf;
+outs5(char *buf)
 {
 	if (substdio_puts(&ss5, buf) == -1)
 		die_write5();
 }
 
-GEN_ALLOC_typedef(ulongalloc, unsigned long, u, len, a)
-GEN_ALLOC_readyplus(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_readyplus)
-GEN_ALLOC_ready(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_ready)
-char            strnum[FMT_ULONG];
-stralloc        pool = { 0 };
-unsigned int    poolbytes = 0;
-int             nummsg = 0;
-ulongalloc      msg = { 0 };
-ulongalloc      bytes = { 0 };
-ulongalloc      qp = { 0 };
-ulongalloc      uid = { 0 };
-ulongalloc      numk = { 0 };
-ulongalloc      numd = { 0 };
-ulongalloc      numz = { 0 };
-ulongalloc      sender = { 0 };
-ulongalloc      birth = { 0 };
-
 int
-msg_find(m)
-	unsigned long   m;
+msg_find(unsigned long m)
 {
 	int             i;
+
 	for (i = 0; i < nummsg; ++i)
 		if (msg.u[i] == m)
 			return i;
@@ -144,39 +152,30 @@ msg_find(m)
 }
 
 int
-msg_add(m)
-	unsigned long   m;
+msg_add(unsigned long m)
 {
 	int             i;
+
 	for (i = 0; i < nummsg; ++i)
 		if (msg.u[i] == m)
 			return i;
 	i = nummsg++;
-	if (!ulongalloc_ready(&msg, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&bytes, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&qp, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&uid, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&numk, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&numd, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&numz, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&sender, nummsg))
-		nomem();
-	if (!ulongalloc_ready(&birth, nummsg))
+	if (!ulongalloc_ready(&msg, nummsg) ||
+			!ulongalloc_ready(&bytes, nummsg) ||
+			!ulongalloc_ready(&qp, nummsg) ||
+			!ulongalloc_ready(&uid, nummsg) ||
+			!ulongalloc_ready(&numk, nummsg) ||
+			!ulongalloc_ready(&numd, nummsg) ||
+			!ulongalloc_ready(&numz, nummsg) ||
+			!ulongalloc_ready(&sender, nummsg) ||
+			!ulongalloc_ready(&birth, nummsg))
 		nomem();
 	msg.u[i] = m;
 	return i;
 }
 
 void
-msg_kill(i)
-	int             i;
+msg_kill(int i)
 {
 	poolbytes -= str_len(pool.s + sender.u[i]) + 1;
 	poolbytes -= str_len(pool.s + birth.u[i]) + 1;
@@ -193,63 +192,52 @@ msg_kill(i)
 	birth.u[i] = birth.u[nummsg];
 }
 
-int             numdel = 0;
-ulongalloc      del = { 0 };
-ulongalloc      dmsg = { 0 };
-ulongalloc      dchan = { 0 };
-ulongalloc      drecip = { 0 };
-ulongalloc      dstart = { 0 };
-
 int
-del_find(d)
-	unsigned long   d;
+del_find(unsigned long d, int _qid)
 {
 	int             i;
+
 	for (i = 0; i < numdel; ++i)
-		if (del.u[i] == d)
+		if (del.u[i] == d && qid.u[i] == _qid)
 			return i;
 	return -1;
 }
 
 int
-del_add(d)
-	unsigned long   d;
+del_add(unsigned long d, int _qid)
 {
 	int             i;
+
 	for (i = 0; i < numdel; ++i)
-		if (del.u[i] == d)
+		if (del.u[i] == d && qid.u[i] == _qid)
 			return i;
 	i = numdel++;
-	if (!ulongalloc_ready(&del, numdel))
-		nomem();
-	if (!ulongalloc_ready(&dmsg, numdel))
-		nomem();
-	if (!ulongalloc_ready(&dchan, numdel))
-		nomem();
-	if (!ulongalloc_ready(&drecip, numdel))
-		nomem();
-	if (!ulongalloc_ready(&dstart, numdel))
+	if (!ulongalloc_ready(&del, numdel) ||
+			!ulongalloc_ready(&qid, numdel) ||
+			!ulongalloc_ready(&dmsg, numdel) ||
+			!ulongalloc_ready(&dchan, numdel) ||
+			!ulongalloc_ready(&drecip, numdel) ||
+			!ulongalloc_ready(&dstart, numdel))
 		nomem();
 	del.u[i] = d;
+	qid.u[i] = _qid;
 	return i;
 }
 
 void
-del_kill(i)
-	int             i;
+del_kill(int i)
 {
 	poolbytes -= str_len(pool.s + dchan.u[i]) + 1;
 	poolbytes -= str_len(pool.s + drecip.u[i]) + 1;
 	poolbytes -= str_len(pool.s + dstart.u[i]) + 1;
 	--numdel;
 	del.u[i] = del.u[numdel];
+	qid.u[i] = qid.u[numdel];
 	dmsg.u[i] = dmsg.u[numdel];
 	dchan.u[i] = dchan.u[numdel];
 	drecip.u[i] = drecip.u[numdel];
 	dstart.u[i] = dstart.u[numdel];
 }
-
-stralloc        pool2 = { 0 };
 
 void
 garbage()
@@ -259,65 +247,49 @@ garbage()
 
 	if (pool.len - poolbytes < poolbytes + 4096)
 		return;
-
 	if (!stralloc_copys(&pool2, ""))
 		nomem();
-
-	for (i = 0; i < nummsg; ++i)
-	{
+	for (i = 0; i < nummsg; ++i) {
 		x = pool.s + birth.u[i];
 		birth.u[i] = pool2.len;
-		if (!stralloc_cats(&pool2, x))
-			nomem();
-		if (!stralloc_0(&pool2))
+		if (!stralloc_cats(&pool2, x) ||
+				!stralloc_0(&pool2))
 			nomem();
 		x = pool.s + sender.u[i];
 		sender.u[i] = pool2.len;
-		if (!stralloc_cats(&pool2, x))
-			nomem();
-		if (!stralloc_0(&pool2))
+		if (!stralloc_cats(&pool2, x) ||
+				!stralloc_0(&pool2))
 			nomem();
 	}
-
-	for (i = 0; i < numdel; ++i)
-	{
+	for (i = 0; i < numdel; ++i) {
 		x = pool.s + dstart.u[i];
 		dstart.u[i] = pool2.len;
-		if (!stralloc_cats(&pool2, x))
-			nomem();
-		if (!stralloc_0(&pool2))
+		if (!stralloc_cats(&pool2, x) ||
+				!stralloc_0(&pool2))
 			nomem();
 		x = pool.s + dchan.u[i];
 		dchan.u[i] = pool2.len;
-		if (!stralloc_cats(&pool2, x))
-			nomem();
-		if (!stralloc_0(&pool2))
+		if (!stralloc_cats(&pool2, x) ||
+				!stralloc_0(&pool2))
 			nomem();
 		x = pool.s + drecip.u[i];
 		drecip.u[i] = pool2.len;
-		if (!stralloc_cats(&pool2, x))
-			nomem();
-		if (!stralloc_0(&pool2))
+		if (!stralloc_cats(&pool2, x) ||
+				!stralloc_0(&pool2))
 			nomem();
 	}
-
 	if (!stralloc_copy(&pool, &pool2))
 		nomem();
-
-	poolbytes = pool.len;
-						/*- redundant, but doesn't hurt */
+	poolbytes = pool.len; /*- redundant, but doesn't hurt */
 }
 
- /*
-  * turn TAI date into old fashioned date 
-  * dates without @ are left alone 
-  */
-
-static char     datebuf[FMT_ULONG + FMT_ULONG + 2]; /*- ssssssssss.ffffffffff\n */
+/*
+ * turn TAI date into old fashioned date 
+ * dates without @ are left alone 
+ */
 
 char           *
-tai64nunix(s)
-	char           *s;
+tai64nunix(char *s)
 {
 	int             c;
 	int             len;
@@ -328,11 +300,9 @@ tai64nunix(s)
 	if (*s != '@')
 		return s;
 	s++;
-	while ((c = *s++))
-	{
+	while ((c = *s++)) {
 		u = c - '0';
-		if (u >= 10)
-		{
+		if (u >= 10) {
 			u = c - 'a';
 			if (u >= 6)
 				break;
@@ -352,12 +322,6 @@ tai64nunix(s)
 	return datebuf;
 }
 
-stralloc        line = { 0 };
-int             match;
-
-#define FIELDS 20
-int             field[FIELDS];
-
 void
 clear()
 {
@@ -369,91 +333,77 @@ clear()
 void
 starting()
 {
-	unsigned long   d;
-	unsigned long   m;
-	int             dpos;
+	unsigned long   d, m, _qid;
+	int             dpos, i;
 
-	scan_ulong(line.s + field[3], &d);
+	/*- ts starting delivery 1.5: msg 1209359 to local recipiet@domain queue5 */
+	i = scan_ulong(line.s + field[3], &d);
 	scan_ulong(line.s + field[5], &m);
-
-	dpos = del_add(d);
-
+	if (*(line.s + field[3] + i) == '.')
+		scan_ulong(line.s + field[3] + i + 1, &_qid);
+	else
+		_qid = 0;
+	dpos = del_add(d, _qid);
 	dmsg.u[dpos] = m;
-
 	dstart.u[dpos] = pool.len;
-	if (!stralloc_cats(&pool, tai64nunix(line.s + field[0])))
+	if (!stralloc_cats(&pool, tai64nunix(line.s + field[0])) ||
+			!stralloc_0(&pool))
 		nomem();
-	if (!stralloc_0(&pool))
-		nomem();
-
 	dchan.u[dpos] = pool.len;
-	if (!stralloc_cats(&pool, line.s + field[7]))
+	if (!stralloc_cats(&pool, line.s + field[7]) ||
+			!stralloc_0(&pool))
 		nomem();
-	if (!stralloc_0(&pool))
-		nomem();
-
 	drecip.u[dpos] = pool.len;
-	if (!stralloc_cats(&pool, line.s + field[8]))
-		nomem();
-	if (!stralloc_0(&pool))
+	if (!stralloc_cats(&pool, line.s + field[8]) ||
+			!stralloc_0(&pool))
 		nomem();
 	case_lowers(pool.s + drecip.u[dpos]);
-
 	poolbytes += pool.len - dstart.u[dpos];
 }
 
 void
 delivery()
 {
-	unsigned long   d;
-	unsigned long   m;
-	int             dpos;
-	int             mpos;
-	char           *result = "?";
-	char           *reason = "";
+	unsigned long   d, m, _qid;
+	int             dpos, mpos, i;
+	char           *result = "?", *reason = "";
 
-	scan_ulong(line.s + field[2], &d);
-
-	dpos = del_find(d);
-	if (dpos == -1)
+	/* ts delivery 1.5: success: did_1+0+1/ queue5 */
+	i = scan_ulong(line.s + field[2], &d);
+	if (*(line.s + field[2] + i) == '.')
+		scan_ulong(line.s + field[2] + i + 1, &_qid);
+	else
+		_qid = 0;
+	if ((dpos = del_find(d, _qid)) == -1)
 		return;
-
 	m = dmsg.u[dpos];
 	mpos = msg_find(m);
-
-	if (str_start(line.s + field[3], "succ"))
-	{
+	if (str_start(line.s + field[3], "succ")) {
 		if (mpos != -1)
 			++numk.u[mpos];
 		result = "d k ";
 		reason = line.s + field[4];
 	} else
-	if (str_start(line.s + field[3], "fail"))
-	{
+	if (str_start(line.s + field[3], "fail")) {
 		if (mpos != -1)
 			++numd.u[mpos];
 		result = "d d ";
 		reason = line.s + field[4];
 	} else
-	if (str_start(line.s + field[3], "defer"))
-	{
+	if (str_start(line.s + field[3], "defer")) {
 		if (mpos != -1)
 			++numz.u[mpos];
 		result = "d z ";
 		reason = line.s + field[4];
 	} else
-	if (str_start(line.s + field[3], "report"))
-	{
+	if (str_start(line.s + field[3], "report")) {
 		if (mpos != -1)
 			++numz.u[mpos];
 		result = "d z ";
 		reason = "report_mangled";
 	}
-
 	outs(result);
-
-	if (mpos != -1)
-	{
+	if (mpos != -1) {
 		outs(pool.s + birth.u[mpos]);
 		outs(" ");
 		outs(pool.s + dstart.u[dpos]);
@@ -473,8 +423,7 @@ delivery()
 		out(strnum, fmt_ulong(strnum, uid.u[mpos]));
 		outs(" ");
 		outs(reason);
-	} else
-	{
+	} else {
 		outs(pool.s + dstart.u[dpos]);
 		outs(" ");
 		outs(pool.s + dstart.u[dpos]);
@@ -487,9 +436,7 @@ delivery()
 		outs(" ? ? ");
 		outs(reason);
 	}
-
 	outs("\n");
-
 	del_kill(dpos);
 	garbage();
 }
@@ -501,8 +448,7 @@ newmsg()
 	int             mpos;
 
 	scan_ulong(line.s + field[3], &m);
-	mpos = msg_find(m);
-	if (mpos == -1)
+	if ((mpos = msg_find(m)) == -1)
 		return;
 	msg_kill(mpos);
 	garbage();
@@ -515,10 +461,8 @@ endmsg()
 	int             mpos;
 
 	scan_ulong(line.s + field[3], &m);
-	mpos = msg_find(m);
-	if (mpos == -1)
+	if ((mpos = msg_find(m)) == -1)
 		return;
-
 	outs("m ");
 	outs(pool.s + birth.u[mpos]);
 	outs(" ");
@@ -538,7 +482,6 @@ endmsg()
 	outs(" ");
 	out(strnum, fmt_ulong(strnum, uid.u[mpos]));
 	outs("\n");
-
 	msg_kill(mpos);
 	garbage();
 }
@@ -549,30 +492,24 @@ info()
 	unsigned long   m;
 	int             mpos;
 
+	/* ts info msg 1209363: bytes 295 from <sender@domain> qp 2203 uid 1000 queue5 */
 	scan_ulong(line.s + field[3], &m);
 	mpos = msg_add(m);
-
 	scan_ulong(line.s + field[5], &bytes.u[mpos]);
 	scan_ulong(line.s + field[9], &qp.u[mpos]);
 	scan_ulong(line.s + field[11], &uid.u[mpos]);
-
 	numk.u[mpos] = 0;
 	numd.u[mpos] = 0;
 	numz.u[mpos] = 0;
-
 	birth.u[mpos] = pool.len;
-	if (!stralloc_cats(&pool, tai64nunix(line.s + field[0])))
+	if (!stralloc_cats(&pool, tai64nunix(line.s + field[0])) ||
+			!stralloc_0(&pool))
 		nomem();
-	if (!stralloc_0(&pool))
-		nomem();
-
 	sender.u[mpos] = pool.len;
-	if (!stralloc_cats(&pool, line.s + field[7]))
-		nomem();
-	if (!stralloc_0(&pool))
+	if (!stralloc_cats(&pool, line.s + field[7]) ||
+			!stralloc_0(&pool))
 		nomem();
 	case_lowers(pool.s + sender.u[mpos]);
-
 	poolbytes += pool.len - birth.u[mpos];
 }
 
@@ -583,10 +520,8 @@ extra()
 	int             mpos;
 
 	scan_ulong(line.s + field[2], &m);
-	mpos = msg_find(m);
-	if (mpos == -1)
+	if ((mpos = msg_find(m)) == -1)
 		return;
-
 	scan_ulong(line.s + field[3], &numk.u[mpos]);
 	scan_ulong(line.s + field[4], &numz.u[mpos]);
 	scan_ulong(line.s + field[5], &numd.u[mpos]);
@@ -597,8 +532,7 @@ pending()
 {
 	int             i;
 
-	for (i = 0; i < nummsg; ++i)
-	{
+	for (i = 0; i < nummsg; ++i) {
 		outs5(pool.s + birth.u[i]);
 		outs5(" info msg ");
 		out5(strnum, fmt_ulong(strnum, msg.u[i]));
@@ -622,9 +556,7 @@ pending()
 		out5(strnum, fmt_ulong(strnum, numd.u[i]));
 		outs5("\n");
 	}
-
-	for (i = 0; i < numdel; ++i)
-	{
+	for (i = 0; i < numdel; ++i) {
 		outs5(pool.s + dstart.u[i]);
 		outs5(" starting delivery ");
 		out5(strnum, fmt_ulong(strnum, del.u[i]));
@@ -636,7 +568,6 @@ pending()
 		outs5(pool.s + drecip.u[i]);
 		outs5("\n");
 	}
-
 	out5(line.s, line.len);
 	if (substdio_flush(&ss5) == -1)
 		die_write5();
@@ -647,34 +578,22 @@ stralloc        outline = { 0 };
 int
 main()
 {
-	int             i;
-	int             j;
+	int             i, j;
 	char            ch;
 
-	if (!stralloc_copys(&pool, ""))
+	if (!stralloc_copys(&pool, "") ||
+			!ulongalloc_ready(&msg, 1) ||
+			!ulongalloc_ready(&qid, 1) ||
+			!ulongalloc_ready(&bytes, 1) ||
+			!ulongalloc_ready(&qp, 1) ||
+			!ulongalloc_ready(&uid, 1) ||
+			!ulongalloc_ready(&numk, 1) ||
+			!ulongalloc_ready(&numd, 1) ||
+			!ulongalloc_ready(&numz, 1) ||
+			!ulongalloc_ready(&del, 1) ||
+			!ulongalloc_ready(&dmsg, 1))
 		nomem();
-
-	if (!ulongalloc_ready(&msg, 1))
-		nomem();
-	if (!ulongalloc_ready(&bytes, 1))
-		nomem();
-	if (!ulongalloc_ready(&qp, 1))
-		nomem();
-	if (!ulongalloc_ready(&uid, 1))
-		nomem();
-	if (!ulongalloc_ready(&numk, 1))
-		nomem();
-	if (!ulongalloc_ready(&numd, 1))
-		nomem();
-	if (!ulongalloc_ready(&numz, 1))
-		nomem();
-	if (!ulongalloc_ready(&del, 1))
-		nomem();
-	if (!ulongalloc_ready(&dmsg, 1))
-		nomem();
-
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdin, &line, &match, '\n') == -1)
 			die_read();
 		if (!match)
@@ -683,15 +602,13 @@ main()
 		if (!stralloc_copy(&outline, &line))
 			nomem();
 
-		for (i = 0; i < line.len; ++i)
-		{
+		for (i = 0; i < line.len; ++i) {
 			ch = line.s[i];
 			if ((ch == '\n') || (ch == ' ') || (ch == '\t'))
 				line.s[i] = 0;
 		}
 		j = 0;
-		for (i = 0; i < FIELDS; ++i)
-		{
+		for (i = 0; i < FIELDS; ++i) {
 			while (j < line.len)
 				if (line.s[j])
 					break;
@@ -706,14 +623,13 @@ main()
 		}
 		if (!stralloc_0(&line))
 			nomem();
-
 		if (str_equal(line.s + field[1], "status:"));
 		else
 		if (str_equal(line.s + field[1], "starting"))
 			starting();
 		else
 		if (str_equal(line.s + field[1], "delivery"))
-			delivery();
+			delivery(); /*- ts delivery 1.5: success: did_1+0+1/ queue5 */
 		else
 		if (str_equal(line.s + field[1], "new"))
 			newmsg();
@@ -775,27 +691,22 @@ main()
 		else
 		if (str_equal(line.s + field[1], "alert:"))
 			out(outline.s, outline.len);
-		else
-		{
+		else {
 			outs("? ");
 			out(outline.s, outline.len);
 		}
 	}
-
 	if (substdio_flush(subfdout) == -1)
 		die_write();
-
 	pending();
 
 	_exit(0);
-  /*- Not reached */
-	return (0);
 }
 
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.12 2022-03-10 20:22:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.13 2022-03-16 19:56:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
