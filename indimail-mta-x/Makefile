@@ -1026,7 +1026,8 @@ qmail-srs.9 conf-sysconfdir
 
 qmail-getpw: \
 load qmail-getpw.o auto_break.o auto_usera.o
-	./load qmail-getpw auto_break.o auto_usera.o $(QMAILLIB)
+	./load qmail-getpw auto_break.o auto_usera.o \
+	$(static_option) $(QMAILLIB)
 
 qmail-getpw.8: \
 qmail-getpw.9 conf-break
@@ -1339,7 +1340,8 @@ auto_prefix.o auto_qmail.o auto_control.o control.o \
 custom_error.o rt.lib
 	./load qmail-spamfilter qmulti.o auto_control.o \
 	auto_prefix.o auto_qmail.o variables.o control.o \
-	custom_error.o `cat rt.lib` $(QMAILLIB)
+	custom_error.o $(static_option) $(QMAILLIB) \
+	$(dynamic_option) `cat rt.lib`
 
 qmail-spamfilter.o: \
 compile qmail-spamfilter.c qmulti.h
@@ -1367,9 +1369,9 @@ auto_prefix.o control.o wildmat.o qregex.o \
 auto_control.o matchregex.o envrules.o getDomainToken.o \
 socket.lib dns.lib
 	./load spawn-filter variables.o report.o auto_qmail.o \
-	auto_prefix.o control.o wildmat.o qregex.o \
-	auto_control.o matchregex.o getDomainToken.o \
-	envrules.o `cat dns.lib socket.lib` -lm $(QMAILLIB)
+	auto_prefix.o control.o wildmat.o qregex.o auto_control.o \
+	matchregex.o getDomainToken.o envrules.o $(static_option) \
+	$(QMAILLIB) $(dynamic_option) `cat dns.lib socket.lib` -lm
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
