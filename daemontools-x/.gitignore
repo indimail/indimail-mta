@@ -13,6 +13,7 @@ conf-servicedir
 conf-shared
 conf-sysconfdir
 conf-release
+conf-libexec
 daemontools.spec
 daemontools.changes
 docker-entrypoint

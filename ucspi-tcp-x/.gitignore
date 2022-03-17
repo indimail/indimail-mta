@@ -51,6 +51,8 @@ Makevars.
 conf-release
 conf-shared
 conf-sysconfdir
+conf-libexec
+conf-servicedir
 ucspi-tcp.spec
 ucspi-tcp.changes
 addcr
@@ -59,8 +61,6 @@ delcr
 fixcrio
 recordio
 DIRS
-conf-libexec
-conf-servicedir
 ucspi-tcp.perms
 tcpclient.1
 dotls.o

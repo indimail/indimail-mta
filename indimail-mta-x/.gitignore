@@ -19,6 +19,7 @@ conf-shared
 conf-sysconfdir
 conf-qmail
 conf-servicedir
+conf-libexec
 leapsecs.dat
 udplogger
 udpclient
