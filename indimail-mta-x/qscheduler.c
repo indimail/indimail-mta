@@ -920,7 +920,7 @@ dynamic_queue()
 #ifdef HASLIBRT
 	shm_unlink("/qscheduler");
 #endif
-	log_outf("info: qscheduler: exiting1\n");
+	log_outf("info: qscheduler: exiting\n");
 	_exit(flagexitasap ? 0 : 111);
 }
 #endif
