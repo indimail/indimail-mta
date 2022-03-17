@@ -81,3 +81,4 @@ hasinotify.h
 openrc
 BIN
 INPUT
+svscan_rc
