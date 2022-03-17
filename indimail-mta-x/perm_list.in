@@ -224,7 +224,6 @@
 %attr(0755,root,root)  @libexecdir@/senders
 %attr(0755,root,root)  @libexecdir@/matchup
 %attr(0755,root,root)  @libexecdir@/mlmatchup
-%attr(0755,root,root)  @libexecdir@/multilog-matchup
 %attr(0755,root,root)  @libexecdir@/smtp-matchup
 %attr(0755,root,root)  @libexecdir@/xqp
 %attr(0755,root,root)  @libexecdir@/successes
