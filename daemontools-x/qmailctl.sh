@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.71 2022-03-05 13:53:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.72 2022-03-17 17:26:54+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@

@@ -1,7 +1,10 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.20  2022-01-30 09:51:34+05:30  Cprogrammer
+ * changed datatype of mode for comparision with -1
+ *
  * Revision 1.19  2021-08-29 23:27:08+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.18  2021-08-05 20:52:44+05:30  Cprogrammer
  * fixed bug of skipping files in check mode
@@ -182,7 +185,7 @@ myr_mkdir(char *home, mode_t mode)
 
 void
 set_perms(char *dest, char *uidstr, char *gidstr, char *modestr, uid_t uid,
-		gid_t gid, mode_t mode, int check)
+		gid_t gid, int mode, int check)
 {
 	struct stat     st;
 	struct passwd  *pw;
@@ -599,7 +602,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.19 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.20 2022-01-30 09:51:34+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
