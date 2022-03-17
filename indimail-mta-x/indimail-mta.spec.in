@@ -682,7 +682,6 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{libexecdir}/rspamrdomain
 %attr(755,root,root)                    %{libexecdir}/matchup
 %attr(755,root,root)                    %{libexecdir}/mlmatchup
-%attr(755,root,root)                    %{libexecdir}/multilog-matchup
 %attr(755,root,root)                    %{libexecdir}/smtp-matchup
 %attr(755,root,root)                    %{libexecdir}/xqp
 %attr(755,root,root)                    %{libexecdir}/zddist

@@ -52,7 +52,6 @@ f:::0755:/:zrecipients:zrecipients
 f:::0755:/:zrxdelay:zrxdelay
 f:::0755:/:zsenders:zsenders
 f:::0755:/:zsuids:zsuids
-f:::0755:/:multilog-matchup:multilog-matchup
 f:::0755:/:smtp-matchup:smtp-matchup
 f:::0755:/:matchup:matchup
 f:::0755:/:mlmatchup:mlmatchup

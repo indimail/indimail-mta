@@ -904,7 +904,7 @@ mlmatchup matchup columnt zoverall zsendmail xqp xsender xrecipient ddist \
 deferrals failures successes rhosts recipients rxdelay senders suids \
 zddist zdeferrals zfailures zsuccesses zrhosts zrecipients zrxdelay \
 zsenders zsuids zsmtp rsmtp rsmtpfailures rsmtpsdomains rsmtprdomains \
-rsmtpsenders rsmtprecipients multilog-matchup smtp-matchup rspamrdomain \
+rsmtpsenders rsmtprecipients smtp-matchup rspamrdomain \
 rspamsdomain zspam rspamstat rspamhist
 
 qtools: \
@@ -2801,14 +2801,6 @@ warn-auto.sh zsuids.sh conf-libexec
 	cat warn-auto.sh zsuids.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zsuids
-	chmod +x $@
-
-multilog-matchup: \
-warn-auto.sh multilog-matchup.sh conf-prefix
-	cat warn-auto.sh multilog-matchup.sh \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	> multilog-matchup
 	chmod +x $@
 
 smtp-matchup: \
