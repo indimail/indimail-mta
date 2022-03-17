@@ -48,6 +48,7 @@ installer.o
 mysql_inc
 make-makelib
 Makevars.
+conf-prefix
 conf-release
 conf-shared
 conf-sysconfdir
