@@ -201,7 +201,7 @@ stop()
 	case "$SYSTEM" in
 		FreeBSD|alpine)
 		sv_pid=$rundir/svscan/.svscan.pid
-		daemon_pid=$rundir/svscan/sv_daemon.pid
+		daemon_pid=$rundir/sv_daemon.pid
 		if [ ! -f $sv_pid -a ! -f $daemon_pid ] ; then
 			echo "WARNING: svscan is already stopped"
 			return $ret
@@ -225,10 +225,22 @@ stop()
 		echo ""
 	elif [ -f /usr/sbin/daemon ] ; then
 		$ECHO -n "Stopping svscan: "
-		if [ -f $rundir/sv_daemon.pid ] ; then
-			kill `cat $rundir/sv_daemon.pid` && $succ || $fail
-		else
-			ps ax|grep svscan|egrep -v "grep" >/dev/null && $fail || $succ
+		if [ -f $daemon_pid ] ; then
+			kill `cat $daemon_pid` && $succ || $fail
+			count=0
+			while true
+			do
+				ps ax|grep svscan|egrep -v "grep|restart" >/dev/null
+				if [ $? -ne 0 ] ; then
+					break
+				fi
+				sleep 1
+				count=$(expr $count + 1)
+				if [ $count -eq 5 ] ; then
+					break
+				fi
+			done
+			ps ax|grep svscan|egrep -v "grep|restart" >/dev/null && $fail || $succ
 		fi
 		echo ""
 	elif [ -f /etc/inittab ] ; then
@@ -349,7 +361,6 @@ start()
 			/sbin/initctl start svscan >/dev/null 2>>/tmp/sv.err && $succ || $fail
 		elif [ -f /usr/sbin/daemon ] ; then
 			$ECHO -n "Starting svscan: "
-			daemon_pid=$rundir/sv_daemon.pid
 			env SETSID=1 /usr/sbin/daemon -cS -P $daemon_pid -R 5 \
 				-t "$SYSTEM"_svscan @libexecdir@/svscanboot && $succ || $fail
 		else
