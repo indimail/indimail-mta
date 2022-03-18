@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.71 2022-03-05 13:53:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.72 2022-03-17 23:11:13+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -339,6 +339,16 @@ start()
 		rundir=/service
 	fi
 	local ret=0
+	case "$SYSTEM" in
+		FreeBSD|alpine)
+		sv_pid=$rundir/svscan/.svscan.pid
+		daemon_pid=$rundir/sv_daemon.pid
+		if [ -f $sv_pid -o -f $daemon_pid ] ; then
+			echo "WARNING: svscan is already running"
+			return $ret
+		fi
+		;;
+	esac
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
 		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && sv_up_all && return $ret || rm -f /var/lock/subsys/svscan
 	fi
