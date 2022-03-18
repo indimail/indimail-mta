@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.72 2022-03-17 23:11:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.71 2022-03-18 09:16:33+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -230,7 +230,7 @@ stop()
 			count=0
 			while true
 			do
-				ps ax|grep svscan|egrep -v "grep|restart" >/dev/null
+				ps ax|grep svscan|egrep -v "grep|restart|stop" >/dev/null
 				if [ $? -ne 0 ] ; then
 					break
 				fi
@@ -240,7 +240,7 @@ stop()
 					break
 				fi
 			done
-			ps ax|grep svscan|egrep -v "grep|restart" >/dev/null && $fail || $succ
+			ps ax|grep svscan|egrep -v "grep|restart|stop" >/dev/null && $fail || $succ
 		fi
 		echo ""
 	elif [ -f /etc/inittab ] ; then

@@ -1,4 +1,7 @@
 # $Log: svps.in,v $
+# Revision 1.13  2022-03-18 09:17:35+05:30  Cprogrammer
+# added -h, HUP option to send HUP to svscan
+#
 # Revision 1.12  2022-03-06 18:50:50+05:30  Cprogrammer
 # fix for FreeBSD (stat command usage)
 #
@@ -36,30 +39,16 @@
 # Initial revision
 #
 # 
-# $Id: svps.in,v 1.12 2022-03-06 18:50:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.13 2022-03-18 09:17:35+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
 {
-option=$1
-max=$2
+svpid=$1
+option=$2
+max=$3
+mod=$4
 
-if [ -d /run/svscan ] ; then
-	pidfile=/run/svscan/.svscan.pid
-elif [ -d /var/run/svscan ] ; then
-	pidfile=/var/run/svscan/.svscan.pid
-else
-	pidfile=@servicedir@/.svscan.pid
-fi
-
-SYSTEM=$(uname -s)
-case "$SYSTEM" in
-	Darwin|FreeBSD)
-	mod=$(stat -f "%m" $pidfile)
-	;;
-	*)
-	mod=$(stat --printf="%Y\n" $pidfile)
-esac
 now=$(date +%s)
 diff=$(expr $now - $mod)
 
@@ -68,7 +57,8 @@ set $line
 echo "------------ svscan ---------------"
 printf "%-"$max"s up   %7d secs  pid %7d\n" "$5 $6" $diff $1
 
-if [ "$option" = "all" -o "$option" = "main" ] ; then
+case "$option" in
+	all|main)
 	echo
 	echo "------------ main -----------------"
 
@@ -113,9 +103,11 @@ if [ "$option" = "all" -o "$option" = "main" ] ; then
 			break
 		fi
 	done
-fi
+	;;
+esac
 
-if [ "$option" = "all" -o "$option" = "logs" ] ; then
+case "$option" in
+	all|logs)
 	echo
 	echo "------------ logs -----------------"
 
@@ -131,7 +123,22 @@ if [ "$option" = "all" -o "$option" = "logs" ] ; then
 			break
 		fi
 	done
-fi
+	;;
+esac
+case "$option" in
+	hup)
+	if [ ! -f $pidfile ] ; then
+		echo "$pidfile: No such file or directory" 1>&2
+		exit 1
+	else
+		echo "Sending HUP to svscan with PID $svpid"
+		kill -1 $svpid
+		if [ $? -ne 0 ] ; then
+			echo "Failed to send HUP signal to pid $svpid" 1>&2
+		fi
+	fi
+	;;
+esac
 }
 
 if [ -x /usr/bin/less ] ; then
@@ -152,6 +159,9 @@ while test $# -gt 0; do
     -a|--all)
 	option=all
     ;;
+	-h|--hup)
+	option=hup
+	;;
     -m|--main)
 	option=main
     ;;
@@ -178,6 +188,23 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
+if [ -d /run/svscan ] ; then
+	pidfile=/run/svscan/.svscan.pid
+elif [ -d /var/run/svscan ] ; then
+	pidfile=/var/run/svscan/.svscan.pid
+else
+	pidfile=@servicedir@/.svscan.pid
+fi
+svpid=$(sed -n '$p' $pidfile)
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	Darwin|FreeBSD)
+	mod=$(stat -f "%m" $pidfile)
+	;;
+	*)
+	mod=$(stat --printf="%Y\n" $pidfile)
+esac
+
 @prefix@/bin/svstat @servicedir@/* @servicedir@/*/log \
 	@servicedir@/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
 status=$?
@@ -204,10 +231,13 @@ do
 	fi
 done < /tmp/svps.$$
 
+if [ "$option" = "hup" ] ; then
+	PAGER=""
+fi
 if [ -n "$PAGER" ] ; then
-	doit $option $max | $PAGER
+	doit $svpid $option $max $mod | $PAGER
 else
-	doit $option $max
+	doit $svpid $option $max $mod
 fi
 
 /bin/rm -f /tmp/svps.$$
