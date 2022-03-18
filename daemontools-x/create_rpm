@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.4  2022-03-17 19:03:26+05:30  Cprogrammer
+# added --clean option
+#
 # Revision 1.3  2021-03-26 18:15:59+05:30  Cprogrammer
 # fixed missing catChangeLog in obs builds
 #
@@ -10,7 +13,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.3 2021-03-26 18:15:59+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.4 2022-03-17 19:03:26+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
@@ -54,6 +57,7 @@ if [ -f /etc/debian_version ] ; then
 fi
 
 verbose=0
+clean=""
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
@@ -66,13 +70,15 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+	--clean)
+	clean="--clean"
+	;;
     --release=*)
 	release=$optarg
     ;;
     *)
     echo "invalid option [$1]"
     read key
-    usage 1
     ;;
     esac
 
@@ -190,11 +196,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	fi
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/daemontools.spec"
-		rpmbuild -ba --clean --quiet /tmp/daemontools.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/daemontools.spec"
+		rpmbuild -ba $clean --quiet /tmp/daemontools.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/daemontools.spec"
-		rpmbuild -ba --clean /tmp/daemontools.spec
+		echo "rpmbuild -ba $clean /tmp/daemontools.spec"
+		rpmbuild -ba $clean /tmp/daemontools.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/daemontools.spec
