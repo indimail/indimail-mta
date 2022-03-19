@@ -134,6 +134,8 @@ Release 2.14.1 Start 21/09/2021
 72. matchup.c: handle multi-queue format
 73. qmail-lspawn.c: made copy_pwstruct return type void
 74. qmail-queue.c: added FASTQUEUE to bypass features for speeding delivery
+- 20/03/2022
+75. qmail-todo.c: use mq_timedreceive() for TODO_CHUNK_SIZE to work
 
 * 
 Release 2.14.0 Start 18/07/2021

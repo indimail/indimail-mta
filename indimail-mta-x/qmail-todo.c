@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.57 2022-03-13 19:55:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.58 2022-03-20 00:24:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -61,7 +61,8 @@ static cmap     mapvdoms;
 static stralloc vdoms = { 0 };
 static stralloc envnoathost = { 0 };
 
-static char     strnum[FMT_ULONG];
+static char     strnum1[FMT_ULONG];
+static char     strnum2[FMT_ULONG];
 
 /*- if qmail-send.c changes this has to be updated */
 #define CHANNELS 2
@@ -113,6 +114,7 @@ static stralloc qfn = { 0 };
  * default is to run dynamic mode without compat
  */
 static int      compat_mode_flag = 2;
+clockid_t       clock_id;
 #endif
 
 void            log1(char *w);
@@ -218,15 +220,13 @@ rewrite(char *recip)
 	static stralloc addr = { 0 };
 	int             at;
 
-	if (!stralloc_copys(&rwline, "T"))
-		return 0;
-	if (!stralloc_copys(&addr, recip))
+	if (!stralloc_copys(&rwline, "T") ||
+			!stralloc_copys(&addr, recip))
 		return 0;
 	i = byte_rchr(addr.s, addr.len, '@');
 	if (i == addr.len) {
-		if (!stralloc_cats(&addr, "@"))
-			return 0;
-		if (!stralloc_cat(&addr, &envnoathost))
+		if (!stralloc_cats(&addr, "@") ||
+				!stralloc_cat(&addr, &envnoathost))
 			return 0;
 	}
 	while (constmap(&mappercenthack, addr.s + i + 1, addr.len - i - 1)) {
@@ -239,9 +239,8 @@ rewrite(char *recip)
 	}
 	at = byte_rchr(addr.s, addr.len, '@');
 	if (constmap(&maplocals, addr.s + at + 1, addr.len - at - 1)) {
-		if (!stralloc_cat(&rwline, &addr))
-			return 0;
-		if (!stralloc_0(&rwline))
+		if (!stralloc_cat(&rwline, &addr) ||
+				!stralloc_0(&rwline))
 			return 0;
 		return 1;
 	}
@@ -251,21 +250,17 @@ rewrite(char *recip)
 			if ((x = constmap(&mapvdoms, addr.s + i, addr.len - i))) {
 				if (!*x)
 					break;
-				if (!stralloc_cats(&rwline, x))
-					return 0;
-				if (!stralloc_cats(&rwline, "-"))
-					return 0;
-				if (!stralloc_cat(&rwline, &addr))
-					return 0;
-				if (!stralloc_0(&rwline))
+				if (!stralloc_cats(&rwline, x) ||
+						!stralloc_cats(&rwline, "-") ||
+						!stralloc_cat(&rwline, &addr) ||
+						!stralloc_0(&rwline))
 					return 0;
 				return 1;
 			}
 		}
 	}
-	if (!stralloc_cat(&rwline, &addr))
-		return 0;
-	if (!stralloc_0(&rwline))
+	if (!stralloc_cat(&rwline, &addr) ||
+			!stralloc_0(&rwline))
 		return 0;
 	return 2;
 }
@@ -442,14 +437,11 @@ comm_write(unsigned long id, int local, int remote)
 	else
 		s = "X";
 	pos = comm_buf.len;
-	strnum[fmt_ulong(strnum, id)] = 0;
-	if (!stralloc_cats(&comm_buf, "D"))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, s))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, strnum))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	if (!stralloc_cats(&comm_buf, "D") ||
+			!stralloc_cats(&comm_buf, s) ||
+			!stralloc_cats(&comm_buf, strnum1) ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 fail:
@@ -460,11 +452,8 @@ fail:
 static int
 issafe(char ch)
 {
-	if (ch == '%')
-		return 0; /*- general principle: allman's code is crap */
-	if (ch < 33)
-		return 0;
-	if (ch > 126)
+	/*- general principle: allman's code is crap */
+	if (ch == '%' || ch < 33 || ch > 126)
 		return 0;
 	return 1;
 }
@@ -479,15 +468,12 @@ comm_info(unsigned long id, unsigned long size, char *from, unsigned long pid, u
 	pos = comm_buf.len;
 	if (!stralloc_cats(&comm_buf, "Linfo msg "))
 		goto fail;
-	strnum[fmt_ulong(strnum, id)] = 0;
-	if (!stralloc_cats(&comm_buf, strnum))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, ": bytes "))
-		goto fail;
-	strnum[fmt_ulong(strnum, size)] = 0;
-	if (!stralloc_cats(&comm_buf, strnum))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, " from <"))
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	strnum2[fmt_ulong(strnum2, size)] = 0;
+	if (!stralloc_cats(&comm_buf, strnum1) ||
+			!stralloc_cats(&comm_buf, ": bytes ") ||
+			!stralloc_cats(&comm_buf, strnum2) ||
+			!stralloc_cats(&comm_buf, " from <"))
 		goto fail;
 	i = comm_buf.len;
 	if (!stralloc_cats(&comm_buf, from))
@@ -501,21 +487,15 @@ comm_info(unsigned long id, unsigned long size, char *from, unsigned long pid, u
 	}
 	if (!stralloc_cats(&comm_buf, "> qp "))
 		goto fail;
-	strnum[fmt_ulong(strnum, pid)] = 0;
-	if (!stralloc_cats(&comm_buf, strnum))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, " uid "))
-		goto fail;
-	strnum[fmt_ulong(strnum, uid)] = 0;
-	if (!stralloc_cats(&comm_buf, strnum))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, " "))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, queuedesc))
-		goto fail;
-	if (!stralloc_cats(&comm_buf, "\n"))
-		goto fail;
-	if (!stralloc_0(&comm_buf))
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	strnum2[fmt_ulong(strnum2, uid)] = 0;
+	if (!stralloc_cats(&comm_buf, strnum1) ||
+			!stralloc_cats(&comm_buf, " uid ") ||
+			!stralloc_cats(&comm_buf, strnum2) ||
+			!stralloc_cats(&comm_buf, " ") ||
+			!stralloc_cats(&comm_buf, queuedesc) ||
+			!stralloc_cats(&comm_buf, "\n") ||
+			!stralloc_0(&comm_buf))
 		goto fail;
 	return;
 
@@ -528,9 +508,8 @@ void
 comm_exit(void)
 {
 	/*- if it fails exit, we have already stoped */
-	if (!stralloc_cats(&comm_buf, "X"))
-		_exit(1);
-	if (!stralloc_0(&comm_buf))
+	if (!stralloc_cats(&comm_buf, "X") ||
+			!stralloc_0(&comm_buf))
 		_exit(1);
 }
 
@@ -654,6 +633,10 @@ mqueue_init(void)
 		comm_die(111);
 	} 
 	nexttodorun = now();
+	if (clock_getcpuclockid(0, &clock_id)) {
+		log5("alert: ", argv0, ": failed to get clockid: ", error_str(errno), "\n");
+		comm_die(111);
+	}
 }
 
 /*-
@@ -670,6 +653,7 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 {
 	struct mq_attr  attr;
 	unsigned int    priority;
+	struct timespec tsp;
 	int             i;
 
 	if (mq_queue == (mqd_t)-1) {
@@ -702,7 +686,17 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 	msgbuflen = attr.mq_msgsize;
 	priority = 0;
 	for (;;) {
-		if (mq_receive(mq_queue, msgbuf, msgbuflen, &priority) == -1) {
+		if (clock_gettime(clock_id, &tsp) == -1) {
+			log7("warning: ", argv0, ": ", queuedesc,
+				": unable to get RTC time:  ", error_str(errno), "\n");
+			return -1;
+		}
+		tsp.tv_sec += SLEEP_FUZZ;
+		if (mq_timedreceive(mq_queue, msgbuf, msgbuflen, &priority, &tsp) == -1) {
+			if (errno == error_timeout) {
+				flagtododir = 0;
+				return 4;
+			}
 			if (errno == error_intr)
 				continue;
 			log7("warning: ", argv0, ": ", queuedesc,
@@ -714,12 +708,13 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 		} else
 			break;
 	}
+	flagtododir = 1;
 	*id = ((q_msg *) msgbuf)->inum;
 	if (((q_msg *) msgbuf)->split == conf_split)
 		qfn.len = 0;
 	else {
-		strnum[i = fmt_ulong(strnum, ((q_msg *) msgbuf)->split)] = 0;
-		if (!stralloc_copyb(&qfn, strnum, i) || !stralloc_0(&qfn)) {
+		strnum1[i = fmt_ulong(strnum1, ((q_msg *) msgbuf)->split)] = 0;
+		if (!stralloc_copyb(&qfn, strnum1, i) || !stralloc_0(&qfn)) {
 			if (!do_readsubdir) {
 				log5("warning: ", argv0, ": ", queuedesc,
 					": out of memory. Resetting to opendir mode\n");
@@ -787,7 +782,6 @@ log_stat(unsigned long id, size_t bytes)
 {
 	char           *ptr;
 	char           *mode;
-	char            strnum1[FMT_ULONG + 1], strnum2[FMT_ULONG + 1];
 
 	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
 	strnum2[fmt_ulong(strnum2 + 1, bytes) + 1] = 0;
@@ -973,8 +967,8 @@ todo_do(int *nfds, fd_set *rfds)
 			error_str(errno), "\n");
 		goto fail;
 	}
-	strnum[fmt_ulong(strnum, id)] = 0;
-	log5("new msg ", strnum, " ", queuedesc, "\n");
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	log5("new msg ", strnum1, " ", queuedesc, "\n");
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
 	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf)); /*- read envelope */
@@ -1154,13 +1148,10 @@ fail:
 int
 getcontrols(void)
 {
-	if (control_init() == -1)
-		return 0;
-	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1)
-		return 0;
-	if (control_readfile(&locals, "locals", 1) != 1)
-		return 0;
-	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
+	if (control_init() == -1 ||
+			control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1 ||
+			control_readfile(&locals, "locals", 1) != 1 ||
+			!constmap_init(&maplocals, locals.s, locals.len, 0))
 		return 0;
 	switch (control_readfile(&percenthack, "percenthack", 0))
 	{
@@ -1191,9 +1182,8 @@ getcontrols(void)
 	if (control_readint(&todo_interval, "todointerval") == -1)
 		return 0;
 #ifdef USE_FSYNC
-	if (control_readint(&use_syncdir, "conf-syncdir") == -1)
-		return 0;
-	if (control_readint(&use_fsync, "conf-fsync") == -1)
+	if (control_readint(&use_syncdir, "conf-syncdir") == -1 ||
+			control_readint(&use_fsync, "conf-fsync") == -1)
 		return 0;
 	if (use_syncdir > 0) {
 		if (!env_put2("USE_SYNCDIR", "1"))
@@ -1327,8 +1317,13 @@ main(int argc, char **argv)
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
-	strnum[fmt_ulong(strnum, conf_split)] = 0;
-	log7("info: ", argv0, ": ", queuedesc, ": conf split=", strnum, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n");
+	getEnvConfigInt(&todo_chunk_size, "TODO_CHUNK_SIZE", CHUNK_SIZE);
+	if (todo_chunk_size <= 0)
+		todo_chunk_size = CHUNK_SIZE;
+	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
+	strnum2[fmt_ulong(strnum2, todo_chunk_size)] = 0;
+	log9("info: ", argv0, ": ", queuedesc, ": conf split=", strnum1,
+		", todo_chunk_size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n");
 #ifdef USE_FSYNC
 	if ((ptr = env_get("USE_FSYNC")) && *ptr)
 		use_fsync = 1;
@@ -1381,13 +1376,6 @@ main(int argc, char **argv)
 		scan_int(ptr, &todo_interval);
 		if (todo_interval <= 0)
 			todo_interval = ONCEEVERY;
-	}
-	if (!(ptr = env_get("TODO_CHUNK_SIZE")))
-		todo_chunk_size = CHUNK_SIZE;
-	else {
-		scan_int(ptr, &todo_chunk_size);
-		if (todo_chunk_size <= 0)
-			todo_chunk_size = CHUNK_SIZE;
 	}
 	fnmake_init(); /*- initialize fn */
 #ifdef HASLIBRT
@@ -1468,15 +1456,15 @@ main(int argc, char **argv)
 			comm_do(&wfds, &rfds); /*- communicate with qmail-send on fd 0, fd 1 */
 		}
 	} /*- for (;;) */
-	strnum[fmt_ulong(strnum, getpid())] = 0;
-	log7("status: ", argv0, ": ", strnum, " ", queuedesc, " exiting\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("status: ", argv0, ": ", strnum1, " ", queuedesc, " exiting\n");
 	_exit(0);
 }
 
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.57 2022-03-13 19:55:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.58 2022-03-20 00:24:17+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1484,6 +1472,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.58  2022-03-20 00:24:17+05:30  Cprogrammer
+ * use mq_timedreceive() for TODO_CHUNK_SIZE to work
+ *
  * Revision 1.57  2022-03-13 19:55:26+05:30  Cprogrammer
  * display bigtodo value in logs on startup
  *
