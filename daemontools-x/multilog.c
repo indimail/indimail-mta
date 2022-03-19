@@ -54,6 +54,7 @@
 int             rename(const char *, const char *);
 
 mode_t          old_umask;
+static int      f_sync;
 
 void
 pause3(char *s1, char *s2, char *s3)
@@ -79,19 +80,17 @@ f_init(char **script)
 	int             fd;
 
 	for (i = 0; script[i]; ++i);
-	if(!(f = (int *) alloc(i * sizeof(*f))))
+	if (!(f = (int *) alloc(i * sizeof(*f))))
 		strerr_die2x(111, FATAL, "out of memory");
-	for (i = 0; script[i]; ++i)
-	{
+	for (i = 0; script[i]; ++i) {
 		fd = -1;
-		if (script[i][0] == '=')
-		{
+		if (script[i][0] == '=') {
 			if (fchdir(fdstartdir) == -1)
 				strerr_die2sys(111, FATAL, "unable to switch to starting directory: ");
-			if((fd = open_append(script[i] + 1)) == -1)
+			if ((fd = open_append(script[i] + 1)) == -1)
 				strerr_die4sys(111, FATAL, "unable to create ", script[i] + 1, ": ");
 			close(fd);
-			if((fd = open_write(script[i] + 1)) == -1)
+			if ((fd = open_write(script[i] + 1)) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", script[i] + 1, ": ");
 			coe(fd);
 		}
@@ -124,51 +123,44 @@ filesfit(struct cyclog *d)
 	int             count;
 	int             i;
 
-	if(!(dir = opendir(".")))
+	if (!(dir = opendir(".")))
 		return -1;
 	fn[0] = '@';
 	fn[1] = 'z';
 	fn[2] = 0;
 	count = 0;
-	for (;;)
-	{
+	for (;;) {
 		errno = 0;
-		if(!(x = readdir(dir)))
+		if (!(x = readdir(dir)))
 			break;
-		if (x->d_name[0] == '@' && str_len(x->d_name) >= 25)
-		{
+		if (x->d_name[0] == '@' && str_len(x->d_name) >= 25) {
 			++count;
-			if (str_diff(x->d_name, fn) < 0)
-			{
+			if (str_diff(x->d_name, fn) < 0) {
 				for (i = 0; i < 25; ++i)
 					fn[i] = x->d_name[i];
 				fn[25] = 0;
 			}
 		}
 	}
-	if (errno)
-	{
+	if (errno) {
 		closedir(dir);
 		return -1;
 	}
 	closedir(dir);
 	if (count < d->num)
 		return 1;
-	if(!(dir = opendir(".")))
+	if (!(dir = opendir(".")))
 		return -1;
-	for (;;)
-	{
+	for (;;) {
 		errno = 0;
-		if(!(x = readdir(dir)))
+		if (!(x = readdir(dir)))
 			break;
-		if (x->d_name[0] == '@' && str_len(x->d_name) >= 25 && str_start(x->d_name, fn))
-		{
+		if (x->d_name[0] == '@' && str_len(x->d_name) >= 25 && str_start(x->d_name, fn)) {
 			unlink(x->d_name);
 			break;
 		}
 	}
-	if (errno)
-	{
+	if (errno) {
 		closedir(dir);
 		return -1;
 	}
@@ -181,18 +173,15 @@ finish(struct cyclog *d, char *file, char *code)
 {
 	struct stat     st;
 
-	for (;;)
-	{
+	for (;;) {
 		if (stat(file, &st) == 0)
 			break;
 		if (errno == error_noent)
 			return;
 		pause5("unable to stat ", d->dir, "/", file, ", pausing: ");
 	}
-	if (st.st_nlink == 1)
-	{
-		for (;;)
-		{
+	if (st.st_nlink == 1) {
+		for (;;) {
 			timestamp(fn);
 			fn[25] = '.';
 			fn[26] = code[0];
@@ -204,8 +193,7 @@ finish(struct cyclog *d, char *file, char *code)
 	}
 	while (unlink(file) == -1)
 		pause5("unable to remove ", d->dir, "/", file, ", pausing: ");
-	for (;;)
-	{
+	for (;;) {
 		switch (filesfit(d))
 		{
 		case 1:
@@ -226,19 +214,19 @@ startprocessor(struct cyclog *d)
 	sig_uncatch(sig_alarm);
 	sig_unblock(sig_term);
 	sig_unblock(sig_alarm);
-	if((fd = open_read("previous")) == -1)
+	if ((fd = open_read("previous")) == -1)
 		return;
 	if (fd_move(0, fd) == -1)
 		return;
-	if((fd = open_trunc("processed")) == -1)
+	if ((fd = open_trunc("processed")) == -1)
 		return;
 	if (fd_move(1, fd) == -1)
 		return;
-	if((fd = open_read("state")) == -1)
+	if ((fd = open_read("state")) == -1)
 		return;
 	if (fd_move(4, fd) == -1)
 		return;
-	if((fd = open_trunc("newstate")) == -1)
+	if ((fd = open_trunc("newstate")) == -1)
 		return;
 	if (fd_move(5, fd) == -1)
 		return;
@@ -258,8 +246,9 @@ fullcurrent(struct cyclog *d)
 
 	while (fchdir(d->fddir) == -1)
 		pause3("unable to switch to ", d->dir, ", pausing: ");
-	while (fsync(d->fdcurrent) == -1)
-		pause3("unable to write ", d->dir, "/current to disk, pausing: ");
+	if (f_sync)
+		while (fsync(d->fdcurrent) == -1)
+			pause3("unable to write ", d->dir, "/current to disk, pausing: ");
 	close(d->fdcurrent);
 	while (rename("current", "previous") == -1)
 		pause3("unable to rename current to previous in directory ", d->dir, ", pausing: ");
@@ -273,14 +262,11 @@ fullcurrent(struct cyclog *d)
 		pause3("unable to set mode of ", d->dir, "/previous, pausing: ");
 	if (!d->processor)
 		finish(d, "previous", "s");
-	else
-	{
-		for (;;)
-		{
+	else {
+		for (;;) {
 			while ((pid = fork()) == -1)
 				pause3("unable to fork for processor in ", d->dir, ", pausing: ");
-			if (!pid)
-			{
+			if (!pid) {
 				startprocessor(d);
 				strerr_die4sys(111, FATAL, "unable to run ", d->processor, ": ");
 			}
@@ -297,15 +283,17 @@ fullcurrent(struct cyclog *d)
 		}
 		while ((fd = open_append("processed")) == -1)
 			pause3("unable to create ", d->dir, "/processed, pausing: ");
-		while (fsync(fd) == -1)
-			pause3("unable to write ", d->dir, "/processed to disk, pausing: ");
+		if (f_sync)
+			while (fsync(fd) == -1)
+				pause3("unable to write ", d->dir, "/processed to disk, pausing: ");
 		while (fchmod(fd, 0744) == -1)
 			pause3("unable to set mode of ", d->dir, "/processed, pausing: ");
 		close(fd);
 		while ((fd = open_append("newstate")) == -1)
 			pause3("unable to create ", d->dir, "/newstate, pausing: ");
-		while (fsync(fd) == -1)
-			pause3("unable to write ", d->dir, "/newstate to disk, pausing: ");
+		if (f_sync)
+			while (fsync(fd) == -1)
+				pause3("unable to write ", d->dir, "/newstate to disk, pausing: ");
 		close(fd);
 		while (unlink("previous") == -1)
 			pause3("unable to remove ", d->dir, "/previous, pausing: ");
@@ -327,22 +315,19 @@ c_write(int pos, char *buf, int len)
 	if (d->size > 0 && len >= d->size - d->bytes)
 		len = d->size - d->bytes;
 
-	if (d->size > 0 && d->bytes + len >= d->size - 2000)
-	{
+	if (d->size > 0 && d->bytes + len >= d->size - 2000) {
 		w = byte_rchr(buf, len, '\n');
 		if (w < len)
 			len = w + 1;
 	}
-	for (;;)
-	{
+	for (;;) {
 		w = write(d->fdcurrent, buf, len);
 		if (w > 0)
 			break;
 		pause3("unable to write to ", d->dir, "/current, pausing: ");
 	}
 	d->bytes += w;
-	if (d->size > 0 && d->bytes >= d->size - 2000)
-	{
+	if (d->size > 0 && d->bytes >= d->size - 2000) {
 		if (buf[w - 1] == '\n')
 			fullcurrent(d);
 	}
@@ -358,11 +343,11 @@ restart(struct cyclog *d)
 
 	if (fchdir(fdstartdir) == -1)
 		strerr_die2sys(111, FATAL, "unable to switch to starting directory: ");
-	if(old_umask != 022)
+	if (old_umask != 022)
 		umask(old_umask);
 	if (mkdir(d->dir, 0755) && errno != error_exist)
 		strerr_die4sys(111, FATAL, "unable to create directory ", d->dir, ": ");
-	if(old_umask != 022)
+	if (old_umask != 022)
 		umask(022);
 	d->fddir = open_read(d->dir);
 	if ((d->fddir == -1) || (fchdir(d->fddir) == -1))
@@ -372,13 +357,11 @@ restart(struct cyclog *d)
 	if ((d->fdlock == -1) || (lock_exnb(d->fdlock) == -1))
 		strerr_die4sys(111, FATAL, "unable to lock directory ", d->dir, ": ");
 	coe(d->fdlock);
-	if (stat("current", &st) == -1)
-	{
+	if (stat("current", &st) == -1) {
 		if (errno != error_noent)
 			strerr_die4sys(111, FATAL, "unable to stat ", d->dir, "/current: ");
 	} else
-	if (st.st_mode & 0100)
-	{
+	if (st.st_mode & 0100) {
 		fd = open_append("current");
 		if (fd == -1)
 			strerr_die4sys(111, FATAL, "unable to append to ", d->dir, "/current: ");
@@ -392,27 +375,24 @@ restart(struct cyclog *d)
 	unlink("state");
 	unlink("newstate");
 	flagprocessed = 0;
-	if (stat("processed", &st) == -1)
-	{
+	if (stat("processed", &st) == -1) {
 		if (errno != error_noent)
 			strerr_die4sys(111, FATAL, "unable to stat ", d->dir, "/processed: ");
 	} else
 	if (st.st_mode & 0100)
 		flagprocessed = 1;
-	if (flagprocessed)
-	{
+	if (flagprocessed) {
 		unlink("previous");
 		finish(d, "processed", "s");
-	} else
-	{
+	} else {
 		unlink("processed");
 		finish(d, "previous", "u");
 	}
 	finish(d, "current", "u");
-	if((fd = open_trunc("state")) == -1)
+	if ((fd = open_trunc("state")) == -1)
 		strerr_die4sys(111, FATAL, "unable to write to ", d->dir, "/state: ");
 	close(fd);
-	if((fd = open_append("current")) == -1)
+	if ((fd = open_append("current")) == -1)
 		strerr_die4sys(111, FATAL, "unable to write to ", d->dir, "/current: ");
 	if (fchmod(fd, 0644) == -1)
 		strerr_die4sys(111, FATAL, "unable to set mode of ", d->dir, "/current: ");
@@ -430,35 +410,30 @@ c_init(char **script)
 	unsigned long   num, rot, size;
 
 	cnum = 0;
-	for (i = 0; script[i]; ++i)
-	{
+	for (i = 0; script[i]; ++i) {
 		if ((script[i][0] == '.') || (script[i][0] == '/'))
 			++cnum;
 	}
-	if(!(c = (struct cyclog *) alloc(cnum * sizeof(*c))))
+	if (!(c = (struct cyclog *) alloc(cnum * sizeof(*c))))
 		strerr_die2x(111, FATAL, "out of memory");
 	d = c;
 	processor = 0;
 	num = 10;
 	size = -1;
-	for (i = 0; script[i]; ++i)
-	{
-		if (script[i][0] == 's')
-		{
+	for (i = 0; script[i]; ++i) {
+		if (script[i][0] == 's') {
 			scan_ulong(script[i] + 1, &size);
 			if (size > 0 && size < 4096)
 				size = 4096;
 			if (size > 16777215)
 				size = 16777215;
 		} else
-		if (script[i][0] == 'n')
-		{
+		if (script[i][0] == 'n') {
 			scan_ulong(script[i] + 1, &num);
 			if (num < 2)
 				num = 2;
 		} else
-		if (script[i][0] == 'r')
-		{
+		if (script[i][0] == 'r') {
 			struct itimerval timer;
 
 			scan_ulong(script[i] + 1, &rot);
@@ -471,12 +446,10 @@ c_init(char **script)
 			if (setitimer(ITIMER_REAL, &timer, NULL) == -1)
 				strerr_die2sys(111,FATAL,"setitimer: ");
 		} else
-		if (script[i][0] == '!')
-		{
+		if (script[i][0] == '!') {
 			processor = script[i] + 1;
 		} else
-		if ((script[i][0] == '.') || (script[i][0] == '/'))
-		{
+		if ((script[i][0] == '.') || (script[i][0] == '/')) {
 			d->num = num;
 			d->size = size;
 			d->processor = processor;
@@ -493,11 +466,11 @@ c_quit(void)
 {
 	int             j;
 
-	for (j = 0; j < cnum; ++j)
-	{
+	for (j = 0; j < cnum; ++j) {
 		substdio_flush(&c[j].ss);
-		while (fsync(c[j].fdcurrent) == -1)
-			pause3("unable to write ", c[j].dir, "/current to disk, pausing: ");
+		if (f_sync)
+			while (fsync(c[j].fdcurrent) == -1)
+				pause3("unable to write ", c[j].dir, "/current to disk, pausing: ");
 		while (fchmod(c[j].fdcurrent, 0744) == -1)
 			pause3("unable to set mode of ", c[j].dir, "/current, pausing: ");
 	}
@@ -539,8 +512,7 @@ flushread(int fd, char *buf, int len)
 
 	for (j = 0; j < cnum; ++j)
 		substdio_flush(&c[j].ss);
-	if (flagforcerotate)
-	{
+	if (flagforcerotate) {
 		for (j = 0; j < cnum; ++j)
 			if (c[j].bytes > 0)
 				fullcurrent(&c[j]);
@@ -549,8 +521,7 @@ flushread(int fd, char *buf, int len)
 
 	if (!len)
 		return 0;
-	if (flagexitasap)
-	{
+	if (flagexitasap) {
 		if (flagnewline)
 			return 0;
 		len = 1;
@@ -598,22 +569,18 @@ doit(char **script)
 		line[i] = '\n';
 	linelen = 0;
 	flageof = 0;
-	for (;;)
-	{
+	for (;;) {
 		for (i = 0; i < linelen; ++i)
 			line[i] = '\n';
 		linelen = 0;
-		while (linelen < 1000)
-		{
-			if (substdio_get(&ssin, &ch, 1) <= 0)
-			{
+		while (linelen < 1000) {
+			if (substdio_get(&ssin, &ch, 1) <= 0) {
 				if (!linelen)
 					return;
 				flageof = 1;
 				break;
 			}
-			if (!linelen && flagtimestamp)
-			{
+			if (!linelen && flagtimestamp) {
 				timestamp(line);
 				line[25] = ' ';
 				linelen = 26;
@@ -622,13 +589,12 @@ doit(char **script)
 				break;
 			line[linelen++] = ch;
 		}
-		if(flaglog)
+		if (flaglog)
 			flagselected = 1;
 		else
 			flagselected = 0;
 		j = 0;
-		for (i = 0; (action = script[i]); ++i)
-		{
+		for (i = 0; (action = script[i]); ++i) {
 			switch (*action)
 			{
 			case '+':
@@ -640,14 +606,11 @@ doit(char **script)
 					flagselected = 0;
 				break;
 			case 'e':
-				if (flagselected)
-				{
-					if (linelen > 200)
-					{
+				if (flagselected) {
+					if (linelen > 200) {
 						substdio_put(subfderr, line, 200);
 						substdio_puts(subfderr, "...\n");
-					} else
-					{
+					} else {
 						substdio_put(subfderr, line, linelen);
 						substdio_puts(subfderr, "\n");
 					}
@@ -655,10 +618,8 @@ doit(char **script)
 				}
 				break;
 			case '=':
-				if (flagselected)
-				{
-					for (;;)
-					{
+				if (flagselected) {
+					for (;;) {
 						while (seek_begin(f[i]) == -1)
 							pause3("unable to move to beginning of ", action + 1, ", pausing: ");
 						if (write(f[i], line, 1001) == 1001)
@@ -674,33 +635,26 @@ doit(char **script)
 				break;
 			}
 		}
-		for (j = 0; j < cnum; ++j)
-		{
+		for (j = 0; j < cnum; ++j) {
 			if (c[j].flagselected)
 				substdio_put(&c[j].ss, line, linelen);
 		}
-		if (linelen == 1000)
-		{
-			for (;;)
-			{
-				if (substdio_get(&ssin, &ch, 1) <= 0)
-				{
+		if (linelen == 1000) {
+			for (;;) {
+				if (substdio_get(&ssin, &ch, 1) <= 0) {
 					flageof = 1;
 					break;
 				}
 				if (ch == '\n')
 					break;
-				for (j = 0; j < cnum; ++j)
-				{
+				for (j = 0; j < cnum; ++j) {
 					if (c[j].flagselected)
 						substdio_put(&c[j].ss, &ch, 1);
 				}
 			}
 		}
-		for (j = 0; j < cnum; ++j)
-		{
-			if (c[j].flagselected)
-			{
+		for (j = 0; j < cnum; ++j) {
+			if (c[j].flagselected) {
 				ch = '\n';
 				substdio_put(&c[j].ss, &ch, 1);
 			}
@@ -714,9 +668,9 @@ int
 main(int argc, char **argv)
 {
 
+	f_sync = env_get("NOFSYNC") ? 0 : 1;
 	old_umask = umask(022);
-	fdstartdir = open_read(".");
-	if (fdstartdir == -1)
+	if ((fdstartdir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to switch to current directory: ");
 	coe(fdstartdir);
 	sig_block(sig_term);

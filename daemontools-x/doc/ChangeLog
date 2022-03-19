@@ -173,6 +173,8 @@ o setuidgid: Feature to set additional groups using -g option
 74. qmailctl.sh: Fix restart on FreeBSD
 - 18/03/2022
 75. svps.in: added -h,--HUP option to send HUP to svscan
+- 20/03/2022
+76. multilog.c: Added NOFSYNC env variable to turn off fsync
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
