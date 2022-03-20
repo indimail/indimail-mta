@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.98 2022-03-16 19:58:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.98 2022-03-20 22:59:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -179,6 +179,7 @@ sigint()
 			return;
 		}
 		loglock_open(argv0, 1);
+		log5("info: ", argv0, ": ", queuedesc, ": loglock enabled\n");
 		chdir_toqueue();
 	} else {
 		if (loglock_fd != -1) {
@@ -2573,7 +2574,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.98 2022-03-16 19:58:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.98 2022-03-20 22:59:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2583,7 +2584,7 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.98  2022-03-16 19:58:33+05:30  Cprogrammer
+ * Revision 1.98  2022-03-20 22:59:00+05:30  Cprogrammer
  * added queue ident in logs for matchup (qmailanalog to handle multi-queue)
  *
  * Revision 1.97  2022-03-06 11:05:09+05:30  Cprogrammer
