@@ -137,6 +137,7 @@ Release 2.14.1 Start 21/09/2021
 - 20/03/2022
 75. qmail-todo.c: use mq_timedreceive() for TODO_CHUNK_SIZE to work
 76. qmail-lspawn.c: bypass indimail if AUTHSELF is not set
+77. qmail-showctl.c: -E option for displaying client env variables
 
 * 
 Release 2.14.0 Start 18/07/2021
