@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-showctl.c,v $
- * Revision 1.5  2022-03-20 16:00:29+05:30  Cprogrammer
+ * Revision 1.5  2022-03-20 16:28:45+05:30  Cprogrammer
  * -E option for displaying client env variables
  *
  * Revision 1.4  2022-01-30 09:14:04+05:30  Cprogrammer
@@ -431,7 +431,8 @@ valid_control_files(char *fn)
 		"maxrecipients", "maxcmdlen", "defaultdelivery", "blackholedpatterns",
 		"blackholedrcptpatterns", "goodrcptpatterns", "outgoingip", "domainbindings",
 		"bindroutes", "badextpatterns", "holdremote", "holdlocal", "signaturedomains",
-		"msgqueuelen", "msgqueuesize", "global_vars", "qfilters",
+		"msgqueuelen", "msgqueuesize", "global_vars", "qfilters", ".qmail_control",
+		".indimail_control",
 #ifdef HAVESRS
 		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
 #endif
@@ -873,7 +874,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.5 2022-03-20 16:00:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.5 2022-03-20 16:28:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
