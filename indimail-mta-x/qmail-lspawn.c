@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-lspawn.c,v 1.41 2022-03-16 19:57:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-lspawn.c,v 1.42 2022-03-20 12:29:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -141,9 +141,8 @@ nughde_get(char *local)
 		if (!(cdbdir = env_get("ASSIGNDIR")))
 			cdbdir = auto_assign;
 	}
-	if (!stralloc_copys(&cdbfile, cdbdir))
-		_exit (QLX_NOMEM);
-	if (cdbfile.s[cdbfile.len - 1] != '/' && !stralloc_cats(&cdbfile, "/"))
+	if (!stralloc_copys(&cdbfile, cdbdir) ||
+			(cdbfile.s[cdbfile.len - 1] != '/' && !stralloc_cats(&cdbfile, "/")))
 		_exit (QLX_NOMEM);
 	if (!stralloc_catb(&cdbfile, "cdb", 4) ||
 			!stralloc_copys(&lower, "!") ||
@@ -291,6 +290,8 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 		_exit (-1);
 #ifdef ENABLE_VIRTUAL_PKG
 	/*- indimail */
+	if (!env_get("AUTHSELF"))
+		goto noauthself;
 	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -309,7 +310,7 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 	loadLibrary(&phandle, libptr, &f, 0);
 	if (f)
 		_exit (-3);
-	if (!env_get("AUTHSELF") || !phandle)
+	if (!phandle)
 		goto noauthself;
 	if (!(isvirtualdomain = getlibObject(libptr, &phandle, "isvirtualdomain", 0)) ||
 			!(iopen = getlibObject(libptr, &phandle, "iopen", 0)) ||
@@ -374,9 +375,8 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 					!stralloc_append(&save, "-") ||
 					!stralloc_catb(&save, ptr, len) || /*- copy user portion */
 					!stralloc_catb(&save, tptr, f + 1) || /*- copy @domain */
-					!stralloc_0(&save))
-				_exit (-1);
-			if (!stralloc_copyb(&user, ptr, len) || /*- copy user portion */
+					!stralloc_0(&save) ||
+					!stralloc_copyb(&user, ptr, len) || /*- copy user portion */
 					!stralloc_0(&user))
 				_exit (-1);
 			recip = save.s;
@@ -396,10 +396,8 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 						!stralloc_cats(&pwstruct, user.s) ||
 						!stralloc_append(&pwstruct, "@") ||
 						!stralloc_cats(&pwstruct, recip + at + 1) ||
-						!stralloc_0(&pwstruct))
-					_exit (-1);
-				else
-				if (!env_put(pwstruct.s))
+						!stralloc_0(&pwstruct) ||
+						!env_put(pwstruct.s))
 					_exit (-1);
 			} else {
 				(*iclose) ();
@@ -498,7 +496,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.41 2022-03-16 19:57:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.42 2022-03-20 12:29:02+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -506,6 +504,9 @@ getversion_qmail_lspawn_c()
 
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.42  2022-03-20 12:29:02+05:30  Cprogrammer
+ * bypass indimail if AUTHSELF is not set
+ *
  * Revision 1.41  2022-03-16 19:57:57+05:30  Cprogrammer
  * made copy_pwstruct() return type void
  *
