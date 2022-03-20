@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.7  2022-03-20 16:34:23+05:30  Cprogrammer
+ * refactored batv code
+ *
  * Revision 1.7  2021-09-21 13:32:31+05:30  Cprogrammer
  * refactored batv code
  *
@@ -23,7 +26,6 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #ifdef BATV
 #include <unistd.h>
 #include <ctype.h>
@@ -291,7 +293,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.7 2021-09-21 13:32:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.7 2022-03-20 16:34:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
