@@ -159,7 +159,9 @@ If
 receives a HUP signal,
 it will reread
 .IR concurrencylocal ,
+.IR concurrencylocal.qmta ,
 .IR concurrencyremote ,
+.IR concurrencyremote.qmta ,
 .IR locals ,
 .IR virtualdomains ,
 .IR todointerval ,
@@ -254,11 +256,33 @@ If 0, local deliveries will be put on hold.
 is limited at compile time to SPAWN.
 
 .TP 5
+.I concurrencyl.qmta
+Maximum number of simultaneous local delivery attempts for the queue
+\fIqmta\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
+variable, referring to the path of the queue. Here \fIqmta\fR refers to
+the basename of the queue path.
+Default: 10.
+If 0, local deliveries will be put on hold.
+.I concurrencyl.qmta
+is limited at compile time to SPAWN.
+
+.TP 5
 .I concurrencyremote
 Maximum number of simultaneous remote delivery attempts.
 Default: 20.
 If 0, remote deliveries will be put on hold.
 .I concurrencyremote
+is limited at compile time to SPAWN.
+
+.TP 5
+.I concurrencyr.qmta
+Maximum number of simultaneous remote delivery attempts for the queue
+\fIqmta\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
+variable, referring to the path of the queue. Here \fIqmta\fR refers to
+the basename of the queue path.
+Default: 20.
+If 0, remote deliveries will be put on hold.
+.I concurrencyr.qmta
 is limited at compile time to SPAWN.
 
 .TP 5

@@ -1,5 +1,9 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.16  2022-03-24 13:16:58+05:30  Cprogrammer
+ * added missing loading of concurrencylocal, concurrencyremote
+ * added holdjobs functionality
+ *
  * Revision 1.15  2022-03-13 20:58:59+05:30  Cprogrammer
  * display bigtodo value in logs on startup
  * fixed SIGSEGV
@@ -148,6 +152,14 @@ static int      chanfdin[CHANNELS];
 static int      chanskip[CHANNELS] = { 10, 20 };
 static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
 static char    *chanstatusmsg[CHANNELS] = { " local ", " remote " };
+static char    *chanjobsheldmsg[CHANNELS] = { /* NJL 1998/05/03 */
+	"local deliveries temporarily held\n",
+	"remote deliveries temporarily held\n"
+};
+static char    *chanjobsunheldmsg[CHANNELS] = {	/* NJL 1998/05/03 */
+	"local deliveries resumed\n",
+	"remote deliveries resumed\n"
+};
 static char    *tochan[CHANNELS] = { " to local ", " to remote " };
 static prioq    pqdone = { 0 };						/*- -todo +info; HOPEFULLY -local -remote */
 static prioq    pqchan[CHANNELS] = { {0} , {0} };	/*- pqchan 0: -todo +info +local ?remote */
@@ -1085,7 +1097,9 @@ typedef struct DEL {
 unsigned long   masterdelid = 1;
 unsigned int    concurrency[CHANNELS] = { 10, 20 };
 unsigned int    concurrencyused[CHANNELS] = { 0, 0 };
+unsigned int    holdjobs[CHANNELS] = { 0, 0 };	/* Booleans: hold deliveries NJL 1998/05/03 */
 static DEL     *del[CHANNELS];
+static stralloc concurrencyf = { 0 };
 static stralloc dline[CHANNELS];
 static char     delbuf[2048];
 
@@ -1099,6 +1113,8 @@ del_status()
 		strnum1[fmt_ulong(strnum1, (unsigned long) concurrencyused[c])] = 0;
 		strnum2[fmt_ulong(strnum2, (unsigned long) concurrency[c])] = 0;
 		log4_noflush(chanstatusmsg[c], strnum1, "/", strnum2);
+		if (holdjobs[c]) /*NJL*/
+			log1_noflush(" (held)"); /*NJL*/
 	}
 	if (flagexitasap)
 		log1(" exitasap");
@@ -1132,7 +1148,7 @@ del_canexit()
 	int             c;
 
 	for (c = 0; c < CHANNELS; ++c) {
-		if (flagspawnalive[c]) { /* if dead, nothing we can do about its jobs */
+		if (flagspawnalive[c] && !holdjobs[c]) { /* if dead or held /NJL/, nothing we can do about its jobs */
 			if (concurrencyused[c]) /*- stay alive if delivery jobs are present */
 				return 0;
 		}
@@ -1143,7 +1159,7 @@ del_canexit()
 static int
 del_avail(int c)
 {
-	return flagspawnalive[c] && comm_canwrite(c) && (concurrencyused[c] < concurrency[c]);
+	return flagspawnalive[c] && comm_canwrite(c) && !holdjobs[c] && (concurrencyused[c] < concurrency[c]);	/* NJL 1998/07/24 */
 }
 
 static void
@@ -1154,6 +1170,8 @@ del_start(int j, seek_pos mpos, char *recip)
 	c = jo[j].channel;
 	if (!flagspawnalive[c])
 		return;
+	if (holdjobs[c])
+		return;	/* NJL 1998/05/03 */
 	for (i = 0; i < concurrency[c]; ++i)
 		if (!del[c][i].used)
 			break;
@@ -2248,6 +2266,61 @@ do_controls()
 		return 0;
 	if (control_readint((int *) &lifetime, "queuelifetime") == -1)
 		return 0;
+	/*- read concurrencylocal */
+	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1)
+		return 0;
+	/*- per queue concurrency */
+	if (!stralloc_copys(&concurrencyf, "concurrencyl.") ||
+			!stralloc_cats(&concurrencyf, queuedesc) ||
+			!stralloc_0(&concurrencyf))
+		return 0;
+	if (control_readint((int *) &concurrency[0], concurrencyf.s) == -1)
+		return 0;
+	/*- read concurrencyremote */
+	if (control_readint((int *) &concurrency[1], "concurrencyremote") == -1)
+		return 0;
+	/*- per queue concurrency */
+	if (!stralloc_copys(&concurrencyf, "concurrencyr.") ||
+			!stralloc_cats(&concurrencyf, queuedesc) ||
+			!stralloc_0(&concurrencyf))
+		return 0;
+	if (control_readint((int *) &concurrency[1], concurrencyf.s) == -1)
+		return 0;
+
+	if (control_readint((int *) &holdjobs[0], "holdlocal") == -1)
+		return 0; /*NJL*/
+	if (control_readint((int *) &holdjobs[1], "holdremote") == -1)
+		return 0; /*NJL*/
+	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1)
+		return 0;
+#ifdef USE_FSYNC
+	if (control_readint(&use_syncdir, "conf-syncdir") == -1)
+		return 0;
+	if (control_readint(&use_fsync, "conf-fsync") == -1)
+		return 0;
+	if (use_syncdir > 0) {
+		if (!env_put2("USE_SYNCDIR", "1"))
+			return 0;
+	} else
+	if (!use_syncdir) {
+		if (!env_unset("USE_SYNCDIR"))
+			return 0;
+	}
+	if (use_fsync > 0) {
+		if (!env_put2("USE_FSYNC", "1"))
+			return 0;
+	} else
+	if (!use_fsync) {
+		if (!env_unset("USE_FSYNC"))
+			return 0;
+	}
+#endif
+#ifdef HAVESRS
+	if (control_readline(&srs_domain, "srs_domain") == -1)
+		return 0;
+	if (srs_domain.len && !stralloc_0(&srs_domain))
+		return 0;
+#endif
 	if (control_readint(&bouncemaxbytes, "bouncemaxbytes") == -1)
 		return 0;
 #ifdef BOUNCELIFETIME
@@ -2279,8 +2352,6 @@ do_controls()
 	if (control_rldef(&doublebouncesubject, "doublebouncesubject", 0, "failure notice") != 1)
 		return 0;
 
-	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1)
-		return 0;
 	if (control_readfile(&locals, "locals", 1) != 1)
 		return 0;
 	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
@@ -2311,28 +2382,6 @@ do_controls()
 			return 0;
 		break;
 	}
-#ifdef USE_FSYNC
-	if (control_readint(&use_syncdir, "conf-syncdir") == -1)
-		return 0;
-	if (control_readint(&use_fsync, "conf-fsync") == -1)
-		return 0;
-	if (use_syncdir > 0) {
-		if (!env_put2("USE_SYNCDIR", "1"))
-			return 0;
-	} else
-	if (!use_syncdir) {
-		if (!env_unset("USE_SYNCDIR"))
-			return 0;
-	}
-	if (use_fsync > 0) {
-		if (!env_put2("USE_FSYNC", "1"))
-			return 0;
-	} else
-	if (!use_fsync) {
-		if (!env_unset("USE_FSYNC"))
-			return 0;
-	}
-#endif
 	if (control_readint(&todo_interval, "todointerval") == -1)
 		return 0;
 	return 1;
@@ -2355,6 +2404,8 @@ static void
 regetcontrols()
 {
 	int             r;
+	int             c; /*NJL*/
+	int             newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
 
 	if (control_readfile(&newlocals, "locals", 1) != 1) {
 		log3("alert: ", argv0, ": unable to reread locals\n");
@@ -2376,24 +2427,19 @@ regetcontrols()
 		log3("alert: ", argv0, ": unable to reread concurrencyremote\n");
 		return;
 	}
+	/*- Add "holdlocal/holdremote" flags - NJL 1998/05/03 */
+	if (control_readint(&newholdjobs[0], "holdlocal") == -1) {
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdlocal\n");
+		return;
+	}
+	if (control_readint(&newholdjobs[1], "holdremote") == -1) {
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdremote\n");
+		return;
+	}
 	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1) {
 		log3("alert: ", argv0, ": unable to reread envnoathost\n");
 		return;
 	}
-	constmap_free(&maplocals);
-	while (!stralloc_copy(&locals, &newlocals))
-		nomem(argv0);
-	while (!constmap_init(&maplocals, locals.s, locals.len, 0))
-		nomem(argv0);
-	constmap_free(&mapvdoms);
-	if (r) {
-		while (!stralloc_copy(&vdoms, &newvdoms))
-			nomem(argv0);
-		while (!constmap_init(&mapvdoms, vdoms.s, vdoms.len, 1))
-			nomem(argv0);
-	} else
-		while (!constmap_init(&mapvdoms, "", 0, 1))
-			nomem(argv0);
 #ifdef USE_FSYNC
 	if (control_readint(&use_syncdir, "conf-syncdir") == -1) {
 		log3("alert: ", argv0, ": unable to reread conf-syncdir\n");
@@ -2420,6 +2466,31 @@ regetcontrols()
 			nomem(argv0);
 	}
 #endif
+	for (c = 0; c < CHANNELS; c++) {
+		if (holdjobs[c] != newholdjobs[c]) {
+			holdjobs[c] = newholdjobs[c];
+			if (holdjobs[c])
+				log3(chanjobsheldmsg[c], " ", queuedesc);
+			else {
+				log3(chanjobsunheldmsg[c], " ", queuedesc);
+				flagrunasap = 1; /*- run all jobs now */
+			}
+		}
+	}
+	constmap_free(&maplocals);
+	while (!stralloc_copy(&locals, &newlocals))
+		nomem(argv0);
+	while (!constmap_init(&maplocals, locals.s, locals.len, 0))
+		nomem(argv0);
+	constmap_free(&mapvdoms);
+	if (r) {
+		while (!stralloc_copy(&vdoms, &newvdoms))
+			nomem(argv0);
+		while (!constmap_init(&mapvdoms, vdoms.s, vdoms.len, 1))
+			nomem(argv0);
+	} else
+		while (!constmap_init(&mapvdoms, "", 0, 1))
+			nomem(argv0);
 }
 
 static void
@@ -2704,7 +2775,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.15 2022-03-13 20:58:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.16 2022-03-24 13:16:58+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
