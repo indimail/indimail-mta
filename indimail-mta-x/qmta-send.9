@@ -165,6 +165,8 @@ it will reread
 .IR locals ,
 .IR virtualdomains ,
 .IR todointerval ,
+.IR holdlocal ,
+.IR holdremote ,
 .IR envnoathost ,
 .IR conf-syncdir ,
 and
@@ -444,6 +446,26 @@ if a domain is listed in
 .IR locals ,
 .I virtualdomains
 does not apply.
+
+.TP 5
+.I holdlocal
+A boolean parameter indicating whether mail for local
+hosts should be queued without delivery.  Zero indicates
+delivery as normal; any other value causes local mail to
+be held.
+Default:
+.IR zero
+
+.TP 5
+.I holdremote
+A boolean parameter indicating whether mail for remote
+hosts should be queued without delivery.  Zero indicates
+delivery as normal; any other value causes remote mail to
+be held.  This is provided to permit use of qmail in a 
+dial-up environment when the remote delivery path may not
+always be available, as an alternative to the use of serialmail.
+Default:
+.IR zero
 
 .TP 5
 .I todointerval
