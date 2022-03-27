@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.82 2022-03-16 21:37:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.83 2022-03-27 20:15:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -42,13 +42,15 @@
 #include "matchregex.h"
 #include "auto_split.h"
 #include "auto_prefix.h"
+#include "auto_qmail.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
 #ifdef HASLIBRT
 #include "qscheduler.h"
-#include "qmail.h"
 #endif
+
+#include "getqueue.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
@@ -92,6 +94,9 @@ static stralloc envheaders = { 0 };
 void
 cleanup()
 {
+	int             e;
+
+	e = errno;
 	if (flagmadeintd) {
 		seek_trunc(intdfd, 0);
 		unlink(intdfn);
@@ -100,6 +105,7 @@ cleanup()
 		seek_trunc(messfd, 0);
 		unlink(messfn);
 	}
+	errno = e;
 }
 
 no_return void
@@ -709,14 +715,15 @@ main()
 {
 	int             token_len, exclude = 0, include = 0, loghead = 0, line_brk_excl = 1,
 					line_brk_incl = 1, in_header = 1, line_brk_log = 1, logfd = -1, field_len,
-					itoken_len, fastqueue;
-#ifdef USE_FSYNC
+					itoken_len, fastqueue, queueNo;
+#if defined(USE_FSYNC) && defined(LINUX)
 	int             fd;
 #endif
+	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 	unsigned int    len, originipfield = 0;
 	char            tmp[FMT_ULONG];
 	char            ch;
-	char           *ptr, *qqeh, *tmp_ptr;
+	char           *ptr, *qqeh, *tmp_ptr, *qbase;
 	struct stat     st;
 #ifdef HASLIBRT
 	int             i;
@@ -752,8 +759,46 @@ main()
 			flagarchive = 1;
 #endif
 	}
-	if (!(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue"; /*- single queue like qmail */
+	starttime = now();
+	if (!(queuedir = env_get("QUEUEDIR"))) {
+#ifdef HASLIBRT
+		if (!(ptr = env_get("DYNAMIC_QUEUE")))
+			queueNo = queueNo_from_env(starttime);
+		else {
+            if (env_get("DYNAMIC_QUEUE_TIME"))
+				queueNo = queueNo_from_env(starttime);
+			else
+			if ((queueNo = queueNo_from_shm("qmail-queue", starttime)) == -1)
+				queueNo = queueNo_from_env(starttime);
+		}
+#else
+		queueNo = queueNo_from_env();
+#endif
+		if (!(qbase = env_get("QUEUE_BASE"))) {
+			switch (control_readfile(&QueueBase, "queue_base", 0))
+			{
+			case -1:
+				_exit(55);
+				break;
+			case 0:
+				if (!stralloc_copys(&QueueBase, auto_qmail) ||
+						!stralloc_catb(&QueueBase, "/queue", 6) ||
+						!stralloc_0(&QueueBase))
+					_exit(51);
+				qbase = QueueBase.s;
+				break;
+			case 1:
+				qbase = QueueBase.s;
+				break;
+			}
+		}
+		if (!stralloc_copys(&Queuedir, qbase) ||
+				!stralloc_cats(&Queuedir, "/queue") ||
+				!stralloc_catb(&Queuedir, tmp, fmt_ulong(tmp, queueNo)) ||
+				!stralloc_0(&Queuedir))
+			_exit(51);
+		queuedir = Queuedir.s;
+	}
 	if (chdir(queuedir) == -1)
 		die(62);
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
@@ -773,7 +818,6 @@ main()
 #endif
 	mypid = getpid();
 	uid = getuid();
-	starttime = now();
 	datetime_tai(&dt, starttime);
 	received_setup();
 	sig_pipeignore();
@@ -1105,7 +1149,7 @@ main()
 		cleanup();
 		die(66);
 	}
-#ifdef USE_FSYNC
+#if defined(USE_FSYNC) && defined(LINUX) /*- asynchronous nature of link() happens only on Linux */
 	if (use_syncdir > 0) {
 		if ((fd = open(todofn, O_RDONLY)) == -1) {
 			/*- 
@@ -1139,15 +1183,13 @@ main()
 	triggerpull();
 #endif
 	die(0);
-	/*- Not reached */
-	return (0);
 }
 
 #ifndef lint
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.82 2022-03-16 21:37:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.83 2022-03-27 20:15:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1155,6 +1197,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.83  2022-03-27 20:15:01+05:30  Cprogrammer
+ * handle multi-queue without qmail-multi helper
+ *
  * Revision 1.82  2022-03-16 21:37:36+05:30  Cprogrammer
  * FASTQUEUE to bypass features for faster inject speed
  *
