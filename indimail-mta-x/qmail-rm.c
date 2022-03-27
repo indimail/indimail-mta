@@ -1,10 +1,7 @@
 /*
  * $Log: qmail-rm.c,v $
- * Revision 1.25  2021-10-21 12:41:08+05:30  Cprogrammer
- * eliminated extra variables
- *
- * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
+ * Revision 1.24  2022-03-27 20:21:52+05:30  Cprogrammer
+ * define non returning functions as no_return
  *
  * Revision 1.23  2021-05-29 23:50:55+05:30  Cprogrammer
  * fixed qbase path
@@ -195,7 +192,6 @@
 #include <open.h>
 #include <fmt.h>
 #include <env.h>
-#include <scan.h>
 #include <sgetopt.h>
 #include <noreturn.h>
 #include "control.h"
@@ -203,7 +199,7 @@
 #include "getEnvConfig.h"
 #include "auto_qmail.h"
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.25 2021-10-21 12:41:08+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.24 2022-03-27 20:21:52+05:30 Cprogrammer Exp mbhangui $";
 
 /*- many linux fcntl.h's seem to be broken */
 #ifndef O_NOFOLLOW
@@ -524,14 +520,8 @@ main(int argc, char **argv)
 		logerrf("\n");
 		_exit(111);
 	}
-	if (!(ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(ptr, &qcount);
-	if (!(ptr = env_get("QUEUE_START")))
-		qstart = 1;
-	else
-		scan_int(ptr, &qstart);
+	getEnvConfigInt(&qcount, "QUEUE_COUNT", QUEUE_COUNT);
+	getEnvConfigInt(&qstart, "QUEUE_START", QUEUE_START);
 	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
 		if (!stralloc_copys(&Queuedir, qbase) ||
 				!stralloc_cats(&Queuedir, "/queue") ||
@@ -1210,7 +1200,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.25 2021-10-21 12:41:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.24 2022-03-27 20:21:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
