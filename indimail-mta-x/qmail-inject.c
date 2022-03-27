@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.46  2022-03-27 20:10:47+05:30  Cprogrammer
+ * display system error when qmail_open() fails
+ *
  * Revision 1.45  2022-01-30 08:39:45+05:30  Cprogrammer
  * allow disabling of databytes check
  *
@@ -154,6 +157,7 @@
 #include <byte.h>
 #include <token822.h>
 #include <noreturn.h>
+#include <error.h>
 #include "hfield.h"
 #include "control.h"
 #include "qmail.h"
@@ -315,7 +319,9 @@ die_invalid(stralloc *sa)
 no_return void
 die_qqt()
 {
-	substdio_putsflush(subfderr, "qmail-inject: fatal: unable to run qmail-queue\n");
+	substdio_puts(subfderr, "qmail-inject: fatal: unable to run qmail-queue: ");
+	substdio_puts(subfderr, error_str(errno));
+	substdio_putsflush(subfderr, "\n");
 	temp();
 }
 
@@ -1200,7 +1206,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.45 2022-01-30 08:39:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.46 2022-03-27 20:10:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
