@@ -1,5 +1,8 @@
 /*
  * $Log: process_queue.c,v $
+ * Revision 1.5  2022-03-27 20:09:13+05:30  Cprogrammer
+ * set qstart variable from conf-queue
+ *
  * Revision 1.4  2021-10-21 12:37:54+05:30  Cprogrammer
  * added qmta queue
  *
@@ -65,7 +68,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 	else
 		scan_int(ptr, &qcount);
 	if (!(ptr = env_get("QUEUE_START")))
-		qstart = 1;
+		qstart = QUEUE_START;
 	else
 		scan_int(ptr, &qstart);
 	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
@@ -116,7 +119,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 void
 getversion_process_queue_c()
 {
-	static char    *x = "$Id: process_queue.c,v 1.4 2021-10-21 12:37:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: process_queue.c,v 1.5 2022-03-27 20:09:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
