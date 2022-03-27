@@ -1,12 +1,10 @@
 /*
- * $Id: qmulti.c,v 1.60 2022-03-12 13:58:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.61 2022-03-27 20:22:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
 #ifdef HASLIBRT
-#include <sys/mman.h>
-#include <sys/stat.h>  /* For mode constants */
-#include <fcntl.h>     /* For O_* constants */
+#include <str.h>
 #endif
 #include <env.h>
 #include <stralloc.h>
@@ -29,13 +27,8 @@
 #include "auto_qmail.h"
 #include "auto_prefix.h"
 #include "control.h"
+#include "getqueue.h"
 #include "qmulti.h"
-#ifdef HASLIBRT
-#include <str.h>
-#include "qmail.h"
-#include "qscheduler.h"
-#include "custom_error.h"
-#endif
 
 int
 getfreespace(char *filesystem)
@@ -63,90 +56,17 @@ getfreespace(char *filesystem)
 	return (0);
 }
 
-#ifdef HASLIBRT
-int
-queueNo_from_shm(char **argv)
-{
-	int             shm, i, j, x, min, n = 1, qcount;
-	int             q[4];
-	char            shm_name[FMT_ULONG + 6];
-	char           *s, *ptr;
-
-	i = str_rchr(argv[0], '/');
-	ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
-	/*- get queue count */
-	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1) {
-		if (errno == error_noent)
-			return -1;
-		custom_error(ptr, "Z", "unable to open POSIX shared memory segment /qscheduler", 0, "X.3.0");
-	}
-	if (read(shm, (char *) &qcount, sizeof(int)) == -1)
-		custom_error(ptr, "Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
-	close(shm);
-	/*- get queue with lowest concurrency load  */
-	for (j = 0; j < qcount; j++) {
-		s = shm_name;
-		i = fmt_str(s, "/queue");
-		s += i;
-		i = fmt_int(s, j + 1);
-		s += i;
-		*s++ = 0;
-		i = 0;
-		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1)
-			custom_error(ptr, "Z", "failed to open POSIX shared memory segment ", shm_name, "X.3.0");
-		if (read(shm, (char *) q, sizeof(int) * 4) == -1)
-			custom_error(ptr, "Z", "failed to read POSIX shared memory segment ", shm_name, "X.3.0");
-		close(shm);
-		/*-
-		 * q[0] - concurrencyusedlocal
-		 * q[1] - concurrencyusedremote
-		 * q[2] - concurrencylocal
-		 * q[3] - concurrencyremote
-		 */
-		if (!q[2] || !q[3])
-			continue;
-		x = q[0] * 100 /q[2] > q[1] * 100 /q[3] ? q[0] * 100/q[2] : q[1] * 100/q[3];
-		if (!j) {
-			min = x;
-			n = 1;
-			continue;
-		}
-		if (x < min) {
-			min = x;
-			n = j + 1;
-		}
-	}
-	return n;
-}
-#endif
-
-int
-queueNo_from_env()
-{
-	char           *ptr;
-	int             qcount, qstart;
-
-	if (!(ptr = env_get("QUEUE_COUNT")))
-		qcount = QUEUE_COUNT;
-	else
-		scan_int(ptr, &qcount);
-	if (!(ptr = env_get("QUEUE_START")))
-		qstart = 1;
-	else
-		scan_int(ptr, &qstart);
-	return ((now() % qcount) + qstart);
-}
-
 no_return int
 qmulti(char *queue_env, int argc, char **argv)
 {
 	char            strnum[FMT_ULONG];
 	char           *ptr, *qbase;
-	int             queueNo;
+	int             i, queueNo;
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 	char           *qqargs[3] = { 0, 0, NULL };
 	char           *binqqargs[2] = { 0, NULL };
 	stralloc        q = {0};
+	static datetime_sec    starttime;
 
 	if (chdir("/") == -1)
 		_exit(63);
@@ -175,14 +95,17 @@ qmulti(char *queue_env, int argc, char **argv)
 			}
 		}
 #ifdef HASLIBRT
-		if (!(ptr = env_get("DYNAMIC_QUEUE")))
-			queueNo = queueNo_from_env();
+		i = str_rchr(argv[0], '/');
+		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
+		starttime = now();
+		if (!(env_get("DYNAMIC_QUEUE")))
+			queueNo = queueNo_from_env(starttime);
 		else {
-			if ((queueNo = queueNo_from_shm(argv)) == -1)
-				queueNo = queueNo_from_env();
+			if ((queueNo = queueNo_from_shm(ptr, starttime)) == -1)
+				queueNo = queueNo_from_env(starttime);
 		}
 #else
-		queueNo = queueNo_from_env();
+		queueNo = queueNo_from_env(starttime);
 #endif
 		if (!stralloc_copys(&Queuedir, "QUEUEDIR=") ||
 				!stralloc_cats(&Queuedir, qbase) ||
@@ -278,7 +201,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.60 2022-03-12 13:58:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.61 2022-03-27 20:22:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -287,6 +210,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.61  2022-03-27 20:22:29+05:30  Cprogrammer
+ * moved queueNo_from_env(), queueNo_from_shm() to getqueue.c
+ *
  * Revision 1.60  2022-03-12 13:58:23+05:30  Cprogrammer
  * use static queue if /qscheduler shared memory doesn't exist
  *
