@@ -1,105 +1,5 @@
 /*
- * $Log: qmail-qread.c,v $
- * Revision 1.41  2022-03-12 15:30:31+05:30  Cprogrammer
- * added -i option to display dynamic queue information
- *
- * Revision 1.41  2022-03-12 15:19:41+05:30  Cprogrammer
- * added -i option to display dynamic queue information
- *
- * Revision 1.40  2022-01-30 08:42:40+05:30  Cprogrammer
- * added -s option to display only counts with -c option
- * allow configurable big/small todo/intd
- *
- * Revision 1.39  2021-10-21 14:42:22+05:30  Cprogrammer
- * chdir to auto_qmail instead of auto_sysconfdir
- *
- * Revision 1.38  2021-06-28 17:06:33+05:30  Cprogrammer
- * use process_queue to process all queues
- *
- * Revision 1.37  2021-06-27 10:45:09+05:30  Cprogrammer
- * moved conf_split variable to fmtqfn.c
- *
- * Revision 1.36  2021-06-05 12:51:37+05:30  Cprogrammer
- * process special queue "slowq"
- *
- * Revision 1.35  2021-05-29 23:50:11+05:30  Cprogrammer
- * fixed qbase path
- *
- * Revision 1.34  2021-05-26 10:45:51+05:30  Cprogrammer
- * handle access() error other than ENOENT
- *
- * Revision 1.33  2021-05-16 00:46:51+05:30  Cprogrammer
- * limit conf_split to compile time value in conf-split
- *
- * Revision 1.32  2021-05-13 14:44:12+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.31  2021-05-12 15:49:49+05:30  Cprogrammer
- * set conf_split from CONFSPLIT env variable
- *
- * Revision 1.30  2020-11-24 13:47:14+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.29  2020-04-04 12:13:55+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.28  2019-06-07 11:26:32+05:30  Cprogrammer
- * replaced getopt() with subgetopt()
- *
- * Revision 1.27  2016-06-13 17:49:11+05:30  Cprogrammer
- * removed ifdef indimail
- *
- * Revision 1.26  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.25  2016-01-29 11:55:52+05:30  Cprogrammer
- * use defaultqueue to set env variables and set QUEUE variables
- *
- * Revision 1.24  2011-07-29 09:29:40+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.23  2011-02-12 15:35:36+05:30  Cprogrammer
- * added usage() function
- *
- * Revision 1.22  2010-07-15 08:24:44+05:30  Cprogrammer
- * ability to toggle local, remote queues when displaying counts
- *
- * Revision 1.21  2010-05-20 11:28:46+05:30  Cprogrammer
- * added queue count functionality of qmail-qstat
- *
- * Revision 1.20  2010-02-17 10:38:55+05:30  Cprogrammer
- * removed compiler warning
- *
- * Revision 1.19  2010-02-10 08:58:43+05:30  Cprogrammer
- * use -DMULTI_QUEUE to use multiple queues
- *
- * Revision 1.18  2009-11-09 19:55:08+05:30  Cprogrammer
- * Use control file queue_base to process multiple indimail queues
- *
- * Revision 1.17  2009-09-08 13:32:36+05:30  Cprogrammer
- * define default value for QUEUE_COUNT
- *
- * Revision 1.16  2007-12-20 12:49:10+05:30  Cprogrammer
- * removed compiler warnings
- *
- * Revision 1.15  2005-03-03 14:37:04+05:30  Cprogrammer
- * assign queuedir after stralloc operation
- *
- * Revision 1.14  2004-10-22 20:33:14+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.13  2004-10-22 15:37:43+05:30  Cprogrammer
- * replaced readwrite.h with unistd.h
- *
- * Revision 1.12  2004-10-09 00:28:12+05:30  Cprogrammer
- * use stralloc variable for queuedir
- *
- * Revision 1.11  2004-09-22 23:13:00+05:30  Cprogrammer
- * replaced atoi() with scan_int()
- *
- * Revision 1.10  2004-07-17 21:21:14+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail-qread.c,v 1.42 2022-03-27 20:12:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -264,6 +164,9 @@ usage()
 	substdio_puts(subfdout, "-c - Display Counts\n\t");
 	substdio_puts(subfdout, "-l - Display local  Queue\n\t");
 	substdio_puts(subfdout, "-r - Display remote Queue\n");
+#ifdef HASLIBRT
+	substdio_puts(subfdout, "-i - Display queue counts, concurrencies and loads\n");
+#endif
 	substdio_flush(subfdout);
 }
 
@@ -692,8 +595,118 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-03-12 15:30:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.42 2022-03-27 20:12:02+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: qmail-qread.c,v $
+ * Revision 1.42  2022-03-27 20:12:02+05:30  Cprogrammer
+ * updated USAGE string
+ *
+ * Revision 1.41  2022-03-26 08:24:41+05:30  Cprogrammer
+ * added -i option to display dynamic queue information
+ *
+ * Revision 1.41  2022-03-12 15:30:31+05:30  Cprogrammer
+ * added -i option to display dynamic queue information
+ *
+ * Revision 1.41  2022-03-12 15:19:41+05:30  Cprogrammer
+ * added -i option to display dynamic queue information
+ *
+ * Revision 1.40  2022-01-30 08:42:40+05:30  Cprogrammer
+ * added -s option to display only counts with -c option
+ * allow configurable big/small todo/intd
+ *
+ * Revision 1.39  2021-10-21 14:42:22+05:30  Cprogrammer
+ * chdir to auto_qmail instead of auto_sysconfdir
+ *
+ * Revision 1.38  2021-06-28 17:06:33+05:30  Cprogrammer
+ * use process_queue to process all queues
+ *
+ * Revision 1.37  2021-06-27 10:45:09+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ *
+ * Revision 1.36  2021-06-05 12:51:37+05:30  Cprogrammer
+ * process special queue "slowq"
+ *
+ * Revision 1.35  2021-05-29 23:50:11+05:30  Cprogrammer
+ * fixed qbase path
+ *
+ * Revision 1.34  2021-05-26 10:45:51+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
+ * Revision 1.33  2021-05-16 00:46:51+05:30  Cprogrammer
+ * limit conf_split to compile time value in conf-split
+ *
+ * Revision 1.32  2021-05-13 14:44:12+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.31  2021-05-12 15:49:49+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ *
+ * Revision 1.30  2020-11-24 13:47:14+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.29  2020-04-04 12:13:55+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.28  2019-06-07 11:26:32+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
+ * Revision 1.27  2016-06-13 17:49:11+05:30  Cprogrammer
+ * removed ifdef indimail
+ *
+ * Revision 1.26  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.25  2016-01-29 11:55:52+05:30  Cprogrammer
+ * use defaultqueue to set env variables and set QUEUE variables
+ *
+ * Revision 1.24  2011-07-29 09:29:40+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
+ * Revision 1.23  2011-02-12 15:35:36+05:30  Cprogrammer
+ * added usage() function
+ *
+ * Revision 1.22  2010-07-15 08:24:44+05:30  Cprogrammer
+ * ability to toggle local, remote queues when displaying counts
+ *
+ * Revision 1.21  2010-05-20 11:28:46+05:30  Cprogrammer
+ * added queue count functionality of qmail-qstat
+ *
+ * Revision 1.20  2010-02-17 10:38:55+05:30  Cprogrammer
+ * removed compiler warning
+ *
+ * Revision 1.19  2010-02-10 08:58:43+05:30  Cprogrammer
+ * use -DMULTI_QUEUE to use multiple queues
+ *
+ * Revision 1.18  2009-11-09 19:55:08+05:30  Cprogrammer
+ * Use control file queue_base to process multiple indimail queues
+ *
+ * Revision 1.17  2009-09-08 13:32:36+05:30  Cprogrammer
+ * define default value for QUEUE_COUNT
+ *
+ * Revision 1.16  2007-12-20 12:49:10+05:30  Cprogrammer
+ * removed compiler warnings
+ *
+ * Revision 1.15  2005-03-03 14:37:04+05:30  Cprogrammer
+ * assign queuedir after stralloc operation
+ *
+ * Revision 1.14  2004-10-22 20:33:14+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.13  2004-10-22 15:37:43+05:30  Cprogrammer
+ * replaced readwrite.h with unistd.h
+ *
+ * Revision 1.12  2004-10-09 00:28:12+05:30  Cprogrammer
+ * use stralloc variable for queuedir
+ *
+ * Revision 1.11  2004-09-22 23:13:00+05:30  Cprogrammer
+ * replaced atoi() with scan_int()
+ *
+ * Revision 1.10  2004-07-17 21:21:14+05:30  Cprogrammer
+ * added RCS log
+ *
+ */
