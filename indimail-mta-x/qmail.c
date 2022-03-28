@@ -1,73 +1,5 @@
 /*
- * $Log: qmail.c,v $
- * Revision 1.30  2022-03-09 13:16:55+05:30  Cprogrammer
- * added new error codes
- *
- * Revision 1.29  2022-03-05 13:31:03+05:30  Cprogrammer
- * use auto_prefix for binary paths
- *
- * Revision 1.28  2020-12-07 16:08:20+05:30  Cprogrammer
- * added exit code 79 as duplicate to 91 for Envelope format error
- *
- * Revision 1.27  2020-11-24 13:46:41+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.26  2020-05-12 12:11:46+05:30  Cprogrammer
- * c89 prototypes
- * fix integer signedness error in qmail_put() (CVE-2005-1515)
- *
- * Revision 1.25  2016-06-03 09:57:41+05:30  Cprogrammer
- * moved qmail-mullqueue, qmail-queue to sbin
- *
- * Revision 1.24  2009-11-13 23:05:29+05:30  Cprogrammer
- * report QHPSI error when exit code is 77
- *
- * Revision 1.23  2009-04-22 15:23:55+05:30  Cprogrammer
- * added scan.h
- *
- * Revision 1.22  2009-04-22 13:42:10+05:30  Cprogrammer
- * made fd for custom error configurable through env variable ERROR_FD
- *
- * Revision 1.21  2009-04-03 11:42:35+05:30  Cprogrammer
- * increased size of errstr
- *
- * Revision 1.20  2009-03-22 09:24:05+05:30  Cprogrammer
- * removed domainkey, dkim specific error messages. domainkey, dkim will now use
- * custom error (exit code 88)
- *
- * Revision 1.19  2005-06-11 21:31:44+05:30  Cprogrammer
- * added custom message support
- *
- * Revision 1.18  2005-05-16 16:33:44+05:30  Cprogrammer
- * added case where mess file is not accessible
- *
- * Revision 1.17  2005-04-24 22:43:11+05:30  Cprogrammer
- * added codes for running external scanners
- *
- * Revision 1.16  2005-04-01 23:03:49+05:30  Cprogrammer
- * added exit codes for domainkeys
- *
- * Revision 1.15  2004-10-22 20:28:13+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.14  2004-10-22 15:36:40+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.13  2004-09-19 14:37:00+05:30  Cprogrammer
- * added cases for virus and banned attachments
- *
- * Revision 1.12  2004-05-03 22:10:34+05:30  Cprogrammer
- * unset QMAILQUEUE back to original for multisession SMTP
- *
- * Revision 1.11  2004-01-10 09:44:11+05:30  Cprogrammer
- * case 76 added for problem with SPAM filter
- *
- * Revision 1.10  2003-12-20 01:34:08+05:30  Cprogrammer
- * corrected message for exec failure and fork failure
- *
- * Revision 1.9  2003-12-16 00:31:41+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail.c,v 1.30 2022-03-28 10:08:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -76,6 +8,7 @@
 #include <fd.h>
 #include <env.h>
 #include <stralloc.h>
+#include <error.h>
 #include "qmail.h"
 #include "auto_prefix.h"
 
@@ -85,33 +18,39 @@ qmail_open(struct qmail *qq)
 {
 	int             pim[2];
 	int             pie[2];
-	int             pic[2], errfd; /* custom message */
+	int             pic[2], e, errfd; /* custom message */
 	char           *x, *binqqargs[2] = { 0, 0 };
 	stralloc        q = {0};
 
 	if (pipe(pim) == -1)
 		return -1;
 	if (pipe(pie) == -1) {
+		e = errno;
 		close(pim[0]);
 		close(pim[1]);
+		errno = e;
 		return -1;
 	}
 	if (pipe(pic) == -1) {
+		e = errno;
 		close(pim[0]);
 		close(pim[1]);
 		close(pie[0]);
 		close(pie[1]);
+		errno = e;
 		return -1;
 	}
 	switch (qq->pid = vfork())
 	{
 	case -1:
+		e = errno;
 		close(pim[0]);
 		close(pim[1]);
 		close(pie[0]);
 		close(pie[1]);
 		close(pic[0]);
 		close(pic[1]);
+		errno = e;
 		return -1;
 	case 0:
 		close(pim[1]);
@@ -282,7 +221,7 @@ qmail_close(struct qmail *qq)
 	case 63:
 		return "Zqq trouble doing cd to root directory (#4.3.0)";
 	case 64:
-		return "Zqq syncing files (#4.3.0)";
+		return "Zqq trouble syncing files (#4.3.0)";
 	case 65:
 		return "Zqq trouble creating files in intd. (#4.3.0)";
 	case 66:
@@ -292,7 +231,7 @@ qmail_close(struct qmail *qq)
 	case 68: /*-*/
 		return "Zqq trouble creating temporary files (#4.3.0)";
 	case 69: /*-*/
-		return "Zqq syncing dir (#4.3.0)";
+		return "Zqq trouble syncing dir (#4.3.0)";
 	case 71:
 		return "Zmail server temporarily rejected message (#4.3.0)";
 	case 72:
@@ -337,7 +276,80 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.30 2022-03-09 13:16:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.30 2022-03-28 10:08:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qmail.c,v $
+ * Revision 1.30  2022-03-28 10:08:14+05:30  Cprogrammer
+ * added new error codes
+ * save and restore errno
+ *
+ * Revision 1.29  2022-03-05 13:31:03+05:30  Cprogrammer
+ * use auto_prefix for binary paths
+ *
+ * Revision 1.28  2020-12-07 16:08:20+05:30  Cprogrammer
+ * added exit code 79 as duplicate to 91 for Envelope format error
+ *
+ * Revision 1.27  2020-11-24 13:46:41+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.26  2020-05-12 12:11:46+05:30  Cprogrammer
+ * c89 prototypes
+ * fix integer signedness error in qmail_put() (CVE-2005-1515)
+ *
+ * Revision 1.25  2016-06-03 09:57:41+05:30  Cprogrammer
+ * moved qmail-mullqueue, qmail-queue to sbin
+ *
+ * Revision 1.24  2009-11-13 23:05:29+05:30  Cprogrammer
+ * report QHPSI error when exit code is 77
+ *
+ * Revision 1.23  2009-04-22 15:23:55+05:30  Cprogrammer
+ * added scan.h
+ *
+ * Revision 1.22  2009-04-22 13:42:10+05:30  Cprogrammer
+ * made fd for custom error configurable through env variable ERROR_FD
+ *
+ * Revision 1.21  2009-04-03 11:42:35+05:30  Cprogrammer
+ * increased size of errstr
+ *
+ * Revision 1.20  2009-03-22 09:24:05+05:30  Cprogrammer
+ * removed domainkey, dkim specific error messages. domainkey, dkim will now use
+ * custom error (exit code 88)
+ *
+ * Revision 1.19  2005-06-11 21:31:44+05:30  Cprogrammer
+ * added custom message support
+ *
+ * Revision 1.18  2005-05-16 16:33:44+05:30  Cprogrammer
+ * added case where mess file is not accessible
+ *
+ * Revision 1.17  2005-04-24 22:43:11+05:30  Cprogrammer
+ * added codes for running external scanners
+ *
+ * Revision 1.16  2005-04-01 23:03:49+05:30  Cprogrammer
+ * added exit codes for domainkeys
+ *
+ * Revision 1.15  2004-10-22 20:28:13+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.14  2004-10-22 15:36:40+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.13  2004-09-19 14:37:00+05:30  Cprogrammer
+ * added cases for virus and banned attachments
+ *
+ * Revision 1.12  2004-05-03 22:10:34+05:30  Cprogrammer
+ * unset QMAILQUEUE back to original for multisession SMTP
+ *
+ * Revision 1.11  2004-01-10 09:44:11+05:30  Cprogrammer
+ * case 76 added for problem with SPAM filter
+ *
+ * Revision 1.10  2003-12-20 01:34:08+05:30  Cprogrammer
+ * corrected message for exec failure and fork failure
+ *
+ * Revision 1.9  2003-12-16 00:31:41+05:30  Cprogrammer
+ * added RCS log
+ *
+ */
