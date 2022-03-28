@@ -139,16 +139,15 @@ Release 2.14.1 Start 21/09/2021
 76. qmail-lspawn.c: bypass indimail if AUTHSELF is not set
 77. qmail-showctl.c: -E option for displaying client env variables
 - 24/03/2022
-78. added missing loading of concurrencylocal, concurrencyremote
-79. added holdjobs functionality
+78. qmta-send.c: added missing loading of concurrencylocal, concurrencyremote
+79. qmta-send.c: added holdjobs functionality
 - 25/03/2022
 80. qmail-queue.c: handle multi-queue without qmail-multi helper
 - 27/03/2022
 81. custom_error.c, qmail.c: include extended error from errno if EXTENDED_ERROR
     env variable is defined
-82. qmail.c: return error using extended_err() from custom_error.c
-83. qmail-inject.c: Display system error when qmail_open() fails
-84. qmail-qread.c: updated usage string
+82. qmail-inject.c: Display system error when qmail_open() fails
+83. qmail-qread.c: updated usage string
 
 * 
 Release 2.14.0 Start 18/07/2021
