@@ -854,6 +854,9 @@ conf-servicedir
 
 custom_error.o: compile custom_error.c qmail.h
 	./compile custom_error.c
+getqueue.o: \
+compile getqueue.c getqueue.h haslibrt.h custom_error.h conf-queue
+	./compile `grep -h -v "^#" conf-queue` getqueue.c
 
 qscanq-stdin: load qscanq-stdin.o auto_sysconfdir.o auto_qmail.o \
 auto_prefix.o auto_spool.o mkfn.o do_ripmime.o auto_ripmime_cmd.o \
