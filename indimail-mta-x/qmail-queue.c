@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.83 2022-03-27 20:15:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.83 2022-03-28 08:44:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -772,7 +772,7 @@ main()
 				queueNo = queueNo_from_env(starttime);
 		}
 #else
-		queueNo = queueNo_from_env();
+		queueNo = queueNo_from_env(starttime);
 #endif
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			switch (control_readfile(&QueueBase, "queue_base", 0))
@@ -1189,7 +1189,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.83 2022-03-27 20:15:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.83 2022-03-28 08:44:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1197,7 +1197,7 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.83  2022-03-27 20:15:01+05:30  Cprogrammer
+ * Revision 1.83  2022-03-28 08:44:03+05:30  Cprogrammer
  * handle multi-queue without qmail-multi helper
  *
  * Revision 1.82  2022-03-16 21:37:36+05:30  Cprogrammer
