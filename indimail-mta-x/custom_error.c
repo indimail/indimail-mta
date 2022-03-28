@@ -1,8 +1,5 @@
 /*
  * $Log: custom_error.c,v $
- * Revision 1.2  2022-03-27 20:06:52+05:30  Cprogrammer
- * include extended error from errno if EXTENDED_ERROR env variable is defined
- *
  * Revision 1.1  2022-03-08 22:56:41+05:30  Cprogrammer
  * Initial revision
  *
@@ -12,12 +9,8 @@
 #include <env.h>
 #include <scan.h>
 #include <noreturn.h>
-#include <stralloc.h>
-#include <error.h>
 #include "custom_error.h"
 #include "qmail.h"
-
-static stralloc e = {0};
 
 no_return void
 custom_error(char *program, char *type, char *message, char *extra, char *code)
@@ -57,25 +50,3 @@ custom_error(char *program, char *type, char *message, char *extra, char *code)
 	_exit(88);
 }
 
-char           *
-extended_err(char *str1, char *str2)
-{
-	if (!stralloc_copys(&e, str1))
-		return "Zqq out of memory (#4.3.0)";
-	if (str2) {
-		if (!stralloc_catb(&e, " (#", 3) ||
-				!stralloc_cats(&e, str2) ||
-				!stralloc_catb(&e, ")", 2))
-			return "Zqq out of memory (#4.3.0)";
-	}
-	if (!env_get("EXTENDED_ERROR")) {
-		if (!stralloc_0(&e))
-			return "Zqq out of memory (#4.3.0)";
-		return e.s;
-	}
-	if (!stralloc_catb(&e, ": ", 2) ||
-			!stralloc_cats(&e, error_str(errno)) ||
-			!stralloc_0(&e))
-		return "Zqq out of memory (#4.3.0)";
-	return e.s;
-}
