@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.17  2022-03-31 00:42:18+05:30  Cprogrammer
+ * replace fsync() with fdatasync()
+ *
  * Revision 1.16  2022-03-24 13:16:58+05:30  Cprogrammer
  * added missing loading of concurrencylocal, concurrencyremote
  * added holdjobs functionality
@@ -2786,7 +2789,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.16 2022-03-24 13:16:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.17 2022-03-31 00:42:18+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
