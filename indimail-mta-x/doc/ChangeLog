@@ -148,8 +148,8 @@ Release 2.14.1 Start 21/09/2021
 82. qmail-qread.c: updated usage string
 - 31/03/2022
 83. qmail-todo.c: use chunk_wait seconds to wait for message chunks
-84. malidir_deliver.c, qmail-local.c, qmail-send.c: replace fsync() with
-    fdatasync()
+84. malidir_deliver.c, qmail-local.c, qmail-send.c, qmta-send.c, slowq-send.c
+	- replace fsync() with fdatasync()
 85. qmail.c: include error.h for errno. Save and restore errno
 86. getqueue.c, qmulti.c: removed starttime argument to queueNo_from_env(),
     queueNo_from_shm()
