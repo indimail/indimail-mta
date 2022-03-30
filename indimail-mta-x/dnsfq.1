@@ -1,0 +1,25 @@
+.TH s/qmail: dnsfq 1
+.SH NAME
+dnsfq
+.SH SYNOPSIS
+.B dnsfq 
+.I fqdn
+.SH DESCRIPTION
+.B fqdns
+takes the given
+.I fqdn
+for a host and employs a 
+.I CNAME 
+DNS lookup while finally retrieving the
+.I AAAA
+and
+.I A 
+record following the chain of potential alias names. 
+On output, the entire chain of nested DNS information 
+is displayed together with the retrieved IP(v6|v6) 
+addresses.
+.SH "SEE ALSO"
+dnscname(1),
+dnsmxip(1),
+dnsptr(1),
+dnstxt(1).

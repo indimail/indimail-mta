@@ -37,6 +37,10 @@ f:::0644:/man1/:condredirect.1:condredirect.1
 f:::0644:/man1/:condtomaildir.1:condtomaildir.1
 f:::0644:/man1/:datemail.1:datemail.1
 f:::0644:/man1/:dnstlsarr.1:dnstlsarr.1
+f:::0644:/man1/:dnscname.1:dnscname.1
+f:::0644:/man1/:dnsfq.1:dnsfq.1
+f:::0644:/man1/:dnsmxip.1:dnsmxip.1
+f:::0644:/man1/:dnsptr.1:dnsptr.1
 f:::0644:/man1/:dot-forward.1:dot-forward.1
 f:::0644:/man1/:drate.1:drate.1
 f:::0644:/man1/:except.1:except.1

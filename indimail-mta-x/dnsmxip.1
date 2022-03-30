@@ -1,0 +1,35 @@
+.TH s/qmail: dnsmxip 1
+.SH NAME
+dnsmxip
+.SH SYNOPSIS
+.B dnsmxip
+.I fqdn
+.SH DESCRIPTION
+.B dnsmxip
+takes the given
+.I fqdn
+as domain name and employs a 
+.I MX
+lookup for 
+.I fqdn
+while evaluating for the retrieved MX host(s) the respective
+.I AAAA
+and
+.I A 
+address(es).
+
+On output, for each MX
+.I host 
+its provided 
+.I weight 
+and the respective
+.I AAAA 
+and 
+.I A 
+addresses (in perenthesis) are displayed on separate lines.
+.SH "SEE ALSO"
+dnscname(1),
+dnsip(1),
+dnsfq(1),
+dnsptr(1),
+dnstxt(1).
