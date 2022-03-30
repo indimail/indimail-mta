@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.20  2022-03-31 00:08:53+05:30  Cprogrammer
+ * replaced fsync() with fdatasync()
+ *
  * Revision 1.19  2022-03-13 19:54:51+05:30  Cprogrammer
  * display bigtodo value in logs on startup
  *
@@ -2098,6 +2101,11 @@ todo_do(fd_set *rfds)
 		log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
 		goto fail;
 	}
+#else
+	if (fdatasync(fdinfo) == -1) {
+		log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
+		goto fail;
+	}
 #endif
 	close(fdinfo);
 	fdinfo = -1;
@@ -2105,6 +2113,12 @@ todo_do(fd_set *rfds)
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
 			if (use_fsync > 0 && fsync(fdchan[c]) == -1) {
+				fnmake_chanaddr(id, c);
+				log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
+				goto fail;
+			}
+#else
+			if (fdatasync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
 				log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
 				goto fail;
@@ -2615,7 +2629,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.19 2022-03-13 19:54:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.20 2022-03-31 00:08:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

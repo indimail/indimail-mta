@@ -731,6 +731,11 @@ process_todo(unsigned long id)
 		log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
 		goto fail;
 	}
+#else
+	if (fsync(fdinfo) == -1) {
+		log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
+		goto fail;
+	}
 #endif
 	close(fdinfo);
 	fdinfo = -1;
@@ -738,6 +743,12 @@ process_todo(unsigned long id)
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
 			if (use_fsync > 0 && fsync(fdchan[c]) == -1) {
+				fnmake_chanaddr(id, c);
+				log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
+				goto fail;
+			}
+#else
+			if (fsync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
 				log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
 				goto fail;
