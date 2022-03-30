@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.83 2022-03-28 08:44:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.84 2022-03-31 00:03:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -457,6 +457,8 @@ qhpsiprog(char *program)
 		 * execute the qhpsi executable for security reasons.
 		 * revoke all privileges and run with qmailq uid
 		 */
+		if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1)
+			die(67);
 		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
 			_exit(50);
 		if (!str_diffn(program, "plugin:", 7)) {
@@ -731,15 +733,11 @@ main()
 
 	sig_blocknone();
 	umask(033);
-	if (!(ptr = env_get("FASTQUEUE"))) {
+	if (!(ptr = env_get("FASTQUEUE")))
 		fastqueue = 0;
-		if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1)
-			die(67);
-	} else {
+	else {
 		scan_int(ptr, &fastqueue);
 		auto_uidq = fastqueue;
-		if (setreuid(auto_uidq, auto_uidq))
-			_exit(50);
 	}
 	if (!fastqueue) {
 		if ((ptr = env_get("ORIGINIPFIELD")))
@@ -763,16 +761,16 @@ main()
 	if (!(queuedir = env_get("QUEUEDIR"))) {
 #ifdef HASLIBRT
 		if (!(ptr = env_get("DYNAMIC_QUEUE")))
-			queueNo = queueNo_from_env(starttime);
+			queueNo = queueNo_from_env();
 		else {
             if (env_get("DYNAMIC_QUEUE_TIME"))
-				queueNo = queueNo_from_env(starttime);
+				queueNo = queueNo_from_env();
 			else
-			if ((queueNo = queueNo_from_shm("qmail-queue", starttime)) == -1)
-				queueNo = queueNo_from_env(starttime);
+			if ((queueNo = queueNo_from_shm("qmail-queue")) == -1)
+				queueNo = queueNo_from_env();
 		}
 #else
-		queueNo = queueNo_from_env(starttime);
+		queueNo = queueNo_from_env();
 #endif
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			switch (control_readfile(&QueueBase, "queue_base", 0))
@@ -805,10 +803,7 @@ main()
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
-	if (fastqueue)
-		qqeh = (char *) NULL;
-	else
-		qqeh = env_get("QQEH");
+	qqeh = fastqueue ? (char *) NULL : env_get("QQEH");
 #ifdef USE_FSYNC
 	use_fsync = use_syncdir = 0;
 	if ((ptr = env_get("USE_FSYNC")) && *ptr)
@@ -1141,9 +1136,12 @@ main()
 		die_write();
 #ifdef USE_FSYNC
 	if (use_fsync > 0) {
-		if (fsync(messfd) == -1 || fsync(intdfd) == -1)
+		if (fdatasync(messfd) == -1 || fdatasync(intdfd) == -1)
 			die(64);
 	}
+#else
+	if (fdatasync(messfd) == -1 || fdatasync(intdfd) == -1)
+		die(64);
 #endif
 	if (link(intdfn, todofn) == -1) {
 		cleanup();
@@ -1162,7 +1160,7 @@ main()
 				die(69);
 			} 
 		} else
-		if (fsync(fd) == -1 || close(fd) == -1) {
+		if (fdatasync(fd) == -1 || close(fd) == -1) {
 			cleanup();
 			die(69);
 		}
@@ -1189,7 +1187,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.83 2022-03-28 08:44:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.84 2022-03-31 00:03:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1197,6 +1195,10 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.84  2022-03-31 00:03:57+05:30  Cprogrammer
+ * replace fsync() with fdatasync()
+ * removed starttime argument to queueNo_from_env(), queueNO_from_shm()
+ *
  * Revision 1.83  2022-03-28 08:44:03+05:30  Cprogrammer
  * handle multi-queue without qmail-multi helper
  *
