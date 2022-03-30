@@ -1,15 +1,18 @@
 /*
  * $Log: getqueue.c,v $
+ * Revision 1.2  2022-03-30 21:08:38+05:30  Cprogrammer
+ * use arc4random() to randomly select queue
+ *
  * Revision 1.1  2022-03-26 10:23:34+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include <unistd.h>
-#include <datetime.h>
 #include <fmt.h>
 #include <scan.h>
 #include <env.h>
 #include <error.h>
+#include <arc4random.h>
 #include "haslibrt.h"
 #ifdef HASLIBRT
 #include <sys/mman.h>
@@ -22,11 +25,12 @@
 
 #ifdef HASLIBRT
 int
-queueNo_from_shm(char *ident, datetime_sec t)
+queueNo_from_shm(char *ident)
 {
 	int             shm, i, j, x, y, min, n = 1, qcount;
 	int             q[4];
 	int            *queue;
+	uint32_t        random;
 	char            shm_name[FMT_ULONG + 6];
 	char           *s;
 
@@ -91,7 +95,8 @@ queueNo_from_shm(char *ident, datetime_sec t)
 		alloc_free((char *) queue);
 		return n + 1;
 	}
-	for (i = j = 0, y = t % x; i < qcount; i++) {
+	random = arc4random();
+	for (i = j = 0, y = random % x; i < qcount; i++) {
 		if (queue[i] == min) {
 			if (j == y) {
 				alloc_free((char *) queue);
@@ -106,10 +111,11 @@ queueNo_from_shm(char *ident, datetime_sec t)
 #endif
 
 int
-queueNo_from_env(datetime_sec t)
+queueNo_from_env()
 {
 	char           *ptr;
 	int             qcount, qstart;
+	uint32_t        random;
 
 	if (!(ptr = env_get("QUEUE_COUNT")))
 		qcount = QUEUE_COUNT;
@@ -119,14 +125,15 @@ queueNo_from_env(datetime_sec t)
 		qstart = QUEUE_START;
 	else
 		scan_int(ptr, &qstart);
-	return ((t % qcount) + qstart);
+	random = arc4random();
+	return ((random % qcount) + qstart);
 }
 
 #ifndef	lint
 void
 getversion_getqueue_c()
 {
-	static char    *x = "$Id: getqueue.c,v 1.1 2022-03-26 10:23:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getqueue.c,v 1.2 2022-03-30 21:08:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
