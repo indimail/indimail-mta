@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.58 2022-03-20 00:35:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.59 2022-03-31 00:25:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -47,10 +47,10 @@
 /*- important timing feature: when triggered, respond instantly */
 #define SLEEP_TODO     1500  /*- check todo/ every 25 minutes in any case */
 #define ONCEEVERY        10  /*- Run todo maximal once every N seconds */
-#define SLEEP_FUZZ        1  /*- slop a bit on sleeps to avoid zeno effect */
+#define CHUNK_WAIT        1
 #define SLEEP_FOREVER 86400  /*- absolute maximum time spent in select() */
 #define SLEEP_SYSFAIL   123
-#define CHUNK_SIZE      100
+#define CHUNK_SIZE      1
 
 static stralloc percenthack = { 0 };
 typedef struct  constmap cmap;
@@ -101,6 +101,7 @@ static stralloc mailto = { 0 };
 static stralloc newlocals = { 0 };
 static stralloc newvdoms = { 0 };
 static int      dynamic_queue = 0;
+static int      chunk_wait = CHUNK_WAIT;
 #ifdef HASLIBRT
 static int      do_readsubdir = 1;
 static mqd_t    mq_queue = (mqd_t)-1;
@@ -692,7 +693,7 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 				": unable to get RTC time:  ", error_str(errno), "\n");
 			return -1;
 		}
-		tsp.tv_sec += SLEEP_FUZZ;
+		tsp.tv_sec += chunk_wait;
 		if (mq_timedreceive(mq_queue, msgbuf, msgbuflen, &priority, &tsp) == -1) {
 			if (errno == error_timeout) {
 				flagtododir = 0;
@@ -1084,7 +1085,13 @@ todo_do(int *nfds, fd_set *rfds)
 		}
 	}
 #ifdef USE_FSYNC
-	if (use_fsync && fsync(fdinfo) == -1) {
+	if (use_fsync && fdatasync(fdinfo) == -1) {
+		log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
+			error_str(errno), "\n");
+		goto fail;
+	}
+#else
+	if (fdatasync(fdinfo) == -1) {
 		log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
 			error_str(errno), "\n");
 		goto fail;
@@ -1095,7 +1102,14 @@ todo_do(int *nfds, fd_set *rfds)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
-			if (use_fsync && fsync(fdchan[c]) == -1) {
+			if (use_fsync && fdatasync(fdchan[c]) == -1) {
+				fnmake_chanaddr(id, c);
+				log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
+					error_str(errno), "\n");
+				goto fail;
+			}
+#else
+			if (fdatasync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
 				log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
 					error_str(errno), "\n");
@@ -1314,6 +1328,7 @@ main(int argc, char **argv)
 				error_str(errno), "\n");
 		comm_die(111);
 	}
+	getEnvConfigInt(&chunk_wait, "CHUNK_WAIT", CHUNK_WAIT);
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
@@ -1324,7 +1339,7 @@ main(int argc, char **argv)
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	strnum2[fmt_ulong(strnum2, todo_chunk_size)] = 0;
 	log9("info: ", argv0, ": ", queuedesc, ": conf split=", strnum1,
-		", todo_chunk_size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n");
+		", todo chunk size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n");
 #ifdef USE_FSYNC
 	if ((ptr = env_get("USE_FSYNC")) && *ptr)
 		use_fsync = 1;
@@ -1434,7 +1449,7 @@ main(int argc, char **argv)
 		if (wakeup <= recent)
 			tv.tv_sec = 0;
 		else
-			tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
+			tv.tv_sec = wakeup - recent + chunk_wait;
 		tv.tv_usec = 0;
 		if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
 			if (errno == error_intr);
@@ -1465,7 +1480,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.58 2022-03-20 00:35:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.59 2022-03-31 00:25:15+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1473,6 +1488,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.59  2022-03-31 00:25:15+05:30  Cprogrammer
+ * use chunk_wait seconds to wait for message chunks
+ *
  * Revision 1.58  2022-03-20 00:35:06+05:30  Cprogrammer
  * use mq_timedreceive() for TODO_CHUNK_SIZE to work
  *
