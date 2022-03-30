@@ -65,6 +65,10 @@ IO for better filesystem performance.
 If the environment variable \fBORIGINIPFIELD\fR is set, a
 "X-Originating-IP" header will be added to every relayed mail.
 
+If the environment variable \fBFASTQUEUE\fR is set, qmail-queue will bypass
+QHPSI, ORIGINIPFIELD, extraqueue, removehaders, envheaders, logheaders,
+mailarchive control files
+
 .SH CONTROL FILES
 \fBqmail-queue\fR use many control files to provide various features.
 

@@ -35,7 +35,9 @@ todo/<messid> See also INTERNALS). Next \fBqmail-todo\fR transmits the
 which schedules the message for delivery. \fBqmail-todo\fR can be optimized
 further by making it to transmit the <messids> in chunks rather than every
 time a file is found in todo directory. The chunk size can be set by
-defining TODO_CHUNK_SIZE
+defining TODO_CHUNK_SIZE. \fqmail-todo\fR will wait for \fBCHUNK_WAIT\fR
+seconds (set by environment variable \fBCHUNK_WAIT\fR) before transmitting
+accumulated all <messids> to qmail-send.
 
 qmail-todo can work in two modes - static queue mode or dynamic queue mode.
 The dynamic queue mode is enabled when passed the \-\fId\fR argument by
