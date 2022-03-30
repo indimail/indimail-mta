@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.84 2022-03-31 00:03:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.84 2022-03-31 00:45:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -805,11 +805,15 @@ main()
 		conf_split = auto_split;
 	qqeh = fastqueue ? (char *) NULL : env_get("QQEH");
 #ifdef USE_FSYNC
-	use_fsync = use_syncdir = 0;
-	if ((ptr = env_get("USE_FSYNC")) && *ptr)
-		use_fsync = 1;
-	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
-		use_syncdir = 1;
+	if (fastqueue)
+		use_fsync = use_syncdir = 0;
+	else {
+		use_fsync = use_syncdir = 0;
+		if ((ptr = env_get("USE_FSYNC")) && *ptr)
+			use_fsync = 1;
+		if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
+			use_syncdir = 1;
+	}
 #endif
 	mypid = getpid();
 	uid = getuid();
@@ -1187,7 +1191,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.84 2022-03-31 00:03:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.84 2022-03-31 00:45:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1195,9 +1199,10 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.84  2022-03-31 00:03:57+05:30  Cprogrammer
+ * Revision 1.84  2022-03-31 00:45:18+05:30  Cprogrammer
  * replace fsync() with fdatasync()
- * removed starttime argument to queueNo_from_env(), queueNO_from_shm()
+ * removed starttime argument to queueNo_from_env(), queueNo_from_shm()
+ * turn off fsync, syncdir if fastqueue is set
  *
  * Revision 1.83  2022-03-28 08:44:03+05:30  Cprogrammer
  * handle multi-queue without qmail-multi helper
