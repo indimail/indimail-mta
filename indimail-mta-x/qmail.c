@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.30 2022-03-28 10:08:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.31 2022-03-30 22:53:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -276,13 +276,16 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.30 2022-03-28 10:08:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.31 2022-03-30 22:53:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.31  2022-03-30 22:53:05+05:30  Cprogrammer
+ * include error.h for errno
+ *
  * Revision 1.30  2022-03-28 10:08:14+05:30  Cprogrammer
  * added new error codes
  * save and restore errno
