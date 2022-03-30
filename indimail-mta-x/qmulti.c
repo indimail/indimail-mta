@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.61 2022-03-27 20:22:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.62 2022-03-31 00:07:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -9,7 +9,6 @@
 #include <env.h>
 #include <stralloc.h>
 #include <substdio.h>
-#include <datetime.h>
 #include <now.h>
 #include <fmt.h>
 #include <scan.h>
@@ -66,7 +65,6 @@ qmulti(char *queue_env, int argc, char **argv)
 	char           *qqargs[3] = { 0, 0, NULL };
 	char           *binqqargs[2] = { 0, NULL };
 	stralloc        q = {0};
-	static datetime_sec    starttime;
 
 	if (chdir("/") == -1)
 		_exit(63);
@@ -97,15 +95,14 @@ qmulti(char *queue_env, int argc, char **argv)
 #ifdef HASLIBRT
 		i = str_rchr(argv[0], '/');
 		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
-		starttime = now();
 		if (!(env_get("DYNAMIC_QUEUE")))
-			queueNo = queueNo_from_env(starttime);
+			queueNo = queueNo_from_env();
 		else {
-			if ((queueNo = queueNo_from_shm(ptr, starttime)) == -1)
-				queueNo = queueNo_from_env(starttime);
+			if ((queueNo = queueNo_from_shm(ptr)) == -1)
+				queueNo = queueNo_from_env();
 		}
 #else
-		queueNo = queueNo_from_env(starttime);
+		queueNo = queueNo_from_env();
 #endif
 		if (!stralloc_copys(&Queuedir, "QUEUEDIR=") ||
 				!stralloc_cats(&Queuedir, qbase) ||
@@ -201,7 +198,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.61 2022-03-27 20:22:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.62 2022-03-31 00:07:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -210,6 +207,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.62  2022-03-31 00:07:03+05:30  Cprogrammer
+ * removed starttime argument to queueNo_from_env(), queueNo_from_shm()
+ *
  * Revision 1.61  2022-03-27 20:22:29+05:30  Cprogrammer
  * moved queueNo_from_env(), queueNo_from_shm() to getqueue.c
  *
