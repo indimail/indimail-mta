@@ -157,6 +157,7 @@ Release 2.14.1 Start 21/09/2021
 88. added man pages for dnscname, dnsfq, dnsmxip, dnsptr
 89. maildir_deliver.c, qmail-local.c, qmail-queue.c, qmail-todo.c,
     slowq-send.c, syncdir.c: replaced fsync() with fdatasync()
+90. zoverall.sh: display time span in seconds if < 86400
 
 * 
 Release 2.14.0 Start 18/07/2021

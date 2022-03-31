@@ -1,5 +1,8 @@
 #
 # $Log: zoverall.sh,v $
+# Revision 1.2  2022-03-31 22:39:37+05:30  Cprogrammer
+# display time span in seconds if < 86400
+#
 # Revision 1.1  2004-01-02 23:40:54+05:30  Cprogrammer
 # Initial revision
 #
@@ -12,9 +15,10 @@ ddelay is the latency for a successful delivery to one recipient---the
 end of successful delivery, minus the time when the message was queued.
 
 xdelay is the latency for a delivery attempt---the time when the attempt
-finished, minus the time when it started. The average concurrency is the
-total xdelay for all deliveries divided by the time span; this is a good
-measure of how busy the mailer is.
+finished, minus the time when it started.
+
+The queue concurrency is the total xdelay for all deliveries divided by the
+time span; this is a good measure of how busy the mailer is.
 '
 
 awk '
@@ -67,7 +71,7 @@ awk '
       str = sprintf("%.6f",ddelay)
       print "Total ddelay (s):", str
       if (succ) {
-	str = sprintf("%.6f",ddelay / succ)
+        str = sprintf("%.6f",ddelay / succ)
         print "Average ddelay per success (s):", str
       }
       str = sprintf("%.6f",xdelay)
@@ -75,8 +79,11 @@ awk '
       str = sprintf("%.6f",xdelay / deliveries)
       print "Average xdelay per delivery attempt (s):", str
       if (last > first) {
-        print "Time span (days):", (last - first) / 86400
-        print "Average concurrency:", xdelay / (last - first)
+        if ((last - first) > 86400)
+          print "Time span (days):", (last - first) / 86400
+        else
+          print "Time span (s):", last - first
+        print "Queue concurrency:", xdelay / (last - first)
       }
     }
   }
