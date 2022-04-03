@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.7  2022-04-04 00:52:04+05:30  Cprogrammer
+ * Use QUEUE_BASE, queue_base control for setting base directory of queue
+ *
  * Revision 1.6  2022-01-30 09:42:10+05:30  Cprogrammer
  * made global variables as static
  *
@@ -32,6 +35,7 @@
 #include <setuserid.h>
 #include <noreturn.h>
 #include "auto_uids.h"
+#include "set_queuedir.h"
 
 no_return void
 die()
@@ -135,12 +139,17 @@ main(int argc, char **argv)
 		die();
 	if (fd_copy(6, 0) == -1)
 		die();
-	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
-		qsargs[1] = ptr;
-		qcargs[1] = ptr;
-		qlargs[2] = ptr;
-		qrargs[1] = ptr;
+	if (!(ptr = env_get("QUEUEDIR"))) {
+		if (!(ptr = set_queuedir("slowq-start", "slowq")))
+			die();
+		if (!env_put2("QUEUEDIR", ptr))
+			die();
 	}
+	/*- pass the queue as argument for the ps command */
+	qsargs[1] = ptr;
+	qcargs[1] = ptr;
+	qlargs[2] = ptr;
+	qrargs[1] = ptr;
 	if (argv[1]) { /*- set argument for qmail-local */
 		qlargs[1] = argv[1];
 		++argv;
@@ -288,7 +297,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.6 2022-01-30 09:42:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-start.c,v 1.7 2022-04-04 00:52:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
