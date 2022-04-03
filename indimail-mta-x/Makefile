@@ -1121,11 +1121,12 @@ qmail-lspawn: \
 load qmail-lspawn.o lspawn.o slurpclose.o get_uid.o \
 auto_sysconfdir.o auto_control.o auto_prefix.o \
 auto_uids.o auto_spawn.o auto_assign.o control.o \
-indimail_stub.o variables.o dns.lib
+auto_qmail.o set_queuedir.o indimail_stub.o variables.o dns.lib
 	./load qmail-lspawn lspawn.o slurpclose.o auto_uids.o \
 	get_uid.o auto_sysconfdir.o auto_control.o auto_prefix.o \
-	auto_spawn.o indimail_stub.o control.o \
-	variables.o auto_assign.o $(static_option) $(QMAILLIB) \
+	auto_spawn.o indimail_stub.o control.o set_queuedir.o \
+	auto_qmail.o variables.o auto_assign.o \
+	$(static_option) $(QMAILLIB) \
 	`cat dns.lib` $(dynamic_option) -ldl
 
 qmail-lspawn.o: compile qmail-lspawn.c slurpclose.h \
@@ -1139,13 +1140,13 @@ auto_control.h auto_prefix.h variables.h conf-virtual
 	qmail-lspawn.c
 
 qmail-rspawn: \
-load qmail-rspawn.o rspawn.o tcpto_clean.o get_uid.o \
-auto_uids.o auto_spawn.o rcpthosts.o control.o auto_prefix.o \
-variables.o auto_sysconfdir.o dns.lib indimail_stub.o
-	./load qmail-rspawn rspawn.o tcpto_clean.o get_uid.o \
-	auto_spawn.o rcpthosts.o control.o variables.o \
-	auto_sysconfdir.o auto_uids.o indimail_stub.o \
-	auto_control.o auto_prefix.o $(static_option) $(QMAILLIB) \
+load qmail-rspawn.o rspawn.o tcpto_clean.o get_uid.o auto_uids.o \
+auto_spawn.o rcpthosts.o control.o auto_prefix.o variables.o \
+set_queuedir.o auto_sysconfdir.o auto_qmail.o dns.lib indimail_stub.o
+	./load qmail-rspawn rspawn.o tcpto_clean.o get_uid.o auto_spawn.o \
+	rcpthosts.o control.o variables.o auto_sysconfdir.o auto_uids.o \
+	indimail_stub.o auto_control.o auto_qmail.o auto_prefix.o \
+	set_queuedir.o $(static_option) $(QMAILLIB) \
 	`cat dns.lib` $(dynamic_option) -ldl
 
 qmail-rspawn.o: compile qmail-rspawn.c tcpto.h rcpthosts.h \
@@ -1647,15 +1648,15 @@ conf-smtputf8
 qmail-send: \
 load qmail-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
-auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o variables.o \
-getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
-auto_prefix.o delivery_rate.o libsyncdir.a srs.lib rt.lib
+auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
+variables.o getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
+set_queuedir.o auto_prefix.o delivery_rate.o libsyncdir.a srs.lib rt.lib
 	./load qmail-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
 	auto_split.o variables.o envrules.o matchregex.o srs.o \
 	delivery_rate.o rcpthosts.o auto_control.o auto_prefix.o \
-	$(static_option) -L. -lsyncdir \
+	set_queuedir.o $(static_option) -L. -lsyncdir \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB) \
 	$(dynamic_option) -lm `cat rt.lib` -ldl
 
@@ -1663,7 +1664,8 @@ qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-haslibrt.h conf-mime conf-sync conf-batv conf-srs conf-bounce conf-loglock
+set_queuedir.h haslibrt.h conf-mime conf-sync conf-batv conf-srs \
+conf-bounce conf-loglock
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-bounce conf-loglock` qmail-send.c
 
@@ -1679,12 +1681,11 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	> qmail-send.8
 
 qmail-todo: \
-load qmail-todo.o control.o trigger.o fmtqfn.o \
-readsubdir.o auto_qmail.o auto_split.o \
-auto_control.o variables.o libsyncdir.a rt.lib
+load qmail-todo.o control.o trigger.o fmtqfn.o readsubdir.o auto_qmail.o \
+auto_split.o auto_control.o set_queuedir.o variables.o libsyncdir.a rt.lib
 	./load qmail-todo control.o trigger.o fmtqfn.o \
-	auto_control.o readsubdir.o auto_qmail.o auto_split.o \
-	variables.o $(static_option) -L. -lsyncdir $(QMAILLIB) \
+	auto_control.o readsubdir.o auto_qmail.o auto_split.o variables.o \
+	set_queuedir.o $(static_option) -L. -lsyncdir $(QMAILLIB) \
 	$(dynamic_option) `cat rt.lib`
 
 qmail-todo.o: \
@@ -1701,26 +1702,32 @@ qmail-todo.9 conf-qmail conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-todo.8
 
+set_queuedir.o: \
+compile set_queuedir.c set_queuedir.h auto_qmail.h control.h
+	./compile set_queuedir.c
+
 slowq-send: \
 load slowq-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
 variables.o envrules.o qregex.o wildmat.o getDomainToken.o \
-do_rate.o delivery_rate.o auto_prefix.o libsyncdir.a srs.lib
+do_rate.o delivery_rate.o auto_prefix.o set_queuedir.o \
+libsyncdir.a srs.lib
 	./load slowq-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	do_rate.o wildmat.o qmail.o auto_qmail.o auto_split.o \
 	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
 	delivery_rate.o auto_control.o getDomainToken.o \
-	auto_prefix.o $(static_option) -L. -lsyncdir \
-	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB) \
-	$(dynamic_option) -lm -ldl
+	auto_prefix.o set_queuedir.o \
+	$(static_option) -L. -lsyncdir -L../libsrs2-x/libsrs2/.libs \
+	`cat srs.lib` $(QMAILLIB) $(dynamic_option) -lm -ldl
 
 slowq-send.o: \
 compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
+set_queuedir.h conf-mime conf-sync conf-batv \
+conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-loglock conf-bounce` slowq-send.c
 
@@ -1737,21 +1744,21 @@ slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 
 qmta-send: \
 load qmta-send.o trigger.o fmtqfn.o readsubdir.o \
-variables.o auto_control.o control.o qsutil.o \
+variables.o auto_control.o control.o qsutil.o auto_qmail.o \
 auto_split.o auto_uids.o prioq.o newfield.o quote.o \
 qmail.o syncdir.o srs.o rcpthosts.o auto_spawn.o \
 slurpclose.o get_uid.o qmta_lspawn.o qmta_rspawn.o \
 qmta-lspawn.o qmta-rspawn.o auto_assign.o tcpto_clean.o \
-set_environment.o auto_prefix.o
+set_environment.o set_queuedir.o auto_prefix.o
 	./load qmta-send trigger.o fmtqfn.o readsubdir.o \
 	variables.o auto_control.o control.o qsutil.o \
-	rcpthosts.o auto_split.o auto_uids.o prioq.o \
+	rcpthosts.o auto_split.o auto_uids.o prioq.o auto_qmail.o \
 	newfield.o quote.o qmail.o syncdir.o srs.o qmta_lspawn.o \
 	qmta_rspawn.o qmta-lspawn.o qmta-rspawn.o slurpclose.o \
 	get_uid.o auto_spawn.o auto_assign.o tcpto_clean.o \
-	set_environment.o auto_prefix.o $(static_option) \
-	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB) \
-	$(dynamic_option)
+	set_environment.o set_queuedir.o auto_prefix.o \
+	$(static_option) -L../libsrs2-x/libsrs2/.libs `cat srs.lib` \
+	$(QMAILLIB) $(dynamic_option)
 
 qmta-lspawn.o: compile qmail-lspawn.c slurpclose.h \
 auto_uids.h qlx.h auto_assign.h indimail_stub.h \
@@ -1775,9 +1782,9 @@ ipalloc.h auto_control.h variables.h conf-tls conf-ip
 
 qmta-send.o: \
 compile qmta-send.c qsutil.h fmtqfn.h readsubdir.h trigger.h \
-variables.h prioq.h qmail.h newfield.h quote.h \
-auto_split.h auto_uids.h auto_prefix.h conf-mime conf-sync \
-conf-batv conf-srs conf-loglock conf-bounce
+variables.h prioq.h qmail.h newfield.h quote.h set_environment.h \
+auto_split.h auto_uids.h auto_prefix.h set_queuedir.h conf-mime \
+conf-sync conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-loglock conf-bounce` qmta-send.c
 
