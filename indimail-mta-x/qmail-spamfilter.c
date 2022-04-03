@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.5  2022-04-03 18:44:36+05:30  Cprogrammer
+ * refactored qmail_open() error codes
+ *
  * Revision 1.4  2022-03-05 13:35:30+05:30  Cprogrammer
  * use auto_prefix/sbin for qscanq path
  *
@@ -57,7 +60,7 @@ main(int argc, char **argv)
 	char          **Argv;
 
 	if (chdir("/") == -1)
-		_exit(63);
+		_exit(61);
 	sig_pipeignore();
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
@@ -232,7 +235,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.4 2022-03-05 13:35:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.5 2022-04-03 18:44:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;

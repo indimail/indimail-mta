@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dk.c,v 1.58 2022-03-08 22:59:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dk.c,v 1.59 2022-04-03 18:43:56+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef DOMAIN_KEYS
 #include <unistd.h>
@@ -408,9 +408,9 @@ main(int argc, char *argv[])
 	if ((ret = pidopen(starttime, x)))
 		die(ret);
 	if ((readfd = open_read(pidfn)) == -1)
-		die(63);
+		die(70);
 	if (unlink(pidfn) == -1)
-		die(63);
+		die(70);
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf)); /*- message content */
 	dkexcludeheaders = env_get("DKEXCLUDEHEADERS");
@@ -612,7 +612,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.58 2022-03-08 22:59:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.59 2022-04-03 18:43:56+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
@@ -626,6 +626,9 @@ getversion_qmail_dk_c()
 
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.59  2022-04-03 18:43:56+05:30  Cprogrammer
+ * refactored qmail_open() error codes
+ *
  * Revision 1.58  2022-03-08 22:59:14+05:30  Cprogrammer
  * use custom_error() function from custom_error.c
  *

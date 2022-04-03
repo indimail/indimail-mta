@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.63 2022-03-08 22:59:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.64 2022-04-03 18:44:21+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -963,9 +963,9 @@ main(int argc, char *argv[])
 	if ((ret = pidopen(starttime, ptr))) /*- set pidfn and open with fd = messfd */
 		die(ret, 0);
 	if ((readfd = open_read(pidfn)) == -1)
-		die(63, dkimsign ? 1 : 2);
+		die(70, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
-		die(63, dkimsign ? 1 : 2);
+		die(70, dkimsign ? 1 : 2);
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf)); /*- message content */
 	for (ret = 0;;) {
@@ -1170,7 +1170,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.63 2022-03-08 22:59:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.64 2022-04-03 18:44:21+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1184,6 +1184,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.64  2022-04-03 18:44:21+05:30  Cprogrammer
+ * refactored qmail_open() error codes
+ *
  * Revision 1.63  2022-03-08 22:59:35+05:30  Cprogrammer
  * use custom_error() from custom_error.c
  *
