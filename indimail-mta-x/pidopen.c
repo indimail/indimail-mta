@@ -1,5 +1,8 @@
 /*
  * $Log: pidopen.c,v $
+ * Revision 1.3  2022-04-03 18:14:07+05:30  Cprogrammer
+ * use 70 as return code for pidopen failure
+ *
  * Revision 1.2  2021-06-15 21:50:34+05:30  Cprogrammer
  * added tmpdir argument
  *
@@ -79,14 +82,14 @@ pidopen(datetime_sec _starttime, char *tmpdir)
 		if ((messfd = open_exclr(pidfn)) != -1)
 			return 0;
 	}
-	return(63);
+	return(70);
 }
 
 #ifndef lint
 void
 getversion_pidopen_c()
 {
-	static char    *x = "$Id: pidopen.c,v 1.2 2021-06-15 21:50:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: pidopen.c,v 1.3 2022-04-03 18:14:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	x++;
