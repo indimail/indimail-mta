@@ -15,6 +15,43 @@ environment variable QUEUEDIR to point to a path having a valid
 queue created by the program \fBqueue-fix\fR(8). \fBqmail-queue\fR
 is setuid to uid \fIqmailq\fR.
 
+The deposition and balancing of mail across multiple queues is controlled
+by the following environment variables.
+
+.TP 5
+\fBQUEUE_BASE\fR The base directory having all the indimail queues. If this
+is not defined, the control file \fIqueue_base\fR is used. This is
+typically QMAILHOME/queue.
+
+.TP 5
+\fBQUEUE_START\fR This is a number which defines the first queue that
+should be used.
+
+e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue/queue1
+
+.TP 5
+\fBQUEUE_COUNT\fR This defines the number of queues that should be used for
+load balancing. \fBqmail-queue\fR used a random number to select a queue in
+a multi-queue setup.
+
+e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue/queue1,
+QMAILHOME/queue/queue2, ..., QMAILHOME/queue/queue5
+
+.TP 5
+.B MIN_FREE
+This is the minimum free disk space that should be available in the
+filesystem containing the queues. When free space goes below this value,
+qmail-multi will return a temporary disk full error "qq write error or disk
+full (#4.3.0)". This prevents \fBqmail-send\fR reaching a deadlock in the
+case when disk becomes full and there are bounce messages to be processed.
+\fBqmail-send\fR in this case keeps on retrying bounce message which does
+not succeeed because of insufficient disk space to write the bounce. This
+effectively stops processing of local and remote messages and thus disk
+space never gets freed up. \fBqmail-multi\fR prevents this from happening
+by accepting mails only when disk space greater than MIN_FREE is present.
+It uses \fBstatfs(2)\fR (\fBstatvfs\fR on solaris) to get the free space on
+the filesystem.
+
 \fBqmail-queue\fR uses DIRSPLIT as the directory split. It can be
 overriden by environment variable \fBCONFSPLIT\fR upto a max of
 DIRSPLIT

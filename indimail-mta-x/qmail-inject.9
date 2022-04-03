@@ -173,7 +173,8 @@ Print the message rather than feeding it to
 \fBqmail-inject\fR uses environment set according to files in
 $HOME/.defaultqueue directory. If QUEUE_BASE environment variable is not
 set, it additionally uses environment set according to files in
-@controldir@/defaultqueue directory.
+@controldir@/defaultqueue directory. If the environment variable
+\fBFASTQUEUE\fR is set, $HOME/.defaultqueue is not processed.
 
 .SH OPTIONS
 

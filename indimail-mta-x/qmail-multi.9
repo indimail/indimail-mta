@@ -27,7 +27,8 @@ e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue/queue1
 
 .TP 5
 \fBQUEUE_COUNT\fR This defines the number of queues that should be used for
-load balancing.
+load balancing. \fBqmail-multi\fR used a random number to select a queue in
+a multi-queue setup.
 
 e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue/queue1,
 QMAILHOME/queue/queue2, ..., QMAILHOME/queue/queue5
