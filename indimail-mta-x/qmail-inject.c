@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.47  2022-04-03 18:46:17+05:30  Cprogrammer
+ * bypass set_environment if FASTQUEUE env variable is set
+ *
  * Revision 1.46  2022-03-27 20:10:47+05:30  Cprogrammer
  * display system error when qmail_open() fails
  *
@@ -1014,7 +1017,8 @@ getcontrols()
 	char           *x;
 
 	mft_init();
-	set_environment(WARN, FATAL, 1);
+	if (!env_get("FASTQUEUE"))
+		set_environment(WARN, FATAL, 1);
 	if (!(x = env_get("QMAILDEFAULTDOMAIN"))) {
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)
 			die_read();
@@ -1206,7 +1210,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.46 2022-03-27 20:10:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.47 2022-04-03 18:46:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
