@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.85 2022-04-03 18:43:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.86 2022-04-03 21:18:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -190,7 +190,7 @@ tcpgetremoteip()
  */
 
 static unsigned int
-receivedfmt(char *s)
+receivedfmt(char *s, int fastqueue)
 {
 	unsigned int    i;
 	unsigned int    len;
@@ -239,7 +239,7 @@ receivedfmt(char *s)
 			s += i;
 		if (!tcpremoteip)
 			tcpremoteip = env_get("TCPREMOTEIP");
-		if (!tcpremoteip)
+		if (!fastqueue && !tcpremoteip)
 			tcpgetremoteip();
 		i = fmt_str(s, tcpremoteip);
 		len += i;
@@ -258,7 +258,7 @@ receivedfmt(char *s)
 			s += i;
 		if (!tcpremoteip)
 			tcpremoteip = env_get("TCPREMOTEIP");
-		if (!tcpremoteip)
+		if (!fastqueue && !tcpremoteip)
 			tcpgetremoteip();
 		if (tcpremoteip) {
 			i = fmt_str(s, "from network ");
@@ -295,12 +295,12 @@ receivedfmt(char *s)
 }
 
 void
-received_setup()
+received_setup(int fastqueue)
 {
-	receivedlen = receivedfmt((char *) 0);
+	receivedlen = receivedfmt((char *) 0, fastqueue);
 	if (!(received = alloc(receivedlen + 1)))
 		die(51, 0, "out of memory");
-	receivedfmt(received);
+	receivedfmt(received, fastqueue);
 }
 
 unsigned int
@@ -813,7 +813,7 @@ main()
 	mypid = getpid();
 	uid = getuid();
 	datetime_tai(&dt, starttime);
-	received_setup();
+	received_setup(fastqueue);
 	sig_pipeignore();
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
@@ -1175,7 +1175,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.85 2022-04-03 18:43:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.86 2022-04-03 21:18:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1183,6 +1183,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.86  2022-04-03 21:18:52+05:30  Cprogrammer
+ * bypass getpeername() if fastqueue is set
+ *
  * Revision 1.85  2022-04-03 18:43:29+05:30  Cprogrammer
  * use custom_error() for error messages
  *
