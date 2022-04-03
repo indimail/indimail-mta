@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.99 2022-04-04 00:08:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.98 2022-03-20 22:59:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -58,7 +58,6 @@
 #endif
 #include "delivery_rate.h"
 #include "getDomainToken.h"
-#include "set_queuedir.h"
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -158,13 +157,8 @@ sighup()
 static void
 chdir_toqueue()
 {
-	while (!queuedir && !(queuedir = env_get("QUEUEDIR"))) {
-		while (!(queuedir = set_queuedir(argv0, "queue"))) {
-			log7("alert: ", argv0, ": ", queuedesc,
-					": cannot start: unable to get queue directory: ", error_str(errno), "\n");
-			sleep(10);
-		}
-	}
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue"; /*- single queue like qmail */
 	while (chdir(queuedir) == -1) {
 		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to switch back to queue directory; HELP! sleeping...",
@@ -2369,13 +2363,8 @@ main(int argc, char **argv)
 
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
-	if (!(queuedir = env_get("QUEUEDIR"))) {
-		if (!(queuedir = set_queuedir(argv0, "queue"))) {
-			log7("alert: ", argv0, ": ", queuedesc,
-					": cannot start: unable to get queue directory: ", error_str(errno), "\n");
-			_exit(111);
-		}
-	}
+	if (!(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue"; /*- single queue like qmail */
 	ptr = env_get("RATELIMIT_DIR");
 	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	/*- get basename of queue directory to define qmail-send instance */
@@ -2395,7 +2384,7 @@ main(int argc, char **argv)
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log9("info: ", argv0, ": ", queuedir, ": ratelimit=", 
+	log9("info: ", argv0, ": ", queuedesc, ": ratelimit=", 
 			do_ratelimit ? "ON, loglock=" : "OFF, loglock=", 
 			loglock_fd == -1 ? "disabled, conf split=" : "enabled, conf split=",
 			strnum1, "\n");
@@ -2585,7 +2574,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.99 2022-04-04 00:08:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.98 2022-03-20 22:59:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2595,9 +2584,6 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.99  2022-04-04 00:08:17+05:30  Cprogrammer
- * Use QUEUE_BASE, queue_base control for setting base directory of queue
- *
  * Revision 1.98  2022-03-20 22:59:00+05:30  Cprogrammer
  * added queue ident in logs for matchup (qmailanalog to handle multi-queue)
  *

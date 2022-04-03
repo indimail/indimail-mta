@@ -164,7 +164,7 @@ Release 2.14.1 Start 21/09/2021
 92. pidopen: use 70 as return code for pidopen() failure
 93. qmail-direct.c, qmail-queue.c: use custom_error() for error messages
 94. qmail-queue.c: bypass getpeername() if fastqueue is set
-95. slowq-send.c, qmta-send.c, qmail-todo.c, qmail-send.c: Use QUEUE_BASE,
+95. slowq-start.c, qmta-send.c: Use QUEUE_BASE,
     queue_base control for setting base directory of queue
 
 * 

@@ -1,7 +1,7 @@
 /*
  * $Log: slowq-send.c,v $
- * Revision 1.21  2022-04-04 00:08:29+05:30  Cprogrammer
- * Use QUEUE_BASE, queue_base control for setting base directory of queue
+ * Revision 1.21  2022-04-04 00:51:51+05:30  Cprogrammer
+ * display queuedir in logs
  *
  * Revision 1.20  2022-03-31 00:08:53+05:30  Cprogrammer
  * replaced fsync() with fdatasync()
@@ -118,7 +118,6 @@
 #endif
 #include "delivery_rate.h"
 #include "getDomainToken.h"
-#include "set_queuedir.h"
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -219,13 +218,8 @@ sighup()
 static void
 chdir_toqueue()
 {
-	while (!queuedir && !(queuedir = env_get("QUEUEDIR"))) {
-		while (!(queuedir = set_queuedir(argv0, "slowq"))) {
-			log7("alert: ", argv0, ": ", queuedesc,
-					": cannot start: unable to get queue directory: ", error_str(errno), "\n");
-			sleep(10);
-		}
-	}
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue/slowq";
 	while (chdir(queuedir) == -1) {
 		log7("alert: ", argv0, ": ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
 		sleep(10);
@@ -2443,27 +2437,12 @@ main(int argc, char **argv)
 	struct timeval  tv;
 	char           *ptr;
 
+	if (!(queuedir = env_get("QUEUEDIR")))
+		queuedir = "queue/slowq"; /*- single queue like qmail */
 	ptr = env_get("RATELIMIT_DIR");
 	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
-
-	if (!stralloc_copys(&fn1, argv0) || !stralloc_cats(&fn1, ": warn: ") || !stralloc_0(&fn1)) {
-		log3("alert: ", argv0, ": out of memoery\n");
-		_exit(111);
-	}
-	if (!stralloc_copys(&fn2, argv0) || !stralloc_cats(&fn2, ": fatal: ") || !stralloc_0(&fn2)) {
-		log3("alert: ", argv0, ": out of memoery\n");
-		_exit(111);
-	}
-	if (!(queuedir = env_get("QUEUEDIR"))) {
-		if (!(queuedir = set_queuedir(argv0, "slowq"))) {
-			log5("alert: ", argv0, ": cannot start: unable to get queue directory: ",
-					error_str(errno), "\n");
-			_exit(111);
-		}
-	}
-
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -2653,7 +2632,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.21 2022-04-04 00:08:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.21 2022-04-04 00:51:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
