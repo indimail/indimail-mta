@@ -669,3 +669,6 @@ qscheduler.o
 rt.lib
 haslibrt.h
 multi-queue.7
+custom_error.o
+getqueue.o
+tryfts.o
