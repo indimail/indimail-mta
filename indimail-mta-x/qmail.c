@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.31 2022-03-30 22:53:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.32 2022-04-03 18:09:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -180,15 +180,15 @@ qmail_close(struct qmail *qq)
 		return "Denvelope address too long for qq (#5.1.3)";
 	case 31:
 		return "Dmail server permanently rejected message (#5.3.0)";
-	case 32: /*-*/
+	case 32:
 		return "DSPAM or junk mail threshold exceeded (#5.7.1)";
-	case 33: /*-*/
+	case 33:
 		return "DMessage contains virus (#5.7.1)";
-	case 34: /*-*/
+	case 34:
 		return "DMessage contains banned attachment (#5.7.1)";
-	case 35: /*-*/
+	case 35:
 		return "DPrivate key file does not exist (#5.3.5)";
-	case 50: /*-*/
+	case 50:
 		return "Zunable to set uid/gid (#4.3.0)";
 	case 51:
 		return "Zqq out of memory (#4.3.0)";
@@ -206,32 +206,34 @@ qmail_close(struct qmail *qq)
 		return "Zqq unable to read configuration (#4.3.0)";
 	case 56:
 		return "Zqq trouble making network connection (#4.3.0)";
-	case 57: /*-*/
+	case 57:
 		return "Zunable to open shared object/plugin (#4.3.0)";
-	case 58: /*-*/
+	case 58:
 		return "Zunable to resolve symbol in shared object/plugin (#4.3.0)";
-	case 59: /*-*/
+	case 59:
 		return "Zunable to close shared object/plugin (#4.3.0)";
-	case 60: /*-*/
+	case 60:
 		return "Zqq trouble creating pipes/sockets (#4.3.0)";
 	case 61:
 		return "Zqq trouble in home directory (#4.3.0)";
-	case 62: /*-*/
+	case 62:
 		return "Zqq unable to access mess file (#4.3.0)";
 	case 63:
 		return "Zqq trouble doing cd to root directory (#4.3.0)";
 	case 64:
-		return "Zqq trouble syncing files (#4.3.0)";
+		return "Zqq trouble syncing message to disk (#4.3.0)";
 	case 65:
 		return "Zqq trouble creating files in intd. (#4.3.0)";
 	case 66:
-		return "Zqq trouble creating linking todofn to intdfn (#4.3.0)";
-	case 67: /*-*/
-		return "Zqq trouble getting uids/gids (#4.3.0)";
-	case 68: /*-*/
+		return "Zqq trouble linking todofn to intdfn (#4.3.0)";
+	case 67:
+		return "Zqq trouble linking messfn to pidfn (#4.3.0)";
+	case 68:
 		return "Zqq trouble creating temporary files (#4.3.0)";
-	case 69: /*-*/
-		return "Zqq trouble syncing dir (#4.3.0)";
+	case 69:
+		return "Zqq trouble syncing dir to disk (#4.3.0)";
+	case 70:
+		return "Zqq trouble with pid file (#4.3.0)";
 	case 71:
 		return "Zmail server temporarily rejected message (#4.3.0)";
 	case 72:
@@ -240,14 +242,18 @@ qmail_close(struct qmail *qq)
 		return "Zconnection to mail server rejected (#4.4.1)";
 	case 74:
 		return "Zcommunication with mail server failed (#4.4.2)";
-	case 75: /*-*/
+	case 75:
 		return "Zunable to exec (#4.3.0)";
-	case 76: /*-*/
+	case 76:
 		return "Ztemporary problem with SPAM filter (#4.3.0)";
 	case 77: /*- thanks to problem repoted by peter cheng */
 		return "Zqq unable to run QHPSI scanner (#4.3.0)";
+	case 78:
+		return "Zqq trouble getting uids/gids (#4.3.0)";
 	case 79:
-		return "Zqq Envelope format error (#4.3.0)";
+		return "Zqq envelope format error (#4.3.0)";
+	case 80:
+		return "Zqq trouble removing intdfn";
 	case 91:
 		/*- fall through */
 	case 81:
@@ -276,13 +282,16 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.31 2022-03-30 22:53:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.32 2022-04-03 18:09:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.32  2022-04-03 18:09:00+05:30  Cprogrammer
+ * refactored return codes
+ *
  * Revision 1.31  2022-03-30 22:53:05+05:30  Cprogrammer
  * include error.h for errno
  *
