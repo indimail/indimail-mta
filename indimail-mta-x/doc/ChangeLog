@@ -158,6 +158,11 @@ Release 2.14.1 Start 21/09/2021
 89. maildir_deliver.c, qmail-local.c, qmail-queue.c, qmail-todo.c,
     slowq-send.c, syncdir.c: replaced fsync() with fdatasync()
 90. zoverall.sh: display time span in seconds if < 86400
+- 03/04/2022
+91. qmail.c, qmail-dk.c, qmail-dkim.c, qmail-spamfilter.c, qmail-queue.c,
+    qmail-direct.c: refactored return codes for qmail_open()
+92. pidopen: use 70 as return code for pidopen() failure
+93. qmail-direct.c, qmail-queue.c: use custom_error() for error messages
 
 * 
 Release 2.14.0 Start 18/07/2021
