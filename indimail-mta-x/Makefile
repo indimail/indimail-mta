@@ -1413,12 +1413,13 @@ drate.9 conf-prefix conf-qmail
 	| sed s}QUEUEDIR}"`head -1 conf-qmail`/queue"}g \
 	> drate.1
 
-qmail-direct: load qmail-direct.o pidopen.o
-	./load qmail-direct pidopen.o $(QMAILLIB)
+qmail-direct: load qmail-direct.o pidopen.o custom_error.o \
+syncdir.o
+	./load qmail-direct pidopen.o custom_error.o syncdir.o $(QMAILLIB)
 
 qmail-direct.o: \
-compile qmail-direct.c pidopen.h
-	./compile qmail-direct.c
+compile qmail-direct.c pidopen.h custom_error.h syncdir.h conf-sync
+	./compile `grep -h -v "^#" conf-sync` qmail-direct.c
 
 qmail-direct.8: \
 qmail-direct.9 conf-sysconfdir
