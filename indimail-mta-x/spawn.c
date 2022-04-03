@@ -102,6 +102,7 @@
 #include "auto_spawn.h"
 #include "auto_control.h"
 #include "variables.h"
+#include "set_queuedir.h"
 
 extern int      truncreport_SPAWN;
 int             SPAWN(int, int, unsigned long, char *, char *, char *, int);
@@ -435,13 +436,18 @@ QSPAWN(int argc, char **argv)
 #ifdef ENABLE_VIRTUAL_PKG
 	char           *ptr;
 #endif
+	char           *argv0;
 	int             i, r, nfds;
 	fd_set          rfds;
 
 	if (uidinit(1, 0) == -1 || auto_uidq == -1)
 		_exit(111);
-	if (!(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue"; /*- single queue like qmail */
+	if (!(queuedir = env_get("QUEUEDIR"))) {
+		i = str_rchr(argv[0], '/');
+		argv0 = (argv[0][i] && argv[0][i + 1]) ? argv[0] + i + 1 : argv[0];
+		if (!(queuedir = set_queuedir(argv0, "queue")))
+			_exit(111);
+	}
 	if (chdir(queuedir) == -1 || chdir("mess") == -1)
 		_exit(111);
 	if (!stralloc_copys(&messid, "") ||
