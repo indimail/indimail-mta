@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.18  2022-04-04 00:08:26+05:30  Cprogrammer
+ * Use QUEUE_BASE, queue_base control for setting base directory of queue
+ *
  * Revision 1.17  2022-03-31 00:42:18+05:30  Cprogrammer
  * replace fsync() with fdatasync()
  *
@@ -108,6 +111,7 @@
 #include "auto_split.h"
 #include "auto_uids.h"
 #include "set_environment.h"
+#include "set_queuedir.h"
 
 #define OSSIFIED      129600 /*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 #define SLEEP_CLEANUP 76431 /*- time between cleanups */
@@ -219,10 +223,15 @@ spawndied(int c)
 static void
 chdir_toqueue()
 {
-	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue/qmta";
+	if (!queuedir && !(queuedir = env_get("QUEUEDIR"))) {
+		while (!(queuedir = set_queuedir(argv0, "qmta"))) {
+			log7("alert: ", argv0, ": ", queuedesc,
+					": cannot start: unable to get queue directory: ", error_str(errno), "\n");
+			sleep(10);
+		}
+	}
 	while (chdir(queuedir) == -1) {
-		log5("alert: ", argv0, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
 		sleep(10);
 	}
 }
@@ -2672,11 +2681,22 @@ main(int argc, char **argv)
 		getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
+	if (!(queuedir = env_get("QUEUEDIR"))) {
+		if (!(queuedir = set_queuedir(argv0, "qmta")))
+			strerr_die3sys(111, "alert: ", argv0, ": unable to get queue directory; quitting...");
+		if (!env_put2("QUEUEDIR", queuedir))
+			strerr_die3sys(111, "alert: ", argv0, ": out of memory; quitting...");
+	}
+	/*- get basename of queue directory to define qmta-send instance */
+	for (queuedesc = queuedir; *queuedesc; queuedesc++);
+	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
+	if (*queuedesc == '/')
+		queuedesc++;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	if (!(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue/qmta"; /*- single queue like qmail */
 	if (substdio_put(subfdout, "info: ", 6) == -1 ||
 			substdio_puts(subfdout, argv0) == -1 ||
+			substdio_puts(subfdout, ": ") == -1 ||
+			substdio_puts(subfdout, queuedir) == -1 ||
 			substdio_put(subfdout, ": conf split=", 13) == -1 ||
 			substdio_puts(subfdout, strnum1) == -1 ||
 			substdio_put(subfdout, bigtodo ? ", bigtodo=1\n" : ", bigtodo=0\n", 12) || substdio_flush(subfdout) == -1)
@@ -2789,7 +2809,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.17 2022-03-31 00:42:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.18 2022-04-04 00:08:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

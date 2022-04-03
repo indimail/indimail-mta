@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.59 2022-03-31 00:25:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.60 2022-04-04 00:08:21+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -41,6 +41,7 @@
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
+#include "set_queuedir.h"
 
 /*- critical timing feature #1: if not triggered, do not busy-loop */
 /*- critical timing feature #2: if triggered, respond within fixed time */
@@ -1295,8 +1296,14 @@ reread(void)
 		return;
 	}
 	regetcontrols();
-	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue"; /*- single queue like qmail */
+
+	while (!queuedir && !(queuedir = env_get("QUEUEDIR"))) {
+		while (!(queuedir = set_queuedir(argv0, "queue"))) {
+			log7("alert: ", argv0, ": ", queuedesc,
+					": cannot start: unable to get queue directory: ", error_str(errno), "\n");
+			sleep(10);
+		}
+	}
 	while (chdir(queuedir) == -1) {
 		log9("alert: ", argv0, ": ", queuedesc,
 				": unable to switch back to queue directory ", queuedir,
@@ -1316,8 +1323,12 @@ main(int argc, char **argv)
 
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
-	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
-		queuedir = "queue"; /*- single queue like qmail */
+	if (!(queuedir = env_get("QUEUEDIR"))) {
+		if (!(queuedir = set_queuedir(argv0, "queue"))) {
+			log5("alert: ", argv0, ": cannot start: unable to get queue directory: ", error_str(errno), "\n");
+			comm_die(111);
+		}
+	}
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
 	if (*queuedesc == '/')
@@ -1338,7 +1349,7 @@ main(int argc, char **argv)
 		todo_chunk_size = CHUNK_SIZE;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	strnum2[fmt_ulong(strnum2, todo_chunk_size)] = 0;
-	log9("info: ", argv0, ": ", queuedesc, ": conf split=", strnum1,
+	log9("info: ", argv0, ": ", queuedir, ": conf split=", strnum1,
 		", todo chunk size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n");
 #ifdef USE_FSYNC
 	if ((ptr = env_get("USE_FSYNC")) && *ptr)
@@ -1480,7 +1491,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.59 2022-03-31 00:25:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.60 2022-04-04 00:08:21+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1488,6 +1499,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.60  2022-04-04 00:08:21+05:30  Cprogrammer
+ * Use QUEUE_BASE, queue_base control for setting base directory of queue
+ *
  * Revision 1.59  2022-03-31 00:25:15+05:30  Cprogrammer
  * use chunk_wait seconds to wait for message chunks
  *
