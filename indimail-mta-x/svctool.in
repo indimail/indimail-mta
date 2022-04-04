@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.623 2022-03-06 19:02:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.624 2022-04-04 14:33:58+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.623 2022-03-06 19:02:49+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.624 2022-04-04 14:33:58+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2488,15 +2488,20 @@ if [ " $odmr" = " " ] ; then
 			echo $bodycheck > $conf_dir/BODYCHECK
 		fi
 	fi
-	if [ " $usefsync" = " " ] ; then
+	if [ $usefsync -eq 0 ] ; then
 		> $conf_dir/USE_FSYNC
 	else
-		echo > $conf_dir/USE_FSYNC
+		echo 1 > $conf_dir/USE_FSYNC
+	fi
+	if [ $usefdatasync -eq 0 ] ; then
+		> $conf_dir/USE_FDATASYNC
+	else
+		echo 1 > $conf_dir/USE_FDATASYNC
 	fi
 	if [ " $usesyncdir" = " " ] ; then
 		> $conf_dir/USE_SYNCDIR
 	else
-		echo > $conf_dir/USE_SYNCDIR
+		echo 1 > $conf_dir/USE_SYNCDIR
 	fi
 	if [ " $min_free" = " " ] ; then
 		echo 52428800 > $conf_dir/MIN_FREE
@@ -2901,15 +2906,20 @@ if [ " $qhpsi" = " " ] ; then
 else
 	echo $qhpsi > $conf_dir/QHPSI
 fi
-if [ " $usefsync" = " " ] ; then
+if [ $usefsync -eq 0 ] ; then
 	> $conf_dir/USE_FSYNC
 else
-	echo > $conf_dir/USE_FSYNC
+	echo 1 > $conf_dir/USE_FSYNC
+fi
+if [ $usefdatasync -eq 0 ] ; then
+	> $conf_dir/USE_FDATASYNC
+else
+	echo 1 > $conf_dir/USE_FDATASYNC
 fi
 if [ " $usesyncdir" = " " ] ; then
 	> $conf_dir/USE_SYNCDIR
 else
-	echo > $conf_dir/USE_SYNCDIR
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $spamfilter" = " " ] ; then
 	echo "$spamfilter" > $conf_dir/SPAMFILTER
@@ -3211,15 +3221,20 @@ case "$dkverify_option" in
 	fi
 	;;
 esac
-if [ " $usefsync" = " " ] ; then
+if [ $usefsync -eq 0 ] ; then
 	> $conf_dir/USE_FSYNC
 else
-	echo > $conf_dir/USE_FSYNC
+	echo 1 > $conf_dir/USE_FSYNC
+fi
+if [ $usefdatasync -eq 0 ] ; then
+	> $conf_dir/USE_FDATASYNC
+else
+	echo 1 > $conf_dir/USE_FDATASYNC
 fi
 if [ " $usesyncdir" = " " ] ; then
 	> $conf_dir/USE_SYNCDIR
 else
-	echo > $conf_dir/USE_SYNCDIR
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
@@ -5991,15 +6006,20 @@ if [ ! " $CONTROLDIR" = " " ] ; then
 else
 	> $conf_dir/CONTROLDIR
 fi
-if [ " $usefsync" = " " ] ; then
+if [ $usefsync -eq 0 ] ; then
 	> $conf_dir/USE_FSYNC
 else
-	echo > $conf_dir/USE_FSYNC
+	echo 1 > $conf_dir/USE_FSYNC
+fi
+if [ $usefdatasync -eq 0 ] ; then
+	> $conf_dir/USE_FDATASYNC
+else
+	echo 1 > $conf_dir/USE_FDATASYNC
 fi
 if [ " $usesyncdir" = " " ] ; then
 	> $conf_dir/USE_SYNCDIR
 else
-	echo > $conf_dir/USE_SYNCDIR
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $memory" = " " ] ; then
 	echo $memory > $conf_dir/SOFT_MEM
@@ -6479,15 +6499,20 @@ if [ ! " $overquota_mailsize" = " " ] ; then
 else
 	> $conf_dir/OVERQUOTA_MAILSIZE
 fi
-if [ " $usefsync" = " " ] ; then
+if [ $usefsync -eq 0 ] ; then
 	> $conf_dir/USE_FSYNC
 else
-	echo > $conf_dir/USE_FSYNC
+	echo 1 > $conf_dir/USE_FSYNC
+fi
+if [ $usefdatasync -eq 0 ] ; then
+	> $conf_dir/USE_FDATASYNC
+else
+	echo 1 > $conf_dir/USE_FDATASYNC
 fi
 if [ " $usesyncdir" = " " ] ; then
 	> $conf_dir/USE_SYNCDIR
 else
-	echo > $conf_dir/USE_SYNCDIR
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $dmemory" = " " ] ; then
 	echo $dmemory > $conf_dir/SOFT_MEM
@@ -6734,15 +6759,20 @@ if [ ! " $overquota_mailsize" = " " ] ; then
 else
 	> $conf_dir/OVERQUOTA_MAILSIZE
 fi
-if [ " $usefsync" = " " ] ; then
+if [ $usefsync -eq 0 ] ; then
 	> $conf_dir/USE_FSYNC
 else
-	echo > $conf_dir/USE_FSYNC
+	echo 1 > $conf_dir/USE_FSYNC
+fi
+if [ $usefdatasync -eq 0 ] ; then
+	> $conf_dir/USE_FDATASYNC
+else
+	echo 1 > $conf_dir/USE_FDATASYNC
 fi
 if [ " $usesyncdir" = " " ] ; then
 	> $conf_dir/USE_SYNCDIR
 else
-	echo > $conf_dir/USE_SYNCDIR
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $dmemory" = " " ] ; then
 	echo $dmemory > $conf_dir/SOFT_MEM
@@ -9307,6 +9337,8 @@ forcetls=0
 nooverwrite=0
 run_file_only=0
 utf8=0
+usefsync=0
+usefdatasync=0
 mount_resolvconf=0
 valid_for=366
 databytes=$DATABYTES
@@ -9473,6 +9505,9 @@ while test $# -gt 0; do
 	;;
 	--fsync)
 	usefsync=1
+	;;
+	--fdatasync)
+	usefdatasync=1
 	;;
 	--syncdir)
 	usesyncdir=1

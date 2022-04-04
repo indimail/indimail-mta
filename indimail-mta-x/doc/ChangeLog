@@ -174,6 +174,7 @@ Release 2.14.1 Start 21/09/2021
 98. qmail-local.c, qmail-send.c, qmail-todo.c, slowq-send.c, qmta-send.c:
     added setting of fdatasync() instead of fsync()
 99. syncdir.c: added use_fdatasync to turn on fdatasync() instead of fsync()
+100.svctool: added option to set fdatasync
 
 * 
 Release 2.14.0 Start 18/07/2021
