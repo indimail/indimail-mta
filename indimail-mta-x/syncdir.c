@@ -79,8 +79,8 @@ int             use_fsync = -1, use_fdatasync = -1, use_syncdir = -1;
 #include "env.h"
 
 #define SYS_FSYNC(FD)            syscall(SYS_fsync, FD)
-#define SYS_FDATASYNC(FD)        syscall(SYS_fdatasync, FD)
 #ifdef DARWIN
+#define SYS_FDATASYNC(FD)        syscall(SYS_fsync, FD)
 #define SYS_OPEN(FILE,FLAG,MODE) open(FILE,FLAG,MODE)
 #define SYS_CLOSE(FD)            close(FD)
 #define SYS_LINK(OLD,NEW)        link(OLD,NEW)
@@ -89,6 +89,7 @@ int             use_fsync = -1, use_fdatasync = -1, use_syncdir = -1;
 int             open(char *, int, ...);
 int             rename(char *, char *); 
 #else
+#define SYS_FDATASYNC(FD)        syscall(SYS_fdatasync, FD)
 #if defined(SYS_openat) && defined(AT_FDCWD)
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_openat,AT_FDCWD,FILE,FLAG,MODE)
 #else

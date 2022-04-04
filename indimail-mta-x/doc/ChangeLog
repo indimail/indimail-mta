@@ -175,6 +175,7 @@ Release 2.14.1 Start 21/09/2021
     added setting of fdatasync() instead of fsync()
 99. syncdir.c: added use_fdatasync to turn on fdatasync() instead of fsync()
 100.svctool: added option to set fdatasync
+101.syncdir.c: fix for missing fdatasync on OSX
 
 * 
 Release 2.14.0 Start 18/07/2021
