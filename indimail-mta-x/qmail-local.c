@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.43  2022-04-04 11:12:37+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
  * Revision 1.42  2022-03-31 00:08:28+05:30  Cprogrammer
  * replaced fsync() with fdatasync()
  *
@@ -315,10 +318,10 @@ mailfile(char *fn)
 	if (substdio_bputs(&ssout, "\n") || substdio_flush(&ssout))
 		goto writeerrs;
 #ifdef USE_FSYNC
-	if (use_fsync > 0 && fdatasync(fd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync > 0 ? fdatasync : fsync) (fd) == -1)
 		goto writeerrs;
 #else
-	if (fdatasync(fd) == -1)
+	if (fsync(fd) == -1)
 		goto writeerrs;
 #endif
 	close(fd);
@@ -849,11 +852,12 @@ main(int argc, char **argv)
 	flag99 = 0;
 	i = 0;
 #ifdef USE_FSYNC
-	use_fsync = use_syncdir = 0;
-	if ((x = env_get("USE_FSYNC")) && *x)
-		use_fsync = 1;
-	if ((x = env_get("USE_SYNCDIR")) && *x)
-		use_syncdir = 1;
+	x = env_get("USE_FSYNC");
+	use_fsync = (x && *x) ? 1 : 0;
+	x = env_get("USE_FDATASYNC");
+	use_fdatasync = (x && *x) ? 1 : 0;
+	x = env_get("USE_SYNCDIR");
+	use_syncdir = (x && *x) ? 1 : 0;
 #endif
 	for (j = 0; j < cmds.len; ++j) {
 		if (cmds.s[j] == '\n') {
@@ -972,7 +976,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.42 2022-03-31 00:08:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.43 2022-04-04 11:12:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

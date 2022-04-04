@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.19  2022-04-04 11:16:37+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
  * Revision 1.18  2022-04-04 00:08:26+05:30  Cprogrammer
  * Use QUEUE_BASE, queue_base control for setting base directory of queue
  *
@@ -739,7 +742,7 @@ process_todo(unsigned long id)
 		}
 	}
 #ifdef USE_FSYNC
-	if (use_fsync > 0 && fsync(fdinfo) == -1) {
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdinfo) == -1) {
 		log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
 		goto fail;
 	}
@@ -754,7 +757,7 @@ process_todo(unsigned long id)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
-			if (use_fsync > 0 && fsync(fdchan[c]) == -1) {
+			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
 				log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
 				goto fail;
@@ -2321,22 +2324,8 @@ do_controls()
 		return 0;
 	if (control_readint(&use_fsync, "conf-fsync") == -1)
 		return 0;
-	if (use_syncdir > 0) {
-		if (!env_put2("USE_SYNCDIR", "1"))
-			return 0;
-	} else
-	if (!use_syncdir) {
-		if (!env_unset("USE_SYNCDIR"))
-			return 0;
-	}
-	if (use_fsync > 0) {
-		if (!env_put2("USE_FSYNC", "1"))
-			return 0;
-	} else
-	if (!use_fsync) {
-		if (!env_unset("USE_FSYNC"))
-			return 0;
-	}
+	if (control_readint(&use_fdatasync, "conf-fdatasync") == -1)
+		return 0;
 #endif
 #ifdef HAVESRS
 	if (control_readline(&srs_domain, "srs_domain") == -1)
@@ -2472,21 +2461,9 @@ regetcontrols()
 		log3("alert: ", argv0, ": unable to reread conf-fsync\n");
 		return;
 	}
-	if (use_syncdir > 0) {
-		while (!env_put2("USE_SYNCDIR", "1"))
-			nomem(argv0);
-	} else
-	if (!use_syncdir) {
-		while (!env_unset("USE_SYNCDIR"))
-			nomem(argv0);
-	}
-	if (use_fsync > 0) {
-		while (!env_put2("USE_FSYNC", "1"))
-			nomem(argv0);
-	} else
-	if (!use_fsync) {
-		while (!env_unset("USE_FSYNC"))
-			nomem(argv0);
+	if (control_readint(&use_fdatasync, "conf-fdatasync") == -1) {
+		log3("alert: ", argv0, ": unable to reread conf-fdatasync\n");
+		return;
 	}
 #endif
 	for (c = 0; c < CHANNELS; c++) {
@@ -2514,12 +2491,6 @@ regetcontrols()
 	} else
 		while (!constmap_init(&mapvdoms, "", 0, 1))
 			nomem(argv0);
-}
-
-static void
-reread()
-{
-	regetcontrols();
 }
 
 static void
@@ -2722,10 +2693,36 @@ main(int argc, char **argv)
 			todo_interval = ONCEEVERY;
 	}
 #ifdef USE_FSYNC
-	if ((ptr = env_get("USE_FSYNC")) && *ptr)
-		use_fsync = 1;
-	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
-		use_syncdir = 1;
+	ptr = env_get("USE_FSYNC");
+	use_fsync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_FDATASYNC");
+	use_fdatasync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_SYNCDIR");
+	use_syncdir = (ptr && *ptr) ? 1 : 0;
+	if (use_syncdir > 0) {
+		while (!env_put2("USE_SYNCDIR", "1"))
+			nomem(argv0);
+	} else
+	if (!use_syncdir) {
+		while (!env_unset("USE_SYNCDIR"))
+			nomem(argv0);
+	}
+	if (use_fsync > 0) {
+		while (!env_put2("USE_FSYNC", "1"))
+			nomem(argv0);
+	} else
+	if (!use_fsync) {
+		while (!env_unset("USE_FSYNC"))
+			nomem(argv0);
+	}
+	if (use_fdatasync > 0) {
+		while (!env_put2("USE_FDATASYNC", "1"))
+			nomem(argv0);
+	} else
+	if (!use_fdatasync) {
+		while (!env_unset("USE_FDATASYNC"))
+			nomem(argv0);
+	}
 #endif
 	sig_pipeignore();
 	sig_termcatch(sigterm);
@@ -2749,7 +2746,7 @@ main(int argc, char **argv)
 		}
 		if (flagreadasap) {
 			flagreadasap = 0;
-			reread();
+			regetcontrols();
 		}
 		wakeup = recent + SLEEP_FOREVER;
 		FD_ZERO(&rfds);
@@ -2809,7 +2806,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.18 2022-04-04 00:08:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.19 2022-04-04 11:16:37+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

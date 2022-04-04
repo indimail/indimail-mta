@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.98 2022-03-20 22:59:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.99 2022-04-04 11:15:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2027,22 +2027,8 @@ getcontrols()
 		return 0;
 	if (control_readint(&use_fsync, "conf-fsync") == -1)
 		return 0;
-	if (use_syncdir > 0) {
-		if (!env_put2("USE_SYNCDIR", "1"))
-			return 0;
-	} else
-	if (!use_syncdir) {
-		if (!env_unset("USE_SYNCDIR"))
-			return 0;
-	}
-	if (use_fsync > 0) {
-		if (!env_put2("USE_FSYNC", "1"))
-			return 0;
-	} else
-	if (!use_fsync) {
-		if (!env_unset("USE_FSYNC"))
-			return 0;
-	}
+	if (control_readint(&use_fdatasync, "conf-fdatasync") == -1)
+		return 0;
 #endif
 #ifdef HAVESRS
 	if (control_readline(&srs_domain, "srs_domain") == -1)
@@ -2173,21 +2159,9 @@ regetcontrols()
 		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fsync\n");
 		return;
 	}
-	if (use_syncdir > 0) {
-		while (!env_put2("USE_SYNCDIR", "1"))
-			nomem(argv0);
-	} else
-	if (!use_syncdir) {
-		while (!env_unset("USE_SYNCDIR"))
-			nomem(argv0);
-	}
-	if (use_fsync > 0) {
-		while (!env_put2("USE_FSYNC", "1"))
-			nomem(argv0);
-	} else
-	if (!use_fsync) {
-		while (!env_unset("USE_FSYNC"))
-			nomem(argv0);
+	if (control_readint(&use_fdatasync, "conf-fdatasync") == -1) {
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fdatasync\n");
+		return;
 	}
 #endif
 	for (c = 0; c < CHANNELS; c++) {
@@ -2388,6 +2362,38 @@ main(int argc, char **argv)
 			do_ratelimit ? "ON, loglock=" : "OFF, loglock=", 
 			loglock_fd == -1 ? "disabled, conf split=" : "enabled, conf split=",
 			strnum1, "\n");
+#ifdef USE_FSYNC
+	ptr = env_get("USE_FSYNC");
+	use_fsync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_FDATASYNC");
+	use_fdatasync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_SYNCDIR");
+	use_syncdir = (ptr && *ptr) ? 1 : 0;
+	if (use_syncdir > 0) {
+		while (!env_put2("USE_SYNCDIR", "1"))
+			nomem(argv0);
+	} else
+	if (!use_syncdir) {
+		while (!env_unset("USE_SYNCDIR"))
+			nomem(argv0);
+	}
+	if (use_fsync > 0) {
+		while (!env_put2("USE_FSYNC", "1"))
+			nomem(argv0);
+	} else
+	if (!use_fsync) {
+		while (!env_unset("USE_FSYNC"))
+			nomem(argv0);
+	}
+	if (use_fdatasync > 0) {
+		while (!env_put2("USE_FDATASYNC", "1"))
+			nomem(argv0);
+	} else
+	if (!use_fdatasync) {
+		while (!env_unset("USE_FDATASYNC"))
+			nomem(argv0);
+	}
+#endif
 	if (!getcontrols()) {
 		log5("alert: ", argv0, ": ", queuedesc,
 				": cannot start: unable to read controls\n");
@@ -2437,10 +2443,6 @@ main(int argc, char **argv)
 		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: instance already running\n");
 		_exit(111);
 	}
-#ifdef USE_FSYNC
-	if (env_get("USE_FSYNC"))
-		use_fsync = 1;
-#endif
 
 	numjobs = 0;
 	/*- read 2 bytes from qmail-lspawn, qmail-rspawn to get concurrency */
@@ -2574,7 +2576,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.98 2022-03-20 22:59:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.99 2022-04-04 11:15:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2584,6 +2586,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.99  2022-04-04 11:15:36+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
  * Revision 1.98  2022-03-20 22:59:00+05:30  Cprogrammer
  * added queue ident in logs for matchup (qmailanalog to handle multi-queue)
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.60 2022-04-04 00:51:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.61 2022-04-04 11:16:11+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -1085,13 +1085,13 @@ todo_do(int *nfds, fd_set *rfds)
 		}
 	}
 #ifdef USE_FSYNC
-	if (use_fsync && fdatasync(fdinfo) == -1) {
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdinfo) == -1) {
 		log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
 			error_str(errno), "\n");
 		goto fail;
 	}
 #else
-	if (fdatasync(fdinfo) == -1) {
+	if (fsync(fdinfo) == -1) {
 		log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
 			error_str(errno), "\n");
 		goto fail;
@@ -1102,7 +1102,7 @@ todo_do(int *nfds, fd_set *rfds)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
-			if (use_fsync && fdatasync(fdchan[c]) == -1) {
+			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
 				log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
 					error_str(errno), "\n");
@@ -1198,24 +1198,9 @@ getcontrols(void)
 		return 0;
 #ifdef USE_FSYNC
 	if (control_readint(&use_syncdir, "conf-syncdir") == -1 ||
-			control_readint(&use_fsync, "conf-fsync") == -1)
+			control_readint(&use_fsync, "conf-fsync") == -1 ||
+			control_readint(&use_fdatasync, "conf-fdatasync") == -1)
 		return 0;
-	if (use_syncdir > 0) {
-		if (!env_put2("USE_SYNCDIR", "1"))
-			return 0;
-	} else
-	if (!use_syncdir) {
-		if (!env_unset("USE_SYNCDIR"))
-			return 0;
-	}
-	if (use_fsync > 0) {
-		if (!env_put2("USE_FSYNC", "1"))
-			return 0;
-	} else
-	if (!use_fsync) {
-		if (!env_unset("USE_FSYNC"))
-			return 0;
-	}
 #endif
 	return 1;
 }
@@ -1252,21 +1237,9 @@ regetcontrols(void)
 		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fsync\n");
 		return;
 	}
-	if (use_syncdir > 0) {
-		while (!env_put2("USE_SYNCDIR", "1"))
-			nomem();
-	} else
-	if (!use_syncdir) {
-		while (!env_unset("USE_SYNCDIR"))
-			nomem();
-	}
-	if (use_fsync > 0) {
-		while (!env_put2("USE_FSYNC", "1"))
-			nomem();
-	} else
-	if (!use_fsync) {
-		while (!env_unset("USE_FSYNC"))
-			nomem();
+	if (control_readint(&use_fdatasync, "conf-fdatasync") == -1) {
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fdatasync\n");
+		return;
 	}
 #endif
 	constmap_free(&maplocals);
@@ -1341,10 +1314,36 @@ main(int argc, char **argv)
 	log9("info: ", argv0, ": ", queuedir, ": conf split=", strnum1,
 		", todo chunk size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n");
 #ifdef USE_FSYNC
-	if ((ptr = env_get("USE_FSYNC")) && *ptr)
-		use_fsync = 1;
-	if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
-		use_syncdir = 1;
+	ptr = env_get("USE_FSYNC");
+	use_fsync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_FDATASYNC");
+	use_fdatasync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_SYNCDIR");
+	use_syncdir = (ptr && *ptr) ? 1 : 0;
+	if (use_syncdir > 0) {
+		while (!env_put2("USE_SYNCDIR", "1"))
+			nomem();
+	} else
+	if (!use_syncdir) {
+		while (!env_unset("USE_SYNCDIR"))
+			nomem();
+	}
+	if (use_fsync > 0) {
+		while (!env_put2("USE_FSYNC", "1"))
+			nomem();
+	} else
+	if (!use_fsync) {
+		while (!env_unset("USE_FSYNC"))
+			nomem();
+	}
+	if (use_fdatasync > 0) {
+		while (!env_put2("USE_FDATASYNC", "1"))
+			nomem();
+	} else
+	if (!use_fdatasync) {
+		while (!env_unset("USE_FDATASYNC"))
+			nomem();
+	}
 #endif
 	if (!getcontrols()) {
 		log5("alert: ", argv0, ": ", queuedesc,
@@ -1480,7 +1479,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.60 2022-04-04 00:51:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.61 2022-04-04 11:16:11+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1488,6 +1487,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.61  2022-04-04 11:16:11+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
  * Revision 1.60  2022-04-04 00:51:42+05:30  Cprogrammer
  * display queuedir in logs
  *
