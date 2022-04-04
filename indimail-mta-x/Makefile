@@ -1085,21 +1085,18 @@ qmail-limits.9 conf-spawn
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
 	> qmail-limits.7
 
-libsyncdir.a: makelib syncdir.o
-	./makelib libsyncdir.a syncdir.o
-
 syncdir.o: compile syncdir.c conf-sync
 	./compile `grep -h -v "^#" conf-sync` syncdir.c
 
 qmail-local: \
 load qmail-local.o qmail.o quote.o gfrom.o slurpclose.o srs.o \
 auto_patrn.o rcpthosts.o auto_control.o variables.o control.o \
-maildir_deliver.o auto_prefix.o libsyncdir.a socket.lib srs.lib
+maildir_deliver.o auto_prefix.o syncdir.o socket.lib srs.lib
 	./load qmail-local qmail.o quote.o gfrom.o slurpclose.o srs.o \
 	rcpthosts.o auto_patrn.o variables.o auto_control.o control.o \
-	maildir_deliver.o auto_prefix.o \
+	maildir_deliver.o auto_prefix.o syncdir.o \
 	$(static_option) -L../libsrs2-x/libsrs2/.libs `cat srs.lib` \
-	-L. -lsyncdir $(QMAILLIB) `cat socket.lib` $(dynamic_option)
+	$(QMAILLIB) `cat socket.lib` $(dynamic_option)
 
 qmail-local.o: \
 compile qmail-local.c quote.h qmail.h slurpclose.h \
@@ -1431,11 +1428,11 @@ qmail-queue: \
 load qmail-queue.o triggerpull.o fmtqfn.o get_uid.o auto_split.o \
 auto_uids.o variables.o matchregex.o auto_prefix.o auto_qmail.o \
 control.o auto_control.o strsalloc.o custom_error.o getqueue.o \
-socket.lib rt.lib libsyncdir.a
+syncdir.o socket.lib rt.lib
 	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o auto_split.o \
 	auto_uids.o auto_prefix.o variables.o matchregex.o auto_qmail.o \
 	control.o auto_control.o strsalloc.o custom_error.o getqueue.o \
-	$(static_option) $(QMAILLIB) -L. -lsyncdir `cat socket.lib` \
+	syncdir.o $(static_option) $(QMAILLIB) `cat socket.lib` \
 	$(dynamic_option) `cat rt.lib`
 
 qmail-queue.8: \
@@ -1649,13 +1646,13 @@ load qmail-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
 variables.o getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
-auto_prefix.o delivery_rate.o libsyncdir.a srs.lib rt.lib
+auto_prefix.o delivery_rate.o syncdir.o srs.lib rt.lib
 	./load qmail-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
 	auto_split.o variables.o envrules.o matchregex.o srs.o \
 	delivery_rate.o rcpthosts.o auto_control.o auto_prefix.o \
-	$(static_option) -L. -lsyncdir \
+	syncdir.o $(static_option) \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB) \
 	$(dynamic_option) -lm `cat rt.lib` -ldl
 
@@ -1681,10 +1678,10 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 
 qmail-todo: \
 load qmail-todo.o control.o trigger.o fmtqfn.o readsubdir.o auto_qmail.o \
-auto_split.o auto_control.o variables.o libsyncdir.a rt.lib
+auto_split.o auto_control.o variables.o syncdir.o rt.lib
 	./load qmail-todo control.o trigger.o fmtqfn.o auto_control.o \
 	readsubdir.o auto_qmail.o auto_split.o variables.o \
-	$(static_option) -L. -lsyncdir $(QMAILLIB) \
+	syncdir.o $(static_option) $(QMAILLIB) \
 	$(dynamic_option) `cat rt.lib`
 
 qmail-todo.o: \
@@ -1710,13 +1707,13 @@ load slowq-send.o qsutil.o control.o newfield.o prioq.o \
 trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
 variables.o envrules.o qregex.o wildmat.o getDomainToken.o \
-do_rate.o delivery_rate.o auto_prefix.o libsyncdir.a srs.lib
+do_rate.o delivery_rate.o auto_prefix.o syncdir.o srs.lib
 	./load slowq-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	do_rate.o wildmat.o qmail.o auto_qmail.o auto_split.o \
 	variables.o envrules.o matchregex.o srs.o rcpthosts.o \
 	delivery_rate.o auto_control.o getDomainToken.o auto_prefix.o \
-	$(static_option) -L. -lsyncdir -L../libsrs2-x/libsrs2/.libs \
+	syncdir.o $(static_option) -L../libsrs2-x/libsrs2/.libs \
 	`cat srs.lib` $(QMAILLIB) $(dynamic_option) -lm -ldl
 
 slowq-send.o: \
@@ -2498,8 +2495,9 @@ syncdir.o
 	./load maildirdeliver maildir_deliver.o syncdir.o \
 	$(QMAILLIB)
 
-maildirdeliver.o: compile maildirdeliver.c maildir_deliver.h
-	./compile maildirdeliver.c
+maildirdeliver.o: \
+compile maildirdeliver.c maildir_deliver.h conf-sync
+	./compile `grep -h -v "^#" conf-sync` maildirdeliver.c
 
 qmail-rm: load qmail-rm.o auto_split.o auto_qmail.o \
 control.o auto_control.o variables.o fts.lib
@@ -2611,11 +2609,12 @@ filterto.1: filterto.9 conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> filterto.1
 
-condtomaildir: load condtomaildir.o
-	./load condtomaildir $(QMAILLIB)
+condtomaildir: load condtomaildir.o syncdir.o
+	./load condtomaildir syncdir.o $(QMAILLIB)
 
-condtomaildir.o: compile condtomaildir.c
-	./compile condtomaildir.c
+condtomaildir.o: \
+compile condtomaildir.c syncdir.h conf-sync
+	./compile `grep -h -v "^#" conf-sync` condtomaildir.c
 
 iftoccfrom: load iftoccfrom.o
 	./load iftoccfrom $(QMAILLIB)
