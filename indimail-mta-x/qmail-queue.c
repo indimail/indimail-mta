@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.86 2022-04-03 21:18:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.87 2022-04-04 11:14:30+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -707,7 +707,7 @@ main()
 	int             token_len, exclude = 0, include = 0, loghead = 0, line_brk_excl = 1,
 					line_brk_incl = 1, in_header = 1, line_brk_log = 1, logfd = -1, field_len,
 					itoken_len, fastqueue, queueNo, e;
-#if defined(USE_FSYNC) && defined(LINUX)
+#if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX)
 	int             fd;
 #endif
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
@@ -725,12 +725,12 @@ main()
 	qm_custom_err = env_get("QMAIL_QUEUE_CUSTOM_ERROR") ? 1 : 0;
 	if (!(ptr = env_get("FASTQUEUE")))
 		fastqueue = 0;
-	else {
+	else
 		scan_int(ptr, &fastqueue);
+	if (fastqueue) {
 		auto_uidq = fastqueue;
 		auto_gidq = -1;
-	}
-	if (!fastqueue) {
+	} else {
 		if ((ptr = env_get("ORIGINIPFIELD")))
 			scan_ulong(ptr, (unsigned long *) &originipfield);
 		read_control(&extraqueue, "EXTRAQUEUE", "extraqueue", 0);
@@ -800,15 +800,12 @@ main()
 		conf_split = auto_split;
 	qqeh = fastqueue ? (char *) NULL : env_get("QQEH");
 #ifdef USE_FSYNC
-	if (fastqueue)
-		use_fsync = use_syncdir = 0;
-	else {
-		use_fsync = use_syncdir = 0;
-		if ((ptr = env_get("USE_FSYNC")) && *ptr)
-			use_fsync = 1;
-		if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
-			use_syncdir = 1;
-	}
+	ptr = env_get("USE_FSYNC");
+	use_fsync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_FDATASYNC");
+	use_fdatasync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_SYNCDIR");
+	use_syncdir = (ptr && *ptr) ? 1 : 0;
 #endif
 	mypid = getpid();
 	uid = getuid();
@@ -1131,15 +1128,16 @@ main()
 	if (substdio_flush(&ssout) == -1)
 		die(53, 1, "trouble writing envelope");
 #ifdef USE_FSYNC
-	if (use_fsync > 0 && (fdatasync(messfd) == -1 || fdatasync(intdfd) == -1))
+	if ((use_fsync > 0 || use_fdatasync > 0) &&
+			((use_fdatasync > 0 ? fdatasync : fsync) (messfd) == -1 || (use_fdatasync > 0 ? fdatasync : fsync) (intdfd) == -1))
 		die(64, 1, "trouble syncing message to disk");
 #else
-	if (fdatasync(messfd) == -1 || fdatasync(intdfd) == -1)
+	if (fsync(messfd) == -1 || fsync(intdfd) == -1)
 		die(64, 1, "trouble syncing message to disk");
 #endif
 	if (link(intdfn, todofn) == -1)
 		die(66, 1, "trouble linking todofn to intdfn");
-#if defined(USE_FSYNC) && defined(LINUX) /*- asynchronous nature of link() happens only on Linux */
+#if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX) /*- asynchronous nature of link() happens only on Linux */
 	if (use_syncdir > 0) {
 		if ((fd = open(todofn, O_RDONLY)) == -1) {
 			/*- 
@@ -1150,7 +1148,7 @@ main()
 			if (errno != error_noent)
 				die(69, 1, "trouble syncing dir to disk");
 		} else
-		if (fdatasync(fd) == -1 || close(fd) == -1)
+		if ((use_fdatasync > 0 ? fdatasync : fsync) (fd) == -1 || close(fd) == -1)
 			die(69, 1, "trouble syncing dir to disk");
 	}
 #endif
@@ -1175,7 +1173,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.86 2022-04-03 21:18:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.87 2022-04-04 11:14:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1183,6 +1181,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.87  2022-04-04 11:14:30+05:30  Cprogrammer
+ * refactored fastqueue and added setting of fdatasync()
+ *
  * Revision 1.86  2022-04-03 21:18:52+05:30  Cprogrammer
  * bypass getpeername() if fastqueue is set
  *

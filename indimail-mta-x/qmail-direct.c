@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.12  2022-04-04 11:11:31+05:30  Cprogrammer
+ * refactored fastqueue and added setting of fdatasync()
+ *
  * Revision 1.11  2022-04-03 18:41:49+05:30  Cprogrammer
  * use custom_error() for error messages
  *
@@ -338,24 +341,11 @@ main(int argc, char **argv)
 	umask(033);
 	if (!(ptr = env_get("FASTQUEUE")))
 		fastqueue = 0;
-	else {
+	else
 		scan_uint(ptr, &fastqueue);
+	if (fastqueue) {
 		uid = fastqueue;
 		gid = -1;
-	}
-#ifdef USE_FSYNC
-	if (fastqueue)
-		use_fsync = use_syncdir = 0;
-	else {
-		use_fsync = use_syncdir = 0;
-		if ((ptr = env_get("USE_FSYNC")) && *ptr)
-			use_fsync = 1;
-		if ((ptr = env_get("USE_SYNCDIR")) && *ptr)
-			use_syncdir = 1;
-	}
-#endif
-	qm_custom_err = env_get("QMAIL_QUEUE_CUSTOM_ERROR") ? 1 : 0;
-	if (fastqueue) {
 		if (!(home = env_get("HOME")))
 			die(78, "trouble getting home directory for user");
 	} else {
@@ -368,6 +358,15 @@ main(int argc, char **argv)
 		uid = pw->pw_uid;
 		gid = pw->pw_gid;
 	}
+#ifdef USE_FSYNC
+	ptr = env_get("USE_FSYNC");
+	use_fsync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_FDATASYNC");
+	use_fdatasync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_SYNCDIR");
+	use_syncdir = (ptr && *ptr) ? 1 : 0;
+#endif
+	qm_custom_err = env_get("QMAIL_QUEUE_CUSTOM_ERROR") ? 1 : 0;
 	if (!stralloc_copys(&fntmptph, home) ||
 			!stralloc_catb(&fntmptph, "/Maildir", 8) ||
 			!stralloc_0(&fntmptph))
@@ -538,10 +537,10 @@ main(int argc, char **argv)
 		die(53, "trouble writing message");
 	}
 #ifdef USE_FSYNC
-	if (use_fsync && fdatasync(mailfd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (mailfd) == -1)
 		die(53, "trouble syncing message to disk");
 #else
-	if (fdatasync(mailfd) == -1)
+	if (fsync(mailfd) == -1)
 		die(53, "trouble syncing message to disk");
 #endif
 	close(mailfd);
@@ -553,10 +552,10 @@ main(int argc, char **argv)
 	/*- remove tmp_fn file */
 	if (unlink(fntmptph.s) == -1)
 		die(68, "trouble removing file in Maildir/tmp");
-#if defined(USE_FSYNC) && defined(LINUX) /*- asynchronous nature of link() happens only on Linux */
+#if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX)
 	if (use_syncdir > 0) {
 		if ((mailfd = open(fnnewtph.s, O_RDONLY)) == -1 ||
-				fdatasync(mailfd) == -1 || close(mailfd) == -1) {
+				(use_fdatasync > 0 ? fdatasync : fsync) (mailfd) == -1 || close(mailfd) == -1) {
 			if (!stralloc_copyb(&err_str, "trouble syncing ", 16) ||
 					!stralloc_cats(&err_str, home) ||
 					!stralloc_catb(&err_str, " directory", 10) ||
@@ -572,7 +571,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.11 2022-04-03 18:41:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.12 2022-04-04 11:11:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)
