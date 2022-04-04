@@ -106,19 +106,22 @@ rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configur
 .B qmail-srs(5)
 for information on how to do this
 
-If the environment variable USE_FSYNC is set, then\fBqmail-local\fR writes
-all data to disk ("flushes") all modified in-core data of (i.e., modified
-buffer cache pages for) the new message to the disk device (or other
-permanent storage device) so that all  changed  information can  be
-retrieved even if the system crashes or is rebooted. This includes
-writing through or flushing a disk cache if present. The call blocks
-until the device reports that the transfer has completed.
+If the environment variable USE_FSYNC or USE_FDATASYNC is set,
+then\fBqmail-local\fR writes all data to disk ("flushes") all modified
+in-core data of (i.e., modified buffer cache pages for) the new message to
+the disk device (or other permanent storage device) so that all changed
+information can  be retrieved even if the system crashes or is rebooted.
+This includes writing through or flushing a disk cache if present. The call
+blocks until the device reports that the transfer has completed. The system
+calls fsync(2) or fdatasync(2) are used to flush data to disk.
+Though fdatasync(2) is faster than fsync(2), both these calls impose a
+penalty on performance.
 
 If the environment variable USE_SYNCDIR is enabled, \fBqmail-local\fR
 forces BSD style directory syncing.
 
-The environment variable USE_FSYNC, USE_SYNCDIR is controlled by
-qmail-send/qmail-todo. The fsync(2) system call is used for doing this.
+The environment variable USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR is
+controlled by qmail-send/qmail-todo
 
 .SH "CONTROL FILES"
 .B

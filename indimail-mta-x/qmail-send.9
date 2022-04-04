@@ -83,9 +83,17 @@ until the device reports that the transfer has completed. This is done
 for the info and mess files. This can also be set by using \fIconf-fsync\fR
 control file.
 
-If the environment variable USE_SYNCDIR is enabled, \fBqmail-send\fR
+If the environment variable \fBUSE_FDATASYNC\fR is enabled,
+\fBqmail-send\fR uses fdatasync(2) instead of fsync(2). This can also be
+set by using \fIconf-fdatasync\fR control file.
+
+If the environment variable \fBUSE_SYNCDIR\fR is enabled, \fBqmail-send\fR
 forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
+
+if the value of the environment variables USE_FSYNC, USE_FDATASYNC,
+USE_SYNCDIR  is zero, the corresponding variables is unset. This allows
+setting of these variables for \fBqmail-local\fR(8).
 
 \fBqmail-send\fR can be configured to use a queue with a different split
 subdirectory value than compile time value of DIRSPLIT. This can be done by
@@ -93,13 +101,6 @@ setting the \fBCONFSPLIT\fR envrionment variable. Additionally, it can
 process a queue created with \fItodo\fR, \fIintd\fR with subdirectory split
 instead of without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable.
-
-The control files conf-syncdir, conf-fsync take precedence over
-the environment variable counterparts. If the control conf-fsync,
-conf-syncdir are present, \fBqmail-send\fR will additionally set
-or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
-is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is used
-for doing this.
 
 .SH OPTIONS
 .PP
@@ -707,4 +708,5 @@ qmail-lspawn(8),
 qmail-dkim(8),
 dk-filter(8),
 qmail-rspawn(8),
-fsync(2)
+fsync(2),
+fdatasync(2)

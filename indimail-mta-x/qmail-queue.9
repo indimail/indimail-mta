@@ -62,11 +62,11 @@ letter F and terminated by a 0 byte. Each recipient address is preceded by
 the letter T and terminated by a 0 byte. The list of recipient addresses is
 terminated by an extra 0 byte. If \fBqmail-queue\fR sees end-of-file before
 the extra 0 byte, it aborts without placing the message into the queue. If
-\fBUSE_FSYNC\fR environment variable is defined \fBqmail-queue\fR uses
-fsync(2) to sync the message file in \fIqueue/mess\fR and the envelope in
-\fIqueue/intd\fR file as well. After creating a link to the envelope in
-\fIqueue/todo\fR to \fIqueue/intd\fR, qmail-queue syncs the directory using
-the following two methods.
+\fBUSE_FSYNC\fR \fBUSE_FDATASYNC\fR environment variable is defined
+\fBqmail-queue\fR uses fsync(2) or fdatasync(2) to sync the message file in
+\fIqueue/mess\fR and the envelope in \fIqueue/intd\fR file as well. After
+creating a link to the envelope in \fIqueue/todo\fR to \fIqueue/intd\fR,
+qmail-queue syncs the directory using the following two methods.
 
 .IP \[bu] 2
 BSD Style Synchronous Directory -
@@ -77,6 +77,13 @@ forces directory syncing.
 Using FSYNC -
 \fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the fsync(2)
 call to flush data buffers to the disk
+
+.IP \[bu]
+Using FDATASYNC -
+\fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the
+fdatasync(2) instead of fsync(2) call to flush data buffers to the disk.
+fdatasync(2) is faster than fsync(2), but does not flush few of the file's
+metadata.
 
 .PP
 \fBqmail-queue\fR(8) communicates with \fBqmail-todo\fR(8) when it places a
@@ -972,4 +979,6 @@ qmail-spamfilter(8),
 qmail-nullqueue(8),
 qmail-direct(8),
 multi-queue(7),
+fsync(2),
+fdatasync(2),
 mq_open(3)
