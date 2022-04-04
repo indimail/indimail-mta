@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.h,v $
+ * Revision 1.3  2022-04-04 11:17:15+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
  * Revision 1.2  2021-05-16 23:02:52+05:30  Cprogrammer
  * define use_fsync, use_syncdir as extern
  *
@@ -10,7 +13,7 @@
 
 #ifndef SYNCDIR_H
 #define SYNCDIR_H
-extern int use_fsync, use_syncdir;
+extern int use_fsync, use_fdatasync, use_syncdir;
 #ifdef DARWIN
 int             qopen(char *, int, ...);
 int             qlink(char *, char *); 
