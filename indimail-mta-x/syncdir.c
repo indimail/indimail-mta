@@ -1,11 +1,5 @@
 /*
  * $Log: syncdir.c,v $
- * Revision 1.13  2022-04-04 11:16:49+05:30  Cprogrammer
- * have both SYS_FSYNC and SYS_FDATASYNC
- *
- * Revision 1.12  2022-03-31 00:09:14+05:30  Cprogrammer
- * replaced fsync() with fdatasync()
- *
  * Revision 1.11  2020-09-30 20:39:50+05:30  Cprogrammer
  * Darwin Port
  *
@@ -78,42 +72,40 @@ int             use_fsync = -1, use_fdatasync = -1, use_syncdir = -1;
 #include <unistd.h>
 #include "env.h"
 
-#define SYS_FSYNC(FD)            syscall(SYS_fsync, FD)
 #ifdef DARWIN
-#define SYS_FDATASYNC(FD)        syscall(SYS_fsync, FD)
 #define SYS_OPEN(FILE,FLAG,MODE) open(FILE,FLAG,MODE)
 #define SYS_CLOSE(FD)            close(FD)
 #define SYS_LINK(OLD,NEW)        link(OLD,NEW)
 #define SYS_UNLINK(PATH)         unlink(PATH)
 #define SYS_RENAME(OLD,NEW)      rename(OLD,NEW)
+#define SYS_FSYNC(FD)            fsync(FD)
+#define SYS_FDATASYNC(FD)        fsync(FD)
 int             open(char *, int, ...);
 int             rename(char *, char *); 
 #else
-#define SYS_FDATASYNC(FD)        syscall(SYS_fdatasync, FD)
 #if defined(SYS_openat) && defined(AT_FDCWD)
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_openat,AT_FDCWD,FILE,FLAG,MODE)
 #else
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_open,FILE,FLAG,MODE)
 #endif
-
 #define SYS_CLOSE(FD) syscall(SYS_close, FD)
 #if defined(SYS_linkat) && defined(AT_FDCWD)
 #define SYS_LINK(OLD,NEW)        syscall(SYS_linkat,AT_FDCWD,OLD,AT_FDCWD,NEW,0)
 #else
 #define SYS_LINK(OLD,NEW)        syscall(SYS_link,OLD,NEW)
 #endif
-
 #if defined(SYS_unlinkat) && defined(AT_FDCWD)
 #define SYS_UNLINK(PATH)         syscall(SYS_unlinkat,AT_FDCWD,PATH,0)
 #else
 #define SYS_UNLINK(PATH)         syscall(SYS_unlink,PATH)
 #endif
-
 #if defined(SYS_renameat) && defined(AT_FDCWD)
 #define SYS_RENAME(OLD,NEW)      syscall(SYS_renameat,AT_FDCWD,OLD,AT_FDCWD,NEW,0)
 #else
 #define SYS_RENAME(OLD,NEW)      syscall(SYS_rename,OLD,NEW)
 #endif
+#define SYS_FSYNC(FD)            syscall(SYS_fsync, FD)
+#define SYS_FDATASYNC(FD)        syscall(SYS_fsync, FD)
 #endif
 
 static int
@@ -131,7 +123,7 @@ fdirsync(const char *filename, unsigned length)
 	dirname[length] = 0;
 	if ((dirfd = SYS_OPEN(dirname, O_RDONLY, 0)) == -1)
 		return -1;
-	retval = (SYS_FDATASYNC(dirfd) == -1 && errno == EIO) ? -1 : 0;
+	retval = (SYS_FSYNC(dirfd) == -1 && errno == EIO) ? -1 : 0;
 	SYS_CLOSE(dirfd);
 	return retval;
 }
@@ -239,7 +231,7 @@ rename(const char *oldpath, const char *newpath)
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.13 2022-04-04 11:16:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: syncdir.c,v 1.11 2020-09-30 20:39:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
