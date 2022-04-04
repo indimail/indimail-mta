@@ -1,5 +1,8 @@
 /*
  * $Log: maildirdeliver.c,v $
+ * Revision 1.2  2022-04-04 11:10:12+05:30  Cprogrammer
+ * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
+ *
  * Revision 1.1  2021-05-16 23:01:48+05:30  Cprogrammer
  * Initial revision
  *
@@ -11,6 +14,9 @@
 #include <strerr.h>
 #include <stralloc.h>
 #include "maildir_deliver.h"
+#ifdef USE_FSYNC
+#include "syncdir.h"
+#endif
 
 #define FATAL "maildirdeliver: fatal: "
 
@@ -29,6 +35,14 @@ main(int argc, char **argv)
 	if (!*dir)
 		strerr_die1x(100, "usage: maildirdeliver dir");
 	umask(077);
+#ifdef USE_FSYNC
+	ptr = env_get("USE_FSYNC");
+	use_fsync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_FDATASYNC");
+	use_fdatasync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_SYNCDIR");
+	use_syncdir = (ptr && *ptr) ? 1 : 0;
+#endif
 	if ((ptr = env_get("RPLINE"))) {
 		if (!stralloc_copys(&rpline, ptr) || !stralloc_0(&rpline))
 			strerr_die1x(111, "Out of memory. (#4.3.0)");
@@ -60,7 +74,7 @@ main(int argc, char **argv)
 void
 getversion_maildirdeliver_c()
 {
-	static char    *x = "$Id: maildirdeliver.c,v 1.1 2021-05-16 23:01:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirdeliver.c,v 1.2 2022-04-04 11:10:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

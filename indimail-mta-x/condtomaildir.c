@@ -1,5 +1,8 @@
 /*
  * $Log: condtomaildir.c,v $
+ * Revision 1.7  2022-04-04 11:08:07+05:30  Cprogrammer
+ * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -37,6 +40,10 @@
 #include <env.h>
 #include <pathexec.h>
 #include <noreturn.h>
+#ifdef USE_FSYNC
+#include <fcntl.h>
+#include "syncdir.h"
+#endif
 
 #define sig_ignore(s) (sig_catch((s),sig_ignorehandler))
 #define FATAL "condtomaildir: fatal: "
@@ -98,26 +105,19 @@ doit(char *dir)
 	}
 	str_copy(fnnewtph, fntmptph);
 	byte_copy(fnnewtph, 3, "new");
-
 	alarm(86400);
-	fd = open_excl(fntmptph);
-	if (fd == -1)
+	if ((fd = open_excl(fntmptph)) == -1)
 		return (1);
-
-	rpline = env_get("RPLINE");
-	if (!rpline)
+	if (!(rpline = env_get("RPLINE")))
 		strerr_die2x(100, FATAL, "RPLINE not set");
-	dtline = env_get("DTLINE");
-	if (!dtline)
+	if (!(dtline = env_get("DTLINE")))
 		strerr_die2x(100, FATAL, "DTLINE not set");
-
 	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
 	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
 	if (substdio_puts(&ssout, rpline) == -1)
 		goto fail;
 	if (substdio_puts(&ssout, dtline) == -1)
 		goto fail;
-
 	switch (substdio_copy(&ssout, &ss))
 	{
 	case -2:
@@ -129,17 +129,32 @@ doit(char *dir)
 
 	if (substdio_flush(&ssout) == -1)
 		goto fail;
+#ifdef USE_FSYNC
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fd) == -1)
+		goto fail;
+#else
 	if (fsync(fd) == -1)
 		goto fail;
+#endif
 	if (close(fd) == -1)
 		goto fail;
-
 	if (link(fntmptph, fnnewtph) == -1)
 		goto fail;
 	tryunlinktmp();
+#if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX)
+	if (use_syncdir > 0) {
+		if ((fd = open(fnnewtph, O_RDONLY)) == -1) {
+			if (errno != error_noent)
+				goto fail;
+		} else
+		if ((use_fdatasync ? fdatasync : fsync) (fd) == -1 || close(fd) == -1)
+			goto fail;
+	}
+#endif
 	return (0);
 
-  fail:tryunlinktmp();
+fail:
+	tryunlinktmp();
 	return (1);
 }
 
@@ -147,12 +162,21 @@ int
 main(int argc, char **argv, char **envp)
 {
 	char           *dir;
-	int             pid;
-	int             wstat;
-	int             r;
+	int             pid, wstat, r;
+#ifdef USE_FSYNC
+	char           *ptr;
+#endif
 
 	if (!argv[1] || !argv[2])
 		strerr_die1x(100, "condtomaildir: usage: condtomaildir dir program [ arg ... ]");
+#ifdef USE_FSYNC
+	ptr = env_get("USE_FSYNC");
+	use_fsync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_FDATASYNC");
+	use_fdatasync = (ptr && *ptr) ? 1 : 0;
+	ptr = env_get("USE_SYNCDIR");
+	use_syncdir = (ptr && *ptr) ? 1 : 0;
+#endif
 
 	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
@@ -201,7 +225,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_condtomaildir_c()
 {
-	static char    *x = "$Id: condtomaildir.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: condtomaildir.c,v 1.7 2022-04-04 11:08:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
