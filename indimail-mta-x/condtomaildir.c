@@ -1,6 +1,6 @@
 /*
  * $Log: condtomaildir.c,v $
- * Revision 1.7  2022-04-04 11:08:07+05:30  Cprogrammer
+ * Revision 1.7  2022-04-04 14:20:03+05:30  Cprogrammer
  * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
  *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
@@ -130,7 +130,7 @@ doit(char *dir)
 	if (substdio_flush(&ssout) == -1)
 		goto fail;
 #ifdef USE_FSYNC
-	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fd) : fsync(fd)) == -1)
 		goto fail;
 #else
 	if (fsync(fd) == -1)
@@ -147,7 +147,7 @@ doit(char *dir)
 			if (errno != error_noent)
 				goto fail;
 		} else
-		if ((use_fdatasync ? fdatasync : fsync) (fd) == -1 || close(fd) == -1)
+		if ((use_fdatasync ? fdatasync(fd) : fsync(fd)) == -1 || close(fd) == -1)
 			goto fail;
 	}
 #endif
@@ -225,7 +225,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_condtomaildir_c()
 {
-	static char    *x = "$Id: condtomaildir.c,v 1.7 2022-04-04 11:08:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: condtomaildir.c,v 1.7 2022-04-04 14:20:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

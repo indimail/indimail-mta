@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-local.c,v $
- * Revision 1.43  2022-04-04 11:12:37+05:30  Cprogrammer
+ * Revision 1.43  2022-04-04 14:25:39+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *
  * Revision 1.42  2022-03-31 00:08:28+05:30  Cprogrammer
@@ -318,7 +318,7 @@ mailfile(char *fn)
 	if (substdio_bputs(&ssout, "\n") || substdio_flush(&ssout))
 		goto writeerrs;
 #ifdef USE_FSYNC
-	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync > 0 ? fdatasync : fsync) (fd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync > 0 ? fdatasync(fd) : fsync(fd)) == -1)
 		goto writeerrs;
 #else
 	if (fsync(fd) == -1)
@@ -976,7 +976,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.43 2022-04-04 11:12:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.43 2022-04-04 14:25:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

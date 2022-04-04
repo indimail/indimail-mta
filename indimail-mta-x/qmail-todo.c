@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.61 2022-04-04 11:16:11+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.61 2022-04-04 14:30:07+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -1085,7 +1085,7 @@ todo_do(int *nfds, fd_set *rfds)
 		}
 	}
 #ifdef USE_FSYNC
-	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdinfo) == -1) {
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdinfo) : fsync(fdinfo)) == -1) {
 		log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
 			error_str(errno), "\n");
 		goto fail;
@@ -1102,7 +1102,7 @@ todo_do(int *nfds, fd_set *rfds)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
-			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdchan[c]) == -1) {
+			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdchan[c]) : fsync(fdchan[c])) == -1) {
 				fnmake_chanaddr(id, c);
 				log9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
 					error_str(errno), "\n");
@@ -1479,7 +1479,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.61 2022-04-04 11:16:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.61 2022-04-04 14:30:07+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1487,7 +1487,7 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
- * Revision 1.61  2022-04-04 11:16:11+05:30  Cprogrammer
+ * Revision 1.61  2022-04-04 14:30:07+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *
  * Revision 1.60  2022-04-04 00:51:42+05:30  Cprogrammer

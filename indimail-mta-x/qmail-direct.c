@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-direct.c,v $
- * Revision 1.12  2022-04-04 11:11:31+05:30  Cprogrammer
+ * Revision 1.12  2022-04-04 14:23:27+05:30  Cprogrammer
  * refactored fastqueue and added setting of fdatasync()
  *
  * Revision 1.11  2022-04-03 18:41:49+05:30  Cprogrammer
@@ -537,7 +537,7 @@ main(int argc, char **argv)
 		die(53, "trouble writing message");
 	}
 #ifdef USE_FSYNC
-	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (mailfd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(mailfd) : fsync(mailfd)) == -1)
 		die(53, "trouble syncing message to disk");
 #else
 	if (fsync(mailfd) == -1)
@@ -555,7 +555,7 @@ main(int argc, char **argv)
 #if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX)
 	if (use_syncdir > 0) {
 		if ((mailfd = open(fnnewtph.s, O_RDONLY)) == -1 ||
-				(use_fdatasync > 0 ? fdatasync : fsync) (mailfd) == -1 || close(mailfd) == -1) {
+				(use_fdatasync > 0 ? fdatasync(mailfd) : fsync(mailfd)) == -1 || close(mailfd) == -1) {
 			if (!stralloc_copyb(&err_str, "trouble syncing ", 16) ||
 					!stralloc_cats(&err_str, home) ||
 					!stralloc_catb(&err_str, " directory", 10) ||
@@ -571,7 +571,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.12 2022-04-04 11:11:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.12 2022-04-04 14:23:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)

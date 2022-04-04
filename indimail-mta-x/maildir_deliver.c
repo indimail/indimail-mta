@@ -1,6 +1,6 @@
 /*
  * $Log: maildir_deliver.c,v $
- * Revision 1.4  2022-04-04 11:09:41+05:30  Cprogrammer
+ * Revision 1.4  2022-04-04 14:22:01+05:30  Cprogrammer
  * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
  *
  * Revision 1.3  2022-03-31 00:08:07+05:30  Cprogrammer
@@ -166,7 +166,7 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 	if (substdio_flush(&ssout) == -1)
 		goto fail;
 #ifdef USE_FSYNC
-	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fd) : fsync(fd)) == -1)
 		goto fail;
 #else
 	if (fsync(fd) == -1)
@@ -219,7 +219,7 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 			if (errno != error_noent)
 				goto fail;
 		} else
-		if ((use_fdatasync > 0 ? fdatasync : fsync) (fd) == -1 || close(fd) == -1)
+		if ((use_fdatasync > 0 ? fdatasync(fd) : fsync(fd)) == -1 || close(fd) == -1)
 			goto fail;
 	}
 #endif
@@ -241,7 +241,7 @@ fail:
 void
 getversion_maildir_deliver_c()
 {
-	static char    *x = "$Id: maildir_deliver.c,v 1.4 2022-04-04 11:09:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir_deliver.c,v 1.4 2022-04-04 14:22:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

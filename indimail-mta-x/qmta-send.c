@@ -1,6 +1,6 @@
 /*
  * $Log: qmta-send.c,v $
- * Revision 1.19  2022-04-04 11:16:37+05:30  Cprogrammer
+ * Revision 1.19  2022-04-04 14:31:21+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *
  * Revision 1.18  2022-04-04 00:08:26+05:30  Cprogrammer
@@ -742,7 +742,7 @@ process_todo(unsigned long id)
 		}
 	}
 #ifdef USE_FSYNC
-	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdinfo) == -1) {
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdinfo) : fsync(fdinfo)) == -1) {
 		log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
 		goto fail;
 	}
@@ -757,7 +757,7 @@ process_todo(unsigned long id)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
-			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdchan[c]) == -1) {
+			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdchan[c]) : fsync(fdchan[c])) == -1) {
 				fnmake_chanaddr(id, c);
 				log5("warning: ", argv0, ": trouble fsyncing ", fn1.s, "\n");
 				goto fail;
@@ -2806,7 +2806,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.19 2022-04-04 11:16:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.19 2022-04-04 14:31:21+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

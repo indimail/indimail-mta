@@ -1,6 +1,6 @@
 /*
  * $Log: slowq-send.c,v $
- * Revision 1.22  2022-04-04 11:16:41+05:30  Cprogrammer
+ * Revision 1.22  2022-04-04 14:33:47+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *
  * Revision 1.21  2022-04-04 00:51:51+05:30  Cprogrammer
@@ -2103,7 +2103,7 @@ todo_do(fd_set *rfds)
 		}
 	}
 #ifdef USE_FSYNC
-	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdinfo) == -1) {
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdinfo) : fsync(fdinfo)) == -1) {
 		log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
 		goto fail;
 	}
@@ -2118,7 +2118,7 @@ todo_do(fd_set *rfds)
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 #ifdef USE_FSYNC
-			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync : fsync) (fdchan[c]) == -1) {
+			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdchan[c]) : fsync(fdchan[c])) == -1) {
 				fnmake_chanaddr(id, c);
 				log7("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n");
 				goto fail;
@@ -2631,7 +2631,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.22 2022-04-04 11:16:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.22 2022-04-04 14:33:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

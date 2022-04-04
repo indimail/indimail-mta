@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.87 2022-04-04 11:14:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.87 2022-04-04 14:27:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1129,7 +1129,7 @@ main()
 		die(53, 1, "trouble writing envelope");
 #ifdef USE_FSYNC
 	if ((use_fsync > 0 || use_fdatasync > 0) &&
-			((use_fdatasync > 0 ? fdatasync : fsync) (messfd) == -1 || (use_fdatasync > 0 ? fdatasync : fsync) (intdfd) == -1))
+			((use_fdatasync > 0 ? fdatasync(messfd) : fsync(messfd)) == -1 || (use_fdatasync > 0 ? fdatasync(intdfd) : fsync(intdfd)) == -1))
 		die(64, 1, "trouble syncing message to disk");
 #else
 	if (fsync(messfd) == -1 || fsync(intdfd) == -1)
@@ -1148,7 +1148,7 @@ main()
 			if (errno != error_noent)
 				die(69, 1, "trouble syncing dir to disk");
 		} else
-		if ((use_fdatasync > 0 ? fdatasync : fsync) (fd) == -1 || close(fd) == -1)
+		if ((use_fdatasync > 0 ? fdatasync(fd) : fsync(fd)) == -1 || close(fd) == -1)
 			die(69, 1, "trouble syncing dir to disk");
 	}
 #endif
@@ -1173,7 +1173,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.87 2022-04-04 11:14:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.87 2022-04-04 14:27:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1181,7 +1181,7 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
- * Revision 1.87  2022-04-04 11:14:30+05:30  Cprogrammer
+ * Revision 1.87  2022-04-04 14:27:00+05:30  Cprogrammer
  * refactored fastqueue and added setting of fdatasync()
  *
  * Revision 1.86  2022-04-03 21:18:52+05:30  Cprogrammer
