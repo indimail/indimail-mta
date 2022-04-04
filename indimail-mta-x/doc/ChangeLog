@@ -166,6 +166,14 @@ Release 2.14.1 Start 21/09/2021
 94. qmail-queue.c: bypass getpeername() if fastqueue is set
 95. slowq-start.c, qmta-send.c: Use QUEUE_BASE,
     queue_base control for setting base directory of queue
+- 04/04/2022
+96. condtomaildir.c, maildir_deliver.c, maildirdeliver.c: use USE_FSYNC,
+    USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
+97. qmail-direct.c, qmail-queue.c: refactored fastqueue and added setting of
+    fdatasync()
+98. qmail-local.c, qmail-send.c, qmail-todo.c, slowq-send.c, qmta-send.c:
+    added setting of fdatasync() instead of fsync()
+99. syncdir.c: added use_fdatasync to turn on fdatasync() instead of fsync()
 
 * 
 Release 2.14.0 Start 18/07/2021
