@@ -243,8 +243,8 @@
 %attr(0755,root,root)  @libexecdir@/zspam
 %attr(0755,root,root)  @libexecdir@/zsuccesses
 %attr(0755,root,root)  @libexecdir@/zsuids
-%attr(0755,root,root)  @libexecdir@/qupgrade.sh
-%attr(0755,root,root)  @libexecdir@/qlocal_upgrade.sh
+%attr(0755,root,root)  @libexecdir@/qupgrade
+%attr(0755,root,root)  @libexecdir@/qlocal_upgrade
 %attr(0755,root,root)  @libexecdir@/daneprog
 #
 # setuid / setgid

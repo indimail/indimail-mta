@@ -1,6 +1,6 @@
 it += indimail-mta.fc indimail-mta.spec indimail-mta-permissions.easy \
 	indimail-mta-permissions.paranoid indimail-mta-permissions.secure \
-	indimail-mta.fc qlocal_upgrade.sh PKGBUILD qmta-send.service
+	indimail-mta.fc qlocal_upgrade qupgrade PKGBUILD qmta-send.service
 
 static_option = -Wl,-Bstatic
 dynamic_option = -Wl,-Bdynamic

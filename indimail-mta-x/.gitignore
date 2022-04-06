@@ -616,7 +616,8 @@ svwait.8
 qmailctl.8
 debian/daemontools.postinst
 debian/daemontools.postrm
-qlocal_upgrade.sh
+qlocal_upgrade
+qupgrade
 cleanq.8
 docker-entrypoint.8
 sslerator

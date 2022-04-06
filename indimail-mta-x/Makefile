@@ -3846,10 +3846,16 @@ conf-sysconfdir conf-shared conf-servicedir
 	$(edit) $@.in > $@; chmod 755 $@
 	chmod +x $@
 
-qlocal_upgrade.sh: \
+qlocal_upgrade: \
 warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
 conf-sysconfdir conf-servicedir
 	cat warn-auto.sh qlocal_upgrade.in \
+	| $(edit) > $@
+
+qupgrade: \
+warn-auto.sh qupgrade.in conf-prefix conf-libexec \
+conf-sysconfdir conf-servicedir
+	cat warn-auto.sh qupgrade.in \
 	| $(edit) > $@
 
 qmta-send.service: qmta-send.service.in warn-auto.sh

@@ -1117,7 +1117,7 @@ greydaemon
 qmailctl.8
 debian/daemontools.postinst
 debian/daemontools.postrm
-qlocal_upgrade.sh
+qlocal_upgrade
 cleanq.8
 svscan.plist
 docker-entrypoint.8
