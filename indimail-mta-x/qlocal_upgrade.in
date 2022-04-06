@@ -1,147 +1,5 @@
-# $Log: qlocal_upgrade.in,v $
-# Revision 1.48  2022-01-30 08:37:23+05:30  Cprogrammer
-# replaced qmail-daemon with qscheduler
 #
-# Revision 1.47  2021-08-23 17:34:36+05:30  Cprogrammer
-# fixed default_domain variable
-#
-# Revision 1.46  2021-07-13 00:24:35+05:30  Cprogrammer
-# fixed typo for servicedir
-#
-# Revision 1.45  2021-07-12 18:23:00+05:30  Cprogrammer
-# create service/*/variables/.envdir file for control/global_vars
-#
-# Revision 1.44  2021-07-10 23:18:22+05:30  Cprogrammer
-# removed updation of cronlist
-#
-# Revision 1.43  2021-06-27 11:35:09+05:30  Cprogrammer
-# renamed LOCK_LOGS env variable to LOGLOCK
-#
-# Revision 1.42  2021-01-23 17:07:59+05:30  Cprogrammer
-# fixed logfifo path
-#
-# Revision 1.41  2020-10-09 17:30:18+05:30  Cprogrammer
-# migration only when servicedir != /service
-#
-# Revision 1.40  2020-10-09 12:47:30+05:30  Cprogrammer
-# use variables from conf-* files
-#
-# Revision 1.39  2020-10-09 11:26:37+05:30  Cprogrammer
-# use servicedir from Makefile
-#
-# Revision 1.38  2020-10-08 22:55:18+05:30  Cprogrammer
-# use variables from Makefile
-#
-# Revision 1.37  2020-09-25 21:43:56+05:30  Cprogrammer
-# remove libwatch service
-#
-# Revision 1.36  2020-07-30 11:29:43+05:30  Cprogrammer
-# reverted interpreter back to /bin/sh
-#
-# Revision 1.35  2020-07-11 22:07:55+05:30  Cprogrammer
-# removed svscan STATUSFILE
-#
-# Revision 1.34  2020-05-24 23:55:25+05:30  Cprogrammer
-# fix permission for certs
-#
-# Revision 1.33  2020-04-27 22:11:27+05:30  Cprogrammer
-# added install routine
-#
-# Revision 1.32  2020-04-11 08:38:02+05:30  Cprogrammer
-# use /usr/bin/sh to suppress rpmlint errors
-#
-# Revision 1.31  2020-03-23 16:18:28+05:30  Cprogrammer
-# changed --fixmysql_libs to --fixsharedlibs
-#
-# Revision 1.30  2020-03-16 22:39:12+05:30  Cprogrammer
-# disable freshclam svscan service if systemd freshclam is enabled
-#
-# Revision 1.29  2019-10-27 19:22:59+05:30  Cprogrammer
-# removed svctool --config=foxhole since freshclam now updates foxhole on startup
-#
-# Revision 1.28  2019-10-01 14:06:53+05:30  Cprogrammer
-# use svctool to update libindimail, mysql_lib control files
-#
-# Revision 1.27  2019-06-17 18:17:15+05:30  Cprogrammer
-# update with mysql_lib control file with either libmsyqlclient or libmariadbclient
-#
-# Revision 1.26  2019-06-16 19:12:53+05:30  Cprogrammer
-# look for libmariadb in addition to libmysqlclient
-#
-# Revision 1.25  2019-06-07 19:19:28+05:30  Cprogrammer
-# set mysql_lib control file
-#
-# Revision 1.24  2019-05-27 12:36:48+05:30  Cprogrammer
-# create libindimail control file
-#
-# Revision 1.23  2019-05-26 11:00:27+05:30  Cprogrammer
-# create /etc/indimail/control/mysql_lib control file
-#
-# Revision 1.22  2019-05-24 14:13:58+05:30  Cprogrammer
-# create /etc/indimail/control/cache directory
-#
-# Revision 1.21  2019-04-21 11:57:50+05:30  Cprogrammer
-# create MYSQL_LIB for dynamically loading MySQL shared libs
-#
-# Revision 1.20  2018-10-31 07:42:34+05:30  Cprogrammer
-# migrate clamd.conf to scan.conf
-#
-# Revision 1.19  2018-10-31 00:21:55+05:30  Cprogrammer
-# create scan.conf from clamd.conf
-#
-# Revision 1.18  2018-10-29 21:48:56+05:30  Cprogrammer
-# fix for missing ln -r option in CentOS6
-#
-# Revision 1.17  2018-09-10 13:02:27+05:30  Cprogrammer
-# move tcpserver tcp access files to /etc/indimail/tcp
-#
-# Revision 1.16  2018-09-10 12:22:45+05:30  Cprogrammer
-# create directory /etc/indimail/tcp and move tcpserver access control files
-#
-# Revision 1.15  2018-09-02 14:25:02+05:30  Cprogrammer
-# fixed syntax error
-#
-# Revision 1.14  2018-07-15 13:58:08+05:30  Cprogrammer
-# create env variable ROUTE_NULL_USER, LOCK_LOGS for qmail-send
-#
-# Revision 1.13  2018-07-03 11:01:27+05:30  Cprogrammer
-# update envnoathost, defaulthost, defaultdomain if hostname has changed
-#
-# Revision 1.12  2018-06-30 19:00:22+05:30  Cprogrammer
-# added check for apache group and clamd.conf
-#
-# Revision 1.11  2018-06-25 08:47:11+05:30  Cprogrammer
-# removed creation of getdns-root.key
-#
-# Revision 1.10  2018-06-21 23:10:37+05:30  Cprogrammer
-# check for /usr/sbin/unbound-anchor
-#
-# Revision 1.9  2018-05-20 23:14:29+05:30  Cprogrammer
-# create getdns-root.key
-#
-# Revision 1.8  2018-05-18 19:40:01+05:30  Cprogrammer
-# added --config=foxhole to create foxhole_all.cdb for clamd
-#
-# Revision 1.7  2018-03-25 20:05:19+05:30  Cprogrammer
-# removed chmod of variables directory as it is redundant now with read perm for indimail group
-#
-# Revision 1.6  2018-02-18 22:23:31+05:30  Cprogrammer
-# pass argument to do_post_upgrade()
-#
-# Revision 1.5  2018-01-31 16:21:36+05:30  Cprogrammer
-# update QMAILLOCAL, QMAILREMOTE for qmail-local, qmail-remote in sbin
-#
-# Revision 1.4  2018-01-09 11:46:40+05:30  Cprogrammer
-# updated for v2.3 indimail-mta
-#
-# Revision 1.2  2017-11-06 21:46:12+05:30  Cprogrammer
-# fixed upgrade script for posttrans
-#
-# Revision 1.1  2017-10-22 15:27:47+05:30  Cprogrammer
-# Initial revision
-#
-#
-# $Id: qlocal_upgrade.in,v 1.48 2022-01-30 08:37:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.49 2022-04-06 09:21:24+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -169,7 +27,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.48 2022-01-30 08:37:23+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.49 2022-04-06 09:21:24+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
 /usr/sbin/svctool --fixsharedlibs
@@ -178,7 +36,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.48 2022-01-30 08:37:23+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.48 2022-01-30 08:37:23+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.49 2022-04-06 09:21:24+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -446,6 +304,10 @@ do
 		echo $sysconfdir/control/global_vars > $i/.envdir
 	fi
 done
+for i in `grep -l fsync /service/*/variables/.options`
+do
+	sed -i -e 's{--fsync{--fdatasync{g' $i
+done
 }
 
 case $1 in
@@ -456,3 +318,149 @@ case $1 in
 	do_install $1
 	;;
 esac
+#
+# $Log: qlocal_upgrade.in,v $
+# Revision 1.49  2022-04-06 09:21:24+05:30  Cprogrammer
+# replace --fsync with --fdatasync
+#
+# Revision 1.48  2022-01-30 08:37:23+05:30  Cprogrammer
+# replaced qmail-daemon with qscheduler
+#
+# Revision 1.47  2021-08-23 17:34:36+05:30  Cprogrammer
+# fixed default_domain variable
+#
+# Revision 1.46  2021-07-13 00:24:35+05:30  Cprogrammer
+# fixed typo for servicedir
+#
+# Revision 1.45  2021-07-12 18:23:00+05:30  Cprogrammer
+# create service/*/variables/.envdir file for control/global_vars
+#
+# Revision 1.44  2021-07-10 23:18:22+05:30  Cprogrammer
+# removed updation of cronlist
+#
+# Revision 1.43  2021-06-27 11:35:09+05:30  Cprogrammer
+# renamed LOCK_LOGS env variable to LOGLOCK
+#
+# Revision 1.42  2021-01-23 17:07:59+05:30  Cprogrammer
+# fixed logfifo path
+#
+# Revision 1.41  2020-10-09 17:30:18+05:30  Cprogrammer
+# migration only when servicedir != /service
+#
+# Revision 1.40  2020-10-09 12:47:30+05:30  Cprogrammer
+# use variables from conf-* files
+#
+# Revision 1.39  2020-10-09 11:26:37+05:30  Cprogrammer
+# use servicedir from Makefile
+#
+# Revision 1.38  2020-10-08 22:55:18+05:30  Cprogrammer
+# use variables from Makefile
+#
+# Revision 1.37  2020-09-25 21:43:56+05:30  Cprogrammer
+# remove libwatch service
+#
+# Revision 1.36  2020-07-30 11:29:43+05:30  Cprogrammer
+# reverted interpreter back to /bin/sh
+#
+# Revision 1.35  2020-07-11 22:07:55+05:30  Cprogrammer
+# removed svscan STATUSFILE
+#
+# Revision 1.34  2020-05-24 23:55:25+05:30  Cprogrammer
+# fix permission for certs
+#
+# Revision 1.33  2020-04-27 22:11:27+05:30  Cprogrammer
+# added install routine
+#
+# Revision 1.32  2020-04-11 08:38:02+05:30  Cprogrammer
+# use /usr/bin/sh to suppress rpmlint errors
+#
+# Revision 1.31  2020-03-23 16:18:28+05:30  Cprogrammer
+# changed --fixmysql_libs to --fixsharedlibs
+#
+# Revision 1.30  2020-03-16 22:39:12+05:30  Cprogrammer
+# disable freshclam svscan service if systemd freshclam is enabled
+#
+# Revision 1.29  2019-10-27 19:22:59+05:30  Cprogrammer
+# removed svctool --config=foxhole since freshclam now updates foxhole on startup
+#
+# Revision 1.28  2019-10-01 14:06:53+05:30  Cprogrammer
+# use svctool to update libindimail, mysql_lib control files
+#
+# Revision 1.27  2019-06-17 18:17:15+05:30  Cprogrammer
+# update with mysql_lib control file with either libmsyqlclient or libmariadbclient
+#
+# Revision 1.26  2019-06-16 19:12:53+05:30  Cprogrammer
+# look for libmariadb in addition to libmysqlclient
+#
+# Revision 1.25  2019-06-07 19:19:28+05:30  Cprogrammer
+# set mysql_lib control file
+#
+# Revision 1.24  2019-05-27 12:36:48+05:30  Cprogrammer
+# create libindimail control file
+#
+# Revision 1.23  2019-05-26 11:00:27+05:30  Cprogrammer
+# create /etc/indimail/control/mysql_lib control file
+#
+# Revision 1.22  2019-05-24 14:13:58+05:30  Cprogrammer
+# create /etc/indimail/control/cache directory
+#
+# Revision 1.21  2019-04-21 11:57:50+05:30  Cprogrammer
+# create MYSQL_LIB for dynamically loading MySQL shared libs
+#
+# Revision 1.20  2018-10-31 07:42:34+05:30  Cprogrammer
+# migrate clamd.conf to scan.conf
+#
+# Revision 1.19  2018-10-31 00:21:55+05:30  Cprogrammer
+# create scan.conf from clamd.conf
+#
+# Revision 1.18  2018-10-29 21:48:56+05:30  Cprogrammer
+# fix for missing ln -r option in CentOS6
+#
+# Revision 1.17  2018-09-10 13:02:27+05:30  Cprogrammer
+# move tcpserver tcp access files to /etc/indimail/tcp
+#
+# Revision 1.16  2018-09-10 12:22:45+05:30  Cprogrammer
+# create directory /etc/indimail/tcp and move tcpserver access control files
+#
+# Revision 1.15  2018-09-02 14:25:02+05:30  Cprogrammer
+# fixed syntax error
+#
+# Revision 1.14  2018-07-15 13:58:08+05:30  Cprogrammer
+# create env variable ROUTE_NULL_USER, LOCK_LOGS for qmail-send
+#
+# Revision 1.13  2018-07-03 11:01:27+05:30  Cprogrammer
+# update envnoathost, defaulthost, defaultdomain if hostname has changed
+#
+# Revision 1.12  2018-06-30 19:00:22+05:30  Cprogrammer
+# added check for apache group and clamd.conf
+#
+# Revision 1.11  2018-06-25 08:47:11+05:30  Cprogrammer
+# removed creation of getdns-root.key
+#
+# Revision 1.10  2018-06-21 23:10:37+05:30  Cprogrammer
+# check for /usr/sbin/unbound-anchor
+#
+# Revision 1.9  2018-05-20 23:14:29+05:30  Cprogrammer
+# create getdns-root.key
+#
+# Revision 1.8  2018-05-18 19:40:01+05:30  Cprogrammer
+# added --config=foxhole to create foxhole_all.cdb for clamd
+#
+# Revision 1.7  2018-03-25 20:05:19+05:30  Cprogrammer
+# removed chmod of variables directory as it is redundant now with read perm for indimail group
+#
+# Revision 1.6  2018-02-18 22:23:31+05:30  Cprogrammer
+# pass argument to do_post_upgrade()
+#
+# Revision 1.5  2018-01-31 16:21:36+05:30  Cprogrammer
+# update QMAILLOCAL, QMAILREMOTE for qmail-local, qmail-remote in sbin
+#
+# Revision 1.4  2018-01-09 11:46:40+05:30  Cprogrammer
+# updated for v2.3 indimail-mta
+#
+# Revision 1.2  2017-11-06 21:46:12+05:30  Cprogrammer
+# fixed upgrade script for posttrans
+#
+# Revision 1.1  2017-10-22 15:27:47+05:30  Cprogrammer
+# Initial revision
+#
