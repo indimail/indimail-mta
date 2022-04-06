@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.c,v $
+ * Revision 1.12  2022-04-06 09:19:56+05:30  Cprogrammer
+ * added SYS_FDATASYNC
+ *
  * Revision 1.11  2020-09-30 20:39:50+05:30  Cprogrammer
  * Darwin Port
  *
@@ -231,7 +234,7 @@ rename(const char *oldpath, const char *newpath)
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.11 2020-09-30 20:39:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: syncdir.c,v 1.12 2022-04-06 09:19:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
