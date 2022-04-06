@@ -3,179 +3,186 @@ Release 2.14.1 Start 21/09/2021
 ======= Release Highlights ================================================
 ===========================================================================
 - 21/09/2021
-01. batv.c: refactored code. Return error type during validation
-02. added man pages for batv
-03. Fixed typos
+01.  batv.c: refactored code. Return error type during validation
+02.  added man pages for batv
+03.  Fixed typos
 - 04/10/2021
-04. svctool.in: removed not-needed QUERY_CACHE env variable from defaultqueue
+04.  svctool.in: removed not-needed QUERY_CACHE env variable from defaultqueue
 - 20/10/2021
-05. qmail-send.c, qmail-todo.c, qmta-send: display program 'qmail-send' in
-    logs for identification
-06. qmail-start.c, qmta-send.c, slowq-start.c: added queue directory as
-    argument for identification in ps list
-07. smtpd.c: allow SMTP code to be configured when setting SHUTDOWN env
-    variable
-08. qmail-cat.c: added SIGTERM handler to flush io
+05.  qmail-send.c, qmail-todo.c, qmta-send: display program 'qmail-send' in
+     logs for identification
+06.  qmail-start.c, qmta-send.c, slowq-start.c: added queue directory as
+     argument for identification in ps list
+07.  smtpd.c: allow SMTP code to be configured when setting SHUTDOWN env
+     variable
+08.  qmail-cat.c: added SIGTERM handler to flush io
 - 21/10/2021
-09. qmail-qread.c process_queue.c qmail-rm.c qmulti.c: eliminated extra
-    variables
-10. qmail-daemon.c: made qstart, qcount variables global
-11. qmail-daemon.c: replaced execv with execvp
+09.  qmail-qread.c process_queue.c qmail-rm.c qmulti.c: eliminated extra
+     variables
+10.  qmail-daemon.c: made qstart, qcount variables global
+11.  qmail-daemon.c: replaced execv with execvp
 - 22/10/2021
-12. qmta-send.c: removed loglock code (not required for signle queue)
-13. qmail-send.c: change for ident argument to loglock_open()
-14. qsutil.[c,h]: added ident argument to loglock_open for identification in
-    logs
-15. mini-smtpd.c: removed extra arguments passed to err_size()
-16. Makefile: added target rt.lib for qscheduler
-17. mini-smtpd.c: removed extra arguments passed to err_size()
-18. Makefile: added target for qscheduler
-19. added qscheduler for running dynamic queues
-20. conf-queue: added definition for QUEUE_MAX, QUEUE_LOAD
+12.  qmta-send.c: removed loglock code (not required for signle queue)
+13.  qmail-send.c: change for ident argument to loglock_open()
+14.  qsutil.[c,h]: added ident argument to loglock_open for identification in
+     logs
+15.  mini-smtpd.c: removed extra arguments passed to err_size()
+16.  Makefile: added target rt.lib for qscheduler
+17.  mini-smtpd.c: removed extra arguments passed to err_size()
+18.  Makefile: added target for qscheduler
+19.  added qscheduler for running dynamic queues
+20.  conf-queue: added definition for QUEUE_MAX, QUEUE_LOAD
 - 25/10/2021
-21. eliminated mktmpfd() function
+21.  eliminated mktmpfd() function
 - 02/11/2021
-22. qmail-send.c, slowq-send.c, qmail-todo.c: use argv0 for program name
-23. qmail-todo.c: optimize by writting to comm_buf all files found in todo
-    using TODO_CHUNK_SIZE variable
-    in chunks before doing comm_do
+22.  qmail-send.c, slowq-send.c, qmail-todo.c: use argv0 for program name
+23.  qmail-todo.c: optimize by writting to comm_buf all files found in todo
+     using TODO_CHUNK_SIZE variable
+     in chunks before doing comm_do
 - 27/11/2021
-24. qmail-daemon.c: use sig_block(), sig_unblock() to prevent interruptions
-25. queue-fix.c: return exit status for queue-creation
+24.  qmail-daemon.c: use sig_block(), sig_unblock() to prevent interruptions
+25.  queue-fix.c: return exit status for queue-creation
 - 05/12/2021
-26. rrt.c: fixed command line args for return-path, receipient
-27. qmail-send.c, qmail-todo.c, slowq-send.c: fixed argv0
+26.  rrt.c: fixed command line args for return-path, receipient
+27.  qmail-send.c, qmail-todo.c, slowq-send.c: fixed argv0
 - 13/12/2021
-28. added man page for multi-queue.7
-29. removed qmail-daemon
+28.  added man page for multi-queue.7
+29.  removed qmail-daemon
 - 20/12/2021
-30. qlocal_upgrade.in: added command to fix qmail-send run script
+30.  qlocal_upgrade.in: added command to fix qmail-send run script
 - 31/12/2021
-31. qmail-todo.c, qmail-send.c, qmail-start.c: added compat mode option to
-    scan on lock/trigger in addition to message queue
-32. qmail-qread.c: added -s option to display only counts with -c option
+31.  qmail-todo.c, qmail-send.c, qmail-start.c: added compat mode option to
+     scan on lock/trigger in addition to message queue
+32.  qmail-qread.c: added -s option to display only counts with -c option
 - 01/01/2022
-33. qmail-multi: Make queue directory as second argument to qmail-queue
-34. qscheduler.c: use control files msgqueuelen, msgqueuesize for configuring
-    POSIX message queue
-35. qmail-queue.c: Minor formatting changes to Received lines
+33.  qmail-multi: Make queue directory as second argument to qmail-queue
+34.  qscheduler.c: use control files msgqueuelen, msgqueuesize for configuring
+     POSIX message queue
+35.  qmail-queue.c: Minor formatting changes to Received lines
 - 02/01/2022
-36. qmail-local.c, qmail-queue.c, qmail-todo.c, qmta-send.c, slowq-send.c
-    USE_FSYNC, USE_SYNCDIR consistent
+36.  qmail-local.c, qmail-queue.c, qmail-todo.c, qmta-send.c, slowq-send.c
+     USE_FSYNC, USE_SYNCDIR consistent
 - 04/01/2022
-37. qmail-inject.c, smtpd.c - configurable DATABYTES
-38. qmail-clean.c, qmail-qread.c, qmail-queue.c, qmail-rm.c, qmail-send.c,
-    qmail-todo.c, qmail-showctl.c, qmail-start.c, qmta-send.c, slowq-send.c
-    qscheduler.c, queue-fix.c, readsubdir.c, readsubdir.h configurable bigtodo
+37.  qmail-inject.c, smtpd.c - configurable DATABYTES
+38.  qmail-clean.c, qmail-qread.c, qmail-queue.c, qmail-rm.c, qmail-send.c,
+     qmail-todo.c, qmail-showctl.c, qmail-start.c, qmta-send.c, slowq-send.c
+     qscheduler.c, queue-fix.c, readsubdir.c, readsubdir.h configurable bigtodo
 - 05/01/2022
-39. smtpd.c, ofmipd.c, etrn.c, atrn.c, qmail-showctl,c ldap-checkpwd.c,
+39.  smtpd.c, ofmipd.c, etrn.c, atrn.c, qmail-showctl,c ldap-checkpwd.c,
     sys-checkpwd.c, qmail-rspawn.c, qmail-poppass.c: replace execvp with execv
 - 19/01/2022
-40. qscheduler.c: use log_out functions instead of strerr_warn for logging
-    messages
-41. qmail-send.c: display pid when exiting
-42. qmail-todo.c, trigger.c, trigger.h: remove/add lock/trigger based on
-    dynamic/compat mode
+40.  qscheduler.c: use log_out functions instead of strerr_warn for logging
+     messages
+41.  qmail-send.c: display pid when exiting
+42.  qmail-todo.c, trigger.c, trigger.h: remove/add lock/trigger based on
+     dynamic/compat mode
 - 24/01/2022
-43. autorepsonder.c: use prefix for qmail-inject
-44. qmail-showctl.c: use previx for svctool
-45. qmta-send.c: Replaced execv with execvp
-46. svctool: prevent overwriting servercert.cnf
+43.  autorepsonder.c: use prefix for qmail-inject
+44.  qmail-showctl.c: use previx for svctool
+45.  qmta-send.c: Replaced execv with execvp
+46.  svctool: prevent overwriting servercert.cnf
 - 06/02/2022
-47. svctool: create local queue variables if different from global variable
+47.  svctool: create local queue variables if different from global variable
     value
 - 07/02/2022
-48. svctool: create CONFSPLIT, QUEUE_COUNT, QUEUE_BASE, QUEUE_START as global
+48.  svctool: create CONFSPLIT, QUEUE_COUNT, QUEUE_BASE, QUEUE_START as global
     vars
 - 11/02/2022
-49. qmail-queue.c: New function read_control() to read extraqueue, quarantine,
-    removeheaders, envheaders, logheaders, mailarchive control files.
+49.  qmail-queue.c: New function read_control() to read extraqueue, quarantine,
+     removeheaders, envheaders, logheaders, mailarchive control files.
 - 26/02/2022
-50. qmail-smtpd.c: fix ehlo greating for local connections
+50.  qmail-smtpd.c: fix ehlo greating for local connections
 - 01/03/2022
-51. qmail-todo.c: renamed compat_mode variable to compat_mode_flag
+51.  qmail-todo.c: renamed compat_mode variable to compat_mode_flag
 - 02/03/2022
-52. qscheduler.c: continue to let current deliveries happen instead of exit
-    on error
+52.  qscheduler.c: continue to let current deliveries happen instead of exit
+     on error
 - 05/03/2022
-53. use auto_prefix/bin or auto_prefix/sbin for binary paths
-54. qscheduler.c: Fix for mq_open. shm_open on FreeBSD
-55. qmail-send.c: shm_open with O_RDWR on FreeBSD
+53.  use auto_prefix/bin or auto_prefix/sbin for binary paths
+54.  qscheduler.c: Fix for mq_open. shm_open on FreeBSD
+55.  qmail-send.c: shm_open with O_RDWR on FreeBSD
 - 06/03/2022
-56. qmail-send.c, qscheduler.c: Use ftruncate on shared mem on FreeBSD
-57. qmail-send.c, qscheduler.c: unlink shared memory on exit
-58. qmail-smtpd.c: fix ehlo greating for local connections
+56.  qmail-send.c, qscheduler.c: Use ftruncate on shared mem on FreeBSD
+57.  qmail-send.c, qscheduler.c: unlink shared memory on exit
+58.  qmail-smtpd.c: fix ehlo greating for local connections
 - 06/03/2022
-59. create_services.in: fix for FreeBSD (date usage)
-60. dknewkey.sh: fix for FreeBSD (getopt usage)
-61. svctool.in: fix for FreeBSD (ln -sr)
-62. svctool.in: mount mqueuefs directory in qmail-send run script
+59.  create_services.in: fix for FreeBSD (date usage)
+60.  dknewkey.sh: fix for FreeBSD (getopt usage)
+61.  svctool.in: fix for FreeBSD (ln -sr)
+62.  svctool.in: mount mqueuefs directory in qmail-send run script
 - 08/03/2022
-63. qmail-dk.c, qmail-dkim.c, qmail-qfilter.c, qmulti.c: use custom_error()
-    from custom_error.c
-64. qmail-queue.c, maildir_deliver.c: do not treat error_noent as an error
+63.  qmail-dk.c, qmail-dkim.c, qmail-qfilter.c, qmulti.c: use custom_error()
+     from custom_error.c
+64.  qmail-queue.c, maildir_deliver.c: do not treat error_noent as an error
 - 09/03/2022
-65. get_uid.c: use qendpwent(), qendgrent() when using functions from
-    qgetpwgr.c
+65.  get_uid.c: use qendpwent(), qendgrent() when using functions from
+     qgetpwgr.c
 - 10/03/2022
-66. matchup.c: update for qmail-send, qmail-todo, slowq-send, qmta-send,
-    qscheduler logs (qmailanalog)
+66.  matchup.c: update for qmail-send, qmail-todo, slowq-send, qmta-send,
+     qscheduler logs (qmailanalog)
 - 12/03/2022
-67. qmail-qread.c: added -i option to display /qscheduler queue information
-    - dynamic queue information
-68. qmail-multi.c: use static queue if /qscheduler shared memory doesn't exist
-69. qmail-clean.c, qmail-queue.c, qmail-showctl.c, qmail-todo.c, qmta-send.c,
-    qscheduler.c, queue-fix.c, slowq-send.c: Use default for BIGTODO as 1.
-70. slowq-send.c, qmta-send.c, qmail-todo.c: display bigtodo value in logs on
-    startup
+67.  qmail-qread.c: added -i option to display /qscheduler queue information:
+     dynamic queue information
+68.  qmail-multi.c: use static queue if /qscheduler shared memory doesn't exist
+69.  qmail-clean.c, qmail-queue.c, qmail-showctl.c, qmail-todo.c, qmta-send.c,
+     qscheduler.c, queue-fix.c, slowq-send.c: Use default for BIGTODO as 1.
+70.  slowq-send.c, qmta-send.c, qmail-todo.c: display bigtodo value in logs on
+     startup
 - 16/03/2022
-71. qmail-send.c: added queue ident in logs for matchup (qmailanalog to handle
-    multi-queue)
-72. matchup.c: handle multi-queue format
-73. qmail-lspawn.c: made copy_pwstruct return type void
-74. qmail-queue.c: added FASTQUEUE to bypass features for speeding delivery
+71.  qmail-send.c: added queue ident in logs for matchup (qmailanalog to handle
+     multi-queue)
+72.  matchup.c: handle multi-queue format
+73.  qmail-lspawn.c: made copy_pwstruct return type void
+74.  qmail-queue.c: added FASTQUEUE to bypass features for speeding delivery
 - 20/03/2022
-75. qmail-todo.c: use mq_timedreceive() for TODO_CHUNK_SIZE to work
-76. qmail-lspawn.c: bypass indimail if AUTHSELF is not set
-77. qmail-showctl.c: -E option for displaying client env variables
+75.  qmail-todo.c: use mq_timedreceive() for TODO_CHUNK_SIZE to work
+76.  qmail-lspawn.c: bypass indimail if AUTHSELF is not set
+77.  qmail-showctl.c: -E option for displaying client env variables
 - 24/03/2022
-78. qmta-send.c: added missing loading of concurrencylocal, concurrencyremote
-79. qmta-send.c: added holdjobs functionality
+78.  qmta-send.c: added missing loading of concurrencylocal, concurrencyremote
+79.  qmta-send.c: added holdjobs functionality
 - 25/03/2022
-80. qmail-queue.c: handle multi-queue without qmail-multi helper
-    env variable is defined
-81. qmail-inject.c: Display system error when qmail_open() fails
-82. qmail-qread.c: updated usage string
+80.  qmail-queue.c: handle multi-queue without qmail-multi helper
+     env variable is defined
+81.  qmail-inject.c: Display system error when qmail_open() fails
+82.  qmail-qread.c: updated usage string
 - 31/03/2022
-83. qmail-todo.c: use chunk_wait seconds to wait for message chunks
-84. malidir_deliver.c, qmail-local.c, qmail-send.c, qmta-send.c, slowq-send.c
-	- replace fsync() with fdatasync()
-85. qmail.c: include error.h for errno. Save and restore errno
-86. getqueue.c, qmulti.c: removed starttime argument to queueNo_from_env(),
-    queueNo_from_shm()
-87. getqueue.c: use arc4random() to randomly select queues
-88. added man pages for dnscname, dnsfq, dnsmxip, dnsptr
-89. maildir_deliver.c, qmail-local.c, qmail-queue.c, qmail-todo.c,
-    slowq-send.c, syncdir.c: replaced fsync() with fdatasync()
-90. zoverall.sh: display time span in seconds if < 86400
+83.  qmail-todo.c: use chunk_wait seconds to wait for message chunks
+84.  malidir_deliver.c, qmail-local.c, qmail-send.c, qmta-send.c,
+     slowq-send.c: replace fsync() with fdatasync()
+85.  qmail.c: include error.h for errno. Save and restore errno
+86.  getqueue.c, qmulti.c: removed starttime argument to queueNo_from_env(),
+     queueNo_from_shm()
+87.  getqueue.c: use arc4random() to randomly select queues
+88.  added man pages for dnscname, dnsfq, dnsmxip, dnsptr
+89.  maildir_deliver.c, qmail-local.c, qmail-queue.c, qmail-todo.c,
+     slowq-send.c, syncdir.c: replaced fsync() with fdatasync()
+90.  zoverall.sh: display time span in seconds if < 86400
 - 03/04/2022
-91. qmail.c, qmail-dk.c, qmail-dkim.c, qmail-spamfilter.c, qmail-queue.c,
-    qmail-direct.c: refactored return codes for qmail_open()
-92. pidopen: use 70 as return code for pidopen() failure
-93. qmail-direct.c, qmail-queue.c: use custom_error() for error messages
-94. qmail-queue.c: bypass getpeername() if fastqueue is set
-95. slowq-start.c, qmta-send.c: Use QUEUE_BASE,
-    queue_base control for setting base directory of queue
+91.  qmail.c, qmail-dk.c, qmail-dkim.c, qmail-spamfilter.c, qmail-queue.c,
+     qmail-direct.c: refactored return codes for qmail_open()
+92.  pidopen: use 70 as return code for pidopen() failure
+93.  qmail-direct.c, qmail-queue.c: use custom_error() for error messages
+94.  qmail-queue.c: bypass getpeername() if fastqueue is set
+95.  slowq-start.c, qmta-send.c: Use QUEUE_BASE,
+     queue_base control for setting base directory of queue
 - 04/04/2022
-96. condtomaildir.c, maildir_deliver.c, maildirdeliver.c: use USE_FSYNC,
-    USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
-97. qmail-direct.c, qmail-queue.c: refactored fastqueue and added setting of
-    fdatasync()
-98. qmail-local.c, qmail-send.c, qmail-todo.c, slowq-send.c, qmta-send.c:
-    added setting of fdatasync() instead of fsync()
-99. syncdir.c: added use_fdatasync to turn on fdatasync() instead of fsync()
-100.svctool: added option to set fdatasync
-101.syncdir.c: fix for missing fdatasync on OSX
+96.  condtomaildir.c, maildir_deliver.c, maildirdeliver.c: use USE_FSYNC,
+     USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
+97.  qmail-direct.c, qmail-queue.c: refactored fastqueue and added setting of
+     fdatasync()
+98.  qmail-local.c, qmail-send.c, qmail-todo.c, slowq-send.c, qmta-send.c:
+     added setting of fdatasync() instead of fsync()
+99.  syncdir.c: added use_fdatasync to turn on fdatasync() instead of fsync()
+100. svctool: added option to set fdatasync
+101. syncdir.c: fix for missing fdatasync on OSX
+- 06/04/2022
+102. create_services.in, indimail-mta.spec.in, debian/postinst.in,
+     PKGBUILD.in: set fsync, syncdir as global variables instead of local
+     variables
+101. svctool.in: added setting of USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR as
+     global variables
+102. renamed qlocal_upgrade.sh to qlocal_upgrade, qupgrade.sh to qupgrade
 
 * 
 Release 2.14.0 Start 18/07/2021
