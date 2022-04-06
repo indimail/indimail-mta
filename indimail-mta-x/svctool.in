@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.624 2022-04-04 14:33:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.625 2022-04-06 09:17:39+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.624 2022-04-04 14:33:58+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.625 2022-04-06 09:17:39+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2227,11 +2227,28 @@ if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
 	mkdir -p "$DESTDIR"$sysconfdir/control/global_vars
 	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
 	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
+fi
+if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
 	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+fi
+if [ $usefsync -eq 1 -o $usefdatasync -eq 1 ] ; then
+	echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
 else
-	if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
-		echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
-	fi
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_FSYNC
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
+fi
+if [ $usesyncdir -eq 1 ] ; then
+	SYSTEM=$(uname -s)
+	case "$SYSTEM" in
+		Linux)
+		echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
+		;;
+		*)
+		> "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
+		;;
+	esac
+else
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
 fi
 if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then
 	echo $sysconfdir/control/global_vars > $conf_dir/.envdir
@@ -2488,19 +2505,13 @@ if [ " $odmr" = " " ] ; then
 			echo $bodycheck > $conf_dir/BODYCHECK
 		fi
 	fi
-	if [ $usefsync -eq 0 ] ; then
-		> $conf_dir/USE_FSYNC
-	else
+	if [ $usefsync -ne 0 ] ; then
 		echo 1 > $conf_dir/USE_FSYNC
 	fi
-	if [ $usefdatasync -eq 0 ] ; then
-		> $conf_dir/USE_FDATASYNC
-	else
+	if [ $usefdatasync -ne 0 ] ; then
 		echo 1 > $conf_dir/USE_FDATASYNC
 	fi
-	if [ " $usesyncdir" = " " ] ; then
-		> $conf_dir/USE_SYNCDIR
-	else
+	if [ $usesyncdir -ne 0 ] ; then
 		echo 1 > $conf_dir/USE_SYNCDIR
 	fi
 	if [ " $min_free" = " " ] ; then
@@ -2906,19 +2917,13 @@ if [ " $qhpsi" = " " ] ; then
 else
 	echo $qhpsi > $conf_dir/QHPSI
 fi
-if [ $usefsync -eq 0 ] ; then
-	> $conf_dir/USE_FSYNC
-else
+if [ $usefsync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ $usefdatasync -eq 0 ] ; then
-	> $conf_dir/USE_FDATASYNC
-else
+if [ $usefdatasync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FDATASYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
+if [ $usesyncdir -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $spamfilter" = " " ] ; then
@@ -3221,19 +3226,13 @@ case "$dkverify_option" in
 	fi
 	;;
 esac
-if [ $usefsync -eq 0 ] ; then
-	> $conf_dir/USE_FSYNC
-else
+if [ $usefsync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ $usefdatasync -eq 0 ] ; then
-	> $conf_dir/USE_FDATASYNC
-else
+if [ $usefdatasync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FDATASYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
+if [ $usesyncdir -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ " $min_free" = " " ] ; then
@@ -6006,19 +6005,13 @@ if [ ! " $CONTROLDIR" = " " ] ; then
 else
 	> $conf_dir/CONTROLDIR
 fi
-if [ $usefsync -eq 0 ] ; then
-	> $conf_dir/USE_FSYNC
-else
+if [ $usefsync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ $usefdatasync -eq 0 ] ; then
-	> $conf_dir/USE_FDATASYNC
-else
+if [ $usefdatasync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FDATASYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
+if [ $usesyncdir -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $memory" = " " ] ; then
@@ -6499,19 +6492,13 @@ if [ ! " $overquota_mailsize" = " " ] ; then
 else
 	> $conf_dir/OVERQUOTA_MAILSIZE
 fi
-if [ $usefsync -eq 0 ] ; then
-	> $conf_dir/USE_FSYNC
-else
+if [ $usefsync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ $usefdatasync -eq 0 ] ; then
-	> $conf_dir/USE_FDATASYNC
-else
+if [ $usefdatasync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FDATASYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
+if [ $usesyncdir -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $dmemory" = " " ] ; then
@@ -6759,19 +6746,13 @@ if [ ! " $overquota_mailsize" = " " ] ; then
 else
 	> $conf_dir/OVERQUOTA_MAILSIZE
 fi
-if [ $usefsync -eq 0 ] ; then
-	> $conf_dir/USE_FSYNC
-else
+if [ $usefsync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ $usefdatasync -eq 0 ] ; then
-	> $conf_dir/USE_FDATASYNC
-else
+if [ $usefdatasync -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_FDATASYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
+if [ $usesyncdir -ne 0 ] ; then
 	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $dmemory" = " " ] ; then
@@ -9339,6 +9320,7 @@ run_file_only=0
 utf8=0
 usefsync=0
 usefdatasync=0
+usesyncdir=0
 mount_resolvconf=0
 valid_for=366
 databytes=$DATABYTES
