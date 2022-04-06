@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.87 2022-04-04 14:27:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.83 2022-04-06 09:09:27+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -116,7 +116,7 @@ die(int e, int do_cleanup, char *str)
 	if (do_cleanup)
 		cleanup();
 	if (qm_custom_err)
-		custom_error("qmail-direct", "Z", str, errno ? error_str(errno) : 0, "X.3.0");
+		custom_error("qmail-queue", "Z", str, errno ? error_str(errno) : 0, "X.3.0");
 	else
 		_exit(e);
 }
@@ -1173,31 +1173,13 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.87 2022-04-04 14:27:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.83 2022-04-06 09:09:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
 }
 #endif
 /*
- * $Log: qmail-queue.c,v $
- * Revision 1.87  2022-04-04 14:27:00+05:30  Cprogrammer
- * refactored fastqueue and added setting of fdatasync()
- *
- * Revision 1.86  2022-04-03 21:18:52+05:30  Cprogrammer
- * bypass getpeername() if fastqueue is set
- *
- * Revision 1.85  2022-04-03 18:43:29+05:30  Cprogrammer
- * use custom_error() for error messages
- *
- * Revision 1.84  2022-03-31 00:45:18+05:30  Cprogrammer
- * replace fsync() with fdatasync()
- * removed starttime argument to queueNo_from_env(), queueNo_from_shm()
- * turn off fsync, syncdir if fastqueue is set
- *
- * Revision 1.83  2022-03-28 08:44:03+05:30  Cprogrammer
- * handle multi-queue without qmail-multi helper
- *
  * Revision 1.82  2022-03-16 21:37:36+05:30  Cprogrammer
  * FASTQUEUE to bypass features for faster inject speed
  *
