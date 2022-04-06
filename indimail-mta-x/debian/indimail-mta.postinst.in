@@ -242,7 +242,7 @@ fi
 
 # Misc/Configuration
 echo "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
-${prefix}/sbin/svctool --config=qmail --postmaster=${qmaildir}/alias/Maildir/
+${prefix}/sbin/svctool --config=qmail --fsync --syncdir  --postmaster=${qmaildir}/alias/Maildir/
 
 if [ $nodksignature -eq 0 ] ; then
 	if [ -x ${prefix}/bin/dknewkey ] ; then
@@ -323,7 +323,7 @@ do
 		--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 		--query-cache --dnscheck --password-cache \
 		--cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-		--starttls --fsync --syncdir --memory=$smtp_soft_mem \
+		--starttls --memory=$smtp_soft_mem \
 		--chkrecipient --chkrelay --masquerade \
 		--min-free=52428800 --content-filter --virus-filter \
 		--dmasquerade --infifo=infifo \
@@ -339,14 +339,14 @@ if [ $have_clamav -eq 1 ] ; then
 fi
 eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 	--qbase=${qbase} --qcount=${qcount} --qstart=1 \
-	--min-free=52428800 --fsync --syncdir --virus-filter \
+	--min-free=52428800 --virus-filter \
 	--dkverify="none" --dksign=$sign_opt \
 	--private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
 	$extra_opt
 
 # slowq service
 eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} \
-	--cntrldir=control --persistdb --starttls --fsync --syncdir \
+	--cntrldir=control --persistdb --starttls \
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
 	--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/${dkimkeyfn} \
 	--remote-authsmtp=plain --localfilter --remotefilter \
@@ -375,13 +375,13 @@ fi
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
-	--fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800
+	--memory=$qmtp_soft_mem --min-free=52428800
 
 # qmail-qmqpd service
 ${prefix}/sbin/svctool --qmqp=628 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
-	--fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800
+	--memory=$qmqp_soft_mem --min-free=52428800
 /bin/touch ${servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering

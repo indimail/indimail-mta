@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.14  2022-04-06 09:15:51+05:30  Cprogrammer
+# set fsync, syncdir as global variables instead of local variables
+#
 # Revision 1.13  2021-09-05 10:56:38+05:30  Cprogrammer
 # changed permissions for dirs with 555 to 755
 #
@@ -42,7 +45,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.13 2021-09-05 10:56:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.14 2022-04-06 09:15:51+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -158,11 +161,11 @@ package_indimail-mta() {
   ./installer -fc ${pkgdir}${_prefix}"/lib/indimail" < PLUGINS
   ./installer -fc ${pkgdir}${_libexecdir}            < LIBEXEC
   ./installer -fc ${pkgdir}${_mandir}                < MAN
-  if [ -f qupgrade.sh ] ; then
-    install -D -m 0755 qupgrade.sh ${pkgdir}${_libexecdir}/qupgrade.sh
+  if [ -f qupgrade ] ; then
+    install -D -m 0755 qupgrade ${pkgdir}${_libexecdir}/qupgrade
   fi
-  if [ -f qlocal_upgrade.sh ] ; then
-    install -D -m 0755 qlocal_upgrade.sh ${pkgdir}${_libexecdir}/qlocal_upgrade.sh
+  if [ -f qlocal_upgrade ] ; then
+    install -D -m 0755 qlocal_upgrade ${pkgdir}${_libexecdir}/qlocal_upgrade
   fi
   install -D -m 0644 ${pkgname}.changes "$pkgdir"${_shareddir}/doc/${pkgname}.changes
   install -D -m 0644 controlfiles.q "$pkgdir"${_sysconfdir}/controlfiles.q
@@ -355,9 +358,9 @@ shutdown_service() {
       ${_prefix}/bin/svc -d ${_servicedir}/$i
     fi
   done
-  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+  if [ -f ${_libexecdir}/qupgrade ] ; then
     echo "Running Custom Upgrade Script for pretrans"
-    /bin/sh ${_libexecdir}/qupgrade.sh pretrans noargs ${pkgver} $*
+    /bin/sh ${_libexecdir}/qupgrade pretrans noargs ${pkgver} $*
   fi
   ) >> /var/log/${pkgname}-setup.log 2>&1
 }
@@ -439,7 +442,7 @@ post_install() {
   fi
   chown -R qmaill:nofiles ${_logdir}
 
-  ${_prefix}/sbin/svctool --config=qmail --postmaster=${_qmaildir}/alias/Maildir/
+  ${_prefix}/sbin/svctool --config=qmail --fsync --syncdir --postmaster=${_qmaildir}/alias/Maildir/
 
   if [ ${_nodksignatures} -eq 0 ] ; then
     if [ -x ${_prefix}/bin/dknewkey ] ; then
@@ -516,7 +519,7 @@ post_install() {
       --qbase=${_qbase} --qcount=${_qcount} --qstart=1 \
       --query-cache --dnscheck --password-cache \
       --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-      --starttls --fsync --syncdir --memory=${smtp_soft_mem} \
+      --starttls --memory=${smtp_soft_mem} \
       --chkrecipient --chkrelay --masquerade \
       --min-free=52428800 --content-filter --virus-filter \
       --dmasquerade --infifo=infifo \
@@ -532,14 +535,14 @@ post_install() {
   fi
   eval ${_prefix}/sbin/svctool --queueParam=defaultqueue \
     --qbase=${_qbase} --qcount=${_qcount} --qstart=1 \
-    --min-free=52428800 --fsync --syncdir --virus-filter \
+    --min-free=52428800 --virus-filter \
     --dkverify="none" --dksign=${sign_opt} \
     --private_key=${_sysconfdir}/control/domainkeys/%/${_dkimkeyfn} \
     $extra_opt
 
   # slowq service
   eval ${_prefix}/sbin/svctool --slowq --servicedir=${_servicedir} --qbase=${_qbase} \
-    --cntrldir=control --persistdb --starttls --fsync --syncdir \
+    --cntrldir=control --persistdb --starttls \
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
     --dksign=${sign_opt} --private_key=${_sysconfdir}/control/domainkeys/%/${dkimkeyfn} \
     --remote-authsmtp=plain --localfilter --remotefilter \
@@ -565,11 +568,11 @@ post_install() {
   # qmail-qmtpd service
   eval ${_prefix}/sbin/svctool --qmtp=209 --servicedir=${_servicedir} --qbase=${_qbase} \
     --qcount=${_qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-    --fsync --syncdir --memory=${qmtp_soft_mem} --min-free=52428800 $extra_opt
+    --memory=${qmtp_soft_mem} --min-free=52428800 $extra_opt
   # qmail-qmqpd service
   eval ${_prefix}/sbin/svctool --qmqp=628 --servicedir=${_servicedir} --qbase=${_qbase} \
     --qcount=${_qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-    --fsync --syncdir --memory=${qmqp_soft_mem} --min-free=52428800 $extra_opt
+    --memory=${qmqp_soft_mem} --min-free=52428800 $extra_opt
   touch ${_servicedir}/qmail-qmqpd.628/down
 
   # virus/spam filtering
@@ -675,9 +678,9 @@ EOF
     cp ${_sysconfdir}/cronlist.q ${confdir}/cron.d
   fi
 
-  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+  if [ -f ${_libexecdir}/qupgrade ] ; then
     echo "Running Custom Installation Script for post install"
-    /bin/sh ${_libexecdir}/qupgrade.sh post install ${pkgver} $*
+    /bin/sh ${_libexecdir}/qupgrade post install ${pkgver} $*
   fi
   ) >> /var/log/${pkgname}-setup.log 2>&1
   if [ -f ${confdir}/init/svscan.conf -o -f ${confdir}/event.d/svscan ] ; then
@@ -721,12 +724,12 @@ post_upgrade() {
   ${_libexecdir}/instcheck.${pkgname}
   (
   echo "doing post upgrade activities"
-  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+  if [ -f ${_libexecdir}/qupgrade ] ; then
     if [ "${_prefix}" != "/usr" ] ; then
       /sbin/ldconfig
     fi
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh ${_libexecdir}/qupgrade.sh post upgrade ${pkgver} $*
+    /bin/sh ${_libexecdir}/qupgrade post upgrade ${pkgver} $*
   fi
   if [ -f ${confdir}/inittab ] ; then # one of these days, this will disappear
     /bin/grep "^#SV:" ${confdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
@@ -783,9 +786,9 @@ post_upgrade() {
 pre_remove() {
   (
   # we are doing upgrade
-  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+  if [ -f ${_libexecdir}/qupgrade ] ; then
     echo "Running Custom Un-Installation Script for preun pre-uninstall"
-    /bin/sh ${_libexecdir}/qupgrade.sh preun uninstall ${pkgver} "$argv1"
+    /bin/sh ${_libexecdir}/qupgrade preun uninstall ${pkgver} "$argv1"
   fi
 
   echo "shutting down and removing indimail-mta/indimail-mta-log services"
@@ -882,9 +885,9 @@ post_remove() {
     /sbin/ldconfig
   fi
 
-  if [ -f ${_libexecdir}/qupgrade.sh ] ; then
+  if [ -f ${_libexecdir}/qupgrade ] ; then
     echo "Running Custom Un-Installation Script for postun uninstall"
-    /bin/sh ${_libexecdir}/qupgrade.sh postun uninstall ${pkgver} $*
+    /bin/sh ${_libexecdir}/qupgrade postun uninstall ${pkgver} $*
   fi
   ) >> /var/log/${pkgname}-setup.log 2>&1
 }

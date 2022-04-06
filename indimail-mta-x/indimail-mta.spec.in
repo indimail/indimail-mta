@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.354 2022-03-20 00:23:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.355 2022-04-06 09:15:37+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -340,11 +340,11 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 #copy files not copied by setup
 install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog-indimail-mta %{buildroot}%{shareddir}/doc/ChangeLog-indimail-mta
-if [ -f qupgrade.sh ] ; then
-  install -m 0755 qupgrade.sh %{buildroot}%{libexecdir}/qupgrade.sh
+if [ -f qupgrade then
+  install -m 0755 qupgrade}%{libexecdir}/qupgrade
 fi
-if [ -f qlocal_upgrade.sh ] ; then
-  install -m 0755 qlocal_upgrade.sh %{buildroot}%{libexecdir}/qlocal_upgrade.sh
+if [ -f qlocal_upgrade ] ; then
+  install -m 0755 qlocal_upgrade %{buildroot}%{libexecdir}/qlocal_upgrade
 fi
 if [ -f indimail-mta.fc ] ; then
   install -m 0644 indimail-mta.fc %{buildroot}%{qsysconfdir}/indimail-mta.fc
@@ -706,8 +706,8 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{libexecdir}/ddist
 %attr(755,root,root)                    %{libexecdir}/rspamsdomain
 %attr(755,root,root)                    %{libexecdir}/zrxdelay
-%attr(755,root,root)                    %{libexecdir}/qupgrade.sh
-%verify (not md5 size mtime mode)       %{libexecdir}/qlocal_upgrade.sh
+%attr(755,root,root)                    %{libexecdir}/qupgrade
+%verify (not md5 size mtime mode)       %{libexecdir}/qlocal_upgrade
 
 %attr(755,root,root)                    %{libexecdir}/atrn
 %attr(755,root,root)                    %{libexecdir}/etrn
@@ -1092,9 +1092,9 @@ do
     %{_prefix}/bin/svc -d %{servicedir}/$i
   fi
 done
-if [ -f %{libexecdir}/qupgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade ] ; then
   echo "Running Custom Upgrade Script for pretrans"
-  /bin/sh %{libexecdir}/qupgrade.sh pretrans noargs %{version} $*
+  /bin/sh %{libexecdir}/qupgrade pretrans noargs %{version} $*
 fi
 ) > /var/log/%{name}-setup.log 2>&1
 
@@ -1111,10 +1111,10 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 2 ] ; then
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade ] ; then
   (
     echo "Running Custom Upgrade Script for pre upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh pre upgrade %{version} $*
+    /bin/sh %{libexecdir}/qupgrade pre upgrade %{version} $*
   ) >> /var/log/%{name}-setup.log 2>&1
   fi
   exit 0
@@ -1181,12 +1181,12 @@ fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
   echo "doing post upgrade activities"
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade ] ; then
     if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
       /sbin/ldconfig
     fi
     echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh post upgrade %{version} $*
+    /bin/sh %{libexecdir}/qupgrade post upgrade %{version} $*
   fi
   # selinux
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux
@@ -1269,7 +1269,7 @@ fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
 (
-%{_prefix}/sbin/svctool --config=qmail --postmaster=%{qmaildir}/alias/Maildir/
+%{_prefix}/sbin/svctool --config=qmail --fsync --syncdir  --postmaster=%{qmaildir}/alias/Maildir/
 
 if [ %nodksignatures -eq 0 ] ; then
   if [ -x %{_prefix}/bin/dknewkey ] ; then
@@ -1369,7 +1369,7 @@ do
     --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
     --query-cache --dnscheck --password-cache \
     --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-    --starttls --fsync --syncdir --memory=%{smtp_soft_mem} \
+    --starttls --memory=%{smtp_soft_mem} \
     --chkrecipient --chkrelay --masquerade \
     --min-free=52428800 --content-filter --virus-filter \
     --dmasquerade --infifo=infifo \
@@ -1385,14 +1385,14 @@ if [ $have_clamav -eq 1 ] ; then
 fi
 eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
-  --min-free=52428800 --fsync --syncdir --virus-filter \
+  --min-free=52428800 --virus-filter \
   --dkverify="none" --dksign=$sign_opt \
   --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
   $extra_opt
 
 # slowq service
 %{_prefix}/sbin/svctool --slowq --servicedir=%{servicedir} --qbase=%{qbase} \
-  --cntrldir=control --persistdb --starttls --fsync --syncdir \
+  --cntrldir=control --persistdb --starttls \
   --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
   --dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
   --remote-authsmtp=plain --localfilter --remotefilter \
@@ -1418,11 +1418,11 @@ fi
 # qmail-qmtpd service
 eval %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-  --fsync --syncdir --memory=%{qmtp_soft_mem} --min-free=52428800 $extra_opt
+  --memory=%{qmtp_soft_mem} --min-free=52428800 $extra_opt
 # qmail-qmqpd service
 eval %{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-  --fsync --syncdir --memory=%{qmqp_soft_mem} --min-free=52428800 $extra_opt
+  --memory=%{qmqp_soft_mem} --min-free=52428800 $extra_opt
 touch %{servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
@@ -1531,9 +1531,9 @@ if [ -f %{qsysconfdir}/cronlist.q -a -d %{_sysconfdir}/cron.d ] ; then
   %{__cp} %{qsysconfdir}/cronlist.q %{_sysconfdir}/cron.d
 fi
 
-if [ -f %{libexecdir}/qupgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade ] ; then
   echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/qupgrade.sh post install %{version} $*
+  /bin/sh %{libexecdir}/qupgrade post install %{version} $*
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
@@ -1582,17 +1582,17 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade ] ; then
     echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh preun upgrade %{version} "$argv1"
+    /bin/sh %{libexecdir}/qupgrade preun upgrade %{version} "$argv1"
   fi
   ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
 
-if [ -f %{libexecdir}/qupgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade ] ; then
   echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/qupgrade.sh preun uninstall %{version} "$argv1"
+  /bin/sh %{libexecdir}/qupgrade preun uninstall %{version} "$argv1"
 fi
 
 echo "shutting down and removing indimail-mta/indimail-mta-log services"
@@ -1636,10 +1636,10 @@ if [ -z "$argv1" ] ; then
 fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade ] ; then
     (
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
+    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $*
     ) >> /var/log/%{name}-setup.log
   fi
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
@@ -1728,9 +1728,9 @@ if [ -x /usr/sbin/selinuxenabled ] ; then
   fi
 fi
 
-if [ -f %{libexecdir}/qupgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade ] ; then
   echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/qupgrade.sh postun uninstall %{version} $*
+  /bin/sh %{libexecdir}/qupgrade postun uninstall %{version} $*
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
 
@@ -1742,10 +1742,10 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-if [ -f %{libexecdir}/qupgrade.sh ] ; then
+if [ -f %{libexecdir}/qupgrade ] ; then
 (
   echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/qupgrade.sh posttrans noargs %{version} $*
+  /bin/sh %{libexecdir}/qupgrade posttrans noargs %{version} $*
 ) >> /var/log/%{name}-setup.log 2>&1
 fi
 
@@ -1924,9 +1924,9 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
+    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $*
   fi
   ) >> /var/log/%{name}-setup.log
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
@@ -2278,9 +2278,9 @@ fi
 # we are doing upgrade
 if [ $argv1 -eq 1 ] ; then
   (
-  if [ -f %{libexecdir}/qupgrade.sh ] ; then
+  if [ -f %{libexecdir}/qupgrade ] ; then
     echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade.sh postun upgrade %{version} $*
+    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $*
   fi
   ) >> /var/log/%{name}-setup.log
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
