@@ -1096,7 +1096,7 @@ maildir_deliver.o auto_prefix.o syncdir.o socket.lib srs.lib
 	rcpthosts.o auto_patrn.o variables.o auto_control.o control.o \
 	maildir_deliver.o auto_prefix.o syncdir.o \
 	$(static_option) -L../libsrs2-x/libsrs2/.libs `cat srs.lib` \
-	$(QMAILLIB) `cat socket.lib` $(dynamic_option)
+	$(QMAILLIB) $(dynamic_option) `cat socket.lib`
 
 qmail-local.o: \
 compile qmail-local.c quote.h qmail.h slurpclose.h \
@@ -1122,8 +1122,7 @@ indimail_stub.o variables.o dns.lib
 	./load qmail-lspawn lspawn.o slurpclose.o auto_uids.o \
 	get_uid.o auto_sysconfdir.o auto_control.o auto_prefix.o \
 	auto_spawn.o indimail_stub.o control.o variables.o auto_assign.o \
-	$(static_option) $(QMAILLIB) \
-	`cat dns.lib` $(dynamic_option) -ldl
+	$(static_option) $(QMAILLIB) $(dynamic_option) `cat dns.lib` -ldl
 
 qmail-lspawn.o: compile qmail-lspawn.c slurpclose.h \
 auto_uids.h qlx.h auto_assign.h indimail_stub.h \
@@ -1142,8 +1141,7 @@ auto_sysconfdir.o dns.lib indimail_stub.o
 	./load qmail-rspawn rspawn.o tcpto_clean.o get_uid.o auto_spawn.o \
 	rcpthosts.o control.o variables.o auto_sysconfdir.o auto_uids.o \
 	indimail_stub.o auto_control.o auto_prefix.o \
-	$(static_option) $(QMAILLIB) \
-	`cat dns.lib` $(dynamic_option) -ldl
+	$(static_option) $(QMAILLIB) $(dynamic_option) `cat dns.lib` -ldl
 
 qmail-rspawn.o: compile qmail-rspawn.c tcpto.h rcpthosts.h \
 indimail_stub.h ipalloc.h auto_control.h auto_prefix.h \
@@ -1262,7 +1260,7 @@ auto_control.o socket.lib
 	socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 	auto_control.o socket_v4mappedprefix.o timeoutconn.o ip.o \
 	control.o variables.o $(static_option) $(QMAILLIB) \
-	`cat socket.lib` $(dynamic_option)
+	$(dynamic_option) `cat socket.lib`
 
 qmail-qmqpc.o: \
 compile qmail-qmqpc.c auto_control.h slurpclose.h ip.h \
@@ -1322,7 +1320,7 @@ auto_qmail.o custom_error.o getqueue.o dns.lib socket.lib rt.lib
 	./load qmail-multi qmulti.o auto_control.o auto_qmail.o \
 	variables.o control.o mailfilter.o auto_prefix.o \
 	custom_error.o getqueue.o $(static_option) $(QMAILLIB) \
-	`cat dns.lib socket.lib` $(dynamic_option) `cat rt.lib`
+	$(dynamic_option) `cat dns.lib socket.lib rt.lib`
 
 qmail-multi.o: \
 compile qmail-multi.c qmulti.h mailfilter.h conf-queue
@@ -1371,7 +1369,7 @@ socket.lib dns.lib
 	./load spawn-filter variables.o report.o auto_qmail.o \
 	auto_prefix.o control.o wildmat.o qregex.o auto_control.o \
 	matchregex.o getDomainToken.o envrules.o $(static_option) \
-	$(QMAILLIB) `cat dns.lib socket.lib` -lm $(dynamic_option)
+	$(QMAILLIB) $(dynamic_option) `cat dns.lib socket.lib` -lm
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
@@ -1432,8 +1430,8 @@ syncdir.o socket.lib rt.lib
 	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o auto_split.o \
 	auto_uids.o auto_prefix.o variables.o matchregex.o auto_qmail.o \
 	control.o auto_control.o strsalloc.o custom_error.o getqueue.o \
-	syncdir.o $(static_option) $(QMAILLIB) `cat socket.lib` \
-	$(dynamic_option) `cat rt.lib`
+	syncdir.o $(static_option) $(QMAILLIB) $(dynamic_option) \
+	`cat socket.lib rt.lib`
 
 qmail-queue.8: \
 qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
@@ -1495,7 +1493,7 @@ auto_prefix.o auto_qmail.o getqueue.o dns.lib rt.lib
 	strsalloc.o ip.o ipalloc.o wildmat.o domainkeys.o dktrace.o \
 	control.o dns_text.o getDomainToken.o pidopen.o auto_qmail.o \
 	auto_prefix.o getqueue.o $(static_option) $(QMAILLIB) \
-	`cat dns.lib` $(dynamic_option) -lcrypto `cat rt.lib`
+	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
 
 qmail-dk.o: \
 compile qmail-dk.c qmail.h control.h domainkeys.h \
@@ -1542,10 +1540,9 @@ dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o auto_prefix.o \
 	variables.o control.o pidopen.o dns_text.o custom_error.o \
 	-L../libdkim-x/.libs `cat dkim.lib` wildmat.o \
-	getDomainToken.o getqueue.o \
-	`cat conf-ld-$(SYSTEM) 2>/dev/null` \
+	getDomainToken.o getqueue.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	auto_qmail.o $(static_option) $(QMAILLIB) \
-	`cat dns.lib` $(dynamic_option) -lcrypto `cat rt.lib`
+	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
 
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h control.h domainkeys.h \
@@ -1620,7 +1617,7 @@ socket_tcp.o socket_tcp6.o idn2.lib
 	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o fn_handler.o \
 	qr_digest_md5.o query_skt.o tlsarralloc.o variables.o \
 	socket_tcp.o socket_tcp6.o tls.o $(static_option) $(QMAILLIB) \
-	`cat dns.lib socket.lib` $(dynamic_option) `cat tls.lib idn2.lib`
+	$(dynamic_option) `cat dns.lib socket.lib tls.lib idn2.lib`
 
 qmail-remote.8: \
 qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
@@ -1875,8 +1872,8 @@ mysql_config
 		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_sysconfdir.o ssl_timeoutio.o tls.o \
-		$(static_option) $(QMAILLIB) `cat socket.lib` \
-		$(dynamic_option) `cat dns.lib tls.lib`; \
+		$(static_option) $(QMAILLIB) $(dynamic_option) \
+		`cat socket.lib dns.lib tls.lib`; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
@@ -1887,8 +1884,8 @@ mysql_config
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o tls.o \
-		ssl_timeoutio.o -Wl,-Bstatic $(QMAILLIB) `cat socket.lib` \
-		-Wl,-Bdynamic `cat dns.lib tls.lib`; \
+		ssl_timeoutio.o -Wl,-Bstatic $(QMAILLIB) -Wl,-Bdynamic \
+		`cat socket.lib dns.lib tls.lib`; \
 	fi
 
 qmail-smtpd: \
@@ -1912,7 +1909,7 @@ tls.lib ssl_timeoutio.o mysql_config conf-sql
 	auto_control.o auto_assign.o query_skt.o fn_handler.o tls.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	ssl_timeoutio.o $(static_option) $(QMAILLIB) \
-	`cat socket.lib` $(dynamic_option) `cat dns.lib tls.lib` -ldl
+	$(dynamic_option) `cat socket.lib dns.lib tls.lib` -ldl
 
 smtpd.o: \
 compile smtpd.c tls.h ssl_timeoutio.h control.h received.h \
@@ -3780,7 +3777,7 @@ strsalloc.o tlsarralloc.o dns.o dns.lib conf-ld-$(SYSTEM)
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 		strsalloc.o tlsarralloc.o dns.o \
 		$(static_option) `cat conf-ld-$(SYSTEM) 2>/dev/null` $(QMAILLIB) \
-		`cat dns.lib` $(dynamic_option); \
+		$(dynamic_option) `cat dns.lib`; \
 	elif test $(SYSTEM) = FREEBSD ; then \
 		$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
 		auto_control.o variables.o socket_v6any.o \
@@ -3792,7 +3789,8 @@ strsalloc.o tlsarralloc.o dns.o dns.lib conf-ld-$(SYSTEM)
 		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
-		`cat conf-ld-$(SYSTEM) 2>/dev/null` $(QMAILLIB); \
+		$(static_option) `cat conf-ld-$(SYSTEM) 2>/dev/null` $(QMAILLIB) \
+		$(dynamic_option); \
 	fi
 
 dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h

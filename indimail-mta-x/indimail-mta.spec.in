@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.355 2022-04-06 09:15:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.356 2022-04-07 23:14:06+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -112,6 +112,9 @@ Obsoletes: indimail-mta < 2.0
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: sed findutils diffutils gzip coreutils grep
 BuildRequires: glibc glibc-devel binutils libidn2-devel
+%if 0%{?rhel_version} != 700 && %{undefined sles_version} && %{undefined suse_version}
+BuildRequires: glibc-static
+%endif
 BuildRequires: openssl openssl-devel mysql-devel
 BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
 
@@ -332,6 +335,11 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 %if 0%{?build_ldflags:1}
   LDFLAGS="%{build_ldflags} $LDFLAGS"
 %endif
+# no static linking for RHEL7 and opensuse, sles versions
+%if 0%{?rhel_version} == 700 || %{defined sles_version} || %{defined suse_version}
+  %{__sed} -i -e 's{^static_option{#static_option{' \
+    -e 's{^dynamic_option{#dynamic_option{' Makefile.LINUX
+%endif
 %{__make} SYSTEM=LINUX %{?_smp_mflags} CC="%{__cc}" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
 %{__make} SYSTEM=LINUX %{?_smp_mflags} DESTDIR=%{buildroot} install
 %{__mkdir_p} %{buildroot}%{shareddir}/doc
@@ -340,8 +348,8 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 #copy files not copied by setup
 install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog-indimail-mta %{buildroot}%{shareddir}/doc/ChangeLog-indimail-mta
-if [ -f qupgrade then
-  install -m 0755 qupgrade}%{libexecdir}/qupgrade
+if [ -f qupgrade ] ; then
+  install -m 0755 qupgrade %{buildroot}%{libexecdir}/qupgrade
 fi
 if [ -f qlocal_upgrade ] ; then
   install -m 0755 qlocal_upgrade %{buildroot}%{libexecdir}/qlocal_upgrade
