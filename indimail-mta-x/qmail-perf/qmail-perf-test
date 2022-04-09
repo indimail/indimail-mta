@@ -1,0 +1,1592 @@
+#!/usr/bin/env bash
+
+if [ $(id -u) -eq 0 ] ; then
+	echo "You cannot run $0 as root" 1>&2
+	exit 1
+fi
+#
+# user configurable defaults
+# can be changed by having these
+# variables in ~/.qmail-perf
+#
+to=$(whoami)
+from=root
+maildir=~/Maildir
+mcount=500
+pcount=20
+iter=3
+qcount=5
+initial_wait=60
+outfile=qmail.csv
+servicedir=/service
+logdir=/var/log/svc
+reportdir=/tmp/reports
+MTA="indimail-mta ipc compat slowq qmta netqmail notqmail sqmail exttodo chunk-trigger chunk-ipc"
+SYNCTYPES="sync fsync syncd nosync fdatasync fdatasyncd"
+QUEUES="5"
+DIRSPLITS="23 151"
+QUEUE_BASE=/var/indimail/queue
+
+################################
+restart=0
+PATH="$PATH:/var/netqmail/bin:/var/notqmail/bin:/var/sqmail/bin:/var/exttodo/bin:/usr/sbin"
+
+run_checks()
+{
+cat <<EOF
+This program comes with no warranty
+There is no documentation available.
+You need to look into this script to understand
+how it works.
+
+This program works for me but it may not for you. I wrote it for myself
+to make sure that I don't add features that degrade the performance
+for indimail-mta
+
+WARNING!!! This program requires sudo privileges.
+WARNING!!! You cannot run this program as root
+
+This scripts expects the following
+
+1. daemontools installed  from
+   https://github.com/mbhangui/indimail-mta/tree/master/daemontools-x
+   or rpm from
+   https://software.opensuse.org//download.html?project=home%3Ambhangui&package=daemontools
+2. standard indimail-mta installation from
+   https://github.com/mbhangui/indimail-mta/tree/master/indimail-mta-x
+   or rpm from
+   https://software.opensuse.org//download.html?project=home%3Ambhangui&package=indimail-mta
+3. netqmail installed in /var/netqmail with logs in /var/log/svc/netqmail
+   and supervise service directory as /service/netqmail
+4. notqmail installed in /var/notqmail with logs in /var/log/svc/notqmail
+   and supervise service directory as /service/notqmail
+5. s/qmail installed in /var/sqmail with logs in /var/log/svc/sqmail
+   and supervise service directory as /service/sqmail
+6. netqmail with external todo in /var/exttodo with logs in
+   /var/log/svc/exttodo and supervise service directory as /service/exttodo
+
+
+The simplest way to run this script is to do (as non-root)
+./qmail-perf-test -c
+
+The complete usage is as below
+
+EOF
+usage
+	for i in sudo matchup svc svstat time cat ls wc zip tail head sed \
+		rm printf expr awk tai64nunix grep egrep getent date cut \
+		mkdir chmod chown multilog qmail-inject qmail-queue \
+		qmail-send qmta-send slowq-send qmail-todo matchup zoverall
+	do
+		command -v $i >/dev/null
+		if [ $? -ne 0 ] ; then
+			echo "$i: command not found" 1>&2
+			exit 1
+		fi
+	done
+	for i in qmail-send.25 notqmail netqmail exttodo sqmail
+	do
+		if [ ! -d $servicedir/$i ] ; then
+			case "$i" in
+				qmail-send.25)
+				echo "indimail-mta qmail-send service not found in $servicedir" 1>&2
+				;;
+				*)
+				echo "$i qmail-send service not found in $servicedir" 1>&2
+				;;
+			esac
+		fi
+	done
+	for i in indimail notqmail netqmail exttodo sqmail
+	do
+		if [ ! -d /var/$i ] ; then
+			case "$i" in
+				exttodo)
+				echo "$i installation not found in $var/$i" 1>&2
+				echo "download archive for netqmail"
+				echo "change conf-qmail to have /var/$i"
+				echo "apply exttodo patch"
+				echo "do"
+				echo "$ make"
+				echo "$ sudo make setup check"
+				;;
+				*)
+				echo "$i installation not found in $var/$i" 1>&2
+				echo "download archive for $i"
+				echo "change conf-qmail to have /var/$i"
+				echo "do"
+				echo "$ make"
+				echo "$ sudo make setup check"
+				;;
+			esac
+		fi
+	done
+	for i in deliver.25 notqmail netqmail exttodo sqmail
+	do
+		if [ ! -d $logdir/$i ] ; then
+			case "$i" in
+				deliver.25)
+				echo "indimail-mta log directory not found in $logdir" 1>&2
+				;;
+				*)
+				echo "$I log directory not found in $logdir" 1>&2
+				;;
+			esac
+		fi
+	done
+}
+
+timeCmd()
+{
+	/usr/bin/time -p $* 2>/tmp/time.test
+	line=$(wc -l /tmp/time.test)
+	set $line
+	lc=$(expr $1 - 3)
+	if [ $lc -gt 0 ] ; then
+		cat /tmp/time.test|sed -n 1,"$lc"p
+		exit 1
+	fi
+	line=$(tail -n 3 /tmp/time.test|sed -n 1p)
+	set $line
+	real=$2 # inject time
+	line=$(tail -n 3 /tmp/time.test|sed -n 2p)
+	set $line
+	user=$2
+	line=$(tail -n 3 /tmp/time.test|sed -n 3p)
+	set $line
+	sys=$2
+	#/bin/rm -f /tmp/time.test
+	if [ -n "$real" ] ; then
+		ispeed=$(echo $mcount $real|awk '{printf "%.2f\n", $1 / $2}')
+	else
+		ispeed=inf
+	fi
+	return 0
+}
+
+getTime()
+{
+	line=$(wc -l /tmp/time.test)
+	set $line
+	lc=$(expr $1 - 3)
+	if [ $lc -gt 0 ] ; then
+		cat /tmp/time.test|sed -n 1,"$lc"p
+		return 1
+	fi
+	line=$(tail -n 3 /tmp/time.test|sed -n 1p)
+	set $line
+	real=$2 # inject time
+	line=$(tail -n 3 /tmp/time.test|sed -n 2p)
+	set $line
+	user=$2
+	line=$(tail -n 3 /tmp/time.test|sed -n 3p)
+	set $line
+	sys=$2
+	#/bin/rm -f /tmp/time.test
+	if [ -n "$real" ] ; then
+		ispeed=$(echo $mcount $real|awk '{printf "%.2f\n", $1 / $2}')
+	else
+		ispeed=inf
+	fi
+	return 0
+}
+
+print_time()
+{
+	hours=$(expr $1 / 3600)
+	rem=$(expr $1 % 3600)
+	mins=$(expr $rem / 60)
+	secs=$(expr $rem % 60)
+	if [ $hours -ne 0 ] ; then
+		printf "%02d hours " $hours
+	fi
+	if [ $mins -ne 0 ] ; then
+		printf "%02d minutes " $mins
+	fi
+	if [ $secs -ne 0 ] ; then
+		printf "%02d seconds" $secs
+	fi
+	echo
+}
+
+do_sleep()
+{
+	val=$(expr $1 / 5)
+	rem=$(expr $1 % 5)
+	wait_time=$1
+	echo -n "sleeping for $1 secs"
+	i=0
+	while true
+	do
+		if [ $i -eq $val ] ; then
+			break;
+		fi
+		sleep 5
+		echo -n "."
+		i=$(expr $i + 1)
+	done
+	if [ $rem -gt 0 ] ; then
+		echo -n "*"
+		sleep $rem
+	fi
+	echo ""
+}
+
+speed_calc()
+{
+	old_time=$1
+	zlogs=$3
+	echo -n "waiting for all emails to arrive"
+	tai1=""
+	tai2=""
+	w=0
+	count=0
+	while true
+	do
+		t1=$(grep success $zlogs/current|head -1|tai64nunix)
+		if [ -n "$t1" ] ; then
+			break
+		fi
+		w=$(expr $w + 5)
+		sleep 5
+		echo -n "."
+		count=$(expr $count + 1)
+		if [ $count -gt 100 ] ; then
+			echo "Wait count exceeded" 1>&2
+			break
+		fi
+	done
+
+	count=0
+	while true
+	do
+		t=$(grep success $zlogs/current|wc -l)
+		dcount=$(echo $t)
+		echo -n " $dcount"
+		if [ $dcount -ge $mcount ] ; then
+			break
+		fi
+		w=$(expr $w + 5)
+		sleep 5
+		echo -n " ."
+		count=$(expr $count + 1)
+		if [ $count -gt 50 ] ; then
+			echo "Wait count exceeded" 1>&2
+			break
+		fi
+	done
+	t=$(date '+%s')
+	t=$(echo $t $old_time $real|awk '{printf "%.f\n", $1 - $2 - $3}')
+	echo " $t (s) waited $w (s)"
+	t=$(echo $t|cut -d. -f1)
+	if [ $t -gt $WAIT ] ; then
+		if [ $w -gt 0 ] ; then
+			WAIT=$t
+		elif [ $WAIT -gt 10 ] ; then
+			WAIT=$(expr $t - 10)
+		fi
+	else
+		if [ $w -gt 0 ] ; then
+			WAIT=$t
+		elif [ $WAIT -gt 10 ] ; then
+			WAIT=$(expr $WAIT - 10)
+		fi
+	fi
+	if [ -n "$t1" ] ; then
+		set $t1
+		tai1=$1
+		del_start=$(echo $tai1 $old_time|awk '{printf "%.4f\n", $1 - $2}')
+		t1=$(grep "new msg" $zlogs/current|head -1|tai64nunix)
+		set $t1
+		tai1=$1
+	else
+		del_start="?"
+	fi
+	echo "First email delivered after $del_start seconds"
+	t2=$(grep success $zlogs/current |tail -n 1|tai64nunix)
+	if [ -n "$t2" ] ; then
+		set $t2
+		tai2=$1
+	fi
+	if [ -n "$tai1" -a -n "$tai2" ] ; then
+		echo $t1
+		echo $t2
+		dtime=$(echo $tai2 $tai1|awk '{printf "%.4f\n", $1 - $2}')
+		if [ -n "$dtime" ] ; then
+			dspeed=$(echo $dcount $dtime|awk '{printf "%.2f\n", $1 / $2}')
+		else
+			dspeed=inf
+		fi
+		t=$(echo $dtime $real|awk '{printf "%.f\n", $1 - $2}')
+		t=$(echo $t|cut -d. -f1)
+		if [ $WAIT -lt $t -o $(expr $WAIT - $t) -gt 100 ] ; then
+			WAIT=$(echo $dtime|cut -d. -f1)
+		fi
+	else
+		dtime="?"
+		dspeed="?"
+	fi
+}
+
+zaverage()
+{
+	if [ ! -f $reportdir/zaverage.out ] ; then
+		echo "$reportdir/zaverage.out: No such file or directory" 1>&2
+		return 1
+	fi
+	grep -v "^MTA" $reportdir/zaverage.out | awk -F, '
+		BEGIN {
+			total = 0
+			qtime = 0
+			ddelay = 0
+			avg_delay = 0
+			xdelay = 0
+			avg_xdelay = 0
+			time_span = 0
+			queue_conc = 0
+			max_conc = 0
+			real = 0
+			user = 0
+			sys = 0
+			del_start = 0
+			dtime = 0
+			load=0
+			method = ""
+			prev_method = ""
+		}
+		{
+			method = $1
+			if (length(method) != 0) {
+				if (length(prev_method) == 0)
+					prev_method = $1
+				if (method != prev_method) {
+					printf "%-40s, %2d, %5d, ",            prev_method, total, mcount
+					printf "%6.2f, %9.2f, %6.2f, ",        qtime/total, ddelay/total, avg_delay/total
+					printf "%8.2f, %6.4f, %8.2f, ",        xdelay/total, avg_xdelay/total, time_span/total
+					printf "%8.2f, %4d, %5.2f, ",          queue_conc/total, max_conc, user/total
+					printf "%5.2f, %7.2f, %7.2f, %6.2f, ", sys/total, del_start/total, (total * mcount)/real, (total * mcount) / dtime
+					printf "%6.2f\n",                      load/total
+					prev_method = $1
+					total = 0
+					qtime = 0
+					ddelay = 0
+					avg_delay = 0
+					xdelay = 0
+					avg_xdelay = 0
+					time_span = 0
+					queue_conc = 0
+					max_conc = 0
+					user = 0
+					sys = 0
+					real = 0
+					del_start = 0
+					dtime = 0
+					load = 0
+				}
+				method = $1
+				#itertion is $2
+				mcount = $3
+				total += 1
+				qtime += $4
+				ddelay += $5
+				avg_delay += $6
+				xdelay += $7
+				avg_xdelay += $8
+				time_span += $9
+				queue_conc += $10
+				if ($11 > max_conc)
+					max_conc = $11
+				user += $12
+				sys += $13
+				del_start += $14
+				real += $15
+				dtime += $16
+				load += $17
+				#logfile is $18
+			}
+		}
+		END {
+			printf "%-40s, %2d, %5d, ",            method, total, mcount
+			printf "%6.2f, %9.2f, %6.2f, ",        qtime/total, ddelay/total, avg_delay/total
+			printf "%8.2f, %6.4f, %8.2f, ",        xdelay/total, avg_xdelay/total, time_span/total
+			printf "%8.2f, %4d, %5.2f, ",          queue_conc/total, max_conc, user/total
+			printf "%5.2f, %7.2f, %7.2f, %6.2f, ", sys/total, del_start/total, (total * mcount)/real, (total * mcount) / dtime
+			printf "%6.2f\n",                      load/total
+		}
+	'
+	return 0
+}
+
+queue_change()
+{
+	if [ $# -ne 1 ] ; then
+		echo "queue_type indimail-mta|ipc|compat|syncd|fsync|nosyncd|nofsync|clearmaildir" 1>&2
+		echo "  queue-count-number split-number nofastq chunk-trigger chunk-ipc"
+		echo "  todo-chunk-number"
+		exit 1
+	fi
+	case "$1" in
+		noauthself)
+		sudo rm -f $controldir/global_vars/AUTHSELF
+		;;
+		authself)
+		sudo sh -c "echo 1 > $controldir/global_vars/AUTHSELF"
+		;;
+		fastq)
+		getent passwd qmailq|awk -F: '{print $3}' > $home/.defaultqueue/FASTQUEUE
+		;;
+		nofastq)
+		> $home/.defaultqueue/FASTQUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		bigtodo-*)
+		bigtodo=$(echo $1|cut -d- -f2)
+		sudo sh -c "echo $bigtodo > $controldir/global_vars/BIGTODO"
+		;;
+		queue-count-*)
+		q=$(echo $1|cut -d- -f3)
+		echo $q > $home/.defaultqueue/QUEUE_COUNT
+		sudo sh -c "echo $q > $controldir/defaultqueue/QUEUE_COUNT"
+		sudo sh -c "echo $q > $controldir/defaultqueue/QUEUE_MAX"
+		;;
+		chunk-trigger)
+		sudo sh -c "echo $mcount > $controldir/global_vars/TODO_CHUNK_SIZE"
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		chunk-ipc)
+		if [ $mcount -gt 2000 ] ; then
+			sudo sh -c "echo 2000 > $controldir/global_vars/TODO_CHUNK_SIZE"
+		else
+			sudo sh -c "echo $mcount > $controldir/global_vars/TODO_CHUNK_SIZE"
+		fi
+		echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		todo-chunk-*)
+		chunk_size=$(echo $1|cut -d- -f3)
+		if [ "$chunk_size" != "trigger" -a "$chunk_size" != "ipc" ] ; then
+			if [ $chunk_size -gt 0 ] ; then
+				sudo sh -c "echo $chunk_size > $controldir/global_vars/TODO_CHUNK_SIZE"
+			else
+				sudo sh -c "> $controldir/global_vars/TODO_CHUNK_SIZE"
+			fi
+		fi
+		;;
+		indimail-mta)
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		ipc)
+		echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		compat)
+		echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -s{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -s{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		slowq)
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		echo "$QUEUE_BASE/slowq" > $home/.defaultqueue/QUEUEDIR
+		;;
+		qmta)
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		echo "$QUEUE_BASE/qmta" > $home/.defaultqueue/QUEUEDIR
+		;;
+		fsync)
+		sudo sh -c "echo 1 > $controldir/conf-fsync"
+		sudo sh -c "echo 1 > $controldir/global_vars/USE_FSYNC"
+		;;
+		nofsync)
+		sudo sh -c "echo 0 > $controldir/conf-fsync"
+		sudo sh -c "> $controldir/global_vars/USE_FSYNC"
+		;;
+		fdatasync)
+		sudo sh -c "echo 1 > $controldir/conf-fdatasync"
+		sudo sh -c "echo 1 > $controldir/global_vars/USE_FDATASYNC"
+		;;
+		nofdatasync)
+		sudo sh -c "echo 0 > $controldir/conf-fdatasync"
+		sudo sh -c "> $controldir/global_vars/USE_FDATASYNC"
+		;;
+		syncd)
+		sudo sh -c "echo 1 > $controldir/conf-syncdir"
+		sudo sh -c "echo 1 > $controldir/global_vars/USE_SYNCDIR"
+		;;
+		nosyncd)
+		sudo sh -c "echo 0 > $controldir/conf-syncdir"
+		sudo sh -c "> $controldir/global_vars/USE_SYNCDIR"
+		;;
+		split-*)
+		split=$(echo $1|cut -d- -f2)
+		sudo sh -c "echo $split > $controldir/global_vars/CONFSPLIT"
+		;;
+		concurrency-*)
+		cr=$(echo $1|cut -d- -f2)
+		if [ $cr -gt 0 ] ; then
+			sudo sh -c "echo $cr > $controldir/concurrencylocal"
+		else
+			sudo /bin/rm -f $controldir/concurrencylocal
+		fi
+		;;
+		clearmaildir)
+		echo -n "Clearing $maildir "
+		t1=$(date '+%s')
+		original=$PWD
+		for i in new
+		do
+			cd $maildir/$i
+			if [ $? -eq 0 ] ; then
+				sudo find . -type f -name "*$host*" -exec /bin/rm -f {} \;
+			fi
+		done
+		t2=$(date '+%s')
+		t3=$(expr $t2 - $t1)
+		echo " $t3 (s)"
+		cd $original
+		;;
+		*)
+		echo "Invalid option $1" 1>&2
+		exit 1
+		;;
+	esac
+	if [ ! "$1" = "clearmaildir" ] ; then
+		restart=1
+	fi
+}
+
+break_when_complete()
+{
+	if [ $# -gt 0 ] ; then
+		check_error=1
+	else
+		check_error=0
+	fi
+	echo -n "waiting for last mail to arrive "
+	t1=$(date '+%s')
+	while true
+	do
+		./readfifo -t 5 $fifo
+		if [ $? -eq 0 ] ; then
+			break
+		fi
+		if [ $check_error -eq 1 -a -s /tmp/time.test ] ; then
+			line=$(wc -l /tmp/time.test)
+			set $line
+			lc=$(expr $1 - 3)
+			if [ $lc -gt 0 ] ; then
+				cat /tmp/time.test|sed -n 1,"$lc"p
+				return 1
+			fi
+		fi
+		echo -n "."
+	done
+	t2=$(date '+%s')
+	t3=$(expr $t2 - $t1)
+	echo " waited $t3 (s)"
+	waited=$t3
+	return 0
+}
+
+display()
+{
+	percent=$(echo $testno $test_count|awk '{printf "%.2f\n", $1 * 100 / $2}')
+	echo "Test      no = $testno / $test_count ($percent %)"
+	case $mta in
+		netqmail|notqmail|sqmail|exttodo|qmta|slowq)
+		echo "MTA Method   = $mta-$synctype-$split-1"
+		;;
+		*)
+		echo "MTA Method   = $mta-$synctype-$split-$qno"
+		;;
+	esac
+	echo "Iteration no = $iterCount"
+	echo "fsync        = $fsync"
+	echo "fdatasync    = $fdatasync"
+	echo "syncdir      = $syncdir"
+	case $mta in
+		netqmail|sqmail|exttodo)
+		echo "queue  count = 1 (tests=$qtcount)"
+		echo "queue  split = 23"
+		echo "todo batch   = OFF"
+		;;
+		notqmail)
+		echo "queue  count = 1 (tests=$qtcount)"
+		echo "queue  split = 23"
+		echo "todo batch   = OFF"
+		;;
+		qmta|slowq)
+		echo "queue  count = 1 (tests=$qtcount)"
+		echo "queue  split = $split"
+		echo "todo batch   = OFF"
+		;;
+		chunk-trigger|chunk-ipc)
+		echo "queue  count = $qno (tests=$qtcount)"
+		echo "queue  split = $split"
+		if [ -s $controldir/global_vars/TODO_CHUNK_SIZE ] ; then
+			chunk_size=$(cat $controldir/global_vars/TODO_CHUNK_SIZE)
+			echo "todo batch   = ON ($chunk_size)"
+		else
+			echo "todo batch   = OFF"
+		fi
+		;;
+		*)
+		echo "queue  count = $qno (tests=$qtcount)"
+		echo "queue  split = $split"
+		if [ -s $controldir/global_vars/TODO_CHUNK_SIZE ] ; then
+			chunk_size=$(cat $controldir/global_vars/TODO_CHUNK_SIZE)
+			echo "todo batch   = ON ($chunk_size)"
+		else
+			echo "todo batch   = OFF"
+		fi
+		;;
+	esac
+}
+
+setup_sync()
+{
+	case $1 in
+		syncd)
+			fsync="OFF"
+			fdatasync="OFF"
+			syncdir="ON"
+			queue_change nofsync
+			queue_change nofdatasync
+			queue_change syncd
+			;;
+		fsync)
+			fsync="ON"
+			fdatasync="OFF"
+			syncdir="OFF"
+			queue_change fsync
+			queue_change nofdatasync
+			queue_change nosyncd
+			;;
+		nosync)
+			fsync="OFF"
+			fdatasync="OFF"
+			syncdir="OFF"
+			queue_change nofsync
+			queue_change nofdatasync
+			queue_change nosyncd
+			;;
+		sync)
+			fsync="ON"
+			fdatasync="OFF"
+			syncdir="ON"
+			queue_change fsync
+			queue_change nofdatasync
+			queue_change syncd
+			;;
+		fdatasync)
+			fsync="OFF"
+			fdatasync="ON"
+			syncdir="OFF"
+			queue_change fdatasync
+			queue_change nofsync
+			queue_change nosyncd
+			;;
+		fdatasyncd)
+			fsync="OFF"
+			fdatasync="ON"
+			syncdir="ON"
+			queue_change fdatasync
+			queue_change nofsync
+			queue_change syncd
+			;;
+	esac
+}
+
+zoverall()
+{
+	if [ ! -d $logdir ] ; then
+		sudo mkdir -p $logdir
+		sudo chown qmaill:nofiles $logdir
+	fi
+	if [ ! -d $logdir/reports ] ; then
+		sudo mkdir -p $logdir/reports
+		sudo chown qmaill:nofiles $logdir/reports
+	fi
+	mkdir -p $reportdir
+	(
+	if [ -f $logdir/reports/send_pend ] ; then
+		/bin/cat $logdir/reports/send_pend
+		sudo /bin/rm -f $logdir/reports/send_pend
+	fi
+	/bin/cat $1/current
+	) | $libexecdir/matchup 5>$reportdir/pend_tmp > $reportdir/deliver
+	if [ -s $reportdir/pend_tmp ] ; then
+		sudo mv $reportdir/pend_tmp $logdir/reports/send_pend
+	else
+		/bin/rm -f $reportdir/pend_tmp
+	fi
+	if [ -s $reportdir/deliver ] ; then
+		echo "-------- zoverall -------------"
+		$libexecdir/zoverall < $reportdir/deliver >$reportdir/report.out 
+		while read line
+		do
+			echo $line|egrep "Completed messages:|Recipients for completed messages:"
+			if [ $? -eq 0 ] ; then
+				continue
+			fi
+			echo $line|egrep "Total delivery attempts for completed messages:|Average delivery attempts per completed message:"
+			if [ $? -eq 0 ] ; then
+				continue
+			fi
+			echo $line|grep "Average message qtime (s):"
+			if [ $? -eq 0 ] ; then
+				set $line
+				qtime=$5
+				continue
+			fi
+			echo $line|grep "Total ddelay (s):"
+			if [ $? -eq 0 ] ; then
+				set $line
+				ddelay=$4
+				continue
+			fi
+			echo $line|grep "Average ddelay per success (s):"
+			if [ $? -eq 0 ] ; then
+				set $line
+				avg_ddelay=$6
+				continue
+			fi
+			echo $line|grep "Total xdelay (s):"
+			if [ $? -eq 0 ] ; then
+				set $line
+				xdelay=$4
+				continue
+			fi
+			echo $line|grep "Average xdelay per delivery attempt (s):"
+			if [ $? -eq 0 ] ; then
+				set $line
+				avg_xdelay=$7
+				continue
+			fi
+			echo $line|grep "Time span (days):" >/dev/null
+			if [ $? -eq 0 ] ; then
+				time_span=$(echo $line|awk '{print $4 * 86400}')
+				echo "Time span (s): $time_span"
+				continue
+			fi
+			echo $line|grep "Time span (s):" >/dev/null
+			if [ $? -eq 0 ] ; then
+				set $line
+				time_span=$4
+				echo "Time span (s): $time_span"
+				continue
+			fi
+			echo $line|grep "Queue concurrency:"
+			if [ $? -eq 0 ] ; then
+				set $line
+				q_conc=$3
+			fi
+		done < $reportdir/report.out
+		/bin/rm -f report.out
+		echo "---------- end ----------------"
+	fi
+	/bin/rm -f $reportdir/deliver
+}
+
+start_service()
+{
+	echo "Starting service $1"
+	sudo $prefix/bin/svc -u $1
+}
+
+stop_service()
+{
+	echo -n "Stopping service $1"
+	sudo $prefix/bin/svc -d $1
+	while true
+	do
+		sudo $prefix/bin/svstat $1 >/dev/null
+		if [ $? -eq 0 ] ; then
+			echo -n "."
+			sleep 1
+			continue
+		fi
+		break
+	done
+	echo ""
+}
+
+reset_logs()
+{
+	echo "Resetting log  - $1"
+	sudo $prefix/bin/svc -a $1/log
+}
+
+initial_setup()
+{
+	if [ $# -eq 0 ] ; then
+		skip_test=0
+	else
+		skip_test=1
+	fi
+	echo "Doing initial setup"
+	mkdir -p $reportdir
+	if [ ! -p $fifo ] ; then
+		/bin/rm -f $fifo
+		mkfifo $fifo
+	fi
+	/bin/rm -f $reportdir/zaverage.avg
+
+	(
+	echo "#!/bin/sh"
+	echo
+	echo "grep \"Subject: Test message number $mcount\" >/dev/null"
+	echo "if [ \$? -eq 0 ] ; then"
+	echo "  echo > $fifo"
+	echo "fi"
+	) > $home/bin/break_on_completion
+	chmod +x $home/bin/break_on_completion
+
+	if [ ! -d $maildir ] ; then
+		sudo mkdir -p $maildir/new
+		sudo mkdir -p $maildir/cur
+		sudo mkdir -p $maildir/tmp
+		sudo chown -R $(getent passwd mbhangui|awk -F: '{print $3":"$4}') $maildir
+	fi
+
+	(
+	echo "$maildir/"
+	echo "|$home/bin/break_on_completion"
+	) > $home/.qmail-test
+	queue_change fastq
+	queue_change noauthself
+	queue_change todo-chunk-0
+	queue_change queue-count-1
+	queue_change indimail-mta
+	queue_change concurrency-500
+	echo $prefix/sbin/qmail-queue > $home/.defaultqueue/QMAILQUEUE
+	for i in notqmail netqmail sqmail exttodo
+	do
+		if [ -d /var/$i/control ] ; then
+			sudo sh -c "echo 500 > /var/$i/control/concurrencylocal"
+		fi
+	done
+	if [ -z "$WAIT" ] ; then
+		WAIT=$initial_wait
+	fi
+	setup_sync fsync
+	queue_change split-23
+	reset_logs $servicedir/qmail-send.25;
+	if [ $restart -eq 1 ] ; then
+		echo "Restarting service $rl"
+		restart=0
+		sudo $prefix/bin/svc -r $rl
+	else
+		sudo $prefix/bin/svstat $rl >/dev/null
+		if [ $? -ne 0 ] ; then
+			echo "Starting service $rl"
+			sudo $prefix/bin/svc -u $rl
+		fi
+	fi
+	if [ $skip_test -eq 0 ] ; then
+		iterCount=0
+		mta="indimail-mta"
+		qno=1
+		sync
+		start_time=$(date '+%s')
+		display $start_time
+		queue_change clearmaildir
+		echo -n "./mail -q $prefix/bin/qmail-inject -n $mcount -p $pcount -f $from -t "$to"-test ... "
+		/usr/bin/time -p envdir -c $home/.defaultqueue ./mail -q $prefix/bin/qmail-inject \
+			-n $mcount -p $pcount -f $from -t "$to"-test 2>/tmp/time.test
+		getTime
+		if [ $? -ne 0 ] ; then
+			clear_queue $qb
+			reset_logs $rl
+			queue_change clearmaildir
+			echo "Test failed" 1>&2
+			exit 1
+		fi
+		echo "$real (s)"
+		load=$(./loadavg)
+		break_when_complete
+		if [ $initial_wait -gt $waited ] ; then
+			do_sleep $(expr $initial_wait - $waited)
+		fi
+		speed_calc $start_time $mcount $logdir/deliver.25
+		zoverall $logdir/deliver.25 3>/dev/null
+		printf "Injection speed = %-8.2f emails/sec (%6.2f secs)\n" $ispeed $real
+		printf "Delivery  speed = %-8.2f emails/sec (%6.2f secs)\n" $dspeed $dtime
+		max_concurrency=$(grep "status: local" $logdir/deliver.25/current|awk '{print $4}'|sort -rnu|head -1|cut -d/ -f1)
+		echo   "Max concurrency = $max_concurrency"
+		printf "Load    average = %0.2f\n" $load
+	fi
+	echo "WAIT = $WAIT seconds"
+	queue_change clearmaildir
+	for mta in indimail-mta ipc compat chunk-trigger chunk-ipc qmta slowq netqmail notqmail sqmail exttodo
+	do
+		/bin/rm -f $reportdir/$mta
+	done
+	for mta in $MTA
+	do
+		case "$mta" in
+			indimail-mta|ipc|compat|chunk-trigger|chunk-ipc)
+			i="qmail-send.25"
+			;;
+			qmta|slowq)
+			i="$mta"-send
+			;;
+			*)
+			i=$mta
+			;;
+		esac
+		if [ ! -f $reportdir/$mta -a -d $servicedir/$i ] ; then
+			touch $reportdir/$mta
+			echo "Clearing log for $servicedir/$i"
+			sudo svc -a $servicedir/$i/log
+		fi
+	done
+	for mta in qmail-send.25 netqmail notqmail sqmail exttodo slowq-send qmta-send
+	do
+		/bin/rm -f $reportdir/$mta
+	done
+}
+
+usage()
+{
+	echo "USAGE qmail-perf options"
+	echo "OPTIONS"
+	echo "  -q=queue1,queue2,... -m=mailcount -p=processcount -i=iterations -t=to -f=from"
+	echo "  -I=initial_wait -w=max_wait -W=initial_wait+WAIT"
+	echo "  -M=queueMethod (wsp separated indimail-mta chunk-trigger chunk-ipc"
+	echo "     ipc compat slowq qmta netqmail notqmail sqmail exttodo)"
+	echo "  -S=syncType (wsp separated sync methods fsync syncd nofsync, nosyncd)"
+	echo "  -D=directorySplit (wsp separated 23 151)"
+	echo "  -O=resultFile"
+	if [ $# -gt 0 ] ; then
+		exit 1
+	fi
+}
+
+reset_queue()
+{
+	/bin/rm -f $home/.defaultqueue/QUEUEDIR
+	echo $prefix/sbin/qmail-queue > $home/.defaultqueue/QMAILQUEUE
+	queue_change authself
+	queue_change nofastq
+	queue_change todo-chunk-0
+	queue_change nofsync
+	queue_change nosyncd
+	queue_change split-23
+	queue_change ipc
+	queue_change queue-count-5
+	queue_change clearmaildir
+	queue_change bigtodo-0
+	queue_change concurrency-0
+	sudo svc -r $servicedir/qmail-send.25
+}
+
+clear_queue()
+{
+	echo -n "Clearing queue $1"
+	t1=$(date '+%s')
+	if [ -z "$1" ] ; then
+		for i in $QUEUE_BASE/queue*
+		do
+			cd $i
+			if [ $? -eq 0 ] ; then
+				find bounce info intd local mess remote todo -type f -exec /bin/rm -f {} \;
+			fi
+		done
+	else
+		cd $1
+		if [ $? -eq 0 ] ; then
+			find bounce info intd local mess remote todo -type f -exec /bin/rm -f {} \;
+		fi
+	fi
+	t2=$(date '+%s')
+	t3=$(expr $t2 - $t1)
+	echo " $t3 (s)"
+}
+
+#### main ##############
+
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	FreeBSD|Darwin)
+	prefix=/usr/local
+	controldir=/usr/local/etc/indimail/control
+	;;
+	*)
+	prefix=/usr
+	controldir=/etc/indimail/control
+	;;
+esac
+libexecdir=$prefix/libexec/indimail
+fifo=/tmp/qmail-test
+append_mode=0
+sanity_check=1
+pure_injection=0
+host=$(uname -n)
+home=$(getent passwd $to|awk -F: '{print $6}')
+if [ $? -ne 0 ] ; then
+	echo "$to: No such user" 1>&2
+	exit 1
+fi
+if [ -f $home/.qmail-perf ] ; then
+	. $home/.qmail-perf
+fi
+if [ -z "$maildir" ] ; then
+	maildir=$home/Maildir
+fi
+while test $# -gt 0; do
+    case "$1" in
+    	-*=*)
+		optarg=$(echo "$1" | sed 's/[-_a-zA-Z0-9]*=//')
+		optval=$(echo "$1" | cut -d'=' -f1)
+		prog_args="$prog_args $optval=\"$optarg\""
+		;;
+    	*) optarg=
+		prog_args="$prog_args $1"
+		;;
+    esac
+
+    case "$1" in
+		-c)
+		sanity_check=0
+		;;
+		-P)
+		pure_injection=1
+		;;
+		-a)
+		append_mode=1
+		;;
+		-q=*)
+		QUEUES=$optarg
+		;;
+		-m=*)
+		mcount=$optarg
+		;;
+		-p=*)
+		pcount=$optarg
+		;;
+		-i=*)
+		iter=$optarg
+		;;
+		-t=*)
+		to=$optarg
+		;;
+		-f=*)
+		from=$optarg
+		;;
+		-I=*)
+		initial_wait=$optarg
+		;;
+		-W=*)
+		initial_wait=$optarg
+		WAIT=$optarg
+		;;
+		-w=*)
+		max_wait=$optarg
+		;;
+		-M=*) # indimail-mta, ipc, compat, qmta, slowq, netqmail, notqmail, sqmail, exttodo
+		MTA=$optarg
+		;;
+		-S=*) # sync type - sync, fsync, syncd, nosync
+		SYNCTYPES=$optarg
+		;;
+		-D=*)
+		DIRSPLITS=$optarg
+		;;
+		-O=*)
+		outfile=$optarg
+		;;
+    	*)
+    	echo "invalid option [$1]" 1>&2
+		usage 1
+    	;;
+    esac
+    shift
+done
+echo "Running command $0 $prog_args"
+if [ $sanity_check -eq 1 ] ; then
+	run_checks
+	exit 0
+fi
+
+# queue counts
+qtcount=0
+for i in $QUEUES
+do
+	qtcount=$(expr $qtcount + 1)
+done
+
+# sync methods
+isync_count=0
+qsync_count=0
+for i in $SYNCTYPES
+do
+	if [ "$i" = "fsync" ] ; then
+		qsync_count=$(expr $qsync_count + 1)
+	fi
+	case $i in
+		sync|fsync|syncd|nosync|fdatasync|fdatasyncd)
+		;;
+		*)
+		echo "unknown sync type $i" 1>&2
+		continue
+		;;
+	esac
+	isync_count=$(expr $isync_count + 1)
+done
+
+# directory splits
+isplit_count=0
+for i in $DIRSPLITS
+do
+	case $i in
+		23|151)
+		;;
+		*)
+		echo "unknown directory split" 1>&2
+		continue
+		;;
+	esac
+	isplit_count=$(expr $isplit_count + 1)
+done
+
+# methods
+m1=0
+m2=0
+m3=0
+m4=0
+m5=0
+for i in $MTA
+do
+	case $i in
+		indimail-mta|ipc|compat)
+		m1=$(expr $m1 + 1)
+		;;
+		netqmail|sqmail|exttodo)
+		m2=$(expr $m2 + 1)
+		continue
+		;;
+		notqmail)
+		m3=$(expr $m3 + 1)
+		continue
+		;;
+		qmta|slowq)
+		m4=$(expr $m4 + 1)
+		continue
+		;;
+		chunk-trigger|chunk-ipc)
+		m5=$(expr $m5 + 1)
+		continue
+		;;
+		*)
+		echo "unknown method $i" 1>&2
+		;;
+	esac
+done
+
+if [ $append_mode -eq 0 ] ; then
+	teeOpt=""
+	exec 3>$outfile.csv
+else
+	teeOpt="-a"
+	exec 3>>$outfile.csv
+fi
+
+count1=$(expr $iter \* $m1 \* $isplit_count \* $isync_count \* $qtcount) # indimail-mta
+count2=$(expr $iter \* $m2 \* 1             \* $qsync_count \* 1       ) # netqmail|sqmail|exttodo
+count3=$(expr $iter \* $m3 \* 1             \* $qsync_count \* 1       ) # notqmail
+count4=$(expr $iter \* $m4 \* $isplit_count \* $isync_count \* 1       ) # qmta/slowq
+count5=$(expr $iter \* $m5 \* $isplit_count \* $isync_count \* $qtcount) # chunk-[trigger|ipc]
+test_count=$(expr $count1 + $count2 + $count3 + $count4 + $count5)
+
+echo "This script will run $test_count tests"
+
+printf "%3d indimail-mta tests  --> %d (iterations) * %d (indimail-mta+ipc+compat)  * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count1 $iter $m1 $isync_count $isplit_count $qtcount
+printf "%3d        qmail tests  --> %d (iterations) * %d ([net|s]qmail|exttodo)     * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count2 $iter $m2            1 1                   1
+printf "%3d     notqmail tests  --> %d (iterations) * %d (notqmail)                 * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count3 $iter $m3            1 1                   1
+printf "%3d   qmta/slowq tests  --> %d (iterations) * %d (qmta|slowq)               * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count4 $iter $m4 $isync_count $isplit_count        1
+printf "%3d chunk-[trigger|ipc] --> %d (iterations) * %d (chunk[trigger|ipc])       * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count5 $iter $m5 $isync_count $isplit_count $qtcount
+
+echo "Press ENTER to continue"
+read key
+
+testno=0
+if [ -n "$WAIT" ] ; then
+	initial_setup 1 3>/dev/null
+else
+	initial_setup 3>/dev/null
+	echo "Press ENTER to continue"
+	read key
+fi
+
+uname -srv
+echo
+test_start_time=$(date '+%s')
+unset MIN_FREE #skip using statvfs to calculate free space
+(
+echo -n "MTA,Iteration,Mail Count,avg message qtime,"
+echo -n "ddelay,avg ddelay,xdelay,avg xdelay,Time Span,Queue Concurrency,"
+echo -n "Max Concurrency,User Time,Sys Time,Delivery Start,Injection Time,Delivery Time,Load,"
+echo    "multilog"
+) | tee $teeOpt $reportdir/zaverage.out 1>&3
+testno=1
+for mta in $MTA
+do
+	case "$mta" in
+		netqmail|notqmail|sqmail|exttodo)
+		;;
+		*)
+		queue_change $mta
+		;;
+	esac
+	for synctype in $SYNCTYPES
+	do
+		case "$mta" in
+			netqmail|notqmail|sqmail|exttodo)
+			if [ "$synctype" != "fsync" ] ; then
+				continue
+			fi
+			;;
+			*)
+			setup_sync $synctype
+			;;
+		esac
+		for split in $DIRSPLITS
+		do
+			case $split in
+				23|151)
+				;;
+				*)
+				echo "Unknown split $split" 1>&2
+				continue
+				;;
+			esac
+			case "$mta" in
+				netqmail|sqmail|exttodo)
+				if [ $split -ne 23 ] ; then
+					continue
+				fi
+				qspeed="fastq"
+				;;
+				notqmail)
+				if [ $split -ne 23 ] ; then
+					continue
+				fi
+				qspeed="nofastq"
+				;;
+				*)
+				qspeed="fastq"
+				queue_change split-"$split"
+				queue_change $qspeed
+				;;
+			esac
+			m=$(echo $mta|sed 's{-{{g')
+			declare ${m}_queue_done=0
+			var="${m}_queue_done"
+			for qno in $QUEUES
+			do
+				qcount=$qno
+				case "$mta" in
+					netqmail|notqmail|sqmail|exttodo)
+					if [ ${!var} -ne 0 ] ; then
+						continue
+					fi
+					declare ${m}_queue_done=1
+					qi=/var/$mta/bin/qmail-inject
+					if [ -z "$QMAILQUEUE" ] ; then
+						qq=$var/$mta/bin/qmail-queue
+					else
+						qq=$QMAILQUEUE
+					fi
+					qd=""
+					qb="/var/$mta/queue"
+					zlogs=$logdir/$mta
+					rl=$servicedir/$mta
+					;;
+					slowq|qmta)
+					if [ ${!var} -ne 0 ] ; then
+						continue
+					fi
+					declare ${m}_queue_done=1
+					qi=$prefix/bin/qmail-inject
+					if [ -z "$QMAILQUEUE" ] ; then
+						qq=$prefix/sbin/qmail-queue
+					else
+						qq=$QMAILQUEUE
+					fi
+					qd=$QUEUE_BASE/$mta
+					qb=$QUEUE_BASE/$mta
+					zlogs=$logdir/$mta
+					rl=$servicedir/$mta-send
+					echo $qq > $home/.defaultqueue/QMAILQUEUE
+					sudo sh -c "echo  $qd > $controldir/global_vars/QUEUEDIR"
+					queue_change queue-count-1
+					;;
+					*)
+					qi=$prefix/bin/qmail-inject
+					if [ -z "$QMAILQUEUE" ] ; then
+						qq=$prefix/sbin/qmail-queue
+					else
+						qq=$QMAILQUEUE
+					fi
+					qd=""
+					qb=""
+					zlogs=$logdir/deliver.25
+					rl=$servicedir/qmail-send.25
+					echo $qq > $home/.defaultqueue/QMAILQUEUE
+					sudo /bin/rm -f $controldir/global_vars/QUEUEDIR
+					queue_change queue-count-$qno
+					;;
+				esac
+				if [ -n "$qd" ] ; then
+					echo  $qd > $home/.defaultqueue/QUEUEDIR
+				else
+					/bin/rm -f $home/.defaultqueue/QUEUEDIR
+				fi
+				if [ $pure_injection -eq 1 ] ; then
+					stop_service $rl
+				else
+					if [ $restart -eq 1 ] ; then
+						echo "Restarting service $rl"
+						restart=0
+						sudo $prefix/bin/svc -r $rl
+					else
+						sudo $prefix/bin/svstat $rl >/dev/null
+						if [ $? -ne 0 ] ; then
+							echo "Starting service $rl"
+							sudo $prefix/bin/svc -u $rl
+						fi
+					fi
+				fi
+				iterCount=1
+				while true #2
+				do
+					sync
+					start_time=$(date '+%s')
+					case $SYSTEM in
+						FreeBSD)
+						date -r $start_time
+						;;
+						*)
+						date --date=@"$start_time"
+						;;
+					esac
+					display $start_time
+					echo "current wait = $WAIT (s)"
+					start_time=$(date '+%s')
+					if [ $pure_injection -eq 1 ] ; then
+						echo "foreground injection: cmmd=$qi n=$mcount p=$pcount from=$from to="$to"-test"
+						case "$mta" in
+							netqmail|notqmail|sqmail|exttodo)
+							/usr/bin/time -p ./mail -q $qi -n $mcount -p $pcount -f $from \
+								-t "$to"-test 2>/tmp/time.test
+							;;
+							*)
+							/usr/bin/time -p envdir -c $home/.defaultqueue ./mail -q $qi -n $mcount \
+								-p $pcount -f $from -t "$to"-test 2>/tmp/time.test
+							;;
+						esac
+						getTime
+						if [ $? -ne 0 ] ; then
+							echo "Test failed: Repeating test" 1>&2
+							clear_queue $qb
+							reset_logs $rl
+							queue_change clearmaildir
+							continue
+						fi
+						echo "mail injection complete ... $real (s)"
+						start_service $rl
+						break_when_complete
+						load=$(./loadavg)
+					else
+						echo "background injection: cmmd=$qi n=$mcount p=$pcount from=$from to="$to"-test"
+						case "$mta" in
+							netqmail|notqmail|sqmail|exttodo)
+							/usr/bin/time -p ./mail -q $qi -n $mcount -p $pcount -f $from \
+								-t "$to"-test 2>/tmp/time.test &
+							;;
+							*)
+							/usr/bin/time -p envdir -c $home/.defaultqueue ./mail -q $qi -n $mcount \
+								-p $pcount -f $from -t "$to"-test 2>/tmp/time.test &
+							;;
+						esac
+						break_when_complete 1
+						if [ $? -ne 0 ] ; then
+							echo "Test failed: Repeating test" 1>&2
+							break_when_complete
+							reset_logs $rl
+							queue_change clearmaildir
+							continue
+						fi
+						load=$(./loadavg)
+						wait
+						getTime
+						if [ $? -ne 0 ] ; then
+							echo "Test failed: Repeating test" 1>&2
+							clear_queue $qb
+							reset_logs $rl
+							queue_change clearmaildir
+							continue
+						fi
+						echo "mail injection complete ... $real (s)"
+					fi
+					if [ $WAIT -gt $waited ] ; then
+						do_sleep $(expr $WAIT - $waited)
+					fi
+					speed_calc $start_time $mcount $zlogs
+					zoverall $zlogs
+					case "$mta" in
+						netqmail|notqmail|sqmail|exttodo|qmta|slowq)
+						max_concurrency=$(grep "status: local" $zlogs/current|awk '{print $4}'|sort -rnu|head -1|cut -d/ -f1)
+						;;
+						*)
+						if [ $qcount -gt 1 ] ; then
+							i=1
+							m=0
+							while true # 3
+							do
+								t=$(grep "status: local" $zlogs/current|grep queue"$i"|awk '{print $4}'|sort -rnu|head -1|cut -d/ -f1)
+								echo "Max Concurrency[$i] = $t"
+								m=$(expr $m + $t)
+								i=$(expr $i + 1)
+								if [ $i -gt $qcount ] ; then
+									break
+								fi
+							done # while true # 3
+							max_concurrency=$m
+						else
+							max_concurrency=$(grep "status: local" $zlogs/current|awk '{print $4}'|sort -rnu|head -1|cut -d/ -f1)
+						fi
+						;;
+					esac
+					reset_logs $rl
+					prev_log=$(ls -t $zlogs/*.s 2>/dev/null|head -1)
+					cp $prev_log $reportdir
+					sudo /bin/rm -f $prev_log
+					printf "Injection speed = %-8.2f emails/sec (%6.2f secs)\n" $ispeed $real
+					printf "Delivery  speed = %-8.2f emails/sec (%6.2f secs)\n" $dspeed $dtime
+					echo   "Max concurrency = $max_concurrency"
+					printf "Load    average = %0.2f\n" $load
+					echo   "Logfile         = $prev_log"
+					prev_log=$(basename $prev_log)
+					(
+					case $mta in
+						netqmail|notqmail|sqmail|exttodo|qmta|slowq)
+						t=1
+						;;
+						*)
+						t=$qno
+						;;
+					esac
+					echo -n "$mta-$synctype-$split-$t,$iterCount,$mcount,$qtime,"
+					echo -n "$ddelay,$avg_ddelay,$xdelay,$avg_xdelay,$time_span,$q_conc,"
+					echo -n "$max_concurrency,$user,$sys,$del_start,$real,$dtime,$load,"
+					echo    "$prev_log"
+					) | tee -a $reportdir/zaverage.out 1>&3
+					queue_change clearmaildir
+					end_time=$(date '+%s')
+					case $SYSTEM in
+						FreeBSD)
+						date -r $end_time
+						;;
+						*)
+						date --date=@"$end_time"
+						;;
+					esac
+					t=$(expr $end_time - $start_time)
+					echo "Test took $t seconds"
+					t=$(expr $end_time - $test_start_time)
+					echo -n "Time elapsed = "
+					print_time $t
+					testno=$(expr $testno + 1)
+					iterCount=$(expr $iterCount + 1)
+					if [ $iterCount -gt $iter ] ; then
+						echo 1>&3
+						zaverage >> $reportdir/zaverage.avg
+						/bin/rm -f  $reportdir/zaverage.out
+						break
+					fi
+					echo
+				done # while true # 2 iteration
+				if [ $pure_injection -eq 0 ] ; then
+					stop_service $rl
+				fi
+				echo
+			done # for qno in QUEUES
+		done # for split in 23 151
+	done # for synctype in sync syncd fsync nosync
+done # for mta in indimail-mta ipc compat notqmail
+(
+echo -n "MTA/Method,Count,Mail Count,avg message qtime,ddelay,avg ddelay,"
+echo -n "xdelay,avg xdelay,time span,Queue concurrency,max concurrency,"
+echo    "User time,Sys time,Delivery Start, Injection Speed,Delivery Speed,Load"
+cat $reportdir/zaverage.avg
+) 1>&3
+/bin/rm -f $reportdir/zaverage.avg
+zipfile=$(basename $outfile | cut -d. -f1)
+zip -m $reportdir/$zipfile.zip $reportdir/*.s
+end_time=$(date '+%s')
+t=$(expr $end_time - $test_start_time)
+echo -n "Total time elapsed = "
+print_time $t
+reset_queue
