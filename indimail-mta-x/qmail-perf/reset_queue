@@ -1,0 +1,247 @@
+#!/bin/sh
+set -e
+
+queue_change()
+{
+	if [ $# -ne 1 ] ; then
+		echo "queue_type indimail-mta|ipc|compat|syncd|fsync|nosyncd|nofsync|clearmaildir" 1>&2
+		echo "  queue-count-number split-number nofastq chunk-trigger chunk-ipc"
+		echo "  todo-chunk-number"
+		exit 1
+	fi
+	case "$1" in
+		noauthself)
+		sudo rm -f $controldir/global_vars/AUTHSELF
+		;;
+		authself)
+		sudo sh -c "echo 1 > $controldir/global_vars/AUTHSELF"
+		;;
+		fastq)
+		getent passwd qmailq|awk -F: '{print $3}' > $home/.defaultqueue/FASTQUEUE
+		;;
+		nofastq)
+		> $home/.defaultqueue/FASTQUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		bigtodo-*)
+		bigtodo=$(echo $1|cut -d- -f2)
+		sudo sh -c "echo $bigtodo > $controldir/global_vars/BIGTODO"
+		;;
+		queue-count-*)
+		q=$(echo $1|cut -d- -f3)
+		echo $q > $home/.defaultqueue/QUEUE_COUNT
+		sudo sh -c "echo $q > $controldir/defaultqueue/QUEUE_COUNT"
+		sudo sh -c "echo $q > $controldir/defaultqueue/QUEUE_MAX"
+		;;
+		chunk-trigger)
+		sudo sh -c "echo $mcount > $controldir/global_vars/TODO_CHUNK_SIZE"
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		chunk-ipc)
+		if [ $mcount -gt 2000 ] ; then
+			sudo sh -c "echo 2000 > $controldir/global_vars/TODO_CHUNK_SIZE"
+		else
+			sudo sh -c "echo $mcount > $controldir/global_vars/TODO_CHUNK_SIZE"
+		fi
+		echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		todo-chunk-*)
+		chunk_size=$(echo $1|cut -d- -f3)
+		if [ "$chunk_size" != "trigger" -a "$chunk_size" != "ipc" ] ; then
+			if [ $chunk_size -gt 0 ] ; then
+				sudo sh -c "echo $chunk_size > $controldir/global_vars/TODO_CHUNK_SIZE"
+			else
+				sudo sh -c "> $controldir/global_vars/TODO_CHUNK_SIZE"
+			fi
+		fi
+		;;
+		indimail-mta)
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -s{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -s{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		ipc)
+		echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		compat)
+		echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		/bin/rm -f $home/.defaultqueue/QUEUEDIR
+		case "$SYSTEM" in
+			FreeBSD)
+			sudo sed -i "" 's{qscheduler -d{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -s{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			;;
+			*)
+			sudo sed -i 's{qscheduler -d{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -s{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			;;
+		esac
+		;;
+		slowq)
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		echo "$QUEUE_BASE/slowq" > $home/.defaultqueue/QUEUEDIR
+		;;
+		qmta)
+		> $home/.defaultqueue/DYNAMIC_QUEUE
+		echo "$QUEUE_BASE/qmta" > $home/.defaultqueue/QUEUEDIR
+		;;
+		fsync)
+		sudo sh -c "echo 1 > $controldir/conf-fsync"
+		sudo sh -c "echo 1 > $controldir/global_vars/USE_FSYNC"
+		;;
+		nofsync)
+		sudo sh -c "echo 0 > $controldir/conf-fsync"
+		sudo sh -c "> $controldir/global_vars/USE_FSYNC"
+		;;
+		fdatasync)
+		sudo sh -c "echo 1 > $controldir/conf-fdatasync"
+		sudo sh -c "echo 1 > $controldir/global_vars/USE_FDATASYNC"
+		;;
+		nofdatasync)
+		sudo sh -c "echo 0 > $controldir/conf-fdatasync"
+		sudo sh -c "> $controldir/global_vars/USE_FDATASYNC"
+		;;
+		syncd)
+		sudo sh -c "echo 1 > $controldir/conf-syncdir"
+		sudo sh -c "echo 1 > $controldir/global_vars/USE_SYNCDIR"
+		;;
+		nosyncd)
+		sudo sh -c "echo 0 > $controldir/conf-syncdir"
+		sudo sh -c "> $controldir/global_vars/USE_SYNCDIR"
+		;;
+		split-*)
+		split=$(echo $1|cut -d- -f2)
+		sudo sh -c "echo $split > $controldir/global_vars/CONFSPLIT"
+		;;
+		concurrency-*)
+		cr=$(echo $1|cut -d- -f2)
+		if [ $cr -gt 0 ] ; then
+			sudo sh -c "echo $cr > $controldir/concurrencylocal"
+		else
+			sudo /bin/rm -f $controldir/concurrencylocal
+		fi
+		;;
+		clearmaildir)
+		echo -n "Clearing $maildir "
+		set +e
+		t1=$(date '+%s')
+		original=$PWD
+		for i in new
+		do
+			cd $maildir/$i
+			if [ $? -eq 0 ] ; then
+				sudo find . -type f -name "*$host*" -exec /bin/rm -f {} \;
+			fi
+		done
+		t2=$(date '+%s')
+		t3=$(expr $t2 - $t1)
+		echo " $t3 (s)"
+		cd $original
+		set -e
+		;;
+		*)
+		echo "Invalid option $1" 1>&2
+		exit 1
+		;;
+	esac
+	if [ ! "$1" = "clearmaildir" ] ; then
+		restart=1
+	fi
+}
+
+reset_queue()
+{
+	/bin/rm -f $home/.defaultqueue/QUEUEDIR
+	echo $prefix/sbin/qmail-queue > $home/.defaultqueue/QMAILQUEUE
+	queue_change authself
+	queue_change nofastq
+	queue_change todo-chunk-0
+	queue_change nofsync
+	queue_change nosyncd
+	queue_change split-23
+	queue_change ipc
+	queue_change queue-count-5
+	queue_change bigtodo-0
+	queue_change concurrency-0
+	sudo svc -r $servicedir/qmail-send.25
+}
+
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	FreeBSD|Darwin)
+		prefix=/usr/local
+		controldir=/usr/local/etc/indimail/control
+		;;
+		*)
+		prefix=/usr
+		controldir=/etc/indimail/control
+		;;
+esac
+servicedir=/service
+to=$(whoami)
+home=$(getent passwd $to|awk -F: '{print $6}')
+maildir=$home/Maildir
+reset_queue
+
+for i in $servicedir/qmail-send.25 $servicedir/slowq-send $servicedir/qmta-send $servicedir/netqmail $servicedir/notqmail
+do
+	if [ ! -d $i ] ; then
+		continue
+	fi
+	echo "Restarting and clearing logs $i"
+	sudo $prefix/bin/svc -a $i/log
+	sudo $prefix/bin/svc -r $i
+done
+queue_change clearmaildir

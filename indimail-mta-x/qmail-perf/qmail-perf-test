@@ -134,6 +134,13 @@ usage
 			esac
 		fi
 	done
+	for i in mail readfifo loadavg
+	do
+		if [ ! -x $i ] ; then
+			echo "helper $i not found in current directory"
+			exit 1
+		fi
+	done
 }
 
 timeCmd()

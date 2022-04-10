@@ -1,0 +1,149 @@
+#!/bin/sh
+original=$PWD
+mcount=1000
+iterations=5
+
+getTime()
+{
+	line=$(wc -l /tmp/fs.test)
+	set $line
+	lc=$(expr $1 - 3)
+	if [ $lc -gt 0 ] ; then
+		cat /tmp/fs.test|sed -n 1,"$lc"p
+		return 1
+	fi
+	line=$(tail -n 3 /tmp/fs.test|sed -n 1p)
+	set $line
+	real=$2 # inject time
+	line=$(tail -n 3 /tmp/fs.test|sed -n 2p)
+	set $line
+	user=$2
+	line=$(tail -n 3 /tmp/fs.test|sed -n 3p)
+	set $line
+	sys=$2
+	#/bin/rm -f /tmp/fs.test
+	return 0
+}
+
+zaverage()
+{
+	grep -v "^Test" fs.csv | awk -F, '
+		BEGIN {
+			total = 0
+			ctime = 0
+			cspeed = 0
+			atime = 0
+			dtime = 0
+			method = ""
+			prev_method = ""
+		}
+		{
+			method = $1
+			if (length(method) != 0) {
+				if (length(prev_method) == 0)
+					prev_method = $1
+				if (method != prev_method) {
+					printf "%-25s, %2d, %8.4f, ",   prev_method, total, ctime/total
+					printf "%10.2f, %6.2f, %6.2f\n", cspeed/total, atime/total, dtime/total
+					prev_method = $1
+					total = 0
+					ctime = 0
+					cspeed = 0
+					atime = 0
+					dtime = 0
+				}
+				total += 1
+				method = $1
+				#itertion is $2
+				ctime += $3
+				cspeed += $4
+				atime += $5
+				dtime += $6
+			}
+		}
+		END {
+			printf "%-25s, %2d, %8.4f, ",   prev_method, total, ctime/total
+			printf "%10.2f, %6.2f, %6.2f\n", cspeed/total, atime/total, dtime/total
+		}
+	'
+	return 0
+}
+
+exec 3>fs.csv
+ID=$(id -u)
+echo "Test,Iteration,Create Time, Create Speed,Access Time, Delete Time" 1>&3
+for fs in ext4 xfs btrfs zfs
+do
+	cd /$fs
+	if [ $? -ne 0 ] ; then
+		continue
+	fi
+	sudo mkdir -p fstest
+	if [ $? -ne 0 ] ; then
+		continue
+	fi
+	sudo chown $ID fstest
+	if [ $? -ne 0 ] ; then
+		continue
+	fi
+	cd fstest
+	if [ $? -ne 0 ] ; then
+		continue
+	fi
+	/bin/rm -rf tests
+	for sync in 0 1
+	do
+		for split in 23 151
+		do
+			iter=0
+			while true
+			do
+				iter=$(expr $iter + 1)
+				if [ $sync -eq 1 ] ; then
+					t="FSYNC"
+				else
+					t="NOFSYNC"
+				fi
+				mkdir tests
+				if [ $? -ne 0 ] ; then
+					continue
+				fi
+				cd tests
+				if [ $? -ne 0 ] ; then
+					continue
+				fi
+				real_prec=$(time -p $original/sub $sync $split $mcount 2>/tmp/fs.test)
+				if [ $? -ne 0 ] ; then
+					echo "Test failed. Repeating test" 1>&2
+					sleep 1
+					continue
+				fi
+				getTime
+				if [ -n "$real_prec" ] ; then
+					cspeed=$(echo $mcount $real_prec|awk '{printf "%11.4f\n", $1 / $2}')
+				else
+					cspeed=inf
+				fi
+				cd ..
+				time -p ls -lR tests >/dev/null 2>/tmp/fs.test
+				getTime
+				access_time=$real
+				time -p /bin/rm -rf tests 2>/tmp/fs.test
+				getTime
+				delete_time=$real
+				printf "%-5s %02d %-7s %3d %5d %8.4f sec Speed %8.2f files/sec %4.2f %4.2f\n" \
+					$fs $iter $t $split $mcount $real_prec $cspeed $access_time $delete_time
+				echo "$fs-$t-$split-$mcount,$iter,$real_prec,$cspeed,$access_time,$delete_time" 1>&3
+				if [ $iter -eq $iterations ] ; then
+					break
+				fi
+			done # while true --- iter
+		done # for split in 23 151
+	done # for sync in fsync nofsync
+	cd $original
+done # for fs in ext4 btrfs xfs zfs
+(
+echo 
+echo "Test,Iteration,Create Time, Create Speed,Access Time, Delete Time" 1>&3
+zaverage
+) >> fs.csv
