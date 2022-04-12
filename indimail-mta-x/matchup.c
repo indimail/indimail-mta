@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.14  2022-04-12 08:36:36+05:30  Cprogrammer
+ * updated for new qmail-send, qmail-todo, qscheduler logs
+ *
  * Revision 1.13  2022-03-16 19:56:21+05:30  Cprogrammer
  * handle multi-queue format
  *
@@ -641,15 +644,17 @@ main()
 		else
 		if (str_equal(line.s + field[4], "conf") && str_start(line.s + field[5], "split="));
 		else
-		if (str_equal(line.s + field[3], "got") || str_equal(line.s + field[4], "got"));
+		if (str_equal(line.s + field[5], "got"));
 		else
 		if (str_equal(line.s + field[5], "has") && str_equal(line.s + field[6], "shutdown"));
 		else
-		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[8], "started"));
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[7], "started"));
 		else
-		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "static"));
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[7], "killed"));
 		else
-		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "dynamic"));
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[5], "static"));
+		else
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[5], "dynamic"));
 		else
 		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "issue"));
 		else
@@ -657,7 +662,7 @@ main()
 		else
 		if (str_equal(line.s + field[2], "qmail-todo:") && str_start(line.s + field[4], "subdir="));
 		else
-		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "exiting"))
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[5], "exiting"))
 			clear();
 		else
 		if (str_equal(line.s + field[2], "slowq-send:") && str_equal(line.s + field[4], "exiting"))
@@ -706,7 +711,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.13 2022-03-16 19:56:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.14 2022-04-12 08:36:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
