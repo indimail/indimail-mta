@@ -29,6 +29,9 @@ qmail-perf-test is a bash script to test various performance parameters for emai
 
 The qmail-perf-test script will create a csv file with the data and averaged totals in the end of the csv file. The totals can be uploaded in excel sheet to produce graphs.
 
+** NOTE **
+The qmail-perf-test scripts comes without any warranty. You can use, modify, distribute it the way you like.
+
 ## Hardware
 
 * Sony VAIO laptop from 2012
