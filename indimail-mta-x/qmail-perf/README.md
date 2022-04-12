@@ -13,19 +13,19 @@ qmail-perf-test is a bash script to test various performance parameters for emai
 * Following supervised services /service (provided by installing daemontools). You need the version from indimail-mta github repositor because the script uses `svc -r` command to restart and this feature is not present in any other version. If you have supervised services in another directory, change the value of `servicedir` in qmail-perf-test or in ~/.qmail-perf
 	* qmail-send.25 (indimail-mta), notqmail, netqmail, exttodo and sqmail. If the service is not present, the test for that particular mta will have to be skipped
 * Installation Prefix as below for the following MTAs
-	indimail-mta - /var/indimail
-	notqmail - /var/notqmail
-	netqmail - /var/netqmail
-	netqmail with external todo - /var/exttodo
-	s/qmail - /var/sqmail
+	* indimail-mta - /var/indimail
+	* notqmail - /var/notqmail
+	* netqmail - /var/netqmail
+	* netqmail with external todo - /var/exttodo
+	* s/qmail - /var/sqmail
 * daemontool logs as per the following scheme
-	indimail-mta - /var/log/svc/delivery.25
-	notqmail - /var/log/svc/netqmail
-	netqmail - /var/log/svc/netqmail
-	netqmail with external todo - /var/log/svc/exttodo
-	s/qmail - /var/log/svc/sqmail
+	* indimail-mta - /var/log/svc/delivery.25
+	* notqmail - /var/log/svc/netqmail
+	* netqmail - /var/log/svc/netqmail
+	* netqmail with external todo - /var/log/svc/exttodo
+	* s/qmail - /var/log/svc/sqmail
 * Compiled binaries in the same directory where you will run the qmail-perf-test
-	mail.c, readfifo.c, loadavg.c, sub.c
+	* mail.c, readfifo.c, loadavg.c, sub.c
 
 The qmail-perf-test script will create a csv file with the data and averaged totals in the end of the csv file. The totals can be uploaded in excel sheet to produce graphs.
 
