@@ -2,7 +2,7 @@
 
 ## Overview
 
-The script qmail-perf-test uses mail.c to inject emails. The program mail.c forks multiple parallel process to inject mail. Each email has a subject having the email number. A .qmail-test is installed which triggers a fifo /tmp/qmail-test when the last email injected by mail.c is received.  qmail-perf-test waits on this fifo using readfifo. After the trigger is pulled, It then uses waits for all emails injected to arrive. When they do, the script zoverall from qmailanalog is used to generate statistics.  All values are recorded in a csv file which is then used in google sheets to generate the graphs.			
+The script qmail-perf-test uses mail.c to inject emails. The program mail.c forks multiple parallel process to inject mail. Each email has a subject having the email number. A .qmail-test is installed in the home directory of the user. This dot-qmail has a command which triggers a fifo /tmp/qmail-test when the last email injected by mail.c is received.  qmail-perf-test waits on this fifo using readfifo. After the trigger is pulled, It then waits for all emails injected to arrive. This is done by counting the success count in the delivery log. When they do, the script zoverall from qmailanalog is used to generate statistics.  All values are recorded in a csv file which is then used in google sheets to generate the graphs.			
 
 ## Hardware
 
@@ -11,6 +11,12 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 	* CPU MHz - 1407.227
 	* CPU Cache Size - 3072 KB
 	* CPU Model - 58
+* Memory
+	* 2 x 4Gb in Slot 1 and 2
+	* Total Width: 64 bits
+	* Data Width: 64 bits
+	* Form Factor: SODIMM
+	* Error Correction Type: None
 * Hard Disk - Toshiba 2.5" HDD MQ01ABD
 	* Device Model TOSHIBA MQ01ABD050
 	* Serial Number Z2MLF2S7S
@@ -22,12 +28,12 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 	* Form Factor 2.5 inches
 	* Device is In smartctl database
 	* ATA Version is ATA8-ACS
-* Memory
-	* 8Gb DDR3
-* OS FC 35
 * Filesystem
 	* ext4 for binaries
 	* zfs for qmail queue
+* OS FC 35
+	* Name Fedora Linux
+	* VERSION (Workstation Edition)
 * Software
 	* daemontools from openSUSE [Build Service Repo](https://software.opensuse.org//download.html?project=home%3Ambhangui&package=daemontools)
 	* indimail-mta (dynamic-queue branch) from source [indimail-mta](https://github.com/mbhangui/indimail-mta)
