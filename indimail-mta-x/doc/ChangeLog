@@ -187,6 +187,9 @@ Release 2.14.1 Start 21/09/2021
 103. indimail-mta.spec.in: added glibc-static in BuildRequires for non RHEL,
      non-suse, non-sles distributions
 104. Makefile: link resolv library dynamically
+- 12/04/2022
+105. qmail-todo.c, slowq-send.c, qmta-send.c, qmail-send.c: display queuedir
+     in logs on startup
 
 * 
 Release 2.14.0 Start 18/07/2021

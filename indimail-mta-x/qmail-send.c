@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.100 2022-04-12 08:37:11+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.101 2022-04-12 08:49:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2358,7 +2358,7 @@ main(int argc, char **argv)
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log9("info: ", argv0, ": ", queuedesc, ": ratelimit=", 
+	log9("info: ", argv0, ": ", queuedir, ": ratelimit=", 
 			do_ratelimit ? "ON, loglock=" : "OFF, loglock=", 
 			loglock_fd == -1 ? "disabled, conf split=" : "enabled, conf split=",
 			strnum1, "\n");
@@ -2576,7 +2576,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.100 2022-04-12 08:37:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.101 2022-04-12 08:49:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2586,6 +2586,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.101  2022-04-12 08:49:49+05:30  Cprogrammer
+ * display queuedir in logs on startup
+ *
  * Revision 1.100  2022-04-12 08:37:11+05:30  Cprogrammer
  * added pid in logs
  *
