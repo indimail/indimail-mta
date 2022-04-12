@@ -21,7 +21,7 @@ outfile=qmail
 servicedir=/service
 logdir=/var/log/svc
 reportdir=/tmp/reports
-MTA="indimail-mta ipc compat slowq qmta netqmail notqmail sqmail exttodo chunk-trigger chunk-ipc"
+MTA="indimail-mta ipc compat slowq qmta netqmail notqmail sqmail exttodo batch-trigger batch-ipc"
 SYNCTYPES="sync fsync syncd nosync fdatasync fdatasyncd"
 QUEUES="5"
 DIRSPLITS="23 151"
@@ -34,16 +34,16 @@ PATH="$PATH:/var/netqmail/bin:/var/notqmail/bin:/var/sqmail/bin:/var/exttodo/bin
 run_checks()
 {
 cat <<EOF
-This program comes with no warranty
-There is no documentation available.
-You need to look into this script to understand
-how it works.
+This program comes with no warranty. There is no documentation available.
+You need to look into this script to understand how it works.
+
+This program uses sudo command to work. Use it at your own risk.
 
 This program works for me but it may not for you. I wrote it for myself
 to make sure that I don't add features that degrade the performance
-for indimail-mta
+of indimail-mta
 
-WARNING!!! This program requires sudo privileges.
+FINAL WARNING!!! This program requires sudo privileges.
 WARNING!!! You cannot run this program as root
 
 This scripts expects the following
@@ -64,6 +64,7 @@ This scripts expects the following
    and supervise service directory as /service/sqmail
 6. netqmail with external todo in /var/exttodo with logs in
    /var/log/svc/exttodo and supervise service directory as /service/exttodo
+7. Compiled binaries of mail.c, loadavg.c, readfifo.c
 
 
 The simplest way to run this script is to do (as non-root)
@@ -428,8 +429,8 @@ queue_change()
 {
 	if [ $# -ne 1 ] ; then
 		echo "queue_type indimail-mta|ipc|compat|syncd|fsync|nosyncd|nofsync|clearmaildir" 1>&2
-		echo "  queue-count-number split-number nofastq chunk-trigger chunk-ipc"
-		echo "  todo-chunk-number"
+		echo "  queue-count-number split-number nofastq batch-trigger batch-ipc"
+		echo "  todo-batch-number"
 		exit 1
 	fi
 	case "$1" in
@@ -466,7 +467,7 @@ queue_change()
 		sudo sh -c "echo $q > $controldir/defaultqueue/QUEUE_COUNT"
 		sudo sh -c "echo $q > $controldir/defaultqueue/QUEUE_MAX"
 		;;
-		chunk-trigger)
+		batch-trigger)
 		sudo sh -c "echo $mcount > $controldir/global_vars/TODO_CHUNK_SIZE"
 		> $home/.defaultqueue/DYNAMIC_QUEUE
 		/bin/rm -f $home/.defaultqueue/QUEUEDIR
@@ -481,7 +482,7 @@ queue_change()
 			;;
 		esac
 		;;
-		chunk-ipc)
+		batch-ipc)
 		if [ $mcount -gt 2000 ] ; then
 			sudo sh -c "echo 2000 > $controldir/global_vars/TODO_CHUNK_SIZE"
 		else
@@ -500,11 +501,11 @@ queue_change()
 			;;
 		esac
 		;;
-		todo-chunk-*)
-		chunk_size=$(echo $1|cut -d- -f3)
-		if [ "$chunk_size" != "trigger" -a "$chunk_size" != "ipc" ] ; then
-			if [ $chunk_size -gt 0 ] ; then
-				sudo sh -c "echo $chunk_size > $controldir/global_vars/TODO_CHUNK_SIZE"
+		todo-batch-*)
+		batch_size=$(echo $1|cut -d- -f3)
+		if [ "$batch_size" != "trigger" -a "$batch_size" != "ipc" ] ; then
+			if [ $batch_size -gt 0 ] ; then
+				sudo sh -c "echo $batch_size > $controldir/global_vars/TODO_CHUNK_SIZE"
 			else
 				sudo sh -c "> $controldir/global_vars/TODO_CHUNK_SIZE"
 			fi
@@ -539,7 +540,11 @@ queue_change()
 		esac
 		;;
 		compat)
-		echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		if [ $pure_injection -eq 1 ] ; then
+			/bin/rm -f > $home/.defaultqueue/DYNAMIC_QUEUE
+		else
+			echo 1 > $home/.defaultqueue/DYNAMIC_QUEUE
+		fi
 		/bin/rm -f $home/.defaultqueue/QUEUEDIR
 		case "$SYSTEM" in
 			FreeBSD)
@@ -699,7 +704,7 @@ display()
 		display_queuedir $qd
 		echo "todo batch   = OFF"
 		;;
-		chunk-trigger|chunk-ipc)
+		batch-trigger|batch-ipc)
 		echo "queue  count = $qno (tests=$qtcount)"
 		echo "queue  split = $split"
 		if [ -n "$qd" ] ; then
@@ -710,8 +715,8 @@ display()
 			display_queuedir /var/indimail/queue
 		fi
 		if [ -s $controldir/global_vars/TODO_CHUNK_SIZE ] ; then
-			chunk_size=$(cat $controldir/global_vars/TODO_CHUNK_SIZE)
-			echo "todo batch   = ON ($chunk_size)"
+			batch_size=$(cat $controldir/global_vars/TODO_CHUNK_SIZE)
+			echo "todo batch   = ON ($batch_size)"
 		else
 			echo "todo batch   = OFF"
 		fi
@@ -727,8 +732,8 @@ display()
 			display_queuedir /var/indimail/queue
 		fi
 		if [ -s $controldir/global_vars/TODO_CHUNK_SIZE ] ; then
-			chunk_size=$(cat $controldir/global_vars/TODO_CHUNK_SIZE)
-			echo "todo batch   = ON ($chunk_size)"
+			batch_size=$(cat $controldir/global_vars/TODO_CHUNK_SIZE)
+			echo "todo batch   = ON ($batch_size)"
 		else
 			echo "todo batch   = OFF"
 		fi
@@ -913,13 +918,13 @@ clear_queue()
 		do
 			cd $i
 			if [ $? -eq 0 ] ; then
-				find bounce info intd local mess remote todo -type f -exec /bin/rm -f {} \;
+				sudo find bounce info intd local mess remote todo -type f -exec /bin/rm -f {} \;
 			fi
 		done
 	else
 		cd $1
 		if [ $? -eq 0 ] ; then
-			find bounce info intd local mess remote todo -type f -exec /bin/rm -f {} \;
+			sudo find bounce info intd local mess remote todo -type f -exec /bin/rm -f {} \;
 		fi
 	fi
 	t2=$(date '+%s')
@@ -946,7 +951,9 @@ initial_setup()
 		/bin/rm -f $fifo
 		mkfifo $fifo
 	fi
-	/bin/rm -f $reportdir/zaverage.avg
+	if [ $append_mode -eq 0 ] ; then
+		/bin/rm -f $reportdir/zaverage.avg
+	fi
 
 	(
 	echo "#!/bin/sh"
@@ -971,7 +978,7 @@ initial_setup()
 	) > $home/.qmail-test
 	queue_change fastq
 	queue_change noauthself
-	queue_change todo-chunk-0
+	queue_change todo-batch-0
 	queue_change queue-count-1
 	queue_change indimail-mta
 	queue_change concurrency-500
@@ -1034,14 +1041,14 @@ initial_setup()
 	fi
 	echo "WAIT = $WAIT seconds"
 	queue_change clearmaildir
-	for mta in indimail-mta ipc compat chunk-trigger chunk-ipc qmta slowq netqmail notqmail sqmail exttodo
+	for mta in indimail-mta ipc compat batch-trigger batch-ipc qmta slowq netqmail notqmail sqmail exttodo
 	do
 		/bin/rm -f $reportdir/$mta
 	done
 	for mta in $MTA
 	do
 		case "$mta" in
-			indimail-mta|ipc|compat|chunk-trigger|chunk-ipc)
+			indimail-mta|ipc|compat|batch-trigger|batch-ipc)
 			i="qmail-send.25"
 			;;
 			qmta|slowq)
@@ -1069,7 +1076,7 @@ usage()
 	echo "OPTIONS"
 	echo "  -q=queue1,queue2,... -m=mailcount -p=processcount -i=iterations -t=to -f=from"
 	echo "  -I=initial_wait -w=max_wait -W=initial_wait+WAIT"
-	echo "  -M=queueMethod (wsp separated indimail-mta chunk-trigger chunk-ipc"
+	echo "  -M=queueMethod (wsp separated indimail-mta batch-trigger batch-ipc"
 	echo "     ipc compat slowq qmta netqmail notqmail sqmail exttodo)"
 	echo "  -S=syncType (wsp separated sync methods fsync syncd nofsync, nosyncd)"
 	echo "  -D=directorySplit (wsp separated 23 151)"
@@ -1086,7 +1093,7 @@ reset_queue()
 	echo $prefix/sbin/qmail-queue > $home/.defaultqueue/QMAILQUEUE
 	queue_change authself
 	queue_change nofastq
-	queue_change todo-chunk-0
+	queue_change todo-batch-0
 	queue_change nofsync
 	queue_change nosyncd
 	queue_change split-23
@@ -1268,7 +1275,7 @@ do
 		m4=$(expr $m4 + 1)
 		continue
 		;;
-		chunk-trigger|chunk-ipc)
+		batch-trigger|batch-ipc)
 		m5=$(expr $m5 + 1)
 		continue
 		;;
@@ -1278,19 +1285,11 @@ do
 	esac
 done
 
-if [ $append_mode -eq 0 ] ; then
-	teeOpt=""
-	exec 3>$outfile.csv
-else
-	teeOpt="-a"
-	exec 3>>$outfile.csv
-fi
-
 count1=$(expr $iter \* $m1 \* $isplit_count \* $isync_count \* $qtcount) # indimail-mta
 count2=$(expr $iter \* $m2 \* 1             \* $qsync_count \* 1       ) # netqmail|sqmail|exttodo
 count3=$(expr $iter \* $m3 \* 1             \* $qsync_count \* 1       ) # notqmail
 count4=$(expr $iter \* $m4 \* $isplit_count \* $isync_count \* 1       ) # qmta/slowq
-count5=$(expr $iter \* $m5 \* $isplit_count \* $isync_count \* $qtcount) # chunk-[trigger|ipc]
+count5=$(expr $iter \* $m5 \* $isplit_count \* $isync_count \* $qtcount) # batch-[trigger|ipc]
 test_count=$(expr $count1 + $count2 + $count3 + $count4 + $count5)
 
 echo "This script will run $test_count tests"
@@ -1299,10 +1298,18 @@ printf "%3d indimail-mta tests  --> %d (iterations) * %d (indimail-mta+ipc+compa
 printf "%3d        qmail tests  --> %d (iterations) * %d ([net|s]qmail|exttodo)     * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count2 $iter $m2            1 1                   1
 printf "%3d     notqmail tests  --> %d (iterations) * %d (notqmail)                 * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count3 $iter $m3            1 1                   1
 printf "%3d   qmta/slowq tests  --> %d (iterations) * %d (qmta|slowq)               * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count4 $iter $m4 $isync_count $isplit_count        1
-printf "%3d chunk-[trigger|ipc] --> %d (iterations) * %d (chunk[trigger|ipc])       * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count5 $iter $m5 $isync_count $isplit_count $qtcount
+printf "%3d batch-[trigger|ipc] --> %d (iterations) * %d (batch[trigger|ipc])       * %d (sync methods) %d (dir splits) * %d (queue test count)\n" $count5 $iter $m5 $isync_count $isplit_count $qtcount
 
 echo "Press ENTER to continue"
 read key
+
+if [ $append_mode -eq 0 ] ; then
+	teeOpt=""
+	exec 3>$outfile.csv
+else
+	teeOpt="-a"
+	exec 3>>$outfile.csv
+fi
 
 testno=0
 if [ -n "$WAIT" ] ; then
@@ -1439,9 +1446,7 @@ do
 				else
 					/bin/rm -f $home/.defaultqueue/QUEUEDIR
 				fi
-				if [ $pure_injection -eq 1 ] ; then
-					stop_service $rl
-				else
+				if [ $pure_injection -eq 0 ] ; then
 					if [ $restart -eq 1 ] ; then
 						echo "Restarting service $rl"
 						restart=0
@@ -1471,6 +1476,12 @@ do
 					echo "current wait = $WAIT (s)"
 					start_time=$(date '+%s')
 					if [ $pure_injection -eq 1 ] ; then
+						stop_service $rl
+						case "$mta" in
+							ipc|batch-ipc)
+							> $home/.defaultqueue/DYNAMIC_QUEUE
+							;;
+						esac
 						echo "foreground injection: cmmd=$qi n=$mcount p=$pcount from=$from to="$to"-test"
 						case "$mta" in
 							netqmail|notqmail|sqmail|exttodo)
@@ -1485,7 +1496,9 @@ do
 						getTime
 						if [ $? -ne 0 ] ; then
 							echo "Test failed: Repeating test" 1>&2
+							original=$PWD
 							clear_queue $qb
+							cd $original
 							reset_logs $rl
 							queue_change clearmaildir
 							continue
@@ -1519,7 +1532,11 @@ do
 						getTime
 						if [ $? -ne 0 ] ; then
 							echo "Test failed: Repeating test" 1>&2
+							original=$PWD
 							clear_queue $qb
+							cd $original
+							echo "Press ENTER"
+							read key
 							reset_logs $rl
 							queue_change clearmaildir
 							continue
@@ -1630,7 +1647,6 @@ echo -n "xdelay,avg xdelay,time span,Queue concurrency,max concurrency,"
 echo    "User time,Sys time,Delivery Start, Injection Speed,Delivery Speed,Load"
 cat $reportdir/zaverage.avg
 ) 1>&3
-/bin/rm -f $reportdir/zaverage.avg
 zipfile=$(basename $outfile | cut -d. -f1)
 zip -m $reportdir/$zipfile.zip $reportdir/*.s
 end_time=$(date '+%s')
