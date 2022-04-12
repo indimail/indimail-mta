@@ -64,26 +64,31 @@ batch-trigger|This IPC method in indimail-mta sends delivery instructions to qma
 
 ### Directory Split
 
-	* Directory split of 23 (this is what qmail, netqmail, notqmail, s/qmail use). This is a compile time configuration.
-	* Directory split of 151. This is what indimail-mta uses as default, but is runtime configurable by setting CONFSPLIT environment variable
+Split No|Description
+--------|-----------
+23|This is what qmail, netqmail, notqmail, s/qmail use. This is a compile time configuration in conf-split
+151|This is what indimail-mta uses as default, but is runtime configurable by setting CONFSPLIT environment variable
 
 ### Sync Methods
 
-	* fsync enabled/disabled. qmail, netqail, notqmail, s/qmail have fsync system call always enabled in qmail-queue.c, qmail-send.c, qmail-local.c. In indimail-mta, fsync can be enabled/disabled by setting USE_FSYNC environment variable
-	* syncdir enabled/disabled. indimail-mta uses a modified version of Bruce Guenter syncdir patch for qmail
-	* fdatasync instead of fsync. This can be turned on in indimail-mta by setting USE_FDATASYNC instead of USE_FSYNC environment variable.
+Sync Method|Description
+-----------|-----------
+
+fsync|qmail, netqail, notqmail, s/qmail have fsync system call always enabled in qmail-queue.c, qmail-send.c, qmail-local.c. In indimail-mta, fsync can be enabled/disabled by setting USE_FSYNC environment variable
+syncdir|indimail-mta uses a modified version of Bruce Guenter syncdir patch for qmail. This can be enabled by setting USE_SYNCDIR environment variable
+fdatasync|This can be turned on in indimail-mta by setting USE_FDATASYNC instead of USE_FSYNC environment variable.
 
 ## Observations
 
-	* qmail based MTAs that use an external todo processor demonstrate a lower qtime
-	* external todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
-	* processing todo in batches has a significant impact on qmail-send performance and delivery times by as much as 30%. But this has an impact on the delivery of the first email.
-	* Increasting directory split has negligible effect in qmail-perf test and filesystem test
-	* statically linked binaries give much better performance. With dynamic linking, indimail-mta performs the worst amongst all MTAs.
-	* When delivery rate increase inject rate decreases
-	* The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
-		* Disabling fsync, ext4 gave the best performance in the test carried out
-		* Using fsync, zfs gave the best performance in the tests carried out
+* qmail based MTAs that use an external todo processor demonstrate a lower qtime
+* external todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
+* processing todo in batches has a significant impact on qmail-send performance and delivery times by as much as 30%. But this has an impact on the delivery of the first email.
+* Increasting directory split has negligible effect in qmail-perf test and filesystem test
+* statically linked binaries give much better performance. With dynamic linking, indimail-mta performs the worst amongst all MTAs.
+* When delivery rate increase inject rate decreases
+* The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
+	* Disabling fsync, ext4 gave the best performance in the test carried out
+	* Using fsync, zfs gave the best performance in the tests carried out
 
 ## Results
 
