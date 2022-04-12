@@ -44,17 +44,17 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 
 MTA/Method|Description
 -----------|------
-	* indimail-mta|indimail-mta using traditional queue trigger method using lock/trigger with a dedicated todo processor.  This mta has a runtime configurable directory split and bigtodo
-	* ipc|indimail-mta using POSIX IPC, nameley message queues and shared memory for communication between qmail-queue, qmail-todo and qmail-send. This mta has a runtime configurable directory split and bigtodo
-	* qmta|indimail-mta having qmail-send+qmail-lspawn-qmail-rspawn+qmail-clean as a single binary. This mta doesn't have a separate todo processor. This mta has a runtime configurable directory split and bigtodo
-	* slowq|indimail-mta having qmail-send with rate control delivery. This mta doesn't have a separate todo processor. This mta has a runtime configurable directory split and bigtodo
-	* compat|indimail-mta using IPC but which can respond to both lock/trigger and POSIX IPC message queue. This mta has a separate todo processor. This mta has a runtime configurable directory split and bigtodo
-	* netqmail|Probably the second fork of qmail to the best of my knowledge. This mta doesn't have a separate todo processor and doesn't use the bigtodo directory.
-	* exttodo|This patch gives external todo processor to netqmail
-	* notqmail|Collaborative open-source successor to qmail and netqmail. This mta doesn't have a separate todo processor and doesn't use the bigtodo directory.
-	* s/qmail|Another fork of qmail. This has a separate todo processor and bigtodo directory
-	* batch-ipc|This lock/trigger method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /* XXX: could allow a bigger buffer; say 10 recipients */
-	* batch-trigger|This IPC method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /* XXX: could allow a bigger buffer; say 10 recipients */
+indimail-mta|indimail-mta using traditional queue trigger method using lock/trigger with a dedicated todo processor.  This mta has a runtime configurable directory split and bigtodo
+ipc|indimail-mta using POSIX IPC, nameley message queues and shared memory for communication between qmail-queue, qmail-todo and qmail-send. This mta has a runtime configurable directory split and bigtodo
+qmta|indimail-mta having qmail-send+qmail-lspawn-qmail-rspawn+qmail-clean as a single binary. This mta doesn't have a separate todo processor. This mta has a runtime configurable directory split and bigtodo
+slowq|indimail-mta having qmail-send with rate control delivery. This mta doesn't have a separate todo processor. This mta has a runtime configurable directory split and bigtodo
+compat|indimail-mta using IPC but which can respond to both lock/trigger and POSIX IPC message queue. This mta has a separate todo processor. This mta has a runtime configurable directory split and bigtodo
+netqmail|Probably the second fork of qmail to the best of my knowledge. This mta doesn't have a separate todo processor and doesn't use the bigtodo directory.
+exttodo|This patch gives external todo processor to netqmail
+notqmail|Collaborative open-source successor to qmail and netqmail. This mta doesn't have a separate todo processor and doesn't use the bigtodo directory.
+s/qmail|Another fork of qmail. This has a separate todo processor and bigtodo directory
+batch-ipc|This lock/trigger method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /* XXX: could allow a bigger buffer; say 10 recipients */
+batch-trigger|This IPC method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /* XXX: could allow a bigger buffer; say 10 recipients */
 
 ### Directory Split
 
