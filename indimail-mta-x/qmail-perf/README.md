@@ -20,17 +20,16 @@ qmail-perf-test is a bash script to test various performance parameters for emai
 	* s/qmail - /var/sqmail
 * daemontool logs as per the following scheme
 	* indimail-mta - /var/log/svc/delivery.25
-	* notqmail - /var/log/svc/netqmail
 	* netqmail - /var/log/svc/netqmail
 	* netqmail with external todo - /var/log/svc/exttodo
+	* notqmail - /var/log/svc/notqmail
 	* s/qmail - /var/log/svc/sqmail
 * Compiled binaries in the same directory where you will run the qmail-perf-test
 	* mail.c, readfifo.c, loadavg.c, sub.c
 
 The qmail-perf-test script will create a csv file with the data and averaged totals in the end of the csv file. The totals can be uploaded in excel sheet to produce graphs.
 
-** NOTE **
-The qmail-perf-test scripts comes without any warranty. You can use, modify, distribute it the way you like.
+**NOTE** The qmail-perf-test scripts comes without any warranty. You can use, modify, distribute it the way you like.
 
 ## Hardware
 
