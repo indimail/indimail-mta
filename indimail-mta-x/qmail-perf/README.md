@@ -41,6 +41,7 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 ## What was Tested
 
 ### MTA / Methods
+
 	* indimail-mta - indimail-mta using traditional queue trigger method using lock/trigger with a dedicated todo processor.  This mta has a runtime configurable directory split and bigtodo
 	* ipc - indimail-mta using POSIX IPC, nameley message queues and shared memory for communication between qmail-queue, qmail-todo and qmail-send. This mta has a runtime configurable directory split and bigtodo
 	* qmta - indimail-mta having qmail-send+qmail-lspawn-qmail-rspawn+qmail-clean as a single binary. This mta doesn't have a separate todo processor. This mta has a runtime configurable directory split and bigtodo
@@ -54,15 +55,18 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 	* batch-trigger - This IPC method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO\_CHUNK\_SIZE environment variable. See this comment in qmail-send.c by djb /\* XXX: could allow a bigger buffer; say 10 recipients \*/
 
 ### Directory Split
+
 	* Directory split of 23 (this is what qmail, netqmail, notqmail, s/qmail use). This is a compile time configuration.
 	* Directory split of 151. This is what indimail-mta uses as default, but is runtime configurable by setting CONFSPLIT environment variable
 
 ### Sync Methods
+
 	* fsync enabled/disabled. qmail, netqail, notqmail, s/qmail have fsync system call always enabled in qmail-queue.c, qmail-send.c, qmail-local.c. In indimail-mta, fsync can be enabled/disabled by setting USE\_FSYNC environment variable
 	* syncdir enabled/disabled. indimail-mta uses a modified version of Bruce Guenter syncdir patch for qmail
 	* fdatasync instead of fsync. This can be turned on in indimail-mta by setting USE\_FDATASYNC instead of USE\_FSYNC environment variable.
 
 ## Observations
+
 	* qmail based MTAs that use an external todo processor demonstrate a lower qtime
 	* external todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
 	* processing todo in batches has a significant impact on qmail-send performance and delivery times by as much as 30%. But this has an impact on the delivery of the first email.
