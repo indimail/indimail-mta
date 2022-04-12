@@ -11,7 +11,7 @@ qmail-perf-test is a bash script to test various performance parameters for emai
 * The following binaries in the path
 	* sudo,matchup, svc, svstat, time, cat, ls, wc, zip, tail, head, sed, rm, printf, expr, awk, tai64nunix, grep, egrep, getent, date, cut, mkdir, chmod, chown, multilog, qmail-inject, matchup, zoverall
 * Following supervised services /service (provided by installing daemontools). You need the version from indimail-mta github repositor because the script uses `svc -r` command to restart and this feature is not present in any other version. If you have supervised services in another directory, change the value of `servicedir` in qmail-perf-test or in ~/.qmail-perf
-	* qmail-send.25 (indimail-mta) notqmail netqmail exttodo sqmail. If the service is not present, the test for that particular mta will have to be skipped
+	* qmail-send.25 (indimail-mta), notqmail, netqmail, exttodo and sqmail. If the service is not present, the test for that particular mta will have to be skipped
 * Installation Prefix as below for the following MTAs
 	indimail-mta - /var/indimail
 	notqmail - /var/notqmail
