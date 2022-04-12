@@ -73,7 +73,6 @@ Split No|Description
 
 Sync Method|Description
 -----------|-----------
-
 fsync|qmail, netqail, notqmail, s/qmail have fsync system call always enabled in qmail-queue.c, qmail-send.c, qmail-local.c. In indimail-mta, fsync can be enabled/disabled by setting USE_FSYNC environment variable
 syncdir|indimail-mta uses a modified version of Bruce Guenter syncdir patch for qmail. This can be enabled by setting USE_SYNCDIR environment variable
 fdatasync|This can be turned on in indimail-mta by setting USE_FDATASYNC instead of USE_FSYNC environment variable.
