@@ -51,8 +51,8 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 	* exttodo - This patch gives external todo processor to netqmail
 	* notqmail - Collaborative open-source successor to qmail and netqmail. This mta doesn't have a separate todo processor and doesn't use the bigtodo directory.
 	* s/qmail - Another fork of qmail. This has a separate todo processor and bigtodo directory
-	* batch-ipc - This lock/trigger method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO\_CHUNK\_SIZE environment variable. See this comment in qmail-send.c by djb /\* XXX: could allow a bigger buffer; say 10 recipients \*/
-	* batch-trigger - This IPC method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO\_CHUNK\_SIZE environment variable. See this comment in qmail-send.c by djb /\* XXX: could allow a bigger buffer; say 10 recipients \*/
+	* batch-ipc - This lock/trigger method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /\* XXX: could allow a bigger buffer; say 10 recipients \*/
+	* batch-trigger - This IPC method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /* XXX: could allow a bigger buffer; say 10 recipients */
 
 ### Directory Split
 
@@ -61,9 +61,9 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 
 ### Sync Methods
 
-	* fsync enabled/disabled. qmail, netqail, notqmail, s/qmail have fsync system call always enabled in qmail-queue.c, qmail-send.c, qmail-local.c. In indimail-mta, fsync can be enabled/disabled by setting USE\_FSYNC environment variable
+	* fsync enabled/disabled. qmail, netqail, notqmail, s/qmail have fsync system call always enabled in qmail-queue.c, qmail-send.c, qmail-local.c. In indimail-mta, fsync can be enabled/disabled by setting USE_FSYNC environment variable
 	* syncdir enabled/disabled. indimail-mta uses a modified version of Bruce Guenter syncdir patch for qmail
-	* fdatasync instead of fsync. This can be turned on in indimail-mta by setting USE\_FDATASYNC instead of USE\_FSYNC environment variable.
+	* fdatasync instead of fsync. This can be turned on in indimail-mta by setting USE_FDATASYNC instead of USE_FSYNC environment variable.
 
 ## Observations
 
