@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-todo.c,v 1.61 2022-04-04 14:30:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-todo.c,v 1.62 2022-04-12 08:37:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -130,7 +130,8 @@ void
 sigterm(void)
 {
 	sig_block(sig_term);
-	log5("alert: ", argv0, ": got TERM: ", queuedesc, "\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n");
 	if (!flagstopasap)
 		log5("status: ", argv0, ": ", queuedesc, " stop processing asap\n");
 	flagstopasap = 1;
@@ -141,7 +142,8 @@ void
 sighup(void)
 {
 	flagreadasap = 1;
-	log5("alert: ", argv0, ": got HUP: ", queuedesc, "\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("alert: ", argv0, ": pid ", strnum1, " got HUP: ", queuedesc, "\n");
 }
 
 void
@@ -1479,7 +1481,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: qmail-todo.c,v 1.61 2022-04-04 14:30:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-todo.c,v 1.62 2022-04-12 08:37:19+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1487,6 +1489,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: qmail-todo.c,v $
+ * Revision 1.62  2022-04-12 08:37:19+05:30  Cprogrammer
+ * added pid in logs
+ *
  * Revision 1.61  2022-04-04 14:30:07+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.99 2022-04-04 11:15:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.100 2022-04-12 08:37:11+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -135,7 +135,7 @@ sigterm()
 {
 	flagexitasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("alert: ", argv0, ": ", strnum1, " got TERM: ", queuedesc, "\n");
+	log7("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n");
 }
 
 static void
@@ -143,7 +143,7 @@ sigalrm()
 {
 	flagrunasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("alert: ", argv0, ": ", strnum1, " got ALRM: ", queuedesc, "\n");
+	log7("alert: ", argv0, ": pid ", strnum1, " got ALRM: ", queuedesc, "\n");
 }
 
 static void
@@ -151,7 +151,7 @@ sighup()
 {
 	flagreadasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("alert: ", argv0, ": ", strnum1, " got HUP: ", queuedesc, "\n");
+	log7("alert: ", argv0, ": pid ", strnum1, " got HUP: ", queuedesc, "\n");
 }
 
 static void
@@ -2576,7 +2576,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.99 2022-04-04 11:15:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.100 2022-04-12 08:37:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2586,6 +2586,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.100  2022-04-12 08:37:11+05:30  Cprogrammer
+ * added pid in logs
+ *
  * Revision 1.99  2022-04-04 11:15:36+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *
