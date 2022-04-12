@@ -235,13 +235,15 @@ home=$(getent passwd $to|awk -F: '{print $6}')
 maildir=$home/Maildir
 reset_queue
 
-for i in $servicedir/qmail-send.25 $servicedir/slowq-send $servicedir/qmta-send $servicedir/netqmail $servicedir/notqmail
+for i in $servicedir/qmail-send.25 $servicedir/slowq-send $servicedir/qmta-send \
+	$servicedir/netqmail $servicedir/notqmail $servicedir/sqmail $servicedir/exttodo
 do
 	if [ ! -d $i ] ; then
 		continue
 	fi
-	echo "Restarting and clearing logs $i"
+	echo "Clearing logs $i/log"
 	sudo $prefix/bin/svc -a $i/log
+	echo "Restarting $i"
 	sudo $prefix/bin/svc -r $i
 done
 queue_change clearmaildir
