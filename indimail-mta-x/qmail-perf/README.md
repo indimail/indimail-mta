@@ -2,7 +2,32 @@
 
 ## Overview
 
-The script qmail-perf-test uses mail.c to inject emails. The program mail.c forks multiple parallel process to inject mail. Each email has a subject having the email number. A .qmail-test is installed in the home directory of the user. This dot-qmail has a command which triggers a fifo /tmp/qmail-test when the last email injected by mail.c is received.  qmail-perf-test waits on this fifo using readfifo. After the trigger is pulled, It then waits for all emails injected to arrive. This is done by counting the success count in the delivery log. When they do, the script zoverall from qmailanalog is used to generate statistics.  All values are recorded in a csv file which is then used in google sheets to generate the graphs.			
+The script qmail-perf-test uses mail.c to inject emails. The program mail.c forks multiple parallel process to inject mail. Each email has a subject having the email number. A .qmail-test is installed in the home directory of the user. This dot-qmail has a command which triggers a fifo /tmp/qmail-test when the last email injected by mail.c is received.  qmail-perf-test waits on this fifo using readfifo. After the trigger is pulled, It then waits for all emails injected to arrive. This is done by counting the success count in the delivery log. When they do, the script zoverall from qmailanalog is used to generate statistics.  All values are recorded in a csv file which is then used in google sheets to generate the graphs.
+
+## qmail-perf-test
+
+qmail-perf-test is a bash script to test various performance parameters for email delivery for indimail-mta. It can be used for all qmail-based MTAs. It requires the following to work
+
+* The following binaries in the path
+	* sudo,matchup, svc, svstat, time, cat, ls, wc, zip, tail, head, sed, rm, printf, expr, awk, tai64nunix, grep, egrep, getent, date, cut, mkdir, chmod, chown, multilog, qmail-inject, matchup, zoverall
+* Following supervised services /service (provided by installing daemontools). You need the version from indimail-mta github repositor because the script uses `svc -r` command to restart and this feature is not present in any other version. If you have supervised services in another directory, change the value of `servicedir` in qmail-perf-test or in ~/.qmail-perf
+	* qmail-send.25 (indimail-mta) notqmail netqmail exttodo sqmail. If the service is not present, the test for that particular mta will have to be skipped
+* Installation Prefix as below for the following MTAs
+	indimail-mta - /var/indimail
+	notqmail - /var/notqmail
+	netqmail - /var/netqmail
+	netqmail with external todo - /var/exttodo
+	s/qmail - /var/sqmail
+* daemontool logs as per the following scheme
+	indimail-mta - /var/log/svc/delivery.25
+	notqmail - /var/log/svc/netqmail
+	netqmail - /var/log/svc/netqmail
+	netqmail with external todo - /var/log/svc/exttodo
+	s/qmail - /var/log/svc/sqmail
+* Compiled binaries in the same directory where you will run the qmail-perf-test
+	mail.c, readfifo.c, loadavg.c, sub.c
+
+The qmail-perf-test script will create a csv file with the data and averaged totals in the end of the csv file. The totals can be uploaded in excel sheet to produce graphs.
 
 ## Hardware
 
@@ -36,7 +61,7 @@ The script qmail-perf-test uses mail.c to inject emails. The program mail.c fork
 	* VERSION (Workstation Edition)
 * Software
 	* daemontools from openSUSE [Build Service Repo](https://software.opensuse.org//download.html?project=home%3Ambhangui&package=daemontools)
-	* indimail-mta (dynamic-queue branch) from source [indimail-mta](https://github.com/mbhangui/indimail-mta)
+	* indimail-mta (dynamic-queue branch) from source [indimail-mta](https://github.com/mbhangui/indimail-mta). This included qmailanalog program/scripts matchup and zoverall used by the qmail-perf-test script.
 	* netqmail from source [netqmail](http://netqmail.org/)
 	* netqmail-exttodo from [netqmail source](http://netqmail.org) + [exttodo patch](https://github.com/bruceg/qmail-patches/blob/master/ext_todo-20030105.patch)
 	* notqmail from source [notqmail](https://github.com/notqmail/notqmail)
@@ -58,7 +83,7 @@ compat|indimail-mta using IPC but which can respond to both lock/trigger and POS
 netqmail|Probably the second fork of qmail to the best of my knowledge. This mta doesn't have a separate todo processor and doesn't use the bigtodo directory.
 notqmail|Collaborative open-source successor to qmail and netqmail. This mta doesn't have a separate todo processor and doesn't use the bigtodo directory.
 s/qmail|Another fork of qmail. This has a separate todo processor and bigtodo directory
-exttodo|This patch gives external todo processor to netqmail
+exttodo|This patch gives an external todo processor to netqmail
 batch-ipc|This lock/trigger method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /* XXX: could allow a bigger buffer; say 10 recipients */
 batch-trigger|This IPC method in indimail-mta sends delivery instructions to qmail-lspawn/qmail-rspawn in batches of a number defined by TODO_CHUNK_SIZE environment variable. See this comment in qmail-send.c by djb /* XXX: could allow a bigger buffer; say 10 recipients */
 
