@@ -26,6 +26,7 @@ f:::0755:/sbin/:cleanq:cleanq
 f:::0755:/sbin/:qscanq-stdin:qscanq-stdin
 f:::0755:/sbin/:qmail-qmqpc:qmail-qmqpc
 f:::0751:/sbin/:qscheduler:qscheduler
+f:::0751:/sbin/:setqload:setqload
 f:::0751:/sbin/:qmail-start:qmail-start
 f:::0751:/sbin/:slowq-start:slowq-start
 f:::0751:/sbin/:qmail-lspawn:qmail-lspawn

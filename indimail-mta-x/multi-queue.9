@@ -103,6 +103,12 @@ owned by qmails:qmail with perm 0644. The queue load is the ratio of
 current concurrency and the maximum concurrency.
 
 .PP
+The program \fBqtop\fR(8) uses the above shared memory segments to display
+the queues with top load continuously without using file IO.
+\fBqmail-qread\fR(8) is another program that uses the above shared memory to
+display the queue status.
+
+.PP
 .TP 3
 \fBmessage queue\fR /\fIqscheduler\fR
 
@@ -112,8 +118,10 @@ for concurrency to total concurrency ratio. When the average concurrency
 load reaches \fBQUEUE_LOAD\fR, \fBqscheduler\fR(8) starts a new
 \fBqmail-send\fR(8), \fBqmail-send\fR(8) instance to install a new queue.
 This is owned by root:root with perm 0600. This message queue is also used
-by \fBqsetload\fR(8) to communicate artificial load to \fBqscheduler\fR(8)
-to increase the number of queues manually at runtime.
+by \fBsetqload\fR(8) to set queue load by sending a message on
+\fIqscheduler\fR message queue to set the queue laod or to increase the
+number of queues manually at runtime. \fBsetqload\fR(8) can also be used to
+disable a queue temporarily.
 
 .PP
 .TP 3
@@ -138,6 +146,9 @@ number (qscheduler -s) or increased dynamically (qscheduler -d).
 
 .SH SEE ALSO
 qscheduler(8),
+setqload(8),
+qtop(8),
+qmail-qread(8),
 qmail-start(8),
 qmail-multi(8),
 qmail-queue(8),

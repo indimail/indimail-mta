@@ -1178,3 +1178,6 @@ haslibrt.h
 custom_error.o
 getqueue.o
 tryfts.o
+setqload.o
+setqload
+send_qload.o

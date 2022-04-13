@@ -28,7 +28,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	create_services cronlist.q ctrlenv datemail dk-filter dknewkey dktest \
 	dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt dot-forward \
 	drate etrn except fastforward forward generic.so greydaemon home \
-	home+df hostname iftocc indimail-mta.changes \
+	home+df hostname iftocc indimail-mta.changes setqload \
 	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
@@ -1800,6 +1800,18 @@ qscheduler.o: \
 compile qscheduler.c qscheduler.h control.h auto_qmail.h readsubdir.h \
 auto_split.h auto_uids.h haslibrt.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qscheduler.c
+
+setqload: \
+load setqload.o send_qload.o
+	./load setqload send_qload.o $(QMAILLIB)
+
+setqload.o: \
+compile setqload.c qscheduler.h haslibrt.h
+	./compile setqload.c
+
+send_qload.o: \
+compile haslibrt.h qscheduler.h send_qload.h
+	./compile send_qload.c
 
 multi-queue.7: \
 multi-queue.9 conf-sysconfdir conf-qmail

@@ -149,6 +149,7 @@
 %attr(0755,root,root)  @prefix@/sbin/cleanq
 
 %attr(0751,root,root)  @prefix@/sbin/qscheduler
+%attr(0751,root,root)  @prefix@/sbin/setqload
 %attr(0751,root,root)  @prefix@/sbin/qmail-start
 %attr(0751,root,root)  @prefix@/sbin/qmail-lspawn #qmta
 %attr(0751,root,root)  @prefix@/sbin/qmail-rspawn #qmta

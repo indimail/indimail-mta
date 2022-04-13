@@ -1,0 +1,19 @@
+.TH setqload 8
+.SH NAME
+setqload \- Set queue load manually to dynamically add a new queue
+
+.SH SYNOPSIS
+\fBsetqload\fR \fIqnum\fR \fIqload\fR
+
+.SH DESCRIPTION
+\fBsetqload\fR communicates with \fBqscheduler\fR for the queue \fIqnum\fR
+and instructs it to set it's load as \fIqload\fR. If the average load is
+goes beyond the limit defined by \fBQUEUE_LOAD\fR environment variabe,
+\fBqscheduler\fR will increase the number of queues, provided the current
+number of queues is below the value of \fBQUEUE_MAX\fR environment
+variable.
+
+.SH SEE ALSO
+qscheduler(8),
+multi-queue(8)
+
