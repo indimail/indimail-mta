@@ -60,12 +60,6 @@ static readsubdir todosubdir;
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
 int             conf_split;
-typedef struct
-{
-	pid_t           pid;
-	unsigned int    queue_no;
-	unsigned long   load;      /*- concurrency used percent */
-} qtab;
 static qtab    *queue_table;
 static char    *(qsargs[]) = { "qmail-start", "-s", "./Mailbox", 0};
 char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
@@ -972,9 +966,15 @@ dynamic_queue()
 				}
 			}
 		} else {
-			log_out("info: qscheduler: average load ");
+			log_out("info: qscheduler: average load within limits (load=");
 			log_out(strnum1);
-			log_out(" within limits (<= ");
+			log_out(" <= ");
+			log_out(strnum2);
+			log_out(" and qcount=");
+			strnum1[fmt_int(strnum1, qcount)] = 0;
+			strnum2[fmt_int(strnum2, qmax)] = 0;
+			log_out(strnum1);
+			log_out(" < qmax ");
 			log_out(strnum2);
 			log_outf(")\n");
 		}

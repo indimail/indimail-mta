@@ -31,4 +31,11 @@ typedef struct
 	ino_t           inum;      /*- inode number */
 } q_msg;
 
+typedef struct
+{
+	pid_t           pid;
+	unsigned int    queue_no;
+	unsigned long   load;      /*- concurrency used percent */
+} qtab;
+
 #endif
