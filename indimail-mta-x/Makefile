@@ -1802,8 +1802,8 @@ auto_split.h auto_uids.h haslibrt.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qscheduler.c
 
 setqload: \
-load setqload.o send_qload.o
-	./load setqload send_qload.o $(QMAILLIB)
+load setqload.o send_qload.o rt.lib
+	./load setqload send_qload.o $(QMAILLIB) `cat rt.lib`
 
 setqload.o: \
 compile setqload.c qscheduler.h haslibrt.h
