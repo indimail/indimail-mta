@@ -100,25 +100,25 @@ clean=""
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
-	;;
+    ;;
     *) optarg=
-	;;
+    ;;
     esac
 
     case "$1" in
     --verbose)
-	verbose=1
+    verbose=1
     ;;
-	--clean)
-	clean="--clean"
-	;;
+    --clean)
+    clean="--clean"
+    ;;
     --release=*)
-	release=$optarg
+    release=$optarg
     ;;
     *)
     echo "invalid option [$1]"
     read key
-	exit 1
+    exit 1
     ;;
     esac
 
