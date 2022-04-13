@@ -1,5 +1,8 @@
 /*
  * $Log: getqueue.c,v $
+ * Revision 1.3  2022-04-13 19:35:56+05:30  Cprogrammer
+ * added feature to disable a queue and skip disabled queues
+ *
  * Revision 1.2  2022-03-30 21:08:38+05:30  Cprogrammer
  * use arc4random() to randomly select queue
  *
@@ -28,7 +31,7 @@ int
 queueNo_from_shm(char *ident)
 {
 	int             shm, i, j, x, y, min, n = 1, qcount;
-	int             q[4];
+	int             q[5];
 	int            *queue;
 	uint32_t        random;
 	char            shm_name[FMT_ULONG + 6];
@@ -46,7 +49,7 @@ queueNo_from_shm(char *ident)
 	if (!(queue = (int *) alloc(qcount * sizeof(int))))
 		_exit(51);
 	/*- get queue with lowest concurrency load  */
-	for (j = min = n = 0; j < qcount; j++) {
+	for (j = n = 0, min = -1; j < qcount; j++) {
 		s = shm_name;
 		i = fmt_str(s, "/queue");
 		s += i;
@@ -56,7 +59,7 @@ queueNo_from_shm(char *ident)
 		i = 0;
 		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1)
 			custom_error(ident, "Z", "failed to open POSIX shared memory segment ", shm_name, "X.3.0");
-		if (read(shm, (char *) q, sizeof(int) * 4) == -1)
+		if (read(shm, (char *) q, sizeof(int) * 5) == -1)
 			custom_error(ident, "Z", "failed to read POSIX shared memory segment ", shm_name, "X.3.0");
 		close(shm);
 		/*-
@@ -64,38 +67,48 @@ queueNo_from_shm(char *ident)
 		 * q[1] - concurrencyusedremote
 		 * q[2] - concurrencylocal
 		 * q[3] - concurrencyremote
+		 * q[4] - 0 enabled, 1 disabled
+		 *        on startup, qmail-send will always set this to 0 (enabled)
+		 *        future version will use the mode of the queue base directory
+		 *        to set it to enabled/disabled state
 		 */
-		if (!q[2] || !q[3]) {
-			alloc_free((char *) queue);
-			return -1;
-		}
+		/*- skip disabled queue and queue with invalid concurrency */
+		if (q[4] || !q[2] || !q[3])
+			continue;
 		x = q[0] * 100 /q[2] > q[1] * 100 /q[3] ? q[0] * 100/q[2] : q[1] * 100/q[3];
 		queue[j] = x;
-		if (!j) {
-			min = x;
-			n = j;
+		if (min == -1) {
+			min = x; /*- minimum load */
+			n = j; /*- queue with minimum load */
 			continue;
 		}
 		if (x < min) {
-			min = x;
-			n = j;
+			min = x; /*- minimum load */
+			n = j; /*- queue with minimum load */
 		}
 	}
 	/*
 	 * at this stage n+1 is our queue
 	 * with minimum load. But there may be
-	 * other queues with the same minimum load.
-	 * use time modulus to select one of them
+	 * other queues with the same minimum load (x)
+	 * use modulus of arc4random and x to select one of them
 	 */
 	for (i = 0, x = 0; i < qcount; i++) {
 		if (queue[i] == min)
 			x++; /*- queue count with minimum loads */
 	}
-	if (x == 1) {
+	if (x == 1) { /*- only one queue with minimum load */
 		alloc_free((char *) queue);
 		return n + 1;
 	}
 	random = arc4random();
+	/*
+	 * 0 queue1      10
+	 * 1 queue2 min   5
+	 * 2 queue3 min   5
+	 * 3 queue4      20
+	 * 4 queue5      30
+	 */
 	for (i = j = 0, y = random % x; i < qcount; i++) {
 		if (queue[i] == min) {
 			if (j == y) {
@@ -105,8 +118,9 @@ queueNo_from_shm(char *ident)
 			j++;
 		}
 	}
+	/*- never reached but make compiler happy */
 	alloc_free((char *) queue);
-	return n;
+	return n + 1;
 }
 #endif
 
@@ -133,7 +147,7 @@ queueNo_from_env()
 void
 getversion_getqueue_c()
 {
-	static char    *x = "$Id: getqueue.c,v 1.2 2022-03-30 21:08:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getqueue.c,v 1.3 2022-04-13 19:35:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

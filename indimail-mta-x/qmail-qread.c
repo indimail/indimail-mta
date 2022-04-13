@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.42 2022-04-13 16:59:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.43 2022-04-13 19:36:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -175,7 +175,7 @@ void
 read_shm(int flag)
 {
 	int             shm, i, j, x, min = -1, n = 1, qcount, len;
-	int             q[4];
+	int             q[5];
 	char            shm_name[256], strnum[FMT_ULONG];
 	char           *s;
 
@@ -212,7 +212,7 @@ read_shm(int flag)
 		*s++ = 0;
 		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1)
 			strerr_die4sys(111, FATAL, "failed to open POSIX shared memory segment ", shm_name, ": ");
-		if (read(shm, (char *) q, sizeof(int) * 4) == -1)
+		if (read(shm, (char *) q, sizeof(int) * 5) == -1)
 			strerr_die4sys(111, FATAL, "failed to read POSIX shared memory segment ", shm_name, ": ");
 		close(shm);
 		substdio_put(subfdout, shm_name + 1, len - 1);
@@ -228,12 +228,13 @@ read_shm(int flag)
 		substdio_put(subfdout, "/", 1);
 		strnum[i = fmt_ulong(strnum, q[3])] = 0;
 		substdio_put(subfdout, strnum, i);
-		substdio_put(subfdout, "\n", 1);
+		substdio_put(subfdout, q[4] ? "disabled\n" : " enabled\n", 9);
 		/*-
 		 * q[0] - concurrencyusedlocal
 		 * q[1] - concurrencyusedremote
 		 * q[2] - concurrencylocal
 		 * q[3] - concurrencyremote
+		 * q[4] - disabled/enabled
 		 */
 		if (!q[2] || !q[3]) {
 			substdio_put(subfderr, "invalid concurrency\n", 20);
@@ -598,7 +599,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.42 2022-04-13 16:59:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.43 2022-04-13 19:36:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -606,6 +607,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.43  2022-04-13 19:36:40+05:30  Cprogrammer
+ * added feature to disable a queue and skip disabled queues
+ *
  * Revision 1.42  2022-04-13 16:59:25+05:30  Cprogrammer
  * display queues configured
  *

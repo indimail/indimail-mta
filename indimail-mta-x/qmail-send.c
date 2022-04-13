@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.101 2022-04-12 08:49:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.102 2022-04-13 19:36:45+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2298,7 +2298,7 @@ run_plugin()
 void
 shm_init(char *shm_name)
 {
-	int             q[4];
+	int             q[5];
 
 	/*- open shm /queueN for storing concurrency values */
 #ifdef FREEBSD
@@ -2310,16 +2310,27 @@ shm_init(char *shm_name)
 		log9("alert: ", argv0, ": ", queuedesc, ": failed to open POSIX shared memory ", shm_name, ": ", error_str(errno), "\n");
 		_exit(111);
 	}
+	/*-
+	 * q[0] - concurrencyusedlocal
+	 * q[1] - concurrencyusedremote
+	 * q[2] - concurrencylocal
+	 * q[3] - concurrencyremote
+	 * q[4] - 0 enabled, 1 disabled
+	 *        on startup, qmail-send will always set this to 0 (enabled)
+	 *        future version will use the mode of the queue base directory
+	 *        to set it to enabled/disabled state
+	 */
 	q[0] = q[1] = 0;
-	q[2] = concurrency[0]; /*- local  concurrency */
-	q[3] = concurrency[1]; /*- remote concurrency */
+	q[2] = concurrency[0];
+	q[3] = concurrency[1];
+	q[4] = 0;
 #ifdef FREEBSD /*- another FreeBSD idiosyncrasies */
 	if (ftruncate(shm_queue, getpagesize()) < 0) {
 		log7("alert: ", argv0, ": ", queuedesc, ": unable to truncate shared memory: ", error_str(errno), "\n");
 		_exit(111);
 	}
 #endif
-	if (write(shm_queue, (char *) q, 4 * sizeof(int)) == -1) {
+	if (write(shm_queue, (char *) q, 5 * sizeof(int)) == -1) {
 		log7("alert: ", argv0, ": ", queuedesc, ": unable to write to shared memory: ", error_str(errno), "\n");
 		_exit(111);
 	}
@@ -2576,7 +2587,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.101 2022-04-12 08:49:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.102 2022-04-13 19:36:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2586,6 +2597,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.102  2022-04-13 19:36:45+05:30  Cprogrammer
+ * added feature to disable a queue and skip disabled queues.
+ *
  * Revision 1.101  2022-04-12 08:49:49+05:30  Cprogrammer
  * display queuedir in logs on startup
  *
