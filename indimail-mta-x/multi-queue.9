@@ -74,18 +74,21 @@ This segment is used to store two integers
 .LP
 .nr step 1 1
 .IP \n[step] 2
-\fBqueue count\fR - number of queues in use by \fBqscheduler\fR(8). This
-value will be the value of \fBQUEUE_COUNT\fR environment variable on
-\fBqscheduler\fR(8) startup. This is a dynamic number that is incremented
-when the total concurrency load goes beyond a threshold (defined by
-\fBQUEUE_LOAD\fR environment variable). \fBqscheduler\fR(8) will increase
-the queue count upto a maximum defined by the \fBQUEUE_MAX\fR environment
-variable.
+\fBqueue count\fR - \fIqcount\fR number of queues in use by
+\fBqscheduler\fR(8). This value will be the value of \fBQUEUE_COUNT\fR
+environment variable on \fBqscheduler\fR(8) startup. This is a dynamic
+number that is incremented when the total concurrency load goes beyond a
+threshold (defined by \fBQUEUE_LOAD\fR environment variable).
+\fBqscheduler\fR(8) will increase the queue count upto a maximum defined by
+the \fBQUEUE_MAX\fR environment variable. \fBqmail-multi\fR(8),
+\fBqmail-queue\fR(8) cycles through \fIqcount\fR queues to find the queue
+with the least concurrency and uses that queue to queue the message.
 
 .IP \n+[step]
-\fBqueue configured\fR - number of existing queues in QMAILHOME directory.
-This number is incremented by qscheduler when it creates a new queue. This
-number cannot go beyond the value of \fBQUEUE_MAX\fR environment variable.
+\fBqueue configured\fR - \fIqconf\fR number of existing queues in QMAILHOME
+directory. This number is incremented by qscheduler when it creates a new
+queue. This number cannot go beyond the value of \fBQUEUE_MAX\fR
+environment variable.
 .LP
 .RE
 
@@ -108,13 +111,9 @@ communicate back, when its queue reaches, the maximum threshold percentage
 for concurrency to total concurrency ratio. When the average concurrency
 load reaches \fBQUEUE_LOAD\fR, \fBqscheduler\fR(8) starts a new
 \fBqmail-send\fR(8), \fBqmail-send\fR(8) instance to install a new queue.
-This is owned by root:root with perm 0600.
-
-.PP
-The value stored in the first segment is the \fBqueue count\R \fIqcount\fR.
-\fBqmail-multi\fR(8) cycles through \fIqcount\fR queues to find the queue
-with the least concurrency. It then sets the environment variable
-\fBQUEUEDIR\fR to this queue before calling \fBqmail-queue\fR(8).
+This is owned by root:root with perm 0600. This message queue is also used
+by \fBqsetload\fR(8) to communicate artificial load to \fBqscheduler\fR(8)
+to increase the number of queues manually at runtime.
 
 .PP
 .TP 3
@@ -128,13 +127,14 @@ This message queue is used by \fBqmail-queue\fR(8) to communicate to
 \fBqmail-todo\fR(8) the split dir and the inode number of the message in
 the outgoing queue. This is more efficient than the trigger method that
 qmail-queue uses, where the trigger wakes up \fBqmail-send\fR(8) to scan
-the \fItodo\fR directory. Scanning the \fItodo\R using \fBopendir\fR(3),
+the \fItodo\fR directory. Scanning \fItodo\fR using \fBopendir\fR(3),
 \fBreaddir\fR(2), also introduces what is known as the Silly Qmail
-Syndrome, where a single instance of \fBqmail-send\fR(8) cannot keep up
-with the injection rate from multiple qmail-queue clients. The solution to
-this problem is to have multiple instances of qmail-send.  These instances
-of qmail-send can be a fixed number (qscheduler -s) or increased
-dynamically (qscheduler -d).
+Syndrome (\fBSQS\fR), where a single instance of \fBqmail-send\fR(8) cannot
+keep up with the injection rate from multiple qmail-queue clients. The
+solution to this problem is to have a seperate process to process
+\fItodo\fR directory. Having multiple instances of qmail-send can also
+help avoiding \fBSQS\fR. These instances of qmail-send can be a fixed
+number (qscheduler -s) or increased dynamically (qscheduler -d).
 
 .SH SEE ALSO
 qscheduler(8),
