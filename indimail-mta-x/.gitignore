@@ -676,3 +676,5 @@ tryfts.o
 setqload.o
 setqload
 send_qload.o
+qtop
+qtop.o
