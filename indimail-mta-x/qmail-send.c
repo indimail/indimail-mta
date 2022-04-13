@@ -2311,8 +2311,8 @@ shm_init(char *shm_name)
 		_exit(111);
 	}
 	q[0] = q[1] = 0;
-	q[2] = concurrency[0];
-	q[3] = concurrency[1];
+	q[2] = concurrency[0]; /*- local  concurrency */
+	q[3] = concurrency[1]; /*- remote concurrency */
 #ifdef FREEBSD /*- another FreeBSD idiosyncrasies */
 	if (ftruncate(shm_queue, getpagesize()) < 0) {
 		log7("alert: ", argv0, ": ", queuedesc, ": unable to truncate shared memory: ", error_str(errno), "\n");
