@@ -194,6 +194,11 @@ Release 2.14.1 Start 21/09/2021
 106. do_rate.c: return 2 if rate definition is missing or is invalid
 107. delivery_rate.c: set do_ratelimit only if rate definition existss
 108. slowq-send.c: set delayed flag = 0 for new jobs
+109. process_queue.c: flush subfdout to fix out of band err messages
+110. qmail-qread.c: display queues configured
+111. getqueue.c, qmail-send.c, qmail-qread.c: added feature to disable a queue
+     and skip disabled queues
+112. matchup.c: skip qscheduler load messages in logs
 
 * 
 Release 2.14.0 Start 18/07/2021
