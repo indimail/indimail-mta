@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.41 2022-04-13 08:29:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.42 2022-04-13 16:59:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -191,11 +191,14 @@ read_shm(int flag)
 		}
 		strerr_die2x(111, FATAL, "unable to open POSIX shared memory segment /qscheduler");
 	}
-	if (read(shm, (char *) q, sizeof(int)) == -1)
+	if (read(shm, (char *) q, sizeof(int) * 2) == -1)
 		strerr_die2x(111, FATAL, "unable to read POSIX shared memory segment /qscheduler");
 	close(shm);
-	substdio_put(subfdout, "queue count=", 12);
+	substdio_put(subfdout, "queue count = ", 14);
 	strnum[i = fmt_ulong(strnum, q[0])] = 0;
+	substdio_put(subfdout, strnum, i);
+	substdio_put(subfdout, ", queue configured = ", 21);
+	strnum[i = fmt_ulong(strnum, q[1])] = 0;
 	substdio_put(subfdout, strnum, i);
 	substdio_put(subfdout, "\n", 1);
 	/*- get queue with lowest concurrency load  */
@@ -595,7 +598,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-04-13 08:29:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.42 2022-04-13 16:59:25+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -603,6 +606,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.42  2022-04-13 16:59:25+05:30  Cprogrammer
+ * display queues configured
+ *
  * Revision 1.41  2022-04-13 08:29:19+05:30  Cprogrammer
  * added -i option to display dynamic queue information
  *
