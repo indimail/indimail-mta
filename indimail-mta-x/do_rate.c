@@ -1,5 +1,8 @@
 /*
  * $Log: do_rate.c,v $
+ * Revision 1.3  2022-04-13 07:48:09+05:30  Cprogrammer
+ * return 2 if rate definition is missing or is invalid
+ *
  * Revision 1.2  2021-06-05 12:44:50+05:30  Cprogrammer
  * return time_needed in seconds to reach configured rate
  *
@@ -62,6 +65,12 @@ get_rate(char *expression, double *rate)
 	return (0);
 }
 
+/*-
+ * returns
+ * 0 if delivery rate is exceeded
+ * 1 if delivery rate is fine
+ * 2 if no rate control definition exists
+ */
 int
 is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
 		double *r, datetime_sec *time_needed)
@@ -172,15 +181,17 @@ is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
 		close(rfd);
 	}
 	/*-
-	 * line_no   < 1        - no point in messing with invalid data
-	 * conf_rate < 0        - update the email count, timestamps
-	 * conf_rate = 0        - defer emails
-	 * cur_rate > conf_rate - defer emails
+	 * line_no   <  1         - no point in messing. We either have invalid data
+	 *                          or missing rate control definition
+	 * conf_rate <  0         - update the email count, timestamps
+	 * conf_rate >= 0 and
+	 * cur_rate  > conf_rate - defer emails
 	 */
 	if (line_no < 1 || (force == 0 && conf_rate >= 0 && cur_rate > conf_rate)) {
 		close(wfd);
-		return (line_no < 1 ? 1 : 0);
+		return (line_no < 1 ? 2 : 0);
 	}
+	/*- update rate control definition */
 	ecount[fmt_ulong(ecount, ++email_count)] = 0;
 	if (e)
 		*e = email_count;
@@ -210,7 +221,7 @@ is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
 void
 getversion_do_rate_c()
 {
-	static char    *x = "$Id: do_rate.c,v 1.2 2021-06-05 12:44:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: do_rate.c,v 1.3 2022-04-13 07:48:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;

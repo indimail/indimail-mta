@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.23  2022-04-13 08:01:13+05:30  Cprogrammer
+ * set delayed flag to 0 for new jobs
+ *
  * Revision 1.22  2022-04-04 14:33:47+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *
@@ -626,6 +629,10 @@ pqadd(unsigned long id, char delayedflag)
 			if (!recent)
 				recent = now();
 			pechan[c].dt = delayedflag ? recent : st.st_mtime;
+			/*-
+			 * if rate limiting, add already existing IDs
+			 * to priority queue with delayed flag
+			 */
 			pechan[c].delayed = delayedflag;
 		}
 	}
@@ -640,8 +647,9 @@ pqadd(unsigned long id, char delayedflag)
 			break;
 	}
 	if (c == CHANNELS) {
-		pe.id = id;
+		pe.id = id; /*- new addition to priority queue */
 		pe.dt = now();
+		pe.delayed = 0;
 		while (!prioq_insert(min, &pqdone, &pe))
 			nomem(argv0);
 	}
@@ -1686,8 +1694,13 @@ pass_dochan(int c)
 	switch (line.s[0])
 	{
 	case 'T': /*- send message to qmail-lspawn/qmail-rspawn to start delivery */
-		delivery = c ? remote_delivery : local_delivery;
+		delivery = (c == 0) ?  local_delivery : remote_delivery;
+		/*-
+		 * if the domain has delivery rate control, delivery_rate()
+		 * will set _do_ratelimit
+		 */
 		if (!(i = delivery_rate(line.s + 1, pe.id, &t, &_do_ratelimit, argv0))) {
+			/* we are rate controlled */
 			if (t && (t < time_needed || !time_needed))
 				time_needed = t + SLEEP_FUZZ; /*- earliest delayed job */
 			else
@@ -1703,7 +1716,7 @@ pass_dochan(int c)
 		if (i == -1)
 			log7("warning: ", argv0, ": ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n");
 		else
-		if (_do_ratelimit && delayed_jobs)
+		if (_do_ratelimit) /*- for del_status to display delayed jobs */
 			delayed_jobs = delayed_job_count();
 		++jo[pass[c].j].numtodo;
 		del_start(pass[c].j, pass[c].mpos, line.s + 1); /*- line.s[1] = recipient */
@@ -2631,7 +2644,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.22 2022-04-04 14:33:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.23 2022-04-13 08:01:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

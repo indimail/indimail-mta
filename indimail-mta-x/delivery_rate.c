@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.8  2022-04-13 07:59:46+05:30  Cprogrammer
+ * set delivery_rate only if rate control definition exists
+ *
  * Revision 1.7  2022-01-30 08:30:55+05:30  Cprogrammer
  * added additional argument in nomem()
  *
@@ -40,6 +43,14 @@ static stralloc ratedefs = { 0 };
 static stralloc ratelimit_file = { 0 };
 extern char    *queuedesc;
 
+/*-
+ * returns
+ *  0 - delivery rate should be throttled
+ *  1 - delivery rate is fine
+ * -1 - failed to get delivery rate
+ * Additionally
+ * set do_ratelimit if rate definition exists
+ */
 int
 delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 		int *do_ratelimit, char *argv0)
@@ -89,7 +100,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				*do_ratelimit = 1;
 			return 0;
 		} else {
-			if (i == 1) {
+			if (i == 1 || i == 2) {
 				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 				email[fmt_ulong(email, email_count)] = 0;
@@ -130,7 +141,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				*do_ratelimit = 1;
 			return 0;
 		} else {
-			if (i == 1) {
+			if (i == 1 || i == 2) {
 				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 				email[fmt_ulong(email, email_count)] = 0;
@@ -168,7 +179,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				*do_ratelimit = 1;
 			return 0;
 		} else {
-			if (i == 1) {
+			if (i == 1 || i == 2) {
 				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 				email[fmt_ulong(email, email_count)] = 0;
@@ -193,7 +204,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.7 2022-01-30 08:30:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.8 2022-04-13 07:59:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;
