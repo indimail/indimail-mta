@@ -8,3 +8,5 @@
 # is configured
 # QUEUE_MAX defines the maximum queues that qscheduler can use for
 # deliveries when dynamic queues is configured
+# QUEUE_LOAD is the ratio of concurrencyused to concurrency configured
+# when reached, qscheduler should increase the queue count
