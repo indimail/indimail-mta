@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.42 2022-03-27 20:12:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.41 2022-04-13 08:29:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -159,13 +159,13 @@ putstats()
 void
 usage()
 {
-	substdio_puts(subfdout, "qmail-read [-calrt]\n\t");
-	substdio_puts(subfdout, "-a - Display local, remote and todo Queues\n\t");
-	substdio_puts(subfdout, "-c - Display Counts\n\t");
-	substdio_puts(subfdout, "-l - Display local  Queue\n\t");
-	substdio_puts(subfdout, "-r - Display remote Queue\n");
+	substdio_puts(subfdout, "qmail-read [-calrt]\n");
+	substdio_puts(subfdout, "\t-a - Display local, remote and todo Queues\n");
+	substdio_puts(subfdout, "\t-c - Display Counts\n");
+	substdio_puts(subfdout, "\t-l - Display local  Queue\n");
+	substdio_puts(subfdout, "\t-r - Display remote Queue\n");
 #ifdef HASLIBRT
-	substdio_puts(subfdout, "-i - Display queue counts, concurrencies and loads\n");
+	substdio_puts(subfdout, "\t-i - Display queue counts, concurrencies and loads\n");
 #endif
 	substdio_flush(subfdout);
 }
@@ -595,7 +595,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.42 2022-03-27 20:12:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-04-13 08:29:19+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -603,16 +603,7 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
- * Revision 1.42  2022-03-27 20:12:02+05:30  Cprogrammer
- * updated USAGE string
- *
- * Revision 1.41  2022-03-26 08:24:41+05:30  Cprogrammer
- * added -i option to display dynamic queue information
- *
- * Revision 1.41  2022-03-12 15:30:31+05:30  Cprogrammer
- * added -i option to display dynamic queue information
- *
- * Revision 1.41  2022-03-12 15:19:41+05:30  Cprogrammer
+ * Revision 1.41  2022-04-13 08:29:19+05:30  Cprogrammer
  * added -i option to display dynamic queue information
  *
  * Revision 1.40  2022-01-30 08:42:40+05:30  Cprogrammer
