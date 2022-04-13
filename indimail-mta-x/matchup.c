@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.15  2022-04-13 19:37:58+05:30  Cprogrammer
+ * skip qscheduler load information in logs
+ *
  * Revision 1.14  2022-04-12 08:36:36+05:30  Cprogrammer
  * updated for new qmail-send, qmail-todo, qscheduler logs
  *
@@ -658,6 +661,8 @@ main()
 		else
 		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "issue"));
 		else
+		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "average"));
+		else
 		if (str_equal(line.s + field[2], "qmail-todo:") && str_equal(line.s + field[4], "Resetting"));
 		else
 		if (str_equal(line.s + field[2], "qmail-todo:") && str_start(line.s + field[4], "subdir="));
@@ -711,7 +716,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.14 2022-04-12 08:36:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.15 2022-04-13 19:37:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
