@@ -1,6 +1,6 @@
 /*
  * $Log: getqueue.c,v $
- * Revision 1.3  2022-04-13 19:35:56+05:30  Cprogrammer
+ * Revision 1.3  2022-04-13 21:10:23+05:30  Cprogrammer
  * added feature to disable a queue and skip disabled queues
  *
  * Revision 1.2  2022-03-30 21:08:38+05:30  Cprogrammer
@@ -30,9 +30,10 @@
 int
 queueNo_from_shm(char *ident)
 {
-	int             shm, i, j, x, y, min, n = 1, qcount;
+	int             shm, i, j, y, z, n = 1, qcount;
+	double          min, x;
 	int             q[5];
-	int            *queue;
+	double         *queue;
 	uint32_t        random;
 	char            shm_name[FMT_ULONG + 6];
 	char           *s;
@@ -46,7 +47,7 @@ queueNo_from_shm(char *ident)
 	if (read(shm, (char *) &qcount, sizeof(int)) == -1)
 		custom_error(ident, "Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
 	close(shm);
-	if (!(queue = (int *) alloc(qcount * sizeof(int))))
+	if (!(queue = (double *) alloc(qcount * sizeof(int))))
 		_exit(51);
 	/*- get queue with lowest concurrency load  */
 	for (j = n = 0, min = -1; j < qcount; j++) {
@@ -75,9 +76,9 @@ queueNo_from_shm(char *ident)
 		/*- skip disabled queue and queue with invalid concurrency */
 		if (q[4] || !q[2] || !q[3])
 			continue;
-		x = q[0] * 100 /q[2] > q[1] * 100 /q[3] ? q[0] * 100/q[2] : q[1] * 100/q[3];
+		x = (double) q[0]/q[2] > (double) q[1]/q[3] ? (double) q[0]/q[2] : (double) q[1]/q[3];
 		queue[j] = x;
-		if (min == -1) {
+		if (min == -1.0) {
 			min = x; /*- minimum load */
 			n = j; /*- queue with minimum load */
 			continue;
@@ -93,23 +94,16 @@ queueNo_from_shm(char *ident)
 	 * other queues with the same minimum load (x)
 	 * use modulus of arc4random and x to select one of them
 	 */
-	for (i = 0, x = 0; i < qcount; i++) {
+	for (i = 0, z = 0; i < qcount; i++) {
 		if (queue[i] == min)
-			x++; /*- queue count with minimum loads */
+			z++; /*- queue count with minimum loads */
 	}
-	if (x == 1) { /*- only one queue with minimum load */
+	if (z == 1) { /*- only one queue with minimum load */
 		alloc_free((char *) queue);
 		return n + 1;
 	}
 	random = arc4random();
-	/*
-	 * 0 queue1      10
-	 * 1 queue2 min   5
-	 * 2 queue3 min   5
-	 * 3 queue4      20
-	 * 4 queue5      30
-	 */
-	for (i = j = 0, y = random % x; i < qcount; i++) {
+	for (i = j = 0, y = random % z; i < qcount; i++) {
 		if (queue[i] == min) {
 			if (j == y) {
 				alloc_free((char *) queue);
@@ -147,7 +141,7 @@ queueNo_from_env()
 void
 getversion_getqueue_c()
 {
-	static char    *x = "$Id: getqueue.c,v 1.3 2022-04-13 19:35:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getqueue.c,v 1.3 2022-04-13 21:10:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
