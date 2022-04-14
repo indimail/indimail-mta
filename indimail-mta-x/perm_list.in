@@ -90,6 +90,7 @@
 %attr(0755,root,root)  @prefix@/bin/qmail-inject #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/qmail-qfilter
 %attr(0755,root,root)  @prefix@/bin/qmail-qread
+%attr(0755,root,root)  @prefix@/bin/qtop
 %attr(0755,root,root)  @prefix@/bin/qmail-rm
 %attr(0755,root,root)  @prefix@/bin/qmail-showctl #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/qnotify

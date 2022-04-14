@@ -36,7 +36,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	nowutc ofmipd ofmipname parsedate plugtest predate preline \
 	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
 	qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat qmail-cdb \
-	qmail-clean qmailconfig qmail-daned qmail-direct \
+	qmail-clean qmailconfig qmail-daned qmail-direct qtop \
 	qmaildirmake qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
 	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newmrh \
 	qmail-newu qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u \
@@ -3854,7 +3854,6 @@ create_services: create_services.in \
 conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared conf-servicedir
 	$(edit) $@.in > $@; chmod 755 $@
-	chmod +x $@
 
 qlocal_upgrade: \
 warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
@@ -3867,6 +3866,12 @@ warn-auto.sh qupgrade.in conf-prefix conf-libexec \
 conf-sysconfdir conf-servicedir
 	cat warn-auto.sh qupgrade.in \
 	| $(edit) > $@
+
+qtop: \
+warn-auto.sh qtop.in
+	cat warn-auto.sh $@.in | $(edit) > $@
+	chmod 755 $@
+
 
 qmta-send.service: qmta-send.service.in warn-auto.sh
 	(sed -n '2,$$p' warn-auto.sh;cat $@.in) | $(edit) > $@

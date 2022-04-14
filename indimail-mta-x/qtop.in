@@ -1,0 +1,42 @@
+#
+# $Log: qtop.in,v $
+# Revision 1.1  2022-04-14 13:52:41+05:30  Cprogrammer
+# Initial revision
+#
+#
+usage ()
+{
+	echo "Wrong Usage"
+	echo "$0 [options]"
+	echo "-t    display interval"
+	echo "-q	queue count"
+}
+interval=5
+qcount=5
+command="tail -F @logdir@/deliver.25/current"
+while getopts i:q: opt
+do
+	case $opt in
+		c)
+		command=$OPTARG
+		;;
+		i)
+		interval=$OPTARG
+		;;
+		q)
+		qcount=$OPTARG
+		;;
+		?)
+		usage $0
+		exit 1
+		;;
+	esac
+done
+width=$(tput cols)
+height=$(tput lines)
+qread_lines=$(expr $qcount + 4)
+percent=$(echo $qread_lines $height|awk '{printf "%.0f\n", 100 - 100 * $1/$2}')
+exec tmux new-session -s qmail-qread -d -x $width -y $height \
+	'while true; do clear; sudo @prefix@/bin/qmail-qread -i; sleep 5; done' \; \
+	split-window -p $percent -f -v "$command" \; \
+	attach -t qmail-qread
