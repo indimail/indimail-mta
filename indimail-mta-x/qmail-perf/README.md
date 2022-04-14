@@ -1,5 +1,7 @@
 # Performance Graphs for indimail-mta
 
+[Results](https://docs.google.com/spreadsheets/d/1Dfr1c1RXh18Lc47fmGymTRV5nL9DRviS9Gy8kqH5iZM/edit?usp=sharing)
+
 ## Overview
 
 The script qmail-perf-test uses mail.c to inject emails. The program mail.c forks multiple parallel process to inject mail. Each email has a subject having the email number. A .qmail-test is installed in the home directory of the user. This dot-qmail has a command which triggers a fifo /tmp/qmail-test when the last email injected by mail.c is received.  qmail-perf-test waits on this fifo using readfifo. After the trigger is pulled, It then waits for all emails injected to arrive. This is done by counting the success count in the delivery log. When they do, the script zoverall from qmailanalog is used to generate statistics.  All values are recorded in a csv file which is then used in google sheets to generate the graphs.
