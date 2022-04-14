@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.44 2022-04-14 19:53:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.45 2022-04-14 20:19:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -184,7 +184,7 @@ usage()
 void
 read_shm(int flag)
 {
-	int             shm, i, j, qcount, qconf, len, x, min = -1;
+	int             shm, i, j, qcount, qconf, len, x, min = -1, lcur = 0, rcur = 0;
 	double          load;
 	int             q[5];
 	qdef           *queue;
@@ -239,8 +239,10 @@ read_shm(int flag)
 			continue;
 		}
 		queue[j].lcur = q[0];
+		lcur += q[0];
 		queue[j].lmax = q[2];
 		queue[j].rcur = q[1];
+		rcur += q[1];
 		queue[j].rmax = q[3];
 		queue[j].flag = q[4];
 		x = q[0] + q[1];
@@ -283,9 +285,19 @@ read_shm(int flag)
 	substdio_put(subfdout, "queue count = ", 14);
 	strnum[i = fmt_ulong(strnum, qcount)] = 0;
 	substdio_put(subfdout, strnum, i);
+
 	substdio_put(subfdout, ", queue configured = ", 21);
 	strnum[i = fmt_ulong(strnum, qconf)] = 0;
 	substdio_put(subfdout, strnum, i);
+
+	substdio_put(subfdout, ", Total local = ", 16);
+	strnum[i = fmt_ulong(strnum, lcur)] = 0;
+	substdio_put(subfdout, strnum, i);
+
+	substdio_put(subfdout, ", Total remote = ", 17);
+	strnum[i = fmt_ulong(strnum, rcur)] = 0;
+	substdio_put(subfdout, strnum, i);
+
 	substdio_put(subfdout, ", Total queue load = ", 19);
 	strnum[i = fmt_double(strnum, 100 * load, 4)] = 0;
 	substdio_put(subfdout, strnum, i);
@@ -630,7 +642,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.44 2022-04-14 19:53:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.45 2022-04-14 20:19:52+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -638,6 +650,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.45  2022-04-14 20:19:52+05:30  Cprogrammer
+ * added total local, remote concurrency
+ *
  * Revision 1.44  2022-04-14 19:53:47+05:30  Cprogrammer
  * added header for queue load display
  *
