@@ -393,6 +393,7 @@
 %attr(0644,root,root) @mandir@/man1/qmail-rm.1.gz
 %attr(0644,root,root) @mandir@/man1/qnotify.1.gz
 %attr(0644,root,root) @mandir@/man1/qreceipt.1.gz
+%attr(0644,root,root) @mandir@/man1/qtop.1.gz
 %attr(0644,root,root) @mandir@/man1/replier.1.gz
 %attr(0644,root,root) @mandir@/man1/replier-config.1.gz
 %attr(0644,root,root) @mandir@/man1/rrforward.1.gz
