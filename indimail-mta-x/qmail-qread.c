@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.43 2022-04-13 19:36:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.43 2022-04-14 13:50:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -17,6 +17,8 @@
 #include <strerr.h>
 #include <error.h>
 #include <getEnvConfig.h>
+#include <qprintf.h>
+#include <alloc.h>
 #ifndef MULTI_QUEUE
 #include <env.h>
 #include "auto_qmail.h"
@@ -56,6 +58,14 @@ static int      doshm = 0;
 static unsigned long   id;
 static unsigned long   size;
 static stralloc stats = { 0 };
+typedef struct {
+	stralloc queue;
+	int lcur;
+	int lmax;
+	int rcur;
+	int rmax;
+	char flag;
+} qdef;
 
 static void
 die_opendir(char *fn)
@@ -165,7 +175,7 @@ usage()
 	substdio_puts(subfdout, "\t-l - Display local  Queue\n");
 	substdio_puts(subfdout, "\t-r - Display remote Queue\n");
 #ifdef HASLIBRT
-	substdio_puts(subfdout, "\t-i - Display queue counts, concurrencies and loads\n");
+	substdio_puts(subfdout, "\t-i - Display queue counts, concurrencies queue load\n");
 #endif
 	substdio_flush(subfdout);
 }
@@ -174,9 +184,11 @@ usage()
 void
 read_shm(int flag)
 {
-	int             shm, i, j, x, min = -1, n = 1, qcount, len;
+	int             shm, i, j, qcount, qconf, len, x, min = -1;
+	double          load;
 	int             q[5];
-	char            shm_name[256], strnum[FMT_ULONG];
+	qdef           *queue;
+	char            shm_name[256], strnum[FMT_DOUBLE];
 	char           *s;
 
 	/*- get queue count */
@@ -194,15 +206,11 @@ read_shm(int flag)
 	if (read(shm, (char *) q, sizeof(int) * 2) == -1)
 		strerr_die2x(111, FATAL, "unable to read POSIX shared memory segment /qscheduler");
 	close(shm);
-	substdio_put(subfdout, "queue count = ", 14);
-	strnum[i = fmt_ulong(strnum, q[0])] = 0;
-	substdio_put(subfdout, strnum, i);
-	substdio_put(subfdout, ", queue configured = ", 21);
-	strnum[i = fmt_ulong(strnum, q[1])] = 0;
-	substdio_put(subfdout, strnum, i);
-	substdio_put(subfdout, "\n", 1);
-	/*- get queue with lowest concurrency load  */
-	for (j = 0, qcount=q[0]; j < qcount; j++) {
+	qcount = q[0];
+	qconf = q[1];
+	if (!(queue = (qdef *) alloc(qcount * sizeof(qdef))))
+		strerr_die2x(111, FATAL, "out of memory");
+	for (j = 0, load = 0.0, min = -1; j < qcount; j++) {
 		len = 0;
 		s = shm_name;
 		s += (i = fmt_str(s, "/queue"));
@@ -210,53 +218,75 @@ read_shm(int flag)
 		s += (i = fmt_uint(s, j + 1));
 		len += i;
 		*s++ = 0;
+		if (!stralloc_copyb(&queue[j].queue, shm_name + 1, len - 1) ||
+				!stralloc_0(&queue[j].queue))
+			strerr_die2x(111, FATAL, "out of memory");
 		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1)
 			strerr_die4sys(111, FATAL, "failed to open POSIX shared memory segment ", shm_name, ": ");
 		if (read(shm, (char *) q, sizeof(int) * 5) == -1)
 			strerr_die4sys(111, FATAL, "failed to read POSIX shared memory segment ", shm_name, ": ");
 		close(shm);
-		substdio_put(subfdout, shm_name + 1, len - 1);
-		substdio_put(subfdout, " ", 1);
-		strnum[i = fmt_ulong(strnum, q[0])] = 0;
-		substdio_put(subfdout, strnum, i);
-		substdio_put(subfdout, "/", 1);
-		strnum[i = fmt_ulong(strnum, q[2])] = 0;
-		substdio_put(subfdout, strnum, i);
-		substdio_put(subfdout, " ", 1);
-		strnum[i = fmt_ulong(strnum, q[1])] = 0;
-		substdio_put(subfdout, strnum, i);
-		substdio_put(subfdout, "/", 1);
-		strnum[i = fmt_ulong(strnum, q[3])] = 0;
-		substdio_put(subfdout, strnum, i);
-		substdio_put(subfdout, q[4] ? "disabled\n" : " enabled\n", 9);
-		/*-
-		 * q[0] - concurrencyusedlocal
-		 * q[1] - concurrencyusedremote
-		 * q[2] - concurrencylocal
-		 * q[3] - concurrencyremote
-		 * q[4] - disabled/enabled
-		 */
 		if (!q[2] || !q[3]) {
-			substdio_put(subfderr, "invalid concurrency\n", 20);
+			substdio_put(subfderr, "invalid concurrency = 0 ", 24);
+			if (!queue[j].lmax)
+				substdio_put(subfderr, "[local] ", 8);
+			if (!queue[j].rmax)
+				substdio_put(subfderr, "[remote] ", 9);
+			substdio_put(subfderr, "for queue ", 10);
+			substdio_put(subfderr, shm_name + 1, len - 1);
+			substdio_put(subfderr, "\n", 1);
+			substdio_flush(subfderr);
 			continue;
 		}
-		x = q[0] * 100 /q[2] > q[1] * 100 /q[3] ? q[0] * 100/q[2] : q[1] * 100/q[3];
-		if (!j) {
-			min = x;
-			n = 1;
-			continue;
-		}
-		if (x < min) {
-			min = x;
-			n = j + 1;
-		}
+		queue[j].lcur = q[0];
+		queue[j].lmax = q[2];
+		queue[j].rcur = q[1];
+		queue[j].rmax = q[3];
+		queue[j].flag = q[4];
+		x = q[0] + q[1];
+		load += (double) q[0] / q[2] + (double) q[1]/ q[3];
+		if (min == -1 || x < min)
+			min = x; /*- minimum concurrency */
 	}
-	substdio_put(subfdout, "queue with minimum load (", 25);
-	strnum[i = fmt_ulong(strnum, min)] = 0;
+	for (j = 0; j < qcount; j++) {
+		if (!queue[j].lmax || !queue[j].rmax) {
+			substdio_put(subfderr, "invalid concurrency = 0 ", 24);
+			if (!queue[j].lmax)
+				substdio_put(subfderr, "[local] ", 8);
+			if (!queue[j].rmax)
+				substdio_put(subfderr, "[remote] ", 9);
+			substdio_put(subfderr, "for queue ", 10);
+			substdio_put(subfderr, shm_name + 1, len - 1);
+			substdio_put(subfderr, "\n", 1);
+			substdio_flush(subfderr);
+			continue;
+		}
+		x = queue[j].lcur + queue[j].rcur;
+		qprintf(subfdout, queue[j].queue.s, "%-08s");
+		substdio_put(subfdout, " ", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].lcur)] = 0;
+		qprintf(subfdout, strnum, "%+3s");
+		substdio_put(subfdout, "/", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].lmax)] = 0;
+		qprintf(subfdout, strnum, "%-4s");
+		substdio_put(subfdout, ":", 1);
+		substdio_put(subfdout, " ", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].rcur)] = 0;
+		qprintf(subfdout, strnum, "%+3s");
+		substdio_put(subfdout, "/", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].rmax)] = 0;
+		qprintf(subfdout, strnum, "%-4s");
+		substdio_put(subfdout, x == min ? " . " : " + ", 3);
+		substdio_put(subfdout, queue[j].flag ? "disabled\n" : " enabled\n", 9);
+	}
+	substdio_put(subfdout, "queue count = ", 14);
+	strnum[i = fmt_ulong(strnum, qcount)] = 0;
 	substdio_put(subfdout, strnum, i);
-	substdio_put(subfdout, ") = ", 4);
-	substdio_put(subfdout, "queue", 5);
-	strnum[i = fmt_ulong(strnum, n)] = 0;
+	substdio_put(subfdout, ", queue configured = ", 21);
+	strnum[i = fmt_ulong(strnum, qconf)] = 0;
+	substdio_put(subfdout, strnum, i);
+	substdio_put(subfdout, ", Total queue load = ", 19);
+	strnum[i = fmt_double(strnum, 100 * load, 4)] = 0;
 	substdio_put(subfdout, strnum, i);
 	substdio_put(subfdout, "\n", 1);
 	substdio_flush(subfdout);
@@ -599,7 +629,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.43 2022-04-13 19:36:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.43 2022-04-14 13:50:32+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -607,8 +637,8 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
- * Revision 1.43  2022-04-13 19:36:40+05:30  Cprogrammer
- * added feature to disable a queue and skip disabled queues
+ * Revision 1.43  2022-04-14 13:50:32+05:30  Cprogrammer
+ * display qload for use in qtop
  *
  * Revision 1.42  2022-04-13 16:59:25+05:30  Cprogrammer
  * display queues configured
