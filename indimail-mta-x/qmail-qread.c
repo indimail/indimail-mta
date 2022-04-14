@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.44 2022-04-14 19:25:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.44 2022-04-14 19:53:47+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -250,7 +250,7 @@ read_shm(int flag)
 	}
 	for (j = 0; j < qcount; j++) {
 		if (!j)
-			substdio_put(subfdout, "queue      local  Remote   +/- enabled\n", 39);
+			substdio_put(subfdout, "queue      local  Remote   +/- flag\n", 36);
 		if (!queue[j].lmax || !queue[j].rmax) {
 			substdio_put(subfderr, "invalid concurrency = 0 ", 24);
 			if (!queue[j].lmax)
@@ -277,7 +277,7 @@ read_shm(int flag)
 		substdio_put(subfdout, "/", 1);
 		strnum[i = fmt_ulong(strnum, queue[j].rmax)] = 0;
 		qprintf(subfdout, strnum, "%-4s");
-		substdio_put(subfdout, x == min ? " . " : " + ", 3);
+		substdio_put(subfdout, x == min ? " - " : " + ", 3);
 		substdio_put(subfdout, queue[j].flag ? " disabled\n" : "  enabled\n", 10);
 	}
 	substdio_put(subfdout, "queue count = ", 14);
@@ -630,7 +630,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.44 2022-04-14 19:25:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.44 2022-04-14 19:53:47+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -638,7 +638,7 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
- * Revision 1.44  2022-04-14 19:25:45+05:30  Cprogrammer
+ * Revision 1.44  2022-04-14 19:53:47+05:30  Cprogrammer
  * added header for queue load display
  *
  * Revision 1.43  2022-04-14 13:50:32+05:30  Cprogrammer
