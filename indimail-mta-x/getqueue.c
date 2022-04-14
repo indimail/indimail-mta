@@ -1,7 +1,8 @@
 /*
  * $Log: getqueue.c,v $
- * Revision 1.3  2022-04-13 21:10:23+05:30  Cprogrammer
+ * Revision 1.3  2022-04-14 08:17:55+05:30  Cprogrammer
  * added feature to disable a queue and skip disabled queues
+ * refactored code and added comments
  *
  * Revision 1.2  2022-03-30 21:08:38+05:30  Cprogrammer
  * use arc4random() to randomly select queue
@@ -30,10 +31,9 @@
 int
 queueNo_from_shm(char *ident)
 {
-	int             shm, i, j, y, z, n = 1, qcount;
-	double          min, x;
+	int             shm, i, j, x, y, min, n = 1, qcount;
 	int             q[5];
-	double         *queue;
+	int            *queue;
 	uint32_t        random;
 	char            shm_name[FMT_ULONG + 6];
 	char           *s;
@@ -47,9 +47,9 @@ queueNo_from_shm(char *ident)
 	if (read(shm, (char *) &qcount, sizeof(int)) == -1)
 		custom_error(ident, "Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
 	close(shm);
-	if (!(queue = (double *) alloc(qcount * sizeof(int))))
+	if (!(queue = (int *) alloc(qcount * sizeof(int))))
 		_exit(51);
-	/*- get queue with lowest concurrency load  */
+	/*- get queue with lowest concurrency */
 	for (j = n = 0, min = -1; j < qcount; j++) {
 		s = shm_name;
 		i = fmt_str(s, "/queue");
@@ -76,34 +76,28 @@ queueNo_from_shm(char *ident)
 		/*- skip disabled queue and queue with invalid concurrency */
 		if (q[4] || !q[2] || !q[3])
 			continue;
-		x = (double) q[0]/q[2] > (double) q[1]/q[3] ? (double) q[0]/q[2] : (double) q[1]/q[3];
+		x = q[0] > q[1] ? q[0] : q[1]; /*- max concurrency for queue */
 		queue[j] = x;
-		if (min == -1.0) {
-			min = x; /*- minimum load */
-			n = j; /*- queue with minimum load */
-			continue;
-		}
-		if (x < min) {
-			min = x; /*- minimum load */
-			n = j; /*- queue with minimum load */
+		if (min == -1 || x < min) {
+			min = x; /*- minimum concurrency */
+			n = j; /*- queue with minimum concurrency */
 		}
 	}
-	/*
-	 * at this stage n+1 is our queue
-	 * with minimum load. But there may be
-	 * other queues with the same minimum load (x)
-	 * use modulus of arc4random and x to select one of them
+	/*-
+	 * at this stage n+1 is our queue with minimum concurrency. There
+	 * can be other queues with the same minimum concurrency (x).
+	 * we will use modulus * of arc4random() and x to select one of them
 	 */
-	for (i = 0, z = 0; i < qcount; i++) {
+	for (i = 0, x = 0; i < qcount; i++) {
 		if (queue[i] == min)
-			z++; /*- queue count with minimum loads */
+			x++; /*- count of queues with the same minimum concurrency */
 	}
-	if (z == 1) { /*- only one queue with minimum load */
+	if (x == 1) { /*- only one queue with minimum concurrency */
 		alloc_free((char *) queue);
 		return n + 1;
 	}
 	random = arc4random();
-	for (i = j = 0, y = random % z; i < qcount; i++) {
+	for (i = j = 0, y = random % x; i < qcount; i++) {
 		if (queue[i] == min) {
 			if (j == y) {
 				alloc_free((char *) queue);
@@ -141,7 +135,7 @@ queueNo_from_env()
 void
 getversion_getqueue_c()
 {
-	static char    *x = "$Id: getqueue.c,v 1.3 2022-04-13 21:10:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getqueue.c,v 1.3 2022-04-14 08:17:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
