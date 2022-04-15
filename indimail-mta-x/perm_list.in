@@ -150,6 +150,7 @@
 %attr(0755,root,root)  @prefix@/sbin/cleanq
 
 %attr(0751,root,root)  @prefix@/sbin/qscheduler
+%attr(0751,root,root)  @prefix@/sbin/qmonitor
 %attr(0751,root,root)  @prefix@/sbin/setqload
 %attr(0751,root,root)  @prefix@/sbin/qmail-start
 %attr(0751,root,root)  @prefix@/sbin/qmail-lspawn #qmta
@@ -446,6 +447,7 @@
 %attr(0644,root,root) @mandir@/man7/forgeries.7.gz
 %attr(0644,root,root) @mandir@/man7/qmail.7.gz
 %attr(0644,root,root) @mandir@/man7/qmail-limits.7.gz
+%attr(0644,root,root) @mandir@/man7/multi-queue.7.gz
 %attr(0644,root,root) @mandir@/man8/cleanq.8.gz
 %attr(0644,root,root) @mandir@/man8/dk-filter.8.gz
 %attr(0644,root,root) @mandir@/man8/dkim.8.gz
@@ -460,6 +462,8 @@
 %attr(0644,root,root) @mandir@/man8/qmail-clean.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-command.8.gz
 %attr(0644,root,root) @mandir@/man8/qscheduler.8.gz
+%attr(0644,root,root) @mandir@/man8/setqload.8.gz
+%attr(0644,root,root) @mandir@/man8/qmonitor.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dk.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-getpw.8.gz

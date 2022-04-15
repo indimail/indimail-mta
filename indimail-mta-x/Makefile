@@ -28,7 +28,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	create_services cronlist.q ctrlenv datemail dk-filter dknewkey dktest \
 	dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt dot-forward \
 	drate etrn except fastforward forward generic.so greydaemon home \
-	home+df hostname iftocc indimail-mta.changes setqload \
+	home+df hostname iftocc indimail-mta.changes setqload qmonitor \
 	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
@@ -1297,15 +1297,16 @@ process_queue.h conf-queue
 qmail-qread: \
 load qmail-qread.o fmtqfn.o readsubdir.o auto_qmail.o \
 auto_split.o variables.o control.o auto_control.o \
-set_environment.o process_queue.o rt.lib
+set_environment.o queue_load.o process_queue.o rt.lib
 	./load qmail-qread fmtqfn.o readsubdir.o control.o \
 	auto_qmail.o auto_split.o variables.o auto_control.o \
-	set_environment.o process_queue.o $(QMAILLIB) \
-	`cat rt.lib`
+	set_environment.o process_queue.o queue_load.o \
+	$(QMAILLIB) `cat rt.lib`
 
 qmail-qread.o: \
 compile qmail-qread.c auto_qmail.h auto_split.h readsubdir.h \
-fmtqfn.h haslibrt.h control.h variables.h process_queue.h conf-queue
+fmtqfn.h haslibrt.h control.h variables.h process_queue.h \
+queue_load.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-qread.c
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
@@ -1313,6 +1314,10 @@ qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-qread.8
+
+queue_load.o: \
+compile queue_load.c queue_load.h haslibrt.h
+	./compile queue_load.c
 
 qmail-multi: load qmail-multi.o qmulti.o auto_control.o \
 variables.o control.o mailfilter.o auto_prefix.o \
@@ -1812,6 +1817,14 @@ compile setqload.c qscheduler.h haslibrt.h
 send_qload.o: \
 compile haslibrt.h qscheduler.h send_qload.h
 	./compile send_qload.c
+
+qmonitor: \
+load qmonitor.o send_qload.o queue_load.o rt.lib
+	./load qmonitor send_qload.o queue_load.o $(QMAILLIB) `cat rt.lib`
+
+qmonitor.o: \
+compile qmonitor.c haslibrt.h queue_load.h send_qload.h
+	./compile qmonitor.c
 
 multi-queue.7: \
 multi-queue.9 conf-sysconfdir conf-qmail

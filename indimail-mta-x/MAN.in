@@ -156,6 +156,7 @@ f:::0644:/man8/:qmail-cdb.8:qmail-cdb.8
 f:::0644:/man8/:qmail-clean.8:qmail-clean.8
 f:::0644:/man8/:qmail-command.8:qmail-command.8
 f:::0644:/man8/:qscheduler.8:qscheduler.8
+f:::0644:/man8/:qmonitor.8:qmonitor.8
 f:::0644:/man8/:setqload.8:setqload.8
 f:::0644:/man8/:qmail-daned.8:qmail-daned.8
 f:::0644:/man8/:qmail-dk.8:qmail-dk.8
