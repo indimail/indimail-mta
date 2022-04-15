@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.45 2022-04-14 20:19:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.46 2022-04-16 01:30:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -24,10 +24,7 @@
 #include "auto_qmail.h"
 #endif
 #include "haslibrt.h"
-#ifdef HASLIBRT
-#include <fcntl.h>
-#include <sys/mman.h>
-#endif
+#include "queue_load.h"
 #include "auto_split.h"
 #include "readsubdir.h"
 #include "fmtqfn.h"
@@ -58,14 +55,6 @@ static int      doshm = 0;
 static unsigned long   id;
 static unsigned long   size;
 static stralloc stats = { 0 };
-typedef struct {
-	stralloc queue;
-	int lcur;
-	int lmax;
-	int rcur;
-	int rmax;
-	char flag;
-} qdef;
 
 static void
 die_opendir(char *fn)
@@ -179,133 +168,6 @@ usage()
 #endif
 	substdio_flush(subfdout);
 }
-
-#ifdef HASLIBRT
-void
-read_shm(int flag)
-{
-	int             shm, i, j, qcount, qconf, len, x, min = -1, lcur = 0, rcur = 0;
-	double          load;
-	int             q[5];
-	qdef           *queue;
-	char            shm_name[256], strnum[FMT_DOUBLE];
-	char           *s;
-
-	/*- get queue count */
-	if ((shm = shm_open("/qscheduler", O_RDONLY, 0644)) == -1) {
-		if (errno == error_noent) {
-			if (flag)
-				strerr_die2sys(111, FATAL, "dynamic queue disabled / qscheduler not running\n");
-			else {
-				substdio_puts(subfdout, "no active dynamic queue\n");
-				return;
-			}
-		}
-		strerr_die2x(111, FATAL, "unable to open POSIX shared memory segment /qscheduler");
-	}
-	if (read(shm, (char *) q, sizeof(int) * 2) == -1)
-		strerr_die2x(111, FATAL, "unable to read POSIX shared memory segment /qscheduler");
-	close(shm);
-	qcount = q[0];
-	qconf = q[1];
-	if (!(queue = (qdef *) alloc(qcount * sizeof(qdef))))
-		strerr_die2x(111, FATAL, "out of memory");
-	for (j = 0, load = 0.0, min = -1; j < qcount; j++) {
-		len = 0;
-		s = shm_name;
-		s += (i = fmt_str(s, "/queue"));
-		len += i;
-		s += (i = fmt_uint(s, j + 1));
-		len += i;
-		*s++ = 0;
-		if (!stralloc_copyb(&queue[j].queue, shm_name + 1, len - 1) ||
-				!stralloc_0(&queue[j].queue))
-			strerr_die2x(111, FATAL, "out of memory");
-		if ((shm = shm_open(shm_name, O_RDONLY, 0600)) == -1)
-			strerr_die4sys(111, FATAL, "failed to open POSIX shared memory segment ", shm_name, ": ");
-		if (read(shm, (char *) q, sizeof(int) * 5) == -1)
-			strerr_die4sys(111, FATAL, "failed to read POSIX shared memory segment ", shm_name, ": ");
-		close(shm);
-		if (!q[2] || !q[3]) {
-			substdio_put(subfderr, "invalid concurrency = 0 ", 24);
-			if (!queue[j].lmax)
-				substdio_put(subfderr, "[local] ", 8);
-			if (!queue[j].rmax)
-				substdio_put(subfderr, "[remote] ", 9);
-			substdio_put(subfderr, "for queue ", 10);
-			substdio_put(subfderr, shm_name + 1, len - 1);
-			substdio_put(subfderr, "\n", 1);
-			substdio_flush(subfderr);
-			continue;
-		}
-		queue[j].lcur = q[0];
-		lcur += q[0];
-		queue[j].lmax = q[2];
-		queue[j].rcur = q[1];
-		rcur += q[1];
-		queue[j].rmax = q[3];
-		queue[j].flag = q[4];
-		x = q[0] + q[1];
-		load += (double) q[0] / q[2] + (double) q[1]/ q[3];
-		if (min == -1 || x < min)
-			min = x; /*- minimum concurrency */
-	}
-	for (j = 0; j < qcount; j++) {
-		if (!j)
-			substdio_put(subfdout, "queue      local  Remote   +/- flag\n", 36);
-		if (!queue[j].lmax || !queue[j].rmax) {
-			substdio_put(subfderr, "invalid concurrency = 0 ", 24);
-			if (!queue[j].lmax)
-				substdio_put(subfderr, "[local] ", 8);
-			if (!queue[j].rmax)
-				substdio_put(subfderr, "[remote] ", 9);
-			substdio_put(subfderr, "for queue ", 10);
-			substdio_put(subfderr, shm_name + 1, len - 1);
-			substdio_put(subfderr, "\n", 1);
-			substdio_flush(subfderr);
-			continue;
-		}
-		x = queue[j].lcur + queue[j].rcur;
-		qprintf(subfdout, queue[j].queue.s, "%-08s");
-		substdio_put(subfdout, " ", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].lcur)] = 0;
-		qprintf(subfdout, strnum, "%+3s");
-		substdio_put(subfdout, "/", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].lmax)] = 0;
-		qprintf(subfdout, strnum, "%-4s");
-		substdio_put(subfdout, " ", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].rcur)] = 0;
-		qprintf(subfdout, strnum, "%+3s");
-		substdio_put(subfdout, "/", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].rmax)] = 0;
-		qprintf(subfdout, strnum, "%-4s");
-		substdio_put(subfdout, x == min ? " - " : " + ", 3);
-		substdio_put(subfdout, queue[j].flag ? " disabled\n" : "  enabled\n", 10);
-	}
-	substdio_put(subfdout, "queue count = ", 14);
-	strnum[i = fmt_ulong(strnum, qcount)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", queue configured = ", 21);
-	strnum[i = fmt_ulong(strnum, qconf)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", Total local = ", 16);
-	strnum[i = fmt_ulong(strnum, lcur)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", Total remote = ", 17);
-	strnum[i = fmt_ulong(strnum, rcur)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", Total queue load = ", 19);
-	strnum[i = fmt_double(strnum, 100 * load, 4)] = 0;
-	substdio_put(subfdout, strnum, i);
-	substdio_put(subfdout, "\n", 1);
-	substdio_flush(subfdout);
-	return;
-}
-#endif
 
 static int
 get_arguments(int argc, char **argv)
@@ -608,7 +470,7 @@ main(int argc, char **argv)
 		putcounts("Total ", lCount, rCount, bCount, tCount);
 #ifdef HASLIBRT
 	if (doshm)
-		read_shm(doshm == 1 ? 0 : 1);
+		queue_load("qmail-qread", 1, 0, 0, 0, 0);
 #endif
 #endif
 	substdio_flush(subfdout);
@@ -633,7 +495,7 @@ main(int argc, char **argv)
 	}
 #ifdef HASLIBRT
 	if (doshm)
-		read_shm(doshm == 1 ? 0 : 1);
+		queue_load("qmail-qread", 1, 0, 0, 0, 0);
 #endif
 	return(0);
 }
@@ -642,7 +504,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.45 2022-04-14 20:19:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.46 2022-04-16 01:30:48+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -650,6 +512,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.46  2022-04-16 01:30:48+05:30  Cprogrammer
+ * moved read_shm() code to queue_load.c
+ *
  * Revision 1.45  2022-04-14 20:19:52+05:30  Cprogrammer
  * added total local, remote concurrency
  *
