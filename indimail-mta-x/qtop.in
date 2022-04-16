@@ -1,17 +1,8 @@
 #
 # $Log: qtop.in,v $
-# Revision 1.4  2022-04-14 22:02:34+05:30  Cprogrammer
-# use tai64nlocal to convert multilog timestamp to human readable format
-#
-# Revision 1.3  2022-04-14 21:43:07+05:30  Cprogrammer
-# fixed getopt
-# use stty if tput is missing
-#
-# Revision 1.2  2022-04-14 19:26:02+05:30  Cprogrammer
-# removed use of sudo
-#
-# Revision 1.1  2022-04-14 13:52:41+05:30  Cprogrammer
+# Revision 1.1  2022-04-16 13:02:52+05:30  Cprogrammer
 # Initial revision
+#
 #
 #
 usage ()
@@ -23,10 +14,6 @@ usage ()
 	echo "-c	command"
 }
 
-if [ $(id -u) -ne 0 ] ; then
-	echo "$0 requires to run as root" 1>&2
-	exit 1
-fi
 interval=5
 qcount=5
 command="tail -F @logdir@/deliver.25/current|tai64nlocal"
