@@ -46,7 +46,7 @@ static char  **prog_argv;
 static char     strnum1[FMT_ULONG];
 static int      bigtodo;
 #ifdef HASLIBRT
-static int      qconf, qmax, qload, error_interval = ERROR_INTERVAL;
+static int      qconf, qmax, threshold, error_interval = ERROR_INTERVAL;
 static q_type   qtype = fixed;
 static char    *msgbuf;
 static int      msgbuflen;
@@ -461,7 +461,7 @@ set_queue_variables()
 	getEnvConfigInt(&qstart, "QUEUE_START", QUEUE_START);
 #ifdef HASLIBRT
 	getEnvConfigInt(&qmax,   "QUEUE_MAX",   QUEUE_MAX);
-	getEnvConfigInt(&qload,  "QUEUE_LOAD",  QUEUE_LOAD);
+	getEnvConfigInt(&threshold,  "QUEUE_LOAD",  QUEUE_LOAD);
 	getEnvConfigInt(&error_interval, "ERROR_INTERVAL", ERROR_INTERVAL);
 #endif
 	if (!(qbase = env_get("QUEUE_BASE"))) {
@@ -929,8 +929,8 @@ dynamic_queue()
 		for (i = 1, total_load = 0; i <= qcount; i++)
 			total_load += queue_table[i].load;
 		strnum1[fmt_int(strnum1, total_load)] = 0;
-		strnum2[fmt_int(strnum2, qcount * qload)] = 0;
-		if (total_load > qcount * qload && qcount < qmax) {
+		strnum2[fmt_int(strnum2, qcount * threshold)] = 0;
+		if (total_load > qcount * threshold && qcount < qmax) {
 			strerr_warn5("alert: qscheduler: average load ",strnum1, " exceeds threshold (> ", strnum2, ")", 0);
 			qptr = queuenum_to_dir(qcount + 1);
 			r = 0; /*- flag for queue creation */
