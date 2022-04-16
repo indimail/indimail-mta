@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: qscheduler.h,v $
+ * Revision 1.1  2022-04-16 21:45:55+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #ifndef _QSCHEDULER_H_
 #define _QSCHEDULER_H_

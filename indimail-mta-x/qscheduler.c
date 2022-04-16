@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: qscheduler.c,v $
+ * Revision 1.1  2022-04-16 21:45:44+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -1064,7 +1067,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: $";
+	static char    *x = "$Id: qscheduler.c,v 1.1 2022-04-16 21:45:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
