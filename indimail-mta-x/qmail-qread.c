@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.46 2022-04-16 01:30:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.47 2022-04-16 13:00:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -266,6 +266,82 @@ putcounts(char *pre_str, int lCount, int rCount, int bCount, int tCount)
 	}
 }
 
+#ifdef HASLIBRT
+void
+display(QDEF *queue, int queue_count, int queue_conf)
+{
+	char            strnum[FMT_DOUBLE];
+	int             i, j, x, lcur = 0, rcur = 0, min = -1;
+	double          load_l = 0.0, load_r = 0.0;
+
+	for (j = 0; j < queue_count; j++) {
+		x = queue[j].lcur + queue[j].rcur;
+		if (min == -1 || x < min)
+			min = x; /*- minimum concurrency */
+	}
+	for (j = 0; j < queue_count; j++) {
+		if (!j)
+			substdio_put(subfdout, "queue      local  Remote   +/- flag\n", 36);
+		if (!queue[j].lmax || !queue[j].rmax) {
+			substdio_put(subfderr, "invalid concurrency = 0 ", 24);
+			if (!queue[j].lmax)
+				substdio_put(subfderr, "[local] ", 8);
+			if (!queue[j].rmax)
+				substdio_put(subfderr, "[remote] ", 9);
+			substdio_put(subfderr, "for queue ", 10);
+			substdio_put(subfderr, queue[j].queue.s, queue[j].queue.len);
+			substdio_put(subfderr, "\n", 1);
+			substdio_flush(subfderr);
+			continue;
+		}
+		lcur += queue[j].lcur;
+		rcur += queue[j].rcur;
+		load_l += (double) queue[j].lcur / queue[j].lmax;
+		load_r += (double) queue[j].rcur / queue[j].rmax;
+		qprintf(subfdout, queue[j].queue.s, "%-08s");
+		substdio_put(subfdout, " ", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].lcur)] = 0;
+		qprintf(subfdout, strnum, "%+3s");
+		substdio_put(subfdout, "/", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].lmax)] = 0;
+		qprintf(subfdout, strnum, "%-4s");
+		substdio_put(subfdout, " ", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].rcur)] = 0;
+		qprintf(subfdout, strnum, "%+3s");
+		substdio_put(subfdout, "/", 1);
+		strnum[i = fmt_ulong(strnum, queue[j].rmax)] = 0;
+		qprintf(subfdout, strnum, "%-4s");
+		x = queue[j].lcur + queue[j].rcur;
+		substdio_put(subfdout, x == min ? " - " : " + ", 3);
+		substdio_put(subfdout, queue[j].flag ? " disabled\n" : "  enabled\n", 10);
+	}
+	substdio_put(subfdout, "queue count = ", 14);
+	strnum[i = fmt_ulong(strnum, queue_count)] = 0;
+	substdio_put(subfdout, strnum, i);
+
+	substdio_put(subfdout, ", queue configured = ", 21);
+	strnum[i = fmt_ulong(strnum, queue_conf)] = 0;
+	substdio_put(subfdout, strnum, i);
+
+	substdio_put(subfdout, ", Total local = ", 16);
+	strnum[i = fmt_ulong(strnum, lcur)] = 0;
+	substdio_put(subfdout, strnum, i);
+
+	substdio_put(subfdout, ", Total remote = ", 17);
+	strnum[i = fmt_ulong(strnum, rcur)] = 0;
+	substdio_put(subfdout, strnum, i);
+
+	substdio_put(subfdout, ", Total queue load = ", 19);
+	strnum[i = fmt_double(strnum, 100 * load_l, 2)] = 0;
+	qprintf(subfdout, strnum, "%+6s");
+	substdio_put(subfdout, " / ", 3);
+	strnum[i = fmt_double(strnum, 100 * load_r, 2)] = 0;
+	qprintf(subfdout, strnum, "%+6s");
+	substdio_put(subfdout, "\n", 1);
+	substdio_flush(subfdout);
+}
+#endif
+
 #ifdef MULTI_QUEUE
 int
 main_function(int *lcount, int *rcount, int *bcount, int *tcount)
@@ -280,6 +356,10 @@ main(int argc, char **argv)
 	substdio        ss;
 	static stralloc line = { 0 };
 #ifndef MULTI_QUEUE
+#ifdef HASLIBRT
+	int             qcount, qconf;
+	QDEF           *queue;
+#endif
 	char           *qbase;
 	static stralloc QueueBase = { 0 };
 #endif
@@ -469,8 +549,10 @@ main(int argc, char **argv)
 	if (doCount)
 		putcounts("Total ", lCount, rCount, bCount, tCount);
 #ifdef HASLIBRT
-	if (doshm)
-		queue_load("qmail-qread", 1, 0, 0, 0, 0);
+	if (doshm) {
+		queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
+		display(queue, qcount, qconf);
+	}
 #endif
 #endif
 	substdio_flush(subfdout);
@@ -482,6 +564,10 @@ int
 main(int argc, char **argv)
 {
 	int             lcount = 0, rcount = 0, bcount = 0, tcount = 0;
+#ifdef HASLIBRT
+	int             qcount, qconf;
+	QDEF           *queue;
+#endif
 
 	if (get_arguments(argc, argv)) {
 		substdio_flush(subfdout);
@@ -494,8 +580,10 @@ main(int argc, char **argv)
 		substdio_flush(subfdout);
 	}
 #ifdef HASLIBRT
-	if (doshm)
-		queue_load("qmail-qread", 1, 0, 0, 0, 0);
+	if (doshm) {
+		queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
+		display(queue, qcount, qconf);
+	}
 #endif
 	return(0);
 }
@@ -504,7 +592,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.46 2022-04-16 01:30:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.47 2022-04-16 13:00:09+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -512,6 +600,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.47  2022-04-16 13:00:09+05:30  Cprogrammer
+ * moved display of queue loads from queue_load.c to qmail-qread.c
+ *
  * Revision 1.46  2022-04-16 01:30:48+05:30  Cprogrammer
  * moved read_shm() code to queue_load.c
  *
