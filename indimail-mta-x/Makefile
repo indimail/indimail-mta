@@ -1823,8 +1823,8 @@ load qmonitor.o send_qload.o queue_load.o rt.lib
 	./load qmonitor send_qload.o queue_load.o $(QMAILLIB) `cat rt.lib`
 
 qmonitor.o: \
-compile qmonitor.c haslibrt.h queue_load.h send_qload.h
-	./compile qmonitor.c
+compile qmonitor.c haslibrt.h queue_load.h send_qload.h conf-queue
+	./compile `grep -h -v "^#" conf-queue` qmonitor.c
 
 multi-queue.7: \
 multi-queue.9 conf-sysconfdir conf-qmail

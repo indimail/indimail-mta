@@ -201,6 +201,9 @@ Release 2.14.1 Start 21/09/2021
 112. matchup.c: skip qscheduler load messages in logs
 - 16/04/2022
 113. added qmonitor
+- 17/04/2022
+114. qmonitor.c: use getEnvConfigDouble() to set threshold from QUEUE_LOAD env
+     variable
 
 * 
 Release 2.14.0 Start 18/07/2021

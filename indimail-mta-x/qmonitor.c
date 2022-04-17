@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.1 2022-04-16 13:01:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.2 2022-04-17 08:31:39+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -11,6 +11,7 @@
 #include <strerr.h>
 #include <scan.h>
 #include <qprintf.h>
+#include <getEnvConfig.h>
 #include "queue_load.h"
 #include "send_qload.h"
 
@@ -98,10 +99,11 @@ int
 main(int argc, char **argv)
 {
 	int             i, j, opt, qcount, qconf, interval = 60, test_mode = 0;
-	double          threshold = 90.0, total_load[2], qload;
+	double          threshold, total_load[2], qload;
 	char            strnum[FMT_DOUBLE];
 	QDEF           *queue = (QDEF *) NULL;
 
+	getEnvConfigDouble(&threshold,   "QUEUE_LOAD",   QUEUE_LOAD);
 	while ((opt = getopt(argc, argv, "i:t:n")) != opteof) {
 		switch (opt)
 		{
@@ -178,13 +180,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.1 2022-04-16 13:01:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.2 2022-04-17 08:31:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.2  2022-04-17 08:31:39+05:30  Cprogrammer
+ * use getEnvConfigDouble() to set threshold from QUEUE_LOAD env variable
+ *
  * Revision 1.1  2022-04-16 13:01:40+05:30  Cprogrammer
  * Initial revision
  *
