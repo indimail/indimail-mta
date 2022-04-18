@@ -15,6 +15,43 @@ environment variable QUEUEDIR to point to a path having a valid
 queue created by the program \fBqueue-fix\fR(8). \fBqmail-queue\fR
 is setuid to uid \fIqmailq\fR.
 
+The deposition and balancing of mail across multiple queues is controlled
+by the following environment variables.
+
+.TP 5
+\fBQUEUE_BASE\fR The base directory having all the indimail queues. If this
+is not defined, the control file \fIqueue_base\fR is used. This is
+typically QMAILHOME/queue.
+
+.TP 5
+\fBQUEUE_START\fR This is a number which defines the first queue that
+should be used.
+
+e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue/queue1
+
+.TP 5
+\fBQUEUE_COUNT\fR This defines the number of queues that should be used for
+load balancing. \fBqmail-queue\fR used a random number to select a queue in
+a multi-queue setup.
+
+e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue/queue1,
+QMAILHOME/queue/queue2, ..., QMAILHOME/queue/queue5
+
+.TP 5
+.B MIN_FREE
+This is the minimum free disk space that should be available in the
+filesystem containing the queues. When free space goes below this value,
+qmail-multi will return a temporary disk full error "qq write error or disk
+full (#4.3.0)". This prevents \fBqmail-send\fR reaching a deadlock in the
+case when disk becomes full and there are bounce messages to be processed.
+\fBqmail-send\fR in this case keeps on retrying bounce message which does
+not succeeed because of insufficient disk space to write the bounce. This
+effectively stops processing of local and remote messages and thus disk
+space never gets freed up. \fBqmail-multi\fR prevents this from happening
+by accepting mails only when disk space greater than MIN_FREE is present.
+It uses \fBstatfs(2)\fR (\fBstatvfs\fR on solaris) to get the free space on
+the filesystem.
+
 \fBqmail-queue\fR uses DIRSPLIT as the directory split. It can be
 overriden by environment variable \fBCONFSPLIT\fR upto a max of
 DIRSPLIT
@@ -25,11 +62,11 @@ letter F and terminated by a 0 byte. Each recipient address is preceded by
 the letter T and terminated by a 0 byte. The list of recipient addresses is
 terminated by an extra 0 byte. If \fBqmail-queue\fR sees end-of-file before
 the extra 0 byte, it aborts without placing the message into the queue. If
-\fBUSE_FSYNC\fR environment variable is defined \fBqmail-queue\fR uses
-fsync(2) to sync the message file in \fIqueue/mess\fR and the envelope in
-\fIqueue/intd\fR file as well. After creating a link to the envelope in
-\fIqueue/todo\fR to \fIqueue/intd\fR, qmail-queue syncs the directory using
-the following two methods.
+\fBUSE_FSYNC\fR \fBUSE_FDATASYNC\fR environment variable is defined
+\fBqmail-queue\fR uses fsync(2) or fdatasync(2) to sync the message file in
+\fIqueue/mess\fR and the envelope in \fIqueue/intd\fR file as well. After
+creating a link to the envelope in \fIqueue/todo\fR to \fIqueue/intd\fR,
+qmail-queue syncs the directory using the following two methods.
 
 .IP \[bu] 2
 BSD Style Synchronous Directory -
@@ -40,6 +77,41 @@ forces directory syncing.
 Using FSYNC -
 \fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the fsync(2)
 call to flush data buffers to the disk
+
+.IP \[bu]
+Using FDATASYNC -
+\fBqmail-queue\fR opens the file in \fBqueue/todo\fR and uses the
+fdatasync(2) instead of fsync(2) call to flush data buffers to the disk.
+fdatasync(2) is faster than fsync(2), but does not flush few of the file's
+metadata.
+
+.PP
+\fBqmail-queue\fR(8) communicates with \fBqmail-todo\fR(8) when it places a
+message in the outgoing queue using either of the two below methods.
+
+\fBtrigger\fR method - This is used when the environment variable
+\fBDYNAMIC_QUEUE\fR is not set. Every queue in indimail has the path
+\fIlock/trigger\fR pointing to a named pipe. When a message is queued,
+\fBqmail-queue\fR writes a null byte to the pipe which causes
+\fBqmail-todo\fR to wake up and scan the \fItodo\fR subdirectory of the
+queue. This is a disk intensive operation and can overwhelm
+\fBqmail-todo\fR / \fBqmail-send\fR under high injection rate conditions.
+
+\fBmessage queue\fR method - This is used when the environment variable
+\fBDYNAMIC_QUEUE\fR is set. Here \fBqmail-queue\fR communicates the inode
+number and the todo subdirectory name using POSIX message queue
+/queue\fIN\fR. Here \fIN\fR refers to the queue number (See
+\fBmulti-queue\fR(7). qmail-queue uses mq_open(3) to open the message
+queue. This method avoids the need for \fBqmail-todo\fR / \fBqmail-send\fR
+to scan the queue subdirectories for new messages, thereby saving on disk
+IO for better filesystem performance.
+
+If the environment variable \fBORIGINIPFIELD\fR is set, a
+"X-Originating-IP" header will be added to every relayed mail.
+
+If the environment variable \fBFASTQUEUE\fR is set, qmail-queue will bypass
+QHPSI, ORIGINIPFIELD, extraqueue, removehaders, envheaders, logheaders,
+mailarchive control files
 
 .SH CONTROL FILES
 \fBqmail-queue\fR use many control files to provide various features.
@@ -53,15 +125,86 @@ also does the same thing. The value of the environment variable overrides
 the value in the control file. Also the environment variable can be just one
 recipient. There is a potential for loops in case the recipient is local and
 the local delivery has any kind of forwarding rule which results in
-qmail-queue being invoked.
+qmail-queue being invoked. If \fBEXTRAQUEUE\fR is set but empty, the
+control will not be read.
+
+.TP
+.B quarantine
+If this control file exists, recipient list is replaced with its content.
+The environment variable
+.B QUARANTINE
+also does the same thing. The value of the environment variable overrides
+the value in the control file. Additionally, comma separated list of
+original recipient list is added to the header \fBX-Quarantine-ID\fR. If
+\fBQUARANTINE\fR is set but empty, the control will not be read.
+
+.TP
+.B envheaders
+If this control file exists, \fBqmail-queue\fR passes all headers listed
+in the control file to the queue along with the value. \fBqmail-local\fR
+and \fBqmail-remote\fR will set environment variables corresponding to the
+headers with the values. An optional length, separated by a ':', can be
+appended to the name of the header. If length is specified, the
+environment variable will be set only if the actual length of the header
+value is less than or equal to this value. This will prevent emails with
+extra long headers or malicious headers to exploit memory allocation on
+the system. The environment variable \fBENVHEADERS\fR can be set to use
+a different name for this control file. If \fBENVHEADERS\fR is set but
+empty, the control file will not be read.
+
+.TP
+.B logheaders
+If this control file exists, \fBqmail-queue\fR writes all headers (along
+with values) listed in the control file to file descriptor defined by
+\fBLOGHEADERFD\fR environment variable. The file descriptor needs to be open
+for write. You can open the file descriptor in the startup scripts for
+\fBqmail-smtpd\fR, for example. If \fBLOGHEADERS\fR is set but empty, the
+control file will not be read.
+
+.EX
+ touch /tmp/header.log
+ exec 45 >/tmp/header.log
+ LOGHEADERFD=45
+.EE
+
+If the file descriptor is not open, logging of header will be silently
+ignored. Logging of headers can be useful for debugging or logging specific
+headers in log files. The environment variable \fBLOGHEADERS\fR can be set
+to use a different name for this control file.
+
+.TP
+.B removeheaders
+If this control file
+exists, \fBqmail-queue\fR removes all headers listed in the control file
+from the mail message on descriptor 0 before writing it to the disk. The
+environment variable \fBREMOVEHEADERS\fR can be set to use a different
+name for this control file. If \fBREMOVEHEADERS\fR is set but empty, the
+control will not be read.
+
+Every envelope recipient address should contain a username, an @ sign,
+and a fully qualified domain name.
+
+.B qmail-queue
+always adds a
+.B Received
+line to the top of the message.
+.B qmail-queue
+keeps a copy of the
+.B QQEH
+environment variable (if set), and passes it into the queue.
+.B qmail-local
+and
+.B qmail-remote
+will prepend it to the headers of the email when it is delivered.
 
 .TP
 .B mailarchive
 if this control file exists, its content can be used for rule based
 archival. The environment variable
 .B MAILARCHIVE
-overrides the name of the \fImailarchive\fR control file. A line in
-this control file can be of the form
+overrides the name of the \fImailarchive\fR control file. if
+\fBMAILARCHIVE\fR is set but empty, the control file will not be read. A
+line in this control file can be of the form
 
 .EX
  type:regexp:dest_mailbox
@@ -110,71 +253,6 @@ The environment variable
 .B ORIGINIPFIELD
 overrides the control file 
 .BR originipfield .
-
-.TP
-.B quarantine
-If this control file exists, recipient list is replaced with its content.
-The environment variable
-.B QUARANTINE
-also does the same thing. The value of the environment variable overrides
-the value in the control file. Additionally, comma separated list of
-original recipient list is added to the header \fBX-Quarantine-ID\fR.
-
-.TP
-.B removeheaders
-If this control file
-exists, \fBqmail-queue\fR removes all headers listed in the control file
-from the mail message on descriptor 0 before writing it to the disk. The
-environment variable \fBREMOVEHEADERS\fR can be set to use a different
-name for this control file.
-
-Every envelope recipient address should contain a username, an @ sign,
-and a fully qualified domain name.
-
-.B qmail-queue
-always adds a
-.B Received
-line to the top of the message.
-.B qmail-queue
-keeps a copy of the
-.B QQEH
-environment variable (if set), and passes it into the queue.
-.B qmail-local
-and
-.B qmail-remote
-will prepend it to the headers of the email when it is delivered.
-
-.TP
-.B envheaders
-If this control file exists, \fBqmail-queue\fR passes all headers listed
-in the control file to the queue along with the value. \fBqmail-local\fR
-and \fBqmail-remote\fR will set environment variables corresponding to the
-headers with the values. An optional length, separated by a ':', can be
-appended to the name of the header. If length is specified, the
-environment variable will be set only if the actual length of the header
-value is less than or equal to this value. This will prevent emails with
-extra long headers or malicious headers to exploit memory allocation on
-the system. The environment variable \fBENVHEADERS\fR can be set to use
-a different name for this control file.
-
-.TP
-.B logheaders
-If this control file exists, \fBqmail-queue\fR writes all headers (along
-with values) listed in the control file to file descriptor defined by
-\fBLOGHEADERFD\fR environment variable. The file descriptor needs to be open
-for write. You can open the file descriptor in the startup scripts for
-\fBqmail-smtpd\fR, for example.
-
-.EX
- touch /tmp/header.log
- exec 45 >/tmp/header.log
- LOGHEADERFD=45
-.EE
-
-If the file descriptor is not open, logging of header will be silently
-ignored. Logging of headers can be useful for debugging or logging specific
-headers in log files. The environment variable \fBLOGHEADERS\fR can be set
-to use a different name for this control file.
 
 .PP
 .B qmail-queue
@@ -899,4 +977,8 @@ qmail-internals(8),
 qmail-multi(8),
 qmail-spamfilter(8),
 qmail-nullqueue(8),
-qmail-direct(8)
+qmail-direct(8),
+multi-queue(7),
+fsync(2),
+fdatasync(2),
+mq_open(3)

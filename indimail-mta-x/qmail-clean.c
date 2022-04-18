@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.14  2022-01-30 08:37:53+05:30  Cprogrammer
+ * made bigtodo configurable
+ *
  * Revision 1.13  2021-06-27 10:45:02+05:30  Cprogrammer
  * moved conf_split variable to fmtqfn.c
  *
@@ -95,8 +98,7 @@ respond(s)
 int
 main()
 {
-	int             i;
-	int             match;
+	int             i, match, bigtodo;
 	int             cleanuploop;
 	unsigned long   id;
 
@@ -106,6 +108,7 @@ main()
 		_exit(111);
 	sig_pipeignore();
 
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
@@ -152,13 +155,13 @@ main()
 		if (byte_equal(line.s, 5, "foop/")) {
 #define U(prefix,flag) fmtqfn(fnbuf,prefix,id,flag); \
 if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
-			U("intd/", 1)
+			U("intd/", bigtodo)
 			U("mess/", 1)
 			respond("+");
 		} else
 		if (byte_equal(line.s, 4, "todo/")) {
-			U("intd/", 1)
-			U("todo/", 1)
+			U("intd/", bigtodo)
+			U("todo/", bigtodo)
 			respond("+");
 		} else
 			respond("x");
@@ -169,7 +172,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.13 2021-06-27 10:45:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.14 2022-01-30 08:37:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

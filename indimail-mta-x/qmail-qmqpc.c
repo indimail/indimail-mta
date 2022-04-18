@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.25  2022-01-30 08:41:15+05:30  Cprogrammer
+ * removed unused function
+ *
  * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -143,12 +146,6 @@ no_return void
 die_socket()
 {
 	_exit(56);
-}
-
-no_return void
-die_home()
-{
-	_exit(61);
 }
 
 no_return void
@@ -395,7 +392,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.24 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.25 2022-01-30 08:41:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

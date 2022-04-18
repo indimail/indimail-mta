@@ -1,5 +1,267 @@
 /*
+ * $Id: qmail-rspawn.c,v 1.44 2022-03-05 13:34:54+05:30 Cprogrammer Exp mbhangui $
+ */
+#include <unistd.h>
+#include <fd.h>
+#include <str.h>
+#include <wait.h>
+#include <substdio.h>
+#include <error.h>
+#include <env.h>
+#include <fmt.h>
+#include <stralloc.h>
+#include "tcpto.h"
+#include "rcpthosts.h"
+#include "auto_control.h"
+#include "auto_prefix.h"
+#include "variables.h"
+#include "indimail_stub.h"
+
+
+static char *setup_qrargs()
+{
+	static char    *qrargs;
+	stralloc        q = {0};
+
+	if (!qrargs)
+		qrargs = env_get("QMAILREMOTE");
+	if (!qrargs) {
+		if (!stralloc_copys(&q, auto_prefix) ||
+				!stralloc_catb(&q, "/sbin/qmail-remote", 18) ||
+				!stralloc_0(&q))
+			return ((char *) NULL);
+		qrargs = q.s;
+	}
+	return qrargs;
+}
+
+void
+initialize_SPAWN(int argc, char **argv)
+{
+	tcpto_clean();
+}
+
+int             truncreport_SPAWN = 0;
+
+void
+report_SPAWN(substdio *ss, int wstat, char *s, int len)
+{
+	int             j;
+	int             k;
+	int             result;
+	int             orr;
+
+	if (wait_crashed(wstat)) {
+		substdio_puts(ss, "Zqmail-remote crashed.\n");
+		return;
+	}
+	switch (wait_exitcode(wstat))
+	{
+	case 0:
+		break;
+	case 111:
+		substdio_puts(ss, "ZUnable to run qmail-remote.\n");
+		return;
+	default:
+		substdio_puts(ss, "DUnable to run qmail-remote.\n");
+		return;
+	}
+	if (!len) {
+		substdio_puts(ss, "Zqmail-remote produced no output.\n");
+		return;
+	}
+	result = -1;
+	j = 0;
+	for (k = 0; k < len; ++k) {
+		if (!s[k]) {
+			if (s[j] == 'K') {
+				result = 1;
+				break;
+			}
+			if (s[j] == 'Z') {
+				result = 0;
+				break;
+			}
+			if (s[j] == 'D')
+				break;
+			j = k + 1;
+		}
+	}
+	orr = result;
+	switch (s[0])
+	{
+	case 's': /*- SMTP code >= 400 */
+		orr = 0;
+		break;
+	case 'h': /*- SMTP code >= 500 */
+		orr = -1;
+	case 'r': /*- SMTP code success */
+		break;
+	}
+
+	switch (orr)
+	{
+	case 1:
+		substdio_put(ss, "K", 1);
+		break;
+	case 0:
+		substdio_put(ss, "Z", 1);
+		break;
+	case -1:
+		substdio_put(ss, "D", 1);
+		break;
+	}
+	for (k = 1; k < len;) {
+		if (!s[k++]) {
+			substdio_puts(ss, s + 1);
+			if (result <= orr)
+				if (k < len)
+					switch (s[k])
+					{
+					case 'Z':
+					case 'D':
+					case 'K':
+						substdio_puts(ss, s + k + 1);
+					}
+			break;
+		}
+	}
+}
+
+int
+SPAWN(int fdmess, int fdout, unsigned long msgsize, char *s, char *qqeh, char *r, int at)
+{
+	int             f;
+	char           *ptr, *(args[7]);
+	char            size_buf[FMT_ULONG];
+#ifdef VIRTUAL_PKG
+	/*- indimail */
+	static stralloc libfn = { 0 };
+	int             i;
+	char           *ip, *real_domain, *libptr;
+	static char     smtproute[MAX_BUFF]; 
+	static int      rcptflag = 1;
+	extern void    *phandle;
+	int            *u_not_found;
+	int             (*is_distributed_domain) (char *);
+	char *          (*get_real_domain) (char *);
+	char *          (*findhost) (char *, int);
+#endif
+
+	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
+	args[0] = "qmail-remote";
+	args[1] = r + at + 1;		/*- domain */
+	args[2] = s;				/*- sender */
+	args[3] = qqeh;				/*- qqeh */
+	args[4] = size_buf;			/*- size */
+	args[5] = r;				/*- recipient */
+	args[6] = 0;
+
+#ifdef VIRTUAL_PKG
+	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!libfn.len) {
+			if (!stralloc_copys(&libfn, controldir))
+				return(-1);
+			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
+				return(-1);
+			if (!stralloc_catb(&libfn, "libindimail", 11) ||
+					!stralloc_0(&libfn))
+				return(-1);
+			}
+		libptr = libfn.s;
+	} else
+		libptr = "VIRTUAL_PKG_LIB";
+	loadLibrary(&phandle, libptr, &i, 0);
+	if (i)
+		return (-1);
+	if (!phandle)
+		goto noroutes;
+	*smtproute = 0;
+	if (!env_unset("SMTPROUTE"))
+		return (-1);
+	else
+	if (!env_unset("QMTPROUTE"))
+		return (-1);
+	/*
+	 * On SIGHUP have to figure out a way to set rcptflag to 0.
+	 * A new Distributed domain added will not work as distributed as
+	 * long as rcptflag is not reinitialized. Static smtproutes will
+	 * be used instead.
+	 */
+	if (!(ptr = env_get("ROUTES")))
+		goto noroutes;
+	if ((!str_diffn(ptr, "smtp", 4) || !str_diffn(ptr, "qmtp", 4))) {
+		if (rcptflag)
+			rcptflag = rcpthosts_init();
+		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
+			if (!(get_real_domain = getlibObject(libptr, &phandle, "get_real_domain", 0)))
+				return (-1);
+			if (!(is_distributed_domain = getlibObject(libptr, &phandle, "is_distributed_domain", 0)))
+				return (-1);
+			if (!(findhost = getlibObject(libptr, &phandle, "findhost", 0)))
+				return (-1);
+			if ((real_domain = (*get_real_domain) (r + at + 1))
+				&& ((*is_distributed_domain) (real_domain) == 1)) {
+				if ((ip = (*findhost) (r, 0)) != (char *) 0) {
+					i = fmt_str(smtproute, !str_diffn(ptr, "smtp", 4) ? "SMTPROUTE=" : "QMTPROUTE=");
+					i += fmt_strn(smtproute + i, ip, MAX_BUFF - 11);
+					if (i > MAX_BUFF - 1)
+						return (-1);
+					smtproute[i] = 0;
+					if (!env_put(smtproute))
+						return (-1);
+				} else {
+					if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
+						return (-1);
+					if (!*u_not_found) /*- temp MySQL error */
+						return (-2);
+				}
+			}
+		}
+	}
+noroutes:
+#endif
+	if (!env_unset("QMAILLOCAL"))
+		_exit(111);
+	if (!(f = vfork())) {
+#if 0
+		closeLibrary(&phandle);
+#endif
+		if (fd_move(0, fdmess) == -1)
+			_exit(111);
+		if (fd_move(1, fdout) == -1)
+			_exit(111);
+		if (fd_copy(2, 1) == -1)
+			_exit(111);
+		ptr = setup_qrargs();
+		if (chdir("/"))
+			_exit(111);
+		execvp(ptr, args);
+		if (error_temp(errno))
+			_exit(111);
+		_exit(100);
+	}
+	return f;
+}
+
+void
+getversion_qmail_rspawn_c()
+{
+	static char    *x = "$Id: qmail-rspawn.c,v 1.44 2022-03-05 13:34:54+05:30 Cprogrammer Exp mbhangui $";
+
+	if (x)
+		x++;
+}
+
+/*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.44  2022-03-05 13:34:54+05:30  Cprogrammer
+ * use auto_prefix/sbin for qmail-remote path
+ *
  * Revision 1.43  2021-06-29 09:29:09+05:30  Cprogrammer
  * modularize spawn code
  *
@@ -124,251 +386,3 @@
  * added SMTPROUTE bypass if env ROUTES is defined as static
  *
  */
-#include <unistd.h>
-#include "fd.h"
-#include "str.h"
-#include "wait.h"
-#include "substdio.h"
-#include "error.h"
-#include "tcpto.h"
-#include "env.h"
-#include "rcpthosts.h"
-#include "fmt.h"
-#include "stralloc.h"
-#include "auto_control.h"
-#include "variables.h"
-#include "auto_qmail.h"
-#include "indimail_stub.h"
-
-
-static char *setup_qrargs()
-{
-	static char *qrargs;
-	if (!qrargs)
-		qrargs = env_get("QMAILREMOTE");
-	if (!qrargs)
-		qrargs = "sbin/qmail-remote";
-	return qrargs;
-}
-
-void
-initialize_SPAWN(int argc, char **argv)
-{
-	tcpto_clean();
-}
-
-int             truncreport_SPAWN = 0;
-
-void
-report_SPAWN(substdio *ss, int wstat, char *s, int len)
-{
-	int             j;
-	int             k;
-	int             result;
-	int             orr;
-
-	if (wait_crashed(wstat)) {
-		substdio_puts(ss, "Zqmail-remote crashed.\n");
-		return;
-	}
-	switch (wait_exitcode(wstat))
-	{
-	case 0:
-		break;
-	case 111:
-		substdio_puts(ss, "ZUnable to run qmail-remote.\n");
-		return;
-	default:
-		substdio_puts(ss, "DUnable to run qmail-remote.\n");
-		return;
-	}
-	if (!len) {
-		substdio_puts(ss, "Zqmail-remote produced no output.\n");
-		return;
-	}
-	result = -1;
-	j = 0;
-	for (k = 0; k < len; ++k) {
-		if (!s[k]) {
-			if (s[j] == 'K') {
-				result = 1;
-				break;
-			}
-			if (s[j] == 'Z') {
-				result = 0;
-				break;
-			}
-			if (s[j] == 'D')
-				break;
-			j = k + 1;
-		}
-	}
-	orr = result;
-	switch (s[0])
-	{
-	case 's': /*- SMTP code >= 400 */
-		orr = 0;
-		break;
-	case 'h': /*- SMTP code >= 500 */
-		orr = -1;
-	case 'r': /*- SMTP code success */
-		break;
-	}
-
-	switch (orr)
-	{
-	case 1:
-		substdio_put(ss, "K", 1);
-		break;
-	case 0:
-		substdio_put(ss, "Z", 1);
-		break;
-	case -1:
-		substdio_put(ss, "D", 1);
-		break;
-	}
-	for (k = 1; k < len;) {
-		if (!s[k++]) {
-			substdio_puts(ss, s + 1);
-			if (result <= orr)
-				if (k < len)
-					switch (s[k])
-					{
-					case 'Z':
-					case 'D':
-					case 'K':
-						substdio_puts(ss, s + k + 1);
-					}
-			break;
-		}
-	}
-}
-
-int
-SPAWN(int fdmess, int fdout, unsigned long msgsize, char *s, char *qqeh, char *r, int at)
-{
-	int             f;
-	char           *ptr, *(args[7]);
-	char            size_buf[FMT_ULONG];
-#ifdef VIRTUAL_PKG
-	/*- indimail */
-	static stralloc libfn = { 0 };
-	int             i;
-	char           *ip, *real_domain, *libptr;
-	static char     smtproute[MAX_BUFF]; 
-	static int      rcptflag = 1;
-	extern void    *phandle;
-	int            *u_not_found;
-	int             (*is_distributed_domain) (char *);
-	char *          (*get_real_domain) (char *);
-	char *          (*findhost) (char *, int);
-#endif
-
-	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
-	args[0] = "sbin/qmail-remote";
-	args[1] = r + at + 1;		/*- domain */
-	args[2] = s;				/*- sender */
-	args[3] = qqeh;				/*- qqeh */
-	args[4] = size_buf;			/*- size */
-	args[5] = r;				/*- recipient */
-	args[6] = 0;
-
-#ifdef VIRTUAL_PKG
-	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!libfn.len) {
-			if (!stralloc_copys(&libfn, controldir))
-				return(-1);
-			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
-				return(-1);
-			if (!stralloc_catb(&libfn, "libindimail", 11) ||
-					!stralloc_0(&libfn))
-				return(-1);
-			}
-		libptr = libfn.s;
-	} else
-		libptr = "VIRTUAL_PKG_LIB";
-	loadLibrary(&phandle, libptr, &i, 0);
-	if (i)
-		return (-1);
-	if (!phandle)
-		goto noroutes;
-	*smtproute = 0;
-	if (!env_unset("SMTPROUTE"))
-		return (-1);
-	else
-	if (!env_unset("QMTPROUTE"))
-		return (-1);
-	/*
-	 * On SIGHUP have to figure out a way to set rcptflag to 0.
-	 * A new Distributed domain added will not work as distributed as
-	 * long as rcptflag is not reinitialized. Static smtproutes will
-	 * be used instead.
-	 */
-	if (!(ptr = env_get("ROUTES")))
-		goto noroutes;
-	if ((!str_diffn(ptr, "smtp", 4) || !str_diffn(ptr, "qmtp", 4))) {
-		if (rcptflag)
-			rcptflag = rcpthosts_init();
-		if (!rcptflag && (f = rcpthosts(r, str_len(r), 0)) == 1) {
-			if (!(get_real_domain = getlibObject(libptr, &phandle, "get_real_domain", 0)))
-				return (-1);
-			if (!(is_distributed_domain = getlibObject(libptr, &phandle, "is_distributed_domain", 0)))
-				return (-1);
-			if (!(findhost = getlibObject(libptr, &phandle, "findhost", 0)))
-				return (-1);
-			if ((real_domain = (*get_real_domain) (r + at + 1))
-				&& ((*is_distributed_domain) (real_domain) == 1)) {
-				if ((ip = (*findhost) (r, 0)) != (char *) 0) {
-					i = fmt_str(smtproute, !str_diffn(ptr, "smtp", 4) ? "SMTPROUTE=" : "QMTPROUTE=");
-					i += fmt_strn(smtproute + i, ip, MAX_BUFF - 11);
-					if (i > MAX_BUFF - 1)
-						return (-1);
-					smtproute[i] = 0;
-					if (!env_put(smtproute))
-						return (-1);
-				} else {
-					if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
-						return (-1);
-					if (!*u_not_found) /*- temp MySQL error */
-						return (-2);
-				}
-			}
-		}
-	}
-noroutes:
-#endif
-	if (!env_unset("QMAILLOCAL"))
-		_exit(111);
-	if (!(f = vfork())) {
-#if 0
-		closeLibrary(&phandle);
-#endif
-		if (fd_move(0, fdmess) == -1)
-			_exit(111);
-		if (fd_move(1, fdout) == -1)
-			_exit(111);
-		if (fd_copy(2, 1) == -1)
-			_exit(111);
-		ptr = setup_qrargs();
-		if (chdir(auto_qmail))
-			_exit(111);
-		execvp(ptr, args);
-		if (error_temp(errno))
-			_exit(111);
-		_exit(100);
-	}
-	return f;
-}
-
-void
-getversion_qmail_rspawn_c()
-{
-	static char    *x = "$Id: qmail-rspawn.c,v 1.43 2021-06-29 09:29:09+05:30 Cprogrammer Exp mbhangui $";
-
-	if (x)
-		x++;
-}

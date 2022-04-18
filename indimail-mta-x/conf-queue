@@ -1,7 +1,12 @@
--DMULTI_QUEUE -DQUEUE_START=1 -DQUEUE_COUNT=20
+-DMULTI_QUEUE -DQUEUE_START=1 -DQUEUE_COUNT=10 -DQUEUE_MAX=20 -DQUEUE_LOAD=90
 
 # MULTI_QUEUE makes indimail use multiple queues.
+# QUEUE_START defines the first queue that should be used
 # QUEUE_COUNT is the upper limit on the number of queue that
-# qmail-qread(8), qmail-multi(8), qmail-daemon(8), qmail-tcpok(8),
-# qmail-tcpto(8) will process in the absence of QUEUE_COUNT
-# environment variable.
+# qmail-qread(8), qmail-multi(8), qscheduler(8), qmail-tcpok(8),
+# qmail-tcpto(8) that qscheduler can use for deliveries when static queues
+# is configured
+# QUEUE_MAX defines the maximum queues that qscheduler can use for
+# deliveries when dynamic queues is configured
+# QUEUE_LOAD is the ratio of concurrencyused to concurrency configured
+# when reached, qscheduler should increase the queue count

@@ -37,6 +37,10 @@ f:::0644:/man1/:condredirect.1:condredirect.1
 f:::0644:/man1/:condtomaildir.1:condtomaildir.1
 f:::0644:/man1/:datemail.1:datemail.1
 f:::0644:/man1/:dnstlsarr.1:dnstlsarr.1
+f:::0644:/man1/:dnscname.1:dnscname.1
+f:::0644:/man1/:dnsfq.1:dnsfq.1
+f:::0644:/man1/:dnsmxip.1:dnsmxip.1
+f:::0644:/man1/:dnsptr.1:dnsptr.1
 f:::0644:/man1/:dot-forward.1:dot-forward.1
 f:::0644:/man1/:drate.1:drate.1
 f:::0644:/man1/:except.1:except.1
@@ -95,6 +99,7 @@ f:::0644:/man1/:udpclient.1:udpclient.1
 f:::0644:/man1/:xqp.1:xqp.1
 f:::0644:/man1/:xrecipient.1:xrecipient.1
 f:::0644:/man1/:xsender.1:xsender.1
+f:::0644:/man1/:qtop.1:qtop.1
 f:::0644:/man3/:greylist.3:greylist.3
 f:::0644:/man3/:plugin_init.3:plugin_init.3
 f:::0644:/man3/:tlsacheck.3:tlsacheck.3
@@ -132,6 +137,7 @@ f:::0644:/man5/:tcp-environ.5:tcp-environ.5
 f:::0644:/man7/:forgeries.7:forgeries.7
 f:::0644:/man7/:qmail.7:qmail.7
 f:::0644:/man7/:qmail-limits.7:qmail-limits.7
+f:::0644:/man7/:multi-queue.7:multi-queue.7
 f:::0644:/man8/:cdb-database.8:cdb-database.8
 f:::0644:/man8/:cleanq.8:cleanq.8
 f:::0644:/man8/:ctrlenv.8:ctrlenv.8
@@ -149,7 +155,9 @@ f:::0644:/man8/:qhpsi.8:qhpsi.8
 f:::0644:/man8/:qmail-cdb.8:qmail-cdb.8
 f:::0644:/man8/:qmail-clean.8:qmail-clean.8
 f:::0644:/man8/:qmail-command.8:qmail-command.8
-f:::0644:/man8/:qmail-daemon.8:qmail-daemon.8
+f:::0644:/man8/:qscheduler.8:qscheduler.8
+f:::0644:/man8/:qmonitor.8:qmonitor.8
+f:::0644:/man8/:setqload.8:setqload.8
 f:::0644:/man8/:qmail-daned.8:qmail-daned.8
 f:::0644:/man8/:qmail-dk.8:qmail-dk.8
 f:::0644:/man8/:qmail-dkim.8:qmail-dkim.8

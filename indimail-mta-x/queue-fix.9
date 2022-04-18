@@ -2,7 +2,7 @@
 .SH NAME
 queue-fix \- Create or Repair a qmail queue structure
 .SH SYNOPSIS
-\fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBr\fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
+\fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBr\fR -\fBb\fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
 
 .SH DESCRIPTION
 \fBqueue-fix\fR is a small utility for checking and repairing the qmail queue
@@ -28,6 +28,10 @@ Interactive mode
 \fB\-N\fR
 Test mode. This option will report inconsistencies in the queue and 
 not make any changes.
+
+.TP
+\fB\-b\fR
+Create \fItodo\fR and \fIintd\fR directory with queue subdirectory split.
 
 .TP
 \fB\-s\fR \fIsplit\fR

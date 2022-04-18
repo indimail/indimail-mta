@@ -163,13 +163,18 @@ o setuidgid: Feature to set additional groups using -g option
 - 02/01/2022
 69. softlimit.c: added -q option for setting message queue size
 - 30/01/2022
-70. added missing '/' in display
+70. inotify.c: added missing '/' in display
+- 25/02/2022
+71. softlimit.c: Use -1 to set resource limit as unlimited
+72. added missing '/' in display
 - 06/03/2022
-71. svps.in: fix for FreeBSD (stat command usage)
+73. svps.in: fix for FreeBSD (stat command usage)
 - 17/03/2022
-72. qmailctl.sh: Fix restart on FreeBSD
+74. qmailctl.sh: Fix restart on FreeBSD
 - 18/03/2022
-73. svps.in: added -h,--HUP option to send HUP to svscan
+75. svps.in: added -h,--HUP option to send HUP to svscan
+- 20/03/2022
+76. multilog.c: Added NOFSYNC env variable to turn off fsync
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

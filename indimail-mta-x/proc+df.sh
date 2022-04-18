@@ -5,5 +5,5 @@
 # Using procmail to deliver messages to /var/spool/mail/$USER by default.
 
 exec env - PATH="PREFIX/bin:$PATH" \
-qmail-daemon '|dot-forward .forward
+qscheduler '|dot-forward .forward
 |preline procmail' splogger qmail

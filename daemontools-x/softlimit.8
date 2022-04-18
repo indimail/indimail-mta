@@ -23,7 +23,12 @@ In each of the following
 .IB opts ,
 .I n
 may be =, indicating that the soft limit should be set equal to the hard
-limit. 
+limit.
+
+In each of the following
+.IB opts ,
+.I n
+may be -1, indicating that soft limit be unlimited.
 
 .I opts
 .B controlling memory use: 
@@ -68,6 +73,11 @@ This option has no effect on some operating systems.
 .B \-p \fIn
 Limit the number of processes per uid to
 .IR n .
+.TP
+.B \-q \fIn
+Limit the number of bytes in POSIX message queues to
+.I n
+bytes. This option has no effect on some operating systems.
 .P
 .I opts
 .B controlling file sizes: 

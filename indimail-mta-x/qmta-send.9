@@ -58,7 +58,7 @@ recipients and \fBqmail-remote\fR to deliver messages to remote recipients.
 If a message is temporarily undeliverable to one or more addresses,
 \fBqmta-send\fR leaves it in the queue and tries the addresses again later.
 
-\fBqmta-send\fR uses \fBqmail-queue\fR to queue bounces and
+\fBqmta-send\fR uses \fBqmail-queue\fR(8) to queue bounces and
 aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
 variable. If a different queue program is desired for bounces, it can be set
 by using \fBBOUNCEQUEUE\fR environment variable.
@@ -89,21 +89,25 @@ until the device reports that the transfer has completed. This is done
 for the info and mess files. This can also be set by using \fIconf-fsync\fR
 control file.
 
-If the environment variable USE_SYNCDIR is enabled, \fBqmta-send\fR
+If the environment variable \fBUSE_FDATASYNC\fR is enabled,
+\fBqmta-send\fR uses fdatasync(2) instead of fsync(2). This can also be
+set by using \fIconf-fdatasync\fR control file.
+
+If the environment variable \fBUSE_SYNCDIR\fR is enabled, \fBqmta-send\fR
 forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
 
-The control files conf-syncdir, conf-fsync take precedence over
-the environment variable counterparts. If the control conf-fsync,
-conf-syncdir are present, \fBqmta-send\fR will additionally set
-or unset the environment variables USE_FSYNC, USE_SYNCDIR. This feature
-is exploited by \fBqmail-local(8)\fR. The fsync(2) system call is
-used for doing this.
+if the value of the environment variables USE_FSYNC, USE_FDATASYNC,
+USE_SYNCDIR  is zero, the corresponding variables is unset. This allows
+setting of these variables for \fBqmail-local\fR(8).
 
 \fBqmta-send\fR can process messages queued by clients with differing
 split directory value. The only required is that \fBqmta-send\fR should
 be running with a higher split dir value than that of the client. You
 can use the \fB-s\fR option to run with any split dir value.
+\fBqmta-send\fR can process queues with or without the \fItodo\fR,
+\fIintd\fR having subdirectory split. Set the environment variable
+\fBBIGTODO\fR to process a big \fItodo\fR, \fIintd\fR subdirectory.
 
 If running as non-root \fBqmta-send\fR uses environment set according to
 files $HOME/.defaultqueue directory. If running as root and if
@@ -119,6 +123,10 @@ daemon mode. Run continuously in the background.
 \fB\-l\fR
 use qmail-lspawn to spawn local deliveries instead of built-in spawn
 function
+
+.TP
+\fB\-b\fR
+Process \fItodo\fR, \fIintd\fR as having subdirectory split.
 
 .TP
 \fB\-r\fR
@@ -152,10 +160,14 @@ If
 receives a HUP signal,
 it will reread
 .IR concurrencylocal ,
+.IR concurrencyl.qmta ,
 .IR concurrencyremote ,
+.IR concurrencyr.qmta ,
 .IR locals ,
 .IR virtualdomains ,
 .IR todointerval ,
+.IR holdlocal ,
+.IR holdremote ,
 .IR envnoathost ,
 .IR conf-syncdir ,
 and
@@ -247,11 +259,33 @@ If 0, local deliveries will be put on hold.
 is limited at compile time to SPAWN.
 
 .TP 5
+.I concurrencyl.qmta
+Maximum number of simultaneous local delivery attempts for the queue
+\fIqmta\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
+variable, referring to the path of the queue. Here \fIqmta\fR refers to
+the basename of the queue path.
+Default: 10.
+If 0, local deliveries will be put on hold.
+.I concurrencyl.qmta
+is limited at compile time to SPAWN.
+
+.TP 5
 .I concurrencyremote
 Maximum number of simultaneous remote delivery attempts.
 Default: 20.
 If 0, remote deliveries will be put on hold.
 .I concurrencyremote
+is limited at compile time to SPAWN.
+
+.TP 5
+.I concurrencyr.qmta
+Maximum number of simultaneous remote delivery attempts for the queue
+\fIqmta\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
+variable, referring to the path of the queue. Here \fIqmta\fR refers to
+the basename of the queue path.
+Default: 20.
+If 0, remote deliveries will be put on hold.
+.I concurrencyr.qmta
 is limited at compile time to SPAWN.
 
 .TP 5
@@ -413,6 +447,26 @@ if a domain is listed in
 .IR locals ,
 .I virtualdomains
 does not apply.
+
+.TP 5
+.I holdlocal
+A boolean parameter indicating whether mail for local
+hosts should be queued without delivery.  Zero indicates
+delivery as normal; any other value causes local mail to
+be held.
+Default:
+.IR zero
+
+.TP 5
+.I holdremote
+A boolean parameter indicating whether mail for remote
+hosts should be queued without delivery.  Zero indicates
+delivery as normal; any other value causes remote mail to
+be held.  This is provided to permit use of qmail in a 
+dial-up environment when the remote delivery path may not
+always be available, as an alternative to the use of serialmail.
+Default:
+.IR zero
 
 .TP 5
 .I todointerval
@@ -644,7 +698,7 @@ drate(1),
 qmail-start(8),
 slowq-start(8),
 slowq-send(8),
-qmail-daemon(8),
+qscheduler(8),
 qmail-send(8),
 qmail-todo(8),
 qmail-clean(8),
@@ -652,4 +706,5 @@ qmail-lspawn(8),
 qmail-dkim(8),
 dk-filter(8),
 qmail-rspawn(8),
-fsync(2)
+fsync(2),
+fdatasync(2)

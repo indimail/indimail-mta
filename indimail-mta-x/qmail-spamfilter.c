@@ -1,5 +1,14 @@
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.5  2022-04-03 18:44:36+05:30  Cprogrammer
+ * refactored qmail_open() error codes
+ *
+ * Revision 1.4  2022-03-05 13:35:30+05:30  Cprogrammer
+ * use auto_prefix/sbin for qscanq path
+ *
+ * Revision 1.3  2022-01-30 09:14:32+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
  * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -17,10 +26,10 @@
 #include <fmt.h>
 #include <wait.h>
 #include <error.h>
-#include "auto_qmail.h"
 #include <makeargs.h>
 #include <mktempfile.h>
 #include <noreturn.h>
+#include "auto_prefix.h"
 #include "qmulti.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
@@ -45,12 +54,12 @@ main(int argc, char **argv)
 	int             pipefd[2], recpfd[2];
 	pid_t           filt_pid, queuepid;
 	struct substdio ssin, ssout;
-	stralloc        spamfilterargs = { 0 };
+	stralloc        spamfilterargs = { 0 }, q = { 0 };
 	char            inbuf[2048], outbuf[2048];
 	char           *ptr, *makeseekable, *spamf;
 	char          **Argv;
 
-	if (chdir(auto_qmail) == -1)
+	if (chdir("/") == -1)
 		_exit(61);
 	sig_pipeignore();
 	sig_miscignore();
@@ -60,7 +69,10 @@ main(int argc, char **argv)
 	if ((ptr = env_get("VIRUSCHECK")) && *ptr) {
 		scan_int(ptr, &n);
 		if (1 < n && 8 > n) {
-			execv("sbin/qscanq", argv);
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/sbin/qscanq", 12) ||
+					!stralloc_0(&q))
+			execv(q.s, argv);
 			_exit(75);
 		}
 	}
@@ -223,7 +235,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.2 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.5 2022-04-03 18:44:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;

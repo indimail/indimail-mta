@@ -1,5 +1,11 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.23  2022-03-16 20:01:53+05:30  Cprogrammer
+ * added log5_noflush() function
+ *
+ * Revision 1.22  2022-01-30 09:28:08+05:30  Cprogrammer
+ * print program name in logs
+ *
  * Revision 1.21  2021-10-22 14:00:10+05:30  Cprogrammer
  * added ident argument to loglock_open() for identification in logs
  *
@@ -117,7 +123,7 @@ loglock_open(char *ident, int preopen)
 				|| !stralloc_append(&lockfn, "/")
 				|| !stralloc_catb(&lockfn, "/defaultdelivery", 16)
 				|| !stralloc_0(&lockfn))
-			nomem();
+			nomem(ident);
 		if ((loglock_fd = open_read(lockfn.s)) == -1) {
 			if (queuedesc)
 				log5("alert: ", ident, ": ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
@@ -220,6 +226,16 @@ log4_noflush(char *s1, char *s2, char *s3, char *s4)
 	substdio_puts(&sserr, s2);
 	substdio_puts(&sserr, s3);
 	substdio_puts(&sserr, s4);
+}
+
+void
+log5_noflush(char *s1, char *s2, char *s3, char *s4, char *s5)
+{
+	substdio_puts(&sserr, s1);
+	substdio_puts(&sserr, s2);
+	substdio_puts(&sserr, s3);
+	substdio_puts(&sserr, s4);
+	substdio_puts(&sserr, s5);
 }
 
 void
@@ -443,12 +459,12 @@ log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, size_t bytes)
 }
 
 void
-nomem()
+nomem(char *argv0)
 {
 	if (queuedesc)
-		log3("alert: ", queuedesc, ": out of memory, sleeping...\n");
+		log5("alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n");
 	else
-		log1("alert: out of memory, sleeping...\n");
+		log3("alert: ", argv0, ": out of memory, sleeping...\n");
 	sleep(10);
 }
 
@@ -469,12 +485,12 @@ issafe(char ch)
 }
 
 void
-logsafe_noflush(char *s)
+logsafe_noflush(char *s, char *argv0)
 {
 	int             i;
 
 	while (!stralloc_copys(&foo, s))
-		nomem();
+		nomem(argv0);
 	for (i = 0; i < foo.len; ++i)
 		if (foo.s[i] == '\n')
 			foo.s[i] = '/';
@@ -485,12 +501,12 @@ logsafe_noflush(char *s)
 }
 
 void
-logsafe(char *s)
+logsafe(char *s, char *argv0)
 {
 	int             i;
 
 	while (!stralloc_copys(&foo, s))
-		nomem();
+		nomem(argv0);
 	for (i = 0; i < foo.len; ++i)
 		if (foo.s[i] == '\n')
 			foo.s[i] = '/';
@@ -503,7 +519,7 @@ logsafe(char *s)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.21 2021-10-22 14:00:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.23 2022-03-16 20:01:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

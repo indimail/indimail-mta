@@ -1,5 +1,230 @@
 /*
+ * $Id: qmulti.c,v 1.62 2022-03-31 00:07:03+05:30 Cprogrammer Exp mbhangui $
+ */
+#include <unistd.h>
+#include "haslibrt.h"
+#ifdef HASLIBRT
+#include <str.h>
+#endif
+#include <env.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <now.h>
+#include <fmt.h>
+#include <scan.h>
+#include <error.h>
+#include <noreturn.h>
+#ifdef sun
+#include <sys/types.h>
+#include <sys/statvfs.h>
+#elif defined(DARWIN) || defined(FREEBSD)
+#include <sys/param.h>
+#include <sys/mount.h>
+#elif defined(linux)
+#include <sys/vfs.h>
+#endif
+#include "auto_qmail.h"
+#include "auto_prefix.h"
+#include "control.h"
+#include "getqueue.h"
+#include "qmulti.h"
+
+int
+getfreespace(char *filesystem)
+{
+	unsigned long   quota_size, u;
+	char           *ptr;
+#ifdef sun
+	struct statvfs  statbuf;
+#else
+	struct statfs   statbuf;
+#endif
+
+	if (!(ptr = env_get("MIN_FREE")))
+		return (0);
+#ifdef sun
+	if (statvfs(filesystem, &statbuf))
+#else
+	if (statfs(filesystem, &statbuf))
+#endif
+		return (-1);
+	quota_size = ((statbuf.f_bavail / 1024) * (statbuf.f_bsize / 1024));
+	scan_ulong(ptr, &u);
+	if (quota_size < (u / (1024 * 1024)))
+		return (1);
+	return (0);
+}
+
+no_return int
+qmulti(char *queue_env, int argc, char **argv)
+{
+	char            strnum[FMT_ULONG];
+	char           *ptr, *qbase;
+	int             i, queueNo;
+	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
+	char           *qqargs[3] = { 0, 0, NULL };
+	char           *binqqargs[2] = { 0, NULL };
+	stralloc        q = {0};
+
+	if (chdir("/") == -1)
+		_exit(63);
+	if (queue_env && (ptr = env_get(queue_env)) && *ptr) {
+		binqqargs[0] = ptr;
+		execv(*binqqargs, binqqargs);
+		_exit(120);
+	}
+	if (!(ptr = env_get("QUEUEDIR"))) {
+		if (!(qbase = env_get("QUEUE_BASE"))) {
+			switch (control_readfile(&QueueBase, "queue_base", 0))
+			{
+			case -1:
+				_exit(55);
+				break;
+			case 0:
+				if (!stralloc_copys(&QueueBase, auto_qmail) ||
+						!stralloc_catb(&QueueBase, "/queue", 6) ||
+						!stralloc_0(&QueueBase))
+					_exit(51);
+				qbase = QueueBase.s;
+				break;
+			case 1:
+				qbase = QueueBase.s;
+				break;
+			}
+		}
+#ifdef HASLIBRT
+		i = str_rchr(argv[0], '/');
+		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
+		if (!(env_get("DYNAMIC_QUEUE")))
+			queueNo = queueNo_from_env();
+		else {
+			if ((queueNo = queueNo_from_shm(ptr)) == -1)
+				queueNo = queueNo_from_env();
+		}
+#else
+		queueNo = queueNo_from_env();
+#endif
+		if (!stralloc_copys(&Queuedir, "QUEUEDIR=") ||
+				!stralloc_cats(&Queuedir, qbase) ||
+				!stralloc_cats(&Queuedir, "/queue") ||
+				!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) queueNo)) ||
+				!stralloc_0(&Queuedir))
+			_exit(51);
+		env_put(Queuedir.s);
+		ptr = Queuedir.s + 9;
+	}
+	qqargs[1] = ptr;
+	switch (getfreespace(ptr))
+	{
+	case -1:
+		_exit(55);
+	case 1: /*- Disk full */
+		_exit(53);
+	}
+	if ((ptr = env_get("QUEUEPROG"))) {
+		argv[0] = qqargs[0] = ptr;
+		execv(*qqargs, argv);
+	} else {
+		if (!stralloc_copys(&q, auto_prefix) ||
+				!stralloc_catb(&q, "/sbin/qmail-queue", 17) ||
+				!stralloc_0(&q))
+			_exit(51);
+		qqargs[0] = q.s;
+		execv(*qqargs, qqargs);
+	}
+	_exit(120);
+}
+
+int
+discard_envelope()
+{
+	char            buffer[2048];
+	int             n, total = 0;
+
+	/*- discard envelope and empty smtp's pipe */
+	for (;;) {
+		if (!(n = read(1, buffer, sizeof (buffer))))
+			break;
+		if (n == -1) {
+			if (errno == error_intr)
+				continue;
+			return (54);
+		}
+		total += sizeof (buffer);
+	}
+	if (!total)
+		return (54);
+	return (0);
+}
+
+/*
+ * Returns
+ * 1 if envelope was rewritten
+ * 0 if no rewriting has happened
+ * > 1 on error
+ */
+int
+rewrite_envelope(int outfd)
+{
+	static stralloc notifyaddress = { 0 };
+	struct substdio ssout;
+	int             n;
+	char            buffer[2048];
+	char           *ptr;
+
+	if (!(ptr = env_get("SPAMREDIRECT"))) {
+		if (control_readline(&notifyaddress, "globalspamredirect") == -1)
+			return (55);
+	} else
+	if (!stralloc_copys(&notifyaddress, ptr))
+		_exit(51);
+	if (!notifyaddress.len)
+		return (0);
+	if ((n = discard_envelope()))
+		return (n);
+	substdio_fdbuf(&ssout, write, outfd, buffer, sizeof (buffer));
+	if (substdio_bput(&ssout, "F", 1) == -1 ||
+			substdio_bput(&ssout, "\0", 1) == -1 ||
+			substdio_bput(&ssout, "T", 1) == -1 ||
+			substdio_bput(&ssout, notifyaddress.s, notifyaddress.len) == -1 ||
+			substdio_bput(&ssout, "\0", 1) == -1 ||
+			substdio_bput(&ssout, "\0", 1) == -1 ||
+			substdio_flush(&ssout) == -1)
+		return (53);
+	return (1);
+}
+
+#ifndef	lint
+void
+getversion_qmulti_c()
+{
+	static char    *x = "$Id: qmulti.c,v 1.62 2022-03-31 00:07:03+05:30 Cprogrammer Exp mbhangui $";
+
+	x = sccsidqmultih;
+	x++;
+}
+#endif
+
+/*
  * $Log: qmulti.c,v $
+ * Revision 1.62  2022-03-31 00:07:03+05:30  Cprogrammer
+ * removed starttime argument to queueNo_from_env(), queueNo_from_shm()
+ *
+ * Revision 1.61  2022-03-27 20:22:29+05:30  Cprogrammer
+ * moved queueNo_from_env(), queueNo_from_shm() to getqueue.c
+ *
+ * Revision 1.60  2022-03-12 13:58:23+05:30  Cprogrammer
+ * use static queue if /qscheduler shared memory doesn't exist
+ *
+ * Revision 1.59  2022-03-08 23:00:22+05:30  Cprogrammer
+ * use custom_error() from custom_error.c
+ *
+ * Revision 1.58  2022-03-05 13:07:14+05:30  Cprogrammer
+ * use IPC as another method for queues in addition to lock/trigger
+ * added haslibrt.h to configure dynamic queue
+ * make queue directory as the second argument to qmail-queue
+ * use auto_prefix/sbin for qmail-queue path
+ *
  * Revision 1.57  2021-10-21 12:41:36+05:30  Cprogrammer
  * eliminated extra variables
  *
@@ -164,192 +389,3 @@
  * added code to calculate free space on filesystem before accepting mail
  *
  */
-#include <unistd.h>
-#include <env.h>
-#include <stralloc.h>
-#include <substdio.h>
-#include <datetime.h>
-#include <now.h>
-#include <fmt.h>
-#include <scan.h>
-#include <error.h>
-#include <noreturn.h>
-#ifdef sun
-#include <sys/types.h>
-#include <sys/statvfs.h>
-#elif defined(DARWIN) || defined(FREEBSD)
-#include <sys/param.h>
-#include <sys/mount.h>
-#elif defined(linux)
-#include <sys/vfs.h>
-#endif
-#include "auto_qmail.h"
-#include "control.h"
-#include "qmulti.h"
-
-#if !defined(QUEUE_COUNT)
-#define QUEUE_COUNT 10
-#endif
-
-int
-getfreespace(char *filesystem)
-{
-	unsigned long   quota_size, u;
-	char           *ptr;
-#ifdef sun
-	struct statvfs  statbuf;
-#else
-	struct statfs   statbuf;
-#endif
-
-	if (!(ptr = env_get("MIN_FREE")))
-		return (0);
-#ifdef sun
-	if (statvfs(filesystem, &statbuf))
-#else
-	if (statfs(filesystem, &statbuf))
-#endif
-		return (-1);
-	quota_size = ((statbuf.f_bavail / 1024) * (statbuf.f_bsize / 1024));
-	scan_ulong(ptr, &u);
-	if (quota_size < (u / (1024 * 1024)))
-		return (1);
-	return (0);
-}
-
-no_return int
-qmulti(char *queue_env, int argc, char **argv)
-{
-	datetime_sec    queueNo;
-	char            strnum[FMT_ULONG];
-	char           *qqargs[2] = { 0, 0 };
-	char           *ptr, *qbase;
-	int             qcount, qstart;
-	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
-	char           *binqqargs[2] = { "sbin/qmail-multi", 0 };
-
-	if (chdir(auto_qmail) == -1)
-		_exit(61);
-	if (queue_env && (ptr = env_get(queue_env)) && *ptr) {
-		binqqargs[0] = ptr;
-		execv(*binqqargs, binqqargs);
-		_exit(120);
-	}
-	if (!(ptr = env_get("QUEUEDIR"))) {
-		if (!(ptr = env_get("QUEUE_COUNT")))
-			qcount = QUEUE_COUNT;
-		else
-			scan_int(ptr, &qcount);
-		if (!(ptr = env_get("QUEUE_START")))
-			qstart = 1;
-		else
-			scan_int(ptr, &qstart);
-		if (!(qbase = env_get("QUEUE_BASE"))) {
-			switch (control_readfile(&QueueBase, "queue_base", 0))
-			{
-			case -1:
-				_exit(55);
-				break;
-			case 0:
-				if (!stralloc_copys(&QueueBase, auto_qmail) ||
-						!stralloc_catb(&QueueBase, "/queue", 6) ||
-						!stralloc_0(&QueueBase))
-					_exit(51);
-				qbase = QueueBase.s;
-				break;
-			case 1:
-				qbase = QueueBase.s;
-				break;
-			}
-		}
-		queueNo = (now() % qcount) + qstart;
-		if (!stralloc_copys(&Queuedir, "QUEUEDIR=") ||
-				!stralloc_cats(&Queuedir, qbase) ||
-				!stralloc_cats(&Queuedir, "/queue") ||
-				!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) queueNo)) ||
-				!stralloc_0(&Queuedir))
-			_exit(51);
-		env_put(Queuedir.s);
-		ptr = Queuedir.s + 9;
-	}
-	switch (getfreespace(ptr))
-	{
-	case -1:
-		_exit(55);
-	case 1: /*- Disk full */
-		_exit(53);
-	}
-	if (!(qqargs[0] = env_get("QUEUEPROG")))
-		qqargs[0] = "sbin/qmail-queue";
-	execv(*qqargs, argv);
-	_exit(120);
-}
-
-int
-discard_envelope()
-{
-	char            buffer[2048];
-	int             n, total = 0;
-
-	/*- discard envelope and empty smtp's pipe */
-	for (;;) {
-		if (!(n = read(1, buffer, sizeof (buffer))))
-			break;
-		if (n == -1) {
-			if (errno == error_intr)
-				continue;
-			return (54);
-		}
-		total += sizeof (buffer);
-	}
-	if (!total)
-		return (54);
-	return (0);
-}
-
-/*
- * Returns
- * 1 if envelope was rewritten
- * 0 if no rewriting has happened
- * > 1 on error
- */
-int
-rewrite_envelope(int outfd)
-{
-	static stralloc notifyaddress = { 0 };
-	struct substdio ssout;
-	int             n;
-	char            buffer[2048];
-	char           *ptr;
-
-	if (!(ptr = env_get("SPAMREDIRECT"))) {
-		if (control_readline(&notifyaddress, "globalspamredirect") == -1)
-			return (55);
-	} else if (!stralloc_copys(&notifyaddress, ptr))
-		_exit(51);
-	if (!notifyaddress.len)
-		return (0);
-	if ((n = discard_envelope()))
-		return (n);
-	substdio_fdbuf(&ssout, write, outfd, buffer, sizeof (buffer));
-	if (substdio_bput(&ssout, "F", 1) == -1 ||
-			substdio_bput(&ssout, "\0", 1) == -1 ||
-			substdio_bput(&ssout, "T", 1) == -1 ||
-			substdio_bput(&ssout, notifyaddress.s, notifyaddress.len) == -1 ||
-			substdio_bput(&ssout, "\0", 1) == -1 ||
-			substdio_bput(&ssout, "\0", 1) == -1 ||
-			substdio_flush(&ssout) == -1)
-		return (53);
-	return (1);
-}
-
-#ifndef	lint
-void
-getversion_qmulti_c()
-{
-	static char    *x = "$Id: qmulti.c,v 1.57 2021-10-21 12:41:36+05:30 Cprogrammer Exp mbhangui $";
-
-	x = sccsidqmultih;
-	x++;
-}
-#endif

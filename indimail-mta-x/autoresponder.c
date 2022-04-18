@@ -1,5 +1,8 @@
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.36  2022-01-30 08:28:42+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
  * Revision 1.35  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -127,7 +130,8 @@
 #include "ipme.h"
 #include "quote.h"
 #include "control.h"
-#include "auto_qmail.h"
+#include "auto_sysconfdir.h"
+#include "auto_prefix.h"
 
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -710,6 +714,7 @@ int
 popen_inject(char *sender)
 {
 	char           *(args[6]);
+	stralloc        bin = {0};
 	int             fds[2];
 
 	if (pipe(fds) == -1)
@@ -721,9 +726,13 @@ popen_inject(char *sender)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 		break;
 	case 0:
-		if (chdir(auto_qmail))
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
-		args[0] = "bin/qmail-inject";
+		if (chdir("/"))
+			strerr_die2sys(111, FATAL, "unable to chdir to root: ");
+		if (!stralloc_copys(&bin, auto_prefix) ||
+				!stralloc_catb(&bin, "/bin/qmail-inject", 17) ||
+				!stralloc_0(&bin))
+			strerr_die2x(111, FATAL, "out of memory");
+		args[0] = bin.s;
 		args[1] = "-a";
 		args[2] = "-f";
 		args[3] = "";
@@ -1049,8 +1058,8 @@ main(int argc, char *argv[])
 #endif
 	struct datetime dt;
 
-	if (chdir(auto_qmail))
-		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_qmail, ": ");
+	if (chdir(auto_sysconfdir))
+		strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
 	if (control_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to read init controls: ");
 	if (control_rldef(&bouncefrom, "bouncefrom", 0, "MAILER-DAEMON") != 1)
@@ -1294,7 +1303,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.35 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.36 2022-01-30 08:28:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

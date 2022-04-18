@@ -8,6 +8,8 @@ qmail-qread \- list outgoing messages and recipients
 .I [-r]
 .I [-t]
 .I [-c]
+.I [-s]
+.I [-i]
 .TP 2
 -a List Mails in local, remote and todo
 .TP 2
@@ -18,27 +20,25 @@ qmail-qread \- list outgoing messages and recipients
 -t List Mails in todo
 .TP 2
 -c Display counts only
+.TP 2
+-s Silent display for option -\fBc\fR
+.TP 2
+-i Display queue count, concurrency and load
 
 .SH DESCRIPTION
-.B qmail-qread
-scans the outgoing queue of messages.
-For each message it prints various human-readable information,
-including the date the message entered the queue,
-the number of bytes in the message,
-the message sender, the queue id no,
-and all the recipients still under consideration.
+\fBqmail-qread\fR scans the outgoing queue of messages.  For each message
+it prints various human-readable information, including the date the
+message entered the queue, the number of bytes in the message, the message
+sender, the queue id no, and all the recipients still under consideration.
 
-.B qmail-qread
-must be run either as 
-.B root
-or with user id
-.B qmails
-and group id
-.BR qmail .
+\fBqmail-qread\fR must be run either as \fBroot\fR or with user id
+\fBqmails\fR and group id \fBqmail\fR.
 
 \fBqmail-qread\fR uses DIRSPLIT as the directory split. It can be
 overriden by environment variable \fICONFSPLIT\fR upto a max of
-DIRSPLIT
+DIRSPLIT. \fBqmail-qread\fR can process a queue created with \fItodo\fR,
+\fIintd\fR with subdirectory split instead of without any split. This
+can be done by setting the \fBBIGTODO\fR environment variable.
 
 \fBqmail-qread\fR uses the environment variable QUEUE_BASE or the conrol file \fBqbase\fR if
 present to use the queue base. If the environment variables QUEUE_START and QUEUE_COUNT are set,
@@ -49,5 +49,13 @@ $HOME/.defaultqueue directory. If QUEUE_BASE environment variable is not
 set, it additionally uses environment set according to files in
 @controldir@/defaultqueue directory.
 
+When using dynamic queues (See multi-queue(7)), -i option can be used to
+display queue counts, queue load and queue concurrencies.
+
 .SH "SEE ALSO"
-qmail-send(8)
+qmail-queue(8),
+qmail-send(8),
+qmail-todo(8),
+shm_open(3),
+ipcs(1),
+mq_overview(7)

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.6  2022-01-30 08:40:59+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
  * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -137,7 +140,7 @@ authenticate()
 			close(pi[0]);
 		}
 		sig_pipedefault();
-		execvp(*authargs, authargs);
+		execv(*authargs, authargs);
 		_exit(1);
 	}
 	close(pi[0]);
@@ -181,7 +184,7 @@ change_pass()
 			close(pi[0]);
 		}
 		sig_pipedefault();
-		execvp(*passargs, passargs);
+		execv(*passargs, passargs);
 		_exit(1);
 	}
 	close(pi[0]);
@@ -356,7 +359,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.6 2022-01-30 08:40:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

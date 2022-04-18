@@ -1,5 +1,11 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.8  2022-04-13 07:59:46+05:30  Cprogrammer
+ * set delivery_rate only if rate control definition exists
+ *
+ * Revision 1.7  2022-01-30 08:30:55+05:30  Cprogrammer
+ * added additional argument in nomem()
+ *
  * Revision 1.6  2021-08-13 18:25:53+05:30  Cprogrammer
  * turn off ratelimit if RATELIMIT_DIR is set but empty
  *
@@ -37,9 +43,17 @@ static stralloc ratedefs = { 0 };
 static stralloc ratelimit_file = { 0 };
 extern char    *queuedesc;
 
+/*-
+ * returns
+ *  0 - delivery rate should be throttled
+ *  1 - delivery rate is fine
+ * -1 - failed to get delivery rate
+ * Additionally
+ * set do_ratelimit if rate definition exists
+ */
 int
 delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
-		int *do_ratelimit)
+		int *do_ratelimit, char *argv0)
 {
 	char           *rate_dir, *rate_exp, *domain;
 	int             i, s, at;
@@ -55,12 +69,12 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			return 1;
 		}
 		while (!stralloc_copys(&ratelimit_file, rate_dir))
-			nomem();
+			nomem(argv0);
 		s = ratelimit_file.len;
 	} else {
 		while (!stralloc_copys(&ratelimit_file, queuedir) ||
 				!stralloc_catb(&ratelimit_file, "/ratelimit", 10))
-			nomem();
+			nomem(argv0);
 		s = ratelimit_file.len;
 	}
 	if (_domain[at = str_rchr(_domain, '@')])
@@ -70,7 +84,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 	while (!stralloc_append(&ratelimit_file, "/") ||
 			!stralloc_cats(&ratelimit_file, domain) ||
 			!stralloc_0(&ratelimit_file))
-		nomem();
+		nomem(argv0);
 	if (!access(ratelimit_file.s, W_OK)) {
 		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate, time_needed))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
@@ -86,7 +100,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				*do_ratelimit = 1;
 			return 0;
 		} else {
-			if (i == 1) {
+			if (i == 1 || i == 2) {
 				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 				email[fmt_ulong(email, email_count)] = 0;
@@ -108,7 +122,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 	ratelimit_file.len = s;
 	while (!stralloc_catb(&ratelimit_file, "/ratecontrol", 12) ||
 			!stralloc_0(&ratelimit_file))
-		nomem();
+		nomem(argv0);
 	if (!access(ratelimit_file.s, R_OK)) {
 		if (control_readfile(&ratedefs, ratelimit_file.s, 0) == -1)
 			return -1;
@@ -127,7 +141,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				*do_ratelimit = 1;
 			return 0;
 		} else {
-			if (i == 1) {
+			if (i == 1 || i == 2) {
 				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 				email[fmt_ulong(email, email_count)] = 0;
@@ -149,7 +163,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 	ratelimit_file.len = s;
 	while (!stralloc_catb(&ratelimit_file, "/.global", 8) ||
 			!stralloc_0(&ratelimit_file))
-		nomem();
+		nomem(argv0);
 	if (!access(ratelimit_file.s, W_OK)) {
 		if (!(i = is_rate_ok(ratelimit_file.s, 0, &email_count, &conf_rate, &rate, time_needed))) {
 			strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
@@ -165,7 +179,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				*do_ratelimit = 1;
 			return 0;
 		} else {
-			if (i == 1) {
+			if (i == 1 || i == 2) {
 				strdouble1[fmt_double(strdouble1, rate, 10)] = 0;
 				strdouble2[fmt_double(strdouble2, conf_rate, 10)] = 0;
 				email[fmt_ulong(email, email_count)] = 0;
@@ -190,7 +204,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.6 2021-08-13 18:25:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.8 2022-04-13 07:59:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

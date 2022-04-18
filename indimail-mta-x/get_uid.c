@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.4  2022-03-09 13:03:12+05:30  Cprogrammer
+ * use qendpwent(), qendgrent() when using functions from qgetpwgr.c
+ *
  * Revision 1.3  2021-07-10 00:28:46+05:30  Cprogrammer
  * fixed wrong uid/gid allocation
  *
@@ -164,8 +167,8 @@ uidinit(int closeflag, int exit_on_error)
 	DO_GID(auto_gidv, g, INDIGROUP, exit_on_error, not_found);
 	DO_GID(auto_gidc, g, QSCANDG, exit_on_error, not_found);
 	if (closeflag) {
-		endpwent();
-		endgrent();
+		use_pwgr ? qendpwent() : endpwent();
+		use_pwgr ? qendgrent() : endgrent();
 	}
 	if (not_found)
 		return -1;
@@ -229,7 +232,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.3 2021-07-10 00:28:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.4 2022-03-09 13:03:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

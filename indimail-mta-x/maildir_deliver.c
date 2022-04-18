@@ -1,11 +1,19 @@
 /*
  * $Log: maildir_deliver.c,v $
+ * Revision 1.4  2022-04-04 14:22:01+05:30  Cprogrammer
+ * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
+ *
+ * Revision 1.3  2022-03-31 00:08:07+05:30  Cprogrammer
+ * replaced fsync() with fdatasync()
+ *
+ * Revision 1.2  2022-03-08 22:57:00+05:30  Cprogrammer
+ * syncdir: do not treat error_noent as an error
+ *
  * Revision 1.1  2021-05-16 22:53:41+05:30  Cprogrammer
  * Initial revision
  *
  */
 #include <unistd.h>
-#include <fcntl.h>
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <stralloc.h>
@@ -18,6 +26,7 @@
 #include <alloc.h>
 #include <strerr.h>
 #ifdef USE_FSYNC
+#include <fcntl.h>
 #include "syncdir.h"
 #endif
 
@@ -157,7 +166,10 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 	if (substdio_flush(&ssout) == -1)
 		goto fail;
 #ifdef USE_FSYNC
-	if (use_fsync > 0 && fsync(fd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fd) : fsync(fd)) == -1)
+		goto fail;
+#else
+	if (fsync(fd) == -1)
 		goto fail;
 #endif
 	if (fstat(fd, &st) == -1)
@@ -201,13 +213,13 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
 	if (link(fntmptph.s, fnnewtph.s) == -1)
 		goto fail;
-#ifdef USE_FSYNC
-	if (use_syncdir && use_fsync > 0) {
+#if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX)
+	if (use_syncdir > 0) {
 		if ((fd = open(fnnewtph.s, O_RDONLY)) == -1) {
 			if (errno != error_noent)
 				goto fail;
 		} else
-		if (fsync(fd) < 0 || close(fd) < 0)
+		if ((use_fdatasync > 0 ? fdatasync(fd) : fsync(fd)) == -1 || close(fd) == -1)
 			goto fail;
 	}
 #endif
@@ -229,7 +241,7 @@ fail:
 void
 getversion_maildir_deliver_c()
 {
-	static char    *x = "$Id: maildir_deliver.c,v 1.1 2021-05-16 22:53:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir_deliver.c,v 1.4 2022-04-04 14:22:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

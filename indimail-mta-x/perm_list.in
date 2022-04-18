@@ -90,6 +90,7 @@
 %attr(0755,root,root)  @prefix@/bin/qmail-inject #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/qmail-qfilter
 %attr(0755,root,root)  @prefix@/bin/qmail-qread
+%attr(0755,root,root)  @prefix@/bin/qtop
 %attr(0755,root,root)  @prefix@/bin/qmail-rm
 %attr(0755,root,root)  @prefix@/bin/qmail-showctl #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/qnotify
@@ -148,7 +149,9 @@
 %attr(0755,root,root)  @prefix@/sbin/sys-checkpwd
 %attr(0755,root,root)  @prefix@/sbin/cleanq
 
-%attr(0751,root,root)  @prefix@/sbin/qmail-daemon
+%attr(0751,root,root)  @prefix@/sbin/qscheduler
+%attr(0751,root,root)  @prefix@/sbin/qmonitor
+%attr(0751,root,root)  @prefix@/sbin/setqload
 %attr(0751,root,root)  @prefix@/sbin/qmail-start
 %attr(0751,root,root)  @prefix@/sbin/qmail-lspawn #qmta
 %attr(0751,root,root)  @prefix@/sbin/qmail-rspawn #qmta
@@ -243,8 +246,8 @@
 %attr(0755,root,root)  @libexecdir@/zspam
 %attr(0755,root,root)  @libexecdir@/zsuccesses
 %attr(0755,root,root)  @libexecdir@/zsuids
-%attr(0755,root,root)  @libexecdir@/qupgrade.sh
-%attr(0755,root,root)  @libexecdir@/qlocal_upgrade.sh
+%attr(0755,root,root)  @libexecdir@/qupgrade
+%attr(0755,root,root)  @libexecdir@/qlocal_upgrade
 %attr(0755,root,root)  @libexecdir@/daneprog
 #
 # setuid / setgid
@@ -391,6 +394,7 @@
 %attr(0644,root,root) @mandir@/man1/qmail-rm.1.gz
 %attr(0644,root,root) @mandir@/man1/qnotify.1.gz
 %attr(0644,root,root) @mandir@/man1/qreceipt.1.gz
+%attr(0644,root,root) @mandir@/man1/qtop.1.gz
 %attr(0644,root,root) @mandir@/man1/replier.1.gz
 %attr(0644,root,root) @mandir@/man1/replier-config.1.gz
 %attr(0644,root,root) @mandir@/man1/rrforward.1.gz
@@ -443,6 +447,7 @@
 %attr(0644,root,root) @mandir@/man7/forgeries.7.gz
 %attr(0644,root,root) @mandir@/man7/qmail.7.gz
 %attr(0644,root,root) @mandir@/man7/qmail-limits.7.gz
+%attr(0644,root,root) @mandir@/man7/multi-queue.7.gz
 %attr(0644,root,root) @mandir@/man8/cleanq.8.gz
 %attr(0644,root,root) @mandir@/man8/dk-filter.8.gz
 %attr(0644,root,root) @mandir@/man8/dkim.8.gz
@@ -456,7 +461,9 @@
 %attr(0644,root,root) @mandir@/man8/qmail-cdb.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-clean.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-command.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-daemon.8.gz
+%attr(0644,root,root) @mandir@/man8/qscheduler.8.gz
+%attr(0644,root,root) @mandir@/man8/setqload.8.gz
+%attr(0644,root,root) @mandir@/man8/qmonitor.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dk.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-getpw.8.gz

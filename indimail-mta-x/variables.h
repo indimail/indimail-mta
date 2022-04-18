@@ -1,5 +1,8 @@
 /*
  * $Log: variables.h,v $
+ * Revision 1.9  2022-04-04 11:17:50+05:30  Cprogrammer
+ * added use_fdatasync to turn on fdatasync() instead of fsync()
+ *
  * Revision 1.8  2021-08-28 23:08:41+05:30  Cprogrammer
  * moved dtype enum delivery variable from variables.h to getDomainToken.h
  *
@@ -25,7 +28,7 @@
 extern char    *queuedir;
 extern char    *controldir;
 extern char    *certdir;
-extern int      use_fsync, use_syncdir;
+extern int      use_fsync, use_fdatasync, use_syncdir;
 extern int      noipv6;
 
 #endif

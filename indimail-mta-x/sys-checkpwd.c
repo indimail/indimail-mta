@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.14  2022-01-30 09:44:47+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
  * Revision 1.13  2021-09-12 12:55:30+05:30  Cprogrammer
  * relinquish setuid in pipe_exec()
  *
@@ -177,7 +180,7 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 	if (write(4, tmpbuf, len) != len)
 		strerr_die2sys(111, FATAL, "write: ");
 	close(4);
-	execvp(argv[1], argv + 1);
+	execv(argv[1], argv + 1);
 	strerr_die3sys(111, FATAL, "exec: ", argv[1]);
 }
 
@@ -332,7 +335,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.13 2021-09-12 12:55:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.14 2022-01-30 09:44:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

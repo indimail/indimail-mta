@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.17  2022-01-30 08:30:11+05:30  Cprogrammer
+# added --clean argument
+#
 # Revision 1.16  2021-07-09 22:04:49+05:30  Cprogrammer
 # added qmta
 #
@@ -49,7 +52,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.16 2021-07-09 22:04:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.17 2022-01-30 08:30:11+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
@@ -93,25 +96,29 @@ if [ -f /etc/debian_version ] ; then
 fi
 
 verbose=0
+clean=""
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
-	;;
+    ;;
     *) optarg=
-	;;
+    ;;
     esac
 
     case "$1" in
     --verbose)
-	verbose=1
+    verbose=1
+    ;;
+    --clean)
+    clean="--clean"
     ;;
     --release=*)
-	release=$optarg
+    release=$optarg
     ;;
     *)
     echo "invalid option [$1]"
     read key
-    usage 1
+    exit 1
     ;;
     esac
 
@@ -229,11 +236,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	fi
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/indimail-mta.spec"
-		rpmbuild -ba --clean --quiet /tmp/indimail-mta.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/indimail-mta.spec"
+		rpmbuild -ba $clean --quiet /tmp/indimail-mta.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/indimail-mta.spec"
-		rpmbuild -ba --clean /tmp/indimail-mta.spec
+		echo "rpmbuild -ba $clean /tmp/indimail-mta.spec"
+		rpmbuild -ba $clean /tmp/indimail-mta.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/indimail-mta.spec

@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.14  2022-03-05 13:38:12+05:30  Cprogrammer
+ * use auto_prefix/sbin for qmail-smtpd, auto_prefix/bin for qmail-inject, qmail-qread path
+ *
  * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -35,8 +38,11 @@
 #include <alloc.h>
 #include <env.h>
 #include <str.h>
+#include <stralloc.h>
 #include <noreturn.h>
-#include "auto_qmail.h"
+#include "auto_prefix.h"
+
+static stralloc q = {0};
 
 no_return void
 nomem()
@@ -55,7 +61,7 @@ die_usage()
 no_return void
 smtpd()
 {
-	char           *smtpdarg[] = { "sbin/qmail-smtpd", 0 };
+	char           *smtpdarg[] = { 0, NULL };
 
 	if (!env_get("PROTO")) {
 		if (!env_put("RELAYCLIENT="))
@@ -75,6 +81,9 @@ smtpd()
 		if (!env_put("TCPREMOTEINFO=sendmail-bs"))
 			nomem();
 	}
+	if (!stralloc_catb(&q, "/sbin/qmail-smtpd", 17) || !stralloc_0(&q))
+		nomem();
+	smtpdarg[0] = q.s;
 	execv(*smtpdarg, smtpdarg);
 	substdio_putsflush(subfderr, "sendmail: fatal: unable to run qmail-smtpd\n");
 	_exit(111);
@@ -83,8 +92,11 @@ smtpd()
 no_return void
 mailq()
 {
-	char           *qreadarg[] = { "bin/qmail-qread", 0 };
+	char           *qreadarg[] = { 0, NULL };
 
+	if (!stralloc_catb(&q, "/bin/qmail-qread", 16) || !stralloc_0(&q))
+		nomem();
+	qreadarg[0] = q.s;
 	execv(*qreadarg, qreadarg);
 	substdio_putsflush(subfderr, "sendmail: fatal: unable to run qmail-qread\n");
 	_exit(111);
@@ -118,20 +130,19 @@ do_sender(const char *s)
 	alloc_free(x);
 }
 
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             opt, i, flagh;
 	char          **qiargv, **arg;
 	char           *sender;
 
-	if (chdir(auto_qmail) == -1) {
-		substdio_putsflush(subfderr, "sendmail: fatal: unable to switch to qmail home directory\n");
+	if (chdir("/") == -1) {
+		substdio_putsflush(subfderr, "sendmail: fatal: unable to switch to root directory\n");
 		_exit(111);
 	}
+	if (!stralloc_copys(&q, auto_prefix))
+		nomem();
 
 	flagh = 0;
 	sender = 0;
@@ -240,7 +251,9 @@ main(argc, argv)
 	if (!qiargv)
 		nomem();
 	arg = qiargv;
-	*arg++ = "bin/qmail-inject";
+	if (!stralloc_catb(&q, "/bin/qmail-inject", 17) || !stralloc_0(&q))
+		nomem();
+	*arg++ = q.s;
 	*arg++ = (flagh ? "-H" : "-a");
 	if (sender) {
 		*arg++ = "-f";
@@ -261,7 +274,7 @@ main(argc, argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.14 2022-03-05 13:38:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

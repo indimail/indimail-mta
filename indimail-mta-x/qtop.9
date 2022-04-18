@@ -1,0 +1,51 @@
+.TH qtop 1
+.SH NAME
+qtop \- display queue load for indimail-mta (qscheduler) running in IPC mode
+
+.SH SYNOPSIS
+\fBqtop\fR
+[\fB\-c\fR \fIcommand\fR]
+[\fB\-i\fR \fIinterval\fR]
+[\fB\-q\fR \fIqcount\fR]
+
+.SH DESCRIPTION
+\fBqtop\fR(1) displays the current local and remote concurrency for all
+queues. It also displays the total queue load. \fBqtop\fR(1) uses
+\fBqmail-qread\fR(8) for this information. It creates two horizontally
+split windows using \fBtmux\fR(1) terminal multiplexer to do this. The
+queue information is displayed in the top pane. The bottom pane displays
+the out of the following command.
+
+.EX
+tail -F @logdir@/deliver.25/current
+.EE
+
+The command can be changed by using the \fB-c\fR option.
+
+The data for the queues is refreshed every 5 seconds as default but can be
+changed by specifying the \fB-i\fR option. As a default \fBqtop\fR reserves
+enough lines for 5 queues, but can be changed by specifying the \fB-q\fR
+option.
+
+To come out of \fBqtop\fR you need to press CTR-C (control C) to come out
+of the program.
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-c\fR \fIcommand\fR
+Use \fIcommand\fR instead of tail -F @logdir@/deliver.25/current
+
+.TP
+\fB\-i\fR \fIinterval\fR
+Change display interval to \fIinterval\fR seconds instead of the default 5
+
+.TP
+\fB\-q\fR \fIqcount\fR
+Reserve \fIqcount\fR lines for the top pane instead of the default 5 lines
+
+.SH SEE ALSO
+qscheduler(8),
+qsetload(1),
+multi-queue(8)
+

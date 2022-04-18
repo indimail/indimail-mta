@@ -1,5 +1,11 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.7  2022-04-04 00:52:04+05:30  Cprogrammer
+ * Use QUEUE_BASE, queue_base control for setting base directory of queue
+ *
+ * Revision 1.6  2022-01-30 09:42:10+05:30  Cprogrammer
+ * made global variables as static
+ *
  * Revision 1.5  2021-10-20 22:51:18+05:30  Cprogrammer
  * add queue directory as argument for identification in ps list
  *
@@ -29,6 +35,7 @@
 #include <setuserid.h>
 #include <noreturn.h>
 #include "auto_uids.h"
+#include "set_queuedir.h"
 
 no_return void
 die()
@@ -68,13 +75,13 @@ check_user(char *userlist, char *user)
 	return 0;
 }
 
-int             pi0[2];
-int             pi1[2];
-int             pi2[2];
-int             pi3[2];
-int             pi4[2];
-int             pi5[2];
-int             pi6[2];
+static int      pi0[2];
+static int      pi1[2];
+static int      pi2[2];
+static int      pi3[2];
+static int      pi4[2];
+static int      pi5[2];
+static int      pi6[2];
 
 void
 close23456()
@@ -132,17 +139,22 @@ main(int argc, char **argv)
 		die();
 	if (fd_copy(6, 0) == -1)
 		die();
-	if (argv[1]) {
+	if (!(ptr = env_get("QUEUEDIR"))) {
+		if (!(ptr = set_queuedir("slowq-start", "slowq")))
+			die();
+		if (!env_put2("QUEUEDIR", ptr))
+			die();
+	}
+	/*- pass the queue as argument for the ps command */
+	qsargs[1] = ptr;
+	qcargs[1] = ptr;
+	qlargs[2] = ptr;
+	qrargs[1] = ptr;
+	if (argv[1]) { /*- set argument for qmail-local */
 		qlargs[1] = argv[1];
 		++argv;
 	}
-	if ((ptr = env_get("QUEUEDIR"))) { /*- pass the queue as argument for the ps command */
-		qsargs[1] = ptr;
-		qcargs[1] = ptr;
-		qlargs[2] = ptr;
-		qrargs[1] = ptr;
-	}
-	if (argv[1]) {
+	if (argv[1]) { /*- logger (e.g. splogger) specified on command line */
 		if (pipe(pi0) == -1)
 			die();
 		switch (fork())
@@ -285,7 +297,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.5 2021-10-20 22:51:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-start.c,v 1.7 2022-04-04 00:52:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

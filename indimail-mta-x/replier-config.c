@@ -1,5 +1,8 @@
 /*
  * $Log: replier-config.c,v $
+ * Revision 1.7  2022-03-05 13:37:29+05:30  Cprogrammer
+ * use auto_prefix/bin for binary paths
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -30,6 +33,7 @@
 #include <str.h>
 #include <noreturn.h>
 #include "auto_ezmlm.h"
+#include "auto_prefix.h"
 
 #define FATAL "replier-config: fatal: "
 
@@ -207,13 +211,16 @@ main(int argc, char **argv)
 	outs("|");
 	outs(auto_ezmlm);
 	outs("/ezmlm-weed\n|");
-	outs("/usr/bin/replier ");
+	outs(auto_prefix);
+	outs("/bin/replier ");
 	outs(dir);
 	outs(" \"$SENDER\" ");
-	outs("/usr/bin/822bodyfilter ");
+	outs(auto_prefix);
+	outs("/bin/822bodyfilter ");
 	outs(dir);
 	outs("/bodyfilter\n|");
-	outs("/usr/bin/bouncesaying 'Cannot filter message'\n");
+	outs(auto_prefix);
+	outs("/bin/bouncesaying 'Cannot filter message'\n");
 	finish();
 	perm(0600);
 
@@ -221,13 +228,16 @@ main(int argc, char **argv)
 	outs("|");
 	outs(auto_ezmlm);
 	outs("/ezmlm-weed\n|");
-	outs("/usr/bin/replier ");
+	outs(auto_prefix);
+	outs("/bin/replier ");
 	outs(dir);
 	outs(" \"$SENDER\" ");
-	outs("/usr/bin/822headerfilter ");
+	outs(auto_prefix);
+	outs("/bin/822headerfilter ");
 	outs(dir);
 	outs("/headerfilter\n|");
-	outs("/usr/bin/bouncesaying 'Cannot filter message'\n");
+	outs(auto_prefix);
+	outs("/bin/bouncesaying 'Cannot filter message'\n");
 	finish();
 	perm(0600);
 
@@ -235,12 +245,14 @@ main(int argc, char **argv)
 	outs("|");
 	outs(auto_ezmlm);
 	outs("/ezmlm-weed\n|");
-	outs("/usr/bin/replier ");
+	outs(auto_prefix);
+	outs("/bin/replier ");
 	outs(dir);
 	outs(" \"$SENDER\" ");
 	outs(dir);
 	outs("/msgfilter\n|");
-	outs("/usr/bin/bouncesaying 'Cannot filter message'\n");
+	outs(auto_prefix);
+	outs("/bin/bouncesaying 'Cannot filter message'\n");
 	finish();
 	perm(0600);
 
@@ -289,7 +301,7 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	static char    *x = "$Id: replier-config.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier-config.c,v 1.7 2022-03-05 13:37:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

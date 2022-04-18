@@ -515,8 +515,8 @@ qmail-command.0
 qmail-control.0
 qmail-control.5
 qmailctl
-qmail-daemon
-qmail-daemon.o
+qscheduler
+qscheduler.o
 qmail-dk
 qmail-dk.0
 qmail-dk.o
@@ -1117,7 +1117,7 @@ greydaemon
 qmailctl.8
 debian/daemontools.postinst
 debian/daemontools.postrm
-qlocal_upgrade.sh
+qlocal_upgrade
 cleanq.8
 svscan.plist
 docker-entrypoint.8
@@ -1173,3 +1173,16 @@ qfrontend.1
 qf-log-subject
 INPUT
 dknewkey.8
+rt.lib
+haslibrt.h
+custom_error.o
+getqueue.o
+tryfts.o
+setqload.o
+setqload
+send_qload.o
+qtop
+qtop.1
+qmonitor
+qmonitor.o
+queue_load.o

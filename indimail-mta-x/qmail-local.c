@@ -1,5 +1,14 @@
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.43  2022-04-04 14:25:39+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
+ * Revision 1.42  2022-03-31 00:08:28+05:30  Cprogrammer
+ * replaced fsync() with fdatasync()
+ *
+ * Revision 1.41  2022-01-30 08:40:26+05:30  Cprogrammer
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ *
  * Revision 1.40  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -269,8 +278,7 @@ mailfile(char *fn)
 
 	if (seek_begin(0) == -1)
 		temp_rewind();
-	fd = open_append(fn);
-	if (fd == -1)
+	if ((fd = open_append(fn)) == -1)
 		strerr_die5x(111, "Unable to open ", fn, ": ", error_str(errno), ". (#4.2.1)");
 	sig_alarmcatch(temp_slowlock);
 	alarm(30);
@@ -310,7 +318,10 @@ mailfile(char *fn)
 	if (substdio_bputs(&ssout, "\n") || substdio_flush(&ssout))
 		goto writeerrs;
 #ifdef USE_FSYNC
-	if (use_fsync > 0 && fsync(fd) == -1)
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync > 0 ? fdatasync(fd) : fsync(fd)) == -1)
+		goto writeerrs;
+#else
+	if (fsync(fd) == -1)
 		goto writeerrs;
 #endif
 	close(fd);
@@ -841,10 +852,12 @@ main(int argc, char **argv)
 	flag99 = 0;
 	i = 0;
 #ifdef USE_FSYNC
-	if (env_get("USE_FSYNC"))
-		use_fsync = 1;
-	if (env_get("USE_SYNCDIR"))
-		use_syncdir = 1;
+	x = env_get("USE_FSYNC");
+	use_fsync = (x && *x) ? 1 : 0;
+	x = env_get("USE_FDATASYNC");
+	use_fdatasync = (x && *x) ? 1 : 0;
+	x = env_get("USE_SYNCDIR");
+	use_syncdir = (x && *x) ? 1 : 0;
 #endif
 	for (j = 0; j < cmds.len; ++j) {
 		if (cmds.s[j] == '\n') {
@@ -963,7 +976,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.40 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.43 2022-04-04 14:25:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

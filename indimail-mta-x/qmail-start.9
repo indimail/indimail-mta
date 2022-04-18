@@ -1,94 +1,117 @@
-.TH qmail-start 8
+.TH qscheduler 8
 
 .SH NAME
-qmail-start \- turn on mail delivery
-qmail-daemon \- turn on mail delivery
+qscheduler \- Turn on mail delivery with fixed number of queues or load dependent dynamic queues
+
 .SH SYNOPSIS
 .B qmail-start
-[
-.I defaultdelivery
+[ -\fBs\fR] | [-\fBc\fR]-\fBd\fR
+[ \fIdefaultdelivery\fR ]
 [
 .I logger arg ...
 ]
 ]
 
-.B qmail-daemon
-[
-.I defaultdelivery
+.B qscheduler
+[ -\fBs\fR | [-\fBc\fR]-\fBd\fR
+[ \fIdefaultdelivery\fR ]
 [
 .I logger arg ...
 ]
 ]
+
 .SH DESCRIPTION
-.B qmail-start
-invokes
-.BR qmail-send ,
-.BR qmail-todo ,
-.BR qmail-lspawn ,
-.BR qmail-rspawn ,
-and
-.BR qmail-clean ,
-under the proper uids and gids for a queue defined by the environment
-variable \fBQUEUEDIR\fR. These five daemons cooperate to deliver messages
-from the queue. The uids and gids are obtained from the passwd(5) database
-using standard glibc getpwent(3), getgrent(3) calls which are inherently
+\fBqmail-start\fR invokes \fBqmail-send\fR, \fBqmail-todo\fR,
+\fBqmail-lspawn\fR, \fBqmail-rspawn\fR, and \fBqmail-clean\fR, under the
+proper uids and gids for a queue defined by the environment variable
+\fBQUEUEDIR\fR. These five daemons cooperate to deliver messages from the
+queue. The uids and gids are obtained from the passwd(5) database using
+standard glibc getpwent(3), getgrent(3) calls which are inherently
 unreliable. You can switch to internal qgetpwent(3), qgetgrent(3) funtions
-by setting the environment variable \fBUSE_QPWGR\fR.
+by setting the environment variable \fBUSE_QPWGR\fR. \fBqmail-start\fR
+should be used if you desire to run only one queue. For running multiple
+parallel queues use \fBqscheduler\fR.
 
-.B qmail-daemon
-invokes multiple invocations of \fBqmail-start\fR to invoke
-.BR qmail-send ,
-.BR qmail-todo ,
-.BR qmail-lspawn ,
-.BR qmail-rspawn ,
-and
-.BR qmail-clean ,
-under the proper uids and gids for multiple queues. It invokes \fBqmail-start\fR
-mutiple times. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance
-it runs is defined by the environment variable \fBQUEUE_COUNT\fR. For each
-instance of \fBqmail-start\fR,  the queue is defined by \fBqmail-daemon\fR
-by setting the environment variable \fBQUEUEDIR\fR. A queue is defined by
-the integers defined by environment variables \fBQUEUE_START\fR and
+\fBqscheduler\fR invokes multiple invocations of \fBqmail-start\fR to
+invoke \fBqmail-send\fR, \fBqmail-todo\fR, \fBqmail-lspawn\fR,
+\fBqmail-rspawn\fR, and \fBqmail-clean\fR, under the proper uids and gids
+for multiple queues. Each instance refers to a specific queue. The number
+of instances can be fixed (\-\fBs\fR) or dynamic (\-\fBd\fR). When using
+static queues, the number of queues is fixed at runtime. When using dynamic
+queues, the number of queues can be increased or decreased at runtime
+depending on the queue load. The queue load is an indicator of the average
+concurrency of all queues. When it reaches \fBMAX_LOAD\fR, \fBqscheduler\fR
+configures an additional queue using \fBqueue-fix\fR(8) and invokes
+\fBqmail-send\fR, \fbqmail-todo\fR, \fBqmail-lspawn\fR, \fBqmail-rspawn\fR
+and \fBqmail-clean\fR on the new queue. \fBqscheduler\fR uses DIRSPLIT as
+the default split value. This can be changed by setting the \fBCONFSPLIT\fR
+environment variable. Additionally \fBqscheduler\fR can process a queue
+created with \fItodo\fR, \fIintd\fR with subdirectory split instead of
+without any split. This can be done by setting the \fBBIGTODO\fR
+environment variable.
+
+\fBqscheduler\fR also monitors each \fBqmail-todo\fR, \fBqmail-send\fR
+instances and restarts them if they go down.
+
+\fBqmail-start\fR or \fBqscheduler\fR arranges for \fBqmail-send 's
+activity record to be sent to \fBqmail-start\fR's output. See
+\fBqmail-log\fR(5) for the format of the activity record. Other than this,
+\fBqmail-start\fR does not print anything, even on failure.
+\fBqscheduler\fR announces its startup, exit and failures on stdout
+and stderr. \fBqscheduler\fR sets the environment variable \fBQIDENT\fR
+representing the queue directory number. This is used by \fBqmail-send\fR
+to append the \fBQIDENT\fR number to the delivery number in the logs,
+facilitating processing of logs by \fBmatchup\fR(1).
+
+Resource limits, controlling ttys, et al. are also passed from
+\fBqmail-start\fR or \fBqscheduler\fR to \fBqmail-local\fR.
+
+Note that \fBqmail-send\fR normally juggles several simultaneous
+deliveries.  To reduce \fBqmail-send\fR's impact on other programs, you can
+run \fBqmail-start\fR or \fBqscheduler\fR with a low priority.
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-s\fR
+This implies \fBqscheduler\fR will have a fixed number of \fBqmail-start\fR
+invocations. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance it
+runs is defined by the environment variable \fBQUEUE_COUNT\fR. For each
+instance of \fBqmail-start\fR,  the queue is defined by \fBqscheduler\fR by
+setting the environment variable \fBQUEUEDIR\fR. A queue is defined by the
+integers defined by environment variables \fBQUEUE_START\fR and
 \fBQUEUE_COUNT\fR.
 
-Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqmail-daemon\fR run
+Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqscheduler\fR run
 \fBqmail-start\fR twice. The first invocation of \fBqmail-start\fR will use
 the queue QMAILHOME/queue/queue1 and the second instance will use
 QMAILHOME/queue/queue2. This will cause two copies of qmail-todo,
 qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean to run
 
-.B qmail-daemon
-also monitors each \fBqmail-todo\fR, \fBqmail-send\fR instances and restart
-them if they go down.
+.PP
+.TP 3
+\fB\-d\fR
+This implements dynamic queues and uses POSIX IPC for communcation between
+\fBqscheduler\fR(8), \fBqmail-send\fR(8), \fBqmail-todo\fR(8),
+\fBqmail-queue\R(8), \fBqmail-multi\fR(8). See multi-queue(7) for a
+complete overview.
 
-.B qmail-start
-should be used if you desire to run only one queue. For running multiple
-parallel queues use
-.BR qmail-daemon .
+.PP
+.TP 3
+\fB\-c\fR
+When using dynamic queues, this enables compatability mode with the
+traditional method of using the \fIlock/trigger\fR fifo in the queue
+directory. This allows \fBqmail-queue\fR running in non-dynamic mode to
+trigger scan of the todo directory by \fBqmail-todo\fR. Use this when your
+system has qmail, netqmail or old qmail-queue clients injecting emails.
+Using compatability mode doesn't give you the full performance benefits
+when system is configured to use POSIX IPC for dynamic queues.
 
-.B qmail-start
-or
-.B qmail-daemon
-arranges for
-.BR qmail-send 's
-activity record to be sent to
-.BR qmail-start 's
-output. See
-.B qmail-log(5)
-for the format of the activity record. Other than this,
-.B qmail-start
-does not print anything, even on failure.
-.B qmail-daemon
-announces its startup, exit and failures on stdout and stderr
-
-If
-.I defaultdelivery
-is supplied,
-.B qmail-start
-or
-.B qmail-daemon
-passes it to
-.BR qmail-lspawn .
+.PP
+.TP 3
+\fIdefaultdelivery\fR
+If \fIdefaultdelivery\fR is supplied, \fBqmail-start\fR or
+\fBqscheduler\fR passes it to \fBqmail-lspawn\fR.
 
 The default indimail installation, creates a supervised service in
 @servicedir@/deliver.25. The output goes to @logdir@/slowq/current. The
@@ -114,29 +137,16 @@ _
 .TE
 
 
-If
-.I logger
-is supplied,
-.B qmail-start
-or
-.B qmail-daemon
-invokes
-.I logger
-with the given arguments,
-and feeds
-.BR qmail-send 's
-activity record through
-.IR logger .
+.PP
+.TP 3
+\fIlogger\fR
+If \fIlogger\fR is supplied, \fBqmail-start\fR or \fBqscheduler\fR
+invokes \fIlogger with the given arguments, and feeds \fBqmail-send\fR's
+activity record through \fIlogger\fR.
 
-Environment variables given to
-.B qmail-start
-or
-.B qmail-daemon
-will eventually be passed on to
-.BR qmail-local ,
-so make sure to clean up the environment if you run
-.B qmail-start
-manually:
+Environment variables given to \fBqmail-start\fR or \fBqscheduler\fR will
+eventually be passed on to \fBqmail-local\fR, so make sure to clean up the
+environment if you run \fBqmail-start\fR manually:
 
 .EX
    # env - PATH="PREFIX/sbin:$PATH"
@@ -146,24 +156,17 @@ manually:
    (all on one line)
 .EE
 
-Resource limits, controlling ttys, et al. are also passed from
-.B qmail-start
-or
-.B qmail-daemon
-to
-.BR qmail-local .
+.SH CONTROL FILES
+.PP
+.TP 3
+\fBmsgqueuelen\fR
+The maximum message queue length of POSIX message queue /queue\fIN\fR,
+where \fIN\fR is the queue number of the queue.
 
-Note that
-.B qmail-send
-normally juggles several simultaneous deliveries.
-To reduce
-.BR qmail-send 's
-impact on other programs,
-you can run
-.B qmail-start
-or
-.B qmail-daemon
-with a low priority.
+.TP 3
+\fBmsgqueuesize\fR
+The maximum message size of POSIX message queue /queue\fIN\fR, where
+\fIN\fR is the queue number of the queue
 
 .SH Supplementary Groups
 If you set the environment variable \fBUSE_SETGROUPS\fR, \fBqmail-start\fR
@@ -176,6 +179,7 @@ learn how to set supplementary groups.
 logger(1),
 splogger(1),
 nice(1),
+qtop(1),
 qmail-log(5),
 qmail-local(8),
 qmail-clean(8),
@@ -184,6 +188,8 @@ qmail-rspawn(8),
 qmail-send(8),
 qmail-todo(8),
 qmail-multi(8),
+queue-fix(8),
+setqload(8),
 initsvc(1),
 svscan(8),
 supervise(8),
@@ -193,4 +199,9 @@ qgetpwent(3),
 qgetgrent(3),
 passwd(5),
 group(5),
+shm_open(3),
+mq_open(3),
+ipcs(1),
+mq_overview(7),
+multi-queue(7),
 IndiMail(7)

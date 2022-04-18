@@ -56,10 +56,20 @@ case "$SYSTEM" in
   ;;
 esac
 if [ -f Makefile ] ; then
-	if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
-		echo "Already configured"
-		exit 0
-	fi
+	case "$SYSTEM" in
+		Darwin)
+		if [ $(stat -f %m configure.ac) -le $(stat -f %m Makefile) ] ; then
+			echo "Already configured"
+			exit 0
+		fi
+		;;
+		*)
+		if [ $(stat --format %Y configure.ac) -le $(stat --format %Y Makefile) ] ; then
+			echo "Already configured"
+			exit 0
+		fi
+		;;
+	esac
 fi
 ./configure --prefix=$prefix --bindir=$bindir \
   --mandir=$mandir --libdir=$libdir \

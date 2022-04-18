@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.h,v $
+ * Revision 1.5  2022-01-30 09:38:08+05:30  Cprogrammer
+ * allow configurable big/small todo/intd
+ *
  * Revision 1.4  2021-05-12 17:50:29+05:30  Cprogrammer
  * added readsubdir_name()
  *
@@ -21,11 +24,12 @@ typedef struct readsubdir
 {
 	DIR            *dir;
 	int             pos;
+	int             split;
 	char           *name;
 	void            (*pause) ();
 } readsubdir;
 
-void            readsubdir_init(readsubdir *, char *, void (*pause) ());
+void            readsubdir_init(readsubdir *, char *, int, void (*pause) ());
 int             readsubdir_next(readsubdir *, unsigned long *);
 char           *readsubdir_name(readsubdir *);
 

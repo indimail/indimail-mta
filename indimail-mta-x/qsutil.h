@@ -1,5 +1,11 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.22  2022-03-16 20:02:03+05:30  Cprogrammer
+ * added log5_noflush() function
+ *
+ * Revision 1.21  2022-01-30 09:28:18+05:30  Cprogrammer
+ * print program name in logs
+ *
  * Revision 1.20  2021-10-22 14:00:33+05:30  Cprogrammer
  * added ident argument to loglock_open() for identification in logs
  *
@@ -68,6 +74,7 @@ void            my_log2(char *, char *);
 void            log2_noflush(char *, char *);
 void            log3_noflush(char *, char *, char *);
 void            log4_noflush(char *, char *, char *, char *);
+void            log5_noflush(char *, char *, char *, char *, char *);
 void            log3(char *, char *, char *);
 void            log4(char *, char *, char *, char *);
 void            log5(char *, char *, char *, char *, char *);
@@ -79,10 +86,10 @@ void            log15(char *, char *, char *, char *, char *, char *, char *, ch
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            log_stat(stralloc *, stralloc *, unsigned long, size_t);
-void            nomem(void);
+void            nomem(char *);
 void            pausedir(char *);
-void            logsafe(char *);
-void            logsafe_noflush(char *);
+void            logsafe(char *, char *);
+void            logsafe_noflush(char *, char *);
 void            flush();
 int             fix_split(char *s, char *path, char *client_split, unsigned long id);
 

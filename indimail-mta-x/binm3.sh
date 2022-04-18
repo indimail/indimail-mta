@@ -5,6 +5,6 @@
 # Using V7 binmail interface: /bin/mail -f
 
 exec env - PATH="PREFIX/bin:$PATH" \
-qmail-daemon \
+qscheduler \
 '|preline -f /bin/mail -f "${SENDER:-MAILER-DAEMON}" -d "$USER"' \
 splogger qmail

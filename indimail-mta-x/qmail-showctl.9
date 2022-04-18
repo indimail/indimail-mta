@@ -43,6 +43,13 @@ This variable can be set to override the compile time directory split value
 of DIRSPLIT. Administrators can set this environment variable in
 $HOME/.defaultqueue or SYSCONFDIR/control/defaultqueue directory.
 
+.TP
+BIGTODO
+This variable can be set to override the queue default of having
+\fItodo\fR, \fIintd\fR without subdirectory split. Administrators can set
+this environment variable in $HOME/.defaultqueue,
+SYSCONFDIR/control/defaultqueue, SYSCONFDIR/control/global_vars directory.
+
 .SH OPTIONS
 .TP
 \fB\-i\fR
@@ -68,6 +75,10 @@ information. This option runs \fBsvctool\fR(8) and requires root privilegs.
 .TP
 \fB\-e\fR
 error check mode. Show file in the control directory which shouldn't be there
+
+.TP
+\fB\-e\fR
+Show environment variables inherited from $HOME/.defaultqueue
 
 .TP
 \fB\-a\fR

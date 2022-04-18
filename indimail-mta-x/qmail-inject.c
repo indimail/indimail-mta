@@ -1,5 +1,14 @@
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.47  2022-04-03 18:46:17+05:30  Cprogrammer
+ * bypass set_environment if FASTQUEUE env variable is set
+ *
+ * Revision 1.46  2022-03-27 20:10:47+05:30  Cprogrammer
+ * display system error when qmail_open() fails
+ *
+ * Revision 1.45  2022-01-30 08:39:45+05:30  Cprogrammer
+ * allow disabling of databytes check
+ *
  * Revision 1.44  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -151,6 +160,7 @@
 #include <byte.h>
 #include <token822.h>
 #include <noreturn.h>
+#include <error.h>
 #include "hfield.h"
 #include "control.h"
 #include "qmail.h"
@@ -233,9 +243,11 @@ put(char *s, int len)
 {
 	if (flagqueue) {
 		qmail_put(&qqt, s, len);
-		size += len;
-		if (databytes && size > databytes)
-			qmail_fail(&qqt);
+		if (databytes > 0) {
+			size += len;
+			if (size > databytes)
+				qmail_fail(&qqt);
+		}
 	} else
 		substdio_put(subfdout, s, len);
 }
@@ -310,7 +322,9 @@ die_invalid(stralloc *sa)
 no_return void
 die_qqt()
 {
-	substdio_putsflush(subfderr, "qmail-inject: fatal: unable to run qmail-queue\n");
+	substdio_puts(subfderr, "qmail-inject: fatal: unable to run qmail-queue: ");
+	substdio_puts(subfderr, error_str(errno));
+	substdio_putsflush(subfderr, "\n");
 	temp();
 }
 
@@ -414,7 +428,7 @@ exitnicely()
 		}
 		qqx = qmail_close(&qqt);
 		if (*qqx) {
-			if (databytes && size > databytes)
+			if (databytes > 0 && size > databytes)
 				die_size();
 			substdio_puts(subfderr, "qmail-inject: fatal: ");
 			substdio_puts(subfderr, qqx + 1);
@@ -1003,7 +1017,8 @@ getcontrols()
 	char           *x;
 
 	mft_init();
-	set_environment(WARN, FATAL, 1);
+	if (!env_get("FASTQUEUE"))
+		set_environment(WARN, FATAL, 1);
 	if (!(x = env_get("QMAILDEFAULTDOMAIN"))) {
 		if (control_rldef(&control_defaultdomain, "defaultdomain", 1, "defaultdomain") != 1)
 			die_read();
@@ -1048,8 +1063,6 @@ getcontrols()
 			die_read();
 	} else
 		scan_ulong(x, &databytes);
-	if (!(databytes + 1))
-		--databytes;
 	if (!(x = env_get("MAXRECIPIENTS"))) {
 		if (control_readint(&maxrcptcount,"maxrecipients") == -1)
 			die_read();
@@ -1057,10 +1070,12 @@ getcontrols()
 			maxrcptcount = 0;
 	} else
 		scan_int(x, &maxrcptcount);
-	if (fstat(0, &statbuf))
-		die_stat();
-	if (databytes && statbuf.st_size > databytes)
-		die_size();
+	if (databytes > 0) {
+		if (fstat(0, &statbuf))
+			die_stat();
+		if (statbuf.st_size > databytes)
+			die_size();
+	}
 }
 
 #define RECIP_DEFAULT 1
@@ -1195,7 +1210,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.44 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.47 2022-04-03 18:46:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

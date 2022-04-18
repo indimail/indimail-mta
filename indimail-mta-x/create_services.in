@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.113 2022-03-06 18:48:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.114 2022-04-06 09:11:01+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -469,7 +469,7 @@ do
     --qbase=$qbase --qcount=$qcount --qstart=1 \
     --query-cache --dnscheck --password-cache \
     --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
-    --starttls --fsync --syncdir --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
+    --starttls --memory=$smtp_soft_mem --chkrecipient --chkrelay --masquerade \
     --min-free=52428800 --content-filter --virus-filter \
     --dmasquerade --infifo=infifo \
     --dkverify=$ver_opt \
@@ -487,13 +487,13 @@ if [ $clamav_os -eq 1 ] ; then
 fi
 eval $svctool --queueParam=defaultqueue \
   --qbase=$qbase --qcount=$qcount --qstart=1 \
-  --min-free=52428800 --fsync --syncdir --virus-filter \
+  --min-free=52428800 --virus-filter \
   --dkverify="none" --dksign=$sign_opt \
   --private_key=$controldir/domainkeys/%/$dkimkeyfn \
   $append_opt $extra_opt
 
 eval $svctool --slowq --servicedir=$servicedir --qbase=$qbase \
-	--cntrldir=control --persistdb --starttls --fsync --syncdir \
+	--cntrldir=control --persistdb --starttls \
     --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
 	--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
 	--remote-authsmtp=plain --localfilter --remotefilter \
@@ -515,14 +515,14 @@ $svctool --tlsa=1998 --servicedir=$servicedir --timeout-days=30 \
 $svctool --qmtp=209 --servicedir=$servicedir \
   --qbase=$qbase --qcount=$qcount --qstart=1 \
   --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-  --fsync --syncdir --memory=$qmtp_soft_mem --min-free=52428800 $extra_opt
+  --memory=$qmtp_soft_mem --min-free=52428800 $extra_opt
 #
 # qmqpd service
 #
 $svctool --qmqp=628 --servicedir=$servicedir \
   --qbase=$qbase --qcount=$qcount --qstart=1 \
   --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-  --fsync --syncdir --memory=$qmqp_soft_mem --min-free=52428800 $extra_opt
+  --memory=$qmqp_soft_mem --min-free=52428800 $extra_opt
 
 #
 # fetchmail
@@ -757,6 +757,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.114  2022-04-06 09:11:01+05:30  Cprogrammer
+# set fsync, syncdir as global variables instead of local variables
+#
 # Revision 2.113  2022-03-06 18:48:10+05:30  Cprogrammer
 # fix for FreeBSD (date usage)
 #

@@ -1,0 +1,26 @@
+.TH s/qmail: dnscname 1
+.SH NAME
+dnscname
+.SH SYNOPSIS
+.B dnscname 
+.I fqdn
+.SH DESCRIPTION
+.B dnscame
+takes the given
+.I fqdn
+for a host and employs an one-stage
+.I CNAME 
+DNS lookup for
+.IR fqdn .
+The retrieved DNS name could instead be an alias,
+rather than a \fIcanonical name\fR.
+Use
+.B dnsfq 
+to evaluate the entire 
+.I CNAME
+chain.
+.SH "SEE ALSO"
+dnsfq(1),
+dnsmxip(1),
+dnsptr(1),
+dnstxt(1).

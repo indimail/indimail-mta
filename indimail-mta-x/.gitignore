@@ -19,6 +19,7 @@ conf-shared
 conf-sysconfdir
 conf-qmail
 conf-servicedir
+conf-libexec
 leapsecs.dat
 udplogger
 udpclient
@@ -615,7 +616,8 @@ svwait.8
 qmailctl.8
 debian/daemontools.postinst
 debian/daemontools.postrm
-qlocal_upgrade.sh
+qlocal_upgrade
+qupgrade
 cleanq.8
 docker-entrypoint.8
 sslerator
@@ -663,3 +665,19 @@ qfrontend.1
 qf-log-subject
 INPUT
 dknewkey.8
+qscheduler
+qscheduler.o
+rt.lib
+haslibrt.h
+multi-queue.7
+custom_error.o
+getqueue.o
+tryfts.o
+setqload.o
+setqload
+send_qload.o
+qtop
+qtop.1
+qmonitor
+qmonitor.o
+queue_load.o

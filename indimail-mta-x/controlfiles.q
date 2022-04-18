@@ -109,3 +109,5 @@ conf-fsync
 conf-syncdir
 servicedir.conf
 dkimkeys
+msgqueuelen
+msgqueuesize

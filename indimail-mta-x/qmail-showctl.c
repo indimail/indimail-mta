@@ -1,5 +1,12 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.5  2022-03-20 16:28:45+05:30  Cprogrammer
+ * -E option for displaying client env variables
+ *
+ * Revision 1.4  2022-01-30 09:14:04+05:30  Cprogrammer
+ * made big-todo configurable
+ * replaced execvp with execv
+ *
  * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -32,6 +39,7 @@
 #include <strerr.h>
 #include <qprintf.h>
 #include <noreturn.h>
+#include <wait.h>
 #include "control.h"
 #include "auto_uids.h"
 #include "auto_qmail.h"
@@ -42,6 +50,7 @@
 #include "auto_split.h"
 #include "auto_control.h"
 #include "auto_sysconfdir.h"
+#include "auto_prefix.h"
 #include "variables.h"
 #include "hassrs.h"
 #include "indimail_stub.h"
@@ -422,6 +431,8 @@ valid_control_files(char *fn)
 		"maxrecipients", "maxcmdlen", "defaultdelivery", "blackholedpatterns",
 		"blackholedrcptpatterns", "goodrcptpatterns", "outgoingip", "domainbindings",
 		"bindroutes", "badextpatterns", "holdremote", "holdlocal", "signaturedomains",
+		"msgqueuelen", "msgqueuesize", "global_vars", "qfilters", ".qmail_control",
+		".indimail_control",
 #ifdef HAVESRS
 		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
 #endif
@@ -637,17 +648,21 @@ void
 show_queues()
 {
 	char           *qbase;
-	int             save, i, j, k, l;
+	int             save, i, j, k, l, bigtodo;
 	char            strnum[FMT_ULONG];
 	char         **ptr;
 	char           *extra_queue[] = {"slowq", "nqueue", "qmta", 0};
 
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	substdio_puts(subfdout, "subdirectory split      : ");
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) conf_split));
 	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "big todo / big intd     : ");
+	substdio_puts(subfdout, bigtodo ? "Yes\n" : "No\n");
 
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&qdir, "queue_base", 0))
@@ -733,14 +748,16 @@ main(int argc, char **argv)
 	DIR            *dir;
 	char           *ptr;
 	int             opt, do_control = 0, do_internals = 0, do_concurrency = 0,
-					do_queue = 0, do_errors = 0;
+					do_queue = 0, do_errors = 0, do_env = 0, qstat;
+	pid_t           pid;
 	char           *svctool[] = { "svctool", "--dumpconfig", 0};
+	stralloc        bin = {0};
 
-	while ((opt = getopt(argc, argv, "acCiqes")) != opteof) {
+	while ((opt = getopt(argc, argv, "acCiqeEs")) != opteof) {
 		switch(opt)
 		{
 		case 'a':
-			do_control = do_concurrency = do_internals = do_queue = do_errors = 1;
+			do_control = do_concurrency = do_internals = do_queue = do_errors = do_env = 1;
 			break;
 		case 'c':
 			do_control = 1;
@@ -757,8 +774,15 @@ main(int argc, char **argv)
 		case 'e':
 			do_errors = 1;
 			break;
+		case 'E':
+			do_env = 1;
+			break;
 		case 's':
-			execvp(*svctool, svctool); /*- run svctool */
+			if (!stralloc_copys(&bin, auto_prefix) ||
+					!stralloc_catb(&bin, "/sbin/svctool", 13) ||
+					!stralloc_0(&bin))
+				strerr_die2x(111, FATAL, "out of memory");
+			execv(bin.s, svctool); /*- run svctool */
 			strerr_die4sys(111, FATAL, "execv: ", *svctool, ": ");
 			break;
 		default:
@@ -771,13 +795,33 @@ main(int argc, char **argv)
 					"        -q Display indimail-mta queues\n"
 					"        -s Dump entire indimail-mta configuration\n"
 					"        -e Display files that shouldn't be there\n"
+					"        -E Display default env variables set\n"
 					"        -a Do all of the above");
 		}
 	}
-	if (!do_control && !do_concurrency && !do_internals && !do_errors && !do_queue)
+	if (!do_control && !do_concurrency && !do_internals && !do_errors && !do_queue && !do_env)
 		do_queue = do_internals = 1;
 
+	env_clear();
 	set_environment(WARN, FATAL, 1);
+	if (do_env) {
+		substdio_puts(subfdout, "------------------ begin show env ----------------------------\n");
+		substdio_flush(subfdout);
+		switch ((pid = fork()))
+		{
+		case -1:
+			strerr_die2sys(111, FATAL, "fork: ");
+		case 0:
+			execlp("env", "env", (char *) 0);
+			strerr_die2sys(111, FATAL, "execv: env: ");
+		default:
+			if (wait_pid(&qstat, pid) == -1)
+				strerr_die2sys(111, FATAL, "wait_pid: ");
+			if (wait_crashed(qstat))
+				strerr_die2x(111, FATAL, "env program crashed");
+		}
+		substdio_puts(subfdout, "\n");
+	}
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 
@@ -830,7 +874,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.5 2022-03-20 16:28:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

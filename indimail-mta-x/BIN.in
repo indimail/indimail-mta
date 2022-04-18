@@ -7,6 +7,7 @@
 f:::0755:/bin/:qmail-inject:qmail-inject
 f:::0755:/bin/:qmail-showctl:qmail-showctl
 f:::0755:/bin/:qmail-qread:qmail-qread
+f:::0755:/bin/:qtop:qtop
 f:::0755:/bin/:sendmail:sendmail
 f:::0755:/bin/:tcp-env:tcp-env
 f:::0755:/bin/:qreceipt:qreceipt

@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.c,v $
+ * Revision 1.12  2022-04-06 09:19:56+05:30  Cprogrammer
+ * added SYS_FDATASYNC
+ *
  * Revision 1.11  2020-09-30 20:39:50+05:30  Cprogrammer
  * Darwin Port
  *
@@ -55,7 +58,7 @@
  */
 
 #ifdef USE_FSYNC
-int             use_fsync = -1, use_syncdir = -1;
+int             use_fsync = -1, use_fdatasync = -1, use_syncdir = -1;
 #include <sys/types.h>
 #include <sys/stat.h>
 #define open XXX_open
@@ -79,6 +82,7 @@ int             use_fsync = -1, use_syncdir = -1;
 #define SYS_UNLINK(PATH)         unlink(PATH)
 #define SYS_RENAME(OLD,NEW)      rename(OLD,NEW)
 #define SYS_FSYNC(FD)            fsync(FD)
+#define SYS_FDATASYNC(FD)        fsync(FD)
 int             open(char *, int, ...);
 int             rename(char *, char *); 
 #else
@@ -89,21 +93,22 @@ int             rename(char *, char *);
 #endif
 #define SYS_CLOSE(FD) syscall(SYS_close, FD)
 #if defined(SYS_linkat) && defined(AT_FDCWD)
-#define SYS_LINK(OLD,NEW) syscall(SYS_linkat,AT_FDCWD,OLD,AT_FDCWD,NEW,0)
+#define SYS_LINK(OLD,NEW)        syscall(SYS_linkat,AT_FDCWD,OLD,AT_FDCWD,NEW,0)
 #else
-#define SYS_LINK(OLD,NEW) syscall(SYS_link,OLD,NEW)
+#define SYS_LINK(OLD,NEW)        syscall(SYS_link,OLD,NEW)
 #endif
 #if defined(SYS_unlinkat) && defined(AT_FDCWD)
-#define SYS_UNLINK(PATH) syscall(SYS_unlinkat,AT_FDCWD,PATH,0)
+#define SYS_UNLINK(PATH)         syscall(SYS_unlinkat,AT_FDCWD,PATH,0)
 #else
-#define SYS_UNLINK(PATH) syscall(SYS_unlink,PATH)
+#define SYS_UNLINK(PATH)         syscall(SYS_unlink,PATH)
 #endif
 #if defined(SYS_renameat) && defined(AT_FDCWD)
-#define SYS_RENAME(OLD,NEW) syscall(SYS_renameat,AT_FDCWD,OLD,AT_FDCWD,NEW,0)
+#define SYS_RENAME(OLD,NEW)      syscall(SYS_renameat,AT_FDCWD,OLD,AT_FDCWD,NEW,0)
 #else
-#define SYS_RENAME(OLD,NEW) syscall(SYS_rename,OLD,NEW)
+#define SYS_RENAME(OLD,NEW)      syscall(SYS_rename,OLD,NEW)
 #endif
-#define SYS_FSYNC(FD) syscall(SYS_fsync, FD)
+#define SYS_FSYNC(FD)            syscall(SYS_fsync, FD)
+#define SYS_FDATASYNC(FD)        syscall(SYS_fsync, FD)
 #endif
 
 static int
@@ -229,7 +234,7 @@ rename(const char *oldpath, const char *newpath)
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.11 2020-09-30 20:39:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: syncdir.c,v 1.12 2022-04-06 09:19:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

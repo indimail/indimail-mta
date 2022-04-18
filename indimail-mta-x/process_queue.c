@@ -1,5 +1,11 @@
 /*
  * $Log: process_queue.c,v $
+ * Revision 1.6  2022-04-13 16:58:06+05:30  Cprogrammer
+ * flush subfdout to fix out of band err messages
+ *
+ * Revision 1.5  2022-03-27 20:09:13+05:30  Cprogrammer
+ * set qstart variable from conf-queue
+ *
  * Revision 1.4  2021-10-21 12:37:54+05:30  Cprogrammer
  * added qmta queue
  *
@@ -65,7 +71,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 	else
 		scan_int(ptr, &qcount);
 	if (!(ptr = env_get("QUEUE_START")))
-		qstart = 1;
+		qstart = QUEUE_START;
 	else
 		scan_int(ptr, &qstart);
 	for (idx = qstart, count=1; count <= qcount; count++, idx++) {
@@ -82,12 +88,14 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 		substdio_puts(subfdout, "processing queue ");
 		substdio_puts(subfdout, Queuedir.s);
 		substdio_puts(subfdout, "\n");
+		substdio_flush(subfdout);
 		queuedir = Queuedir.s;
 		if (w && x && y && z)
 			(*func) (w, x, y, z);
 		else
 			(*func) ();
 		substdio_puts(subfdout, "\n");
+		substdio_flush(subfdout);
 	}
 
 	for (idx = 0; extra_queue[idx]; idx++) {
@@ -100,12 +108,14 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 			substdio_puts(subfdout, "processing queue ");
 			substdio_puts(subfdout, Queuedir.s);
 			substdio_puts(subfdout, "\n");
+			substdio_flush(subfdout);
 			queuedir = Queuedir.s;
 			if (w && x && y && z)
 				(*func) (w, x, y, z);
 			else
 				(*func) ();
 			substdio_puts(subfdout, "\n");
+			substdio_flush(subfdout);
 		} else
 		if (errno != error_noent)
 			strerr_die4sys(111, fatal, "unable to access ", Queuedir.s, ": ");
@@ -116,7 +126,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 void
 getversion_process_queue_c()
 {
-	static char    *x = "$Id: process_queue.c,v 1.4 2021-10-21 12:37:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: process_queue.c,v 1.6 2022-04-13 16:58:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

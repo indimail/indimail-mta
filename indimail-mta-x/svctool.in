@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.618 2021-10-04 09:24:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.625 2022-04-06 09:17:39+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.618 2021-10-04 09:24:13+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.625 2022-04-06 09:17:39+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -49,6 +49,7 @@ Known values for OPTION are:
   [--cntrldir=cntrl_path]
   --localip=a --maxdaemons=m --maxperip=i
   [--no-multi]
+  [--qtype=static|dynamic|compat]
   [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
@@ -58,6 +59,7 @@ Known values for OPTION are:
   [--qregex]
   [--memory=b]
   [--dmemory=c]
+  [--msgqsize=Q]
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
@@ -99,13 +101,15 @@ Known values for OPTION are:
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
   b              - Max Memory that SMTP can allocate
-  c              - Max Memory that qmail-daemon can allocate
+  c              - Max Memory that qscheduler can allocate
+  Q              - Max number of bytes in POSIX message queues
   d              - Max size of email that can be submitted to SMTP or
                    injected locally
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qtype          - Set multi-queue as static, dynamic or dynamic in compat mode
   qmailq         - Path to any qmail-queue compatabile binary
   Port           - Bind on this port for SMTP
   service_path   - Path where supervise service will be installed
@@ -188,12 +192,14 @@ Known values for OPTION are:
   --servicedir=service_path
   [--cntrldir=cntrl_path]
   [--no-multi]
+  [--qtype=static|dynamic|compat]
   [--qmailqueue=qmailq]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--persistdb]
   [--fsync --syncdir]
   [--qregex]
   [--dmemory=c]
+  [--msgqsize=Q]
   [--overquota_mailsize=o]
   [--domainlimits]
   [--routes=smtp|qmtp|static]
@@ -213,11 +219,13 @@ Known values for OPTION are:
   I              - Numeral Prefix of first queue (i.e 1 for @qmaildir@/queue/queue1)
   M              - Minimum Disk Space to maintain in queue after which
                    Temporary error will be returned
-  c              - Max Memory that qmail-daemon can allocate
+  c              - Max Memory that qscheduler can allocate
+  Q              - Max number of bytes in POSIX message queues
   D              - Max deliveries allowed per day for a user
   S              - Max sum total size of mails allowed per day for a user
   o              - Max size of mails to accept after user is overquota
   no-multi       - Do not set QMAILQUEUE to qmail-multi
+  qtype          - Set multi-queue as static, dynamic or dynamic in compat mode
   qmailq         - Path to any qmail-queue compatabile binary
   service_path   - Path where supervise service will be installed
   queue_path     - Path where the queues are installed. If this is different from
@@ -2219,11 +2227,28 @@ if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
 	mkdir -p "$DESTDIR"$sysconfdir/control/global_vars
 	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
 	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
+fi
+if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
 	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+fi
+if [ $usefsync -eq 1 -o $usefdatasync -eq 1 ] ; then
+	echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
 else
-	if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
-		echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
-	fi
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_FSYNC
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
+fi
+if [ $usesyncdir -eq 1 ] ; then
+	SYSTEM=$(uname -s)
+	case "$SYSTEM" in
+		Linux)
+		echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
+		;;
+		*)
+		> "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
+		;;
+	esac
+else
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
 fi
 if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then
 	echo $sysconfdir/control/global_vars > $conf_dir/.envdir
@@ -2480,15 +2505,14 @@ if [ " $odmr" = " " ] ; then
 			echo $bodycheck > $conf_dir/BODYCHECK
 		fi
 	fi
-	if [ " $usefsync" = " " ] ; then
-		> $conf_dir/USE_FSYNC
-	else
-		echo > $conf_dir/USE_FSYNC
+	if [ $usefsync -ne 0 ] ; then
+		echo 1 > $conf_dir/USE_FSYNC
 	fi
-	if [ " $usesyncdir" = " " ] ; then
-		> $conf_dir/USE_SYNCDIR
-	else
-		echo > $conf_dir/USE_SYNCDIR
+	if [ $usefdatasync -ne 0 ] ; then
+		echo 1 > $conf_dir/USE_FDATASYNC
+	fi
+	if [ $usesyncdir -ne 0 ] ; then
+		echo 1 > $conf_dir/USE_SYNCDIR
 	fi
 	if [ " $min_free" = " " ] ; then
 		echo 52428800 > $conf_dir/MIN_FREE
@@ -2893,15 +2917,14 @@ if [ " $qhpsi" = " " ] ; then
 else
 	echo $qhpsi > $conf_dir/QHPSI
 fi
-if [ " $usefsync" = " " ] ; then
-	> $conf_dir/USE_FSYNC
-else
-	echo > $conf_dir/USE_FSYNC
+if [ $usefsync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
-	echo > $conf_dir/USE_SYNCDIR
+if [ $usefdatasync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FDATASYNC
+fi
+if [ $usesyncdir -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $spamfilter" = " " ] ; then
 	echo "$spamfilter" > $conf_dir/SPAMFILTER
@@ -3203,15 +3226,14 @@ case "$dkverify_option" in
 	fi
 	;;
 esac
-if [ " $usefsync" = " " ] ; then
-	> $conf_dir/USE_FSYNC
-else
-	echo > $conf_dir/USE_FSYNC
+if [ $usefsync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
-	echo > $conf_dir/USE_SYNCDIR
+if [ $usefdatasync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FDATASYNC
+fi
+if [ $usesyncdir -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ " $min_free" = " " ] ; then
 	echo 52428800 > $conf_dir/MIN_FREE
@@ -5983,15 +6005,14 @@ if [ ! " $CONTROLDIR" = " " ] ; then
 else
 	> $conf_dir/CONTROLDIR
 fi
-if [ " $usefsync" = " " ] ; then
-	> $conf_dir/USE_FSYNC
-else
-	echo > $conf_dir/USE_FSYNC
+if [ $usefsync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
-	echo > $conf_dir/USE_SYNCDIR
+if [ $usefdatasync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FDATASYNC
+fi
+if [ $usesyncdir -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $memory" = " " ] ; then
 	echo $memory > $conf_dir/SOFT_MEM
@@ -6415,6 +6436,11 @@ if [ " $min_free" = " " ] ; then
 else
 	echo $min_free > $conf_dir/MIN_FREE
 fi
+if [ -z "$msgqsize" ] ; then
+	echo 819200 > $conf_dir/MSGQSIZE
+else
+	echo $msgqsize > $conf_dir/MSGQSIZE
+fi
 if [ " $QmailBinPrefix" = " /usr" ] ; then
 	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 else
@@ -6466,15 +6492,14 @@ if [ ! " $overquota_mailsize" = " " ] ; then
 else
 	> $conf_dir/OVERQUOTA_MAILSIZE
 fi
-if [ " $usefsync" = " " ] ; then
-	> $conf_dir/USE_FSYNC
-else
-	echo > $conf_dir/USE_FSYNC
+if [ $usefsync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
-	echo > $conf_dir/USE_SYNCDIR
+if [ $usefdatasync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FDATASYNC
+fi
+if [ $usesyncdir -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $dmemory" = " " ] ; then
 	echo $dmemory > $conf_dir/SOFT_MEM
@@ -6566,9 +6591,31 @@ echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
 echo "else"
 echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	FreeBSD)
+	echo "if [ ! -d $QmailHOME/queue/mqueue ] ; then"
+	echo "  mkdir -p $QmailHOME/queue/mqueue"
+	echo "fi"
+	echo "mq=\$(df $QmailHOME/queue/mqueue|grep mqueue >/dev/null)"
+	echo "if [ \$? -ne 0 ] ; then"
+  	echo "  mount -t mqueuefs null $QmailHOME/queue/mqueue"
+	echo "fi"
+	;;
+esac
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
-echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailBinPrefix/sbin/qmail-daemon \$defaultdelivery\""
+echo "exec $QmailBinPrefix/bin/softlimit -q \\\$MSGQSIZE -m \\\$SOFT_MEM -o 1024 \\"
+case $qtype in
+	static|*)
+	echo "$QmailBinPrefix/sbin/qscheduler -s \$defaultdelivery\""
+	;;
+	dynamic)
+	echo "$QmailBinPrefix/sbin/qscheduler -d \$defaultdelivery\""
+	;;
+	compat)
+	echo "$QmailBinPrefix/sbin/qscheduler -cd \$defaultdelivery\""
+	;;
+esac
 ) > "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-send."$tag"/run
 
@@ -6699,15 +6746,14 @@ if [ ! " $overquota_mailsize" = " " ] ; then
 else
 	> $conf_dir/OVERQUOTA_MAILSIZE
 fi
-if [ " $usefsync" = " " ] ; then
-	> $conf_dir/USE_FSYNC
-else
-	echo > $conf_dir/USE_FSYNC
+if [ $usefsync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FSYNC
 fi
-if [ " $usesyncdir" = " " ] ; then
-	> $conf_dir/USE_SYNCDIR
-else
-	echo > $conf_dir/USE_SYNCDIR
+if [ $usefdatasync -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_FDATASYNC
+fi
+if [ $usesyncdir -ne 0 ] ; then
+	echo 1 > $conf_dir/USE_SYNCDIR
 fi
 if [ ! " $dmemory" = " " ] ; then
 	echo $dmemory > $conf_dir/SOFT_MEM
@@ -9262,6 +9308,7 @@ fi
 prog_args="$QmailBinPrefix/sbin/svctool"
 force=0
 no_multi=0
+qtype="static"
 silent=0
 down_state=0
 use_unshare=0
@@ -9271,6 +9318,9 @@ forcetls=0
 nooverwrite=0
 run_file_only=0
 utf8=0
+usefsync=0
+usefdatasync=0
+usesyncdir=0
 mount_resolvconf=0
 valid_for=366
 databytes=$DATABYTES
@@ -9376,6 +9426,9 @@ while test $# -gt 0; do
 	--dmemory=*)
 	dmemory=$optarg
 	;;
+	--msgqsize=*)
+	msgqsize=$optarg
+	;;
 	--password-cache)
 	password_cache=1
 	;;
@@ -9406,6 +9459,17 @@ while test $# -gt 0; do
 	--no-multi)
 	no_multi=1
 	;;
+	--qtype=*)
+	case $qtype in
+		static|dynamic|compat)
+		qtype=$optarg
+		;;
+		*)
+		echo qtype must be static, dynamic or compat 1>&2
+		exit 1
+		;;
+	esac
+	;;
 	--content-filter=*)
 	bodycheck=$optarg
 	;;
@@ -9423,6 +9487,9 @@ while test $# -gt 0; do
 	;;
 	--fsync)
 	usefsync=1
+	;;
+	--fdatasync)
+	usefdatasync=1
 	;;
 	--syncdir)
 	usesyncdir=1

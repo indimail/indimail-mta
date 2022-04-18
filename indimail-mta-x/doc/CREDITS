@@ -107,6 +107,8 @@ The site http://qmail.org and the qmail mailing list for wealth of information
     - limit the size of bounces (bouncemaxbytes)
     - MAXRECIPIENT
     - maxhop control file
+    - The qmail-link-sync patch for simple fix to the non-synchronous link()
+      problem of qmail on Linux filesystems
 64. Paul Gregg - ENFORCE_FQDN_HELO patch 29/08/2003
 65. qmail-remove from LinuxMagic is the development arm of Wizard Tower TechnoServices Ltd
 66. qtools - from www.superscript.com
