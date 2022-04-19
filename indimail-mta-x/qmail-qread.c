@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.47 2022-04-16 13:00:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.40 2022-04-19 08:20:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -477,7 +477,7 @@ main(int argc, char **argv)
 	while ((x = readsubdir_next(&rs, &id))) {
 		if (x > 0) {
 			fmtqfn(fnmess, "mess/", id, 1);
-			fmtqfn(fninfo, "todo/", id, 1);
+			fmtqfn(fninfo, "todo/", id, bigtodo);
 			if (stat(fnmess, &st) == -1) {
 				err(id);
 				continue;
@@ -592,7 +592,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.47 2022-04-16 13:00:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.40 2022-04-19 08:20:23+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -600,28 +600,10 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
- * Revision 1.47  2022-04-16 13:00:09+05:30  Cprogrammer
- * moved display of queue loads from queue_load.c to qmail-qread.c
- *
- * Revision 1.46  2022-04-16 01:30:48+05:30  Cprogrammer
- * moved read_shm() code to queue_load.c
- *
- * Revision 1.45  2022-04-14 20:19:52+05:30  Cprogrammer
- * added total local, remote concurrency
- *
- * Revision 1.44  2022-04-14 19:53:47+05:30  Cprogrammer
- * added header for queue load display
- *
- * Revision 1.43  2022-04-14 13:50:32+05:30  Cprogrammer
+ * Revision 1.40  2022-04-19 08:20:23+05:30  Cprogrammer
  * display qload for use in qtop
- *
- * Revision 1.42  2022-04-13 16:59:25+05:30  Cprogrammer
  * display queues configured
- *
- * Revision 1.41  2022-04-13 08:29:19+05:30  Cprogrammer
  * added -i option to display dynamic queue information
- *
- * Revision 1.40  2022-01-30 08:42:40+05:30  Cprogrammer
  * added -s option to display only counts with -c option
  * allow configurable big/small todo/intd
  *
