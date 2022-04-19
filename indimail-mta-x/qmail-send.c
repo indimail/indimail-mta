@@ -127,6 +127,7 @@ static int      dynamic_queue = 0;
 #ifdef HASLIBRT
 static int      shm_queue = -1;
 #endif
+static int      bigtodo;
 
 static void     reread(int);
 
@@ -234,7 +235,7 @@ fnmake_info(unsigned long id)
 static void
 fnmake_todo(unsigned long id)
 {
-	fn1.len = fmtqfn(fn1.s, "todo/", id, 1);
+	fn1.len = fmtqfn(fn1.s, "todo/", id, bigtodo);
 }
 
 static void
@@ -256,7 +257,7 @@ fnmake_split(unsigned long id)
 }
 
 static void
-fnmake2_bounce(unsigned long id)
+fnmake_bounce(unsigned long id)
 {
 	fn2.len = fmtqfn(fn2.s, "bounce/", id, 0);
 }
@@ -848,7 +849,7 @@ addbounce(unsigned long id, char *recip, char *report)
 	}
 	while (!stralloc_append(&bouncetext, "\n"))
 		nomem(argv0);
-	fnmake2_bounce(id);
+	fnmake_bounce(id);
 	for (;;) {
 		if ((fd = open_append(fn2.s)) != -1)
 			break;
@@ -940,7 +941,7 @@ injectbounce(unsigned long id)
 		byte_copy(sender.s, sender.len, sender.s + 4);
 	}
 #endif
-	fnmake2_bounce(id);
+	fnmake_bounce(id);
 	fnmake_mess(id);
 	if (stat(fn2.s, &st) == -1) {
 		if (errno == error_noent)
@@ -2375,6 +2376,7 @@ main(int argc, char **argv)
 	loglock_open(argv0, 0);
 #endif
 	qident = env_get("QIDENT");
+	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
