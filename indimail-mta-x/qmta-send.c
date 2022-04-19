@@ -307,7 +307,7 @@ fnmake_split(unsigned long id)
 }
 
 static void
-fnmake2_bounce(unsigned long id)
+fnmake_bounce(unsigned long id)
 {
 	fn2.len = fmtqfn(fn2.s, "bounce/", id, 0);
 }
@@ -1320,7 +1320,7 @@ addbounce(unsigned long id, char *recip, char *report)
 	}
 	while (!stralloc_append(&bouncetext, "\n"))
 		nomem(argv0);
-	fnmake2_bounce(id);
+	fnmake_bounce(id);
 	for (;;) {
 		if ((fd = open_append(fn2.s)) != -1)
 			break;
@@ -1698,7 +1698,7 @@ injectbounce(unsigned long id)
 		byte_copy(sender.s, sender.len, sender.s + 4);
 	}
 #endif
-	fnmake2_bounce(id);
+	fnmake_bounce(id);
 	fnmake_mess(id);
 	if (stat(fn2.s, &st) == -1) {
 		if (errno == error_noent)
