@@ -1,5 +1,5 @@
 * 
-Release 2.14.1 Start 21/09/2021
+Release 2.14.1 Start 21/09/2021 End xx/xx/2022
 ======= Release Highlights ================================================
 ===========================================================================
 - 21/09/2021
@@ -204,9 +204,12 @@ Release 2.14.1 Start 21/09/2021
 - 17/04/2022
 114. qmonitor.c: use getEnvConfigDouble() to set threshold from QUEUE_LOAD env
      variable
+- 20/04/2022
+115. control.c, control.h: added control_writefile(), control_readint()
+     functions
 
 * 
-Release 2.14.0 Start 18/07/2021
+Release 2.14.0 Start 18/07/2021 End 12/09/2021
 ======= Release Highlights ================================================
 o alpine linux ready - openrc script, svctool, minisvc
 o github packages - docker/podman images for
