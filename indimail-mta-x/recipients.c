@@ -1,5 +1,8 @@
 /*
  * $Log: recipients.c,v $
+ * Revision 1.10  2022-04-20 23:15:43+05:30  Cprogrammer
+ * replaced multiple stralloc_0 with single stralloc_catb
+ *
  * Revision 1.9  2020-05-11 11:11:36+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -161,11 +164,7 @@ callapam(pam, addr)
 	mailaddress.len = 0;
 	if (!stralloc_copys(&mailaddress, addr))
 		return -2;
-	if (!stralloc_0(&mailaddress))
-		return -2;
-	if (!stralloc_0(&mailaddress))
-		return -2;
-	if (!stralloc_0(&mailaddress))
+	if (!stralloc_catb(&mailaddress, "\0\0\0", 3))
 		return -2;
 
 	substdio_fdbuf(&ssrcpt, write, pi[1], ssrcptbuf, sizeof ssrcptbuf);
@@ -365,7 +364,7 @@ recipients(buf, len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.9 2020-05-11 11:11:36+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: recipients.c,v 1.10 2022-04-20 23:15:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
