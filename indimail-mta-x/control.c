@@ -1,5 +1,564 @@
 /*
+ * $Id: control.c,v 1.22 2022-04-20 23:10:53+05:30 Cprogrammer Exp mbhangui $
+ */
+#include <unistd.h>
+#include <open.h>
+#include <now.h>
+#include <str.h>
+#include <getln.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <error.h>
+#include <alloc.h>
+#include <scan.h>
+#include <env.h>
+#include <lock.h>
+#include <fmt.h>
+#include "control.h"
+#include "auto_control.h"
+#include "variables.h"
+
+static char     inbuf[2048];
+static stralloc line = { 0 };
+static stralloc me = { 0 };
+static int      meok = 0;
+
+/*-
+ * remove white space from the end
+ * of a stralloc variable
+ */
+void
+striptrailingwhitespace(stralloc *sa)
+{
+	while (sa->len > 0) {
+		switch (sa->s[sa->len - 1])
+		{
+		case '\n':
+		case ' ':
+		case '\t':
+			--sa->len;
+			break;
+		default:
+			return;
+		}
+	}
+}
+
+int
+control_init()
+{
+	int             r;
+
+	if ((r = control_readline(&me, "me")) == 1)
+		meok = 1;
+	return r; /*- negative for error */
+}
+
+/*
+ * open control file fn
+ * if not found, copy value of me to sa if flagme is specified and
+ *   control file me exists
+ * else
+ * if def is defined, copy value of def to sa
+ *   else leave sa untouched.
+ */
+
+int
+control_rldef(stralloc *sa, char *fn, int flagme, char *def)
+{
+	int             r;
+
+	if ((r = control_readline(sa, fn)))
+		return r;
+	if (flagme && meok)
+		return stralloc_copy(sa, &me) ? 1 : -1;
+	if (def)
+		return stralloc_copys(sa, def) ? 1 : -1;
+	return r;
+}
+
+/*
+ * read a line from control file fn
+ * into sa without the terminating newline
+ */
+
+int
+control_readline(stralloc *sa, char *fn)
+{
+	substdio        ss;
+	int             fd, match;
+	static stralloc controlfile = {0};
+
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfile, controldir) ||
+				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
+				!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if ((fd = open_read(controlfile.s)) == -1) {
+		if (errno == error_noent)
+			return 0;
+		return -1;
+	}
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ss, sa, &match, '\n') == -1) {
+		close(fd);
+		return -1;
+	}
+	striptrailingwhitespace(sa);
+	close(fd);
+	return 1;
+}
+
+/*
+ * read an int number from control file fn
+ * into sa without the terminating newline
+ */
+
+int
+control_readint(int *i, char *fn)
+{
+	int             u;
+
+	switch (control_readline(&line, fn))
+	{
+	case 0:
+		return 0;
+	case -1:
+		return -1;
+	}
+	if (!stralloc_0(&line))
+		return -1;
+	if (!scan_int(line.s, &u))
+		return 0;
+	*i = u;
+	return 1;
+}
+
+/*
+ * read an unsigned number from control file fn
+ * into sa without the terminating newline
+ */
+
+int
+control_readulong(unsigned long *i, char *fn)
+{
+	unsigned long   u;
+
+	switch (control_readline(&line, fn))
+	{
+	case 0:
+		return 0;
+	case -1:
+		return -1;
+	}
+	if (!stralloc_0(&line))
+		return -1;
+	if (!scan_ulong(line.s, &u))
+		return 0;
+	*i = u;
+	return 1;
+}
+
+/*
+ * read entire file in variable sa
+ * without any interpretation (e.g. comments)
+ * To be used in case a file contains '#' character
+ * in the first column (which control_readfile() will
+ * skip
+ */
+int
+control_readnativefile(stralloc *sa, char *fn, int mode)
+{
+	substdio        ss;
+	int             fd, match;
+	static stralloc controlfile = {0};
+
+	if (!stralloc_copys(sa, ""))
+		return -1;
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfile, controldir) ||
+				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
+				!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if ((fd = open_read(controlfile.s)) == -1) {
+		if (errno == error_noent)
+			return(0);
+		return -1;
+	}
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	for (;;) {
+		if (getln(&ss, &line, &match, '\n') == -1)
+			break;
+		if (!match && !line.len) {
+			close(fd);
+			return 1;
+		}
+		if (mode) { /* for qmail-dk */
+			striptrailingwhitespace(&line);
+			if (!stralloc_0(&line))
+				break;
+			if (line.s[0] && !stralloc_cat(sa, &line))
+				break;
+		} else
+		if (!stralloc_cat(sa, &line))
+			break;
+		if (!match) {
+			close(fd);
+			return 1;
+		}
+	}
+	close(fd);
+	return -1;
+}
+
+/*
+ * read entire file into variable sa
+ * skipping line containing comments
+ *
+ * returns
+ *  0 - file not found
+ *  1 - file is opened successfuly
+ * -1 - system error
+ */
+int
+control_readfile(stralloc *sa, char *fn, int flagme)
+{
+	substdio        ss;
+	int             fd, match;
+	static stralloc controlfile = {0};
+
+	if (!stralloc_copys(sa, ""))
+		return -1;
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfile, controldir) ||
+				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
+				!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if ((fd = open_read(controlfile.s)) == -1) {
+		if (errno == error_noent) {
+			if (flagme && meok) {
+				if (!stralloc_copy(sa, &me))
+					return -1;
+				if (!stralloc_0(sa))
+					return -1;
+				return 1;
+			}
+			return 0;
+		}
+		return -1;
+	}
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	for (;;) {
+		if (getln(&ss, &line, &match, '\n') == -1)
+			break;
+		if (!match && !line.len) {
+			close(fd);
+			return 1;
+		}
+		striptrailingwhitespace(&line);
+		if (!stralloc_0(&line) ||
+				(line.s[0] && line.s[0] != '#' && !stralloc_cat(sa, &line)))
+			break;
+		if (!match) {
+			close(fd);
+			return 1;
+		}
+	}
+	close(fd);
+	return -1;
+}
+
+/*-
+ * pick a random file from fn and copy it to sa
+ */
+int
+control_readrandom(stralloc *sa, char *fn)
+{
+	substdio        ss;
+	char           *ptr;
+	int             fd, match, len, ilen, count;
+	unsigned long   random;
+	static stralloc controlfile = {0};
+
+	if (!stralloc_copys(sa, ""))
+		return -1;
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfile, controldir) ||
+				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
+					!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if ((fd = open_read(controlfile.s)) == -1) {
+		if (errno == error_noent)
+			return 0;
+		return -1;
+	}
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	for (count = 0;;count++) {
+		if (getln(&ss, &line, &match, '\n') == -1)
+			goto error;
+		if (!match && !line.len)
+			break;
+		striptrailingwhitespace(&line);
+		if (!stralloc_0(&line) ||
+				(line.s[0] && line.s[0] != '#' && !stralloc_cat(sa, &line)))
+			goto error;
+		if (!match)
+			break;
+	}
+	random = (now() % count);
+	for (count = len = 0, ptr = sa->s;len < sa->len;count++) {
+		len += ((ilen = str_len(ptr)) + 1);
+		if (count == random) {
+			if (!stralloc_copyb(sa, ptr, ilen)) /*- copy without the \0 */
+				break;
+			return (1);
+		}
+		ptr += (ilen + 1);
+	}
+error:
+	close(fd);
+	return -1;
+}
+
+extern int rename (const char *, const char *);
+
+/*-
+ * write the content of sa to control file fn,
+ * after transforming null character to
+ * newlines
+ */
+int
+control_writefile(stralloc *sa, char *fn)
+{
+	int             i, wfd;
+	static stralloc controlfileold = {0}, controlfilenew = {0};
+
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfileold, controldir) ||
+				(controlfileold.s[controlfileold.len - 1] != '/' && !stralloc_cats(&controlfileold, "/")) ||
+				!stralloc_cats(&controlfileold, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfileold, fn))
+		return(-1);
+	if (!stralloc_copy(&controlfilenew, &controlfileold) ||
+			!stralloc_0(&controlfileold) ||
+			!stralloc_catb(&controlfilenew, ".tmp", 4) ||
+			!stralloc_0(&controlfilenew))
+		return(-1);
+	i = access(controlfilenew.s, F_OK);
+	if ((wfd = (i ? open_excl : open_write) (controlfilenew.s)) == -1)
+		return(-1);
+	else
+	if (lock_ex(wfd) == -1) {
+		unlink(controlfilenew.s);
+		close(wfd);
+		return(-1);
+	}
+	for (i = 0; i < sa->len; i++) {
+		if (sa->s[i] == '\0' )
+			sa->s[i] = '\n';
+	}
+	if (write(wfd, sa->s, sa->len) == -1) {
+		unlink(controlfilenew.s);
+		close(wfd);
+		return(-1);
+	}
+	if (rename(controlfilenew.s, controlfileold.s))
+		return(-1);
+	close(wfd);
+	return 0;
+}
+
+/*-
+ * write an int value to control file fn
+ */
+int
+control_writeint(int val, char *fn)
+{
+	int             i, wfd;
+	static stralloc controlfileold = {0}, controlfilenew = {0};
+	char            strnum[FMT_ULONG];
+
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfileold, controldir) ||
+				(controlfileold.s[controlfileold.len - 1] != '/' && !stralloc_cats(&controlfileold, "/")) ||
+				!stralloc_cats(&controlfileold, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfileold, fn))
+		return(-1);
+	if (!stralloc_copy(&controlfilenew, &controlfileold) ||
+			!stralloc_0(&controlfileold) ||
+			!stralloc_catb(&controlfilenew, ".tmp", 4) ||
+			!stralloc_0(&controlfilenew))
+		return(-1);
+	i = access(controlfilenew.s, F_OK);
+	if ((wfd = (i ? open_excl : open_write) (controlfilenew.s)) == -1)
+		return(-1);
+	else
+	if (lock_ex(wfd) == -1) {
+		unlink(controlfilenew.s);
+		close(wfd);
+		return(-1);
+	}
+	strnum[i = fmt_int(strnum, val)] = 0;
+	if (!stralloc_copyb(&line, strnum, i) ||
+			!stralloc_append(&line, "\n")) {
+		unlink(controlfilenew.s);
+		close(wfd);
+		return(-1);
+	}
+	if (write(wfd, line.s, line.len) == -1) {
+		unlink(controlfilenew.s);
+		close(wfd);
+		return(-1);
+	}
+	if (rename(controlfilenew.s, controlfileold.s))
+		return(-1);
+	close(wfd);
+	return 0;
+}
+
+#ifdef CONTROL_CMD
+#include "wait.h"
+#include "MakeArgs.h"
+
+/*
+ * 1. read lines from control file having '!'
+ *    as the first char.
+ * 2. execute the command after the '!'
+ *    characture
+ * 3. Store the output in sa
+ */
+int
+control_readcmd(stralloc *sa, char *fn)
+{
+	substdio        ss, ssin;
+	int             fd, match, child, wstat;
+	char          **argv;
+	int             pi[2];
+	static stralloc controlfile = {0};
+
+	if (*fn != '/' && *fn != '.') {
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfile, controldir) ||
+				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
+				!stralloc_cats(&controlfile, fn))
+			return(-1);
+	} else
+	if (!stralloc_copys(&controlfile, fn))
+		return(-1);
+	if (!stralloc_0(&controlfile))
+		return(-1);
+	if ((fd = open_read(controlfile.s)) == -1) {
+		if (errno == error_noent)
+			return 0;
+		return -1;
+	}
+	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	if (getln(&ss, sa, &match, '\n') == -1) {
+		close(fd);
+		return -1;
+	}
+	striptrailingwhitespace(sa);
+	close(fd);
+	if (sa->s[0] == '!') {
+		if (pipe(pi) == -1)
+			return -1;
+		switch ((child = fork()))
+		{
+		case -1:
+			return -1;
+		case 0:
+			if (dup2(pi[1], 1) == -1)
+				return -1;
+			close(pi[0]); /*- close read end */
+			if (!stralloc_0(sa))
+				return -1;
+			if (!(argv = MakeArgs(sa->s + 1)))
+				return -1;
+			execv(*argv, argv);
+			exit (1);
+		}
+		close(pi[1]); /*- close write end */
+		substdio_fdbuf(&ssin, read, pi[0], inbuf, sizeof(inbuf));
+		if (getln(&ssin, sa, &match, '\n') == -1) {
+			close(fd);
+			close(pi[0]);
+			return -1;
+		}
+		striptrailingwhitespace(sa);
+		close(pi[0]);
+		if (wait_pid(&wstat, child) == -1 ||
+				wait_crashed(wstat) ||
+				wait_exitcode(wstat))
+			return -1;
+	}
+	return 1;
+}
+#endif
+
+void
+getversion_control_c()
+{
+	static char    *x = "$Id: control.c,v 1.22 2022-04-20 23:10:53+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
+}
+
+/*
  * $Log: control.c,v $
+ * Revision 1.22  2022-04-20 23:10:53+05:30  Cprogrammer
+ * added control_writefile(), control_readint() functions
+ *
  * Revision 1.21  2020-04-01 16:13:09+05:30  Cprogrammer
  * added header for MakeArgs() function
  *
@@ -56,475 +615,3 @@
  * set sccsid
  *
  */
-#include "open.h"
-#include "now.h"
-#include "str.h"
-#include "getln.h"
-#include "stralloc.h"
-#include "substdio.h"
-#include "error.h"
-#include "control.h"
-#include "alloc.h"
-#include "scan.h"
-#include "env.h"
-#include "auto_control.h"
-#include "variables.h"
-#include <unistd.h>
-
-static char     inbuf[2048];
-static stralloc line = { 0 };
-static stralloc me = { 0 };
-static int      meok = 0;
-
-void
-striptrailingwhitespace(sa)
-	stralloc       *sa;
-{
-	while (sa->len > 0)
-	{
-		switch (sa->s[sa->len - 1])
-		{
-		case '\n':
-		case ' ':
-		case '\t':
-			--sa->len;
-			break;
-		default:
-			return;
-		}
-	}
-}
-
-int
-control_init()
-{
-	int             r;
-
-	if ((r = control_readline(&me, "me")) == 1)
-		meok = 1;
-	return r; /*- negative for error */
-}
-
-int
-control_rldef(sa, fn, flagme, def)
-	stralloc       *sa;
-	char           *fn;
-	int             flagme;
-	char           *def;
-{
-	int             r;
-
-	if ((r = control_readline(sa, fn)))
-		return r;
-	if (flagme && meok)
-		return stralloc_copy(sa, &me) ? 1 : -1;
-	if (def)
-		return stralloc_copys(sa, def) ? 1 : -1;
-	return r;
-}
-
-int
-control_readline(sa, fn)
-	stralloc       *sa;
-	char           *fn;
-{
-	substdio        ss;
-	int             fd, match;
-	static stralloc controlfile = {0};
-
-	if (*fn != '/' && *fn != '.')
-	{
-		if (!controldir)
-		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&controlfile, controldir))
-			return(-1);
-		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
-			return(-1);
-		if (!stralloc_cats(&controlfile, fn))
-			return(-1);
-	} else
-	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
-	if (!stralloc_0(&controlfile))
-		return(-1);
-	if ((fd = open_read(controlfile.s)) == -1)
-	{
-		if (errno == error_noent)
-			return 0;
-		return -1;
-	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-	if (getln(&ss, sa, &match, '\n') == -1)
-	{
-		close(fd);
-		return -1;
-	}
-	striptrailingwhitespace(sa);
-	close(fd);
-	return 1;
-}
-
-int
-control_readint(i, fn)
-	int            *i;
-	char           *fn;
-{
-	int             u;
-
-	switch (control_readline(&line, fn))
-	{
-	case 0:
-		return 0;
-	case -1:
-		return -1;
-	}
-	if (!stralloc_0(&line))
-		return -1;
-	if (!scan_int(line.s, &u))
-		return 0;
-	*i = u;
-	return 1;
-}
-
-int
-control_readulong(i, fn)
-	unsigned long  *i;
-	char           *fn;
-{
-	unsigned long   u;
-
-	switch (control_readline(&line, fn))
-	{
-	case 0:
-		return 0;
-	case -1:
-		return -1;
-	}
-	if (!stralloc_0(&line))
-		return -1;
-	if (!scan_ulong(line.s, &u))
-		return 0;
-	*i = u;
-	return 1;
-}
-
-/*
- * read entire file in variable sa
- * without any interpretation (e.g. comments)
- * To be used in case a file contains '#' character
- * in the first column (which control_readfile() will
- * skip
- */
-int
-control_readnativefile(sa, fn, mode)
-	stralloc       *sa;
-	char           *fn;
-	int             mode;
-{
-	substdio        ss;
-	int             fd, match;
-	static stralloc controlfile = {0};
-
-	if (!stralloc_copys(sa, ""))
-		return -1;
-	if (*fn != '/' && *fn != '.')
-	{
-		if (!controldir)
-		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&controlfile, controldir))
-			return(-1);
-		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
-			return(-1);
-		if (!stralloc_cats(&controlfile, fn))
-			return(-1);
-	} else
-	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
-	if (!stralloc_0(&controlfile))
-		return(-1);
-	if ((fd = open_read(controlfile.s)) == -1)
-	{
-		if (errno == error_noent)
-			return(0);
-		return -1;
-	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-	for (;;)
-	{
-		if (getln(&ss, &line, &match, '\n') == -1)
-			break;
-		if (!match && !line.len)
-		{
-			close(fd);
-			return 1;
-		}
-		if (mode) /* for qmail-dk */
-		{
-			striptrailingwhitespace(&line);
-			if (!stralloc_0(&line))
-				break;
-			if (line.s[0] && !stralloc_cat(sa, &line))
-				break;
-		} else
-		if (!stralloc_cat(sa, &line))
-			break;
-		if (!match)
-		{
-			close(fd);
-			return 1;
-		}
-	}
-	close(fd);
-	return -1;
-}
-
-/*
- * read entire file into variable sa
- * skipping line containing comments
- *
- * returns
- *  0 - file not found
- *  1 - file is opened successfuly
- * -1 - system error
- */
-int
-control_readfile(sa, fn, flagme)
-	stralloc       *sa;
-	char           *fn;
-	int             flagme;
-{
-	substdio        ss;
-	int             fd, match;
-	static stralloc controlfile = {0};
-
-	if (!stralloc_copys(sa, ""))
-		return -1;
-	if (*fn != '/' && *fn != '.')
-	{
-		if (!controldir)
-		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&controlfile, controldir))
-			return(-1);
-		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
-			return(-1);
-		if (!stralloc_cats(&controlfile, fn))
-			return(-1);
-	} else
-	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
-	if (!stralloc_0(&controlfile))
-		return(-1);
-	if ((fd = open_read(controlfile.s)) == -1)
-	{
-		if (errno == error_noent)
-		{
-			if (flagme && meok)
-			{
-				if (!stralloc_copy(sa, &me))
-					return -1;
-				if (!stralloc_0(sa))
-					return -1;
-				return 1;
-			}
-			return 0;
-		}
-		return -1;
-	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-	for (;;)
-	{
-		if (getln(&ss, &line, &match, '\n') == -1)
-			break;
-		if (!match && !line.len)
-		{
-			close(fd);
-			return 1;
-		}
-		striptrailingwhitespace(&line);
-		if (!stralloc_0(&line))
-			break;
-		if (line.s[0] && line.s[0] != '#' && !stralloc_cat(sa, &line))
-			break;
-		if (!match)
-		{
-			close(fd);
-			return 1;
-		}
-	}
-	close(fd);
-	return -1;
-}
-
-/*-
- * pick a random file from fn and copy it to sa
- */
-int
-control_readrandom(sa, fn)
-	stralloc       *sa;
-	char           *fn;
-{
-	substdio        ss;
-	char           *ptr;
-	int             fd, match, len, ilen, count;
-	unsigned long   random;
-	static stralloc controlfile = {0};
-
-	if (!stralloc_copys(sa, ""))
-		return -1;
-	if (*fn != '/' && *fn != '.')
-	{
-		if (!controldir)
-		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&controlfile, controldir))
-			return(-1);
-		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
-			return(-1);
-		if (!stralloc_cats(&controlfile, fn))
-			return(-1);
-	} else
-	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
-	if (!stralloc_0(&controlfile))
-		return(-1);
-	if ((fd = open_read(controlfile.s)) == -1)
-	{
-		if (errno == error_noent)
-			return 0;
-		return -1;
-	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-	for (count = 0;;count++)
-	{
-		if (getln(&ss, &line, &match, '\n') == -1)
-			goto error;
-		if (!match && !line.len)
-			break;
-		striptrailingwhitespace(&line);
-		if (!stralloc_0(&line))
-			goto error;
-		if (line.s[0] && line.s[0] != '#' && !stralloc_cat(sa, &line))
-			goto error;
-		if (!match)
-			break;
-	}
-	random = (now() % count);
-	for (count = len = 0, ptr = sa->s;len < sa->len;count++)
-	{
-		len += ((ilen = str_len(ptr)) + 1);
-		if (count == random)
-		{
-			if (!stralloc_copyb(sa, ptr, ilen)) /*- copy without the \0 */
-				break;
-			return (1);
-		}
-		ptr += (ilen + 1);
-	}
-error:
-	close(fd);
-	return -1;
-}
-
-#ifdef CONTROL_CMD
-#include "wait.h"
-#include "MakeArgs.h"
-
-int
-control_readcmd(stralloc *sa, char *fn)
-{
-	substdio        ss, ssin;
-	int             fd, match, child, wstat;
-	char          **argv;
-	int             pi[2];
-	static stralloc controlfile = {0};
-
-	if (*fn != '/' && *fn != '.')
-	{
-		if (!controldir)
-		{
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&controlfile, controldir))
-			return(-1);
-		if (controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/"))
-			return(-1);
-		if (!stralloc_cats(&controlfile, fn))
-			return(-1);
-	} else
-	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
-	if (!stralloc_0(&controlfile))
-		return(-1);
-	if ((fd = open_read(controlfile.s)) == -1)
-	{
-		if (errno == error_noent)
-			return 0;
-		return -1;
-	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
-	if (getln(&ss, sa, &match, '\n') == -1)
-	{
-		close(fd);
-		return -1;
-	}
-	striptrailingwhitespace(sa);
-	close(fd);
-	if (sa->s[0] == '!')
-	{
-		if (pipe(pi) == -1)
-			return -1;
-		switch ((child = fork()))
-		{
-		case -1:
-			return -1;
-		case 0:
-			if (dup2(pi[1], 1) == -1)
-				return -1;
-			close(pi[0]); /*- close read end */
-			if (!stralloc_0(sa))
-				return -1;
-			if (!(argv = MakeArgs(sa->s + 1)))
-				return -1;
-			execv(*argv, argv);
-			exit (1);
-		}
-		close(pi[1]); /*- close write end */
-		substdio_fdbuf(&ssin, read, pi[0], inbuf, sizeof(inbuf));
-		if (getln(&ssin, sa, &match, '\n') == -1)
-		{
-			close(fd);
-			close(pi[0]);
-			return -1;
-		}
-		striptrailingwhitespace(sa);
-		close(pi[0]);
-		if (wait_pid(&wstat, child) == -1)
-			return -1;
-		if (wait_crashed(wstat))
-			return -1;
-		if (wait_exitcode(wstat))
-			return -1;
-	}
-	return 1;
-}
-#endif
-
-void
-getversion_control_c()
-{
-	static char    *x = "$Id: control.c,v 1.21 2020-04-01 16:13:09+05:30 Cprogrammer Exp mbhangui $";
-
-	x++;
-}
