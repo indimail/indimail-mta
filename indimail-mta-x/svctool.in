@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.625 2022-04-06 09:17:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.626 2022-04-21 18:57:53+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.625 2022-04-06 09:17:39+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.626 2022-04-21 18:57:53+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6591,20 +6591,24 @@ echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
 echo "else"
 echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
-SYSTEM=$(uname -s)
-case "$SYSTEM" in
-	FreeBSD)
-	echo "if [ ! -d $QmailHOME/queue/mqueue ] ; then"
-	echo "  mkdir -p $QmailHOME/queue/mqueue"
-	echo "fi"
-	echo "mq=\$(df $QmailHOME/queue/mqueue|grep mqueue >/dev/null)"
-	echo "if [ \$? -ne 0 ] ; then"
-  	echo "  mount -t mqueuefs null $QmailHOME/queue/mqueue"
-	echo "fi"
-	;;
-esac
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
-echo "exec $QmailBinPrefix/bin/softlimit -q \\\$MSGQSIZE -m \\\$SOFT_MEM -o 1024 \\"
+if [ "$qtype" = "static" ] ; then
+	echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
+else
+	SYSTEM=$(uname -s)
+	case "$SYSTEM" in
+		FreeBSD)
+		echo "if [ ! -d $QmailHOME/queue/mqueue ] ; then"
+		echo "  mkdir -p $QmailHOME/queue/mqueue"
+		echo "fi"
+		echo "mq=\$(df $QmailHOME/queue/mqueue|grep mqueue >/dev/null)"
+		echo "if [ \$? -ne 0 ] ; then"
+		echo "  mount -t mqueuefs null $QmailHOME/queue/mqueue"
+		echo "fi"
+		;;
+	esac
+	echo "exec $QmailBinPrefix/bin/softlimit -q \\\$MSGQSIZE -m \\\$SOFT_MEM -o 1024 \\"
+fi
 case $qtype in
 	static|*)
 	echo "$QmailBinPrefix/sbin/qscheduler -s \$defaultdelivery\""
