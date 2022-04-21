@@ -1,0 +1,54 @@
+.TH qmonitor 8
+.SH NAME
+qmonitor \- Monitor queue loads and increase it dynamically
+
+.SH SYNOPSIS
+\fBqmonitor\fR [-t \fIthreshold\fR] [-i \fIinterval\fR] [-n]
+
+.SH DESCRIPTION
+\fBqmonitor\fR monitors the queue load when indimail-mta is running in IPC
+mode (see qscheduler(8)). queue load is the ratio of current concurrency to
+the max concurrency. The max concurrency is defined by the control files
+concurrencylocal for the local queue and concurrencyremote for the remote
+queue. So the total queue load is the sum of the queue load for local and
+remote concurrency. The threshold for both local and remote concurrency is
+defined at compile time as @qload@. The sum for the two queues (local and
+remote) is therefore @tload@. When the total queue load crosses this value,
+qmonitor instructs qscheduler to increase the queue count. The queue count
+is increased only if the number of queues is below the value of the
+QUEUE_MAX environment variable (default @qmax@). The current load is
+calculated by the formula
+
+.EX
+(\fIthreshold\fR * (\fIlcur\fR / \fIlmax\fR)) + (\fIthreshold\fR * (\fIrcur\fR / \fIrmax\fR))
+
+where
+
+\fIlcur\fR = current local concurrency
+\fIlmax\fR = max local concurrency
+\fIrcur\fR = current remote concurrency.
+\fIrmax\fR = max remote concurrency
+.EE
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-t\fR \fIthreshold\fR
+increment queue if the load crosses \fIthreshold\fR. The default threshold
+is @tload@
+
+.TP
+\fB\-i\fR \fIinterval\fR
+Monitor queue every \fIinterval\fR seconds instead of the default 60 seconds
+
+.TP
+\fB\-n\fR \fIqcount\fR
+Display mode. Do not increment/decrement queue. Report the queue loads
+
+.SH SEE ALSO
+qscheduler(8),
+setqload(8),
+qtop(1),
+multi-queue(8)
+
+

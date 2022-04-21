@@ -59,7 +59,7 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 \
 	qmail-cdb.8 qmail-clean.8 qmail-control.5 qmail-daned.8 qtop.1 \
 	qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
-	qmail-limits.7 qmail-local.8 qmail-multi.8 qmail-newmrh.8 \
+	qmail-limits.7 qmail-local.8 qmail-multi.8 qmail-newmrh.8 qmonitor.8 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 \
 	qmail-queue.8 qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 \
 	qmail-smtpd.8 qmail-spamfilter.8 qmail-srs.5 qmail-start.8 \
@@ -1825,6 +1825,13 @@ load qmonitor.o send_qload.o queue_load.o rt.lib
 qmonitor.o: \
 compile qmonitor.c haslibrt.h queue_load.h send_qload.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmonitor.c
+
+qmonitor.8: qmonitor.9 conf-qmail Makefile
+	cat qmonitor.9 \
+	| sed s}@tload\@}"`head -1 conf-queue|sed 's{.*QUEUE_LOAD{QUEUE_LOAD{g'|cut -d= -f2|awk '{print $$1}'|awk '{print $$1 * 2}'`"}g \
+	| sed s}@qload\@}"`head -1 conf-queue|sed 's{.*QUEUE_LOAD{QUEUE_LOAD{g'|cut -d= -f2|awk '{print $$1}'`"}g \
+	| sed s}@qmax\@}"`head -1 conf-queue|sed 's{.*QUEUE_MAX{QUEUE_MAX{g'|cut -d= -f2|awk '{print $$1}'`"}g \
+	> qmonitor.8
 
 multi-queue.7: \
 multi-queue.9 conf-sysconfdir conf-qmail
