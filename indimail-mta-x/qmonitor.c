@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.2 2022-04-17 08:31:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.3 2022-04-21 21:33:46+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -16,10 +16,10 @@
 #include "send_qload.h"
 
 char           *usage =
-				"usage: qmonitor [-t threshold ] [-i interval] [-n]\n"
-				"        -t threshold (load threshold)\n"
-				"        -i interval\n"
-				"        -n           (Report Mode)";
+	"usage: qmonitor [-t threshold ] [-i interval] [-n]\n"
+	"        -t threshold (load threshold)\n"
+	"        -i interval\n"
+	"        -n           (Display Mode)";
 
 void
 display(QDEF *queue, int queue_count, int queue_conf)
@@ -98,13 +98,14 @@ display(QDEF *queue, int queue_count, int queue_conf)
 int
 main(int argc, char **argv)
 {
-	int             i, j, opt, qcount, qconf, interval = 60, test_mode = 0;
+	int             i, j, opt, qcount, qconf, interval = 60,
+					display_mode = 0, verbose = 0;
 	double          threshold, total_load[2], qload;
 	char            strnum[FMT_DOUBLE];
 	QDEF           *queue = (QDEF *) NULL;
 
 	getEnvConfigDouble(&threshold,   "QUEUE_LOAD",   QUEUE_LOAD);
-	while ((opt = getopt(argc, argv, "i:t:n")) != opteof) {
+	while ((opt = getopt(argc, argv, "i:t:nv")) != opteof) {
 		switch (opt)
 		{
 		case 't':
@@ -114,7 +115,10 @@ main(int argc, char **argv)
 			scan_int(optarg, &interval);
 			break;
 		case 'n':
-			test_mode = 1;
+			display_mode = 1;
+			break;
+		case 'v':
+			verbose = 1;
 			break;
 		default:
 			strerr_die1x(100, usage);
@@ -122,27 +126,29 @@ main(int argc, char **argv)
 	}
 	for (;;) {
 		queue_load("qmonitor", &qcount, &qconf, total_load, &queue);
-		if (test_mode) {
+		if (display_mode) {
 			display(queue, qcount, qconf);
 			break;
 		}
-		substdio_put(subfdout, "queue loads local[", 18);
-		strnum[i = fmt_double(strnum, total_load[0], 2)] = 0;
-		substdio_put(subfdout, strnum, i);
-		substdio_put(subfdout, "] + remote[", 11);
-		strnum[i = fmt_double(strnum, total_load[1], 2)] = 0;
-		substdio_put(subfdout, strnum, i);
-		if ((total_load[0] + total_load[1]) > 2 * qcount * threshold)
-			substdio_put(subfdout, "] >  ", 5);
-		else
-			substdio_put(subfdout, "] <= ", 5);
-		strnum[i = fmt_double(strnum, 2 * qcount * threshold, 2)] = 0;
-		substdio_put(subfdout, strnum, i);
-		substdio_put(subfdout, "\n", 1);
-		substdio_flush(subfdout);
+		if (verbose || ((total_load[0] + total_load[1]) > 2 * qcount * threshold)) {
+			substdio_put(subfdout, "queue loads local[", 18);
+			strnum[i = fmt_double(strnum, total_load[0], 2)] = 0;
+			substdio_put(subfdout, strnum, i);
+			substdio_put(subfdout, "] + remote[", 11);
+			strnum[i = fmt_double(strnum, total_load[1], 2)] = 0;
+			substdio_put(subfdout, strnum, i);
+			if ((total_load[0] + total_load[1]) > 2 * qcount * threshold)
+				substdio_put(subfdout, "] >  ", 5);
+			else
+				substdio_put(subfdout, "] <= ", 5);
+			strnum[i = fmt_double(strnum, 2 * qcount * threshold, 2)] = 0;
+			substdio_put(subfdout, strnum, i);
+			substdio_put(subfdout, "\n", 1);
+			substdio_flush(subfdout);
+		}
 		if ((total_load[0] + total_load[1]) > 2 * qcount * threshold) {
 			for (j = 0; j < qcount; j++) {
-				qload = (double) queue[j].lcur * 50/queue[j].lmax + (double) queue[j].rcur * 50/queue[j].rmax;
+				qload = (double) queue[j].lcur * 100/queue[j].lmax + (double) queue[j].rcur * 100/queue[j].rmax;
 				substdio_put(subfdout, "queue[", 6);
 				strnum[i = fmt_int(strnum, j)] = 0;
 				substdio_put(subfdout, strnum, i);
@@ -180,13 +186,17 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.2 2022-04-17 08:31:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.3 2022-04-21 21:33:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.3  2022-04-21 21:33:46+05:30  Cprogrammer
+ * added verbose mode
+ * updated formula
+ *
  * Revision 1.2  2022-04-17 08:31:39+05:30  Cprogrammer
  * use getEnvConfigDouble() to set threshold from QUEUE_LOAD env variable
  *
