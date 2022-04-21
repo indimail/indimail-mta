@@ -979,7 +979,7 @@ dynamic_queue()
 		}
 		if (keep_qcount) {
 			strerr_warn1("alert: qscheduler: deferring qmonitor msg to update load as -n option in effect", 0);
-			continiue;
+			continue;
 		}
 		queue_table[((qtab *) msgbuf)->queue_no].load = ((qtab *) msgbuf)->load;
 		for (i = 1, total_load = 0; i <= qcount; i++)
