@@ -1,6 +1,6 @@
 /*
  * $Log: qscheduler.c,v $
- * Revision 1.1  2022-04-16 21:45:44+05:30  Cprogrammer
+ * Revision 1.1  2022-04-21 21:25:55+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -59,7 +59,6 @@ static int     *shm_queue;
 static int      compat_mode;
 static char     strnum2[FMT_ULONG];
 #endif
-static readsubdir todosubdir;
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
 int             conf_split;
@@ -375,21 +374,28 @@ check_send(int queue_no)
 	return 0;
 }
 
-unsigned long
-get_load(char *qptr)
+int
+is_queue_empty(char *qptr)
 {
-	unsigned long   id, i;
-	int             x;
+	readsubdir      qsubdir;
+	int             x, split_flag = bigtodo;
+	unsigned long   id;
+	char           *dir_s1[] = {"todo", "local", "remote", 0};
+	char          **ptr;
 
 	if (chdir(qptr) == -1)
 		die_chdir(qptr);
-	readsubdir_init(&todosubdir, "todo", bigtodo, die_opendir);
-	i = 0;
-	while ((x = readsubdir_next(&todosubdir, &id))) {
-		if (x > 0)
-			i++;
+	for (ptr = dir_s1; *ptr; ptr++) {
+		readsubdir_init(&qsubdir, *ptr, split_flag, die_opendir);
+		split_flag = 1;
+		while ((x = readsubdir_next(&qsubdir, &id))) {
+			if (x > 0) {
+				closedir(qsubdir.dir);
+				return 0;
+			}
+		}
 	}
-	return i;
+	return 1;
 }
 
 void
@@ -841,6 +847,7 @@ dynamic_queue()
 		}
 	} else
 		nqueue = 0;
+
 	/*-
 	 * qmax is QUEUE_MAX compile time default in conf-queue
 	 * or value of QUEUE_MAX env variable if set
@@ -854,10 +861,39 @@ dynamic_queue()
 			die();
 		}
 	} /*- for (qconf = 0; qconf < qmax; qconf++) */
+
 	/*- 
-	 * qcount is QUEUE_COUNT compile time default in conf-queue
-	 * or value of QUEUE_COUNT env variable if set
+	 * qcount is usually QUEUE_COUNT compile time default in
+	 * conf-queue or value of QUEUE_COUNT env variable if set.
+	 * But it may have been increased in a previous qscheduler
+	 * run
+	 * We already got value of qcount in set_queue_variables()
+	 * if this qcount is lesser than the value in 'qcount'
+	 * control file, set it to the value in the control file
 	 */
+	if ((r = control_readint(&i, "qcount")) == -1) {
+		strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
+		die();
+	}
+	if (r && i > qcount)
+		qcount = i;
+
+	/*-
+	 * decrement qcount if higher
+	 * numbered queues are empty
+	 */
+	for (i = qcount; i; i--) {
+		qptr = queuenum_to_dir(i);
+		if (!is_queue_empty(qptr))
+			break;
+	}
+	qcount = i > 0 ? i : 1;
+
+	if (r && control_writeint(qcount, "qcount") == -1) {
+		strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
+		sleep(error_interval);
+	}
+
 	if (!(shm_queue = (int *) alloc(sizeof(int) * qcount)))
 		nomem();
 	create_ipc(&qlen, &qsize);
@@ -911,14 +947,21 @@ dynamic_queue()
 		if (mq_getattr(mq_sch, &attr) == -1) {
 			strerr_warn1("alert: qscheduler: unable to get message queue attributes: ", &strerr_sys);
 			sleep(error_interval);
+			continue;
 		}
 		if (!msgbuflen) {
-			if (!(msgbuf = (char *) alloc(attr.mq_msgsize)))
+			if (!(msgbuf = (char *) alloc(attr.mq_msgsize))) {
+				strerr_warn1("alert: qscheduler: out of memory", 0);
 				sleep(error_interval);
+				continue;
+			}
 		} else
 		if (msgbuflen < attr.mq_msgsize) {
-			if (!alloc_re((char *) &msgbuf, msgbuflen, attr.mq_msgsize))
+			if (!alloc_re((char *) &msgbuf, msgbuflen, attr.mq_msgsize)) {
+				strerr_warn1("alert: qscheduler: out of memory", 0);
 				sleep(error_interval);
+				continue;
+			}
 		}
 		msgbuflen = attr.mq_msgsize;
 		priority = 0;
@@ -932,9 +975,10 @@ dynamic_queue()
 		for (i = 1, total_load = 0; i <= qcount; i++)
 			total_load += queue_table[i].load;
 		strnum1[fmt_int(strnum1, total_load)] = 0;
-		strnum2[fmt_int(strnum2, qcount * threshold)] = 0;
-		if (total_load > qcount * threshold && qcount < qmax) {
-			strerr_warn5("alert: qscheduler: average load ",strnum1, " exceeds threshold (> ", strnum2, ")", 0);
+		strnum2[fmt_int(strnum2, 2 * qcount * threshold)] = 0;
+		/*- total load = total load for local queue + total load for remote queue */
+		if (total_load > 2 * qcount * threshold && qcount < qmax) {
+			strerr_warn5("alert: qscheduler: average load ", strnum1, " exceeds threshold (> ", strnum2, "). Increasing qcount", 0);
 			qptr = queuenum_to_dir(qcount + 1);
 			r = 0; /*- flag for queue creation */
 			if (access(qptr, F_OK)) {
@@ -943,12 +987,14 @@ dynamic_queue()
 					r = queue_fix(qptr);
 				else {
 					strerr_warn3("alert: qscheduler: ", qptr, ": ", &strerr_sys);
-					sleep(error_interval);
+					continue;
 				}
 			}
 			if (!r) {
-				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2)))
-					sleep(error_interval);
+				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
+					strerr_warn1("alert: qscheduler: out of memory", 0);
+					continue;
+				}
 				if (++qcount > qconf)
 					qconf++;
 				queue_table[qcount].pid = -1;
@@ -957,7 +1003,7 @@ dynamic_queue()
 				create_ipc(&qlen, &qsize);
 				if (check_send(qcount)) {
 					qcount--;
-					sleep(error_interval);
+					continue;
 				}
 				start_send(qcount, -1);
 				q[0] = qcount;
@@ -965,7 +1011,11 @@ dynamic_queue()
 				if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) <= 0) {
 					strerr_warn1("alert: qscheduler: unable to write to shared memory:  /qscheduler", &strerr_sys);
 					qcount--;
-					sleep(error_interval);
+					continue;
+				}
+				if (control_writeint(qcount, "qcount") == -1) {
+					strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
+					continue;
 				}
 			}
 		} else {
@@ -980,10 +1030,27 @@ dynamic_queue()
 			log_out(" < qmax ");
 			log_out(strnum2);
 			log_outf(")\n");
+			for (i = qcount; i > 1; i--) {
+				qptr = queuenum_to_dir(i);
+				if (!is_queue_empty(qptr))
+					break;
+				r = queue_table[i].pid;
+				queue_table[i].pid = -1;
+				strnum1[fmt_int(strnum1, r)] = 0;
+				strnum2[fmt_int(strnum2, qcount - 1)] = 0;
+				strerr_warn6("alert: qscheduler: queue ", qptr, "empty. Removing pid ", strnum1, ". New qcount=", strnum2, 0);
+				qcount--;
+				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
+					strerr_warn1("alert: qscheduler: out of memory", 0);
+					qcount++;
+					queue_table[i].pid = r;
+				} else
+				if (kill(r, sig_term)) {
+					strerr_warn3("alert: qscheduler: unable to kill pid ", strnum1, ": ", &strerr_sys);
+					qcount++;
+				}
+			}
 		}
-		/*-
-		 * queue_no load priority qcount -> ((qtab *) msgbuf)->queue_no, ((qtab *) msgbuf)->load, priority, qcount);
-		 */ 
 	} /*- for (; !flagexitasap;) */
 
 	for (; flagexitasap;) {
@@ -1067,7 +1134,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.1 2022-04-16 21:45:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.1 2022-04-21 21:25:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
