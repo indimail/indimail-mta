@@ -3,7 +3,7 @@
 qmonitor \- Monitor queue loads and increase it dynamically
 
 .SH SYNOPSIS
-\fBqmonitor\fR [-t \fIthreshold\fR] [-i \fIinterval\fR] [-n]
+\fBqmonitor\fR [-t \fIthreshold\fR] [-i \fIinterval\fR] [-nv]
 
 .SH DESCRIPTION
 \fBqmonitor\fR monitors the queue load when indimail-mta is running in IPC
@@ -42,8 +42,13 @@ is @tload@
 Monitor queue every \fIinterval\fR seconds instead of the default 60 seconds
 
 .TP
-\fB\-n\fR \fIqcount\fR
+\fB\-n\fR
 Display mode. Do not increment/decrement queue. Report the queue loads
+
+.TP
+\fB\-v\fR
+verbose mode. Display local and remote queue loads. Normally load is
+reported only when load threshold is exceeded.
 
 .SH SEE ALSO
 qscheduler(8),
