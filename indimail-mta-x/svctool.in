@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.626 2022-04-21 18:57:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.627 2022-04-21 22:37:31+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.626 2022-04-21 18:57:53+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.627 2022-04-21 22:37:31+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6605,6 +6605,10 @@ else
 		echo "if [ \$? -ne 0 ] ; then"
 		echo "  mount -t mqueuefs null $QmailHOME/queue/mqueue"
 		echo "fi"
+		;;
+		Linux)
+		echo "# fix for linux. Haven't understood this, but this works"
+		echo "ulimit -q unlimited"
 		;;
 	esac
 	echo "exec $QmailBinPrefix/bin/softlimit -q \\\$MSGQSIZE -m \\\$SOFT_MEM -o 1024 \\"
