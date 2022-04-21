@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.103 2022-04-16 01:31:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.104 2022-04-21 21:34:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2599,7 +2599,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.103 2022-04-16 01:31:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.104 2022-04-21 21:34:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2609,6 +2609,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.104  2022-04-21 21:34:31+05:30  Cprogrammer
+ * fixed bigtodo setting for todofn
+ *
  * Revision 1.103  2022-04-16 01:31:08+05:30  Cprogrammer
  * set delayed flag to 0 for new jobs
  *
