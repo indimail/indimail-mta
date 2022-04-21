@@ -37,18 +37,24 @@ invoke \fBqmail-send\fR, \fBqmail-todo\fR, \fBqmail-lspawn\fR,
 \fBqmail-rspawn\fR, and \fBqmail-clean\fR, under the proper uids and gids
 for multiple queues. Each instance refers to a specific queue. The number
 of instances can be fixed (\-\fBs\fR) or dynamic (\-\fBd\fR). When using
-static queues, the number of queues is fixed at runtime. When using dynamic
+static queues, the number of queues is fixed at runtime.
+
+Using the program \fBqmonitor\fR(8), queue loads can be communicated to
+\fBqscheduler\fR using \fBqscheduler\fR message queue. When using dynamic
 queues, the number of queues can be increased or decreased at runtime
 depending on the queue load. The queue load is an indicator of the average
-concurrency of all queues. When it reaches \fBMAX_LOAD\fR, \fBqscheduler\fR
+concurrency of all queues. When it reaches \fBMAX_LOAD\fR environment
+variable for both the local queue or the remote queue for all the queues
+(default compile time value=@qload@ for each queue), \fBqscheduler\fR
 configures an additional queue using \fBqueue-fix\fR(8) and invokes
 \fBqmail-send\fR, \fbqmail-todo\fR, \fBqmail-lspawn\fR, \fBqmail-rspawn\fR
 and \fBqmail-clean\fR on the new queue. \fBqscheduler\fR uses DIRSPLIT as
 the default split value. This can be changed by setting the \fBCONFSPLIT\fR
-environment variable. Additionally \fBqscheduler\fR can process a queue
+environment variable.  Additionally \fBqscheduler\fR can process a queue
 created with \fItodo\fR, \fIintd\fR with subdirectory split instead of
 without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable.
+
 
 \fBqscheduler\fR also monitors each \fBqmail-todo\fR, \fBqmail-send\fR
 instances and restarts them if they go down.
@@ -176,6 +182,7 @@ and any logger specified on command line (qmaill user). See group(5) to
 learn how to set supplementary groups.
 
 .SH "SEE ALSO"
+qmonitor(1),
 logger(1),
 splogger(1),
 nice(1),
