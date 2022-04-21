@@ -13,7 +13,7 @@ qscheduler \- Turn on mail delivery with fixed number of queues or load dependen
 ]
 
 .B qscheduler
-[ -\fBs\fR | [-\fBc\fR]-\fBd\fR
+[ -\fBs\fR | [-\fBc\fR]-\fBd\fR [-\fBn\fR]
 [ \fIdefaultdelivery\fR ]
 [
 .I logger arg ...
@@ -53,8 +53,8 @@ the default split value. This can be changed by setting the \fBCONFSPLIT\fR
 environment variable.  Additionally \fBqscheduler\fR can process a queue
 created with \fItodo\fR, \fIintd\fR with subdirectory split instead of
 without any split. This can be done by setting the \fBBIGTODO\fR
-environment variable.
-
+environment variable. If the -n option is provided, queue counts will not
+be increased or decreased.
 
 \fBqscheduler\fR also monitors each \fBqmail-todo\fR, \fBqmail-send\fR
 instances and restarts them if they go down.
@@ -112,6 +112,12 @@ trigger scan of the todo directory by \fBqmail-todo\fR. Use this when your
 system has qmail, netqmail or old qmail-queue clients injecting emails.
 Using compatability mode doesn't give you the full performance benefits
 when system is configured to use POSIX IPC for dynamic queues.
+
+.PP
+.TP 3
+\fB\-n\fR
+When using dynamic queues, this keeps original queue counts. The queue
+counts are neither decreased or increased
 
 .PP
 .TP 3
