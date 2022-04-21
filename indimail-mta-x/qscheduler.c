@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.2  2022-04-21 22:37:10+05:30  Cprogrammer
+ * added -n option to keep qcount static
+ *
  * Revision 1.1  2022-04-21 21:25:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -57,6 +60,7 @@ static mqd_t    mq_sch = (mqd_t) -1;
 static int      shm_conf = -1;
 static int     *shm_queue;
 static int      compat_mode;
+static int      keep_qcount = 0;
 static char     strnum2[FMT_ULONG];
 #endif
 static char     ssoutbuf[512];
@@ -878,16 +882,18 @@ dynamic_queue()
 	if (r && i > qcount)
 		qcount = i;
 
-	/*-
-	 * decrement qcount if higher
-	 * numbered queues are empty
-	 */
-	for (i = qcount; i; i--) {
-		qptr = queuenum_to_dir(i);
-		if (!is_queue_empty(qptr))
-			break;
+	if (!keep_qcount) {
+		/*-
+		 * decrement qcount if higher
+		 * numbered queues are empty
+		 */
+		for (i = qcount; i; i--) {
+			qptr = queuenum_to_dir(i);
+			if (!is_queue_empty(qptr))
+				break;
+		}
+		qcount = i > 0 ? i : 1;
 	}
-	qcount = i > 0 ? i : 1;
 
 	if (r && control_writeint(qcount, "qcount") == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
@@ -971,6 +977,10 @@ dynamic_queue()
 			strerr_warn1("alert: qscheduler: unable to read message queue: ", &strerr_sys);
 			sleep(error_interval);
 		}
+		if (keep_qcount) {
+			strerr_warn1("alert: qscheduler: deferring qmonitor msg to update load as -n option in effect", 0);
+			continiue;
+		}
 		queue_table[((qtab *) msgbuf)->queue_no].load = ((qtab *) msgbuf)->load;
 		for (i = 1, total_load = 0; i <= qcount; i++)
 			total_load += queue_table[i].load;
@@ -1030,6 +1040,8 @@ dynamic_queue()
 			log_out(" < qmax ");
 			log_out(strnum2);
 			log_outf(")\n");
+			if (keep_qcount)
+				continue;
 			for (i = qcount; i > 1; i--) {
 				qptr = queuenum_to_dir(i);
 				if (!is_queue_empty(qptr))
@@ -1090,7 +1102,7 @@ main(int argc, char **argv)
 		strerr_die1sys(111, "alert: qscheduler: cannot start: unable to open queue/qscheduler: ");
 	if (lock_exnb(fd) == -1)
 		strerr_die1x(111, "alert: cannot start: qscheduler is already running\n");
-	while ((opt = getopt(argc, argv, "cds")) != opteof) {
+	while ((opt = getopt(argc, argv, "cdsn")) != opteof) {
 		switch (opt)
 		{
 			case 'c':
@@ -1111,6 +1123,11 @@ main(int argc, char **argv)
 			case 's':
 #ifdef HASLIBRT
 				qtype = fixed;
+#endif
+				break;
+			case 'n':
+#ifdef HASLIBRT
+				keep_qcount = 1;
 #endif
 				break;
 		}
@@ -1134,7 +1151,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.1 2022-04-21 21:25:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.2 2022-04-21 22:37:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
