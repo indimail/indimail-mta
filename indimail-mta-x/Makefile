@@ -1826,7 +1826,7 @@ qmonitor.o: \
 compile qmonitor.c haslibrt.h queue_load.h send_qload.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmonitor.c
 
-qmonitor.8: qmonitor.9 conf-qmail Makefile
+qmonitor.8: qmonitor.9 conf-qmail
 	cat qmonitor.9 \
 	| sed s}@tload\@}"`head -1 conf-queue|sed 's{.*QUEUE_LOAD{QUEUE_LOAD{g'|cut -d= -f2|awk '{print $$1}'|awk '{print $$1 * 2}'`"}g \
 	| sed s}@qload\@}"`head -1 conf-queue|sed 's{.*QUEUE_LOAD{QUEUE_LOAD{g'|cut -d= -f2|awk '{print $$1}'`"}g \
