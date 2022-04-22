@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.4 2022-04-23 00:14:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.5 2022-04-23 00:40:39+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -108,6 +108,7 @@ main(int argc, char **argv)
 	char            strnum[FMT_DOUBLE];
 	QDEF           *queue = (QDEF *) NULL;
 
+	set_environment(WARN, FATAL, 0);
 	getEnvConfigDouble(&threshold,   "QUEUE_LOAD",   QUEUE_LOAD);
 	while ((opt = getopt(argc, argv, "i:t:nv")) != opteof) {
 		switch (opt)
@@ -128,7 +129,6 @@ main(int argc, char **argv)
 			strerr_die1x(100, usage);
 		}
 	}
-	set_environment(WARN, FATAL, 0);
 	for (;;) {
 		queue_load("qmonitor", &qcount, &qconf, total_load, &queue);
 		if (display_mode) {
@@ -191,13 +191,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.4 2022-04-23 00:14:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.5 2022-04-23 00:40:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.5  2022-04-23 00:40:39+05:30  Cprogrammer
+ * set env variables before getEnvConfig
+ *
  * Revision 1.4  2022-04-23 00:14:13+05:30  Cprogrammer
  * set default env variables from $HOME/.defaultqueue
  *
