@@ -1306,7 +1306,7 @@ set_environment.o queue_load.o process_queue.o rt.lib
 qmail-qread.o: \
 compile qmail-qread.c auto_qmail.h auto_split.h readsubdir.h \
 fmtqfn.h haslibrt.h control.h variables.h process_queue.h \
-queue_load.h conf-queue
+queue_load.h set_environment.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-qread.c
 
 qmail-qread.8: qmail-qread.9 conf-sysconfdir conf-split
@@ -1819,11 +1819,14 @@ compile haslibrt.h qscheduler.h send_qload.h
 	./compile send_qload.c
 
 qmonitor: \
-load qmonitor.o send_qload.o queue_load.o rt.lib
-	./load qmonitor send_qload.o queue_load.o $(QMAILLIB) `cat rt.lib`
+load qmonitor.o send_qload.o queue_load.o set_environment.o \
+variables.o auto_control.o rt.lib
+	./load qmonitor send_qload.o queue_load.o set_environment.o \
+	variables.o auto_control.o $(QMAILLIB) `cat rt.lib`
 
 qmonitor.o: \
-compile qmonitor.c haslibrt.h queue_load.h send_qload.h conf-queue
+compile qmonitor.c haslibrt.h queue_load.h send_qload.h \
+set_environment.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmonitor.c
 
 qmonitor.8: qmonitor.9 conf-qmail
