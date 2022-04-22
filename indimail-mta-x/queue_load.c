@@ -1,5 +1,5 @@
 /*
- * $Id: queue_load.c,v 1.2 2022-04-16 13:03:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue_load.c,v 1.3 2022-04-23 00:14:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 
@@ -43,6 +43,12 @@ queue_load(char *argv0, int *qcount, int *qconf, double total_load[2], QDEF **qu
 		*qconf = queue_conf;
 	if (!(qdef = (QDEF *) alloc(queue_count * sizeof(QDEF))))
 		strerr_die2x(111, argv0, ": fatal: out of memory");
+	/*- initialize qcount QDEF structures */
+	for (j = 0; j < queue_count; j++) {
+		qdef[j].queue.a = 0;
+		qdef[j].queue.len = 0;
+		qdef[j].queue.s = 0;
+	}
 	if (queue)
 		*queue = qdef;
 	for (j = 0, load_l = load_r = 0.0, min = -1; j < queue_count; j++) {
@@ -98,7 +104,7 @@ queue_load(char *argv0, int *qcount, int *qconf, double total_load[2], QDEF **qu
 void
 getversion_queue_load_c()
 {
-	static char    *x = "$Id: queue_load.c,v 1.2 2022-04-16 13:03:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue_load.c,v 1.3 2022-04-23 00:14:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -106,6 +112,9 @@ getversion_queue_load_c()
 
 /*-
  * $Log: queue_load.c,v $
+ * Revision 1.3  2022-04-23 00:14:18+05:30  Cprogrammer
+ * initialize QDEF
+ *
  * Revision 1.2  2022-04-16 13:03:13+05:30  Cprogrammer
  * removed display of queue loads
  *
