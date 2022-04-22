@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.627 2022-04-21 22:37:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.628 2022-04-22 11:52:53+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.627 2022-04-21 22:37:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.628 2022-04-22 11:52:53+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6437,7 +6437,7 @@ else
 	echo $min_free > $conf_dir/MIN_FREE
 fi
 if [ -z "$msgqsize" ] ; then
-	echo 819200 > $conf_dir/MSGQSIZE
+	echo 8388608 > $conf_dir/MSGQSIZE
 else
 	echo $msgqsize > $conf_dir/MSGQSIZE
 fi
