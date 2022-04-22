@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.41 2022-04-22 11:52:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.42 2022-04-23 00:13:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -31,6 +31,7 @@
 #include "control.h"
 #include "variables.h"
 #include "process_queue.h"
+#include "set_environment.h"
 
 #define FATAL "qmail-qread: fatal: "
 #define WARN  "qmail-qread: warn: "
@@ -363,7 +364,7 @@ main(int argc, char **argv)
 #ifndef MULTI_QUEUE
 #ifdef HASLIBRT
 	int             qcount, qconf;
-	QDEF           *queue;
+	QDEF           *queue = (QDEF *) NULL;
 #endif
 	char           *qbase;
 	static stralloc QueueBase = { 0 };
@@ -555,6 +556,7 @@ main(int argc, char **argv)
 		putcounts("Total ", lCount, rCount, bCount, tCount);
 #ifdef HASLIBRT
 	if (doshm) {
+		set_environment(WARN, FATAL, 0);
 		queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
 		display(queue, qcount, qconf);
 	}
@@ -571,7 +573,7 @@ main(int argc, char **argv)
 	int             lcount = 0, rcount = 0, bcount = 0, tcount = 0;
 #ifdef HASLIBRT
 	int             qcount, qconf;
-	QDEF           *queue;
+	QDEF           *queue = (QDEF *) NULL;
 #endif
 
 	if (get_arguments(argc, argv)) {
@@ -586,6 +588,7 @@ main(int argc, char **argv)
 	}
 #ifdef HASLIBRT
 	if (doshm) {
+		set_environment(WARN, FATAL, 1);
 		queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
 		display(queue, qcount, qconf);
 	}
@@ -597,7 +600,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-04-22 11:52:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.42 2022-04-23 00:13:49+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -605,6 +608,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.42  2022-04-23 00:13:49+05:30  Cprogrammer
+ * set default env variables from $HOME/.defaultqueue
+ *
  * Revision 1.41  2022-04-22 11:52:42+05:30  Cprogrammer
  * display threshold
  *

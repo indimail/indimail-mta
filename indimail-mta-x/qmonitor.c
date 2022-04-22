@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.3 2022-04-21 21:33:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.4 2022-04-23 00:14:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -13,7 +13,11 @@
 #include <qprintf.h>
 #include <getEnvConfig.h>
 #include "queue_load.h"
+#include "set_environment.h"
 #include "send_qload.h"
+
+#define FATAL "qmonitor: fatal: "
+#define WARN  "qmonitor: warn: "
 
 char           *usage =
 	"usage: qmonitor [-t threshold ] [-i interval] [-n]\n"
@@ -124,6 +128,7 @@ main(int argc, char **argv)
 			strerr_die1x(100, usage);
 		}
 	}
+	set_environment(WARN, FATAL, 0);
 	for (;;) {
 		queue_load("qmonitor", &qcount, &qconf, total_load, &queue);
 		if (display_mode) {
@@ -186,13 +191,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.3 2022-04-21 21:33:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.4 2022-04-23 00:14:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.4  2022-04-23 00:14:13+05:30  Cprogrammer
+ * set default env variables from $HOME/.defaultqueue
+ *
  * Revision 1.3  2022-04-21 21:33:46+05:30  Cprogrammer
  * added verbose mode
  * updated formula
