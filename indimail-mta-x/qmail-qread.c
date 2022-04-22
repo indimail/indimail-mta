@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.40 2022-04-19 08:20:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.41 2022-04-22 11:52:42+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -272,8 +272,10 @@ display(QDEF *queue, int queue_count, int queue_conf)
 {
 	char            strnum[FMT_DOUBLE];
 	int             i, j, x, lcur = 0, rcur = 0, min = -1;
+	double          threshold;
 	double          load_l = 0.0, load_r = 0.0;
 
+	getEnvConfigDouble(&threshold,   "QUEUE_LOAD",   QUEUE_LOAD);
 	for (j = 0; j < queue_count; j++) {
 		x = queue[j].lcur + queue[j].rcur;
 		if (min == -1 || x < min)
@@ -315,23 +317,26 @@ display(QDEF *queue, int queue_count, int queue_conf)
 		substdio_put(subfdout, x == min ? " - " : " + ", 3);
 		substdio_put(subfdout, queue[j].flag ? " disabled\n" : "  enabled\n", 10);
 	}
-	substdio_put(subfdout, "queue count = ", 14);
+	substdio_put(subfdout, "threshold = ", 12);
+	strnum[i = fmt_double(strnum, 2 * queue_count * threshold, 2)] = 0;
+	substdio_put(subfdout, strnum, i);
+	substdio_put(subfdout, ", qcount = ", 11);
 	strnum[i = fmt_ulong(strnum, queue_count)] = 0;
 	substdio_put(subfdout, strnum, i);
 
-	substdio_put(subfdout, ", queue configured = ", 21);
+	substdio_put(subfdout, ", qconf = ", 10);
 	strnum[i = fmt_ulong(strnum, queue_conf)] = 0;
 	substdio_put(subfdout, strnum, i);
 
-	substdio_put(subfdout, ", Total local = ", 16);
+	substdio_put(subfdout, ", local = ", 10);
 	strnum[i = fmt_ulong(strnum, lcur)] = 0;
 	substdio_put(subfdout, strnum, i);
 
-	substdio_put(subfdout, ", Total remote = ", 17);
+	substdio_put(subfdout, ", remote = ", 11);
 	strnum[i = fmt_ulong(strnum, rcur)] = 0;
 	substdio_put(subfdout, strnum, i);
 
-	substdio_put(subfdout, ", Total queue load = ", 19);
+	substdio_put(subfdout, ", qload = ", 10);
 	strnum[i = fmt_double(strnum, 100 * load_l, 2)] = 0;
 	qprintf(subfdout, strnum, "%+6s");
 	substdio_put(subfdout, " / ", 3);
@@ -592,7 +597,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.40 2022-04-19 08:20:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.41 2022-04-22 11:52:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -600,6 +605,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.41  2022-04-22 11:52:42+05:30  Cprogrammer
+ * display threshold
+ *
  * Revision 1.40  2022-04-19 08:20:23+05:30  Cprogrammer
  * display qload for use in qtop
  * display queues configured
