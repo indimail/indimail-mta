@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.42 2022-04-23 00:13:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.43 2022-04-23 09:44:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -319,8 +319,8 @@ display(QDEF *queue, int queue_count, int queue_conf)
 		substdio_put(subfdout, queue[j].flag ? " disabled\n" : "  enabled\n", 10);
 	}
 	substdio_put(subfdout, "threshold = ", 12);
-	strnum[i = fmt_double(strnum, 2 * queue_count * threshold, 2)] = 0;
-	substdio_put(subfdout, strnum, i);
+	strnum[i = fmt_double(strnum, threshold, 2)] = 0;
+	qprintf(subfdout, strnum, "%+6s");
 	substdio_put(subfdout, ", qcount = ", 11);
 	strnum[i = fmt_ulong(strnum, queue_count)] = 0;
 	substdio_put(subfdout, strnum, i);
@@ -337,11 +337,8 @@ display(QDEF *queue, int queue_count, int queue_conf)
 	strnum[i = fmt_ulong(strnum, rcur)] = 0;
 	substdio_put(subfdout, strnum, i);
 
-	substdio_put(subfdout, ", qload = ", 10);
-	strnum[i = fmt_double(strnum, 100 * load_l, 2)] = 0;
-	qprintf(subfdout, strnum, "%+6s");
-	substdio_put(subfdout, " / ", 3);
-	strnum[i = fmt_double(strnum, 100 * load_r, 2)] = 0;
+	substdio_put(subfdout, ", qload_av = ", 10);
+	strnum[i = fmt_double(strnum, 50 * (load_l + load_r)/queue_count, 2)] = 0;
 	qprintf(subfdout, strnum, "%+6s");
 	substdio_put(subfdout, "\n", 1);
 	substdio_flush(subfdout);
@@ -600,7 +597,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.42 2022-04-23 00:13:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.43 2022-04-23 09:44:19+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -608,6 +605,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.43  2022-04-23 09:44:19+05:30  Cprogrammer
+ * display qload average instead of total load
+ *
  * Revision 1.42  2022-04-23 00:13:49+05:30  Cprogrammer
  * set default env variables from $HOME/.defaultqueue
  *

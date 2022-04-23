@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.5 2022-04-23 00:40:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.6 2022-04-23 09:44:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -89,11 +89,8 @@ display(QDEF *queue, int queue_count, int queue_conf)
 	strnum[i = fmt_ulong(strnum, rcur)] = 0;
 	substdio_put(subfdout, strnum, i);
 
-	substdio_put(subfdout, ", Total queue load = ", 19);
-	strnum[i = fmt_double(strnum, 100 * load_l, 2)] = 0;
-	qprintf(subfdout, strnum, "%+6s");
-	substdio_put(subfdout, " / ", 3);
-	strnum[i = fmt_double(strnum, 100 * load_r, 2)] = 0;
+	substdio_put(subfdout, ", qload_avg = ", 14);
+	strnum[i = fmt_double(strnum, 50 * (load_l +  load_r)/queue_count, 2)] = 0;
 	qprintf(subfdout, strnum, "%+6s");
 	substdio_put(subfdout, "\n", 1);
 	substdio_flush(subfdout);
@@ -191,13 +188,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.5 2022-04-23 00:40:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.6 2022-04-23 09:44:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.6  2022-04-23 09:44:49+05:30  Cprogrammer
+ * display qload average instead of total load
+ *
  * Revision 1.5  2022-04-23 00:40:39+05:30  Cprogrammer
  * set env variables before getEnvConfig
  *
