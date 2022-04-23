@@ -3,15 +3,29 @@
 setqload \- Set queue load manually to dynamically add a new queue
 
 .SH SYNOPSIS
-\fBsetqload\fR \fIqnum\fR \fIqload\fR
+\fBsetqload\fR -q \fIqnum\fR \fIqload\fR
+.br
+or
+.br
+\fBsetqload\fR -q \fIqnum\fR \fIqloadl\fR \fIqloadr\fR
 
 .SH DESCRIPTION
 \fBsetqload\fR communicates with \fBqscheduler\fR for the queue \fIqnum\fR
 and instructs it to set it's load as \fIqload\fR. If the average load is
-goes beyond the limit defined by \fBQUEUE_LOAD\fR environment variabe,
+goes beyond the limit defined by \fBQUEUE_LOAD\fR environment variable,
 \fBqscheduler\fR will increase the number of queues, provided the current
 number of queues is below the value of \fBQUEUE_MAX\fR environment
 variable.
+
+\fIqload\fR is the sum of the concurrency used to concurrency max
+ratios of the local and remote queue. So if local concurrency is 2/10
+and the remote concurrency is 5/20, qload is 45. Both of the below examples
+are equivalent.
+
+.EX
+$ setqload -q 10 45/100
+$ setqload -q 10 2/10 5/20
+.EE
 
 .SH SEE ALSO
 qscheduler(8),
