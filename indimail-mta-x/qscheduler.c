@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.4  2022-04-23 22:52:44+05:30  Cprogrammer
+ * do not restart qmail-send when terminated due to empty queue
+ *
  * Revision 1.3  2022-04-23 09:45:09+05:30  Cprogrammer
  * compare qload average with threshold in log
  *
@@ -50,7 +53,7 @@ static int      qstart, qcount;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
-static int      selfpid;
+static int      selfpid, killed;
 static char  **prog_argv;
 static char     strnum1[FMT_ULONG];
 static int      bigtodo;
@@ -350,8 +353,12 @@ sigchld()
 		}
 		if (!child)
 			break;
-		start_send(-1, child);
-		sleep(1);
+		if (child == killed) /*- we killed this as queue was empty */
+			killed = 0;
+		else { 
+			start_send(-1, child);
+			sleep(1);
+		}
 	} /*- for (child = 0;;) */
 	sig_unblock(sig_child);
 }
@@ -985,7 +992,7 @@ dynamic_queue()
 			continue;
 		}
 		/*-
-		 * data received from qmonitor in msgbuf
+		 * data received from qmonitor, setqload in msgbuf
 		 * queue_table[i].load = lcur * 100/lmax + rcur * 100/rmax;
 		 */
 		queue_table[((qtab *) msgbuf)->queue_no].load = ((qtab *) msgbuf)->load;
@@ -1044,7 +1051,7 @@ dynamic_queue()
 			strnum1[fmt_int(strnum1, qcount)] = 0;
 			strnum2[fmt_int(strnum2, qmax)] = 0;
 			log_out(strnum1);
-			log_out(" < qmax ");
+			log_out(" < qmax=");
 			log_out(strnum2);
 			log_outf(")\n");
 			if (keep_qcount)
@@ -1057,8 +1064,8 @@ dynamic_queue()
 				queue_table[i].pid = -1;
 				strnum1[fmt_int(strnum1, r)] = 0;
 				strnum2[fmt_int(strnum2, qcount - 1)] = 0;
-				strerr_warn6("alert: qscheduler: queue ", qptr, "empty. Removing pid ", strnum1, ". New qcount=", strnum2, 0);
 				qcount--;
+				strerr_warn6("alert: qscheduler: queue ", qptr, " empty. Removing pid ", strnum1, ". New qcount=", strnum2, 0);
 				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
 					strerr_warn1("alert: qscheduler: out of memory", 0);
 					qcount++;
@@ -1067,6 +1074,9 @@ dynamic_queue()
 				if (kill(r, sig_term)) {
 					strerr_warn3("alert: qscheduler: unable to kill pid ", strnum1, ": ", &strerr_sys);
 					qcount++;
+				} else {
+					strerr_warn6("alert: qscheduler: queue ", qptr, " empty. Removed pid ", strnum1, ". New qcount=", strnum2, 0);
+					killed = r;
 				}
 			}
 		}
@@ -1158,7 +1168,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.3 2022-04-23 09:45:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.4 2022-04-23 22:52:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

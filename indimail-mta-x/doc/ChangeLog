@@ -210,6 +210,8 @@ Release 2.14.1 Start 21/09/2021 End xx/xx/2022
 - 21/04/2022
 116. qscheduler.c: added ability to decrease queue count
 117. qscheduler.c: added -n option to keep queue count static
+- 23/04/2022
+118. qscheduler.c: do not restart qmail-send when terminated due to empty queue
 
 * 
 Release 2.14.0 Start 18/07/2021 End 12/09/2021
