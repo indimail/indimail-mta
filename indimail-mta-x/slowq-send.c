@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.24  2022-04-23 22:52:18+05:30  Cprogrammer
+ * added pid in log when quitting
+ *
  * Revision 1.23  2022-04-13 08:01:13+05:30  Cprogrammer
  * set delayed flag to 0 for new jobs
  *
@@ -2637,14 +2640,15 @@ main(int argc, char **argv)
 		}
 	} /*- while (!flagexitasap || !del_canexit()) */
 	pqfinish();
-	log5("status: ", argv0, ": ", queuedesc, " exiting\n");
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("status: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
 	return (0);
 }
 
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.23 2022-04-13 08:01:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.24 2022-04-23 22:52:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

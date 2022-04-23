@@ -1474,7 +1474,7 @@ main(int argc, char **argv)
 		}
 	} /*- for (;;) */
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("status: ", argv0, ": ", strnum1, " ", queuedesc, " exiting\n");
+	log7("status: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
 	_exit(0);
 }
 

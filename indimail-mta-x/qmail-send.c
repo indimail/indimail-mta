@@ -2589,7 +2589,7 @@ main(int argc, char **argv)
 	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("status: ", argv0, ": ", strnum1, " ", queuedesc, " exiting\n");
+	log7("status: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
 #ifdef HASLIBRT
 	shm_unlink(queuedesc);
 #endif
