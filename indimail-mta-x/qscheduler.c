@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.3  2022-04-23 09:45:09+05:30  Cprogrammer
+ * compare qload average with threshold in log
+ *
  * Revision 1.2  2022-04-21 22:37:10+05:30  Cprogrammer
  * added -n option to keep qcount static
  *
@@ -981,14 +984,18 @@ dynamic_queue()
 			strerr_warn1("alert: qscheduler: deferring qmonitor msg to update load as -n option in effect", 0);
 			continue;
 		}
+		/*-
+		 * data received from qmonitor in msgbuf
+		 * queue_table[i].load = lcur * 100/lmax + rcur * 100/rmax;
+		 */
 		queue_table[((qtab *) msgbuf)->queue_no].load = ((qtab *) msgbuf)->load;
 		for (i = 1, total_load = 0; i <= qcount; i++)
 			total_load += queue_table[i].load;
-		strnum1[fmt_int(strnum1, total_load)] = 0;
-		strnum2[fmt_int(strnum2, 2 * qcount * threshold)] = 0;
+		strnum1[fmt_double(strnum1, total_load/(2 * qcount), 2)] = 0;
+		strnum2[fmt_double(strnum2, threshold, 2)] = 0;
 		/*- total load = total load for local queue + total load for remote queue */
 		if (total_load > 2 * qcount * threshold && qcount < qmax) {
-			strerr_warn5("alert: qscheduler: average load ", strnum1, " exceeds threshold (> ", strnum2, "). Increasing qcount", 0);
+			strerr_warn5("alert: qscheduler: total load avg ", strnum1, " exceeds threshold (> ", strnum2, "). Increasing qcount", 0);
 			qptr = queuenum_to_dir(qcount + 1);
 			r = 0; /*- flag for queue creation */
 			if (access(qptr, F_OK)) {
@@ -1151,7 +1158,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.2 2022-04-21 22:37:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.3 2022-04-23 09:45:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
