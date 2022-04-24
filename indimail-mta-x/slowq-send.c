@@ -2641,7 +2641,7 @@ main(int argc, char **argv)
 	} /*- while (!flagexitasap || !del_canexit()) */
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("status: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
+	log7("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
 	return (0);
 }
 

@@ -2287,7 +2287,7 @@ run_plugin()
 			log9("alert: ", argv0, ": ", queuedesc, ": dlsym ", plugin_symb, " failed: ", error, "\n");
 			_exit(111);
 		}
-		log7("status: ", argv0, ": ", queuedesc, ": executing function ", plugin_symb, "\n");
+		log7("info: ", argv0, ": ", queuedesc, ": executing function ", plugin_symb, "\n");
 		if ((status = (*func) ())) {
 			strnum1[fmt_ulong(strnum1, status)] = 0;
 			log9("alert: ", argv0, ": ", queuedesc, ": function ", plugin_symb, " failed with status ", strnum1, "\n");
@@ -2589,7 +2589,7 @@ main(int argc, char **argv)
 	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("status: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
+	log7("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
 #ifdef HASLIBRT
 	shm_unlink(queuedesc);
 #endif

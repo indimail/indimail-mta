@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.20  2022-04-24 08:07:18+05:30  Cprogrammer
+ * added exiting log message on exit
+ *
  * Revision 1.19  2022-04-04 14:31:21+05:30  Cprogrammer
  * added setting of fdatasync() instead of fsync()
  *
@@ -2801,12 +2804,14 @@ main(int argc, char **argv)
 		}
 	} /*- while (!flagexitasap || !del_canexit()) */
 	pqfinish();
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	log7("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
 }
 
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.19 2022-04-04 14:31:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.20 2022-04-24 08:07:18+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

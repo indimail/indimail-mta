@@ -133,7 +133,7 @@ sigterm(void)
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	log7("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n");
 	if (!flagstopasap)
-		log5("status: ", argv0, ": ", queuedesc, " stop processing asap\n");
+		log5("info: ", argv0, ": ", queuedesc, " stop processing asap\n");
 	flagstopasap = 1;
 }
 
@@ -603,7 +603,7 @@ comm_die(int i)
 	nfds = 1;
 	comm_selprep(&nfds, &wfds, &rfds);
 	comm_do(&wfds, &rfds);
-	log5("status: ", argv0, ": ", queuedesc, " stop processing asap\n");
+	log5("info: ", argv0, ": ", queuedesc, " stop processing asap\n");
 	_exit(i);
 }
 
@@ -1474,7 +1474,7 @@ main(int argc, char **argv)
 		}
 	} /*- for (;;) */
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	log7("status: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
+	log7("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
 	_exit(0);
 }
 
