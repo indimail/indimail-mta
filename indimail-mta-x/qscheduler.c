@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.6  2022-04-24 19:07:12+05:30  Cprogrammer
+ * display local+remote load on receipt of message queue by send_qload()
+ *
  * Revision 1.5  2022-04-24 17:15:36+05:30  Cprogrammer
  * added function to update queue counts in shared memory
  *
@@ -1011,8 +1014,16 @@ dynamic_queue()
 		 * queue_table[i].load = lcur * 100/lmax + rcur * 100/rmax;
 		 */
 		queue_table[((qtab *) msgbuf)->queue_no].load = ((qtab *) msgbuf)->load;
-		for (i = 1, total_load = 0; i <= qcount; i++)
+		for (i = 1, total_load = 0; i <= qcount; i++) {
+			log_out("info: qscheduler: total local+remote load[");
+			strnum1[fmt_int(strnum1, i)] = 0;
+			log_out(strnum1);
+			log_out("] = ");
+			strnum1[fmt_ulong(strnum1, queue_table[i].load)] = 0;
+			log_out(strnum1);
+			log_outf("\n");
 			total_load += queue_table[i].load;
+		}
 		strnum1[fmt_double(strnum1, total_load/(2 * qcount), 2)] = 0;
 		strnum2[fmt_double(strnum2, threshold, 2)] = 0;
 		/*- total load = total load for local queue + total load for remote queue */
@@ -1174,7 +1185,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.5 2022-04-24 17:15:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.6 2022-04-24 19:07:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
