@@ -1065,7 +1065,7 @@ dynamic_queue()
 				strnum1[fmt_int(strnum1, r)] = 0;
 				strnum2[fmt_int(strnum2, qcount - 1)] = 0;
 				qcount--;
-				strerr_warn6("alert: qscheduler: queue ", qptr, " empty. Removing pid ", strnum1, ". New qcount=", strnum2, 0);
+				strerr_warn6("alert: qscheduler: queue ", qptr, " empty. Terminating pid ", strnum1, ". New qcount=", strnum2, 0);
 				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
 					strerr_warn1("alert: qscheduler: out of memory", 0);
 					qcount++;
@@ -1075,7 +1075,7 @@ dynamic_queue()
 					strerr_warn3("alert: qscheduler: unable to kill pid ", strnum1, ": ", &strerr_sys);
 					qcount++;
 				} else {
-					strerr_warn6("alert: qscheduler: queue ", qptr, " empty. Removed pid ", strnum1, ". New qcount=", strnum2, 0);
+					strerr_warn4("alert: qscheduler: Removed pid ", strnum1, ". New qcount=", strnum2, 0);
 					killed = r;
 				}
 			}
