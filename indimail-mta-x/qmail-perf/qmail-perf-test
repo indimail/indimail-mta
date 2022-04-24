@@ -1651,7 +1651,7 @@ echo    "User time,Sys time,Delivery Start, Injection Speed,Delivery Speed,Load"
 cat $reportdir/zaverage.avg
 ) 1>&3
 zipfile=$(basename $outfile | cut -d. -f1)
-zip -m --no-dir-entries $reportdir/$zipfile.zip $reportdir/*.s
+zip -m -j $reportdir/$zipfile.zip $reportdir/*.s
 end_time=$(date '+%s')
 t=$(expr $end_time - $test_start_time)
 echo -n "Total time elapsed = "
