@@ -1,5 +1,8 @@
 /*
  * $Log: setqload.c,v $
+ * Revision 1.2  2022-04-25 01:26:33+05:30  Cprogrammer
+ * fix for OSX
+ *
  * Revision 1.1  2022-04-24 19:09:32+05:30  Cprogrammer
  * Initial revision
  *
@@ -163,8 +166,10 @@ main(argc, argv)
 void
 getversion_setqload_c()
 {
-	static char    *x = "$Id: setqload.c,v 1.1 2022-04-24 19:09:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setqload.c,v 1.2 2022-04-25 01:26:33+05:30 Cprogrammer Exp mbhangui $";
 
+#ifdef HASLIBRT
 	x = sccsidevalh;
+#endif
 	x++;
 }
