@@ -485,14 +485,14 @@ queue_change()
 		/bin/rm -f $home/.defaultqueue/QUEUEDIR
 		case "$SYSTEM" in
 			FreeBSD)
-			sudo sed -i "" 's{qscheduler -s{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i "" 's{qscheduler -cdn{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i "" 's{qscheduler -cd{qscheduler -dn{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cdn{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
 			;;
 			*)
-			sudo sed -i 's{qscheduler -s{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i 's{qscheduler -cdn{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i 's{qscheduler -cd{qscheduler -dn{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cdn{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
 			;;
 		esac
 		;;
@@ -529,14 +529,14 @@ queue_change()
 		/bin/rm -f $home/.defaultqueue/QUEUEDIR
 		case "$SYSTEM" in
 			FreeBSD)
-			sudo sed -i "" 's{qscheduler -s{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i "" 's{qscheduler -cdn{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i "" 's{qscheduler -cd{qscheduler -dn{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cdn{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
 			;;
 			*)
-			sudo sed -i 's{qscheduler -s{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i 's{qscheduler -cdn{qscheduler -dn{' $servicedir/qmail-send.25/run 
-			sudo sed -i 's{qscheduler -cd{qscheduler -dn{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -s{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cdn{qscheduler -d{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -cd{qscheduler -d{' $servicedir/qmail-send.25/run 
 			;;
 		esac
 		;;
@@ -549,14 +549,14 @@ queue_change()
 		/bin/rm -f $home/.defaultqueue/QUEUEDIR
 		case "$SYSTEM" in
 			FreeBSD)
-			sudo sed -i "" 's{qscheduler -dn{qscheduler -cdn{' $servicedir/qmail-send.25/run 
-			sudo sed -i "" 's{qscheduler -d{qscheduler -cdn{' $servicedir/qmail-send.25/run 
-			sudo sed -i "" 's{qscheduler -s{qscheduler -cdn{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -dn{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -d{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i "" 's{qscheduler -s{qscheduler -cd{' $servicedir/qmail-send.25/run 
 			;;
 			*)
-			sudo sed -i 's{qscheduler -dn{qscheduler -cdn{' $servicedir/qmail-send.25/run 
-			sudo sed -i 's{qscheduler -d{qscheduler -cdn{' $servicedir/qmail-send.25/run 
-			sudo sed -i 's{qscheduler -s{qscheduler -cdn{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -dn{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -d{qscheduler -cd{' $servicedir/qmail-send.25/run 
+			sudo sed -i 's{qscheduler -s{qscheduler -cd{' $servicedir/qmail-send.25/run 
 			;;
 		esac
 		;;
@@ -1651,7 +1651,7 @@ echo    "User time,Sys time,Delivery Start, Injection Speed,Delivery Speed,Load"
 cat $reportdir/zaverage.avg
 ) 1>&3
 zipfile=$(basename $outfile | cut -d. -f1)
-zip -m $reportdir/$zipfile.zip $reportdir/*.s
+zip -m --no-dir-entries $reportdir/$zipfile.zip $reportdir/*.s
 end_time=$(date '+%s')
 t=$(expr $end_time - $test_start_time)
 echo -n "Total time elapsed = "
