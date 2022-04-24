@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.2 2022-04-24 10:06:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.3 2022-04-24 13:08:54+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -11,6 +11,7 @@
 #include <strerr.h>
 #include <scan.h>
 #include <getEnvConfig.h>
+#include <qprintf.h>
 #include "queue_load.h"
 #include "set_environment.h"
 #include "send_qload.h"
@@ -53,20 +54,26 @@ main(int argc, char **argv)
 	for (;;) {
 		queue_load("qmonitor", &qcount, &qconf, total_load, &queue);
 		if (verbose || ((total_load[0] + total_load[1]) > 2 * qcount * threshold)) {
-			substdio_put(subfdout, "queue loads local[", 18);
+			substdio_put(subfdout, "queue load avg (local[", 22);
 			strnum[i = fmt_double(strnum, total_load[0], 2)] = 0;
-			substdio_put(subfdout, strnum, i);
+			qprintf(subfdout, strnum, "%+6");
 			substdio_put(subfdout, "] + remote[", 11);
 			strnum[i = fmt_double(strnum, total_load[1], 2)] = 0;
-			substdio_put(subfdout, strnum, i);
+			qprintf(subfdout, strnum, "%+6s");
+			substdio_put(subfdout, "])/2 = ", 7);
+			strnum[i = fmt_double(strnum, (total_load[0] + total_load[1])/2, 2)] = 0;
+			qprintf(subfdout, strnum, "%+6s");
 			if ((total_load[0] + total_load[1]) > 2 * qcount * threshold)
-				substdio_put(subfdout, "] >  ", 5);
+				substdio_put(subfdout, " >  (", 5);
 			else
-				substdio_put(subfdout, "] <= ", 5);
-			strnum[i = fmt_double(strnum, 2 * qcount * threshold, 2)] = 0;
+				substdio_put(subfdout, " <= (", 5);
+			strnum[i = fmt_int(strnum, threshold)] = 0;
 			substdio_put(subfdout, strnum, i);
-			substdio_put(subfdout, ", qcount=", 9);
-			strnum[i = fmt_int(strnum, 2 * qcount)] = 0;
+			substdio_put(subfdout, " * ", 3);
+			strnum[i = fmt_int(strnum, qcount)] = 0;
+			substdio_put(subfdout, strnum, i);
+			substdio_put(subfdout, ") = ", 4);
+			strnum[i = fmt_double(strnum, qcount * threshold, 2)] = 0;
 			substdio_put(subfdout, strnum, i);
 			substdio_put(subfdout, "\n", 1);
 			substdio_flush(subfdout);
@@ -112,13 +119,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.2 2022-04-24 10:06:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.3 2022-04-24 13:08:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.3  2022-04-24 13:08:54+05:30  Cprogrammer
+ * display avg load and calculation
+ *
  * Revision 1.2  2022-04-24 10:06:37+05:30  Cprogrammer
  * removed display code
  *
