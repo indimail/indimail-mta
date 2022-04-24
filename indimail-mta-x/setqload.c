@@ -1,6 +1,6 @@
 /*
  * $Log: setqload.c,v $
- * Revision 1.1  2022-04-23 22:46:40+05:30  Cprogrammer
+ * Revision 1.1  2022-04-24 17:14:43+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -24,8 +24,15 @@
 #define FATAL "setqload: fatal: "
 #define WARN  "setqload: warning: "
 
-char           *usage1 = "-q queue_number total_load_pct";
-char           *usage2 = "-q queue_number local_load_pct remote_load_pct";
+char           *usage1 = "-q queue_number total";
+char           *usage2 = "-q queue_number lcur/lmax rcur/rmax";
+char           *desc = 
+	"\n\nwhere\n"
+	"   total = lcur/lmax + rcur/rmax\n"
+	"   lcur  = cur local   concurrency\n"
+	"   lmax  = max local   concurrency\n"
+	"   rcur  = cur remote  concurrency\n"
+	"   rmax  = max remote  concurrency";
 
 void
 get_queue_details(int *q)
@@ -70,10 +77,10 @@ compute_expression(struct vartable *vt, char *s, double *x)
 int
 main(int argc, char **argv)
 {
-	int             i, opt, ret, qnum = 0, qcount, qconf;
+	int             i, opt, qnum = 0;
 	int             q[3];
 	double          load, load_l, load_r;
-	char            strnum[FMT_ULONG];
+	char            strnum[FMT_DOUBLE];
 	char           *argv0;
 	struct vartable *vt = {0};
 
@@ -90,6 +97,7 @@ main(int argc, char **argv)
 			strerr_warn4("usage: ", argv0, " ", usage1, 0);
 			strerr_warn1("       or", 0);
 			strerr_warn4("usage: ", argv0, " ", usage2, 0);
+			strerr_warn1(desc, 0);
 			_exit(100);
 		}
 	}
@@ -97,12 +105,11 @@ main(int argc, char **argv)
 		strerr_warn4("usage: ", argv0, " ", usage1, 0);
 		strerr_warn1("       or", 0);
 		strerr_warn4("usage: ", argv0, " ", usage2, 0);
+		strerr_warn1(desc, 0);
 		_exit(100);
 	}
 	get_queue_details(q);
-	qcount = q[0];
-	qconf = q[1];
-	if (qnum > qcount) {
+	if (qnum > q[0]) {
 		strnum[fmt_int(strnum, qnum)] = 0;
 		strerr_die3x(100, WARN, "queue number cannot be > ", strnum);
 	}
@@ -121,20 +128,16 @@ main(int argc, char **argv)
 	if (vt)
 		free_vartable(vt);
 	load = 100 * (load_l + load_r);
-	ret = (load > 0 ? send_qload("/qscheduler", qnum, load, 10) : 0);
-	if (!ret) {
-		strnum[i = fmt_int(strnum, qcount)] = 0;
-		if (substdio_put(subfdout, "queue count = ", 14) == -1 ||
-				substdio_put(subfdout, strnum, i) == -1 ||
-				substdio_put(subfdout, ", queue configured = ", 21) == -1)
-			_exit(111);
-		strnum[i = fmt_int(strnum, qconf)] = 0;
-		if (substdio_put(subfdout, strnum, i) == -1 ||
-				substdio_put(subfdout, "\n", 1) == -1 ||
-				substdio_flush(subfdout))
-			_exit(111);
+	if (load > 0.0) {
+		substdio_put(subfdout, "send load to qscheduler. qload= ", 31);
+		strnum[i = fmt_double(strnum, load_l + load_r, 2)] = 0;
+		substdio_put(subfdout, strnum, i);
+		substdio_flush(subfdout);
+		return (send_qload("/qscheduler", qnum, load, 10));
+	} else {
+		strerr_warn2(argv0, ": nothing communicated to qscheduler", 0);
+		return 1;
 	}
-	return ret;
 }
 #else
 #warning "not compiled with -DHASLIBRT"
@@ -159,7 +162,7 @@ main(argc, argv)
 void
 getversion_setqload_c()
 {
-	static char    *x = "$Id: setqload.c,v 1.1 2022-04-23 22:46:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setqload.c,v 1.1 2022-04-24 17:14:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x++;
