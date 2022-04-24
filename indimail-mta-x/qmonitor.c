@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.6 2022-04-23 09:44:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.1 2022-04-24 08:51:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -145,6 +145,9 @@ main(int argc, char **argv)
 				substdio_put(subfdout, "] <= ", 5);
 			strnum[i = fmt_double(strnum, 2 * qcount * threshold, 2)] = 0;
 			substdio_put(subfdout, strnum, i);
+			substdio_put(subfdout, ", qcount=", 9);
+			strnum[i = fmt_int(strnum, 2 * qcount)] = 0;
+			substdio_put(subfdout, strnum, i);
 			substdio_put(subfdout, "\n", 1);
 			substdio_flush(subfdout);
 		}
@@ -162,7 +165,7 @@ main(int argc, char **argv)
 				send_qload("/qscheduler", j + 1, qload, 10);
 			}
 		}
-		sleep(5);
+		sleep(interval);
 	}
 }
 #else
@@ -188,30 +191,14 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.6 2022-04-23 09:44:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.1 2022-04-24 08:51:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
- * Revision 1.6  2022-04-23 09:44:49+05:30  Cprogrammer
- * display qload average instead of total load
- *
- * Revision 1.5  2022-04-23 00:40:39+05:30  Cprogrammer
- * set env variables before getEnvConfig
- *
- * Revision 1.4  2022-04-23 00:14:13+05:30  Cprogrammer
- * set default env variables from $HOME/.defaultqueue
- *
- * Revision 1.3  2022-04-21 21:33:46+05:30  Cprogrammer
- * added verbose mode
- * updated formula
- *
- * Revision 1.2  2022-04-17 08:31:39+05:30  Cprogrammer
- * use getEnvConfigDouble() to set threshold from QUEUE_LOAD env variable
- *
- * Revision 1.1  2022-04-16 13:01:40+05:30  Cprogrammer
+ * Revision 1.1  2022-04-24 08:51:15+05:30  Cprogrammer
  * Initial revision
  *
  */
