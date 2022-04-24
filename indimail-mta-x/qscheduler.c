@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.5  2022-04-24 17:15:36+05:30  Cprogrammer
+ * added function to update queue counts in shared memory
+ *
  * Revision 1.4  2022-04-23 22:52:44+05:30  Cprogrammer
  * do not restart qmail-send when terminated due to empty queue
  *
@@ -843,12 +846,29 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 	return;
 }
 
+void
+write_queue2shm(int update_qcount)
+{
+	int            q[2];
+
+	q[0] = qcount; /*- queue count */
+	q[1] = qconf;  /*- existing no of queues in /var/indimail/queue dir */
+	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) <= 0) {
+		strerr_warn1("alert: qscheduler: unable to write to shared memory /qscheduler: ", &strerr_sys);
+		die();
+	}
+	if (update_qcount && control_writeint(qcount, "qcount") == -1) {
+		strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
+		die();
+	}
+}
+
 no_return void
 dynamic_queue()
 {
 	struct mq_attr  attr;
 	unsigned int    priority, total_load;
-	int             i, r, nqueue, q[2], qlen, qsize, child, wstat;
+	int             i, r, nqueue, qlen, qsize, child, wstat;
 	char           *qptr;
 
 	qsargs[1] = compat_mode ? "-cd" : "-d";
@@ -913,12 +933,7 @@ dynamic_queue()
 	if (!(shm_queue = (int *) alloc(sizeof(int) * qcount)))
 		nomem();
 	create_ipc(&qlen, &qsize);
-	q[0] = qcount; /*- queue count */
-	q[1] = qconf;  /*- existing no of queues in /var/indimail/queue dir */
-	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) <= 0) {
-		strerr_warn1("alert: qscheduler: unable to write to shared memory /qscheduler: ", &strerr_sys);
-		die();
-	}
+	write_queue2shm(0);
 	log_out("info: qscheduler: pid ");
 	strnum1[fmt_ulong(strnum1, selfpid)] = 0;
 	log_out(strnum1);
@@ -1030,17 +1045,7 @@ dynamic_queue()
 					continue;
 				}
 				start_send(qcount, -1);
-				q[0] = qcount;
-				q[1] = qconf;
-				if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) <= 0) {
-					strerr_warn1("alert: qscheduler: unable to write to shared memory:  /qscheduler", &strerr_sys);
-					qcount--;
-					continue;
-				}
-				if (control_writeint(qcount, "qcount") == -1) {
-					strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
-					continue;
-				}
+				write_queue2shm(1);
 			}
 		} else {
 			log_out("info: qscheduler: average load within limits (load=");
@@ -1077,6 +1082,7 @@ dynamic_queue()
 				} else {
 					strerr_warn4("alert: qscheduler: Removed pid ", strnum1, ". New qcount=", strnum2, 0);
 					killed = r;
+					write_queue2shm(1);
 				}
 			}
 		}
@@ -1168,7 +1174,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.4 2022-04-23 22:52:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.5 2022-04-24 17:15:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
