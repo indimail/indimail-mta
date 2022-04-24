@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.16  2022-04-24 19:10:11+05:30  Cprogrammer
+ * fixed field position of 'exiting' for slowq-send, qmta-send logs
+ *
  * Revision 1.15  2022-04-13 19:37:58+05:30  Cprogrammer
  * skip qscheduler load information in logs
  *
@@ -670,7 +673,10 @@ main()
 		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[5], "exiting"))
 			clear();
 		else
-		if (str_equal(line.s + field[2], "slowq-send:") && str_equal(line.s + field[4], "exiting"))
+		if (str_equal(line.s + field[2], "slowq-send:") && str_equal(line.s + field[6], "exiting"))
+			clear();
+		else
+		if (str_equal(line.s + field[2], "qmta-send:") && str_equal(line.s + field[6], "exiting"))
 			clear();
 		else
 		if (str_equal(line.s + field[2], "qmta-send:") && str_equal(line.s + field[6], "quitting..."))
@@ -716,7 +722,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.15 2022-04-13 19:37:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: matchup.c,v 1.16 2022-04-24 19:10:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
