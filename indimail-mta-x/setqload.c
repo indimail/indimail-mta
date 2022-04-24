@@ -1,6 +1,6 @@
 /*
  * $Log: setqload.c,v $
- * Revision 1.1  2022-04-24 17:14:43+05:30  Cprogrammer
+ * Revision 1.1  2022-04-24 19:09:32+05:30  Cprogrammer
  * Initial revision
  *
  */
@@ -132,6 +132,7 @@ main(int argc, char **argv)
 		substdio_put(subfdout, "send load to qscheduler. qload= ", 31);
 		strnum[i = fmt_double(strnum, load_l + load_r, 2)] = 0;
 		substdio_put(subfdout, strnum, i);
+		substdio_put(subfdout, "\n", 1);
 		substdio_flush(subfdout);
 		return (send_qload("/qscheduler", qnum, load, 10));
 	} else {
@@ -162,7 +163,7 @@ main(argc, argv)
 void
 getversion_setqload_c()
 {
-	static char    *x = "$Id: setqload.c,v 1.1 2022-04-24 17:14:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setqload.c,v 1.1 2022-04-24 19:09:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x++;
