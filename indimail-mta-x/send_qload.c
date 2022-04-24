@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: send_qload.c,v 1.1 2022-04-24 08:48:22+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -17,14 +17,20 @@ send_qload(char *queue_ident, unsigned int queue_no,
 	mqd_t           mqd;
 	qtab            queue_tab;
 
-	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == -1)
-		strerr_die3sys(111, "send_qload: ", queue_ident, ": ");
+	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == -1) {
+		strerr_warn3("send_qload: ", queue_ident, ": ", &strerr_sys);
+		return -1;
+	}
 	queue_tab.queue_no = queue_no;
 	queue_tab.load = load;
-	if (mq_send(mqd, (char *) &queue_tab, sizeof(qtab), priority) == -1)
-		strerr_die3sys(111, "send_qload: mq_send: ", queue_ident, ": ");
-	if (mq_close(mqd) == -1)
-		strerr_die3sys(111, "send_qload: mq_close: ", queue_ident, ": ");
+	if (mq_send(mqd, (char *) &queue_tab, sizeof(qtab), priority) == -1) {
+		strerr_warn3("send_qload: mq_send: ", queue_ident, ": ", &strerr_sys);
+		return -1;
+	}
+	if (mq_close(mqd) == -1) {
+		strerr_warn3("send_qload: mq_close: ", queue_ident, ": ", &strerr_sys);
+		return -1;
+	}
 	return 0;
 }
 #endif
@@ -32,11 +38,14 @@ send_qload(char *queue_ident, unsigned int queue_no,
 void
 getversion_send_qload_c()
 {
-	static char    *x = "$Id: $";
+	static char    *x = "$Id: send_qload.c,v 1.1 2022-04-24 08:48:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
- * $Log: $
+ * $Log: send_qload.c,v $
+ * Revision 1.1  2022-04-24 08:48:22+05:30  Cprogrammer
+ * Initial revision
+ *
  */
