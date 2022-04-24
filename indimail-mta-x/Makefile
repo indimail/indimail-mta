@@ -1815,7 +1815,7 @@ compile setqload.c qscheduler.h haslibrt.h
 	./compile setqload.c
 
 send_qload.o: \
-compile haslibrt.h qscheduler.h send_qload.h
+compile send_qload.c haslibrt.h qscheduler.h send_qload.h
 	./compile send_qload.c
 
 qmonitor: \
