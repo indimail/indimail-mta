@@ -11,8 +11,8 @@ or
 
 .SH DESCRIPTION
 \fBsetqload\fR communicates with \fBqscheduler\fR for the queue \fIqnum\fR
-and instructs it to set it's load as \fIqload\fR. If the average load is
-goes beyond the limit defined by \fBQUEUE_LOAD\fR environment variable,
+and instructs it to set it's load as \fIqload\fR. If the average load goes
+beyond the limit defined by \fBQUEUE_LOAD\fR environment variable,
 \fBqscheduler\fR will increase the number of queues, provided the current
 number of queues is below the value of \fBQUEUE_MAX\fR environment
 variable.
