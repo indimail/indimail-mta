@@ -1,5 +1,8 @@
 /*
  * $Log: svscan.c,v $
+ * Revision 1.24  2022-05-06 01:29:01+05:30  Cprogrammer
+ * enable auto scan if AUTOSCAN env variable is set or if service startup fails
+ *
  * Revision 1.23  2021-10-20 22:32:20+05:30  Cprogrammer
  * enable scan on sigchld
  *
@@ -209,6 +212,7 @@ start(char *fn, char *sdir)
 		if (chdir(run_dir) == -1) {
 			strerr_warn4(WARNING, "unable to switch to ", run_dir, ": ", &strerr_sys);
 			close(fdsource);
+			scannow = -1;
 			return;
 		}
 		if (!access(fn, F_OK)) { /*- no need to rename */
@@ -223,8 +227,10 @@ start(char *fn, char *sdir)
 		 * e.g. if /service/qmail-smtpd.25 is renamed to /service/.qmail-smtpd.25
 		 * then rename /run/svscan/qmail-smtpd.25 to /run/svscan/.qmail-smtpd.25
 		 */
-		if (!access(fn + 1, F_OK) && rename(fn + 1, fn))
+		if (!access(fn + 1, F_OK) && rename(fn + 1, fn)) {
 			strerr_warn6(WARNING, "unable to rename ", fn + 1, " to ", fn, ": ", &strerr_sys);
+			scannow = -1;
+		}
 		if (fchdir(fdsource) == -1)
 			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
 		close(fdsource);
@@ -232,6 +238,7 @@ start(char *fn, char *sdir)
 	}
 	if (stat(fn, &st) == -1) {
 		strerr_warn4(WARNING, "unable to stat ", fn, ": ", &strerr_sys);
+		scannow = -1;
 		return;
 	}
 	if ((st.st_mode & S_IFMT) != S_IFDIR)
@@ -263,12 +270,14 @@ start(char *fn, char *sdir)
 			else
 			if (errno != error_noent) {
 				strerr_warn4(WARNING, "unable to stat ", fn, "/log: ", &strerr_sys);
+				scannow = -1;
 				return;
 			}
 		}
 		if (x[i].flaglog) {
 			if (pipe(x[i].pi) == -1) {
 				strerr_warn4(WARNING, "unable to create pipe for ", fn, ": ", &strerr_sys);
+				scannow = -1;
 				return;
 			}
 			coe(x[i].pi[0]);
@@ -592,11 +601,13 @@ int
 main(int argc, char **argv)
 {
 	unsigned long   scan_interval = 60;
+	int             auto_scan;
 	char           *s, *sdir;
 	char            dirbuf[256];
 	struct sigaction sa;
 	pid_t           pid;
 
+	/*- setup handler for sigchild if running as pid 1 */
 	if (1 == (pid = getpid())) {
 		byte_zero((char *) &sa, sizeof(struct sigaction));
 		sa.sa_flags = SA_SIGINFO;
@@ -639,13 +650,17 @@ main(int argc, char **argv)
 		open_svscan_log(sdir);
 	if ((s = env_get("INITCMD")))
 		init_cmd(s, env_get("WAIT_INITCMD") ? 1 : 0, 0);
-#if 0
-	if (1 != pid)
-		sig_uncatch(sig_child);
-#endif
+	auto_scan = env_get("AUTOSCAN") ? 1 : 0;
 	for (scannow = 1;;) {
 		doit(sdir, pid);
-		/* we do not scan service directory unless we get a sighup */
+		/*-
+		 * we do not scan service directory unless we get a sighup,
+		 * sigchld, auto_scan is set or we failed to start supervise
+		 */
+		if (scannow == -1) {
+			sleep(scan_interval ? scan_interval : 60);
+			continue;
+		}
 		scannow = 0;
 		while (!scannow) {
 			sleep(scan_interval ? scan_interval : 60);
@@ -657,6 +672,8 @@ main(int argc, char **argv)
 			 */
 			if (errno == EINTR)
 				continue;
+			if (auto_scan)
+				break;
 		}
 	}
 }
@@ -664,7 +681,7 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.23 2021-10-20 22:32:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.24 2022-05-06 01:29:01+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }

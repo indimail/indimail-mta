@@ -20,6 +20,8 @@ o supervise: add feature to run ./init once before ./run
 o svscan: set SERVICEDIR, PWD environment variable
 o svscan: ability to run as PID 1 and reap dead children
 o setuidgid: Feature to set additional groups using -g option
+o softlimit.c: added -q option for setting message queue size
+o svps: added -h option to send HUP to svscan
 ===========================================================================
 - 27/02/2021
 01. minisvc: added options to set, unset, remove env variables for supervised
@@ -175,6 +177,9 @@ o setuidgid: Feature to set additional groups using -g option
 75. svps.in: added -h,--HUP option to send HUP to svscan
 - 20/03/2022
 76. multilog.c: Added NOFSYNC env variable to turn off fsync
+- 06/05/2022
+77. svscan.c: Enable automatic scan of /service if AUTOSCAN environment
+    variable is set.
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
