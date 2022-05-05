@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.628 2022-04-22 11:52:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.629 2022-05-05 10:01:00+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.628 2022-04-22 11:52:53+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.629 2022-05-05 10:01:00+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1433,9 +1433,10 @@ for i in $SVCDIRS; do
   if [ ! -f $servicedir/$i/run ]; then
     echo "! $servicedir/$i/run file is missing" 1>&2
     OK=0
-  elif [ " $interp" != " #!/bin/sh$" -a " $interp" != " #!/bin/bash$" -a " $interp" != " #!/usr/bin/sh$" -a " $interp" != " #!/usr/bin/bash$" ] ; then
-    echo "! $servicedir/$i/run has bad magic cookie [$interp]" 1>&2
-    echo "...try: dos2unix $servicedir/$i/run" 1>&2
+  elif [ "$interp" != "#!/bin/sh$" -a "$interp" != "#!/bin/bash$" \
+	  -a "$interp" != "#!/usr/bin/sh$" -a "$interp" != "#!/usr/bin/bash$" \
+	  -a "$interp" != "#!/usr/local/bin/bash$" ] ; then
+    echo "! $servicedir/$i/run has bad interpreter [$interp]" 1>&2
     OK=0
   elif [ ! -x $servicedir/$i/run ]; then
     echo "! $servicedir/$i/run file is not executable" 1>&2
@@ -1450,9 +1451,10 @@ for i in $SVCDIRS; do
   if [ ! -f $servicedir/$i/log/run ]; then
     echo "! $servicedir/$i/log/run file is missing" 1>&2
     OK=0
-  elif [ " $interp" != " #!/bin/sh$" -a " $interp" != " #!/bin/bash$" -a " $interp" != " #!/usr/bin/sh$" -a " $interp" != " #!/usr/bin/bash$" ] ; then
-    echo "! $servicedir/$i/log/run has bad magic cookie [$interp]" 1>&2
-    echo "...try: dos2unix $servicedir/$i/log/run" 1>&2
+  elif [ "$interp" != "#!/bin/sh$" -a "$interp" != "#!/bin/bash$" \
+	  -a "$interp" != "#!/usr/bin/sh$" -a "$interp" != "#!/usr/bin/bash$" \
+	  -a "$interp" != "#!/usr/local/bin/bash$" ] ; then
+    echo "! $servicedir/$i/log/run has bad interpreter [$interp]" 1>&2
     OK=0
   elif [ ! -x $servicedir/$i/log/run ]; then
     echo "! $servicedir/$i/log/run file is not executable" 1>&2
@@ -7646,6 +7648,8 @@ create_users()
 			echo "creating user indimail"
 			if [ -f /bin/bash ] ; then
 				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/bash indimail
+			if [ -f /usr/local/bin/bash ] ; then
+				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /usr/local/bin/bash indimail
 			else
 				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/sh indimail
 			fi
