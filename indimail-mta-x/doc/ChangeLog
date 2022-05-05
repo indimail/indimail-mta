@@ -219,6 +219,8 @@ Release 2.14.1 Start 21/09/2021 End xx/xx/2022
      send_qload()
 122. matchup.c: fixed field postion of 'exiting' for slowq-send, qmta-send
      logs
+- 05/0052022
+123. svctool: added /usr/local/bin/bash as a valid shell
 
 * 
 Release 2.14.0 Start 18/07/2021 End 12/09/2021
