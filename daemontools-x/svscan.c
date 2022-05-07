@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.24 2022-05-08 00:43:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.24 2022-05-08 00:57:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -329,7 +329,8 @@ doit(char *sdir, pid_t mypid)
 	} /*- for (;;) */
 	if (!auto_scan && !scannow)
 		return;
-	strerr_warn3(INFO, "Scanning directory ", sdir, 0);
+	if (scannow) /*- do not display scanning msg for auto scan */
+		strerr_warn3(INFO, "Scanning directory ", sdir, 0);
 	for (i = 0; i < numx; ++i)
 		x[i].flagactive = 0;
 	if (!(dir = opendir("."))) {
@@ -613,14 +614,14 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.24 2022-05-08 00:43:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.24 2022-05-08 00:57:28+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
- * Revision 1.24  2022-05-08 00:43:59+05:30  Cprogrammer
+ * Revision 1.24  2022-05-08 00:57:28+05:30  Cprogrammer
  * enable auto scan if AUTOSCAN env variable & service startup fails
  *
  * Revision 1.23  2021-10-20 22:32:20+05:30  Cprogrammer
