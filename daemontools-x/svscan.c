@@ -1,78 +1,5 @@
 /*
- * $Log: svscan.c,v $
- * Revision 1.24  2022-05-06 01:29:01+05:30  Cprogrammer
- * enable auto scan if AUTOSCAN env variable is set or if service startup fails
- *
- * Revision 1.23  2021-10-20 22:32:20+05:30  Cprogrammer
- * enable scan on sigchld
- *
- * Revision 1.22  2021-08-11 21:29:32+05:30  Cprogrammer
- * added handler for SIGCHLD when running as PID 1
- *
- * Revision 1.21  2021-07-27 12:33:28+05:30  Cprogrammer
- * set SERVICEDIR, PWD environment variable to service directory
- *
- * Revision 1.20  2021-04-16 12:24:13+05:30  Cprogrammer
- * disable service in run filesystem when disabled in original service directory
- *
- * Revision 1.19  2021-04-11 12:15:24+05:30  Cprogrammer
- * display parent name as argv2 for log process
- *
- * Revision 1.18  2020-10-09 11:42:28+05:30  Cprogrammer
- * renamed svscan.pid to .svscan.pid
- *
- * Revision 1.17  2020-10-08 18:29:45+05:30  Cprogrammer
- * use /run, /var/run if available
- *
- * Revision 1.16  2020-09-19 20:24:35+05:30  Cprogrammer
- * call setsid() if SETSID environment variable is set
- *
- * Revision 1.15  2020-07-11 22:08:52+05:30  Cprogrammer
- * removed STATUSFILE code
- *
- * Revision 1.14  2020-07-04 16:35:45+05:30  Cprogrammer
- * write pid as a string on the second line of .svlock
- *
- * Revision 1.13  2020-05-11 10:58:12+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.12  2020-03-22 08:03:58+05:30  Cprogrammer
- * return error on deletion of .svlock only when file exists
- *
- * Revision 1.11  2020-03-21 23:54:02+05:30  Cprogrammer
- * improved code for get_lock()
- *
- * Revision 1.10  2019-12-08 18:21:29+05:30  Cprogrammer
- * fixed svscan lock failure when run as pid 1 in docker container
- *
- * Revision 1.9  2017-05-11 14:24:27+05:30  Cprogrammer
- * run .svscan/shutdown on SIGTERM
- *
- * Revision 1.8  2017-05-11 13:30:34+05:30  Cprogrammer
- * added option to run initialization command via INITCMD env variable
- *
- * Revision 1.7  2017-04-18 08:59:53+05:30  Cprogrammer
- * lock service directory using file .svlock to prevent multiple svscan runs
- *
- * Revision 1.6  2011-08-05 14:31:05+05:30  Cprogrammer
- * create STATUSFILE on startup and delete on shutdown
- *
- * Revision 1.5  2011-05-26 23:17:52+05:30  Cprogrammer
- * open svscan log only if SCANLOG is defined
- *
- * Revision 1.4  2008-06-07 13:54:28+05:30  Cprogrammer
- * added logging of svscan through external loggers like multilog
- *
- * Revision 1.3  2004-10-22 20:31:19+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2003-10-11 09:31:58+05:30  Cprogrammer
- * added scan.h for scan_ulong() prototype
- * changed wait to unsigned long
- *
- * Revision 1.1  2003-10-11 09:28:24+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: svscan.c,v 1.24 2022-05-08 00:43:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -118,7 +45,7 @@ struct
 	int             pidlog;		/*- 0 if not running */
 	int             pi[2];		/*- defined if flaglog */
 } x[SERVICES];
-static int      numx = 0, scannow = 0;
+static int      numx = 0, scannow = 0, auto_scan = 0;
 static char     fnlog[260];
 static char    *pidfile, *p_exe_name;
 static stralloc tmp = {0};
@@ -288,6 +215,7 @@ start(char *fn, char *sdir)
 	x[i].flagactive = 1;
 	pid = getpid();
 	if (!x[i].pid) { /*- exec supervise fn only if it is not .svscan/log */
+		strerr_warn3(INFO, "Starting service ", fn, 0);
 		switch (child = fork())
 		{
 		case -1:
@@ -310,6 +238,7 @@ start(char *fn, char *sdir)
 		}
 	}
 	if (x[i].flaglog && !x[i].pidlog) { /*- exec supervise log */
+		strerr_warn4(INFO, "Starting service ", fn, "/log", 0);
 		switch (child = fork())
 		{
 		case -1:
@@ -338,7 +267,7 @@ start(char *fn, char *sdir)
 }
 
 void
-doit(char *sdir, pid_t pid)
+doit(char *sdir, pid_t mypid)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -364,11 +293,14 @@ doit(char *sdir, pid_t pid)
 				break;
 			}
 		}
-		if (pid != 1)
+		if (mypid != 1)
 			continue;
 		/*-
+		 * we come here when mypid == 1
 		 * this are not my children. Happens when
 		 * svscan is running as pid 1 in a docker container
+		 * when i == numx implies the child wasn't started
+		 * by svscan
 		 */
 		strnum1[fmt_ulong(strnum1, r)] = 0;
 		if (wait_stopped(wstat)) {
@@ -384,8 +316,7 @@ doit(char *sdir, pid_t pid)
 				strerr_warn6(WARNING, "pid: ", strnum1, " exe ", p_exe_name, ", crashed", 0);
 			else
 				strerr_warn4(WARNING, "pid: ", strnum1, ", crashed", 0);
-		}
-		else {
+		} else {
 			t = wait_exitcode(wstat);
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (p_exe_name)
@@ -393,11 +324,12 @@ doit(char *sdir, pid_t pid)
 			else
 				strerr_warn5(WARNING, "pid: ", strnum1, ", exited with status=", strnum2, 0);
 		}
-		if (r > 1 && i == numx)
+		if (i == numx)
 			strerr_warn3(INFO, "completed last rites for orphan ", strnum1, 0);
 	} /*- for (;;) */
-	if (pid == 1 || !scannow)
+	if (!auto_scan && !scannow)
 		return;
+	strerr_warn3(INFO, "Scanning directory ", sdir, 0);
 	for (i = 0; i < numx; ++i)
 		x[i].flagactive = 0;
 	if (!(dir = opendir("."))) {
@@ -601,7 +533,6 @@ int
 main(int argc, char **argv)
 {
 	unsigned long   scan_interval = 60;
-	int             auto_scan;
 	char           *s, *sdir;
 	char            dirbuf[256];
 	struct sigaction sa;
@@ -672,8 +603,9 @@ main(int argc, char **argv)
 			 */
 			if (errno == EINTR)
 				continue;
-			if (auto_scan)
+			if (auto_scan) {
 				break;
+			}
 		}
 	}
 }
@@ -681,7 +613,84 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.24 2022-05-06 01:29:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.24 2022-05-08 00:43:59+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
+
+/*
+ * $Log: svscan.c,v $
+ * Revision 1.24  2022-05-08 00:43:59+05:30  Cprogrammer
+ * enable auto scan if AUTOSCAN env variable & service startup fails
+ *
+ * Revision 1.23  2021-10-20 22:32:20+05:30  Cprogrammer
+ * enable scan on sigchld
+ *
+ * Revision 1.22  2021-08-11 21:29:32+05:30  Cprogrammer
+ * added handler for SIGCHLD when running as PID 1
+ *
+ * Revision 1.21  2021-07-27 12:33:28+05:30  Cprogrammer
+ * set SERVICEDIR, PWD environment variable to service directory
+ *
+ * Revision 1.20  2021-04-16 12:24:13+05:30  Cprogrammer
+ * disable service in run filesystem when disabled in original service directory
+ *
+ * Revision 1.19  2021-04-11 12:15:24+05:30  Cprogrammer
+ * display parent name as argv2 for log process
+ *
+ * Revision 1.18  2020-10-09 11:42:28+05:30  Cprogrammer
+ * renamed svscan.pid to .svscan.pid
+ *
+ * Revision 1.17  2020-10-08 18:29:45+05:30  Cprogrammer
+ * use /run, /var/run if available
+ *
+ * Revision 1.16  2020-09-19 20:24:35+05:30  Cprogrammer
+ * call setsid() if SETSID environment variable is set
+ *
+ * Revision 1.15  2020-07-11 22:08:52+05:30  Cprogrammer
+ * removed STATUSFILE code
+ *
+ * Revision 1.14  2020-07-04 16:35:45+05:30  Cprogrammer
+ * write pid as a string on the second line of .svlock
+ *
+ * Revision 1.13  2020-05-11 10:58:12+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.12  2020-03-22 08:03:58+05:30  Cprogrammer
+ * return error on deletion of .svlock only when file exists
+ *
+ * Revision 1.11  2020-03-21 23:54:02+05:30  Cprogrammer
+ * improved code for get_lock()
+ *
+ * Revision 1.10  2019-12-08 18:21:29+05:30  Cprogrammer
+ * fixed svscan lock failure when run as pid 1 in docker container
+ *
+ * Revision 1.9  2017-05-11 14:24:27+05:30  Cprogrammer
+ * run .svscan/shutdown on SIGTERM
+ *
+ * Revision 1.8  2017-05-11 13:30:34+05:30  Cprogrammer
+ * added option to run initialization command via INITCMD env variable
+ *
+ * Revision 1.7  2017-04-18 08:59:53+05:30  Cprogrammer
+ * lock service directory using file .svlock to prevent multiple svscan runs
+ *
+ * Revision 1.6  2011-08-05 14:31:05+05:30  Cprogrammer
+ * create STATUSFILE on startup and delete on shutdown
+ *
+ * Revision 1.5  2011-05-26 23:17:52+05:30  Cprogrammer
+ * open svscan log only if SCANLOG is defined
+ *
+ * Revision 1.4  2008-06-07 13:54:28+05:30  Cprogrammer
+ * added logging of svscan through external loggers like multilog
+ *
+ * Revision 1.3  2004-10-22 20:31:19+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2003-10-11 09:31:58+05:30  Cprogrammer
+ * added scan.h for scan_ulong() prototype
+ * changed wait to unsigned long
+ *
+ * Revision 1.1  2003-10-11 09:28:24+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
