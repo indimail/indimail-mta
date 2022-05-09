@@ -7648,7 +7648,7 @@ create_users()
 			echo "creating user indimail"
 			if [ -f /bin/bash ] ; then
 				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/bash indimail
-			if [ -f /usr/local/bin/bash ] ; then
+			elif [ -f /usr/local/bin/bash ] ; then
 				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /usr/local/bin/bash indimail
 			else
 				macOSuseradd -M -u $userid -g indimail -d $QmailHOME -s /bin/sh indimail
