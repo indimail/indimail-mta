@@ -3687,25 +3687,18 @@ udplogger: load udplogger.o
 udplogger.o: compile udplogger.c conf-ip haveip6.h
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` udplogger.c
 
-udpclient: load udpclient.o udpopen.o
-	./load udpclient udpopen.o $(QMAILLIB)
-
-udpopen.o: compile udpopen.c udpopen.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip` udpopen.c
-
-tcpopen.o: compile tcpopen.c tcpopen.h haveip6.h conf-ip \
-hasrresvport.h
-	./compile -DQMAIL_INTERNAL `grep -h -v "^#" conf-ip` tcpopen.c
+udpclient: load udpclient.o
+	./load udpclient $(QMAILLIB)
 
 udpclient.o: compile udpclient.c
 	./compile udpclient.c
 
 whois: \
-load whois.o tcpopen.o
-	./load whois tcpopen.o $(QMAILLIB)
+load whois.o
+	./load whois $(QMAILLIB)
 
 whois.o:\
-compile whois.c tcpopen.h
+compile whois.c
 	./compile `grep -h -v "^#" conf-ip` whois.c
 
 conf-release:
