@@ -9,6 +9,7 @@ on:
       - '!**/libdkim-x/libdkim.spec.in'
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   testfreebsd:

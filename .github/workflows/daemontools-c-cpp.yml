@@ -12,6 +12,7 @@ on:
       - '!**/daemontools-x/*.1'
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   build:

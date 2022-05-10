@@ -9,6 +9,7 @@ on:
       - '!**/libsrs2-x/libsrs2.spec.in'
       - '!**/doc/*'
       - '!**.md'
+  workflow_dispatch:
 
 jobs:
   build:
