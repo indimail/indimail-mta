@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.7  2022-05-10 20:56:17+05:30  Cprogrammer
+ * use headers from standard include path
+ *
  * Revision 1.6  2021-04-29 20:30:32+05:30  Cprogrammer
  * moved variable inside if block
  *
@@ -22,13 +25,12 @@
  */
 #include <unistd.h>
 #include <errno.h>
-#include <string.h>
-#include "sgetopt.h"
-#include "udpopen.h"
-#include "strerr.h"
-#include "subfd.h"
-#include "scan.h"
-#include "timeoutread.h"
+#include <sgetopt.h>
+#include <udpopen.h>
+#include <strerr.h>
+#include <subfd.h>
+#include <scan.h>
+#include <timeoutread.h>
 
 char           *usage = "usage: udpclient [-h host] [-p port] [-r responsesize] [-t timeout] message message ...";
 
@@ -112,7 +114,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.6 2021-04-29 20:30:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udpclient.c,v 1.7 2022-05-10 20:56:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
