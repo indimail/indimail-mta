@@ -219,8 +219,12 @@ Release 2.14.1 Start 21/09/2021 End xx/xx/2022
      send_qload()
 122. matchup.c: fixed field postion of 'exiting' for slowq-send, qmta-send
      logs
-- 05/0052022
+- 05/05/2022
 123. svctool: added /usr/local/bin/bash as a valid shell
+- 10/05/2022
+124. use tcpopen, udpopen from libqmail
+125. whois.c: replaced strstr.c with str_str from libqmail
+126. udplcient.c: use headers from standard include path
 
 * 
 Release 2.14.0 Start 18/07/2021 End 12/09/2021
