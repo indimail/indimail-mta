@@ -1,5 +1,8 @@
 /*
  * $Log: whois.c,v $
+ * Revision 1.5  2022-05-10 20:56:35+05:30  Cprogrammer
+ * replaced strstr with str_str from libqmail
+ *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -20,10 +23,7 @@
  * 
  * @author Silver Moon ( m00n.silv3r@gmail.com )
  */
-#include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/socket.h>
 #include <subfd.h>
 #include <sgetopt.h>
@@ -31,7 +31,7 @@
 #include <str.h>
 #include <stralloc.h>
 #include <noreturn.h>
-#include "tcpopen.h"
+#include <tcpopen.h>
 
 #define FATAL "whois: fatal: "
 
@@ -115,7 +115,7 @@ str_whois(char *resp, int resp_len)
 	int             len;
 
 	whois_server.len = 0;
-	if ((pch = strstr(resp, "whois."))) {
+	if ((pch = str_str(resp, "whois."))) {
 		for (len = 0, wch = pch; len < resp_len; len++, wch++) {
 			if (*wch == '\n' || *wch == '\r') {
 				if (!stralloc_copyb(&whois_server, pch, len))
@@ -139,10 +139,10 @@ get_whois_data(char *domain)
 	int          i ;
 
 	/* remove "http://" and "www." */
-	if ((ptr = strstr(domain, "www.")))
+	if ((ptr = str_str(domain, "www.")))
 		ptr += 4;
 	else
-	if ((ptr = strstr(domain, "http://")))
+	if ((ptr = str_str(domain, "http://")))
 		ptr += 7;
 	else
 		ptr = domain;
@@ -255,7 +255,7 @@ whois_query(char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	static char    *x = "$Id: whois.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: whois.c,v 1.5 2022-05-10 20:56:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
