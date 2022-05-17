@@ -1,6 +1,6 @@
 /*
  * $Log: tls.c,v $
- * Revision 1.11  2022-05-17 18:40:18+05:30  Cprogrammer
+ * Revision 1.11  2022-05-18 00:48:43+05:30  Cprogrammer
  * replaced deprecated function SSL_CTX_use_RSAPrivateKey_file with SSL_CTX_use_PrivateKey_file
  *
  * Revision 1.10  2021-03-10 18:24:06+05:30  Cprogrammer
@@ -58,7 +58,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.11 2022-05-17 18:40:18+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.11 2022-05-18 00:48:43+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -197,12 +197,21 @@ tls_init(char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
 	}
 #endif
 	if (SSL_CTX_use_certificate_chain_file(ctx, cert)) {
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
 		if (SSL_CTX_use_PrivateKey_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
 			sslerr_str = (char *) myssl_error_str();
 			strerr_warn2("SSL_CTX_use_PrivateKey_file: Unable to load private keys: ", sslerr_str, 0);
 			SSL_CTX_free(ctx);
 			return ((SSL_CTX *) NULL);
 		}
+#else
+		if (SSL_CTX_use_RSAPrivateKey_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
+			sslerr_str = (char *) myssl_error_str();
+			strerr_warn2("SSL_CTX_use_RSAPrivateKey_file: Unable to load RSA private keys: ", sslerr_str, 0);
+			SSL_CTX_free(ctx);
+			return ((SSL_CTX *) NULL);
+		}
+#endif
 		if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
 			sslerr_str = (char *) myssl_error_str();
 			strerr_warn4("SSL_CTX_use_certificate_file: Unable to use cerficate: ", cert, ": ", sslerr_str, 0);
