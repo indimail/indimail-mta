@@ -37,6 +37,9 @@ while test $# -gt 0; do
     --verbose)
     verbose=1
     ;;
+    --clean)
+    clean="--clean"
+    ;;
     --release=*)
     release=$optarg
     ;;
@@ -140,11 +143,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
     fi
   fi
   if [ $verbose -eq 0 ] ; then
-    echo "rpmbuild -ba --clean --quiet /tmp/$name.spec"
-    rpmbuild -ba --clean --quiet /tmp/$name.spec
+    echo "rpmbuild -ba $clean --quiet /tmp/$name.spec"
+    rpmbuild -ba $clean --quiet /tmp/$name.spec
   else
-    echo "rpmbuild -ba --clean /tmp/$name.spec"
-    rpmbuild -ba --clean /tmp/$name.spec
+    echo "rpmbuild -ba $clean /tmp/$name.spec"
+    rpmbuild -ba $clean /tmp/$name.spec
   fi
   if [ $? -eq 0 ] ; then
     /bin/rm /tmp/$name.spec

@@ -32,10 +32,9 @@ tools/Makefile.in
 *.o
 *.lo
 autom4te.cache
-mkinstalldirs
 configure.lineno
 conf-release
-config.h.in.BAK
+*.BAK
 config.h.in~
 libsrs2.spec
 libsrs2.changes

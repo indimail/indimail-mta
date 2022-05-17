@@ -17,7 +17,7 @@
 #
 curdir=`pwd`
 version=$(cat conf-version)
-name=libdkim
+name=libsrs2
 
 if [ -f /etc/debian_version ] ; then
   echo "you can't do rpmbuild on an insane system" 1>&2
@@ -36,6 +36,9 @@ while test $# -gt 0; do
     case "$1" in
     --verbose)
     verbose=1
+    ;;
+    --clean)
+    clean="--clean"
     ;;
     --release=*)
     release=$optarg
@@ -140,11 +143,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
     fi
   fi
   if [ $verbose -eq 0 ] ; then
-    echo "rpmbuild -ba --clean --quiet /tmp/$name.spec"
-    rpmbuild -ba --clean --quiet /tmp/$name.spec
+    echo "rpmbuild -ba $clean --quiet /tmp/$name.spec"
+    rpmbuild -ba $clean --quiet /tmp/$name.spec
   else
-    echo "rpmbuild -ba --clean /tmp/$name.spec"
-    rpmbuild -ba --clean /tmp/$name.spec
+    echo "rpmbuild -ba $clean /tmp/$name.spec"
+    rpmbuild -ba $clean /tmp/$name.spec
   fi
   if [ $? -eq 0 ] ; then
     /bin/rm /tmp/$name.spec

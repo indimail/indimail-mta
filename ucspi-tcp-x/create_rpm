@@ -58,13 +58,15 @@ while test $# -gt 0; do
     --verbose)
 	verbose=1
     ;;
+    --clean)
+    clean="--clean"
+    ;;
     --release=*)
 	release=$optarg
     ;;
     *)
     echo "invalid option [$1]"
     read key
-    usage 1
     ;;
     esac
 
@@ -182,11 +184,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	fi
 	build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
 	if [ $verbose -eq 0 ] ; then
-		echo "rpmbuild -ba --clean --quiet /tmp/ucspi-tcp.spec"
-		rpmbuild -ba --clean --quiet /tmp/ucspi-tcp.spec
+		echo "rpmbuild -ba $clean --quiet /tmp/ucspi-tcp.spec"
+		rpmbuild -ba $clean --quiet /tmp/ucspi-tcp.spec
 	else
-		echo "rpmbuild -ba --clean /tmp/ucspi-tcp.spec"
-		rpmbuild -ba --clean /tmp/ucspi-tcp.spec
+		echo "rpmbuild -ba $clean /tmp/ucspi-tcp.spec"
+		rpmbuild -ba $clean /tmp/ucspi-tcp.spec
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/ucspi-tcp.spec
