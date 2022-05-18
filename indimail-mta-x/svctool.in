@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.629 2022-05-05 10:01:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.630 2022-05-18 13:30:37+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.629 2022-05-05 10:01:00+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.630 2022-05-18 13:30:37+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5887,17 +5887,13 @@ if [ $mount_resolvconf -eq 1 -a \
 	echo "function clean_up"
 	echo "{"
 	echo "	echo \"shutting down\""
-	echo "	pkill -P \`jobs -p\` inotify"
+	echo "	pkill -P \$(jobs -p) inotify"
 	echo "	exit"
 	echo "}"
 	echo ""
 	echo "exec 2>&1"
-	echo "if [ -f /etc/resolv.conf -a ! -L /etc/resolv.conf ] ; then"
-	echo "	file=/etc/resolv.conf"
-	echo "else"
-	echo "	file=\`file /etc/resolv.conf |awk '{print \$5}'\`"
-	echo "fi"
-	echo "dir=\`dirname \$file\`"
+	echo "file=\$(realpath /etc/resolv.conf)"
+	echo "dir=\$(dirname \$file)"
 	echo "echo \"starting with resolv_conf_dir=\$dir\""
 	echo "/bin/cat /etc/resolv.conf"
 	echo "exec 2>&1"
