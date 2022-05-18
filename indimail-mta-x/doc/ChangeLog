@@ -238,6 +238,8 @@ o openssl 3.0.0 port
      port
 128. svctool: use realpath to resolve full path of /etc/resolv.conf
 129. update_tmprsadh: added --mxbits argument to specify max bits
+130. smtpd.c: fixed reading of dh parameters.
+131. smtpd.c: added SSL_BITS to set RSA, DH pem file to be read
 
 * 
 Release 2.14.0 Start 18/07/2021 End 12/09/2021
