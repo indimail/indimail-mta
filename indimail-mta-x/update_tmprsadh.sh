@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.12  2022-05-18 13:30:52+05:30  Cprogrammer
+# added --maxbits argument to specify maximum bits
+#
 # Revision 1.11  2021-09-11 19:03:47+05:30  Cprogrammer
 # added read permissions for qmail group
 #
@@ -46,6 +49,7 @@ ln=$(which ln)
 mv=$(which mv)
 
 export PATH="$PATH:/usr/local/bin/ssl:/usr/sbin"
+maxbits=2048
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
@@ -55,6 +59,9 @@ while test $# -gt 0; do
     case "$1" in
     --certdir=*)
 	CERTDIR=$optarg
+	;;
+	--maxbits=*)
+	maxbits=$optarg
 	;;
 
     *)
@@ -73,7 +80,8 @@ slash=`echo $CERTDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
 	cd @sysconfdir@
 fi
-for i in 512 1024 2048
+i=$maxbits
+while true
 do
 	/usr/bin/openssl genrsa -out $CERTDIR/rsa"$i".new $i &&
 	$chmod 640 $CERTDIR/rsa"$i".new &&
@@ -86,6 +94,10 @@ do
 	$chown indimail:qmail $CERTDIR/dh"$i".new &&
 	$mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
 	echo dh"$i".pem
+	i=$(expr $i / 2)
+	if [ $i -lt 512 ] ; then
+		break;
+	fi
 done
 if [ ! -f $CERTDIR/dhparams.pem ] ; then
 	echo $ln -sr $CERTDIR/dh2048.pem $CERTDIR/dhparams.pem
