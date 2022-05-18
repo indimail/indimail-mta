@@ -123,13 +123,13 @@ main(int argc, char **argv)
 	if (optind == argc)
 		strerr_die1x(100, usage);
 	if (!(wd = (INOTIFY_DIR *) malloc(sizeof(INOTIFY_DIR) * (argc - optind))))
-		strerr_die2sys(111, FATAL, "out of mem");
+		strerr_die2x(111, FATAL, "out of mem");
 	/*- create a INOTIFY instance */
 	if ((ifd = inotify_init()) < 0)
 		strerr_die2sys(111, FATAL, "inotify_init: ");
 	for (_soptind = optind; optind < argc; optind++) {
 		if (access(argv[optind], F_OK))
-			strerr_die2sys(111, FATAL, argv[optind]);
+			strerr_die3sys(111, FATAL, argv[optind], ": ");
 		/*- adding a directory into watch list.  */
 		wd[optind - _soptind].name = argv[optind];
 		if ((wd[optind - _soptind].wd = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_OPEN| IN_CLOSE_WRITE| IN_DELETE|IN_MOVE_SELF|IN_MOVED_FROM|IN_MOVED_TO)) == -1)
