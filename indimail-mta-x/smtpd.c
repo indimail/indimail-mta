@@ -67,6 +67,7 @@
 #define BATVLEN 3	/* number of bytes */
 #define BATVSTALE 7	/* accept for a week */
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <getEnvConfig.h>
 #include <openssl/evp.h>
 #else
 #include <openssl/md5.h>
@@ -559,7 +560,8 @@ die_custom(char *arg)
 	logerrpid();
 	logerr(remoteip);
 	logerr(" ");
-	logerrf(arg);
+	logerr(arg);
+	logerrf("\n");
 	_exit(1);
 }
 
@@ -5565,9 +5567,10 @@ get_dhkey(int export, int keylen)
 			continue;
 		}
 		if ((in = BIO_new(BIO_s_file()))) {
-			BIO_read_filename(in, filename.s);
+			if (!BIO_read_filename(in, filename.s))
+				die_custom("error reading dhparams file");
 			alloc_free(filename.s);
-			if (!(dh_key = PEM_read_bio_PrivateKey(in, NULL, 0, NULL)))
+			if (!(dh_key = PEM_read_bio_Parameters_ex(in, NULL, NULL, NULL)))
 				die_custom("error reading dh parameters");
 			BIO_free(in);
 			return dh_key;
@@ -5741,6 +5744,7 @@ tls_init()
 	stralloc        filename = { 0 };
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	EVP_PKEY       *dh_pkey;
+	int             bits;
 #endif
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	stralloc        ssl_option = { 0 };
@@ -5912,9 +5916,10 @@ tls_init()
 	SSL_set_cipher_list(myssl, ciphers);
 	alloc_free(saciphers.s);
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	if (get_rsakey(0, 512))
-		EVP_RSA_gen(512);
-	if (!(dh_pkey = get_dhkey(0, 4096)))
+	getEnvConfigInt(&bits, "SSL_BITS", 2048);
+	if (!get_rsakey(0, bits))
+		EVP_RSA_gen(bits);
+	if (!(dh_pkey = get_dhkey(0, bits)))
 		SSL_set_dh_auto(myssl, 1);
 	else
 		SSL_set0_tmp_dh_pkey(myssl, dh_pkey);
@@ -6303,7 +6308,7 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.252  2022-05-18 13:30:14+05:30  Cprogrammer
+ * Revision 1.252  2022-05-18 17:01:02+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
  * Revision 1.251  2022-02-26 09:05:54+05:30  Cprogrammer
@@ -6499,7 +6504,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.252 2022-05-18 13:30:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.252 2022-05-18 17:01:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
