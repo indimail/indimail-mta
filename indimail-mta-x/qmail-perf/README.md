@@ -115,7 +115,7 @@ fdatasync|This can be turned on in indimail-mta by setting USE_FDATASYNC instead
 * Increasting directory split has negligible effect in qmail-perf test and filesystem test
 * statically linked binaries give much better performance. With dynamic linking, indimail-mta performs the worst amongst all MTAs.
 * When delivery rate increase inject rate decreases
-* The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
+* The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in improving the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
 	* Disabling fsync, ext4 gave the best performance in the test carried out
 	* Using fsync, zfs gave the best performance in the tests carried out
 * netqmail gives the best injection rate. One of the reason is statically compiled uids, gids which avoids the need to do passwd, group entry lookups uisng the getpw, getgr libc functions.
