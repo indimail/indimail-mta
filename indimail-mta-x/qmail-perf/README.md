@@ -72,6 +72,7 @@ The qmail-perf-test script will create a csv file with the data and averaged tot
 	* s/qmail from source [s/qmail](https://www.fehcom.de/sqmail/sqmail.html)
 	* qmail-perf-test, testfs script
 	* compiled binaries of sub.c, mail.c, loadavg.c, readfifo.c
+	* nsswitch.conf was modified to use files. This improves inject speeds because lower times for passwd file lookups.
 
 ## What was Tested
 
