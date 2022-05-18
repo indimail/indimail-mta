@@ -1,6 +1,14 @@
 * 
-Release 2.14.1 Start 21/09/2021 End xx/xx/2022
+Release 3.0.0 Start 21/09/2021 End 18/05/2022
 ======= Release Highlights ================================================
+o dynamic queue using POSIX message queue, shared memory
+o New daemon qscheduler which replaced qmail-daemon
+o Ability to group deliveries in chunks to improve delivery speed
+o added qmonitor manage queues.
+o added qtop program to monitor queue loads without using disk IO
+o Made SPLIT, big todo configurable using env variables.
+o added ability to disable a queue temporarily.
+o openssl 3.0.0 port
 ===========================================================================
 - 21/09/2021
 01.  batv.c: refactored code. Return error type during validation
@@ -225,6 +233,11 @@ Release 2.14.1 Start 21/09/2021 End xx/xx/2022
 124. use tcpopen, udpopen from libqmail
 125. whois.c: replaced strstr.c with str_str from libqmail
 126. udplcient.c: use headers from standard include path
+- 18/05/2022
+127. batv.c, smtpd.c, sslerator.c, qmail-remote.c, starttls.c: openssl 3.0.0
+     port
+128. svctool: use realpath to resolve full path of /etc/resolv.conf
+129. update_tmprsadh: added --mxbits argument to specify max bits
 
 * 
 Release 2.14.0 Start 18/07/2021 End 12/09/2021
@@ -405,7 +418,6 @@ o New control file dkimkeys to override DKIMKEY and allow domain specfic
 95. svctool.in: set inlookup fifo permissions during startup
 96. sys-checkpwd.c: relinquish setuid privileges in pipe_exec()
 97. qmail-dk.c, qmail-dkim.c: restore gid after reading private key file
-- 12/09/2021 - indimail-mta-2.14.0
 
 * 
 Release 2.13 Start 14/02/2021

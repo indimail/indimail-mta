@@ -65,15 +65,17 @@ Release 1.5 Start 19/03/2009
 32. renamed DKKIMDOMAIN to BOUNCEDOMAIN
 - 06/10/2020
 33. configure.ac: changes for FreeBSD, Darwin
-- 13/10/2020 indimail-mta-2.12
+- 13/10/2020 - indimail-mta-2.12
 34. added debuginfo package
-- 18/07/2021 indimail-mta-2.13
+- 18/07/2021 - indimail-mta-2.13
 - 20/07/2021
 35. updated configure.ac by doing autoupdate
 - 28/08/2021
 36. dkimsign.cpp: added ReplaceSelector to replace selector
 37. dkimfuncs.cpp - added DKIMSignReplaceSelector to replace selector
 38. dkim.h: Added prototype for DKIMSignReplaceSelector
+- 12/09/2021 - indimail-mta-2.14.0
+- 18/05/2022 - indimail-mta-3.0.0
 
 *
 ----------------------
