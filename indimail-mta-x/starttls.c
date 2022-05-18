@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.c,v $
+ * Revision 1.12  2022-05-18 13:30:29+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
  * Revision 1.11  2021-06-14 01:19:59+05:30  Cprogrammer
  * collapsed stralloc_..
  *
@@ -702,7 +705,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 
 	/*- let the other side complain if it needs a cert and we don't have one */
 	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert.s))
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+		SSL_CTX_use_PrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
+#else
 		SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
+#endif
 
 	if (!(myssl = SSL_new(ctx))) {
 		t = (char *) ssl_error();
@@ -1480,7 +1487,7 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.11 2021-06-14 01:19:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.12 2022-05-18 13:30:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

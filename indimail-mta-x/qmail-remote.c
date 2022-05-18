@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.149 2021-08-19 19:55:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include "cdb.h"
 #include "open.h"
@@ -26,7 +26,7 @@
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #else
-#warning "not compiled with -DHASTLSA"
+#warning "not compiled with -DTLS -DHASTLSA"
 #endif /*- #if defined(TLS) && defined(HASTLSA) */
 #include "dns.h"
 #include "alloc.h"
@@ -139,9 +139,14 @@ stralloc        helo_str = { 0 };
 
 /*- http://mipassoc.org/pipermail/batv-tech/2007q4/000032.html */
 #ifdef BATV
+#include <openssl/ssl.h>
 #define BATVLEN 3 /*- number of bytes */
 #include "byte.h"
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/evp.h>
+#else
 #include <openssl/md5.h>
+#endif
 char            batvok = 0;
 stralloc        signkey = { 0 };
 stralloc        nosign = { 0 };
@@ -1536,7 +1541,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 
 	/*- let the other side complain if it needs a cert and we don't have one */
 	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert.s))
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+		SSL_CTX_use_PrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
+#else
 		SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
+#endif
 
 	if (!(myssl = SSL_new(ctx))) {
 		t = (char *) ssl_error();
@@ -3151,6 +3160,19 @@ getcontrols()
 
 #if BATV
 stralloc        newsender = { 0 };
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+void
+temp_batv(char *arg)
+{
+	out("Zerror verifying batv signature. (#4.3.0)\n");
+	if (!stralloc_copys(&smtptext, arg) ||
+			!stralloc_catb(&smtptext, ". (#4.3.0)", 10))
+		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
+}
+#endif
 
 void
 sign_batv()
@@ -3159,8 +3181,15 @@ sign_batv()
 	int             i;
 	char            kdate[] = "0000";
 	static char     hex[] = "0123456789abcdef";
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	EVP_MD_CTX     *mdctx;
+	const EVP_MD   *md = 0;
+	unsigned char   md5digest[EVP_MAX_MD_SIZE];
+	unsigned int    md_len;
+#else
 	MD5_CTX         md5;
 	unsigned char   md5digest[MD5_DIGEST_LENGTH];
+#endif
 
 	if (stralloc_starts(&smtp_sender, "prvs="))
 		return;	/*- already signed */
@@ -3178,11 +3207,25 @@ sign_batv()
 	kdate[3] = '0' + daynumber % 10;
 	if (!stralloc_catb(&newsender, kdate, 4))
 		temp_nomem();
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	if (!(md = EVP_MD_fetch(NULL, "md5", NULL)))
+		temp_batv("batv: unable to fetch digest implementation for MD5");
+	if (!(mdctx = EVP_MD_CTX_new()))
+		temp_nomem();
+	if (!EVP_DigestInit_ex(mdctx, md, NULL) ||
+			!EVP_DigestUpdate(mdctx, kdate, 4) ||/*- date */
+			!EVP_DigestUpdate(mdctx, smtp_sender.s, smtp_sender.len) ||
+			!EVP_DigestUpdate(mdctx, signkey.s, signkey.len) ||
+			!EVP_DigestFinal_ex(mdctx, md5digest, &md_len))
+		temp_batv("batv: unable to hash md5 message digest");
+	EVP_MD_free(md);
+#else
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4);
 	MD5_Update(&md5, smtp_sender.s, smtp_sender.len);
 	MD5_Update(&md5, signkey.s, signkey.len);
 	MD5_Final(md5digest, &md5);
+#endif
 	for (i = 0; i < BATVLEN; i++) {
 		char            md5hex[2];
 
@@ -3613,7 +3656,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.149 2021-08-19 19:55:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidauthcramh;
 	x = sccsidqrdigestmd5h;
 	x++;
@@ -3621,6 +3664,9 @@ getversion_qmail_remote_c()
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.150  2022-05-18 13:30:05+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
  * Revision 1.149  2021-08-19 19:55:42+05:30  Cprogrammer
  * added comments
  *

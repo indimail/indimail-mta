@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.8  2022-05-18 13:29:25+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
  * Revision 1.7  2022-03-20 16:34:23+05:30  Cprogrammer
  * refactored batv code
  *
@@ -29,7 +32,12 @@
 #ifdef BATV
 #include <unistd.h>
 #include <ctype.h>
+#include <openssl/ssl.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/evp.h>
+#else
 #include <openssl/md5.h>
+#endif
 #include <sgetopt.h>
 #include <stralloc.h>
 #include <now.h>
@@ -99,8 +107,15 @@ checkbatv(char *sender, int *days)
 	int             md5pos;
 	int             atpos, slpos;
 	char            kdate[] = "0000";
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	EVP_MD_CTX     *mdctx;
+	const EVP_MD   *md = 0;
+	unsigned char   md5digest[EVP_MAX_MD_SIZE];
+	unsigned int    md_len;
+#else
 	MD5_CTX         md5;
 	unsigned char   md5digest[MD5_DIGEST_LENGTH];
+#endif
 	unsigned long   signday;
 
 	if (!stralloc_copys(&newsender, sender) || !stralloc_0(&newsender))
@@ -124,11 +139,25 @@ checkbatv(char *sender, int *days)
 		*days = daynumber - signday;
 	if ((unsigned) (daynumber - signday) > batvkeystale)
 		return STALE_SIG; /*- stale bounce */
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	if (!(md = EVP_MD_fetch(NULL, "md5", NULL)))
+		strerr_die2x(111, FATAL, "EVP_MD_fetch: unable to fetch digest implementation for MD5");
+	if (!(mdctx = EVP_MD_CTX_new()))
+		die_nomem();
+	if (!EVP_DigestInit_ex(mdctx, md, NULL) ||
+			!EVP_DigestUpdate(mdctx, kdate, 4) ||/*- date */
+			!EVP_DigestUpdate(mdctx, newsender.s + slpos + 1, len - slpos - 1) ||
+			!EVP_DigestUpdate(mdctx, batvkey.s, batvkey.len) ||
+			!EVP_DigestFinal_ex(mdctx, md5digest, &md_len))
+		strerr_die2x(111, FATAL, "unable to hash md5 message digest");
+	EVP_MD_free(md);
+#else
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4); /* date */
 	MD5_Update(&md5, newsender.s + slpos + 1, len - slpos - 1);
 	MD5_Update(&md5, batvkey.s, batvkey.len);
 	MD5_Final(md5digest, &md5);
+#endif
 	for (i = 0; i < BATVLEN; i++) {
 		int             c, x;
 
@@ -172,8 +201,15 @@ signbatv(char *sender)
 	int             i, len;
 	char            kdate[] = "0000";
 	static char     hex[] = "0123456789abcdef";
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	EVP_MD_CTX     *mdctx;
+	const EVP_MD   *md = 0;
+	unsigned char   md5digest[EVP_MAX_MD_SIZE];
+	unsigned int    md_len;
+#else
 	MD5_CTX         md5;
 	unsigned char   md5digest[MD5_DIGEST_LENGTH];
+#endif
 
 	if (!str_diffn(sender, "prvs=", 5))
 		return sender; /*- already signed */
@@ -189,11 +225,25 @@ signbatv(char *sender)
 	kdate[3] = '0' + daynumber % 10;
 	if (!stralloc_catb(&newsender, kdate, 4))
 		die_nomem();
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	if (!(md = EVP_MD_fetch(NULL, "md5", NULL)))
+		strerr_die2x(111, FATAL, "EVP_MD_fetch: unable to fetch digest implementation for MD5");
+	if (!(mdctx = EVP_MD_CTX_new()))
+		die_nomem();
+	if (!EVP_DigestInit_ex(mdctx, md, NULL) ||
+			!EVP_DigestUpdate(mdctx, kdate, 4) ||/*- date */
+			!EVP_DigestUpdate(mdctx, sender, len) ||
+			!EVP_DigestUpdate(mdctx, batvkey.s, batvkey.len) ||
+			!EVP_DigestFinal_ex(mdctx, md5digest, &md_len))
+		strerr_die2x(111, FATAL, "unable to hash md5 message digest");
+	EVP_MD_free(md);
+#else
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4);
 	MD5_Update(&md5, sender, len);
 	MD5_Update(&md5, batvkey.s, batvkey.len);
 	MD5_Final(md5digest, &md5);
+#endif
 	for (i = 0; i < BATVLEN; i++) {
 		char            md5hex[2];
 
@@ -293,7 +343,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.7 2022-03-20 16:34:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.8 2022-05-18 13:29:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

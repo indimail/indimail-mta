@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.4  2022-05-18 13:30:24+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
  * Revision 1.3  2021-03-04 23:02:07+05:30  Cprogrammer
  * fixed usage strings
  *
@@ -203,7 +206,11 @@ load_certificate(char *certfile)
 	}
 #endif
 	if (SSL_CTX_use_certificate_chain_file(myctx, certfile)) {
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+		if (SSL_CTX_use_PrivateKey_file(ctx, certfile, SSL_FILETYPE_PEM) != 1) {
+#else
 		if (SSL_CTX_use_RSAPrivateKey_file(myctx, certfile, SSL_FILETYPE_PEM) != 1) {
+#endif
 			strerr_warn3(FATAL, "SSL_CTX_use_RSAPrivateKey: unable to load RSA private key: ",
 				ERR_error_string(ERR_get_error(), 0), 0);
 			SSL_CTX_free(myctx);
@@ -432,7 +439,7 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.3 2021-03-04 23:02:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.4 2022-05-18 13:30:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

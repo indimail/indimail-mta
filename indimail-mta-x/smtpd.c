@@ -62,10 +62,15 @@
 #endif
 
 #ifdef BATV
+#include <openssl/ssl.h>
 #include <cdb.h>
 #define BATVLEN 3	/* number of bytes */
 #define BATVSTALE 7	/* accept for a week */
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+#include <openssl/evp.h>
+#else
 #include <openssl/md5.h>
+#endif
 #endif
 #ifdef SMTP_PLUGIN
 #include "smtp_plugin.h"
@@ -106,7 +111,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.251 $";
+char           *revision = "$Revision: 1.252 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -540,6 +545,21 @@ die_nomem()
 	logerrpid();
 	logerr(remoteip);
 	logerrf(" out of memory\n");
+	_exit(1);
+}
+
+void
+die_custom(char *arg)
+{
+	out("451 ");
+	out(arg);
+	out(" (#4.3.0)\r\n");
+	flush();
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" ");
+	logerrf(arg);
 	_exit(1);
 }
 
@@ -2955,8 +2975,15 @@ check_batv_sig()
 	int             daynumber = (now() / 86400) % 1000;
 	int             i, md5pos, atpos, slpos;
 	char            kdate[] = "0000";
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	EVP_MD_CTX     *mdctx;
+	const EVP_MD   *md = 0;
+	unsigned char   md5digest[EVP_MAX_MD_SIZE];
+	unsigned int    md_len;
+#else
 	MD5_CTX         md5;
 	unsigned char   md5digest[MD5_DIGEST_LENGTH];
+#endif
 	unsigned long   signday;
 
 	if (addr.len >= (11 + 2 * BATVLEN) && stralloc_starts(&addr, "prvs=")) {
@@ -2969,17 +2996,31 @@ check_batv_sig()
 	} else
 		return 0; /*- no BATV */
 	if (kdate[0] != '0')
-		return 0;				/* not known format 0 */
+		return 0; /* not known format 0 */
 	if (scan_ulong(kdate + 1, &signday) != 3)
 		return 0;
 	if ((unsigned) (daynumber - signday) > signkeystale)
 		return 0; /*- stale bounce */
+	addr.len--;
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	if (!(md = EVP_MD_fetch(NULL, "md5", NULL)))
+		die_custom("batv: unable to fetch digest implementation for MD5");
+	if (!(mdctx = EVP_MD_CTX_new()))
+		die_nomem();
+	if (!EVP_DigestInit_ex(mdctx, md, NULL) ||
+			!EVP_DigestUpdate(mdctx, kdate, 4) ||/*- date */
+			!EVP_DigestUpdate(mdctx, addr.s + slpos + 1, addr.len - slpos - 1) ||
+			!EVP_DigestUpdate(mdctx, signkey.s, signkey.len) ||
+			!EVP_DigestFinal_ex(mdctx, md5digest, &md_len))
+		die_custom("batv: unable to hash md5 message digest");
+	EVP_MD_free(md);
+#else
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4);
-	addr.len--;
 	MD5_Update(&md5, addr.s + slpos + 1, addr.len - slpos - 1);
 	MD5_Update(&md5, signkey.s, signkey.len);
 	MD5_Final(md5digest, &md5);
+#endif
 	for (i = 0; i < BATVLEN; i++) {
 		int             c, x;
 		c = addr.s[md5pos + 2 * i];
@@ -5324,44 +5365,62 @@ smtp_tls(char *arg)
 	}
 }
 
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 RSA            *
 tmp_rsa_cb(SSL *ssl_p, int export, int keylen)
 {
 	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	int             i, j;
+	FILE           *in;
+	RSA            *rsa;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	BIGNUM         *e;
+	BIGNUM         *bn;
 	RSA            *key;
 #endif
 
 	if (!export)
 		keylen = 512;
-	if (keylen == 512) {
-		FILE           *in;
-
-		if (!certdir) {
-			if (!(certdir = env_get("CERTDIR")))
-				certdir = auto_control;
-		}
-		if (!stralloc_copys(&filename, certdir) ||
-				!stralloc_catb(&filename, "/rsa512.pem", 11) ||
+	if (!certdir) {
+		if (!(certdir = env_get("CERTDIR")))
+			certdir = auto_control;
+	}
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/rsa", 4))
+		die_nomem();
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen != i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
 				!stralloc_0(&filename))
 			die_nomem();
-		if ((in = fopen(filename.s, "r"))) {
-			RSA            *rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL);
-			fclose(in);
-			if (rsa) {
-				alloc_free(filename.s);
-				return rsa;
-			}
+		filename.len = j;
+		if (!(in = fopen(filename.s, "r"))) {
+			if (errno != error_noent)
+				die_custom("error reading rsa private key");
+			continue;
 		}
+		if (!(rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL)))
+			die_custom("error reading rsa private key");
+		fclose(in);
 		alloc_free(filename.s);
+		return rsa;
 	}
+	alloc_free(filename.s);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	e = BN_new();
-	BN_set_word(e, 65537);
-	key = RSA_new();
-	RSA_generate_key_ex(key, keylen, e, NULL);
-	BN_free(e);
+	if (!(bn = BN_new()))
+		die_nomem();
+	if (!BN_set_word(bn, 65537))
+		die_custom("error setting BIGNUM");
+	if (!(key = RSA_new()))
+		die_nomem();
+	if (!RSA_generate_key_ex(key, keylen, bn, NULL))
+		die_custom("error generating RSA keys");
+	BN_free(bn);
 	return (key);
 #else
 	return RSA_generate_key(keylen, RSA_F4, NULL, NULL);
@@ -5372,6 +5431,11 @@ DH             *
 tmp_dh_cb(SSL *ssl_p, int export, int keylen)
 {
 	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	int             i, j;
+	FILE           *in;
+	DH             *dh;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	DH             *client_key;
 #endif
@@ -5382,45 +5446,137 @@ tmp_dh_cb(SSL *ssl_p, int export, int keylen)
 		if (!(certdir = env_get("CERTDIR")))
 			certdir = auto_control;
 	}
-	if (keylen == 512) {
-		FILE           *in;
-		if (!stralloc_copys(&filename, certdir) ||
-				!stralloc_catb(&filename, "/dh512.pem", 10) ||
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/dh", 3))
+		die_nomem();
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen != i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
 				!stralloc_0(&filename))
 			die_nomem();
-		if ((in = fopen(filename.s, "r"))) {
-			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
-			fclose(in);
-			if (dh) {
-				alloc_free(filename.s);
-				return dh;
-			}
+		filename.len = j;
+		if (!(in = fopen(filename.s, "r"))) {
+			if (errno != error_noent)
+				die_custom("error reading dh parameters");
+			continu;e
 		}
-	}
-	if (keylen == 1024) {
-		FILE           *in;
-		if (!stralloc_copys(&filename, certdir) ||
-				!stralloc_catb(&filename, "/dh1024.pem", 11) ||
-				!stralloc_0(&filename))
-			die_nomem();
-		if ((in = fopen(filename.s, "r"))) {
-			DH             *dh = PEM_read_DHparams(in, NULL, NULL, NULL);
-			fclose(in);
-			if (dh) {
-				alloc_free(filename.s);
-				return dh;
-			}
-		}
+		if (!(dh = PEM_read_DHparams(in, NULL, NULL, NULL)))
+			die_custom("error reading dh parameters");
+		fclose(in);
+		alloc_free(filename.s);
+		return dh;
 	}
 	alloc_free(filename.s);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	client_key = DH_new();
-	DH_generate_parameters_ex(client_key, keylen, DH_GENERATOR_2, NULL);
+	if (!(client_key = DH_new()))
+		die_nomem();
+	if (!DH_generate_parameters_ex(client_key, keylen, DH_GENERATOR_2, NULL))
+		die_custom("error generating DH parameters");
 	return (client_key);
 #else
 	return DH_generate_parameters(keylen, DH_GENERATOR_2, NULL, NULL);
 #endif
 }
+#else /*- #if OPENSSL_VERSION_NUMBER < 0x30000000L */
+EVP_PKEY       *
+get_rsakey(int export, int keylen)
+{
+	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	BIO            *in;
+	int             i, j;
+	EVP_PKEY       *rsa_key;
+
+	if (!export)
+		keylen = 512;
+	if (!certdir) {
+		if (!(certdir = env_get("CERTDIR")))
+			certdir = auto_control;
+	}
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/rsa", 4))
+		die_nomem();
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen != i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
+				!stralloc_0(&filename))
+			die_nomem();
+		filename.len = j;
+		if (access(filename.s, F_OK)) {
+			if (errno != error_noent)
+				die_custom("error reading rsa private key");
+			continue;
+		}
+		if ((in = BIO_new(BIO_s_file()))) {
+			BIO_read_filename(in, filename.s);
+			alloc_free(filename.s);
+			if (!(rsa_key = PEM_read_bio_PrivateKey(in, NULL, 0, NULL)))
+				die_custom("error reading rsa private key");
+			BIO_free(in);
+			return rsa_key;
+		} else
+			die_nomem();
+	}
+	alloc_free(filename.s);
+	return ((EVP_PKEY *) NULL);
+}
+
+EVP_PKEY       *
+get_dhkey(int export, int keylen)
+{
+	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	int             i, j;
+	BIO            *in;
+	EVP_PKEY       *dh_key;
+
+	if (!export)
+		keylen = 1024;
+	if (!certdir) {
+		if (!(certdir = env_get("CERTDIR")))
+			certdir = auto_control;
+	}
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/dh", 3))
+		die_nomem();
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen == i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
+				!stralloc_0(&filename))
+			die_nomem();
+		filename.len = j;
+		if (access(filename.s, F_OK)) {
+			if (errno != error_noent)
+				die_custom("error reading dh parameters");
+			continue;
+		}
+		if ((in = BIO_new(BIO_s_file()))) {
+			BIO_read_filename(in, filename.s);
+			alloc_free(filename.s);
+			if (!(dh_key = PEM_read_bio_PrivateKey(in, NULL, 0, NULL)))
+				die_custom("error reading dh parameters");
+			BIO_free(in);
+			return dh_key;
+		} else
+			die_nomem();
+	}
+	return ((EVP_PKEY *) NULL);
+}
+#endif /*- #if OPENSSL_VERSION_NUMBER < 0x30000000L */
 
 /*
  * don't want to fail handshake if cert isn't verifiable 
@@ -5583,6 +5739,9 @@ tls_init()
 	X509_LOOKUP    *lookup;
 	stralloc        saciphers = { 0 };
 	stralloc        filename = { 0 };
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	EVP_PKEY       *dh_pkey;
+#endif
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	stralloc        ssl_option = { 0 };
 	int             method = 4;	/* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
@@ -5723,7 +5882,11 @@ tls_init()
 	if (!stralloc_cats(&filename, servercert) ||
 			!stralloc_0(&filename))
 		die_nomem();
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	if (!SSL_use_PrivateKey_file(myssl, filename.s, SSL_FILETYPE_PEM)) {
+#else
 	if (!SSL_use_RSAPrivateKey_file(myssl, filename.s, SSL_FILETYPE_PEM)) {
+#endif
 		SSL_free(myssl);
 		alloc_free(filename.s);
 		tls_err("no valid RSA private key");
@@ -5748,8 +5911,17 @@ tls_init()
 		ciphers = "DEFAULT";
 	SSL_set_cipher_list(myssl, ciphers);
 	alloc_free(saciphers.s);
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	if (get_rsakey(0, 512))
+		EVP_RSA_gen(512);
+	if (!(dh_pkey = get_dhkey(0, 4096)))
+		SSL_set_dh_auto(myssl, 1);
+	else
+		SSL_set0_tmp_dh_pkey(myssl, dh_pkey);
+#else
 	SSL_set_tmp_rsa_callback(myssl, tmp_rsa_cb);
 	SSL_set_tmp_dh_callback(myssl, tmp_dh_cb);
+#endif
 	SSL_set_rfd(myssl, ssl_rfd = substdio_fileno(&ssin));
 	SSL_set_wfd(myssl, ssl_wfd = substdio_fileno(&ssout));
 	if (!smtps) {
@@ -6131,6 +6303,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.252  2022-05-18 13:30:14+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
  * Revision 1.251  2022-02-26 09:05:54+05:30  Cprogrammer
  * fix ehlo greating for local connections
  *
@@ -6324,7 +6499,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.251 2022-02-26 09:05:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.252 2022-05-18 13:30:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
