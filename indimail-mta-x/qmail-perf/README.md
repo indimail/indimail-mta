@@ -12,8 +12,8 @@ qmail-perf-test is a bash script to test various performance parameters for emai
 
 * The following binaries in the path
 	* sudo,matchup, svc, svstat, time, cat, ls, wc, zip, tail, head, sed, rm, printf, expr, awk, tai64nunix, grep, egrep, getent, date, cut, mkdir, chmod, chown, multilog, qmail-inject, matchup, zoverall
-* Following supervised services /service (provided by installing daemontools). You need the version from indimail-mta github repositor because the script uses `svc -r` command to restart and this feature is not present in any other version. If you have supervised services in another directory, change the value of `servicedir` in qmail-perf-test or in ~/.qmail-perf
-	* qmail-send.25 (indimail-mta), notqmail, netqmail, exttodo and sqmail. If the service is not present, the test for that particular mta will have to be skipped
+* Following supervised services in /service (provided by installing daemontools). You need the version from indimail-mta github repository because the script uses `svc -r` command to restart. This feature is not present in any other version. If you have supervised services in another directory, change the value of `servicedir` in qmail-perf-test or in ~/.qmail-perf
+	* qmail-send.25 (indimail-mta), notqmail, netqmail, exttodo and sqmail. If the service is not present, the test for that particular mta will be skipped
 * Installation Prefix as below for the following MTAs
 	* indimail-mta - /var/indimail
 	* notqmail - /var/notqmail
@@ -26,7 +26,7 @@ qmail-perf-test is a bash script to test various performance parameters for emai
 	* netqmail with external todo - /var/log/svc/exttodo
 	* notqmail - /var/log/svc/notqmail
 	* s/qmail - /var/log/svc/sqmail
-* Compiled binaries in the same directory where you will run the qmail-perf-test
+* Compiled binaries in the same directory where you will run the qmail-perf-test. There is a Makefile in this directory to compile all the required binaries.
 	* mail.c, readfifo.c, loadavg.c, sub.c
 
 The qmail-perf-test script will create a csv file with the data and averaged totals in the end of the csv file. The totals can be uploaded in excel sheet to produce graphs.
@@ -118,6 +118,7 @@ fdatasync|This can be turned on in indimail-mta by setting USE_FDATASYNC instead
 * The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
 	* Disabling fsync, ext4 gave the best performance in the test carried out
 	* Using fsync, zfs gave the best performance in the tests carried out
+* netqmail gives the best injection rate. One of the reason is statically compiled uids, gids which avoids the need to do passwd, group entry lookups uisng the getpw, getgr libc functions.
 
 ## Results
 
