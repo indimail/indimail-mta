@@ -5462,7 +5462,7 @@ tmp_dh_cb(SSL *ssl_p, int export, int keylen)
 		if (!(in = fopen(filename.s, "r"))) {
 			if (errno != error_noent)
 				die_custom("error reading dh parameters");
-			continu;e
+			continue;
 		}
 		if (!(dh = PEM_read_DHparams(in, NULL, NULL, NULL)))
 			die_custom("error reading dh parameters");
