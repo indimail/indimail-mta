@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.630 2022-05-18 13:30:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.631 2022-05-21 11:13:00+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.630 2022-05-18 13:30:37+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.631 2022-05-21 11:13:00+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2464,15 +2464,15 @@ if [ " $odmr" = " " ] ; then
 		do
 			/bin/rm -f $conf_dir/$i
 		done
-		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_BASE | cut -d= -f2)
 		if [ ! "$t" = "$QUEUE_BASE" ] ; then
 			echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 		fi
-		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_COUNT | cut -d= -f2)
 		if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 			echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 		fi
-		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+		t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_START | cut -d= -f2)
 		if [ ! "$t" = "$QUEUE_START" ] ; then
 			echo $QUEUE_START  > $conf_dir/QUEUE_START
 		fi
@@ -3103,15 +3103,15 @@ else
 	do
 		/bin/rm -f $conf_dir/$i
 	done
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_BASE | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_BASE" ] ; then
 		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 	fi
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_COUNT | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 	fi
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_START | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_START" ] ; then
 		echo $QUEUE_START  > $conf_dir/QUEUE_START
 	fi
@@ -5975,15 +5975,15 @@ else
 	do
 		/bin/rm -f $conf_dir/$i
 	done
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_BASE | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_BASE" ] ; then
 		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 	fi
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_COUNT | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 	fi
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_START | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_START" ] ; then
 		echo $QUEUE_START  > $conf_dir/QUEUE_START
 	fi
@@ -6416,15 +6416,15 @@ else
 	do
 		/bin/rm -f $conf_dir/$i
 	done
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_BASE | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_BASE | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_BASE" ] ; then
 		echo $QUEUE_BASE   > $conf_dir/QUEUE_BASE
 	fi
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_COUNT | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_COUNT | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_COUNT" ] ; then
 		echo $QUEUE_COUNT > $conf_dir/QUEUE_COUNT
 	fi
-	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env | grep QUEUE_START | cut -d= -f2)
+	t=$("$DESTDIR"$QmailBinPrefix/bin/envdir $conf_dir env 2>/dev/null | grep QUEUE_START | cut -d= -f2)
 	if [ ! "$t" = "$QUEUE_START" ] ; then
 		echo $QUEUE_START  > $conf_dir/QUEUE_START
 	fi

@@ -1,3 +1,7 @@
+Release 3.0.1 Start 21/05/2022 End --/--/20--
+- 21/05/2022
+01.  svctool: redirect envdir error message for missing dir to /dev/null
+
 * 
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
 ======= Release Highlights ================================================
