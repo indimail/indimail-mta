@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.5  2022-05-22 23:00:19+05:30  Cprogrammer
+ * check /run/svscan to determine if svscan is using /run
+ *
  * Revision 1.4  2021-04-16 18:59:28+05:30  Cprogrammer
  * added comments to explain code
  *
@@ -28,10 +31,10 @@ run_init(char *service_dir)
 	char            buf[256], dirbuf[256];
 	int             i;
 
-	if (!access("/run", F_OK))
+	if (!access("/run/svscan", F_OK))
 		run_dir = "/run";
 	else
-	if (!access("/var/run", F_OK))
+	if (!access("/var/run/svscan", F_OK))
 		run_dir = "/var/run";
 	else
 		return 1;
@@ -105,7 +108,7 @@ run_init(char *service_dir)
 void
 getversion_svrun_c()
 {
-	static char    *x = "$Id: run_init.c,v 1.4 2021-04-16 18:59:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: run_init.c,v 1.5 2022-05-22 23:00:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
