@@ -1,5 +1,8 @@
 /*
  * $Log: multilog.c,v $
+ * Revision 1.8  2022-05-22 23:06:19+05:30  Cprogrammer
+ * skip fsync() when writing log to disk if env variable NOFSYNC is set
+ *
  * Revision 1.7  2008-07-15 19:56:40+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -692,7 +695,7 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	static char    *x = "$Id: multilog.c,v 1.7 2008-07-15 19:56:40+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: multilog.c,v 1.8 2022-05-22 23:06:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
