@@ -1,5 +1,8 @@
 /*
  * $Log: supervise.c,v $
+ * Revision 1.25  2022-05-22 23:04:53+05:30  Cprogrammer
+ * new variable use_runfs to indicate if svscan is using /run
+ *
  * Revision 1.24  2021-08-11 18:12:15+05:30  Cprogrammer
  * fix for using of uninitialized value of signal in error log
  *
@@ -123,6 +126,7 @@ static stralloc wait_sv_file = {0};
 #ifdef USE_RUNFS
 static char    *sdir;
 static stralloc run_service_dir = { 0 };
+int             use_runfs;
 #endif
 static pid_t    childpid = 0;	/*- 0 means down */
 static pid_t    svpid;
@@ -245,12 +249,12 @@ do_wait()
 	char           *service_name;
 
 #ifdef USE_RUNFS
-	if (fchdir(fddir) == -1)
+	if (use_runfs && fchdir(fddir) == -1)
 		strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 	i = get_wait_params(&sleep_interval, &service_name);
 #ifdef USE_RUNFS
-	if (chdir(dir) == -1)
+	if (use_runfs && chdir(dir) == -1)
 		strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
 #endif
 	if (i)
@@ -330,7 +334,7 @@ trystart(void)
 		sig_uncatch(sig_child);
 		sig_unblock(sig_child);
 #ifdef USE_RUNFS
-		if (fchdir(fddir) == -1)
+		if (use_runfs && fchdir(fddir) == -1)
 			strerr_die2sys(111, FATAL, "unable to set current directory: ");
 #endif
 		execve(*run, run, environ);
@@ -367,7 +371,7 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 		sig_uncatch(sig_child);
 		sig_unblock(sig_child);
 #ifdef USE_RUNFS
-		if (fchdir(fddir) == -1)
+		if (use_runfs && fchdir(fddir) == -1)
 			strerr_die2sys(111, FATAL, "unable to set current directory: ");
 #endif
 		strnum1[fmt_ulong(strnum1, spid)] = 0;
@@ -459,13 +463,13 @@ doit(void)
 					return;
 				if (flagwant && flagwantup) {
 #ifdef USE_RUNFS
-					if (fchdir(fddir) == -1)
+					if (use_runfs && fchdir(fddir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*alert, F_OK))
 						tryaction(alert, r, wstat, 1);
 #ifdef USE_RUNFS
-					if (chdir(dir) == -1)
+					if (use_runfs && chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
 #endif
 					trystart();
@@ -488,13 +492,13 @@ doit(void)
 				flagwantup = 1;
 				if (childpid) {
 #ifdef USE_RUNFS
-					if (fchdir(fddir) == -1)
+					if (use_runfs && fchdir(fddir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
-					if (chdir(dir) == -1)
+					if (use_runfs && chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
 #endif
 					kill(g ? 0 - childpid : childpid, SIGTERM);
@@ -523,13 +527,13 @@ doit(void)
 				flagwantup = 0;
 				if (childpid) {
 #ifdef USE_RUNFS
-					if (fchdir(fddir) == -1)
+					if (use_runfs && fchdir(fddir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
-					if (chdir(dir) == -1)
+					if (use_runfs && chdir(dir) == -1)
 						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
 #endif
 					kill(g ? 0 - childpid : childpid, SIGTERM);
@@ -659,10 +663,12 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 	if (!access("/run", F_OK)) {
 		run_dir = "/run";
 		i = 4;
+		use_runfs = 1;
 	} else
 	if (!access("/var/run", F_OK)) {
 		run_dir = "/var/run";
 		i = 8;
+		use_runfs = 1;
 	} else
 		return;
 	if (!stralloc_copyb(&run_service_dir, run_dir, i) ||
@@ -865,7 +871,7 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.24 2021-08-11 18:12:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.25 2022-05-22 23:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
