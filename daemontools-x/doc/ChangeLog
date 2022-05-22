@@ -185,6 +185,9 @@ o svscan: added AUTOSCAN feature (which was actually part of the original
 - 08/04/2022
 78. svscan.c: added few INFO messages (scanning, starting service)
 - 18/05/2022 - indimail-mta-3.0.0
+- 22/05/2022
+79. run_init.c: check /run/svscan to determine if svscan is using /run
+80. supervise.c: new variable use_runfs to indicate if svscan is using /run
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020
