@@ -1,45 +1,5 @@
-# $Log: svps.in,v $
-# Revision 1.13  2022-03-18 09:17:35+05:30  Cprogrammer
-# added -h, HUP option to send HUP to svscan
-#
-# Revision 1.12  2022-03-06 18:50:50+05:30  Cprogrammer
-# fix for FreeBSD (stat command usage)
-#
-# Revision 1.11  2021-07-26 11:31:08+05:30  Cprogrammer
-# added --no-pager, -n option to disable pager
-#
-# Revision 1.10  2020-11-29 16:26:02+05:30  Cprogrammer
-# use portable way to use while loop
-#
-# Revision 1.9  2020-11-27 17:30:27+05:30  Cprogrammer
-# set status variable
-#
-# Revision 1.8  2020-11-26 23:01:52+05:30  Cprogrammer
-# remove PIPESTATUS as it is not portable
-#
-# Revision 1.7  2020-11-12 11:28:09+05:30  Cprogrammer
-# fixed output for normally up and normally down status
-#
-# Revision 1.6  2020-11-11 18:23:28+05:30  Cprogrammer
-# display uptime of svscan
-#
-# Revision 1.5  2020-11-11 18:05:14+05:30  Cprogrammer
-# display error if not running as root
-#
-# Revision 1.4  2020-11-11 18:01:37+05:30  Cprogrammer
-# send output through pager
-#
-# Revision 1.3  2020-11-10 19:14:47+05:30  Cprogrammer
-# display supervise process pid when service is down
-#
-# Revision 1.2  2020-11-10 16:53:38+05:30  Cprogrammer
-# added getopt style options
-#
-# Revision 1.1  2020-11-09 09:19:58+05:30  Cprogrammer
-# Initial revision
-#
 # 
-# $Id: svps.in,v 1.13 2022-03-18 09:17:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.14 2022-05-24 12:15:48+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -51,11 +11,17 @@ mod=$4
 
 now=$(date +%s)
 diff=$(expr $now - $mod)
+words=$(ps ax|head -1|wc -w)
+words=$(expr $words - 1)
 
-line=$(ps ax|grep "svscan"|egrep -v "grep|multilog")
-set $line
 echo "------------ svscan ---------------"
-printf "%-"$max"s up   %7d secs  pid %7d\n" "$5 $6" $diff $1
+ps ax|grep "sbin/svscan"|egrep -v "grep|multilog|supervise" | while read line
+do
+	set $line
+	pid=$1
+	shift $words
+	printf "%-"$max"s up   %7d secs  pid %7d\n" "$*" $diff $pid
+done
 
 case "$option" in
 	all|main)
@@ -202,7 +168,11 @@ case "$SYSTEM" in
 	mod=$(stat -f "%m" $pidfile)
 	;;
 	*)
-	mod=$(stat --printf="%Y\n" $pidfile)
+	if [ -f /etc/alpine-release ] ; then
+		mod=$(stat -c "%Y" $pidfile)
+	else
+		mod=$(stat --printf="%Y\n" $pidfile)
+	fi
 esac
 
 @prefix@/bin/svstat @servicedir@/* @servicedir@/*/log \
@@ -241,3 +211,47 @@ else
 fi
 
 /bin/rm -f /tmp/svps.$$
+#
+# $Log: svps.in,v $
+# Revision 1.14  2022-05-24 12:15:48+05:30  Cprogrammer
+# fix for alpine linux
+#
+# revision 1.13  2022-03-18 09:17:35+05:30  cprogrammer
+# added -h, hup option to send hup to svscan
+#
+# revision 1.12  2022-03-06 18:50:50+05:30  cprogrammer
+# fix for freebsd (stat command usage)
+#
+# revision 1.11  2021-07-26 11:31:08+05:30  cprogrammer
+# added --no-pager, -n option to disable pager
+#
+# revision 1.10  2020-11-29 16:26:02+05:30  cprogrammer
+# use portable way to use while loop
+#
+# revision 1.9  2020-11-27 17:30:27+05:30  cprogrammer
+# set status variable
+#
+# Revision 1.8  2020-11-26 23:01:52+05:30  Cprogrammer
+# remove PIPESTATUS as it is not portable
+#
+# Revision 1.7  2020-11-12 11:28:09+05:30  Cprogrammer
+# fixed output for normally up and normally down status
+#
+# Revision 1.6  2020-11-11 18:23:28+05:30  Cprogrammer
+# display uptime of svscan
+#
+# Revision 1.5  2020-11-11 18:05:14+05:30  Cprogrammer
+# display error if not running as root
+#
+# Revision 1.4  2020-11-11 18:01:37+05:30  Cprogrammer
+# send output through pager
+#
+# Revision 1.3  2020-11-10 19:14:47+05:30  Cprogrammer
+# display supervise process pid when service is down
+#
+# Revision 1.2  2020-11-10 16:53:38+05:30  Cprogrammer
+# added getopt style options
+#
+# Revision 1.1  2020-11-09 09:19:58+05:30  Cprogrammer
+# Initial revision
+#
