@@ -10,6 +10,7 @@ on:
       - '!**/indimail-mta-x/indimail-mta.spec.in'
       - '!**/libdkim-x/libdkim.spec.in'
       - '!**/libdkim-x/libsrs2.spec.in'
+      - '!**/indimail-mta-x/qmail-perf/*'
       - '!**/indimail-mta-x/debian/*'
       - '!**/libdkim-x/debian/*'
       - '!**/libsrs2-x/debian/*'
