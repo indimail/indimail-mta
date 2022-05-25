@@ -1,3 +1,3 @@
 CFLAGS=-O3
-all: readfifo mail sub loadavg
+all: readfifo inject_mail sub loadavg
 

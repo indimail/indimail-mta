@@ -1017,8 +1017,8 @@ initial_setup()
 		start_time=$(date '+%s')
 		display $start_time
 		queue_change clearmaildir
-		echo -n "./mail -q $prefix/bin/qmail-inject -n $mcount -p $pcount -f $from -t "$to"-test ... "
-		/usr/bin/time -p envdir -c $home/.defaultqueue ./mail -q $prefix/bin/qmail-inject \
+		echo -n "./inject_mail -q $prefix/bin/qmail-inject -n $mcount -p $pcount -f $from -t "$to"-test ... "
+		/usr/bin/time -p envdir -c $home/.defaultqueue ./inject_mail -q $prefix/bin/qmail-inject \
 			-n $mcount -p $pcount -f $from -t "$to"-test 2>/tmp/time.test
 		getTime
 		if [ $? -ne 0 ] ; then
@@ -1488,11 +1488,11 @@ do
 						echo "foreground injection: cmmd=$qi n=$mcount p=$pcount from=$from to="$to"-test"
 						case "$mta" in
 							netqmail|notqmail|sqmail|exttodo)
-							/usr/bin/time -p ./mail -q $qi -n $mcount -p $pcount -f $from \
+							/usr/bin/time -p ./inject_mail -q $qi -n $mcount -p $pcount -f $from \
 								-t "$to"-test 2>/tmp/time.test
 							;;
 							*)
-							/usr/bin/time -p envdir -c $home/.defaultqueue ./mail -q $qi -n $mcount \
+							/usr/bin/time -p envdir -c $home/.defaultqueue ./inject_mail -q $qi -n $mcount \
 								-p $pcount -f $from -t "$to"-test 2>/tmp/time.test
 							;;
 						esac
@@ -1514,11 +1514,11 @@ do
 						echo "background injection: cmmd=$qi n=$mcount p=$pcount from=$from to="$to"-test"
 						case "$mta" in
 							netqmail|notqmail|sqmail|exttodo)
-							/usr/bin/time -p ./mail -q $qi -n $mcount -p $pcount -f $from \
+							/usr/bin/time -p ./inject_mail -q $qi -n $mcount -p $pcount -f $from \
 								-t "$to"-test 2>/tmp/time.test &
 							;;
 							*)
-							/usr/bin/time -p envdir -c $home/.defaultqueue ./mail -q $qi -n $mcount \
+							/usr/bin/time -p envdir -c $home/.defaultqueue ./inject_mail -q $qi -n $mcount \
 								-p $pcount -f $from -t "$to"-test 2>/tmp/time.test &
 							;;
 						esac
