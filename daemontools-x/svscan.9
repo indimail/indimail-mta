@@ -59,26 +59,19 @@ directory scan. If running as PID 1, \fBsvscan\fR will automatically scan
 for new subdirectories when any of it's children or any orphaned process
 die.
 
-\fBsvscan\fR can be run with a PID of 1 (init replacement) and reap child
-processes. This feature exploited in docker/podman/kubernates environment.
-The \fBINITCMD\fR environment variable can be used to do service
-management. The biggest advantage of \fBsvscan\fR is its simplicity.
-Unlike systemd(1), it is not complex and tied with multiple pieces of
-software to make it work. You can also use openrc from Gentoo to create a
-decent, simple service manager to start only the processes that you
-require.
-
 If \fBsvscan\fR is given a command-line argument \fIdirectory\fR, it
 switches to that \fIdirectory\fR when it starts.
 
-\fBsvscan\fR writes its pid to the file \fB.svscan.pid\fR in /run/svscan,
-/var/run/svscan or the directory where it starts (which ever is found
-first). It uses this file to prevent multiple copies of \fBsvscan\fR to run
-for the same directory. It also uses the /proc filesystem to verify if the
-pid belongs to a process named \fBsvscan\fR, by opening the file
-\fB/proc/pid/comm\fR. \fBsvscan\fR will start if the file does not exist,
-or if pid does not exist, or if the pid belongs to a non-svscan process.
-The file \fB.svscan.pid\fR is deleted on SIGTERM.
+\fBsvscan\fR writes its pid to the file \fB.svscan.pid\fR in
+/\fIrun\fR/\fIsvscan\fR, /\fIvar\fR/\fIrun\fR/\fIsvscan\fR or the directory
+where it starts (which ever is found first). It uses this file to prevent
+multiple copies of \fBsvscan\fR to run for the same directory. It also uses
+the /proc filesystem to verify if the pid belongs to a process named
+\fBsvscan\fR, by opening the file /\fIproc\fR/\fIpid\fR/\fIcomm\fR.
+\fBsvscan\fR will start if the file does not exist, or if pid does not
+exist, or if the pid belongs to a non-svscan process. The file
+\fB.svscan.pid\fR is deleted on SIGTERM. If \fBDISABLE_RUN\fR is set,
+/\fIrun\fR will not be used.
 
 \fBsvscan\fR output can be driven through \fBmultilog\fR. If a directory
 (or symlink to a directory) named \fB@servicedir@/.svscan\fR exists and the
@@ -98,16 +91,25 @@ runs, \fBsvscan\fR also sets \fBSV_PWD\fR=\fBs\fR environment variable.
 \fBsvscan\fR also sets PPID for supervise proceses and any initialization
 command it runs.
 
+\fBsvscan\fR can be run with a PID of 1 (init replacement) and reap child
+processes. This feature exploited in docker/podman/kubernates environment.
+The \fBINITCMD\fR environment variable can be used to do service
+management. The biggest advantage of \fBsvscan\fR is its simplicity.
+Unlike systemd(1), it is not complex and tied with multiple pieces of
+software to make it work. You can also use openrc from Gentoo to create a
+decent, simple service manager to start only the processes that you
+require.
+
 If \fBINITCMD\fR environment variable is defined and set to an empty string
-and if \fI@servicedir@\fR/.svscan/\fIrun\fR exists and has the executable
-bit set, \fIrun\fR is executed. \fBINITCMD\fR can be set to full path of
-an executable or script to override \fI@servicedir@\fR/.svscan/\fIrun\fR If
-\fBWAIT_INITCMD\fR env variable is set, it will additionally wait for
-\fIrun\fR to exit, before starting the scan of \fIdirectory\fR. Typical use
-of \fBINITCMD\fR is to mount --bind @sysconfdir@/resolv.conf as
-/etc/resolv.conf, to redirect all dns resolver requests, to locally running
-\fBdnscache\fR(8). A typical \fIrun\fR to exploit \fBINITCMD\fR looks like
-this
+and if \fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR exists and has the
+executable bit set, \fIrun\fR is executed. \fBINITCMD\fR can be set to full
+path of an executable or script to override
+\fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR If \fBWAIT_INITCMD\fR env
+variable is set, it will additionally wait for \fIrun\fR to exit, before
+starting the scan of \fIdirectory\fR. Typical use of \fBINITCMD\fR is to
+mount --bind @sysconfdir@/resolv.conf as /etc/resolv.conf, to redirect all
+dns resolver requests, to locally running \fBdnscache\fR(8). A typical
+\fIrun\fR to exploit \fBINITCMD\fR looks like this
 
 .EX
 #!/bin/sh
@@ -123,7 +125,8 @@ On most Linux distros, svscan is started using a systemd(1) unit file
 script in /usr/local/etc/rc.d/svscan. On Darwin, it is started by
 launchd(8) using /Library/LaunchDaemons/org.indimail.svscan.plist. On
 alpine linux, it is started by openrc using /etc/init.d/svscan. In a
-container environment, it is the entrypoint and starts as PID 1.
+container environment, it is the entrypoint and starts as PID 1. The
+entrypint is enabled using the \fBdocker-entrypoint\fR(8) script.
 
 .SH SEE ALSO
 proc(5),
@@ -147,6 +150,7 @@ envuidgid(8),
 envdir(8),
 dnscache(8),
 softlimit(8),
-setlock(8)
+setlock(8),
+docker-entrypoint(8)
 
 http://cr.yp.to/daemontools.html

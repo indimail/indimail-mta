@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.24 2022-05-08 00:57:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.25 2022-05-25 09:51:47+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -538,6 +538,7 @@ main(int argc, char **argv)
 	char            dirbuf[256];
 	struct sigaction sa;
 	pid_t           pid;
+	int             use_run;
 
 	/*- setup handler for sigchild if running as pid 1 */
 	if (1 == (pid = getpid())) {
@@ -549,7 +550,11 @@ main(int argc, char **argv)
 	}
 	/*- save the current dir */
 #ifdef USE_RUNFS
-	initialize_run();
+	use_run = env_get("DISABLE_RUN") ? 0 : 1;
+	if (use_run)
+		initialize_run();
+	else
+		pidfile = PIDFILE;
 #else
 	pidfile = PIDFILE;
 #endif
@@ -560,9 +565,6 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
 		while (get_lock(sdir)) ;
 	} else {
-#ifdef USE_RUNFS
-		pidfile = PIDFILE;
-#endif
 		if (!((sdir = getcwd(dirbuf, 255))))
 			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
 		while (get_lock(sdir)) ;
@@ -614,13 +616,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.24 2022-05-08 00:57:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.25 2022-05-25 09:51:47+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.25  2022-05-25 09:51:47+05:30  Cprogrammer
+ * use DISABLE_RUN to disable using /run
+ *
  * Revision 1.24  2022-05-08 00:57:28+05:30  Cprogrammer
  * enable auto scan if AUTOSCAN env variable & service startup fails
  *
