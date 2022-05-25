@@ -1,81 +1,4 @@
-/*
- * $Log: supervise.c,v $
- * Revision 1.25  2022-05-22 23:04:53+05:30  Cprogrammer
- * new variable use_runfs to indicate if svscan is using /run
- *
- * Revision 1.24  2021-08-11 18:12:15+05:30  Cprogrammer
- * fix for using of uninitialized value of signal in error log
- *
- * Revision 1.23  2021-07-27 12:36:03+05:30  Cprogrammer
- * add feature to run ./init once before ./run
- *
- * Revision 1.22  2021-07-24 20:27:00+05:30  Cprogrammer
- * display in logs if child is stopped
- *
- * Revision 1.21  2021-06-06 10:14:57+05:30  Cprogrammer
- * indicate service name in logs when supervised service exits/crashes
- *
- * Revision 1.20  2021-04-27 14:16:23+05:30  Cprogrammer
- * do not treat error_exist as error for mkdir
- *
- * Revision 1.19  2021-04-07 22:37:08+05:30  Cprogrammer
- * allow extra parent_dir argument for log process
- *
- * Revision 1.18  2020-11-12 11:27:38+05:30  Cprogrammer
- * initialize svpid in main()
- *
- * Revision 1.17  2020-11-11 09:27:23+05:30  Cprogrammer
- * pass exit/signal of exited child to alert
- *
- * Revision 1.16  2020-11-10 19:11:24+05:30  Cprogrammer
- * maintain pid of supervise in down state and status of down state in byte 20
- *
- * Revision 1.15  2020-11-09 21:32:09+05:30  Cprogrammer
- * avoid recreating status file with every invocation of supervise.
- *
- * Revision 1.14  2020-11-09 18:17:57+05:30  Cprogrammer
- * recover from fork error - http://cr-yp-to.996295.n3.nabble.com/posible-bug-in-daemontools-td16964.html
- *
- * Revision 1.13  2020-11-09 09:30:24+05:30  Cprogrammer
- * add wait for service feature
- *
- * Revision 1.12  2020-11-07 14:30:35+05:30  Cprogrammer
- * run alert script on abnormal exit of service
- *
- * Revision 1.11  2020-10-08 18:33:24+05:30  Cprogrammer
- * use /run, /var/run if system supports it
- *
- * Revision 1.10  2020-09-16 19:07:40+05:30  Cprogrammer
- * fix compiler warning for FreeBSD
- *
- * Revision 1.9  2020-08-29 11:50:27+05:30  Cprogrammer
- * send signal to process id after sending signal to process group id
- *
- * Revision 1.8  2020-08-29 08:38:51+05:30  Cprogrammer
- * new option 'G' to send signal to entire process group
- *
- * Revision 1.7  2020-06-10 17:37:21+05:30  Cprogrammer
- * new option 'r' to restart (stop & start) a service
- *
- * Revision 1.6  2020-06-08 22:52:16+05:30  Cprogrammer
- * quench compiler warning
- *
- * Revision 1.5  2008-06-07 13:53:31+05:30  Cprogrammer
- * added signals SIGQUIT, SIGUSR2
- *
- * Revision 1.4  2008-05-28 11:19:58+05:30  Cprogrammer
- * added wait for shutdown script
- *
- * Revision 1.3  2004-10-24 21:40:06+05:30  Cprogrammer
- * added prototype for rename()
- *
- * Revision 1.2  2004-10-22 20:31:13+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2003-12-25 23:49:19+05:30  Cprogrammer
- * Initial revision
- *
- */
+/*- $Id: supervise.c,v 1.25 2022-05-25 08:27:08+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -660,12 +583,12 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 	char           *run_dir, *parent_dir = (char *) 0;
 	int             i;
 
-	if (!access("/run", F_OK)) {
+	if (!access("/run/svscan", F_OK)) {
 		run_dir = "/run";
 		i = 4;
 		use_runfs = 1;
 	} else
-	if (!access("/var/run", F_OK)) {
+	if (!access("/var/run/svscan", F_OK)) {
 		run_dir = "/var/run";
 		i = 8;
 		use_runfs = 1;
@@ -871,7 +794,86 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.25 2022-05-22 23:04:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.25 2022-05-25 08:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: supervise.c,v $
+ * Revision 1.25  2022-05-25 08:27:08+05:30  Cprogrammer
+ * new variable use_runfs to indicate if svscan is using /run
+ *
+ * Revision 1.24  2021-08-11 18:12:15+05:30  Cprogrammer
+ * fix for using of uninitialized value of signal in error log
+ *
+ * Revision 1.23  2021-07-27 12:36:03+05:30  Cprogrammer
+ * add feature to run ./init once before ./run
+ *
+ * Revision 1.22  2021-07-24 20:27:00+05:30  Cprogrammer
+ * display in logs if child is stopped
+ *
+ * Revision 1.21  2021-06-06 10:14:57+05:30  Cprogrammer
+ * indicate service name in logs when supervised service exits/crashes
+ *
+ * Revision 1.20  2021-04-27 14:16:23+05:30  Cprogrammer
+ * do not treat error_exist as error for mkdir
+ *
+ * Revision 1.19  2021-04-07 22:37:08+05:30  Cprogrammer
+ * allow extra parent_dir argument for log process
+ *
+ * Revision 1.18  2020-11-12 11:27:38+05:30  Cprogrammer
+ * initialize svpid in main()
+ *
+ * Revision 1.17  2020-11-11 09:27:23+05:30  Cprogrammer
+ * pass exit/signal of exited child to alert
+ *
+ * Revision 1.16  2020-11-10 19:11:24+05:30  Cprogrammer
+ * maintain pid of supervise in down state and status of down state in byte 20
+ *
+ * Revision 1.15  2020-11-09 21:32:09+05:30  Cprogrammer
+ * avoid recreating status file with every invocation of supervise.
+ *
+ * Revision 1.14  2020-11-09 18:17:57+05:30  Cprogrammer
+ * recover from fork error - http://cr-yp-to.996295.n3.nabble.com/posible-bug-in-daemontools-td16964.html
+ *
+ * Revision 1.13  2020-11-09 09:30:24+05:30  Cprogrammer
+ * add wait for service feature
+ *
+ * Revision 1.12  2020-11-07 14:30:35+05:30  Cprogrammer
+ * run alert script on abnormal exit of service
+ *
+ * Revision 1.11  2020-10-08 18:33:24+05:30  Cprogrammer
+ * use /run, /var/run if system supports it
+ *
+ * Revision 1.10  2020-09-16 19:07:40+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
+ * Revision 1.9  2020-08-29 11:50:27+05:30  Cprogrammer
+ * send signal to process id after sending signal to process group id
+ *
+ * Revision 1.8  2020-08-29 08:38:51+05:30  Cprogrammer
+ * new option 'G' to send signal to entire process group
+ *
+ * Revision 1.7  2020-06-10 17:37:21+05:30  Cprogrammer
+ * new option 'r' to restart (stop & start) a service
+ *
+ * Revision 1.6  2020-06-08 22:52:16+05:30  Cprogrammer
+ * quench compiler warning
+ *
+ * Revision 1.5  2008-06-07 13:53:31+05:30  Cprogrammer
+ * added signals SIGQUIT, SIGUSR2
+ *
+ * Revision 1.4  2008-05-28 11:19:58+05:30  Cprogrammer
+ * added wait for shutdown script
+ *
+ * Revision 1.3  2004-10-24 21:40:06+05:30  Cprogrammer
+ * added prototype for rename()
+ *
+ * Revision 1.2  2004-10-22 20:31:13+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2003-12-25 23:49:19+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
