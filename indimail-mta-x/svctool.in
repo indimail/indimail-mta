@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.631 2022-05-21 11:13:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.632 2022-05-26 08:54:07+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.631 2022-05-21 11:13:00+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.632 2022-05-26 08:54:07+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9140,10 +9140,10 @@ if [ -z "$defaultHost" -o -z "$defaultDomain" ] ; then
 	echo "host or domain cannot be null" 1>&2
 	exit 1
 fi
+orig=$(cat "$DESTDIR"$CONTROLDIR/me)
 # config-fast - me, defaulthost, envnoathost, defaultdomain,
 # plusdomain, locals, rcpthosts, virtualdomains
 /usr/libexec/indimail/config-fast $defaultDomain
-orig=$(cat "$DESTDIR"$CONTROLDIR/me)
 out=$(mktemp -t recontrolXXXXXX)
 for i in nodnscheck locals rcpthosts smtpgreeting
 do
