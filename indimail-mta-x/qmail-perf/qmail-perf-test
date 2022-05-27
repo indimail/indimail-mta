@@ -9,8 +9,8 @@ fi
 # can be changed by having these
 # variables in ~/.qmail-perf
 #
-to=$(whoami)
 from=root
+real_time=0
 maildir=~/Maildir
 mcount=500
 pcount=20
@@ -64,7 +64,7 @@ This scripts expects the following
    and supervise service directory as /service/sqmail
 6. netqmail with external todo in /var/exttodo with logs in
    /var/log/svc/exttodo and supervise service directory as /service/exttodo
-7. Compiled binaries of mail.c, loadavg.c, readfifo.c
+7. Compiled binaries of inject_mail.c, loadavg.c, readfifo.c
 
 
 The simplest way to run this script is to do (as non-root)
@@ -135,7 +135,7 @@ usage
 			esac
 		fi
 	done
-	for i in mail readfifo loadavg
+	for i in inject_mail readfifo loadavg
 	do
 		if [ ! -x $i ] ; then
 			echo "helper $i not found in current directory"
@@ -146,34 +146,16 @@ usage
 
 timeCmd()
 {
-	/usr/bin/time -p $* 2>/tmp/time.test
-	line=$(wc -l /tmp/time.test)
-	set $line
-	lc=$(expr $1 - 3)
-	if [ $lc -gt 0 ] ; then
-		cat /tmp/time.test|sed -n 1,"$lc"p
-		exit 1
-	fi
-	line=$(tail -n 3 /tmp/time.test|sed -n 1p)
-	set $line
-	real=$2 # inject time
-	line=$(tail -n 3 /tmp/time.test|sed -n 2p)
-	set $line
-	user=$2
-	line=$(tail -n 3 /tmp/time.test|sed -n 3p)
-	set $line
-	sys=$2
-	#/bin/rm -f /tmp/time.test
-	if [ -n "$real" ] ; then
-		ispeed=$(echo $mcount $real|awk '{printf "%.2f\n", $1 / $2}')
-	else
-		ispeed=inf
-	fi
+	t1=$(date +'%s.%N')
+	/usr/bin/time -p $*
+	t2=$(date +'%s.%N')
+	real_time=$(echo $t1 $t2|awk '{printf "%f\n", $2 - $1}')
 	return 0
 }
 
 getTime()
 {
+	real_time=$(echo $real_t1 $real_t2|awk '{printf "%f\n", $2 - $1}')
 	line=$(wc -l /tmp/time.test)
 	set $line
 	lc=$(expr $1 - 3)
@@ -183,7 +165,11 @@ getTime()
 	fi
 	line=$(tail -n 3 /tmp/time.test|sed -n 1p)
 	set $line
-	real=$2 # inject time
+	if [ -n "$real_time" ] ; then
+		real=$real_time
+	else
+		real=$2 # inject time
+	fi
 	line=$(tail -n 3 /tmp/time.test|sed -n 2p)
 	set $line
 	user=$2
@@ -191,7 +177,9 @@ getTime()
 	set $line
 	sys=$2
 	#/bin/rm -f /tmp/time.test
-	if [ -n "$real" ] ; then
+	if [ "$real" = "0.00" -o "$real" = "0.000000" ] ; then
+		ispeed=inf
+	elif [ -n "$real" ] ; then
 		ispeed=$(echo $mcount $real|awk '{printf "%.2f\n", $1 / $2}')
 	else
 		ispeed=inf
@@ -278,7 +266,7 @@ speed_calc()
 		sleep 5
 		echo -n " ."
 		count=$(expr $count + 1)
-		if [ $count -gt 50 ] ; then
+		if [ $count -gt 100 ] ; then
 			echo "Wait count exceeded" 1>&2
 			break
 		fi
@@ -317,8 +305,8 @@ speed_calc()
 		tai2=$1
 	fi
 	if [ -n "$tai1" -a -n "$tai2" ] ; then
-		echo $t1
-		echo $t2
+		echo First entry $t1
+		echo Last  entry $t2
 		dtime=$(echo $tai2 $tai1|awk '{printf "%.4f\n", $1 - $2}')
 		if [ -n "$dtime" ] ; then
 			dspeed=$(echo $dcount $dtime|awk '{printf "%.2f\n", $1 / $2}')
@@ -941,23 +929,12 @@ reset_logs()
 	sudo $prefix/bin/svc -a $1/log
 }
 
-initial_setup()
+install_dot_qmail()
 {
-	if [ $# -eq 0 ] ; then
-		skip_test=0
-	else
-		skip_test=1
-	fi
-	echo "Doing initial setup"
-	mkdir -p $reportdir
 	if [ ! -p $fifo ] ; then
 		/bin/rm -f $fifo
 		mkfifo $fifo
 	fi
-	if [ $append_mode -eq 0 ] ; then
-		/bin/rm -f $reportdir/zaverage.avg
-	fi
-
 	(
 	echo "#!/bin/sh"
 	echo
@@ -979,6 +956,24 @@ initial_setup()
 	echo "$maildir/"
 	echo "|$home/bin/break_on_completion"
 	) > $home/.qmail-test
+}
+
+initial_setup()
+{
+	if [ $# -eq 0 ] ; then
+		skip_test=0
+	else
+		skip_test=1
+	fi
+	echo "Doing initial setup"
+	mkdir -p $reportdir
+	if [ $append_mode -eq 0 ] ; then
+		/bin/rm -f $reportdir/zaverage.avg
+	fi
+
+	if [ $is_remote -eq 0 ] ; then
+		install_dot_qmail
+	fi
 	queue_change fastq
 	queue_change noauthself
 	queue_change todo-batch-0
@@ -1017,9 +1012,11 @@ initial_setup()
 		start_time=$(date '+%s')
 		display $start_time
 		queue_change clearmaildir
-		echo -n "./inject_mail -q $prefix/bin/qmail-inject -n $mcount -p $pcount -f $from -t "$to"-test ... "
+		echo -n "./inject_mail -q $prefix/bin/qmail-inject -n $mcount -p $pcount -f $from -t $recipient ... "
+		real_t1=$(date +'%s.%N')
 		/usr/bin/time -p envdir -c $home/.defaultqueue ./inject_mail -q $prefix/bin/qmail-inject \
-			-n $mcount -p $pcount -f $from -t "$to"-test 2>/tmp/time.test
+			-n $mcount -p $pcount -f $from -t $recipient 2>/tmp/time.test
+		real_t2=$(date +'%s.%N')
 		getTime
 		if [ $? -ne 0 ] ; then
 			clear_queue $qb
@@ -1030,7 +1027,11 @@ initial_setup()
 		fi
 		echo "$real (s)"
 		load=$(./loadavg)
-		break_when_complete
+		if [ $is_remote -eq 0 ] ; then
+			break_when_complete
+		else
+			waited=0
+		fi
 		if [ $initial_wait -gt $waited ] ; then
 			do_sleep $(expr $initial_wait - $waited)
 		fi
@@ -1127,13 +1128,31 @@ append_mode=0
 sanity_check=1
 pure_injection=0
 host=$(uname -n)
-home=$(getent passwd $to|awk -F: '{print $6}')
+home=$(getent passwd $(whoami)|awk -F: '{print $6}')
 if [ $? -ne 0 ] ; then
-	echo "$to: No such user" 1>&2
+	echo "failed to get home directory for $(whoami)" 1>&2
 	exit 1
 fi
+
 if [ -f $home/.qmail-perf ] ; then
 	. $home/.qmail-perf
+fi
+user_part=$(echo $to|cut -d@ -f1)
+domain=$(echo $to|cut -d@ -f2)
+if [ -n "$domain" ] ; then
+	t=$(grep $domain $controldir/locals $controldir/virtualdomais)
+	if [ -n "$t" ] ; then
+		is_remote=0
+	else
+		is_remote=1
+	fi
+else
+	is_remote=0
+fi
+if [ $is_remote -eq 0 ] ; then
+	recipient="$user_part-test"
+else
+	recipient="$user_part-test@$domain"
 fi
 if [ -z "$maildir" ] ; then
 	maildir=$home/Maildir
@@ -1485,17 +1504,19 @@ do
 							> $home/.defaultqueue/DYNAMIC_QUEUE
 							;;
 						esac
-						echo "foreground injection: cmmd=$qi n=$mcount p=$pcount from=$from to="$to"-test"
+						echo "foreground injection: cmmd=$qi n=$mcount p=$pcount from=$from to=$recipient"
+						real_t1=$(date +'%s.%N')
 						case "$mta" in
 							netqmail|notqmail|sqmail|exttodo)
 							/usr/bin/time -p ./inject_mail -q $qi -n $mcount -p $pcount -f $from \
-								-t "$to"-test 2>/tmp/time.test
+								-t $recipient 2>/tmp/time.test
 							;;
 							*)
 							/usr/bin/time -p envdir -c $home/.defaultqueue ./inject_mail -q $qi -n $mcount \
-								-p $pcount -f $from -t "$to"-test 2>/tmp/time.test
+								-p $pcount -f $from -t $recipient 2>/tmp/time.test
 							;;
 						esac
+						real_t2=$(date +'%s.%N')
 						getTime
 						if [ $? -ne 0 ] ; then
 							echo "Test failed: Repeating test" 1>&2
@@ -1508,30 +1529,44 @@ do
 						fi
 						echo "mail injection complete ... $real (s)"
 						start_service $rl
-						break_when_complete
+						if [ $is_remote -eq 0 ] ; then
+							break_when_complete
+						else
+							waited=0
+						fi
 						load=$(./loadavg)
 					else
-						echo "background injection: cmmd=$qi n=$mcount p=$pcount from=$from to="$to"-test"
+						echo "background injection: cmmd=$qi n=$mcount p=$pcount from=$from to=$recipient"
+						real_t1=$(date +'%s.%N')
 						case "$mta" in
 							netqmail|notqmail|sqmail|exttodo)
 							/usr/bin/time -p ./inject_mail -q $qi -n $mcount -p $pcount -f $from \
-								-t "$to"-test 2>/tmp/time.test &
+								-t $recipient 2>/tmp/time.test &
 							;;
 							*)
 							/usr/bin/time -p envdir -c $home/.defaultqueue ./inject_mail -q $qi -n $mcount \
-								-p $pcount -f $from -t "$to"-test 2>/tmp/time.test &
+								-p $pcount -f $from -t $recipient 2>/tmp/time.test &
 							;;
 						esac
-						break_when_complete 1
+						if [ $is_remote -eq 0 ] ; then
+							break_when_complete 1
+						else
+							waited=0
+						fi
 						if [ $? -ne 0 ] ; then
 							echo "Test failed: Repeating test" 1>&2
-							break_when_complete
+							if [ $is_remote -eq 0 ] ; then
+								break_when_complete
+							else
+								waited=0
+							fi
 							reset_logs $rl
 							queue_change clearmaildir
 							continue
 						fi
 						load=$(./loadavg)
 						wait
+						real_t2=$(date +'%s.%N')
 						getTime
 						if [ $? -ne 0 ] ; then
 							echo "Test failed: Repeating test" 1>&2
