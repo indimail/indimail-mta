@@ -112,7 +112,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.252 $";
+char           *revision = "$Revision: 1.253 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4526,8 +4526,11 @@ authgetl(void)
 		if (!stralloc_readyplus(&authin, 1))
 			die_nomem(); /*- XXX */
 		i = substdio_get(&ssin, authin.s + authin.len, 1);
-		if (i != 1)
+		if (i != 1) {
+			if (!i)
+				errno = 0;
 			die_read("client dropped connection");
+		}
 		if (authin.s[authin.len] == '\n')
 			break;
 		++authin.len;
@@ -6308,6 +6311,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.253  2022-06-01 13:05:24+05:30  Cprogrammer
+ * clear errno when client drops connection
+ *
  * Revision 1.252  2022-05-18 17:01:02+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
@@ -6504,7 +6510,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.252 2022-05-18 17:01:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.253 2022-06-01 13:05:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
