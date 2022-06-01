@@ -1,5 +1,12 @@
 /*
  * $Log: dotls.c,v $
+ * Revision 1.8  2022-06-01 13:29:24+05:30  Cprogrammer
+ * BUG \r not copied, extra \0 copied. Thanks Stefan Berger
+ * Report line too long error instead of clubbing it with 'out of mem' error
+ * Return error for pop3 substdio failure
+ * fix DATA/RETR commands not getting passed to child
+ * handle eof from network gracefully
+ *
  * Revision 1.7  2021-08-30 12:47:59+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -53,10 +60,11 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.7 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.8 2022-06-01 13:29:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-int             do_bulk();
+int             do_data();
+int             do_retr();
 int             smtp_ehlo(char *, char *, int);
 int             func_unimpl(char *, char *, int);
 int             do_tls();
@@ -95,7 +103,7 @@ usage(void)
 }
 
 struct scommd smtpcommands[] = {
-	{ "data", do_bulk, flush_data },
+	{ "data", do_data, flush_data },
 	{ "ehlo", smtp_ehlo, flush },
 	{ "starttls", do_tls, flush_io },
 	{ "quit", do_quit, flush},
@@ -103,15 +111,21 @@ struct scommd smtpcommands[] = {
 };
 
 struct scommd pop3commands[] = {
-	{ "retr", do_bulk, flush_data },
+	{ "retr", do_retr, flush_data },
 	{ "capa", pop3_capa, flush },
 	{ "stls", do_tls, flush_io },
 	{ "quit", do_quit, flush},
 	{ 0, func_unimpl, flush }
 };
 
+/*-
+ * Returns
+ * 0 for EOF
+ * 1 for success
+ * exits on system errors
+ */
 int
-do_commands(enum starttls stls, SSL *ssl, substdio *ss, int rfd, int wfd)
+do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearout)
 {
 	int             i, j, found;
 	char           *arg;
@@ -120,7 +134,7 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int rfd, int wfd)
 	static stralloc cmd = { 0 };
 
 	if (!stralloc_copys(&cmd, ""))
-		return -1;
+		strerr_die2x(111, FATAL, "out of memory");
 	switch (stls)
 	{
 	case smtp:
@@ -130,10 +144,13 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int rfd, int wfd)
 		c = pop3commands;
 		break;
 	default:
-		return -1;
+		strerr_die2x(111, FATAL, "invalid STARTTLS handler. Current known methods are SMTP, POP3");
 	}
 	for (;;) {
-		if ((i = substdio_get(ss, &ch, 1)) != 1) {
+		if ((i = substdio_get(ss, &ch, 1)) <= 0) {
+			if (i < 0)
+				strerr_die2sys(111, FATAL, "read: ");
+			/*- premature close or read error */
 			return i;
 		}
 		if (ch == '\n')
@@ -141,12 +158,12 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int rfd, int wfd)
 		if (!ch)
 			ch = '\n';
 		if (!stralloc_append(&cmd, &ch))
-			return -1;
+			strerr_die2x(111, FATAL, "out of memory");
 	}
 	if (cmd.len > 0 && cmd.s[cmd.len - 1] == '\r')
 		--cmd.len;
 	if (!stralloc_0(&cmd))
-		return -1;
+		strerr_die2x(111, FATAL, "out of memory");
 	cmd.len--;
 	i = str_chr(cmd.s, ' ');
 	arg = cmd.s + i;
@@ -169,31 +186,35 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int rfd, int wfd)
 		switch (stls)
 		{
 		case smtp:
-			if (substdio_put(&ssto, "220 ready for tls\r\n", 19) == -1 || substdio_flush(&ssto) == -1)
+			if (substdio_put(&ssto, "220 ready for tls\r\n", 19) == -1 ||
+					substdio_flush(&ssto) == -1)
 				strerr_die2sys(111, FATAL, "write: ");
 			break;
 		case pop3:
 			if (substdio_put(&ssto, "+OK Begin SSL/TLS negotiation now.\r\n", 37) == -1 ||
 					substdio_flush(&ssto) == -1)
+				strerr_die2sys(111, FATAL, "write: ");
 			break;
 		default:
 			break;
 		}
 		if (tls_accept(ssl))
 			strerr_die2x(111, FATAL, "unable to accept SSL connection");
-		i = translate(0, wfd, rfd, dtimeout); /*- returns only when one side closes */
+		i = translate(0, clearout, clearin, dtimeout); /*- returns only when one side closes */
 		ssl_free();
 		_exit(i);
 	}
-	return 0;
+	return 1;
 }
 
 void
 get1(char *ch)
 {
 	substdio_get(&smtpin, ch, 1);
-	if (*ch != '\r' && capatext.len < HUGECAPATEXT &&
-			!stralloc_append(&capatext, ch))
+	if (capatext.len >= HUGECAPATEXT)
+		strerr_die2x(111, FATAL, "line too long");
+	else
+	if (!stralloc_append(&capatext, ch))
 		strerr_die2x(111, FATAL, "out of memory");
 }
 
@@ -209,8 +230,10 @@ get3()
 	for (i = 0; i < 3; i++) {
 		if (str[i] == '\r')
 			continue;
-		if (capatext.len < HUGECAPATEXT &&
-				!stralloc_append(&capatext, str + i))
+		if (capatext.len >= HUGECAPATEXT)
+			strerr_die2x(111, FATAL, "line too long");
+		else
+		if (!stralloc_append(&capatext, str + i))
 			strerr_die2x(111, FATAL, "out of memory");
 	}
 	scan_ulong(str, &code);
@@ -232,6 +255,12 @@ smtpcode(unsigned int *ilen)
 		get1(&ch);
 		if (ch != ' ' && ch != '-')
 			err = 1;
+		/*-
+		 * ilen is length of capabilities minus the lengh of last
+		 * capability and one space character
+		 * capatext.len is the length of the string with all
+		 * capabilities
+		 */
 		if (ch == ' ')
 			*ilen = capatext.len - 1;
 		if (ch != '-')
@@ -327,16 +356,10 @@ ehlo(char *host, int len, unsigned int *ilen)
 {
 	unsigned long   code;
 
-	if (substdio_puts(&smtpto, "EHLO ") == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	else
-	if (substdio_put(&smtpto, host, len) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	else
-	if (substdio_puts(&smtpto, "\r\n") == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	else
-	if (substdio_flush(&smtpto) == -1)
+	if (substdio_put(&smtpto, "EHLO ", 5) == -1 ||
+			substdio_put(&smtpto, host, len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
 	if ((code = smtpcode(ilen)) != 250)
 		return code;
@@ -345,9 +368,24 @@ ehlo(char *host, int len, unsigned int *ilen)
 }
 
 int
-do_bulk()
+do_data()
 {
 	linemode = 0;
+	if (substdio_put(&smtpto, "DATA\r\n", 6) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	return 0;
+}
+
+int
+do_retr(char *arg, char *cmmd, int cmmdlen)
+{
+	linemode = 0;
+	if (substdio_put(&smtpto, "RETR ", 5) == -1 ||
+			substdio_puts(&smtpto, arg) ||
+			substdio_put(&smtpto, "\r\n", 2) ||
+			substdio_flush(&smtpto) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
 	return 0;
 }
 
@@ -372,16 +410,49 @@ smtp_ehlo(char *arg, char *cmmd, int cmmdlen)
 	len = capakw.len;
 	saptr = capakw.sa;
 	for (; len && case_diffs(saptr->s, "STARTTLS"); ++saptr, --len);
-	if (!len && ilen) {
-		if (!stralloc_copyb(&save, capatext.s + ilen, capatext.len - ilen) ||
-				!stralloc_0(&save))
+	if (!len && ilen) { /*- server/child doesn't have STARTTLS capability */
+		/*-
+		 * e.g. ehlo of server without STARTTLS
+		 * 250-indimail.org [::ffff:127.0.0.1]\r\n
+		 * 250-PIPELINING\r\n
+		 * 250-8BITMIME\r\n
+		 * 250-SIZE 10000000\r\n
+		 * 250-ETRN\r\n
+		 * 250 HELP\r\n
+		 *
+		 * store the last capability in save. e.g.
+		 * <sp>HELP\r\n
+		 * where <sp> is the single space char
+		 */
+		if (!stralloc_copyb(&save, capatext.s + ilen, capatext.len - ilen))
 			strerr_die2x(111, FATAL, "out of memory");
+		/*-
+		 * truncate length of capatext so that it becoems
+		 * 250-indimail.org [::ffff:127.0.0.1]\r\n
+		 * 250-PIPELINING\r\n
+		 * 250-8BITMIME\r\n
+		 * 250-SIZE 10000000\r\n
+		 * 250-ETRN\r\n
+		 * 250
+		 */
 		capatext.len = ilen;
-		if (!stralloc_catb(&capatext, "-STARTTLS\n250", 14) ||
+		/*
+		 * append STARTTLS to the capability, followed by <sp>HELP\r\n.
+		 * The capability passed to the client thus becomes
+		 * 250-indimail.org [::ffff:127.0.0.1]\r\n
+		 * 250-PIPELINING\r\n
+		 * 250-8BITMIME\r\n
+		 * 250-SIZE 10000000\r\n
+		 * 250-ETRN\r\n
+		 * 250-STARTTLS\r\n
+		 * 250 HELP\r\n
+		 */
+		if (!stralloc_catb(&capatext, "-STARTTLS\r\n250", 14) ||
 				!stralloc_cat(&capatext, &save))
 			strerr_die2x(111, FATAL, "out of memory");
 	}
-	if (substdio_put(&ssto, capatext.s, capatext.len) == -1 || substdio_flush(&ssto) == -1)
+	if (substdio_put(&ssto, capatext.s, capatext.len) == -1 ||
+			substdio_flush(&ssto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
 	return 0;
 }
@@ -395,7 +466,8 @@ do_tls()
 int
 do_quit()
 {
-	if (substdio_put(&smtpto, "quit\r\n",  6) == -1 || substdio_flush(&smtpto) == -1)
+	if (substdio_put(&smtpto, "quit\r\n",  6) == -1 ||
+			substdio_flush(&smtpto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
 	ssl_free();
 	return 0;
@@ -407,7 +479,8 @@ func_unimpl(char *arg1, char *cmd, int cmdlen)
 	if (!*cmd)
 		return 0;
 	if (substdio_put(&smtpto, cmd, cmdlen) == -1 ||
-			substdio_put(&smtpto, "\r\n", 2) == -1 || substdio_flush(&smtpto) == -1)
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
 	return 0;
 }
@@ -420,7 +493,8 @@ pop3_capa(char *arg, char *cmmd, int cmmdlen)
 
 	if (!stralloc_copys(&capatext, ""))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (substdio_put(&smtpto, "CAPA\n", 5) == -1 || substdio_flush(&smtpto) == -1)
+	if (substdio_put(&smtpto, "CAPA\n", 5) == -1 ||
+			substdio_flush(&smtpto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
 	if (getln(&smtpin, &line, &match, '\n') == -1)
 		strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
@@ -475,26 +549,27 @@ do_write(int fd, char *buf, size_t len)
 }
 
 int
-do_starttls(enum starttls stls, SSL *ssl, int rfd, int wfd)
+do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 {
-	fd_set          rfds;	/*- File descriptor mask for select -*/
+	fd_set          rfds; /*- File descriptor mask for select -*/
 	char            inbuf[512], outbuf[1024], smtp_inbuf[512],
 	                smtp_outbuf[1024], buf[512];
-	int             r, flagexitasap = 0;
+	int             ret, r, flagexitasap = 0, fd0_flag = 1;
 	size_t          n;
 	struct timeval  timeout;
 
-	substdio_fdbuf(&ssin, do_read, 0, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&smtpin, read, rfd, smtp_inbuf, sizeof(smtp_inbuf));
-	substdio_fdbuf(&smtpto, write, wfd, smtp_outbuf, sizeof(smtp_outbuf));
-	while (!flagexitasap && linemode) {
+	substdio_fdbuf(&ssin, do_read, 0, inbuf, sizeof(inbuf));                    /*- from client */
+	substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf));                 /*- to child (smtpd, pop3d */
+	substdio_fdbuf(&smtpin, read, clearin, smtp_inbuf, sizeof(smtp_inbuf));     /*- cleartxt in */
+	substdio_fdbuf(&smtpto, write, clearout, smtp_outbuf, sizeof(smtp_outbuf)); /*- cleartxt out */
+	while (!flagexitasap) {
 		timeout.tv_sec = dtimeout;
 		timeout.tv_usec = 0;
 		FD_ZERO(&rfds);
-		FD_SET(0, &rfds);
-		FD_SET(rfd, &rfds);
-		if ((r = select(rfd + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
+		if (fd0_flag)
+			FD_SET(0, &rfds);
+		FD_SET(clearin, &rfds);
+		if ((r = select(clearin + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
 #ifdef ERESTART
 			if (errno == EINTR || errno == ERESTART)
 #else
@@ -510,19 +585,42 @@ do_starttls(enum starttls stls, SSL *ssl, int rfd, int wfd)
 			strerr_warn4(FATAL, "idle timeout reached without input [", strnum, " sec]", 0);
 			_exit(111);
 		}
-		if (FD_ISSET(0, &rfds))
-			do_commands(stls, ssl, &ssin, rfd, wfd);
-		if (FD_ISSET(rfd, &rfds)) {
-			if ((n = saferead(rfd, buf, sizeof(buf), dtimeout)) < 0)
-				strerr_die2sys(111, FATAL, "unable to read from smtpd: ");
-			else
-			if (!n) { /*- remote closed socket */
-				flagexitasap = 1;
-				close(wfd);
-				break;
+		if (fd0_flag && FD_ISSET(0, &rfds)) { /*- data from client */
+			if (!linemode) { /*- data/retr command was issued without initiating TLS */
+				if ((n = saferead(0, buf, sizeof(buf), dtimeout)) < 0)
+					strerr_die3sys(111, FATAL, "unable to read from ", stls == smtp ? "smtp client: " : "pop3 client: ");
+				else
+				if (!n) { /*- client closed connection */
+					FD_CLR(0, &rfds);
+					fd0_flag = 0;
+					close(clearout); /*- make the child get EOF on read */
+				} else
+				if ((n = timeoutwrite(dtimeout, clearout, buf, n)) == -1)
+					strerr_die3sys(111, FATAL, "unable to write to ", stls == smtp ? "smtpd: " : "pop3d: ");
+			} else {
+				/*-
+				 * do_commands returns only if TLS session wasn't initiated
+				 * In such a case we continue to pass data from the client
+				 * to child and data from child to client
+				 */
+				if ((ret = do_commands(stls, ssl, &ssin, clearin, clearout)) <= 0) {
+					/*- client closed connection / error */
+					FD_CLR(0, &rfds);
+					fd0_flag = 0;
+					close(clearout); /*- make the child get EOF on read */
+				}
 			}
+		}
+		if (FD_ISSET(clearin, &rfds)) { /*- data from program (smtpd, pop3d) */
+			if ((n = saferead(clearin, buf, sizeof(buf), dtimeout)) < 0)
+				strerr_die3sys(111, FATAL, "unable to read from ", stls == smtp ? "smtpd: " : "pop3d: ");
+			else
+			if (!n) { /*- child (smtp/pop3 binary) exited */
+				flagexitasap = 1;
+				close(1); /*- tell client no more data can be read */
+			} else
 			if ((n = timeoutwrite(dtimeout, 1, buf, n)) == -1)
-				strerr_die2sys(111, FATAL, "unable to write to child: ");
+				strerr_die3sys(111, FATAL, "unable to write to ", stls == smtp ? "smtp client: " : "pop3 client: ");
 		}
 	} /*- while (!flagexitasap) */
 	return 0;
@@ -590,11 +688,19 @@ main(int argc, char **argv)
 	argv += optind;
 	if (!*argv)
 		usage();
+	/*-
+	 * We create two pipes to read and write unencrypted data
+	 * from/to child
+	 * pi1[0] - child  uses this to read from parent
+	 * pi2[1] - child  uses this to write to  parent
+	 * pi1[1] - parent uses this to write to  child
+	 * pi2[0] - parent uses this to read from child
+	 */
 	if (pipe(pi1) != 0 || pipe(pi2) != 0)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 		ciphers = "PROFILE=SYSTEM";
-    /* setup SSL context (load key and cert into ctx) */
+    /*- setup SSL context (load key and cert into ctx) */
 	if (!(ctx = tls_init(certfile.s, cafile, ciphers, client_mode ? client : server)))
 		_exit(111);
 	switch ((pid = fork()))
@@ -608,17 +714,17 @@ main(int argc, char **argv)
 			sig_uncatch(sig_pipe);
 			sig_uncatch(sig_child);
 			sig_uncatch(sig_term);
-			close(pi1[1]);
-			close(pi2[0]);
+			close(pi1[1]); /*- pi1[0] will be used for reading cleartxt */
+			close(pi2[0]); /*- pi2[1] will be used for writing cleartxt */
 			if ((fd_move(tcpclient ? 6 : 0, pi1[0]) == -1) || (fd_move(tcpclient ? 7 : 1, pi2[1]) == -1))
 				strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
 			upathexec(argv);
 			strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
-			/* Not reached */
+			/*- Not reached */
 			_exit(0);
 		default:
-			close(pi1[0]);
-			close(pi2[1]);
+			close(pi1[0]); /*- pi1[1] be used for writing cleartext */
+			close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 			break;
 	}
 	if (!(ssl = tls_session(ctx, client_mode ? 6 : 0, ciphers)))
