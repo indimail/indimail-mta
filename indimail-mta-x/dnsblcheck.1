@@ -1,0 +1,18 @@
+.TH dnsblcheck 1
+.SH NAME
+dnsblcheck
+.SH SYNOPSIS
+\fBdnsblcheck\fR -d \fIserver\fR \fIIP\fR
+.SH DESCRIPTION
+\fBdnsblcheck\fR checks existence of \fIIP\fR in the database of DNS
+blacklist server \fIserver\fR.
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-d\fR \fIserver\fR
+Hostname or IP address of DNS blacklist server
+
+.SH RETURN VALUES
+\fBdnsblacklist\fR returns 0 if IP is not blacklisted, 1 if blacklisted. It
+returns 100 for wrong usage and 111 for temporary system failures.

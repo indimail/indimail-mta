@@ -26,6 +26,7 @@ f:::0755:/:dnsmxip:dnsmxip
 f:::0755:/:dnsfq:dnsfq
 f:::0755:/:dnstxt:dnstxt
 f:::0755:/:dnstlsarr:dnstlsarr
+f:::0755:/:dnsblcheck:dnsblcheck
 f:::0755:/:leapsecs:leapsecs
 f:::0755:/:yearcal:yearcal
 f:::0755:/:nowutc:nowutc

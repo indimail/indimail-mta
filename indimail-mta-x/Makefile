@@ -26,9 +26,9 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	bouncesaying cdb-database cdbdump cdbget cdbgetm cdbmake cdbmake-12 \
 	cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 	create_services cronlist.q ctrlenv datemail dk-filter dknewkey dktest \
-	dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt dot-forward \
-	drate etrn except fastforward forward generic.so greydaemon home \
-	home+df hostname iftocc indimail-mta.changes setqload qmonitor \
+	dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt \
+	dot-forward drate etrn except fastforward forward generic.so greydaemon \
+	home home+df hostname iftocc indimail-mta.changes setqload qmonitor \
 	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
@@ -3849,6 +3849,16 @@ generic.so: generic.o auto_scancmd.o conf-ld-$(SYSTEM)
 		`cat conf-ld-$(SYSTEM) 2>/dev/null` $(QMAILLIB); \
 	fi
 
+dnsblcheck: load dnsblcheck.o variables.o auto_control.o ip.o \
+socket_v4mappedprefix.o socket_v6any.o dns.o control.o strsalloc.o \
+ipalloc.o tlsarralloc.o -lqmail dns.lib
+	./load dnsblcheck variables.o auto_control.o ip.o \
+	socket_v4mappedprefix.o socket_v6any.o dns.o control.o strsalloc.o \
+	ipalloc.o tlsarralloc.o -lqmail `cat dns.lib`
+
+dnsblcheck.o: compile dnsblcheck.c control.h dns.h
+	./compile dnsblcheck.c
+
 indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
@@ -3898,6 +3908,7 @@ indimail-env.5: indimail-env.9 conf-split conf-sysconfdir
 	$(edit) indimail-env.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	>$@
+
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \

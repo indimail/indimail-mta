@@ -733,6 +733,7 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{libexecdir}/dnsptr
 %attr(755,root,root)                    %{libexecdir}/dnsip
 %attr(755,root,root)                    %{libexecdir}/dnscname
+%attr(755,root,root)                    %{libexecdir}/dnsblcheck
 %if %notlsarr == 0
 %attr(755,root,root)                    %{libexecdir}/dnstlsarr
 %endif

@@ -3,6 +3,11 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 01.  svctool: redirect envdir error message for missing dir to /dev/null
 - 26/05/2022
 02.  svctool: fix original value of me getting overwritten by config-fast
+- 01/06/2022
+03.  dnsbl.c: skip dnsblcheck for loopback addresses
+04.  added dnsblcheck program
+05.  smtpd.c: clear errno when client drops connection
+06.  svctool: replaced dnsbl.njabl.org with zen.spamhaus.org
 
 * 
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
