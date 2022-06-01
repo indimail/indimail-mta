@@ -1,6 +1,6 @@
 /*
  * $Log: iopause.c,v $
- * Revision 1.2  2004-10-22 20:25:55+05:30  Cprogrammer
+ * Revision 1.2  2022-06-01 13:19:06+05:30  Cprogrammer
  * added RCS id
  *
  * Revision 1.1  2003-12-31 19:31:10+05:30  Cprogrammer
@@ -15,7 +15,7 @@
 #include "iopause.h"
 
 void
-iopause(iopause_fd * x, unsigned int len, struct taia *deadline, struct taia *stamp)
+iopause(iopause_fd *x, unsigned int len, struct taia *deadline, struct taia *stamp)
 {
 	struct taia     t;
 	int             millisecs;
@@ -24,35 +24,26 @@ iopause(iopause_fd * x, unsigned int len, struct taia *deadline, struct taia *st
 
 	if (taia_less(deadline, stamp))
 		millisecs = 0;
-	else
-	{
+	else {
 		t = *stamp;
 		taia_sub(&t, deadline, &t);
-		d = taia_approx(&t);
-		if (d > 1000.0)
+		if ((d = taia_approx(&t)) > 1000.0)
 			d = 1000.0;
 		millisecs = d * 1000.0 + 20.0;
 	}
-
 	for (i = 0; i < len; ++i)
 		x[i].revents = 0;
-
 #ifdef IOPAUSE_POLL
 
 	poll(x, len, millisecs);
-	/*
+	/*-
 	 * XXX: some kernels apparently need x[0] even if len is 0 
-	 */
-	/*
 	 * XXX: how to handle EAGAIN? are kernels really this dumb? 
-	 */
-	/*
 	 * XXX: how to handle EINVAL? when exactly can this happen? 
 	 */
 
 #else
 	{
-
 		struct timeval  tv;
 		fd_set          rfds;
 		fd_set          wfds;
@@ -63,14 +54,13 @@ iopause(iopause_fd * x, unsigned int len, struct taia *deadline, struct taia *st
 		FD_ZERO(&wfds);
 
 		nfds = 1;
-		for (i = 0; i < len; ++i)
-		{
-			fd = x[i].fd;
-			if (fd < 0)
+		for (i = 0; i < len; ++i) {
+			if ((fd = x[i].fd) < 0)
 				continue;
 			if (fd >= 8 * sizeof(fd_set))
 				continue;
-			/*XXX*/ if (fd >= nfds)
+			/*XXX*/
+			if (fd >= nfds)
 				nfds = fd + 1;
 			if (x[i].events & IOPAUSE_READ)
 				FD_SET(fd, &rfds);
@@ -87,21 +77,17 @@ iopause(iopause_fd * x, unsigned int len, struct taia *deadline, struct taia *st
 		 * XXX: for EBADF, could seek out and destroy the bad descriptor 
 		 */
 
-		for (i = 0; i < len; ++i)
-		{
-			fd = x[i].fd;
-			if (fd < 0)
+		for (i = 0; i < len; ++i) {
+			if ((fd = x[i].fd) < 0)
 				continue;
 			if (fd >= 8 * sizeof(fd_set))
 				continue;
-			/*XXX*/ if (x[i].events & IOPAUSE_READ)
-				if (FD_ISSET(fd, &rfds))
-					x[i].revents |= IOPAUSE_READ;
-			if (x[i].events & IOPAUSE_WRITE)
-				if (FD_ISSET(fd, &wfds))
-					x[i].revents |= IOPAUSE_WRITE;
+			/*XXX*/
+			if ((x[i].events & IOPAUSE_READ) && FD_ISSET(fd, &rfds))
+				x[i].revents |= IOPAUSE_READ;
+			if ((x[i].events & IOPAUSE_WRITE) && FD_ISSET(fd, &wfds))
+				x[i].revents |= IOPAUSE_WRITE;
 		}
-
 	}
 #endif
 
@@ -110,7 +96,7 @@ iopause(iopause_fd * x, unsigned int len, struct taia *deadline, struct taia *st
 void
 getversion_iopause_c()
 {
-	static char    *x = "$Id: iopause.c,v 1.2 2004-10-22 20:25:55+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: iopause.c,v 1.2 2022-06-01 13:19:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
