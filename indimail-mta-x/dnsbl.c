@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.7  2022-06-01 13:00:54+05:30  Cprogrammer
+ * skip loopback address from dnsbl check
+ *
  * Revision 1.6  2017-12-27 00:32:44+05:30  Cprogrammer
  * fixed RCS id
  *
@@ -124,7 +127,8 @@ dnsblcheck(char **mesg, char *remoteip)
 			ip4_fmt(x, &dnsblip.ix->addr.ip);
 			skipdnsbl = 1;
 			return 1;
-		} while (*ch++);
+		}
+		while (*ch++);
 	}
 	skipdnsbl = 1;
 	return 0;
@@ -140,7 +144,9 @@ mailfrom_hook(char *remoteip, char *from, char **mesg)
 		skipdnsbl = 1;
 		return (0);
 	}
-	if (!str_diffn(remoteip, "unknown", 7))
+	if (!str_diffn(remoteip, "unknown", 7) ||
+			!str_diffn(remoteip, "::ffff:127.0.0.1", 17) ||
+			!str_diffn(remoteip, "127.0.0.1", 10))
 		return (0);
 	if ((dnsblok = control_readfile(&dnsbllist,
 			dnsblFn = ((x = env_get("DNSBLLIST")) && *x ? x : "dnsbllist"), 0)) == -1) {
@@ -179,6 +185,6 @@ plugin_init()
 void
 getversion_dnsbl_c()
 {
-	static char    *x = "$Id: dnsbl.c,v 1.6 2017-12-27 00:32:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsbl.c,v 1.7 2022-06-01 13:00:54+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
