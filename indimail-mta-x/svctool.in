@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.632 2022-05-26 08:54:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.633 2022-06-01 13:06:41+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.632 2022-05-26 08:54:07+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.633 2022-06-01 13:06:41+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2057,7 +2057,7 @@ fi
 
 if [ ! -f $t/dnsbllist ] ; then
 	echo "dnsbllist"
-	echo "dnsbl.njabl.org"      > $t/dnsbllist
+	echo "zen.spamhaus.org"     > $t/dnsbllist
 fi
 
 for i in smtp qmtp qmqp
