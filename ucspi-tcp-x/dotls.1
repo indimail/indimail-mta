@@ -32,6 +32,12 @@ when you use \fB\-T\fR or the \fB\-C\fR options.
 ucspi-tcp package from indimail-mta git repo at,
 https://github.com/mbhangui/indimail-mta/tree/master/ucspi-tcp-x
 
+\fBdotls\fR intercepts client commands for the \fBEHLO\fR, \fBCAPA\fR,
+\fBSTARTTLS\fR, \fBSTLS\fR, \fBQUIT\fR requests. For the \fBEHLO\fR and
+\fBCAPA\fR requests, it offers \fBSTARTTLS\fR and \fBSTLS\fR capability on
+behalf of \fIprog\fR. All other commands are passed unaltered to
+\fIprog\fR.
+
 .SH "OPTIONS"
 .TP
 \fB-n \fIcertfile\fB\fR
@@ -103,4 +109,6 @@ string should be separated by a colon.
 .SH "SEE ALSO"
 .PP
 \fBtcpclient\fR(1),
-\fBtcpserver\fR(1)
+\fBtcpserver\fR(1),
+\fBqmail-smtpd\fR(8),
+\fBqmail-pop3d\fR(8)
