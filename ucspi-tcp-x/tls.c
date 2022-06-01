@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.12  2022-06-01 13:27:07+05:30  Cprogrammer
+ * handle eof from network gracefully
+ *
  * Revision 1.11  2022-05-18 00:48:43+05:30  Cprogrammer
  * replaced deprecated function SSL_CTX_use_RSAPrivateKey_file with SSL_CTX_use_PrivateKey_file
  *
@@ -58,7 +61,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.11 2022-05-18 00:48:43+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.12 2022-06-01 13:27:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -441,7 +444,7 @@ translate(int sfd, int clearout, int clearin, unsigned int iotimeout)
 {
 	struct taia     now, deadline;
 	iopause_fd      iop[2];
-	int             flagexitasap, iopl;
+	int             flagexitasap, iopl, sfd_flag = 1;
 	ssize_t         n, r;
 	char            tbuf[2048];
 
@@ -452,16 +455,30 @@ translate(int sfd, int clearout, int clearin, unsigned int iotimeout)
 		taia_add(&deadline, &now, &deadline);
 
 		/*- fill iopause struct */
-		iopl = 2;
-		iop[0].fd = sfd;
+		iopl = sfd_flag ? 2 : 1;
+		iop[0].fd = clearin;
 		iop[0].events = IOPAUSE_READ;
-		iop[1].fd = clearin;
-		iop[1].events = IOPAUSE_READ;
+		if (sfd_flag) {
+			iop[1].fd = sfd;
+			iop[1].events = IOPAUSE_READ;
+		}
 
 		/*- do iopause read */
 		iopause(iop, iopl, &deadline, &now);
-		if (iop[0].revents) {
-			/*- data on sfd */
+		if (iop[0].revents) { /*- data on clearin */
+			if ((n = timeoutread(iotimeout, clearin, tbuf, sizeof(tbuf))) < 0) {
+				strerr_warn1("unable to read: ", &strerr_sys);
+				return -1;
+			} else
+			if (!n)
+				flagexitasap = 1;
+			else
+			if ((r = safewrite(sfd, tbuf, n, iotimeout)) == -1) {
+				strerr_warn1("unable to write to network: ", &strerr_sys);
+				return -1;
+			}
+		}
+		if (sfd_flag && iop[1].revents) { /*- data on sfd */
 			if ((n = saferead(sfd, tbuf, sizeof(tbuf), iotimeout)) < 0) {
 				if (errno == EAGAIN)
 					continue;
@@ -469,35 +486,16 @@ translate(int sfd, int clearout, int clearin, unsigned int iotimeout)
 				return -1;
 			} else
 			if (!n) {
-				flagexitasap = 1;
-				break;
-			}
+				sfd_flag = 0;
+				close(clearout);
+			} else
 			if ((r = allwrite(clearout, tbuf, n)) == -1) {
-				if (errno == EAGAIN)
-					continue;
 				strerr_warn1("unable to write: ", &strerr_sys);
 				return -1;
 			}
 		}
-		if (iop[1].revents) {
-			/*- data on clearin */
-			if ((n = timeoutread(iotimeout, clearin, tbuf, sizeof(tbuf))) < 0) {
-				strerr_warn1("unable to read: ", &strerr_sys);
-				return -1;
-			} else
-			if (!n) {
-				flagexitasap = 1;
-				break;
-			}
-			if ((r = safewrite(sfd, tbuf, n, iotimeout)) == -1) {
-				if (errno == EAGAIN)
-					continue;
-				strerr_warn1("unable to write to network: ", &strerr_sys);
-				return -1;
-			}
-		}
 		if (!iop[0].revents && !iop[1].revents) {
-			strerr_warn1("timeout reached without input", 0);
+			strerr_warn1("timeout reached without input from network/child", 0);
 			return -1;
 		}
 	} /*- while (!flagexitasap) */
