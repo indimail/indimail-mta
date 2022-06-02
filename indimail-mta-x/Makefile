@@ -3851,10 +3851,10 @@ generic.so: generic.o auto_scancmd.o conf-ld-$(SYSTEM)
 
 dnsblcheck: load dnsblcheck.o variables.o auto_control.o ip.o \
 socket_v4mappedprefix.o socket_v6any.o dns.o control.o strsalloc.o \
-ipalloc.o tlsarralloc.o -lqmail dns.lib
+ipalloc.o tlsarralloc.o dns.lib
 	./load dnsblcheck variables.o auto_control.o ip.o \
 	socket_v4mappedprefix.o socket_v6any.o dns.o control.o strsalloc.o \
-	ipalloc.o tlsarralloc.o -lqmail `cat dns.lib`
+	ipalloc.o tlsarralloc.o $(QMAILLIB) `cat dns.lib`
 
 dnsblcheck.o: compile dnsblcheck.c control.h dns.h
 	./compile dnsblcheck.c
