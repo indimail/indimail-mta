@@ -1,6 +1,6 @@
 /*
  * $Log: dotls.c,v $
- * Revision 1.8  2022-06-01 13:29:24+05:30  Cprogrammer
+ * Revision 1.8  2022-06-02 09:03:59+05:30  Cprogrammer
  * BUG \r not copied, extra \0 copied. Thanks Stefan Berger
  * Report line too long error instead of clubbing it with 'out of mem' error
  * Return error for pop3 substdio failure
@@ -60,7 +60,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.8 2022-06-01 13:29:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.8 2022-06-02 09:03:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -211,6 +211,8 @@ void
 get1(char *ch)
 {
 	substdio_get(&smtpin, ch, 1);
+	if (*ch == '\r')
+		return;
 	if (capatext.len >= HUGECAPATEXT)
 		strerr_die2x(111, FATAL, "line too long");
 	else
@@ -409,7 +411,7 @@ smtp_ehlo(char *arg, char *cmmd, int cmmdlen)
 		strerr_die2x(111, FATAL, "Greeting to server failed");
 	len = capakw.len;
 	saptr = capakw.sa;
-	for (; len && case_diffs(saptr->s, "STARTTLS"); ++saptr, --len);
+	for (;len && case_diffs(saptr->s, "STARTTLS");++saptr, --len);
 	if (!len && ilen) { /*- server/child doesn't have STARTTLS capability */
 		/*-
 		 * e.g. ehlo of server without STARTTLS
@@ -523,7 +525,7 @@ pop3_capa(char *arg, char *cmmd, int cmmdlen)
 	extract_kw(pop3);
 	len = capakw.len;
 	saptr = capakw.sa;
-	for (; len && case_diffs(saptr->s, "STLS"); ++saptr, --len) ;
+	for (;len && case_diffs(saptr->s, "STLS");++saptr, --len) ;
 	if (!len) {
 		if (!stralloc_catb(&capatext, "STLS\n", 5))
 			strerr_die2x(111, FATAL, "out of memory");

@@ -67,12 +67,12 @@ o tls.c ported for openssl 3.0.0
 - 18/05/2022
 31. tls.c: ported for openssl 3.0.0
 - 18/05/2022 - indimail-mta-3.0.0
-- 30/05/2022 - indimail-mta-3.0.0
+- 30/05/2022
 32. dotls.c: BUG \r not copied, extra \0 copied. Thanks Stefan Berger
 33. dotls.c: Report line too long error instead of clubbing it with 'out of
     memory' error
 34. dotls.c: Return error for pop3 substdio failure
-- 31/05/2022 - indimail-mta-3.0.0
+- 31/05/2022
 35. dotls.c: fix DATA/RETR commands not getting passed to child
 - 01/06/2022
 36. tls.c, dotls.c: handle eof from network gracefully
