@@ -1,6 +1,6 @@
 /*
  * $Log: dotls.c,v $
- * Revision 1.8  2022-06-02 09:03:59+05:30  Cprogrammer
+ * Revision 1.8  2022-06-05 07:48:17+05:30  Cprogrammer
  * BUG \r not copied, extra \0 copied. Thanks Stefan Berger
  * Report line too long error instead of clubbing it with 'out of mem' error
  * Return error for pop3 substdio failure
@@ -60,7 +60,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.8 2022-06-02 09:03:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.8 2022-06-05 07:48:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -102,7 +102,7 @@ usage(void)
 		 " program");
 }
 
-struct scommd smtpcommands[] = {
+struct scommd   smtpcommands[] = {
 	{ "data", do_data, flush_data },
 	{ "ehlo", smtp_ehlo, flush },
 	{ "starttls", do_tls, flush_io },
@@ -110,7 +110,7 @@ struct scommd smtpcommands[] = {
 	{ 0, func_unimpl, flush }
 };
 
-struct scommd pop3commands[] = {
+struct scommd   pop3commands[] = {
 	{ "retr", do_retr, flush_data },
 	{ "capa", pop3_capa, flush },
 	{ "stls", do_tls, flush_io },
@@ -130,7 +130,7 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 	int             i, j, found;
 	char           *arg;
 	char            ch;
-	struct scommd   *c;
+	struct scommd  *c;
 	static stralloc cmd = { 0 };
 
 	if (!stralloc_copys(&cmd, ""))
@@ -394,7 +394,7 @@ do_retr(char *arg, char *cmmd, int cmmdlen)
 void
 flush_data()
 {
-	linemode=1;
+	linemode = 1;
 	flush();
 	return;
 }
@@ -405,7 +405,7 @@ smtp_ehlo(char *arg, char *cmmd, int cmmdlen)
 	stralloc       *saptr;
 	unsigned long   code;
 	unsigned int    len, ilen = 0;
-	static stralloc save = {0};
+	static stralloc save = { 0 };
 
 	if ((code = ehlo(arg, str_len(arg), &ilen)) != 250)
 		strerr_die2x(111, FATAL, "Greeting to server failed");
@@ -505,7 +505,6 @@ pop3_capa(char *arg, char *cmmd, int cmmdlen)
 	if (!case_startb(line.s, 3, "+OK")) {
 		if (!stralloc_catb(&capatext, "STLS\n", 5))
 			strerr_die2x(111, FATAL, "out of memory");
-		/*- capatext.len--; -*/
 	} else
 	for (;;) {
 		if (getln(&smtpin, &line, &match, '\n') == -1)
@@ -707,27 +706,27 @@ main(int argc, char **argv)
 		_exit(111);
 	switch ((pid = fork()))
 	{
-		case -1:
-			SSL_CTX_free(ctx);
-			strerr_die2sys(111, FATAL, "fork: ");
-			break;
-		case 0:
-			SSL_CTX_free(ctx);
-			sig_uncatch(sig_pipe);
-			sig_uncatch(sig_child);
-			sig_uncatch(sig_term);
-			close(pi1[1]); /*- pi1[0] will be used for reading cleartxt */
-			close(pi2[0]); /*- pi2[1] will be used for writing cleartxt */
-			if ((fd_move(tcpclient ? 6 : 0, pi1[0]) == -1) || (fd_move(tcpclient ? 7 : 1, pi2[1]) == -1))
-				strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
-			upathexec(argv);
-			strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
-			/*- Not reached */
-			_exit(0);
-		default:
-			close(pi1[0]); /*- pi1[1] be used for writing cleartext */
-			close(pi2[1]); /*- pi2[0] be used for reading cleartext */
-			break;
+	case -1:
+		SSL_CTX_free(ctx);
+		strerr_die2sys(111, FATAL, "fork: ");
+		break;
+	case 0:
+		SSL_CTX_free(ctx);
+		sig_uncatch(sig_pipe);
+		sig_uncatch(sig_child);
+		sig_uncatch(sig_term);
+		close(pi1[1]); /*- pi1[0] will be used for reading cleartxt */
+		close(pi2[0]); /*- pi2[1] will be used for writing cleartxt */
+		if ((fd_move(tcpclient ? 6 : 0, pi1[0]) == -1) || (fd_move(tcpclient ? 7 : 1, pi2[1]) == -1))
+			strerr_die2sys(111, FATAL, "unable to set up descriptors: ");
+		upathexec(argv);
+		strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
+		/*- Not reached */
+		_exit(0);
+	default:
+		close(pi1[0]); /*- pi1[1] be used for writing cleartext */
+		close(pi2[1]); /*- pi2[0] be used for reading cleartext */
+		break;
 	}
 	if (!(ssl = tls_session(ctx, client_mode ? 6 : 0, ciphers)))
 		strerr_die2x(111, FATAL, "unable to setup SSL session");
