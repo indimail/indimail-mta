@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.633 2022-06-01 13:06:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.634 2022-06-20 00:52:31+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.633 2022-06-01 13:06:41+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.634 2022-06-20 00:52:31+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7767,22 +7767,31 @@ create_users()
 	esac
 	case "$host" in
 		*-*-darwin*)
-		loginwindow="/Library/Preferences/com.apple.loginwindow"
-		defaults read $loginwindow HiddenUsersList | while read line
-		do
-			if [ " $line" = " (" -o " $line" = " )" ] ; then
-				continue
-			fi
-			line=`echo $line | cut -d, -f1`
+		defaults read /Library/Preferences/com.apple.loginwindow SHOWOTHERUSERS_MANAGED >/dev/null
+		if [ $? -eq 0 ] ; then
 			case "$line" in
 				indimail|alias|qmaild|qmaill|qmailp|qmailq|qmailr|qmails|qscand|mysql)
-				echo $line
-				;;
-				*)
-				defaults write $loginwindow HiddenUsersList -array-add $line
+				dscl . create /Users/$line IsHidden 1
 				;;
 			esac
-		done
+		else
+			loginwindow="/Library/Preferences/com.apple.loginwindow"
+			defaults read $loginwindow HiddenUsersList | while read line
+			do
+				if [ " $line" = " (" -o " $line" = " )" ] ; then
+					continue
+				fi
+				line=`echo $line | cut -d, -f1`
+				case "$line" in
+					indimail|alias|qmaild|qmaill|qmailp|qmailq|qmailr|qmails|qscand|mysql)
+					echo $line
+					;;
+					*)
+					defaults write $loginwindow HiddenUsersList -array-add $line
+					;;
+				esac
+			done
+		fi
 		;;
 	esac
 	) 2>$TMPDIR/svctool.user.$$
@@ -7817,8 +7826,6 @@ delUsers()
 			echo "deleting user $i"
 			dscl . -delete /Users/$i
 		done
-		#defaults delete /Library/Preferences/com.apple.loginwindow HiddenUsersList
-		defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList mysql
 		;;
 		*)
 		for i in indimail qmail nofiles qscand; do
