@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.21  2022-06-20 00:47:40+05:30  Cprogrammer
+ * fix directory creation on OSX
+ *
  * Revision 1.20  2022-01-30 09:51:34+05:30  Cprogrammer
  * changed datatype of mode for comparision with -1
  *
@@ -454,8 +457,7 @@ doit(stralloc *line, int uninstall, int check)
 	case 'd':
 		if (!check || access(target.s, F_OK)) {
 			print_info("mkdir", 0, target.s, (my_uid || mode == -1) ? 0755 : mode, uid, gid);
-			if ((create_paths ?  myr_mkdir(target.s, (my_uid || mode == -1) ? 0755 : mode)
-						: mkdir(target.s, (my_uid || mode == -1) ? 0755 : mode)) == -1) {
+			if (myr_mkdir(target.s, (my_uid || mode == -1) ? 0755 : mode) == -1) {
 				if (errno != error_exist)
 					strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
 			}
@@ -602,7 +604,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.20 2022-01-30 09:51:34+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.21 2022-06-20 00:47:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

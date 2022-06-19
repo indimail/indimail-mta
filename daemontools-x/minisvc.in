@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.30 2021-08-26 12:41:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.31 2022-06-20 00:48:04+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.30 2021-08-26 12:41:46+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.31 2022-06-20 00:48:04+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -325,6 +325,8 @@ if [ -x /usr/bin/mount ] ; then
 	mount=/usr/bin/mount
 elif [ -x /bin/mount ] ; then
 	mount=/bin/mount
+elif [ -x /sbin/mount ] ; then
+	mount=/sbin/mount
 else
 	echo "mount command not found" 1>&2
 	return 1
@@ -333,8 +335,10 @@ if [ -x /usr/bin/umount ] ; then
 	umount=/usr/binu/mount
 elif [ -x /bin/umount ] ; then
 	umount=/bin/umount
+elif [ -x /sbin/umount ] ; then
+	umount=/sbin/umount
 else
-	echo "mount command not found" 1>&2
+	echo "umount command not found" 1>&2
 	return 1
 fi
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
@@ -745,7 +749,7 @@ create_startup()
 			if [ $silent -eq 0 ] ; then
 				echo "Creating /service in /etc/synthetic.conf"
 			fi
-			printf "service\t/System/Volumes/data@sysconfdir@/sv\n" > /etc/synthetic.conf
+			printf "service\t/System/Volumes/Data@sysconfdir@/sv\n" > /etc/synthetic.conf
 		else
 			grep "^service" /etc/synthetic.conf >/dev/null
 			if [ $? -ne 0 ] ; then
@@ -753,10 +757,10 @@ create_startup()
 					echo "Creating /service in /etc/synthetic.conf"
 				fi
 				if [ -z "$DESTDIR" ] ; then
-					printf "service\t/System/Volumes/data@sysconfdir@/sv\n" >> /etc/synthetic.conf
+					printf "service\t/System/Volumes/Data@sysconfdir@/sv\n" >> /etc/synthetic.conf
 				else
 				(
-					printf "service\t/System/Volumes/data@sysconfdir@/sv\n"
+					printf "service\t/System/Volumes/Data@sysconfdir@/sv\n"
 					cat /etc/synthetic.conf
 				) > "$DESTDIR"/etc/synthetic.conf
 				fi
@@ -1647,21 +1651,27 @@ create_users()
 	case "$host" in
 		*-*-darwin*)
 		loginwindow="/Library/Preferences/com.apple.loginwindow"
-		defaults read $loginwindow HiddenUsersList | while read line
-		do
-			if [ " $line" = " (" -o " $line" = " )" ] ; then
-				continue
-			fi
-			line=`echo $line | cut -d, -f1`
-			case "$line" in
-				qmaill)
-				echo $line
-				;;
-				*)
-				defaults write $loginwindow HiddenUsersList -array-add $line
-				;;
-			esac
-		done
+		# defaults write /Library/Preferences/com.apple.loginwindow SHOWOTHERUSERS_MANAGED -bool FALSE
+		defaults read /Library/Preferences/com.apple.loginwindow SHOWOTHERUSERS_MANAGED >/dev/null
+		if [ $? -eq 0 ] ; then
+			dscl . create /Users/qmaill IsHidden 1
+		else
+			defaults read $loginwindow HiddenUsersList | while read line
+			do
+				if [ " $line" = " (" -o " $line" = " )" ] ; then
+					continue
+				fi
+				line=`echo $line | cut -d, -f1`
+				case "$line" in
+					qmaill)
+					defaults write $loginwindow HiddenUsersList -array-add $line
+					;;
+					*)
+					echo $line
+					;;
+				esac
+			done
+		fi
 		;;
 	esac
 	) 2>$TMPDIR/minisvc.user.$$
@@ -2733,6 +2743,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.31  2022-06-20 00:48:04+05:30  Cprogrammer
+# Fixes for OSX
+#
 # Revision 1.30  2021-08-26 12:41:46+05:30  Cprogrammer
 # use /usr/local/etc/indimail/sv for servicedir on OSX/Darwin
 #
