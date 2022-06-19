@@ -192,6 +192,9 @@ o svscan: added AUTOSCAN feature (which was actually part of the original
 81. svps.in: fix for alpine
 - 25/05/2022
 82. svscan.c: use DISABLE_RUN env variable to disable svscan from using /run
+20/06/2022
+83. run_init.c: fixed usage of . for supervised directory
+84. minisvc.in: Fixes for OSX
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

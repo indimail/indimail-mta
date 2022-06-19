@@ -8,6 +8,10 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 04.  added dnsblcheck program
 05.  smtpd.c: clear errno when client drops connection
 06.  svctool: replaced dnsbl.njabl.org with zen.spamhaus.org
+- 06/06/2022
+07.  swaks: updated to version 20201014.0
+- 20/06/2022
+08. installer.c, svctool: fixes for OSX
 
 * 
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
