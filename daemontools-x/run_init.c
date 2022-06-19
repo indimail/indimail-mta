@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.6  2022-06-20 00:48:20+05:30  Cprogrammer
+ * fixed using . for supervise directory
+ *
  * Revision 1.5  2022-05-22 23:00:19+05:30  Cprogrammer
  * check /run/svscan to determine if svscan is using /run
  *
@@ -34,6 +37,9 @@ run_init(char *service_dir)
 	if (!access("/run/svscan", F_OK))
 		run_dir = "/run";
 	else
+	if (!access("/private/var/run/svscan", F_OK))
+		run_dir = "/private/var/run";
+	else
 	if (!access("/var/run/svscan", F_OK))
 		run_dir = "/var/run";
 	else
@@ -48,8 +54,15 @@ run_init(char *service_dir)
 	if (!str_diff(p, ".")) {
 		if (!getcwd(buf, 255))
 			return -1;
-		p = basename(buf);
-		/*- e.g. /run/svscan/qmail-smtpd.25 */
+		i = str_rchr(buf, '/');
+		if (buf[i])
+			p = buf + i + 1;
+		else
+			return -2;
+		/*- e.g. doing svstat . in
+		 * 1. /run/svscan/qmail-smtpd.25
+		 * 2. /run/svscan/qmail-smtpd.25/log
+		 */
 		i = fmt_str(0, run_dir) + 9 + fmt_str(0, p);
 		if (i > 255)
 			return 1;
@@ -58,22 +71,31 @@ run_init(char *service_dir)
 		s += fmt_strn(s, "/svscan/", 8);
 		s += fmt_str(s, p);	
 		*s++ = 0;
+		if (access(dirbuf, F_OK)) {
+			for (p -= 2;*p && *p != '/';p--);
+			if (*p != '/')
+				return -2;
+			i = fmt_str(0, run_dir) + 9 + fmt_str(0, p + 1);
+			if (i > 255)
+				return 1;
+			s = dirbuf;
+			s += fmt_str(s, run_dir);
+			s += fmt_strn(s, "/svscan/", 8);
+			s += fmt_str(s, p + 1);	
+			*s++ = 0;
+		}
 	} else
 	if (!str_diff(p, "log")) {
-		if (!getcwd(buf, 255))
+		if (!getcwd(buf, 255)) /*- /service/name/log */
 			return -1;
-		/*-
-		 * dirname needs to be called
-		 * this will put a null before the last component.
-		 * Next call to basename will get the 2nd last
-		 * component
-		 * e.g. for /service/qmail-smtpd.25/log
-		 * you will get qmail-smtpd.25 using this
-		 * procedure
-		 */
-		s = dirname(buf);
-		p = basename(buf);
-		/*- e.g. /run/svscan/qmail-smtpd.25/log */
+		i = str_rchr(buf, '/'); /*- /log */
+		if (!buf[i])
+			return -2;
+		buf[i] = 0;
+		i = str_rchr(buf, '/'); /*- /name/log */
+		if (!buf[i])
+			return -2;
+		p = buf + i + 1; /*- name/log */
 		i = fmt_str(0, run_dir) + 13 + fmt_str(0, p);
 		if (i > 255)
 			return 1;
@@ -108,7 +130,7 @@ run_init(char *service_dir)
 void
 getversion_svrun_c()
 {
-	static char    *x = "$Id: run_init.c,v 1.5 2022-05-22 23:00:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: run_init.c,v 1.6 2022-06-20 00:48:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
