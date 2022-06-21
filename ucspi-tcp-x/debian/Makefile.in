@@ -71,6 +71,7 @@ ucspi-tcp-xUbuntu_18.04.dsc: ucspi-tcp-xUbuntu_18.04.dsc.in Makefile \
 	$(edit) $@.in > $@
 
 debian.tar.gz: copyright rules changelog compat control ucspi-tcp.install \
-preinst postinst
-	tar cf - copyright rules changelog compat control \
-		preinst postinst ucspi-tcp.install | gzip > $@
+preinst postinst source/format Makefile
+	cd .. && tar cf - debian/copyright debian/rules debian/changelog \
+	debian/compat debian/control debian/preinst debian/postinst \
+	debian/ucspi-tcp.install debian/source | gzip > debian/$@

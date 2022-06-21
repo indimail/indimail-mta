@@ -1,4 +1,4 @@
-Format: 1.0
+Format: 3.0
 Source: ucspi-tcp
 Section: Misc
 Priority: extra

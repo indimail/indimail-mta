@@ -131,17 +131,17 @@ indimail-mta.cron.d: indimail-mta.cron.d.in Makefile
 
 debian.tar.gz: copyright indimail-mta.preinst indimail-mta.postinst \
 indimail-mta.prerm indimail-mta.postrm rules changelog compat control \
-usr.bin.freshclam usr.sbin.clamd \
-indimail-mini.prerm indimail-mini.preinst indimail-mini.postrm \
-indimail-mini.postinst indimail-mini.install \
-qmta.prerm qmta.preinst qmta.postrm \
-qmta.postinst qmta.install \
-indimail-mta.cron.d indimail-mta.install
-	tar cf - copyright indimail-mta.preinst indimail-mta.postinst \
-		indimail-mta.prerm indimail-mta.postrm rules changelog compat \
-		control usr.bin.freshclam usr.sbin.clamd \
-		indimail-mini.prerm indimail-mini.preinst \
-		indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
-		qmta.prerm qmta.preinst \
-		qmta.postrm qmta.postinst qmta.install \
-		indimail-mta.cron.d indimail-mta.install | gzip > $@
+usr.bin.freshclam usr.sbin.clamd indimail-mini.prerm indimail-mini.preinst \
+indimail-mini.postrm indimail-mini.postinst indimail-mini.install \
+qmta.prerm qmta.preinst qmta.postrm qmta.postinst qmta.install \
+source/format indimail-mta.cron.d indimail-mta.install
+	cd .. && tar cf - debian/copyright debian/indimail-mta.preinst \
+	debian/indimail-mta.postinst debian/indimail-mta.prerm \
+	debian/indimail-mta.postrm debian/rules debian/changelog debian/compat \
+	debian/control debian/usr.bin.freshclam debian/usr.sbin.clamd \
+	debian/indimail-mini.prerm debian/indimail-mini.preinst \
+	debian/indimail-mini.postrm debian/indimail-mini.postinst \
+	debian/indimail-mini.install debian/qmta.prerm debian/qmta.preinst \
+	debian/qmta.postrm debian/qmta.postinst debian/qmta.install \
+	debian/indimail-mta.cron.d debian/indimail-mta.install \
+	debian/source/format | gzip > debian/$@
