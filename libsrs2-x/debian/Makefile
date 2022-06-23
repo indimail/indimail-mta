@@ -1,4 +1,4 @@
-all: debian.tar.gz
+all: debian.tar.gz libsrs2.dsc
 version=$(shell cat ../conf-version)
 arch=$(shell uname -m)
 email=$(shell cat ../conf-email)
@@ -30,12 +30,10 @@ libsrs2-dev.install: libsrs2-dev.install.in
 clean:
 	/bin/rm -f changelog libsrs2.dsc libsrs2.install libsrs2-dev.install debian.tar.gz
 
-debian.tar.gz: changelog compat control copyright \
-libsrs2-dev.docs libsrs2.docs \
-libsrs2.dsc rules libsrs2.install \
-libsrs2-dev.install libsrs2-dev.docs libsrs2.docs 
-	tar cf - changelog compat control copyright \
-		libsrs2-dev.docs libsrs2.docs libsrs2.dsc \
-		rules libsrs2.install \
-		libsrs2-dev.install libsrs2-dev.docs \
-		libsrs2.docs source | gzip -c >$@
+debian.tar.gz: changelog compat control copyright libsrs2-dev.docs \
+libsrs2.docs libsrs2.dsc rules libsrs2.install libsrs2-dev.install \
+source/format Makefile
+	cd .. && tar cf - debian/changelog debian/compat debian/control debian/copyright \
+	debian/libsrs2-dev.docs debian/libsrs2.docs debian/libsrs2.dsc \
+	debian/rules debian/libsrs2.install debian/libsrs2-dev.install \
+	debian/source | gzip -c >debian/$@
