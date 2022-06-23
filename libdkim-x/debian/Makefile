@@ -1,4 +1,4 @@
-all: debian.tar.gz
+all: debian.tar.gz libdkim.dsc
 version=$(shell cat ../conf-version)
 arch=$(shell uname -m)
 email=$(shell cat ../conf-email)
@@ -30,12 +30,10 @@ libdkim-dev.install: libdkim-dev.install.in
 clean:
 	/bin/rm -f changelog libdkim.dsc libdkim.install libdkim-dev.install debian.tar.gz
 
-debian.tar.gz: changelog compat control copyright \
-libdkim-dev.docs libdkim.docs \
-libdkim.dsc README.Debian rules libdkim.install \
-libdkim-dev.install libdkim-dev.docs libdkim.docs 
-	tar cf - changelog compat control copyright \
-		libdkim-dev.docs libdkim.docs libdkim.dsc \
-		README.Debian rules libdkim.install \
-		libdkim-dev.install libdkim-dev.docs \
-		libdkim.docs source | gzip -c >$@
+debian.tar.gz: changelog compat control copyright libdkim-dev.docs \
+libdkim.docs README.Debian rules libdkim.install libdkim-dev.install \
+source/format
+	cd .. && tar cf - debian/changelog debian/compat debian/control \
+	debian/copyright debian/libdkim-dev.docs debian/libdkim.docs \
+	debian/README.Debian debian/rules debian/libdkim.install \
+	debian/libdkim-dev.install debian/source | gzip -c >debian/$@
