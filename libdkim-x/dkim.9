@@ -61,7 +61,10 @@ issue error if not all message's From headers are in signature
 Allow unsigned subject in signature
 .TP
 -h
-include Copied Headers
+include Copied Headers. This adds the z= tag with a list of the message's
+original headers and may differ from the headers listed in the h= tag. This
+tag may be used by some mailbox providers in the process of diagnosing a
+verification error. Its value is not well defined.
 .TP
 -p \fIssp\fR | \fIadsp\fR
 0 - disable practice (default), 1- SSP, or 2 - ADSP verification

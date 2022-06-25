@@ -59,7 +59,9 @@ You can set various DKIM options in getopt style, by setting the environment var
  l                    include body length tag
  q                    include query method tag;
  t                    include a timestamp tag
- h                    include copied headers
+ h                    include copied headers. This adds the z= tag
+                      containing a copy of the message's original
+                      headers.
  i <identity>         the identity, if not provided it will not be included
  x <expire_time>      the expire time in seconds since epoch
                       ( DEFAULT = current time + 604800)
