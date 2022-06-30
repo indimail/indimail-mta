@@ -505,7 +505,7 @@ $ sudo make install-strip
 
 You are here because you decided to do a complete source installation. If you use the source installation method, you need to setup various configuration files and services. You can configure indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail-mta services and configuration.
 
-You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd(1) unit file `svscan.service` in `/lib/systemd/system` for systems using systemd. For FreeBSD, it will create /usr/local/etc/rc.d/svscan. It will use alternatives command to setup indimail-mta as your default MTA. On FreeBSD, it will configure mailwrapper by modifying /etc/mail/mailer.conf.
+You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd(1) unit file `svscan.service` in `/usr/lib/systemd/system` for systems using systemd. For FreeBSD, it will create /usr/local/etc/rc.d/svscan. It will use alternatives command to setup indimail-mta as your default MTA. On FreeBSD, it will configure mailwrapper by modifying /etc/mail/mailer.conf.
 
 ```
 $ cd /usr/local/src/indimail-mta-x
@@ -534,7 +534,7 @@ $ sudo /usr/sbin/svctool --config=rm-boot
 
 ## Start Services
 
-indimail, indimail-mta uses [systemd.unit](https://www.freedesktop.org/software/systemd/man/systemd.unit.html) file to load all indimail services. This is the standard unit file that gets installed as /lib/systemd/system/svscan.service.
+indimail, indimail-mta uses [systemd.unit](https://www.freedesktop.org/software/systemd/man/systemd.unit.html) file to load all indimail services. This is the standard unit file that gets installed as /usr/lib/systemd/system/svscan.service.
 
 ```
 [Unit]
