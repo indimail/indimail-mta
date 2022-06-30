@@ -756,7 +756,7 @@ Currently, the list of supported distributions for indimail-mta is
 
 ## IMPORTANT NOTE for binary builds on debian
 
-debian/ubuntu repositories already has daemontools and ucspi-tcp which are far behind in terms of feature list that the indimail-mta repo provides. When you install indimail-mta, apt-get may pull the wrong version with limited features. Also `apt-get install indimail` or `apt-get install indimail-mta` will get installed with errors, leading to an incomplete setup. You need to ensure that the two packages get installed from the indimail-mta repository instead of the debian repository. If you don't do this, indimail-mta will not function correctly as it depends on setting of proper global envirnoment variables. Global environment variabels are not supported by daemontools from the official debian repository. Additionally, the official ucspi-tcp package from the debian repository doesn't support TLS, which will result in services that depend on TLS not functioning.
+debian/ubuntu repositories already has daemontools and ucspi-tcp which are far behind in terms of feature list that the indimail-mta repo provides. When you install indimail-mta, apt-get may pull the wrong version with limited features. Also `apt-get install indimail` or `apt-get install indimail-mta` will get installed with errors, leading to an incomplete setup. You need to ensure that the two packages get installed from the indimail-mta repository instead of the debian repository. If you don't do this, indimail-mta will not function correctly as it depends on setting of proper global envirnoment variables. Global environment variables are not supported by daemontools from the official debian repository. Additionally, the official ucspi-tcp package from the debian repository doesn't support TLS, which will result in services that depend on TLS not functioning.
 
 All you need to do is set a higher preference for the indimail-mta repository by creating /etc/apt/preferences.d/preferences with the following contents
 
@@ -827,6 +827,27 @@ There are four Mailing Lists for IndiMail
 4. Archive at [Google Groups](http://groups.google.com/group/indimail). This groups acts as a remote archive for indimail-support and indimail-devel.
 
 There is also a [Project Tracker](http://sourceforge.net/tracker/?group_id=230686) for IndiMail (Bugs, Feature Requests, Patches, Support Requests)
+
+# Performance / Benchmarks
+
+As stated earlier, indimal-mta was built for supporting few million users with as little hardware as possible. The queue design gives indimail-mta unparalled performance. All details are available [here](https://github.com/mbhangui/indimail-mta/tree/master/indimail-mta-x/qmail-perf).
+
+## Observations
+
+* qmail based MTAs that use an external todo processor demonstrate a lower qtime
+* external todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
+* processing todo in batches has a significant impact on qmail-send performance and delivery times by as much as 30%. But this has an impact on the delivery of the first email.
+* Increasting directory split has negligible effect in qmail-perf test and filesystem test
+* statically linked binaries give much better performance. With dynamic linking, indimail-mta performs the worst amongst all MTAs.
+* When delivery rate increase inject rate decreases
+* The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in improving the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
+	* Disabling fsync, ext4 gave the best performance in the test carried out
+	* Using fsync, zfs gave the best performance in the tests carried out
+* netqmail gives the best injection rate. One of the reason is statically compiled uids, gids which avoids the need to do passwd, group entry lookups uisng the getpw, getgr libc functions.
+
+## Results
+
+Results on [Google Sheet](https://docs.google.com/spreadsheets/d/1Dfr1c1RXh18Lc47fmGymTRV5nL9DRviS9Gy8kqH5iZM/edit?usp=sharing)
 
 # History
 
