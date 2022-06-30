@@ -30,23 +30,23 @@ A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/maste
 
 indimail-mta is the default MTA installed when you install [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).
 
-indimail-mta is [FHS 3.0](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard) compliant. Components like qmail, ucspi-tcp, demontools have been modified significantly to include features available in all possible patches growing wild. All possible hardcoding have been removed. indimail-mta is not tied to a specific directory, uid, gid, control/config file. Most of these can be changed by setting environment variables. Additionally indimail-mta can be configured based on the mail SENDER or RECIPIENT(s). Features like DKIM, SRS2, greylisting, DANE have been natively available since many years. ucspi-tcp too has been modifed to handle IPv6 and TLS. daemontools has lot more feature available like running a shutdown script on shutdown, seamlessly run with docker/podman. svscan uses the [/run](http://www.h-online.com/open/news/item/Linux-distributions-to-include-run-directory-1219006.html) filesystem to store state information in the supervise directory. The changes made to ucspi-tcp and daemontools are briefly mentioned [here](https://github.com/mbhangui/indimail-mta/blob/master/ucspi-tcp-x/README.md) and [here](https://github.com/mbhangui/indimail-mta/blob/master/daemontools-x/README.md). Other components like serialmail, qmailanalog, dotforward, fastforward, mess822 have been incorporated with minimal changes. All common functions used by qmail, daemontools, ucspi-tcp, serialmail, dotforward, fastforward, mess822 have been moved to common library [libqmail](https://github.com/mbhangui/libqmail).
+indimail-mta is [FHS 3.0](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard) compliant. Components like qmail, ucspi-tcp, demontools have been modified significantly to include features available in all possible patches growing wild. All possible hardcoding have been removed. indimail-mta is not tied to a specific directory, uid, gid or any control/config file. Most of these can be changed by setting environment variables. Additionally indimail-mta can be configured to be based on the mail SENDER or RECIPIENT(s). Features like DKIM, SRS2, greylisting, DANE have been natively available since many years. ucspi-tcp too has been modifed to handle IPv6 and TLS. daemontools has lot more feature available. It can execute a shutdown script on shutdown, seamlessly integrate with docker/podman to give you a MTA in a container. svscan uses the [/run](http://www.h-online.com/open/news/item/Linux-distributions-to-include-run-directory-1219006.html) filesystem to store state information in the supervise directory. The changes made to ucspi-tcp and daemontools are briefly mentioned [here](https://github.com/mbhangui/indimail-mta/blob/master/ucspi-tcp-x/README.md) and [here](https://github.com/mbhangui/indimail-mta/blob/master/daemontools-x/README.md). Other components like serialmail, qmailanalog, dotforward, fastforward, mess822 have been incorporated with minimal changes. All common functions used by qmail, daemontools, ucspi-tcp, serialmail, dotforward, fastforward, mess822 have been moved to a common library [libqmail](https://github.com/mbhangui/libqmail).
 
-indimail-mta, indimail-virtualdomains, libqmail gets installed with man pages.
+indimail-mta, indimail-virtualdomains, libqmail gets installed with man pages for almost all commands and configuration.
 
-Refer to this [WIKI](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta. Refer to [indimail-mta-INTERNALS](https://github.com/mbhangui/indimail-mta/wiki/IndiMail#indimail-mta-internals) for indimail-mta internals.
+Refer to this [WIKI](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta. Refer to [indimail-mta-INTERNALS](https://github.com/mbhangui/indimail-mta/wiki/IndiMail#indimail-mta-internals) for indimail-mta internals specifically.
 
-This document contains instructions for building indimail-mta from source. indimail-mta compiles and runs on all linux distros, Arch Linux, Gentoo, FreeBSD and Mac OS X. Let me know if you want me to try it on any other OS.
+This document contains instructions for building indimail-mta from source. indimail-mta compiles and runs on all linux distros (Fedora, Debian, openSUSE, SLES), Arch Linux, Gentoo, Alpine Linux, FreeBSD and Mac OS X. Let me know if you want it on any other OS not mentioned in this document. The correct way to read this document is from top to bottom and follow the instructions serially. If you click on any link, you need to come back to this document.
 
 To install you need to do the following
 
-# Source Compiling/Linking
+# Building the Source - Compilation and Linking
 
 The steps below give instructions to build from source. If you need to deploy indimail-mta on multiple hosts, it is better to create a set of RPM / Deb binary packages. Once generated, the package/packages can be deployed on multiple hosts. To generate RPM packages for all components refer to [Create Local Binary Packages](.github/CREATE-Packages.md)
 
-You can also use docker / podman images to deploy indimail-mta. Look at the chapter [Docker / Podman Repository](#docker--podman-containers) below on how to do that. The big advantage of using a docker / podman image is you can save your configuration with the `docker commit ..` or `podman commit` to checkpoint your entire build and deploy the exact configuration on multiple hosts.
+You can also use docker / podman images to deploy indimail-mta. Refer to the chapter [Docker / Podman Repository](#docker--podman-containers) below on how to do that. The big advantage of using a docker / podman image is that you can save your configuration, with the `docker commit ..` or `podman commit`, to checkpoint your entire build and deploy the exact configuration on multiple hosts.
 
-Doing a source build can be daunting for many. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document.
+Doing a source build can be daunting for many. You can always use the pre-built binaries from the DNF / YUM / APT repositories given in the chapter [Binary Builds on OBS](#binary-builds-on-opensuse-build-service) towards the end of this document. They have been enabled for 64-bit distributions only. But you can clone the repository and tailor the build to your taste. You can also install the [openSUSE osc](https://en.opensuse.org/openSUSE:OSC) python package locally on your host and build the binary packages locally using the `osc` command.
 
 Doing a source build requires you to have all the development packages installed. Linux distributions are known to be crazy. You will have different package names for different distirbutions. e.g.
 
@@ -57,7 +57,7 @@ db-devel, libdb-devel, db4-devel on different systems, just to get Berkeley db i
 
 **Note**
 
-This is a rough list of packages required. If you want the exact packages, look BuildRequires in the spec file or Build-Depends in the debian/control or debian/\*.dsc files
+If the above wasn't easy for you, then this is a rough list of packages required. If you want the exact packages, look for BuildRequires in the spec file or Build-Depends in the debian/control or debian/\*.dsc files
 
 **RPM Based Distributions**
 Install the following packages using dnf/yum
@@ -67,7 +67,7 @@ Universal
 gcc gcc-c++ make autoconf automake libtool pkgconfig
 sed findutils diffutils gzip binutils coreutils grep
 glibc glibc-devel procps openssl openssl-devel mysql-devel
-libqmail-devel libqmail libidn2-devel
+libidn2-devel
 
 opensuse - openldap2-devel instead of openldap-devel
 ```
@@ -77,9 +77,9 @@ Install the following packages using apt
 
 ```
 Universal
-cdbs debhelper gcc g++ automake autoconf libtool libqmail-dev libqmail
-libldap2-dev libssl-dev libidn2-0-dev mime-support m4 gawk openssl 
-procps sed findutils diffutils readline gzip binutils coreutils grep
+cdbs debhelper gcc g++ automake autoconf libtool libldap2-dev
+libssl-dev libidn2-0-dev mime-support m4 gawk openssl procps
+sed findutils diffutils readline gzip binutils coreutils grep
 
 Ubuntu 16.04, Debian 8 - libmysqlclient-dev
 Remaining - default-libmysqlclient-dev
@@ -118,7 +118,7 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 
 **NOTES**
 
-You need libidn2, without which, indimail-mta will get built without [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+You need libidn2 to get indimail-mta built with [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
 
 ```
 FreeBSD
@@ -171,6 +171,8 @@ NOTE: For Darwin (Mac OSX), install [MacPorts](https://www.macports.org/) or bre
 # port install autoconf libtool automake pkgconfig openssl
 # port update outdated
 ```
+
+I prefer macports instead of brew because there are no setuid programs installed.
 
 ## Download indimail-mta
 
@@ -501,7 +503,7 @@ $ sudo make install-strip
 
 # Setup & Configuration
 
-You are here because you decided to do a complete source installation. If you use source installation method, you need to setup various configuration and services. You can configure indimail-mta using /usr/sbin/svctool. svctool is a general purpose utility to configure indimail-mta services and configuration.
+You are here because you decided to do a complete source installation. If you use the source installation method, you need to setup various configuration files and services. You can configure indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail-mta services and configuration.
 
 You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd(1) unit file `svscan.service` in `/lib/systemd/system` for systems using systemd. For FreeBSD, it will create /usr/local/etc/rc.d/svscan. It will use alternatives command to setup indimail-mta as your default MTA. On FreeBSD, it will configure mailwrapper by modifying /etc/mail/mailer.conf.
 
@@ -510,7 +512,7 @@ $ cd /usr/local/src/indimail-mta-x
 $ sudo ./create_services
 ```
 
-NOTE: The Darwin Mac OSX system is broken for sending emails because you can't remove /usr/sbin/sendmail. [System Integrity Protection (SIP)](https://en.wikipedia.org/wiki/System_Integrity_Protection) ensures that you cannot modify anything in /bin, /sbin, /usr, /System, etc. You could disable it by using csrutil in recover mode but that is not adviseable. See [this](https://www.howtogeek.com/230424/how-to-disable-system-integrity-protection-on-a-mac-and-why-you-shouldnt/). indimail-mta requires services in /service to configure all startup items. On Mac OS X, it uses `/etc/synthetic.conf' to create a virtual symlink of /service to /usr/local/etc/indimail/sv. This file is created/modified by 'svctool --add-boot' command. For programs that need to send mails, you will need to call /usr/local/bin/sendmail (indimail-mta's sendmail replacement). The OS and all utilites like cron, mailx, etc will continue to use /usr/sbin/sendmail. There is nothing you can do about it, other than fooling around with SIP. You can use s-nail or hierloom-mailx program instead of /mail/mailx.
+NOTE: The Darwin Mac OSX system is broken for sending emails because you can't remove /usr/sbin/sendmail. [System Integrity Protection (SIP)](https://en.wikipedia.org/wiki/System_Integrity_Protection) ensures that you cannot modify anything in /bin, /sbin, /usr, /System, etc. You could disable it by using csrutil in recover mode but that is not adviseable. See [this](https://www.howtogeek.com/230424/how-to-disable-system-integrity-protection-on-a-mac-and-why-you-shouldnt/). indimail-mta requires services in /service to configure all startup items. On Mac OS X, it uses `/etc/synthetic.conf' to create a virtual symlink of /service to /usr/local/etc/indimail/sv. This file is created/modified by 'svctool --add-boot' command. For programs that need to send mails, you will need to call /usr/local/bin/sendmail (indimail-mta's sendmail replacement). The OS and all utilites like cron, mailx, etc will continue to use /usr/sbin/sendmail. There is nothing you can do about it, other than fooling around with SIP. You can use s-nail or hierloom-mailx program instead of mail/mailx command used on Linux/BSD.
 
 ## Enable svscan to be started at boot
 
@@ -752,11 +754,11 @@ Currently, the list of supported distributions for indimail-mta is
           o Ubuntu 22.04
 ```
 
-## NOTE for binary builds on debian
+## IMPORTANT NOTE for binary builds on debian
 
-debian/ubuntu repositories already has daemontools and ucspi-tcp which are far behind in terms of feature list that the indimail-mta repo provides. When you install indimail-mta, apt-get may pull the wrong version with limited features. Also `apt-get install indimail` or `apt-get install indimail-mta` will get installed with errors, leading to an incomplete setup. You need to ensure that the two packages get installed from the indimail-mta repository instead of the debian repository.
+debian/ubuntu repositories already has daemontools and ucspi-tcp which are far behind in terms of feature list that the indimail-mta repo provides. When you install indimail-mta, apt-get may pull the wrong version with limited features. Also `apt-get install indimail` or `apt-get install indimail-mta` will get installed with errors, leading to an incomplete setup. You need to ensure that the two packages get installed from the indimail-mta repository instead of the debian repository. If you don't do this, indimail-mta will not function correctly as it depends on setting of proper global envirnoment variables. Global environment variabels are not supported by daemontools from the official debian repository. Additionally, the official ucspi-tcp package from the debian repository doesn't support TLS, which will result in services that depend on TLS not functioning.
 
-All you need to do is set a higher preference for the indimail-mta repository by creating /etc/apt/preferences.d/preferences with the following conents
+All you need to do is set a higher preference for the indimail-mta repository by creating /etc/apt/preferences.d/preferences with the following contents
 
 ```
 $ sudo /bin/bash
@@ -790,6 +792,11 @@ ucspi-tcp:
        1001 http://download.opensuse.org/repositories/home:/indimail/Debian_10/ Packages
         100 /var/lib/dpkg/status
 ```
+
+## Build Binary packages locally using openSUSE Build Service
+
+You can install the [OSC package](https://en.opensuse.org/openSUSE:OSC). You just need to create a project and a package in the project using the `osc` commands. You can build the binary packages locally using the `osc build` command. I will expand this section later. You can refer to the documentation for `osc` and continue without my help.
+
 
 # Docker / Podman Containers
 
