@@ -837,13 +837,13 @@ As stated earlier, indimal-mta was built for supporting few million users with a
 * qmail based MTAs that use an external todo processor demonstrate a lower qtime
 * external todo processor has a remarkable impact on the local concurrency. The concurrency never reaches high values with high inject rates.
 * processing todo in batches has a significant impact on qmail-send performance and delivery times by as much as 30%. But this has an impact on the delivery of the first email.
-* Increasting directory split has negligible effect in qmail-perf test and filesystem test
+* Increasing directory split has negligible effect in qmail-perf test and filesystem test
 * statically linked binaries give much better performance. With dynamic linking, indimail-mta performs the worst amongst all MTAs.
-* When delivery rate increase inject rate decreases
+* When delivery rate increases inject rate decreases
 * The biggest impact on local delivery rate are the fsync() calls. Changing fsync() to fdatasync() did not result in improving the delivery rate. Disabling fsync() resulted in local deliveries increasing by 6x.
 	* Disabling fsync, ext4 gave the best performance in the test carried out
 	* Using fsync, zfs gave the best performance in the tests carried out
-* netqmail gives the best injection rate. One of the reason is statically compiled uids, gids which avoids the need to do passwd, group entry lookups uisng the getpw, getgr libc functions.
+* netqmail gives the best injection rate. One of the reason is statically compiled uids, gids which avoids the need to do passwd, group entry lookups uisng the getpw, getgr libc functions. libqmail provides replacement for each of these getpw functions. Setting the environment variable USE_GETPW in indimail-mta to use the libqmail getpw interface results in significant improvement in user lookup times.
 
 ## Results
 
