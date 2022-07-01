@@ -1,16 +1,10 @@
 #
 # $Log: instcheck.in,v $
-# Revision 1.3  2021-08-03 21:33:39+05:30  Cprogrammer
-# adapted daemontools installer for ucspi-tcp
-#
-# Revision 1.2  2021-08-03 21:31:28+05:30  Cprogrammer
-# use ucspi-tcp installer
-#
-# Revision 1.1  2021-08-03 21:22:32+05:30  Cprogrammer
+# Revision 1.1  2022-07-01 18:39:35+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: instcheck.in,v 1.3 2021-08-03 21:33:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: instcheck.in,v 1.1 2022-07-01 18:39:35+05:30 Cprogrammer Exp mbhangui $
 #
 if [ $# -eq 0 ] ; then
 	name=$(basename $0)
@@ -32,13 +26,11 @@ else
 fi
 if [ -f INPUT ] ; then
 	dir="./"
-	installer=./installer
 else
 	dir=@libexecdir@
 	conf_dir=@qsysconfdir@
-	installer=$dir/uinstaller
 	if [ ! -d $conf_dir/perms.d/$package ] ; then
-		echo "$package: missing permission files" 1>&2
+		echo "$package: missing permission files dir [$conf_dir/perms.d/$package]" 1>&2
 		exit 111
 	else
 		cd $conf_dir/perms.d/$package
@@ -51,12 +43,24 @@ else
 		exit 111
 	fi
 fi
+if [ -x $dir/uinstaller ] ; then
+	installer=$dir/uinstaller #ucspi-tcp
+else
+	installer=$dir/installer
+fi
 status=0
 set -e
 while read line
 do
 	set $line
-	eval $installer $opt $DESTDIR"$1" < $2
+	if [ "$1" = "/" ] ; then
+		x=""
+	else
+		x="$1"
+	fi
+	in=$2
+	echo eval $installer $opt $DESTDIR"$x" < $in
+	eval $dir/installer $opt $DESTDIR"$x" < $in
 	if [ $? -ne 0 ] ; then
 		break
 	fi
