@@ -1,7 +1,7 @@
 /*
  * $Log: tcpclient.c,v $
- * Revision 1.22  2022-07-01 18:38:27+05:30  Cprogrammer
- * use TLS_CERTFILE env variable to set client certificate filename
+ * Revision 1.22  2022-07-01 19:57:38+05:30  Cprogrammer
+ * use unencrypted connection if argument to -n is an empty string
  *
  * Revision 1.21  2021-08-30 12:47:59+05:30  Cprogrammer
  * define funtions as noreturn
@@ -115,7 +115,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.22 2022-07-01 18:38:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.22 2022-07-01 19:57:38+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -340,6 +340,18 @@ main(int argc, char **argv)
 	close(6);
 	close(7);
 	sig_ignore(sig_pipe);
+#ifdef TLS
+	if (!(ptr = env_get("TLS_CERTFILE")))
+		ptr = "clientcert.pem";
+	if (!(certsdir = env_get("CERTDIR")))
+		certsdir = "/etc/indimail/certs";
+	if (!stralloc_copys(&certfile, certsdir) ||
+			!stralloc_append(&certfile, "/") ||
+			!stralloc_cats(&certfile, ptr) ||
+			!stralloc_0(&certfile))
+		strerr_die2x(111, FATAL, "out of memory");
+	flagssl = access(certfile.s, F_OK) ? 0 : 1;
+#endif
 #ifdef IPV6
 #ifdef TLS
 	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:n:c:s:m")) != opteof)
@@ -429,8 +441,11 @@ main(int argc, char **argv)
 			if (*optarg) {
 				if (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile))
 					strerr_die2x(111, FATAL, "out of memory");
-				flagssl = access(certfile.s, F_OK) ? 0 : 1;
-			}
+				if (access(certfile.s, F_OK))
+					strerr_die3sys(111, FATAL, certfile.s, ": ");
+				flagssl = 1;
+			} else
+				flagssl = 0;
 			break;
 		case 'c':
 			cafile = optarg;
@@ -455,22 +470,14 @@ main(int argc, char **argv)
 	argv += optind;
 	if (!verbosity)
 		subfderr->fd = -1;
+	if (verbosity >= 2) {
+		if (flagssl)
+			strerr_warn2("tcpclient: using certificate ", certfile.s, 0);
+		else
+			strerr_warn1("tcpclient: using un-encrypted connection", 0);
+	}
 	if (!(hostname = *argv))
 		usage();
-#ifdef TLS
-	if (!certfile.len) {
-		if (!(ptr = env_get("TLS_CERTFILE")))
-			ptr = "clientcert.pem";
-		if (!(certsdir = env_get("CERTDIR")))
-			certsdir = "/etc/indimail/certs";
-		if (!stralloc_copys(&certfile, certsdir) ||
-				!stralloc_append(&certfile, "/") ||
-				!stralloc_cats(&certfile, ptr) ||
-				!stralloc_0(&certfile))
-			strerr_die2x(111, FATAL, "out of memory");
-		flagssl = access(certfile.s, F_OK) ? 0 : 1;
-	}
-#endif
 	if (!hostname[0] || str_equal(hostname,"0"))
 #ifdef IPV6
 		hostname = (noipv6 ? "127.0.0.1" : "::1");

@@ -119,7 +119,9 @@ Never delay sending data; enable TCP_NODELAY.
 A certificate is required for SSL/TLS servers. \fIclientcert\fR must not
 be world-readable. This option overrides environment variable TLS_CERTFILE.
 If this is not provided, the file @qsysconfdir@/certs/clientcert.pem will
-be used.
+be used. If the file \fIclientcert.pem\fR does not exist, tcpclient will
+continue with an un-encrypted connection. If the -n option is provided and
+\fIclientcert\fR doesn't exist, tcpclient will exit with an error.
 
 .TP
 .B \-c \fIcafile
