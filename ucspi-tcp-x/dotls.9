@@ -45,7 +45,7 @@ Use \fIcertfile\fR as the certificate
 The certificate to use and is required for SSL/TLS servers.
 \fIcertfile\fR must not be world-readable. This option overrides
 environment variable TLS_CERTFILE. If this is not provided, the file
-/etc/indimail/certs/clientcert.pem will be used.
+@qsysconfdir@/certs/clientcert.pem will be used.
 
 .TP
 \fB-t\fR \fItimeout\fB\fR
@@ -77,7 +77,7 @@ order to configure the SSL/TLS protocol:
 .TP
 .B CERTDIR
 Directory having servercert.pem.
-Default is /etc/indimail/certs.
+Default is @qsysconfdir@/certs.
 
 .TP
 .B TLS_CERTFILE

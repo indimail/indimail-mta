@@ -116,9 +116,10 @@ Never delay sending data; enable TCP_NODELAY.
 
 .TP
 .B \-n \fIclientcert
-Instead of the default clientcert.pem certificate in @qsysconfdir@/certs,
-use the specified \fIclientcert\fR. The location of certificate directory
-can be changed by setting \fBCERTDIR\fR environment variable.
+A certificate is required for SSL/TLS servers. \fIclientcert\fR must not
+be world-readable. This option overrides environment variable TLS_CERTFILE.
+If this is not provided, the file @qsysconfdir@/certs/clientcert.pem will
+be used.
 
 .TP
 .B \-c \fIcafile

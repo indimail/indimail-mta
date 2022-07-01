@@ -1,5 +1,8 @@
 /*
  * $Log: dotls.c,v $
+ * Revision 1.9  2022-07-01 09:15:37+05:30  Cprogrammer
+ * use TLS_CERTFILE env variable to set client certificate filename
+ *
  * Revision 1.8  2022-06-05 07:48:17+05:30  Cprogrammer
  * BUG \r not copied, extra \0 copied. Thanks Stefan Berger
  * Report line too long error instead of clubbing it with 'out of mem' error
@@ -60,7 +63,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.8 2022-06-05 07:48:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.9 2022-07-01 09:15:37+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -632,23 +635,14 @@ main(int argc, char **argv)
 {
 	int             opt, pi1[2], pi2[2], client_mode = 0, tcpclient = 0;
 	pid_t           pid;
-	char           *certsdir, *cafile = NULL, *host = NULL, *ciphers = NULL;
+	char           *certsdir, *cafile = NULL, *host = NULL, *ciphers = NULL, *ptr;
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
 	enum starttls   stls = unknown;
 	unsigned long   u;
 
 	sig_ignore(sig_pipe);
-	if (!(certsdir = env_get("CERTDIR")))
-		certsdir = "/etc/indimail/certs";
-	if (!stralloc_copys(&certfile, certsdir))
-		strerr_die2x(111, FATAL, "out of memory");
-	else
-	if (!stralloc_cats(&certfile, "/clientcert.pem"))
-		strerr_die2x(111, FATAL, "out of memory");
-	else
-	if (!stralloc_0(&certfile))
-		strerr_die2x(111, FATAL, "out of memory");
+
 	while ((opt = getopt(argc, argv, "CTs:h:t:n:c:")) != opteof) {
 		switch (opt) {
 		case 'h':
@@ -689,6 +683,17 @@ main(int argc, char **argv)
 	argv += optind;
 	if (!*argv)
 		usage();
+	if (!certfile.len) {
+		if (!(ptr = env_get("TLS_CERTFILE")))
+			ptr = "clientcert.pem";
+		if (!(certsdir = env_get("CERTDIR")))
+			certsdir = "/etc/indimail/certs";
+		if (!stralloc_copys(&certfile, certsdir) ||
+				!stralloc_append(&certfile, "/") ||
+				!stralloc_cats(&certfile, ptr) ||
+				!stralloc_0(&certfile))
+			strerr_die2x(111, FATAL, "out of memory");
+	}
 	/*-
 	 * We create two pipes to read and write unencrypted data
 	 * from/to child
