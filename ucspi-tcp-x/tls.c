@@ -1,7 +1,7 @@
 /*
  * $Log: tls.c,v $
- * Revision 1.12  2022-06-01 13:27:07+05:30  Cprogrammer
- * handle eof from network gracefully
+ * Revision 1.12  2022-07-01 18:54:12+05:30  Cprogrammer
+ * set socket in no delay mode
  *
  * Revision 1.11  2022-05-18 00:48:43+05:30  Cprogrammer
  * replaced deprecated function SSL_CTX_use_RSAPrivateKey_file with SSL_CTX_use_PrivateKey_file
@@ -51,6 +51,7 @@
 #include <openssl/err.h>
 #include <case.h>
 #endif
+#include <ndelay.h>
 #include <taia.h>
 #include <strerr.h>
 #include <env.h>
@@ -61,7 +62,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.12 2022-06-01 13:27:07+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.12 2022-07-01 18:54:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -125,18 +126,18 @@ check_cert(SSL *myssl, char *host)
 	X509           *peer;
 	char            peer_CN[256];
 
-    if (SSL_get_verify_result(myssl) != X509_V_OK) {
+	if (SSL_get_verify_result(myssl) != X509_V_OK) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_get_verify_result: ", sslerr_str, 0);
 		return (1);
 	}
-    /*
+	/*
 	 * Check the cert chain. The chain length
 	 * is automatically checked by OpenSSL when
 	 * we set the verify depth in the ctx
 	 */
 
-    /*- Check the common name */
+	/*- Check the common name */
 	if (!(peer = SSL_get_peer_certificate(myssl))) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_get_peer_certificate: ", sslerr_str, 0);
@@ -354,30 +355,6 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 	return -1;
 }
 
-int
-ssl_timeoutrehandshake(long t, int rfd, int wfd, SSL *ssl)
-{
-	int             r;
-
-	SSL_renegotiate(ssl);
-	r = ssl_timeoutio(SSL_do_handshake, t, rfd, wfd, ssl, NULL, 0);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	if (r <= 0 || SSL_get_state(ssl) == SSL_ST_CONNECT)
-#else
-	if (r <= 0 || ssl->type == SSL_ST_CONNECT)
-#endif
-		return r;
-	/*
-	 * this is for the server only 
-	 */
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	SSL_set_accept_state(ssl);
-#else
-	ssl->state = SSL_ST_ACCEPT;
-#endif
-	return ssl_timeoutio(SSL_do_handshake, t, rfd, wfd, ssl, NULL, 0);
-}
-
 ssize_t
 allwrite(int fd, char *buf, size_t len)
 {
@@ -444,58 +421,63 @@ translate(int sfd, int clearout, int clearin, unsigned int iotimeout)
 {
 	struct taia     now, deadline;
 	iopause_fd      iop[2];
-	int             flagexitasap, iopl, sfd_flag = 1;
+	int             flagexitasap, iopl;
 	ssize_t         n, r;
 	char            tbuf[2048];
 
 	flagexitasap = 0;
+	ndelay_on(sfd);
 	while (!flagexitasap) {
 		taia_now(&now);
 		taia_uint(&deadline, iotimeout);
 		taia_add(&deadline, &now, &deadline);
 
 		/*- fill iopause struct */
-		iopl = sfd_flag ? 2 : 1;
-		iop[0].fd = clearin;
+		iopl = 2;
+		iop[0].fd = sfd;
 		iop[0].events = IOPAUSE_READ;
-		if (sfd_flag) {
-			iop[1].fd = sfd;
-			iop[1].events = IOPAUSE_READ;
-		}
+		iop[1].fd = clearin;
+		iop[1].events = IOPAUSE_READ;
 
 		/*- do iopause read */
 		iopause(iop, iopl, &deadline, &now);
-		if (iop[0].revents) { /*- data on clearin */
-			if ((n = timeoutread(iotimeout, clearin, tbuf, sizeof(tbuf))) < 0) {
-				strerr_warn1("unable to read: ", &strerr_sys);
-				return -1;
-			} else
-			if (!n)
-				flagexitasap = 1;
-			else
-			if ((r = safewrite(sfd, tbuf, n, iotimeout)) == -1) {
-				strerr_warn1("unable to write to network: ", &strerr_sys);
-				return -1;
-			}
-		}
-		if (sfd_flag && iop[1].revents) { /*- data on sfd */
+		if (iop[0].revents) { /*- data on sfd */
 			if ((n = saferead(sfd, tbuf, sizeof(tbuf), iotimeout)) < 0) {
 				if (errno == EAGAIN)
 					continue;
-				strerr_warn1("unable to read from network", &strerr_sys);
+				strerr_warn1("translate: read network", &strerr_sys);
 				return -1;
 			} else
 			if (!n) {
-				sfd_flag = 0;
-				close(clearout);
-			} else
+				flagexitasap = 1;
+				break;
+			}
 			if ((r = allwrite(clearout, tbuf, n)) == -1) {
-				strerr_warn1("unable to write: ", &strerr_sys);
+				strerr_warn1("translate: write clear channel: ", &strerr_sys);
+				return -1;
+			}
+		}
+		if (iop[1].revents) { /*- data on clearin */
+			if ((n = timeoutread(iotimeout, clearin, tbuf, sizeof(tbuf))) < 0) {
+				strerr_warn1("translate: read clear channel: ", &strerr_sys);
+				return -1;
+			} else
+			if (!n) {
+				flagexitasap = 1;
+				break;
+			}
+			if ((r = safewrite(sfd, tbuf, n, iotimeout)) == -1) {
+				if (errno == EAGAIN)
+					continue;
+				strerr_warn1("translate: write network: ", &strerr_sys);
 				return -1;
 			}
 		}
 		if (!iop[0].revents && !iop[1].revents) {
-			strerr_warn1("timeout reached without input from network/child", 0);
+			if (!iop[0].revents)
+				strerr_warn1("timeout reached without input from network", 0);
+			if (!iop[1].revents)
+				strerr_warn1("timeout reached without input from child", 0);
 			return -1;
 		}
 	} /*- while (!flagexitasap) */
