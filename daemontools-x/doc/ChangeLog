@@ -195,6 +195,8 @@ o svscan: added AUTOSCAN feature (which was actually part of the original
 20/06/2022
 83. run_init.c: fixed usage of . for supervised directory
 84. minisvc.in: Fixes for OSX
+- 01/07/2022
+85. instcheck.in: common instcheck for daemontools, ucspi-tcp, indimail-mta
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

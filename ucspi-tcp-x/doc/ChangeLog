@@ -76,6 +76,11 @@ o tls.c ported for openssl 3.0.0
 35. dotls.c: fix DATA/RETR commands not getting passed to child
 - 01/06/2022
 36. tls.c, dotls.c: handle eof from network gracefully
+- 01/07/2022
+37. dotls.c, tcpclient.c: use TLS_CERTFILE env variable to set client
+certificate filename
+38. tls.c: set socket in ndelay mode
+39. instcheck.in: common instcheck for daemontools, ucspi-tcp, indimail-mta
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 21/05/2020

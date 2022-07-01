@@ -13,6 +13,8 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 07.  swaks: updated to version 20201014.0
 - 20/06/2022
 08. installer.c, svctool: fixes for OSX
+- 01/07/2022
+09. instcheck.in: common instcheck for daemontools, ucspi-tcp, indimail-mta
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
