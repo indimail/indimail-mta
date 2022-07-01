@@ -1,10 +1,13 @@
 #
 # $Log: instcheck.in,v $
-# Revision 1.1  2022-07-01 18:39:35+05:30  Cprogrammer
+# Revision 1.2  2022-07-01 18:30:28+05:30  Cprogrammer
+# common instcheck for daemontools, ucspi-tcp, indimail-mta
+#
+# Revision 1.1  2021-08-03 21:22:32+05:30  Cprogrammer
 # Initial revision
 #
 #
-# $Id: instcheck.in,v 1.1 2022-07-01 18:39:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: instcheck.in,v 1.2 2022-07-01 18:30:28+05:30 Cprogrammer Exp mbhangui $
 #
 if [ $# -eq 0 ] ; then
 	name=$(basename $0)
@@ -58,9 +61,9 @@ do
 	else
 		x="$1"
 	fi
-	in=$2
-	echo eval $installer $opt $DESTDIR"$x" < $in
-	eval $dir/installer $opt $DESTDIR"$x" < $in
+	input=$2
+	echo $installer $opt $DESTDIR"$x" < $input
+	eval $installer $opt $DESTDIR"$x" < $input
 	if [ $? -ne 0 ] ; then
 		break
 	fi
