@@ -18,7 +18,7 @@ edit = sed \
 
 default: it
 
-man: tcpserver.1 tcpclient.1
+man: tcpserver.1 tcpclient.1 dotls.1
 
 compile: make-compile warn-auto.sh systype conf-cc-$(SYSTEM)
 	( cat warn-auto.sh; ./make-compile "`cat systype`" ) > \
@@ -98,6 +98,8 @@ tcpserver.1: tcpserver.9
 	$(edit) tcpserver.9 > $@
 tcpclient.1: tcpclient.9
 	$(edit) tcpclient.9 > $@
+dotls.1: dotls.9
+	$(edit) dotls.9 > $@
 
 date@: \
 warn-auto.sh date@.sh conf-prefix

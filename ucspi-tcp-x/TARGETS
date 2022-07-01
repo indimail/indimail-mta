@@ -152,3 +152,4 @@ tcpclient.1
 dotls.o
 dotls
 PKGBUILD
+dotls.1

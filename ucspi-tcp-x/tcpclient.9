@@ -207,7 +207,7 @@ Default is @qsysconfdir@/certs.
 
 3. Connect to port 25 on 127.0.0.1 like telnet
    read from fd 0 & write to network, read from network & write to fd 1
-   tcpclient -n "" 127.0.0.1 25
+   tcpclient 127.0.0.1 25
 
 6. Run a script under tcpclient that connects to a SSL server on port 5555
    read from fd 6 reads from network, write to fd 7 writes to network
