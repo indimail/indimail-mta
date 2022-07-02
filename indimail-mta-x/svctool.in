@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.634 2022-06-20 00:52:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.635 2022-07-03 00:11:13+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.634 2022-06-20 00:52:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.635 2022-07-03 00:11:13+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5559,13 +5559,13 @@ echo "$QmailBinPrefix/bin/setuidgid mysql \$MYSQL_BASE/$mysqld --defaults-file=$
 echo "--port=$port --basedir=\$MYSQL_BASE \\"
 echo "--datadir=\$DATABASE/data \\"
 check_mysqld_variable --memlock 1
-check_mysqld_variable --ssl 1
+#check_mysqld_variable --ssl 1
 check_mysqld_variable --require-secure-transport 1
 # skip external locking is not shown in the list of variables
 echo "--skip-external-locking \\"
 check_mysqld_variable --delay-key-write=all 1
 check_mysqld_variable --skip-name-resolve 1
-echo "--sql-mode=\"NO_ENGINE_SUBSTITUTION,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,STRICT_TRANS_TABLES\" \\"
+echo "--sql-mode=\"NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES\" \\"
 check_mysqld_variable --explicit-defaults-for-timestamp=TRUE 1
 if [ $? -ne 0 ] ; then
 	check_mysqld_variable --explicit-defaults-for-timestamp 1
@@ -5575,10 +5575,12 @@ check_mysqld_variable --general-log-file=\$DATABASE/logs/general-log 1
 check_mysqld_variable --slow-query-log=1 1
 check_mysqld_variable --slow-query-log-file=\$DATABASE/logs/slowquery-log 1
 check_mysqld_variable --log-queries-not-using-indexes 1
-check_mysqld_variable --log-error-verbosity=3 1
 # On Unix systems, if the --log-error option is not used,
 # the errors are written to stderr (usually, the command line).
-#echo "--log-error=\$DATABASE/logs/mysqld.log \\"
+# Few mysql-community have a bug where if you don't have --log-error
+# Error-log destination "stderr" is not a file. Can not restore error log messages from previous run.
+check_mysqld_variable --log-error=$DATABASE/logs/mysql-error.log 1
+check_mysqld_variable --log-error-verbosity=2 1
 if [ $mariadb -eq 1 ] ; then
 check_mysqld_variable --log-warnings=2 1
 fi
@@ -5698,7 +5700,7 @@ echo "#"
 echo
 echo "#default-authentication-plugin=mysql_native_password"
 echo "#sql_mode=\"NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,STRICT_ALL_TABLES\""
-echo "sql_mode=\"NO_ENGINE_SUBSTITUTION,STRICT_ALL_TABLES\""
+echo "#sql_mode=\"NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES\""
 if [ $mariadb -eq 1 -a -d "$DESTDIR"$databasedir/ssl ] ; then
 	check_mysqld_variable --ssl 0
 	if [ $? -eq 0 ] ; then
@@ -5841,6 +5843,9 @@ fi
 (
 dump_run_header
 echo "exec 2>&1"
+if [ $mount_resolvconf -eq 1 ] ; then
+	echo "/usr/bin/umount /etc/resolv.conf"
+fi
 echo "exec $QmailBinPrefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
