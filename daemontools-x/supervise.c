@@ -1,5 +1,6 @@
-/*- $Id: supervise.c,v 1.25 2022-05-25 08:27:08+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.26 2022-07-03 00:05:34+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -27,9 +28,6 @@
 #include "scan.h"
 #include "seek.h"
 
-#define FATAL   "supervise: fatal: "
-#define WARNING "supervise: warning: "
-
 static char    *dir;
 static int      selfpipe[2];
 static int      fdlock;
@@ -37,18 +35,26 @@ static int      fdcontrolwrite;
 static int      fdcontrol;
 static int      fdstatus;
 static int      fdok;
+static int      fdup;
 static int      flagexit = 0;
 static int      flagwant = 1;
 static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
 static char     waited, flagfailed;
+/*-
+ * status[12-15] - pid
+ * status[16]    - paused
+ * status[17]    - wants up/down
+ * status[18-19] - wait interval
+ * status[20]    - up / down
+ */
 static char     status[21];
 static char     pwdbuf[256];
-static stralloc wait_sv_file = {0};
+static stralloc fatal, warn, info;
+static stralloc wait_sv_status;
 #ifdef USE_RUNFS
-static char    *sdir;
-static stralloc run_service_dir = { 0 };
+static stralloc run_service_dir;
 int             use_runfs;
 #endif
 static pid_t    childpid = 0;	/*- 0 means down */
@@ -82,22 +88,22 @@ announce(short sleep_interval)
 
 	status[16] = (childpid ? flagpaused : 0);
 	status[17] = (flagwant ? (flagwantup ? 'u' : 'd') : 0);
-	if (sleep_interval) {
+	if (sleep_interval > 0) {
 		s = (short *) (status + 18);
 		*s = sleep_interval;
 	} else
 		status[18] = status[19] = 0;
 
 	if (seek_begin(fdstatus)) {
-		strerr_warn2(WARNING, "lseek: status: ", &strerr_sys);
+		strerr_warn2(warn.s, "lseek: status: ", &strerr_sys);
 		return;
 	}
 	if ((r = write(fdstatus, status, sizeof status)) == -1) {
-		strerr_warn4(WARNING, "unable to write ", dir, "/supervise/status: ", &strerr_sys);
+		strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: ", &strerr_sys);
 		return;
 	}
 	if (r < sizeof status) {
-		strerr_warn4(WARNING, "unable to write ", dir, "/supervise/status: partial write: ", 0);
+		strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: partial write: ", 0);
 		return;
 	}
 }
@@ -120,8 +126,8 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	static ushort   sleep_interval = 60;
 	unsigned long   t;
 	struct substdio ssin;
-	static stralloc tline = { 0 };
-	char            inbuf[256];
+	static stralloc tline;
+	char            inbuf[256], strnum[FMT_ULONG];
 
 	if (tline.len) {
 		*sv_name = tline.s;
@@ -129,16 +135,20 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	}
 	*interval = 0;
 	*sv_name = (char *) 0;
+	/*-
+	 * first line is the sleep interval
+	 * second line is the service to wait for
+	 */
 	if ((fd = open_read("wait")) == -1) {
 		if (errno == error_noent)
 			return 2;
-		strerr_die2sys(111, FATAL, "unable to open wait: ");
+		strerr_die2sys(111, fatal.s, "unable to open wait: ");
 		return -1;
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof (inbuf));
 	for (i = 0;i < 2; i++) {
 		if (getln(&ssin, &tline, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "unable to read input");
+			strerr_die2sys(111, fatal.s, "unable to read input");
 		if (!tline.len)
 			break;
 		if (match) {
@@ -146,7 +156,7 @@ get_wait_params(unsigned short *interval, char **sv_name)
 			tline.s[tline.len] = 0;
 		} else {
 			if (!stralloc_0(&tline))
-				strerr_die2x(111, FATAL, "out of memory");
+				strerr_die2x(111, fatal.s, "out of memory");
 			tline.len--;
 		}
 		if (!i) {/*- max value 32767 */
@@ -159,13 +169,15 @@ get_wait_params(unsigned short *interval, char **sv_name)
 		return 1;
 	*sv_name = tline.s;
 	*interval = sleep_interval;
+	strnum[fmt_int(strnum, sleep_interval)] = 0;
+	strerr_warn5(info.s, "wait ", strnum, " seconds for service ", *sv_name, 0);
 	return 0;
 }
 
 void
 do_wait()
 {
-	int             fd, i, r;
+	int             fd, fd_depend, i, r, len;
 	unsigned short  sleep_interval = 60;
 	unsigned long   wpid;
 	char            wstatus[20];
@@ -173,39 +185,56 @@ do_wait()
 
 #ifdef USE_RUNFS
 	if (use_runfs && fchdir(fddir) == -1)
-		strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+		strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 	i = get_wait_params(&sleep_interval, &service_name);
 #ifdef USE_RUNFS
 	if (use_runfs && chdir(dir) == -1)
-		strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+		strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
 #endif
 	if (i)
 		return;
-	if (!stralloc_copyb(&wait_sv_file, "../", 3) ||
-			!stralloc_cats(&wait_sv_file, service_name) ||
-			!stralloc_catb(&wait_sv_file, "/supervise/status", 17) ||
-			!stralloc_0(&wait_sv_file))
-		strerr_die2x(111, FATAL, "out of memory");
 	pidchange(svpid, 0);
+	if (!stralloc_copyb(&wait_sv_status, "../", 3) ||
+			!stralloc_cats(&wait_sv_status, service_name) ||
+			!stralloc_catb(&wait_sv_status, "/supervise/", 11))
+		strerr_die2x(111, fatal.s, "out of memory");
+	len = wait_sv_status.len;
+	if (!stralloc_catb(&wait_sv_status, "up", 2) || !stralloc_0(&wait_sv_status))
+		strerr_die2x(111, fatal.s, "out of memory");
+
+	/*- 
+	 * if service_name is up
+	 *   opening supervise/up should return
+	 * if service_name is done
+	 *   opening supervise/up should block
+	 */
+	if ((fd_depend = open(wait_sv_status.s, O_WRONLY)) == -1)
+		strerr_die4sys(111, fatal.s, "unable to write ", wait_sv_status.s, ": ");
+	close(fd_depend);
+
+	/*- now open the status file of service_name */
+	wait_sv_status.len = len;
+	if (!stralloc_catb(&wait_sv_status, "status", 6) || !stralloc_0(&wait_sv_status))
+		strerr_die2x(111, fatal.s, "out of memory");
+	announce(-1);
 	for (;;) {
-		announce(-1);
-		if ((fd = open_read(wait_sv_file.s)) == -1) {
+		if ((fd = open_read(wait_sv_status.s)) == -1) {
 			if (errno != error_noent)
-				strerr_warn4(WARNING, "unable to open ", wait_sv_file.s, ": ", &strerr_sys);
+				strerr_die4sys(111, fatal.s, "unable to open ", wait_sv_status.s, ": ");
 			sleep(1);
 			waited = 0;
 			continue;
 		}
 		if ((r = read(fd, wstatus, sizeof wstatus)) == -1) {
-			strerr_warn4(WARNING, "unable to read ", wait_sv_file.s, ": ", &strerr_sys);
+			strerr_warn4(warn.s, "unable to read ", wait_sv_status.s, ": ", &strerr_sys);
 			close(fd);
 			sleep(1);
 			waited = 0;
 			continue;
 		} else
 		if (!r) {
-			strerr_warn4(WARNING, "file ", wait_sv_file.s, " is of zero bytes: ", &strerr_sys);
+			strerr_warn4(warn.s, "file ", wait_sv_status.s, " is of zero bytes: ", &strerr_sys);
 			close(fd);
 			sleep(1);
 			waited = 0;
@@ -225,7 +254,7 @@ do_wait()
 		waited = 0;
 	} /*- for (i = -1;;) */
 	if (!waited) {
-		waited = 1;
+		/*- waited = 1; -*/
 		pidchange(svpid, 0); /*- update start time */
 		announce(sleep_interval);
 		deepsleep(sleep_interval);
@@ -244,11 +273,7 @@ trystart(void)
 	switch (f = fork())
 	{
 	case -1:
-#ifdef USE_RUNFS
-		strerr_warn4(WARNING, "unable to fork for ", sdir, ", sleeping 60 seconds: ", &strerr_sys);
-#else
-		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
-#endif
+		strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
 		trigger();
 		flagfailed = 1;
@@ -258,18 +283,19 @@ trystart(void)
 		sig_unblock(sig_child);
 #ifdef USE_RUNFS
 		if (use_runfs && fchdir(fddir) == -1)
-			strerr_die2sys(111, FATAL, "unable to set current directory: ");
+			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 		execve(*run, run, environ);
-#ifdef USE_RUNFS
-		strerr_die4sys(111, FATAL, "unable to start ", sdir, "/run: ");
-#else
-		strerr_die4sys(111, FATAL, "unable to start ", dir, "/run: ");
-#endif
+		strerr_die2sys(111, fatal.s, "unable to start run: ");
 	}
 	flagpaused = 0;
+	strerr_warn2(info.s, "Started service", 0);
 	pidchange((childpid = f), 1);
 	announce(0);
+	fifo_make("supervise/up", 0600);
+	if ((fdup = open_read("supervise/up")) == -1) /*- open O_RDONLY|O_NDELAY */
+		strerr_die2sys(111, fatal.s, "read: supervise/up: ");
+	coe(fdup);
 	deepsleep(1);
 }
 
@@ -282,11 +308,7 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 	switch (f = fork())
 	{
 	case -1:
-#ifdef USE_RUNFS
-		strerr_warn4(WARNING, "unable to fork for ", sdir, ", sleeping 60 seconds: ", &strerr_sys);
-#else
-		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
-#endif
+		strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
 		trigger();
 		return;
@@ -295,7 +317,7 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 		sig_unblock(sig_child);
 #ifdef USE_RUNFS
 		if (use_runfs && fchdir(fddir) == -1)
-			strerr_die2sys(111, FATAL, "unable to set current directory: ");
+			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 		strnum1[fmt_ulong(strnum1, spid)] = 0;
 		action[1] = strnum1;
@@ -317,11 +339,7 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 		} else
 			action[2] = NULL;
 		execve(*action, action, environ);
-#ifdef USE_RUNFS
-		strerr_die6sys(111, FATAL, "unable to exec ", sdir, "/", *action, ": ");
-#else
-		strerr_die6sys(111, FATAL, "unable to exec ", dir, "/", *action, ": ");
-#endif
+		strerr_die4sys(111, fatal.s, "unable to exec ", *action, ": ");
 	default:
 		wait_pid(&t, f);
 	}
@@ -367,33 +385,34 @@ doit(void)
 				strnum1[fmt_ulong(strnum1, childpid)] = 0;
 				childpid = 0;
 				pidchange(svpid, 0);
+				close(fdup);
 				announce(0);
 				t = str_rchr(dir, '/');
 				ptr = dir[t] ? dir + t + 1 : dir;
 				if (wait_stopped(wstat)) {
 					t = wait_stopsig(wstat);
 					strnum2[fmt_ulong(strnum2, t)] = 0;
-					strerr_warn7(WARNING, "pid: ", strnum1, " service ", ptr, " stopped by signal ", strnum2, 0);
+					strerr_warn7(warn.s, "pid: ", strnum1, " service ", ptr, " stopped by signal ", strnum2, 0);
 				} else
 				if (wait_crashed(wstat))
-					strerr_warn6(WARNING, "pid: ", strnum1, " service ", ptr, " crashed", 0);
+					strerr_warn6(warn.s, "pid: ", strnum1, " service ", ptr, " crashed", 0);
 				else {
 					t = wait_exitcode(wstat);
 					strnum2[fmt_ulong(strnum2, t)] = 0;
-					strerr_warn7(WARNING, "pid: ", strnum1, " service ", ptr, " exited with status=", strnum2, 0);
+					strerr_warn7(warn.s, "pid: ", strnum1, " service ", ptr, " exited with status=", strnum2, 0);
 				}
 				if (flagexit)
 					return;
 				if (flagwant && flagwantup) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
-						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*alert, F_OK))
 						tryaction(alert, r, wstat, 1);
 #ifdef USE_RUNFS
 					if (use_runfs && chdir(dir) == -1)
-						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
 #endif
 					trystart();
 				}
@@ -416,13 +435,13 @@ doit(void)
 				if (childpid) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
-						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (use_runfs && chdir(dir) == -1)
-						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
 #endif
 					kill(g ? 0 - childpid : childpid, SIGTERM);
 					kill(g ? 0 - childpid : childpid, SIGCONT);
@@ -451,13 +470,13 @@ doit(void)
 				if (childpid) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
-						strerr_die2sys(111, FATAL, "unable to switch back to service directory: ");
+						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (use_runfs && chdir(dir) == -1)
-						strerr_die2sys(111, FATAL, "unable to switch back to run directory: ");
+						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
 #endif
 					kill(g ? 0 - childpid : childpid, SIGTERM);
 					kill(g ? 0 - childpid : childpid, SIGCONT);
@@ -596,57 +615,64 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		return;
 	if (!stralloc_copyb(&run_service_dir, run_dir, i) ||
 			!stralloc_catb(&run_service_dir, "/svscan/", 8))
-		strerr_die2x(111, FATAL, "out of memory");
+		strerr_die2x(111, fatal.s, "out of memory");
 
 	if (!str_diff(service_dir, "log")) {
-		/*- SV_PWD is the dirname of directory in /service e.g. qmail-smtpd.25 or log */
+		/*- 
+		 * SV_PWD is the dirname of directory in /service e.g.
+		 * for qmail-smtpd.25/log it will be qmail-smtpd.25
+		 * supervise invocation will be
+		 * supervise log qmail-stmpd.25
+		 * supervise cwd will be
+		 * /service/qmail-stmpd.25 or /run/svscan/qmail-smtpd.25
+		 */
 		if (!(parent_dir = env_get("SV_PWD"))) {
 			if (!getcwd(pwdbuf, 255))
-				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+				strerr_die2sys(111, fatal.s, "log: unable to get current working directory: ");
 			i = str_rchr(pwdbuf, '/');
 			if (!pwdbuf[i])
-				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+				strerr_die2sys(111, fatal.s, "unable to get current working directory: ");
 			parent_dir = pwdbuf + i + 1;
 		}
 		if (!stralloc_cats(&run_service_dir, parent_dir) ||
 				!stralloc_append(&run_service_dir, "/"))
-			strerr_die2x(111, FATAL, "out of memory");
+			strerr_die2x(111, fatal.s, "out of memory");
 	} 
 	/*- full path /run/svscan/service/qmail-smtpd.25 or /run/svscan/service/qmail-smtpd.25/log */
 	if (!stralloc_cats(&run_service_dir, service_dir) ||
 			!stralloc_0(&run_service_dir))
-		strerr_die2x(111, FATAL, "out of memory");
+		strerr_die2x(111, fatal.s, "out of memory");
 	if (chdir(run_dir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", run_dir, ": ");
+		strerr_die4sys(111, fatal.s, "unable to chdir to ", run_dir, ": ");
 	if (access("svscan", F_OK) && mkdir("svscan", 0755) == -1)
-		strerr_die4sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan: ");
+		strerr_die4sys(111, fatal.s, "unable to mkdir ", run_dir, "/svscan: ");
 	if (chdir("svscan") == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan: ");
+		strerr_die4sys(111, fatal.s, "unable to chdir to ", run_dir, "/svscan: ");
 
 	if (parent_dir) { /*- we were called as supervise log */
 		if (access(parent_dir, F_OK)) {
 			if (mkdir(parent_dir, 0755) == -1 && errno != error_exist)
-				strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", parent_dir, ": ");
+				strerr_die6sys(111, fatal.s, "unable to mkdir ", run_dir, "/svscan/", parent_dir, ": ");
 			if (chown(parent_dir, own, grp) == -1)
-				strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, ": ");
+				strerr_die6sys(111, fatal.s, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, ": ");
 		}
 		if (chdir(parent_dir) == -1)
-			strerr_die6sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan/", parent_dir, ": ");
+			strerr_die6sys(111, fatal.s, "unable to chdir to ", run_dir, "/svscan/", parent_dir, ": ");
 		if (access("log", F_OK)) {
 			if (mkdir("log", mode) == -1 && errno != error_exist)
-				strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", parent_dir, "/log: ");
+				strerr_die6sys(111, fatal.s, "unable to mkdir ", run_dir, "/svscan/", parent_dir, "/log: ");
 			if (chown("log", own, grp) == -1)
-				strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, "/log: ");
+				strerr_die6sys(111, fatal.s, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, "/log: ");
 		}
 	} else
 	if (access(service_dir, F_OK)) {
 		if (mkdir(service_dir, mode) == -1 && errno != error_exist)
-			strerr_die6sys(111, FATAL, "unable to mkdir ", run_dir, "/svscan/", service_dir, ": ");
+			strerr_die6sys(111, fatal.s, "unable to mkdir ", run_dir, "/svscan/", service_dir, ": ");
 		if (chown(service_dir, own, grp) == -1)
-			strerr_die6sys(111, FATAL, "unable to set permssions for ", run_dir, "/svscan/", service_dir, ": ");
+			strerr_die6sys(111, fatal.s, "unable to set permssions for ", run_dir, "/svscan/", service_dir, ": ");
 	}
 	if (chdir(service_dir) == -1) /*- e.g. qmail-smtpd.25 or log */
-		strerr_die6sys(111, FATAL, "unable to chdir to ", run_dir, "/svscan/", service_dir, ": ");
+		strerr_die6sys(111, fatal.s, "unable to chdir to ", run_dir, "/svscan/", service_dir, ": ");
 	dir = run_service_dir.s;
 	return;
 }
@@ -663,7 +689,7 @@ do_init()
 	switch (f = fork())
 	{
 	case -1:
-		strerr_warn4(WARNING, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
+		strerr_warn4(warn.s, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
 		trigger();
 		flagfailed = 1;
@@ -672,10 +698,10 @@ do_init()
 		sig_uncatch(sig_child);
 		sig_unblock(sig_child);
 		execve(*init, init, environ);
-		strerr_die4sys(111, FATAL, "unable to start ", dir, "/init: ");
+		strerr_die4sys(111, fatal.s, "unable to start ", dir, "/init: ");
 	}
 	if (wait_pid(&t, f) == -1) {
-		strerr_warn4(WARNING, "wait failed ", dir, "/init: ", &strerr_sys);
+		strerr_warn4(warn.s, "wait failed ", dir, "/init: ", &strerr_sys);
 		return -1;
 	}
 	if (WIFSTOPPED(t) || WIFSIGNALED(t))
@@ -696,8 +722,26 @@ main(int argc, char **argv)
 		strerr_die1x(100, "supervise: usage: supervise dir [log_parent]");
 	if (*dir == '/' || *dir == '.')
 		strerr_die1x(100, "supervise: dir cannot start with '/' or '.'");
+	if (argc == 2) {
+		if (!stralloc_copys(&fatal, dir) || !stralloc_catb(&fatal, ": supervise: fatal: ", 20))
+			strerr_die1x(111, "supervise: out of memory");
+		if (!stralloc_copys(&warn, dir) || !stralloc_catb(&warn, ": supervise: warning: ", 22))
+			strerr_die1x(111, "supervise: out of memory");
+		if (!stralloc_copys(&info, dir) || !stralloc_catb(&info, ": supervise: info: ", 19))
+			strerr_die1x(111, "supervise: out of memory");
+	} else
+	if (argc == 3) {
+		if (!stralloc_copys(&fatal, argv[2]) || !stralloc_catb(&fatal, "/log: supervise: fatal: ", 24))
+			strerr_die1x(111, "supervise: out of memory");
+		if (!stralloc_copys(&warn, argv[2]) || !stralloc_catb(&warn, "/log: supervise: warning: ", 26))
+			strerr_die1x(111, "supervise: out of memory");
+		if (!stralloc_copys(&info, argv[2]) || !stralloc_catb(&info, "/log: supervise: info: ", 23))
+			strerr_die1x(111, "supervise: out of memory");
+	}
+	if (!stralloc_0(&fatal) || !stralloc_0(&warn) || !stralloc_0(&info))
+		strerr_die2x(111, fatal.s, "out of memory");
 	if (pipe(selfpipe) == -1)
-		strerr_die4sys(111, FATAL, "unable to create pipe for ", dir, ": ");
+		strerr_die4sys(111, fatal.s, "unable to create pipe for ", dir, ": ");
 	coe(selfpipe[0]);
 	coe(selfpipe[1]);
 	ndelay_on(selfpipe[0]);
@@ -707,7 +751,7 @@ main(int argc, char **argv)
 
 	if (!(ptr = env_get("SERVICEDIR"))) {
 		if (!getcwd(pwdbuf, 255))
-			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+			strerr_die2sys(111, fatal.s, "unable to get current working directory: ");
 		ptr = pwdbuf;
 	}
 	if (!stralloc_copys(&init_sv_path, ptr) ||
@@ -716,48 +760,43 @@ main(int argc, char **argv)
 			!stralloc_append(&init_sv_path, "/") ||
 			!stralloc_catb(&init_sv_path, "init", 4) ||
 			!stralloc_0(&init_sv_path))
-		strerr_die2x(111, FATAL, "out of memory");
+		strerr_die2x(111, fatal.s, "out of memory");
 	init[0] = init_sv_path.s;
 
 	if (chdir(dir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", dir, ": ");
+		strerr_die4sys(111, fatal.s, "unable to chdir to ", dir, ": ");
 	if (stat("down", &st) != -1)
 		flagwantup = 0;
 	else
 	if (errno != error_noent)
-		strerr_die4sys(111, FATAL, "unable to stat ", dir, "/down: ");
+		strerr_die4sys(111, fatal.s, "unable to stat ", dir, "/down: ");
 
 	if ((fddir = open_read(".")) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
+		strerr_die2sys(111, fatal.s, "unable to open current directory: ");
 #ifdef USE_RUNFS
 	if (stat(".", &st) == -1)
-		strerr_die2sys(111, FATAL, "unable to stat current directory: ");
-	/*-
-	 * save original directory in sdir since
-	 * dir gets modified in initialize_run()
-	 */
-	sdir = dir;
+		strerr_die2sys(111, fatal.s, "unable to stat current directory: ");
 	initialize_run(dir, st.st_mode, st.st_uid, st.st_gid); /*- this will set dir to new service directory in /run, /var/run */
 #endif
 	if (mkdir("supervise", 0700) && errno != error_exist) 
-		strerr_die2sys(111, FATAL, "unable to create supervise directory: ");
+		strerr_die2sys(111, fatal.s, "unable to create supervise directory: ");
 
 	if ((fdstatus = open_trunc("supervise/status")) == -1)
-		strerr_die4sys(111, FATAL, "unable to create ", dir, "/supervise/status: ");
+		strerr_die4sys(111, fatal.s, "unable to create ", dir, "/supervise/status: ");
 	coe(fdstatus);
 
 	fdlock = open_append("supervise/lock");
 	if ((fdlock == -1) || (lock_exnb(fdlock) == -1))
-		strerr_die4sys(111, FATAL, "unable to acquire ", dir, "/supervise/lock: ");
+		strerr_die4sys(111, fatal.s, "unable to acquire ", dir, "/supervise/lock: ");
 	coe(fdlock);
 
 	fifo_make("supervise/control", 0600);
 	if ((fdcontrol = open_read("supervise/control")) == -1)
-		strerr_die4sys(111, FATAL, "unable to read ", dir, "/supervise/control: ");
+		strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/control: ");
 	coe(fdcontrol);
 	ndelay_on(fdcontrol); /*- shouldn't be necessary */
 	if ((fdcontrolwrite = open_write("supervise/control")) == -1)
-		strerr_die4sys(111, FATAL, "unable to write ", dir, "/supervise/control: ");
+		strerr_die4sys(111, fatal.s, "unable to write ", dir, "/supervise/control: ");
 	coe(fdcontrolwrite);
 
 	pidchange((svpid = getpid()), 0);
@@ -765,7 +804,7 @@ main(int argc, char **argv)
 
 	fifo_make("supervise/ok", 0600);
 	if ((fdok = open_read("supervise/ok")) == -1)
-		strerr_die4sys(111, FATAL, "unable to read ", dir, "/supervise/ok: ");
+		strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/ok: ");
 	coe(fdok);
 
 	/*
@@ -776,7 +815,7 @@ main(int argc, char **argv)
 	while (1) {
 		if (!access(*init, X_OK)) {
 			if (do_init()) {
-				strerr_warn4(WARNING, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
+				strerr_warn4(warn.s, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
 				deepsleep(60);
 			} else
 				break;
@@ -794,13 +833,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.25 2022-05-25 08:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.26 2022-07-03 00:05:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.26  2022-07-03 00:05:34+05:30  Cprogrammer
+ * open supervise/ok in write blocked mode when waiting for a service
+ *
  * Revision 1.25  2022-05-25 08:27:08+05:30  Cprogrammer
  * new variable use_runfs to indicate if svscan is using /run
  *

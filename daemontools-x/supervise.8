@@ -6,58 +6,72 @@ supervise \- starts and monitors a service.
 \fBsupervise\fR \fIs\fR
 
 .SH DESCRIPTION
-\fBsupervise\fR switches to the directory named \fIs\fR and starts ./init
+\fBsupervise\fR(8) switches to the directory named \fIs\fR and starts ./init
 if it exists. It restarts ./init if ./init exits with non-zero status. It
 pauses for a second after starting ./init, so that it does not loop too
 quickly in case ./init exits immediately. \fIdirectory\fR has to be
 relative to the current working directory and cannot start with the dot
 (\fB.\fR) or the slash (\fB/\fR) character.
 
-After ./init exits with zero exit status, \fBsupervise\fR starts ./run.
+After ./init exits with zero exit status, \fBsupervise\fR(8) starts ./run.
 It restarts ./run if ./run exits. It pauses for a second after
 starting ./run, so that it does not loop too quickly if ./run exits
 immediately. 
 
-If the file \fIs\fR/down exists, \fBsupervise\fR does not start ./run
+If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run and to give other
-commands to \fBsupervise\fR.
+commands to \fBsupervise\fR(8).
 
-if the file \fIs\fR/shutdown exists \fBsupervise\fR executes
+if the file \fIs\fR/shutdown exists \fBsupervise\fR(8) executes
 \fIshutdown\fR when asked to exit.
 
-if the file \fIs\fR/alert exists \fBsupervise\fR executes \fIalert\fR
+if the file \fIs\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
 whenever run exits. The pid of the process that exited is passed as the
 first argument to \fIalert\fR. The exit value or signal (if killed by
 signal) is passed as the second argument to \fIalert\fR. The third argument
 is either \fIexited\fR or \fIstopped / signalled\fR.
 
-supervises uses directory \fIrun\fR/svscan/\fIs\fR/supervise where\fIrun\fR
-is either /run or /var/run, depending on your operating system.
+\fBsupervise\fR(8) creates the directory \fIs\fR/\fIsupervise\fR in
+\fIrun\fR/\fIsvscan\fR where \fIrun\fR is either /run or /var/run,
+depending on your operating system. \fBsupervise\fR(8) maintains status
+information in a binary format in the directory
+\fIs\fR/\fIsupervise\fR. The directory \fIs\fR must be writable to
+\fBsupervise\fR(8). The status information can be read by \fBsvstat\fR(8).
 
-\fBsupervise\fR maintains status information in a binary format in the
-directory \fIrun\fR\fIs\fR/supervise. This directory \fIrun\fR\fIs\fR must
-be writable to \fBsupervise\fR. The status information can be read by
-\fBsvstat\fR(8).
-
-\fBsupervise\fR may exit immediately after startup if it cannot find the
-files it needs in \fIs\fR or if another copy of \fBsupervise\fR is already
-running in \fIs\fR. Once \fBsupervise\fR is successfully running, it will
+\fBsupervise\fR(8) may exit immediately after startup if it cannot find the
+files it needs in \fIs\fR or if another copy of \fBsupervise\fR(8) is already
+running in \fIs\fR. Once \fBsupervise\fR(8) is successfully running, it will
 not exit unless it is killed or specifically asked to exit. You can use
-\fBsvok\fR(8) to check whether \fBsupervise\fR is successfully running. You
-can use \fBsvscan\fR(8) to reliably start a collection of \fBsupervise\fR
-processes. \fBsvscan\fR mirrors the service directory in /run or /var/run
-directory (whichever is found first). So /run/\fIs\fR will be analogous
-to /service/\fIs\fR. When started by \fBsvscan\fR, error messages printed
-by \fBsupervise\fR will go the standard error output of \fBsvscan\fR
-process.
+\fBsvok\fR(8) to check whether \fBsupervise\fR(8) is successfully running. You
+can use \fBsvscan\fR(8) to reliably start a collection of
+\fBsupervise\fR(8) processes. \fBsvscan\fR mirrors the service directory in
+/run or /var/run directory (whichever is found first). So /run/\fIs\fR will
+be analogous to /service/\fIs\fR. When started by \fBsvscan\fR, error
+messages printed by \fBsupervise\fR(8) will go the standard error output of
+\fBsvscan\fR(8) process.
 
-\fBsupervise\fR can wait for another service by having a file named
-\fIs\fR/\fIwait\fR. This file has two lines. The first line is a service
-name \fIw\fR and the second line is time in seconds \fIt\fR. \fIw\fR
+\fBsupervise\fR(8) can wait for another service by having a file named
+\fIs\fR/\fIwait\fR. This file has two lines. The first line is time \fIt\fR
+in seconds and the second line is the service name \fIw\fR. \fIw\fR
 refers to the service for which service \fIs\fR should wait for \fIt\fR
-secs once service \fIw\fR is up and runnng. The amount of time \fIt\fR
+secs after service \fIw\fR is up and runnng. The amount of time \fIt\fR
 is limited to a max of 32767 secs. Any value above this value will be
-limited to 60 secs.
+limited to 60 secs. \fIsupervise\fR(8) opens \fIw\fR/\fIsupervise\fR/\fIup\fR in
+write mode. If service \fIw\fR is up, the write returns immediately. If
+service \fIw\fR is done, write will block till \fIw\fR is up and running.
+
+\fBsupervise\fR(8) creates the following FIFOs for reading
+
+.IP \[bu] 2
+\fIs\fR/\fIsupervise\fR/\fIcontrol\fR - for reading commands from clients
+like \fBsvc\fR(8).
+.IP \[bu] 2
+\fIs\fR/\fIsupervise\fR/\fIok\fR - clients can open this in write mode as a
+test which indicates supervise(8) is up
+.IP \[bu] 2
+\fIs\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode as a
+test to indicate service \fIs\fR is up. Any client that opens this fifo
+will block until the service \fIs\fR is up.
 
 .SH SEE ALSO
 svc(8),
