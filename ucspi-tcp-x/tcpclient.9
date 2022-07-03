@@ -203,18 +203,18 @@ Default is @qsysconfdir@/certs.
 .SH EXAMPLES
 .EX
 1. Connect to port 25 and issue the starttls command
-   tcpclient -n "" -s smtp 0 25
+   tcpclient -s smtp 0 25
 
 2. Connect to port 110 and issue the STLS command
-   tcpclient -n "" -s pop3 0 110
+   tcpclient -s pop3 0 110
 
 3. Connect to port 25 on 127.0.0.1 like telnet
    read from fd 0 & write to network, read from network & write to fd 1
-   tcpclient 127.0.0.1 25
+   tcpclient -n "" 127.0.0.1 25
 
 6. Run a script under tcpclient that connects to a SSL server on port 5555
    read from fd 6 reads from network, write to fd 7 writes to network
-   tcpclient -n "" 0 5555 /usr/bin/my_script
+   tcpclient 0 5555 /usr/bin/my_script
 .EE
 
 .SH SEE ALSO
