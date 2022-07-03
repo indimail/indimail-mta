@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.26 2022-07-03 00:05:34+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.26 2022-07-03 11:32:00+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -41,7 +41,7 @@ static int      flagwant = 1;
 static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
-static char     waited, flagfailed;
+static char     flagfailed;
 /*-
  * status[12-15] - pid
  * status[16]    - paused
@@ -223,21 +223,18 @@ do_wait()
 			if (errno != error_noent)
 				strerr_die4sys(111, fatal.s, "unable to open ", wait_sv_status.s, ": ");
 			sleep(1);
-			waited = 0;
 			continue;
 		}
 		if ((r = read(fd, wstatus, sizeof wstatus)) == -1) {
 			strerr_warn4(warn.s, "unable to read ", wait_sv_status.s, ": ", &strerr_sys);
 			close(fd);
 			sleep(1);
-			waited = 0;
 			continue;
 		} else
 		if (!r) {
 			strerr_warn4(warn.s, "file ", wait_sv_status.s, " is of zero bytes: ", &strerr_sys);
 			close(fd);
 			sleep(1);
-			waited = 0;
 			continue;
 		}
 		close(fd);
@@ -251,16 +248,12 @@ do_wait()
 		/*- supervise started and not in paused and not in want down */
 		if (wpid && (!wstatus[16] && wstatus[17] != 'd'))
 			break;
-		waited = 0;
 	} /*- for (i = -1;;) */
-	if (!waited) {
-		/*- waited = 1; -*/
-		pidchange(svpid, 0); /*- update start time */
-		announce(sleep_interval);
-		deepsleep(sleep_interval);
-		childpid = 0;
-		announce(0);
-	}
+	pidchange(svpid, 0); /*- update start time */
+	announce(sleep_interval);
+	deepsleep(sleep_interval);
+	childpid = 0;
+	announce(0);
 	return;
 }
 
@@ -833,15 +826,15 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.26 2022-07-03 00:05:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.26 2022-07-03 11:32:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
- * Revision 1.26  2022-07-03 00:05:34+05:30  Cprogrammer
- * open supervise/ok in write blocked mode when waiting for a service
+ * Revision 1.26  2022-07-03 11:32:00+05:30  Cprogrammer
+ * open supervise/up in O_WRONLY when waiting for service
  *
  * Revision 1.25  2022-05-25 08:27:08+05:30  Cprogrammer
  * new variable use_runfs to indicate if svscan is using /run
