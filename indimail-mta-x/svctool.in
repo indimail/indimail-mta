@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.635 2022-07-03 00:11:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.636 2022-07-04 17:20:52+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.635 2022-07-03 00:11:13+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.636 2022-07-04 17:20:52+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2762,14 +2762,21 @@ else
 fi
 (
 dump_run_header
-echo "MYUID=\`/usr/bin/id -u qmaild\`"
-echo "MYGID=\`/usr/bin/getent group qmail|awk -F: '{print \$3}'\`"
-echo "ME=\`head -1 $CONTROLDIR/me\`"
-echo "HOSTNAME=\`uname -n\`"
+echo "MYUID=\$(/usr/bin/id -u qmaild)"
+case $host in
+	*-*-darwin*)
+	echo "MYGID=\$(dscl . -read /Groups/qmail PrimaryGroupID|awk '{print \$2}')"
+	;;
+	*)
+	echo "MYGID=\$(/usr/bin/getent group qmail|awk -F: '{print \$3}')"
+	;;
+esac
+echo "ME=\$(head -1 $CONTROLDIR/me)"
+echo "HOSTNAME=\$(uname -n)"
 echo
 echo "if [ -z \"\$MYUID\" -o -z \"\$MYGID\" -o -z \"\$ME\" ]; then"
 echo "    echo UID, GID, or ME is unset in"
-echo "    echo \`pwd\`/run"
+echo "    echo \$(pwd)/run"
 echo "    sleep 5"
 echo "    exit 1"
 echo "fi"
@@ -4768,7 +4775,14 @@ echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 dump_run_header
 echo "exec 2>&1"
 echo ""
-echo "home=\$(getent passwd indimail|awk -F: '{print \$6}')"
+case $host in
+	*-*-darwin*)
+	echo "home=\$(dscl . -read /Users/indimail|grep NFS|awk '{print \$2}')"
+	;;
+	*)
+	echo "home=\$(getent passwd indimail|awk -F: '{print \$6}')"
+	;;
+esac
 echo "if [ -z \"\$home\" ] ; then"
 echo "  echo \"unable to get homedir for indimail\" 1>&2"
 echo "  exit 1"
