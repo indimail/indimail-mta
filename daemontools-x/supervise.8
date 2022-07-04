@@ -15,12 +15,13 @@ relative to the current working directory and cannot start with the dot
 
 After ./init exits with zero exit status, \fBsupervise\fR(8) starts ./run.
 It restarts ./run if ./run exits. It pauses for a second after
-starting ./run, so that it does not loop too quickly if ./run exits
-immediately. 
+starting ./run, so that it does not loop too quickly in case ./run exits
+immediately.
 
 If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
-immediately. You can use \fBsvc\fR(8) to start ./run and to give other
-commands to \fBsupervise\fR(8).
+immediately. You can use \fBsvc\fR(8) to start ./run or to give other
+commands to \fBsupervise\fR(8). \fBsupervise\fR uses
+\fIs\fR/\fIsupervise\fR/\/\fIcontrol\fR fifo to read these commands.
 
 if the file \fIs\fR/shutdown exists \fBsupervise\fR(8) executes
 \fIshutdown\fR when asked to exit.
@@ -41,7 +42,9 @@ information in a binary format in the directory
 \fBsupervise\fR(8) may exit immediately after startup if it cannot find the
 files it needs in \fIs\fR or if another copy of \fBsupervise\fR(8) is already
 running in \fIs\fR. Once \fBsupervise\fR(8) is successfully running, it will
-not exit unless it is killed or specifically asked to exit. You can use
+not exit unless it is killed or specifically asked to exit. Once
+\fBsupervise\fR(8) is successfully running, it opens the fifo
+\fIs\fR/\fIsupervise\fR/\fIok\fR in O_RDONLY|O_NDELAY mode. You can use
 \fBsvok\fR(8) to check whether \fBsupervise\fR(8) is successfully running. You
 can use \fBsvscan\fR(8) to reliably start a collection of
 \fBsupervise\fR(8) processes. \fBsvscan\fR mirrors the service directory in
@@ -52,26 +55,29 @@ messages printed by \fBsupervise\fR(8) will go the standard error output of
 
 \fBsupervise\fR(8) can wait for another service by having a file named
 \fIs\fR/\fIwait\fR. This file has two lines. The first line is time \fIt\fR
-in seconds and the second line is the service name \fIw\fR. \fIw\fR
-refers to the service for which service \fIs\fR should wait for \fIt\fR
-secs after service \fIw\fR is up and runnng. The amount of time \fIt\fR
-is limited to a max of 32767 secs. Any value above this value will be
-limited to 60 secs. \fIsupervise\fR(8) opens \fIw\fR/\fIsupervise\fR/\fIup\fR in
-write mode. If service \fIw\fR is up, the write returns immediately. If
-service \fIw\fR is done, write will block till \fIw\fR is up and running.
+in seconds and the second line is service name \fIw\fR. \fIw\fR refers to
+the service which service \fIs\fR should wait \fIt\fR secs after service
+\fIw\fR starts up. The amount of time \fIt\fR is limited to a max of 32767
+secs. Any value above this value will be limited to 60 secs.
+\fIsupervise\fR(8) opens \fIw\fR/\fIsupervise\fR/\fIup\fR in write mode. If
+service \fIw\fR is up, the write returns immediately. If service \fIw\fR is
+done, write will block till \fIw\fR is up and running.
 
-\fBsupervise\fR(8) creates the following FIFOs for reading
+\fBsupervise\fR(8) creates the following FIFOs for with O_RDONLY|O_NDELAY
+mode. See open(2) for description of O_RDONLY, O_NDELAY
 
 .IP \[bu] 2
 \fIs\fR/\fIsupervise\fR/\fIcontrol\fR - for reading commands from clients
 like \fBsvc\fR(8).
 .IP \[bu] 2
-\fIs\fR/\fIsupervise\fR/\fIok\fR - clients can open this in write mode as a
-test which indicates supervise(8) is up
+\fIs\fR/\fIsupervise\fR/\fIok\fR - clients can open this in write mode
+(O_WRONLY) to test if \fBsupervise\fR(8) is running in \fIs\fR. If write
+returns, it means \fBsupervise\fR(8) is running.
 .IP \[bu] 2
-\fIs\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode as a
-test to indicate service \fIs\fR is up. Any client that opens this fifo
-will block until the service \fIs\fR is up.
+\fIs\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode
+(O_WRONLY) to test if service \fIs\fR is up. Any client that opens this
+fifo will block until the service \fIs\fR is up. If write returns, it means
+service \fBs\fR(8) is running.
 
 .SH SEE ALSO
 svc(8),
@@ -83,7 +89,7 @@ svscan(8),
 svctool(8),
 minisvc(8),
 readproctitle(8),
-fghack(8),  
+fghack(8),
 pgrphack(8),
 multilog(8),
 tai64n(8),
@@ -92,4 +98,5 @@ setuidgid(8),
 envuidgid(8),
 envdir(8),
 softlimit(8),
-setlock(8)
+setlock(8),
+open(2)
