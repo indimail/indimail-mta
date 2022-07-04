@@ -15,14 +15,17 @@ Few of the changes are
 9. Addtional actions in svc command (-r, -1, -2)
 10. svps command to pretty print service status
 11. Ability for a service to wait for another service
-12. Additional information in svstat (wait status, supervise pid)
-13. rpm/debian packages along with create\_rpm, create\_debian scripts
-14. Return the status of supervise/service in svstat itself.
-15. man pages for all commands
-16. docker-entrypoint to svscan
-17. ability to become session leader if SETSID env variable is set
-18. create .svscan.pid file
-19. Linked with [libqmail](https://github.com/mbhangui/libqmail) to avoid duplication of functions and ease of maintenance. This also implies use of substdio interface instead of buffer interface for standard input / output
+12. New fifo supervise/up which services can open to test if service is up or down.
+13. Additional information in svstat (wait status, supervise pid)
+14. rpm/debian packages along with create\_rpm, create\_debian scripts
+15. Return the status of supervise/service in svstat itself.
+16. enhanced envdir utility that can load environment variables from multiple directories and -c option to clear existing environment variables on startup.
+17. man pages for all commands
+18. docker-entrypoint to svscan
+19. functional as init replacement in docker/podman environment.
+20. ability to become session leader if SETSID env variable is set
+21. create .svscan.pid file
+22. Linked with [libqmail](https://github.com/mbhangui/libqmail) to avoid duplication of functions and ease of maintenance. This also implies use of substdio interface instead of buffer interface for standard input / output
 
 ## Build daemontools
 
