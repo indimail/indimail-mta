@@ -1,4 +1,4 @@
-/                     DIRS
+/                     DIR
 @prefix@                  BIN
 @prefix@                  SBIN
 @shareddir@   SHARED
