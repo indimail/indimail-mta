@@ -1,4 +1,5 @@
 usr/bin       /usr
+usr/libexec   /usr
 usr/share     /usr
 usr/lib       /usr
 etc/indimail  /etc
