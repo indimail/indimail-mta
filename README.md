@@ -1,18 +1,6 @@
-# indimail-mta
+[![Matrix](https://img.shields.io/matrix/indimail:matrix.org.svg)](https://matrix.to/#/#indimail:matrix.org)
 
-[qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following packages
-
-* [daemontools](https://cr.yp.to/daemontools.html "daemontools")
-* [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
-* [qmailanalog](http://cr.yp.to/qmailanalog.html "qmailanalog")
-* [serialmail](https://cr.yp.to/serialmail.html "serialmail")
-* [dotforward](https://cr.yp.to/dot-forward.html "dot-foward")
-* [fastforward](https://cr.yp.to/fastforward.html "fastforward")
-* [mess822](https://cr.yp.to/mess822.html "mess822")
-
-A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for indimail-mta is [here](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md)
-
-**Complation Status (from Github Actions)**
+**Current Complation Status**
 
 [![indimail-mta Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-c-cpp.yml)
 [![indimail-mta FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-freebsd.yml)
@@ -27,6 +15,20 @@ A detailed [wiki](https://github.com/mbhangui/indimail-virtualdomains/blob/maste
 [![libdkim FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml)
 [![libsrs2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml)
 [![libsrs2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml)
+
+# indimail-mta
+
+[qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following packages
+
+* [daemontools](https://cr.yp.to/daemontools.html "daemontools")
+* [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
+* [qmailanalog](http://cr.yp.to/qmailanalog.html "qmailanalog")
+* [serialmail](https://cr.yp.to/serialmail.html "serialmail")
+* [dotforward](https://cr.yp.to/dot-forward.html "dot-foward")
+* [fastforward](https://cr.yp.to/fastforward.html "fastforward")
+* [mess822](https://cr.yp.to/mess822.html "mess822")
+
+[README-indimail](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) is a detailed wiki for indimail-mta.
 
 indimail-mta is the default MTA installed when you install [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).
 
@@ -810,7 +812,7 @@ Earlier I used to provide docker / podman container images on [docker hub](https
 
 ## IRC / Matrix
 
-![Matrix](https://img.shields.io/matrix/indimail:matrix.org)
+[![Matrix](https://img.shields.io/matrix/indimail:matrix.org.svg)](https://matrix.to/#/#indimail:matrix.org)
 
 * [Matrix Invite Link #indimail:matrix.org](https://matrix.to/#/#indimail:matrix.org)
 * IndiMail has an [IRC channel on libera](https://libera.chat/) #indimail-mta
