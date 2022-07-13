@@ -73,3 +73,4 @@ inotify.o
 hasinotify.h
 openrc
 INPUT
+set-network-wait

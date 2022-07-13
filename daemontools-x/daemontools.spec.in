@@ -266,6 +266,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{libexecdir}/svscanboot
 %attr(0755,root,root)                    %{libexecdir}/installer
 %attr(0755,root,root)                    %{libexecdir}/instcheck.daemontools
+%attr(0755,root,root)                    %{libexecdir}/set-network-wait
 %attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
 %attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
 %attr(644,root,root)  %config(noreplace) %{qsysconfdir}/perms.d/%{name}/*

@@ -1,0 +1,43 @@
+#
+# $Id: set-network-wait.in,v 1.1 2022-07-13 11:56:17+05:30 Cprogrammer Exp mbhangui $
+#
+out=`mktemp -t svscanXXXXXXXXX`
+if [ ! -d /usr/lib/systemd/system/svscan.service.d ] ; then
+	mkdir -p /usr/lib/systemd/system/svscan.service.d
+fi
+do_create=0
+mkdir -p /tmp/svscan
+for i in systemd-networkd NetworkManager
+do
+	active=$(systemctl is-active $i.service)
+	if [ "$active" != "active" ] ; then
+		continue
+	fi
+	sed \
+		-e "s{^#After=$i-wait-online.service{After=$i-wait-online.service{" \
+		-e "s{^#Also=$i-wait-online.service{Also=$i-wait-online.service{" \
+		@shareddir@/boot/systemd.override.conf > $out
+	if [ -f /usr/lib/systemd/system/svscan.service.d/override.conf ] ; then
+		diff $out /usr/lib/systemd/system/svscan.service.d/override.conf > /dev/null
+		if [ $? -ne 0 ] ; then
+			do_create=1
+		fi
+	else
+		do_create=1
+	fi
+	if [ $do_create -eq 1 ] ; then
+		echo "Setting wait-online for $i"
+		mv $out /usr/lib/systemd/system/svscan.service.d/override.conf
+		systemctl daemon-reload
+		break
+	else
+		/bin/rm -f $out
+	fi
+done
+
+#
+# $Log: set-network-wait.in,v $
+# Revision 1.1  2022-07-13 11:56:17+05:30  Cprogrammer
+# Initial revision
+#
+#

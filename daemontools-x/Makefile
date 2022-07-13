@@ -370,6 +370,14 @@ systemd: systemd.in conf-libexec conf-servicedir
 	echo "#"; \
 	$(edit) systemd.in \
 	) > systemd
+set-network-wait: set-network-wait.in conf-shared
+	( \
+	cat warn-auto.sh; \
+	echo "# svscan service override"; \
+	echo "#"; \
+	$(edit) $@.in; \
+	) > $@
+	chmod +x $@
 openrc: openrc.in conf-libexec conf-servicedir
 	( \
 	echo "#!/sbin/openrc-run"; \
