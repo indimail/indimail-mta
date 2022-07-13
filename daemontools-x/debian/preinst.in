@@ -80,7 +80,6 @@ case "$1" in
 	# Create a users and groups. Do not report any problems if they already
 	# exists.
 	#
-	echo "Doing install"
 	(
 	mkdir -p /tmp/daemontools
 	chmod 700 /tmp/daemontools
