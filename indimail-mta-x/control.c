@@ -296,7 +296,7 @@ control_readfile(stralloc *sa, char *fn, int flagme)
 }
 
 /*-
- * pick a random file from fn and copy it to sa
+ * pick a random line from fn and copy it to sa
  */
 int
 control_readrandom(stralloc *sa, char *fn)
