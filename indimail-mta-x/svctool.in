@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.636 2022-07-04 17:20:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.637 2022-07-21 07:54:36+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.636 2022-07-04 17:20:52+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.637 2022-07-21 07:54:36+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3666,6 +3666,7 @@ if [ $run_file_only -ne 1 ] ; then
 		# this will have all variables of "$cdb_f"_config_ssl also
 		create_"$cdb_f"_config $COURIER_PORT $infifo > $conf_dir/.courier_variables
 	fi
+	echo "/tmp/inquery" > $conf_dir/TMPDIR
 	echo "0660" > $conf_dir/FIFO_MODE
 	if [ ! " $memory" = " " ] ; then
 		echo $memory > $conf_dir/SOFT_MEM
@@ -3698,6 +3699,9 @@ echo "prefix=$QmailBinPrefix"
 echo "bindir=\${prefix}/bin"
 echo "libexecdir=${libexecdir}"
 echo ""
+echo "mkdir -p /tmp/inquery"
+echo "chmod 2770 /tmp/inquery"
+echo "chown qmaild:indimail /tmp/inquery"
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "IMAPAUTHMODULES=\\\"\\\""
@@ -5593,7 +5597,7 @@ check_mysqld_variable --log-queries-not-using-indexes 1
 # the errors are written to stderr (usually, the command line).
 # Few mysql-community have a bug where if you don't have --log-error
 # Error-log destination "stderr" is not a file. Can not restore error log messages from previous run.
-check_mysqld_variable --log-error=$DATABASE/logs/mysql-error.log 1
+check_mysqld_variable --log-error=\$DATABASE/logs/mysql-error.log 1
 check_mysqld_variable --log-error-verbosity=2 1
 if [ $mariadb -eq 1 ] ; then
 check_mysqld_variable --log-warnings=2 1
