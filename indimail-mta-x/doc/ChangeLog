@@ -20,6 +20,10 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 11. svctool.in: unmount resolv.conf when svscan is shutdown
 - 04/07/2022
 12. svctool.in: fixed qmail-smtpd, inlookup service script for Mac OSX
+- 21/07/2022
+13. svctool.in: fixed error in mysql run script
+14. svctool.in: use /tmp/inquery as TMPDIR for courier-imap inlookup
+
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
