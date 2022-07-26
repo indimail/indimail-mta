@@ -97,7 +97,9 @@ static int      auth_login(char *);
 static int      auth_plain(char *);
 static int      auth_cram_md5();
 static int      auth_cram_sha1();
+static int      auth_cram_sha224();
 static int      auth_cram_sha256();
+static int      auth_cram_sha384();
 static int      auth_cram_sha512();
 static int      auth_cram_ripemd();
 static int      auth_digest_md5();
@@ -112,7 +114,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.253 $";
+char           *revision = "$Revision: 1.254 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -359,7 +361,9 @@ struct authcmd {
 	{"plain", auth_plain},
 	{"cram-md5", auth_cram_md5},
 	{"cram-sha1", auth_cram_sha1},
+	{"cram-sha224", auth_cram_sha224},
 	{"cram-sha256", auth_cram_sha256},
+	{"cram-sha384", auth_cram_sha384},
 	{"cram-sha512", auth_cram_sha512},
 	{"cram-ripemd", auth_cram_ripemd},
 	{"digest-md5", auth_digest_md5},
@@ -825,9 +829,21 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 						logerr(": AUTH CRAM-SHA1");
 						break;
 					case 5:
-						logerr(": AUTH CRAM-RIPEMD");
+						logerr(": AUTH CRAM-SHA224");
 						break;
 					case 6:
+						logerr(": AUTH CRAM-SHA256");
+						break;
+					case 7:
+						logerr(": AUTH CRAM-SHA384");
+						break;
+					case 8:
+						logerr(": AUTH CRAM-SHA512");
+						break;
+					case 9:
+						logerr(": AUTH CRAM-RIPEMD");
+						break;
+					case 10:
 						logerr(": AUTH DIGEST-MD5");
 						break;
 					default:
@@ -910,9 +926,21 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, in
 					logerr(": AUTH CRAM-SHA1");
 					break;
 				case 5:
-					logerr(": AUTH CRAM-RIPEMD");
+					logerr(": AUTH CRAM-SHA224");
 					break;
 				case 6:
+					logerr(": AUTH CRAM-SHA256");
+					break;
+				case 7:
+					logerr(": AUTH CRAM-SHA384");
+					break;
+				case 8:
+					logerr(": AUTH CRAM-SHA512");
+					break;
+				case 9:
+					logerr(": AUTH CRAM-RIPEMD");
+					break;
+				case 10:
 					logerr(": AUTH DIGEST-MD5");
 					break;
 				default:
@@ -1325,12 +1353,21 @@ log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 			logerr("> AUTH CRAM-SHA1 <");
 			break;
 		case 5:
-			logerr("> AUTH CRAM-SHA256 <");
+			logerr("> AUTH CRAM-SHA224 <");
 			break;
 		case 6:
-			logerr("> AUTH CRAM-RIPEMD <");
+			logerr("> AUTH CRAM-SHA256 <");
 			break;
 		case 7:
+			logerr("> AUTH CRAM-SHA384 <");
+			break;
+		case 8:
+			logerr("> AUTH CRAM-SHA512 <");
+			break;
+		case 9:
+			logerr("> AUTH CRAM-RIPEMD <");
+			break;
+		case 10:
 			logerr("> AUTH DIGEST-MD5 <");
 			break;
 		default:
@@ -2821,8 +2858,8 @@ smtp_ehlo(char *arg)
 	}
 	out("\r\n");
 	if (hostname && *hostname && childargs && *childargs) {
-		char           *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha256;
-		char           *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
+		char           *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224, *no_cram_sha256;
+		char           *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
 #ifdef TLS
 		no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
@@ -2832,15 +2869,17 @@ smtp_ehlo(char *arg)
 #endif
 		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
 		no_cram_sha1 = env_get("DISABLE_CRAM_SHA1");
+		no_cram_sha224 = env_get("DISABLE_CRAM_SHA224");
 		no_cram_sha256 = env_get("DISABLE_CRAM_SHA256");
+		no_cram_sha384 = env_get("DISABLE_CRAM_SHA384");
 		no_cram_sha512 = env_get("DISABLE_CRAM_SHA512");
 		no_cram_ripemd = env_get("DISABLE_CRAM_RIPEMD");
 		no_digest_md5 = env_get("DISABLE_DIGEST_MD5");
 
 		if (!no_auth_login && !no_auth_plain && !no_cram_md5 && !no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512
 			&& !no_cram_ripemd && !no_digest_md5) {
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 		} else
 		if (!no_auth_login || !no_auth_plain || !no_cram_md5 || !no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512
 				   || !no_cram_ripemd) {
@@ -2855,8 +2894,12 @@ smtp_ehlo(char *arg)
 				out(" CRAM-MD5");
 			if (!no_cram_sha1)
 				out(" CRAM-SHA1");
+			if (!no_cram_sha224)
+				out(" CRAM-SHA224");
 			if (!no_cram_sha256)
 				out(" CRAM-SHA256");
+			if (!no_cram_sha384)
+				out(" CRAM-SHA384");
 			if (!no_cram_sha512)
 				out(" CRAM-SHA512");
 			if (!no_cram_ripemd)
@@ -2880,9 +2923,17 @@ smtp_ehlo(char *arg)
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-SHA1");
 			}
+			if (!no_cram_sha224) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("CRAM-SHA224");
+			}
 			if (!no_cram_sha256) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("CRAM-SHA256");
+			}
+			if (!no_cram_sha384) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("CRAM-SHA384");
 			}
 			if (!no_cram_sha512) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
@@ -4545,14 +4596,16 @@ authgetl(void)
 	return (authin.len);
 }
 
-#define AUTH_LOGIN       1
-#define AUTH_PLAIN       2
-#define AUTH_CRAM_MD5    3
-#define AUTH_CRAM_SHA1   4
-#define AUTH_CRAM_SHA256 5
-#define AUTH_CRAM_SHA512 6
-#define AUTH_CRAM_RIPEMD 7
-#define AUTH_DIGEST_MD5  8
+#define AUTH_LOGIN        1
+#define AUTH_PLAIN        2
+#define AUTH_CRAM_MD5     3
+#define AUTH_CRAM_SHA1    4
+#define AUTH_CRAM_SHA224  5
+#define AUTH_CRAM_SHA256  6
+#define AUTH_CRAM_SHA384  7
+#define AUTH_CRAM_SHA512  8
+#define AUTH_CRAM_RIPEMD  9
+#define AUTH_DIGEST_MD5   10
 
 stralloc        authmethod = { 0 };
 
@@ -4806,9 +4859,21 @@ auth_cram_sha1()
 }
 
 static int
+auth_cram_sha224()
+{
+	return (auth_cram(AUTH_CRAM_SHA224));
+}
+
+static int
 auth_cram_sha256()
 {
 	return (auth_cram(AUTH_CRAM_SHA256));
+}
+
+static int
+auth_cram_sha384()
+{
+	return (auth_cram(AUTH_CRAM_SHA384));
 }
 
 static int
@@ -6311,6 +6376,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.254  2022-07-26 09:33:10+05:30  Cprogrammer
+ * added AUTH CRAM-SHA224, CRAM-SHA384 methods
+ *
  * Revision 1.253  2022-06-01 13:05:24+05:30  Cprogrammer
  * clear errno when client drops connection
  *
@@ -6510,7 +6578,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.253 2022-06-01 13:05:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.254 2022-07-26 09:33:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
