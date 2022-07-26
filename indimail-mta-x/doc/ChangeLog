@@ -23,7 +23,8 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 - 21/07/2022
 13. svctool.in: fixed error in mysql run script
 14. svctool.in: use /tmp/inquery as TMPDIR for courier-imap inlookup
-
+- 26/07/2022
+15. smtpd.c: added AUTH CRAM-SHA224, CRAM-SHA384 methods
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
