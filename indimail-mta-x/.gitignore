@@ -684,3 +684,4 @@ queue_load.o
 qmonitor.8
 dnsblcheck
 dnsblcheck.o
+haslibgsasl.h
