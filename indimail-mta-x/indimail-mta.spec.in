@@ -117,6 +117,9 @@ BuildRequires: glibc-static
 %endif
 BuildRequires: openssl openssl-devel mysql-devel
 BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
+%if %{undefined rhel_version} && %{undefined centos_version} && %{undefined sles_version} && %{undefined scientificlinux_version}
+BuildRequires: libgsasl-devel
+%endif
 
 ##################################### OBS ####################################
 %if %build_on_obs == 1
