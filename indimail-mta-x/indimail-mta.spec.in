@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.360 2022-06-20 00:51:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.361 2022-07-30 20:55:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -115,7 +115,7 @@ BuildRequires: glibc glibc-devel binutils libidn2-devel
 %if 0%{?rhel_version} != 700 && %{undefined sles_version} && %{undefined suse_version}
 BuildRequires: glibc-static
 %endif
-BuildRequires: openssl openssl-devel mysql-devel
+BuildRequires: openssl openssl-devel mysql-devel libgsasl-devel
 BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
 
 ##################################### OBS ####################################

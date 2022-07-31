@@ -1895,7 +1895,7 @@ socket_v6any.o spf.o dns.o auto_uids.o qregex_sql.o \
 tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o \
 ssl_timeoutio.o auto_sysconfdir.o socket.lib dns.lib tls.lib \
-mysql_config
+gsasl.lib mysql_config
 	if test $(SYSTEM) = DARWIN ; then \
 		$(CC) -dynamiclib -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
@@ -1908,7 +1908,7 @@ mysql_config
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_sysconfdir.o ssl_timeoutio.o tls.o \
 		$(static_option) $(QMAILLIB) $(dynamic_option) \
-		`cat socket.lib dns.lib tls.lib`; \
+		`cat gsasl.lib socket.lib dns.lib tls.lib`; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
@@ -1920,7 +1920,7 @@ mysql_config
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o tls.o \
 		ssl_timeoutio.o -Wl,-Bstatic $(QMAILLIB) -Wl,-Bdynamic \
-		`cat socket.lib dns.lib tls.lib`; \
+		`cat gsasl.lib socket.lib dns.lib tls.lib`; \
 	fi
 
 qmail-smtpd: \
@@ -1933,7 +1933,7 @@ socket_v6any.o mail_acl.o spf.o dns.o auto_uids.o auto_qmail.o \
 qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
 query_skt.o fn_handler.o tlsarralloc.o load_mysql.o tls.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o socket.lib dns.lib \
-tls.lib ssl_timeoutio.o mysql_config conf-sql
+tls.lib gsasl.lib ssl_timeoutio.o mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	qcount_dir.o received.o wildmat.o qmail.o variables.o \
@@ -1944,7 +1944,7 @@ tls.lib ssl_timeoutio.o mysql_config conf-sql
 	auto_control.o auto_assign.o query_skt.o fn_handler.o tls.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	ssl_timeoutio.o $(static_option) $(QMAILLIB) \
-	$(dynamic_option) `cat socket.lib dns.lib tls.lib` -ldl
+	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib` -ldl
 
 smtpd.o: \
 compile smtpd.c tls.h ssl_timeoutio.h control.h received.h \
@@ -1953,8 +1953,9 @@ matchregex.o variables.h rcpthosts.h etrn.h \
 envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h \
 smtp_plugin.h auto_prefix.h hastlsv1_1_server.h \
 hastlsv1_2_server.h hasmysql.h indimail_stub.h \
-auto_control.h dns.h hassmtputf8.h conf-tls conf-spf conf-ip \
-conf-plugin conf-batv conf-smtputf8 mysql_config mysql_inc
+auto_control.h dns.h hassmtputf8.h haslibgsasl.h \
+conf-tls conf-spf conf-ip conf-plugin conf-batv \
+conf-smtputf8 mysql_config mysql_inc
 	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` smtpd.c
 
@@ -2307,6 +2308,18 @@ trylib.c
 	( ( $(CC) -c trylib.c -o trylibrt.o && $(CC) -o trylibrt trylibrt.o -lrt ) >/dev/null 2>&1 \
 	&& echo "#define HASLIBRT 1" || exit 0 ) > haslibrt.h
 	rm -f trylibrt.o trylibrt
+
+gsasl.lib: \
+trylib.c
+	( ( $(CC) -c trylib.c -o trylib.o && $(CC) -o trylib trylib.o -lgsasl ) >/dev/null 2>&1 \
+	&& echo -lgsasl || exit 0 ) > gsasl.lib
+	rm -f trylib.o trylib
+
+haslibgsasl.h: \
+trylib.c
+	( ( $(CC) -c trylib.c -o trylibgsasl.o && $(CC) -o trylibgsasl trylibgsasl.o -lgsasl ) >/dev/null 2>&1 \
+	&& echo "#define HASLIBGSASL 1" || exit 0 ) > haslibgsasl.h
+	rm -f trylibgsasl.o trylibgsasl
 
 tls.lib: \
 trytls.c compile conf-tls load conf-ld-$(SYSTEM)
@@ -3826,8 +3839,7 @@ dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h
 
 smtpd-plugin.so: smtp_plugin.o
 	if test $(SYSTEM) = DARWIN ; then \
-		$(LD) -bundle -undefined dynamic_lookup -o smtpd-plugin.so \
-		smtp_plugin.o; \
+		$(CC) -dynamiclib -o smtpd-plugin.so smtp_plugin.o; \
 	elif test $(SYSTEM) = FREEBSD ; then \
 		$(LD) -shared -o smtpd-plugin.so smtp_plugin.o; \
 	else \

@@ -80,11 +80,29 @@
 #include <pwd.h>
 #include "hassmtputf8.h"
 #include "wildmat.h"
+#include "haslibgsasl.h"
+#ifdef HASLIBGSASL
+#include <gsasl.h>
+#endif
 
 #define MAXHOPS   100
 #define SMTP_PORT  25
 #define ODMR_PORT 366 /*- On Demand Mail Relay Protocol RFC 2645 */
 #define SUBM_PORT 587 /*- Message Submission Port RFC 2476 */
+
+#define AUTH_LOGIN        1
+#define AUTH_PLAIN        2
+#define AUTH_CRAM_MD5     3
+#define AUTH_CRAM_SHA1    4
+#define AUTH_CRAM_SHA224  5
+#define AUTH_CRAM_SHA256  6
+#define AUTH_CRAM_SHA384  7
+#define AUTH_CRAM_SHA512  8
+#define AUTH_CRAM_RIPEMD  9
+#define AUTH_DIGEST_MD5   10
+#define AUTH_SCRAM_SHA1   11
+#define AUTH_SCRAM_SHA256 12
+#define AUTH_SCRAM_SHA512 13
 
 #ifdef TLS
 void            tls_init();
@@ -103,6 +121,13 @@ static int      auth_cram_sha384();
 static int      auth_cram_sha512();
 static int      auth_cram_ripemd();
 static int      auth_digest_md5();
+#ifdef HASLIBGSASL
+static int      auth_scram_sha1();
+static int      auth_scram_sha256();
+#if 0
+static int      auth_scram_sha512();
+#endif
+#endif
 int             err_noauth();
 int             err_noauthallowed();
 int             addrrelay();
@@ -367,6 +392,13 @@ struct authcmd {
 	{"cram-sha512", auth_cram_sha512},
 	{"cram-ripemd", auth_cram_ripemd},
 	{"digest-md5", auth_digest_md5},
+#ifdef HASLIBGSASL
+	{"scram-sha-1", auth_scram_sha1},
+	{"scram-sha-256", auth_scram_sha256},
+#if 0
+	{"scram-sha-512", auth_scram_sha512},
+#endif
+#endif
 	{0, err_noauth}
 };
 
@@ -380,6 +412,9 @@ int             smtputf8 = 0, smtputf8_enable = 0;
 int             smtp_port;
 void           *phandle;
 char           *no_help, *no_vrfy;
+#ifdef HASLIBGSASL
+static Gsasl   *gsasl_ctx;
+#endif
 
 extern char   **environ;
 
@@ -846,6 +881,17 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 					case 10:
 						logerr(": AUTH DIGEST-MD5");
 						break;
+					case 11:
+						logerr(": AUTH SCRAM-SHA-1");
+						break;
+					case 12:
+						logerr(": AUTH SCRAM-SHA-256");
+						break;
+#if 0
+					case 13:
+						logerr(": AUTH SCRAM-SHA-512");
+						break;
+#endif
 					default:
 						logerr(": AUTH unknown");
 						break;
@@ -943,6 +989,17 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, in
 				case 10:
 					logerr(": AUTH DIGEST-MD5");
 					break;
+				case 11:
+					logerr(": AUTH SCRAM-SHA-1");
+					break;
+				case 12:
+					logerr(": AUTH SCRAM-SHA-256");
+					break;
+#if 0
+				case 13:
+					logerr(": AUTH SCRAM-SHA-512");
+					break;
+#endif
 				default:
 					logerr(": AUTH unknown");
 					break;
@@ -1370,6 +1427,17 @@ log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 		case 10:
 			logerr("> AUTH DIGEST-MD5 <");
 			break;
+		case 11:
+			logerr("> AUTH SCRAM-SHA-1 <");
+			break;
+		case 12:
+			logerr("> AUTH SCRAM-SHA-256 <");
+			break;
+#if 0
+		case 13:
+			logerr("> AUTH SCRAM-SHA-512 <");
+			break;
+#endif
 		default:
 			logerr("> AUTH unknown <");
 			break;
@@ -2546,6 +2614,7 @@ void
 smtp_init(int force_flag)
 {
 	static int      flag;
+	int             r;
 
 	if (!force_flag && flag)
 		return;
@@ -2637,6 +2706,14 @@ smtp_init(int force_flag)
 	spfbehaviorFn = spfipv6Fn = 0;
 #endif
 	open_control_files();
+#ifdef HASLIBGSASL
+	if ((r = gsasl_init(&gsasl_ctx)) < 0) {
+		logerr("gsasl_init: ");
+		logerr(gsasl_strerror(r));
+		logerrf("\r\n");
+		_exit(111);
+	}
+#endif
 	return;
 }
 
@@ -2860,6 +2937,10 @@ smtp_ehlo(char *arg)
 	if (hostname && *hostname && childargs && *childargs) {
 		char           *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224, *no_cram_sha256;
 		char           *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
+#ifdef HASLIBGSASL
+		char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha512;
+#endif
+		int             flags1, flags2;
 #ifdef TLS
 		no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
@@ -2875,14 +2956,36 @@ smtp_ehlo(char *arg)
 		no_cram_sha512 = env_get("DISABLE_CRAM_SHA512");
 		no_cram_ripemd = env_get("DISABLE_CRAM_RIPEMD");
 		no_digest_md5 = env_get("DISABLE_DIGEST_MD5");
-
-		if (!no_auth_login && !no_auth_plain && !no_cram_md5 && !no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512
-			&& !no_cram_ripemd && !no_digest_md5) {
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+#ifdef HASLIBGSASL
+		no_scram_sha1 = env_get("DISABLE_SCRAM_SHA1");
+		no_scram_sha256 = env_get("DISABLE_SCRAM_SHA256");
+		no_scram_sha512 = env_get("DISABLE_SCRAM_SHA512");
+#endif
+#ifdef HASLIBGSASL
+		flags1 = !no_auth_login && !no_auth_plain && !no_cram_md5 &&
+			!no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512 &&
+			!no_cram_ripemd && !no_digest_md5 && !no_scram_sha1 &&
+			!no_scram_sha256 && !no_scram_sha512;
+		flags2 = !no_auth_login || !no_auth_plain || !no_cram_md5 ||
+			!no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd
+			|| !no_scram_sha1 || !no_scram_sha256 || !no_scram_sha512;
+#else
+		flags1 = !no_auth_login && !no_auth_plain && !no_cram_md5 &&
+			!no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512 &&
+			!no_cram_ripemd && !no_digest_md5;
+		flags2 = !no_auth_login || !no_auth_plain || !no_cram_md5 ||
+			!no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd;
+#endif
+		if (flags1) {
+#if 0
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
+#else
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256\r\n");
+#endif
 		} else
-		if (!no_auth_login || !no_auth_plain || !no_cram_md5 || !no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512
-				   || !no_cram_ripemd) {
+		if (flags2) {
 			int             flag = 0;
 
 			out("250-AUTH");
@@ -2906,6 +3009,16 @@ smtp_ehlo(char *arg)
 				out(" CRAM-RIPEMD");
 			if (!no_digest_md5)
 				out(" DIGEST-MD5");
+#ifdef HASLIBGSASL
+			if (!no_scram_sha1)
+				out(" SCRAM-SHA-1");
+			if (!no_scram_sha256)
+				out(" SCRAM-SHA-256");
+#if 0
+			if (!no_scram_sha512)
+				out(" SCRAM-SHA-512");
+#endif
+#endif
 			out("\r\n");
 			if (!no_auth_login) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
@@ -2947,6 +3060,22 @@ smtp_ehlo(char *arg)
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("DIGEST-MD5");
 			}
+#ifdef HASLIBGSASL
+			if (!no_scram_sha1) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("SCRAM-SHA-1");
+			}
+			if (!no_scram_sha256) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("SCRAM-SHA-256");
+			}
+#if 0
+			if (!no_scram_sha512) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("SCRAM-SHA-512");
+			}
+#endif
+#endif
 			out("\r\n");
 		}
 	}
@@ -4591,21 +4720,12 @@ authgetl(void)
 	authin.s[authin.len] = 0;
 	if (*authin.s == '*' && *(authin.s + 1) == 0)
 		return err_authabrt();
+#if 0
 	if (authin.len == 0)
 		return err_input();
+#endif
 	return (authin.len);
 }
-
-#define AUTH_LOGIN        1
-#define AUTH_PLAIN        2
-#define AUTH_CRAM_MD5     3
-#define AUTH_CRAM_SHA1    4
-#define AUTH_CRAM_SHA224  5
-#define AUTH_CRAM_SHA256  6
-#define AUTH_CRAM_SHA384  7
-#define AUTH_CRAM_SHA512  8
-#define AUTH_CRAM_RIPEMD  9
-#define AUTH_DIGEST_MD5   10
 
 stralloc        authmethod = { 0 };
 
@@ -4756,7 +4876,7 @@ auth_login(char *arg)
 		return err_input();
 	r = authenticate(AUTH_LOGIN);
 	if (!r || r == 3)
-		authd = 1;
+		authd = AUTH_LOGIN;
 	return (r);
 }
 
@@ -4792,7 +4912,7 @@ auth_plain(char *arg)
 		return err_input();
 	r = authenticate(AUTH_PLAIN);
 	if (!r || r == 3)
-		authd = 2;
+		authd = AUTH_PLAIN;
 	return (r);
 }
 
@@ -4846,6 +4966,223 @@ auth_cram(int method)
 	return (r);
 }
 
+#ifdef HASLIBGSASL
+static int
+gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
+{
+	int             rc = GSASL_NO_CALLBACK;
+	struct passwd  *pw;
+	char           *p, *ptr, *x;
+	int            *u_not_found, *i_inactive;
+	void           *(*inquery) (char, char *, char *);
+
+	switch (prop)
+	{
+	case GSASL_AUTHID:
+		break;
+	case GSASL_PASSWORD:
+		if (!hasvirtual)
+			return GSASL_NO_CALLBACK;
+		if (!(ptr = load_virtual()))
+			return GSASL_NO_CALLBACK;
+		else
+		if (!(inquery = getlibObject(ptr, &phandle, "inquery", &x))) {
+			err_library(x);
+			return GSASL_NO_CALLBACK;
+		}
+		if (!(p = gsasl_property_fast(sctx, GSASL_AUTHID))) {
+			return GSASL_NO_CALLBACK;
+		}
+		if (!stralloc_copys(&user, p) || !stralloc_0(&user))
+			die_nomem();
+		user.len--;
+		if (!(pw = (*inquery) (PWD_QUERY, p, 0))) {
+			if (!(u_not_found = (int *) getlibObject(ptr, &phandle, "userNotFound", &x))) {
+				err_library(x);
+				return GSASL_NO_CALLBACK;
+			}
+			if (*u_not_found) {
+				/*- 
+				 * Accept the mail as denial could be stupid
+				 * like the vrfy command
+				 */
+				logerr("qmail-smtpd: ");
+				logerrpid();
+				logerr(remoteip);
+				logerr(" mail from invalid user <");
+				logerr(mailfrom.s);
+				logerrf(">\n");
+				out("553 SMTP Access denied (#5.7.1)\r\n");
+				sleep(5); /*- Prevent DOS */
+				return GSASL_NO_CALLBACK;
+			} else {
+				logerr("qmail-smtpd: ");
+				logerrpid();
+				logerr(remoteip);
+				logerrf(" Database error\n");
+				out("451 Requested action aborted: database error (#4.3.2)\r\n");
+				return GSASL_NO_CALLBACK;
+			}
+		} else {
+			if (!(i_inactive = (int *) getlibObject(ptr, &phandle, "is_inactive", &x))) {
+				err_library(x);
+				return GSASL_NO_CALLBACK;
+			}
+			if (*i_inactive || pw->pw_gid & NO_SMTP) {
+				logerr("qmail-smtpd: ");
+				logerrpid();
+				logerr(remoteip);
+				logerr(" SMTP Access denied to <");
+				logerr(mailfrom.s);
+				logerr("> ");
+				logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
+				out("553 SMTP Access denied (#5.7.1)\r\n");
+				return GSASL_NO_CALLBACK;
+			}
+			if (pw->pw_gid & NO_RELAY)
+				return 3;
+		}
+		gsasl_property_set(sctx, prop, pw->pw_passwd);
+		break;
+	/*- These are for GSSAPI/GS2 only.  */
+	case GSASL_SERVICE:
+		gsasl_property_set(sctx, prop, "smtp");
+		break;
+	case GSASL_HOSTNAME:
+		gsasl_property_set(sctx, prop, hostname);
+		break;
+	case GSASL_SCRAM_ITER:
+		gsasl_property_set(sctx, prop, "4096");
+		break;
+	case GSASL_VALIDATE_GSSAPI:
+		return GSASL_OK;
+	case GSASL_CB_TLS_UNIQUE:
+		break;
+#ifdef GSASL_SCRAM_SERVERKEY
+	case GSASL_SCRAM_SERVERKEY:
+		break;
+#endif
+	case GSASL_SCRAM_SALT:
+		break;
+	default:
+		/*
+		 * You may want to log (at debug verbosity level) that an
+		 * unknown property was requested here, possibly after filtering
+		 * known rejected property requests. 
+		 * printf("unknown gsasl callback %u\n", prop);
+		 */
+		strnum[fmt_int(strnum, prop)] = 0;
+		logerr("unknown callback [");
+		logerr(strnum);
+		logerrf("]\n");
+		break;
+	}
+
+	return rc;
+}
+
+static int
+server_auth(Gsasl_session *session)
+{
+	char           *p;
+	int             r;
+
+	/*
+	 * The ordering and the type of checks in the following loop has to
+	 * be adapted for each protocol depending on its SASL properties.
+	 * SMTP is normally a "server-first" SASL protocol, but if
+	 * INITIAL_CHALLENGE is supplied by the client it turns into a
+	 * client-first SASL protocol.  This implementation do not support
+	 * piggy-backing of the terminating server response.  See RFC 2554
+	 * and RFC 4422 for terminology.  That profile results in the
+	 * following loop structure.  Ask on the help-gsasl list if you are
+	 * uncertain.  
+	 */
+	do {
+		r = gsasl_step64(session, authin.s, &p);
+		if (r == GSASL_NEEDS_MORE || (r == GSASL_OK && p && *p)) {
+			out("334 ");
+			out(p);
+			out("\r\n");
+			flush();
+			gsasl_free(p);
+			if (authgetl() < 0) /*- got response */
+				return 1;
+		}
+	} while (r == GSASL_NEEDS_MORE);
+
+	if (r != GSASL_OK) {
+		logerr("535 gsasl_step64: ");
+		logerr(gsasl_strerror(r));
+		logerrf("\n");
+		return (r == 3 ? 3 : 1);
+	}
+	return 0;
+}
+
+static int
+auth_scram(int method)
+{
+	int             r = -1, channel_binding = 0;
+	Gsasl_session  *session = NULL;
+
+	logerr("gsasl header version ");
+	logerr(GSASL_VERSION);
+	logerr(" library version ");
+	logerr(gsasl_check_version(NULL));
+	logerrf("\n");
+	gsasl_callback_set(gsasl_ctx, gs_callback);
+	switch(method)
+	{
+		case AUTH_SCRAM_SHA1:
+			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-1", &session);
+			break;
+		case AUTH_SCRAM_SHA256:
+			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-256", &session);
+			break;
+		case AUTH_SCRAM_SHA512:
+			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-512", &session);
+			break;
+	}
+	if (r != GSASL_OK) {
+		logerr("gsasl_server_start: ");
+		logerr(gsasl_strerror(r));
+		logerrf("\n");
+		_exit(111);
+	}
+	out("334 \r\n");
+	flush();
+
+	if (authgetl() < 0) /*- got response */
+		return -1;
+	if ((r = b64decode((const unsigned char *) authin.s, authin.len, &slop)) == 1)
+		return err_input();
+	if (r == -1 || !stralloc_0(&slop))
+		die_nomem();
+	slop.len--;
+	switch(slop.s[0])
+	{
+	case 'n':
+		break;
+	case 'p':
+		if (!channel_binding)
+			return 1;
+		break;
+	case 'y':
+		if (channel_binding)
+			return 1;
+		break;
+	default:
+		return 1;
+	}
+	r = server_auth(session);
+	gsasl_finish(session);
+	gsasl_done(gsasl_ctx);
+	authd = method;
+	return (r);
+}
+#endif
+
 static int
 auth_cram_md5()
 {
@@ -4887,6 +5224,26 @@ auth_cram_ripemd()
 {
 	return (auth_cram(AUTH_CRAM_RIPEMD));
 }
+
+static int
+auth_scram_sha1()
+{
+	return (auth_scram(AUTH_SCRAM_SHA1));
+}
+
+static int
+auth_scram_sha256()
+{
+	return (auth_scram(AUTH_SCRAM_SHA256));
+}
+
+#if 0
+static int
+auth_scram_sha512()
+{
+	return (auth_scram(AUTH_SCRAM_SHA512));
+}
+#endif
 
 /*- parse digest response */
 unsigned int
@@ -5073,7 +5430,7 @@ auth_digest_md5()
 		return (err_input());
 	r = authenticate(AUTH_DIGEST_MD5);
 	if (!r || r == 3)
-		authd = 6;
+		authd = AUTH_DIGEST_MD5;
 	return (r);
 }
 

@@ -6,48 +6,57 @@ sys-checkpwd \- indimail-mta checkpassword program for authentication
 \fBsys-checkpwd\fR \fIalternate_checkpassword_program\fR(s) \fB/bin/false\fR
 
 .SH DESCRIPTION
-\fBsys-checkpwd\fR supports authentication for ESMTP AUTH option in \fBqmail-smtpd(8)\fR,
-allowing the LOGIN, PLAIN, and CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH types.
-\fBsys-checkpwd\fR looks up userids in the systems authentication database (/etc/passwd
-or /etc/shadow). \fBsys-checkpwd\fR needs to be setuid root to function.
-\fBsys-checkpwd\fR drops all root privileges after reading the shadow(5)
-file, switches to the real uid of the invoking process.
+\fBsys-checkpwd\fR supports authentication for ESMTP AUTH option in
+\fBqmail-smtpd(8)\fR, allowing the LOGIN, PLAIN, and CRAM-MD5, CRAM-SHA1,
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5
+AUTH types. \fBsys-checkpwd\fR looks up userids in the systems
+authentication database (/etc/passwd or /etc/shadow). \fBsys-checkpwd\fR
+needs to be setuid root to function. \fBsys-checkpwd\fR drops all root
+privileges after reading the shadow(5) file, switches to the real uid of
+the invoking process.
 .PP
-As reflected in the \fBqmail-smtpd(8)\fR man page, \fBqmail-smtpd(8)\fR must be invoked with
-three arguments: hostname, path of the sys-checkpwd program, and subprogram. If these
-arguments are missing, \fBqmail-smtpd(8)\fR will not advertise availability of AUTH.
+As reflected in the \fBqmail-smtpd(8)\fR man page, \fBqmail-smtpd(8)\fR
+must be invoked with three arguments: hostname, path of the sys-checkpwd
+program, and subprogram. If these arguments are missing,
+\fBqmail-smtpd(8)\fR will not advertise availability of AUTH.
 .PP
 \fBsys-checkpwd\fR reads descriptor 3 through end of file and then closes
-descriptor 3. There must be at most 512 bytes of data before end of file. If it invokes an
-\fBalternate_checkpassword_program\fR, it opens a pipe duping the read descriptor as 3 for
-the \fBalternate_checkpassword_program\fR. The write end of the pipe is duped to descriptor 4
-and the data which was earlier read on descriptor 3 is written back on descriptor 4.
-The alternate program is invoked when sys-checkpwd doesn't support authentication for the
-supplied login name.
+descriptor 3. There must be at most 512 bytes of data before end of file.
+If it invokes an \fBalternate_checkpassword_program\fR, it opens a pipe
+duping the read descriptor as 3 for the
+\fBalternate_checkpassword_program\fR. The write end of the pipe is duped
+to descriptor 4 and the data which was earlier read on descriptor 3 is
+written back on descriptor 4.  The alternate program is invoked when
+sys-checkpwd doesn't support authentication for the supplied login name.
 .PP
-For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a login name
-terminated by \\0 and password terminated by \\0. \fBsys-checkpwd\fR encrypts the password using
-cyrpt(3) routine and compares it against the value present in the passwd database. The encrypted
-password can be in DES, MD5, SHA-256 or SHA-512 hash.
+For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a
+login name terminated by \\0 and password terminated by \\0.
+\fBsys-checkpwd\fR encrypts the password using cyrpt(3) routine and
+compares it against the value present in the passwd database. The
+encrypted password can be in DES, MD5, SHA-256 or SHA-512 hash.
 .PP
-For CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 AUTH type, the information supplied on
-descriptor 3 is a login name terminated by \\0, a cram-md5 challenge terminated by \\0, and
-a cram-md5 response terminated by \\0.  \fBsys-checkpwd\fR encrypts the
-challenge with keyed MD5 using passwords from passwd database. It's compared with
-response (3rd parameter) and if they are the same then sys-checkpwd uses execvp to
-run subprogram with the given arguments. If they differ then it returns -1.
+For CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5 AUTH type, the information supplied on
+descriptor 3 is a login name terminated by \\0, a cram-md5 challenge
+terminated by \\0, and a cram-md5 response terminated by \\0.
+\fBsys-checkpwd\fR encrypts the challenge with keyed MD5 using passwords
+from passwd database. It's compared with response (3rd parameter) and if
+they are the same then sys-checkpwd uses execvp to run subprogram with the
+given arguments. If they differ then it returns -1.
 .PP
-If challenge and response differ, \fBsys-checkpwd\fR exits 1. If \fBsys-checkpwd\fR
-is misused, it may instead exit 2. If there is a temporary problem checking the password,
-\fBsys-checkpwd\fR exits 111.
+If challenge and response differ, \fBsys-checkpwd\fR exits 1. If
+\fBsys-checkpwd\fR is misused, it may instead exit 2. If there is a
+temporary problem checking the password, \fBsys-checkpwd\fR exits 111.
 .PP
-hostname is simply used to form the CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5 challenge.
-\fBqmail-smtpd\fR invokes \fBsys-checkpwd\fR, feeding it the username and password, in the case
-of LOGIN or PLAIN, or the username, challenge, and response, in the case of CRAM-MD5,
-CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5.  If the user checks out, \fBsys-checkpwd\fR
-exits with a status of 0 for the user to be authenticated. Otherwise, subprogram should
-exit with a non-zero status, or call an alternate checkpassword program. The last
-subprogram can usually be /usr/bin/false (or /bin/false, depending on your flavor of OS).
+hostname is simply used to form the CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
+CRAM-SHA256, CRAM-SHA384, CRAM-RIPEMD, DIGEST-MD5 challenge.
+\fBqmail-smtpd\fR invokes \fBsys-checkpwd\fR, feeding it the username and
+password, in the case of LOGIN or PLAIN, or the username, challenge, and
+response, in the case of CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5.  If
+the user checks out, \fBsys-checkpwd\fR exits with a status of 0 for the
+user to be authenticated. Otherwise, subprogram should exit with a non-zero
+status, or call an alternate checkpassword program. The last subprogram can
+usually be /usr/bin/false (or /bin/false, depending on your flavor of OS).
 
 .PP
 For getting the user's encrypted password, \fBsys-checkpwd\fR(8) uses
@@ -56,16 +65,19 @@ of these functions, qgetpwnam(3) and qgetspnam(3) if the environment
 variable \fBUSE_QPWGR\fR is set.
 
 .PP
-\fBsys-checkwd\fR does not authenticate if user is inactive. A user is active if one logs in using
-IMAP or POP3 protocol. If \fBALLOW_INACTIVE\fR is defined, \fBsys-checkwd\fR will proceed regardless
-of the user's active or inactive status.
+\fBsys-checkwd\fR does not authenticate if user is inactive. A user is
+active if one logs in using IMAP or POP3 protocol. If \fBALLOW_INACTIVE\fR
+is defined, \fBsys-checkwd\fR will proceed regardless of the user's active
+or inactive status.
 
-If the environment variable \fBDOMAIN_LIMITS\fR is defined, \fBsys-checkwd\fR validates domain
-expiry and password expiry set by \fBvmoduser(1)\fR program.
+If the environment variable \fBDOMAIN_LIMITS\fR is defined,
+\fBsys-checkwd\fR validates domain expiry and password expiry set by
+\fBvmoduser(1)\fR program.
 
-On successful authentication, \fBsys-checkwd\fR can execute a script defined by environment
-variable \fBPOSTAUTH\fR. In that case, the return value of \fBsys-checkpwd\fR will be the
-return value of \fBPOSTAUTH\fR program/script.
+On successful authentication, \fBsys-checkwd\fR can execute a script
+defined by environment variable \fBPOSTAUTH\fR. In that case, the return
+value of \fBsys-checkpwd\fR will be the return value of \fBPOSTAUTH\fR
+program/script.
 .PP
 MUAs and AUTH types tested with this software are:
 
