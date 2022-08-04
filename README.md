@@ -67,9 +67,9 @@ Install the following packages using dnf/yum
 ```
 Universal
 gcc gcc-c++ make autoconf automake libtool pkgconfig
-sed findutils diffutils gzip binutils coreutils grep
+sed findutils diffutils gzip xz binutils coreutils grep file
 glibc glibc-devel procps openssl openssl-devel mysql-devel
-libidn2-devel
+libidn2-devel libgsasl-devel
 
 opensuse - openldap2-devel instead of openldap-devel
 ```
@@ -82,6 +82,7 @@ Universal
 cdbs debhelper gcc g++ automake autoconf libtool libldap2-dev
 libssl-dev libidn2-0-dev mime-support m4 gawk openssl procps
 sed findutils diffutils readline gzip binutils coreutils grep
+libgsasl7-dev
 
 Ubuntu 16.04, Debian 8 - libmysqlclient-dev
 Remaining - default-libmysqlclient-dev
@@ -93,7 +94,7 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 # pacman -S --needed archlinux-keyring
 # pacman -S --refresh --sysupgrade
-# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn2
+# pacman -S base-devel diffutils coreutils openssl openldap mysql libidn2 gsasl
 ```
 
 **Gentoo Linux**
@@ -109,25 +110,27 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 # emerge -a systemd
 # emerge -a dev-db/mysql
 # emerge -a openldap
+# emerge -a libgsasl
 ```
 
 **alpine Linux**
 
 ```
 # apk add gcc g++ make git autoconf automake libtool m4 sed
-# apk add openssl-dev mysql-dev libidn2-dev fts-dev
+# apk add openssl-dev mysql-dev libidn2-dev fts-dev libgsasl
 ```
 
 **NOTES**
 
 You need libidn2 to get indimail-mta built with [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
+You need libgsasl for SCRAM AUTH methods (SCRAM-SHA-1, SCRAM-SHA-256)
 
 ```
 FreeBSD
-# pkg install pkgconf libidn2
+# pkg install pkgconf libidn2 libgsasl
 
 Darwin
-# port install pkgconfig libidn2
+# port install pkgconfig libidn2 gsasl
 ```
 
 FreeBSD / Darwin OSX
