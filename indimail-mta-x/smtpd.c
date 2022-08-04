@@ -81,28 +81,16 @@
 #include "hassmtputf8.h"
 #include "wildmat.h"
 #include "haslibgsasl.h"
+#include <authmethods.h>
 #ifdef HASLIBGSASL
 #include <gsasl.h>
+#include <get_scram_secrets.h>
 #endif
 
 #define MAXHOPS   100
 #define SMTP_PORT  25
 #define ODMR_PORT 366 /*- On Demand Mail Relay Protocol RFC 2645 */
 #define SUBM_PORT 587 /*- Message Submission Port RFC 2476 */
-
-#define AUTH_LOGIN        1
-#define AUTH_PLAIN        2
-#define AUTH_CRAM_MD5     3
-#define AUTH_CRAM_SHA1    4
-#define AUTH_CRAM_SHA224  5
-#define AUTH_CRAM_SHA256  6
-#define AUTH_CRAM_SHA384  7
-#define AUTH_CRAM_SHA512  8
-#define AUTH_CRAM_RIPEMD  9
-#define AUTH_DIGEST_MD5   10
-#define AUTH_SCRAM_SHA1   11
-#define AUTH_SCRAM_SHA256 12
-#define AUTH_SCRAM_SHA512 13
 
 #ifdef TLS
 void            tls_init();
@@ -134,12 +122,13 @@ int             addrrelay();
 void            smtp_greet(char *);
 int             atrn_queue(char *, char *);
 
+typedef struct passwd  PASSWD;
 #ifdef TLS
 int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.254 $";
+char           *revision = "$Revision: 1.255 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3405,7 +3394,7 @@ static int      f_envret = 0, d_envret = 0, a_envret = 0;
 void
 smtp_mail(char *arg)
 {
-	struct passwd  *pw;
+	PASSWD         *pw;
 	char           *x, *ptr;
 	int             ret, i;
 	int            *u_not_found, *i_inactive;
@@ -4967,102 +4956,177 @@ auth_cram(int method)
 }
 
 #ifdef HASLIBGSASL
+static PASSWD  *gsasl_pw;
+
+PASSWD         *
+get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, char **server_key, char **salted_pass)
+{
+	int             i;
+	char           *ptr, *err;
+	int            *u_not_found, *i_inactive;
+	void           *(*inquery) (char, char *, char *);
+
+	gsasl_pw = (PASSWD *) NULL;
+	if (!hasvirtual)
+		return ((PASSWD *) NULL);
+	if (!(ptr = load_virtual()))
+		return ((PASSWD *) NULL);
+	else
+	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &err))) {
+		err_library(err);
+		return ((PASSWD *) NULL);
+	}
+	if (!stralloc_copys(&user, u) || !stralloc_0(&user))
+		die_nomem();
+	user.len--;
+	if (!(gsasl_pw = (*inquery) (PWD_QUERY, u, 0))) {
+		if (!(u_not_found = (int *) getlibObject(ptr, &phandle, "userNotFound", &err))) {
+			err_library(err);
+			return ((PASSWD *) NULL);
+		}
+		if (*u_not_found) {
+			/*- 
+			 * Accept the mail as denial could be stupid
+			 * like the vrfy command
+			 */
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" mail from invalid user <");
+			logerr(u);
+			logerrf(">\n");
+			out("553 SMTP Access denied (#5.7.1)\r\n");
+			sleep(5); /*- Prevent DOS */
+			return ((PASSWD *) NULL);
+		} else {
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerrf(" Database error\n");
+			out("451 Requested action aborted: database error (#4.3.2)\r\n");
+			return ((PASSWD *) NULL);
+		}
+	} else {
+		if (!(i_inactive = (int *) getlibObject(ptr, &phandle, "is_inactive", &err))) {
+			err_library(err);
+			gsasl_pw = (PASSWD *) NULL;
+			return ((PASSWD *) NULL);
+		}
+		if (*i_inactive || gsasl_pw->pw_gid & NO_SMTP) {
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" SMTP Access denied to <");
+			logerr(u);
+			logerr("> ");
+			logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
+			out("553 SMTP Access denied (#5.7.1)\r\n");
+			gsasl_pw = (PASSWD *) NULL;
+			return ((PASSWD *) NULL);
+		}
+	}
+	if (!str_diffn(gsasl_pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(gsasl_pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
+		i = get_scram_secrets(gsasl_pw->pw_passwd, mech, iter, salt, stored_key, server_key, salted_pass);
+		if (i != 6) {
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" SMTP Access denied to <");
+			logerr(u);
+			logerr("> unable go get secrets");
+			out("553 SMTP Access denied (#5.7.1)\r\n");
+			gsasl_pw = (PASSWD *) NULL;
+			return ((PASSWD *) NULL);
+		}
+	} else
+		*mech = 0;
+	return gsasl_pw;
+}
+
 static int
 gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
 	int             rc = GSASL_NO_CALLBACK;
-	struct passwd  *pw;
-	char           *p, *ptr, *x;
-	int            *u_not_found, *i_inactive;
-	void           *(*inquery) (char, char *, char *);
+	static int      mech, iter = 4096;
+	static char    *u, *salt, *stored_key, *server_key, *salted_pass;
+	static int      i = -1;
 
 	switch (prop)
 	{
 	case GSASL_AUTHID:
+		if (!(u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
+			return GSASL_NO_CALLBACK;
+		}
 		break;
 	case GSASL_PASSWORD:
-		if (!hasvirtual)
-			return GSASL_NO_CALLBACK;
-		if (!(ptr = load_virtual()))
-			return GSASL_NO_CALLBACK;
+		if (i == -1) {
+			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
+				return GSASL_NO_CALLBACK;
+			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			i = 0;
+		}
+		if (mech > 10)
+			gsasl_property_set(sctx, GSASL_PASSWORD, salted_pass);
 		else
-		if (!(inquery = getlibObject(ptr, &phandle, "inquery", &x))) {
-			err_library(x);
+			gsasl_property_set(sctx, GSASL_PASSWORD, gsasl_pw->pw_passwd);
+		break;
+	case GSASL_SCRAM_SALT:
+		if (!(u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
 			return GSASL_NO_CALLBACK;
 		}
-		if (!(p = gsasl_property_fast(sctx, GSASL_AUTHID))) {
-			return GSASL_NO_CALLBACK;
+		if (i == -1) {
+			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
+				return GSASL_NO_CALLBACK;
+			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			i = 0;
 		}
-		if (!stralloc_copys(&user, p) || !stralloc_0(&user))
-			die_nomem();
-		user.len--;
-		if (!(pw = (*inquery) (PWD_QUERY, p, 0))) {
-			if (!(u_not_found = (int *) getlibObject(ptr, &phandle, "userNotFound", &x))) {
-				err_library(x);
+		if (mech > 10)
+			gsasl_property_set(sctx, GSASL_SCRAM_SALT, salt);
+		break;
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
+	case GSASL_SCRAM_SERVERKEY:
+		if (i == -1) {
+			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
 				return GSASL_NO_CALLBACK;
-			}
-			if (*u_not_found) {
-				/*- 
-				 * Accept the mail as denial could be stupid
-				 * like the vrfy command
-				 */
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerr(remoteip);
-				logerr(" mail from invalid user <");
-				logerr(mailfrom.s);
-				logerrf(">\n");
-				out("553 SMTP Access denied (#5.7.1)\r\n");
-				sleep(5); /*- Prevent DOS */
-				return GSASL_NO_CALLBACK;
-			} else {
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerr(remoteip);
-				logerrf(" Database error\n");
-				out("451 Requested action aborted: database error (#4.3.2)\r\n");
-				return GSASL_NO_CALLBACK;
-			}
-		} else {
-			if (!(i_inactive = (int *) getlibObject(ptr, &phandle, "is_inactive", &x))) {
-				err_library(x);
-				return GSASL_NO_CALLBACK;
-			}
-			if (*i_inactive || pw->pw_gid & NO_SMTP) {
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerr(remoteip);
-				logerr(" SMTP Access denied to <");
-				logerr(mailfrom.s);
-				logerr("> ");
-				logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
-				out("553 SMTP Access denied (#5.7.1)\r\n");
-				return GSASL_NO_CALLBACK;
-			}
-			if (pw->pw_gid & NO_RELAY)
-				return 3;
+			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			i = 0;
 		}
-		gsasl_property_set(sctx, prop, pw->pw_passwd);
+		if (mech > 10)
+			gsasl_property_set(sctx, GSASL_SCRAM_SERVERKEY, server_key);
+		break;
+	case GSASL_SCRAM_STOREDKEY:
+		if (i == -1) {
+			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
+				return GSASL_NO_CALLBACK;
+			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			i = 0;
+		}
+		if (mech > 10)
+			gsasl_property_set(sctx, GSASL_SCRAM_STOREDKEY, stored_key);
+		break;
+#endif
+	case GSASL_SCRAM_SALTED_PASSWORD:
 		break;
 	/*- These are for GSSAPI/GS2 only.  */
 	case GSASL_SERVICE:
-		gsasl_property_set(sctx, prop, "smtp");
+		gsasl_property_set(sctx, GSASL_SERVICE, "smtp");
 		break;
 	case GSASL_HOSTNAME:
-		gsasl_property_set(sctx, prop, hostname);
+		gsasl_property_set(sctx, GSASL_HOSTNAME, hostname);
 		break;
 	case GSASL_SCRAM_ITER:
-		gsasl_property_set(sctx, prop, "4096");
+		if (i == -1) {
+			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
+				return GSASL_NO_CALLBACK;
+			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			i = 0;
+		}
+		strnum[fmt_int(strnum, iter)] = 0;
+		gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum);
 		break;
 	case GSASL_VALIDATE_GSSAPI:
 		return GSASL_OK;
 	case GSASL_CB_TLS_UNIQUE:
-		break;
-#ifdef GSASL_SCRAM_SERVERKEY
-	case GSASL_SCRAM_SERVERKEY:
-		break;
-#endif
-	case GSASL_SCRAM_SALT:
 		break;
 	default:
 		/*
@@ -5077,7 +5141,6 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		logerrf("]\n");
 		break;
 	}
-
 	return rc;
 }
 
@@ -5112,10 +5175,11 @@ server_auth(Gsasl_session *session)
 	} while (r == GSASL_NEEDS_MORE);
 
 	if (r != GSASL_OK) {
+		fprintf(stderr, "r=%d\n", r);
 		logerr("535 gsasl_step64: ");
 		logerr(gsasl_strerror(r));
 		logerrf("\n");
-		return (r == 3 ? 3 : 1);
+		return 1;
 	}
 	return 0;
 }
@@ -5178,7 +5242,10 @@ auth_scram(int method)
 	r = server_auth(session);
 	gsasl_finish(session);
 	gsasl_done(gsasl_ctx);
-	authd = method;
+	if (!r && gsasl_pw->pw_gid & NO_RELAY)
+		r = 3;
+	if (!r || r == 3)
+		authd = method;
 	return (r);
 }
 #endif
@@ -6733,6 +6800,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.255  2022-08-04 13:55:53+05:30  Cprogrammer
+ * scram authentication with salt and stored/server keys
+ *
  * Revision 1.254  2022-07-26 09:33:10+05:30  Cprogrammer
  * added AUTH CRAM-SHA224, CRAM-SHA384 methods
  *
@@ -6935,7 +7005,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.254 2022-07-26 09:33:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.255 2022-08-04 13:55:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
