@@ -128,7 +128,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.255 $";
+char           *revision = "$Revision: 1.256 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -665,6 +665,7 @@ err_addressmatch(char *errstr, char *fn)
 	logerr(errstr);
 	logerrf("\n");
 	out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
+	flush();
 }
 
 void
@@ -1068,6 +1069,7 @@ void
 err_smf()
 {
 	out("451 Requested action aborted: DNS temporary failure (#4.4.3)\r\n");
+	flush();
 }
 
 void
@@ -1077,6 +1079,7 @@ err_size(char *rip, char *mfrom, char *rcpt, int len)
 	char           *ptr;
 
 	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n");
+	flush();
 	if (env_get("DATABYTES_NOTIFY"))
 		msg_notify();
 	for (ptr = rcpt + 1, idx = 0; idx < len; idx++) {
@@ -1101,6 +1104,7 @@ void
 err_hops()
 {
 	out("554 too many hops, this message is looping (#5.4.6)\r\n");
+	flush();
 }
 
 void
@@ -1119,6 +1123,7 @@ err_hmf(char *arg1, char *arg2, int arg3)
 		out("553 Bad sender's system address (#5.1.8)\r\n");
 	else
 		out("553 sorry, helo domain must exist (#5.1.8)\r\n");
+	flush();
 }
 
 void
@@ -1162,12 +1167,14 @@ err_nogateway(char *arg1, char *arg2, char *arg3, int flag)
 		tls_nogateway();
 #endif
 	out("#5.7.1\r\n");
+	flush();
 }
 
 void
 err_badbounce()
 {
 	out("553 sorry, bounce messages should have a single envelope recipient (#5.7.1)\r\n");
+	flush();
 }
 
 void
@@ -1180,6 +1187,7 @@ err_bmf(char *arg1, char *arg2)
 	logerr(arg2);
 	logerrf(">\n");
 	out("553 sorry, your envelope sender has been denied (#5.7.1)\r\n");
+	flush();
 }
 
 #ifdef USE_SPF
@@ -1202,6 +1210,7 @@ err_spf()
 			out(" (#5.7.1)\r\n");
 		}
 	}
+	flush();
 }
 #endif
 
@@ -1215,6 +1224,7 @@ err_hostaccess(char *arg1, char *arg2)
 	logerr(arg2);
 	logerrf(">\n");
 	out("553 sorry, your host has been denied (#5.7.1)\r\n");
+	flush();
 }
 
 void
@@ -1264,6 +1274,7 @@ err_acl(char *arg1, char *arg2, char *arg3)
 	logerr(arg3);
 	logerrf("\n");
 	out("553 sorry, sites access list denies transaction (#5.7.1)\r\n");
+	flush();
 	return;
 }
 
@@ -1279,6 +1290,7 @@ err_rcp(char *arg1, char *arg2, char *arg3)
 	logerr(arg3);
 	logerrf("\n");
 	out("553 sorry, your envelope recipient has been denied (#5.7.1)\r\n");
+	flush();
 	return;
 }
 
@@ -1293,6 +1305,7 @@ smtp_badip(char *arg)
 	out("421 sorry, your IP (");
 	out(arg);
 	out(") is temporarily denied (#4.7.1)\r\n");
+	flush();
 	return;
 }
 
@@ -1309,6 +1322,8 @@ smtp_badhost(char *arg)
 	out("553 sorry, your host (");
 	out(remotehost);
 	out(") has been denied (#5.7.1)\r\n");
+	flush();
+	return;
 }
 
 void
@@ -1322,6 +1337,7 @@ smtp_relayreject(char *arg)
 	out("553 No mail accepted from an open relay (");
 	out(remoteip);
 	out("); check your server configs (#5.7.1)\r\n");
+	flush();
 	return;
 }
 
@@ -1344,6 +1360,7 @@ smtp_paranoid(char *arg)
 		out(" (#5.7.1)\r\n");
 	} else
 		out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)\r\n");
+	flush();
 	return;
 }
 
@@ -1369,6 +1386,7 @@ smtp_ptr(char *arg)
 		out(arg);
 		out(") (#5.7.1)\r\n");
 	}
+	flush();
 	return;
 }
 
@@ -1440,6 +1458,7 @@ void
 err_relay()
 {
 	out("550 we don't relay (#5.7.1)\r\n");
+	flush();
 }
 
 void
@@ -1455,24 +1474,28 @@ err_unimpl(char *arg)
 		out(arg);
 		out(" not recognized (#5.5.2)\r\n");
 	}
+	flush();
 }
 
 void
 err_syntax()
 {
 	out("555 syntax error in address (#5.1.3)\r\n");
+	flush();
 }
 
 void
 err_wantmail()
 {
 	out("503 MAIL first (#5.5.1)\r\n");
+	flush();
 }
 
 void
 err_wantrcpt()
 {
 	out("503 RCPT first (#5.5.1)\r\n");
+	flush();
 }
 
 void
@@ -1533,6 +1556,7 @@ err_mrc(char *arg1, char *arg2, char *arg3)
 	logerr(arg3);
 	logerrf(">\n");
 	out("557 sorry, too many recipients (#5.7.1)\r\n");
+	flush();
 }
 
 void
@@ -1540,6 +1564,7 @@ smtp_noop(char *arg)
 {
 	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		flush();
 		return;
 	}
 	switch (setup_state)
@@ -1548,6 +1573,7 @@ smtp_noop(char *arg)
 		break;
 	case 1:
 		out("503 bad sequence of commands (#5.3.2)\r\n");
+		flush();
 		return;
 	case 2:
 		smtp_relayreject(remoteip);
@@ -1566,6 +1592,7 @@ smtp_noop(char *arg)
 		return;
 	}
 	out("250 ok\r\n");
+	flush();
 	return;
 }
 
@@ -1582,6 +1609,7 @@ smtp_vrfy(char *arg)
 		break;
 	case 1:
 		out("503 bad sequence of commands (#5.3.2)\r\n");
+		flush();
 		return;
 	case 2:
 		smtp_relayreject(remoteip);
@@ -1600,22 +1628,27 @@ smtp_vrfy(char *arg)
 		return;
 	}
 	out("252 Cannot VRFY user, but will accept message and attempt delivery (#2.7.0)\r\n");
+	flush();
+	return;
 }
 
 void
 err_qqt(char *arg)
 {
 	out("451 Requested action aborted: qqt failure (#4.3.0)\r\n");
+	flush();
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg);
 	logerrf(" qqt failure\n");
+	return;
 }
 
 int
 err_child()
 {
 	out("451 Requested action aborted: problem with child and I can't auth (#4.3.0)\r\n");
+	flush();
 	return -1;
 }
 
@@ -1623,6 +1656,7 @@ void
 err_library(char *arg)
 {
 	out("451 Requested action aborted: problem loading virtual domain library (#4.3.0)\r\n");
+	flush();
 	if (arg) {
 		logerr("qmail-smtpd: ");
 		logerrpid();
@@ -1638,6 +1672,7 @@ int
 err_fork()
 {
 	out("451 Requested action aborted: child won't start and I can't auth (#4.3.0)\r\n");
+	flush();
 	return -1;
 }
 
@@ -1645,6 +1680,7 @@ int
 err_pipe()
 {
 	out("451 Requested action aborted: unable to open pipe and I can't auth (#4.3.0)\r\n");
+	flush();
 	return -1;
 }
 
@@ -1652,6 +1688,7 @@ int
 err_write()
 {
 	out("451 Requested action aborted: unable to write pipe and I can't auth (#4.3.0)\r\n");
+	flush();
 	return -1;
 }
 
@@ -1693,12 +1730,14 @@ void
 err_authd()
 {
 	out("503 you're already authenticated (#5.5.0)\r\n");
+	flush();
 }
 
 void
 err_authrequired()
 {
 	out("530 authentication required (#5.7.1)\r\n");
+	flush();
 }
 
 void
@@ -1707,12 +1746,14 @@ err_transaction(char *arg)
 	out("503 no ");
 	out(arg);
 	out(" during mail transaction (#5.5.0)\r\n");
+	flush();
 }
 
 int
 err_noauth()
 {
 	out("504 auth type unimplemented (#5.5.1)\r\n");
+	flush();
 	return -1;
 }
 
@@ -1720,6 +1761,7 @@ int
 err_noauthallowed()
 {
 	out("530 auth type prohibited without TLS (#5.7.0)\r\n");
+	flush();
 	return -2;
 }
 
@@ -1727,6 +1769,7 @@ int
 err_authabrt()
 {
 	out("501 auth exchange cancelled (#5.0.0)\r\n");
+	flush();
 	return -1;
 }
 
@@ -1734,6 +1777,7 @@ int
 err_input()
 {
 	out("501 malformed auth input (#5.5.4)\r\n");
+	flush();
 	return -1;
 }
 
@@ -1757,6 +1801,7 @@ err_mailbox(char *arg1, char *arg2, char *arg3)
 	out("> ");
 	out(arg3);
 	out("\r\n");
+	flush();
 	return;
 }
 
@@ -1773,6 +1818,8 @@ err_rcpt_errcount(char *arg1, int count)
 	logerr(arg1);
 	logerrf(">\n");
 	out("421 too many invalid addresses, goodbye (#4.7.1)\r\n");
+	flush();
+	return;
 }
 
 void
@@ -1838,6 +1885,7 @@ err_grey()
 		logerr("...");			/* > 1 address sent for greylist check */
 	logerr("\n");
 	out("450 try again later (#4.3.0)\r\n");
+	flush();
 	return;
 }
 
@@ -2163,6 +2211,8 @@ esmtp_print()
 	i = date822fmt(buf, &dt);
 	buf[i - 1] = 0;
 	out(buf);
+	flush();
+	return;
 }
 
 void
@@ -2245,6 +2295,8 @@ smtp_help(char *arg)
 		out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n");
 		break;
 	}
+	flush();
+	return;
 }
 
 void
@@ -2857,6 +2909,7 @@ smtp_helo(char *arg)
 		break;
 	case 1:
 		out("503 bad sequence of commands (#5.3.2)\r\n");
+		flush();
 		return;
 	case 2:
 		smtp_relayreject(remoteip);
@@ -2885,6 +2938,8 @@ smtp_helo(char *arg)
 		dohelo(remotehost);
 	else
 		dohelo(arg);
+	flush();
+	return;
 }
 
 void
@@ -2899,6 +2954,7 @@ smtp_ehlo(char *arg)
 		break;
 	case 1:
 		out("503 bad sequence of commands (#5.3.2)\r\n");
+		flush();
 		return;
 	case 2:
 		smtp_relayreject(remoteip);
@@ -2966,12 +3022,17 @@ smtp_ehlo(char *arg)
 			!no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd;
 #endif
 		if (flags1) {
+#ifdef HASLIBGSASL
 #if 0
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
 			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256\r\n");
 			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256\r\n");
+#endif
+#else
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 #endif
 		} else
 		if (flags2) {
@@ -3122,10 +3183,12 @@ smtp_ehlo(char *arg)
 	}
 #endif
 	out("250 HELP\r\n");
+	flush();
 	if (!arg || !*arg)
 		dohelo(remotehost);
 	else
 		dohelo(arg);
+	return;
 }
 
 void
@@ -3133,10 +3196,13 @@ smtp_rset(char *arg)
 {
 	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		flush();
 		return;
 	}
 	seenmail = rcptto.len = mailfrom.len = addr.len = 0;
 	out("250 flushed\r\n");
+	flush();
+	return;
 }
 
 #ifdef BATV
@@ -3247,6 +3313,7 @@ pop_bef_smtp(char *mfrom)
 			die_nomem();
 	} else {
 		out("451 Requested action aborted: database error (#4.3.2)\r\n");
+		flush();
 		logerr("qmail-smtpd: ");
 		logerrpid();
 		logerrf("Database error\n");
@@ -3276,6 +3343,7 @@ domain_compare(char *dom1, char *dom2)
 		if (!(tmpdom1 = (*inquery) (DOMAIN_QUERY, dom1, 0)) ||
 				!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
 			out("451 Requested action aborted: database error (#4.3.2)\r\n");
+			flush();
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerrf("Database error\n");
@@ -3422,6 +3490,7 @@ smtp_mail(char *arg)
 		break;
 	case 1:
 		out("503 bad sequence of commands (#5.3.2)\r\n");
+		flush();
 		return;
 	case 2:
 		smtp_relayreject(remoteip);
@@ -3441,6 +3510,7 @@ smtp_mail(char *arg)
 	}
 	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
+		flush();
 		return;
 	}
 	if (!addrparse(arg)) {
@@ -3612,6 +3682,7 @@ smtp_mail(char *arg)
 			logerr(mailfrom.s);
 			logerrf(">\n");
 			out("553 SMTP Access denied (#5.7.1)\r\n");
+			flush();
 			return;
 		}
 		if (!(pw = (*inquery) (PWD_QUERY, mailfrom.s, 0))) {
@@ -3631,6 +3702,7 @@ smtp_mail(char *arg)
 				logerr(mailfrom.s);
 				logerrf(">\n");
 				out("553 SMTP Access denied (#5.7.1)\r\n");
+				flush();
 				sleep(5); /*- Prevent DOS */
 				return;
 			} else {
@@ -3639,6 +3711,7 @@ smtp_mail(char *arg)
 				logerr(remoteip);
 				logerrf(" Database error\n");
 				out("451 Requested action aborted: database error (#4.3.2)\r\n");
+				flush();
 				return;
 			}
 		} else {
@@ -3655,6 +3728,7 @@ smtp_mail(char *arg)
 				logerr("> ");
 				logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
 				out("553 SMTP Access denied (#5.7.1)\r\n");
+				flush();
 				return;
 			}
 		}
@@ -3677,6 +3751,7 @@ smtp_mail(char *arg)
 			logerr(mailfrom.s);
 			logerrf(">\n");
 			out("530 authentication required for local users (#5.7.1)\r\n");
+			flush();
 			return;
 		}
 	}
@@ -3759,6 +3834,7 @@ nohasvirtual:
 			if (spfbehavior < 2)
 				break;
 			out("451 SPF lookup failure (#4.3.0)\r\n");
+			flush();
 			return;
 		case SPF_NONE:
 		case SPF_UNKNOWN:
@@ -3806,6 +3882,7 @@ nohasvirtual:
 			continue;
 		if (plug[i]->mail_func(remoteip, addr.s, &mesg)) {
 			out(mesg);
+			flush();
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr("plugin(from)[");
@@ -3835,12 +3912,15 @@ nohasvirtual:
 	if (env_get("FORCE_TLS")) {
 		if (!ssl) {
 			out("530 must issue STARTTLS first (#5.7.0)\r\n");
+			flush();
 			return;
 		}
 	}
 #endif
 	seenmail = 1;
 	out("250 ok\r\n");
+	flush();
+	return;
 }
 
 void
@@ -3862,6 +3942,7 @@ smtp_rcpt(char *arg)
 		break;
 	case 1:
 		out("503 bad sequence of commands (#5.3.2)\r\n");
+		flush();
 		return;
 	case 2:
 		smtp_relayreject(remoteip);
@@ -3935,6 +4016,7 @@ smtp_rcpt(char *arg)
 			break;
 		default:
 			out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
+			flush();
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr(remoteip);
@@ -4069,6 +4151,7 @@ smtp_rcpt(char *arg)
 		logerr(addr.s);
 		logerrf("\n");
 		out("553 Not our message (#5.7.1)\r\n");
+		flush();
 		return;
 	}
 #endif
@@ -4078,6 +4161,7 @@ smtp_rcpt(char *arg)
 			continue;
 		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg)) {
 			out(mesg);
+			flush();
 			logerr("qmail-smtpd: ");
 			logerrpid();
 			logerr("plugin(rcpt)[");
@@ -4122,6 +4206,8 @@ smtp_rcpt(char *arg)
 			!stralloc_0(&rcptto))
 		die_nomem();
 	out("250 ok\r\n");
+	flush();
+	return;
 }
 
 ssize_t
@@ -4487,6 +4573,8 @@ acceptmessage(unsigned long qp)
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
 	out(accept_buf);
 	out("\r\n");
+	flush();
+	return;
 }
 
 static void
@@ -4535,6 +4623,7 @@ smtp_data(char *arg)
 #endif
 	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		flush();
 		return;
 	}
 	if (!seenmail) {
@@ -4623,6 +4712,7 @@ smtp_data(char *arg)
 				continue;
 			if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg)) {
 				out(mesg);
+				flush();
 				logerr("qmail-smtpd: ");
 				logerrpid();
 				logerr("plugin(data)[");
@@ -4681,7 +4771,9 @@ smtp_data(char *arg)
 		out("451 ");
 	out(qqx + 1);
 	out("\r\n");
+	flush();
 	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
+	return;
 }
 
 int
@@ -4957,6 +5049,7 @@ auth_cram(int method)
 
 #ifdef HASLIBGSASL
 static PASSWD  *gsasl_pw;
+static stralloc scram_method;
 
 PASSWD         *
 get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, char **server_key, char **salted_pass)
@@ -4996,6 +5089,7 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 			logerr(u);
 			logerrf(">\n");
 			out("553 SMTP Access denied (#5.7.1)\r\n");
+			flush();
 			sleep(5); /*- Prevent DOS */
 			return ((PASSWD *) NULL);
 		} else {
@@ -5004,6 +5098,7 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 			logerr(remoteip);
 			logerrf(" Database error\n");
 			out("451 Requested action aborted: database error (#4.3.2)\r\n");
+			flush();
 			return ((PASSWD *) NULL);
 		}
 	} else {
@@ -5021,25 +5116,43 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 			logerr("> ");
 			logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
 			out("553 SMTP Access denied (#5.7.1)\r\n");
+			flush();
 			gsasl_pw = (PASSWD *) NULL;
 			return ((PASSWD *) NULL);
 		}
 	}
-	if (!str_diffn(gsasl_pw->pw_passwd, "{SCRAM-SHA-1}", 13) || !str_diffn(gsasl_pw->pw_passwd, "{SCRAM-SHA-256}", 15)) {
-		i = get_scram_secrets(gsasl_pw->pw_passwd, mech, iter, salt, stored_key, server_key, salted_pass);
-		if (i != 6) {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" SMTP Access denied to <");
-			logerr(u);
-			logerr("> unable go get secrets");
-			out("553 SMTP Access denied (#5.7.1)\r\n");
-			gsasl_pw = (PASSWD *) NULL;
-			return ((PASSWD *) NULL);
-		}
+	if (str_diffn(gsasl_pw->pw_passwd, scram_method.s, scram_method.len)) {
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerr(remoteip);
+		logerr(" SCRAM encryption level ");
+		logerr(scram_method.s);
+		i = str_chr(gsasl_pw->pw_passwd, '}');
+		if (gsasl_pw->pw_passwd[i]) {
+			logerr(" not supported for ");
+			substdio_put(&sserr, gsasl_pw->pw_passwd, i + 1);
+			logerrf("\n");
+		} else
+			logerrf(" not supported\n");
+		out("553 Incorrect encryption level: SMTP Access denied (#5.7.1)\r\n");
+		flush();
+		gsasl_pw = (PASSWD *) NULL;
+		return ((PASSWD *) NULL);
 	} else
 		*mech = 0;
+	i = get_scram_secrets(gsasl_pw->pw_passwd, mech, iter, salt, stored_key, server_key, salted_pass);
+	if (i != 6) {
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerr(remoteip);
+		logerr(" Unable go get secrets for <");
+		logerr(u);
+		logerrf(">\n");
+		out("553 SMTP Access denied (#5.7.1)\r\n");
+		flush();
+		gsasl_pw = (PASSWD *) NULL;
+		return ((PASSWD *) NULL);
+	}
 	return gsasl_pw;
 }
 
@@ -5175,7 +5288,6 @@ server_auth(Gsasl_session *session)
 	} while (r == GSASL_NEEDS_MORE);
 
 	if (r != GSASL_OK) {
-		fprintf(stderr, "r=%d\n", r);
 		logerr("535 gsasl_step64: ");
 		logerr(gsasl_strerror(r));
 		logerrf("\n");
@@ -5199,14 +5311,24 @@ auth_scram(int method)
 	switch(method)
 	{
 		case AUTH_SCRAM_SHA1:
+			if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-1}", 13) ||
+					!stralloc_0(&scram_method))
+				die_nomem();
+			scram_method.len--;
 			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-1", &session);
 			break;
 		case AUTH_SCRAM_SHA256:
+			if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-256}", 15) ||
+					!stralloc_0(&scram_method))
+				die_nomem();
+			scram_method.len--;
 			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-256", &session);
 			break;
+#if 0
 		case AUTH_SCRAM_SHA512:
 			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-512", &session);
 			break;
+#endif
 	}
 	if (r != GSASL_OK) {
 		logerr("gsasl_server_start: ");
@@ -5394,8 +5516,10 @@ auth_digest_md5()
 			b64encode(&slop, &tmp) != 0)
 		die_nomem();
 	out("334 ");
-	if (substdio_put(&ssout, tmp.s, tmp.len) == -1)
+	if (substdio_put(&ssout, tmp.s, tmp.len) == -1) {
+		flush();
 		return err_write();
+	}
 	out("\r\n");
 	flush();
 
@@ -5513,6 +5637,7 @@ smtp_auth(char *arg)
 		break;
 	case 1:
 		out("503 bad sequence of commands (#5.3.2)\r\n");
+		flush();
 		return;
 	case 2:
 		smtp_relayreject(remoteip);
@@ -5532,6 +5657,7 @@ smtp_auth(char *arg)
 	}
 	if (!hostname || !*hostname || !childargs || !*childargs) {
 		out("503 auth not available (#5.3.3)\r\n");
+		flush();
 		return;
 	}
 	if (authd) {
@@ -5569,16 +5695,19 @@ smtp_auth(char *arg)
 		if (!env_put2("AUTHINFO", remoteinfo))
 			die_nomem();
 		out("235 ok, go ahead (#2.0.0)\r\n");
+		flush();
 		break;
 	case 1:/*- auth fail */
 	case 2:/*- misuse */
 		err_authfailure(remoteip, user.s, j);
 		sleep(5);
 		out("535 authorization failed (#5.7.1)\r\n");
+		flush();
 		break;
 	case -1:
 		err_authfailure(remoteip, user.s, j);
 		out("454 temporary authentication failure (#4.3.0)\r\n");
+		flush();
 		break;
 	case -2: /*- returned by err_noauthallowed() when SECURE_AUTH is set and TLS isn't used */
 		err_authinsecure(remoteip, j);
@@ -5602,6 +5731,7 @@ smtp_etrn(char *arg)
 	}
 	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
+		flush();
 		return;
 	}
 	if (seenmail) {
@@ -5612,6 +5742,7 @@ smtp_etrn(char *arg)
 		arg++;
 	if (!valid_hostname(arg)) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		flush();
 		return;
 	}
 	if (!nodnscheck) {
@@ -5645,26 +5776,31 @@ smtp_etrn(char *arg)
 		out("250 OK, queueing for node <");
 		out(arg);
 		out("> started\r\n");
+		flush();
 		return;
 	case -1:
 		log_etrn(remoteip, arg, "ETRN Error");
 		out("451 Unable to queue messages (#4.3.0)\r\n");
+		flush();
 		return;
 	case -2:
 		log_etrn(remoteip, arg, "ETRN Rejected");
 		out("553 <");
 		out(arg);
 		out(">: etrn service unavailable (#5.7.1)\r\n");
+		flush();
 		return;
 	case -3:
 		out("250 OK, No message waiting for node <");
 		out(arg);
 		out(">\r\n");
+		flush();
 		return;
 	case -4:
 		out("252 OK, pending message for node <");
 		out(arg);
 		out("> started\r\n");
+		flush();
 		return;
 	default:
 		status_buf[fmt_ulong(status_buf, (unsigned long) status)] = 0;
@@ -5674,6 +5810,7 @@ smtp_etrn(char *arg)
 			out("> pending message for node <");
 			out(arg);
 			out("> started\r\n");
+			flush();
 			return;
 		}
 		i = fmt_str(err_buff, "unable to talk to fast flush service status <");
@@ -5688,6 +5825,7 @@ smtp_etrn(char *arg)
 		out("451 Unable to queue messages, status <");
 		out(status_buf);
 		out("> (#4.3.0)\r\n");
+		flush();
 		return;
 	}
 	return;
@@ -5711,6 +5849,7 @@ smtp_atrn(char *arg)
 	}
 	if (!seenhelo) {
 		out("503 Polite people say hello first (#5.5.4)\r\n");
+		flush();
 		return;
 	}
 	if (seenmail) {
@@ -5771,6 +5910,7 @@ smtp_atrn(char *arg)
 				end_flag = 1;
 			if (!valid_hostname(arg)) {
 				out("501 invalid parameter syntax (#5.3.2)\r\n");
+				flush();
 				return;
 			}
 			if ((*atrn_access) (remoteinfo, domain_ptr)) {
@@ -5792,6 +5932,7 @@ smtp_atrn(char *arg)
 			out("450 atrn service unavailable (#5.7.1)\r\n");
 		else
 			out("553 atrn service unavailable (#5.7.1)\r\n");
+		flush();
 		return;
 	}
 	switch ((status = atrn_queue(arg, remoteip)))
@@ -5804,20 +5945,24 @@ smtp_atrn(char *arg)
 	case -1:
 		log_atrn(remoteip, remoteinfo, arg, "ATRN Error");
 		out("451 Unable to queue messages (#4.3.0)\r\n");
+		flush();
 		return;
 	case -2:
 		log_atrn(remoteip, remoteinfo, arg, "ATRN Rejected");
 		out("553 <");
 		out(arg);
 		out(">: atrn service unavailable (#5.7.1)\r\n");
+		flush();
 		return;
 	case -3:
 		out("453 No message waiting for node(s) <");
 		out(arg);
 		out(">\r\n");
+		flush();
 		return;
 	case -4:
 		out("451 Unable to queue messages (#4.3.0)\r\n");
+		flush();
 		return;
 	default:
 		status_buf[fmt_ulong(status_buf, (unsigned long) status)] = 0;
@@ -5834,6 +5979,7 @@ smtp_atrn(char *arg)
 			out("451 Unable to queue messages, status <");
 			out(status_buf);
 			out("> (#4.3.0)\r\n");
+			flush();
 		}
 		return;
 	}
@@ -5850,9 +5996,10 @@ smtp_tls(char *arg)
 	if (ssl)
 		err_unimpl("unimplimented");
 	else
-	if (*arg)
+	if (*arg) {
 		out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
-	else {
+		flush();
+	} else {
 		tls_init();
 		/*- have to discard the pre-STARTTLS HELO/EHLO argument, if any */
 		dohelo(remotehost);
@@ -6094,6 +6241,8 @@ tls_nogateway()
 		out((char *) ssl_verify_err);
 	}
 	out(" ");
+	flush();
+	return;
 }
 
 void
@@ -6107,6 +6256,7 @@ tls_out(const char *s1, const char *s2)
 	}
 	out(" (#4.3.0)\r\n");
 	flush();
+	return;
 }
 
 void
@@ -6652,6 +6802,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			smtp_greet("220 ");
 	}
 	out("\r\n");
+	flush();
 	switch (smtp_port)
 	{
 	case ODMR_PORT:/*- RFC 2645 */
@@ -6800,6 +6951,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.256  2022-08-05 11:43:05+05:30  Cprogrammer
+ * added missing flush() statements
+ * display error if incorrect scram encryption level is used
+ *
  * Revision 1.255  2022-08-04 13:55:53+05:30  Cprogrammer
  * scram authentication with salt and stored/server keys
  *
@@ -7005,7 +7160,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.255 2022-08-04 13:55:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.256 2022-08-05 11:43:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
