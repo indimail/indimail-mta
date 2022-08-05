@@ -27,9 +27,12 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 15. smtpd.c: added AUTH CRAM-SHA224, CRAM-SHA384 methods
 - 31/07/2022
 16. smtpd.c: added AUTH SCRAM-SHA-1, SCRAM-SHA-256 methods
-04/08/2022
+- 04/08/2022
 17. smtpd.c: scram authentication with salt and stored/server keys
 18. svctool: create /tmp/inquery for pop3, imapd services
+- 05/08/2022
+19. smtpd.c: display error if incorrect scram encryption level is used
+20. smtpd.c: added missing flush() statements
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
