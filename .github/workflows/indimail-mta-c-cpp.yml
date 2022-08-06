@@ -29,13 +29,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        host: [ubuntu-latest, macos-latest]
+        host: [ubuntu-latest, ubuntu-22.04, macos-latest]
 
     steps:
     - name: extra_packages
       run: |
         if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install libmysqlclient-dev libc6 libc6-dev libgsasl7-dev; fi
-        if [ "${OS}" = "macOS-10.15" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql gsasl; fi
+        if [ "${OS}" = "ubuntu-22.04" ] ; then sudo apt-get install libmysqlclient-dev libc6 libc6-dev libgsasl-dev; fi
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql gsasl; fi
       env:
         OS: ${{ matrix.host }}
