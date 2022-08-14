@@ -131,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.258 $";
+char           *revision = "$Revision: 1.259 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -551,12 +551,12 @@ die_read(char *str, char *err)
 		logerr(str);
 		logerr(": ");
 	}
-	if (errno) {
+	if (errno)
 		logerr(error_str(errno));
+	if (err) {
 		logerr(": ");
-	}
-	if (err)
 		logerr(err);
+	}
 	logerrf("\n");
 	out("451 Requested action aborted: read error (#4.4.2)\r\n");
 	flush();
@@ -5240,7 +5240,7 @@ err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
 	logerr(" ");
 	logerr(mesg);
 	if (str) {
-		logerr("[");
+		logerr(" [");
 		logerr(str);
 		logerr("]");
 	}
@@ -7320,6 +7320,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.259  2022-08-14 22:40:34+05:30  Cprogrammer
+ * fixed minor formatting issue with die_read(), err_scram() functions
+ *
  * Revision 1.258  2022-08-14 20:57:12+05:30  Cprogrammer
  * conditionally add log_gsasl_version() using #ifdef HASLIBGSAS
  *
@@ -7535,7 +7538,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.258 2022-08-14 20:57:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.259 2022-08-14 22:40:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
