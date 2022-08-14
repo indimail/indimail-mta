@@ -2687,7 +2687,9 @@ void
 smtp_init(int force_flag)
 {
 	static int      flag;
+#ifdef HASLIBGSASL
 	int             r;
+#endif
 
 	if (!force_flag && flag)
 		return;
@@ -5701,6 +5703,7 @@ auth_cram_ripemd()
 	return (auth_cram(AUTH_CRAM_RIPEMD));
 }
 
+#ifdef HASLIBGSASL
 static int
 auth_scram_sha1()
 {
@@ -5738,6 +5741,7 @@ auth_scram_sha512_plus()
 	return (auth_scram(AUTH_SCRAM_SHA512_PLUS));
 }
 #endif
+#endif /*- #ifdef HASLIBGSASL */
 
 /*- parse digest response */
 unsigned int
@@ -7316,8 +7320,8 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.258  2022-08-14 19:33:23+05:30  Cprogrammer
- * conditionally add log_gsasl_version() using #ifdef HASLIBGSASL
+ * Revision 1.258  2022-08-14 20:57:12+05:30  Cprogrammer
+ * conditionally add log_gsasl_version() using #ifdef HASLIBGSAS
  *
  * Revision 1.257  2022-08-14 19:13:11+05:30  Cprogrammer
  * added auth methods SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
@@ -7531,7 +7535,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.258 2022-08-14 19:33:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.258 2022-08-14 20:57:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
