@@ -111,9 +111,12 @@ static int      auth_cram_ripemd();
 static int      auth_digest_md5();
 #ifdef HASLIBGSASL
 static int      auth_scram_sha1();
+static int      auth_scram_sha1_plus();
 static int      auth_scram_sha256();
+static int      auth_scram_sha256_plus();
 #if 0
 static int      auth_scram_sha512();
+static int      auth_scram_sha512_plus();
 #endif
 #endif
 int             err_noauth();
@@ -128,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.256 $";
+char           *revision = "$Revision: 1.257 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -383,9 +386,12 @@ struct authcmd {
 	{"digest-md5", auth_digest_md5},
 #ifdef HASLIBGSASL
 	{"scram-sha-1", auth_scram_sha1},
+	{"scram-sha-1-plus", auth_scram_sha1_plus},
 	{"scram-sha-256", auth_scram_sha256},
+	{"scram-sha-256-plus", auth_scram_sha256_plus},
 #if 0
 	{"scram-sha-512", auth_scram_sha512},
+	{"scram-sha-512-plus", auth_scram_sha512_plus},
 #endif
 #endif
 	{0, err_noauth}
@@ -403,6 +409,10 @@ void           *phandle;
 char           *no_help, *no_vrfy;
 #ifdef HASLIBGSASL
 static Gsasl   *gsasl_ctx;
+typedef enum {
+	tls_unique,
+	tls_exporter,
+} cb_type;
 #endif
 
 extern char   **environ;
@@ -531,7 +541,7 @@ die_lcmd()
 }
 
 void
-die_read(char *str)
+die_read(char *str, char *err)
 {
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -541,8 +551,12 @@ die_read(char *str)
 		logerr(str);
 		logerr(": ");
 	}
-	if (errno)
+	if (errno) {
 		logerr(error_str(errno));
+		logerr(": ");
+	}
+	if (err)
+		logerr(err);
 	logerrf("\n");
 	out("451 Requested action aborted: read error (#4.4.2)\r\n");
 	flush();
@@ -1701,8 +1715,10 @@ err_authfailure(char *arg1, char *arg2, int ret)
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(arg1);
-	logerr(" AUTH ");
-	logerr(arg2);
+	if (arg2) {
+		logerr(" AUTH ");
+		logerr(arg2);
+	}
 	logerr(" status=[");
 	if (ret < 0)
 		logerr("-");
@@ -2021,7 +2037,7 @@ check_recipient_pwd(char *rcpt, int len)
 	for (;;) {
 		if (getln(&pwss, &line, &match, '\n') == -1) {
 			close(fd);
-			die_read("/etc/passwd");
+			die_read("/etc/passwd", 0);
 		}
 		if (!line.len) {
 			close(fd);
@@ -2452,7 +2468,7 @@ greetdelay_check(int delay)
 	if (r <= 0) {
 		if (!r)
 			errno = 0;
-		die_read(!r ? "client dropped connection" : 0);
+		die_read(!r ? "client dropped connection" : 0, 0);
 	}
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -2754,6 +2770,11 @@ smtp_init(int force_flag)
 		logerrf("\r\n");
 		_exit(111);
 	}
+	logerr("gsasl header version ");
+	logerr(GSASL_VERSION);
+	logerr(" library version ");
+	logerr(gsasl_check_version(NULL));
+	logerrf("\n");
 #endif
 	return;
 }
@@ -3027,8 +3048,14 @@ smtp_ehlo(char *arg)
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
 			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
 #else
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256\r\n");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
+			if (ssl)
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
+			out("\r\n");
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
+			if (ssl)
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
+			out("\r\n");
 #endif
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
@@ -4229,7 +4256,7 @@ saferead(int fd, char *buf, int len)
 			die_alarm();
 	}
 	if (r < 0)
-		die_read("ssl");
+		ssl ? die_read("ssl_timeoutread", ssl_error()) : die_read("timeoutread", 0);
 	return r;
 }
 
@@ -4790,7 +4817,7 @@ authgetl(void)
 		if (i != 1) {
 			if (!i)
 				errno = 0;
-			die_read("client dropped connection");
+			die_read("client dropped connection", 0);
 		}
 		if (authin.s[authin.len] == '\n')
 			break;
@@ -4880,7 +4907,7 @@ authenticate(int method)
 	byte_zero(upbuf, sizeof upbuf);
 	if (method == AUTH_DIGEST_MD5) {
 		if ((n = saferead(po[0], respbuf, 33)) == -1)
-			die_read("err reading digest md5 response");
+			die_read("err reading digest md5 response", 0);
 		respbuf[n] = 0;
 		close(po[0]);
 	}
@@ -4892,7 +4919,7 @@ authenticate(int method)
 		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
 			substdio_fdbuf(&pwd_in, saferead, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
 			if (substdio_copy(&ssout, &pwd_in) == -2)
-				die_read("err reading checkpassword pipe");
+				die_read("error reading checkpassword pipe", 0);
 		}
 		/* 
 		 * i == 3 - account doesn't have RELAY permissions.
@@ -4910,14 +4937,15 @@ authenticate(int method)
 		slop.s[slop.len] = 0;
 		if (b64encode(&slop, &resp) < 0)
 			die_nomem();
-		resp.s[resp.len] = 0;
+		if (!stralloc_0(&resp))
+			die_nomem();
 		out("334 ");
 		out(resp.s);
 		out("\r\n");
 		flush();
 		/*- digest-md5 requires a special okay response ...  */
 		if ((n = saferead(0, respbuf, 512)) == -1)
-			die_read("err getting ack from client");
+			die_read("failed to get OK from client", 0);
 		if (n)
 			respbuf[n] = 0;
 		return (0);
@@ -5156,25 +5184,93 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 	return gsasl_pw;
 }
 
+void
+err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
+{
+	out(err_code1);
+	out(" ");
+	out(mesg);
+	out(" (#");
+	out(err_code2);
+	out(")\r\n");
+	flush();
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" ");
+	logerr(mesg);
+	if (str) {
+		logerr("[");
+		logerr(str);
+		logerr("]");
+	}
+	logerrf("\n");
+}
+
+char           *
+get_finish_message(cb_type type)
+{
+	char            tls_finish_buf[EVP_MAX_MD_SIZE];
+	static stralloc in = {0}, res = {0};
+	int             i, tls_finish_len;
+
+	if (!ssl) /*- we should never be here */
+		return ((char *) NULL);
+	switch (type)
+	{
+	case tls_unique: /*- RFC 5929 */
+		/*
+		 * Save the TLS finish message expected to be found, useful for
+		 * authentication checks related to channel binding.
+		 * SSL_get_peer_finished() does not offer a way to know the exact length
+		 * of a TLS finish message beforehand, so attempt first with a fixed-length
+		 * buffer, and try again if the message does not fit.
+		 */
+		tls_finish_len = SSL_get_peer_finished(ssl, tls_finish_buf, EVP_MAX_MD_SIZE);
+		if (tls_finish_len > EVP_MAX_MD_SIZE)
+			return ((char *) NULL);
+		break;
+	case tls_exporter: /*- RFC 9266 tls-exporter length = 32 */
+		tls_finish_len = 32;
+		if ((i = SSL_export_keying_material(ssl, (unsigned char *) tls_finish_buf,
+						tls_finish_len, "EXPORTER-Channel-Binding", 24, 0, 0, 1)) != 1) {
+			err_scram("410", "4.3.5", "Temporary channel binding failure", "SSL_export_keyring_material failed");
+			return ((char *) NULL);
+		}
+		break;
+	default:
+		return ((char *) NULL);
+	}
+	if (!stralloc_copyb(&in, tls_finish_buf, tls_finish_len) ||
+			b64encode(&in, &res) != 0 || !stralloc_0(&res))
+		die_nomem();
+	return res.s;
+}
+
 static int
 gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
 	int             rc = GSASL_NO_CALLBACK;
 	static int      mech, iter = 4096;
-	static char    *u, *salt, *stored_key, *server_key, *salted_pass;
+	static char    *u, *salt, *stored_key, *server_key, *salted_pass, *p;
 	static int      i = -1;
 
 	switch (prop)
 	{
 	case GSASL_AUTHID:
-		if (!(u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
+		if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
 			return GSASL_NO_CALLBACK;
-		}
+		if (!stralloc_copys(&user, u) || !stralloc_0(&user))
+			die_nomem();
+		user.len--;
 		break;
 	case GSASL_PASSWORD:
 		if (i == -1) {
 			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
 				return GSASL_NO_CALLBACK;
+			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
+				die_nomem();
+			user.len--;
 			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
 			i = 0;
 		}
@@ -5184,12 +5280,12 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 			gsasl_property_set(sctx, GSASL_PASSWORD, gsasl_pw->pw_passwd);
 		break;
 	case GSASL_SCRAM_SALT:
-		if (!(u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
-			return GSASL_NO_CALLBACK;
-		}
 		if (i == -1) {
 			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
 				return GSASL_NO_CALLBACK;
+			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
+				die_nomem();
+			user.len--;
 			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
 			i = 0;
 		}
@@ -5201,6 +5297,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		if (i == -1) {
 			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
 				return GSASL_NO_CALLBACK;
+			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
+				die_nomem();
+			user.len--;
 			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
 			i = 0;
 		}
@@ -5211,6 +5310,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		if (i == -1) {
 			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
 				return GSASL_NO_CALLBACK;
+			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
+				die_nomem();
+			user.len--;
 			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
 			i = 0;
 		}
@@ -5231,6 +5333,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		if (i == -1) {
 			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
 				return GSASL_NO_CALLBACK;
+			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
+				die_nomem();
+			user.len--;
 			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
 			i = 0;
 		}
@@ -5240,14 +5345,32 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	case GSASL_VALIDATE_GSSAPI:
 		return GSASL_OK;
 	case GSASL_CB_TLS_UNIQUE:
+		if ((p = get_finish_message(tls_unique))) {
+			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p)) != GSASL_OK) {
+				logerr("gsasl_proporty_set: GSASL_CB_TLS_UNIQUE: ");
+				logerr(gsasl_strerror(rc));
+				logerrf("\n");
+			}
+		} else {
+			logerrf("unable to get finish message for GSASL_CB_TLS_UNIQUE\n");
+			return GSASL_NO_CALLBACK;
+		}
 		break;
+#if GSASL_VERSION_NUMBER >= 0x020001
+	case GSASL_CB_TLS_EXPORTER:
+		if ((p = get_finish_message(tls_exporter))) {
+			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK) {
+				logerr("gsasl_proporty_set: GSASL_CB_TLS_EXPORTER: ");
+				logerr(gsasl_strerror(rc));
+				logerrf("\n");
+			}
+		} else {
+			logerrf("unable to get finish message for GSASL_CB_TLS_EXPORTER\n");
+			return GSASL_NO_CALLBACK;
+		}
+		break;
+#endif
 	default:
-		/*
-		 * You may want to log (at debug verbosity level) that an
-		 * unknown property was requested here, possibly after filtering
-		 * known rejected property requests. 
-		 * printf("unknown gsasl callback %u\n", prop);
-		 */
 		strnum[fmt_int(strnum, prop)] = 0;
 		logerr("unknown callback [");
 		logerr(strnum);
@@ -5258,7 +5381,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 }
 
 static int
-server_auth(Gsasl_session *session)
+gsasl_server_auth(Gsasl_session *session)
 {
 	char           *p;
 	int             r;
@@ -5288,7 +5411,7 @@ server_auth(Gsasl_session *session)
 	} while (r == GSASL_NEEDS_MORE);
 
 	if (r != GSASL_OK) {
-		logerr("535 gsasl_step64: ");
+		logerr("gsasl_step64: ");
 		logerr(gsasl_strerror(r));
 		logerrf("\n");
 		return 1;
@@ -5296,38 +5419,64 @@ server_auth(Gsasl_session *session)
 	return 0;
 }
 
+/*- RFC 5802, RFC 7677, RFC 5056, RFC 5929, RFC 9266 */
 static int
 auth_scram(int method)
 {
-	int             r = -1, channel_binding = 0;
+	int             r = -1, i, channel_binding;
 	Gsasl_session  *session = NULL;
+	char           *p;
 
-	logerr("gsasl header version ");
-	logerr(GSASL_VERSION);
-	logerr(" library version ");
-	logerr(gsasl_check_version(NULL));
-	logerrf("\n");
+	channel_binding = 0;
 	gsasl_callback_set(gsasl_ctx, gs_callback);
+	user.len = 0;
 	switch(method)
 	{
-		case AUTH_SCRAM_SHA1:
-			if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-1}", 13) ||
-					!stralloc_0(&scram_method))
-				die_nomem();
-			scram_method.len--;
-			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-1", &session);
-			break;
-		case AUTH_SCRAM_SHA256:
-			if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-256}", 15) ||
-					!stralloc_0(&scram_method))
-				die_nomem();
-			scram_method.len--;
-			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-256", &session);
-			break;
+	case AUTH_SCRAM_SHA1:
+		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-1}", 13) ||
+				!stralloc_0(&scram_method))
+			die_nomem();
+		scram_method.len--;
+		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-1", &session);
+		break;
+	case AUTH_SCRAM_SHA1_PLUS:
+		channel_binding = 1;
+		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-1}", 13) ||
+				!stralloc_0(&scram_method))
+			die_nomem();
+		scram_method.len--;
+		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-1-PLUS", &session);
+		break;
+	case AUTH_SCRAM_SHA256:
+		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-256}", 15) ||
+				!stralloc_0(&scram_method))
+			die_nomem();
+		scram_method.len--;
+		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-256", &session);
+		break;
+	case AUTH_SCRAM_SHA256_PLUS:
+		channel_binding = 1;
+		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-256}", 15) ||
+				!stralloc_0(&scram_method))
+			die_nomem();
+		scram_method.len--;
+		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-256-PLUS", &session);
+		break;
 #if 0
-		case AUTH_SCRAM_SHA512:
-			r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-512", &session);
-			break;
+	case AUTH_SCRAM_SHA512:
+		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-512}", 15) ||
+				!stralloc_0(&scram_method))
+			die_nomem();
+		scram_method.len--;
+		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-512", &session);
+		break;
+	case AUTH_SCRAM_SHA512_PLUS:
+		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-512}", 15) ||
+				!stralloc_0(&scram_method))
+			die_nomem();
+		scram_method.len--;
+		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-512-PLUS", &session);
+		break;
 #endif
 	}
 	if (r != GSASL_OK) {
@@ -5346,22 +5495,95 @@ auth_scram(int method)
 	if (r == -1 || !stralloc_0(&slop))
 		die_nomem();
 	slop.len--;
+	/*
+	 * Read gs2-cbind-flag. Server handles its value as described in RFC 5802,
+	 * section 6 dealing with channel binding.
+	 *
+	 * client first message must start with n, y or p
+	 * e.g. from RFC documentation
+	 * C: n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL
+	 * S: r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,s=QSXCR+Q6sek8bf92, i=4096
+	 * C: c=biws,r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j, p=v0X8v3Bz2T0CJGbJQyF0X+HI4Ts=
+	 * S: v=rmF9pqV8S7suAoZWja4dJRkFsKQ=
+	 */
 	switch(slop.s[0])
 	{
 	case 'n':
-		break;
-	case 'p':
-		if (!channel_binding)
+		if (ssl) {
+			/*
+			 * Client does not support channel binding. Since we support,
+			 * we cannot support this option.
+			 */
+			if (channel_binding)
+				err_scram("535", "5.7.4", "client does not support SCRAM channel binding, but server needs it for SSL connections", 0);
+			else
+				err_scram("535", "5.7.4", "client does not support SCRAM channel binding, but server does", 0);
+		}
+		/*- check if the syntax is correct by checking for comma */
+		if (slop.s[1] != ',') {
+			err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
 			return 1;
+		}
 		break;
 	case 'y':
-		if (channel_binding)
+		if (!ssl) {
+			if (slop.s[1] != ',') {
+				err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
+				return 1;
+			}
+			break;
+		}
+		/*-
+		 * this is a downgrade attack
+		 * Client supports channel binding and thinks that the server
+		 * does not. Server must fail authentication if it supports channel binding,
+		 * which is the case if a connection is using TLS.
+		 */
+		err_scram("535", "5.7.3", "SCRAM channel binding negotiation error", 0);
+		break;
+	case 'p':
+		if (!ssl)
+			/*
+			 * Client requires channel binding but we don't support it.
+			 *
+			 * RFC 5802 specifies a particular error code,
+			 * e=server-does-support-channel-binding, for this.  But it can
+			 * only be sent in the server-final message, and we don't want to
+			 * go through the motions of the authentication, knowing it will
+			 * fail, just to send that error message.
+			 * The client requires channel binding.  Channel binding type
+			 * follows, e.g., "p=tls-unique".
+			 */
+			err_scram("535", "5.7.4", "client requires SCRAM channel binding, but it is not supported", slop.s + 2);
+		if (slop.s[1] != '=') {
+			err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
 			return 1;
+		}
+		for (p = slop.s + 2;*p && *p != ','; p++);
+		i = 0;
+		if (*p == ',') {
+			*p = '\0';
+			i = 1;
+		}
+		/* channel name is slop.s + 2 */
+		if (str_diffn(slop.s + 2, "tls-unique", 11) && str_diffn(slop.s + 2, "tls-exporter", 13)) {
+			err_scram("535", "5.7.6", "unexpected SCRAM channel-binding type", slop.s + 2);
+			return 1;
+		}
+		if (i) /*- replace the comma */
+			*p = ',';
 		break;
 	default:
+		err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
 		return 1;
 	}
-	r = server_auth(session);
+	/*-
+	 * Read channel-binding.  We don't support channel binding for instance running
+	 * without TLS, so it's expected to always be "biws" in this case,
+	 * which is "n,,", base64-encoded. "biws" is used for Non-SSL connection attempts,
+	 * and for SSL connections the client has to provide channel binding value. cD10bHM
+	 */
+	r = gsasl_server_auth(session);
 	gsasl_finish(session);
 	gsasl_done(gsasl_ctx);
 	if (!r && gsasl_pw->pw_gid & NO_RELAY)
@@ -5421,9 +5643,21 @@ auth_scram_sha1()
 }
 
 static int
+auth_scram_sha1_plus()
+{
+	return (auth_scram(AUTH_SCRAM_SHA1_PLUS));
+}
+
+static int
 auth_scram_sha256()
 {
 	return (auth_scram(AUTH_SCRAM_SHA256));
+}
+
+static int
+auth_scram_sha256_plus()
+{
+	return (auth_scram(AUTH_SCRAM_SHA256_PLUS));
 }
 
 #if 0
@@ -5431,6 +5665,12 @@ static int
 auth_scram_sha512()
 {
 	return (auth_scram(AUTH_SCRAM_SHA512));
+}
+
+static int
+auth_scram_sha512_plus()
+{
+	return (auth_scram(AUTH_SCRAM_SHA512_PLUS));
 }
 #endif
 
@@ -5699,13 +5939,13 @@ smtp_auth(char *arg)
 		break;
 	case 1:/*- auth fail */
 	case 2:/*- misuse */
-		err_authfailure(remoteip, user.s, j);
+		err_authfailure(remoteip, user.len ? user.s : 0, j);
 		sleep(5);
 		out("535 authorization failed (#5.7.1)\r\n");
 		flush();
 		break;
 	case -1:
-		err_authfailure(remoteip, user.s, j);
+		err_authfailure(remoteip, user.len ? user.s : 0, j);
 		out("454 temporary authentication failure (#4.3.0)\r\n");
 		flush();
 		break;
@@ -6246,25 +6486,29 @@ tls_nogateway()
 }
 
 void
-tls_out(const char *s1, const char *s2)
+tls_err(const char *err_code1, const char *err_code2, const char *s)
 {
-	out("454 TLS ");
-	out((char *) s1);
-	if (s2) {
-		out(": ");
-		out((char *) s2);
-	}
-	out(" (#4.3.0)\r\n");
-	flush();
-	return;
-}
+	const char     *err;
 
-void
-tls_err(const char *s)
-{
-	tls_out(s, ssl_error());
-	if (smtps)
-		die_read("smtps: ssl");
+	out(err_code1);
+	out(" ");
+	out(s);
+	out(" (#");
+	out(err_code2);
+	out(")\r\n");
+	flush();
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" ");
+	logerr(s);
+	err = ssl_error();
+	if (err) {
+		logerr(": ");
+		logerr(err);
+	}
+	logerrf("\n");
+	return;
 }
 
 int
@@ -6319,9 +6563,8 @@ tls_verify()
 	}
 
 	if (ssl_timeoutrehandshake(timeout, ssl_rfd, ssl_wfd, ssl) <= 0) {
-		const char     *err = ssl_error_str();
-		tls_out("rehandshake failed", err);
-		die_read("ssl");
+		tls_err("454", "4.3.0", "rehandshake failed");
+		_exit(1);
 	}
 
 	do { /*- one iteration */
@@ -6374,6 +6617,130 @@ tls_verify()
 	return relayclient ? 1 : 0;
 }
 
+SSL_CTX        *
+set_tls_method()
+{
+	SSL_CTX        *ctx;
+	stralloc        ssl_option = { 0 };
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	int             method = 4;	/*- (1 unused) 2 = SSLv23, 3=SSLv3, 4 = TLSv1, 5=TLSv1.1, 6=TLSv1.2 */
+#else
+	int             method = 0;	/*- (1,2 unused) 3=SSLv3, 4 = TLSv1, 5=TLSv1.1, 6=TLSv1.2, 7=TLSv1.3 */
+#endif
+
+	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1_2") != 1)
+		die_control();
+	if (!stralloc_0(&ssl_option))
+		die_nomem();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	if (str_equal(ssl_option.s, "SSLv23"))
+		method = 2;
+	else
+	if (str_equal(ssl_option.s, "SSLv3"))
+		method = 3;
+	else
+#endif
+	if (str_equal(ssl_option.s, "TLSv1"))
+		method = 4;
+	else
+	if (str_equal(ssl_option.s, "TLSv1_1"))
+		method = 5;
+	else
+	if (str_equal(ssl_option.s, "TLSv1_2"))
+		method = 6;
+	else
+	if (str_equal(ssl_option.s, "TLSv1_3"))
+		method = 7;
+	else {
+		tls_err("454", "4.3.0", "Invalid TLS method configured");
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+		logerrf("Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2\n");
+#else
+		logerrf("Supported methods: TLSv1, TLSv1_1, TLSv1_2 TLSv1_3\n");
+#endif
+		return ((SSL_CTX *) NULL);
+	}
+	SSL_library_init();
+	/*- a new SSL context with the bare minimum of options */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	if (method == 2 && !(ctx = SSL_CTX_new(SSLv23_server_method()))) {
+		tls_err("454", "4.3.0", "TLS not available: unable to initialize SSLv23 ctx");
+		return ((SSL_CTX *) NULL);
+	} else
+	if (method == 3 && !(ctx = SSL_CTX_new(SSLv3_server_method()))) {
+		tls_err("454", "4.3.0", "TLS not available: unable to initialize SSLv3 ctx");
+		return ((SSL_CTX *) NULL);
+	} else
+#if defined(TLSV1_SERVER_METHOD) || defined(TLS1_VERSION)
+	if (method == 4 && !(ctx = SSL_CTX_new(TLSv1_server_method()))) {
+		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLSv1 ctx");
+		return ((SSL_CTX *) NULL);
+	} else
+#else
+	if (method == 4) {
+		tls_err("454", "4.3.0", "TLS not available: TLSv1_server_method not available");
+		return ((SSL_CTX *) NULL);
+	} else
+#endif
+#if defined(TLSV1_1_SERVER_METHOD) || defined(TLS1_1_VERSION)
+	if (method == 5 && !(ctx = SSL_CTX_new(TLSv1_1_server_method()))) {
+		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLSv1_1 ctx");
+		return ((SSL_CTX *) NULL);
+	} else
+#else
+	if (method == 5) {
+		tls_err("454", "4.3.0", "TLS not available: TLSv1_1_server_method not available");
+		return ((SSL_CTX *) NULL);
+	} else
+#endif
+#if defined(TLSV1_2_SERVER_METHOD) || defined(TLS1_2_VERSION)
+	if (method == 6 && !(ctx = SSL_CTX_new(TLSv1_2_server_method()))) {
+		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLSv1_2 ctx");
+		return ((SSL_CTX *) NULL) ;
+	} else
+#else
+	if (method == 6) {
+		tls_err("454", "4.3.0", "TLS not available: TLSv1_2_server_method not available");
+		return ((SSL_CTX *) NULL) ;
+	}
+#endif
+#else /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
+	if (!(ctx = SSL_CTX_new(TLS_server_method()))) {
+		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLS ctx");
+		return ((SSL_CTX *) NULL) ;
+	}
+	/*-
+	 * Currently supported versions are SSL3_VERSION, TLS1_VERSION, TLS1_1_VERSION,
+	 * TLS1_2_VERSION, TLS1_3_VERSION for TLS
+	 */
+	switch (method)
+	{
+	case 2:
+		tls_err("454", "4.3.0", "TLS not available: SSLv23_server_method not available");
+		return ((SSL_CTX *) NULL) ;
+	case 3:
+		SSL_CTX_set_min_proto_version(ctx, SSL3_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, SSL3_VERSION);
+		break;
+	case 4:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_VERSION);
+		break;
+	case 5:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_1_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_1_VERSION);
+		break;
+	case 6:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
+		break;
+	}
+	/*- POODLE Vulnerability */
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
+#endif /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
+	return ctx;
+}
+
 void
 tls_init()
 {
@@ -6388,89 +6755,9 @@ tls_init()
 	EVP_PKEY       *dh_pkey;
 	int             bits;
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	stralloc        ssl_option = { 0 };
-	int             method = 4;	/* (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
-#endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1_2") != 1)
-		die_control();
-	if (!stralloc_0(&ssl_option))
-		die_nomem();
-	if (str_equal(ssl_option.s, "SSLv23"))
-		method = 2;
-	else
-	if (str_equal(ssl_option.s, "SSLv3"))
-		method = 3;
-	else
-	if (str_equal(ssl_option.s, "TLSv1"))
-		method = 4;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_1"))
-		method = 5;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_2"))
-		method = 6;
-#endif
-	SSL_library_init();
-	/*- a new SSL context with the bare minimum of options */
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (method == 2 && !(ctx = SSL_CTX_new(SSLv23_server_method()))) {
-		tls_err("454 TLS not available: unable to initialize SSLv23 ctx (#4.3.0)\r\n");
+	if (!(ctx = set_tls_method()))
 		return;
-	} else
-	if (method == 3 && !(ctx = SSL_CTX_new(SSLv3_server_method()))) {
-		tls_err("454 TLS not available: unable to initialize SSLv3 ctx (#4.3.0)\r\n");
-		return;
-	}
-#if defined(TLSV1_SERVER_METHOD) || defined(TLS1_VERSION)
-	else
-	if (method == 4 && !(ctx = SSL_CTX_new(TLSv1_server_method()))) {
-		tls_err("454 TLS not available: unable to initialize TLSv1 ctx (#4.3.0)\r\n");
-		return;
-	}
-#else
-	else
-	if (method == 4) {
-		tls_err("454 TLS not available: TLSv1_server_method not available (#4.3.0)\r\n");
-		return;
-	}
-#endif
-#if defined(TLSV1_1_SERVER_METHOD) || defined(TLS1_1_VERSION)
-	else
-	if (method == 5 && !(ctx = SSL_CTX_new(TLSv1_1_server_method()))) {
-		tls_err("454 TLS not available: unable to initialize TLSv1_1 ctx (#4.3.0)\r\n");
-		return;
-	}
-#else
-	else
-	if (method == 5) {
-		tls_err("454 TLS not available: TLSv1_1_server_method not available (#4.3.0)\r\n");
-		return;
-	}
-#endif
-#if defined(TLSV1_2_SERVER_METHOD) || defined(TLS1_2_VERSION)
-	else
-	if (method == 6 && !(ctx = SSL_CTX_new(TLSv1_2_server_method()))) {
-		tls_err("454 TLS not available: unable to initialize TLSv1_2 ctx (#4.3.0)\r\n");
-		return;
-	}
-#else
-	else
-	if (method == 6) {
-		tls_err("454 TLS not available: TLSv1_2_server_method not available (#4.3.0)\r\n");
-		return;
-	}
-#endif
-#else /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if (!(ctx = SSL_CTX_new(TLS_server_method()))) {
-		tls_err("454 TLS not available: unable to initialize SSLv23 ctx (#4.3.0)\r\n");
-		return;
-	}
-	/*- POODLE Vulnerability */
-	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-#endif /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if (!certdir) {
 		if (!(certdir = env_get("CERTDIR")))
 			certdir = auto_control;
@@ -6485,8 +6772,8 @@ tls_init()
 	if (!SSL_CTX_use_certificate_chain_file(ctx, filename.s)) {
 		alloc_free(filename.s);
 		SSL_CTX_free(ctx);
-		tls_err("missing certificate");
-		return;
+		tls_err("454", "4.3.0", "certificate missing");
+		_exit(1);
 	}
 	if (!stralloc_copys(&filename, certdir) ||
 			!stralloc_catb(&filename, "/", 1))
@@ -6517,8 +6804,8 @@ tls_init()
 	SSL_CTX_free(ctx);
 	if (!myssl) {
 		alloc_free(filename.s);
-		tls_err("unable to initialize ssl");
-		return;
+		tls_err("454", "4.3.0", "unable to initialize ssl");
+		_exit(1);
 	}
 	/*- this will also check whether public and private keys match */
 	if (!stralloc_copys(&filename, certdir) ||
@@ -6535,8 +6822,8 @@ tls_init()
 #endif
 		SSL_free(myssl);
 		alloc_free(filename.s);
-		tls_err("no valid RSA private key");
-		return;
+		tls_err("454", "4.3.0", "no valid RSA private key");
+		_exit(1);
 	}
 	alloc_free(filename.s);
 	if (!(ciphers = env_get("TLS_CIPHER_LIST"))) {
@@ -6577,15 +6864,16 @@ tls_init()
 	}
 	if (ssl_timeoutaccept(timeout, ssl_rfd, ssl_wfd, myssl) <= 0) {
 		/*- neither cleartext nor any other response here is part of a standard */
-		const char     *err = ssl_error_str();
+		tls_err("454", "4.3.0", "failed to accept connection");
 		while (SSL_shutdown(myssl) == 0)
 			usleep(100);
 		SSL_free(myssl);
 		myssl = 0;
-		tls_out("connection failed", err);
-		die_read("ssl");
 	}
 	ssl = myssl;
+	logerr("ssl-version ");
+	logerr(SSL_get_version(ssl));
+	logerrf("\n");
 	/*- populate the protocol string, used in Received */
 	if (!stralloc_append(&proto, "(") ||
 			!stralloc_cats(&proto, (char *) SSL_get_version(ssl)) ||
@@ -6593,6 +6881,7 @@ tls_init()
 			!stralloc_cats(&proto, (char *) SSL_CIPHER_get_name(SSL_get_current_cipher(ssl))) ||
 			!stralloc_catb(&proto, " encrypted) ", 12))
 		die_nomem();
+	return;
 }
 #endif
 
@@ -6922,7 +7211,7 @@ command:
 	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
 #endif
 	if (commands(&ssin, cmdptr) == 0)
-		die_read("client dropped connection");
+		die_read("client dropped connection", 0);
 	die_nomem();
 }
 
@@ -6951,6 +7240,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.257  2022-08-14 17:01:11+05:30  Cprogrammer
+ * added auth methods SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
+ *
  * Revision 1.256  2022-08-05 11:43:05+05:30  Cprogrammer
  * added missing flush() statements
  * display error if incorrect scram encryption level is used
@@ -7160,7 +7452,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.256 2022-08-05 11:43:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.257 2022-08-14 17:01:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
