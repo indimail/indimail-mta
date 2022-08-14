@@ -1,5 +1,8 @@
 /*
  * $Log: setqload.c,v $
+ * Revision 1.3  2022-08-14 21:58:24+05:30  Cprogrammer
+ * fix compilation warning if HASLIBRT is undefined
+ *
  * Revision 1.2  2022-04-25 01:26:33+05:30  Cprogrammer
  * fix for OSX
  *
@@ -149,9 +152,6 @@ main(int argc, char **argv)
 #include <subfd.h>
 #include <unistd.h>
 
-static char     sserrbuf[512];
-struct substdio sserr;
-
 int
 main(argc, argv)
 	int             argc;
@@ -166,7 +166,7 @@ main(argc, argv)
 void
 getversion_setqload_c()
 {
-	static char    *x = "$Id: setqload.c,v 1.2 2022-04-25 01:26:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setqload.c,v 1.3 2022-08-14 21:58:24+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASLIBRT
 	x = sccsidevalh;

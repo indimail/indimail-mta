@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.62 2022-03-31 00:07:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.63 2022-08-14 21:58:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -60,7 +60,10 @@ qmulti(char *queue_env, int argc, char **argv)
 {
 	char            strnum[FMT_ULONG];
 	char           *ptr, *qbase;
-	int             i, queueNo;
+	int             queueNo;
+#ifdef HASLIBRT
+	int             i;
+#endif
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 	char           *qqargs[3] = { 0, 0, NULL };
 	char           *binqqargs[2] = { 0, NULL };
@@ -198,7 +201,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.62 2022-03-31 00:07:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.63 2022-08-14 21:58:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -207,6 +210,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.63  2022-08-14 21:58:18+05:30  Cprogrammer
+ * fix compilation warning if HASLIBRT is undefined
+ *
  * Revision 1.62  2022-03-31 00:07:03+05:30  Cprogrammer
  * removed starttime argument to queueNo_from_env(), queueNo_from_shm()
  *

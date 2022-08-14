@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.3 2022-04-24 13:08:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.4 2022-08-14 21:57:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -102,9 +102,6 @@ main(int argc, char **argv)
 #include <subfd.h>
 #include <unistd.h>
 
-static char     sserrbuf[512];
-struct substdio sserr;
-
 int
 main(argc, argv)
 	int             argc;
@@ -119,13 +116,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.3 2022-04-24 13:08:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.4 2022-08-14 21:57:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.4  2022-08-14 21:57:53+05:30  Cprogrammer
+ * fix compilation warning if HASLIBRT is undefined
+ *
  * Revision 1.3  2022-04-24 13:08:54+05:30  Cprogrammer
  * display avg load and calculation
  *
