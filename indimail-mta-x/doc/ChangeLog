@@ -33,6 +33,8 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 - 05/08/2022
 19. smtpd.c: display error if incorrect scram encryption level is used
 20. smtpd.c: added missing flush() statements
+- 14/08/2022
+21. smtpd.c: added auth methods SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022

@@ -2668,6 +2668,20 @@ open_control_files()
 }
 
 void
+log_gsasl_version()
+{
+	logerr("qmail-smtpd: ");
+	strnum[fmt_ulong(strnum, getpid())] = 0;
+	logerr("pid ");
+	logerr(strnum);
+	logerr(" gsasl header version=");
+	logerr(GSASL_VERSION);
+	logerr(" library version=");
+	logerr(gsasl_check_version(NULL));
+	logerrf("\n");
+}
+
+void
 smtp_init(int force_flag)
 {
 	static int      flag;
@@ -2770,11 +2784,7 @@ smtp_init(int force_flag)
 		logerrf("\r\n");
 		_exit(111);
 	}
-	logerr("gsasl header version ");
-	logerr(GSASL_VERSION);
-	logerr(" library version ");
-	logerr(gsasl_check_version(NULL));
-	logerrf("\n");
+	log_gsasl_version();
 #endif
 	return;
 }
@@ -3001,10 +3011,13 @@ smtp_ehlo(char *arg)
 	}
 	out("\r\n");
 	if (hostname && *hostname && childargs && *childargs) {
-		char           *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224, *no_cram_sha256;
-		char           *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
+		char           *no_auth_login, *no_auth_plain, *no_cram_md5,
+					   *no_cram_sha1, *no_cram_sha224, *no_cram_sha256,
+					   *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd,
+					   *no_digest_md5;
 #ifdef HASLIBGSASL
-		char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha512;
+		char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha512,
+					   *no_scram_sha1_plus, *no_scram_sha256_plus, *no_scram_sha512_plus;
 #endif
 		int             flags1, flags2;
 #ifdef TLS
@@ -3026,15 +3039,20 @@ smtp_ehlo(char *arg)
 		no_scram_sha1 = env_get("DISABLE_SCRAM_SHA1");
 		no_scram_sha256 = env_get("DISABLE_SCRAM_SHA256");
 		no_scram_sha512 = env_get("DISABLE_SCRAM_SHA512");
+		no_scram_sha1_plus = env_get("DISABLE_SCRAM_SHA1_PLUS");
+		no_scram_sha256_plus = env_get("DISABLE_SCRAM_SHA256_PLUS");
+		no_scram_sha512_plus = env_get("DISABLE_SCRAM_SHA512_PLUS");
 #endif
 #ifdef HASLIBGSASL
 		flags1 = !no_auth_login && !no_auth_plain && !no_cram_md5 &&
 			!no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512 &&
 			!no_cram_ripemd && !no_digest_md5 && !no_scram_sha1 &&
-			!no_scram_sha256 && !no_scram_sha512;
+			!no_scram_sha256 && !no_scram_sha512 && !no_scram_sha1_plus &&
+			!no_scram_sha256_plus && !no_scram_sha512_plus;
 		flags2 = !no_auth_login || !no_auth_plain || !no_cram_md5 ||
 			!no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd
-			|| !no_scram_sha1 || !no_scram_sha256 || !no_scram_sha512;
+			|| !no_scram_sha1 || !no_scram_sha256 || !no_scram_sha512 ||
+			!no_scram_sha1_plus || !no_scram_sha256_plus || !no_scram_sha512_plus;
 #else
 		flags1 = !no_auth_login && !no_auth_plain && !no_cram_md5 &&
 			!no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512 &&
@@ -3089,11 +3107,17 @@ smtp_ehlo(char *arg)
 #ifdef HASLIBGSASL
 			if (!no_scram_sha1)
 				out(" SCRAM-SHA-1");
+			if (!no_scram_sha1_plus)
+				out(" SCRAM-SHA-1-PLUS");
 			if (!no_scram_sha256)
 				out(" SCRAM-SHA-256");
+			if (!no_scram_sha256_plus)
+				out(" SCRAM-SHA-256-PLUS");
 #if 0
 			if (!no_scram_sha512)
 				out(" SCRAM-SHA-512");
+			if (!no_scram_sha512_plus)
+				out(" SCRAM-SHA-512-PLUS");
 #endif
 #endif
 			out("\r\n");
@@ -3142,14 +3166,26 @@ smtp_ehlo(char *arg)
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("SCRAM-SHA-1");
 			}
+			if (!no_scram_sha1_plus) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("SCRAM-SHA-1-PLUS");
+			}
 			if (!no_scram_sha256) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("SCRAM-SHA-256");
+			}
+			if (!no_scram_sha256_plus) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("SCRAM-SHA-256-PLUS");
 			}
 #if 0
 			if (!no_scram_sha512) {
 				out(flag++ == 0 ? "250-AUTH=" : " ");
 				out("SCRAM-SHA-512");
+			}
+			if (!no_scram_sha512_plus) {
+				out(flag++ == 0 ? "250-AUTH=" : " ");
+				out("SCRAM-SHA-512-PLUS");
 			}
 #endif
 #endif
@@ -6769,6 +6805,19 @@ set_tls_method()
 }
 
 void
+log_ssl_version()
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" ");
+	logerr("ssl-version=");
+	logerr(SSL_get_version(ssl));
+	logerrf("\n");
+	return;
+}
+
+void
 tls_init()
 {
 	const char     *ciphers;
@@ -6898,9 +6947,7 @@ tls_init()
 		myssl = 0;
 	}
 	ssl = myssl;
-	logerr("ssl-version ");
-	logerr(SSL_get_version(ssl));
-	logerrf("\n");
+	log_ssl_version();
 	/*- populate the protocol string, used in Received */
 	if (!stralloc_append(&proto, "(") ||
 			!stralloc_cats(&proto, (char *) SSL_get_version(ssl)) ||
@@ -7267,7 +7314,7 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.257  2022-08-14 17:01:11+05:30  Cprogrammer
+ * Revision 1.257  2022-08-14 19:13:11+05:30  Cprogrammer
  * added auth methods SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
  *
  * Revision 1.256  2022-08-05 11:43:05+05:30  Cprogrammer
@@ -7479,7 +7526,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.257 2022-08-14 17:01:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.257 2022-08-14 19:13:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
