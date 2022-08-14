@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.10  2022-08-14 16:14:03+05:30  Cprogrammer
+ * use error_str() for all errno values
+ *
  * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -70,7 +73,7 @@ ssl_error_str()
 		return err;
 	if (!errno)
 		return "unknown error";
-	return (errno == error_timeout) ? "timed out" : error_str(errno);
+	return (error_str(errno));
 }
 
 const char     *
@@ -81,14 +84,14 @@ ssl_strerror()
 		return err;
 	if (!errno)
 		return 0;
-	return errno == error_timeout ? "timed out" : error_str(errno);
+	return (error_str(errno));
 }
 #endif
 
 void
 getversion_tls_c()
 {
-	static char    *x = "$Id: tls.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tls.c,v 1.10 2022-08-14 16:14:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
