@@ -1187,3 +1187,9 @@ qmonitor
 qmonitor.o
 queue_load.o
 qmonitor.8
+gsasl.lib
+haslibgsasl.h
+fts.lib
+dnsblcheck.o
+set_queuedir.o
+dnsblcheck
