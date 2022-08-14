@@ -2280,46 +2280,46 @@ slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c
 
 socket.lib: \
-trylib.c
-	( ( $(CC) -c trylib.c -o trylib.o && $(CC) -o trylib trylib.o -lsocket -lnsl ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c -o trysocket.o && ./load trysocket -lsocket -lnsl ) >/dev/null 2>&1 \
 	&& echo -lsocket -lnsl || exit 0 ) > socket.lib
-	rm -f trylib.o trylib
+	rm -f trysocket.o trysocket
 
 fts.lib: \
-trylib.c
-	( ( $(CC) -c trylib.c -o tryfts.o && $(CC) -o tryfts tryfts.o -lfts ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c -o tryfts.o && ./load tryfts -lfts ) >/dev/null 2>&1 \
 	&& echo -lfts || exit 0 ) > fts.lib
 	rm -f trytfs.o trytfs
 
 rt.lib: \
-trylib.c
-	( ( $(CC) -c trylib.c -o tryrt.o && $(CC) -o tryrt tryrt.o -lrt ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c -o tryrt.o && ./load tryrt -lrt ) >/dev/null 2>&1 \
 	&& echo -lrt || exit 0 ) > rt.lib
 	rm -f tryrt.o tryrt
 
 crypt.lib: \
-trylib.c
-	( ( $(CC) -c trylib.c -o trycrypt.o && $(CC) -o trycrypt trycrypt.o -lcrypt ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c -o trycrypt.o && ./load trycrypt -lcrypt ) >/dev/null 2>&1 \
 	&& echo -lcrypt || exit 0 ) > crypt.lib
 	rm -f trycrypt.o trycrypt
 
 haslibrt.h: \
-trylib.c
-	( ( $(CC) -c trylib.c -o trylibrt.o && $(CC) -o trylibrt trylibrt.o -lrt ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c -o tryrt.o && ./load tryrt -lrt ) >/dev/null 2>&1 \
 	&& echo "#define HASLIBRT 1" || exit 0 ) > haslibrt.h
-	rm -f trylibrt.o trylibrt
+	rm -f tryrt.o tryrt
 
 gsasl.lib: \
-trylib.c
-	( ( $(CC) -c trylib.c -o trylib.o && $(CC) -o trylib trylib.o -lgsasl ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c -o trygsasl.o && ./load trygsasl -lgsasl ) >/dev/null 2>&1 \
 	&& echo -lgsasl || exit 0 ) > gsasl.lib
-	rm -f trylib.o trylib
+	rm -f trygsasl.o trygsasl
 
 haslibgsasl.h: \
-trylib.c
-	( ( $(CC) -c trylib.c -o trylibgsasl.o && $(CC) -o trylibgsasl trylibgsasl.o -lgsasl ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c -o trygsasl.o && ./load trygsasl -lgsasl ) >/dev/null 2>&1 \
 	&& echo "#define HASLIBGSASL 1" || exit 0 ) > haslibgsasl.h
-	rm -f trylibgsasl.o trylibgsasl
+	rm -f trygsasl.o trygsasl
 
 tls.lib: \
 trytls.c compile conf-tls load conf-ld-$(SYSTEM)
