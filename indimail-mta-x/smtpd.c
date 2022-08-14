@@ -131,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.257 $";
+char           *revision = "$Revision: 1.258 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2667,6 +2667,7 @@ open_control_files()
 	return;
 }
 
+#ifdef HASLIBGSASL
 void
 log_gsasl_version()
 {
@@ -2680,6 +2681,7 @@ log_gsasl_version()
 	logerr(gsasl_check_version(NULL));
 	logerrf("\n");
 }
+#endif
 
 void
 smtp_init(int force_flag)
@@ -7314,6 +7316,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.258  2022-08-14 19:33:23+05:30  Cprogrammer
+ * conditionally add log_gsasl_version() using #ifdef HASLIBGSASL
+ *
  * Revision 1.257  2022-08-14 19:13:11+05:30  Cprogrammer
  * added auth methods SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
  *
@@ -7526,7 +7531,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.257 2022-08-14 19:13:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.258 2022-08-14 19:33:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
