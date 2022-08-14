@@ -2293,21 +2293,21 @@ trylib.c compile load
 
 rt.lib: \
 trylib.c compile load
-	( ( ./compile trylib.c -o tryrt.o && ./load tryrt -lrt ) >/dev/null 2>&1 \
+	( ( ./compile trylib.c -o tryrt1.o && ./load tryrt1 -lrt ) >/dev/null 2>&1 \
 	&& echo -lrt || exit 0 ) > rt.lib
-	rm -f tryrt.o tryrt
+	rm -f tryrt1.o tryrt1
+
+haslibrt.h: \
+trylib.c compile load
+	( ( ./compile trylib.c -o tryrt2.o && ./load tryrt2 -lrt ) >/dev/null 2>&1 \
+	&& echo "#define HASLIBRT 1" || exit 0 ) > haslibrt.h
+	rm -f tryrt2.o tryrt2
 
 crypt.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o trycrypt.o && ./load trycrypt -lcrypt ) >/dev/null 2>&1 \
 	&& echo -lcrypt || exit 0 ) > crypt.lib
 	rm -f trycrypt.o trycrypt
-
-haslibrt.h: \
-trylib.c compile load
-	( ( ./compile trylib.c -o tryrt.o && ./load tryrt -lrt ) >/dev/null 2>&1 \
-	&& echo "#define HASLIBRT 1" || exit 0 ) > haslibrt.h
-	rm -f tryrt.o tryrt
 
 gsasl.lib: \
 trylib.c compile load
