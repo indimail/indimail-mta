@@ -5207,6 +5207,7 @@ err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
 	logerrf("\n");
 }
 
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
 char           *
 get_finish_message(cb_type type)
 {
@@ -5218,6 +5219,7 @@ get_finish_message(cb_type type)
 		return ((char *) NULL);
 	switch (type)
 	{
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
 	case tls_unique: /*- RFC 5929 */
 		/*
 		 * Save the TLS finish message expected to be found, useful for
@@ -5230,6 +5232,8 @@ get_finish_message(cb_type type)
 		if (tls_finish_len > EVP_MAX_MD_SIZE)
 			return ((char *) NULL);
 		break;
+#endif
+#if GSASL_VERSION_NUMBER >= 0x020001
 	case tls_exporter: /*- RFC 9266 tls-exporter length = 32 */
 		tls_finish_len = 32;
 		if ((i = SSL_export_keying_material(ssl, (unsigned char *) tls_finish_buf,
@@ -5238,7 +5242,23 @@ get_finish_message(cb_type type)
 			return ((char *) NULL);
 		}
 		break;
+#endif
 	default:
+		if (type == tls_unique || type == tls_exporter) {
+			if (!stralloc_copyb(&res, "channel binding type=", 21) ||
+					!stralloc_cats(&res, type == tls_unique ? "tls-unique" : "tls-exporter") ||
+					!stralloc_catb(&res, " not supported", 14) ||
+					!stralloc_0(&res))
+				die_nomem();
+		} else {
+			i = strnum[fmt_int(strnum, type)] = 0;
+			if (!stralloc_copyb(&res, "channel binding type=", 21) ||
+					!stralloc_catb(&res, strnum, i) ||
+					!stralloc_catb(&res, " not supported", 14) ||
+					!stralloc_0(&res))
+				die_nomem();
+		}
+		err_scram("410", "4.3.5", res.s, 0);
 		return ((char *) NULL);
 	}
 	if (!stralloc_copyb(&in, tls_finish_buf, tls_finish_len) ||
@@ -5246,6 +5266,7 @@ get_finish_message(cb_type type)
 		die_nomem();
 	return res.s;
 }
+#endif
 
 static int
 gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
@@ -5344,18 +5365,24 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		break;
 	case GSASL_VALIDATE_GSSAPI:
 		return GSASL_OK;
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
 	case GSASL_CB_TLS_UNIQUE:
 		if ((p = get_finish_message(tls_unique))) {
+#if GSASL_VERSION_MAJOR > 1
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p)) != GSASL_OK) {
 				logerr("gsasl_proporty_set: GSASL_CB_TLS_UNIQUE: ");
 				logerr(gsasl_strerror(rc));
 				logerrf("\n");
 			}
+#else
+			gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p);
+#endif
 		} else {
 			logerrf("unable to get finish message for GSASL_CB_TLS_UNIQUE\n");
 			return GSASL_NO_CALLBACK;
 		}
 		break;
+#endif
 #if GSASL_VERSION_NUMBER >= 0x020001
 	case GSASL_CB_TLS_EXPORTER:
 		if ((p = get_finish_message(tls_exporter))) {
