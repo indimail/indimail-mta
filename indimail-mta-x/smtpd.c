@@ -5233,7 +5233,7 @@ get_finish_message(cb_type type)
 			return ((char *) NULL);
 		break;
 #endif
-#if GSASL_VERSION_NUMBER >= 0x020001
+#if GSASL_VERSION_NUMBER >= 0x020002
 	case tls_exporter: /*- RFC 9266 tls-exporter length = 32 */
 		tls_finish_len = 32;
 		if ((i = SSL_export_keying_material(ssl, (unsigned char *) tls_finish_buf,
@@ -5383,7 +5383,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		}
 		break;
 #endif
-#if GSASL_VERSION_NUMBER >= 0x020001
+#if GSASL_VERSION_NUMBER >= 0x020002
 	case GSASL_CB_TLS_EXPORTER:
 		if ((p = get_finish_message(tls_exporter))) {
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK) {
