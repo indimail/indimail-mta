@@ -131,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.259 $";
+char           *revision = "$Revision: 1.260 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -413,6 +413,7 @@ typedef enum {
 	tls_unique,
 	tls_exporter,
 } cb_type;
+static char    *no_scram_sha1_plus, *no_scram_sha256_plus, *no_scram_sha512_plus;
 #endif
 
 extern char   **environ;
@@ -546,13 +547,15 @@ die_read(char *str, char *err)
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(remoteip);
-	logerr(" read error: ");
+	logerr(" read error");
 	if (str) {
-		logerr(str);
 		logerr(": ");
+		logerr(str);
 	}
-	if (errno)
+	if (errno) {
+		logerr(": ");
 		logerr(error_str(errno));
+	}
 	if (err) {
 		logerr(": ");
 		logerr(err);
@@ -3020,8 +3023,7 @@ smtp_ehlo(char *arg)
 					   *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd,
 					   *no_digest_md5;
 #ifdef HASLIBGSASL
-		char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha512,
-					   *no_scram_sha1_plus, *no_scram_sha256_plus, *no_scram_sha512_plus;
+		char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha512;
 #endif
 		int             flags1, flags2;
 #ifdef TLS
@@ -3064,26 +3066,37 @@ smtp_ehlo(char *arg)
 		flags2 = !no_auth_login || !no_auth_plain || !no_cram_md5 ||
 			!no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd;
 #endif
-		if (flags1) {
+		if (flags1) { /*- all auth methods enabled */
 #ifdef HASLIBGSASL
 #if 0
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512\r\n");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512");
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
-			if (ssl)
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
-			out("\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
-			if (ssl)
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
-			out("\r\n");
 #endif
+			if (ssl)
+#if 0
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
+#else
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
+#endif
+			out("\r\n");
+#if 0
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512");
+#else
+			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
+#endif
+			if (ssl)
+#if 0
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
+#else
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
+#endif
+			out("\r\n");
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
-#endif
-		} else
+#endif /*- #ifdef HAVELIBGSASL */
+		} else /*- few auth methods disabled */
 		if (flags2) {
 			int             flag = 0;
 
@@ -5325,6 +5338,8 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 			die_nomem();
 		user.len--;
 		break;
+	case GSASL_AUTHZID: /*- ignored */
+		break;
 	case GSASL_PASSWORD:
 		if (i == -1) {
 			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
@@ -5490,16 +5505,18 @@ gsasl_server_auth(Gsasl_session *session)
 static int
 auth_scram(int method)
 {
-	int             r = -1, i, channel_binding;
+	int             r = -1, i, cb_required, cb_disabled;
 	Gsasl_session  *session = NULL;
 	char           *p;
 
-	channel_binding = 0;
+	cb_required = cb_disabled = 0;
 	gsasl_callback_set(gsasl_ctx, gs_callback);
 	user.len = 0;
 	switch(method)
 	{
 	case AUTH_SCRAM_SHA1:
+		if (no_scram_sha1_plus)
+			cb_disabled = 1;
 		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-1}", 13) ||
 				!stralloc_0(&scram_method))
 			die_nomem();
@@ -5507,7 +5524,7 @@ auth_scram(int method)
 		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-1", &session);
 		break;
 	case AUTH_SCRAM_SHA1_PLUS:
-		channel_binding = 1;
+		cb_required = 1;
 		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-1}", 13) ||
 				!stralloc_0(&scram_method))
 			die_nomem();
@@ -5515,6 +5532,8 @@ auth_scram(int method)
 		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-1-PLUS", &session);
 		break;
 	case AUTH_SCRAM_SHA256:
+		if (no_scram_sha256_plus)
+			cb_disabled = 1;
 		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-256}", 15) ||
 				!stralloc_0(&scram_method))
 			die_nomem();
@@ -5522,7 +5541,7 @@ auth_scram(int method)
 		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-256", &session);
 		break;
 	case AUTH_SCRAM_SHA256_PLUS:
-		channel_binding = 1;
+		cb_required = 1;
 		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-256}", 15) ||
 				!stralloc_0(&scram_method))
 			die_nomem();
@@ -5531,6 +5550,8 @@ auth_scram(int method)
 		break;
 #if 0
 	case AUTH_SCRAM_SHA512:
+		if (no_scram_sha512_plus)
+			cb_disabled = 1;
 		if (!stralloc_copyb(&scram_method, "{SCRAM-SHA-512}", 15) ||
 				!stralloc_0(&scram_method))
 			die_nomem();
@@ -5545,7 +5566,7 @@ auth_scram(int method)
 		r = gsasl_server_start(gsasl_ctx, "SCRAM-SHA-512-PLUS", &session);
 		break;
 #endif
-	}
+	} /*- switch(method) */
 	if (r != GSASL_OK) {
 		logerr("gsasl_server_start: ");
 		logerr(gsasl_strerror(r));
@@ -5576,15 +5597,12 @@ auth_scram(int method)
 	switch(slop.s[0])
 	{
 	case 'n':
-		if (ssl) {
-			/*
-			 * Client does not support channel binding. Since we support,
-			 * we cannot support this option.
+		if (cb_required) {
+			/*-
+			 * Client does not support channel binding. Since selected auth mechanism
+			 * requires cb, we do support this option.
 			 */
-			if (channel_binding)
-				err_scram("535", "5.7.4", "client does not support SCRAM channel binding, but server needs it for SSL connections", 0);
-			else
-				err_scram("535", "5.7.4", "client does not support SCRAM channel binding, but server does", 0);
+			err_scram("535", "5.7.4", "client doesn't support channel binding, but selected mechanism does", 0);
 		}
 		/*- check if the syntax is correct by checking for comma */
 		if (slop.s[1] != ',') {
@@ -5593,23 +5611,23 @@ auth_scram(int method)
 		}
 		break;
 	case 'y':
-		if (!ssl) {
-			if (slop.s[1] != ',') {
-				err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
-				return 1;
-			}
-			break;
+		if (ssl && !cb_disabled) {
+			/*-
+			 * this is a downgrade attack
+			 * Client supports channel binding and thinks that the server
+			 * does not. Server must fail authentication if it supports channel binding,
+			 * which is the case if a connection is using TLS.
+			 */
+			err_scram("535", "5.7.4", "client supports channel binding, but thinks server doesn't", 0);
+			return 1;
 		}
-		/*-
-		 * this is a downgrade attack
-		 * Client supports channel binding and thinks that the server
-		 * does not. Server must fail authentication if it supports channel binding,
-		 * which is the case if a connection is using TLS.
-		 */
-		err_scram("535", "5.7.3", "SCRAM channel binding negotiation error", 0);
+		if (slop.s[1] != ',') {
+			err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
+			return 1;
+		}
 		break;
 	case 'p':
-		if (!ssl)
+		if (!ssl || (ssl && cb_disabled)) {
 			/*
 			 * Client requires channel binding but we don't support it.
 			 *
@@ -5621,7 +5639,9 @@ auth_scram(int method)
 			 * The client requires channel binding.  Channel binding type
 			 * follows, e.g., "p=tls-unique".
 			 */
-			err_scram("535", "5.7.4", "client requires SCRAM channel binding, but it is not supported", slop.s + 2);
+			err_scram("535", "5.7.4", "client requires channel binding, but server doesn't support", slop.s + 2);
+			return 1;
+		}
 		if (slop.s[1] != '=') {
 			err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
 			return 1;
@@ -7320,7 +7340,11 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.259  2022-08-14 22:40:34+05:30  Cprogrammer
+ * Revision 1.260  2022-08-15 20:55:05+05:30  Cprogrammer
+ * fixed channel binding logic
+ * added option to disable SCRAM PLUS variants
+ *
+ * Revision 1.259  2022-08-15 08:36:01+05:30  Cprogrammer
  * fixed minor formatting issue with die_read(), err_scram() functions
  *
  * Revision 1.258  2022-08-14 20:57:12+05:30  Cprogrammer
@@ -7538,7 +7562,7 @@ addrrelay()
 void
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.259 2022-08-14 22:40:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.260 2022-08-15 20:55:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;

@@ -37,6 +37,9 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 21. smtpd.c: added auth methods SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
 22. setqload.c, qmonitor.c, qmulti.c: fix compilation warning if HASLIBRT is
     undefined
+- 15/08/2022
+23. smtpd.c: fixed channel binding logic
+24. smtpd.c: added option to disable SCRAM PLUS variants
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
