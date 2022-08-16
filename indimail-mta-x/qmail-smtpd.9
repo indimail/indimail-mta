@@ -3,12 +3,21 @@
 qmail-smtpd \- receive mail via SMTP
 .SH SYNOPSIS
 .B qmail-smtpd
+[-v] 
 [
 .I hostname
 .I checkprogram
 .I subprogram
 .I subprogram
 ]
+
+.SH OPTIONS
+.PP
+.TP
+\fB\-v\fR
+Print qmail-smtpd features, control files present and environment
+variables used and set. After displaying the information exit.
+
 .SH DESCRIPTION
 .B qmail-smtpd
 receives mail messages via the Simple Mail Transfer Protocol (SMTP)
@@ -135,8 +144,9 @@ DISABLE_SCRAM_SHA256_PLUS, environment variable. If you set the environment
 variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled unless
 STARTTLS is issued or you run qmail-smtpd under SSL (port 465).
 
-For SCRAM auth types, qmail-smtpd uses the GNU SASL library for carrying
-out authentication. for the SCRAM-*-PLUS methods, \fBqmail-smtpd\fR(8)
+qmail-smtpd supports SASL - Simple Authentication and Security Layer
+framework with the GNU SASL library. For SCRAM authentication types,
+qmail-smtpd uses SASL. For the SCRAM-*-PLUS methods, \fBqmail-smtpd\fR(8)
 supports the \fBtls-unique\fR and \fBtls-exporter\fR channel binding types
 (See RFC 5929 and RFC 9266).
 
