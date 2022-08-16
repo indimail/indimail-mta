@@ -131,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.260 $";
+char           *revision = "$Revision: 1.261 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -369,6 +369,7 @@ void          **plughandle;
 int             plugin_count;
 #endif
 int             logfd = 255;
+static int      old_client_auth_parse_bug = 0;
 
 struct authcmd {
 	char           *text;
@@ -3080,21 +3081,24 @@ smtp_ehlo(char *arg)
 				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
 #endif
 			out("\r\n");
+			if (old_client_auth_parse_bug) {
 #if 0
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512");
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512");
 #else
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
 #endif
-			if (ssl)
+				if (ssl)
 #if 0
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
+					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
 #else
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
+					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
 #endif
-			out("\r\n");
+				out("\r\n");
+			}
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
-			out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+			if (old_client_auth_parse_bug) {
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 #endif /*- #ifdef HAVELIBGSASL */
 		} else /*- few auth methods disabled */
 		if (flags2) {
@@ -3138,75 +3142,77 @@ smtp_ehlo(char *arg)
 #endif
 #endif
 			out("\r\n");
-			if (!no_auth_login) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("LOGIN");
-			}
-			if (!no_auth_plain) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("PLAIN");
-			}
-			if (!no_cram_md5) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("CRAM-MD5");
-			}
-			if (!no_cram_sha1) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("CRAM-SHA1");
-			}
-			if (!no_cram_sha224) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("CRAM-SHA224");
-			}
-			if (!no_cram_sha256) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("CRAM-SHA256");
-			}
-			if (!no_cram_sha384) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("CRAM-SHA384");
-			}
-			if (!no_cram_sha512) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("CRAM-SHA512");
-			}
-			if (!no_cram_ripemd) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("CRAM-RIPEMD");
-			}
-			if (!no_digest_md5) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("DIGEST-MD5");
-			}
+			if (old_client_auth_parse_bug) {
+				if (!no_auth_login) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("LOGIN");
+				}
+				if (!no_auth_plain) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("PLAIN");
+				}
+				if (!no_cram_md5) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("CRAM-MD5");
+				}
+				if (!no_cram_sha1) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("CRAM-SHA1");
+				}
+				if (!no_cram_sha224) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("CRAM-SHA224");
+				}
+				if (!no_cram_sha256) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("CRAM-SHA256");
+				}
+				if (!no_cram_sha384) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("CRAM-SHA384");
+				}
+				if (!no_cram_sha512) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("CRAM-SHA512");
+				}
+				if (!no_cram_ripemd) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("CRAM-RIPEMD");
+				}
+				if (!no_digest_md5) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("DIGEST-MD5");
+				}
 #ifdef HASLIBGSASL
-			if (!no_scram_sha1) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("SCRAM-SHA-1");
-			}
-			if (!no_scram_sha1_plus) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("SCRAM-SHA-1-PLUS");
-			}
-			if (!no_scram_sha256) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("SCRAM-SHA-256");
-			}
-			if (!no_scram_sha256_plus) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("SCRAM-SHA-256-PLUS");
-			}
+				if (!no_scram_sha1) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("SCRAM-SHA-1");
+				}
+				if (!no_scram_sha1_plus) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("SCRAM-SHA-1-PLUS");
+				}
+				if (!no_scram_sha256) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("SCRAM-SHA-256");
+				}
+				if (!no_scram_sha256_plus) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("SCRAM-SHA-256-PLUS");
+				}
 #if 0
-			if (!no_scram_sha512) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("SCRAM-SHA-512");
-			}
-			if (!no_scram_sha512_plus) {
-				out(flag++ == 0 ? "250-AUTH=" : " ");
-				out("SCRAM-SHA-512-PLUS");
-			}
+				if (!no_scram_sha512) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("SCRAM-SHA-512");
+				}
+				if (!no_scram_sha512_plus) {
+					out(flag++ == 0 ? "250-AUTH=" : " ");
+					out("SCRAM-SHA-512-PLUS");
+				}
 #endif
 #endif
-			out("\r\n");
+				out("\r\n");
+			}
 		}
 	}
 	if (hasvirtual) {
@@ -7074,6 +7080,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		hostname = argv[1];
 		childargs = argv + 2;
 	}
+	old_client_auth_parse_bug = env_get("OLD_CLIENT") ? 1 : 0;
 	no_help = env_get("DISABLE_HELP");
 	no_vrfy = env_get("DISABLE_VRFY");
 	setup_state = 0;
@@ -7340,6 +7347,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.261  2022-08-17 02:08:23+05:30  Cprogrammer
+ * disable AUTH= string in EHLO if OLD_CLIENT isn't set
+ *
  * Revision 1.260  2022-08-15 20:55:05+05:30  Cprogrammer
  * fixed channel binding logic
  * added option to disable SCRAM PLUS variants
@@ -7559,12 +7569,13 @@ addrrelay()
  *
  */
 
-void
+char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.260 2022-08-15 20:55:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.261 2022-08-17 02:08:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
 	x++;
+	return revision + 11;
 }
