@@ -1946,6 +1946,11 @@ tls.lib gsasl.lib ssl_timeoutio.o mysql_config conf-sql
 	ssl_timeoutio.o $(static_option) $(QMAILLIB) \
 	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib` -ldl
 
+qmail-smtpd.o: \
+compile qmail-smtpd.c
+	./compile `grep -h -v "^#" conf-tls conf-spf \
+	conf-ip conf-batv conf-plugin mysql_inc` qmail-smtpd.c
+
 smtpd.o: \
 compile smtpd.c tls.h ssl_timeoutio.h control.h received.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
