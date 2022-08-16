@@ -40,6 +40,10 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 - 15/08/2022
 23. smtpd.c: fixed channel binding logic
 24. smtpd.c: added option to disable SCRAM PLUS variants
+- 17/08/2022
+25. qmail-smtpd: added -v option to display feature list and exit
+26. smtpd.c: disable AUTH= string in EHLO if OLD_CLIENT env variable isn't set
+27. qmail-showctl.c: added qregex, tlsclients to control file list
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
