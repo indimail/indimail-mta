@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-smtpd.c,v $
- * Revision 1.5  2022-08-17 02:06:54+05:30  Cprogrammer
+ * Revision 1.5  2022-08-17 13:12:35+05:30  Cprogrammer
  * -v option added to display feature list and exit
  *
  * Revision 1.4  2020-07-05 10:58:04+05:30  Cprogrammer
@@ -15,13 +15,11 @@
  */
 #include <strerr.h>
 #include <str.h>
-#include <fmt.h>
 #include <unistd.h>
-#include <sgetopt.h>
 #include <env.h>
-#include <substdio.h>
 #include <qprintf.h>
 #include <subfd.h>
+#include <noreturn.h>
 #ifdef TLS
 #include <openssl/opensslv.h>
 #endif
@@ -30,13 +28,16 @@
 #include "hasmysql.h"
 #include "haslibgsasl.h"
 #include "auto_control.h"
+#ifdef HASLIBGSASL
+#include <gsasl.h>
+#endif
 
 void            qmail_smtpd(int, char **, char **);
 void            out(char *);
 void            flush();
 char           *getversion_smtpd_c();
 
-void
+no_return void
 print_details()
 {
 	char           *ptr;
@@ -103,11 +104,20 @@ print_details()
 		revision[i] = 0;
 	qprintf(subfdout, revision, "%s");
 	qprintf(subfdout, "\n", "%s");
+
 #ifdef TLS
-	qprintf(subfdout, "Openssl version", "%-35s");
+#if defined(OPENSSL_FULL_VERSION_STR) || defined(OPENSSL_VERSION_STR)
+	qprintf(subfdout, "OpenSSL", "%-35s");
 	qprintf(subfdout, ": ", "%s");
+#if defined(OPENSSL_VERSION_TEXT)
+	qprintf(subfdout, OPENSSL_VERSION_TEXT, "%s");
+#elif defined(OPENSSL_FULL_VERSION_STR)
 	qprintf(subfdout, OPENSSL_FULL_VERSION_STR, "%s");
+#elif defined(OPENSSL_VERSION_STR)
+	qprintf(subfdout, OPENSSL_VERSION_STR, "%s");
+#endif
 	qprintf(subfdout, "\n", "%s");
+#endif
 #endif
 	qprintf(subfdout, "SMTPS", "%-35s");
 	qprintf(subfdout, ": ", "%s");
@@ -123,6 +133,16 @@ print_details()
 #else
 	qprintf(subfdout, "No\n", "%s");
 #endif
+
+	qprintf(subfdout, "SASL", "%-35s");
+	qprintf(subfdout, ": ", "%s");
+#ifdef HASLIBGSASL
+	qprintf(subfdout, "Yes, GSASL ", "%s");
+	qprintf(subfdout, gsasl_check_version(GSASL_VERSION), "%s");
+#else
+	qprintf(subfdout, "No", "%s");
+#endif
+	qprintf(subfdout, "\n", "%s");
 
 	qprintf(subfdout, "SPF", "%-35s");
 	qprintf(subfdout, ": ", "%s");
@@ -211,33 +231,22 @@ print_details()
 		qprintf(subfdout, "\n", "%s");
 	}
 	substdio_flush(subfdout);
+	_exit(0);
 }
 
 int
 main(int argc, char **argv)
 {
-	int             opt;
-	char           *usage = "usage: qmail-smgtpd [-v] options\n";
-
-	while ((opt = getopt(argc, argv, "v")) != opteof) {
-		switch (opt)
-		{
-		case 'v':
-			print_details();
-			_exit(0);
-			break;
-		default:
-			strerr_die1x(100, usage);
-		}
-	}
-	qmail_smtpd(argc - optind, argv + optind, 0);
+	if (argc > 1 && !str_diff(argv[1], "-v"))
+		print_details();
+	qmail_smtpd(argc, argv, 0);
 	return(0);
 }
 
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.5 2022-08-17 02:06:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.5 2022-08-17 13:12:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

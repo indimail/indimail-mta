@@ -1947,7 +1947,8 @@ tls.lib gsasl.lib ssl_timeoutio.o mysql_config conf-sql
 	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib` -ldl
 
 qmail-smtpd.o: \
-compile qmail-smtpd.c
+compile qmail-smtpd.c variables.h hassmtputf8.h hasmysql.h \
+haslibgsasl.h auto_control.h
 	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` qmail-smtpd.c
 
