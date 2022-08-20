@@ -3,7 +3,7 @@
 qmail-smtpd \- receive mail via SMTP
 .SH SYNOPSIS
 .B qmail-smtpd
-[-v] 
+[ -v ] 
 [
 .I hostname
 .I checkprogram
@@ -16,7 +16,9 @@ qmail-smtpd \- receive mail via SMTP
 .TP
 \fB\-v\fR
 Print qmail-smtpd features, control files present and environment
-variables used and set. After displaying the information exit.
+variables used and set. After displaying this information, qmail-smtpd will
+exit. This option gets activated only when the first argument to
+\fBqmail-smtpd\fR is -\fBv\fR.
 
 .SH DESCRIPTION
 .B qmail-smtpd
