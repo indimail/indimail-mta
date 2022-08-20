@@ -44,6 +44,9 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 25. qmail-smtpd: added -v option to display feature list and exit
 26. smtpd.c: disable AUTH= string in EHLO if OLD_CLIENT env variable isn't set
 27. qmail-showctl.c: added qregex, tlsclients to control file list
+- 20/08/2022
+28. svctool: skip lead space, comments, blank lines when converting envfile to
+    envdir
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022

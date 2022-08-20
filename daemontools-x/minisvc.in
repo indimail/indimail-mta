@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.31 2022-06-20 00:48:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.32 2022-08-20 12:14:18+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.31 2022-06-20 00:48:04+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.32 2022-08-20 12:14:18+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -976,7 +976,7 @@ if [ $silent -eq 0 ] ; then
 fi
 old=$silent
 silent=1
-grep -v "^#" $env_file | while read line
+sed -e 's{^[ \t]*#.*{{g ; s{^[ \t]*{{g ; s{#.*{{ ;  /^$/d' $env_file | while read line
 do
 	if [ -z "$line" ] ; then
 		continue
@@ -2743,6 +2743,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.32  2022-08-20 12:14:18+05:30  Cprogrammer
+# skip lead space, comments, blank lines when converting envfile to envdir
+#
 # Revision 1.31  2022-06-20 00:48:04+05:30  Cprogrammer
 # Fixes for OSX
 #

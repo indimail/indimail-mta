@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.638 2022-08-04 11:21:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.639 2022-08-20 12:13:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.638 2022-08-04 11:21:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.639 2022-08-20 12:13:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -8985,7 +8985,8 @@ if [ $silent -eq 0 ] ; then
 fi
 old=$silent
 silent=1
-grep -v "^#" $env_file | while read line
+# remove comment, leading space and blank lines
+sed -e 's{^[ \t]*#.*{{g ; s{^[ \t]*{{g ; s{#.*{{ ;  /^$/d' $env_file | while read line
 do
 	if [ -z "$line" ] ; then
 		continue
