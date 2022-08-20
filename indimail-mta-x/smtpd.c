@@ -3097,7 +3097,7 @@ smtp_ehlo(char *arg)
 			}
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
-			if (old_client_auth_parse_bug) {
+			if (old_client_auth_parse_bug)
 				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 #endif /*- #ifdef HAVELIBGSASL */
 		} else /*- few auth methods disabled */
@@ -7347,7 +7347,7 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.261  2022-08-17 02:08:23+05:30  Cprogrammer
+ * Revision 1.261  2022-08-20 17:46:14+05:30  Cprogrammer
  * disable AUTH= string in EHLO if OLD_CLIENT isn't set
  *
  * Revision 1.260  2022-08-15 20:55:05+05:30  Cprogrammer
@@ -7572,7 +7572,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.261 2022-08-17 02:08:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.261 2022-08-20 17:46:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
