@@ -1,5 +1,8 @@
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.15  2022-08-21 17:59:08+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ *
  * Revision 1.14  2021-05-26 11:05:43+05:30  Cprogrammer
  * use starttls.h for prototypes in starttls.c
  *
@@ -266,6 +269,7 @@ main(argc, argv)
 }
 #else
 #warning "not compiled with -DHASTLSA -DTLS"
+#include <unistd.h>
 int
 main()
 {
@@ -278,8 +282,10 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.14 2021-05-26 11:05:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.15 2022-08-21 17:59:08+05:30 Cprogrammer Exp mbhangui $";
 
+#if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
+#endif
 	x++;
 }

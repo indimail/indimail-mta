@@ -1,5 +1,8 @@
 /*
  * $Log: dnsmxip.c,v $
+ * Revision 1.10  2022-08-21 17:58:04+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ *
  * Revision 1.9  2020-11-24 13:44:56+05:30  Cprogrammer
  * removed exit.h
  *
@@ -58,8 +61,10 @@ main(argc, argv)
 	dnsdoe(dns_mxip(&ia, &sa, r));
 	for (j = 0; j < ia.len; ++j)
 	{
+#ifdef TLS
 		substdio_puts(subfdout, ia.ix[j].fqdn);
 		substdio_put(subfdout, " ", 1);
+#endif
 		switch(ia.ix[j].af)
 		{
 		case AF_INET:
@@ -84,7 +89,7 @@ main(argc, argv)
 void
 getversion_dnsmxip_c()
 {
-	static char    *x = "$Id: dnsmxip.c,v 1.9 2020-11-24 13:44:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsmxip.c,v 1.10 2022-08-21 17:58:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

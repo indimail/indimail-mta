@@ -1,5 +1,8 @@
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.5  2022-08-21 17:59:24+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ *
  * Revision 1.4  2022-05-18 13:30:24+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
@@ -13,7 +16,6 @@
  * Initial revision
  *
  */
-#include <stdio.h>
 #ifdef TLS
 #include <unistd.h>
 #include <signal.h>
@@ -426,6 +428,8 @@ main(argc, argv)
 	_exit (0);
 }
 #else
+#include <strerr.h>
+#define FATAL           "sslerator: fatal: "
 int
 main(argc, argv)
 	int             argc;
@@ -439,7 +443,7 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.4 2022-05-18 13:30:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.5 2022-08-21 17:59:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

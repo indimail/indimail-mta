@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.29  2022-08-21 17:59:12+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ *
  * Revision 1.28  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -1349,6 +1352,7 @@ main(int argc, char **argv)
 }
 #else
 #warning "TLSA, TLS code not compiled"
+#include <unistd.h>
 int
 main()
 {
@@ -1362,10 +1366,12 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.28 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.29 2022-08-21 17:59:12+05:30 Cprogrammer Exp mbhangui $";
 
+#if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
 	x = sccsidmakeargsh;
+#endif
 	x++;
 }
 #endif
