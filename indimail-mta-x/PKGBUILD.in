@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.15  2022-08-21 18:06:20+05:30  Cprogrammer
+# added gsasl in depends
+#
 # Revision 1.14  2022-04-06 09:15:51+05:30  Cprogrammer
 # set fsync, syncdir as global variables instead of local variables
 #
@@ -45,7 +48,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.14 2022-04-06 09:15:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.15 2022-08-21 18:06:20+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
