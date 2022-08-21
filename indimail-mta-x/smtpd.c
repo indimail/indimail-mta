@@ -369,7 +369,7 @@ void          **plughandle;
 int             plugin_count;
 #endif
 int             logfd = 255;
-static int      old_client_auth_parse_bug = 0;
+static int      old_client_bug = 0;
 
 struct authcmd {
 	char           *text;
@@ -826,21 +826,21 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 }
 
 void
-log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
+log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, int notify)
 {
 	char           *ptr;
 	int             idx;
 	static stralloc tmpLine = { 0 };
 
 	tmpLine.len = 0;
-	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
-		if (!arg3[idx]) {
+	for (ptr = recipients + 1, idx = 0; idx < rcpt_len; idx++) {
+		if (!recipients[idx]) {
 			/*- write data to spamlogger and get X-Bogosity line in tmpLine */
 			if (!notify)
-				log_fifo(arg2, ptr, msg_size, &tmpLine);
+				log_fifo(mfrom, ptr, msg_size, &tmpLine);
 			logerr("qmail-smtpd: ");
 			logerrpid();
-			logerr(arg1);
+			logerr(r_ip);
 			if (!notify) {
 				logerr(" HELO <");
 				logerr(helohost.s);
@@ -848,56 +848,67 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 			} else
 				logerr(" NOTIFY: ");
 			logerr("MAIL from <");
-			logerr(arg2);
+			logerr(mfrom);
 			logerr("> RCPT <");
 			logerr(ptr);
 			if (!notify) {
 				logerr("> AUTH <");
-				if (arg4 && *arg4) {
-					logerr(arg4);
+				if (authuser && *authuser) {
+					logerr(authuser);
 					switch (authd)
 					{
 					case 0:
 						break;
-					case 1:
+					case AUTH_LOGIN:
 						logerr(": AUTH LOGIN");
 						break;
-					case 2:
+					case AUTH_PLAIN:
 						logerr(": AUTH PLAIN");
 						break;
-					case 3:
+					case AUTH_CRAM_MD5:
 						logerr(": AUTH CRAM-MD5");
 						break;
-					case 4:
+					case AUTH_CRAM_SHA1:
 						logerr(": AUTH CRAM-SHA1");
 						break;
-					case 5:
+					case AUTH_CRAM_SHA224:
 						logerr(": AUTH CRAM-SHA224");
 						break;
-					case 6:
+					case AUTH_CRAM_SHA256:
 						logerr(": AUTH CRAM-SHA256");
 						break;
-					case 7:
+					case AUTH_CRAM_SHA384:
 						logerr(": AUTH CRAM-SHA384");
 						break;
-					case 8:
+					case AUTH_CRAM_SHA512:
 						logerr(": AUTH CRAM-SHA512");
 						break;
-					case 9:
+					case AUTH_CRAM_RIPEMD:
 						logerr(": AUTH CRAM-RIPEMD");
 						break;
-					case 10:
+					case AUTH_DIGEST_MD5:
 						logerr(": AUTH DIGEST-MD5");
 						break;
-					case 11:
+					case AUTH_SCRAM_SHA1:
 						logerr(": AUTH SCRAM-SHA-1");
 						break;
-					case 12:
+					case AUTH_SCRAM_SHA256:
 						logerr(": AUTH SCRAM-SHA-256");
 						break;
 #if 0
-					case 13:
+					case AUTH_SCRAM_SHA512:
 						logerr(": AUTH SCRAM-SHA-512");
+						break;
+#endif
+					case AUTH_SCRAM_SHA1_PLUS:
+						logerr(": AUTH SCRAM-SHA-1-PLUS");
+						break;
+					case AUTH_SCRAM_SHA256_PLUS:
+						logerr(": AUTH SCRAM-SHA-256-PLUS");
+						break;
+#if 0
+					case AUTH_SCRAM_SHA512_PLUS:
+						logerr(": AUTH SCRAM-SHA-512-PLUS");
 						break;
 #endif
 					default:
@@ -906,22 +917,26 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 					}
 				}
 				if (addrallowed(ptr)) {
-					if (arg4 && *arg4)
+					if (authuser && *authuser)
 						logerr(": ");
 					logerr("local-rcpt");
 				} else
-				if (!arg4 || !*arg4)
+				if (!authuser || !*authuser)
 					logerr("auth-ip/pop");
 			}
 			logerr("> Size: ");
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
 			logerr(strnum);
+#ifdef TLS
+			logerr(" ");
+			logerr(ssl ? "TLS=Yes" : "TLS=No");
+#endif
 			if (!notify && tmpLine.len) {
 				logerr(" ");
 				logerr(tmpLine.s);
 			}
 			logerr("\n");
-			ptr = arg3 + idx + 2;
+			ptr = recipients + idx + 2;
 		}
 	}
 	if (substdio_flush(&sserr) == -1)
@@ -929,7 +944,7 @@ log_trans(char *arg1, char *arg2, char *arg3, int len, char *arg4, int notify)
 }
 
 void
-err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, int permanent, unsigned long qp)
+err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx, int permanent, unsigned long qp)
 {
 	char           *ptr;
 	int             idx;
@@ -939,15 +954,13 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, in
 	tmpLine.len = 0;
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
 	size[fmt_ulong(size, msg_size)] = 0;
-	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
-		if (!arg3[idx]) {
-		/*
-		 * write data to spamlogger 
-		 */
-			log_fifo(arg2, ptr, msg_size, &tmpLine);
+	for (ptr = recipients + 1, idx = 0; idx < rcpt_len; idx++) {
+		if (!recipients[idx]) {
+			/*- write data to spamlogger */
+			log_fifo(mfrom, ptr, msg_size, &tmpLine);
 			logerr("qmail-smtpd: ");
 			logerrpid();
-			logerr(arg1);
+			logerr(r_ip);
 			logerr(" ");
 			logerr(qqx);
 			if (permanent)
@@ -957,55 +970,66 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, in
 			logerr("HELO <");
 			logerr(helohost.s);
 			logerr("> MAIL from <");
-			logerr(arg2);
+			logerr(mfrom);
 			logerr("> RCPT <");
 			logerr(ptr);
 			logerr("> AUTH <");
-			if (arg4 && *arg4) {
-				logerr(arg4);
+			if (authuser && *authuser) {
+				logerr(authuser);
 				switch (authd)
 				{
 				case 0:
 					break;
-				case 1:
+				case AUTH_LOGIN:
 					logerr(": AUTH LOGIN");
 					break;
-				case 2:
+				case AUTH_PLAIN:
 					logerr(": AUTH PLAIN");
 					break;
-				case 3:
+				case AUTH_CRAM_MD5:
 					logerr(": AUTH CRAM-MD5");
 					break;
-				case 4:
+				case AUTH_CRAM_SHA1:
 					logerr(": AUTH CRAM-SHA1");
 					break;
-				case 5:
+				case AUTH_CRAM_SHA224:
 					logerr(": AUTH CRAM-SHA224");
 					break;
-				case 6:
+				case AUTH_CRAM_SHA256:
 					logerr(": AUTH CRAM-SHA256");
 					break;
-				case 7:
+				case AUTH_CRAM_SHA384:
 					logerr(": AUTH CRAM-SHA384");
 					break;
-				case 8:
+				case AUTH_CRAM_SHA512:
 					logerr(": AUTH CRAM-SHA512");
 					break;
-				case 9:
+				case AUTH_CRAM_RIPEMD:
 					logerr(": AUTH CRAM-RIPEMD");
 					break;
-				case 10:
+				case AUTH_DIGEST_MD5:
 					logerr(": AUTH DIGEST-MD5");
 					break;
-				case 11:
+				case AUTH_SCRAM_SHA1:
 					logerr(": AUTH SCRAM-SHA-1");
 					break;
-				case 12:
+				case AUTH_SCRAM_SHA256:
 					logerr(": AUTH SCRAM-SHA-256");
 					break;
 #if 0
-				case 13:
+				case AUTH_SCRAM_SHA512:
 					logerr(": AUTH SCRAM-SHA-512");
+					break;
+#endif
+				case AUTH_SCRAM_SHA1_PLUS:
+					logerr(": AUTH SCRAM-SHA-1-PLUS");
+					break;
+				case AUTH_SCRAM_SHA256_PLUS:
+					logerr(": AUTH SCRAM-SHA-256-PLUS");
+					break;
+#if 0
+				case AUTH_SCRAM_SHA512_PLUS:
+					logerr(": AUTH SCRAM-SHA-512-PLUS");
 					break;
 #endif
 				default:
@@ -1014,11 +1038,11 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, in
 				}
 			}
 			if (addrallowed(ptr)) {
-				if (arg4 && *arg4)
+				if (authuser && *authuser)
 					logerr(": ");
 				logerr("local-rcpt");
 			} else
-			if (!arg4 || !*arg4)
+			if (!authuser || !*authuser)
 				logerr("auth-ip/pop");
 			logerr("> Size: ");
 			logerr(size);
@@ -1026,10 +1050,14 @@ err_queue(char *arg1, char *arg2, char *arg3, int len, char *arg4, char *qqx, in
 				logerr(" ");
 				logerr(tmpLine.s); /*- X-Bogosity line */
 			}
+#ifdef TLS
+			logerr(" ");
+			logerr(ssl ? "TLS=Yes" : "TLS=No");
+#endif
 			logerr(" qp ");
 			logerr(accept_buf);
 			logerr("\n");
-			ptr = arg3 + idx + 2;
+			ptr = recipients + idx + 2;
 		}
 	}
 	if (substdio_flush(&sserr) == -1)
@@ -1422,45 +1450,56 @@ log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 	if (authd) {
 		switch (authd)
 		{
-		case 1:
+		case AUTH_LOGIN:
 			logerr("> AUTH LOGIN <");
 			break;
-		case 2:
+		case AUTH_PLAIN:
 			logerr("> AUTH PLAIN <");
 			break;
-		case 3:
+		case AUTH_CRAM_MD5:
 			logerr("> AUTH CRAM-MD5 <");
 			break;
-		case 4:
+		case AUTH_CRAM_SHA1:
 			logerr("> AUTH CRAM-SHA1 <");
 			break;
-		case 5:
+		case AUTH_CRAM_SHA224:
 			logerr("> AUTH CRAM-SHA224 <");
 			break;
-		case 6:
+		case AUTH_CRAM_SHA256:
 			logerr("> AUTH CRAM-SHA256 <");
 			break;
-		case 7:
+		case AUTH_CRAM_SHA384:
 			logerr("> AUTH CRAM-SHA384 <");
 			break;
-		case 8:
+		case AUTH_CRAM_SHA512:
 			logerr("> AUTH CRAM-SHA512 <");
 			break;
-		case 9:
+		case AUTH_CRAM_RIPEMD:
 			logerr("> AUTH CRAM-RIPEMD <");
 			break;
-		case 10:
+		case AUTH_DIGEST_MD5:
 			logerr("> AUTH DIGEST-MD5 <");
 			break;
-		case 11:
+		case AUTH_SCRAM_SHA1:
 			logerr("> AUTH SCRAM-SHA-1 <");
 			break;
-		case 12:
+		case AUTH_SCRAM_SHA256:
 			logerr("> AUTH SCRAM-SHA-256 <");
 			break;
 #if 0
-		case 13:
+		case AUTH_SCRAM_SHA512:
 			logerr("> AUTH SCRAM-SHA-512 <");
+			break;
+#endif
+		case AUTH_SCRAM_SHA1_PLUS:
+			logerr("> AUTH SCRAM-SHA-1-PLUS <");
+			break;
+		case AUTH_SCRAM_SHA256_PLUS:
+			logerr("> AUTH SCRAM-SHA-256-PLUS <");
+			break;
+#if 0
+		case AUTH_SCRAM_SHA512_PLUS:
+			logerr("> AUTH SCRAM-SHA-512-PLUS <");
 			break;
 #endif
 		default:
@@ -1711,39 +1750,49 @@ err_write()
 }
 
 void
-err_authfailure(char *arg1, char *arg2, int ret)
+err_authfailure(char *r_ip, char *authuser, int ret)
 {
 	static char     retstr[FMT_ULONG];
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
 	logerr("qmail-smtpd: ");
 	logerrpid();
-	logerr(arg1);
-	if (arg2) {
+	logerr(r_ip);
+	if (authuser) {
 		logerr(" AUTH ");
-		logerr(arg2);
+		logerr(authuser);
 	}
 	logerr(" status=[");
 	if (ret < 0)
 		logerr("-");
 	logerr(retstr);
-	logerrf("] auth failure\n");
+	logerr("]");
+#ifdef TLS
+	logerr(" ");
+	logerr(ssl ? "TLS=Yes" : "TLS=No");
+#endif
+	logerrf(" auth failure\n");
 }
 
 void
-err_authinsecure(char *arg1, int ret)
+err_authinsecure(char *r_ip, int ret)
 {
 	static char     retstr[FMT_ULONG];
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
 	logerr("qmail-smtpd: ");
 	logerrpid();
-	logerr(arg1);
+	logerr(r_ip);
 	logerr(" status=[");
 	if (ret < 0)
 		logerr("-");
 	logerr(retstr);
-	logerrf("] auth failure\n");
+	logerr("]");
+#ifdef TLS
+	logerr(" ");
+	logerr(ssl ? "TLS=Yes" : "TLS=No");
+#endif
+	logerrf(" auth failure\n");
 }
 
 void
@@ -3074,30 +3123,34 @@ smtp_ehlo(char *arg)
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
 #endif
+#ifdef TLS
 			if (ssl)
 #if 0
 				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
 #else
 				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
 #endif
+#endif
 			out("\r\n");
-			if (old_client_auth_parse_bug) {
+			if (old_client_bug) {
 #if 0
 				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512");
 #else
 				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
 #endif
+#ifdef TLS
 				if (ssl)
 #if 0
 					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
 #else
 					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
 #endif
+#endif
 				out("\r\n");
 			}
 #else
 			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
-			if (old_client_auth_parse_bug)
+			if (old_client_bug)
 				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
 #endif /*- #ifdef HAVELIBGSASL */
 		} else /*- few auth methods disabled */
@@ -3142,7 +3195,7 @@ smtp_ehlo(char *arg)
 #endif
 #endif
 			out("\r\n");
-			if (old_client_auth_parse_bug) {
+			if (old_client_bug) {
 				if (!no_auth_login) {
 					out(flag++ == 0 ? "250-AUTH=" : " ");
 					out("LOGIN");
@@ -3617,7 +3670,7 @@ smtp_mail(char *arg)
 	if (authd && !stralloc_append(&proto, "A"))
 		die_nomem();
 
-#if BATV
+#ifdef BATV
 	if (batvok)
 		(void) check_batv_sig(); /*- unwrap in case it's ours */
 #endif
@@ -4054,7 +4107,7 @@ smtp_rcpt(char *arg)
 		err_syntax();
 		return;
 	}
-#if BATV
+#ifdef BATV
 	if (batvok)
 		ws = check_batv_sig(); /*- always strip sig, even if it's not a bounce */
 #endif
@@ -4315,7 +4368,11 @@ saferead(int fd, char *buf, int len)
 			die_alarm();
 	}
 	if (r < 0)
+#ifdef TLS
 		ssl ? die_read("ssl_timeoutread", ssl_error()) : die_read("timeoutread", 0);
+#else
+		die_read("timeoutread", 0);
+#endif
 	return r;
 }
 
@@ -4900,10 +4957,13 @@ int
 authenticate(int method)
 {
 	int             child, wstat, i, n = 0;
-	int             pi[2], po[2] = { -1, -1}, pe[2];
-	char            respbuf[1024];
-	char            pwd_in_buf[1024];
+	int             pi[2], po[2] = { -1, -1};
+#ifdef TLS
+	int             pe[2];
 	struct substdio pwd_in;
+	char            pwd_in_buf[1024];
+#endif
+	char            respbuf[1024];
 
 	if (!stralloc_0(&user) ||
 			!stralloc_0(&pass) ||
@@ -4913,8 +4973,10 @@ authenticate(int method)
 		return err_pipe();
 	if (pipe(po) == -1) /*- digest md5 */
 		return err_pipe();
+#ifdef TLS
 	if (ssl && pipe(pe) == -1) /*- smtp message pipe */
 		return err_pipe();
+#endif
 	switch (child = fork())
 	{
 	case -1:
@@ -4922,7 +4984,9 @@ authenticate(int method)
 	case 0:
 		close(pi[1]);
 		close(po[0]);
+#ifdef TLS
 		close(pe[0]);
+#endif
 		if (pi[0] != 3) {
 			if (dup2(pi[0], 3) == -1)
 				return err_write();
@@ -4933,19 +4997,23 @@ authenticate(int method)
 				return err_write();
 			close(po[1]);
 		}
+#ifdef TLS
 		if (ssl && pe[1] != 1) {
 			if (dup2(pe[1], 1) == -1)
 				return err_write();
 			close(pe[1]);
 		}
+#endif
 		sig_pipedefault();
 		execv(*childargs, childargs);
 		_exit(1);
 	}
 	close(pi[0]);
 	close(po[1]);
+#ifdef TLS
 	if (ssl)
 		close(pe[1]);
+#endif
 	substdio_fdbuf(&ssup, safewrite, pi[1], upbuf, sizeof upbuf);
 	if (substdio_put(&ssup, user.s, user.len) == -1)
 		return err_write();
@@ -4975,11 +5043,13 @@ authenticate(int method)
 	if (wait_crashed(wstat))
 		return err_child();
 	if ((i = wait_exitcode(wstat))) {
+#ifdef TLS
 		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
 			substdio_fdbuf(&pwd_in, saferead, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
 			if (substdio_copy(&ssout, &pwd_in) == -2)
 				die_read("error reading checkpassword pipe", 0);
 		}
+#endif
 		/* 
 		 * i == 3 - account doesn't have RELAY permissions.
 		 * pw_gid is set with NO_RELAY
@@ -5017,8 +5087,10 @@ auth_login(char *arg)
 {
 	int             r;
 
+#ifdef TLS
 	if (secure_auth && !ssl)
 		return err_noauthallowed();
+#endif
 	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &user)) == 1)
 			return err_input();
@@ -5053,8 +5125,10 @@ auth_plain(char *arg)
 {
 	int             r, id = 0;
 
+#ifdef TLS
 	if (secure_auth && !ssl)
 		return err_noauthallowed();
+#endif
 	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
 			return err_input();
@@ -5266,6 +5340,7 @@ err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
 	logerrf("\n");
 }
 
+#ifdef TLS
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
 char           *
 get_finish_message(cb_type type)
@@ -5326,14 +5401,18 @@ get_finish_message(cb_type type)
 	return res.s;
 }
 #endif
+#endif
 
 static int
 gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
 	int             rc = GSASL_NO_CALLBACK;
 	static int      mech, iter = 4096;
-	static char    *u, *salt, *stored_key, *server_key, *salted_pass, *p;
+	static char    *u, *salt, *stored_key, *server_key, *salted_pass;
 	static int      i = -1;
+#ifdef TLS
+	static char    *p;
+#endif
 
 	switch (prop)
 	{
@@ -5426,6 +5505,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		break;
 	case GSASL_VALIDATE_GSSAPI:
 		return GSASL_OK;
+#ifdef TLS
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
 	case GSASL_CB_TLS_UNIQUE:
 		if ((p = get_finish_message(tls_unique))) {
@@ -5457,6 +5537,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 			return GSASL_NO_CALLBACK;
 		}
 		break;
+#endif
 #endif
 	default:
 		strnum[fmt_int(strnum, prop)] = 0;
@@ -5617,6 +5698,7 @@ auth_scram(int method)
 		}
 		break;
 	case 'y':
+#ifdef TLS
 		if (ssl && !cb_disabled) {
 			/*-
 			 * this is a downgrade attack
@@ -5627,12 +5709,14 @@ auth_scram(int method)
 			err_scram("535", "5.7.4", "client supports channel binding, but thinks server doesn't", 0);
 			return 1;
 		}
+#endif
 		if (slop.s[1] != ',') {
 			err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
 			return 1;
 		}
 		break;
 	case 'p':
+#ifdef TLS
 		if (!ssl || (ssl && cb_disabled)) {
 			/*
 			 * Client requires channel binding but we don't support it.
@@ -5648,6 +5732,10 @@ auth_scram(int method)
 			err_scram("535", "5.7.4", "client requires channel binding, but server doesn't support", slop.s + 2);
 			return 1;
 		}
+#else
+		err_scram("535", "5.7.4", "client requires channel binding, but server doesn't support", slop.s + 2);
+		return 1;
+#endif
 		if (slop.s[1] != '=') {
 			err_scram("535", "5.7.1", "535 malformed SCRAM message", slop.s);
 			return 1;
@@ -7080,7 +7168,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		hostname = argv[1];
 		childargs = argv + 2;
 	}
-	old_client_auth_parse_bug = env_get("OLD_CLIENT") ? 1 : 0;
+	old_client_bug = env_get("OLD_CLIENT") ? 1 : 0;
 	no_help = env_get("DISABLE_HELP");
 	no_vrfy = env_get("DISABLE_VRFY");
 	setup_state = 0;
@@ -7347,7 +7435,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.261  2022-08-20 17:46:14+05:30  Cprogrammer
+ * Revision 1.261  2022-08-21 19:31:25+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ * replace hard coded auth methods with defines in authmethods.h
  * disable AUTH= string in EHLO if OLD_CLIENT isn't set
  *
  * Revision 1.260  2022-08-15 20:55:05+05:30  Cprogrammer
@@ -7572,7 +7662,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.261 2022-08-20 17:46:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.261 2022-08-21 19:31:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidauthcramh;
 	x = sccsidwildmath;
