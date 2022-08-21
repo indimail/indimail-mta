@@ -183,7 +183,8 @@ but authentication was rejected (password).
 Z
 Connected to
 .I host
-but authentication was rejected (AUTH CRAM-MD5/CRAM-SHA1/CRAM-SHA256/CRAM-RIPEMD/DIGEST-MD5).
+but authentication was rejected (AUTH LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1,
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-RIPEMD, DIGEST-MD5)
 
 .TP 5
 Z
@@ -454,20 +455,23 @@ or
 .EE
 
 without any extra spaces. If the environment variable \fBAUTH_SMTP\fR is
-set, \fBqmail-remote\fR will use \fIusername\fR and \fIpassword\fR
+set, \fBqmail-remote\fR will use \fIusername\fR and \fIpassword\fR 
 to relay out mails through server \fIrelay\fR using authenticated SMTP.
 <sp> is a single space character. AUTH_SMTP can also have the values
-DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA256, CRAM-MD5, LOGIN or PLAIN
-to use the desired authentication method. You can disable specific AUTH
-methods by defining any one more more of the following environment
-variables
+DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+CRAM-SHA512, CRAM-MD5, LOGIN or PLAIN to use the desired authentication
+method. You can disable specific AUTH methods by defining any one more more
+of the following environment variables
 
 .EX
 	DISABLE_AUTH_LOGIN
 	DISABLE_AUTH_PLAIN
 	DISABLE_CRAM_MD5
 	DISABLE_CRAM_SHA1
+	DISABLE_CRAM_SHA224
 	DISABLE_CRAM_SHA256
+	DISABLE_CRAM_SHA384
+	DISABLE_CRAM_SHA512
 	DISABLE_CRAM_RIPEMD
 	DISABLE_DIGEST_MD5
 .EE
