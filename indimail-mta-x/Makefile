@@ -1633,13 +1633,11 @@ qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
 	> qmail-remote.8
 
 qmail-remote.o: \
-compile qmail-remote.c tls.h ssl_timeoutio.h auth_cram.h \
-control.h dns.h quote.h ip.h ipalloc.h \
-query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
-variables.h hastlsv1_1_client.h hastlsv1_2_client.h \
-auto_control.h hastlsa.h tlsacheck.h fn_handler.h \
-tlsarralloc.h hassmtputf8.h conf-tls conf-ip conf-batv conf-mxps \
-conf-smtputf8
+compile qmail-remote.c tls.h ssl_timeoutio.h control.h dns.h quote.h ip.h \
+ipalloc.h query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
+variables.h hastlsv1_1_client.h hastlsv1_2_client.h auto_control.h \
+hastlsa.h tlsacheck.h fn_handler.h tlsarralloc.h hassmtputf8.h \
+conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
 		conf-batv` qmail-remote.c
 
