@@ -1,23 +1,39 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.151 2022-08-21 19:39:22+05:30 Cprogrammer Exp mbhangui $
  */
-#include "cdb.h"
-#include "open.h"
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "sig.h"
-#include "env.h"
-#include "stralloc.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "scan.h"
-#include "case.h"
-#include "error.h"
-#include "auto_control.h"
-#include "control.h"
+#include <cdb.h>
+#include <open.h>
+#include <sig.h>
+#include <env.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <scan.h>
+#include <case.h>
+#include <error.h>
+#include <alloc.h>
+#include <gen_alloc.h>
+#include <gen_allocdefs.h>
+#include <str.h>
+#include <now.h>
+#include <constmap.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <fmt.h>
+#include <base64.h>
+#include <wait.h>
+#include <openssl/md5.h>
+#include <openssl/ripemd.h>
+#include <hmac.h>
+#include <authmethods.h>
+
 #include "hastlsa.h"
 #if defined(TLS) && defined(HASTLSA)
 #include "tlsarralloc.h"
@@ -28,45 +44,37 @@
 #else
 #warning "not compiled with -DTLS -DHASTLSA"
 #endif /*- #if defined(TLS) && defined(HASTLSA) */
-#include "dns.h"
-#include "alloc.h"
-#include "quote.h"
-#include "ip.h"
-#include "ipalloc.h"
-#include "ipme.h"
-#include "gen_alloc.h"
-#include "gen_allocdefs.h"
-#include "str.h"
-#include "now.h"
-#include "constmap.h"
-#include "tcpto.h"
-#include "timeoutconn.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
-#include "variables.h"
-#include "fmt.h"
-#include "socket.h"
-#include "base64.h"
-#include "wait.h"
-#include <unistd.h>
+
 #ifdef TLS
-#include <sys/stat.h>
-#include "tls.h"
-#include "ssl_timeoutio.h"
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
-#include "auth_cram.h"
-#include "qr_digest_md5.h"
+#include "tls.h"
+#include "ssl_timeoutio.h"
 #include "hastlsv1_1_client.h"
 #include "hastlsv1_2_client.h"
 #ifdef HASTLSA
 #include "tlsacheck.h"
 #endif
 #endif /*- #ifdef TLS */
+
+/* email address internationalization EAI */
 #include "hassmtputf8.h"
 #ifdef SMTPUTF8
 #include <idn2.h>
 #endif
+
+#include "auto_control.h"
+#include "control.h"
+#include "dns.h"
+#include "quote.h"
+#include "ip.h"
+#include "ipalloc.h"
+#include "ipme.h"
+#include "tcpto.h"
+#include "timeoutconn.h"
+#include "variables.h"
+#include "socket.h"
+#include "qr_digest_md5.h"
 
 #define EHLO 1
 #define HUGESMTPTEXT  5000
@@ -321,12 +329,14 @@ zero()
 void
 zerodie(char *s1, int succ)
 {
+#ifdef TLS
 	if (ssl) {
 		while (SSL_shutdown(ssl) == 0)
 			usleep(100);
 		SSL_free(ssl);
 		ssl = 0;
 	}
+#endif
 	zero();
 	substdio_flush(subfdoutsmall);
 	_exit(run_script(s1 ? s1[0] : 'Z', succ));
@@ -2095,38 +2105,59 @@ void
 auth_cram(int type, int use_size)
 {
 	int             j, code, iter = 16;
-	unsigned char   digest[21], encrypted[41];
+	unsigned char   digest[129], encrypted[65];
 	unsigned char  *e;
 
 	switch (type)
 	{
-	case 3:
-		iter = 16;
+	case AUTH_CRAM_MD5:
+		iter = MD5_DIGEST_LENGTH;
 		substdio_puts(&smtpto, "AUTH CRAM-MD5\r\n");
 		substdio_flush(&smtpto);
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
 		break;
-	case 4:
-		iter = 20;
+	case AUTH_CRAM_RIPEMD:
+		iter = RIPEMD160_DIGEST_LENGTH;
+		substdio_puts(&smtpto, "AUTH CRAM-RIPEMD\r\n");
+		substdio_flush(&smtpto);
+		if ((code = smtpcode()) != 334)
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD).", code, -1);
+		break;
+	case AUTH_CRAM_SHA1:
+		iter = SHA_DIGEST_LENGTH;
 		substdio_puts(&smtpto, "AUTH CRAM-SHA1\r\n");
 		substdio_flush(&smtpto);
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA1).", code, -1);
 		break;
-	case 5:
-		iter = 20;
+	case AUTH_CRAM_SHA224:
+		iter = SHA224_DIGEST_LENGTH;
+		substdio_puts(&smtpto, "AUTH CRAM-SHA224\r\n");
+		substdio_flush(&smtpto);
+		if ((code = smtpcode()) != 334)
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA224).", code, -1);
+		break;
+	case AUTH_CRAM_SHA256:
+		iter = SHA256_DIGEST_LENGTH;
 		substdio_puts(&smtpto, "AUTH CRAM-SHA256\r\n");
 		substdio_flush(&smtpto);
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA256).", code, -1);
 		break;
-	case 6:
-		iter = 20;
-		substdio_puts(&smtpto, "AUTH CRAM-RIPEMD\r\n");
+	case AUTH_CRAM_SHA384:
+		iter = SHA384_DIGEST_LENGTH;
+		substdio_puts(&smtpto, "AUTH CRAM-SHA384\r\n");
 		substdio_flush(&smtpto);
 		if ((code = smtpcode()) != 334)
-			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD).", code, -1);
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA384).", code, -1);
+		break;
+	case AUTH_CRAM_SHA512:
+		iter = SHA512_DIGEST_LENGTH;
+		substdio_puts(&smtpto, "AUTH CRAM-SHA512\r\n");
+		substdio_flush(&smtpto);
+		if ((code = smtpcode()) != 334)
+			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA512).", code, -1);
 		break;
 	}
 	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) {	/*- Challenge */
@@ -2139,16 +2170,25 @@ auth_cram(int type, int use_size)
 		quit("ZConnected to ", " but got no challenge.", -1, -1);
 	switch (type)
 	{
-	case 3:
+	case AUTH_CRAM_MD5:
 		hmac_md5((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
 		break;
-	case 4:
+	case AUTH_CRAM_SHA1:
 		hmac_sha1((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
 		break;
-	case 5:
+	case AUTH_CRAM_SHA224:
+		hmac_sha224((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+		break;
+	case AUTH_CRAM_SHA256:
 		hmac_sha256((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
 		break;
-	case 6:
+	case AUTH_CRAM_SHA384:
+		hmac_sha384((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+		break;
+	case AUTH_CRAM_SHA512:
+		hmac_sha512((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
+		break;
+	case AUTH_CRAM_RIPEMD:
 		hmac_ripemd((unsigned char *) chal.s, chal.len, (unsigned char *) pass.s, pass.len, digest);
 		break;
 	}
@@ -2238,15 +2278,20 @@ auth_login(int use_size)
 void
 smtp_auth(char *type, int use_size)
 {
-	int             i = 0, j, login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0, cram_sha256_supp =
-		0, cram_rmd_supp = 0, digest_md5_supp = 0, secure_auth;
-	char           *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha256, *no_cram_ripemd,
-		*no_digest_md5;
+	int             i = 0, login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0,
+					cram_sha224_supp, cram_sha256_supp = 0, cram_sha384_supp, cram_sha512_supp = 0,
+					cram_rmd_supp = 0, digest_md5_supp = 0, secure_auth;
+	char           *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224,
+				   *no_cram_sha256, *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
 
 	if (!type) {
 		mailfrom(use_size);
 		return;
 	}
+	/*-
+	 * cycle through all lines got as response to EHLO
+	 * break when you find 2XX-AUTH or 2XX AUTH
+	 */
 	while ((i += str_chr(smtptext.s + i, '\n') + 1) && (i + 8 < smtptext.len)
 		   && str_diffn(smtptext.s + i + 4, "AUTH ", 5));
 
@@ -2258,25 +2303,32 @@ smtp_auth(char *type, int use_size)
 			if (case_starts(ptr - 4, "CRAM-RIPEMD"))
 				cram_rmd_supp = 1;
 			else
+			if (case_starts(ptr - 4, "CRAM-SHA512"))
+				cram_sha512_supp = 1;
+			else
+			if (case_starts(ptr - 4, "CRAM-SHA384"))
+				cram_sha384_supp = 1;
+			else
 			if (case_starts(ptr - 4, "CRAM-SHA256"))
 				cram_sha256_supp = 1;
+			else
+			if (case_starts(ptr - 4, "CRAM-SHA224"))
+				cram_sha224_supp = 1;
 			else
 			if (case_starts(ptr - 4, "CRAM-SHA1"))
 				cram_sha1_supp = 1;
 			else
 			if (case_starts(ptr - 4, "CRAM-MD5"))
 				cram_md5_supp = 1;
+		} else
+		if (*ptr == 'L') {
+			if (case_starts(ptr, "LOGIN"))
+				login_supp = 1;
+		} else
+		if (*ptr == 'P') {
+			if (case_starts(ptr, "PLAIN"))
+				plain_supp = 1;
 		}
-	}
-	/*- AUTH LOGIN */
-	if ((j = str_chr(smtptext.s + i + 8, 'L')) > 0) {
-		if (case_starts(smtptext.s + i + 8 + j, "LOGIN"))
-			login_supp = 1;
-	}
-	/*- AUTH PLAIN */
-	if ((j = str_chr(smtptext.s + i + 8, 'P')) > 0) {
-		if (case_starts(smtptext.s + i + 8 + j, "PLAIN"))
-			plain_supp = 1;
 	}
 #ifdef TLS
 	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
@@ -2288,82 +2340,96 @@ smtp_auth(char *type, int use_size)
 #endif
 	no_cram_md5 = env_get("DISABLE_CRAM_MD5");
 	no_cram_sha1 = env_get("DISABLE_CRAM_SHA1");
+	no_cram_sha224 = env_get("DISABLE_CRAM_SHA224");
 	no_cram_sha256 = env_get("DISABLE_CRAM_SHA256");
+	no_cram_sha384 = env_get("DISABLE_CRAM_SHA384");
+	no_cram_sha512 = env_get("DISABLE_CRAM_SHA512");
 	no_cram_ripemd = env_get("DISABLE_CRAM_RIPEMD");
 	no_digest_md5 = env_get("DISABLE_DIGEST_MD5");
-	if (!case_diffs(type, "DIGEST-MD5")) {
-		if (digest_md5_supp) {
-			auth_digest_md5(use_size);
-			return;
-		}
+	if (login_supp && !case_diffs(type, "LOGIN")) {
+		auth_login(use_size);
+		return;
 	} else
-	if (!case_diffs(type, "CRAM-RIPEMD")) {
-		if (cram_rmd_supp) {
-			auth_cram(6, use_size);
-			return;
-		}
+	if (plain_supp && !case_diffs(type, "PLAIN")) {
+		auth_plain(use_size);
+		return;
 	} else
-	if (!case_diffs(type, "CRAM-SHA256")) {
-		if (cram_sha256_supp) {
-			auth_cram(5, use_size);
-			return;
-		}
+	if (cram_md5_supp && !case_diffs(type, "CRAM-MD5")) {
+		auth_cram(AUTH_CRAM_MD5, use_size);
+		return;
 	} else
-	if (!case_diffs(type, "CRAM-SHA1")) {
-		if (cram_sha1_supp) {
-			auth_cram(4, use_size);
-			return;
-		}
+	if (cram_sha1_supp && !case_diffs(type, "CRAM-SHA1")) {
+		auth_cram(AUTH_CRAM_SHA1, use_size);
+		return;
 	} else
-	if (!case_diffs(type, "CRAM-MD5")) {
-		if (cram_md5_supp) {
-			auth_cram(3, use_size);
-			return;
-		}
+	if (cram_sha1_supp && !case_diffs(type, "CRAM-SHA224")) {
+		auth_cram(AUTH_CRAM_SHA224, use_size);
+		return;
 	} else
-	if (!case_diffs(type, "LOGIN")) {
-		if (login_supp) {
-			auth_login(use_size);
-			return;
-		}
+	if (cram_sha256_supp && !case_diffs(type, "CRAM-SHA256")) {
+		auth_cram(AUTH_CRAM_SHA256, use_size);
+		return;
 	} else
-	if (!case_diffs(type, "PLAIN")) {
-		if (plain_supp) {
-			auth_plain(use_size);
-			return;
-		}
+	if (cram_sha384_supp && !case_diffs(type, "CRAM-SHA384")) {
+		auth_cram(AUTH_CRAM_SHA384, use_size);
+		return;
+	} else
+	if (cram_sha512_supp && !case_diffs(type, "CRAM-SHA512")) {
+		auth_cram(AUTH_CRAM_SHA512, use_size);
+		return;
+	} else
+	if (cram_rmd_supp && !case_diffs(type, "CRAM-RIPEMD")) {
+		auth_cram(AUTH_CRAM_RIPEMD, use_size);
+		return;
+	} else
+	if (digest_md5_supp && !case_diffs(type, "DIGEST-MD5")) {
+		auth_digest_md5(use_size);
+		return;
 	} else
 	if (!*type) {
-		if (!no_digest_md5 && digest_md5_supp) {
-			auth_digest_md5(use_size);
+		if (!no_cram_sha512 && cram_sha512_supp) {
+			auth_cram(AUTH_CRAM_SHA512, use_size);
 			return;
 		}
-		if (!no_cram_ripemd && cram_rmd_supp) {
-			auth_cram(6, use_size);
+		if (!no_cram_sha384 && cram_sha384_supp) {
+			auth_cram(AUTH_CRAM_SHA384, use_size);
 			return;
 		}
 		if (!no_cram_sha256 && cram_sha256_supp) {
-			auth_cram(5, use_size);
+			auth_cram(AUTH_CRAM_SHA256, use_size);
+			return;
+		}
+		if (!no_cram_sha224 && cram_sha224_supp) {
+			auth_cram(AUTH_CRAM_SHA224, use_size);
 			return;
 		}
 		if (!no_cram_sha1 && cram_sha1_supp) {
-			auth_cram(4, use_size);
+			auth_cram(AUTH_CRAM_SHA1, use_size);
+			return;
+		}
+		if (!no_cram_ripemd && cram_rmd_supp) {
+			auth_cram(AUTH_CRAM_RIPEMD, use_size);
 			return;
 		}
 		if (!no_cram_md5 && cram_md5_supp) {
-			auth_cram(3, use_size);
-			return;
-		}
-		if (!no_auth_login && login_supp) {
-			auth_login(use_size);
+			auth_cram(AUTH_CRAM_MD5, use_size);
 			return;
 		}
 		if (!no_auth_plain && plain_supp) {
 			auth_plain(use_size);
 			return;
 		}
+		if (!no_auth_login && login_supp) {
+			auth_login(use_size);
+			return;
+		}
+		if (!no_digest_md5 && digest_md5_supp) {
+			auth_digest_md5(use_size);
+			return;
+		}
 	}
 	err_authprot();
+	_exit(0);
 	mailfrom(use_size);
 	return;
 }
@@ -3656,14 +3722,18 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $";
-	x = sccsidauthcramh;
+	static char    *x = "$Id: qmail-remote.c,v 1.151 2022-08-21 19:39:22+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.151  2022-08-21 19:39:22+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ * replace hard coded auth methods with defines in authmethods.h
+ * added CRAM-SHA224, CRAM-SHA384, CRAM-SHA512 AUTH methods
+ *
  * Revision 1.150  2022-05-18 13:30:05+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
