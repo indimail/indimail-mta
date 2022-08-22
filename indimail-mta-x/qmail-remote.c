@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.152 2022-08-22 22:23:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -985,7 +985,7 @@ outsmtptext()
 no_return void
 quit(char *prepend, char *append, int code, int die)
 {
-	if (substdio_putsflush(&smtpto, "QUIT\r\n") == -1)
+	if (substdio_putflush(&smtpto, "QUIT\r\n", 6) == -1)
 		temp_write();
 	/*- waiting for remote side is just too ridiculous */
 	out(prepend);
@@ -1200,12 +1200,12 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *saptr)
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	state = ssl ? SSL_get_state(ssl) : SSL_ST_BEFORE;
 	if ((state & TLS_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
-		if (substdio_putsflush(&smtpto, "QUIT\r\n") == -1)
+		if (substdio_putflush(&smtpto, "QUIT\r\n", 6) == -1)
 			temp_write();
 #else
 	state = ssl ? ssl->state : SSL_ST_BEFORE;
 	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
-		if (substdio_putsflush(&smtpto, "QUIT\r\n") == -1)
+		if (substdio_putflush(&smtpto, "QUIT\r\n", 6) == -1)
 			temp_write();
 #endif
 	out(ssl ? "; connected to " : "; connecting to ");
@@ -1577,7 +1577,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	} else
 		SSL_CTX_free(ctx);
 
-	if (!smtps && substdio_putsflush(&smtpto, "STARTTLS\r\n") == -1)
+	if (!smtps && substdio_putflush(&smtpto, "STARTTLS\r\n", 10) == -1)
 		temp_write();
 
 	/*- while the server is preparing a response, do something else */
@@ -1945,7 +1945,7 @@ mailfrom(int use_size)
 #ifdef SMTPUTF8
 	if (enable_utf8 && smtputf8 && flagutf8 &&
 			substdio_put(&smtpto, " SMTPUTF8", 9) == -1)
-			temp_write();
+		temp_write();
 #endif
 	if (substdio_put(&smtpto, "\r\n", 2) == -1)
 		temp_write();
@@ -1973,7 +1973,7 @@ mailfrom_xtext(int use_size)
 #ifdef SMTPUTF8
 	if (enable_utf8 && smtputf8 && flagutf8 &&
 			substdio_put(&smtpto, " SMTPUTF8", 9) == -1)
-			temp_write();
+		temp_write();
 #endif
 	if (substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
@@ -2309,7 +2309,7 @@ auth_login(int use_size)
 }
 
 #ifdef HASLIBGSASL
-void
+static void
 remove_newline()
 {
 	int             i;
@@ -3099,7 +3099,7 @@ smtp()
 	}
 	if (!flagbother)
 		quit("DGiving up on ", "", code, 1);
-	if (substdio_putsflush(&smtpto, "DATA\r\n") == -1)
+	if (substdio_putflush(&smtpto, "DATA\r\n", 6) == -1)
 		temp_write();
 	code = smtpcode();
 	if (code >= 500)
@@ -4018,13 +4018,21 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.152 2022-08-22 22:23:34+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.152  2022-08-22 22:23:34+05:30  Cprogrammer
+ * added check for return value of subsdio_put
+ *
+ * Revision 1.151  2022-08-21 19:39:22+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ * replace hard coded auth methods with defines in authmethods.h
+ * added CRAM-SHA224, CRAM-SHA384, CRAM-SHA512 AUTH methods
+ *
  * Revision 1.150  2022-05-18 13:30:05+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
