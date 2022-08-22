@@ -53,6 +53,9 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 30. qmail-smtpd.c, qmail-remote.c: replace hard coded auth methods with
     defines in authmethods.h
 31. qmail-remote: added CRAM-SHA224, CRAM-SHA384, CRAM-SHA512 AUTH methods
+- 22/08/2022
+32. smtpd.c: handle errors in gs_callback
+33. smtpd.c: improve logging for authenticated SMTP.
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
