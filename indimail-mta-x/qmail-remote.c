@@ -2443,6 +2443,7 @@ client(Gsasl *gsasl_ctx, int method)
 	 * Set username and password in session handle. This info will be
 	 * lost when this session is deallocated below.  
 	 */
+#if GSASL_VERSION_MAJOR > 1
 	rc = gsasl_property_set(session, GSASL_AUTHID, user.s);
 	if (rc != GSASL_OK) {
 		if (!stralloc_copyb(&gsasl_str, " failed to set username: ", 25) ||
@@ -2461,6 +2462,10 @@ client(Gsasl *gsasl_ctx, int method)
 		quit("ZConnected to ", gsasl_str.s, -1, 1);
 		return;
 	}
+#else
+	gsasl_property_set(session, GSASL_AUTHID, user.s);
+	gsasl_property_set(session, GSASL_PASSWORD, pass.s);
+#endif
 	gsasl_authenticate(session, mech);
 	/* Cleanup.  */
 	gsasl_finish(session);
