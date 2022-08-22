@@ -131,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.263 $";
+char           *revision = "$Revision: 1.264 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -7055,11 +7055,12 @@ tls_init()
 	}
 	if (ssl_timeoutaccept(timeout, ssl_rfd, ssl_wfd, myssl) <= 0) {
 		/*- neither cleartext nor any other response here is part of a standard */
-		tls_err("454", "4.3.0", "failed to accept connection");
+		tls_err("454", "4.3.0", "failed to accept TLS connection");
 		while (SSL_shutdown(myssl) == 0)
 			usleep(100);
 		SSL_free(myssl);
 		myssl = 0;
+		_exit(1);
 	}
 	ssl = myssl;
 	log_ssl_version();
@@ -7430,6 +7431,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.264  2022-08-23 01:18:50+05:30  Cprogrammer
+ * fixed crash when ssl_timeoutaccept() failed
+ *
  * Revision 1.263  2022-08-22 21:04:56+05:30  Cprogrammer
  * handle errors in gs_callback
  *
@@ -7664,7 +7668,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.263 2022-08-22 21:04:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.264 2022-08-23 01:18:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
