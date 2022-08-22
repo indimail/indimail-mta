@@ -131,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.262 $";
+char           *revision = "$Revision: 1.263 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -160,6 +160,7 @@ static stralloc user = { 0 };
 static stralloc pass = { 0 };
 static stralloc resp = { 0 };
 static stralloc slop = { 0 };
+static stralloc authmethod = { 0 };
 
 stralloc        locals = { 0 };
 struct constmap maplocals;
@@ -825,6 +826,52 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 	return;
 }
 
+char           *
+authmethod_to_str(int method)
+{
+	switch (method)
+	{
+	case AUTH_LOGIN:
+		return ("LOGIN");
+	case AUTH_PLAIN:
+		return ("PLAIN");
+	case AUTH_CRAM_MD5:
+		return ("CRAM-MD5");
+	case AUTH_CRAM_SHA1:
+		return ("CRAM-SHA1");
+	case AUTH_CRAM_SHA224:
+		return ("CRAM-SHA224");
+	case AUTH_CRAM_SHA256:
+		return ("CRAM-SHA256");
+	case AUTH_CRAM_SHA384:
+		return ("CRAM-SHA384");
+	case AUTH_CRAM_SHA512:
+		return ("CRAM-SHA512");
+	case AUTH_CRAM_RIPEMD:
+		return ("CRAM-RIPEMD");
+	case AUTH_DIGEST_MD5:
+		return ("DIGEST-MD5");
+	case AUTH_SCRAM_SHA1:
+		return ("SCRAM-SHA-1");
+	case AUTH_SCRAM_SHA256:
+		return ("SCRAM-SHA-256");
+#if 0
+	case AUTH_SCRAM_SHA512:
+		return ("SCRAM-SHA-512");
+#endif
+	case AUTH_SCRAM_SHA1_PLUS:
+		return ("SCRAM-SHA-1-PLUS");
+	case AUTH_SCRAM_SHA256_PLUS:
+		return ("SCRAM-SHA-256-PLUS");
+#if 0
+	case AUTH_SCRAM_SHA512_PLUS:
+		return ("SCRAM-SHA-512-PLUS");
+#endif
+	default:
+		return ("unknown");
+	}
+}
+
 void
 log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, int notify)
 {
@@ -855,66 +902,8 @@ log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 				logerr("> AUTH <");
 				if (authuser && *authuser) {
 					logerr(authuser);
-					switch (authd)
-					{
-					case 0:
-						break;
-					case AUTH_LOGIN:
-						logerr(": AUTH LOGIN");
-						break;
-					case AUTH_PLAIN:
-						logerr(": AUTH PLAIN");
-						break;
-					case AUTH_CRAM_MD5:
-						logerr(": AUTH CRAM-MD5");
-						break;
-					case AUTH_CRAM_SHA1:
-						logerr(": AUTH CRAM-SHA1");
-						break;
-					case AUTH_CRAM_SHA224:
-						logerr(": AUTH CRAM-SHA224");
-						break;
-					case AUTH_CRAM_SHA256:
-						logerr(": AUTH CRAM-SHA256");
-						break;
-					case AUTH_CRAM_SHA384:
-						logerr(": AUTH CRAM-SHA384");
-						break;
-					case AUTH_CRAM_SHA512:
-						logerr(": AUTH CRAM-SHA512");
-						break;
-					case AUTH_CRAM_RIPEMD:
-						logerr(": AUTH CRAM-RIPEMD");
-						break;
-					case AUTH_DIGEST_MD5:
-						logerr(": AUTH DIGEST-MD5");
-						break;
-					case AUTH_SCRAM_SHA1:
-						logerr(": AUTH SCRAM-SHA-1");
-						break;
-					case AUTH_SCRAM_SHA256:
-						logerr(": AUTH SCRAM-SHA-256");
-						break;
-#if 0
-					case AUTH_SCRAM_SHA512:
-						logerr(": AUTH SCRAM-SHA-512");
-						break;
-#endif
-					case AUTH_SCRAM_SHA1_PLUS:
-						logerr(": AUTH SCRAM-SHA-1-PLUS");
-						break;
-					case AUTH_SCRAM_SHA256_PLUS:
-						logerr(": AUTH SCRAM-SHA-256-PLUS");
-						break;
-#if 0
-					case AUTH_SCRAM_SHA512_PLUS:
-						logerr(": AUTH SCRAM-SHA-512-PLUS");
-						break;
-#endif
-					default:
-						logerr(": AUTH unknown");
-						break;
-					}
+					logerr(": AUTH ");
+					logerr(authmethod_to_str(authd));
 				}
 				if (addrallowed(ptr)) {
 					if (authuser && *authuser)
@@ -928,8 +917,8 @@ log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
 			logerr(strnum);
 #ifdef TLS
-			logerr(" ");
-			logerr(ssl ? "TLS=Yes" : "TLS=No");
+			logerr(" TLS=");
+			logerr(ssl ? SSL_get_version(ssl) : "No");
 #endif
 			if (!notify && tmpLine.len) {
 				logerr(" ");
@@ -976,66 +965,8 @@ err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 			logerr("> AUTH <");
 			if (authuser && *authuser) {
 				logerr(authuser);
-				switch (authd)
-				{
-				case 0:
-					break;
-				case AUTH_LOGIN:
-					logerr(": AUTH LOGIN");
-					break;
-				case AUTH_PLAIN:
-					logerr(": AUTH PLAIN");
-					break;
-				case AUTH_CRAM_MD5:
-					logerr(": AUTH CRAM-MD5");
-					break;
-				case AUTH_CRAM_SHA1:
-					logerr(": AUTH CRAM-SHA1");
-					break;
-				case AUTH_CRAM_SHA224:
-					logerr(": AUTH CRAM-SHA224");
-					break;
-				case AUTH_CRAM_SHA256:
-					logerr(": AUTH CRAM-SHA256");
-					break;
-				case AUTH_CRAM_SHA384:
-					logerr(": AUTH CRAM-SHA384");
-					break;
-				case AUTH_CRAM_SHA512:
-					logerr(": AUTH CRAM-SHA512");
-					break;
-				case AUTH_CRAM_RIPEMD:
-					logerr(": AUTH CRAM-RIPEMD");
-					break;
-				case AUTH_DIGEST_MD5:
-					logerr(": AUTH DIGEST-MD5");
-					break;
-				case AUTH_SCRAM_SHA1:
-					logerr(": AUTH SCRAM-SHA-1");
-					break;
-				case AUTH_SCRAM_SHA256:
-					logerr(": AUTH SCRAM-SHA-256");
-					break;
-#if 0
-				case AUTH_SCRAM_SHA512:
-					logerr(": AUTH SCRAM-SHA-512");
-					break;
-#endif
-				case AUTH_SCRAM_SHA1_PLUS:
-					logerr(": AUTH SCRAM-SHA-1-PLUS");
-					break;
-				case AUTH_SCRAM_SHA256_PLUS:
-					logerr(": AUTH SCRAM-SHA-256-PLUS");
-					break;
-#if 0
-				case AUTH_SCRAM_SHA512_PLUS:
-					logerr(": AUTH SCRAM-SHA-512-PLUS");
-					break;
-#endif
-				default:
-					logerr(": AUTH unknown");
-					break;
-				}
+				logerr(": AUTH ");
+				logerr(authmethod_to_str(authd));
 			}
 			if (addrallowed(ptr)) {
 				if (authuser && *authuser)
@@ -1051,8 +982,8 @@ err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 				logerr(tmpLine.s); /*- X-Bogosity line */
 			}
 #ifdef TLS
-			logerr(" ");
-			logerr(ssl ? "TLS=Yes" : "TLS=No");
+			logerr(" TLS=");
+			logerr(ssl ? SSL_get_version(ssl) : "No");
 #endif
 			logerr(" qp ");
 			logerr(accept_buf);
@@ -1448,64 +1379,9 @@ log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 	logerr(": MAIL from <");
 	logerr(arg2);
 	if (authd) {
-		switch (authd)
-		{
-		case AUTH_LOGIN:
-			logerr("> AUTH LOGIN <");
-			break;
-		case AUTH_PLAIN:
-			logerr("> AUTH PLAIN <");
-			break;
-		case AUTH_CRAM_MD5:
-			logerr("> AUTH CRAM-MD5 <");
-			break;
-		case AUTH_CRAM_SHA1:
-			logerr("> AUTH CRAM-SHA1 <");
-			break;
-		case AUTH_CRAM_SHA224:
-			logerr("> AUTH CRAM-SHA224 <");
-			break;
-		case AUTH_CRAM_SHA256:
-			logerr("> AUTH CRAM-SHA256 <");
-			break;
-		case AUTH_CRAM_SHA384:
-			logerr("> AUTH CRAM-SHA384 <");
-			break;
-		case AUTH_CRAM_SHA512:
-			logerr("> AUTH CRAM-SHA512 <");
-			break;
-		case AUTH_CRAM_RIPEMD:
-			logerr("> AUTH CRAM-RIPEMD <");
-			break;
-		case AUTH_DIGEST_MD5:
-			logerr("> AUTH DIGEST-MD5 <");
-			break;
-		case AUTH_SCRAM_SHA1:
-			logerr("> AUTH SCRAM-SHA-1 <");
-			break;
-		case AUTH_SCRAM_SHA256:
-			logerr("> AUTH SCRAM-SHA-256 <");
-			break;
-#if 0
-		case AUTH_SCRAM_SHA512:
-			logerr("> AUTH SCRAM-SHA-512 <");
-			break;
-#endif
-		case AUTH_SCRAM_SHA1_PLUS:
-			logerr("> AUTH SCRAM-SHA-1-PLUS <");
-			break;
-		case AUTH_SCRAM_SHA256_PLUS:
-			logerr("> AUTH SCRAM-SHA-256-PLUS <");
-			break;
-#if 0
-		case AUTH_SCRAM_SHA512_PLUS:
-			logerr("> AUTH SCRAM-SHA-512-PLUS <");
-			break;
-#endif
-		default:
-			logerr("> AUTH unknown <");
-			break;
-		}
+		logerr("> AUTH ");
+		logerr(authmethod_to_str(authd));
+		logerr(" <");
 		logerr(arg3);
 	}
 	logerrf(">\n");
@@ -1753,6 +1629,7 @@ void
 err_authfailure(char *r_ip, char *authuser, int ret)
 {
 	static char     retstr[FMT_ULONG];
+	int             i;
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
 	logerr("qmail-smtpd: ");
@@ -1767,9 +1644,15 @@ err_authfailure(char *r_ip, char *authuser, int ret)
 		logerr("-");
 	logerr(retstr);
 	logerr("]");
+	if (authmethod.len) {
+		logerr(" AUTH ");
+		i = authmethod.s[0];
+		logerr(authmethod_to_str(i));
+	} else
+		logerr(" AUTH Unknown ");
 #ifdef TLS
-	logerr(" ");
-	logerr(ssl ? "TLS=Yes" : "TLS=No");
+	logerr(" TLS=");
+	logerr(ssl ? SSL_get_version(ssl) : "No");
 #endif
 	logerrf(" auth failure\n");
 }
@@ -1789,8 +1672,8 @@ err_authinsecure(char *r_ip, int ret)
 	logerr(retstr);
 	logerr("]");
 #ifdef TLS
-	logerr(" ");
-	logerr(ssl ? "TLS=Yes" : "TLS=No");
+	logerr(" TLS=");
+	logerr(ssl ? SSL_get_version(ssl) : "No");
 #endif
 	logerrf(" auth failure\n");
 }
@@ -4951,8 +4834,6 @@ authgetl(void)
 	return (authin.len);
 }
 
-stralloc        authmethod = { 0 };
-
 int
 authenticate(int method)
 {
@@ -5211,9 +5092,10 @@ auth_cram(int method)
 #ifdef HASLIBGSASL
 static PASSWD  *gsasl_pw;
 static stralloc scram_method;
+static int      gs_callback_err;
 
 PASSWD         *
-get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, char **server_key, char **salted_pass)
+get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key, char **server_key, char **salted_pass)
 {
 	int             i;
 	char           *ptr, *err;
@@ -5316,6 +5198,54 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 	return gsasl_pw;
 }
 
+static int
+is_scram_method(int mech)
+{
+	switch (mech)
+	{
+	case AUTH_SCRAM_SHA1:
+	case AUTH_SCRAM_SHA256:
+	case AUTH_SCRAM_SHA1_PLUS:
+	case AUTH_SCRAM_SHA256_PLUS:
+		return 1;
+	default:
+		return 0;
+	}
+}
+
+static int
+get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter, char **salt, char **stored_key, char **server_key, char **salted_pass)
+{
+	int             rc;
+
+	if (!*u && !(*u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
+		logerr("gsasl_property_fast: GSASL_AUTHID failed\n");
+		return GSASL_NO_CALLBACK;
+	}
+	if (!(gsasl_pw = get_scram_record(*u, mech, iter, salt, stored_key, server_key, salted_pass)))
+		return gs_callback_err = GSASL_NO_CALLBACK;
+	if (!is_scram_method(*mech)) {
+		strnum[fmt_int(strnum, *mech)] = 0;
+		logerr("unknown SCRAM AUTH method [");
+		logerr(strnum);
+		logerr("]\n");
+		return GSASL_NO_CALLBACK;
+	}
+	strnum[fmt_int(strnum, *iter)] = 0;
+#if GSASL_VERSION_MAJOR > 1
+	if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum)) != GSASL_OK) {
+		logerr("gsasl_property_set: GSASL_SCRAM_ITER: ");
+		logerr(gsasl_strerror(rc));
+		logerrf("\n");
+		return GSASL_NO_CALLBACK;
+	}
+#else
+	gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum);
+	rc = GSASL_OK;
+#endif
+	return rc;
+}
+
 void
 err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
 {
@@ -5413,113 +5343,169 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	static char    *p;
 #endif
 
+	gs_callback_err = 0;
 	switch (prop)
 	{
 	case GSASL_AUTHID:
-		if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
-			return GSASL_NO_CALLBACK;
-		if (!stralloc_copys(&user, u) || !stralloc_0(&user))
-			die_nomem();
-		user.len--;
+		if (i == -1) {
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+				return gs_callback_err = GSASL_NO_CALLBACK;
+			i = 0;
+		} else
+		if (gsasl_pw && u)
+			rc = GSASL_OK;
 		break;
 	case GSASL_AUTHZID: /*- ignored */
 		break;
 	case GSASL_PASSWORD:
 		if (i == -1) {
-			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
-				return GSASL_NO_CALLBACK;
-			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
-				die_nomem();
-			user.len--;
-			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
-		if (mech > 10)
-			gsasl_property_set(sctx, GSASL_PASSWORD, salted_pass);
-		else
-			gsasl_property_set(sctx, GSASL_PASSWORD, gsasl_pw->pw_passwd);
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_PASSWORD, salted_pass)) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_PASSWORD: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
+		gsasl_property_set(sctx, GSASL_PASSWORD, salted_pass);
+		rc = GSASL_OK;
+#endif
 		break;
 	case GSASL_SCRAM_SALT:
 		if (i == -1) {
-			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
-				return GSASL_NO_CALLBACK;
-			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
-				die_nomem();
-			user.len--;
-			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
-		if (mech > 10)
-			gsasl_property_set(sctx, GSASL_SCRAM_SALT, salt);
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALT, salt)) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_SCRAM_SALT: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
+		gsasl_property_set(sctx, GSASL_SCRAM_SALT, salt);
+		rc = GSASL_OK;
+#endif
 		break;
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	case GSASL_SCRAM_SERVERKEY:
 		if (i == -1) {
-			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
-				return GSASL_NO_CALLBACK;
-			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
-				die_nomem();
-			user.len--;
-			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
-		if (mech > 10)
-			gsasl_property_set(sctx, GSASL_SCRAM_SERVERKEY, server_key);
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SERVERKEY, server_key)) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_SCRAM_SERVERKEY: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
+		gsasl_property_set(sctx, GSASL_SCRAM_SERVERKEY, server_key);
+		rc = GSASL_OK;
+#endif
 		break;
 	case GSASL_SCRAM_STOREDKEY:
 		if (i == -1) {
-			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
-				return GSASL_NO_CALLBACK;
-			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
-				die_nomem();
-			user.len--;
-			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
-		if (mech > 10)
-			gsasl_property_set(sctx, GSASL_SCRAM_STOREDKEY, stored_key);
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_STOREDKEY, stored_key)) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_SCRAM_STOREDKEY: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
+		gsasl_property_set(sctx, GSASL_SCRAM_STOREDKEY, stored_key);
+		rc = GSASL_OK;
+#endif
 		break;
 #endif
 	case GSASL_SCRAM_SALTED_PASSWORD:
+		if (i == -1) {
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+				return gs_callback_err = GSASL_NO_CALLBACK;
+			i = 0;
+		}
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, salted_pass)) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_SCRAM_SALTED_PASSWORD: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
+		gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, salted_pass);
+		rc = GSASL_OK;
+#endif
 		break;
 	/*- These are for GSSAPI/GS2 only.  */
 	case GSASL_SERVICE:
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_SERVICE, "smtp")) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_SERVICE: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
 		gsasl_property_set(sctx, GSASL_SERVICE, "smtp");
+		rc = GSASL_OK;
+#endif
 		break;
 	case GSASL_HOSTNAME:
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_HOSTNAME, hostname)) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_HOSTNAME: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
 		gsasl_property_set(sctx, GSASL_HOSTNAME, hostname);
+		rc = GSASL_OK;
+#endif
 		break;
 	case GSASL_SCRAM_ITER:
-		if (i == -1) {
-			if (!u && !(u = gsasl_property_fast(sctx, GSASL_AUTHID)))
-				return GSASL_NO_CALLBACK;
-			if (!stralloc_copys(&user, u) || !stralloc_0(&user))
-				die_nomem();
-			user.len--;
-			gsasl_pw = get_user_details(u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass);
+		if (i == -1 && u) {
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
 		strnum[fmt_int(strnum, iter)] = 0;
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum)) != GSASL_OK) {
+			logerr("gsasl_property_set: GSASL_SCRAM_ITER: ");
+			logerr(gsasl_strerror(rc));
+			logerrf("\n");
+		}
+#else
 		gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum);
+		rc = GSASL_OK;
+#endif
 		break;
 	case GSASL_VALIDATE_GSSAPI:
-		return GSASL_OK;
+		return gs_callback_err = GSASL_OK;
 #ifdef TLS
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
 	case GSASL_CB_TLS_UNIQUE:
 		if ((p = get_finish_message(tls_unique))) {
 #if GSASL_VERSION_MAJOR > 1
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p)) != GSASL_OK) {
-				logerr("gsasl_proporty_set: GSASL_CB_TLS_UNIQUE: ");
+				logerr("gsasl_property_set: GSASL_CB_TLS_UNIQUE: ");
 				logerr(gsasl_strerror(rc));
 				logerrf("\n");
 			}
 #else
 			gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p);
+			rc = GSASL_OK;
 #endif
 		} else {
 			logerrf("unable to get finish message for GSASL_CB_TLS_UNIQUE\n");
-			return GSASL_NO_CALLBACK;
+			return gs_callback_err = GSASL_NO_CALLBACK;
 		}
 		break;
 #endif
@@ -5527,13 +5513,13 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	case GSASL_CB_TLS_EXPORTER:
 		if ((p = get_finish_message(tls_exporter))) {
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK) {
-				logerr("gsasl_proporty_set: GSASL_CB_TLS_EXPORTER: ");
+				logerr("gsasl_property_set: GSASL_CB_TLS_EXPORTER: ");
 				logerr(gsasl_strerror(rc));
 				logerrf("\n");
 			}
 		} else {
 			logerrf("unable to get finish message for GSASL_CB_TLS_EXPORTER\n");
-			return GSASL_NO_CALLBACK;
+			return gs_callback_err = GSASL_NO_CALLBACK;
 		}
 		break;
 #endif
@@ -5545,14 +5531,14 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		logerrf("]\n");
 		break;
 	}
-	return rc;
+	return gs_callback_err = rc;
 }
 
 static int
 gsasl_server_auth(Gsasl_session *session)
 {
 	char           *p;
-	int             r;
+	int             r, i = 0;
 
 	/*
 	 * The ordering and the type of checks in the following loop has to
@@ -5566,6 +5552,11 @@ gsasl_server_auth(Gsasl_session *session)
 	 * uncertain.  
 	 */
 	do {
+		if (gs_callback_err)
+			return 1;
+		else
+		if (i++ > 0 && !gsasl_pw)
+			return 1;
 		r = gsasl_step64(session, authin.s, &p);
 		if (r == GSASL_NEEDS_MORE || (r == GSASL_OK && p && *p)) {
 			out("334 ");
@@ -5598,6 +5589,11 @@ auth_scram(int method)
 	cb_required = cb_disabled = 0;
 	gsasl_callback_set(gsasl_ctx, gs_callback);
 	user.len = 0;
+  
+	strnum[0] = method;
+	strnum[1] = 0;
+	if (!stralloc_copyb(&authmethod, strnum, 2))
+		die_nomem();
 	switch(method)
 	{
 	case AUTH_SCRAM_SHA1:
@@ -7434,6 +7430,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.263  2022-08-22 21:04:56+05:30  Cprogrammer
+ * handle errors in gs_callback
+ *
  * Revision 1.262  2022-08-22 11:03:21+05:30  Cprogrammer
  * removed auth_cram.h
  * altered few error messages
@@ -7665,7 +7664,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.262 2022-08-22 11:03:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.263 2022-08-22 21:04:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
