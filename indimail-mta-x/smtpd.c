@@ -56,7 +56,6 @@
 #ifdef USE_SPF
 #include "spf.h"
 #endif
-#include "auth_cram.h"
 #ifdef HAS_MYSQL
 #include "sqlmatch.h"
 #endif
@@ -82,6 +81,7 @@
 #include "wildmat.h"
 #include "haslibgsasl.h"
 #include <authmethods.h>
+#include <hmac.h>
 #ifdef HASLIBGSASL
 #include <gsasl.h>
 #include <get_scram_secrets.h>
@@ -131,7 +131,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.261 $";
+char           *revision = "$Revision: 1.262 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2162,7 +2162,7 @@ check_recipient_sql(char *rcpt, int len)
 			return (0);
 		return (*ptr);
 	}
-	out("451 Requested action aborted: database error (#4.3.2)\r\n");
+	out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
 	flush();
 	logerr("qmail-smtpd: ");
 	logerrpid();
@@ -3451,7 +3451,7 @@ pop_bef_smtp(char *mfrom)
 		if (!env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0"))
 			die_nomem();
 	} else {
-		out("451 Requested action aborted: database error (#4.3.2)\r\n");
+		out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
 		flush();
 		logerr("qmail-smtpd: ");
 		logerrpid();
@@ -3481,7 +3481,7 @@ domain_compare(char *dom1, char *dom2)
 	if (str_diff(dom1, dom2)) {
 		if (!(tmpdom1 = (*inquery) (DOMAIN_QUERY, dom1, 0)) ||
 				!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
-			out("451 Requested action aborted: database error (#4.3.2)\r\n");
+			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
 			flush();
 			logerr("qmail-smtpd: ");
 			logerrpid();
@@ -3820,7 +3820,7 @@ smtp_mail(char *arg)
 			logerr(" Invalid SENDER address: MAIL from <");
 			logerr(mailfrom.s);
 			logerrf(">\n");
-			out("553 SMTP Access denied (#5.7.1)\r\n");
+			out("553 authorization failure (#5.7.1)\r\n");
 			flush();
 			return;
 		}
@@ -3840,7 +3840,7 @@ smtp_mail(char *arg)
 				logerr(" mail from invalid user <");
 				logerr(mailfrom.s);
 				logerrf(">\n");
-				out("553 SMTP Access denied (#5.7.1)\r\n");
+				out("553 authorization failure (#5.7.1)\r\n");
 				flush();
 				sleep(5); /*- Prevent DOS */
 				return;
@@ -3849,7 +3849,7 @@ smtp_mail(char *arg)
 				logerrpid();
 				logerr(remoteip);
 				logerrf(" Database error\n");
-				out("451 Requested action aborted: database error (#4.3.2)\r\n");
+				out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
 				flush();
 				return;
 			}
@@ -3866,7 +3866,7 @@ smtp_mail(char *arg)
 				logerr(mailfrom.s);
 				logerr("> ");
 				logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
-				out("553 SMTP Access denied (#5.7.1)\r\n");
+				out("553 authorization failure (#5.7.1)\r\n");
 				flush();
 				return;
 			}
@@ -5249,7 +5249,7 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 			logerr(" mail from invalid user <");
 			logerr(u);
 			logerrf(">\n");
-			out("553 SMTP Access denied (#5.7.1)\r\n");
+			out("553 authorization failure (#5.7.1)\r\n");
 			flush();
 			sleep(5); /*- Prevent DOS */
 			return ((PASSWD *) NULL);
@@ -5258,7 +5258,7 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 			logerrpid();
 			logerr(remoteip);
 			logerrf(" Database error\n");
-			out("451 Requested action aborted: database error (#4.3.2)\r\n");
+			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
 			flush();
 			return ((PASSWD *) NULL);
 		}
@@ -5276,7 +5276,7 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 			logerr(u);
 			logerr("> ");
 			logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
-			out("553 SMTP Access denied (#5.7.1)\r\n");
+			out("553 authorization failure (#5.7.1)\r\n");
 			flush();
 			gsasl_pw = (PASSWD *) NULL;
 			return ((PASSWD *) NULL);
@@ -5286,16 +5286,15 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 		logerr("qmail-smtpd: ");
 		logerrpid();
 		logerr(remoteip);
-		logerr(" SCRAM encryption level ");
+		logerr(" SCRAM AUTH Method not supported for user ");
 		logerr(scram_method.s);
 		i = str_chr(gsasl_pw->pw_passwd, '}');
 		if (gsasl_pw->pw_passwd[i]) {
-			logerr(" not supported for ");
+			logerr(" != ");
 			substdio_put(&sserr, gsasl_pw->pw_passwd, i + 1);
-			logerrf("\n");
-		} else
-			logerrf(" not supported\n");
-		out("553 Incorrect encryption level: SMTP Access denied (#5.7.1)\r\n");
+		}
+		logerrf("\n");
+		out("553 authorization failure (#5.7.1)\r\n");
 		flush();
 		gsasl_pw = (PASSWD *) NULL;
 		return ((PASSWD *) NULL);
@@ -5309,7 +5308,7 @@ get_user_details(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 		logerr(" Unable go get secrets for <");
 		logerr(u);
 		logerrf(">\n");
-		out("553 SMTP Access denied (#5.7.1)\r\n");
+		out("553 authorization failure (#5.7.1)\r\n");
 		flush();
 		gsasl_pw = (PASSWD *) NULL;
 		return ((PASSWD *) NULL);
@@ -6124,7 +6123,7 @@ smtp_auth(char *arg)
 	case 2:/*- misuse */
 		err_authfailure(remoteip, user.len ? user.s : 0, j);
 		sleep(5);
-		out("535 authorization failed (#5.7.1)\r\n");
+		out("553 authorization failure (#5.7.1)\r\n");
 		flush();
 		break;
 	case -1:
@@ -7435,6 +7434,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.262  2022-08-22 11:03:21+05:30  Cprogrammer
+ * removed auth_cram.h
+ * altered few error messages
+ *
  * Revision 1.261  2022-08-21 19:31:25+05:30  Cprogrammer
  * fix compilation error when TLS is not defined in conf-tls
  * replace hard coded auth methods with defines in authmethods.h
@@ -7662,9 +7665,8 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.261 2022-08-21 19:31:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.262 2022-08-22 11:03:21+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidauthcramh;
 	x = sccsidwildmath;
 	x++;
 	return revision + 11;
