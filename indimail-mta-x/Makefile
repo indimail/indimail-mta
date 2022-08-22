@@ -1615,14 +1615,15 @@ ssl_timeoutio.o auto_control.o socket_ip4loopback.o \
 socket_v6loopback.o socket_v6any.o tlsarralloc.o \
 qr_digest_md5.o fn_handler.o query_skt.o tlsacheck.o \
 dns.lib socket.lib socket_v4mappedprefix.o \
-socket_tcp.o socket_tcp6.o idn2.lib
+socket_tcp.o socket_tcp6.o idn2.lib gsasl.lib
 	./load qmail-remote control.o tlsacheck.o auto_control.o \
 	timeoutconn.o tcpto.o dns.o ip.o socket_ip4loopback.o \
 	socket_v6loopback.o socket_v6any.o ipalloc.o ssl_timeoutio.o \
 	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o fn_handler.o \
 	qr_digest_md5.o query_skt.o tlsarralloc.o variables.o \
 	socket_tcp.o socket_tcp6.o tls.o $(static_option) $(QMAILLIB) \
-	$(dynamic_option) `cat dns.lib socket.lib idn2.lib` -lssl -lcrypto
+	$(dynamic_option) `cat dns.lib socket.lib idn2.lib gsasl.lib` \
+	-lssl -lcrypto
 
 qmail-remote.8: \
 qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec

@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.151 2022-08-21 19:39:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -33,6 +33,7 @@
 #include <openssl/ripemd.h>
 #include <hmac.h>
 #include <authmethods.h>
+#include <noreturn.h>
 
 #include "hastlsa.h"
 #if defined(TLS) && defined(HASTLSA)
@@ -56,6 +57,11 @@
 #include "tlsacheck.h"
 #endif
 #endif /*- #ifdef TLS */
+
+#include "haslibgsasl.h"
+#ifdef HASLIBGSASL
+#include <gsasl.h>
+#endif
 
 /* email address internationalization EAI */
 #include "hassmtputf8.h"
@@ -182,6 +188,10 @@ static char    *enable_utf8 = 0; /*- enable utf8 using SMTPUTF8 env variable */
 int             flagutf8;        /*- sender, recipient or received header has UTF8 */
 #endif
 
+#ifdef HASLIBGSASL
+static stralloc gsasl_str = { 0 };
+#endif
+
 void            temp_nomem();
 
 void
@@ -197,24 +207,20 @@ my_error(char *s1, char *s2, char *s3)
 	if (substdio_puts(subfderr, s1) == -1)
 		_exit(0);
 	if (s2) {
-		if (substdio_puts(subfderr, ": ") == -1)
-			_exit(0);
-		if (substdio_puts(subfderr, s2) == -1)
+		if (substdio_put(subfderr, ": ", 2) == -1 ||
+				substdio_puts(subfderr, s2) == -1)
 			_exit(0);
 	}
 	if (s3) {
-		if (substdio_puts(subfderr, ": ") == -1)
-			_exit(0);
-		if (substdio_puts(subfderr, s3) == -1)
+		if (substdio_put(subfderr, ": ", 2) == -1 ||
+				substdio_puts(subfderr, s3) == -1)
 			_exit(0);
 	}
-	if (substdio_puts(subfderr, ": ") == -1)
+	if (substdio_put(subfderr, ": ", 2) == -1 ||
+			substdio_puts(subfderr, error_str(errno)) == -1 ||
+			substdio_put(subfderr, "\n", 1) == -1 ||
+			substdio_flush(subfderr) == -1)
 		_exit(0);
-	if (substdio_puts(subfderr, error_str(errno)) == -1)
-		_exit(0);
-	if (substdio_puts(subfderr, "\n") == -1)
-		_exit(0);
-	substdio_flush(subfderr);
 }
 
 /*-
@@ -319,29 +325,6 @@ zero()
 		_exit(0);
 }
 
-/*-
- * RETURN VALUES:
- * succ  1 - success
- * succ  0 - perm failure
- * succ -1 - temp failure
- * execute user definded script/executable using run_script()
- */
-void
-zerodie(char *s1, int succ)
-{
-#ifdef TLS
-	if (ssl) {
-		while (SSL_shutdown(ssl) == 0)
-			usleep(100);
-		SSL_free(ssl);
-		ssl = 0;
-	}
-#endif
-	zero();
-	substdio_flush(subfdoutsmall);
-	_exit(run_script(s1 ? s1[0] : 'Z', succ));
-}
-
 void
 outsafe(stralloc *sa)
 {
@@ -357,6 +340,30 @@ outsafe(stralloc *sa)
 		if (substdio_put(subfdoutsmall, &ch, 1) == -1)
 			_exit(0);
 	}
+}
+
+extern void _exit (int __status) __attribute__ ((__noreturn__));
+/*-
+ * RETURN VALUES:
+ * succ  1 - success
+ * succ  0 - perm failure
+ * succ -1 - temp failure
+ * execute user definded script/executable using run_script()
+ */
+no_return void
+zerodie(char *s1, int succ)
+{
+#ifdef TLS
+	if (ssl) {
+		while (SSL_shutdown(ssl) == 0)
+			usleep(100);
+		SSL_free(ssl);
+		ssl = 0;
+	}
+#endif
+	zero();
+	substdio_flush(subfdoutsmall);
+	_exit(run_script(s1 ? s1[0] : 'Z', succ));
 }
 
 /*
@@ -400,18 +407,18 @@ setsmtptext(int code, int type)
 	return (0);
 }
 
-void
+no_return void
 temp_nomem()
 {
 	out("ZOut of memory. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, "Out of memory. (#4.3.0)"))
-		temp_nomem();
+		zerodie("Z", -1);
 	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_noip()
 {
 	if (!controldir) {
@@ -430,7 +437,7 @@ temp_noip()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_oserr()
 {
 	out("ZSystem resources temporarily unavailable. (#4.3.0)\n");
@@ -441,7 +448,7 @@ temp_oserr()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_write()
 {
 	out("ZUnable to write message. (#4.3.0)\n");
@@ -452,7 +459,7 @@ temp_write()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_read()
 {
 	out("ZUnable to read message. (#4.3.0)\n");
@@ -463,7 +470,7 @@ temp_read()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_dnscanon()
 {
 	out("ZCNAME lookup failed temporarily. (#4.4.3)\n");
@@ -474,7 +481,7 @@ temp_dnscanon()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_dns()
 {
 	out("ZSorry, I couldn't find any host by that name. (#4.1.2)\n");
@@ -485,7 +492,7 @@ temp_dns()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_dns_rr()
 {
 	out("ZSorry, I couldn't find TLSA RR for this host. (#4.1.2)\n");
@@ -496,7 +503,7 @@ temp_dns_rr()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_chdir()
 {
 	out("ZUnable to switch to home directory. (#4.3.0)\n");
@@ -507,7 +514,7 @@ temp_chdir()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_control(char *arg1, char *arg2)
 {
 	out("Z");
@@ -528,7 +535,7 @@ temp_control(char *arg1, char *arg2)
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 perm_partialline()
 {
 	char           *r = "DSMTP cannot transfer messages with partial final lines. (#5.6.2)\n";
@@ -542,7 +549,7 @@ perm_partialline()
 	zerodie(r, 0);
 }
 
-void
+no_return void
 perm_usage()
 {
 	char           *r = "DI (qmail-remote) was invoked improperly. (#5.3.5)\n";
@@ -556,7 +563,7 @@ perm_usage()
 	zerodie(r, 0);
 }
 
-void
+no_return void
 perm_dns()
 {
 	char           *r = "DSorry, I couldn't find any host named ";
@@ -573,7 +580,7 @@ perm_dns()
 	zerodie(r, 0);
 }
 
-void
+no_return void
 perm_nomx()
 {
 	char           *r = "DSorry, I couldn't find a mail exchanger or IP address. (#5.4.4)\n";
@@ -587,7 +594,7 @@ perm_nomx()
 	zerodie(r, 0);
 }
 
-void
+no_return void
 perm_ambigmx()
 {
 	char           *r = "DSorry. Although I'm listed as a best-preference MX or A for that host,\nit isn't in my ";
@@ -633,14 +640,13 @@ outhost()
 		temp_nomem();
 	if (substdio_put(subfdoutsmall, x, len) == -1)
 		_exit(0);
-	if (!env_put2("SMTPHOST", rhost.s)) {
+	if (!env_put2("SMTPHOST", rhost.s))
 		temp_nomem();
-	}
 }
 
 int             flagcritical = 0;
 
-void
+no_return void
 dropped()
 {
 	char            strnum[FMT_ULONG];
@@ -699,7 +705,7 @@ temp_noconn_out(char *s)
 	return;
 }
 
-void
+no_return void
 temp_noconn(stralloc *h, char *ip, int port_num)
 {
 	char            strnum[FMT_ULONG];
@@ -719,15 +725,15 @@ temp_noconn(stralloc *h, char *ip, int port_num)
 		strnum[fmt_ulong(strnum, port_num)] = 0;
 		temp_noconn_out(strnum);
 		temp_noconn_out(" bind IP [");
-		substdio_put(subfdoutsmall, outgoingip.s, outgoingip.len);
+		if (substdio_put(subfdoutsmall, outgoingip.s, outgoingip.len) == -1)
+			_exit(0);
 		temp_noconn_out("]");
 		if (!stralloc_catb(&smtptext, outgoingip.s, outgoingip.len) ||
 				!stralloc_copys(&rhost, ip) ||
 				!stralloc_0(&rhost))
 			temp_nomem();
-		if (!env_put2("SMTPHOST", rhost.s)) {
+		if (!env_put2("SMTPHOST", rhost.s))
 			temp_nomem();
-		}
 		alloc_free(ip);
 	}
 	temp_noconn_out(". (#4.4.1)\n");
@@ -736,7 +742,7 @@ temp_noconn(stralloc *h, char *ip, int port_num)
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 temp_qmtp_noconn(stralloc *h, char *ip, int port_num)
 {
 	char            strnum[FMT_ULONG];
@@ -896,16 +902,10 @@ ehlo()
 	ehlokw.len = 0;
 	if (protocol_t == 'q')		/*- QMTP */
 		return 0;
-	if (substdio_puts(&smtpto, "EHLO ") == -1)
-		temp_write();
-	else
-	if (substdio_put(&smtpto, helohost.s, helohost.len) == -1)
-		temp_write();
-	else
-	if (substdio_puts(&smtpto, "\r\n") == -1)
-		temp_write();
-	else
-	if (substdio_flush(&smtpto) == -1)
+	if (substdio_put(&smtpto, "EHLO ", 5) == -1 ||
+			substdio_put(&smtpto, helohost.s, helohost.len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
 		temp_write();
 	if ((code = smtpcode()) != 250)
 		return code;
@@ -982,10 +982,11 @@ outsmtptext()
  * code =  xxx - smtp code
  * code =    0 - temporary failure
  */
-void
+no_return void
 quit(char *prepend, char *append, int code, int die)
 {
-	substdio_putsflush(&smtpto, "QUIT\r\n");
+	if (substdio_putsflush(&smtpto, "QUIT\r\n") == -1)
+		temp_write();
 	/*- waiting for remote side is just too ridiculous */
 	out(prepend);
 	outhost();
@@ -1003,9 +1004,10 @@ blast()
 	char            in[4096], out[4096 * 2 + 1];
 
 	for (r = 0; r < qqeh.len; r++) {
-		if (qqeh.s[r] == '\n')
-			substdio_put(&smtpto, "\r", 1);
-		substdio_put(&smtpto, qqeh.s + r, 1);
+		if (qqeh.s[r] == '\n' && substdio_put(&smtpto, "\r", 1) == -1)
+				temp_write();
+		if (substdio_put(&smtpto, qqeh.s + r, 1) == -1)
+			temp_write();
 	}
 	for (sol = 1;;) {
 		if (!(r = substdio_get(&ssin, in, sizeof(in))))
@@ -1029,12 +1031,14 @@ blast()
 				out[j++] = in[i++];
 			} /*- while (i < r) */
 		} /*- for (i = o = 0; i < r; ) */
-		substdio_put(&smtpto, out, j);
+		if (substdio_put(&smtpto, out, j) == -1)
+			temp_write();
 	}
 	if (!sol)
 		perm_partialline();
 	flagcritical = 1;
-	substdio_put(&smtpto, ".\r\n", 3);
+	if (substdio_put(&smtpto, ".\r\n", 3) == -1)
+		temp_write();
 	substdio_flush(&smtpto);
 }
 
@@ -1164,7 +1168,7 @@ char           *partner_fqdn = 0;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define SSL_ST_BEFORE 0x4000
 #endif
-void
+no_return void
 tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *saptr)
 {
 	char            ch;
@@ -1196,11 +1200,13 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *saptr)
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	state = ssl ? SSL_get_state(ssl) : SSL_ST_BEFORE;
 	if ((state & TLS_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
-		substdio_putsflush(&smtpto, "QUIT\r\n");
+		if (substdio_putsflush(&smtpto, "QUIT\r\n") == -1)
+			temp_write();
 #else
 	state = ssl ? ssl->state : SSL_ST_BEFORE;
 	if ((state & SSL_ST_OK) || (!smtps && (state & SSL_ST_BEFORE)))
-		substdio_putsflush(&smtpto, "QUIT\r\n");
+		if (substdio_putsflush(&smtpto, "QUIT\r\n") == -1)
+			temp_write();
 #endif
 	out(ssl ? "; connected to " : "; connecting to ");
 	outhost();
@@ -1571,8 +1577,8 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	} else
 		SSL_CTX_free(ctx);
 
-	if (!smtps)
-		substdio_putsflush(&smtpto, "STARTTLS\r\n");
+	if (!smtps && substdio_putsflush(&smtpto, "STARTTLS\r\n") == -1)
+		temp_write();
 
 	/*- while the server is preparing a response, do something else */
 	if (!ciphers) {
@@ -1625,7 +1631,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 }
 
 #ifdef HASTLSA
-void
+no_return void
 tlsa_error(char *str)
 {
 	out("Z");
@@ -1926,18 +1932,23 @@ xtext(stralloc *ptr, char *s, int len)
 void
 mailfrom(int use_size)
 {
-	substdio_puts(&smtpto, "MAIL FROM:<");
-	substdio_put(&smtpto, smtp_sender.s, smtp_sender.len);
+	if (substdio_put(&smtpto, "MAIL FROM:<", 11) == -1 ||
+			substdio_put(&smtpto, smtp_sender.s, smtp_sender.len) == -1)
+		temp_write();
 	if (use_size) {
-		substdio_put(&smtpto, "> SIZE=", 7);
-		substdio_puts(&smtpto, msgsize);
+		if (substdio_put(&smtpto, "> SIZE=", 7) == -1 ||
+				substdio_puts(&smtpto, msgsize) == -1)
+			temp_write();
 	} else
-		substdio_put(&smtpto, ">", 1);
+	if (substdio_put(&smtpto, ">", 1) == -1)
+		temp_write();
 #ifdef SMTPUTF8
-	if (enable_utf8 && smtputf8 && flagutf8)
-		substdio_put(&smtpto, " SMTPUTF8", 9);
+	if (enable_utf8 && smtputf8 && flagutf8 &&
+			substdio_put(&smtpto, " SMTPUTF8", 9) == -1)
+			temp_write();
 #endif
-	substdio_put(&smtpto, "\r\n", 2);
+	if (substdio_put(&smtpto, "\r\n", 2) == -1)
+		temp_write();
 }
 
 void
@@ -1945,22 +1956,28 @@ mailfrom_xtext(int use_size)
 {
 	if (!xtext(&xuser, user.s, user.len))
 		temp_nomem();
-	substdio_puts(&smtpto, "MAIL FROM:<");
-	substdio_put(&smtpto, smtp_sender.s, smtp_sender.len);
+	if (substdio_put(&smtpto, "MAIL FROM:<", 11) == -1 ||
+			substdio_put(&smtpto, smtp_sender.s, smtp_sender.len) == -1)
+		temp_write();
 	if (use_size) {
-		substdio_put(&smtpto, "> SIZE=", 7);
-		substdio_puts(&smtpto, msgsize);
-		substdio_put(&smtpto, " AUTH=<", 7);
+		if (substdio_put(&smtpto, "> SIZE=", 7) == -1 ||
+				substdio_puts(&smtpto, msgsize) == -1 ||
+				substdio_put(&smtpto, " AUTH=<", 7) == -1)
+			temp_write();
 	} else
-		substdio_put(&smtpto, "> AUTH=<", 8);
-	substdio_put(&smtpto, xuser.s, xuser.len);
-	substdio_put(&smtpto, ">", 1);
+	if (substdio_put(&smtpto, "> AUTH=<", 8) == -1)
+		temp_write();
+	if (substdio_put(&smtpto, xuser.s, xuser.len) == -1 ||
+			substdio_put(&smtpto, ">", 1) == -1)
+		temp_write();
 #ifdef SMTPUTF8
-	if (enable_utf8 && smtputf8 && flagutf8)
-		substdio_put(&smtpto, " SMTPUTF8", 9);
+	if (enable_utf8 && smtputf8 && flagutf8 &&
+			substdio_put(&smtpto, " SMTPUTF8", 9) == -1)
+			temp_write();
 #endif
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
 }
 
 static char     hextab[] = "0123456789abcdef";
@@ -2013,8 +2030,9 @@ auth_digest_md5(int use_size)
 	int             code;
 	char            z[IPFMT];
 
-	substdio_puts(&smtpto, "AUTH DIGEST-MD5\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, "AUTH DIGEST-MD5\r\n", 17) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (AUTH DIGEST-MD5).", code, -1);
 	if ((i = str_chr(smtptext.s + 5, '\n')) > 0) {	/*- Challenge */
@@ -2089,13 +2107,15 @@ auth_digest_md5(int use_size)
 		temp_nomem();
 	if (b64encode(&slop, &auth))
 		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
-	substdio_put(&smtpto, auth.s, auth.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
 	if ((code = smtpcode()) != 235)
 		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
 	mailfrom_xtext(use_size);
@@ -2112,50 +2132,57 @@ auth_cram(int type, int use_size)
 	{
 	case AUTH_CRAM_MD5:
 		iter = MD5_DIGEST_LENGTH;
-		substdio_puts(&smtpto, "AUTH CRAM-MD5\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "AUTH CRAM-MD5\r\n", 15) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5).", code, -1);
 		break;
 	case AUTH_CRAM_RIPEMD:
 		iter = RIPEMD160_DIGEST_LENGTH;
-		substdio_puts(&smtpto, "AUTH CRAM-RIPEMD\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "AUTH CRAM-RIPEMD\r\n", 18) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD).", code, -1);
 		break;
 	case AUTH_CRAM_SHA1:
 		iter = SHA_DIGEST_LENGTH;
-		substdio_puts(&smtpto, "AUTH CRAM-SHA1\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "AUTH CRAM-SHA1\r\n", 16) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA1).", code, -1);
 		break;
 	case AUTH_CRAM_SHA224:
 		iter = SHA224_DIGEST_LENGTH;
-		substdio_puts(&smtpto, "AUTH CRAM-SHA224\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "AUTH CRAM-SHA224\r\n", 18) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA224).", code, -1);
 		break;
 	case AUTH_CRAM_SHA256:
 		iter = SHA256_DIGEST_LENGTH;
-		substdio_puts(&smtpto, "AUTH CRAM-SHA256\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "AUTH CRAM-SHA256\r\n", 18) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA256).", code, -1);
 		break;
 	case AUTH_CRAM_SHA384:
 		iter = SHA384_DIGEST_LENGTH;
-		substdio_puts(&smtpto, "AUTH CRAM-SHA384\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "AUTH CRAM-SHA384\r\n", 18) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA384).", code, -1);
 		break;
 	case AUTH_CRAM_SHA512:
 		iter = SHA512_DIGEST_LENGTH;
-		substdio_puts(&smtpto, "AUTH CRAM-SHA512\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "AUTH CRAM-SHA512\r\n", 18) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		if ((code = smtpcode()) != 334)
 			quit("ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA512).", code, -1);
 		break;
@@ -2209,8 +2236,9 @@ auth_cram(int type, int use_size)
 
 	if (b64encode(&slop, &auth))
 		quit("ZConnected to ", " but unable to base64encode username+digest.", -1, -1);
-	substdio_put(&smtpto, auth.s, auth.len);
-	substdio_puts(&smtpto, "\r\n");
+	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1)
+		temp_write();
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 235)
 		quit("ZConnected to ", " but authentication was rejected (username+digest)", code, -1);
@@ -2222,8 +2250,9 @@ auth_plain(int use_size)
 {
 	int             code;
 
-	substdio_puts(&smtpto, "AUTH PLAIN\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, "AUTH PLAIN\r\n", 12) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (AUTH PLAIN).", code, -1);
 	if (!stralloc_cat(&plain, &smtp_sender) || /*- Mail From: <auth-id> */
@@ -2235,9 +2264,10 @@ auth_plain(int use_size)
 		temp_nomem();
 	if (b64encode(&plain, &auth))
 		quit("ZConnected to ", " but unable to base64encode (plain).", -1, -1);
-	substdio_put(&smtpto, auth.s, auth.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_nomem();
 	if ((code = smtpcode()) != 235)
 		quit("ZConnected to ", " but authentication was rejected (plain).", code, -1);
 	mailfrom_xtext(use_size);
@@ -2248,8 +2278,9 @@ auth_login(int use_size)
 {
 	int             code;
 
-	substdio_puts(&smtpto, "AUTH LOGIN\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, "AUTH LOGIN\r\n", 12) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (AUTH LOGIN).", code, -1);
 
@@ -2257,9 +2288,10 @@ auth_login(int use_size)
 		temp_nomem();
 	if (b64encode(&user, &auth))
 		quit("ZConnected to ", " but unable to base64encode user.", -1, -1);
-	substdio_put(&smtpto, auth.s, auth.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_nomem();
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (username).", code, -1);
 
@@ -2267,13 +2299,195 @@ auth_login(int use_size)
 		temp_nomem();
 	if (b64encode(&pass, &auth))
 		quit("ZConnected to ", " but unable to base64encode pass.", -1, -1);
-	substdio_put(&smtpto, auth.s, auth.len);
-	substdio_puts(&smtpto, "\r\n");
-	substdio_flush(&smtpto);
+	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_nomem();
 	if ((code = smtpcode()) != 235)
 		quit("ZConnected to ", " but authentication was rejected (password)", code, -1);
 	mailfrom_xtext(use_size);
 }
+
+#ifdef HASLIBGSASL
+void
+remove_newline()
+{
+	int             i;
+
+	if (!stralloc_copyb(&gsasl_str, smtptext.s + 4, smtptext.len - 4))
+		temp_nomem();
+	i = str_rchr(gsasl_str.s, '\r');
+	if (gsasl_str.s[i])
+		gsasl_str.s[i] = 0;
+	else {
+		i = str_rchr(gsasl_str.s, '\n');
+		if (gsasl_str.s[i])
+			gsasl_str.s[i] = 0;
+	}
+	return;
+}
+
+static void
+gsasl_authenticate(Gsasl_session *session, char *mech)
+{
+	char           *p;
+	int             rc, code;
+
+	if (substdio_put(&smtpto, "AUTH ", 5) == -1 ||
+			substdio_puts(&smtpto, mech) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
+	if ((code = smtpcode()) != 334) {
+		if (!stralloc_copyb(&gsasl_str, " but authentication was rejected (AUTH ", 39) ||
+				!stralloc_cats(&gsasl_str, mech) ||
+				!stralloc_catb(&gsasl_str, ").", 2) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, code, -1);
+	}
+
+	if (!stralloc_0(&gsasl_str))
+		temp_nomem();
+	/*- This loop mimics a protocol where the client send data first. */
+	do {
+		/* -
+		 * skip smtp code in gsasl_str.s (3 bytes + 1 sp)
+		 * Generate client output.
+		 */
+		rc = gsasl_step64(session, gsasl_str.s, &p);
+		if (rc == GSASL_NEEDS_MORE || rc == GSASL_OK) {
+			if (substdio_puts(&smtpto, p) == -1 ||
+					substdio_put(&smtpto, "\r\n", 2) == -1 ||
+					substdio_flush(&smtpto) == -1)
+				temp_write();
+			gsasl_free(p);
+		}
+		if (rc == GSASL_NEEDS_MORE) {
+			/*
+			 * If the client need more data from server, get it here. 
+			 */
+			if ((code = smtpcode()) != 334) {
+				if (!stralloc_copyb(&gsasl_str, " but authentication was rejected (AUTH ", 39) ||
+						!stralloc_cats(&gsasl_str, mech) ||
+						!stralloc_catb(&gsasl_str, ").", 2) ||
+						!stralloc_0(&gsasl_str))
+					temp_nomem();
+				quit("ZConnected to ", gsasl_str.s, code, -1);
+			}
+			remove_newline();
+		}
+	} while (rc == GSASL_NEEDS_MORE);
+	if (rc != GSASL_OK) {
+		if (!stralloc_copyb(&gsasl_str, " but authentication failed: ", 28) ||
+				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, -1, 1);
+	}
+	/*
+	 * The client is done.  Here you would typically check if the server
+	 * let the client in.  If not, you could try again. 
+	 */
+	if ((code = smtpcode()) != 235) {
+		if (!stralloc_copyb(&gsasl_str, " but authentication was rejected (AUTH ", 39) ||
+				!stralloc_cats(&gsasl_str, mech) ||
+				!stralloc_catb(&gsasl_str, ").", 2) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, code, -1);
+	}
+}
+
+static void
+client(Gsasl *gsasl_ctx, int method)
+{
+	Gsasl_session  *session;
+	const char     *mech;
+	int             i, rc;
+	char            strnum[FMT_ULONG];
+
+	switch (method)
+	{
+	case AUTH_SCRAM_SHA1:
+		mech = "SCRAM-SHA-1";
+		break;
+	case AUTH_SCRAM_SHA256:
+		mech = "SCRAM-SHA-256";
+		break;
+	case AUTH_SCRAM_SHA1_PLUS:
+		mech = "SCRAM-SHA-1-PLUS";
+		break;
+	case AUTH_SCRAM_SHA256_PLUS:
+		mech = "SCRAM-SHA-256-PLUS";
+		break;
+	default:
+		strnum[i = fmt_int(strnum, method)] = 0;
+		if (!stralloc_copyb(&gsasl_str, " but got unknown method=", 24) ||
+				!stralloc_catb(&gsasl_str, strnum, i) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, -1, 1);
+		break;
+	}
+	/* Create new authentication session.  */
+	if ((rc = gsasl_client_start(gsasl_ctx, mech, &session)) != GSASL_OK) {
+		if (!stralloc_copyb(&gsasl_str, " failed to initialize client: ", 30) ||
+				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, -1, 1);
+	}
+
+	/*
+	 * Set username and password in session handle. This info will be
+	 * lost when this session is deallocated below.  
+	 */
+	rc = gsasl_property_set(session, GSASL_AUTHID, user.s);
+	if (rc != GSASL_OK) {
+		if (!stralloc_copyb(&gsasl_str, " failed to set username: ", 25) ||
+				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, -1, 1);
+		return;
+	}
+	rc = gsasl_property_set(session, GSASL_PASSWORD, pass.s);
+	if (rc != GSASL_OK) {
+		if (!stralloc_copyb(&gsasl_str, " failed to set password: ", 25) ||
+				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, -1, 1);
+		return;
+	}
+	gsasl_authenticate(session, mech);
+	/* Cleanup.  */
+	gsasl_finish(session);
+}
+
+void
+auth_scram(int method, int use_size)
+{
+	Gsasl          *gsasl_ctx = NULL;
+	int             rc;
+
+	/* Initialize library. */
+	if ((rc = gsasl_init(&gsasl_ctx)) != GSASL_OK) {
+		if (!stralloc_copyb(&gsasl_str, " failed to initialize libgsasl: ", 32) ||
+				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
+				!stralloc_0(&gsasl_str))
+			temp_nomem();
+		quit("ZConnected to ", gsasl_str.s, -1, 1);
+	}
+	/* Do it.  */
+	client(gsasl_ctx, method);
+	/* Cleanup.  */
+	gsasl_done(gsasl_ctx);
+	mailfrom_xtext(use_size);
+	return;
+}
+#endif
 
 void
 smtp_auth(char *type, int use_size)
@@ -2283,6 +2497,11 @@ smtp_auth(char *type, int use_size)
 					cram_rmd_supp = 0, digest_md5_supp = 0, secure_auth;
 	char           *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224,
 				   *no_cram_sha256, *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
+#ifdef HASLIBGSASL
+	int             scram_sha1_supp = 0, scram_sha256_supp = 0, scram_sha1_plus_supp = 0,
+					scram_sha256_plus_supp = 0;
+	char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha1_plus, *no_scram_sha256_plus;
+#endif
 
 	if (!type) {
 		mailfrom(use_size);
@@ -2320,6 +2539,20 @@ smtp_auth(char *type, int use_size)
 			else
 			if (case_starts(ptr - 4, "CRAM-MD5"))
 				cram_md5_supp = 1;
+#ifdef HASLIBGSASL
+			else
+			if (case_starts(ptr - 5, "SCRAM-SHA-1-PLUS"))
+				scram_sha1_plus_supp = 1;
+			else
+			if (case_starts(ptr - 5, "SCRAM-SHA-1"))
+				scram_sha1_supp = 1;
+			else
+			if (case_starts(ptr - 5, "SCRAM-SHA-256-PLUS"))
+				scram_sha256_plus_supp = 1;
+			else
+			if (case_starts(ptr - 5, "SCRAM-SHA-256"))
+				scram_sha256_supp = 1;
+#endif
 		} else
 		if (*ptr == 'L') {
 			if (case_starts(ptr, "LOGIN"))
@@ -2346,6 +2579,33 @@ smtp_auth(char *type, int use_size)
 	no_cram_sha512 = env_get("DISABLE_CRAM_SHA512");
 	no_cram_ripemd = env_get("DISABLE_CRAM_RIPEMD");
 	no_digest_md5 = env_get("DISABLE_DIGEST_MD5");
+#ifdef HASLIBGSASL
+	no_scram_sha1 = env_get("DISABLE_SCRAM_SHA1");
+	no_scram_sha256 = env_get("DISABLE_SCRAM_SHA256");
+	no_scram_sha1_plus = env_get("DISABLE_SCRAM_SHA1_PLUS");
+	no_scram_sha256_plus = env_get("DISABLE_SCRAM_SHA256_PLUS");
+#endif
+#ifdef HASLIBGSASL
+	if (scram_sha1_supp || scram_sha256_supp ||
+			scram_sha1_plus_supp || scram_sha256_plus_supp) {
+		if (scram_sha256_plus_supp && !case_diffs(type, "SCRAM-SHA-256-PLUS")) {
+			auth_scram(AUTH_SCRAM_SHA256_PLUS, use_size);
+			return;
+		} else
+		if (scram_sha1_plus_supp && !case_diffs(type, "SCRAM-SHA-1-PLUS")) {
+			auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
+			return;
+		} else
+		if (scram_sha256_supp && !case_diffs(type, "SCRAM-SHA-256")) {
+			auth_scram(AUTH_SCRAM_SHA256, use_size);
+			return;
+		} else
+		if (scram_sha1_supp && !case_diffs(type, "SCRAM-SHA-1")) {
+			auth_scram(AUTH_SCRAM_SHA1, use_size);
+			return;
+		}
+	}
+#endif
 	if (login_supp && !case_diffs(type, "LOGIN")) {
 		auth_login(use_size);
 		return;
@@ -2387,6 +2647,24 @@ smtp_auth(char *type, int use_size)
 		return;
 	} else
 	if (!*type) {
+#ifdef HASLIBGSASL
+		if (!no_scram_sha256_plus && scram_sha256_plus_supp) {
+			auth_scram(AUTH_SCRAM_SHA256_PLUS, use_size);
+			return;
+		} else
+		if (!no_scram_sha1_plus && scram_sha1_plus_supp) {
+			auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
+			return;
+		} else
+		if (!no_scram_sha256 && scram_sha256_supp) {
+			auth_scram(AUTH_SCRAM_SHA256, use_size);
+			return;
+		} else
+		if (!no_scram_sha1 && scram_sha1_supp) {
+			auth_scram(AUTH_SCRAM_SHA1, use_size);
+			return;
+		}
+#endif
 		if (!no_cram_sha512 && cram_sha512_supp) {
 			auth_cram(AUTH_CRAM_SHA512, use_size);
 			return;
@@ -2429,12 +2707,11 @@ smtp_auth(char *type, int use_size)
 		}
 	}
 	err_authprot();
-	_exit(0);
 	mailfrom(use_size);
 	return;
 }
 
-void
+no_return void
 temp_proto()
 {
 	out("Zrecipient did not talk proper QMTP (#4.3.0)\n");
@@ -2468,7 +2745,7 @@ qmtp_priority(int pref)
 }
 #endif
 
-void
+no_return void
 qmtp(stralloc *h, char *ip, int port_num)
 {
 	struct stat     st;
@@ -2484,34 +2761,40 @@ qmtp(stralloc *h, char *ip, int port_num)
 	/*-
  	 * the following code was substantially taken from serialmail'ss serialqmtp.c
  	 */
-	substdio_put(&smtpto, num, fmt_ulong(num, len + 1));
-	substdio_put(&smtpto, ":\n", 2);
+	if (substdio_put(&smtpto, num, fmt_ulong(num, len + 1)) == -1 ||
+			substdio_put(&smtpto, ":\n", 2) == -1)
+		temp_write();
 	while (len > 0) {
 		if ((n = substdio_feed(&ssin)) <= 0)
 			_exit(32);	/*- wise guy again */
 		x = substdio_PEEK(&ssin);
-		substdio_put(&smtpto, x, n);
+		if (substdio_put(&smtpto, x, n) == -1)
+			temp_write();
 		substdio_SEEK(&ssin, n);
 		len -= n;
 	}
-	substdio_put(&smtpto, ",", 1);
 	len = qmtp_sender.len;
-	substdio_put(&smtpto, num, fmt_ulong(num, len));
-	substdio_put(&smtpto, ":", 1);
-	substdio_put(&smtpto, qmtp_sender.s, qmtp_sender.len);
-	substdio_put(&smtpto, ",", 1);
+	if (substdio_put(&smtpto, ",", 1) == -1 ||
+			substdio_put(&smtpto, num, fmt_ulong(num, len)) == -1 ||
+			substdio_put(&smtpto, ":", 1) == -1 ||
+			substdio_put(&smtpto, qmtp_sender.s, qmtp_sender.len) == -1 ||
+			substdio_put(&smtpto, ",", 1) == -1)
+		temp_write();
 	len = 0;
 	for (i = 0; i < qmtp_reciplist.len; ++i)
 		len += fmt_ulong(num, qmtp_reciplist.sa[i].len) + 1 + qmtp_reciplist.sa[i].len + 1;
-	substdio_put(&smtpto, num, fmt_ulong(num, len));
-	substdio_put(&smtpto, ":", 1);
+	if (substdio_put(&smtpto, num, fmt_ulong(num, len)) == -1 ||
+			substdio_put(&smtpto, ":", 1) == -1)
+		temp_write();
 	for (i = 0; i < qmtp_reciplist.len; ++i) {
-		substdio_put(&smtpto, num, fmt_ulong(num, qmtp_reciplist.sa[i].len));
-		substdio_put(&smtpto, ":", 1);
-		substdio_put(&smtpto, qmtp_reciplist.sa[i].s, qmtp_reciplist.sa[i].len);
-		substdio_put(&smtpto, ",", 1);
+		if (substdio_put(&smtpto, num, fmt_ulong(num, qmtp_reciplist.sa[i].len)) == -1 ||
+				substdio_put(&smtpto, ":", 1) == -1 ||
+				substdio_put(&smtpto, qmtp_reciplist.sa[i].s, qmtp_reciplist.sa[i].len) == -1 ||
+				substdio_put(&smtpto, ",", 1) == -1)
+			temp_write();
 	}
-	substdio_put(&smtpto, ",", 1);
+	if (substdio_put(&smtpto, ",", 1) == -1)
+		temp_write();
 	substdio_flush(&smtpto);
 	flagallok = 1;
 	for (i = 0; i < qmtp_reciplist.len; ++i) {
@@ -2576,7 +2859,7 @@ qmtp(stralloc *h, char *ip, int port_num)
 }
 
 #if defined(TLS) && defined(HASTLSA)
-void
+no_return void
 timeoutfn()
 {
 	out("Zerror connecting to DANE verification service. (#4.4.2)\n");
@@ -2587,7 +2870,7 @@ timeoutfn()
 	zerodie("Z", -1);
 }
 
-void
+no_return void
 err_tmpfail(char *arg)
 {
 	out("ZTemporory failure with DANE verification service [");
@@ -2713,10 +2996,11 @@ smtp()
 	if (!use_auth_smtp) {
 		if (code >= 500) {
 			is_esmtp = 0;
-			substdio_puts(&smtpto, "HELO ");
-			substdio_put(&smtpto, helohost.s, helohost.len);
-			substdio_puts(&smtpto, "\r\n");
-			substdio_flush(&smtpto);
+			if (substdio_put(&smtpto, "HELO ", 5) == -1 ||
+					substdio_put(&smtpto, helohost.s, helohost.len) == -1 ||
+					substdio_put(&smtpto, "\r\n", 2) == -1 ||
+					substdio_flush(&smtpto) == -1)
+				temp_write();
 			code = smtpcode();
 		}
 	}
@@ -2771,10 +3055,11 @@ smtp()
 		quit("ZConnected to ", " but sender was rejected", code, -1);
 	flagbother = 0;
 	for (i = 0; i < smtp_reciplist.len; ++i) {
-		substdio_puts(&smtpto, "RCPT TO:<");
-		substdio_put(&smtpto, smtp_reciplist.sa[i].s, smtp_reciplist.sa[i].len);
-		substdio_puts(&smtpto, ">\r\n");
-		substdio_flush(&smtpto);
+		if (substdio_put(&smtpto, "RCPT TO:<", 9) == -1 ||
+				substdio_put(&smtpto, smtp_reciplist.sa[i].s, smtp_reciplist.sa[i].len) == -1 ||
+				substdio_put(&smtpto, ">\r\n", 3) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
 		code = smtpcode();
 		if (code >= 500) {
 			out("hFrom: <");
@@ -2809,15 +3094,17 @@ smtp()
 	}
 	if (!flagbother)
 		quit("DGiving up on ", "", code, 1);
-	substdio_putsflush(&smtpto, "DATA\r\n");
+	if (substdio_putsflush(&smtpto, "DATA\r\n") == -1)
+		temp_write();
 	code = smtpcode();
 	if (code >= 500)
 		quit("D", " failed on DATA command", code, 1);
 	if (code >= 400)
 		quit("Z", " failed on DATA command", code, -1);
 #ifdef SMTPUTF8
-	if (enable_utf8 && header.len)
-		substdio_put(&smtpto, header.s, header.len);
+	if (enable_utf8 && header.len &&
+			substdio_put(&smtpto, header.s, header.len) == -1)
+		temp_write();
 #endif
 	blast();
 	code = smtpcode();
@@ -3227,7 +3514,7 @@ getcontrols()
 #if BATV
 stralloc        newsender = { 0 };
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
-void
+no_return void
 temp_batv(char *arg)
 {
 	out("Zerror verifying batv signature. (#4.3.0)\n");
@@ -3471,8 +3758,12 @@ main(int argc, char **argv)
 					relayhost[i + j + 1] = 0;
 					if (relayhost[i + 1] && relayhost[i + j + 2]) {	/*- both user and password are present */
 						if (!stralloc_copys(&user, relayhost + i + 1) ||
-								!stralloc_copys(&pass, relayhost + i + j + 2))
+								!stralloc_0(&user) ||
+								!stralloc_copys(&pass, relayhost + i + j + 2) ||
+								!stralloc_0(&pass))
 							temp_nomem();
+						user.len--;
+						pass.len--;
 					}
 				} else
 					use_auth_smtp = 0;
@@ -3722,18 +4013,13 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.151 2022-08-21 19:39:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.150 2022-05-18 13:30:05+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
- * Revision 1.151  2022-08-21 19:39:22+05:30  Cprogrammer
- * fix compilation error when TLS is not defined in conf-tls
- * replace hard coded auth methods with defines in authmethods.h
- * added CRAM-SHA224, CRAM-SHA384, CRAM-SHA512 AUTH methods
- *
  * Revision 1.150  2022-05-18 13:30:05+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
