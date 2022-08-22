@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.152 2022-08-22 22:23:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.153 2022-08-23 00:05:38+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -61,6 +61,7 @@
 #include "haslibgsasl.h"
 #ifdef HASLIBGSASL
 #include <gsasl.h>
+#include <openssl/ssl.h>
 #endif
 
 /* email address internationalization EAI */
@@ -190,6 +191,10 @@ int             flagutf8;        /*- sender, recipient or received header has UT
 
 #ifdef HASLIBGSASL
 static stralloc gsasl_str = { 0 };
+typedef enum {
+	tls_unique,
+	tls_exporter,
+} cb_type;
 #endif
 
 void            temp_nomem();
@@ -610,6 +615,20 @@ perm_ambigmx()
 			!stralloc_cats(&smtptext, controldir) ||
 			!stralloc_cats(&smtptext, "/locals file, so I don't treat it as local. (#5.4.6)"))
 		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	zerodie(r, 0);
+}
+
+no_return void
+perm_tlsclientmethod()
+{
+	char           *r = "DInvalid TLS method configured. (#5.3.5)\n";
+
+	out(r);
+	if (!stralloc_copys(&smtptext, r + 3))
+		temp_nomem();
+	smtptext.len--;
 	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie(r, 0);
@@ -1359,9 +1378,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	const char     *ciphers = 0;
 	char           *t, *servercert = 0, *certfile;
 	static SSL     *myssl;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	stralloc        ssl_option = { 0 };
-	int             method = 4;	/*- (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	int             method = 6;	/*- (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
+#else
+	int             method = 7;
 #endif
 	int             method_fail = 1;
 
@@ -1386,21 +1407,18 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	}
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (!stralloc_copys(&tlsFilename, controldir) ||
-			!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16) ||
-			!stralloc_0(&tlsFilename))
-		temp_nomem();
-	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
-		temp_control("Unable to read control files", tlsFilename.s);
+	if (control_rldef(&ssl_option, "tlsclientmethod", 0, "TLSv1_2") != 1)
+		temp_control("Unable to read control files", "tlsclientmethod");
 	if (!stralloc_0(&ssl_option))
 		temp_nomem();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	if (str_equal(ssl_option.s, "SSLv23"))
 		method = 2;
 	else
 	if (str_equal(ssl_option.s, "SSLv3"))
 		method = 3;
 	else
+#endif
 	if (str_equal(ssl_option.s, "TLSv1"))
 		method = 4;
 	else
@@ -1409,7 +1427,11 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	else
 	if (str_equal(ssl_option.s, "TLSv1_2"))
 		method = 6;
-#endif
+	else
+	if (str_equal(ssl_option.s, "TLSv1_3"))
+		method = 7;
+	else
+		perm_tlsclientmethod();
 	if (!certdir && !(certdir = env_get("CERTDIR")))
 		certdir = auto_control;
 	if (!stralloc_copys(&clientcert, certdir) ||
@@ -1506,6 +1528,31 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 #else /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
 	if ((ctx = SSL_CTX_new(TLS_client_method())))
 		method_fail = 0;
+	/*-
+	 * Currently supported versions are SSL3_VERSION, TLS1_VERSION, TLS1_1_VERSION,
+	 * TLS1_2_VERSION, TLS1_3_VERSION for TLS
+	 */
+	switch (method)
+	{
+	case 2:
+		perm_tlsclientmethod();
+	case 3:
+		SSL_CTX_set_min_proto_version(ctx, SSL3_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, SSL3_VERSION);
+		break;
+	case 4:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_VERSION);
+		break;
+	case 5:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_1_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_1_VERSION);
+		break;
+	case 6:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
+		break;
+	}
 	/*- SSL_OP_NO_SSLv3, SSL_OP_NO_TLSv1, SSL_OP_NO_TLSv1_1 and SSL_OP_NO_TLSv1_2 */
 	/*- POODLE Vulnerability */
 	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
@@ -1536,6 +1583,9 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 			break;
 		case 6:
 			tls_quit("ZTLS error initializing TLSv1_2 ctx: ", t, 0, 0, 0);
+			break;
+		case 7:
+			tls_quit("ZTLS error initializing TLSv1_3 ctx: ", t, 0, 0, 0);
 			break;
 		}
 	}
@@ -2399,6 +2449,85 @@ gsasl_authenticate(Gsasl_session *session, char *mech)
 	}
 }
 
+#ifdef TLS
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
+char           *
+get_finish_message(cb_type type)
+{
+	char            tls_finish_buf[EVP_MAX_MD_SIZE];
+	static stralloc in = {0}, res = {0};
+	int             i, tls_finish_len;
+
+	if (!ssl) /*- we should never be here */
+		return ((char *) NULL);
+	switch (type)
+	{
+#if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
+	case tls_unique: /*- RFC 5929 */
+		/*
+		 * Save the TLS finish message expected to be found, useful for
+		 * authentication checks related to channel binding.
+		 * SSL_get_peer_finished() does not offer a way to know the exact length
+		 * of a TLS finish message beforehand, so attempt first with a fixed-length
+		 * buffer, and try again if the message does not fit.
+		 */
+		tls_finish_len = SSL_get_finished(ssl, tls_finish_buf, EVP_MAX_MD_SIZE);
+		if (tls_finish_len > EVP_MAX_MD_SIZE)
+			return ((char *) NULL);
+		break;
+#endif
+#if GSASL_VERSION_NUMBER >= 0x020002
+	case tls_exporter: /*- RFC 9266 tls-exporter length = 32 */
+		tls_finish_len = 32;
+		if ((i = SSL_export_keying_material(ssl, (unsigned char *) tls_finish_buf,
+						tls_finish_len, "EXPORTER-Channel-Binding", 24, 0, 0, 1)) != 1) {
+			return ((char *) NULL);
+		}
+		break;
+#endif
+	default:
+		return ((char *) NULL);
+	}
+	if (!stralloc_copyb(&in, tls_finish_buf, tls_finish_len) ||
+			b64encode(&in, &res) != 0 || !stralloc_0(&res))
+		temp_nomem();
+	return res.s;
+}
+#endif /*- #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1 */
+#endif /*- #ifdef TLS */
+
+void
+do_channel_binding(Gsasl_session *sctx)
+{
+	char           *p = (char *) NULL;
+	int             i, rc;
+
+	switch ((i = SSL_version(ssl)))
+	{
+	case TLS1_2_VERSION:
+		if (!(p = get_finish_message(tls_unique)))
+			quit("ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", -1, -1);
+#if GSASL_VERSION_MAJOR > 1
+		if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p)) != GSASL_OK)
+			quit("ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", -1, -1);
+#else
+		gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p);
+		rc = GSASL_OK;
+#endif
+		break;
+#if GSASL_VERSION_NUMBER >= 0x020002
+	case TLS1_3_VERSION:
+		if(!(p = get_finish_message(tls_exporter)))
+			quit("ZConnected to ", " but unable to get finish message for GSASL_CB_TLS_EXPORTER", -1, -1);
+		if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK)
+			quit("ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_EXPORTER", -1, -1);
+		break;
+#endif
+	default:
+		quit("ZConnected to ", " but got unknown channel binding", -1, -1);
+	}
+}
+
 static void
 client(Gsasl *gsasl_ctx, int method)
 {
@@ -2439,6 +2568,8 @@ client(Gsasl *gsasl_ctx, int method)
 		quit("ZConnected to ", gsasl_str.s, -1, 1);
 	}
 
+	if (method == AUTH_SCRAM_SHA1_PLUS || method == AUTH_SCRAM_SHA256_PLUS)
+		do_channel_binding(session);
 	/*
 	 * Set username and password in session handle. This info will be
 	 * lost when this session is deallocated below.  
@@ -2492,7 +2623,7 @@ auth_scram(int method, int use_size)
 	mailfrom_xtext(use_size);
 	return;
 }
-#endif
+#endif /*- #ifdef HASLIBGSASL */
 
 void
 smtp_auth(char *type, int use_size)
@@ -2546,13 +2677,13 @@ smtp_auth(char *type, int use_size)
 				cram_md5_supp = 1;
 #ifdef HASLIBGSASL
 			else
-			if (case_starts(ptr - 5, "SCRAM-SHA-1-PLUS"))
+			if (ssl && case_starts(ptr - 5, "SCRAM-SHA-1-PLUS"))
 				scram_sha1_plus_supp = 1;
 			else
 			if (case_starts(ptr - 5, "SCRAM-SHA-1"))
 				scram_sha1_supp = 1;
 			else
-			if (case_starts(ptr - 5, "SCRAM-SHA-256-PLUS"))
+			if (ssl && case_starts(ptr - 5, "SCRAM-SHA-256-PLUS"))
 				scram_sha256_plus_supp = 1;
 			else
 			if (case_starts(ptr - 5, "SCRAM-SHA-256"))
@@ -4018,13 +4149,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.152 2022-08-22 22:23:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.153 2022-08-23 00:05:38+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.153  2022-08-23 00:05:38+05:30  Cprogrammer
+ * added channel binding for SCRAM-*-PLUS methods
+ *
  * Revision 1.152  2022-08-22 22:23:34+05:30  Cprogrammer
  * added check for return value of subsdio_put
  *

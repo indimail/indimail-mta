@@ -60,6 +60,8 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
     SCRAM-SHA-256-PLUS AUTH methods
 35. qmail-remote.c: check return value of substdio_put, substdio_puts
     functions
+- 23/08/2022
+36. qmail-remote.c: added channel binding for SCRAM-*-PLUS methods
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
