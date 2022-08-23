@@ -586,18 +586,20 @@ expressions used by setting \fBQREGEX\fR environment variable.
 You can set regex patterns in \fIbadmailfrom\fR itself if \fBQREGEX\fR environment variable is enabled.
 
 .TP 5
+.I tlsservermethod
+The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1,
+TLSv1_2. The default is TLSv1. This control file is used for openssl
+version < 1.0.1. OpenSSL Version >= 1.0.1 uses TLS_server_method() where
+The actual protocol version used will be negotiated to the highest version
+mutually supported by the client and the server. The supported protocols
+are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3
+
+.TP 5
 .I tlsserverciphers
 A set of OpenSSL cipher strings. Multiple ciphers contained in a
 string should be separated by a colon. If the environment variable
 .B TLS_CIPHER_LIST
 is set to such a string, it takes precedence.
-
-.TP 5
-.I tlsservermethod
-The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2. The default is TLSv1.
-This control file is used for openssl version < 1.0.1. OpenSSL Version >= 1.0.1 uses TLS_server_method() where
-The actual protocol version used will be negotiated to the highest version mutually supported by the client
-and the server.  The supported protocols are SSLv3, TLSv1, TLSv1.1 and TLSv1.2.
 
 .TP 5
 .I tlsclients
@@ -613,16 +615,18 @@ and the certificate email address is in
 .I servercert.pem
 SSL certificate to be presented to clients in TLS-encrypted sessions.
 Should contain both the certificate and the private key. Certifying Authority
-(CA) and intermediate certificates can be added at the end of the file. The filename
-can be overriden by the environment variable \fBSERVERCERT\fR.
-The default location of @controldir@ can be overriden by environment variable CERTDIR
+(CA) and intermediate certificates can be added at the end of the file. The
+filename can be overriden by the environment variable \fBSERVERCERT\fR. The
+default location of @controldir@ can be overriden by environment variable
+CERTDIR.
 
 .TP 5
 .I clientca.pem
 A list of Certifying Authority (CA) certificates that are used to verify
 the client-presented certificates during a TLS-encrypted session. The
 filename can be overriden by the environment variable \fBCLIENTCA\fR.
-The default location of @controldir@ can be overriden by environment variable CERTDIR
+The default location of @controldir@ can be overriden by environment
+variable CERTDIR.
 
 .TP 5
 .I clientcrl.pem
@@ -631,7 +635,8 @@ should contain the CRLs of the CAs in
 .I clientca.pem 
 and client certs that will be checked for revocation. The
 filename can be overriden by the environment variable \fBCLIENTCRL\fR.
-The default location of @controldir@ can be overriden by environment variable CERTDIR
+The default location of @controldir@ can be overriden by environment
+variable CERTDIR.
 
 .TP 5
 .I rsa512.pem

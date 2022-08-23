@@ -76,21 +76,42 @@ connection to mailin-01.mx.aol.com. The point is that QMTP is faster than
 SMTP. If the QMTP connection attempt fails, the client tries a SMTP
 connection to port 25 as usual. \fBqmail-remote\fR does not try SMTP if the
 QMTP connection attempt succeeds but mail delivery through that connection
-fails. You can disable MXPS by setting \fBDISABLE_MXPS\R environment
+fails. You can disable MXPS by setting \fBDISABLE_MXPS\fR environment
 variable.
 
 \fBqmail-remote\fR will issue the STARTTLS command if it finds the remote
 server supports STARTTLS and it finds a valid certificate in
-\fI@sysconfdir@/certs/clientcert.pem\fR. \fBqmail-remote\fR will revert
+\fISYSCONF/certs/clientcert.pem\fR. \fBqmail-remote\fR will revert
 to non-encrypted session if the TLS connection fails.
 
-\fBqmail-remote\fR normally gets called by qmail-rspawn but can be called
-by \fBspawn-filter\fR when you set the \fBQMAILREMOTE\fR environment
-variable. \fBspawn-filter\fR can do tasks like filterin, running custom
-scripts, etc.
+\fBqmail-remote\fR can use authenticated SMTP for remote deliveries if
+username and secret is provided in the SYSCONF/smtproutes control file
+described in the section \fBCONTROL FILES\fR. \fBqmail-remote\fR uses
+libgsasl to use GNU Simple Authentication and Security Layer detailed here
+https://www.gnu.org/software/gsasl. \fBqmail-remote\fR supports LOGIN,
+PLAIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+CRAM-RIPEMD, DIGEST-MD5 authentication using built-in functions and
+SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
+authentication provided by libgsasl. Note that DIGEST-MD5 has been moved to
+historic (https://www.rfc-editor.org/rfc/rfc6331.html).
 
-Note that \fBqmail-remote\fR does not take options and does not follow the
-\fBgetopt\fR standard.
+.SH CUSTOMIZING qmail-remote
+\fBqmail-remote\fR normally gets called by \fBqmail-rspawn\fR but can be
+called by \fBspawn-filter\fR when you set the \fBQMAILREMOTE\fR environment
+variable to PREFIX/sbin/spawn-filter. \fBspawn-filter\fR(8) can do tasks
+like filtering, running custom scripts, etc before running qmail-remote.
+\fBqmail-remote\fR is controlled by several environment variables,
+described in this manual. It is possible to have an elaborate scheme to run
+a custom script/program instead of \fBqmail-remote\fR by setting the
+\fBQMAILREMOTE\fR environment variable as full path to your custom
+script/program. The custom script can then call \fBqmail-remote\fR after
+doing certain things. A useful utility to call in such custom
+scripts/programs is the \fBctrlenv\fR(8) utility. ctrlenv(8) can call
+\fBqmail-remote\fR after seting various environment variables based on the
+\fIrecip\fR address. Note that \fBqmail-remote\fR does does not follow the
+\fBgetopt\fR standard and it is not possible to set options. In cases where
+you want a customized behaviour, it is possible to do that with a
+combination of \fBQMAILREMOTE\fR and the \fBctrlenv\fR(8) utility.
 
 .SH DANE VERIFICATION
 
@@ -271,7 +292,7 @@ If neither of these variables \fBONSUCCESS_REMOTE\fR,
 \fBqmail-remote\fR will always return zero exit status.
 
 When these two variables are set, \fBqmail-remote\fR will also set the
-environment variables
+following environment variables
 
 .TP
 .B SMTPTEXT
@@ -298,7 +319,7 @@ variables can be recipient specific by using envrules. See
 \fBspawn-filter(8)\fR for more details.
 
 .SH "CONTROL FILES"
-\fBqmail-remote\fR by default looks at @sysconfdir@/control for all control
+\fBqmail-remote\fR by default looks at SYSCONF/control for all control
 files. This path can be changed by defining the CONTROLDIR environment
 variable.
 
@@ -464,7 +485,13 @@ SCRAM-SHA256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS, DIGEST-MD5,
 CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512,
 CRAM-MD5, LOGIN or PLAIN to use the desired authentication method. You can
 disable specific AUTH methods by defining any one more more of the
-following environment variables
+following environment variables. When using SCRAM authentication, the
+secret can be the plaintext password or a salted password. The salted
+password is a hex-encoded string (40 characters for SCRAM-SHA-1 and 64
+characters for SCRAM-SHA-256) with the user’s PBKDF2-prepared password. The
+salted password value can also be derived by using the
+gsasl_scram_secrets_from_password(3) function or through the --mkpasswd
+parameter for the gsasl(1) utility.
 
 .EX
 	DISABLE_AUTH_LOGIN
@@ -485,7 +512,7 @@ following environment variables
 
 If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and
 AUTH PLAIN gets disabled, unless qmail-remote has opened a TLS session wth
-the remote host. See the control file \fIclientcert.pem\fR
+the remote host. See the control file \fIclientcert.pem\fR.
 
 If all connections to the \fIrelay\fR server fail for a \fImax_tolerance\fR
 seconds, further connections to the same server are avoided for a period of
@@ -571,42 +598,41 @@ Attention: If a host has more that one hostname, please list them all in
 Exclusions of domains you host for Bounce Address Tag Validation (BATV).
 
 .TP 5
-.I notlhosts
-domains for which \fBqmail-remote\fR will not initiate TLS sesson. This
-file in @sysconfdir@/control or directory defined by the \fBCONTROLDIR\fR
-envirnoment variable, shouldn't be confused with \fInotlshosts\fR in the
-directory defined by the \fBCERTDIR\fR environment variable.
-
-.PP
-For TLS sessions, the default location of @sysconfdir@/control can be
-overriden by environment variable CERTDIR. This affects the location of
-below files/directories \fItlsclientciphers\fR, \fItlsclientmethod\fR,
-\fIclientcert.pem\fR, \fIservercert.pem\fR, \fItlshosts/<FQDN>.pem\fR,
-\fItlshosts/exhaustivelist\fR, \fInotlshosts/<FQDN>\fR,
-\fInotlshosts/host\fR.
-
-.TP 5
-.I tlsclientciphers
-A set of OpenSSL client cipher strings. Multiple ciphers contained in a
-string should be separated by a colon. The default location of
-@sysconfdir@/control can be overriden by environment variable
-\fBCERTDIR\fR
-
-.TP 5
 .I tlsclientmethod
 The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1,
 TLSv1_2. The default is TLSv1. This control file is used for openssl
 version < 1.0.1. OpenSSL Version >= 1.0.1 uses TLS_client_method() where
 the actual protocol version used will be negotiated to the highest version
 mutually supported by the client and the server. The supported protocols
-are SSLv3, TLSv1, TLSv1.1 and TLSv1.2. The default location of
-@sysconfdir@/control can be overriden by environment variable CERTDIR
+are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. The default location of
+SYSCONF/control can be overriden by environment variable \fBCONTROLDIR\fR.
+
+.TP 5
+.I tlsclientciphers
+A set of OpenSSL client cipher strings. Multiple ciphers contained in a
+string should be separated by a colon. The default location of
+SYSCONF/control can be overriden by environment variable
+\fBCONTROLDIR\fR
+
+.TP 5
+.I notlhosts
+domains for which \fBqmail-remote\fR will not initiate TLS sesson. This
+file in SYSCONF/control or directory defined by the \fBCONTROLDIR\fR
+envirnoment variable, shouldn't be confused with \fInotlshosts\fR directory
+in the directory defined by the \fBCERTDIR\fR environment variable.
+
+.PP
+For TLS sessions, the default location of SYSCONF/control can be
+overriden by environment variable CERTDIR. This affects the location of
+below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
+\fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
+\fInotlshosts/<FQDN>\fR, \fInotlshosts/host\fR.
 
 .TP 5
 .I clientcert.pem
 SSL certificate that is used to authenticate with the remote server during
 a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR will
-not negotiate TLS. The default location of @sysconfdir@/control can be
+not negotiate TLS. The default location of SYSCONF/control can be
 overriden by environment variable CERTDIR. \fIclientcert.pem\fR can be
 overriden by environment variable \fBCLIENTCERT\fR.
 
@@ -620,7 +646,7 @@ is the fully-qualified domain name of the remote SMTP server). One of the
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
-The default location of @sysconfdir@/control can be overriden by
+The default location of SYSCONF/control can be overriden by
 environment variable \fBCERTDIR\fR.
 
 .TP 5
@@ -628,8 +654,8 @@ environment variable \fBCERTDIR\fR.
 if this file exists no TLS will be tried on hosts other than those for
 which a file
 .B tlshosts/<FQDN>.pem
-exists. The default location of @sysconfdir@/control can be overriden by
-environment variable CERTDIR
+exists. The default location of SYSCONF/control can be overriden by
+environment variable \fBCERTDIR\fR.
 
 .B WARNING:
 this option may cause mail to be delayed, bounced, doublebounced, or lost.
@@ -642,7 +668,7 @@ will not try TLS on servers for which this file exists
 is the fully-qualified domain name of the remote SMTP server).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-@sysconfdir@/control can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/control can be overriden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I notlshosts/host
@@ -652,7 +678,7 @@ will not try TLS on servers for which this file exists
 is the domain name of the recipient).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-@sysconfdir@/control can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/control can be overriden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I tlsadomains
@@ -677,4 +703,7 @@ qmail-daned(8),
 tlsacheck(3),
 qmail-tcpok(8),
 qmail-tcpto(8),
-idn2_lookup_u8(3)
+idn2_lookup_u8(3),
+ctrlenv(8),
+gsasl_scram_secrets_from_password(3),
+gsasl(1)
