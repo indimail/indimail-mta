@@ -1,5 +1,5 @@
 /*
- * $Id: control.c,v 1.22 2022-04-20 23:10:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: control.c,v 1.23 2022-08-23 22:39:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <open.h>
@@ -14,6 +14,8 @@
 #include <env.h>
 #include <lock.h>
 #include <fmt.h>
+#include <wait.h>
+#include <makeargs.h>
 #include "control.h"
 #include "auto_control.h"
 #include "variables.h"
@@ -464,15 +466,11 @@ control_writeint(int val, char *fn)
 	return 0;
 }
 
-#ifdef CONTROL_CMD
-#include "wait.h"
-#include "MakeArgs.h"
-
 /*
  * 1. read lines from control file having '!'
  *    as the first char.
  * 2. execute the command after the '!'
- *    characture
+ *    character
  * 3. Store the output in sa
  */
 int
@@ -523,10 +521,10 @@ control_readcmd(stralloc *sa, char *fn)
 			close(pi[0]); /*- close read end */
 			if (!stralloc_0(sa))
 				return -1;
-			if (!(argv = MakeArgs(sa->s + 1)))
+			if (!(argv = makeargs(sa->s + 1)))
 				return -1;
 			execv(*argv, argv);
-			exit (1);
+			_exit (1);
 		}
 		close(pi[1]); /*- close write end */
 		substdio_fdbuf(&ssin, read, pi[0], inbuf, sizeof(inbuf));
@@ -544,18 +542,24 @@ control_readcmd(stralloc *sa, char *fn)
 	}
 	return 1;
 }
-#endif
 
+#ifndef lint
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.22 2022-04-20 23:10:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: control.c,v 1.23 2022-08-23 22:39:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
+	x = sccsidmakeargsh;
+	x++;
 }
+#endif
 
 /*
  * $Log: control.c,v $
+ * Revision 1.23  2022-08-23 22:39:09+05:30  Cprogrammer
+ * enabled control_readcmd() which translates output of command as a control file
+ *
  * Revision 1.22  2022-04-20 23:10:53+05:30  Cprogrammer
  * added control_writefile(), control_readint() functions
  *
