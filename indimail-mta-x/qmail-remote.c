@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.153 2022-08-23 00:05:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.154 2022-08-23 20:01:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -2584,7 +2584,7 @@ client(Gsasl *gsasl_ctx, int method)
 		quit("ZConnected to ", gsasl_str.s, -1, 1);
 		return;
 	}
-	rc = gsasl_property_set(session, GSASL_PASSWORD, pass.s);
+	rc = gsasl_property_set(session, env_get("SALTED_PASSWORD") ? GSASL_SCRAM_SALTED_PASSWORD : GSASL_PASSWORD, pass.s);
 	if (rc != GSASL_OK) {
 		if (!stralloc_copyb(&gsasl_str, " failed to set password: ", 25) ||
 				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
@@ -2595,7 +2595,7 @@ client(Gsasl *gsasl_ctx, int method)
 	}
 #else
 	gsasl_property_set(session, GSASL_AUTHID, user.s);
-	gsasl_property_set(session, GSASL_PASSWORD, pass.s);
+	gsasl_property_set(session, env_get("SALTED_PASSWORD") ? GSASL_SCRAM_SALTED_PASSWORD : GSASL_PASSWORD, pass.s);
 #endif
 	gsasl_authenticate(session, mech);
 	/* Cleanup.  */
@@ -2721,67 +2721,6 @@ smtp_auth(char *type, int use_size)
 	no_scram_sha1_plus = env_get("DISABLE_SCRAM_SHA1_PLUS");
 	no_scram_sha256_plus = env_get("DISABLE_SCRAM_SHA256_PLUS");
 #endif
-#ifdef HASLIBGSASL
-	if (scram_sha1_supp || scram_sha256_supp ||
-			scram_sha1_plus_supp || scram_sha256_plus_supp) {
-		if (scram_sha256_plus_supp && !case_diffs(type, "SCRAM-SHA-256-PLUS")) {
-			auth_scram(AUTH_SCRAM_SHA256_PLUS, use_size);
-			return;
-		} else
-		if (scram_sha1_plus_supp && !case_diffs(type, "SCRAM-SHA-1-PLUS")) {
-			auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
-			return;
-		} else
-		if (scram_sha256_supp && !case_diffs(type, "SCRAM-SHA-256")) {
-			auth_scram(AUTH_SCRAM_SHA256, use_size);
-			return;
-		} else
-		if (scram_sha1_supp && !case_diffs(type, "SCRAM-SHA-1")) {
-			auth_scram(AUTH_SCRAM_SHA1, use_size);
-			return;
-		}
-	}
-#endif
-	if (login_supp && !case_diffs(type, "LOGIN")) {
-		auth_login(use_size);
-		return;
-	} else
-	if (plain_supp && !case_diffs(type, "PLAIN")) {
-		auth_plain(use_size);
-		return;
-	} else
-	if (cram_md5_supp && !case_diffs(type, "CRAM-MD5")) {
-		auth_cram(AUTH_CRAM_MD5, use_size);
-		return;
-	} else
-	if (cram_sha1_supp && !case_diffs(type, "CRAM-SHA1")) {
-		auth_cram(AUTH_CRAM_SHA1, use_size);
-		return;
-	} else
-	if (cram_sha1_supp && !case_diffs(type, "CRAM-SHA224")) {
-		auth_cram(AUTH_CRAM_SHA224, use_size);
-		return;
-	} else
-	if (cram_sha256_supp && !case_diffs(type, "CRAM-SHA256")) {
-		auth_cram(AUTH_CRAM_SHA256, use_size);
-		return;
-	} else
-	if (cram_sha384_supp && !case_diffs(type, "CRAM-SHA384")) {
-		auth_cram(AUTH_CRAM_SHA384, use_size);
-		return;
-	} else
-	if (cram_sha512_supp && !case_diffs(type, "CRAM-SHA512")) {
-		auth_cram(AUTH_CRAM_SHA512, use_size);
-		return;
-	} else
-	if (cram_rmd_supp && !case_diffs(type, "CRAM-RIPEMD")) {
-		auth_cram(AUTH_CRAM_RIPEMD, use_size);
-		return;
-	} else
-	if (digest_md5_supp && !case_diffs(type, "DIGEST-MD5")) {
-		auth_digest_md5(use_size);
-		return;
-	} else
 	if (!*type) {
 #ifdef HASLIBGSASL
 		if (!no_scram_sha256_plus && scram_sha256_plus_supp) {
@@ -2841,6 +2780,67 @@ smtp_auth(char *type, int use_size)
 			auth_digest_md5(use_size);
 			return;
 		}
+	} else
+#ifdef HASLIBGSASL
+	if (scram_sha1_supp || scram_sha256_supp ||
+			scram_sha1_plus_supp || scram_sha256_plus_supp) {
+		if (scram_sha256_plus_supp && !case_diffs(type, "SCRAM-SHA-256-PLUS")) {
+			auth_scram(AUTH_SCRAM_SHA256_PLUS, use_size);
+			return;
+		} else
+		if (scram_sha1_plus_supp && !case_diffs(type, "SCRAM-SHA-1-PLUS")) {
+			auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
+			return;
+		} else
+		if (scram_sha256_supp && !case_diffs(type, "SCRAM-SHA-256")) {
+			auth_scram(AUTH_SCRAM_SHA256, use_size);
+			return;
+		} else
+		if (scram_sha1_supp && !case_diffs(type, "SCRAM-SHA-1")) {
+			auth_scram(AUTH_SCRAM_SHA1, use_size);
+			return;
+		}
+	} else
+#endif
+	if (login_supp && !case_diffs(type, "LOGIN")) {
+		auth_login(use_size);
+		return;
+	} else
+	if (plain_supp && !case_diffs(type, "PLAIN")) {
+		auth_plain(use_size);
+		return;
+	} else
+	if (cram_md5_supp && !case_diffs(type, "CRAM-MD5")) {
+		auth_cram(AUTH_CRAM_MD5, use_size);
+		return;
+	} else
+	if (cram_sha1_supp && !case_diffs(type, "CRAM-SHA1")) {
+		auth_cram(AUTH_CRAM_SHA1, use_size);
+		return;
+	} else
+	if (cram_sha1_supp && !case_diffs(type, "CRAM-SHA224")) {
+		auth_cram(AUTH_CRAM_SHA224, use_size);
+		return;
+	} else
+	if (cram_sha256_supp && !case_diffs(type, "CRAM-SHA256")) {
+		auth_cram(AUTH_CRAM_SHA256, use_size);
+		return;
+	} else
+	if (cram_sha384_supp && !case_diffs(type, "CRAM-SHA384")) {
+		auth_cram(AUTH_CRAM_SHA384, use_size);
+		return;
+	} else
+	if (cram_sha512_supp && !case_diffs(type, "CRAM-SHA512")) {
+		auth_cram(AUTH_CRAM_SHA512, use_size);
+		return;
+	} else
+	if (cram_rmd_supp && !case_diffs(type, "CRAM-RIPEMD")) {
+		auth_cram(AUTH_CRAM_RIPEMD, use_size);
+		return;
+	} else
+	if (digest_md5_supp && !case_diffs(type, "DIGEST-MD5")) {
+		auth_digest_md5(use_size);
+		return;
 	}
 	err_authprot();
 	mailfrom(use_size);
@@ -3436,7 +3436,7 @@ getcontrols()
 		break;
 	}
 	routes = (routes = env_get("SMTPROUTE")) ? routes : env_get("X-SMTPROUTES");
-	if (routes) {				/*- mysql or X-SMTPROUTES from header */
+	if (routes) {	/*- MySQL smtp_port table or X-SMTPROUTES from header */
 		if (!stralloc_copyb(&smtproutes, routes, str_len(routes) + 1))
 			temp_nomem();
 		cntrl_stat1 = 2;
@@ -4149,13 +4149,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.153 2022-08-23 00:05:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.154 2022-08-23 20:01:29+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.154  2022-08-23 20:01:29+05:30  Cprogrammer
+ * use scram salted password instead of plaintext for SCRAM when SALTED_PASSWORD environment variable is set
+ *
  * Revision 1.153  2022-08-23 00:05:38+05:30  Cprogrammer
  * added channel binding for SCRAM-*-PLUS methods
  *
