@@ -1,3 +1,7 @@
+/*
+ * RCS log at bottom
+ * $Id: smtpd.c,v 1.265 2022-08-23 13:11:13+05:30 Cprogrammer Exp mbhangui $
+ */
 #include <sig.h>
 #include <stralloc.h>
 #include <substdio.h>
@@ -131,7 +135,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.264 $";
+char           *revision = "$Revision: 1.265 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -826,52 +830,6 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
 	return;
 }
 
-char           *
-authmethod_to_str(int method)
-{
-	switch (method)
-	{
-	case AUTH_LOGIN:
-		return ("LOGIN");
-	case AUTH_PLAIN:
-		return ("PLAIN");
-	case AUTH_CRAM_MD5:
-		return ("CRAM-MD5");
-	case AUTH_CRAM_SHA1:
-		return ("CRAM-SHA1");
-	case AUTH_CRAM_SHA224:
-		return ("CRAM-SHA224");
-	case AUTH_CRAM_SHA256:
-		return ("CRAM-SHA256");
-	case AUTH_CRAM_SHA384:
-		return ("CRAM-SHA384");
-	case AUTH_CRAM_SHA512:
-		return ("CRAM-SHA512");
-	case AUTH_CRAM_RIPEMD:
-		return ("CRAM-RIPEMD");
-	case AUTH_DIGEST_MD5:
-		return ("DIGEST-MD5");
-	case AUTH_SCRAM_SHA1:
-		return ("SCRAM-SHA-1");
-	case AUTH_SCRAM_SHA256:
-		return ("SCRAM-SHA-256");
-#if 0
-	case AUTH_SCRAM_SHA512:
-		return ("SCRAM-SHA-512");
-#endif
-	case AUTH_SCRAM_SHA1_PLUS:
-		return ("SCRAM-SHA-1-PLUS");
-	case AUTH_SCRAM_SHA256_PLUS:
-		return ("SCRAM-SHA-256-PLUS");
-#if 0
-	case AUTH_SCRAM_SHA512_PLUS:
-		return ("SCRAM-SHA-512-PLUS");
-#endif
-	default:
-		return ("unknown");
-	}
-}
-
 void
 log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, int notify)
 {
@@ -903,7 +861,7 @@ log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 				if (authuser && *authuser) {
 					logerr(authuser);
 					logerr(": AUTH ");
-					logerr(authmethod_to_str(authd));
+					logerr(get_authmethod(authd));
 				}
 				if (addrallowed(ptr)) {
 					if (authuser && *authuser)
@@ -966,7 +924,7 @@ err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 			if (authuser && *authuser) {
 				logerr(authuser);
 				logerr(": AUTH ");
-				logerr(authmethod_to_str(authd));
+				logerr(get_authmethod(authd));
 			}
 			if (addrallowed(ptr)) {
 				if (authuser && *authuser)
@@ -1380,7 +1338,7 @@ log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
 	logerr(arg2);
 	if (authd) {
 		logerr("> AUTH ");
-		logerr(authmethod_to_str(authd));
+		logerr(get_authmethod(authd));
 		logerr(" <");
 		logerr(arg3);
 	}
@@ -1647,7 +1605,7 @@ err_authfailure(char *r_ip, char *authuser, int ret)
 	if (authmethod.len) {
 		logerr(" AUTH ");
 		i = authmethod.s[0];
-		logerr(authmethod_to_str(i));
+		logerr(get_authmethod(i));
 	} else
 		logerr(" AUTH Unknown ");
 #ifdef TLS
@@ -5284,12 +5242,11 @@ get_finish_message(cb_type type)
 	{
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 4 || GSASL_VERSION_MAJOR > 1
 	case tls_unique: /*- RFC 5929 */
-		/*
-		 * Save the TLS finish message expected to be found, useful for
-		 * authentication checks related to channel binding.
+		/*-
 		 * SSL_get_peer_finished() does not offer a way to know the exact length
-		 * of a TLS finish message beforehand, so attempt first with a fixed-length
-		 * buffer, and try again if the message does not fit.
+		 * of a TLS finish message beforehand, so we use EVP_MAX_MD_SIZE
+		 * and return failure if the message does not fit (this will however
+		 * never happen)
 		 */
 		tls_finish_len = SSL_get_peer_finished(ssl, tls_finish_buf, EVP_MAX_MD_SIZE);
 		if (tls_finish_len > EVP_MAX_MD_SIZE)
@@ -5324,6 +5281,10 @@ get_finish_message(cb_type type)
 		err_scram("410", "4.3.5", res.s, 0);
 		return ((char *) NULL);
 	}
+	/*
+	 * Save the TLS finish message expected to be found, useful for
+	 * authentication checks related to channel binding.
+	 */
 	if (!stralloc_copyb(&in, tls_finish_buf, tls_finish_len) ||
 			b64encode(&in, &res) != 0 || !stralloc_0(&res))
 		die_nomem();
@@ -7431,6 +7392,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.265  2022-08-23 13:11:13+05:30  Cprogrammer
+ * replaced authmethod_to_str() with get_authmethod() from libqmail
+ *
  * Revision 1.264  2022-08-23 01:18:50+05:30  Cprogrammer
  * fixed crash when ssl_timeoutaccept() failed
  *
@@ -7668,7 +7632,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.264 2022-08-23 01:18:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.265 2022-08-23 13:11:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
