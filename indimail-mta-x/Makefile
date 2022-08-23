@@ -1630,7 +1630,8 @@ qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
 	cat qmail-remote.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
-	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}SYSCONF}"`head -1 conf-sysconfdir`"}g \
 	> qmail-remote.8
 
 qmail-remote.o: \
