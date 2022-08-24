@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.154 2022-08-23 20:01:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.155 2022-08-24 08:03:54+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -2782,24 +2782,21 @@ smtp_auth(char *type, int use_size)
 		}
 	} else
 #ifdef HASLIBGSASL
-	if (scram_sha1_supp || scram_sha256_supp ||
-			scram_sha1_plus_supp || scram_sha256_plus_supp) {
-		if (scram_sha256_plus_supp && !case_diffs(type, "SCRAM-SHA-256-PLUS")) {
-			auth_scram(AUTH_SCRAM_SHA256_PLUS, use_size);
-			return;
-		} else
-		if (scram_sha1_plus_supp && !case_diffs(type, "SCRAM-SHA-1-PLUS")) {
-			auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
-			return;
-		} else
-		if (scram_sha256_supp && !case_diffs(type, "SCRAM-SHA-256")) {
-			auth_scram(AUTH_SCRAM_SHA256, use_size);
-			return;
-		} else
-		if (scram_sha1_supp && !case_diffs(type, "SCRAM-SHA-1")) {
-			auth_scram(AUTH_SCRAM_SHA1, use_size);
-			return;
-		}
+	if (scram_sha256_plus_supp && !case_diffs(type, "SCRAM-SHA-256-PLUS")) {
+		auth_scram(AUTH_SCRAM_SHA256_PLUS, use_size);
+		return;
+	} else
+	if (scram_sha1_plus_supp && !case_diffs(type, "SCRAM-SHA-1-PLUS")) {
+		auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
+		return;
+	} else
+	if (scram_sha256_supp && !case_diffs(type, "SCRAM-SHA-256")) {
+		auth_scram(AUTH_SCRAM_SHA256, use_size);
+		return;
+	} else
+	if (scram_sha1_supp && !case_diffs(type, "SCRAM-SHA-1")) {
+		auth_scram(AUTH_SCRAM_SHA1, use_size);
+		return;
 	} else
 #endif
 	if (login_supp && !case_diffs(type, "LOGIN")) {
@@ -4149,13 +4146,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.154 2022-08-23 20:01:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.155 2022-08-24 08:03:54+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.155  2022-08-24 08:03:54+05:30  Cprogrammer
+ * fixed non-SCRAM methods getting skipped
+ *
  * Revision 1.154  2022-08-23 20:01:29+05:30  Cprogrammer
  * use scram salted password instead of plaintext for SCRAM when SALTED_PASSWORD environment variable is set
  *
