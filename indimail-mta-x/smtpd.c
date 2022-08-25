@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.265 2022-08-23 13:11:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.266 2022-08-25 18:28:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sig.h>
 #include <stralloc.h>
@@ -135,7 +135,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.265 $";
+char           *revision = "$Revision: 1.266 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5053,7 +5053,8 @@ static stralloc scram_method;
 static int      gs_callback_err;
 
 PASSWD         *
-get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key, char **server_key, char **salted_pass)
+get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
+		char **server_key, char **hexsaltpw, char **cleartxt, char **saltedpw)
 {
 	int             i;
 	char           *ptr, *err;
@@ -5140,12 +5141,12 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key, 
 		return ((PASSWD *) NULL);
 	} else
 		*mech = 0;
-	i = get_scram_secrets(gsasl_pw->pw_passwd, mech, iter, salt, stored_key, server_key, salted_pass);
-	if (i != 6) {
+	i = get_scram_secrets(gsasl_pw->pw_passwd, mech, iter, salt, stored_key, server_key, hexsaltpw, cleartxt, saltedpw);
+	if (i != 6 && i != 8) {
 		logerr("qmail-smtpd: ");
 		logerrpid();
 		logerr(remoteip);
-		logerr(" Unable go get secrets for <");
+		logerr(" Unable to get secrets for <");
 		logerr(u);
 		logerrf(">\n");
 		out("553 authorization failure (#5.7.1)\r\n");
@@ -5172,15 +5173,18 @@ is_scram_method(int mech)
 }
 
 static int
-get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter, char **salt, char **stored_key, char **server_key, char **salted_pass)
+get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
+		char **salt, char **stored_key, char **server_key,
+		char **hexsaltpw, char **cleartxt, char **saltedpw)
 {
 	int             rc;
 
 	if (!*u && !(*u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
-		logerr("gsasl_property_fast: GSASL_AUTHID failed\n");
+		logerr("gsasl_property_fast: unable to get GSASL_AUTHID\n");
 		return GSASL_NO_CALLBACK;
 	}
-	if (!(gsasl_pw = get_scram_record(*u, mech, iter, salt, stored_key, server_key, salted_pass)))
+	if (!(gsasl_pw = get_scram_record(*u, mech, iter, salt, stored_key,
+					server_key, hexsaltpw, cleartxt, saltedpw)))
 		return gs_callback_err = GSASL_NO_CALLBACK;
 	if (!is_scram_method(*mech)) {
 		strnum[fmt_int(strnum, *mech)] = 0;
@@ -5298,7 +5302,8 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
 	int             rc = GSASL_NO_CALLBACK;
 	static int      mech, iter = 4096;
-	static char    *u, *salt, *stored_key, *server_key, *salted_pass;
+	static char    *u, *salt, *stored_key, *server_key, *hexsaltpw,
+				   *cleartxt, *saltedpw;
 	static int      i = -1;
 #ifdef TLS
 	static char    *p;
@@ -5309,7 +5314,8 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	{
 	case GSASL_AUTHID:
 		if (i == -1) {
-			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
+							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
 				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		} else
@@ -5320,24 +5326,26 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		break;
 	case GSASL_PASSWORD:
 		if (i == -1) {
-			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
+							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
 				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
 #if GSASL_VERSION_MAJOR > 1
-		if ((rc = gsasl_property_set(sctx, GSASL_PASSWORD, salted_pass)) != GSASL_OK) {
+		if ((rc = gsasl_property_set(sctx, GSASL_PASSWORD, cleartxt)) != GSASL_OK) {
 			logerr("gsasl_property_set: GSASL_PASSWORD: ");
 			logerr(gsasl_strerror(rc));
 			logerrf("\n");
 		}
 #else
-		gsasl_property_set(sctx, GSASL_PASSWORD, salted_pass);
+		gsasl_property_set(sctx, GSASL_PASSWORD, cleartxt);
 		rc = GSASL_OK;
 #endif
 		break;
 	case GSASL_SCRAM_SALT:
 		if (i == -1) {
-			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
+							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
 				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
@@ -5354,8 +5362,11 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		break;
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	case GSASL_SCRAM_SERVERKEY:
+		if (env_get("GSASL_PASSWORD"))
+			break;
 		if (i == -1) {
-			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
+							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
 				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
@@ -5371,8 +5382,11 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #endif
 		break;
 	case GSASL_SCRAM_STOREDKEY:
+		if (env_get("GSASL_PASSWORD"))
+			break;
 		if (i == -1) {
-			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
+							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
 				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
@@ -5390,18 +5404,19 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #endif
 	case GSASL_SCRAM_SALTED_PASSWORD:
 		if (i == -1) {
-			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
+							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
 				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
 #if GSASL_VERSION_MAJOR > 1
-		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, salted_pass)) != GSASL_OK) {
+		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, hexsaltpw)) != GSASL_OK) {
 			logerr("gsasl_property_set: GSASL_SCRAM_SALTED_PASSWORD: ");
 			logerr(gsasl_strerror(rc));
 			logerrf("\n");
 		}
 #else
-		gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, salted_pass);
+		gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, hexsaltpw);
 		rc = GSASL_OK;
 #endif
 		break;
@@ -5432,7 +5447,8 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		break;
 	case GSASL_SCRAM_ITER:
 		if (i == -1 && u) {
-			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key, &server_key, &salted_pass)) != GSASL_OK)
+			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
+							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
 				return gs_callback_err = GSASL_NO_CALLBACK;
 			i = 0;
 		}
@@ -7392,6 +7408,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.266  2022-08-25 18:28:52+05:30  Cprogrammer
+ * fetch hexsalted and clear text passwords
+ *
  * Revision 1.265  2022-08-23 13:11:13+05:30  Cprogrammer
  * replaced authmethod_to_str() with get_authmethod() from libqmail
  *
@@ -7632,7 +7651,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.265 2022-08-23 13:11:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.266 2022-08-25 18:28:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

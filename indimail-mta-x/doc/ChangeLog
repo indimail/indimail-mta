@@ -70,6 +70,9 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
     a qmail control file
 - 24/08/2022
 41. qmail-remote.c: fixed non SCRAM methods getting skipped
+- 25/08/2022
+42. smtpd.c: fetch hexsalted and clear text passwords if available for SCRAM
+    authentication
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022

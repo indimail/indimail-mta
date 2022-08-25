@@ -150,7 +150,11 @@ qmail-smtpd supports SASL - Simple Authentication and Security Layer
 framework with the GNU SASL library. For SCRAM authentication types,
 qmail-smtpd uses SASL. For the SCRAM-*-PLUS methods, \fBqmail-smtpd\fR(8)
 supports the \fBtls-unique\fR and \fBtls-exporter\fR channel binding types
-(See RFC 5929 and RFC 9266).
+(See RFC 5929 and RFC 9266). qmail-smtpd fetches server_key, stored_key
+from the indimail MySQL database for authenticaion. If you have used
+vpasswd(1) or vmoduser(1) to set clear text passwords for CRAM
+authentication methods, the same passwords will work for SCRAM
+authentication if the environment variable \fBGSASL_PASSWORD\fB is set.
 
 .I checkprogram
 returns 0 on successful authentication, terminating the chain. Similarly \fIsubprogram\fR exits 0 on
