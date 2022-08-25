@@ -55,7 +55,7 @@ conditions
 1. connection to remote host gets dropped without a greeting from the
    remote host
 
-2. greeting  code >= 400 and < 500
+2. greeting code >= 400 and < 500
 
 3. ehlo/helo code >= 400 and < 500 (enabled by setting
    TRY_NEXT_MX_HELO_FAIL environment variable)
@@ -251,7 +251,7 @@ Recipient report: temporary rejection.
 
 .TP 5
 K
-Message report: success.  \fIhost\fR has taken responsibility for
+Message report: success. \fIhost\fR has taken responsibility for
 delivering the message to each acceptable recipient.
 
 .TP 5
@@ -326,7 +326,7 @@ variable.
 .TP 5
 .I outgoingip
 file containing local IP addresses to be bound on socket and used on
-outgoing connections. Default: system-defined.  The value \fI0.0.0.0\fR is
+outgoing connections. Default: system-defined. The value \fI0.0.0.0\fR is
 equivalent to the system default. You can have multiple IP addresses one
 per line, one per line for each IP. \fBqmail-remote\fR will use the
 modulus operator with the current time to pick a single IP address.
@@ -377,7 +377,7 @@ have the following line,
 .EE
 
 then all connections with address not matching any line in
-\fIdomainbindings\fR, will get bound to \fB1.2.3.5\fR.  The \fB qmail\fR
+\fIdomainbindings\fR, will get bound to \fB1.2.3.5\fR. The \fB qmail\fR
 system does not protect you if you specify an invalid local address to
 bind to. \fIdomainbindings\fR takes precedence over \fIoutgoingip\fR. The
 name for domainbindings control file can be configured by setting
@@ -413,7 +413,7 @@ instead of this value.
 .TP 5
 .I helohostbyip
 Map helohost for specific outgoing IPs.s, for use solely in saying hello to
-the remote SMTP server.  Default: \fIme\fR, if that is supplied; otherwise
+the remote SMTP server. Default: \fIme\fR, if that is supplied; otherwise
 \fBqmail-remote\fR refuses to run. If the envelope sender address matches
 a domain in the \fIdomainbindings\fR control file, the envelope sender
 domain will be used instead of this value.
@@ -446,7 +446,7 @@ routed by its MX records; any other address is artificially routed to
 
 The \fBqmail\fR system does not protect you if you create an artificial
 mail loop between machines. However, you are always safe using
-\fIsmtproutes\fR if you do not accept mail from the network.  Additionally,
+\fIsmtproutes\fR if you do not accept mail from the network. Additionally,
 \fIsmtproutes\fR allows to forward bounces (with
 a 'Nullsender' MAIL FROM: <>) literally expressed as '!@' to a particular
 bounce host:
@@ -479,19 +479,27 @@ or
 without any extra spaces. If the environment variable \fBAUTH_SMTP\fR is
 set, \fBqmail-remote\fR will use \fIusername\fR and \fIpassword\fR (or
 \fIsecret\fR for SCRAM authentication methods) to relay out mails through
-server \fIrelay\fR using authenticated SMTP.  <sp> is a single space
+server \fIrelay\fR using authenticated SMTP. <sp> is a single space
 character. AUTH_SMTP can also have the values SCRAM-SHA-1, SCRAM-SHA-256,
 SCRAM-SHA256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS, DIGEST-MD5,
 CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512,
 CRAM-MD5, LOGIN or PLAIN to use the desired authentication method. You can
 disable specific AUTH methods by defining any one more more of the
 following environment variables. When using SCRAM authentication, the
-secret can be the plaintext password or a salted password. The salted
-password is a hex-encoded string (40 characters for SCRAM-SHA-1 and 64
+secret can be a clear text password or a salted password. The salted
+password should be a hex-encoded string (40 characters for SCRAM-SHA-1 and 64
 characters for SCRAM-SHA-256) with the user’s PBKDF2-prepared password. The
-salted password value can also be derived by using the
-gsasl_scram_secrets_from_password(3) function or through the --mkpasswd
-parameter for the gsasl(1) utility.
+salted password value can be derived by using the --mkpasswd parameter for
+the gsasl(1) utility. indimail has vpasswd(1) / vmoduser(1), which use
+gsasl_scram_secrets_from_password(3) API to set passwords for AUTH PLAIN,
+LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256 methods.
+The hex-encoded salted password can be used to avoid storing a clear-text
+credential in the client, however note that an attacker who steal it may
+impersonate both a SCRAM client and SCRAM server. If the property is not
+available, qmail-remote will ask for the clear text password instead. You
+need to set the environment variable \fBSALTED_PASSWORD\fR for qmail-remote
+to use the secret as a salted password.
 
 .EX
 	DISABLE_AUTH_LOGIN
@@ -556,7 +564,7 @@ routes should obey the form \fIdomain\fR:\fIrelay\fR:\fIport\fR, without
 any extra spaces. \fIqmtproutes\fR follows the same syntax as
 \fIsmtproutes\fR. By default, \fBqmail-remote\fR connects to QMTP service
 port 209. However you can chose a dedicated high-port for QMTP
-communication as defined in \fIqmtproutes\fR.  If the recipient domain is
+communication as defined in \fIqmtproutes\fR. If the recipient domain is
 listed neither in \fIqmtproutes\fR nor in \fIsmtproutes\fR,
 \fBqmail-remote\fR will choose the protocol according to MX priority. The
 qmtproutes control file is bypassed if the \fBQMTPROUTE\fR environment
@@ -707,4 +715,6 @@ qmail-tcpto(8),
 idn2_lookup_u8(3),
 ctrlenv(8),
 gsasl_scram_secrets_from_password(3),
-gsasl(1)
+gsasl(1),
+vpasswd(1),
+vmoduser(1)
