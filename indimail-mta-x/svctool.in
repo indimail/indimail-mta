@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.639 2022-08-20 12:13:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.640 2022-08-28 17:46:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.639 2022-08-20 12:13:14+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.640 2022-08-28 17:46:40+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3919,6 +3919,7 @@ echo "TLS_VERIFYPEER=NONE"
 echo "TLS_CACHEFILE=$sysconfdir/certs/couriersslcache"
 echo "TLS_CACHESIZE=524288"
 echo "TLS_ALPN=imap"
+echo "IMAP_TLS=1"
 }
 
 create_ssl_cnf()
