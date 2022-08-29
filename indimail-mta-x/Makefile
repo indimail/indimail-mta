@@ -666,35 +666,35 @@ trynpbg1.c compile load
 	( ( ./compile trynpbg1.c \
 	&& ./load trynpbg1 $(QMAILLIB) && ./trynpbg1 ) \
 	>/dev/null 2>&1 \
-	&& echo \#define HASNAMEDPIPEBUG1 1 || exit 0 ) > \
+	&& echo "#define HASNAMEDPIPEBUG1 1" || exit 0 ) > \
 	hasnpbg1.h
 	rm -f trynpbg1.o trynpbg1
 
 hassalen.h: \
 trysalen.c compile
 	( ./compile trysalen.c >/dev/null 2>&1 \
-	&& echo \#define HASSALEN 1 || exit 0 ) > hassalen.h
+	&& echo "#define HASSALEN 1" || exit 0 ) > hassalen.h
 	rm -f trysalen.o
 
 hassgact.h: \
 trysgact.c compile load
 	( ( ./compile trysgact.c && ./load trysgact ) >/dev/null \
 	2>&1 \
-	&& echo \#define HASSIGACTION 1 || exit 0 ) > hassgact.h
+	&& echo "#define HASSIGACTION 1" || exit 0 ) > hassgact.h
 	rm -f trysgact.o trysgact
 
 hassgprm.h: \
 trysgprm.c compile load
 	( ( ./compile trysgprm.c && ./load trysgprm ) >/dev/null \
 	2>&1 \
-	&& echo \#define HASSIGPROCMASK 1 || exit 0 ) > hassgprm.h
+	&& echo "#define HASSIGPROCMASK 1" || exit 0 ) > hassgprm.h
 	rm -f trysgprm.o trysgprm
 
 hasrresvport.h: \
 tryrresvport.c compile load
 	( ( ./compile tryrresvport.c && ./load tryrresvport ) >/dev/null \
 	2>&1 \
-	&& echo \#define HASRRESVPORT 1 || exit 0 ) > hasrresvport.h
+	&& echo "#define HASRRESVPORT 1" || exit 0 ) > hasrresvport.h
 	rm -f tryrresvport.o tryrresvport
 
 headerbody.o: \
@@ -1520,23 +1520,23 @@ dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
 	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
 	-I/usr/include/dkim -I../libdkim-x \
-	`grep -h -v "^#" conf-dkim` trydkim.c && \
-	c++ -o trydkim trydkim.o dns_text.o \
+	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim1.o && \
+	c++ -o trydkim1 trydkim1.o dns_text.o \
 	`cat dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
 	-L../libdkim-x/.libs -ldkim -lcrypto -ldkim $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& echo "-ldkim" || exit 0 ) > dkim.lib
-	rm -f trydkim.o trydkim
+	&& echo "-ldkim" || "WARNING!!! Not linked with libdkim" ) > dkim.lib
+	rm -f trydkim1.o trydkim1
 
 hasdkim.h: dns_text.o \
 trydkim.c compile dns.lib dkim.lib conf-indi
 	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
 	-I/usr/include/dkim -I../libdkim-x \
-	`grep -h -v "^#" conf-dkim` trydkim.c && \
-	c++ -o trydkim trydkim.o dns_text.o \
+	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim2.o && \
+	c++ -o trydkim trydkim2.o dns_text.o \
 	`cat dkim.lib dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
 	-L../libdkim-x/.libs -lcrypto $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& (echo \#define HASDKIM 1) || exit 0 ) > hasdkim.h; \
-	rm -f trydkim.o trydkim
+	&& (echo "#define HASDKIM 1") || echo "WARNING!!! Not compiled with -DHASDKIM" ) > hasdkim.h; \
+	rm -f trydkim2.o trydkim2
 
 qmail-dkim: qmail-dkim.o auto_control.o pidopen.o auto_prefix.o \
 variables.o control.o dns_text.o wildmat.o getDomainToken.o \
@@ -1578,7 +1578,7 @@ socket_v6any.o ipalloc.o strsalloc.o
 	trytlsa.c && ./load trytlsa dns.o tlsarralloc.o \
 	ip.o socket_v4mappedprefix.o socket_v6any.o \
 	ipalloc.o strsalloc.o `cat dns.lib` $(QMAILLIB)) >/dev/null 2>&1 \
-	&& (echo \#define HASTLSA 1) || exit 0 ) > hastlsa.h
+	&& echo "#define HASTLSA 1" || echo "WARNING||| Not compiled with -DHASTLSA" ) > hastlsa.h
 	rm -f trytlsa.o trytlsa
 
 qnotify.1: qnotify.9 conf-qmail conf-sysconfdir
@@ -1598,7 +1598,7 @@ hassmtputf8.h: \
 tryidn2.c compile load conf-smtputf8
 	( ( ./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
 		&& ./load tryidn2 -lidn2 ) >/dev/null 2>&1 \
-	&& echo \#define SMTPUTF8 1 || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2 ) > hassmtputf8.h
+	&& echo "#define SMTPUTF8 1" || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2 ) > hassmtputf8.h
 	rm -f tryidn2.o tryidn2
 
 idn2.lib: \
@@ -2288,51 +2288,51 @@ slurpclose.o: compile slurpclose.c slurpclose.h
 socket.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o trysocket.o && ./load trysocket -lsocket -lnsl ) >/dev/null 2>&1 \
-	&& echo -lsocket -lnsl || exit 0 ) > socket.lib
+	&& echo -lsocket -lnsl || echo "WARNING!!! Not linked with libsocket" 1>&2 ) > socket.lib
 	rm -f trysocket.o trysocket
 
 fts.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o tryfts.o && ./load tryfts -lfts ) >/dev/null 2>&1 \
-	&& echo -lfts || exit 0 ) > fts.lib
+	&& echo -lfts || echo "WARNING!!! Not linked with libfts" 1>&2 ) > fts.lib
 	rm -f trytfs.o trytfs
 
 rt.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o tryrt1.o && ./load tryrt1 -lrt ) >/dev/null 2>&1 \
-	&& echo -lrt || exit 0 ) > rt.lib
+	&& echo -lrt || echo "WARNING!!! Not linked with librt" 1>&2 ) > rt.lib
 	rm -f tryrt1.o tryrt1
 
 haslibrt.h: \
 trylib.c compile load
 	( ( ./compile trylib.c -o tryrt2.o && ./load tryrt2 -lrt ) >/dev/null 2>&1 \
-	&& echo "#define HASLIBRT 1" || exit 0 ) > haslibrt.h
+	&& echo "#define HASLIBRT 1" || echo "WARNING!!! Not compiled -with -DHASLIBRT" 1>&2 ) > haslibrt.h
 	rm -f tryrt2.o tryrt2
 
 crypt.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o trycrypt.o && ./load trycrypt -lcrypt ) >/dev/null 2>&1 \
-	&& echo -lcrypt || exit 0 ) > crypt.lib
+	&& echo -lcrypt || echo "WARNING!!! Not linked with libcrypt" 1>&2 ) > crypt.lib
 	rm -f trycrypt.o trycrypt
 
 gsasl.lib: \
 trylib.c compile load
-	( ( ./compile trylib.c -o trygsasl.o && ./load trygsasl -lgsasl ) >/dev/null 2>&1 \
-	&& echo -lgsasl || exit 0 ) > gsasl.lib
-	rm -f trygsasl.o trygsasl
+	( ( ./compile trylib.c -o trygsasl1.o && ./load trygsasl1 -lgsasl ) >/dev/null 2>&1 \
+	&& echo -lgsasl || echo "WARNING!!! Not linked with libgsasl" 1>&2 ) > gsasl.lib
+	rm -f trygsasl1.o trygsasl1
 
 haslibgsasl.h: \
 trylib.c compile load
-	( ( ./compile trylib.c -o trygsasl.o && ./load trygsasl -lgsasl ) >/dev/null 2>&1 \
-	&& echo "#define HASLIBGSASL 1" || exit 0 ) > haslibgsasl.h
-	rm -f trygsasl.o trygsasl
+	( ( ./compile trylib.c -o trygsasl2.o && ./load trygsasl2 -lgsasl ) >/dev/null 2>&1 \
+	&& echo "#define HASLIBGSASL 1" || echo "WARNING!!! Not compiled with -DHASLIBGSASL" 1<&2 ) > haslibgsasl.h
+	rm -f trygsasl2.o trygsasl2
 
 tls.lib: \
 trytls.c compile conf-tls load conf-ld-$(SYSTEM)
 	( ( ./compile `grep -v "^#" conf-tls` trytls.c && \
 	./load trytls `cat conf-ld-$(SYSTEM)` \
 	-lssl -lcrypto ) >tls.err 2>&1 \
-	&& echo $(LDFLAGS) `cat conf-ld-$(SYSTEM)` -lssl -lcrypto || exit 0 ) > tls.lib
+	&& echo $(LDFLAGS) `cat conf-ld-$(SYSTEM)` -lssl -lcrypto || echo "WARNING!!! Not linked with libcrypto, libssl" 1>&2 ) > tls.lib
 	echo -tls.err----; cat tls.err;echo ---tls.lib---; cat tls.lib
 	rm -f trytls.o trytls tls.err
 
@@ -2416,20 +2416,20 @@ compile splogger.c
 srs.lib: trysrs.c compile load conf-srs dns.lib
 	( ( ./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
 	-I/opt/local/include/srs2 -I../libsrs2-x/libsrs2 \
-	`grep -h -v "^#" conf-srs` trysrs.c && \
-	./load trysrs -L/usr/local/lib -L/opt/local/lib \
+	`grep -h -v "^#" conf-srs` trysrs.c -o trysrs1.o && \
+	./load trysrs1 -L/usr/local/lib -L/opt/local/lib \
 	-L../libsrs2-x/libsrs2/.libs -lsrs2 ) \
 	>/dev/null 2>&1 && echo "-lsrs2" || exit 0 ) > srs.lib
-	rm -f trysrs.o trysrs
+	rm -f trysrs1.o trysrs1
 
 hassrs.h: trysrs.c compile load srs.lib conf-indi
 	( ( ./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
 	-I/opt/local/include/srs2 -I../libsrs2-x/libsrs2 \
-	`grep -h -v "^#" conf-srs` trysrs.c && \
-	./load trysrs -L/usr/local/lib -L/usr/local/lib \
+	`grep -h -v "^#" conf-srs` trysrs.c -o trysrs2.o && \
+	./load trysrs2 -L/usr/local/lib -L/usr/local/lib \
 	-L/opt/local/lib -L../libsrs2-x/libsrs2/.libs `cat srs.lib` ) \
-	 >/dev/null 2>&1 && (echo \#define HAVESRS 1) || exit 0 ) > hassrs.h
-	rm -f trysrs.o trysrs
+	 >/dev/null 2>&1 && echo "#define HAVESRS 1" || exit 0 ) > hassrs.h
+	rm -f trysrs2.o trysrs2
 
 srs.o: compile srs.c hassrs.h srs.h control.h rcpthosts.h
 	./compile -I/usr/include/srs2 -I/usr/local/include/srs2 \
@@ -3596,21 +3596,21 @@ hasifaddr.h: \
 tryifaddr.c compile load
 	( ( ./compile tryifaddr.c \
 	&& ./load tryifaddr ) >/dev/null 2>&1 \
-	&& echo \#define HASIFADDR 1 || exit 0 ) > hasifaddr.h
+	&& echo "#define HASIFADDR 1" || exit 0 ) > hasifaddr.h
 	rm -f tryifaddr.o tryifaddr
 
 hasspnam.h: \
 tryspnam.c compile load
 	( ( ./compile tryspnam.c \
 	&& ./load tryspnam ) >/dev/null 2>&1 \
-	&& echo \#define HASGETSPNAM 1 || exit 0 ) > hasspnam.h
+	&& echo "#define HASGETSPNAM 1" || exit 0 ) > hasspnam.h
 	rm -f tryspnam.o tryspnam
 
 hasuserpw.h: \
 tryuserpw.c compile load
 	( ( ./compile tryuserpw.c \
 	&& ./load tryuserpw ) >/dev/null 2>&1 \
-	&& echo \#define HASGETUSERPW 1 || exit 0 ) > hasuserpw.h
+	&& echo "#define HASGETUSERPW 1" || exit 0 ) > hasuserpw.h
 	rm -f tryuserpw.o tryuserpw
 
 ldap.lib: \
@@ -3744,28 +3744,28 @@ hastlsv1_1_server.h: \
 trytlsv1_1_server.c compile load
 	( ( ./compile trytlsv1_1_server.c && ./load trytlsv1_1_server \
 	-lssl -lcrypto ) >/dev/null 2>&1 \
-	&& echo \#define TLSV1_1_SERVER_METHOD 1 || exit 0 ) > hastlsv1_1_server.h
+	&& echo "#define TLSV1_1_SERVER_METHOD 1" || exit 0 ) > hastlsv1_1_server.h
 	rm -f trytlsv1_1_server.o trytlsv1_1_server
 
 hastlsv1_2_server.h: \
 trytlsv1_2_server.c compile load
 	( ( ./compile trytlsv1_2_server.c && ./load trytlsv1_2_server \
 	-lssl -lcrypto ) >/dev/null 2>&1 \
-	&& echo \#define TLSV1_2_SERVER_METHOD 1 || exit 0 ) > hastlsv1_2_server.h
+	&& echo "#define TLSV1_2_SERVER_METHOD 1" || exit 0 ) > hastlsv1_2_server.h
 	rm -f trytlsv1_2_server.o trytlsv1_2_server
 
 hastlsv1_1_client.h: \
 trytlsv1_1_client.c compile load
 	( ( ./compile trytlsv1_1_client.c && ./load trytlsv1_1_client \
 	-lssl -lcrypto ) >/dev/null 2>&1 \
-	&& echo \#define TLSV1_1_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_1_client.h
+	&& echo "#define TLSV1_1_CLIENT_METHOD 1" || exit 0 ) > hastlsv1_1_client.h
 	rm -f trytlsv1_1_client.o trytlsv1_1_client
 
 hastlsv1_2_client.h: \
 trytlsv1_2_client.c compile load
 	( ( ./compile trytlsv1_2_client.c && ./load trytlsv1_2_client \
 	-lssl -lcrypto ) >/dev/null 2>&1 \
-	&& echo \#define TLSV1_2_CLIENT_METHOD 1 || exit 0 ) > hastlsv1_2_client.h
+	&& echo "#define TLSV1_2_CLIENT_METHOD 1" || exit 0 ) > hastlsv1_2_client.h
 	rm -f trytlsv1_2_client.o trytlsv1_2_client
 
 maildirsize: \
