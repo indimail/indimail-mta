@@ -20,7 +20,7 @@ name \fIs\fR must not contain =. Spaces and tabs at the end of \fIt\fR are
 removed. Nulls in \fIt\fR are changed to newlines in the environment
 variable. If the file \fIs\fR is completely empty (0 bytes long),
 \fBenvdir\fR removes an environment variable named \fIs\fR if one exists,
-without adding a new variable. \fBenvdir\fb reads a maximum of 256 bytes
+without adding a new variable. \fBenvdir\fR reads a maximum of 256 bytes
 from \fIs\fR.
 
 If \fBenvdir\fR finds a link named .\fIenvdir\fR pointing to a directory, or a
@@ -38,14 +38,15 @@ variables. Any directory included in this file which have been already
 processed are silently ignored.
 
 if \fBenvdir\fR finds a file named .\fIenvfile\fR, it assumes that a file
-contains envirnoment variables in key=value format. If it finds a line of
+contains envirnoment variables in key=value format. Comments, blank lines
+and leading white spaces are removed from the file. If it finds a line of
 the form \fIs\fR=\fIt\fR, \fBenvdir\fR removes an environment variable
 named \fIs\fR if one exists, and then adds an evironment variable named
-\fIs\fR with value \fIt\fR. Spaces and tabs at the end of \fIt\fR are
-removed. Nulls in \fIt\fR are changed to newlines in the environment
-variable. If \fBenvdir\fR finds a line \fIs\fR, without =, \fBenvdir\fR
-removes an environment variable named \fIs\fR if one exists, without adding
-a new variable.
+\fIs\fR with value \fIt\fR. Whitespace at end of \fIt\fR are preserved and
+are part of the value. Nulls in \fIt\fR are changed to newlines in the
+environment variable. If \fBenvdir\fR finds a line \fIs\fR, without =,
+\fBenvdir\fR removes an environment variable named \fIs\fR if one exists,
+without adding a new variable.
 
 Apart from .\fIenvdir\fR and \fI.envfile\fR, \fBenvdir\fR skips all
 files/directories starting with the '.' dot character.
