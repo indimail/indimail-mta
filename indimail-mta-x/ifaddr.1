@@ -1,6 +1,7 @@
 .TH ifaddr 1
 .SH NAME
-ifaddr
+ifaddr - check if address appears in a field in a message.
+
 .SH SYNOPSIS
 .B ifaddr
 .I [ field ... : ] [ addr ... ]
@@ -16,6 +17,7 @@ uses
 .B To
 and 
 .B CC
+
 .SH DESCRIPTION
 .B ifaddr
 reads a message from standard input, exiting 0 if any 
@@ -46,3 +48,7 @@ The invocation
  | condtomaildir dir ifaddr @example.com
 
 writes a message with a To or Cc address in the domain example.com to dir. 
+
+.SH SEE ALSO
+iftocc(1),
+iftoccfrom(1)

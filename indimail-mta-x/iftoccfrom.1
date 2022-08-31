@@ -1,6 +1,8 @@
 .TH iftoccfrom 1
+
 .SH NAME
-iftoccfrom \- 
+iftoccfrom \- Check if recipient is listed in To, CC or From field in a message
+
 .SH SYNOPSIS
 .B iftoccfrom
 [ 
@@ -8,6 +10,7 @@ iftoccfrom \-
 ] where
 .I addr
 is an email address
+
 .SH DESCRIPTION
 .B iftoccfrom
 reads an 822-format message from standard input and exits 0 if $RECIPIENT is listed in a
@@ -26,3 +29,7 @@ For example, the .qmail line
    | condtomaildir dir iftoccfrom afriend
 
 writes correspondence with afriend to dir. 
+
+.SH SEE ALSO
+iftocc(1),
+ifaddr(1)

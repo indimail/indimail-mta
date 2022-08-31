@@ -1,11 +1,13 @@
 .TH dnsfq 1
 .SH NAME
-dnsfq
+dnsfq - Retrieve AAAA and A records for a fqdn
+
 .SH SYNOPSIS
 .B dnsfq 
 .I fqdn
+
 .SH DESCRIPTION
-.B fqdns
+.B dnsfq
 takes the given
 .I fqdn
 for a host and employs a 
@@ -16,8 +18,9 @@ and
 .I A 
 record following the chain of potential alias names. 
 On output, the entire chain of nested DNS information 
-is displayed together with the retrieved IP(v6|v6) 
+is displayed together with the retrieved IP(v4|v6) 
 addresses.
+
 .SH "SEE ALSO"
 dnscname(1),
 dnsmxip(1),
