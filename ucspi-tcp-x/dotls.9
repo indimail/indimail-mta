@@ -1,7 +1,7 @@
 .TH "dotls" "1" "06 Mar 2010" "Manvendra Bhangui" ""
 
 .SH NAME
-dotls \- TLS/SSL protocol wrapper
+dotls \- Generic TLS/SSL protocol wrapper for non-TLS programs
 .SH SYNOPSIS
 
 \fBdotls\fR [-ntCT ] [-s smtp|pop3] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
@@ -40,7 +40,7 @@ behalf of \fIprog\fR. All other commands are passed unaltered to
 
 .SH "OPTIONS"
 .TP
-\fB-n \fIcertfile\fB\fR
+-\fBn\fR \fIcertfile\fR
 Use \fIcertfile\fR as the certificate
 The certificate to use and is required for SSL/TLS servers.
 \fIcertfile\fR must not be world-readable. This option overrides
@@ -48,11 +48,11 @@ environment variable TLS_CERTFILE. If this is not provided, the file
 @qsysconfdir@/certs/clientcert.pem will be used.
 
 .TP
-\fB-t\fR \fItimeout\fB\fR
+-\fBt\fR \fItimeout\fR
 Timeout after \fItimeout\fR seconds if no data is received
 
 .TP
-.B \-s \fIstartlsType
+-\fBs\fR \fIstartlsType\fR
 Specify smtp or pop3 for \fIstarttlsType\fR. In this mode,
 \fBdotls\fR will offer STARTTLS extension. It will initiate SSL/TLS
 negotation only when it receives \fBSTARTTLS\fR command from client.
@@ -92,26 +92,26 @@ string should be separated by a colon.
 .SH EXAMPLES
 .EX
 1. Add STARTTLS extension for qmail-smtpd
-   tcpserver 0 25 /usr/bin/dotls -n "" -s smtp /var/qmail/bin/qmail-smtpd
+   tcpserver 0 25 /usr/bin/dotls -s smtp /var/qmail/bin/qmail-smtpd
 
 2. Provide SMTPS service on port 465 for qmail-smtpd
-   tcpserver 0 465 /usr/bin/dotls -n "" /var/qmail/bin/qmail-smtpd
+   tcpserver 0 465 /usr/bin/dotls /var/qmail/bin/qmail-smtpd
 
 3. Add STLS extension for qmail-pop3d
-   tcpserver 0 110 /usr/bin/dotls -n "" -s pop3 qmail-popup host \\
+   tcpserver 0 110 /usr/bin/dotls -s pop3 qmail-popup host \\
      checkpassword qmail-pop3d Maildir
 
 4. Provide POP3S service on port 993 for qmail-pop3d
-   tcpserver 0 993 /usr/bin/dotls -n "" qmail-popup host checkpassword \\
+   tcpserver 0 993 /usr/bin/dotls qmail-popup host checkpassword \\
      qmail-pop3d Maildir
 
 5. Run a script under tcpclient that connects to a SSL server on port 5555
    read from fd 0 reads from network & write to fd 1 writes to network
-   tcpclient 0 555 /usr/bin/dotls -n "" -C /usr/bin/myscript
+   tcpclient 0 555 /usr/bin/dotls -C /usr/bin/myscript
 
 6. Run a script under tcpclient that connects to a SSL server on port 5555
    read from fd 6 reads from network & write to fd 7 writes to network
-   tcpclient 0 555 /usr/bin/dotls -n "" -CT /usr/bin/myscript
+   tcpclient 0 555 /usr/bin/dotls -CT /usr/bin/myscript
 .EE
 
 .SH "SEE ALSO"
