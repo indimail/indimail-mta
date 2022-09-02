@@ -123,7 +123,7 @@ Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 **NOTES**
 
 You need libidn2 to get indimail-mta built with [Internationalized Email Addresses (RFC6530)](https://tools.ietf.org/html/rfc6530)
-You need libgsasl for SCRAM AUTH methods (SCRAM-SHA-1, SCRAM-SHA-256)
+You need libgsasl for SCRAM AUTH methods (SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS)
 
 ```
 FreeBSD
