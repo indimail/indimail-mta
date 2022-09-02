@@ -391,7 +391,7 @@ address of the host to which we are delivering matches the remote address,
 then bind the socket to the interface matching the local address, making it
 appear as if the connection had originated from the named local address
 instead of the default local address. \fIbindroutes\fR may contain suffix
-wildcards. \fIbindroutes\fR takes precedence over \f domainbindings\fR.
+wildcards. \fIbindroutes\fR takes precedence over \fIdomainbindings\fR.
 
 .EX
 # Send this on the internal net
@@ -456,7 +456,7 @@ bounce host:
 .EE
 
 You can override the smtproutes filename by setting environment variable
-SMTPROUTEFILE.
+SMTPROUTESFILE.
 
 The smtproutes control file is bypassed if the SMTPROUTE environment
 variable is set by \fBqmail-rspawn\fR. The SMTPROUTE environment variable
@@ -575,7 +575,7 @@ multiple hosts. In such a case the QMTPROUTE variable points to the host
 where the user's mailbox lies.
 
 You can override the qmtproutes filename by setting environment variable
-\fBQMTPROUTEFILE\fR.
+\fBQMTPROUTESFILE\fR.
 
 .TP 5
 .I timeoutconnect

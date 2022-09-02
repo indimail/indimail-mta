@@ -1,5 +1,12 @@
 *
 Release 3.0.1 Start 21/05/2022 End --/--/20--
+======= Release Highlights ================================================
+o added SCRAM authentication SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS
+  SCRAM-SHA-256-plus in qmail-smtpd and qmail-remote
+o added CRAM-SHA224, CRAM=SHA-384 authentication methods in qmail-smtpd,
+  qmail-remote
+o Converted man pages to markdown for indimail wiki
+===========================================================================
 - 21/05/2022
 01.  svctool: redirect envdir error message for missing dir to /dev/null
 - 26/05/2022
@@ -78,6 +85,9 @@ Release 3.0.1 Start 21/05/2022 End --/--/20--
 - 29/08/2022
 44. Makefile: warn libraries not linked, headers not included & avoid race
     conditions
+- 02/09/2022
+45. qmail-remote: renamed SMTPROUTEFILE, QMTPROUTEFILE env variable to
+    SMTPROUTESFILE, QMTPROUTESFILE
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
