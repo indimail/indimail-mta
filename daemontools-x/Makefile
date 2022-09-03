@@ -307,7 +307,7 @@ multipipe.o: compile multipipe.c bool.h svcfns.h
 	./compile multipipe.c
 
 teepipe: load teepipe.o
-	./load teepipe
+	./load teepipe -lqmail
 
 teepipe.o: compile teepipe.c
 	./compile teepipe.c

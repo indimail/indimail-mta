@@ -1,5 +1,8 @@
 /*
  * $Log: teepipe.c,v $
+ * Revision 1.6  2022-09-03 22:24:33+05:30  Cprogrammer
+ * refactored teepipe
+ *
  * Revision 1.5  2021-08-30 12:04:53+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -35,90 +38,72 @@
  */
 #include <signal.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <errno.h>
+#include <strerr.h>
 #include <noreturn.h>
 
-no_return void
-err(const char *msg)
-{
-	if (write(2, "teepipe: Error: ", 16) == -1 
-		|| write(2, msg, strlen(msg)) == -1 
-		|| write(2, "\n", 1) == -1)
-		;
-	exit(1);
-}
+#define WARN   "teepipe: warning: "
+#define FATAL  "teepipe: fatal: "
 
-no_return void
-err2(const char *msg1, const char *msg2)
-{
-	if (write(2, "teepipe: Error: ", 16) == -1
-		|| write(2, msg1, strlen(msg1)) == -1
-		|| write(2, msg2, strlen(msg2)) == -1
-		|| write(2, "\n", 1) == -1)
-		;
-	exit(1);
-}
 
 #define BUFSIZE 4096
-
-void
-main_loop(int fd)
-{
-	for (;;) {
-		char            buf[BUFSIZE];
-		ssize_t         rd = read(0, buf, BUFSIZE);
-		if (rd == 0 || rd == -1)
-			break;
-		if (write(fd, buf, rd) != rd)
-			err("Error writing to program");
-		if (write(1, buf, rd) != rd)
-			err("Error writing to standard output");
-	}
-}
-
-no_return void
-exec_child(char **argv, int fd[2])
-{
-	if (close(fd[1]) || close(0) || dup2(fd[0], 0) || close(fd[0]))
-		err("Error setting up pipe as standard input");
-	if (close(1) || dup2(2, 1) != 1)
-		err("Error setting up standard output");
-	execvp(argv[0], argv);
-	err2("Error executing", argv[0]);
-}
 
 int
 main(int argc, char **argv)
 {
 	int             fd[2];
 	int             status;
+	ssize_t         rd;
+	char            buf[BUFSIZE];
 	pid_t           pid;
+
 	if (argc < 2)
-		err("usage: teepipe program [args ...]");
+		strerr_die2x(100, WARN, "usage: teepipe program [args ...]: ");
 	if (pipe(fd) == -1)
-		err("Could not create pipe");
-	if ((pid = fork()) == -1)
-		err("Could not fork");
-	if (!pid)
-		exec_child(argv + 1, fd);
+		strerr_die2sys(111, FATAL, "Could not create pipe: ");
 	signal(SIGPIPE, SIG_IGN);
-	signal(SIGCHLD, SIG_IGN);
+	switch ((pid = fork()))
+	{
+	case -1:
+		strerr_die2sys(11, FATAL, "Could not fork: ");
+		break;
+	case 0: /*- child */
+		if (close(fd[1]) || close(0) || dup2(fd[0], 0) || close(fd[0]))
+			strerr_die2sys(111, FATAL, "Error setting up pipe as standard input: ");
+		if (close(1) || dup2(2, 1) != 1)
+			strerr_die2sys(111, FATAL, "Error setting up standard output: ");
+		execvp(argv[1], argv + 1);
+		strerr_die4sys(111, FATAL, "Error executing ", argv[1], ": ");
+		break;
+	}
 	close(fd[0]);
-	main_loop(fd[1]);
-	if (close(fd[1]))
-		err("Error closing output pipe");
-	if (waitpid(pid, &status, 0) != pid)
-		err("Error waiting for program to exit");
-	return WIFEXITED(status) ? WEXITSTATUS(status) : 255;
+	for (;;) {
+		rd = read(0, buf, BUFSIZE);
+		if (rd == 0 || rd == -1)
+			break;
+		if (write(fd[1], buf, rd) != rd)
+			strerr_die2sys(111, FATAL, "Error writing to program: ");
+		if (write(1, buf, rd) != rd)
+			strerr_die2sys(111, FATAL, "Error writing to standard out: ");
+	}
+	if (close(fd[1])) /*- close pipe so that child reads 0, and exits */
+		strerr_die2sys(111, FATAL, "Error closing output pipe: ");
+	while (waitpid(pid, &status, WUNTRACED) != pid) {
+		if (errno != EINTR)
+			strerr_die2sys(111, FATAL, "failed to wait for child: ");
+	}
+	if (!WIFEXITED(status))
+		strerr_die2x(111, FATAL, "child crashed: ");
+	return WEXITSTATUS(status);
 }
 
 void
 getversion_teepipe_c()
 {
-	static char    *x = "$Id: teepipe.c,v 1.5 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: teepipe.c,v 1.6 2022-09-03 22:24:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
