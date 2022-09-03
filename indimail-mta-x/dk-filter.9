@@ -37,36 +37,42 @@ The private key should be created by
 .BR dknewkey(8) .
 
 You can set various DK options in getopt style, by setting the environment variable DKSIGNOPTIONS
- b <advice_length>    Length of Advice
- c <canonicalization> simple, nofws
- s <privkeyfile>
- h                    show headers included
- r                    Skip Duplicate Headers
+
+.nf
+b \fIadvice_length\fR     Length of Advice
+c \fIcanonicalization\fR  simple, nofws
+s \fIprivkeyfile\fR       Private key
+h                   show headers included
+r                   Skip Duplicate Headers
+.fi
+
 .EX
- DKSIGNOPTIONS="-h -r -c nofws"
- sets the h= tag, skips duplicate headers and sets nofws canonicalization
+DKSIGNOPTIONS="-h -r -c nofws"
+sets the h= tag, skips duplicate headers and sets nofws canonicalization
 .EE
 
 You can set various DKIM options in getopt style, by setting the environment variable DKIMSIGNOPTIONS
 
- b <standard>         1 - allman, 2 - ietf or 3 - both
- c <canonicalization> r for relaxed [DEFAULT], s - simple,
-                      t relaxed/simple, u - simple/relaxed
- l                    include body length tag
- q                    include query method tag;
- t                    include a timestamp tag
- h
- i <identity>         the identity, if not provided it will not be included
- x <expire_time>      the expire time in seconds since epoch
-                      ( DEFAULT = current time + 604800)
-                      if set to - then it will not be included
- z <hash>             1 for sha1, 2 for sha256, 3 for both
- s <privkeyfile>
- y <selector>
+.nf
+b <standard>         1 - allman, 2 - ietf or 3 - both
+c <canonicalization> r for relaxed [DEFAULT], s - simple,
+                     t relaxed/simple, u - simple/relaxed
+l                    include body length tag
+q                    include query method tag;
+t                    include a timestamp tag
+h
+i <identity>         the identity, if not provided it will not be included
+x <expire_time>      the expire time in seconds since epoch
+                     ( DEFAULT = current time + 604800)
+                     if set to - then it will not be included
+z <hash>             1 for sha1, 2 for sha256, 3 for both
+s <privkeyfile>
+y <selector>
+.fi
 
 .EX
- DKIMSIGNOPTIONS="-b 1 -c r -q"
- sets allman standard, with relaxed canonicalization and include query method tag
+DKIMSIGNOPTIONS="-b 1 -c r -q"
+sets allman standard, with relaxed canonicalization and include query method tag
 .EE
 
 when signing \fBdk-filter\fR uses the domain found in the Return-Path, Sender, From headers to set

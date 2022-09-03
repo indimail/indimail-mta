@@ -1,21 +1,23 @@
 .TH teepipe 1
 .SH NAME
 teepipe \- copy stdin to a program and stdout
+
 .SH SYNOPSIS
 .B teepipe
 .I program
 [
 .I args ...
 ]
+
 .SH DESCRIPTION
 .B teepipe
 starts a pipeline to the program named on the command line, and copies
-standard input to both the pipe and to standard output.
-Standard output of the executed program is redirected to standard error.
-If an error occurs while writing to either the pipeline or standard
-output, the other is closed and
-.B teepipe
-exits.
+standard input to both the pipe and to standard output. Standard output of
+the executed program is redirected to standard error. If an error occurs
+while writing to either the pipeline or standard output, the other end is
+closed and \fBteepipe\fR exits.
+
 .SH RETURN VALUE
 Exits 0 if all data from standard input was successfully copied to both
-the pipe and standard output.
+the pipe and standard output. Exits 111 for system error and 100 for wrong
+usage.

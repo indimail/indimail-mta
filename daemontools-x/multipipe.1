@@ -2,43 +2,32 @@
 .SH NAME
 multipipe \- supervise a pipeline of commands
 .SH SYNOPSIS
-.B multipipe
-.I [ directory ]
+\fBmultipipe\fR [ \fIdirectory\fR ]
+
 .SH DESCRIPTION
-.B multipipe
-starts one supervise process for each subdirectory of the current
-directory.
-.B multipipe
-skips subdirectory names starting with dots.
-Each supervised processes is piped a copy of standard input sent to
-.BR multipipe .
+\fBmultipipe\fR starts one supervise process for each subdirectory of the
+current directory. \fBmultipipe\fR skips subdirectory names starting with
+dots.  Each supervised processes is piped a copy of standard input sent to
+\fBmultipipe\fR.
+
 .P
-Every five seconds,
-.B multipipe
-checks for subdirectories again.
-If it sees a new subdirectory, it starts a new supervise process.
-If a subdirectory is removed, it closes the pipe to that supervise
-process.
-Directory named
-.I supervise
-or with names starting with a period are ignored.
+Every five seconds, \fBmultipipe\fR checks for subdirectories again. If it
+sees a new subdirectory, it starts a new supervise process. If a
+subdirectory is removed, it closes the pipe to that supervise process.
+Directory named \fIsupervise\fR or with names starting with a period are ignored.
+
 .P
 If
-.B multipipe
-is given a command-line argument, it switches to that directory when it
-starts.
+\fBmultipipe\fR is given a command-line argument, it switches to that
+directory when it starts.
+
 .P
-If
-.B multipipe
-is sent either the
-.IR INT ,
-.IR QUIT ,
-or the
-.I TERM
-signal, or it reaches end of file on standard input, it runs
-.B svc -dx
-on each command to shut it down, and waits for it to exit.
+If \fBmultipipe\fR is sent either the \fBINT\fR, \fBQUIT\fR, or the
+\fBTERM\fR signal, or it reaches end of file on standard input, it runs
+\fBsvc -dx\fR on each command to shut it down, and waits for it to exit.
+
 .SH RETURN VALUE
 Exits 0 when all the commands are shut down.
+
 .SH SEE ALSO
 supervise, svscan
