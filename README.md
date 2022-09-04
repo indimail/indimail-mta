@@ -36,7 +36,7 @@ indimail-mta is [FHS 3.0](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Sta
 
 indimail-mta, indimail-virtualdomains, libqmail gets installed with man pages for almost all commands and configuration.
 
-Refer to this [WIKI](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta. Refer to [indimail-mta-INTERNALS](https://github.com/mbhangui/indimail-mta/wiki/IndiMail#indimail-mta-internals) for indimail-mta internals specifically.
+Refer to this [WIKI](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) for a detailed understanding of Indimail Virtual Domains and indimail-mta. Refer to [indimail-mta-INTERNALS](https://github.com/mbhangui/indimail-mta/wiki/1-IndiMail#indimail-mta-internals) for indimail-mta internals specifically.
 
 This document contains instructions for building indimail-mta from source. indimail-mta compiles and runs on all linux distros (Fedora, Debian, openSUSE, SLES), Arch Linux, Gentoo, Alpine Linux, FreeBSD and Mac OS X. Let me know if you want it on any other OS not mentioned in this document. The correct way to read this document is from top to bottom and follow the instructions serially. If you click on any link, you need to come back to this document.
 
