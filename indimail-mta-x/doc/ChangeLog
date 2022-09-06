@@ -88,6 +88,9 @@ o Converted man pages to markdown for indimail wiki
 - 02/09/2022
 45. qmail-remote: renamed SMTPROUTEFILE, QMTPROUTEFILE env variable to
     SMTPROUTESFILE, QMTPROUTESFILE
+- 06/09/2022
+46. qmail-remote: fixed compilation on systems without TLS1_3_VERSION
+47. svctool: made gecos field for qmail users descriptive
 
 * Wednesday 18 May 2022 01:41:34 PM IST Manvendra Bhangui <indimail-mta@indimail.org> 1.0-1.1%{?dist}
 Release 3.0.0 Start 21/09/2021 End 18/05/2022
