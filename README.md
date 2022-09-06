@@ -85,8 +85,8 @@ sed findutils diffutils readline gzip binutils coreutils grep
 libgsasl7-dev
 
 Ubuntu 16.04, Debian 8 - libmysqlclient-dev
+Ubuntu 16.04 - libcom-err2 additionally
 Remaining - default-libmysqlclient-dev
-Ubuntu 16.04 - libcom-err2 libmysqlclient-dev
 ```
 
 **Arch Linux**
@@ -312,7 +312,8 @@ conf-shared|/usr/local/share/indimail
 conf-libexec|/usr/local/libexec/indimail
 conf-servicedir|/usr/local/etc/indimail/sv
 
-The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make distclean`. If you don't run default.configure, you can run replace `make` with `./qmake`
+The build below depends on several Makefiles. For the build to operate without errors, you need to run default.configure the first time and everytime after you do a `make distclean`. If you don't run default.configure, you can run replace `make` with `./qmake`. You also need few users for the `make` command to succeed by running the `svctool` command.
+
 
 ```
 $ cd /usr/local/src/indimail-mta/indimail-mta-x
@@ -323,6 +324,8 @@ $ sudo ./svctool --config=users --nolog
 $ sudo make install or sudo qmake install
 ```
 
+The following groups will be added to the system - indimail, qmail, nofiles, qscand, mysql.
+The following users will be added to the system - indimail, alias, qmaill, qmaild, qmailp, qmailq, qmailr, qmails, qscand.  
 (check version in indimail-mta/indimail-mta-x/conf-version)
 
 Note: for Darwin
