@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.640 2022-08-28 17:46:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.641 2022-09-06 16:26:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.640 2022-08-28 17:46:40+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.641 2022-09-06 16:26:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7720,12 +7720,12 @@ create_users()
 		userid=`expr $userid + 1`
 		/usr/bin/dscl . -list Users/alias >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
-			echo "creating user alias"
+			echo "Creating user alias"
 			macOSuseradd -M -u $userid -g nofiles -d $QmailHOME/alias -s $safe_shell alias
 		fi
 		;;
 		*)
-		linuxuseradd -c "indimail alias user" -M -g nofiles -d $QmailHOME/alias -s $safe_shell alias
+		linuxuseradd -c "qmail alias user" -M -g nofiles -d $QmailHOME/alias -s $safe_shell alias
 		;;
 	esac
 	# qmaill user
@@ -7735,45 +7735,64 @@ create_users()
 		userid=`expr $userid + 1`
 		/usr/bin/dscl . -list Users/qmaill >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
-			echo "creating user qmaill"
+			echo "Creating qmail log user qmaill"
 			macOSuseradd -M -u $userid -g nofiles -d $LOGDIR -s $safe_shell qmaill
 		fi
 		;;
 		*)
-		linuxuseradd -c "indimail log user" -M -g nofiles -d $LOGDIR -s $safe_shell qmaill
+		linuxuseradd -c "qmail log user qmaill" -M -g nofiles -d $LOGDIR -s $safe_shell qmaill
 		;;
 	esac
 	# qmaild, qmailp user
 	for i in qmaild qmailp; do
+		case "$i" in
+			qmaild)
+			t="qmail daemon user $i"
+			;;
+			qmailp)
+			t="qmail password fetch user $i"
+			;;
+		esac
 		case "$host" in
 			*-*-darwin*)
 			userid=`dscl . -list /Users UniqueID | awk '{print $2}' | sort -n |tail -1`
 			userid=`expr $userid + 1`
 			/usr/bin/dscl . -list Users/$i >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				echo "creating user $i"
+				echo "Creating $t"
 				macOSuseradd -M -u $userid -g nofiles -d $QmailHOME -s $safe_shell $i
 			fi
 			;;
 			*)
-			linuxuseradd -c "indimail $i user" -M -g nofiles -d $QmailHOME -s $safe_shell $i
+			linuxuseradd -c "$t" -M -g nofiles -d $QmailHOME -s $safe_shell $i
 			;;
 		esac
 	done
 	# qmailq, qmailr, qmails user
 	for i in qmailq qmailr qmails; do
+		case "$i" in
+			qmailq)
+			t="qmail-queue user $i"
+			;;
+			qmailr)
+			t="qmail-remote user $i"
+			;;
+			qmails)
+			t="qmail-send user $i"
+			;;
+		esac
 		case "$host" in
 			*-*-darwin*)
 			userid=`dscl . -list /Users UniqueID | awk '{print $2}' | sort -n |tail -1`
 			userid=`expr $userid + 1`
 			/usr/bin/dscl . -list Users/$i >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
-				echo "creating user $i"
+				echo "Creating $t"
 				macOSuseradd -M -u $userid -g qmail -d $QmailHOME -s $safe_shell $i
 			fi
 			;;
 			*)
-			linuxuseradd -c "indimail $i user" -M -g qmail -d $QmailHOME -s $safe_shell $i
+			linuxuseradd -c "$t" -M -g qmail -d $QmailHOME -s $safe_shell $i
 			;;
 		esac
 	done
