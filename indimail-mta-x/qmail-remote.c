@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.155 2022-08-24 08:03:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.156 2022-09-06 16:23:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -2516,12 +2516,14 @@ do_channel_binding(Gsasl_session *sctx)
 #endif
 		break;
 #if GSASL_VERSION_NUMBER >= 0x020002
+#if defined(TLS1_3_VERSION)
 	case TLS1_3_VERSION:
 		if(!(p = get_finish_message(tls_exporter)))
 			quit("ZConnected to ", " but unable to get finish message for GSASL_CB_TLS_EXPORTER", -1, -1);
 		if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK)
 			quit("ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_EXPORTER", -1, -1);
 		break;
+#endif
 #endif
 	default:
 		quit("ZConnected to ", " but got unknown channel binding", -1, -1);
@@ -4146,13 +4148,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.155 2022-08-24 08:03:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.156 2022-09-06 16:23:15+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.156  2022-09-06 16:23:15+05:30  Cprogrammer
+ * fixed compilation on systems without TLS1_3_VERSION
+ *
  * Revision 1.155  2022-08-24 08:03:54+05:30  Cprogrammer
  * fixed non-SCRAM methods getting skipped
  *
