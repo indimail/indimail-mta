@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.156 2022-09-06 16:23:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.156 2022-09-07 20:18:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -2456,7 +2456,10 @@ get_finish_message(cb_type type)
 {
 	char            tls_finish_buf[EVP_MAX_MD_SIZE];
 	static stralloc in = {0}, res = {0};
-	int             i, tls_finish_len;
+	int             tls_finish_len;
+#if GSASL_VERSION_NUMBER >= 0x020002
+	int             i;
+#endif
 
 	if (!ssl) /*- we should never be here */
 		return ((char *) NULL);
@@ -2500,7 +2503,7 @@ void
 do_channel_binding(Gsasl_session *sctx)
 {
 	char           *p = (char *) NULL;
-	int             i, rc;
+	int             i;
 
 	switch ((i = SSL_version(ssl)))
 	{
@@ -2508,11 +2511,10 @@ do_channel_binding(Gsasl_session *sctx)
 		if (!(p = get_finish_message(tls_unique)))
 			quit("ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", -1, -1);
 #if GSASL_VERSION_MAJOR > 1
-		if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p)) != GSASL_OK)
+		if (gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p) != GSASL_OK)
 			quit("ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", -1, -1);
 #else
 		gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p);
-		rc = GSASL_OK;
 #endif
 		break;
 #if GSASL_VERSION_NUMBER >= 0x020002
@@ -2520,7 +2522,7 @@ do_channel_binding(Gsasl_session *sctx)
 	case TLS1_3_VERSION:
 		if(!(p = get_finish_message(tls_exporter)))
 			quit("ZConnected to ", " but unable to get finish message for GSASL_CB_TLS_EXPORTER", -1, -1);
-		if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK)
+		if (gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p) != GSASL_OK)
 			quit("ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_EXPORTER", -1, -1);
 		break;
 #endif
@@ -4148,14 +4150,14 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.156 2022-09-06 16:23:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.156 2022-09-07 20:18:53+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
- * Revision 1.156  2022-09-06 16:23:15+05:30  Cprogrammer
+ * Revision 1.156  2022-09-07 20:18:53+05:30  Cprogrammer
  * fixed compilation on systems without TLS1_3_VERSION
  *
  * Revision 1.155  2022-08-24 08:03:54+05:30  Cprogrammer
