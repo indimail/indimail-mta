@@ -426,7 +426,8 @@ qmailctl.8: qmailctl.9 conf-servicedir
 	$(edit) qmailctl.9 > qmailctl.8
 
 docker-entrypoint: \
-warn-auto.sh docker-entrypoint.sh conf-prefix conf-servicedir
+warn-auto.sh docker-entrypoint.sh conf-prefix conf-servicedir \
+conf-sysconfdir
 	( \
 	cat warn-auto.sh; \
 	$(edit) $@.sh \

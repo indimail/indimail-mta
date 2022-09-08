@@ -1,46 +1,5 @@
 #
-# $Id: docker-entrypoint.sh,v 1.13 2021-08-22 23:03:36+05:30 Cprogrammer Exp mbhangui $
-#
-# $Log: docker-entrypoint.sh,v $
-# Revision 1.13  2021-08-22 23:03:36+05:30  Cprogrammer
-# added -r, --repair option to drop to shell
-#
-# Revision 1.12  2021-08-20 18:13:44+05:30  Cprogrammer
-# removed host component from domain name
-#
-# Revision 1.11  2021-08-18 15:28:19+05:30  Cprogrammer
-# removed timedatectl as it doesn't work without systemd
-#
-# Revision 1.10  2021-08-18 00:10:16+05:30  Cprogrammer
-# added hotfix for podman named pipe bug
-#
-# Revision 1.9  2021-08-11 23:23:15+05:30  Cprogrammer
-# use getopt to get options to set domain, timezone
-#
-# Revision 1.8  2020-10-08 22:53:43+05:30  Cprogrammer
-# use variables from Makefile
-#
-# Revision 1.7  2020-05-06 15:30:52+05:30  Cprogrammer
-# remove down file to start services
-#
-# Revision 1.6  2020-05-06 11:09:11+05:30  Cprogrammer
-# start httpd, php-fpm for webmail entrypoint
-#
-# Revision 1.5  2020-05-04 11:11:01+05:30  Cprogrammer
-# create /etc/mtab as link to /proc/self/mounts / /proc/mounts if missing
-# start apache if argument to podman/docker entrypoint is webmail
-#
-# Revision 1.4  2020-04-29 11:31:56+05:30  Cprogrammer
-# removed deletion of mysql.3306/down
-#
-# Revision 1.3  2020-03-21 23:41:17+05:30  Cprogrammer
-# use envdir to set env variables in /service/.svscan/variables
-#
-# Revision 1.2  2020-03-20 15:08:32+05:30  Cprogrammer
-# display command being run during docker entrypoint
-#
-# Revision 1.1  2019-12-08 18:07:36+05:30  Cprogrammer
-# Initial revision
+# $Id: docker-entrypoint.sh,v 1.14 2022-09-08 17:55:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -52,6 +11,31 @@ usage()
 	echo "              [command] [args]"
 	echo "default command is svscan"
 	exit 100
+}
+
+fix_podman()
+{
+if [ -f @prefix@/sbin/qmail-queue -a ! -p @indimaildir@/queue/queue1/lock/trigger ] ; then
+	echo "Your podman/docker container suffers from named pipe bug. Applying hotfix" 1>&2
+	if [ -f @prefix@/sbin/inlookup -a -d @indimaildir@/inquery ] ; then
+		cd @indimaildir@/inquery
+		for i in 1 2 3 4 5
+		do
+			if [ ! -p infifo.$i ] ; then
+				echo creating infifo.$i
+				mkfifo infifo.$i
+				chown indimail:indimail infifo.$i
+				chmod 600 infifo.$i
+			fi
+		done
+	fi
+	if [ -d @indimaildir@/queue -a ! -f @servicedir@/.svscan/run ] ; then
+		cd @indimaildir@/queue
+		for i in queue1 queue2 queue3 queue4 queue5; do if [ -d $i -a ! -p $i/lock/trigger ] ; then @prefix@/bin/queue-fix -v $i; fi; done
+		for i in slowq nqueue; do if [ -d $i ] ; then @prefix@/bin/queue-fix -v $i; fi; done
+		for i in qmta; do if [ -d $i ] ; then @prefix@/bin/queue-fix -mv $i; fi; done
+	fi
+fi
 }
 
 options=$(getopt -a -n entrypoint -o "rd:t:" -l repair,domain:,timezone: -- "$@")
@@ -92,36 +76,30 @@ do
 	;;
 	esac
 done
+
 # fix for podman bug which drops fifos
-if [ -f /usr/sbin/qmail-queue -a ! -p /var/indimail/queue/queue1/lock/trigger ] ; then
-	echo "Your podman/docker container suffers from named pipe bug. Applying hotfix" 1>&2
-	if [ -f /usr/sbin/inlookup -a -d /var/indimail/inquery ] ; then
-		cd /var/indimail/inquery
-		for i in 1 2 3 4 5; do if [ ! -p infifo.$i ] ; then echo creating infifo.$i; \
-			mkfifo infifo.$i; chown indimail:indimail infifo.$i; \
-			chmod 600 infifo.$i; fi; done
-	fi
-	if [ -d /var/indimail/queue -a ! -f /service/.svscan/run ] ; then
-		cd /var/indimail/queue
-		for i in queue1 queue2 queue3 queue4 queue5; do if [ -d $i -a ! -p $i/lock/trigger ] ; then queue-fix -v $i; fi; done
-		for i in slowq nqueue; do if [ -d $i ] ; then queue-fix -v $i; fi; done
-		for i in qmta; do if [ -d $i ] ; then queue-fix -mv $i; fi; done
-	fi
-fi
-# end fix for podman
+fix_podman
+
 set -e
 cd /
 if [ -z "$domain" ] ; then
 	domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 fi
-if [ -f /etc/indimail/control/defaultdomain ] ; then
-	orig=$(cat /etc/indimail/control/defaultdomain)
+if [ -f @sysconfdir@/control/defaultdomain ] ; then
+	orig=$(cat @sysconfdir@/control/defaultdomain)
 fi
 if [ ! "$orig" = "$domain" ] ; then
-	/usr/sbin/svctool --default-domain=$domain --config=recontrol
+	@prefix@/sbin/svctool --default-domain=$domain --config=recontrol
 fi
 
-case "$1" in
+if [ $# -eq 0 ] ; then
+	program=svscan
+elif [ $# -eq 1 -a "$1" = "bash" ] ; then
+	program=svscan
+else
+	program=$1
+fi
+case "$program" in
 indimail|indimail-mta|svscan|webmail)
 	if [ ! -f /etc/mtab ] ; then
 		if [ -f /proc/self/mounts ] ; then
@@ -134,31 +112,75 @@ indimail|indimail-mta|svscan|webmail)
 			echo "Warning /etc/mtab: No such file or directory" 1>&2
 		fi
 	fi
-	case "$1" in
+	case "$program" in
 	webmail)
-		if [ -f @servicedir@/php-fpm/down ] ; then
-			echo "enabling @servicedir@/php-fpm"
-			/bin/rm -f @servicedir@/php-fpm/down
-		fi
-		if [ -f @servicedir@/httpd/down ] ; then
-			echo "enabling @servicedir@/httpd"
-			/bin/rm -f @servicedir@/httpd/down
-		else
-			echo "/usr/sbin/apachectl start"
-			/usr/sbin/apachectl start
-		fi
-	;;
+			if [ -f @servicedir@/php-fpm/down ] ; then
+				echo "enabling @servicedir@/php-fpm"
+				/bin/rm -f @servicedir@/php-fpm/down
+			fi
+			if [ -f @servicedir@/httpd/down ] ; then
+				echo "enabling @servicedir@/httpd"
+				/bin/rm -f @servicedir@/httpd/down
+			else
+				echo "/usr/sbin/apachectl start"
+				/usr/sbin/apachectl start
+			fi
+		;;
 	esac
 	if [ -d @servicedir@/.svscan/variables ] ; then
-   		echo "docker-entrypoint: [$1] @prefix@/bin/envdir @servicedir@/.svscan/variables @prefix@/sbin/svscan @servicedir@"
+   		echo "docker-entrypoint: [$program] @prefix@/bin/envdir @servicedir@/.svscan/variables @prefix@/sbin/svscan @servicedir@"
    		exec @prefix@/bin/envdir @servicedir@/.svscan/variables @prefix@/sbin/svscan @servicedir@
 	else
-   		echo "docker-entrypoint: [$1] executing @prefix@/sbin/svscan @servicedir@"
+   		echo "docker-entrypoint: [$program] executing @prefix@/sbin/svscan @servicedir@"
    		exec @prefix@/sbin/svscan @servicedir@
 	fi
-;;
+	;;
 *)
 	echo "docker-entrypoint: executing $@"
 	exec "$@"
-;;
+	;;
 esac
+#
+# $Log: docker-entrypoint.sh,v $
+# Revision 1.14  2022-09-08 17:55:47+05:30  Cprogrammer
+# set svscan as default when no arguments are passed
+#
+# Revision 1.13  2021-08-22 23:03:36+05:30  Cprogrammer
+# added -r, --repair option to drop to shell
+#
+# Revision 1.12  2021-08-20 18:13:44+05:30  Cprogrammer
+# removed host component from domain name
+#
+# Revision 1.11  2021-08-18 15:28:19+05:30  Cprogrammer
+# removed timedatectl as it doesn't work without systemd
+#
+# Revision 1.10  2021-08-18 00:10:16+05:30  Cprogrammer
+# added hotfix for podman named pipe bug
+#
+# Revision 1.9  2021-08-11 23:23:15+05:30  Cprogrammer
+# use getopt to get options to set domain, timezone
+#
+# Revision 1.8  2020-10-08 22:53:43+05:30  Cprogrammer
+# use variables from Makefile
+#
+# Revision 1.7  2020-05-06 15:30:52+05:30  Cprogrammer
+# remove down file to start services
+#
+# Revision 1.6  2020-05-06 11:09:11+05:30  Cprogrammer
+# start httpd, php-fpm for webmail entrypoint
+#
+# Revision 1.5  2020-05-04 11:11:01+05:30  Cprogrammer
+# create /etc/mtab as link to /proc/self/mounts / /proc/mounts if missing
+# start apache if argument to podman/docker entrypoint is webmail
+#
+# Revision 1.4  2020-04-29 11:31:56+05:30  Cprogrammer
+# removed deletion of mysql.3306/down
+#
+# Revision 1.3  2020-03-21 23:41:17+05:30  Cprogrammer
+# use envdir to set env variables in /service/.svscan/variables
+#
+# Revision 1.2  2020-03-20 15:08:32+05:30  Cprogrammer
+# display command being run during docker entrypoint
+#
+# Revision 1.1  2019-12-08 18:07:36+05:30  Cprogrammer
+# Initial revision
