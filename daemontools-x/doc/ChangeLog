@@ -1,5 +1,5 @@
-* Thu 08 Sep 2022 12:28:05 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
-Release 1.1.0 Start 27/02/2021
+* Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
+Release 1.1.0 Start 27/02/2021 End 08/09/2022
 ======= Release Highlights ================================================
 o svscan: run log supervise process with parent directory as argv2, allow
   supervise processes to run with three arguments
@@ -210,6 +210,7 @@ o svscan: added AUTOSCAN feature (which was actually part of the original
 89. updated docker-entrypoint man page
 90. docker-entrypoint: set svscan as default program if not provided
 - 08/09/2022 - Final release daemontools-1.1.0
+- 08/09/2022 - indimail-mta-3.0.1
 
 * Sunday 14 February 2021 07:46:33 PM IST
 Release 1.0 Start 09/10/2020

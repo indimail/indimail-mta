@@ -1,5 +1,5 @@
-*
-Release 3.0.1 Start 21/05/2022 End --/--/20--
+* Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 1.1.0-1.1%{?dist}
+Release 3.0.1 Start 21/05/2022 End 08/09/2022
 ======= Release Highlights ================================================
 o added SCRAM authentication SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS
   SCRAM-SHA-256-plus in qmail-smtpd and qmail-remote
