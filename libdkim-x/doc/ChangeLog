@@ -8,8 +8,8 @@ By making, using, selling, offering for sale, importing, and/or sublicensing
 Implementations as permitted, you agree to the terms and conditions of the 
 Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 
-* ChangeLog
-Release 1.5 Start 19/03/2009
+* Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.5-1.1%{?dist}
+Release 1.5 Start 19/03/2009 End 08/09/2022
 - 19/03/2009
 1.  Added libdkim-1.0 - DKIM signing/verification library by ALT-N
     technologies. New program dkim for testing dkim signatures
