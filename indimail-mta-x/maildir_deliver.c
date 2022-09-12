@@ -47,7 +47,7 @@ sigalrm()
 	_exit (3);
 }
 
-/*
+/*-
  * Some operating systems quickly recycle PIDs, which can lead 
  * to collisions between Maildir-style filenames, which must 
  * be unique and non-repeatable within one second.
@@ -75,6 +75,11 @@ sigalrm()
  * Maildir protocol by looking through the hostname for 
  * instances of '/' and ':', replacing them with "057" and 
  * "072", respectively, when writing it to disk.
+ *
+ * Special thanks go to Matthias Andree for design and 
+ * sanity-checking.
+ *
+ *   --Toby Betts <tmb2@po.cwru.edu>
  */
 
 int
@@ -117,26 +122,25 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
 	for (loop = 0;; ++loop) {
 		gettimeofday(&tmval, 0);
-		strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0;
+		strnum[fmt_ulong(strnum, tmval.tv_sec)] = 0; /*- seconds */
 		fntmptph.len = 4;
 		if (!stralloc_cats(&fntmptph, strnum)
 				|| !stralloc_append(&fntmptph, ".")
 				|| !stralloc_append(&fntmptph, "M"))
 			strerr_die1x(111, "Out of memory. (#4.3.0)");
-		strnum[fmt_ulong(strnum, tmval.tv_usec)] = 0;
+		strnum[fmt_ulong(strnum, tmval.tv_usec)] = 0; /*- microseconds */
 		if (!stralloc_cats(&fntmptph, strnum)
 				|| !stralloc_append(&fntmptph, "P"))
 			strerr_die1x(111, "Out of memory. (#4.3.0)");
-		strnum[fmt_ulong(strnum, pid)] = 0;
+		strnum[fmt_ulong(strnum, pid)] = 0; /*- pid */
 		if (!stralloc_cats(&fntmptph, strnum)
 				|| !stralloc_append(&fntmptph, ".")
-				|| !stralloc_cat(&fntmptph, &hostname)
+				|| !stralloc_cat(&fntmptph, &hostname) /*- hostname */
 				|| !stralloc_0(&fntmptph))
 			strerr_die1x(111, "Out of memory. (#4.3.0)");
 		if ((fd = open_excl(fntmptph.s)) >= 0)
 			break;
-		if (errno == error_exist) {
-			/*- really should never get to this point */
+		if (errno == error_exist) { /*- really should never get to this point */
 			if (loop == 2)
 				return (1);
 			usleep(100);
@@ -178,35 +182,35 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 		goto fail;	/*- NFS dorks */
 	if (!stralloc_copyb(&fnnewtph, "new/", 4))
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
-	strnum[i = fmt_ulong(strnum, tmval.tv_sec)] = 0;
+	strnum[i = fmt_ulong(strnum, tmval.tv_sec)] = 0; /*- seconds */
 	if (!stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_append(&fnnewtph, "."))
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
 	/*- in hexadecimal */
 	if (!stralloc_append(&fnnewtph, "I"))
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
-	s = alloc(fmt_xlong(0, st.st_ino) + fmt_xlong(0, st.st_dev));
+	s = alloc(fmt_xlong(0, st.st_ino) + fmt_xlong(0, st.st_dev)); /*- inode number */
 	i = fmt_xlong(s, st.st_ino);
 	if (!stralloc_catb(&fnnewtph, s, i)
 			|| !stralloc_append(&fnnewtph, "V"))
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
-	i = fmt_xlong(s, st.st_dev);
+	i = fmt_xlong(s, st.st_dev); /*- device number */
 	if (!stralloc_catb(&fnnewtph, s, i))
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
 	alloc_free(s);
 	/*- in decimal */
 	if (!stralloc_append(&fnnewtph, "M"))
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
-	strnum[i = fmt_ulong(strnum, tmval.tv_usec)] = 0;
+	strnum[i = fmt_ulong(strnum, tmval.tv_usec)] = 0; /*- microseconds */
 	if (!stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_append(&fnnewtph, "P"))
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
-	strnum[i = fmt_ulong(strnum, pid)] = 0;
+	strnum[i = fmt_ulong(strnum, pid)] = 0; /*- pid */
 	if (!stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_append(&fnnewtph, ".")
-			|| !stralloc_cat(&fnnewtph, &hostname))
+			|| !stralloc_cat(&fnnewtph, &hostname)) /*- hostname */
 		strerr_die1x(111, "Out of memory. (#4.3.0)");
-	strnum[i = fmt_ulong(strnum, st.st_size)] = 0;
+	strnum[i = fmt_ulong(strnum, st.st_size)] = 0; /*- size */
 	if (!stralloc_catb(&fnnewtph, ",S=", 3)
 			|| !stralloc_catb(&fnnewtph, strnum, i)
 			|| !stralloc_0(&fnnewtph))
