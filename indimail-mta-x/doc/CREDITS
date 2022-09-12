@@ -171,3 +171,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 107.Fefe - felix-libowfat@fefe.de for functions taken from libowfat & ipv6 in ucspi-tcp
 108.RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / EH Hoffman unicode address
     support patch for qmail.
+109.Toby Betts - Prevent collisions in Maildir style filenames - maildir uniq patch
