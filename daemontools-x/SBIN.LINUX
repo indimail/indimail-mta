@@ -1,3 +1,4 @@
 # installer input files for Linux depdendent programs in @prefix@/sbin
 #
 f:::0755:/sbin/:docker-entrypoint:docker-entrypoint
+f:::0755:/sbin/:runpod:runpod

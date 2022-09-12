@@ -262,6 +262,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{_prefix}/sbin/pgrphack
 %attr(0755,root,root)                    %{_prefix}/sbin/docker-entrypoint
 %attr(0755,root,root)                    %{_prefix}/sbin/minisvc
+%attr(0755,root,root)                    %{_prefix}/sbin/runpod
 
 %attr(0755,root,root)                    %{libexecdir}/svscanboot
 %attr(0755,root,root)                    %{libexecdir}/installer
@@ -289,6 +290,7 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0644,root,root)                    %{mandir}/man1/tai64n2tai.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/svps.1.gz
 %attr(0644,root,root)                    %{mandir}/man1/inotify.1.gz
+%attr(0644,root,root)                    %{mandir}/man1/runpod.1.gz
 %attr(0644,root,root)                    %{mandir}/man8/envdir.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.gz
 %attr(0644,root,root)                    %{mandir}/man8/fghack.8.gz

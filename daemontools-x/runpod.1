@@ -1,0 +1,78 @@
+.TH runpod 1
+.SH NAME
+runpod \- Run podman / docker image using podman / docker
+
+.SH SYNOPSIS
+\fBrunpod\fR [\fIOPTIONS\fR] \fIprog\fR \fIarg\fR \fIarg\fR ...
+
+.SH DESCRIPTION
+\fBrunpod\fR is a frontend for \fBpodman\fR(1) / \fBdocker\fR(1) to help
+execute indimail containers
+
+\fIprog\fR is usually the binary to be executed on startup. \fIprog\fR also
+can have a special meaning. if \fIprog\fR is indimail, indimail-mta,
+webmail, runpod will let the docker-entrypoint get executed. If \fIprog\fR
+is test or devel, runpod will run bash in the container with a tty. If this
+is not specified, systemd will be loaded for debian, ubuntu, fedora,
+centos, almalinux, oraclelinux, opensuse images. For alpine linux bash
+will be loaded with a controlling terminal. If systemd is empty, the
+default entry point for the container will be used. If \fIprog\fR is set as
+auto, then \fBrunpod\fR will instruct podman or docker to execute systemd
+if the image supports systemd or /sbin/init for alpine and gentoo images.
+
+If \fIprog\fR is not specified, then runpod will execute bash in the
+container if \fIname\fR is test or devel and execute the entrypoint for the
+container if \fIname\fR is svscan. See --name or -n option below for
+setting name.
+
+.SH OPTIONS
+.TP
+\fB\-\-id\fR=\fIimageID\fR
+Use this option to specify image id
+
+.TP
+\fB\-\-name\fR=\fIname\fR | -\fBn\fR \fIname\fR
+Use this option to specify name for the running image. \fIname\fR has
+special significance if name is either of indimail, indimail-mta, webmail
+which causes following ports to be mapped
+
+.EX
+2025 -> 25, 2106 -> 106, 2110 -> 110  2143 -> 143, 2209 -> 209,
+2366 -> 366, 2465 -> 465, 2587 -> 587 2628 -> 628, 2993 -> 993,
+2995 -> 995, 4110 -> 4110 4143 -> 4143, 9110 -> 9110, 9143 -> 9143,
+8080 -> 80
+.EE
+
+\fIname\fR is what you see in the podman ps or the docker ps command.
+
+.TP
+\fB\-\-capability\fR=\fIcap\fR | -\fBC\fR \fIcap\fR
+Use this option to add capabilities like SYS_PTRACE, SYS_ADMIN, IPC_LOCK,
+SYS_RESOURCE. You can specify this option multiple times.
+
+.TP
+\fB\-\-host\fR=\fIhost\fR | -\fBh\fR \fIhost\fR
+Specify hostname for the container.
+
+.TP
+\fB\-\-port\fR=\fIlport\fR:\fIrport\fR -\fBp\fR \fIlport\fR:\fIrport\fR
+Map local port \fIlport\fR to remote port \fIrport\fR in the container. You
+can specify this option multiple times.
+
+.TP
+\fB\-\-command\fR=\fIdocker\fR|\fIpodman\fR | -\fBc\fR \fIdocker\fR|\fIpodman\fR
+Use docker or podoman to run the container. Default is podman
+
+.TP
+\fB\-\-volume\fR=\fIlocal_dir\fR:\fIremote_dir\fR | -\fBv\fR \fIlocal_dir\fR:\fIremote_dir\fR
+mount \fIlocal_dir\fR as \fIremote_dir\fR in the container. You can specify
+this option multiple times.
+
+.TP
+\fB\-\-cgroup\fR=\fIgroup\fR | -\fBg\fR \fIgroup\fR
+Specify \fIgroup\fR for cgroups. You can specify this option multiple
+times.
+
+.SH SEE ALSO
+docker(1),
+podman(1)
