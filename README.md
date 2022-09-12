@@ -513,7 +513,7 @@ $ sudo make install-strip
 
 You are here because you decided to do a complete source installation. If you use the source installation method, you need to setup various configuration files and services. You can configure indimail-mta using /usr/sbin/svctool. `svctool` is a general purpose utility to configure indimail-mta services and configuration.
 
-You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd(1) unit file `svscan.service` in `/usr/lib/systemd/system` for systems using systemd. For FreeBSD, it will create /usr/local/etc/rc.d/svscan. It will use alternatives command to setup indimail-mta as your default MTA. On FreeBSD, it will configure mailwrapper by modifying /etc/mail/mailer.conf.
+You can also run the script `create_services` which invokes svctool to setup few default services to start a fully configured system. `create_services` will also put a systemd(1) unit file `svscan.service` in `/usr/lib/systemd/system` for systems using systemd. For non-systemd systems like gentoo and alpine, it will create configure rc startup. For FreeBSD, it will create /usr/local/etc/rc.d/svscan. For OSX, it will create /Library/LaunchDaemons/org.indimail.svscan.plist to create a LaunchDaemon startup item. It will use alternatives command to setup indimail-mta as your default MTA. On FreeBSD, it will configure mailwrapper by modifying /etc/mail/mailer.conf.
 
 ```
 $ cd /usr/local/src/indimail-mta-x
@@ -715,7 +715,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
 
 ```
-Currently, the list of supported distributions for indimail-mta is
+Currently, the list of supported binary distributions for indimail-mta is
 
     * Arch Linux
 
@@ -742,10 +742,8 @@ Currently, the list of supported distributions for indimail-mta is
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
-          o CentOS 8 Stream
 
     * Debian
-          o Debian  9.0
           o Debian 10.0
           o Debian 11.0
           o Univention_4.3
@@ -753,12 +751,8 @@ Currently, the list of supported distributions for indimail-mta is
 
     * Ubuntu
           o Ubuntu 16.04
-          o Ubuntu 17.04
           o Ubuntu 18.04
-          o Ubuntu 19.04
           o Ubuntu 20.04
-          o Ubuntu 21.04
-          o Ubuntu 21.10
           o Ubuntu 22.04
 ```
 
