@@ -46,7 +46,7 @@ else
 		exit 111
 	fi
 fi
-if [ -x $dir/uinstaller ] ; then
+if [ "$package" = "ucspi-tcp" -a -x $dir/uinstaller ] ; then
 	installer=$dir/uinstaller #ucspi-tcp
 else
 	installer=$dir/installer
@@ -62,7 +62,7 @@ do
 		x="$1"
 	fi
 	input=$2
-	echo $installer $opt $DESTDIR"$x" < $input
+	echo "$installer $opt $DESTDIR"$x" < $input"
 	eval $installer $opt $DESTDIR"$x" < $input
 	if [ $? -ne 0 ] ; then
 		break
