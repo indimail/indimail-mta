@@ -31,7 +31,7 @@ f:root:qmail:0644:/control/:level3-tlds:level3-tlds
 # Permissions for instcheck
 #
 f:root:root:0644:/perms.d/indimail-mta/:INPUT:INPUT
-f:root:root:0644:/perms.d/indimail-mta/:DIR:DIRS
+f:root:root:0644:/perms.d/indimail-mta/:DIRS:DIRS
 f:root:root:0644:/perms.d/indimail-mta/:BIN:BIN
 f:root:root:0644:/perms.d/indimail-mta/:SBIN:SBIN
 f:root:root:0644:/perms.d/indimail-mta/:SHARED:SHARED
