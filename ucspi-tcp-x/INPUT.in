@@ -1,4 +1,4 @@
-/                     DIR
+/                     DIRS
 @prefix@                  BIN
 @shareddir@   SHARED
 @libexecdir@ LIBEXEC
