@@ -3,7 +3,7 @@
 #
 
 # Base directory
-d:::0555:::
+d:::0755:::
 
 # scripts/programs
 f:::0755:/qfilters/:qf-smtp-ratelimit:qf-smtp-ratelimit
