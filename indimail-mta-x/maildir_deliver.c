@@ -1,5 +1,8 @@
 /*
  * $Log: maildir_deliver.c,v $
+ * Revision 1.5  2022-09-18 23:01:36+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.4  2022-04-04 14:22:01+05:30  Cprogrammer
  * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
  *
@@ -245,7 +248,7 @@ fail:
 void
 getversion_maildir_deliver_c()
 {
-	static char    *x = "$Id: maildir_deliver.c,v 1.4 2022-04-04 14:22:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir_deliver.c,v 1.5 2022-09-18 23:01:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
