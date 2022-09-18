@@ -1524,7 +1524,7 @@ compile trydkim.c dns_text.o conf-dkim dns.lib
 	c++ -o trydkim1 trydkim1.o dns_text.o \
 	`cat dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
 	-L../libdkim-x/.libs -ldkim -lcrypto -ldkim $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& echo "-ldkim" || "WARNING!!! Not linked with libdkim" ) > dkim.lib
+	&& echo "-ldkim" || "WARNING!!! Not linked with libdkim" 1>&2 ) > dkim.lib
 	rm -f trydkim1.o trydkim1
 
 hasdkim.h: dns_text.o \
@@ -1535,7 +1535,7 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 	c++ -o trydkim trydkim2.o dns_text.o \
 	`cat dkim.lib dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
 	-L../libdkim-x/.libs -lcrypto $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& (echo "#define HASDKIM 1") || echo "WARNING!!! Not compiled with -DHASDKIM" ) > hasdkim.h; \
+	&& (echo "#define HASDKIM 1") || echo "WARNING!!! Not compiled with -DHASDKIM" 1>&2 ) > hasdkim.h; \
 	rm -f trydkim2.o trydkim2
 
 qmail-dkim: qmail-dkim.o auto_control.o pidopen.o auto_prefix.o \
@@ -1578,7 +1578,7 @@ socket_v6any.o ipalloc.o strsalloc.o
 	trytlsa.c && ./load trytlsa dns.o tlsarralloc.o \
 	ip.o socket_v4mappedprefix.o socket_v6any.o \
 	ipalloc.o strsalloc.o `cat dns.lib` $(QMAILLIB)) >/dev/null 2>&1 \
-	&& echo "#define HASTLSA 1" || echo "WARNING||| Not compiled with -DHASTLSA" ) > hastlsa.h
+	&& echo "#define HASTLSA 1" || echo "WARNING||| Not compiled with -DHASTLSA" 1>&2 ) > hastlsa.h
 	rm -f trytlsa.o trytlsa
 
 qnotify.1: qnotify.9 conf-qmail conf-sysconfdir
@@ -1598,7 +1598,7 @@ hassmtputf8.h: \
 tryidn2.c compile load conf-smtputf8
 	( ( ./compile `grep -h -v "^#" conf-smtputf8` tryidn2.c \
 		&& ./load tryidn2 -lidn2 ) >/dev/null 2>&1 \
-	&& echo "#define SMTPUTF8 1" || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1<&2 ) > hassmtputf8.h
+	&& echo "#define SMTPUTF8 1" || echo "WARNING!!! Not compiled with -DSMTPUTF8" 1>&2 ) > hassmtputf8.h
 	rm -f tryidn2.o tryidn2
 
 idn2.lib: \
