@@ -5,6 +5,10 @@ Release 1.1.1 Start 12/09/2022
 - 12/09/2022
 01. Added runpod command to execute indimail-mta, indimail in a containerized
     pod
+- 18/09/2022
+02.  instcheck.in: use uininstaller only for ucspi-tcp
+- 19/09/2022
+03. runpod: added SYS_NICE capability to defaults
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 27/02/2021 End 08/09/2022

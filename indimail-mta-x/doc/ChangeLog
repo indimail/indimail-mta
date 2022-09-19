@@ -4,6 +4,12 @@ Release @version@-@release@ Start 08/09/2022
 ===========================================================================
 - 08/09/2022
 01.  First change
+02.  maildir_deliver.c: added comments
+- 18/09/2022
+03.  instcheck.in: use uininstaller only for ucspi-tcp
+04.  INPUT, ETC: renamed DIR to DIRS
+- 19/09/2022
+05.  svctool: added scram, salted, TIMESTAMP column to indimail table
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
