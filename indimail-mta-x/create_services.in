@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.114 2022-04-06 09:11:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.115 2022-09-19 22:21:54+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -328,8 +328,8 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
       chkconfig mysqld off
     elif [ -x /sbin/update-rc.d ] ; then
       update-rc.d -f mysqld disable
-	elif [ -f /sbin/rc-update ] ; then
-		/sbin/rc-update del mysqld
+    elif [ -f /sbin/rc-update ] ; then
+      /sbin/rc-update del mysqld
     #else bhagwan bharose
     fi
   elif [ -f /etc/init.d/mysql ] ; then
@@ -338,8 +338,8 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
       chkconfig mysql off
     elif [ -x /sbin/update-rc.d ] ; then
       update-rc.d -f mysql disable
-	elif [ -f /sbin/rc-update ] ; then
-		/sbin/rc-update del mysql
+    elif [ -f /sbin/rc-update ] ; then
+      /sbin/rc-update del mysql
     #else bhagwan bharose
     fi
   else
@@ -358,6 +358,7 @@ if [ $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
   $svctool --mysql=3306 --servicedir=$servicedir \
     --mysqlPrefix=$mysql_base --databasedir=$indimaildir/mysqldb \
     --config=$sysconfdir/indimail.cnf $extra_opt
+  $prefix/sbin/ischema -u
 fi
 if [ $noindimail -eq 0 ] ; then
   if [ -n "$MYSQL_SOCKET" ] ; then
@@ -493,11 +494,11 @@ eval $svctool --queueParam=defaultqueue \
   $append_opt $extra_opt
 
 eval $svctool --slowq --servicedir=$servicedir --qbase=$qbase \
-	--cntrldir=control --persistdb --starttls \
-    --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
-	--dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
-	--remote-authsmtp=plain --localfilter --remotefilter \
-	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+  --cntrldir=control --persistdb --starttls \
+  --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
+  --dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
+  --remote-authsmtp=plain --localfilter --remotefilter \
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
 #
 # Greylist
 #
@@ -539,7 +540,7 @@ if [ $nofetchmail -eq 0 ] ; then
   eval $svctool --fetchmail --servicedir=$servicedir \
     --qbase=$qbase --qcount=$qcount --qstart=1 \
     --cntrldir=control --memory=$fetchmail_mem --fsync \
-	--syncdir --dkverify=$ver_opt \
+    --syncdir --dkverify=$ver_opt \
     $append_opt $extra_opt
   touch $dir_prefix$servicedir/fetchmail/down
 fi
@@ -598,7 +599,7 @@ if [ $noindimail -eq 0 ] ; then
     else
       nssd_sock=/tmp/nssd.sock
     fi
-	if [ -n "$MYSQL_SOCKET" ] ; then
+    if [ -n "$MYSQL_SOCKET" ] ; then
       mysqlSocket=$MYSQL_SOCKET
     elif [ -d /run ] ; then
       mysqlSocket=/run/mysqld/mysqld.sock
@@ -757,6 +758,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.115  2022-09-19 22:21:54+05:30  Cprogrammer
+# run ischema -u to update indimail schema to current
+#
 # Revision 2.114  2022-04-06 09:11:01+05:30  Cprogrammer
 # set fsync, syncdir as global variables instead of local variables
 #
