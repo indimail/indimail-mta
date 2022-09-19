@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.1 2022-09-12 22:50:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.2 2022-09-19 21:21:22+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -75,6 +75,7 @@ set_defaults()
 			cap_args="$cap_args--cap-add SYS_PTRACE --cap-add SYS_ADMIN "
 			cap_args="$cap_args--cap-add IPC_LOCK   --cap-add SYS_RESOURCE "
 			cap_args="$cap_args--cap-add=NET_ADMIN  --cap-add=CAP_NET_RAW "
+			cap_args="$cap_args--cap-add=SYS_NICE "
 		else
 			echo $cap_args|grep SYS_ADMIN > /dev/null
 			if [ $? -ne 0 ] ; then
@@ -197,6 +198,7 @@ do
 	if [ " $2" = " auto" ] ; then
 		cap_args="$cap_args--cap-add SYS_PTRACE --cap-add SYS_ADMIN "
 		cap_args="$cap_args--cap-add IPC_LOCK   --cap-add SYS_RESOURCE "
+		cap_args="$cap_args--cap-add SYS_NICE "
 	else
 		cap_args="$cap_args--cap-add $2 "
 	fi
@@ -273,6 +275,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.2  2022-09-19 21:21:22+05:30  Cprogrammer
+# added SYS_NICE capability to defaults
+#
 # Revision 1.1  2022-09-12 22:50:12+05:30  Cprogrammer
 # Initial revision
 #
