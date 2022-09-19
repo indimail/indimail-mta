@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.641 2022-09-06 16:26:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.642 2022-09-19 21:19:35+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.641 2022-09-06 16:26:14+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.642 2022-09-19 21:19:35+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5435,6 +5435,9 @@ create_mysql_user()
 	c_d="$c_d pw_gecos char(48) not null,"
 	c_d="$c_d pw_dir char(156),"
 	c_d="$c_d pw_shell char(30),"
+	c_d="$c_d scram char(255),"
+	c_d="$c_d salted char(128),"
+	c_d="$c_d timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null,"
 	c_d="$c_d primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid));"
 	mecho $c_d
 	c_d=""
@@ -5447,6 +5450,9 @@ create_mysql_user()
 	c_d="$c_d pw_gecos char(48) not null,"
 	c_d="$c_d pw_dir char(156),"
 	c_d="$c_d pw_shell char(30),"
+	c_d="$c_d scram char(255),"
+	c_d="$c_d salted char(128),"
+	c_d="$c_d timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP not null,"
 	c_d="$c_d primary key (pw_name, pw_domain), index pw_gecos (pw_gecos(25)), index pw_uid (pw_uid));"
 	mecho $c_d
 	c_d=""
