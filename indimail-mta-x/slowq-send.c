@@ -1,83 +1,9 @@
 /*
- * $Log: slowq-send.c,v $
- * Revision 1.24  2022-04-23 22:52:18+05:30  Cprogrammer
- * added pid in log when quitting
- *
- * Revision 1.23  2022-04-13 08:01:13+05:30  Cprogrammer
- * set delayed flag to 0 for new jobs
- *
- * Revision 1.22  2022-04-04 14:33:47+05:30  Cprogrammer
- * added setting of fdatasync() instead of fsync()
- *
- * Revision 1.21  2022-04-04 00:51:51+05:30  Cprogrammer
- * display queuedir in logs
- *
- * Revision 1.20  2022-03-31 00:08:53+05:30  Cprogrammer
- * replaced fsync() with fdatasync()
- *
- * Revision 1.19  2022-03-13 19:54:51+05:30  Cprogrammer
- * display bigtodo value in logs on startup
- *
- * Revision 1.18  2022-01-30 09:40:18+05:30  Cprogrammer
- * make USE_FSYNC, USE_SYNCDIR consistent across programs
- * allow configurable big/small todo/intd
- * fixed signal sent to child
- *
- * Revision 1.17  2021-11-02 17:57:22+05:30  Cprogrammer
- * use argv0 for program name
- *
- * Revision 1.16  2021-10-20 22:49:43+05:30  Cprogrammer
- * add program 'slowq-send' in logs for identifcation.
- *
- * Revision 1.15  2021-08-28 23:08:17+05:30  Cprogrammer
- * moved dtype enum delivery variable from variables.h to getDomainToken.h
- *
- * Revision 1.14  2021-08-13 18:26:02+05:30  Cprogrammer
- * turn off ratelimit if RATELIMIT_DIR is set but empty
- *
- * Revision 1.13  2021-07-26 23:25:36+05:30  Cprogrammer
- * log when log sighup, sigalrm is caught
- *
- * Revision 1.12  2021-07-17 14:38:09+05:30  Cprogrammer
- * skip processing of for messages queued with wrong split dir
- *
- * Revision 1.11  2021-07-15 22:37:20+05:30  Cprogrammer
- * corrected data type of comm_pos to int
- *
- * Revision 1.10  2021-07-15 13:23:32+05:30  Cprogrammer
- * organize bounce related control files together
- *
- * Revision 1.9  2021-06-27 10:45:38+05:30  Cprogrammer
- * moved conf_split variable to fmtqfn.c
- * fixed error handling in injectbounce
- *
- * Revision 1.8  2021-06-23 13:27:26+05:30  Cprogrammer
- * moved log_stat to qsutil.c
- *
- * Revision 1.7  2021-06-05 22:42:38+05:30  Cprogrammer
- * added code comments
- *
- * Revision 1.6  2021-06-05 18:02:19+05:30  Cprogrammer
- * corrected log message
- *
- * Revision 1.5  2021-06-05 17:46:32+05:30  Cprogrammer
- * reduce wakeup when time_needed is earlier than wakeup
- *
- * Revision 1.4  2021-06-05 12:58:45+05:30  Cprogrammer
- * refactored rate limit code to display delayed job count in logs
- *
- * Revision 1.3  2021-06-03 18:08:21+05:30  Cprogrammer
- * use new prioq functions
- *
- * Revision 1.2  2021-06-01 01:52:35+05:30  Cprogrammer
- * moved delivery_rate to delivery_rate.c
- *
- * Revision 1.1  2021-05-31 17:06:24+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: slowq-send.c,v 1.25 2022-09-25 23:59:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
+#include <signal.h>
 #include <ctype.h>
 #include <sys/time.h>
 #include <dlfcn.h>
@@ -140,6 +66,7 @@
 #define SLEEP_TODO      1500 /*- check todo/ every 25 minutes in any case */
 #define ONCEEVERY         10 /*- Run todo maximal once every N seconds */
 #endif
+#define CHUNK_SIZE      1
 
 static int      lifetime = 604800;
 static int      bouncemaxbytes = 50000;
@@ -169,7 +96,6 @@ static cmap     maplocals;
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 
-/*- if qmail-send.c changes this has to be updated */
 #define CHANNELS 2
 static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
 static char    *chanstatusmsg[CHANNELS] = { " local ", " remote " };
@@ -189,23 +115,45 @@ static int      chanskip[CHANNELS] = { 10, 20 };
 char           *queuedesc;
 static char    *argv0 = "slowq-send";
 
-static int      flagexitasap = 0;
-static int      flagrunasap = 0;
-static int      flagreadasap = 0;
-static int      bigtodo;
+static int      flagexitsend; /*- qmail-send: exit when set */
+static int      flagexittodo; /*- todo-processor: exit when set */
+static int      flagrunasap; /*- immediaely schedule deliveries in queue */
+static int      flagreadasap; /*- reread control files on sighup */
+static int      flagdetached; /*- qmail-send detaches from todo processing */
+static int      forktodo; /*- run a parallel independent todo processor */
+static int      flagtodoalive, flagsendalive = 1; /*- flag to indicate if todo-processor and qmail-send are alive */
+static int      todopid, bigtodo, todofdi, todofdo, sendfdi, sendfdo, todo_chunk_size;
 
 extern dtype    delivery;
 static int      do_ratelimit;
 unsigned long   delayed_jobs;
 
 static void     reread();
+static void     sigusr1();
+static void     sigusr2();
+void            slog5(char *u, char *w, char *x, char *y, char *z);
+void            slog7(char *s, char *t, char *u, char *w, char *x, char *y, char *z);
+void            slog9(char *r, char *s, char *t, char *u, char *v, char *w, char *x, char *y, char *z);
 
 static void
 sigterm()
 {
-	flagexitasap = 1;
+	flagexitsend = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	if (todopid)
+		kill(todopid, SIGTERM);
 	log7("alert: ", argv0, ": ", strnum1, ": got TERM: ", queuedesc, "\n");
+}
+
+static void
+sigterm_todo()
+{
+	sig_block(sig_term);
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	slog7("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n");
+	if (!flagexittodo)
+		slog5("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n");
+	flagexittodo = 1;
 }
 
 static void
@@ -230,7 +178,9 @@ chdir_toqueue()
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/slowq";
 	while (chdir(queuedir) == -1) {
-		log7("alert: ", argv0, ": ", queuedesc, ": unable to switch back to queue directory; HELP! sleeping...", error_str(errno), "\n");
+		log7("alert: ", argv0, ": ", queuedesc,
+			": unable to switch back to queue directory; HELP! sleeping...",
+			error_str(errno), "\n");
 		sleep(10);
 	}
 }
@@ -238,25 +188,27 @@ chdir_toqueue()
 static void
 cleandied()
 {
-	log5("alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n");
-	flagexitasap = 1;
+	log5("alert: ", argv0, ": ", queuedesc,
+		": oh no! lost qmail-clean connection! dying...\n");
+	flagexitsend = 1;
 }
 
 int             flagspawnalive[CHANNELS];
 static void
 spawndied(int c)
 {
-	log5("alert: ", argv0, ": ", queuedesc, ": oh no! lost spawn connection! dying...\n");
+	log5("alert: ", argv0, ": ", queuedesc,
+		": oh no! lost spawn connection! dying...\n");
 	flagspawnalive[c] = 0;
-	flagexitasap = 1;
+	flagexitsend = 1;
 }
 
 #define REPORTMAX 10000
 
 datetime_sec    recent, time_needed;
 
-
 /* this file is too long ----------------------------------------- FILENAMES */
+
 static stralloc fn1 = { 0 };
 static stralloc fn2 = { 0 };
 
@@ -311,7 +263,6 @@ fnmake_chanaddr(unsigned long id, int c)
 	fn1.len = fmtqfn(fn1.s, chanaddr[c], id, 1);
 }
 
-
 /* this file is too long ----------------------------------------- REWRITING */
 
 void
@@ -344,7 +295,6 @@ senderadd(stralloc *sa, char *sender, char *recip)
 	while (!stralloc_cats(sa, sender))
 		nomem(argv0);
 }
-
 
 /* this file is too long ---------------------------------------------- INFO */
 
@@ -394,16 +344,33 @@ getinfo(stralloc *sa, stralloc *qh, stralloc *eh, datetime_sec *dt, unsigned lon
 	return 1;
 }
 
-
 /* this file is too long ------------------------------------- COMMUNICATION */
 
 static substdio sstoqc;
 static substdio ssfromqc;
 static char     sstoqcbuf[1024];
 static char     ssfromqcbuf[1024];
-static stralloc comm_buf[CHANNELS] = { {0}, {0} };
-static int      comm_pos[CHANNELS];
+static stralloc comm_buf_spawn[CHANNELS] = { {0}, {0} };
+static int      comm_pos_spawn[CHANNELS];
 
+static stralloc comm_buf_todo = { 0 };
+static int      comm_pos_todo, comm_count_todo;
+
+typedef enum    {qmail_spawn, qmail_todo} comm_type;
+
+static int
+issafe(char ch)
+{
+	/*- general principle: allman's code is crap */
+	if (ch == '%' || ch < 33 || ch > 126)
+		return 0;
+	return 1;
+}
+
+/*
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 comm_init()
 {
@@ -419,16 +386,51 @@ comm_init()
 	}
 }
 
+/*
+ * used by
+ * todo-processor
+ */
+void
+comm_exit_send(void)
+{
+	/*- if it fails exit, we have already stoped */
+	if (!stralloc_cats(&comm_buf_todo, "X") ||
+			!stralloc_0(&comm_buf_todo))
+		_exit(1);
+}
+
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static int
-comm_canwrite(int c)
+comm_canwrite(comm_type comm, int c)
 {
 	/*- XXX: could allow a bigger buffer; say 10 recipients */
-	if (comm_buf[c].s && comm_buf[c].len) /*- data pending to be written to qmail-[l|r]spawn */
+	switch(comm)
+	{
+	case qmail_spawn:
+		if (comm_buf_spawn[c].s && comm_buf_spawn[c].len) /*- data pending to be written to qmail-[l|r]spawn */
+			return 0;
+		return 1;
+		break;
+	case qmail_todo:
+		if (!flagsendalive)
+			return 0;
+		if (comm_buf_todo.s && comm_buf_todo.len)
+			return 1;
 		return 0;
-	return 1;
+		break;
+	}
+	return 0;
 }
 
 /*-
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ *
  * "\0\00015/id\0recipient@domain\0qqeh\0envh\0sender@domain\0"
  * NULL
  * delivery number
@@ -439,50 +441,93 @@ comm_canwrite(int c)
  * recipient
  */
 static void
-comm_write(int c, int delnum, unsigned long id, char *sender, char *qqeh, char *envh, char *recip)
+comm_write_spawn(int c, int delnum, unsigned long id, char *sender,
+		char *qqeh, char *envh, char *recip)
 {
 	char            ch;
 
-	if (comm_buf[c].s && comm_buf[c].len)
+	if (comm_buf_spawn[c].s && comm_buf_spawn[c].len)
 		return;
-	while (!stralloc_copys(&comm_buf[c], ""))
+	while (!stralloc_copys(&comm_buf_spawn[c], ""))
 		nomem(argv0);
 	ch = delnum;
-	while (!stralloc_append(&comm_buf[c], &ch))
+	while (!stralloc_append(&comm_buf_spawn[c], &ch))
 		nomem(argv0);
 	ch = delnum >> 8;
-	while (!stralloc_append(&comm_buf[c], &ch))
+	while (!stralloc_append(&comm_buf_spawn[c], &ch))
 		nomem(argv0);
 	fnmake_split(id);
-	while (!stralloc_cats(&comm_buf[c], fn1.s))
+	while (!stralloc_cats(&comm_buf_spawn[c], fn1.s))
 		nomem(argv0);
-	while (!stralloc_0(&comm_buf[c]))
+	while (!stralloc_0(&comm_buf_spawn[c]))
 		nomem(argv0);
-	senderadd(&comm_buf[c], sender, recip);
-	while (!stralloc_0(&comm_buf[c]))
+	senderadd(&comm_buf_spawn[c], sender, recip);
+	while (!stralloc_0(&comm_buf_spawn[c]))
 		nomem(argv0);
-	while (!stralloc_cats(&comm_buf[c], qqeh))
+	while (!stralloc_cats(&comm_buf_spawn[c], qqeh))
 		nomem(argv0);
-	while (!stralloc_0(&comm_buf[c]))
+	while (!stralloc_0(&comm_buf_spawn[c]))
 		nomem(argv0);
-	while (!stralloc_cats(&comm_buf[c], envh))
+	while (!stralloc_cats(&comm_buf_spawn[c], envh))
 		nomem(argv0);
-	while (!stralloc_0(&comm_buf[c]))
+	while (!stralloc_0(&comm_buf_spawn[c]))
 		nomem(argv0);
-	while (!stralloc_cats(&comm_buf[c], recip))
+	while (!stralloc_cats(&comm_buf_spawn[c], recip))
 		nomem(argv0);
-	while (!stralloc_0(&comm_buf[c]))
+	while (!stralloc_0(&comm_buf_spawn[c]))
 		nomem(argv0);
-	comm_pos[c] = 0;
+	comm_pos_spawn[c] = 0;
 }
 
+/*
+ * used by
+ * qmail-send
+ * todo-processor
+ * prepare comm buf to be written to todo-processor
+ */
+void
+comm_write_todo(unsigned long id, int local, int remote)
+{
+	int             pos;
+	char           *s;
+
+	if (flagdetached)
+		return;
+	if (local && remote)
+		s = "B";
+	else
+	if (local)
+		s = "L";
+	else
+	if (remote)
+		s = "R";
+	else
+		s = "X";
+	pos = comm_buf_todo.len;
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	if (!stralloc_cats(&comm_buf_todo, "D") ||
+			!stralloc_cats(&comm_buf_todo, s) ||
+			!stralloc_cats(&comm_buf_todo, strnum1) ||
+			!stralloc_0(&comm_buf_todo))
+		goto fail;
+	return;
+fail:
+	/*- reset length to start */
+	comm_buf_todo.len = pos;
+}
+
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
-comm_selprep(int *nfds, fd_set *wfds)
+comm_selprep_spawn(int *nfds, fd_set *wfds)
 {
 	int             c;
 
 	for (c = 0; c < CHANNELS; ++c) {
-		if (flagspawnalive[c] && comm_buf[c].s && comm_buf[c].len) {
+		if (flagspawnalive[c] && comm_buf_spawn[c].s && comm_buf_spawn[c].len) {
 			FD_SET(chanfdout[c], wfds); /*- fd 1 - pi1[1] - write, and fd 3 - pi3[1] - write */
 			if (*nfds <= chanfdout[c])
 				*nfds = chanfdout[c] + 1;
@@ -490,35 +535,216 @@ comm_selprep(int *nfds, fd_set *wfds)
 	}
 }
 
+/*
+ * used by
+ * todo-processor
+ */
+void
+comm_selprep_send(int *nfds, fd_set *wfds, fd_set *rfds)
+{
+	if (flagsendalive) {
+		int             c;
+
+		c = comm_canwrite(qmail_todo, 0);
+		if (flagexittodo && c == 0)
+			comm_exit_send();
+		if (c) {
+			FD_SET(sendfdo, wfds); /*- write fd to qmail-send */
+			if (*nfds <= sendfdo)
+				*nfds = sendfdo + 1;
+		}
+		FD_SET(sendfdi, rfds); /*- read fd from qmail-send */
+		if (*nfds <= sendfdi)
+			*nfds = sendfdi + 1;
+	}
+}
+
 /*-
+ * used by
+ * qmail-send
+ * todo-processor
  * write to qmail-lspawn, qmail-rspawn
- * set comm_buff[c].len = 0 when data is written
+ * set comm_buf_spawn[c].len = 0 when data is written
  */
 static void
-comm_do(fd_set *wfds)
+comm_do_spawn(fd_set *wfds)
 {
 	int             c;
 
 	for (c = 0; c < CHANNELS; ++c) {
-		if (flagspawnalive[c] && comm_buf[c].s && comm_buf[c].len && FD_ISSET(chanfdout[c], wfds)) {
+		if (flagspawnalive[c] && comm_buf_spawn[c].s && comm_buf_spawn[c].len && FD_ISSET(chanfdout[c], wfds)) {
 			int             w;
 			int             len;
 
-			len = comm_buf[c].len;
-			if ((w = write(chanfdout[c], comm_buf[c].s + comm_pos[c], len - comm_pos[c])) <= 0) {
+			len = comm_buf_spawn[c].len;
+			if ((w = write(chanfdout[c], comm_buf_spawn[c].s + comm_pos_spawn[c], len - comm_pos_spawn[c])) <= 0) {
 				if ((w == -1) && (errno == error_pipe))
 					spawndied(c);
 				else
 					continue;	/*- kernel select() bug; can't avoid busy-looping */
 			} else {
-				comm_pos[c] += w;
-				if (comm_pos[c] == len)
-					comm_buf[c].len = 0;
+				comm_pos_spawn[c] += w;
+				if (comm_pos_spawn[c] == len)
+					comm_buf_spawn[c].len = 0;
 			}
 		}
 	}
 }
 
+/*
+ * used by
+ * todo-processor
+ */
+static void
+senddied()
+{
+	if (!flagexittodo)
+		log5("alert: ", argv0, ": ", queuedesc,
+			": oh no! lost qmail-send connection! dying...\n");
+	flagsendalive = 0;
+}
+
+/*
+ * used by
+ * todo-processor
+ */
+void
+comm_read_todo(fd_set *wfds, fd_set *rfds)
+{
+	if (flagsendalive && comm_canwrite(qmail_todo, 0)) {
+		if (FD_ISSET(sendfdo, wfds)) {
+			int             w;
+			int             len;
+
+			len = comm_buf_todo.len;
+			if ((w = write(sendfdo, comm_buf_todo.s + comm_pos_todo, len - comm_pos_todo)) <= 0) {
+				if ((w == -1) && (errno == error_pipe))
+					senddied();
+			} else {
+				comm_pos_todo += w;
+				if (comm_pos_todo == len) {
+					comm_buf_todo.len = 0;
+					comm_pos_todo = 0;
+					comm_count_todo = 0;
+				}
+			}
+		}
+	}
+	/*- next read from qmail-send */
+	if (flagsendalive && FD_ISSET(sendfdi, rfds)) {
+		/*- handle 'A', 'D', 'H' and 'X' */
+		char            c;
+		int             r;
+		if ((r = read(sendfdi, &c, 1)) <= 0) {
+			if (!r || (r == -1 && errno != error_intr))
+				senddied();
+		} else {
+			switch (c)
+			{
+			case 'A': /*- attached mode */
+				flagdetached = 0;
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				slog7("alert: ", argv0, ": pid ", strnum1,
+					" got USR1: todo-processor attached: ",
+					queuedesc, "\n");
+				break;
+			case 'D': /*- detached mode */
+				flagdetached = 1;
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				slog7("alert: ", argv0, ": pid ", strnum1,
+					" got USR2: todo-processor detached: ",
+					queuedesc, "\n");
+				break;
+			case 'H':
+				sighup(); /*- set flagreadasap = 1 */
+				break;
+			case 'X':
+				sigterm_todo(); /*-set flagexittodo = 1 */
+				break;
+			default:
+				slog5("warning: ", argv0, ": ", queuedesc,
+					": qmail-send speaks an obscure dialect\n");
+				break;
+			}
+		}
+	}
+}
+
+/*-
+ * used by
+ * todo-processor
+ * shutdown communication channel with qmail-send
+ * and exit
+ */
+void
+comm_die_send(int i)
+{
+	fd_set          rfds, wfds;
+	int             nfds;
+
+	if (ndelay_on(sendfdo) == -1)
+		senddied();
+	while (!stralloc_ready(&comm_buf_todo, 1024))
+		nomem(argv0);
+	comm_exit_send();
+	FD_ZERO(&rfds);
+	FD_ZERO(&wfds);
+	nfds = 1;
+	comm_selprep_send(&nfds, &wfds, &rfds);
+	comm_read_todo(&wfds, &rfds);
+	slog5("info: ", argv0, ": ", queuedesc, " stop processing asap\n");
+	_exit(i);
+}
+
+/*
+ * used by
+ * todo-processor
+ */
+void
+comm_info_todo(unsigned long id, unsigned long size, char *from, unsigned long pid, unsigned long uid)
+{
+	int             pos;
+	int             i;
+
+	comm_count_todo++;
+	pos = comm_buf_todo.len;
+	if (!stralloc_cats(&comm_buf_todo, "Linfo msg "))
+		goto fail;
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	strnum2[fmt_ulong(strnum2, size)] = 0;
+	if (!stralloc_cats(&comm_buf_todo, strnum1) ||
+			!stralloc_cats(&comm_buf_todo, ": bytes ") ||
+			!stralloc_cats(&comm_buf_todo, strnum2) ||
+			!stralloc_cats(&comm_buf_todo, " from <"))
+		goto fail;
+	i = comm_buf_todo.len;
+	if (!stralloc_cats(&comm_buf_todo, from))
+		goto fail;
+	for (; i < comm_buf_todo.len; ++i) {
+		if (comm_buf_todo.s[i] == '\n')
+			comm_buf_todo.s[i] = '/';
+		else
+		if (!issafe(comm_buf_todo.s[i]))
+			comm_buf_todo.s[i] = '_';
+	}
+	if (!stralloc_cats(&comm_buf_todo, "> qp "))
+		goto fail;
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	strnum2[fmt_ulong(strnum2, uid)] = 0;
+	if (!stralloc_cats(&comm_buf_todo, strnum1) ||
+			!stralloc_cats(&comm_buf_todo, " uid ") ||
+			!stralloc_cats(&comm_buf_todo, strnum2) ||
+			!stralloc_cats(&comm_buf_todo, " ") ||
+			!stralloc_cats(&comm_buf_todo, queuedesc) ||
+			!stralloc_cats(&comm_buf_todo, "\n") ||
+			!stralloc_0(&comm_buf_todo))
+		goto fail;
+	return;
+
+fail:
+	/*- either all or nothing */
+	comm_buf_todo.len = pos;
+}
 
 /*- this file is too long ------------------------------------------ CLEANUPS */
 
@@ -526,6 +752,11 @@ static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
 static readsubdir cleanupdir;
 static datetime_sec cleanuptime;
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 cleanup_init()
 {
@@ -533,6 +764,11 @@ cleanup_init()
 	cleanuptime = now();
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 cleanup_selprep(datetime_sec *wakeup)
 {
@@ -542,6 +778,11 @@ cleanup_selprep(datetime_sec *wakeup)
 		*wakeup = cleanuptime;
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 cleanup_do()
 {
@@ -593,7 +834,6 @@ cleanup_do()
 		log7("warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
 }
 
-
 /*- this file is too long ----------------------------------- PRIORITY QUEUES */
 
 static prioq    pqdone = { 0 };						/*- -todo +info; HOPEFULLY -local -remote */
@@ -601,6 +841,11 @@ static prioq    pqchan[CHANNELS] = { {0} , {0} };	/*- pqchan 0: -todo +info +loc
 													/*- pqchan 1: -todo +info ?local +remote */
 static prioq    pqfail = { 0 };						/*- stat() failure; has to be pqadded again */
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 pqadd(unsigned long id, char delayedflag)
 {
@@ -639,6 +884,7 @@ pqadd(unsigned long id, char delayedflag)
 			pechan[c].delayed = delayedflag;
 		}
 	}
+	/*- add to delivery queue */
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c]) {
 			while (!prioq_insert(min, &pqchan[c], &pechan[c]))
@@ -665,6 +911,11 @@ fail:
 		nomem(argv0);
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 unsigned long
 delayed_job_count()
 {
@@ -679,6 +930,11 @@ delayed_job_count()
 	return n;
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 pqstart()
 {
@@ -694,6 +950,11 @@ pqstart()
 	delayed_jobs = do_ratelimit ? delayed_job_count() : 0;
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 pqfinish()
 {
@@ -712,6 +973,11 @@ pqfinish()
 	}
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 pqrun()
 {
@@ -724,7 +990,6 @@ pqrun()
 		}
 	}
 }
-
 
 /*- this file is too long ---------------------------------------------- JOBS */
 
@@ -742,6 +1007,11 @@ typedef struct job {
 static int      numjobs;
 static job     *jo;
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 job_init()
 {
@@ -757,6 +1027,11 @@ job_init()
 	}
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static int
 job_avail()
 {
@@ -770,6 +1045,11 @@ job_avail()
 	return -1;
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 job_open(unsigned long id, int channel, int j)
 {
@@ -782,6 +1062,11 @@ job_open(unsigned long id, int channel, int j)
 	return;
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 job_close(int j)
 {
@@ -1283,7 +1568,6 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 	return 1;
 }
 
-
 /*- this file is too long ---------------------------------------- DELIVERIES */
 
 typedef struct DEL {
@@ -1305,6 +1589,11 @@ static stralloc concurrencyf = { 0 };
 static stralloc dline[CHANNELS];
 static char     delbuf[2048];
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 del_status()
 {
@@ -1323,12 +1612,17 @@ del_status()
 		log4_noflush(" delayed jobs=", strnum1, " ", queuedesc);
 	} else
 		log2_noflush(" ", queuedesc);
-	if (flagexitasap)
+	if (flagexitsend)
 		log1_noflush(" exitasap");
 	log1_noflush("\n");
 	flush();
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 del_init()
 {
@@ -1349,6 +1643,11 @@ del_init()
 	del_status();
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static int
 del_canexit()
 {
@@ -1363,12 +1662,22 @@ del_canexit()
 	return 1;
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static int
 del_avail(int c)
 {
-	return flagspawnalive[c] && comm_canwrite(c) && !holdjobs[c] && (concurrencyused[c] < concurrency[c]);	/* NJL 1998/07/24 */
+	return flagspawnalive[c] && comm_canwrite(qmail_spawn, c) && !holdjobs[c] && (concurrencyused[c] < concurrency[c]);	/* NJL 1998/07/24 */
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 del_start(int j, seek_pos mpos, char *recip)
 {
@@ -1379,7 +1688,7 @@ del_start(int j, seek_pos mpos, char *recip)
 		return;
 	if (holdjobs[c])
 		return;	/* NJL 1998/05/03 */
-	if (!comm_canwrite(c))
+	if (!comm_canwrite(qmail_spawn, c))
 		return;
 	for (i = 0; i < concurrency[c]; ++i)
 		if (!del[c][i].used)
@@ -1397,7 +1706,7 @@ del_start(int j, seek_pos mpos, char *recip)
 	del[c][i].mpos = mpos;
 	del[c][i].used = 1;
 	++concurrencyused[c];
-	comm_write(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
+	comm_write_spawn(c, i, jo[j].id, jo[j].sender.s, jo[j].qqeh.s, jo[j].envh.s, recip);
 	strnum1[fmt_ulong(strnum1, del[c][i].delid)] = 0;
 	strnum2[fmt_ulong(strnum2, jo[j].id)] = 0;
 	log2_noflush("starting delivery ", strnum1);
@@ -1436,6 +1745,10 @@ markdone(int c, unsigned long id, seek_pos pos)
 }
 
 /*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ *
  * read delivery report
  * first 2 bytes = delivery number
  * byte 3 is
@@ -1518,6 +1831,11 @@ del_dochan(int c)
 	} /*- for (i = 0; i < r; ++i) */
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 del_selprep(int *nfds, fd_set *rfds)
 {
@@ -1533,6 +1851,11 @@ del_selprep(int *nfds, fd_set *rfds)
 	}
 }
 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 del_do(fd_set *rfds)
 {
@@ -1544,7 +1867,6 @@ del_do(fd_set *rfds)
 	}
 }
 
-
 /*- this file is too long -------------------------------------------- PASSES */
 
 static struct {
@@ -1555,7 +1877,12 @@ static struct {
 	substdio        ss;
 	char            buf[128];
 } pass[CHANNELS];
-
+ 
+/*
+ * used by
+ * qmail-send
+ * qmail-send + todo-processor
+ */
 static void
 pass_init()
 {
@@ -1571,7 +1898,7 @@ pass_selprep(datetime_sec *wakeup)
 	int             c;
 	struct prioq_elt pe;
 
-	if (flagexitasap)
+	if (flagexitsend)
 		return;
 	for (c = 0; c < CHANNELS; ++c) {
 		if (pass[c].id && del_avail(c)) {
@@ -1639,7 +1966,7 @@ pass_dochan(int c)
 	datetime_sec    t;
 	int             i, match, _do_ratelimit;
 
-	if (flagexitasap)
+	if (flagexitsend)
 		return;
 	if (!pass[c].id) { /*- new pass */
 		int             j;
@@ -1829,7 +2156,6 @@ pass_do()
 	}
 }
 
-
 /*- this file is too long ---------------------------------------------- TODO */
 
 static stralloc rwline = { 0 };
@@ -1897,6 +2223,11 @@ static char     todobuf[SUBSTDIO_INSIZE];
 static char     todobufinfo[512];
 static char     todobufchan[CHANNELS][1024];
 
+/*
+ * used by
+ * qmail-send
+ * todo-processor
+ */
 static void
 todo_init()
 {
@@ -1905,16 +2236,74 @@ todo_init()
 	trigger_set();
 }
 
+/*
+ * qmail-send
+ */
+static void
+todo_init_send()
+{
+	/*-
+	 * syncrhonize with todo-processor so that
+	 * we are ready when the todo-processor starts
+	 * sending us deliveryjobs
+	 */
+	if (write(todofdo, "C", 1) == 1)
+		flagtodoalive = 1;
+	else {
+		log5("alert: ", argv0,
+				": unable to write a byte to external todo! dying...: ",
+				error_str(errno), "\n");
+		flagexitsend = 1;
+		flagtodoalive = 0;
+	}
+	return;
+}
+
+/*
+ * qmail-send without todo-processor
+ */
 static void
 todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
-	if (flagexitasap)
+	if (flagexitsend)
 		return;
 	trigger_selprep(nfds, rfds);
 	if (flagtododir)
 		*wakeup = 0;
 	if (*wakeup > nexttodorun)
 		*wakeup = nexttodorun;
+}
+
+/*
+ * todo-processor
+ */
+void
+todo_selprep_todo(int *nfds, fd_set *rfds, datetime_sec *wakeup)
+{
+	if (flagexittodo)
+		return;
+	trigger_selprep(nfds, rfds);
+	if (flagtododir)
+		*wakeup = 0;
+	if (*wakeup > nexttodorun)
+		*wakeup = nexttodorun;
+}
+
+/*
+ * qmail-send
+ */
+static void
+todo_selprep_send(int *nfds, fd_set *rfds, datetime_sec *wakeup)
+{
+	if (flagexitsend && flagtodoalive) {
+		write(todofdo, "X", 1);
+		flagtodoalive = 0;
+	}
+	if (flagtodoalive) {
+		FD_SET(todofdi, rfds); /*- read fd from todo-processor */
+		if (*nfds <= todofdi)
+			*nfds = todofdi + 1;
+	}
 }
 
 static stralloc mailfrom = { 0 };
@@ -1925,17 +2314,17 @@ todo_do(fd_set *rfds)
 {
 	struct stat     st;
 	struct prioq_elt pe;
-	substdio        ss, ssinfo;
+	substdio        sstodo, ssinfo;
 	substdio        sschan[CHANNELS];
-	int             fd, fdinfo, match, i, c, split;
+	int             fdtodo, fdinfo, match, i, c, split;
 	int             fdchan[CHANNELS], flagchan[CHANNELS];
 	char            ch;
 	char           *ptr;
 	unsigned long   id, uid, pid;
 
-	if (flagexitasap)
+	if (flagexitsend)
 		return;
-	fd = -1;
+	fdtodo = -1;
 	fdinfo = -1;
 	for (c = 0; c < CHANNELS; ++c)
 		fdchan[c] = -1;
@@ -1974,7 +2363,7 @@ todo_do(fd_set *rfds)
 			return;
 	} else
 		fnmake_todo(id);
-	if ((fd = open_read(fn1.s)) == -1) {
+	if ((fdtodo = open_read(fn1.s)) == -1) {
 		log5("warning: ", argv0, ": unable to open ", fn1.s, "\n");
 		return;
 	}
@@ -2008,12 +2397,12 @@ todo_do(fd_set *rfds)
 	log3("new msg ", strnum1, "\n");
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
-	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf));
+	substdio_fdbuf(&sstodo, read, fdtodo, todobuf, sizeof (todobuf));
 	substdio_fdbuf(&ssinfo, write, fdinfo, todobufinfo, sizeof (todobufinfo));
 	uid = 0;
 	pid = 0;
 	for (;;) {
-		if (getln(&ss, &todoline, &match, '\0') == -1) {
+		if (getln(&sstodo, &todoline, &match, '\0') == -1) {
 			/*- perhaps we're out of memory, perhaps an I/O error */
 			fnmake_todo(id);
 			log5("warning: ", argv0, ": trouble reading ", fn1.s, "\n");
@@ -2102,8 +2491,8 @@ todo_do(fd_set *rfds)
 			goto fail;
 		}
 	} /*- for (;;) */
-	close(fd);
-	fd = -1;
+	close(fdtodo);
+	fdtodo = -1;
 	fnmake_info(id);
 	if (substdio_flush(&ssinfo) == -1) {
 		log7("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n");
@@ -2182,8 +2571,8 @@ todo_do(fd_set *rfds)
 	return;
 
 fail:
-	if (fd != -1)
-		close(fd);
+	if (fdtodo != -1)
+		close(fdtodo);
 	if (fdinfo != -1)
 		close(fdinfo);
 	for (c = 0; c < CHANNELS; ++c) {
@@ -2191,6 +2580,7 @@ fail:
 			close(fdchan[c]);
 	}
 }
+
 /*- this file is too long ---------------------------------------------- MAIN */
 
 static int
@@ -2320,7 +2710,7 @@ getcontrols()
  * new domains added will not get served till another sighup causes
  * regetcontrols to get executed without problems. This is much
  * better than having slowq-send come to a grinding halt.
- * Another way could be to set flagexitasap to 1
+ * Another way could be to set flagexitsend to 1
  */
 static stralloc newlocals = { 0 };
 static stralloc newvdoms = { 0 };
@@ -2343,7 +2733,7 @@ regetcontrols()
 		return;
 	}
 	if (control_readint(&todo_interval, "todointerval") == -1) {
-		log7("alert: ", argv0, ": ", queuedesc, ": qmail-todo: unable to reread ", controldir, "/todointerval\n");
+		log7("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/todointerval\n");
 		return;
 	}
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1) {
@@ -2421,10 +2811,699 @@ reread()
 	chdir_toqueue();
 }
 
+void
+slog5(char *v, char *w, char *x, char *y, char *z)
+{
+	int             pos;
+
+	pos = comm_buf_todo.len;
+	if (!stralloc_cats(&comm_buf_todo, "L") ||
+			!stralloc_cats(&comm_buf_todo, v) ||
+			!stralloc_cats(&comm_buf_todo, w) ||
+			!stralloc_cats(&comm_buf_todo, x) ||
+			!stralloc_cats(&comm_buf_todo, y) ||
+			!stralloc_cats(&comm_buf_todo, z) ||
+			!stralloc_0(&comm_buf_todo))
+		goto fail;
+	return;
+fail:
+	/*- either all or nothing */
+	comm_buf_todo.len = pos;
+}
+
+void
+slog7(char *t, char *u, char *v, char *w, char *x, char *y, char *z)
+{
+	int             pos;
+
+	pos = comm_buf_todo.len;
+	if (!stralloc_cats(&comm_buf_todo, "L") ||
+			!stralloc_cats(&comm_buf_todo, t) ||
+			!stralloc_cats(&comm_buf_todo, u) ||
+			!stralloc_cats(&comm_buf_todo, v) ||
+			!stralloc_cats(&comm_buf_todo, w) ||
+			!stralloc_cats(&comm_buf_todo, x) ||
+			!stralloc_cats(&comm_buf_todo, y) ||
+			!stralloc_cats(&comm_buf_todo, z) ||
+			!stralloc_0(&comm_buf_todo))
+		goto fail;
+	return;
+fail:
+	/*- either all or nothing */
+	comm_buf_todo.len = pos;
+}
+
+void
+slog9(char *r, char *s, char *t, char *u, char *v, char *w, char *x, char *y, char *z)
+{
+	int             pos;
+
+	pos = comm_buf_todo.len;
+	if (!stralloc_cats(&comm_buf_todo, "L") ||
+			!stralloc_cats(&comm_buf_todo, r) ||
+			!stralloc_cats(&comm_buf_todo, s) ||
+			!stralloc_cats(&comm_buf_todo, t) ||
+			!stralloc_cats(&comm_buf_todo, u) ||
+			!stralloc_cats(&comm_buf_todo, v) ||
+			!stralloc_cats(&comm_buf_todo, w) ||
+			!stralloc_cats(&comm_buf_todo, x) ||
+			!stralloc_cats(&comm_buf_todo, y) ||
+			!stralloc_cats(&comm_buf_todo, z) ||
+			!stralloc_0(&comm_buf_todo))
+		goto fail;
+	return;
+fail:
+	/*- either all or nothing */
+	comm_buf_todo.len = pos;
+}
+
+/*-
+ * scan todo subdir using readsubdir_next
+ * set flagtododir, nexttodorun
+ *
+ * return
+ *  0 - Found file
+ *  1 - skip todo run
+ *  4 - no files found
+ * -1 - error
+ */
+int
+todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
+{
+	/*- run todo maximal once every N seconds */
+	if (todo_interval > 0 && recent < nexttodorun)
+		return 1;	/* skip todo run this time */
+	if (!flagtododir) {
+		/*- we come here at the beginning or after end of a todo scan */
+		if (!trigger_pulled(rfds) && recent < nexttodorun)
+			return 1;
+		trigger_set(); /*- close & open lock/trigger fifo */
+		/*- initialize todosubdir */
+		readsubdir_init(&todosubdir, "todo", bigtodo, pausedir);
+		flagtododir = 1;
+		nexttodorun = recent + (todo_interval > 0 ? todo_interval : SLEEP_TODO);
+	}
+	switch (readsubdir_next(&todosubdir, id))
+	{
+	case 1: /*- found file with name=*id */
+		break;
+	case 0: /*- no files in todo/split/ */
+		flagtododir = 0;
+		/*return 4;*/
+		/*- flow through */
+	default: /*- error */
+		return -1;
+	}
+	return 0;
+}
+
+void
+log_stat_todo(unsigned long id, size_t bytes)
+{
+	char           *ptr;
+	char           *mode;
+
+	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
+	strnum2[fmt_ulong(strnum2 + 1, bytes) + 1] = 0;
+	*strnum1 = ' ';
+	*strnum2 = ' ';
+	for (ptr = mailto.s; ptr < mailto.s + mailto.len;) {
+		mode = " opendir mode\n";
+		log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>",
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2,
+				" bytes ", queuedesc, mode);
+		ptr += str_len(ptr) + 1;
+	}
+	mailfrom.len = mailto.len = 0;
+}
+
+/*- 
+ * todo_do calls todo_scan for static queues which
+ *
+ * 1. scans todo dir recursively 
+ * 2. sets flagtododir if any file found in todo subdir
+ * 3. sets nexttodorun
+ *
+ * todo_do calls mqueue_scan for dynamic queues which
+ * 1. reads mq_queue message queue to get
+ *    todo/split/inode injected by qmail-queue
+ * 2. sets nexttodorun
+ *
+ * todo_do will optmimize by writing to comm_buf all files
+ * in todo directory before doing comm_do. But can return 3
+ * if files in todo is a multiple of todo_chunk_size. This is to
+ * prevent comm_buf becoming very large.
+ *
+ * todo_do returns
+ *
+ *  0 - stop asap
+ *  1 - skip todo run
+ *  2 - files in todo > 0
+ *  3 - files in todo is a multiple of todo_chunk_size
+ *  4 - files in todo = 0
+ * -1 - error
+ */
+int
+todo_do_todo(int *nfds, fd_set *rfds)
+{
+	struct stat     st;
+	substdio        ss, ssinfo, sschan[CHANNELS];
+	int             fd, fdinfo, match, i, c, split;
+	int             fdchan[CHANNELS], flagchan[CHANNELS];
+	char            ch;
+	char           *ptr;
+	unsigned long   id, uid, pid;
+
+	fd = -1;
+	fdinfo = -1;
+	for (c = 0; c < CHANNELS; ++c)
+		fdchan[c] = -1;
+	if ((i = todo_scan(nfds, rfds, &id, 0))) /*- skip todo run if this returns 1 */
+		return i;
+	ptr = readsubdir_name(&todosubdir); /*- split/id */
+	if (ptr) {
+		scan_int(ptr, &split); /*- actual split value from filename */
+		fnmake_todo(id); /*- set fn as todo/split/id */
+		scan_int(fn1.s + 5, &i); /*- split as per calculation by fnmake using auto_split */
+		slog9(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc, 
+			": subdir=todo/", ptr, " fn=", fn1.s,
+			split != i ? " incorrect split\n" : "\n");
+		if (split != i) /*- split doesn't match with split calculation in fnmake_todo() */
+			return -1;
+	} else
+		fnmake_todo(id); /*- set fn as todo/id */
+	if ((fd = open_read(fn1.s)) == -1) { /*- envelope in todo/split/id */
+		slog9("warning: ", argv0, ": ", queuedesc, ": open ", fn1.s, ": ",
+			error_str(errno), "\n");
+		return -1;
+	}
+	fnmake_mess(id); /*- change fn to mess/split/id */
+	/*- just for the statistics, stat on mess/split file */
+	if (stat(fn1.s, &st) == -1) {
+		slog9("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, ": ",
+			error_str(errno), "\n");
+		goto fail;
+	}
+	for (c = 0; c < CHANNELS; ++c) {
+		fnmake_chanaddr(id, c);
+		if (unlink(fn1.s) == -1 && errno != error_noent) {
+			slog9("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, ": ",
+				error_str(errno), "\n");
+			goto fail;
+		}
+	}
+	fnmake_info(id); /*- now fn is info/split/id */
+	if (unlink(fn1.s) == -1 && errno != error_noent) { /*- delete any existing info/split/id */
+		slog9("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, ": ",
+			error_str(errno), "\n");
+		goto fail;
+	}
+	if ((fdinfo = open_excl(fn1.s)) == -1) { /*- create info/split/id */
+		slog9("warning: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, ": ",
+			error_str(errno), "\n");
+		goto fail;
+	}
+	strnum1[fmt_ulong(strnum1, id)] = 0;
+	slog5("new msg ", strnum1, " ", queuedesc, "\n");
+	for (c = 0; c < CHANNELS; ++c)
+		flagchan[c] = 0;
+	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf)); /*- read envelope */
+	substdio_fdbuf(&ssinfo, write, fdinfo, todobufinfo, sizeof (todobufinfo)); /*- write to info/split/id */
+	uid = 0;
+	pid = 0;
+	for (;;) {
+		if (getln(&ss, &todoline, &match, '\0') == -1) {
+			/*- perhaps we're out of memory, perhaps an I/O error */
+			fnmake_todo(id); /* todo/split/id */
+			slog9("warning: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, ": ",
+				error_str(errno), "\n");
+			goto fail;
+		}
+		if (!match)
+			break;
+		switch (todoline.s[0])
+		{
+		case 'u': /*- uid */
+			scan_ulong(todoline.s + 1, &uid);
+			break;
+		case 'p': /*- process ID */
+			scan_ulong(todoline.s + 1, &pid);
+			break;
+		case 'h': /*- envheader */
+		case 'e': /*- qqeh */
+			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
+				slog9("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+					error_str(errno), "\n");
+				goto fail;
+			}
+			break;
+		case 'F': /*- from */
+			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
+				slog9("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+					error_str(errno), "\n");
+				goto fail;
+			}
+			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom)) {
+				nomem(argv0);
+				goto fail;
+			}
+			/*- write data to comm_buf, which will be written to qmail-send later */
+			comm_info_todo(id, (unsigned long) st.st_size, todoline.s + 1, pid, uid);
+			break;
+		case 'T':
+			/*- 
+			 * 1. check address in control/locals, controls/virtualdomains
+			 * 2. rewrite address in rwline
+			 */
+			switch (rewrite(todoline.s + 1))
+			{
+			case 0:
+				nomem(argv0);
+				goto fail;
+			case 2: /* Sea */
+				if (!stralloc_cats(&mailto, "R") || !stralloc_cat(&mailto, &todoline)) {
+					nomem(argv0);
+					goto fail;
+				}
+				c = 1;
+				break;
+			default: /* Land */
+				if (!stralloc_cats(&mailto, "L") || !stralloc_cat(&mailto, &todoline)) {
+					nomem(argv0);
+					goto fail;
+				}
+				c = 0;
+				break;
+			}
+			if (fdchan[c] == -1) {
+				/*- create local/split/id or remote/split/id */
+				fnmake_chanaddr(id, c);
+				if ((fdchan[c] = open_excl(fn1.s)) == -1) {
+					slog9("warning: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, ": ",
+						error_str(errno), "\n");
+					goto fail;
+				}
+				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
+				flagchan[c] = 1;
+			}
+			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
+				fnmake_chanaddr(id, c);
+				slog9("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+					error_str(errno), "\n");
+				goto fail;
+			}
+			break;
+		default:
+			fnmake_todo(id); /* todo/split/id */
+			slog9("warning: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, ": ",
+				error_str(errno), "\n");
+			goto fail;
+		}
+	}
+	close(fd);
+	fd = -1;
+	fnmake_info(id); /* info/split/id */
+	if (substdio_flush(&ssinfo) == -1) {
+		slog9("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+			error_str(errno), "\n");
+		goto fail;
+	}
+	for (c = 0; c < CHANNELS; ++c) {
+		if (fdchan[c] != -1) {
+			if (substdio_flush(&sschan[c]) == -1) {
+				fnmake_chanaddr(id, c);
+				slog9("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+					error_str(errno), "\n");
+				goto fail;
+			}
+		}
+	}
+#ifdef USE_FSYNC
+	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdinfo) : fsync(fdinfo)) == -1) {
+		slog9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+			error_str(errno), "\n");
+		goto fail;
+	}
+#else
+	if (fsync(fdinfo) == -1) {
+		slog9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+			error_str(errno), "\n");
+		goto fail;
+	}
+#endif
+	close(fdinfo);
+	fdinfo = -1;
+	for (c = 0; c < CHANNELS; ++c) {
+		if (fdchan[c] != -1) {
+#ifdef USE_FSYNC
+			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdchan[c]) : fsync(fdchan[c])) == -1) {
+				fnmake_chanaddr(id, c);
+				slog9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+					error_str(errno), "\n");
+				goto fail;
+			}
+#else
+			if (fdatasync(fdchan[c]) == -1) {
+				fnmake_chanaddr(id, c);
+				slog9("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+					error_str(errno), "\n");
+				goto fail;
+			}
+#endif
+			close(fdchan[c]);
+			fdchan[c] = -1;
+		}
+	}
+	fnmake_todo(id); /* todo/split/id */
+	if (substdio_putflush(&sstoqc, fn1.s, fn1.len) == -1) {
+		cleandied();
+		return -1;
+	}
+	if (substdio_get(&ssfromqc, &ch, 1) != 1) {
+		cleandied();
+		return -1;
+	}
+	if (ch != '+') {
+		slog9("warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, ": ",
+			error_str(errno), "\n");
+		return -1;
+	}
+	comm_write_todo(id, flagchan[0], flagchan[1]); /*- e.g. "DL656826\0" */
+	/*- "Llocal: mbhangui@argos.indimail.org mbhangui@argos.indimail.org 798 queue1\n\0" */
+	log_stat_todo(id, st.st_size);
+	/*-
+	 * return in chunks of todo_chunk_size
+	 * so that todo-processor doesn't spend to much time in building
+	 * comm_buf without sending a single email for delivery. This
+	 * will avoid slow delivery when todo-processor/qmail-send wasn't running
+	 * and large number of emails have been injected into the queue.
+	 */
+	return (flagtododir == 0 ? 4 : (comm_count_todo % todo_chunk_size) == 0 ? 3 : 2);
+
+fail:
+	if (fd != -1)
+		close(fd);
+	if (fdinfo != -1)
+		close(fdinfo);
+	for (c = 0; c < CHANNELS; ++c) {
+		if (fdchan[c] != -1)
+			close(fdchan[c]);
+	}
+	return -1;
+}
+
+void
+todo_processor(int *pi1, int *pi2, int lockfd)
+{
+	fd_set          rfds, wfds;
+	datetime_sec    wakeup;
+	int             nfds, c, r;
+	struct timeval  tv;
+
+	switch((todopid = fork()))
+	{
+	case -1:
+		log5("alert: ", argv0, ": ", queuedesc, ": unable to fork\n");
+		_exit(111);
+	case 0:
+		str_copyb(argv0 + 6, "todo", 4);
+		sendfdi = pi2[0];
+		sendfdo = pi1[1];
+		close(pi1[0]);
+		close(pi2[1]);
+		close(lockfd);
+		sig_pipeignore();
+		sig_childdefault();
+		sig_alarmdefault();
+		sig_catch(sig_usr1, SIG_DFL);
+		sig_catch(sig_usr2, SIG_DFL);
+		sig_termcatch(sigterm_todo);
+		sig_hangupcatch(sighup);
+		todo_init(); /*- initialize flagtododir, lasttodorun, nexttodorun, open lock/trigger */
+		for (;;) {
+			/*- read from fd 0 (qmail-send) */
+			if ((r = read(sendfdi, &c, 1)) == -1) {
+				if (errno == error_intr)
+					continue;
+				comm_die_send(100);	/*- read failed probably qmail-send died */
+			}
+			if (!r)
+				comm_die_send(100);	/*- read failed probably qmail-send died */
+			break;
+		}
+		if (c != 'C') {
+			slog5("warning: ", argv0, ": ", queuedesc, ": qmail-send speaks an obscure dialect\n");
+			comm_die_send(100);
+		}
+		while (!flagexitsend) {
+			recent = now();
+			if (flagreadasap) {
+				flagreadasap = 0;
+				reread();
+			}
+			if (!flagsendalive) {
+				/*- qmail-send finally exited, so do the same. */
+				if (flagexittodo)
+					_exit(0);
+				/*- qmail-send died. We can not log and we can not work therefor _exit(1). */
+				_exit(1);
+			}
+			wakeup = recent + SLEEP_FOREVER;
+			FD_ZERO(&rfds);
+			FD_ZERO(&wfds);
+			nfds = 1;
+			todo_selprep_todo(&nfds, &rfds, &wakeup);
+			comm_selprep_send(&nfds, &wfds, &rfds);
+			if (wakeup <= recent)
+				tv.tv_sec = time_needed ? time_needed : 0;
+			else
+				if (time_needed && time_needed < (wakeup - recent))
+				tv.tv_sec = time_needed + SLEEP_FUZZ;
+			else
+				tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
+			tv.tv_usec = 0;
+			if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
+				if (errno == error_intr) {
+					if (flagexitsend)
+						break;
+				} else
+					slog5("warning: ", argv0, ": ", queuedesc, ": trouble in select\n");
+			} else {
+				recent = now();
+				while (todo_do_todo(&nfds, &rfds) == 2);
+				comm_read_todo(&wfds, &rfds); /*- communicate with qmail-send on fd 0, fd 1 */
+			}
+		} /*- while (!flagexitsend) */
+		strnum1[fmt_ulong(strnum1, getpid())] = 0;
+		slog7("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
+		_exit(0);
+	default:
+		close(pi1[1]);
+		close(pi2[0]);
+		break;
+	}
+	flagtodoalive = 1;
+	return;
+}
+
+static void
+sigusr1()
+{
+	if (flagdetached == 1)
+		return;
+	sig_block(sig_usr1);
+	flagdetached = 1;
+	/*- tell todo-processor to stop sending jobs */
+	if (write(todofdo, "D", 1) != 1) {
+		log5("alert: ", argv0,
+				": unable to write two bytes to todo-processor! dying...: ",
+				error_str(errno), "\n");
+		flagexitsend = 1;
+		flagtodoalive = 0;
+	}
+	sig_unblock(sig_usr1);
+	if (!del_canexit())
+		sig_block(sig_usr2);
+}
+
+static void
+sigusr2()
+{
+	if (flagdetached == 0)
+		return;
+	sig_block(sig_usr2);
+	flagdetached = 0;
+	/*- 
+	 * we need to rescan todo if we were earlier in detached mode
+	 * add jobs from todo
+	 */
+	pqstart();
+	/*- tell todo-processor to start */
+	if (write(todofdo, "A", 1) != 1) {
+		log5("alert: ", argv0,
+				": unable to write two bytes to todo-processor! dying...: ",
+				error_str(errno), "\n");
+		flagexitsend = 1;
+		flagtodoalive = 0;
+	}
+	sig_unblock(sig_usr2);
+	sig_unblock(sig_usr1);
+}
+
+static void
+tododied()
+{
+	if (!flagexitsend)
+		log5("alert: ", argv0, ": ", queuedesc,
+			": oh no! lost todo-processor connection! dying...\n");
+	flagexitsend = 1;
+	flagtodoalive = 0;
+}
+
+static void
+sigchld()
+{
+	int             wstat;
+	pid_t           pid;
+
+	while ((pid = wait_nohang(&wstat)) > 0) {
+		if (pid == todopid) {
+			tododied();
+			break;
+		}
+	}
+}
+
+/*
+ * set flagchan for local or remote
+ * set pqchan[c]
+ * set pqdone
+ */
+static void
+todo_del(char *s)
+{
+	int             c;
+	int             flagchan[CHANNELS];
+	struct prioq_elt pe;
+	unsigned long   id;
+	unsigned int    len;
+
+	for (c = 0; c < CHANNELS; ++c)
+		flagchan[c] = 0;
+	switch (*s++)
+	{
+	case 'L':
+		flagchan[0] = 1;
+		break;
+	case 'R':
+		flagchan[1] = 1;
+		break;
+	case 'B':
+		flagchan[0] = 1;
+		flagchan[1] = 1;
+		break;
+	case 'X':
+		break;
+	default:
+		log5("warning: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n");
+		return;
+	}
+	len = scan_ulong(s, &id);
+	if (!len || s[len]) {
+		log5("warning: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n");
+		return;
+	}
+	pe.id = id;
+	pe.dt = now();
+	/*- add to delivery queue */
+	for (c = 0; c < CHANNELS; ++c) {
+		if (flagchan[c])
+			while (!prioq_insert(min, &pqchan[c], &pe))
+				nomem(argv0);
+	}
+	/*- mark delivery as 'done' */
+	for (c = 0; c < CHANNELS; ++c) {
+		if (flagchan[c])
+			break;
+	}
+	if (c == CHANNELS) {
+		while (!prioq_insert(min, &pqdone, &pe))
+			nomem(argv0);
+	}
+	return;
+}
+
+/*
+ * if data is available fd 8 for read
+ * read data
+ * 'D' - set up delivery by calling todo_del()
+ * 'L' - write to log (fd 0) for logging
+ * 'X' - set flagtodoalive = 0, flagexitsend = 1
+ */
+static void
+todo_do_send(fd_set *rfds)
+{
+	int             r, i;
+	char            ch;
+
+	if (!flagtodoalive)
+		return;
+	if (!FD_ISSET(todofdi, rfds))
+		return;
+
+	if ((r = read(todofdi, todobuf, sizeof (todobuf))) == -1)
+		return;
+	if (r == 0) {
+		if (flagexitsend)
+			flagtodoalive = 0;
+		else
+			tododied(); /*- sets flagexitsend, flagtodoalive */
+		return;
+	}
+	for (i = 0; i < r; ++i) {
+		ch = todobuf[i];
+		while (!stralloc_append(&todoline, &ch))
+			nomem(argv0);
+		if (todoline.len > REPORTMAX)
+			todoline.len = REPORTMAX;
+		/*- 
+		 * todo-processor is responsible for keeping it short
+		 * e.g. todo-processor writes a line like this
+		 * local  DL656826\0
+		 * remote DR656826\0
+		 * both   DB656826\0
+		 */
+		if (!ch && (todoline.len > 1)) {
+			switch (todoline.s[0])
+			{
+			case 'D': /*- message to be delivered */
+				if (flagexitsend)
+					break;
+				todo_del(todoline.s + 1);
+				break;
+			case 'L': /*- write to log */
+				log1(todoline.s + 1);
+				break;
+			case 'X': /*- todo-processor is exiting */
+				if (flagexitsend)
+					flagtodoalive = 0;
+				else
+					tododied(); /*- sets flagexitsend, flagtodoalive */
+				break;
+			default:
+				log5("warning: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n");
+				break;
+			}
+			todoline.len = 0;
+		}
+	} /*- for (i = 0; i < r; ++i) */
+}
+
 int
 main(int argc, char **argv)
 {
-	int             fd, nfds, c;
+	int             lockfd, nfds, c;
+	int             pi1[2], pi2[2];
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	struct timeval  tv;
@@ -2436,6 +3515,7 @@ main(int argc, char **argv)
 	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
+	forktodo = env_get("FORK_TODO") ? 1 : 0;
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -2452,8 +3532,13 @@ main(int argc, char **argv)
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	log9("info: ", argv0, ": ", queuedir, ": ratelimit=",
-			do_ratelimit ? "ON" : "OFF", ", conf split=", strnum1, bigtodo ? ", bigtodo=1\n" : ", bigtodo=0\n");
+	getEnvConfigInt(&todo_chunk_size, "TODO_CHUNK_SIZE", CHUNK_SIZE);
+	if (todo_chunk_size <= 0)
+		todo_chunk_size = CHUNK_SIZE;
+	log11("info: ", argv0, ": ", queuedir,
+			": todo processor: ", forktodo ? "YES" : "NO",
+			", ratelimit=", do_ratelimit ? "ON" : "OFF",
+			", conf split=", strnum1, bigtodo ? ", bigtodo=1\n" : ", bigtodo=0\n");
 	if (!(ptr = env_get("TODO_INTERVAL")))
 		todo_interval = -1;
 	else
@@ -2510,14 +3595,20 @@ main(int argc, char **argv)
 	sig_termcatch(sigterm);
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
-	sig_childdefault();
+	sig_childcatch(sigchld);
+	if (forktodo) {
+		sig_block(sig_usr1);
+		sig_block(sig_usr2);
+		sig_catch(sig_usr1, sigusr1);
+		sig_catch(sig_usr2, sigusr2);
+	}
 	umask(077);
 	/*- prevent multiple copies of slowq-send to run */
-	if ((fd = open_write("lock/sendmutex")) == -1) {
+	if ((lockfd = open_write("lock/sendmutex")) == -1) {
 		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: unable to open mutex\n");
 		_exit(111);
 	}
-	if (lock_exnb(fd) == -1) {
+	if (lock_exnb(lockfd) == -1) {
 		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: instance already running\n");
 		_exit(111);
 	}
@@ -2556,9 +3647,27 @@ main(int argc, char **argv)
 	job_init();     /*- initialize numjobs job structures */
 	del_init();     /*- initialize concurrencylocal + concurrrencyremote delivery structure */
 	pass_init();    /*- initialize pass structure */
-	todo_init();    /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
+	if (forktodo) {
+		if (pipe(pi1) == -1) {
+			log7("alert: ", argv0, ": ", queuedesc, ": failed to create pipe1: ", error_str(errno), "\n");
+			_exit(111);
+		}
+		if (pipe(pi2) == -1) {
+			log7("alert: ", argv0, ": ", queuedesc, ": failed to create pipe2: ", error_str(errno), "\n");
+			_exit(111);
+		}
+		todofdi = pi1[0];
+		todofdo = pi2[1];
+		todo_processor(pi1, pi2, lockfd); /*- this will wait till todo_init_send sends the "C" character */
+		todo_init_send();
+	} else
+		todo_init(); /*- initialize flagtododir, lasttodorun, nexttodorun, open lock/trigger */
 	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
-	while (!flagexitasap || !del_canexit()) { /*- stay alive if delivery jobs are present */
+	if (forktodo) {
+		sig_unblock(sig_usr1);
+		sig_unblock(sig_usr2);
+	}
+	while (!flagexitsend || !del_canexit() || flagtodoalive) { /*- stay alive if delivery, todo jobs are present */
 		recent = now();
 		if (flagrunasap) {
 			flagrunasap = 0;
@@ -2577,7 +3686,7 @@ main(int argc, char **argv)
 		 * fd 1 - pi1[1] - write to qmail-lspawn
 		 * fd 3 - pi3[1] - write to qmail-rspawn
 		 */
-		comm_selprep(&nfds, &wfds);
+		comm_selprep_spawn(&nfds, &wfds);
 		/*-
 		 * prepare readfd for select
 		 * fd 2 - pi2[0] - read from qmail-lspawn
@@ -2594,9 +3703,11 @@ main(int argc, char **argv)
 		pass_selprep(&wakeup);
 		/*-
 		 * prepare readfd for select
-		 * set todofdin = 8 for select: read end from qmail-todo pi8[0]
 		 */
-		todo_selprep(&nfds, &rfds, &wakeup);
+		if (forktodo)
+			todo_selprep_send(&nfds, &rfds, &wakeup);
+		else
+			todo_selprep(&nfds, &rfds, &wakeup);
 		/*- set wakeup */
 		cleanup_selprep(&wakeup);
 		if (wakeup <= recent)
@@ -2609,7 +3720,7 @@ main(int argc, char **argv)
 		tv.tv_usec = 0;
 		if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
 			if (errno == error_intr) {
-				if (flagexitasap)
+				if (flagexitsend)
 					break;
 			} else
 				log5("warning: ", argv0, ": ", queuedesc, ": trouble in select\n");
@@ -2621,7 +3732,7 @@ main(int argc, char **argv)
 			 * write on fd 1 read by fd 0 in qmail-lspawn,
 			 * write on fd 3 read by fd 0 in qmail-rspawn
 			 */
-			comm_do(&wfds);
+			comm_do_spawn(&wfds);
 			/*-
 			 * if data is available for read on fd 2 or 4
 			 * then read from qmail-lspawn or qmail-rspawn
@@ -2629,16 +3740,25 @@ main(int argc, char **argv)
 			 * fd 4 - pi4[0] - data from qmail-rspawn
 			 */
 			del_do(&rfds);
-			/* read data from fd 8 from qmail-todo
-			 * 'D' - Do deliver
-			 * 'L' - Write to log (fd 0) for logging
-			 * 'X' - set flagtodoalive = 0, flagexitasap = 1
+			/*-
+			 * scan todo directory
+			 * classify and rewrite todoline
 			 */
-			todo_do(&rfds);
+			if (forktodo)
+				todo_do_send(&rfds);
+			else
+				todo_do(&rfds);
+			/*-
+			 * add/del priority queue
+			 * mark delivered/bounced messages as done
+			 */
 			pass_do();
+			/*-
+			 * communicate with qmail-clean for cleanup
+			 */
 			cleanup_do();
 		}
-	} /*- while (!flagexitasap || !del_canexit()) */
+	} /*- while (!flagexitsend || !del_canexit()) */
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	log7("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
@@ -2648,10 +3768,92 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.24 2022-04-23 22:52:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.25 2022-09-25 23:59:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: slowq-send.c,v $
+ * Revision 1.25  2022-09-25 23:59:13+05:30  Cprogrammer
+ * added dedicated todo processor
+ *
+ * Revision 1.24  2022-04-23 22:52:18+05:30  Cprogrammer
+ * added pid in log when quitting
+ *
+ * Revision 1.23  2022-04-13 08:01:13+05:30  Cprogrammer
+ * set delayed flag to 0 for new jobs
+ *
+ * Revision 1.22  2022-04-04 14:33:47+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
+ * Revision 1.21  2022-04-04 00:51:51+05:30  Cprogrammer
+ * display queuedir in logs
+ *
+ * Revision 1.20  2022-03-31 00:08:53+05:30  Cprogrammer
+ * replaced fsync() with fdatasync()
+ *
+ * Revision 1.19  2022-03-13 19:54:51+05:30  Cprogrammer
+ * display bigtodo value in logs on startup
+ *
+ * Revision 1.18  2022-01-30 09:40:18+05:30  Cprogrammer
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ * allow configurable big/small todo/intd
+ * fixed signal sent to child
+ *
+ * Revision 1.17  2021-11-02 17:57:22+05:30  Cprogrammer
+ * use argv0 for program name
+ *
+ * Revision 1.16  2021-10-20 22:49:43+05:30  Cprogrammer
+ * add program 'slowq-send' in logs for identifcation.
+ *
+ * Revision 1.15  2021-08-28 23:08:17+05:30  Cprogrammer
+ * moved dtype enum delivery variable from variables.h to getDomainToken.h
+ *
+ * Revision 1.14  2021-08-13 18:26:02+05:30  Cprogrammer
+ * turn off ratelimit if RATELIMIT_DIR is set but empty
+ *
+ * Revision 1.13  2021-07-26 23:25:36+05:30  Cprogrammer
+ * log when log sighup, sigalrm is caught
+ *
+ * Revision 1.12  2021-07-17 14:38:09+05:30  Cprogrammer
+ * skip processing of for messages queued with wrong split dir
+ *
+ * Revision 1.11  2021-07-15 22:37:20+05:30  Cprogrammer
+ * corrected data type of comm_pos to int
+ *
+ * Revision 1.10  2021-07-15 13:23:32+05:30  Cprogrammer
+ * organize bounce related control files together
+ *
+ * Revision 1.9  2021-06-27 10:45:38+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ * fixed error handling in injectbounce
+ *
+ * Revision 1.8  2021-06-23 13:27:26+05:30  Cprogrammer
+ * moved log_stat to qsutil.c
+ *
+ * Revision 1.7  2021-06-05 22:42:38+05:30  Cprogrammer
+ * added code comments
+ *
+ * Revision 1.6  2021-06-05 18:02:19+05:30  Cprogrammer
+ * corrected log message
+ *
+ * Revision 1.5  2021-06-05 17:46:32+05:30  Cprogrammer
+ * reduce wakeup when time_needed is earlier than wakeup
+ *
+ * Revision 1.4  2021-06-05 12:58:45+05:30  Cprogrammer
+ * refactored rate limit code to display delayed job count in logs
+ *
+ * Revision 1.3  2021-06-03 18:08:21+05:30  Cprogrammer
+ * use new prioq functions
+ *
+ * Revision 1.2  2021-06-01 01:52:35+05:30  Cprogrammer
+ * moved delivery_rate to delivery_rate.c
+ *
+ * Revision 1.1  2021-05-31 17:06:24+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
