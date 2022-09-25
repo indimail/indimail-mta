@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.7  2022-09-26 00:02:05+05:30  Cprogrammer
+ * handle SIGUSR1, SIGUSR2
+ *
  * Revision 1.6  2022-04-24 19:07:12+05:30  Cprogrammer
  * display local+remote load on receipt of message queue by send_qload()
  *
@@ -369,6 +372,60 @@ sigchld()
 	sig_unblock(sig_child);
 }
 
+void
+sigusr1()
+{
+	int             i;
+	pid_t           pid;
+	char           *qptr;
+
+	sig_block(sig_usr1);
+	if ((pid = getpid()) != selfpid)
+		_exit(0);
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	strerr_warn3("alert: qscheduler: pid ", strnum1, " got USR1", 0);
+	for (i = 0; queue_table && i <= qcount;i++) {
+		if (queue_table[i].pid == -1)
+			continue;
+		qptr = queuenum_to_dir(i);
+		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
+		log_out("info: qscheduler: issue SIGUSR1 to ");
+		log_out(strnum1);
+		log_out(", queue ");
+		log_out(qptr);
+		log_outf("\n");
+		kill(queue_table[i].pid, sig_usr1);
+	}
+	sig_unblock(sig_usr1);
+}
+
+void
+sigusr2()
+{
+	int             i;
+	pid_t           pid;
+	char           *qptr;
+
+	sig_block(sig_usr2);
+	if ((pid = getpid()) != selfpid)
+		_exit(0);
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	strerr_warn3("alert: qscheduler: pid ", strnum1, " got USR2", 0);
+	for (i = 0; queue_table && i <= qcount;i++) {
+		if (queue_table[i].pid == -1)
+			continue;
+		qptr = queuenum_to_dir(i);
+		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
+		log_out("info: qscheduler: issue SIGUSR2 to ");
+		log_out(strnum1);
+		log_out(", queue ");
+		log_out(qptr);
+		log_outf("\n");
+		kill(queue_table[i].pid, sig_usr2);
+	}
+	sig_unblock(sig_usr2);
+}
+
 int
 check_send(int queue_no)
 {
@@ -461,6 +518,8 @@ start_send(int queueNum, pid_t pid)
 		sig_catch(sig_hangup, SIG_DFL);
 		sig_catch(sig_child, SIG_DFL);
 		sig_catch(sig_int, SIG_DFL);
+		sig_catch(sig_usr1, SIG_DFL);
+		sig_catch(sig_usr2, SIG_DFL);
 		if (!queue_no) { /*- don't set this for nqueue */
 			if (!env_unset("QMAILLOCAL") || !env_unset("QMAILREMOTE"))
 				strerr_die1x(111, "alert: qscheduler: out of memory");
@@ -607,6 +666,8 @@ queue_fix(char *queuedir)
 		sig_catch(sig_hangup, SIG_DFL);
 		sig_catch(sig_child, SIG_DFL);
 		sig_catch(sig_int, SIG_DFL);
+		sig_catch(sig_usr1, SIG_DFL);
+		sig_catch(sig_usr2, SIG_DFL);
 		if (chdir(auto_qmail) == -1)
 			strerr_die3sys(111, "alert: qscheduler: queue-fix: chdir ", auto_qmail, ": ");
 		strnum1[fmt_int(strnum1, conf_split)] = 0;
@@ -725,7 +786,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 			strerr_warn2("alert: qscheduler: failed to open POSIX shared memory ", ipc_name, &strerr_sys);
 			die();
 		}
-		/*- message queue for communication between qmail-todo, qmail-queue */
+		/*- message queue for communication between todo-proc, qmail-queue */
 #ifdef FREEBSD
 		if ((mq_queue = mq_open(ipc_name, O_CREAT|O_EXCL|O_RDWR,  0640, NULL)) != (mqd_t) -1) {
 			if (mq_setattr(mq_queue, &attr, 0) == -1) {
@@ -1129,6 +1190,8 @@ main(int argc, char **argv)
 	sig_catch(sig_hangup, sighup);
 	sig_catch(sig_int, sigint);
 	sig_catch(sig_child, sigchld);
+	sig_catch(sig_usr1, sigusr1);
+	sig_catch(sig_usr2, sigusr2);
 	if (chdir(auto_qmail) == -1)
 		die_chdir(auto_qmail);
 	/*- we allow only one copy to run */
@@ -1185,7 +1248,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.6 2022-04-24 19:07:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.7 2022-09-26 00:02:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
