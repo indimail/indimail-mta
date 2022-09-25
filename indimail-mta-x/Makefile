@@ -43,7 +43,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread \
 	qmail-queue qmail-remote qmail-rm qmail-rspawn qmail-send \
 	qmail-showctl qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start \
-	qmail-tcpok qmail-tcpto qmail-todo qmail-upq qmta-send qnotify qpq \
+	qmail-tcpok qmail-tcpto todo-proc qmail-upq qmta-send qnotify qpq \
 	qquote qreceipt qsmhook qtools qscheduler queue-fix recipient-cdb relaytest \
 	rewind rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
 	setforward setmaillist slowq-send slowq-start smtpd-plugin0.so \
@@ -63,7 +63,7 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 \
 	qmail-queue.8 qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 \
 	qmail-smtpd.8 qmail-spamfilter.8 qmail-srs.5 qmail-start.8 \
-	qmail-todo.8 qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
+	todo-proc.8 qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
 	queue-fix.8 recipient-cdb.8 replier.1 rrforward.1 rrt.1 run-cleanq.8 \
 	slowq-send.8 slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8
 
@@ -1678,27 +1678,27 @@ qmail-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-send.8
 
-qmail-todo: \
-load qmail-todo.o control.o trigger.o fmtqfn.o readsubdir.o auto_qmail.o \
+todo-proc: \
+load todo-proc.o control.o trigger.o fmtqfn.o readsubdir.o auto_qmail.o \
 auto_split.o auto_control.o variables.o syncdir.o rt.lib
-	./load qmail-todo control.o trigger.o fmtqfn.o auto_control.o \
+	./load todo-proc control.o trigger.o fmtqfn.o auto_control.o \
 	readsubdir.o auto_qmail.o auto_split.o variables.o \
 	syncdir.o $(static_option) $(QMAILLIB) \
 	$(dynamic_option) `cat rt.lib`
 
-qmail-todo.o: \
-compile qmail-todo.c auto_qmail.h control.h syncdir.h \
+todo-proc.o: \
+compile todo-proc.c auto_qmail.h control.h syncdir.h \
 fmtqfn.h readsubdir.h trigger.h variables.h qscheduler.h \
 haslibrt.h auto_control.h auto_split.h auto_uids.h conf-sync
-	./compile `grep -h -v "^#" conf-sync` qmail-todo.c
+	./compile `grep -h -v "^#" conf-sync` todo-proc.c
 
-qmail-todo.8: \
-qmail-todo.9 conf-qmail conf-sysconfdir
-	cat qmail-todo.9 \
+todo-proc.8: \
+todo-proc.9 conf-qmail conf-sysconfdir
+	cat todo-proc.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> qmail-todo.8
+	> todo-proc.8
 
 set_queuedir.o: \
 compile set_queuedir.c set_queuedir.h auto_qmail.h control.h

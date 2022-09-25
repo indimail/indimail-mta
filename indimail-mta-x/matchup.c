@@ -7,13 +7,13 @@
  * skip qscheduler load information in logs
  *
  * Revision 1.14  2022-04-12 08:36:36+05:30  Cprogrammer
- * updated for new qmail-send, qmail-todo, qscheduler logs
+ * updated for new qmail-send, todo-proc, qscheduler logs
  *
  * Revision 1.13  2022-03-16 19:56:21+05:30  Cprogrammer
  * handle multi-queue format
  *
  * Revision 1.12  2022-03-10 20:22:06+05:30  Cprogrammer
- * update for qmail-send, qmail-todo, slowq-send, qmta-send, qscheduler logs
+ * update for qmail-send, todo-proc, slowq-send, qmta-send, qscheduler logs
  *
  * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
@@ -666,9 +666,9 @@ main()
 		else
 		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[3], "average"));
 		else
-		if (str_equal(line.s + field[2], "qmail-todo:") && str_equal(line.s + field[4], "Resetting"));
+		if (str_equal(line.s + field[2], "todo-proc:") && str_equal(line.s + field[4], "Resetting"));
 		else
-		if (str_equal(line.s + field[2], "qmail-todo:") && str_start(line.s + field[4], "subdir="));
+		if (str_equal(line.s + field[2], "todo-proc:") && str_start(line.s + field[4], "subdir="));
 		else
 		if (str_equal(line.s + field[2], "qscheduler:") && str_equal(line.s + field[5], "exiting"))
 			clear();

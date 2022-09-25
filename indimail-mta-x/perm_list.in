@@ -158,7 +158,7 @@
 %attr(0751,root,root)  @prefix@/sbin/qmail-clean #qmta
 %attr(0751,root,root)  @prefix@/sbin/qmail-send
 %attr(0751,root,root)  @prefix@/sbin/qmta-send #qmta
-%attr(0751,root,root)  @prefix@/sbin/qmail-todo
+%attr(0751,root,root)  @prefix@/sbin/todo-proc
 %attr(0755,root,root)  @prefix@/sbin/qmail-greyd
 %attr(0755,root,root)  @prefix@/sbin/greydaemon
 %attr(0755,root,root)  @prefix@/sbin/qmail-daned
@@ -498,7 +498,7 @@
 %attr(0644,root,root) @mandir@/man8/qmail-start.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-tcpok.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-tcpto.8.gz #qmta
-%attr(0644,root,root) @mandir@/man8/qmail-todo.8.gz
+%attr(0644,root,root) @mandir@/man8/todo-proc.8.gz
 %attr(0644,root,root) @mandir@/man8/qscanq.8.gz
 %attr(0644,root,root) @mandir@/man8/qscanq-stdin.8.gz
 %attr(0644,root,root) @mandir@/man8/queue-fix.8.gz #qmta

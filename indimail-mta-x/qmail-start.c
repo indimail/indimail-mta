@@ -21,7 +21,7 @@
  * use uidinit function proto from auto_uids.h
  *
  * Revision 1.20  2021-04-05 07:19:44+05:30  Cprogrammer
- * added qmail-todo.h
+ * added todo-proc.h
  *
  * Revision 1.19  2020-11-24 13:47:32+05:30  Cprogrammer
  * removed exit.h
@@ -175,7 +175,7 @@ main(int argc, char **argv)
 	char           *(qcargs[]) = { "qmail-clean", 0, 0, (char *) NULL};
 	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, (char *) NULL};
 	char           *(qrargs[]) = { "qmail-rspawn", 0, (char *) NULL};
-	char           *(qtargs[]) = { "qmail-todo", 0, 0, 0, (char *) NULL};
+	char           *(qtargs[]) = { "todo-proc", 0, 0, 0, (char *) NULL};
 	gid_t          *gidset;
 	int             ngroups, i = 1, j = 1;
 	int             opt;
@@ -328,7 +328,7 @@ main(int argc, char **argv)
 	switch (fork())
 	{
 	case -1:
-		die("unable to fork qmail-clean (qmail-todo)");
+		die("unable to fork qmail-clean (todo-proc)");
 	case 0:
 		if (check_user(set_supplementary_groups, "qmailq")) {
 			if ((gidset = grpscan("qmailq", &ngroups))) {
@@ -347,14 +347,14 @@ main(int argc, char **argv)
 			die("unable to copy fd1 to pipe6");
 		close2345678();
 		closepipes();
-		qcargs[2] = "qmail-todo"; /*- pass qmail-todo as argument for the ps command */
+		qcargs[2] = "todo-proc"; /*- pass todo-proc as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
-		die("unable to exec qmail-clean (qmail-todo)");
+		die("unable to exec qmail-clean (todo-proc)");
 	}
 	switch (fork())
 	{
 	case -1:
-		die("unable to fork qmail-todo");
+		die("unable to fork todo-proc");
 	case 0:
 		if (prot_uid(auto_uids) == -1)
 			die("unable to set qmails uid");
@@ -368,8 +368,8 @@ main(int argc, char **argv)
 		if (fd_copy(3, pi10[0]) == -1)
 			die("unable to copy fd3 to pipe10");
 		closepipes();
-		execvp(*qtargs, qtargs); /*- qmail-todo */
-		die("unable to exec qmail-todo");
+		execvp(*qtargs, qtargs); /*- todo-proc */
+		die("unable to exec todo-proc");
 	}
 
 	switch (fork())

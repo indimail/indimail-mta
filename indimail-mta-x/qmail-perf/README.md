@@ -81,7 +81,7 @@ The qmail-perf-test script will create a csv file with the data and averaged tot
 MTA/Method|Description
 -----------|------
 indimail-mta|indimail-mta using traditional queue trigger method using lock/trigger with a dedicated todo processor.  This mta has a runtime configurable directory split and bigtodo
-ipc|indimail-mta using POSIX IPC, nameley message queues and shared memory for communication between qmail-queue, qmail-todo and qmail-send. This mta has a runtime configurable directory split and bigtodo
+ipc|indimail-mta using POSIX IPC, nameley message queues and shared memory for communication between qmail-queue, todo-proc and qmail-send. This mta has a runtime configurable directory split and bigtodo
 qmta|indimail-mta having qmail-send+qmail-lspawn-qmail-rspawn+qmail-clean as a single binary. This mta doesn't have a separate todo processor. This mta has a runtime configurable directory split and bigtodo
 slowq|indimail-mta having qmail-send with rate control delivery. This mta doesn't have a separate todo processor. This mta has a runtime configurable directory split and bigtodo
 compat|indimail-mta using IPC but which can respond to both lock/trigger and POSIX IPC message queue. This mta has a separate todo processor. This mta has a runtime configurable directory split and bigtodo

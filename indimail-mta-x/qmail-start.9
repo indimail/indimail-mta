@@ -21,7 +21,7 @@ qscheduler \- turn on mail delivery with fixed number of queues or load dependen
 ]
 
 .SH DESCRIPTION
-\fBqmail-start\fR invokes \fBqmail-send\fR, \fBqmail-todo\fR,
+\fBqmail-start\fR invokes \fBqmail-send\fR, \fBtodo-proc\fR,
 \fBqmail-lspawn\fR, \fBqmail-rspawn\fR, and \fBqmail-clean\fR, under the
 proper uids and gids for a queue defined by the environment variable
 \fBQUEUEDIR\fR. These five daemons cooperate to deliver messages from the
@@ -33,7 +33,7 @@ should be used if you desire to run only one queue. For running multiple
 parallel queues use \fBqscheduler\fR.
 
 \fBqscheduler\fR invokes multiple invocations of \fBqmail-start\fR to
-invoke \fBqmail-send\fR, \fBqmail-todo\fR, \fBqmail-lspawn\fR,
+invoke \fBqmail-send\fR, \fBtodo-proc\fR, \fBqmail-lspawn\fR,
 \fBqmail-rspawn\fR, and \fBqmail-clean\fR, under the proper uids and gids
 for multiple queues. Each instance refers to a specific queue. The number
 of instances can be fixed (\-\fBs\fR) or dynamic (\-\fBd\fR). When using
@@ -47,7 +47,7 @@ concurrency of all queues. When it reaches \fBMAX_LOAD\fR environment
 variable for both the local queue or the remote queue for all the queues
 (default compile time value=@qload@ for each queue), \fBqscheduler\fR
 configures an additional queue using \fBqueue-fix\fR(8) and invokes
-\fBqmail-send\fR, \fbqmail-todo\fR, \fBqmail-lspawn\fR, \fBqmail-rspawn\fR
+\fBqmail-send\fR, \fbtodo-proc\fR, \fBqmail-lspawn\fR, \fBqmail-rspawn\fR
 and \fBqmail-clean\fR on the new queue. \fBqscheduler\fR uses DIRSPLIT as
 the default split value. This can be changed by setting the \fBCONFSPLIT\fR
 environment variable.  Additionally \fBqscheduler\fR can process a queue
@@ -56,7 +56,7 @@ without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable. If the -n option is provided, queue counts will not
 be increased or decreased.
 
-\fBqscheduler\fR also monitors each \fBqmail-todo\fR, \fBqmail-send\fR
+\fBqscheduler\fR also monitors each \fBtodo-proc\fR, \fBqmail-send\fR
 instances and restarts them if they go down.
 
 \fBqmail-start\fR or \fBqscheduler\fR arranges for \fBqmail-send 's
@@ -81,7 +81,7 @@ run \fBqmail-start\fR or \fBqscheduler\fR with a low priority.
 .TP 3
 \fB\-s\fR
 This implies \fBqscheduler\fR will have a fixed number of \fBqmail-start\fR
-invocations. The number of \fBqmail-todo\fR, \fBqmail-send\fR instance it
+invocations. The number of \fBtodo-proc\fR, \fBqmail-send\fR instance it
 runs is defined by the environment variable \fBQUEUE_COUNT\fR. For each
 instance of \fBqmail-start\fR,  the queue is defined by \fBqscheduler\fR by
 setting the environment variable \fBQUEUEDIR\fR. A queue is defined by the
@@ -91,14 +91,14 @@ integers defined by environment variables \fBQUEUE_START\fR and
 Setting QUEUE_COUNT=2, QUEUE_START=1 will make \fBqscheduler\fR run
 \fBqmail-start\fR twice. The first invocation of \fBqmail-start\fR will use
 the queue QMAILHOME/queue/queue1 and the second instance will use
-QMAILHOME/queue/queue2. This will cause two copies of qmail-todo,
+QMAILHOME/queue/queue2. This will cause two copies of todo-proc,
 qmail-send, qmail-lspawn, qmail-rspawn, qmail-clean to run
 
 .PP
 .TP 3
 \fB\-d\fR
 This implements dynamic queues and uses POSIX IPC for communcation between
-\fBqscheduler\fR(8), \fBqmail-send\fR(8), \fBqmail-todo\fR(8),
+\fBqscheduler\fR(8), \fBqmail-send\fR(8), \fBtodo-proc\fR(8),
 \fBqmail-queue\R(8), \fBqmail-multi\fR(8). See multi-queue(7) for a
 complete overview.
 
@@ -108,7 +108,7 @@ complete overview.
 When using dynamic queues, this enables compatability mode with the
 traditional method of using the \fIlock/trigger\fR fifo in the queue
 directory. This allows \fBqmail-queue\fR running in non-dynamic mode to
-trigger scan of the todo directory by \fBqmail-todo\fR. Use this when your
+trigger scan of the todo directory by \fBtodo-proc\fR. Use this when your
 system has qmail, netqmail or old qmail-queue clients injecting emails.
 Using compatability mode doesn't give you the full performance benefits
 when system is configured to use POSIX IPC for dynamic queues.
@@ -199,7 +199,7 @@ qmail-clean(8),
 qmail-lspawn(8),
 qmail-rspawn(8),
 qmail-send(8),
-qmail-todo(8),
+todo-proc(8),
 qmail-multi(8),
 queue-fix(8),
 setqload(8),

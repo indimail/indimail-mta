@@ -666,7 +666,7 @@ echo ../resolv.conf 1>&3
 %attr(751,root,root)                    %{_prefix}/sbin/slowq-send
 %attr(751,root,root)                    %{_prefix}/sbin/qmta-send
 %attr(751,root,root)                    %{_prefix}/sbin/mini-smtpd
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-todo
+%attr(751,root,root)                    %{_prefix}/sbin/todo-proc
 %attr(755,root,root)                    %{_prefix}/sbin/surblfilter
 %attr(755,root,root)                    %{_prefix}/sbin/surblqueue
 

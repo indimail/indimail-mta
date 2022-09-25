@@ -20,7 +20,7 @@ qmta-send \- standalone mail delivery
 \fBqmta-send\fR is on systems that requires a simple delivery mechanism
 for mails generated locally (like in cron scripts). It can be run as a
 daemon running continuously or as and when mail is generated. qmta-send
-doesn't require qmail-todo, qmail-lspawn, qmail-rspawn, qmail-clean to
+doesn't require todo-proc, qmail-lspawn, qmail-rspawn, qmail-clean to
 process a queue.
 
 .EX
@@ -700,7 +700,7 @@ slowq-start(8),
 slowq-send(8),
 qscheduler(8),
 qmail-send(8),
-qmail-todo(8),
+todo-proc(8),
 qmail-clean(8),
 qmail-lspawn(8),
 qmail-dkim(8),

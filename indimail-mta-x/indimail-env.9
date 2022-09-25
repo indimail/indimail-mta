@@ -137,7 +137,7 @@ Override the default @sysconfdir@/certs/clientcrl.pem used by
 \fICONFSPLIT\fR
 Used by \fBqmail-clean\fR(8), \fBqmail-qread\fR(8), \fBqmail-queue\fR(8),
 \fBqmail-rm\fR(1), \fBqmail-send\fR(8), \fBqmail-showctl\fR(8),
-\fBqmail-todo\fR(8), \fBqmta-send\fR(8), \fBqueue-fix\fR(8),
+\fBtodo-proc\fR(8), \fBqmta-send\fR(8), \fBqueue-fix\fR(8),
 \fBslowq-send\fR(8) to set the directory split. Default is DIRSPLIT
 
 .TP
@@ -500,7 +500,7 @@ LOGHEADERFD.
 .TP
 \fILOGLOCK\fR
 indimail-mta uses multiple queues with each queue being served by specific
-\fBqmail-todo\fR(8), \fBqmail-send\fR(8), \fBqmail-lspawn\fR(8),
+\fBtodo-proc\fR(8), \fBqmail-send\fR(8), \fBqmail-lspawn\fR(8),
 \fBqmail-rspawn\fR(8) and \fBqmail-clean\fR(8) processes. The standard
 output and errors all go to a single fd (usually setup by supervise).
 The output can get jumbled up. Setting this prevents log output to be
@@ -965,7 +965,7 @@ Used as path for creating temporary files by \fBautoresponder\fR(1), qarf,
 
 .TP
 \fITODO_INTERVAL\fR
-Used by \fBqmail-todo\fR(8), \fBslowq-send\fR(8) and \fBqmta-send\fR(8)
+Used by \fBtodo-proc\fR(8), \fBslowq-send\fR(8) and \fBqmta-send\fR(8)
 
 .TP
 \fITRY_NEXT_MX_HELO_FAIL\fR
@@ -1019,7 +1019,7 @@ Used by \fBdot-forward\fR(1), \fBnew-inject\fR(8), \fBqmail-direct\fR(8),
 .TP
 \fIUSE_SETGROUPS\fR
 Used by \fBqmail-start\fR(8), \fBslowq-start\fR(8) to add supplementary
-groups for daemons \fBqmail-todo\fR(8), \fBqmail-send\fR(8),
+groups for daemons \fBtodo-proc\fR(8), \fBqmail-send\fR(8),
 \fBqmail-lspawn\fR(8), \fBqmail-rspawn\fR(8) and \fBqmail-clean\fR(8)
 
 .TP

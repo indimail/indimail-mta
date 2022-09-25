@@ -54,7 +54,7 @@ deliveries when dynamic queues is configured (-\fId\fR argument to
 
 QUEUE_LOAD - defines the max queue load after which \fBqscheduler\fR(8)
 should increment the queue count by starting an additional
-\fBqmail-send\fR(8), \fBqmail-todo\fR(8) instance.
+\fBqmail-send\fR(8), \fBtodo-proc\fR(8) instance.
 
 .SH Inter-Process Communication
 .
@@ -132,7 +132,7 @@ For each queue, \fBqscheduler\fR(8) creates a message queue using
 by qmailq:qmail with perm 0640.
 
 This message queue is used by \fBqmail-queue\fR(8) to communicate to
-\fBqmail-todo\fR(8) the split dir and the inode number of the message in
+\fBtodo-proc\fR(8) the split dir and the inode number of the message in
 the outgoing queue. This is more efficient than the trigger method that
 qmail-queue uses, where the trigger wakes up \fBqmail-send\fR(8) to scan
 the \fItodo\fR directory. Scanning \fItodo\fR using \fBopendir\fR(3),
@@ -153,7 +153,7 @@ qmail-start(8),
 qmail-multi(8),
 qmail-queue(8),
 qmail-send(8),
-qmail-todo(8),
+todo-proc(8),
 shm_open(3),
 mq_open(3),
 ipcs(1),

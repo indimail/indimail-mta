@@ -77,7 +77,7 @@ usage
 	for i in sudo matchup svc svstat time cat ls wc zip tail head sed \
 		rm printf expr awk tai64nunix grep egrep getent date cut \
 		mkdir chmod chown multilog qmail-inject qmail-queue \
-		qmail-send qmta-send slowq-send qmail-todo matchup zoverall
+		qmail-send qmta-send slowq-send todo-proc matchup zoverall
 	do
 		command -v $i >/dev/null
 		if [ $? -ne 0 ] ; then

@@ -36,14 +36,27 @@ function to load all the plugins and by default try to execute the symbol
 \fBSTART_PLUGIN_SYMB\fR environment variable. \fBqmail-send\fR will terminate
 if any of the loaded functions return non-zero status.
 
-\fBqmail-send\fR sends a single byte 'S' on desciptor 7 to qmail-todo to
+\fBqmail-send\fR sends a single byte 'C' on desciptor 7 to todo-proc to
 indicate that it has started. \fBqmail-send\fR reads instructions from
-\fBqmail-todo\fR on descriptor 8. It gets the filename in todo directory,
+\fBtodo-proc\fR on descriptor 8. It gets the filename in todo directory,
 the message id and whether the message is local or remote. It then uses
 \fBqmail-lspawn\fR to deliver messages to local recipients and
 \fBqmail-rspawn\fR to deliver messages to remote recipients. If a message
 is temporarily undeliverable to one or more addresses, \fBqmail-send\fR
 leaves it in the queue and tries the addresses again later.
+
+\fBqmail-send\fR can run delivery and todo processing in detached mode by
+issuing \fBSIGUSR1\fR signal to \fBqmail-send\fR. In detached mode,
+qmail-send processes just the existing local and remote queue at the time
+of the receipt of \fBSIGUSR1\fR and schedules delivery until the existing
+local/remote deliveries complete. Meanwhile the todo processing continues
+to happen and emails continue to get classied as local, remote, but they
+don't get scheduled for delivery. One can issue the signal \fBSIGUSR2\fR to
+enter the normal attached mode, where emails get scheduled immediately
+after todo processing. One can issue SIGUSR1 if \fBqmail-send\fR is unable
+to cope with high injection rates. Or one may issue SIGUSR1 if you want to
+pre-process the incoming emails but schedule delivery later on receipt of
+SIGUSR2.
 
 \fBqmail-send\fR prints a readable record of its activities to descriptor
 0. It writes commands to \fBqmail-lspawn\fR, \fBqmail-rspawn\fR, and
@@ -702,7 +715,7 @@ drate(1),
 qmail-start(8),
 qscheduler(8),
 multi-queue(7),
-qmail-todo(8),
+todo-proc(8),
 qmail-clean(8),
 qmail-lspawn(8),
 qmail-dkim(8),

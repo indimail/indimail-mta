@@ -624,10 +624,10 @@ qmail-tcpok.o
 qmail-tcpto
 qmail-tcpto.0
 qmail-tcpto.o
-qmail-todo
-qmail-todo.0
-qmail-todo.8
-qmail-todo.o
+todo-proc
+todo-proc.0
+todo-proc.8
+todo-proc.o
 qmail-upq
 qmail-users.0
 qmail-users.5

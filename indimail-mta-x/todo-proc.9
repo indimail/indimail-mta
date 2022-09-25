@@ -1,18 +1,18 @@
-.TH qmail-todo 8
+.TH todo-proc 8
 .SH NAME
-qmail-todo \- process todo messages from the queue
+todo-proc \- process todo messages from the queue
 
 .SH SYNOPSIS
-\fBqmail-todo\fR
+\fBtodo-proc\fR
 [ -\fBs\fR] | [-\fBc\fR]-\fBd\fR
 
 .SH DESCRIPTION
-\fBqmail-todo\fR handles todo messages placed into the outgoing queue by
-\fBqmail-queue\fR \fBqmail-todo\fR by default looks at QMAILHOME/queue for
+\fBtodo-proc\fR handles todo messages placed into the outgoing queue by
+\fBqmail-queue\fR \fBtodo-proc\fR by default looks at QMAILHOME/queue for
 messages. This path can be changed by defining the QUEUEDIR environment
 variable.
 
-\fBqmail-todo\fR addresses a problem known as the silly qmail (queue)
+\fBtodo-proc\fR addresses a problem known as the silly qmail (queue)
 problem. This problem is found only on system with high injection rates.
 qmail with a big local and remote concurrency could deliver a tremendous
 amount of messages but normally this can not be achieved because
@@ -25,34 +25,34 @@ slots and therefor it is not possible to achieve the maximum throughput.
 This would be a minor problem if one \fBqmail-send\fR run could be done in
 extreme short time. But because of many file system calls (fsync and
 (un)link) a todo run is expensive and throttles the throughput.
-\fBqmail-todo\fR solves this by having the todo run done by itself rather
+\fBtodo-proc\fR solves this by having the todo run done by itself rather
 than by \fBqmail-send\fR This reduces the run time in \fBqmail-send.\fR
 
-\fBqmail-todo\fR prepares incoming messages for local and remote deliveries
+\fBtodo-proc\fR prepares incoming messages for local and remote deliveries
 (by creating info/<messid> local/<messid> and remote/<messid> and removing
-todo/<messid> See also INTERNALS). Next \fBqmail-todo\fR transmits the
+todo/<messid> See also INTERNALS). Next \fBtodo-proc\fR transmits the
 <messid> to qmail-send which will add this message into the priority queue
-which schedules the message for delivery. \fBqmail-todo\fR can be optimized
+which schedules the message for delivery. \fBtodo-proc\fR can be optimized
 further by making it to transmit the <messids> in chunks rather than every
 time a file is found in todo directory. The chunk size can be set by
-defining TODO_CHUNK_SIZE. \fqmail-todo\fR will wait for \fBCHUNK_WAIT\fR
+defining TODO_CHUNK_SIZE. \ftodo-proc\fR will wait for \fBCHUNK_WAIT\fR
 seconds (set by environment variable \fBCHUNK_WAIT\fR) before transmitting
 accumulated all <messids> to qmail-send.
 
-qmail-todo can work in two modes - static queue mode or dynamic queue mode.
+todo-proc can work in two modes - static queue mode or dynamic queue mode.
 The dynamic queue mode is enabled when passed the \-\fId\fR argument by
 \fBqscheduler\fR(8).
 
-In dynamic queue mode, qmail-todo wakes up on a message from
+In dynamic queue mode, todo-proc wakes up on a message from
 \fBqmail-queue\fR(8). If the environment variable \fBDYNAMIC_QUEUE\fR is
 set, \fBqmail-queue\fR(8) uses message queue /\fBqmail-queue\fR. If there
 is any failure using message queues, \fBqmail-queue\fR(8) reverts back to
-using QUEUE/lock/trigger. When in dynamic queue mode, \fBqmail-todo\fR(8)
+using QUEUE/lock/trigger. When in dynamic queue mode, \fBtodo-proc\fR(8)
 will also respond to qmail-queue running in static mode whhere
 communications happens through \fIQUEUE/lock/trigger\fR. Here \fIQUEUE\fR
 refers to the base path of the queue. e.g. /var/indimail/queue/queue1.
 
-In static queue mode, qmail-todo normally does a queue run for every
+In static queue mode, todo-proc normally does a queue run for every
 injected message and then transmits the <messid> to qmail-send which
 schedules it for local/remote delivery. If we get too many injections the
 queue runs will stall scheduling of local/remote deliveries. Usually we see
@@ -68,14 +68,24 @@ will schedule a forced queue run at last complete queue run plus
 TODO_INTERVAL seconds to not miss the new additions to the queue.
 TODO_INTERVAL can also be set in the control file \fItodointerval\fR. The
 control file takes precedence over the environment variable. If
-TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero, qmail-todo
+TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero, todo-proc
 silently uses 10 secs as the value for TODO_INTERVAL.
 
-If \fBqmail-todo\fR receives a HUP signal, it will reread \fIlocals\fR,
+If \fBtodo-proc\fR receives a HUP signal, it will reread \fIlocals\fR,
 \fItodointerval\fR, \fIvirtualdomains\fR, \fIenvnoathost\fR,
 \fIconf-syncdir\fR, and \fIconf-fsync\fR.
 
-If the environment variable USE_FSYNC is set, then \fBqmail-todo\fR writes
+if \fBqmail-send\fR receives USR1 signal, it will instruct \fBtodo-proc\fR
+to stop communicating with \fBqmail-send\fR, but continue to pre-process
+the \fItodo\fR sub directory. This will allow \fBqmail-send\fR to dedicated
+itself to finish pending deliveries if any. One can issue the signal
+\fBSIGUSR2\fR to make \fBtodo-proc\fR start communicationg with
+\fBqmail-send\fR. One can issue SIGUSR1 if \fBqmail-send\fR is unable to
+cope with high injection rates. Or one may issue SIGUSR1 if you want to
+pre-process the incoming emails but schedule delivery later on receipt of
+SIGUSR2.
+
+If the environment variable USE_FSYNC is set, then \fBtodo-proc\fR writes
 all data to disk ("flushes") all modified in-core data of (i.e., modified
 buffer cache pages for) the new message to the disk device (or other
 permanent storage device) so that all changed information can be
@@ -89,7 +99,7 @@ If the environment variable USE_SYNCDIR is enabled, \fBqmail-send\fR
 forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
 
-\fBqmail-todo\fR can be configured to use a queue with a different split
+\fBtodo-proc\fR can be configured to use a queue with a different split
 subdirectory value than compile time value of DIRSPLIT. This can be done by
 setting the \fBCONFSPLIT\fR envrionment variable. Additionally, it can
 process a queue created with \fItodo\fR, \fIintd\fR with subdirectory split
@@ -106,7 +116,7 @@ environment variables USE_FSYNC, USE_SYNCDIR. This feature is exploited by
 .PP
 .TP 3
 \fB\-s\fR
-This implies \fBqmail-todo\fR will use static queue mode described
+This implies \fBtodo-proc\fR will use static queue mode described
 previously.
 
 .PP
@@ -127,9 +137,9 @@ Using compatability mode doesn't give you the full performance benefits
 when system is configured to use POSIX IPC for dynamic queues.
 
 .SH INTERNALS
-Communication between qmail-send and qmail-todo
+Communication between qmail-send and todo-proc
 
-qmail-todo -> qmail-send
+todo-proc -> qmail-send
    D[LRB]<mesgid>\\0
     Start delivery for new message with id <messid>.
     the character L, R or B defines the type
@@ -137,12 +147,12 @@ qmail-todo -> qmail-send
    L<string>\\0
     Dump string to the logger without adding additional \\n or similar.
 
-qmail-send -> qmail-todo
+qmail-send -> todo-proc
    H   Got a SIGHUP reread @controldir@/locals and @controldir@/virtualdomains
    X   Quit ASAP.
 
-qmail-todo sends "\\0" terminated messages whereas qmail-send sends just one
-character to qmail-todo.
+todo-proc sends "\\0" terminated messages whereas qmail-send sends just one
+character to todo-proc.
 
 .SH "SEE ALSO"
 qmail-queue(8),

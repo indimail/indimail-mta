@@ -40,7 +40,7 @@ f:::0751:/sbin/:mini-smtpd:mini-smtpd
 f:::0751:/sbin/:qmail-qmqpd:qmail-qmqpd
 f:::0751:/sbin/:qmail-qmtpd:qmail-qmtpd
 f:::0751:/sbin/:qmail-smtpd:qmail-smtpd
-f:::0751:/sbin/:qmail-todo:qmail-todo
+f:::0751:/sbin/:todo-proc:todo-proc
 f:::0751:/sbin/:qmail-greyd:qmail-greyd
 f:::0751:/sbin/:greydaemon:greydaemon
 f:::0751:/sbin/:qmail-daned:qmail-daned

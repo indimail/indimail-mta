@@ -24,7 +24,22 @@ to the queue. \fBTODO_INTERVAL\fR can also be set in the control file
 \fItodointerval\fR. The control file takes precedence over the environment
 variable. If TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
 \fBslowq-send\fR silently uses 10 secs as the value for
-\fBTODO_INTERVAL\fR.
+\fBTODO_INTERVAL\fR. \fBslow-send\fR can also run a parallel todo-processor
+if the environment variable \fBTODO_PROCESSOR\fR is set. This addresses a
+problem known as the silly qmail (queue) problem sometimes found only on
+system with high injection rates. With todo-processor running,
+\fBslowq-send\fR can run delivery processing and todo processing in
+detached mode by issuing \fBSIGUSR1\fR signal to \fBslowq-send\fR. In
+detached mode, slowq-send processes just the existing local and remote
+queue at the time of the receipt of \fBSIGUSR1\fR and schedules delivery
+until the existing local/remote deliveries complete. Meanwhile the todo
+processing continues to happen and emails continue to get classied as
+local, remote, but they don't get scheduled for delivery. One can issue the
+signal \fBSIGUSR2\fR to enter the normal attached mode, where emails get
+scheduled immediately after todo processing. One can issue SIGUSR1 if
+\fBslowq-send\fR is unable to cope with high injection rates. Or one may
+issue SIGUSR1 if you want to pre-process the incoming emails but schedule
+delivery later on receipt of SIGUSR2.
 
 \fBslowq-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
 recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
@@ -42,10 +57,10 @@ aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
 variable. If a different queue program is desired for bounces, it can be set
 by using \fBBOUNCEQUEUE\fR environment variable.
 
-When injecting a bounce for a previously forwarded email, whose sender was
-rewritten using \fISRS\fB, \fBslowq-send\fR rewrites the recipient to the
-original sender using Sender Rewriting Scheme, if \fISRS\fB has been
-configured. see \fBqmail-srs\fR(5) for information on how to do this.
+If \fISRS\fR has been configured, when injecting a bounce for a previously
+forwarded email whose sender was rewritten using \fISRS\fR, \fBslowq-send\fR
+rewrites the recipient to the original sender using Sender Rewriting
+Scheme. See \fBqmail-srs\fR(5) for information on how to do this.
 
 \fBslowq-send\fR adds the \fBX-Bounced-Address\fR header when creating a
 bounce. It assigns the address that caused the bounce to this header. This
@@ -670,7 +685,7 @@ qmail-start(8),
 slowq-start(8),
 qscheduler(8),
 qmail-send(8),
-qmail-todo(8),
+todo-proc(8),
 qmail-clean(8),
 qmail-lspawn(8),
 qmail-dkim(8),

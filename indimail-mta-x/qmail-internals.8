@@ -7,7 +7,7 @@ qmail-internals - Overview of qmail internals
 
 Here's the data flow in the qmail suite:
              -                                  _
- qmail-smtpd  \\                  qmail-todo    /   qmail-rspawn --- qmail-remote
+ qmail-smtpd  \\                  todo-proc     /   qmail-rspawn --- qmail-remote
                \\                      |       /
                  qmail-queue --- qmail-send  /
                 /                     |      \\
@@ -170,6 +170,6 @@ qmail-send(8),
 qmail-smtpd(8),
 qmail-multi(8),
 qmail-queue(8),
-qmail-todo(8),
+todo-proc(8),
 qmail-send(8),
 qmail-clean(8)

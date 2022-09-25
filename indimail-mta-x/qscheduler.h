@@ -25,7 +25,7 @@ typedef enum {
 
 /*-
  * queue message
- * used by qmail-queue to communicate with qmail-todo
+ * used by qmail-queue to communicate with todo-proc
  */
 typedef struct
 {

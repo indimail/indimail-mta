@@ -1141,7 +1141,7 @@ main()
 	if (use_syncdir > 0) {
 		if ((fd = open(todofn, O_RDONLY)) == -1) {
 			/*- 
-			 * check if todofn has been picked up by qmail-todo
+			 * check if todofn has been picked up by todo-proc
 			 * and moved to local or remote folder. In such
 			 * a case you will get error_noent
 			 */

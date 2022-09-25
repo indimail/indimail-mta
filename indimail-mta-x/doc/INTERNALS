@@ -2,7 +2,7 @@
 
 Here's the data flow in the qmail suite:
 
- qmail-smtpd --- qmail-multi --- qmail-queue --- qmail-todo
+ qmail-smtpd --- qmail-multi --- qmail-queue --- todo-proc 
                /                                 /    \
 qmail-inject _/                                 /      \___ qmail-clean
                               _________________/
@@ -16,7 +16,7 @@ qmail-queue is invoked as needed, usually by qmail-inject for locally
 generated messages, qmail-smtpd for messages received through SMTP,
 qmail-local for forwarded messages, or qmail-send for bounce messages.
 
-Every message is pre-processed by qmail-todo and cleaned up by qmail-clean.
+Every message is pre-processed by todo-proc and cleaned up by qmail-clean.
 Every message is then delivered by qmail-send, in cooperation with
 qmail-lspawn and qmail-rspawn. These five programs are long-running daemons.
 

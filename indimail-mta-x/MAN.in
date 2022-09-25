@@ -194,7 +194,7 @@ f:::0644:/man8/:qmail-start.8:qmail-start.8
 f:::0644:/man8/:slowq-start.8:slowq-start.8
 f:::0644:/man8/:qmail-tcpok.8:qmail-tcpok.8
 f:::0644:/man8/:qmail-tcpto.8:qmail-tcpto.8
-f:::0644:/man8/:qmail-todo.8:qmail-todo.8
+f:::0644:/man8/:todo-proc.8:todo-proc.8
 f:::0644:/man8/:qscanq.8:qscanq.8
 f:::0644:/man8/:qscanq-stdin.8:qscanq-stdin.8
 f:::0644:/man8/:queue-fix.8:queue-fix.8
