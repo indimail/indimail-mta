@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.104 2022-04-21 21:34:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.105 2022-09-25 23:55:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -120,9 +120,10 @@ extern dtype    delivery;
 static int      do_ratelimit;
 unsigned long   delayed_jobs;
 
-static int      flagexitasap = 0;
+static int      flagexitsend = 0;
 static int      flagrunasap = 0;
 static int      flagreadasap = 0;
+static int      flagdetached = 0; /*- allow qmail-send to stop adding new jobs received from todo-proc */
 static int      dynamic_queue = 0;
 #ifdef HASLIBRT
 static int      shm_queue = -1;
@@ -130,11 +131,13 @@ static int      shm_queue = -1;
 static int      bigtodo;
 
 static void     reread(int);
+static void     sigusr1();
+static void     sigusr2();
 
 static void
 sigterm()
 {
-	flagexitasap = 1;
+	flagexitsend = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	log7("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n");
 }
@@ -196,7 +199,7 @@ static void
 cleandied()
 {
 	log5("alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n");
-	flagexitasap = 1;
+	flagexitsend = 1;
 }
 
 int             flagspawnalive[CHANNELS];
@@ -205,13 +208,12 @@ spawndied(int c)
 {
 	log5("alert: ", argv0, ": ", queuedesc, ": oh no! lost spawn connection! dying...\n");
 	flagspawnalive[c] = 0;
-	flagexitasap = 1;
+	flagexitsend = 1;
 }
 
 #define REPORTMAX 10000
 
 datetime_sec    recent, time_needed;
-
 
 /* this file is too long ----------------------------------------- FILENAMES */
 static stralloc fn1 = { 0 };
@@ -268,7 +270,6 @@ fnmake_chanaddr(unsigned long id, int c)
 	fn1.len = fmtqfn(fn1.s, chanaddr[c], id, 1);
 }
 
-
 /* this file is too long ----------------------------------------- REWRITING */
 
 void
@@ -301,7 +302,6 @@ senderadd(stralloc *sa, char *sender, char *recip)
 	while (!stralloc_cats(sa, sender))
 		nomem(argv0);
 }
-
 
 /* this file is too long ---------------------------------------------- INFO */
 
@@ -350,7 +350,6 @@ getinfo(stralloc *sa, stralloc *qh, stralloc *eh, datetime_sec *dt, unsigned lon
 	*dt = st.st_mtime;
 	return 1;
 }
-
 
 /* this file is too long ------------------------------------- COMMUNICATION */
 
@@ -476,7 +475,6 @@ comm_do(fd_set *wfds)
 	}
 }
 
-
 /*- this file is too long ------------------------------------------ CLEANUPS */
 
 static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
@@ -550,12 +548,11 @@ cleanup_do()
 		log7("warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n");
 }
 
-
 /*- this file is too long ----------------------------------- PRIORITY QUEUES */
 
-static prioq    pqdone = { 0 };						/*- -todo +info; HOPEFULLY -local -remote */
 static prioq    pqchan[CHANNELS] = { {0} , {0} };	/*- pqchan 0: -todo +info +local ?remote */
 													/*- pqchan 1: -todo +info ?local +remote */
+static prioq    pqdone = { 0 };						/*- -todo +info; HOPEFULLY -local -remote */
 static prioq    pqfail = { 0 };						/*- stat() failure; has to be pqadded again */
 
 static void
@@ -683,7 +680,6 @@ pqrun()
 	}
 }
 
-
 /*- this file is too long ---------------------------------------------- JOBS */
 
 typedef struct job {
@@ -778,7 +774,6 @@ job_close(int j)
 	while (!prioq_insert(min, &pqchan[jo[j].channel], &pe))
 		nomem(argv0);
 }
-
 
 /*- this file is too long ------------------------------------------- BOUNCES */
 
@@ -1278,7 +1273,7 @@ del_status()
 		log4_noflush(" delayed jobs=", strnum1, " ", queuedesc);
 	} else
 		log2_noflush(" ", queuedesc);
-	if (flagexitasap)
+	if (flagexitsend)
 		log1_noflush(" exitasap");
 	log1_noflush("\n");
 	flush();
@@ -1531,7 +1526,6 @@ del_do(fd_set *rfds)
 	}
 }
 
-
 /*- this file is too long -------------------------------------------- PASSES */
 
 static struct {
@@ -1558,7 +1552,7 @@ pass_selprep(datetime_sec *wakeup)
 	int             c;
 	struct prioq_elt pe;
 
-	if (flagexitasap)
+	if (flagexitsend)
 		return;
 	for (c = 0; c < CHANNELS; ++c) {
 		if (pass[c].id && del_avail(c)) {
@@ -1626,7 +1620,7 @@ pass_dochan(int c)
 	datetime_sec    t;
 	int             i, match, _do_ratelimit;
 
-	if (flagexitasap)
+	if (flagexitsend)
 		return;
 	if (!pass[c].id) { /*- new pass */
 		int             j;
@@ -1816,35 +1810,77 @@ pass_do()
 	}
 }
 
-
 /*- this file is too long ---------------------------------------------- TODO */
 
 static stralloc todoline = { 0 };
-
 static char     todobuf[2048];
-static int      todofdin, todofdout, flagtodoalive;
+static int      todofdi, todofdo, flagtodoalive;
+
+static void
+sigusr1()
+{
+	if (flagdetached == 1)
+		return;
+	sig_block(sig_usr1);
+	flagdetached = 1;
+	/*- tell todo-proc to stop sending jobs */
+	if (write(todofdo, "D", 1) != 1) {
+		log5("alert: ", argv0,
+				": unable to write two bytes to todo-proc! dying...: ",
+				error_str(errno), "\n");
+		flagexitsend = 1;
+		flagtodoalive = 0;
+	}
+	sig_unblock(sig_usr1);
+	if (!del_canexit())
+		sig_block(sig_usr2);
+}
+
+static void
+sigusr2()
+{
+	if (flagdetached == 0)
+		return;
+	sig_block(sig_usr2);
+	flagdetached = 0;
+	/*- 
+	 * we need to rescan todo if we were earlier in detached mode
+	 * add jobs from todo
+	 */
+	pqstart();
+	/*- tell todo-proc to start */
+	if (write(todofdo, "A", 1) != 1) {
+		log5("alert: ", argv0,
+				": unable to write two bytes to todo-proc! dying...: ",
+				error_str(errno), "\n");
+		flagexitsend = 1;
+		flagtodoalive = 0;
+	}
+	sig_unblock(sig_usr2);
+	sig_unblock(sig_usr1);
+}
 
 static void
 tododied()
 {
 	log5("alert: ", argv0, ": ", queuedesc,
-			": oh no! lost qmail-todo connection! dying...\n");
-	flagexitasap = 1;
+			": oh no! lost todo-proc connection! dying...\n");
+	flagexitsend = 1;
 	flagtodoalive = 0;
 }
 
 static void
 todo_init()
 {
-	todofdout = 7; /*- write end pi7[1] */
-	todofdin = 8;  /*- read end  pi8[0] */
+	todofdo = 7; /*- write end pi7[1] */
+	todofdi = 8;  /*- read end  pi8[0] */
 	flagtodoalive = 1;
-	/*- sync with external todo */
-	if (write(todofdout, "S", 1) != 1) {
+	/*- tell todo-proc to start */
+	if (write(todofdo, "C", 1) != 1) {
 		log5("alert: ", argv0,
 				": unable to write a byte to external todo! dying...: ",
 				error_str(errno), "\n");
-		flagexitasap = 1;
+		flagexitsend = 1;
 		flagtodoalive = 0;
 	}
 	return;
@@ -1853,19 +1889,14 @@ todo_init()
 static void
 todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
-	if (flagexitasap) {
-		if (flagtodoalive && write(todofdout, "X", 1) != 1) {
-			log7("alert: ", argv0, ": ", queuedesc,
-					": unable to write a byte to external todo! dying...: ",
-					error_str(errno), "\n");
-			flagexitasap = 1;
-			flagtodoalive = 0;
-		}
+	if (flagexitsend && flagtodoalive) {
+		write(todofdo, "X", 1);
+		flagtodoalive = 0;
 	}
 	if (flagtodoalive) {
-		FD_SET(todofdin, rfds);
-		if (*nfds <= todofdin)
-			*nfds = todofdin + 1;
+		FD_SET(todofdi, rfds); /*- read fd from todo-processor */
+		if (*nfds <= todofdi)
+			*nfds = todofdi + 1;
 	}
 }
 
@@ -1900,21 +1931,23 @@ todo_del(char *s)
 	case 'X':
 		break;
 	default:
-		log5("warning: ", argv0, ": ", queuedesc, ": unable to understand qmail-todo\n");
+		log5("warning: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n");
 		return;
 	}
 	len = scan_ulong(s, &id);
 	if (!len || s[len]) {
-		log5("warning: ", argv0, ": ", queuedesc, ": unable to understand qmail-todo\n");
+		log5("warning: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n");
 		return;
 	}
 	pe.id = id;
 	pe.dt = now();
+	/*- add to delivery queue */
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c])
 			while (!prioq_insert(min, &pqchan[c], &pe))
 				nomem(argv0);
 	}
+	/*- mark delivery as 'done' */
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagchan[c])
 			break;
@@ -1929,9 +1962,9 @@ todo_del(char *s)
 /*
  * if data is available fd 8 for read
  * read data
- * 'D' - set up delivery by calling todo_do()
- * 'L' - Write to log (fd 0) for logging
- * 'X' - set flagtodoalive = 0, flagexitasap = 1
+ * 'D' - set up delivery by calling todo_del()
+ * 'L' - write to log (fd 0) for logging
+ * 'X' - set flagtodoalive = 0, flagexitsend = 1
  */
 static void
 todo_do(fd_set *rfds)
@@ -1941,16 +1974,16 @@ todo_do(fd_set *rfds)
 
 	if (!flagtodoalive)
 		return;
-	if (!FD_ISSET(todofdin, rfds))
+	if (!FD_ISSET(todofdi, rfds))
 		return;
 
-	if ((r = read(todofdin, todobuf, sizeof (todobuf))) == -1)
+	if ((r = read(todofdi, todobuf, sizeof (todobuf))) == -1)
 		return;
 	if (r == 0) {
-		if (flagexitasap)
+		if (flagexitsend)
 			flagtodoalive = 0;
 		else
-			tododied();
+			tododied(); /*- sets flagexitsend, flagtodoalive */
 		return;
 	}
 	for (i = 0; i < r; ++i) {
@@ -1960,8 +1993,8 @@ todo_do(fd_set *rfds)
 		if (todoline.len > REPORTMAX)
 			todoline.len = REPORTMAX;
 		/*- 
-		 * qmail-todo is responsible for keeping it short
-		 * e.g. qmail-todo writes a line like this
+		 * todo-proc is responsible for keeping it short
+		 * e.g. todo-proc writes a line like this
 		 * local  DL656826\0
 		 * remote DR656826\0
 		 * both   DB656826\0
@@ -1970,28 +2003,27 @@ todo_do(fd_set *rfds)
 			switch (todoline.s[0])
 			{
 			case 'D': /*- message to be delivered */
-				if (flagexitasap)
+				if (flagexitsend)
 					break;
 				todo_del(todoline.s + 1);
 				break;
 			case 'L': /*- write to log */
 				log1(todoline.s + 1);
 				break;
-			case 'X': /*- qmail-todo is exiting */
-				if (flagexitasap)
+			case 'X': /*- todo-proc is exiting */
+				if (flagexitsend)
 					flagtodoalive = 0;
 				else
-					tododied();
+					tododied(); /*- sets flagexitsend, flagtodoalive */
 				break;
 			default:
-				log5("warning: ", argv0, ": ", queuedesc, ": unable to understand qmail-todo: report mangled\n");
+				log5("warning: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n");
 				break;
 			}
 			todoline.len = 0;
 		}
-	}
+	} /*- for (i = 0; i < r; ++i) */
 }
-/*- this file is too long ---------------------------------------------- MAIN */
 
 static int
 getcontrols()
@@ -2118,7 +2150,7 @@ getcontrols()
  * new domains added will not get served till another sighup causes
  * regetcontrols to get executed without problems. This is much
  * better than having qmail-send come to a grinding halt.
- * Another way could be to set flagexitasap to 1
+ * Another way could be to set flagexitsend to 1
  */
 static stralloc newlocals = { 0 };
 static stralloc newvdoms = { 0 };
@@ -2211,7 +2243,7 @@ reread(int hupflag)
 				auto_qmail, ": ", error_str(errno), "\n");
 		return;
 	}
-	if (hupflag && write(todofdout, "H", 1) != 1) {
+	if (hupflag && write(todofdo, "H", 1) != 1) {
 		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to write a byte to external todo: ",
 				error_str(errno), "\n");
@@ -2351,7 +2383,7 @@ shm_init(char *shm_name)
 int
 main(int argc, char **argv)
 {
-	int             fd, nfds, c, opt;
+	int             lockfd, nfds, c, opt, can_exit;
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	struct timeval  tv;
@@ -2437,6 +2469,10 @@ main(int argc, char **argv)
 #ifdef LOGLOCK
 	sig_intcatch(sigint);
 #endif
+	sig_block(sig_usr1);
+	sig_block(sig_usr2);
+	sig_catch(sig_usr1, sigusr1);
+	sig_catch(sig_usr2, sigusr2);
 	umask(077);
 
 	while ((opt = getopt(argc, argv, "cds")) != opteof) {
@@ -2458,11 +2494,11 @@ main(int argc, char **argv)
 	argv += optind;
 
 	/*- prevent multiple copies of qmail-send to run */
-	if ((fd = open_write("lock/sendmutex")) == -1) {
+	if ((lockfd = open_write("lock/sendmutex")) == -1) {
 		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: unable to open mutex\n");
 		_exit(111);
 	}
-	if (lock_exnb(fd) == -1) {
+	if (lock_exnb(lockfd) == -1) {
 		log5("alert: ", argv0, ": ", queuedesc, ": cannot start: instance already running\n");
 		_exit(111);
 	}
@@ -2504,9 +2540,12 @@ main(int argc, char **argv)
 	job_init();     /*- initialize numjobs job structures */
 	del_init();     /*- initialize concurrencylocal + concurrrencyremote delivery structure */
 	pass_init();    /*- initialize pass structure */
-	todo_init();    /*- set fd 7 to write to qmail-todo, set fd 8 to read from qmail-todo, write 'S' to qmail-todo */
+	todo_init();    /*- set fd 7 to write to todo-proc, set fd 8 to read from todo-proc, write 'S' to todo-proc */
 	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
-	while (!flagexitasap || !del_canexit() || flagtodoalive) { /*- stay alive if delivery jobs, todo jobs are present */
+	sig_unblock(sig_usr1);
+	sig_unblock(sig_usr2);
+	can_exit = del_canexit();
+	while (!flagexitsend || !can_exit || flagtodoalive) { /*- stay alive if delivery jobs, todo jobs are present */
 		recent = now();
 		if (flagrunasap) {
 			flagrunasap = 0;
@@ -2542,7 +2581,7 @@ main(int argc, char **argv)
 		pass_selprep(&wakeup);
 		/*-
 		 * prepare readfd for select
-		 * set todofdin = 8 for select: read end from qmail-todo pi8[0]
+		 * set todofdi = 8 for select: read end from todo-proc pi8[0]
 		 */
 		todo_selprep(&nfds, &rfds, &wakeup);
 		/*- set wakeup */
@@ -2557,7 +2596,7 @@ main(int argc, char **argv)
 		tv.tv_usec = 0;
 		if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
 			if (errno == error_intr) {
-				if (flagexitasap)
+				if (flagexitsend)
 					break;
 			} else
 				log5("warning: ", argv0, ": ", queuedesc, ": trouble in select\n");
@@ -2577,16 +2616,25 @@ main(int argc, char **argv)
 			 * fd 4 - pi4[0] - data from qmail-rspawn
 			 */
 			del_do(&rfds);
-			/* read data from fd 8 from qmail-todo
-			 * 'D' - Do deliver
-			 * 'L' - Write to log (fd 0) for logging
-			 * 'X' - set flagtodoalive = 0, flagexitasap = 1
+			/* read data from fd 8 from todo-proc
+			 * 'D' - do delivery
+			 * 'L' - write to log (fd 0) for logging
+			 * 'X' - set flagtodoalive = 0, flagexitsend = 1
 			 */
 			todo_do(&rfds);
+			/*-
+			 * add/del priority queue
+			 * mark delivered/bounced messages as done
+			 */
 			pass_do();
+			/*-
+			 * communicate with qmail-clean for cleanup
+			 */
 			cleanup_do();
 		}
-	} /*- while (!flagexitasap || !del_canexit() || flagtodoalive) */
+		if ((can_exit = del_canexit()))
+			sig_unblock(sig_usr2);
+	} /*- while (!flagexitsend || !can_exit || flagtodoalive) */
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	log7("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n");
@@ -2599,7 +2647,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.104 2022-04-21 21:34:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.105 2022-09-25 23:55:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2609,6 +2657,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.105  2022-09-25 23:55:34+05:30  Cprogrammer
+ * added feature to disconnect from todo-proc
+ *
  * Revision 1.104  2022-04-21 21:34:31+05:30  Cprogrammer
  * fixed bigtodo setting for todofn
  *
@@ -2742,7 +2793,7 @@ getversion_qmail_send_c()
  * replaced utime() with utimes()
  *
  * Revision 1.68  2020-05-19 10:33:59+05:30  Cprogrammer
- * define use_fsync for non-external qmail-todo
+ * define use_fsync for non-external todo-proc
  *
  * Revision 1.67  2020-05-16 09:57:09+05:30  Cprogrammer
  * avoid possible integer overflow in rewrite()
