@@ -8,7 +8,7 @@ todo-proc \- process todo messages from the queue
 
 .SH DESCRIPTION
 \fBtodo-proc\fR handles todo messages placed into the outgoing queue by
-\fBqmail-queue\fR \fBtodo-proc\fR by default looks at QMAILHOME/queue for
+\fBqmail-queue\fR. \fBtodo-proc\fR by default looks at QMAILHOME/queue for
 messages. This path can be changed by defining the QUEUEDIR environment
 variable.
 
@@ -153,6 +153,11 @@ qmail-send -> todo-proc
 
 todo-proc sends "\\0" terminated messages whereas qmail-send sends just one
 character to todo-proc.
+
+.SH CREDITS
+\fBtodo-proc\fR borrows its basic design from the ext-todo patch by
+Claudio Jeker <jeker@n-r-g.com> and Andre Oppermann <opi@nrg4u.com> 
+(c) 1998,1999,2000,2001,2002 Internet Business Solutions Ltd.
 
 .SH "SEE ALSO"
 qmail-queue(8),
