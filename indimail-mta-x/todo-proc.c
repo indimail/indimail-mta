@@ -1,5 +1,5 @@
 /*
- * $Id: todo-proc.c,v 1.63 2022-09-25 23:56:55+05:30 Cprogrammer Exp mbhangui $
+ *  todo-proc.c,v 1.62 2022-04-12 08:37:19+05:30 Cprogrammer Exp mbhangui
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -134,7 +134,7 @@ sigterm(void)
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	log7("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n");
 	if (!flagexittodo)
-		log5("info: ", argv0, ": ", queuedesc, " stop processing asap\n");
+		log5("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n");
 	flagexittodo = 1;
 }
 
@@ -304,13 +304,13 @@ comm_init(void)
 		nomem();
 }
 
+/*- XXX: returns true if there is something in the buffer */
 int
 comm_canwrite(void)
 {
-	/*- XXX: could allow a bigger buffer; say 10 recipients */
-	/*- XXX: returns true if there is something in the buffer */
 	if (!flagsendalive)
 		return 0;
+	/*- XXX: could allow a bigger buffer; say 10 recipients */
 	if (comm_buf.s && comm_buf.len)
 		return 1;
 	return 0;
@@ -515,7 +515,6 @@ fail:
 void
 comm_exit(void)
 {
-	/*- if it fails exit, we have already stoped */
 	if (!stralloc_cats(&comm_buf, "X") ||
 			!stralloc_0(&comm_buf))
 		_exit(1);
@@ -625,7 +624,7 @@ comm_die(int i)
 	nfds = 1;
 	comm_selprep(&nfds, &wfds, &rfds);
 	comm_do(&wfds, &rfds);
-	log5("info: ", argv0, ": ", queuedesc, " stop processing asap\n");
+	log5("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n");
 	_exit(i);
 }
 
@@ -1505,7 +1504,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: todo-proc.c,v 1.63 2022-09-25 23:56:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: todo-proc.c,v 1.63 2022-09-26 09:28:00+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1513,7 +1512,7 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
- * Revision 1.63  2022-09-25 23:56:55+05:30  Cprogrammer
+ * Revision 1.63  2022-09-26 09:28:00+05:30  Cprogrammer
  * added feature to disconnect from qmail-send
  *
  * Revision 1.62  2022-04-12 08:37:19+05:30  Cprogrammer
