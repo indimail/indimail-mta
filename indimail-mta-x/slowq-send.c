@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.25 2022-09-25 23:59:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.25 2022-09-26 09:17:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -393,7 +393,6 @@ comm_init()
 void
 comm_exit_send(void)
 {
-	/*- if it fails exit, we have already stoped */
 	if (!stralloc_cats(&comm_buf_todo, "X") ||
 			!stralloc_0(&comm_buf_todo))
 		_exit(1);
@@ -692,7 +691,7 @@ comm_die_send(int i)
 	nfds = 1;
 	comm_selprep_send(&nfds, &wfds, &rfds);
 	comm_read_todo(&wfds, &rfds);
-	slog5("info: ", argv0, ": ", queuedesc, " stop processing asap\n");
+	slog5("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n");
 	_exit(i);
 }
 
@@ -2296,7 +2295,7 @@ static void
 todo_selprep_send(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
 	if (flagexitsend && flagtodoalive) {
-		write(todofdo, "X", 1);
+		if (write(todofdo, "X", 1)) ; /* keep compiler happy */
 		flagtodoalive = 0;
 	}
 	if (flagtodoalive) {
@@ -3768,7 +3767,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.25 2022-09-25 23:59:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.25 2022-09-26 09:17:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3778,6 +3777,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.25  2022-09-26 09:17:34+05:30  Cprogrammer
+ * added dedicated todo processor
+ *
  * Revision 1.25  2022-09-25 23:59:13+05:30  Cprogrammer
  * added dedicated todo processor
  *

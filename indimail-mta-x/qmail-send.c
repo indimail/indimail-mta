@@ -1890,7 +1890,7 @@ static void
 todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
 	if (flagexitsend && flagtodoalive) {
-		write(todofdo, "X", 1);
+		if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
 		flagtodoalive = 0;
 	}
 	if (flagtodoalive) {
