@@ -346,7 +346,7 @@ eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 
 # slowq service
 eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} \
-	--cntrldir=control --persistdb --starttls \
+	--cntrldir=control --todo-proc --persistdb --starttls \
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
 	--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/${dkimkeyfn} \
 	--remote-authsmtp=plain --localfilter --remotefilter \

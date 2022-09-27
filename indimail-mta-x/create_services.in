@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.115 2022-09-19 22:21:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.116 2022-09-27 22:05:02+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -494,7 +494,7 @@ eval $svctool --queueParam=defaultqueue \
   $append_opt $extra_opt
 
 eval $svctool --slowq --servicedir=$servicedir --qbase=$qbase \
-  --cntrldir=control --persistdb --starttls \
+  --cntrldir=control --todo-proc --persistdb --starttls \
   --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
   --dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
   --remote-authsmtp=plain --localfilter --remotefilter \
@@ -758,6 +758,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.116  2022-09-27 22:05:02+05:30  Cprogrammer
+# Create slowq-send service with todo processor turned on
+#
 # Revision 2.115  2022-09-19 22:21:54+05:30  Cprogrammer
 # run ischema -u to update indimail schema to current
 #
