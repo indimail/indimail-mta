@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.25 2022-09-26 09:17:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.26 2022-09-27 12:49:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -480,9 +480,8 @@ comm_write_spawn(int c, int delnum, unsigned long id, char *sender,
 
 /*
  * used by
- * qmail-send
  * todo-processor
- * prepare comm buf to be written to todo-processor
+ * prepare comm buf to be written to qmail-send
  */
 void
 comm_write_todo(unsigned long id, int local, int remote)
@@ -644,14 +643,14 @@ comm_read_todo(fd_set *wfds, fd_set *rfds)
 				flagdetached = 0;
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				slog7("alert: ", argv0, ": pid ", strnum1,
-					" got USR1: todo-processor attached: ",
+					" got 'A' command: todo-processor attached: ",
 					queuedesc, "\n");
 				break;
 			case 'D': /*- detached mode */
 				flagdetached = 1;
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				slog7("alert: ", argv0, ": pid ", strnum1,
-					" got USR2: todo-processor detached: ",
+					" got 'D' command: todo-processor detached: ",
 					queuedesc, "\n");
 				break;
 			case 'H':
@@ -2249,7 +2248,7 @@ todo_init_send()
 	if (write(todofdo, "C", 1) == 1)
 		flagtodoalive = 1;
 	else {
-		log5("alert: ", argv0,
+		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to write a byte to external todo! dying...: ",
 				error_str(errno), "\n");
 		flagexitsend = 1;
@@ -2937,6 +2936,8 @@ log_stat_todo(unsigned long id, size_t bytes)
 }
 
 /*- 
+ * used by todo processor
+ *
  * todo_do calls todo_scan for static queues which
  *
  * 1. scans todo dir recursively 
@@ -3314,7 +3315,7 @@ sigusr1()
 	flagdetached = 1;
 	/*- tell todo-processor to stop sending jobs */
 	if (write(todofdo, "D", 1) != 1) {
-		log5("alert: ", argv0,
+		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to write two bytes to todo-processor! dying...: ",
 				error_str(errno), "\n");
 		flagexitsend = 1;
@@ -3337,9 +3338,9 @@ sigusr2()
 	 * add jobs from todo
 	 */
 	pqstart();
-	/*- tell todo-processor to start */
+	/*- tell todo-processor to start sending jobs */
 	if (write(todofdo, "A", 1) != 1) {
-		log5("alert: ", argv0,
+		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to write two bytes to todo-processor! dying...: ",
 				error_str(errno), "\n");
 		flagexitsend = 1;
@@ -3501,7 +3502,7 @@ todo_do_send(fd_set *rfds)
 int
 main(int argc, char **argv)
 {
-	int             lockfd, nfds, c;
+	int             lockfd, nfds, c, can_exit;
 	int             pi1[2], pi2[2];
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
@@ -3666,7 +3667,8 @@ main(int argc, char **argv)
 		sig_unblock(sig_usr1);
 		sig_unblock(sig_usr2);
 	}
-	while (!flagexitsend || !del_canexit() || flagtodoalive) { /*- stay alive if delivery, todo jobs are present */
+	can_exit = del_canexit();
+	while (!flagexitsend || !can_exit || flagtodoalive) { /*- stay alive if delivery, todo jobs are present */
 		recent = now();
 		if (flagrunasap) {
 			flagrunasap = 0;
@@ -3757,6 +3759,24 @@ main(int argc, char **argv)
 			 */
 			cleanup_do();
 		}
+		if ((can_exit = del_canexit())) {
+			if (flagdetached) {
+				pqstart();
+				/*- tell todo-proc to start sending jobs */
+				if (write(todofdo, "A", 1) != 1) {
+					log7("alert: ", argv0, ": ", queuedesc,
+							": unable to write two bytes to todo-proc! dying...: ",
+							error_str(errno), "\n");
+					flagexitsend = 1;
+					flagtodoalive = 0;
+				}
+				sig_unblock(sig_usr2);
+				sig_unblock(sig_usr1);
+				log5("info: ", argv0, ": ", queuedesc,
+						": no pending jobs, attaching back to todo-proc\n");
+				flagdetached = 0;
+			}
+		}
 	} /*- while (!flagexitsend || !del_canexit()) */
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
@@ -3767,7 +3787,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.25 2022-09-26 09:17:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.26 2022-09-27 12:49:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3777,6 +3797,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.26  2022-09-27 12:49:40+05:30  Cprogrammer
+ * auto attach to todo-processor when there are no pending delivery jobs
+ *
  * Revision 1.25  2022-09-26 09:17:34+05:30  Cprogrammer
  * added dedicated todo processor
  *

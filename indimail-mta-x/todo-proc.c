@@ -577,14 +577,14 @@ comm_do(fd_set *wfds, fd_set *rfds)
 				flagdetached = 0;
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				log7("alert: ", argv0, ": pid ", strnum1,
-					" got USR1: todo-proc attached: ",
+					" got 'A' command: todo-proc attached: ",
 					queuedesc, "\n");
 				break;
 			case 'D': /*- detached mode */
 				flagdetached = 1;
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				log7("alert: ", argv0, ": pid ", strnum1,
-					" got USR1: todo-proc detached: ",
+					" got 'D' command: todo-proc detached: ",
 					queuedesc, "\n");
 				break;
 			case 'H':
@@ -1504,7 +1504,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: todo-proc.c,v 1.63 2022-09-26 09:28:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: todo-proc.c,v 1.64 2022-09-27 12:49:46+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1512,6 +1512,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
+ * Revision 1.64  2022-09-27 12:49:46+05:30  Cprogrammer
+ * updated log messages
+ *
  * Revision 1.63  2022-09-26 09:28:00+05:30  Cprogrammer
  * added feature to disconnect from qmail-send
  *

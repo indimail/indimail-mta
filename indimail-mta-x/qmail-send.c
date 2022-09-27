@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.105 2022-09-25 23:55:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.106 2022-09-27 12:48:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1825,7 +1825,7 @@ sigusr1()
 	flagdetached = 1;
 	/*- tell todo-proc to stop sending jobs */
 	if (write(todofdo, "D", 1) != 1) {
-		log5("alert: ", argv0,
+		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to write two bytes to todo-proc! dying...: ",
 				error_str(errno), "\n");
 		flagexitsend = 1;
@@ -1848,9 +1848,9 @@ sigusr2()
 	 * add jobs from todo
 	 */
 	pqstart();
-	/*- tell todo-proc to start */
+	/*- tell todo-proc to start sending jobs */
 	if (write(todofdo, "A", 1) != 1) {
-		log5("alert: ", argv0,
+		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to write two bytes to todo-proc! dying...: ",
 				error_str(errno), "\n");
 		flagexitsend = 1;
@@ -1877,7 +1877,7 @@ todo_init()
 	flagtodoalive = 1;
 	/*- tell todo-proc to start */
 	if (write(todofdo, "C", 1) != 1) {
-		log5("alert: ", argv0,
+		log7("alert: ", argv0, ": ", queuedesc,
 				": unable to write a byte to external todo! dying...: ",
 				error_str(errno), "\n");
 		flagexitsend = 1;
@@ -2632,8 +2632,24 @@ main(int argc, char **argv)
 			 */
 			cleanup_do();
 		}
-		if ((can_exit = del_canexit()))
-			sig_unblock(sig_usr2);
+		if ((can_exit = del_canexit())) {
+			if (flagdetached) {
+				pqstart();
+				/*- tell todo-proc to start sending jobs */
+				if (write(todofdo, "A", 1) != 1) {
+					log7("alert: ", argv0, ": ", queuedesc,
+							": unable to write two bytes to todo-proc! dying...: ",
+							error_str(errno), "\n");
+					flagexitsend = 1;
+					flagtodoalive = 0;
+				}
+				sig_unblock(sig_usr2);
+				sig_unblock(sig_usr1);
+				log5("info: ", argv0, ": ", queuedesc,
+						": no pending jobs, attaching back to todo-proc\n");
+				flagdetached = 0;
+			}
+		}
 	} /*- while (!flagexitsend || !can_exit || flagtodoalive) */
 	pqfinish();
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
@@ -2647,7 +2663,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.105 2022-09-25 23:55:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.106 2022-09-27 12:48:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2657,6 +2673,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.106  2022-09-27 12:48:44+05:30  Cprogrammer
+ * auto attach to todo-processor when there are no pending delivery jobs
+ *
  * Revision 1.105  2022-09-25 23:55:34+05:30  Cprogrammer
  * added feature to disconnect from todo-proc
  *
