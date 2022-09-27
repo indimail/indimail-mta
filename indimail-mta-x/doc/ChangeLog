@@ -17,6 +17,10 @@ Release @version@-@release@ Start 08/09/2022
 - 27/09/2022
 09. qmail-send.c, slowq-send.c: auto attach to todo-processor when there are
     no pending delivery jobs
+10. svctool: added --todo-proc option to create TODO_PROCESSOR env variable
+    for external todo processor in slowq-send service
+11. indimail-mta.spec.in, create_services, debian-postinst: Create slowq-send
+    service with todo processor turned on
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
