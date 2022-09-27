@@ -120,7 +120,7 @@ static int      flagexittodo; /*- todo-processor: exit when set */
 static int      flagrunasap; /*- immediaely schedule deliveries in queue */
 static int      flagreadasap; /*- reread control files on sighup */
 static int      flagdetached; /*- qmail-send detaches from todo processing */
-static int      forktodo; /*- run a parallel independent todo processor */
+static int      todoproc; /*- run a parallel independent todo processor */
 static int      flagtodoalive, flagsendalive = 1; /*- flag to indicate if todo-processor and qmail-send are alive */
 static int      todopid, bigtodo, todofdi, todofdo, sendfdi, sendfdo, todo_chunk_size;
 
@@ -3515,7 +3515,7 @@ main(int argc, char **argv)
 	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
-	forktodo = env_get("FORK_TODO") ? 1 : 0;
+	todoproc = env_get("TODO_PROCESSOR") ? 1 : 0;
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -3536,7 +3536,7 @@ main(int argc, char **argv)
 	if (todo_chunk_size <= 0)
 		todo_chunk_size = CHUNK_SIZE;
 	log11("info: ", argv0, ": ", queuedir,
-			": todo processor: ", forktodo ? "YES" : "NO",
+			": todo processor: ", todoproc ? "YES" : "NO",
 			", ratelimit=", do_ratelimit ? "ON" : "OFF",
 			", conf split=", strnum1, bigtodo ? ", bigtodo=1\n" : ", bigtodo=0\n");
 	if (!(ptr = env_get("TODO_INTERVAL")))
@@ -3596,7 +3596,7 @@ main(int argc, char **argv)
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
 	sig_childcatch(sigchld);
-	if (forktodo) {
+	if (todoproc) {
 		sig_block(sig_usr1);
 		sig_block(sig_usr2);
 		sig_catch(sig_usr1, sigusr1);
@@ -3647,7 +3647,7 @@ main(int argc, char **argv)
 	job_init();     /*- initialize numjobs job structures */
 	del_init();     /*- initialize concurrencylocal + concurrrencyremote delivery structure */
 	pass_init();    /*- initialize pass structure */
-	if (forktodo) {
+	if (todoproc) {
 		if (pipe(pi1) == -1) {
 			log7("alert: ", argv0, ": ", queuedesc, ": failed to create pipe1: ", error_str(errno), "\n");
 			_exit(111);
@@ -3663,7 +3663,7 @@ main(int argc, char **argv)
 	} else
 		todo_init(); /*- initialize flagtododir, lasttodorun, nexttodorun, open lock/trigger */
 	cleanup_init(); /*- initialize flagcleanup = 0, cleanuptime = now*/
-	if (forktodo) {
+	if (todoproc) {
 		sig_unblock(sig_usr1);
 		sig_unblock(sig_usr2);
 	}
@@ -3705,7 +3705,7 @@ main(int argc, char **argv)
 		/*-
 		 * prepare readfd for select
 		 */
-		if (forktodo)
+		if (todoproc)
 			todo_selprep_send(&nfds, &rfds, &wakeup);
 		else
 			todo_selprep(&nfds, &rfds, &wakeup);
@@ -3745,7 +3745,7 @@ main(int argc, char **argv)
 			 * scan todo directory
 			 * classify and rewrite todoline
 			 */
-			if (forktodo)
+			if (todoproc)
 				todo_do_send(&rfds);
 			else
 				todo_do(&rfds);
