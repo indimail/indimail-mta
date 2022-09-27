@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.642 2022-09-19 21:19:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.643 2022-09-27 22:04:31+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.642 2022-09-19 21:19:35+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.643 2022-09-27 22:04:31+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6828,6 +6828,11 @@ if [ ! " $remotefilter" = " " ] ; then
 else
 	> $conf_dir/QMAILREMOTE
 fi
+if [ $todo_proc -eq 1 ] ; then
+	echo "1" > $conf_dir/TODO_PROCESSOR
+else
+	> $conf_dir/TODO_PROCESSOR
+fi
 #
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
 #
@@ -9391,6 +9396,7 @@ usefdatasync=0
 usesyncdir=0
 mount_resolvconf=0
 valid_for=366
+todo_proc=0
 databytes=$DATABYTES
 qmailqueue="/usr/sbin/qmail-queue"
 qmailsmtpd=$QmailBinPrefix"/sbin/qmail-smtpd"
@@ -9581,6 +9587,9 @@ while test $# -gt 0; do
 	;;
 	--remotefilter)
 	remotefilter=1
+	;;
+	--todo-proc)
+	todo_proc=1
 	;;
 	--rejectspam=*)
 	rejectspam=$optarg
