@@ -77,11 +77,13 @@ If \fBtodo-proc\fR receives a HUP signal, it will reread \fIlocals\fR,
 
 if \fBqmail-send\fR receives USR1 signal, it will instruct \fBtodo-proc\fR
 to stop communicating with \fBqmail-send\fR, but continue to pre-process
-the \fItodo\fR sub directory. This will allow \fBqmail-send\fR to dedicated
-itself to finish pending deliveries if any. One can issue the signal
-\fBSIGUSR2\fR to make \fBtodo-proc\fR start communicationg with
-\fBqmail-send\fR. One can issue SIGUSR1 if \fBqmail-send\fR is unable to
-cope with high injection rates. Or one may issue SIGUSR1 if you want to
+the \fItodo\fR sub directory. This allows \fBqmail-send\fR to dedicate
+itself to complete scheduling of delivery jobs for the local and remote
+queue if any. Once pending delivery jobs are over, \fBqmail-send\fR will
+instruct \fBtodo-proc\fR to start sending new delivery jobs. One can also
+issue the signal \fBSIGUSR2\fR to make \fBtodo-proc\fR start communicationg
+with \fBqmail-send\fR. SIGUSR1 should be used if \fBqmail-send\fR is unable
+to cope with high injection rates.  One may issue SIGUSR1 if you want to
 pre-process the incoming emails but schedule delivery later on receipt of
 SIGUSR2.
 
@@ -168,4 +170,5 @@ mq_open(3),
 qmail-send(8),
 qmail-lspawn(8),
 qmail-rspawn(8),
-fsync(2)
+fsync(2),
+svc(8)

@@ -29,17 +29,18 @@ if the environment variable \fBTODO_PROCESSOR\fR is set. This addresses a
 problem known as the silly qmail (queue) problem sometimes found only on
 system with high injection rates. With todo-processor running,
 \fBslowq-send\fR can run delivery processing and todo processing in
-detached mode by issuing \fBSIGUSR1\fR signal to \fBslowq-send\fR. In
-detached mode, slowq-send processes just the existing local and remote
-queue at the time of the receipt of \fBSIGUSR1\fR and schedules delivery
-until the existing local/remote deliveries complete. Meanwhile the todo
+detached mode if it gets\fBSIGUSR1\fR signal. In detached mode, slowq-send
+processes just the existing local and remote queue at the time of the
+receipt of \fBSIGUSR1\fR and schedules delivery jobs for the existing
+local/remote queue.  Once there are no existing jobs, \fBqmail-send\fR
+instructs \fBtodo-proc\fR to start sending new jobs. Meanwhile the todo
 processing continues to happen and emails continue to get classied as
-local, remote, but they don't get scheduled for delivery. One can issue the
-signal \fBSIGUSR2\fR to enter the normal attached mode, where emails get
-scheduled immediately after todo processing. One can issue SIGUSR1 if
-\fBslowq-send\fR is unable to cope with high injection rates. Or one may
-issue SIGUSR1 if you want to pre-process the incoming emails but schedule
-delivery later on receipt of SIGUSR2.
+local, remote, but they don't get scheduled for delivery. One can also
+issue the signal \fBSIGUSR2\fR to enter the normal attached mode, where
+emails get scheduled immediately after todo processing. SIGUSR1 should be
+used if \fBqmail-send\fR is unable to cope with high injection rates. One
+may issue SIGUSR1 if you want to pre-process the incoming emails but
+schedule delivery later on receipt of SIGUSR2.
 
 \fBslowq-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
 recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
@@ -697,4 +698,5 @@ qmail-dkim(8),
 dk-filter(8),
 qmail-rspawn(8),
 fsync(2),
-fdatasync(2)
+fdatasync(2),
+svc(8)

@@ -45,16 +45,18 @@ the message id and whether the message is local or remote. It then uses
 is temporarily undeliverable to one or more addresses, \fBqmail-send\fR
 leaves it in the queue and tries the addresses again later.
 
-\fBqmail-send\fR can run delivery and todo processing in detached mode by
-issuing \fBSIGUSR1\fR signal to \fBqmail-send\fR. In detached mode,
-qmail-send processes just the existing local and remote queue at the time
-of the receipt of \fBSIGUSR1\fR and schedules delivery until the existing
-local/remote deliveries complete. Meanwhile the todo processing continues
-to happen and emails continue to get classied as local, remote, but they
-don't get scheduled for delivery. One can issue the signal \fBSIGUSR2\fR to
-enter the normal attached mode, where emails get scheduled immediately
-after todo processing. One can issue SIGUSR1 if \fBqmail-send\fR is unable
-to cope with high injection rates. Or one may issue SIGUSR1 if you want to
+\fBqmail-send\fR can run delivery and todo processing in detached mode if
+it gets \fBSIGUSR1\fR signal. In detached mode, qmail-send processes just
+the existing local and remote queue at the time of the receipt of
+\fBSIGUSR1\fR and schedules delivery jobs for the existing local/remote
+queue. Once there are no existing jobs, \fBqmail-send\fR instructs
+\fBtodo-proc\fR to start sending new jobs. Meanwhile the todo processing
+continues to happen and emails continue to get classied as local, remote,
+but they don't get scheduled for delivery. One can issue the signal
+\fBSIGUSR2\fR to enter the normal attached mode, where emails get scheduled
+immediately after todo processing. \fBtodo-proc\fR start communicationg
+with \fBqmail-send\fR. SIGUSR1 should be used if \fBqmail-send\fR is unable
+to cope with high injection rates. One may issue SIGUSR1 if you want to
 pre-process the incoming emails but schedule delivery later on receipt of
 SIGUSR2.
 
@@ -722,4 +724,5 @@ qmail-dkim(8),
 dk-filter(8),
 qmail-rspawn(8),
 fsync(2),
-fdatasync(2)
+fdatasync(2),
+svc(8)
