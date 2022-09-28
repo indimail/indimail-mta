@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.28 2021-08-28 23:15:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.29 2022-09-28 15:26:32+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -25,6 +25,10 @@ dksign=0
 dkimsign=0
 dkverify=0
 dkimverify=0
+prefix=PREFIX
+if [ " $CONTROLDIR" = " " ] ; then
+	CONTROLDIR=@controldir@
+fi
 if [ -n "$NODK" -a -n "$NODKIM" ] ; then
 	exec /bin/cat
 fi
@@ -33,16 +37,13 @@ if [ -z "$DEFAULT_DKIM_KEY" ] ; then
 else
 	default_key=$DEFAULT_DKIM_KEY
 fi
-if [ " $CONTROLDIR" = " " ] ; then
-	CONTROLDIR=@controldir@
-fi
-slash=`echo $CONTROLDIR | cut -c1`
+slash=$(echo $CONTROLDIR | cut -c1)
 if [ ! " $slash" = " /" ] ; then
 	cd SYSCONFDIR
 fi
-if [ -z "$NODK" -a -x PREFIX/bin/dktest -a -z "$DKVERIFY" ] ; then
+if [ -z "$NODK" -a -x $prefix/bin/dktest -a -z "$DKVERIFY" ] ; then
 	if [ -f $CONTROLDIR/dkimkeys ] ; then
-		domain=`echo $_SENDER | cut -d@ -f2`
+		domain=$(echo $_SENDER | cut -d@ -f2)
 		t=$(get_dkimkeys $domain)
 		if [ -n "$t" ] ; then
 			DKSIGN=$t
@@ -50,14 +51,14 @@ if [ -z "$NODK" -a -x PREFIX/bin/dktest -a -z "$DKVERIFY" ] ; then
 	fi
 	if [ -z "$DKSIGN" ] ; then
 		DKSIGN=$CONTROLDIR/domainkeys/%/default
-		dksign=2 # key, selector selected as default
+		dksign=2 # key, selector selected as control/domainkeys/defaut
 	elif [ " $DKSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-		dksign=2 # key, selector selected as default
+		dksign=2 # key, selector selected as control/domainkeys/defaut
 	fi
 fi
-if [ -z "$NODKIM" -a -x PREFIX/bin/dkim -a -z "$DKIMVERIFY" ] ; then
+if [ -z "$NODKIM" -a -x $prefix/bin/dkim -a -z "$DKIMVERIFY" ] ; then
 	if [ -f $CONTROLDIR/dkimkeys ] ; then
-		domain=`echo $_SENDER | cut -d@ -f2`
+		domain=$(echo $_SENDER | cut -d@ -f2)
 		t=$(get_dkimkeys $domain)
 		if [ -n "$t" ] ; then
 			DKIMSIGN=$t
@@ -65,14 +66,14 @@ if [ -z "$NODKIM" -a -x PREFIX/bin/dkim -a -z "$DKIMVERIFY" ] ; then
 	fi
 	if [ -z "$DKIMSIGN" ] ; then
 		DKIMSIGN=$CONTROLDIR/domainkeys/%/default
-		dkimsign=2 # key, selector selected as default
+		dkimsign=2 # key, selector selected as control/domainkeys/defaut
 	elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-		dkimsign=2 # key, selector selected as default
+		dkimsign=2 # key, selector selected as control/domainkeys/defaut
 	fi
 fi
 if [ -z "$NODK" -a -n "$DKSIGN" ] ; then
-	if [ ! -f PREFIX/bin/dktest ] ; then
-		echo "PREFIX/bin/dktest: No such file or directory" 1>&2
+	if [ ! -f $prefix/bin/dktest ] ; then
+		echo "$prefix/bin/dktest: No such file or directory" 1>&2
 		exit 1
 	fi
 	percent_found=0
@@ -82,11 +83,23 @@ if [ -z "$NODK" -a -n "$DKSIGN" ] ; then
 	fi
 	if [ $percent_found -eq 1 ] ; then
 		if [ -n "$BOUNCEDOMAIN" -a -z "$_SENDER" ] ; then
-			dkkeyfn=`echo $DKSIGN | sed s{%{$BOUNCEDOMAIN{g`
+			dkkeyfn=$(echo $DKSIGN | sed "s{%{$BOUNCEDOMAIN{g")
+			if [ ! -f $dkkeyfn ] ; then # remove % and check if file exists
+				t=$(echo $DKIMSIGN | sed "s{/%{{g")
+				if [ -f $t ] ; then
+					dkkeyfn=$t
+				fi
+			fi
 		elif [ -n " $_SENDER" ] ; then
 			# replace '%' in filename with domain
-			domain=`echo $_SENDER | cut -d@ -f2`
-			dkkeyfn=`echo $DKSIGN | sed s{%{$domain{g`
+			domain=$(echo $_SENDER | cut -d@ -f2)
+			dkkeyfn=$(echo $DKSIGN | sed "s{%{$domain{g")
+			if [ ! -f $dkkeyfn ] ; then # remove % and check if file exists
+				t=$(echo $DKIMSIGN | sed "s{/%{{g")
+				if [ -f $t ] ; then
+					dkkeyfn=$t
+				fi
+			fi
 		else
 			dkkeyfn=$DKSIGN
 		fi
@@ -101,11 +114,11 @@ if [ -z "$NODK" -a -n "$DKSIGN" ] ; then
 		exit 35 # private key does not exist
 	fi
 	dksign=1
-	dkselector=`basename $dkkeyfn`
+	dkselector=$(basename $dkkeyfn)
 fi
 if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
-	if [ ! -f PREFIX/bin/dkim ] ; then
-		echo "PREFIX/bin/dkim: No such file or directory" 1>&2
+	if [ ! -f $prefix/bin/dkim ] ; then
+		echo "$prefix/bin/dkim: No such file or directory" 1>&2
 		exit 1
 	fi
 	percent_found=0
@@ -115,11 +128,23 @@ if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
 	fi
 	if [ $percent_found -eq 1 ] ; then
 		if [ -n "$BOUNCEDOMAIN" -a -z "$_SENDER" ] ; then
-			dkimkeyfn=`echo $DKIMSIGN | sed s{%{$BOUNCEDOMAIN{g`
+			dkimkeyfn=$(strip_default $(echo $DKIMSIGN | sed "s{%{$BOUNCEDOMAIN{g"))
+			if [ ! -f $dkimkeyfn ] ; then # remove % and check if file exists
+				t=$(echo $DKIMSIGN | sed "s{/%{{g")
+				if [ -f $t ] ; then
+					dkimkeyfn=$t
+				fi
+			fi
 		elif [ -n "$_SENDER" ] ; then
 			# replace '%' in filename with domain
-			domain=`echo $_SENDER | cut -d@ -f2`
-			dkimkeyfn=`echo $DKIMSIGN | sed s{%{$domain{g`
+			domain=$(echo $_SENDER | cut -d@ -f2)
+			dkimkeyfn=$(echo $DKIMSIGN | sed "s{%{$domain{g")
+			if [ ! -f $dkimkeyfn ] ; then # remove % and check if file exists
+				t=$(echo $DKIMSIGN | sed "s{/%{{g")
+				if [ -f $t ] ; then
+					dkimkeyfn=$t
+				fi
+			fi
 		else
 			dkimkeyfn=$DKIMSIGN
 		fi
@@ -134,18 +159,18 @@ if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
 		exit 35 # private key does not exist
 	fi
 	dkimsign=1
-	dkimselector=`basename $dkimkeyfn`
+	dkimselector=$(basename $dkimkeyfn)
 fi
 if [ -z "$NODK" -a -n "$DKVERIFY" ] ; then
-	if [ ! -f PREFIX/bin/dktest ] ; then
-		echo "PREFIX/bin/dktest: No such file or directory" 1>&2
+	if [ ! -f $prefix/bin/dktest ] ; then
+		echo "$prefix/bin/dktest: No such file or directory" 1>&2
 		exit 1
 	fi
 	dkverify=1
 fi
 if [ -z "$NODKIM" -a -n "$DKIMVERIFY" ] ; then
-	if [ ! -f PREFIX/bin/dkim ] ; then
-		echo "PREFIX/bin/dkim: No such file or directory" 1>&2
+	if [ ! -f $prefix/bin/dkim ] ; then
+		echo "$prefix/bin/dkim: No such file or directory" 1>&2
 		exit 1
 	fi
 	dkimverify=1
@@ -153,13 +178,13 @@ fi
 /bin/cat > /tmp/dk.$$
 if [ $dkimsign -eq 1 ] ; then
 	# DKIMSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
-	set -- `getopt lqthb:c:d:i:x:z:y:s: $DKIMSIGNOPTIONS`
+	set -- $(getopt lqthb:c:d:i:x:z:y:s: $DKIMSIGNOPTIONS)
 	bopt=0
 	xopt=0
 	zopt=0
 	yopt=0
 	sopt=0
-	dkimopts="PREFIX/bin/dkim"
+	dkimopts="$prefix/bin/dkim"
 	while [ $1 != -- ]
 	do
 		case $1 in
@@ -242,15 +267,15 @@ if [ $dkimsign -eq 1 ] ; then
 	eval $dkimopts
 	if [ $? -ne 0 ] ; then
 		/bin/rm -f /tmp/dk.$$
-		echo "PREFIX/bin/dkim failed" 1>&2
+		echo "$prefix/bin/dkim failed" 1>&2
 		exit 1
 	fi
 fi
 if [ $dksign -eq 1 ] ; then
 	#dktest: [-f] [-b advice_length] [-c nofws|simple] [-v|-s selector] [-h] [-t#] [-r] [-T][-d dnsrecord]
 	# DKSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
-	set -- `getopt hrb:c:s: $DKSIGNOPTIONS`
-	dkopts="PREFIX/bin/dktest"
+	set -- $(getopt hrb:c:s: $DKSIGNOPTIONS)
+	dkopts="$prefix/bin/dktest"
 	sopt=0
 	while [ $1 != -- ]
 	do
@@ -290,7 +315,7 @@ if [ $dksign -eq 1 ] ; then
 	# allow error due to duplicate DomainKey-Header
 	if [ $exit_val -ne 0 -a $exit_val -ne 12 ] ; then
 		/bin/rm -f /tmp/dk.$$
-		echo "PREFIX/bin/dktest failed" 1>&2
+		echo "$prefix/bin/dktest failed" 1>&2
 		exit $exit_val
 	fi
 fi
@@ -311,7 +336,7 @@ if [ $dkimverify -eq 1 ] ; then
 	if [ -n "$UNSIGNED_FROM" ] ; then
 		dkimvargs="$dkimvargs -f"
 	fi
-	PREFIX/bin/dkim $dkimvargs -v
+	$prefix/bin/dkim $dkimvargs -v
 	ret=$?
 	case $ret in
 		14) # permanent error
@@ -324,16 +349,16 @@ if [ $dkimverify -eq 1 ] ; then
 		;;
 	esac
 	if [ $ret -lt 0 ] ; then
-		echo "PREFIX/bin/dkim failed" 1>&2
+		echo "$prefix/bin/dkim failed" 1>&2
 		/bin/rm -f /tmp/dk.$$
 		exit 1
 	fi
 fi
 if [ $dkverify -eq 1 ] ; then
 	exec 0</tmp/dk.$$
-	PREFIX/bin/dktest -v
+	$prefix/bin/dktest -v
 	if [ $? -ne 0 ] ; then
-		echo "PREFIX/bin/dktest failed" 1>&2
+		echo "$prefix/bin/dktest failed" 1>&2
 		/bin/rm -f /tmp/dk.$$
 		exit 1
 	fi
@@ -344,11 +369,14 @@ exec 0</tmp/dk.$$
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.29  2022-09-28 15:26:32+05:30  Cprogrammer
+# remove '%' from filename if dkim key file not found
+#
 # Revision 1.28  2021-08-28 23:15:40+05:30  Cprogrammer
 # control file dkimkeys for domain specific private key, selector
 #
 # Revision 1.27  2020-07-30 11:29:04+05:30  Cprogrammer
-# Use BOUNCEDOMAINS only for bounces
+# Use BOUNCEDOMAIN only for bounces
 #
 # Revision 1.26  2020-04-11 08:41:50+05:30  Cprogrammer
 # renamed DKIMDOMAIN to BOUNCEDOMAIN
