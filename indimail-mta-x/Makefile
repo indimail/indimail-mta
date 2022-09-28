@@ -1398,11 +1398,11 @@ variables.h do_rate.h getDomainToken.h control.h
 	./compile delivery_rate.c
 
 report.o: \
-compile report.c report.h variables.h
+compile report.c report.h
 	./compile report.c
 
 getDomainToken.o: \
-compile getDomainToken.c getDomainToken.h wildmat.h variables.h
+compile getDomainToken.c getDomainToken.h wildmat.h
 	./compile getDomainToken.c
 
 drate.1: \
