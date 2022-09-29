@@ -1,100 +1,6 @@
 /*
- * $Log: dns.c,v $
- * Revision 1.36  2020-05-11 11:15:49+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.35  2018-06-02 09:58:37+05:30  Cprogrammer
- * fqdn of ip_mx struct was pointing to a location that could be overwritten
- *
- * Revision 1.34  2018-06-01 22:51:10+05:30  Cprogrammer
- * define dns_ptrplus() proto only if USE_SPF is defined
- * set ix.fqdn when quering mx records
- *
- * Revision 1.33  2018-05-28 17:24:20+05:30  Cprogrammer
- * define T_TLSA for older systems where nameser.h doesn'thave T_TLSA defined
- *
- * Revision 1.32  2018-05-26 12:41:25+05:30  Cprogrammer
- * fixed memory leak dns_mxip()
- * added functions for getting TLSA RR.
- *
- * Revision 1.31  2017-05-16 12:30:52+05:30  Cprogrammer
- * refactored dns_txt() code
- *
- * Revision 1.30  2017-05-10 14:59:19+05:30  Cprogrammer
- * increase responselen to 1024 for long text records
- *
- * Revision 1.29  2015-08-24 19:05:12+05:30  Cprogrammer
- * replaced ip_scan() with ip4_scan()
- *
- * Revision 1.28  2014-01-29 13:56:22+05:30  Cprogrammer
- * fix for OS X
- * fixed wrong address passed to resolve()
- *
- * Revision 1.27  2012-10-09 18:09:20+05:30  Cprogrammer
- * removed DISABLE_CNAME_LOOKUP
- *
- * Revision 1.26  2012-10-08 19:34:11+05:30  Cprogrammer
- * added DISABLE_CNAME_LOOKUP to bypass cname lookup
- *
- * Revision 1.25  2012-06-20 18:38:46+05:30  Cprogrammer
- * moved strsalloc_readyplus() to spf.c
- *
- * Revision 1.24  2012-04-26 18:04:30+05:30  Cprogrammer
- * fix SIGSEGV in dns_txt() function
- *
- * Revision 1.23  2011-07-29 09:28:15+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.22  2009-05-31 09:32:09+05:30  Cprogrammer
- * added fix to disable Verisign Wildcard Feature
- *
- * Revision 1.21  2009-03-14 08:47:31+05:30  Cprogrammer
- * removed function dnsText()
- *
- * Revision 1.20  2008-08-03 18:25:00+05:30  Cprogrammer
- * use proper proto
- *
- * Revision 1.19  2008-07-25 16:50:35+05:30  Cprogrammer
- * port for darwin
- *
- * Revision 1.18  2005-08-23 17:29:58+05:30  Cprogrammer
- * gcc 4 compliance
- * ipv6 corrections
- *
- * Revision 1.17  2005-06-17 21:47:49+05:30  Cprogrammer
- * replaced struct ip_address and struct ip6_address with shorter typedefs
- *
- * Revision 1.16  2005-06-15 22:55:50+05:30  Cprogrammer
- * ipv6 support
- *
- * Revision 1.15  2005-06-11 21:28:11+05:30  Cprogrammer
- * added ipv6 support
- *
- * Revision 1.14  2004-10-22 20:24:24+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.13  2004-10-21 21:54:42+05:30  Cprogrammer
- * free allocated string
- *
- * Revision 1.12  2004-10-20 01:05:53+05:30  Cprogrammer
- * added dnsText() function
- * corrected bug with getting short txt records
- *
- * Revision 1.11  2004-08-15 20:06:44+05:30  Cprogrammer
- * free local stralloc variables
- *
- * Revision 1.10  2004-08-14 02:36:36+05:30  Cprogrammer
- * added prototype for dns_txtplus()
- *
- * Revision 1.9  2004-08-14 02:16:52+05:30  Cprogrammer
- * added SPF code
- *
- * Revision 1.8  2004-07-30 17:59:32+05:30  Cprogrammer
- * new code from Fredrik Vermeulen for TLS code
- *
- * Revision 1.7  2003-12-20 12:55:31+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: dns.c,v 1.37 2022-09-29 19:30:38+05:30 Cprogrammer Exp mbhangui $
+ * RCS log at bottom
  */
 #include <netdb.h>
 #include <sys/types.h>
@@ -119,6 +25,7 @@
 #include "case.h"
 
 /*-
+ * https://slashdot.org/story/03/09/16/0034210/resolving-everything-verisign-adds-wildcards
  * As of a little while ago (it is around 7:45 PM US Eastern on Mon 15 Sep 2003 as I write this),
  * VeriSign added a wildcard A record to the .COM and .NET TLD DNS zones. The IP address
  * returned is 64.94.110.11, which reverses to sitefinder.verisign.com. What that means in plain
@@ -1185,7 +1092,109 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.36 2020-05-11 11:15:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.37 2022-09-29 19:30:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: dns.c,v $
+ * Revision 1.37  2022-09-29 19:30:38+05:30  Cprogrammer
+ * moved RCS log to bottom
+ *
+ * Revision 1.36  2020-05-11 11:15:49+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.35  2018-06-02 09:58:37+05:30  Cprogrammer
+ * fqdn of ip_mx struct was pointing to a location that could be overwritten
+ *
+ * Revision 1.34  2018-06-01 22:51:10+05:30  Cprogrammer
+ * define dns_ptrplus() proto only if USE_SPF is defined
+ * set ix.fqdn when quering mx records
+ *
+ * Revision 1.33  2018-05-28 17:24:20+05:30  Cprogrammer
+ * define T_TLSA for older systems where nameser.h doesn'thave T_TLSA defined
+ *
+ * Revision 1.32  2018-05-26 12:41:25+05:30  Cprogrammer
+ * fixed memory leak dns_mxip()
+ * added functions for getting TLSA RR.
+ *
+ * Revision 1.31  2017-05-16 12:30:52+05:30  Cprogrammer
+ * refactored dns_txt() code
+ *
+ * Revision 1.30  2017-05-10 14:59:19+05:30  Cprogrammer
+ * increase responselen to 1024 for long text records
+ *
+ * Revision 1.29  2015-08-24 19:05:12+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan()
+ *
+ * Revision 1.28  2014-01-29 13:56:22+05:30  Cprogrammer
+ * fix for OS X
+ * fixed wrong address passed to resolve()
+ *
+ * Revision 1.27  2012-10-09 18:09:20+05:30  Cprogrammer
+ * removed DISABLE_CNAME_LOOKUP
+ *
+ * Revision 1.26  2012-10-08 19:34:11+05:30  Cprogrammer
+ * added DISABLE_CNAME_LOOKUP to bypass cname lookup
+ *
+ * Revision 1.25  2012-06-20 18:38:46+05:30  Cprogrammer
+ * moved strsalloc_readyplus() to spf.c
+ *
+ * Revision 1.24  2012-04-26 18:04:30+05:30  Cprogrammer
+ * fix SIGSEGV in dns_txt() function
+ *
+ * Revision 1.23  2011-07-29 09:28:15+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
+ * Revision 1.22  2009-05-31 09:32:09+05:30  Cprogrammer
+ * added fix to disable Verisign Wildcard Feature
+ *
+ * Revision 1.21  2009-03-14 08:47:31+05:30  Cprogrammer
+ * removed function dnsText()
+ *
+ * Revision 1.20  2008-08-03 18:25:00+05:30  Cprogrammer
+ * use proper proto
+ *
+ * Revision 1.19  2008-07-25 16:50:35+05:30  Cprogrammer
+ * port for darwin
+ *
+ * Revision 1.18  2005-08-23 17:29:58+05:30  Cprogrammer
+ * gcc 4 compliance
+ * ipv6 corrections
+ *
+ * Revision 1.17  2005-06-17 21:47:49+05:30  Cprogrammer
+ * replaced struct ip_address and struct ip6_address with shorter typedefs
+ *
+ * Revision 1.16  2005-06-15 22:55:50+05:30  Cprogrammer
+ * ipv6 support
+ *
+ * Revision 1.15  2005-06-11 21:28:11+05:30  Cprogrammer
+ * added ipv6 support
+ *
+ * Revision 1.14  2004-10-22 20:24:24+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.13  2004-10-21 21:54:42+05:30  Cprogrammer
+ * free allocated string
+ *
+ * Revision 1.12  2004-10-20 01:05:53+05:30  Cprogrammer
+ * added dnsText() function
+ * corrected bug with getting short txt records
+ *
+ * Revision 1.11  2004-08-15 20:06:44+05:30  Cprogrammer
+ * free local stralloc variables
+ *
+ * Revision 1.10  2004-08-14 02:36:36+05:30  Cprogrammer
+ * added prototype for dns_txtplus()
+ *
+ * Revision 1.9  2004-08-14 02:16:52+05:30  Cprogrammer
+ * added SPF code
+ *
+ * Revision 1.8  2004-07-30 17:59:32+05:30  Cprogrammer
+ * new code from Fredrik Vermeulen for TLS code
+ *
+ * Revision 1.7  2003-12-20 12:55:31+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

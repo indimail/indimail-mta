@@ -1,64 +1,6 @@
 /*
- * $Log: qmail-start.c,v $
- * Revision 1.26  2022-03-07 22:38:09+05:30  Cprogrammer
- * fixed qmail-send arguments
- *
- * Revision 1.25  2022-01-30 09:15:36+05:30  Cprogrammer
- * added qscheduler, removed qmail-daemon
- * added compat mode option (support trigger mode in ipc mode)
- * allow configurable big/small todo/intd
- *
- * Revision 1.24  2021-10-20 22:45:12+05:30  Cprogrammer
- * added queue directory as argument for identification in ps list
- *
- * Revision 1.23  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.22  2021-06-27 10:40:10+05:30  Cprogrammer
- * uidnit new argument to disable/enable error on missing uids
- *
- * Revision 1.21  2021-06-24 12:17:21+05:30  Cprogrammer
- * use uidinit function proto from auto_uids.h
- *
- * Revision 1.20  2021-04-05 07:19:44+05:30  Cprogrammer
- * added todo-proc.h
- *
- * Revision 1.19  2020-11-24 13:47:32+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.18  2020-06-16 22:33:09+05:30  Cprogrammer
- * use prot_gid() to lose existing qmail group privileges (qmailr)
- *
- * Revision 1.17  2020-06-16 21:47:30+05:30  Cprogrammer
- * set supplementary group ids if USE_SETGROUPS env variable is set
- *
- * Revision 1.16  2009-12-09 23:57:36+05:30  Cprogrammer
- * additional closeflag argument to uidinit()
- *
- * Revision 1.15  2009-04-30 16:15:06+05:30  Cprogrammer
- * removed hasindimail.h
- *
- * Revision 1.14  2008-06-30 16:10:44+05:30  Cprogrammer
- * removed license code
- *
- * Revision 1.13  2008-06-04 14:00:24+05:30  Cprogrammer
- * compilation failure for non-indimail installation
- *
- * Revision 1.12  2007-12-21 16:03:36+05:30  Cprogrammer
- * conditional compilation of license code
- *
- * Revision 1.11  2004-10-22 20:29:39+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.10  2004-06-03 23:01:47+05:30  Cprogrammer
- * fixed compilation problem without indimail
- *
- * Revision 1.9  2004-05-13 22:53:58+05:30  Cprogrammer
- * removed debug statement left by mistake
- *
- * Revision 1.8  2004-05-12 08:59:35+05:30  Cprogrammer
- * change in checklicense()
- *
+ * $Id: qmail-start.c,v 1.27 2022-09-29 19:30:53+05:30 Cprogrammer Exp mbhangui $
+ * RCS log at bottom
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -231,7 +173,7 @@ main(int argc, char **argv)
 		qlargs[1] = argv[0];
 		++argv;
 	}
-	if (argv[0]) {
+	if (argv[0]) { /*- logger */
 		if (pipe(pi0) == -1)
 			die("unable to move read end of pipe to fd 0");
 		switch (fork())
@@ -286,7 +228,7 @@ main(int argc, char **argv)
 		die("failed to create pipe9");
 	if (pipe(pi10) == -1)
 		die("failed to create pipe10");
-	switch (fork())
+	switch (fork()) /*- qmail-lspawn */
 	{
 	case -1:
 		die("unable to fork qmail-lspawn");
@@ -300,7 +242,7 @@ main(int argc, char **argv)
 		execvp(*qlargs, qlargs); /*- qmail-lspawn */
 		die("unable to exec qmail-lspawn");
 	}
-	switch (fork())
+	switch (fork()) /*- qmail-rspawn */
 	{
 	case -1:
 		die("unable to fork qmail-rspawn");
@@ -325,7 +267,7 @@ main(int argc, char **argv)
 		execvp(*qrargs, qrargs); /*- qmail-rspawn */
 		die("unable to exec qmail-rspawn");
 	}
-	switch (fork())
+	switch (fork()) /*- qmail-clean for todo-proc */
 	{
 	case -1:
 		die("unable to fork qmail-clean (todo-proc)");
@@ -351,7 +293,7 @@ main(int argc, char **argv)
 		execvp(*qcargs, qcargs); /*- qmail-clean */
 		die("unable to exec qmail-clean (todo-proc)");
 	}
-	switch (fork())
+	switch (fork()) /*- todo-proc */
 	{
 	case -1:
 		die("unable to fork todo-proc");
@@ -372,7 +314,7 @@ main(int argc, char **argv)
 		die("unable to exec todo-proc");
 	}
 
-	switch (fork())
+	switch (fork()) /*- qmail-clean for qmail-send */
 	{
 	case -1:
 		die("unable to fork qmail-clean (qmail-send)");
@@ -437,7 +379,73 @@ main(int argc, char **argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.26 2022-03-07 22:38:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.27 2022-09-29 19:30:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qmail-start.c,v $
+ * Revision 1.27  2022-09-29 19:30:53+05:30  Cprogrammer
+ * moved RCS log to bottom
+ *
+ * Revision 1.26  2022-03-07 22:38:09+05:30  Cprogrammer
+ * fixed qmail-send arguments
+ *
+ * Revision 1.25  2022-01-30 09:15:36+05:30  Cprogrammer
+ * added qscheduler, removed qmail-daemon
+ * added compat mode option (support trigger mode in ipc mode)
+ * allow configurable big/small todo/intd
+ *
+ * Revision 1.24  2021-10-20 22:45:12+05:30  Cprogrammer
+ * added queue directory as argument for identification in ps list
+ *
+ * Revision 1.23  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.22  2021-06-27 10:40:10+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
+ * Revision 1.21  2021-06-24 12:17:21+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
+ * Revision 1.20  2021-04-05 07:19:44+05:30  Cprogrammer
+ * added todo-proc.h
+ *
+ * Revision 1.19  2020-11-24 13:47:32+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.18  2020-06-16 22:33:09+05:30  Cprogrammer
+ * use prot_gid() to lose existing qmail group privileges (qmailr)
+ *
+ * Revision 1.17  2020-06-16 21:47:30+05:30  Cprogrammer
+ * set supplementary group ids if USE_SETGROUPS env variable is set
+ *
+ * Revision 1.16  2009-12-09 23:57:36+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
+ * Revision 1.15  2009-04-30 16:15:06+05:30  Cprogrammer
+ * removed hasindimail.h
+ *
+ * Revision 1.14  2008-06-30 16:10:44+05:30  Cprogrammer
+ * removed license code
+ *
+ * Revision 1.13  2008-06-04 14:00:24+05:30  Cprogrammer
+ * compilation failure for non-indimail installation
+ *
+ * Revision 1.12  2007-12-21 16:03:36+05:30  Cprogrammer
+ * conditional compilation of license code
+ *
+ * Revision 1.11  2004-10-22 20:29:39+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.10  2004-06-03 23:01:47+05:30  Cprogrammer
+ * fixed compilation problem without indimail
+ *
+ * Revision 1.9  2004-05-13 22:53:58+05:30  Cprogrammer
+ * removed debug statement left by mistake
+ *
+ * Revision 1.8  2004-05-12 08:59:35+05:30  Cprogrammer
+ * change in checklicense()
+ *
+ */
