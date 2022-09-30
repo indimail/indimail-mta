@@ -1532,7 +1532,7 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
 	-I/usr/include/dkim -I../libdkim-x \
 	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim2.o && \
-	c++ -o trydkim trydkim2.o dns_text.o \
+	c++ -o trydkim2 trydkim2.o dns_text.o \
 	`cat dkim.lib dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
 	-L../libdkim-x/.libs -lcrypto $(QMAILLIB) ) >/dev/null 2>&1 \
 	&& (echo "#define HASDKIM 1") || echo "WARNING!!! Not compiled with -DHASDKIM" 1>&2 ) > hasdkim.h; \
@@ -2063,7 +2063,7 @@ compile fn_handler.c
 	./compile fn_handler.c
 
 qmail-start: \
-load qmail-start.o auto_uids.o get_uid.o
+load qmail-start.o auto_uids.o get_uid.o haslibrt.h
 	./load qmail-start auto_uids.o get_uid.o $(QMAILLIB)
 
 qmail-start.8: \
