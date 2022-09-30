@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.362 2022-09-27 22:04:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.363 2022-09-30 19:48:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -81,6 +81,10 @@ Requires(postun): shadow-utils
 %if %{defined suse_version} || %{defined sles_version}
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
+%endif
+%if %{defined fedora_version}
+Requires(post): alternatives
+Requires(postun): alternatives
 %endif
 
 %if %build_on_obs == 1
@@ -202,6 +206,10 @@ Requires: /usr/bin /usr/sbin
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
 %endif
+%if %{defined fedora_version}
+Requires(post): alternatives
+Requires(postun): alternatives
+%endif
 
 %description -n indimail-mini
 This package contains sendmail, qmail-inject and qmail-qmqpc - Bare minimum
@@ -227,6 +235,10 @@ Requires: /usr/bin /usr/sbin
 %if %{defined suse_version} || %{defined sles_version}
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
+%endif
+%if %{defined fedora_version}
+Requires(post): alternatives
+Requires(postun): alternatives
 %endif
 
 %description -n qmta
@@ -465,16 +477,16 @@ echo ../resolv.conf 1>&3
 %dir %attr(2775,alias,qmail)                       %{qmaildir}/alias
 %dir %attr(2775,indimail,qmail)                    %{qmaildir}/autoturn
 %dir %attr(2755,root,qmail)                        %{qsysconfdir}
-%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/users
-%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/certs
-%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control
+%dir %attr(2775,root,qmail)                        %{qsysconfdir}/certs
+%dir %attr(2775,root,qmail)                        %{qsysconfdir}/control
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control/cache
-%dir %attr(2755,indimail,qmail)                    %{qsysconfdir}/control/domainkeys
-%dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/tcp
-%dir %attr(0755,indimail,qmail)                    %{qsysconfdir}/control/defaultqueue
+%dir %attr(2755,root,qmail)                        %{qsysconfdir}/control/domainkeys
+%dir %attr(0755,root,qmail)                        %{qsysconfdir}/control/defaultqueue
 %dir %attr(0755,root,qmail)                        %{qsysconfdir}/control/global_vars
 %dir %attr(0755,root,root)                         %{qsysconfdir}/perms.d
 %dir %attr(0755,root,root)                         %{qsysconfdir}/perms.d/%{name}
+%dir %attr(2775,root,qmail)                        %{qsysconfdir}/tcp
+%dir %attr(2775,root,qmail)                        %{qsysconfdir}/users
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)                         %{mandir}
 %dir %attr(0755,root,root)                         %{mandir}/man1
@@ -841,14 +853,14 @@ echo ../resolv.conf 1>&3
                                    %{qmaildir}/bin
                                    %{qmaildir}/sbin
                                    %{qmaildir}/control
-%dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
+%dir %attr(2775,root,qmail)        %{qsysconfdir}/control
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)         %{mandir}
 %dir %attr(0755,root,root)         %{mandir}/man1
 %dir %attr(0755,root,root)         %{mandir}/man5
 %dir %attr(0755,root,root)         %{mandir}/man8
 %endif
-%dir %attr(755,indimail,qmail)     %{qsysconfdir}/control/defaultqueue
+%dir %attr(755,root,qmail)         %{qsysconfdir}/control/defaultqueue
 %dir %attr(755,root,qmail)         %{qsysconfdir}/control/global_vars
 #
 %attr(0755,root,root)              %{_prefix}/bin/sendmail
@@ -863,8 +875,8 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
 %attr(0755,root,root)              %{_prefix}/sbin/mini-smtpd
 
-%ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
-%ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/global_vars/CONFSPLIT
+%ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+%ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/global_vars/CONFSPLIT
 #
 %attr(0644,root,root)              %{mandir}/man1/srsfilter.1.gz
 %attr(0644,root,root)              %{mandir}/man1/predate.1.gz
@@ -911,15 +923,15 @@ echo ../resolv.conf 1>&3
                                    %{qmaildir}/sbin
                                    %{qmaildir}/users
                                    %{qmaildir}/control
-%dir %attr(2775,indimail,qmail)    %{qsysconfdir}/control
-%dir %attr(2775,indimail,qmail)    %{qsysconfdir}/users
+%dir %attr(2775,root,qmail)        %{qsysconfdir}/control
+%dir %attr(2775,root,qmail)        %{qsysconfdir}/users
 %if "%{mandir}" != "/usr/share/man"
 %dir %attr(0755,root,root)         %{mandir}
 %dir %attr(0755,root,root)         %{mandir}/man1
 %dir %attr(0755,root,root)         %{mandir}/man5
 %dir %attr(0755,root,root)         %{mandir}/man8
 %endif
-%dir %attr(755,indimail,qmail)     %{qsysconfdir}/control/defaultqueue
+%dir %attr(755,root,qmail)         %{qsysconfdir}/control/defaultqueue
 %dir %attr(755,root,qmail)         %{qsysconfdir}/control/global_vars
 #
 %attr(0755,root,root)              %{_prefix}/bin/sendmail
@@ -947,9 +959,9 @@ echo ../resolv.conf 1>&3
 %attr(0751,root,root)              %{_prefix}/sbin/qmail-tcpok
 %attr(0751,root,root)              %{_prefix}/sbin/qmail-tcpto
 
-%ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
-%ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QUEUEDIR
-%ghost %attr(0644,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/control/global_vars/CONFSPLIT
+%ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+%ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QUEUEDIR
+%ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/global_vars/CONFSPLIT
 
 %if %{defined suse_version} || %{defined sles_version}
 %attr(0644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions
@@ -1875,6 +1887,7 @@ for i in mailq newaliases; do
     %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
   fi
 done
+echo "configuring indimail-mini as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -1948,6 +1961,7 @@ if [ $argv1 -eq 1 ] ; then
   exit 0
 fi
 (
+echo "removing indimail-mini as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -2199,6 +2213,7 @@ if [ -L /usr/sbin ] ; then
 else
   move="$move /usr/sbin/sendmail"
 fi
+echo "configuring qmta as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -2302,6 +2317,7 @@ if [ $argv1 -eq 1 ] ; then
   exit 0
 fi
 (
+echo "removing qmta as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then

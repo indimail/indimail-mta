@@ -23,6 +23,8 @@ Release @version@-@release@ Start 08/09/2022
     service with todo processor turned on
 - 28/09/2022
 12. dk-filter: remove '%' from filename if dkim key file not found
+- 30/09/2022
+13. set owner to root for important directories
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
