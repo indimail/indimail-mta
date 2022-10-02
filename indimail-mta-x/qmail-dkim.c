@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.64 2022-04-03 18:44:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.65 2022-10-02 22:21:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -141,14 +141,16 @@ static void
 write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 {
 	char           *pSig, *keyfn, *ptr, *selector;
-	int             i;
+	int             i, r, pct_found, olen = 0;
 	static stralloc keyfnfrom = { 0 };
 
 	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
-		custom_error("qmail-dkim", "Z", "Unable to read dkimkeys.", 0, "X.3.0");
+		custom_error("qmail-dkim", "Z", "unable to read dkimkeys.", 0, "X.3.0");
 	else
-	if (!i || !(keyfn = getDomainToken(domain, &dkimkeys)))
+	if (!i || !(keyfn = getDomainToken(domain, &dkimkeys))) {
+		i = 0;
 		keyfn = dkimsign;
+	}
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -157,35 +159,29 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		if (!stralloc_copys(&keyfnfrom, controldir) ||
 				!stralloc_append(&keyfnfrom, "/"))
 			die(51, 1);
+		olen = keyfnfrom.len;
 	}
-	if (i) {
-		selector = ptr = keyfn;
-		while (*ptr) {
-			if (*ptr == '/' && *(ptr + 1))
-				selector = ptr + 1;
-			ptr++;
-		}
-	} else
-		selector = opts->szSelector;
+	r = i ? 1 : 0; /*- for replacing selector later */
 	i = str_chr(keyfn, '%');
 	if (keyfn[i]) {
+		pct_found = 1;
+		if (!keyfn[i + 1]) /*- file has % as the last component */
+			r = 1;
 		if (keyfn[0] == '/') {
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51, 1);
 		} else
 		if (!stralloc_catb(&keyfnfrom, keyfn, i))
 			die(51, 1);
-		if (!stralloc_cats(&keyfnfrom, domain))
-			die(51, 1);
-		if (keyfn[i + 1] && !stralloc_cats(&keyfnfrom, keyfn + i + 1))
-			die(51, 1);
-		if (!stralloc_0(&keyfnfrom))
+		if (!stralloc_cats(&keyfnfrom, domain) ||
+				(keyfn[i + 1] && !stralloc_cats(&keyfnfrom, keyfn + i + 1)) ||
+				!stralloc_0(&keyfnfrom))
 			die(51, 1);
 		if (access(keyfnfrom.s, F_OK)) {
-			if (errno != error_noent)
-				custom_error("qmail-dkim", "Z", "Unable to read private key.", 0, "X.3.0");
+			if (errno != error_noent && errno != error_notdir)
+				custom_error("qmail-dkim", "Z", "unable to read private key.", 0, "X.3.0");
 			/*- since file does not exists remove '%' sign */
-			keyfnfrom.len = 8;
+			keyfnfrom.len = olen;
 			if (keyfn[0] == '/') {
 				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 					die(51, 1);
@@ -199,6 +195,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 				die(51, 1);
 		}
 	} else {
+		pct_found = 0;
 		if (keyfn[0] == '/') {
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51, 1);
@@ -208,7 +205,11 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		if (!stralloc_0(&keyfnfrom))
 			die(51, 1);
 	}
-	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + 8, 1))
+	/*
+	 * 1. full path or
+	 * 2. "control/domainkeys/xxx" - keyfnfrom.s+ 8
+	 */
+	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + olen, 1))
 	{
 	case 0: /*- missing signature file */
 		DKIMSignFree(&ctxt);
@@ -217,14 +218,17 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		 * only for few domains which have the key present. Do not
 		 * treat domains with missing key as an error.
 		 */
-		if (keyfn[i])
+		if (pct_found)
 			return;
 		die(35, 0);
 	case 1:
 		restore_gid();
 		break;
 	default:
-		custom_error("qmail-dkim", "Z", "Unable to read private key.", 0, "X.3.0");
+		DKIMSignFree(&ctxt);
+		if (errno == error_isdir && pct_found)
+			return;
+		custom_error("qmail-dkim", "Z", "unable to read private key.", 0, "X.3.0");
 	}
 	for (i = 0; i < dksignature.len; i++) {
 		if (dksignature.s[i] == '\0')
@@ -232,7 +236,13 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 	}
 	if (!stralloc_0(&dksignature))
 		die(51, 1);
-	if (selector != opts->szSelector) {
+	if (r) {
+		selector = ptr = keyfn;
+		while (*ptr) {
+			if (*ptr == '/' && *(ptr + 1))
+				selector = ptr + 1;
+			ptr++;
+		}
 		str_copyb(opts->szSelector, selector, selector_size);
 		DKIMSignReplaceSelector(&ctxt, opts);
 	}
@@ -1170,7 +1180,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.64 2022-04-03 18:44:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.65 2022-10-02 22:21:48+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1184,6 +1194,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.65  2022-10-02 22:21:48+05:30  Cprogrammer
+ * fixed 'Private key file does not exist' for DKIMSIGN with '%'
+ *
  * Revision 1.64  2022-04-03 18:44:21+05:30  Cprogrammer
  * refactored qmail_open() error codes
  *
