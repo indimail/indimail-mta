@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dk.c,v 1.59 2022-04-03 18:43:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dk.c,v 1.60 2022-10-02 22:20:50+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef DOMAIN_KEYS
 #include <unistd.h>
@@ -135,14 +135,16 @@ write_signature(DK *dka, char *dk_selector,
 	unsigned char   advice[ADVICE_BUF];
 	char           *selector, *from, *ptr, *keyfn;
 	static stralloc keyfnfrom = { 0 };
-	int             i;
+	int             i, pct_found, olen = 0;
 
 	from = dk_from(dka);
 	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
 		custom_error("qmail-dk", "Z", "Unable to read dkimkeys.", 0, "X.3.0");
 	else
-	if (!i || !(keyfn = getDomainToken(from, &dkimkeys)))
+	if (!i || !(keyfn = getDomainToken(from, &dkimkeys))) {
+		i = 0;
 		keyfn = dksign;
+	}
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -151,9 +153,11 @@ write_signature(DK *dka, char *dk_selector,
 		if (!stralloc_copys(&keyfnfrom, controldir) ||
 				!stralloc_append(&keyfnfrom, "/"))
 			die(51);
+		olen = keyfnfrom.len;
 	}
 	i = str_chr(keyfn, '%');
 	if (keyfn[i]) {
+		pct_found = 1;
 		if (keyfn[0] == '/') {
 			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 				die(51);
@@ -165,10 +169,10 @@ write_signature(DK *dka, char *dk_selector,
 				!stralloc_0(&keyfnfrom))
 			die(51);
 		if (access(keyfnfrom.s, F_OK)) {
-			if (errno != error_noent)
+			if (errno != error_noent && errno != error_notdir)
 				custom_error("qmail-dk", "Z", "Unable to read private key.", 0, "X.3.0");
 			/*- since file is not found remove '%' sign */
-			keyfnfrom.len = 8;
+			keyfnfrom.len = olen;
 			if (keyfn[0] == '/') {
 				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
 					die(51);
@@ -182,6 +186,7 @@ write_signature(DK *dka, char *dk_selector,
 				die(51);
 		} 
 	} else {
+		pct_found = 0;
 		if (keyfn[0] == '/') {
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51);
@@ -189,7 +194,7 @@ write_signature(DK *dka, char *dk_selector,
 		if (!stralloc_cats(&keyfnfrom, keyfn) || !stralloc_0(&keyfnfrom))
 			die(51);
 	}
-	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + 8, 1))
+	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + olen, 1))
 	{
 	case 0: /*- file not present */
 		/*
@@ -197,13 +202,15 @@ write_signature(DK *dka, char *dk_selector,
 		 * only for few domains which have the key present. Do not
 		 * treat domains with missing key as an error.
 		 */
-		if (keyfn[i])
+		if (pct_found)
 			return;
 		die(35);
 	case 1:
 		restore_gid();
 		break;
 	default:
+		if (errno == error_isdir && pct_found)
+			return;
 		custom_error("qmail-dk", "Z", "Unable to read private key.", 0, "X.3.0");
 	}
 	for (i = 0; i < dksignature.len; i++) {
@@ -612,7 +619,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.59 2022-04-03 18:43:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.60 2022-10-02 22:20:50+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
@@ -626,6 +633,9 @@ getversion_qmail_dk_c()
 
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.60  2022-10-02 22:20:50+05:30  Cprogrammer
+ * fixed 'Private key file does not exist' for DKSIGN with '%'
+ *
  * Revision 1.59  2022-04-03 18:43:56+05:30  Cprogrammer
  * refactored qmail_open() error codes
  *
