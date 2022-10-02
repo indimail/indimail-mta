@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.29 2022-09-28 15:26:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.30 2022-10-02 22:15:23+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -17,6 +17,40 @@ get_dkimkeys()
 	)
 }
 
+replace_percent()
+{
+	percent_found=0
+	echo $1|grep "%" >/dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		percent_found=1
+	fi
+	if [ $percent_found -eq 1 ] ; then
+		if [ -n "$BOUNCEDOMAIN" -a -z "$_SENDER" ] ; then
+			keyfn=$(echo $1 | sed "s{%{$BOUNCEDOMAIN{g")
+			if [ ! -f $keyfn ] ; then # remove % and check if file exists
+				t=$(echo $1 | sed "s{/%{{g")
+				if [ -f $t ] ; then
+					keyfn=$t
+				fi
+			fi
+		elif [ -n " $_SENDER" ] ; then
+			# replace '%' in filename with domain
+			domain=$(echo $_SENDER | cut -d@ -f2)
+			keyfn=$(echo $1 | sed "s{%{$domain{g")
+			if [ ! -f $keyfn ] ; then # remove % and check if file exists
+				t=$(echo $1 | sed "s{/%{{g")
+				if [ -f $t ] ; then
+					keyfn=$t
+				fi
+			fi
+		else
+			keyfn=$1
+		fi
+	else
+		keyfn=$1
+	fi
+}
+
 if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
 	exit 1
@@ -32,147 +66,100 @@ fi
 if [ -n "$NODK" -a -n "$NODKIM" ] ; then
 	exec /bin/cat
 fi
+
+if [ -z "$NODK" -a ! -f $prefix/bin/dktest ] ; then
+	echo "$prefix/bin/dktest: No such file or directory" 1>&2
+	exit 1
+fi
+if [ -z "$NODKIM" -a ! -f $prefix/bin/dkim ] ; then
+	echo "$prefix/bin/dkim: No such file or directory" 1>&2
+	exit 1
+fi
+
 if [ -z "$DEFAULT_DKIM_KEY" ] ; then
 	default_key=$CONTROLDIR/domainkeys/default
 else
 	default_key=$DEFAULT_DKIM_KEY
 fi
 slash=$(echo $CONTROLDIR | cut -c1)
-if [ ! " $slash" = " /" ] ; then
+if [ " $slash" != " /" ] ; then
 	cd SYSCONFDIR
 fi
-if [ -z "$NODK" -a -x $prefix/bin/dktest -a -z "$DKVERIFY" ] ; then
+
+# set private key for dk / dkim signing
+if [ \( -z "$NODK" -a -z "$DKVERIFY" \) -o \( -z "$NODKIM" -a -z "$DKIMVERIFY" \) ] ; then
 	if [ -f $CONTROLDIR/dkimkeys ] ; then
 		domain=$(echo $_SENDER | cut -d@ -f2)
 		t=$(get_dkimkeys $domain)
 		if [ -n "$t" ] ; then
-			DKSIGN=$t
+			if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
+				DKSIGN=$t
+			fi
+			if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
+				DKIMSIGN=$t
+			fi
 		fi
 	fi
-	if [ -z "$DKSIGN" ] ; then
-		DKSIGN=$CONTROLDIR/domainkeys/%/default
-		dksign=2 # key, selector selected as control/domainkeys/defaut
-	elif [ " $DKSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-		dksign=2 # key, selector selected as control/domainkeys/defaut
-	fi
-fi
-if [ -z "$NODKIM" -a -x $prefix/bin/dkim -a -z "$DKIMVERIFY" ] ; then
-	if [ -f $CONTROLDIR/dkimkeys ] ; then
-		domain=$(echo $_SENDER | cut -d@ -f2)
-		t=$(get_dkimkeys $domain)
-		if [ -n "$t" ] ; then
-			DKIMSIGN=$t
+	if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
+		if [ -z "$DKSIGN" ] ; then
+			DKSIGN=$CONTROLDIR/domainkeys/%/default
+			dksign=2 # key, selector selected as control/domainkeys/defaut
+		elif [ " $DKSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
+			dksign=2 # key, selector selected as control/domainkeys/defaut
 		fi
 	fi
-	if [ -z "$DKIMSIGN" ] ; then
-		DKIMSIGN=$CONTROLDIR/domainkeys/%/default
-		dkimsign=2 # key, selector selected as control/domainkeys/defaut
-	elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-		dkimsign=2 # key, selector selected as control/domainkeys/defaut
+	if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
+		if [ -z "$DKIMSIGN" ] ; then
+			DKIMSIGN=$CONTROLDIR/domainkeys/%/default
+			dkimsign=2 # key, selector selected as control/domainkeys/defaut
+		elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
+			dkimsign=2 # key, selector selected as control/domainkeys/defaut
+		fi
 	fi
 fi
+
+#dk signing
 if [ -z "$NODK" -a -n "$DKSIGN" ] ; then
-	if [ ! -f $prefix/bin/dktest ] ; then
-		echo "$prefix/bin/dktest: No such file or directory" 1>&2
-		exit 1
-	fi
-	percent_found=0
-	echo $DKSIGN|grep "%" >/dev/null 2>&1
-	if [ $? -eq 0 ] ; then
-		percent_found=1
-	fi
-	if [ $percent_found -eq 1 ] ; then
-		if [ -n "$BOUNCEDOMAIN" -a -z "$_SENDER" ] ; then
-			dkkeyfn=$(echo $DKSIGN | sed "s{%{$BOUNCEDOMAIN{g")
-			if [ ! -f $dkkeyfn ] ; then # remove % and check if file exists
-				t=$(echo $DKIMSIGN | sed "s{/%{{g")
-				if [ -f $t ] ; then
-					dkkeyfn=$t
-				fi
-			fi
-		elif [ -n " $_SENDER" ] ; then
-			# replace '%' in filename with domain
-			domain=$(echo $_SENDER | cut -d@ -f2)
-			dkkeyfn=$(echo $DKSIGN | sed "s{%{$domain{g")
-			if [ ! -f $dkkeyfn ] ; then # remove % and check if file exists
-				t=$(echo $DKIMSIGN | sed "s{/%{{g")
-				if [ -f $t ] ; then
-					dkkeyfn=$t
-				fi
-			fi
-		else
-			dkkeyfn=$DKSIGN
-		fi
-	else
-		dkkeyfn=$DKSIGN
-	fi
+	replace_percent $DKSIGN
+	dkkeyfn=$keyfn
 	if [ $dksign -eq 2 -a ! -f $dkkeyfn ] ; then
 		dkkeyfn=$default_key
 	fi
 	if [ ! -f $dkkeyfn ] ; then
-		echo "private key does not exist" 1>&2
-		exit 35 # private key does not exist
-	fi
-	dksign=1
-	dkselector=$(basename $dkkeyfn)
-fi
-if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
-	if [ ! -f $prefix/bin/dkim ] ; then
-		echo "$prefix/bin/dkim: No such file or directory" 1>&2
-		exit 1
-	fi
-	percent_found=0
-	echo $DKIMSIGN|grep "%" >/dev/null 2>&1
-	if [ $? -eq 0 ] ; then
-		percent_found=1
-	fi
-	if [ $percent_found -eq 1 ] ; then
-		if [ -n "$BOUNCEDOMAIN" -a -z "$_SENDER" ] ; then
-			dkimkeyfn=$(strip_default $(echo $DKIMSIGN | sed "s{%{$BOUNCEDOMAIN{g"))
-			if [ ! -f $dkimkeyfn ] ; then # remove % and check if file exists
-				t=$(echo $DKIMSIGN | sed "s{/%{{g")
-				if [ -f $t ] ; then
-					dkimkeyfn=$t
-				fi
-			fi
-		elif [ -n "$_SENDER" ] ; then
-			# replace '%' in filename with domain
-			domain=$(echo $_SENDER | cut -d@ -f2)
-			dkimkeyfn=$(echo $DKIMSIGN | sed "s{%{$domain{g")
-			if [ ! -f $dkimkeyfn ] ; then # remove % and check if file exists
-				t=$(echo $DKIMSIGN | sed "s{/%{{g")
-				if [ -f $t ] ; then
-					dkimkeyfn=$t
-				fi
-			fi
-		else
-			dkimkeyfn=$DKIMSIGN
+		dksign=0
+		if [ $percent_found -eq 0 ] ; then
+			echo "private key does not exist" 1>&2
+			exit 35 # private key does not exist
 		fi
 	else
-		dkimkeyfn=$DKIMSIGN
+		dksign=1
 	fi
+	dkselector=$(basename $dkkeyfn)
+fi
+
+# dkim signing
+if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
+	replace_percent $DKIMSIGN
+	dkimkeyfn=$keyfn
 	if [ $dkimsign -eq 2 -a ! -f $dkimkeyfn ] ; then
 		dkimkeyfn=$default_key
 	fi
 	if [ ! -f $dkimkeyfn ] ; then
-		echo "private key does not exist" 1>&2
-		exit 35 # private key does not exist
+		dkimsign=0
+		if [ $percent_found -eq 0 ] ; then
+			echo "private key does not exist" 1>&2
+			exit 35 # private key does not exist
+		fi
+	else
+		dkimsign=1
 	fi
-	dkimsign=1
 	dkimselector=$(basename $dkimkeyfn)
 fi
+
 if [ -z "$NODK" -a -n "$DKVERIFY" ] ; then
-	if [ ! -f $prefix/bin/dktest ] ; then
-		echo "$prefix/bin/dktest: No such file or directory" 1>&2
-		exit 1
-	fi
 	dkverify=1
 fi
 if [ -z "$NODKIM" -a -n "$DKIMVERIFY" ] ; then
-	if [ ! -f $prefix/bin/dkim ] ; then
-		echo "$prefix/bin/dkim: No such file or directory" 1>&2
-		exit 1
-	fi
 	dkimverify=1
 fi
 /bin/cat > /tmp/dk.$$
@@ -369,6 +356,9 @@ exec 0</tmp/dk.$$
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.30  2022-10-02 22:15:23+05:30  Cprogrammer
+# don't treat missng private key as error when DKIMSIGN has %
+#
 # Revision 1.29  2022-09-28 15:26:32+05:30  Cprogrammer
 # remove '%' from filename if dkim key file not found
 #
