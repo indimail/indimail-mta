@@ -3,19 +3,19 @@
 dknewkey \- create a new domain key
 
 .SH SYNOPSIS
-\fBdknewkey\fR [-\fBd\fR | --\fBdomain\fR \fIdomain\fR]
+\fBdknewkey\fR [-\fBd\fR \fIdomain\fR | --\fBdomain\fR \fIdomain\fR]
 [-\fBb\fR | --\fBbits\fR \fIbits\fR] [-\fBf\fR | --\fBforce\fR]
 \fIselector\fR
 
 or
 
 \fBdknewkey\fR [-\fBp\fR | --\fBprint\fR]
-[-\fBd\fR | --\fBdomain\fR \fIdomain\fR] [\fIselector\fR]
+[-\fBd\fR \fIdomain\fR | --\fBdomain\fR \fIdomain\fR] [\fIselector\fR]
 
 or
 
 \fBdknewkey\fR [-\fBr\fR | --\fBremove\fR]
-[-\fBd\fR | --\fBdomain\fR \fIdomain\fR] \fIselector\fR
+[-\fBd\fR \fIdomain\fR | --\fBdomain\fR \fIdomain\fR] \fIselector\fR
 
 .SH DESCRIPTION
 .B dknewkey
@@ -55,7 +55,7 @@ print DKIM public key for selector \fIselector\fR, domain \fIdomain\fR. If
 remove DKIM keys for selector \fIselector\fR, domain \fIdomain\fR
 
 .TP
--\fBd\fR | --\fBdomain\fR \fIdomain\fR
+-\fBd\fR \fIdomain\fR | --\fBdomain\fR \fIdomain\fR
 domain name for the DKIM key. The private key \fIselector\fR, public key
 \fIselector.pub\fR will be created in the directory
 @qsysconfdir@/control/domainkeys/\fIdomain\fR.
@@ -75,9 +75,10 @@ overwrite an existing DKIM key
 
 .SH "SEE ALSO"
 qmail-dk(8),
+qmail-dkim(8),
 qmail-smtpd(8),
 qmail-queue(8),
 spawn-filter(8),
 dktest(8),
-domain-keys(5),
+dkim(8),
 openssl(1)
