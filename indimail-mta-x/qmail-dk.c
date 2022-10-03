@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dk.c,v 1.60 2022-10-02 22:20:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dk.c,v 1.61 2022-10-03 17:10:08+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef DOMAIN_KEYS
 #include <unistd.h>
@@ -191,7 +191,8 @@ write_signature(DK *dka, char *dk_selector,
 			if (!stralloc_copys(&keyfnfrom, keyfn))
 				die(51);
 		} else
-		if (!stralloc_cats(&keyfnfrom, keyfn) || !stralloc_0(&keyfnfrom))
+		if (!stralloc_cats(&keyfnfrom, keyfn) ||
+				!stralloc_0(&keyfnfrom))
 			die(51);
 	}
 	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + olen, 1))
@@ -558,13 +559,13 @@ main(int argc, char *argv[])
 		}
 	}
 	if (pipe(pim) == -1)
-		die(59);
+		die(60);
 	switch (pid = vfork())
 	{
 	case -1:
 		close(pim[0]);
 		close(pim[1]);
-		die(58);
+		die(121);
 	case 0:
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
@@ -588,9 +589,9 @@ main(int argc, char *argv[])
 		die_write();
 	close(pim[1]);
 	if (wait_pid(&wstat, pid) != pid)
-		die(57);
+		die(122);
 	if (wait_crashed(wstat))
-		die(57);
+		die(123);
 	die(wait_exitcode(wstat));
 	/*- Not Reached */
 	exit(0);
@@ -619,7 +620,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.60 2022-10-02 22:20:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.61 2022-10-03 17:10:08+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
@@ -633,6 +634,9 @@ getversion_qmail_dk_c()
 
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.61  2022-10-03 17:10:08+05:30  Cprogrammer
+ * fixed return exit codes
+ *
  * Revision 1.60  2022-10-02 22:20:50+05:30  Cprogrammer
  * fixed 'Private key file does not exist' for DKSIGN with '%'
  *

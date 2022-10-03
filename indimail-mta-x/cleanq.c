@@ -214,7 +214,7 @@ main(int argc, char **argv)
 
 	sig_termcatch(sigterm);
 	if (uidinit(1, 1) == -1)
-		_exit(67);
+		strerr_die2sys(111, FATAL, "uidinit: ");
 	while ((opt = getopt(argc, argv, "ls:")) != opteof) {
 		switch (opt)
 		{

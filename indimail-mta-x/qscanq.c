@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.11  2022-10-03 12:25:19+05:30  Cprogrammer
+ * fixed return exit codes
+ *
  * Revision 1.10  2021-06-27 10:38:40+05:30  Cprogrammer
  * uidnit new argument to disable/enable error on missing uids
  *
@@ -96,8 +99,11 @@ main(int argc, char *argv[])
 	pid_t           pid = 0;
 	char           *ptr;
 
-	if (uidinit(1, 1) == -1)
-		_exit(67);
+	if (uidinit(1, 1) == -1) {
+		if (flaglog)
+			strerr_die2sys(QQ_XTEMP, FATAL, "unable to get uid/gid: ");
+		_exit(QQ_XTEMP);
+	}
 	/*- Check whether we should be logging errors */
 	if (env_get("DEBUG"))
 		flaglog = 1;
@@ -106,8 +112,8 @@ main(int argc, char *argv[])
 	uid = getuid();
 	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc)) {
 		if (flaglog)
-			strerr_die2sys(111, FATAL, "setreuid failed: ");
-		_exit(111);
+			strerr_die2sys(QQ_XTEMP, FATAL, "setreuid failed: ");
+		_exit(QQ_XTEMP);
 	}
 	if (!(ptr = env_get("SCANDIR")))
 		ptr = (char *) auto_spool;
@@ -190,7 +196,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.10 2021-06-27 10:38:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.11 2022-10-03 12:25:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

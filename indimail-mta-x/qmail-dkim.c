@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.65 2022-10-02 22:21:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.66 2022-10-03 12:28:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -1119,13 +1119,13 @@ main(int argc, char *argv[])
 		} /*- if (dkimverify) */
 	}
 	if (pipe(pim) == -1)
-		die(59, 0);
+		die(60, 0);
 	switch (pid = vfork())
 	{
 	case -1:
 		close(pim[0]);
 		close(pim[1]);
-		die(58, 0);
+		die(121, 0);
 	case 0:
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
@@ -1149,9 +1149,9 @@ main(int argc, char *argv[])
 		die_write();
 	close(pim[1]);
 	if (wait_pid(&wstat, pid) != pid)
-		die(57, 0);
+		die(122, 0);
 	if (wait_crashed(wstat))
-		die(57, 0);
+		die(123, 0);
 	die(wait_exitcode(wstat), 0);
 	/*- Not Reached */
 	exit(0);
@@ -1180,7 +1180,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.65 2022-10-02 22:21:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.66 2022-10-03 12:28:16+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1194,6 +1194,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.66  2022-10-03 12:28:16+05:30  Cprogrammer
+ * fixed return exit codes
+ *
  * Revision 1.65  2022-10-02 22:21:48+05:30  Cprogrammer
  * fixed 'Private key file does not exist' for DKIMSIGN with '%'
  *
