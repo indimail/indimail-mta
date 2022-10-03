@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.11  2022-10-03 12:27:48+05:30  Cprogrammer
+ * added dependency on stralloc.h
+ *
  * Revision 1.10  2020-09-16 18:58:02+05:30  Cprogrammer
  * fix for FreeBSD
  *
@@ -36,10 +39,11 @@
 #include <netinet/in.h>
 #include <arpa/nameser.h>
 #include <resolv.h>
-#include "str.h"
+#include <stralloc.h>
+#include <str.h>
+#include <error.h>
+#include <alloc.h>
 #include "dns.h"
-#include "error.h"
-#include "alloc.h"
 #include <openssl/evp.h>
 
 char           *
@@ -234,7 +238,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.10 2020-09-16 18:58:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns_text.c,v 1.11 2022-10-03 12:27:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
