@@ -1,0 +1,181 @@
+.TH qmail-queue-clients 7
+
+.SH NAME
+qmail-queue-clients \- use qmail-queue protocol to process messages
+
+.SH SYNOPSIS
+.B qmail-queue-clients [ options ]
+
+.SH DESCRIPTION
+qmail-queue-clients use \fBqmail-queue\fR(8) to queue messages to the
+indimail queue using the program \fBqmail-queue\fR(8). \fBqmail-queue\fR(8)
+reads a mail message from descriptor 0. It then reads envelope information
+from descriptor 1. It places the message into the outgoing queue for future
+delivery by qmail-send. Error message if any is read from descriptor 2.
+
+These clients call \fBqmail-queue\fR(8) as the default program to queue the
+message. By setting the environment variable \fBQMAILQUEUE\fR these clients
+can call an alternate program instead of \fBqmail-queue\fR(8) known as
+qmail-queue frontene A qmail-queue frontends too read mail message from
+descriptor 0. It then reads envelope information from descriptor 1. This
+allow a qmail-queue frontend to intercept mail message before it goes to
+qmail-queue. This opens the possibility to act on the mail message before
+it reaches the indimail queue. See below for various qmail-queue frontends
+available with indimail-mta.
+
+If the environment variable \fBNULLQUEUE\fR is set, the message is
+discarded instead of getting queued to the indimail queue. The
+environment variable takes precedence over \fBQMAILQUEUE\fR.
+
+The following programs are used in .qmail and use \fBqmail-queue\fR(8) to
+queue messages to the indimail queue.
+
+.nf
+\pcondredirect - in .qmail: |condredirect newaddress program [ arg ...  ]\p
+\pdot-forward - in ~/.qmail: | dot-forward [ -nN ] file ...\p
+\pfastforward - in .qmail-default: | fastforward [ -nNpPdD ] cdb
+\pfilterto - in  .qmail: | filterto address prog [ arg ...  ]
+\pforward - in .qmail: |forward address ....
+\pqnotify - in .qmail: |qnotify [-h] [-n]
+\pqreceipt - in .qmail: |qreceipt youraddress
+\preplier - in .qmail: |replier dir address program [ arg ...  ]
+\prrforward - in .qmail: |rrforward .qmailrr[-extension] address ...
+\psrsfilter - in .qmail-srs-default: |/bin/srsfilter
+
+.fi
+The following programs are command line programs that use
+\fBqmail-queue\fR(8) to queue messages to the indimail queue
+
+.nf
+\pqmail-inject - preprocess and send a mail message
+\pnew-inject - preprocess a mail message
+
+.fi
+The \fBrrt\fR(1) program uses \fBqmail-queue\fR(8) to queue return receipts
+to the indimail queue. The \fBrrt\fR(1) program is used by
+\fBqmail-remote\fR(8).
+
+The \fBmaildirserial\fR(1) program uses \fBqmail-queue\fR(8) to queue
+bounces to the indimail queue.
+
+The \fBqmail-local\fR(8) uses \fBqmail-queue\fR(8) to when forwarding
+messages.
+
+The following programs usually run as daemons and use \fBqmail-queue\fR(8)
+to queue messages to the indimail queue for messages submitted by it's
+clients.
+
+.nf
+\pqmail-qmqpd - receive mail via QMQP
+\pqmail-qmtpd - receive mail via QMTP
+\pqmail-smtpd - receive mail via SMTP
+\pmini-smtpd  - recieive mail via SMTP
+\pofmipd      - accept outgoing mail through OFMIP
+
+.fi
+The following program used \fBqmail-queue\fR(8) to queue bounces to the
+indimail queue.
+
+.nf
+\pqmail-send - deliver mail messages from the queue with rate control
+\pslowq-send - deliver mail messages from the queue with rate control
+\pqmta-send  - standalone mail delivery program
+
+.fi
+The following programs are qmail-queue frontends and get called by
+the above programs by setting the QMAILQUEUE environment variable.
+
+.nf
+\pqmail-dk         - sign/verify using domainkeys
+\pqmail-dkim       - sign/verify using DKIM
+\pqmail-spamfilter - SPAM filter
+\pqmail-multi      - queue multiplexor and filter
+
+.fi
+qmail-queue frontends use specific exit codes to return error messages to
+the client. These clients can report these errors in a human readable
+format. Following is the list of standard messages that these clients
+report.
+
+.nf
+An error message starting with 'D' means that it is a permanent error.
+An error message starting with 'Z' means that it is a temporary error.
+
+.ta 4c 12c
+Exit Code	Error Message
+11	Dqq envelope address too long (#5.1.3)
+31	Dqq mail server permanently rejected message (#5.3.0)
+32	Dqq spam or junk mail threshold exceeded (#5.7.1) /*- qmail-spamfiter */
+33	Dqq message contains virus (#5.7.1)
+34	Dqq message contains banned attachment (#5.7.1)
+35	Dqq private key file does not exist (#5.3.5)
+50	Zqq unable to get privilege to run virus scanner (#4.3.0) /*- qhpsi */
+51	Zqq out of memory (#4.3.0)
+52	Zqq timeout (#4.3.0)
+53	Zqq write error or disk full (#4.3.0)
+54	Zqq read error (#4.3.0)
+55	Zqq unable to read configuration (#4.3.0)
+56	Zqq trouble making network connection (#4.3.0)
+57	Zqq unable to open shared object/plugin (#4.3.0)
+58	Zqq unable to resolve symbol in shared object/plugin (#4.3.0)
+59	Zqq unable to close shared object/plugin (#4.3.0)
+60	Zqq trouble creating pipes/sockets (#4.3.0)
+61	Zqq trouble in home directory (#4.3.0)
+62	Zqq unable to access mess file (#4.3.0)
+63	Zqq trouble doing cd to root directory (#4.3.0)
+64	Zqq trouble syncing message to disk (#4.3.0)
+65	Zqq trouble creating files in intd. (#4.3.0)
+66	Zqq trouble linking todofn to intdfn (#4.3.0)
+67	Zqq trouble linking messfn to pidfn (#4.3.0)
+68	Zqq trouble creating temporary files (#4.3.0)
+69	Zqq trouble syncing dir to disk (#4.3.0)
+70	Zqq trouble with pid file (#4.3.0)
+71	Zqq mail server temporarily rejected message (#4.3.0)
+72	Zqq connection to mail server timed out (#4.4.1)
+73	Zqq connection to mail server rejected (#4.4.1)
+74	Zqq communication with mail server failed (#4.4.2)
+75	Zqq unable to exec (#4.3.0)
+76	Zqq temporary problem with SPAM filter (#4.3.0)
+77	Zqq unable to run QHPSI scanner (#4.3.0)
+78	Zqq trouble getting uids/gids (#4.3.0)
+79	Zqq envelope format error (#4.3.0)
+80	Zqq trouble removing intdfn
+91,81	Zqq internal bug (#4.3.0)
+87	Zqq mail system incorrectly configured. (#4.3.5)
+82,120	Zqq unable to exec qq (#4.3.0)
+121	Zqq unable to fork (#4.3.0)
+122	Zqq waitpid surprise (#4.3.0)
+123	Zqq crashed (#4.3.0)
+
+.fi
+Apart from the above exit codes if a qmail-queue frontend exits with a
+value from 11 to 40, the error message Dqq permanent problem (#5.3.0) will
+be returned to the client. For exit code from 11 to 40, the error message
+will be returned to the client.
+
+.EX
+Zqq temporary problem (#4.3.0)
+.EE
+
+qmail-queue frontends can use custom error message if they exit 88. In this
+case any string written to descriptor 2 by the qmail-queue frontend will be
+returned as the error message to the client. e.g. qmail-dkim prints the
+following message on descriptor 2 to indicate that the private key file
+couldn't be read.
+
+.EX
+Zunable to read private key. #(4.3.0)
+.EE
+
+If a qmail-queue frontend exits 88 but prints nothing on descriptor 2, then
+the following error message will returned to the client.
+
+.nf
+Zqq temporary problem (#4.3.0)
+
+The environment variable \fBERROR_FD\fR can be set to any other open file
+descriptor instead of 2. If \fBERROR_FD\fR is set as -1, custom error
+messages gets disabled.
+
+.SH SEE ALSO
+qmail-queue(8)

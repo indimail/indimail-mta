@@ -139,6 +139,7 @@ f:::0644:/man7/:forgeries.7:forgeries.7
 f:::0644:/man7/:qmail.7:qmail.7
 f:::0644:/man7/:qmail-limits.7:qmail-limits.7
 f:::0644:/man7/:multi-queue.7:multi-queue.7
+f:::0644:/man7/:qmail-queue-clients.7:qmail-queue-clients.7
 f:::0644:/man8/:cdb-database.8:cdb-database.8
 f:::0644:/man8/:cleanq.8:cleanq.8
 f:::0644:/man8/:ctrlenv.8:ctrlenv.8
