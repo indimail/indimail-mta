@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.32 2022-04-03 18:09:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.33 2022-10-04 23:43:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -18,10 +18,14 @@ qmail_open(struct qmail *qq)
 {
 	int             pim[2];
 	int             pie[2];
-	int             pic[2], e, errfd; /* custom message */
+	int             pic[2], e, errfd; /* custom error message from custom error patch by Flavio Curti */
 	char           *x, *binqqargs[2] = { 0, 0 };
 	stralloc        q = {0};
 
+	if (!(x = env_get("ERROR_FD")))
+		errfd = CUSTOM_ERR_FD;
+	else
+		scan_int(x, &errfd);
 	if (pipe(pim) == -1)
 		return -1;
 	if (pipe(pie) == -1) {
@@ -31,7 +35,7 @@ qmail_open(struct qmail *qq)
 		errno = e;
 		return -1;
 	}
-	if (pipe(pic) == -1) {
+	if (errfd != -1 && pipe(pic) == -1) { /* pipe for custom error */
 		e = errno;
 		close(pim[0]);
 		close(pim[1]);
@@ -48,24 +52,25 @@ qmail_open(struct qmail *qq)
 		close(pim[1]);
 		close(pie[0]);
 		close(pie[1]);
-		close(pic[0]);
-		close(pic[1]);
+		if (errfd != -1) {
+			close(pic[0]);
+			close(pic[1]);
+		}
 		errno = e;
 		return -1;
 	case 0:
 		close(pim[1]);
 		close(pie[1]);
-		close(pic[0]); /*- we want to receive data */
+		if (errfd != -1)
+			close(pic[0]); /*- we want to write error message */
 		if (fd_move(0, pim[0]) == -1)
 			_exit(120);
 		if (fd_move(1, pie[0]) == -1)
 			_exit(120);
-		if (!(x = env_get("ERROR_FD")))
-			errfd = CUSTOM_ERR_FD;
-		else
-			scan_int(x, &errfd);
-		if (fd_move(errfd, pic[1]) == -1)
-			_exit(120);
+		if (errfd != -1) {
+			if (fd_move(errfd, pic[1]) == -1)
+				_exit(120);
+		}
 		if (chdir("/") == -1)
 			_exit(63);
 		if (!(x = env_get("NULLQUEUE"))) {
@@ -92,8 +97,11 @@ qmail_open(struct qmail *qq)
 	close(pim[0]);
 	qq->fde = pie[1];
 	close(pie[0]);
-	qq->fdc = pic[0];
-	close(pic[1]);
+	if (errfd != -1) {
+		qq->fdc = pic[0];
+		close(pic[1]); /*- we want to read error message */
+	} else
+		qq->fdc = -1;
 	substdio_fdbuf(&qq->ss, write, qq->fdm, qq->buf, sizeof(qq->buf));
 	qq->flagerr = 0;
 	return 0;
@@ -160,14 +168,18 @@ qmail_close(struct qmail *qq)
 	if (!qq->flagerr && substdio_flush(&qq->ss) == -1)
 		qq->flagerr = 1;
 	close(qq->fde);
-	substdio_fdbuf(&qq->ss, read, qq->fdc, qq->buf, sizeof(qq->buf));
-	while (substdio_bget(&qq->ss, &ch, 1) && len < (sizeof(errstr) - 1)) {
-		errstr[len] = ch;
-		len++;
+
+	/* read custom error */
+	if (qq->fdc != -1) {
+		substdio_fdbuf(&qq->ss, read, qq->fdc, qq->buf, sizeof(qq->buf));
+		while (substdio_bget(&qq->ss, &ch, 1) && len < (sizeof(errstr) - 1)) {
+			errstr[len] = ch;
+			len++;
+		}
+		if (len > 0)
+			errstr[len] = 0; /* add termination */
+		close(qq->fdc);
 	}
-	if (len > 0)
-		errstr[len] = 0; /* add str-term */
-	close(qq->fdc);
 	if (wait_pid(&wstat, qq->pid) != qq->pid)
 		return "Zqq waitpid surprise (#4.3.0)";
 	if (wait_crashed(wstat))
@@ -177,19 +189,19 @@ qmail_close(struct qmail *qq)
 	{
 	case 115: /*- compatibility */
 	case 11:
-		return "Denvelope address too long for qq (#5.1.3)";
+		return "Dqq envelope address too long (#5.1.3)";
 	case 31:
-		return "Dmail server permanently rejected message (#5.3.0)";
+		return "Dqq mail server permanently rejected message (#5.3.0)";
 	case 32:
-		return "DSPAM or junk mail threshold exceeded (#5.7.1)";
+		return "Dqq spam or junk mail threshold exceeded (#5.7.1)"; /*- qmail-spamfiter */
 	case 33:
-		return "DMessage contains virus (#5.7.1)";
+		return "Dqq message contains virus (#5.7.1)";
 	case 34:
-		return "DMessage contains banned attachment (#5.7.1)";
+		return "Dqq message contains banned attachment (#5.7.1)";
 	case 35:
-		return "DPrivate key file does not exist (#5.3.5)";
+		return "Dqq private key file does not exist (#5.3.5)";
 	case 50:
-		return "Zunable to set uid/gid (#4.3.0)";
+		return "Zqq unable to get privilege to run virus scanner (#4.3.0)"; /*- qhpsi */
 	case 51:
 		return "Zqq out of memory (#4.3.0)";
 	case 52:
@@ -207,11 +219,11 @@ qmail_close(struct qmail *qq)
 	case 56:
 		return "Zqq trouble making network connection (#4.3.0)";
 	case 57:
-		return "Zunable to open shared object/plugin (#4.3.0)";
+		return "Zqq unable to open shared object/plugin (#4.3.0)";
 	case 58:
-		return "Zunable to resolve symbol in shared object/plugin (#4.3.0)";
+		return "Zqq unable to resolve symbol in shared object/plugin (#4.3.0)";
 	case 59:
-		return "Zunable to close shared object/plugin (#4.3.0)";
+		return "Zqq unable to close shared object/plugin (#4.3.0)";
 	case 60:
 		return "Zqq trouble creating pipes/sockets (#4.3.0)";
 	case 61:
@@ -235,17 +247,17 @@ qmail_close(struct qmail *qq)
 	case 70:
 		return "Zqq trouble with pid file (#4.3.0)";
 	case 71:
-		return "Zmail server temporarily rejected message (#4.3.0)";
+		return "Zqq mail server temporarily rejected message (#4.3.0)";
 	case 72:
-		return "Zconnection to mail server timed out (#4.4.1)";
+		return "Zqq connection to mail server timed out (#4.4.1)";
 	case 73:
-		return "Zconnection to mail server rejected (#4.4.1)";
+		return "Zqq connection to mail server rejected (#4.4.1)";
 	case 74:
-		return "Zcommunication with mail server failed (#4.4.2)";
+		return "Zqq communication with mail server failed (#4.4.2)";
 	case 75:
-		return "Zunable to exec (#4.3.0)";
+		return "Zqq unable to exec (#4.3.0)";
 	case 76:
-		return "Ztemporary problem with SPAM filter (#4.3.0)";
+		return "Zqq temporary problem with SPAM filter (#4.3.0)";
 	case 77: /*- thanks to problem repoted by peter cheng */
 		return "Zqq unable to run QHPSI scanner (#4.3.0)";
 	case 78:
@@ -259,19 +271,20 @@ qmail_close(struct qmail *qq)
 	case 81:
 		return "Zqq internal bug (#4.3.0)";
 	case 87: /*-*/
-		return "Zmail system incorrectly configured. (#4.3.5)";
+		return "Zqq mail system incorrectly configured. (#4.3.5)";
 	case 82: /*- compatability with simscan, notqmail, etc */
-	case 88: /*- custom error */
-		if (len > 2)
-			return errstr;
 	case 120:
-		return "Zunable to exec qq (#4.3.0)";
+		return "Zqq unable to exec qq (#4.3.0)";
 	case 121: /*-*/
-		return "Zunable to fork (#4.3.0)";
+		return "Zqq unable to fork (#4.3.0)";
 	case 122: /*-*/
 		return "Zqq waitpid surprise (#4.3.0)";
 	case 123: /*-*/
 		return "Zqq crashed (#4.3.0)";
+	case 88: /*- custom error */
+		if (qq->fdc != -1 && len > 2)
+			return errstr;
+		return "Zqq temporary problem (#4.3.0)";
 	default:
 		if ((exitcode >= 11) && (exitcode <= 40))
 			return "Dqq permanent problem (#5.3.0)";
@@ -282,13 +295,16 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.32 2022-04-03 18:09:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.33 2022-10-04 23:43:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.33  2022-10-04 23:43:37+05:30  Cprogrammer
+ * set ERROR_FD to -1 to disable custom error
+ *
  * Revision 1.32  2022-04-03 18:09:00+05:30  Cprogrammer
  * refactored return codes
  *
