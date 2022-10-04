@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.83 2022-04-06 09:09:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.84 2022-10-04 23:56:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -426,7 +426,7 @@ qhpsiprog(char *program)
 	struct stat     st;
 
 	if (stat(messfn, &st) == -1)
-		die(62, 1, "unable to access mess file");
+		die(62, 1, "qhpsi: unable to access mess file");
 	size = (unsigned int) st.st_size;
 	if ((x = env_get("QHPSIMINSIZE"))) {
 		scan_ulong(x, &u);
@@ -443,16 +443,16 @@ qhpsiprog(char *program)
 	switch (child = fork())
 	{
 	case -1:
-		die(121, 1, "unable to fork");
+		die(121, 1, "qhpsi: unable to fork");
 	case 0:
 		/* 
 		 * execute the qhpsi executable for security reasons.
 		 * revoke all privileges and run with qmailq uid
 		 */
 		if (uidinit(1, 0) == -1)
-			die(78, 0, "trouble getting uids/gids");
+			die(78, 0, "qhpsi: trouble getting uids/gids");
 		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
-			die(50, 0, "unable to set uid/gid");
+			die(50, 0, "qhpsi: unable to get privilege to queue messages");
 		if (!str_diffn(program, "plugin:", 7)) {
 			if (!stralloc_copys(&plugin, "plugin:") ||
 					!stralloc_cats(&plugin, messfn) ||
@@ -478,12 +478,12 @@ qhpsiprog(char *program)
 				!stralloc_0(&qhpsibin))
 			die(51, 0, "out of memory");
 		execv(qhpsibin.s, argv);
-		die(75, 0, "unable to exec qhpsi executable");
+		die(75, 0, "qhpsi: unable to exec qhpsi executable");
 	} /*- switch (child = fork()) */
 	if (wait_pid(&wstat, child) == -1)
-		die(122, 1, "waitpid surprise");
+		die(122, 1, "qhpsi: waitpid surprise");
 	if (wait_crashed(wstat))
-		die(123, 1, "qmail-queue crashed");
+		die(123, 1, "qhpsi: qmail-queue crashed");
 	childrc = wait_exitcode(wstat);
 	if ((x = env_get("REJECTVIRUS"))) {
 		scan_ulong(x, &u);
@@ -512,7 +512,7 @@ qhpsiprog(char *program)
 			 * Should the default be after case 2 ?
 			 */
 			default:/*- Bounce */
-				die(33, 1, "Message contains virus"); /*- message contains a virus */
+				die(33, 1, "qhpsi: message contains virus"); /*- message contains a virus */
 				break;
 			case 2: /*- Blackhole */
 				flagblackhole = 1;
@@ -523,7 +523,7 @@ qhpsiprog(char *program)
 		if (!stralloc_copys(&qqehextra, "X-QHPSI: clean\n"))
 			die(51, 1, "out of memory");
 	} else
-		die(77, 1, "Unable to run QHPSI scanner"); /*- QHPSI error in qmail.c */
+		die(77, 1, "qhpsi: unable to run QHPSI scanner"); /*- QHPSI error in qmail.c */
 	return;
 }
 #endif
@@ -1173,13 +1173,20 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.83 2022-04-06 09:09:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.84 2022-10-04 23:56:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
 }
 #endif
 /*
+ * $Log: qmail-queue.c,v $
+ * Revision 1.84  2022-10-04 23:56:17+05:30  Cprogrammer
+ * prefix qhpsi messages with 'qhpsi: '
+ *
+ * Revision 1.83  2022-04-06 03:39:27+05:30 Cprogrammer
+ * added USE_FDATASYNC to allow use of fdatasync() instead of fsync()
+ *
  * Revision 1.82  2022-03-16 21:37:36+05:30  Cprogrammer
  * FASTQUEUE to bypass features for faster inject speed
  *
