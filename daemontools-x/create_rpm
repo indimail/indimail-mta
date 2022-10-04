@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.5  2022-10-04 23:47:04+05:30  Cprogrammer
+# use rpmlintrc from .config directory
+#
 # Revision 1.4  2022-03-17 19:03:26+05:30  Cprogrammer
 # added --clean option
 #
@@ -13,7 +16,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.4 2022-03-17 19:03:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.5 2022-10-04 23:47:04+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
@@ -211,7 +214,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			(
 			echo daemontools-"$version"-"1.$release".$dist.rpm
-			rpmlint $rpmbuild/RPMS/$build_arch/daemontools-"$version"-"1.$release".$dist.$build_arch.rpm
+			if [ -f $HOME/.config/daemontools.rpmlintrc ] ; then
+				rpmlint -r $HOME/.config/daemontools.rpmlintrc $rpmbuild/RPMS/$build_arch/daemontools-"$version"-"1.$release".$dist.$build_arch.rpm
+			else
+				rpmlint $rpmbuild/RPMS/$build_arch/daemontools-"$version"-"1.$release".$dist.$build_arch.rpm
+			fi
 			echo ------------------------
 			echo daemontools-"$version"-"1.$release".$dist.src.rpm
 			rpmlint $rpmbuild/SRPMS/daemontools-"$version"-"1.$release".$dist.src.rpm

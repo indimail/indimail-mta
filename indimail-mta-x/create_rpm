@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.18  2022-10-04 23:40:14+05:30  Cprogrammer
+# use rpmlintrc from $HOME/.config
+#
 # Revision 1.17  2022-01-30 08:30:11+05:30  Cprogrammer
 # added --clean argument
 #
@@ -52,7 +55,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.17 2022-01-30 08:30:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.18 2022-10-04 23:40:14+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
@@ -256,7 +259,11 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			for i in indimail-mta indimail-mini qmta
 			do
 				echo $i
-				rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+				if [ -f $HOME/.config/$i.rpmlintrc ] ; then
+					rpmlint -r $HOME/.config/$i.rpmlintrc $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+				else
+					rpmlint $rpmbuild/RPMS/$build_arch/$i-"$version"-"1.$release".$dist.$build_arch.rpm
+				fi
 				echo ------------------------
 			done
 			echo indimail-mta-"$version"-"1.$release".$dist.src.rpm
