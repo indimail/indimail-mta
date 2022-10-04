@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.h,v $
+ * Revision 1.7  2022-10-04 23:43:51+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.6  2020-05-12 12:14:13+05:30  Cprogrammer
  * fix integer signedness error in qmail_put() (CVE-2005-1515)
  *
@@ -21,14 +24,17 @@
 
 #include "substdio.h"
 
+#ifndef CUSTOM_ERR_FD
 #define CUSTOM_ERR_FD 2
+#endif
+
 struct qmail
 {
 	int             flagerr;
 	unsigned long   pid;
-	int             fdm;
-	int             fde;
-	int             fdc;
+	int             fdm; /*- fd message */
+	int             fde; /*- fd envelope */
+	int             fdc; /*- fd custom */
 	substdio        ss;
 	char            buf[1024];
 };
