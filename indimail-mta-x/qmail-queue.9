@@ -13,7 +13,7 @@ outgoing queue for future delivery by \fBqmail-send\fR.  The default
 outgoing queue is @qmaildir@/queue. This can be changed by setting
 environment variable QUEUEDIR to point to a path having a valid
 queue created by the program \fBqueue-fix\fR(8). \fBqmail-queue\fR
-is setuid to uid \fIqmailq\fR.
+is setuid to uid of user \fIqmailq\fR.
 
 The deposition and balancing of mail across multiple queues is controlled
 by the following environment variables.
@@ -981,4 +981,5 @@ qmail-direct(8),
 multi-queue(7),
 fsync(2),
 fdatasync(2),
-mq_open(3)
+mq_open(3),
+qmail-queue-clients(7)

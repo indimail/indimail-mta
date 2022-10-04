@@ -362,8 +362,9 @@ that \fBqmail-queue\fR(8) should pass to \fBqmail-local\fR(8),
 Override the default stderr fd of 2. \fBqmail-queue\fR(8) clients can pass
 on custom error (=bounce) messages back on this file descriptor when they
 exit 88. Any \fBqmail-queue\fR(8) client have to write the error message to
-STDERR and exit 88, in order to use the custom  message. Used by all
-programs that use \fBqmail-queue\fR(8) to queue messages.
+STDERR and exit 88 in order to use the custom  message. Used by all
+programs that use \fBqmail-queue\fR(8) to queue messages. Setting ERROR_FD
+to -1 disables custom error message.
 
 .TP
 \fIEXT\fR \fIEXT2\fR
