@@ -7,13 +7,13 @@ qmail-queue-clients \- use qmail-queue / qmail-queue frontend to process message
 .B qmail-queue-clients [ options ]
 
 .SH DESCRIPTION
-qmail-queue-clients use the program \fBqmail-queue\fR(8) to queue messages
-to the indimail queue. Messages queued to the indimail queue are picked up
-for delivery to their destination by programs like \fBqmail-send\fR(8),
+qmail-queue-clients use the \fBqmail-queue\fR(8) to place messages into the
+outgoing queue. Messages placed into the outgoing queue are picked up for
+delivery to their destination by programs like \fBqmail-send\fR(8),
 \fBslowq-send\fR(8) and \fBqmta-send\fR(8). \fBqmail-queue\fR(8) reads a
 mail message from descriptor 0. It then reads envelope information from
 descriptor 1. It places the message into the outgoing queue for future
-delivery by qmail-send. Error message if any is read from descriptor 2.
+delivery by qmail-send. Error message if any is written to descriptor 2.
 By setting the environment variable \fBQMAILQUEUE\fR to full path
 to a program, these clients can call an alternate program, known as
 qmail-queue frontend instead of \fBqmail-queue\fR(8). A qmail-queue
@@ -27,12 +27,12 @@ queue. indimail-mta provides \fBqmail-dk\fR(8), \fBqmail-dkim\fR(8),
 
 If the environment variable \fBNULLQUEUE\fR is set, the program
 @prefix@/sbin/qmail-nullqueue is used instead of \fBqmail-queue\fR(8),
-which causes messages to be discarded instead of getting queued to the
-indimail queue. \fBNULLQUEUE\fR variable takes precedence over
+which causes messages to be discarded instead of getting queued into the
+outgoing queue. \fBNULLQUEUE\fR variable takes precedence over
 \fBQMAILQUEUE\fR.
 
 The following programs are used in .qmail and use \fBqmail-queue\fR(8) to
-queue messages to the indimail queue.
+place messages into the outgoing queue.
 
 .nf
 \p\fBcondredirect\fR(1) - in .qmail: |condredirect newaddress program [arg ...]
@@ -48,7 +48,7 @@ queue messages to the indimail queue.
 
 .fi
 The following programs are command line programs that use
-\fBqmail-queue\fR(8) to queue messages to the indimail queue
+\fBqmail-queue\fR(8) to place messages into the outgoing queue.
 
 .nf
 \p\fBqmail-inject\fR(8) - preprocess and send a mail message
@@ -56,17 +56,17 @@ The following programs are command line programs that use
 
 .fi
 The \fBrrt\fR(1) program uses \fBqmail-queue\fR(8) to queue return receipts
-to the indimail queue. The \fBrrt\fR(1) program is used by
+into the outgoing queue. The \fBrrt\fR(1) program is used by
 \fBqmail-remote\fR(8).
 
 The \fBmaildirserial\fR(1) program uses \fBqmail-queue\fR(8) to queue
-bounces to the indimail queue.
+bounces into the outgoing queue.
 
 The \fBqmail-local\fR(8) uses \fBqmail-queue\fR(8) to when forwarding
 messages.
 
 The following programs usually run as daemons and use \fBqmail-queue\fR(8)
-to queue messages to the indimail queue for messages submitted by it's
+to place messages into the outgoing queue for messages submitted by it's
 clients.
 
 .nf
@@ -77,7 +77,7 @@ clients.
 \p\fBofmipd\fR(8)      - accept outgoing mail through OFMIP
 
 .fi
-The following program use \fBqmail-queue\fR(8) to queue bounces to the
+The following program use \fBqmail-queue\fR(8) to queue bounces in the
 indimail queue.
 
 .nf
@@ -164,23 +164,34 @@ Zqq temporary problem (#4.3.0)
 
 qmail-queue frontends can use custom error message if they exit 88. In this
 case any string written to descriptor 2 by the qmail-queue frontend will be
-returned as the error message to the client. e.g. qmail-dkim prints the
-following message on descriptor 2 to indicate that the private key file
-couldn't be read.
+read by \fBqmail-queue\fR(8) and returned as the error message to the
+client. e.g. qmail-dkim prints the following message on descriptor 2 to
+indicate that the private key file couldn't be read.
 
 .EX
 Zunable to read private key. #(4.3.0)
 .EE
 
-If a qmail-queue frontend exits 88 but prints nothing on descriptor 2, then
+If a qmail-queue frontend exits 88 but writes nothing to descriptor 2, then
 the following error message will returned to the client.
 
 .nf
 Zqq temporary problem (#4.3.0)
 
+.fi
 The environment variable \fBERROR_FD\fR can be set to any other open file
 descriptor instead of 2. If \fBERROR_FD\fR is set as -1, custom error
-messages gets disabled.
+messages gets disabled. In this case \fBqmail-queue\fR(8) will not read
+anything written on descriptor 2 by the qmail-queue frontends. Also an exit
+value of 88 will result in the following error message returned to the
+client.
+
+.nf
+Zqq temporary problem (#4.3.0)
+
+.fi
+Exit value of 88 is typically used by a qmail-queue frontend for reporting
+an error message not handled by \fBqmail-queue\fR(8) currently.
 
 .SH SEE ALSO
 qmail-queue(8)
