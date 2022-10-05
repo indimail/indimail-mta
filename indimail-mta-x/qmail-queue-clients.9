@@ -7,23 +7,23 @@ qmail-queue-clients \- use qmail-queue / qmail-queue frontend to process message
 .B qmail-queue-clients [ options ]
 
 .SH DESCRIPTION
-qmail-queue-clients use the \fBqmail-queue\fR(8) to place messages into the
+qmail-queue-clients use \fBqmail-queue\fR(8) to place messages into the
 outgoing queue. Messages placed into the outgoing queue are picked up for
 delivery to their destination by programs like \fBqmail-send\fR(8),
 \fBslowq-send\fR(8) and \fBqmta-send\fR(8). \fBqmail-queue\fR(8) reads a
 mail message from descriptor 0. It then reads envelope information from
 descriptor 1. It places the message into the outgoing queue for future
-delivery by qmail-send. Error message if any is written to descriptor 2.
-By setting the environment variable \fBQMAILQUEUE\fR to full path
-to a program, these clients can call an alternate program, known as
-qmail-queue frontend instead of \fBqmail-queue\fR(8). A qmail-queue
-frontend too read mail message from descriptor 0. It then reads envelope
-information from descriptor 1. This allow a qmail-queue frontend to
-intercept mail message before it goes to qmail-queue. This opens the
-possibility to act on the mail message before it reaches the indimail
-queue. indimail-mta provides \fBqmail-dk\fR(8), \fBqmail-dkim\fR(8),
-\fBqmail-spamfilter\fR(8), \fBqmail-multi\fR(8), and
-\fBqmail-nullqueue\fR(8) as qmail queue frontends.
+delivery. Error message if any is written to descriptor 2. By setting the
+environment variable \fBQMAILQUEUE\fR to full path to a program, these
+clients can call an alternate program, known as qmail-queue frontend
+instead of \fBqmail-queue\fR(8). A qmail-queue frontend too read mail
+message from descriptor 0. It then reads envelope information from
+descriptor 1. This allow a qmail-queue frontend to intercept mail message
+before it goes into the outgoing queue. This opens the possibility to act
+on the mail message before it reaches the outgoing queue. indimail-mta
+provides \fBqmail-dk\fR(8), \fBqmail-dkim\fR(8), \fBqmail-spamfilter\fR(8),
+\fBqmail-multi\fR(8), and \fBqmail-nullqueue\fR(8) as qmail queue
+frontends.
 
 If the environment variable \fBNULLQUEUE\fR is set, the program
 @prefix@/sbin/qmail-nullqueue is used instead of \fBqmail-queue\fR(8),
@@ -77,8 +77,8 @@ clients.
 \p\fBofmipd\fR(8)      - accept outgoing mail through OFMIP
 
 .fi
-The following program use \fBqmail-queue\fR(8) to queue bounces in the
-indimail queue.
+The following program use \fBqmail-queue\fR(8) to queue bounces into the
+outgoing queue.
 
 .nf
 \p\fBqmail-send\fR(8) - deliver mail messages from the queue with rate control
@@ -173,7 +173,7 @@ Zunable to read private key. #(4.3.0)
 .EE
 
 If a qmail-queue frontend exits 88 but writes nothing to descriptor 2, then
-the following error message will returned to the client.
+the following error message will be returned to the client.
 
 .nf
 Zqq temporary problem (#4.3.0)
@@ -191,7 +191,7 @@ Zqq temporary problem (#4.3.0)
 
 .fi
 Exit value of 88 is typically used by a qmail-queue frontend for reporting
-an error message not handled by \fBqmail-queue\fR(8) currently.
+a non-standard error message not handled by \fBqmail-queue\fR(8) currently.
 
 .SH SEE ALSO
 qmail-queue(8)
