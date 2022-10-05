@@ -1,54 +1,58 @@
 .TH qmail-queue-clients 7
 
 .SH NAME
-qmail-queue-clients \- use qmail-queue protocol to process messages
+qmail-queue-clients \- use qmail-queue / qmail-queue frontend to process messages
 
 .SH SYNOPSIS
 .B qmail-queue-clients [ options ]
 
 .SH DESCRIPTION
-qmail-queue-clients use \fBqmail-queue\fR(8) to queue messages to the
-indimail queue using the program \fBqmail-queue\fR(8). \fBqmail-queue\fR(8)
-reads a mail message from descriptor 0. It then reads envelope information
-from descriptor 1. It places the message into the outgoing queue for future
+qmail-queue-clients use the program \fBqmail-queue\fR(8) to queue messages
+to the indimail queue. Messages queued to the indimail queue are picked up
+for delivery to their destination by programs like \fBqmail-send\fR(8),
+\fBslowq-send\fR(8) and \fBqmta-send\fR(8). \fBqmail-queue\fR(8) reads a
+mail message from descriptor 0. It then reads envelope information from
+descriptor 1. It places the message into the outgoing queue for future
 delivery by qmail-send. Error message if any is read from descriptor 2.
+By setting the environment variable \fBQMAILQUEUE\fR to full path
+to a program, these clients can call an alternate program, known as
+qmail-queue frontend instead of \fBqmail-queue\fR(8). A qmail-queue
+frontend too read mail message from descriptor 0. It then reads envelope
+information from descriptor 1. This allow a qmail-queue frontend to
+intercept mail message before it goes to qmail-queue. This opens the
+possibility to act on the mail message before it reaches the indimail
+queue. indimail-mta provides \fBqmail-dk\fR(8), \fBqmail-dkim\fR(8),
+\fBqmail-spamfilter\fR(8), \fBqmail-multi\fR(8), and
+\fBqmail-nullqueue\fR(8) as qmail queue frontends.
 
-These clients call \fBqmail-queue\fR(8) as the default program to queue the
-message. By setting the environment variable \fBQMAILQUEUE\fR these clients
-can call an alternate program instead of \fBqmail-queue\fR(8) known as
-qmail-queue frontene A qmail-queue frontends too read mail message from
-descriptor 0. It then reads envelope information from descriptor 1. This
-allow a qmail-queue frontend to intercept mail message before it goes to
-qmail-queue. This opens the possibility to act on the mail message before
-it reaches the indimail queue. See below for various qmail-queue frontends
-available with indimail-mta.
-
-If the environment variable \fBNULLQUEUE\fR is set, the message is
-discarded instead of getting queued to the indimail queue. The
-environment variable takes precedence over \fBQMAILQUEUE\fR.
+If the environment variable \fBNULLQUEUE\fR is set, the program
+@prefix@/sbin/qmail-nullqueue is used instead of \fBqmail-queue\fR(8),
+which causes messages to be discarded instead of getting queued to the
+indimail queue. \fBNULLQUEUE\fR variable takes precedence over
+\fBQMAILQUEUE\fR.
 
 The following programs are used in .qmail and use \fBqmail-queue\fR(8) to
 queue messages to the indimail queue.
 
 .nf
-\pcondredirect - in .qmail: |condredirect newaddress program [ arg ...  ]\p
-\pdot-forward - in ~/.qmail: | dot-forward [ -nN ] file ...\p
-\pfastforward - in .qmail-default: | fastforward [ -nNpPdD ] cdb
-\pfilterto - in  .qmail: | filterto address prog [ arg ...  ]
-\pforward - in .qmail: |forward address ....
-\pqnotify - in .qmail: |qnotify [-h] [-n]
-\pqreceipt - in .qmail: |qreceipt youraddress
-\preplier - in .qmail: |replier dir address program [ arg ...  ]
-\prrforward - in .qmail: |rrforward .qmailrr[-extension] address ...
-\psrsfilter - in .qmail-srs-default: |/bin/srsfilter
+\p\fBcondredirect\fR(1) - in .qmail: |condredirect newaddress program [arg ...]
+\p\fBfilterto\fR(1)     - in .qmail: |filterto address prog [arg ...]
+\p\fBforward\fR(1)      - in .qmail: |forward address ....
+\p\fBqnotify\fR(1)      - in .qmail: |qnotify [-h] [-n]
+\p\fBqreceipt\fR(1)     - in .qmail: |qreceipt youraddress
+\p\fBreplier\fR(1)      - in .qmail: |replier dir address program [arg ...]
+\p\fBrrforward\fR(1)    - in .qmail: |rrforward .qmailrr[-extension] address ...
+\p\fBdot-forward\fR(1)  - in ~/.qmail: |dot-forward [-nN] file ...
+\p\fBfastforward\fR(1)  - in .qmail-default: |fastforward [-nNpPdD ] cdb
+\p\fBsrsfilter\fR(1)    - in .qmail-srs-default: |srsfilter
 
 .fi
 The following programs are command line programs that use
 \fBqmail-queue\fR(8) to queue messages to the indimail queue
 
 .nf
-\pqmail-inject - preprocess and send a mail message
-\pnew-inject - preprocess a mail message
+\p\fBqmail-inject\fR(8) - preprocess and send a mail message
+\p\fBnew-inject\fR(8)   - preprocess a mail message
 
 .fi
 The \fBrrt\fR(1) program uses \fBqmail-queue\fR(8) to queue return receipts
@@ -66,30 +70,31 @@ to queue messages to the indimail queue for messages submitted by it's
 clients.
 
 .nf
-\pqmail-qmqpd - receive mail via QMQP
-\pqmail-qmtpd - receive mail via QMTP
-\pqmail-smtpd - receive mail via SMTP
-\pmini-smtpd  - recieive mail via SMTP
-\pofmipd      - accept outgoing mail through OFMIP
+\p\fBqmail-qmqpd\fR(8) - receive mail via QMQP
+\p\fBqmail-qmtpd\fR(8) - receive mail via QMTP
+\p\fBqmail-smtpd\fR(8) - receive mail via SMTP
+\p\fBmini-smtpd\fR(8)  - recieive mail via SMTP
+\p\fBofmipd\fR(8)      - accept outgoing mail through OFMIP
 
 .fi
-The following program used \fBqmail-queue\fR(8) to queue bounces to the
+The following program use \fBqmail-queue\fR(8) to queue bounces to the
 indimail queue.
 
 .nf
-\pqmail-send - deliver mail messages from the queue with rate control
-\pslowq-send - deliver mail messages from the queue with rate control
-\pqmta-send  - standalone mail delivery program
+\p\fBqmail-send\fR(8) - deliver mail messages from the queue with rate control
+\p\fBslowq-send\fR(8) - deliver mail messages from the queue with rate control
+\p\fBqmta-send\fR(8)  - standalone mail delivery program
 
 .fi
 The following programs are qmail-queue frontends and get called by
 the above programs by setting the QMAILQUEUE environment variable.
 
 .nf
-\pqmail-dk         - sign/verify using domainkeys
-\pqmail-dkim       - sign/verify using DKIM
-\pqmail-spamfilter - SPAM filter
-\pqmail-multi      - queue multiplexor and filter
+\p\fBqmail-dk\fR(8)         - sign/verify using domainkeys
+\p\fBqmail-dkim\fR(8)       - sign/verify using DKIM
+\p\fBqmail-spamfilter\fR(8) - spam filter
+\p\fBqmail-multi\fR(8)      - queue multiplexor and filter
+\p\fBqmail-nullqueue\fR(8)  - disappear a message
 
 .fi
 qmail-queue frontends use specific exit codes to return error messages to
@@ -148,7 +153,7 @@ Exit Code	Error Message
 123	Zqq crashed (#4.3.0)
 
 .fi
-Apart from the above exit codes if a qmail-queue frontend exits with a
+Apart from the above exit codes, if a qmail-queue frontend exits with a
 value from 11 to 40, the error message Dqq permanent problem (#5.3.0) will
 be returned to the client. For exit code from 11 to 40, the error message
 will be returned to the client.

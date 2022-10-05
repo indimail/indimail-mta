@@ -1193,3 +1193,4 @@ fts.lib
 dnsblcheck.o
 set_queuedir.o
 dnsblcheck
+qmail-queue-clients.7

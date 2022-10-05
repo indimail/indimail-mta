@@ -685,3 +685,4 @@ qmonitor.8
 dnsblcheck
 dnsblcheck.o
 haslibgsasl.h
+qmail-queue-clients.7

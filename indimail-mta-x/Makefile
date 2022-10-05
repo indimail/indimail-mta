@@ -61,11 +61,12 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
 	qmail-limits.7 qmail-local.8 qmail-multi.8 qmail-newmrh.8 qmonitor.8 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 \
-	qmail-queue.8 qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 \
-	qmail-smtpd.8 qmail-spamfilter.8 qmail-srs.5 qmail-start.8 \
-	todo-proc.8 qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
-	queue-fix.8 recipient-cdb.8 replier.1 rrforward.1 rrt.1 run-cleanq.8 \
-	slowq-send.8 slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8
+	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
+	qmail-send.8 qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 \
+	qmail-srs.5 qmail-start.8 todo-proc.8 qmail-users.5 qmta-send.8 \
+	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 recipient-cdb.8 replier.1 \
+	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 \
+	spawn-filter.8 surblfilter.8 svctool.8
 
 include Makefile.$(SYSTEM)
 
@@ -1443,6 +1444,11 @@ qmail-queue.9 conf-qmail conf-prefix conf-servicedir conf-split
 	$(edit) qmail-queue.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	> qmail-queue.8
+
+qmail-queue-clients.7: \
+qmail-queue-clients.9 conf-prefix
+	$(edit) qmail-queue-clients.9 \
+	> qmail-queue-clients.7
 
 qmail-queue.o: \
 compile qmail-queue.c matchregex.h triggerpull.h \
