@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.266 2022-08-25 18:28:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.267 2022-10-07 18:09:39+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sig.h>
 #include <stralloc.h>
@@ -135,7 +135,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.266 $";
+char           *revision = "$Revision: 1.267 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2506,6 +2506,7 @@ open_control_files()
 #ifdef BATV
 	open_control_once(&batvok, 0, &batvfn, 0, "SIGNKEY", 0, "signkey", 0, &signkey, 0, 0);
 	if (batvok) {
+		signkey.len--;
 		if (!nosign.len) {
 			switch (control_readfile(&nosign, "nosignhosts", 0))
 			{
@@ -3221,7 +3222,7 @@ check_batv_sig()
 	addr.len--;
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	if (!(md = EVP_MD_fetch(NULL, "md5", NULL)))
-		die_custom("batv: unable to fetch digest implementation for MD5");
+		die_custom("qmail-smtpd: batv: unable to fetch digest implementation for MD5");
 	if (!(mdctx = EVP_MD_CTX_new()))
 		die_nomem();
 	if (!EVP_DigestInit_ex(mdctx, md, NULL) ||
@@ -3229,7 +3230,7 @@ check_batv_sig()
 			!EVP_DigestUpdate(mdctx, addr.s + slpos + 1, addr.len - slpos - 1) ||
 			!EVP_DigestUpdate(mdctx, signkey.s, signkey.len) ||
 			!EVP_DigestFinal_ex(mdctx, md5digest, &md_len))
-		die_custom("batv: unable to hash md5 message digest");
+		die_custom("qmail-smtpd: batv: unable to hash md5 message digest");
 	EVP_MD_free(md);
 #else
 	MD5_Init(&md5);
@@ -3250,7 +3251,7 @@ check_batv_sig()
 		if (c >= 'A' && c <= 'F')
 			x = 10 + c - 'A';
 		else
-			return 0;
+			return 0; /*- bad signature */
 		x <<= 4;
 		c = addr.s[md5pos + 2 * i + 1];
 		if (isdigit(c))
@@ -3262,9 +3263,9 @@ check_batv_sig()
 		if (c >= 'A' && c <= 'F')
 			x += 10 + c - 'A';
 		else
-			return 0;
+			return 0; /*- bad signature */
 		if (x != md5digest[i])
-			return 0;
+			return 0; /*- bad signature */
 	}
 	/*- peel off the signature */
 	addr.len -= slpos;
@@ -7408,6 +7409,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.267  2022-10-07 18:09:39+05:30  Cprogrammer
+ * fixed length of batv signkey
+ *
  * Revision 1.266  2022-08-25 18:28:52+05:30  Cprogrammer
  * fetch hexsalted and clear text passwords
  *
@@ -7651,7 +7655,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.266 2022-08-25 18:28:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.267 2022-10-07 18:09:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
