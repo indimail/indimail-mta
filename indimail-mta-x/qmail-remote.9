@@ -95,6 +95,19 @@ SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
 authentication provided by libgsasl. Note that DIGEST-MD5 has been moved to
 historic (https://www.rfc-editor.org/rfc/rfc6331.html).
 
+\fBqmail-remote\fR supports \fBBounce Address Tag Validation (BATV)\fR.
+It uses BATV to replace an envelope sender like mailbox@example.com with
+prvs=tag-value=mailbox@example.com, where prvs, called
+"Simple Private Signature", is just one of the possible tagging schemes;
+actually, the only one fully specified in the draft. The BATV draft gives a
+framework that other possible techniques can fit into. Other types of
+implementations, such as using public key signatures that can be verified
+by third parties, are mentioned but left undefined. Having the control file
+\fIsignkey\fR or setting the environment variable \fBSIGNKEY\fR enables
+BATV. When a bounce is received by \fBqmail-smtpd\fR(8) it can check the
+validity of the signature in the tagged envelope sender address and reject
+in case the signature is invalid.
+
 .SH CUSTOMIZING qmail-remote
 \fBqmail-remote\fR normally gets called by \fBqmail-rspawn\fR but can be
 called by \fBspawn-filter\fR when you set the \fBQMAILREMOTE\fR environment
@@ -701,6 +714,7 @@ table of tlsa verification enforced domains.
 .SH "SEE ALSO"
 addresses(5),
 envelopes(5),
+batv(1),
 qmtp(5),
 qmail-control(5),
 qmail-send(8),

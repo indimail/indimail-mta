@@ -13,14 +13,16 @@ batv \- Bounce Address Tag Validation Tester for indimail-mta
 Where \fIaddr\fR is the Mail From address.
 
 .SH DESCRIPTION
-BATV defines a method for tagging information to be included in the
-local part of the RFC2821 MailFrom address. This permits encoding
-information that authenticates the MailFrom. The encoded information also
-contains DDD as the number of days elapsed since 1970, (applying MOD 1000).
-This can be used by BATV to limit the validity period of the BATV address.
-\fBbatv\fR(1) is a Bounce Address Tag Validation tester. It can be used to
-encode a tag that can be included in \fIaddr\fR or validate a BATV encoded
-address \fIaddr\fR.
+BATV defines a method for tagging information to be included in the local
+part of the RFC2821 Return Path address. This permits encoding information
+that authenticates bounces to the envelope sender. The encoded information
+also contains DDD is the number of days elapsed since 1970 and modulus
+1000. This can be used by BATV to limit the validity period of the BATV
+address. \fBbatv\fR(1) is a Bounce Address Tag Validation tester. It can be
+used to encode a tag that can be included in \fIaddr\fR or validate a BATV
+encoded address \fIaddr\fR.
+
+Usage Examples
 
 .EX
 $ date +%s
@@ -57,8 +59,8 @@ to encode the Mail From address.
 .TP
 \fB\-t\fR \fIstale\fR
 Used for defining the validity in days of the BATV encoded address. A BATV
-encoded address contains the number of days elapsed since 1970, (applying
-MOD 1000). The value of \fIstale\fR is used to limit the validity of the
+encoded address contains the number of days elapsed since 1970 and modulus
+of 1000. The value of \fIstale\fR is used to limit the validity of the
 tagged address to a maximum of \fIstale\fR days.  Default: 7 days.
 
 .SH RETURN VALUES
@@ -75,9 +77,6 @@ the following codes if the BATV encoding doesn't validate
 
 .SH SEE ALSO
 qmail-smtpd(8),
-qmail-remote(8),
-qmail-send(8),
-slowq-send(8),
-qmta-send(8)
+qmail-remote(8)
 
 https://mipassoc.org/batv/draft-levine-smtp-batv-01.txt
