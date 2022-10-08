@@ -37,6 +37,8 @@ Release @version@-@release@ Start 08/09/2022
 20. qmail-queue.c: prefix qhpsi error messages with 'qhpsi: '
 - 07/10/2022
 21. smtpd.c: fixed length of BATV signkey
+- 08/10/2022
+22. smtpd.c: Set SPFRESULT env variable for qmail-queue frontend and qfilters
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022

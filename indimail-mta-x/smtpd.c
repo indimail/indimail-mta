@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.267 2022-10-07 18:09:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.268 2022-10-08 20:01:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sig.h>
 #include <stralloc.h>
@@ -135,7 +135,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.267 $";
+char           *revision = "$Revision: 1.268 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3809,6 +3809,31 @@ nohasvirtual:
 		switch (r = spfcheck(remoteip))
 #endif
 		{
+		case SPF_OK:
+			env_put2("SPFRESULT","pass");
+			break;
+		case SPF_NONE:
+			env_put2("SPFRESULT","none");
+			break;
+		case SPF_UNKNOWN:
+			env_put2("SPFRESULT","unknown");
+			break;
+		case SPF_NEUTRAL:
+			env_put2("SPFRESULT","neutral");
+			break;
+		case SPF_SOFTFAIL:
+			env_put2("SPFRESULT","softfail");
+			break;
+		case SPF_FAIL:
+			env_put2("SPFRESULT","fail");
+			break;
+		case SPF_ERROR:
+			env_put2("SPFRESULT","error");
+			break;
+		}
+
+		switch(r)
+		{
 		case SPF_NOMEM:
 			die_nomem();
 		case SPF_ERROR:
@@ -3836,7 +3861,8 @@ nohasvirtual:
 				die_nomem();
 			flagbarfspf = 1;
 		}
-	}
+	} else
+		env_unset("SPFRESULT");
 	if (flagbarfspf) {
 		err_spf();
 		return;
@@ -7409,6 +7435,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.268  2022-10-08 20:01:48+05:30  Cprogrammer
+ * set SPFRESULT environment variable
+ *
  * Revision 1.267  2022-10-07 18:09:39+05:30  Cprogrammer
  * fixed length of batv signkey
  *
@@ -7655,7 +7684,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.267 2022-10-07 18:09:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.268 2022-10-08 20:01:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

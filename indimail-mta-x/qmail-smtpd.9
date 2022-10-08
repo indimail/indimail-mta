@@ -78,31 +78,6 @@ capability in the EHLO greeting. Since qmail-smtpd is 8 bit clean, setting
 of SMTPUTF8 has no real consequences except for displaying this setting in
 the received headers as \fBUTF8(E)SMTP\fR.
 
-If the environment variable \fBLOGFILTER\fR is defined, \fBqmail-smtpd\fR
-will open a fifo defined by \fBLOGFILTER\fR environment variable in
-O_WRONLY mode. It will write the SMTP transaction log to the fifo. This
-makes it possible for \fBqmail-smtpd\fR to push the SMTP transaction log to
-exernal programs. Additionally, if \fBQMAILQUEUE\fR or \fBFILTERARGS\fR env
-variabels are defined, \fBqmail-smtpd\fR will make available file
-descriptor 255 to be available for writing by external programs.
-Additionally, \fBqmail-smtpd\fR will read 255 bytes on file descriptor 255.
-To use a file descriptor other than 255, use the LOGFD environment
-variable. The bytes read will be logged to stderr along with the
-transaction log. This makes it possible for programs called during the data
-phase of SMTP to send back 255 bytes of messages back to \fBqmail-smtpd\fR.
-In fact, this is used to obtain the \fBX-Bogosity\fR header from
-\fBbogofilter(1)\fR when during spam filtering. An example of a SMTP
-transaction log is as below
-.PP
-.EX
-qmail-smtpd: pid 14544 from ::ffff:127.0.0.1 HELO <indimail.org> \\
- MAIL from <newsletter_xxx@example.com> \\
- RCPT <mailstore@indimail.org> AUTH <local-rcpt> Size: 245988 \\
- X-Bogosity: No, spamicity=0.578967, cutoff=9.90e-01, ham_cutoff=0.00e+00, \\
- queueID=x18cs40485wff, msgID=<Newsletter_xxx@example.com>, \\
- ipaddr=217.73.48.143
-.EE
-
 .B qmail-smtpd
 is responsible for counting hops.
 It rejects any message with 100 or more 
@@ -123,7 +98,7 @@ supports basic help usage when you use the HELP command. You can disable
 HELP by setteing environment variable \fBDISABLE_HELP\fR
 
 .B qmail-smtpd
-includes a \'MAIL FROM:\' parameter parser and obeys \'Auth\' and \'Size\'
+includes a \'MAIL FROM:\' parameter parser and obeys \'AUTH\' and \'SIZE\'
 advertisements.
 
 .B qmail-smtpd
@@ -155,7 +130,9 @@ DISABLE_CRAM_SHA512, DISABLE_CRAM_RIPEMD, DISABLE_DIGEST_MD5,
 DISABLE_SCRAM_SHA1, DISABLE_SCRAM_SHA1_PLUS, DISABLE_SCRAM_SHA256,
 DISABLE_SCRAM_SHA256_PLUS, environment variable. If you set the environment
 variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled unless
-STARTTLS is issued or you run qmail-smtpd under SSL (port 465).
+STARTTLS is issued or you run qmail-smtpd under SSL (port 465). You may set
+\fBFORCE_TLS\fR environment variable to deny authentication, if the client
+does not provide the STARTTLS command.
 
 qmail-smtpd supports SASL - Simple Authentication and Security Layer
 framework with the GNU SASL library. For SCRAM authentication types,
@@ -221,10 +198,6 @@ advertizes AUTH capability only if
 and
 .IR checkprogram
 are passed as the minimum arguments.
-
-For additional security, you may set \fBFORCE_TLS\fR environment variable,
-for authentication
-to be denied, if the client does not provide the STARTTLS command.
 
 \fBqmail-smtpd\fR prevents unauthorized relaying and also reject mails
 addressed to invalid mailboxes. To do this, \fBqmail-smtpd\fR employs the
@@ -320,6 +293,40 @@ the control file \fIsignkey\fR or setting the environment variable
 signature in the tagged bounce address and reject the message in case the
 signature is invalid. \fBqmail-smtpd\fR(8) will also unwrap the signature
 for replies to a an address tagged by \fBqmail-remote\fR(8).
+
+\fBqmail-smtpd\fR(8) can be configured to do SPF lookup by using the
+control file \fIspfbehavior\fR. SPF lookup enables \fBqmail-smtpd\fR(8) to
+accept mails for a domain from IP addresses designated as permitted sender
+by the domain administrator. When SPF lookup is enabled, qmail-smtpd sets
+the environment variable \fBSPFRESULT\fR which contains the result of the
+SPF evaluation. You can use this variable in your filter scripts or any
+configured qmail-queue-frontend like \fBqmail-multi\fR(8),
+\fBqmail-qfilter\fR(1), \fBqfrontend\fR(1).
+
+If the environment variable \fBLOGFILTER\fR is defined, \fBqmail-smtpd\fR
+will open a fifo defined by \fBLOGFILTER\fR environment variable in
+O_WRONLY mode. It will write the SMTP transaction log to the fifo. This
+makes it possible for \fBqmail-smtpd\fR to push the SMTP transaction log to
+exernal programs. Additionally, if \fBQMAILQUEUE\fR or \fBFILTERARGS\fR env
+variabels are defined, \fBqmail-smtpd\fR will make available file
+descriptor 255 to be available for writing by external programs.
+Additionally, \fBqmail-smtpd\fR will read 255 bytes on file descriptor 255.
+To use a file descriptor other than 255, use the LOGFD environment
+variable. The bytes read will be logged to stderr along with the
+transaction log. This makes it possible for programs called during the data
+phase of SMTP to send back 255 bytes of messages back to \fBqmail-smtpd\fR.
+In fact, this is used to obtain the \fBX-Bogosity\fR header from
+\fBbogofilter(1)\fR when during spam filtering. An example of a SMTP
+transaction log is as below
+.PP
+.EX
+qmail-smtpd: pid 14544 from ::ffff:127.0.0.1 HELO <indimail.org> \\
+ MAIL from <newsletter_xxx@example.com> \\
+ RCPT <mailstore@indimail.org> AUTH <local-rcpt> Size: 245988 \\
+ X-Bogosity: No, spamicity=0.578967, cutoff=9.90e-01, ham_cutoff=0.00e+00, \\
+ queueID=x18cs40485wff, msgID=<Newsletter_xxx@example.com>, \\
+ ipaddr=217.73.48.143
+.EE
 
 .SH Database Connections
 \fBqmail-smtpd\fR uses \fBinlookup(8)\fR, instead of directly connecting to
@@ -1549,7 +1556,15 @@ will wait for writing data to inlookup for fifo query. Default: 4.
 .nr step 0 1
 Set to a value between 1 and 6 to enable SPF checks; 0 to disable. The
 contents of this file are overridden by the value of the \fBSPFBEHAVIOR\fR
-environment variable, if set.
+environment variable, if set. e.g. from tcpserver rules or setting it in
+the supervise variables directory.
+
+Values bigger than 3 are strongly discouraged, you probably want to go with
+2 or 3.
+
+Note: If RELAYCLIENT is set, SPF checks won't run at all. (This also
+includes SMTP-AUTH and similar patches)
+
 .RS 5
 .IP \n[step] 2
 disable spf check
@@ -1578,19 +1593,36 @@ encountered).
 .I spfexp
 You can add a line with a an SPF explanation that will be shown to the
 sender in case of a reject. It will override the default one. You can
-use SPF macro expansion.
+use SPF macro expansion. If a domain specifies its own explanation it is
+going to be used instead.
+
+The SMTP answer when rejecting mails will look like:
+.EX
+550 \fHthe expanded SPF explanation\fR (#5.7.1)
+.EE
 
 .TP 5
 .I spfguess
 You can add a line with SPF rules that will be checked if a sender
-domain doesn't have a SPF record. The local rules will also be used
-in this case.
+domain doesn't have a SPF record. The local spfrules are always executed
+afterwards.
+
+It is suggested to add \fHa/24 mx/24 ptr\fR.
+This isn't needed but generally gives good results (for spam filters
+scoring Received-SPF lines).
+
 
 .TP 5
 .I spfrules
-You can add a line with SPF rules that will be checked before other SPF
-rules would fail.  This can be used to always allow certain machines to
-send certain mails.
+Local rules means: Rules that are executed before the real SPF rules for a
+domain would fail (fail, softfail, neutral). This can be used to always
+allow certain machines to send certain mails.
+
+They are also executed for domains that don't publish SPF entries.
+It is suggested to add \fHinclude:spf.trusted-forwarder.org\fR.
+You can also add mechanisms to trust known mail servers like backup MX
+servers, though you should at least also use tcprules (to modify
+SPFBEHAVIOR).
 
 .TP 5
 .I spfipv6
@@ -2010,7 +2042,7 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
 mysqld(1), tcp-env(1), tcp-environ(5), tcpserver(1), tcprules(1), uacl(1),
 qmail-control(5), MCDFILE(5), qmail-inject(8), qmail-newmrh(8),
 qmail-queue(8), qmail-multi(8), qscanq(8), cleanq(8), qmail-remote(8),
-qmail-send(8), qmail-cdb(8), recipient-cdb(8), pam-multi(8),
+qmail-send(8), qmail-cdb(8), recipient-cdb(8), pam-multi(8), spfquery(1),
 pam-checkpwd(8), inlookup(8), batv(1), vchkpass(8), systpass(8),
 plugin_init(3), dlopen(3), plugtest(1), bogofilter(1), greydaemon(8),
 qmail-greyd(8), rfc-2821(5), rfc-1893(5), rfc-1894(5), rfc-1985(5),
