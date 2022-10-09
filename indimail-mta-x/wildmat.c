@@ -1,37 +1,37 @@
 /*-** wildmat.c.orig	Wed Dec  3 11:46:31 1997
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * Do shell-style pattern matching for ?, \, [], and * characters.
  * Might not be robust in face of malformed patterns; e.g., "foo[a-"
- * could cause a segmentation violation.  It is 8bit clean.
+ * could cause a segmentation violation. It is 8bit clean.
  * 
  * Written by Rich $alz, mirror!rs, Wed Nov 26 19:03:17 EST 1986.
  * Rich $alz is now <rsalz@osf.org>.
- * April, 1991:  Replaced mutually-recursive calls with in-line code
+ * April, 1991: Replaced mutually-recursive calls with in-line code
  * for the star character.
  *
  * Special thanks to Lars Mathiesen <thorinn@diku.dk> for the ABORT code.
- * This can greatly speed up failing wildcard patterns.  For example:
+ * This can greatly speed up failing wildcard patterns. For example:
  * pattern: -*-*-*-*-*-*-12-*-*-*-m-*-*-*
  * text 1:  -adobe-courier-bold-o-normal--12-120-75-75-m-70-iso8859-1
  * text 2:  -adobe-courier-bold-o-normal--12-120-75-75-X-70-iso8859-1
- * Text 1 matches with 51 calls, while text 2 fails with 54 calls.  Without
- * the ABORT code, it takes 22310 calls to fail.  Ugh.  The following
+ * Text 1 matches with 51 calls, while text 2 fails with 54 calls. Without
+ * the ABORT code, it takes 22310 calls to fail. Ugh. The following
  * explanation is from Lars:
  * The precondition that must be fulfilled is that DoMatch will consume
- * at least one character in text.  This is true if *p is neither '*' no
- * '\0'.)  The last return has ABORT instead of FALSE to avoid quadratic
- * behaviour in cases like pattern "*a*b*c*d" with text "abcxxxxx".  With
+ * at least one character in text. This is true if *p is neither '*' no
+ * '\0'.) The last return has ABORT instead of FALSE to avoid quadratic
+ * behaviour in cases like pattern "*a*b*c*d" with text "abcxxxxx". With
  * FALSE, each star-loop has to run to the end of the text; with ABORT
  * only the last one does.
  * 
  * Once the control of one instance of DoMatch enters the star-loop, that
  * instance will return either TRUE or ABORT, and any calling instance
  * will therefore return immediately after (without calling recursively
- * again).  In effect, only one star-loop is ever active.  It would be
+ * again). In effect, only one star-loop is ever active. It would be
  * possible to modify the code to maintain this context explicitly,
  * eliminating all recursive calls at the cost of some complication and
  * loss of clarity (and the ABORT stuff seems to be unclear enough by
- * itself).  I think it would be unwise to try to get this into a
+ * itself). I think it would be unwise to try to get this into a
  * released version unless you have a good test data base to try it out
  * on.
  */
@@ -39,16 +39,13 @@
 
 /*- Match text and p, return TRUE, FALSE, or ABORT.  */
 static int
-DoMatch(text, p)
-	register char  *text;
-	register char  *p;
+DoMatch(register char *text, register char *p)
 {
 	register int    last;
 	register int    matched;
 	register int    reverse;
 
-	for (; *p; text++, p++)
-	{
+	for (; *p; text++, p++) {
 		if (*text == '\0' && *p != '*')
 			return ABORT;
 		switch (*p)
@@ -79,13 +76,11 @@ DoMatch(text, p)
 			if (reverse)
 				p++;
 			matched = FALSE;
-			if (p[1] == ']' || p[1] == '-')
-			{
+			if (p[1] == ']' || p[1] == '-') {
 				if (*++p == *text)
 					matched = TRUE;
 			}
-			for (last = *p; *++p && *p != ']'; last = *p)
-			{
+			for (last = *p; *++p && *p != ']'; last = *p) {
 				/*- This next line requires a good C compiler.  */
 				if (*p == '-' && p[1] != ']' ? *text <= *++p && *text >= last : *text == *p)
 					matched = TRUE;
@@ -99,16 +94,13 @@ DoMatch(text, p)
 #ifdef	MATCH_TAR_PATTERN
 	if (*text == '/')
 		return TRUE;
-#endif /*- MATCH_TAR_ATTERN */
+#endif /*- MATCH_TAR_PATTERN */
 	return *text == '\0';
 }
 
-
 /*- User-level routine.  Returns TRUE or FALSE.  */
 int
-wildmat_internal(text, p)
-	char           *text;
-	char           *p;
+wildmat_internal(char *text, char *p)
 {
 #ifdef	OPTIMIZE_JUST_STAR
 	if (p[0] == '*' && p[1] == '\0')
@@ -118,8 +110,8 @@ wildmat_internal(text, p)
 }
 
 #if	defined(TEST)
-include < stdio.h >
-/*- Yes, we use gets not fgets.  Sue me.  */
+include <stdio.h>
+/*- Yes, we use gets not fgets. Sue me.  */
 
 int
 main()
@@ -130,14 +122,12 @@ main()
 	printf("Wildmat tester.  Enter pattern, then strings to test.\n");
 	printf("A blank line gets prompts for a new pattern; a blank pattern\n");
 	printf("exits the program.\n");
-	for (;;)
-	{
+	for (;;) {
 		printf("\nEnter pattern:  ");
 		(void) fflush(stdout);
 		if (gets(p) == NULL || p[0] == '\0')
 			break;
-		for (;;)
-		{
+		for (;;) {
 			printf("Enter text:  ");
 			(void) fflush(stdout);
 			if (gets(text) == NULL)
@@ -156,7 +146,7 @@ main()
 void
 getversion_wildmat_internal_c()
 {
-	static char    *x = "$Id: wildmat.c,v 1.7 2021-05-23 06:36:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: wildmat.c,v 1.8 2022-10-09 23:04:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
