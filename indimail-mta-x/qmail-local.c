@@ -1,109 +1,5 @@
 /*
- * $Log: qmail-local.c,v $
- * Revision 1.43  2022-04-04 14:25:39+05:30  Cprogrammer
- * added setting of fdatasync() instead of fsync()
- *
- * Revision 1.42  2022-03-31 00:08:28+05:30  Cprogrammer
- * replaced fsync() with fdatasync()
- *
- * Revision 1.41  2022-01-30 08:40:26+05:30  Cprogrammer
- * make USE_FSYNC, USE_SYNCDIR consistent across programs
- *
- * Revision 1.40  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.39  2021-06-12 18:19:53+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.38  2021-06-01 10:05:39+05:30  Cprogrammer
- * replaced myctime() with libqmail qtime()
- *
- * Revision 1.37  2021-05-16 23:02:33+05:30  Cprogrammer
- * move out maildir delivery to maildir_deliver.c
- *
- * Revision 1.36  2021-05-16 17:17:04+05:30  Cprogrammer
- * added S=message_size in filename
- *
- * Revision 1.35  2020-11-24 13:46:55+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.34  2020-10-06 14:29:27+05:30  Cprogrammer
- * fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
- *
- * Revision 1.33  2020-09-30 20:39:16+05:30  Cprogrammer
- * Darwin port for syncdir
- *
- * Revision 1.32  2020-09-15 21:08:02+05:30  Cprogrammer
- * changed default value of use_fsync to -1
- *
- * Revision 1.31  2020-05-19 10:34:49+05:30  Cprogrammer
- * avoid race creating file in Maildir/tmp
- *
- * Revision 1.30  2020-05-15 10:42:52+05:30  Cprogrammer
- * use unsigned variables for array offsets of cmds variable
- *
- * Revision 1.29  2020-05-11 11:09:17+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.28  2017-03-10 11:26:36+05:30  Cprogrammer
- * no of duplicate Delivered-To configurable in maxdeliveredto control file
- *
- * Revision 1.27  2015-08-24 19:07:43+05:30  Cprogrammer
- * moved fmt_xlong() to separate source fmt_xlong.c
- *
- * Revision 1.26  2014-01-22 20:38:24+05:30  Cprogrammer
- * added hassrs.h
- *
- * Revision 1.25  2013-08-27 08:19:48+05:30  Cprogrammer
- * use sticky bit definition from header file
- *
- * Revision 1.24  2013-08-25 18:38:00+05:30  Cprogrammer
- * added SRS
- *
- * Revision 1.23  2011-07-07 19:55:08+05:30  Cprogrammer
- * added branch logic
- *
- * Revision 1.22  2010-08-09 18:30:41+05:30  Cprogrammer
- * use different archival rules for forwarding/aliases to prevent duplication
- * when sending to groups
- *
- * Revision 1.21  2010-07-16 14:12:15+05:30  Cprogrammer
- * formatted code and comments
- *
- * Revision 1.20  2009-12-05 20:07:40+05:30  Cprogrammer
- * ansic conversion
- *
- * Revision 1.19  2008-11-15 17:08:17+05:30  Cprogrammer
- * added localdomains control file
- *
- * Revision 1.18  2005-04-05 12:02:29+05:30  Cprogrammer
- * fix buffer overflow and made maildir file creation collision proof
- *
- * Revision 1.17  2005-03-24 20:03:26+05:30  Cprogrammer
- * removed useless code for sync
- *
- * Revision 1.16  2005-03-24 09:04:12+05:30  Cprogrammer
- * added Hack to force directory sync after link
- *
- * Revision 1.15  2004-10-22 20:28:23+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.14  2004-10-22 15:36:54+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.13  2004-10-11 23:56:41+05:30  Cprogrammer
- * set QQEH for mail forwarding
- *
- * Revision 1.12  2004-08-14 02:25:04+05:30  Cprogrammer
- * set QQEH only when executing another program
- *
- * Revision 1.11  2004-07-27 22:58:40+05:30  Cprogrammer
- * usage change for qqeh
- *
- * Revision 1.10  2004-07-17 21:20:40+05:30  Cprogrammer
- * added qqeh code
- * added RCS log
- *
+ * $Id: qmail-local.c,v 1.44 2022-10-09 23:05:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -166,7 +62,7 @@ static stralloc foo = { 0 };
 no_return void
 usage()
 {
-	strerr_die1x(100, "qmail-local: usage: qmail-local [ -nN ] user homedir local dash ext domain sender aliasempty qqeh");
+	strerr_die1x(100, "qmail-local: usage: qmail-local [ -nN ] user homedir local dash ext domain sender defaultdelivery qqeh");
 }
 
 no_return void
@@ -493,11 +389,11 @@ checkhome(char *home_dir)
 		else
 			strerr_warn1("Warning: home directory is sticky.", 0);
 	}
-	if (!env_get("LOCALDOMAINS") && stat(".localdomains", &st))
+	if (env_get("LOCALDOMAINS") || !access(".localdomains", F_OK)) {
+		if ((ldmok = control_readfile(&ldm, "localdomains", 0)) == -1)
+			strerr_die1x(111, "Unable to read control file [localdomains]. (#4.3.0)");
+	} else
 		ldmok = 0;
-	else
-	if ((ldmok = control_readfile(&ldm, "localdomains", 0)) == -1)
-		strerr_die1x(111, "Unable to read control file [localdomains]. (#4.3.0)");
 	if (ldmok) {
 		stralloc        sas = {0};
 		int             j, len;
@@ -509,7 +405,7 @@ checkhome(char *home_dir)
 			if (!stralloc_copys(&sas, sender + j + 1))
 				temp_nomem();
 			if (!constmap(&mapldm, sas.s, sas.len))
-				strerr_die1x(100, "This email address doesn't accept mails from remote domains. (#4.2.1)");
+				strerr_die1x(100, "This email address doesn't accept mails from remote domains. (#5.2.1)");
 		}
 	}
 }
@@ -553,7 +449,7 @@ qmeexists(int *fd, int *cutable)
 	if ((st.st_mode & S_IFMT) == S_IFREG) {
 		if (st.st_mode & auto_patrn)
 			strerr_die1x(111, "Uh-oh: .qmail file is writable. (#4.7.0)");
-		*cutable = !!(st.st_mode & 0100);
+		*cutable = !!(st.st_mode & 0100); /*- executable bit */
 		return 1;
 	}
 	close(*fd);
@@ -561,13 +457,15 @@ qmeexists(int *fd, int *cutable)
 }
 
 
-/* "" "": "" */
-/* "-/" "": "-/" "-/default" */
-/* "-/" "a": "-/a" "-/default" */
-/* "-/" "a-": "-/a-" "-/a-default" "-/default" */
-/* "-/" "a-b": "-/a-b" "-/a-default" "-/default" */
-/* "-/" "a-b-": "-/a-b-" "-/a-b-default" "-/a-default" "-/default" */
-/* "-/" "a-b-c": "-/a-b-c" "-/a-b-default" "-/a-default" "-/default" */
+/*-
+ * "" "": ""
+ * "-/" "": "-/" "-/default"
+ * "-/" "a": "-/a" "-/default"
+ * "-/" "a-": "-/a-" "-/a-default" "-/default"
+ * "-/" "a-b": "-/a-b" "-/a-default" "-/default"
+ * "-/" "a-b-": "-/a-b-" "-/a-b-default" "-/a-default" "-/default"
+ * "-/" "a-b-c": "-/a-b-c" "-/a-b-default" "-/a-default" "-/default"
+ */
 
 void
 qmesearch(int *fd, int *cutable)
@@ -583,6 +481,7 @@ qmesearch(int *fd, int *cutable)
 			i = safeext.len - 7;
 			if (!byte_diff("default", 7, safeext.s + i)) {
 				if (i <= str_len(ext)) { /*- paranoia */
+					/*- set env variable DEFAULT for fastforward */
 					if (!env_put2("DEFAULT", ext + i))
 						temp_nomem();
 				}
@@ -598,9 +497,11 @@ qmesearch(int *fd, int *cutable)
 					|| !stralloc_cats(&qme, "default"))
 				temp_nomem();
 			if (qmeexists(fd, cutable)) {
-				if (i <= str_len(ext))	/*- paranoia */
+				if (i <= str_len(ext)) {/*- paranoia */
+					/*- set env variable DEFAULT for fastforward */
 					if (!env_put2("DEFAULT", ext + i))
 						temp_nomem();
+				}
 				return;
 			}
 		}
@@ -976,8 +877,120 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.43 2022-04-04 14:25:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.44 2022-10-09 23:05:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
 }
+
+/*
+ * $Log: qmail-local.c,v $
+ * Revision 1.44  2022-10-09 23:05:44+05:30  Cprogrammer
+ * added comments for fastforward usage
+ * fixed localdomains restricted delivery
+ *
+ * Revision 1.43  2022-04-04 14:25:39+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
+ * Revision 1.42  2022-03-31 00:08:28+05:30  Cprogrammer
+ * replaced fsync() with fdatasync()
+ *
+ * Revision 1.41  2022-01-30 08:40:26+05:30  Cprogrammer
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ *
+ * Revision 1.40  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.39  2021-06-12 18:19:53+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.38  2021-06-01 10:05:39+05:30  Cprogrammer
+ * replaced myctime() with libqmail qtime()
+ *
+ * Revision 1.37  2021-05-16 23:02:33+05:30  Cprogrammer
+ * move out maildir delivery to maildir_deliver.c
+ *
+ * Revision 1.36  2021-05-16 17:17:04+05:30  Cprogrammer
+ * added S=message_size in filename
+ *
+ * Revision 1.35  2020-11-24 13:46:55+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.34  2020-10-06 14:29:27+05:30  Cprogrammer
+ * fixed bug with loopcounter in qmail-local.c - initialized maxdeliveredto
+ *
+ * Revision 1.33  2020-09-30 20:39:16+05:30  Cprogrammer
+ * Darwin port for syncdir
+ *
+ * Revision 1.32  2020-09-15 21:08:02+05:30  Cprogrammer
+ * changed default value of use_fsync to -1
+ *
+ * Revision 1.31  2020-05-19 10:34:49+05:30  Cprogrammer
+ * avoid race creating file in Maildir/tmp
+ *
+ * Revision 1.30  2020-05-15 10:42:52+05:30  Cprogrammer
+ * use unsigned variables for array offsets of cmds variable
+ *
+ * Revision 1.29  2020-05-11 11:09:17+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.28  2017-03-10 11:26:36+05:30  Cprogrammer
+ * no of duplicate Delivered-To configurable in maxdeliveredto control file
+ *
+ * Revision 1.27  2015-08-24 19:07:43+05:30  Cprogrammer
+ * moved fmt_xlong() to separate source fmt_xlong.c
+ *
+ * Revision 1.26  2014-01-22 20:38:24+05:30  Cprogrammer
+ * added hassrs.h
+ *
+ * Revision 1.25  2013-08-27 08:19:48+05:30  Cprogrammer
+ * use sticky bit definition from header file
+ *
+ * Revision 1.24  2013-08-25 18:38:00+05:30  Cprogrammer
+ * added SRS
+ *
+ * Revision 1.23  2011-07-07 19:55:08+05:30  Cprogrammer
+ * added branch logic
+ *
+ * Revision 1.22  2010-08-09 18:30:41+05:30  Cprogrammer
+ * use different archival rules for forwarding/aliases to prevent duplication
+ * when sending to groups
+ *
+ * Revision 1.21  2010-07-16 14:12:15+05:30  Cprogrammer
+ * formatted code and comments
+ *
+ * Revision 1.20  2009-12-05 20:07:40+05:30  Cprogrammer
+ * ansic conversion
+ *
+ * Revision 1.19  2008-11-15 17:08:17+05:30  Cprogrammer
+ * added localdomains control file
+ *
+ * Revision 1.18  2005-04-05 12:02:29+05:30  Cprogrammer
+ * fix buffer overflow and made maildir file creation collision proof
+ *
+ * Revision 1.17  2005-03-24 20:03:26+05:30  Cprogrammer
+ * removed useless code for sync
+ *
+ * Revision 1.16  2005-03-24 09:04:12+05:30  Cprogrammer
+ * added Hack to force directory sync after link
+ *
+ * Revision 1.15  2004-10-22 20:28:23+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.14  2004-10-22 15:36:54+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.13  2004-10-11 23:56:41+05:30  Cprogrammer
+ * set QQEH for mail forwarding
+ *
+ * Revision 1.12  2004-08-14 02:25:04+05:30  Cprogrammer
+ * set QQEH only when executing another program
+ *
+ * Revision 1.11  2004-07-27 22:58:40+05:30  Cprogrammer
+ * usage change for qqeh
+ *
+ * Revision 1.10  2004-07-17 21:20:40+05:30  Cprogrammer
+ * added qqeh code
+ * added RCS log
+ *
+ */
