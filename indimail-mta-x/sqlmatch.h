@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.h,v $
+ * Revision 1.7  2022-10-09 23:02:35+05:30  Cprogrammer
+ * removed function check_db()
+ *
  * Revision 1.6  2021-02-27 20:59:49+05:30  Cprogrammer
  * changed error to warning for missing MySQL libs
  *
@@ -47,7 +50,6 @@
 #ifdef HAS_MYSQL
 extern int      create_sqltable(MYSQL *, char *, char **);
 extern int      connect_sqldb(char *, MYSQL **, char **, char **);
-extern int      check_db(MYSQL *, char *, unsigned long *, unsigned long *, char **);
 #endif
 extern int      sqlmatch(char *, char *, int, char **);
 extern void     sqlmatch_close_db(void);

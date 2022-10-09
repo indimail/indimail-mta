@@ -1,47 +1,5 @@
 /*
- * $Log: sqlmatch.c,v $
- * Revision 1.13  2021-02-27 20:59:46+05:30  Cprogrammer
- * changed error to warning for missing MySQL libs
- *
- * Revision 1.12  2020-04-09 16:03:16+05:30  Cprogrammer
- * removed not needed arguments to check_db()
- *
- * Revision 1.11  2019-04-20 19:53:13+05:30  Cprogrammer
- * load MySQL library dynamically
- *
- * Revision 1.10  2018-02-11 21:21:16+05:30  Cprogrammer
- * use USE_SQL to compile sql support
- *
- * Revision 1.9  2018-01-09 12:36:24+05:30  Cprogrammer
- * replaced #ifdef INDIMAIL with #ifdef HAS_MYSQL
- *
- * Revision 1.8  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.7  2010-04-19 10:19:44+05:30  Cprogrammer
- * fixed setting MYSQL_OPT_CONNECT_TIMEOUT
- * make query work for MySQL server without NO_BACKSLASH_ESCAPES
- * changes for qmail-sql
- *
- * Revision 1.6  2009-09-07 15:33:31+05:30  Cprogrammer
- * renamed create_table(), connect_db() to avoid clash with indimail
- *
- * Revision 1.5  2009-09-07 13:55:41+05:30  Cprogrammer
- * enable compilation without indimail
- *
- * Revision 1.4  2009-05-01 12:41:32+05:30  Cprogrammer
- * return error for create_table()
- *
- * Revision 1.3  2009-05-01 10:44:39+05:30  Cprogrammer
- * added errstr argument to sqlmatch()
- * use constants from qregex.h for returning errors
- *
- * Revision 1.2  2009-04-30 18:51:39+05:30  Cprogrammer
- * return no match if filename is null
- *
- * Revision 1.1  2009-04-30 15:34:07+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: sqlmatch.c,v 1.14 2022-10-09 23:02:04+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef USE_SQL
 #include "hasmysql.h"
@@ -297,8 +255,8 @@ create_sqltable(MYSQL *conn, char *table_name, char **error)
 	return (0);
 }
 
-int
-check_db(MYSQL *conn, char *addr, unsigned long *row_count, unsigned long *tmval, char **errStr)
+static int
+query_db(MYSQL *conn, char *addr, unsigned long *row_count, unsigned long *tmval, char **errStr)
 {
 
 	MYSQL_RES      *res;
@@ -395,7 +353,7 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 		return (0);
 	if ((cntrl_ok = connect_sqldb(controlfile.s, &conn, 0, errStr)) < 0)
 		return (cntrl_ok);
-	if ((cntrl_ok = check_db(conn, addr, 0, 0, errStr)) < 0)
+	if ((cntrl_ok = query_db(conn, addr, 0, 0, errStr)) < 0)
 		return (cntrl_ok);
 	return (cntrl_ok ? 1 : 0);
 }
@@ -434,7 +392,57 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.13 2021-02-27 20:59:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sqlmatch.c,v 1.14 2022-10-09 23:02:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: sqlmatch.c,v $
+ * Revision 1.14  2022-10-09 23:02:04+05:30  Cprogrammer
+ * renamed check_db() to query_db()
+ * moved RCS log to bottom
+ *
+ * Revision 1.13  2021-02-27 20:59:46+05:30  Cprogrammer
+ * changed error to warning for missing MySQL libs
+ *
+ * Revision 1.12  2020-04-09 16:03:16+05:30  Cprogrammer
+ * removed not needed arguments to check_db()
+ *
+ * Revision 1.11  2019-04-20 19:53:13+05:30  Cprogrammer
+ * load MySQL library dynamically
+ *
+ * Revision 1.10  2018-02-11 21:21:16+05:30  Cprogrammer
+ * use USE_SQL to compile sql support
+ *
+ * Revision 1.9  2018-01-09 12:36:24+05:30  Cprogrammer
+ * replaced #ifdef INDIMAIL with #ifdef HAS_MYSQL
+ *
+ * Revision 1.8  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.7  2010-04-19 10:19:44+05:30  Cprogrammer
+ * fixed setting MYSQL_OPT_CONNECT_TIMEOUT
+ * make query work for MySQL server without NO_BACKSLASH_ESCAPES
+ * changes for qmail-sql
+ *
+ * Revision 1.6  2009-09-07 15:33:31+05:30  Cprogrammer
+ * renamed create_table(), connect_db() to avoid clash with indimail
+ *
+ * Revision 1.5  2009-09-07 13:55:41+05:30  Cprogrammer
+ * enable compilation without indimail
+ *
+ * Revision 1.4  2009-05-01 12:41:32+05:30  Cprogrammer
+ * return error for create_table()
+ *
+ * Revision 1.3  2009-05-01 10:44:39+05:30  Cprogrammer
+ * added errstr argument to sqlmatch()
+ * use constants from qregex.h for returning errors
+ *
+ * Revision 1.2  2009-04-30 18:51:39+05:30  Cprogrammer
+ * return no match if filename is null
+ *
+ * Revision 1.1  2009-04-30 15:34:07+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
