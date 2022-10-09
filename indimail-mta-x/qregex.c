@@ -1,108 +1,11 @@
 /*
- * $Log: qregex.c,v $
- * Revision 1.31  2021-05-23 07:11:06+05:30  Cprogrammer
- * include wildmat.h for wildmat_internal
- *
- * Revision 1.30  2020-09-16 19:06:06+05:30  Cprogrammer
- * FreeBSD fix
- *
- * Revision 1.29  2020-04-09 16:01:17+05:30  Cprogrammer
- * collapsed multiple stralloc statements
- *
- * Revision 1.28  2018-07-02 00:31:24+05:30  Cprogrammer
- * use addr->len - 1 instead of str_len(addr->s)
- *
- * Revision 1.27  2018-02-11 21:21:05+05:30  Cprogrammer
- * use USE_SQL to compile sql support
- *
- * Revision 1.26  2018-01-09 11:55:42+05:30  Cprogrammer
- * compile sql code with USE_MYSQL definition
- *
- * Revision 1.25  2016-06-14 09:10:09+05:30  Cprogrammer
- * updated with original authors and maintainers
- *
- * Revision 1.24  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.23  2009-09-07 16:02:31+05:30  Cprogrammer
- * removed compilation warning
- *
- * Revision 1.22  2009-09-07 13:56:06+05:30  Cprogrammer
- * disable sqlmatch() if INDIMAIL is not defined
- *
- * Revision 1.21  2009-05-01 10:45:58+05:30  Cprogrammer
- * added errstr argument to matchregex(), cdbmatch(), sqlmatch()
- * use constants from qregex.h when returning errors
- *
- * Revision 1.20  2009-04-30 18:50:57+05:30  Cprogrammer
- * functions cdbmatch() and sqlmatch() not to be invoked if filename is null
- *
- * Revision 1.19  2009-04-30 16:14:28+05:30  Cprogrammer
- * moved out matchregex() function
- * conditional compilation of sqlmatch()
- *
- * Revision 1.18  2009-04-30 15:41:03+05:30  Cprogrammer
- * added sqlmatch() for qmail control files in MySQL
- *
- * Revision 1.17  2009-04-30 11:47:37+05:30  Cprogrammer
- * added cdbmatch() function
- *
- * Revision 1.16  2009-04-29 10:56:25+05:30  Cprogrammer
- * use str_len() for key length
- *
- * Revision 1.15  2009-04-29 08:59:31+05:30  Cprogrammer
- * added function to search cdb
- *
- * Revision 1.14  2009-04-29 08:23:29+05:30  Cprogrammer
- * simplified wildmat_match() and regexec_match()
- *
- * Revision 1.13  2007-12-20 13:51:04+05:30  Cprogrammer
- * removed compiler warning
- *
- * Revision 1.12  2005-08-23 17:41:36+05:30  Cprogrammer
- * regex to be turned on only of QREGEX is defined to non-zero value
- *
- * Revision 1.11  2005-04-02 19:07:25+05:30  Cprogrammer
- * use internal wildmat version
- *
- * Revision 1.10  2005-01-22 00:39:04+05:30  Cprogrammer
- * added missing error handling
- *
- * Revision 1.9  2004-10-22 20:29:45+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.8  2004-09-21 23:48:18+05:30  Cprogrammer
- * made matchregex() visible
- * introduced dotChar (configurable dot char)
- *
- * Revision 1.7  2004-02-05 18:48:48+05:30  Cprogrammer
- * changed curregex to static
- *
- * Revision 1.6  2003-12-23 23:22:53+05:30  Cprogrammer
- * implicitly use wildcard if address starts with '@'
- *
- * Revision 1.5  2003-12-22 18:33:12+05:30  Cprogrammer
- * added address_match()
- *
- * Revision 1.4  2003-12-22 13:21:08+05:30  Cprogrammer
- * added text and pattern as part of error message
- *
- * Revision 1.3  2003-12-22 10:04:04+05:30  Cprogrammer
- * conditional compilation of qregex
- *
- * Revision 1.2  2003-12-21 15:32:18+05:30  Cprogrammer
- * added regerror
- *
- * Revision 1.1  2003-12-20 13:17:16+05:30  Cprogrammer
- * Initial revision
+ * $Id: qregex.c,v 1.32 2022-10-09 23:00:03+05:30 Cprogrammer Exp mbhangui $
  *
  * qregex (v2)
- * $Id: qregex.c,v 1.31 2021-05-23 07:11:06+05:30 Cprogrammer Exp mbhangui $
- *
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2021-05-23 07:11:06+05:30 $
- * Revision: $Revision: 1.31 $
+ * Modified: $Date: 2022-10-09 23:00:03+05:30 $
+ * Revision: $Revision: 1.32 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -138,7 +41,6 @@
  * Note: this revision follows the coding guidelines set forth by the rest of
  *       the qmail code and that described at the following URL.
  *       http://cr.yp.to/qmail/guarantee.html
- * 
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -339,8 +241,110 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.31 2021-05-23 07:11:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.32 2022-10-09 23:00:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
 }
+
+/*
+ * $Log: qregex.c,v $
+ * Revision 1.32  2022-10-09 23:00:03+05:30  Cprogrammer
+ * moved RCS log to bottom
+ *
+ * Revision 1.31  2021-05-23 07:11:06+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
+ * Revision 1.30  2020-09-16 19:06:06+05:30  Cprogrammer
+ * FreeBSD fix
+ *
+ * Revision 1.29  2020-04-09 16:01:17+05:30  Cprogrammer
+ * collapsed multiple stralloc statements
+ *
+ * Revision 1.28  2018-07-02 00:31:24+05:30  Cprogrammer
+ * use addr->len - 1 instead of str_len(addr->s)
+ *
+ * Revision 1.27  2018-02-11 21:21:05+05:30  Cprogrammer
+ * use USE_SQL to compile sql support
+ *
+ * Revision 1.26  2018-01-09 11:55:42+05:30  Cprogrammer
+ * compile sql code with USE_MYSQL definition
+ *
+ * Revision 1.25  2016-06-14 09:10:09+05:30  Cprogrammer
+ * updated with original authors and maintainers
+ *
+ * Revision 1.24  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.23  2009-09-07 16:02:31+05:30  Cprogrammer
+ * removed compilation warning
+ *
+ * Revision 1.22  2009-09-07 13:56:06+05:30  Cprogrammer
+ * disable sqlmatch() if INDIMAIL is not defined
+ *
+ * Revision 1.21  2009-05-01 10:45:58+05:30  Cprogrammer
+ * added errstr argument to matchregex(), cdbmatch(), sqlmatch()
+ * use constants from qregex.h when returning errors
+ *
+ * Revision 1.20  2009-04-30 18:50:57+05:30  Cprogrammer
+ * functions cdbmatch() and sqlmatch() not to be invoked if filename is null
+ *
+ * Revision 1.19  2009-04-30 16:14:28+05:30  Cprogrammer
+ * moved out matchregex() function
+ * conditional compilation of sqlmatch()
+ *
+ * Revision 1.18  2009-04-30 15:41:03+05:30  Cprogrammer
+ * added sqlmatch() for qmail control files in MySQL
+ *
+ * Revision 1.17  2009-04-30 11:47:37+05:30  Cprogrammer
+ * added cdbmatch() function
+ *
+ * Revision 1.16  2009-04-29 10:56:25+05:30  Cprogrammer
+ * use str_len() for key length
+ *
+ * Revision 1.15  2009-04-29 08:59:31+05:30  Cprogrammer
+ * added function to search cdb
+ *
+ * Revision 1.14  2009-04-29 08:23:29+05:30  Cprogrammer
+ * simplified wildmat_match() and regexec_match()
+ *
+ * Revision 1.13  2007-12-20 13:51:04+05:30  Cprogrammer
+ * removed compiler warning
+ *
+ * Revision 1.12  2005-08-23 17:41:36+05:30  Cprogrammer
+ * regex to be turned on only of QREGEX is defined to non-zero value
+ *
+ * Revision 1.11  2005-04-02 19:07:25+05:30  Cprogrammer
+ * use internal wildmat version
+ *
+ * Revision 1.10  2005-01-22 00:39:04+05:30  Cprogrammer
+ * added missing error handling
+ *
+ * Revision 1.9  2004-10-22 20:29:45+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.8  2004-09-21 23:48:18+05:30  Cprogrammer
+ * made matchregex() visible
+ * introduced dotChar (configurable dot char)
+ *
+ * Revision 1.7  2004-02-05 18:48:48+05:30  Cprogrammer
+ * changed curregex to static
+ *
+ * Revision 1.6  2003-12-23 23:22:53+05:30  Cprogrammer
+ * implicitly use wildcard if address starts with '@'
+ *
+ * Revision 1.5  2003-12-22 18:33:12+05:30  Cprogrammer
+ * added address_match()
+ *
+ * Revision 1.4  2003-12-22 13:21:08+05:30  Cprogrammer
+ * added text and pattern as part of error message
+ *
+ * Revision 1.3  2003-12-22 10:04:04+05:30  Cprogrammer
+ * conditional compilation of qregex
+ *
+ * Revision 1.2  2003-12-21 15:32:18+05:30  Cprogrammer
+ * added regerror
+ *
+ * Revision 1.1  2003-12-20 13:17:16+05:30  Cprogrammer
+ * Initial revision
+ */
