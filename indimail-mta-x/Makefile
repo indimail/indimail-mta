@@ -1108,6 +1108,7 @@ syncdir.h maildir_deliver.h conf-sync conf-mailarch
 qmail-local.8:\
 qmail-local.9 conf-sysconfdir
 	cat qmail-local.9 \
+	| sed s}@qmaildir\@}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-local.8
 
@@ -2505,7 +2506,7 @@ compile triggerpull.c triggerpull.h
 
 wildmat.o: \
 compile wildmat.c
-	./compile -DOPTIMIZE_JUST_STAR wildmat.c
+	./compile wildmat.c
 
 variables.o: \
 compile variables.c variables.h haveip6.h conf-ip
