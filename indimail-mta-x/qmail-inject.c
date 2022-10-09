@@ -1,139 +1,5 @@
 /*
- * $Log: qmail-inject.c,v $
- * Revision 1.47  2022-04-03 18:46:17+05:30  Cprogrammer
- * bypass set_environment if FASTQUEUE env variable is set
- *
- * Revision 1.46  2022-03-27 20:10:47+05:30  Cprogrammer
- * display system error when qmail_open() fails
- *
- * Revision 1.45  2022-01-30 08:39:45+05:30  Cprogrammer
- * allow disabling of databytes check
- *
- * Revision 1.44  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.43  2021-07-15 09:22:02+05:30  Cprogrammer
- * removed unused function
- *
- * Revision 1.42  2021-07-05 21:27:47+05:30  Cprogrammer
- * allow processing $HOME/.defaultqueue for root
- *
- * Revision 1.41  2021-06-15 11:55:01+05:30  Cprogrammer
- * moved token822.h to libqmail
- *
- * Revision 1.40  2021-05-27 11:25:45+05:30  Cprogrammer
- * removed spam ignore code
- *
- * Revision 1.39  2021-05-23 07:10:48+05:30  Cprogrammer
- * include wildmat.h for wildmat_internal
- *
- * Revision 1.38  2021-05-13 14:44:07+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.37  2021-05-12 15:49:24+05:30  Cprogrammer
- * removed redundant initialization
- *
- * Revision 1.36  2021-04-29 12:04:00+05:30  Cprogrammer
- * use 'n' option in QMAILINJECT env variable to print message rather than queue
- *
- * Revision 1.35  2020-11-24 13:46:52+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.34  2020-11-22 23:12:03+05:30  Cprogrammer
- * removed supression of ANSI C proto
- *
- * Revision 1.33  2020-05-10 17:46:59+05:30  Cprogrammer
- * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
- *
- * Revision 1.32  2020-04-04 11:53:24+05:30  Cprogrammer
- * use auto_sysconfdir instead of auto_qmail
- *
- * Revision 1.31  2020-04-03 22:09:46+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.30  2019-07-08 16:09:39+05:30  Cprogrammer
- * to not parse mail header in qmail-inject if -a is given
- *
- * Revision 1.29  2018-05-01 01:42:41+05:30  Cprogrammer
- * indented code
- *
- * Revision 1.28  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.27  2014-01-29 14:02:54+05:30  Cprogrammer
- * made domainqueue file configurable through env variable DOMAINQUEUE
- *
- * Revision 1.26  2014-01-22 20:38:19+05:30  Cprogrammer
- * added hassrs.h
- *
- * Revision 1.25  2013-11-21 15:40:52+05:30  Cprogrammer
- * added domainqueue functionality
- *
- * Revision 1.24  2013-08-25 18:37:55+05:30  Cprogrammer
- * added SRS
- *
- * Revision 1.23  2011-07-28 19:39:08+05:30  Cprogrammer
- * chdir to home after envdir_set()
- *
- * Revision 1.22  2010-06-08 22:00:27+05:30  Cprogrammer
- * use envdir_set() on queuedefault to set default queue parameters
- *
- * Revision 1.21  2010-01-20 09:25:09+05:30  Cprogrammer
- * corrected error message
- *
- * Revision 1.20  2009-09-08 12:33:51+05:30  Cprogrammer
- * removed dependency of indimail on qmail-inject
- *
- * Revision 1.19  2009-08-13 19:08:00+05:30  Cprogrammer
- * code beautified
- *
- * Revision 1.18  2009-05-01 10:40:58+05:30  Cprogrammer
- * added errstr argument to envrules()
- *
- * Revision 1.17  2009-04-14 11:31:09+05:30  Cprogrammer
- * added maxrecipient check
- *
- * Revision 1.16  2008-06-12 08:39:27+05:30  Cprogrammer
- * added rulesfile argument
- *
- * Revision 1.15  2007-12-20 12:47:04+05:30  Cprogrammer
- * removed compiler warnings
- *
- * Revision 1.14  2005-08-23 17:33:49+05:30  Cprogrammer
- * added case 's' for deleting sender
- *
- * Revision 1.13  2005-04-02 23:03:17+05:30  Cprogrammer
- * replaced wildmat with wildmat_internal
- *
- * Revision 1.12  2004-10-22 20:28:21+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.11  2004-10-11 23:59:48+05:30  Cprogrammer
- * include sgetopt.h after unistd.h
- * use control_readulong() instead of control_readint()
- *
- * Revision 1.10  2004-05-23 22:17:50+05:30  Cprogrammer
- * added envrules filename as argument
- *
- * Revision 1.9  2004-02-05 18:47:21+05:30  Cprogrammer
- * replaced qforward with envrules
- *
- * Revision 1.8  2003-12-15 13:50:06+05:30  Cprogrammer
- * renamed QMAILFILTER to SPAMFILTER
- *
- * Revision 1.7  2003-12-07 13:03:31+05:30  Cprogrammer
- * added spamignore and spamignorepatterns
- *
- * Revision 1.6  2003-10-23 01:23:41+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.5  2003-10-03 11:47:46+05:30  Cprogrammer
- * changed puts() to myputs() to avoid conflict in stdio.h
- * added qforward() code
- *
- * Revision 1.4  2002-10-08 20:35:06+05:30  Cprogrammer
- * added databytes control check
- *
+ * $Id: qmail-inject.c,v 1.48 2022-10-09 22:57:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -173,7 +39,6 @@
 #include "srs.h"
 #endif
 #include "set_environment.h"
-#include "wildmat.h"
 
 #define FATAL "qmail-inject: fatal: "
 #define WARN  "qmail-inject: warn: "
@@ -1210,8 +1075,149 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.47 2022-04-03 18:46:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.48 2022-10-09 22:57:14+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidwildmath;
 	x++;
 }
+
+/*
+ * $Log: qmail-inject.c,v $
+ * Revision 1.48  2022-10-09 22:57:14+05:30  Cprogrammer
+ * removed wildmat.h
+ * moved RCS log to bottom
+ *
+ * Revision 1.47  2022-04-03 18:46:17+05:30  Cprogrammer
+ * bypass set_environment if FASTQUEUE env variable is set
+ *
+ * Revision 1.46  2022-03-27 20:10:47+05:30  Cprogrammer
+ * display system error when qmail_open() fails
+ *
+ * Revision 1.45  2022-01-30 08:39:45+05:30  Cprogrammer
+ * allow disabling of databytes check
+ *
+ * Revision 1.44  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.43  2021-07-15 09:22:02+05:30  Cprogrammer
+ * removed unused function
+ *
+ * Revision 1.42  2021-07-05 21:27:47+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
+ * Revision 1.41  2021-06-15 11:55:01+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
+ * Revision 1.40  2021-05-27 11:25:45+05:30  Cprogrammer
+ * removed spam ignore code
+ *
+ * Revision 1.39  2021-05-23 07:10:48+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
+ * Revision 1.38  2021-05-13 14:44:07+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.37  2021-05-12 15:49:24+05:30  Cprogrammer
+ * removed redundant initialization
+ *
+ * Revision 1.36  2021-04-29 12:04:00+05:30  Cprogrammer
+ * use 'n' option in QMAILINJECT env variable to print message rather than queue
+ *
+ * Revision 1.35  2020-11-24 13:46:52+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.34  2020-11-22 23:12:03+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
+ * Revision 1.33  2020-05-10 17:46:59+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
+ * Revision 1.32  2020-04-04 11:53:24+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
+ * Revision 1.31  2020-04-03 22:09:46+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.30  2019-07-08 16:09:39+05:30  Cprogrammer
+ * to not parse mail header in qmail-inject if -a is given
+ *
+ * Revision 1.29  2018-05-01 01:42:41+05:30  Cprogrammer
+ * indented code
+ *
+ * Revision 1.28  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.27  2014-01-29 14:02:54+05:30  Cprogrammer
+ * made domainqueue file configurable through env variable DOMAINQUEUE
+ *
+ * Revision 1.26  2014-01-22 20:38:19+05:30  Cprogrammer
+ * added hassrs.h
+ *
+ * Revision 1.25  2013-11-21 15:40:52+05:30  Cprogrammer
+ * added domainqueue functionality
+ *
+ * Revision 1.24  2013-08-25 18:37:55+05:30  Cprogrammer
+ * added SRS
+ *
+ * Revision 1.23  2011-07-28 19:39:08+05:30  Cprogrammer
+ * chdir to home after envdir_set()
+ *
+ * Revision 1.22  2010-06-08 22:00:27+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
+ * Revision 1.21  2010-01-20 09:25:09+05:30  Cprogrammer
+ * corrected error message
+ *
+ * Revision 1.20  2009-09-08 12:33:51+05:30  Cprogrammer
+ * removed dependency of indimail on qmail-inject
+ *
+ * Revision 1.19  2009-08-13 19:08:00+05:30  Cprogrammer
+ * code beautified
+ *
+ * Revision 1.18  2009-05-01 10:40:58+05:30  Cprogrammer
+ * added errstr argument to envrules()
+ *
+ * Revision 1.17  2009-04-14 11:31:09+05:30  Cprogrammer
+ * added maxrecipient check
+ *
+ * Revision 1.16  2008-06-12 08:39:27+05:30  Cprogrammer
+ * added rulesfile argument
+ *
+ * Revision 1.15  2007-12-20 12:47:04+05:30  Cprogrammer
+ * removed compiler warnings
+ *
+ * Revision 1.14  2005-08-23 17:33:49+05:30  Cprogrammer
+ * added case 's' for deleting sender
+ *
+ * Revision 1.13  2005-04-02 23:03:17+05:30  Cprogrammer
+ * replaced wildmat with wildmat_internal
+ *
+ * Revision 1.12  2004-10-22 20:28:21+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.11  2004-10-11 23:59:48+05:30  Cprogrammer
+ * include sgetopt.h after unistd.h
+ * use control_readulong() instead of control_readint()
+ *
+ * Revision 1.10  2004-05-23 22:17:50+05:30  Cprogrammer
+ * added envrules filename as argument
+ *
+ * Revision 1.9  2004-02-05 18:47:21+05:30  Cprogrammer
+ * replaced qforward with envrules
+ *
+ * Revision 1.8  2003-12-15 13:50:06+05:30  Cprogrammer
+ * renamed QMAILFILTER to SPAMFILTER
+ *
+ * Revision 1.7  2003-12-07 13:03:31+05:30  Cprogrammer
+ * added spamignore and spamignorepatterns
+ *
+ * Revision 1.6  2003-10-23 01:23:41+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.5  2003-10-03 11:47:46+05:30  Cprogrammer
+ * changed puts() to myputs() to avoid conflict in stdio.h
+ * added qforward() code
+ *
+ * Revision 1.4  2002-10-08 20:35:06+05:30  Cprogrammer
+ * added databytes control check
+ *
+ */
