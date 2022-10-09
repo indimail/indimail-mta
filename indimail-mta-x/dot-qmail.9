@@ -10,12 +10,9 @@ where
 .I homedir
 is your home directory.
 
-It can instead
-write the mail to a different file or directory,
-forward it to another address,
-distribute it to a mailing list,
-or even execute programs,
-all under your control.
+It can instead write the mail to a different file or directory, forward it
+to another address, distribute it to a mailing list, or even execute
+programs, all under your control.
 .SH "THE QMAIL FILE"
 To change
 .BR qmail-local 's
@@ -24,11 +21,9 @@ behavior, set up a
 file in your home directory.
 
 .B .qmail
-contains one or more lines.
-Each line is a delivery instruction.
+contains one or more lines. Each line is a delivery instruction.
 .B qmail-local
-follows each instruction in turn.
-There are five types of delivery instructions:
+follows each instruction in turn. There are five types of delivery instructions:
 (1) comment; (2) program; (3) forward; (4) mbox; (5) maildir; (6) branch;
 
 .TP 5
@@ -69,9 +64,9 @@ A forward line begins with an ampersand:
 takes the rest of the line as a mail address;
 it uses
 .B qmail-queue
-to forward the message to that address.
-The address must contain a fully qualified domain name;
-it must not contain extra spaces, angle brackets, or comments:
+to forward the message to that address. The address must contain a fully
+qualified domain name; it must not contain extra spaces, angle brackets, or
+comments:
 
 .EX
      # the following examples are WRONG
@@ -85,8 +80,8 @@ it must not contain extra spaces, angle brackets, or comments:
      &me@new.job.com (New Address)
 .EE
 
-If the address begins with a letter or number,
-you may leave out the ampersand:
+If the address begins with a letter or number, you may leave out the
+ampersand:
 
 .EX
      me@new.job.com
@@ -102,17 +97,15 @@ line when forwarding messages.
 (4)
 An 
 .I mbox
-line begins with a slash or dot,
-and does not end with a slash:
+line begins with a slash or dot, and does not end with a slash:
 
 .EX
      /home/djb/Mailbox.sos
 .EE
 
 .B qmail-local
-takes the entire line as a filename.
-It appends the mail message to that file,
-using
+takes the entire line as a filename. It appends the mail message to that
+file, using
 .BR flock -style
 file locking if possible.
 .B qmail-local
@@ -127,16 +120,14 @@ anyone who can read a file can
 .B flock
 it, and thus hold up
 .BR qmail-local 's
-delivery forever.
-Do not deliver mail to a publicly accessible file!
+delivery forever. Do not deliver mail to a publicly accessible file!
 
 If
 .B qmail-local
-is able to lock the file, but has trouble writing to it
-(because, for example, the disk is full),
-it will truncate the file back to its original length.
-However, it cannot prevent mailbox corruption if the system
-crashes during delivery.
+is able to lock the file, but has trouble writing to it (because, for
+example, the disk is full), it will truncate the file back to its original
+length. However, it cannot prevent mailbox corruption if the system crashes
+during delivery.
 
 .TP 5
 (5)
@@ -153,8 +144,7 @@ and ends with a slash:
 takes the entire line as the name of a directory in
 .I maildir
 format.
-It reliably stores the incoming message in that directory.
-See
+It reliably stores the incoming message in that directory. See
 .B maildir(5)
 for more details.
 
@@ -190,29 +180,30 @@ A \fB.qmail\fR file using this feature might look like:
   /home/b1ff/mail/main/
 .EE
 
-\fBqmail-local\fR will deliver the message to the command just as it does for a |command line,
-and if the command exits with status 99, qmail-local will skip down to the :label line;
-delivery instructions in the intervening lines are ignored. If the command exits with status
-other than 99, the result is the same as with a |command line. :label lines are otherwise
-ignored, just like #comment lines.
+\fBqmail-local\fR will deliver the message to the command just as it does
+for a |command line, and if the command exits with status 99, qmail-local
+will skip down to the :label line; delivery instructions in the intervening
+lines are ignored. If the command exits with status other than 99, the
+result is the same as with a |command line (See \fBqmail-command\fR(8)).
+:label lines are otherwise ignored, just like #comment lines.
 
-A label is a (possibly empty) sequence of non-space, non-tab, nonzero bytes. Text following a
-label on a ":" line is ignored. If there is no command on a ?label line, it's an unconditional
-jump. If a command exits 99 and the corresponding label is not found, all following delivery
+A label is a (possibly empty) sequence of non-space, non-tab, nonzero
+bytes. Text following a label on a ":" line is ignored. If there is no
+command on a ?label line, it's an unconditional jump. If a command exits 99
+and the corresponding label is not found, all following delivery
 instructions are skipped (as with |command). There are no backward jumps.
 
-This makes the \fB.qmail\fR language a little more useful, IMO, but not enough to cause trouble.
-(You get if-then-else, but no loops.) The syntax is a little ugly, but it gets the job done.
-The same functionality is already available with |command lines, but then you need multiple
-\fB.qmail\fR files, which exposes extra addresses to outside senders, so it gets a little more
-complicated.
+This makes the \fB.qmail\fR language a little more useful, IMO, but not
+enough to cause trouble. (You get if-then-else, but no loops.) The syntax
+is a little ugly, but it gets the job done. The same functionality is
+already available with |command lines, but then you need multiple
+\fB.qmail\fR files, which exposes extra addresses to outside senders, so it
+gets a little more complicated.
 
 .PP
 If
 .B .qmail
-has the execute bit set,
-it must not contain any
-program lines,
+has the execute bit set, it must not contain any program lines,
 .I mbox
 lines,
 or
@@ -220,8 +211,7 @@ or
 lines.
 If
 .B qmail-local
-sees any such lines,
-it will stop and indicate a temporary failure.
+sees any such lines, it will stop and indicate a temporary failure.
 
 If
 .B .qmail
@@ -229,8 +219,7 @@ is completely empty (0 bytes long), or does not exist,
 .B qmail-local
 follows the
 .I defaultdelivery
-instructions set by your system administrator;
-normally
+instructions set by your system administrator; normally
 .I defaultdelivery
 is
 .BR ./Mailbox ,
@@ -243,8 +232,8 @@ in
 format.
 
 .B .qmail
-may contain extra spaces and tabs at the end of a line.
-Blank lines are allowed, but not for the first line of
+may contain extra spaces and tabs at the end of a line. Blank lines are
+allowed, but not for the first line of
 .BR .qmail .
 
 If
@@ -263,48 +252,41 @@ file, first set the sticky bit on your home directory:
 .EE
 
 .B qmail-local
-will temporarily defer delivery of any message to you
-if your home directory is sticky
-(or group-writable or other-writable,
-which should never happen).
-Make sure to
+will temporarily defer delivery of any message to you if your home
+directory is sticky (or group-writable or other-writable, which should
+never happen). Make sure to
 
 .EX
      chmod -t $HOME
 .EE
 
-when you are done!
-It's a good idea to test your new
+when you are done! It's a good idea to test your new
 .B .qmail
 file as follows:
 
 .EX
      qmail-local -n $USER ~ $USER '' '' '' '' ./Mailbox
 .EE
+
 .SH "EXTENSION ADDRESSES"
 In the
 .B qmail
-system,
-you control all local addresses of the form
+system, you control all local addresses of the form
 .IR user\fBBREAK\fIanything ,
 as well as the address
 .I user
-itself,
-where
+itself, where
 .I user
-is your account name.
-Delivery to
+is your account name. Delivery to
 .I user\fBBREAK\fIanything
 is controlled by the file
 .IR homedir/\fB.qmail\-\fIanything .
-(These rules may be changed by the system administrator;
-see
+(These rules may be changed by the system administrator; see
 .BR qmail-users (5).)
 
 The
 .B alias
-user controls all other addresses.
-Delivery to
+user controls all other addresses. Delivery to
 .I local
 is controlled by the file
 .IR homedir/\fB.qmail\-\fIlocal ,
@@ -353,8 +335,7 @@ and finally
 .BR .qmail-default .
 If none of these exist,
 .B qmail-local
-will bounce the message.
-(Exception: for the basic
+will bounce the message. (Exception: for the basic
 .I user
 address,
 .B qmail-local
@@ -384,16 +365,12 @@ forwards a message as instructed in
 .BR .qmail-default ),
 it checks whether
 .B .qmail\-\fIext\fB-owner\fP
-exists.
-If so,
-it uses
+exists. If so, it uses
 .I local\fB-owner@\fIdomain
-as the envelope sender for the forwarded message.
-Otherwise it retains the envelope sender of the original message.
-Exception:
+as the envelope sender for the forwarded message. Otherwise it retains the
+envelope sender of the original message. Exception:
 .B qmail-local
-always retains the original envelope sender
-if it is the empty address or
+always retains the original envelope sender if it is the empty address or
 .BR #@[] ,
 i.e., if this is a bounce message.
 
@@ -407,8 +384,7 @@ and
 .B .qmail\-\fIext\fB-owner-default\fP
 both exist, it uses
 .I local\fB\-owner\-@\fIdomain\fB-@[]
-as the envelope sender.
-This will cause a recipient
+as the envelope sender. This will cause a recipient
 .I recip\fB@\fIreciphost
 to see an envelope sender of
 .IR local\fB\-owner\-\fIrecip\fB=\fIreciphost\fB@\fIdomain .
@@ -417,8 +393,8 @@ If a delivery instruction fails,
 .B qmail-local
 stops immediately and reports failure.
 .B qmail-local
-handles forwarding after all other instructions,
-so any error in another type of delivery will prevent all forwarding.
+handles forwarding after all other instructions, so any error in another
+type of delivery will prevent all forwarding.
 
 If a program returns exit code 99,
 .B qmail-local
@@ -426,10 +402,9 @@ ignores all succeeding lines in
 .BR .qmail ,
 but it still pays attention to previous forward lines.
 
-To set up independent instructions,
-where a temporary or permanent failure in one instruction
-does not affect the others,
-move each instruction into a separate
+To set up independent instructions, where a temporary or permanent failure
+in one instruction does not affect the others, move each instruction into a
+separate
 .B .qmail\-\fIext
 file, and set up a central
 .B .qmail
@@ -438,6 +413,7 @@ file that forwards to all of the
 Note that
 .B qmail-local
 can handle any number of forward lines simultaneously.
+
 .SH "SEE ALSO"
 envelopes(5),
 maildir(5),
