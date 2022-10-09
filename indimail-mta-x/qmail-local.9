@@ -15,134 +15,93 @@ qmail-local \- deliver or forward a mail message
 .I sender
 .I defaultdelivery
 .I qqeh
+
 .SH DESCRIPTION
-.B qmail-local
-reads a mail message
-and delivers it to
-.I user
-by the procedure described in
-.BR dot-qmail(5) .
+\fBqmail-local\fR(8) reads a mail message and delivers it to \fIuser\fR by
+the procedure described in \fBdot-qmail\fR(5).
 
-The message's envelope recipient is
-.IR local@domain .
-.B qmail-local
-records
-.I local@domain
-in a new
-.B Delivered-To
-header field.
-If exactly the same
-.B Delivered-To: \fIlocal@domain
-already appears in the header,
-.B qmail-local
-bounces the message,
-to prevent mail forwarding loops.
-If
-.IR maxdeliveredto 
-is a value greater than the number of exact
-.I local@domain 
-matches then delivery progresses.
-If
-.IR maxdeliveredto 
-is -1 then this stage goes unchecked.
+The message's envelope recipient is \fIlocal@domain\fR.
+\fBqmail-local\fR(8) records \fIlocal@domain\fR in a new \fBDelivered-To\fR
+header field. If exactly the same \fBDelivered-To:\fR \fIlocal@domain\fR
+already appears in the header, \fBqmail-local\fR(8) bounces the message to
+prevent mail forwarding loops. If \fImaxdeliveredto\fR is a value greater
+than the number of exact \fIlocal@domain\fR matches, then delivery
+progresses. If \fImaxdeliveredto\fR is -1 then this stage goes unchecked.
 
-The message's envelope sender is
-.IR sender .
-.B qmail-local
-records
-.I sender
-in a new
-.B Return-Path
-header field.
+The message's envelope sender is \fIsender\fR. \fBqmail-local\fR(8) records
+\fIsender\fR in a new \fBReturn-Path\fR header field.
 
-.I homedir
-is the user's home directory.
-It must be an absolute directory name.
+\fIhomedir\fR is the user's home directory. It must be an absolute
+directory name.
 
-.I dash
-and
-.I ext
-identify the
-.B .qmail\fIdashext
-file used by
-.BR qmail-local ;
-see
-.BR dot-qmail(5) .
-Normally
-.I dash
-is either empty or a lone hyphen.
-If it is empty,
-.B qmail-local
-treats a nonexistent
-.B .qmail\fIext\fR
-the same way as an empty
-.BR .qmail\fIext\fR :
-namely, following the delivery instructions in
-.IR defaultdelivery .
+\fIdash\fR and \fIext\fR identify the \fB.qmail\fR\fIdashext\fR file used
+by \fBqmail-local\fR(8) ; See \fBdot-qmail\fR(5). Normally \fIdash\fR is
+either empty or a lone hyphen. If it is empty, \fBqmail-local\fR(8) treats
+a nonexistent \fB.qmail\fR\fIext\fR the same way as an empty
+\fB.qmail\fR\fIext\fR : namely, following the delivery instructions in
+\fIdefaultdelivery\fR. If \fIext\fR ends with the string literal "default",
+then \fBqmail-local\fR(8) sets the environment variable \fBDEFAULT\fR to
+the string "default". This environment variable can be used by
+\fBfastforward\fR(1) in a \fB.qmail\fR file to use the -d flag and use
+default@$HOST as the recipient. Without this environment variable set,
+\fBfastforward\fR can use $EXT@$HOST as the recipient. Typical use of this
+would be use \fB.qmail-default\fR in \fI@qmaildir@/alias\fR directory to
+handle default for unknown addresses.
 
-.IR qqeh
-prepends the contents of
-.IR qqeh
-to the message on standard input.
+The contents of \fIqqeh\fR is prepended to the message on standard input.
+It is used to add extra headers to an existing message.
 
-The standard input for
-.B qmail-local
-must be a seekable file,
-so that
-.B qmail-local
-can read it more than once.
+The standard input for \fBqmail-local\fR(8) must be a seekable file, so
+that \fBqmail-local\fR(8) can read it more than once.
+
 .SH "OPTIONS"
 .TP
 .B \-n
-Instead of reading and delivering the message,
-print a description of the delivery instructions.
+Instead of reading and delivering the message, print a description of the
+delivery instructions.
+
 .TP
 .B \-N
 (Default.) Read and deliver the message.
-\fBqmail-local\fR uses few environment variables. These environment variables can be recipient
-specific by using envrules. See \fBspawn-filter(8)\fR for more details.
+\fBqmail-local\fR(8) uses few environment variables. These environment
+variables can be recipient specific by using envrules. See
+\fBspawn-filter(8)\fR for more details.
 
 When forwarding, due to instructions in a dot-qmail file,
-.B qmail-local
-rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configured. see
-.B qmail-srs(5)
-for information on how to do this
+\fBqmail-local\fR(8) rewrites the sender using Sender Rewriting Scheme
+if \fISRS\fR has been configured. See \fBqmail-srs\fR(5) for information on
+how to do this.
 
-If the environment variable USE_FSYNC or USE_FDATASYNC is set,
-then\fBqmail-local\fR writes all data to disk ("flushes") all modified
+If the environment variable \fBUSE_FSYNC\fR or \fBUSE_FDATASYNC\fR is set,
+then \fBqmail-local\fR(8) writes all data to disk ("flushes") all modified
 in-core data of (i.e., modified buffer cache pages for) the new message to
 the disk device (or other permanent storage device) so that all changed
-information can  be retrieved even if the system crashes or is rebooted.
+information can be retrieved even if the system crashes or is rebooted.
 This includes writing through or flushing a disk cache if present. The call
 blocks until the device reports that the transfer has completed. The system
-calls fsync(2) or fdatasync(2) are used to flush data to disk.
-Though fdatasync(2) is faster than fsync(2), both these calls impose a
-penalty on performance.
+calls fsync(2) or fdatasync(2) are used to flush data to disk. Though
+fdatasync(2) is faster than fsync(2), both these calls impose a penalty on
+performance.
 
-If the environment variable USE_SYNCDIR is enabled, \fBqmail-local\fR
-forces BSD style directory syncing.
+If the environment variable \fBUSE_SYNCDIR\fR is enabled,
+\fBqmail-local\fR(8) forces BSD style directory syncing.
 
-The environment variable USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR is
-controlled by qmail-send/todo-proc
+The environment variable \fBUSE_FSYNC\fR, \fBUSE_FDATASYNC\fR,
+\fBUSE_SYNCDIR\fR is controlled by \fBqmail-send\fR(8) /
+\fBtodo-proc\fR(8).
 
 .SH "CONTROL FILES"
-.B
-qmail-local
-by default looks at @controldir@ for all control files. This path can be changed by defining the CONTROLDIR
-environment variable.
+\fBqmail-local\fR(8) by default looks in \fI@controldir@\fR directory for
+all control files. This path can be changed by defining the
+\fBCONTROLDIR\fR environment variable.
 
 .TP 5
-.I localdomains
-List of domains considered as local. If the user's home directory has a file
-.B .localdomains
-or if the environment
-variable
-.BR LOCALDOMAINS ,
-is defined
-.B qmail-local
-will deliver the mail only if it comes from any of the domain listed in
-.BR localdomains .
-This restricts users to receive local mails only.
+\fIlocaldomains\fR
+List of domains considered as local. If the user's home directory has a
+file \fB.localdomains\fR or if the environment variable \fBLOCALDOMAINS\fR,
+is defined \fBqmail-local\fR(8) will deliver the mail only if it comes from
+any of the domain listed in \fBlocaldomains\fR. This restricts users to
+receive local mails only.
 
 .SH "EXIT CODES"
 0 if the delivery is completely successful, 5 if out of disk quota;
