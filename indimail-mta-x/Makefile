@@ -1064,7 +1064,7 @@ qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
 qmail-inject.o: \
 compile qmail-inject.c hfield.h control.h \
 qmail.h quote.h headerbody.h newfield.h envrules.h \
-hassrs.h set_environment.h wildmat.h conf-srs
+hassrs.h set_environment.h conf-srs
 	./compile qmail-inject.c
 
 envrules.o: \
@@ -2505,7 +2505,7 @@ compile triggerpull.c triggerpull.h
 
 wildmat.o: \
 compile wildmat.c
-	./compile wildmat.c
+	./compile -DOPTIMIZE_JUST_STAR wildmat.c
 
 variables.o: \
 compile variables.c variables.h haveip6.h conf-ip
