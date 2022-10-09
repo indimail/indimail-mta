@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.268 2022-10-08 20:01:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.269 2022-10-09 23:00:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sig.h>
 #include <stralloc.h>
@@ -82,7 +82,6 @@
 #endif
 #include <pwd.h>
 #include "hassmtputf8.h"
-#include "wildmat.h"
 #include "haslibgsasl.h"
 #include <authmethods.h>
 #include <hmac.h>
@@ -135,7 +134,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.268 $";
+char           *revision = "$Revision: 1.269 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -714,7 +713,7 @@ addrallowed(char *rcpt)
 }
 
 void
-log_fifo(char *arg1, char *arg2, unsigned long size, stralloc * line)
+log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 {
 	int             logfifo, match;
 	char           *fifo_name;
@@ -1803,7 +1802,7 @@ int             flagblackhole;
 stralloc        Desc = { 0 };
 
 int
-sigscheck(stralloc * line, char **desc, int in_header)
+sigscheck(stralloc *line, char **desc, int in_header)
 {
 	int             i, j, k, len, pos1, pos2, header_check, body_check;
 	char           *ptr;
@@ -2391,8 +2390,9 @@ databytes_setup()
 }
 
 void
-open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p, char *envstr, char *envstr_p, char *cfn, char *cfn_p,
-				  stralloc * sfn, struct constmap *mapvar, stralloc * sfn_p)
+open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p,
+	char *envstr, char *envstr_p, char *cfn, char *cfn_p,
+	stralloc *sfn, struct constmap *mapvar, stralloc *sfn_p)
 {
 	char           *x;
 
@@ -5858,7 +5858,7 @@ auth_scram_sha512_plus()
 
 /*- parse digest response */
 unsigned int
-scan_response(stralloc * dst, stralloc * src, const char *search)
+scan_response(stralloc *dst, stralloc *src, const char *search)
 {
 	char           *x = src->s;
 	int             i, len;
@@ -7435,6 +7435,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.269  2022-10-09 23:00:33+05:30  Cprogrammer
+ * removed include wildmat.h
+ *
  * Revision 1.268  2022-10-08 20:01:48+05:30  Cprogrammer
  * set SPFRESULT environment variable
  *
@@ -7684,9 +7687,8 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.268 2022-10-08 20:01:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.269 2022-10-09 23:00:33+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidwildmath;
 	x++;
 	return revision + 11;
 }
