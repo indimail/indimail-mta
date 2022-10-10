@@ -30,7 +30,13 @@ srs.example.com
 A random string to generate and check SRS addresses. You can specify
 a list of secrets (one per line). The first secret in the list is used
 for generating new SRS addresses. All secrets on the list may be used to
-verify SRS addresses.
+verify SRS addresses. You can use the following command to generate a
+random string of 24 charactoers.
+
+.EX
+$ tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' \
+	</dev/urandom | head -c 24; echo
+.EE
 
 .TP 5
 .I srs_maxage
