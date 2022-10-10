@@ -333,6 +333,8 @@ then
 .BR .qmail-foo-default ,
 and finally
 .BR .qmail-default .
+If any of these default \fB.qmail\fR files exist, \fBqmail-local\fR will
+set the environment variable \fBDEFAULT\fR as the string "\fIdefault\fR".
 If none of these exist,
 .B qmail-local
 will bounce the message. (Exception: for the basic
