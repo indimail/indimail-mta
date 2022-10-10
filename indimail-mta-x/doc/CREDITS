@@ -173,7 +173,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 99. DNSBL Support (DNS Blacklist) Author "Fabio Busatto" <fabio.busatto at sikurezza.org>
 100.Pieter Droogendijk <pieter at binky.org.uk> http://binky.org.uk - URL
     parsing code for SURBL
-101.Marcelo Coelho - qmail-srs-0.4.patch and libsrs2 - http://www.libsrs2.org
+101.Marcelo Coelho - qmail-srs-0.8.patch and libsrs2 - http://www.libsrs2.org
 102 Roberto Puzzanghera <roberto.puzzanghera at gmail.com> - using
     FORCE_TLS environment variable to force TLS during AUTH
 103.Ed Neville - allow multiple Delivered-To in qmail-local using control
