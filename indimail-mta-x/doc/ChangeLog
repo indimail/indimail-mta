@@ -43,6 +43,8 @@ Release @version@-@release@ Start 08/09/2022
 23. smtpd.c, qmail-inject.c: removed include wildmat.h
 24. sqlmatch.c: renamed check_db() to query_db().
 25. qmail-local.c: fixed localdomains restricted delivery feature
+- 10/10/2022
+26. renamed qmail-control to indimail-control, qmail-srs to indimail-srs
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
