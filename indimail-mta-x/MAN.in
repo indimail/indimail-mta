@@ -110,7 +110,7 @@ f:::0644:/man5/:envelopes.5:envelopes.5
 f:::0644:/man5/:indimail-env.5:indimail-env.5
 f:::0644:/man5/:maildir.5:maildir.5
 f:::0644:/man5/:mbox.5:mbox.5
-f:::0644:/man5/:qmail-control.5:qmail-control.5
+f:::0644:/man5/:indimail-control.5:indimail-control.5
 f:::0644:/man5/:qmail-header.5:qmail-header.5
 f:::0644:/man5/:qmail-log.5:qmail-log.5
 f:::0644:/man5/:qmail-srs.5:qmail-srs.5

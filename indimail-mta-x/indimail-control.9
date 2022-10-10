@@ -1,26 +1,22 @@
-.TH qmail-control 5
+.TH indimail-control 5
 .SH "NAME"
-qmail-control \- qmail configuration files
+indimail-control \- indimail configuration files
 .SH "INTRODUCTION"
 You can change the behavior of the
-.B qmail
+.B indimail-mta
 system by modifying
-.BR qmail 's
+.BR indimail-mta 's
 .I control files
 in
 .BR @controldir@ .
+You can set the environment variable \fBCONTROLDIR\fR to make indimail-mta
+look for control files in a different directory.
 
-.B qmail
+.B indimail-mta
 can survive with just one control file,
 .IR me ,
-containing the
-fully-qualified name of the current host.
-This file is used as the default for
-other hostname-related control files.
-
-If control files are required apart from what is present in @controldir@, you can
-set the environment variable CONTROLDIR. This forces qmail system to look at path
-defined by CONTROLDIR for all control files.
+containing the fully-qualified name of the current host. This file is used
+as the default for other hostname-related control files.
 
 Comments are allowed
 in
@@ -84,8 +80,8 @@ and
 .IR virtualdomains .
 Trailing spaces and tabs are allowed in any control file.
 
-The following control files can also be specified in cdb format or
-be in MySQL
+The following control files can also be specified in cdb format or be in
+MySQL.
 
 .IR authdomains ,
 .IR badhelo ,
@@ -106,9 +102,10 @@ and
 
 To use the cdb format, the control files should be converted to cdb using
 .BR qmail-cdb
-and have a .cdb extension. To have the control files in MySQL, you should have the control file
-with a .sql extension and a colon separated list of paramaters for connecting to MySQL
-specified in the file. If the files are present in all the 3 formats, cdb file will be used.
+and have a .cdb extension. To have the control files in MySQL, you should
+have the control file with a .sql extension and a colon separated list of
+paramaters for connecting to MySQL specified in the file. If the files are
+present in all the 3 formats, cdb file will be used.
 
 The parameters are as given below.
 
@@ -119,20 +116,21 @@ Having the following entry in \fIbadmailfrom\fR.\fIsql\fR
 
 localhost:indimail:ssh-1.5-:qmail:my_badmailfrom
 
-specifies that entries for  badmailfrom should  be  checked in the MySQL table
-\fImy_badmailfrom\fR on localhost. The username and password for connecting to MySQL
-is \fIindimail\fR and \fIssh-1.5-\fR and the database name to use is \fIqmail\fR.
+specifies that entries for  badmailfrom should  be  checked in the MySQL
+table \fImy_badmailfrom\fR on localhost. The username and password for
+connecting to MySQL is \fIindimail\fR and \fIssh-1.5-\fR and the database
+name to use is \fIqmail\fR.
 .EE
 
-For database connection to MySQL, one can define \fBMYSQL_LIB\fR environment variable
-or have the control file \fImysql_lib\fR
+For database connection to MySQL, one can define \fBMYSQL_LIB\fR
+environment variable or have the control file \fImysql_lib\fR
 .EE
   MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
 .EX
 Environment variable takes precedence over the control file.
 
-The following control files can have regular expressions for match if QREGEX environment
-variable is defined
+The following control files can have regular expressions for match if
+QREGEX environment variable is defined
 
 .IR badhelo ,
 .IR badhost ,
@@ -287,8 +285,8 @@ control	default	used by
 
 .RE
 .IR Defaultvalues
-following a $ sign (ie. $RELAYCLIENT) depend on the
-corresponding environment variable.
+following a $ sign (ie. $RELAYCLIENT) depend on the corresponding
+environment variable.
     
 .SH "SEE ALSO"
 qmail-inject(8),

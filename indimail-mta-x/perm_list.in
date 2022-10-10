@@ -420,7 +420,7 @@
 %attr(0644,root,root) @mandir@/man5/envelopes.5.gz
 %attr(0644,root,root) @mandir@/man5/maildir.5.gz
 %attr(0644,root,root) @mandir@/man5/mbox.5.gz
-%attr(0644,root,root) @mandir@/man5/qmail-control.5.gz
+%attr(0644,root,root) @mandir@/man5/indimail-control.5.gz
 %attr(0644,root,root) @mandir@/man5/qmail-header.5.gz
 %attr(0644,root,root) @mandir@/man5/qmail-log.5.gz
 %attr(0644,root,root) @mandir@/man5/qmail-users.5.gz

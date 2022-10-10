@@ -512,8 +512,7 @@ qmail-clean.0
 qmail-clean.o
 qmail-clean.8
 qmail-command.0
-qmail-control.0
-qmail-control.5
+indimail-control.5
 qmailctl
 qscheduler
 qscheduler.o

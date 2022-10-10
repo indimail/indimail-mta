@@ -276,8 +276,7 @@ qmail-cdb.8
 qmail-clean
 qmail-clean.0
 qmail-command.0
-qmail-control.0
-qmail-control.5
+indimail-control.5
 qmailctl
 qmail-daemon
 qmaildirmake

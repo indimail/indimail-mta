@@ -57,7 +57,7 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.5 forward.1 maildirserial.1 mlmatchup.8 multi-queue.7 \
 	new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 \
-	qmail-cdb.8 qmail-clean.8 qmail-control.5 qmail-daned.8 qtop.1 \
+	qmail-cdb.8 qmail-clean.8 indimail-control.5 qmail-daned.8 qtop.1 \
 	qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
 	qmail-limits.7 qmail-local.8 qmail-multi.8 qmail-newmrh.8 qmonitor.8 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 \
@@ -1016,11 +1016,11 @@ qmail-clean.8: qmail-clean.9 conf-split
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	> qmail-clean.8
 
-qmail-control.5: \
-qmail-control.9 conf-sysconfdir
-	cat qmail-control.9 \
+indimail-control.5: \
+indimail-control.9 conf-sysconfdir
+	cat indimail-control.9 \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> qmail-control.5
+	> indimail-control.5
 
 qmail-srs.5: \
 qmail-srs.9 conf-sysconfdir
