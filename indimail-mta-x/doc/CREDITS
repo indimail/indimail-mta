@@ -105,8 +105,10 @@ The site http://qmail.org and the qmail mailing list for wealth of information
     like sendmail does.
 56. Mark Belnap - Bounce Lifetime patch
 57. Christopher K. Davis' DNS patch handles a problem qmail has with DNS
-    responses larger than the standard
-58. 512 bytes. http://www.ckdhr.com/ckd/qmail-103.patch and
+    responses larger than the standard 512 bytes.
+	http://www.ckdhr.com/ckd/qmail-103.patch and
+58. Toby Betts - Prevent collisions in Maildir style filenames - maildir
+    uniq patch
 59. Mark Delany - wildmat patch
 60. Nagy Balazs - patch to ensure that the domain name on the envelope
     sender is a valid DNS name.
@@ -187,5 +189,3 @@ The site http://qmail.org and the qmail mailing list for wealth of information
     in ucspi-tcp
 108.RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / EH Hoffman unicode address
     support patch for qmail.
-109.Toby Betts - Prevent collisions in Maildir style filenames - maildir
-    uniq patch
