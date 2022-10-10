@@ -408,7 +408,7 @@
 %attr(0644,root,root) @mandir@/man1/srsfilter.1.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man1/inotify.1.gz
 %attr(0644,root,root) @mandir@/man1/spfquery.1.gz
-%attr(0644,root,root) @mandir@/man1/qmail-srs.5.gz
+%attr(0644,root,root) @mandir@/man1/indimail-srs.5.gz
 %attr(0644,root,root) @mandir@/man1/swaks.1.gz
 %attr(0644,root,root) @mandir@/man1/uacl.1.gz
 %attr(0644,root,root) @mandir@/man1/udpclient.1.gz

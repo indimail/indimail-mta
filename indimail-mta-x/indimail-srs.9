@@ -1,14 +1,17 @@
-.TH qmail-srs 5
+.TH indimail-srs 5
 
 .SH "NAME"
-qmail-srs \- qmail srs configuration files
+indimail-srs \- indimail srs configuration files
 
 .SH "INTRODUCTION"
-You can configure indimail system by modifying
-.BR qmail 's
+You can configure indimail system for SRS by modifying
+.BR indimail 's
 .I control files
 in
 .BR @controldir@ .
+You can set the environment variable \fBCONTROLDIR\fR to make indimail-mta
+look for control files in a different directory. The control files
+\fIsrs_domain\fR and \fIsrs_secrets\fR are mandatory.
 
 .SH CONTROL FILES
 

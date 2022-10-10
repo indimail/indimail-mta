@@ -11,7 +11,7 @@ debian/changelog
 debian/copyright
 debian/control
 auto_libexec.o
-qmail-srs.5
+indimail-srs.5
 indimail-mta.fc
 indimail-mta.perms
 conf-prefix

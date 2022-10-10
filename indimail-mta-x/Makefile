@@ -63,7 +63,7 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 \
 	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
 	qmail-send.8 qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 \
-	qmail-srs.5 qmail-start.8 todo-proc.8 qmail-users.5 qmta-send.8 \
+	indimail-srs.5 qmail-start.8 todo-proc.8 qmail-users.5 qmta-send.8 \
 	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 recipient-cdb.8 replier.1 \
 	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 \
 	spawn-filter.8 surblfilter.8 svctool.8
@@ -1022,11 +1022,11 @@ indimail-control.9 conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> indimail-control.5
 
-qmail-srs.5: \
-qmail-srs.9 conf-sysconfdir
-	cat qmail-srs.9 \
+indimail-srs.5: \
+indimail-srs.9 conf-sysconfdir
+	cat indimail-srs.9 \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> qmail-srs.5
+	> indimail-srs.5
 
 qmail-getpw: \
 load qmail-getpw.o auto_break.o auto_usera.o

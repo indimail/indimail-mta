@@ -113,7 +113,7 @@ f:::0644:/man5/:mbox.5:mbox.5
 f:::0644:/man5/:indimail-control.5:indimail-control.5
 f:::0644:/man5/:qmail-header.5:qmail-header.5
 f:::0644:/man5/:qmail-log.5:qmail-log.5
-f:::0644:/man5/:qmail-srs.5:qmail-srs.5
+f:::0644:/man5/:indimail-srs.5:indimail-srs.5
 f:::0644:/man5/:qmail-users.5:qmail-users.5
 f:::0644:/man5/:qmtp.5:qmtp.5
 f:::0644:/man5/:rewriting.5:rewriting.5

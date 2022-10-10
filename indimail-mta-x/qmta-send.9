@@ -66,7 +66,7 @@ by using \fBBOUNCEQUEUE\fR environment variable.
 When injecting a bounce for a previously forwarded email, whose sender was
 rewritten using \fISRS\fB, \fBqmta-send\fR rewrites the recipient to the
 original sender using Sender Rewriting Scheme, if \fISRS\fB has been
-configured. see \fBqmail-srs\fR(5) for information on how to do this.
+configured. see \fBindimail-srs\fR(5) for information on how to do this.
 
 \fBqmta-send\fR adds the \fBX-Bounced-Address\fR header when creating a
 bounce. It assigns the address that caused the bounce to this header. This
@@ -690,7 +690,7 @@ nice(1),
 addresses(5),
 envelopes(5),
 indimail-control(5),
-qmail-srs(5),
+indimail-srs(5),
 qmail-log(5),
 qmail-queue(8),
 qmail-multi(8),
