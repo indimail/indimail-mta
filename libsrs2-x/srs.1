@@ -1,46 +1,102 @@
-.\"                                      Hey, EMACS: -*- nroff -*-
-.\" First parameter, NAME, should be all caps
-.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
-.\" other parameters are allowed: see man(7), man(1)
-.TH srs 1 "June  5, 2004"
-.\" Please adjust this date whenever revising the manpage.
-.\"
-.\" Some roff macros, for reference:
-.\" .nh        disable hyphenation
-.\" .hy        enable hyphenation
-.\" .ad l      left justify
-.\" .ad b      justify to both left and right margins
-.\" .nf        disable filling
-.\" .fi        enable filling
-.\" .br        insert line break
-.\" .sp <n>    insert n+1 empty lines
-.\" for manpage-specific macros, see man(7)
+.TH srs 1
 .SH NAME
 srs \- command line interface to libsrs2
 .SH SYNOPSIS
 .B srs
-.RI [ options ] " files" ...
+.RI [ options ] " address"
 .br
+
 .SH DESCRIPTION
-This manual page documents briefly the
-.B srs
-command.
-This manual page was written for the Debian distribution
-because the original program does not have a manual page.
-.PP
+\fBsrs\fR is a frontend to the libsrs2 library. libsrs2 is the next
+generation SRS library from the original designer of SRS. It implements the
+Sender Rewriting Scheme, a part of the SPF/SRS protocol pair. Libsrs2 has
+been written from an entirely clean codebase with compliance, speed and
+versatility in mind. It is platform independent and has no external
+dependencies. It is thread-safe and heap-safe, and is suitable for large
+scale applications and embedded systems and can operate without many
+standard system facilities.
+
 .SH OPTIONS
-These programs follow the usual GNU command line syntax, with long
-options starting with two dashes (`-').
-A summary of options is included below.
+\fBsrs\fR programs follows the usual GNU command line syntax, with long
+options starting with two dashes (`-'). A summary of options is included
+below.
+
 .TP
-.B \-h, \-\-help
-Show summary of options.
+\fB\-a\fR \fIaddress\fR | --\fBaddress\fR=\fIaddress\fR
+Provide an address to translate
+
 .TP
-.B \-v, \-\-version
-Show version of program.
+\fB\-k\fR \fIsecret\fR | --\fBsecret\fR=\fIsecret\fR
+Provide a cryptographic secret.
+
+.TP
+\fB\-f\fR \fIfilename\fR | --\fBsecretfile\fR=\fIfilename\fR
+Provide a file containing cryptographic secrets.
+
+.TP
+\fB\-i\fR \fIdomain\fR | --\fBalias\fR=\fIdomain\fR
+Specify the alias for forwards rewriting.
+
+.TP
+\fB\-l\fR \fIlength\fR | --\fBhashlength\fR=\fIlength\fR
+Specify the hash length for forwards rewriting.
+
+.TP
+\fB\-r\fR | --\fBalwaysrewrite\fR
+Force rewriting even when optional.
+
+.TP
+\fB\-o\fR | --\fBforward\fR
+Perform forwards rewriting.
+
+.TP
+--\fBseparator\fR=\fIsep\fR
+Set the initial SRS separator.
+
+.TP
+\fB\-d\fR | --\fBdaemon\fR
+Become a rewriting daemon.
+
+.TP
+\fB\-x\fR | --\fBnofork\fR
+Run fork daemon in foreground.
+
+.TP
+\fB\-s\fR \fIsocket\fR | --\fBsocket\fR=\fIsocket\fR
+
+.TP
+.B \-v | \-\-reverse
+Perform reverse rewriting.
+
+.TP
+.B \-h | \-\-help
+Display this help.
+
+.PP
 .br
 This program and library are documented fully at
 .IR "http://www.libsrs2.org/" .
-.SH AUTHOR
-This manual page was written by Shevek <srs@anarres.org>,
-for the Debian GNU/Linux system (but may be used by others).
+
+.SH EXAMPLES
+.EX
+Rewrite postmaster@argos.indimail.org
+
+$ srs -k 'kdjf93oupoxlpNlR[cUyXEY(YuYH' -i srs.argos.indimail.org postmaster@argos.indimail.org
+SRS0=B3Wp=2M=argos.indimail.org=postmaster@srs.argos.indimail.org
+
+Translate SRS0=B3Wp=2M=argos.indimail.org=postmaster@srs.argos.indimail.org
+
+$ srs -k 'kdjf93oupoxlpNlR[cUyXEY(YuYH' -i srs.argos.indimail.org -v SRS0=B3Wp=2M=argos.indimail.org=postmaster@srs.argos.indimail.org
+postmaster@argos.indimail.org
+.EE
+
+.SH SEE ALSO
+qmail-smtpd(8),
+srsfilter(1),
+qmail-send(8),
+slowq-send(8),
+qmta-send(8),
+qmail-inject(8),
+qmail-local(8),
+condredirect(1),
+forward(1)
