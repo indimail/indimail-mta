@@ -38,7 +38,8 @@ usr/share/man/man1/qmaildirmake.1.gz           /usr/share/man/man1
 usr/share/man/man1/maildir2mbox.1.gz           /usr/share/man/man1
 usr/share/man/man1/qmaildirwatch.1.gz          /usr/share/man/man1
 usr/share/man/man1/srsfilter.1.gz              /usr/share/man/man1
-usr/share/man/man5/qmail-srs.5.gz              /usr/share/man/man5
+usr/share/man/man5/indimail-srs.5.gz           /usr/share/man/man5
+usr/share/man/man5/indimail-control.5.gz       /usr/share/man/man5
 usr/share/man/man8/qmail-showctl.8.gz          /usr/share/man/man8
 usr/share/man/man8/irmail.8.gz                 /usr/share/man/man8
 usr/share/man/man8/qmail-queue.8.gz            /usr/share/man/man8
