@@ -3654,7 +3654,7 @@ stralloc        newsender = { 0 };
 no_return void
 temp_batv(char *arg)
 {
-	out("Zerror verifying batv signature. (#4.3.0)\n");
+	out("Zerror creating batv signature. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, arg) ||
 			!stralloc_catb(&smtptext, ". (#4.3.0)", 10))
 		temp_nomem();
