@@ -22,7 +22,7 @@ d:::0755:/doc::
 f:::0644:/doc/:COPYING-indimail-mta:doc/COPYING-indimail-mta
 f:::0644:/doc/:LICENSE.qhpsi:doc/LICENSE.qhpsi
 f:::0644:/doc/:softwarelicense1-1.html:doc/softwarelicense1-1.html
-f:::0644:/doc/:CREDITS:doc/CREDITS
+f:::0644:/doc/:CREDITS.md:doc/CREDITS.md
 f:::0644:/doc/:INSTALL-MINI:doc/INSTALL-MINI
 f:::0644:/doc/:INSTALL.alias:doc/INSTALL.alias
 f:::0644:/doc/:INSTALL.control:doc/INSTALL.control

@@ -67,4 +67,4 @@ usr/share/indimail/doc/README.indimail-mta     /usr/share/indimail/doc
 usr/share/indimail/doc/README.qhpsi            /usr/share/indimail/doc
 usr/share/indimail/doc/README.queue-fix        /usr/share/indimail/doc
 usr/share/indimail/doc/README.srs              /usr/share/indimail/doc
-usr/share/indimail/doc/CREDITS                 /usr/share/indimail/doc
+usr/share/indimail/doc/CREDITS.md              /usr/share/indimail/doc

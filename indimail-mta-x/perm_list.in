@@ -307,7 +307,7 @@
 %attr(0444,root,root)  @shareddir@/doc/README.srs #indimail-mini
 %attr(0444,root,root)  @shareddir@/doc/README.status
 %attr(0444,root,root)  @shareddir@/doc/README.surbl
-%attr(0444,root,root)  @shareddir@/doc/CREDITS #indimail-mini
+%attr(0444,root,root)  @shareddir@/doc/CREDITS.md #indimail-mini
 %attr(0444,root,root)  @shareddir@/doc/FROMISP
 %attr(0444,root,root)  @shareddir@/doc/TOISP
 %attr(0444,root,root)  @shareddir@/doc/AUTOTURN
