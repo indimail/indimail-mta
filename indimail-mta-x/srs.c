@@ -1,5 +1,8 @@
 /*
  * $Log: srs.c,v $
+ * Revision 1.4  2022-10-12 19:15:03+05:30  Cprogrammer
+ * added feature to set SRS parameters using environment variables
+ *
  * Revision 1.3  2022-10-12 16:26:26+05:30  Cprogrammer
  * added documentation
  * return -1 for control file open failure
@@ -17,10 +20,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <srs2.h>
+#include <env.h>
+#include <str.h>
+#include <stralloc.h>
 #include "control.h"
 #include "rcpthosts.h"
-#include "str.h"
-#include "stralloc.h"
 #include "srs.h"
 
 static stralloc srs_domain = { 0 };
@@ -52,35 +56,43 @@ static int      srs_secrets_ok = 0;
  * srs_alwaysrewrite
  * srs_separator
  */
-static int
-setup(int with_rcpthosts)
+int
+srs_setup(int with_rcpthosts)
 {
+	char           *x;
 
 	if (setup_ok == 1)
 		return 1;
 	if (control_init() == -1)
 		return -1;
-	if (control_readline(&srs_domain, "srs_domain") == -1)
+	x = env_get("SRS_DOMAIN");
+	if (control_readline(&srs_domain, x && *x ? x : "srs_domain") == -1)
 		return -1;
 	if (!srs_domain.len)
 		return 0;
 	if (!stralloc_0(&srs_domain))
 		return -2;
-	if ((srs_secrets_ok = control_readfile(&srs_secrets, "srs_secrets", 0)) == -1)
+	x = env_get("SRS_SECRETS");
+	if ((srs_secrets_ok = control_readfile(&srs_secrets, x && *x ? x : "srs_secrets", 0)) == -1)
 		return -1;
 	if (!srs_secrets.len)
 		return 0;
-	if (control_readint((int *) &srs_maxage, "srs_maxage") == -1)
+	x = env_get("SRS_MAXAGE");
+	if (control_readint((int *) &srs_maxage, x && *x ? x : "srs_maxage") == -1)
 		return -1;
-	if (control_readint((int *) &srs_hashlength, "srs_hashlength") == -1)
+	x = env_get("SRS_HASHLENGTH");
+	if (control_readint((int *) &srs_hashlength, x && *x ? x : "srs_hashlength") == -1)
 		return -1;
-	if (control_readint((int *) &srs_hashmin, "srs_hashmin") == -1)
+	x = env_get("SRS_HASHMIN");
+	if (control_readint((int *) &srs_hashmin, x && *x ? x : "srs_hashmin") == -1)
 		return -1;
 	if (srs_hashmin > srs_hashlength)
 		srs_hashmin = srs_hashlength;
-	if (control_readint((int *) &srs_alwaysrewrite, "srs_alwaysrewrite") == -1)
+	x = env_get("SRS_ALWAYSREWRITE");
+	if (control_readint((int *) &srs_alwaysrewrite, x && *x ? x : "srs_alwaysrewrite") == -1)
 		return -1;
-	if (control_readline(&srs_separator, "srs_separator") == -1)
+	x = env_get("SRS_SEPARATOR");
+	if (control_readline(&srs_separator, x && *x ? x : "srs_separator") == -1)
 		return -1;
 	if (srs_separator.len && !stralloc_0(&srs_separator))
 		return -2;
@@ -117,7 +129,7 @@ srsforward(char *address)
 	int             j = 0;
 
 	/*- Return if setup was unsucessfull */
-	if ((x = setup(1)) < 1)
+	if ((x = srs_setup(1)) < 1)
 		return (x); /*- return 0, -1 or -2 */
 	/*- Return zero if null-sender */
 	if ((x = str_len(address)) <= 1)
@@ -167,7 +179,7 @@ srsreverse(char *srsaddress)
 	int             j = 0;
 
 	/*- Return if setup was unsucessfull */
-	if ((x = setup(0)) < 1)
+	if ((x = srs_setup(0)) < 1)
 		return (x); /*- return 0, -1 or -2 */
 	/*- Return error if null-sender */
 	if ((x = str_len(srsaddress)) <= 1)
@@ -204,7 +216,7 @@ srsreverse(char *srsaddress)
 void
 getversion_srs_c()
 {
-	static char    *x = "$Id: srs.c,v 1.3 2022-10-12 16:26:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srs.c,v 1.4 2022-10-12 19:15:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
