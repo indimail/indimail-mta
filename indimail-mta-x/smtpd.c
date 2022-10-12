@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.270 2022-10-12 17:13:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.271 2022-10-12 19:14:07+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sig.h>
 #include <stralloc.h>
@@ -138,7 +138,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.270 $";
+char           *revision = "$Revision: 1.271 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -625,6 +625,9 @@ die_custom(char *arg)
 void
 die_control()
 {
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerrf(" unable to read controls\n");
 	out("451 Requested action aborted: unable to read controls (#4.3.0)\r\n");
 	flush();
 	_exit(1);
@@ -633,6 +636,9 @@ die_control()
 void
 die_ipme()
 {
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerrf(" unable to figure out my IP address\n");
 	out("451 Requested action aborted: unable to figure out my IP addresses (#4.3.0)\r\n");
 	flush();
 	_exit(1);
@@ -2589,9 +2595,7 @@ void
 smtp_init(int force_flag)
 {
 	static int      flag;
-#ifdef HASLIBGSASL
 	int             r;
-#endif
 
 	if (!force_flag && flag)
 		return;
@@ -2651,11 +2655,16 @@ smtp_init(int force_flag)
 	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
 		die_nomem();
 #ifdef HAVESRS
-	if (control_readline(&srs_domain, "srs_domain") == -1)
-		die_control();
-	if (!stralloc_0(&srs_domain))
-		die_nomem();
-	srs_domain.len--;
+	if ((r = srs_setup(0)) < 0) {
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerrf(" srs_setup failed\n");
+		out("451 Requested action aborted: unable to read srs controls (#4.3.0)\r\n");
+		flush();
+		_exit(1);
+	}
+	if (r)
+		srs_domain.len--; /*- substract length due to stralloc_0 */
 #endif
 #ifdef USE_SPF
 	if (control_readline(&spflocal, "spfrules") == -1)
@@ -7501,6 +7510,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.271  2022-10-12 19:14:07+05:30  Cprogrammer
+ * use srs_setup() to determine if srs is configured or not
+ *
  * Revision 1.270  2022-10-12 17:13:54+05:30  Cprogrammer
  * added code to decode SRS addresses
  *
@@ -7756,7 +7768,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.270 2022-10-12 17:13:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.271 2022-10-12 19:14:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
