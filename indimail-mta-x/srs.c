@@ -1,5 +1,9 @@
 /*
  * $Log: srs.c,v $
+ * Revision 1.3  2022-10-12 16:26:26+05:30  Cprogrammer
+ * added documentation
+ * return -1 for control file open failure
+ *
  * Revision 1.2  2021-06-12 19:57:46+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -34,6 +38,20 @@ stralloc        srs_error = { 0 };
 static int      setup_ok = 0;
 static int      srs_secrets_ok = 0;
 
+/*
+ * returns  1 if ok
+ * returns  0 if srs not configured
+ * returns -1 system error
+ * returns -2 out of memory
+ * opens control files
+ * srs_domain
+ * srs_secrets
+ * srs_maxage
+ * srs_hashlength
+ * srs_hashmin
+ * srs_alwaysrewrite
+ * srs_separator
+ */
 static int
 setup(int with_rcpthosts)
 {
@@ -44,25 +62,24 @@ setup(int with_rcpthosts)
 		return -1;
 	if (control_readline(&srs_domain, "srs_domain") == -1)
 		return -1;
-	if (srs_domain.len) {
-		if (!stralloc_0(&srs_domain))
-			return -2;
-	} else {
+	if (!srs_domain.len)
 		return 0;
-	}
-
+	if (!stralloc_0(&srs_domain))
+		return -2;
 	if ((srs_secrets_ok = control_readfile(&srs_secrets, "srs_secrets", 0)) == -1)
 		return -1;
+	if (!srs_secrets.len)
+		return 0;
 	if (control_readint((int *) &srs_maxage, "srs_maxage") == -1)
-		return 0;
+		return -1;
 	if (control_readint((int *) &srs_hashlength, "srs_hashlength") == -1)
-		return 0;
+		return -1;
 	if (control_readint((int *) &srs_hashmin, "srs_hashmin") == -1)
-		return 0;
+		return -1;
 	if (srs_hashmin > srs_hashlength)
 		srs_hashmin = srs_hashlength;
 	if (control_readint((int *) &srs_alwaysrewrite, "srs_alwaysrewrite") == -1)
-		return 0;
+		return -1;
 	if (control_readline(&srs_separator, "srs_separator") == -1)
 		return -1;
 	if (srs_separator.len && !stralloc_0(&srs_separator))
@@ -82,11 +99,9 @@ setup(int with_rcpthosts)
 static int
 srs_error_str(int code)
 {
-	if (!stralloc_copys(&srs_error, "SRS: "))
-		return -2;
-	if (!stralloc_cats(&srs_error, (char *) srs_strerror(code)))
-		return -2;
-	if (!stralloc_0(&srs_error))
+	if (!stralloc_copys(&srs_error, "SRS: ") ||
+			!stralloc_cats(&srs_error, (char *) srs_strerror(code)) || 
+			!stralloc_0(&srs_error))
 		return -2;
 	return -3;
 }
@@ -103,7 +118,7 @@ srsforward(char *address)
 
 	/*- Return if setup was unsucessfull */
 	if ((x = setup(1)) < 1)
-		return (x);
+		return (x); /*- return 0, -1 or -2 */
 	/*- Return zero if null-sender */
 	if ((x = str_len(address)) <= 1)
 		return 0;
@@ -124,20 +139,19 @@ srsforward(char *address)
 	}
 	if (srs_separator.len) {
 		if ((x = srs_set_separator(srs, srs_separator.s[0])) != SRS_SUCCESS)
-			return srs_error_str(x);
+			return srs_error_str(x); /*- returns -2 or -3 */
 	}
 	for (j = 0; j < srs_secrets.len; ++j) {
 		if (!srs_secrets.s[j]) {
 			if ((x = srs_add_secret(srs, srs_secrets.s + i)) != SRS_SUCCESS)
-				return srs_error_str(x);
+				return srs_error_str(x); /*- returns -2 or -3 */
 			i = j + 1;
 		}
 	}
 	if ((x = srs_forward(srs, srsaddress, 1000, address, srs_domain.s)) != SRS_SUCCESS)
-		return srs_error_str(x);
-	if (!stralloc_copys(&srs_result, srsaddress))
-		return -2;
-	if (!stralloc_0(&srs_result))
+		return srs_error_str(x); /*- returns -2 or -3 */
+	if (!stralloc_copys(&srs_result, srsaddress) ||
+			!stralloc_0(&srs_result))
 		return -2;
 	srs_free(srs);
 	return 1;
@@ -154,13 +168,11 @@ srsreverse(char *srsaddress)
 
 	/*- Return if setup was unsucessfull */
 	if ((x = setup(0)) < 1)
-		return (x);
-
+		return (x); /*- return 0, -1 or -2 */
 	/*- Return error if null-sender */
 	if ((x = str_len(srsaddress)) <= 1)
 		return -3;
 	/*- Now it's time to rewrite the envelope */
-
 	srs = srs_new();
 	if (srs_maxage > 0)
 		srs->maxage = srs_maxage;
@@ -170,20 +182,19 @@ srsreverse(char *srsaddress)
 		srs->hashmin = srs_hashmin;
 	if (srs_separator.len) {
 		if ((x = srs_set_separator(srs, srs_separator.s[0])) != SRS_SUCCESS)
-			return srs_error_str(x);
+			return srs_error_str(x); /*- returns -2 or -3 */
 	}
 	for (j = 0; j < srs_secrets.len; ++j) {
 		if (!srs_secrets.s[j]) {
 			if ((x = srs_add_secret(srs, srs_secrets.s + i)) != SRS_SUCCESS)
-				return srs_error_str(x);
+				return srs_error_str(x); /*- returns -2 or -3 */
 			i = j + 1;
 		}
 	}
 	if ((x = srs_reverse(srs, address, 1000, srsaddress)) != SRS_SUCCESS)
-		return srs_error_str(x);
-	if (!stralloc_copys(&srs_result, address))
-		return -2;
-	if (!stralloc_0(&srs_result))
+		return srs_error_str(x); /*- returns -2 or -3 */
+	if (!stralloc_copys(&srs_result, address) ||
+			!stralloc_0(&srs_result))
 		return -2;
 	srs_free(srs);
 	return 1;
@@ -193,7 +204,7 @@ srsreverse(char *srsaddress)
 void
 getversion_srs_c()
 {
-	static char    *x = "$Id: srs.c,v 1.2 2021-06-12 19:57:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srs.c,v 1.3 2022-10-12 16:26:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
