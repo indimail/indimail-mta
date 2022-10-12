@@ -23,6 +23,8 @@ You can set the environment variable \fBCONTROLDIR\fR to make indimail-mta
 look for control files in a different directory. The control files
 \fIsrs_domain\fR and \fIsrs_secrets\fR are mandatory.
 
+You can also configure SRS by setting environment variables.
+
 .SH CONTROL FILES
 
 .TP
@@ -34,6 +36,10 @@ You must create a MX record for srs\.\fIdomain\fR.  If your
 .EX
 srs.example.com
 .EE
+
+\fIsrs_domain\fR can also be configured by setting \fBSRS_DOMAIN\fR
+environment variable. The environment variable takes precedence over
+control file.
 
 .TP
 .I srs_secrets
@@ -48,17 +54,29 @@ $ tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\]^_`{|}~' \
 	</dev/urandom | head -c 24; echo
 .EE
 
+\fIsrs_secrets\fR can also be configured by setting \fBSRS_SECRETS\fR
+environment variable. The environment variable takes precedence over
+control file.
+
 .TP 5
 .I srs_maxage
 The maximum permitted age of a rewritten address. SRS rewritten addresses
 expire after a specified number of days. libsrs2 default is 21. But a week
 is enough to get all bounces. Recommended value is 7
 
+\fIsrs_maxage\fR can also be configured by setting \fBSRS_MAXAGE\fR
+environment variable. The environment variable takes precedence over
+control file.
+
 .TP 5
 .I srs_hashlength
 The hash length to generate in a rewritten address. The hash length is a
 measure of security in the SRS system; longer is more secure.
 Recommended value 4
+
+\fIsrs_hashlength\fR can also be configured by setting \fBSRS_HASHLENGTH\fR
+environment variable. The environment variable takes precedence over
+control file.
 
 .TP 5
 .I srs_hashmin
@@ -68,16 +86,28 @@ shorted hash length. This paramter may be sit to permit checking of hashes
 shorter than \fIsrs_hashlength\fR. This parameter should be at most
 \fIsrs_hashlength\fR. Recommended value 4
 
+\fIsrs_hashmin\fR can also be configured by setting \fBSRS_HASHMIN\fR
+environment variable. The environment variable takes precedence over
+control file.
+
 .TP 5
 .I srs_separator
 The separator to appear immediately after SRS[01] in rewritten addresses.
 This must be \-, + or =. Default value is =
+
+\fIsrs_separator\fR can also be configured by setting \fBSRS_SEPARATOR\fR
+environment variable. The environment variable takes precedence over
+control file.
 
 .TP 5
 .I srs_alwaysrewrite
 Skip \fIrcpthosts\fR check and perform SRS rewriting for all forwarding,
 even when not required. This must be 0 (disabled) or 1 (enabled).
 Default value is 0
+
+\fIsrs_alwaysrewrite\fR can also be configured by setting
+\fBSRS_ALWAYSREWRITE\fR environment variable. The environment variable
+takes precedence over control file.
 
 .SH "SEE ALSO"
 indimail-control(5),

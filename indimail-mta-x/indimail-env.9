@@ -906,6 +906,25 @@ Enables RFC 5336 SMTP Email  Address Internationalization  support in
 \fBqmail-smtpd\fR(8) and \fBqmail-remote\fR(8)
 
 .TP
+\fISRS_DOMAIN\fR
+.TP
+\fISRS_SECRETS\fR
+.TP
+\fISRS_MAXAGE\fR
+.TP
+\fISRS_HASHLENGTH\fR
+.TP
+\fISRS_HASHMIN\fR
+.TP
+\fISRS_ALWAYSREWRITE\fR
+.TP
+\fISRS_SEPARATOR\fR
+These are used for configuring Sender Rewriting Scheme (SRS). Used by 
+\fBcondredirect\fR(1), \fBforward\fR(1), \fBqmail-inject\fR(8),
+\fBqmail-local\fR(8), \fBqmail-send\fR(8), \fBqmta-send\fR(8),
+\fBslowq-send\fR(8), \fBqmail-smtpd\fR(8), \fBsrsfilter\fR(1)
+
+.TP
 \fISTART_PLUGIN\fR \fISTART_PLUGIN_SYMB\fR
 Enables to load and execute startup plugin in \fBqmail-send\fR(8)
 
