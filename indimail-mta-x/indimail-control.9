@@ -73,6 +73,7 @@ in
 .IR badhost ,
 .IR badip ,
 .IR mailarchive ,
+.IR srs_secrets ,
 .IR removeheaders ,
 .IR envheaders ,
 .IR logheaders ,
@@ -280,6 +281,13 @@ control	default	used by
 .I signkeystale	\fR7	\fRqmail-smtpd
 .I nosignhosts	\fR(none)	\fRqmail-remote, qmail-smtpd
 .I nosignmydoms	\fR(none)	\fRqmail-remote
+.I srs_domains	\fR(none)	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
+.I srs_secrets	\fR(none)	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
+.I srs_maxage	\fR7	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
+.I srs_hashlength	\fR4	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
+.I srs_hashmin	\fR4	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
+.I srs_separator	\fR=	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
+.I srs_alwaysrewrite	\fR0	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
 .I servicedir.conf	\fR/service	\fRsvctool
 .fi
 
