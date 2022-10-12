@@ -1,6 +1,8 @@
 * XXX XX XXX XXXX xx:xx:xx +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release @version@-@release@ Start 08/09/2022
 ======= Release Highlights ================================================
+o SRS decoding in qmail-smtpd avoiding the need to create virtualdomain for
+  srs and .qmail-srs-default in /var/indimail/alias
 ===========================================================================
 - 08/09/2022
 01.  First change
@@ -45,6 +47,10 @@ Release @version@-@release@ Start 08/09/2022
 25. qmail-local.c: fixed localdomains restricted delivery feature
 - 10/10/2022
 26. renamed qmail-control to indimail-control, qmail-srs to indimail-srs
+- 12/10/2022
+27. srs.c: return -1 in setup() for control file open failure
+28. srs.c: added documentation
+29. smtpd.c: added SRS code to decode SRS addresses
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
