@@ -303,6 +303,13 @@ SPF evaluation. You can use this variable in your filter scripts or any
 configured qmail-queue-frontend like \fBqmail-multi\fR(8),
 \fBqmail-qfilter\fR(1), \fBqfrontend\fR(1).
 
+\fBqmail-smtpd\fR(8) will decode recipient addresses written using Sender
+Rewriting Scheme (SRS) for srs domain configured in the control file
+\fIsrs_domain\fR. This enabls \fBqmail-smtpd\fR(8) to redirect mail to the
+original sender (forwarder) without using a complicated scheme of using
+\fB.qmail-srs-default\fR which calls \fBsrsfilter\fR(1). See
+\fBindimail-srs\fR(5) on how to configure \fBsrs\fR.
+
 If the environment variable \fBLOGFILTER\fR is defined, \fBqmail-smtpd\fR
 will open a fifo defined by \fBLOGFILTER\fR environment variable in
 O_WRONLY mode. It will write the SMTP transaction log to the fifo. This
@@ -1996,6 +2003,8 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
  "451 Unable to queue messages (#4.3.0)"
  "451 greylist temporary failure - Timeout (#4.3.0)"
  "451 greylist temporary failure (#4.3.0)"
+ "451 failed to decode srs address (#4.3.0)"
+ "451 unable to decode SRS address (#4.3.5)"
  "501 auth exchange cancelled (#5.0.0)"
  "501 invalid parameter syntax (#5.3.2)"
  "501 malformed auth input (#5.5.4)"
@@ -2036,6 +2045,7 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
  "554 too many hops, this message is looping (#5.4.6)"
  "554 SMTP protocol violation. Polite people say hello after the server greets them (#5.7.1)"
  "555 syntax error in address (#5.1.3)"
+ "553 Not our message (#5.7.1)"
  "557 sorry, too many recipients (#5.7.1)"
 
 .SH "SEE ALSO"
@@ -2045,5 +2055,5 @@ qmail-queue(8), qmail-multi(8), qscanq(8), cleanq(8), qmail-remote(8),
 qmail-send(8), qmail-cdb(8), recipient-cdb(8), pam-multi(8), spfquery(1),
 pam-checkpwd(8), inlookup(8), batv(1), vchkpass(8), systpass(8),
 plugin_init(3), dlopen(3), plugtest(1), bogofilter(1), greydaemon(8),
-qmail-greyd(8), rfc-2821(5), rfc-1893(5), rfc-1894(5), rfc-1985(5),
-rfc-2645(5), rfc-1321(5), rfc-822(5), rfc-2104(5), rfc-2476(5)
+qmail-greyd(8), indimail-srs(5), rfc-2821(5), rfc-1893(5), rfc-1894(5),
+rfc-1985(5), rfc-2645(5), rfc-1321(5), rfc-822(5), rfc-2104(5), rfc-2476(5)

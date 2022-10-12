@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.269 2022-10-09 23:00:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.270 2022-10-12 17:13:54+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sig.h>
 #include <stralloc.h>
@@ -89,6 +89,10 @@
 #include <gsasl.h>
 #include <get_scram_secrets.h>
 #endif
+#include "hassrs.h"
+#ifdef HAVESRS
+#include "srs.h"
+#endif
 
 #define MAXHOPS   100
 #define SMTP_PORT  25
@@ -134,12 +138,15 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.269 $";
+char           *revision = "$Revision: 1.270 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
 static stralloc greeting = { 0 };
 
+#ifdef HAVESRS
+stralloc        srs_domain = { 0 };
+#endif
 #ifdef USE_SPF
 stralloc        spflocal = { 0 };
 stralloc        spfguess = { 0 };
@@ -2643,6 +2650,13 @@ smtp_init(int force_flag)
 		die_control();
 	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
 		die_nomem();
+#ifdef HAVESRS
+	if (control_readline(&srs_domain, "srs_domain") == -1)
+		die_control();
+	if (!stralloc_0(&srs_domain))
+		die_nomem();
+	srs_domain.len--;
+#endif
 #ifdef USE_SPF
 	if (control_readline(&spflocal, "spfrules") == -1)
 		die_control();
@@ -3540,7 +3554,7 @@ smtp_mail(char *arg)
 		}
 		break;
 	}
-	if (!(ret = tablematch("hostaccess", remoteip, addr.s + str_chr(addr.s, '@')))) {
+	if (!(ret = tablematch("hostaccess", remoteip, addr.s + str_rchr(addr.s, '@')))) {
 		err_hostaccess(remoteip, addr.s);
 		return;
 	} else
@@ -3741,7 +3755,7 @@ smtp_mail(char *arg)
 		int             at1, at2, iter_pass, flag;
 		char           *dom1, *dom2, *allowed;
 
-		if (mailfrom.s[at1 = str_chr(mailfrom.s, '@')]) {
+		if (mailfrom.s[at1 = str_rchr(mailfrom.s, '@')]) {
 			dom1 = mailfrom.s + at1 + 1;
 			if (!addrallowed(mailfrom.s)) {
 				err_nogateway(remoteip, mailfrom.s, 0, 1);
@@ -3755,7 +3769,7 @@ smtp_mail(char *arg)
 					allowed = remoteinfo;
 					iter_pass++;
 				}
-				if (allowed[at2 = str_chr(allowed, '@')]) {
+				if (allowed[at2 = str_rchr(allowed, '@')]) {
 					dom2 = allowed + at2 + 1;
 					allowed[at2] = 0;
 					if (str_diff(mailfrom.s, allowed)) {
@@ -3933,7 +3947,7 @@ nohasvirtual:
 void
 smtp_rcpt(char *arg)
 {
-	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, at, isLocal;
+	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, at, isLocal, do_srs;
 	char           *tmp;
 #if BATV
 	int             ws = -1;
@@ -3979,6 +3993,58 @@ smtp_rcpt(char *arg)
 	if (batvok)
 		ws = check_batv_sig(); /*- always strip sig, even if it's not a bounce */
 #endif
+#ifdef HAVESRS
+	do_srs = 0;
+	if (srs_domain.len && (case_starts(addr.s, "SRS0=") || case_starts(addr.s, "SRS1="))) {
+		if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1) {
+			if (!str_diffn(srs_domain.s, addr.s + at + 1, srs_domain.len > (addr.len - 2 - at) ? srs_domain.len : addr.len - at - 1))
+				do_srs = 1;
+		}
+	}
+	if (do_srs) {
+		switch (srsreverse(addr.s))
+		{
+		case -3: /*- srs error */
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" failed to decode srs address ");
+			logerr(addr.s);
+			logerr(": ");
+			logerr(srs_error.s);
+			logerrf("\n");
+			out("451 failed to decode srs address (#4.3.0)\r\n");
+			flush();
+			break;
+		case -2: /*- out of memory */
+			die_nomem();
+			break;
+		case -1: /*- unable to read srs control files */
+			die_control();
+			break;
+		case 0:
+			/*-
+			 * srs not configured
+			 * srsreverse returns 0 only when setup() in srs.c
+			 * returns 0
+			 */
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" unable to decode SRS address ");
+			logerr(addr.s);
+			logerrf("\n");
+			out("451 unable to decode SRS address (#4.3.5)\r\n");
+			flush();
+			break;
+		case 1:
+			if (!stralloc_copy(&addr, &srs_result))
+				die_nomem();
+			break;
+		}
+	}
+#endif
+	/*- Reject relay probes. */
 	if (addrrelay()) {
 		err_relay();
 		return;
@@ -7435,6 +7501,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.270  2022-10-12 17:13:54+05:30  Cprogrammer
+ * added code to decode SRS addresses
+ *
  * Revision 1.269  2022-10-09 23:00:33+05:30  Cprogrammer
  * removed include wildmat.h
  *
@@ -7687,7 +7756,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.269 2022-10-09 23:00:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.270 2022-10-12 17:13:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
