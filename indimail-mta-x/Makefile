@@ -1898,7 +1898,7 @@ ipalloc.o strsalloc.o control.o etrn.o atrn.o received.o \
 wildmat.o qmail.o variables.o tls.o envrules.o auto_qmail.o \
 bodycheck.o sqlmatch.o matchregex.o qcount_dir.o mail_acl.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
-socket_v6any.o spf.o dns.o auto_uids.o qregex_sql.o \
+socket_v6any.o spf.o dns.o auto_uids.o qregex_sql.o srs.o \
 tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o \
 ssl_timeoutio.o auto_sysconfdir.o socket.lib dns.lib tls.lib \
@@ -1908,26 +1908,26 @@ gsasl.lib mysql_config
 		smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
 		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o \
 		etrn.o atrn.o received.o wildmat.o qmail.o auto_qmail.o \
-		variables.o envrules.o bodycheck.o spf.o dns.o \
+		variables.o envrules.o bodycheck.o spf.o dns.o srs.o \
 		sqlmatch.o matchregex.o socket_v4mappedprefix.o \
 		socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_sysconfdir.o ssl_timeoutio.o tls.o \
 		$(static_option) $(QMAILLIB) $(dynamic_option) \
-		`cat gsasl.lib socket.lib dns.lib tls.lib`; \
+		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib`; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
 		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
-		received.o wildmat.o qmail.o variables.o envrules.o \
+		received.o wildmat.o qmail.o variables.o envrules.o srs.o \
 		bodycheck.o spf.o dns.o sqlmatch.o matchregex.o auto_qmail.o \
 		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o tls.o \
 		ssl_timeoutio.o -Wl,-Bstatic $(QMAILLIB) -Wl,-Bdynamic \
-		`cat gsasl.lib socket.lib dns.lib tls.lib`; \
+		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib`; \
 	fi
 
 qmail-smtpd: \
@@ -1938,10 +1938,10 @@ envrules.o bodycheck.o sqlmatch.o matchregex.o indimail_stub.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_uids.o auto_qmail.o \
 qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
-query_skt.o fn_handler.o tlsarralloc.o load_mysql.o tls.o \
+query_skt.o fn_handler.o tlsarralloc.o load_mysql.o tls.o srs.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o socket.lib dns.lib \
-tls.lib gsasl.lib ssl_timeoutio.o mysql_config conf-sql
-	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o \
+tls.lib gsasl.lib srs.lib ssl_timeoutio.o mysql_config conf-sql
+	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o srs.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	qcount_dir.o received.o wildmat.o qmail.o variables.o \
 	envrules.o bodycheck.o spf.o dns.o sqlmatch.o auto_qmail.o \
@@ -1951,7 +1951,8 @@ tls.lib gsasl.lib ssl_timeoutio.o mysql_config conf-sql
 	auto_control.o auto_assign.o query_skt.o fn_handler.o tls.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	ssl_timeoutio.o $(static_option) $(QMAILLIB) \
-	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib` -lcrypto -ldl
+	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib srs.lib` \
+	-lcrypto -ldl
 
 qmail-smtpd.o: \
 compile qmail-smtpd.c variables.h hassmtputf8.h hasmysql.h \
@@ -1967,7 +1968,7 @@ envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h \
 smtp_plugin.h auto_prefix.h hastlsv1_1_server.h \
 hastlsv1_2_server.h hasmysql.h indimail_stub.h \
 auto_control.h dns.h hassmtputf8.h haslibgsasl.h \
-conf-tls conf-spf conf-ip conf-plugin conf-batv \
+hassrs.h conf-tls conf-spf conf-ip conf-plugin conf-batv \
 conf-smtputf8 mysql_config mysql_inc
 	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` smtpd.c
