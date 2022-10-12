@@ -1,5 +1,5 @@
 /*
- * $Id: control.c,v 1.23 2022-08-23 22:39:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: control.c,v 1.23 2022-10-12 16:44:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <open.h>
@@ -82,8 +82,8 @@ control_rldef(stralloc *sa, char *fn, int flagme, char *def)
 /*
  * read a line from control file fn
  * into sa without the terminating newline
+ * WARNING!!! sa is not null terminalted
  */
-
 int
 control_readline(stralloc *sa, char *fn)
 {
@@ -99,12 +99,12 @@ control_readline(stralloc *sa, char *fn)
 		if (!stralloc_copys(&controlfile, controldir) ||
 				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
 				!stralloc_cats(&controlfile, fn))
-			return(-1);
+			return -1;
 	} else
 	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
+		return -1;
 	if (!stralloc_0(&controlfile))
-		return(-1);
+		return -1;
 	if ((fd = open_read(controlfile.s)) == -1) {
 		if (errno == error_noent)
 			return 0;
@@ -194,15 +194,15 @@ control_readnativefile(stralloc *sa, char *fn, int mode)
 		if (!stralloc_copys(&controlfile, controldir) ||
 				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
 				!stralloc_cats(&controlfile, fn))
-			return(-1);
+			return -1;
 	} else
 	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
+		return -1;
 	if (!stralloc_0(&controlfile))
-		return(-1);
+		return -1;
 	if ((fd = open_read(controlfile.s)) == -1) {
 		if (errno == error_noent)
-			return(0);
+			return 0;
 		return -1;
 	}
 	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
@@ -257,18 +257,17 @@ control_readfile(stralloc *sa, char *fn, int flagme)
 		if (!stralloc_copys(&controlfile, controldir) ||
 				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
 				!stralloc_cats(&controlfile, fn))
-			return(-1);
+			return -1;
 	} else
 	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
+		return -1;
 	if (!stralloc_0(&controlfile))
-		return(-1);
+		return -1;
 	if ((fd = open_read(controlfile.s)) == -1) {
 		if (errno == error_noent) {
 			if (flagme && meok) {
-				if (!stralloc_copy(sa, &me))
-					return -1;
-				if (!stralloc_0(sa))
+				if (!stralloc_copy(sa, &me) ||
+						!stralloc_0(sa))
 					return -1;
 				return 1;
 			}
@@ -319,12 +318,12 @@ control_readrandom(stralloc *sa, char *fn)
 		if (!stralloc_copys(&controlfile, controldir) ||
 				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
 					!stralloc_cats(&controlfile, fn))
-			return(-1);
+			return -1;
 	} else
 	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
+		return -1;
 	if (!stralloc_0(&controlfile))
-		return(-1);
+		return -1;
 	if ((fd = open_read(controlfile.s)) == -1) {
 		if (errno == error_noent)
 			return 0;
@@ -349,7 +348,7 @@ control_readrandom(stralloc *sa, char *fn)
 		if (count == random) {
 			if (!stralloc_copyb(sa, ptr, ilen)) /*- copy without the \0 */
 				break;
-			return (1);
+			return 1;
 		}
 		ptr += (ilen + 1);
 	}
@@ -379,23 +378,23 @@ control_writefile(stralloc *sa, char *fn)
 		if (!stralloc_copys(&controlfileold, controldir) ||
 				(controlfileold.s[controlfileold.len - 1] != '/' && !stralloc_cats(&controlfileold, "/")) ||
 				!stralloc_cats(&controlfileold, fn))
-			return(-1);
+			return -1;
 	} else
 	if (!stralloc_copys(&controlfileold, fn))
-		return(-1);
+		return -1;
 	if (!stralloc_copy(&controlfilenew, &controlfileold) ||
 			!stralloc_0(&controlfileold) ||
 			!stralloc_catb(&controlfilenew, ".tmp", 4) ||
 			!stralloc_0(&controlfilenew))
-		return(-1);
+		return -1;
 	i = access(controlfilenew.s, F_OK);
 	if ((wfd = (i ? open_excl : open_write) (controlfilenew.s)) == -1)
-		return(-1);
+		return -1;
 	else
 	if (lock_ex(wfd) == -1) {
 		unlink(controlfilenew.s);
 		close(wfd);
-		return(-1);
+		return -1;
 	}
 	for (i = 0; i < sa->len; i++) {
 		if (sa->s[i] == '\0' )
@@ -404,10 +403,10 @@ control_writefile(stralloc *sa, char *fn)
 	if (write(wfd, sa->s, sa->len) == -1) {
 		unlink(controlfilenew.s);
 		close(wfd);
-		return(-1);
+		return -1;
 	}
 	if (rename(controlfilenew.s, controlfileold.s))
-		return(-1);
+		return -1;
 	close(wfd);
 	return 0;
 }
@@ -430,38 +429,38 @@ control_writeint(int val, char *fn)
 		if (!stralloc_copys(&controlfileold, controldir) ||
 				(controlfileold.s[controlfileold.len - 1] != '/' && !stralloc_cats(&controlfileold, "/")) ||
 				!stralloc_cats(&controlfileold, fn))
-			return(-1);
+			return -1;
 	} else
 	if (!stralloc_copys(&controlfileold, fn))
-		return(-1);
+		return -1;
 	if (!stralloc_copy(&controlfilenew, &controlfileold) ||
 			!stralloc_0(&controlfileold) ||
 			!stralloc_catb(&controlfilenew, ".tmp", 4) ||
 			!stralloc_0(&controlfilenew))
-		return(-1);
+		return -1;
 	i = access(controlfilenew.s, F_OK);
 	if ((wfd = (i ? open_excl : open_write) (controlfilenew.s)) == -1)
-		return(-1);
+		return -1;
 	else
 	if (lock_ex(wfd) == -1) {
 		unlink(controlfilenew.s);
 		close(wfd);
-		return(-1);
+		return -1;
 	}
 	strnum[i = fmt_int(strnum, val)] = 0;
 	if (!stralloc_copyb(&line, strnum, i) ||
 			!stralloc_append(&line, "\n")) {
 		unlink(controlfilenew.s);
 		close(wfd);
-		return(-1);
+		return -1;
 	}
 	if (write(wfd, line.s, line.len) == -1) {
 		unlink(controlfilenew.s);
 		close(wfd);
-		return(-1);
+		return -1;
 	}
 	if (rename(controlfilenew.s, controlfileold.s))
-		return(-1);
+		return -1;
 	close(wfd);
 	return 0;
 }
@@ -490,12 +489,12 @@ control_readcmd(stralloc *sa, char *fn)
 		if (!stralloc_copys(&controlfile, controldir) ||
 				(controlfile.s[controlfile.len - 1] != '/' && !stralloc_cats(&controlfile, "/")) ||
 				!stralloc_cats(&controlfile, fn))
-			return(-1);
+			return -1;
 	} else
 	if (!stralloc_copys(&controlfile, fn))
-		return(-1);
+		return -1;
 	if (!stralloc_0(&controlfile))
-		return(-1);
+		return -1;
 	if ((fd = open_read(controlfile.s)) == -1) {
 		if (errno == error_noent)
 			return 0;
@@ -519,9 +518,8 @@ control_readcmd(stralloc *sa, char *fn)
 			if (dup2(pi[1], 1) == -1)
 				return -1;
 			close(pi[0]); /*- close read end */
-			if (!stralloc_0(sa))
-				return -1;
-			if (!(argv = makeargs(sa->s + 1)))
+			if (!stralloc_0(sa) ||
+					!(argv = makeargs(sa->s + 1)))
 				return -1;
 			execv(*argv, argv);
 			_exit (1);
@@ -547,7 +545,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.23 2022-08-23 22:39:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: control.c,v 1.23 2022-10-12 16:44:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;
@@ -557,7 +555,7 @@ getversion_control_c()
 
 /*
  * $Log: control.c,v $
- * Revision 1.23  2022-08-23 22:39:09+05:30  Cprogrammer
+ * Revision 1.23  2022-10-12 16:44:09+05:30  Cprogrammer
  * enabled control_readcmd() which translates output of command as a control file
  *
  * Revision 1.22  2022-04-20 23:10:53+05:30  Cprogrammer
