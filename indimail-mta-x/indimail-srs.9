@@ -4,8 +4,18 @@
 indimail-srs \- indimail srs configuration files
 
 .SH "INTRODUCTION"
+Hosts which adopt the Sender Permitted From (SPF) convention face a
+challenge when required to forward mail. If the forwarding host does not
+change the sender domain, it will fail the SPF test and may not be able to
+hand the message off to the recipient. The Sender Rewriting Scheme (SRS) is
+a scheme for bypassing the Sender Policy Framework's (SPF) methods of
+preventing forged sender addresses. SPF "breaks" email forwarding. SRS is a
+way to fix it. SRS is a simple way for forwarding MTAs to rewrite the
+sender address. indimail-mta's SRS implementation has been adapted from Marcelo
+Coelho's qmail SRS patch. The base SRS functions comes from libsrs2.
+
 You can configure indimail system for SRS by modifying
-.BR indimail 's
+.BR indimail-mta 's
 .I control files
 in
 .BR @controldir@ .
@@ -71,6 +81,10 @@ Default value is 0
 
 .SH "SEE ALSO"
 indimail-control(5),
+qmail-send(8),
+slowq-send(8),
+qmta-send(8),
+qmail-smtpd(8),
 qmail-inject(8),
 qmail-local(8),
 sendmail(1),
