@@ -111,3 +111,7 @@ servicedir.conf
 dkimkeys
 msgqueuelen
 msgqueuesize
+batvkey
+batvkeystale
+nosignremote
+nosignlocals

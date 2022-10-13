@@ -103,7 +103,7 @@ actually, the only one fully specified in the draft. The BATV draft gives a
 framework that other possible techniques can fit into. Other types of
 implementations, such as using public key signatures that can be verified
 by third parties, are mentioned but left undefined. Having the control file
-\fIsignkey\fR or setting the environment variable \fBSIGNKEY\fR enables
+\fIbatvkey\fR or setting the environment variable \fBSIGNKEY\fR enables
 BATV. When a bounce is received by \fBqmail-smtpd\fR(8) it can check the
 validity of the signature in the tagged envelope sender address and reject
 in case the signature is invalid.
@@ -602,21 +602,24 @@ Number of seconds \fBqmail-remote\fR will wait for each response from the
 remote SMTP server. Default: 1200.
 
 .TP 5
-.I signkey
+.I batvkey
 Key for Bounce Address Tag Validation (BATV) signing. The filename can be
-overriden by the environment variable \fISIGNKEY\fR.
+overriden by the environment variable \fBBATVKEY\fR.
 
 .TP 5
-.I nosignhosts
+.I batvnosignremote
 Exclusions of remote hosts for Bounce Address Tag Validation (BATV) that do
-not work with signed addresses.
+not work with signed addresses. The filename can be overriden by the
+environment variable \fBBATVNOSIGNREMOTE\fR.
 
 Attention: If a host has more that one hostname, please list them all in
-\fInosignhosts\fR.
+\fIbatvnosignremote\fR.
 
 .TP 5
-.I nosignmydoms
+.I batvnosignlocals
 Exclusions of domains you host for Bounce Address Tag Validation (BATV).
+The filename can be overriden by the environment variable
+\fBBATVNOSIGNLOCALS\fR.
 
 .TP 5
 .I tlsclientmethod
