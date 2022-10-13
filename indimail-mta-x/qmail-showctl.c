@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-showctl.c,v $
- * Revision 1.7  2022-10-13 21:11:43+05:30  Cprogrammer
+ * Revision 1.7  2022-10-13 21:51:48+05:30  Cprogrammer
  * renamed batv control files (use batv prefix)
  *
  * Revision 1.6  2022-08-17 02:05:41+05:30  Cprogrammer
@@ -446,7 +446,7 @@ valid_control_files(char *fn)
 		"spfbehavior", "spfexp", "spfguess", "spfrules",
 #endif
 #ifdef BATV
-		"signkey", "signkeystale", "nosignhosts", "nosignmydoms",
+		"batvkey", "batvkeystale", "batvnosignremote", "batvnosignlocals",
 #endif
 		"conf-syncdir", "conf-fsync", "servercert.pem", "tlsserverciphers",
 		"tlsclientciphers", "clientcert.pem", "servicedir.conf", "nosignaturedomains",
@@ -880,7 +880,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.7 2022-10-13 21:11:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.7 2022-10-13 21:51:48+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
