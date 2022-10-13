@@ -1645,7 +1645,7 @@ qmail-remote.o: \
 compile qmail-remote.c tls.h ssl_timeoutio.h control.h dns.h quote.h ip.h \
 ipalloc.h query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
 variables.h hastlsv1_1_client.h hastlsv1_2_client.h auto_control.h \
-hastlsa.h tlsacheck.h fn_handler.h tlsarralloc.h hassmtputf8.h \
+hastlsa.h tlsacheck.h fn_handler.h tlsarralloc.h hassmtputf8.h batv.h \
 haslibgsasl.h conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
 		conf-batv` qmail-remote.c
@@ -1963,7 +1963,7 @@ haslibgsasl.h auto_control.h
 smtpd.o: \
 compile smtpd.c tls.h ssl_timeoutio.h control.h received.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
-matchregex.o variables.h rcpthosts.h etrn.h \
+matchregex.o variables.h rcpthosts.h etrn.h batv.h \
 envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h \
 smtp_plugin.h auto_prefix.h hastlsv1_1_server.h \
 hastlsv1_2_server.h hasmysql.h indimail_stub.h \
@@ -3539,7 +3539,7 @@ compile qdane.c tlsacheck.h
 batv: load batv.o
 	./load batv $(QMAILLIB) -lcrypto
 
-batv.o: compile batv.c conf-batv
+batv.o: compile batv.c conf-batv batv.h
 	./compile `grep -h -v "^#" conf-batv` batv.c
 
 uacl: \
