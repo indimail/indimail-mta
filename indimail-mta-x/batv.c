@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.10  2022-10-13 23:58:43+05:30  Cprogrammer
+ * added link to batv draft used by indimail-mta
+ *
  * Revision 1.9  2022-10-13 20:29:09+05:30  Cprogrammer
  * use definitions from batv.h
  *
@@ -30,6 +33,8 @@
  *
  * Revision 1.1  2009-09-01 22:23:19+05:30  Cprogrammer
  * Initial revision
+ *
+ * https://datatracker.ietf.org/doc/html/draft-levine-mass-batv-02
  *
  */
 #ifdef BATV
@@ -343,7 +348,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.9 2022-10-13 20:29:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.10 2022-10-13 23:58:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
