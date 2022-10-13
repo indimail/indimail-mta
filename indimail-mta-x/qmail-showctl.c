@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.7  2022-10-13 21:11:43+05:30  Cprogrammer
+ * renamed batv control files (use batv prefix)
+ *
  * Revision 1.6  2022-08-17 02:05:41+05:30  Cprogrammer
  * added qregex, tlsclients to control file list
  *
@@ -397,10 +400,10 @@ display_control()
 	do_str("spfrules", 0, "", "The local SPF rules are: ");
 #endif
 #ifdef BATV
-	do_str("signkey", 0, "No BATV sign key", "BATV sign key: ");
-	do_int("signkeystale", "7", "BATV sign key stale is set to ", "");
-	do_lst("nosignhosts", "Nothing defined.", "", " will be excluded for BATV signing (remote hosts).");
-	do_lst("nosignmydoms", "Nothing defined.", "", " will be excluded for BATV signing (local domain).");
+	do_str("batvkey", 0, "No BATV sign key", "BATV sign key: ");
+	do_int("batvkeystale", "7", "BATV sign key stale is set to ", "");
+	do_lst("batvnosignremote", "Nothing defined.", "", " will be excluded for BATV signing (remote hosts).");
+	do_lst("batvnosignlocals", "Nothing defined.", "", " will be excluded for BATV signing (local domain).");
 #endif
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 	do_str("tlsclientmethod", 0, "TLSv1", "TLS client method is ");
@@ -877,7 +880,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.6 2022-08-17 02:05:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.7 2022-10-13 21:11:43+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
