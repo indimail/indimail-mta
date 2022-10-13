@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.156 2022-09-07 20:18:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.157 2022-10-13 20:32:50+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -154,8 +154,8 @@ stralloc        helo_str = { 0 };
 
 /*- http://mipassoc.org/pipermail/batv-tech/2007q4/000032.html */
 #ifdef BATV
+#include "batv.h"
 #include <openssl/ssl.h>
-#define BATVLEN 3 /*- number of bytes */
 #include "byte.h"
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #include <openssl/evp.h>
@@ -163,12 +163,12 @@ stralloc        helo_str = { 0 };
 #include <openssl/md5.h>
 #endif
 char            batvok = 0;
-stralloc        signkey = { 0 };
-stralloc        nosign = { 0 };
-stralloc        nosigndoms = { 0 };
+stralloc        batvkey = { 0 };
+stralloc        nosignremote = { 0 };
+stralloc        nosignlocals = { 0 };
 
-struct constmap mapnosign;
-struct constmap mapnosigndoms;
+struct constmap mapnosignremote;
+struct constmap mapnosignlocals;
 #endif
 
 #if defined(TLS) && defined(HASTLSA)
@@ -3474,32 +3474,34 @@ getcontrols()
 		break;
 	}
 #ifdef BATV
-	if ((batvok = control_readline(&signkey, (x = env_get("SIGNKEY")) ? x : "signkey")) == -1)
+	if ((batvok = control_readline(&batvkey, (x = env_get("BATVKEY")) ? x : "batvkey")) == -1)
 		temp_control("Unable to read control file", x);
 	if (batvok) {
-		switch (control_readfile(&nosign, "nosignhosts", 0))
+		x = (x = env_get("BATVNOSIGNREMOTE")) && *x ? x : "batvnosignremote";
+		switch (control_readfile(&nosignremote, x, 0))
 		{
 		case -1:
-			temp_control("Unable to read control file", "nosignhosts");
+			temp_control("Unable to read control file", x);
 		case 0:
-			if (!constmap_init(&mapnosign, "", 0, 1))
+			if (!constmap_init(&mapnosignremote, "", 0, 1))
 				temp_nomem();
 			break;
 		case 1:
-			if (!constmap_init(&mapnosign, nosign.s, nosign.len, 0))
+			if (!constmap_init(&mapnosignremote, nosignremote.s, nosignremote.len, 0))
 				temp_nomem();
 			break;
 		}
-		switch (control_readfile(&nosigndoms, "nosignmydoms", 0))
+		x = (x = env_get("BATVNOSIGNLOCALS")) && *x ? x : "batvnosignlocals";
+		switch (control_readfile(&nosignlocals, x, 0))
 		{
 		case -1:
-			temp_control("Unable to read control file", "nosignmydoms");
+			temp_control("Unable to read control file", x);
 		case 0:
-			if (!constmap_init(&mapnosigndoms, "", 0, 1))
+			if (!constmap_init(&mapnosignlocals, "", 0, 1))
 				temp_nomem();
 			break;
 		case 1:
-			if (!constmap_init(&mapnosigndoms, nosigndoms.s, nosigndoms.len, 0))
+			if (!constmap_init(&mapnosignlocals, nosignlocals.s, nosignlocals.len, 0))
 				temp_nomem();
 			break;
 		}
@@ -3705,7 +3707,7 @@ sign_batv()
 	if (!EVP_DigestInit_ex(mdctx, md, NULL) ||
 			!EVP_DigestUpdate(mdctx, kdate, 4) ||/*- date */
 			!EVP_DigestUpdate(mdctx, smtp_sender.s, smtp_sender.len) ||
-			!EVP_DigestUpdate(mdctx, signkey.s, signkey.len) ||
+			!EVP_DigestUpdate(mdctx, batvkey.s, batvkey.len) ||
 			!EVP_DigestFinal_ex(mdctx, md5digest, &md_len))
 		temp_batv("batv: unable to hash md5 message digest");
 	EVP_MD_free(md);
@@ -3713,7 +3715,7 @@ sign_batv()
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4);
 	MD5_Update(&md5, smtp_sender.s, smtp_sender.len);
-	MD5_Update(&md5, signkey.s, signkey.len);
+	MD5_Update(&md5, batvkey.s, batvkey.len);
 	MD5_Final(md5digest, &md5);
 #endif
 	for (i = 0; i < BATVLEN; i++) {
@@ -3966,14 +3968,14 @@ main(int argc, char **argv)
 #endif
 	}
 #if BATV
-	if (batvok && smtp_sender.len && signkey.len) {
+	if (batvok && smtp_sender.len && batvkey.len) {
 		if (!stralloc_0(&smtp_sender))
 			temp_nomem();		/*- null terminate */
 		smtp_sender.len--;
 		i = str_rchr(*recips, '@');	/*- should check all recips, not just the first */
 		j = str_rchr(smtp_sender.s, '@');
-		if (!constmap(&mapnosign, *recips + i + 1, str_len(*recips + i + 1))
-			&& !constmap(&mapnosigndoms, smtp_sender.s + j + 1, smtp_sender.len - (j + 1)))
+		if (!constmap(&mapnosignremote, *recips + i + 1, str_len(*recips + i + 1))
+			&& !constmap(&mapnosignlocals, smtp_sender.s + j + 1, smtp_sender.len - (j + 1)))
 			sign_batv(); /*- modifies sender */
 	}
 #endif
@@ -4150,13 +4152,17 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.156 2022-09-07 20:18:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.157 2022-10-13 20:32:50+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.157  2022-10-13 20:32:50+05:30  Cprogrammer
+ * use batv prefix for batv control files
+ * allow batv parameters to be set via env variables
+ *
  * Revision 1.156  2022-09-07 20:18:53+05:30  Cprogrammer
  * fixed compilation on systems without TLS1_3_VERSION
  *
