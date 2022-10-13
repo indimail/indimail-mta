@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.9  2022-10-13 20:29:09+05:30  Cprogrammer
+ * use definitions from batv.h
+ *
  * Revision 1.8  2022-05-18 13:29:25+05:30  Cprogrammer
  * openssl 3.0.0 port
  *
@@ -50,13 +53,10 @@
 #include <byte.h>
 #include <fmt.h>
 #include <noreturn.h>
+#include "batv.h"
 
 #define FATAL "batv: fatal: "
 #define BATVLEN 3 /*- number of bytes */
-
-#define NO_BATV 1
-#define FORMAT_BAD 2
-#define STALE_SIG  3
 
 stralloc        batvkey = {0};
 stralloc        nosign = {0};
@@ -78,15 +78,15 @@ print_batv_err(int code, int days)
 
 	switch (code)
 	{
-	case NO_BATV:
+	case BATV_NOSIGNATURE:
 		if (substdio_puts(subfderr, "missing BATV address") == -1)
 			_exit(111);
 		break;
-	case FORMAT_BAD:
+	case BATV_BADFORMAT:
 		if (substdio_puts(subfderr, "bad BATV address encoding") == -1)
 			_exit(111);
 		break;
-	case STALE_SIG:
+	case BATV_STALE:
 		strnum[fmt_int(strnum, days)] = 0;
 		if (substdio_puts(subfderr, "expired BATV address [") == -1 ||
 				substdio_puts(subfderr, strnum) == -1 ||
@@ -130,15 +130,15 @@ checkbatv(char *sender, int *days)
 		byte_copy(kdate, 4, newsender.s + 5); /*- string after prvs= */
 		md5pos = 9;
 	} else
-		return NO_BATV; /*- no BATV */
+		return BATV_NOSIGNATURE; /*- no BATV */
 	if (kdate[0] != '0')
-		return FORMAT_BAD; /*- not known format 0 */
+		return BATV_BADFORMAT; /*- not known format 0 */
 	if (scan_ulong(kdate + 1, &signday) != 3)
-		return FORMAT_BAD;
+		return BATV_BADFORMAT;
 	if (days)
 		*days = daynumber - signday;
 	if ((unsigned) (daynumber - signday) > batvkeystale)
-		return STALE_SIG; /*- stale bounce */
+		return BATV_STALE; /*- stale bounce */
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	if (!(md = EVP_MD_fetch(NULL, "md5", NULL)))
 		strerr_die2x(111, FATAL, "EVP_MD_fetch: unable to fetch digest implementation for MD5");
@@ -171,7 +171,7 @@ checkbatv(char *sender, int *days)
 		if (c >= 'A' && c <= 'F')
 			x = 10 + c - 'A';
 		else
-			return FORMAT_BAD;
+			return BATV_BADFORMAT;
 		x <<= 4;
 		c = newsender.s[md5pos + 2 * i + 1];
 		if (isdigit(c))
@@ -183,15 +183,15 @@ checkbatv(char *sender, int *days)
 		if (c >= 'A' && c <= 'F')
 			x += 10 + c - 'A';
 		else
-			return FORMAT_BAD;
+			return BATV_BADFORMAT;
 		if (x != md5digest[i])
-			return FORMAT_BAD;
+			return BATV_BADFORMAT;
 	}
 	/*- peel off the signature */
 	if (!stralloc_copyb(&newsender, newsender.s + slpos + 1, len - (slpos + 1)) ||
 			!stralloc_0(&newsender))
 		die_nomem();
-	return 0;
+	return BATV_OK;
 }
 
 char *
@@ -343,7 +343,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.8 2022-05-18 13:29:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: batv.c,v 1.9 2022-10-13 20:29:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
