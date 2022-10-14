@@ -142,7 +142,7 @@ supports the \fBtls-unique\fR and \fBtls-exporter\fR channel binding types
 from the indimail MySQL database for authenticaion. If you have used
 vpasswd(1) or vmoduser(1) to set clear text passwords for CRAM
 authentication methods, the same passwords will work for SCRAM
-authentication if the environment variable \fBGSASL_PASSWORD\fB is set.
+authentication if the environment variable \fBGSASL_PASSWORD\fR is set.
 
 .I checkprogram
 returns 0 on successful authentication, terminating the chain. Similarly
@@ -157,15 +157,15 @@ you want to support.
 Once a user has authenticated or authentication is enforced MASQUERADE env
 variable can be used to enforce a certain behaviour.
 
-If the environment variable MASQUERADE is set,
+If the environment variable \fBMASQUERADE\fR is set,
 .LP
 .nr step 1 1
 .IP \n[step] 2
 after successful authentication, relaying to outside domains will be
-allowed with any sender address (if MASQUERADE is set but empty).
+allowed with any sender address (if \fBMASQUERADE\fR is set but empty).
 .IP \n+[step]
 after successful authentication, relaying to outside domains will be
-allowed with the sender address equal to the value of MASQUERADE
+allowed with the sender address equal to the value of \fBMASQUERADE\fR
 environment variable
 .IP \n+[step]
 mails to local domain will be allowed without authentication
@@ -527,7 +527,7 @@ To enable badhelo check, define the environment variable BADHELOCHECK or
 set the environment variable BADHELO to a control file containing
 unacceptable HELO/EHLO greetings strings. When badhelocheck is enabled,
 .B qmail-smtpd
-will reject email send using HELO hostname equal to your IP address, your
+will reject email sent using HELO hostname equal to your IP address, your
 hostname or any hostname without dots. if ENFORCE_FQDN_HELO is set
 .B qmail-smtpd
 will reject emails from hosts which pass HELO hostname without dots.
