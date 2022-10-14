@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.272 2022-10-13 21:33:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.273 2022-10-14 22:40:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -146,7 +146,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.272 $";
+char           *revision = "$Revision: 1.273 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -202,7 +202,7 @@ char            isbounce;
 static char     strnum[FMT_ULONG];
 static char     accept_buf[FMT_ULONG];
 
-char           *remoteip, *remotehost, *remoteinfo, *local, *relayclient, *nodnscheck, *msgsize, *fakehelo;
+char           *remoteip, *remotehost, *remoteinfo, *localhost, *relayclient, *nodnscheck, *msgsize, *fakehelo;
 char           *hostname, *bouncemail, *requireauth, *localip, *greyip;
 #ifdef IPV6
 char           *remoteip4;
@@ -765,9 +765,9 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	int             logfifo, match;
 	char           *fifo_name;
 	struct stat     statbuf;
-	static char     fifobuf[256], inbuf[1024];
-	static substdio logfifo_in;
-	static substdio logfifo_out;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+	char            fifobuf[256], inbuf[1024];
+	substdio        logfifo_in, logfifo_out;
 
 	if (!env_get("SPAMFILTER"))
 		return;
@@ -795,42 +795,18 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	 * write the SMTP transaction line to LOGFILTER fifo. All lines written
 	 * to this fifo will be read by the qmail-cat spamlogger service
 	 */
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	strnum2[fmt_ulong(strnum2, msg_size)] = 0;
 	substdio_fdbuf(&logfifo_out, write, logfifo, fifobuf, sizeof (fifobuf));
-	if (substdio_puts(&logfifo_out, "qmail-smtpd: ") == -1) {
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&logfifo_out, "pid ") == -1) {
-		close(logfifo);
-		return;
-	}
-	strnum[fmt_ulong(strnum, getpid())] = 0;
-	if (substdio_puts(&logfifo_out, strnum) == -1) {
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&logfifo_out, " MAIL from <") == -1) {
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&logfifo_out, arg1) == -1) {
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&logfifo_out, "> RCPT <") == -1) {
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&logfifo_out, arg2) == -1) {
-		close(logfifo);
-		return;
-	}
-	if (substdio_puts(&logfifo_out, "> Size: ") == -1) {
-		close(logfifo);
-		return;
-	}
-	strnum[fmt_ulong(strnum, msg_size)] = 0;
-	if (substdio_puts(&logfifo_out, strnum) == -1) {
+	if (substdio_puts(&logfifo_out, "qmail-smtpd: ") == -1 ||
+			substdio_puts(&logfifo_out, "pid ") == -1 ||
+			substdio_puts(&logfifo_out, strnum1) == -1 ||
+			substdio_puts(&logfifo_out, " MAIL from <") == -1 ||
+			substdio_puts(&logfifo_out, arg1) == -1 ||
+			substdio_puts(&logfifo_out, "> RCPT <") == -1 ||
+			substdio_puts(&logfifo_out, arg2) == -1 ||
+			substdio_puts(&logfifo_out, "> Size: ") == -1 ||
+			substdio_puts(&logfifo_out, strnum2) == -1) {
 		close(logfifo);
 		return;
 	}
@@ -1021,7 +997,7 @@ msg_notify()
 		protocol = proto.s;
 	}
 	datetime_tai(&dt, now());
-	received(&qqt, (char *) protocol, local, remoteip,
+	received(&qqt, (char *) protocol, localhost, remoteip,
 			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 	strnum[fmt_ulong(strnum, msg_size)] = 0;
 	qmail_puts(&qqt, "X-size-Notification: ");
@@ -1665,12 +1641,19 @@ void
 err_authinsecure(char *r_ip, int ret)
 {
 	static char     retstr[FMT_ULONG];
+	int             i;
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(r_ip);
-	logerr(" status=[");
+	if (authmethod.len) {
+		logerr(" AUTH ");
+		i = authmethod.s[0];
+		logerr(get_authmethod(i));
+	} else
+		logerr(" AUTH Unknown ");
+	logerr("status=[");
 	if (ret < 0)
 		logerr("-");
 	logerr(retstr);
@@ -2352,8 +2335,12 @@ dohelo(char *arg)
 	}
 	/*- badhelo */
 	if (dohelocheck) {
-		if (!case_diffs(localip, remoteip) && case_diffs(local, helohost.s) && case_diffs(localip, helohost.s))
-			err_localhelo(local, localip, arg);
+		/*
+		 * if not connecting from the local ip interface
+		 * helo must not match localhost or localip
+		 */
+		if (case_diffs(localip, remoteip) && (!case_diffs(localhost, helohost.s) || case_diffs(localip, helohost.s)))
+			err_localhelo(localhost, localip, arg);
 		switch (address_match
 				((badhelofn
 				  && *badhelofn) ? badhelofn : "badhelo", &helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0,
@@ -2785,8 +2772,8 @@ setup()
 	if (!(localip = env_get("TCPLOCALIP")))
 		localip = "unknown";
 #endif
-	if (!(local = env_get("TCPLOCALHOST")))
-		local = hostname && *hostname ? hostname : "unknown";
+	if (!(localhost = env_get("TCPLOCALHOST")))
+		localhost = hostname && *hostname ? hostname : "unknown";
 	if (!(remotehost = env_get("TCPREMOTEHOST")))
 		remotehost = "unknown";
 	remoteinfo = env_get("TCPREMOTEINFO");
@@ -3829,9 +3816,9 @@ smtp_mail(char *arg)
 			}
 			mailfrom.s[at1] = 0;
 			for (flag = 0, iter_pass = 0;; iter_pass++) {
-				if (x && *x) {
+				if (x && *x)
 					allowed = iter_pass ? remoteinfo : x;
-				} else {
+				else {
 					allowed = remoteinfo;
 					iter_pass++;
 				}
@@ -4738,11 +4725,9 @@ create_logfilter()
 			die_nomem();
 		if ((x = env_get("LOGFD")))
 			scan_int(x, &logfd);
-		if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
-			die_logfilter();
-		if (unlink(tmpFile.s))
-			die_logfilter();
-		if (dup2(fd, logfd) == -1)
+		if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1 ||
+				unlink(tmpFile.s) ||
+				dup2(fd, logfd) == -1)
 			die_logfilter();
 		if (fd != logfd)
 			close(fd);
@@ -4840,7 +4825,7 @@ smtp_data(char *arg)
 			die_nomem();
 		protocol = proto.s;
 	}
-	received(&qqt, (char *) protocol, local, remoteip,
+	received(&qqt, (char *) protocol, localhost, remoteip,
 			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 #ifdef USE_SPF
 	spfreceived();
@@ -4854,7 +4839,7 @@ smtp_data(char *arg)
 		for (i = 0; i < plugin_count; i++) {
 			if (!plug[i] || !plug[i]->data_func)
 				continue;
-			if (plug[i]->data_func(local, remoteip, remotehost, remoteinfo, &mesg)) {
+			if (plug[i]->data_func(localhost, remoteip, remotehost, remoteinfo, &mesg)) {
 				out(mesg);
 				flush();
 				logerr("qmail-smtpd: ");
@@ -5014,19 +4999,16 @@ authenticate(int method)
 		close(pe[1]);
 #endif
 	substdio_fdbuf(&ssup, safewrite, pi[1], upbuf, sizeof upbuf);
-	if (substdio_put(&ssup, user.s, user.len) == -1)
-		return err_write();
-	if (substdio_put(&ssup, pass.s, pass.len) == -1)
-		return err_write();
-	if (substdio_put(&ssup, resp.s, resp.len) == -1)
+	if (substdio_put(&ssup, user.s, user.len) == -1 ||
+			substdio_put(&ssup, pass.s, pass.len) == -1 ||
+			substdio_put(&ssup, resp.s, resp.len) == -1)
 		return err_write();
 	strnum[0] = method;
 	strnum[1] = 0;
 	if (!stralloc_copyb(&authmethod, strnum, 2))
 		die_nomem();
-	if (substdio_put(&ssup, authmethod.s, authmethod.len) == -1)
-		return err_write();
-	if (substdio_flush(&ssup) == -1)
+	if (substdio_put(&ssup, authmethod.s, authmethod.len) == -1 ||
+			substdio_flush(&ssup) == -1)
 		return err_write();
 	close(pi[1]);
 	byte_zero(pass.s, pass.len);
@@ -5037,9 +5019,8 @@ authenticate(int method)
 		respbuf[n] = 0;
 		close(po[0]);
 	}
-	if (wait_pid(&wstat, child) == -1)
-		return err_child();
-	if (wait_crashed(wstat))
+	if (wait_pid(&wstat, child) == -1 ||
+			wait_crashed(wstat))
 		return err_child();
 	if ((i = wait_exitcode(wstat))) {
 #ifdef TLS
@@ -5195,9 +5176,8 @@ auth_cram(int method)
 	while (*s == ' ')
 		++s;
 	slop.s[i] = 0;
-	if (!stralloc_copys(&user, slop.s)) /*- userid */
-		die_nomem();
-	if (!stralloc_copys(&resp, s)) /*- digest */
+	if (!stralloc_copys(&user, slop.s) || /*- userid */
+			!stralloc_copys(&resp, s)) /*- digest */
 		die_nomem();
 	if (!user.len || !resp.len)
 		return err_input();
@@ -6087,31 +6067,26 @@ auth_digest_md5()
 		die_nomem();
 
 	/*- scan slop for all required fields, fill resp for later auth.  */
-	if (scan_response(&user, &slop, "username") == 0)
-		return (err_input());
-	if (scan_response(&tmp, &slop, "digest-uri") == 0)
+	if (scan_response(&user, &slop, "username") == 0 ||
+			scan_response(&tmp, &slop, "digest-uri") == 0)
 		return (err_input());
 	if (!stralloc_cats(&resp, "digest-uri=") ||
 			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- check nc field */
-	if (scan_response(&tmp, &slop, "nc") == 0)
-		return (err_input());
-	if (tmp.len != 8)
-		return (err_input());
-	if (case_diffb("00000001", 8, tmp.s) != 0)
+	if (scan_response(&tmp, &slop, "nc") == 0 ||
+			tmp.len != 8 ||
+			case_diffb("00000001", 8, tmp.s) != 0)
 		return (err_input());
 	if (!stralloc_cats(&resp, "\nnc=") ||
 			!stralloc_cat(&resp, &tmp))
 		die_nomem();
 
 	/*- check nonce */
-	if (scan_response(&tmp, &slop, "nonce") == 0)
-		return (err_input());
-	if (tmp.len != nonce.len)
-		return (err_input());
-	if (case_diffb(nonce.s, tmp.len, tmp.s) != 0)
+	if (scan_response(&tmp, &slop, "nonce") == 0 ||
+			tmp.len != nonce.len ||
+			case_diffb(nonce.s, tmp.len, tmp.s) != 0)
 		return (err_input());
 	if (!stralloc_cats(&resp, "\nnonce=") ||
 			!stralloc_cat(&resp, &tmp))
@@ -7489,9 +7464,8 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			}
 		}
 	}
-	if (!(plughandle = (void **) alloc(sizeof (void *) * plugin_count)))
-		die_nomem();
-	if (!(plug = (PLUGIN **) alloc(sizeof (PLUGIN *) * plugin_count)))
+	if (!(plughandle = (void **) alloc(sizeof (void *) * plugin_count)) ||
+			!(plug = (PLUGIN **) alloc(sizeof (PLUGIN *) * plugin_count)))
 		die_nomem();
 	plugin.len = len - 4;
 	if (!stralloc_cats(&plugin, ".so") ||
@@ -7556,11 +7530,9 @@ addrrelay()
 	if (j < 0)
 		j = addr.len;
 	while (--j >= 0) {
-		if (addr.s[j] == '@')
-			return 1;
-		if (addr.s[j] == '%')
-			return 1;
-		if (addr.s[j] == '!')
+		if (addr.s[j] == '@' ||
+				addr.s[j] == '%' ||
+				addr.s[j] == '!')
 			return 1;
 	}
 	return 0;
@@ -7568,6 +7540,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.273  2022-10-14 22:40:59+05:30  Cprogrammer
+ * corrected helocheck
+ * display auth method used when SECURE_AUTH is set
+ *
  * Revision 1.272  2022-10-13 21:33:51+05:30  Cprogrammer
  * refactored batv code
  * display control filename in die_control()
@@ -7830,7 +7806,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.272 2022-10-13 21:33:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.273 2022-10-14 22:40:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
