@@ -1,5 +1,8 @@
 /*
  * $Log: spf.c,v $
+ * Revision 1.20  2022-10-14 22:41:49+05:30  Cprogrammer
+ * changed variable name for localhost to localhost
+ *
  * Revision 1.19  2022-01-30 09:43:47+05:30  Cprogrammer
  * initialize ip4mask, ip6mask variables
  *
@@ -129,7 +132,7 @@ static ipalloc  ia = { 0 };
 
 extern stralloc addr;
 extern stralloc helohost;
-extern char    *local;
+extern char    *localhost;
 
 extern stralloc spflocal;
 extern stralloc spfguess;
@@ -512,7 +515,7 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 			return 0;
 		break;
 	case 'R':
-		if (!stralloc_copys(&sa, local))
+		if (!stralloc_copys(&sa, localhost))
 			return 0;
 		break;
 	case 'S':
@@ -1429,7 +1432,7 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.19 2022-01-30 09:43:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.20 2022-10-14 22:41:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

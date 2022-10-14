@@ -1,5 +1,8 @@
 /*
  * $Log: spfquery.c,v $
+ * Revision 1.8  2022-10-14 22:42:11+05:30  Cprogrammer
+ * changed variable name for localhost to localhost
+ *
  * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -32,7 +35,7 @@
 #ifdef USE_SPF
 #include "spf.h"
 
-char           *local = "localhost";
+char           *localhost = "localhost";
 stralloc        addr = { 0 };
 stralloc        helohost = { 0 };
 stralloc        spflocal = { 0 };
@@ -162,7 +165,7 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spfquery.c,v 1.8 2022-10-14 22:42:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
