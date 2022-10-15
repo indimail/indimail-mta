@@ -113,5 +113,12 @@ msgqueuelen
 msgqueuesize
 batvkey
 batvkeystale
-nosignremote
-nosignlocals
+batvnosignremote
+batvnosignlocals
+srs_domain
+srs_secrets
+srs_maxage
+srs_hashlength
+srs_hashmin
+srs_alwaysrewrite
+srs_separator
