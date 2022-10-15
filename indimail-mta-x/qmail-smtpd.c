@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.6  2022-10-15 12:09:18+05:30  Cprogrammer
+ * updated control file list and env variable list
+ *
  * Revision 1.5  2022-08-17 13:12:35+05:30  Cprogrammer
  * -v option added to display feature list and exit
  *
@@ -65,7 +68,11 @@ print_details()
 		"spfbehavior", "spfexp", "spfguess", "spfrules",
 #endif
 #ifdef BATV
-		"signkey", "signkeystale", "nosignhosts", "nosignmydoms",
+		"batvkey", "batvkeystale", "batvnosignlocals", "batvnosignremote",
+#endif
+#ifdef HAVESRS
+		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
+		"srs_alwaysrewrite", "srs_separator",
 #endif
 		"servercert.pem", "tlsserverciphers", "mysql_lib", 0};
 	char          *cdb_sql_files[] = {
@@ -74,8 +81,14 @@ print_details()
 		"greylist.white", "tlsa.white", "tlsadomains", "badip", 0};
 	char          *read_env_vars[] = {
 		"ANTISPOOFING", "AUTH_ALL", "AUTHRULES", "BADHELO", "BADHELOCHECK",
-		"BADHOST", "BADHOSTCHECK", "BADIP", "BADIPCHECK", "BODYCHECK",
-		"BOUNCEMAIL", "CERTDIR", "CHECKRECIPIENT", "CHECKRELAY", "CLIENTCA",
+		"BADHOST", "BADHOSTCHECK", "BADIP", "BADIPCHECK",
+#ifdef USE_SPF
+		"SPFBEHAVIOR", "SPFIPV6",
+#endif
+#ifdef BATV
+		"BATVNOSIGNLOCALS", "BATVNOSIGNREMOTE", "BATVKEY", "BATVKEYSTALE",
+#endif
+		"BODYCHECK", "BOUNCEMAIL", "CERTDIR", "CHECKRECIPIENT", "CHECKRELAY", "CLIENTCA",
 		"CLIENTCRL", "CONTROLDIR", "CUGMAIL", "DATABYTES", "DATABYTES_NOTIFY",
 		"DEFAULT_DOMAIN", "DISABLE_AUTH_LOGIN", "DISABLE_AUTH_PLAIN", "DISABLE_CRAM_MD5",
 		"DISABLE_CRAM_RIPEMD", "DISABLE_CRAM_SHA1", "DISABLE_CRAM_SHA224",
@@ -86,12 +99,21 @@ print_details()
 		"DOMAINQUEUE", "ENFORCE_FQDN_HELO", "FORCE_TLS", "FROMRULES", "GREYIP",
 		"LOGFD", "LOGFILTER", "MASQUERADE", "MAX_RCPT_ERRCOUNT", "NODNSCHECK",
 		"OPENRELAY", "PLUGINDIR", "RELAYCLIENT", "REQPTR", "REQUIREAUTH", "SECURE_AUTH",
-		"SERVERCERT", "SHUTDOWN", "SMTP_PLUGIN", "SMTP_PLUGIN_SYMB", "SMTPS", "SMTPUTF8",
-		"SPAMFILTER", "STARTTLS", "TLS_CIPHER_LIST", "TMPDIR", "VIRTUAL_PKG_LIB", "VIRUSCHECK", 0};
+		"SERVERCERT", "SHUTDOWN", "SIGNATURES", "SMTP_PLUGIN", "SMTP_PLUGIN_SYMB",
+		"SMTPS", "SMTPUTF8", "SPAMFILTER",
+#ifdef HAVESRS
+		"SRS_DOMAIN", "SRS_SECRETS", "SRS_MAXAGE", "SRS_HASHLENGTH", "SRS_HASHMIN",
+		"SRS_ALWAYSREWRITE", "SRS_SEPARATOR",
+#endif
+		"STARTTLS", "TARPITCOUNT", "TARPITDELAY", "GREETDELAY",
+		"TLS_CIPHER_LIST", "TMPDIR", "VIRTUAL_PKG_LIB", "VIRUSCHECK", 0};
 	char          *write_env_vars[] = {
-		"AUTHENTICATED", "AUTHINFO", "NULLQUEUE", "QREGEX", "TCP6LOCALIP", "TCP6REMOTEIP",
-		"TCPLOCALHOST", "TCPLOCALIP", "TCPLOCALPORT", "TCPPARANOID", "TCPREMOTEHOST",
-		"TCPREMOTEINFO", "TCPREMOTEIP", 0};
+		"AUTHENTICATED", "AUTHINFO", "NULLQUEUE",
+#ifdef USE_SPF
+		"SPFRESULT",
+#endif
+		"QREGEX", "TCP6LOCALIP", "TCP6REMOTEIP", "TCPLOCALHOST", "TCPLOCALIP",
+		"TCPLOCALPORT", "TCPPARANOID", "TCPREMOTEHOST", "TCPREMOTEINFO", "TCPREMOTEIP", 0};
 
 
 	qprintf(subfdout, "Basic Information\n--------------------------------------------\n", "%s");
@@ -246,7 +268,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.5 2022-08-17 13:12:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.6 2022-10-15 12:09:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
