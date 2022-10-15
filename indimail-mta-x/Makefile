@@ -1957,7 +1957,7 @@ tls.lib gsasl.lib srs.lib ssl_timeoutio.o mysql_config conf-sql
 qmail-smtpd.o: \
 compile qmail-smtpd.c variables.h hassmtputf8.h hasmysql.h \
 haslibgsasl.h auto_control.h
-	./compile `grep -h -v "^#" conf-tls conf-spf \
+	./compile `grep -h -v "^#" conf-tls conf-spf conf-srs \
 	conf-ip conf-batv conf-plugin mysql_inc` qmail-smtpd.c
 
 smtpd.o: \
