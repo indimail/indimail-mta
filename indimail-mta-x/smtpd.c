@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.273 2022-10-14 22:40:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.274 2022-10-15 12:15:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -146,7 +146,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.273 $";
+char           *revision = "$Revision: 1.274 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2406,23 +2406,6 @@ greetdelay_check(int delay)
 	_exit(1);
 }
 
-
-/*
- * This function gets called after envrules
- * Set any environment variables again using envrules
- */
-void
-databytes_setup()
-{
-	char           *x;
-
-	if (!(x = env_get("DATABYTES"))) {
-		if (control_readulong(&databytes, "databytes") == -1)
-			die_control("databytes");
-	} else
-		scan_ulong(x, &databytes);
-}
-
 void
 open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p,
 	char *envstr, char *envstr_p, char *cfn, char *cfn_p,
@@ -2480,10 +2463,81 @@ open_control_once_int(int *val, int *openok, char *envstr, char *cfn, int neg_al
 	return;
 }
 
+/*
+ * These control filename cannot be overriden by environment
+ * variables
+ */
 void
-open_control_files()
+open_control_files1()
+{
+	if (control_init() == -1)
+		die_control("me");
+	if (control_readfile(&greeting, "smtpgreeting", 1) != 1)
+		die_control("smtpgreeting");
+	if ((liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1)
+		die_control("localiphost");
+	if (control_readint(&timeout, "timeoutsmtpd") == -1)
+		die_control("timeoutsmtpd");
+	if (timeout <= 0)
+		timeout = 1;
+	if (control_readint(&maxhops, "maxhops") == -1)
+		die_control("maxhops");
+	if (maxhops <= 0)
+		maxhops = MAXHOPS;
+	/*- buffer limit for commands */
+	if (control_readint(&ctl_maxcmdlen, "maxcmdlen") == -1)
+		die_control("maxcmdlen");
+	if (ctl_maxcmdlen < 0)
+		ctl_maxcmdlen = 0;
+	if (rcpthosts_init() == -1)
+		die_control("rcpthosts");
+	if (recipients_init() == -1)
+		die_control("recipients");
+	if (!relayclient) {
+		if ((relayclientsok = control_readfile(&relayclients, "relayclients", 0)) == -1)
+			die_control("relayclients");
+		if (relayclientsok && !constmap_init(&maprelayclients, relayclients.s, relayclients.len, 0))
+			die_nomem();
+	}
+	if (!relayclient) {
+		if ((relaydomainsok = control_readfile(&relaydomains, "relaydomains", 0)) == -1)
+			die_control("relaydomains");
+		if (relaydomainsok && !constmap_init(&maprelaydomains, relaydomains.s, relaydomains.len, 0))
+			die_nomem();
+	}
+	/*- RELAYMAILFROM Patch - include Control File */
+	if ((rmfok = control_readfile(&rmf, "relaymailfrom", 0)) == -1)
+		die_control("relaymailfrom");
+	if (rmfok && !constmap_init(&maprmf, rmf.s, rmf.len, 0))
+		die_nomem();
+	if ((chkrcptok = control_readfile(&chkrcpt, "chkrcptdomains", 0)) == -1)
+		die_control("chkrcptdomains");
+	if (chkrcptok && !constmap_init(&mapchkrcpt, chkrcpt.s, chkrcpt.len, 0))
+		die_nomem();
+	if ((chkdomok = control_readfile(&chkdom, "authdomains", 0)) == -1)
+		die_control("authdomains");
+	if (chkdomok && !constmap_init(&mapchkdom, chkdom.s, chkdom.len, 0))
+		die_nomem();
+	if (control_readfile(&locals, "locals", 1) != 1)
+		die_control("locals");
+	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
+		die_nomem();
+#ifdef USE_SPF
+#endif
+}
+
+/*
+ * These control filename can be overriden by environment
+ * variables. Hence this function is convenient to call
+ * after envrules
+ */
+void
+open_control_files2()
 {
 	char           *x;
+#ifdef HAVESRS
+	int             r;
+#endif
 
 	/*- BADMAILFROM */
 	open_control_once(&bmfok, &bmpok, &bmfFn, &bmfFnp,
@@ -2566,6 +2620,18 @@ open_control_files()
 		open_control_once_int(&batvkeystale, &batvkeystaleok, "BATVKEYSTALE", "batvkeystale", 0);
 	}
 #endif
+#ifdef HAVESRS
+	if ((r = srs_setup(0)) < 0) {
+		logerr("qmail-smtpd: ");
+		logerrpid();
+		logerrf(" srs_setup failed\n");
+		out("451 Requested action aborted: unable to read srs controls (#4.3.0)\r\n");
+		flush();
+		_exit(1);
+	}
+	if (r)
+		srs_domain.len--; /*- substract length due to stralloc_0 */
+#endif
 	open_control_once(&acclistok, 0, &accFn, 0, "ACCESSLIST", 0, "accesslist", 0, &acclist, 0, 0);
 	if ((x = env_get("BODYCHECK"))) {
 		open_control_once(&bodyok, 0, &bodyFn, 0, (x && *x) ? x : "BODYCHECK", 0, "bodycheck", 0, &body, 0, 0);
@@ -2574,6 +2640,18 @@ open_control_files()
 #ifdef USE_SPF
 	open_control_once_int((int *) &spfbehavior, &spfbehaviorok, "SPFBEHAVIOR", "spfbehavior", 0);
 	open_control_once_int((int *) &spfipv6, &spfipv6ok, "SPFIPV6", "spfipv6", 0);
+	if (control_readline(&spflocal, (x = env_get("SPFRULES")) && *x ? x : "spfrules") == -1)
+		die_control(x);
+	if (spflocal.len && !stralloc_0(&spflocal))
+		die_nomem();
+	if (control_readline(&spfguess, (x = env_get("SPFGUESS")) && *x ? x : "spfguess") == -1)
+		die_control(x);
+	if (spfguess.len && !stralloc_0(&spfguess))
+		die_nomem();
+	if (control_rldef(&spfexp, (x = env_get("SPFEXP")) && *x ? x : "spfexp", 0, SPF_DEFEXP) == -1)
+		die_control(x);
+	if (!stralloc_0(&spfexp))
+		die_nomem();
 #endif
 	/*- TARPIT Patch - include Control Files */
 	open_control_once_int(&tarpitcount, &tarpitcountok, "TARPITCOUNT", "tarpitcount", 0);
@@ -2604,6 +2682,11 @@ open_control_files()
 	open_control_once_int(&qregex, &qregexok, "QREGEX", "qregex", 0);
 	if (qregex && !env_get("QREGEX") && !env_put("QREGEX=1"))
 		die_nomem();
+	if (!(x = env_get("DATABYTES"))) {
+		if (control_readulong(&databytes, "databytes") == -1)
+			die_control("databytes");
+	} else
+		scan_ulong(x, &databytes);
 	return;
 }
 
@@ -2627,91 +2710,14 @@ void
 smtp_init(int force_flag)
 {
 	static int      flag;
+#ifdef HASLIBGSASL
 	int             r;
+#endif
 
 	if (!force_flag && flag)
 		return;
 	if (!flag)
 		flag++;
-	if (control_init() == -1)
-		die_control("me");
-	if (control_readfile(&greeting, "smtpgreeting", 1) != 1)
-		die_control("smtpgreeting");
-	if ((liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1)
-		die_control("localiphost");
-	if (control_readint(&timeout, "timeoutsmtpd") == -1)
-		die_control("timeoutsmtpd");
-	if (timeout <= 0)
-		timeout = 1;
-	if (control_readint(&maxhops, "maxhops") == -1)
-		die_control("maxhops");
-	if (maxhops <= 0)
-		maxhops = MAXHOPS;
-	/*- buffer limit for commands */
-	if (control_readint(&ctl_maxcmdlen, "maxcmdlen") == -1)
-		die_control("maxcmdlen");
-	if (ctl_maxcmdlen < 0)
-		ctl_maxcmdlen = 0;
-	databytes_setup();
-	if (rcpthosts_init() == -1)
-		die_control("rcpthosts");
-	if (recipients_init() == -1)
-		die_control("recipients");
-	if (!relayclient) {
-		if ((relayclientsok = control_readfile(&relayclients, "relayclients", 0)) == -1)
-			die_control("relayclients");
-		if (relayclientsok && !constmap_init(&maprelayclients, relayclients.s, relayclients.len, 0))
-			die_nomem();
-	}
-	if (!relayclient) {
-		if ((relaydomainsok = control_readfile(&relaydomains, "relaydomains", 0)) == -1)
-			die_control("relaydomains");
-		if (relaydomainsok && !constmap_init(&maprelaydomains, relaydomains.s, relaydomains.len, 0))
-			die_nomem();
-	}
-	/*- RELAYMAILFROM Patch - include Control File */
-	if ((rmfok = control_readfile(&rmf, "relaymailfrom", 0)) == -1)
-		die_control("relaymailfrom");
-	if (rmfok && !constmap_init(&maprmf, rmf.s, rmf.len, 0))
-		die_nomem();
-	if ((chkrcptok = control_readfile(&chkrcpt, "chkrcptdomains", 0)) == -1)
-		die_control("chkrcptdomains");
-	if (chkrcptok && !constmap_init(&mapchkrcpt, chkrcpt.s, chkrcpt.len, 0))
-		die_nomem();
-	if ((chkdomok = control_readfile(&chkdom, "authdomains", 0)) == -1)
-		die_control("authdomains");
-	if (chkdomok && !constmap_init(&mapchkdom, chkdom.s, chkdom.len, 0))
-		die_nomem();
-	if (control_readfile(&locals, "locals", 1) != 1)
-		die_control("locals");
-	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
-		die_nomem();
-#ifdef HAVESRS
-	if ((r = srs_setup(0)) < 0) {
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerrf(" srs_setup failed\n");
-		out("451 Requested action aborted: unable to read srs controls (#4.3.0)\r\n");
-		flush();
-		_exit(1);
-	}
-	if (r)
-		srs_domain.len--; /*- substract length due to stralloc_0 */
-#endif
-#ifdef USE_SPF
-	if (control_readline(&spflocal, "spfrules") == -1)
-		die_control("spfrules");
-	if (spflocal.len && !stralloc_0(&spflocal))
-		die_nomem();
-	if (control_readline(&spfguess, "spfguess") == -1)
-		die_control("spfguess");
-	if (spfguess.len && !stralloc_0(&spfguess))
-		die_nomem();
-	if (control_rldef(&spfexp, "spfexp", 0, SPF_DEFEXP) == -1)
-		die_control("spfexp");
-	if (!stralloc_0(&spfexp))
-		die_nomem();
-#endif
 	/*- initialize all variables */
 	bmfok = bmpok = bhfok = bhpok = bhrcpok = bhbrpok = rcpok = brpok = 0;
 	chkgrcptok = chkgrcptokp = spfok = sppok = nodnschecksok = 0;
@@ -2731,7 +2737,6 @@ smtp_init(int force_flag)
 #ifdef USE_SPF
 	spfbehavior = spfipv6 = spfbehaviorok = spfipv6ok = 0;
 #endif
-	open_control_files();
 #ifdef HASLIBGSASL
 	if ((r = gsasl_init(&gsasl_ctx)) < 0) {
 		logerr("gsasl_init: ");
@@ -2741,6 +2746,13 @@ smtp_init(int force_flag)
 	}
 	log_gsasl_version();
 #endif
+
+	open_control_files1();
+	/*-
+	 * open control files that use environment variable
+	 * to override defaults
+	 */
+	open_control_files2();
 	return;
 }
 
@@ -3525,7 +3537,7 @@ smtp_mail(char *arg)
 	 */
 	restore_env();
 	if (f_envret || d_envret || a_envret) {	/* reload control files if in an earlier session, envrules was used */
-		open_control_files();
+		open_control_files2();
 		f_envret = 0;
 	}
 	switch (setup_state)
@@ -3601,8 +3613,7 @@ smtp_mail(char *arg)
 			 * SMTPS, RELAYCLIENT, TCPREMOTEINFO, TCPREMOTEHOST, TCPLOCALIP
 			 * TCPLOCALHOST, TCPREMOTEIP
 			 */
-			databytes_setup(); /*- so that it is possible to set DATABYTES again using envrules */
-			open_control_files();
+			open_control_files2();
 			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, f_envret, 0);
 		}
 		break;
@@ -7318,10 +7329,6 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		_exit(1);
 	}
 	hasvirtual = phandle ? 1 : 0;
-	/*-
-	 * setup calls databytes_setup(), which sets
-	 * databytes
-	 */
 	setup(); /*- remoteip is set */
 	if (ipme_init() != 1)
 		die_ipme();
@@ -7540,6 +7547,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.274  2022-10-15 12:15:03+05:30  Cprogrammer
+ * organized opening of control files into two functions open_control_files1(), open_control_files2()
+ *
  * Revision 1.273  2022-10-14 22:40:59+05:30  Cprogrammer
  * corrected helocheck
  * display auth method used when SECURE_AUTH is set
@@ -7806,7 +7816,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.273 2022-10-14 22:40:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.274 2022-10-15 12:15:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
