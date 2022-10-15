@@ -887,8 +887,23 @@ Override @sysconfdir@/control/signaturedomains control file used by
 \fBqmail-dkim\fR(8)
 
 .TP
-\fISIGNKEY\fR
-Override @sysconfdir@/control/signkey control file used by
+\fIBATVKEY\fR
+Override @sysconfdir@/control/batvkey control file used by
+\fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
+
+.TP
+\fIBATVKEYSTALE\fR
+Override @sysconfdir@/control/batvkeystale control file used by
+\fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
+
+.TP
+\fIBATVNOSIGNLOCALS\fR
+Override @sysconfdir@/control/batvnosinlocals control file used by
+\fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
+
+.TP
+\fIBATVNOSIGNREMOTE\fR
+Override @sysconfdir@/control/batvnosinremote control file used by
 \fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
 
 .TP
