@@ -1608,7 +1608,8 @@ encountered).
 You can add a line with a an SPF explanation that will be shown to the
 sender in case of a reject. It will override the default one. You can
 use SPF macro expansion. If a domain specifies its own explanation it is
-going to be used instead.
+going to be used instead. You can override the \fIspfexp\fR filename by
+setting \fBSPFEXP\fR environment variable.
 
 The SMTP answer when rejecting mails will look like:
 .EX
@@ -1623,26 +1624,27 @@ afterwards.
 
 It is suggested to add \fHa/24 mx/24 ptr\fR.
 This isn't needed but generally gives good results (for spam filters
-scoring Received-SPF lines).
-
+scoring Received-SPF lines). You can override the \fIspfguess\fR filename
+by setting \fBSPFGUESS\fR environment variable.
 
 .TP 5
 .I spfrules
 Local rules means: Rules that are executed before the real SPF rules for a
 domain would fail (fail, softfail, neutral). This can be used to always
-allow certain machines to send certain mails.
+allow certain machines to send certain mails. You can override
+\fIspfrules\fR filename by setting \fBSPFRULES\fR environment variable.
 
 They are also executed for domains that don't publish SPF entries.
 It is suggested to add \fHinclude:spf.trusted-forwarder.org\fR.
 You can also add mechanisms to trust known mail servers like backup MX
 servers, though you should at least also use tcprules (to modify
-SPFBEHAVIOR).
+\fBSPFBEHAVIOR\fR).
 
 .TP 5
 .I spfipv6
 You can turn on spf for ipv6 connections by setting to  value 1; 0 to
 disable. You can override this control file with environment variable
-USE_SPFIPV6.
+\fBUSE_SPFIPV6\fR.
 
 .TP 5
 .I bouncesubject
