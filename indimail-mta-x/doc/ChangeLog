@@ -65,6 +65,10 @@ o SRS decoding in qmail-smtpd avoiding the need to create virtualdomain for
 37. smtpd.c: corrected helocheck
 38. smtpd.c: display auth method used in logs when SECURE_AUTH is set
 39. spf.c, smtpd.c, spfquery.c: renamed variable for localhost from local to localhost
+- 15/10/2022
+40. qmail-smtpd.c: updated control file list and env variable list
+41. smtpd.c: reorganized opening of control files in to functions -
+    open_control_files1() and open_control_files2()
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
