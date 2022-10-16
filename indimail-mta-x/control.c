@@ -213,7 +213,7 @@ control_readnativefile(stralloc *sa, char *fn, int mode)
 			close(fd);
 			return 1;
 		}
-		if (mode) { /* for qmail-dk */
+		if (mode) { /* for qmail-dk, qmail-dkim */
 			striptrailingwhitespace(&line);
 			if (!stralloc_0(&line))
 				break;
