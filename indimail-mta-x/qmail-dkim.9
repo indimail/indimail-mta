@@ -27,14 +27,13 @@ It uses the libdkim and OpenSSL libraries.
 To sign a message, set the
 .B DKIMSIGN
 environment variable to the pathname of the private key that will be
-used to sign the message. If there is a % character in the environment
-variable, it is removed and replaced by the domain name in the
-From: header. The selector (s=) will be taken from the basename of the
-file. If, after substituting the %, that file does not exist, the
-% character will be removed to check if the file exists. In addition to
-\fBDKIMSIGN\fR environment variable, you can have the domain and the
-pathname of the private key in the control file \fIdkimkeys\fR which has
-the following format
+used to sign the message. any % character in the environment variable are
+removed and replaced by the domain name in the From: header. The selector
+(s=) will be taken from the basename of the file. If, after substituting
+the %, that file does not exist, the % character will be removed to check
+if the file exists. In addition to \fBDKIMSIGN\fR environment variable, you
+can have the domain and the pathname of the private key in the control file
+\fIdkimkeys\fR which has the following format
 .EX
 domain:private_key_path
 .EE

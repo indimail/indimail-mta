@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dk.c,v 1.61 2022-10-03 17:10:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dk.c,v 1.62 2022-10-17 12:28:35+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef DOMAIN_KEYS
 #include <unistd.h>
@@ -128,14 +128,63 @@ static stralloc dksignature = { 0 }; /*- content of private signature */
 static stralloc dkopts = { 0 };
 static stralloc dkimkeys = { 0 };
 
+char           *
+replace_pct(char *keyfn, char *domain, int pos, int *replace)
+{
+	char           *p, *t, *s;
+	int             i, d, r, len;
+	static stralloc tmp = {0};
+
+	if (!domain) {
+		tmp.len = 0;
+		for (p = keyfn, len = 0; *p; p++) {
+			if (*p == '%') {
+				if (tmp.len && *(p - 1) == '/' && *(p + 1) == '/') /*- replace // with single / */
+					tmp.len--;
+			} else
+			if (!stralloc_append(&tmp, p))
+				die(51);
+		}
+		if (!stralloc_0(&tmp))
+			die(51);
+		return tmp.s;
+	}
+	if (!keyfn[pos + 1]) { /*- file has % as the last component (implies selector is %) */
+		len = pos + (d = fmt_str(0, domain));
+		r = 0;
+		if (replace)
+			*replace = 1;
+	} else
+		len = pos + (d = fmt_str(0, domain)) + (r = fmt_str(0, keyfn + pos + 1));
+	if (!(t = (char *) alloc((len + 1) * sizeof(char))))
+		die(51);
+	s = t;
+	s += fmt_strn(t, keyfn, pos);
+	s += fmt_strn(t + pos, domain, d);
+	if (keyfn[pos + 1])
+		s += fmt_strn(t + pos + d, keyfn + pos + 1, r);
+	*s = 0;
+	i = str_rchr(t, '%');
+	if (t[i]) {
+		p = replace_pct(t, domain, i, replace);
+		alloc_free(t);
+		return p;
+	} else {
+		if (!stralloc_copyb(&tmp, t, len + 1))
+			die(51);
+		alloc_free(t);
+		return tmp.s;
+	}
+}
+
 static void
 write_signature(DK *dka, char *dk_selector,
 	int advicelen, int opth, char *canon)
 {
 	unsigned char   advice[ADVICE_BUF];
 	char           *selector, *from, *ptr, *keyfn;
-	static stralloc keyfnfrom = { 0 };
-	int             i, pct_found, olen = 0;
+	static stralloc tmp = { 0 };
+	int             i, pct_found;
 
 	from = dk_from(dka);
 	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
@@ -150,52 +199,28 @@ write_signature(DK *dka, char *dk_selector,
 			if (!(controldir = env_get("CONTROLDIR")))
 				controldir = auto_control;
 		}
-		if (!stralloc_copys(&keyfnfrom, controldir) ||
-				!stralloc_append(&keyfnfrom, "/"))
+		if (!stralloc_copys(&tmp, controldir) ||
+				!stralloc_append(&tmp, "/"))
 			die(51);
-		olen = keyfnfrom.len;
-	}
+	} else
+	if (!stralloc_copys(&tmp, keyfn))
+		die(51);
+	if (!stralloc_0(&tmp))
+		die(51);
 	i = str_chr(keyfn, '%');
 	if (keyfn[i]) {
 		pct_found = 1;
-		if (keyfn[0] == '/') {
-			if (!stralloc_copyb(&keyfnfrom, keyfn, i))
-				die(51);
-		} else
-		if (!stralloc_catb(&keyfnfrom, keyfn, i))
-			die(51);
-		if (!stralloc_cats(&keyfnfrom, from) ||
-				!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
-				!stralloc_0(&keyfnfrom))
-			die(51);
-		if (access(keyfnfrom.s, F_OK)) {
+		keyfn = replace_pct(tmp.s, from, i, 0);
+		if (access(keyfn, F_OK)) {
 			if (errno != error_noent && errno != error_notdir)
-				custom_error("qmail-dk", "Z", "Unable to read private key.", 0, "X.3.0");
-			/*- since file is not found remove '%' sign */
-			keyfnfrom.len = olen;
-			if (keyfn[0] == '/') {
-				if (!stralloc_copyb(&keyfnfrom, keyfn, i))
-					die(51);
-			} else
-			if (!stralloc_catb(&keyfnfrom, keyfn, i))
-				die(51);
-			if ((i - 1) > 0 && keyfn[i - 1] == '/' && keyfn[i + 1] == '/')
-				i++;
-			if (!stralloc_cats(&keyfnfrom, keyfn + i + 1) ||
-					!stralloc_0(&keyfnfrom))
-				die(51);
-		} 
+				custom_error("qmail-dk", "Z", "unable to read private key.", 0, "X.3.0");
+			keyfn = replace_pct(tmp.s, 0, 0, 0);
+		}
 	} else {
 		pct_found = 0;
-		if (keyfn[0] == '/') {
-			if (!stralloc_copys(&keyfnfrom, keyfn))
-				die(51);
-		} else
-		if (!stralloc_cats(&keyfnfrom, keyfn) ||
-				!stralloc_0(&keyfnfrom))
-			die(51);
+		keyfn = tmp.s;
 	}
-	switch (control_readnativefile(&dksignature, keyfn[0] == '/' ? keyfnfrom.s : keyfnfrom.s + olen, 1))
+	switch (control_readnativefile(&dksignature, keyfn, 1))
 	{
 	case 0: /*- file not present */
 		/*
@@ -620,7 +645,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.61 2022-10-03 17:10:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.62 2022-10-17 12:28:35+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
@@ -634,6 +659,9 @@ getversion_qmail_dk_c()
 
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.62  2022-10-17 12:28:35+05:30  Cprogrammer
+ * replace all '%' character with domain -name
+ *
  * Revision 1.61  2022-10-03 17:10:08+05:30  Cprogrammer
  * fixed return exit codes
  *

@@ -24,10 +24,10 @@ and OpenSSL libraries.
 To sign a message, set the
 .B DKSIGN
 environment variable to the pathname of the private key that will be
-used to sign the message. If there is a % character in the environment
-variable, it is removed and replaced by the domain name in the
+used to sign the message. All % characters in the environment
+variable are removed and replaced by the domain name in the
 From: header. The selector (s=) will be taken from the basename of the
-file. If, after substituting the %, that file does not exist, the
+file. If, after substituting %, that file does not exist, the
 % character will be removed to check if the file exists. In addition to
 \fBDKSIGN\fR environment variable, you can have the domain and the
 pathname of the private key in the control file \fIdkimkeys\fR which has
