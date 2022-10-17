@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.13  2022-10-17 19:45:16+05:30  Cprogrammer
+ * collapsed multiple stralloc lines
+ *
  * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -131,9 +134,8 @@ main(int argc, char **argv)
 					tmperrno;
 	int             pf[2];
 
-	if (!(dir = argv[1]))
-		usage();
-	if (!(addr = argv[2]))
+	if (!(dir = argv[1]) ||
+			!(addr = argv[2]))
 		usage();
 	umask(022);
 	sig_ignore(SIGPIPE);
@@ -143,9 +145,7 @@ main(int argc, char **argv)
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch to ", dir, ": ");
 	if ((sender = env_get("SENDER"))) {
-		if (!*sender)
-			strerr_die2x(100, FATAL, "I don't reply to bounce messages (#5.7.2)");
-		if (str_equal(sender, "#@[]"))
+		if (!*sender || str_equal(sender, "#@[]"))
 			strerr_die2x(100, FATAL, "I don't reply to bounce messages (#5.7.2)");
 	}
 	if (!(local = env_get("LOCAL")))
@@ -205,17 +205,12 @@ main(int argc, char **argv)
 	for (i = 0; i < headeradd.len; ++i)
 		if (!headeradd.s[i])
 			headeradd.s[i] = '\n';
-	if (!stralloc_copys(&mydtline, "Delivered-To: replier "))
-		nomem();
-	if (!stralloc_cat(&mydtline, &outlocal))
-		nomem();
-	if (!stralloc_cats(&mydtline, action))
-		nomem();
-	if (!stralloc_cats(&mydtline, "@"))
-		nomem();
-	if (!stralloc_catb(&mydtline, outhost.s, outhost.len))
-		nomem();
-	if (!stralloc_cats(&mydtline, "\n"))
+	if (!stralloc_copys(&mydtline, "Delivered-To: replier ") ||
+			!stralloc_cat(&mydtline, &outlocal) ||
+			!stralloc_cats(&mydtline, action) ||
+			!stralloc_cats(&mydtline, "@") ||
+			!stralloc_catb(&mydtline, outhost.s, outhost.len) ||
+			!stralloc_cats(&mydtline, "\n"))
 		nomem();
 	myputs("Mailing-List: ");
 	put(mailinglist.s, mailinglist.len);
@@ -249,13 +244,10 @@ main(int argc, char **argv)
 	}
 	if (flagmlwasthere)
 		strerr_die2x(100, FATAL, "message already has Mailing-List (#5.7.2)");
-	if (!stralloc_copy(&line, &outlocal))
-		nomem();
-	if (!stralloc_cats(&line, "return-@"))
-		nomem();
-	if (!stralloc_cat(&line, &outhost))
-		nomem();
-	if (!stralloc_0(&line))
+	if (!stralloc_copy(&line, &outlocal) ||
+			!stralloc_cats(&line, "return-@") ||
+			!stralloc_cat(&line, &outhost) ||
+			!stralloc_0(&line))
 		nomem();
 	qmail_from(&qq, line.s);
 	substdio_fdbuf(&ssout, mywrite, -1, outbuf, sizeof(outbuf));
@@ -290,7 +282,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: replier.c,v 1.13 2022-10-17 19:45:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
