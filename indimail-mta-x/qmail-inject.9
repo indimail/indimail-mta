@@ -13,9 +13,8 @@ qmail-inject \- preprocess and send a mail message
 
 .SH DESCRIPTION
 .B qmail-inject
-reads a mail message from its standard input,
-adds appropriate information to the message header,
-and invokes
+reads a mail message from its standard input, adds appropriate information
+to the message header, and invokes
 .B qmail-queue
 to send the message to one or more recipients.
 
@@ -31,10 +30,8 @@ for information on how
 rewrites header fields.
 
 .B qmail-inject
-normally exits 0.
-It exits 100 if it was invoked improperly
-or if there is a severe syntax error in the message.
-It exits 111 for temporary errors.
+normally exits 0. It exits 100 if it was invoked improperly or if there is
+a severe syntax error in the message.  It exits 111 for temporary errors.
 
 .SH "ENVIRONMENT VARIABLES"
 For the convenience of users who do not run
@@ -55,8 +52,7 @@ whichever comes first.
 
 The host name is normally set by the
 .I defaulthost
-control
-but can be overridden with
+control but can be overridden with
 .B QMAILHOST
 or
 .BR MAILHOST .
@@ -67,11 +63,9 @@ The personal name is
 or
 .BR NAME .
 
-The default envelope sender address is the same as the
-default
+The default envelope sender address is the same as the default
 .B From
-address,
-but it can be overridden with
+address, but it can be overridden with
 .B QMAILSUSER
 and
 .BR QMAILSHOST .
@@ -79,41 +73,34 @@ It may also be modified by the
 .B r
 and
 .B m
-letters described below.
-Bounces will be sent to this address.
+letters described below. Bounces will be sent to this address.
 
 If
 .B QMAILMFTFILE
 is set,
 .B qmail-inject
-reads a list of mailing list addresses,
-one per line,
-from that file.
-If To+Cc includes one of those addresses (without regard to case),
+reads a list of mailing list addresses, one per line, from that file. If
+To+Cc includes one of those addresses (without regard to case),
 .B qmail-inject
-adds a Mail-Followup-To field
-with all the To+Cc addresses.
+adds a Mail-Followup-To field with all the To+Cc addresses.
 .B qmail-inject
-does not add Mail-Followup-To
-to a message that already has one.
+does not add Mail-Followup-To to a message that already has one.
 
 If
 .B QMAILQUEUE
 environment variable is set to PREFIX/sbin/qmail-multi,
 .B qmail-inject
-gets the ability to multiplex queues. See qmail-multi(8).
+gets the ability to multiplex queues and filter emails. See qmail-multi(8).
 
 The
 .B QMAILINJECT
-environment variable
-can contain any of the following letters:
+environment variable can contain any of the following letters:
 
 .TP
 .B c
 Use address-comment style for the
 .B From
-field.
-Normally
+field. Normally
 .B qmail-inject
 uses name-address style.
 
@@ -121,11 +108,10 @@ uses name-address style.
 .B s
 Do not look at any incoming
 .B Return-Path
-field.
-Normally, if
+field. Normally, if
 .B Return-Path
-is supplied, it sets the envelope sender address,
-overriding all environment variables.
+is supplied, it sets the envelope sender address, overriding all
+environment variables.
 .B Return-Path
 is deleted in any case.
 
@@ -145,8 +131,7 @@ field created by
 .B i
 Delete any incoming
 .B Message-ID
-field.
-Normally, if
+field. Normally, if
 .B Message-ID
 is supplied, it overrides the usual
 .B Message-ID
@@ -157,8 +142,8 @@ field created by
 .B r
 Use a per-recipient VERP.
 .B qmail-inject
-will append each recipient address to the envelope sender
-of the copy going to that recipient.
+will append each recipient address to the envelope sender of the copy going
+to that recipient.
 
 .TP
 .B m
@@ -182,20 +167,17 @@ set, it additionally uses environment set according to files in
 .B \-a
 Send the message to all addresses given as
 .I recip
-arguments;
-do not use header recipient addresses.
+arguments; do not use header recipient addresses.
 
 .TP
 .B \-h
-Send the message to all header recipient addresses.
-For non-forwarded messages, this means
-the addresses listed under
+Send the message to all header recipient addresses. For non-forwarded
+messages, this means the addresses listed under
 .BR To ,
 .BR Cc ,
 .BR Bcc ,
 .BR Apparently-To .
-For forwarded messages, this means
-the addresses listed under
+For forwarded messages, this means the addresses listed under
 .BR Resent-To ,
 .BR Resent-Cc ,
 .BR Resent-Bcc .
@@ -211,13 +193,12 @@ Send the message to all addresses given as
 arguments.
 If no
 .I recip
-arguments are supplied,
-send the message to all header recipient addresses.
+arguments are supplied, send the message to all header recipient addresses.
 
 .TP
 .B \-H
-Send the message to all header recipient addresses,
-and to all addresses given as
+Send the message to all header recipient addresses, and to all addresses
+given as
 .I recip
 arguments.
 
@@ -227,8 +208,7 @@ Pass
 .I sender
 to
 .B qmail-queue
-as the envelope sender address.
-This overrides
+as the envelope sender address. This overrides
 .B Return-Path
 and all environment variables.
 
@@ -255,19 +235,16 @@ otherwise the literal name
 .BR defaultdomain ,
 which is probably not what you want.
 .B qmail-inject
-adds this name to any host name without dots,
-including
+adds this name to any host name without dots, including
 .I defaulthost
 if
 .I defaulthost
-does not have dots.
-(Exception: see
+does not have dots. (Exception: see
 .IR plusdomain .)
 
 The
 .B QMAILDEFAULTDOMAIN
-environment variable
-overrides
+environment variable overrides
 .IR defaultdomain .
 
 .TP 5
@@ -275,17 +252,14 @@ overrides
 Default host name.
 Default:
 .IR me ,
-if that is supplied;
-otherwise the literal name
+if that is supplied; otherwise the literal name
 .BR defaulthost ,
 which is probably not what you want.
 .B qmail-inject
 adds this name to any address without a host name.
 .I defaulthost
-need not be the current host's name.
-For example,
-you may prefer that outgoing mail show
-just your domain name.
+need not be the current host's name. For example, you may prefer that
+outgoing mail show just your domain name.
 
 The
 .B QMAILDEFAULTHOST
@@ -302,13 +276,11 @@ otherwise the literal name
 .BR idhost ,
 which is certainly not what you want.
 .I idhost
-need not be the current host's name.
-For example, you may prefer to use fake
-host names in Message-IDs.
-However,
+need not be the current host's name. For example, you may prefer to use
+fake host names in Message-IDs. However,
 .I idhost
-must be a fully-qualified name within your domain,
-and each host in your domain should use a different
+must be a fully-qualified name within your domain, and each host in your
+domain should use a different
 .IR idhost .
 
 The
@@ -326,13 +298,12 @@ otherwise the literal name
 .BR plusdomain ,
 which is probably not what you want.
 .B qmail-inject
-adds this name to any host name that ends with a plus sign,
-including
+adds this name to any host name that ends with a plus sign, including
 .I defaulthost
 if
 .I defaulthost
-ends with a plus sign.
-If a host name does not have dots but ends with a plus sign,
+ends with a plus sign. If a host name does not have dots but ends with a
+plus sign,
 .B qmail-inject
 uses
 .IR plusdomain ,
@@ -356,19 +327,21 @@ overrides the value in this control file.
 
 .TP 5
 .I domainqueue
-Specific queue can be assigned to recipient domains. The format of this file is of the
-form
+Specific queue can be assigned to recipient domains. The format of this
+file is of the form
 
 domain:QUEUEDIR=queue_dir
 
-where domain is the recipient domain and queue_dir is any queue which is part of
-indimail's queue collection. You could also specify a set of queues for a domain.
+where domain is the recipient domain and queue_dir is any queue which is
+part of indimail's queue collection. You could also specify a set of queues
+for a domain.
 
 domain:QUEUE_COUNT=5,QUEUE_START=6,QUEUE_BASE=/var/indimail/queue
 
-specifies that any emails to *@domain be queued in /var/indimail/queue/queue[6,7,8,9,10]
-You can use \fIdomainqueue\fR to queue mails for certain domains into specific domains and
-specify individual concurrencies for these queues (see qmail-send(8)). e.g. having
+specifies that any emails to *@domain be queued in
+/var/indimail/queue/queue[6,7,8,9,10]. You can use \fIdomainqueue\fR to
+queue mails for certain domains into specific domains and specify
+individual concurrencies for these queues (see qmail-send(8)). e.g. having
 
 yahoo.com:QUEUEDIR=/var/indimail/queue/queue6
 in @controldir@/domainqueue and
@@ -380,15 +353,16 @@ will set 10 as the remote concurrency for all emails sent to yahoo.com
 
 .TP 5
 .I envrules
-Specific environment variables can be set for specific senders.
-The format of this file is of the form                                       
+Specific environment variables can be set for specific senders. The format
+of this file is of the form
+
 pat:envar1=val,envar2=val,...]
+
 where pat is a regular expression which matches a sender. envar1, envar2
 are list of environment variables to be set.
 
-The name of the control file can be overriden by the environment
-variable FROMRULES. The following environment variables used
-by
+The name of the control file can be overriden by the environment variable
+FROMRULES. The following environment variables used by
 .B qmail-queue
 can be set by using envrules.
 
