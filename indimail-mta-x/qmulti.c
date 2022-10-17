@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.63 2022-08-14 21:58:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.64 2022-10-17 19:45:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -28,6 +28,7 @@
 #include "control.h"
 #include "getqueue.h"
 #include "qmulti.h"
+#include "qmail.h"
 
 int
 getfreespace(char *filesystem)
@@ -70,24 +71,24 @@ qmulti(char *queue_env, int argc, char **argv)
 	stralloc        q = {0};
 
 	if (chdir("/") == -1)
-		_exit(63);
+		_exit(QQ_CHDIR);
 	if (queue_env && (ptr = env_get(queue_env)) && *ptr) {
 		binqqargs[0] = ptr;
 		execv(*binqqargs, binqqargs);
-		_exit(120);
+		_exit(QQ_EXEC_QMAILQUEUE);
 	}
 	if (!(ptr = env_get("QUEUEDIR"))) {
 		if (!(qbase = env_get("QUEUE_BASE"))) {
 			switch (control_readfile(&QueueBase, "queue_base", 0))
 			{
 			case -1:
-				_exit(55);
+				_exit(QQ_CONFIG_ERR);
 				break;
 			case 0:
 				if (!stralloc_copys(&QueueBase, auto_qmail) ||
 						!stralloc_catb(&QueueBase, "/queue", 6) ||
 						!stralloc_0(&QueueBase))
-					_exit(51);
+					_exit(QQ_OUT_OF_MEMORY);
 				qbase = QueueBase.s;
 				break;
 			case 1:
@@ -112,7 +113,7 @@ qmulti(char *queue_env, int argc, char **argv)
 				!stralloc_cats(&Queuedir, "/queue") ||
 				!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) queueNo)) ||
 				!stralloc_0(&Queuedir))
-			_exit(51);
+			_exit(QQ_OUT_OF_MEMORY);
 		env_put(Queuedir.s);
 		ptr = Queuedir.s + 9;
 	}
@@ -120,9 +121,9 @@ qmulti(char *queue_env, int argc, char **argv)
 	switch (getfreespace(ptr))
 	{
 	case -1:
-		_exit(55);
+		_exit(QQ_READ_ERR);
 	case 1: /*- Disk full */
-		_exit(53);
+		_exit(QQ_WRITE_ERR);
 	}
 	if ((ptr = env_get("QUEUEPROG"))) {
 		argv[0] = qqargs[0] = ptr;
@@ -131,11 +132,11 @@ qmulti(char *queue_env, int argc, char **argv)
 		if (!stralloc_copys(&q, auto_prefix) ||
 				!stralloc_catb(&q, "/sbin/qmail-queue", 17) ||
 				!stralloc_0(&q))
-			_exit(51);
+			_exit(QQ_OUT_OF_MEMORY);
 		qqargs[0] = q.s;
 		execv(*qqargs, qqargs);
 	}
-	_exit(120);
+	_exit(QQ_EXEC_QMAILQUEUE);
 }
 
 int
@@ -151,12 +152,12 @@ discard_envelope()
 		if (n == -1) {
 			if (errno == error_intr)
 				continue;
-			return (54);
+			return (QQ_READ_ERR);
 		}
 		total += sizeof (buffer);
 	}
 	if (!total)
-		return (54);
+		return (QQ_READ_ERR);
 	return (0);
 }
 
@@ -177,10 +178,10 @@ rewrite_envelope(int outfd)
 
 	if (!(ptr = env_get("SPAMREDIRECT"))) {
 		if (control_readline(&notifyaddress, "globalspamredirect") == -1)
-			return (55);
+			return (QQ_CONFIG_ERR);
 	} else
 	if (!stralloc_copys(&notifyaddress, ptr))
-		_exit(51);
+		_exit(QQ_OUT_OF_MEMORY);
 	if (!notifyaddress.len)
 		return (0);
 	if ((n = discard_envelope()))
@@ -193,7 +194,7 @@ rewrite_envelope(int outfd)
 			substdio_bput(&ssout, "\0", 1) == -1 ||
 			substdio_bput(&ssout, "\0", 1) == -1 ||
 			substdio_flush(&ssout) == -1)
-		return (53);
+		return (QQ_OUT_OF_MEMORY);
 	return (1);
 }
 
@@ -201,7 +202,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.63 2022-08-14 21:58:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.64 2022-10-17 19:45:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -210,6 +211,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.64  2022-10-17 19:45:03+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.63  2022-08-14 21:58:18+05:30  Cprogrammer
  * fix compilation warning if HASLIBRT is undefined
  *

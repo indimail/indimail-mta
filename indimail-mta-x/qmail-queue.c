@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.84 2022-10-04 23:56:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.85 2022-10-17 19:44:55+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -51,6 +51,7 @@
 #endif
 #include "getqueue.h"
 #include "custom_error.h"
+#include "qmail.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
@@ -126,14 +127,14 @@ sigalrm()
 {
 	/*- thou shalt not clean up here */
 	errno = 0;
-	die(52, 0, "timer expired");
+	die(QQ_TIMEOUT, 0, "timer expired");
 }
 
 no_return void
 sigbug()
 {
 	errno = 0;
-	die(81, 0, "internal bug");
+	die(QQ_INTERNAL_BUG, 0, "internal bug");
 }
 
 void
@@ -299,7 +300,7 @@ received_setup(int fastqueue)
 {
 	receivedlen = receivedfmt((char *) 0, fastqueue);
 	if (!(received = alloc(receivedlen + 1)))
-		die(51, 0, "out of memory");
+		die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 	receivedfmt(received, fastqueue);
 }
 
@@ -330,7 +331,7 @@ origin_setup()
 {
 	originlen = originfmt((char *) 0);
 	if (!(origin = alloc(originlen + 1)))
-		die(51, 0, "out of memory");
+		die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 	originfmt(origin);
 }
 
@@ -378,7 +379,7 @@ fnnum(char *dirslash, int flagsplit)
 	char           *s;
 
 	if (!(s = alloc(fmtqfn((char *) 0, dirslash, messnum, flagsplit))))
-		die(51, 0, "out of memory");
+		die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 	fmtqfn(s, dirslash, messnum, flagsplit);
 	return s;
 }
@@ -392,15 +393,15 @@ pidopen()
 	seq = 1;
 	len = pidfmt((char *) 0, seq);
 	if (!(pidfn = alloc(len)))
-		die(51, 0, "out of memory");
+		die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 	for (seq = 1; seq < 10; ++seq) {
 		if (pidfmt((char *) 0, seq) > len)
-			die(81, 0, "internal bug"); /*- paranoia */
+			die(QQ_INTERNAL_BUG, 0, "internal bug"); /*- paranoia */
 		pidfmt(pidfn, seq);
 		if ((messfd = open_excl(pidfn)) != -1)
 			return;
 	}
-	die(70, 0, "trouble creating pid file");
+	die(QQ_PID_FILE, 0, "trouble creating pid file");
 }
 
 #if defined(QHPSI)
@@ -426,7 +427,7 @@ qhpsiprog(char *program)
 	struct stat     st;
 
 	if (stat(messfn, &st) == -1)
-		die(62, 1, "qhpsi: unable to access mess file");
+		die(QQ_MESS_FILE, 1, "qhpsi: unable to access mess file");
 	size = (unsigned int) st.st_size;
 	if ((x = env_get("QHPSIMINSIZE"))) {
 		scan_ulong(x, &u);
@@ -443,26 +444,26 @@ qhpsiprog(char *program)
 	switch (child = fork())
 	{
 	case -1:
-		die(121, 1, "qhpsi: unable to fork");
+		die(QQ_FORK_ERR, 1, "qhpsi: unable to fork");
 	case 0:
 		/* 
 		 * execute the qhpsi executable for security reasons.
 		 * revoke all privileges and run with qmailq uid
 		 */
 		if (uidinit(1, 0) == -1)
-			die(78, 0, "qhpsi: trouble getting uids/gids");
+			die(QQ_GET_UID_GID, 0, "qhpsi: trouble getting uids/gids");
 		if (setregid(auto_gidq, auto_gidq) || setreuid(auto_uidq, auto_uidq))
-			die(50, 0, "qhpsi: unable to get privilege to queue messages");
+			die(QQ_VIRUS_SCANNER_PRIV, 0, "qhpsi: unable to get privilege to queue messages");
 		if (!str_diffn(program, "plugin:", 7)) {
 			if (!stralloc_copys(&plugin, "plugin:") ||
 					!stralloc_cats(&plugin, messfn) ||
 					!stralloc_append(&plugin, " ") ||
 					!stralloc_cats(&plugin, program + 7) ||
 					!stralloc_0(&plugin) || !(argv = makeargs(plugin.s)))
-				die(51, 0, "out of memory");
+				die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 		} else {
 			if (!(argv = makeargs(program)))
-				die(51, 0, "out of memory");
+				die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 			if (!argv[1]) {
 				scancmd[0] = argv[0];
 				scancmd[1] = messfn;
@@ -476,14 +477,14 @@ qhpsiprog(char *program)
 		if (!stralloc_copys(&qhpsibin, auto_prefix) ||
 				!stralloc_catb(&qhpsibin, "/sbin/qhpsi", 11) ||
 				!stralloc_0(&qhpsibin))
-			die(51, 0, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 		execv(qhpsibin.s, argv);
-		die(75, 0, "qhpsi: unable to exec qhpsi executable");
+		die(QQ_EXEC_FAILED, 0, "qhpsi: unable to exec qhpsi executable");
 	} /*- switch (child = fork()) */
 	if (wait_pid(&wstat, child) == -1)
-		die(122, 1, "qhpsi: waitpid surprise");
+		die(QQ_WAITPID_SURPRISE, 1, "qhpsi: waitpid surprise");
 	if (wait_crashed(wstat))
-		die(123, 1, "qhpsi: qmail-queue crashed");
+		die(QQ_CRASHED, 1, "qhpsi: qmail-queue crashed");
 	childrc = wait_exitcode(wstat);
 	if ((x = env_get("REJECTVIRUS"))) {
 		scan_ulong(x, &u);
@@ -499,10 +500,10 @@ qhpsiprog(char *program)
 	}
 	if (childrc == qhpsirc) { /*- Virus Infected */
 		if (!stralloc_copys(&qqehextra, "X-QHPSI: Virus found\n"))
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 		if ((x = env_get("VIRUSFORWARD"))) {
 			if (!stralloc_copys(&quarantine, x))
-				die(51, 1, "out of memory");
+				die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 		}
 		switch (rejectvirus)
 		{
@@ -512,7 +513,7 @@ qhpsiprog(char *program)
 			 * Should the default be after case 2 ?
 			 */
 			default:/*- Bounce */
-				die(33, 1, "qhpsi: message contains virus"); /*- message contains a virus */
+				die(QQ_VIRUS_IN_MSG, 1, "qhpsi: message contains virus"); /*- message contains a virus */
 				break;
 			case 2: /*- Blackhole */
 				flagblackhole = 1;
@@ -521,9 +522,9 @@ qhpsiprog(char *program)
 	} else
 	if (childrc == qhpsirn) { /*- Clean Mail */
 		if (!stralloc_copys(&qqehextra, "X-QHPSI: clean\n"))
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 	} else
-		die(77, 1, "qhpsi: unable to run QHPSI scanner"); /*- QHPSI error in qmail.c */
+		die(QQ_QHPSI_TEMP_ERR, 1, "qhpsi: unable to run QHPSI scanner"); /*- QHPSI error in qmail.c */
 	return;
 }
 #endif
@@ -679,8 +680,8 @@ read_control(stralloc *s, char *env, char *f, int flag)
 			if (!stralloc_copyb(&err_str, "unable to read configuration ", 29) ||
 					!stralloc_cats(&err_str, f) ||
 					!stralloc_0(&err_str))
-				die(51, 0, "out of memory");
-			die(55, 0, err_str.s);
+				die(QQ_QHPSI_TEMP_ERR, 0, "out of memory");
+			die(QQ_CONFIG_ERR, 0, err_str.s);
 		}
 	} else
 	if (ptr && *ptr) {
@@ -689,12 +690,12 @@ read_control(stralloc *s, char *env, char *f, int flag)
 				if (!stralloc_copyb(&err_str, "unable to read configuration ", 29) ||
 						!stralloc_cats(&err_str, f) ||
 						!stralloc_0(&err_str))
-					die(51, 0, "out of memory");
-				die(55, 0, err_str.s);
+					die(QQ_OUT_OF_MEMORY, 0, "out of memory");
+				die(QQ_CONFIG_ERR, 0, err_str.s);
 			}
 		} else {
 			if (!stralloc_copys(s, ptr) || !stralloc_0(s))
-				die(51, 0, "out of memory");
+				die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 			s->len--;
 		}
 	}
@@ -767,13 +768,13 @@ main()
 			switch (control_readfile(&QueueBase, "queue_base", 0))
 			{
 			case -1:
-				_exit(55);
+				_exit(QQ_CONFIG_ERR);
 				break;
 			case 0:
 				if (!stralloc_copys(&QueueBase, auto_qmail) ||
 						!stralloc_catb(&QueueBase, "/queue", 6) ||
 						!stralloc_0(&QueueBase))
-					die(51, 0, "out of memory");
+					die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 				qbase = QueueBase.s;
 				break;
 			case 1:
@@ -785,14 +786,14 @@ main()
 				!stralloc_cats(&Queuedir, "/queue") ||
 				!stralloc_catb(&Queuedir, tmp, fmt_ulong(tmp, queueNo)) ||
 				!stralloc_0(&Queuedir))
-			die(51, 0, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 0, "out of memory");
 		queuedir = Queuedir.s;
 	}
 	if (chdir(queuedir) == -1) {
 		if (!stralloc_copyb(&err_str, "trouble doing cd to queue directory", 35) ||
 				!stralloc_cat(&err_str, &Queuedir))
-			die(51, 0, "out of memory");
-		die(61, 0, err_str.s);
+			die(QQ_OUT_OF_MEMORY, 0, "out of memory");
+		die(QQ_CHDIR, 0, err_str.s);
 	}
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
@@ -818,7 +819,7 @@ main()
 	alarm(DEATH);
 	pidopen();
 	if (fstat(messfd, &pidst) == -1)
-		die(70, 0, "unable to stat messfn");
+		die(QQ_MESS_FILE, 0, "unable to stat messfn");
 	messnum = pidst.st_ino;
 	messfn = fnnum("mess/", 1);
 	todofn = fnnum("todo/", bigtodo);
@@ -827,13 +828,13 @@ main()
 		e = errno;
 		unlink(pidfn);
 		errno = e;
-		die(67, 0, "trouble linking messfn to pidfn");
+		die(QQ_LINK_MESS_PID, 0, "trouble linking messfn to pidfn");
 	}
 	if (unlink(pidfn) == -1) {
 		e = errno;
 		unlink(messfn);
 		errno = e;
-		die(70, 0, "trouble unlinking pid file");
+		die(QQ_REMOVE_PID_ERR, 0, "trouble unlinking pid file");
 	}
 	flagmademess = 1;
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
@@ -849,33 +850,33 @@ main()
 		}
 	}
 	if (substdio_bput(&ssout, received, receivedlen) == -1)
-		die(53, 1, "trouble writing message");
+		die(QQ_WRITE_ERR, 1, "trouble writing message");
 	if (originipfield && (tcpremoteip = env_get("TCPREMOTEIP"))
 		&& (env_get("RELAYCLIENT") || env_get("TCPREMOTEINFO"))) {
 		origin_setup();
 		if (substdio_bput(&ssout, origin, originlen) == -1)
-			die(53, 1, "trouble writing message");
+			die(QQ_WRITE_ERR, 1, "trouble writing message");
 	}
 
 	if (!excl.len && !incl.len && !logh.len) {
 		switch (substdio_copy(&ssout, &ssin))
 		{
 		case -2:
-			die(54, 1, "trouble reading message");
+			die(QQ_READ_ERR, 1, "trouble reading message");
 		case -3:
-			die(53, 1, "trouble writing message");
+			die(QQ_WRITE_ERR, 1, "trouble writing message");
 		}
 	} else
 	for (itoken_len = 0;;) { /*- Line Processing */
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			die(54, 1, "trouble reading message");
+			die(QQ_READ_ERR, 1, "trouble reading message");
 		if (!match && line.len == 0)
 			break;
 		if (in_header && !mess822_ok(&line))
 			in_header = 0;
 		if (!in_header) {
 			if (substdio_put(&ssout, line.s, line.len))
-				die(53, 1, "trouble writing message");
+				die(QQ_WRITE_ERR, 1, "trouble writing message");
 			continue;
 		}
 		exclude = 0;
@@ -931,18 +932,18 @@ main()
 			}
 		}
 		if (include && (field_len == -1 || itoken_len <= field_len) && !stralloc_catb(&envheaders, line.s, line.len))
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 		if (!exclude && substdio_put(&ssout, line.s, line.len))
-			die(53, 1, "trouble writing message");
+			die(QQ_WRITE_ERR, 1, "trouble writing message");
 		if (logfd > 0 && loghead && substdio_put(&sslog, line.s, line.len))
-			die(53, 1, "trouble logging headers");
+			die(QQ_WRITE_ERR, 1, "trouble logging headers");
 		if (!match)
 			break;
 	} /*- for (;;) - Line Processing */
 	if (substdio_flush(&ssout) == -1)
-		die(53, 1, "trouble writing message");
+		die(QQ_WRITE_ERR, 1, "trouble writing message");
 	if (logfd > 0 && substdio_flush(&sslog) == -1)
-		die(53, 1, "trouble logging headers");
+		die(QQ_WRITE_ERR, 1, "trouble logging headers");
 	if (!fastqueue) {
 #if defined(QHPSI)
 		if ((qhpsi = env_get("QHPSI")))
@@ -955,7 +956,7 @@ main()
 	}
 	/*- write the envelope */
 	if ((intdfd = open_excl(intdfn)) == -1)
-		die(65, 1, "trouble creating files in intd");
+		die(QQ_INTD_FILE, 1, "trouble creating files in intd");
 	flagmadeintd = 1;
 	substdio_fdbuf(&ssout, write, intdfd, outbuf, sizeof(outbuf));
 	if (substdio_bput(&ssout, "u", 1) == -1 ||
@@ -964,40 +965,40 @@ main()
 			substdio_bput(&ssout, "p", 1) == -1 ||
 			substdio_bput(&ssout, tmp, fmt_ulong(tmp, mypid)) == -1 ||
 			substdio_bput(&ssout, "", 1) == -1)
-		die(53, 1, "trouble writing envelope");
+		die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	/*- read the message envelope */
 	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof(inbuf));
 	if (substdio_get(&ssin, &ch, 1) < 1)
-		die(53, 1, "trouble reading envelope");
+		die(QQ_READ_ERR, 1, "trouble reading envelope");
 	/*- Get the Sender */
 	if (ch != 'F') {
 		errno = 0;
-		die(79, 1, "envelope format error");
+		die(QQ_ENVELOPE_FMT_ERR, 1, "envelope format error");
 	}
 	if (substdio_bput(&ssout, &ch, 1) == -1)
-		die(53, 1, "trouble writing envelope");
+		die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 #if defined(MAILARCHIVE)
 	if (flagarchive) {
 		if (!stralloc_copys(&line, "") ||
 				!stralloc_catb(&line, &ch, 1))
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 	}
 #endif
 	for (len = 0; len < ADDR; ++len) {
 		if (substdio_get(&ssin, &ch, 1) < 1)
-			die(53, 1, "trouble reading envelope");
+			die(QQ_READ_ERR, 1, "trouble reading envelope");
 		if (substdio_put(&ssout, &ch, 1) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 #if defined(MAILARCHIVE)
 		if (flagarchive && !stralloc_catb(&line, &ch, 1))
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 #endif
 		if (!ch)
 			break;
 	}
 	if (len >= ADDR) {
 		errno = 0;
-		die(11, 1, "envelope address too long");
+		die(QQ_ENVELOPE_TOO_LONG, 1, "envelope address too long");
 	}
 	if (extraqueue.len && extraqueue.s) {
 		for (len = 0, ptr = extraqueue.s;len < extraqueue.len;) {
@@ -1005,7 +1006,7 @@ main()
 			if (substdio_bput(&ssout, "T", 1) == -1 ||
 					substdio_bput(&ssout, ptr, token_len) == -1 ||
 					substdio_bput(&ssout, "\0", 1) == -1)
-				die(53, 1, "trouble writing envelope");
+				die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 			ptr = extraqueue.s + len;
 		}
 	}
@@ -1013,17 +1014,17 @@ main()
 		if (substdio_bput(&ssout, "T", 1) == -1 ||
 				substdio_bput(&ssout, quarantine.s, quarantine.len) == -1 ||
 				substdio_bput(&ssout, "\0", 1) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 		if (!stralloc_cats(&qqehextra, "X-Quarantine-ID: ") ||
 				!stralloc_cat(&qqehextra, &quarantine)) {
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 		}
 	}
 	/*- Get the recipients */
 	if (flagblackhole) {
 		for (;;) { /*- empty the pipe created by qmail_open() */
 			if (substdio_get(&ssin, &ch, 1) < 1)
-				die(53, 1, "trouble reading envelope");
+				die(QQ_READ_ERR, 1, "trouble reading envelope");
 			if (!ch)
 				break;
 		}
@@ -1033,7 +1034,7 @@ main()
 	for (;;) {
 		/*- get one recipient at a time */
 		if (substdio_get(&ssin, &ch, 1) < 1)
-			die(53, 1, "trouble reading envelope");
+			die(QQ_READ_ERR, 1, "trouble reading envelope");
 		if (!ch)
 			break;
 #if defined(QHPSI)
@@ -1044,39 +1045,39 @@ main()
 #endif
 		if (ch != 'T') {
 			errno = 0;
-			die(79, 1, "envelope format error");
+			die(QQ_ENVELOPE_FMT_ERR, 1, "envelope format error");
 		}
 		if (flagquarantine) {
 			if (!stralloc_append(&qqehextra, ",")) {
 				cleanup();
-				die(51, 1, "out of memory");
+				die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 			}
 		} else
 		if (substdio_bput(&ssout, &ch, 1) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 #if defined(MAILARCHIVE)
 		if (flagarchive && !stralloc_catb(&line, &ch, 1))
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 #endif
 		for (len = 0; len < ADDR; ++len) {
 			if (substdio_get(&ssin, &ch, 1) < 1)
-				die(53, 1, "trouble reading envelope");
+				die(QQ_READ_ERR, 1, "trouble reading envelope");
 			if (flagquarantine) {
 				if (ch && !stralloc_append(&qqehextra, &ch))
-					die(51, 1, "out of memory");
+					die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 			} else
 			if (substdio_bput(&ssout, &ch, 1) == -1)
-				die(53, 1, "trouble writing envelope");
+				die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 #if defined(MAILARCHIVE)
 			if (flagarchive && !stralloc_catb(&line, &ch, 1))
-				die(51, 1, "out of memory");
+				die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 #endif
 			if (!ch) /* this completes one recipient */
 				break;
 		}
 		if (len >= ADDR) {
 			errno = 0;
-			die(11, 1, "envelope address too long");
+			die(QQ_ENVELOPE_TOO_LONG, 1, "envelope address too long");
 		}
 	} /*- for (;;) */
 #if defined(MAILARCHIVE)
@@ -1086,57 +1087,57 @@ main()
 		 * assign special address F<> for bounces
 		 */
 		if (!stralloc_0(&line))
-			die(51, 1, "out of memory");
+			die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 		for (ptr = line.s;*ptr;) {
 			if (set_archive(*(ptr + 1) ? ptr : "F<>"))
-				die(51, 1, "out of memory");
+				die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 			ptr += str_len(ptr) + 1;
 		}
 	}
 	if (arch_email.s && arch_email.len) {
 		if (substdio_bput(&ssout, arch_email.s, arch_email.len) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	}
 #endif
 	if (flagquarantine && !stralloc_append(&qqehextra, "\n"))
-		die(51, 1, "out of memory");
+		die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 	if ((qqeh && *qqeh) || (qqehextra.s && qqehextra.len)) {
 		if (substdio_bput(&ssout, "e", 1) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	}
 	if (qqehextra.s && qqehextra.len) {
 		if (substdio_bput(&ssout, qqehextra.s, qqehextra.len) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	}
 	if (qqeh && *qqeh) {
 		if (substdio_bputs(&ssout, qqeh) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 		len = str_len(qqeh);
 		if (qqeh[len - 1] != '\n' && substdio_bput(&ssout, "\n", 1) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	}
 	if ((qqeh && *qqeh) || (qqehextra.s && qqehextra.len)) {
 		if (substdio_bput(&ssout, "\0", 1) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	}
 	if (envheaders.s && envheaders.len) {
 		if (substdio_bput(&ssout, "h", 1) == -1 ||
 				substdio_bput(&ssout, envheaders.s, envheaders.len) == -1 ||
 				substdio_bput(&ssout, "\0", 1) == -1)
-			die(53, 1, "trouble writing envelope");
+			die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	}
 	if (substdio_flush(&ssout) == -1)
-		die(53, 1, "trouble writing envelope");
+		die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 #ifdef USE_FSYNC
 	if ((use_fsync > 0 || use_fdatasync > 0) &&
 			((use_fdatasync > 0 ? fdatasync(messfd) : fsync(messfd)) == -1 || (use_fdatasync > 0 ? fdatasync(intdfd) : fsync(intdfd)) == -1))
-		die(64, 1, "trouble syncing message to disk");
+		die(QQ_FSYNC_ERR, 1, "trouble syncing message to disk");
 #else
 	if (fsync(messfd) == -1 || fsync(intdfd) == -1)
-		die(64, 1, "trouble syncing message to disk");
+		die(QQ_FSYNC_ERR, 1, "trouble syncing message to disk");
 #endif
 	if (link(intdfn, todofn) == -1)
-		die(66, 1, "trouble linking todofn to intdfn");
+		die(QQ_LINK_TODO_INTD, 1, "trouble linking todofn to intdfn");
 #if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX) /*- asynchronous nature of link() happens only on Linux */
 	if (use_syncdir > 0) {
 		if ((fd = open(todofn, O_RDONLY)) == -1) {
@@ -1146,10 +1147,10 @@ main()
 			 * a case you will get error_noent
 			 */
 			if (errno != error_noent)
-				die(69, 1, "trouble syncing dir to disk");
+				die(QQ_SYNCDIR_ERR, 1, "trouble syncing dir to disk");
 		} else
 		if ((use_fdatasync > 0 ? fdatasync(fd) : fsync(fd)) == -1 || close(fd) == -1)
-			die(69, 1, "trouble syncing dir to disk");
+			die(QQ_SYNCDIR_ERR, 1, "trouble syncing dir to disk");
 	}
 #endif
 #ifdef HASLIBRT
@@ -1173,7 +1174,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.84 2022-10-04 23:56:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.85 2022-10-17 19:44:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1181,6 +1182,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.85  2022-10-17 19:44:55+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.84  2022-10-04 23:56:17+05:30  Cprogrammer
  * prefix qhpsi messages with 'qhpsi: '
  *

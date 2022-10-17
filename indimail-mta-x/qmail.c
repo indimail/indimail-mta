@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.33 2022-10-04 23:43:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.34 2022-10-17 19:44:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -188,100 +188,102 @@ qmail_close(struct qmail *qq)
 	switch (exitcode)
 	{
 	case 115: /*- compatibility */
-	case 11:
+	case QQ_ENVELOPE_TOO_LONG:
 		return "Dqq envelope address too long (#5.1.3)";
-	case 31:
+	case QQ_PERM_MSG_REJECT:
 		return "Dqq mail server permanently rejected message (#5.3.0)";
-	case 32:
+	case QQ_SPAM_THRESHOLD:
 		return "Dqq spam or junk mail threshold exceeded (#5.7.1)"; /*- qmail-spamfiter */
-	case 33:
+	case QQ_VIRUS_IN_MSG:
 		return "Dqq message contains virus (#5.7.1)";
-	case 34:
+	case QQ_BANNED_ATTACHMENT:
 		return "Dqq message contains banned attachment (#5.7.1)";
-	case 35:
+	case QQ_NO_PRIVATE_KEY:
 		return "Dqq private key file does not exist (#5.3.5)";
-	case 50:
+	case QQ_VIRUS_SCANNER_PRIV:
 		return "Zqq unable to get privilege to run virus scanner (#4.3.0)"; /*- qhpsi */
-	case 51:
+	case QQ_OUT_OF_MEMORY:
 		return "Zqq out of memory (#4.3.0)";
-	case 52:
+	case QQ_TIMEOUT:
 		return "Zqq timeout (#4.3.0)";
-	case 53:
+	case QQ_DUP_ERR:
+		return "Zqq trouble duplicating file descriptors (#4.3.0)";
+	case QQ_WRITE_ERR:
 		return "Zqq write error or disk full (#4.3.0)";
-	case 0:
+	case QQ_OK:
 		if (!qq->flagerr)
 			return "";
 		/*- fall through */
-	case 54:
+	case QQ_READ_ERR:
 		return "Zqq read error (#4.3.0)";
-	case 55:
+	case QQ_CONFIG_ERR:
 		return "Zqq unable to read configuration (#4.3.0)";
-	case 56:
+	case QQ_NETWORK:
 		return "Zqq trouble making network connection (#4.3.0)";
-	case 57:
+	case QQ_OPEN_SHARED_OBJ:
 		return "Zqq unable to open shared object/plugin (#4.3.0)";
-	case 58:
+	case QQ_RESOLVE_SHARED_SYM:
 		return "Zqq unable to resolve symbol in shared object/plugin (#4.3.0)";
-	case 59:
+	case QQ_CLOSE_SHARED_OBJ:
 		return "Zqq unable to close shared object/plugin (#4.3.0)";
-	case 60:
+	case QQ_PIPE_SOCKET:
 		return "Zqq trouble creating pipes/sockets (#4.3.0)";
-	case 61:
+	case QQ_CHDIR:
 		return "Zqq trouble in home directory (#4.3.0)";
-	case 62:
+	case QQ_MESS_FILE:
 		return "Zqq unable to access mess file (#4.3.0)";
-	case 63:
+	case QQ_CD_ROOT:
 		return "Zqq trouble doing cd to root directory (#4.3.0)";
-	case 64:
+	case QQ_FSYNC_ERR:
 		return "Zqq trouble syncing message to disk (#4.3.0)";
-	case 65:
+	case QQ_INTD_FILE:
 		return "Zqq trouble creating files in intd. (#4.3.0)";
-	case 66:
+	case QQ_LINK_TODO_INTD:
 		return "Zqq trouble linking todofn to intdfn (#4.3.0)";
-	case 67:
+	case QQ_LINK_MESS_PID:
 		return "Zqq trouble linking messfn to pidfn (#4.3.0)";
-	case 68:
+	case QQ_TMP_FILES:
 		return "Zqq trouble creating temporary files (#4.3.0)";
-	case 69:
+	case QQ_SYNCDIR_ERR:
 		return "Zqq trouble syncing dir to disk (#4.3.0)";
-	case 70:
+	case QQ_PID_FILE:
 		return "Zqq trouble with pid file (#4.3.0)";
-	case 71:
+	case QQ_TEMP_MSG_REJECT:
 		return "Zqq mail server temporarily rejected message (#4.3.0)";
-	case 72:
+	case QQ_CONN_TIMEOUT:
 		return "Zqq connection to mail server timed out (#4.4.1)";
-	case 73:
+	case QQ_CONN_REJECT:
 		return "Zqq connection to mail server rejected (#4.4.1)";
-	case 74:
+	case QQ_CONN_FAILED:
 		return "Zqq communication with mail server failed (#4.4.2)";
-	case 75:
+	case QQ_EXEC_FAILED:
 		return "Zqq unable to exec (#4.3.0)";
-	case 76:
+	case QQ_TEMP_SPAM_FILTER:
 		return "Zqq temporary problem with SPAM filter (#4.3.0)";
-	case 77: /*- thanks to problem repoted by peter cheng */
+	case QQ_QHPSI_TEMP_ERR: /*- thanks to problem repoted by peter cheng */
 		return "Zqq unable to run QHPSI scanner (#4.3.0)";
-	case 78:
+	case QQ_GET_UID_GID:
 		return "Zqq trouble getting uids/gids (#4.3.0)";
-	case 79:
+	case QQ_ENVELOPE_FMT_ERR:
 		return "Zqq envelope format error (#4.3.0)";
-	case 80:
+	case QQ_REMOVE_INTD_ERR:
 		return "Zqq trouble removing intdfn";
 	case 91:
 		/*- fall through */
-	case 81:
+	case QQ_INTERNAL_BUG:
 		return "Zqq internal bug (#4.3.0)";
-	case 87: /*-*/
+	case QQ_SYSTEM_MISCONFIG: /*-*/
 		return "Zqq mail system incorrectly configured. (#4.3.5)";
 	case 82: /*- compatability with simscan, notqmail, etc */
-	case 120:
+	case QQ_EXEC_QMAILQUEUE:
 		return "Zqq unable to exec qq (#4.3.0)";
-	case 121: /*-*/
+	case QQ_FORK_ERR: /*-*/
 		return "Zqq unable to fork (#4.3.0)";
-	case 122: /*-*/
+	case QQ_WAITPID_SURPRISE: /*-*/
 		return "Zqq waitpid surprise (#4.3.0)";
-	case 123: /*-*/
+	case QQ_CRASHED: /*-*/
 		return "Zqq crashed (#4.3.0)";
-	case 88: /*- custom error */
+	case QQ_CUSTOM_ERR: /*- custom error */
 		if (qq->fdc != -1 && len > 2)
 			return errstr;
 		return "Zqq temporary problem (#4.3.0)";
@@ -295,13 +297,16 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.33 2022-10-04 23:43:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.34 2022-10-17 19:44:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.34  2022-10-17 19:44:15+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.33  2022-10-04 23:43:37+05:30  Cprogrammer
  * set ERROR_FD to -1 to disable custom error
  *

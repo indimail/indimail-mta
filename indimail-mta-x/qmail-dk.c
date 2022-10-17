@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dk.c,v 1.62 2022-10-17 12:28:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dk.c,v 1.63 2022-10-17 19:44:28+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef DOMAIN_KEYS
 #include <unistd.h>
@@ -62,26 +62,26 @@ die(int e)
 no_return void
 die_write()
 {
-	_exit(53);
+	_exit(QQ_WRITE_ERR);
 }
 
 no_return void
 die_read()
 {
-	_exit(54);
+	_exit(QQ_READ_ERR);
 }
 
 no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
-	_exit(52);
+	_exit(QQ_TIMEOUT);
 }
 
 no_return void
 sigbug()
 {
-	_exit(81);
+	_exit(QQ_INTERNAL_BUG);
 }
 
 void
@@ -91,9 +91,9 @@ maybe_die_dk(e)
 	switch (e)
 	{
 	case DK_STAT_NORESOURCE:
-		_exit(51);
+		_exit(QQ_OUT_OF_MEMORY);
 	case DK_STAT_INTERNAL:
-		_exit(81);
+		_exit(QQ_INTERNAL_BUG);
 	case DK_STAT_ARGS:
 		custom_error("qmail-dk", "Z", "Arguments are not usable.", 0, "X.3.5");
 	case DK_STAT_SYNTAX:
@@ -143,10 +143,10 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 					tmp.len--;
 			} else
 			if (!stralloc_append(&tmp, p))
-				die(51);
+				die(QQ_OUT_OF_MEMORY);
 		}
 		if (!stralloc_0(&tmp))
-			die(51);
+			die(QQ_OUT_OF_MEMORY);
 		return tmp.s;
 	}
 	if (!keyfn[pos + 1]) { /*- file has % as the last component (implies selector is %) */
@@ -157,7 +157,7 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 	} else
 		len = pos + (d = fmt_str(0, domain)) + (r = fmt_str(0, keyfn + pos + 1));
 	if (!(t = (char *) alloc((len + 1) * sizeof(char))))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	s = t;
 	s += fmt_strn(t, keyfn, pos);
 	s += fmt_strn(t + pos, domain, d);
@@ -171,7 +171,7 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 		return p;
 	} else {
 		if (!stralloc_copyb(&tmp, t, len + 1))
-			die(51);
+			die(QQ_OUT_OF_MEMORY);
 		alloc_free(t);
 		return tmp.s;
 	}
@@ -201,12 +201,12 @@ write_signature(DK *dka, char *dk_selector,
 		}
 		if (!stralloc_copys(&tmp, controldir) ||
 				!stralloc_append(&tmp, "/"))
-			die(51);
+			die(QQ_OUT_OF_MEMORY);
 	} else
 	if (!stralloc_copys(&tmp, keyfn))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	if (!stralloc_0(&tmp))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	i = str_chr(keyfn, '%');
 	if (keyfn[i]) {
 		pct_found = 1;
@@ -230,7 +230,7 @@ write_signature(DK *dka, char *dk_selector,
 		 */
 		if (pct_found)
 			return;
-		die(35);
+		die(QQ_NO_PRIVATE_KEY);
 	case 1:
 		restore_gid();
 		break;
@@ -244,7 +244,7 @@ write_signature(DK *dka, char *dk_selector,
 			dksignature.s[i] = '\n';
 	}
 	if (!stralloc_0(&dksignature))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	st = dk_getsig(dka, dksignature.s, advice, advicelen);
 	maybe_die_dk(st);
 	if (!dk_selector) {
@@ -266,32 +266,30 @@ write_signature(DK *dka, char *dk_selector,
 			!stralloc_cats(&dkoutput, "    s=") ||
 			!stralloc_cats(&dkoutput, selector) ||
 			!stralloc_cats(&dkoutput, "; d="))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	ptr = env_get("DKDOMAIN");
 	if (from || ptr) {
 		if (!stralloc_cats(&dkoutput, ptr ? ptr : from))
-			die(51);
+			die(QQ_OUT_OF_MEMORY);
 	} else
 	if (!stralloc_cats(&dkoutput, "unknown"))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	if (!stralloc_cats(&dkoutput, ";\n") ||
 			!stralloc_cats(&dkoutput, "    b=") ||
 			!stralloc_cats(&dkoutput, (char *) advice))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	if (dkexcludeheaders || opth) {
 		if ((i = dk_headers(dka, NULL)) > 0) {
-			if (!(ptr = alloc(i)))
-				die(51);
-			if (!dk_headers(dka, ptr))
-				die(51);
-			if (!stralloc_cats(&dkoutput, ";\n    h=") ||
+			if (!(ptr = alloc(i)) ||
+					!dk_headers(dka, ptr) ||
+					!stralloc_cats(&dkoutput, ";\n    h=") ||
 					!stralloc_cats(&dkoutput, ptr))
-				die(51);
+				die(QQ_OUT_OF_MEMORY);
 			alloc_free(ptr);
 		}
 	}
 	if (!stralloc_cats(&dkoutput, ";\n"))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 }
 
 int
@@ -308,11 +306,11 @@ find_header(stralloc *line)
 		return -1;
 	if (!headers.len) {
 		if (!stralloc_copys(&headers, ""))
-			die(51);
+			die(QQ_OUT_OF_MEMORY);
 		if (dkexcludeheaders) {
 			if (!stralloc_cats(&headers, dkexcludeheaders) ||
 					!stralloc_append(&headers, ":"))
-				die(51);
+				die(QQ_OUT_OF_MEMORY);
 		}
 	}
 	if (!headers.len)
@@ -345,7 +343,7 @@ dk_setoptions(char **selector, int *advicelen, int *opth, int *optr, int *optc,
 			!stralloc_cats(&dkopts, signOptions) ||
 			!stralloc_0(&dkopts) ||
 			!(argv = makeargs(dkopts.s)))
-		die(51);
+		die(QQ_OUT_OF_MEMORY);
 	for (argc = 0;argv[argc];argc++);
 	while ((ch = sgopt(argc, argv, "hrb:c:s:")) != sgoptdone) {
 		switch (ch)
@@ -403,7 +401,7 @@ main(int argc, char *argv[])
 		if (!(dksign = env_get("DKKEY"))) {
 			if (!stralloc_copys(&dkfn, "domainkeys/%/default") ||
 					!stralloc_0(&dkfn))
-				die(51);
+				die(QQ_OUT_OF_MEMORY);
 			dksign = dkfn.s;
 		}
 	}
@@ -441,9 +439,9 @@ main(int argc, char *argv[])
 	if ((ret = pidopen(starttime, x)))
 		die(ret);
 	if ((readfd = open_read(pidfn)) == -1)
-		die(70);
+		die(QQ_PID_FILE);
 	if (unlink(pidfn) == -1)
-		die(70);
+		die(QQ_PID_FILE);
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf)); /*- message content */
 	dkexcludeheaders = env_get("DKEXCLUDEHEADERS");
@@ -519,7 +517,7 @@ main(int argc, char *argv[])
 
 			restore_gid();
 			if (!stralloc_copys(&dkoutput, "DomainKey-Status: "))
-				die(51);
+				die(QQ_OUT_OF_MEMORY);
 			switch (st)
 			{
 			case DK_STAT_OK:
@@ -576,7 +574,7 @@ main(int argc, char *argv[])
 			}
 			if (!stralloc_cats(&dkoutput, status) ||
 					!stralloc_cats(&dkoutput, "\n"))
-				die(51);
+				die(QQ_OUT_OF_MEMORY);
 			if (dkverify[str_chr(dkverify, 'A' + st)])
 				custom_error("qmail-dk", "D", status, 0, code); /*- return permanent error */
 			if (dkverify[str_chr(dkverify, 'a' + st)])
@@ -584,17 +582,17 @@ main(int argc, char *argv[])
 		}
 	}
 	if (pipe(pim) == -1)
-		die(60);
+		die(QQ_PID_FILE);
 	switch (pid = vfork())
 	{
 	case -1:
 		close(pim[0]);
 		close(pim[1]);
-		die(121);
+		die(QQ_FORK_ERR);
 	case 0:
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
-			die(120);
+			die(QQ_DUP_ERR);
 		restore_gid();
 		return (qmulti("DKQUEUE", argc, argv));
 	}
@@ -614,9 +612,9 @@ main(int argc, char *argv[])
 		die_write();
 	close(pim[1]);
 	if (wait_pid(&wstat, pid) != pid)
-		die(122);
+		die(QQ_WAITPID_SURPRISE);
 	if (wait_crashed(wstat))
-		die(123);
+		die(QQ_CRASHED);
 	die(wait_exitcode(wstat));
 	/*- Not Reached */
 	exit(0);
@@ -645,7 +643,7 @@ main(argc, argv)
 void
 getversion_qmail_dk_c()
 {
-	static char    *x = "$Id: qmail-dk.c,v 1.62 2022-10-17 12:28:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dk.c,v 1.63 2022-10-17 19:44:28+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef DOMAIN_KEYS
 	x = sccsidmakeargsh;
@@ -659,6 +657,9 @@ getversion_qmail_dk_c()
 
 /*
  * $Log: qmail-dk.c,v $
+ * Revision 1.63  2022-10-17 19:44:28+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.62  2022-10-17 12:28:35+05:30  Cprogrammer
  * replace all '%' character with domain -name
  *
