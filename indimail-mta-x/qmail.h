@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.h,v $
+ * Revision 1.8  2022-10-17 19:44:36+05:30  Cprogrammer
+ * define qmail-queue exit codes
+ *
  * Revision 1.7  2022-10-04 23:43:51+05:30  Cprogrammer
  * added comments
  *
@@ -47,5 +50,54 @@ void            qmail_to(struct qmail *, char *);
 void            qmail_fail(struct qmail *);
 char           *qmail_close(struct qmail *);
 unsigned long   qmail_qp(struct qmail *);
+
+#define QQ_OK                  0
+#define QQ_ENVELOPE_TOO_LONG  11
+#define QQ_PERM_MSG_REJECT    31
+#define QQ_SPAM_THRESHOLD     32
+#define QQ_VIRUS_IN_MSG       33
+#define QQ_BANNED_ATTACHMENT  34
+#define QQ_NO_PRIVATE_KEY     35
+/*- define errors > 40 */
+#define QQ_DUP_ERR            41
+#define QQ_VIRUS_SCANNER_PRIV 50
+#define QQ_OUT_OF_MEMORY      51
+#define QQ_TIMEOUT            52
+#define QQ_WRITE_ERR          53
+#define QQ_READ_ERR           54
+#define QQ_CONFIG_ERR         55
+#define QQ_NETWORK            56
+#define QQ_OPEN_SHARED_OBJ    57
+#define QQ_RESOLVE_SHARED_SYM 58
+#define QQ_CLOSE_SHARED_OBJ   59
+#define QQ_PIPE_SOCKET        60
+#define QQ_CHDIR              61
+#define QQ_MESS_FILE          62
+#define QQ_CD_ROOT            63
+#define QQ_FSYNC_ERR          64
+#define QQ_INTD_FILE          65
+#define QQ_LINK_TODO_INTD     66
+#define QQ_LINK_MESS_PID      67
+#define QQ_TMP_FILES          68
+#define QQ_SYNCDIR_ERR        69
+#define QQ_PID_FILE           70
+#define QQ_TEMP_MSG_REJECT    71
+#define QQ_CONN_TIMEOUT       72
+#define QQ_CONN_REJECT        73
+#define QQ_CONN_FAILED        74
+#define QQ_EXEC_FAILED        75
+#define QQ_TEMP_SPAM_FILTER   76
+#define QQ_QHPSI_TEMP_ERR     77
+#define QQ_GET_UID_GID        78
+#define QQ_ENVELOPE_FMT_ERR   79
+#define QQ_REMOVE_INTD_ERR    80
+#define QQ_INTERNAL_BUG       81
+#define QQ_REMOVE_PID_ERR     83
+#define QQ_SYSTEM_MISCONFIG   87
+#define QQ_CUSTOM_ERR         88
+#define QQ_EXEC_QMAILQUEUE   120
+#define QQ_FORK_ERR          121
+#define QQ_WAITPID_SURPRISE  122
+#define QQ_CRASHED           123
 
 #endif

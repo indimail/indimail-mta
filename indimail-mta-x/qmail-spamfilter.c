@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.6  2022-10-17 19:44:59+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.5  2022-04-03 18:44:36+05:30  Cprogrammer
  * refactored qmail_open() error codes
  *
@@ -31,6 +34,7 @@
 #include <noreturn.h>
 #include "auto_prefix.h"
 #include "qmulti.h"
+#include "qmail.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 
@@ -38,13 +42,13 @@ no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
-	_exit(52);
+	_exit(QQ_TIMEOUT);
 }
 
 no_return void
 sigbug()
 {
-	_exit(81);
+	_exit(QQ_INTERNAL_BUG);
 }
 
 int
@@ -60,7 +64,7 @@ main(int argc, char **argv)
 	char          **Argv;
 
 	if (chdir("/") == -1)
-		_exit(61);
+		_exit(QQ_CHDIR);
 	sig_pipeignore();
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
@@ -73,13 +77,13 @@ main(int argc, char **argv)
 					!stralloc_catb(&q, "/sbin/qscanq", 12) ||
 					!stralloc_0(&q))
 			execv(q.s, argv);
-			_exit(75);
+			_exit(QQ_EXEC_FAILED);
 		}
 	}
 	if (!(spamf = env_get("SPAMFILTER")) || env_get("RELAYCLIENT"))
 		return (qmulti("SPAMQUEUE", argc, argv)); /*- Does not return */
 	if (pipe(pipefd) == -1)
-		_exit(60);
+		_exit(QQ_PIPE_SOCKET);
 	switch ((filt_pid = fork())) /*- spam filter */
 	{
 	case -1:
@@ -87,23 +91,25 @@ main(int argc, char **argv)
 		close(1);
 		close(pipefd[0]);
 		close(pipefd[1]);
-		_exit(121);
+		_exit(QQ_FORK_ERR);
 	case 0:
 		if (!stralloc_copys(&spamfilterargs, spamf) ||
 				!stralloc_0(&spamfilterargs))
-			_exit(51);
+			_exit(QQ_OUT_OF_MEMORY);
 		if (!(Argv = makeargs(spamfilterargs.s)))
-			_exit(51);
+			_exit(QQ_OUT_OF_MEMORY);
 		/*- Mail content read from fd 0 */
 		makeseekable = env_get("MAKE_SEEKABLE");
 		if (makeseekable && mktempfile(0))
-			_exit(68);
-		if (dup2(pipefd[1], 1) == -1 || close(pipefd[0]) == -1)
-			_exit(60);
+			_exit(QQ_TMP_FILES);
+		if (dup2(pipefd[1], 1) == -1)
+			_exit(QQ_DUP_ERR);
+		if (close(pipefd[0]) == -1)
+			_exit(QQ_PIPE_SOCKET);
 		if (pipefd[1] != 1)
 			close(pipefd[1]);
 		execv(*Argv, Argv);
-		_exit(75);
+		_exit(QQ_EXEC_FAILED);
 	default:
 		break;
 	}
@@ -114,7 +120,7 @@ main(int argc, char **argv)
 		close(pipefd[1]);
 		close(recpfd[0]);
 		close(recpfd[1]);
-		_exit(60);
+		_exit(QQ_PIPE_SOCKET);
 	}
 	close(0);
 	switch ((queuepid = fork()))
@@ -126,17 +132,21 @@ main(int argc, char **argv)
 		close(recpfd[0]);
 		close(recpfd[1]);
 		wait_pid(&wstat, filt_pid);
-		_exit(120);
+		_exit(QQ_FORK_ERR);
 	case 0:
 		/*- 
 		 * Mail content read from pipfd[0]
 		 * which has been filtered through SPAMFILTER
 		 * Envelope information can be read through recpfd[0]
 		 */
-		if (dup2(pipefd[0], 0) == -1 || close(pipefd[1]) == -1)
-			_exit(60);
-		if (dup2(recpfd[0], 1) == -1 || close(recpfd[1]) == -1)
-			_exit(60);
+		if (dup2(pipefd[0], 0) == -1)
+			_exit(QQ_DUP_ERR);
+		if (close(pipefd[1]) == -1)
+			_exit(QQ_PIPE_SOCKET);
+		if (dup2(recpfd[0], 1) == -1)
+			_exit(QQ_DUP_ERR);
+		if (close(recpfd[1]) == -1)
+			_exit(QQ_PIPE_SOCKET);
 		if (pipefd[0] != 0)
 			close(pipefd[0]);
 		if (recpfd[0] != 1)
@@ -152,13 +162,13 @@ main(int argc, char **argv)
 		close(1);
 		close(recpfd[1]);
 		wait_pid(&wstat, queuepid);
-		_exit(122);
+		_exit(QQ_WAITPID_SURPRISE);
 	}
 	if (wait_crashed(wstat)) {
 		close(1);
 		close(recpfd[1]);
 		wait_pid(&wstat, queuepid);
-		_exit(123);
+		_exit(QQ_CRASHED);
 	}
 	/*
 	 * Process message if exit code is 0, 1, 2
@@ -185,7 +195,7 @@ main(int argc, char **argv)
 						close(recpfd[1]);
 						wait_pid(&wstat, queuepid);
 						if (*ptr == '1')
-							_exit(32); /*- bounce */
+							_exit(QQ_SPAM_THRESHOLD); /*- bounce */
 						else
 							_exit(0); /*- blackhole */
 					} else /*- spam notification - envelope has been rewritten */ if (n == 1) {
@@ -200,7 +210,7 @@ main(int argc, char **argv)
 		close(1);
 		close(recpfd[1]);
 		wait_pid(&wstat, queuepid);
-		_exit(76); /*- treat this as temp problem with spam filter */
+		_exit(QQ_TEMP_SPAM_FILTER); /*- treat this as temp problem with spam filter */
 	}
 	/*- Write envelope to qmail-queue */
 	substdio_fdbuf(&ssout, write, recpfd[1], outbuf, sizeof (outbuf));
@@ -211,21 +221,21 @@ main(int argc, char **argv)
 	case -2: /*- read error */
 		close(1);
 		close(recpfd[1]);
-		_exit(54);
+		_exit(QQ_READ_ERR);
 	case -3: /*- write error */
 		close(1);
 		close(recpfd[1]);
-		_exit(53);
+		_exit(QQ_WRITE_ERR);
 	}
 	if (substdio_flush(&ssout) == -1)
-		_exit(53);
+		_exit(QQ_WRITE_ERR);
 finish:
 	close(1);
 	close(recpfd[1]);
 	if (wait_pid(&wstat, queuepid) != queuepid)
-		_exit(122);
+		_exit(QQ_WAITPID_SURPRISE);
 	if (wait_crashed(wstat))
-		_exit(123);
+		_exit(QQ_CRASHED);
 	_exit(queueexitcode = wait_exitcode(wstat));
 	/*- Not reached */
 	return (0);
@@ -235,7 +245,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.5 2022-04-03 18:44:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.6 2022-10-17 19:44:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.67 2022-10-17 12:28:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.68 2022-10-17 19:44:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -65,26 +65,26 @@ die(int e, int what)
 no_return void
 die_write()
 {
-	die(53, 0);
+	die(QQ_WRITE_ERR, 0);
 }
 
 no_return void
 die_read()
 {
-	die(54, 0);
+	die(QQ_READ_ERR, 0);
 }
 
 no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
-	die(52, 0);
+	die(QQ_TIMEOUT, 0);
 }
 
 no_return void
 sigbug()
 {
-	die(81, 0);
+	die(QQ_INTERNAL_BUG, 0);
 }
 
 int DKIM_CALL
@@ -108,7 +108,7 @@ maybe_die_dkim(e)
 	{
 	case DKIM_OUT_OF_MEMORY:
 	case DKIM_BUFFER_TOO_SMALL:
-		_exit (51);
+		_exit (QQ_OUT_OF_MEMORY);
 	case DKIM_INVALID_CONTEXT:
 		custom_error("qmail-dkim", "Z", "DKIMContext structure invalid for this operation", 0, "X.3.0");
 	case DKIM_NO_SENDER:
@@ -152,10 +152,10 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 					tmp.len--;
 			} else
 			if (!stralloc_append(&tmp, p))
-				die(51, 1);
+				die(QQ_OUT_OF_MEMORY, 1);
 		}
 		if (!stralloc_0(&tmp))
-			die(51, 1);
+			die(QQ_OUT_OF_MEMORY, 1);
 		return tmp.s;
 	}
 	if (!keyfn[pos + 1]) { /*- file has % as the last component (implies selector is %) */
@@ -166,7 +166,7 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 	} else
 		len = pos + (d = fmt_str(0, domain)) + (r = fmt_str(0, keyfn + pos + 1));
 	if (!(t = (char *) alloc((len + 1) * sizeof(char))))
-		die(51, 1);
+		die(QQ_OUT_OF_MEMORY, 1);
 	s = t;
 	s += fmt_strn(t, keyfn, pos);
 	s += fmt_strn(t + pos, domain, d);
@@ -180,7 +180,7 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 		return p;
 	} else {
 		if (!stralloc_copyb(&tmp, t, len + 1))
-			die(51, 1);
+			die(QQ_OUT_OF_MEMORY, 1);
 		alloc_free(t);
 		return tmp.s;
 	}
@@ -208,12 +208,12 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		if (!stralloc_copys(&tmp, controldir) ||
 				!stralloc_append(&tmp, "/") ||
 				!stralloc_cats(&tmp, keyfn))
-			die(51, 1);
+			die(QQ_OUT_OF_MEMORY, 1);
 	} else
 	if (!stralloc_copys(&tmp, keyfn))
-		die(51, 1);
+		die(QQ_OUT_OF_MEMORY, 1);
 	if (!stralloc_0(&tmp))
-		die(51, 1);
+		die(QQ_OUT_OF_MEMORY, 1);
 	/*
 	 * it is possible that selector was chosen based
 	 * on DKIMSIGN.
@@ -246,7 +246,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		 */
 		if (pct_found)
 			return;
-		die(35, 0);
+		die(QQ_NO_PRIVATE_KEY, 0);
 	case 1:
 		restore_gid();
 		break;
@@ -261,7 +261,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 			dksignature.s[i] = '\n';
 	}
 	if (!stralloc_0(&dksignature))
-		die(51, 1);
+		die(QQ_OUT_OF_MEMORY, 1);
 	if (r_selector) { /*- replace selector */
 		selector = ptr = keyfn;
 		while (*ptr) {
@@ -277,7 +277,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 	if (pSig) {
 		if (!stralloc_catb(&dkimoutput, pSig, str_len(pSig)) ||
 				!stralloc_cats(&dkimoutput, "\n"))
-			die(51, 1);
+			die(QQ_OUT_OF_MEMORY, 1);
 	}
 	DKIMSignFree(&ctxt);
 }
@@ -346,7 +346,7 @@ checkSSP(char *domain, int *bTesting)
 
 	*bTesting = 0;
 	if (!(query = DKIM_MALLOC(str_len("_ssp._domainkey.") + str_len(domain) + 1)))
-		die(51, 0);
+		die(QQ_OUT_OF_MEMORY, 0);
 	sprintf(query, "_ssp._domainkey.%s", domain);
 	results = dns_text(query);
 	DKIM_MFREE(query);
@@ -429,7 +429,7 @@ checkADSP(char *domain)
 	}
 	if (!(query = DKIM_MALLOC(str_len("_adsp._domainkey.") + str_len(domain) + 1))) {
 		DKIM_MFREE(results);
-		die(51, 0);
+		die(QQ_OUT_OF_MEMORY, 0);
 	}
 	sprintf(query, "_adsp._domainkey.%s", domain);
 	results = dns_text(query);
@@ -629,10 +629,10 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 	}
 	if (!stralloc_copys(&dkimoutput, "DKIM-Status: ") ||
 			!stralloc_cats(&dkimoutput, dkimStatus))
-		die(51, 0);
+		die(QQ_OUT_OF_MEMORY, 0);
 	if (origRet != DKIM_MAX_ERROR && ret != origRet) {
 		if (!stralloc_cats(&dkimoutput, "\n\t(old="))
-			die(51, 0);
+			die(QQ_OUT_OF_MEMORY, 0);
 		switch (origRet)
 		{
 		case DKIM_SUCCESS:			/*- 0 */ /*- A */
@@ -710,30 +710,30 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		}
 		if (!stralloc_cats(&dkimoutput, orig) ||
 				!stralloc_cats(&dkimoutput, ":"))
-			die(51, 0);
+			die(QQ_OUT_OF_MEMORY, 0);
 		if (origRet < 0) {
 			if (!stralloc_cats(&dkimoutput, "-"))
-				die(51, 0);
+				die(QQ_OUT_OF_MEMORY, 0);
 			strnum[fmt_ulong(strnum, 0 - origRet)] = 0;
 		} else
 			strnum[fmt_ulong(strnum, origRet)] = 0;
 		if (!stralloc_cats(&dkimoutput, strnum) ||
 				!stralloc_cats(&dkimoutput, ")"))
-			die(51, 0);
+			die(QQ_OUT_OF_MEMORY, 0);
 	}
 	if (!stralloc_cats(&dkimoutput, "\n"))
-		die(51, 0);
+		die(QQ_OUT_OF_MEMORY, 0);
 	if (useSSP && sspStatus) {
 		if (!stralloc_cats(&dkimoutput, "X-DKIM-SSP: ") ||
 				!stralloc_cats(&dkimoutput, sspStatus) ||
 				!stralloc_cats(&dkimoutput, "\n"))
-			die(51, 0);
+			die(QQ_OUT_OF_MEMORY, 0);
 	}
 	if (useADSP && adspStatus) {
 		if (!stralloc_cats(&dkimoutput, "X-DKIM-ADSP: ") ||
 				!stralloc_cats(&dkimoutput, adspStatus) ||
 				!stralloc_cats(&dkimoutput, "\n"))
-			die(51, 0);
+			die(QQ_OUT_OF_MEMORY, 0);
 	}
 	dkimverify_exit(ret, dkimStatus, code);
 	return;
@@ -792,9 +792,9 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 	if (!stralloc_copys(&dkimopts, "dkim ") ||
 			!stralloc_cats(&dkimopts, signOptions) ||
 			!stralloc_0(&dkimopts))
-		die(51, 0);
+		die(QQ_OUT_OF_MEMORY, 0);
 	if (!(argv = makeargs(dkimopts.s)))
-		die(51, 0);
+		die(QQ_OUT_OF_MEMORY, 0);
 	for (argc = 0;argv[argc];argc++);
 #ifdef HAVE_EVP_SHA256
 	while ((ch = sgopt(argc, argv, "b:c:li:qthx:z:")) != sgoptdone) {
@@ -921,7 +921,7 @@ main(int argc, char *argv[])
 		if (!(dkimsign = env_get("DKIMKEY"))) {
 			if (!stralloc_copys(&dkimfn, "domainkeys/%/default") ||
 					!stralloc_0(&dkimfn))
-				die(51, 0);
+				die(QQ_OUT_OF_MEMORY, 0);
 			dkimsign = dkimfn.s;
 		}
 	}
@@ -1070,10 +1070,10 @@ main(int argc, char *argv[])
 				if ((domain = DKIMVerifyGetDomain(&ctxt))) {
 					if (!(ptr = env_get("SIGNATUREDOMAINS"))) {
 						if (control_readfile(&sigdomains, "signaturedomains", 0) == -1)
-							die(55, 2);
+							custom_error("qmail-dkim", "Z", "unable to read signaturedomains.", 0, "X.3.0");
 					} else
 					if (!stralloc_copys(&sigdomains, ptr))
-						die(51, 2);
+						die(QQ_OUT_OF_MEMORY, 2);
 					for (len = 0, ptr = sigdomains.s;len < sigdomains.len;) {
 						len += ((token_len = str_len(ptr)) + 1); /*- next domain */
 						if (!case_diffb(ptr, token_len, domain)) {
@@ -1089,10 +1089,10 @@ main(int argc, char *argv[])
 					if (!skip_nosignature_domain) {
 						if (!(ptr = env_get("NOSIGNATUREDOMAINS"))) {
 							if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
-								die(55, 2);
+								custom_error("qmail-dkim", "Z", "unable to read nosignaturedomains.", 0, "X.3.0");
 						} else
 						if (!stralloc_copys(&nsigdomains, ptr))
-							die(51, 2);
+							die(QQ_OUT_OF_MEMORY, 2);
 						for (len = 0, ptr = nsigdomains.s;len < nsigdomains.len;) {
 							len += ((token_len = str_len(ptr)) + 1); /*- next domain */
 							if (*ptr == '*' || !case_diffb(ptr, token_len, domain)) {
@@ -1145,17 +1145,17 @@ main(int argc, char *argv[])
 		} /*- if (dkimverify) */
 	}
 	if (pipe(pim) == -1)
-		die(60, 0);
+		die(QQ_PIPE_SOCKET, 0);
 	switch (pid = vfork())
 	{
 	case -1:
 		close(pim[0]);
 		close(pim[1]);
-		die(121, 0);
+		die(QQ_FORK_ERR, 0);
 	case 0:
 		close(pim[1]);
 		if (fd_move(0, pim[0]) == -1)
-			die(120, 0);
+			die(QQ_DUP_ERR, 0);
 		restore_gid();
 		return (qmulti("DKIMQUEUE", argc, argv));
 	}
@@ -1175,9 +1175,9 @@ main(int argc, char *argv[])
 		die_write();
 	close(pim[1]);
 	if (wait_pid(&wstat, pid) != pid)
-		die(122, 0);
+		die(QQ_WAITPID_SURPRISE, 0);
 	if (wait_crashed(wstat))
-		die(123, 0);
+		die(QQ_CRASHED, 0);
 	die(wait_exitcode(wstat), 0);
 	/*- Not Reached */
 	exit(0);
@@ -1206,7 +1206,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.67 2022-10-17 12:28:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.68 2022-10-17 19:44:32+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1220,6 +1220,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.68  2022-10-17 19:44:32+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.67  2022-10-17 12:28:50+05:30  Cprogrammer
  * replace all '%' character with domain name
  *

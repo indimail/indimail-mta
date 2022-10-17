@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.3  2022-10-17 19:44:45+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -13,6 +16,7 @@
 #include <noreturn.h>
 #include "qmulti.h"
 #include "mailfilter.h"
+#include "qmail.h"
 
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 
@@ -20,13 +24,13 @@ no_return void
 sigalrm()
 {
 	/*- thou shalt not clean up here */
-	_exit(52);
+	_exit(QQ_TIMEOUT);
 }
 
 no_return void
 sigbug()
 {
-	_exit(81);
+	_exit(QQ_INTERNAL_BUG);
 }
 
 int
@@ -47,7 +51,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.2 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-multi.c,v 1.3 2022-10-17 19:44:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmailfilterh;

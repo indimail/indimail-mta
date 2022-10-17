@@ -1,5 +1,8 @@
 /* 
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.18  2022-10-17 19:44:50+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
  * Revision 1.17  2022-03-08 22:59:54+05:30  Cprogrammer
  * use custom_error() from custom_error.c
  *
@@ -95,10 +98,6 @@
 #define BUFSIZE 4096
 #endif
 
-#define QQ_OOM         51
-#define QQ_WRITE_ERROR 53
-#define QQ_READ_ERROR  54
-#define QQ_BAD_ENV     79
 #define QQ_INTERNAL    81
 #define QQ_DROP_MSG    99
 
@@ -129,25 +128,25 @@ parse_sender(char *env)
 	ptr++;
 	len++;
 	if (!env_unset("QMAILNAME"))
-		_exit(QQ_OOM);
+		_exit(QQ_OUT_OF_MEMORY);
 	if (!*ptr) {
 		if (!env_put("QMAILUSER=") || !env_put("QMAILHOST="))
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 		return 2;
 	}
 	at = str_rchr(ptr, '@');
 	if (ptr[at]) {
 		if (!env_put2("QMAILHOST", ptr + at + 1))
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 		ptr[at] = 0;
 		if (!env_put2("QMAILUSER", ptr))
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 		ptr[at] = '@';
 	} else {
 		if (!env_put2("QMAILUSER", ptr))
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 		if (!env_put("QMAILHOST="))
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 	}
 	for (; *ptr; len++, ptr++);
 	return (len + 1);
@@ -173,10 +172,10 @@ parse_rcpts(char *env, int offset)
 	}
 	*tmp = 0;
 	if (!env_put2("QMAILRCPTS", buf))
-		_exit(QQ_OOM);
+		_exit(QQ_OUT_OF_MEMORY);
 	strnum[fmt_ulong(strnum, count)] = 0;
 	if (!env_put2("NUMRCPTS", strnum))
-		_exit(QQ_OOM);
+		_exit(QQ_OUT_OF_MEMORY);
 	alloc_free(buf);
 }
 
@@ -246,11 +245,11 @@ copy_fd(int fdin, int fdout, size_t * var)
 		ssize_t         rd = read(fdin, buf, BUFSIZE);
 
 		if (rd == -1)
-			exit(QQ_READ_ERROR);
+			exit(QQ_READ_ERR);
 		if (rd == 0)
 			break;
 		if (write(tmp, buf, rd) != rd)
-			exit(QQ_WRITE_ERROR);
+			exit(QQ_WRITE_ERR);
 		bytes += rd;
 	}
 	close(fdin);
@@ -330,9 +329,9 @@ read_qqfd(void)
 		_exit(QQ_INTERNAL);
 	if (st.st_size > 0) {
 		if ((buf = alloc(st.st_size + 1)) == 0)
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 		if (read(QQFD, buf, st.st_size) != st.st_size)
-			_exit(QQ_READ_ERROR);
+			_exit(QQ_READ_ERR);
 		buf[st.st_size] = 0;
 		return buf;
 	}
@@ -357,10 +356,10 @@ run_filters(const command * first)
 
 		strnum[fmt_ulong(strnum, env_len)] = 0;
 		if (!env_put2("ENVSIZE", strnum))
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 		strnum[fmt_ulong(strnum, msg_len)] = 0;
 		if (!env_put2("MSGSIZE", strnum))
-			_exit(QQ_OOM);
+			_exit(QQ_OUT_OF_MEMORY);
 		if (lseek(1, 0, SEEK_SET) != 0)
 			custom_error("qmail-qfilter", "Z", "unable to lseek envelope.", 0, "X.3.0");
 		switch ((pid = fork()))
@@ -372,11 +371,11 @@ run_filters(const command * first)
 			_exit(QQ_INTERNAL);
 		}
 		if (waitpid(pid, &status, WUNTRACED) == -1)
-			exit(QQ_INTERNAL);
+			_exit(QQ_INTERNAL);
 		if (!WIFEXITED(status))
-			exit(QQ_INTERNAL);
+			_exit(QQ_INTERNAL);
 		if (WEXITSTATUS(status))
-			exit((WEXITSTATUS(status) == QQ_DROP_MSG) ? 0 : WEXITSTATUS(status));
+			_exit((WEXITSTATUS(status) == QQ_DROP_MSG) ? 0 : WEXITSTATUS(status));
 		move_unless_empty(MSGOUT, MSGIN, c->next, &msg_len);
 		move_unless_empty(ENVOUT, ENVIN, c->next, &env_len);
 		if (lseek(QQFD, 0, SEEK_SET) != 0)
@@ -409,7 +408,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.17 2022-03-08 22:59:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.18 2022-10-17 19:44:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;

@@ -1330,7 +1330,7 @@ auto_qmail.o custom_error.o getqueue.o dns.lib socket.lib rt.lib
 	$(dynamic_option) `cat dns.lib socket.lib rt.lib`
 
 qmail-multi.o: \
-compile qmail-multi.c qmulti.h mailfilter.h conf-queue
+compile qmail-multi.c qmulti.h qmail.h mailfilter.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-multi.c
 
 qmail-multi.8: \
@@ -1349,7 +1349,7 @@ custom_error.o getqueue.o rt.lib
 	$(dynamic_option) `cat rt.lib`
 
 qmail-spamfilter.o: \
-compile qmail-spamfilter.c qmulti.h
+compile qmail-spamfilter.c qmulti.h qmail.h
 	./compile qmail-spamfilter.c
 
 qmail-spamfilter.8: \
@@ -1361,11 +1361,12 @@ qmail-spamfilter.9 conf-prefix conf-qmail
 
 qmulti.o: \
 compile qmulti.c auto_qmail.h control.h qmulti.h qmail.h \
-auto_prefix.h qscheduler.h custom_error.h haslibrt.h conf-queue
+auto_prefix.h qscheduler.h custom_error.h haslibrt.h qmail.h \
+conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmulti.c
 
 mailfilter.o: \
-compile mailfilter.c mailfilter.h qmulti.h
+compile mailfilter.c mailfilter.h qmulti.h qmail.h
 	./compile mailfilter.c
 
 spawn-filter: \
