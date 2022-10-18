@@ -1,5 +1,8 @@
 /*
  * $Log: tcpto.c,v $
+ * Revision 1.16  2022-10-18 09:24:42+05:30  Cprogrammer
+ * converted function proto to ansic
+ *
  * Revision 1.15  2021-05-08 12:23:35+05:30  Cprogrammer
  * use /var/indimail/queue if QUEUEDIR is not defined
  *
@@ -67,21 +70,18 @@ getbuf()
 	lockfile[r] = 0;
 	if ((fdlock = open_write(lockfile)) == -1)
 		return 0;
-	if ((fd = open_read(lockfile)) == -1)
-	{
+	if ((fd = open_read(lockfile)) == -1) {
 		close(fdlock);
 		return 0;
 	}
-	if (lock_ex(fdlock) == -1)
-	{
+	if (lock_ex(fdlock) == -1) {
 		close(fdlock);
 		close(fd);
 		return 0;
 	}
 	r = read(fd, tcpto_buf, sizeof(tcpto_buf));
 	close(fd);
-	if (r < 0)
-	{
+	if (r < 0) {
 		close(fdlock);
 		return 0;
 	}
@@ -107,9 +107,7 @@ getbuf()
 */
 
 int
-tcpto(ix, min_backoff)
-	struct ip_mx   *ix;
-	int             min_backoff;
+tcpto(struct ip_mx *ix, int min_backoff)
 {
 	int             n, i, af = ix->af;
 	char           *record;
@@ -124,8 +122,7 @@ tcpto(ix, min_backoff)
 		return 0;
 	close(fdlock);
 	record = tcpto_buf;
-	for (i = 0; i < n; ++i)
-	{
+	for (i = 0; i < n; ++i) {
 #ifdef IPV6
 		if (af == record[0] && byte_equal(af == AF_INET ? (char *) ip4->d : (char *) ip6->d, af == AF_INET ? 4 : 16, (char *) record + 16))
 #else
@@ -133,19 +130,25 @@ tcpto(ix, min_backoff)
 #endif
 		{
 			flagwasthere = 1;
-			if (record[4] >= 2)
-			{
+			if (record[4] >= 2) {
 				when = (unsigned long) (unsigned char ) record[11];
 				when = (when << 8) + (unsigned long) (unsigned char ) record[10];
 				when = (when << 8) + (unsigned long) (unsigned char ) record[9];
 				when = (when << 8) + (unsigned long) (unsigned char ) record[8];
+				/* 
+				 * ((60 + (getpid() & 31)) << 6) =
+				 * Timeout in seconds: 64 - 97 minutes, depending on pid
+				 */
 				if (min_backoff > 0)
 					min_penalty = ((60 + (getpid() & 31)) << 6) - 3600;
-				else
-				{
+				else {
 					min_penalty = 0;
 					min_backoff = -min_backoff;
 				}
+				/*
+				 * If this IP address had a SMTP connection timeout last
+				 * time, don't connect to it again immediately
+				 */
 				if (now() - when < min_backoff + min_penalty)
 					return 1;
 			}
@@ -157,9 +160,7 @@ tcpto(ix, min_backoff)
 }
 
 void
-tcpto_err(ix, flagerr, max_tolerance)
-	struct ip_mx   *ix;
-	int             flagerr, max_tolerance;
+tcpto_err(struct ip_mx *ix, int flagerr, int max_tolerance)
 {
 	int             n, i, firstpos, af = ix->af;
 	char           *record;
@@ -175,8 +176,7 @@ tcpto_err(ix, flagerr, max_tolerance)
 	if (!(n = getbuf()))
 		return;
 	record = tcpto_buf;
-	for (i = 0; i < n; ++i)
-	{
+	for (i = 0; i < n; ++i) {
 #ifdef IPV6
 		if (af == record[0] && byte_equal(af == AF_INET ? (char *) ip4->d : (char *) ip6->d, af == AF_INET ? 4 : 16, (char *) record + 16))
 #else
@@ -185,15 +185,13 @@ tcpto_err(ix, flagerr, max_tolerance)
 		{
 			if (!flagerr)
 				record[4] = 0;
-			else
-			{
+			else {
 				lastwhen = (unsigned long) (unsigned char ) record[11];
 				lastwhen = (lastwhen << 8) + (unsigned long) (unsigned char ) record[10];
 				lastwhen = (lastwhen << 8) + (unsigned long) (unsigned char ) record[9];
 				lastwhen = (lastwhen << 8) + (unsigned long) (unsigned char ) record[8];
 				when = now();
-				if (record[4] && (when < max_tolerance + lastwhen))
-				{
+				if (record[4] && (when < max_tolerance + lastwhen)) {
 					close(fdlock);
 					return;
 				}
@@ -214,31 +212,26 @@ tcpto_err(ix, flagerr, max_tolerance)
 		}
 		record += 32;
 	}
-	if (!flagerr)
-	{
+	if (!flagerr) {
 		close(fdlock);
 		return;
 	}
 	record = tcpto_buf;
-	for (i = 0; i < n; ++i)
-	{
+	for (i = 0; i < n; ++i) {
 		if (!record[4])
 			break;
 		record += 32;
 	}
-	if (i >= n)
-	{
+	if (i >= n) {
 		firstpos = -1;
 		record = tcpto_buf;
-		for (i = 0; i < n; ++i)
-		{
+		for (i = 0; i < n; ++i) {
 			when = (unsigned long) (unsigned char ) record[11];
 			when = (when << 8) + (unsigned long) (unsigned char ) record[10];
 			when = (when << 8) + (unsigned long) (unsigned char ) record[9];
 			when = (when << 8) + (unsigned long) (unsigned char ) record[8];
 			when += (record[4] << 10);
-			if ((firstpos < 0) || (when < firstwhen))
-			{
+			if ((firstpos < 0) || (when < firstwhen)) {
 				firstpos = i;
 				firstwhen = when;
 			}
@@ -246,8 +239,7 @@ tcpto_err(ix, flagerr, max_tolerance)
 		}
 		i = firstpos;
 	}
-	if (i >= 0)
-	{
+	if (i >= 0) {
 		record = tcpto_buf + (i << 5);
 		record[0] = af;
 #ifdef IPV6
@@ -273,7 +265,7 @@ tcpto_err(ix, flagerr, max_tolerance)
 void
 getversion_tcpto_c()
 {
-	static char    *x = "$Id: tcpto.c,v 1.15 2021-05-08 12:23:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tcpto.c,v 1.16 2022-10-18 09:24:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
