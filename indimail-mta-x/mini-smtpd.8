@@ -20,8 +20,7 @@ with 100 or more \fBReceived\fR or \fBDelivered-To\fR header fields.
 .SH TRANSPARENCY
 \fBmini-smtpd\fR converts the SMTP newline convention into the UNIX newline
 convention by converting CR LF into LF.  It returns a temporary error and
-drops the connection on bare LFs; see
-\fBhttp://pobox.com/~djb/docs/smtplf.html\fR.
+drops the connection on bare LFs; see \fBhttps://cr.yp.to/docs/smtplf.html\fR.
 
 \fBmini-smtpd\fR accepts messages that contain long lines or non-ASCII
 characters, even though such messages violate the SMTP protocol.

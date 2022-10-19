@@ -8,7 +8,8 @@ qmail-smtpd \- receive mail via SMTP
 .I hostname
 .I checkprogram
 .I subprogram
-.I subprogram
+.I subprogram ..
+.I falsepgm
 ]
 
 .SH OPTIONS
@@ -132,7 +133,8 @@ DISABLE_SCRAM_SHA256_PLUS, environment variable. If you set the environment
 variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled unless
 STARTTLS is issued or you run qmail-smtpd under SSL (port 465). You may set
 \fBFORCE_TLS\fR environment variable to deny authentication, if the client
-does not provide the STARTTLS command.
+does not provide the STARTTLS command. The \fIfalsepgm\fR argument is the
+name a program that fails, such as \fB/bin/false\fR.
 
 qmail-smtpd supports SASL - Simple Authentication and Security Layer
 framework with the GNU SASL library. For SCRAM authentication types,
