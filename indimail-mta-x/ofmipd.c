@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.23  2022-10-19 12:54:35+05:30  Cprogrammer
+ * authorize mail using RELAYCLIENT
+ *
  * Revision 1.22  2022-01-30 08:36:54+05:30  Cprogrammer
  * replaced execvp with execv
  *
@@ -346,6 +349,13 @@ err_noauth()
 }
 
 int
+err_notauth()
+{
+	out("503 authorize your mail before sending (#5.5.1)\r\n");
+	return -1;
+}
+
+int
 err_write()
 {
 	out("451 Requested action aborted: unable to write pipe and I can't auth (#4.3.0)\r\n");
@@ -564,6 +574,10 @@ smtp_mail(char *arg)
 		err_authrequired();
 		return;
 	}
+	if (!relayclient) {
+		err_notauth();
+		return;
+	}
 	if (!addrparse(arg)) {
 		err_syntax();
 		return;
@@ -607,6 +621,10 @@ smtp_rcpt(char *arg)
 {
 	if (!seenmail) {
 		err_wantmail();
+		return;
+	}
+	if (!relayclient) {
+		err_notauth();
 		return;
 	}
 	if (!addrparse(arg)) {
@@ -1222,7 +1240,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.22 2022-01-30 08:36:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.23 2022-10-19 12:54:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

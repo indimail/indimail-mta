@@ -5,13 +5,15 @@ ofmipd \- accept outgoing mail through OFMIP
 .B ofmipd
 [
 .I name.cdb
+.I hostname
+.I checkpasswd
+.I falsepgm
 ]
+
 .SH DESCRIPTION
 .B ofmipd
-accepts mail messages through the
-Old-Fashioned Mail Injection Protocol (OFMIP),
-rewrites them according to local rules,
-and invokes
+accepts mail messages through the Old-Fashioned Mail Injection Protocol
+(OFMIP), rewrites them according to local rules, and invokes
 .B qmail-queue
 to deposit them into the outgoing queue.
 .B ofmipd
@@ -20,30 +22,40 @@ see
 .BR tcp-environ (5).
 
 See
-.B http://pobox.com/~djb/proto/ofmip.html
+.B https://cr.yp.to/proto/ofmip.html
 for further information on OFMIP.
 .SH "USING OFMIP"
 You can use
 .B tcpserver
 to set up
 .B ofmipd
-on a free TCP port.
-Some sites use port 26.
-Some sites use port 25 on an IP address that does not receive incoming mail.
+on a free TCP port. Some sites use port 26. Some sites use port 25 on an IP
+address that does not receive incoming mail.
 
-Note that
+The
+.I hostname
+argument is the name of the mail host, intended to create CRAM password
+challenges but currently ignored. The
+.I checkpasswd
+argument is the name of a password checker that uses the same calling
+conventions as the qmail POP3 checkpasswd.
+The
+.I falsepgm
+argument is the name a program that fails, such as
+.BR /bin/false\c.
+
+If the environment variable RELAYCLIENT is set, or the client logs in with
+AUTH,
 .B ofmipd
-will relay messages to any destination.
-It should be invoked
-only for connections from preauthorized users.
-With
+will relay messages to any destination. If not, it will reject any MAIL
+FROM, RCPT TO, or DATA command with a 503 error. With
 .B tcpserver
-you can deny connections
-that do not come from preauthorized IP addresses such as 127.0.0.1.
+you can set RELAYCLIENT for preauthorized IP addresses such as 127.0.0.1.
+The contents of RELAYCLIENT are ignored; in particular, they are not
+appended to destnation mail addresses.
 
-Most MUAs that claim to be ``SMTP clients''
-are actually OFMIP clients.
-You should point them at
+Most MUAs that claim to be ``SMTP clients'' are actually OFMIP clients. You
+should point them at
 .B ofmipd
 rather than
 .BR qmail-smtpd .
@@ -51,6 +63,7 @@ Some MUAs will use port 26 of
 .I server
 if you tell them that the ``SMTP server'' is
 .IR server\fB:26 .
+
 .SH "MESSAGE REWRITING"
 .B ofmipd
 rewrites each message in essentially the same way that
@@ -92,6 +105,10 @@ is supplied.
 See
 .BR ofmipname (8)
 for further details.
+he
+I name.cdb
+rgument must be supplied but may be a null string of no name
+ransformation file is to be used.
 
 .B ofmipd
 accepts LF and CR LF as line terminators inside messages.
@@ -99,6 +116,7 @@ accepts LF and CR LF as line terminators inside messages.
 .B ofmipd
 does not do hop counting
 or local-IP-address recognition.
+
 .SH "SEE ALSO"
 new-inject(1),
 tcpserver(1),

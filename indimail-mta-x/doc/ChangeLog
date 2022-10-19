@@ -75,6 +75,8 @@ o SRS decoding in qmail-smtpd avoiding the need to create virtualdomain for
 43. qmulti.c, qmail-spamfilter.c, qmail-queue.c, qmail-qfilter.c,
 	qmail-multi.c, qmail-dkim.c, qmail-dk.c, mailfilter.c: use exit code
 	defines from qmail.h
+- 19/10/2022
+44. ofmipd.c: authorize mails using RELAYCLIENT
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
