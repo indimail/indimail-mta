@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.16  2022-10-22 13:07:46+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
  * Revision 1.15  2021-09-11 19:01:33+05:30  Cprogrammer
  * pass null remotehost to received when remotehost is unknown
  *
@@ -194,7 +197,7 @@ main()
 			flagdos = 1;
 		else
 			badproto();
-		received(&qq, "QMTP", local, remoteip,
+		received(&qq, "qmtpd", "QMTP", local, remoteip,
 				str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, (char *) 0);
 		/*
 		 * XXX: check for loops? only if len is big? 
@@ -352,7 +355,7 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	static char    *x = "$Id: qmail-qmtpd.c,v 1.15 2021-09-11 19:01:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmtpd.c,v 1.16 2022-10-22 13:07:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

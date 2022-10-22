@@ -1,5 +1,8 @@
 /*
  * $Log: received.h,v $
+ * Revision 1.4  2022-10-22 13:08:38+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
  * Revision 1.3  2004-10-11 14:01:09+05:30  Cprogrammer
  * added function prototypes
  *
@@ -11,6 +14,6 @@
 #define RECEIVED_H
 #include "qmail.h"
 
-void            received(struct qmail *, char *, char *, char *, char *, char *, char *);
+void            received(struct qmail *, char *, char *, char *, char *, char *, char *, char *);
 
 #endif

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.12  2022-10-22 13:07:41+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
  * Revision 1.11  2021-09-11 19:01:18+05:30  Cprogrammer
  * pass null remotehost to received when remotehost is unknown
  *
@@ -124,7 +127,7 @@ identify()
 		local = env_get("TCPLOCALIP");
 	if (!local)
 		local = "unknown";
-	received(&qq, "QMQP", local, remoteip,
+	received(&qq, "qmqpd", "QMQP", local, remoteip,
 			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, (char *) 0);
 }
 
@@ -221,7 +224,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.11 2021-09-11 19:01:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpd.c,v 1.12 2022-10-22 13:07:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

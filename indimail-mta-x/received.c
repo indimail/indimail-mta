@@ -1,5 +1,8 @@
 /*
  * $Log: received.c,v $
+ * Revision 1.8  2022-10-22 13:08:35+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
  * Revision 1.7  2021-09-11 19:02:01+05:30  Cprogrammer
  * skip remotehost in received headers when value is unknown
  *
@@ -58,13 +61,15 @@ safeput(struct qmail *qqt, char *s)
  */
 
 void
-received(struct qmail *qqt, char *protocol, char *local, char *remoteip,
+received(struct qmail *qqt, char *program, char *protocol, char *local, char *remoteip,
 		char *remotehost, char *remoteinfo, char *helo)
 {
 	struct datetime dt;
 	char            strnum[FMT_ULONG], buf[DATE822FMT];
 
 	qmail_puts(qqt, "Received: indimail-mta ");
+	qmail_puts(qqt, program);
+	qmail_puts(qqt, " ");
 	qmail_put(qqt, strnum, fmt_ulong(strnum, getpid()));
 	if (remotehost) {
 		qmail_puts(qqt, " from ");
@@ -93,7 +98,7 @@ received(struct qmail *qqt, char *protocol, char *local, char *remoteip,
 void
 getversion_received_c()
 {
-	static char    *x = "$Id: received.c,v 1.7 2021-09-11 19:02:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: received.c,v 1.8 2022-10-22 13:08:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

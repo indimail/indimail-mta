@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.274 2022-10-15 12:15:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.275 2022-10-22 13:08:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -146,7 +146,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.274 $";
+char           *revision = "$Revision: 1.275 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -997,7 +997,7 @@ msg_notify()
 		protocol = proto.s;
 	}
 	datetime_tai(&dt, now());
-	received(&qqt, (char *) protocol, localhost, remoteip,
+	received(&qqt, "notify", (char *) protocol, localhost, remoteip,
 			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 	strnum[fmt_ulong(strnum, msg_size)] = 0;
 	qmail_puts(&qqt, "X-size-Notification: ");
@@ -4836,7 +4836,7 @@ smtp_data(char *arg)
 			die_nomem();
 		protocol = proto.s;
 	}
-	received(&qqt, (char *) protocol, localhost, remoteip,
+	received(&qqt, "smtpd", (char *) protocol, localhost, remoteip,
 			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 #ifdef USE_SPF
 	spfreceived();
@@ -7547,6 +7547,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.275  2022-10-22 13:08:43+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
  * Revision 1.274  2022-10-15 12:15:03+05:30  Cprogrammer
  * organized opening of control files into two functions open_control_files1(), open_control_files2()
  *
@@ -7816,7 +7819,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.274 2022-10-15 12:15:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.275 2022-10-22 13:08:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

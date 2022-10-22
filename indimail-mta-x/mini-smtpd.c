@@ -1,5 +1,8 @@
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.5  2022-10-22 13:07:14+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
  * Revision 1.4  2021-10-22 15:51:41+05:30  Cprogrammer
  * removed extra arguments to err_size()
  *
@@ -667,7 +670,7 @@ smtp_data(char *arg)
 	qp = qmail_qp(&qqt);
 	out("354 go ahead\r\n");
 
-	received(&qqt, "SMTP", local, remoteip,
+	received(&qqt, "mini-smtpd", "SMTP", local, remoteip,
 			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
 	blast(&hops);
 	hops = (hops >= MAXHOPS);
@@ -738,7 +741,7 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.4 2021-10-22 15:51:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.5 2022-10-22 13:07:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
