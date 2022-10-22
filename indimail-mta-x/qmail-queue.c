@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.85 2022-10-17 19:44:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.86 2022-10-22 13:07:55+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -229,20 +229,6 @@ receivedfmt(char *s, int fastqueue)
 
 	if (uid == auto_uida) {
 		i = fmt_str(s, "(invoked by alias");
-		len += i;
-		if (s)
-			s += i;
-	} else
-	if (uid == auto_uidd) {
-		i = fmt_str(s, "(invoked from network ");
-		len += i;
-		if (s)
-			s += i;
-		if (!tcpremoteip)
-			tcpremoteip = env_get("TCPREMOTEIP");
-		if (!fastqueue && !tcpremoteip)
-			tcpgetremoteip();
-		i = fmt_str(s, tcpremoteip);
 		len += i;
 		if (s)
 			s += i;
@@ -1174,7 +1160,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.85 2022-10-17 19:44:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.86 2022-10-22 13:07:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1182,6 +1168,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.86  2022-10-22 13:07:55+05:30  Cprogrammer
+ * treat auto_uidd as any other uid for Received header
+ *
  * Revision 1.85  2022-10-17 19:44:55+05:30  Cprogrammer
  * use exit codes defines from qmail.h
  *
