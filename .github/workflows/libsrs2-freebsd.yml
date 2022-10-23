@@ -17,14 +17,13 @@ jobs:
     name: FreeBSD
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
-      MYTOKEN2: "value2"
     steps:
     - uses: actions/checkout@v2
     - name: build libsrs2
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.2.1
       with:
-        envs: 'MYTOKEN MYTOKEN2'
+        envs: 'MYTOKEN'
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2
         run: cd libsrs2-x; ./default.configure; make
