@@ -5,97 +5,79 @@ cdb-database \- prepare cdb assignments for ctrlenv
 \fBcdb-database\fR \fIfilename\fR
 
 .SH DESCRIPTION
-.B cdb-database
-reads the assignments in \fICONTROL/filename\fR
-and writes them into \fICONTROL/filename.cdb\fR in a binary format suited
-for quick access by \fBctrlenv\fR.
-Extra arguments provided after \fIfilename\fR are silently ignored.
+\fBcdb-database\fR reads the assignments in \fICONTROL/filename\fR and
+writes them into \fICONTROL/filename.cdb\fR in a binary format suited for
+quick access by \fBctrlenv\fR. Extra arguments provided after
+\fIfilename\fR are silently ignored.
 
 If there is a problem with \fICONTROL/filename\fR, \fBcdb-database\fR
 complains and leaves \fICONTROL/filename.cdb\fR alone.
 
-\fBcdb-database\fR ensures that
-\fICONTROL/filename.cdb\fR is updated atomically, so
-\fBctrlenv\fR never has to wait for \fBcdb-database\fR to finish.
-However, \fBcdb-database\fR makes no attempt to protect against two simultaneous updates of
-\fICONTROL/filename.cdb\fR.
+\fBcdb-database\fR ensures that \fICONTROL/filename.cdb\fR is updated
+atomically, so \fBctrlenv\fR never has to wait for \fBcdb-database\fR to
+finish. However, \fBcdb-database\fR makes no attempt to protect against two
+simultaneous updates of \fICONTROL/filename.cdb\fR.
 
 The binary \fICONTROL/filename.cdb\fR format is portable across machines.
 
-.B CONTROL/filename
-is a series of assignments, one per line.
-It ends with a line containing a single dot.
-Lines must not contain NUL.
+\fBCONTROL/filename\fR is a series of assignments, one per line. It ends
+with a line containing a single dot. Lines must not contain NUL.
 
 Lines in \fICONTROL/filename\fR consists of \fIaddress\fR separated by
 \fIvalue\fR
+
 .EX
-   =joe.shmoe@indimail.org:CONTROL/domainkeys/joe:
+=joe.shmoe@indimail.org:DKIMSIGN=CONTROL/domainkeys/joe:
 .EE
 
 When \fBctrlenv\fR is run against this file using address
-jome.shmoe@indimail.org, DKIMSIGN will be set to \fICONTROL/domainkeys/joe\fR
+joe.shmoe@indimail.org, DKIMSIGN will be set to
+\fICONTROL/domainkeys/joe\fR
 
 .SH "SIMPLE ASSIGNMENTS"
 A simple assignment is a line of the form
 
 .EX
-   =local:value:
+=local:value:
 .EE
 
 Here \fIlocal\fR is an address;
 \fIvalue\fR is the value of environment variable that \fBctrlenv\fR will
 set when it finds a match for address \fIlocal\fR.
 
-If there are several assignments for the same
-.I local
-address,
-.B ctrlenv
-will use the first one.
+If there are several assignments for the same \fIlocal\fR address,
+\fBctrlenv\R will use the first one.
 
-.I local
-is interpreted without regard to case.
+\fIlocal\fR is interpreted without regard to case.
 
 .SH "WILDCARD ASSIGNMENTS"
 A wildcard assignment is a line of the form
 
 .EX
-   +loc:value:
++loc:value:
 .EE
 
-This assignment applies to any address beginning with
-.IR loc ,
-including
-.I loc
-itself.
-It means the same as
+This assignment applies to any address beginning with \fIloc\fR, including
+\fIloc\fR itself. It means the same as
 
 .EX
-   =locext:value:
+=locext:value:
 .EE
 
-for every string
-.IR ext .
+for every string \fIext\fR .
 
-A more specific wildcard assignment overrides a less specific
-assignment, and a simple assignment overrides any wildcard assignment.
-For example:
+A more specific wildcard assignment overrides a less specific assignment,
+and a simple assignment overrides any wildcard assignment. For example:
 
 .EX
-   +:CONTROL/domainkeys/%/default:
-   +joe-:CONTROL/domainkeys/indimail.org/joe:
-   =joe:CONTROL/domainkeys/example.com/joe:
++:CONTROL/domainkeys/%/default:
++joe-:CONTROL/domainkeys/indimail.org/joe:
+=joe:CONTROL/domainkeys/example.com/joe:
 .EE
 
-The address
-.B joe
-is handled by the third line;
-the address
-.B joe-direct
-is handled by the second line;
-the address
-.B bill
-is handled by the first line.
+The address \fBjoe\fR is handled by the third line;
+the address \fBjoe-direct\fR is handled by the second line;
+the address \fBbill\fR is handled by the first line.
 
 .SH "SEE ALSO"
 ctrlenv(8)

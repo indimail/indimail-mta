@@ -1,31 +1,33 @@
-.TH cdb-database 8
+.TH sql-database 8
 .SH NAME
-cdb-database \- prepare data in MySQL for
+sql-database \- prepare data in MySQL for
 .BR ctrlenv(8) .
 
 .SH SYNOPSIS
-.B cdb-database
+.B sql-database
 [-Sr] [-s \fIdbserver\fR -u \fIuser\fR -p \fIpass\fR -d \fIdbname\fR -t \fItable_name\fR] \fIfilename\fR
 
 .SH DESCRIPTION
-\fBcdb-database\fR does a chdir to @controldir@ and prepares filename.sql control file to enable
+\fBsql-database\fR does a chdir to @controldir@ and prepares filename.sql control file to enable
 \fBctrlenv\fR to access data from MySQL instead of control files / cdb files.
-\fBcdb-database\fR also prepares data in \fIfilename\fR to be inserted into \fItable_name\fR in MySQL.
+\fBsql-database\fR also prepares data in \fIfilename\fR to be inserted into \fItable_name\fR in MySQL.
 
 The below command will create a file \fIdkimtable.sql\fR in @controldir@ and table \fIdkimtable\fR
 in MySQL
+
 .EX
- cdb-database -s localhost -u indimail -p ssh-1.5- -d indimail -t dkimtable dkimtable
+sql-database -s localhost -u indimail -p ssh-1.5- -d indimail -t dkimtable dkimtable
 .EE
 
 The below command will replace contents of file dkimtable in @controldir@ into the the table
 \fIdkimtable\fR in MySQL.
+
 .EX
- cdb-database -r dkimtable
+sql-database -r dkimtable
 .EE
 
 .SH OPTIONS
-.TP
+.TP 3
 .B -S
 Skip creating MySQL table and subsequent inserting of data into MySQL
 .TP

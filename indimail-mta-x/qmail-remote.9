@@ -481,39 +481,121 @@ SMTPROUTE env variable takes precendence over X-SMTPROUTES variable. Unlike
 SMTPROUTE, X-SMTPROUTES variable is not unset by qmail-rspawn for each
 delivery.
 
-route may also have the form
+route may also have the forms
 
 .EX
-\fIdomain\fB:\fIrelay\fB:\fIport\fB:\fIpenalty\fB:\fImax_tolerance<sp>username<sp>\fIpassword\fR
-or
-\fIdomain\fB:\fIrelay\fB:\fIport\fB<sp>username<sp>\fIpassword\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>\fIusername\fR<sp>\fIpassword\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>\fIusername\fR<sp>\fIsecret\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR<sp>\fIusername\fR<sp>\fIpassword\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR<sp>\fIusername\fR<sp>\fIsecret\fR
 .EE
 
 without any extra spaces. If the environment variable \fBAUTH_SMTP\fR is
 set, \fBqmail-remote\fR will use \fIusername\fR and \fIpassword\fR (or
 \fIsecret\fR for SCRAM authentication methods) to relay out mails through
 server \fIrelay\fR using authenticated SMTP. <sp> is a single space
-character. AUTH_SMTP can also have the values SCRAM-SHA-1, SCRAM-SHA-256,
-SCRAM-SHA256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS, DIGEST-MD5,
-CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512,
-CRAM-MD5, LOGIN or PLAIN to use the desired authentication method. You can
-disable specific AUTH methods by defining any one more more of the
-following environment variables. When using SCRAM authentication, the
-secret can be a clear text password or a salted password. The salted
-password should be a hex-encoded string (40 characters for SCRAM-SHA-1 and 64
-characters for SCRAM-SHA-256) with the user’s PBKDF2-prepared password. The
-salted password value can be derived by using the --mkpasswd parameter for
-the gsasl(1) utility. indimail has vpasswd(1) / vmoduser(1), which use
-gsasl_scram_secrets_from_password(3) API to set passwords for AUTH PLAIN,
-LOGIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
-CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256 methods.
-The hex-encoded salted password can be used to avoid storing a clear-text
-credential in the client, however note that an attacker who steal it may
-impersonate both a SCRAM client and SCRAM server. If the property is not
-available, qmail-remote will ask for the clear text password instead. You
-need to set the environment variable \fBSALTED_PASSWORD\fR for qmail-remote
-to use the secret as a salted password.
+character.
 
+route may also have the forms
+
+.EX
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIs\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIr\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIaddr\fR
+.EE
+
+Here,
+
+/\fIs\fR means the user and password will be fetched if there is match for
+the address \fIsender\fR in remote_auth.cdb
+
+/\fIr\fR means the user and password will be fetched if there is match for
+the address \fIrecip\fR in remote_auth.cdb
+
+/\fIaddr\fR means the user and password will be fetched if there is match for
+the address \fIaddr\fR in remote_auth.cdb
+
+Lines in \fISYSCONF/control/remote_auth.cdb\fR consists of \fIaddress\fR
+separated by user password pairs
+
+.EX
+=joe.shmoe@indimail.org:testuser@example.com<sp>supersecret:
+.EE
+
+When address matches joe.shmoe@indimail.org, the username, password for
+authenticated SMTP will be set as testuser@example.com, supersecret. The
+cdb file remote_auth.cdb allows you to store username and passwords
+more securely compared to storing them in smtproutes control file. You can
+read access for remote_auth.cdb only for the qmailr user.
+
+.SH "SIMPLE ASSIGNMENTS"
+A simple assignment is a line of the form
+
+.EX
+=addr:user password:
+.EE
+
+Here \fIaddr\fR is an address;
+\fIuser\fR, \fIpass\fR is the value of username, password variables that
+\fBqmail-remote\fR will set when it uses authenticated SMTP.
+
+If there are several assignments for the same \fIaddr\fR address,
+\fBqmail-remote\R will use the first one.
+
+\fIaddr\fR is interpreted without regard to case.
+
+.SH "WILDCARD ASSIGNMENTS"
+A wildcard assignment is a line of the form
+
+.EX
++addr:user password:
+.EE
+
+This assignment applies to any address beginning with \fIaddr\fR, including
+\fIaddr\fR itself. It means the same as
+
+.EX
+=addrext:user password:
+.EE
+
+for every string \fIext\fR .
+
+A more specific wildcard assignment overrides a less specific assignment,
+and a simple assignment overrides any wildcard assignment. For example:
+
+.EX
++:testuser@example.com supersecret:
++joe-:joe@example.com everyoneknows:
+=joe:joe@example.com everyoneknows:
+.EE
+
+The address \fBjoe\fR is handled by the third line;
+the address \fBjoe-direct\fR is handled by the second line;
+the address \fBbill\fR is handled by the first line.
+
+AUTH_SMTP can have the values SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA256,
+SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS, DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1,
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-MD5, LOGIN or
+PLAIN to use the desired authentication method.
+
+When using SCRAM authentication, the secret can be a clear text password or
+a salted password. The salted password should be a hex-encoded string (40
+characters for SCRAM-SHA-1 and 64 characters for SCRAM-SHA-256) with the
+user’s PBKDF2-prepared password. The salted password value can be derived
+by using the --mkpasswd parameter for the gsasl(1) utility.  indimail has
+vpasswd(1) / vmoduser(1), which use gsasl_scram_secrets_from_password(3)
+API to set passwords for AUTH PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1,
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD,
+DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256 methods. The hex-encoded salted
+password can be used to avoid storing a clear-text credential in the
+client, however note that an attacker who steal it may impersonate both a
+SCRAM client and SCRAM server. If the property is not available,
+qmail-remote will ask for the clear text password instead. You need to set
+the environment variable \fBSALTED_PASSWORD\fR for qmail-remote to use the
+secret as a salted password.
+
+You can disable specific AUTH methods by defining any one more more of the
+following environment variables.
 .EX
 	DISABLE_AUTH_LOGIN
 	DISABLE_AUTH_PLAIN

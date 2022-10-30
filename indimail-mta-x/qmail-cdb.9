@@ -24,5 +24,25 @@ The binary \fIfilename.cdb\fR format is portable across machines.
 \fBqmail-cdb\fR renames \fIfilename\fR to \fIfilename.bak\fR if it
 succeeds.
 
+The following control files can also be converted to cdb format using
+\fBqmail-cdb\fR(8).
+
+.IR authdomains ,
+.IR badhelo ,
+.IR badext ,
+.IR badmailfrom ,
+.IR badrcptto ,
+.IR blackholedsender ,
+.IR blackholedrcpt ,
+.IR chkrcptdomains ,
+.IR goodrcptto ,
+.IR relaymailfrom ,
+.IR spamignore ,
+.IR greylist.white ,
+.IR tlsa.white ,
+.IR tlsadomains ,
+and
+.IR badip .
+
 .SH "SEE ALSO"
 qmail-newmrh(8), qmail-smtpd(8), spawn-filter(8), qmail-multi(8)

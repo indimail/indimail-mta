@@ -4,7 +4,7 @@ ctrlenv \- runs another program with environment modified, according to a
 match in control file having key value pairs, where key can be any address
 
 .SH SYNOPSIS
-\fBctrlenv\fR -f \fIfilename\fR [-e \fIenv\fR] -a \fIaddress\fR \fIchild\fR
+\fBctrlenv\fR [-c] -f \fIfilename\fR [-e \fIenv\fR] -a \fIaddress\fR \fIchild\fR
 
 .SH DESCRIPTION
 \fIchild\fR consists of one or more arguments. 
@@ -55,13 +55,14 @@ if \fIfilename\fR has a \fB.sql\fR extension, \fBctrlenv\fR will use
 MySQL table to do a match. You can use sql-database(8) to convert a file
 to a table in MySQL
 
+if -c option is passed on the command line all existing environment
+variables will be cleared before running \fIchild\fR.
+
 .SH EXIT CODES
-.B ctrlenv
-exits 111 if it has trouble reading \fIfilename\fR,
-if it runs out of memory for environment variables, or if it cannot run
-.IR child .
-Otherwise its exit code is the same as that of
-.IR child .
+\fBctrlenv\fR exits 111 if it has trouble reading \fIfilename\fR, if it
+runs out of memory for environment variables, or if it cannot run
+\fIchild\fR. Otherwise its exit code is the same as that of \fIchild\fR.
+
 .SH SEE ALSO
 cdb-database(8),
 sql-database(8),
