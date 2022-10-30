@@ -1,5 +1,9 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.4  2022-10-30 22:15:39+05:30  Cprogrammer
+ * added -c option to clear existing env variables
+ * moved cdb_match() function to cdb_match.c
+ *
  * Revision 1.3  2020-04-10 18:28:52+05:30  Cprogrammer
  * added feature to add multiple env variables
  *
@@ -12,20 +16,22 @@
  */
 #include <unistd.h>
 #include <ctype.h>
-#include "sgetopt.h"
+#include <sgetopt.h>
+#include <strerr.h>
+#include <case.h>
+#include <str.h>
+#include <stralloc.h>
+#include <alloc.h>
+#include <pathexec.h>
+#include <uint32.h>
+#include <alloc.h>
+#include <cdb.h>
+#include <byte.h>
+#include <error.h>
+#include <open.h>
+#include <env.h>
 #include "control.h"
-#include "strerr.h"
-#include "case.h"
-#include "str.h"
-#include "stralloc.h"
-#include "alloc.h"
-#include "pathexec.h"
-#include "uint32.h"
-#include "alloc.h"
-#include "cdb.h"
-#include "error.h"
-#include "open.h"
-#include "env.h"
+#include "cdb_match.h"
 #include "variables.h"
 #include "auto_control.h"
 
@@ -181,7 +187,7 @@ sql_match(char *fn, char *addr, int len, char **result)
 	if (!stralloc_copys(&controlfile, controldir) || !stralloc_cats(&controlfile, "/") ||
 			!stralloc_cats(&controlfile, fn) ||
 			!stralloc_0(&controlfile))
-		strerr_die2sys(111, FATAL, "out of memory");
+		strerr_die2x(111, FATAL, "out of memory");
 	if ((cntrl_ok = initMySQLlibrary(&errStr)))
 		return (0);
 	else
@@ -195,68 +201,19 @@ sql_match(char *fn, char *addr, int len, char **result)
 }
 #endif
 
-stralloc        ctrl = {0};
-
-int
-cdb_match(char *fn, char *addr, int len, char **result)
-{
-	static stralloc controlfile = {0};
-	static stralloc temp = { 0 };
-	uint32          dlen;
-	char           *tmpbuf;
-	int             fd_cdb, cntrl_ok, i;
-
-	if (!len || !*addr || !fn)
-		return (0);
-	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	if (!stralloc_copys(&controlfile, controldir) || !stralloc_cats(&controlfile, "/")
-			|| !stralloc_cats(&controlfile, fn) || !stralloc_0(&controlfile))
-		strerr_die2sys(111, FATAL, "out of memory");
-	if ((fd_cdb = open_read(controlfile.s)) == -1) {
-		if (errno != error_noent)
-			strerr_die3sys(111, FATAL, controlfile.s, ": ");
-		/*- cdb missing or entry missing */
-		*result = (char *) 0;
-		return (0);
-	}
-	if (!stralloc_copyb(&temp, "!", 1)) {
-		close(fd_cdb);
-		strerr_die2sys(111, FATAL, "out of memory");
-	}
-	if (!stralloc_catb(&temp, addr, len) || !stralloc_0(&temp)) {
-		close(fd_cdb);
-		strerr_die2sys(111, FATAL, "out of memory");
-	}
-	if ((cntrl_ok = cdb_seek(fd_cdb, temp.s, len + 1, &dlen)) == -1) {
-		close(fd_cdb);
-		strerr_die2sys(111, FATAL, "lseek: ");
-	} else
-	if (cntrl_ok == 1) {
-		if (!(tmpbuf = (char *) alloc(dlen + 1))) {
-			close(fd_cdb);
-			strerr_die2sys(111, FATAL, "out of memory");
-		}
-		if ((i = read(fd_cdb, tmpbuf, dlen)) == -1)
-			strerr_die4sys(111, FATAL, "read: ", controlfile.s, ": ");
-		else
-		if (!i)
-			strerr_die4x(111, FATAL, "read: ", controlfile.s, ": EOF");
-		tmpbuf[dlen] = 0;
-		*result = tmpbuf;
-	}
-	close(fd_cdb);
-	return (cntrl_ok ? 1 : 0);
-}
-
 int
 main(int argc, char **argv)
 {
+	static stralloc ctrl = {0};
 	char           *fn = (char *) 0, *ptr, *env_name = (char *) 0, *addr = (char *) 0, *result;
 	int             i, j, opt, token_len, len;
 
-	while ((opt = getopt(argc, argv, "f:e:a:")) != opteof) {
-		switch (opt) {
+	while ((opt = getopt(argc, argv, "cf:e:a:")) != opteof) {
+		switch (opt)
+		{
+		case 'c':
+			env_clear();
+			break;
 		case 'f':
 			fn = optarg;
 			break;
@@ -268,24 +225,37 @@ main(int argc, char **argv)
 			break;
 		}
 	}
-	if (optind == argc)
-		strerr_die1x(100, "usage: cntrlenv -f filename [-e env] -a address child");
-	if (!fn || !addr)
-		strerr_die1x(100, "usage: cntrlenv -f filename [-e env] -a address child");
+	if (optind == argc || !fn || !addr)
+		strerr_die1x(100, "usage: cntrlenv [-c] -f filename [-e env] -a address child");
 	j = str_len(addr);
 	i = str_end(fn, ".cdb");
 	if (fn[i]) {
-		if (cdb_match(fn, addr, j, &result)) {
+		switch (cdb_match(fn, addr, j, &result))
+		{
+		case CDB_FOUND:
 			if (env_name) {
 				if (!pathexec_env(env_name, result))
-					strerr_die2sys(111, FATAL, "out of memory");
+					strerr_die2x(111, FATAL, "out of memory");
 			} else
 			if (parse_env(result))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			pathexec(argv + optind);
-		} else
+			strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
+			break;
+		case CDB_NOMATCH:
 			pathexec(argv + optind);
-		strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
+			strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
+			break;
+		case CDB_MEM_ERR:
+			strerr_die2x(111, FATAL, "out of memory");
+		case CDB_LSEEK_ERR:
+			strerr_die3sys(111, FATAL, fn, ": unable to seek: ");
+		case CDB_READ_ERR:
+			strerr_die3sys(111, FATAL, fn, ": read error: ");
+		case CDB_FILE_ERR:
+			strerr_die4sys(111, FATAL, "error opening ", fn, ": ");
+			break;
+		}
 	}
 #ifdef HAS_MYSQL
 	i = str_end(fn, ".sql");
@@ -293,10 +263,10 @@ main(int argc, char **argv)
 		if (sql_match(fn, addr, j, &result)) {
 			if (env_name) {
 				if (!pathexec_env(env_name, result))
-					strerr_die2sys(111, FATAL, "out of memory");
+					strerr_die2x(111, FATAL, "out of memory");
 			} else
 			if (parse_env(result))
-				strerr_die2sys(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 			pathexec(argv + optind);
 		} else
 			pathexec(argv + optind);
@@ -313,10 +283,10 @@ main(int argc, char **argv)
 				ptr[i + 1 + j] = 0;
 				if (env_name) {
 					if (!pathexec_env(env_name, ptr + i + 1))
-						strerr_die2sys(111, FATAL, "out of memory");
+						strerr_die2x(111, FATAL, "out of memory");
 				} else
 				if (parse_env(ptr + i + 1))
-					strerr_die2sys(111, FATAL, "out of memory");
+					strerr_die2x(111, FATAL, "out of memory");
 				pathexec(argv + optind);
 				strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
 			}
@@ -330,7 +300,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	static char    *x = "$Id: ctrlenv.c,v 1.3 2020-04-10 18:28:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ctrlenv.c,v 1.4 2022-10-30 22:15:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.30  2022-10-30 20:21:32+05:30  Cprogrammer
+ * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
+ *
  * Revision 1.29  2022-08-21 17:59:12+05:30  Cprogrammer
  * fix compilation error when TLS is not defined in conf-tls
  *
@@ -107,7 +110,6 @@
 #include <constmap.h>
 #include <uint32.h>
 #include <error.h>
-#include <cdb.h>
 #include <strerr.h>
 #include <open.h>
 #include <str.h>
@@ -126,6 +128,7 @@
 #include "ip.h"
 #include "auto_control.h"
 #include "starttls.h"
+#include "cdb_match.h"
 #include "variables.h"
 
 #define FATAL "qmail-daned: fatal: "
@@ -202,42 +205,6 @@ whitelist_init(char *arg)
 }
 
 int
-cdb_match(char *fn, char *addr, int len)
-{
-	static stralloc controlfile = {0};
-	static stralloc temp = { 0 };
-	uint32          dlen;
-	int             fd_cdb, cntrl_ok;
-
-	if (!len || !*addr || !fn)
-		return (0);
-	if(!(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	if (!stralloc_copys(&controlfile, controldir) ||
-			!stralloc_cats(&controlfile, "/") ||
-			!stralloc_cats(&controlfile, fn) ||
-			!stralloc_cats(&controlfile, ".cdb") ||
-			!stralloc_0(&controlfile))
-		die_nomem();
-	if ((fd_cdb = open_read(controlfile.s)) == -1) {
-		if (errno != error_noent)
-			die_control("unable to read control file ", controlfile.s);
-		/*- cdb missing or entry missing */
-		return (0);
-	}
-	if (!stralloc_copyb(&temp, addr, len)) {
-		close(fd_cdb);
-		die_nomem();
-	}
-	if ((cntrl_ok = cdb_seek(fd_cdb, temp.s, len, &dlen)) == -1) {
-		close(fd_cdb);
-		strerr_die2sys(111, FATAL, "lseek: ");
-	}
-	close(fd_cdb);
-	return (cntrl_ok ? 1 : 0);
-}
-
-int
 domain_match(char *fn, stralloc *domain, stralloc *content,
 	struct constmap *ptrmap, char **errStr)
 {
@@ -246,9 +213,20 @@ domain_match(char *fn, stralloc *domain, stralloc *content,
 
 	if (errStr)
 		*errStr = 0;
-	if (fn && (x = cdb_match(fn, domain->s, domain->len - 1)))
-		return (x);
-	else
+	if (fn) {
+		switch ((x = cdb_matchaddr(fn, domain->s, domain->len - 1)))
+		{
+		case 0:
+		case 1:
+			return (x);
+		case CDB_MEM_ERR:
+			die_nomem();
+		case CDB_LSEEK_ERR:
+			strerr_die3sys(111, FATAL, fn, ".cdb: lseek: ");
+		case CDB_FILE_ERR:
+			strerr_die4sys(111, FATAL, "unable to read cdb file ", fn, ".cdb: ");
+		}
+	} else
 	if (ptrmap && constmap(ptrmap, domain->s, domain->len - 1))
 		return 1;
 	if (!content)
@@ -1366,7 +1344,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.29 2022-08-21 17:59:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.30 2022-10-30 20:21:32+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;

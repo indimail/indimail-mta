@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.33  2022-10-30 20:22:09+05:30  Cprogrammer
+ * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
+ *
  * Revision 1.32  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -127,21 +130,16 @@
 #include <error.h>
 #include <uint32.h>
 #include <open.h>
-#include <cdb.h>
 #include <noreturn.h>
 #include "ip.h"
-#ifdef NETQMAIL
-#include "auto_qmail.h"
-#endif
 #include "auto_control.h"
 #include "control.h"
 #include "tablematch.h"
-#ifndef NETQMAIL /*- netqmail does not have configurable control directory */
 #include "variables.h"
-#endif
 #include "greylist.h"
 #include "haveip6.h"
 #include "socket.h"
+#include "cdb_match.h"
 #include <search.h>
 
 #define FATAL "qmail-greyd: fatal: "
@@ -290,66 +288,13 @@ whitelist_init(char *arg)
 {
 	if (verbose > 2)
 		logerr("initializing whitelist\n");
-#ifdef NETQMAIL /*- look for control files in QMAILHOME/control */
-	static stralloc controlfile = {0};
-
-	if (!stralloc_copys(&controlfile, "control/") ||
-			!stralloc_cats(&controlfile, arg) ||
-			!stralloc_0(&controlfile))
-		die_nomem();
-	if ((whitelistok = control_readfile(&whitelist, controlfile.s, 0)) == -1)
-		die_control(arg);
-#else /*- look for control files in $CONTROLDIR/control */
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
 		die_control(arg);
-#endif
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
 	if (verbose > 2)
 		logerrf("initialized  whitelist\n");
 	return;
-}
-
-int
-cdb_match(char *fn, char *addr, int len)
-{
-	static stralloc controlfile = {0};
-	static stralloc temp = { 0 };
-	uint32          dlen;
-	int             fd_cdb, cntrl_ok;
-
-	if (!len || !*addr || !fn)
-		return (0);
-#ifdef NETQMAIL
-	if (!stralloc_copys(&controlfile, "control"))
-		die_nomem();
-#else
-	if (!stralloc_copys(&controlfile, controldir))
-		die_nomem();
-#endif
-	if (!stralloc_cats(&controlfile, "/") ||
-			!stralloc_cats(&controlfile, fn) ||
-			!stralloc_cats(&controlfile, ".cdb") ||
-			!stralloc_0(&controlfile))
-		die_nomem();
-	if ((fd_cdb = open_read(controlfile.s)) == -1) {
-		if (errno != error_noent)
-			die_control(controlfile.s);
-		/*
-		 * cdb missing or entry missing
-		 */
-		return (0);
-	}
-	if (!stralloc_copyb(&temp, addr, len)) {
-		close(fd_cdb);
-		die_nomem();
-	}
-	if ((cntrl_ok = cdb_seek(fd_cdb, temp.s, len, &dlen)) == -1) {
-		close(fd_cdb);
-		strerr_die2sys(111, FATAL, "lseek: ");
-	}
-	close(fd_cdb);
-	return (cntrl_ok ? 1 : 0);
 }
 
 int
@@ -364,9 +309,20 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 
 	if (errStr)
 		*errStr = 0;
-	if (whitefn && (x = cdb_match(whitefn, ipaddr->s, ipaddr->len - 1)))
-		return (x);
-	else
+	if (whitefn) { 
+		switch ((x = cdb_matchaddr(whitefn, ipaddr->s, ipaddr->len - 1)))
+		{
+		case 0:
+		case 1:
+			return (x);
+		case CDB_MEM_ERR:
+			die_nomem();
+		case CDB_LSEEK_ERR:
+			strerr_die3sys(111, FATAL, whitefn, ".cdb: lseek: ");
+		case CDB_FILE_ERR:
+			strerr_die4sys(111, FATAL, "unable to read cdb file ", whitefn, ".cdb: ");
+		}
+	} else
 	if (ptrmap && constmap(ptrmap, ipaddr->s, ipaddr->len - 1))
 		return 1;
 	if (!content)
@@ -1248,13 +1204,8 @@ main(int argc, char **argv)
 #else
 		ipaddr = INADDR_ANY;
 #endif
-#ifndef NETQMAIL
 	if (!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-#else
-	if (chdir(auto_qmail) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir: ", auto_qmail, ": ");
-#endif
 	if (whitefn) {
 		whitelist_init(whitefn);
 		sig_catch(SIGHUP, sighup);
@@ -1262,15 +1213,9 @@ main(int argc, char **argv)
 	for (ptr = argv[optind++]; *ptr;ptr++);
 	ptr = argv[optind - 1];
 	if (*ptr != '/') {
-#ifndef NETQMAIL
 		if (!stralloc_copys(&context_file, controldir) ||
 				!stralloc_cats(&context_file, "/"))
 			die_nomem();
-#else
-		if (!stralloc_copys(&context_file, "control") ||
-				!stralloc_cats(&context_file, "/"))
-			die_nomem();
-#endif
 	}
 	if (!stralloc_cats(&context_file, ptr) ||
 			!stralloc_0(&context_file))
@@ -1563,7 +1508,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.32 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.33 2022-10-30 20:22:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
