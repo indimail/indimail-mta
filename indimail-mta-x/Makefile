@@ -1622,13 +1622,13 @@ ipalloc.o strsalloc.o ipme.o quote.o variables.o tls.o \
 ssl_timeoutio.o auto_control.o socket_ip4loopback.o \
 socket_v6loopback.o socket_v6any.o tlsarralloc.o \
 qr_digest_md5.o fn_handler.o query_skt.o tlsacheck.o \
-dns.lib socket.lib socket_v4mappedprefix.o \
+dns.lib socket.lib socket_v4mappedprefix.o cdb_match.o \
 socket_tcp.o socket_tcp6.o idn2.lib gsasl.lib
 	./load qmail-remote control.o tlsacheck.o auto_control.o \
 	timeoutconn.o tcpto.o dns.o ip.o socket_ip4loopback.o \
 	socket_v6loopback.o socket_v6any.o ipalloc.o ssl_timeoutio.o \
 	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o fn_handler.o \
-	qr_digest_md5.o query_skt.o tlsarralloc.o variables.o \
+	qr_digest_md5.o query_skt.o tlsarralloc.o variables.o cdb_match.o \
 	socket_tcp.o socket_tcp6.o tls.o $(static_option) $(QMAILLIB) \
 	$(dynamic_option) `cat dns.lib socket.lib idn2.lib gsasl.lib` \
 	-lssl -lcrypto
@@ -1647,7 +1647,8 @@ compile qmail-remote.c tls.h ssl_timeoutio.h control.h dns.h quote.h ip.h \
 ipalloc.h query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
 variables.h hastlsv1_1_client.h hastlsv1_2_client.h auto_control.h \
 hastlsa.h tlsacheck.h fn_handler.h tlsarralloc.h hassmtputf8.h batv.h \
-haslibgsasl.h conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
+cdb_match.h haslibgsasl.h \
+conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
 		conf-batv` qmail-remote.c
 
@@ -3477,16 +3478,21 @@ compile qmail-qfilter.c qmail.h qmulti.h custom_error.h
 qfrontend.1: qfrontend.9 conf-libexec
 	$(edit) qfrontend.9 > $@
 
+cdb_match.o: \
+compile cdb_match.c variables.h auto_control.h cdb_match.h
+	./compile cdb_match.c
+
 qmail-greyd: load qmail-greyd.o ip.o socket_v6any.o \
 socket_v4mappedprefix.o variables.o auto_control.o \
-control.o tablematch.o
+control.o tablematch.o cdb_match.o
 	./load qmail-greyd auto_control.o ip.o socket_v6any.o \
 	socket_v4mappedprefix.o variables.o control.o tablematch.o \
-	$(QMAILLIB)
+	cdb_match.o $(QMAILLIB)
 
 qmail-greyd.o: \
 compile qmail-greyd.c ip.h control.h variables.h greylist.h \
-tablematch.h socket.h haveip6.h conf-ip auto_control.h
+tablematch.h socket.h cdb_match.h auto_control.h haveip6.h \
+conf-ip
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-greyd.c
 
 qmail-daned: \
@@ -3494,9 +3500,9 @@ load qmail-daned.o ip.o socket_v6any.o socket_v4mappedprefix.o \
 variables.o auto_control.o control.o ipalloc.o dns.o dnsdoe.o \
 strsalloc.o socket_tcp.o socket_tcp6.o timeoutconn.o tlsarralloc.o \
 ssl_timeoutio.o socket_ip4loopback.o socket_v6loopback.o \
-tls.o starttls.o dns.lib tls.lib
+cdb_match.o tls.o starttls.o dns.lib tls.lib
 	./load qmail-daned auto_control.o ssl_timeoutio.o \
-	ip.o socket_v6any.o socket_v4mappedprefix.o \
+	cdb_match.o ip.o socket_v6any.o socket_v4mappedprefix.o \
 	tlsarralloc.o variables.o control.o ipalloc.o dns.o \
 	dnsdoe.o strsalloc.o socket_tcp.o socket_tcp6.o timeoutconn.o \
 	socket_ip4loopback.o socket_v6loopback.o starttls.o tls.o \
@@ -3505,7 +3511,7 @@ tls.o starttls.o dns.lib tls.lib
 qmail-daned.o: \
 compile qmail-daned.c control.h variables.h \
 tlsacheck.h haveip6.h ip.h auto_control.h \
-hastlsa.h starttls.h conf-ip conf-tls
+cdb_match.h hastlsa.h starttls.h conf-ip conf-tls
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip conf-tls` \
 	qmail-daned.c
 
@@ -3791,16 +3797,16 @@ compile qcount_dir.c
 
 ctrlenv: \
 load ctrlenv.o control.o auto_control.o variables.o \
-load_mysql.o indimail_stub.o sqlmatch.o \
+load_mysql.o indimail_stub.o sqlmatch.o cdb_match.o \
 auto_uids.o auto_sysconfdir.o
 	./load ctrlenv auto_control.o control.o variables.o \
 	load_mysql.o indimail_stub.o sqlmatch.o \
-	auto_uids.o auto_sysconfdir.o \
+	auto_uids.o auto_sysconfdir.o cdb_match.o \
 	$(QMAILLIB) -ldl
 
 ctrlenv.o: compile ctrlenv.c variables.h \
 hasmysql.h load_mysql.h indimail_stub.h \
-auto_control.h sqlmatch.h mysql_config \
+auto_control.h sqlmatch.h cdb_match.h mysql_config \
 mysql_inc conf-sql
 	./compile `grep -h -v "^#" conf-sql mysql_inc` ctrlenv.c
 
