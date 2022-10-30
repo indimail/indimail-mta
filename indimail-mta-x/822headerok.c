@@ -1,5 +1,8 @@
 /*
  * $Log: 822headerok.c,v $
+ * Revision 1.4  2022-10-30 17:55:00+05:30  Cprogrammer
+ * converted to ansic prototype
+ *
  * Revision 1.3  2020-11-24 13:43:38+05:30  Cprogrammer
  * removed exit.h
  *
@@ -22,12 +25,9 @@ static char     ssinbuf[1024];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			_exit(111);
 		if (!mess822_ok(&line))
@@ -35,8 +35,7 @@ main(argc, argv)
 		if (!match)
 			_exit(0);
 	}
-	if (match)
-	{
+	if (match) {
 		--line.len;
 		if (line.len && (line.s[line.len - 1] == '\r'))
 			--line.len;
@@ -49,7 +48,7 @@ main(argc, argv)
 void
 getversion_822headerok_c()
 {
-	static char    *x = "$Id: 822headerok.c,v 1.3 2020-11-24 13:43:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822headerok.c,v 1.4 2022-10-30 17:55:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

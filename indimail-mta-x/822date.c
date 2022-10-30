@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.11  2022-10-30 17:54:48+05:30  Cprogrammer
+ * converted to ansic prototype
+ *
  * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -68,9 +71,7 @@ stralloc        line = { 0 };
 int             match;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
@@ -78,8 +79,7 @@ main(argc, argv)
 		a[0].name = argv[1];
 	if (!mess822_begin(&h, a))
 		nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!mess822_ok(&line))
@@ -127,7 +127,7 @@ main(argc, argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.11 2022-10-30 17:54:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

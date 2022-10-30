@@ -1,5 +1,8 @@
 /*
  * $Log: 822header.c,v $
+ * Revision 1.8  2022-10-30 17:54:57+05:30  Cprogrammer
+ * converted to ansic prototype
+ *
  * Revision 1.7  2020-11-24 13:42:27+05:30  Cprogrammer
  * removed exit.h
  *
@@ -40,15 +43,12 @@ stralloc        excl = { 0 };
 int             match;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             opt, len, token_len, include = 0, exclude = 0, keep_continue = 0;
 	char           *ptr;
 
-	while ((opt = getopt(argc, argv, "I:X:")) != opteof)
-	{
+	while ((opt = getopt(argc, argv, "I:X:")) != opteof) {
 		switch (opt)
 		{
 		case 'X':
@@ -76,29 +76,22 @@ main(argc, argv)
 	}
 	if (include && exclude)
 		strerr_die1x(100, "Only one of -I or -X can be specified");
-	for (;;)
-	{
+	for (;;) {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
 		if (!mess822_ok(&line))
 			break;
-		if (include)
-		{
-			if (line.s[0] == ' ' || line.s[0] == '\t') /*- RFC 822 LWSP char */
-			{
-				if (keep_continue)
-				{
+		if (include) {
+			if (line.s[0] == ' ' || line.s[0] == '\t') /*- RFC 822 LWSP char */ {
+				if (keep_continue) {
 					if (substdio_put(subfdoutsmall, line.s, line.len))
 						strerr_die2sys(111, FATAL, "unable to write: ");
 				}
-			} else
-			{
+			} else {
 				keep_continue = 0;
-				for (len = 0, ptr = incl.s;len < incl.len;)
-				{
+				for (len = 0, ptr = incl.s;len < incl.len;) {
 					len += ((token_len = str_len(ptr)) + 1);
-					if (!case_diffb(ptr, token_len, line.s))
-					{
+					if (!case_diffb(ptr, token_len, line.s)) {
 						if (substdio_put(subfdoutsmall, line.s, line.len))
 							strerr_die2sys(111, FATAL, "unable to write: ");
 						keep_continue = 1;
@@ -108,21 +101,16 @@ main(argc, argv)
 				}
 			}
 		} else
-		if (exclude)
-		{
+		if (exclude) {
 			exclude = 1;
-			if (line.s[0] == ' ' || line.s[0] == '\t') /*- RFC 822 LWSP char */
-			{
+			if (line.s[0] == ' ' || line.s[0] == '\t') /*- RFC 822 LWSP char */ {
 				if (!keep_continue)
 					exclude = 2;
-			} else
-			{
+			} else {
 				keep_continue = 1;
-				for (len = 0, ptr = excl.s;len < excl.len;)
-				{
+				for (len = 0, ptr = excl.s;len < excl.len;) {
 					len += ((token_len = str_len(ptr)) + 1);
-					if (!case_diffb(ptr, token_len, line.s))
-					{
+					if (!case_diffb(ptr, token_len, line.s)) {
 						exclude = 2;
 						keep_continue = 0;
 						break;
@@ -146,7 +134,7 @@ main(argc, argv)
 void
 getversion_822header_c()
 {
-	static char    *x = "$Id: 822header.c,v 1.7 2020-11-24 13:42:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822header.c,v 1.8 2022-10-30 17:54:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: quote.c,v $
+ * Revision 1.5  2022-10-30 18:01:15+05:30  Cprogrammer
+ * converted to ansic prototype
+ *
  * Revision 1.4  2020-05-13 20:12:48+05:30  Cprogrammer
  * fix integer signedness error for quote()
  *
@@ -35,9 +38,7 @@ static char     ok[128] = {
 };
 
 static int
-doit(saout, sain)
-	stralloc       *saout;
-	stralloc       *sain;
+doit(stralloc *saout, stralloc *sain)
 {
 	char            ch;
 	int             i, j;
@@ -64,9 +65,7 @@ doit(saout, sain)
 }
 
 int
-quote_need(s, n)
-	char           *s;
-	unsigned int    n;
+quote_need(char *s, unsigned int n)
 {
 	unsigned char   uch;
 	int             i;
@@ -91,9 +90,7 @@ quote_need(s, n)
 }
 
 int
-quote(saout, sain)
-	stralloc       *saout;
-	stralloc       *sain;
+quote(stralloc *saout, stralloc *sain)
 {
 	if (quote_need(sain->s, sain->len))
 		return doit(saout, sain);
@@ -103,11 +100,10 @@ quote(saout, sain)
 static stralloc foo = { 0 };
 
 int
-quote2(sa, s)
-	stralloc       *sa;
-	char           *s;
+quote2(stralloc *sa, char *s)
 {
 	int             j;
+
 	if (!*s)
 		return stralloc_copys(sa, s);
 	j = str_rchr(s, '@');
@@ -124,7 +120,7 @@ quote2(sa, s)
 void
 getversion_quote_c()
 {
-	static char    *x = "$Id: quote.c,v 1.4 2020-05-13 20:12:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: quote.c,v 1.5 2022-10-30 18:01:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
