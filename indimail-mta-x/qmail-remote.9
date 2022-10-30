@@ -85,9 +85,10 @@ server supports STARTTLS and it finds a valid certificate in
 to non-encrypted session if the TLS connection fails.
 
 \fBqmail-remote\fR can use authenticated SMTP for remote deliveries if
-username and secret is provided in the SYSCONF/smtproutes control file
-described in the section \fBCONTROL FILES\fR. \fBqmail-remote\fR uses
-libgsasl to use GNU Simple Authentication and Security Layer detailed here
+username and secret is provided in the \fiSYSCONF/control/remote_auth.cdb\fR
+or \fISYSCONF/control/smtproutes\fRcontrol file. This is described in
+detail in the section \fBCONTROL FILES\fR. \fBqmail-remote\fR uses libgsasl
+to use GNU Simple Authentication and Security Layer detailed here
 https://www.gnu.org/software/gsasl. \fBqmail-remote\fR supports LOGIN,
 PLAIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
 CRAM-RIPEMD, DIGEST-MD5 authentication using built-in functions and
@@ -524,38 +525,37 @@ separated by user password pairs
 
 When address matches joe.shmoe@indimail.org, the username, password for
 authenticated SMTP will be set as testuser@example.com, supersecret. The
-cdb file remote_auth.cdb allows you to store username and passwords
-more securely compared to storing them in smtproutes control file. You can
-read access for remote_auth.cdb only for the qmailr user.
+cdb file remote_auth.cdb allows you to store username and passwords more
+securely compared to storing them in \fIsmtproutes\fR control file. You can
+set read access for remote_auth.cdb only for the qmailr user. You can have
+simple or wildcard assignments
 
-.SH "SIMPLE ASSIGNMENTS"
-A simple assignment is a line of the form
+A simple assignment in remote_auth.cdb is a line of the form
 
 .EX
-=addr:user password:
+=addr:user pass:
 .EE
 
 Here \fIaddr\fR is an address;
 \fIuser\fR, \fIpass\fR is the value of username, password variables that
-\fBqmail-remote\fR will set when it uses authenticated SMTP.
+\fBqmail-remote\fR will use for authenticated SMTP.
 
 If there are several assignments for the same \fIaddr\fR address,
 \fBqmail-remote\R will use the first one.
 
 \fIaddr\fR is interpreted without regard to case.
 
-.SH "WILDCARD ASSIGNMENTS"
-A wildcard assignment is a line of the form
+A wildcard assignment in remote_auth.cdb is a line of the form
 
 .EX
-+addr:user password:
++addr:user pass:
 .EE
 
 This assignment applies to any address beginning with \fIaddr\fR, including
 \fIaddr\fR itself. It means the same as
 
 .EX
-=addrext:user password:
+=addrext:user pass:
 .EE
 
 for every string \fIext\fR .
@@ -572,6 +572,9 @@ and a simple assignment overrides any wildcard assignment. For example:
 The address \fBjoe\fR is handled by the third line;
 the address \fBjoe-direct\fR is handled by the second line;
 the address \fBbill\fR is handled by the first line.
+
+You can create \fISYSCONF/control/remote_auth.cdb\fR from
+\fISYSCONF/control/remote_auth\fR using the program \fBcdb-database\fR(8).
 
 AUTH_SMTP can have the values SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA256,
 SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS, DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1,
@@ -813,6 +816,7 @@ qmail-tcpok(8),
 qmail-tcpto(8),
 idn2_lookup_u8(3),
 ctrlenv(8),
+cdb-database(8),
 gsasl_scram_secrets_from_password(3),
 gsasl(1),
 vpasswd(1),
