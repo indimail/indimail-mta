@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.275 2022-10-22 13:08:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.276 2022-10-30 10:02:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -146,7 +146,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.275 $";
+char           *revision = "$Revision: 1.276 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5513,8 +5513,6 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		break;
 #if GSASL_VERSION_MAJOR == 1 && GSASL_VERSION_MINOR > 8 || GSASL_VERSION_MAJOR > 1
 	case GSASL_SCRAM_SERVERKEY:
-		if (env_get("GSASL_PASSWORD"))
-			break;
 		if (i == -1) {
 			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
 							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
@@ -5533,8 +5531,6 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #endif
 		break;
 	case GSASL_SCRAM_STOREDKEY:
-		if (env_get("GSASL_PASSWORD"))
-			break;
 		if (i == -1) {
 			if ((rc = get_user_details(sctx, &u, &mech, &iter, &salt, &stored_key,
 							&server_key, &hexsaltpw, &cleartxt, &saltedpw)) != GSASL_OK)
@@ -7547,6 +7543,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.276  2022-10-30 10:02:00+05:30  Cprogrammer
+ * removed skip setting STOREDKEY, SERVERKEY using GSASL_PASSWORD env variable
+ *
  * Revision 1.275  2022-10-22 13:08:43+05:30  Cprogrammer
  * added program identifier to Received header
  *
@@ -7819,7 +7818,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.275 2022-10-22 13:08:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.276 2022-10-30 10:02:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
