@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.157 2022-10-13 20:32:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.158 2022-10-30 22:16:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -38,6 +38,7 @@
 #include "hastlsa.h"
 #if defined(TLS) && defined(HASTLSA)
 #include "tlsarralloc.h"
+#include "cdb_match.h"
 #include "fn_handler.h"
 #include <netdb.h>
 #include <openssl/bio.h>
@@ -533,6 +534,21 @@ temp_control(char *arg1, char *arg2)
 				!stralloc_append(&smtptext, "]"))
 			temp_nomem();
 	}
+	if (!stralloc_catb(&smtptext, " (#4.3.0)", 8))
+		temp_nomem();
+	if (setsmtptext(0, protocol_t))
+		smtpenv.len = 0;
+	zerodie("Z", -1);
+}
+
+no_return void
+temp_cdb(char *arg)
+{
+	out("Z");
+	out(arg);
+	out(". (#4.3.0)\n");
+	if (!stralloc_copys(&smtptext, arg))
+		temp_nomem();
 	if (!stralloc_catb(&smtptext, " (#4.3.0)", 8))
 		temp_nomem();
 	if (setsmtptext(0, protocol_t))
@@ -3257,24 +3273,24 @@ stralloc        canonhost = { 0 };
 stralloc        canonbox = { 0 };
 
 void	 /*- host has to be canonical, box has to be quoted */
-addrmangle(stralloc *saout, char *s, int *flagalias, int flagcname,
+addrmangle(stralloc *saout, char *sender, int *flagalias, int flagcname,
 		int flagquote)
 {
 	int             j;
 
 	*flagalias = flagcname;
-	j = str_rchr(s, '@');
-	if (!s[j]) {
-		if (!stralloc_copys(saout, s))
+	j = str_rchr(sender, '@');
+	if (!sender[j]) {
+		if (!(flagquote ? quote2(saout, sender) : stralloc_copys(saout, sender)))
 			temp_nomem();
 		return;
 	}
-	if (!stralloc_copys(&canonbox, s))
+	if (!stralloc_copys(&canonbox, sender))
 		temp_nomem();
 	canonbox.len = j;
-	if (!(flagquote ? quote(saout,&canonbox) : stralloc_copy(saout,&canonbox)) ||
+	if (!(flagquote ? quote(saout, &canonbox) : stralloc_copy(saout, &canonbox)) ||
 			!stralloc_cats(saout, "@") ||
-			!stralloc_copys(&canonhost, s + j + 1))
+			!stralloc_copys(&canonhost, sender + j + 1))
 		temp_nomem();
 	if (flagcname) {
 		switch (dns_cname(&canonhost))
@@ -3318,40 +3334,6 @@ prep_reciplist(saa *list,char **recips,int flagcname,int flagquote)
 
 
 #if defined(TLS) && defined(HASTLSA)
-int
-cdb_match(char *fn, char *addr, int len)
-{
-	static stralloc controlfile = {0};
-	static stralloc temp = { 0 };
-	uint32          dlen;
-	int             fd_cdb, cntrl_ok;
-
-	if (!len || !*addr || !fn)
-		return (0);
-	if (!stralloc_copys(&controlfile, controldir) ||
-			!stralloc_cats(&controlfile, "/") ||
-			!stralloc_cats(&controlfile, fn) ||
-			!stralloc_cats(&controlfile, ".cdb") ||
-			!stralloc_0(&controlfile))
-		temp_nomem();
-	if ((fd_cdb = open_read(controlfile.s)) == -1) {
-		if (errno != error_noent)
-			temp_control("Unable to read control file", controlfile.s);
-		/*- cdb missing or entry missing */
-		return (0);
-	}
-	if (!stralloc_copyb(&temp, addr, len)) {
-		close(fd_cdb);
-		temp_nomem();
-	}
-	if ((cntrl_ok = cdb_seek(fd_cdb, temp.s, len, &dlen)) == -1) {
-		close(fd_cdb);
-		temp_oserr();
-	}
-	close(fd_cdb);
-	return (cntrl_ok ? 1 : 0);
-}
-
 static int
 dmatch(char *fn, stralloc *domain, stralloc *content,
 	struct constmap *ptrmap)
@@ -3359,10 +3341,21 @@ dmatch(char *fn, stralloc *domain, stralloc *content,
 	int             x, len;
 	char           *ptr;
 
-	if (fn && (x = cdb_match(fn, domain->s, domain->len - 1)))
-		return (x);
-	else
-	if (ptrmap && constmap(ptrmap, domain->s, domain->len - 1))
+	if (fn) {
+		switch ((x = cdb_matchaddr(fn, domain->s, domain->len)))
+		{
+		case 0:
+		case 1:
+			return (x);
+		case CDB_MEM_ERR:
+			temp_nomem();
+		case CDB_LSEEK_ERR:
+			temp_cdb("unable to lseek tlsadomains.cdb file");
+		case CDB_FILE_ERR:
+			temp_cdb("unable to open tlsadomains.cdb file");
+		}
+	} else
+	if (ptrmap && constmap(ptrmap, domain->s, domain->len))
 		return 1;
 	if (!content)
 		return (0);
@@ -3383,6 +3376,7 @@ is_in_tlsadomains(char *domain)
 	if (!stralloc_copys(&_domain, domain) ||
 			!stralloc_0(&_domain))
 		temp_nomem();
+	_domain.len--;
 	switch (dmatch(tlsadomainsfn, &_domain, tlsadomains.len ? &tlsadomains : 0, 
 			tlsadomains.len ? &maptlsadomains : 0))
 	{
@@ -3637,7 +3631,9 @@ getcontrols()
 		notls = 1;
 #ifdef HASTLSA
 	/*- tlsadomains */
-	switch (control_readfile(&tlsadomains, (x = env_get("TLSADOMAINS")) ? x : "tlsadomains", 0))
+	if (!(tlsadomainsfn = env_get("TLSADOMAINS")))
+		tlsadomainsfn = "tlsadomains";
+	switch (control_readfile(&tlsadomains, tlsadomainsfn, 0))
 	{
 	case -1:
 		temp_control("Unable to read control file", x);
@@ -3740,7 +3736,7 @@ sign_batv()
  * http://www.apecity.com/qmail/moresmtproutes.txt
  */
 char           *
-lookup_host(char *hst, int len)
+host_lookup(char *hst, int len)
 {
 	static stralloc morerelayhost = { 0 };
 	static stralloc h = { 0 };
@@ -3795,6 +3791,46 @@ timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port_num, int tmo
 	}
 }
 
+void
+password_lookup(char *addr, int addr_len)
+{
+	int             i;
+	char           *result;
+
+	switch (cdb_match("remote_auth.cdb", addr, addr_len, &result))
+	{
+	case CDB_FOUND:
+		if (result) {
+			i = str_chr(result, ' ');
+			if (result[i]) {
+				result[i] = 0;
+				if (!stralloc_copys(&user, result) ||
+						!stralloc_0(&user) ||
+						!stralloc_copys(&pass, result + i + 1) ||
+						!stralloc_0(&pass))
+					temp_nomem();
+				user.len--;
+				pass.len--;
+			} else
+				use_auth_smtp = 0;
+		} else
+			use_auth_smtp = 0;
+		break;
+	case CDB_MEM_ERR:
+		temp_nomem();
+	case CDB_READ_ERR:
+		temp_cdb("unable to read remote_auth.cdb file");
+	case CDB_LSEEK_ERR:
+		temp_cdb("unable to lseek remote_auth.cdb file");
+	case CDB_FILE_ERR:
+		temp_cdb("unable to open remote_auth.cdb file");
+	default:
+		use_auth_smtp = 0;
+		break;
+	}
+	return;
+}
+
 /*
  * argv[0] - qmail-remote
  * argv[1] - Recipient SMTP Domain/host
@@ -3837,7 +3873,7 @@ main(int argc, char **argv)
 	enable_utf8 = env_get("SMTPUTF8");
 #endif
 	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
-	relayhost = lookup_host(*recips, str_len(*recips));
+	relayhost = host_lookup(*recips, str_len(*recips));
 	min_penalty = (x = env_get("MIN_PENALTY")) ? scan_int(x, &min_penalty) : MIN_PENALTY;
 	max_tolerance = (x = env_get("MAX_TOLERANCE")) ? scan_ulong(x, &max_tolerance) : MAX_TOLERANCE;
 	if (smtp_sender.len == 0) { /*- bounce routes */
@@ -3848,7 +3884,7 @@ main(int argc, char **argv)
 			port = PORT_QMTP;
 		} else
 		if (!(relayhost = constmap(&mapsmtproutes, bounce.s, bounce.len)))
-			relayhost = lookup_host("!@", 2);
+			relayhost = host_lookup("!@", 2);
 	}
 	if (relayhost && !*relayhost)
 		relayhost = 0;
@@ -3875,7 +3911,7 @@ main(int argc, char **argv)
 					port = PORT_SMTP;
 					break;
 				} else
-				if ((relayhost = lookup_host(host.s + i, host.len - i)))
+				if ((relayhost = host_lookup(host.s + i, host.len - i)))
 					break;
 			}
 		}
@@ -3885,32 +3921,43 @@ main(int argc, char **argv)
 	if (relayhost) {
 		if (use_auth_smtp) {
 			/*-
-			 * test.com:x.x.x.x:port username password
+			 * adapted from a patch by Jay Soffian
+			 * domain:relay:port username password
 			 *         or
 			 * domain:relay:port:penalty:max_tolerance username password
 			 */
 			i = str_chr(relayhost, ' ');
 			if (relayhost[i]) {
-				relayhost[i] = 0;
-				j = str_chr(relayhost + i + 1, ' ');
-				if (relayhost[i + j + 1]) { /*- if password is present */
-					relayhost[i + j + 1] = 0;
-					if (relayhost[i + 1] && relayhost[i + j + 2]) {	/*- both user and password are present */
-						if (!stralloc_copys(&user, relayhost + i + 1) ||
-								!stralloc_0(&user) ||
-								!stralloc_copys(&pass, relayhost + i + j + 2) ||
-								!stralloc_0(&pass))
-							temp_nomem();
-						user.len--;
-						pass.len--;
-					}
-				} else
-					use_auth_smtp = 0;
+				if (relayhost[i + 1] == '/') { /*- get password from remote_auth.cdb */
+					if (!str_diff(relayhost + i + 1, "/s")) /*- match on sender */
+						password_lookup(smtp_sender.s, smtp_sender.len);
+					else
+					if (!str_diff(relayhost + i + 1, "/r")) /*- match on recipient */
+						password_lookup(*recips, str_len(*recips));
+					else /*- match on address specifed in smtproute */
+						password_lookup(relayhost + i + 2, str_len(relayhost + i + 2));
+				} else {
+					relayhost[i] = 0;
+					j = str_chr(relayhost + i + 1, ' ');
+					if (relayhost[i + j + 1]) { /*- if password is present */
+						relayhost[i + j + 1] = 0;
+						if (relayhost[i + 1] && relayhost[i + j + 2]) {	/*- both user and password are present */
+							if (!stralloc_copys(&user, relayhost + i + 1) ||
+									!stralloc_0(&user) ||
+									!stralloc_copys(&pass, relayhost + i + j + 2) ||
+									!stralloc_0(&pass))
+								temp_nomem();
+							user.len--;
+							pass.len--;
+						}
+					} else
+						use_auth_smtp = 0;
+				}
 			} else
 				use_auth_smtp = 0;
 		}
 		/*-
-		 * test.com:x.x.x.x:port username password
+		 * domain:relay:port username password
 		 *         or
 		 * domain:relay:port:penalty:max_tolerance username password
 		 */
@@ -3919,18 +3966,18 @@ main(int argc, char **argv)
 			if (relayhost[i + 1]) {
 				if (relayhost[i + 1] == ':')
 					port = PORT_SMTP;
-				else			/*- port is present */
+				else /*- port is present */
 					scan_ulong(relayhost + i + 1, &port);
 				relayhost[i] = 0;
-				x = relayhost + i + 1;	/*- port */
-				i = str_chr(x, ':'); /*- : before min_penalty */
+				x = relayhost + i + 1; /*- port */
+				i = str_chr(x, ':');   /*- : before min_penalty */
 				if (x[i]) {
-					if (x[i + 1] != ':')	 /*- if penalty figure is present */
+					if (x[i + 1] != ':') /*- if penalty figure is present */
 						scan_int(x + i + 1, &min_penalty);
 					x = relayhost + i + 1; /*- min_penalty */
 					i = str_chr(x, ':');
 					if (x[i]) {
-						if (x[i + 1] != ':')	 /*- if tolerance figure is present */
+						if (x[i + 1] != ':') /*- if tolerance figure is present */
 							scan_ulong(x + i + 1, &max_tolerance);
 					}
 					if (!min_penalty)
@@ -4152,13 +4199,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.157 2022-10-13 20:32:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.158 2022-10-30 22:16:52+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.158  2022-10-30 22:16:52+05:30  Cprogrammer
+ * fetch username password for authenticated smtp from remote_auth.cdb
+ *
  * Revision 1.157  2022-10-13 20:32:50+05:30  Cprogrammer
  * use batv prefix for batv control files
  * allow batv parameters to be set via env variables
