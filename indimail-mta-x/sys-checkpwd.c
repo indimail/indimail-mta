@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.15  2022-10-30 10:03:39+05:30  Cprogrammer
+ * display auth method in logs if DEBUG is set
+ *
  * Revision 1.14  2022-01-30 09:44:47+05:30  Cprogrammer
  * replaced execvp with execv
  *
@@ -59,6 +62,7 @@
 #include <stralloc.h>
 #include <strerr.h>
 #include <str.h>
+#include <authmethods.h>
 #include <fmt.h>
 #include <error.h>
 #include <env.h>
@@ -191,7 +195,8 @@ main(int argc, char **argv)
 	char           *ptr, *tmpbuf, *login, *response, *challenge, *stored;
 	char            strnum[FMT_ULONG];
 	static stralloc buf = {0};
-	int             i, count, offset, status, save = -1, use_pwgr, authlen = 512;
+	int             i, count, offset, status, save = -1, use_pwgr, authlen = 512,
+					auth_method;
 	struct passwd  *pw;
 #ifdef HASUSERPW
 	struct userpw  *upw;
@@ -238,7 +243,14 @@ main(int argc, char **argv)
 	for (;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
-	response = tmpbuf + count + 1; /*- response */
+	count++;
+	response = tmpbuf + count; /*- response */
+	for (; tmpbuf[count] && count < offset; count++);
+	if (count == offset || (count + 1) == offset)
+		auth_method = 0;
+	else
+		auth_method = tmpbuf[count + 1];
+
 	if (env_get("STRIP_DOMAIN")) { /*- set this for roundcubemail */
 		i = str_chr(login, '@');
 		if (login[i]) {
@@ -283,33 +295,17 @@ main(int argc, char **argv)
 	strnum[fmt_ulong(strnum, getuid())] = 0;
 	if (env_get("DEBUG_LOGIN")) {
 		i = str_rchr(argv[0], '/');
-		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
-		out(ptr);
-		out(": ");
-		out("uid (");
-		out(strnum);
-		out(") login [");
-		out(login);
-		out("] challenge [");
-		out(challenge);
-		out("] response [");
-		out(response);
-		out("] pw_passwd [");
-		out(stored);
-		out("]\n");
-		flush();
+		ptr = get_authmethod(auth_method);
+		strerr_warn14(argv[0][i] ? argv[0] + i + 1 : argv[0], ": uid(",
+				strnum, ") login [", login, "] challenge [", challenge,
+				"] response [", response, "] pw_passwd [", stored,
+				"] auth_method [", ptr, "]", 0);
 	} else
 	if (debug) {
 		i = str_rchr(argv[0], '/');
-		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
-		out(ptr);
-		out(": ");
-		out("uid (");
-		out(strnum);
-		out(") login [");
-		out(login);
-		out("]\n");
-		flush();
+		ptr = get_authmethod(auth_method);
+		strerr_warn8(argv[0][i] ? argv[0] + i + 1 : argv[0], ": uid(",
+				strnum, ") login [", login, "] auth_method [", ptr, "]", 0);
 	}
 	if (pw_comp((unsigned char *) login, (unsigned char *) stored,
 			(unsigned char *) (*response ? challenge : 0),
@@ -335,7 +331,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.14 2022-01-30 09:44:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.15 2022-10-30 10:03:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
