@@ -85,6 +85,13 @@ o SRS decoding in qmail-smtpd avoiding the need to create virtualdomain for
 47. smtpd.c: removed skip setting STOREDKEY, SERVERKEY using GSASL_PASSWORD
     env variable
 48. sys-checkpwd.c: display auth method in logs if DEBUG is set
+49. qmail-daned.c, qmail-greyd.c, qmail-remote.c: replaced cdb_match() with
+    cdb_matchaddr() in cdb_match.c
+50. cdb_match.c, cdb_match.h: added cdb_match(), cdb_matchaddr()
+51. ctrlenv.c: added -c option to clear existing env variables
+52. ctrlenv.c: moved cdb_match() function to cdb_match.c
+53. qmail-remote.c: fetch username password for authenticated smtp from
+    remote_auth.cdb
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
