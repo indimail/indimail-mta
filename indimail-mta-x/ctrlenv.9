@@ -7,14 +7,25 @@ match in control file having key value pairs, where key can be any address
 \fBctrlenv\fR [-c] -f \fIfilename\fR [-e \fIenv\fR] -a \fIaddress\fR \fIchild\fR
 
 .SH DESCRIPTION
+\fBctrlenv\fR(8) supports three formats for \fIfilename\fR.
+
+.IP \[bu] 2
+A plain text file without any extension. 
+.IP \[bu] 2
+A file with .cdb extension. This imples a cdb file created from the plain
+text file using \fBcdb-database\fR(8).
+.IP \[bu] 2
+A file with .sql extension. This implies data to be in MySQL.
+
+.PP
 \fIchild\fR consists of one or more arguments. 
 
-\fBctrlenv\fR sets environment variable \fIenv\fR according to the first matched
-line for address \fIaddress\fR in the file \fICONTROL/control/filename\fR
-It then runs \fIchild\fR.
+\fBctrlenv\fR sets environment variable \fIenv\fR according to the first
+matched line for address \fIaddress\fR in the file
+\fICONTROL/control/filename\fR It then runs \fIchild\fR.
 
-The matched lines can be in two forms.
-In the first form, it could be assignment of multiple environment variables separated by comma.
+The matched lines can be in two forms. In the first form, it could be
+assignment of multiple environment variables separated by comma.
 
 .EX
 addr:envar1=val,envar2=val,envar3=,envar4=val:
@@ -27,33 +38,35 @@ unset. \fBenv\fR=\fIval\fR adds an environment variable named \fBenv\fR
 with value \fIval\fR. \fBenv=\fR unsets an environment variable named
 \fBenv\fR, if it exists.
 
-Here \fBenvar1\fR, \fBenvar2\fR, \fBenvar4\fR set to \fIval\fR and \fBenvar3\fR is unset.
+Here \fBenvar1\fR, \fBenvar2\fR, \fBenvar4\fR set to \fIval\fR and
+\fBenvar3\fR is unset.
 
-In the second form, it could a value that is assigned to \fIenv\fR. This is when
-\fIenv\fR is specified in the command line.
+In the second form, it could a value that is assigned to \fIenv\fR passed
+on the command line with the -\fBe\fR option.
 
 .EX
 addr:val:
 .EE
 
-If the matched line contains a line starting wth \fIaddr\fR whose first word following
-\fIaddr\fR separated by colon ":" is \fIval\fR, \fBctrlenv\fR removes an environment
-variable named \fIenv\fR if one exists, and then adds an environment variable named
-\fBenv\fR with value \fIval\fR.
+If the matched line contains a line starting wth \fIaddr\fR whose first
+word following \fIaddr\fR separated by colon ":" is \fIval\fR,
+\fBctrlenv\fR removes an environment variable named \fIenv\fR if one
+exists, and then adds an environment variable named \fBenv\fR with value
+\fIval\fR.
 
-if \fIenv\fR does not exists, \fBctrlenv\fR adds an environment variable named
-\fIenv\fR with value \fIt\fR.
+if \fIenv\fR does not exists, \fBctrlenv\fR adds an environment variable
+named \fIenv\fR with value \fIt\fR.
 
 If no matched lines are found, \fBctrlenv\fR runs \fIchild\fR without
-modifying any environment variable
+modifying any environment variable.
 
 if \fIfilename\fR has a \fB.cdb\fR extension, \fBctrlenv\fR will use
-cdb(3) to do a match. You can use cdb-database to convert a file to cdb
-form.
+\fBcdb\fR(3) to do a match. You can use \fBcdb-database\fR(8) to convert a
+file to cdd format.
 
-if \fIfilename\fR has a \fB.sql\fR extension, \fBctrlenv\fR will use
-MySQL table to do a match. You can use sql-database(8) to convert a file
-to a table in MySQL
+if \fIfilename\fR has a \fB.sql\fR extension, \fBctrlenv\fR will use MySQL
+table to do a match. You can use sql-database(8) to convert a file to a
+table in MySQL.
 
 if -c option is passed on the command line all existing environment
 variables will be cleared before running \fIchild\fR.
