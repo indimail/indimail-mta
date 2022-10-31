@@ -1,5 +1,8 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.5  2022-10-31 09:09:26+05:30  Cprogrammer
+ * look at last colon when parsing data from plain text files
+ *
  * Revision 1.4  2022-10-30 22:15:39+05:30  Cprogrammer
  * added -c option to clear existing env variables
  * moved cdb_match() function to cdb_match.c
@@ -206,7 +209,7 @@ main(int argc, char **argv)
 {
 	static stralloc ctrl = {0};
 	char           *fn = (char *) 0, *ptr, *env_name = (char *) 0, *addr = (char *) 0, *result;
-	int             i, j, opt, token_len, len;
+	int             i, j, opt, token_len, len, t;
 
 	while ((opt = getopt(argc, argv, "cf:e:a:")) != opteof) {
 		switch (opt)
@@ -229,7 +232,7 @@ main(int argc, char **argv)
 		strerr_die1x(100, "usage: cntrlenv [-c] -f filename [-e env] -a address child");
 	j = str_len(addr);
 	i = str_end(fn, ".cdb");
-	if (fn[i]) {
+	if (fn[i]) { /*- cdb extension */
 		switch (cdb_match(fn, addr, j, &result))
 		{
 		case CDB_FOUND:
@@ -259,7 +262,7 @@ main(int argc, char **argv)
 	}
 #ifdef HAS_MYSQL
 	i = str_end(fn, ".sql");
-	if (fn[i]) {
+	if (fn[i]) { /*- sql extension */
 		if (sql_match(fn, addr, j, &result)) {
 			if (env_name) {
 				if (!pathexec_env(env_name, result))
@@ -278,9 +281,12 @@ main(int argc, char **argv)
 	for (len = 0, ptr = ctrl.s; len < ctrl.len; ) {
 		i = str_chr(ptr, ':');
 		if (ptr[i]) {
-			if (!case_diffb(addr, i - 1, ptr + 1)) {
-				j = str_chr(ptr + i + 1, ':');
-				ptr[i + 1 + j] = 0;
+			t = str_len(addr);
+			if ((ptr[0] == '=' && !case_diffb(addr, t > i - 1 ? t : i - 1, ptr + 1)) ||
+					(ptr[0] == '+' && !case_diffb(addr, i - 1, ptr + 1)))
+			{
+				j = str_rchr(ptr, ':');
+				ptr[j] = 0;
 				if (env_name) {
 					if (!pathexec_env(env_name, ptr + i + 1))
 						strerr_die2x(111, FATAL, "out of memory");
@@ -300,7 +306,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	static char    *x = "$Id: ctrlenv.c,v 1.4 2022-10-30 22:15:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ctrlenv.c,v 1.5 2022-10-31 09:09:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

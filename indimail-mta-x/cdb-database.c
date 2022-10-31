@@ -1,5 +1,8 @@
 /*
  * $Log: cdb-database.c,v $
+ * Revision 1.2  2022-10-31 09:07:47+05:30  Cprogrammer
+ * look at last colon when parsing data
+ *
  * Revision 1.1  2021-06-15 11:30:39+05:30  Cprogrammer
  * Initial revision
  *
@@ -39,7 +42,6 @@ int
 main(int argc, char **argv)
 {
 	int             i, fd, fdtemp, match;
-	int             numcolons;
 
 	if (argc != 2)
 		strerr_die1x(100, "usage: cdb-database filename");
@@ -64,14 +66,10 @@ main(int argc, char **argv)
 			strerr_die4sys(111, FATAL, "read: ", argv[1], ": ");
 		if (line.len && (line.s[0] == '.'))
 			break;
-		if (!match)
-			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
-		if (byte_chr(line.s, line.len, '\0') < line.len)
+		if (!match || byte_chr(line.s, line.len, '\0') < line.len)
 			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
 		i = byte_chr(line.s, line.len, ':');
-		if (i == line.len)
-			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
-		if (i == 0)
+		if (i == line.len || !i || i < 2)
 			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
 		if (!stralloc_copys(&key, "!"))
 			strerr_die2sys(111, FATAL, "out of memory");
@@ -92,17 +90,10 @@ main(int argc, char **argv)
 		}
 		if (!stralloc_copyb(&data, line.s + i + 1, line.len - i - 1))
 			strerr_die2sys(111, FATAL, "out of memory");
-		numcolons = 0;
-		for (i = 0; i < data.len; ++i) {
-			if (data.s[i] == ':') {
-				data.s[i] = 0;
-				if (++numcolons == 1)
-					break;
-			}
-		}
-		if (numcolons < 1)
+		if (data.s[data.len - 2] != ':')
 			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
-		data.len = i;
+		data.s[data.len - 2] = 0;
+		data.len -= 2;
 		if (cdbmss_add(&cdbmss, (unsigned char *) key.s, key.len, (unsigned char *) data.s, data.len) == -1)
 			strerr_die3sys(111, FATAL, fntmp.s, ": write: ");
 	}
@@ -123,7 +114,7 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	static char    *x = "$Id: cdb-database.c,v 1.1 2021-06-15 11:30:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdb-database.c,v 1.2 2022-10-31 09:07:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
