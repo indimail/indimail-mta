@@ -276,7 +276,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to run ", argv[optind], ": ");
 	}
 #endif
-	if ((opt = control_readfile(&ctrl, fn, 0)) == -1)
+	if ((opt = control_readfile(&ctrl, fn, 0)) == -1) /*- plain text search */
 		strerr_die3sys(111, FATAL, fn, ": ");
 	for (len = 0, ptr = ctrl.s; len < ctrl.len; ) {
 		i = str_chr(ptr, ':');
