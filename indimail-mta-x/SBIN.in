@@ -17,7 +17,6 @@ f:::0755:/sbin/:cdbtest:cdbtest
 f:::0755:/sbin/:cdbget:cdbget
 f:::0755:/sbin/:cdbgetm:cdbgetm
 f:::0755:/sbin/:cdbmake:cdbmake
-f:::0755:/sbin/:qmail-newmrh:qmail-newmrh
 f:::0755:/sbin/:relaytest:relaytest
 f:::0755:/sbin/:splogger:splogger
 f:::0755:/sbin/:qmail-tcpto:qmail-tcpto

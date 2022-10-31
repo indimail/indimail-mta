@@ -79,11 +79,7 @@ both exist,
 is effectively appended to
 .IR rcpthosts .
 
-You must run
-.B qmail-newmrh
-whenever
-.I morercpthosts
-changes.
+You must run \fBqmail-cdb\fR(8) on \fImorercpthosts\fR whenever it changes.
 
 Rule of thumb for large sites:
 Put your 50 most commonly used domains into
@@ -145,7 +141,7 @@ tcp-env(1),
 tcp-environ(5),
 indimail-control(5),
 qmail-inject(8),
-qmail-newmrh(8),
+qmail-cdb(8),
 qmail-queue(8),
 qmta-send(8),
 qmail-local(8),

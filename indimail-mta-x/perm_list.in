@@ -135,7 +135,6 @@
 %attr(0755,root,root)  @prefix@/sbin/cdbget
 %attr(0755,root,root)  @prefix@/sbin/cdbgetm
 %attr(0755,root,root)  @prefix@/sbin/cdbmake
-%attr(0755,root,root)  @prefix@/sbin/qmail-newmrh
 %attr(0755,root,root)  @prefix@/sbin/qmail-tcpok #qmta
 %attr(0755,root,root)  @prefix@/sbin/qmail-tcpto #qmta
 %attr(0755,root,root)  @prefix@/sbin/qmail-multi
@@ -475,7 +474,6 @@
 %attr(0644,root,root) @mandir@/man8/qmail-lspawn.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-multi.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-spamfilter.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-newmrh.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-newu.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-nullqueue.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-poppass.8.gz

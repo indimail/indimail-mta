@@ -38,7 +38,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat qmail-cdb \
 	qmail-clean qmailconfig qmail-daned qmail-direct qtop \
 	qmaildirmake qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
-	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newmrh \
+	qmail-inject qmail-local qmail-lspawn qmail-multi \
 	qmail-newu qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u \
 	qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread \
 	qmail-queue qmail-remote qmail-rm qmail-rspawn qmail-send \
@@ -59,7 +59,7 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 \
 	qmail-cdb.8 qmail-clean.8 indimail-control.5 qmail-daned.8 qtop.1 \
 	qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
-	qmail-limits.7 qmail-local.8 qmail-multi.8 qmail-newmrh.8 qmonitor.8 \
+	qmail-limits.7 qmail-local.8 qmail-multi.8 qmonitor.8 indimail-mta.7 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 \
 	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
 	qmail-send.8 qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 \
@@ -921,6 +921,10 @@ qtools: \
 822fields checkaddr checkdomain filterto condtomaildir \
 iftoccfrom ifaddr replier replier-config
 
+indimail-mta.7: \
+indimail-mta.9
+	$(edit) indimail-mta.9 > indimail-mta.7
+
 maildir.o: \
 compile maildir.c prioq.h maildir.h
 	./compile maildir.c
@@ -1154,21 +1158,6 @@ variables.h conf-tls conf-ip conf-virtual
 	-Dinitialize_SPAWN=initialize_rspawn \
 	-Dtruncreport_SPAWN=truncreport_rspawn \
 	qmail-rspawn.c
-
-qmail-newmrh: \
-load qmail-newmrh.o auto_control.o variables.o
-	./load qmail-newmrh auto_control.o variables.o $(QMAILLIB)
-
-qmail-newmrh.o: \
-compile qmail-newmrh.c
-	./compile qmail-newmrh.c
-
-qmail-newmrh.8: \
-qmail-newmrh.9 conf-sysconfdir conf-prefix
-	cat qmail-newmrh.9 \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
-	> qmail-newmrh.8
 
 qmail-cdb: \
 load qmail-cdb.o variables.o auto_control.o
@@ -1981,7 +1970,7 @@ qmail-smtpd.9 conf-qmail conf-sysconfdir conf-prefix
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
 	> qmail-smtpd.8
 
 mini-smtpd: \

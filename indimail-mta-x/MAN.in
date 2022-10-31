@@ -136,7 +136,7 @@ f:::0644:/man5/:rfc-4871.5:rfc-4871.5
 f:::0644:/man5/:rfc-822.5:rfc-822.5
 f:::0644:/man5/:tcp-environ.5:tcp-environ.5
 f:::0644:/man7/:forgeries.7:forgeries.7
-f:::0644:/man7/:qmail.7:qmail.7
+f:::0644:/man7/:indimail-mta.7:indimail-mta.7
 f:::0644:/man7/:qmail-limits.7:qmail-limits.7
 f:::0644:/man7/:multi-queue.7:multi-queue.7
 f:::0644:/man7/:qmail-queue-clients.7:qmail-queue-clients.7
@@ -171,7 +171,6 @@ f:::0644:/man8/:qmail-local.8:qmail-local.8
 f:::0644:/man8/:qmail-lspawn.8:qmail-lspawn.8
 f:::0644:/man8/:qmail-multi.8:qmail-multi.8
 f:::0644:/man8/:qmail-spamfilter.8:qmail-spamfilter.8
-f:::0644:/man8/:qmail-newmrh.8:qmail-newmrh.8
 f:::0644:/man8/:qmail-newu.8:qmail-newu.8
 f:::0644:/man8/:qmail-nullqueue.8:qmail-nullqueue.8
 f:::0644:/man8/:qmail-popbull.8:qmail-popbull.8
