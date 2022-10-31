@@ -3,6 +3,8 @@ Release @version@-@release@ Start 08/09/2022
 ======= Release Highlights ================================================
 o SRS decoding in qmail-smtpd avoiding the need to create virtualdomain for
   srs and .qmail-srs-default in /var/indimail/alias
+o qmail-remote can use credentials stored in remote_auth.cdb using simple or
+  wildcard assignments
 ===========================================================================
 - 08/09/2022
 01.  First change
@@ -92,6 +94,8 @@ o SRS decoding in qmail-smtpd avoiding the need to create virtualdomain for
 52. ctrlenv.c: moved cdb_match() function to cdb_match.c
 53. qmail-remote.c: fetch username password for authenticated smtp from
     remote_auth.cdb
+- 31/10/2022
+54. cdb-database.c, ctrlenv.c: look at last colon when parsing data
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
