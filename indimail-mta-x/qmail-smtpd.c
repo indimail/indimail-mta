@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.7  2022-10-31 12:53:17+05:30  Cprogrammer
+ * do chdir /etc/indimail as default cwd
+ *
  * Revision 1.6  2022-10-15 12:09:18+05:30  Cprogrammer
  * updated control file list and env variable list
  *
@@ -31,6 +34,7 @@
 #include "hasmysql.h"
 #include "haslibgsasl.h"
 #include "auto_control.h"
+#include "auto_sysconfdir.h"
 #ifdef HASLIBGSASL
 #include <gsasl.h>
 #endif
@@ -261,6 +265,8 @@ main(int argc, char **argv)
 {
 	if (argc > 1 && !str_diff(argv[1], "-v"))
 		print_details();
+	if (chdir(auto_sysconfdir) == -1)
+		strerr_die3sys(111, "chdir: ", auto_sysconfdir, ": ");
 	qmail_smtpd(argc, argv, 0);
 	return(0);
 }
@@ -268,7 +274,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.6 2022-10-15 12:09:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.7 2022-10-31 12:53:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
