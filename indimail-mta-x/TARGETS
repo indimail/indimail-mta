@@ -515,9 +515,6 @@ quote.o
 rcpthosts.o
 readsubdir.o
 received.o
-recipient-cdb
-recipient-cdb.8
-recipient-cdb.o
 recipients
 recipients.o
 relaytest

@@ -175,7 +175,6 @@
 %attr(0755,root,root)  @prefix@/sbin/sql-database
 %attr(0755,root,root)  @prefix@/sbin/ctrlenv
 %attr(0751,root,root)  @prefix@/sbin/qmail-newu
-%attr(0755,root,root)  @prefix@/sbin/recipient-cdb
 %attr(0755,root,qmail) @prefix@/sbin/qmail-direct #indimail-mini #qmta
 
 %attr(0755,root,root)  @libexecdir@/cdbmake-12
@@ -501,7 +500,6 @@
 %attr(0644,root,root) @mandir@/man8/qscanq-stdin.8.gz
 %attr(0644,root,root) @mandir@/man8/queue-fix.8.gz #qmta
 %attr(0644,root,root) @mandir@/man8/qmail-popbull.8.gz
-%attr(0644,root,root) @mandir@/man8/recipient-cdb.8.gz
 %attr(0644,root,root) @mandir@/man8/irmail.8.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man8/isendmail.8.gz #indimail-mini #qmta
 %attr(0644,root,root) @mandir@/man8/run-cleanq.8.gz

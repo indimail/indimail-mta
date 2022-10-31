@@ -44,7 +44,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	qmail-queue qmail-remote qmail-rm qmail-rspawn qmail-send \
 	qmail-showctl qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start \
 	qmail-tcpok qmail-tcpto todo-proc qmail-upq qmta-send qnotify qpq \
-	qquote qreceipt qsmhook qtools qscheduler queue-fix recipient-cdb relaytest \
+	qquote qreceipt qsmhook qtools qscheduler queue-fix relaytest \
 	rewind rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
 	setforward setmaillist slowq-send slowq-start smtpd-plugin0.so \
 	smtpd-plugin.so sortedtest spawn-filter spfquery splogger srsfilter \
@@ -64,7 +64,7 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
 	qmail-send.8 qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 \
 	indimail-srs.5 qmail-start.8 todo-proc.8 qmail-users.5 qmta-send.8 \
-	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 recipient-cdb.8 replier.1 \
+	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 replier.1 \
 	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 \
 	spawn-filter.8 surblfilter.8 svctool.8
 
@@ -1160,8 +1160,8 @@ variables.h conf-tls conf-ip conf-virtual
 	qmail-rspawn.c
 
 qmail-cdb: \
-load qmail-cdb.o variables.o auto_control.o
-	./load qmail-cdb auto_control.o variables.o $(QMAILLIB)
+load qmail-cdb.o variables.o auto_control.o auto_assign.o
+	./load qmail-cdb auto_control.o auto_assign.o variables.o $(QMAILLIB)
 
 qmail-cdb.o: \
 compile qmail-cdb.c variables.h auto_control.h
@@ -1173,21 +1173,8 @@ qmail-cdb.9 conf-break conf-spawn conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}BREAK}"`head -1 conf-break`"}g \
 	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
-	> qmail-cdb.8
-
-recipient-cdb: \
-load recipient-cdb.o auto_assign.o
-	./load recipient-cdb auto_assign.o $(QMAILLIB)
-
-recipient-cdb.8: \
-recipient-cdb.9 conf-sysconfdir
-	cat recipient-cdb.9 \
 	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
-	> recipient-cdb.8
-
-recipient-cdb.o: \
-compile recipient-cdb.c auto_assign.h
-	./compile recipient-cdb.c
+	> qmail-cdb.8
 
 qmail-newu: \
 load qmail-newu.o auto_assign.o

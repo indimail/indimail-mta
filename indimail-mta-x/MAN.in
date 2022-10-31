@@ -198,7 +198,6 @@ f:::0644:/man8/:todo-proc.8:todo-proc.8
 f:::0644:/man8/:qscanq.8:qscanq.8
 f:::0644:/man8/:qscanq-stdin.8:qscanq-stdin.8
 f:::0644:/man8/:queue-fix.8:queue-fix.8
-f:::0644:/man8/:recipient-cdb.8:recipient-cdb.8
 f:::0644:/man8/:run-cleanq.8:run-cleanq.8
 f:::0644:/man8/:spawn-filter.8:spawn-filter.8
 f:::0644:/man8/:splogger.8:splogger.8

@@ -353,8 +353,6 @@ queue-fix
 queue-fix.8
 queue_load.o
 qupgrade
-recipient-cdb
-recipient-cdb.8
 recipients
 relaytest
 replier
