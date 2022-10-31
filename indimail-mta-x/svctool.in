@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.643 2022-09-27 22:04:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.644 2022-10-31 12:56:22+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.643 2022-09-27 22:04:31+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.644 2022-10-31 12:56:22+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2619,7 +2619,7 @@ if [ $shared_objects -eq 1 ] ; then
 	fi
 	echo "@prefix@/lib/indimail/plugins/qmail_smtpd.so" > $conf_dir/PLUGIN"$plugin_count"
 	echo "smtp_init" > $conf_dir/PLUGIN"$plugin_count"_init
-	echo "$QmailHOME" > $conf_dir/PLUGIN"$plugin_count"_dir
+	echo "$sysconfdir" > $conf_dir/PLUGIN"$plugin_count"_dir
 	plugin_count=`expr $plugin_count + 1`
 	fi
 	if [ -f "$DESTDIR"@prefix@/lib/indimail/plugins/rblsmtpd.so ] ; then
