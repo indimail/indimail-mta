@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cdb.c,v $
+ * Revision 1.14  2022-10-31 23:52:38+05:30  Cprogrammer
+ * ignore filename with -r option
+ *
  * Revision 1.13  2022-10-31 19:14:29+05:30  Cprogrammer
  * add feature to create recipient.cdb for qmail-smtpd
  *
@@ -87,15 +90,17 @@ main(int argc, char **argv)
 			strerr_die1x(100, "qmail-cdb [-r] [-m] filename");
 		}
 	}
-	if (optind + 1 != argc)
-		strerr_die1x(100, "qmail-cdb [-r] [-m] filename");
-	arg = argv[optind++];
 	if (!recipient_cdb) {
+		if (optind + 1 != argc)
+			strerr_die1x(100, "qmail-cdb [-r] [-m] filename");
+		arg = argv[optind++];
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 		workdir = controldir;
-	} else
+	} else {
+		arg = "recipients";
 		workdir = auto_assign;
+	}
 	if (chdir(workdir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", workdir, ": ");
 	/* fn = argv.cdb\0argv.bak */
@@ -169,7 +174,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.13 2022-10-31 19:14:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.14 2022-10-31 23:52:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

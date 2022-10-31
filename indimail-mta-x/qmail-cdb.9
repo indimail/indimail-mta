@@ -12,15 +12,16 @@ qmail-cdb \- prepare data in cdb format for
 .I filename
 
 .SH DESCRIPTION
-With the \fI\-r\fR option \fBqmail-cdb\fR does a chdir to ASSIGN and reads the
+With the -\fIr\fR option \fBqmail-cdb\fR does a chdir to ASSIGN and reads the
 addresses provided in \fIrecipients\fR, converts them into lowercase, and
 writes them into \fIfilename.cdb\fR in a binary format suited for quick
 access by \fBqmail-smtpd\fR. Each line in \fIfilename\fR should be a
 local email address. \fIfilename.cdb\fR is compatible with
 \fBsetforward\fR(1)'s generated \'fastforward\' cdbs and it's format is
-portable across machines.
+portable across machines. With the -\fIr\fR option, and ASSIGN/recipients
+is used as the \fIfilename\fR.
 
-Without the \fI\-r\fR option \fBqmail-cdb\fR does a chdir to @controldir@ and
+Without the -\fIr\fR option \fBqmail-cdb\fR does a chdir to @controldir@ and
 reads the instructions in \fIfilename\fR, converts them into lowercase, and
 writes them into \fIfilename.cdb\fR in a binary format suited for quick
 access by \fBqmail-smtpd\fR or \fBspawn-filter\fR.
