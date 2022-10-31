@@ -1,0 +1,252 @@
+.TH indimail-mta 7
+.SH "NAME"
+indimail-mta \- overview of indimail-mta documentation
+.SH "INTRODUCTION"
+.B indimail-mta
+is a rewrite of qmail which is a secure, reliable, efficient, simple
+message transfer agent.
+
+Users who want to control incoming messages
+should read
+.BR dot-qmail (5).
+Available commands for the
+.B .qmail
+file include
+.BR qbiff (1),
+.BR qreceipt (1),
+.BR forward (1),
+.BR rrforward (1),
+.BR bouncesaying (1),
+and
+.BR condredirect (1).
+Other helpful commands include
+.BR qmaildirmake (1),
+.BR maildir2mbox (1),
+and
+.BR qmaildirwatch (1).
+
+System administrators who want to control the entire \fBindimail-mta\fR
+system should start with \fBsvscan\fR(8), \fBsupervise\fR(8),
+\fBindimail-control\fR(5) and \fBqmail-start\fR(8) / \fBslowq-start\fR(8)
+(\fBqmail-start\fR also has documentation on \fBqscheduler\fR(8)).
+
+There are four queue-monitoring tools:
+.BR qmonitor (8), 
+.BR qmail-qread (8),
+.BR qmail-qstat (8),
+and
+.BR qmail-tcpto (8).
+Incoming SMTP connections are handled by \fBqmail-smtpd\fR(8) running under
+\fBtcpserver\fR(1). rblsmtpd(1) can be used toblock mail from RBL-listed
+sites.
+
+.B qmail
+offers two command-line message-sending interfaces:
+.BR qmail-inject (8)
+and
+.BR mailsubj (1).
+For background information on Internet mail messages,
+see
+.BR addresses (5),
+.BR envelopes (5),
+.BR qmail-header (5),
+and
+.BR forgeries (7).
+
+Miscellaneous documentation includes
+.BR qmail-limits (7)
+and
+.BR qmail-pop3d (8).
+
+This documentation describes version @version@ of
+.BR indimail-mta .
+.SH "SEE ALSO"
+addcr(1),
+addresses(5),
+alloc(3),
+argv0(1),
+batv,
+bouncesaying(1),
+caldate(3),
+caldate_mjd(3),
+caltime(3),
+caltime_tai(3),
+case(3),
+cdb(3),
+cdb-database(8),
+cdbdump(1),
+cdbget(1),
+cdbgetm(1),
+cdbmake(1),
+cdbstats(1),
+cdbtest(1),
+cleanq(8),
+coe(3),
+columnt(1),
+condredirect(1),
+config(3),
+ctrlenv(8),
+date@(1),
+datetime(3),
+delcr(1),
+direntry(3),
+dnsblcheck,
+dnscname,
+dnsfq,
+dnsip,
+dnsmxip,
+dnsptr,
+dnstlsarr,
+dnstxt,
+dot-qmail(5),
+env(3),
+envdir(8),
+envelopes(5),
+envuidgid(8),
+error(3),
+error_str(3),
+error_temp(3),
+except(1),
+fd_copy(3),
+fd_move(3),
+fetchmail(1),
+fetchmailconf(1),
+fghack(8),
+fifo_make(3),
+finger@(1),
+fixcrio(1),
+forgeries(7),
+forward(1),
+getln2(3),
+getln(3),
+http@(1),
+indimail-control(5),
+ipmeprint,
+ldap-checkpwd(8),
+leapsecs(3),
+maildir2mbox(1),
+maildir(5),
+maildirmake(1),
+maildirqmtp(1),
+maildirserial(1),
+maildirsmtp(1),
+mailsubj(1),
+matchup(1),
+mbox(5),
+mconnect(1),
+mess822_date(3),
+mini-smtpd(8),
+mlmatchup,
+multilog(8),
+now(3),
+ofmipd(8),
+pgrphack(8),
+plugtest(1),
+preline(1),
+qbiff(1),
+qfrontend,
+qhpsi(8),
+qmail-cdb(8),
+qmail-clean(8),
+qmail-command(8),
+qmail-daned(8),
+qmail-direct(8),
+qmaildirwatch(1),
+qmail-dk(8),
+qmail-dkim(8),
+qmail-getpw(8),
+qmail-greyd(8),
+qmail-header(5),
+qmail-inject(8),
+qmail-limits(7),
+qmail-local(8),
+qmail-log(5),
+qmail-lspawn(8),
+qmail-multi(8),
+qmail-newu(8),
+qmail-nullqueue(8),
+qmail-pop3d(8),
+qmail-popup(8),
+qmail-pw2u(8),
+qmail-qmqpc(8),
+qmail-qmqpd(8),
+qmail-qmtpd(8),
+qmail-qread(8),
+qmail-qstat(8),
+qmail-queue(8),
+qmail-remote(8),
+qmail-rspawn(8),
+qmail-send(8),
+qmail-showctl(8),
+qmail-smtpd(8),
+qmail-spamfilter(8),
+qmail-spamthrottle(5),
+qmail-sql(8),
+qmail-start(8),
+qmail-tcpok(8),
+qmail-tcpto(8),
+qmail-users(5),
+qmonitor(8),
+qmta-send(8),
+qreceipt(1),
+qscanq(8),
+qscanq-stdin(8),
+qscheduler(8),
+rblsmtpd(1),
+readproctitle(8),
+recipient-cdb(8),
+recordio(1),
+rfc-1321(5),
+rfc-1893(5),
+rfc-1894(5),
+rfc-1985(5),
+rfc-2104(5),
+rfc-2821(5),
+rfc-822(5),
+run-cleanq(8),
+serialqmtp(1),
+serialsmtp(1),
+setlock(1),
+setlock(8),
+setqload(8),
+setuidgid(8),
+sgetopt(3),
+slowq-send(8),
+slowq-start(8),
+softlimit(8),
+spawn-filter(8),
+splogger(8),
+sql-database(8),
+stralloc(3),
+subgetopt(3),
+supervise(8),
+surblfilter(8),
+surblqueue(8),
+svc(8),
+svctool(8),
+svok(8),
+svscan(8),
+svscanboot(8),
+svstat(8),
+sys-checkpwd(8),
+tai(3),
+tai64n(8),
+tai64nlocal(8),
+tai64nunix(8),
+tai_now(3),
+tai_pack(3),
+tcpcat(1),
+tcpclient(1),
+tcp-env(1),
+tcp-environ(5),
+tcprules(1),
+tcprulescheck(1),
+tcpserver(1),
+todo-proc(8),
+udplogger(8),
+wait(3),
+who@(1),
+whois,
+xqp(1),
+xrecipient(1),
+xsender(1)

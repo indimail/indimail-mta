@@ -476,17 +476,13 @@ accepts messages that contain long lines or non-ASCII characters,
 even though such messages violate the SMTP protocol.
 
 .SH "CONTROL FILES"
-.B qmail-smtpd
-by default looks at @controldir@ for all control files. This path can be
-changed by defining the CONTROLDIR environment variable. Some of these
-control files can also be in cdb format if they have the
-.I .cdb
-extension.
-Some of these control files can be in MySQL if they have the
-.I .sql
-extension. If you desire that the control file to be in MySQL, the file (with 
-.I .sql
-extension) should have an entry in the following format
+\fBqmail-smtpd\fR by default looks at @sysconfdir@/control for all control
+files. This path can be changed by defining the CONTROLDIR environment
+variable. Some of these control files can also be in cdb format if they
+have the \fI.cdb\fR extension. Some of these control files can be in MySQL
+if they have the \fI.sql\fR extension. If you desire that the control file
+to be in MySQL, the file (with \fI.sql\fR extension) should have an entry
+in the following format.
 
 .BR dbase_server_ip:dbase_user:dbase_password:dbase_name:table_name .
 See indimail-control(5) to see the full list of control files which support
@@ -695,16 +691,16 @@ SSL certificate to be presented to clients in TLS-encrypted sessions.
 Should contain both the certificate and the private key. Certifying
 Authority (CA) and intermediate certificates can be added at the end of the
 file. The filename can be overriden by the environment variable
-\fBSERVERCERT\fR. The default location of @controldir@ can be overriden by
-environment variable CERTDIR.
+\fBSERVERCERT\fR. The default location of @sysconfdir@/control can be
+overriden by environment variable CERTDIR.
 
 .TP 5
 .I clientca.pem
 A list of Certifying Authority (CA) certificates that are used to verify
 the client-presented certificates during a TLS-encrypted session. The
 filename can be overriden by the environment variable \fBCLIENTCA\fR.
-The default location of @controldir@ can be overriden by environment
-variable CERTDIR.
+The default location of @sysconfdir@/control can be overriden by
+environment variable CERTDIR.
 
 .TP 5
 .I clientcrl.pem
@@ -713,16 +709,16 @@ should contain the CRLs of the CAs in
 .I clientca.pem 
 and client certs that will be checked for revocation. The
 filename can be overriden by the environment variable \fBCLIENTCRL\fR.
-The default location of @controldir@ can be overriden by environment
-variable CERTDIR.
+The default location of @sysconfdir@/control can be overriden by
+environment variable CERTDIR.
 
 .TP 5
 .I rsa512.pem
 If this 512 bit RSA key is provided,
 .B qmail-smtpd
 will use it for TLS sessions instead of generating one on-the-fly.
-The default location of @controldir@ can be overriden by environment
-variable CERTDIR
+The default location of @sysconfdir@/control can be overriden by
+environment variable CERTDIR.
 
 .TP 5
 .I dh1024.pem
@@ -730,15 +726,15 @@ If these 1024 bit DH parameters are provided,
 .B qmail-smtpd
 will use them for TLS sessions instead of generating one on-the-fly 
 (which is very timeconsuming).
-The default location of @controldir@ can be overriden by environment
-variable CERTDIR
+The default location of @sysconfdir@/control can be overriden by
+environment variable CERTDIR.
 
 .TP 5
 .I dh512.pem
 512 bit counterpart for 
 .B dh1024.pem. 
-The default location of @controldir@ can be overriden by environment
-variable CERTDIR
+The default location of @sysconfdir@/control can be overriden by
+environment variable CERTDIR.
 
 .TP 5
 .I signatures
@@ -1269,10 +1265,7 @@ both exist,
 is effectively appended to
 .IR rcpthosts .
 
-You must run
-PREFIX/sbin/qmail-newmrh
-whenever
-.I morercpthosts
+You must run PREFIX/sbin/qmail-cdb on \fImorercpthosts\fR whenever it
 changes.
 
 Rule of thumb for large sites:
@@ -1412,48 +1405,35 @@ Examples:
 
 .TP 5
 .I recipients
-List of external resources providing acceptable,
-full-qualified envelope addresses 
-(\'RCPT to: <recip@domain>\')
-to be used for recipient verification
-during the SMTP session.
+List of external resources providing acceptable, full-qualified envelope
+addresses (\'RCPT to: <recip@domain>\') to be used for recipient
+verification during the SMTP session.
 
-The external sources can be either
-.B fastforward 
-compliant cdbs including the envelope addresses, 
-where the path to a cdb has to be referenced 
-relative to Qmail's home directory - or -
-.B checkpassword
-compatible Plugable Authentication Modules
-(PAM), receiving the envelope address on FD 3 
-as 'recip@domain\\0\\0\\0' and returning '0'
-in case of success and '1' in case of failure. 
-The use of a PAM is indicated with a delimiting '|' and
-it will be called with up to five additional parameters; 
+The external sources can be either \fBfastforward\fR compliant cdbs
+including the envelope addresses, where the path to a cdb has to be
+referenced relative to @sysconfdir@ directory - or - \fBcheckpassword\fR
+compatible Plugable Authentication Modules (PAM), receiving the envelope
+address on FD 3 as 'recip@domain\\0\\0\\0' and returning '0' in case of
+success and '1' in case of failure. The use of a PAM is indicated with a
+delimiting '|' and it will be called with up to five additional parameters;
 while a cdb follows a ':', which can be omitted.
 
-The list of external sources is consulted line-by-line for each
-recipient envelope address until the first positive answer,  
-or a final negative response is encountered.  
-Which external source to be queried, depends on the domain part of the
-recipient envelope address specified on the left side of the 
-.I recipients 
-file, while the external resource is provided right from the delimitor.
+The list of external sources is consulted line-by-line for each recipient
+envelope address until the first positive answer, or a final negative
+response is encountered. Which external source to be queried, depends on
+the domain part of the recipient envelope address specified on the left
+side of the \fIrecipients\fR file, while the external resource is provided
+right from the delimitor.
 
-The addresses' domain part is evaluted in lower-case.
-An exact domain match can be encompassed by means of a leading '@'. 
-The '*' is a generic wildcard for all domains. 
-Specific domains can be excluded from the lookup by means of a 
-leading '!'; thus all recipient addresses are accepted for this domain.  
-Additionally, a '!*' can be used as wildcard for all domains not
-encountered before in 
-.I recipients 
-(pass-thru).
+The addresses' domain part is evaluted in lower-case. An exact domain match
+can be encompassed by means of a leading '@'.  The '*' is a generic
+wildcard for all domains. Specific domains can be excluded from the lookup
+by means of a leading '!'; thus all recipient addresses are accepted for
+this domain. Additionally, a '!*' can be used as wildcard for all domains
+not encountered before in \fIrecipients\fR (pass-thru).
 
-A
-.I recipients
-file is always constructed like 'domain:cdb','domain|pam', 
-or simply 'cdb':
+A \fIrecipients\fR file is always constructed like
+'domain:cdb','domain|pam', or simply 'cdb':
 
 .EX
    !nocheck.com
@@ -1471,25 +1451,17 @@ Legacy format:
    etc/fastforward.cdb
 .EE
 
-NOTE: Particular domains starting with a '!' or
-a '@' should be placed in the beginning of the 
-.I recipients
-file for performance reasons, while the pass-thru
-statement '!*' has to be on the last line.
-The recipients check is applied after the
-.I rcpthosts
-evaluation.
+NOTE: Particular domains starting with a '!' or a '@' should be placed in
+the beginning of the \fIrecipients\fR file for performance reasons, while
+the pass-thru statement '!*' has to be on the last line. The recipients
+check is applied after the \fIrcpthosts\fR evaluation.
 
-.B recipient-cdb 
-may be used to construct a 
-.I ASSIGN/recipients.cdb 
-from 
-.IR ASSIGN/recipients .
+\fBrecipient-cdb\fR may be used to construct a \fIASSIGN/recipients.cdb\fR
+from \fIASSIGN/recipients\fR.
 
-The
-.B qmail-smtpd
-recipients mechanism supports Qmail's address extension (VERP).
-Unqualified envelope recipients are appended with \'@localhost\'.
+The \fBqmail-smtpd\fR recipients mechanism supports Qmail's address
+extension (VERP).  Unqualified envelope recipients are appended with
+\'@localhost\'.
 
 .TP 5
 .I batvkey
@@ -1702,11 +1674,11 @@ specifies that any emails to *@domain be queued in
 queue mails for certain domains into specific domains and specify
 individual concurrencies for these queues (see qmail-send(8)). e.g. having
 
-yahoo.com:QUEUEDIR=/var/indimail/queue/queue6
-in @controldir@/domainqueue and
+yahoo.com:QUEUEDIR=QMAILHOME/queue/queue6
+in @sysconfdir@/control/domainqueue and
 
 10
-in @controldir@/concurrencyr.queue6
+in @sysconfdir@/control/concurrencyr.queue6
 
 will set 10 as the remote concurrency for all emails sent to yahoo.com
 
@@ -2063,9 +2035,9 @@ See rfc-1893(5) for an explanation of the error codes in parentheses.
 
 .SH "SEE ALSO"
 mysqld(1), tcp-env(1), tcp-environ(5), tcpserver(1), tcprules(1), uacl(1),
-indimail-control(5), MCDFILE(5), qmail-inject(8), qmail-newmrh(8),
+indimail-control(5), MCDFILE(5), qmail-inject(8), qmail-cdb(8),
 qmail-queue(8), qmail-multi(8), qscanq(8), cleanq(8), qmail-remote(8),
-qmail-send(8), qmail-cdb(8), recipient-cdb(8), pam-multi(8), spfquery(1),
+qmail-send(8), recipient-cdb(8), pam-multi(8), spfquery(1),
 pam-checkpwd(8), inlookup(8), batv(1), vchkpass(8), systpass(8),
 plugin_init(3), dlopen(3), plugtest(1), bogofilter(1), greydaemon(8),
 qmail-greyd(8), indimail-srs(5), rfc-2821(5), rfc-1893(5), rfc-1894(5),
