@@ -238,8 +238,8 @@ by looking up in \fBMySQL\fR, status of recipients is determined before
 accepting the mails. This option is turned on by defining the environment
 variable \fBCHECKRECIPIENT\fR to one of the following values
  1. Reject if recipient not in MySQL
- 2. Reject if recipient not in both MySQL and recipients.cdb (See below)
- 3. Reject if recipient not in recipients.cdb (See below)
+ 2. Reject if recipient not in both MySQL and recipients extension (See below)
+ 3. Reject if recipient not found through recipients extension (See below)
 
 .IP \[bu] 2
 .I Inactive Recipients
@@ -1423,23 +1423,31 @@ envelope address until the first positive answer, or a final negative
 response is encountered. Which external source to be queried, depends on
 the domain part of the recipient envelope address specified on the left
 side of the \fIrecipients\fR file, while the external resource is provided
-right from the delimitor.
+right from the delimiter.
 
-The addresses' domain part is evaluted in lower-case. An exact domain match
-can be encompassed by means of a leading '@'.  The '*' is a generic
-wildcard for all domains. Specific domains can be excluded from the lookup
-by means of a leading '!'; thus all recipient addresses are accepted for
-this domain. Additionally, a '!*' can be used as wildcard for all domains
-not encountered before in \fIrecipients\fR (pass-thru).
+The addresses' domain part is evaluted in lower-case.
+.IP \[bu] 2
+An entry 'example.com' is used to match 'example.com' and in addition all
+subdomain addresses '*.example.com'; depending of course control/rcpthosts.
+.IP \[bu]
+An entry '@example.com' serves as exact match for the domain address
+.IP \[bu]
+The entry '*' will match all domains for the respective lookup.
+.IP \[bu]
+Reversely, domains flagged as '!domain.com' are not queried and all
+recipients for this domain are accepted.
+.IP \[bu]
+Additionally, a '!*' can be used as wildcard for all domains not
+encountered before in \fIrecipients\fR (pass-thru).
 
-A \fIrecipients\fR file is always constructed like
-'domain:cdb','domain|pam', or simply 'cdb':
+A \fIrecipients\fR file is always constructed like 'domain:cdb',
+ 'domain|pam', or simply 'cdb':
 
 .EX
    !nocheck.com
-   @mydomain.com:recipients.cdb
+   @mydomain.com:users/recipients.cdb
    example.com|ldap_pam ldapserver host port DN passwd
-   *:etc/fastforward.cdb
+   *:control/fastforward.cdb
    *|ldap_pam otherserver
    !*
 .EE
@@ -1452,14 +1460,14 @@ Legacy format:
 .EE
 
 NOTE: Particular domains starting with a '!' or a '@' should be placed in
-the beginning of the \fIrecipients\fR file for performance reasons, while
-the pass-thru statement '!*' has to be on the last line. The recipients
-check is applied after the \fIrcpthosts\fR evaluation.
+the beginning of the \fIrecipients\fR control file for performance reasons,
+while the pass-thru statement '!*' has to be on the last line. The
+recipients check is applied after the \fIrcpthosts\fR evaluation.
 
 \fBqmail-cdb\fR may be used to construct a \fIASSIGN/recipients.cdb\fR
 from \fIASSIGN/recipients\fR.
 
-The \fBqmail-smtpd\fR recipients mechanism supports Qmail's address
+The \fBqmail-smtpd\fR recipients mechanism supports qmail's address
 extension (VERP).  Unqualified envelope recipients are appended with
 \'@localhost\'.
 

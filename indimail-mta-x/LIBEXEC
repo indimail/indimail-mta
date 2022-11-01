@@ -75,3 +75,5 @@ f:::0755:/:qmailconfig:qmailconfig
 f:::0755:/:config-fast:config-fast
 f:::0755:/:instcheck.indimail-mta:instcheck
 f:::0755:/:whois:whois
+f:::0755:/:test-recipients:test-recipients
+f:::0755:/:make-recipients:make-recipients

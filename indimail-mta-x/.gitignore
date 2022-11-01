@@ -215,6 +215,8 @@ make-compile
 Makefile.
 makeheader
 make-load
+make-recipients
+make-recipients.1
 make-text
 Makevars.
 matchup
@@ -421,6 +423,9 @@ swaks
 sys-checkpwd
 systype
 tcp-env
+test-recipients
+test-recipients.o
+test-recipients.1
 testzero
 tlsacheck.o
 todo-proc

@@ -32,25 +32,25 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
-	mailsubj mbox2maildir mini-smtpd multirotate newinclude new-inject \
-	nowutc ofmipd ofmipname parsedate plugtest predate preline \
-	printforward printmaillist proc proc+df qaes qarf qbase64 qdane \
-	qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat qmail-cdb \
-	qmail-clean qmailconfig qmail-daned qmail-direct qtop \
+	mailsubj make-recipients mbox2maildir mini-smtpd multirotate \
+	newinclude new-inject nowutc ofmipd ofmipname parsedate plugtest \
+	predate preline printforward printmaillist proc proc+df qaes qarf \
+	qbase64 qdane qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat \
+	qmail-cdb qmail-clean qmailconfig qmail-daned qmail-direct qtop \
 	qmaildirmake qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
-	qmail-inject qmail-local qmail-lspawn qmail-multi \
-	qmail-newu qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u \
-	qmail-qfilter qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread \
-	qmail-queue qmail-remote qmail-rm qmail-rspawn qmail-send \
-	qmail-showctl qmail-smtpd qmail_smtpd.so qmail-spamfilter qmail-start \
-	qmail-tcpok qmail-tcpto todo-proc qmail-upq qmta-send qnotify qpq \
-	qquote qreceipt qsmhook qtools qscheduler queue-fix relaytest \
-	rewind rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
-	setforward setmaillist slowq-send slowq-start smtpd-plugin0.so \
-	smtpd-plugin.so sortedtest spawn-filter spfquery splogger srsfilter \
-	sslerator surblfilter surblqueue svctool swaks sys-checkpwd tcp-env \
-	testzero tokenize uacl udpclient udplogger update_tmprsadh \
-	viruscanner whois yearcal
+	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newu \
+	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
+	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
+	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-smtpd \
+	qmail_smtpd.so qmail-spamfilter qmail-start qmail-tcpok qmail-tcpto \
+	todo-proc qmail-upq qmta-send qnotify qpq qquote qreceipt qsmhook \
+	qtools qscheduler queue-fix test-recipients relaytest rewind rpmattr \
+	rrforward rrt sendmail serialcmd serialqmtp serialsmtp setforward \
+	setmaillist slowq-send slowq-start smtpd-plugin0.so smtpd-plugin.so \
+	sortedtest spawn-filter spfquery splogger srsfilter sslerator \
+	surblfilter surblqueue svctool swaks sys-checkpwd tcp-env testzero \
+	tokenize uacl udpclient udplogger update_tmprsadh viruscanner whois \
+	yearcal
 
 man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 dktest.8 \
@@ -64,9 +64,9 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
 	qmail-send.8 qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 \
 	indimail-srs.5 qmail-start.8 todo-proc.8 qmail-users.5 qmta-send.8 \
-	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 replier.1 \
-	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 \
-	spawn-filter.8 surblfilter.8 svctool.8
+	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 replier.1 make-recipients.1 \
+	test-recipients.1 rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 \
+	slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8
 
 include Makefile.$(SYSTEM)
 
@@ -3865,6 +3865,33 @@ ipalloc.o tlsarralloc.o dns.lib
 
 dnsblcheck.o: compile dnsblcheck.c control.h dns.h
 	./compile dnsblcheck.c
+
+test-recipients: \
+load test-recipients.o variables.o recipients.o auto_control.o \
+indimail_stub.o control.o auto_break.o auto_sysconfdir.o
+	./load test-recipients variables.o recipients.o auto_control.o \
+	indimail_stub.o control.o auto_break.o auto_sysconfdir.o \
+	$(QMAILLIB) -ldl
+
+test-recipients.o: \
+compile test-recipients.c recipients.h variables.h auto_control.h \
+indimail_stub.h
+	./compile test-recipients.c
+
+test-recipients.1: \
+test-recipients.9 conf-sysconfdir conf-libexec
+	$(edit) test-recipients.9 > $@
+
+make-recipients: make-recipients.sh conf-qmail conf-sysconfdir
+	cat warn-auto.sh make-recipients.sh \
+	| sed s}QMAIL}"`head -1 conf-qmail`"}g \
+	| sed s}SYSCONF}"`head -1 conf-sysconfdir`"}g \
+	> $@
+	chmod +x $@
+
+make-recipients.1: \
+make-recipients.9 conf-sysconfdir
+	$(edit) make-recipients.9 > $@
 
 indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared

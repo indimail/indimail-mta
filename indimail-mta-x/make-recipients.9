@@ -1,0 +1,22 @@
+.TH make-recipients 8
+.SH NAME
+make-recipients \- Make recipient addresses for RECIPIENTS extension.
+
+.SH SYNOPSIS
+.B make-recipients
+
+.SH DESCRIPTION
+\fBmake-recipients\fR(1) creates recipient addresses for all local
+addresses from /etc/passwd, dot-qmail-files in @indimaildir@/alias,
+@sysconfdir@/users/assign, @sysconfdir@/users/recipients and prints them on
+standard output. The addresses can be reviewed and added to
+\fI@sysconfdir@/users/recipients\fR to rebuild
+\fI@sysconfdir@/users/recipients.cdb\fR database using \fBqmail-cdb\fR(8).
+
+.EX
+$ sudo qmail-cdb -r
+.EE
+
+.SH SEE ALSO
+test-recipients(1),
+qmail-cdb(8)

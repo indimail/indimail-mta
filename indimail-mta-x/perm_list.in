@@ -179,6 +179,8 @@
 
 %attr(0755,root,root)  @libexecdir@/cdbmake-12
 %attr(0755,root,root)  @libexecdir@/cdbmake-sv
+%attr(0755,root,root)  @libexecdir@/test-recipients
+%attr(0755,root,root)  @libexecdir@/make-recipients
 %attr(0755,root,root)  @libexecdir@/atrn
 %attr(0755,root,root)  @libexecdir@/etrn
 %attr(0755,root,root)  @libexecdir@/qmailconfig
@@ -374,6 +376,7 @@
 %attr(0644,root,root) @mandir@/man1/maildirsmtp.1.gz
 %attr(0644,root,root) @mandir@/man1/qmaildirwatch.1.gz #qmta
 %attr(0644,root,root) @mandir@/man1/mailsubj.1.gz #indimail-mini #qmta
+%attr(0644,root,root) @mandir@/man1/make-recipients.1.gz
 %attr(0644,root,root) @mandir@/man1/matchup.1.gz
 %attr(0644,root,root) @mandir@/man1/inewaliases.1.gz
 %attr(0644,root,root) @mandir@/man1/newinclude.1.gz
@@ -407,6 +410,7 @@
 %attr(0644,root,root) @mandir@/man1/inotify.1.gz
 %attr(0644,root,root) @mandir@/man1/spfquery.1.gz
 %attr(0644,root,root) @mandir@/man1/indimail-srs.5.gz
+%attr(0644,root,root) @mandir@/man1/test-recipients.1.gz
 %attr(0644,root,root) @mandir@/man1/swaks.1.gz
 %attr(0644,root,root) @mandir@/man1/uacl.1.gz
 %attr(0644,root,root) @mandir@/man1/udpclient.1.gz

@@ -301,6 +301,8 @@ make-compile
 makeheader
 makeheader.o
 make-load
+make-recipients
+make-recipients.1
 make-text
 make-text.o
 matchregex.o
@@ -632,6 +634,9 @@ sys-checkpwd.o
 syslog.lib
 systype
 tablematch.o
+test-recipients
+test-recipients.o
+test-recipients.1
 tcp-env
 tcp-env.o
 tcpto_clean.o

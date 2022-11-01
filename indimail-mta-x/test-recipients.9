@@ -1,0 +1,55 @@
+.TH test-recipients 8
+.SH NAME
+test-recipients \- Test Recipients in MySQL or via RECIPIENTS extension.
+
+.SH SYNOPSIS
+.B test-recipients
+\-\fBr\fR
+|
+\-\fBs\fR
+[
+\-\fBt\fR
+\fItimeout\fR
+]
+.I addr
+
+.SH DESCRIPTION
+\fBtest-recipients\fR(1) tests recipients in indimail's MySQL database or
+using recipients extension. The recipients extension in indimail-mta comes
+from s/qmail at https://www.fehcom.de/sqmail/sqmail.html.
+
+The \-\fIr\fR option makes \fBtest-recipients\fR doing chdir to @sysconfdir@
+directory and opening the control file @sysconfdir@/control/recipients.
+
+The \-\fIs\fR option makes \fBtest-recipients\fR loads the indimail.so
+shared library for submittig query to \fBinlookup\fR(8) daemon using the
+\fBinquery\fR(3) function. The default timeout used to get result from
+\fBinlookup\fR(8) daemon is 60 seconds and can be changed by specifying the
+\-\fBt\fR \fItimeout\fR argument.
+
+\fBqmail-smtpd\fR(8) checks recipients in RCPT TO dialog when the
+environment variable \fBCHECKRECIPIENT\fR is set and rejects email when the
+recipient is missing. Rejecting emails during SMTP session is better than
+accepting it and bouncing it later.
+
+\fBtest-recipient\fR(1) is located in @libexecdir@ directory.
+
+.SH NOTES
+
+The inlookup daemon creates named pipes that can be accessed by
+\fBqmaild\fR user. To test users in MySQL it is neccessary to execute it
+with the privileges of the user \fBqmaild\fR
+
+.EX
+$ sudo bash
+# setuidgid -g qmail qmaild test-recipients -s testuser01@example.com
+# setuidgid -g indimail indimail env FIFO_MODE=0666 \\
+  test-recipients -s testuser01@example.com
+.EE
+
+.SH "SEE ALSO"
+qmail-smtpd(8),
+inlookup(8),
+inquery(3),
+qmail-cdb(8),
+make-recipients(1)
