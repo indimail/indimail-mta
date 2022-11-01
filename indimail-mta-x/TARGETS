@@ -685,3 +685,9 @@ zsmtp
 zspam
 zsuccesses
 zsuids
+BIN
+DIRS
+INPUT
+MAN
+SBIN
+SHARED
