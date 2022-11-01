@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.2 2022-09-19 21:21:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.3 2022-11-01 23:53:11+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -58,16 +58,16 @@ set_defaults()
 				indimail|indimail-mta|webmail)
 				port_args="$port_args-p 2025:25   -p 2106:106  -p 2110:110  -p 2143:143 "
 				port_args="$port_args-p 2209:209  -p 2366:366  -p 2465:465  -p 2587:587 "
-				port_args="$port_args-p 2628:628  -p 2993:993  -p 2995:995  -p 4110:4110 "
-				port_args="$port_args-p 4143:4143 -p 9110:9110 -p 9143:9143 -p 8080:80"
+				port_args="$port_args-p 2628:628  -p 2993:993  -p 2995:995  -p 3110:4110 "
+				port_args="$port_args-p 3143:4143 -p 5110:9110 -p 5143:9143 -p 8080:80"
 
 				# port_str is used just for display purpose
 				NEWLINE=$'\n'
 				port_str=""
 				port_str="${port_str}  -p 2025:25   -p 2106:106  -p 2110:110  -p 2143:143${NEWLINE}"
 				port_str="${port_str}  -p 2209:209  -p 2366:366  -p 2465:465  -p 2587:587${NEWLINE}"
-				port_str="${port_str}  -p 2628:628  -p 2993:993  -p 2995:995  -p 4110:4110${NEWLINE}"
-				port_str="${port_str}  -p 4143:4143 -p 9110:9110 -p 9143:9143 -p 8080:80"
+				port_str="${port_str}  -p 2628:628  -p 2993:993  -p 2995:995  -p 3110:4110${NEWLINE}"
+				port_str="${port_str}  -p 3143:4143 -p 5110:9110 -p 5143:9143 -p 8080:80"
 			;;
 			esac
 		fi
@@ -275,6 +275,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.3  2022-11-01 23:53:11+05:30  Cprogrammer
+# fixed port clash
+#
 # Revision 1.2  2022-09-19 21:21:22+05:30  Cprogrammer
 # added SYS_NICE capability to defaults
 #
