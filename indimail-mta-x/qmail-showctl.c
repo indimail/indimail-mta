@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.8  2022-11-03 12:35:40+05:30  Cprogrammer
+ * added remote_auth, recipients control file
+ *
  * Revision 1.7  2022-10-13 21:51:48+05:30  Cprogrammer
  * renamed batv control files (use batv prefix)
  *
@@ -300,6 +303,7 @@ display_control()
 	do_str("defaultdelivery", 0, "undefined! Uh-oh", "Default Delivery is: ");
 	do_str("smtpgreeting", 1, "smtpgreeting", "SMTP greeting: 220 ");
 	do_lst("smtproutes", "No artificial SMTP routes.", "SMTP route: ", "");
+	do_lst("remote_auth", "No users for remote authenticated SMTP", "Remote SMTP Auth Users: ", "");
 	do_lst("signaturedomains", "No DKIM signature domains.", "DKIM signature domain(s): ", "");
 	do_lst("virtualdomains", "No virtual domains.", "Virtual domain: ", "");
 
@@ -373,8 +377,9 @@ display_control()
 	do_int("timeoutread", "4", "InServer Read data timeout is ", " seconds");
 	do_int("timeoutwrite", "4", "InServer Write data timeout is ", " seconds");
 	do_lst("etrnhosts", "No ETRN/ATRN domains.", "ETRN/ATRN domain(s): ", "");
-	do_lst("chkrcptdomains", "All Recipient Domains will be checked for User Status", "Recipient Domains checked for User Status: ",
-		   "");
+	do_lst("chkrcptdomains", "All Recipient Domains will be checked for User Status",
+			"Recipient Domains checked for User Status: ", "");
+	do_lst("recipients", "No recipients extension defined", "recipients extension rules: ", "");
 	do_lst("authdomains", "Auth not reqd for mails to local domains ", "SMTP/IMAP/POP3 auth required for: ", "");
 	do_lst("relayclients", "No Relayclients defined.", "Allowed Relayclients: ", "");
 	do_lst("relaydomains", "No Relaydomains defined.", "Allowed Relaydomains: ", "");
@@ -438,7 +443,8 @@ valid_control_files(char *fn)
 		"blackholedrcptpatterns", "goodrcptpatterns", "outgoingip", "domainbindings",
 		"bindroutes", "badextpatterns", "holdremote", "holdlocal", "signaturedomains",
 		"msgqueuelen", "msgqueuesize", "global_vars", "qfilters", ".qmail_control",
-		"qregex", "tlsclients", ".indimail_control",
+		"qregex", "recipients", "remote_auth", "remote_auth.cdb", "tlsclients",
+		".indimail_control",
 #ifdef HAVESRS
 		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
 #endif
@@ -448,7 +454,7 @@ valid_control_files(char *fn)
 #ifdef BATV
 		"batvkey", "batvkeystale", "batvnosignremote", "batvnosignlocals",
 #endif
-		"conf-syncdir", "conf-fsync", "servercert.pem", "tlsserverciphers",
+		"conf-syncdir", "conf-fsync", "conf-fdatasync", "servercert.pem", "tlsserverciphers",
 		"tlsclientciphers", "clientcert.pem", "servicedir.conf", "nosignaturedomains",
 		"domainkeys", "level2-tlds", "level3-tlds", "mysql_lib", 0};
 	char          *cdb_sql_files[] = {
@@ -880,7 +886,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.7 2022-10-13 21:51:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.8 2022-11-03 12:35:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
