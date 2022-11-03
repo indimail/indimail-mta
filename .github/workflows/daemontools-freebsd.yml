@@ -30,7 +30,7 @@ jobs:
         path: libqmail
     - name: build daemontools
       id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.2.9
+      uses: vmactions/freebsd-vm@v0.3.0
       with:
         envs: 'MYTOKEN'
         usesh: true
