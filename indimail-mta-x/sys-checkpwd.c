@@ -1,5 +1,8 @@
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.16  2022-11-05 22:41:26+05:30  Cprogrammer
+ * Use ENABLE_CRAM env variable to enable CRAM authentication using encrypted password
+ *
  * Revision 1.15  2022-10-30 10:03:39+05:30  Cprogrammer
  * display auth method in logs if DEBUG is set
  *
@@ -196,7 +199,7 @@ main(int argc, char **argv)
 	char            strnum[FMT_ULONG];
 	static stralloc buf = {0};
 	int             i, count, offset, status, save = -1, use_pwgr, authlen = 512,
-					auth_method;
+					auth_method, enable_cram;
 	struct passwd  *pw;
 #ifdef HASUSERPW
 	struct userpw  *upw;
@@ -215,6 +218,7 @@ main(int argc, char **argv)
 		strerr_warn3("alloc-", strnum, ": ", &strerr_sys);
 		_exit(111);
 	}
+	enable_cram = env_get("ENABLE_CRAM") ? 1 : 0;
 	for (offset = 0;;) {
 		do {
 			count = read(3, tmpbuf + offset, authlen + 1 - offset);
@@ -239,12 +243,12 @@ main(int argc, char **argv)
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
 	count++;
-	challenge = tmpbuf + count; /*- challenge */
+	challenge = tmpbuf + count; /*- challenge for CRAM methods (or plain text password for LOGIN/PLAIN) */
 	for (;tmpbuf[count] && count < offset;count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
 	count++;
-	response = tmpbuf + count; /*- response */
+	response = tmpbuf + count; /*- response (CRAM methods, etc) */
 	for (; tmpbuf[count] && count < offset; count++);
 	if (count == offset || (count + 1) == offset)
 		auth_method = 0;
@@ -267,7 +271,10 @@ main(int argc, char **argv)
 		}
 		_exit (111);
 	}
-	stored = pw->pw_passwd;
+	if (enable_cram)
+		stored = pw->pw_passwd;
+	else
+		stored = (auth_method > 2 && auth_method < 11) ? NULL : pw->pw_passwd;
 #ifdef HASUSERPW
 	if (!(upw = getuserpw(login))) {
 		if (errno != ETXTBSY)
@@ -277,7 +284,10 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "getuserpw: ");
 		}
 	}
-	stored = upw->upw_passwd;
+	if (enable_cram)
+		stored = upw->upw_passwd
+	else
+		stored = (auth_method > 2 && auth_method < 11) ? NULL : upw->upw_passwd
 #endif
 #ifdef HASGETSPNAM
 	if (!(spw = getspnam(login))) {
@@ -288,7 +298,10 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "getspnam: ");
 		}
 	}
-	stored = spw->sp_pwdp;
+	if (enable_cram)
+		stored = spw->sp_pwdp;
+	else
+		stored = (auth_method > 2 && auth_method < 11) ? NULL : spw->sp_pwdp;
 #endif
 	if (setuid(getuid()))
 		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
@@ -298,8 +311,9 @@ main(int argc, char **argv)
 		ptr = get_authmethod(auth_method);
 		strerr_warn14(argv[0][i] ? argv[0] + i + 1 : argv[0], ": uid(",
 				strnum, ") login [", login, "] challenge [", challenge,
-				"] response [", response, "] pw_passwd [", stored,
-				"] auth_method [", ptr, "]", 0);
+				"] response [", response, "] pw_passwd [",
+				enable_cram ? stored : "cram-disabled", "] auth_method [",
+				ptr, "]", 0);
 	} else
 	if (debug) {
 		i = str_rchr(argv[0], '/');
@@ -307,9 +321,11 @@ main(int argc, char **argv)
 		strerr_warn8(argv[0][i] ? argv[0] + i + 1 : argv[0], ": uid(",
 				strnum, ") login [", login, "] auth_method [", ptr, "]", 0);
 	}
+	if (!stored)
+		pipe_exec(argv, tmpbuf, offset, save);
 	if (pw_comp((unsigned char *) login, (unsigned char *) stored,
 			(unsigned char *) (*response ? challenge : 0),
-			(unsigned char *) (*response ? response : challenge), 0))
+			(unsigned char *) (*response ? response : challenge), auth_method))
 		pipe_exec(argv, tmpbuf, offset, save); /*- never returns */
 	status = 0;
 	if ((ptr = (char *) env_get("POSTAUTH"))) {
@@ -331,7 +347,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.15 2022-10-30 10:03:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.16 2022-11-05 22:41:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
