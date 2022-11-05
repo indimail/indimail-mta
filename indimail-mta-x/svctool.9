@@ -138,7 +138,7 @@ Known values for OPTION are:
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
-  [--authsmtp --forceauthsmtp --authall]
+  [--authsmtp --forceauthsmtp --enablecram --authall]
   [--chkrecipient --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
@@ -199,6 +199,8 @@ Known values for OPTION are:
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP
   forceauthsmtp  - Enforce Authenticated SMTP before accepting MAIL FROM
+  enablecram     - Enable the pw_passwd field of indimail table to be used
+                   for CRAM authenticated smtp methods
   authall        - Accept mails to both remote & local domains only after
                    AUTH SMTP or POP/IMAP before SMTP
   chkrelay       - Accept mails to remote domains only after AUTH SMTP or

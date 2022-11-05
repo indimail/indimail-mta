@@ -340,6 +340,15 @@ prog on successful authentication and exit 1 if password is unacceptable.
 Totally opposite of what indimail's checkpassword programs do.
 
 .TP
+\fIENABLE_CRAM\fR
+If set, vchkpass checkpassword will support the encrypted password field to
+be used as the password for CRAM authentication
+
+.TP
+\fIALLOW_INACTIVE\fR
+If set, vchkpass will allow authentication for inactive users 
+
+.TP
 \fIDTLINE\fR
 Used by \fBautoresponder\fR(1) \fBcondredirect\fR(1) condtomaildir
 \fBdot-forward\fR(1) \fBfastforward\fR(1) \fBfilterto\fR(1) forward
@@ -743,7 +752,9 @@ Override @sysconfdir@/control/quarantine control file Used by
 
 .TP
 \fIQUERY_CACHE\fR
-Used by \fBqmail-lspawn\fR(8)
+Used by \fBqmail-smtpd\fR, \fBqmail-lspawn\fR(8), \fBvchkpas\fR(8) to use
+\fBinlookup\fR(8), \fBauthindi\fR(7) password request connection pooling
+daemon for authentication and user and password lookups.
 
 .TP
 \fIQUEUE_BASE\fR \fIQUEUE_START\fR \fIQUEUE_COUNT\fR \fIQUEUEDIR\fR
@@ -1145,8 +1156,8 @@ If set, total size of mail delivery/day for user by \fBvdelivermail\fR(8)
 
 .PP
 
-This variables are mostly used by indimail-virtualdomains. But there can
-be overlap with indimail-mta
+These variables are mostly used by indimail-virtualdomains. But there can
+overlap with indimail-mta
 
 .TS
 l l.
