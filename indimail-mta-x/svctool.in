@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.644 2022-10-31 12:56:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.645 2022-11-05 22:36:53+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.644 2022-10-31 12:56:22+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.645 2022-11-05 22:36:53+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -63,7 +63,7 @@ Known values for OPTION are:
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
-  [--authsmtp --forceauthsmtp --authall]
+  [--authsmtp --forceauthsmtp --authall --enable-cram]
   [--chkrecipient --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
@@ -124,6 +124,8 @@ Known values for OPTION are:
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP
   forceauthsmtp  - Enforce Authenticated SMTP before accepting MAIL FROM
+  enablecram     - Enable the pw_passwd field of indimail table to be used
+                   for CRAM authenticated smtp methods
   authall        - Accept mails to both remote & local domains only after
                    AUTH SMTP or POP/IMAP before SMTP
   chkrelay       - Accept mails to remote domains only after AUTH SMTP or
@@ -1074,8 +1076,8 @@ check_installation()
 # check Sendmail Status"
 #
 if [ $# -lt 5 ] ; then
-	echo "USAGE: check_installation qbase queue_count first_queue_no supervise_dir verb" 1>&2
-	return 1
+  echo "USAGE: check_installation qbase queue_count first_queue_no supervise_dir verb" 1>&2
+  return 1
 fi
 QUEUE_BASE=$1
 QUEUE_COUNT=$2
@@ -1084,9 +1086,9 @@ SERVICEDIR=$4
 OK=1
 
 if [ "$5" = "-v" ]; then
-	VERB=y
+VERB=y
 else
-	VERB=n
+VERB=n
 fi
 echo "Checking IndiMail Home"
 if [ ! -d "$DESTDIR"$QmailHOME ]; then
@@ -1175,12 +1177,12 @@ else
   done
   for i in nqueue slowq
   do
-	if [ "$i" = "slowq" ] ; then
-    	"$DESTDIR"$QmailBinPrefix/bin/queue-fix -N -r "$DESTDIR"$QUEUE_BASE/$i > /dev/null 2>&1
-	else
-    	"$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/$i > /dev/null 2>&1
-	fi
-	status=$?
+    if [ "$i" = "slowq" ] ; then
+      "$DESTDIR"$QmailBinPrefix/bin/queue-fix -N -r "$DESTDIR"$QUEUE_BASE/$i > /dev/null 2>&1
+    else
+      "$DESTDIR"$QmailBinPrefix/bin/queue-fix -N "$DESTDIR"$QUEUE_BASE/$i > /dev/null 2>&1
+    fi
+status=$?
     if [ $status -ne 0 ] ; then
       echo "status $status ! $i should be fixed. Run queue-fix -v "$DESTDIR"$QUEUE_BASE/$i !" 1>&2
       OK=0
@@ -2586,6 +2588,11 @@ if [ " $odmr" = " " ] ; then
 	else
 		> $conf_dir/PARANOID
 		> $conf_dir/DOMAIN_MASQUERADE
+	fi
+	if [ $enablecram -eq 1 ] ; then
+		echo 1 > $conf_dir/ENABLE_CRAM
+	else
+		> $conf_dir/ENABLE_CRAM
 	fi
 	if [ ! " $forceauthsmtp" = " " ] ; then
 		echo > $conf_dir/REQUIREAUTH
@@ -5365,11 +5372,11 @@ create_mysql_rootuser()
 	mecho "delimiter ';;'"
 	mecho "create procedure remove_unsafe()"
 	mecho "begin"
-    mecho "  if exists (select * from information_schema.columns where table_name = 'user' and column_name = 'password') then"
+	mecho "  if exists (select * from information_schema.columns where table_name = 'user' and column_name = 'password') then"
 	mecho "    DELETE FROM user where user='' or password='';"
 	mecho "  ELSE"
 	mecho "    DELETE FROM user where user='';"
-    mecho "  end if;"
+	mecho "  end if;"
 	mecho "end;;"
 	mecho "delimiter \';\'"
 	mecho "call remove_unsafe();"
@@ -9347,7 +9354,7 @@ create_cert()
 
 ################################# Main ##################################
 if test $# -eq 0; then
-    usage 1
+	usage 1
 fi
 if [ $(id -u) -ne 0 ] ; then
 	echo "svctool is not meant to be run by mere mortals. Use sudo to get superpowers"
@@ -9397,6 +9404,7 @@ usesyncdir=0
 mount_resolvconf=0
 valid_for=366
 todo_proc=0
+enablecram=0
 databytes=$DATABYTES
 qmailqueue="/usr/sbin/qmail-queue"
 qmailsmtpd=$QmailBinPrefix"/sbin/qmail-smtpd"
@@ -9426,47 +9434,47 @@ else
 	touch=/bin/touch
 fi
 while test $# -gt 0; do
-    case "$1" in
-    -*=*)
+	case "$1" in
+	-*=*)
 	optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'`
 	optval=`echo "$1" | cut -d'=' -f1`
 	prog_args="$prog_args $optval=\"$optarg\""
 	;;
-    *)
+	*)
 	optarg=
 	prog_args="$prog_args $1"
 	;;
-    esac
+	esac
 
-    case "$1" in
-    --qbase=*)
+	case "$1" in
+	--qbase=*)
 	qbase=$optarg
 	;;
-    --verbose)
+	--verbose)
 	verbose="-v"
 	;;
-    --qcount=*)
+	--qcount=*)
 	qcount=$optarg
 	;;
-    --qstart=*)
+	--qstart=*)
 	qstart=$optarg
 	;;
-    --min-free=*)
+	--min-free=*)
 	min_free=$optarg
 	;;
-    --deliverylimit-count=*)
+	--deliverylimit-count=*)
 	mailcount_limit=$optarg
 	;;
-    --deliverylimit-size=*)
+	--deliverylimit-size=*)
 	mailsize_limit=$optarg
 	;;
-    --overquota_mailsize=*)
+	--overquota_mailsize=*)
 	overquota_mailsize=$optarg
 	;;
-    --servicedir=*)
+	--servicedir=*)
 	servicedir=$optarg
 	;;
-    --cntrldir=*)
+	--cntrldir=*)
 	slash=`echo $optarg | cut -c1`
 	if [ " $slash" = " /" ] ; then
 		cntrldir=$optarg
@@ -9594,39 +9602,42 @@ while test $# -gt 0; do
 	--rejectspam=*)
 	rejectspam=$optarg
 	;;
-    --spamexitcode=*)
+	--spamexitcode=*)
 	spamexitcode=$optarg
 	;;
 	--masquerade)
 	masquerade=1
 	;;
-    --logdir=*)
+	--logdir=*)
 	LOGDIR=$optarg
 	export LOGDIR
 	;;
-    --indimaildir=*)
+	--indimaildir=*)
 	indimaildir=$optarg
 	export indimaildir
 	;;
 	--domainlimits)
 	domainlimits=1
 	;;
-    --chkrecipient)
+	--chkrecipient)
 	chkrecipient=1
 	;;
-    --antispoof)
+	--antispoof)
 	antispoof=1
 	;;
-    --cugmail)
+	--cugmail)
 	cugmail=1
 	;;
-    --forceauthsmtp)
+	--forceauthsmtp)
 	forceauthsmtp=1
 	;;
-    --authsmtp)
+	--enablecram)
+	enableram=1
+	;;
+	--authsmtp)
 	authsmtp=1
 	;;
-    --remote-authsmtp=*)
+	--remote-authsmtp=*)
 	remoteauthsmtp=$optarg
 	;;
 	--min-resend-min=*)
@@ -10626,8 +10637,8 @@ case $option in
 		if [ $nscd_up -ge 1 ] ; then
 			if [ -x /etc/init.d/nscd ] ; then
 				/etc/init.d/nscd stop
-  			elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-    			/bin/systemctl stop nscd.service
+			elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+				/bin/systemctl stop nscd.service
 			fi
 		fi
 		create_users
@@ -10635,8 +10646,8 @@ case $option in
 		if [ $nscd_up -ge 1 ] ; then
 			if [ -x /etc/init.d/nscd ] ; then
 				/etc/init.d/nscd start
-  			elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
-    			/bin/systemctl start nscd.service
+			elif [ -f /etc/systemd/system/multi-user.target/nscd.service ] ; then
+				/bin/systemctl start nscd.service
 			fi
 		fi
 		exit $status
