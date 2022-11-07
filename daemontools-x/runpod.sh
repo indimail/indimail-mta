@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.3 2022-11-01 23:53:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.4 2022-11-07 22:43:38+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -160,7 +160,7 @@ while :
 do
 	case "$1" in
 	-a | --args)
-	echo $2 | grep "\-d" && detached=1
+	echo $2 | grep "\-d" >/dev/null && detached=1 
 	extra_args="$extra_args""$2 "
 	shift 2
 	;;
@@ -275,6 +275,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.4  2022-11-07 22:43:38+05:30  Cprogrammer
+# prevent output of test on stdout
+#
 # Revision 1.3  2022-11-01 23:53:11+05:30  Cprogrammer
 # fixed port clash
 #
