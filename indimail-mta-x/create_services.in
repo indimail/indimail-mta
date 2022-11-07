@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.116 2022-09-27 22:05:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.117 2022-11-07 20:45:29+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -378,8 +378,8 @@ fi
 
 if [ $nodksignatures -eq 0 ] ; then
   if [ -x $dir_prefix$prefix/bin/dknewkey ] ; then
-    ver_opt="both"
-    sign_opt="both"
+    ver_opt="dkim"
+    sign_opt="dkim"
     mkdir -p "$dir_prefix"$controldir/domainkeys
     $dir_prefix$prefix/bin/dknewkey -b 1024 $dkimkeyfn
   else
@@ -758,6 +758,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.117  2022-11-07 20:45:29+05:30  Cprogrammer
+# removed domainkeys for new installs
+#
 # Revision 2.116  2022-09-27 22:05:02+05:30  Cprogrammer
 # Create slowq-send service with todo processor turned on
 #
