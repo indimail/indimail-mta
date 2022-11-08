@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.158 2022-10-30 22:16:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.159 2022-11-08 23:32:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -4184,6 +4184,7 @@ main(int argc, char **argv)
 						  || errno == error_netunreach || errno == error_hostunreach || smtp_error);
 				tcpto_err(&ip.ix[i], errors, max_tolerance);
 			}
+			smtpfrom.p = 0; /*- clear anything in buffer if any - Franz Sirl */
 			close(smtpfd);
 		}
 	} /*- for (i = j = 0; i < ip.len; ++i) */
@@ -4199,13 +4200,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.158 2022-10-30 22:16:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.159 2022-11-08 23:32:53+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.159  2022-11-08 23:32:53+05:30  Cprogrammer
+ * clear input buffer when trying next mx
+ *
  * Revision 1.158  2022-10-30 22:16:52+05:30  Cprogrammer
  * fetch username password for authenticated smtp from remote_auth.cdb
  *
