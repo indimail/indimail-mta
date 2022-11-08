@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.4 2022-11-07 22:43:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.5 2022-11-08 23:27:52+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -100,18 +100,9 @@ set_defaults()
 			if [ $# -eq 0 ] ; then
 				systemd="bash"
 			fi
-			if [ -z "$extra_args" ] ; then
-				extra_args="-ti --rm"
-			fi
 		fi
-		if [ " $name" = " mail" ] ; then
-			if [ $# -eq 0 ] ; then
-				systemd="svscan"
-			fi
-			if [ -z "$extra_args" ] ; then
-				extra_args="-d --rm"
-				detached=1
-			fi
+		if [ " $name" = " svscan" ] ; then
+				extra_args="-ti --rm"
 		fi
 		if [ -z "$extra_args" ] ; then
 			detached=1
@@ -275,6 +266,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.5  2022-11-08 23:27:52+05:30  Cprogrammer
+# added case for name=svscan
+#
 # Revision 1.4  2022-11-07 22:43:38+05:30  Cprogrammer
 # prevent output of test on stdout
 #

@@ -17,30 +17,33 @@ https://github.com/mbhangui?tab=packages
 
 \fIprog\fR is usually the binary to be executed on startup. \fIprog\fR also
 can have a special meaning. if \fIprog\fR is indimail, indimail-mta,
-webmail, runpod will let the docker-entrypoint get executed. If \fIprog\fR
-is test or devel, runpod will run bash in the container with a tty. If this
-is not specified, systemd will be loaded for debian, ubuntu, fedora,
-centos, almalinux, oraclelinux, opensuse images. For alpine linux bash
-will be loaded with a controlling terminal. If systemd is empty, the
+webmail, runpod will let \fBdocker-entrypoint\fR(8) get executed. If
+\fIprog\fR is test or devel, runpod will run bash in the container with a
+tty. If this is not specified, systemd will be loaded for debian, ubuntu,
+fedora, centos, almalinux, oraclelinux, opensuse images. For alpine linux
+bash will be loaded with a controlling terminal. If systemd is empty, the
 default entry point for the container will be used. If \fIprog\fR is set as
-auto, then \fBrunpod\fR will instruct podman or docker to execute systemd
-if the image supports systemd or /sbin/init for alpine and gentoo images.
+auto, then \fBrunpod\fR will instruct podman or docker to execute
+\fBsystemd\fR(1) if the image supports systemd or /sbin/init for alpine and
+gentoo images.
 
 If \fIprog\fR is not specified, then runpod will execute bash in the
-container if \fIname\fR is test or devel and execute the entrypoint for the
-container if \fIname\fR is svscan. See --name or -n option below for
-setting name.
+container if \fIname\fR is \fBtest\fR or \fBdevel\fR. It will execute the
+entrypoint for the container if \fIname\fR is \fBsvscan\fR and run in the
+foreground. If the entry point is \fBmail\fR, it will execute the
+entrypoint for the container and run in detached mode. See --name or -n
+option below for setting name.
 
 .SH OPTIONS
-.TP
+.TP 2
 \fB\-\-id\fR=\fIimageID\fR
 Use this option to specify image id
 
 .TP
 \fB\-\-name\fR=\fIname\fR | -\fBn\fR \fIname\fR
 Use this option to specify name for the running image. \fIname\fR has
-special significance if name is either of indimail, indimail-mta, webmail
-which causes following ports to be mapped
+special significance if name is either of \fBindimail\fR,
+\fBindimail-mta\fR, \fBwebmail\fR which causes following ports to be mapped
 
 .EX
 2025 -> 25, 2106 -> 106, 2110 -> 110  2143 -> 143, 2209 -> 209,
@@ -49,7 +52,8 @@ which causes following ports to be mapped
 8080 -> 80
 .EE
 
-\fIname\fR is what you see in the podman ps or the docker ps command.
+\fIname\fR is what you see in the \fBpodman\fR ps or the \fBdocker\fR ps
+command.
 
 .TP
 \fB\-\-capability\fR=\fIcap\fR | -\fBC\fR \fIcap\fR
@@ -67,10 +71,11 @@ can specify this option multiple times.
 
 .TP
 \fB\-\-command\fR=\fIdocker\fR|\fIpodman\fR | -\fBc\fR \fIdocker\fR|\fIpodman\fR
-Use docker or podoman to run the container. Default is podman
+Use \fBdocker\fR(1) or \fBpodman\fR(1) to run the container. Default is
+\fBpodman\fR(1).
 
 .TP
-\fB\-\-volume\fR=\fIlocal_dir\fR:\fIremote_dir\fR | -\fBv\fR \fIlocal_dir\fR:\fIremote_dir\fR
+\fB\-\-volume\fR=\fIlocal_dir\fR:\fIremote_dir\fR | \fB\-v\fR \fIlocal_dir\fR:\fIremote_dir\fR
 mount \fIlocal_dir\fR as \fIremote_dir\fR in the container. You can specify
 this option multiple times.
 
