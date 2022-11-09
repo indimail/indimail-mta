@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.71 2022-03-18 09:16:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.72 2022-11-09 20:13:43+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -188,7 +188,7 @@ fi
 stop()
 {
 	if [ -d /var/lock/subsys -a ! -f /var/lock/subsys/svscan ] ; then
-		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null || exit 0
+		ps ax|grep svscan|grep -Ev "grep|supervise|multilog" >/dev/null || exit 0
 	fi
 	if [ -d /run ] ; then
 		rundir=/run
@@ -230,7 +230,7 @@ stop()
 			count=0
 			while true
 			do
-				ps ax|grep svscan|egrep -v "grep|restart|stop" >/dev/null
+				ps ax|grep svscan|grep -Ev "grep|restart|stop" >/dev/null
 				if [ $? -ne 0 ] ; then
 					break
 				fi
@@ -240,7 +240,7 @@ stop()
 					break
 				fi
 			done
-			ps ax|grep svscan|egrep -v "grep|restart|stop" >/dev/null && $fail || $succ
+			ps ax|grep svscan|grep -Ev "grep|restart|stop" >/dev/null && $fail || $succ
 		fi
 		echo ""
 	elif [ -f /etc/inittab ] ; then
@@ -263,7 +263,7 @@ stop()
 						$succ
 					fi
 				else
-					ps ax|grep svscan|egrep -v "grep" >/dev/null && $fail || $succ
+					ps ax|grep svscan|grep -Ev "grep" >/dev/null && $fail || $succ
 				fi
 				RETVAL=1
 			else
@@ -350,7 +350,7 @@ start()
 		;;
 	esac
 	if [ -d /var/lock/subsys -a -f /var/lock/subsys/svscan ] ; then
-		ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && sv_up_all && return $ret || rm -f /var/lock/subsys/svscan
+		ps ax|grep svscan|grep -Ev "grep|supervise|multilog" >/dev/null && sv_up_all && return $ret || rm -f /var/lock/subsys/svscan
 	fi
 	if [ -d $SERVICE/.svscan/log ] ; then
 		@prefix@/bin/svstat $SERVICE/.svscan/log > /dev/null 2>&1
@@ -399,7 +399,7 @@ start()
 				fi
 				sv_pid=$rundir/svscan/.svscan.pid
 				if [ ! -f $sv_pid ] ; then
-					echo $0 | egrep "qmailctl" > /dev/null
+					echo $0 | grep -E "qmailctl" > /dev/null
 					if [ $? -eq 0 ] ;then
 						if [ "$SYSTEM" = "alpine" ] ; then
 							kill -1 1
@@ -413,7 +413,7 @@ start()
 						kill -0 `sed -n 2p $sv_pid` && $succ || $fail
 					fi
 				else
-					ps ax|grep svscan|egrep -v "grep|supervise|multilog" >/dev/null && $succ || $fail
+					ps ax|grep svscan|grep -Ev "grep|supervise|multilog" >/dev/null && $succ || $fail
 				fi
 			fi
 		fi
@@ -524,7 +524,7 @@ case "$cmmd" in
 	kill)
 		noindimail
 		$ECHO -n "killing tcpserver,supervise,qmail-send: "
-		kill `ps ax| egrep "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $1}'` && $succ || $fail
+		kill `ps ax| grep -E "tcpserver|supervise|qmail-send" | grep -v grep | awk '{print $1}'` && $succ || $fail
 		ret=$?
 		echo
 		[ $ret -eq 0 ] && exit 0 || exit 1

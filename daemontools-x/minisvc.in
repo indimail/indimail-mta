@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.32 2022-08-20 12:14:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.33 2022-11-09 20:13:17+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.32 2022-08-20 12:14:18+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.33 2022-11-09 20:13:17+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1915,9 +1915,9 @@ do
 			EXPIRE_IN_SECS=`date +%s --date $TEMP_DATE 2>/dev/null`
 			;;
 		esac
-		if [ "`echo $EXPIRE_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+		if [ "`echo $EXPIRE_IN_SECS|grep -E '^[0-9]+$'`" != "" ]; then
 			NOW_IN_SECS=`date +%s 2>/dev/null`
-			if [ "`echo $NOW_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+			if [ "`echo $NOW_IN_SECS|grep -E '^[0-9]+$'`" != "" ]; then
 				if [ $NOW_IN_SECS -gt $EXPIRE_IN_SECS ]; then
 					error=1
 					echo expiry $TEMP_DATE 1>&2
@@ -1932,7 +1932,7 @@ do
 		fi
 
 		if [ "`echo $cert|grep server`" != "" ];then
-			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|server).* yes'`" = "" ]; then
+			if [ "`echo $TEMP_PURPOSE|grep -Ei '(any purpose|server).* yes'`" = "" ]; then
 				error=1
 				echo "Purpose $TEMP_PURPOSE" 1>&2
 				dir=`dirname $cert`
@@ -1944,7 +1944,7 @@ do
 			fi
 		fi
 		if [ "`echo $cert|grep client`" != "" ];then
-			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|client).* yes'`" = "" ]; then
+			if [ "`echo $TEMP_PURPOSE|grep -Ei '(any purpose|client).* yes'`" = "" ]; then
 				error=1
 				echo "Purpose $TEMP_PURPOSE" 1>&2
 				dir=`dirname $cert`
@@ -2743,6 +2743,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.33  2022-11-09 20:13:17+05:30  Cprogrammer
+# replaced deprecated egrep with grep -E
+#
 # Revision 1.32  2022-08-20 12:14:18+05:30  Cprogrammer
 # skip lead space, comments, blank lines when converting envfile to envdir
 #

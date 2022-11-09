@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.30 2022-10-02 22:15:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.31 2022-11-09 20:15:17+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -8,7 +8,7 @@ get_dkimkeys()
 	awk -F: '{print $1" "$2}' $CONTROLDIR/dkimkeys | while read line
 	do
 		set $line
-		echo $domain | egrep "$1" >/dev/null
+		echo $domain | grep -E "$1" >/dev/null
 		if [ $? -eq 0 ] ; then
 			echo $2
 			break
@@ -356,6 +356,9 @@ exec 0</tmp/dk.$$
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.31  2022-11-09 20:15:17+05:30  Cprogrammer
+# replaced deprecated egrep with grep -E
+#
 # Revision 1.30  2022-10-02 22:15:23+05:30  Cprogrammer
 # don't treat missng private key as error when DKIMSIGN has %
 #

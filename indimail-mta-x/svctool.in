@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.645 2022-11-05 22:36:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.646 2022-11-09 20:15:45+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.645 2022-11-05 22:36:53+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.646 2022-11-09 20:15:45+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2004,7 +2004,7 @@ else
 fi
 
 "$DESTDIR"$libexecdir/ipmeprint | \
-	egrep -vw "::|::1|0\.0\.0\.0|127\.0\.0\.1|172.17.0|0000:0000:0000:0000:0000:0000:0000:0000" | \
+	grep -Evw "::|::1|0\.0\.0\.0|127\.0\.0\.1|172.17.0|0000:0000:0000:0000:0000:0000:0000:0000" | \
 	head -1|awk '{print $3}'> $TMPDIR/localiphost.$$
 if [ -s $TMPDIR/localiphost.$$ ] ; then
 	echo "localiphost"
@@ -5083,7 +5083,7 @@ if [ $? -eq 0 ] ; then
 	mysql_version=`echo $mysql_version|cut -d- -f1`
 	mariadb=1
 else
-	$mysqlPrefix/$mysqld --version | egrep "MySQL Community Server|FreeBSD" > /dev/null 2>&1
+	$mysqlPrefix/$mysqld --version | grep -E "MySQL Community Server|FreeBSD" > /dev/null 2>&1
 	if [ $? -eq 0 ] ; then
 		mysql_community_server=1
 	else
@@ -8941,9 +8941,9 @@ do
 			EXPIRE_IN_SECS=`date +%s --date $TEMP_DATE 2>/dev/null`
 			;;
 		esac
-		if [ "`echo $EXPIRE_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+		if [ "`echo $EXPIRE_IN_SECS|grep -E '^[0-9]+$'`" != "" ]; then
 			NOW_IN_SECS=`date +%s 2>/dev/null`
-			if [ "`echo $NOW_IN_SECS|egrep '^[0-9]+$'`" != "" ]; then
+			if [ "`echo $NOW_IN_SECS|grep -E '^[0-9]+$'`" != "" ]; then
 				if [ $NOW_IN_SECS -gt $EXPIRE_IN_SECS ]; then
 					error=1
 					echo expiry $TEMP_DATE 1>&2
@@ -8958,7 +8958,7 @@ do
 		fi
 
 		if [ "`echo $cert|grep server`" != "" ];then
-			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|server).* yes'`" = "" ]; then
+			if [ "`echo $TEMP_PURPOSE|grep -Ei '(any purpose|server).* yes'`" = "" ]; then
 				error=1
 				echo "Purpose $TEMP_PURPOSE" 1>&2
 				dir=`dirname $cert`
@@ -8970,7 +8970,7 @@ do
 			fi
 		fi
 		if [ "`echo $cert|grep client`" != "" ];then
-			if [ "`echo $TEMP_PURPOSE|egrep -i '(any purpose|client).* yes'`" = "" ]; then
+			if [ "`echo $TEMP_PURPOSE|grep -Ei '(any purpose|client).* yes'`" = "" ]; then
 				error=1
 				echo "Purpose $TEMP_PURPOSE" 1>&2
 				dir=`dirname $cert`

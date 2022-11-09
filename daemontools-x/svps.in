@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.14 2022-05-24 12:15:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.15 2022-11-09 20:15:01+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -15,7 +15,7 @@ words=$(ps ax|head -1|wc -w)
 words=$(expr $words - 1)
 
 echo "------------ svscan ---------------"
-ps ax|grep "sbin/svscan"|egrep -v "grep|multilog|supervise" | while read line
+ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
 do
 	set $line
 	pid=$1
@@ -42,7 +42,7 @@ case "$option" in
 		fi
 	done
 
-	egrep -w wait /tmp/svps.$$ | sort -n -k3 | grep -v "/log" | while read line
+	grep -Ew wait /tmp/svps.$$ | sort -n -k3 | grep -v "/log" | while read line
 	do
 		set $line
 		name=`echo $1|cut -d: -f1`
@@ -56,7 +56,7 @@ case "$option" in
 		fi
 	done
 
-	egrep -w "up" /tmp/svps.$$ | grep -v "normally up" | sort -n -k3 | grep -v "/log" | while read line
+	grep -Ew "up" /tmp/svps.$$ | grep -v "normally up" | sort -n -k3 | grep -v "/log" | while read line
 	do
 		set $line
 		name=`echo $1|cut -d: -f1`
@@ -80,7 +80,7 @@ case "$option" in
 	set `grep "@servicedir@/\.svscan/log" /tmp/svps.$$`
 	name=`echo $1|cut -d: -f1`
 	printf "%-"$max"s up   %7d secs  pid %7d\n" $name $3 $6
-	egrep "@servicedir@/.*/log" /tmp/svps.$$ | sort -n -k3 | grep -v "\.svscan" | while read line
+	grep -E "@servicedir@/.*/log" /tmp/svps.$$ | sort -n -k3 | grep -v "\.svscan" | while read line
 	do
 		set $line
 		name=`echo $1|cut -d: -f1`
@@ -185,7 +185,7 @@ if [ $status -ne 0 ] ; then
 	/bin/rm -f /tmp/svpserr.$$ /tmp/svps_tmp.$$
 	exit $status
 else
-	egrep -v "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
+	grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
 	/bin/rm -f /tmp/svpserr.$$ /tmp/svps_tmp.$$
 fi
 max=0
@@ -213,6 +213,9 @@ fi
 /bin/rm -f /tmp/svps.$$
 #
 # $Log: svps.in,v $
+# Revision 1.15  2022-11-09 20:15:01+05:30  Cprogrammer
+# replaced deprecated egrep with grep -E
+#
 # Revision 1.14  2022-05-24 12:15:48+05:30  Cprogrammer
 # fix for alpine linux
 #
