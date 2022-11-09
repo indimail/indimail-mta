@@ -1,5 +1,5 @@
 #
-# $Id: docker-entrypoint.sh,v 1.14 2022-09-08 17:55:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.15 2022-11-09 09:59:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -31,9 +31,10 @@ if [ -f @prefix@/sbin/qmail-queue -a ! -p @indimaildir@/queue/queue1/lock/trigge
 	fi
 	if [ -d @indimaildir@/queue -a ! -f @servicedir@/.svscan/run ] ; then
 		cd @indimaildir@/queue
-		for i in queue1 queue2 queue3 queue4 queue5; do if [ -d $i -a ! -p $i/lock/trigger ] ; then @prefix@/bin/queue-fix -v $i; fi; done
-		for i in slowq nqueue; do if [ -d $i ] ; then @prefix@/bin/queue-fix -v $i; fi; done
-		for i in qmta; do if [ -d $i ] ; then @prefix@/bin/queue-fix -mv $i; fi; done
+		for i in queue*; do if [ -d $i -a ! -p $i/lock/trigger ] ; then @prefix@/bin/queue-fix -v $i; fi; done
+		if [ -d nqueue ] ; then @prefix@/bin/queue-fix -v nqueue; fi
+		if [ -d slowq ] ; then @prefix@/bin/queue-fix -rv slowq; fi
+		if [ -d qmta ] ; then @prefix@/bin/queue-fix -mv qmta; fi
 	fi
 fi
 }
@@ -142,6 +143,9 @@ indimail|indimail-mta|svscan|webmail)
 esac
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.15  2022-11-09 09:59:43+05:30  Cprogrammer
+# fixed fix-queue argument for slowq
+#
 # Revision 1.14  2022-09-08 17:55:47+05:30  Cprogrammer
 # set svscan as default when no arguments are passed
 #
