@@ -34,6 +34,16 @@ foreground. If the entry point is \fBmail\fR, it will execute the
 entrypoint for the container and run in detached mode. See --name or -n
 option below for setting name.
 
+If you need to pass any command line switches to \fBprog\fR, use \-\- to
+prevent the options getting passed to \fBrunpod\fR instead of \fBprog\fR.
+
+e.g. The below passes the timezone parameter to indimail's
+\fBdocker-entrypoint\fR(8).
+
+.EX
+runpod --id=2a13c928f3aa --name=svscan \-\- -t UTC
+.EE
+
 .SH OPTIONS
 .TP 2
 \fB\-\-id\fR=\fIimageID\fR
