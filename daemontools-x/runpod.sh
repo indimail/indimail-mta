@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.5 2022-11-08 23:27:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.6 2022-11-10 12:49:11+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -102,7 +102,7 @@ set_defaults()
 			fi
 		fi
 		if [ " $name" = " svscan" ] ; then
-				extra_args="-ti --rm"
+				extra_args="$extra_args""-ti --rm "
 		fi
 		if [ -z "$extra_args" ] ; then
 			detached=1
@@ -110,21 +110,6 @@ set_defaults()
 		fi
 		;;
 	esac
-	if [ $# -gt 0 -a "$1" = "auto" ] ; then
-		tag=`$command images | grep  $imageid | awk '{print $2}'`
-		case $tag in
-			xenial*|debian*|focal*|bionic*|archlinux*|ubi*)
-			systemd=/lib/systemd/systemd
-			;;
-			alpine*|gentoo*)
-			systemd="/sbin/init"
-			;;
-			*)
-			systemd=/usr/lib/systemd/systemd
-			;;
-		esac
-		echo systemd=$systemd
-	fi
 	if [ -n "$cgroup" -a "$cgroup" = "auto" ] ; then
 		cgroup="-v /sys/fs/cgroup:/sys/fs/cgroup:rw"
 	fi
@@ -219,9 +204,24 @@ done
 if [ -z "$imageid" ] ; then
   usage 1
 fi
-set_defaults $*
+set_defaults
+if [ $# -gt 0 -a "$1" = "auto" ] ; then
+	shift
+	tag=`$command images | grep  $imageid | awk '{print $2}'`
+	case $tag in
+		xenial*|debian*|focal*|bionic*|archlinux*|ubi*)
+		systemd=/lib/systemd/systemd
+		;;
+		alpine*|gentoo*)
+		systemd="/sbin/init"
+		;;
+		*)
+		systemd=/usr/lib/systemd/systemd
+		;;
+	esac
+fi
 if [ -n "$systemd" ] ; then
-	set "$systemd"
+	set "$systemd $*"
 fi
 echo "$command run $cgroup $extra_args"
 echo "  --publish-all --name $name"
@@ -266,6 +266,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.6  2022-11-10 12:49:11+05:30  Cprogrammer
+# fixed extra_args variable getting clobbered
+#
 # Revision 1.5  2022-11-08 23:27:52+05:30  Cprogrammer
 # added case for name=svscan
 #
