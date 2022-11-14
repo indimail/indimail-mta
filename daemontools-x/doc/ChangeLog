@@ -11,15 +11,17 @@ Release 1.1.1 Start 12/09/2022
 03. runpod: added SYS_NICE capability to defaults
 - 01/11/2022
 04. runpod: fixed port clash
-- 07/22/2022
+- 07/11/2022
 05. runpod: prevent output of test on stdout
-- 08/22/2022
+- 08/11/2022
 06. runpod: added case for name=svscan to run in foreground
-- 09/22/2022
+- 09/11/2022
 07. docker-entrypoint: fixed fix-queue argument for slowq
 08. svps.in, minisvc.in, qmailctl.sh: replaced deprecated egrep with grep -E
-- 10/22/2022
+- 10/11/2022
 09. docker-entrypoint: fixed extra_args variable getting clobbered.
+- 14/11/2022
+10. minisvc: when importing variables don't treat existing variables as error
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 27/02/2021 End 08/09/2022

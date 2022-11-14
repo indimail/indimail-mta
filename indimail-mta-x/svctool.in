@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.646 2022-11-09 20:15:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.647 2022-11-14 19:58:51+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.646 2022-11-09 20:15:45+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.647 2022-11-14 19:58:51+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -681,6 +681,7 @@ Known values for OPTION are:
                    2 - Blackhole SPAM Mails
   e              - Exit value of spamfilter that should be treated as spam
   default-domain - default domain name for which this host will handle mails
+  silent         - be less verbose
 
 --qscanq --servicedir=service_path [--scanint=n]
 
@@ -861,7 +862,7 @@ Known values for OPTION are:
 --import-variables=file
   --servicedir=service_path
   --service-name=service_name
-  [--force]
+  [--force] [--silent]
 
   Import new environment variables from a file having one more multiple
   key=value pairs
@@ -870,6 +871,7 @@ Known values for OPTION are:
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
   force          - Set the variable if variable already exists
+  silent         - be less verbose
 
 --export-variables=file
   --servicedir=service_path
@@ -9017,12 +9019,12 @@ mode=$6
 if [ $silent -eq 0 ] ; then
 	if [ $restore_flag -eq 1 ] ; then
 		printf "Restoring %-40s from %s\n" $dir $env_file
+		old=$silent
+		silent=1
 	else
 		printf "importing %-40s from %s\n" $dir $env_file
 	fi
 fi
-old=$silent
-silent=1
 # remove comment, leading space and blank lines
 sed -e 's{^[ \t]*#.*{{g ; s{^[ \t]*{{g ; s{#.*{{ ;  /^$/d' $env_file | while read line
 do
@@ -9031,10 +9033,12 @@ do
 	fi
 	file=`echo $line | cut -d= -f1`
 	value=`echo $line | cut -d= -f2- | tr -d \"`
-	if [ $force -eq 0 -a -f $dir/$file ] ; then
-		echo "env variable $file exists and --force not specified" 1>&2
-		silent=$old
-		return 1
+	# when importing variables
+	if [ $restore_flag -eq 0 -a $force -eq 0 -a -f $dir/$file ] ; then
+		if [ $silent -eq 0 ] ; then
+			echo "importing variables without --force. not replacing variable $file" 1>&2
+		fi
+		continue
 	fi
 	if [ -z "$value" ] ; then
 		value=`echo $line | cut -d= -f2-`
@@ -9073,9 +9077,14 @@ do
 		$chown $owner $dir/$file
 	fi
 done
-silent=$old
-if [ $restore_flag -ne 0 ] ; then
-	out=`mktemp -dt surblXXXXXXXXXX`
+if [ $restore_flag -eq 1 ] ; then
+	silent=$old
+fi
+
+# remove variables not originally present
+# This will restore variables to original state
+if [ $restore_flag -eq 1 ] ; then
+	out=`mktemp -dt svcXXXXXXXXXXXX`
 	if [ $? -ne 0 ] ; then
 		echo "unable to create temp dir" 1>&2
 		return 1
