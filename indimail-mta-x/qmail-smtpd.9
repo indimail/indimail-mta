@@ -1191,16 +1191,10 @@ Local IP addresses can be displayed by means of the program
 .B ipmeprint .
 
 .TP 5
-.IR notipme
-.B qmail-smtpd 
-will ignore detected local IP addresses included in
-.IR notipme .
-This has precedence over
-.IR moreipme .
-.LP
-.IR moreipme ,
-.IR notipme
-can be used in some configurations that involve network
+\fInotipme\fR
+\fBqmail-smtpd\fR will ignore detected local IP addresses included in
+\fInotipme\fR. This has precedence over \fImoreipme\fR. \fImoreipme\fR,
+\fInotipme\fR can be used in some configurations that involve network
 address translation or port forwarding.  It prevents a problem caused
 by an MX or other mail routing directive instructing qmail to connect to
 itself without realizing it's connecting to itself.  When this happens,
@@ -1236,93 +1230,60 @@ configurations where a "dumb" mailserver is configured to use your qmail
 server as a "smarthost", delivering all mail to it without inspection.
 
 To solve this, other IP addresses which will ultimately connect back to
-your machine can be added to the file "control/moreipme", one per line.
-qmail will treat all addresses in this file exactly as if they were
-local, and if it finds an MX record or other mail routing information
-which would cause it to connect to any of these addresses, it will call
-perm_ambigmx(), and print the above error message.
+your machine can be added to the file \fImoreipme\fR, one per line. qmail
+will treat all addresses in this file exactly as if they were local, and if
+it finds an MX record or other mail routing information which would cause
+it to connect to any of these addresses, it will call perm_ambigmx(), and
+print the above error message.
 
 Additionally, IP addresses which the system detects but which should
 *not* be treated as local can be removed from qmail's ipme list by
-adding them to the file "control/notipme".
+adding them to the file \fInotipme\fR.
 
-"control/notipme" takes precedence over "control/moreipme".  In other
-words, addresses that appear in both "control/moreipme" and
-"control/notipme" will not be considered local.
+\fInotipme\fR takes precedence over \fImoreipme\fR. In other words,
+addresses that appear in both \fImoreipme\fR and \fnotipme\fR will not
+be considered local.
 
-You can run the program "ipmeprint" to see what interfaces qmail is
+You can run the program \fBipmeprint\fR to see what interfaces qmail is
 detecting or finds in moreipme.
 
 .TP 5
-.I morercpthosts
-Extra allowed RCPT domains.
-If
-.I rcpthosts
-and
-.I morercpthosts
-both exist,
-.I morercpthosts
-is effectively appended to
-.IR rcpthosts .
+\fImorercpthosts\fR
+Extra allowed RCPT domains. If \fIrcpthosts\fR and \fImorercpthosts\fR both
+exist, \fImorercpthosts\fR is effectively appended to \fIrcpthosts\fR.
 
 You must run PREFIX/sbin/qmail-cdb on \fImorercpthosts\fR whenever it
 changes.
 
-Rule of thumb for large sites:
-Put your 50 most commonly used domains into
-.IR rcpthosts ,
-and the rest into
-.IR morercpthosts .
+Rule of thumb for large sites: Put your 50 most commonly used domains into
+\fIrcpthosts\fR, and the rest into \fImorercpthosts\fR.
 
 .TP 5
-.I nodnscheck
-DNS checks are prohibited for sender addresses (Mail from:)
-included here. Addresses can be expressed individually and/or
-for a domain:
+\fInodnscheck\fR
+DNS checks are prohibited for sender addresses (Mail from:) included here.
+Addresses can be expressed individually and/or for a domain:
 
 .EX
    god@heaven.af.mil
    @heaven.af.mil
 .EE
 
-If the environment variable
-.B NODNSCHECK
-is set, 
-.B qmail-smtpd
-will ignore 
-.IB nodnscheck
-and the DNS check will be disabled in general.
-A line in
-.I nodnschecks
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
+If the environment variable \fBNODNSCHECK\fR is set, \fBqmail-smtpd\fR will
+ignore \fInodnscheck\fR and the DNS check will be disabled in general. A
+line in \fInodnschecks\fR may be of the form \fB@\fIhost\fR, meaning every
+address att \fIhost\fR.
 
 .TP 5
-.I rcpthosts
-Allowed RCPT domains.
-If
-.I rcpthosts
-is supplied,
-.B qmail-smtpd
-will reject
-any envelope recipient address with a domain not listed in
-.IR rcpthosts .
+\fIrcpthosts\fR
+Allowed RCPT domains. If \fIrcpthosts is supplied, \fBqmail-smtpd\fR will
+reject any envelope recipient address with a domain not listed in
+\fIrcpthosts\fR.
 
-Exception:
-If the environment variable
-.B RELAYCLIENT
-is set,
-.B qmail-smtpd
-will ignore
-.IR rcpthosts ,
-and will append the value of
-.B RELAYCLIENT
-to each incoming recipient address.
+Exception: If the environment variable \fBRELAYCLIENT\fR is set,
+\fBqmail-smtpd\fR will ignore \fIrcpthosts\fR, and will append the value of
+\fBRELAYCLIENT\fR to each incoming recipient address.
 
-.I rcpthosts
-may include wildcards:
+\fIrcpthosts\fR may include wildcards:
 
 .EX
    heaven.af.mil
@@ -1333,22 +1294,19 @@ Envelope recipient addresses without @ signs are
 always allowed through.
 
 .TP 5
-.I etrnhosts
+\fIetrnhosts\fR
 domain names for which ETRN is allowed. Delivery for these domains should
 should be set to the Maildir QMAILHOME/autoturn/domain_name/Maildir where
 domain_name is the name of the domain.
 
 .TP 5
-.I relayclients
+\fIrelayclients\fR
 IP addresses of clients allowed to relay mail through this host.
 Each address should be followed by a colon and an (optional) string
 that should be appended to each incoming recipient address, just as
-with the
-.B RELAYCLIENT
-environment variable.
-Nearly always, the optional string should be null. The filename can be
-overriden by the environment variable
-.BR RELAYCLIENTS .
+with the \fBRELAYCLIENT\fR environment variable. Nearly always, the
+optional string should be null. The filename can be overriden by the
+environment variable \fBRELAYCLIENTS\fR.
 
 Addresses in
 .I relayclients
@@ -1360,18 +1318,14 @@ may be wildcarded:
 .EE
 
 .TP 5
-.I relaydomains
+\fIrelaydomains\fR
 Host and domain names allowed to relay mail through this host.
 Each address should be followed by a colon and an (optional) string
 that should be appended to each incoming recipient address, just as
-with the
-.B RELAYCLIENT
-environment variable.
-Nearly always, the optional string should be null.
+with the \fBRELAYCLIENT\fR environment variable. Nearly always, the
+optional string should be null.
 
-Addresses in
-.I relaydomains
-may be wildcarded:
+Addresses in \fIrelaydomains\fR may be wildcarded:
 
 .EX
    heaven.af.mil:
@@ -1379,23 +1333,14 @@ may be wildcarded:
 .EE
  
 .TP 5
-.I relaymailfrom
+\fIrelaymailfrom\fR
 envelope senders (MAIL FROM) listed in this file will be allowed to relay
 independently of the $RELAYCLIENT environment variable. Entries in
-.I relaymailfrom 
-can be E-Mail addresses, or just the domain (with the @ sign). Unlike
-.I relaydomains 
-native addresses should be entered.
-A line in
-.I relaymailfrom
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I relaymailfrom
-can also be in cdb format. If
-.I relaymailfrom.cdb
-is present, it will be searched first.
+\fIrelaymailfrom \fR can be E-Mail addresses, or just the domain (with
+the @ sign). Unlike \fIrelaydomains\fR native addresses should be entered.
+A line in \fIrelaymailfrom\fR may be of the form \fB@\fIhost\fR, meaning
+every address at \fIhost\fR. \fIrelaymailfrom\fR can also be in cdb format.
+If \fIrelaymailfrom.cdb\fR is present, it will be searched first.
 Examples:
 
 .EX
@@ -1404,7 +1349,7 @@ Examples:
 .EE
 
 .TP 5
-.I recipients
+\fIrecipients\fR
 List of external resources providing acceptable, full-qualified envelope
 addresses (\'RCPT to: <recip@domain>\') to be used for recipient
 verification during the SMTP session.
@@ -1468,87 +1413,71 @@ recipients check is applied after the \fIrcpthosts\fR evaluation.
 from \fIASSIGN/recipients\fR.
 
 The \fBqmail-smtpd\fR recipients mechanism supports qmail's address
-extension (VERP).  Unqualified envelope recipients are appended with
+extension (VERP). Unqualified envelope recipients are appended with
 \'@localhost\'.
 
 .TP 5
-.I batvkey
+\fIbatvkey\fR
 Key for Bounce Address Tag Validation (BATV) signing. The filename can be
-overriden by the environment variable
-.IR BATVKEY .
+overriden by the environment variable \fIBATVKEY\fR.
 
 .TP 5
-.I batvkeystale
+\fIbatvkeystale\fR
 Validity period in days of the BATV signing key after which the key will be
 considered Stale. The validity period can be overriden by setting the
 environment variable \fBBATVKEYSTALE\fR.
 
 .TP 5
-.I batvnosignremote
+\fIbatvnosignremote\fR
 Exclusions of remote hosts for Bounce Address Tag Validation (BATV) that do
 not work with signed addresses. The filename can be overriden by the
 environment variable \fBBATVNOSIGNREMOTE\fR.
 
 .TP 5
-.I batvnosignlocals
-Exclusions of hosts for Bounce Address Tag Validation (BATV)
-that do not work with signed addresses. If you want to skip BATV
-validiation for any host in locals or rcpthosts, you need to put them here.
-The filename can be overriden by the environment variable
-\fBBATVNOSIGNLOCALS\fR.
+\fIbatvnosignlocals\fR
+Exclusions of hosts for Bounce Address Tag Validation (BATV) that do not
+work with signed addresses. If you want to skip BATV validiation for any
+host in locals or rcpthosts, you need to put them here. The filename can be
+overriden by the environment variable \fBBATVNOSIGNLOCALS\fR.
 
 .TP 5
-.I smtpgreeting
-SMTP greeting message.
-Default:
-.IR me ,
-if that is supplied;
-otherwise
-.B qmail-smtpd
-will refuse to run.
-The first word of
-.I smtpgreeting
-should be the current host's name.
+\fIsmtpgreeting\fR
+SMTP greeting message. Default: \fIme\fR, if that is supplied; otherwise
+\fBqmail-smtpd\fR will refuse to run. The first word of \fIsmtpgreeting\fR
+should be the current host's name. The first line of greeting includes
+version, revision and local date and time. You can disable printing of
+version, revision and local date and time by setting
+\fBDISABLE_EXTRA_GREET\fR environment variable.
 
 .TP 5
-.I tarpitcount
-tarpitcount ist the number of RPCT TO: 
-.B qmail-smtpd
-accepts before it starts tarpitting.
-Default: 0 which means no tarpitting.
-The environment variable 
-.B TARPITCOUNT
-can be used instead.
+\fItarpitcount\fR
+tarpitcount ist the number of RPCT TO: \fBqmail-smtpd\fR accepts before it
+starts tarpitting. Default: 0 which means no tarpitting. The environment
+variable \fBTARPITCOUNT\fR can be used instead.
 
 .TP 5
-.I tarpitdelay
-tarpitdelay is the time in seconds of delay
-to be introduced after each subsequent RCPT TO:.
-Default: 5.
-The environment variable
-.B TARPITDELAY
-can be used instead.
+\fItarpitdelay\fR
+tarpitdelay is the time in seconds of delay to be introduced after each
+subsequent RCPT TO:.  Default: 5. The environment variable
+\fBTARPITDELAY\fR can be used instead.
 
 .TP 5
 .I timeoutsmtpd
-Number of seconds
-.B qmail-smtpd
-will wait for each new buffer of data from the remote SMTP client.
-Default: 1200.
-.TP 5
-.I timeoutread
-Number of seconds
-.B qmail-smtpd
-will wait for each new buffer of data from inlookup for fifo query.
-Default: 4.
-.TP 5
-.I timeoutwrite
-Number of seconds
-.B qmail-smtpd
-will wait for writing data to inlookup for fifo query. Default: 4.
+Number of seconds \fBqmail-smtpd\fR will wait for each new buffer of data
+from the remote SMTP client. Default: 1200.
 
 .TP 5
-.I spfbehavior
+\fItimeoutread\fR
+Number of seconds \fBqmail-smtpd\fR will wait for each new buffer of data
+from inlookup for fifo query. Default: 4.
+
+.TP 5
+\fItimeoutwrite\fR
+Number of seconds \fBqmail-smtpd\fR will wait for writing data to inlookup
+for fifo query. Default: 4.
+
+.TP 5
+\fIspfbehavior\fR
 .nr step 0 1
 Set to a value between 1 and 6 to enable SPF checks; 0 to disable. The
 contents of this file are overridden by the value of the \fBSPFBEHAVIOR\fR
@@ -1565,18 +1494,17 @@ includes SMTP-AUTH and similar patches)
 .IP \n[step] 2
 disable spf check
 .IP \n+[step]
-select 'annotate-only' mode, where \fBqmail-smtpd\fR will annotate
-incoming email with \fBReceived-SPF\fR fields, but will not reject any
-messages.
+select 'annotate-only' mode, where \fBqmail-smtpd\fR will annotate incoming
+email with \fBReceived-SPF\fR fields, but will not reject any messages.
 .IP \n+[step]
-produce temporary failures on DNS lookup problems so you
-can make sure you always have meaningful Received-SPF headers.
+produce temporary failures on DNS lookup problems so you can make sure you
+always have meaningful Received-SPF headers.
 .IP \n+[step]
 select 'reject' mode, where incoming mail will be rejected if the SPF
 record says 'fail'.
 .IP \n+[step]
-select a more stricter rejection mode, which is like 'reject' mode,
-except that incoming mail will also be rejected when the SPF record
+select a more stricter rejection mode, which is like 'reject' mode, except
+that incoming mail will also be rejected when the SPF record
 says 'softfail'.
 .IP \n+[step]
 reject when the SPF record says 'neutral'
@@ -1586,7 +1514,7 @@ encountered).
 .RE
 
 .TP 5
-.I spfexp
+\fIspfexp\fR
 You can add a line with a an SPF explanation that will be shown to the
 sender in case of a reject. It will override the default one. You can
 use SPF macro expansion. If a domain specifies its own explanation it is
@@ -1599,9 +1527,9 @@ The SMTP answer when rejecting mails will look like:
 .EE
 
 .TP 5
-.I spfguess
-You can add a line with SPF rules that will be checked if a sender
-domain doesn't have a SPF record. The local spfrules are always executed
+\fIspfguess\fR
+You can add a line with SPF rules that will be checked if a sender domain
+doesn't have a SPF record. The local spfrules are always executed
 afterwards.
 
 It is suggested to add \fHa/24 mx/24 ptr\fR.
@@ -1610,53 +1538,43 @@ scoring Received-SPF lines). You can override the \fIspfguess\fR filename
 by setting \fBSPFGUESS\fR environment variable.
 
 .TP 5
-.I spfrules
+\fIspfrules\fR
 Local rules means: Rules that are executed before the real SPF rules for a
 domain would fail (fail, softfail, neutral). This can be used to always
 allow certain machines to send certain mails. You can override
 \fIspfrules\fR filename by setting \fBSPFRULES\fR environment variable.
 
-They are also executed for domains that don't publish SPF entries.
-It is suggested to add \fHinclude:spf.trusted-forwarder.org\fR.
-You can also add mechanisms to trust known mail servers like backup MX
-servers, though you should at least also use tcprules (to modify
-\fBSPFBEHAVIOR\fR).
+They are also executed for domains that don't publish SPF entries. It is
+suggested to add \fHinclude:spf.trusted-forwarder.org\fR. You can also add
+mechanisms to trust known mail servers like backup MX servers, though you
+should at least also use tcprules (to modify \fBSPFBEHAVIOR\fR).
 
 .TP 5
-.I spfipv6
+\fIspfipv6\fR
 You can turn on spf for ipv6 connections by setting to  value 1; 0 to
 disable. You can override this control file with environment variable
 \fBUSE_SPFIPV6\fR.
 
 .TP 5
-.I bouncesubject
-.TP 5
-.I doublebouncesubject
+\fIbouncesubject\fR, \fIdoublebouncesubject\fR
 The subject which will be used for bounce messages and double bounce
 messages. Default: failure notice
+
 .TP 5
-.I bouncemessage
-.TP 5
-.I doublebouncemessage
+\fIbouncemessage\fR, \fIdoublebouncemessage\fR
 The text which will be used for bounce messages and double bounce messages.
 Default: QSBMF
 
 .TP 5
-.I chkrcptdomains
+\fIchkrcptdomains\fR
 If CHECKRECIPIENT environment variable is defined, user status check will
-be carried out for addresses listed in this file.
-A line in
-.I chkrcptdomains
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I chkrcptdomains
-can also be in cdb format. if \fIchkrcptdomains\fR.\fIcdb\fR file is
-present, it will be searched first. \fIchkrcptdomains\fR.\fIcdb\fR can be
-built using \fBqmail\fR-\fBcdb\fR(8). You can set QREGEX environment
-variable if you want to use regex patterns for addresses in
-\fIchkrcptdomains\fR.
+be carried out for addresses listed in this file. A line in
+\fIchkrcptdomains\fR may be of the form \fB@\fIhost\fR\fR, meaning every
+address at \fIhost\fR. \fIchkrcptdomains\fR can also be in cdb format. if
+\fIchkrcptdomains\fR.\fIcdb\fR file is present, it will be searched first.
+\fIchkrcptdomains\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).
+You can set QREGEX environment variable if you want to use regex patterns
+for addresses in \fIchkrcptdomains\fR.
 
 Default: All domains listed in rcpthosts are checked if CHECKRECIPIENT is
 defined and this control file is absent. If the CUGMAIL environment
@@ -1665,7 +1583,7 @@ variable is defined, mails will be accepted only from local domains
 have privileges to use SMTP.
 
 .TP 5
-.I domainqueue
+\fIdomainqueue\fR
 Specific queue can be assigned to recipient domains. The format of this
 file is of the form
 
@@ -1691,7 +1609,7 @@ in @sysconfdir@/control/concurrencyr.queue6
 will set 10 as the remote concurrency for all emails sent to yahoo.com
 
 .TP 5
-.I from.envrules
+\fIfrom.envrules\fR
 Specific environment variables can be set for specific senders.
 The format of this file is of the form                                       
 pat:envar1=val,envar2=val,...]
@@ -1718,7 +1636,7 @@ internal \fIwildmat\fR function. The second line gets applied for null
 senders
 
 .TP 5
-.I auth.envrules
+\fIauth.envrules\fR
 Specific environment variables can be set for clients who have RELAYCLIENT
 set or authenticate using SMTP AUTH. These environment variables are
 available for \fBqmail-queue(8)\fR. The format of this file is of the form
@@ -1727,13 +1645,11 @@ available for \fBqmail-queue(8)\fR. The format of this file is of the form
 <>:envar1=val,envar2=val,...]
 .EE
 
-envar1, envar2 are list of environment variables to be set. If
-.I val
-is omitted, the environment variable is unset.
+envar1, envar2 are list of environment variables to be set. If \fIval\fR is
+omitted, the environment variable is unset.
 
-The name of the control file can be overriden by the environment
-variable
-.BR AUTHRULES .
+The name of the control file can be overriden by the environment variable
+\fBAUTHRULES\fR.
 
 The following list of environment variables can be modified using envrules
 .IR QREGEX ,

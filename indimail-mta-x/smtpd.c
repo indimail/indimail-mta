@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.276 2022-10-30 10:02:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.277 2022-11-14 11:19:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -136,7 +136,6 @@ static int      auth_scram_sha512_plus();
 int             err_noauth();
 int             err_noauthallowed();
 int             addrrelay();
-void            smtp_greet(char *);
 int             atrn_queue(char *, char *);
 no_return void _exit(int status);
 
@@ -146,7 +145,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.276 $";
+char           *revision = "$Revision: 1.277 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2116,22 +2115,8 @@ log_atrn(char *arg1, char *arg2, char *arg3, char *arg4)
 	logerrf("\n");
 }
 
-no_return void
-sigterm()
-{
-	smtp_greet("421 ");
-	out(" Service not available, closing tranmission channel (#4.3.2)\r\n");
-	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" going down on SIGTERM");
-	logerrf("\n");
-	_exit(1);
-}
-
 void
-esmtp_print()
+greet_extra()
 {
 	char           *ptr;
 	char            buf[DATE822FMT];
@@ -2141,41 +2126,39 @@ esmtp_print()
 	substdio_puts(&ssout, " (NO UCE) ESMTP IndiMail ");
 	for (ptr = (revision + 11); *ptr; ptr++) {
 		if (*ptr == ' ') {
-			out(" ");
+			substdio_put(&ssout, " ", 1);
 			break;
 		}
 		substdio_put(&ssout, ptr, 1);
 	}
 	datetime_tai(&dt, now());
 	i = date822fmt(buf, &dt);
-	buf[i - 1] = 0;
-	out(buf);
-	flush();
+	substdio_put(&ssout, buf, i - 1); /*- skip printing \n */
+	substdio_flush(&ssout);
 	return;
 }
 
 void
-smtp_greet(char *code)
+smtp_respond(char *code)
 {
-	int             i, j, esmtp;
+	int             i, j, do_greet;
+	static int      d = -1;
 
-	if (code[3] != ' ') {
-		substdio_puts(&ssout, code);
-		substdio_puts(&ssout, greeting.s);
-		return;
-	}
 	if (code[0] == '2' && code[1] == '2' && code[2] == '0')
-		esmtp = 1;
+		do_greet = 1;
 	else
-		esmtp = 0;
+		do_greet = 0;
+	if (d == -1)
+		d = env_get("DISABLE_EXTRA_GREET") ? 1 : 0;
+	/*- multiline greeting */
 	for (i = 0, j = 0; i < greeting.len - 1; i++) {
 		if (greeting.s[i] == '\0') {
 			substdio_put(&ssout, code, 3);
 			substdio_puts(&ssout, "-");
 			substdio_put(&ssout, greeting.s + j, i - j);
-			if (esmtp) {
-				esmtp_print();
-				esmtp = 0;
+			if (!d && do_greet) {
+				greet_extra();
+				do_greet = 0;
 			}
 			substdio_puts(&ssout, "\r\n");
 			j = i + 1;
@@ -2183,10 +2166,22 @@ smtp_greet(char *code)
 	}
 	substdio_puts(&ssout, code);
 	substdio_put(&ssout, greeting.s + j, greeting.len - 1 - j);
-	if (esmtp) {
-		esmtp_print();
-		esmtp = 0;
-	}
+	if (!d && do_greet)
+		greet_extra();
+}
+
+no_return void
+sigterm()
+{
+	smtp_respond("421 ");
+	out(" Service not available, closing tranmission channel (#4.3.2)\r\n");
+	flush();
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" going down on SIGTERM");
+	logerrf("\n");
+	_exit(1);
 }
 
 void
@@ -2208,6 +2203,7 @@ smtp_help(char *arg)
 		}
 	}
 	out("\r\n");
+	out("214-https://github.com/mbhangui/indimail-mta\r\n");
 	out("214-This server supports the following commands:\r\n");
 	switch (smtp_port)
 	{
@@ -2245,7 +2241,7 @@ smtp_quit(char *arg)
 	int             i;
 #endif
 
-	smtp_greet("221 ");
+	smtp_respond("221 ");
 	out(" closing connection\r\n");
 	flush();
 	if (phandle)
@@ -2925,7 +2921,7 @@ smtp_helo(char *arg)
 		smtp_badip(remoteip);
 		return;
 	}
-	smtp_greet("250 ");
+	smtp_respond("250 ");
 	if (!arg || !*arg) {
 		out(" [");
 		out(remoteip);
@@ -2970,7 +2966,8 @@ smtp_ehlo(char *arg)
 		smtp_badip(remoteip);
 		return;
 	}
-	smtp_greet("250-");
+	out("250-");
+	out(greeting.s);
 	if (!arg || !*arg) {
 		out(" [");
 		out(remoteip);
@@ -7333,42 +7330,42 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if ((ptr = env_get("SHUTDOWN"))) {
 		if (*ptr) {
 			if (!isdigit(ptr[0]) || !isdigit(ptr[1]) || !isdigit(ptr[2])) {
-				smtp_greet("421 ");
+				smtp_respond("421 ");
 			} else {
 				str_copyb(strnum, ptr, 4);
 				strnum[4] = 0;
-				smtp_greet(strnum);
+				smtp_respond(strnum);
 				out(ptr + 3);
 			}
 		} else {
-			smtp_greet("421 ");
+			smtp_respond("421 ");
 			out(" SMTP service unavailable (#4.3.2)");
 		}
 		setup_state = 1;
 	} else {
 		if (dobadipcheck && badipcheck(remoteip)) {
-			smtp_greet("421 ");
+			smtp_respond("421 ");
 			out(" sorry, your IP (");
 			out(remoteip);
 			out(") is temporarily denied (#4.7.1)");
 			setup_state = 6;
 		} else
 		if (dobadhostcheck && badhostcheck()) {
-			smtp_greet("553 ");
+			smtp_respond("553 ");
 			out(" sorry, your host (");
 			out(remotehost);
 			out(") has been denied (#5.7.1)");
 			setup_state = 5;
 		} else
 		if (env_get("OPENRELAY")) {
-			smtp_greet("553 ");
+			smtp_respond("553 ");
 			out(" No mail accepted from an open relay (");
 			out(remoteip);
 			out("); check your server configs (#5.7.1)");
 			setup_state = 2;
 		} else
 		if ((ptr = env_get("TCPPARANOID"))) {
-			smtp_greet("553 ");
+			smtp_respond("553 ");
 			out(" sorry, your IP address (");
 			out(remoteip);
 			if (*ptr) {
@@ -7380,7 +7377,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			setup_state = 3;
 		} else
 		if ((ptr = env_get("REQPTR")) && str_equal(remotehost, "unknown")) {
-			smtp_greet("553 ");
+			smtp_respond("553 ");
 			if (*ptr) {
 				out(" ");
 				out(ptr);
@@ -7394,7 +7391,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			}
 			setup_state = 4;
 		} else
-			smtp_greet("220 ");
+			smtp_respond("220 ");
 	}
 	out("\r\n");
 	flush();
@@ -7543,6 +7540,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.277  2022-11-14 11:19:43+05:30  Cprogrammer
+ * set DISABLE_EXTRA_GREET environment variable to disable extra information in greeting
+ *
  * Revision 1.276  2022-10-30 10:02:00+05:30  Cprogrammer
  * removed skip setting STOREDKEY, SERVERKEY using GSASL_PASSWORD env variable
  *
@@ -7818,7 +7818,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.276 2022-10-30 10:02:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.277 2022-11-14 11:19:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
