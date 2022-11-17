@@ -19,6 +19,7 @@ url="https://github.com/mbhangui/indimail-mta"
 license=('GPL3')
 groups=('base-devel')
 depends=('coreutils' 'findutils' 'sed' 'openssl' 'mariadb-libs' 'libqmail')
+makedepends=('gzip')
 source=("$pkgname-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 _sysconfdir=@sysconfdir@
