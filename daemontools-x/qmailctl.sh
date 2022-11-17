@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.72 2022-11-09 20:13:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.73 2022-11-17 08:44:30+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -38,28 +38,23 @@ else
 		SYSTEM=`uname -s`
 	fi
 fi
-ECHO=echo
-case "$SYSTEM" in
-	Darwin*|Debian|SuSE|alpine)
-		RES_COL=60
-		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
-		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
-		SETCOLOR_FAILURE="$ECHO -en \\033[1;31m"
-		SETCOLOR_WARNING="$ECHO -en \\033[1;33m"
-		SETCOLOR_NORMAL="$ECHO -en \\033[0;39m"
-		CR="$ECHO -n -e \r"
+RES_COL=60
+if [ "$(uname -s)" = "Linux" -a -f /proc/$$/exe ] ; then
+	shell=$(realpath /proc/$$/exe)
+	case "$shell" in
+		bash)
+		set_esc_seq echo echo
 		;;
-	FreeBSD)
+		*)
 		ECHO=/bin/echo
-		RES_COL=60
-		MOVE_TO_COL="printf \\033[${RES_COL}G"
-		SETCOLOR_SUCCESS="printf \\033[1;32m"
-		SETCOLOR_FAILURE="printf \\033[1;31m"
-		SETCOLOR_WARNING="printf \\033[1;33m"
-		SETCOLOR_NORMAL="printf \\033[0;39m"
-		CR="printf \r"
+		set_esc_seq printf /bin/echo
 		;;
-esac
+	esac
+elif [ "$SYSTEM" = "Darwin" ] ; then
+	set_esc_seq echo echo
+elif [ "$SYSTEM" = "FreeBSD" ] ; then
+	set_esc_seq printf /bin/echo
+fi
 if [ -f /etc/indimail/indimail-mta-release ] ; then
 	have_indimail=1
 else
@@ -107,6 +102,28 @@ case "$SYSTEM" in
 	fail=myfailure
 	;;
 esac
+}
+
+set_esc_seq() {
+	case $1 in
+		echo)
+		MOVE_TO_COL="$ECHO -en \\033[${RES_COL}G"
+		SETCOLOR_SUCCESS="$ECHO -en \\033[1;32m"
+		SETCOLOR_FAILURE="$ECHO -en \\033[1;31m"
+		SETCOLOR_WARNING="$ECHO -en \\033[1;33m"
+		SETCOLOR_NORMAL="$ECHO -en \\033[0;39m"
+		CR="$ECHO -n -e \r"
+		;;
+		printf)
+		MOVE_TO_COL="printf \\033[${RES_COL}G"
+		SETCOLOR_SUCCESS="printf \\033[1;32m"
+		SETCOLOR_FAILURE="printf \\033[1;31m"
+		SETCOLOR_WARNING="printf \\033[1;33m"
+		SETCOLOR_NORMAL="printf \\033[0;39m"
+		CR="printf \r"
+		;;
+	esac
+	ECHO=$2
 }
 
 myecho_success() {
@@ -306,7 +323,7 @@ sv_up_all()
 			@prefix@/bin/svc -u $i 2>/tmp/sv.err && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		fi
 	done
 }
@@ -324,7 +341,7 @@ sv_down_all()
 			@prefix@/bin/svc -d $i 2>>/tmp/sv.err && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		fi
 	done
 }
@@ -420,7 +437,7 @@ start()
 		RETVAL=$?
 		[ $RETVAL -eq 0 ] && $succ || $fail
 		echo ""
-		let ret+=$RETVAL >/dev/null
+		ret=$(($ret + $RETVAL))
 	fi
 	if [ -s /tmp/sv.err ] ; then
 		/bin/cat /tmp/sv.err
@@ -432,8 +449,14 @@ start()
 	return $ret
 }
 
+notroot()
+{
+	echo "you need to be a superpower"
+	exit 4
+}
+
 # Check that we're a privileged user
-[ `id -u` = 0 ] || exit 4
+[ `id -u` = 0 ] || notroot
 if [ "x$1" = "xstop" ] ; then
 	if [ $PPID -ne 1 ] ; then
 		SYSTEMCTL_SKIP_REDIRECT=1
@@ -484,10 +507,10 @@ case "$cmmd" in
 	restart|force-reload)
 		stop
 		RETVAL=$?
-		let ret+=$RETVAL >/dev/null
+		ret=$(($ret + $RETVAL))
 		start
 		RETVAL=$?
-		let ret+=$RETVAL >/dev/null
+		ret=$(($ret + $RETVAL))
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	condrestart|try-restart)
@@ -499,7 +522,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -d $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		done
 		for i in `echo $SERVICE/qmail-send.*`
 		do
@@ -507,7 +530,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -t $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		done
 		for i in `echo $SERVICE/qmail-smtpd.* $SERVICE/qmail-qmqpd.* $SERVICE/qmail-qmtpd.*`
 		do
@@ -516,7 +539,7 @@ case "$cmmd" in
 				@prefix@/bin/svc -u $i && $succ || $fail
 				RETVAL=$?
 				echo
-				let ret+=$RETVAL >/dev/null
+				ret=$(($ret + $RETVAL))
 			fi
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
@@ -538,7 +561,7 @@ case "$cmmd" in
 				@prefix@/bin/svc -a $i/log && $succ || $fail
 				RETVAL=$?
 				echo
-				let ret+=$RETVAL >/dev/null
+				ret=$(($ret + $RETVAL))
 			fi
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
@@ -555,7 +578,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -a $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
@@ -573,7 +596,7 @@ case "$cmmd" in
 		else
 			echo "No services configured under svscan"
 		fi
-		let ret+=$RETVAL >/dev/null
+		ret=$(($ret + $RETVAL))
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
 	queue)
@@ -591,7 +614,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -h $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
@@ -604,7 +627,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -p $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
@@ -617,7 +640,7 @@ case "$cmmd" in
 			@prefix@/bin/svc -c $i && $succ || $fail
 			RETVAL=$?
 			echo
-			let ret+=$RETVAL >/dev/null
+			ret=$(($ret + $RETVAL))
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
 		;;
@@ -634,7 +657,7 @@ case "$cmmd" in
 					/bin/rm -f $j && $succ || $fail
 					RETVAL=$?
 					echo
-					let ret+=$RETVAL >/dev/null
+					ret=$(($ret + $RETVAL))
 				fi
 			done
 			for j in `/bin/ls @sysconfdir@/tcp/tcp*.$i 2>/dev/null`
@@ -654,7 +677,7 @@ case "$cmmd" in
 				else
 					RETVAL=0
 				fi
-				let ret+=$RETVAL >/dev/null
+				ret=$(($ret + $RETVAL))
 			done
 		done
 		[ $ret -eq 0 ] && exit 0 || exit 1
