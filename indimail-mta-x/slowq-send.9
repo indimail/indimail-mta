@@ -25,27 +25,28 @@ to the queue. \fBTODO_INTERVAL\fR can also be set in the control file
 variable. If TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
 \fBslowq-send\fR silently uses 10 secs as the value for
 \fBTODO_INTERVAL\fR. \fBslow-send\fR can also run a parallel todo-processor
-if the environment variable \fBTODO_PROCESSOR\fR is set. This addresses a
-problem known as the silly qmail (queue) problem sometimes found only on
-system with high injection rates. With todo-processor running,
-\fBslowq-send\fR can run delivery processing and todo processing in
-detached mode if it gets\fBSIGUSR1\fR signal. In detached mode, slowq-send
-processes just the existing local and remote queue at the time of the
-receipt of \fBSIGUSR1\fR and schedules delivery jobs for the existing
-local/remote queue.  Once there are no existing jobs, \fBqmail-send\fR
-instructs \fBtodo-proc\fR to start sending new jobs. Meanwhile the todo
-processing continues to happen and emails continue to get classied as
-local, remote, but they don't get scheduled for delivery. One can also
-issue the signal \fBSIGUSR2\fR to enter the normal attached mode, where
-emails get scheduled immediately after todo processing. SIGUSR1 should be
-used if \fBqmail-send\fR is unable to cope with high injection rates. One
-may issue SIGUSR1 if you want to pre-process the incoming emails but
-schedule delivery later on receipt of SIGUSR2.
+named \fBslowq-todo\fR, if the environment variable \fBTODO_PROCESSOR\fR is
+set. This addresses a problem known as the silly qmail (queue) problem
+sometimes found only on system with high injection rates and an inefficient
+filesystem. With todo-processor running, \fBslowq-send\fR can run delivery
+processing and todo processing in detached mode if it gets\fBSIGUSR1\fR
+signal. In detached mode, \fBslowq-send\fR will process just the existing
+local and remote queue at the time of the receipt of \fBSIGUSR1\fR and then
+schedule delivery jobs for the existing local/remote queue. Once there are
+no existing jobs, \fBslowq-send\fR instructs \fBslowq-todo\fR to start
+sending new jobs. Meanwhile the todo processing continues to happen and
+emails continue to get classied as local, remote, but they don't get
+scheduled for delivery. One can also issue the signal \fBSIGUSR2\fR to
+enter the normal attached mode, where emails get scheduled immediately
+after todo processing. \fBSIGUSR1\fR should be used if \fBslowq-send\fR is
+unable to cope with high injection rates. One may issue \fBSIGUSR1\fR if
+you want to pre-process the incoming emails but schedule delivery later by
+issuing signal \fBSIGUSR2\fR.
 
 \fBslowq-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
 recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
 If a message is temporarily undeliverable to one or more addresses,
-\fBslowq-send\fR leaves it in the queue and tries the addresses again later.
+\fBslowq-send\fR leaves it in the queue and retries the addresses later.
 
 \fBslowq-send\fR prints a readable record of its activities to descriptor
 0. It writes commands to \fBqmail-lspawn\fR, \fBqmail-rspawn\fR, and
@@ -53,15 +54,15 @@ If a message is temporarily undeliverable to one or more addresses,
 descriptors 2, 4, and 6. \fBslowq-send\fR is responsible for avoiding
 deadlock.
 
-\fBslowq-send\fR uses \fBqmail-queue\fR to queue bounces and
-aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
-variable. If a different queue program is desired for bounces, it can be set
-by using \fBBOUNCEQUEUE\fR environment variable.
+\fBslowq-send\fR uses \fBqmail-queue\fR to queue aliases/forwards and
+bounces. This can be changed by setting \fBQMAILQUEUE\fR
+environment variable. If a different queue program is desired for bounces
+alone, it can be set by using \fBBOUNCEQUEUE\fR environment variable.
 
-If \fISRS\fR has been configured, when injecting a bounce for a previously
-forwarded email whose sender was rewritten using \fISRS\fR, \fBslowq-send\fR
-rewrites the recipient to the original sender using Sender Rewriting
-Scheme. See \fBindimail-srs\fR(5) for information on how to do this.
+If Sender Rewriting Schme (\fISRS\fR) has been configured, when injecting a
+bounce for a previously forwarded email whose sender was rewritten using
+\fISRS\fR, \fBslowq-send\fR rewrites the recipient to the original sender
+using \fBSRS\fR. See \fBindimail-srs\fR(5) to know how to do this.
 
 \fBslowq-send\fR adds the \fBX-Bounced-Address\fR header when creating a
 bounce. It assigns the address that caused the bounce to this header. This
@@ -69,10 +70,11 @@ is useful for programs that generate DKIM signature to use the domain in
 the \fBX-Bounced-Address\fR for the d= DKIM-Signature tag.
 
 If \fBslowq-send\fR receives a TERM signal, it will exit cleanly, after
-waiting (possibly more than a minute) for current delivery attempts to finish.
+waiting (possibly more than a minute) for current delivery attempts to
+finish.
 
-If \fBslowq-send\fR receives an ALRM signal, it will reschedule every message
-in the queue for immediate delivery.
+If \fBslowq-send\fR receives an ALRM signal, it will reschedule every
+message in the queue for immediate delivery.
 
 If the environment variable USE_FSYNC is set, then \fBslowq-send\fR writes
 all data to disk ("flushes") all modified in-core data of (i.e., modified
@@ -93,7 +95,7 @@ forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
 
 if the value of the environment variables USE_FSYNC, USE_FDATASYNC,
-USE_SYNCDIR  is zero, the corresponding variables is unset. This allows
+USE_SYNCDIR is zero, the corresponding variables is unset. This allows
 setting of these variables for \fBqmail-local\fR(8).
 
 \fBslowq-send\fR can be configured to use a queue with a different split
@@ -104,16 +106,10 @@ instead of without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable.
 
 .SH "CONTROL FILES"
-.B WARNING:
-.B slowq-send
-reads its control files only when it starts. If you change the control
-files, you must stop and restart
-.BR slowq-send .
-Exception:
-If
-.B slowq-send
-receives a HUP signal,
-it will reread
+\fBWARNING\fR: \fBslowq-send\fR reads its control files only when it
+starts. If you change the control files, you must stop and restart
+\fBslowq-send\fR. Exception: If \fBslowq-send\fR receives a HUP signal, it
+will reread
 .IR concurrencylocal ,
 .IR concurrencyl.slowq ,
 .IR concurrencyremote ,
@@ -128,256 +124,173 @@ it will reread
 and
 .IR conf-fsync .
 
-.B slowq-send
-by default looks at @controldir@ for all control files. This path can be
-changed by defining the \fBCONTROLDIR\fR environment variable.
+\fBslowq-send\fR by default looks at @controldir@ for all control files.
+This path can be changed by defining the \fBCONTROLDIR\fR environment
+variable.
 
 .TP 5
-.I bouncefrom
-Bounce username.
-Default:
-.BR MAILER-DAEMON .
+\fIbouncefrom\fR
+Bounce username. Default: \fBMAILER-DAEMON\fR.
 
 .TP 5
-.I bouncehost
-Bounce host.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR bouncehost ,
-which is probably not what you want.
-If a message is permanently undeliverable,
-.B slowq-send
-sends a
-.B single-bounce
-notice back to the message's envelope sender.
-The notice is
-.B From: \fIbouncefrom\fB@\fIbouncehost\fR,
-although its envelope sender is empty.
+\fIbouncehost\fR
+Bounce host. Default: \fIme\fR, if that is supplied; otherwise the literal
+name \fBbouncehost\fR, which is probably not what you want. If a message is
+permanently undeliverable, \fBslowq-send\fR sends a \fBsingle-bounce\fR
+notice back to the message's envelope sender. The notice is \fBFrom:
+\fIbouncefrom\fB@\fIbouncehost\fR, although its envelope sender is empty.
 
 .TP 5
-.I bouncemaxbyte
+\fIbouncemaxbyte\fR
 Limit the size of bounces. Default: 50000 bytes.
 
 .TP 5
-.I bouncesubject
+\fIbouncesubject\fR
 Configures the bounce message subject
 
 .TP 5
-.I bouncemessage
+\fIbouncemessage\fR
 Text for bounce message. Remember that this may break QSBMF
 
 .TP 5
-.I doublebouncehost
-Double-bounce host.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR doublebouncehost ,
-which is probably not what you want.
+\fIdoublebouncehost\fR
+Double-bounce host. Default: \fIme\fR, if that is supplied; otherwise the
+literal name \fBdoublebouncehost\fR, which is probably not what you want.
 
 .TP 5
-.I doublebounceto
-User to receive double-bounces.
-Default:
-.BR postmaster .
-If a single-bounce notice is permanently undeliverable,
-.B slowq-send
-sends a
-.B double-bounce
-notice to
-.IR doublebounceto\fB@\fIdoublebouncehost .
-(If that bounces,
-.B slowq-send
-gives up.)
-As a special case, if the first line of
-.IR doublebounceto
-contains a '@' or is blank (contains a single linefeed), slowq-send will
-not queue the double-bounce at all.
+\fIdoublebounceto\fR
+User to receive double-bounces. Default: \fBpostmaster\fR.  If a
+single-bounce notice is permanently undeliverable, \fBslowq-send\fR sends a
+\fBdouble-bounce\fR notice to \fIdoublebounceto\fB@\fIdoublebouncehost\fR.
+(If that bounces, \fBslowq-send\fR gives up.) As a special case, if the
+first line of \fIdoublebounceto\fR contains a '@' or is blank (contains a
+single linefeed), slowq-send will not queue the double-bounce at all.
 
 .TP 5
-.I doublebouncesubject
+\fIdoublebouncesubject\fR
 Configures the double bounce message subject
 
 .TP 5
-.I doublebouncemessage
+\fIdoublebouncemessage\fR
 Text for double bounce message. Remember that this may break QSBMF
 
 .TP 5
-.I concurrencylocal
-Maximum number of simultaneous local delivery attempts.
-Default: 10.
-If 0, local deliveries will be put on hold.
-.I concurrencylocal
-is limited at compile time to SPAWN.
+\fIconcurrencylocal\fR
+Maximum number of simultaneous local delivery attempts. Default: 10. If 0,
+local deliveries will be put on hold. \fIconcurrencylocal\fR is limited at
+compile time to SPAWN.
 
 .TP 5
-.I concurrencyl.slowq
+\fIconcurrencyl.slowq\fR
 Maximum number of simultaneous local delivery attempts for the queue
 \fIslowq\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
 variable, referring to the path of the queue. Here \fIslowq\fR refers to
-the basename of the queue path.
-Default: 10.
-If 0, local deliveries will be put on hold.
-.I concurrencyl.slowq
-is limited at compile time to SPAWN.
+the basename of the queue path. Default: 10. If 0, local deliveries will be
+put on hold. \fIconcurrencyl\fB.\fIslowq\fR is limited at compile time to SPAWN.
 
 .TP 5
-.I concurrencyremote
-Maximum number of simultaneous remote delivery attempts.
-Default: 20.
-If 0, remote deliveries will be put on hold.
-.I concurrencyremote
-is limited at compile time to SPAWN.
+\fIconcurrencyremote\fR
+Maximum number of simultaneous remote delivery attempts. Default: 20.  If
+0, remote deliveries will be put on hold. \fIconcurrencyremote\fR is
+limited at compile time to SPAWN.
 
 .TP 5
-.I concurrencyr.slowq
+\fIconcurrencyr.slowq\fR
 Maximum number of simultaneous remote delivery attempts for the queue
 \fIslowq\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
 variable, referring to the path of the queue. Here \fIslowq\fR refers to
-the basename of the queue path.
-Default: 20.
-If 0, remote deliveries will be put on hold.
-.I concurrencyr.slowq
-is limited at compile time to SPAWN.
+the basename of the queue path. Default: 20. If 0, remote deliveries will
+be put on hold. \fIconcurrencyr\fB.\fIslowq\fR is limited at compile time
+to SPAWN.
 
 .TP 5
-.I envnoathost
-Presumed domain name for addresses without @ signs.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR envnoathost ,
-which is probably not what you want.
-If
-.B slowq-send
-sees an envelope recipient address without an @ sign,
-it appends
-.B @\fIenvnoathost\fR.
+\fIenvnoathost\fR
+Presumed domain name for addresses without @ signs. Default: \fIme\fR, if
+that is supplied; otherwise the literal name \fBenvnoathost\fR, which is
+probably not what you want. If \fBslowq-send\fR sees an envelope recipient
+address without an @ sign, it appends \fB@\fIenvnoathost\fR.
 
 .TP 5
-.I locals
-List of domain names that the current host
-receives mail for,
-one per line.
-Default:
-.IR me ,
-if that is supplied;
-otherwise
-.B slowq-send
-refuses to run.
-An address 
-.I user@domain
-is considered local if
-.I domain
-is listed in
-.IR locals .
+\fIlocals\fR
+List of domain names that the current host receives mail for, one per line.
+Default: \fIme\fR, if that is supplied; otherwise \fBslowq-send\fR refuses
+to run. An address \fBuser@domain\fR is considered local if \fIdomain\fR is
+listed in \fIlocals\fR.
 
 .TP 5
-.I percenthack
-List of domain names where the percent hack is applied.
-If
-.I domain
-is listed in
-.IR percenthack ,
-any address of the form
+\fIpercenthack\fR
+List of domain names where the percent hack is applied. If \fBdomain\fR is
+listed in \fIpercenthack\fR, any address of the form
 
-.I user%fqdn@domain
+\fIuser%fqdn@domain\fR
 
-is rewritten as
-.IR user@fqdn .
-.I user
-may contain %, so the percent hack may be applied repeatedly.
-.B slowq-send
-handles
-.I percenthack
-before
-.IR locals .
+is rewritten as \fIuser@fqdn\fR. \fIuser\fR may contain %, so the percent
+hack may be applied repeatedly. \fBslowq-send\fR handles \fIpercenthack\fR
+before \fIlocals\fR.
 
 .TP 5
-.I queuelifetime
-Number of seconds
-a message can stay in the queue.
-Default: 604800 (one week).
-After this time expires,
-.B slowq-send
-will try the message once more, but it will treat any temporary delivery
-failures as permanent failures.
+\fIqueuelifetime\fR
+Number of seconds a message can stay in the queue. Default: 604800 (one
+week). After this time expires, \fBslowq-send\fR will try the message once
+more, but it will treat any temporary delivery failures as permanent
+failures.
 
 .TP 5
-.I bouncelifetime
-Number of seconds
-a bounce message can stay in the queue.
-Default: 604800 (one week).
-After this time expires,
-.B slowq-send
-will try the message once more, but it will treat any temporary delivery
-failures as permanent failures.
+\fIbouncelifetime\fR
+Number of seconds a bounce message can stay in the queue. Default: 604800
+(one week). After this time expires, \fBslowq-send\fR will try the message
+once more, but it will treat any temporary delivery failures as permanent
+failures.
 
 .TP 5
-.I bounce.envrules
+\fIbounce.envrules\fR
 Specific environment variables can be set for bounce recipients. The format
-of this file is of the form pat:envar1=val,envar2=val,...]   where pat is a
-regular expression which matches a bounce recipient. envar1, envar2 are list
-of environment variables to be set. If var is omitted, the environment
-variable is unset.
+of this file is of the form \fBpat:envar1=val,envar2=val,...]\fR where pat
+is a regular expression which matches a bounce recipient. envar1, envar2
+are list of environment variables to be set. If var is omitted, the
+environment variable is unset.
 
-The name of the control file can be overriden by the environment variable BOUNCERULES
-
-Example:
-answerme@save*:CONTROLDIR=control2,QMAILQUEUE=
-
-sets CONTROLDIR to control2 for the sender answerme@saveme.com and unsets
-QMAILQUEUE environment variable. If there are multiple lines for a pattern,
-all lines are applied. However if an environment variable is being set in
-multiple lines, the last rule takes precedence. The environment variable
-QREGEX can be set to use regular expressions for matching pat instead of
-the internal wildmat function.
+The name of the control file can be overriden by the environment variable
+\fBBOUNCERULES\fR.
 
 Example:
-answerme@save*:DATABYTES=2000000,MAXRECIPIENT=2,QMAILQUEUE=
-answerme@save*:DATABYTES=4000000
-
-DATABYTES gets set to 4 MB in for any email matching answerme@save*
-
-.TP 5
-.I virtualdomains
-List of virtual users or domains, one per line.
-A virtual user has the form
-.IR user\fB@\fIdomain\fB:\fIprepend ,
-without any extra spaces.
-When
-.B slowq-send
-sees the recipient address
-.IR user\fB@\fIdomain ,
-it converts it to
-.I prepend\fB-\fIuser\fB@\fIdomain
-and treats it as local.
-
-A virtual domain has the form
-.IR domain\fB:\fIprepend .
-It applies to any recipient address at
-.IR domain .
-For example, if
-
 .EX
-     nowhere.mil:joeBREAKfoo
+answerme@save*:CONTROLDIR=control2,QMAILQUEUE=
 .EE
 
-is in
-.IR virtualdomains ,
-and a message arrives for
-.BR info@nowhere.mil ,
-.B slowq-send
-will rewrite the recipient address as
-.B joeBREAKfoo-info@nowhere.mil
-and deliver the message locally.
+sets \fBCONTROLDIR\fR to control2 for the sender answerme@saveme.com and
+unsets \fBQMAILQUEUE\fR environment variable. If there are multiple lines
+for a pattern, all lines are applied. However if an environment variable is
+being set in multiple lines, the last rule takes precedence. The
+environment variable \fBQREGEX\fR can be set to use regular expressions for
+matching pat instead of the internal wildmat function. For example,
 
-.I virtualdomains
-may contain wildcards:
+.EX
+answerme@save*:DATABYTES=2000000,MAXRECIPIENT=2,QMAILQUEUE=
+answerme@save*:DATABYTES=4000000
+.EE
+
+\fBDATABYTES\fR gets set to 4 MB in for any email matching answerme@save*
+
+.TP 5
+\fIvirtualdomains\fR
+List of virtual users or domains, one per line. A virtual user has the form
+\fIuser\fB@\fIdomain\fB:\fIprepend\fR, without any extra spaces. When
+\fBslowq-send\fR sees the recipient address \fIuser\fB@\fIdomain\fR, it
+converts it to \fIprepend\fB-\fIuser\fB@\fIdomain\fR and treats it as local.
+
+A virtual domain has the form \fIdomain\fB:\fIprepend\fR.  It applies to
+any recipient address at \fIdomain\fR. For example, if
+
+.EX
+    nowhere.mil:joeBREAKfoo
+.EE
+
+is in \fIvirtualdomains\fR, and a message arrives for
+\fBinfo@nowhere.mil\fR, \fBslowq-send\fR will rewrite the recipient address
+as \fBjoeBREAKfoo-info@nowhere.mil\fR and deliver the message locally.
+
+\fIvirtualdomains\fR may contain wildcards:
 
 .EX
      .fax:uucpBREAKfax
@@ -385,56 +298,41 @@ may contain wildcards:
      .nowhere.mil:joeBREAKfoo-host
 .EE
 
-.I virtualdomains
-may also contain exceptions:
-an empty
-.I prepend
-means that
-.I domain
-is not a virtual domain.
+\fIvirtualdomains\fR may also contain exceptions: an empty \fIprepend\fR
+means that \fIdomain\fR is not a virtual domain.
 
-.B slowq-send
-handles
-.I virtualdomains
-after
-.IR locals :
-if a domain is listed in
-.IR locals ,
-.I virtualdomains
-does not apply.
+\fBslowq-send\fR handles \fIvirtualdomains\fR after \fIlocals\fR:
+if a domain is listed in \fIlocals\fR, \fIvirtualdomains\fR does not apply.
 
 .TP 5
-.I holdlocal
+\fIholdlocal\fR
 A boolean parameter indicating whether mail for local
-hosts should be queued without delivery.  Zero indicates
+hosts should be queued without delivery. Zero indicates
 delivery as normal; any other value causes local mail to
-be held.
-Default:
-.IR zero
+be held. Default: \fIzero\fR
 
 .TP 5
-.I holdremote
+\fIholdremote\fR
 A boolean parameter indicating whether mail for remote
 hosts should be queued without delivery.  Zero indicates
 delivery as normal; any other value causes remote mail to
-be held.  This is provided to permit use of qmail in a 
+be held. This is provided to permit use of qmail in a 
 dial-up environment when the remote delivery path may not
 always be available, as an alternative to the use of serialmail.
-Default:
-.IR zero
+Default: \fIzero\fR
 
 .TP 5
-.I todointerval
+\fItodointerval\fR
 The seconds to sleep between each todo run. It can be
 overriden by the environment variable \fBTODO_INTERVAL\fR.
 
 .TP 5
-.I conf-fsync
+\fIconf-fsync\fR
 A boolean parameter to turn on fsync of file descriptors
 when writing to a file during delivery
 
 .TP 5
-.I conf-syncdir
+\fIconf-syncdir\fR
 A boolean parameter to turn on BSD style sync semantics for flushing
 directories.
 
@@ -453,17 +351,21 @@ for a domain in \fIratecontrol\fR file takes precedence over definition
 in .\fIglobal\fR file.
 
 .TP 5
-.I RATELIMIT_DIR/ratecontrol
+\fIRATELIMIT_DIR/ratecontrol\fR
 You can set rate control expression for recipient domains. The format of
 this file is of the form
+
+.EX
 pat:mathematical_expression
+.EE
+
 where pat is a regular expression which matches the domain part the
 recipient. When a match occurs, slowq-send will automatically create a local
 rate definition file and the rate control will apply to the individual
 domain that got matched.
 
 .TP 5
-.I RATELIMIT_DIR/.global
+\fIRATELIMIT_DIR/.global\fR
 For recpient domains that do not have a local rate control definition and
 do not match any line in RATELIMIT_DIR/ratecontrol, this file serves as the
 rate control definition for all such domains. This definition does not apply
@@ -473,9 +375,8 @@ domains that do not have a local definition.
 .SH "External BOUNCE Processor"
 .B slowq-send
 will execute an external program defined by the environment variable
-.I BOUNCEPROCESSOR
-when delivery to a recipient fails. The external program will be called with
-the following arguments
+\fBBOUNCEPROCESSOR\fR when delivery to a recipient fails. The external
+program will be called with the following arguments
 
 .I original_message_file
 .I bounce_file
