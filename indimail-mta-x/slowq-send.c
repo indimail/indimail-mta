@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.26 2022-09-27 12:49:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.27 2022-11-22 19:06:39+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -115,13 +115,13 @@ static int      chanskip[CHANNELS] = { 10, 20 };
 char           *queuedesc;
 static char    *argv0 = "slowq-send";
 
-static int      flagexitsend; /*- qmail-send: exit when set */
+static int      flagexitsend; /*- slowq-send: exit when set */
 static int      flagexittodo; /*- todo-processor: exit when set */
 static int      flagrunasap; /*- immediaely schedule deliveries in queue */
 static int      flagreadasap; /*- reread control files on sighup */
-static int      flagdetached; /*- qmail-send detaches from todo processing */
+static int      flagdetached; /*- slowq-send detaches from todo processing */
 static int      todoproc; /*- run a parallel independent todo processor */
-static int      flagtodoalive, flagsendalive = 1; /*- flag to indicate if todo-processor and qmail-send are alive */
+static int      flagtodoalive, flagsendalive = 1; /*- flag to indicate if todo-processor and slowq-send are alive */
 static int      todopid, bigtodo, todofdi, todofdo, sendfdi, sendfdo, todo_chunk_size;
 
 extern dtype    delivery;
@@ -368,8 +368,8 @@ issafe(char ch)
 }
 
 /*
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 comm_init()
@@ -400,8 +400,8 @@ comm_exit_send(void)
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static int
 comm_canwrite(comm_type comm, int c)
@@ -427,8 +427,8 @@ comm_canwrite(comm_type comm, int c)
 
 /*-
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  *
  * "\0\00015/id\0recipient@domain\0qqeh\0envh\0sender@domain\0"
  * NULL
@@ -481,7 +481,7 @@ comm_write_spawn(int c, int delnum, unsigned long id, char *sender,
 /*
  * used by
  * todo-processor
- * prepare comm buf to be written to qmail-send
+ * prepare comm buf to be written to slowq-send
  */
 void
 comm_write_todo(unsigned long id, int local, int remote)
@@ -516,8 +516,8 @@ fail:
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 comm_selprep_spawn(int *nfds, fd_set *wfds)
@@ -547,11 +547,11 @@ comm_selprep_send(int *nfds, fd_set *wfds, fd_set *rfds)
 		if (flagexittodo && c == 0)
 			comm_exit_send();
 		if (c) {
-			FD_SET(sendfdo, wfds); /*- write fd to qmail-send */
+			FD_SET(sendfdo, wfds); /*- write fd to slowq-send */
 			if (*nfds <= sendfdo)
 				*nfds = sendfdo + 1;
 		}
-		FD_SET(sendfdi, rfds); /*- read fd from qmail-send */
+		FD_SET(sendfdi, rfds); /*- read fd from slowq-send */
 		if (*nfds <= sendfdi)
 			*nfds = sendfdi + 1;
 	}
@@ -559,7 +559,7 @@ comm_selprep_send(int *nfds, fd_set *wfds, fd_set *rfds)
 
 /*-
  * used by
- * qmail-send
+ * slowq-send
  * todo-processor
  * write to qmail-lspawn, qmail-rspawn
  * set comm_buf_spawn[c].len = 0 when data is written
@@ -598,7 +598,7 @@ senddied()
 {
 	if (!flagexittodo)
 		log5("alert: ", argv0, ": ", queuedesc,
-			": oh no! lost qmail-send connection! dying...\n");
+			": oh no! lost slowq-send connection! dying...\n");
 	flagsendalive = 0;
 }
 
@@ -628,7 +628,7 @@ comm_read_todo(fd_set *wfds, fd_set *rfds)
 			}
 		}
 	}
-	/*- next read from qmail-send */
+	/*- next read from slowq-send */
 	if (flagsendalive && FD_ISSET(sendfdi, rfds)) {
 		/*- handle 'A', 'D', 'H' and 'X' */
 		char            c;
@@ -661,7 +661,7 @@ comm_read_todo(fd_set *wfds, fd_set *rfds)
 				break;
 			default:
 				slog5("warning: ", argv0, ": ", queuedesc,
-					": qmail-send speaks an obscure dialect\n");
+					": slowq-send speaks an obscure dialect\n");
 				break;
 			}
 		}
@@ -671,7 +671,7 @@ comm_read_todo(fd_set *wfds, fd_set *rfds)
 /*-
  * used by
  * todo-processor
- * shutdown communication channel with qmail-send
+ * shutdown communication channel with slowq-send
  * and exit
  */
 void
@@ -752,8 +752,8 @@ static datetime_sec cleanuptime;
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 cleanup_init()
@@ -764,8 +764,8 @@ cleanup_init()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 cleanup_selprep(datetime_sec *wakeup)
@@ -778,8 +778,8 @@ cleanup_selprep(datetime_sec *wakeup)
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 cleanup_do()
@@ -841,8 +841,8 @@ static prioq    pqfail = { 0 };						/*- stat() failure; has to be pqadded again
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 pqadd(unsigned long id, char delayedflag)
@@ -911,8 +911,8 @@ fail:
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 unsigned long
 delayed_job_count()
@@ -930,8 +930,8 @@ delayed_job_count()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 pqstart()
@@ -950,8 +950,8 @@ pqstart()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 pqfinish()
@@ -973,8 +973,8 @@ pqfinish()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 pqrun()
@@ -1007,8 +1007,8 @@ static job     *jo;
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 job_init()
@@ -1027,8 +1027,8 @@ job_init()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static int
 job_avail()
@@ -1045,8 +1045,8 @@ job_avail()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 job_open(unsigned long id, int channel, int j)
@@ -1062,8 +1062,8 @@ job_open(unsigned long id, int channel, int j)
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 job_close(int j)
@@ -1589,8 +1589,8 @@ static char     delbuf[2048];
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 del_status()
@@ -1618,8 +1618,8 @@ del_status()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 del_init()
@@ -1643,8 +1643,8 @@ del_init()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static int
 del_canexit()
@@ -1662,8 +1662,8 @@ del_canexit()
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static int
 del_avail(int c)
@@ -1673,8 +1673,8 @@ del_avail(int c)
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 del_start(int j, seek_pos mpos, char *recip)
@@ -1744,8 +1744,8 @@ markdone(int c, unsigned long id, seek_pos pos)
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  *
  * read delivery report
  * first 2 bytes = delivery number
@@ -1831,8 +1831,8 @@ del_dochan(int c)
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 del_selprep(int *nfds, fd_set *rfds)
@@ -1851,8 +1851,8 @@ del_selprep(int *nfds, fd_set *rfds)
 
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 del_do(fd_set *rfds)
@@ -1878,8 +1878,8 @@ static struct {
  
 /*
  * used by
- * qmail-send
- * qmail-send + todo-processor
+ * slowq-send
+ * slowq-send + todo-processor
  */
 static void
 pass_init()
@@ -2223,7 +2223,7 @@ static char     todobufchan[CHANNELS][1024];
 
 /*
  * used by
- * qmail-send
+ * slowq-send
  * todo-processor
  */
 static void
@@ -2235,7 +2235,7 @@ todo_init()
 }
 
 /*
- * qmail-send
+ * slowq-send
  */
 static void
 todo_init_send()
@@ -2258,7 +2258,7 @@ todo_init_send()
 }
 
 /*
- * qmail-send without todo-processor
+ * slowq-send without todo-processor
  */
 static void
 todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
@@ -2288,7 +2288,7 @@ todo_selprep_todo(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 }
 
 /*
- * qmail-send
+ * slowq-send
  */
 static void
 todo_selprep_send(int *nfds, fd_set *rfds, datetime_sec *wakeup)
@@ -3067,7 +3067,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 				nomem(argv0);
 				goto fail;
 			}
-			/*- write data to comm_buf, which will be written to qmail-send later */
+			/*- write data to comm_buf, which will be written to slowq-send later */
 			comm_info_todo(id, (unsigned long) st.st_size, todoline.s + 1, pid, uid);
 			break;
 		case 'T':
@@ -3195,7 +3195,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 	 * return in chunks of todo_chunk_size
 	 * so that todo-processor doesn't spend to much time in building
 	 * comm_buf without sending a single email for delivery. This
-	 * will avoid slow delivery when todo-processor/qmail-send wasn't running
+	 * will avoid slow delivery when todo-processor/slowq-send wasn't running
 	 * and large number of emails have been injected into the queue.
 	 */
 	return (flagtododir == 0 ? 4 : (comm_count_todo % todo_chunk_size) == 0 ? 3 : 2);
@@ -3225,7 +3225,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 	case -1:
 		log5("alert: ", argv0, ": ", queuedesc, ": unable to fork\n");
 		_exit(111);
-	case 0:
+	case 0: /*- ps will show this as slowq-todo */
 		str_copyb(argv0 + 6, "todo", 4);
 		sendfdi = pi2[0];
 		sendfdo = pi1[1];
@@ -3241,18 +3241,18 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 		sig_hangupcatch(sighup);
 		todo_init(); /*- initialize flagtododir, lasttodorun, nexttodorun, open lock/trigger */
 		for (;;) {
-			/*- read from fd 0 (qmail-send) */
+			/*- read from fd 0 (slowq-send) */
 			if ((r = read(sendfdi, &c, 1)) == -1) {
 				if (errno == error_intr)
 					continue;
-				comm_die_send(100);	/*- read failed probably qmail-send died */
+				comm_die_send(100);	/*- read failed probably slowq-send died */
 			}
 			if (!r)
-				comm_die_send(100);	/*- read failed probably qmail-send died */
+				comm_die_send(100);	/*- read failed probably slowq-send died */
 			break;
 		}
 		if (c != 'C') {
-			slog5("warning: ", argv0, ": ", queuedesc, ": qmail-send speaks an obscure dialect\n");
+			slog5("warning: ", argv0, ": ", queuedesc, ": slowq-send speaks an obscure dialect\n");
 			comm_die_send(100);
 		}
 		while (!flagexitsend) {
@@ -3262,10 +3262,10 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 				reread();
 			}
 			if (!flagsendalive) {
-				/*- qmail-send finally exited, so do the same. */
+				/*- slowq-send finally exited, so do the same. */
 				if (flagexittodo)
 					_exit(0);
-				/*- qmail-send died. We can not log and we can not work therefor _exit(1). */
+				/*- slowq-send died. We can not log and we can not work therefor _exit(1). */
 				_exit(1);
 			}
 			wakeup = recent + SLEEP_FOREVER;
@@ -3291,7 +3291,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 			} else {
 				recent = now();
 				while (todo_do_todo(&nfds, &rfds) == 2);
-				comm_read_todo(&wfds, &rfds); /*- communicate with qmail-send on fd 0, fd 1 */
+				comm_read_todo(&wfds, &rfds); /*- communicate with slowq-send on fd 0, fd 1 */
 			}
 		} /*- while (!flagexitsend) */
 		strnum1[fmt_ulong(strnum1, getpid())] = 0;
@@ -3787,7 +3787,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.26 2022-09-27 12:49:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.27 2022-11-22 19:06:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3797,6 +3797,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.27  2022-11-22 19:06:39+05:30  Cprogrammer
+ * corrected name (qmail-send -> slowq-send)
+ *
  * Revision 1.26  2022-09-27 12:49:40+05:30  Cprogrammer
  * auto attach to todo-processor when there are no pending delivery jobs
  *
