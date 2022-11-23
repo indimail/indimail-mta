@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.647 2022-11-14 19:58:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.648 2022-11-23 15:12:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.647 2022-11-14 19:58:51+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.648 2022-11-23 15:12:43+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -997,7 +997,7 @@ Known values for OPTION are:
 
 --fixsharedlibs
 
-  fix mysql shared library in @sysconfdir@/control/mysql_lib
+  fix mysql shared library in @sysconfdir@/control/libmysql
 
 --report=all| zddist| zdeferrals| zfailures| zoverall| zrecipients| zrhosts|
   zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
@@ -1770,8 +1770,8 @@ check_libmysqlclient_lib()
 	if [ -z "$CONTROLDIR" ] ; then
 		CONTROLDIR=$sysconfdir/control
 	fi
-	if [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
-		mysqllib=`cat "$DESTDIR"$CONTROLDIR/mysql_lib 2>/dev/null`
+	if [ -f "$DESTDIR"$CONTROLDIR/libmysql ] ; then
+		mysqllib=`cat "$DESTDIR"$CONTROLDIR/libmysql 2>/dev/null`
 		if [ -f $mysqllib ] ; then
 			return 0
 		else
@@ -1909,12 +1909,12 @@ check_libmysqlclient_lib()
 		done
 	fi
 	if [ -n "$mysqllib" ] ; then
-		check_update_if_diff "$DESTDIR"$CONTROLDIR/mysql_lib $mysqllib
+		check_update_if_diff "$DESTDIR"$CONTROLDIR/libmysql $mysqllib
 	else
-		echo "Sorry: Couldn't figure out mysql shared library. Manually edit "$DESTDIR"$CONTROLDIR/mysql_lib" 1>&2
-		if [ -f "$DESTDIR"$CONTROLDIR/mysql_lib ] ; then
-			echo "removing "$DESTDIR"$CONTROLDIR/mysql_lib"
-			/bin/rm -f "$DESTDIR"$CONTROLDIR/mysql_lib
+		echo "Sorry: Couldn't figure out mysql shared library. Manually edit "$DESTDIR"$CONTROLDIR/libmysql" 1>&2
+		if [ -f "$DESTDIR"$CONTROLDIR/libmysql ] ; then
+			echo "removing "$DESTDIR"$CONTROLDIR/libmysql"
+			/bin/rm -f "$DESTDIR"$CONTROLDIR/libmysql
 		fi
 	fi
 	return 0
@@ -1945,19 +1945,30 @@ echo "# by the below command"
 echo "$prog_args"
 echo ""
 ) > $t/.qmail_control
-echo "Creating Default qmail Control Files"
+if [ -n "$verbose" ] ; then
+	echo "Creating Default qmail Control Files"
+	echo "me"
+	echo "defaulthost"
+	echo "envnoathost"
+	echo "defaultdomain"
+	echo "plusdomain"
+	echo "locals"
+	echo "rcpthosts"
+fi
+
 hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
-echo "me"
-echo "defaulthost"
-echo "envnoathost"
-echo "defaultdomain"
-echo "plusdomain"
-echo "locals"
-echo "rcpthosts"
 if [ -f ./config-fast ] ; then
-	./config-fast $hostname $DESTDIR
+	if [ -n "$verbose" ] ; then
+		./config-fast --verbose --destdir=$DESTDIR $hostname
+	else
+		./config-fast --quiet --destdir=$DESTDIR $hostname
+	fi
 else
-	"$DESTDIR"$libexecdir/config-fast $hostname $DESTDIR
+	if [ -n "$verbose" ] ; then
+		"$DESTDIR"$libexecdir/config-fast --verbose --destdir=$DESTDIR $hostname
+	else
+		"$DESTDIR"$libexecdir/config-fast --quiet --destdir=$DESTDIR $hostname
+	fi
 fi
 if [ ! -d $t/global_vars ] ; then
 	mkdir -p $t/global_vars
@@ -1978,7 +1989,32 @@ if [ ! -f $t/global_vars/QMAILDEFAULTHOST -a ! -L $t/global_vars/QMAILDEFAULTHOS
 		ln -s ../defaulthost QMAILDEFAULTHOST
 	fi
 fi
-echo "Setting Following Files to Reasonable Defaults"
+if [ -n "$verbose" ] ; then
+	echo "Setting control files (if not existing) to defaults"
+	echo "locals"
+	echo "rcpthosts"
+	echo "defaultdelivery"
+	echo "servicedir.conf"
+	echo "nodnscheck"
+	echo "localiphost"
+	echo "users/assign"
+	echo "greylist.white"
+	echo "chkrcptdomains"
+	echo "smtpgreeting"
+	echo "databytes"
+	echo "timeoutsmtpd"
+	echo "timeoutremote"
+	echo "dnsbllist"
+	echo "tcp/tcp.[smtp,qmtp,qmqp]"
+	echo "tlsserverciphers"
+	echo "tlsservermethod"
+	echo "tlsclientciphers"
+	echo "tlsclientmethod"
+	echo "procmailrc"
+	echo "libindimail"
+	echo "libmysql"
+	echo "backup.conf"
+fi
 if [ ! -f $t/servicedir.conf ] ; then
 	echo "servicedir.conf"
 	echo "$servicedir" > $t/servicedir.conf
@@ -2009,10 +2045,14 @@ fi
 	grep -Evw "::|::1|0\.0\.0\.0|127\.0\.0\.1|172.17.0|0000:0000:0000:0000:0000:0000:0000:0000" | \
 	head -1|awk '{print $3}'> $TMPDIR/localiphost.$$
 if [ -s $TMPDIR/localiphost.$$ ] ; then
-	echo "localiphost"
-	/bin/mv $TMPDIR/localiphost.$$ $t/localiphost
+	diff $TMPDIR/localiphost.$$ $t/localiphost >/dev/null 2>&1
+	if [ $? -ne 0 ] ; then
+		ip=$(cat $TMPDIR/localiphost.$$)
+		echo "localiphost [$ip]"
+		/bin/mv $TMPDIR/localiphost.$$ $t/localiphost
+	fi
 else
-	echo "localiphost"
+	echo "localiphost [127.0.0.1]"
 	echo 127.0.0.1 > $t/localiphost
 fi
 if [ ! -f $t/hostip ] ; then
@@ -2044,8 +2084,11 @@ if [ ! -f $t/timeoutremote ] ; then
 	echo 300                    > $t/timeoutremote
 fi
 
-echo "chkrcptdomains"
-$touch $t/chkrcptdomains
+if [ ! -f $t/chkrcptdomains -a -n "$default_domain" ] ; then
+	echo "chkrcptdomains"
+	echo $default_domain > $t/chkrcptdomains
+fi
+
 if [ ! -f $t/greylist.white ] ; then
 	echo "greylist.white"
 	/bin/cat $t/localiphost > $t/greylist.white
@@ -2191,6 +2234,19 @@ else
 	/bin/rm -f $t/libindimail
 fi
 check_libmysqlclient_lib
+if [ ! -f $sysconfdir/backup.conf ] ; then
+	echo "Creating "$DESTDIR"$sysconfdir/backup.conf file"
+	(
+	for i in $servicedir $sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
+		$QmailHOME/alias/.qmail-\* /etc/inittab /etc/init.d/svscan \
+		/etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
+		/etc/nsswitch.conf /etc/resolv.conf /etc/security /etc/alternativces \
+		$QmailHOME/.bashrc $QmailHOME/.bash_profile $QmailHOME/.indimail $file
+	do
+		echo "$i"
+	done
+	) |sort -u > $sysconfdir/backup.conf
+fi
 }
 
 dump_run_header()
@@ -5588,7 +5644,7 @@ echo "MYSQL_BASE=$mysqlPrefix"
 echo "DATABASE=$databasedir"
 echo "PIDFILE=\$socket_dir/mysqld."$port".pid"
 echo ""
-echo "# update $sysconfdir/control/mysql_lib with the latest MySQL shared lib"
+echo "# update $sysconfdir/control/libmysql with the latest MySQL shared lib"
 echo "$QmailBinPrefix/sbin/svctool --fixsharedlibs"
 echo ""
 echo "exec $QmailBinPrefix/bin/softlimit -o 1024 -p 1024 \\"
@@ -7915,20 +7971,22 @@ delUsers()
 	fi
 }
 
-create_qmail_config()
+default_alias_config()
 {
-	default_qmail_control
-	echo "Creating catch-all alias ($QmailHOME/alias/Maildir) for all system users"
+	t=$QmailHOME/alias/Maildir
+	if [ ! -d $t -o ! -d $t/new -o ! -d $t/cur -o ! -d $t/tmp ] ; then
+		echo "Creating catch-all alias ($t) for all system users"
+	fi
 	if [ -x "$DESTDIR"$QmailBinPrefix/bin/maildirmake ] ; then
-		"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$QmailHOME/alias/Maildir >/dev/null 2>&1
+		"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$t >/dev/null 2>&1
 	else
-		/bin/mkdir -p "$DESTDIR"$QmailHOME/alias/Maildir/tmp >/dev/null 2>&1
-		/bin/mkdir -p "$DESTDIR"$QmailHOME/alias/Maildir/new >/dev/null 2>&1
-		/bin/mkdir -p "$DESTDIR"$QmailHOME/alias/Maildir/cur >/dev/null 2>&1
+		/bin/mkdir -p "$DESTDIR"$t/tmp >/dev/null 2>&1
+		/bin/mkdir -p "$DESTDIR"$t/new >/dev/null 2>&1
+		/bin/mkdir -p "$DESTDIR"$t/cur >/dev/null 2>&1
 	fi
 	if [ $? -eq 0 ] ; then
-		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/Maildir
-		/bin/chmod -R 775 "$DESTDIR"$QmailHOME/alias/Maildir
+		$chown -R alias:qmail "$DESTDIR"$t
+		/bin/chmod -R 775 "$DESTDIR"$t
 	fi
 	/bin/rm -f "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
 	first_char=`echo $postmaster | cut -c1`
@@ -7954,6 +8012,12 @@ create_qmail_config()
 		/bin/ln -s .qmail-postmaster .qmail-root
 		/bin/ln -s .qmail-postmaster .qmail-mailer-daemon
 	fi
+}
+
+create_qmail_config()
+{
+	default_qmail_control
+	default_alias_config
 }
 
 create_startup()
@@ -8887,18 +8951,18 @@ elif [ -f /usr/lib/systemd/system/svscan.service ] ; then
 fi
 # who cuts the barber
 if [ -f $sysconfdir/backup.conf ] ; then
-	file="$file `/bin/cat $sysconfdir/backup.conf`"
+	file="$file $sysconfdir/backup.conf `/bin/cat $sysconfdir/backup.conf`"
 fi
 servicedir=$1
 (
 for i in $servicedir $sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
-	$QmailHOME/alias/.qmail-* /etc/inittab /etc/init.d/svscan \
+	$QmailHOME/alias/.qmail-\* /etc/inittab /etc/init.d/svscan \
 	/etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
-	/etc/resolv.conf $QmailHOME/.bashrc $QmailHOME/.bash_profile \
-	$QmailHOME/.indimail $file
+	/etc/nsswitch.conf /etc/resolv.conf /etc/security /etc/alternativces \
+	$QmailHOME/.bashrc $QmailHOME/.bash_profile $QmailHOME/.indimail $file
 do
 	if [ -f $i -o -d $i ] ; then
-		echo $i
+		echo "$i"
 	fi
 done
 ) | sort -u
@@ -9224,7 +9288,7 @@ fi
 orig=$(cat "$DESTDIR"$CONTROLDIR/me)
 # config-fast - me, defaulthost, envnoathost, defaultdomain,
 # plusdomain, locals, rcpthosts, virtualdomains
-/usr/libexec/indimail/config-fast $defaultDomain
+/usr/libexec/indimail/config-fast --quiet $defaultDomain
 out=$(mktemp -t recontrolXXXXXX)
 for i in nodnscheck locals rcpthosts smtpgreeting
 do
