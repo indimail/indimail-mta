@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.11  2022-11-23 15:25:15+05:30  Cprogrammer
+ * renamed mysql_lib to libmysql
+ *
  * Revision 1.10  2021-03-12 14:16:17+05:30  Cprogrammer
  * conditional compilation of mysql code
  *
@@ -202,7 +205,7 @@ initMySQLlibrary(char **errstr)
 	if (phandle)
 		return (0);
 	if (!(ptr = env_get("MYSQL_LIB"))) {
-		ptr = "/etc/indimail/control/mysql_lib";
+		ptr = "/etc/indimail/control/libmysql";
 		if (access(ptr, R_OK))
 			return (0);
 	} else {
@@ -261,7 +264,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.10 2021-03-12 14:16:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.11 2022-11-23 15:25:15+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
