@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.49 2022-04-06 09:21:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.50 2022-11-23 15:07:42+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -27,16 +27,16 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.49 2022-04-06 09:21:24+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.50 2022-11-23 15:07:42+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
-# upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
+# upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
 }
 
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.49 2022-04-06 09:21:24+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.50 2022-11-23 15:07:42+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -276,7 +276,10 @@ if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 fi
 
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
-# upgrade libmysqlclient path in /etc/indimail/control/mysql_lib
+# upgrade libmysqlclient path in /etc/indimail/control/libmysql
+if [ -f $sysconfdir/control/mysql_lib ] ; then
+	mv $sysconfdir/control/mysql_lib $sysconfdir/control/libmysql
+fi
 /usr/sbin/svctool --fixsharedlibs
 if [ -d $servicedir/libwatch ] ; then
 	$mv $servicedir/libwatch $servicedir/.libwatch
@@ -320,6 +323,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.50  2022-11-23 15:07:42+05:30  Cprogrammer
+# rename mysql_lib to libmysql on upgrade
+#
 # Revision 1.49  2022-04-06 09:21:24+05:30  Cprogrammer
 # replace --fsync with --fdatasync
 #

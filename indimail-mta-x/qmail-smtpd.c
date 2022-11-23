@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.8  2022-11-23 15:08:03+05:30  Cprogrammer
+ * rename mysql_lib to libmysql on upgrade
+ *
  * Revision 1.7  2022-10-31 12:53:17+05:30  Cprogrammer
  * do chdir /etc/indimail as default cwd
  *
@@ -78,7 +81,7 @@ print_details()
 		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
 		"srs_alwaysrewrite", "srs_separator",
 #endif
-		"servercert.pem", "tlsserverciphers", "mysql_lib", 0};
+		"servercert.pem", "tlsserverciphers", "libmysql", 0};
 	char          *cdb_sql_files[] = {
 		"authdomains",  "badhelo",  "badext",  "badmailfrom", "badrcptto", "blackholedsender",
 		"blackholedrcpt", "chkrcptdomains", "goodrcptto", "relaymailfrom", "spamignore",
@@ -274,7 +277,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.7 2022-10-31 12:53:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.8 2022-11-23 15:08:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.9  2022-11-23 15:07:55+05:30  Cprogrammer
+ * rename mysql_lib to libmysql on upgrade
+ *
  * Revision 1.8  2022-11-03 12:35:40+05:30  Cprogrammer
  * added remote_auth, recipients control file
  *
@@ -456,7 +459,7 @@ valid_control_files(char *fn)
 #endif
 		"conf-syncdir", "conf-fsync", "conf-fdatasync", "servercert.pem", "tlsserverciphers",
 		"tlsclientciphers", "clientcert.pem", "servicedir.conf", "nosignaturedomains",
-		"domainkeys", "level2-tlds", "level3-tlds", "mysql_lib", 0};
+		"domainkeys", "level2-tlds", "level3-tlds", "libmysql", 0};
 	char          *cdb_sql_files[] = {
 		"authdomains",  "badhelo",  "badext",  "badmailfrom", "badrcptto", "blackholedsender",
 		"blackholedrcpt", "chkrcptdomains", "goodrcptto", "relaymailfrom", "spamignore",
@@ -886,7 +889,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.8 2022-11-03 12:35:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.9 2022-11-23 15:07:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

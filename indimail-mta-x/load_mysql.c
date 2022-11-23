@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.10  2022-11-23 15:05:30+05:30  Cprogrammer
+ * renamed mysql_lib to libmysql
+ *
  * Revision 1.9  2021-05-26 10:37:44+05:30  Cprogrammer
  * handle access() error other than ENOENT
  *
@@ -76,7 +79,7 @@ initMySQLlibrary(char **errstr)
 				return(-1);
 			if (libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/"))
 				return(-1);
-			if (!stralloc_catb(&libfn, "mysql_lib", 9) ||
+			if (!stralloc_catb(&libfn, "libmysql", 8) ||
 					!stralloc_0(&libfn))
 				return(-1);
 		}
@@ -145,7 +148,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.9 2021-05-26 10:37:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.10 2022-11-23 15:05:30+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
