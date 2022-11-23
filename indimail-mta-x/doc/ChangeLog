@@ -124,6 +124,13 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
     information in greeting
 69. svctool.in: when importing variables don't treat existing variables as
     error
+- 23/11/2022
+70. config-fast: added command line options --destdir, --quiet, --verbose
+71. load_mysql.c, qmail-showctl.c, smtpd.c, svctool: renamed control file
+    mysql_lib to libmysql
+72. qlocal_upgrade.sh: rename mysql_lib to libmysql on upgrade
+73. svctool.in: change invocation of config-fast for command line args
+74. svctool.in: create backup.conf config file in default_qmail_control
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
