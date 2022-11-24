@@ -14,36 +14,57 @@ handles messages placed into the outgoing queue by
 by default looks at QMAILHOME/queue for messages. This path can be changed
 by defining the QUEUEDIR environment variable. If you are using
 \fBqscheduler\fR(8) to invoke qmail-send, then \fBqscheduler\fR will
-use QUEUE_COUNT, QUEUE_START to invoke multiple qmail-send processes, with
-each having its own queue defined by the \fBQUEUEDIR\fR environment variable.
-\fBQUEUEDIR\fR will typically be QMAILHOME/queue/queue1, QMAILHOME/queue/queue2
-and so on. This manual will refer \fIqueue\fR as the value of
-\fBQUEUEDIR\fR. For each delivery, qmail-send puts a delivery number in the
-logs. In a multi-queue environment, qmail-send will append the queue
-identifier to the delivery number. It uses the value of \fBQIDENT\fR
-environment variable set by \fBqscheduler\fR. This allows the
-\fBmatchup\fR(1) program to process the logs in a multi-queue environment.
-The \fBmatchup\fR(1) program is used by qmailanalog scripts.
+use environment variables \fBQUEUE_COUNT\fR, \fBQUEUE_START\fR to invoke
+multiple qmail-send processes, with each having its own queue defined by
+the \fBQUEUEDIR\fR environment variable. \fBQUEUEDIR\fR will typically be
+QMAILHOME/queue/queue1, QMAILHOME/queue/queue2 and so on. This manual will
+refer \fIqueue\fR as the value of \fBQUEUEDIR\fR. For each delivery,
+qmail-send puts a delivery number in the logs. In a multi-queue
+environment, qmail-send will append the queue identifier to the delivery
+number. It uses the value of \fBQIDENT\fR environment variable set by
+\fBqscheduler\fR. This allows the \fBmatchup\fR(1) program to process the
+logs in a multi-queue environment. The \fBmatchup\fR(1) program is used by
+report generation qmailanalog scripts.
 
 \fBqmail-send\fR can load startup plugins from PREFIX/lib/indimail/plugins
 directory. This directory can be changed by defining the \fBPLUGINDIR\fR
 environment variable. By default, qmail-send will attempt to load the plugin
 qmail-send.so. This can be changed by defining \fBSTART_PLUGIN\fR environment
-variable. You can define multiple plugins separated by the space charater
-in the \fBSTART_PLUGIN\fR variable. \fBqmail-send\fR will use \fBdlopen(3)\fR
-function to load all the plugins and by default try to execute the symbol
-\fIstartup\fR. The symbol to be loaded can be changed by defining the
-\fBSTART_PLUGIN_SYMB\fR environment variable. \fBqmail-send\fR will terminate
-if any of the loaded functions return non-zero status.
+variable. You can define multiple plugins separated by the space character
+in the \fBSTART_PLUGIN\fR environkent variable. \fBqmail-send\fR will use
+\fBdlopen(3)\fR function to load all the plugins and by default try to
+execute the function with the symbol \fIstartup\fR. The symbol to be loaded
+can be changed by defining the \fBSTART_PLUGIN_SYMB\fR environment
+variable. \fBqmail-send\fR will terminate if any of the loaded functions
+return non-zero status.
 
-\fBqmail-send\fR sends a single byte 'C' on desciptor 7 to todo-proc to
-indicate that it has started. \fBqmail-send\fR reads instructions from
-\fBtodo-proc\fR on descriptor 8. It gets the filename in todo directory,
-the message id and whether the message is local or remote. It then uses
-\fBqmail-lspawn\fR to deliver messages to local recipients and
-\fBqmail-rspawn\fR to deliver messages to remote recipients. If a message
-is temporarily undeliverable to one or more addresses, \fBqmail-send\fR
-leaves it in the queue and tries the addresses again later.
+\fBqmail-send\fR(8) uses an external todo processor \fBtodo-proc\fR(8) to
+process the \fItodo\fR subdir of the incoming queue. \fBqmail-send\fR(8)
+sends a single byte 'C' on desciptor 7 to \fBtodo-proc\fR(8) to indicate
+that it has started. \fBqmail-send\fR reads instructions from
+\fBtodo-proc\fR on descriptor 8. Other instructions that \fBqmail-send\fR
+understands are instruction to log a message, instruction to quit. All
+instructions start with a single byte character followed by zero or more
+bytes and terminated by the NULL \0 byte. All communcation between
+\fBqmai-send\fR and \fBtodo-processor\fR happens on descriptors 7 and 8
+which are actually two pipes setup by \fBqmail-start\fR(8).
+
+.TS
+l l.
+Byte | Description
+_
+D    | Take up local/remote delivery jobs
+L    | Log message
+X    | Exit
+.TE
+
+The delivery instruction starts with 'D' as the first byte. This
+instruction gets the filename in todo directory, the message id and whether
+the message is local or remote. It then uses \fBqmail-lspawn\fR(8) to
+deliver messages to local recipients and \fBqmail-rspawn\fR(8) to deliver
+messages to remote recipients. If a message is temporarily undeliverable to
+one or more addresses, \fBqmail-send\fR leaves it in the queue and tries
+the addresses again later.
 
 \fBqmail-send\fR can run delivery and todo processing in detached mode if
 it gets \fBSIGUSR1\fR signal. In detached mode, qmail-send processes just
@@ -55,26 +76,32 @@ continues to happen and emails continue to get classied as local, remote,
 but they don't get scheduled for delivery. One can issue the signal
 \fBSIGUSR2\fR to enter the normal attached mode, where emails get scheduled
 immediately after todo processing. \fBtodo-proc\fR start communicationg
-with \fBqmail-send\fR. SIGUSR1 should be used if \fBqmail-send\fR is unable
-to cope with high injection rates. One may issue SIGUSR1 if you want to
-pre-process the incoming emails but schedule delivery later on receipt of
-SIGUSR2.
+with \fBqmail-send\fR. \fBSIGUSR1\fR should be used if \fBqmail-send\fR is
+unable to cope with high injection rates. One may issue \fBSIGUSR1\fR if
+you want to pre-process the incoming emails but schedule delivery later on
+receipt of \fBSIGUSR2\fR.
+
+\fBqmail-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
+recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
+If a message is temporarily undeliverable to one or more addresses,
+\fBqmail-send\fR leaves it in the queue and retries the addresses later.
 
 \fBqmail-send\fR prints a readable record of its activities to descriptor
 0. It writes commands to \fBqmail-lspawn\fR, \fBqmail-rspawn\fR, and
 \fBqmail-clean\fR on descriptors 1, 3, and 5, and reads responses from
 descriptors 2, 4, and 6. \fBqmail-send\fR is responsible for avoiding
-deadlock.
+deadlock. These descriptors are actually pipes setup by
+\fBqmail-start\fR(8).
 
 \fBqmail-send\fR uses \fBqmail-queue\fR to queue bounces and
 aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
 variable. If a different queue program is desired for bounces, it can be
 set by using \fBBOUNCEQUEUE\fR environment variable.
 
-When injecting a bounce for a previously forwarded email, whose sender was
-rewritten using \fISRS\fB, \fBqmail-send\fR rewrites the recipient to the
-original sender using Sender Rewriting Scheme, if \fISRS\fB has been
-configured. see \fBindimail-srs\fR(5) for information on how to do this.
+If Sender Rewriting Schme (\fISRS\fR) has been configured, when injecting a
+bounce for a previously forwarded email whose sender was rewritten using
+\fISRS\fR, \fBqmail-send\fR rewrites the recipient to the original sender
+using \fBSRS\fR. See \fBindimail-srs\fR(5) to know how to do this.
 
 \fBqmail-send\fR adds the \fBX-Bounced-Address\fR header when creating a
 bounce. It assigns the address that caused the bounce to this header. This
@@ -88,10 +115,10 @@ finish.
 If \fBqmail-send\fR receives an ALRM signal, it will reschedule every
 message in the queue for immediate delivery.
 
-If the environment variable USE_FSYNC is set, then \fBqmail-send\fR writes
-all data to disk ("flushes") all modified in-core data of (i.e., modified
-buffer cache pages for) the new message to the disk device (or other
-permanent storage device) so that all changed information can be
+If the environment variable \fBUSE_FSYNC\fR is set, then \fBqmail-send\fR
+writes all data to disk ("flushes") all modified in-core data of (i.e.,
+modified buffer cache pages for) the new message to the disk device (or
+other permanent storage device) so that all changed information can be
 retrieved even if the system crashes or is rebooted. This includes
 writing through or flushing a disk cache if present. The call blocks
 until the device reports that the transfer has completed. This is done
@@ -107,7 +134,7 @@ forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
 
 if the value of the environment variables USE_FSYNC, USE_FDATASYNC,
-USE_SYNCDIR  is zero, the corresponding variables is unset. This allows
+USE_SYNCDIR is zero, the corresponding variables is unset. This allows
 setting of these variables for \fBqmail-local\fR(8).
 
 \fBqmail-send\fR can be configured to use a queue with a different split
@@ -703,6 +730,12 @@ l l.
    #73 2131600 [24 16:06:40]         58800 [00 16:20:00]
    #74 2190400 [25 08:26:40]         59600 [00 16:33:20]
 .TE
+
+.SH CREDITS
+The external todo processor, \fBtodo-proc\fR(8) borrows its basic design
+from the ext-todo patch by Claudio Jeker <jeker@n-r-g.com> and
+Andre Oppermann <opi@nrg4u.com> (c) 1998,1999,2000,2001,2002 Internet
+Business Solutions Ltd.
 
 .SH "SEE ALSO"
 nice(1),
