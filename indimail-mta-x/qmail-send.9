@@ -45,8 +45,8 @@ that it has started. \fBqmail-send\fR reads instructions from
 \fBtodo-proc\fR on descriptor 8. Other instructions that \fBqmail-send\fR
 understands are instruction to log a message, instruction to quit. All
 instructions start with a single byte character followed by zero or more
-bytes and terminated by the NULL \0 byte. All communcation between
-\fBqmai-send\fR and \fBtodo-processor\fR happens on descriptors 7 and 8
+bytes and terminated by the NULL \\0 byte. All communcation between
+\fBqmail-send\fR and \fBtodo-processor\fR happens on descriptors 7 and 8
 which are actually two pipes setup by \fBqmail-start\fR(8).
 
 .TS
@@ -93,10 +93,11 @@ descriptors 2, 4, and 6. \fBqmail-send\fR is responsible for avoiding
 deadlock. These descriptors are actually pipes setup by
 \fBqmail-start\fR(8).
 
-\fBqmail-send\fR uses \fBqmail-queue\fR to queue bounces and
-aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
+\fBqmail-send\fR uses \fBqmail-queue\fR to queue aliases, forwards and
+bounces. This can be changed by using \fBQMAILQUEUE\fR environment
 variable. If a different queue program is desired for bounces, it can be
-set by using \fBBOUNCEQUEUE\fR environment variable.
+done by setting \fBBOUNCEQUEUE\fR environment variable to a qmail-queue
+client program.
 
 If Sender Rewriting Schme (\fISRS\fR) has been configured, when injecting a
 bounce for a previously forwarded email whose sender was rewritten using
