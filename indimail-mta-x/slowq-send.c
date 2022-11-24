@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.27 2022-11-22 19:06:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.28 2022-11-24 08:49:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -3217,7 +3217,8 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 {
 	fd_set          rfds, wfds;
 	datetime_sec    wakeup;
-	int             nfds, c, r;
+	int             nfds, r;
+	char            c;
 	struct timeval  tv;
 
 	switch((todopid = fork()))
@@ -3787,7 +3788,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.27 2022-11-22 19:06:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.28 2022-11-24 08:49:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3797,6 +3798,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.28  2022-11-24 08:49:14+05:30  Cprogrammer
+ * changed variable type to c when reading from slowq-send process
+ *
  * Revision 1.27  2022-11-22 19:06:39+05:30  Cprogrammer
  * corrected name (qmail-send -> slowq-send)
  *
