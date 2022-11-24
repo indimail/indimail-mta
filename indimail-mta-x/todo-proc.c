@@ -1304,7 +1304,8 @@ reread(void)
 int
 main(int argc, char **argv)
 {
-	int             nfds, r, c, opt;
+	int             nfds, r, opt;
+	char            c;
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	char           *ptr;
@@ -1504,7 +1505,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: todo-proc.c,v 1.64 2022-09-27 12:49:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: todo-proc.c,v 1.65 2022-11-24 08:50:10+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1512,6 +1513,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
+ * Revision 1.65  2022-11-24 08:50:10+05:30  Cprogrammer
+ * changed variable type to c when reading from qmail-send
+ *
  * Revision 1.64  2022-09-27 12:49:46+05:30  Cprogrammer
  * updated log messages
  *
