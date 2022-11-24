@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.17  2022-11-24 08:49:54+05:30  Cprogrammer
+ * converted function declaration to ansic
+ *
  * Revision 1.16  2020-09-16 19:08:17+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -186,12 +189,7 @@ socket_bind6(int s, char *bound, ip6_addr *ipr)
 
 #ifdef IPV6
 int
-timeoutconn6(s, ipr, ipl, port, timeout)
-	int             s;
-	ip6_addr       *ipr;
-	union v46addr  *ipl;
-	unsigned int    port;
-	int             timeout;
+timeoutconn6(int s, ip6_addr *ipr, union v46addr *ipl, unsigned int port, int timeout)
 {
 	int             i;
 	char            ch, bound = 0;
@@ -323,12 +321,7 @@ timeoutconn6(s, ipr, ipl, port, timeout)
 #endif /*- #ifdef IPV6 */
 
 int
-timeoutconn4(s, ipr, ipl, port, timeout)
-	int             s;
-	ip_addr        *ipr;
-	union v46addr  *ipl;
-	unsigned int    port;
-	int             timeout;
+timeoutconn4(int s, ip_addr *ipr, union v46addr *ipl, unsigned int port, int timeout)
 {
 	char            ch, bound = 0;
 	sockaddr_in     sin;
@@ -386,7 +379,7 @@ timeoutconn4(s, ipr, ipl, port, timeout)
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.16 2020-09-16 19:08:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: timeoutconn.c,v 1.17 2022-11-24 08:49:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
