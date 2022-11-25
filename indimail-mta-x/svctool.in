@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.648 2022-11-23 15:12:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.649 2022-11-25 23:49:27+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.648 2022-11-23 15:12:43+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.649 2022-11-25 23:49:27+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -8918,9 +8918,14 @@ do
 	echo
 done
 echo
+echo "Service variables ====================================================="
+print_all_variables
+
+echo
 echo "Control Configuration ================================================="
 echo
 "$DESTDIR"$QmailBinPrefix/bin/qmail-showctl
+
 echo
 echo "IndiMail Assign File:"
 /bin/cat "$DESTDIR"$sysconfdir/users/assign
@@ -8956,10 +8961,11 @@ fi
 servicedir=$1
 (
 for i in $servicedir $sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
-	$QmailHOME/alias/.qmail-\* /etc/inittab /etc/init.d/svscan \
-	/etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
-	/etc/nsswitch.conf /etc/resolv.conf /etc/security /etc/alternativces \
-	$QmailHOME/.bashrc $QmailHOME/.bash_profile $QmailHOME/.indimail $file
+	/etc/inittab /etc/init.d/svscan /etc/passwd /etc/group /etc/hosts \
+	/etc/sysconfig/network /etc/nsswitch.conf /etc/resolv.conf \
+	/etc/security /etc/alternativces  $QmailHOME/.bashrc \
+	$QmailHOME/.bash_profile $QmailHOME/.indimail /root/indimail_config.txt \
+	$file
 do
 	if [ -f $i -o -d $i ] ; then
 		echo "$i"
@@ -9423,6 +9429,72 @@ create_cert()
 	echo "Restarting services using $sysconfdir/certs/servercert.pem"
 	for i in $svc_list; do echo "Restarting service $i"; done
 	svc -r $svc_list
+}
+
+print_all_variables()
+{
+	for i in $servicedir/*
+	do
+		if [ -d $i/variables ] ; then
+			vars=$(envdir -c $i/variables env 2>/dev/null)
+			if [ -n "$vars" ] ; then
+				echo "------ environment variables for $i ------------"
+				envdir -c $i/variables env
+				echo
+				if [ -L $i/variables/.envdir ] ; then
+					link_name=$(readlink $i/variables/.envdir)
+					echo "NOTE: additional variables were obtained from $link_name"
+					echo
+				elif [ -f $i/variables/.envdir ] ; then
+					echo "NOTE: additional variables were obtained from .envdir"
+					cat $i/variables/.envdir
+					echo
+				fi
+				if [ -f $i/variables/.envfile ] ; then
+					echo "NOTE: additional variables were obtained from .envfile"
+					cat $i/variables/.envfile
+					echo
+				fi
+			else
+				echo "------ $i ------------"
+				echo "NOTE: This service has no configured variables"
+				echo
+			fi
+		fi
+	done
+	for i in $sysconfdir/control/defaultqueue $sysconfdir/control/global_vars \
+		$sysconfdir/ezmlm/global_vars
+	do
+		if [ -d $i ] ; then
+			vars=$(envdir -c $i env 2>/dev/null)
+			if [ -n "$vars" ] ; then
+				if [ -L $i/.envdir -o -f $i/.envdir -o -f $i/.envfile ] ; then
+					echo "------ $i ------------"
+				fi
+				if [ -L $i/.envdir ] ; then
+					link_name=$(readlink $i/.envdir)
+					echo "NOTE: additional variables were obtained from $link_name"
+					echo
+				elif [ -f $i/.envdir ] ; then
+					echo "NOTE: additional variables were obtained from .envdir"
+					cat $i/.envdir
+					echo
+				fi
+				if [ -f $i/.envfile ] ; then
+					echo "NOTE: additional variables were obtained from .envfile"
+					cat $i/.envfile
+					echo
+				fi
+				echo "------ environment variables for $i ------------"
+				envdir -c $i env
+				echo
+			else
+				echo "------ $i ------------"
+				echo "NOTE: This directory has no configured variables"
+				echo
+			fi
+		fi
+	done
 }
 
 ################################# Main ##################################
@@ -11035,15 +11107,17 @@ case $option in
 		exit 1
 	fi
 	EXT=`date +'%d%m%y-%H%M%S'`
+	dump_config "$servicedir" "$cntrldir" > /root/indimail_config.txt
 	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indimail-backup.$EXT.tar.gz
+	/bin/rm -f /root/indimail_config.txt
 	if [ -f $HOME/.mylogin.cnf ] ; then
-	$mysqlPrefix/bin/mysqldump --login-path=admin --extended-insert \
-		--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
-		--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		$mysqlPrefix/bin/mysqldump --login-path=admin --extended-insert \
+			--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
+			--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
 	else
-	$mysqlPrefix/bin/mysqldump -u mysql -p$PRIV_PASS --extended-insert \
-		--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
-		--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		$mysqlPrefix/bin/mysqldump -u mysql -p$PRIV_PASS --extended-insert \
+			--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
+			--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
 	fi
 	;;
 
@@ -11613,68 +11687,7 @@ case $option in
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
 	fi
-	for i in $servicedir/*
-	do
-		if [ -d $i/variables ] ; then
-			vars=$(envdir -c $i/variables env 2>/dev/null)
-			if [ -n "$vars" ] ; then
-				echo "------ environment variables for $i ------------"
-				envdir -c $i/variables env
-				echo
-				if [ -L $i/variables/.envdir ] ; then
-					link_name=$(readlink $i/variables/.envdir)
-					echo "NOTE: additional variables were obtained from $link_name"
-					echo
-				elif [ -f $i/variables/.envdir ] ; then
-					echo "NOTE: additional variables were obtained from .envdir"
-					cat $i/variables/.envdir
-					echo
-				fi
-				if [ -f $i/variables/.envfile ] ; then
-					echo "NOTE: additional variables were obtained from .envfile"
-					cat $i/variables/.envfile
-					echo
-				fi
-			else
-				echo "------ $i ------------"
-				echo "NOTE: This service has no configured variables"
-				echo
-			fi
-		fi
-	done
-	for i in $sysconfdir/control/defaultqueue $sysconfdir/control/global_vars \
-		$sysconfdir/ezmlm/global_vars
-	do
-		if [ -d $i ] ; then
-			vars=$(envdir -c $i env 2>/dev/null)
-			if [ -n "$vars" ] ; then
-				if [ -L $i/.envdir -o -f $i/.envdir -o -f $i/.envfile ] ; then
-					echo "------ $i ------------"
-				fi
-				if [ -L $i/.envdir ] ; then
-					link_name=$(readlink $i/.envdir)
-					echo "NOTE: additional variables were obtained from $link_name"
-					echo
-				elif [ -f $i/.envdir ] ; then
-					echo "NOTE: additional variables were obtained from .envdir"
-					cat $i/.envdir
-					echo
-				fi
-				if [ -f $i/.envfile ] ; then
-					echo "NOTE: additional variables were obtained from .envfile"
-					cat $i/.envfile
-					echo
-				fi
-				echo "------ environment variables for $i ------------"
-				envdir -c $i env
-				echo
-			else
-				echo "------ $i ------------"
-				echo "NOTE: This directory has no configured variables"
-				echo
-			fi
-		fi
-	done
+	print_all_variables
 	;;
 
 	47) # create_delivery
