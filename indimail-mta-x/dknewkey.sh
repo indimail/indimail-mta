@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.13 2022-10-02 21:55:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.14 2022-11-27 09:32:51+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -66,6 +66,7 @@ print_key()
 		if [ -f $selector ] ; then
 			echo "DKIM Private key for $domain file $dir/$selector"
 			cat $selector
+			ls -l $dir/$selector
 			echo "------------------------------------------------------"
 		else
 			echo "DKIM Private key for $domain does not exist in $dir/$selector"
@@ -74,6 +75,7 @@ print_key()
 		if [ -f $selector.pub ] ; then
 			echo "DKIM TXT record for $domain with selector=$selector file $dir/$selector.pub"
 			cat $selector.pub
+			ls -l $dir/$selector.pub
 			echo "------------------------------------------------------"
 		else
 			echo "DKIM TXT record for $domain with selector=$selector does not exist in $dir/$selector.pub"
@@ -86,6 +88,9 @@ print_key()
 			t=$(echo $i | cut -c3-)
 			echo "DKIM TXT record for $domain with selector=$selector file $dir/$t"
 			cat $i
+			ls -l $dir/$t
+			t=$(echo $t|sed 's{.pub{{')
+			ls -l $dir/$t
 			echo "------------------------------------------------------"
 		done
 		exit 0
@@ -203,15 +208,11 @@ else
 	fi
 	if [ -f $selector -a $force -eq 0 ] ; then
 		echo "DKIM private key $selector exists. Skipping private key generation" 1>&2
-		skip_priv_key=1
-	else
-		skip_priv_key=0
+		exit 1
 	fi
 	if [ -f $selector -a $force -eq 0 ] ; then
 		echo "DKIM public  key $selector.pub exists. Skipping public  key generation" 1>&2
-		skip_pub_key=1
-	else
-		skip_pub_key=0
+		exit 1
 	fi
 	err=$(mktemp -t dkkeyXXXXXXXXXX)
 	if [ $? -ne 0 ] ; then
@@ -222,32 +223,28 @@ else
 	exec 2>$err
 	exec 0<$err
 	/bin/rm -f $err
-	if [ $skip_priv_key -eq 0 ] ; then
-		echo "Generating DKIM private key keysize=$bits, file $dir/$selector"
-		/usr/bin/openssl genrsa -out $selector $bits
-		if [ $? -ne 0 ] ; then
-			/bin/cat
-			exit 1
-		fi
+	echo "Generating DKIM private key keysize=$bits, file $dir/$selector"
+	/usr/bin/openssl genrsa -out $selector $bits
+	if [ $? -ne 0 ] ; then
+		/bin/cat
+		exit 1
 	fi
-	if [ $skip_pub_key -eq 0 ] ; then
-		pubkey=$(/usr/bin/openssl rsa -in $selector -pubout -outform PEM | grep -v '^--' | tr -d '\n')
-		if [ $? -ne 0 ] ; then
-			/bin/cat
-			exit 1
-		fi
-		echo "Generating DKIM public  key keysize=$bits for $selector.domainkey.$domain, file $dir/$selector.pub"
-		gen_pub_key "$selector" "$domain" "$pubkey" > $selector.pub
-		if [ $? -ne 0 ] ; then
-			/bin/cat
-			exit 1
-		fi
+
+	pubkey=$(/usr/bin/openssl rsa -in $selector -pubout -outform PEM | grep -v '^--' | tr -d '\n')
+	if [ $? -ne 0 ] ; then
+		/bin/cat
+		exit 1
 	fi
+	echo "Generating DKIM public  key keysize=$bits for $selector.domainkey.$domain, file $dir/$selector.pub"
+	gen_pub_key "$selector" "$domain" "$pubkey" > $selector.pub
+	if [ $? -ne 0 ] ; then
+		/bin/cat
+		exit 1
+	fi
+
 	exec 2>&3 # restore stderr
-	if [ $skip_priv_key -eq 0 -o $skip_pub_key -eq 0 ] ; then
-		if ( ! chown root:qmail $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
-			exit 1
-		fi
+	if ( ! chown root:qmail $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
+		exit 1
 	fi
 	print_key "$domain" "$selector"
 fi
@@ -255,6 +252,9 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.14  2022-11-27 09:32:51+05:30  Cprogrammer
+# list public, private key using ls
+#
 # Revision 1.13  2022-10-02 21:55:50+05:30  Cprogrammer
 # refactored code
 #
