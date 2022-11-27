@@ -1,0 +1,5 @@
+#
+# linux specific daemontools programs for @libexecdir@
+# scripts/programs
+f:::0755:/:set-network-wait:set-network-wait
+

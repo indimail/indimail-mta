@@ -66,6 +66,7 @@ upstart
 DIRS
 MAN
 SBIN
+LIBEXEC
 SHARED
 installer
 auto_home.c

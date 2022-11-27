@@ -495,6 +495,10 @@ BIN: BIN.in
 	([ -f BIN.$(SYSTEM) ] && \
 	cat BIN.in BIN.$(SYSTEM) || cat BIN.in) > BIN
 
+LIBEXEC: LIBEXEC.in
+	([ -f LIBEXEC.$(SYSTEM) ] && \
+	cat LIBEXEC.in LIBEXEC.$(SYSTEM) || cat LIBEXEC.in) > LIBEXEC
+
 SBIN: SBIN.in
 	([ -f SBIN.$(SYSTEM) ] && \
 	cat SBIN.in SBIN.$(SYSTEM) || cat SBIN.in) > SBIN

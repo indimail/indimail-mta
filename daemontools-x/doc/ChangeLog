@@ -24,6 +24,8 @@ Release 1.1.1 Start 12/09/2022
 10. minisvc: when importing variables don't treat existing variables as error
 - 17/11/2022
 11. qmailctl.sh: made dash portable
+- 27/11/2022
+12. moved set-network-wait to Linux specific LIBEXEC
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 27/02/2021 End 08/09/2022
