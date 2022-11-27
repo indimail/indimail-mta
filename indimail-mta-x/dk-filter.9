@@ -35,11 +35,11 @@ You can set various DK options in getopt style, by setting the environment
 variable DKSIGNOPTIONS
 
 .nf
-b \fIadvice_length\fR     Length of Advice
-c \fIcanonicalization\fR  simple, nofws
-s \fIprivkeyfile\fR       Private key
-h                   show headers included
-r                   Skip Duplicate Headers
+b \fI<advice_length>\fR    Length of Advice
+c \fI<canonicalization>\fR simple, nofws
+s \fI<privkeyfile>\fR      Private key
+h                    show headers included
+r                    Skip Duplicate Headers
 .fi
 
 .EX
@@ -57,7 +57,9 @@ c <canonicalization> r for relaxed [DEFAULT], s - simple,
 l                    include body length tag
 q                    include query method tag;
 t                    include a timestamp tag
-h
+h                    include copied headers. This adds the z= tag
+                     containing a copy of the message's original
+                     headers.
 i <identity>         the identity, if not provided it will not be included
 x <expire_time>      the expire time in seconds since epoch
                      ( DEFAULT = current time + 604800)
