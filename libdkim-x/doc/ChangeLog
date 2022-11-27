@@ -77,6 +77,8 @@ Release 1.5 Start 19/03/2009 End 08/09/2022
 - 12/09/2021 - indimail-mta-2.14.0
 - 18/05/2022 - indimail-mta-3.0.0
 - 08/09/2022 - indimail-mta-3.0.1
+- 27/11/2022
+39. dkim.c: updated help message for -h option
 
 *
 ----------------------

@@ -1,5 +1,8 @@
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.28  2022-11-27 09:41:38+05:30  Cprogrammer
+ * updated help message for -h option
+ *
  * Revision 1.27  2021-07-20 23:20:09+05:30  Cprogrammer
  * removed use of register
  *
@@ -152,7 +155,8 @@ usage()
 	fprintf(stderr, "l                    include body length tag\n");
 	fprintf(stderr, "q                    include query method tag\n");
 	fprintf(stderr, "t                    include a timestamp tag\n");
-	fprintf(stderr, "h                    include Copied Headers\n");
+	fprintf(stderr, "h                    include Copied Headers. This adds the z= tag containing\n");
+	fprintf(stderr, "                     a copy of the message's original headers.\n");
 	fprintf(stderr, "f                    allow Unsigned From (default is to reject if From field is not signed)\n");
 	fprintf(stderr, "S                    allow Unsigned Subject (default is to reject if Subject field is not signed)\n");
 	fprintf(stderr, "v                    verify the message\n");
@@ -887,7 +891,7 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.27 2021-07-20 23:20:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.28 2022-11-27 09:41:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
