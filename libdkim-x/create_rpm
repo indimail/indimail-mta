@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.5  2022-11-27 09:41:26+05:30  Cprogrammer
+# added --clean argument
+#
 # Revision 1.4  2021-08-28 21:39:21+05:30  Cprogrammer
 # sign devel package
 #
@@ -13,7 +16,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.4 2021-08-28 21:39:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.5 2022-11-27 09:41:26+05:30 Cprogrammer Exp mbhangui $
 #
 curdir=`pwd`
 version=$(cat conf-version)
