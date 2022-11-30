@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.649 2022-11-25 23:49:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.650 2022-11-30 15:41:15+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.649 2022-11-25 23:49:27+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.650 2022-11-30 15:41:15+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9331,9 +9331,13 @@ create_cert()
 		echo "/usr/bin/openssl: No such file or directory" 1>&2
 		exit 1
 	fi
-	echo "Creating SSL Configuration email=$postmaster cn=$common_name"
+	rand_file=$DESTDIR"$sysconfdir/certs/servercert.rand"
+	if [ ! -f $rand_file -o $force -eq 1 ] ; then
+		head -c 512 /dev/urandom > $rand_file
+	fi
 	conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
-	if [ ! -f $conf_file ] ; then
+	if [ ! -f $conf_file -o $force -eq 1 ] ; then
+		echo "Creating SSL Configuration email=$postmaster cn=$common_name"
 		create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
 		/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
 		change_config $conf_file $TMPDIR/config.cnf.$$
@@ -9353,11 +9357,20 @@ create_cert()
 	fi
 	/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
 	$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
-	/bin/ln -sr $sysconfdir/certs/servercert.pem \
-		"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
-	if [ $? -ne 0 ] ; then
-		cd "$DESTDIR"$sysconfdir/certs
-		/bin/ln -s servercert.pem clientcert.pem
+	if [ -f "$DESTDIR"$sysconfdir/certs/clientcert.pem ] ; then
+		t=$(readlink "$DESTDIR"$sysconfdir/certs/clientcert.pem)
+		t=$(basename $t)
+		if [ ! "$t" = "servercert.pem" ] ; then
+			/bin/rm -f "$DESTDIR"$sysconfdir/certs/clientcert.pem
+		fi
+	fi
+	if [ ! -f $sysconfdir/certs/clientcert.pem ] ; then
+		/bin/ln -sr $sysconfdir/certs/servercert.pem \
+			"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
+		if [ $? -ne 0 ] ; then
+			cd "$DESTDIR"$sysconfdir/certs
+			/bin/ln -s servercert.pem clientcert.pem
+		fi
 	fi
 	echo "Updating temporary RSA and DH keys"
 	"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$sysconfdir/certs
