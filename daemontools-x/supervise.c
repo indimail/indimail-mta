@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.26 2022-07-03 11:32:00+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.27 2022-12-02 09:05:07+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -42,6 +42,7 @@ static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
 static char     flagfailed;
+static unsigned long scan_interval = 60;
 /*-
  * status[12-15] - pid
  * status[16]    - paused
@@ -187,6 +188,7 @@ do_wait()
 	if (use_runfs && fchdir(fddir) == -1)
 		strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
+	/* get sleep interval and the service name for which we are waiting */
 	i = get_wait_params(&sleep_interval, &service_name);
 #ifdef USE_RUNFS
 	if (use_runfs && chdir(dir) == -1)
@@ -204,14 +206,26 @@ do_wait()
 		strerr_die2x(111, fatal.s, "out of memory");
 
 	/*- 
-	 * if service_name is up
-	 *   opening supervise/up should return
-	 * if service_name is done
-	 *   opening supervise/up should block
+	 * supervise/up is a FIFO
+	 * if the service service_name is running
+	 *   opening supervise/up with O_WRONLY should return
+	 * if the service service_name is down
+	 *   opening supervise/up with O_WRONLY should block
 	 */
-	if ((fd_depend = open(wait_sv_status.s, O_WRONLY)) == -1)
-		strerr_die4sys(111, fatal.s, "unable to write ", wait_sv_status.s, ": ");
-	close(fd_depend);
+	for (;;) {
+		if ((fd_depend = open(wait_sv_status.s, O_WRONLY)) == -1) {
+			if (errno == error_noent) {/*- supervise for service_name is not running */
+				strerr_warn3(warn.s, "supervise not running for service ", service_name, 0);
+				sleep(scan_interval);
+				continue;
+			}
+			sleep(scan_interval); /* prevent high cpu utilization */
+			strerr_die4sys(111, fatal.s, "unable to write ", wait_sv_status.s, ": ");
+		} else {
+			close(fd_depend);
+			break;
+		}
+	}
 
 	/*- now open the status file of service_name */
 	wait_sv_status.len = len;
@@ -756,6 +770,8 @@ main(int argc, char **argv)
 		strerr_die2x(111, fatal.s, "out of memory");
 	init[0] = init_sv_path.s;
 
+	if ((ptr = env_get("SCANINTERVAL")))
+		scan_ulong(ptr, &scan_interval);
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, fatal.s, "unable to chdir to ", dir, ": ");
 	if (stat("down", &st) != -1)
@@ -800,7 +816,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/ok: ");
 	coe(fdok);
 
-	/*
+	/*-
 	 * By now we have finished initialization of /run. We
 	 * can now run scripts that will not fail due to absense of
 	 * directories/files in /run
@@ -826,13 +842,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.26 2022-07-03 11:32:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.27 2022-12-02 09:05:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.27  2022-12-02 09:05:07+05:30  Cprogrammer
+ * sleep SCANINTERVAL seconds if supervise for waited service is not running
+ *
  * Revision 1.26  2022-07-03 11:32:00+05:30  Cprogrammer
  * open supervise/up in O_WRONLY when waiting for service
  *
