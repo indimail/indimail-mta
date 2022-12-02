@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.50 2022-11-23 15:07:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.51 2022-12-02 10:45:09+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -27,7 +27,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.50 2022-11-23 15:07:42+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.51 2022-12-02 10:45:09+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -36,7 +36,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.50 2022-11-23 15:07:42+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.50 2022-11-23 15:07:42+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.51 2022-12-02 10:45:09+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -252,8 +252,11 @@ $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' $servicedir/greylist.1999/run
 # qmail-daemon changed to qscheduler -s
 $sed -i 's{/sbin/qmail-daemon{/sbin/qscheduler -s{' $servicedir/qmail-send.25/run
 
-# remove STATUSFILE as .svlock serves the same purpose
+# remove STATUSFILE as .svscan.pid serves the same purpose
 rm -f $servicedir/.svscan/variables/STATUSFILE
+if [ ! -f $servicedir/.svscan/variables/AUTOSCAN ] ; then
+	echo 1 > $servicedir/.svscan/variables/AUTOSCAN
+fi
 
 # migrate clamd.conf to scan.conf
 if [ -f $sysconfdir/clamd.conf -a ! -f $sysconfdir/scan.conf ] ; then
@@ -323,6 +326,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.51  2022-12-02 10:45:09+05:30  Cprogrammer
+# add AUTOSCAN env variable for svscan
+#
 # Revision 1.50  2022-11-23 15:07:42+05:30  Cprogrammer
 # rename mysql_lib to libmysql on upgrade
 #

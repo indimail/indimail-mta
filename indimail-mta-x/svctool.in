@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.650 2022-11-30 15:41:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.651 2022-12-02 10:45:33+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.650 2022-11-30 15:41:15+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.651 2022-12-02 10:45:33+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5896,7 +5896,7 @@ fi
 echo "/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin" > $conf_dir/PATH
 if [ " $scan_interval" = " " ] ; then
 	echo           "300"  > $conf_dir/SCANINTERVAL
-	else
+else
 	echo "$scan_interval" > $conf_dir/SCANINTERVAL
 fi
 echo > $conf_dir/SCANLOG
@@ -5905,7 +5905,7 @@ if [ -x /usr/bin/unshare -a $use_unshare -eq 1 ] ; then
 else
 	> $conf_dir/UNSHARE
 fi
-
+echo 1 > $conf_dir/AUTOSCAN
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 /bin/mkdir -p "$DESTDIR"$sysconfdir
 if [ $mount_resolvconf -eq 1 ] ; then
