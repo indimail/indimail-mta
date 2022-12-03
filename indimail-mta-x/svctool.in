@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.651 2022-12-02 10:45:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.652 2022-12-03 08:28:08+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.651 2022-12-02 10:45:33+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.652 2022-12-03 08:28:08+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5236,8 +5236,10 @@ if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
 		$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
 	fi
 elif [ $mariadb -eq 1 ] ; then
-	echo "Creating MariaDB SSL/TLS Certificates" 1>&2
-	mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
+	if [ ! -f "$DESTDIR"$databasedir/ssl/ca.pem ] ; then
+		echo "Creating MariaDB SSL/TLS Certificates" 1>&2
+		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
+	fi
 fi
 $chown -R mysql:mysql "$DESTDIR"$databasedir
 #
@@ -5749,12 +5751,14 @@ else
 	mariadb_client=0
 fi
 
-if [ -d "$DESTDIR"$databasedir ] ; then
-	if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
+if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
+	if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
 		echo "Creating MySQL SSL Certs" 1>&2
 		echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
 		$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
-	elif [ $mariadb -eq 1 ] ; then
+	fi
+elif [ $mariadb -eq 1 ] ; then
+	if [ ! -f "$DESTDIR"$databasedir/ssl/ca.pem ] ; then
 		echo "Creating MariaDB SSL/TLS Certificates" 1>&2
 		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl 1>&2
 	fi
