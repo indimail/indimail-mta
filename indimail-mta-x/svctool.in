@@ -5176,7 +5176,8 @@ else
 	install_db=""
 fi
 
-if [ -d "$DESTDIR"$databasedir/data -a "$force" -eq 0 ] ; then
+if [ -d "$DESTDIR"$databasedir/data/mysql -a "$force" -eq 0 ] ; then
+	echo "MySQL database exists!!!" 1>&2
 	return 0
 fi
 t=$(dirname $mysqlSocket)
@@ -5185,7 +5186,7 @@ if [ ! -d $t ] ; then
 	$chown mysql:mysql $t
 fi
 if [ $force -eq 1 ] ; then
-	/bin/rm -rf "$DESTDIR"$databasedir/data
+	find "$DESTDIR"$databasedir/data -not -name '*'.pem -exec /bin/rm -rf {} \;
 fi
 if ( ! /bin/mkdir -p "$DESTDIR"$databasedir/data || ! /bin/mkdir -p "$DESTDIR"$databasedir/logs ) ; then
 	echo "Unable to create "$DESTDIR"$databasedir/data or "$DESTDIR"$databasedir/logs" 1>&2
@@ -5199,11 +5200,36 @@ echo "$prog_args"
 echo ""
 ) > "$DESTDIR"$databasedir/.create_db
 chmod +x "$DESTDIR"$databasedir/.create_db
+if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
+	if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
+		echo "Creating MySQL SSL/TLS Certificates" 1>&2
+		echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
+		$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
+	fi
+elif [ $mariadb -eq 1 ] ; then
+	if [ ! -f "$DESTDIR"$databasedir/ssl/ca.pem ] ; then
+		echo "Creating MariaDB SSL/TLS Certificates" 1>&2
+		echo "mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl" 1>&2
+		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
+	fi
+fi
 $chown -R mysql:mysql "$DESTDIR"$databasedir
 echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
 if [ $mariadb -eq 1 ] ; then
-	echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
-	$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
+	echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp" 1>&2
+	$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp
+	if [ $? -eq 0 ] ; then
+		if [ ! -d "$DESTDIR"$databasedir/data ] ; then
+			/bin/mv "$DESTDIR"$databasedir/dbtmp "$DESTDIR"$databasedir/data
+		else
+			/bin/mv "$DESTDIR"$databasedir/dbtmp/* "$DESTDIR"$databasedir/data && \
+				/bin/rm -rf "$DESTDIR"$databasedir/dbtmp
+		fi
+	else
+		/bin/rm -rf "$DESTDIR"$databasedir/dbtmp
+		echo "WARNING!!! $install_db failed" 1>&2
+		return 1
+	fi
 else
 	if [ $mysql_version_8 -eq 1 ] ; then
 		opt_str="--user=root"
@@ -5213,32 +5239,32 @@ else
 	/bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str" 1>&2
 	/bin/echo -n " --skip-networking" 1>&2
 	/bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log"  1>&2
-	/bin/echo    " --datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket" 1>&2
+	/bin/echo    " --datadir="$DESTDIR"$databasedir/dbtmp --socket=$mysqlSocket" 1>&2
 	$mysqlPrefix/$mysqld --no-defaults --initialize-insecure $opt_str \
 		--skip-networking \
 		--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
-		--datadir="$DESTDIR"$databasedir/data --socket=$mysqlSocket
-	if [ $? -ne 0 ] ; then
+		--datadir="$DESTDIR"$databasedir/dbtmp --socket=$mysqlSocket
+	if [ $? -eq 0 ] ; then
+		if [ ! -d "$DESTDIR"$databasedir/data ] ; then
+			/bin/mv "$DESTDIR"$databasedir/dbtmp "$DESTDIR"$databasedir/data
+		else
+			/bin/mv "$DESTDIR"$databasedir/dbtmp/* "$DESTDIR"$databasedir/data && \
+				/bin/rm -rf "$DESTDIR"$databasedir/dbtmp
+		fi
+	else
+		/bin/rm -rf "$DESTDIR"$databasedir/dbtmp
 		if [ -z $install_db ] ; then
-			echo "couldn't locate db installation program" 1>&2
+			echo "mysqld --initialize failed and couldn't locate db installation program" 1>&2
 			return 1
 		else
 			echo "WARNING!!! mysqld --initialize-insecure failed. Running $install_db" 1>&2
-			echo "$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data" 1>&2
-			$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/data
+			echo "$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp" 1>&2
+			$install_db $opt_str --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp
+			if [ $? -ne 0 ] ; then
+				echo "WARNING!!! $install_db too failed. Giving up !!!" 1>&2
+				return 1
+			fi
 		fi
-	fi
-fi
-if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
-	if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
-		echo "Creating MySQL SSL Certs" 1>&2
-		echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
-		$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data
-	fi
-elif [ $mariadb -eq 1 ] ; then
-	if [ ! -f "$DESTDIR"$databasedir/ssl/ca.pem ] ; then
-		echo "Creating MariaDB SSL/TLS Certificates" 1>&2
-		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
 	fi
 fi
 $chown -R mysql:mysql "$DESTDIR"$databasedir
@@ -5752,15 +5778,34 @@ else
 fi
 
 if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
+	if [ $force -eq 1 ] ; then
+		find "$DESTDIR"$databasedir/data -name '*'.pem -exec /bin/rm -rf {} \;
+	fi
+	if ( ! /bin/mkdir -p "$DESTDIR"$databasedir/data ) ; then
+		echo "Unable to create "$DESTDIR"$databasedir/data for MySQL Certificates" 1>&2
+		return 1
+	fi
 	if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
-		echo "Creating MySQL SSL Certs" 1>&2
+		echo "Creating MySQL SSL/TLS Certificates" 1>&2
 		echo "$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data" 1>&2
 		$mysqlPrefix/bin/mysql_ssl_rsa_setup --uid=mysql --datadir="$DESTDIR"$databasedir/data 1>&2
+	else
+		echo "MySQL SSL/TLS Certificates exists!!!" 1>&2
 	fi
 elif [ $mariadb -eq 1 ] ; then
+	if [ $force -eq 1 ] ; then
+		find "$DESTDIR"$databasedir/ssl -name '*'.pem -exec /bin/rm -rf {} \;
+	fi
+	if ( ! /bin/mkdir -p "$DESTDIR"$databasedir/ssl ) ; then
+		echo "Unable to create "$DESTDIR"$databasedir/ssl for MariaDB Certificates" 1>&2
+		return 1
+	fi
 	if [ ! -f "$DESTDIR"$databasedir/ssl/ca.pem ] ; then
 		echo "Creating MariaDB SSL/TLS Certificates" 1>&2
+		echo "mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl" 1>&2
 		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl 1>&2
+	else
+		echo "MariaDB SSL/TLS Certificates exists!!!" 1>&2
 	fi
 fi
 
@@ -5773,7 +5818,7 @@ echo "[client]"
 echo "port      = $mysql_port"
 echo "socket    = $mysqlSocket"
 check_mysqld_ini_variable "default_character_set=utf8mb4" 1
-if [ $mariadb_client -eq 1 -a -d "$DESTDIR"$databasedir/ssl ] ; then
+if [ -d "$DESTDIR"$databasedir/ssl ] ; then
 	echo ""
 	echo "# MySQL Client SSL configuration"
 	echo "ssl-ca=$databasedir/ssl/ca.pem"
@@ -11108,7 +11153,7 @@ case $option in
 	check_installation "$qbase" "$qcount" "$qstart" "$servicedir" "$verbose"
 	;;
 
-	13) # mysqldump
+	13) # backup - mysqldump, dump_config, tar
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
