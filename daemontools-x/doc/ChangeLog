@@ -32,8 +32,9 @@ Release 1.1.1 Start 12/09/2022
 14. svscan.c: use 'down' file to start or stop service automatically
 15. svscan.c: scan immediately instead of SCANINTERVAL on termination of a
     supervised service if SCANNOW env variable is set
-- 08/12/2022
+- 07/12/2022
 16. runpod: run bash in foreground if name is test, devel
+17. runpod: added port 8081 for mapping to port 443 on container OS
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 27/02/2021 End 08/09/2022

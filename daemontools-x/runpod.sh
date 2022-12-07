@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.8 2022-12-07 00:56:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.9 2022-12-07 20:51:56+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -61,7 +61,7 @@ set_defaults()
         port_args="$port_args-p 2025:25   -p 2106:106  -p 2110:110  -p 2143:143 "
         port_args="$port_args-p 2209:209  -p 2366:366  -p 2465:465  -p 2587:587 "
         port_args="$port_args-p 2628:628  -p 2993:993  -p 2995:995  -p 3110:4110 "
-        port_args="$port_args-p 3143:4143 -p 5110:9110 -p 5143:9143 -p 8080:80"
+        port_args="$port_args-p 3143:4143 -p 5110:9110 -p 5143:9143 -p 8080:80 -p 8081:443"
 
         # port_str is used just for display purpose
         NEWLINE=$'\n'
@@ -69,7 +69,7 @@ set_defaults()
         port_str="${port_str}  -p 2025:25   -p 2106:106  -p 2110:110  -p 2143:143${NEWLINE}"
         port_str="${port_str}  -p 2209:209  -p 2366:366  -p 2465:465  -p 2587:587${NEWLINE}"
         port_str="${port_str}  -p 2628:628  -p 2993:993  -p 2995:995  -p 3110:4110${NEWLINE}"
-        port_str="${port_str}  -p 3143:4143 -p 5110:9110 -p 5143:9143 -p 8080:80"
+        port_str="${port_str}  -p 3143:4143 -p 5110:9110 -p 5143:9143 -p 8080:80 -p 8081:443"
       ;;
       esac
     fi
@@ -269,6 +269,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.9  2022-12-07 20:51:56+05:30  Cprogrammer
+# added port 8081 for mapping to port 443 on container OS
+#
 # Revision 1.8  2022-12-07 00:56:36+05:30  Cprogrammer
 # run in foreground if name is test or devel
 #
