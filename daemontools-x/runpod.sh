@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.7 2022-11-10 16:55:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.8 2022-12-07 00:56:36+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -101,6 +101,7 @@ set_defaults()
     if [ " $name" = " devel" -o " $name" = " test" ] ; then
       if [ $# -eq 0 ] ; then
         systemd="bash"
+		extra_args="-ti --rm"
       fi
     fi
     if [ " $name" = " svscan" ] ; then
@@ -268,6 +269,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.8  2022-12-07 00:56:36+05:30  Cprogrammer
+# run in foreground if name is test or devel
+#
 # Revision 1.7  2022-11-10 16:55:40+05:30  Cprogrammer
 # redirect all error message to fd 2
 #
