@@ -32,7 +32,7 @@ container after execution.
 podman run -ti --rm e716bf178990 -- ls -l /tmp
 .EE
 
-docker-entrypoint(8) uses the hostname to reconfigures qmail control files.
+docker-entrypoint(8) uses the hostname to reconfigure qmail control files.
 This can be set by passing the -h argument to podman(1) / docker(1). The
 hostname set by podman(1) or docker(1) can be overriden by the -d argument.
 The command 
@@ -75,6 +75,10 @@ services.
 -d \fIdomain\fR or --domain \fIdomain\fR
 By default the hostname argument passed to podman or docker command is used
 as the domain name. This option overrides that value.
+
+.TP
+-t \fItimezone\fR
+Set \fItimezone\fR as the timezone for the container
 
 .SH "SEE ALSO"
 docker(1), podman(1), svscan(8), svstat(8), svc(8), supervise(8),
