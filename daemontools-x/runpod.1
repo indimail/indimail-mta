@@ -1,6 +1,6 @@
 .TH runpod 1
 .SH NAME
-runpod \- Run podman / docker image using podman / docker
+runpod \- Run indimail podman / docker image using podman / docker
 
 .SH SYNOPSIS
 \fBrunpod\fR [\fIOPTIONS\fR] \fIprog\fR \fIarg\fR \fIarg\fR ...
@@ -17,22 +17,21 @@ https://github.com/mbhangui?tab=packages
 
 \fIprog\fR is usually the binary to be executed on startup. \fIprog\fR also
 can have a special meaning. if \fIprog\fR is indimail, indimail-mta,
-webmail, runpod will let \fBdocker-entrypoint\fR(8) get executed. If
-\fIprog\fR is test or devel, runpod will run bash in the container with a
-tty. If this is not specified, systemd will be loaded for debian, ubuntu,
-fedora, centos, almalinux, oraclelinux, opensuse images. For alpine linux
-bash will be loaded with a controlling terminal. If systemd is empty, the
-default entry point for the container will be used. If \fIprog\fR is set as
-auto, then \fBrunpod\fR will instruct podman or docker to execute
-\fBsystemd\fR(1) if the image supports systemd or /sbin/init for alpine and
-gentoo images.
-
-If \fIprog\fR is not specified, then runpod will execute bash in the
-container if \fIname\fR is \fBtest\fR or \fBdevel\fR. It will execute the
-entrypoint for the container if \fIname\fR is \fBsvscan\fR and run in the
-foreground. If the entry point is \fBmail\fR, it will execute the
-entrypoint for the container and run in detached mode. See --name or -n
-option below for setting name.
+svscan, webmail, runpod will let \fBdocker-entrypoint\fR(8) execute
+\fBsvscan\fR(8) in the container. This will start an services configured in
+the \fB/service\fR directory of the container image. If you don't want
+this, you can set \fBname\fR to execute something else instead of
+\fBsvscan\fR. If \fIname\fR is \fBtest\fR or \fBdevel\fR, bash will be
+executed with a controlling terminal and also remove the container on exit.
+If \fIname\fR is \fBsvscan\fR, bash will be executed with a controlling
+terminal, but the container will not be removed on exit. If \fIprog\fR is
+\fBauto\fR, systemd will be loaded for debian, ubuntu, fedora, centos,
+almalinux, oraclelinux, opensuse images. For alpine linux bash will be
+loaded with a controlling terminal. If systemd is empty, the default entry
+point for the container will be used. If \fIprog\fR is set as auto, then
+\fBrunpod\fR will instruct podman or docker to execute \fBsystemd\fR(1) if
+the image supports systemd or execute /sbin/init for alpine and gentoo
+images.
 
 If you need to pass any command line switches to \fBprog\fR, use \-\- to
 prevent the options getting passed to \fBrunpod\fR instead of \fBprog\fR.

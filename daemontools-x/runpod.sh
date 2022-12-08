@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.9 2022-12-07 20:51:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.10 2022-12-08 09:40:09+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -101,15 +101,14 @@ set_defaults()
     if [ " $name" = " devel" -o " $name" = " test" ] ; then
       if [ $# -eq 0 ] ; then
         systemd="bash"
-		extra_args="-ti --rm"
+        extra_args="$extra_args ""-ti --rm"
       fi
-    fi
-    if [ " $name" = " svscan" ] ; then
-        extra_args="$extra_args""-ti --rm "
+    elif [ " $name" = " svscan" ] ; then
+        extra_args="$extra_args ""-ti"
     fi
     if [ -z "$extra_args" ] ; then
       detached=1
-      extra_args="-d --rm"
+      extra_args="-d"
     fi
     ;;
   esac
@@ -140,7 +139,7 @@ do
   case "$1" in
   -a | --args)
   echo $2 | grep "\-d" >/dev/null && detached=1 
-  extra_args="$extra_args""$2 "
+  extra_args="$extra_args ""$2"
   shift 2
   ;;
 
@@ -207,9 +206,8 @@ done
 if [ -z "$imageid" ] ; then
   usage 1
 fi
-set_defaults
+set_defaults $*
 if [ $# -gt 0 -a "$1" = "auto" ] ; then
-  shift
   tag=`$command images | grep  $imageid | awk '{print $2}'`
   case $tag in
     xenial*|debian*|focal*|bionic*|archlinux*|ubi*)
@@ -222,9 +220,9 @@ if [ $# -gt 0 -a "$1" = "auto" ] ; then
     systemd=/usr/lib/systemd/systemd
     ;;
   esac
-fi
-if [ -n "$systemd" ] ; then
-  set "$systemd $*"
+  if [ -n "$systemd" ] ; then
+    set "$systemd $*"
+  fi
 fi
 echo "$command run $cgroup $extra_args"
 echo "  --publish-all --name $name"
@@ -269,6 +267,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.10  2022-12-08 09:40:09+05:30  Cprogrammer
+# fixed setting of systemd
+#
 # Revision 1.9  2022-12-07 20:51:56+05:30  Cprogrammer
 # added port 8081 for mapping to port 443 on container OS
 #
