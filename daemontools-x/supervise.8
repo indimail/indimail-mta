@@ -8,15 +8,20 @@ supervise \- starts and monitors a service.
 .SH DESCRIPTION
 \fBsupervise\fR(8) switches to the directory named \fIs\fR and starts ./init
 if it exists. It restarts ./init if ./init exits with non-zero status. It
-pauses for a second after starting ./init, so that it does not loop too
+pauses for 60 seconds after starting ./init, so that it does not loop too
 quickly in case ./init exits immediately. \fIdirectory\fR has to be
 relative to the current working directory and cannot start with the dot
 (\fB.\fR) or the slash (\fB/\fR) character.
 
-After ./init exits with zero exit status, \fBsupervise\fR(8) starts ./run.
-It restarts ./run if ./run exits. It pauses for a second after
-starting ./run, so that it does not loop too quickly in case ./run exits
-immediately.
+After ./init exits with zero exit status, \fBsupervise\fR starts ./run. It
+restarts ./run if ./run exits. It pauses for a second after starting ./run,
+so that it does not loop too quickly in case ./run exits immediately.
+\fBsupervise\fR expects ./run to run in the foreground. Sometimes daemon
+fork themselves into background, which some consider bad software design.
+If you want to supervise such a daemon, set the sticky bit on ./run. This
+makes \fBsupervise\fR go into \fBsubreaper\fR mode using \fBprctl\fR(2)
+\fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
+\fBPROC_REAP_ACQUIRE\fR on FreeBSD.
 
 If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run or to give other
@@ -30,7 +35,7 @@ if the file \fIs\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
 whenever run exits. The pid of the process that exited is passed as the
 first argument to \fIalert\fR. The exit value or signal (if killed by
 signal) is passed as the second argument to \fIalert\fR. The third argument
-is either \fIexited\fR or \fIstopped / signalled\fR.
+is either \fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
 
 \fBsupervise\fR(8) creates the directory \fIs\fR/\fIsupervise\fR in
 \fIrun\fR/\fIsvscan\fR where \fIrun\fR is either /run or /var/run tmpfs
@@ -42,11 +47,11 @@ status information in a binary format in the directory
 \fBsupervise\fR(8) may exit immediately after startup if it cannot find the
 files it needs in \fIs\fR or if another copy of \fBsupervise\fR(8) is already
 running in \fIs\fR. Once \fBsupervise\fR(8) is successfully running, it will
-not exit unless it is killed or specifically asked to exit. Once
-\fBsupervise\fR(8) is successfully running, it opens the fifo
+not exit unless it is killed or specifically asked to exit. On a successful
+startup \fBsupervise\fR(8) it opens the fifo
 \fIs\fR/\fIsupervise\fR/\fIok\fR in O_RDONLY|O_NDELAY mode. You can use
-\fBsvok\fR(8) to check whether \fBsupervise\fR(8) is successfully running. You
-can use \fBsvscan\fR(8) to reliably start a collection of
+\fBsvok\fR(8) to check whether \fBsupervise\fR(8) is successfully running.
+You can use \fBsvscan\fR(8) to reliably start a collection of
 \fBsupervise\fR(8) processes. \fBsvscan\fR mirrors the service directory in
 /run or /var/run directory (whichever is found first). So /run/\fIs\fR will
 be analogous to /service/\fIs\fR. When started by \fBsvscan\fR, error
