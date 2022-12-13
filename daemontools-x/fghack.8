@@ -2,19 +2,33 @@
 .SH NAME
 fghack \- is an anti-backgrounding tool.
 .SH SYNOPSIS
-.B fghack
-.I child
+\fBfghack\fR \fIchild\fR
+
 .SH DESCRIPTION
-.B fghack
-runs
-.I child
-with many extra descriptors writing to a pipe.
-.B fghack
-reads and discards any data written to the pipe. After
-.I child
-has exited and the pipe has been closed,
-.B fghack
-exits. 
+\fBfghack\fR runs \fIchild\fR with many extra descriptors writing to a
+pipe. \fBfghack\fR reads and discards any data written to the pipe. After
+\fIchild\fR has exited and the pipe has been closed, \fBfghack\fR exits. 
+
+Beware that \fBsupervise\fR(8) cannot send signals to daemons under fghack.
+fghack creates a pipe from the daemon and reads data until the pipe is
+closed. Normally all the daemon's descendants will inherit the open pipe
+from the daemon, so the pipe will not be closed until they all exit.
+
+However, fghack will exit early if the daemon goes out of its way to close
+extra descriptors. A few of these daemons leave descriptor 0 open, even
+though they do not use descriptor 0; so
+
+.EX
+#!/bin/sh
+exec fghack baddaemon <&-
+.EE
+
+might work.
+
+Instead of using \fBfghack\fR to handle daemons that puts themselves in
+background, you can set the sticky bit for the run file for the service.
+See \fBsupervise\fR(8).
+
 .SH SEE ALSO
 supervise(8),
 svc(8),
