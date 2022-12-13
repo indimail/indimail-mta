@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.27 2022-12-02 09:05:07+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.28 2022-12-13 21:44:54+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -27,6 +27,7 @@
 #include "getln.h"
 #include "scan.h"
 #include "seek.h"
+#include "subreaper.h"
 
 static char    *dir;
 static int      selfpipe[2];
@@ -43,6 +44,7 @@ static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
 static char     flagfailed;
 static unsigned long scan_interval = 60;
+static char     is_subreaper = 0;
 /*-
  * status[12-15] - pid
  * status[16]    - paused
@@ -59,6 +61,7 @@ static stralloc run_service_dir;
 int             use_runfs;
 #endif
 static pid_t    childpid = 0;	/*- 0 means down */
+static int      grandchild = 0;
 static pid_t    svpid;
 
 void
@@ -275,6 +278,7 @@ void
 trystart(void)
 {
 	int             f;
+	char            strnum[FMT_ULONG];
 
 	do_wait();
 	switch (f = fork())
@@ -295,8 +299,10 @@ trystart(void)
 		execve(*run, run, environ);
 		strerr_die2sys(111, fatal.s, "unable to start run: ");
 	}
+	grandchild = 0;
 	flagpaused = 0;
-	strerr_warn2(info.s, "Started service", 0);
+	strnum[fmt_ulong(strnum, f)] = 0;
+	strerr_warn4(info.s, "pid: ", strnum, is_subreaper ? " started service in subreaper mode" : "started service in non-subreaper mode", 0);
 	pidchange((childpid = f), 1);
 	announce(0);
 	fifo_make("supervise/up", 0600);
@@ -352,16 +358,54 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 	}
 }
 
+static void
+postmortem(pid_t pid, int wstat, int _status)
+{
+	int             t;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	if (!_status) {
+		if (wait_stopped(wstat) || wait_continued(wstat)) {
+			t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
+			strnum2[fmt_ulong(strnum2, t)] = 0;
+			strerr_warn5(warn.s, "pid: ", strnum1,
+					wait_stopped(wstat) ? " stopped by signal " : " started by signal ", strnum2, 0);
+		} else
+		if (wait_signaled(wstat)) {
+			t = wait_termsig(wstat);
+			strnum2[fmt_ulong(strnum2, t)] = 0;
+			strerr_warn5(warn.s, "pid: ", strnum1, " got signal ", strnum2, 0);
+		}
+		return;
+	}
+	if (wait_stopped(wstat) || wait_continued(wstat)) {
+		t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
+		strnum2[fmt_ulong(strnum2, t)] = 0;
+		strerr_warn5(warn.s, "pid: ", strnum1,
+				wait_stopped(wstat) ? " stopped by signal " : " started by signal ", strnum2, 0);
+	} else
+	if (wait_signaled(wstat)) {
+		t = wait_termsig(wstat);
+		strnum2[fmt_ulong(strnum2, t)] = 0;
+		strerr_warn5(warn.s, "pid: ", strnum1, " killed by signal ", strnum2, 0);
+	} else {
+		t = wait_exitcode(wstat);
+		strnum2[fmt_ulong(strnum2, t)] = 0;
+		strerr_warn5(warn.s, "pid: ", strnum1, " exited with status=", strnum2, 0);
+	}
+}
+
 void
 doit(void)
 {
 	iopause_fd      x[2];
 	struct taia     deadline;
 	struct taia     stamp;
-	int             wstat, r, t, g = 0;
+	static int      double_fork_flag;
+	int             wstat, wstat_reap, r, t, g = 0, do_break;
 	char            ch, c = 0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-	char           *ptr;
 
 	announce(0);
 
@@ -375,39 +419,78 @@ doit(void)
 		x[0].events = IOPAUSE_READ;
 		x[1].fd = fdcontrol;
 		x[1].events = IOPAUSE_READ;
-		taia_now(&stamp);
-		taia_uint(&deadline, 3600);
-		taia_add(&deadline, &stamp, &deadline);
+		taia_now(&stamp); /*- current timestamp */
+		taia_uint(&deadline, 3600); /*- one hour deadline */
+		taia_add(&deadline, &stamp, &deadline); /*- current timestamp + 1 hour */
+		/*-
+		 * handle events on
+		 * 1. selfpipe -> when child dies
+		 * 2. supervise/control
+		 * This is where supervise will be, waiting
+		 * for sigchild to happen or waiting for
+		 * something written to supervise/control
+		 */
 		iopause(x, 2, &deadline, &stamp);
 
 		sig_block(sig_child);
 
+		/*- empty the pipe and come out when empty */
 		while (read(selfpipe[0], &ch, 1) == 1) ;
-		for (;;) {
-			if (!(r = wait_nohang(&wstat)))
+
+		/*- handle child exits */
+		for (do_break = 0;;) {
+			if (!(r = waitpid(-1, &wstat, WNOHANG|WSTOPPED|WCONTINUED)))
 				break;
-			if (r == -1 && errno != error_intr)
-				break;
-			if (r == childpid) { /*- process exited */
+			if (r == -1) {
+				if (errno != error_intr)
+					break;
+				else
+					continue;
+			}
+			if (wait_stopped(wstat) || wait_continued(wstat)) {
 				strnum1[fmt_ulong(strnum1, childpid)] = 0;
+				t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
+				strnum2[fmt_ulong(strnum2, t)] = 0;
+				strerr_warn5(warn.s, "pid: ", strnum1,
+						wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
+				break;
+			}
+			if (r == childpid || (r != -1 && grandchild)) { /*- process exited */
+				if (r != childpid) {
+					strnum1[fmt_ulong(strnum1, childpid)] = 0;
+					strnum2[fmt_ulong(strnum2, r)] = 0;
+					strerr_warn6(warn.s, "pid: ", strnum2, " double fork (orig pid ", strnum1, ")", 0);
+					childpid = r;
+				}
+				if (is_subreaper) {
+					for (do_break = 0;;) {
+						if (!(r = wait_nohang(&wstat_reap))) { /*- children but no zombies */
+							strnum1[fmt_ulong(strnum1, childpid)] = 0;
+							if (!double_fork_flag++)
+								strerr_warn4(warn.s, "pid: ", strnum1, ": double fork detected", 0);
+							postmortem(childpid, wstat, r);
+							grandchild = 1;
+							do_break = 1;
+							break;
+						}
+						if (r == -1) {
+							if (errno == error_child) /*- no child left */
+								break;
+							if (errno != error_intr) {
+								do_break = 1;
+								break;
+							}
+						}
+					}
+				}
+				if (do_break)
+					break;
+				double_fork_flag = 0;
+				postmortem(childpid, wstat, r);
 				childpid = 0;
 				pidchange(svpid, 0);
 				close(fdup);
 				announce(0);
-				t = str_rchr(dir, '/');
-				ptr = dir[t] ? dir + t + 1 : dir;
-				if (wait_stopped(wstat)) {
-					t = wait_stopsig(wstat);
-					strnum2[fmt_ulong(strnum2, t)] = 0;
-					strerr_warn7(warn.s, "pid: ", strnum1, " service ", ptr, " stopped by signal ", strnum2, 0);
-				} else
-				if (wait_crashed(wstat))
-					strerr_warn6(warn.s, "pid: ", strnum1, " service ", ptr, " crashed", 0);
-				else {
-					t = wait_exitcode(wstat);
-					strnum2[fmt_ulong(strnum2, t)] = 0;
-					strerr_warn7(warn.s, "pid: ", strnum1, " service ", ptr, " exited with status=", strnum2, 0);
-				}
 				if (flagexit)
 					return;
 				if (flagwant && flagwantup) {
@@ -749,6 +832,7 @@ main(int argc, char **argv)
 		strerr_die2x(111, fatal.s, "out of memory");
 	if (pipe(selfpipe) == -1)
 		strerr_die4sys(111, fatal.s, "unable to create pipe for ", dir, ": ");
+	/*- close selfpipe on execve */
 	coe(selfpipe[0]);
 	coe(selfpipe[1]);
 	ndelay_on(selfpipe[0]);
@@ -782,6 +866,10 @@ main(int argc, char **argv)
 
 	if ((fddir = open_read(".")) == -1)
 		strerr_die2sys(111, fatal.s, "unable to open current directory: ");
+	if (stat("run", &st) == -1)
+		strerr_die4sys(111, fatal.s, "unable to stat ", dir, "/run: ");
+	if (st.st_mode & S_ISVTX) /*- sticky bit on run file */
+		is_subreaper = subreaper() == 0 ? 1 : 0;
 #ifdef USE_RUNFS
 	if (stat(".", &st) == -1)
 		strerr_die2sys(111, fatal.s, "unable to stat current directory: ");
@@ -842,13 +930,17 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.27 2022-12-02 09:05:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.28 2022-12-13 21:44:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.28  2022-12-13 21:44:54+05:30  Cprogrammer
+ * display exit status and termination signal
+ * become subreaper if run file has sticky bit set
+ *
  * Revision 1.27  2022-12-02 09:05:07+05:30  Cprogrammer
  * sleep SCANINTERVAL seconds if supervise for waited service is not running
  *
