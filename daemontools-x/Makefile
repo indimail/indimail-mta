@@ -196,12 +196,15 @@ softlimit: load softlimit.o
 softlimit.o: compile softlimit.c
 	./compile softlimit.c
 
-supervise: deepsleep.o load supervise.o iopause.o
-	./load supervise deepsleep.o iopause.o -lqmail
+supervise: deepsleep.o load supervise.o iopause.o subreaper.o
+	./load supervise deepsleep.o iopause.o subreaper.o -lqmail
 
 supervise.o: compile supervise.c deepsleep.h iopause.h \
-conf-runfs
+subreaper.h conf-runfs
 	./compile `grep -v "^#" conf-runfs` supervise.c
+
+subreaper.o: compile subreaper.c subreaper.h
+	./compile subreaper.c
 
 run_init.o: compile run_init.c
 	./compile `grep -v "^#" conf-runfs` run_init.c
