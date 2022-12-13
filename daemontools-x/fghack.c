@@ -1,5 +1,8 @@
 /*
  * $Log: fghack.c,v $
+ * Revision 1.6  2022-12-13 21:21:12+05:30  Cprogrammer
+ * display exit status and termination signal
+ *
  * Revision 1.5  2020-09-16 18:59:01+05:30  Cprogrammer
  * fix compiler warning
  *
@@ -21,6 +24,7 @@
 #include "error.h"
 #include "strerr.h"
 #include "pathexec.h"
+#include "fmt.h"
 
 #define FATAL "fghack: fatal: "
 
@@ -30,9 +34,9 @@ int
 main(int argc, char **argv, char **envp)
 {
 	char            ch;
-	int             wstat;
+	int             wstat, i;
 	int             pi[2];
-	int             i;
+	char            strnum[FMT_ULONG];
 
 	if (!argv[1])
 		strerr_die1x(100, "fghack: usage: fghack child");
@@ -67,15 +71,28 @@ main(int argc, char **argv, char **envp)
 
 	if (wait_pid(&wstat, pid) == -1)
 		strerr_die2sys(111, FATAL, "wait failed: ");
-	if (wait_crashed(wstat))
-		strerr_die2x(111, FATAL, "child crashed");
+	if (wait_stopped(wstat) || wait_continued(wstat)) {
+		i = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
+		strnum[fmt_ulong(strnum, i)] = 0;
+		strerr_die3x(111, FATAL,
+					wait_stopped(wstat) ?  "child stopped by signal " : "child continued by signal ", strnum);
+	} else
+	if (wait_signaled(wstat)) {
+		i = wait_termsig(wstat);
+		strnum[fmt_ulong(strnum, i)] = 0;
+		strerr_die3x(111, FATAL, "child killed by signal ", strnum);
+	} else {
+		i = wait_exitcode(wstat);
+		strnum[fmt_ulong(strnum, i)] = 0;
+		strerr_warn2("child exited with status=", strnum, 0);
+	}
 	_exit(wait_exitcode(wstat));
 }
 
 void
 getversion_fghack_c()
 {
-	static char    *x = "$Id: fghack.c,v 1.5 2020-09-16 18:59:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fghack.c,v 1.6 2022-12-13 21:21:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
