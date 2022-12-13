@@ -1,4 +1,4 @@
-/*- $Id: subreaper.c,v 1.1 2022-12-13 20:49:24+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: subreaper.c,v 1.1 2022-12-13 23:22:25+05:30 Cprogrammer Exp mbhangui $ */
 #include "subreaper.h"
 
 #if defined(linux)
@@ -10,16 +10,21 @@ subreaper()
 }
 #elif defined(__FreeBSD__)
 #include <sys/procctl.h>
-#else
 int
 subreaper()
 {
 	return (procctl(P_PID, 0, PROC_REAP_ACQUIRE, 0));
 }
+#else
+int
+subreaper()
+{
+	return 1;
+}
 #endif
 /*
  * $Log: subreaper.c,v $
- * Revision 1.1  2022-12-13 20:49:24+05:30  Cprogrammer
+ * Revision 1.1  2022-12-13 23:22:25+05:30  Cprogrammer
  * Initial revision
  *
  */
