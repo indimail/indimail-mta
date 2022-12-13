@@ -1,6 +1,6 @@
 /*
  * $Log: fghack.c,v $
- * Revision 1.6  2022-12-13 21:21:12+05:30  Cprogrammer
+ * Revision 1.6  2022-12-14 00:09:07+05:30  Cprogrammer
  * display exit status and termination signal
  *
  * Revision 1.5  2020-09-16 18:59:01+05:30  Cprogrammer
@@ -20,6 +20,7 @@
  *
  */
 #include <unistd.h>
+#include <signal.h>
 #include "wait.h"
 #include "error.h"
 #include "strerr.h"
@@ -92,7 +93,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fghack_c()
 {
-	static char    *x = "$Id: fghack.c,v 1.6 2022-12-13 21:21:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fghack.c,v 1.6 2022-12-14 00:09:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
