@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.26 2022-12-02 10:33:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.27 2022-12-13 21:39:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -433,19 +433,23 @@ doit(char *sdir, pid_t mypid)
 		 * In such a case, we just report the death
 		 */
 		strnum1[fmt_ulong(strnum1, r)] = 0;
-		if (wait_stopped(wstat)) {
-			t = wait_stopsig(wstat);
+		if (wait_stopped(wstat) || wait_continued(wstat)) {
+			t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (p_exe_name)
-				strerr_warn7(WARN, "pid: ", strnum1, " exe ", p_exe_name, ", stopped by signal ", strnum2, 0);
+				strerr_warn7(WARN, "pid: ", strnum1, " exe ", p_exe_name,
+						wait_stopped(wstat) ? ", stopped by signal " : ", continued by signal ", strnum2, 0);
 			else
-				strerr_warn5(WARN, "pid: ", strnum1, " stopped by signal ", strnum2, 0);
+				strerr_warn5(WARN, "pid: ", strnum1,
+						wait_stopped(wstat) ? ", stopped by signal " : ", continued by signal ", strnum2, 0);
 		} else
-		if (wait_crashed(wstat)) {
+		if (wait_signaled(wstat)) {
+			t = wait_termsig(wstat);
+			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (p_exe_name)
-				strerr_warn6(WARN, "pid: ", strnum1, " exe ", p_exe_name, ", crashed", 0);
+				strerr_warn7(WARN, "pid: ", strnum1, " exe ", p_exe_name, ", killed by signal ", strnum2, 0);
 			else
-				strerr_warn4(WARN, "pid: ", strnum1, ", crashed", 0);
+				strerr_warn5(WARN, "pid: ", strnum1, ", killed by signal ", strnum2, 0);
 		} else {
 			t = wait_exitcode(wstat);
 			strnum2[fmt_ulong(strnum2, t)] = 0;
@@ -760,13 +764,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.26 2022-12-02 10:33:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.27 2022-12-13 21:39:01+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.27  2022-12-13 21:39:01+05:30  Cprogrammer
+ * display exit status and termination signal
+ *
  * Revision 1.26  2022-12-02 10:33:13+05:30  Cprogrammer
  * 1. use 'down' file to start or stop service automatically
  * 2. scan immediately instead of SCANINTERVAL on termination of a supervised service if SCANNOW env variable is set
