@@ -1,5 +1,8 @@
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.23  2022-12-13 20:22:26+05:30  Cprogrammer
+ * display diagnostic on exit status
+ *
  * Revision 1.22  2022-07-01 19:57:38+05:30  Cprogrammer
  * use unencrypted connection if argument to -n is an empty string
  *
@@ -115,7 +118,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.22 2022-07-01 19:57:38+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.23 2022-12-13 20:22:26+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -199,9 +202,16 @@ sigchld()
 
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		strnum[fmt_ulong(strnum, pid)] = 0;
-		if (wait_crashed(wstat))
-			strerr_warn3("tcpclient: end ", strnum, " status crashed", 0);
-		else
+		if (wait_stopped(wstat) || wait_continued(wstat)) {
+			i = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
+			strnum2[fmt_ulong(strnum2, i)] = 0;
+			strerr_warn4("tcpclient: end ", strnum, wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
+		} else
+		if (wait_signaled(wstat)) {
+			i = wait_termsig(wstat);
+			strnum2[fmt_ulong(strnum2, i)] = 0;
+			strerr_warn4("tcpclient: end ", strnum, " killed by signal ", strnum2, 0);
+		} else
 		if ((i = wait_exitcode(wstat))) {
 			strnum2[fmt_ulong(strnum2, i)] = 0;
 			strerr_warn4("tcpclient: end ", strnum, " status ", strnum2, 0);

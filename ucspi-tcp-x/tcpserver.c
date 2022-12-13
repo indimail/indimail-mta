@@ -1,5 +1,8 @@
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.77  2022-12-13 20:23:13+05:30  Cprogrammer
+ * display diagnostic on exit status
+ *
  * Revision 1.76  2021-08-30 12:47:59+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -259,7 +262,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.76 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.77 2022-12-13 20:23:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1332,9 +1335,16 @@ sigchld()
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		if (verbosity >= 2) {
 			strnum[fmt_ulong(strnum, pid)] = 0;
-			if (wait_crashed(wstat))
-				strerr_warn3("tcpserver: end ", strnum, " status crashed", 0);
-			else
+			if (wait_stopped(wstat) || wait_continued(wstat)) {
+				i = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
+				strnum2[fmt_ulong(strnum2, i)] = 0;
+				strerr_warn4("tcpserver: end ", strnum, wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
+			} else
+			if (wait_signaled(wstat)) {
+				i = wait_termsig(wstat);
+				strnum2[fmt_ulong(strnum2, i)] = 0;
+				strerr_warn4("tcpserver: end ", strnum, " killed by signal ", strnum2, 0);
+			} else
 			if ((i = wait_exitcode(wstat))) {
 				strnum2[fmt_ulong(strnum2, i)] = 0;
 				strerr_warn4("tcpserver: end ", strnum, " status ", strnum2, 0);
