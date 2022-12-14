@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.27 2022-12-13 21:39:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.28 2022-12-14 13:38:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -23,6 +23,7 @@
 #include <ndelay.h>
 #include <substdio.h>
 #include <open.h>
+#include <sgetopt.h>
 #include "auto_sysconfdir.h"
 
 #define SERVICES 1000
@@ -49,7 +50,8 @@ struct
 	int             pidlog;		/*- 0 if not running */
 	int             pi[2];		/*- defined if flaglog */
 } x[SERVICES];
-static int      numx = 0, scannow = 0, auto_scan = 0, use_run = 1;
+static int      numx = 0, scannow = 0, auto_scan = 0, use_run = 1,
+				verbose = 0, silent = 0;
 static char     fnlog[260];
 static char     fntmp[260];
 static char    *pidfile, *p_exe_name, *run_dir;
@@ -92,7 +94,7 @@ init_cmd(char *cmmd, int dowait, int shutdown)
 	switch (child = fork())
 	{
 	case -1:
-		strerr_warn4(WARN, "unable to fork for init command ", cpath, ": ", &strerr_sys);
+		strerr_die4sys(111, FATAL, "unable to fork for init command ", cpath, ": ");
 		return;
 	case 0:
 		args[0] = "/bin/sh";
@@ -130,15 +132,19 @@ sv_control(char *service_name, char *fn, char *command)
 	switch (command[0])
 	{
 	case 'u':
-		strerr_warn4(INFO, "Starting service ", service_name, " which was down", 0);
+		if (verbose)
+			strerr_warn4(INFO, "Starting service ", service_name, " which was down", 0);
 		break;
 	case 'd':
-		strerr_warn4(INFO, "Stopping service ", service_name, " which was up", 0);
+		if (verbose)
+			strerr_warn4(INFO, "Stopping service ", service_name, " which was up", 0);
 		break;
 	default:
 		return 1;
 	}
 	if ((fd = open_write(fn)) == -1) {
+		if (silent)
+			return 1;
 		if (errno == error_nodevice)
 			strerr_warn4(WARN, "unable to control ", service_name, ": supervise not running", 0);
 		else
@@ -149,7 +155,8 @@ sv_control(char *service_name, char *fn, char *command)
 	substdio_fdbuf(&b, write, fd, bspace, sizeof bspace);
 	if (substdio_putflush(&b, command, 1) == -1) {
 		close(fd);
-		strerr_warn4(WARN, "error writing commands to ", fn, ": ", &strerr_sys);
+		if (!silent)
+			strerr_warn4(WARN, "error writing commands to ", fn, ": ", &strerr_sys);
 		return 1;
 	}
 	close(fd);
@@ -179,12 +186,14 @@ start(char *fn, char *sdir)
 		if (!run_dir)
 			return;
 		if ((fdsource = open(".", O_RDONLY|O_NDELAY, 0)) == -1) {
-			strerr_warn2(WARN, "unable to open current directory: ", &strerr_sys);
+			if (!silent)
+				strerr_warn2(WARN, "unable to open current directory: ", &strerr_sys);
 			scannow = -1;
 			return;
 		}
 		if (chdir(run_dir) == -1) {
-			strerr_warn4(WARN, "unable to switch to ", run_dir, ": ", &strerr_sys);
+			if (!silent)
+				strerr_warn4(WARN, "unable to switch to ", run_dir, ": ", &strerr_sys);
 			close(fdsource);
 			scannow = -1;
 			return;
@@ -192,7 +201,8 @@ start(char *fn, char *sdir)
 		if (!access(fn, F_OK)) { /*- no need to rename */
 			if (fchdir(fdsource) == -1 && chdir(sdir) == -1) {
 				scannow = -1;
-				strerr_warn4(WARN, "unable to switch back to ", sdir, ": ", &strerr_sys);
+				if (!silent)
+					strerr_warn4(WARN, "unable to switch back to ", sdir, ": ", &strerr_sys);
 			}
 			close(fdsource);
 			return;
@@ -204,11 +214,13 @@ start(char *fn, char *sdir)
 		 * then rename /run/svscan/qmail-smtpd.25 to /run/svscan/.qmail-smtpd.25
 		 */
 		if (!access(fn + 1, F_OK) && rename(fn + 1, fn)) {
-			strerr_warn6(WARN, "unable to rename ", fn + 1, " to ", fn, ": ", &strerr_sys);
+			if (!silent)
+				strerr_warn6(WARN, "unable to rename ", fn + 1, " to ", fn, ": ", &strerr_sys);
 			scannow = -1;
 		}
 		if (fchdir(fdsource) == -1 && chdir(sdir) == -1) {
-			strerr_warn4(WARN, "unable to switch back to ", sdir, ": ", &strerr_sys);
+			if (!silent)
+				strerr_warn4(WARN, "unable to switch back to ", sdir, ": ", &strerr_sys);
 			scannow = -1;
 		}
 		close(fdsource);
@@ -216,7 +228,8 @@ start(char *fn, char *sdir)
 	}
 #endif
 	if (stat(fn, &st) == -1) {
-		strerr_warn4(WARN, "unable to stat ", fn, ": ", &strerr_sys);
+		if (!silent)
+			strerr_warn4(WARN, "unable to stat ", fn, ": ", &strerr_sys);
 		scannow = -1;
 		return;
 	}
@@ -228,7 +241,8 @@ start(char *fn, char *sdir)
 	}
 	if (i == numx) { /*- we found a new service to start */
 		if (numx >= SERVICES) {
-			strerr_warn4(WARN, "unable to start ", fn, ": running too many services", 0);
+			if (!silent)
+				strerr_warn4(WARN, "unable to start ", fn, ": running too many services", 0);
 			return;
 		}
 		x[i].ino = st.st_ino;
@@ -250,14 +264,16 @@ start(char *fn, char *sdir)
 				x[i].flaglog = 1;
 			else
 			if (errno != error_noent) {
-				strerr_warn4(WARN, "unable to stat ", fn, "/log: ", &strerr_sys);
+				if (!silent)
+					strerr_warn4(WARN, "unable to stat ", fn, "/log: ", &strerr_sys);
 				scannow = -1;
 				return;
 			}
 		}
 		if (x[i].flaglog) {
 			if (pipe(x[i].pi) == -1) {
-				strerr_warn4(WARN, "unable to create pipe for ", fn, ": ", &strerr_sys);
+				if (!silent)
+					strerr_warn4(WARN, "unable to create pipe for ", fn, ": ", &strerr_sys);
 				scannow = -1;
 				return;
 			}
@@ -270,7 +286,8 @@ start(char *fn, char *sdir)
 	x[i].flagactive = 1;
 	pid = getpid();
 	if (!x[i].pid) { /*- exec supervise fn only if it is not .svscan/log */
-		strerr_warn3(INFO, "Starting service ", fn, 0);
+		if (verbose)
+			strerr_warn3(INFO, "Starting service ", fn, 0);
 		fnlen = (t1 = str_len(sdir)) + 6 + (t2 = str_len(fn));
 		if (fnlen <= 255) {
 			s = fntmp;
@@ -284,7 +301,8 @@ start(char *fn, char *sdir)
 		switch (child = fork())
 		{
 		case -1:
-			strerr_warn4(WARN, "unable to fork for ", fn, ": ", &strerr_sys);
+			if (!silent)
+				strerr_warn4(WARN, "unable to fork for ", fn, ": ", &strerr_sys);
 			return;
 		case 0:
 			if (x[i].flaglog)
@@ -367,11 +385,13 @@ start(char *fn, char *sdir)
 		}
 	}
 	if (x[i].flaglog && !x[i].pidlog) { /*- exec supervise log */
-		strerr_warn4(INFO, "Starting service ", fn, "/log", 0);
+		if (verbose)
+			strerr_warn4(INFO, "Starting service ", fn, "/log", 0);
 		switch (child = fork())
 		{
 		case -1:
-			strerr_warn4(WARN, "unable to fork for ", fn, "/log: ", &strerr_sys);
+			if (!silent)
+				strerr_warn4(WARN, "unable to fork for ", fn, "/log: ", &strerr_sys);
 			return;
 		case 0:
 			if (fd_move(0, x[i].pi[0]) == -1)
@@ -437,34 +457,36 @@ doit(char *sdir, pid_t mypid)
 			t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (p_exe_name)
-				strerr_warn7(WARN, "pid: ", strnum1, " exe ", p_exe_name,
+				strerr_warn7(INFO, "pid: ", strnum1, " exe ", p_exe_name,
 						wait_stopped(wstat) ? ", stopped by signal " : ", continued by signal ", strnum2, 0);
 			else
-				strerr_warn5(WARN, "pid: ", strnum1,
+				strerr_warn5(INFO, "pid: ", strnum1,
 						wait_stopped(wstat) ? ", stopped by signal " : ", continued by signal ", strnum2, 0);
 		} else
 		if (wait_signaled(wstat)) {
 			t = wait_termsig(wstat);
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (p_exe_name)
-				strerr_warn7(WARN, "pid: ", strnum1, " exe ", p_exe_name, ", killed by signal ", strnum2, 0);
+				strerr_warn7(INFO, "pid: ", strnum1, " exe ", p_exe_name, ", killed by signal ", strnum2, 0);
 			else
-				strerr_warn5(WARN, "pid: ", strnum1, ", killed by signal ", strnum2, 0);
+				strerr_warn5(INFO, "pid: ", strnum1, ", killed by signal ", strnum2, 0);
 		} else {
 			t = wait_exitcode(wstat);
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (p_exe_name)
-				strerr_warn7(WARN, "pid: ", strnum1, " exe ", p_exe_name, ", exited with status=", strnum2, 0);
+				strerr_warn7(INFO, "pid: ", strnum1, " exe ", p_exe_name, ", exited with status=", strnum2, 0);
 			else
-				strerr_warn5(WARN, "pid: ", strnum1, ", exited with status=", strnum2, 0);
+				strerr_warn5(INFO, "pid: ", strnum1, ", exited with status=", strnum2, 0);
 		}
 		if (i == numx)
-			strerr_warn3(INFO, "completed last rites for orphan ", strnum1, 0);
+			if (verbose)
+				strerr_warn3(INFO, "completed last rites for orphan ", strnum1, 0);
 	} /*- for (;;) */
 	if (!auto_scan) {
 		if (!scannow)
 			return;
 		else /*- do not display scanning msg for auto scan */
+		if (verbose)
 			strerr_warn3(INFO, "Scanning directory ", sdir, 0);
 	}
 	for (i = 0; i < numx; ++i)
@@ -509,16 +531,21 @@ static void
 sighup(int i)
 {
 	scannow = 1;
-	signal(SIGHUP, sighup);
-	strerr_warn2(INFO, "got sighup", 0);
+	sig_block(sig_hangup);
+	if (verbose)
+		strerr_warn2(INFO, "got sighup", 0);
+	sig_unblock(sig_hangup);
 }
 
 static void
 sigterm(int i)
 {
+	char            strnum[FMT_ULONG];
+
 	unlink(pidfile);
 	signal(SIGTERM, SIG_IGN);
-	strerr_warn2(INFO, "Stopping svscan", 0);
+	strnum[fmt_ulong(strnum, getpid())] = 0;
+	strerr_warn4(INFO, "pid: ", strnum, ": shutdown...", 0);
 	init_cmd(0, 1, 1); /*- run .svscan/shutdown */
 	_exit(0);
 }
@@ -529,6 +556,7 @@ open_svscan_log(char *sdir)
 	const int       i = numx;
 	struct stat     st;
 	static char     fn[] = SVSCANINFO;	/*- avoid compiler warning on const string */
+	char            strnum[FMT_ULONG];
 
 	/*- (semi-paranoid; could be more so) */
 	if (fstat(STDIN_FILENO, &st) != 0 && errno == EBADF)
@@ -542,7 +570,8 @@ open_svscan_log(char *sdir)
 		if (i + 1 == numx && x[i].pidlog != 0) {
 			(void) dup2(x[i].pi[1], STDOUT_FILENO);
 			(void) dup2(x[i].pi[1], STDERR_FILENO);
-			strerr_warn2(INFO, "Starting svscan", 0);
+			strnum[fmt_ulong(strnum, getpid())] = 0;
+			strerr_warn4(INFO, "pid: ", strnum, ": starting...", 0);
 		}
 	}
 }
@@ -671,6 +700,18 @@ sigchld(int signum, siginfo_t *si, void *data)
 	scannow = 2;
 }
 
+static void
+siguser1()
+{
+	verbose = !verbose;
+}
+
+static void
+siguser2()
+{
+	silent = !silent;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -681,6 +722,24 @@ main(int argc, char **argv)
 	pid_t           pid;
 	int             i;
 
+	while ((i = getopt(argc, argv, "vs")) != opteof) {
+		switch (i)
+		{
+		case 'v':
+			verbose = 1;
+			if (!env_put2("VERBOSE", "1"))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case 's':
+			silent = 1;
+			if (!env_put2("SILENT", "1"))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		default:
+			strerr_die2x(100, FATAL, "usage: svscan [-sv] [directory]");
+			break;
+		}
+	}
 	/*- setup handler for sigchild if running as pid 1 or SCANNOW is set */
 	if (env_get("SCANNOW") || 1 == (pid = getpid())) {
 		byte_zero((char *) &sa, sizeof(struct sigaction));
@@ -689,6 +748,8 @@ main(int argc, char **argv)
 		if (sigaction(sig_child, &sa, 0) == -1)
 			strerr_die2sys(111, FATAL, "sigaction: unable to set signal handler for SIGCHLD");
 	}
+	sig_catch(sig_usr1, siguser1);
+	sig_catch(sig_usr2, siguser2);
 	/*- save the current dir */
 #ifdef USE_RUNFS
 	use_run = env_get("DISABLE_RUN") ? 0 : 1;
@@ -699,9 +760,9 @@ main(int argc, char **argv)
 #else
 	pidfile = PIDFILE;
 #endif
-	if (argc > 1 && argv[1]) {
-		if (chdir(argv[1]) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[1], ": ");
+	if (argc - optind >= 1 && argv[optind]) {
+		if (chdir(argv[optind]) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[optind], ": ");
 		if (!((sdir = getcwd(dirbuf, 255))))
 			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
 		while (get_lock(sdir)) ;
@@ -764,13 +825,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.27 2022-12-13 21:39:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.28 2022-12-14 13:38:10+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.28  2022-12-14 13:38:10+05:30  Cprogrammer
+ * added -v, -s option to control logging of info, warn messages
+ *
  * Revision 1.27  2022-12-13 21:39:01+05:30  Cprogrammer
  * display exit status and termination signal
  *

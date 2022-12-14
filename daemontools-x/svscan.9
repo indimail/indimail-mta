@@ -3,7 +3,7 @@
 svscan \- starts and monitors a collection of services
 
 .SH SYNOPSIS
-.B svscan [ \fIdirectory\fR ]
+.B svscan [ -vs ] [ \fIdirectory\fR ]
 
 .SH DESCRIPTION
 \fBsvscan\fR(8) starts one \fBsupervise\fR(8) process for each subdirectory
@@ -82,10 +82,10 @@ management. The biggest advantage of \fBsvscan\fR is its simplicity.
 Unlike systemd(1), it is not complex and tied with multiple pieces of
 software to make it work. You can also use openrc from Gentoo to create a
 decent, simple service manager to start only the processes that you
-require. If running as PID 1, \fBsvscan\fR will immediately start a
-supervised service if it dies rather waiting for 60 (or SCANINTERVAL)
-seconds. This behaviour can be enabled as default if the environment
-variable \fBSCANNOW\fR is set.
+require. If running as PID 1, \fBsvscan\fR will immediately restart a
+\fBsupervise\fR process if it dies, rather waiting for 60 (or SCANINTERVAL)
+seconds. This behaviour can be enabled as default by setting \fBSCANNOW\fR
+environment variable.
 
 If \fBINITCMD\fR environment variable is defined and set to an empty string
 and if \fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR exists and has the
@@ -114,6 +114,17 @@ launchd(8) using /Library/LaunchDaemons/org.indimail.svscan.plist. On
 alpine linux, it is started by openrc using /etc/init.d/svscan. In a
 container environment, it is the entrypoint and starts as PID 1. The
 entrypint is enabled using the \fBdocker-entrypoint\fR(8) script.
+
+.SH OPTIONS
+.TP
+.B \-v
+Display informational messages. Normally this is suppressed. You can toggle
+this by sending \fBsvscan\fR \fBUSR1\fR signal.
+
+.TP
+.B \-s
+Suppress warning message. Normally this is printed on the standard error.
+You can toggle this by sending \fBsvscan\fR \fBUSR2\fR signal.
 
 .SH SEE ALSO
 proc(5),
