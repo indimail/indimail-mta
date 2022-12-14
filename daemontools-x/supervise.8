@@ -21,7 +21,8 @@ fork themselves into background, which some consider bad software design.
 If you want to supervise such a daemon, set the sticky bit on ./run. This
 makes \fBsupervise\fR go into \fBsubreaper\fR mode using \fBprctl\fR(2)
 \fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
-\fBPROC_REAP_ACQUIRE\fR on FreeBSD.
+\fBPROC_REAP_ACQUIRE\fR on FreeBSD. This allows \fBsupervise\fR to
+supervise daemons that fork themselves into background.
 
 If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run or to give other
@@ -87,6 +88,11 @@ returns, it means \fBsupervise\fR(8) is running.
 (O_WRONLY) to test if service \fIs\fR is up. Any client that opens this
 fifo will block until the service \fIs\fR is up. If write returns, it means
 service \fBs\fR(8) is running.
+
+\fBsupervise\fR logs informational, warning and error messages to
+descriptor 2. Informational messages can be turned on by setting the
+environment variable \fBVERBOSE\fR. Warning messages can be turned off by
+setting the environment variable \fBSILENT\fR.
 
 .SH SEE ALSO
 svc(8),

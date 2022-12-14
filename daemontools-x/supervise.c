@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.28 2022-12-13 21:44:54+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.28 2022-12-14 13:35:44+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -42,6 +42,7 @@ static int      flagwant = 1;
 static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
+static int      verbose = 0, silent = 0;
 static char     flagfailed;
 static unsigned long scan_interval = 60;
 static char     is_subreaper = 0;
@@ -99,15 +100,18 @@ announce(short sleep_interval)
 		status[18] = status[19] = 0;
 
 	if (seek_begin(fdstatus)) {
-		strerr_warn2(warn.s, "lseek: status: ", &strerr_sys);
+		if (!silent)
+			strerr_warn2(warn.s, "lseek: status: ", &strerr_sys);
 		return;
 	}
 	if ((r = write(fdstatus, status, sizeof status)) == -1) {
-		strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: ", &strerr_sys);
+		if (!silent)
+			strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: ", &strerr_sys);
 		return;
 	}
 	if (r < sizeof status) {
-		strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: partial write: ", 0);
+		if (!silent)
+			strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: partial write: ", 0);
 		return;
 	}
 }
@@ -174,7 +178,8 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	*sv_name = tline.s;
 	*interval = sleep_interval;
 	strnum[fmt_int(strnum, sleep_interval)] = 0;
-	strerr_warn5(info.s, "wait ", strnum, " seconds for service ", *sv_name, 0);
+	if (verbose)
+		strerr_warn5(info.s, "wait ", strnum, " seconds for service ", *sv_name, 0);
 	return 0;
 }
 
@@ -218,7 +223,8 @@ do_wait()
 	for (;;) {
 		if ((fd_depend = open(wait_sv_status.s, O_WRONLY)) == -1) {
 			if (errno == error_noent) {/*- supervise for service_name is not running */
-				strerr_warn3(warn.s, "supervise not running for service ", service_name, 0);
+				if (!silent)
+					strerr_warn3(warn.s, "supervise not running for service ", service_name, 0);
 				sleep(scan_interval);
 				continue;
 			}
@@ -243,13 +249,15 @@ do_wait()
 			continue;
 		}
 		if ((r = read(fd, wstatus, sizeof wstatus)) == -1) {
-			strerr_warn4(warn.s, "unable to read ", wait_sv_status.s, ": ", &strerr_sys);
+			if (!silent)
+				strerr_warn4(warn.s, "unable to read ", wait_sv_status.s, ": ", &strerr_sys);
 			close(fd);
 			sleep(1);
 			continue;
 		} else
 		if (!r) {
-			strerr_warn4(warn.s, "file ", wait_sv_status.s, " is of zero bytes: ", &strerr_sys);
+			if (!silent)
+				strerr_warn4(warn.s, "file ", wait_sv_status.s, " is of zero bytes: ", &strerr_sys);
 			close(fd);
 			sleep(1);
 			continue;
@@ -284,7 +292,8 @@ trystart(void)
 	switch (f = fork())
 	{
 	case -1:
-		strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
+		if (!silent)
+			strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
 		trigger();
 		flagfailed = 1;
@@ -302,7 +311,8 @@ trystart(void)
 	grandchild = 0;
 	flagpaused = 0;
 	strnum[fmt_ulong(strnum, f)] = 0;
-	strerr_warn4(info.s, "pid: ", strnum, is_subreaper ? " started service in subreaper mode" : "started service in non-subreaper mode", 0);
+	if (verbose)
+		strerr_warn4(info.s, "pid: ", strnum, is_subreaper ? " started service in subreaper mode" : " started service in non-subreaper mode", 0);
 	pidchange((childpid = f), 1);
 	announce(0);
 	fifo_make("supervise/up", 0600);
@@ -321,7 +331,8 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 	switch (f = fork())
 	{
 	case -1:
-		strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
+		if (!silent)
+			strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
 		trigger();
 		return;
@@ -364,13 +375,15 @@ postmortem(pid_t pid, int wstat, int _status)
 	int             t;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
+	if (silent)
+		return;
 	strnum1[fmt_ulong(strnum1, pid)] = 0;
 	if (!_status) {
 		if (wait_stopped(wstat) || wait_continued(wstat)) {
 			t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			strerr_warn5(warn.s, "pid: ", strnum1,
-					wait_stopped(wstat) ? " stopped by signal " : " started by signal ", strnum2, 0);
+				wait_stopped(wstat) ? " stopped by signal " : " started by signal ", strnum2, 0);
 		} else
 		if (wait_signaled(wstat)) {
 			t = wait_termsig(wstat);
@@ -432,6 +445,11 @@ doit(void)
 		 */
 		iopause(x, 2, &deadline, &stamp);
 
+		/*-
+		 * block sigchld till we handle
+		 * current death of a child without
+		 * any interruption by another sigchld
+		 */
 		sig_block(sig_child);
 
 		/*- empty the pipe and come out when empty */
@@ -451,7 +469,8 @@ doit(void)
 				strnum1[fmt_ulong(strnum1, childpid)] = 0;
 				t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
 				strnum2[fmt_ulong(strnum2, t)] = 0;
-				strerr_warn5(warn.s, "pid: ", strnum1,
+				if (!silent)
+					strerr_warn5(warn.s, "pid: ", strnum1,
 						wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
 				break;
 			}
@@ -459,7 +478,8 @@ doit(void)
 				if (r != childpid) {
 					strnum1[fmt_ulong(strnum1, childpid)] = 0;
 					strnum2[fmt_ulong(strnum2, r)] = 0;
-					strerr_warn6(warn.s, "pid: ", strnum2, " double fork (orig pid ", strnum1, ")", 0);
+					if (!silent)
+						strerr_warn6(warn.s, "pid: ", strnum2, " double fork (orig pid ", strnum1, ")", 0);
 					childpid = r;
 				}
 				if (is_subreaper) {
@@ -467,7 +487,8 @@ doit(void)
 						if (!(r = wait_nohang(&wstat_reap))) { /*- children but no zombies */
 							strnum1[fmt_ulong(strnum1, childpid)] = 0;
 							if (!double_fork_flag++)
-								strerr_warn4(warn.s, "pid: ", strnum1, ": double fork detected", 0);
+								if (!silent)
+									strerr_warn4(warn.s, "pid: ", strnum1, ": double fork detected", 0);
 							postmortem(childpid, wstat, r);
 							grandchild = 1;
 							do_break = 1;
@@ -779,7 +800,8 @@ do_init()
 	switch (f = fork())
 	{
 	case -1:
-		strerr_warn4(warn.s, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
+		if (!silent)
+			strerr_warn4(warn.s, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
 		trigger();
 		flagfailed = 1;
@@ -791,7 +813,8 @@ do_init()
 		strerr_die4sys(111, fatal.s, "unable to start ", dir, "/init: ");
 	}
 	if (wait_pid(&t, f) == -1) {
-		strerr_warn4(warn.s, "wait failed ", dir, "/init: ", &strerr_sys);
+		if (!silent)
+			strerr_warn4(warn.s, "wait failed ", dir, "/init: ", &strerr_sys);
 		return -1;
 	}
 	if (WIFSTOPPED(t) || WIFSIGNALED(t))
@@ -808,6 +831,8 @@ main(int argc, char **argv)
 	struct stat     st;
 	char           *ptr;
 
+	verbose = env_get("VERBOSE") ? 1 : 0;
+	silent = env_get("SILENT") ? 1 : 0;
 	if (!(dir = argv[1]) || argc > 3)
 		strerr_die1x(100, "supervise: usage: supervise dir [log_parent]");
 	if (*dir == '/' || *dir == '.')
@@ -912,7 +937,8 @@ main(int argc, char **argv)
 	while (1) {
 		if (!access(*init, X_OK)) {
 			if (do_init()) {
-				strerr_warn4(warn.s, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
+				if (!silent)
+					strerr_warn4(warn.s, "initialization failed for ", dir, ", sleeping 60 seconds: ", 0);
 				deepsleep(60);
 			} else
 				break;
@@ -930,16 +956,17 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.28 2022-12-13 21:44:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.28 2022-12-14 13:35:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
- * Revision 1.28  2022-12-13 21:44:54+05:30  Cprogrammer
- * display exit status and termination signal
+ * Revision 1.28  2022-12-14 13:35:44+05:30  Cprogrammer
  * become subreaper if run file has sticky bit set
+ * display exit status and termination signal
+ * use VERBOSE, SILENT env variables to control logging of info, warn messages
  *
  * Revision 1.27  2022-12-02 09:05:07+05:30  Cprogrammer
  * sleep SCANINTERVAL seconds if supervise for waited service is not running
