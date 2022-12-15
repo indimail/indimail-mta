@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.652 2022-12-03 08:28:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.653 2022-12-14 13:59:26+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.652 2022-12-03 08:28:08+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.653 2022-12-14 13:59:26+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5963,18 +5963,23 @@ if [ $mount_resolvconf -eq 1 ] ; then
 	dump_run_header
 	echo "echo svscan \$PPID initialization PID \$\$"
 	echo "exec 2>&1"
-	echo "/usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
-	echo "/usr/bin/mount -l"
+	echo "if [ -f $sysconfdir/resolv.conf ] ; then"
+	echo "  /usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
+	echo "  /usr/bin/mount -l"
+	echo "fi"
 	echo ""
 	echo "echo \"Environment Variable List\""
 	echo "env"
 	) > "$DESTDIR"$SERVICEDIR/.svscan/run
-	hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
-	(
-	echo "# $prog_args"
-	echo "search $hostname"
-	echo "nameserver 127.0.0.1"
-	) > "$DESTDIR"$sysconfdir/resolv.conf
+	if [ ! -f "$DESTDIR"$sysconfdir/resolv.conf -o $force -eq 1 ] ; then
+		hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+		(
+		echo "# $prog_args"
+		echo "# generated at `date`"
+		echo "search $hostname"
+		echo "nameserver 127.0.0.1"
+		) > "$DESTDIR"$sysconfdir/resolv.conf
+	fi
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
 else
 	if [ -x "$DESTDIR"$SERVICEDIR/.svscan/run ] ; then
