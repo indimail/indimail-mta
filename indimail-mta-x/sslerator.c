@@ -1,20 +1,5 @@
 /*
- * $Log: sslerator.c,v $
- * Revision 1.5  2022-08-21 17:59:24+05:30  Cprogrammer
- * fix compilation error when TLS is not defined in conf-tls
- *
- * Revision 1.4  2022-05-18 13:30:24+05:30  Cprogrammer
- * openssl 3.0.0 port
- *
- * Revision 1.3  2021-03-04 23:02:07+05:30  Cprogrammer
- * fixed usage strings
- *
- * Revision 1.2  2021-03-02 10:41:58+05:30  Cprogrammer
- * renamed SSL_CIPHER to TLS_CIPHER_LIST
- *
- * Revision 1.1  2020-11-17 16:22:57+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: sslerator.c,v 1.6 2022-12-18 12:30:06+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -30,6 +15,7 @@
 #include <env.h>
 #include <strmsg.h>
 #include <scan.h>
+#include <wait.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
 #include "control.h"
@@ -124,9 +110,9 @@ translate(SSL *myssl, int err_to_net, int out, int clearout, int clearerr, unsig
 		FD_SET(clearerr, &rfds);
 		if ((retval = select(clearerr > sslin ? clearerr + 1 : sslin + 1, &rfds, (fd_set *) NULL, (fd_set *) NULL, &timeout)) < 0) {
 #ifdef ERESTART
-			if (errno == EINTR || errno == ERESTART)
+			if (errno == error_intr || errno == error_restart)
 #else
-			if (errno == EINTR)
+			if (errno == error_intr)
 #endif
 				continue;
 			strerr_warn2(FATAL, "translate: ", &strerr_sys);
@@ -292,7 +278,8 @@ main(argc, argv)
 	BIO            *sbio;
 	char          **pgargs, *ptr, *certfile, *banner;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], tbuf[2048];
-	int             status, r, ret, n, sock, err_to_net, pid, pi1[2], pi2[2], pi3[2];
+	int             status, werr, r, ret, n, sock, err_to_net, pid,
+					pi1[2], pi2[2], pi3[2];
 
 	if (get_options(argc, argv, &certfile, &banner, &timeoutssl, &err_to_net, &sock, &pgargs))
 		_exit (100);
@@ -396,30 +383,56 @@ main(argc, argv)
 	SSL_shutdown(ssl);
 	SSL_free(ssl);
 	ssl = 0;
-	for (ret = -1;(r = waitpid(pid, &status, WNOHANG | WUNTRACED));) {
+	for (ret = -1;;) {
+		if (!(r = waitpid(pid, &status, WUNTRACED|WCONTINUED)))
+			break;
+		else
+		if (r == -1) {
 #ifdef ERESTART
-		if (r == -1 && (errno == EINTR || errno == ERESTART))
+			if (errno == error_intr || errno == error_restart)
 #else
-		if (r == -1 && errno == EINTR)
+			if (errno == error_intr)
 #endif
-			continue;
-		if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
+				continue;
 			if (verbose) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_int(strnum2, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status))] = 0;
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strerr_warn3(FATAL, strnum1, ": waitpid error: ", &strerr_sys);
+			}
+			break;
+		}
+		if (r != pid) {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_warn3(FATAL, strnum1, ": waitpid surprise: ", 0);
+			break;
+		}
+		if (!(r = wait_handler(status, &werr))) {
+			if (verbose) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strnum2[fmt_int(strnum2, werr)] = 0;
+				strerr_warn4(FATAL, strnum1, wait_stopped(status) ? ": stopped by signal " : ": started by signal ", strnum2, 0);
+			}
+			continue;
+		} else
+		if (werr == -1) {
+			if (verbose) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strerr_warn3(FATAL, strnum1, ": internal wait handler error", 0);
+			}
+		} else
+		if (werr) {
+			if (verbose) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strnum2[fmt_int(strnum2, WTERMSIG(status))] = 0;
 				strerr_warn4(FATAL, strnum1, ": killed by signal ", strnum2, 0);
 			}
-			ret = -1;
-		} else
-		if (WIFEXITED(status)) {
-			ret = WEXITSTATUS(status);
+		} else {
 			if (verbose) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_int(strnum2, ret)] = 0;
-				strerr_warn4(FATAL, strnum1, ": normal exit return status ", strnum2, 0);
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strnum2[fmt_int(strnum2, r)] = 0;
+				strerr_warn4(FATAL, strnum1, ": normal exit. return status ", strnum2, 0);
 			}
+			ret = r;
 		}
-		break;
 	} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
 	if (n)
 		_exit(n);
@@ -443,7 +456,29 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.5 2022-08-21 17:59:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.6 2022-12-18 12:30:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: sslerator.c,v $
+ * Revision 1.6  2022-12-18 12:30:06+05:30  Cprogrammer
+ * handle wait status with details
+ *
+ * Revision 1.5  2022-08-21 17:59:24+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ *
+ * Revision 1.4  2022-05-18 13:30:24+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
+ * Revision 1.3  2021-03-04 23:02:07+05:30  Cprogrammer
+ * fixed usage strings
+ *
+ * Revision 1.2  2021-03-02 10:41:58+05:30  Cprogrammer
+ * renamed SSL_CIPHER to TLS_CIPHER_LIST
+ *
+ * Revision 1.1  2020-11-17 16:22:57+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

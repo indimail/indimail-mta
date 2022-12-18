@@ -41,12 +41,13 @@ Release 1.1.1 Start 12/09/2022
 19. supervise.c: added subreaper mode using prctl(2) PR_SET_CHILD_SUBREAPER on
     Linux or procctl(2) PROC_REAP_ACQUIRE on FreeBSD.
 20. subreaper.c, subreaper.h: added subreaper function
-21. fghack.c: display exit status and termination signal
-22. supervise.c, svscan.c: display exit status and termination signal
+21. supervise.c, svscan.c: display exit status and termination signal
 - 14/12/2022
-23. svscan.c: added -v, -s option to control logging of info, warn messages
-24. supervise.c: use VERBOSE, SILENT environment variables to control logging
+22. svscan.c: added -v, -s option to control logging of info, warn messages
+23. supervise.c: use VERBOSE, SILENT environment variables to control logging
     of info, warn messages.
+- 18/12/2022
+24. fghack.c: handle wait status with details
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 27/02/2021 End 08/09/2022

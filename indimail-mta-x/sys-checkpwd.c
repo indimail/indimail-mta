@@ -1,53 +1,5 @@
 /*
- * $Log: sys-checkpwd.c,v $
- * Revision 1.16  2022-11-05 22:41:26+05:30  Cprogrammer
- * Use ENABLE_CRAM env variable to enable CRAM authentication using encrypted password
- *
- * Revision 1.15  2022-10-30 10:03:39+05:30  Cprogrammer
- * display auth method in logs if DEBUG is set
- *
- * Revision 1.14  2022-01-30 09:44:47+05:30  Cprogrammer
- * replaced execvp with execv
- *
- * Revision 1.13  2021-09-12 12:55:30+05:30  Cprogrammer
- * relinquish setuid in pipe_exec()
- *
- * Revision 1.12  2021-07-05 21:24:53+05:30  Cprogrammer
- * use qgetpw interface from libqmail if USE_QPWGR is set
- *
- * Revision 1.11  2021-06-15 12:22:24+05:30  Cprogrammer
- * moved makeargs.h to libqmail
- *
- * Revision 1.10  2021-05-26 10:47:37+05:30  Cprogrammer
- * handle access() error other than ENOENT
- *
- * Revision 1.9  2020-09-28 13:11:38+05:30  Cprogrammer
- * added pid in debug log for authmodule
- *
- * Revision 1.8  2020-09-28 13:08:19+05:30  Cprogrammer
- * display authmodule executed in debug logs
- *
- * Revision 1.7  2020-09-28 00:06:20+05:30  Cprogrammer
- * skip stripping of domain if STRIP_DOMAIN env variable is not set
- *
- * Revision 1.6  2020-09-27 23:44:25+05:30  Cprogrammer
- * restore '@' sign in username
- *
- * Revision 1.5  2020-04-01 19:00:49+05:30  Cprogrammer
- * display uid in debug login mode
- *
- * Revision 1.4  2020-04-01 16:15:33+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.3  2010-06-08 22:00:54+05:30  Cprogrammer
- * pathexec() now returns allocated environment variable which should be freed
- *
- * Revision 1.2  2010-05-05 11:48:44+05:30  Cprogrammer
- * fixed calls to my_error
- *
- * Revision 1.1  2010-04-21 20:01:49+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: sys-checkpwd.c,v 1.17 2022-12-18 12:30:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <pwd.h>
@@ -67,6 +19,7 @@
 #include <str.h>
 #include <authmethods.h>
 #include <fmt.h>
+#include <wait.h>
 #include <error.h>
 #include <env.h>
 #include <subfd.h>
@@ -113,7 +66,7 @@ static int
 runcmmd(char *cmmd)
 {
 	char          **argv;
-	int             status, i, retval;
+	int             status, i, werr, retval;
 	pid_t           pid;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
@@ -130,36 +83,53 @@ runcmmd(char *cmmd)
 		break;
 	}
 	for (retval = -1;;) {
-		i = wait(&status);
-#ifdef ERESTART
-		if (i == -1 && (errno == EINTR || errno == ERESTART))
-#else
-		if (i == -1 && errno == EINTR)
-#endif
-			continue;
-		else
-		if (i == -1)
+		if (!(i = waitpid(pid, &status, WUNTRACED|WCONTINUED)))
 			break;
-		if (i != pid)
-			continue;
-		if (WIFSTOPPED(status) || WIFSIGNALED(status)) {
-			if (debug) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_uint(strnum2, WIFSTOPPED(status) ? WSTOPSIG(status) : WTERMSIG(status))] = 0;
-				strerr_warn3(strnum1, ": killed by signal ", strnum2, 0);
-			}
-			retval = -1;
-		} else
-		if (WIFEXITED(status)) {
-			retval = WEXITSTATUS(status);
-			if (debug) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_uint(strnum2, retval < 0 ? 0 - retval : retval)] = 0;
-				strerr_warn4(strnum1, ": normal exit return status", retval < 0 ? " -" : " ", strnum2, 0);
-			}
+		else
+		if (i == -1) {
+#ifdef ERESTART
+			if (errno == error_intr || errno == error_restart)
+#else
+			if (errno == error_intr)
+#endif
+				continue;
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_warn3(FATAL, strnum1, ": waitpid error: ", &strerr_sys);
+			break;
 		}
-		break;
-	}
+		if (i != pid) {
+			strerr_warn3(FATAL, strnum1, ": waitpid surprise: ", 0);
+			continue;
+		}
+		if (!(i = wait_handler(status, &werr))) {
+			if (debug) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strnum2[fmt_int(strnum2, werr)] = 0;
+				strerr_warn4(WARN, strnum1, wait_stopped(status) ? ": stopped by signal " : ": started by signal ", strnum2, 0);
+			}
+			continue;
+		} else
+		if (werr == -1) {
+			if (debug) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strerr_warn3(FATAL, strnum1, ": internal wait handler error", 0);
+			}
+		} else
+		if (werr) {
+			if (debug) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strnum2[fmt_uint(strnum2, WTERMSIG(status))] = 0;
+				strerr_warn4(FATAL, strnum1, ": killed by signal ", strnum2, 0);
+			}
+		} else {
+			if (debug) {
+				strnum1[fmt_ulong(strnum1, pid)] = 0;
+				strnum2[fmt_int(strnum2, i)] = 0;
+				strerr_warn4(WARN, strnum1, ": normal exit return status ", strnum2, 0);
+			}
+			retval = i;
+		}
+	} /*- for (retval = -1;;) */
 	return (retval);
 }
 
@@ -347,9 +317,64 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.16 2022-11-05 22:41:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.17 2022-12-18 12:30:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
 }
 #endif
+
+/*
+ * $Log: sys-checkpwd.c,v $
+ * Revision 1.17  2022-12-18 12:30:10+05:30  Cprogrammer
+ * handle wait status with details
+ *
+ * Revision 1.16  2022-11-05 22:41:26+05:30  Cprogrammer
+ * Use ENABLE_CRAM env variable to enable CRAM authentication using encrypted password
+ *
+ * Revision 1.15  2022-10-30 10:03:39+05:30  Cprogrammer
+ * display auth method in logs if DEBUG is set
+ *
+ * Revision 1.14  2022-01-30 09:44:47+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
+ * Revision 1.13  2021-09-12 12:55:30+05:30  Cprogrammer
+ * relinquish setuid in pipe_exec()
+ *
+ * Revision 1.12  2021-07-05 21:24:53+05:30  Cprogrammer
+ * use qgetpw interface from libqmail if USE_QPWGR is set
+ *
+ * Revision 1.11  2021-06-15 12:22:24+05:30  Cprogrammer
+ * moved makeargs.h to libqmail
+ *
+ * Revision 1.10  2021-05-26 10:47:37+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
+ * Revision 1.9  2020-09-28 13:11:38+05:30  Cprogrammer
+ * added pid in debug log for authmodule
+ *
+ * Revision 1.8  2020-09-28 13:08:19+05:30  Cprogrammer
+ * display authmodule executed in debug logs
+ *
+ * Revision 1.7  2020-09-28 00:06:20+05:30  Cprogrammer
+ * skip stripping of domain if STRIP_DOMAIN env variable is not set
+ *
+ * Revision 1.6  2020-09-27 23:44:25+05:30  Cprogrammer
+ * restore '@' sign in username
+ *
+ * Revision 1.5  2020-04-01 19:00:49+05:30  Cprogrammer
+ * display uid in debug login mode
+ *
+ * Revision 1.4  2020-04-01 16:15:33+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.3  2010-06-08 22:00:54+05:30  Cprogrammer
+ * pathexec() now returns allocated environment variable which should be freed
+ *
+ * Revision 1.2  2010-05-05 11:48:44+05:30  Cprogrammer
+ * fixed calls to my_error
+ *
+ * Revision 1.1  2010-04-21 20:01:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,97 +1,17 @@
 /*
- * $Log: autoresponder.c,v $
- * Revision 1.36  2022-01-30 08:28:42+05:30  Cprogrammer
- * removed chdir auto_qmail
+ * $Id: autoresponder.c,v 1.37 2022-12-18 12:31:42+05:30 Cprogrammer Exp mbhangui $
  *
- * Revision 1.35  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
+ * This is a simple program to automatically respond to emails.
  *
- * Revision 1.34  2021-07-19 07:57:58+05:30  Cprogrammer
- * fixed compiler warning on _XOPEN_SOURCE redefinition
+ * This is based on qmail-autoresponder
+ * Rate-limited autoresponder for qmail
+ * by Bruce Guenter <bruce@untroubled.org>
+ * Version 2.0
+ * 2018-04-13
  *
- * Revision 1.33  2021-06-14 00:37:37+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.32  2017-03-09 14:35:38+05:30  Cprogrammer
- * ignore responses to senders listed in badrcptto
- *
- * Revision 1.31  2015-12-12 15:01:41+05:30  Cprogrammer
- * fix for deliver to email alias
- *
- * Revision 1.30  2015-08-24 19:04:55+05:30  Cprogrammer
- * changed ip_scanbracket to ip4_scanbracket
- *
- * Revision 1.29  2014-05-22 14:45:38+05:30  Cprogrammer
- * fixed issue with Date field
- * fixed SIGPIPE resulting in duplicate emails
- * use mktime to use local time
- *
- * Revision 1.28  2014-01-29 13:57:54+05:30  Cprogrammer
- * changed data type for opt_maxmsgs to unsigned long
- *
- * Revision 1.27  2012-08-16 07:58:56+05:30  Cprogrammer
- * added description for -T option
- *
- * Revision 1.26  2011-12-05 12:13:11+05:30  Cprogrammer
- * set Content-Type if -T argument is given
- *
- * Revision 1.25  2011-12-01 21:21:50+05:30  Cprogrammer
- * added option to add Content-Type header
- *
- * Revision 1.24  2011-11-06 22:54:53+05:30  Cprogrammer
- * fixed checking of strtoul function
- *
- * Revision 1.23  2009-01-06 20:47:48+05:30  Cprogrammer
- * corrected addrparse() function
- *
- * Revision 1.22  2008-08-03 18:25:57+05:30  Cprogrammer
- * use proper prot for strptime()
- *
- * Revision 1.21  2005-06-17 21:49:16+05:30  Cprogrammer
- * replaced struct_ipaddress with shorter typedef
- *
- * Revision 1.20  2005-03-03 14:36:24+05:30  Cprogrammer
- * added service responder
- *
- * Revision 1.19  2005-03-03 00:45:36+05:30  Cprogrammer
- * provide Auto-Submitted, In-Reply-To, References fields (RFC 3834)
- * fixed parsing of RECIPIENT environment variable
- *
- * Revision 1.18  2004-11-03 23:41:28+05:30  Cprogrammer
- * added option %d to add the current date
- * added User-Agent header
- *
- * Revision 1.17  2004-11-01 23:13:32+05:30  Cprogrammer
- * added start date and end date options
- *
- * Revision 1.16  2004-10-29 00:10:50+05:30  Cprogrammer
- * rfc 3834 implementation
- *
- * Revision 1.15  2004-10-24 21:29:28+05:30  Cprogrammer
- * removed fail_temp(), die_nomem()
- * corrected length of filename
- *
- * Revision 1.14  2004-10-24 20:09:41+05:30  Cprogrammer
- * djbfication of code
- *
- * Revision 1.13  2004-10-22 20:28:06+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.12  2004-07-15 23:35:15+05:30  Cprogrammer
- * fixed compilation warning
- *
- * Revision 1.11  2004-05-06 22:26:58+05:30  Cprogrammer
- * FROM field set incorrectly if domain contained '-' character
- *
- * Revision 1.10  2004-05-03 22:09:16+05:30  Cprogrammer
- * header was not delineated properly
- *
- * Revision 1.9  2003-12-07 13:01:20+05:30  Cprogrammer
- * added -S option to add a fixed subject
- *
- * TODO
- *
- * 1. Include more List- headers
+ * Original qmail-qfilter was based on some ideas (but little or no code)
+ * from a similar autoresponder by Eric Huss <e-huss@netmeridian.com>,
+ * and ideas presented in the qmail mailing list.
  */
 #include <stdlib.h>
 #include <limits.h>
@@ -119,6 +39,7 @@
 #include <str.h>
 #include <strerr.h>
 #include <error.h>
+#include <wait.h>
 #include <alloc.h>
 #include <fmt.h>
 #include <byte.h>
@@ -137,16 +58,17 @@
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
 #define FATAL "autoresponder: fatal: "
 
-int             opt_quiet, opt_copyinput, opt_nosend, opt_nolinks, msgfilefd, fixed_subject;
-int             liphostok, dtline_len, opt_laxmode;
+static int      opt_quiet, opt_copyinput, opt_nosend, opt_nolinks, msgfilefd, fixed_subject;
+static int      liphostok, dtline_len, opt_laxmode;
 unsigned long   opt_maxmsgs = 1;
 time_t          when, opt_timelimit = 86400 * 7; /*- RFC 3834 */
-char           *opt_subject_prefix = "Autoreply: Re: ";
-char           *argv0, *dtline, *recipient, *from_addr = 0;
-char            ssinbuf[512], ssoutbuf[512];
+static char    *opt_subject_prefix = "Autoreply: Re: ";
+static char    *argv0, *dtline, *recipient, *from_addr = 0;
+static char     ssinbuf[512], ssoutbuf[512];
+static char     strnum[FMT_ULONG];
 substdio        ssin, ssout;
-pid_t           inject_pid;
-stralloc        liphost = { 0 }, content_type = { 0 };
+static pid_t    inject_pid;
+static stralloc liphost = { 0 }, content_type = { 0 };
 struct header
 {
 	char           *returnpath;
@@ -760,15 +682,39 @@ popen_inject(char *sender)
 void
 pclose_inject(int fdout)
 {
-	int             status;
+	int             i, werr, status;
 
 	close(fdout);
-	if (waitpid(inject_pid, &status, WUNTRACED) == -1)
-		strerr_die2sys(111, FATAL, "waitpid surprise: ");
-	if (!WIFEXITED(status))
-		strerr_die2sys(111, FATAL, "qmail-inject crashed: ");
-	if (WEXITSTATUS(status))
-		strerr_die2sys(111, FATAL, "qmail-inject failed: ");
+	for (;;) {
+		if (!(i = waitpid(inject_pid, &status, 0)))
+			break;
+		else
+		if (i == -1) {
+#ifdef ERESTART
+			if (errno == error_intr || errno == error_restart)
+#else
+			if (errno == error_intr)
+#endif
+				continue;
+			strerr_die2sys(111, FATAL, "waitpid: ");
+		}
+		if (i != inject_pid)
+			strerr_die2x(111, FATAL, "waitpid surprise");
+		if (!(i = wait_handler(status, &werr)))
+			continue;
+		else
+		if (werr == -1)
+			strerr_die2x(111, FATAL, "internal wait handler error");
+		else
+		if (werr) {
+			strnum[fmt_int(strnum, werr)] = 0;
+			strerr_die3x(111, FATAL, "qmail-inject killed by signal ", strnum);
+		} else
+		if (i) {
+			strnum[fmt_int(strnum, i)] = 0;
+			strerr_die3x(111, FATAL, "qmail-inject exit code ", strnum);
+		}
+	}
 }
 
 void
@@ -985,7 +931,7 @@ count_history(char *sender, unsigned max)
 int
 mkTempFile(int seekfd)
 {
-	char            inbuf[2048], outbuf[2048], strnum[FMT_ULONG];
+	char            inbuf[2048], outbuf[2048];
 	char           *tmpdir;
 	static stralloc tmpFile = {0};
 	struct substdio ssin_t;
@@ -1303,7 +1249,106 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.36 2022-01-30 08:28:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.37 2022-12-18 12:31:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: autoresponder.c,v $
+ * Revision 1.37  2022-12-18 12:31:42+05:30  Cprogrammer
+ * handle wait status with details
+ *
+ * Revision 1.36  2022-01-30 08:28:42+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
+ * Revision 1.35  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.34  2021-07-19 07:57:58+05:30  Cprogrammer
+ * fixed compiler warning on _XOPEN_SOURCE redefinition
+ *
+ * Revision 1.33  2021-06-14 00:37:37+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.32  2017-03-09 14:35:38+05:30  Cprogrammer
+ * ignore responses to senders listed in badrcptto
+ *
+ * Revision 1.31  2015-12-12 15:01:41+05:30  Cprogrammer
+ * fix for deliver to email alias
+ *
+ * Revision 1.30  2015-08-24 19:04:55+05:30  Cprogrammer
+ * changed ip_scanbracket to ip4_scanbracket
+ *
+ * Revision 1.29  2014-05-22 14:45:38+05:30  Cprogrammer
+ * fixed issue with Date field
+ * fixed SIGPIPE resulting in duplicate emails
+ * use mktime to use local time
+ *
+ * Revision 1.28  2014-01-29 13:57:54+05:30  Cprogrammer
+ * changed data type for opt_maxmsgs to unsigned long
+ *
+ * Revision 1.27  2012-08-16 07:58:56+05:30  Cprogrammer
+ * added description for -T option
+ *
+ * Revision 1.26  2011-12-05 12:13:11+05:30  Cprogrammer
+ * set Content-Type if -T argument is given
+ *
+ * Revision 1.25  2011-12-01 21:21:50+05:30  Cprogrammer
+ * added option to add Content-Type header
+ *
+ * Revision 1.24  2011-11-06 22:54:53+05:30  Cprogrammer
+ * fixed checking of strtoul function
+ *
+ * Revision 1.23  2009-01-06 20:47:48+05:30  Cprogrammer
+ * corrected addrparse() function
+ *
+ * Revision 1.22  2008-08-03 18:25:57+05:30  Cprogrammer
+ * use proper prot for strptime()
+ *
+ * Revision 1.21  2005-06-17 21:49:16+05:30  Cprogrammer
+ * replaced struct_ipaddress with shorter typedef
+ *
+ * Revision 1.20  2005-03-03 14:36:24+05:30  Cprogrammer
+ * added service responder
+ *
+ * Revision 1.19  2005-03-03 00:45:36+05:30  Cprogrammer
+ * provide Auto-Submitted, In-Reply-To, References fields (RFC 3834)
+ * fixed parsing of RECIPIENT environment variable
+ *
+ * Revision 1.18  2004-11-03 23:41:28+05:30  Cprogrammer
+ * added option %d to add the current date
+ * added User-Agent header
+ *
+ * Revision 1.17  2004-11-01 23:13:32+05:30  Cprogrammer
+ * added start date and end date options
+ *
+ * Revision 1.16  2004-10-29 00:10:50+05:30  Cprogrammer
+ * rfc 3834 implementation
+ *
+ * Revision 1.15  2004-10-24 21:29:28+05:30  Cprogrammer
+ * removed fail_temp(), die_nomem()
+ * corrected length of filename
+ *
+ * Revision 1.14  2004-10-24 20:09:41+05:30  Cprogrammer
+ * djbfication of code
+ *
+ * Revision 1.13  2004-10-22 20:28:06+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.12  2004-07-15 23:35:15+05:30  Cprogrammer
+ * fixed compilation warning
+ *
+ * Revision 1.11  2004-05-06 22:26:58+05:30  Cprogrammer
+ * FROM field set incorrectly if domain contained '-' character
+ *
+ * Revision 1.10  2004-05-03 22:09:16+05:30  Cprogrammer
+ * header was not delineated properly
+ *
+ * Revision 1.9  2003-12-07 13:01:20+05:30  Cprogrammer
+ * added -S option to add a fixed subject
+ *
+ * TODO
+ *
+ * 1. Include more List- headers
+ */

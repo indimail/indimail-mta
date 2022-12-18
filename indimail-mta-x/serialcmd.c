@@ -1,23 +1,5 @@
 /*
- * $Log: serialcmd.c,v $
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2021-07-05 21:24:39+05:30  Cprogrammer
- * use qgetpw interface from libqmail if USE_QPWGR is set
- *
- * Revision 1.4  2004-10-22 20:30:13+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-10-22 15:38:57+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.2  2004-09-26 00:00:51+05:30  Cprogrammer
- * removed stdio.h
- *
- * Revision 1.1  2004-05-14 00:45:09+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: serialcmd.c,v 1.7 2022-12-18 12:29:59+05:30 Cprogrammer Exp mbhangui $
  *
  * serialcmd -- apply a command to a mail message.
  * Copyright 1999,  Len Budney
@@ -41,11 +23,15 @@
 #include <str.h>
 #include <byte.h>
 #include <env.h>
+#include <wait.h>
+#include <error.h>
+#include <fmt.h>
 #include <qgetpwgr.h>
 #include <noreturn.h>
 #include "quote.h"
 
 #define FATAL "serialcmd: fatal: "
+#define WARN  "serialcmd: warning: "
 
 static int      use_pwgr;
 static stralloc line = { 0 };
@@ -250,54 +236,80 @@ makeenv(void)
 void
 runcmd(char **cmd, int fd, stralloc *fnam)
 {
-	int             pid;
-	int             pipedesc[2];
-	int             status;
-	char            msg[80];
-	int             msglen;
+	pid_t           pid;
+	int             i, r, werr, status, msglen, pipedesc[2];
+	char            c, msg[80], strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
-	status = pipe(pipedesc);
-	if (status == -1)
+	if (pipe(pipedesc) == -1)
 		strerr_die2sys(111, FATAL, "unable to open pipe: ");
 	lseek(fd, (off_t) 0, SEEK_SET);
 	if ((pid = fork()) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
-	if (pid == 0) {
+	else
+	if (!pid) {
 		if (dup2(fd, 0) == -1)
 			strerr_die2sys(111, FATAL, "unable to read message: ");
 		if (dup2(pipedesc[1], 1) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to pipe: ");
 		close(pipedesc[1]);
 		close(pipedesc[0]);
-		if (execvp(*cmd, cmd) == -1)
-			strerr_die2sys(111, FATAL, "unable to execvp: ");
-	} else {
-		char            c;
-		int             pstat;
-		/*
-		 * Read any output from the child. 
-		 */
-		close(pipedesc[1]);
-		msglen = read(pipedesc[0], msg, 79);
-		if (msglen == -1)
-			strerr_die2sys(111, FATAL, "unable to read process output: ");
-		msg[msglen] = '\n';
-		msglen = str_chr(msg, '\n');
-		if (*(msg + msglen))
-			msg[msglen] = '\0';
-
-		/*
-		 * Wait for the child to finish. 
-		 */
-		while (1) {
-			if (read(pipedesc[0], &c, 1) == 0)
-				break;
-		}
-		wait(&pstat);
-		if (WIFEXITED(pstat) == 0)
-			die_badexit();
-		result(fnam, WEXITSTATUS(pstat), msg);
+		execvp(*cmd, cmd);
+		strerr_die4sys(111, FATAL, "execvp: ", *cmd, ": ");
 	}
+	/*- Read any output from the child.  */
+	close(pipedesc[1]);
+	msglen = read(pipedesc[0], msg, 79);
+	if (msglen == -1)
+		strerr_die2sys(111, FATAL, "unable to read process output: ");
+	msg[msglen] = '\n';
+	msglen = str_chr(msg, '\n');
+	if (*(msg + msglen))
+		msg[msglen] = '\0';
+
+	/*- Wait for the child to finish.  */
+	while (1) {
+		if (read(pipedesc[0], &c, 1) == 0)
+			break;
+	}
+	for (r = -1;;) {
+		if (!(i = waitpid(pid, &status, 0)))
+			break;
+		if (i == -1) {
+#ifdef ERESTART
+			if (errno == error_intr || errno == error_restart)
+#else
+			if (errno == error_intr)
+#endif
+				continue;
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_die3sys(111, FATAL, strnum1, ": waitpid error: ");
+		}
+		if (i != pid) {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_die3x(111, FATAL, strnum1, ": waitpid surprise");
+		}
+		if (!(i = wait_handler(status, &werr))) {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strnum2[fmt_int(strnum2, werr)] = 0;
+			strerr_warn4(WARN, strnum1, wait_stopped(status) ? ": stopped by signal " : ": started by signal ", strnum2, 0);
+			continue;
+		} else
+		if (werr == -1) {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strerr_die3x(111, FATAL, strnum1, ": internal wait handler error");
+		} else
+		if (werr) {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strnum2[fmt_uint(strnum2, WTERMSIG(status))] = 0;
+			strerr_die4x(111, FATAL, strnum1, ": killed by signal ", strnum2);
+		} else {
+			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			strnum2[fmt_int(strnum2, i)] = 0;
+			strerr_warn4(WARN, strnum1, ": normal exit return status ", strnum2, 0);
+			r = i;
+		}
+	}
+	result(fnam, r, msg);
 }
 
 void
@@ -412,10 +424,35 @@ main(int argc, char *argv[])
 	return(0);
 }
 
+/*
+ * $Log: serialcmd.c,v $
+ * Revision 1.7  2022-12-18 12:29:59+05:30  Cprogrammer
+ * handle wait status with details
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2021-07-05 21:24:39+05:30  Cprogrammer
+ * use qgetpw interface from libqmail if USE_QPWGR is set
+ *
+ * Revision 1.4  2004-10-22 20:30:13+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.3  2004-10-22 15:38:57+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.2  2004-09-26 00:00:51+05:30  Cprogrammer
+ * removed stdio.h
+ *
+ * Revision 1.1  2004-05-14 00:45:09+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
+
 void
 getversion_serialcmd_c()
 {
-	static char    *x = "$Id: serialcmd.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialcmd.c,v 1.7 2022-12-18 12:29:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,60 +1,5 @@
-/* 
- * $Log: qmail-qfilter.c,v $
- * Revision 1.18  2022-10-17 19:44:50+05:30  Cprogrammer
- * use exit codes defines from qmail.h
- *
- * Revision 1.17  2022-03-08 22:59:54+05:30  Cprogrammer
- * use custom_error() from custom_error.c
- *
- * Revision 1.16  2021-10-25 09:13:01+05:30  Cprogrammer
- * eliminated mktmpfd() function
- *
- * Revision 1.15  2021-06-12 18:25:31+05:30  Cprogrammer
- * removed #include "auto_qmail.h"
- *
- * Revision 1.14  2021-06-09 19:36:38+05:30  Cprogrammer
- * use qmulti() instead of exec of qmail-multi
- *
- * Revision 1.13  2021-05-29 23:49:54+05:30  Cprogrammer
- * replace str_chr with str_rchr to get domain correctly from email address
- *
- * Revision 1.12  2020-12-07 16:09:42+05:30  Cprogrammer
- * use exit code 79 for envelope format error
- *
- * Revision 1.11  2019-02-17 11:40:14+05:30  Cprogrammer
- * fixed indentation
- *
- * Revision 1.10  2016-06-03 09:58:12+05:30  Cprogrammer
- * moved qmail-multi to sbin
- *
- * Revision 1.9  2011-07-13 20:56:18+05:30  Cprogrammer
- * removed useless close()
- *
- * Revision 1.8  2011-02-17 22:11:19+05:30  Cprogrammer
- * lseek envelope fd
- *
- * Revision 1.7  2009-04-24 23:50:47+05:30  Cprogrammer
- * version 2.1 of qmail-qfilter
- *
- * Revision 1.6  2009-04-22 20:04:30+05:30  Cprogrammer
- * added customized error messages
- *
- * Revision 1.5  2009-04-21 20:43:38+05:30  Cprogrammer
- * use bin/qmail-multi instead of absolute path
- *
- * Revision 1.4  2009-04-02 20:35:42+05:30  Cprogrammer
- * call qmail-multi instead of qmail-queue
- *
- * Revision 1.3  2004-10-22 20:28:40+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-06-20 17:33:08+05:30  Cprogrammer
- * use setenv() for mysetenv()
- * use mkstemp() instead of tempnam()
- *
- * Revision 1.1  2004-05-23 20:28:44+05:30  Cprogrammer
- * Initial revision
- *
+/*
+ * $Id: qmail-qfilter.c,v 1.19 2022-12-18 11:50:05+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -86,6 +31,8 @@
 #include <str.h>
 #include <fmt.h>
 #include <byte.h>
+#include <wait.h>
+#include <error.h>
 #include "qmail.h"
 #include "qmulti.h"
 #include "custom_error.h"
@@ -114,7 +61,7 @@ static size_t   msg_len;
 char            strnum[FMT_ULONG];
 
 /*
- * Parse the sender address into user and host portions 
+ * Parse the sender address into user and host portions
  */
 size_t
 parse_sender(char *env)
@@ -193,7 +140,7 @@ parse_envelope(void)
 }
 
 /*
- * Create a temporary invisible file opened for read/write 
+ * Create a temporary invisible file opened for read/write
  */
 int
 mktmpfile()
@@ -205,7 +152,7 @@ mktmpfile()
 		custom_error("qmail-qfilter", "Z", "unable to create temp file.", 0, "X.3.0");
 	/*
 	 * The following makes the temporary file disappear immediately on
-	 * program exit. 
+	 * program exit.
 	 */
 	if (unlink(filename) == -1) {
 		close(fd);
@@ -215,7 +162,7 @@ mktmpfile()
 }
 
 /*
- * Renumber from one FD to another 
+ * Renumber from one FD to another
  */
 void
 move_fd(int currfd, int newfd)
@@ -229,7 +176,7 @@ move_fd(int currfd, int newfd)
 }
 
 /*
- * Copy from one FD to a temporary FD 
+ * Copy from one FD to a temporary FD
  */
 void
 copy_fd(int fdin, int fdout, size_t * var)
@@ -238,7 +185,7 @@ copy_fd(int fdin, int fdout, size_t * var)
 	int             tmp = mktmpfile();
 
 	/*
-	 * Copy the message into the temporary file 
+	 * Copy the message into the temporary file
 	 */
 	for (bytes = 0;;) {
 		char            buf[BUFSIZE];
@@ -266,7 +213,7 @@ struct command {
 typedef struct command command;
 
 /*
- * Split up the command line into a linked list of seperate commands 
+ * Split up the command line into a linked list of seperate commands
  */
 command        *
 parse_args(int argc, char *argv[])
@@ -340,12 +287,13 @@ read_qqfd(void)
 }
 
 /*
- * Run each of the filters in sequence 
+ * Run each of the filters in sequence
  */
 void
 run_filters(const command * first)
 {
 	const command  *c;
+	int             i, werr;
 
 	move_fd(mktmpfile(), MSGOUT);
 	move_fd(mktmpfile(), ENVOUT);
@@ -370,12 +318,42 @@ run_filters(const command * first)
 			execvp(c->argv[0], c->argv);
 			_exit(QQ_INTERNAL);
 		}
-		if (waitpid(pid, &status, WUNTRACED) == -1)
-			_exit(QQ_INTERNAL);
-		if (!WIFEXITED(status))
-			_exit(QQ_INTERNAL);
-		if (WEXITSTATUS(status))
-			_exit((WEXITSTATUS(status) == QQ_DROP_MSG) ? 0 : WEXITSTATUS(status));
+		for (;;) {
+			if (!(i = waitpid(pid, &status, 0)))
+				break;
+			else
+			if (i == -1) {
+#ifdef ERESTART
+				if (errno == error_intr || errno == error_restart)
+#else
+				if (errno == error_intr)
+#endif
+					continue;
+				custom_error("qmail-qfilter", "Z", "waitpid error.", 0, "X.3.0");
+			}
+			if (i != pid)
+				_exit(QQ_WAITPID_SURPRISE);
+			if (!(i = wait_handler(status, &werr)))
+				continue;
+			else
+			if (werr == -1)
+				custom_error("qmail-qfilter", "Z", "internal wait handler error.", 0, "X.3.0");
+			else
+			if (werr) {
+				strnum[fmt_ulong(strnum, werr)] = 0;
+				custom_error("qmail-qfilter", "Z", "killed by signal", strnum, "X.3.0");
+			} else
+			if (i == -1)
+				_exit(QQ_INTERNAL);
+			else
+			if (i == QQ_DROP_MSG)
+				_exit(0);
+			else
+			if (i) {
+				strnum[fmt_int(strnum, i)] = 0;
+				custom_error("qmail-qfilter", "Z", "non zero exit status", strnum, "X.3.0");
+			}
+		} /*- for (;;) */
 		move_unless_empty(MSGOUT, MSGIN, c->next, &msg_len);
 		move_unless_empty(ENVOUT, ENVIN, c->next, &env_len);
 		if (lseek(QQFD, 0, SEEK_SET) != 0)
@@ -408,9 +386,71 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.18 2022-10-17 19:44:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.19 2022-12-18 11:50:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
 }
 #endif
+
+/*
+ * $Log: qmail-qfilter.c,v $
+ * Revision 1.19  2022-12-18 11:50:05+05:30  Cprogrammer
+ * handle wait status with details
+ *
+ * Revision 1.18  2022-10-17 19:44:50+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
+ * Revision 1.17  2022-03-08 22:59:54+05:30  Cprogrammer
+ * use custom_error() from custom_error.c
+ *
+ * Revision 1.16  2021-10-25 09:13:01+05:30  Cprogrammer
+ * eliminated mktmpfd() function
+ *
+ * Revision 1.15  2021-06-12 18:25:31+05:30  Cprogrammer
+ * removed #include "auto_qmail.h"
+ *
+ * Revision 1.14  2021-06-09 19:36:38+05:30  Cprogrammer
+ * use qmulti() instead of exec of qmail-multi
+ *
+ * Revision 1.13  2021-05-29 23:49:54+05:30  Cprogrammer
+ * replace str_chr with str_rchr to get domain correctly from email address
+ *
+ * Revision 1.12  2020-12-07 16:09:42+05:30  Cprogrammer
+ * use exit code 79 for envelope format error
+ *
+ * Revision 1.11  2019-02-17 11:40:14+05:30  Cprogrammer
+ * fixed indentation
+ *
+ * Revision 1.10  2016-06-03 09:58:12+05:30  Cprogrammer
+ * moved qmail-multi to sbin
+ *
+ * Revision 1.9  2011-07-13 20:56:18+05:30  Cprogrammer
+ * removed useless close()
+ *
+ * Revision 1.8  2011-02-17 22:11:19+05:30  Cprogrammer
+ * lseek envelope fd
+ *
+ * Revision 1.7  2009-04-24 23:50:47+05:30  Cprogrammer
+ * version 2.1 of qmail-qfilter
+ *
+ * Revision 1.6  2009-04-22 20:04:30+05:30  Cprogrammer
+ * added customized error messages
+ *
+ * Revision 1.5  2009-04-21 20:43:38+05:30  Cprogrammer
+ * use bin/qmail-multi instead of absolute path
+ *
+ * Revision 1.4  2009-04-02 20:35:42+05:30  Cprogrammer
+ * call qmail-multi instead of qmail-queue
+ *
+ * Revision 1.3  2004-10-22 20:28:40+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-06-20 17:33:08+05:30  Cprogrammer
+ * use setenv() for mysetenv()
+ * use mkstemp() instead of tempnam()
+ *
+ * Revision 1.1  2004-05-23 20:28:44+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
