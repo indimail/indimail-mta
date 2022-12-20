@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.37 2022-09-29 19:30:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns.c,v 1.38 2022-12-20 21:38:20+05:30 Cprogrammer Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -23,6 +23,8 @@
 #include "stralloc.h"
 #include "dns.h"
 #include "case.h"
+
+#define MAX_EDNS_RESPONSE_SIZE 65536
 
 /*-
  * https://slashdot.org/story/03/09/16/0034210/resolving-everything-verisign-adds-wildcards
@@ -135,9 +137,9 @@ resolve(stralloc *domain, int type)
 	ns_initparse(response.buf, responselen, &msg);
 #endif
 	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
-		if (responsebuflen < 65536) {
-			if (alloc_re((char *) &response.buf, responsebuflen, 65536))
-				responsebuflen = 65536;
+		if (responsebuflen < MAX_EDNS_RESPONSE_SIZE) {
+			if (alloc_re((char *) &response.buf, responsebuflen, MAX_EDNS_RESPONSE_SIZE))
+				responsebuflen = MAX_EDNS_RESPONSE_SIZE;
 			else
 				return DNS_MEM;
 		}
@@ -457,9 +459,10 @@ dns_txtplus(strsalloc *ssa, stralloc *domain)
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
 		if (r == 1) {
-			if (!stralloc_copy(&tmpsa, &txt))
-				return DNS_MEM;
-			if (!strsalloc_append(ssa, &tmpsa))
+			stralloc        tmp = {0};
+
+			if (!stralloc_copy(&tmp, &txt) ||
+					!strsalloc_append(ssa, &tmp))
 				return DNS_MEM;
 		}
 	}
@@ -473,7 +476,7 @@ dns_txt(strsalloc *ssa, stralloc *domain)
 {
 	int             r, j;
 
-	if (!strsalloc_readyplus(ssa, 0))
+	if (!strsalloc_readyplus(ssa, 32))
 		return DNS_MEM;
 	ssa->len = 0;
 	if ((r = dns_txtplus(ssa, domain)) < 0) {
@@ -487,11 +490,16 @@ dns_txt(strsalloc *ssa, stralloc *domain)
 int
 dns_ptr(strsalloc *ssa, ip_addr *ip4)
 {
-	int             r;
+	int             r, j;
 
+	if (!strsalloc_readyplus(ssa, 32))
+		return DNS_MEM;
 	ssa->len = 0;
-	if ((r = dns_ptrplus(ssa, ip4)) < 0)
+	if ((r = dns_ptrplus(ssa, ip4)) < 0) {
+		for (j = 0; j < ssa->len; ++j)
+			alloc_free(ssa->sa[j].s);
 		ssa->len = 0;
+	}
 	return r;
 }
 
@@ -516,9 +524,10 @@ dns_ptrplus(strsalloc *ssa, ip_addr *ip4)
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
 		if (r == 1) {
-			if (!stralloc_copys(&tmpsa, name))
-				return DNS_MEM;
-			if (!strsalloc_append(ssa, &tmpsa))
+			stralloc        tmp = {0};
+
+			if (!stralloc_copys(&tmp, name) ||
+					!strsalloc_append(ssa, &tmp))
 				return DNS_MEM;
 		}
 	}
@@ -605,12 +614,13 @@ dns_ptr6(stralloc *ssa, ip6_addr *i6)
 			return DNS_SOFT;
 		if (r == 1) {
 #ifdef USE_SPF
-			if (!stralloc_copys(&tmpsa, name))
+			stralloc        tmp = {0};
+			if (!stralloc_copys(&tmp, name))
 				return DNS_MEM;
-			if (!strsalloc_append(ssa, &tmpsa))
+			if (!strsalloc_append(ssa, &tmp))
 				return DNS_MEM;
 #else
-			if (!stralloc_copys(&ssa, name))
+			if (!stralloc_copys(ssa, name))
 				return DNS_MEM;
 			return 0;
 #endif
@@ -1092,13 +1102,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.37 2022-09-29 19:30:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.38 2022-12-20 21:38:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.38  2022-12-20 21:38:20+05:30  Cprogrammer
+ * fixed double_free with strsalloc_append
+ *
  * Revision 1.37  2022-09-29 19:30:38+05:30  Cprogrammer
  * moved RCS log to bottom
  *

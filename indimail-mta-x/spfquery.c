@@ -1,5 +1,8 @@
 /*
  * $Log: spfquery.c,v $
+ * Revision 1.9  2022-12-20 23:00:49+05:30  Cprogrammer
+ * updated usage string
+ *
  * Revision 1.8  2022-10-14 22:42:11+05:30  Cprogrammer
  * changed variable name for localhost to localhost
  *
@@ -55,7 +58,7 @@ die_usage()
 	die(100,
 		"fatal: invalid usage\n"
 		"usage: spfquery <sender-ip> <sender-helo/ehlo> <envelope-from> "
-		"[<local rules>] [<best guess rules>]\n");
+		"[<local rules>] [<best guess rules>] [spfexp]\n");
 }
 
 no_return void
@@ -72,14 +75,14 @@ main(int argc, char **argv)
 
 	if (argc < 4)
 		die_usage();
-	if (!stralloc_copys(&helohost, argv[2]))
-		die_nomem();
-	if (!stralloc_0(&helohost))
+	/*- helo host */
+	if (!stralloc_copys(&helohost, argv[2]) ||
+			!stralloc_0(&helohost))
 		die_nomem();
 
-	if (!stralloc_copys(&addr, argv[3]))
-		die_nomem();
-	if (!stralloc_0(&addr))
+	/*- from addrss */
+	if (!stralloc_copys(&addr, argv[3]) ||
+			!stralloc_0(&addr))
 		die_nomem();
 
 	if (argc > 4) {
@@ -165,7 +168,7 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.8 2022-10-14 22:42:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spfquery.c,v 1.9 2022-12-20 23:00:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

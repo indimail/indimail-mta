@@ -9,12 +9,43 @@ spfquery
 .I envelope-from
 [
 .I local_rules
-.I best_guess_rules
+.I guess_rules
+.I spfexp
 ]
 
 .SH DESCRIPTION
-\fBspfquery\fR is a tool that can be used for checking if a \fIsender-ip\fR is authorized to send emails
-for the domain in \fIenvelope-from\fR
+\fBspfquery\fR is a tool that can be used for checking if a \fIsender-ip\fR
+is authorized to send emails for the domain in \fIenvelope-from\fR
+
+.SH OPTIONS
+.TP 3
+\fIsender-ip\fR
+The IP address to verify if it is authorized to send emails for domain
+specfied in \fIenvelope-from\fR.
+
+.TP 3
+\fIsender-helo\fR
+Substitute the domain used in the most recent SMTP HELO or EHLO with
+\fIsender-helo\fR in case there is a SPF expansion
+
+.TP 3
+\fIenvelope-from\fR
+Use domain from \fIenvelope_from\fR
+
+.TP 3
+\fIlocal_rules\fR
+Rules that are executed before the real SPF rules for a domain would fail
+(fail, softfail, neutral). This can be used to always allow certain
+machines to send certain mails.
+
+.TP 3
+\fIguess_rules\fR
+SPF rules that will be checked if a sender domain doesn't have a SPF
+record. The local spfrules are always executed afterwards.
+
+.TP 3
+\fIspfexp\fR
+Use spfexp as explanation in case of a reject
 
 .SH "SEE ALSO"
 qmail-smtpd(8)

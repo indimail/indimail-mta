@@ -1,65 +1,5 @@
 /*
- * $Log: spf.c,v $
- * Revision 1.20  2022-10-14 22:41:49+05:30  Cprogrammer
- * changed variable name for localhost to localhost
- *
- * Revision 1.19  2022-01-30 09:43:47+05:30  Cprogrammer
- * initialize ip4mask, ip6mask variables
- *
- * Revision 1.18  2020-09-16 19:07:04+05:30  Cprogrammer
- * FreeBSD fix
- *
- * Revision 1.17  2020-05-11 11:18:47+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.16  2018-08-12 00:30:27+05:30  Cprogrammer
- * removed stdio.h
- *
- * Revision 1.15  2018-08-12 00:30:03+05:30  Cprogrammer
- * fixes for double free()
- *
- * Revision 1.14  2017-05-16 20:36:31+05:30  Cprogrammer
- * free strsalloc structure
- *
- * Revision 1.13  2015-08-24 19:12:04+05:30  Cprogrammer
- * removed debugging statement
- *
- * Revision 1.12  2015-08-24 19:09:10+05:30  Cprogrammer
- * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
- *
- * Revision 1.11  2013-08-13 21:48:56+05:30  Cprogrammer
- * added error message for unknown address family
- *
- * Revision 1.10  2013-08-06 11:15:51+05:30  Cprogrammer
- * added ipv6 support
- *
- * Revision 1.9  2012-06-20 18:47:26+05:30  Cprogrammer
- * fixed memory leak after calling strsalloc()
- *
- * Revision 1.8  2012-04-26 18:05:43+05:30  Cprogrammer
- * remove memory leaks
- *
- * Revision 1.7  2012-04-10 20:37:22+05:30  Cprogrammer
- * added remoteip argument (ipv4) to spfcheck()
- *
- * Revision 1.6  2005-06-17 21:50:56+05:30  Cprogrammer
- * replaced struct ip_address with a shorter typdef ip_addr
- *
- * Revision 1.5  2005-06-11 21:32:42+05:30  Cprogrammer
- * change for ipv6 support
- *
- * Revision 1.4  2004-10-22 20:30:40+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-10-10 12:07:14+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.2  2004-10-09 23:32:57+05:30  Cprogrammer
- * BUG Fixes - Use ipalloc functions instead of stralloc functions for ipalloc variables
- *
- * Revision 1.1  2004-09-05 00:50:06+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: spf.c,v 1.21 2022-12-20 22:59:58+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
@@ -125,7 +65,6 @@ const static unsigned char urlchr_table[256] = {
 
 
 strsalloc       ssa = { 0 };
-strsalloc       ssa_t = { 0 };
 static stralloc sa = { 0 };
 static stralloc domain = { 0 };
 static ipalloc  ia = { 0 };
@@ -351,12 +290,24 @@ matchip(ip_addr *net, int mask, ip_addr *ipaddr)
 	return 1;
 }
 
+static void
+ssa_free()
+{
+	int             j;
+
+	for (j = 0;j < ssa.len;++j) {
+		if (ssa.sa[j].a) {
+			ssa.sa[j].a = 0;
+			alloc_free(ssa.sa[j].s);
+		}
+	}
+	ssa.len = 0;
+}
+
 int
 spfget(stralloc *spf, stralloc *domain_v)
 {
-	int             j;
-	int             begin, pos, i;
-	int             r = SPF_NONE;
+	int             j, begin, pos, i, r = SPF_NONE;
 
 	spf->len = 0;
 	ssa.len = 0;
@@ -395,12 +346,14 @@ spfget(stralloc *spf, stralloc *domain_v)
 			r = SPF_UNKNOWN;
 			break;
 		}
-		if (!stralloc_0(&ssa.sa[j]))
+		if (!stralloc_0(&ssa.sa[j]) ||
+				!stralloc_copys(spf, ssa.sa[j].s + pos)) {
+			ssa_free();
 			return SPF_NOMEM;
-		if (!stralloc_copys(spf, ssa.sa[j].s + pos))
-			return SPF_NOMEM;
+		}
 		r = SPF_OK;
 	}
+	ssa_free();
 	return r;
 }
 
@@ -830,6 +783,7 @@ spf_ptr(char *spec, char *mask)
 			switch (dns_ip(&ia, &ssa.sa[j]))
 			{
 			case DNS_MEM:
+				ssa_free();
 				return SPF_NOMEM;
 			case DNS_SOFT:
 				hdr_dns();
@@ -895,10 +849,11 @@ spf_ptr(char *spec, char *mask)
 			}
 			if (r == SPF_ERROR)
 				break;
-		}
-	}
+		} /*- for (j = 0; j < ssa.len; ++j) */
+	} /*- switch (dns_ptr(&ssa, &ip)) */
 	if (!sender_fqdn.len && !stralloc_copys(&sender_fqdn, "unknown"))
 		return SPF_NOMEM;
+	ssa_free();
 	return r;
 }
 
@@ -1211,11 +1166,11 @@ redirect:
 					alloc_free(spf_v.s);
 					return SPF_NOMEM;
 				}
-				ssa_t.len = 0;
-				switch (dns_txt(&ssa_t, &sa))
+				switch (dns_txt(&ssa, &sa))
 				{
 				case DNS_MEM:
 					alloc_free(spf_v.s);
+					ssa_free();
 					return SPF_NOMEM;
 				case DNS_SOFT:
 					continue; /*- FIXME...  */
@@ -1223,16 +1178,19 @@ redirect:
 					continue;
 				}
 				explanation.len = 0;
-				for (i = 0; i < ssa_t.len; i++) {
-					if (!stralloc_cat(&explanation, &ssa_t.sa[i])) {
+				for (i = 0; i < ssa.len; i++) {
+					if (!stralloc_cat(&explanation, &ssa.sa[i])) {
 						alloc_free(spf_v.s);
+						ssa_free();
 						return SPF_NOMEM;
 					}
-					if (i < (ssa_t.len - 1) && !stralloc_append(&explanation, "\n")) {
+					if (i < (ssa.len - 1) && !stralloc_append(&explanation, "\n")) {
 						alloc_free(spf_v.s);
+						ssa_free();
 						return SPF_NOMEM;
 					}
 				}
+				ssa_free();
 				if (!stralloc_0(&explanation)) {
 					alloc_free(spf_v.s);
 					return SPF_NOMEM;
@@ -1418,6 +1376,7 @@ int
 spfinfo(stralloc *sa_p)
 {
 	stralloc        tmp = { 0 };
+
 	if (!stralloc_copys(&tmp, received))
 		return 0;
 	if (!stralloc_0(&tmp))
@@ -1432,7 +1391,74 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.20 2022-10-14 22:41:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.21 2022-12-20 22:59:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: spf.c,v $
+ * Revision 1.21  2022-12-20 22:59:58+05:30  Cprogrammer
+ * added ssa_free() to free strsalloc ssa variable
+ *
+ * Revision 1.20  2022-10-14 22:41:49+05:30  Cprogrammer
+ * changed variable name for localhost to localhost
+ *
+ * Revision 1.19  2022-01-30 09:43:47+05:30  Cprogrammer
+ * initialize ip4mask, ip6mask variables
+ *
+ * Revision 1.18  2020-09-16 19:07:04+05:30  Cprogrammer
+ * FreeBSD fix
+ *
+ * Revision 1.17  2020-05-11 11:18:47+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.16  2018-08-12 00:30:27+05:30  Cprogrammer
+ * removed stdio.h
+ *
+ * Revision 1.15  2018-08-12 00:30:03+05:30  Cprogrammer
+ * fixes for double free()
+ *
+ * Revision 1.14  2017-05-16 20:36:31+05:30  Cprogrammer
+ * free strsalloc structure
+ *
+ * Revision 1.13  2015-08-24 19:12:04+05:30  Cprogrammer
+ * removed debugging statement
+ *
+ * Revision 1.12  2015-08-24 19:09:10+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
+ *
+ * Revision 1.11  2013-08-13 21:48:56+05:30  Cprogrammer
+ * added error message for unknown address family
+ *
+ * Revision 1.10  2013-08-06 11:15:51+05:30  Cprogrammer
+ * added ipv6 support
+ *
+ * Revision 1.9  2012-06-20 18:47:26+05:30  Cprogrammer
+ * fixed memory leak after calling strsalloc()
+ *
+ * Revision 1.8  2012-04-26 18:05:43+05:30  Cprogrammer
+ * remove memory leaks
+ *
+ * Revision 1.7  2012-04-10 20:37:22+05:30  Cprogrammer
+ * added remoteip argument (ipv4) to spfcheck()
+ *
+ * Revision 1.6  2005-06-17 21:50:56+05:30  Cprogrammer
+ * replaced struct ip_address with a shorter typdef ip_addr
+ *
+ * Revision 1.5  2005-06-11 21:32:42+05:30  Cprogrammer
+ * change for ipv6 support
+ *
+ * Revision 1.4  2004-10-22 20:30:40+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.3  2004-10-10 12:07:14+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.2  2004-10-09 23:32:57+05:30  Cprogrammer
+ * BUG Fixes - Use ipalloc functions instead of stralloc functions for ipalloc variables
+ *
+ * Revision 1.1  2004-09-05 00:50:06+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
