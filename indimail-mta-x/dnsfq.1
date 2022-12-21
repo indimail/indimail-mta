@@ -1,25 +1,14 @@
 .TH dnsfq 1
 .SH NAME
-dnsfq - retrieve AAAA and A records for a fqdn
+dnsfq - retrieve PTR record for a fqdn
 
 .SH SYNOPSIS
 .B dnsfq 
 .I fqdn
 
 .SH DESCRIPTION
-.B dnsfq
-takes the given
-.I fqdn
-for a host and employs a 
-.I CNAME 
-DNS lookup while finally retrieving the
-.I AAAA
-and
-.I A 
-record following the chain of potential alias names. 
-On output, the entire chain of nested DNS information 
-is displayed together with the retrieved IP(v4|v6) 
-addresses.
+\fBdnsfq\fR takes the given \fIfqdn\fR for a host and gets the IP, employs
+a DNS PTR lookup on the IP and displays the retreived records.
 
 .SH "SEE ALSO"
 dnscname(1),
