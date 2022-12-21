@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.21 2022-12-20 22:59:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spf.c,v 1.22 2022-12-21 12:23:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
@@ -30,27 +30,27 @@
           while((p) < (a)->len && WSPACE((a)->s[(p)])) (a)->s[(p)++] = 0; \
         } while(0)
 
-/*
+/*-
  * this table and macro came from wget more or less 
  * and was in turn stolen by me from libspf as is :) 
  */
 const static unsigned char urlchr_table[256] = {
-	1, 1, 1, 1, 1, 1, 1, 1,		/*- NUL SOH STX ETX  EOT ENQ ACK BEL */
-	1, 1, 1, 1, 1, 1, 1, 1,		/*- BS  HT  LF  VT   FF  CR  SO  SI  */
-	1, 1, 1, 1, 1, 1, 1, 1,		/*- DLE DC1 DC2 DC3  DC4 NAK SYN ETB */
-	1, 1, 1, 1, 1, 1, 1, 1,		/*- CAN EM  SUB ESC  FS  GS  RS  US  */
-	1, 0, 1, 1, 0, 1, 1, 0,		/*- SP  !   "   #    $   %   &   '   */
-	0, 0, 0, 1, 0, 0, 0, 1,		/*- (   )   *   +    ,   -   .   /   */
-	0, 0, 0, 0, 0, 0, 0, 0,		/*- 0   1   2   3    4   5   6   7   */
-	0, 0, 1, 1, 1, 1, 1, 1,		/*- 8   9   :   ;    <   =   >   ?   */
-	1, 0, 0, 0, 0, 0, 0, 0,		/*- @   A   B   C    D   E   F   G   */
-	0, 0, 0, 0, 0, 0, 0, 0,		/*- H   I   J   K    L   M   N   O   */
-	0, 0, 0, 0, 0, 0, 0, 0,		/*- P   Q   R   S    T   U   V   W   */
-	0, 0, 0, 1, 1, 1, 1, 0,		/*- X   Y   Z   [    \   ]   ^   _   */
-	1, 0, 0, 0, 0, 0, 0, 0,		/*- `   a   b   c    d   e   f   g   */
-	0, 0, 0, 0, 0, 0, 0, 0,		/*- h   i   j   k    l   m   n   o   */
-	0, 0, 0, 0, 0, 0, 0, 0,		/*- p   q   r   s    t   u   v   w   */
-	0, 0, 0, 1, 1, 1, 1, 1,		/*- x   y   z   {    |   }   ~   DEL */
+	1, 1, 1, 1, 1, 1, 1, 1,  /*- NUL SOH STX ETX  EOT ENQ ACK BEL */
+	1, 1, 1, 1, 1, 1, 1, 1,  /*- BS  HT  LF  VT   FF  CR  SO  SI  */
+	1, 1, 1, 1, 1, 1, 1, 1,  /*- DLE DC1 DC2 DC3  DC4 NAK SYN ETB */
+	1, 1, 1, 1, 1, 1, 1, 1,  /*- CAN EM  SUB ESC  FS  GS  RS  US  */
+	1, 0, 1, 1, 0, 1, 1, 0,  /*- SP  !   "   #    $   %   &   '   */
+	0, 0, 0, 1, 0, 0, 0, 1,  /*- (   )   *   +    ,   -   .   /   */
+	0, 0, 0, 0, 0, 0, 0, 0,  /*- 0   1   2   3    4   5   6   7   */
+	0, 0, 1, 1, 1, 1, 1, 1,  /*- 8   9   :   ;    <   =   >   ?   */
+	1, 0, 0, 0, 0, 0, 0, 0,  /*- @   A   B   C    D   E   F   G   */
+	0, 0, 0, 0, 0, 0, 0, 0,  /*- H   I   J   K    L   M   N   O   */
+	0, 0, 0, 0, 0, 0, 0, 0,  /*- P   Q   R   S    T   U   V   W   */
+	0, 0, 0, 1, 1, 1, 1, 0,  /*- X   Y   Z   [    \   ]   ^   _   */
+	1, 0, 0, 0, 0, 0, 0, 0,  /*- `   a   b   c    d   e   f   g   */
+	0, 0, 0, 0, 0, 0, 0, 0,  /*- h   i   j   k    l   m   n   o   */
+	0, 0, 0, 0, 0, 0, 0, 0,  /*- p   q   r   s    t   u   v   w   */
+	0, 0, 0, 1, 1, 1, 1, 1,  /*- x   y   z   {    |   }   ~   DEL */
 
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -63,8 +63,6 @@ const static unsigned char urlchr_table[256] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 };
 
-
-strsalloc       ssa = { 0 };
 static stralloc sa = { 0 };
 static stralloc domain = { 0 };
 static ipalloc  ia = { 0 };
@@ -130,18 +128,18 @@ hdr_none()
 }
 
 static void
-hdr_unknown_msg(e)
-	char           *e;
+hdr_unknown_msg(char *e)
 {
-	stralloc_copys(&errormsg, e);
+	if (!stralloc_copys(&errormsg, e))
+		return;
 	received = "unknown (%{xr}: %{xe})";
 }
 
 static void
-hdr_ext(e)
-	char           *e;
+hdr_ext(char *e)
 {
-	stralloc_copys(&errormsg, e);
+	if (!stralloc_copys(&errormsg, e))
+		return;
 	received = "unknown %{xe} (%{xr}: %{xs} uses mechanism not recognized by this client)";
 }
 
@@ -152,10 +150,10 @@ hdr_syntax()
 }
 
 static void
-hdr_error(e)
-	char           *e;
+hdr_error(char *e)
 {
-	stralloc_copys(&errormsg, e);
+	if (!stralloc_copys(&errormsg, e))
+		return;
 	received = "error (%{xr}: error in processing during lookup of %{d}: %{xe})";
 }
 
@@ -275,8 +273,7 @@ getipmask(char *mask, int ipv6)
 static int
 matchip(ip_addr *net, int mask, ip_addr *ipaddr)
 {
-	int             j;
-	int             bytemask;
+	int             j, bytemask;
 
 	for (j = 0; j < 4 && mask > 0; ++j) {
 		if (mask > 8)
@@ -291,34 +288,39 @@ matchip(ip_addr *net, int mask, ip_addr *ipaddr)
 }
 
 static void
-ssa_free()
+ssa_free(strsalloc *p)
 {
 	int             j;
 
-	for (j = 0;j < ssa.len;++j) {
-		if (ssa.sa[j].a) {
-			ssa.sa[j].a = 0;
-			alloc_free(ssa.sa[j].s);
+	for (j = 0;j < p->len;++j) {
+		if (p->sa[j].a) {
+			p->sa[j].a = 0;
+			alloc_free(p->sa[j].s);
 		}
 	}
-	ssa.len = 0;
+	p->len = 0;
 }
 
 int
 spfget(stralloc *spf, stralloc *domain_v)
 {
 	int             j, begin, pos, i, r = SPF_NONE;
+	strsalloc       ssa = { 0 };
 
+	if (!strsalloc_readyplus(&ssa, 32))
+		return DNS_MEM;
 	spf->len = 0;
-	ssa.len = 0;
 	switch (dns_txt(&ssa, domain_v))
 	{
 	case DNS_MEM:
+		ssa_free(&ssa);
 		return SPF_NOMEM;
 	case DNS_SOFT:
+		ssa_free(&ssa);
 		hdr_dns();
 		return SPF_ERROR;
 	case DNS_HARD:
+		ssa_free(&ssa);
 		return SPF_NONE;
 	}
 	for (j = 0; j < ssa.len; ++j) {
@@ -348,12 +350,12 @@ spfget(stralloc *spf, stralloc *domain_v)
 		}
 		if (!stralloc_0(&ssa.sa[j]) ||
 				!stralloc_copys(spf, ssa.sa[j].s + pos)) {
-			ssa_free();
+			ssa_free(&ssa);
 			return SPF_NOMEM;
 		}
 		r = SPF_OK;
 	}
-	ssa_free();
+	ssa_free(&ssa);
 	return r;
 }
 
@@ -362,12 +364,9 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 {
 	static char     hexdigits[] = "0123456789abcdef";
 	char            ch;
-	int             digits = -1;
-	int             urlencode = 0;
-	int             reverse = 0;
-	int             start = expand->len;
-	int             i, pos;
 	char           *split = ".";
+	int             digits = -1, urlencode = 0, reverse = 0,
+					start = expand->len, i, pos;
 
 	if (!stralloc_readyplus(&sa, 0))
 		return 0;
@@ -473,14 +472,12 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 		break;
 	case 'S':
 		if (expdomain.len > 0) {
-			if (!stralloc_copys(&sa, "SPF record at "))
+			if (!stralloc_copys(&sa, "SPF record at ") ||
+					!stralloc_cats(&sa, expdomain.s))
 				return 0;
-			if (!stralloc_cats(&sa, expdomain.s))
-				return 0;
-		} else {
-			if (!stralloc_copys(&sa, "local policy"))
-				return 0;
-		}
+		} else
+		if (!stralloc_copys(&sa, "local policy"))
+			return 0;
 		break;
 	}
 	if (reverse) {
@@ -616,13 +613,11 @@ static int
 spf_a(char *spec, char *mask)
 {
 #ifdef IPV6
-	int             ip4mask = 0;
-	int             ip6mask = 0;
+	int             ip4mask = 0, ip6mask = 0;
 #else
 	int             ipmask;
 #endif
-	int             r;
-	int             j;
+	int             r, j;
 
 #ifdef IPV6
 	if ((r = getipmask(mask, &ip4mask, &ip6mask)) < 0)
@@ -631,9 +626,8 @@ spf_a(char *spec, char *mask)
 	if ((ipmask = getipmask(mask, 1)) < 0)
 		return SPF_SYNTAX;
 #endif
-	if (!stralloc_copys(&sa, spec))
-		return SPF_NOMEM;
-	if (!ipalloc_readyplus(&ia, 0))
+	if (!stralloc_copys(&sa, spec) ||
+			!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
 	switch (dns_ip(&ia, &sa))
 	{
@@ -680,14 +674,11 @@ static int
 spf_mx(char *spec, char *mask)
 {
 #ifdef IPV6
-	int             ip4mask = 0;
-	int             ip6mask = 0;
+	int             ip4mask = 0, ip6mask = 0;
 #else
 	int             ipmask = getipmask(mask, 1);
 #endif
-	int             random = now() + (getpid() << 16);
-	int             r;
-	int             j;
+	int             random = now() + (getpid() << 16), r, j;
 
 #ifdef IPV6
 	if ((r = getipmask(mask, &ip4mask, &ip6mask)) < 0)
@@ -696,9 +687,8 @@ spf_mx(char *spec, char *mask)
 	if (ipmask < 0)
 		return SPF_SYNTAX;
 #endif
-	if (!stralloc_copys(&sa, spec))
-		return SPF_NOMEM;
-	if (!ipalloc_readyplus(&ia, 0))
+	if (!stralloc_copys(&sa, spec) ||
+			!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
 	switch (dns_mxip(&ia, &sa, random))
 	{
@@ -741,10 +731,8 @@ spf_mx(char *spec, char *mask)
 static int
 spf_ptr(char *spec, char *mask)
 {
-	int             len = str_len(spec);
-	int             r;
-	int             j, k;
-	int             pos;
+	int             len = str_len(spec), r, j, k, pos;
+	strsalloc       ssa = { 0 };
 
 	/*- we didn't find host with the matching ip before */
 	if (sender_fqdn.len == 7 && str_equal(sender_fqdn.s, "unknown"))
@@ -762,13 +750,13 @@ spf_ptr(char *spec, char *mask)
 		return SPF_OK;
 	}
 	/*- ok, either it's the first test or it's a very weird setup */
-	if (!strsalloc_readyplus(&ssa, 0))
-		return SPF_NOMEM;
-	if (!ipalloc_readyplus(&ia, 0))
+	if (!strsalloc_readyplus(&ssa, 0) ||
+			!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
 	switch (dns_ptr(&ssa, &ip))
 	{
 	case DNS_MEM:
+		ssa_free(&ssa);
 		return SPF_NOMEM;
 	case DNS_SOFT:
 		hdr_dns();
@@ -783,7 +771,7 @@ spf_ptr(char *spec, char *mask)
 			switch (dns_ip(&ia, &ssa.sa[j]))
 			{
 			case DNS_MEM:
-				ssa_free();
+				ssa_free(&ssa);
 				return SPF_NOMEM;
 			case DNS_SOFT:
 				hdr_dns();
@@ -851,9 +839,11 @@ spf_ptr(char *spec, char *mask)
 				break;
 		} /*- for (j = 0; j < ssa.len; ++j) */
 	} /*- switch (dns_ptr(&ssa, &ip)) */
-	if (!sender_fqdn.len && !stralloc_copys(&sender_fqdn, "unknown"))
+	if (!sender_fqdn.len && !stralloc_copys(&sender_fqdn, "unknown")) {
+		ssa_free(&ssa);
 		return SPF_NOMEM;
-	ssa_free();
+	}
+	ssa_free(&ssa);
 	return r;
 }
 
@@ -909,9 +899,8 @@ spf_exists(char *spec, char *mask)
 {
 	int             r;
 
-	if (!stralloc_copys(&sa, spec))
-		return SPF_NOMEM;
-	if (!ipalloc_readyplus(&ia, 0))
+	if (!stralloc_copys(&sa, spec) ||
+			!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
 
 	switch (dns_ip(&ia, &sa))
@@ -940,8 +929,7 @@ static struct mechanisms
 	unsigned int    expands:1;
 	unsigned int    filldomain:1;
 	int             defresult:4;
-} mechanisms[] =
-{
+} mechanisms[] = {
 	{"all", 0, 0, 0, 0, 0, SPF_OK},
 	{"include", spf_include, 1, 0, 1, 0, 0},
 	{"a", spf_a, 1, 1, 1, 1, 0},
@@ -1001,8 +989,7 @@ static struct default_aliases
 {
 	char           *alias;
 	int             defret;
-} default_aliases[] =
-{
+} default_aliases[] = {
 	{"allow", SPF_OK},
 	{"pass", SPF_OK},
 	{"deny", SPF_FAIL},
@@ -1017,30 +1004,24 @@ static int
 spflookup(stralloc *domain_s)
 {
 	stralloc        spf_v = { 0 };
+	strsalloc       ssa = { 0 };
 	struct default_aliases *da;
-	int             Main = !recursion;
-	int             local_pos = -1;
-	int             r, q;
-	int             begin, pos;
-	int             i;
-	int             prefix;
-	int             done;
-	int             guessing = 0;
+	int             Main = !recursion, local_pos = -1, r, q, begin, pos,
+					i, prefix, done, guessing = 0;
 	char           *p;
 
+	if (!stralloc_readyplus(&sa, 32))
+		return SPF_NOMEM;
 	/*- fallthrough result */
 	if (Main)
 		hdr_none();
-	if (!stralloc_readyplus(&sa, 0))
-		return SPF_NOMEM;
 redirect:
 	if (++recursion > 20) {
 		hdr_unknown_msg("Maximum nesting level exceeded, possible loop");
 		return SPF_SYNTAX;
 	}
-	if (!stralloc_0(domain_s))
-		return SPF_NOMEM;
-	if (!stralloc_copy(&expdomain, domain_s))
+	if (!stralloc_0(domain_s) ||
+			!stralloc_copy(&expdomain, domain_s))
 		return SPF_NOMEM;
 	if ((r = spfget(&spf_v, domain_s)) == SPF_NONE) {
 		if (!Main) {
@@ -1170,27 +1151,28 @@ redirect:
 				{
 				case DNS_MEM:
 					alloc_free(spf_v.s);
-					ssa_free();
 					return SPF_NOMEM;
 				case DNS_SOFT:
+					ssa_free(&ssa);
 					continue; /*- FIXME...  */
 				case DNS_HARD:
+					ssa_free(&ssa);
 					continue;
 				}
 				explanation.len = 0;
 				for (i = 0; i < ssa.len; i++) {
 					if (!stralloc_cat(&explanation, &ssa.sa[i])) {
 						alloc_free(spf_v.s);
-						ssa_free();
+						ssa_free(&ssa);
 						return SPF_NOMEM;
 					}
 					if (i < (ssa.len - 1) && !stralloc_append(&explanation, "\n")) {
 						alloc_free(spf_v.s);
-						ssa_free();
+						ssa_free(&ssa);
 						return SPF_NOMEM;
 					}
 				}
-				ssa_free();
+				ssa_free(&ssa);
 				if (!stralloc_0(&explanation)) {
 					alloc_free(spf_v.s);
 					return SPF_NOMEM;
@@ -1292,8 +1274,7 @@ redirect:
 int
 spfcheck(char *remoteip)
 {
-	int             pos;
-	int             r;
+	int             pos, r;
 
 	pos = byte_rchr(addr.s, addr.len, '@') + 1;
 	if (pos < addr.len) {
@@ -1377,11 +1358,9 @@ spfinfo(stralloc *sa_p)
 {
 	stralloc        tmp = { 0 };
 
-	if (!stralloc_copys(&tmp, received))
-		return 0;
-	if (!stralloc_0(&tmp))
-		return 0;
-	if (!spfexpand(sa_p, tmp.s, expdomain.s))
+	if (!stralloc_copys(&tmp, received) ||
+			!stralloc_0(&tmp) ||
+			!spfexpand(sa_p, tmp.s, expdomain.s))
 		return 0;
 	alloc_free(tmp.s);
 	return 1;
@@ -1391,13 +1370,16 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.21 2022-12-20 22:59:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.22 2022-12-21 12:23:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: spf.c,v $
+ * Revision 1.22  2022-12-21 12:23:42+05:30  Cprogrammer
+ * changed scope of strsalloc ssa variable to local
+ *
  * Revision 1.21  2022-12-20 22:59:58+05:30  Cprogrammer
  * added ssa_free() to free strsalloc ssa variable
  *
