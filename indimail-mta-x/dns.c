@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.38 2022-12-20 21:38:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns.c,v 1.39 2022-12-21 12:21:46+05:30 Cprogrammer Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -105,9 +105,6 @@ static stralloc tmpsa = { 0 };
 static int      (*lookup) () = res_query;
 #ifdef IPV6
 static int      iaafmt6(char *, ip6_addr *, char *);
-#endif
-#ifdef USE_SPF
-static int      dns_ptrplus(strsalloc *, ip_addr *);
 #endif
 #ifdef HASTLSA
 static tlsarr   tlsaRR;
@@ -441,8 +438,8 @@ findtxt(int wanttype)
 	return 0;
 }
 
-static int
-dns_txtplus(strsalloc *ssa, stralloc *domain)
+int
+dns_txt(strsalloc *ssa, stralloc *domain)
 {
 	int             r;
 
@@ -472,39 +469,7 @@ dns_txtplus(strsalloc *ssa, stralloc *domain)
 }
 
 int
-dns_txt(strsalloc *ssa, stralloc *domain)
-{
-	int             r, j;
-
-	if (!strsalloc_readyplus(ssa, 32))
-		return DNS_MEM;
-	ssa->len = 0;
-	if ((r = dns_txtplus(ssa, domain)) < 0) {
-		for (j = 0; j < ssa->len; ++j)
-			alloc_free(ssa->sa[j].s);
-		ssa->len = 0;
-	}
-	return r;
-}
-
-int
 dns_ptr(strsalloc *ssa, ip_addr *ip4)
-{
-	int             r, j;
-
-	if (!strsalloc_readyplus(ssa, 32))
-		return DNS_MEM;
-	ssa->len = 0;
-	if ((r = dns_ptrplus(ssa, ip4)) < 0) {
-		for (j = 0; j < ssa->len; ++j)
-			alloc_free(ssa->sa[j].s);
-		ssa->len = 0;
-	}
-	return r;
-}
-
-static int
-dns_ptrplus(strsalloc *ssa, ip_addr *ip4)
 {
 	int             r;
 
@@ -1102,13 +1067,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.38 2022-12-20 21:38:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns.c,v 1.39 2022-12-21 12:21:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.39  2022-12-21 12:21:46+05:30  Cprogrammer
+ * renamed dns_txtplus(), dns_ptrplus() as dns_txt(), dns_ptr()
+ *
  * Revision 1.38  2022-12-20 21:38:20+05:30  Cprogrammer
  * fixed double_free with strsalloc_append
  *
