@@ -1,209 +1,5 @@
 /*
- * $Log: tcpserver.c,v $
- * Revision 1.77  2022-12-13 20:23:13+05:30  Cprogrammer
- * display diagnostic on exit status
- *
- * Revision 1.76  2021-08-30 12:47:59+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.75  2021-06-15 08:24:25+05:30  Cprogrammer
- * renamed pathexec.. functions to upathexec to avoid clash with libqmail
- *
- * Revision 1.74  2021-03-12 14:05:48+05:30  Cprogrammer
- * use typedef my_ulong instead of ulong
- *
- * Revision 1.73  2021-03-12 13:55:08+05:30  Cprogrammer
- * use MYSQL_CONFIG for conditional compilation of mysql code
- *
- * Revision 1.72  2021-03-09 08:30:40+05:30  Cprogrammer
- * change in translate() function.
- *
- * Revision 1.71  2021-03-07 08:30:07+05:30  Cprogrammer
- * use common tls functions from tls.c
- * added idle timeout parameter
- *
- * Revision 1.70  2020-11-27 17:34:22+05:30  Cprogrammer
- * added option to specify CA file
- *
- * Revision 1.69  2020-11-11 19:50:11+05:30  Cprogrammer
- * changed scope of global veriables limited to tcpserver.c
- *
- * Revision 1.68  2020-09-20 10:55:06+05:30  Cprogrammer
- * open ipv4 and ipv6 sockets on FreeBSD
- *
- * Revision 1.67  2020-09-19 17:35:36+05:30  Cprogrammer
- * treat IPV6 :: same as 0
- *
- * Revision 1.66  2020-09-16 20:50:32+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.65  2020-08-03 17:28:15+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.64  2020-07-04 22:03:00+05:30  Cprogrammer
- * fixed global variables overshadowd by local variables
- *
- * Revision 1.63  2020-06-08 22:48:45+05:30  Cprogrammer
- * quench compiler warning
- *
- * Revision 1.62  2019-07-10 13:42:39+05:30  Cprogrammer
- * fixed wrong child exit status in logs
- *
- * Revision 1.61  2019-06-07 19:20:54+05:30  Cprogrammer
- * print MySQL load status
- *
- * Revision 1.60  2019-05-26 12:04:50+05:30  Cprogrammer
- * use /etc/indimail/control as controldir
- *
- * Revision 1.59  2019-04-22 21:57:59+05:30  Cprogrammer
- * use mysql only if use_sql is non-zero
- *
- * Revision 1.58  2019-04-21 10:25:07+05:30  Cprogrammer
- * load MySQL functions dynamically at run time
- *
- * Revision 1.57  2018-05-30 12:32:32+05:30  Cprogrammer
- * flagssl should not be used when TLS is not defined
- *
- * Revision 1.56  2018-05-30 12:30:33+05:30  Cprogrammer
- * replaced gethostbyname() with getaddrinfo()
- *
- * Revision 1.55  2017-04-05 04:08:39+05:30  Cprogrammer
- * execute tcpserver_plugin() after shedding root privilege
- *
- * Revision 1.54  2017-04-05 03:06:32+05:30  Cprogrammer
- * changed data type for uid, gid to uid_t, gid_t
- *
- * Revision 1.53  2016-06-21 13:33:06+05:30  Cprogrammer
- * use SSL_set_cipher_list as part of crypto-policy-compliance
- *
- * Revision 1.52  2016-05-16 21:21:09+05:30  Cprogrammer
- * call tcpserver_plugin with reload option on sighup
- *
- * Revision 1.51  2016-05-15 22:42:48+05:30  Cprogrammer
- * added tcpserver plugin
- *
- * Revision 1.50  2013-08-06 07:57:11+05:30  Cprogrammer
- * added socket_ip6optionskill for IPV6 socket
- *
- * Revision 1.49  2012-09-08 16:35:11+05:30  Cprogrammer
- * BUG - wrong variable used for ip address causing fnrules to fail in ip address matching
- *
- * Revision 1.48  2012-04-23 18:49:42+05:30  Cprogrammer
- * use ipv4 addresses if fakev4 detected for if -4 option is passed
- *
- * Revision 1.47  2012-04-19 21:11:31+05:30  Cprogrammer
- * undefine MYSQL_CONFIG for IPV6
- *
- * Revision 1.46  2010-04-16 13:13:13+05:30  Cprogrammer
- * fixed passing parameter for MYSQL_OPT_CONNECT_TIMEOUT
- *
- * Revision 1.45  2010-03-12 08:59:54+05:30  Cprogrammer
- * print connected IPs table on sigusr1
- *
- * Revision 1.44  2010-03-11 13:37:59+05:30  Cprogrammer
- * log maxperip
- *
- * Revision 1.43  2010-03-11 12:47:47+05:30  Cprogrammer
- * initialized maxperio with PerHostLimit
- *
- * Revision 1.42  2009-08-12 09:37:16+05:30  Cprogrammer
- * corrected display of usage
- *
- * Revision 1.41  2009-05-31 09:35:08+05:30  Cprogrammer
- * use CONTROL dir for certificats
- * added -s option for default certificate
- *
- * Revision 1.40  2009-05-29 15:54:48+05:30  Cprogrammer
- * unset env variables with - rule
- * set SSL_CIPHER
- * use ssl if -n option is provided
- *
- * Revision 1.39  2009-05-26 12:23:31+05:30  Cprogrammer
- * added setting of environment variable TCPPARANOID
- *
- * Revision 1.38  2009-05-05 14:58:10+05:30  Cprogrammer
- * close mysql connections
- *
- * Revision 1.37  2008-07-30 12:12:31+05:30  Cprogrammer
- * configure mysql automatically
- *
- * Revision 1.36  2008-07-29 23:01:48+05:30  Cprogrammer
- * mysql code made compile time configurable
- *
- * Revision 1.35  2008-07-25 16:50:23+05:30  Cprogrammer
- * fix for darwin
- *
- * Revision 1.34  2008-07-17 23:05:12+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.33  2008-06-30 16:11:14+05:30  Cprogrammer
- * removed license code
- *
- * Revision 1.32  2008-06-30 09:39:45+05:30  Cprogrammer
- * removed compilation warning
- *
- * Revision 1.31  2008-06-12 14:31:04+05:30  Cprogrammer
- * added mysql patch by Levent Serinol.
- *
- * Revision 1.30  2007-06-10 10:18:03+05:30  Cprogrammer
- * fixed ipv6 issue
- * added compile time license option
- *
- * Revision 1.29  2005-06-11 02:11:35+05:30  Cprogrammer
- * added IPV6 and SSL support
- *
- * Revision 1.28  2004-10-12 00:31:47+05:30  Cprogrammer
- * renamed remoteinfo.h to tcpremoteinfo.h
- *
- * Revision 1.27  2004-09-30 23:23:26+05:30  Cprogrammer
- * BUG - Fixed segmentation fault when concurrency was increased and sighup
- * was given
- *
- * Revision 1.26  2004-09-29 10:56:28+05:30  Cprogrammer
- * made maxperip code to work
- *
- * Revision 1.25  2004-09-24 10:05:03+05:30  Cprogrammer
- * added configurable max per ip limit
- *
- * Revision 1.24  2004-05-12 09:00:49+05:30  Cprogrammer
- * change in checklicense()
- * corrected compilation warning for fedora core
- *
- * Revision 1.23  2003-12-31 20:06:13+05:30  Cprogrammer
- * print receipt of sighup on stderr
- *
- * Revision 1.22  2003-12-30 00:33:45+05:30  Cprogrammer
- * made concurrency configurable.
- *
- * Revision 1.21  2003-12-25 23:45:33+05:30  Cprogrammer
- * BUG - wrongly used remoteip instead of remoteipstr
- * print IPs only if verbosity >= 2
- *
- * Revision 1.20  2003-10-17 21:08:31+05:30  Cprogrammer
- * added tcpserver: tag in print_ip()
- *
- * Revision 1.19  2003-10-11 09:17:17+05:30  Cprogrammer
- * print per host concurrency in log
- *
- * Revision 1.18  2003-09-23 15:50:15+05:30  Cprogrammer
- * added license code
- * numchildren did not get decremented when PerHostLimit was reached
- *
- * Revision 1.17  2002-08-19 19:58:02+05:30  Cprogrammer
- * removed mysql code
- *
- * Revision 1.16  2002-08-18 13:56:06+05:30  Cprogrammer
- * shifted snprintf for better efficiency
- *
- * Revision 1.15  2002-04-10 10:47:50+05:30  Cprogrammer
- * fifo path was wrong
- *
- * Revision 1.14  2002-04-09 13:53:31+05:30  Cprogrammer
- * *** empty log message ***
- *
- * Revision 1.13  2002-04-08 04:46:45+05:30  Cprogrammer
- * *** empty log message ***
- *
+ * $Id: tcpserver.c,v 1.77 2022-12-22 22:19:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -213,7 +9,10 @@
 #include <sys/ipc.h>
 #ifdef TLS
 #include <openssl/ssl.h>
+#include <sys/stat.h>
 #include "tls.h"
+#include <ctype.h>
+#include <openreadclose.h>
 #endif
 #include <str.h>
 #include <byte.h>
@@ -262,7 +61,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.77 2022-12-13 20:23:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.77 2022-12-22 22:19:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -286,6 +85,7 @@ static my_ulong backlog = 20;
 #ifdef TLS
 static int      flagssl;
 struct stralloc certfile;
+struct stralloc saciphers;
 #endif
 
 static stralloc tcpremoteinfo;
@@ -1111,6 +911,7 @@ usage(void)
 #ifdef TLS
 		 "[ -s ]\n"
 		 "[ -n certfile ]\n"
+		 "[ -f cipherlist ]\n"
 		 "[ -a cafile ] \n"
 #endif
 #ifdef IPV6
@@ -1378,8 +1179,9 @@ main(int argc, char **argv, char **envp)
 #ifdef TLS
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
-	char           *certsdir, *ciphers = NULL, *cafile = NULL;
+	char           *certsdir, *ciphers = NULL, *cafile = NULL, *cipherfile = NULL;
 	int             pi2c[2], pi4c[2];
+	struct stat     st;
 #endif
 	struct stralloc options = {0};
 
@@ -1394,7 +1196,7 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "sn:a:"))
+	if (!stralloc_cats(&options, "sn:a:f:"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -1526,6 +1328,9 @@ main(int argc, char **argv, char **envp)
 		case 'a':
 			cafile = optarg;
 			break;
+		case 'f':
+			cipherfile = optarg;
+			break;
 #endif
 #ifdef IPV6
 		case '4':
@@ -1604,6 +1409,23 @@ main(int argc, char **argv, char **envp)
 #ifdef TLS
 	if (flagssl == 1) {
     	/* setup SSL context (load key and cert into ctx) */
+		if (cipherfile) {
+			if (lstat(cipherfile, &st) == -1)
+				strerr_die4sys(111, FATAL, "lstat: ", cipherfile, ": ");
+			if (openreadclose(cipherfile, &saciphers, st.st_size) == -1)
+				strerr_die3sys(111, FATAL, cipherfile, ": ");
+			if (saciphers.s[saciphers.len - 1] == '\n')
+				saciphers.s[saciphers.len - 1] = 0;
+			else
+			if (!stralloc_0(&saciphers))
+				strerr_die2x(111, FATAL, "out of memory");
+			for (ciphers = saciphers.s; *ciphers; ciphers++)
+				if (isspace(*ciphers)) {
+					*ciphers = 0;
+					break;
+				}
+			ciphers = saciphers.s;
+		} else
 		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 			ciphers = "PROFILE=SYSTEM";
 		if (!(ctx = tls_init(certfile.s, cafile, ciphers, server)))
@@ -1829,3 +1651,211 @@ getversion_tcpserver_c()
 	if (write(1, sccsid, 0) == -1)
 		;
 }
+
+/*
+ * $Log: tcpserver.c,v $
+ * Revision 1.77  2022-12-22 22:19:31+05:30  Cprogrammer
+ * added -f option to load tls ciphers from a file
+ *
+ * Revision 1.76  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.75  2021-06-15 08:24:25+05:30  Cprogrammer
+ * renamed pathexec.. functions to upathexec to avoid clash with libqmail
+ *
+ * Revision 1.74  2021-03-12 14:05:48+05:30  Cprogrammer
+ * use typedef my_ulong instead of ulong
+ *
+ * Revision 1.73  2021-03-12 13:55:08+05:30  Cprogrammer
+ * use MYSQL_CONFIG for conditional compilation of mysql code
+ *
+ * Revision 1.72  2021-03-09 08:30:40+05:30  Cprogrammer
+ * change in translate() function.
+ *
+ * Revision 1.71  2021-03-07 08:30:07+05:30  Cprogrammer
+ * use common tls functions from tls.c
+ * added idle timeout parameter
+ *
+ * Revision 1.70  2020-11-27 17:34:22+05:30  Cprogrammer
+ * added option to specify CA file
+ *
+ * Revision 1.69  2020-11-11 19:50:11+05:30  Cprogrammer
+ * changed scope of global veriables limited to tcpserver.c
+ *
+ * Revision 1.68  2020-09-20 10:55:06+05:30  Cprogrammer
+ * open ipv4 and ipv6 sockets on FreeBSD
+ *
+ * Revision 1.67  2020-09-19 17:35:36+05:30  Cprogrammer
+ * treat IPV6 :: same as 0
+ *
+ * Revision 1.66  2020-09-16 20:50:32+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.65  2020-08-03 17:28:15+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.64  2020-07-04 22:03:00+05:30  Cprogrammer
+ * fixed global variables overshadowd by local variables
+ *
+ * Revision 1.63  2020-06-08 22:48:45+05:30  Cprogrammer
+ * quench compiler warning
+ *
+ * Revision 1.62  2019-07-10 13:42:39+05:30  Cprogrammer
+ * fixed wrong child exit status in logs
+ *
+ * Revision 1.61  2019-06-07 19:20:54+05:30  Cprogrammer
+ * print MySQL load status
+ *
+ * Revision 1.60  2019-05-26 12:04:50+05:30  Cprogrammer
+ * use /etc/indimail/control as controldir
+ *
+ * Revision 1.59  2019-04-22 21:57:59+05:30  Cprogrammer
+ * use mysql only if use_sql is non-zero
+ *
+ * Revision 1.58  2019-04-21 10:25:07+05:30  Cprogrammer
+ * load MySQL functions dynamically at run time
+ *
+ * Revision 1.57  2018-05-30 12:32:32+05:30  Cprogrammer
+ * flagssl should not be used when TLS is not defined
+ *
+ * Revision 1.56  2018-05-30 12:30:33+05:30  Cprogrammer
+ * replaced gethostbyname() with getaddrinfo()
+ *
+ * Revision 1.55  2017-04-05 04:08:39+05:30  Cprogrammer
+ * execute tcpserver_plugin() after shedding root privilege
+ *
+ * Revision 1.54  2017-04-05 03:06:32+05:30  Cprogrammer
+ * changed data type for uid, gid to uid_t, gid_t
+ *
+ * Revision 1.53  2016-06-21 13:33:06+05:30  Cprogrammer
+ * use SSL_set_cipher_list as part of crypto-policy-compliance
+ *
+ * Revision 1.52  2016-05-16 21:21:09+05:30  Cprogrammer
+ * call tcpserver_plugin with reload option on sighup
+ *
+ * Revision 1.51  2016-05-15 22:42:48+05:30  Cprogrammer
+ * added tcpserver plugin
+ *
+ * Revision 1.50  2013-08-06 07:57:11+05:30  Cprogrammer
+ * added socket_ip6optionskill for IPV6 socket
+ *
+ * Revision 1.49  2012-09-08 16:35:11+05:30  Cprogrammer
+ * BUG - wrong variable used for ip address causing fnrules to fail in ip address matching
+ *
+ * Revision 1.48  2012-04-23 18:49:42+05:30  Cprogrammer
+ * use ipv4 addresses if fakev4 detected for if -4 option is passed
+ *
+ * Revision 1.47  2012-04-19 21:11:31+05:30  Cprogrammer
+ * undefine MYSQL_CONFIG for IPV6
+ *
+ * Revision 1.46  2010-04-16 13:13:13+05:30  Cprogrammer
+ * fixed passing parameter for MYSQL_OPT_CONNECT_TIMEOUT
+ *
+ * Revision 1.45  2010-03-12 08:59:54+05:30  Cprogrammer
+ * print connected IPs table on sigusr1
+ *
+ * Revision 1.44  2010-03-11 13:37:59+05:30  Cprogrammer
+ * log maxperip
+ *
+ * Revision 1.43  2010-03-11 12:47:47+05:30  Cprogrammer
+ * initialized maxperio with PerHostLimit
+ *
+ * Revision 1.42  2009-08-12 09:37:16+05:30  Cprogrammer
+ * corrected display of usage
+ *
+ * Revision 1.41  2009-05-31 09:35:08+05:30  Cprogrammer
+ * use CONTROL dir for certificats
+ * added -s option for default certificate
+ *
+ * Revision 1.40  2009-05-29 15:54:48+05:30  Cprogrammer
+ * unset env variables with - rule
+ * set SSL_CIPHER
+ * use ssl if -n option is provided
+ *
+ * Revision 1.39  2009-05-26 12:23:31+05:30  Cprogrammer
+ * added setting of environment variable TCPPARANOID
+ *
+ * Revision 1.38  2009-05-05 14:58:10+05:30  Cprogrammer
+ * close mysql connections
+ *
+ * Revision 1.37  2008-07-30 12:12:31+05:30  Cprogrammer
+ * configure mysql automatically
+ *
+ * Revision 1.36  2008-07-29 23:01:48+05:30  Cprogrammer
+ * mysql code made compile time configurable
+ *
+ * Revision 1.35  2008-07-25 16:50:23+05:30  Cprogrammer
+ * fix for darwin
+ *
+ * Revision 1.34  2008-07-17 23:05:12+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.33  2008-06-30 16:11:14+05:30  Cprogrammer
+ * removed license code
+ *
+ * Revision 1.32  2008-06-30 09:39:45+05:30  Cprogrammer
+ * removed compilation warning
+ *
+ * Revision 1.31  2008-06-12 14:31:04+05:30  Cprogrammer
+ * added mysql patch by Levent Serinol.
+ *
+ * Revision 1.30  2007-06-10 10:18:03+05:30  Cprogrammer
+ * fixed ipv6 issue
+ * added compile time license option
+ *
+ * Revision 1.29  2005-06-11 02:11:35+05:30  Cprogrammer
+ * added IPV6 and SSL support
+ *
+ * Revision 1.28  2004-10-12 00:31:47+05:30  Cprogrammer
+ * renamed remoteinfo.h to tcpremoteinfo.h
+ *
+ * Revision 1.27  2004-09-30 23:23:26+05:30  Cprogrammer
+ * BUG - Fixed segmentation fault when concurrency was increased and sighup
+ * was given
+ *
+ * Revision 1.26  2004-09-29 10:56:28+05:30  Cprogrammer
+ * made maxperip code to work
+ *
+ * Revision 1.25  2004-09-24 10:05:03+05:30  Cprogrammer
+ * added configurable max per ip limit
+ *
+ * Revision 1.24  2004-05-12 09:00:49+05:30  Cprogrammer
+ * change in checklicense()
+ * corrected compilation warning for fedora core
+ *
+ * Revision 1.23  2003-12-31 20:06:13+05:30  Cprogrammer
+ * print receipt of sighup on stderr
+ *
+ * Revision 1.22  2003-12-30 00:33:45+05:30  Cprogrammer
+ * made concurrency configurable.
+ *
+ * Revision 1.21  2003-12-25 23:45:33+05:30  Cprogrammer
+ * BUG - wrongly used remoteip instead of remoteipstr
+ * print IPs only if verbosity >= 2
+ *
+ * Revision 1.20  2003-10-17 21:08:31+05:30  Cprogrammer
+ * added tcpserver: tag in print_ip()
+ *
+ * Revision 1.19  2003-10-11 09:17:17+05:30  Cprogrammer
+ * print per host concurrency in log
+ *
+ * Revision 1.18  2003-09-23 15:50:15+05:30  Cprogrammer
+ * added license code
+ * numchildren did not get decremented when PerHostLimit was reached
+ *
+ * Revision 1.17  2002-08-19 19:58:02+05:30  Cprogrammer
+ * removed mysql code
+ *
+ * Revision 1.16  2002-08-18 13:56:06+05:30  Cprogrammer
+ * shifted snprintf for better efficiency
+ *
+ * Revision 1.15  2002-04-10 10:47:50+05:30  Cprogrammer
+ * fifo path was wrong
+ *
+ * Revision 1.14  2002-04-09 13:53:31+05:30  Cprogrammer
+ * *** empty log message ***
+ *
+ * Revision 1.13  2002-04-08 04:46:45+05:30  Cprogrammer
+ * *** empty log message ***
+ *
+ */

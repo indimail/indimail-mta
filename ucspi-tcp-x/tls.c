@@ -1,5 +1,8 @@
 /*
  * $Log: tls.c,v $
+ * Revision 1.13  2022-12-22 22:19:36+05:30  Cprogrammer
+ * log ssl error on SSL_accept() failure
+ *
  * Revision 1.12  2022-07-01 18:54:12+05:30  Cprogrammer
  * set socket in no delay mode
  *
@@ -62,7 +65,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.12 2022-07-01 18:54:12+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.13 2022-12-22 22:19:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -286,15 +289,19 @@ tls_connect(SSL *myssl, char *host)
 int
 tls_accept(SSL *myssl)
 {
-	if (SSL_accept(myssl) <= 0) {
-		sslerr_str = (char *) myssl_error_str();
-		strerr_warn2("SSL_accept: unable to accept SSL connection: ", sslerr_str, 0);
-		SSL_shutdown(myssl);
-		SSL_free(myssl);
-		return -1;
+	int             i;
+	
+	i = SSL_accept(myssl);
+	SSL_get_error(myssl, i);
+	if (i == 1) {
+		usessl = server;
+		return 0;
 	}
-	usessl = server;
-	return 0;
+	sslerr_str = (char *) myssl_error();
+	strerr_warn2("SSL_accept: unable to accept SSL connection: ", sslerr_str, 0);
+	SSL_shutdown(myssl);
+	SSL_free(myssl);
+	return i == 0 ? 1 : i;
 }
 
 ssize_t

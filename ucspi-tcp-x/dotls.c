@@ -1,45 +1,16 @@
 /*
- * $Log: dotls.c,v $
- * Revision 1.9  2022-07-01 09:15:37+05:30  Cprogrammer
- * use TLS_CERTFILE env variable to set client certificate filename
- *
- * Revision 1.8  2022-06-05 07:48:17+05:30  Cprogrammer
- * BUG \r not copied, extra \0 copied. Thanks Stefan Berger
- * Report line too long error instead of clubbing it with 'out of mem' error
- * Return error for pop3 substdio failure
- * fix DATA/RETR commands not getting passed to child
- * handle eof from network gracefully
- *
- * Revision 1.7  2021-08-30 12:47:59+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.6  2021-05-12 21:01:23+05:30  Cprogrammer
- * replace pathexec() with upathexec()
- *
- * Revision 1.5  2021-03-09 08:15:56+05:30  Cprogrammer
- * removed unnecessary initializations and type casts
- *
- * Revision 1.4  2021-03-09 00:55:32+05:30  Cprogrammer
- * SSL argument to translate replaced with fd
- *
- * Revision 1.3  2021-03-07 21:37:12+05:30  Cprogrammer
- * fixed usage
- *
- * Revision 1.2  2021-03-07 18:11:04+05:30  Cprogrammer
- * added opportunistic TLS for pop3
- *
- * Revision 1.1  2021-03-07 08:13:57+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: dotls.c,v 1.10 2022-12-22 22:18:56+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
+#include <ctype.h>
 #ifdef DARWIN
 #define opteof -1
 #else
 #include <sgetopt.h>
 #endif
 #include <openssl/ssl.h>
+#include <sys/stat.h>
 #include <stralloc.h>
 #include <scan.h>
 #include <fmt.h>
@@ -56,6 +27,7 @@
 #include <getln.h>
 #include <timeoutwrite.h>
 #include <noreturn.h>
+#include <openreadclose.h>
 #include "upathexec.h"
 #include "tls.h"
 
@@ -63,7 +35,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.9 2022-07-01 09:15:37+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.10 2022-12-22 22:18:56+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -89,7 +61,10 @@ static stralloc certfile;
 static stralloc capatext;
 static stralloc sauninit;
 static stralloc line;
+static stralloc saciphers;
+static stralloc ssl_server_version, ssl_client_version;
 static char     strnum[FMT_ULONG];
+static char    *remoteip, *remoteip4;
 static int      linemode = 1;
 
 no_return void
@@ -100,6 +75,7 @@ usage(void)
 		 " [ -h host ]\n"
 		 " [ -t timeoutdata ]\n"
 		 " [ -n clientcert ]\n"
+		 " [ -f cipherlist ]\n"
 		 " [ -c cafile ] \n"
 		 " [ -s starttlsType (smtp|pop3) ]\n"
 		 " program");
@@ -203,6 +179,12 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 		}
 		if (tls_accept(ssl))
 			strerr_die2x(111, FATAL, "unable to accept SSL connection");
+		if (!stralloc_copys(&ssl_client_version, SSL_get_version(ssl)) ||
+					!stralloc_0(&ssl_client_version))
+			strerr_die2x(111, FATAL, "out of memory");
+		strnum[fmt_ulong(strnum, getpid())] = 0;
+		strerr_warn8("dotls: pid ", strnum, " from ", remoteip, " TLS Server Version=",
+				ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
 		i = translate(0, clearout, clearin, dtimeout); /*- returns only when one side closes */
 		ssl_free();
 		_exit(i);
@@ -214,13 +196,13 @@ void
 get1(char *ch)
 {
 	substdio_get(&smtpin, ch, 1);
-	if (*ch == '\r')
-		return;
 	if (capatext.len >= HUGECAPATEXT)
 		strerr_die2x(111, FATAL, "line too long");
 	else
 	if (!stralloc_append(&capatext, ch))
 		strerr_die2x(111, FATAL, "out of memory");
+	if (*ch == '\r')
+		return;
 }
 
 unsigned long
@@ -635,18 +617,23 @@ main(int argc, char **argv)
 {
 	int             opt, pi1[2], pi2[2], client_mode = 0, tcpclient = 0;
 	pid_t           pid;
-	char           *certsdir, *cafile = NULL, *host = NULL, *ciphers = NULL, *ptr;
+	char           *certsdir, *cafile = NULL, *host = NULL, *ciphers = NULL,
+				   *ptr, *cipherfile = NULL;
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
 	enum starttls   stls = unknown;
 	unsigned long   u;
+	struct stat     st;
 
 	sig_ignore(sig_pipe);
 
-	while ((opt = getopt(argc, argv, "CTs:h:t:n:c:")) != opteof) {
+	while ((opt = getopt(argc, argv, "CTs:h:t:n:c:f:")) != opteof) {
 		switch (opt) {
 		case 'h':
 			host = optarg;
+			break;
+		case 'f':
+			cipherfile = optarg;
 			break;
 		case 'T':
 			tcpclient = 1;
@@ -683,6 +670,10 @@ main(int argc, char **argv)
 	argv += optind;
 	if (!*argv)
 		usage();
+	if (!(remoteip4 = env_get("TCPREMOTEIP")))
+		remoteip4 = "unknown";
+	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = remoteip4))
+		remoteip = "unknown";
 	if (!certfile.len) {
 		if (!(ptr = env_get("TLS_CERTFILE")))
 			ptr = "clientcert.pem";
@@ -704,6 +695,23 @@ main(int argc, char **argv)
 	 */
 	if (pipe(pi1) != 0 || pipe(pi2) != 0)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
+	if (cipherfile) {
+		if (lstat(cipherfile, &st) == -1)
+			strerr_die4sys(111, FATAL, "lstat: ", cipherfile, ": ");
+		if (openreadclose(cipherfile, &saciphers, st.st_size) == -1)
+			strerr_die3sys(111, FATAL, cipherfile, ": ");
+		if (saciphers.s[saciphers.len - 1] == '\n')
+			saciphers.s[saciphers.len - 1] = 0;
+		else
+		if (!stralloc_0(&saciphers))
+			strerr_die2x(111, FATAL, "out of memory");
+		for (ptr = saciphers.s; *ptr; ptr++)
+			if (isspace(*ptr)) {
+				*ptr = 0;
+				break;
+			}
+		ciphers = saciphers.s;
+	} else
 	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 		ciphers = "PROFILE=SYSTEM";
     /*- setup SSL context (load key and cert into ctx) */
@@ -737,9 +745,19 @@ main(int argc, char **argv)
 		strerr_die2x(111, FATAL, "unable to setup SSL session");
 	SSL_CTX_free(ctx);
 	ctx = NULL;
-	if (client_mode && tls_connect(ssl, host) == -1)
-		_exit(111);
-	else { /*- server mode */
+	if (!stralloc_copys(&ssl_server_version, SSL_get_version(ssl)) ||
+				!stralloc_0(&ssl_server_version))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (client_mode) {
+		if (tls_connect(ssl, host) == -1)
+			_exit(111);
+		if (!stralloc_copys(&ssl_client_version, SSL_get_version(ssl)) ||
+					!stralloc_0(&ssl_client_version))
+			strerr_die2x(111, FATAL, "out of memory");
+		strnum[fmt_ulong(strnum, getpid())] = 0;
+		strerr_warn8("dotls: pid ", strnum, " from ", remoteip, " TLS Server Version=",
+				ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
+	} else { /*- server mode */
 		switch (stls)
 		{
 		case smtp:
@@ -749,6 +767,12 @@ main(int argc, char **argv)
 		default:
 			if (tls_accept(ssl))
 				strerr_die2x(111, FATAL, "unable to accept SSL connection");
+			if (!stralloc_copys(&ssl_client_version, SSL_get_version(ssl)) ||
+						!stralloc_0(&ssl_client_version))
+				strerr_die2x(111, FATAL, "out of memory");
+			strnum[fmt_ulong(strnum, getpid())] = 0;
+			strerr_warn8("dotls: pid ", strnum, " from ", remoteip, " TLS Server Version=",
+					ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
 			translate(0, pi1[1], pi2[0], dtimeout);
 			SSL_free(ssl);
 			break;
@@ -782,3 +806,42 @@ main(int argc, char **argv)
 	_exit(111);
 }
 #endif
+
+/*
+ * $Log: dotls.c,v $
+ * Revision 1.10  2022-12-22 22:18:56+05:30  Cprogrammer
+ * added -f option to load tls ciphers from a file
+ * log client, server tls version on connect
+ *
+ * Revision 1.9  2022-07-01 09:15:37+05:30  Cprogrammer
+ * use TLS_CERTFILE env variable to set client certificate filename
+ *
+ * Revision 1.8  2022-06-05 07:48:17+05:30  Cprogrammer
+ * BUG \r not copied, extra \0 copied. Thanks Stefan Berger
+ * Report line too long error instead of clubbing it with 'out of mem' error
+ * Return error for pop3 substdio failure
+ * fix DATA/RETR commands not getting passed to child
+ * handle eof from network gracefully
+ *
+ * Revision 1.7  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.6  2021-05-12 21:01:23+05:30  Cprogrammer
+ * replace pathexec() with upathexec()
+ *
+ * Revision 1.5  2021-03-09 08:15:56+05:30  Cprogrammer
+ * removed unnecessary initializations and type casts
+ *
+ * Revision 1.4  2021-03-09 00:55:32+05:30  Cprogrammer
+ * SSL argument to translate replaced with fd
+ *
+ * Revision 1.3  2021-03-07 21:37:12+05:30  Cprogrammer
+ * fixed usage
+ *
+ * Revision 1.2  2021-03-07 18:11:04+05:30  Cprogrammer
+ * added opportunistic TLS for pop3
+ *
+ * Revision 1.1  2021-03-07 08:13:57+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

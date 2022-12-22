@@ -4,7 +4,7 @@
 dotls \- Generic TLS/SSL protocol wrapper for non-TLS programs
 .SH SYNOPSIS
 
-\fBdotls\fR [-ntCT ] [-s smtp|pop3] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
+\fBdotls\fR [-nftCT ] [-s smtp|pop3] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
 
 .SH "DESCRIPTION"
 .PP
@@ -48,6 +48,12 @@ environment variable TLS_CERTFILE. If this is not provided, the file
 @qsysconfdir@/certs/clientcert.pem will be used.
 
 .TP
+-\fBf\fR \fIcipher_list\fR
+Use ciphers listed in \fIcipher_list\fR. Without this \fBdotls\fR uses
+TLS_CIPHER_LIST environment variable if set or system configured
+PROFILE=SYSTEM ciphers.
+
+.TP
 -\fBt\fR \fItimeout\fR
 Timeout after \fItimeout\fR seconds if no data is received
 
@@ -81,13 +87,13 @@ Default is @qsysconfdir@/certs.
 
 .TP
 .B TLS_CERTFILE
-client ssl certificate.
+client ssl certificate. This can be overriden by the -n option.
 Default is clientcert.pem
 
 .TP
 \fBTLS_CIPHER_LIST=\fIcipherList\fB\fR
-A set of OpenSSL cipher strings. Multiple ciphers contained in a
-string should be separated by a colon.
+A set of OpenSSL cipher strings. Multiple ciphers contained in a string
+should be separated by a colon. This can be overriden by the -f option.
 
 .SH EXAMPLES
 .EX

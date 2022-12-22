@@ -269,6 +269,12 @@ environment variable.
 Use \fIcertfile\fR as the default certificate instead of servercert.pem.
 
 .TP
+-\fBf\fR \fIcipher_list\fR
+Use ciphers listed in \fIcipher_list\fR. Without this \fBdotls\fR uses
+TLS_CIPHER_LIST environment variable if set or system configured
+PROFILE=SYSTEM ciphers.
+
+.TP
 .B \-a \fIcafile
 Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
 special CA certificates are needed if an intermediate certificate used
