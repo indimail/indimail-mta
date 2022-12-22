@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.277 2022-11-14 11:19:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.278 2022-12-22 22:23:04+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -145,7 +145,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.277 $";
+char           *revision = "$Revision: 1.278 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -589,6 +589,10 @@ die_read(char *str, char *err)
 no_return void
 die_alarm()
 {
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerrf(" timeout reached reading data from client\n");
 	out("451 Requested action aborted: timeout (#4.4.2)\r\n");
 	flush();
 	_exit(1);
@@ -597,6 +601,10 @@ die_alarm()
 no_return void
 die_regex()
 {
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerrf(" regex compilation failed\n");
 	out("451 Requested action aborted: regex compilation failed (#4.3.0)\r\n");
 	flush();
 	_exit(1);
@@ -739,6 +747,10 @@ err_addressmatch(char *errstr, char *fn)
 no_return void
 straynewline()
 {
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerrf(" Bare LF received\n");
 	out("451 Requested action aborted: Bare LF received. (#4.6.0)\r\n");
 	flush();
 	_exit(1);
@@ -7540,6 +7552,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.278  2022-12-22 22:23:04+05:30  Cprogrammer
+ * log timeouts, regex compilation error, Bare LF errors in error log
+ *
  * Revision 1.277  2022-11-14 11:19:43+05:30  Cprogrammer
  * set DISABLE_EXTRA_GREET environment variable to disable extra information in greeting
  *
@@ -7818,7 +7833,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.277 2022-11-14 11:19:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.278 2022-12-22 22:23:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
