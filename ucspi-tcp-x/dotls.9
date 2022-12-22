@@ -27,6 +27,10 @@ opportunistic TLS for qmail-smtpd, qmail-pop3d. This is known as
 enabled server. This is known is \fBclient mode\fR. This gets enabled
 when you use \fB\-T\fR or the \fB\-C\fR options.
 
+\fBdotls\fR will directly execute \fIprog\fR if \fBNOTLS\fR environment
+variable is set. This can be set using the \fBtcpserver\fR(1) rules file to
+bypass SSL/TLS for hosts that don't work if STARTLS or TLS is enabled.
+
 \fBdotls\fR is not needed by indimail-mta, as all features offered by
 \fBdotls\fR are built-in tcpserver(1) and tcpclient(1), provided by
 ucspi-tcp package from indimail-mta git repo at,

@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.10 2022-12-22 22:18:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.11 2022-12-23 00:21:21+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -35,7 +35,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.10 2022-12-22 22:18:56+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.11 2022-12-23 00:21:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -670,6 +670,10 @@ main(int argc, char **argv)
 	argv += optind;
 	if (!*argv)
 		usage();
+	if (!client_mode && env_get("NOTLS")) {
+		upathexec(argv);
+		strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
+	}
 	if (!(remoteip4 = env_get("TCPREMOTEIP")))
 		remoteip4 = "unknown";
 	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = remoteip4))
@@ -809,6 +813,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.11  2022-12-23 00:21:21+05:30  Cprogrammer
+ * bypass SSL/TLS if NOTLS is set
+ *
  * Revision 1.10  2022-12-22 22:18:56+05:30  Cprogrammer
  * added -f option to load tls ciphers from a file
  * log client, server tls version on connect
