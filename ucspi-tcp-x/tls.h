@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.8  2022-12-23 10:37:05+05:30  Cprogrammer
+ * tls_init() prototype change
+ *
  * Revision 1.7  2021-03-10 18:16:57+05:30  Cprogrammer
  * added proto for set_essential_fd()
  *
@@ -37,7 +40,7 @@ ssize_t         saferead(int, char *, size_t, long);
 ssize_t         safewrite(int, char *, size_t, long);
 ssize_t         allwrite(int, char *, size_t);
 #ifdef TLS
-SSL_CTX        *tls_init(char *, char *, char *, enum tlsmode);
+SSL_CTX        *tls_init(char *, char *, char *, char *, enum tlsmode);
 SSL            *tls_session(SSL_CTX *, int, char *);
 int             tls_connect(SSL *, char *);
 int             tls_accept(SSL *);

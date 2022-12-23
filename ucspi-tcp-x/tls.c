@@ -1,45 +1,5 @@
 /*
- * $Log: tls.c,v $
- * Revision 1.13  2022-12-22 22:19:36+05:30  Cprogrammer
- * log ssl error on SSL_accept() failure
- *
- * Revision 1.12  2022-07-01 18:54:12+05:30  Cprogrammer
- * set socket in no delay mode
- *
- * Revision 1.11  2022-05-18 00:48:43+05:30  Cprogrammer
- * replaced deprecated function SSL_CTX_use_RSAPrivateKey_file with SSL_CTX_use_PrivateKey_file
- *
- * Revision 1.10  2021-03-10 18:24:06+05:30  Cprogrammer
- * use set_essential_fd() to avoid deadlock
- *
- * Revision 1.9  2021-03-09 21:35:57+05:30  Cprogrammer
- * return ETIMEDOUT on timeout
- *
- * Revision 1.8  2021-03-09 09:38:08+05:30  Cprogrammer
- * make translate() function generic by using fd instead of SSL structure
- * fix ssl_timeoutio() for non-blocking io to fix SSL_reads() getting blocked
- *
- * Revision 1.7  2021-03-08 20:02:32+05:30  Cprogrammer
- * include taia.h explicitly
- *
- * Revision 1.6  2021-03-08 15:47:17+05:30  Cprogrammer
- * use TLS_client_method(), TLS_server_method() functions
- *
- * Revision 1.5  2021-03-06 23:14:33+05:30  Cprogrammer
- * added server functions
- * added translate() function for ssl io
- *
- * Revision 1.4  2021-03-04 22:58:55+05:30  Cprogrammer
- * generic tls.c for connect, accept
- *
- * Revision 1.3  2021-03-04 11:45:18+05:30  Cprogrammer
- * match host with common name
- *
- * Revision 1.2  2021-03-04 00:28:07+05:30  Cprogrammer
- * fixed compilation for non tls
- *
- * Revision 1.1  2021-03-03 22:26:54+05:30  Cprogrammer
- * Initial revision
+ * $Id: tls.c,v 1.14 2022-12-23 10:36:25+05:30 Cprogrammer Exp mbhangui $
  *
  * ssl_timeoutio functions froms from Frederik Vermeulen's
  * tls patch for qmail
@@ -54,6 +14,7 @@
 #include <openssl/err.h>
 #include <case.h>
 #endif
+#include <str.h>
 #include <ndelay.h>
 #include <taia.h>
 #include <strerr.h>
@@ -65,7 +26,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.13 2022-12-22 22:19:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.14 2022-12-23 10:36:25+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -155,16 +116,90 @@ check_cert(SSL *myssl, char *host)
 }
 
 SSL_CTX        *
-tls_init(char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
+set_tls_method(char *ssl_option, enum tlsmode tmode)
 {
-	static SSL_CTX *ctx = (SSL_CTX *) NULL;
-
-	if (ctx)
-		return (ctx);
-	SSL_library_init();
+	SSL_CTX        *ctx;
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
-	ctx = SSL_CTX_new(tmode == client ? SSLv23_client_method() : SSLv23_server_method());
+	int             method = 4;	/*- (1 unused) 2 = SSLv23, 3=SSLv3, 4 = TLSv1, 5=TLSv1.1, 6=TLSv1.2 */
 #else
+	int             method = 0;	/*- (1,2 unused) 3=SSLv3, 4 = TLSv1, 5=TLSv1.1, 6=TLSv1.2, 7=TLSv1.3 */
+#endif
+
+	if (ssl_option) {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+		if (str_equal(ssl_option, "SSLv23"))
+			method = 2;
+		else
+		if (str_equal(ssl_option, "SSLv3"))
+			method = 3;
+		else
+#endif
+		if (str_equal(ssl_option, "TLSv1"))
+			method = 4;
+		else
+		if (str_equal(ssl_option, "TLSv1_1"))
+			method = 5;
+		else
+		if (str_equal(ssl_option, "TLSv1_2"))
+			method = 6;
+		else
+		if (str_equal(ssl_option, "TLSv1_3"))
+			method = 7;
+		else {
+			strerr_warn1("tls_init: Invalid TLS method configured", 0);
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+			strerr_warn1("tls_init: Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2", 0);
+#else
+			strerr_warn1("tls_init: Supported methods: TLSv1, TLSv1_1, TLSv1_2 TLSv1_3", 0);
+#endif
+			return ((SSL_CTX *) NULL);
+		}
+	}
+	SSL_library_init();
+	/*- a new SSL context with the bare minimum of options */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+	if (method == 2 && !(ctx = SSL_CTX_new(tmode == client ? SSLv23_client_method() : SSLv23_server_method()))) {
+		strerr_warn1("tls_init: TLS not available: unable to initialize SSLv23 ctx", 0);
+		return ((SSL_CTX *) NULL);
+	} else
+	if (method == 3 && !(ctx = SSL_CTX_new(tmode == client ? SSL3_client_method() : SSLv3_server_method()))) {
+		strerr_warn1("tls_init: TLS not available: unable to initialize SSLv3 ctx", 0);
+		return ((SSL_CTX *) NULL);
+	} else
+#if defined(TLSV1_SERVER_METHOD) || defined(TLS1_VERSION)
+	if (method == 4 && !(ctx = SSL_CTX_new(tmode == client ? TLSv1_client_method() : TLSv1_server_method()))) {
+		strerr_warn1("tls_init: TLS not available: unable to initialize TLSv1 ctx", 0);
+		return ((SSL_CTX *) NULL);
+	} else
+#else
+	if (method == 4) {
+		strerr_warn1("tls_init: TLS not available: TLSv1 method not available", 0);
+		return ((SSL_CTX *) NULL);
+	} else
+#endif
+#if defined(TLSV1_1_SERVER_METHOD) || defined(TLS1_1_VERSION)
+	if (method == 5 && !(ctx = SSL_CTX_new(tmode == client ? TLSv1_1_client_method() : TLSv1_1_server_method()))) {
+		strerr_warn1("tls_init: TLS not available: unable to initialize TLSv1_1 ctx", 0);
+		return ((SSL_CTX *) NULL);
+	} else
+#else
+	if (method == 5) {
+		strerr_warn1("tls_init: TLS not available: TLSv1_1_server_method not available", 0);
+		return ((SSL_CTX *) NULL);
+	} else
+#endif
+#if defined(TLSV1_2_SERVER_METHOD) || defined(TLS1_2_VERSION)
+	if (method == 6 && !(ctx = SSL_CTX_new(tmode == client ? TLSv1_2_client_method() : TLSv1_2_server_method()))) {
+		strerr_warn1("tls_init: TLS not available: unable to initialize TLSv1_2 ctx", 0);
+		return ((SSL_CTX *) NULL) ;
+	} else
+#else
+	if (method == 6) {
+		strerr_warn1("tls_init: TLS not available: TLSv1_2_server_method not available", 0);
+		return ((SSL_CTX *) NULL) ;
+	}
+#endif
+#else /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
 	switch (tmode)
 	{
 	case client:
@@ -177,7 +212,46 @@ tls_init(char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
 		ctx = SSL_CTX_new(TLS_method());
 		break;
 	}
-#endif
+	/*-
+	 * Currently supported versions are SSL3_VERSION, TLS1_VERSION, TLS1_1_VERSION,
+	 * TLS1_2_VERSION, TLS1_3_VERSION for TLS
+	 */
+	switch (method)
+	{
+	case 2:
+		strerr_warn1("tls_init: TLS not available: SSLv23_server_method not available", 0);
+		return ((SSL_CTX *) NULL) ;
+	case 3:
+		SSL_CTX_set_min_proto_version(ctx, SSL3_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, SSL3_VERSION);
+		break;
+	case 4:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_VERSION);
+		break;
+	case 5:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_1_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_1_VERSION);
+		break;
+	case 6:
+		SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);
+		SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
+		break;
+	}
+	/*- POODLE Vulnerability */
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
+#endif /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
+	return ctx;
+}
+
+SSL_CTX        *
+tls_init(char *tls_method, char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
+{
+	static SSL_CTX *ctx = (SSL_CTX *) NULL;
+
+	if (ctx)
+		return (ctx);
+	ctx = set_tls_method(tls_method, tmode);
 	if (!ctx) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_CTX_new: error initializing methhod: ", sslerr_str, 0);
@@ -547,3 +621,50 @@ getversion_tls_c()
 		;
 }
 #endif
+
+/*
+ * $Log: tls.c,v $
+ * Revision 1.14  2022-12-23 10:36:25+05:30  Cprogrammer
+ * added set_tls_method to set TLS / SSL client/server method
+ *
+ * Revision 1.13  2022-12-22 22:19:36+05:30  Cprogrammer
+ * log ssl error on SSL_accept() failure
+ *
+ * Revision 1.12  2022-07-01 18:54:12+05:30  Cprogrammer
+ * set socket in no delay mode
+ *
+ * Revision 1.11  2022-05-18 00:48:43+05:30  Cprogrammer
+ * replaced deprecated function SSL_CTX_use_RSAPrivateKey_file with SSL_CTX_use_PrivateKey_file
+ *
+ * Revision 1.10  2021-03-10 18:24:06+05:30  Cprogrammer
+ * use set_essential_fd() to avoid deadlock
+ *
+ * Revision 1.9  2021-03-09 21:35:57+05:30  Cprogrammer
+ * return ETIMEDOUT on timeout
+ *
+ * Revision 1.8  2021-03-09 09:38:08+05:30  Cprogrammer
+ * make translate() function generic by using fd instead of SSL structure
+ * fix ssl_timeoutio() for non-blocking io to fix SSL_reads() getting blocked
+ *
+ * Revision 1.7  2021-03-08 20:02:32+05:30  Cprogrammer
+ * include taia.h explicitly
+ *
+ * Revision 1.6  2021-03-08 15:47:17+05:30  Cprogrammer
+ * use TLS_client_method(), TLS_server_method() functions
+ *
+ * Revision 1.5  2021-03-06 23:14:33+05:30  Cprogrammer
+ * added server functions
+ * added translate() function for ssl io
+ *
+ * Revision 1.4  2021-03-04 22:58:55+05:30  Cprogrammer
+ * generic tls.c for connect, accept
+ *
+ * Revision 1.3  2021-03-04 11:45:18+05:30  Cprogrammer
+ * match host with common name
+ *
+ * Revision 1.2  2021-03-04 00:28:07+05:30  Cprogrammer
+ * fixed compilation for non tls
+ *
+ * Revision 1.1  2021-03-03 22:26:54+05:30  Cprogrammer
+ * Initial revision
+ */
