@@ -1,6 +1,7 @@
 /*
- * $Id: dotls.c,v 1.12 2022-12-23 10:35:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.13 2022-12-23 16:13:41+05:30 Cprogrammer Exp mbhangui $
  */
+#include <stdio.h>
 #ifdef TLS
 #include <unistd.h>
 #include <ctype.h>
@@ -35,7 +36,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.12 2022-12-23 10:35:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.13 2022-12-23 16:13:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -188,6 +189,7 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 				ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
 		i = translate(0, clearout, clearin, dtimeout); /*- returns only when one side closes */
 		ssl_free();
+		strerr_warn5("dotls: pid ", strnum, " from ", remoteip, " exiting...", 0);
 		_exit(i);
 	}
 	return 1;
@@ -616,7 +618,7 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 int
 main(int argc, char **argv)
 {
-	int             opt, pi1[2], pi2[2], client_mode = 0, tcpclient = 0;
+	int             i, opt, pi1[2], pi2[2], client_mode = 0, tcpclient = 0;
 	pid_t           pid;
 	char           *certsdir, *cafile = NULL, *host = NULL, *ciphers = NULL,
 				   *ptr, *cipherfile = NULL, *tls_method = NULL;
@@ -781,8 +783,10 @@ main(int argc, char **argv)
 			strnum[fmt_ulong(strnum, getpid())] = 0;
 			strerr_warn8("dotls: pid ", strnum, " from ", remoteip, " TLS Server Version=",
 					ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
-			translate(0, pi1[1], pi2[0], dtimeout);
-			SSL_free(ssl);
+			i = translate(0, pi1[1], pi2[0], dtimeout);
+			ssl_free();
+			strerr_warn5("dotls: pid ", strnum, " from ", remoteip, " exiting...", 0);
+			_exit(i);
 			break;
 		}
 	}
@@ -817,6 +821,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.13  2022-12-23 16:13:41+05:30  Cprogrammer
+ * display exit message on exit
+ *
  * Revision 1.12  2022-12-23 10:35:06+05:30  Cprogrammer
  * added -M option to set TLS / SSL client/server method
  *
