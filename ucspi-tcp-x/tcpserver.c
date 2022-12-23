@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.77 2022-12-22 22:19:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.78 2022-12-23 10:36:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -61,7 +61,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.77 2022-12-22 22:19:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.78 2022-12-23 10:36:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -912,6 +912,7 @@ usage(void)
 		 "[ -s ]\n"
 		 "[ -n certfile ]\n"
 		 "[ -f cipherlist ]\n"
+		 "[ -M TLS method ]\n"
 		 "[ -a cafile ] \n"
 #endif
 #ifdef IPV6
@@ -1179,7 +1180,8 @@ main(int argc, char **argv, char **envp)
 #ifdef TLS
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
-	char           *certsdir, *ciphers = NULL, *cafile = NULL, *cipherfile = NULL;
+	char           *certsdir, *ciphers = NULL, *cafile = NULL,
+				   *cipherfile = NULL, *tls_method = NULL;
 	int             pi2c[2], pi4c[2];
 	struct stat     st;
 #endif
@@ -1189,14 +1191,18 @@ main(int argc, char **argv, char **envp)
 		scan_ulong(x, &PerHostLimit);
 		maxperip = PerHostLimit;
 	}
-	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:t:T:u:g:l:b:B:c:C:pPoO"))
+	/*
+	 * unused options
+	 * e, E, F, G,i,j,J,k, K, L, N, S, w, W, y, Y, z, Z
+	 */
+	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
 	if (!stralloc_cats(&options, "46I:"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "sn:a:f:"))
+	if (!stralloc_cats(&options, "sn:a:f:M:"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -1331,6 +1337,9 @@ main(int argc, char **argv, char **envp)
 		case 'f':
 			cipherfile = optarg;
 			break;
+		case 'M':
+			tls_method = optarg;
+			break;
 #endif
 #ifdef IPV6
 		case '4':
@@ -1428,7 +1437,7 @@ main(int argc, char **argv, char **envp)
 		} else
 		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 			ciphers = "PROFILE=SYSTEM";
-		if (!(ctx = tls_init(certfile.s, cafile, ciphers, server)))
+		if (!(ctx = tls_init(tls_method, certfile.s, cafile, ciphers, server)))
 			_exit(111);
 	}
 #endif
@@ -1654,6 +1663,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.78  2022-12-23 10:36:13+05:30  Cprogrammer
+ * added -M option to set TLS / SSL client/server method
+ *
  * Revision 1.77  2022-12-22 22:19:31+05:30  Cprogrammer
  * added -f option to load tls ciphers from a file
  *

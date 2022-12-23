@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.11 2022-12-23 00:21:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.12 2022-12-23 10:35:06+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -35,7 +35,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.11 2022-12-23 00:21:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.12 2022-12-23 10:35:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -76,6 +76,7 @@ usage(void)
 		 " [ -t timeoutdata ]\n"
 		 " [ -n clientcert ]\n"
 		 " [ -f cipherlist ]\n"
+		 " [ -M TLS methods ]\n"
 		 " [ -c cafile ] \n"
 		 " [ -s starttlsType (smtp|pop3) ]\n"
 		 " program");
@@ -618,7 +619,7 @@ main(int argc, char **argv)
 	int             opt, pi1[2], pi2[2], client_mode = 0, tcpclient = 0;
 	pid_t           pid;
 	char           *certsdir, *cafile = NULL, *host = NULL, *ciphers = NULL,
-				   *ptr, *cipherfile = NULL;
+				   *ptr, *cipherfile = NULL, *tls_method = NULL;
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
 	enum starttls   stls = unknown;
@@ -627,7 +628,7 @@ main(int argc, char **argv)
 
 	sig_ignore(sig_pipe);
 
-	while ((opt = getopt(argc, argv, "CTs:h:t:n:c:f:")) != opteof) {
+	while ((opt = getopt(argc, argv, "CTs:h:t:n:c:f:M:")) != opteof) {
 		switch (opt) {
 		case 'h':
 			host = optarg;
@@ -650,6 +651,9 @@ main(int argc, char **argv)
 				usage();
 			if (*optarg && (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile)))
 				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case 'M':
+			tls_method = optarg;
 			break;
 		case 'c':
 			cafile = optarg;
@@ -719,7 +723,7 @@ main(int argc, char **argv)
 	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 		ciphers = "PROFILE=SYSTEM";
     /*- setup SSL context (load key and cert into ctx) */
-	if (!(ctx = tls_init(certfile.s, cafile, ciphers, client_mode ? client : server)))
+	if (!(ctx = tls_init(tls_method, certfile.s, cafile, ciphers, client_mode ? client : server)))
 		_exit(111);
 	switch ((pid = fork()))
 	{
@@ -813,6 +817,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.12  2022-12-23 10:35:06+05:30  Cprogrammer
+ * added -M option to set TLS / SSL client/server method
+ *
  * Revision 1.11  2022-12-23 00:21:21+05:30  Cprogrammer
  * bypass SSL/TLS if NOTLS is set
  *
