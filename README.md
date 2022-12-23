@@ -697,6 +697,14 @@ You can have the old non-fhs behaviour by having /var/indimail in the above 5 fi
 [![libdkim obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml)
 [![libsrs2 obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml)
 
+[![daemontools](https://build.opensuse.org/projects/home:mbhangui/packages/daemontools/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/daemontools)
+[![ucspi-tcp](https://build.opensuse.org/projects/home:mbhangui/packages/ucspi-tcp/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/ucspi-tcp)
+[![indimail-mta](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-mta/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-mta)
+[![libqmail](https://build.opensuse.org/projects/home:mbhangui/packages/libqmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libqmail)
+[![libdkim](https://build.opensuse.org/projects/home:mbhangui/packages/libdkim/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libdkim)
+[![libsrs2](https://build.opensuse.org/projects/home:mbhangui/packages/libsrs2/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libsrs2)
+
+
 You can get binary RPM / Debian packages at
 
 * [Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
