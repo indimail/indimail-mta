@@ -1,75 +1,5 @@
 /*
- * $Log: tcpclient.c,v $
- * Revision 1.23  2022-12-13 20:22:26+05:30  Cprogrammer
- * display diagnostic on exit status
- *
- * Revision 1.22  2022-07-01 19:57:38+05:30  Cprogrammer
- * use unencrypted connection if argument to -n is an empty string
- *
- * Revision 1.21  2021-08-30 12:47:59+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.20  2021-05-12 21:04:42+05:30  Cprogrammer
- * replaced pathexec with upathexec
- *
- * Revision 1.19  2021-03-10 18:23:43+05:30  Cprogrammer
- * use set_essential_fd() to avoid deadlock
- *
- * Revision 1.18  2021-03-09 08:37:06+05:30  Cprogrammer
- * removed unnecessary initializations and type casts
- *
- * Revision 1.17  2021-03-09 00:54:22+05:30  Cprogrammer
- * use non-blocking io
- * use translate() functions from tls.c instead of select()
- *
- * Revision 1.16  2021-03-08 15:28:56+05:30  Cprogrammer
- * removed imap options
- *
- * Revision 1.15  2021-03-07 21:15:44+05:30  Cprogrammer
- * call ssl_free() as last step on do_select()
- *
- * Revision 1.14  2021-03-07 18:09:06+05:30  Cprogrammer
- * added starttls for pop3 and imap
- *
- * Revision 1.13  2021-03-06 23:12:11+05:30  Cprogrammer
- * make specifying certificate mandatory for starttls option
- *
- * Revision 1.12  2021-03-06 21:24:02+05:30  Cprogrammer
- * added SSL/TLS and opportunistic TLS
- *
- * Revision 1.11  2020-09-16 20:50:19+05:30  Cprogrammer
- * FreeBSD fix
- *
- * Revision 1.10  2020-08-03 17:27:39+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.9  2017-03-30 23:00:07+05:30  Cprogrammer
- * prefix rbl with ip6_scan(), ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
- *
- * Revision 1.8  2008-07-26 09:45:56+05:30  Cprogrammer
- * fixed compile error
- *
- * Revision 1.7  2008-07-17 23:04:27+05:30  Cprogrammer
- * define opteof on Darwin
- *
- * Revision 1.6  2005-06-11 02:11:54+05:30  Cprogrammer
- * removed blank lines
- *
- * Revision 1.5  2005-06-10 09:13:27+05:30  Cprogrammer
- * added ipv6 support
- *
- * Revision 1.4  2004-10-12 00:31:37+05:30  Cprogrammer
- * renamed remoteinfo.h to tcpremoteinfo.h
- *
- * Revision 1.3  2004-09-23 23:12:58+05:30  Cprogrammer
- * include getopt.h
- *
- * Revision 1.2  2003-12-30 00:32:49+05:30  Cprogrammer
- * added prototype for socket_tcpnodelay()
- *
- * Revision 1.1  2003-10-17 21:09:07+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: tcpclient.c,v 1.24 2022-12-23 10:35:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -105,10 +35,13 @@
 #include <timeoutread.h>
 #include <timeoutwrite.h>
 #include <wait.h>
+#include <openreadclose.h>
 #include "tls.h"
 #ifdef TLS
+#include <sys/stat.h>
 #include <openssl/ssl.h>
 #include <case.h>
+#include <ctype.h>
 #include <env.h>
 #include <getln.h>
 #include <ndelay.h>
@@ -118,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.23 2022-12-13 20:22:26+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.24 2022-12-23 10:35:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -152,6 +85,8 @@ usage(void)
 	 " [ -n clientcert ]\n"
 	 " [ -c cafile ] \n"
 	 " [ -s starttlsType (smtp|pop3) ]\n"
+	 " [ -f cipherlist ]\n"
+	 " [ -M TLS method ] \n"
 #endif
 	 " host port [program]");
 }
@@ -186,6 +121,7 @@ static char     strnum[FMT_ULONG], strnum2[FMT_ULONG];
 static char     seed[128];
 #ifdef TLS
 static struct stralloc certfile;
+struct stralloc saciphers;
 #endif
 
 no_return void
@@ -341,9 +277,11 @@ main(int argc, char **argv)
 #ifdef TLS
 	SSL_CTX        *ctx = NULL;
 	SSL            *ssl = NULL;
-	char           *certsdir, *cafile = NULL, *ciphers = NULL, *ptr;
+	char           *certsdir, *cafile = NULL, *ciphers = NULL, *ptr,
+				   *cipherfile = NULL, *tls_method = NULL;
 	enum starttls   stls = unknown;
 	int             match_cn = 0;
+	struct stat     st;
 #endif
 
 	dns_random_init(seed);
@@ -364,13 +302,13 @@ main(int argc, char **argv)
 #endif
 #ifdef IPV6
 #ifdef TLS
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:n:c:s:m")) != opteof)
+	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:n:c:s:mf:M:")) != opteof)
 #else
 	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:")) != opteof)
 #endif
 #else
 #ifdef TLS
-	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:a:n:c:s:m")) != opteof)
+	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:a:n:c:s:mf:M:")) != opteof)
 #else
 	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:a:")) != opteof)
 #endif
@@ -471,6 +409,12 @@ main(int argc, char **argv)
 			break;
 		case 'm':
 			match_cn = 1;
+			break;
+		case 'f':
+			cipherfile = optarg;
+			break;
+		case 'M':
+			tls_method = optarg;
 			break;
 #endif
 		default:
@@ -677,9 +621,26 @@ CONNECTED:
 		nomem();
 #ifdef TLS
 	if (flagssl) {
+		if (cipherfile) {
+			if (lstat(cipherfile, &st) == -1)
+				strerr_die4sys(111, FATAL, "lstat: ", cipherfile, ": ");
+			if (openreadclose(cipherfile, &saciphers, st.st_size) == -1)
+				strerr_die3sys(111, FATAL, cipherfile, ": ");
+			if (saciphers.s[saciphers.len - 1] == '\n')
+				saciphers.s[saciphers.len - 1] = 0;
+			else
+			if (!stralloc_0(&saciphers))
+				strerr_die2x(111, FATAL, "out of memory");
+			for (ciphers = saciphers.s; *ciphers; ciphers++)
+				if (isspace(*ciphers)) {
+					*ciphers = 0;
+					break;
+				}
+			ciphers = saciphers.s;
+		} else
 		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 			ciphers = "PROFILE=SYSTEM";
-		if (!(ctx = tls_init(certfile.s, cafile, ciphers, client)))
+		if (!(ctx = tls_init(tls_method, certfile.s, cafile, ciphers, client)))
 			_exit(111);
 		if (!(ssl = tls_session(ctx, s, ciphers)))
 			_exit(111);
@@ -721,3 +682,81 @@ getversion_tcpclient_c()
 		;
 }
 #endif
+
+/*
+ * $Log: tcpclient.c,v $
+ * Revision 1.24  2022-12-23 10:35:36+05:30  Cprogrammer
+ * added -M option to set TLS / SSL client/server method
+ * added -f option to specify ciphers from a file
+ *
+ * Revision 1.23  2022-12-13 20:22:26+05:30  Cprogrammer
+ * display diagnostic on exit status
+ *
+ * Revision 1.22  2022-07-01 19:57:38+05:30  Cprogrammer
+ * use unencrypted connection if argument to -n is an empty string
+ *
+ * Revision 1.21  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.20  2021-05-12 21:04:42+05:30  Cprogrammer
+ * replaced pathexec with upathexec
+ *
+ * Revision 1.19  2021-03-10 18:23:43+05:30  Cprogrammer
+ * use set_essential_fd() to avoid deadlock
+ *
+ * Revision 1.18  2021-03-09 08:37:06+05:30  Cprogrammer
+ * removed unnecessary initializations and type casts
+ *
+ * Revision 1.17  2021-03-09 00:54:22+05:30  Cprogrammer
+ * use non-blocking io
+ * use translate() functions from tls.c instead of select()
+ *
+ * Revision 1.16  2021-03-08 15:28:56+05:30  Cprogrammer
+ * removed imap options
+ *
+ * Revision 1.15  2021-03-07 21:15:44+05:30  Cprogrammer
+ * call ssl_free() as last step on do_select()
+ *
+ * Revision 1.14  2021-03-07 18:09:06+05:30  Cprogrammer
+ * added starttls for pop3 and imap
+ *
+ * Revision 1.13  2021-03-06 23:12:11+05:30  Cprogrammer
+ * make specifying certificate mandatory for starttls option
+ *
+ * Revision 1.12  2021-03-06 21:24:02+05:30  Cprogrammer
+ * added SSL/TLS and opportunistic TLS
+ *
+ * Revision 1.11  2020-09-16 20:50:19+05:30  Cprogrammer
+ * FreeBSD fix
+ *
+ * Revision 1.10  2020-08-03 17:27:39+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.9  2017-03-30 23:00:07+05:30  Cprogrammer
+ * prefix rbl with ip6_scan(), ip4_scan() - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
+ * Revision 1.8  2008-07-26 09:45:56+05:30  Cprogrammer
+ * fixed compile error
+ *
+ * Revision 1.7  2008-07-17 23:04:27+05:30  Cprogrammer
+ * define opteof on Darwin
+ *
+ * Revision 1.6  2005-06-11 02:11:54+05:30  Cprogrammer
+ * removed blank lines
+ *
+ * Revision 1.5  2005-06-10 09:13:27+05:30  Cprogrammer
+ * added ipv6 support
+ *
+ * Revision 1.4  2004-10-12 00:31:37+05:30  Cprogrammer
+ * renamed remoteinfo.h to tcpremoteinfo.h
+ *
+ * Revision 1.3  2004-09-23 23:12:58+05:30  Cprogrammer
+ * include getopt.h
+ *
+ * Revision 1.2  2003-12-30 00:32:49+05:30  Cprogrammer
+ * added prototype for socket_tcpnodelay()
+ *
+ * Revision 1.1  2003-10-17 21:09:07+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
