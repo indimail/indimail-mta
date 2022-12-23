@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.78 2022-12-23 10:36:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.79 2022-12-23 16:16:04+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -61,7 +61,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.78 2022-12-23 10:36:13+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.79 2022-12-23 16:16:04+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1637,7 +1637,7 @@ main(int argc, char **argv, char **envp)
 				if (tls_accept(ssl))
 					strerr_die2x(111, DROP, "unable to accept SSL connection");
 				translate(0, pi2c[1], pi4c[0], idle_timeout);
-				SSL_free(ssl);
+				ssl_free();
 				_exit(0);
 			}
 #endif
@@ -1663,6 +1663,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.79  2022-12-23 16:16:04+05:30  Cprogrammer
+ * use ssl_free() to shutdown ssl
+ *
  * Revision 1.78  2022-12-23 10:36:13+05:30  Cprogrammer
  * added -M option to set TLS / SSL client/server method
  *
