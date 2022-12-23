@@ -1,7 +1,6 @@
 /*
- * $Id: dotls.c,v 1.13 2022-12-23 16:13:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.13 2022-12-23 18:00:17+05:30 Cprogrammer Exp mbhangui $
  */
-#include <stdio.h>
 #ifdef TLS
 #include <unistd.h>
 #include <ctype.h>
@@ -36,7 +35,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.13 2022-12-23 16:13:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.13 2022-12-23 18:00:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -382,7 +381,6 @@ do_retr(char *arg, char *cmmd, int cmmdlen)
 void
 flush_data()
 {
-	linemode = 1;
 	flush();
 	return;
 }
@@ -583,9 +581,13 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 					FD_CLR(0, &rfds);
 					fd0_flag = 0;
 					close(clearout); /*- make the child get EOF on read */
-				} else
-				if ((n = timeoutwrite(dtimeout, clearout, buf, n)) == -1)
-					strerr_die3sys(111, FATAL, "unable to write to ", stls == smtp ? "smtpd: " : "pop3d: ");
+				} else {
+					if ((n = timeoutwrite(dtimeout, clearout, buf, n)) == -1)
+						strerr_die3sys(111, FATAL, "unable to write to ", stls == smtp ? "smtpd: " : "pop3d: ");
+					if ((n == 3 && buf[0] == '.' && buf[1] == '\r' && buf[2] == '\n') ||
+							(buf[n - 1] == '\n' && buf[n - 2] == '\r' && buf[n - 3] == '.'))
+						linemode = 1;
+				}
 			} else {
 				/*-
 				 * do_commands returns only if TLS session wasn't initiated
@@ -821,8 +823,8 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
- * Revision 1.13  2022-12-23 16:13:41+05:30  Cprogrammer
- * display exit message on exit
+ * Revision 1.13  2022-12-23 18:00:17+05:30  Cprogrammer
+ * fixed non-tls incorrect linemode setting
  *
  * Revision 1.12  2022-12-23 10:35:06+05:30  Cprogrammer
  * added -M option to set TLS / SSL client/server method
