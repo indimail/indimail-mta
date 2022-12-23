@@ -162,7 +162,7 @@ set_tls_method(char *ssl_option, enum tlsmode tmode)
 		strerr_warn1("tls_init: TLS not available: unable to initialize SSLv23 ctx", 0);
 		return ((SSL_CTX *) NULL);
 	} else
-	if (method == 3 && !(ctx = SSL_CTX_new(tmode == client ? SSL3_client_method() : SSLv3_server_method()))) {
+	if (method == 3 && !(ctx = SSL_CTX_new(tmode == client ? SSLv3_client_method() : SSLv3_server_method()))) {
 		strerr_warn1("tls_init: TLS not available: unable to initialize SSLv3 ctx", 0);
 		return ((SSL_CTX *) NULL);
 	} else
