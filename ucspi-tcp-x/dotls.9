@@ -52,10 +52,28 @@ environment variable TLS_CERTFILE. If this is not provided, the file
 @qsysconfdir@/certs/clientcert.pem will be used.
 
 .TP
+.B \-c \fIcafile
+Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
+special CA certificates are needed if an intermediate certificate used
+by your issuing CA expires. Note that the file given with -c is passed
+to SSL_CTX_load_verify_locations and thus may contain several CA
+certificates, which will be used during SSL connection negotiation to
+close any gap in the certificate chain.
+
+.TP
 -\fBf\fR \fIcipher_list\fR
 Use ciphers listed in \fIcipher_list\fR. Without this \fBdotls\fR uses
 TLS_CIPHER_LIST environment variable if set or system configured
 PROFILE=SYSTEM ciphers.
+
+.TP
+-\fBM\fR \fItls_method\fR
+Use \fItls_method\fR to set client/server method / protocol. This will be
+one of SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLSv1_3 values.
+The actual protocol version used will be negotiated to the highest version
+mutually supported by the client and the server. The supported protocols
+are SSLv3, TLSv1, TLSv1_1, TLSv1_2 and TLSv1_3. Ths option mus not be used
+to avoid the version-specific methods described below, which are deprecated.
 
 .TP
 -\fBt\fR \fItimeout\fR

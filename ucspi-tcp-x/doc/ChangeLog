@@ -15,6 +15,11 @@ Release 1.1.1 Start 18/09/2022
 06.  dotls.c: fixed missing carriage return in EHLO output
 07.  dotls.c: log client, server ssl versions on connnect
 08.  dotls.c: bypass SSL/TLS if NOTLS is set
+- 23/12/2022
+09.  tcpserver.c, tcpclient.c, dotls.c: added -M option to set TLS / SSL
+     client/server method
+10.  tcpclient.c: added -f option to load ciphers from a file
+11.  tls.c: added set_tls_method to set TLS / SSL client/server method
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 14/02/2021 End 08/09/2022
