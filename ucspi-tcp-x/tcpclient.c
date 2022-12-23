@@ -248,11 +248,11 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 		break;
 	case pop3:
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+			strerr_die2sys(111, FATAL, "getln: read-pop3d: ");
 		if (safewrite(sfd, "STLS\r\n", 6, dtimeout) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+			strerr_die2sys(111, FATAL, "getln: read-pop3d: ");
 		if (!line.len || !match)
 			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
 		if (!case_startb(line.s, 3, "+OK"))
