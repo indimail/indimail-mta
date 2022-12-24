@@ -1,5 +1,8 @@
 /*
  * $Log: rcpthosts.c,v $
+ * Revision 1.11  2022-12-24 22:33:27+05:30  Cprogrammer
+ * converted function prototypes to ansic
+ *
  * Revision 1.10  2016-05-17 19:44:58+05:30  Cprogrammer
  * use auto_control, set by conf-control to set control directory
  *
@@ -51,8 +54,7 @@ rcpthosts_init()
 		return flagrh;
 	if (!constmap_init(&maprh, rh.s, rh.len, 0))
 		return flagrh = -1;
-	if (!controldir)
-	{
+	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 	}
@@ -64,8 +66,7 @@ rcpthosts_init()
 		return (flagrh = -1);
 	if (!stralloc_0(&morercpthosts))
 		return (flagrh = -1);
-	if (fdmrh == -1 && (fdmrh = open_read(morercpthosts.s)) == -1)
-	{
+	if (fdmrh == -1 && (fdmrh = open_read(morercpthosts.s)) == -1) {
 		if (errno != error_noent)
 			return flagrh = -1;
 	}
@@ -75,21 +76,17 @@ rcpthosts_init()
 static stralloc host = { 0 };
 
 int
-rcpthosts(buf, len, nolocal)
-	char           *buf;
-	int             len, nolocal;
+rcpthosts(char *buf, int len, int nolocal)
 {
 	int             j;
 
-	if (nolocal == 0)
-	{
+	if (nolocal == 0) {
 		if (flagrh != 1)
 			return 1;
 		if ((j = byte_rchr(buf, len, '@')) >= len)
-			return 1;	/*- presumably envnoathost is acceptable */
+			return 1; /*- presumably envnoathost is acceptable */
 		++j;
-	} else
-	{
+	} else {
 		if (flagrh != 1)
 			return 0;
 		if ((j = byte_rchr(buf, len, '@')) >= len)
@@ -103,24 +100,18 @@ rcpthosts(buf, len, nolocal)
 		return -1;
 	buf = host.s;
 	case_lowerb(buf, len);
-	for (j = 0; j < len; ++j)
-	{
+	for (j = 0; j < len; ++j) {
 		if ((!j || (buf[j] == '.')) && constmap(&maprh, buf + j, len - j))
 			return 1;
 	}
-	if (fdmrh != -1)
-	{
+	if (fdmrh != -1) {
 		uint32          dlen;
 		int             r;
 
-		for (j = 0; j < len; ++j)
-		{
-			if (!j || (buf[j] == '.'))
-			{
-				if ((r = cdb_seek(fdmrh, buf + j, len - j, &dlen)))
-				{
-					if (errno == error_ebadf) /*- oops fdmrh got closed */
-					{
+		for (j = 0; j < len; ++j) {
+			if (!j || (buf[j] == '.')) {
+				if ((r = cdb_seek(fdmrh, buf + j, len - j, &dlen))) {
+					if (errno == error_ebadf) { /*- oops fdmrh got closed */
 						if ((fdmrh = open_read(morercpthosts.s)) == -1)
 							return r;
 						if ((r = cdb_seek(fdmrh, buf + j, len - j, &dlen)))
@@ -137,7 +128,7 @@ rcpthosts(buf, len, nolocal)
 void
 getversion_rcpthosts_c()
 {
-	static char    *x = "$Id: rcpthosts.c,v 1.10 2016-05-17 19:44:58+05:30 Cprogrammer Stab mbhangui $";
+	static char    *x = "$Id: rcpthosts.c,v 1.11 2022-12-24 22:33:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
