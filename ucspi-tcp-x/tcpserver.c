@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.79 2022-12-23 16:16:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.80 2022-12-24 22:15:11+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -13,6 +13,7 @@
 #include "tls.h"
 #include <ctype.h>
 #include <openreadclose.h>
+#include <getEnvConfig.h>
 #endif
 #include <str.h>
 #include <byte.h>
@@ -61,7 +62,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.79 2022-12-23 16:16:04+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.80 2022-12-24 22:15:11+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -910,6 +911,7 @@ usage(void)
 #endif
 #ifdef TLS
 		 "[ -s ]\n"
+		 "[ -i certdir ]\n"
 		 "[ -n certfile ]\n"
 		 "[ -f cipherlist ]\n"
 		 "[ -M TLS method ]\n"
@@ -1180,9 +1182,13 @@ main(int argc, char **argv, char **envp)
 #ifdef TLS
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
-	char           *certsdir, *ciphers = NULL, *cafile = NULL,
+	char           *certdir = NULL, *ciphers = NULL, *cafile = NULL,
 				   *cipherfile = NULL, *tls_method = NULL;
 	int             pi2c[2], pi4c[2];
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+	EVP_PKEY       *dh_pkey;
+	int             bits;
+#endif
 	struct stat     st;
 #endif
 	struct stralloc options = {0};
@@ -1193,7 +1199,7 @@ main(int argc, char **argv, char **envp)
 	}
 	/*
 	 * unused options
-	 * e, E, F, G,i,j,J,k, K, L, N, S, w, W, y, Y, z, Z
+	 * 0, 1, 2, 3, 5, 7, 8, 9, e, E, F, G, j, J, k, K, L, N, S, w, W, y, Y, z, Z
 	 */
 	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
@@ -1202,23 +1208,11 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "sn:a:f:M:"))
+	if (!stralloc_cats(&options, "sn:a:f:M:i:"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
 		strerr_die2x(111, FATAL, "out of memory");
-#ifdef TLS
-	if (!(certsdir = env_get("CERTDIR")))
-		certsdir = "/etc/indimail/certs";
-	if (!stralloc_copys(&certfile, certsdir))
-		strerr_die2x(111, FATAL, "out of memory");
-	else
-	if (!stralloc_cats(&certfile, "/servercert.pem"))
-		strerr_die2x(111, FATAL, "out of memory");
-	else
-	if (!stralloc_0(&certfile) )
-		strerr_die2x(111, FATAL, "out of memory");
-#endif
 	while ((opt = getopt(argc, argv, options.s)) != opteof)
 		switch (opt)
 		{
@@ -1340,6 +1334,9 @@ main(int argc, char **argv, char **envp)
 		case 'M':
 			tls_method = optarg;
 			break;
+		case 'i':
+			certdir = optarg;
+			break;
 #endif
 #ifdef IPV6
 		case '4':
@@ -1416,6 +1413,18 @@ main(int argc, char **argv, char **envp)
 #endif
 	}
 #ifdef TLS
+	if (!certdir && !(certdir = env_get("CERTDIR")))
+		certdir = "/etc/indimail/certs";
+	if (!certfile.len) {
+		if (!stralloc_copys(&certfile, certdir))
+			strerr_die2x(111, FATAL, "out of memory");
+		else
+		if (!stralloc_cats(&certfile, "/servercert.pem"))
+			strerr_die2x(111, FATAL, "out of memory");
+		else
+		if (!stralloc_0(&certfile) )
+			strerr_die2x(111, FATAL, "out of memory");
+	}
 	if (flagssl == 1) {
     	/* setup SSL context (load key and cert into ctx) */
 		if (cipherfile) {
@@ -1634,6 +1643,19 @@ main(int argc, char **argv, char **envp)
 					strerr_die2x(111, DROP, "unable to setup SSL session");
 				SSL_CTX_free(ctx);
 				ctx = NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
+				getEnvConfigInt(&bits, "SSL_BITS", 2048);
+				if (!get_rsakey(0, bits, certdir))
+					EVP_RSA_gen(bits);
+				if ((dh_pkey = get_dhkey(0, bits, certdir))) {
+					SSL_set0_tmp_dh_pkey(ssl, dh_pkey);
+				} else
+					SSL_set_dh_auto(ssl, 1);
+#else
+				set_certdir(certdir);
+				SSL_set_tmp_rsa_callback(ssl, tmp_rsa_cb);
+				SSL_set_tmp_dh_callback(ssl, tmp_dh_cb);
+#endif
 				if (tls_accept(ssl))
 					strerr_die2x(111, DROP, "unable to accept SSL connection");
 				translate(0, pi2c[1], pi4c[0], idle_timeout);
@@ -1663,6 +1685,10 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.80  2022-12-24 22:15:11+05:30  Cprogrammer
+ * added -i option to specify certdir
+ * set RSA/DH parameters
+ *
  * Revision 1.79  2022-12-23 16:16:04+05:30  Cprogrammer
  * use ssl_free() to shutdown ssl
  *
