@@ -1,5 +1,5 @@
 /*
- * $Id: tls.c,v 1.14 2022-12-23 10:36:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tls.c,v 1.15 2022-12-24 11:16:34+05:30 Cprogrammer Exp mbhangui $
  *
  * ssl_timeoutio functions froms from Frederik Vermeulen's
  * tls patch for qmail
@@ -26,7 +26,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.14 2022-12-23 10:36:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.15 2022-12-24 11:16:34+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -34,6 +34,7 @@ static enum tlsmode usessl = none;
 static char    *sslerr_str;
 static SSL     *ssl_t;
 static int      efd = -1;
+static char     do_shutdown = 1;
 
 void
 set_essential_fd(int fd)
@@ -46,7 +47,8 @@ ssl_free()
 {
 	if (!ssl_t)
 		return;
-	SSL_shutdown(ssl_t);
+	if (do_shutdown)
+		SSL_shutdown(ssl_t);
 	SSL_free(ssl_t);
 	if (usessl != none)
 		usessl = none;
@@ -343,37 +345,127 @@ tls_session(SSL_CTX *ctx, int fd, char *ciphers)
 	return (ssl_t = myssl);
 }
 
+const char     *
+decode_ssl_error(int i)
+{
+	/*
+	 * i =
+	 * 0  The TLS/SSL handshake was not successful but was shut down
+	 *    controlled and by the specifications of the TLS/SSL protocol.
+	 *    Call SSL_get_error() with the return value ret to find out the
+	 *    reason.
+	 *
+	 * 1  The TLS/SSL handshake was successfully completed, a TLS/SSL
+	 *    connection has been established.
+	 *
+	 * <0 The TLS/SSL handshake was not successful because a fatal error
+	 *    occurred either at the protocol level or a connection failure
+	 *    occurred. The shutdown was not clean. It can also occur if action
+	 *    is needed to continue the operation for nonblocking BIOs. Call
+	 *    SSL_get_error() with the return value ret to find out the reason.
+	 */
+	switch (i)
+	{
+	case SSL_ERROR_NONE:
+		return "no error";
+	case SSL_ERROR_ZERO_RETURN:
+		return "connection closed by TLS/SSL peer";
+	case SSL_ERROR_WANT_READ:
+		return "unprocessed data availabe for read";
+	case SSL_ERROR_WANT_WRITE:
+		return "unprocessed data availabe for write";
+	case SSL_ERROR_WANT_CONNECT:
+		return "TLS/SSL connect to be retried";
+	case SSL_ERROR_WANT_ACCEPT:
+		return "TLS/SSL accept to be retried";
+	case SSL_ERROR_WANT_X509_LOOKUP:
+		return "retry SSL_CTX_set_client_cert_cb() callback";
+	case SSL_ERROR_WANT_ASYNC:
+		return "async engine still processing data";
+	case SSL_ERROR_WANT_ASYNC_JOB:
+		return "no async jobs available";
+	case SSL_ERROR_WANT_CLIENT_HELLO_CB:
+		return "retry callback set by SSL_CTX_set_client_hello_cb()";
+	case SSL_ERROR_SYSCALL:
+		do_shutdown = 0;
+		return "non-recoverable, fatal I/O error";
+	case SSL_ERROR_SSL:
+		do_shutdown = 0;
+		return "non-recoverable, fatal protocol error";
+	default:
+		return ((char *) 0);
+	}
+}
+
 int
 tls_connect(SSL *myssl, char *host)
 {
-	if (SSL_connect(myssl) <= 0) {
-		sslerr_str = (char *) myssl_error_str();
-		strerr_warn2("SSL_connect: ", sslerr_str, 0);
-		ssl_free();
-		return -1;
+	int             i, err;
+	char           *err_str;
+
+	errno = 0;
+	while (1) {
+		i = SSL_connect(myssl);
+		if (i == 1) {
+			usessl = client;
+			if (host && check_cert(myssl, host)) {
+				SSL_shutdown(myssl);
+				SSL_free(myssl);
+				return -1;
+			}
+			return 0;
+		}
+		if ((err = SSL_get_error(myssl, i)) != SSL_ERROR_WANT_CONNECT)
+			break;
 	}
-	if (host && check_cert(myssl, host)) {
-		ssl_free();
-		return -1;
+	switch (err)
+	{
+	case SSL_ERROR_SYSCALL:
+	case SSL_ERROR_SSL:
+		if (errno)
+			strerr_warn1("SSL_connect: system err: ", &strerr_sys);
 	}
-	usessl = client;
-	return 0;
+	err_str = decode_ssl_error(err);
+	if (err_str)
+		strerr_warn2("SSL_connect: decoded err: ", err_str, 0);
+	while ((err = ERR_get_error()))
+		strerr_warn2("SSL_connect: TLS/SSL err: ", ERR_error_string(err, 0), 0);
+	if (do_shutdown)
+		SSL_shutdown(myssl);
+	SSL_free(myssl);
+	return i == 0 ? 1 : i;
 }
 
 int
 tls_accept(SSL *myssl)
 {
-	int             i;
-	
-	i = SSL_accept(myssl);
-	SSL_get_error(myssl, i);
-	if (i == 1) {
-		usessl = server;
-		return 0;
+	int             i, err;
+	char           *err_str;
+
+	errno = 0;
+	while (1) {
+		i = SSL_accept(myssl);
+		if (i == 1) {
+			usessl = server;
+			return 0;
+		}
+		if ((err = SSL_get_error(myssl, i)) != SSL_ERROR_WANT_ACCEPT)
+			break;
 	}
-	sslerr_str = (char *) myssl_error();
-	strerr_warn2("SSL_accept: unable to accept SSL connection: ", sslerr_str, 0);
-	SSL_shutdown(myssl);
+	switch (err)
+	{
+	case SSL_ERROR_SYSCALL:
+	case SSL_ERROR_SSL:
+		if (errno)
+			strerr_warn1("SSL_accept: system err: ", &strerr_sys);
+	}
+	err_str = decode_ssl_error(err);
+	if (err_str)
+		strerr_warn2("SSL_accept: decoded err: ", err_str, 0);
+	while ((err = ERR_get_error()))
+		strerr_warn2("SSL_accept: TLS/SSL err: ", ERR_error_string(err, 0), 0);
+	if (do_shutdown)
+		SSL_shutdown(myssl);
 	SSL_free(myssl);
 	return i == 0 ? 1 : i;
 }
@@ -624,6 +716,9 @@ getversion_tls_c()
 
 /*
  * $Log: tls.c,v $
+ * Revision 1.15  2022-12-24 11:16:34+05:30  Cprogrammer
+ * decode TLS/SSL SSL_connect, SSL_accept
+ *
  * Revision 1.14  2022-12-23 10:36:25+05:30  Cprogrammer
  * added set_tls_method to set TLS / SSL client/server method
  *

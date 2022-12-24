@@ -22,6 +22,8 @@ Release 1.1.1 Start 18/09/2022
 11.  tls.c: added set_tls_method to set TLS / SSL client/server method
 12.  tcpserver.c, dotls.c: use ssl_free() to shutdown ssl
 13.  dotls.c: fixed non-tls incorrect linemode setting
+- 24/12/2022
+14.  tls.c: decode TLS/SSL SSL_connect, SSL_accept
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 14/02/2021 End 08/09/2022
