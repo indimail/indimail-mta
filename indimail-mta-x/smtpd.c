@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.278 2022-12-22 22:23:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.279 2022-12-24 22:35:39+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -145,7 +145,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.278 $";
+char           *revision = "$Revision: 1.279 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6854,7 +6854,6 @@ tls_verify()
 			die_nomem();
 		STACK_OF(X509_NAME) *sk = SSL_load_client_CA_file(filename.s);
 		alloc_free(filename.s);
-		constmap_free(&mapclients);
 		alloc_free(clients.s);
 		if (sk) {
 			SSL_set_client_CA_list(ssl, sk);
@@ -7552,6 +7551,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.279  2022-12-24 22:35:39+05:30  Cprogrammer
+ * removed incorrect call to constmap_free()
+ *
  * Revision 1.278  2022-12-22 22:23:04+05:30  Cprogrammer
  * log timeouts, regex compilation error, Bare LF errors in error log
  *
@@ -7833,7 +7835,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.278 2022-12-22 22:23:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.279 2022-12-24 22:35:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
