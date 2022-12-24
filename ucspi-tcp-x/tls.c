@@ -1,5 +1,5 @@
 /*
- * $Id: tls.c,v 1.15 2022-12-24 11:16:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tls.c,v 1.16 2022-12-24 22:12:32+05:30 Cprogrammer Exp mbhangui $
  *
  * ssl_timeoutio functions froms from Frederik Vermeulen's
  * tls patch for qmail
@@ -20,13 +20,16 @@
 #include <strerr.h>
 #include <env.h>
 #include <error.h>
+#include <stralloc.h>
+#include <alloc.h>
+#include <scan.h>
 #include <timeoutread.h>
 #include <timeoutwrite.h>
 #include "iopause.h"
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.15 2022-12-24 11:16:34+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.16 2022-12-24 22:12:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -54,6 +57,213 @@ ssl_free()
 		usessl = none;
 	ssl_t = NULL;
 }
+
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+static char    *certdir;
+
+void
+set_certdir(char *s)
+{
+	certdir = s;
+	return;
+}
+
+RSA            *
+tmp_rsa_cb(SSL *ssl_p, int export, int keylen)
+{
+	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	int             i, j;
+	FILE           *in;
+	RSA            *rsa;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	BIGNUM         *bn;
+	RSA            *key;
+#endif
+
+	if (!export)
+		keylen = 512;
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/rsa", 4))
+		strerr_die1x(111, "out of memory");
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen != i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
+				!stralloc_0(&filename))
+			strerr_die1x(111, "out of memory");
+		filename.len = j;
+		if (!(in = fopen(filename.s, "r"))) {
+			if (errno != error_noent)
+				strerr_die1sys(111, "tmp_rsa_cb: error reading rsa private key: ");
+			continue;
+		}
+		if (!(rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL)))
+			strerr_die1sys(111, "error reading rsa private key: ");
+		fclose(in);
+		alloc_free(filename.s);
+		return rsa;
+	}
+	alloc_free(filename.s);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	if (!(bn = BN_new()))
+		strerr_die1x(111, "out of memory");
+	if (!BN_set_word(bn, 65537))
+		strerr_die1sys(111, "error setting BIGNUM: ");
+	if (!(key = RSA_new()))
+		strerr_die1x(111, "out of memory");
+	if (!RSA_generate_key_ex(key, keylen, bn, NULL))
+		strerr_die1sys(111, "error generating RSA keys: ");
+	BN_free(bn);
+	return (key);
+#else
+	return RSA_generate_key(keylen, RSA_F4, NULL, NULL);
+#endif
+}
+
+DH             *
+tmp_dh_cb(SSL *ssl_p, int export, int keylen)
+{
+	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	int             i, j;
+	FILE           *in;
+	DH             *dh;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	DH             *client_key;
+#endif
+
+	if (!export)
+		keylen = 1024;
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/dh", 3))
+		strerr_die1x(111, "out of memory");
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen != i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
+				!stralloc_0(&filename))
+			strerr_die1x(111, "out of memory");
+		filename.len = j;
+		if (!(in = fopen(filename.s, "r"))) {
+			if (errno != error_noent)
+				strerr_die1sys(111, "error reading dh parameters: ");
+			continue;
+		}
+		if (!(dh = PEM_read_DHparams(in, NULL, NULL, NULL)))
+			strerr_die1sys(111, "error reading dh parameters: ");
+		fclose(in);
+		alloc_free(filename.s);
+		return dh;
+	}
+	alloc_free(filename.s);
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	if (!(client_key = DH_new()))
+		strerr_die1x(111, "out of memory");
+	if (!DH_generate_parameters_ex(client_key, keylen, DH_GENERATOR_2, NULL))
+		strerr_die1sys(111, "error generating DH parameters: ");
+	return (client_key);
+#else
+	return DH_generate_parameters(keylen, DH_GENERATOR_2, NULL, NULL);
+#endif
+}
+#else /*- #if OPENSSL_VERSION_NUMBER < 0x30000000L */
+EVP_PKEY       *
+get_rsakey(int export, int keylen, char *certdir)
+{
+	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	BIO            *in;
+	int             i, j;
+	EVP_PKEY       *rsa_key;
+
+	if (!export)
+		keylen = 512;
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/rsa", 4))
+		strerr_die1x(111, "out of memory");
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen != i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
+				!stralloc_0(&filename))
+			strerr_die1x(111, "out of memory");
+		filename.len = j;
+		if (access(filename.s, F_OK)) {
+			if (errno != error_noent)
+				strerr_die1sys(111, "error reading rsa private key: ");
+			continue;
+		}
+		if ((in = BIO_new(BIO_s_file()))) {
+			BIO_read_filename(in, filename.s);
+			alloc_free(filename.s);
+			if (!(rsa_key = PEM_read_bio_PrivateKey(in, NULL, 0, NULL)))
+				strerr_die1sys(111, "error reading rsa private key: ");
+			BIO_free(in);
+			return rsa_key;
+		} else
+			strerr_die1x(111, "out of memory");
+	}
+	alloc_free(filename.s);
+	return ((EVP_PKEY *) NULL);
+}
+
+EVP_PKEY       *
+get_dhkey(int export, int keylen, char *certdir)
+{
+	stralloc        filename = { 0 };
+	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
+	char          **ptr;
+	int             i, j;
+	BIO            *in;
+	EVP_PKEY       *dh_key;
+
+	if (!export)
+		keylen = 1024;
+	if (!stralloc_copys(&filename, certdir) ||
+			!stralloc_catb(&filename, "/dh", 3))
+		strerr_die1x(111, "out of memory");
+	j = filename.len;
+	for (ptr = pems; *ptr; ptr++) {
+		scan_int(*ptr, &i);
+		if (keylen == i)
+			continue;
+		if (!stralloc_cats(&filename, *ptr) ||
+				!stralloc_catb(&filename, ".pem", 4) ||
+				!stralloc_0(&filename))
+			strerr_die1x(111, "out of memory");
+		filename.len = j;
+		if (access(filename.s, F_OK)) {
+			if (errno != error_noent)
+				strerr_die1sys(111, "error reading dh parameters: ");
+			continue;
+		}
+		if ((in = BIO_new(BIO_s_file()))) {
+			if (!BIO_read_filename(in, filename.s))
+				strerr_die1sys(111, "error reading dhparams file: ");
+			alloc_free(filename.s);
+			if (!(dh_key = PEM_read_bio_Parameters_ex(in, NULL, NULL, NULL)))
+				strerr_die1sys(111, "error reading dh parameters: ");
+			BIO_free(in);
+			return dh_key;
+		} else
+			strerr_die1x(111, "out of memory");
+	}
+	return ((EVP_PKEY *) NULL);
+}
+#endif /*- #if OPENSSL_VERSION_NUMBER < 0x30000000L */
 
 /*
  * don't want to fail handshake if certificate can't be verified
@@ -716,6 +926,9 @@ getversion_tls_c()
 
 /*
  * $Log: tls.c,v $
+ * Revision 1.16  2022-12-24 22:12:32+05:30  Cprogrammer
+ * added functions to set RSA/DH parameters
+ *
  * Revision 1.15  2022-12-24 11:16:34+05:30  Cprogrammer
  * decode TLS/SSL SSL_connect, SSL_accept
  *
