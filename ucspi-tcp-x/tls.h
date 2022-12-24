@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.10  2022-12-24 22:38:47+05:30  Cprogrammer
+ * added prototype for set_certdir()
+ *
  * Revision 1.9  2022-12-24 22:13:00+05:30  Cprogrammer
  * added functions to set RSA/DH parameters
  *
@@ -57,6 +60,7 @@ int             ssl_timeoutrehandshake(long, int, int, SSL *);
 const char     *myssl_error_str();
 void            set_essential_fd(int fd);
 #if OPENSSL_VERSION_NUMBER < 0x30000000L
+void            set_certdir(char *s);
 RSA            *tmp_rsa_cb(SSL *ssl_p, int export, int keylen);
 DH             *tmp_dh_cb(SSL *ssl_p, int export, int keylen);
 #else
