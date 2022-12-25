@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.24 2022-12-23 10:35:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.25 2022-12-25 19:38:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.24 2022-12-23 10:35:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.25 2022-12-25 19:38:13+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -83,6 +83,7 @@ usage(void)
 	 " [ -a timeoutdata ]\n"
 #ifdef TLS
 	 " [ -n clientcert ]\n"
+	 " [ -C certdir ] \n"
 	 " [ -c cafile ] \n"
 	 " [ -s starttlsType (smtp|pop3) ]\n"
 	 " [ -f cipherlist ]\n"
@@ -270,6 +271,7 @@ main(int argc, char **argv)
 {
 	unsigned long   u;
 	char           *x;
+	struct stralloc options = {0};
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
@@ -277,7 +279,7 @@ main(int argc, char **argv)
 #ifdef TLS
 	SSL_CTX        *ctx = NULL;
 	SSL            *ssl = NULL;
-	char           *certsdir, *cafile = NULL, *ciphers = NULL, *ptr,
+	char           *certdir, *cafile = NULL, *ciphers = NULL, *ptr,
 				   *cipherfile = NULL, *tls_method = NULL;
 	enum starttls   stls = unknown;
 	int             match_cn = 0;
@@ -291,29 +293,31 @@ main(int argc, char **argv)
 #ifdef TLS
 	if (!(ptr = env_get("TLS_CERTFILE")))
 		ptr = "clientcert.pem";
-	if (!(certsdir = env_get("CERTDIR")))
-		certsdir = "/etc/indimail/certs";
-	if (!stralloc_copys(&certfile, certsdir) ||
-			!stralloc_append(&certfile, "/") ||
-			!stralloc_cats(&certfile, ptr) ||
+	if (!(certdir = env_get("CERTDIR")))
+		certdir = "/etc/indimail/certs";
+	if (*ptr != '.' && *ptr != '/') {
+		if (!stralloc_copys(&certfile, certdir) ||
+				!stralloc_append(&certfile, "/"))
+			strerr_die2x(111, FATAL, "out of memory");
+	}
+	if (!stralloc_cats(&certfile, ptr) ||
 			!stralloc_0(&certfile))
 		strerr_die2x(111, FATAL, "out of memory");
 	flagssl = access(certfile.s, F_OK) ? 0 : 1;
 #endif
+	if (!stralloc_copys(&options, "dDvqQhHrRi:p:t:T:l:a:"))
+		strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
+	if (!stralloc_cats(&options, "46I:"))
+		strerr_die2x(111, FATAL, "out of memory");
+#endif
 #ifdef TLS
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:n:c:s:mf:M:")) != opteof)
-#else
-	while ((opt = getopt(argc, argv, "46dDvqQhHrRi:p:t:T:l:I:a:")) != opteof)
+	if (!stralloc_cats(&options, "n:c:s:mf:M:"))
+		strerr_die2x(111, FATAL, "out of memory");
 #endif
-#else
-#ifdef TLS
-	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:a:n:c:s:mf:M:")) != opteof)
-#else
-	while ((opt = getopt(argc, argv, "dDvqQhHrRi:p:t:T:l:a:")) != opteof)
-#endif
-#endif
-	{
+	if (!stralloc_0(&options))
+		strerr_die2x(111, FATAL, "out of memory");
+	while ((opt = getopt(argc, argv, options.s)) != opteof) {
 		switch (opt)
 		{
 #ifdef IPV6
@@ -325,6 +329,53 @@ main(int argc, char **argv)
 			break;
 		case 'I':
 			netif = socket_getifidx(optarg);
+			break;
+		case 'i':
+			if (!rblip6_scan(optarg, iplocal))
+				usage();
+			break;
+#else
+		case 'i':
+			if (!rblip4_scan(optarg, iplocal))
+				usage();
+			break;
+#endif
+#ifdef TLS
+		case 'n':
+			if (!optarg)
+				usage();
+			if (*optarg) {
+				if (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile))
+					strerr_die2x(111, FATAL, "out of memory");
+				if (access(certfile.s, F_OK))
+					strerr_die3sys(111, FATAL, certfile.s, ": ");
+				flagssl = 1;
+			} else
+				flagssl = 0;
+			break;
+		case 'C':
+			certdir = optarg;
+			break;
+		case 'c':
+			cafile = optarg;
+			break;
+		case 's':
+			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3"))
+				usage();
+			if (!case_diffs(optarg, "smtp"))
+				stls = smtp;
+			else
+			if (!case_diffs(optarg, "pop3"))
+				stls = pop3;
+			break;
+		case 'm':
+			match_cn = 1;
+			break;
+		case 'f':
+			cipherfile = optarg;
+			break;
+		case 'M':
+			tls_method = optarg;
 			break;
 #endif
 		case 'd':
@@ -366,14 +417,6 @@ main(int argc, char **argv)
 				++j;
 			scan_ulong(optarg + j, &ctimeout[1]);
 			break;
-		case 'i':
-#ifdef IPV6
-			if (!rblip6_scan(optarg, iplocal))
-#else
-			if (!rblip4_scan(optarg, iplocal))
-#endif
-				usage();
-			break;
 		case 'p':
 			scan_ulong(optarg, &u);
 			portlocal = u;
@@ -382,41 +425,6 @@ main(int argc, char **argv)
 			scan_ulong(optarg, &u);
 			dtimeout = u;
 			break;
-#ifdef TLS
-		case 'n':
-			if (!optarg)
-				usage();
-			if (*optarg) {
-				if (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile))
-					strerr_die2x(111, FATAL, "out of memory");
-				if (access(certfile.s, F_OK))
-					strerr_die3sys(111, FATAL, certfile.s, ": ");
-				flagssl = 1;
-			} else
-				flagssl = 0;
-			break;
-		case 'c':
-			cafile = optarg;
-			break;
-		case 's':
-			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3"))
-				usage();
-			if (!case_diffs(optarg, "smtp"))
-				stls = smtp;
-			else
-			if (!case_diffs(optarg, "pop3"))
-				stls = pop3;
-			break;
-		case 'm':
-			match_cn = 1;
-			break;
-		case 'f':
-			cipherfile = optarg;
-			break;
-		case 'M':
-			tls_method = optarg;
-			break;
-#endif
 		default:
 			usage();
 		}
@@ -685,6 +693,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.25  2022-12-25 19:38:13+05:30  Cprogrammer
+ * added -C option to specify certdir
+ *
  * Revision 1.24  2022-12-23 10:35:36+05:30  Cprogrammer
  * added -M option to set TLS / SSL client/server method
  * added -f option to specify ciphers from a file
