@@ -1,5 +1,5 @@
 /*
- * $Id: tls.c,v 1.17 2022-12-25 08:31:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tls.c,v 1.18 2022-12-25 19:28:42+05:30 Cprogrammer Exp mbhangui $
  *
  * ssl_timeoutio functions froms from Frederik Vermeulen's
  * tls patch for qmail
@@ -29,7 +29,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.17 2022-12-25 08:31:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.18 2022-12-25 19:28:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -489,34 +489,38 @@ tls_init(char *tls_method, char *cert, char *cafile, char *ciphers, enum tlsmode
 		return ((SSL_CTX *) NULL);
 	}
 #endif
-	if (SSL_CTX_use_certificate_chain_file(ctx, cert)) {
+	if (SSL_CTX_use_certificate_chain_file(ctx, cert) != 1) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_CTX_use_PrivateKey_file: Unable to load private keys: ", sslerr_str, 0);
+		SSL_CTX_free(ctx);
+		return ((SSL_CTX *) NULL);
+	}
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
-		if (SSL_CTX_use_PrivateKey_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
-			sslerr_str = (char *) myssl_error_str();
-			strerr_warn2("SSL_CTX_use_PrivateKey_file: Unable to load private keys: ", sslerr_str, 0);
-			SSL_CTX_free(ctx);
-			return ((SSL_CTX *) NULL);
-		}
+	if (SSL_CTX_use_PrivateKey_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_CTX_use_PrivateKey_file: Unable to load private keys: ", sslerr_str, 0);
+		SSL_CTX_free(ctx);
+		return ((SSL_CTX *) NULL);
+	}
 #else
-		if (SSL_CTX_use_RSAPrivateKey_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
-			sslerr_str = (char *) myssl_error_str();
-			strerr_warn2("SSL_CTX_use_RSAPrivateKey_file: Unable to load RSA private keys: ", sslerr_str, 0);
-			SSL_CTX_free(ctx);
+	if (SSL_CTX_use_RSAPrivateKey_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn2("SSL_CTX_use_RSAPrivateKey_file: Unable to load RSA private keys: ", sslerr_str, 0);
+		SSL_CTX_free(ctx);
 			return ((SSL_CTX *) NULL);
-		}
+	}
 #endif
-		if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
-			sslerr_str = (char *) myssl_error_str();
-			strerr_warn4("SSL_CTX_use_certificate_file: Unable to use cerficate: ", cert, ": ", sslerr_str, 0);
-			SSL_CTX_free(ctx);
-			return ((SSL_CTX *) NULL);
-		}
-		if (cafile && 1 != SSL_CTX_load_verify_locations(ctx, cafile, 0)) {
-			sslerr_str = (char *) myssl_error_str();
-			strerr_warn4("SSL_CTX_load_verify_locations: Unable to use ca certificate: ", cafile, ": ", sslerr_str, 0);
-			SSL_CTX_free(ctx);
-			return ((SSL_CTX *) NULL);
-		}
+	if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn4("SSL_CTX_use_certificate_file: Unable to use cerficate: ", cert, ": ", sslerr_str, 0);
+		SSL_CTX_free(ctx);
+		return ((SSL_CTX *) NULL);
+	}
+	if (cafile && 1 != SSL_CTX_load_verify_locations(ctx, cafile, 0)) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn4("SSL_CTX_load_verify_locations: Unable to use ca certificate: ", cafile, ": ", sslerr_str, 0);
+		SSL_CTX_free(ctx);
+		return ((SSL_CTX *) NULL);
 	}
 	return (ctx);
 }
@@ -642,6 +646,7 @@ tls_connect(SSL *myssl, char *host)
 	err_str = decode_ssl_error(err);
 	if (err_str)
 		strerr_warn2("SSL_connect: decoded err: ", err_str, 0);
+	SSL_load_error_strings();
 	while ((err = ERR_get_error()))
 		strerr_warn2("SSL_connect: TLS/SSL err: ", ERR_error_string(err, 0), 0);
 	if (do_shutdown)
@@ -930,6 +935,9 @@ getversion_tls_c()
 
 /*
  * $Log: tls.c,v $
+ * Revision 1.18  2022-12-25 19:28:42+05:30  Cprogrammer
+ * refactored TLS code
+ *
  * Revision 1.17  2022-12-25 08:31:20+05:30  Cprogrammer
  * added #ifdefs for openssl version specific code
  *
