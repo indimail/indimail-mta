@@ -507,7 +507,7 @@ tls_init(char *tls_method, char *cert, char *cafile, char *ciphers, enum tlsmode
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_CTX_use_RSAPrivateKey_file: Unable to load RSA private keys: ", sslerr_str, 0);
 		SSL_CTX_free(ctx);
-			return ((SSL_CTX *) NULL);
+		return ((SSL_CTX *) NULL);
 	}
 #endif
 	if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
