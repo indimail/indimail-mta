@@ -590,12 +590,16 @@ decode_ssl_error(int i)
 		return "TLS/SSL accept to be retried";
 	case SSL_ERROR_WANT_X509_LOOKUP:
 		return "retry SSL_CTX_set_client_cert_cb() callback";
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L /*- openssl 1.1.0 */
 	case SSL_ERROR_WANT_ASYNC:
 		return "async engine still processing data";
 	case SSL_ERROR_WANT_ASYNC_JOB:
 		return "no async jobs available";
+#endif
+#if OPENSSL_VERSION_NUMBER >= 0x1010107f /*- openssl 1.1.1 */
 	case SSL_ERROR_WANT_CLIENT_HELLO_CB:
 		return "retry callback set by SSL_CTX_set_client_hello_cb()";
+#endif
 	case SSL_ERROR_SYSCALL:
 		do_shutdown = 0;
 		return "non-recoverable, fatal I/O error";
