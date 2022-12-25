@@ -382,6 +382,10 @@ tcpserver 127.0.0.1 25 /usr/indimail/lib/plugins/rblsmtpd.so -rdnsbl-1.uceprotec
 .EE
 
 .SH ENVIRONMENT
+.TP 0
+.B TLS_CERTFILE
+client ssl certificate. This can be overriden by the -n option.
+Default is servercert.pem
 .TP
 .B TLS_CIPHER_LIST
 Specifies the ciphers that should be used in SSL/TLS mode. See
@@ -389,7 +393,7 @@ Specifies the ciphers that should be used in SSL/TLS mode. See
 for more information.
 .TP
 .B CERTDIR
-Sub-directory relative to @qsysconfdir@, having servercert.pem.
+Directory having servercert.pem.
 Default is @qsysconfdir@/certs.
 
 .SH NOTES

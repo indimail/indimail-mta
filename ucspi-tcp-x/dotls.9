@@ -27,6 +27,10 @@ opportunistic TLS for qmail-smtpd, qmail-pop3d. This is known as
 enabled server. This is known is \fBclient mode\fR. This gets enabled
 when you use \fB\-T\fR or the \fB\-C\fR options.
 
+If the environment variable \fBBANNER\fR is set, and -s option has not been
+specified, \fBdotls\fR can print the value of \fBBANNER\fR environment
+variable, on the network to the client, before starting a SSL/TLS session.
+
 \fBdotls\fR will directly execute \fIprog\fR if \fBNOTLS\fR environment
 variable is set. This can be set using the \fBtcpserver\fR(1) rules file to
 bypass SSL/TLS for hosts that don't work if STARTLS or TLS is enabled.
@@ -57,7 +61,7 @@ environment variable TLS_CERTFILE. If this is not provided, the file
 @qsysconfdir@/certs/clientcert.pem will be used.
 
 .TP
-.B \-c \fIcafile
+-\fBc\fR \fIcafile\fR
 Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
 special CA certificates are needed if an intermediate certificate used
 by your issuing CA expires. Note that the file given with -c is passed
@@ -93,12 +97,12 @@ Currently, \fBsmtp\fR and \fBpop3\fR are supported. If this is not
 provided, \fBdotls\fR will directly initiate a TLS session.
 
 .TP
-.B \-C
+-\fBC\fR
 \fBclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
 reading fd 0 for input and using fd 1 for output.
 
 .TP
-.B \-T
+-\fBT\fR
 \fBtcpclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
 reading fd 6 for input and using fd 7 for output. Use this if \fIprog\fR has
 been specifically written for tcpclient(1).

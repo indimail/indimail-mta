@@ -115,6 +115,12 @@ future; if you want it, set it explicitly.
 Never delay sending data; enable TCP_NODELAY.
 
 .TP
+.B \-C \fIcertdir
+Directory having certificates.
+Default is @qsysconfdir@/certs.
+
+
+.TP
 .B \-n \fIclientcert
 A certificate is required for SSL/TLS servers. \fIclientcert\fR must not
 be world-readable. This option overrides environment variable TLS_CERTFILE.
