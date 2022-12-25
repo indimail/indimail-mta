@@ -1,6 +1,6 @@
 /*
  * $Log: tls.h,v $
- * Revision 1.10  2022-12-24 22:38:47+05:30  Cprogrammer
+ * Revision 1.10  2022-12-25 08:32:24+05:30  Cprogrammer
  * added prototype for set_certdir()
  *
  * Revision 1.9  2022-12-24 22:13:00+05:30  Cprogrammer
