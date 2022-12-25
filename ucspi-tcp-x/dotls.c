@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.15 2022-12-25 19:26:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.16 2022-12-25 21:52:58+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -11,6 +11,7 @@
 #endif
 #include <openssl/ssl.h>
 #include <sys/stat.h>
+#include <error.h>
 #include <stralloc.h>
 #include <scan.h>
 #include <fmt.h>
@@ -36,7 +37,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.15 2022-12-25 19:26:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.16 2022-12-25 21:52:58+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -169,7 +170,7 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 	i = c[j].fun(arg, cmd.s, cmd.len);
 	if (c[j].flush)
 		c[j].flush();
-	if (i) { /*- only do_tls() returns 1 */
+	if (i) { /*- only do_tls() returns 1 implying STARTTLS or STLS command */
 		switch (stls)
 		{
 		case smtp:
@@ -883,6 +884,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.16  2022-12-25 21:52:58+05:30  Cprogrammer
+ * include error.h for errno
+ *
  * Revision 1.15  2022-12-25 19:26:44+05:30  Cprogrammer
  * added BANNER functionality for clients to initiate STARTTLS
  *
