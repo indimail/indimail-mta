@@ -28,6 +28,14 @@ Release 1.1.1 Start 18/09/2022
 16.  tcpserver.c, dotls.c: set RSA/DH parameters
 17.  tcpserver.c: added -i option to specify certdir
 18.  dotls.c: added -d option to specify certdir
+- 25/12/2022
+19.  dotls.c: append certdir and certfile only when certfile is not an
+     absolute path
+20.  dotls.c: print value of BANNER env variable if set for clients to
+     initiate STARTTLS TLS/SSL session.
+21.  tcpclient.c: added -C arguemnt to specify certdir
+22.  tls.c: refactored TLS code
+23.  tcpserver.c: use TLS_CERTFILE if set for default servercert
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 14/02/2021 End 08/09/2022
