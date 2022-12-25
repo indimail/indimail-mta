@@ -164,6 +164,9 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
     log
 - 24/12/2022
 90. smtpd.c: removed ncorrect call to constmap_free()
+- 25/12/2022
+91. sslerator.c: refactored code
+91. sslerator.c: added options to specify cipher file, CA file and TLS method
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022

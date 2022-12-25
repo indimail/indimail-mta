@@ -8,59 +8,87 @@ sslerator \- TLS/SSL protocol wrapper
 
 .SH "DESCRIPTION"
 .PP
-The \fBsslerator\fR program is used by applications to encrypt a
-network connection using SSL/TLS, without having the application deal with the
-gory details of SSL/TLS. \fBsslerator\fR is used by the IndiMail
-proxy IMAP and POP3 servers.
+The \fBsslerator\fR program is used by applications to encrypt a network
+connection using SSL/TLS, without having the application deal with the gory
+details of SSL/TLS. \fBsslerator\fR is used by the IndiMail proxy IMAP and
+POP3 servers.
 .PP
-\fBsslerator\fR is not usually run directly from the commandline.
-An application typically creates a network connection, then runs
-\fBsslerator\fR with appropriate options to encrypt the network
-connection with SSL/TLS.
+\fBsslerator\fR is not usually run directly from the commandline. An
+application typically creates a network connection, then runs
+\fBsslerator\fR with appropriate options to encrypt the network connection
+with SSL/TLS.
+
+\fBsslerator\fR(8) can be replaced by the \fBdotls\fR(1) program and in
+future will be deprecated.
 
 .SH "OPTIONS"
-.TP
-\fB-n=\fIcertfile\fB\fR
-Use \fIcertfile\fR as the certificate
-The certificate to use and is required for SSL/TLS servers.
-\fIcertfile\fR must not be world-readable. This option overrides
-environment variable TLS_CERTFILE.
+.TP 3
+\fB-n\fR \fIcertfile\fR
+The certificate to use and is required for SSL/TLS servers. \fIcertfile\fR
+must not be world-readable. This option overrides environment variable
+TLS_CERTFILE.
 
 .TP
-\fB-t=\fItimeout\fB\fR
+\fB-C\fR \fIcafile\fR
+Specify \fIcafile\fR as the file containing CA certificates. Sometimes,
+special CA certificates are needed if an intermediate certificate used
+by your issuing CA expires. Note that the file given with -c is passed
+to SSL_CTX_load_verify_locations and thus may contain several CA
+certificates, which will be used during SSL connection negotiation to
+close any gap in the certificate chain.
+
+.TP
+\fB-c\fR \fIcipherfile\fR
+Use ciphers listed in \fIcipherfile\fR. Without this \fBdotls\fR uses
+TLS_CIPHER_LIST environment variable if set or system configured
+PROFILE=SYSTEM ciphers.
+
+.TP
+-\fBM\fR \fItls_method\fR
+Use \fItls_method\fR to set client/server method / protocol. This will be
+one of SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLSv1_3 values.
+The actual protocol version used will be negotiated to the highest version
+mutually supported by the client and the server. The supported protocols
+are SSLv3, TLSv1, TLSv1_1, TLSv1_2 and TLSv1_3. Ths option mus not be used
+to avoid the version-specific methods described below, which are
+deprecated.
+
+.TP
+\fB-t\fR \fItimeout\fR
 Timeout after \fItimeout\fR seconds if no data is received
 
 .TP
-\fB-b=\fIbanner\fB\fR
-Use \fIbanner\fR as greeting. This is overriden if -s startls stmp option is given.
-This option overrides environment variable BANNER.
+\fB-b\fR \fIbanner\fR
+Use \fIbanner\fR as greeting. This is overriden if -s startls stmp option
+is given. This option overrides environment variable BANNER.
 
 .TP
 \fB-e\fR
-Write ssl library errors to the network. If not provided, \fBsslerator\fR will write
-all ssl library errors to fd 2. This mode is disabled if environment variable TCPREMOTEIP
-is defined (running under tcpserver(1))
+Write ssl library errors to the network. If not provided, \fBsslerator\fR
+will write all ssl library errors to fd 2. This mode is disabled if
+environment variable \fBTCPREMOTEIP\fR is defined (running under
+tcpserver(1)).
 
 .TP
 \fB-s\fR
-Issue SMTP Greeting code on successful TLS/SSL negotiation. This code is obtained from
-\fIprog\fR. \fIprog\fR could be something like qmail-smtpd from qmail/indimail/notqmail/netqmail package.
+Issue SMTP Greeting code on successful TLS/SSL negotiation. This code is
+obtained from \fIprog\fR. \fIprog\fR could be something like qmail-smtpd
+from qmail/indimail/notqmail/netqmail package.
 
 .SH "ENVIRONMENT VARIABLES"
 .PP
-\fBsslerator\fR reads the following environment variables in
-order to configure the SSL/TLS protocol:
+\fBsslerator\fR reads the following environment variables in order to
+configure the SSL/TLS protocol:
 .TP
 \fBTLS_CERTFILE=\fIfilename\fB\fR
-The certificate to use.
-\fBTLS_CERTFILE\fR is required for SSL/TLS servers, and is optional
-for SSL/TLS clients.
+The certificate to use. The -n option overrides this \fBTLS_CERTFILE\fR is
+required for SSL/TLS servers, and is optional for SSL/TLS clients.
 \fIfilename\fR must not be world-readable.
 
 .TP
 \fBSSL_CIPHER=\fIcipherList\fB\fR
-A set of OpenSSL cipher strings. Multiple ciphers contained in a
-string should be separated by a colon.
+A set of OpenSSL cipher strings. Multiple ciphers contained in a string
+should be separated by a colon. The -c option overrides this.
 
 .TP
 \fBBANNER=\fIstring\fB\fR
@@ -70,4 +98,5 @@ Banner to issue before starting SSL/TLS negotiation.
 .PP
 \fBproxyimap\fR(8),
 \fBproxypop3\fR(8),
+\fBdotls\fR(1),
 \fBqmail-smtpd\fR(8)
