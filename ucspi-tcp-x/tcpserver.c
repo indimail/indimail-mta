@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.80 2022-12-24 22:15:11+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.81 2022-12-25 19:27:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -62,7 +62,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.80 2022-12-24 22:15:11+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.81 2022-12-25 19:27:40+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1416,13 +1416,15 @@ main(int argc, char **argv, char **envp)
 	if (!certdir && !(certdir = env_get("CERTDIR")))
 		certdir = "/etc/indimail/certs";
 	if (!certfile.len) {
-		if (!stralloc_copys(&certfile, certdir))
-			strerr_die2x(111, FATAL, "out of memory");
-		else
-		if (!stralloc_cats(&certfile, "/servercert.pem"))
-			strerr_die2x(111, FATAL, "out of memory");
-		else
-		if (!stralloc_0(&certfile) )
+		if (!(x = env_get("TLS_CERTFILE")))
+			x = "servercert.pem";
+		if (*x != '.' && *x != '/') {
+			if (!stralloc_copys(&certfile, certdir) ||
+					!stralloc_append(&certfile, "/"))
+				strerr_die2x(111, FATAL, "out of memory");
+		}
+		if (!stralloc_cats(&certfile, x) ||
+				!stralloc_0(&certfile))
 			strerr_die2x(111, FATAL, "out of memory");
 	}
 	if (flagssl == 1) {
@@ -1685,6 +1687,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.81  2022-12-25 19:27:40+05:30  Cprogrammer
+ * use TLS_CERTFILE if set for default servercert
+ *
  * Revision 1.80  2022-12-24 22:15:11+05:30  Cprogrammer
  * added -i option to specify certdir
  * set RSA/DH parameters
