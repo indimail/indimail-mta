@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.14 2022-12-24 22:14:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.15 2022-12-25 19:26:44+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -36,7 +36,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.14 2022-12-24 22:14:01+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.15 2022-12-25 19:26:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -111,7 +111,7 @@ int
 do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearout)
 {
 	int             i, j, found;
-	char           *arg;
+	char           *arg, *ptr;
 	char            ch;
 	struct scommd  *c;
 	static stralloc cmd = { 0 };
@@ -183,6 +183,12 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 				strerr_die2sys(111, FATAL, "write: ");
 			break;
 		default:
+			if ((ptr = env_get("BANNER"))) {
+				if (substdio_puts(&ssto, ptr) == -1 ||
+						substdio_put(&ssto, "\n", 1) == -1 ||
+					substdio_flush(&ssto) == -1)
+				strerr_die2sys(111, FATAL, "write: ");
+			}
 			break;
 		}
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
@@ -568,9 +574,9 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 	struct timeval  timeout;
 
 	substdio_fdbuf(&ssin, do_read, 0, inbuf, sizeof(inbuf));                    /*- from client */
-	substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf));                 /*- to child (smtpd, pop3d */
-	substdio_fdbuf(&smtpin, read, clearin, smtp_inbuf, sizeof(smtp_inbuf));     /*- cleartxt in */
-	substdio_fdbuf(&smtpto, write, clearout, smtp_outbuf, sizeof(smtp_outbuf)); /*- cleartxt out */
+	substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf));                 /*- to   client */
+	substdio_fdbuf(&smtpin, read, clearin, smtp_inbuf, sizeof(smtp_inbuf));     /*- cleartxt in  from (smtpd, pop3d, etc) */
+	substdio_fdbuf(&smtpto, write, clearout, smtp_outbuf, sizeof(smtp_outbuf)); /*- cleartxt out from (smtpd, pop3d, etc) */
 	while (!flagexitasap) {
 		timeout.tv_sec = dtimeout;
 		timeout.tv_usec = 0;
@@ -715,14 +721,17 @@ main(int argc, char **argv)
 		remoteip4 = "unknown";
 	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = remoteip4))
 		remoteip = "unknown";
+	if (!certdir && !(certdir = env_get("CERTDIR")))
+		certdir = "/etc/indimail/certs";
 	if (!certfile.len) {
 		if (!(ptr = env_get("TLS_CERTFILE")))
 			ptr = "clientcert.pem";
-		if (!certdir && !(certdir = env_get("CERTDIR")))
-			certdir = "/etc/indimail/certs";
-		if (!stralloc_copys(&certfile, certdir) ||
-				!stralloc_append(&certfile, "/") ||
-				!stralloc_cats(&certfile, ptr) ||
+		if (*ptr != '.' && *ptr != '/') {
+			if (!stralloc_copys(&certfile, certdir) ||
+					!stralloc_append(&certfile, "/"))
+				strerr_die2x(111, FATAL, "out of memory");
+		}
+		if (!stralloc_cats(&certfile, ptr) ||
 				!stralloc_0(&certfile))
 			strerr_die2x(111, FATAL, "out of memory");
 	}
@@ -806,6 +815,14 @@ main(int argc, char **argv)
 			do_starttls(stls, ssl, pi2[0], pi1[1]);
 			break;
 		default:
+			if ((ptr = env_get("BANNER"))) {
+				char            outbuf[1024];
+				substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf)); /*- to child (smtpd, pop3d */
+				if (substdio_puts(&ssto, ptr) == -1 ||
+						substdio_put(&ssto, "\n", 1) == -1 ||
+					substdio_flush(&ssto) == -1)
+				strerr_die2sys(111, FATAL, "write: ");
+			}
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 			getEnvConfigInt(&bits, "SSL_BITS", 2048);
 			if (!get_rsakey(0, bits, certdir))
@@ -866,6 +883,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.15  2022-12-25 19:26:44+05:30  Cprogrammer
+ * added BANNER functionality for clients to initiate STARTTLS
+ *
  * Revision 1.14  2022-12-24 22:14:01+05:30  Cprogrammer
  * added -d option to specify certdir
  * set RSA/DH parameters
