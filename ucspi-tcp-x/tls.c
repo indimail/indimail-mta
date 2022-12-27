@@ -1,5 +1,5 @@
 /*
- * $Id: tls.c,v 1.18 2022-12-25 19:28:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tls.c,v 1.19 2022-12-26 21:28:50+05:30 Cprogrammer Exp mbhangui $
  *
  * ssl_timeoutio functions froms from Frederik Vermeulen's
  * tls patch for qmail
@@ -29,7 +29,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.18 2022-12-25 19:28:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.19 2022-12-26 21:28:50+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -38,6 +38,7 @@ static char    *sslerr_str;
 static SSL     *ssl_t;
 static int      efd = -1;
 static char     do_shutdown = 1;
+static char    *certdir;
 
 void
 set_essential_fd(int fd)
@@ -58,9 +59,6 @@ ssl_free()
 	ssl_t = NULL;
 }
 
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-static char    *certdir;
-
 void
 set_certdir(char *s)
 {
@@ -68,6 +66,8 @@ set_certdir(char *s)
 	return;
 }
 
+
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 RSA            *
 tmp_rsa_cb(SSL *ssl_p, int export, int keylen)
 {
@@ -177,7 +177,7 @@ tmp_dh_cb(SSL *ssl_p, int export, int keylen)
 }
 #else /*- #if OPENSSL_VERSION_NUMBER < 0x30000000L */
 EVP_PKEY       *
-get_rsakey(int export, int keylen, char *certdir)
+get_rsakey(int export, int keylen, char *_certdir)
 {
 	stralloc        filename = { 0 };
 	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
@@ -188,7 +188,7 @@ get_rsakey(int export, int keylen, char *certdir)
 
 	if (!export)
 		keylen = 512;
-	if (!stralloc_copys(&filename, certdir) ||
+	if (!stralloc_copys(&filename, _certdir) ||
 			!stralloc_catb(&filename, "/rsa", 4))
 		strerr_die1x(111, "out of memory");
 	j = filename.len;
@@ -221,7 +221,7 @@ get_rsakey(int export, int keylen, char *certdir)
 }
 
 EVP_PKEY       *
-get_dhkey(int export, int keylen, char *certdir)
+get_dhkey(int export, int keylen, char *_certdir)
 {
 	stralloc        filename = { 0 };
 	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
@@ -232,7 +232,7 @@ get_dhkey(int export, int keylen, char *certdir)
 
 	if (!export)
 		keylen = 1024;
-	if (!stralloc_copys(&filename, certdir) ||
+	if (!stralloc_copys(&filename, _certdir) ||
 			!stralloc_catb(&filename, "/dh", 3))
 		strerr_die1x(111, "out of memory");
 	j = filename.len;
@@ -457,9 +457,14 @@ set_tls_method(char *ssl_option, enum tlsmode tmode)
 }
 
 SSL_CTX        *
-tls_init(char *tls_method, char *cert, char *cafile, char *ciphers, enum tlsmode tmode)
+tls_init(char *tls_method, char *cert, char *cafile, char *crlfile,
+		char *ciphers, enum tlsmode tmode)
 {
 	static SSL_CTX *ctx = (SSL_CTX *) NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x00907000L
+	X509_STORE     *store;
+	X509_LOOKUP    *lookup;
+#endif
 
 	if (ctx)
 		return (ctx);
@@ -470,15 +475,28 @@ tls_init(char *tls_method, char *cert, char *cafile, char *ciphers, enum tlsmode
 		return ((SSL_CTX *) NULL);
 	}
 	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-	if (!SSL_CTX_load_verify_locations(ctx, cert, NULL)) {
-		sslerr_str = (char *) myssl_error_str();
-		strerr_warn4("unable to load certificate: ", cert, ": ", sslerr_str, 0);
-		SSL_CTX_free(ctx);
-		return ((SSL_CTX *) NULL);
+	if (tmode == server) {
+		if (1 != SSL_CTX_load_verify_locations(ctx, cert, certdir)) {
+			sslerr_str = (char *) myssl_error_str();
+			strerr_warn4("unable to load certificate: ", cert, ": ", sslerr_str, 0);
+			SSL_CTX_free(ctx);
+			return ((SSL_CTX *) NULL);
+		}
+		if (cafile && 1 != SSL_CTX_load_verify_locations(ctx, cafile, certdir)) {
+			sslerr_str = (char *) myssl_error_str();
+			strerr_warn4("SSL_CTX_load_verify_locations: Unable to use ca certificate: ", cafile, ": ", sslerr_str, 0);
+			SSL_CTX_free(ctx);
+			return ((SSL_CTX *) NULL);
+		}
+#if OPENSSL_VERSION_NUMBER >= 0x00907000L
+		/*- crl checking */
+		store = SSL_CTX_get_cert_store(ctx);
+		if ((lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))
+			&& (X509_load_crl_file(lookup, crlfile, X509_FILETYPE_PEM) == 1))
+			X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
+#endif
 	}
-	/*
-	 * set the callback here; SSL_set_verify didn't work before 0.9.6c
-	 */
+	/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
 #ifdef CRYPTO_POLICY_NON_COMPLIANCE
 	/*- Set our cipher list */
@@ -513,12 +531,6 @@ tls_init(char *tls_method, char *cert, char *cafile, char *ciphers, enum tlsmode
 	if (SSL_CTX_use_certificate_file(ctx, cert, SSL_FILETYPE_PEM) != 1) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn4("SSL_CTX_use_certificate_file: Unable to use cerficate: ", cert, ": ", sslerr_str, 0);
-		SSL_CTX_free(ctx);
-		return ((SSL_CTX *) NULL);
-	}
-	if (cafile && 1 != SSL_CTX_load_verify_locations(ctx, cafile, 0)) {
-		sslerr_str = (char *) myssl_error_str();
-		strerr_warn4("SSL_CTX_load_verify_locations: Unable to use ca certificate: ", cafile, ": ", sslerr_str, 0);
 		SSL_CTX_free(ctx);
 		return ((SSL_CTX *) NULL);
 	}
@@ -748,27 +760,6 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 }
 
 ssize_t
-allwrite(int fd, char *buf, size_t len)
-{
-	ssize_t         w;
-	size_t          total = 0;
-
-	while (len) {
-		if ((w = write(fd, buf, len)) == -1) {
-			if (errno == error_intr)
-				continue;
-			return -1;	/*- note that some data may have been written */
-		}
-		if (w == 0)
-			;	/*- luser's fault */
-		buf += w;
-		total += w;
-		len -= w;
-	}
-	return total;
-}
-
-ssize_t
 allwritessl(SSL *myssl, char *buf, size_t len)
 {
 	int             w;
@@ -807,6 +798,27 @@ ssl_timeoutwrite(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 	return ssl_timeoutio((int (*)())allwritessl, t, rfd, wfd, myssl, buf, len);
 }
 #endif
+
+ssize_t
+allwrite(int fd, char *buf, size_t len)
+{
+	ssize_t         w;
+	size_t          total = 0;
+
+	while (len) {
+		if ((w = write(fd, buf, len)) == -1) {
+			if (errno == error_intr)
+				continue;
+			return -1;	/*- note that some data may have been written */
+		}
+		if (w == 0)
+			;	/*- luser's fault */
+		buf += w;
+		total += w;
+		len -= w;
+	}
+	return total;
+}
 
 int
 translate(int sfd, int clearout, int clearin, unsigned int iotimeout)
@@ -935,6 +947,9 @@ getversion_tls_c()
 
 /*
  * $Log: tls.c,v $
+ * Revision 1.19  2022-12-26 21:28:50+05:30  Cprogrammer
+ * function allwrite() made visible for non-TLS
+ *
  * Revision 1.18  2022-12-25 19:28:42+05:30  Cprogrammer
  * refactored TLS code
  *

@@ -337,6 +337,17 @@ qmail-smtpd: pid 14544 from ::ffff:127.0.0.1 HELO <indimail.org> \\
  ipaddr=217.73.48.143
 .EE
 
+\fBqmail-smtpd\fR writes \fIReceived:\fR header with details of the SMTP
+connection regarding ESMTP, UTF, TLS, date and time.
+
+.EX
+Received: indimail-mta smtpd 28500 (HELO argos.indimail.org) (::1)
+  by unknown with ESMTPS
+  (tls provider dotls, TLS Server=TLSv1.3, Client=TLSv1.3,
+  Ciphers=TLS_AES_256_GCM_SHA384);
+  Mon, 26 Dec 2022 21:02:07 +0530
+.EE
+
 .SH Database Connections
 \fBqmail-smtpd\fR uses \fBinlookup(8)\fR, instead of directly connecting to
 MySQL. This allows very a high queries per seconds to be achieved by avoiding
@@ -691,7 +702,7 @@ SSL certificate to be presented to clients in TLS-encrypted sessions.
 Should contain both the certificate and the private key. Certifying
 Authority (CA) and intermediate certificates can be added at the end of the
 file. The filename can be overriden by the environment variable
-\fBSERVERCERT\fR. The default location of @sysconfdir@/control can be
+\fBSERVERCERT\fR. The default location of @sysconfdir@/certs can be
 overriden by environment variable CERTDIR.
 
 .TP 5
@@ -699,7 +710,7 @@ overriden by environment variable CERTDIR.
 A list of Certifying Authority (CA) certificates that are used to verify
 the client-presented certificates during a TLS-encrypted session. The
 filename can be overriden by the environment variable \fBCLIENTCA\fR.
-The default location of @sysconfdir@/control can be overriden by
+The default location of @sysconfdir@/certs can be overriden by
 environment variable CERTDIR.
 
 .TP 5
@@ -709,7 +720,7 @@ should contain the CRLs of the CAs in
 .I clientca.pem 
 and client certs that will be checked for revocation. The
 filename can be overriden by the environment variable \fBCLIENTCRL\fR.
-The default location of @sysconfdir@/control can be overriden by
+The default location of @sysconfdir@/certs can be overriden by
 environment variable CERTDIR.
 
 .TP 5
@@ -717,7 +728,7 @@ environment variable CERTDIR.
 If this 512 bit RSA key is provided,
 .B qmail-smtpd
 will use it for TLS sessions instead of generating one on-the-fly.
-The default location of @sysconfdir@/control can be overriden by
+The default location of @sysconfdir@/certs can be overriden by
 environment variable CERTDIR.
 
 .TP 5
@@ -726,14 +737,14 @@ If these 1024 bit DH parameters are provided,
 .B qmail-smtpd
 will use them for TLS sessions instead of generating one on-the-fly 
 (which is very timeconsuming).
-The default location of @sysconfdir@/control can be overriden by
+The default location of @sysconfdir@/certs can be overriden by
 environment variable CERTDIR.
 
 .TP 5
 .I dh512.pem
 512 bit counterpart for 
 .B dh1024.pem. 
-The default location of @sysconfdir@/control can be overriden by
+The default location of @sysconfdir@/certs can be overriden by
 environment variable CERTDIR.
 
 .TP 5

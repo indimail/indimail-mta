@@ -1,5 +1,8 @@
 /*
  * $Log: tls.h,v $
+ * Revision 1.11  2022-12-26 21:29:16+05:30  Cprogrammer
+ * function allwrite() made visible for non-TLS
+ *
  * Revision 1.10  2022-12-25 08:32:24+05:30  Cprogrammer
  * added prototype for set_certdir()
  *
@@ -45,13 +48,13 @@ enum starttls {smtp, pop3, unknown};
 ssize_t         saferead(int, char *, size_t, long);
 ssize_t         safewrite(int, char *, size_t, long);
 ssize_t         allwrite(int, char *, size_t);
+int             translate(int, int, int, unsigned int);
 #ifdef TLS
-SSL_CTX        *tls_init(char *, char *, char *, char *, enum tlsmode);
+SSL_CTX        *tls_init(char *, char *, char *, char *, char *, enum tlsmode);
 SSL            *tls_session(SSL_CTX *, int, char *);
 int             tls_connect(SSL *, char *);
 int             tls_accept(SSL *);
 void            ssl_free();
-int             translate(int, int, int, unsigned int);
 ssize_t         allwritessl(SSL *ssl, char *buf, size_t len);
 ssize_t         ssl_timeoutio(int (*fun) (), long, int, int, SSL *, char *, size_t);
 ssize_t         ssl_timeoutread(long, int, int, SSL *, char *, size_t);
@@ -59,8 +62,8 @@ ssize_t         ssl_timeoutwrite(long, int, int, SSL *, char *, size_t);
 int             ssl_timeoutrehandshake(long, int, int, SSL *);
 const char     *myssl_error_str();
 void            set_essential_fd(int fd);
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
 void            set_certdir(char *s);
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
 RSA            *tmp_rsa_cb(SSL *ssl_p, int export, int keylen);
 DH             *tmp_dh_cb(SSL *ssl_p, int export, int keylen);
 #else

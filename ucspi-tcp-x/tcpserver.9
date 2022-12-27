@@ -1,6 +1,6 @@
 .TH tcpserver 1
 .SH NAME
-tcpserver \- accepts incoming TCP connections.
+tcpserver \- accepts incoming TLS/non-TLS TCP connections
 .SH SYNOPSIS
 .B tcpserver
 [
@@ -36,6 +36,12 @@ dotted-decimal IP address, allowing connections only to that address; or a
 host name, allowing connections to the first IP address for that host.
 Host names are fed through qualification using dns_ip4_qualify
 (dns_ip6_qualify for ipv6).
+
+.B tcpserver
+can also do SSL/TLS encryption with remote clients. This requires a SSL
+certificate to be provided using the -n option. For TLS/SSL sessions,
+\fBtcpserver\fR sets the environment variable \fBTLS_PROVIDER\fR with
+details of the TLS connnection.
 
 \fBtcpserver(1)\fR works differently on Linux and FreeBSD. By default,
 FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The default
@@ -271,7 +277,9 @@ Default is @qsysconfdir@/certs.
 
 .TP
 .B \-n \fIcertfile
-Use \fIcertfile\fR as the default certificate instead of servercert.pem.
+Use \fIcertfile\fR as the TLS/SSL certificate. If the -n option is not
+provided, tcpserver will not initiate a TLS/SSL session. \fIcertfile\fR can
+be an empty string to use \fBTLS_CERTFILE\fR environment variable.
 
 .TP
 .B \-a \fIcafile
@@ -280,7 +288,15 @@ special CA certificates are needed if an intermediate certificate used
 by your issuing CA expires. Note that the file given with -a is passed
 to SSL_CTX_load_verify_locations and thus may contain several CA
 certificates, which will be used during SSL connection negotiation to
-close any gap in the certificate chain.
+close any gap in the certificate chain. If this is not provided, the file
+@qsysconfdir@/certs/clientca.pem will be used.
+
+.TP
+-\fBL\fR \fIcrlfile\fR
+A list of Certificate Revocation Lists (CRLs). If present it
+should contain the CRLs of the CAs in \fIcafile\fR and client certs that
+will be checked for revocation. If this is not provided, the file
+@qsysconfdir@/certs/clientcrl.pem will be used.
 
 .TP
 -\fBf\fR \fIcipher_list\fR
@@ -384,13 +400,25 @@ tcpserver 127.0.0.1 25 /usr/indimail/lib/plugins/rblsmtpd.so -rdnsbl-1.uceprotec
 .SH ENVIRONMENT
 .TP 0
 .B TLS_CERTFILE
-client ssl certificate. This can be overriden by the -n option.
+server ssl certificate. This is used when an empty string is passed as the
+argument to the -n option.
 Default is servercert.pem
+
+.TP
+.B CLIENTCA
+CA certificate. This can be overriden by the -c option.
+Default is @qsysconfdir@/certs/clientca.pem
+
+.TP
+.B CLIENTCRL
+Certificate Revocation Lists.
+Default is @qsysconfdir@/certs/clientcrl.pem
+
 .TP
 .B TLS_CIPHER_LIST
-Specifies the ciphers that should be used in SSL/TLS mode. See
-.I openssl(1)
-for more information.
+A set of OpenSSL cipher strings. Multiple ciphers contained in a string
+should be separated by a colon. This can be overriden by the -f option.
+
 .TP
 .B CERTDIR
 Directory having servercert.pem.

@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.16 2022-12-25 21:52:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.17 2022-12-27 07:40:21+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -20,14 +20,17 @@
 #include <case.h>
 #include <env.h>
 #include <fd.h>
+#include <signal.h>
 #include <sig.h>
+#include <wait.h>
 #include <str.h>
 #include <alloc.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
 #include <getEnvConfig.h>
 #include <gen_alloc.h>
 #include <gen_allocdefs.h>
 #include <getln.h>
-#include <timeoutwrite.h>
 #include <noreturn.h>
 #include <openreadclose.h>
 #include "upathexec.h"
@@ -37,7 +40,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.16 2022-12-25 21:52:58+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.17 2022-12-27 07:40:21+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -60,12 +63,14 @@ struct scommd
 static substdio ssin, ssto, smtpin, smtpto;
 static unsigned long   dtimeout = 60;
 static stralloc certfile;
+static stralloc cafile;
+static stralloc crlfile;
 static stralloc capatext;
 static stralloc sauninit;
 static stralloc line;
 static stralloc saciphers;
-static stralloc ssl_server_version, ssl_client_version;
-static char     strnum[FMT_ULONG];
+static stralloc tls_server_version, tls_client_version;
+static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static char    *remoteip, *remoteip4;
 static char    *certdir;
 static int      linemode = 1;
@@ -78,10 +83,11 @@ usage(void)
 		 " [ -h host ]\n"
 		 " [ -t timeoutdata ]\n"
 		 " [ -d certdir ]\n"
-		 " [ -n clientcert ]\n"
+		 " [ -n cert ]\n"
 		 " [ -f cipherlist ]\n"
 		 " [ -M TLS methods ]\n"
 		 " [ -c cafile ] \n"
+		 " [ -L crlfile ] \n"
 		 " [ -s starttlsType (smtp|pop3) ]\n"
 		 " program");
 }
@@ -101,6 +107,49 @@ struct scommd   pop3commands[] = {
 	{ "quit", do_quit, flush},
 	{ 0, func_unimpl, flush }
 };
+
+void
+write_provider_data(SSL *ssl, int writefd, int readfd)
+{
+	int             i;
+	ssize_t         n;
+
+	if (!stralloc_copyb(&line, "TLS Server=", 11) ||
+			!stralloc_cat(&line, &tls_server_version) ||
+			!stralloc_catb(&line, ", Client=", 9) ||
+			!stralloc_cat(&line, &tls_client_version) ||
+			!stralloc_catb(&line, ", Ciphers=", 10) ||
+			!stralloc_cats(&line, SSL_CIPHER_get_name(SSL_get_current_cipher(ssl))))
+		strerr_die2x(111, FATAL, "out of memory");
+	i = line.len;
+	if (write(writefd, (char *) &i, sizeof(int)) == -1)
+		strerr_die2sys(111, FATAL, "unable to write provider data length: ");
+	if (write(writefd, line.s, line.len) == -1)
+		strerr_die2sys(111, FATAL, "unable to write provider data: ");
+	if ((n = timeoutread(5, readfd, (char *) &i, 1)) == -1)
+		strerr_die2sys(111, FATAL, "unable to read provider ACK: ");
+	return;
+}
+
+void
+read_provider_data(stralloc *t, int readfd, int writefd)
+{
+	int             i;
+	ssize_t         n;
+
+	if ((n = timeoutread(5, readfd, (char *) &i, sizeof(int))) == -1)
+		strerr_die2sys(111, FATAL, "unable to read provider data length: ");
+	if (!stralloc_ready(t, t->len + i))
+		strerr_die2x(111, FATAL, "out of memory");
+	if ((n = timeoutread(5, readfd, t->s + t->len, i)) == -1)
+		strerr_die2sys(111, FATAL, "unable to read provider data: ");
+	else
+	if (n)
+		t->len += i;
+	if ((n = write(writefd, (char *) &i, 1)) == -1)
+		strerr_die2sys(111, FATAL, "unable to write provider ACK: ");
+	return;
+}
 
 /*-
  * Returns
@@ -203,21 +252,23 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 		} else
 			SSL_set_dh_auto(ssl, 1);
 #else
-		set_certdir(certdir);
 		SSL_set_tmp_rsa_callback(ssl, tmp_rsa_cb);
 		SSL_set_tmp_dh_callback(ssl, tmp_dh_cb);
 #endif
+		/*- starttls session */
 		if (tls_accept(ssl))
 			strerr_die2x(111, FATAL, "unable to accept SSL connection");
-		strnum[fmt_ulong(strnum, getpid())] = 0;
-		if (!stralloc_copys(&ssl_client_version, SSL_get_version(ssl)) ||
-				!stralloc_0(&ssl_client_version))
+		if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
+				!stralloc_0(&tls_client_version))
 			strerr_die2x(111, FATAL, "out of memory");
-		strerr_warn8("dotls: pid ", strnum, " from ", remoteip, " TLS Server Version=",
-			ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
+		tls_client_version.len--;
+		strnum1[fmt_ulong(strnum1, getpid())] = 0;
+		strerr_warn10("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
+				tls_server_version.s, ", Client=", tls_client_version.s,
+				", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)), 0);
 		i = translate(0, clearout, clearin, dtimeout); /*- returns only when one side closes */
 		ssl_free();
-		strerr_warn5("dotls: pid ", strnum, " from ", remoteip, " exiting...", 0);
+		strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
 		_exit(i);
 	}
 	return 1;
@@ -597,8 +648,8 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 		if (!r) { /*-timeout */
 			timeout.tv_sec = dtimeout;
 			timeout.tv_usec = 0;
-			strnum[fmt_ulong(strnum, timeout.tv_sec)] = 0;
-			strerr_warn4(FATAL, "idle timeout reached without input [", strnum, " sec]", 0);
+			strnum1[fmt_ulong(strnum1, timeout.tv_sec)] = 0;
+			strerr_warn4(FATAL, "idle timeout reached without input [", strnum1, " sec]", 0);
 			_exit(111);
 		}
 		if (fd0_flag && FD_ISSET(0, &rfds)) { /*- data from client */
@@ -646,12 +697,39 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 	return 0;
 }
 
+void
+sigchld()
+{
+	int             i, wstat, pid;
+
+	while ((pid = wait_nohang(&wstat)) > 0) {
+		strnum1[fmt_ulong(strnum1, pid)] = 0;
+		if (wait_stopped(wstat) || wait_continued(wstat)) {
+			i = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
+			strnum2[fmt_ulong(strnum2, i)] = 0;
+			strerr_warn4("dotls: end ", strnum1, wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
+		} else
+		if (wait_signaled(wstat)) {
+			i = wait_termsig(wstat);
+			strnum2[fmt_ulong(strnum2, i)] = 0;
+			strerr_warn4("dotls: end ", strnum1, " killed by signal ", strnum2, 0);
+		} else
+		if ((i = wait_exitcode(wstat))) {
+			strnum2[fmt_ulong(strnum2, i)] = 0;
+			strerr_warn4("dotls: end ", strnum1, " status ", strnum2, 0);
+		}
+	}
+	ssl_free();
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
+	strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
+}
+
 int
 main(int argc, char **argv)
 {
 	int             i, opt, pi1[2], pi2[2], client_mode = 0, tcpclient = 0;
 	pid_t           pid;
-	char           *cafile = NULL, *host = NULL, *ciphers = NULL,
+	char           *host = NULL, *ciphers = NULL,
 				   *ptr, *cipherfile = NULL, *tls_method = NULL;
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
@@ -664,14 +742,10 @@ main(int argc, char **argv)
 #endif
 
 	sig_ignore(sig_pipe);
-
-	while ((opt = getopt(argc, argv, "CTd:s:h:t:n:c:f:M:")) != opteof) {
+	while ((opt = getopt(argc, argv, "CTd:s:h:t:n:c:L:f:M:")) != opteof) {
 		switch (opt) {
 		case 'h':
 			host = optarg;
-			break;
-		case 'f':
-			cipherfile = optarg;
 			break;
 		case 'T':
 			tcpclient = 1;
@@ -687,16 +761,22 @@ main(int argc, char **argv)
 			certdir = optarg;
 			break;
 		case 'n':
-			if (!optarg)
-				usage();
 			if (*optarg && (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile)))
 				strerr_die2x(111, FATAL, "out of memory");
 			break;
+		case 'c':
+			if (*optarg && (!stralloc_copys(&cafile, optarg) || !stralloc_0(&cafile)))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case 'L':
+			if (*optarg && (!stralloc_copys(&crlfile, optarg) || !stralloc_0(&crlfile)))
+				strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case 'f':
+			cipherfile = optarg;
+			break;
 		case 'M':
 			tls_method = optarg;
-			break;
-		case 'c':
-			cafile = optarg;
 			break;
 		case 's':
 			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3"))
@@ -724,9 +804,10 @@ main(int argc, char **argv)
 		remoteip = "unknown";
 	if (!certdir && !(certdir = env_get("CERTDIR")))
 		certdir = "/etc/indimail/certs";
+	set_certdir(certdir);
 	if (!certfile.len) {
 		if (!(ptr = env_get("TLS_CERTFILE")))
-			ptr = "clientcert.pem";
+			ptr = client_mode ? "clientcert.pem" : "servercert.pem";
 		if (*ptr != '.' && *ptr != '/') {
 			if (!stralloc_copys(&certfile, certdir) ||
 					!stralloc_append(&certfile, "/"))
@@ -735,6 +816,34 @@ main(int argc, char **argv)
 		if (!stralloc_cats(&certfile, ptr) ||
 				!stralloc_0(&certfile))
 			strerr_die2x(111, FATAL, "out of memory");
+	}
+	if (!cafile.len) {
+		if (!(ptr = env_get("CLIENTCA")))
+			ptr = "clientca.pem";
+		if (*ptr != '.' && *ptr != '/') {
+			if (!stralloc_copys(&cafile, certdir) ||
+					!stralloc_append(&cafile, "/"))
+				strerr_die2x(111, FATAL, "out of memory");
+		}
+		if (!stralloc_cats(&cafile, ptr) ||
+				!stralloc_0(&cafile))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (access(cafile.s, R_OK))
+			cafile.len = 0;
+	}
+	if (!crlfile.len) {
+		if (!(ptr = env_get("CLIENTCRL")))
+			ptr = "clientca.pem";
+		if (*ptr != '.' && *ptr != '/') {
+			if (!stralloc_copys(&crlfile, certdir) ||
+					!stralloc_append(&crlfile, "/"))
+				strerr_die2x(111, FATAL, "out of memory");
+		}
+		if (!stralloc_cats(&crlfile, ptr) ||
+				!stralloc_0(&crlfile))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (access(crlfile.s, R_OK))
+			crlfile.len = 0;
 	}
 	/*-
 	 * We create two pipes to read and write unencrypted data
@@ -766,8 +875,11 @@ main(int argc, char **argv)
 	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
 		ciphers = "PROFILE=SYSTEM";
     /*- setup SSL context (load key and cert into ctx) */
-	if (!(ctx = tls_init(tls_method, certfile.s, cafile, ciphers, client_mode ? client : server)))
+	if (!(ctx = tls_init(tls_method, certfile.s,
+			cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
+			ciphers, client_mode ? client : server)))
 		_exit(111);
+	sig_catch(sig_child, sigchld);
 	switch ((pid = fork()))
 	{
 	case -1:
@@ -779,6 +891,17 @@ main(int argc, char **argv)
 		sig_uncatch(sig_pipe);
 		sig_uncatch(sig_child);
 		sig_uncatch(sig_term);
+		if (stls != smtp && stls != pop3) {
+			if (!stralloc_copyb(&line, "dotls, ", 7))
+				strerr_die2x(111, FATAL, "out of memory");
+			read_provider_data(&line, pi2[0], pi1[1]);
+			if (!stralloc_0(&line))
+				strerr_die2x(111, FATAL, "out of memory");
+			if (!env_put2("TLS_PROVIDER", line.s))
+				strerr_die2x(111, FATAL, "out of memory");
+		} else
+		if (!env_put("TLS_PROVIDER=dotls, starttls"))
+			strerr_die2x(111, FATAL, "out of memory");
 		close(pi1[1]); /*- pi1[0] will be used for reading cleartxt */
 		close(pi2[0]); /*- pi2[1] will be used for writing cleartxt */
 		if ((fd_move(tcpclient ? 6 : 0, pi1[0]) == -1) || (fd_move(tcpclient ? 7 : 1, pi2[1]) == -1))
@@ -788,31 +911,37 @@ main(int argc, char **argv)
 		/*- Not reached */
 		_exit(0);
 	default:
-		close(pi1[0]); /*- pi1[1] be used for writing cleartext */
-		close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 		break;
 	}
 	if (!(ssl = tls_session(ctx, client_mode ? 6 : 0, ciphers)))
 		strerr_die2x(111, FATAL, "unable to setup SSL session");
 	SSL_CTX_free(ctx);
 	ctx = NULL;
-	if (!stralloc_copys(&ssl_server_version, SSL_get_version(ssl)) ||
-				!stralloc_0(&ssl_server_version))
+	if (!stralloc_copys(&tls_server_version, SSL_get_version(ssl)) ||
+				!stralloc_0(&tls_server_version))
 		strerr_die2x(111, FATAL, "out of memory");
+	tls_server_version.len--;
 	if (client_mode) {
 		if (tls_connect(ssl, host) == -1)
 			_exit(111);
-		if (!stralloc_copys(&ssl_client_version, SSL_get_version(ssl)) ||
-					!stralloc_0(&ssl_client_version))
+		if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
+					!stralloc_0(&tls_client_version))
 			strerr_die2x(111, FATAL, "out of memory");
-		strnum[fmt_ulong(strnum, getpid())] = 0;
-		strerr_warn8("dotls: pid ", strnum, " from ", remoteip, " TLS Server Version=",
-				ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
+		tls_client_version.len--;
+		strnum1[fmt_ulong(strnum1, getpid())] = 0;
+		strerr_warn10("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
+				tls_server_version.s, ", Client=", tls_client_version.s,
+				", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)), 0);
+		write_provider_data(ssl, pi2[1], pi1[0]);
+		close(pi1[0]); /*- pi1[1] be used for writing cleartext */
+		close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 	} else { /*- server mode */
 		switch (stls)
 		{
 		case smtp:
 		case pop3:
+			close(pi1[0]); /*- pi1[1] be used for writing cleartext */
+			close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 			do_starttls(stls, ssl, pi2[0], pi1[1]);
 			break;
 		default:
@@ -834,21 +963,26 @@ main(int argc, char **argv)
 			} else
 				SSL_set_dh_auto(ssl, 1);
 #else
-			set_certdir(certdir);
 			SSL_set_tmp_rsa_callback(ssl, tmp_rsa_cb);
 			SSL_set_tmp_dh_callback(ssl, tmp_dh_cb);
 #endif
+			/*- non-starttls session */
 			if (tls_accept(ssl))
 				strerr_die2x(111, FATAL, "unable to accept SSL connection");
-			if (!stralloc_copys(&ssl_client_version, SSL_get_version(ssl)) ||
-						!stralloc_0(&ssl_client_version))
+			if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
+						!stralloc_0(&tls_client_version))
 				strerr_die2x(111, FATAL, "out of memory");
-			strnum[fmt_ulong(strnum, getpid())] = 0;
-			strerr_warn8("dotls: pid ", strnum, " from ", remoteip, " TLS Server Version=",
-					ssl_server_version.s, ", Client Version=", ssl_client_version.s, 0);
+			tls_client_version.len--;
+			strnum1[fmt_ulong(strnum1, getpid())] = 0;
+			strerr_warn10("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
+					tls_server_version.s, ", Client=", tls_client_version.s,
+					", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)), 0);
+			write_provider_data(ssl, pi2[1], pi1[0]);
+			close(pi1[0]); /*- pi1[1] be used for writing cleartext */
+			close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 			i = translate(0, pi1[1], pi2[0], dtimeout);
 			ssl_free();
-			strerr_warn5("dotls: pid ", strnum, " from ", remoteip, " exiting...", 0);
+			strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
 			_exit(i);
 			break;
 		}
@@ -884,6 +1018,11 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.17  2022-12-27 07:40:21+05:30  Cprogrammer
+ * added -L option to specify CRL
+ * added sigchild handler
+ * set TLS_PROVIDER env variable
+ *
  * Revision 1.16  2022-12-25 21:52:58+05:30  Cprogrammer
  * include error.h for errno
  *

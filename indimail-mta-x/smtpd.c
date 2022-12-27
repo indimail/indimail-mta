@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.279 2022-12-24 22:35:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.281 2022-12-26 22:11:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -145,7 +145,7 @@ int             secure_auth = 0;
 int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
 char           *servercert, *clientca, *clientcrl;
 #endif
-char           *revision = "$Revision: 1.279 $";
+char           *revision = "$Revision: 1.281 $";
 char           *protocol = "SMTP";
 stralloc        proto = { 0 };
 static stralloc Revision = { 0 };
@@ -866,8 +866,8 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 void
 log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, int notify)
 {
-	char           *ptr;
-	int             idx;
+	char           *ptr, *p;
+	int             idx, i;
 	static stralloc tmpLine = { 0 };
 
 	tmpLine.len = 0;
@@ -907,9 +907,33 @@ log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 			logerr("> Size: ");
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
 			logerr(strnum);
-#ifdef TLS
 			logerr(" TLS=");
-			logerr(ssl ? SSL_get_version(ssl) : "No");
+#ifdef TLS
+			if (ssl)
+				logerr(SSL_get_version(ssl));
+			else {
+				if (!(p = env_get("TLS_PROVIDER")))
+					logerr("No");
+				else {
+					i = str_chr(p, ',');
+					if (p[i]) {
+						p[i] = 0;
+						logerr(p);
+						p[i] = ',';
+					}
+				}
+			}
+#else
+			if (!(p = env_get("TLS_PROVIDER")))
+				logerr("No");
+			else {
+				i = str_chr(p, ',');
+				if (p[i]) {
+					p[i] = 0;
+					logerr(p);
+					p[i] = ',';
+				}
+			}
 #endif
 			if (!notify && tmpLine.len) {
 				logerr(" ");
@@ -926,8 +950,8 @@ log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 void
 err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx, int permanent, unsigned long qp)
 {
-	char           *ptr;
-	int             idx;
+	char           *ptr, *p;
+	int             idx, i;
 	char            size[FMT_ULONG];
 	static stralloc tmpLine = { 0 };
 
@@ -972,9 +996,33 @@ err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 				logerr(" ");
 				logerr(tmpLine.s); /*- X-Bogosity line */
 			}
-#ifdef TLS
 			logerr(" TLS=");
-			logerr(ssl ? SSL_get_version(ssl) : "No");
+#ifdef TLS
+			if (ssl)
+				logerr(SSL_get_version(ssl));
+			else {
+				if (!(p = env_get("TLS_PROVIDER")))
+					logerr("No");
+				else {
+					i = str_chr(p, ',');
+					if (p[i]) {
+						p[i] = 0;
+						logerr(p);
+						p[i] = ',';
+					}
+				}
+			}
+#else
+			if (!(p = env_get("TLS_PROVIDER")))
+				logerr("No");
+			else {
+				i = str_chr(p, ',');
+				if (p[i]) {
+					p[i] = 0;
+					logerr(p);
+					p[i] = ',';
+				}
+			}
 #endif
 			logerr(" qp ");
 			logerr(accept_buf);
@@ -1620,6 +1668,7 @@ void
 err_authfailure(char *r_ip, char *authuser, int ret)
 {
 	static char     retstr[FMT_ULONG];
+	char           *ptr;
 	int             i;
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
@@ -1641,9 +1690,33 @@ err_authfailure(char *r_ip, char *authuser, int ret)
 		logerr(get_authmethod(i));
 	} else
 		logerr(" AUTH Unknown ");
-#ifdef TLS
 	logerr(" TLS=");
-	logerr(ssl ? SSL_get_version(ssl) : "No");
+#ifdef TLS
+	if (ssl)
+		logerr(SSL_get_version(ssl));
+	else {
+		if (!(ptr = env_get("TLS_PROVIDER")))
+			logerr("No");
+		else {
+			i = str_chr(ptr, ',');
+			if (ptr[i]) {
+				ptr[i] = 0;
+				logerr(ptr);
+				ptr[i] = ',';
+			}
+		}
+	}
+#else
+	if (!(ptr = env_get("TLS_PROVIDER")))
+		logerr("No");
+	else {
+		i = str_chr(ptr, ',');
+		if (ptr[i]) {
+			ptr[i] = 0;
+			logerr(ptr);
+			ptr[i] = ',';
+		}
+	}
 #endif
 	logerrf(" auth failure\n");
 }
@@ -1652,6 +1725,7 @@ void
 err_authinsecure(char *r_ip, int ret)
 {
 	static char     retstr[FMT_ULONG];
+	char           *ptr;
 	int             i;
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
@@ -1668,10 +1742,33 @@ err_authinsecure(char *r_ip, int ret)
 	if (ret < 0)
 		logerr("-");
 	logerr(retstr);
-	logerr("]");
+	logerr("] TLS=");
 #ifdef TLS
-	logerr(" TLS=");
-	logerr(ssl ? SSL_get_version(ssl) : "No");
+	if (ssl)
+		logerr(SSL_get_version(ssl));
+	else {
+		if (!(ptr = env_get("TLS_PROVIDER")))
+			logerr("No");
+		else {
+			i = str_chr(ptr, ',');
+			if (ptr[i]) {
+				ptr[i] = 0;
+				logerr(ptr);
+				ptr[i] = ',';
+			}
+		}
+	}
+#else
+	if (!(ptr = env_get("TLS_PROVIDER")))
+		logerr("No");
+	else {
+		i = str_chr(ptr, ',');
+		if (ptr[i]) {
+			ptr[i] = 0;
+			logerr(ptr);
+			ptr[i] = ',';
+		}
+	}
 #endif
 	logerrf(" auth failure\n");
 }
@@ -2769,6 +2866,7 @@ setup()
 {
 	unsigned int    i, len;
 	char           *x;
+	char            Hostname[128];
 
 	if (!stralloc_copys(&Revision, revision + 11) ||
 			!stralloc_0(&Revision))
@@ -2792,8 +2890,17 @@ setup()
 	if (!(localip = env_get("TCPLOCALIP")))
 		localip = "unknown";
 #endif
-	if (!(localhost = env_get("TCPLOCALHOST")))
-		localhost = hostname && *hostname ? hostname : "unknown";
+	if (!(localhost = env_get("TCPLOCALHOST"))) {
+		if (hostname && *hostname)
+			localhost = hostname;
+		else
+		if (!(localhost = env_get("HOSTNAME"))) {
+			if (gethostname(Hostname, sizeof(Hostname) - 1) == -1)
+				localhost = "unknown";
+			else
+				localhost = Hostname;
+		}
+	}
 	if (!(remotehost = env_get("TCPREMOTEHOST")))
 		remotehost = "unknown";
 	remoteinfo = env_get("TCPREMOTEINFO");
@@ -3590,7 +3697,17 @@ smtp_mail(char *arg)
 		die_nomem();
 #endif
 #ifdef TLS
-	if (ssl && !stralloc_append(&proto, "S"))
+	if (ssl) {
+		if (!stralloc_append(&proto, "S"))
+			die_nomem();
+	} else {
+		x = env_get("TLS_PROVIDER");
+		if (x && !stralloc_append(&proto, "S"))
+			die_nomem();
+	}
+#else
+	x = env_get("TLS_PROVIDER");
+	if (x && !stralloc_append(&proto, "S"))
 		die_nomem();
 #endif
 	if (authd && !stralloc_append(&proto, "A"))
@@ -4760,7 +4877,7 @@ smtp_data(char *arg)
 {
 	int             hops;
 	unsigned long   qp;
-	char           *qqx;
+	char           *qqx, *x;
 #ifdef SMTP_PLUGIN
 	int             i;
 	char           *mesg;
@@ -4840,6 +4957,17 @@ smtp_data(char *arg)
 	}
 	qp = qmail_qp(&qqt); /*- pid of queue process */
 	out("354 go ahead\r\n");
+#ifdef TLS
+	x = ssl ? 0 : env_get("TLS_PROVIDER");
+#else
+	x = env_get("TLS_PROVIDER");
+#endif
+	if (x) {
+		if (!stralloc_cats(&proto, "\n  (tls provider ") || /*- continuation line */
+				!stralloc_cats(&proto, x) ||
+				!stralloc_cats(&proto, ")"))
+			die_nomem();
+	}
 	if (proto.len) {
 		if (!stralloc_0(&proto))
 			die_nomem();
@@ -7065,10 +7193,12 @@ tls_init()
 	const char     *ciphers;
 	SSL            *myssl;
 	SSL_CTX        *ctx;
-	X509_STORE     *store;
-	X509_LOOKUP    *lookup;
 	stralloc        saciphers = { 0 };
 	stralloc        filename = { 0 };
+#if OPENSSL_VERSION_NUMBER >= 0x00907000L
+	X509_STORE     *store;
+	X509_LOOKUP    *lookup;
+#endif
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	EVP_PKEY       *dh_pkey;
 	int             bits;
@@ -7551,6 +7681,12 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.281  2022-12-26 22:11:12+05:30  Cprogrammer
+ * use env variable HOSTNAME, gethostname to set localhost variable
+ *
+ * Revision 1.280  2022-12-26 21:32:49+05:30  Cprogrammer
+ * use TLS_PROVIDER env variable to write TLS info in logs, headers
+ *
  * Revision 1.279  2022-12-24 22:35:39+05:30  Cprogrammer
  * removed incorrect call to constmap_free()
  *
@@ -7835,7 +7971,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.279 2022-12-24 22:35:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.281 2022-12-26 22:11:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
