@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.17 2022-12-27 07:40:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.18 2022-12-27 08:57:23+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -40,7 +40,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.17 2022-12-27 07:40:21+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.18 2022-12-27 08:57:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -672,7 +672,13 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 				/*-
 				 * do_commands returns only if TLS session wasn't initiated
 				 * In such a case we continue to pass data from the client
-				 * to child and data from child to client
+				 * to child and data from child to client in clear text
+				 *
+				 * If TLS session is initiaed, do_commands executes translate()
+				 * which has it's nown select() loop to encrypt/decrypt data and
+				 * pass data between client and child with the necessary conversion
+				 * when translate() function returns due to exit either by client or
+				 * the child, do_command calls _exit().
 				 */
 				if ((ret = do_commands(stls, ssl, &ssin, clearin, clearout)) <= 0) {
 					/*- client closed connection / error */
@@ -1018,6 +1024,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.18  2022-12-27 08:57:23+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.17  2022-12-27 07:40:21+05:30  Cprogrammer
  * added -L option to specify CRL
  * added sigchild handler
