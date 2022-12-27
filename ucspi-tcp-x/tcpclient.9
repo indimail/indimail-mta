@@ -12,10 +12,10 @@ is one argument.
 .I port
 is one argument.
 .I prog
-consists of one or more arguments. If \fIprog\fR is omitted, tcpclient enters
-client mode where it passes data from fd 0 to the network and data from the
-network to fd 1. client mode is similar to how you would use programs like
-telnet(1), ssh(1), etc.
+consists of one or more arguments. If \fIprog\fR is omitted, tcpclient
+enters client mode where it passes data from descriptor 0 to the network
+and data from the network to descriptor 1. client mode is similar to how
+you would use programs like telnet(1), ssh(1), etc.
 
 .B tcpclient
 attempts to connect to a TCP server. If it is successful, it runs
@@ -24,13 +24,14 @@ with descriptor 6 reading from the network and descriptor 7 writing to the
 network. It also sets up several environment variables (see
 .BR tcp-environ (5)
 ). In client mode, when \fIprog\fR is not run, \fBtcpclient\fR will pass
-data from fd 0 to the network and from the network to fd 1.
+data from descriptor 0 to the network and from the network to descriptor 1.
 
 .B tcpclient
-can also do SSL/TLS negotiation with a remote host (-n option). This requires
-a \fIclientcert\fR to be provided. One can also do opportunistic TLS by using
-\fB\-s\fR \fIstarttls\fR option. The currently supported option for
-\fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR. \fBimap\fR will be added later.
+can also do SSL/TLS negotiation with a remote host (-n option). This
+requires a \fIclientcert\fR to be provided. One can also do opportunistic
+TLS by using \fB\-s\fR \fIstarttls\fR option. The currently supported
+option for \fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR. \fBimap\fR will be
+added later.
 
 For TLS/SSL sessions, \fBtcpclient\fR sets the environment variable
 \fBTLS_PROVIDER\fR with details of the TLS connnection.
@@ -160,7 +161,8 @@ one of SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLSv1_3 values.
 The actual protocol version used will be negotiated to the highest version
 mutually supported by the client and the server. The supported protocols
 are SSLv3, TLSv1, TLSv1_1, TLSv1_2 and TLSv1_3. Ths option mus not be used
-to avoid the version-specific methods described below, which are deprecated.
+to avoid the version-specific methods described below, which are
+deprecated.
 
 .TP
 \fB\-s\fR \fIstartlsType\fR
@@ -249,18 +251,29 @@ Default is @qsysconfdir@/certs.
 .SH EXAMPLES
 .EX
 1. Connect to port 25 and issue the starttls command
+   read from descriptor 0 & write to network, read from network & write to
+   descriptor 1
    tcpclient -s smtp 0 25
 
 2. Connect to port 110 and issue the STLS command
+   read from descriptor 0 & write to network, read from network & write to
+   descriptor 1
    tcpclient -s pop3 0 110
 
 3. Connect to port 25 on 127.0.0.1 like telnet
-   read from fd 0 & write to network, read from network & write to fd 1
-   tcpclient -n "" 127.0.0.1 25
+   read from descriptor 0 & write to network, read from network & write to
+   descriptor 1
+   tcpclient 127.0.0.1 25
 
-6. Run a script under tcpclient that connects to a SSL server on port 5555
-   read from fd 6 reads from network, write to fd 7 writes to network
-   tcpclient 0 5555 /usr/bin/my_script
+4. Connect to port 465 on 127.0.0.1 like openssl s_client
+   read from descriptor 0 & write to network, read from network & write to
+   descriptor 1
+   tcpclient -n /etc/indimail/certs/clientcert.pem 127.0.0.1 25
+
+5. Run a script under tcpclient that connects to a SSL server on port 5555
+   read from descriptor 6 reads from network, write to descriptor 7 writes
+   to network. The certificate used is value of TLS_CERTFILE env variable
+   tcpclient -n "" 0 5555 /usr/bin/my_script
 .EE
 
 .SH SEE ALSO
