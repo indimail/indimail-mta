@@ -300,7 +300,7 @@ will be checked for revocation. If this is not provided, the file
 
 .TP
 -\fBf\fR \fIcipher_list\fR
-Use ciphers listed in \fIcipher_list\fR. Without this \fBdotls\fR uses
+Use ciphers listed in \fIcipher_list\fR. Without this \fBtcpserver\fR uses
 TLS_CIPHER_LIST environment variable if set or system configured
 PROFILE=SYSTEM ciphers.
 
@@ -426,13 +426,12 @@ Default is @qsysconfdir@/certs.
 
 .SH NOTES
 
-This NOTE is valid only when \fBdotls\fR(1) is acting as a server.
-
 A script in cron uses the following openssl commands to pre-generate 2048
 bites RSA and DH parameters. You can pass --maxbits argument to
 \fIupdate_tmprsadh\fR to generate these with higher bits. You can set the
-environment variable \fBSSL_BITS\fR to make dotls choose specific bits for
-the RSA/DH parameters. These files are generated in @qsysconfdir@/certs.
+environment variable \fBSSL_BITS\fR to make tcpserver choose specific bits
+for the RSA/DH parameters. These files are generated in
+@qsysconfdir@/certs.
 
 .EX
 /usr/bin/openssl genrsa  -out    rsa2048.pem 2048
