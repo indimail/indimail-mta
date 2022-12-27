@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.26 2022-12-27 08:04:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.27 2022-12-27 09:01:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.26 2022-12-27 08:04:27+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.27 2022-12-27 09:01:23+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -494,9 +494,19 @@ main(int argc, char **argv)
 #endif
 	if (!(x = *++argv))
 		usage();
+	if (!x[scan_ulong(x, &u)])
+		portremote = u;
+	else {
+		struct servent *se;
 
+		if (!(se = getservbyname(x, "tcp")))
+			strerr_die3x(111, FATAL, "unable to figure out port number for ", x);
+		portremote = ntohs(se->s_port);
+		/*- i continue to be amazed at the stupidity of the s_port interface */
+	}
+	if (*++argv)
+		flag_tcpclient = 1;
 #ifdef TLS
-
 	if (!(certdir = env_get("CERTDIR")))
 		certdir = "/etc/indimail/certs";
 	if (flagssl && !certfile.len) {
@@ -548,19 +558,6 @@ main(int argc, char **argv)
 			crlfile.len = 0;
 	}
 #endif
-
-	if (!x[scan_ulong(x, &u)])
-		portremote = u;
-	else {
-		struct servent *se;
-
-		if (!(se = getservbyname(x, "tcp")))
-			strerr_die3x(111, FATAL, "unable to figure out port number for ", x);
-		portremote = ntohs(se->s_port);
-		/*- i continue to be amazed at the stupidity of the s_port interface */
-	}
-	if (*++argv)
-		flag_tcpclient = 1;
 #ifdef TLS
 	if (!flagssl && stls != unknown)
 		strerr_die2x(100, FATAL, "STARTTLS options require Certificates");
@@ -808,6 +805,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.27  2022-12-27 09:01:23+05:30  Cprogrammer
+ * fixed bug in setting command line args
+ *
  * Revision 1.26  2022-12-27 08:04:27+05:30  Cprogrammer
  * added -L option to specify CRL
  * set TLS_PROVIDER env variable
