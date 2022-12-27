@@ -49,9 +49,8 @@ Use \fItls_method\fR to set client/server method / protocol. This will be
 one of SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLSv1_3 values.
 The actual protocol version used will be negotiated to the highest version
 mutually supported by the client and the server. The supported protocols
-are SSLv3, TLSv1, TLSv1_1, TLSv1_2 and TLSv1_3. Ths option mus not be used
-to avoid the version-specific methods described below, which are
-deprecated.
+are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. Ths option must not be used
+to avoid the version-specific methods as they are deprecated.
 
 .TP
 \fB-t\fR \fItimeout\fR
@@ -93,6 +92,64 @@ should be separated by a colon. The -c option overrides this.
 .TP
 \fBBANNER=\fIstring\fB\fR
 Banner to issue before starting SSL/TLS negotiation.
+
+.SH NOTES
+
+A script \fIupdate_tmprsadh\fR in cron uses the following openssl commands
+to pre-generate 2048 bites RSA and DH parameters. You can pass --maxbits
+argument to \fIupdate_tmprsadh\fR to generate these with higher bits. You
+can set the environment variable \fBSSL_BITS\fR to make sslerator choose
+specific bits for the RSA/DH parameters. These files are generated in
+@qsysconfdir@/certs. \fIupdate_rmprsadh\fR is installed to be run by cron
+if you have installed indimail from Open Build Service.
+
+.EX
+/usr/bin/openssl genrsa  -out    rsa2048.pem 2048
+/usr/bin/openssl dhparam -out -2  dh2048.pem 2048
+.EE
+
+Some ciphersuites may use ephemeral Diffie-Hellman (DH) key exchange. In
+these cases, the session data is negotiated using the ephemeral/temporary
+DH key and the key supplied and certified by the certificate chain is only
+used for signing. Anonymous ciphers (without a permanent server key) also
+use ephemeral DH keys.
+
+Using ephemeral DH key exchange yields forward secrecy as the connection
+can only be decrypted when the DH key is known. By generating a temporary
+DH key inside the server application that is lost when the application is
+left, it becomes impossible for an attacker to decrypt past sessions, even
+if they get hold of the normal (certified) key, as this key was only used
+for signing.
+
+In order to perform a DH key exchange the server must use a DH group (DH
+parameters) and generate a DH key. The server will always generate a new DH
+key during the negotiation.
+
+As generating DH parameters is extremely time consuming, an application
+should not generate the parameters on the fly. DH parameters can be reused,
+as the actual key is newly generated during the negotiation.
+
+Typically applications should use well known DH parameters that have
+built-in support in OpenSSL. The macro SSL_set_dh_auto(3ossl) configures
+OpenSSL to use the default built-in DH parameters for the SSL object.
+Passing a value of 1 in the onoff parameter switches the feature on, and
+passing a value of 0 switches it off. The default setting is off.
+
+If "auto" DH parameters are switched on then the parameters will be
+selected to be consistent with the size of the key associated with the
+server's certificate. If there is no certificate (e.g. for PSK
+ciphersuites), then it it will be consistent with the size of the
+negotiated symmetric cipher key.
+
+Applications may supply their own DH parameters instead of using the
+built-in values. This approach is discouraged and applications should in
+preference use the built-in parameter support described above. Applications
+wishing to supply their own DH parameters should call
+SSL_set0_tmp_dh_pkey(3ossl) to supply the parameters for SSL. The
+parameters should be supplied in the dhpkey argument as an EVP_PKEY
+containg DH parameters. Ownership of the dhpkey value is passed to the
+SSL_CTX or SSL object as a result of this call, and so the caller should
+not free it if the function call is succesful..
 
 .SH "SEE ALSO"
 .PP
