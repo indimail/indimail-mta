@@ -38,7 +38,7 @@ Release 1.1.1 Start 18/09/2022
 23.  tcpserver.c: use TLS_CERTFILE for default servercert
 - 26/12/2022
 24.  dotls.c: added sigchild handler
-25.  dotls.c, tcpclient.c, tcpserver.c: added option to specify CRL 
+25.  dotls.c, tcpclient.c, tcpserver.c, tls.c: added option to specify CRL 
 26.  dotls.c, tcpclient.c, tcpserver.c: set TLS_PROVIDER env variable
 27.  tls.c, tls.h: function allwrite() made visible for non-TLS
 28.  tcpclient.c: skip TLS/SSL if -n option is not provided and cert doesn't

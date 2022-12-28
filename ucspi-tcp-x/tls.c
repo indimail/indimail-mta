@@ -1,5 +1,5 @@
 /*
- * $Id: tls.c,v 1.19 2022-12-26 21:28:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tls.c,v 1.19 2022-12-28 17:47:52+05:30 Cprogrammer Exp mbhangui $
  *
  * ssl_timeoutio functions froms from Frederik Vermeulen's
  * tls patch for qmail
@@ -29,7 +29,7 @@
 #include "tls.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tls.c,v 1.19 2022-12-26 21:28:50+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tls.c,v 1.19 2022-12-28 17:47:52+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef TLS
@@ -498,7 +498,6 @@ tls_init(char *tls_method, char *cert, char *cafile, char *crlfile,
 	}
 	/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
-#ifdef CRYPTO_POLICY_NON_COMPLIANCE
 	/*- Set our cipher list */
 	if (ciphers && !SSL_CTX_set_cipher_list(ctx, ciphers)) {
 		sslerr_str = (char *) myssl_error_str();
@@ -506,7 +505,6 @@ tls_init(char *tls_method, char *cert, char *cafile, char *crlfile,
 		SSL_CTX_free(ctx);
 		return ((SSL_CTX *) NULL);
 	}
-#endif
 	if (SSL_CTX_use_certificate_chain_file(ctx, cert) != 1) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("SSL_CTX_use_PrivateKey_file: Unable to load private keys: ", sslerr_str, 0);
@@ -534,6 +532,12 @@ tls_init(char *tls_method, char *cert, char *cafile, char *crlfile,
 		SSL_CTX_free(ctx);
 		return ((SSL_CTX *) NULL);
 	}
+	if (SSL_CTX_check_private_key(ctx) != 1) {
+		sslerr_str = (char *) myssl_error_str();
+		strerr_warn4("SSL_CTX_use_certificate_file: Unable to use private key: ", cert, ": ", sslerr_str, 0);
+		SSL_CTX_free(ctx);
+		return ((SSL_CTX *) NULL);
+	}
 	return (ctx);
 }
 
@@ -551,15 +555,6 @@ tls_session(SSL_CTX *ctx, int fd, char *ciphers)
 		SSL_CTX_free(ctx);
 		return ((SSL *) NULL);
 	}
-#ifndef CRYPTO_POLICY_NON_COMPLIANCE
-	if (ciphers && !SSL_set_cipher_list(myssl, ciphers)) {
-		sslerr_str = (char *) myssl_error_str();
-		strerr_warn4("tls_session: unable to set ciphers: ", ciphers, ": ", sslerr_str, 0);
-		SSL_shutdown(myssl);
-		SSL_free(myssl);
-		return ((SSL *) NULL);
-	}
-#endif
 	if (!(sbio = BIO_new_socket(fd, BIO_NOCLOSE))) {
 		sslerr_str = (char *) myssl_error_str();
 		strerr_warn2("BIO_new_socket: ", sslerr_str, 0);
@@ -631,7 +626,7 @@ int
 tls_connect(SSL *myssl, char *host)
 {
 	int             i, err;
-	char           *err_str;
+	const char     *err_str;
 
 	errno = 0;
 	while (1) {
@@ -671,7 +666,7 @@ int
 tls_accept(SSL *myssl)
 {
 	int             i, err;
-	char           *err_str;
+	const char     *err_str;
 
 	errno = 0;
 	while (1) {
@@ -731,10 +726,11 @@ ssl_timeoutio(int (*fun) (), long t, int rfd, int wfd, SSL *myssl, char *buf, si
 				FD_SET(efd, &fds);
 			FD_SET(rfd, &fds);
 			n = select(efd != -1 && efd > rfd ? efd + 1 : rfd + 1, &fds, NULL, NULL, &tv);
-			/*- this avoids deadlock in tcpclient
+			/*-
+			 * this avoids deadlock in tcpclient
 			 * where data is initiated by tcpclient by reading fd 0
 			 * but if tcpclient blocks on rfd, this will never happen
-			 * and tcpcliet will continue to block on rfd.
+			 * and tcpclient will continue to block on rfd.
 			 * checking efd for input allows ssl_timeoutio() to
 			 * return when data is available to be written to SSL.
 			 */
@@ -799,7 +795,7 @@ ssl_timeoutwrite(long t, int rfd, int wfd, SSL *myssl, char *buf, size_t len)
 }
 #endif
 
-ssize_t
+static ssize_t
 allwrite(int fd, char *buf, size_t len)
 {
 	ssize_t         w;
@@ -947,8 +943,8 @@ getversion_tls_c()
 
 /*
  * $Log: tls.c,v $
- * Revision 1.19  2022-12-26 21:28:50+05:30  Cprogrammer
- * function allwrite() made visible for non-TLS
+ * Revision 1.19  2022-12-28 17:47:52+05:30  Cprogrammer
+ * added crlfile argument to tls_init
  *
  * Revision 1.18  2022-12-25 19:28:42+05:30  Cprogrammer
  * refactored TLS code
