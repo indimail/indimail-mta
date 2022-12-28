@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.7 2022-12-25 19:44:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sslerator.c,v 1.7 2022-12-28 17:52:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -481,7 +481,6 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	SSL_CTX_free(ctx);
-#ifndef CRYPTO_POLICY_NON_COMPLIANCE
 	if (cipherfile) {
 		if (lstat(cipherfile, &st) == -1)
 			strerr_die4sys(111, FATAL, "lstat: ", cipherfile, ": ");
@@ -507,7 +506,6 @@ main(int argc, char **argv)
 		SSL_free(ssl);
 		_exit (111);
 	}
-#endif
 	if (!(sbio = BIO_new_socket(sock, BIO_NOCLOSE))) {
 		strnum1[fmt_ulong(strnum1, getpid())] = 0;
 		strerr_warn3(FATAL, strnum1, ": unable to set up BIO socket", 0);
@@ -616,14 +614,14 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.7 2022-12-25 19:44:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.7 2022-12-28 17:52:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sslerator.c,v $
- * Revision 1.7  2022-12-25 19:44:37+05:30  Cprogrammer
+ * Revision 1.7  2022-12-28 17:52:17+05:30  Cprogrammer
  * refactored code
  * added options to specify cipher file, CA file and TLS method
  *
