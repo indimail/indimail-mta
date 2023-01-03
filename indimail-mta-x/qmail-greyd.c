@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.34  2023-01-03 23:55:08+05:30  Cprogrammer
+ * removed __USE_GNU
+ *
  * Revision 1.33  2022-10-30 20:22:09+05:30  Cprogrammer
  * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
  *
@@ -112,7 +115,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#define __USE_GNU
 #include <netdb.h>
 #include <sys/select.h>
 #include "sgetopt.h"
@@ -1508,7 +1510,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.33 2022-10-30 20:22:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.34 2023-01-03 23:55:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

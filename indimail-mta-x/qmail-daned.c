@@ -1,9 +1,10 @@
 /*
- * $Id: qmail-daned.c,v 1.31 2023-01-03 22:11:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.32 2023-01-03 23:55:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
 #if defined(HASTLSA) && defined(TLS)
+#include <tls.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -14,7 +15,6 @@
 #include <signal.h>
 #include <time.h>
 #include <fcntl.h>
-#define __USE_GNU
 #include <netdb.h>
 #include <stralloc.h>
 #include <constmap.h>
@@ -32,7 +32,6 @@
 #include <env.h>
 #include <makeargs.h>
 #include <noreturn.h>
-#include <tls.h>
 #include "control.h"
 #include "tlsacheck.h"
 #include "haveip6.h"
@@ -1253,7 +1252,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.31 2023-01-03 22:11:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.32 2023-01-03 23:55:03+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1265,6 +1264,9 @@ getversion_qmail_dane_c()
 
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.32  2023-01-03 23:55:03+05:30  Cprogrammer
+ * removed __USE_GNU
+ *
  * Revision 1.31  2023-01-03 22:11:33+05:30  Cprogrammer
  * include tls.h from libqmail
  *
