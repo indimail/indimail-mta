@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.7  2023-01-04 00:15:14+05:30  Cprogrammer
+ * removed __USE_GNU
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -28,7 +31,6 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#define __USE_GNU
 #include <netdb.h>
 #include <errno.h>
 #include <sgetopt.h>
@@ -394,7 +396,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	static char    *x = "$Id: udplogger.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: udplogger.c,v 1.7 2023-01-04 00:15:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
