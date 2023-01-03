@@ -1,95 +1,5 @@
 /*
- * $Log: qmail-daned.c,v $
- * Revision 1.30  2022-10-30 20:21:32+05:30  Cprogrammer
- * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
- *
- * Revision 1.29  2022-08-21 17:59:12+05:30  Cprogrammer
- * fix compilation error when TLS is not defined in conf-tls
- *
- * Revision 1.28  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.27  2021-06-15 11:50:15+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.26  2021-05-26 11:06:29+05:30  Cprogrammer
- * use starttls.h for prototypes in starttls.c
- *
- * Revision 1.25  2020-11-24 13:46:44+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.24  2020-11-17 16:19:23+05:30  Cprogrammer
- * set default value for timeoutssl to avoid polling
- *
- * Revision 1.23  2020-09-16 19:03:44+05:30  Cprogrammer
- * FreeBSD fix
- *
- * Revision 1.22  2020-07-04 21:43:12+05:30  Cprogrammer
- * removed usage of INET6 define
- *
- * Revision 1.21  2020-05-11 11:07:52+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.20  2020-04-30 18:05:15+05:30  Cprogrammer
- * removed unused variable ssin
- *
- * Revision 1.19  2020-04-08 16:00:24+05:30  Cprogrammer
- * set controldir variable in cdb_match() function
- *
- * Revision 1.18  2020-04-01 16:14:30+05:30  Cprogrammer
- * added header for makeargs() function
- *
- * Revision 1.17  2018-06-01 14:49:22+05:30  Cprogrammer
- * added 'E' option to send back TLSA RR data
- *
- * Revision 1.16  2018-05-31 02:23:10+05:30  Cprogrammer
- * removed NETQMAIL code
- *
- * Revision 1.15  2018-05-30 20:13:21+05:30  Cprogrammer
- * moved timeoutssl variable from starttls.c to qmail-daned.c
- *
- * Revision 1.14  2018-05-30 12:12:45+05:30  Cprogrammer
- * moved tls functions to starttls.c
- *
- * Revision 1.13  2018-05-29 22:10:55+05:30  Cprogrammer
- * removed call to gethostbyname() in ipv6 code
- *
- * Revision 1.12  2018-05-28 21:45:54+05:30  Cprogrammer
- * fix for strange error thrown by stdio.h included by openssl
- *
- * Revision 1.11  2018-05-28 19:57:21+05:30  Cprogrammer
- * exit with 111 for wrong usage
- *
- * Revision 1.10  2018-05-28 01:16:18+05:30  Cprogrammer
- * removed redundant setting of smtptext
- *
- * Revision 1.9  2018-05-27 17:46:06+05:30  Cprogrammer
- * added option for qmail-remote to query/update records
- *
- * Revision 1.8  2018-05-27 14:06:14+05:30  Cprogrammer
- * removed DANEPROG execution method
- *
- * Revision 1.7  2018-05-27 12:32:40+05:30  Cprogrammer
- * refactored code. Organized error messages and error codes in child
- *
- * Revision 1.6  2018-05-26 16:00:30+05:30  Cprogrammer
- * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
- *
- * Revision 1.5  2018-05-25 08:33:40+05:30  Cprogrammer
- * use do_tlsa_query() to get TLSA RR
- *
- * Revision 1.4  2018-05-13 21:34:29+05:30  Cprogrammer
- * renamed RECORD_STALE to RECORD_OLD
- *
- * Revision 1.3  2018-04-27 10:47:53+05:30  Cprogrammer
- * fixed memory leak due to multiple records getting added
- *
- * Revision 1.2  2018-04-26 01:32:30+05:30  Cprogrammer
- * added tlsadomains control file
- *
- * Revision 1.1  2018-04-25 23:01:47+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-daned.c,v 1.31 2023-01-03 19:45:39+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
@@ -122,6 +32,7 @@
 #include <env.h>
 #include <makeargs.h>
 #include <noreturn.h>
+#include <tls.h>
 #include "control.h"
 #include "tlsacheck.h"
 #include "haveip6.h"
@@ -169,12 +80,10 @@ static stralloc context_file = { 0 };
 static stralloc line = { 0 };
 static stralloc whitelist = { 0 };
 static stralloc tlsadomains = { 0 };
-int             timeoutconnect = 60;
+int             timeoutconn = 60;
+int             timeoutdata = 300;
 int             verbose = 0;
-int             timeoutssl = 300;
 stralloc        helohost = { 0 };
-
-extern stralloc save;
 
 void
 tlsadomains_init(char *arg)
@@ -1003,9 +912,9 @@ main(int argc, char **argv)
 
 	if (control_init() == -1)
 		die_control("unable to read control file ", "me");
-	if (control_readint(&timeoutconnect, "timeoutconnect") == -1)
+	if (control_readint(&timeoutconn, "timeoutconnect") == -1)
 		die_control("unable to read control file ", "timeoutconnect");
-	if (control_readint(&timeoutssl, "timeoutremote") == -1)
+	if (control_readint(&timeoutdata, "timeoutremote") == -1)
 		die_control("unable to read control file ", "timeoutremote");
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) == -1)
 		die_control("unable to read control file ", "helohost");
@@ -1080,7 +989,7 @@ main(int argc, char **argv)
 	load_context();
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_DGRAM;
+	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 #ifndef EAI_ADDRFAMILY
 #define EAI_ADDRFAMILY EAI_FAMILY
@@ -1344,7 +1253,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.30 2022-10-30 20:21:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.31 2023-01-03 19:45:39+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1353,3 +1262,101 @@ getversion_qmail_dane_c()
 	x++;
 }
 #endif
+
+/*
+ * $Log: qmail-daned.c,v $
+ * Revision 1.31  2023-01-03 19:45:39+05:30  Cprogrammer
+ * use tls.h from libqmail
+ * Set hints.ai_socktype to SOCK_STREAM
+ *
+ * Revision 1.30  2022-10-30 20:21:32+05:30  Cprogrammer
+ * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
+ *
+ * Revision 1.29  2022-08-21 17:59:12+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ *
+ * Revision 1.28  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.27  2021-06-15 11:50:15+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.26  2021-05-26 11:06:29+05:30  Cprogrammer
+ * use starttls.h for prototypes in starttls.c
+ *
+ * Revision 1.25  2020-11-24 13:46:44+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.24  2020-11-17 16:19:23+05:30  Cprogrammer
+ * set default value for timeoutssl to avoid polling
+ *
+ * Revision 1.23  2020-09-16 19:03:44+05:30  Cprogrammer
+ * FreeBSD fix
+ *
+ * Revision 1.22  2020-07-04 21:43:12+05:30  Cprogrammer
+ * removed usage of INET6 define
+ *
+ * Revision 1.21  2020-05-11 11:07:52+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.20  2020-04-30 18:05:15+05:30  Cprogrammer
+ * removed unused variable ssin
+ *
+ * Revision 1.19  2020-04-08 16:00:24+05:30  Cprogrammer
+ * set controldir variable in cdb_match() function
+ *
+ * Revision 1.18  2020-04-01 16:14:30+05:30  Cprogrammer
+ * added header for makeargs() function
+ *
+ * Revision 1.17  2018-06-01 14:49:22+05:30  Cprogrammer
+ * added 'E' option to send back TLSA RR data
+ *
+ * Revision 1.16  2018-05-31 02:23:10+05:30  Cprogrammer
+ * removed NETQMAIL code
+ *
+ * Revision 1.15  2018-05-30 20:13:21+05:30  Cprogrammer
+ * moved timeoutssl variable from starttls.c to qmail-daned.c
+ *
+ * Revision 1.14  2018-05-30 12:12:45+05:30  Cprogrammer
+ * moved tls functions to starttls.c
+ *
+ * Revision 1.13  2018-05-29 22:10:55+05:30  Cprogrammer
+ * removed call to gethostbyname() in ipv6 code
+ *
+ * Revision 1.12  2018-05-28 21:45:54+05:30  Cprogrammer
+ * fix for strange error thrown by stdio.h included by openssl
+ *
+ * Revision 1.11  2018-05-28 19:57:21+05:30  Cprogrammer
+ * exit with 111 for wrong usage
+ *
+ * Revision 1.10  2018-05-28 01:16:18+05:30  Cprogrammer
+ * removed redundant setting of smtptext
+ *
+ * Revision 1.9  2018-05-27 17:46:06+05:30  Cprogrammer
+ * added option for qmail-remote to query/update records
+ *
+ * Revision 1.8  2018-05-27 14:06:14+05:30  Cprogrammer
+ * removed DANEPROG execution method
+ *
+ * Revision 1.7  2018-05-27 12:32:40+05:30  Cprogrammer
+ * refactored code. Organized error messages and error codes in child
+ *
+ * Revision 1.6  2018-05-26 16:00:30+05:30  Cprogrammer
+ * replaced getdns lib with inbuilt dns_tlsarr() function in dns.c
+ *
+ * Revision 1.5  2018-05-25 08:33:40+05:30  Cprogrammer
+ * use do_tlsa_query() to get TLSA RR
+ *
+ * Revision 1.4  2018-05-13 21:34:29+05:30  Cprogrammer
+ * renamed RECORD_STALE to RECORD_OLD
+ *
+ * Revision 1.3  2018-04-27 10:47:53+05:30  Cprogrammer
+ * fixed memory leak due to multiple records getting added
+ *
+ * Revision 1.2  2018-04-26 01:32:30+05:30  Cprogrammer
+ * added tlsadomains control file
+ *
+ * Revision 1.1  2018-04-25 23:01:47+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

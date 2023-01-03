@@ -34,7 +34,8 @@ option for \fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR. \fBimap\fR will be
 added later.
 
 For TLS/SSL sessions, \fBtcpclient\fR sets the environment variable
-\fBTLS_PROVIDER\fR with details of the TLS connnection.
+\fBTLS_PROVIDER\fR with details of the TLS connnection if passed the -z
+option.
 
 The server's address is given by
 .I host
@@ -70,7 +71,7 @@ Verbose. Print error messages and status messages.
 
 .TP
 .B \-T \fIx\fR+\fIy
-Give up on the connection attempt after
+Timeout on the connection attempt after
 .I x\fR+\fIy
 seconds. Default: 2+58. When a host has several IP addresses,
 .B tcpclient
@@ -149,6 +150,12 @@ close any gap in the certificate chain. If this is not provided, the file
 @qsysconfdir@/certs/servercrl.pem will be used.
 
 .TP
+-\fBz\fR
+Set \fBTLS_PROVIDER\fR environment variables with details of the TLS/SSL
+connection. This environment variable will be available for \fIprog\fR
+when using TLS/SSL.
+
+.TP
 -\fBf\fR \fIcipher_list\fR
 Use ciphers listed in \fIcipher_list\fR. Without this \fBtcpclient\fR uses
 TLS_CIPHER_LIST environment variable if set or system configured
@@ -184,7 +191,8 @@ Match \fIhost\fR with common name in certificate (CN)
 
 .TP
 .B \-a \fItimeoutdata
-Quit if read or write to/from \fIhost\fR exceeds \fItimeoutdata\fR seconds
+Timeout if read or write to/from \fIhost\fR exceeds \fItimeoutdata\fR
+seconds.
 
 .P
 .B Data-gathering options:
@@ -216,7 +224,7 @@ Do not attempt to obtain $TCPREMOTEINFO from the remote host.
 
 .TP
 .B \-t \fIn
-Give up on the $TCPREMOTEINFO connection attempt after
+Timeout on the $TCPREMOTEINFO connection attempt after
 .I n
 seconds. Default: 26.
 
@@ -251,27 +259,27 @@ Default is @qsysconfdir@/certs.
 .EX
 1. Connect to port 25 and issue the starttls command
    read from descriptor 0 & write to network, read from network & write to
-   descriptor 1
+   descriptor 1.
    tcpclient -s smtp 0 25
 
 2. Connect to port 110 and issue the STLS command
    read from descriptor 0 & write to network, read from network & write to
-   descriptor 1
+   descriptor 1.
    tcpclient -s pop3 0 110
 
 3. Connect to port 25 on 127.0.0.1 like telnet
    read from descriptor 0 & write to network, read from network & write to
-   descriptor 1
+   descriptor 1.
    tcpclient 127.0.0.1 25
 
 4. Connect to port 465 on 127.0.0.1 like openssl s_client
    read from descriptor 0 & write to network, read from network & write to
-   descriptor 1
+   descriptor 1.
    tcpclient -n /etc/indimail/certs/clientcert.pem 127.0.0.1 25
 
 5. Run a script under tcpclient that connects to a SSL server on port 5555
    read from descriptor 6 reads from network, write to descriptor 7 writes
-   to network. The certificate used is value of TLS_CERTFILE env variable
+   to network. Certificate used is the value of TLS_CERTFILE env variable.
    tcpclient -n "" 0 5555 /usr/bin/my_script
 .EE
 

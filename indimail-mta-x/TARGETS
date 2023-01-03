@@ -175,6 +175,7 @@ dnsptr.o
 dns_text.o
 dnstlsarr
 dnstlsarr.o
+dnstlsarr.1
 dnstxt
 dnstxt.o
 do_cleanq.o
@@ -647,7 +648,7 @@ timeoutconn.o
 tlsacheck.o
 tlsarralloc.o
 tls.lib
-tls.o
+dotls.o
 todo-proc
 todo-proc.8
 todo-proc.o

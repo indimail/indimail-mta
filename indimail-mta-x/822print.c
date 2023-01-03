@@ -1,5 +1,8 @@
 /*
  * $Log: 822print.c,v $
+ * Revision 1.9  2023-01-03 16:27:35+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.8  2021-06-14 00:31:37+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
@@ -39,7 +42,6 @@
 #include "leapsecs.h"
 #include "caltime.h"
 #include "tai.h"
-#include "auto_sysconfdir.h"
 
 #define FATAL "822print: fatal: "
 
@@ -427,7 +429,7 @@ main()
 void
 getversion_822print_c()
 {
-	static char    *x = "$Id: 822print.c,v 1.8 2021-06-14 00:31:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822print.c,v 1.9 2023-01-03 16:27:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

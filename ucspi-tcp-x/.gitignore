@@ -16,7 +16,6 @@ hasdlmopen.h
 haveip6.h
 http@
 instcheck
-iopause.h
 load
 makelib
 mconnect

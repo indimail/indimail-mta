@@ -1,0 +1,238 @@
+.TH dnstlsarr 1
+
+.SH NAME
+dnstlsarr - DANE/TLSA RR Tester. Display TLSA RR record for a host
+
+.SH SYNOPSIS
+.B dnstlsarr
+[-\fBv\fR level]
+[-p \fIport\fR]
+[-c \fItimeoutconn\fR]
+[-t \fItimeoutcdata\fR]
+[-m]
+[-s]
+.I host
+
+.SH DESCRIPTION
+dnstlsarr fetches and display the TLSA RR records for \fIhost\fR. With the -s option, it can
+perform a DANE verification and display the result.
+
+.SH OPTIONS
+.PP
+
+.TP 3
+.B -v \fIlevel\fR
+.EX
+0 - Normal
+1 - Display DANE Verification Result
+2 - Everything including SMTP conversation
+.EE
+
+.TP 5
+.B -m
+Do a MX query for host \fIhost\fR and then query the MX hosts for TLSA Resource Records
+
+.TP 5
+.B -s
+Issue STARTTLS command and attemtp DANE verification
+
+.TP 5
+\fB-c\fR \fItimeoutconn\fR
+Number of seconds
+.B dnstlsarr
+will wait for the remote SMTP server to accept a connection.
+Default: 60.
+The kernel normally imposes a 75-second upper limit.
+
+.TP 5
+\fB-t\fR \fItimeoutdata\fR
+Number of seconds
+.B dnstlsarr
+will wait for each response from the remote SMTP server.
+Default: 300.
+
+.SH EXAMPLE USAGE
+.EX
+Example 1
+$ dnstlsarr postino.cesnet.cz
+terenasslca3ta.cesnet.cz ttl=3282 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25
+terenasslca3ta.cesnet.cz ttl=3282 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8
+
+Example 2 
+$ dnstlsarr -v 2 -s mail.ietf.org
+checking mail.ietf.org
+TLSARR[0]:_25._tcp.mail.ietf.org IN TLSA ( 3 1 1 0c72ac70b745ac19998811b131d662c9ac69dbdbe7cb23e5b514b56664c5d3d6 )
+220 ietfa.amsl.com ESMTP
+Client: EHLO argos
+250-ietfa.amsl.com
+250-PIPELINING
+250-SIZE 67108864
+250-ETRN
+250-STARTTLS
+250-AUTH PLAIN LOGIN
+250-AUTH=PLAIN LOGIN
+250-ENHANCEDSTATUSCODES
+250 8BITMIME
+Client: STARTTLS
+220 2.0.0 Ready to start TLS
+matched sha256 fingerprint [0c72ac70b745ac19998811b131d662c9ac69dbdbe7cb23e5b514b56664c5d3d6] of subjectPublicKeyInfo
+Client: QUIT
+221 2.0.0 Bye
+
+Example 3 - querying the MX record to get the TLSA RR
+$ dnstlsarr -v 2 -s postino.cesnet.cz
+checking postino.cesnet.cz
+TLSARR[0]:terenasslca3ta.cesnet.cz IN TLSA ( 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25 )
+TLSARR[1]:terenasslca3ta.cesnet.cz IN TLSA ( 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8 )
+220 postino.cesnet.cz ESMTP
+Client: EHLO argos
+250-postino.cesnet.cz
+250-PIPELINING
+250-SIZE 41943040
+250-VRFY
+250-ETRN
+250-STARTTLS
+250-ENHANCEDSTATUSCODES
+250-8BITMIME
+250 DSN
+Client: STARTTLS
+220 2.0.0 Ready to start TLS
+failed  sha256 fingerprint [be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25] of full certificate
+matched sha256 fingerprint [beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8] of full certificate
+Client: QUIT
+221 2.0.0 Bye
+
+Example 4 - getting TLSA RR by giving the domain name
+$ dnstlsarr -m cesnet.cz
+MX postino.cesnet.cz IPv6 2001:718:1:101::144:24210
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8
+MX postino.cesnet.cz IPv4 195.113.144.24210
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8
+MX cartero.cesnet.cz IPv6 2001:718:ff05:202::1650
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8
+MX cartero.cesnet.cz IPv4 78.128.216.1650
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8
+MX mail.cesnet.cz IPv4 195.113.144.234100
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 be6a0d9e1d115f2293f6abf11b3ec8e882e24426eeeb09aaa503597993e77a25
+terenasslca3ta.cesnet.cz ttl=2974 2 0 1 beb8efe9b1a73c841b375a90e5fff8048848e3a2af66f6c4dd7b938d6fe8c5d8
+.EE
+
+.B dnstlsarr
+by default looks at SYSCONF/control for all control files. This path can be changed by defining the
+CONTROLDIR environment variable.
+
+.TP 5
+.I helohost
+Current host name,
+for use solely in saying hello to the remote SMTP server.
+Default:
+.IR me ,
+if that is supplied;
+
+.TP 5
+.I tlsclientmethod
+The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1,
+TLSv1_2, TLSv1_3. The default is TLSv1_2 for OpenSSL Version < 1.0.1.
+Without this control file OpenSSL Version >= 1.0.1 uses
+TLS_client_method(3ossl) where the actual protocol version used will be
+negotiated to the highest version mutually supported by the client and the
+server. The supported protocols are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and
+TLSv1.3. The default location of SYSCONF/control can be overriden by
+environment variable \fBCONTROLDIR\fR.
+
+.TP 5
+.I tlsclientciphers
+A set of OpenSSL client cipher strings. Multiple ciphers contained in a
+string should be separated by a colon. The default location of
+SYSCONF/control can be overriden by environment variable
+\fBCONTROLDIR\fR
+
+.TP 5
+.I notlhosts
+domains for which \fBqmail-remote\fR will not initiate TLS sesson. This
+file in SYSCONF/control or directory defined by the \fBCONTROLDIR\fR
+envirnoment variable, shouldn't be confused with
+SYSCONF/certs/\fInotlshosts\fR directory in the directory or the directory
+defined by the \fBCERTDIR\fR environment variable.
+
+.PP
+For TLS sessions, the default location of SYSCONF/certs can be
+overriden by environment variable CERTDIR. This affects the location of
+below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
+\fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
+\fInotlshosts/<FQDN>\fR, \fInotlshosts/host\fR.
+
+.TP 5
+.I clientcert.pem
+SSL certificate that is used to authenticate with the remote server during
+a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR will
+not negotiate TLS. The default location of SYSCONF/certs can be
+overriden by environment variable CERTDIR. \fIclientcert.pem\fR can be
+overriden by environment variable \fBCLIENTCERT\fR.
+
+.TP 5
+.I tlshosts/<FQDN>.pem
+\fBqmail-remote\fR requires TLS authentication from servers for which this
+file exists
+.RB ( <FQDN>
+is the fully-qualified domain name of the remote SMTP server). One of the
+.I dNSName
+or the
+.I CommonName
+attributes have to match. The file contains the trusted CA certificates.
+The default location of SYSCONF/certs can be overriden by
+environment variable \fBCERTDIR\fR.
+
+.TP 5
+.I tlshosts/exhaustivelist
+if this file exists no TLS will be tried on hosts other than those for
+which a file
+.B tlshosts/<FQDN>.pem
+exists. The default location of SYSCONF/certs can be overriden by
+environment variable \fBCERTDIR\fR.
+
+.B WARNING:
+this option may cause mail to be delayed, bounced, doublebounced, or lost.
+
+.TP 5
+.I notlshosts/<FQDN>
+.B dnstlsarr
+will not try TLS on servers for which this file exists
+.RB ( <FQDN>
+is the fully-qualified domain name of the remote SMTP server).
+.IR (tlshosts/<FQDN>.pem
+takes precedence over this file however). The default location of
+SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+
+.TP 5
+.I notlshosts/host
+.B dnstlsarr
+will not try TLS on servers for which this file exists
+.RB ( host
+is the domain name of the recipient).
+.IR (tlshosts/<FQDN>.pem
+takes precedence over this file however). The default location of
+SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+
+.TP 5
+.I tlsadomains
+file having the list of MX hosts for which TLSA records needs
+to be verified. If this control file is present, TLSA
+verification will be skipped for all domains not in this file. If a file
+with the name \fItlsadomains\fR.\fIcdb\fR exists, \fBdnstlsarr\fR will
+use \fBcdb(3)\fR lookup in addition to the normal in-memory search in a
+table of tlsa verification enforced domains.
+
+.SH RETURN VALUE
+  0 for success
+  1 for failure in getting TLSA Resource Records or DANE verification failure (-s option)
+
+.SH "SEE ALSO"
+qdane(8),
+qmail-daned(8),
+tlsacheck(3),
+qmail-remote(8)

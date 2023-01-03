@@ -1,5 +1,8 @@
 /*
  * $Log: parsedate.c,v $
+ * Revision 1.7  2023-01-03 16:39:03+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -29,7 +32,6 @@
 #include <caltime.h>
 #include <tai.h>
 #include <noreturn.h>
-#include "auto_sysconfdir.h"
 
 #define FATAL "parsedate: fatal: "
 
@@ -97,7 +99,7 @@ main()
 void
 getversion_parsedate_c()
 {
-	static char    *x = "$Id: parsedate.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: parsedate.c,v 1.7 2023-01-03 16:39:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

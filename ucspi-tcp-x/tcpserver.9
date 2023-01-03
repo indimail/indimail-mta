@@ -40,8 +40,8 @@ Host names are fed through qualification using dns_ip4_qualify
 .B tcpserver
 can also do SSL/TLS encryption with remote clients. This requires a SSL
 certificate to be provided using the -n option. For TLS/SSL sessions,
-\fBtcpserver\fR sets the environment variable \fBTLS_PROVIDER\fR with
-details of the TLS connnection.
+\fBtcpserver\fR -z option sets the environment variable \fBTLS_PROVIDER\fR
+with details of the TLS connnection.
 
 \fBtcpserver(1)\fR works differently on Linux and FreeBSD. By default,
 FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The default
@@ -265,6 +265,16 @@ Give up on the $TCPREMOTEINFO connection attempt after
 \fIn\fR seconds. Default: 26.
 
 .TP
+.B \-T \fIn
+Terminate connection if no data is received in
+\fIn\fR seconds. Default: 300.
+
+.TP
+.B \-S \fIn
+Timeout accept for TLS/SSL connection in
+\fIn\fR seconds. Default: 60.
+
+.TP
 .B \-s
 Use default cert servercert.pem in @qsysconfdir@/certs. The location
 of certificate directory can be changed by using -i option or setting
@@ -312,6 +322,12 @@ The actual protocol version used will be negotiated to the highest version
 mutually supported by the client and the server. The supported protocols
 are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. Ths option must not be used
 to avoid version-specific methods since they are now deprecated.
+
+.TP
+-\fBz\fR
+Set \fBTLS_PROVIDER\fR environment variables with details of the TLS/SSL
+connection. This environment variable will be available for \fIprog\fR[.so]
+when using TLS/SSL.
 
 .SH IPv4-mapped IPv6 addresses
 Setting up \fBtcpserver\fR(1) with simultaneous bindings to IPv4 and IPv6

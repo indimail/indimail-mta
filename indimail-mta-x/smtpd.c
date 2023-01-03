@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.281 2022-12-26 22:11:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.282 2023-01-03 18:22:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -54,10 +54,7 @@
 #include "mail_acl.h"
 
 #ifdef TLS
-#include "tls.h"
-#include "ssl_timeoutio.h"
-#include "hastlsv1_1_server.h"
-#include "hastlsv1_2_server.h"
+#include <tls.h>
 #endif
 
 #ifdef USE_SPF
@@ -107,9 +104,9 @@
 #define SUBM_PORT 587 /*- Message Submission Port RFC 2476 */
 
 #ifdef TLS
-void            tls_init();
-int             tls_verify();
-void            tls_nogateway();
+static void     do_tls();
+static int      tls_verify();
+static void     tls_nogateway();
 #endif
 ssize_t         safewrite(int, char *, int);
 ssize_t         saferead(int, char *, int);
@@ -133,38 +130,43 @@ static int      auth_scram_sha512();
 static int      auth_scram_sha512_plus();
 #endif
 #endif
-int             err_noauth();
-int             err_noauthallowed();
-int             addrrelay();
+static int      err_noauth();
+static int      err_noauthallowed();
+static int      addrrelay();
 int             atrn_queue(char *, char *);
 no_return void _exit(int status);
 
 typedef struct passwd  PASSWD;
+typedef unsigned int my_uint;
+typedef unsigned long my_ulong;
+typedef struct constmap CONSTMAP;
 #ifdef TLS
-int             secure_auth = 0;
-int             ssl_rfd = -1, ssl_wfd = -1;	/*- SSL_get_Xfd() are broken */
-char           *servercert, *clientca, *clientcrl;
+static int      secure_auth = 0;
+static char    *servercert, *clientca, *clientcrl;
+static stralloc ssl_option = {0}, certfile = {0}, cafile = {0}, crlfile = {0}, saciphers = {0};
+static char   *ciphers;
+static int     smtps = 0;
+static SSL     *ssl = NULL;
 #endif
-char           *revision = "$Revision: 1.281 $";
-char           *protocol = "SMTP";
-stralloc        proto = { 0 };
+static char    *revision = "$Revision: 1.282 $";
+static char    *protocol = "SMTP";
+static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
 static stralloc greeting = { 0 };
 
 #ifdef HAVESRS
-stralloc        srs_domain = { 0 };
+static stralloc srs_domain = { 0 };
 #endif
 #ifdef USE_SPF
 stralloc        spflocal = { 0 };
 stralloc        spfguess = { 0 };
 stralloc        spfexp = { 0 };
-
-int             flagbarfspf;
-unsigned int    spfbehavior = 0;
-int             spfbehaviorok;
-unsigned int    spfipv6 = 0;
-int             spfipv6ok;
 static stralloc spfbarfmsg = { 0 };
+static int      flagbarfspf;
+static int      spfbehaviorok;
+static int      spfipv6ok;
+static my_uint  spfbehavior = 0;
+static my_uint  spfipv6 = 0;
 #endif
 stralloc        helohost = { 0 };
 stralloc        addr = { 0 }; /*- will be 0-terminated, if addrparse returns 1 */
@@ -178,35 +180,35 @@ static stralloc pass = { 0 };
 static stralloc resp = { 0 };
 static stralloc slop = { 0 };
 static stralloc authmethod = { 0 };
-
-stralloc        locals = { 0 };
-struct constmap maplocals;
+static stralloc locals = { 0 };
+static CONSTMAP maplocals;
 
 #ifdef BATV
-stralloc        batvkey = { 0 };
-char           *batvfn = 0;
+static stralloc batvkey = { 0 };
+static char    *batvfn = 0;
 static stralloc libfn = { 0 };
 
-int             batvok;
-int             batvkeystale = 7; /*- accept batvkey for a week */
-int             batvkeystaleok;
-stralloc        nosignlocals = { 0 };
-struct constmap mapnosignlocals;
-stralloc        nosignremote = { 0 };
-struct constmap mapnosignremote;
-char            isbounce;
+static int      batvok;
+static int      batvkeystale = 7; /*- accept batvkey for a week */
+static int      batvkeystaleok;
+static stralloc nosignlocals = { 0 };
+static CONSTMAP mapnosignlocals;
+static stralloc nosignremote = { 0 };
+static CONSTMAP mapnosignremote;
+static char     isbounce;
 #endif
 
 /*- SpaceNet - maex */
 static char     strnum[FMT_ULONG];
 static char     accept_buf[FMT_ULONG];
 
-char           *remoteip, *remotehost, *remoteinfo, *localhost, *relayclient, *nodnscheck, *msgsize, *fakehelo;
-char           *hostname, *bouncemail, *requireauth, *localip, *greyip;
+char           *localhost;
+static char    *remoteip, *remotehost, *remoteinfo, *relayclient, *nodnscheck, *fakehelo;
+static char    *hostname, *bouncemail, *requireauth, *localip, *greyip;
 #ifdef IPV6
-char           *remoteip4;
+static char    *remoteip4;
 #endif
-char          **childargs;
+static char    **childargs;
 
 static char     ssinbuf[1024];
 static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
@@ -217,177 +219,177 @@ static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof (sserrbuf));
 static char     upbuf[128];
 static substdio ssup;
 
-unsigned long   databytes = 0;
-unsigned long   msg_size = 0;
-unsigned long   BytesToOverflow = 0;
+static my_ulong databytes = 0;
+static my_ulong msg_size = 0;
+static my_ulong BytesToOverflow = 0;
 
-int             hasvirtual = 0;
-int             liphostok = 0;
-int             maxhops = MAXHOPS;
-int             timeout = 1200;
-int             authd = 0;
-int             seenhelo = 0;
-int             authenticated;
-int             seenmail = 0;
-int             setup_state = 0;
-int             rcptcount;
-int             dsn;
-int             qregex = 0;
-int             qregexok;
-int             rcpt_errcount = 0;
-int             max_rcpt_errcount = 1;
+static int      hasvirtual = 0;
+static int      liphostok = 0;
+static int      maxhops = MAXHOPS;
+static int      timeout = 1200;
+static int      authd = 0;
+static int      seenhelo = 0;
+static int      authenticated;
+static int      seenmail = 0;
+static int      setup_state = 0;
+static int      rcptcount;
+static int      dsn;
+static int      qregex = 0;
+static int      qregexok;
+static int      rcpt_errcount = 0;
+static int      max_rcpt_errcount = 1;
 
 struct qmail    qqt;
 
-int             greetdelay = 0;
-int             greetdelayok;
-char           *errStr = 0;
+static int      greetdelay = 0;
+static int      greetdelayok;
+static char    *errStr = 0;
 /*- badmailfrom */
-int             bmfok = 0;
+static int      bmfok = 0;
 static stralloc bmf = { 0 };
 
-struct constmap mapbmf;
-int             bmpok = 0;
+static CONSTMAP mapbmf;
+static int      bmpok = 0;
 static stralloc bmp = { 0 };
 
-char           *bmfFn = 0;
-char           *bmfFnp = 0;
+static char    *bmfFn = 0;
+static char    *bmfFnp = 0;
 /*- blackholedrcpt */
-int             bhrcpok = 0;
+static int      bhrcpok = 0;
 static stralloc bhrcp = { 0 };
 
-struct constmap mapbhrcp;
-int             bhbrpok = 0;
+static CONSTMAP mapbhrcp;
+static int      bhbrpok = 0;
 static stralloc bhbrp = { 0 };
 
-char           *bhrcpFn = 0;
-char           *bhrcpFnp = 0;
+static char    *bhrcpFn = 0;
+static char    *bhrcpFnp = 0;
 /*- BLACKHOLE Sender Check Variables */
-int             bhfok = 0;
-stralloc        bhf = { 0 };
+static int      bhfok = 0;
+static stralloc bhf = { 0 };
 
-struct constmap mapbhf;
-int             bhpok = 0;
+static CONSTMAP mapbhf;
+static int      bhpok = 0;
 static stralloc bhp = { 0 };
 
-char           *bhsndFn = 0;
-char           *bhsndFnp = 0;
+static char    *bhsndFn = 0;
+static char    *bhsndFnp = 0;
 /*- badrcptto */
-int             rcpok = 0;
+static int      rcpok = 0;
 static stralloc rcp = { 0 };
 
-struct constmap maprcp;
-int             brpok = 0;
+static CONSTMAP maprcp;
+static int      brpok = 0;
 static stralloc brp = { 0 };
 
-char           *rcpFn = 0;
-char           *rcpFnp = 0;
+static char    *rcpFn = 0;
+static char    *rcpFnp = 0;
 /*- accesslist */
-int             acclistok = 0;
+static int      acclistok = 0;
 static stralloc acclist = { 0 };
 
-char           *accFn = 0;
+static char    *accFn = 0;
 /*- RELAYCLIENT Check Variables */
-int             relayclientsok = 0;
+static int      relayclientsok = 0;
 static stralloc relayclients = { 0 };
 
-struct constmap maprelayclients;
+static CONSTMAP maprelayclients;
 /*- RELAYDOMAIN Check Variables */
-int             relaydomainsok = 0;
+static int      relaydomainsok = 0;
 static stralloc relaydomains = { 0 };
 
-struct constmap maprelaydomains;
+static CONSTMAP maprelaydomains;
 /*- RELAYMAILFROM Check Variables */
-int             rmfok = 0;
+static int      rmfok = 0;
 static stralloc rmf = { 0 };
 
-struct constmap maprmf;
+static CONSTMAP maprmf;
 /*- NODNSCHECK Check Variables */
-int             nodnschecksok = 0;
+static int      nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
 
-struct constmap mapnodnschecks;
-char           *nodnsFn;
+static CONSTMAP mapnodnschecks;
+static char    *nodnsFn;
 /*- badip Check */
-char           *dobadipcheck = (char *) 0;
-char           *badipfn = (char *) 0;
-int             briok = 0;
-stralloc        bri = { 0 };
+static char    *dobadipcheck = (char *) 0;
+static char    *badipfn = (char *) 0;
+static int      briok = 0;
+static stralloc bri = { 0 };
 
-char           *badhostfn = (char *) 0;
-stralloc        ipaddr = { 0 };
+static char    *badhostfn = (char *) 0;
+static stralloc ipaddr = { 0 };
 
-struct constmap mapbri;
+static CONSTMAP mapbri;
 /*- badhost Check */
-char           *dobadhostcheck = (char *) 0;
-int             brhok = 0;
-stralloc        brh = { 0 };
+static char    *dobadhostcheck = (char *) 0;
+static int      brhok = 0;
+static stralloc brh = { 0 };
 
-struct constmap mapbrh;
+static CONSTMAP mapbrh;
 /*- Helo Check */
-char           *dohelocheck = (char *) 0;
-char           *badhelofn = (char *) 0;
-int             badhelook = 0;
-stralloc        badhelo = { 0 };
+static char    *dohelocheck = (char *) 0;
+static char    *badhelofn = (char *) 0;
+static int      badhelook = 0;
+static stralloc badhelo = { 0 };
 
-struct constmap maphelo;
+static CONSTMAP maphelo;
 /*- authdomains */
-int             chkdomok;
+static int      chkdomok;
 static stralloc chkdom = { 0 };
 
-struct constmap mapchkdom;
+static CONSTMAP mapchkdom;
 /*- goodrcptto */
-int             chkgrcptok = 0;
+static int      chkgrcptok = 0;
 static stralloc grcpt = { 0 };
 
-struct constmap mapgrcpt;
-int             chkgrcptokp = 0;
+static CONSTMAP mapgrcpt;
+static int      chkgrcptokp = 0;
 static stralloc grcptp = { 0 };
 
-char           *grcptFn = 0;
-char           *grcptFnp = 0;
+static char    *grcptFn = 0;
+static char    *grcptFnp = 0;
 /*- SPAM Ingore Sender Check Variables */
-int             spfok = 0;
-stralloc        spf = { 0 };
+static int      spfok = 0;
+static stralloc spf = { 0 };
 
-struct constmap mapspf;
-int             sppok = 0;
+static CONSTMAP mapspf;
+static int      sppok = 0;
 static stralloc spp = { 0 };
 
-char           *spfFn = 0;
-char           *spfFnp = 0;
+static char    *spfFn = 0;
+static char    *spfFnp = 0;
 /*- check recipients using inquery chkrcptdomains */
-int             chkrcptok = 0;
+static int      chkrcptok = 0;
 static stralloc chkrcpt = { 0 };
 
-struct constmap mapchkrcpt;
+static CONSTMAP mapchkrcpt;
 /*- TARPIT Check Variables */
-int             tarpitcount = 0;
-int             tarpitdelay = 5;
-int             tarpitcountok;
-int             tarpitdelayok;
+static int      tarpitcount = 0;
+static int      tarpitdelay = 5;
+static int      tarpitcountok;
+static int      tarpitdelayok;
 /*- MAXRECIPIENTS Check Variable */
-int             maxrcptcount = 0;
-int             maxrcptcountok;
+static int      maxrcptcount = 0;
+static int      maxrcptcountok;
 /*- Russel Nelson's Virus Patch */
-int             sigsok = 0;
-char           *sigsFn = 0;
-int             sigsok_orig = 0;
-stralloc        sigs = { 0 };
+static int      sigsok = 0;
+static char    *sigsFn = 0;
+static int      sigsok_orig = 0;
+static stralloc sigs = { 0 };
 
-char           *virus_desc;
-int             bodyok = 0;
-int             bodyok_orig = 0;
-stralloc        body = { 0 };
+static char    *virus_desc;
+static int      bodyok = 0;
+static int      bodyok_orig = 0;
+static stralloc body = { 0 };
 
-char           *bodyFn = 0;
-char           *content_desc;
+static char    *bodyFn = 0;
+static char    *content_desc;
 #ifdef SMTP_PLUGIN
 PLUGIN        **plug = (PLUGIN **) 0;
 void          **plughandle;
-int             plugin_count;
+static int      plugin_count;
 #endif
-int             logfd = 255;
+static int      logfd = 255;
 static int      old_client_bug = 0;
 
 struct authcmd {
@@ -421,12 +423,12 @@ struct authcmd {
 static stralloc sa = { 0 };
 static stralloc domBuf = { 0 };
 #ifdef SMTPUTF8
-int             smtputf8 = 0, smtputf8_enable = 0;
+static int      smtputf8 = 0, smtputf8_enable = 0;
 #endif
 
-int             smtp_port;
+static int      smtp_port;
 void           *phandle;
-char           *no_help, *no_vrfy;
+static char    *no_help, *no_vrfy;
 #ifdef HASLIBGSASL
 static Gsasl   *gsasl_ctx;
 typedef enum {
@@ -463,41 +465,117 @@ logerrpid()
 	logerr(" from ");
 }
 
-ssize_t
-safewrite(int fd, char *buf, int len)
-{
-	int             r;
-
-#ifdef TLS
-	if (ssl && fd == ssl_wfd)
-		r = ssl_timeoutwrite(timeout, ssl_rfd, ssl_wfd, ssl, buf, len);
-	else
-		r = timeoutwrite(timeout, fd, buf, len);
-#else
-	r = timeoutwrite(timeout, fd, buf, len);
-#endif
-	if (r <= 0)
-		_exit(1);
-	return r;
-}
-
 void
 flush()
 {
-	substdio_flush(&ssout);
+	if (substdio_flush(&ssout) == -1)
+		_exit(1);
 }
 
 void
 flush_io()
 {
 	ssin.p = 0;
-	substdio_flush(&ssout);
+	if (substdio_flush(&ssout) == -1)
+		_exit(1);
 }
 
 void
 out(char *s)
 {
-	substdio_puts(&ssout, s);
+	if (substdio_puts(&ssout, s) == -1)
+		_exit(1);
+}
+
+no_return void
+die_read(char *str, char *err)
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" read error");
+	if (str) {
+		logerr(": ");
+		logerr(str);
+	}
+	if (errno) {
+		logerr(": ");
+		logerr(error_str(errno));
+	}
+	if (err) {
+		logerr(": ");
+		logerr(err);
+	}
+	logerrf("\n");
+	out("451 Requested action aborted: read error (#4.4.2)\r\n");
+	flush();
+	_exit(1);
+}
+
+no_return void
+die_alarm()
+{
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerrf(" timeout reached reading data from client\n");
+	out("451 Requested action aborted: timeout (#4.4.2)\r\n");
+	flush();
+	_exit(1);
+}
+
+ssize_t
+saferead(int fd, char *buf, int len)
+{
+	int             r;
+
+	flush();
+	r = tlsread(fd, buf, len, timeout);
+	if (r == -1) {
+		if (errno == error_timeout)
+			die_alarm();
+	} else
+	if (r <= 0) {
+#ifdef TLS
+		if (ssl) {
+			if (r)
+				die_read("ssl_timeoutread", myssl_error_str());
+			logerr("qmail-smtpd: ");
+			logerrpid();
+			logerr(remoteip);
+			logerr(" client closed connection: ");
+			logerr(myssl_error_str());
+			logerrf("\n");
+			while (SSL_shutdown(ssl) == 0)
+				usleep(100);
+			SSL_free(ssl);
+			ssl = 0;
+		} else
+		if (r)
+			die_read("timeoutread", 0);
+#else
+		if (r)
+			die_read("timeoutread", 0);
+#endif
+	}
+	return r;
+}
+
+ssize_t
+safewrite(int fd, char *buf, int len)
+{
+	int             r;
+
+	if ((r = tlswrite(fd, buf, len, timeout)) <= 0) {
+		if (ssl) {
+			while (SSL_shutdown(ssl) == 0)
+				usleep(100);
+			SSL_free(ssl);
+			ssl = 0;
+		}
+		_exit(1);
+	}
+	return r;
 }
 
 no_return void
@@ -555,45 +633,8 @@ die_lcmd()
 	logerr("qmail-smtpd: ");
 	logerrpid();
 	logerr(remoteip);
-	logerr(" command t00 long!\n");
-	out("553 sorry, the given command is t00 long! (#5.5.2)\r\n");
-	flush();
-	_exit(1);
-}
-
-no_return void
-die_read(char *str, char *err)
-{
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" read error");
-	if (str) {
-		logerr(": ");
-		logerr(str);
-	}
-	if (errno) {
-		logerr(": ");
-		logerr(error_str(errno));
-	}
-	if (err) {
-		logerr(": ");
-		logerr(err);
-	}
-	logerrf("\n");
-	out("451 Requested action aborted: read error (#4.4.2)\r\n");
-	flush();
-	_exit(1);
-}
-
-no_return void
-die_alarm()
-{
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerrf(" timeout reached reading data from client\n");
-	out("451 Requested action aborted: timeout (#4.4.2)\r\n");
+	logerr(" command too long!\n");
+	out("553 sorry, the given command is too long! (#5.5.2)\r\n");
 	flush();
 	_exit(1);
 }
@@ -2232,18 +2273,23 @@ greet_extra()
 	int             i;
 	struct datetime dt;
 
-	substdio_puts(&ssout, " (NO UCE) ESMTP IndiMail ");
+	if (substdio_puts(&ssout, " (NO UCE) ESMTP IndiMail ") == -1)
+		_exit(1);
 	for (ptr = (revision + 11); *ptr; ptr++) {
 		if (*ptr == ' ') {
-			substdio_put(&ssout, " ", 1);
+			if (substdio_put(&ssout, " ", 1) == -1)
+				_exit(1);
 			break;
 		}
-		substdio_put(&ssout, ptr, 1);
+		if (substdio_put(&ssout, ptr, 1) == -1)
+			_exit(1);
 	}
 	datetime_tai(&dt, now());
 	i = date822fmt(buf, &dt);
-	substdio_put(&ssout, buf, i - 1); /*- skip printing \n */
-	substdio_flush(&ssout);
+	if (substdio_put(&ssout, buf, i - 1) == -1) /*- skip printing \n */
+		_exit(1);
+	if (substdio_flush(&ssout) == -1)
+		_exit(1);
 	return;
 }
 
@@ -2262,19 +2308,22 @@ smtp_respond(char *code)
 	/*- multiline greeting */
 	for (i = 0, j = 0; i < greeting.len - 1; i++) {
 		if (greeting.s[i] == '\0') {
-			substdio_put(&ssout, code, 3);
-			substdio_puts(&ssout, "-");
-			substdio_put(&ssout, greeting.s + j, i - j);
+			if (substdio_put(&ssout, code, 3) == -1 ||
+					substdio_puts(&ssout, "-") == -1 ||
+					substdio_put(&ssout, greeting.s + j, i - j) == -1)
+				_exit(1);
 			if (!d && do_greet) {
 				greet_extra();
 				do_greet = 0;
 			}
-			substdio_puts(&ssout, "\r\n");
+			if (substdio_puts(&ssout, "\r\n") == -1)
+				_exit(1);
 			j = i + 1;
 		}
 	}
-	substdio_puts(&ssout, code);
-	substdio_put(&ssout, greeting.s + j, greeting.len - 1 - j);
+	if (substdio_puts(&ssout, code) == -1 ||
+			substdio_put(&ssout, greeting.s + j, greeting.len - 1 - j) == -1)
+		_exit(1);
 	if (!d && do_greet)
 		greet_extra();
 }
@@ -2308,7 +2357,8 @@ smtp_help(char *arg)
 		for (; *ptr; ptr++) {
 			if (*ptr == ' ')
 				break;
-			substdio_put(&ssout, ptr, 1);
+			if (substdio_put(&ssout, ptr, 1) == -1)
+				_exit(1);
 		}
 	}
 	out("\r\n");
@@ -2924,7 +2974,7 @@ setup()
 #ifdef TLS
 	if (env_get("SMTPS")) {
 		smtps = 1;
-		tls_init();
+		do_tls();
 	}
 #endif
 	dohelo(remotehost);
@@ -4474,33 +4524,6 @@ smtp_rcpt(char *arg)
 	return;
 }
 
-ssize_t
-saferead(int fd, char *buf, int len)
-{
-	int             r;
-
-	flush();
-#ifdef TLS
-	if (ssl && fd == ssl_rfd)
-		r = ssl_timeoutread(timeout, ssl_rfd, ssl_wfd, ssl, buf, len);
-	else
-		r = timeoutread(timeout, fd, buf, len);
-#else
-	r = timeoutread(timeout, fd, buf, len);
-#endif
-	if (r == -1) {
-		if (errno == error_timeout)
-			die_alarm();
-	}
-	if (r < 0)
-#ifdef TLS
-		ssl ? die_read("ssl_timeoutread", ssl_error()) : die_read("timeoutread", 0);
-#else
-		die_read("timeoutread", 0);
-#endif
-	return r;
-}
-
 /*-
  * =0 after boundary is found in body,
  * until blank line
@@ -4957,6 +4980,7 @@ smtp_data(char *arg)
 	}
 	qp = qmail_qp(&qqt); /*- pid of queue process */
 	out("354 go ahead\r\n");
+	/*- flush(); -*/
 #ifdef TLS
 	x = ssl ? 0 : env_get("TLS_PROVIDER");
 #else
@@ -6674,233 +6698,10 @@ smtp_tls(char *arg)
 		out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
 		flush();
 	} else {
-		tls_init();
+		do_tls();
 		/*- have to discard the pre-STARTTLS HELO/EHLO argument, if any */
 		dohelo(remotehost);
 	}
-}
-
-#if OPENSSL_VERSION_NUMBER < 0x30000000L
-RSA            *
-tmp_rsa_cb(SSL *ssl_p, int export, int keylen)
-{
-	stralloc        filename = { 0 };
-	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
-	char          **ptr;
-	int             i, j;
-	FILE           *in;
-	RSA            *rsa;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	BIGNUM         *bn;
-	RSA            *key;
-#endif
-
-	if (!export)
-		keylen = 512;
-	if (!certdir) {
-		if (!(certdir = env_get("CERTDIR")))
-			certdir = auto_control;
-	}
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/rsa", 4))
-		die_nomem();
-	j = filename.len;
-	for (ptr = pems; *ptr; ptr++) {
-		scan_int(*ptr, &i);
-		if (keylen != i)
-			continue;
-		if (!stralloc_cats(&filename, *ptr) ||
-				!stralloc_catb(&filename, ".pem", 4) ||
-				!stralloc_0(&filename))
-			die_nomem();
-		filename.len = j;
-		if (!(in = fopen(filename.s, "r"))) {
-			if (errno != error_noent)
-				die_custom("error reading rsa private key");
-			continue;
-		}
-		if (!(rsa = PEM_read_RSAPrivateKey(in, NULL, NULL, NULL)))
-			die_custom("error reading rsa private key");
-		fclose(in);
-		alloc_free(filename.s);
-		return rsa;
-	}
-	alloc_free(filename.s);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	if (!(bn = BN_new()))
-		die_nomem();
-	if (!BN_set_word(bn, 65537))
-		die_custom("error setting BIGNUM");
-	if (!(key = RSA_new()))
-		die_nomem();
-	if (!RSA_generate_key_ex(key, keylen, bn, NULL))
-		die_custom("error generating RSA keys");
-	BN_free(bn);
-	return (key);
-#else
-	return RSA_generate_key(keylen, RSA_F4, NULL, NULL);
-#endif
-}
-
-DH             *
-tmp_dh_cb(SSL *ssl_p, int export, int keylen)
-{
-	stralloc        filename = { 0 };
-	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
-	char          **ptr;
-	int             i, j;
-	FILE           *in;
-	DH             *dh;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	DH             *client_key;
-#endif
-
-	if (!export)
-		keylen = 1024;
-	if (!certdir) {
-		if (!(certdir = env_get("CERTDIR")))
-			certdir = auto_control;
-	}
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/dh", 3))
-		die_nomem();
-	j = filename.len;
-	for (ptr = pems; *ptr; ptr++) {
-		scan_int(*ptr, &i);
-		if (keylen != i)
-			continue;
-		if (!stralloc_cats(&filename, *ptr) ||
-				!stralloc_catb(&filename, ".pem", 4) ||
-				!stralloc_0(&filename))
-			die_nomem();
-		filename.len = j;
-		if (!(in = fopen(filename.s, "r"))) {
-			if (errno != error_noent)
-				die_custom("error reading dh parameters");
-			continue;
-		}
-		if (!(dh = PEM_read_DHparams(in, NULL, NULL, NULL)))
-			die_custom("error reading dh parameters");
-		fclose(in);
-		alloc_free(filename.s);
-		return dh;
-	}
-	alloc_free(filename.s);
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	if (!(client_key = DH_new()))
-		die_nomem();
-	if (!DH_generate_parameters_ex(client_key, keylen, DH_GENERATOR_2, NULL))
-		die_custom("error generating DH parameters");
-	return (client_key);
-#else
-	return DH_generate_parameters(keylen, DH_GENERATOR_2, NULL, NULL);
-#endif
-}
-#else /*- #if OPENSSL_VERSION_NUMBER < 0x30000000L */
-EVP_PKEY       *
-get_rsakey(int export, int keylen)
-{
-	stralloc        filename = { 0 };
-	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
-	char          **ptr;
-	BIO            *in;
-	int             i, j;
-	EVP_PKEY       *rsa_key;
-
-	if (!export)
-		keylen = 512;
-	if (!certdir) {
-		if (!(certdir = env_get("CERTDIR")))
-			certdir = auto_control;
-	}
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/rsa", 4))
-		die_nomem();
-	j = filename.len;
-	for (ptr = pems; *ptr; ptr++) {
-		scan_int(*ptr, &i);
-		if (keylen != i)
-			continue;
-		if (!stralloc_cats(&filename, *ptr) ||
-				!stralloc_catb(&filename, ".pem", 4) ||
-				!stralloc_0(&filename))
-			die_nomem();
-		filename.len = j;
-		if (access(filename.s, F_OK)) {
-			if (errno != error_noent)
-				die_custom("error reading rsa private key");
-			continue;
-		}
-		if ((in = BIO_new(BIO_s_file()))) {
-			BIO_read_filename(in, filename.s);
-			alloc_free(filename.s);
-			if (!(rsa_key = PEM_read_bio_PrivateKey(in, NULL, 0, NULL)))
-				die_custom("error reading rsa private key");
-			BIO_free(in);
-			return rsa_key;
-		} else
-			die_nomem();
-	}
-	alloc_free(filename.s);
-	return ((EVP_PKEY *) NULL);
-}
-
-EVP_PKEY       *
-get_dhkey(int export, int keylen)
-{
-	stralloc        filename = { 0 };
-	char           *pems[] = {"8192", "4096", "2048", "1024", "512", 0};
-	char          **ptr;
-	int             i, j;
-	BIO            *in;
-	EVP_PKEY       *dh_key;
-
-	if (!export)
-		keylen = 1024;
-	if (!certdir) {
-		if (!(certdir = env_get("CERTDIR")))
-			certdir = auto_control;
-	}
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/dh", 3))
-		die_nomem();
-	j = filename.len;
-	for (ptr = pems; *ptr; ptr++) {
-		scan_int(*ptr, &i);
-		if (keylen == i)
-			continue;
-		if (!stralloc_cats(&filename, *ptr) ||
-				!stralloc_catb(&filename, ".pem", 4) ||
-				!stralloc_0(&filename))
-			die_nomem();
-		filename.len = j;
-		if (access(filename.s, F_OK)) {
-			if (errno != error_noent)
-				die_custom("error reading dh parameters");
-			continue;
-		}
-		if ((in = BIO_new(BIO_s_file()))) {
-			if (!BIO_read_filename(in, filename.s))
-				die_custom("error reading dhparams file");
-			alloc_free(filename.s);
-			if (!(dh_key = PEM_read_bio_Parameters_ex(in, NULL, NULL, NULL)))
-				die_custom("error reading dh parameters");
-			BIO_free(in);
-			return dh_key;
-		} else
-			die_nomem();
-	}
-	return ((EVP_PKEY *) NULL);
-}
-#endif /*- #if OPENSSL_VERSION_NUMBER < 0x30000000L */
-
-/*
- * don't want to fail handshake if cert isn't verifiable 
- */
-int
-verify_cb(int preverify_ok, X509_STORE_CTX * ctx)
-{
-	return 1;
 }
 
 void
@@ -6936,7 +6737,7 @@ tls_err(const char *err_code1, const char *err_code2, const char *s)
 	logerr(remoteip);
 	logerr(" ");
 	logerr(s);
-	err = ssl_error();
+	err = myssl_error_str();
 	if (err) {
 		logerr(": ");
 		logerr(err);
@@ -6995,7 +6796,7 @@ tls_verify()
 		die_control("tlsclients");
 	}
 
-	if (ssl_timeoutrehandshake(timeout, ssl_rfd, ssl_wfd, ssl) <= 0) {
+	if (ssl_timeoutrehandshake(timeout, 0, 1, ssl) <= 0) {
 		tls_err("454", "4.3.0", "rehandshake failed");
 		_exit(1);
 	}
@@ -7050,130 +6851,6 @@ tls_verify()
 	return relayclient ? 1 : 0;
 }
 
-SSL_CTX        *
-set_tls_method()
-{
-	SSL_CTX        *ctx;
-	stralloc        ssl_option = { 0 };
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	int             method = 4;	/*- (1 unused) 2 = SSLv23, 3=SSLv3, 4 = TLSv1, 5=TLSv1.1, 6=TLSv1.2 */
-#else
-	int             method = 0;	/*- (1,2 unused) 3=SSLv3, 4 = TLSv1, 5=TLSv1.1, 6=TLSv1.2, 7=TLSv1.3 */
-#endif
-
-	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1_2") != 1)
-		die_control("tlsservermethod");
-	if (!stralloc_0(&ssl_option))
-		die_nomem();
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (str_equal(ssl_option.s, "SSLv23"))
-		method = 2;
-	else
-	if (str_equal(ssl_option.s, "SSLv3"))
-		method = 3;
-	else
-#endif
-	if (str_equal(ssl_option.s, "TLSv1"))
-		method = 4;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_1"))
-		method = 5;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_2"))
-		method = 6;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_3"))
-		method = 7;
-	else {
-		tls_err("454", "4.3.0", "Invalid TLS method configured");
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-		logerrf("Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2\n");
-#else
-		logerrf("Supported methods: TLSv1, TLSv1_1, TLSv1_2 TLSv1_3\n");
-#endif
-		return ((SSL_CTX *) NULL);
-	}
-	SSL_library_init();
-	/*- a new SSL context with the bare minimum of options */
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (method == 2 && !(ctx = SSL_CTX_new(SSLv23_server_method()))) {
-		tls_err("454", "4.3.0", "TLS not available: unable to initialize SSLv23 ctx");
-		return ((SSL_CTX *) NULL);
-	} else
-	if (method == 3 && !(ctx = SSL_CTX_new(SSLv3_server_method()))) {
-		tls_err("454", "4.3.0", "TLS not available: unable to initialize SSLv3 ctx");
-		return ((SSL_CTX *) NULL);
-	} else
-#if defined(TLSV1_SERVER_METHOD) || defined(TLS1_VERSION)
-	if (method == 4 && !(ctx = SSL_CTX_new(TLSv1_server_method()))) {
-		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLSv1 ctx");
-		return ((SSL_CTX *) NULL);
-	} else
-#else
-	if (method == 4) {
-		tls_err("454", "4.3.0", "TLS not available: TLSv1_server_method not available");
-		return ((SSL_CTX *) NULL);
-	} else
-#endif
-#if defined(TLSV1_1_SERVER_METHOD) || defined(TLS1_1_VERSION)
-	if (method == 5 && !(ctx = SSL_CTX_new(TLSv1_1_server_method()))) {
-		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLSv1_1 ctx");
-		return ((SSL_CTX *) NULL);
-	} else
-#else
-	if (method == 5) {
-		tls_err("454", "4.3.0", "TLS not available: TLSv1_1_server_method not available");
-		return ((SSL_CTX *) NULL);
-	} else
-#endif
-#if defined(TLSV1_2_SERVER_METHOD) || defined(TLS1_2_VERSION)
-	if (method == 6 && !(ctx = SSL_CTX_new(TLSv1_2_server_method()))) {
-		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLSv1_2 ctx");
-		return ((SSL_CTX *) NULL) ;
-	} else
-#else
-	if (method == 6) {
-		tls_err("454", "4.3.0", "TLS not available: TLSv1_2_server_method not available");
-		return ((SSL_CTX *) NULL) ;
-	}
-#endif
-#else /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if (!(ctx = SSL_CTX_new(TLS_server_method()))) {
-		tls_err("454", "4.3.0", "TLS not available: unable to initialize TLS ctx");
-		return ((SSL_CTX *) NULL) ;
-	}
-	/*-
-	 * Currently supported versions are SSL3_VERSION, TLS1_VERSION, TLS1_1_VERSION,
-	 * TLS1_2_VERSION, TLS1_3_VERSION for TLS
-	 */
-	switch (method)
-	{
-	case 2:
-		tls_err("454", "4.3.0", "TLS not available: SSLv23_server_method not available");
-		return ((SSL_CTX *) NULL) ;
-	case 3:
-		SSL_CTX_set_min_proto_version(ctx, SSL3_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, SSL3_VERSION);
-		break;
-	case 4:
-		SSL_CTX_set_min_proto_version(ctx, TLS1_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, TLS1_VERSION);
-		break;
-	case 5:
-		SSL_CTX_set_min_proto_version(ctx, TLS1_1_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, TLS1_1_VERSION);
-		break;
-	case 6:
-		SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
-		break;
-	}
-	/*- POODLE Vulnerability */
-	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-#endif /*- OPENSSL_VERSION_NUMBER < 0x10100000L */
-	return ctx;
-}
-
 void
 log_ssl_version()
 {
@@ -7188,138 +6865,93 @@ log_ssl_version()
 }
 
 void
-tls_init()
+do_tls()
 {
-	const char     *ciphers;
-	SSL            *myssl;
 	SSL_CTX        *ctx;
-	stralloc        saciphers = { 0 };
-	stralloc        filename = { 0 };
-#if OPENSSL_VERSION_NUMBER >= 0x00907000L
-	X509_STORE     *store;
-	X509_LOOKUP    *lookup;
-#endif
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	EVP_PKEY       *dh_pkey;
-	int             bits;
-#endif
 
-	if (!(ctx = set_tls_method()))
-		return;
+	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1_2") != 1)
+		die_control("tlsservermethod");
+	if (!stralloc_0(&ssl_option))
+		die_nomem();
 	if (!certdir) {
 		if (!(certdir = env_get("CERTDIR")))
 			certdir = auto_control;
 	}
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/", 1))
+	set_certdir(certdir);
+	if (!stralloc_copys(&certfile, certdir) ||
+			!stralloc_catb(&certfile, "/", 1))
 		die_nomem();
 	servercert = ((servercert = env_get("SERVERCERT")) ? servercert : "servercert.pem");
-	if (!stralloc_cats(&filename, servercert) ||
-			!stralloc_0(&filename))
+	if (!stralloc_cats(&certfile, servercert) ||
+			!stralloc_0(&certfile))
 		die_nomem();
-	if (!SSL_CTX_use_certificate_chain_file(ctx, filename.s)) {
-		alloc_free(filename.s);
-		SSL_CTX_free(ctx);
-		tls_err("454", "4.3.0", "certificate missing");
-		_exit(1);
-	}
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/", 1))
+
+	if (!stralloc_copys(&cafile, certdir) ||
+			!stralloc_catb(&cafile, "/", 1))
 		die_nomem();
 	clientca = ((clientca = env_get("CLIENTCA")) ? clientca : "clientca.pem");
-	if (!stralloc_cats(&filename, clientca) ||
-			!stralloc_0(&filename))
+	if (!stralloc_cats(&cafile, clientca) ||
+			!stralloc_0(&cafile))
 		die_nomem();
-	SSL_CTX_load_verify_locations(ctx, filename.s, NULL);
-#if OPENSSL_VERSION_NUMBER >= 0x00907000L
-	/*- crl checking */
-	store = SSL_CTX_get_cert_store(ctx);
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/", 1))
+	if (access(cafile.s, F_OK))
+		cafile.len = 0;
+
+	if (!stralloc_copys(&crlfile, certdir) ||
+			!stralloc_catb(&crlfile, "/", 1))
 		die_nomem();
 	clientcrl = ((clientcrl = env_get("CLIENTCRL")) ? clientcrl : "clientcrl.pem");
-	if (!stralloc_cats(&filename, clientcrl) ||
-			!stralloc_0(&filename))
+	if (!stralloc_cats(&crlfile, clientcrl) ||
+			!stralloc_0(&crlfile))
 		die_nomem();
-	if ((lookup = X509_STORE_add_lookup(store, X509_LOOKUP_file()))
-		&& (X509_load_crl_file(lookup, filename.s, X509_FILETYPE_PEM) == 1))
-		X509_STORE_set_flags(store, X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
-#endif
-	/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
-	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, verify_cb);
-	/*- a new SSL object, with the rest added to it directly to avoid copying */
-	myssl = SSL_new(ctx);
-	SSL_CTX_free(ctx);
-	if (!myssl) {
-		alloc_free(filename.s);
+	if (access(crlfile.s, F_OK))
+		crlfile.len = 0;
+
+	if (!ciphers) {
+		/* - set cipher list */
+		if (!(ciphers = env_get("TLS_CIPHER_LIST"))) {
+			if (control_readfile(&saciphers, "tlsserverciphers", 0) == -1)
+				die_control("tlsserverciphers");
+			if (saciphers.len) {
+				int             i;
+				/*- convert all '\0's except the last one to ':' */
+				for (i = 0; i < saciphers.len - 1; ++i)
+					if (!saciphers.s[i])
+						saciphers.s[i] = ':';
+				ciphers = saciphers.s;
+			}
+		}
+	}
+
+	if (!(ctx = tls_init(ssl_option.s, certfile.s,
+			cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
+			ciphers, qsmtpd))) {
+		tls_err("454", "4.3.0", "unable to set initialize TLS");
+		if (smtps)
+			_exit(1);
+	}
+	if (!(ssl = tls_session(ctx, 0))) {
+		SSL_CTX_free(ctx);
+		ctx = NULL;
 		tls_err("454", "4.3.0", "unable to initialize ssl");
-		_exit(1);
+		if (smtps)
+			_exit(1);
 	}
-	/*- this will also check whether public and private keys match */
-	if (!stralloc_copys(&filename, certdir) ||
-			!stralloc_catb(&filename, "/", 1))
-		die_nomem();
-	servercert = ((servercert = env_get("SERVERCERT")) ? servercert : "servercert.pem");
-	if (!stralloc_cats(&filename, servercert) ||
-			!stralloc_0(&filename))
-		die_nomem();
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	if (!SSL_use_PrivateKey_file(myssl, filename.s, SSL_FILETYPE_PEM)) {
-#else
-	if (!SSL_use_RSAPrivateKey_file(myssl, filename.s, SSL_FILETYPE_PEM)) {
-#endif
-		SSL_free(myssl);
-		alloc_free(filename.s);
-		tls_err("454", "4.3.0", "no valid RSA private key");
-		_exit(1);
-	}
-	alloc_free(filename.s);
-	if (!(ciphers = env_get("TLS_CIPHER_LIST"))) {
-		if (control_readfile(&saciphers, "tlsserverciphers", 0) == -1) {
-			SSL_free(myssl);
-			die_control("tlsserverciphers");
-		}
-		if (saciphers.len) {
-			int             i;
-			/*- convert all '\0's except the last one to ':' */
-			for (i = 0; i < saciphers.len - 1; ++i)
-				if (!saciphers.s[i])
-					saciphers.s[i] = ':';
-			ciphers = saciphers.s;
-		}
-	}
-	if (!ciphers || !*ciphers)
-		ciphers = "DEFAULT";
-	SSL_set_cipher_list(myssl, ciphers);
-	alloc_free(saciphers.s);
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	getEnvConfigInt(&bits, "SSL_BITS", 2048);
-	if (!get_rsakey(0, bits))
-		EVP_RSA_gen(bits);
-	if (!(dh_pkey = get_dhkey(0, bits)))
-		SSL_set_dh_auto(myssl, 1);
-	else
-		SSL_set0_tmp_dh_pkey(myssl, dh_pkey);
-#else
-	SSL_set_tmp_rsa_callback(myssl, tmp_rsa_cb);
-	SSL_set_tmp_dh_callback(myssl, tmp_dh_cb);
-#endif
-	SSL_set_rfd(myssl, ssl_rfd = substdio_fileno(&ssin));
-	SSL_set_wfd(myssl, ssl_wfd = substdio_fileno(&ssout));
+	SSL_CTX_free(ctx);
+	ctx = NULL;
 	if (!smtps) {
 		out("220 ready for tls\r\n");
 		flush();
 	}
-	if (ssl_timeoutaccept(timeout, ssl_rfd, ssl_wfd, myssl) <= 0) {
+	if (tls_accept(timeout, 0, 1, ssl)) {
 		/*- neither cleartext nor any other response here is part of a standard */
 		tls_err("454", "4.3.0", "failed to accept TLS connection");
-		while (SSL_shutdown(myssl) == 0)
+		while (SSL_shutdown(ssl) == 0)
 			usleep(100);
-		SSL_free(myssl);
-		myssl = 0;
-		_exit(1);
+		SSL_free(ssl);
+		ssl = 0;
+		if (smtps)
+			_exit(1);
 	}
-	ssl = myssl;
 	log_ssl_version();
 	/*- populate the protocol string, used in Received */
 	if (!stralloc_append(&proto, "(") ||
@@ -7653,9 +7285,19 @@ command:
 #ifdef TLS
 	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
 #endif
-	if (commands(&ssin, cmdptr) == 0)
+	if ((i = commands(&ssin, cmdptr)) == 0) {
+#ifdef TLS
+		if (ssl) {
+			while (SSL_shutdown(ssl) == 0)
+				usleep(100);
+			SSL_free(ssl);
+			ssl = 0;
+		}
+#endif
 		die_read("client dropped connection", 0);
-	die_nomem();
+	} else
+	if (i == -1)
+		die_lcmd();
 }
 
 /*- Rejection of relay probes. */
@@ -7681,6 +7323,12 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.282  2023-01-03 18:22:33+05:30  Cprogrammer
+ * fixed erroneous "out of memory" instead of "command too long" error
+ * made global variables static
+ * replace internal TLS function with TLS functions from libqmail
+ * redefine saferead, safewrite to use tlsread, tlswrite from libqmail
+ *
  * Revision 1.281  2022-12-26 22:11:12+05:30  Cprogrammer
  * use env variable HOSTNAME, gethostname to set localhost variable
  *
@@ -7971,7 +7619,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.281 2022-12-26 22:11:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.282 2023-01-03 18:22:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

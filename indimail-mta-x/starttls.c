@@ -1,42 +1,5 @@
 /*
- * $Log: starttls.c,v $
- * Revision 1.12  2022-05-18 13:30:29+05:30  Cprogrammer
- * openssl 3.0.0 port
- *
- * Revision 1.11  2021-06-14 01:19:59+05:30  Cprogrammer
- * collapsed stralloc_..
- *
- * Revision 1.10  2021-05-26 10:47:20+05:30  Cprogrammer
- * handle access() error other than ENOENT
- *
- * Revision 1.9  2020-11-24 13:48:34+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.8  2020-11-22 23:12:12+05:30  Cprogrammer
- * removed supression of ANSI C proto
- *
- * Revision 1.7  2020-05-11 10:59:44+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.6  2020-05-10 17:47:13+05:30  Cprogrammer
- * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
- *
- * Revision 1.5  2018-06-01 22:53:36+05:30  Cprogrammer
- * display correct host in perm_dns()
- *
- * Revision 1.4  2018-05-31 17:12:18+05:30  Cprogrammer
- * fixed potential use of uninitialized variable in do_pkix()
- * changed DANE validation messages
- *
- * Revision 1.3  2018-05-31 02:21:50+05:30  Cprogrammer
- * print status of DANE Validation on stdout
- *
- * Revision 1.2  2018-05-30 20:11:23+05:30  Cprogrammer
- * using hexstring variable inside tlsa_vrfy_records() clobbered certDataField
- *
- * Revision 1.1  2018-05-30 11:54:47+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: starttls.c,v 1.13 2023-01-03 19:50:47+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -49,27 +12,27 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-#include "alloc.h"
-#include "gen_alloc.h"
-#include "gen_allocdefs.h"
-#include "ssl_timeoutio.h"
-#include "timeoutread.h"
-#include "timeoutwrite.h"
-#include "timeoutconn.h"
-#include "stralloc.h"
-#include "getln.h"
-#include "wait.h"
+#include <alloc.h>
+#include <gen_alloc.h>
+#include <gen_allocdefs.h>
+#include <tls.h>
+#include <timeoutread.h>
+#include <timeoutwrite.h>
+#include <stralloc.h>
+#include <getln.h>
+#include <wait.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <strerr.h>
+#include <env.h>
+#include <case.h>
+#include <str.h>
+#include <fmt.h>
+#include <now.h>
+#include <noreturn.h>
 #include "socket.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "tls.h"
-#include "strerr.h"
+#include "timeoutconn.h"
 #include "ip.h"
-#include "env.h"
-#include "case.h"
-#include "str.h"
-#include "fmt.h"
-#include "now.h"
 #include "dns.h"
 #include "control.h"
 #include "variables.h"
@@ -77,6 +40,7 @@
 #include "ipalloc.h"
 #include "tlsarralloc.h"
 #include "auto_control.h"
+#include "auto_sysconfdir.h"
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define SSL_ST_BEFORE 0x4000
@@ -86,30 +50,45 @@
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
 GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
 
-int             smtpfd;
-const char     *ssl_err_str = 0;
-struct ip_mx    partner;
-char           *partner_fqdn = 0;
-stralloc        rhost = { 0 }; /*- host ip to which qmail-remote ultimately connects */
-SSL_CTX        *ctx;
-stralloc        saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
-stralloc        smtptext = { 0 };
-saa             ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
-int             maxehlokwlen = 0;
-stralloc        hexstring = { 0 };
-stralloc        hextmp = { 0 };
+static int      smtpfd;
+static const char *ssl_err_str = 0;
+static struct ip_mx partner;
+static char    *partner_fqdn = 0;
+static stralloc rhost = { 0 }; /*- host ip to which qmail-remote ultimately connects */
+static SSL_CTX *ctx;
+static stralloc saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
+static stralloc smtptext = { 0 };
+static saa      ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
+static int      maxehlokwlen = 0;
+static stralloc hexstring = { 0 };
+static stralloc hextmp = { 0 };
+static stralloc certdir_s;
 stralloc        sa = { 0 };
 ipalloc         ia = { 0 };
 tlsarralloc     ta = { 0 };
-stralloc        tline = { 0 };
+static stralloc tline = { 0 };
 stralloc        save = { 0 };
-union v46addr   outip;
-stralloc        sauninit = { 0 };
+static union v46addr outip;
+static stralloc sauninit = { 0 };
 
 extern int      verbose;
-extern int      timeoutconnect;
-extern int      timeoutssl;
+extern int      timeoutconn;
+extern int      timeoutdata;
+static SSL     *ssl;
+static int      smtps;
 extern stralloc helohost;
+
+no_return void
+ssl_exit(int status)
+{
+	if (ssl) {
+		while (SSL_shutdown(ssl) == 0)
+			usleep(100);
+		SSL_free(ssl);
+		ssl = 0;
+	}
+	_exit(status);
+}
 
 void
 out(char *str)
@@ -137,7 +116,7 @@ die(int e)
 		SSL_free(ssl);
 		ssl = 0;
 	}
-	_exit (e);
+	ssl_exit(e);
 }
 
 void
@@ -243,10 +222,10 @@ saferead(int fd, char *buf, int len)
 	int             r;
 
 	if (ssl) {
-		if ((r = ssl_timeoutread(timeoutssl, smtpfd, smtpfd, ssl, buf, len)) < 0)
-			ssl_err_str = ssl_error_str();
+		if ((r = ssl_timeoutread(timeoutdata, smtpfd, smtpfd, ssl, buf, len)) < 0)
+			ssl_err_str = myssl_error_str();
 	} else
-		r = timeoutread(timeoutssl, smtpfd, buf, len);
+		r = timeoutread(timeoutdata, smtpfd, buf, len);
 	if (r <= 0)
 		dropped();
 	return r;
@@ -258,10 +237,10 @@ safewrite(int fd, char *buf, int len)
 	int             r;
 
 	if (ssl) {
-		if ((r = ssl_timeoutwrite(timeoutssl, smtpfd, smtpfd, ssl, buf, len)) < 0)
-			ssl_err_str = ssl_error_str();
+		if ((r = ssl_timeoutwrite(timeoutdata, smtpfd, smtpfd, ssl, buf, len)) < 0)
+			ssl_err_str = myssl_error_str();
 	} else
-		r = timeoutwrite(timeoutssl, smtpfd, buf, len);
+		r = timeoutwrite(timeoutdata, smtpfd, buf, len);
 	if (r <= 0)
 		dropped();
 	return r;
@@ -524,28 +503,20 @@ do_pkix(char *servercert)
  * 3. exits on error, if smtps == 1 and tls session did not succeed
  */
 int
-tls_init(int pkix, int *needtlsauth, char **scert)
+do_tls(int pkix, int *needtlsauth, char **scert)
 {
 	int             code, i = 0, _needtlsauth = 0;
 	static char     ssl_initialized;
 	const char     *ciphers = 0;
-	char           *t, *servercert = 0;
+	char           *t, *servercert = 0, *certfile;
 	static SSL     *myssl;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	stralloc        ssl_option = { 0 };
-	int             method = 4;	/*- (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
-#endif
-	int             method_fail = 1;
+	int             method_fail;
 
 	if (needtlsauth)
 		*needtlsauth = 0;
 	if (scert)
 		*scert = 0;
-	/*- 
-	 * tls_init() gets called in smtp()
-	 * if smtp() returns for trying next mx
-	 * we need to re-initialize
-	 */
 	if (ctx) {
 		SSL_CTX_free(ctx);
 		ctx = (SSL_CTX *) 0;
@@ -554,36 +525,19 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		SSL_free(myssl);
 		ssl = myssl = (SSL *) 0;
 	}
-	if (!controldir && !(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (!stralloc_copys(&tlsFilename, controldir) ||
-			!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16) ||
-			!stralloc_0(&tlsFilename))
-		die_nomem();
-	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
-		die_control("unable to read control file ", tlsFilename.s);
-	if (!stralloc_0(&ssl_option))
-		die_nomem();
-	if (str_equal(ssl_option.s, "SSLv23"))
-		method = 2;
-	else
-	if (str_equal(ssl_option.s, "SSLv3"))
-		method = 3;
-	else
-	if (str_equal(ssl_option.s, "TLSv1"))
-		method = 4;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_1"))
-		method = 5;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_2"))
-		method = 6;
-#endif
-	if (!certdir && !(certdir = env_get("CERTDIR")))
-		certdir = auto_control;
+	if (!certdir && !(certdir = env_get("CERTDIR"))) {
+		if (!stralloc_copys(&certdir_s, auto_sysconfdir) ||
+				!stralloc_catb(&certdir_s, "/certs", 6) ||
+				!stralloc_0(&certdir_s))
+			die_nomem();
+		certdir = certdir_s.s;
+	}
+	
 	if (!stralloc_copys(&clientcert, certdir) ||
-			!stralloc_catb(&clientcert, "/clientcert.pem", 15) ||
+			!stralloc_append(&clientcert, "/"))
+		die_nomem();
+	certfile = ((certfile = env_get("CLIENTCERT")) ? certfile : "clientcert.pem");
+	if (!stralloc_cats(&clientcert, certfile) ||
 			!stralloc_0(&clientcert))
 		die_nomem();
 	if (access(clientcert.s, F_OK)) {
@@ -625,56 +579,46 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	}
 
 	if (!smtps) {
-		stralloc       *sa_t = ehlokw.sa;
+		stralloc       *saptr = ehlokw.sa;
 		unsigned int    len = ehlokw.len;
 
 		/*- look for STARTTLS among EHLO keywords */
-		for (; len && case_diffs(sa_t->s, "STARTTLS"); ++sa_t, --len);
+		for (; len && case_diffs(saptr->s, "STARTTLS"); ++saptr, --len);
 		if (!len) {
 			if (!_needtlsauth)
 				return (0);
 			tls_quit("No TLS achieved while", tlsFilename.s, " exists", 0, 0);
 		}
 	}
+
 	if (!ssl_initialized++)
 		SSL_library_init();
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (method == 2 && (ctx = SSL_CTX_new(SSLv23_client_method())))
-		method_fail = 0;
-	else
-	if (method == 3 && (ctx = SSL_CTX_new(SSLv3_client_method())))
-		method_fail = 0;
-#if defined(TLSV1_CLIENT_METHOD) || defined(TLS1_VERSION)
-	else
-	if (method == 4 && (ctx = SSL_CTX_new(TLSv1_client_method())))
-		method_fail = 0;
-#endif
-#if defined(TLSV1_1_CLIENT_METHOD) || defined(TLS1_1_VERSION)
-	else
-	if (method == 5 && (ctx = SSL_CTX_new(TLSv1_1_client_method())))
-		method_fail = 0;
-#endif
-#if defined(TLSV1_2_CLIENT_METHOD) || defined(TLS1_2_VERSION)
-	else
-	if (method == 6 && (ctx = SSL_CTX_new(TLSv1_2_client_method())))
-		method_fail = 0;
-#endif
-#else /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if ((ctx = SSL_CTX_new(TLS_client_method())))
-		method_fail = 0;
-	/*- SSL_OP_NO_SSLv3, SSL_OP_NO_TLSv1, SSL_OP_NO_TLSv1_1 and SSL_OP_NO_TLSv1_2 */
-	/*- POODLE Vulnerability */
-	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-#endif /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if (method_fail) {
-		if (!smtps && !_needtlsauth) {
-			SSL_CTX_free(ctx);
+	if (!controldir && !(controldir = env_get("CONTROLDIR")))
+		controldir = auto_control;
+	if (!stralloc_copys(&tlsFilename, controldir) ||
+			!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16) ||
+			!stralloc_0(&tlsFilename))
+		die_nomem();
+	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
+		die_control("unable to read control file ", tlsFilename.s);
+	if (!stralloc_0(&ssl_option))
+		die_nomem();
+	if (!(ctx = set_tls_method(ssl_option.s, client, &method_fail))) {
+		if (!smtps && !_needtlsauth)
 			return (0);
-		}
-		t = (char *) ssl_error();
-		SSL_CTX_free(ctx);
+		t = (char *) myssl_error();
+		if (!stralloc_copyb(&smtptext, "TLS error initializing ctx: ", 28) ||
+				!stralloc_cats(&smtptext, t))
+			die_nomem();
 		switch (method_fail)
 		{
+		case 1:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+			tls_quit("TLS Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2", t, 0, 0, 0);
+#else
+			tls_quit("TLS Supported methods: TLSv1, TLSv1_1, TLSv1_2 TLSv1_3", t, 0, 0, 0);
+#endif
+			break;
 		case 2:
 			tls_quit("TLS error initializing SSLv23 ctx: ", t, 0, 0, 0);
 			break;
@@ -690,13 +634,17 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		case 6:
 			tls_quit("TLS error initializing TLSv1_2 ctx: ", t, 0, 0, 0);
 			break;
+		case 7:
+			tls_quit("TLS error initializing TLSv1_3 ctx: ", t, 0, 0, 0);
+			break;
 		}
 	}
 
 	if (_needtlsauth) {
 		if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
-			t = (char *) ssl_error();
+			t = myssl_error();
 			SSL_CTX_free(ctx);
+			ctx = (SSL_CTX *) 0;
 			tls_quit("TLS unable to load ", servercert, ": ", t, 0);
 		}
 		/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
@@ -712,15 +660,19 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 #endif
 
 	if (!(myssl = SSL_new(ctx))) {
-		t = (char *) ssl_error();
+		t = myssl_error();
 		if (!smtps && !_needtlsauth) {
 			SSL_CTX_free(ctx);
+			ctx = (SSL_CTX *) 0;
 			return (0);
 		}
 		SSL_CTX_free(ctx);
+		ctx = (SSL_CTX *) 0;
 		tls_quit("TLS error initializing ssl: ", t, 0, 0, 0);
-	} else
+	} else {
 		SSL_CTX_free(ctx);
+		ctx = (SSL_CTX *) 0;
+	}
 
 	if (!smtps) {
 		substdio_putsflush(&smtpto, "STARTTLS\r\n");
@@ -731,17 +683,19 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	/*- while the server is preparing a response, do something else */
 	if (!ciphers) {
 		if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
-			while (SSL_shutdown(myssl) == 0);
+			while (SSL_shutdown(myssl) == 0)
+				usleep(100);
 			SSL_free(myssl);
+			ssl = myssl = NULL;
 			die_control("unable to read control file ", "tlsclientciphers");
 		}
 		if (saciphers.len) {
+			/*- convert all '\0's except the last one to ':' */
 			for (i = 0; i < saciphers.len - 1; ++i)
 				if (!saciphers.s[i])
 					saciphers.s[i] = ':';
 			ciphers = saciphers.s;
-		} else
-			ciphers = "DEFAULT";
+		}
 	}
 	SSL_set_cipher_list(myssl, ciphers);
 
@@ -751,7 +705,8 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	/*- read the response to STARTTLS */
 	if (!smtps) {
 		if (smtpcode() != 220) {
-			while (SSL_shutdown(myssl) == 0);
+			while (SSL_shutdown(myssl) == 0)
+				usleep(100);
 			SSL_free(myssl);
 			ssl = myssl = (SSL *) 0;
 			if (!_needtlsauth)
@@ -760,8 +715,8 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		}
 	}
 	ssl = myssl;
-	if (ssl_timeoutconn(timeoutssl, smtpfd, smtpfd, ssl) <= 0) {
-		t = (char *) ssl_error_str();
+	if (ssl_timeoutconn(timeoutconn, smtpfd, smtpfd, ssl) <= 0) {
+		t = (char *) myssl_error_str();
 		tls_quit("TLS connect failed: ", t, 0, 0, 0);
 	}
 	if (smtps && (code = smtpcode()) != 220) /*- 220 ready for tls */
@@ -1229,7 +1184,7 @@ do_dane_validation(char *host, int port)
 	get_tlsa_rr(host, 1, port);
 	if (!ta.len) {
 		logerrf("dane_query_tlsa: No DANE data were found\n");
-		_exit (0);
+		ssl_exit(0);
 	}
 	/*- print TLSA records */
 	for (j = 0, usage = -1; j < ta.len; ++j) {
@@ -1270,7 +1225,7 @@ do_dane_validation(char *host, int port)
 		if ((smtpfd = socket_tcp4()) == -1)
 #endif
 			temp_oserr();
-		if (timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconnect)) {
+		if (timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconn)) {
 			close(smtpfd);
 			continue;
 		}
@@ -1292,7 +1247,7 @@ do_dane_validation(char *host, int port)
 	if (!smtps)
 		code = ehlo();
 	match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
-	if (!tls_init(0, &needtlsauth, &servercert)) {/*- tls is needed for DANE */
+	if (!do_tls(0, &needtlsauth, &servercert)) {/*- tls is needed for DANE */
 		logerr("Connected to ");
 		outhost();
 		logerrf(" but unable to intiate TLS for DANE\n");
@@ -1487,7 +1442,52 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.12 2022-05-18 13:30:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.13 2023-01-03 19:50:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: starttls.c,v $
+ * Revision 1.13  2023-01-03 19:50:47+05:30  Cprogrammer
+ * replace set_tls_method() from libqmail
+ * made global variables static
+ *
+ * Revision 1.12  2022-05-18 13:30:29+05:30  Cprogrammer
+ * openssl 3.0.0 port
+ *
+ * Revision 1.11  2021-06-14 01:19:59+05:30  Cprogrammer
+ * collapsed stralloc_..
+ *
+ * Revision 1.10  2021-05-26 10:47:20+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
+ * Revision 1.9  2020-11-24 13:48:34+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.8  2020-11-22 23:12:12+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
+ * Revision 1.7  2020-05-11 10:59:44+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.6  2020-05-10 17:47:13+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
+ * Revision 1.5  2018-06-01 22:53:36+05:30  Cprogrammer
+ * display correct host in perm_dns()
+ *
+ * Revision 1.4  2018-05-31 17:12:18+05:30  Cprogrammer
+ * fixed potential use of uninitialized variable in do_pkix()
+ * changed DANE validation messages
+ *
+ * Revision 1.3  2018-05-31 02:21:50+05:30  Cprogrammer
+ * print status of DANE Validation on stdout
+ *
+ * Revision 1.2  2018-05-30 20:11:23+05:30  Cprogrammer
+ * using hexstring variable inside tlsa_vrfy_records() clobbered certDataField
+ *
+ * Revision 1.1  2018-05-30 11:54:47+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

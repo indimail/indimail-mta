@@ -4,7 +4,7 @@
 dotls \- Generic TLS/SSL protocol wrapper for non-TLS programs
 .SH SYNOPSIS
 
-\fBdotls\fR [-ndftMCT ] [-s smtp|pop3] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
+\fBdotls\fR [-ndftDMCT ] [-s smtp|pop3] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
 
 .SH "DESCRIPTION"
 .PP
@@ -47,7 +47,7 @@ behalf of \fIprog\fR. All other commands are passed unaltered to
 \fIprog\fR.
 
 \fBdotls\fR sets the environment variable \fBTLS_PROVIDER\fR with details
-of the TLS connnection.
+of the TLS connnection if the -z option is passed.
 
 .SH "OPTIONS"
 .TP
@@ -96,8 +96,20 @@ are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. Ths option must not be used
 to avoid version-specific methods since they are now deprecated.
 
 .TP
--\fBt\fR \fItimeout\fR
-Timeout after \fItimeout\fR seconds if no data is received
+-\fBz\fR
+Set \fBTLS_PROVIDER\fR environment variables with details of the TLS/SSL
+connection. This environment variable will be available for \fIprog\fR
+when using TLS/SSL.
+
+.TP
+-\fBD\fR \fItimeoutdata\fR
+Quit if read or write to/from \fIprogram\fR or application exceeds
+\fItimeoutdata\fR seconds.
+
+.TP
+-\fBt\fR \fItimeoutconn\fR
+Timeout on TLS/SSL connect in client mode or TLS/SSL accept in server mode
+if attempt exceeds \fItimeoutconn\fR seconds.
 
 .TP
 -\fBs\fR \fIstartlsType\fR
@@ -108,15 +120,19 @@ Currently, \fBsmtp\fR and \fBpop3\fR are supported. If this is not
 provided, \fBdotls\fR will directly initiate a TLS session.
 
 .TP
--\fBC\fR
-\fBclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
-reading fd 0 for input and using fd 1 for output.
-
-.TP
 -\fBT\fR
 \fBtcpclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
-reading fd 6 for input and using fd 7 for output. Use this if \fIprog\fR has
-been specifically written for tcpclient(1).
+expecting \fBtcpclient\fR be connected to a port where data is being
+encrypted with TLS/SSL. \fIprog\fR will be run reading descriptor 0 for
+input and descriptor 1 for output.
+
+.TP
+-\fBC\fR
+\fBtcpclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
+expecting \fBtcpclient\fR be connected to a port where data is being
+encrypted with TLS/SSL. \fIprog\fR will be run reading descriptor 0 for
+input and descriptor 1 for output. Use this if \fIprog\fR has been
+specifically written for the original tcpclient(1).
 
 .SH "ENVIRONMENT VARIABLES"
 .PP
@@ -165,12 +181,14 @@ should be separated by a colon. This can be overriden by the -f option.
      qmail-pop3d Maildir
 
 5. Run a script under tcpclient that connects to a SSL server on port 5555
-   read from fd 0 reads from network & write to fd 1 writes to network
-   tcpclient 0 555 /usr/bin/dotls -C /usr/bin/myscript
+   read from descriptor 0 reads from network & write to descriptor 1 writes
+   to network
+   tcpclient 0 5555 /usr/bin/dotls -T /usr/bin/myscript
 
 6. Run a script under tcpclient that connects to a SSL server on port 5555
-   read from fd 6 reads from network & write to fd 7 writes to network
-   tcpclient 0 555 /usr/bin/dotls -CT /usr/bin/myscript
+   read from descriptor 6 reads from network & write to descriptor 7 writes
+   to network
+   tcpclient 0 5555 /usr/bin/dotls -CT /usr/bin/myscript
 .EE
 
 .SH NOTES

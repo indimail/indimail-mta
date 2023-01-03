@@ -1,5 +1,8 @@
 /*
  * $Log: 822received.c,v $
+ * Revision 1.11  2023-01-03 16:27:51+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -44,7 +47,6 @@
 #include <caltime.h>
 #include <tai.h>
 #include <noreturn.h>
-#include "auto_sysconfdir.h"
 
 #define FATAL "822received: fatal: "
 
@@ -218,7 +220,7 @@ main(int argc, char **argv)
 void
 getversion_822received_c()
 {
-	static char    *x = "$Id: 822received.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822received.c,v 1.11 2023-01-03 16:27:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

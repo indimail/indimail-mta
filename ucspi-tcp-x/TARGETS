@@ -145,11 +145,12 @@ ucspi-tcp.perms
 fixcrio.o
 delcr.o
 addcr.o
-iopause.o
-iopause.h
 tls.o
 tcpclient.1
 dotls.o
 dotls
 PKGBUILD
 dotls.1
+upathexec_env.o
+upathexec_rundl.o
+upathexec_run.o

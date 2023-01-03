@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.18  2023-01-03 16:36:02+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.17  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -75,7 +78,6 @@
 #include <noreturn.h>
 #include "qmail.h"
 #include "rwhconfig.h"
-#include "auto_sysconfdir.h"
 #include "set_environment.h"
 
 #define FATAL "new-inject: fatal: "
@@ -626,7 +628,7 @@ main(int argc, char **argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.17 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: new-inject.c,v 1.18 2023-01-03 16:36:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

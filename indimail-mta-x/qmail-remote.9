@@ -86,7 +86,7 @@ to non-encrypted session if the TLS connection fails.
 
 \fBqmail-remote\fR can use authenticated SMTP for remote deliveries if
 username and secret is provided in the \fiSYSCONF/control/remote_auth.cdb\fR
-or \fISYSCONF/control/smtproutes\fRcontrol file. This is described in
+or \fISYSCONF/control/smtproutes\fR control file. This is described in
 detail in the section \fBCONTROL FILES\fR. \fBqmail-remote\fR uses libgsasl
 to use GNU Simple Authentication and Security Layer detailed here
 https://www.gnu.org/software/gsasl. \fBqmail-remote\fR supports LOGIN,
@@ -728,11 +728,12 @@ SYSCONF/control can be overriden by environment variable
 .I notlhosts
 domains for which \fBqmail-remote\fR will not initiate TLS sesson. This
 file in SYSCONF/control or directory defined by the \fBCONTROLDIR\fR
-envirnoment variable, shouldn't be confused with \fInotlshosts\fR directory
-in the directory defined by the \fBCERTDIR\fR environment variable.
+envirnoment variable, shouldn't be confused with
+SYSCONF/certs/\fInotlshosts\fR directory in the directory or the directory
+defined by the \fBCERTDIR\fR environment variable.
 
 .PP
-For TLS sessions, the default location of SYSCONF/control can be
+For TLS sessions, the default location of SYSCONF/certs can be
 overriden by environment variable CERTDIR. This affects the location of
 below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
 \fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
@@ -742,7 +743,7 @@ below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
 .I clientcert.pem
 SSL certificate that is used to authenticate with the remote server during
 a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR will
-not negotiate TLS. The default location of SYSCONF/control can be
+not negotiate TLS. The default location of SYSCONF/certs can be
 overriden by environment variable CERTDIR. \fIclientcert.pem\fR can be
 overriden by environment variable \fBCLIENTCERT\fR.
 
@@ -756,7 +757,7 @@ is the fully-qualified domain name of the remote SMTP server). One of the
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
-The default location of SYSCONF/control can be overriden by
+The default location of SYSCONF/certs can be overriden by
 environment variable \fBCERTDIR\fR.
 
 .TP 5
@@ -764,7 +765,7 @@ environment variable \fBCERTDIR\fR.
 if this file exists no TLS will be tried on hosts other than those for
 which a file
 .B tlshosts/<FQDN>.pem
-exists. The default location of SYSCONF/control can be overriden by
+exists. The default location of SYSCONF/certs can be overriden by
 environment variable \fBCERTDIR\fR.
 
 .B WARNING:
@@ -778,7 +779,7 @@ will not try TLS on servers for which this file exists
 is the fully-qualified domain name of the remote SMTP server).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-SYSCONF/control can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I notlshosts/host
@@ -788,7 +789,7 @@ will not try TLS on servers for which this file exists
 is the domain name of the recipient).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-SYSCONF/control can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I tlsadomains

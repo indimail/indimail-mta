@@ -1074,8 +1074,13 @@ Used by \fBqmail-smtpd\fR(8), \fBqmail-spamfilter\fR(8) to execute
 Used by proxyimap, proxypop3 if configured to add users automatically
 
 .TP
-\fIADMIN_TIMEOUT\fR
-Timout that \fBadminclient\fR(8) uses for connecting to \fBindisrvr\fR(8)
+\fITIMEOUTCONN\fR
+Timeout that \fBadminclient\fR(8) uses for connecting to \fBindisrvr\fR(8)
+
+.TP
+\fITIMEOUTDATA\fR
+Timeout that \fBadminclient\fR(8) uses for data exchange between
+\fBindisrvr\fR(8) and itself.
 
 .TP
 \fIALLOWCHARS\fR

@@ -45,6 +45,20 @@ Release 1.1.1 Start 18/09/2022
      exist
 - 27/12/2022
 29.  dotls: disable write_provider_data, read_provider_data for starttls
+- 29/12/2022
+30. dotls: added -t option to specify TLS/SSL connect/accept timeout
+31. tcpserver.c: added -S option to specify TLS/SSL accept timeout
+32. tcpclient.c: use -T option to timeout TLS/SSL connect
+- 03/01/2023
+33. moved tls functions to libqmail. tls.c, tls.h removed
+34. dotls.c: added -D, -t option for timeoutdata, timeoutconn.
+35. dotls.c, tcpclient.c, tcpserver.c: added -z option to turn on setting of
+    TLS_PROVIDER env variable
+36. dotls.c: log ssl cipher bits
+37. dotls.c, tcpserver.c, tcpclient.c: replace internal TLS function with TLS
+    functions from libqmail
+38. removed iopause.c, iopause.h. Use iopause functions from libqmail
+39. tcpserver.c: added -S option for connection timeout
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 14/02/2021 End 08/09/2022

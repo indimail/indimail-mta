@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.159 2022-11-08 23:32:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.160 2023-01-03 17:01:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -50,10 +50,7 @@
 #ifdef TLS
 #include <openssl/x509v3.h>
 #include <openssl/x509.h>
-#include "tls.h"
-#include "ssl_timeoutio.h"
-#include "hastlsv1_1_client.h"
-#include "hastlsv1_2_client.h"
+#include <tls.h>
 #ifdef HASTLSA
 #include "tlsacheck.h"
 #endif
@@ -72,6 +69,7 @@
 #endif
 
 #include "auto_control.h"
+#include "auto_sysconfdir.h"
 #include "control.h"
 #include "dns.h"
 #include "quote.h"
@@ -138,11 +136,13 @@ char          **my_argv;
 int             my_argc;
 #ifdef TLS
 const char     *ssl_err_str = 0;
-stralloc        saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
+stralloc        saciphers, tlsFilename, clientcert, certdir_s;
 SSL_CTX        *ctx;
 int             notls = 0;
 stralloc        notlshosts = { 0 } ;
 struct constmap mapnotlshosts;
+SSL            *ssl;
+int             smtps;
 #endif
 
 int             fdmoreroutes = -1;
@@ -824,7 +824,7 @@ saferead(int fd, char *buf, int len)
 #ifdef TLS
 	if (ssl) {
 		if ((r = ssl_timeoutread(timeout, smtpfd, smtpfd, ssl, buf, len)) < 0)
-			ssl_err_str = ssl_error_str();
+			ssl_err_str = myssl_error_str();
 	} else
 		r = timeoutread(timeout, smtpfd, buf, len);
 #else
@@ -843,7 +843,7 @@ safewrite(int fd, char *buf, int len)
 #ifdef TLS
 	if (ssl) {
 		if ((r = ssl_timeoutwrite(timeout, smtpfd, smtpfd, ssl, buf, len)) < 0)
-			ssl_err_str = ssl_error_str();
+			ssl_err_str = myssl_error_str();
 	} else
 		r = timeoutwrite(timeout, smtpfd, buf, len);
 #else
@@ -1387,7 +1387,7 @@ do_pkix(char *servercert)
  * 3. exits on error, if smtps == 1 and tls session did not succeed
  */
 int
-tls_init(int pkix, int *needtlsauth, char **scert)
+do_tls(int pkix, int *needtlsauth, char **scert)
 {
 	int             code, i = 0, _needtlsauth = 0;
 	static char     ssl_initialized;
@@ -1395,12 +1395,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	char           *t, *servercert = 0, *certfile;
 	static SSL     *myssl;
 	stralloc        ssl_option = { 0 };
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	int             method = 6;	/*- (1..2 unused) [1..3] = ssl[1..3], 4 = tls1, 5=tls1.1, 6=tls1.2 */
-#else
-	int             method = 7;
-#endif
-	int             method_fail = 1;
+	int             method_fail;
 
 	if (notls) /*- if found in control/notlshosts control file */
 		return (0);
@@ -1409,8 +1404,8 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	if (scert)
 		*scert = 0;
 	/*-
-	 * tls_init() gets called in smtp()
-	 * if smtp() returns for trying next mx
+	 * do_tls() gets called in do_smtp()
+	 * if do_smtp() returns for trying next mx
 	 * we need to re-initialize
 	 */
 	if (ctx) {
@@ -1421,35 +1416,13 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 		SSL_free(myssl);
 		ssl = myssl = (SSL *) 0;
 	}
-	if (!controldir && !(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	if (control_rldef(&ssl_option, "tlsclientmethod", 0, "TLSv1_2") != 1)
-		temp_control("Unable to read control files", "tlsclientmethod");
-	if (!stralloc_0(&ssl_option))
-		temp_nomem();
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (str_equal(ssl_option.s, "SSLv23"))
-		method = 2;
-	else
-	if (str_equal(ssl_option.s, "SSLv3"))
-		method = 3;
-	else
-#endif
-	if (str_equal(ssl_option.s, "TLSv1"))
-		method = 4;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_1"))
-		method = 5;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_2"))
-		method = 6;
-	else
-	if (str_equal(ssl_option.s, "TLSv1_3"))
-		method = 7;
-	else
-		perm_tlsclientmethod();
-	if (!certdir && !(certdir = env_get("CERTDIR")))
-		certdir = auto_control;
+	if (!certdir && !(certdir = env_get("CERTDIR"))) {
+		if (!stralloc_copys(&certdir_s, auto_sysconfdir) ||
+				!stralloc_catb(&certdir_s, "/certs", 6) ||
+				!stralloc_0(&certdir_s))
+			temp_nomem();
+		certdir = certdir_s.s;
+	}
 	if (!stralloc_copys(&clientcert, certdir) ||
 			!stralloc_append(&clientcert, "/"))
 		temp_nomem();
@@ -1518,73 +1491,31 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 			tls_quit("ZNo TLS achieved while", tlsFilename.s, " exists", 0, 0);
 		}
 	}
+
 	if (!ssl_initialized++)
 		SSL_library_init();
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (method == 2 && (ctx = SSL_CTX_new(SSLv23_client_method())))
-		method_fail = 0;
-	else
-	if (method == 3 && (ctx = SSL_CTX_new(SSLv3_client_method())))
-		method_fail = 0;
-#if defined(TLSV1_CLIENT_METHOD) || defined(TLS1_VERSION)
-	else
-	if (method == 4 && (ctx = SSL_CTX_new(TLSv1_client_method())))
-		method_fail = 0;
-#endif
-#if defined(TLSV1_1_CLIENT_METHOD) || defined(TLS1_1_VERSION)
-	else
-	if (method == 5 && (ctx = SSL_CTX_new(TLSv1_1_client_method())))
-		method_fail = 0;
-#endif
-#if defined(TLSV1_2_CLIENT_METHOD) || defined(TLS1_2_VERSION)
-	else
-	if (method == 6 && (ctx = SSL_CTX_new(TLSv1_2_client_method())))
-		method_fail = 0;
-#endif
-#else /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if ((ctx = SSL_CTX_new(TLS_client_method())))
-		method_fail = 0;
-	/*-
-	 * Currently supported versions are SSL3_VERSION, TLS1_VERSION, TLS1_1_VERSION,
-	 * TLS1_2_VERSION, TLS1_3_VERSION for TLS
-	 */
-	switch (method)
-	{
-	case 2:
-		perm_tlsclientmethod();
-	case 3:
-		SSL_CTX_set_min_proto_version(ctx, SSL3_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, SSL3_VERSION);
-		break;
-	case 4:
-		SSL_CTX_set_min_proto_version(ctx, TLS1_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, TLS1_VERSION);
-		break;
-	case 5:
-		SSL_CTX_set_min_proto_version(ctx, TLS1_1_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, TLS1_1_VERSION);
-		break;
-	case 6:
-		SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION);
-		SSL_CTX_set_max_proto_version(ctx, TLS1_2_VERSION);
-		break;
-	}
-	/*- SSL_OP_NO_SSLv3, SSL_OP_NO_TLSv1, SSL_OP_NO_TLSv1_1 and SSL_OP_NO_TLSv1_2 */
-	/*- POODLE Vulnerability */
-	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
-#endif /*- #if OPENSSL_VERSION_NUMBER < 0x10100000L */
-	if (method_fail) {
-		if (!smtps && !_needtlsauth) {
-			SSL_CTX_free(ctx);
+	if (!controldir && !(controldir = env_get("CONTROLDIR")))
+		controldir = auto_control;
+	if (control_rldef(&ssl_option, "tlsclientmethod", 0, "TLSv1_3") != 1)
+		temp_control("Unable to read control files", "tlsclientmethod");
+	if (!stralloc_0(&ssl_option))
+		temp_nomem();
+	if (!(ctx = set_tls_method(ssl_option.s, client, &method_fail))) {
+		if (!smtps && !_needtlsauth)
 			return (0);
-		}
-		t = (char *) ssl_error();
+		t = myssl_error();
 		if (!stralloc_copyb(&smtptext, "TLS error initializing ctx: ", 28) ||
 				!stralloc_cats(&smtptext, t))
 			temp_nomem();
-		SSL_CTX_free(ctx);
 		switch (method_fail)
 		{
+		case 1:
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+			tls_quit("ZTLS Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2", t, 0, 0, 0);
+#else
+			tls_quit("ZTLS Supported methods: TLSv1, TLSv1_1, TLSv1_2 TLSv1_3", t, 0, 0, 0);
+#endif
+			break;
 		case 2:
 			tls_quit("ZTLS error initializing SSLv23 ctx: ", t, 0, 0, 0);
 			break;
@@ -1608,7 +1539,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 
 	if (_needtlsauth) {
 		if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
-			t = (char *) ssl_error();
+			t = myssl_error();
 			if (!stralloc_copyb(&smtptext, "TLS unable to load ", 19) ||
 					!stralloc_cats(&smtptext, servercert) ||
 					!stralloc_catb(&smtptext, ": ", 2) ||
@@ -1630,7 +1561,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 #endif
 
 	if (!(myssl = SSL_new(ctx))) {
-		t = (char *) ssl_error();
+		t = myssl_error();
 		if (!smtps && !_needtlsauth) {
 			SSL_CTX_free(ctx);
 			return (0);
@@ -1649,17 +1580,18 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	/*- while the server is preparing a response, do something else */
 	if (!ciphers) {
 		if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
-			while (SSL_shutdown(myssl) == 0);
+			while (SSL_shutdown(myssl) == 0)
+				usleep(100);
 			SSL_free(myssl);
 			temp_control("Unable to read control file", "tlsclientciphers");
 		}
 		if (saciphers.len) {
+			/*- convert all '\0's except the last one to ':' */
 			for (i = 0; i < saciphers.len - 1; ++i)
 				if (!saciphers.s[i])
 					saciphers.s[i] = ':';
 			ciphers = saciphers.s;
-		} else
-			ciphers = "DEFAULT";
+		}
 	}
 	SSL_set_cipher_list(myssl, ciphers);
 
@@ -1669,7 +1601,8 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	/*- read the response to STARTTLS */
 	if (!smtps) {
 		if (smtpcode() != 220) {
-			while (SSL_shutdown(myssl) == 0);
+			while (SSL_shutdown(myssl) == 0)
+				usleep(100);
 			SSL_free(myssl);
 			ssl = myssl = (SSL *) 0;
 			if (!_needtlsauth)
@@ -1683,7 +1616,7 @@ tls_init(int pkix, int *needtlsauth, char **scert)
 	}
 	ssl = myssl;
 	if (ssl_timeoutconn(timeout, smtpfd, smtpfd, ssl) <= 0) {
-		t = (char *) ssl_error_str();
+		t = myssl_error_str();
 		if (!stralloc_copyb(&smtptext, "TLS connect failed: ", 20) ||
 				!stralloc_cats(&smtptext, t))
 			temp_nomem();
@@ -2549,7 +2482,7 @@ do_channel_binding(Gsasl_session *sctx)
 }
 
 static void
-client(Gsasl *gsasl_ctx, int method)
+gsasl_client(Gsasl *gsasl_ctx, int method)
 {
 	Gsasl_session  *session;
 	const char     *mech;
@@ -2637,7 +2570,7 @@ auth_scram(int method, int use_size)
 		quit("ZConnected to ", gsasl_str.s, -1, 1);
 	}
 	/* Do it.  */
-	client(gsasl_ctx, method);
+	gsasl_client(gsasl_ctx, method);
 	/* Cleanup.  */
 	gsasl_done(gsasl_ctx);
 	mailfrom_xtext(use_size);
@@ -3040,7 +2973,7 @@ err_tmpfail(char *arg)
 #endif
 
 void
-smtp()
+do_smtp()
 {
 	unsigned long   code;
 	int             flagbother;
@@ -3087,7 +3020,7 @@ smtp()
 #ifdef HASTLSA
 	if (do_tlsa && ta.len) {
 		match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
-		if (!tls_init(0, &needtlsauth, &servercert)) /*- tls is needed for DANE */
+		if (!do_tls(0, &needtlsauth, &servercert)) /*- tls is needed for DANE */
 			quit("ZConnected to ", " but unable to intiate TLS for DANE", 530, -1);
 		for (j = 0, usage = -1; j < ta.len; ++j) {
 			rp = &(ta.rr[j]);
@@ -3137,10 +3070,10 @@ smtp()
 			quit("DConnected to ", " but recpient failed DANE validation", 534, 1);
 		}
 	} else /*- no tlsa rr records */
-	if (tls_init(1, 0, 0))
+	if (do_tls(1, 0, 0))
 		code = ehlo();
 #else
-	if (tls_init(1, 0, 0))
+	if (do_tls(1, 0, 0))
 		code = ehlo();
 #endif /*- #ifdef HASTLSA */
 #else
@@ -4158,7 +4091,7 @@ main(int argc, char **argv)
 							x[j - 1] = 0;
 						qmtp(&host, x, port); /*- does not return */
 					} else
-						smtp();	/*- only returns when the next MX is to be tried */
+						do_smtp();	/*- only returns when the next MX is to be tried */
 					smtp_error = 1;
 					break;
 				} else { /*- connect failed */
@@ -4200,13 +4133,17 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.159 2022-11-08 23:32:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.160 2023-01-03 17:01:02+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.160  2023-01-03 17:01:02+05:30  Cprogrammer
+ * set default certificate dir to /etc/indimail/certs
+ * use set_tls_method() from libqmail
+ *
  * Revision 1.159  2022-11-08 23:32:53+05:30  Cprogrammer
  * clear input buffer when trying next mx
  *
