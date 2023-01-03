@@ -59,7 +59,7 @@ the in-memory database as small as possible, records older than
 \fItimeout_days\fR are periodically removed. The default interval is 5
 minutes and can be changed by specifiying the \fB-f\fR option.  You can
 force removal of expired records by issuing \fISIGUSR2\fR signal to
-\fBqmail-daned\fR.  \fBqmail-daned\fR also backups the in-memory database to
+\fBqmail-daned\fR. \fBqmail-daned\fR also backups the in-memory database to
 \fIcontextFile\fR on receipt of \fISIGTERM\fR or \fISIGUSR1\fR signal. The
 \fIcontextFile\fR and its containing directory should be writeable by the
 user with which \fBqmail-daned\fR process runs. At start-up the file
@@ -74,8 +74,8 @@ verification will be skipped for all domains not in this file. If a file
 with the name \fIfilename\fR.\fIcdb\fR exists, \fBqmail-daned\fR will use
 \fBcdb(3)\fR lookup, in addition to the normal in-memory search, in a table
 of tlsa verification enforced domains. \fBqmail-daned\fR re-reads this list
-of domains on receipt of signal \fISIGHUP\fR. This control file is also
-used by \fBqmail-remote(8)\fR
+of domains on receipt of signal \fISIGHUP\fR. You can use the
+\fBtlsadomains\fR control file which is also used by \fBqmail-remote(8)\fR.
 
 A whitelist of domains not subject to tlsa checking can be specified to
 \fBqmail-daned\fR by the \fB-w\fR \fIfilename\fR option. If a file with the
@@ -148,7 +148,7 @@ these modes, qmail-remote and qmail-daned avoid duplicate DANE verification atte
 
 .SH "CONTROL FILES"
 .B qmail-daned
-by default looks at @controldir@ for all control files. This path can be changed by defining the
+by default looks at SYSCONF/control for all control files. This path can be changed by defining the
 CONTROLDIR environment variable.
 
 .TP 5
@@ -173,6 +173,100 @@ for use solely in saying hello to the remote SMTP server.
 Default:
 .IR me ,
 if that is supplied;
+
+.TP 5
+.I tlsclientmethod
+The TLS protocol list. Accepted values are SSLv23, SSLv3, TLSv1, TLSv1_1,
+TLSv1_2, TLSv1_3. The default is TLSv1_2 for OpenSSL Version < 1.0.1.
+Without this control file OpenSSL Version >= 1.0.1 uses
+TLS_client_method(3ossl) where the actual protocol version used will be
+negotiated to the highest version mutually supported by the client and the
+server. The supported protocols are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and
+TLSv1.3. The default location of SYSCONF/control can be overriden by
+environment variable \fBCONTROLDIR\fR.
+
+.TP 5
+.I tlsclientciphers
+A set of OpenSSL client cipher strings. Multiple ciphers contained in a
+string should be separated by a colon. The default location of
+SYSCONF/control can be overriden by environment variable
+\fBCONTROLDIR\fR
+
+.TP 5
+.I notlhosts
+domains for which \fBqmail-daned\fR will not initiate TLS sesson. This
+file in SYSCONF/control or directory defined by the \fBCONTROLDIR\fR
+envirnoment variable, shouldn't be confused with
+SYSCONF/certs/\fInotlshosts\fR directory in the directory or the directory
+defined by the \fBCERTDIR\fR environment variable.
+
+.PP
+For TLS sessions, the default location of SYSCONF/certs can be
+overriden by environment variable CERTDIR. This affects the location of
+below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
+\fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
+\fInotlshosts/<FQDN>\fR, \fInotlshosts/host\fR.
+
+.TP 5
+.I clientcert.pem
+SSL certificate that is used to authenticate with the remote server during
+a TLS session. If clientcert.pem does not exist, \fBqmail-daned\fR will
+not negotiate TLS. The default location of SYSCONF/certs can be
+overriden by environment variable CERTDIR. \fIclientcert.pem\fR can be
+overriden by environment variable \fBCLIENTCERT\fR.
+
+.TP 5
+.I tlshosts/<FQDN>.pem
+\fBqmail-daned\fR requires TLS authentication from servers for which this
+file exists
+.RB ( <FQDN>
+is the fully-qualified domain name of the remote SMTP server). One of the
+.I dNSName
+or the
+.I CommonName
+attributes have to match. The file contains the trusted CA certificates.
+The default location of SYSCONF/certs can be overriden by
+environment variable \fBCERTDIR\fR.
+
+.TP 5
+.I tlshosts/exhaustivelist
+if this file exists no TLS will be tried on hosts other than those for
+which a file
+.B tlshosts/<FQDN>.pem
+exists. The default location of SYSCONF/certs can be overriden by
+environment variable \fBCERTDIR\fR.
+
+.B WARNING:
+this option may cause mail to be delayed, bounced, doublebounced, or lost.
+
+.TP 5
+.I notlshosts/<FQDN>
+.B qmail-daned
+will not try TLS on servers for which this file exists
+.RB ( <FQDN>
+is the fully-qualified domain name of the remote SMTP server).
+.IR (tlshosts/<FQDN>.pem
+takes precedence over this file however). The default location of
+SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+
+.TP 5
+.I notlshosts/host
+.B qmail-daned
+will not try TLS on servers for which this file exists
+.RB ( host
+is the domain name of the recipient).
+.IR (tlshosts/<FQDN>.pem
+takes precedence over this file however). The default location of
+SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+
+.TP 5
+.I tlsadomains
+file having the list of MX hosts for which TLSA records needs
+to be verified. If this control file is present, TLSA
+verification will be skipped for all domains not in this file. If a file
+with the name \fItlsadomains\fR.\fIcdb\fR exists, \fBqmail-daned\fR will
+use \fBcdb(3)\fR lookup in addition to the normal in-memory search in a
+table of tlsa verification enforced domains.
 
 .SH "SEE ALSO"
 qmail-remote(8), qdane(1), tlsacheck(3), hcreate(3), hsearch(3), hdestroy(3), recvfrom(2).

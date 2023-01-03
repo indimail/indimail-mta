@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.81 2022-12-27 07:45:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.82 2023-01-03 20:43:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -10,7 +10,7 @@
 #ifdef TLS
 #include <openssl/ssl.h>
 #include <sys/stat.h>
-#include "tls.h"
+#include <tls.h>
 #include <ctype.h>
 #include <openreadclose.h>
 #include <getEnvConfig.h>
@@ -64,7 +64,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.81 2022-12-27 07:45:30+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.82 2023-01-03 20:43:31+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -79,13 +79,16 @@ static char    *banner = "";
 static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
 static int      flagparanoid;
-static my_ulong itimeout = 26, maxperip = 20, PerHostLimit = 20;
-static my_ulong idle_timeout = 300;
+static my_ulong itimeout = 26; /* timeoutinfo -t option */
+static my_ulong ctimeout = 60; /* timeoutssl  -S option */
+static my_ulong dtimeout = 300;/* timeoutdata -T option */
+static my_ulong maxperip = 20, PerHostLimit = 20;
 static my_ulong limit = 40;
 static my_ulong alloc_count;
 static my_ulong numchildren;
 static my_ulong backlog = 20;
 #ifdef TLS
+static SSL     *ssl;
 static int      flagssl;
 struct stralloc certfile, cafile, crlfile;
 struct stralloc saciphers;
@@ -575,7 +578,7 @@ matchinet(char *ip, char *token)
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 		static char     addrBuf[INET6_ADDRSTRLEN];
 		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
 		hints.ai_protocol = 0;          /* Any protocol */
 		hints.ai_canonname = 0;
@@ -899,7 +902,11 @@ usage(void)
 #ifdef IPV6
 		 "[ -461UXpPhHrRoOdDqQv ]\n"
 #else
+#ifdef TLS
+		 "[ -1UXpPhHrRoOdDqQvsz ]\n"
+#else
 		 "[ -1UXpPhHrRoOdDqQv ]\n"
+#endif
 #endif
 		 "[ -c Maxlimit | -c concurrency_file]\n"
 		 "[ -C PerHostlimit ]\n"
@@ -931,17 +938,47 @@ usage(void)
 }
 
 void
-printstatus(void)
+printstatus(char *str)
 {
+	int             i;
+
 	if (verbosity < 2)
 		return;
 	strnum1[fmt_ulong(strnum1, numchildren)] = 0;
 	strnum2[fmt_ulong(strnum2, limit)] = 0;
+	if (!stralloc_copys(&tmp, "tcpserver: "))
+		drop_nomem();
+	cats("status: ");
+	cats(strnum1);
+	append("/");
+	cats(strnum2);
+	append(" ");
+	cats(str);
+	if (!str_diffn(str, "startup", 8)) {
+		cats(flagssl ? ", TLS=enabled" : ", TLS=disabled");
 #ifdef HAS_MYSQL
-	strerr_warn5("tcpserver: status: ", strnum1, "/", strnum2, use_sql ? " sql: 1" : " sql: 0", 0);
+		cats(use_sql ? ", use sql=YES\n" : ", use sql=NO\n");
 #else
-	strerr_warn4("tcpserver: status: ", strnum1, "/", strnum2, 0);
+		cats(", use sql=NO\n");
 #endif
+		substdio_putflush(subfderr, tmp.s, tmp.len);
+		return;
+	}
+	if (flagssl && ssl) {
+		cats(", TLS Server=");
+		safecats(tls_server_version.s);
+		cats(", Client=");
+		safecats(tls_client_version.s);
+		cats(", Ciphers=");
+		safecats(SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)));
+		cats(", bits=");
+		SSL_get_cipher_bits(ssl, &i);
+		strnum1[fmt_ulong(strnum1, i)] = 0;
+		safecats(strnum1);
+		append("\n");
+		substdio_putflush(subfderr, tmp.s, tmp.len);
+	}
+	return;
 }
 
 void
@@ -1104,6 +1141,7 @@ sighangup()
 {
 	int             i, tmpLimit;
 	IPTABLE       **iptable1, **iptable2, **tmpTable;
+	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
 	if (!IpTable)
 		init_ip();
@@ -1132,55 +1170,60 @@ sighangup()
 		alloc_count = tmpLimit;
 	}
 	limit = tmpLimit;
-	strnum1[fmt_ulong(strnum1, numchildren)] = 0;
-	strnum2[fmt_ulong(strnum2, limit)] = 0;
-	strerr_warn4("tcpserver: sighup: ", strnum1, "/", strnum2, 0);
+	tmp1[fmt_ulong(tmp1, numchildren)] = 0;
+	tmp2[fmt_ulong(tmp2, limit)] = 0;
+	strerr_warn4("tcpserver: sighup: ", tmp1, "/", tmp2, 0);
 }
 
 void
 sigchld()
 {
 	int             i, wstat, pid;
+	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		if (verbosity >= 2) {
-			strnum1[fmt_ulong(strnum1, pid)] = 0;
+			tmp1[fmt_ulong(tmp1, pid)] = 0;
 			if (wait_stopped(wstat) || wait_continued(wstat)) {
 				i = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
-				strnum2[fmt_ulong(strnum2, i)] = 0;
-				strerr_warn4("tcpserver: end ", strnum1, wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
+				tmp2[fmt_ulong(tmp2, i)] = 0;
+				strerr_warn4("tcpserver: end ", tmp1, wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", tmp2, 0);
 			} else
 			if (wait_signaled(wstat)) {
 				i = wait_termsig(wstat);
-				strnum2[fmt_ulong(strnum2, i)] = 0;
-				strerr_warn4("tcpserver: end ", strnum1, " killed by signal ", strnum2, 0);
+				tmp2[fmt_ulong(tmp2, i)] = 0;
+				strerr_warn4("tcpserver: end ", tmp1, " killed by signal ", tmp2, 0);
 			} else
 			if ((i = wait_exitcode(wstat))) {
-				strnum2[fmt_ulong(strnum2, i)] = 0;
-				strerr_warn4("tcpserver: end ", strnum1, " status ", strnum2, 0);
+				tmp2[fmt_ulong(tmp2, i)] = 0;
+				strerr_warn4("tcpserver: end ", tmp1, " status ", tmp2, 0);
 			}
 		}
 		if (numchildren) {
 			--numchildren;
 			remove_ip(pid);
 		}
-		printstatus();
+		printstatus("sigchild");
 	}
 }
 
 #ifdef TLS
 void
-write_provider_data(SSL *ssl, int writefd, int readfd)
+write_provider_data(SSL *myssl, int writefd, int readfd)
 {
 	int             i;
 	ssize_t         n;
 
+	SSL_get_cipher_bits(myssl, &i);
+	strnum1[n = fmt_ulong(strnum1, i)] = 0;
 	if (!stralloc_copyb(&tmp, "TLS Server=", 11) ||
 			!stralloc_cat(&tmp, &tls_server_version) ||
 			!stralloc_catb(&tmp, ", Client=", 9) ||
 			!stralloc_cat(&tmp, &tls_client_version) ||
 			!stralloc_catb(&tmp, ", Ciphers=", 10) ||
-			!stralloc_cats(&tmp, SSL_CIPHER_get_name(SSL_get_current_cipher(ssl))))
+			!stralloc_cats(&tmp, SSL_CIPHER_get_name(SSL_get_current_cipher(myssl))) ||
+			!stralloc_catb(&tmp, ", bits=", 7) ||
+			!stralloc_catb(&tmp, strnum1, n))
 		strerr_die2x(111, FATAL, "out of memory");
 	i = tmp.len;
 	if (write(writefd, (char *) &i, sizeof(int)) == -1)
@@ -1198,16 +1241,16 @@ read_provider_data(stralloc *t, int readfd, int writefd)
 	int             i;
 	ssize_t         n;
 
-	if ((n = timeoutread(5, readfd, (char *) &i, sizeof(int))) == -1)
+	if ((n = timeoutread(dtimeout, readfd, (char *) &i, sizeof(int))) == -1)
 		strerr_die2sys(111, FATAL, "unable to read provider data length: ");
 	if (!stralloc_ready(t, t->len + i))
 		strerr_die2x(111, FATAL, "out of memory");
-	if ((n = timeoutread(5, readfd, t->s + t->len, i)) == -1)
+	if ((n = timeoutread(dtimeout, readfd, t->s + t->len, i)) == -1)
 		strerr_die2sys(111, FATAL, "unable to read provider data: ");
 	else
 	if (n)
 		t->len += i;
-	if ((n = write(writefd, (char *) &i, 1)) == -1)
+	if ((n = timeoutwrite(dtimeout, writefd, (char *) &i, 1)) == -1)
 		strerr_die2sys(111, FATAL, "unable to write provider ACK: ");
 	return;
 }
@@ -1231,15 +1274,11 @@ main(int argc, char **argv, char **envp)
 #endif
 #endif
 #ifdef TLS
-	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
 	char           *certdir = NULL, *ciphers = NULL,
 				   *cipherfile = NULL, *tls_method = NULL;
 	int             pi2c[2], pi4c[2];
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-	EVP_PKEY       *dh_pkey;
-	int             bits;
-#endif
+	int             provide_data = 0;
 	struct stat     st;
 #endif
 	struct stralloc options = {0};
@@ -1250,7 +1289,7 @@ main(int argc, char **argv, char **envp)
 	}
 	/*
 	 * unused options
-	 * 0, 1, 2, 3, 5, 7, 8, 9, e, E, F, G, j, J, k, K, N, S, w, W, y, Y, z, Z
+	 * 0, 1, 2, 3, 5, 7, 8, 9, e, E, F, G, j, J, k, K, N, w, W, y, Y, z, Z
 	 */
 	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
@@ -1259,7 +1298,7 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "sn:a:f:M:i:L:"))
+	if (!stralloc_cats(&options, "sn:a:f:M:i:L:S:z"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -1347,7 +1386,7 @@ main(int argc, char **argv, char **envp)
 			scan_ulong(optarg, &itimeout);
 			break;
 		case 'T':
-			scan_ulong(optarg, &idle_timeout);
+			scan_ulong(optarg, &dtimeout);
 			break;
 		case 'U':
 			if ((x = env_get("UID")))
@@ -1392,6 +1431,12 @@ main(int argc, char **argv, char **envp)
 			break;
 		case 'i':
 			certdir = optarg;
+			break;
+		case 'S':
+			scan_ulong(optarg, &ctimeout);
+			break;
+		case 'z':
+			provide_data = 1;
 			break;
 #endif
 #ifdef IPV6
@@ -1618,7 +1663,7 @@ main(int argc, char **argv, char **envp)
 	}
 	close(0);
 	close(1);
-	printstatus();
+	printstatus("startup");
 	for (;;) {
 		while (numchildren >= limit)
 			sig_pause();
@@ -1653,7 +1698,8 @@ main(int argc, char **argv, char **envp)
 		if (t == -1)
 			continue;
 		++numchildren;
-		printstatus();
+		if (!flagssl)
+			printstatus("un-encrypted session");
 #ifdef IPV6
 		if (!forcev6 && ip6_isv4mapped(remoteip))
 			fakev4 = 1;
@@ -1684,7 +1730,7 @@ main(int argc, char **argv, char **envp)
 				check_db(conn);
 #endif
 			doit(t); /*- MAXPERIP can only be checked after this */
-			if ((fd_move(0, t) == -1) || (fd_copy(1, 0) == -1))
+			if (fd_move(0, t) == -1 || fd_copy(1, 0) == -1)
 				strerr_die2sys(111, DROP, "unable to set up descriptors: ");
 			sig_uncatch(sig_child);
 			sig_unblock(sig_child);
@@ -1695,7 +1741,6 @@ main(int argc, char **argv, char **envp)
 					ipcount = check_ip();
 				if (ipcount >= maxperip) {
 					strnum2[fmt_ulong(strnum2, ipcount)] = 0;
-					close(t);
 					errno = error_acces;
 					strerr_die6sys(111, DROP, "no ip slots for ", remoteipstr, ", perIPlimit ", strnum2, ": ");
 				}
@@ -1714,7 +1759,8 @@ main(int argc, char **argv, char **envp)
 					close(1);
 					if (!stralloc_copyb(&tmp, "tcpserver, ", 11))
 						strerr_die2x(111, FATAL, "out of memory");
-					read_provider_data(&tmp, pi4c[0], pi2c[1]);
+					if (provide_data)
+						read_provider_data(&tmp, pi4c[0], pi2c[1]);
 					if (!stralloc_0(&tmp))
 						strerr_die2x(111, FATAL, "out of memory");
 					if (!env_put2("TLS_PROVIDER", tmp.s))
@@ -1731,7 +1777,7 @@ main(int argc, char **argv, char **envp)
 				default:
 					break;
 				} /*- switch fork() */
-				if (!(ssl = tls_session(ctx, 0, ciphers)))
+				if (!(ssl = tls_session(ctx, 0)))
 					strerr_die2x(111, DROP, "unable to setup SSL session");
 				if (!stralloc_copys(&tls_server_version, SSL_get_version(ssl)) ||
 						!stralloc_0(&tls_server_version))
@@ -1739,29 +1785,18 @@ main(int argc, char **argv, char **envp)
 				tls_server_version.len--;
 				SSL_CTX_free(ctx);
 				ctx = NULL;
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-				getEnvConfigInt(&bits, "SSL_BITS", 2048);
-				if (!get_rsakey(0, bits, certdir))
-					EVP_RSA_gen(bits);
-				if ((dh_pkey = get_dhkey(0, bits, certdir))) {
-					SSL_set0_tmp_dh_pkey(ssl, dh_pkey);
-				} else
-					SSL_set_dh_auto(ssl, 1);
-#else
-				SSL_set_tmp_rsa_callback(ssl, tmp_rsa_cb);
-				SSL_set_tmp_dh_callback(ssl, tmp_dh_cb);
-#endif
-				if (tls_accept(ssl))
+				if (tls_accept(ctimeout, 0, 1, ssl))
 					strerr_die2x(111, DROP, "unable to accept SSL connection");
 				if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
 						!stralloc_0(&tls_client_version))
 					strerr_die2x(111, FATAL, "out of memory");
+				printstatus("encrypted session");
 				tls_client_version.len--;
-				if (flagssl)
+				if (provide_data)
 					write_provider_data(ssl, pi4c[1], pi2c[0]);
 				close(pi2c[0]);
 				close(pi4c[1]);
-				translate(0, pi2c[1], pi4c[0], idle_timeout);
+				translate(0, 1, pi2c[1], pi4c[0], dtimeout);
 				ssl_free();
 				_exit(0);
 			} /*- if (flagssl == 1) */
@@ -1771,10 +1806,10 @@ main(int argc, char **argv, char **envp)
 		case -1:
 			strerr_warn2(DROP, "unable to fork: ", &strerr_sys);
 			--numchildren;
-			printstatus();
+			printstatus("Failure");
 		default:
 			add_ip(pid);
-		}
+		} /*- switch (pid = fork()) */
 		close(t);
 	}
 }
@@ -1788,6 +1823,11 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.82  2023-01-03 20:43:31+05:30  Cprogrammer
+ * replace internal TLS function with TLS functions from libqmail
+ * added -z option to turn on setting of TLS_PROVIDER env variable
+ * added -S option for connection timeout
+ *
  * Revision 1.81  2022-12-27 07:45:30+05:30  Cprogrammer
  * set flagssl only if -n option is specified
  * set TLS_PROVIDER env variable
@@ -1807,7 +1847,7 @@ getversion_tcpserver_c()
  * added -f option to load tls ciphers from a file
  *
  * Revision 1.76  2021-08-30 12:47:59+05:30  Cprogrammer
- * define funtions as noreturn
+ * define functions as noreturn
  *
  * Revision 1.75  2021-06-15 08:24:25+05:30  Cprogrammer
  * renamed pathexec.. functions to upathexec to avoid clash with libqmail

@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.8  2023-01-03 16:36:07+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.7  2021-06-13 17:28:28+05:30  Cprogrammer
  * removed chdir(auto_sysconfdir)
  *
@@ -33,7 +36,6 @@
 #include <subfd.h>
 #include <fmt.h>
 #include <qprintf.h>
-#include "auto_sysconfdir.h"
 
 #define FATAL "nowutc: fatal: "
 
@@ -89,7 +91,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *z = "$Id: nowutc.c,v 1.7 2021-06-13 17:28:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *z = "$Id: nowutc.c,v 1.8 2023-01-03 16:36:07+05:30 Cprogrammer Exp mbhangui $";
 
 	z++;
 }

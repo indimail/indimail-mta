@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.24  2023-01-03 16:38:44+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.23  2022-10-19 12:54:35+05:30  Cprogrammer
  * authorize mail using RELAYCLIENT
  *
@@ -100,7 +103,6 @@
 #include <strerr.h>
 #include <noreturn.h>
 #include "rwhconfig.h"
-#include "auto_sysconfdir.h"
 #include "qmail.h"
 #include "control.h"
 
@@ -1240,7 +1242,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.23 2022-10-19 12:54:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.24 2023-01-03 16:38:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

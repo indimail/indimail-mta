@@ -118,63 +118,63 @@ dns_resolve.o dns_sortip.o dns_transmit.o dns_txt.o
 	dns_transmit.o dns_txt.o
 
 dns_dfd.o: \
-compile dns_dfd.c dns.h iopause.h haveip6.h
+compile dns_dfd.c dns.h haveip6.h
 	./compile dns_dfd.c
 
 dns_domain.o: \
-compile dns_domain.c dns.h iopause.h haveip6.h
+compile dns_domain.c dns.h haveip6.h
 	./compile dns_domain.c
 
 dns_dtda.o: \
-compile dns_dtda.c dns.h iopause.h haveip6.h
+compile dns_dtda.c dns.h haveip6.h
 	./compile dns_dtda.c
 
 dns_ip.o: \
-compile dns_ip.c dns.h iopause.h haveip6.h conf-ip
+compile dns_ip.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_ip.c
 
 dns_ipq.o: \
-compile dns_ipq.c dns.h iopause.h haveip6.h conf-ip
+compile dns_ipq.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_ipq.c
 
 dns_name.o: \
-compile dns_name.c ip6.h dns.h iopause.h haveip6.h conf-ip
+compile dns_name.c ip6.h dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_name.c
 
 dns_nd.o: \
-compile dns_nd.c dns.h iopause.h haveip6.h conf-ip
+compile dns_nd.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_nd.c
 
 dns_packet.o: \
-compile dns_packet.c dns.h iopause.h haveip6.h
+compile dns_packet.c dns.h haveip6.h
 	./compile dns_packet.c
 
 dns_random.o: \
-compile dns_random.c dns.h iopause.h haveip6.h
+compile dns_random.c dns.h haveip6.h
 	./compile dns_random.c
 
 dns_rcip.o: \
-compile dns_rcip.c ip4.h ip6.h dns.h iopause.h haveip6.h conf-ip
+compile dns_rcip.c ip4.h ip6.h dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_rcip.c
 
 dns_rcrw.o: \
-compile dns_rcrw.c dns.h iopause.h haveip6.h
+compile dns_rcrw.c dns.h haveip6.h
 	./compile dns_rcrw.c
 
 dns_resolve.o: \
-compile dns_resolve.c dns.h iopause.h ip6.h haveip6.h conf-ip
+compile dns_resolve.c dns.h ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_resolve.c
 
 dns_sortip.o: \
-compile dns_sortip.c dns.h iopause.h haveip6.h conf-ip
+compile dns_sortip.c dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_sortip.c
 
 dns_transmit.o: \
-compile dns_transmit.c socket.h dns.h iopause.h haveip6.h conf-ip
+compile dns_transmit.c socket.h dns.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` dns_transmit.c
 
 dns_txt.o: \
-compile dns_txt.c dns.h iopause.h haveip6.h
+compile dns_txt.c dns.h haveip6.h
 	./compile dns_txt.c
 
 finger@: \
@@ -287,12 +287,12 @@ dlnamespace.o tcdlmopen.o dns.a unix.a socket.lib
 	`cat socket.lib` -lqmail -ldl
 
 rblsmtpd.o: \
-compile rblsmtpd.c upathexec.h dns.h iopause.h \
+compile rblsmtpd.c upathexec.h dns.h \
 haveip6.h ip6.h conf-ip
 	./compile -DMAIN `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c
 
 rbl.o: \
-compile rblsmtpd.c upathexec.h dns.h iopause.h \
+compile rblsmtpd.c upathexec.h dns.h \
 haveip6.h ip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` rblsmtpd.c -o rbl.o
 
@@ -382,32 +382,27 @@ warn-auto.sh tcpcat.sh conf-prefix
 
 tcpclient: \
 load tcpclient.o tcpremoteinfo.o timeoutconn.o \
-upathexec_run.o tls.o dns.a unix.a socket.lib
+upathexec_run.o dns.a unix.a socket.lib
 	./load tcpclient tcpremoteinfo.o timeoutconn.o \
-	upathexec_run.o tls.o dns.a unix.a \
+	upathexec_run.o dns.a unix.a \
 	$(SSLLIBS) `cat socket.lib` -lqmail
 
 tcpclient.o: \
 compile tcpclient.c ip4.h socket.h upathexec.h \
-timeoutconn.h tcpremoteinfo.h dns.h iopause.h \
-tls.h haveip6.h ip6.h conf-ip conf-tls
+timeoutconn.h tcpremoteinfo.h dns.h \
+haveip6.h ip6.h conf-ip conf-tls
 	./compile \
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` tcpclient.c
 
 dotls: \
-load dotls.o tls.o upathexec_run.o upathexec_env.o
-	./load dotls tls.o upathexec_run.o \
+load dotls.o upathexec_run.o upathexec_env.o
+	./load dotls upathexec_run.o \
 	upathexec_env.o $(SSLLIBS) -lqmail
 
 dotls.o: \
-compile dotls.c tls.c tls.h upathexec.h conf-tls
+compile dotls.c upathexec.h conf-tls
 	./compile \
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` dotls.c
-
-tls.o: \
-compile tls.c tls.h iopause.h conf-tls
-	./compile \
-	`grep -h -v "^#" conf-tls 2>/dev/null` tls.c
 
 tcprules: \
 load tcprules.o unix.a
@@ -451,10 +446,10 @@ compile dlnamespace.c hasdlmopen.h upathexec.h
 tcpserver: \
 load tcpserver.o rules.o tcpremoteinfo.o timeoutconn.o upathexec_rundl.o \
 tcpserver_plugin.o load_shared.o control.o auto_home.o dlnamespace.o \
-tcdlmopen.o tls.o load_mysql.o dns.a unix.a socket.lib mysql_config \
+tcdlmopen.o load_mysql.o dns.a unix.a socket.lib mysql_config \
 conf-ld-$(SYSTEM)
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o load_mysql.o \
-	control.o auto_home.o tcpserver_plugin.o load_shared.o tls.o \
+	control.o auto_home.o tcpserver_plugin.o load_shared.o \
 	dlnamespace.o tcdlmopen.o upathexec_rundl.o dns.a unix.a \
 	`cat socket.lib conf-ld-$(SYSTEM) 2>/dev/null` $(SSLLIBS) -lqmail -ldl
 
@@ -462,8 +457,8 @@ mysql_inc: mysql_config
 	./mysql_config --include > mysql_inc || true
 
 tcpserver.o: \
-compile tcpserver.c ip4.h upathexec.h tls.h load_mysql.h \
-socket.h tcpremoteinfo.h rules.h dns.h iopause.h haveip6.h ip6.h \
+compile tcpserver.c ip4.h upathexec.h load_mysql.h \
+socket.h tcpremoteinfo.h rules.h dns.h haveip6.h ip6.h \
 conf-tls conf-ip conf-mysqlrules conf-dlopen control.h \
 hasmysql.h auto_home.h mysql_inc
 	./compile \
@@ -592,12 +587,12 @@ warn-auto.sh who@.sh conf-prefix
 	chmod 755 who@
 
 recordio.o: \
-compile recordio.c iopause.h upathexec.h
+compile recordio.c upathexec.h
 	./compile recordio.c
 
 recordio: \
-load recordio.o upathexec_run.o iopause.o
-	./load recordio upathexec_run.o iopause.o -lqmail
+load recordio.o upathexec_run.o
+	./load recordio upathexec_run.o -lqmail
 
 argv0.o: \
 compile argv0.c upathexec.h
@@ -621,18 +616,12 @@ delcr.o: \
 compile delcr.c
 	./compile delcr.c
 
-fixcrio: load fixcrio.o upathexec_run.o iopause.o
-	./load fixcrio upathexec_run.o iopause.o -lqmail
+fixcrio: load fixcrio.o upathexec_run.o 
+	./load fixcrio upathexec_run.o -lqmail
 
 fixcrio.o: \
-compile fixcrio.c iopause.h upathexec.h
+compile fixcrio.c upathexec.h
 	./compile fixcrio.c
-
-iopause.h: choose compile iopause.h1 iopause.h2 load trypoll.c
-	./choose clr trypoll iopause.h1 iopause.h2 > iopause.h
-
-iopause.o: compile iopause.c iopause.h
-	./compile iopause.c
 
 clean:
 	rm -f `cat TARGETS`

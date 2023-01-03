@@ -23,6 +23,11 @@ future will be deprecated.
 
 .SH "OPTIONS"
 .TP 3
+\fB-d\fR \fIcertdir\fR
+Directory having certificates.
+Default is @sysconfdir@/certs.
+
+.TP 3
 \fB-n\fR \fIcertfile\fR
 The certificate to use and is required for SSL/TLS servers. \fIcertfile\fR
 must not be world-readable. This option overrides environment variable
@@ -53,8 +58,14 @@ are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. Ths option must not be used
 to avoid the version-specific methods as they are deprecated.
 
 .TP
-\fB-t\fR \fItimeout\fR
-Timeout after \fItimeout\fR seconds if no data is received
+\fB-t\fR \fItimeoutdata\fR
+Timeout after \fItimeoutdata\fR seconds if no data is received. Default is
+from the control file @sysconfdir@/control/\fBtimeoutremote\fR
+
+.TP
+\fB-T\fR \fItimeoutconn\fR
+Timeout TLS/SSL accept if attempt exceeds \fItimeoutconn\fR seconds.
+Default is 60 seconds.
 
 .TP
 \fB-b\fR \fIbanner\fR
@@ -73,6 +84,13 @@ tcpserver(1)).
 Issue SMTP Greeting code on successful TLS/SSL negotiation. This code is
 obtained from \fIprog\fR. \fIprog\fR could be something like qmail-smtpd
 from qmail/indimail/notqmail/netqmail package.
+
+.TP
+\fB-f\fR \fIsocket\fR
+network descriptor to use for communication. This is the socket descriptor
+returned by the accept(2) call or any of the descriptors duplicated to the
+socket descriptor. For tcpserver(1), this will be descriptor 0 and 1 and
+you can use either.
 
 .SH "ENVIRONMENT VARIABLES"
 .PP

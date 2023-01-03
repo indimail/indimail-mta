@@ -126,6 +126,7 @@ dnsmxip
 dnsptr
 dnstlsarr
 dnstlsarr.o
+dnstlsarr.1
 dnstxt
 doc/INSTALL-MINI
 domainkeys.h
@@ -411,7 +412,9 @@ sql-database.o
 srsfilter
 sslerator
 sslerator.o
+sslerator.8
 starttls.o
+dotls.o
 successes
 suids
 surblfilter

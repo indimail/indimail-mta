@@ -1,50 +1,5 @@
 /*
- * $Log: dnstlsarr.c,v $
- * Revision 1.15  2022-08-21 17:59:08+05:30  Cprogrammer
- * fix compilation error when TLS is not defined in conf-tls
- *
- * Revision 1.14  2021-05-26 11:05:43+05:30  Cprogrammer
- * use starttls.h for prototypes in starttls.c
- *
- * Revision 1.13  2020-11-24 13:45:02+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.12  2018-06-01 22:52:11+05:30  Cprogrammer
- * exit on incorrect usage
- *
- * Revision 1.11  2018-06-01 16:29:52+05:30  Cprogrammer
- * added verbose messages to indicate the type of dns query
- *
- * Revision 1.10  2018-05-31 19:40:46+05:30  Cprogrammer
- * fixed compiler 'not reached' warning
- *
- * Revision 1.9  2018-05-31 14:41:33+05:30  Cprogrammer
- * included hastlsa.h
- *
- * Revision 1.8  2018-05-31 02:20:55+05:30  Cprogrammer
- * added option to query mx records before fetching TLSA Resource Records
- *
- * Revision 1.7  2018-05-30 20:17:38+05:30  Cprogrammer
- * added prototype for scan_int()
- *
- * Revision 1.6  2018-05-30 20:10:54+05:30  Cprogrammer
- * added options to do complete DANE verification
- *
- * Revision 1.5  2018-05-28 19:56:56+05:30  Cprogrammer
- * exit with 111 for wrong usage
- *
- * Revision 1.4  2018-05-26 19:17:35+05:30  Cprogrammer
- * fixed program name in usage
- *
- * Revision 1.3  2018-05-26 19:08:41+05:30  Cprogrammer
- * removed -m option to query mx records
- *
- * Revision 1.2  2018-05-26 16:10:14+05:30  Cprogrammer
- * removed leftover debugging code
- *
- * Revision 1.1  2018-05-26 12:37:25+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: dnstlsarr.c,v 1.16 2023-01-03 19:42:24+05:30 Cprogrammer Exp mbhangui $
  */
 #include "substdio.h"
 #include "subfd.h"
@@ -53,38 +8,34 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "stralloc.h"
-#include "fmt.h"
+#include <tls.h>
+#include <stralloc.h>
+#include <fmt.h>
+#include <sgetopt.h>
+#include <scan.h>
+#include <now.h>
 #include "dns.h"
 #include "dnsdoe.h"
 #include "tlsarralloc.h"
-#include "sgetopt.h"
-#include "tls.h"
 #include "control.h"
-#include "scan.h"
-#include "now.h"
 #include "starttls.h"
 
 char            temp[IPFMT + FMT_ULONG];
-int             timeoutssl = 300;
-int             timeoutconnect = 60;
+int             timeoutdata = 300;
+int             timeoutconn = 60;
 int             verbose;
 stralloc        helohost = { 0 };
 stralloc        sahost = { 0 };
 
-extern stralloc sa;
-extern tlsarralloc ta;
-extern ipalloc  ia;
-
 void
 pusage()
 {
-	substdio_puts(subfderr,      "usage: dnstlsarr [-p port] [-c timeoutc] [-t timeoutr] [host\n");
-	substdio_putsflush(subfderr, "         -p port  - port to connect to\n");
-	substdio_putsflush(subfderr, "         -c timoutc - Timeout for connection to remote\n");
-	substdio_putsflush(subfderr, "         -t timoutr - Timeout for data from remote\n");
-	substdio_putsflush(subfderr, "         -v level - verbosity level for STARTTLS\n");
-	substdio_putsflush(subfderr, "         -s Initiate STARTTLS to initiate DANE verification\n");
+	substdio_puts(subfderr,      "usage: dnstlsarr [-p port] [-c timeoutc] [-t timeoutd] [host\n");
+	substdio_putsflush(subfderr, "         -p port       - port to connect to\n");
+	substdio_putsflush(subfderr, "         -c timoutconn - Timeout for connection to remote\n");
+	substdio_putsflush(subfderr, "         -t timoutdata - Timeout for data from remote\n");
+	substdio_putsflush(subfderr, "         -v level      - verbosity level for STARTTLS\n");
+	substdio_putsflush(subfderr, "         -s            - Initiate STARTTLS to initiate DANE verification\n");
 	_exit (111);
 }
 
@@ -110,11 +61,11 @@ main(argc, argv)
 		case 's':
 			verify = 1;
 			break;
-		case 'c': /*- timeoutconnect */
-			scan_int(optarg, &timeoutconnect);
+		case 'c': /*- timeoutconn */
+			scan_int(optarg, &timeoutconn);
 			break;
-		case 't': /*- timeoutconnect */
-			scan_int(optarg, &timeoutssl);
+		case 't': /*- timeoutdata */
+			scan_int(optarg, &timeoutdata);
 			break;
 		case 'v':
 			verbose = *optarg - '0';
@@ -282,10 +233,62 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.15 2022-08-21 17:59:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.16 2023-01-03 19:42:24+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
 #endif
 	x++;
 }
+
+/*
+ * $Log: dnstlsarr.c,v $
+ * Revision 1.16  2023-01-03 19:42:24+05:30  Cprogrammer
+ * include tls.h from libqmail
+ *
+ * Revision 1.15  2022-08-21 17:59:08+05:30  Cprogrammer
+ * fix compilation error when TLS is not defined in conf-tls
+ *
+ * Revision 1.14  2021-05-26 11:05:43+05:30  Cprogrammer
+ * use starttls.h for prototypes in starttls.c
+ *
+ * Revision 1.13  2020-11-24 13:45:02+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.12  2018-06-01 22:52:11+05:30  Cprogrammer
+ * exit on incorrect usage
+ *
+ * Revision 1.11  2018-06-01 16:29:52+05:30  Cprogrammer
+ * added verbose messages to indicate the type of dns query
+ *
+ * Revision 1.10  2018-05-31 19:40:46+05:30  Cprogrammer
+ * fixed compiler 'not reached' warning
+ *
+ * Revision 1.9  2018-05-31 14:41:33+05:30  Cprogrammer
+ * included hastlsa.h
+ *
+ * Revision 1.8  2018-05-31 02:20:55+05:30  Cprogrammer
+ * added option to query mx records before fetching TLSA Resource Records
+ *
+ * Revision 1.7  2018-05-30 20:17:38+05:30  Cprogrammer
+ * added prototype for scan_int()
+ *
+ * Revision 1.6  2018-05-30 20:10:54+05:30  Cprogrammer
+ * added options to do complete DANE verification
+ *
+ * Revision 1.5  2018-05-28 19:56:56+05:30  Cprogrammer
+ * exit with 111 for wrong usage
+ *
+ * Revision 1.4  2018-05-26 19:17:35+05:30  Cprogrammer
+ * fixed program name in usage
+ *
+ * Revision 1.3  2018-05-26 19:08:41+05:30  Cprogrammer
+ * removed -m option to query mx records
+ *
+ * Revision 1.2  2018-05-26 16:10:14+05:30  Cprogrammer
+ * removed leftover debugging code
+ *
+ * Revision 1.1  2018-05-26 12:37:25+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

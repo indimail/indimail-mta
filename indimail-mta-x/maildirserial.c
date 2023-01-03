@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.19  2023-01-03 16:34:26+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -86,7 +89,6 @@
 #include "quote.h"
 #include "maildir.h"
 #include "prioq.h"
-#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "variables.h"
 #include "set_environment.h"
@@ -619,7 +621,7 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.18 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.19 2023-01-03 16:34:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

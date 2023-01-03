@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.12  2023-01-03 16:27:08+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.11  2022-10-30 17:54:48+05:30  Cprogrammer
  * converted to ansic prototype
  *
@@ -46,7 +49,6 @@
 #include "caltime.h"
 #include "tai.h"
 #include "noreturn.h"
-#include "auto_sysconfdir.h"
 
 #define FATAL "822date: fatal: "
 
@@ -127,7 +129,7 @@ main(int argc, char **argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.11 2022-10-30 17:54:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822date.c,v 1.12 2023-01-03 16:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

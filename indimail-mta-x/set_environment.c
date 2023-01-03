@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.8  2023-01-03 17:01:54+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
  * Revision 1.7  2021-07-14 13:10:55+05:30  Cprogrammer
  * change for change in envdir function
  *
@@ -29,7 +32,6 @@
 #include <strerr.h>
 #include <pathexec.h>
 #include <stralloc.h>
-#include "auto_sysconfdir.h"
 #include "auto_control.h"
 #include "variables.h"
 
@@ -84,7 +86,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.7 2021-07-14 13:10:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: set_environment.c,v 1.8 2023-01-03 17:01:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

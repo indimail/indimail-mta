@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.27 2022-12-27 09:01:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.28 2023-01-03 20:39:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -16,27 +16,19 @@
 #include <scan.h>
 #include <str.h>
 #include <arpa/inet.h>
-#include "ip4.h"
-#ifdef IPV6
-#include "ip6.h"
-#endif
 #include <uint16.h>
-#include "socket.h"
 #include <fd.h>
 #include <stralloc.h>
 #include <substdio.h>
 #include <subfd.h>
 #include <error.h>
 #include <strerr.h>
-#include "upathexec.h"
 #include "timeoutconn.h"
-#include "tcpremoteinfo.h"
-#include "dns.h"
 #include <timeoutread.h>
 #include <timeoutwrite.h>
 #include <wait.h>
 #include <openreadclose.h>
-#include "tls.h"
+#include <noreturn.h>
 #ifdef TLS
 #include <sys/stat.h>
 #include <openssl/ssl.h>
@@ -45,13 +37,21 @@
 #include <env.h>
 #include <getln.h>
 #include <ndelay.h>
+#include <tls.h>
 #endif
-#include <noreturn.h>
+#include "ip4.h"
+#ifdef IPV6
+#include "ip6.h"
+#endif
+#include "socket.h"
+#include "upathexec.h"
+#include "tcpremoteinfo.h"
+#include "dns.h"
 
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.27 2022-12-27 09:01:23+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.28 2023-01-03 20:39:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -68,7 +68,7 @@ usage(void)
 	strerr_die1x(100, "usage: tcpclient"
 #ifdef IPV6
 #ifdef TLS
-	 " [ -46hHrRdDqQmv ]\n"
+	 " [ -46hHrRdDqQmvz ]\n"
 #else
 	 " [ -46hHrRdDqQv ]\n"
 #endif
@@ -97,9 +97,10 @@ static int      verbosity = 1;
 static int      flagdelay = 1;
 static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
-static unsigned long   itimeout = 26;
-static unsigned long   ctimeout[2] = { 2, 58 };
-static unsigned long   dtimeout = 300;
+typedef unsigned long my_ulong;
+static my_ulong itimeout = 26;           /* timeoutinfo -t option */
+static my_ulong ctimeout[2] = { 2, 58 }; /* timeoutconn -T option */
+static my_ulong dtimeout = 300;          /* timeoutdata -a option */
 #ifdef IPV6
 static int      forcev6;
 static char     iplocal[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
@@ -121,8 +122,9 @@ static stralloc tmp;
 static stralloc fqdn;
 #ifdef TLS
 static stralloc tls_server_version, tls_client_version;
+static int      provide_data = 0;
 #endif
-static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+static char     strnum[FMT_ULONG];
 static char     seed[128];
 #ifdef TLS
 static struct stralloc certfile, cafile, crlfile;
@@ -140,22 +142,23 @@ sigchld()
 {
 	int             i, wstat;
 	pid_t           pid;
+	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
 	while ((pid = wait_nohang(&wstat)) > 0) {
-		strnum1[fmt_ulong(strnum1, pid)] = 0;
+		tmp1[fmt_ulong(tmp1, pid)] = 0;
 		if (wait_stopped(wstat) || wait_continued(wstat)) {
 			i = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
-			strnum2[fmt_ulong(strnum2, i)] = 0;
-			strerr_warn4("tcpclient: end ", strnum1, wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
+			tmp2[fmt_ulong(tmp2, i)] = 0;
+			strerr_warn4("tcpclient: end ", tmp1, wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", tmp2, 0);
 		} else
 		if (wait_signaled(wstat)) {
 			i = wait_termsig(wstat);
-			strnum2[fmt_ulong(strnum2, i)] = 0;
-			strerr_warn4("tcpclient: end ", strnum1, " killed by signal ", strnum2, 0);
+			tmp2[fmt_ulong(tmp2, i)] = 0;
+			strerr_warn4("tcpclient: end ", tmp1, " killed by signal ", tmp2, 0);
 		} else
 		if ((i = wait_exitcode(wstat))) {
-			strnum2[fmt_ulong(strnum2, i)] = 0;
-			strerr_warn4("tcpclient: end ", strnum1, " status ", strnum2, 0);
+			tmp2[fmt_ulong(tmp2, i)] = 0;
+			strerr_warn4("tcpclient: end ", tmp1, " status ", tmp2, 0);
 		}
 	}
 }
@@ -190,16 +193,16 @@ read_provider_data(stralloc *t, int readfd, int writefd)
 	int             i;
 	ssize_t         n;
 
-	if ((n = timeoutread(5, readfd, (char *) &i, sizeof(int))) == -1)
+	if ((n = timeoutread(dtimeout, readfd, (char *) &i, sizeof(int))) == -1)
 		strerr_die2sys(111, FATAL, "unable to read provider data length: ");
 	if (!stralloc_ready(t, t->len + i))
 		strerr_die2x(111, FATAL, "out of memory");
-	if ((n = timeoutread(5, readfd, t->s + t->len, i)) == -1)
+	if ((n = timeoutread(dtimeout, readfd, t->s + t->len, i)) == -1)
 		strerr_die2sys(111, FATAL, "unable to read provider data: ");
 	else
 	if (n)
 		t->len += i;
-	if ((n = write(writefd, (char *) &i, 1)) == -1)
+	if ((n = timeoutwrite(dtimeout, writefd, (char *) &i, 1)) == -1)
 		strerr_die2sys(111, FATAL, "unable to write provider ACK: ");
 	return;
 }
@@ -233,7 +236,8 @@ do_select(char **argv, int flag_tcpclient, int s)
 			if (flagssl) {
 				if (!stralloc_copyb(&tmp, "tcpclient, ", 11))
 					strerr_die2x(111, FATAL, "out of memory");
-				read_provider_data(&tmp, pi2[0], pi1[1]);
+				if (provide_data)
+					read_provider_data(&tmp, pi2[0], pi1[1]);
 				if (!stralloc_0(&tmp))
 					strerr_die2x(111, FATAL, "out of memory");
 				if (!env_put2("TLS_PROVIDER", tmp.s))
@@ -252,7 +256,8 @@ do_select(char **argv, int flag_tcpclient, int s)
 			break;
 		}
 #ifdef TLS
-		write_provider_data(ssl, pi2[1], pi1[0]);
+		if (provide_data)
+			write_provider_data(ssl, pi2[1], pi1[0]);
 #endif
 		close(pi1[0]);
 		close(pi2[1]);
@@ -262,7 +267,7 @@ do_select(char **argv, int flag_tcpclient, int s)
 		fdin = 0;
 		fdout = 1;
 	}
-	if ((r = translate(s, fdout, fdin, dtimeout)))
+	if ((r = translate(s, s, fdout, fdin, dtimeout)))
 		strerr_warn1("tcpclient: translate returned non-zero: ", &strerr_sys);
 	if (flag_tcpclient) {
 		if (wait_pid(&wstat, pid) == -1)
@@ -303,7 +308,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 		if (code != 220)
 			strerr_die2x(111, FATAL, "connected but greeting failed");
 		/*- issue STARTTLS command and check response */
-		if (safewrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
+		if (tlswrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
@@ -319,7 +324,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 	case pop3:
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "getln: read-pop3d: ");
-		if (safewrite(sfd, "STLS\r\n", 6, dtimeout) == -1)
+		if (tlswrite(sfd, "STLS\r\n", 6, dtimeout) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "getln: read-pop3d: ");
@@ -366,7 +371,7 @@ main(int argc, char **argv)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "n:c:s:mf:M:L:"))
+	if (!stralloc_cats(&options, "n:c:s:mf:M:L:z"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -428,6 +433,9 @@ main(int argc, char **argv)
 			break;
 		case 'M':
 			tls_method = optarg;
+			break;
+		case 'z':
+			provide_data = 1;
 			break;
 #endif
 		case 'd':
@@ -617,7 +625,7 @@ main(int argc, char **argv)
 #endif
 					nomem();
 			} else {
-				strnum1[fmt_ulong(strnum1, portremote)] = 0;
+				strnum[fmt_ulong(strnum, portremote)] = 0;
 #ifdef IPV6
 				if (ip6_isv4mapped(addresses.s + j))
 					ipstr[ip4_fmt(ipstr, addresses.s + j + 12)] = 0;
@@ -626,7 +634,7 @@ main(int argc, char **argv)
 #else
 				ipstr[ip4_fmt(ipstr, addresses.s + j)] = 0;
 #endif
-				strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ", strnum1, ": ", &strerr_sys);
+				strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ", strnum, ": ", &strerr_sys);
 			}
 		}
 		if (!stralloc_copy(&addresses, &moreaddresses))
@@ -651,8 +659,8 @@ CONNECTED:
 	if (!upathexec_env("PROTO", fakev4 ? "TCP" : "TCP6"))
 		nomem();
 #endif
-	strnum1[fmt_ulong(strnum1, portlocal)] = 0;
-	if (!upathexec_env("TCPLOCALPORT", strnum1))
+	strnum[fmt_ulong(strnum, portlocal)] = 0;
+	if (!upathexec_env("TCPLOCALPORT", strnum))
 		nomem();
 #ifdef IPV6
 	if (fakev4)
@@ -682,8 +690,8 @@ CONNECTED:
 	if (socket_remote4(s, ipremote, &portremote) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to get remote address: ");
-	strnum1[fmt_ulong(strnum1, portremote)] = 0;
-	if (!upathexec_env("TCPREMOTEPORT", strnum1))
+	strnum[fmt_ulong(strnum, portremote)] = 0;
+	if (!upathexec_env("TCPREMOTEPORT", strnum))
 		nomem();
 #ifdef IPV6
 	if (fakev4)
@@ -696,7 +704,7 @@ CONNECTED:
 	if (!upathexec_env("TCPREMOTEIP", ipstr))
 		nomem();
 	if (verbosity >= 2)
-		strerr_warn4("tcpclient: connected to ", ipstr, " port ", strnum1, 0);
+		strerr_warn4("tcpclient: connected to ", ipstr, " port ", strnum, 0);
 	x = 0;
 #ifdef IPV6
 	if (flagremotehost && dns_name6(&tmp, ipremote) == 0)
@@ -750,7 +758,7 @@ CONNECTED:
 			cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 			ciphers, client)))
 			_exit(111);
-		if (!(ssl = tls_session(ctx, s, ciphers)))
+		if (!(ssl = tls_session(ctx, s)))
 			_exit(111);
 		SSL_CTX_free(ctx);
 		ctx = NULL;
@@ -760,7 +768,7 @@ CONNECTED:
 				!stralloc_0(&tls_server_version))
 			strerr_die2x(111, FATAL, "out of memory");
 		tls_server_version.len--;
-		if (tls_connect(ssl, match_cn ? hostname : 0) == -1)
+		if (tls_connect(ctimeout[0] + ctimeout[1], s, s, ssl, match_cn ? hostname : 0) == -1)
 			_exit(111);
 		if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
 				!stralloc_0(&tls_client_version))
@@ -805,6 +813,10 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.28  2023-01-03 20:39:19+05:30  Cprogrammer
+ * added -z option to turn on setting of TLS_PROVIDER env variable
+ * replace internal TLS function with TLS functions from libqmail
+ *
  * Revision 1.27  2022-12-27 09:01:23+05:30  Cprogrammer
  * fixed bug in setting command line args
  *

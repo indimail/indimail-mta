@@ -1,5 +1,8 @@
 /*
  * $Log: tablematch.c,v $
+ * Revision 1.10  2023-01-03 17:45:14+05:30  Cprogrammer
+ * Set hints.ai_socktype to SOCK_STREAM
+ *
  * Revision 1.9  2019-03-08 11:50:42+05:30  Cprogrammer
  * improved code documentation
  *
@@ -144,7 +147,7 @@ matchinet(char *ip, char *token, char flag)
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 		static char     addrBuf[INET6_ADDRSTRLEN];
 		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_DGRAM;
+		hints.ai_socktype = SOCK_STREAM;
 		hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
 		hints.ai_protocol = 0;          /* Any protocol */
 		hints.ai_canonname = 0;
@@ -251,7 +254,7 @@ tablematch(char *filename, char *ip, char *domain)
 void
 getversion_tablematch_c()
 {
-	static char    *x = "$Id: tablematch.c,v 1.9 2019-03-08 11:50:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: tablematch.c,v 1.10 2023-01-03 17:45:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
