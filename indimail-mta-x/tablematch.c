@@ -147,7 +147,7 @@ matchinet(char *ip, char *token, char flag)
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 		static char     addrBuf[INET6_ADDRSTRLEN];
 		hints.ai_family = AF_UNSPEC;
-		hints.ai_socktype = SOCK_STREAM;
+		hints.ai_socktype = 0;
 		hints.ai_flags = AI_PASSIVE;    /* For wildcard IP address */
 		hints.ai_protocol = 0;          /* Any protocol */
 		hints.ai_canonname = 0;

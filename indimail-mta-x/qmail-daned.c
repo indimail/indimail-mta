@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-daned.c,v 1.31 2023-01-03 19:45:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.31 2023-01-03 22:11:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
@@ -989,7 +989,7 @@ main(int argc, char **argv)
 	load_context();
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
 #ifndef EAI_ADDRFAMILY
 #define EAI_ADDRFAMILY EAI_FAMILY
@@ -1253,7 +1253,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.31 2023-01-03 19:45:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.31 2023-01-03 22:11:33+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1265,9 +1265,8 @@ getversion_qmail_dane_c()
 
 /*
  * $Log: qmail-daned.c,v $
- * Revision 1.31  2023-01-03 19:45:39+05:30  Cprogrammer
- * use tls.h from libqmail
- * Set hints.ai_socktype to SOCK_STREAM
+ * Revision 1.31  2023-01-03 22:11:33+05:30  Cprogrammer
+ * include tls.h from libqmail
  *
  * Revision 1.30  2022-10-30 20:21:32+05:30  Cprogrammer
  * replaced cdb_match() with cdb_matchaddr() in cdb_match.c

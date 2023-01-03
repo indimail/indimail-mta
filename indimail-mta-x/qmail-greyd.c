@@ -1,8 +1,5 @@
 /*
  * $Log: qmail-greyd.c,v $
- * Revision 1.34  2023-01-03 16:40:57+05:30  Cprogrammer
- * Set hints.ai_socktype to SOCK_STREAM
- *
  * Revision 1.33  2022-10-30 20:22:09+05:30  Cprogrammer
  * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
  *
@@ -1226,7 +1223,7 @@ main(int argc, char **argv)
 	load_context();
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_flags = AI_PASSIVE;
 #ifndef EAI_ADDRFAMILY
 #define EAI_ADDRFAMILY EAI_FAMILY
@@ -1511,7 +1508,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.34 2023-01-03 16:40:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.33 2022-10-30 20:22:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

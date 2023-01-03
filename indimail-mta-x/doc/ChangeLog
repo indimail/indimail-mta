@@ -177,8 +177,7 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
 95. dnstlsarr.c, qmail-daned.c: use tls.h from libqmail
 96. Makefile: removed ssl functions and auto_sysconfdir dependency for
     programs not using auto_sysconfdir
-97. qmail-greyd.c, qmail-daned.c, tablematch.c: Set hints.ai_socktype to
-    SOCK_STREAM
+97. tablematch.c: Set hints.ai_socktype to SOCK_STREAM
 98. qmail-remote.c: set default certificate dir to /etc/indimail/certs
 99. qmail-remote.c: use set_tls_method() from libqmail
 100.starttls.h: define variables used in qmail-daned, dnstlsarr as extern
