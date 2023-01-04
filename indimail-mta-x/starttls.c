@@ -1,5 +1,5 @@
 /*
- * $Id: starttls.c,v 1.13 2023-01-03 19:50:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: starttls.c,v 1.14 2023-01-04 09:24:27+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -498,7 +498,7 @@ do_pkix(char *servercert)
  * 1. returns 0 --> fallback to non-tls
  *    if certs do not exist
  *    host is in notlshosts
- *    smtps == 0 and tls session cannot be initated
+ *    smtps == 0 and tls session cannot be initiated
  * 2. returns 1 if tls session was initated
  * 3. exits on error, if smtps == 1 and tls session did not succeed
  */
@@ -607,9 +607,6 @@ do_tls(int pkix, int *needtlsauth, char **scert)
 		if (!smtps && !_needtlsauth)
 			return (0);
 		t = (char *) myssl_error();
-		if (!stralloc_copyb(&smtptext, "TLS error initializing ctx: ", 28) ||
-				!stralloc_cats(&smtptext, t))
-			die_nomem();
 		switch (method_fail)
 		{
 		case 1:
@@ -1442,13 +1439,16 @@ get_dane_records(char *host)
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.13 2023-01-03 19:50:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.14 2023-01-04 09:24:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: starttls.c,v $
+ * Revision 1.14  2023-01-04 09:24:27+05:30  Cprogrammer
+ * fixed incorrect setting of smtptext
+ *
  * Revision 1.13  2023-01-03 19:50:47+05:30  Cprogrammer
  * replace set_tls_method() from libqmail
  * made global variables static
