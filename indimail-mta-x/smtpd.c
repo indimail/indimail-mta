@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.283 2023-01-06 17:34:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.284 2023-01-06 21:20:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -150,7 +150,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.283 $";
+static char    *revision = "$Revision: 1.284 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2424,6 +2424,14 @@ smtp_quit(char *arg)
 	for (i = 0; plughandle && i < plugin_count; i++) {
 		if (plughandle[i])
 			dlclose(plughandle[i]);
+	}
+#endif
+#ifdef TLS
+	if (ssl) {
+		while (SSL_shutdown(ssl) == 0)
+			usleep(100);
+		SSL_free(ssl);
+		ssl = 0;
 	}
 #endif
 	_exit(0);
@@ -7338,6 +7346,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.284  2023-01-06 21:20:41+05:30  Cprogrammer
+ * shutdown ssl in smtp_quit
+ *
  * Revision 1.283  2023-01-06 17:34:10+05:30  Cprogrammer
  * fixed compilation for non-tls
  *
@@ -7637,7 +7648,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.283 2023-01-06 17:34:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.284 2023-01-06 21:20:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
