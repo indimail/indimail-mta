@@ -1,5 +1,5 @@
 /*
- * $Id: dnstlsarr.c,v 1.16 2023-01-03 19:42:24+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dnstlsarr.c,v 1.17 2023-01-06 17:31:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include "substdio.h"
 #include "subfd.h"
@@ -8,7 +8,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <tls.h>
 #include <stralloc.h>
 #include <fmt.h>
 #include <sgetopt.h>
@@ -20,12 +19,12 @@
 #include "control.h"
 #include "starttls.h"
 
-char            temp[IPFMT + FMT_ULONG];
+static char     temp[IPFMT + FMT_ULONG];
+static stralloc sahost = { 0 };
 int             timeoutdata = 300;
 int             timeoutconn = 60;
 int             verbose;
 stralloc        helohost = { 0 };
-stralloc        sahost = { 0 };
 
 void
 pusage()
@@ -40,9 +39,7 @@ pusage()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             opt, k, j, i, query_mx = 0, verify = 0;
 	char           *port = "25", *host = (char *) 0;
@@ -221,6 +218,9 @@ main(argc, argv)
 #else
 #warning "not compiled with -DHASTLSA -DTLS"
 #include <unistd.h>
+int             timeoutdata = 300;
+int             timeoutconn = 60;
+
 int
 main()
 {
@@ -233,7 +233,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.16 2023-01-03 19:42:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.17 2023-01-06 17:31:49+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -243,6 +243,10 @@ getversion_dnstlsarr_c()
 
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.17  2023-01-06 17:31:49+05:30  Cprogrammer
+ * changed scope of variables te,, sahost to static
+ * added timeoutdata, timeconn variables for dossl.c
+ *
  * Revision 1.16  2023-01-03 19:42:24+05:30  Cprogrammer
  * include tls.h from libqmail
  *

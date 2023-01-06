@@ -465,3 +465,4 @@ INPUT
 MAN
 SBIN
 SHARED
+dossl.o

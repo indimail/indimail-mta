@@ -472,7 +472,7 @@ socket.lib
 
 dns.o: \
 compile dns.c ip.h ipalloc.h strsalloc.h dns.h tlsarralloc.h \
-conf-tls conf-spf conf-domainkeys conf-ip
+conf-tls conf-spf conf-domainkeys conf-ip conf-tlsa
 	./compile `grep -h -v "^#" conf-tls conf-spf conf-domainkeys \
 		conf-ip conf-tlsa` dns.c
 
@@ -550,13 +550,13 @@ compile dnstxt.c strsalloc.h dns.h dnsdoe.h ip.h
 
 dnstlsarr: \
 load dnstlsarr.o dns.o dnsdoe.o ip.o tlsarralloc.o ipalloc.o \
-starttls.o strsalloc.o socket_v4mappedprefix.o socket_v6any.o \
-auto_control.o variables.o control.o socket_tcp.o \
+strsalloc.o socket_v4mappedprefix.o socket_v6any.o dossl.o \
+auto_control.o variables.o control.o socket_tcp.o starttls.o\
 auto_sysconfdir.o socket_tcp6.o timeoutconn.o socket_v6loopback.o \
 socket_ip4loopback.o dns.lib socket.lib tls.lib
 	./load dnstlsarr dns.o dnsdoe.o tlsarralloc.o ip.o ipalloc.o \
-	starttls.o strsalloc.o socket_v4mappedprefix.o socket_v6any.o \
-	auto_control.o socket_tcp.o socket_tcp6.o timeoutconn.o \
+	strsalloc.o socket_v4mappedprefix.o socket_v6any.o starttls.o \
+	auto_control.o socket_tcp.o socket_tcp6.o timeoutconn.o dossl.o \
 	auto_sysconfdir.o socket_v6loopback.o socket_ip4loopback.o \
 	variables.o control.o `cat dns.lib socket.lib tls.lib` $(QMAILLIB)
 
@@ -1563,7 +1563,7 @@ compile pidopen.h pidopen.c
 
 hastlsa.h: trytlsa.c compile load dns.lib \
 dns.o tlsarralloc.o ip.o socket_v4mappedprefix.o \
-socket_v6any.o ipalloc.o strsalloc.o
+socket_v6any.o ipalloc.o strsalloc.o conf-tlsa
 	( ( ./compile `grep -h -v "^#" conf-tlsa` \
 	trytlsa.c && ./load trytlsa dns.o tlsarralloc.o \
 	ip.o socket_v4mappedprefix.o socket_v6any.o \
@@ -1600,14 +1600,14 @@ tryidn2.c compile load conf-smtputf8
 
 qmail-remote: \
 load qmail-remote.o control.o timeoutconn.o tcpto.o dns.o ip.o \
-ipalloc.o strsalloc.o ipme.o quote.o variables.o \
+ipalloc.o strsalloc.o ipme.o quote.o variables.o dossl.o \
 auto_sysconfdir.o auto_control.o socket_ip4loopback.o \
 socket_v6loopback.o socket_v6any.o tlsarralloc.o \
 qr_digest_md5.o fn_handler.o query_skt.o tlsacheck.o \
 dns.lib socket.lib socket_v4mappedprefix.o cdb_match.o \
 socket_tcp.o socket_tcp6.o idn2.lib gsasl.lib
 	./load qmail-remote control.o tlsacheck.o auto_control.o \
-	timeoutconn.o tcpto.o dns.o ip.o socket_ip4loopback.o \
+	timeoutconn.o tcpto.o dns.o ip.o socket_ip4loopback.o dossl.o \
 	auto_sysconfdir.o socket_v6loopback.o socket_v6any.o ipalloc.o \
 	socket_v4mappedprefix.o strsalloc.o ipme.o quote.o fn_handler.o \
 	qr_digest_md5.o query_skt.o tlsarralloc.o variables.o cdb_match.o \
@@ -1627,11 +1627,16 @@ qmail-remote.9 conf-qmail conf-sysconfdir conf-libexec
 qmail-remote.o: \
 compile qmail-remote.c control.h dns.h quote.h ip.h auto_sysconfdir.h \
 ipalloc.h query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
-variables.h auto_control.h cdb_match.h haslibgsasl.h \
+variables.h auto_control.h cdb_match.h haslibgsasl.h dossl.h \
 hastlsa.h tlsacheck.h fn_handler.h tlsarralloc.h hassmtputf8.h batv.h \
 conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
 		conf-batv` qmail-remote.c
+
+dossl.o: \
+compile dossl.c variables.h control.h auto_sysconfdir.h \
+dossl.h hastlsa.h auto_control.h conf-tls
+	./compile `grep -h -v "^#" conf-tls` dossl.c
 
 qmail-send: \
 load qmail-send.o qsutil.o control.o newfield.o prioq.o \
@@ -3470,10 +3475,10 @@ load qmail-daned.o ip.o socket_v6any.o socket_v4mappedprefix.o \
 variables.o auto_control.o control.o ipalloc.o dns.o dnsdoe.o \
 strsalloc.o socket_tcp.o socket_tcp6.o timeoutconn.o tlsarralloc.o \
 socket_ip4loopback.o socket_v6loopback.o auto_sysconfdir.o \
-cdb_match.o starttls.o dns.lib tls.lib
+dossl.o cdb_match.o starttls.o dns.lib tls.lib
 	./load qmail-daned auto_control.o auto_sysconfdir.o \
 	cdb_match.o ip.o socket_v6any.o socket_v4mappedprefix.o \
-	tlsarralloc.o variables.o control.o ipalloc.o dns.o \
+	dossl.o tlsarralloc.o variables.o control.o ipalloc.o dns.o \
 	dnsdoe.o strsalloc.o socket_tcp.o socket_tcp6.o timeoutconn.o \
 	socket_ip4loopback.o socket_v6loopback.o starttls.o \
 	`cat dns.lib tls.lib` $(QMAILLIB)
@@ -3493,7 +3498,8 @@ qmail-daned.9 conf-qmail conf-sysconfdir
 
 starttls.o: compile starttls.c conf-tls hastlsa.h conf-ip \
 socket.h ip.h dns.h control.h variables.h tlsacheck.h \
-ipalloc.h tlsarralloc.h auto_control.h auto_sysconfdir.h haveip6.h
+ipalloc.h tlsarralloc.h auto_control.h auto_sysconfdir.h \
+dossl.h haveip6.h
 	./compile `grep -h -v "^#" conf-ip conf-tls` starttls.c
 
 tlsacheck.o: \

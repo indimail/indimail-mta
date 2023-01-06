@@ -1,10 +1,9 @@
 /*
- * $Id: qmail-daned.c,v 1.32 2023-01-03 23:55:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.33 2023-01-06 17:33:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
 #if defined(HASTLSA) && defined(TLS)
-#include <tls.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -1239,6 +1238,7 @@ main(int argc, char **argv)
 #else
 #warning "TLSA, TLS code not compiled"
 #include <unistd.h>
+int             timeoutconn = 60;
 int
 main()
 {
@@ -1252,7 +1252,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.32 2023-01-03 23:55:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.33 2023-01-06 17:33:20+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1264,6 +1264,9 @@ getversion_qmail_dane_c()
 
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.33  2023-01-06 17:33:20+05:30  Cprogrammer
+ * added timeoutconn variable
+ *
  * Revision 1.32  2023-01-03 23:55:03+05:30  Cprogrammer
  * removed __USE_GNU
  *
