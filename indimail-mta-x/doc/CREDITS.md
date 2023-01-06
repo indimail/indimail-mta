@@ -94,44 +94,44 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 	- maxhop control file
 	- The qmail-link-sync patch for simple fix to the non-synchronous link() problem of qmail on Linux filesystems
 64. Paul Gregg - ENFORCE\_FQDN\_HELO patch 29/08/2003
-67. Nick Leverton - Qmail Holdremote Patch
-68. PLDaniels - ripMIME/altermime
-69. evaluate - evaluate algebraic strings(C) 2000-2002 Kyzer/CSG. http://www.kyzer.me.uk/code/evaluate/
-70. "Marcus Williams" marcus at quintic.co.uk. - make seekable patch
-71. daemontools patches from (additional signals to svc, svscan logging http://www.gluelogic.com/code/daemontools/)
-73. Jos Backus - timed log rotation for multilog
-74. Alin-Adrian Anton - Fixed qmail-smtpd vulnurability for very long header lines
-76. http://members.elysium.pl/brush/qmail-smtpd-auth/ SMTP AUTH
-77. Zach White <zwhite@netlsd.org> 20010812 http://www.netable.com/~dburkes/qmail-smtpd-requireauth/ Require AUTH
-78. http://www.elysium.pl/members/brush/cmd5checkpw/ CRAM-MD5 Checkpassword RFC-2554, RFC-2222 compliance
-79. Rask Ingemann Lambertsen - who provided the original RELAY Patch
-80. Markus Stumpf - provided the original LOGGING patch
-81. Charles Cazabon - Author of the NULL-Sender modification
-82. Bjoern Kalkbrenner - Initial auther of the qmail-smtp-auth-send patch.
-83. Peter Ladwig - had the idea to use hard tarpitting in case of too many invalid RECIPIENTS.
-84. Flash Secure Menu Shell - WWW: http://www.netsoc.ucd.ie/flash/ Author: Steve Fegan
-85. Levent Serinol - MySQL support to tcpserver
-86. mpack/munpack from CMU
-87. Richard Lyons - moresmtproutes patch
-88. Andrew Richard's early talker patch
-89. Animesh Bansriyar for his idea to limit some users to receiving only local email.
-90. Flavio Curti for qmail-queue custom error patch
-91. Fred McIntyre for suggesting DKIMSIGNOPTIONS and other improvements to qmail-dkim
-92. Jason Haar <jhaar at users.sourceforge.net> for his tls-cert-check script
-93. Andrew Richard, John Levine for Greylisting - http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
-94. Bounce Address Tag Validation - John Levine, Joerg Backschues
-95. Alexey Mahotkin <alexm at hsys.msk.ru> for pam support functions and new pam-checkpwd program
-95. Jeremy Kister - X-Originating-IP header qmail-1.03.originip-field.patch [http://jeremy.kister.net/code/qmail-1.03.originip-field.patch]
-96. Joerg Backschues - badremotehost check function (Ability to block hosts listed in badhost)
-97. James Raftery - real envelope recipient after host name canonicalization
-98. Russ Nelson's QMTP patch for qmail-remote
-99. DNSBL Support (DNS Blacklist) Author "Fabio Busatto" <fabio.busatto at sikurezza.org>
-100. Pieter Droogendijk <pieter at binky.org.uk> http://binky.org.uk - URL parsing code for SURBL
-101. Marcelo Coelho - qmail-srs-0.8.patch and libsrs2 - http://www.libsrs2.org
-102. Roberto Puzzanghera <roberto.puzzanghera at gmail.com> - using FORCE\_TLS environment variable to force TLS during AUTH
-103. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredo
-104. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
-105. Bruce Guenter - qmail-remote patch to reduce cpu
-106. Rolf Eike Beer <eike@sf-mail.de> gen\_allocdefs.h, GEN\_ALLOC refactoring changes to fix memory overflow
-107. Fefe - felix-libowfat@fefe.de for functions taken from libowfat & ipv6 in ucspi-tcp
-108. RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / EH Hoffman unicode address support patch for qmail.
+65. Nick Leverton - Qmail Holdremote Patch
+66. PLDaniels - ripMIME/altermime
+67. evaluate - evaluate algebraic strings(C) 2000-2002 Kyzer/CSG. http://www.kyzer.me.uk/code/evaluate/
+68. "Marcus Williams" marcus at quintic.co.uk. - make seekable patch
+69. daemontools patches from (additional signals to svc, svscan logging http://www.gluelogic.com/code/daemontools/)
+70. Jos Backus - timed log rotation for multilog
+71. Alin-Adrian Anton - Fixed qmail-smtpd vulnurability for very long header lines
+72. http://members.elysium.pl/brush/qmail-smtpd-auth/ SMTP AUTH
+73. Zach White <zwhite@netlsd.org> 20010812 http://www.netable.com/~dburkes/qmail-smtpd-requireauth/ Require AUTH
+74. http://www.elysium.pl/members/brush/cmd5checkpw/ CRAM-MD5 Checkpassword RFC-2554, RFC-2222 compliance
+75. Rask Ingemann Lambertsen - who provided the original RELAY Patch
+76. Markus Stumpf - provided the original LOGGING patch
+77. Charles Cazabon - Author of the NULL-Sender modification
+78. Bjoern Kalkbrenner - Initial auther of the qmail-smtp-auth-send patch.
+79. Peter Ladwig - had the idea to use hard tarpitting in case of too many invalid RECIPIENTS.
+80. Flash Secure Menu Shell - WWW: http://www.netsoc.ucd.ie/flash/ Author: Steve Fegan
+81. Levent Serinol - MySQL support to tcpserver
+82. mpack/munpack from CMU
+83. Richard Lyons - moresmtproutes patch
+84. Andrew Richard's early talker patch
+85. Animesh Bansriyar for his idea to limit some users to receiving only local email.
+86. Flavio Curti for qmail-queue custom error patch
+87. Fred McIntyre for suggesting DKIMSIGNOPTIONS and other improvements to qmail-dkim
+88. Jason Haar <jhaar at users.sourceforge.net> for his tls-cert-check script
+89. Andrew Richard, John Levine for Greylisting - http://www.gossamer-threads.com/lists/qmail/users/136740?page=last
+90. Bounce Address Tag Validation - John Levine, Joerg Backschues
+91. Alexey Mahotkin <alexm at hsys.msk.ru> for pam support functions and new pam-checkpwd program
+92. Jeremy Kister - X-Originating-IP header qmail-1.03.originip-field.patch [http://jeremy.kister.net/code/qmail-1.03.originip-field.patch]
+93. Joerg Backschues - badremotehost check function (Ability to block hosts listed in badhost)
+94. James Raftery - real envelope recipient after host name canonicalization
+95. Russ Nelson's QMTP patch for qmail-remote
+96. DNSBL Support (DNS Blacklist) Author "Fabio Busatto" <fabio.busatto at sikurezza.org>
+97. Pieter Droogendijk <pieter at binky.org.uk> http://binky.org.uk - URL parsing code for SURBL
+98. Marcelo Coelho - qmail-srs-0.8.patch and libsrs2 - http://www.libsrs2.org
+99. Roberto Puzzanghera <roberto.puzzanghera at gmail.com> - using FORCE\_TLS environment variable to force TLS during AUTH
+100. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredo
+101. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
+102. Bruce Guenter - qmail-remote patch to reduce cpu
+103. Rolf Eike Beer <eike@sf-mail.de> gen\_allocdefs.h, GEN\_ALLOC refactoring changes to fix memory overflow
+104. Fefe - felix-libowfat@fefe.de for functions taken from libowfat & ipv6 in ucspi-tcp
+105. RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / EH Hoffman unicode address support patch for qmail.

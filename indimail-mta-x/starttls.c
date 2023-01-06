@@ -1,5 +1,5 @@
 /*
- * $Id: starttls.c,v 1.14 2023-01-04 09:24:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: starttls.c,v 1.15 2023-01-06 17:40:27+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -41,32 +41,29 @@
 #include "tlsarralloc.h"
 #include "auto_control.h"
 #include "auto_sysconfdir.h"
+#include "dossl.h"
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define SSL_ST_BEFORE 0x4000
 #endif
 
 #define HUGESMTPTEXT  5000
-GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
+
 GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
 
 static int      smtpfd;
-static const char *ssl_err_str = 0;
+static const char *ssl_err_str = NULL;
 static struct ip_mx partner;
-static char    *partner_fqdn = 0;
+static char    *partner_fqdn = NULL;
+static SSL     *ssl;
 static stralloc rhost = { 0 }; /*- host ip to which qmail-remote ultimately connects */
-static SSL_CTX *ctx;
-static stralloc saciphers = { 0 }, tlsFilename = { 0 }, clientcert = { 0 };
 static stralloc smtptext = { 0 };
 static saa      ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
 static int      maxehlokwlen = 0;
 static stralloc hexstring = { 0 };
-static stralloc hextmp = { 0 };
-static stralloc certdir_s;
-stralloc        sa = { 0 };
+static stralloc tline = { 0 };
 ipalloc         ia = { 0 };
 tlsarralloc     ta = { 0 };
-static stralloc tline = { 0 };
 stralloc        save = { 0 };
 static union v46addr outip;
 static stralloc sauninit = { 0 };
@@ -74,7 +71,6 @@ static stralloc sauninit = { 0 };
 extern int      verbose;
 extern int      timeoutconn;
 extern int      timeoutdata;
-static SSL     *ssl;
 static int      smtps;
 extern stralloc helohost;
 
@@ -85,7 +81,7 @@ ssl_exit(int status)
 		while (SSL_shutdown(ssl) == 0)
 			usleep(100);
 		SSL_free(ssl);
-		ssl = 0;
+		ssl = NULL;
 	}
 	_exit(status);
 }
@@ -114,7 +110,7 @@ die(int e)
 	if (ssl) {
 		while (SSL_shutdown(ssl) == 0);
 		SSL_free(ssl);
-		ssl = 0;
+		ssl = NULL;
 	}
 	ssl_exit(e);
 }
@@ -171,6 +167,12 @@ die_control(char *arg1, char *arg2)
 	substdio_puts(subfderr, "\n");
 	substdio_flush(subfderr);
 	die (111);
+}
+
+void
+die_write()
+{
+	substdio_flush(subfdout);
 }
 
 void
@@ -281,7 +283,7 @@ outsmtptext()
  * code =    0 - temporary failure
  */
 void
-quit(char *prepend, char *append, int e)
+quit(char *prepend, char *append, int code, int e)
 {
 	substdio_putsflush(&smtpto, "QUIT\r\n");
 	if (verbose == 2)
@@ -293,22 +295,25 @@ quit(char *prepend, char *append, int e)
 	logerr(".\n");
 	outsmtptext();
 	substdio_flush(subfderr);
-	die (e);
+	die (e == -1 ? 111 : e);
 }
 
 void
-tls_quit(const char *s1, char *s2, char *s3, char *s4, stralloc *peer_sa)
+tls_quit(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *peer_sa)
 {
 	char            ch;
 	int             i, state;
 
+#if 0
 	logerr((char *) s1);
-	if (s2)
-		logerr((char *) s2);
+#endif
+	logerr((char *) s2);
 	if (s3)
 		logerr((char *) s3);
 	if (s4)
 		logerr((char *) s4);
+	if (s5)
+		logerr((char *) s5);
 	if (peer_sa && peer_sa->len) {
 		for (i = 0; i < peer_sa->len; ++i) {
 			ch = peer_sa->s[i];
@@ -415,558 +420,6 @@ smtpcode()
 	return code;
 }
 
-/*-
- * don't want to fail handshake if certificate can't be verified
- */
-int
-verify_cb(int preverify_ok, X509_STORE_CTX *ctx_dummy)
-{
-	return 1;
-}
-
-int
-match_partner(char *s, int len)
-{
-	if (!case_diffb(partner_fqdn, len, (char *) s) && !partner_fqdn[len])
-		return 1;
-	/*- we also match if the name is *.domainname */
-	if (*s == '*') {
-		const char     *domain = partner_fqdn + str_chr(partner_fqdn, '.');
-		if (!case_diffb((char *) domain, --len, (char *) ++s) && !domain[len])
-			return 1;
-	}
-	return 0;
-}
-
-void
-do_pkix(char *servercert)
-{
-	X509           *peercert;
-	STACK_OF(GENERAL_NAME) *gens;
-	int             r, i = 0;
-	char           *tmp;
-
-	/*- PKIX */
-	if ((r = SSL_get_verify_result(ssl)) != X509_V_OK) {
-		tmp = (char *) X509_verify_cert_error_string(r);
-		tls_quit("TLS unable to verify server with ", servercert, ": ", tmp, 0);
-	}
-	if (!(peercert = SSL_get_peer_certificate(ssl)))
-		tls_quit("TLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
-
-	/*-
-	 * RFC 2595 section 2.4: find a matching name
-	 * first find a match among alternative names
-	 */
-	if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0))) {
-		for (i = 0, r = sk_GENERAL_NAME_num(gens); i < r; ++i) {
-			const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
-			if (gn->type == GEN_DNS)
-				if (match_partner((char *) gn->d.ia5->data, gn->d.ia5->length))
-					break;
-		}
-		sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
-	}
-
-	/*- no alternative name matched, look up commonName */
-	if (!gens || i >= r) {
-		stralloc        peer = { 0 };
-		X509_NAME      *subj = X509_get_subject_name(peercert);
-		if ((i = X509_NAME_get_index_by_NID(subj, NID_commonName, -1)) >= 0) {
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-			X509_NAME_ENTRY *t;
-			t = X509_NAME_get_entry(subj, i);
-			ASN1_STRING    *s = X509_NAME_ENTRY_get_data(t);
-#else
-			const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
-#endif
-			if (s) {
-				peer.len = s->length;
-				peer.s = (char *) s->data;
-			}
-		}
-		if (peer.len <= 0)
-			tls_quit("TLS unable to verify server ", partner_fqdn, ": certificate contains no valid commonName", 0, 0);
-		if (!match_partner((char *) peer.s, peer.len))
-			tls_quit("TLS unable to verify server ", partner_fqdn, ": received certificate for ", 0, &peer);
-	}
-	X509_free(peercert);
-	return;
-}
-
-/*
- * 1. returns 0 --> fallback to non-tls
- *    if certs do not exist
- *    host is in notlshosts
- *    smtps == 0 and tls session cannot be initiated
- * 2. returns 1 if tls session was initated
- * 3. exits on error, if smtps == 1 and tls session did not succeed
- */
-int
-do_tls(int pkix, int *needtlsauth, char **scert)
-{
-	int             code, i = 0, _needtlsauth = 0;
-	static char     ssl_initialized;
-	const char     *ciphers = 0;
-	char           *t, *servercert = 0, *certfile;
-	static SSL     *myssl;
-	stralloc        ssl_option = { 0 };
-	int             method_fail;
-
-	if (needtlsauth)
-		*needtlsauth = 0;
-	if (scert)
-		*scert = 0;
-	if (ctx) {
-		SSL_CTX_free(ctx);
-		ctx = (SSL_CTX *) 0;
-	}
-	if (myssl) {
-		SSL_free(myssl);
-		ssl = myssl = (SSL *) 0;
-	}
-	if (!certdir && !(certdir = env_get("CERTDIR"))) {
-		if (!stralloc_copys(&certdir_s, auto_sysconfdir) ||
-				!stralloc_catb(&certdir_s, "/certs", 6) ||
-				!stralloc_0(&certdir_s))
-			die_nomem();
-		certdir = certdir_s.s;
-	}
-	
-	if (!stralloc_copys(&clientcert, certdir) ||
-			!stralloc_append(&clientcert, "/"))
-		die_nomem();
-	certfile = ((certfile = env_get("CLIENTCERT")) ? certfile : "clientcert.pem");
-	if (!stralloc_cats(&clientcert, certfile) ||
-			!stralloc_0(&clientcert))
-		die_nomem();
-	if (access(clientcert.s, F_OK)) {
-		if (errno != error_noent)
-			die_control("unable to read client certificate ", clientcert.s);
-		return (0);
-	}
-	if (partner_fqdn) {
-		struct stat     st;
-		if (!stralloc_copys(&tlsFilename, certdir) ||
-				!stralloc_catb(&tlsFilename, "/tlshosts/", 10) ||
-				!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn)) ||
-				!stralloc_catb(&tlsFilename, ".pem", 4) ||
-				!stralloc_0(&tlsFilename))
-			die_nomem();
-		if (stat(tlsFilename.s, &st)) {
-			_needtlsauth = 0;
-			if (needtlsauth)
-				*needtlsauth = 0;
-			if (!stralloc_copys(&tlsFilename, certdir) ||
-					!stralloc_catb(&tlsFilename, "/notlshosts/", 12) ||
-					!stralloc_catb(&tlsFilename, partner_fqdn, str_len(partner_fqdn) + 1) ||
-					!stralloc_0(&tlsFilename))
-				die_nomem();
-			if (!stat(tlsFilename.s, &st))
-				return (0);
-			if (!stralloc_copys(&tlsFilename, certdir) ||
-					!stralloc_catb(&tlsFilename, "/tlshosts/exhaustivelist", 24) ||
-					!stralloc_0(&tlsFilename))
-				die_nomem();
-			if (!stat(tlsFilename.s, &st))
-				return (0);
-		} else {
-			*scert = servercert = tlsFilename.s;
-			_needtlsauth = 1;
-			if (needtlsauth)
-				*needtlsauth = 1;
-		}
-	}
-
-	if (!smtps) {
-		stralloc       *saptr = ehlokw.sa;
-		unsigned int    len = ehlokw.len;
-
-		/*- look for STARTTLS among EHLO keywords */
-		for (; len && case_diffs(saptr->s, "STARTTLS"); ++saptr, --len);
-		if (!len) {
-			if (!_needtlsauth)
-				return (0);
-			tls_quit("No TLS achieved while", tlsFilename.s, " exists", 0, 0);
-		}
-	}
-
-	if (!ssl_initialized++)
-		SSL_library_init();
-	if (!controldir && !(controldir = env_get("CONTROLDIR")))
-		controldir = auto_control;
-	if (!stralloc_copys(&tlsFilename, controldir) ||
-			!stralloc_catb(&tlsFilename, "/tlsclientmethod", 16) ||
-			!stralloc_0(&tlsFilename))
-		die_nomem();
-	if (control_rldef(&ssl_option, tlsFilename.s, 0, "TLSv1_2") != 1)
-		die_control("unable to read control file ", tlsFilename.s);
-	if (!stralloc_0(&ssl_option))
-		die_nomem();
-	if (!(ctx = set_tls_method(ssl_option.s, client, &method_fail))) {
-		if (!smtps && !_needtlsauth)
-			return (0);
-		t = (char *) myssl_error();
-		switch (method_fail)
-		{
-		case 1:
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-			tls_quit("TLS Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2", t, 0, 0, 0);
-#else
-			tls_quit("TLS Supported methods: TLSv1, TLSv1_1, TLSv1_2 TLSv1_3", t, 0, 0, 0);
-#endif
-			break;
-		case 2:
-			tls_quit("TLS error initializing SSLv23 ctx: ", t, 0, 0, 0);
-			break;
-		case 3:
-			tls_quit("TLS error initializing SSLv3 ctx: ", t, 0, 0, 0);
-			break;
-		case 4:
-			tls_quit("TLS error initializing TLSv1 ctx: ", t, 0, 0, 0);
-			break;
-		case 5:
-			tls_quit("TLS error initializing TLSv1_1 ctx: ", t, 0, 0, 0);
-			break;
-		case 6:
-			tls_quit("TLS error initializing TLSv1_2 ctx: ", t, 0, 0, 0);
-			break;
-		case 7:
-			tls_quit("TLS error initializing TLSv1_3 ctx: ", t, 0, 0, 0);
-			break;
-		}
-	}
-
-	if (_needtlsauth) {
-		if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
-			t = myssl_error();
-			SSL_CTX_free(ctx);
-			ctx = (SSL_CTX *) 0;
-			tls_quit("TLS unable to load ", servercert, ": ", t, 0);
-		}
-		/*- set the callback here; SSL_set_verify didn't work before 0.9.6c */
-		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, verify_cb);
-	}
-
-	/*- let the other side complain if it needs a cert and we don't have one */
-	if (SSL_CTX_use_certificate_chain_file(ctx, clientcert.s))
-#if OPENSSL_VERSION_NUMBER >= 0x30000000L
-		SSL_CTX_use_PrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
-#else
-		SSL_CTX_use_RSAPrivateKey_file(ctx, clientcert.s, SSL_FILETYPE_PEM);
-#endif
-
-	if (!(myssl = SSL_new(ctx))) {
-		t = myssl_error();
-		if (!smtps && !_needtlsauth) {
-			SSL_CTX_free(ctx);
-			ctx = (SSL_CTX *) 0;
-			return (0);
-		}
-		SSL_CTX_free(ctx);
-		ctx = (SSL_CTX *) 0;
-		tls_quit("TLS error initializing ssl: ", t, 0, 0, 0);
-	} else {
-		SSL_CTX_free(ctx);
-		ctx = (SSL_CTX *) 0;
-	}
-
-	if (!smtps) {
-		substdio_putsflush(&smtpto, "STARTTLS\r\n");
-		if (verbose == 2)
-			substdio_putsflush(subfdout, "Client: STARTTLS\n");
-	}
-
-	/*- while the server is preparing a response, do something else */
-	if (!ciphers) {
-		if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
-			while (SSL_shutdown(myssl) == 0)
-				usleep(100);
-			SSL_free(myssl);
-			ssl = myssl = NULL;
-			die_control("unable to read control file ", "tlsclientciphers");
-		}
-		if (saciphers.len) {
-			/*- convert all '\0's except the last one to ':' */
-			for (i = 0; i < saciphers.len - 1; ++i)
-				if (!saciphers.s[i])
-					saciphers.s[i] = ':';
-			ciphers = saciphers.s;
-		}
-	}
-	SSL_set_cipher_list(myssl, ciphers);
-
-	/*- SSL_set_options(myssl, SSL_OP_NO_TLSv1); */
-	SSL_set_fd(myssl, smtpfd);
-
-	/*- read the response to STARTTLS */
-	if (!smtps) {
-		if (smtpcode() != 220) {
-			while (SSL_shutdown(myssl) == 0)
-				usleep(100);
-			SSL_free(myssl);
-			ssl = myssl = (SSL *) 0;
-			if (!_needtlsauth)
-				return (0);
-			tls_quit("STARTTLS rejected while ", tlsFilename.s, " exists", 0, 0);
-		}
-	}
-	ssl = myssl;
-	if (ssl_timeoutconn(timeoutconn, smtpfd, smtpfd, ssl) <= 0) {
-		t = (char *) myssl_error_str();
-		tls_quit("TLS connect failed: ", t, 0, 0, 0);
-	}
-	if (smtps && (code = smtpcode()) != 220) /*- 220 ready for tls */
-		quit("TLS Connected to ", " but greeting failed", code);
-	if (pkix && _needtlsauth)
-		do_pkix(servercert);
-	return (1);
-}
-
-/*-
- * USAGE
- * 0, 1, 2, 3, 255
- * 255 PrivCert
- * 
- * SELECTOR
- * --------
- * 0, 1, 255
- * 255 PrivSel
- * 
- * Matching Type
- * -------------
- * 0, 1, 2, 255
- * 255 PrivMatch
- *
- * Return Value
- * 0   - match target certificate & payload data
- * 1,2 - successful match
- */
-stralloc        certData = { 0 };
-int
-tlsa_vrfy_records(char *certDataField, int usage, int selector, int match_type, char **err_str )
-{
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-	EVP_MD_CTX     *mdctx;
-#else
-	EVP_MD_CTX     *mdctx;
-	EVP_MD_CTX      _mdctx;
-#endif
-	const EVP_MD   *md = 0;
-	BIO            *membio = 0;
-	EVP_PKEY       *pkey = 0;
-	X509           *xs = 0;
-	STACK_OF(X509) *sk;
-	static char     errbuf[256];
-	char            buffer[512], hex[2];
-	unsigned char   md_value[EVP_MAX_MD_SIZE];
-	unsigned char  *ptr;
-	int             i, len, e;
-	unsigned int    md_len;
-
-	if (!ssl)
-		return (-1);
-	switch (usage)
-	{
-	/*- Trust anchor */
-	case 0: /*- PKIX-TA(0) maps to DANE-TA(2) */
-		/*- flow through */
-	case 2: /*- DANE-TA(2) */
-		usage = 2;
-		break;
-	case 1: /*- PKIX-EE(1) maps to DANE-EE(3) */
-		/*- flow through */
-	case 3: /*- DANE-EE(3) */
-		usage = 3;
-		break;
-	default:
-		return (-2);
-	}
-	switch (selector) /*- match full certificate or subjectPublicKeyInfo */
-	{
-	case 0: /*- Cert(0) - match full certificate   data/SHA256fingerprint/SHA512fingerprint */
-		break;
-	case 1: /*- SPKI(1) - match subject public key data/SHA256fingerprint/SHA512fingerprint  */
-		break;
-	default:
-		return (-2);
-	}
-	switch (match_type) /*- sha256, sha512 */
-	{
-	case 0: /*- Full(0) - match full cert data or subjectPublicKeyInfo data */
-		break;
-	case 1: /*- SHA256(1) fingerprint - servers should publish this mandatorily */
-		md = EVP_get_digestbyname("sha256");
-		break;
-	case 2: /*- SHA512(2)  fingerprint - servers should not exclusively publish this */
-		md = EVP_get_digestbyname("sha512");
-		break;
-	default:
-		return (-2);
-	}
-	/*- SSL_ctrl(ssl, SSL_SET_TLSEXT_HOSTNAME, TLSEXT_NAMETYPE_host_name, servername); -*/
-	if (!(sk =  SSL_get_peer_cert_chain(ssl)))
-		tls_quit("TLS unable to verify server ", partner_fqdn, ": no certificate provided", 0, 0);
-	/*- 
-	 * the server certificate is generally presented
-	 * as the first certificate in the stack along with
-	 * the remaining chain.
-	 * last certificate in the list is a trust anchor
-	 * 5.2.2.  Trust Anchor Digests and Server Certificate Chain
-	 * https://tools.ietf.org/html/rfc7671
-	 *
-	 * for Usage 2, check the last  certificate - sk_X509_value(sk, sk_509_num(sk) - 1)
-	 * for Usage 3, check the first certificate - sk_X509_value(sk, 0)
-	 */
-	/*- for (i = (usage == 2 ? 1 : 0); i < (usage == 2 ? sk_X509_num(sk) : 1); i++) -*/
-	i = (usage == 2 ? sk_X509_num(sk) - 1 : 0);
-	xs = sk_X509_value(sk, i);
-	/*- 
-	 * DANE Validation 
-	 * case 1 - match full certificate data -                            - X 0 0
-	 * case 2 - match full subjectPublicKeyInfo data                     - X 1 0
-	 * case 3 - match  SHA512/SHA256 fingerprint of full certificate     - X 0 1, X 0 2
-	 * case 4 - match  SHA512/SHA256 fingerprint of subjectPublicKeyInfo - X 1 1, X 1 2
-	 */
-	if (match_type == 0 && selector == 0) { /*- match full certificate data */
-		if (!(membio = BIO_new(BIO_s_mem()))) {
-			*err_str = ERR_error_string(ERR_get_error(), errbuf);
-			tls_quit("DANE unable to create membio: ", *err_str, 0, 0, 0);
-		}
-		if (!PEM_write_bio_X509(membio, xs)) {
-			*err_str = ERR_error_string(ERR_get_error(), errbuf);
-			tls_quit("DANE unable to create write to membio: ", *err_str, 0, 0, 0);
-		}
-		for (certData.len = 0;;) {
-			if (!BIO_gets(membio, buffer, sizeof(buffer) - 2))
-				break;
-			if (str_start(buffer, "-----BEGIN CERTIFICATE-----"))
-				continue;
-			if (str_start(buffer, "-----END CERTIFICATE-----"))
-				continue;
-			buffer[i = str_chr(buffer, '\n')] = 0;
-			if (!stralloc_cats(&certData, buffer))
-				die_nomem();
-		}
-		if (!stralloc_0(&certData))
-			die_nomem();
-		certData.len--;
-		BIO_free_all(membio);
-		e = str_diffn(certData.s, certDataField, certData.len);
-		if (verbose) {
-			out(e == 0 ? "matched " : "failed  ");
-			out(usage == 2 ? "full anchorCert\n" : "full serverCert\n");
-			out(certDataField);
-			out("\n");
-			flush();
-		}
-		return (e);
-	}
-	if (match_type == 0 && selector == 1) { /*- match full subjectPublicKeyInfo data */
-		if (!(membio = BIO_new(BIO_s_mem()))) {
-			*err_str = ERR_error_string(ERR_get_error(), errbuf);
-			tls_quit("DANE unable to create membio: ", *err_str, 0, 0, 0);
-		}
-		if (!(pkey = X509_get_pubkey(xs))) {
-			*err_str = ERR_error_string(ERR_get_error(), errbuf);
-			tls_quit("DANE unable to get pubkey: ", *err_str, 0, 0, 0);
-		}
-		if (!PEM_write_bio_PUBKEY(membio, pkey)) {
-			*err_str = ERR_error_string(ERR_get_error(), errbuf);
-			tls_quit("DANE unable to write pubkey to membio: ", *err_str, 0, 0, 0);
-		}
-		for (;;) {
-			if (!BIO_gets(membio, buffer, sizeof(buffer) - 2))
-				break;
-			if (str_start(buffer, "-----BEGIN PUBLIC KEY-----"))
-				continue;
-			if (str_start(buffer, "-----END PUBLIC KEY-----"))
-				continue;
-			buffer[i = str_chr(buffer, '\n')] = 0;
-			if (!stralloc_cats(&certData, buffer))
-				die_nomem();
-		}
-		if (!stralloc_0(&certData))
-			die_nomem();
-		certData.len--;
-		BIO_free_all(membio);
-		e = str_diffn(certData.s, certDataField, certData.len);
-		if (verbose) {
-			out(e == 0 ? "matched " : "failed  ");
-			out(usage == 2 ? "SubjectPublicKeyInfo anchorCert\n" : "SubjectPublicKeyInfo serverCert\n");
-			out(certDataField);
-			out("\n");
-			flush();
-		}
-		return (e);
-	}
-	/*- SHA512/SHA256 fingerprint of full certificate */
-	if ((match_type == 2 || match_type == 1) && selector == 0) {
-		if (!X509_digest(xs, md, md_value, &md_len))
-			tls_quit("TLS Unable to get peer cerficatte digest", 0, 0, 0, 0);
-		for (i = hextmp.len = 0; i < md_len; i++) {
-			fmt_hexbyte(hex, (md_value + i)[0]);
-			if (!stralloc_catb(&hextmp, hex, 2))
-				die_nomem();
-		}
-		e = str_diffn(certDataField, hextmp.s, hextmp.len);
-		if (verbose) {
-			out(e == 0 ? "matched " : "failed  ");
-			out(match_type == 1 ? "sha256" : "sha512");
-			out(" fingerprint [");
-			out(certDataField);
-			out(usage == 2 ? "] full anchorCert\n" : "] full serverCert\n");
-		}
-		return (e);
-	}
-	/*- SHA512/SHA256 fingerprint of subjectPublicKeyInfo */
-	if ((match_type == 2 || match_type == 1) && selector == 1) {
-		unsigned char  *tmpbuf = (unsigned char *) 0;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-		if (!(mdctx = EVP_MD_CTX_new()))
-			die_nomem();
-#else
-		mdctx = &_mdctx;
-#endif
-		if (!(pkey = X509_get_pubkey(xs)))
-			tls_quit("TLS Unable to get public key", 0, 0, 0, 0);
-		if (!EVP_DigestInit_ex(mdctx, md, NULL))
-			tls_quit("TLS Unable to initialize EVP Digest", 0, 0, 0, 0);
-		if ((len = i2d_PUBKEY(pkey, NULL)) < 0)
-			tls_quit("TLS failed to encode public key", 0, 0, 0, 0);
-		if (!(tmpbuf = (unsigned char *) OPENSSL_malloc(len * sizeof(char))))
-			die_nomem();
-		ptr = tmpbuf;
-		if ((len = i2d_PUBKEY(pkey, &ptr)) < 0)
-			tls_quit("TLS failed to encode public key", 0, 0, 0, 0);
-		if (!EVP_DigestUpdate(mdctx, tmpbuf, len))
-			tls_quit("TLS Unable to update EVP Digest", 0, 0, 0, 0);
-		OPENSSL_free(tmpbuf);
-		if (!EVP_DigestFinal_ex(mdctx, md_value, &md_len))
-			tls_quit("TLS Unable to compute EVP Digest", 0, 0, 0, 0);
-		for (i = hextmp.len = 0; i < md_len; i++) {
-			fmt_hexbyte(hex, (md_value + i)[0]);
-			if (!stralloc_catb(&hextmp, hex, 2))
-				die_nomem();
-		}
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
-		EVP_MD_CTX_free(mdctx);
-#else
-		EVP_MD_CTX_cleanup(mdctx);
-#endif
-		e = str_diffn(certDataField, hextmp.s, hextmp.len);
-		if (verbose) {
-			out(e == 0 ? "matched " : "failed  ");
-			out(match_type == 1 ? "sha256" : "sha512");
-			out(" fingerprint [");
-			out(certDataField);
-			out(usage == 2 ? "] SubjectPublicKeyInfo anchorCert\n" : "] SubjectPublicKeyInfo serverCert\n");
-		}
-		return (e);
-	}
-	return (1);
-}
-
 int
 timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port, int timeout)
 {
@@ -1010,6 +463,7 @@ temp_oserr()
 	die (111);
 }
 
+stralloc        sa = { 0 };
 int
 get_tlsa_rr(char *domain, int mxhost, int port)
 {
@@ -1142,7 +596,7 @@ ehlo()
 		 */
 		for (p = sa_ptr->s; *p; ++p) {
 			if (*p == '=') {
-				*p = 0;
+				*p = '\0';
 				break;
 			}
 		}
@@ -1154,7 +608,7 @@ int
 do_dane_validation(char *host, int port)
 {
 	static ipalloc  ip = { 0 };
-    char           *err_str = 0, *servercert = 0;
+    char           *err_str = NULL, *servercert = NULL;
 	char            strnum[FMT_ULONG], hex[2];
 	int             i, j, tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
@@ -1187,18 +641,18 @@ do_dane_validation(char *host, int port)
 	for (j = 0, usage = -1; j < ta.len; ++j) {
 		rp = &(ta.rr[j]);
 		out("TLSARR[");
-		strnum[fmt_ulong(strnum, (unsigned long) j)] = 0;
+		strnum[fmt_ulong(strnum, (unsigned long) j)] = '\0';
 		out(strnum);
 		out("]:");
 		out(rp->host);
 		out(" IN TLSA ( ");
-		strnum[fmt_ulong(strnum, (unsigned long) rp->usage)] = 0;
+		strnum[fmt_ulong(strnum, (unsigned long) rp->usage)] = '\0';
 		out(strnum);
 		out(" ");
-		strnum[fmt_ulong(strnum, (unsigned long) rp->selector)] = 0;
+		strnum[fmt_ulong(strnum, (unsigned long) rp->selector)] = '\0';
 		out(strnum);
 		out(" ");
-		strnum[fmt_ulong(strnum, (unsigned long) rp->mtype)] = 0;
+		strnum[fmt_ulong(strnum, (unsigned long) rp->mtype)] = '\0';
 		out(strnum);
 		out(" ");
 		for (i = hexstring.len = 0; i < rp->data_len; i++) {
@@ -1234,17 +688,18 @@ do_dane_validation(char *host, int port)
 	if (verbose)
 		flush();
 	if (code >= 500 && code < 600)
-		quit("Connected to ", " but greeting failed", code);
+		quit("Connected to ", " but greeting failed", code, 1);
 	else
 	if (code >= 400 && code < 500)
-		quit("Connected to ", " but greeting failed", code);
+		quit("Connected to ", " but greeting failed", code, -1);
 	else
 	if (code != 220)
-		quit("Connected to ", " but greeting failed", code);
+		quit("Connected to ", " but greeting failed", code, -1);
 	if (!smtps)
 		code = ehlo();
 	match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
-	if (!do_tls(0, &needtlsauth, &servercert)) {/*- tls is needed for DANE */
+	if (!do_tls(&ssl, 0, smtps, smtpfd, &needtlsauth, &servercert, partner_fqdn, NULL, 0, tls_quit,
+				die_nomem, die_control, die_write, quit, 0, &ehlokw, verbose)) {/*- tls is needed for DANE */
 		logerr("Connected to ");
 		outhost();
 		logerrf(" but unable to intiate TLS for DANE\n");
@@ -1265,7 +720,9 @@ do_dane_validation(char *host, int port)
 			die_nomem_child();
 		if (!rp->usage || rp->usage == 2)
 			usage = 2;
-		if (!(tlsa_status = tlsa_vrfy_records(hexstring.s, rp->usage, rp->selector, rp->mtype, &err_str))) {
+		if (!(tlsa_status = tlsa_vrfy_records(ssl, hexstring.s, rp->usage,
+					rp->selector, rp->mtype, partner_fqdn, tls_quit,
+					die_nomem, 0, out, flush, &err_str, 0))) {
 			switch(rp->mtype)
 			{
 			case 0:
@@ -1290,7 +747,7 @@ do_dane_validation(char *host, int port)
 	 */
 	if ((!match0Or512 && authsha256) || match0Or512) {
 		if (needtlsauth && usage == 2)
-			do_pkix(servercert);
+			do_pkix(ssl, servercert, partner_fqdn, tls_quit, die_nomem, quit, 0);
 	} else { /*- dane validation failed */
 		substdio_putsflush(&smtpto, "QUIT\r\n");
 		if (verbose == 2)
@@ -1423,7 +880,7 @@ get_dane_records(char *host)
 	case 100: /*- child returning 100 means domain doesn't exist */
 		break;
 	default:
-		strnum[fmt_ulong(strnum, (unsigned long) dane_exitcode)] = 0;
+		strnum[fmt_ulong(strnum, (unsigned long) dane_exitcode)] = '\0';
 		logerr("warning");
 		logerr(": error with child: exit code [");
 		logerr(strnum);
@@ -1433,19 +890,27 @@ get_dane_records(char *host)
 	return (RECORD_FAIL);
 }
 #else
-#warning "TLSA, TLS code not compiled"
+#include <unistd.h>
+#include <substdio.h>
+#include <subfd.h>
+char            smtptobuf[1500];
+substdio        smtpto = SUBSTDIO_FDBUF(write, 2, smtptobuf, sizeof smtptobuf);
+unsigned long smtpcode() { return(550);}
 #endif /*- #if defined(HASTLSA) && defined(TLS) */
 
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.14 2023-01-04 09:24:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.15 2023-01-06 17:40:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: starttls.c,v $
+ * Revision 1.15  2023-01-06 17:40:27+05:30  Cprogrammer
+ * moved tls/ssl functions to dossl.c
+ *
  * Revision 1.14  2023-01-04 09:24:27+05:30  Cprogrammer
  * fixed incorrect setting of smtptext
  *

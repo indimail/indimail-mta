@@ -197,6 +197,12 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
 110.qmail-greyd.c, qmail-daned.c, udplogger.c: removed __USE_GNU
 - 04/02/2023
 111.starttls.c: fixed incorrect setting of smtptext
+- 06/02/2023
+112.startls.c, qmail-remote.c: moved tls/ssl functions to dossl.c
+113.dossl.c, dossl.h: tls/ssl support functions for qmail-remote,
+    qmail-daned, dnstlsarr
+114.qmail-daned, qmail-remote, dnstlsarr, Makefile: Link with dossl.o
+115.smtpd.c: Fixed compilation for non-tls
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022

@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.282 2023-01-03 18:22:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.283 2023-01-06 17:34:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -131,7 +131,9 @@ static int      auth_scram_sha512_plus();
 #endif
 #endif
 static int      err_noauth();
+#ifdef TLS
 static int      err_noauthallowed();
+#endif
 static int      addrrelay();
 int             atrn_queue(char *, char *);
 no_return void _exit(int status);
@@ -148,7 +150,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.282 $";
+static char    *revision = "$Revision: 1.283 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -530,7 +532,11 @@ saferead(int fd, char *buf, int len)
 	int             r;
 
 	flush();
+#ifdef TLS
 	r = tlsread(fd, buf, len, timeout);
+#else
+	r = timeoutread(timeout, fd, buf, len);
+#endif
 	if (r == -1) {
 		if (errno == error_timeout)
 			die_alarm();
@@ -566,13 +572,20 @@ safewrite(int fd, char *buf, int len)
 {
 	int             r;
 
-	if ((r = tlswrite(fd, buf, len, timeout)) <= 0) {
+#ifdef TLS
+	r = tlswrite(fd, buf, len, timeout);
+#else
+	r = timeoutwrite(timeout, fd, buf, len);
+#endif
+	if (r <= 0) {
+#ifdef TLS
 		if (ssl) {
 			while (SSL_shutdown(ssl) == 0)
 				usleep(100);
 			SSL_free(ssl);
 			ssl = 0;
 		}
+#endif
 		_exit(1);
 	}
 	return r;
@@ -1845,6 +1858,7 @@ err_noauth()
 	return -1;
 }
 
+#ifdef TLS
 int
 err_noauthallowed()
 {
@@ -1852,6 +1866,7 @@ err_noauthallowed()
 	flush();
 	return -2;
 }
+#endif
 
 int
 err_authabrt()
@@ -7323,6 +7338,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.283  2023-01-06 17:34:10+05:30  Cprogrammer
+ * fixed compilation for non-tls
+ *
  * Revision 1.282  2023-01-03 18:22:33+05:30  Cprogrammer
  * fixed erroneous "out of memory" instead of "command too long" error
  * made global variables static
@@ -7619,7 +7637,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.282 2023-01-03 18:22:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.283 2023-01-06 17:34:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
