@@ -25,7 +25,7 @@
 #include "auto_control.h"
 
 #ifdef TLS
-extern int      smtpcode();
+extern unsigned long smtpcode();
 
 static SSL_CTX *ctx;
 static stralloc saciphers, tlsFilename, clientcert, certdir_s;
