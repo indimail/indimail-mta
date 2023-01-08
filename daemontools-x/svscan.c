@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.28 2022-12-14 13:38:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.29 2023-01-08 22:14:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -286,6 +286,11 @@ start(char *fn, char *sdir)
 	x[i].flagactive = 1;
 	pid = getpid();
 	if (!x[i].pid) { /*- exec supervise fn only if it is not .svscan/log */
+		/*- 
+		 * we don't have supervise running
+		 * start the service and set flagwantup
+		 * based on the presence of the file 'down'
+		 */
 		if (verbose)
 			strerr_warn3(INFO, "Starting service ", fn, 0);
 		fnlen = (t1 = str_len(sdir)) + 6 + (t2 = str_len(fn));
@@ -325,7 +330,15 @@ start(char *fn, char *sdir)
 		if (fnlen <= 255) {
 			switch (x[i].flagwantup)
 			{
-			case 1:
+			case 1: /*- down file was absent when last checked */
+				/*- 
+				 * we have supervise running
+				 * detect automatically if a running service needs to be
+				 * stopped. If the file 'down' is present, it means
+				 * the service needs to be stopped
+				 * we use sv_contol to stop the service
+				 * sv_control is analogous to svc -d
+				 */
 				s = fntmp;
 				s += fmt_strn(s, sdir, t1);
 				s += fmt_strn(s, "/", 1);
@@ -353,7 +366,15 @@ start(char *fn, char *sdir)
 						x[i].flagwantup = 0;
 				}
 				break;
-			case 0:
+			case 0: /*- down file was present when last checked */
+				/*- 
+				 * we have supervise running
+				 * detect automatically if a down service needs to be
+				 * started. If the file 'down' is present, it means
+				 * the service needs to be started
+				 * we use sv_contol to start the service
+				 * sv_control is analogous to svc -u
+				 */
 				s = fntmp;
 				s += fmt_strn(s, sdir, t1);
 				s += fmt_strn(s, "/", 1);
@@ -825,13 +846,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.28 2022-12-14 13:38:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.29 2023-01-08 22:14:49+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.29  2023-01-08 22:14:49+05:30  Cprogrammer
+ * added comments on auto-start, auto-stop feature of svscan
+ *
  * Revision 1.28  2022-12-14 13:38:10+05:30  Cprogrammer
  * added -v, -s option to control logging of info, warn messages
  *

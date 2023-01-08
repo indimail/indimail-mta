@@ -1,6 +1,8 @@
 *
 Release 1.1.1 Start 12/09/2022
 ======= Release Highlights ================================================
+o added auto-start, auto-stop feature
+o added subreaper functionality - ability to reap grandchilds
 ===========================================================================
 - 12/09/2022
 01. Added runpod command to execute indimail-mta, indimail in a containerized
@@ -29,7 +31,8 @@ Release 1.1.1 Start 12/09/2022
 - 02/12/2022
 13. supervise.c: sleep SCANINTERVAL seconds if supervise for waited service is
     not running
-14. svscan.c: use 'down' file to start or stop service automatically
+14. svscan.c: use 'down' file to start or stop service automatically.
+   auto-start, auto-stop feature
 15. svscan.c: scan immediately instead of SCANINTERVAL on termination of a
     supervised service if SCANNOW env variable is set
 - 07/12/2022

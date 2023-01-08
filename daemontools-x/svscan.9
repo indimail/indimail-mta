@@ -15,7 +15,7 @@ of the current directory, up to a limit of 1000 subdirectories.
 switches to that \fIdirectory\fR when it starts.
 
 \fBsvscan\fR(8) optionally starts a pair of \fRsupervise\fR(8) processes,
-ne for a subdirectory \fIs\fR, one for \fIs\fR/\fIlog\fR, with a pipe
+one for a subdirectory \fIs\fR, one for \fIs\fR/\fIlog\fR, with a pipe
 between them. It does this if the name \fIs\fR is at most 255 bytes long
 and \fIs\fR\fR/\fIlog\fR exists. \fBsvscan\fR(8) needs two free descriptors
 for each pipe. The \fIlog\fR supervise process additionally sets argv2 as
@@ -63,6 +63,13 @@ changed by setting \fBSCANINTERVAL\fR environment variable. Set
 directory completely. You can also send a HUP signal to svscan to force a
 directory scan. If running as PID 1, \fBsvscan\fR will automatically scan
 for new subdirectories when any of it's children or any orphaned process die.
+
+svscan can auto-start or auto-stop a service based on the presence or
+absence of \fIs\fR/down file. During each scan, svscan will automatically
+stop a running service if it finds \fIs\fR/down and the earlier status of
+the service was up. Similarly, svscan will automatically start a stopped
+service if it finds the file \fIs\fR/down missing and the earlier status of
+the service was down.
 
 \fBsvscan\fR output can be driven through \fBmultilog\fR. If a directory
 (or symlink to a directory) named \fB@servicedir@/.svscan\fR exists and the
