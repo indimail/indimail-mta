@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.19 2023-01-08 12:11:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.20 2023-01-08 19:17:15+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -16,6 +16,7 @@
 #include <scan.h>
 #include <fmt.h>
 #include <substdio.h>
+#include <subfd.h>
 #include <strerr.h>
 #include <case.h>
 #include <env.h>
@@ -40,7 +41,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.19 2023-01-08 12:11:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.20 2023-01-08 19:17:15+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -75,13 +76,13 @@ static stralloc tls_server_version, tls_client_version;
 static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 static char    *remoteip, *remoteip4;
 static char    *certdir;
-static int      linemode = 1;
+static int      linemode = 1, verbosity = 1;
 
 no_return void
 usage(void)
 {
 	strerr_die1x(100, "usage: dotls"
-		 " [ -CTz ]\n"
+		 " [ -qQvCTz ]\n"
 		 " [ -h host ]\n"
 		 " [ -D timeoutdata ]\n"
 		 " [ -t timeoutconn ]\n"
@@ -243,22 +244,26 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 		/*- starttls session */
 		if (tls_accept(dtimeout, 0, 1, ssl))
 			strerr_die2x(111, FATAL, "unable to accept SSL connection");
-		if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
-				!stralloc_0(&tls_client_version))
-			strerr_die2x(111, FATAL, "out of memory");
-		tls_client_version.len--;
-		SSL_get_cipher_bits(ssl, &i);
-		strnum1[fmt_ulong(strnum1, getpid())] = 0;
-		strnum2[fmt_ulong(strnum2, i)] = 0;
-		strerr_warn12("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
-				tls_server_version.s, ", Client=", tls_client_version.s,
-				", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)), ", bits=", strnum2, 0);
+		if (verbosity >= 2) {
+			if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
+					!stralloc_0(&tls_client_version))
+				strerr_die2x(111, FATAL, "out of memory");
+			tls_client_version.len--;
+			SSL_get_cipher_bits(ssl, &i);
+			strnum1[fmt_ulong(strnum1, getpid())] = 0;
+			strnum2[fmt_ulong(strnum2, i)] = 0;
+			strerr_warn12("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
+					tls_server_version.s, ", Client=", tls_client_version.s,
+					", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)), ", bits=", strnum2, 0);
+		}
 		i = translate(0, 1, clearout, clearin, dtimeout); /*- returns only when one side closes */
-		strnum2[fmt_int(strnum2, i)] = 0;
-		if (i)
-			strerr_warn7("dotls: pid ", strnum1, " from ", remoteip, ", status=", strnum2, " exiting...", 0);
-		else
-			strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
+		if (verbosity >= 2) {
+			strnum2[fmt_int(strnum2, i)] = 0;
+			if (i)
+				strerr_warn7("dotls: pid ", strnum1, " from ", remoteip, ", status=", strnum2, " exiting...", 0);
+			else
+				strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
+		}
 		ssl_free();
 		_exit(i);
 	}
@@ -640,7 +645,8 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 			timeout.tv_sec = dtimeout;
 			timeout.tv_usec = 0;
 			strnum1[fmt_ulong(strnum1, timeout.tv_sec)] = 0;
-			strerr_warn4(FATAL, "idle timeout reached without input [", strnum1, " sec]", 0);
+			if (verbosity >= 2)
+				strerr_warn4(FATAL, "idle timeout reached without input [", strnum1, " sec]", 0);
 			_exit(111);
 		}
 		if (fd0_flag && FD_ISSET(0, &rfds)) { /*- data from client */
@@ -701,6 +707,8 @@ sigchld()
 	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
 	while ((pid = wait_nohang(&wstat)) > 0) {
+		if (verbosity < 2)
+			continue;
 		tmp1[fmt_ulong(tmp1, pid)] = 0;
 		if (wait_stopped(wstat) || wait_continued(wstat)) {
 			i = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
@@ -740,7 +748,7 @@ main(int argc, char **argv)
 #endif
 
 	sig_ignore(sig_pipe);
-	while ((opt = getopt(argc, argv, "CTd:s:h:t:n:c:L:f:M:D:z")) != opteof) {
+	while ((opt = getopt(argc, argv, "qQvCTd:s:h:t:n:c:L:f:M:D:z")) != opteof) {
 		switch (opt) {
 		case 'h':
 			host = optarg;
@@ -792,6 +800,15 @@ main(int argc, char **argv)
 			if (!case_diffs(optarg, "pop3"))
 				stls = pop3;
 			break;
+		case 'v':
+			verbosity = 2;
+			break;
+		case 'Q':
+			verbosity = 1;
+			break;
+		case 'q':
+			verbosity = 0;
+			break;
 		default:
 			usage();
 		}
@@ -799,6 +816,8 @@ main(int argc, char **argv)
 	argv += optind;
 	if (!*argv)
 		usage();
+	if (!verbosity)
+		subfderr->fd = -1;
 	if (!client_mode && env_get("NOTLS")) {
 		upathexec(argv);
 		strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
@@ -932,26 +951,30 @@ main(int argc, char **argv)
 			_exit(111);
 		if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
 					!stralloc_0(&tls_client_version))
-			strerr_die2x(111, FATAL, "out of memory");
+				strerr_die2x(111, FATAL, "out of memory");
 		tls_client_version.len--;
-		strnum1[fmt_ulong(strnum1, getpid())] = 0;
-		SSL_get_cipher_bits(ssl, &i);
-		strnum2[fmt_ulong(strnum2, i)] = 0;
-		strerr_warn12("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
-				tls_server_version.s, ", Client=", tls_client_version.s,
-				", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)),
-				", bits=", strnum2, 0);
+		if (verbosity >= 2) {
+			strnum1[fmt_ulong(strnum1, getpid())] = 0;
+			SSL_get_cipher_bits(ssl, &i);
+			strnum2[fmt_ulong(strnum2, i)] = 0;
+			strerr_warn12("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
+					tls_server_version.s, ", Client=", tls_client_version.s,
+					", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)),
+					", bits=", strnum2, 0);
+		}
 		if (provide_data)
 			write_provider_data(ssl, pi2[1], pi1[0]);
 		close(pi1[0]); /*- pi1[1] be used for writing cleartext */
 		close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 		i = translate(6, 7, pi1[1], pi2[0], dtimeout);
-		strnum1[fmt_ulong(strnum1, getpid())] = 0;
-		strnum2[fmt_int(strnum2, i)] = 0;
-		if (i)
-			strerr_warn7("dotls: pid ", strnum1, " from ", remoteip, ", status=", strnum2, " exiting...", 0);
-		else
-			strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
+		if (verbosity >= 2) {
+			strnum1[fmt_ulong(strnum1, getpid())] = 0;
+			strnum2[fmt_int(strnum2, i)] = 0;
+			if (i)
+				strerr_warn7("dotls: pid ", strnum1, " from ", remoteip, ", status=", strnum2, " exiting...", 0);
+			else
+				strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
+		}
 		ssl_free();
 		_exit(i);
 	} else { /*- server mode */
@@ -992,24 +1015,28 @@ main(int argc, char **argv)
 						!stralloc_0(&tls_client_version))
 				strerr_die2x(111, FATAL, "out of memory");
 			tls_client_version.len--;
-			SSL_get_cipher_bits(ssl, &i);
-			strnum1[fmt_ulong(strnum1, getpid())] = 0;
-			strnum2[fmt_ulong(strnum2, i)] = 0;
-			strerr_warn12("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
-					tls_server_version.s, ", Client=", tls_client_version.s,
-					", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)),
-					", bits=", strnum2, 0);
+			if (verbosity >= 2) {
+				SSL_get_cipher_bits(ssl, &i);
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_ulong(strnum2, i)] = 0;
+				strerr_warn12("dotls: pid ", strnum1, " from ", remoteip, " TLS Server=",
+						tls_server_version.s, ", Client=", tls_client_version.s,
+						", Ciphers=", SSL_CIPHER_get_name(SSL_get_current_cipher(ssl)),
+						", bits=", strnum2, 0);
+			}
 			if (provide_data)
 				write_provider_data(ssl, pi2[1], pi1[0]);
 			close(pi1[0]); /*- pi1[1] be used for writing cleartext */
 			close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 			i = translate(0, 1, pi1[1], pi2[0], dtimeout);
-			strnum1[fmt_ulong(strnum1, getpid())] = 0;
-			strnum2[fmt_int(strnum2, i)] = 0;
-			if (i)
-				strerr_warn7("dotls: pid ", strnum1, " from ", remoteip, ", status=", strnum2, " exiting...", 0);
-			else
-				strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
+			if (verbosity >= 2) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_int(strnum2, i)] = 0;
+				if (i)
+					strerr_warn7("dotls: pid ", strnum1, " from ", remoteip, ", status=", strnum2, " exiting...", 0);
+				else
+					strerr_warn5("dotls: pid ", strnum1, " from ", remoteip, " exiting...", 0);
+			}
 			ssl_free();
 			_exit(i);
 			break;
@@ -1046,6 +1073,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.20  2023-01-08 19:17:15+05:30  Cprogrammer
+ * added -q, -v, -Q option to control verbosity
+ *
  * Revision 1.19  2023-01-08 12:11:33+05:30  Cprogrammer
  * added -D, -t option for timeoutdata, timeoutconn
  * added -z option to turn on setting of TLS_PROVIDER env variable
