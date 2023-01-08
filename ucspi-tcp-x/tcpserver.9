@@ -451,6 +451,7 @@ specific bits for the RSA/DH parameters. These files are generated in
 if you have installed indimail from Open Build Service.
 
 .EX
+cd @qsysconfdir@/certs
 /usr/bin/openssl genrsa  -out    rsa2048.pem 2048
 /usr/bin/openssl dhparam -out -2  dh2048.pem 2048
 .EE
