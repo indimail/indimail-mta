@@ -171,7 +171,7 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
 92. smtpd.c: use TLS_PROVIDER env variable to write TLS info in logs, headers
 93. smtpd.c: use env variable HOSTNAME, gethostname to set localhost
     variable
-- 03/02/2023
+- 03/01/2023
 94. 822date.c, 822print.c, 822received.c, maildirserial.c, new-inject.c,
     nowutc.c, ofmipd.c, parsedate.c, set_environment.c: removed auto_sysconfdir.h dependency
 95. dnstlsarr.c, qmail-daned.c: use tls.h from libqmail
@@ -195,15 +195,17 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
 108.starttls.c: replace set_tls_method() from libqmail
 109.starttls.c: made global variables static
 110.qmail-greyd.c, qmail-daned.c, udplogger.c: removed __USE_GNU
-- 04/02/2023
+- 04/01/2023
 111.starttls.c: fixed incorrect setting of smtptext
-- 06/02/2023
+- 06/01/2023
 112.startls.c, qmail-remote.c: moved tls/ssl functions to dossl.c
 113.dossl.c, dossl.h: tls/ssl support functions for qmail-remote,
     qmail-daned, dnstlsarr
 114.qmail-daned, qmail-remote, dnstlsarr, Makefile: Link with dossl.o
 115.smtpd.c: Fixed compilation for non-tls
 116.smtpd.c: shutdown ssl on smtp quit
+- 07/01/2023
+117.smtpd.c: remove duplicate free of ssl object after tls_accept
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022

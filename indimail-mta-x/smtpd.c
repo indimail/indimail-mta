@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.284 2023-01-06 21:20:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.284 2023-01-08 08:49:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -509,7 +509,38 @@ die_read(char *str, char *err)
 		logerr(err);
 	}
 	logerrf("\n");
+	/*- generally this will not work when read/write from/to 0/1 happens */
 	out("451 Requested action aborted: read error (#4.4.2)\r\n");
+	flush();
+	_exit(1);
+}
+
+no_return void
+die_write(char *str, char *err)
+{
+	static int      i;
+
+	if (i++)
+		_exit(1);
+	logerr("qmail-smtpd: ");
+	logerrpid();
+	logerr(remoteip);
+	logerr(" write error");
+	if (str) {
+		logerr(": ");
+		logerr(str);
+	}
+	if (errno) {
+		logerr(": ");
+		logerr(error_str(errno));
+	}
+	if (err) {
+		logerr(": ");
+		logerr(err);
+	}
+	logerrf("\n");
+	/*- generally this will not work when read/write from/to 0/1 happens */
+	out("451 Requested action aborted: write error (#4.4.2)\r\n");
 	flush();
 	_exit(1);
 }
@@ -580,11 +611,16 @@ safewrite(int fd, char *buf, int len)
 	if (r <= 0) {
 #ifdef TLS
 		if (ssl) {
+			if (r)
+				die_write("ssl_timeoutwrite", myssl_error_str());
 			while (SSL_shutdown(ssl) == 0)
 				usleep(100);
 			SSL_free(ssl);
 			ssl = 0;
-		}
+		} else
+			die_write("timeoutwrite", 0);
+#else
+		die_write("timeoutwrite", 0);
 #endif
 		_exit(1);
 	}
@@ -6966,12 +7002,9 @@ do_tls()
 		flush();
 	}
 	if (tls_accept(timeout, 0, 1, ssl)) {
+		ssl = 0;
 		/*- neither cleartext nor any other response here is part of a standard */
 		tls_err("454", "4.3.0", "failed to accept TLS connection");
-		while (SSL_shutdown(ssl) == 0)
-			usleep(100);
-		SSL_free(ssl);
-		ssl = 0;
 		if (smtps)
 			_exit(1);
 	}
@@ -7346,7 +7379,8 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.284  2023-01-06 21:20:41+05:30  Cprogrammer
+ * Revision 1.284  2023-01-08 08:49:16+05:30  Cprogrammer
+ * remove duplicate free of ssl object after tls_accept
  * shutdown ssl in smtp_quit
  *
  * Revision 1.283  2023-01-06 17:34:10+05:30  Cprogrammer
@@ -7648,7 +7682,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.284 2023-01-06 21:20:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.284 2023-01-08 08:49:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

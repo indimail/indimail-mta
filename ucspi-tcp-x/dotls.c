@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.19 2023-01-03 20:36:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.19 2023-01-08 12:11:33+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -40,7 +40,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.19 2023-01-03 20:36:59+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.19 2023-01-08 12:11:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -740,7 +740,7 @@ main(int argc, char **argv)
 #endif
 
 	sig_ignore(sig_pipe);
-	while ((opt = getopt(argc, argv, "CTd:s:h:t:n:c:L:f:M:D:")) != opteof) {
+	while ((opt = getopt(argc, argv, "CTd:s:h:t:n:c:L:f:M:D:z")) != opteof) {
 		switch (opt) {
 		case 'h':
 			host = optarg;
@@ -1046,7 +1046,7 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
- * Revision 1.19  2023-01-03 20:36:59+05:30  Cprogrammer
+ * Revision 1.19  2023-01-08 12:11:33+05:30  Cprogrammer
  * added -D, -t option for timeoutdata, timeoutconn
  * added -z option to turn on setting of TLS_PROVIDER env variable
  * log ssl cipher bits
