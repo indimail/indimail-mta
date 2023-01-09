@@ -82,7 +82,10 @@ variable.
 \fBqmail-remote\fR will issue the STARTTLS command if it finds the remote
 server supports STARTTLS and it finds a valid certificate in
 \fISYSCONF/certs/clientcert.pem\fR. \fBqmail-remote\fR will revert
-to non-encrypted session if the TLS connection fails.
+to non-encrypted session if the TLS connection fails. If the environment
+variable SMPTS is set or an artificial SMTP route has a \fIport\fR value of
+465 (deprecated smtps port), \fBqmail-remote\fR will start a TLS session
+and exit if the TLS session cannot be initiated.
 
 \fBqmail-remote\fR can use authenticated SMTP for remote deliveries if
 username and secret is provided in the \fiSYSCONF/control/remote_auth.cdb\fR
