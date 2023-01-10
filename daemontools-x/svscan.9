@@ -92,7 +92,8 @@ decent, simple service manager to start only the processes that you
 require. If running as PID 1, \fBsvscan\fR will immediately restart a
 \fBsupervise\fR process if it dies, rather waiting for 60 (or SCANINTERVAL)
 seconds. This behaviour can be enabled as default by setting \fBSCANNOW\fR
-environment variable.
+environment variable. Setting this variable enables a signal handler for
+\fBSIGCHILD\fR.
 
 If \fBINITCMD\fR environment variable is defined and set to an empty string
 and if \fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR exists and has the
