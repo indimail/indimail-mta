@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.82 2023-01-03 20:43:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.83 2023-01-11 08:19:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -64,7 +64,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.82 2023-01-03 20:43:31+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.83 2023-01-11 08:19:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -900,10 +900,18 @@ usage(void)
 	strerr_warn1(
 		 "usage: tcpserver\n"
 #ifdef IPV6
+#ifdef TLS
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+		 "[ -461UXpPhHrRoOdDqQvsNz ]\n"
+#else
+		 "[ -461UXpPhHrRoOdDqQvsz ]\n"
+#endif
+#else
 		 "[ -461UXpPhHrRoOdDqQv ]\n"
+#endif
 #else
 #ifdef TLS
-		 "[ -1UXpPhHrRoOdDqQvsz ]\n"
+		 "[ -1UXpPhHrRoOdDqQvsNz ]\n"
 #else
 		 "[ -1UXpPhHrRoOdDqQv ]\n"
 #endif
@@ -922,7 +930,6 @@ usage(void)
 		 "[ -m db.conf ]\n"
 #endif
 #ifdef TLS
-		 "[ -s ]\n"
 		 "[ -i certdir ]\n"
 		 "[ -n certfile ]\n"
 		 "[ -f cipherlist ]\n"
@@ -1279,6 +1286,9 @@ main(int argc, char **argv, char **envp)
 				   *cipherfile = NULL, *tls_method = NULL;
 	int             pi2c[2], pi4c[2];
 	int             provide_data = 0;
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	int             client_renegotiation = 0;
+#endif
 	struct stat     st;
 #endif
 	struct stralloc options = {0};
@@ -1289,7 +1299,7 @@ main(int argc, char **argv, char **envp)
 	}
 	/*
 	 * unused options
-	 * 0, 1, 2, 3, 5, 7, 8, 9, e, E, F, G, j, J, k, K, N, w, W, y, Y, z, Z
+	 * 0, 1, 2, 3, 5, 7, 8, 9, e, E, F, G, j, J, k, K, w, W, y, Y, z, Z
 	 */
 	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
@@ -1298,7 +1308,11 @@ main(int argc, char **argv, char **envp)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	if (!stralloc_cats(&options, "sNn:a:f:M:i:L:S:z"))
+#else
 	if (!stralloc_cats(&options, "sn:a:f:M:i:L:S:z"))
+#endif
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -1410,6 +1424,11 @@ main(int argc, char **argv, char **envp)
 		case 's':
 			flagssl = 1;
 			break;
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+		case 'N':
+			client_renegotiation = 1;
+			break;
+#endif
 		case 'n':
 			flagssl = 1;
 			if (*optarg && (!stralloc_copys(&certfile, optarg) || !stralloc_0(&certfile)))
@@ -1582,6 +1601,10 @@ main(int argc, char **argv, char **envp)
 				cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 				ciphers, server)))
 			_exit(111);
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+		if (client_renegotiation)
+			SSL_CTX_set_options(ctx, SSL_OP_ALLOW_CLIENT_RENEGOTIATION);
+#endif
 	}
 #endif
 #ifdef IPV6
@@ -1823,6 +1846,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.83  2023-01-11 08:19:41+05:30  Cprogrammer
+ * added -N option to allow client side renegotiation
+ *
  * Revision 1.82  2023-01-03 20:43:31+05:30  Cprogrammer
  * replace internal TLS function with TLS functions from libqmail
  * added -z option to turn on setting of TLS_PROVIDER env variable

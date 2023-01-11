@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.8 2023-01-03 19:47:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sslerator.c,v 1.9 2023-01-11 08:18:09+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -32,6 +32,9 @@
 
 static int      usessl = 0, verbose = 0, sslin, sslout, timeoutconn,
 				timeoutdata, starttls_smtp = 0;
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+static int      client_renegotiation;
+#endif
 const char     *ssl_err_str = 0;
 SSL_CTX        *ctx = (SSL_CTX *) 0;
 SSL            *ssl = NULL;
@@ -52,6 +55,9 @@ usage()
 			" [ -t timeoutdata ]\n"
 			" [ -T timeoutconn ]\n"
 			" [ -f fd ]\n"
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+			" [ -N ] allow client-side renegotiation\n"
+#endif
 			" [ -s ] (starttls smtp)\n"
 			" [ -v ] (verbose)\n"
 			" prog [ args ]", 0);
@@ -166,7 +172,11 @@ get_options(int argc, char **argv, char **certdir, char **certfile,
 	timeoutconn = 60;
 	*err_to_net = 0;
 	*fd = 0;
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	while ((c = getopt(argc, argv, "vsNd:n:f:t:T:b:c:C:r:")) != opteof) {
+#else
 	while ((c = getopt(argc, argv, "vsd:n:f:t:T:b:c:C:r:")) != opteof) {
+#endif
 		switch (c)
 		{
 		case 'v':
@@ -201,6 +211,11 @@ get_options(int argc, char **argv, char **certdir, char **certfile,
 		case 'M':
 			*tls_method = optarg;
 			break;
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+		case 'N':
+			client_renegotiation = 1;
+			break;
+#endif
 		case 't':
 			scan_int(optarg, &timeoutdata);
 			break;
@@ -333,6 +348,10 @@ main(int argc, char **argv)
 	if (!(ctx = tls_init(tls_method, certfile, cafile , crlfile,
 			ciphers, server)))
 		strerr_die2x(111, FATAL, "unable to set initialize TLS");
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	if (client_renegotiation)
+		SSL_CTX_set_options(ctx, SSL_OP_ALLOW_CLIENT_RENEGOTIATION);
+#endif
 	if (!(ssl = tls_session(ctx, sock)))
 		strerr_die2x(111, FATAL, "unable to create TLS session");
 	SSL_CTX_free(ctx);
@@ -416,13 +435,16 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.8 2023-01-03 19:47:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.9 2023-01-11 08:18:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.9  2023-01-11 08:18:09+05:30  Cprogrammer
+ * added -N option to allow client side renegotiation
+ *
  * Revision 1.8  2023-01-03 19:47:46+05:30  Cprogrammer
  * replace internal TLS function with TLS functions from libqmail
  *

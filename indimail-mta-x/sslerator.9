@@ -58,6 +58,11 @@ are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. Ths option must not be used
 to avoid the version-specific methods as they are deprecated.
 
 .TP
+-\fBN\fR
+Client-initiated renegotiation is disabled by default. This option enables
+it.
+
+.TP
 \fB-t\fR \fItimeoutdata\fR
 Timeout after \fItimeoutdata\fR seconds if no data is received. Default is
 from the control file @sysconfdir@/control/\fBtimeoutremote\fR

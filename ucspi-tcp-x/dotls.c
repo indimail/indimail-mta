@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.20 2023-01-08 19:17:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.21 2023-01-11 08:19:33+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -41,7 +41,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.20 2023-01-08 19:17:15+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.21 2023-01-11 08:19:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -82,7 +82,11 @@ no_return void
 usage(void)
 {
 	strerr_die1x(100, "usage: dotls"
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+		 " [ -qQvNCTz ]\n"
+#else
 		 " [ -qQvCTz ]\n"
+#endif
 		 " [ -h host ]\n"
 		 " [ -D timeoutdata ]\n"
 		 " [ -t timeoutconn ]\n"
@@ -671,7 +675,7 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 				 * In such a case we continue to pass data from the client
 				 * to child and data from child to client in clear text
 				 *
-				 * If TLS session is initiaed, do_commands executes translate()
+				 * If TLS session is initiated, do_commands executes translate()
 				 * which has it's nown select() loop to encrypt/decrypt data and
 				 * pass data between client and child with the necessary conversion
 				 * when translate() function returns due to exit either by client or
@@ -734,6 +738,9 @@ main(int argc, char **argv)
 {
 	int             i, opt, pi1[2], pi2[2], client_mode = 0,
 					tcpclient = 0, provide_data = 0;
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	int             client_renegotiation = 0;
+#endif
 	pid_t           pid;
 	char           *host = NULL, *ciphers = NULL,
 				   *ptr, *cipherfile = NULL, *tls_method = NULL;
@@ -748,7 +755,11 @@ main(int argc, char **argv)
 #endif
 
 	sig_ignore(sig_pipe);
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	while ((opt = getopt(argc, argv, "qQvCTNd:s:h:t:n:c:L:f:M:D:z")) != opteof) {
+#else
 	while ((opt = getopt(argc, argv, "qQvCTd:s:h:t:n:c:L:f:M:D:z")) != opteof) {
+#endif
 		switch (opt) {
 		case 'h':
 			host = optarg;
@@ -788,6 +799,11 @@ main(int argc, char **argv)
 		case 'M':
 			tls_method = optarg;
 			break;
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+		case 'N':
+			client_renegotiation = 1;
+			break;
+#endif
 		case 'z':
 			provide_data = 1;
 			break;
@@ -903,6 +919,10 @@ main(int argc, char **argv)
 			cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 			ciphers, client_mode ? client : server)))
 		_exit(111);
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	if (client_renegotiation && !client_mode)
+		SSL_CTX_set_options(ctx, SSL_OP_ALLOW_CLIENT_RENEGOTIATION);
+#endif
 	sig_catch(sig_child, sigchld);
 	switch ((pid = fork()))
 	{
@@ -1073,6 +1093,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.21  2023-01-11 08:19:33+05:30  Cprogrammer
+ * added -N option to allow client side renegotiation
+ *
  * Revision 1.20  2023-01-08 19:17:15+05:30  Cprogrammer
  * added -q, -v, -Q option to control verbosity
  *

@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.284 2023-01-08 08:49:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.285 2023-01-11 08:17:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -150,7 +150,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.284 $";
+static char    *revision = "$Revision: 1.285 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6988,6 +6988,10 @@ do_tls()
 		if (smtps)
 			_exit(1);
 	}
+#ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
+	if (env_get("CLIENT_RENEGOTIATION"))
+		SSL_CTX_set_options(ctx, SSL_OP_ALLOW_CLIENT_RENEGOTIATION);
+#endif
 	if (!(ssl = tls_session(ctx, 0))) {
 		SSL_CTX_free(ctx);
 		ctx = NULL;
@@ -7379,6 +7383,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.285  2023-01-11 08:17:49+05:30  Cprogrammer
+ * Use env variable CLIENT_RENEGOTIATION to allow client-side renegotiation
+ *
  * Revision 1.284  2023-01-08 08:49:16+05:30  Cprogrammer
  * remove duplicate free of ssl object after tls_accept
  * shutdown ssl in smtp_quit
@@ -7682,7 +7689,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.284 2023-01-08 08:49:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.285 2023-01-11 08:17:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

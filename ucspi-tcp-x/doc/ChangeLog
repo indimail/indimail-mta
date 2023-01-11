@@ -61,6 +61,8 @@ Release 1.1.1 Start 18/09/2022
 39. tcpserver.c: added -S option for connection timeout
 - 08/01/2023
 40. dotls.c: added -q, -Q, -v option to control verbosity
+- 10/01/2023
+41. tcpserver.c, dotls.c: added -N option to allow client side renegotiation
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 14/02/2021 End 08/09/2022

@@ -68,7 +68,9 @@ does not accept MAIL FROM, RCPT TO commands unless the client issues a
 STARTTLS command. One can set the environment variable \fBSSL_BITS\fR to
 set the pem file that \fBqmail-smtpd\fR will use. By default this is set to
 2048. This makes \fBqmail-smtpd\fR to use rsa2048.pem for the RSA private
-key and dh2048.pem for the DH parameters.
+key and dh2048.pem for the DH parameters. If the environment variable
+\fBCLIENT_RENEGOTIATION\fR is set, client-initiated TLS renegotiation will
+be enabled
 
 If the environment variable
 .B SMTPUTF8

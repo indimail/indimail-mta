@@ -324,6 +324,11 @@ are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. Ths option must not be used
 to avoid version-specific methods since they are now deprecated.
 
 .TP
+-\fBN\fR
+Client-initiated renegotiation is disabled by default. This option enables
+it.
+
+.TP
 -\fBz\fR
 Set \fBTLS_PROVIDER\fR environment variables with details of the TLS/SSL
 connection. This environment variable will be available for \fIprog\fR[.so]
