@@ -147,9 +147,10 @@ input and descriptor 1 for output.
 -\fBC\fR
 \fBtcpclient\fR mode. In this mode, \fBdotls\fR acts as a tls client,
 expecting \fBtcpclient\fR be connected to a port where data is being
-encrypted with TLS/SSL. \fIprog\fR will be run reading descriptor 0 for
-input and descriptor 1 for output. Use this if \fIprog\fR has been
-specifically written for the original tcpclient(1).
+encrypted with TLS/SSL. \fIprog\fR will be run reading descriptor 6 for
+input and descriptor 7 for output. Use this if \fIprog\fR has been
+specifically written for the original \fBtcpclient\fR by djb.
+
 
 .SH "ENVIRONMENT VARIABLES"
 .PP
