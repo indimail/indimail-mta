@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.21  2023-01-13 12:09:25+05:30  Cprogrammer
+ * moved parse_env function to parse_env.c
+ *
  * Revision 1.20  2021-05-23 07:09:26+05:30  Cprogrammer
  * include wildmat.h for wildmat_internal
  *
@@ -68,13 +71,12 @@
 #include <stralloc.h>
 #include <env.h>
 #include <str.h>
+#include "parse_env.h"
 #include "control.h"
 #include "envrules.h"
 #include "qregex.h"
 #include "matchregex.h"
 #include "wildmat.h"
-
-static int      parse_env(char *);
 
 int
 do_match(int use_regex, char *text, char *regex, char **errStr)
@@ -188,54 +190,10 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 	return (count);
 }
 
-static int
-parse_env(char *envStrings)
-{
-	char           *ptr1, *ptr2, *ptr3, *ptr4;
-
-	for (ptr2 = ptr1 = envStrings;*ptr1;ptr1++) {
-		if (*ptr1 == ',') {
-			/*
-			 * Allow ',' in environment variable if escaped
-			 * by '\' character
-			 */
-			if (ptr1 != envStrings && *(ptr1 - 1) == '\\') {
-				for (ptr3 = ptr1 - 1, ptr4 = ptr1; *ptr3; *ptr3++ = *ptr4++);
-				continue;
-			}
-			*ptr1 = 0;
-			/*- envar=, - Unset the environment variable */
-			if (ptr1 != envStrings && *(ptr1 - 1) == '=') {
-				*(ptr1 - 1) = 0;
-				if (*ptr2 && !env_unset(ptr2))
-					return (1);
-			} else { /*- envar=val, - Set the environment variable */
-				while (isspace(*ptr2))
-					ptr2++;
-				if (*ptr2 && !env_put(ptr2))
-					return (1);
-			}
-			ptr2 = ptr1 + 1;
-		}
-	}
-	/*- envar=, */
-	if (ptr1 != envStrings && *(ptr1 - 1) == '=') {
-		*(ptr1 - 1) = 0;
-		if (*ptr2 && !env_unset(ptr2))
-			return (1);
-	} else { /*- envar=val, */
-		while (isspace(*ptr2))
-			ptr2++;
-		if (*ptr2 && !env_put(ptr2))
-			return (1);
-	}
-	return (0);
-}
-
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.20 2021-05-23 07:09:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.21 2023-01-13 12:09:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

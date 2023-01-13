@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.161 2023-01-06 17:36:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.162 2023-01-13 12:12:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <cdb.h>
 #include <open.h>
+#include <ctype.h>
 #include <sig.h>
 #include <env.h>
 #include <stralloc.h>
@@ -82,6 +83,7 @@
 #include "variables.h"
 #include "socket.h"
 #include "qr_digest_md5.h"
+#include "parse_env.h"
 
 #define EHLO 1
 #define HUGESMTPTEXT  5000
@@ -106,7 +108,6 @@ static stralloc localips = { 0 };
 static stralloc helohosts = { 0 };
 static stralloc outgoingip = { 0 };
 
-static int      cntrl_stat1, cntrl_stat2;
 static stralloc smtproutes = { 0 };
 static stralloc qmtproutes = { 0 };
 
@@ -2759,9 +2760,8 @@ void
 getcontrols()
 {
 	int             r;
-	char           *routes, *senderdomain, *ip, *x;
-	char           *smtproutefile, *moresmtproutefile, *qmtproutefile;
-	static stralloc controlfile, outgoingipfn;
+	char           *senderdomain, *ip, *x;
+	static stralloc outgoingipfn;
 
 	if (control_init() == -1)
 		temp_control("Unable to initialize control files", 0);
@@ -2771,65 +2771,6 @@ getcontrols()
 		temp_control("Unable to read control file", "timeoutconnect");
 	if (control_rldef(&helohost, "helohost", 1, (char *) 0) != 1)
 		temp_control("Unable to read control file", "helohost");
-	if ((routes = env_get("QMTPROUTE"))) {	/*- mysql */
-		if (!stralloc_copyb(&qmtproutes, routes, str_len(routes) + 1))
-			temp_nomem();
-		cntrl_stat2 = 2;
-	} else {
-		qmtproutefile = (qmtproutefile = env_get("QMTPROUTESFILE")) ? qmtproutefile : "qmtproutes";
-		cntrl_stat2 = control_readfile(&qmtproutes, qmtproutefile, 0);
-	}
-	switch (cntrl_stat2)
-	{
-	case -1:/*- error reading qmtproutes */
-		temp_control("Unable to read control file", "qmtproutes");
-	case 0:/*- qmtproutes absent */
-		if (!constmap_init(&mapqmtproutes, "", 0, 1))
-			temp_nomem();
-		break;
-	case 1:/*- qmtproutes present */
-	case 2:
-		if (!constmap_init(&mapqmtproutes, qmtproutes.s, qmtproutes.len, 1))
-			temp_nomem();
-		break;
-	}
-	routes = (routes = env_get("SMTPROUTE")) ? routes : env_get("X-SMTPROUTES");
-	if (routes) {	/*- MySQL smtp_port table or X-SMTPROUTES from header */
-		if (!stralloc_copyb(&smtproutes, routes, str_len(routes) + 1))
-			temp_nomem();
-		cntrl_stat1 = 2;
-	} else {
-		smtproutefile = (smtproutefile = env_get("SMTPROUTESFILE")) ? smtproutefile : "smtproutes";
-		moresmtproutefile = (moresmtproutefile = env_get("MORESMTPROUTESCDB")) ? moresmtproutefile : "moresmtproutes.cdb";
-		cntrl_stat1 = control_readfile(&smtproutes, smtproutefile, 0);
-		if (!controldir) {
-			if (!(controldir = env_get("CONTROLDIR")))
-				controldir = auto_control;
-		}
-		if (!stralloc_copys(&controlfile, controldir) ||
-				!stralloc_cats(&controlfile, moresmtproutefile) ||
-				!stralloc_0(&controlfile))
-			temp_nomem();
-		else
-		if ((fdmoreroutes = open_read(controlfile.s)) == -1) {
-			if (errno != error_noent)
-				cntrl_stat1 = -1;
-		}
-	}
-	switch (cntrl_stat1)
-	{
-	case -1:/*- error reading smtproutes */
-		temp_control("Unable to read control file", "smtproutes");
-	case 0:/*- smtproutes absent */
-		if (!constmap_init(&mapsmtproutes, "", 0, 1))
-			temp_nomem();
-		break;
-	case 1:/*- smtproutes present */
-	case 2:
-		if (!constmap_init(&mapsmtproutes, smtproutes.s, smtproutes.len, 1))
-			temp_nomem();
-		break;
-	}
 #ifdef BATV
 	if ((batvok = control_readline(&batvkey, (x = env_get("BATVKEY")) ? x : "batvkey")) == -1)
 		temp_control("Unable to read control file", x);
@@ -3099,7 +3040,7 @@ sign_batv()
  * http://www.apecity.com/qmail/moresmtproutes.txt
  */
 char           *
-host_lookup(char *hst, int len)
+moresmtproutes_lookup(char *hst, int len)
 {
 	static stralloc morerelayhost = { 0 };
 	static stralloc h = { 0 };
@@ -3157,8 +3098,8 @@ timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port_num, int tmo
 void
 password_lookup(char *addr, int addr_len)
 {
-	int             i;
-	char           *result;
+	int             i, j;
+	char           *result, *ptr;
 
 	switch (cdb_match("remote_auth.cdb", addr, addr_len, &result))
 	{
@@ -3167,6 +3108,10 @@ password_lookup(char *addr, int addr_len)
 			i = str_chr(result, ' ');
 			if (result[i]) {
 				result[i] = '\0';
+				for (ptr = result + i + 1; isspace(*ptr); ptr++, i++);
+				j = str_chr(result + i + 1, ' ');
+				if (result[i + j + 1]) /* envstr present */
+					result[i + j + 1] = 0;
 				if (!stralloc_copys(&user, result) ||
 						!stralloc_0(&user) ||
 						!stralloc_copys(&pass, result + i + 1) ||
@@ -3174,6 +3119,9 @@ password_lookup(char *addr, int addr_len)
 					temp_nomem();
 				user.len--;
 				pass.len--;
+				for (ptr = result + i + j + 2; isspace(*ptr); ptr++, j++);
+				if (result[i + j + 2])
+					parse_env(result + i + j + 2);
 			} else
 				use_auth_smtp = 0;
 		} else
@@ -3192,6 +3140,248 @@ password_lookup(char *addr, int addr_len)
 		break;
 	}
 	return;
+}
+
+char           *
+get_relayhost(char **recips)
+{
+	int             i, j, k, cntrl_stat1, cntrl_stat2;
+	char           *relayhost, *x, *routes, *smtproutefile,
+				   *moresmtproutefile, *qmtproutefile;
+	static stralloc controlfile;
+
+	/* QMTP */
+	if ((routes = env_get("QMTPROUTE"))) {	/*- MySQL or manually set env variable */
+		if (!stralloc_copyb(&qmtproutes, routes, str_len(routes) + 1))
+			temp_nomem();
+		cntrl_stat2 = 2;
+	} else {
+		qmtproutefile = (qmtproutefile = env_get("QMTPROUTESFILE")) ? qmtproutefile : "qmtproutes";
+		cntrl_stat2 = control_readfile(&qmtproutes, qmtproutefile, 0);
+	}
+	switch (cntrl_stat2)
+	{
+	case -1:/*- error reading qmtproutes */
+		temp_control("Unable to read control file", "qmtproutes");
+	case 0:/*- qmtproutes absent */
+		if (!constmap_init(&mapqmtproutes, "", 0, 1))
+			temp_nomem();
+		break;
+	case 1:/*- qmtproutes present */
+	case 2:/*- QMTPROUTE env variable present */
+		if (!constmap_init(&mapqmtproutes, qmtproutes.s, qmtproutes.len, 1))
+			temp_nomem();
+		break;
+	}
+
+	/* SMTP */
+	routes = (routes = env_get("SMTPROUTE")) ? routes : env_get("X-SMTPROUTES");
+	if (routes) {	/*- MySQL smtp_port, manually set env variable, X-SMTPROUTES from header */
+		if (!stralloc_copyb(&smtproutes, routes, str_len(routes) + 1))
+			temp_nomem();
+		cntrl_stat1 = 2;
+	} else {
+		smtproutefile = (smtproutefile = env_get("SMTPROUTESFILE")) ? smtproutefile : "smtproutes";
+		moresmtproutefile = (moresmtproutefile = env_get("MORESMTPROUTESCDB")) ? moresmtproutefile : "moresmtproutes.cdb";
+		cntrl_stat1 = control_readfile(&smtproutes, smtproutefile, 0);
+
+		/*- open moresmtproutes.cdb */
+		if (!controldir) {
+			if (!(controldir = env_get("CONTROLDIR")))
+				controldir = auto_control;
+		}
+		if (!stralloc_copys(&controlfile, controldir) ||
+				!stralloc_cats(&controlfile, moresmtproutefile) ||
+				!stralloc_0(&controlfile))
+			temp_nomem();
+		else
+		if ((fdmoreroutes = open_read(controlfile.s)) == -1) {
+			if (errno != error_noent)
+				cntrl_stat1 = -1;
+		}
+	}
+	switch (cntrl_stat1)
+	{
+	case -1:/*- error reading smtproutes */
+		temp_control("Unable to read control file", "smtproutes");
+	case 0:/*- smtproutes absent */
+		if (!constmap_init(&mapsmtproutes, "", 0, 1))
+			temp_nomem();
+		break;
+	case 1:/*- smtproutes present */
+	case 2:/*- SMTPROUTE env variable present */
+		if (!constmap_init(&mapsmtproutes, smtproutes.s, smtproutes.len, 1))
+			temp_nomem();
+		break;
+	}
+
+	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
+	relayhost = moresmtproutes_lookup(*recips, str_len(*recips));
+	if (smtp_sender.len == 0) { /*- bounce routes */
+		if (!stralloc_copys(&bounce, "!@"))
+			temp_nomem();
+		if ((relayhost = constmap(&mapqmtproutes, bounce.s, bounce.len))) {
+			protocol_t = 'q';
+			port = PORT_QMTP;
+		} else {
+			if (!(relayhost = constmap(&mapsmtproutes, bounce.s, bounce.len)))
+				relayhost = moresmtproutes_lookup("!@", 2);
+			if (relayhost) {
+				protocol_t = 's';
+				port = PORT_SMTP;
+			}
+		}
+	}
+	if (relayhost && !*relayhost)
+		relayhost = NULL;
+	if (cntrl_stat1 || cntrl_stat2) {
+		/*- Look at qmtproutes/smtproutes */
+		for (i = 0; !relayhost && i <= host.len; ++i) {
+			if ((i == 0) || (i == host.len) || (host.s[i] == '.')) {
+				/*- default qmtproutes */
+				if (cntrl_stat2 == 2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+					protocol_t = 'q';
+					port = PORT_QMTP;
+					break;
+				} else
+				if (cntrl_stat1 == 2 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
+					port = PORT_SMTP;
+					break;
+				} else
+				if (cntrl_stat2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+					protocol_t = 'q';
+					port = PORT_QMTP;
+					break;
+				} else
+				if (cntrl_stat1 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
+					port = PORT_SMTP;
+					break;
+				} else
+				if ((relayhost = moresmtproutes_lookup(host.s + i, host.len - i)))
+					break;
+			}
+		}
+		if (relayhost && !*relayhost)
+			relayhost = NULL;
+	}
+
+	if (relayhost) {
+		if (use_auth_smtp) {
+			/*-
+			 * adapted from a patch by Jay Soffian
+			 * domain:relay username password envstr
+			 *  or
+			 * domain:relay:port username password envstr
+			 *  or
+			 * domain:relay:port:penalty:max_tolerance username password envstr
+			 */
+			i = str_chr(relayhost, ' ');
+			if (relayhost[i]) {
+				if (relayhost[i + 1] == '/') { /*- get password from remote_auth.cdb */
+					if (!str_diff(relayhost + i + 1, "/s")) /*- match on sender */
+						password_lookup(smtp_sender.s, smtp_sender.len);
+					else
+					if (!str_diff(relayhost + i + 1, "/r")) /*- match on recipient */
+						password_lookup(*recips, str_len(*recips));
+					else /* match on address specifed in smtproute */
+						password_lookup(relayhost + i + 2, str_len(relayhost + i + 2));
+				} else {
+					relayhost[i] = '\0';
+					j = str_chr(relayhost + i + 1, ' ');
+					if (relayhost[i + j + 1]) { /*- if password is present */
+						relayhost[i + j + 1] = '\0';
+						if (relayhost[i + 1] && relayhost[i + j + 2]) {	/*- both user and password are present */
+							k = str_chr(relayhost + i + j + 2, ' ');
+							if (relayhost[i + j + 2 + k]) {
+								relayhost[i + j + 2 + k] = '\0';
+								if (relayhost[i + j + k + 3]) /*- envstr */
+									parse_env(relayhost + i + j + k + 3);
+							}
+							if (!stralloc_copys(&user, relayhost + i + 1) ||
+									!stralloc_0(&user) ||
+									!stralloc_copys(&pass, relayhost + i + j + 2) ||
+									!stralloc_0(&pass))
+								temp_nomem();
+							user.len--;
+							pass.len--;
+						}
+					} else
+						use_auth_smtp = 0;
+				}
+			} else
+				use_auth_smtp = 0;
+		} /*- if (use_auth_smtp) */
+		/*-
+		 * domain:relay
+		 *  or
+		 * domain:relay:port
+		 *  or
+		 * domain:relay:port:penalty:max_tolerance
+		 */
+		i = str_chr(relayhost, ':');
+		if (relayhost[i]) {
+			if (relayhost[i + 1]) {
+				if (relayhost[i + 1] != ':') /*- port is present */
+					scan_ulong(relayhost + i + 1, &port);
+				relayhost[i] = '\0';
+				x = relayhost + i + 1; /*- port */
+				i = str_chr(x, ':');   /*- : before min_penalty */
+				if (x[i]) {
+					if (x[i + 1] != ':') /*- if penalty figure is present */
+						scan_int(x + i + 1, &min_penalty);
+					x = relayhost + i + 1; /*- min_penalty */
+					i = str_chr(x, ':');
+					if (x[i]) {
+						if (x[i + 1] != ':') /*- if tolerance figure is present */
+							scan_ulong(x + i + 1, &max_tolerance);
+					}
+					if (!min_penalty)
+						flagtcpto = 0;
+				}
+			} else
+				relayhost[i] = '\0';
+		}
+		switch (port)
+		{
+		case 587:
+			protocol_t = 's';
+			break;
+		case 465:
+			protocol_t = 'S';
+			break;
+		case 6209:
+			protocol_t = 'Q';
+			break;
+		}
+		if (!stralloc_copys(&host, relayhost))
+			temp_nomem();
+	} else {
+#ifdef SMTPUTF8
+		char           *asciihost;
+#endif
+
+		use_auth_smtp = 0;
+#ifdef SMTPUTF8
+		if (smtputf8) {
+			if (!stralloc_0(&host))
+				temp_nomem();
+			host.len--;
+			switch (idn2_lookup_u8((const uint8_t *) host.s, (uint8_t **) &asciihost, IDN2_NFC_INPUT))
+			{
+			case IDN2_OK:
+				break;
+			case IDN2_MALLOC:
+				temp_nomem();
+			default:
+				perm_dns();
+			}
+			if (!stralloc_copys(&idnhost, asciihost) || !stralloc_0(&idnhost))
+				temp_nomem();
+			idnhost.len--;
+		}
+#endif
+	}
+	return relayhost;
 }
 
 /*
@@ -3232,151 +3422,13 @@ main(int argc, char **argv)
 	dns_init(0);
 	protocol_t = env_get("SMTPS") ? 'S' : 's';
 	use_auth_smtp = env_get("AUTH_SMTP");
+	relayhost = get_relayhost(recips);
+	use_auth_smtp = env_get("AUTH_SMTP");
 #ifdef SMTPUTF8
 	enable_utf8 = env_get("SMTPUTF8");
 #endif
-	/*- Per user SMTPROUTE functionality using moresmtproutes.cdb */
-	relayhost = host_lookup(*recips, str_len(*recips));
 	min_penalty = (x = env_get("MIN_PENALTY")) ? scan_int(x, &min_penalty) : MIN_PENALTY;
 	max_tolerance = (x = env_get("MAX_TOLERANCE")) ? scan_ulong(x, &max_tolerance) : MAX_TOLERANCE;
-	if (smtp_sender.len == 0) { /*- bounce routes */
-		if (!stralloc_copys(&bounce, "!@"))
-			temp_nomem();
-		if ((relayhost = constmap(&mapqmtproutes, bounce.s, bounce.len))) {
-			protocol_t = 'q';
-			port = PORT_QMTP;
-		} else
-		if (!(relayhost = constmap(&mapsmtproutes, bounce.s, bounce.len)))
-			relayhost = host_lookup("!@", 2);
-	}
-	if (relayhost && !*relayhost)
-		relayhost = NULL;
-	if (cntrl_stat1 || cntrl_stat2) { /*- set in getcontrols() above */
-		/*- Look at qmtproutes/smtproutes */
-		for (i = 0; !relayhost && i <= host.len; ++i) {
-			if ((i == 0) || (i == host.len) || (host.s[i] == '.')) {
-				/*- default qmtproutes */
-				if (cntrl_stat2 == 2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
-					protocol_t = 'q';
-					port = PORT_QMTP;
-					break;
-				} else
-				if (cntrl_stat1 == 2 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
-					port = PORT_SMTP;
-					break;
-				} else
-				if (cntrl_stat2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
-					protocol_t = 'q';
-					port = PORT_QMTP;
-					break;
-				} else
-				if (cntrl_stat1 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
-					port = PORT_SMTP;
-					break;
-				} else
-				if ((relayhost = host_lookup(host.s + i, host.len - i)))
-					break;
-			}
-		}
-		if (relayhost && !*relayhost)
-			relayhost = NULL;
-	}
-	if (relayhost) {
-		if (use_auth_smtp) {
-			/*-
-			 * adapted from a patch by Jay Soffian
-			 * domain:relay:port username password
-			 *         or
-			 * domain:relay:port:penalty:max_tolerance username password
-			 */
-			i = str_chr(relayhost, ' ');
-			if (relayhost[i]) {
-				if (relayhost[i + 1] == '/') { /*- get password from remote_auth.cdb */
-					if (!str_diff(relayhost + i + 1, "/s")) /*- match on sender */
-						password_lookup(smtp_sender.s, smtp_sender.len);
-					else
-					if (!str_diff(relayhost + i + 1, "/r")) /*- match on recipient */
-						password_lookup(*recips, str_len(*recips));
-					else /*- match on address specifed in smtproute */
-						password_lookup(relayhost + i + 2, str_len(relayhost + i + 2));
-				} else {
-					relayhost[i] = '\0';
-					j = str_chr(relayhost + i + 1, ' ');
-					if (relayhost[i + j + 1]) { /*- if password is present */
-						relayhost[i + j + 1] = '\0';
-						if (relayhost[i + 1] && relayhost[i + j + 2]) {	/*- both user and password are present */
-							if (!stralloc_copys(&user, relayhost + i + 1) ||
-									!stralloc_0(&user) ||
-									!stralloc_copys(&pass, relayhost + i + j + 2) ||
-									!stralloc_0(&pass))
-								temp_nomem();
-							user.len--;
-							pass.len--;
-						}
-					} else
-						use_auth_smtp = 0;
-				}
-			} else
-				use_auth_smtp = 0;
-		}
-		/*-
-		 * domain:relay:port username password
-		 *         or
-		 * domain:relay:port:penalty:max_tolerance username password
-		 */
-		i = str_chr(relayhost, ':');
-		if (relayhost[i]) {
-			if (relayhost[i + 1]) {
-				if (relayhost[i + 1] == ':')
-					port = PORT_SMTP;
-				else /*- port is present */
-					scan_ulong(relayhost + i + 1, &port);
-				relayhost[i] = '\0';
-				x = relayhost + i + 1; /*- port */
-				i = str_chr(x, ':');   /*- : before min_penalty */
-				if (x[i]) {
-					if (x[i + 1] != ':') /*- if penalty figure is present */
-						scan_int(x + i + 1, &min_penalty);
-					x = relayhost + i + 1; /*- min_penalty */
-					i = str_chr(x, ':');
-					if (x[i]) {
-						if (x[i + 1] != ':') /*- if tolerance figure is present */
-							scan_ulong(x + i + 1, &max_tolerance);
-					}
-					if (!min_penalty)
-						flagtcpto = 0;
-				}
-			} else
-				relayhost[i] = '\0';
-		}
-		if (!stralloc_copys(&host, relayhost))
-			temp_nomem();
-	} else {
-#ifdef SMTPUTF8
-		char           *asciihost;
-#endif
-
-		use_auth_smtp = 0;
-#ifdef SMTPUTF8
-		if (smtputf8) {
-			if (!stralloc_0(&host))
-				temp_nomem();
-			host.len--;
-			switch (idn2_lookup_u8((const uint8_t *) host.s, (uint8_t **) &asciihost, IDN2_NFC_INPUT))
-			{
-			case IDN2_OK:
-				break;
-			case IDN2_MALLOC:
-				temp_nomem();
-			default:
-				perm_dns();
-			}
-			if (!stralloc_copys(&idnhost, asciihost) || !stralloc_0(&idnhost))
-				temp_nomem();
-			idnhost.len--;
-		}
-#endif
-	}
 #if BATV
 	if (batvok && smtp_sender.len && batvkey.len) {
 		if (!stralloc_0(&smtp_sender))
@@ -3565,13 +3617,17 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.161 2023-01-06 17:36:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.162 2023-01-13 12:12:33+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.162  2023-01-13 12:12:33+05:30  Cprogrammer
+ * moved setting relayhosts variable to get_relayhosts()
+ * added feature to set env variables from [q,s]mtproutes, remote_auth.cdb
+ *
  * Revision 1.161  2023-01-06 17:36:43+05:30  Cprogrammer
  * changed scope of global variables to static
  * moved tls/ssl functions to dossl.c

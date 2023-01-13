@@ -308,7 +308,7 @@ do
 		# with IndiMail
     	extra_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8"
 	else
-		extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
+		extra_opt="--remote-authsmtp=login --localfilter --remotefilter"
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
 		extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
 		extra_opt="$extra_opt --dmemory=$send_soft_mem --utf8"
@@ -349,7 +349,7 @@ eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} 
 	--cntrldir=control --todo-proc --persistdb --starttls \
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
 	--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/${dkimkeyfn} \
-	--remote-authsmtp=plain --localfilter --remotefilter \
+	--remote-authsmtp=login --localfilter --remotefilter \
 	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
 
 #odmr

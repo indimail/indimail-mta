@@ -505,7 +505,7 @@ route may also have the forms
 .EX
 \fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIs\fR
 \fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIr\fR
-\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIaddr\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fItoken\fR
 .EE
 
 Here,
@@ -516,22 +516,30 @@ the address \fIsender\fR in remote_auth.cdb
 /\fIr\fR means the user and password will be fetched if there is match for
 the address \fIrecip\fR in remote_auth.cdb
 
-/\fIaddr\fR means the user and password will be fetched if there is match for
-the address \fIaddr\fR in remote_auth.cdb
+/\fItoken\fR means the user and password will be fetched if there is match for
+the entry \fItoken\fR in remote_auth.cdb
 
 Lines in \fISYSCONF/control/remote_auth.cdb\fR consists of \fIaddress\fR
 separated by user password pairs
 
 .EX
+in SYSCONF/control/smtprouts
+domain:relay:port: /s
+gmail.com:smtp.gmail.com:587: /gmail
+
+in SYSCONF/control/remoteauth.cdb
 =joe.shmoe@indimail.org:testuser@example.com<sp>supersecret:
+=gmail:some_user@gmail.com<sp>gmail_app_password<sp>AUTH_SMTP=login:
 .EE
 
-When address matches joe.shmoe@indimail.org, the username, password for
-authenticated SMTP will be set as testuser@example.com, supersecret. The
-cdb file remote_auth.cdb allows you to store username and passwords more
-securely compared to storing them in \fIsmtproutes\fR control file. You can
-set read access for remote_auth.cdb only for the qmailr user. You can have
-simple or wildcard assignments
+When sender address matches joe.shmoe@indimail.org, the username, password
+for authenticated SMTP will be set as testuser@example.com, supersecret.
+When mail is sent to \fIgmail.com\fR, the username, password will be set as
+some_user@gmail.com with passwd gmail_app_password. cdb file
+remote_auth.cdb allows you to store username and passwords more securely
+compared to storing them in \fIsmtproutes\fR control file. You can set read
+access for remote_auth.cdb only for the qmailr user. You can have simple or
+wildcard assignments
 
 A simple assignment in remote_auth.cdb is a line of the form
 
