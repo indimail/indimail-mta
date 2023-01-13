@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.162 2023-01-13 12:12:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.163 2023-01-13 22:15:04+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -1672,12 +1672,11 @@ auth_plain(int use_size)
 		temp_write();
 	if ((code = smtpcode()) != 334)
 		quit("ZConnected to ", " but authentication was rejected (AUTH PLAIN).", code, -1);
-	if (!stralloc_cat(&plain, &smtp_sender) || /*- Mail From: <auth-id> */
+	if (!stralloc_copy(&plain, &smtp_sender) || /*- Mail From: <auth-id> */
 			!stralloc_0(&plain) ||
 			!stralloc_cat(&plain, &user) || /*- userid */
 			!stralloc_0(&plain) ||
-			!stralloc_cat(&plain, &pass) || /*- password */
-			!stralloc_0(&plain))
+			!stralloc_cat(&plain, &pass)) /*- password */
 		temp_nomem();
 	if (b64encode(&plain, &auth))
 		quit("ZConnected to ", " but unable to base64encode (plain).", -1, -1);
@@ -3617,13 +3616,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.162 2023-01-13 12:12:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.163 2023-01-13 22:15:04+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.163  2023-01-13 22:15:04+05:30  Cprogrammer
+ * fixed bug with SMTP AUTH PLAIN
+ *
  * Revision 1.162  2023-01-13 12:12:33+05:30  Cprogrammer
  * moved setting relayhosts variable to get_relayhosts()
  * added feature to set env variables from [q,s]mtproutes, remote_auth.cdb

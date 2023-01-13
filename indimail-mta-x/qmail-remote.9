@@ -488,8 +488,8 @@ delivery.
 route may also have the forms
 
 .EX
-\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>\fIusername\fR<sp>\fIpassword\fR
-\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>\fIusername\fR<sp>\fIsecret\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>\fIusername\fR<sp>\fIpassword\fR<sp>\fIenvstr\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>\fIusername\fR<sp>\fIsecret\fR<sp>\fIenvstr\fR
 \fIdomain\fR:\fIrelay\fR:\fIport\fR<sp>\fIusername\fR<sp>\fIpassword\fR
 \fIdomain\fR:\fIrelay\fR:\fIport\fR<sp>\fIusername\fR<sp>\fIsecret\fR
 .EE
@@ -522,29 +522,43 @@ the entry \fItoken\fR in remote_auth.cdb
 Lines in \fISYSCONF/control/remote_auth.cdb\fR consists of \fIaddress\fR
 separated by user password pairs
 
+Here \fIenvstr\fR is a string of environment variable additions or
+removals. e.g.
+
 .EX
-in SYSCONF/control/smtprouts
-domain:relay:port: /s
-gmail.com:smtp.gmail.com:587: /gmail
+AUTH_SMTP=login,SECURE_AUTH=1,DISABLE_CNAME_LOOKUPS=
+.EX
+
+Sets the environment variables AUTH_SMTP, SECURE_AUTH and unsets the
+environment variable DISABLE_CNAME_LOOKUPS.
+
+Description of \fIpenalty\fR and \fImax_tolerance\fR is described further
+below in this man page.
+
+.EX
+in SYSCONF/control/smtproutes
+domain:relay:port:<sp>/s
+gmail.com:smtp.gmail.com:587:<sp>/gmail<sp>AUTH_SMTP=login
 
 in SYSCONF/control/remoteauth.cdb
 =joe.shmoe@indimail.org:testuser@example.com<sp>supersecret:
-=gmail:some_user@gmail.com<sp>gmail_app_password<sp>AUTH_SMTP=login:
+=gmail:some_user@gmail.com<sp>gmail_app_password<sp>AUTH_SMTP=LOGIN:
 .EE
 
 When sender address matches joe.shmoe@indimail.org, the username, password
 for authenticated SMTP will be set as testuser@example.com, supersecret.
 When mail is sent to \fIgmail.com\fR, the username, password will be set as
-some_user@gmail.com with passwd gmail_app_password. cdb file
-remote_auth.cdb allows you to store username and passwords more securely
-compared to storing them in \fIsmtproutes\fR control file. You can set read
-access for remote_auth.cdb only for the qmailr user. You can have simple or
-wildcard assignments
+some_user@gmail.com with password gmail_app_password. Also the environment
+variable AUTH_SMTP will be to "LOGIN" since gmail supports AUTH=LOGIN
+authenticated SMTP. The cdb file remote_auth.cdb allows you to store
+username and passwords more securely compared to storing them in
+\fIsmtproutes\fR control file. You can set read access for remote_auth.cdb
+only for the qmailr user. You can have simple or wildcard assignments
 
 A simple assignment in remote_auth.cdb is a line of the form
 
 .EX
-=addr:user pass:
+=addr:user pass[ envstr]:
 .EE
 
 Here \fIaddr\fR is an address;
@@ -559,14 +573,14 @@ If there are several assignments for the same \fIaddr\fR address,
 A wildcard assignment in remote_auth.cdb is a line of the form
 
 .EX
-+addr:user pass:
++addr:user pass[ envstr]:
 .EE
 
 This assignment applies to any address beginning with \fIaddr\fR, including
 \fIaddr\fR itself. It means the same as
 
 .EX
-=addrext:user pass:
+=addrext:user pass[ envstr]:
 .EE
 
 for every string \fIext\fR .
