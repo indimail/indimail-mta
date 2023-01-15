@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.287 2023-01-15 18:29:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.286 2023-01-15 20:53:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -151,7 +151,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.287 $";
+static char    *revision = "$Revision: 1.286 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -489,6 +489,7 @@ logerr(va_alist)
 		if (substdio_puts(&sserr, str) == -1)
 			_exit(1);
 	}
+	va_end(ap);
 }
 
 void
@@ -527,6 +528,7 @@ out(va_alist)
 		if (substdio_puts(&ssout, str) == -1)
 			_exit(1);
 	}
+	va_end(ap);
 }
 
 void
@@ -6948,11 +6950,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.287  2023-01-15 18:29:19+05:30  Cprogrammer
+ * Revision 1.286  2023-01-15 20:53:48+05:30  Cprogrammer
  * set remoteip variable before first use of logerr()
  * make logerr safe by checking for remoteip
- *
- * Revision 1.286  2023-01-15 12:41:14+05:30  Cprogrammer
  * logerr(), out() changed to have varargs
  *
  * Revision 1.285  2023-01-11 08:17:49+05:30  Cprogrammer
@@ -7261,7 +7261,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.287 2023-01-15 18:29:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.286 2023-01-15 20:53:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
