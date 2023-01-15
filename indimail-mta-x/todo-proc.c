@@ -1,5 +1,5 @@
 /*
- * $Id: todo-proc.c,v 1.66 2023-01-15 21:21:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: todo-proc.c,v 1.66 2023-01-15 23:30:27+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -126,6 +126,7 @@ void
 todo_log(char *s1, ...)
 #else
 todo_log(va_alist)
+va_dcl
 #endif
 {
 	int             pos;
@@ -1423,7 +1424,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: todo-proc.c,v 1.66 2023-01-15 21:21:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: todo-proc.c,v 1.66 2023-01-15 23:30:27+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1431,7 +1432,7 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
- * Revision 1.66  2023-01-15 21:21:32+05:30  Cprogrammer
+ * Revision 1.66  2023-01-15 23:30:27+05:30  Cprogrammer
  * use todo_log() function with varargs to log messages to qmail-send
  *
  * Revision 1.65  2022-11-24 08:50:10+05:30  Cprogrammer

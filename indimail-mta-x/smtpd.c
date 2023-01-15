@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.286 2023-01-15 20:53:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.286 2023-01-15 23:28:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -448,6 +448,7 @@ void
 logerr(int what, ...)
 #else
 logerr(va_alist)
+va_dcl
 #endif
 {
 	int             i;
@@ -6950,7 +6951,7 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.286  2023-01-15 20:53:48+05:30  Cprogrammer
+ * Revision 1.286  2023-01-15 23:28:20+05:30  Cprogrammer
  * set remoteip variable before first use of logerr()
  * make logerr safe by checking for remoteip
  * logerr(), out() changed to have varargs
@@ -7261,7 +7262,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.286 2023-01-15 20:53:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.286 2023-01-15 23:28:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
