@@ -1,5 +1,8 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.5  2023-01-15 18:28:03+05:30  Cprogrammer
+ * changed function out() to match function in qmail-smtpd
+ *
  * Revision 1.4  2021-05-23 07:10:02+05:30  Cprogrammer
  * include wildmat.h for wildmat_internal
  *
@@ -18,9 +21,14 @@
 #include <fmt.h>
 #include "matchregex.h"
 #include "wildmat.h"
+#include "varargs.h"
 
 extern void     die_regex(char *);
+#ifdef HAVE_STDARG_H
+extern void     out(char *s1, ...);
+#else
 extern void     out(char *);
+#endif
 extern void     flush();
 
 int
@@ -294,7 +302,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.4 2021-05-23 07:10:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.5 2023-01-15 18:28:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

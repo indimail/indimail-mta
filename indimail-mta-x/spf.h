@@ -1,5 +1,8 @@
 /*
  * $Log: spf.h,v $
+ * Revision 1.4  2023-01-15 18:31:47+05:30  Cprogrammer
+ * changed SPF_DEFEXP to use open-spf.org/Why
+ *
  * Revision 1.3  2012-04-10 20:36:21+05:30  Cprogrammer
  * added remoteip argument (ipv4) to spfcheck()
  *
@@ -22,8 +25,11 @@
 #define SPF_ERROR    6
 #define SPF_NOMEM    7
 
-#define SPF_DEFEXP   "See http://spf.pobox.com/" \
-                     "why.html?sender=%{S}&ip=%{I}&receiver=%{xR}"
+/*
+ * "http://spf.pobox.com/why.html?sender=%{S}&ip=%{I}&receiver=%{xR}"
+ */
+#define SPF_DEFEXP   "See http://www.open-spf.org/Why" \
+                     "?v=1&s=mfrom&id=%{s}&ip=%{i}&receiver=%{xR}"
 
 int             spfcheck(char *);
 int             spfexplanation(stralloc *);
