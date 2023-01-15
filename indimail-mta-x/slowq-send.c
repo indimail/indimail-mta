@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.29 2023-01-15 20:48:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.29 2023-01-15 23:26:06+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -150,6 +150,7 @@ void
 todo_log(char *s1, ...)
 #else
 todo_log(va_alist)
+va_dcl
 #endif
 {
 	int             pos;
@@ -3762,7 +3763,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.29 2023-01-15 20:48:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.29 2023-01-15 23:26:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3772,7 +3773,7 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
- * Revision 1.29  2023-01-15 20:48:03+05:30  Cprogrammer
+ * Revision 1.29  2023-01-15 23:26:06+05:30  Cprogrammer
  * use slog() function with varargs to log error messages
  * use todo_log() function with varargs to communicate with todo process
  *

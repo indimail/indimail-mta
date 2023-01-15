@@ -1,6 +1,6 @@
 /*
  * $Log: qmail-greyd.c,v $
- * Revision 1.35  2023-01-15 12:28:58+05:30  Cprogrammer
+ * Revision 1.35  2023-01-15 23:14:40+05:30  Cprogrammer
  * logerr(), out() changed to have varargs
  *
  * Revision 1.34  2023-01-03 23:55:08+05:30  Cprogrammer
@@ -229,6 +229,7 @@ void
 out(char *s1, ...)
 #else
 out(va_alist)
+va_dcl
 #endif
 {
 	va_list         ap;
@@ -253,6 +254,7 @@ out(va_alist)
 		if (substdio_puts(subfdout, str) == -1)
 			_exit(1);
 	}
+	va_end(ap);
 }
 
 void
@@ -268,6 +270,7 @@ void
 logerr(char *s1, ...)
 #else
 logerr(va_alist)
+va_dcl
 #endif
 {
 	va_list         ap;
@@ -292,6 +295,7 @@ logerr(va_alist)
 		if (substdio_puts(subfderr, str) == -1)
 			_exit(1);
 	}
+	va_end(ap);
 }
 
 void
@@ -1531,7 +1535,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.35 2023-01-15 12:28:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.35 2023-01-15 23:14:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

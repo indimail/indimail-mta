@@ -1,6 +1,6 @@
 /*
  * $Log: uacl.c,v $
- * Revision 1.8  2023-01-15 21:23:02+05:30  Cprogrammer
+ * Revision 1.8  2023-01-15 23:32:07+05:30  Cprogrammer
  * out() changed to have varargs
  *
  * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
@@ -47,6 +47,7 @@ void
 out(char *s1, ...)
 #else
 out(va_alist)
+va_dcl
 #endif
 {
 	va_list         ap;
@@ -143,7 +144,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.8 2023-01-15 21:23:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.8 2023-01-15 23:32:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
