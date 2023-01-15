@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.9  2023-01-15 12:20:12+05:30  Cprogrammer
+ * use slog() with varargs for logging errors
+ *
  * Revision 1.8  2022-04-13 07:59:46+05:30  Cprogrammer
  * set delivery_rate only if rate control definition exists
  *
@@ -92,10 +95,10 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			email[fmt_ulong(email, email_count + 1)] = 0;
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
-			log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
+			slog(1, "warning: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
-					" secs; will try again later\n");
+					" secs; will try again later\n", 0);
 			if (do_ratelimit)
 				*do_ratelimit = 1;
 			return 0;
@@ -106,9 +109,9 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				email[fmt_ulong(email, email_count)] = 0;
 				strnum1[fmt_ulong(strnum1, id)] = 0;
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
-				log15("info: ", queuedesc, " ", domain, " msg ", strnum1,
+				slog(1, "info: ", queuedesc, " ", domain, " msg ", strnum1,
 						": rate [", email, "/", strdouble1, "/", strdouble2,
-						"] ok since ", strnum2 + 1, " secs\n");
+						"] ok since ", strnum2 + 1, " secs\n", 0);
 			}
 			if (do_ratelimit && i == 1)
 				*do_ratelimit = 1;
@@ -133,10 +136,10 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			email[fmt_ulong(email, email_count + 1)] = 0;
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
-			log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
+			slog(1, "warning: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
-					" secs; will try again later\n");
+					" secs; will try again later\n", 0);
 			if (do_ratelimit)
 				*do_ratelimit = 1;
 			return 0;
@@ -147,9 +150,9 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				email[fmt_ulong(email, email_count)] = 0;
 				strnum1[fmt_ulong(strnum1, id)] = 0;
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
-				log15("info: ", queuedesc, " ", domain, " msg ", strnum1,
+				slog(1, "info: ", queuedesc, " ", domain, " msg ", strnum1,
 						": rate [", email, "/", strdouble1, "/", strdouble2,
-						"] ok since ", strnum2 + 1, " secs\n");
+						"] ok since ", strnum2 + 1, " secs\n", 0);
 			}
 			if (do_ratelimit && i == 1)
 				*do_ratelimit = 1;
@@ -171,10 +174,10 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			email[fmt_ulong(email, email_count + 1)] = 0;
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
-			log15("warning: ", queuedesc, " ", domain, " msg ", strnum1,
+			slog(1, "warning: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
-					" secs; will try again later\n");
+					" secs; will try again later\n", 0);
 			if (do_ratelimit)
 				*do_ratelimit = 1;
 			return 0;
@@ -185,9 +188,9 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				email[fmt_ulong(email, email_count)] = 0;
 				strnum1[fmt_ulong(strnum1, id)] = 0;
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
-				log15("info: ", queuedesc, " ", domain, " msg ", strnum1,
+				slog(1, "info: ", queuedesc, " ", domain, " msg ", strnum1,
 						": rate [", email, "/", strdouble1, "/", strdouble2,
-						"] ok since ", strnum2 + 1, " secs\n");
+						"] ok since ", strnum2 + 1, " secs\n", 0);
 			}
 			if (do_ratelimit && i == 1)
 				*do_ratelimit = 1;
@@ -204,7 +207,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.8 2022-04-13 07:59:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: delivery_rate.c,v 1.9 2023-01-15 12:20:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

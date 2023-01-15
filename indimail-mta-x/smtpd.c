@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.285 2023-01-11 08:17:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.286 2023-01-15 12:41:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -97,6 +97,7 @@
 #ifdef HAVESRS
 #include "srs.h"
 #endif
+#include "varargs.h"
 
 #define MAXHOPS   100
 #define SMTP_PORT  25
@@ -150,7 +151,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.285 $";
+static char    *revision = "$Revision: 1.286 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -443,28 +444,85 @@ static char    *no_scram_sha1_plus, *no_scram_sha256_plus, *no_scram_sha512_plus
 extern char   **environ;
 
 void
-logerr(char *s)
+#ifdef  HAVE_STDARG_H
+logerr(int what, ...)
+#else
+logerr(va_alist)
+#endif
 {
-	if (substdio_puts(&sserr, s) == -1)
-		_exit(1);
+	int             i;
+	va_list         ap;
+	char           *str;
+#ifndef HAVE_STDARG_H
+	int             what;
+#endif
+
+#ifdef HAVE_STDARG_H
+	va_start(ap, what);
+#else
+	va_start(ap);
+	what = va_arg(ap, int);
+#endif
+
+	switch(what)
+	{
+	case 0:
+		break;
+	case 1:
+		strnum[i = fmt_ulong(strnum, getpid())] = 0;
+		if (substdio_put(&sserr, "qmail-smtpd: pid ", 17) == -1 ||
+				substdio_put(&sserr, strnum, i) == -1 ||
+				substdio_put(&sserr, " from ", 6) == -1 ||
+				substdio_puts(&sserr, remoteip) == -1 ||
+				substdio_put(&sserr, " ", 1) == -1)
+			_exit(1);
+		break;
+	}
+	while (1) {
+		str = va_arg(ap, char *);
+		if (!str)
+			break;
+		if (substdio_puts(&sserr, str) == -1)
+			_exit(1);
+	}
 }
 
 void
-logerrf(char *s)
+logflush()
 {
-	if (substdio_puts(&sserr, s) == -1)
-		_exit(1);
 	if (substdio_flush(&sserr) == -1)
 		_exit(1);
 }
 
 void
-logerrpid()
+#ifdef  HAVE_STDARG_H
+out(char *s1, ...)
+#else
+out(va_alist)
+#endif
 {
-	strnum[fmt_ulong(strnum, getpid())] = 0;
-	logerr("pid ");
-	logerr(strnum);
-	logerr(" from ");
+	va_list         ap;
+	char           *str;
+#ifndef HAVE_STDARG_H
+	char           *s1;
+#endif
+
+#ifdef HAVE_STDARG_H
+	va_start(ap, s1);
+#else
+	va_start(ap);
+	s1 = va_arg(ap, char *);
+#endif
+
+	if (substdio_puts(&ssout, s1) == -1)
+		_exit(1);
+	while (1) {
+		str = va_arg(ap, char *);
+		if (!str)
+			break;
+		if (substdio_puts(&ssout, str) == -1)
+			_exit(1);
+	}
 }
 
 void
@@ -482,35 +540,20 @@ flush_io()
 		_exit(1);
 }
 
-void
-out(char *s)
-{
-	if (substdio_puts(&ssout, s) == -1)
-		_exit(1);
-}
-
 no_return void
 die_read(char *str, char *err)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" read error");
-	if (str) {
-		logerr(": ");
-		logerr(str);
-	}
-	if (errno) {
-		logerr(": ");
-		logerr(error_str(errno));
-	}
-	if (err) {
-		logerr(": ");
-		logerr(err);
-	}
-	logerrf("\n");
+	logerr(1, "read error", 0);
+	if (str)
+		logerr(0, ": ", str, 0);
+	if (errno)
+		logerr(0, ": ", error_str(errno), 0);
+	if (err)
+		logerr(0, ": ", err, 0);
+	logerr(0, "\n", 0);
+	logflush();
 	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Requested action aborted: read error (#4.4.2)\r\n");
+	out("451 Requested action aborted: read error (#4.4.2)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -522,25 +565,17 @@ die_write(char *str, char *err)
 
 	if (i++)
 		_exit(1);
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" write error");
-	if (str) {
-		logerr(": ");
-		logerr(str);
-	}
-	if (errno) {
-		logerr(": ");
-		logerr(error_str(errno));
-	}
-	if (err) {
-		logerr(": ");
-		logerr(err);
-	}
-	logerrf("\n");
+	logerr(1, "write error", 0);
+	if (str)
+		logerr(0, ": ", str, 0);
+	if (errno)
+		logerr(0, ": ", error_str(errno), 0);
+	if (err)
+		logerr(0, ": ", err, 0);
+	logerr(0, "\n", 0);
+	logflush();
 	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Requested action aborted: write error (#4.4.2)\r\n");
+	out("451 Requested action aborted: write error (#4.4.2)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -548,11 +583,9 @@ die_write(char *str, char *err)
 no_return void
 die_alarm()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerrf(" timeout reached reading data from client\n");
-	out("451 Requested action aborted: timeout (#4.4.2)\r\n");
+	logerr(1, "timeout reached reading data from client\n", 0);
+	logflush();
+	out("451 Requested action aborted: timeout (#4.4.2)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -577,12 +610,8 @@ saferead(int fd, char *buf, int len)
 		if (ssl) {
 			if (r)
 				die_read("ssl_timeoutread", myssl_error_str());
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" client closed connection: ");
-			logerr(myssl_error_str());
-			logerrf("\n");
+			logerr(1, "client closed connection: ", myssl_error_str(), "\n", 0);
+			logflush();
 			while (SSL_shutdown(ssl) == 0)
 				usleep(100);
 			SSL_free(ssl);
@@ -630,13 +659,9 @@ safewrite(int fd, char *buf, int len)
 no_return void
 die_nohelofqdn(char *arg)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" non-FQDN HELO: ");
-	logerr(arg);
-	logerrf("\n");
-	out("451 unable to accept non-FQDN HELO (#4.3.0)\r\n");
+	logerr(1, "non-FQDN HELO: ", arg, "\n", 0);
+	logflush();
+	out("451 unable to accept non-FQDN HELO (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -644,32 +669,18 @@ die_nohelofqdn(char *arg)
 void
 err_localhelo(char *l, char *lip, char *arg)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" invalid HELO greeting: HELO <");
-	logerr(arg);
-	logerr("> for local ");
-	logerr(l);
-	logerr(", ");
-	logerr(lip);
-	logerrf("\n");
-	out("451 invalid HELO greeting for local (#4.3.0)\r\n");
+	logerr(1, "invalid HELO greeting: HELO <", arg, "> for local ", l, ", ", lip, "\n", 0);
+	out("451 invalid HELO greeting for local (#4.3.0)\r\n", 0);
+	logflush();
 	flush();
 }
 
 void
 err_badhelo(char *arg1, char *arg2)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" Invalid HELO greeting: HELO <");
-	logerr(arg1);
-	logerr("> FQDN <");
-	logerr(arg2);
-	logerrf(">\n");
-	out("553 sorry, your HELO/EHLO greeting is in my badhelo list (#5.7.1)\r\n");
+	logerr(1, "Invalid HELO greeting: HELO <", arg1, "> FQDN <", arg2, ">\n", 0);
+	logflush();
+	out("553 sorry, your HELO/EHLO greeting is in my badhelo list (#5.7.1)\r\n", 0);
 	flush();
 #ifdef QUITASAP
 	_exit(1);
@@ -679,11 +690,9 @@ err_badhelo(char *arg1, char *arg2)
 no_return void
 die_lcmd()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" command too long!\n");
-	out("553 sorry, the given command is too long! (#5.5.2)\r\n");
+	logerr(1, "command too long!\n", 0);
+	logflush();
+	out("553 sorry, the given command is too long! (#5.5.2)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -691,11 +700,9 @@ die_lcmd()
 no_return void
 die_regex()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerrf(" regex compilation failed\n");
-	out("451 Requested action aborted: regex compilation failed (#4.3.0)\r\n");
+	logerr(1, "regex compilation failed\n", 0);
+	logflush();
+	out("451 Requested action aborted: regex compilation failed (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -703,28 +710,20 @@ die_regex()
 no_return void
 die_nomem()
 {
-	out("451 Requested action aborted: out of memory (#4.3.0)\r\n");
+	logerr(1, "out of memory\n", 0);
+	logflush();
+	out("451 Requested action aborted: out of memory (#4.3.0)\r\n", 0);
 	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerrf(" out of memory\n");
 	_exit(1);
 }
 
 no_return void
 die_custom(char *arg)
 {
-	out("451 ");
-	out(arg);
-	out(" (#4.3.0)\r\n");
+	logerr(1, arg, "\n", 0);
+	logflush();
+	out("451 ", arg, " (#4.3.0)\r\n", 0);
 	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" ");
-	logerr(arg);
-	logerrf("\n");
 	_exit(1);
 }
 
@@ -732,17 +731,12 @@ die_custom(char *arg)
 void
 err_batv(char *arg1, char *arg2, char *arg3)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" ");
-	logerr(remoteip);
-	if (arg2) {
-		logerr(" recipient ");
-		logerr(arg2);
-	}
-	logerrf("\n");
-	out(arg3);
+	logerr(1, arg1, 0);
+	if (arg2)
+		logerr(0, " recipient ", arg2, 0);
+	logerr(0, "\n", 0);
+	logflush();
+	out(arg3, 0);
 	flush();
 	return;
 }
@@ -751,15 +745,11 @@ err_batv(char *arg1, char *arg2, char *arg3)
 no_return void
 die_control(char *fn)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	if (fn) {
-		logerr(" unable to read controls [");
-		logerr(fn);
-		logerrf("]\n");
-	} else
-		logerrf(" unable to read controls\n");
-	out("451 Requested action aborted: unable to read controls (#4.3.0)\r\n");
+	logerr(1, "unable to read controls", 0);
+	if (fn)
+		logerr(0, " [", fn, "]\n", 0);
+	logflush();
+	out("451 Requested action aborted: unable to read controls (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -767,10 +757,9 @@ die_control(char *fn)
 no_return void
 die_ipme()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerrf(" unable to figure out my IP address\n");
-	out("451 Requested action aborted: unable to figure out my IP addresses (#4.3.0)\r\n");
+	logerr(1, "unable to figure out my IP address\n", 0);
+	logflush();
+	out("451 Requested action aborted: unable to figure out my IP addresses (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -778,29 +767,27 @@ die_ipme()
 no_return void
 die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(": ");
-	out("451 ");
+	logerr(1, ": ", 0);
+	out("451 ", 0);
 	if (arg1) {
-		logerr(arg1);
-		out(arg1);
+		logerr(0, arg1, 0);
+		out(arg1, 0);
 	}
 	if (arg2) {
-		logerr(arg2);
-		out(arg2);
+		logerr(0, arg2, 0);
+		out(arg2, 0);
 	}
 	if (arg3) {
-		logerr(arg3);
-		out(arg3);
+		logerr(0, arg3, 0);
+		out(arg3, 0);
 	}
 	if (arg4) {
-		logerr(arg4);
-		out(arg4);
+		logerr(0, arg4, 0);
+		out(arg4, 0);
 	}
-	logerrf("\n");
-	out(" (#4.3.0)\r\n");
+	logerr(0, "\n", 0);
+	logflush();
+	out(" (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -808,13 +795,9 @@ die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
 no_return void
 die_logfilter()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" unable create temporary files: ");
-	logerr(error_str(errno));
-	logerrf("\n");
-	out("451 Requested action aborted: unable to create temporary files (#4.3.0)\r\n");
+	logerr(1, "unable create temporary files: ", error_str(errno), "\n", 0);
+	logflush();
+	out("451 Requested action aborted: unable to create temporary files (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -822,26 +805,18 @@ die_logfilter()
 void
 err_addressmatch(char *errstr, char *fn)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" address_match: ");
-	logerr(fn);
-	logerr(": ");
-	logerr(errstr);
-	logerrf("\n");
-	out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
+	logerr(1, "address_match: ", fn, ": ", errstr, "\n", 0);
+	logflush();
+	out("451 Requested action aborted: local system failure (#4.3.0)\r\n", 0);
 	flush();
 }
 
 no_return void
 straynewline()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerrf(" Bare LF received\n");
-	out("451 Requested action aborted: Bare LF received. (#4.6.0)\r\n");
+	logerr(1, "Bare LF received\n", 0);
+	logflush();
+	out("451 Requested action aborted: Bare LF received. (#4.6.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -880,15 +855,9 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1) {
 		if (errno == ENXIO)
 			return;
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(remoteip);
-		logerr(" fifo ");
-		logerr(fifo_name);
-		logerr(": ");
-		logerr(error_str(errno));
-		logerrf("\n");
-		out("451 Unable to queue messages (#4.3.0)\r\n");
+		logerr(1, "fifo ", fifo_name, ": ", error_str(errno), "\n", 0);
+		logflush();
+		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
 		flush();
 		_exit(1);
 	}
@@ -923,9 +892,8 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		}
 		substdio_fdbuf(&logfifo_in, read, logfd, inbuf, sizeof (inbuf));
 		if (getln(&logfifo_in, line, &match, '\n') == -1) {
-			logerr("qmail-smtpd: read error: ");
-			logerr(error_str(errno));
-			logerrf("\n");
+			logerr(1, "read error: ", error_str(errno), "\n", 0);
+			logflush();
 			close(logfd);
 			return;
 		}
@@ -934,16 +902,14 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 			die_nomem();
 		if (line->len) {
 			if (substdio_puts(&logfifo_out, line->s) == -1) {
-				logerr("qmail-smtpd: write error: ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				logerr(1, "write error: ", error_str(errno), "\n", 0);
+				logflush();
 			}
 		}
 	}
 	if (substdio_puts(&logfifo_out, "\n") == -1) {
-		logerr("qmail-smtpd: write error: ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		logerr(1, "write error: ", error_str(errno), "\n", 0);
+		logflush();
 	}
 	if (substdio_flush(&logfifo_out) == -1) {
 		close(logfifo);
@@ -954,7 +920,7 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 }
 
 void
-log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, int notify)
+log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notify)
 {
 	char           *ptr, *p;
 	int             idx, i;
@@ -966,79 +932,64 @@ log_trans(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 			/*- write data to spamlogger and get X-Bogosity line in tmpLine */
 			if (!notify)
 				log_fifo(mfrom, ptr, msg_size, &tmpLine);
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(r_ip);
+			logerr(1, " ", 0);
+			if (!notify)
+				logerr(0, "HELO <", helohost.s, "> ", 0);
+			else
+				logerr(0, "NOTIFY: ", 0);
+			logerr(0, "MAIL from <", mfrom, "> RCPT <", ptr, 0);
 			if (!notify) {
-				logerr(" HELO <");
-				logerr(helohost.s);
-				logerr("> ");
-			} else
-				logerr(" NOTIFY: ");
-			logerr("MAIL from <");
-			logerr(mfrom);
-			logerr("> RCPT <");
-			logerr(ptr);
-			if (!notify) {
-				logerr("> AUTH <");
-				if (authuser && *authuser) {
-					logerr(authuser);
-					logerr(": AUTH ");
-					logerr(get_authmethod(authd));
-				}
+				logerr(0, "> AUTH <", 0);
+				if (authuser && *authuser)
+					logerr(0, authuser, ": AUTH ", get_authmethod(authd), 0);
 				if (addrallowed(ptr)) {
 					if (authuser && *authuser)
-						logerr(": ");
-					logerr("local-rcpt");
+						logerr(0, ": ", 0);
+					logerr(0, "local-rcpt", 0);
 				} else
 				if (!authuser || !*authuser)
-					logerr("auth-ip/pop");
+					logerr(0, "auth-ip/pop", 0);
 			}
-			logerr("> Size: ");
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
-			logerr(strnum);
-			logerr(" TLS=");
+			logerr(0, "> Size: ", strnum, " TLS=", 0);
 #ifdef TLS
 			if (ssl)
-				logerr(SSL_get_version(ssl));
+				logerr(0, SSL_get_version(ssl), 0);
 			else {
 				if (!(p = env_get("TLS_PROVIDER")))
-					logerr("No");
+					logerr(0, "No", 0);
 				else {
 					i = str_chr(p, ',');
 					if (p[i]) {
 						p[i] = 0;
-						logerr(p);
+						logerr(0, p, 0);
 						p[i] = ',';
 					}
 				}
 			}
 #else
 			if (!(p = env_get("TLS_PROVIDER")))
-				logerr("No");
+				logerr(0, "No", 0);
 			else {
 				i = str_chr(p, ',');
 				if (p[i]) {
 					p[i] = 0;
-					logerr(p);
+					logerr(0, p, 0);
 					p[i] = ',';
 				}
 			}
 #endif
-			if (!notify && tmpLine.len) {
-				logerr(" ");
-				logerr(tmpLine.s);
-			}
-			logerr("\n");
+			if (!notify && tmpLine.len)
+				logerr(0, " ", tmpLine.s, 0);
+			logerr(0, "\n", 0);
 			ptr = recipients + idx + 2;
 		}
 	}
-	if (substdio_flush(&sserr) == -1)
-		_exit(1);
+	logflush();
 }
 
 void
-err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx, int permanent, unsigned long qp)
+err_queue(char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx, int permanent, unsigned long qp)
 {
 	char           *ptr, *p;
 	int             idx, i;
@@ -1052,76 +1003,57 @@ err_queue(char *r_ip, char *mfrom, char *recipients, int rcpt_len, char *authuse
 		if (!recipients[idx]) {
 			/*- write data to spamlogger */
 			log_fifo(mfrom, ptr, msg_size, &tmpLine);
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(r_ip);
-			logerr(" ");
-			logerr(qqx);
+			logerr(1, qqx, 0);
 			if (permanent)
-				logerr(" (permanent): ");
+				logerr(0, " (permanent): ", 0);
 			else
-				logerr(" (temporary): ");
-			logerr("HELO <");
-			logerr(helohost.s);
-			logerr("> MAIL from <");
-			logerr(mfrom);
-			logerr("> RCPT <");
-			logerr(ptr);
-			logerr("> AUTH <");
-			if (authuser && *authuser) {
-				logerr(authuser);
-				logerr(": AUTH ");
-				logerr(get_authmethod(authd));
-			}
+				logerr(0, " (temporary): ", 0);
+			logerr(0, "HELO <", helohost.s, "> MAIL from <", mfrom, "> RCPT <", ptr, "> AUTH <", 0);
+			if (authuser && *authuser)
+				logerr(0, authuser, ": AUTH ", get_authmethod(authd), 0);
 			if (addrallowed(ptr)) {
 				if (authuser && *authuser)
-					logerr(": ");
-				logerr("local-rcpt");
+					logerr(0, ": ", 0);
+				logerr(0, "local-rcpt", 0);
 			} else
 			if (!authuser || !*authuser)
-				logerr("auth-ip/pop");
-			logerr("> Size: ");
-			logerr(size);
-			if (tmpLine.len) {
-				logerr(" ");
-				logerr(tmpLine.s); /*- X-Bogosity line */
-			}
-			logerr(" TLS=");
+				logerr(0, "auth-ip/pop", 0);
+			logerr(0, "> Size: ", size, 0);
+			if (tmpLine.len)
+				logerr(0, " ", tmpLine.s, 0); /*- X-Bogosity line */
+			logerr(0, " TLS=", 0);
 #ifdef TLS
 			if (ssl)
-				logerr(SSL_get_version(ssl));
+				logerr(0, SSL_get_version(ssl), 0);
 			else {
 				if (!(p = env_get("TLS_PROVIDER")))
-					logerr("No");
+					logerr(0, "No", 0);
 				else {
 					i = str_chr(p, ',');
 					if (p[i]) {
 						p[i] = 0;
-						logerr(p);
+						logerr(0, p, 0);
 						p[i] = ',';
 					}
 				}
 			}
 #else
 			if (!(p = env_get("TLS_PROVIDER")))
-				logerr("No");
+				logerr(0, "No", 0);
 			else {
 				i = str_chr(p, ',');
 				if (p[i]) {
 					p[i] = 0;
-					logerr(p);
+					logerr(0, p, 0);
 					p[i] = ',';
 				}
 			}
 #endif
-			logerr(" qp ");
-			logerr(accept_buf);
-			logerr("\n");
+			logerr(0, " qp ", accept_buf, "\n", 0);
 			ptr = recipients + idx + 2;
 		}
 	}
-	if (substdio_flush(&sserr) == -1)
-		_exit(1);
+	logflush();
 }
 
 void
@@ -1133,10 +1065,8 @@ msg_notify()
 	struct datetime dt;
 
 	if (qmail_open(&qqt) == -1) {
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(remoteip);
-		logerrf(" qqt failure");
+		logerr(1, "qqt failure", 0);
+		logflush();
 		return;
 	}
 	qp = qmail_qp(&qqt); /*- pid of queue process */
@@ -1165,134 +1095,107 @@ msg_notify()
 	qmail_put(&qqt, rcptto.s, rcptto.len);
 	qqx = qmail_close(&qqt);
 	if (!*qqx) { /*- mail is now in queue */
-		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, 0, 1);
+		log_trans(mailfrom.s, rcptto.s, rcptto.len, 0, 1);
 		return;
 	}
-	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
+	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
 }
 
 void
 err_smf()
 {
-	out("451 Requested action aborted: DNS temporary failure (#4.4.3)\r\n");
+	out("451 Requested action aborted: DNS temporary failure (#4.4.3)\r\n", 0);
 	flush();
 }
 
 void
-err_size(char *rip, char *mfrom, char *rcpt, int len)
+err_size(char *mfrom, char *rcpt, int len)
 {
 	int             idx;
 	char           *ptr;
 
-	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n");
+	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n", 0);
 	flush();
 	if (env_get("DATABYTES_NOTIFY"))
 		msg_notify();
 	for (ptr = rcpt + 1, idx = 0; idx < len; idx++) {
 		if (!rcpt[idx]) {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(rip);
-			logerr(" data size exceeded: MAIL from <");
-			logerr(mfrom);
-			logerr("> RCPT <");
-			logerr(ptr);
-			logerr("> Size: ");
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
-			logerr(strnum);
-			logerr("\n");
+			logerr(1, "data size exceeded: MAIL from <", mfrom,
+					"> RCPT <", ptr, "> Size: ", strnum, "\n", 0);
 			ptr = rcpt + idx + 2;
 		}
 	}
+	logflush();
 }
 
 void
 err_hops()
 {
-	out("554 too many hops, this message is looping (#5.4.6)\r\n");
+	out("554 too many hops, this message is looping (#5.4.6)\r\n", 0);
 	flush();
 }
 
 void
-err_hmf(char *arg1, char *arg2, int arg3)
+err_hmf(char *arg1, int arg2)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	if (arg3)
-		logerr(" Non-existing DNS_MX: MAIL ");
+	if (arg2)
+		logerr(1, "Non-existing DNS_MX: MAIL ", 0);
 	else
-		logerr(" Non-existing DNS_MX: HELO ");
-	logerr(arg2);
-	logerrf("\n");
-	if (arg3)
-		out("553 Bad sender's system address (#5.1.8)\r\n");
+		logerr(1, "Non-existing DNS_MX: HELO ", 0);
+	logerr(0, arg1, "\n", 0);
+	logflush();
+	if (arg2)
+		out("553 Bad sender's system address (#5.1.8)\r\n", 0);
 	else
-		out("553 sorry, helo domain must exist (#5.1.8)\r\n");
+		out("553 sorry, helo domain must exist (#5.1.8)\r\n", 0);
 	flush();
 }
 
 void
-err_nogateway(char *arg1, char *arg2, char *arg3, int flag)
+err_nogateway(char *arg1, char *arg2, int flag)
 {
 	char           *x;
 
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Invalid RELAY client: MAIL from <");
-	logerr(arg2);
-	if (arg3 && *arg3) {
-		logerr("> RCPT <");
-		logerr(arg3);
-	}
-	logerr(">");
+	logerr(1, "Invalid RELAY client: MAIL from <", arg1, 0);
+	if (arg2 && *arg2)
+		logerr(0, "> RCPT <", arg2, 0);
+	logerr(0, ">", 0);
 	if (authd) {
-		logerr(", Auth <");
-		logerr(remoteinfo);
-		logerr(">");
+		logerr(0, ", Auth <", remoteinfo, ">", 0);
 		x = env_get("MASQUERADE");
-		if (x && *x) {
-			logerr(", MASQUERADE <");
-			logerr(x);
-			logerr(">");
-		}
+		if (x && *x)
+			logerr(0, ", MASQUERADE <", x, ">", 0);
 	}
-	logerrf("\n");
+	logerr(0, "\n", 0);
+	logflush();
 	if (flag)
-		out("553 sorry, this MTA does not accept masquerading/forging ");
+		out("553 sorry, this MTA does not accept masquerading/forging ", 0);
 	else
-		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication ");
-	if (authd) {
-		out(", auth <");
-		out(remoteinfo);
-		out("> ");
-	}
+		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication ", 0);
+	if (authd)
+		out(", auth <", remoteinfo, "> ", 0);
 #ifdef TLS
 	if (ssl)
 		tls_nogateway();
 #endif
-	out("#5.7.1\r\n");
+	out("#5.7.1\r\n", 0);
 	flush();
 }
 
 void
 err_badbounce()
 {
-	out("553 sorry, bounce messages should have a single envelope recipient (#5.7.1)\r\n");
+	out("553 sorry, bounce messages should have a single envelope recipient (#5.7.1)\r\n", 0);
 	flush();
 }
 
 void
-err_bmf(char *arg1, char *arg2)
+err_bmf(char *arg1)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Invalid SENDER address: MAIL from <");
-	logerr(arg2);
-	logerrf(">\n");
-	out("553 sorry, your envelope sender has been denied (#5.7.1)\r\n");
+	logerr(1, "Invalid SENDER address: MAIL from <", arg1, ">\n", 0);
+	logflush();
+	out("553 sorry, your envelope sender has been denied (#5.7.1)\r\n", 0);
 	flush();
 }
 
@@ -1305,112 +1208,73 @@ err_spf()
 	for (i = 0; i < spfbarfmsg.len; i = j + 1) {
 		j = byte_chr(spfbarfmsg.s + i, spfbarfmsg.len - i, '\n') + i;
 		if (j < spfbarfmsg.len) {
-			out("550-");
 			spfbarfmsg.s[j] = 0;
-			out(spfbarfmsg.s);
+			out("550-", spfbarfmsg.s, "\r\n", 0);
 			spfbarfmsg.s[j] = '\n';
-			out("\r\n");
-		} else {
-			out("550 ");
-			out(spfbarfmsg.s);
-			out(" (#5.7.1)\r\n");
-		}
+		} else
+			out("550 ", spfbarfmsg.s, " (#5.7.1)\r\n", 0);
 	}
 	flush();
 }
 #endif
 
 void
-err_hostaccess(char *arg1, char *arg2)
+err_hostaccess(char *arg)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Invalid SENDER host IP address: MAIL from <");
-	logerr(arg2);
-	logerrf(">\n");
-	out("553 sorry, your host has been denied (#5.7.1)\r\n");
+	logerr(1, "Invalid SENDER host IP address: MAIL from <", arg, ">\n", 0);
+	logflush();
+	out("553 sorry, your host has been denied (#5.7.1)\r\n", 0);
 	flush();
 }
 
 void
-log_virus(char *arg1, char *arg2, char *arg3, char *arg4, int len, int blackhole)
+log_virus(char *arg1, char *arg2, char *arg3, int len, int blackhole)
 {
 	int             idx;
 	char           *ptr;
 
-	for (ptr = arg4 + 1, idx = 0; idx < len; idx++) {
-		if (!arg4[idx]) {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(arg1);
-			logerr(" virus/banned content: ");
-			logerr(arg2);
-			logerr(": MAIL from <");
-			logerr(arg3);
-			logerr("> RCPT <");
-			logerr(ptr);
-			logerr("> Size: ");
+	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
+		if (!arg3[idx]) {
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
-			logerr(strnum);
-			logerr("\n");
-			ptr = arg4 + idx + 2;
+			logerr(1, "virus/banned content: ", arg1, ": MAIL from <", arg2, "> RCPT <", ptr, "> Size: ", strnum, "\n", 0);
+			ptr = arg3 + idx + 2;
 		}
 	}
-	if (substdio_flush(&sserr) == -1)
-		_exit(1);
+	logflush();
 	if (!blackhole) {
-		out("552-we don't accept email with the below content (#5.3.4)\r\n");
-		out("552 Further Information: ");
-		out(arg2);
-		out("\r\n");
+		out("552-we don't accept email with the below content (#5.3.4)\r\n",
+				"552 Further Information: ", arg1, "\r\n", 0);
 		flush();
 	}
 }
 
 void
-err_acl(char *arg1, char *arg2, char *arg3)
+err_acl(char *arg1, char *arg2)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Invalid RECIPIENT address: MAIL from <");
-	logerr(arg2);
-	logerr("> RCPT ");
-	logerr(arg3);
-	logerrf("\n");
-	out("553 sorry, sites access list denies transaction (#5.7.1)\r\n");
+	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT ", arg2, "\n", 0);
+	logflush();
+	out("553 sorry, sites access list denies transaction (#5.7.1)\r\n", 0);
 	flush();
 	return;
 }
 
 void
-err_rcp(char *arg1, char *arg2, char *arg3)
+err_rcp(char *arg1, char *arg2)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Invalid RECIPIENT address: MAIL from <");
-	logerr(arg2);
-	logerr("> RCPT ");
-	logerr(arg3);
-	logerrf("\n");
-	out("553 sorry, your envelope recipient has been denied (#5.7.1)\r\n");
+	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT ", arg2, "\n", 0);
+	logflush();
+	out("553 sorry, your envelope recipient has been denied (#5.7.1)\r\n", 0);
 	flush();
 	return;
 }
 
 void
-smtp_badip(char *arg)
+smtp_badip()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg);
-	logerrf(" BAD IP client\n");
+	logerr(1, "BAD IP client\n", 0);
+	logflush();
 	sleep(5);
-	out("421 sorry, your IP (");
-	out(arg);
-	out(") is temporarily denied (#4.7.1)\r\n");
+	out("421 sorry, your IP (", remoteip, ") is temporarily denied (#4.7.1)\r\n", 0);
 	flush();
 	return;
 }
@@ -1418,108 +1282,78 @@ smtp_badip(char *arg)
 void
 smtp_badhost(char *arg)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" BAD HOST ");
-	logerr(remotehost);
-	logerrf("\n");
+	logerr(1, "BAD HOST ", remotehost, "\n", 0);
+	logflush();
 	sleep(5);
-	out("553 sorry, your host (");
-	out(remotehost);
-	out(") has been denied (#5.7.1)\r\n");
+	out("553 sorry, your host (", remotehost, ") has been denied (#5.7.1)\r\n", 0);
 	flush();
 	return;
 }
 
 void
-smtp_relayreject(char *arg)
+smtp_relayreject()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg);
-	logerrf(" OPEN RELAY client\n");
+	logerr(1, "OPEN RELAY client\n", 0);
+	logflush();
 	sleep(5);
-	out("553 No mail accepted from an open relay (");
-	out(remoteip);
-	out("); check your server configs (#5.7.1)\r\n");
+	out("553 No mail accepted from an open relay (", remoteip,
+			"); check your server configs (#5.7.1)\r\n", 0);
 	flush();
 	return;
 }
 
 void
-smtp_paranoid(char *arg)
+smtp_paranoid()
 {
 	char           *ptr;
 
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg);
-	logerrf(" PTR (reverse DNS) record points to wrong hostname\n");
+	logerr(1, "PTR (reverse DNS) record points to wrong hostname\n", 0);
+	logflush();
 	sleep(5);
 	ptr = env_get("TCPPARANOID");
-	out("553 sorry, your IP address (");
-	out(arg);
-	if (ptr && *ptr) {
-		out(") PTR (reverse DNS) record points to wrong hostname ");
-		out(ptr);
-		out(" (#5.7.1)\r\n");
-	} else
-		out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)\r\n");
+	out("553 sorry, your IP address (", remoteip, 0);
+	out(") PTR (reverse DNS) record points to wrong hostname", 0);
+	if (ptr && *ptr)
+		out(" [", ptr, "]", 0);
+	out(" (#5.7.1)\r\n", 0);
 	flush();
 	return;
 }
 
 void
-smtp_ptr(char *arg)
+smtp_ptr()
 {
 	char           *ptr;
 
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg);
-	logerrf(" unable to obain PTR (reverse DNS) record\n");
+	logerr(1, "unable to obain PTR (reverse DNS) record\n", 0);
+	logflush();
 	sleep(5);
 	ptr = env_get("REQPTR");
-	out("553 ");
-	if (*ptr) {
-		out(ptr);
-		out(": from ");
-		out(arg);
-		out(": (#5.7.1)\r\n");
-	} else {
-		out(" Sorry, no PTR (reverse DNS) record for (");
-		out(arg);
-		out(") (#5.7.1)\r\n");
-	}
+	out("553 ", 0);
+	if (*ptr)
+		out(ptr, ": from ", remoteip, ": (#5.7.1)\r\n", 0);
+	else
+		out(" Sorry, no PTR (reverse DNS) record for (",
+				remoteip, ") (#5.7.1)\r\n", 0);
 	flush();
 	return;
 }
 
 void
-log_rules(char *arg1, char *arg2, char *arg3, int arg4, int arg5)
+log_rules(char *arg1, char *arg2, int arg3, int arg4)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(arg5 == 0 ? " Setting EnvRule No " : " Setting DomainQueue Rule No ");
-	strnum[fmt_ulong(strnum, arg4)] = 0;
-	logerr(strnum);
-	logerr(": MAIL from <");
-	logerr(arg2);
-	if (authd) {
-		logerr("> AUTH ");
-		logerr(get_authmethod(authd));
-		logerr(" <");
-		logerr(arg3);
-	}
-	logerrf(">\n");
+	strnum[fmt_ulong(strnum, arg3)] = 0;
+	logerr(1, arg4 == 0 ? "Setting EnvRule No " : "Setting DomainQueue Rule No ", strnum, ": MAIL from <", arg1, 0);
+	if (authd)
+		logerr(0, "> AUTH ", get_authmethod(authd), " <", arg2, 0);
+	logerr(0, ">\n", 0);
+	logflush();
 }
 
 void
 err_relay()
 {
-	out("550 we don't relay (#5.7.1)\r\n");
+	out("550 we don't relay (#5.7.1)\r\n", 0);
 	flush();
 }
 
@@ -1527,97 +1361,70 @@ void
 err_unimpl(char *arg)
 {
 	if (!case_diffs(arg, "unimplemented"))
-		out("502 unimplemented (#5.5.1)\r\n");
+		out("502 unimplemented (#5.5.1)\r\n", 0);
 	else
 	if (!case_diffs(arg, "help"))
-		out("502 disabled by the lord in her infinite wisdom (#5.5.1)\r\n");
-	else {
-		out("502 command ");
-		out(arg);
-		out(" not recognized (#5.5.2)\r\n");
-	}
+		out("502 disabled by the lord in her infinite wisdom (#5.5.1)\r\n", 0);
+	else
+		out("502 command ", arg, " not recognized (#5.5.2)\r\n", 0);
 	flush();
 }
 
 void
 err_syntax()
 {
-	out("555 syntax error in address (#5.1.3)\r\n");
+	out("555 syntax error in address (#5.1.3)\r\n", 0);
 	flush();
 }
 
 void
 err_wantmail()
 {
-	out("503 MAIL first (#5.5.1)\r\n");
+	out("503 MAIL first (#5.5.1)\r\n", 0);
 	flush();
 }
 
 void
 err_wantrcpt()
 {
-	out("503 RCPT first (#5.5.1)\r\n");
+	out("503 RCPT first (#5.5.1)\r\n", 0);
 	flush();
 }
 
 void
-err_bhf(char *arg1, char *arg2)
+err_bhf(char *arg1)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Blackholed SENDER address: MAIL ");
-	logerr(arg2);
-	logerrf("\n");
+	logerr(1, "Blackholed SENDER address: MAIL ", arg1, "\n", 0);
+	logflush();
 	if (!env_put("NULLQUEUE=1"))
 		die_nomem();
 }
 
 void
-err_bhrcp(char *arg1, char *arg2, char *arg3)
+err_bhrcp(char *arg2, char *arg3)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Blackholed RECIPIENT address: MAIL from <");
-	logerr(arg2);
-	logerr("> RCPT ");
-	logerr(arg3);
-	logerrf("\n");
+	logerr(1, "Blackholed RECIPIENT address: MAIL from <", arg2, "> RCPT ", arg3, "\n", 0);
+	logflush();
 	if (!env_put("NULLQUEUE=1"))
 		die_nomem();
 }
 
 no_return void
-err_maps(char *m, char *ip, char *from)
+err_maps(char *from, char *reason)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(ip);
-	logerr(" Blackholed SENDER address: MAIL ");
-	logerr(from);
-	logerr(" Reason ");
-	logerr(m);
-	logerrf("\n");
-	out("553 ");
-	out(m);
-	out(" (#5.7.1)\r\n");
+	logerr(1, "Blackholed SENDER address: MAIL from <", from, "> Reason ", reason, "\n", 0);
+	logflush();
+	out("553 ", reason, " (#5.7.1)\r\n", 0);
 	flush();
 	_exit(1);
 }
 
 void
-err_mrc(char *arg1, char *arg2, char *arg3)
+err_mrc(char *arg1, char *arg2)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	logerr(" Too many RECIPIENTS: MAIL <");
-	logerr(arg2);
-	logerr("> Last RCPT <");
-	logerr(arg3);
-	logerrf(">\n");
-	out("557 sorry, too many recipients (#5.7.1)\r\n");
+	logerr(1, "Too many RECIPIENTS: MAIL from <", arg1, "> Last RCPT <", arg2, ">\n", 0);
+	logflush();
+	out("557 sorry, too many recipients (#5.7.1)\r\n", 0);
 	flush();
 }
 
@@ -1625,7 +1432,7 @@ void
 smtp_noop(char *arg)
 {
 	if (arg && *arg) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	}
@@ -1634,26 +1441,26 @@ smtp_noop(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n");
+		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	case 2:
-		smtp_relayreject(remoteip);
+		smtp_relayreject();
 		return;
 	case 3:
-		smtp_paranoid(remoteip);
+		smtp_paranoid();
 		return;
 	case 4:
-		smtp_ptr(remoteip);
+		smtp_ptr();
 		return;
 	case 5:
 		smtp_badhost(remoteip);
 		return;
 	case 6:
-		smtp_badip(remoteip);
+		smtp_badip();
 		return;
 	}
-	out("250 ok\r\n");
+	out("250 ok\r\n", 0);
 	flush();
 	return;
 }
@@ -1670,46 +1477,44 @@ smtp_vrfy(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n");
+		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	case 2:
-		smtp_relayreject(remoteip);
+		smtp_relayreject();
 		return;
 	case 3:
-		smtp_paranoid(remoteip);
+		smtp_paranoid();
 		return;
 	case 4:
-		smtp_ptr(remoteip);
+		smtp_ptr();
 		return;
 	case 5:
 		smtp_badhost(remoteip);
 		return;
 	case 6:
-		smtp_badip(remoteip);
+		smtp_badip();
 		return;
 	}
-	out("252 Cannot VRFY user, but will accept message and attempt delivery (#2.7.0)\r\n");
+	out("252 Cannot VRFY user, but will accept message and attempt delivery (#2.7.0)\r\n", 0);
 	flush();
 	return;
 }
 
 void
-err_qqt(char *arg)
+err_qqt()
 {
-	out("451 Requested action aborted: qqt failure (#4.3.0)\r\n");
+	logerr(1, "qqt failure\n", 0);
+	logflush();
+	out("451 Requested action aborted: qqt failure (#4.3.0)\r\n", 0);
 	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg);
-	logerrf(" qqt failure\n");
 	return;
 }
 
 int
 err_child()
 {
-	out("451 Requested action aborted: problem with child and I can't auth (#4.3.0)\r\n");
+	out("451 Requested action aborted: problem with child and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1717,23 +1522,21 @@ err_child()
 void
 err_library(char *arg)
 {
-	out("451 Requested action aborted: problem loading virtual domain library (#4.3.0)\r\n");
-	flush();
 	if (arg) {
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(remoteip);
-		logerr(" ");
-		logerr(arg);
-		logerrf("\n");
+		logerr(1, arg, "\n", 0);
+		logflush();
 	}
+	out("451 Requested action aborted: problem loading virtual domain library (#4.3.0)\r\n", 0);
+	flush();
 	return;
 }
 
 int
 err_fork()
 {
-	out("451 Requested action aborted: child won't start and I can't auth (#4.3.0)\r\n");
+	logerr(1, "fork: ", error_str(errno), "\n", 0);
+	logflush();
+	out("451 Requested action aborted: child won't start and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1741,7 +1544,9 @@ err_fork()
 int
 err_pipe()
 {
-	out("451 Requested action aborted: unable to open pipe and I can't auth (#4.3.0)\r\n");
+	logerr(1, "trouble creating pipes: ", error_str(errno), "\n", 0);
+	logflush();
+	out("451 Requested action aborted: unable to open pipe and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1749,147 +1554,139 @@ err_pipe()
 int
 err_write()
 {
-	out("451 Requested action aborted: unable to write pipe and I can't auth (#4.3.0)\r\n");
+	logerr(1, "write error: ", error_str(errno), "\n", 0);
+	logflush();
+	out("451 Requested action aborted: unable to write pipe and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
 
 void
-err_authfailure(char *r_ip, char *authuser, int ret)
+err_authfailure(char *authuser, int ret)
 {
 	static char     retstr[FMT_ULONG];
 	char           *ptr;
 	int             i;
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(r_ip);
+	logerr(1, " AUTH USER [", 0);
 	if (authuser) {
-		logerr(" AUTH ");
-		logerr(authuser);
+		logerr(0, authuser, 0);
 	}
-	logerr(" status=[");
+	logerr(0, "] status=[", 0);
 	if (ret < 0)
-		logerr("-");
-	logerr(retstr);
-	logerr("]");
+		logerr(0, "-", 0);
+	logerr(0, retstr, "]", 0);
 	if (authmethod.len) {
-		logerr(" AUTH ");
 		i = authmethod.s[0];
-		logerr(get_authmethod(i));
+		logerr(0, " AUTH ", get_authmethod(i), 0);
 	} else
-		logerr(" AUTH Unknown ");
-	logerr(" TLS=");
+		logerr(0, " AUTH Unknown ", 0);
+	logerr(0, " TLS=", 0);
 #ifdef TLS
 	if (ssl)
-		logerr(SSL_get_version(ssl));
+		logerr(0, SSL_get_version(ssl), 0);
 	else {
 		if (!(ptr = env_get("TLS_PROVIDER")))
-			logerr("No");
+			logerr(0, "No", 0);
 		else {
 			i = str_chr(ptr, ',');
 			if (ptr[i]) {
 				ptr[i] = 0;
-				logerr(ptr);
+				logerr(0, ptr, 0);
 				ptr[i] = ',';
 			}
 		}
 	}
 #else
 	if (!(ptr = env_get("TLS_PROVIDER")))
-		logerr("No");
+		logerr(0, "No", 0);
 	else {
 		i = str_chr(ptr, ',');
 		if (ptr[i]) {
 			ptr[i] = 0;
-			logerr(ptr);
+			logerr(0, ptr, 0);
 			ptr[i] = ',';
 		}
 	}
 #endif
-	logerrf(" auth failure\n");
+	logerr(0, " auth failure\n", 0);
+	logflush();
 }
 
 void
-err_authinsecure(char *r_ip, int ret)
+err_authinsecure(int ret)
 {
 	static char     retstr[FMT_ULONG];
 	char           *ptr;
 	int             i;
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(r_ip);
 	if (authmethod.len) {
-		logerr(" AUTH ");
 		i = authmethod.s[0];
-		logerr(get_authmethod(i));
+		logerr(1, " AUTH ", get_authmethod(i), 0);
 	} else
-		logerr(" AUTH Unknown ");
-	logerr("status=[");
+		logerr(1, " AUTH Unknown ", 0);
+	logerr(0, "status=[", 0);
 	if (ret < 0)
-		logerr("-");
-	logerr(retstr);
-	logerr("] TLS=");
+		logerr(0, "-", 0);
+	logerr(0, retstr, "] TLS=", 0);
 #ifdef TLS
 	if (ssl)
-		logerr(SSL_get_version(ssl));
+		logerr(0, SSL_get_version(ssl), 0);
 	else {
 		if (!(ptr = env_get("TLS_PROVIDER")))
-			logerr("No");
+			logerr(0, "No", 0);
 		else {
 			i = str_chr(ptr, ',');
 			if (ptr[i]) {
 				ptr[i] = 0;
-				logerr(ptr);
+				logerr(0, ptr, 0);
 				ptr[i] = ',';
 			}
 		}
 	}
 #else
 	if (!(ptr = env_get("TLS_PROVIDER")))
-		logerr("No");
+		logerr(0, "No", 0);
 	else {
 		i = str_chr(ptr, ',');
 		if (ptr[i]) {
 			ptr[i] = 0;
-			logerr(ptr);
+			logerr(0, ptr, 0);
 			ptr[i] = ',';
 		}
 	}
 #endif
-	logerrf(" auth failure\n");
+	logerr(0, " auth failure\n", 0);
+	logflush();
 }
 
 void
 err_authd()
 {
-	out("503 you're already authenticated (#5.5.0)\r\n");
+	out("503 you're already authenticated (#5.5.0)\r\n", 0);
 	flush();
 }
 
 void
 err_authrequired()
 {
-	out("530 authentication required (#5.7.1)\r\n");
+	out("530 authentication required (#5.7.1)\r\n", 0);
 	flush();
 }
 
 void
 err_transaction(char *arg)
 {
-	out("503 no ");
-	out(arg);
-	out(" during mail transaction (#5.5.0)\r\n");
+	out("503 no ", arg, " during mail transaction (#5.5.0)\r\n", 0);
 	flush();
 }
 
 int
 err_noauth()
 {
-	out("504 auth type unimplemented (#5.5.1)\r\n");
+	out("504 auth type unimplemented (#5.5.1)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1898,7 +1695,7 @@ err_noauth()
 int
 err_noauthallowed()
 {
-	out("530 auth type prohibited without TLS (#5.7.0)\r\n");
+	out("538 Encryption required for requested authentication mechanism (#5.7.11)\r\n", 0);
 	flush();
 	return -2;
 }
@@ -1907,7 +1704,7 @@ err_noauthallowed()
 int
 err_authabrt()
 {
-	out("501 auth exchange cancelled (#5.0.0)\r\n");
+	out("501 auth exchange cancelled (#5.0.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1915,7 +1712,7 @@ err_authabrt()
 int
 err_input()
 {
-	out("501 malformed auth input (#5.5.4)\r\n");
+	out("501 malformed auth input (#5.5.4)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1923,23 +1720,10 @@ err_input()
 void
 err_mailbox(char *arg1, char *arg2, char *arg3)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" Invalid RECIPIENT address: MAIL from <");
-	logerr(arg1);
-	logerr("> RCPT <");
-	logerr(arg2);
-	logerr("> state <");
-	logerr(arg3);
-	logerrf(">\n");
-	out("550 sorry, ");
-	out(arg1);
-	out(" mailbox <");
-	out(arg2);
-	out("> ");
-	out(arg3);
-	out("\r\n");
+	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT <",
+			arg2, "> state <", arg3, ">\n", 0);
+	logflush();
+	out("550 sorry, ", arg1, " mailbox <", arg2, "> ", arg3, "\r\n", 0);
 	flush();
 	return;
 }
@@ -1947,16 +1731,11 @@ err_mailbox(char *arg1, char *arg2, char *arg3)
 void
 err_rcpt_errcount(char *arg1, int count)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" Too many Invalid RECIPIENTS (");
 	strnum[fmt_ulong(strnum, count)] = 0;
-	logerr(strnum);
-	logerr("): MAIL from <");
-	logerr(arg1);
-	logerrf(">\n");
-	out("421 too many invalid addresses, goodbye (#4.7.1)\r\n");
+	logerr(1, "Too many Invalid RECIPIENTS (", strnum, "): MAIL from <",
+			arg1, ">\n", 0);
+	logflush();
+	out("421 too many invalid addresses, goodbye (#4.7.1)\r\n", 0);
 	flush();
 	return;
 }
@@ -1964,11 +1743,9 @@ err_rcpt_errcount(char *arg1, int count)
 no_return void
 err_greytimeout()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerrf(" Timeout (no response from greylisting server)\n");
-	out("451 greylist temporary failure - Timeout (#4.3.0)\r\n");
+	logerr(1, "Timeout (no response from greylisting server)\n", 0);
+	logflush();
+	out("451 greylist temporary failure - Timeout (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -1976,17 +1753,12 @@ err_greytimeout()
 no_return void
 err_grey_tmpfail(char *arg)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" greylisting temporary failure: ");
-	if (arg) {
-		logerr(arg);
-		logerr(": ");
-	}
-	logerr(error_str(errno));
-	logerrf("\n");
-	out("451 greylist temporary failure (#4.3.0)\r\n");
+	logerr(1, "greylisting temporary failure: ", 0);
+	if (arg)
+		logerr(0, arg, ": ", 0);
+	logerr(0, error_str(errno), "\n", 0);
+	logflush();
+	out("451 greylist temporary failure (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -2000,30 +1772,16 @@ err_grey()
 	arg = rcptto.s;
 	for (ptr = arg + 1, idx = 0; idx < rcptto.len; idx++) {
 		if (!arg[idx]) {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" HELO <");
-			logerr(helohost.s);
-			logerr("> MAIL from <");
-			logerr(mailfrom.s);
-			logerr("> RCPT <");
-			logerr(ptr);
-			logerrf(">\n");
+			logerr(1, "HELO <", helohost.s, "> MAIL from <", mailfrom.s, "> RCPT <", ptr, ">\n", 0);
 			ptr = arg + idx + 2;
 		}
 	}
-	logerr("greylist ");
-	logerr(remoteip);
-	logerr(" <");
-	logerr(mailfrom.s);
-	logerr("> to <");
-	logerr(arg + 1);
-	logerr(">");
+	logerr(1, "greylist ", " <", mailfrom.s, "> to <", arg + 1, ">", 0);
 	if (rcptcount > 1)
-		logerr("...");			/* > 1 address sent for greylist check */
-	logerr("\n");
-	out("450 try again later (#4.3.0)\r\n");
+		logerr(0, "...", 0); /* > 1 address sent for greylist check */
+	logerr(0, "\n", 0);
+	logflush();
+	out("450 try again later (#4.3.0)\r\n", 0);
 	flush();
 	return;
 }
@@ -2124,11 +1882,10 @@ check_recipient_cdb(char *rcpt)
 		return 0;
 	case -3:
 	case 111:
-		out("451 unable to check recipients (#4.3.2)\r\n");
+		logerr(1, "recipients database error\n", 0);
+		logflush();
+		out("451 unable to check recipients (#4.3.2)\r\n", 0);
 		flush();
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerrf("recipients database error\n");
 		_exit(1);
 		/*- Not Reached */
 	}
@@ -2149,10 +1906,9 @@ check_recipient_pwd(char *rcpt, int len)
 	substdio        pwss;
 
 	if ((fd = open_read("/etc/passwd")) == -1) {
-		out("451 Requested action aborted: unable to read passwd database (#4.3.0)\r\n");
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerrf("passwd database error\n");
+		logerr(1, "passwd database error\n", 0);
+		logflush();
+		out("451 Requested action aborted: unable to read passwd database (#4.3.0)\r\n", 0);
 		flush();
 		_exit(1);
 	}
@@ -2232,11 +1988,10 @@ check_recipient_sql(char *rcpt, int len)
 			return (0);
 		return (*ptr);
 	}
-	out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
+	logerr(1, "sql database error\n", 0);
+	logflush();
+	out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
 	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerrf("sql database error\n");
 	_exit(1);
 	/*- Not Reached */
 	return (0);
@@ -2279,41 +2034,25 @@ dnscheck(char *address, int len, int paranoid)
 }
 
 void
-log_etrn(char *arg1, char *arg2, char *arg3)
+log_etrn(char *arg1, char *arg2)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	if (arg3) {
-		logerr(" ");
-		logerr(arg3);
-	}
-	if (arg2) {
-		logerr(" ETRN ");
-		logerr(arg2);
-	}
-	logerrf("\n");
+	logerr(1, "ETRN ", arg1, 0);
+	if (arg2)
+		logerr(0, " ", arg2, 0);
+	logerr(0, "\n", 0);
+	logflush();
 }
 
 void
-log_atrn(char *arg1, char *arg2, char *arg3, char *arg4)
+log_atrn(char *arg1, char *arg2, char *arg3)
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(arg1);
-	if (arg2) {
-		logerr(" ");
-		logerr(arg2);
-	}
-	if (arg3) {
-		logerr(" ATRN ");
-		logerr(arg3);
-	}
-	if (arg4) {
-		logerr(": ");
-		logerr(arg4);
-	}
-	logerrf("\n");
+	logerr(1, "ATRN ", arg1, 0);
+	if (arg2)
+		logerr(0, arg2, 0);
+	if (arg3)
+		logerr(0, ": ", arg3, 0);
+	logerr(0, "\n", 0);
+	logflush();
 }
 
 void
@@ -2383,13 +2122,10 @@ no_return void
 sigterm()
 {
 	smtp_respond("421 ");
-	out(" Service not available, closing tranmission channel (#4.3.2)\r\n");
+	logerr(1, "going down on SIGTERM\n", 0);
+	logflush();
+	out(" Service not available, closing tranmission channel (#4.3.2)\r\n", 0);
 	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" going down on SIGTERM");
-	logerrf("\n");
 	_exit(1);
 }
 
@@ -2404,7 +2140,7 @@ smtp_help(char *arg)
 	}
 	ptr = revision + 11;
 	if (*ptr) {
-		out("214-This is IndiMail SMTP Version ");
+		out("214-This is IndiMail SMTP Version ", 0);
 		for (; *ptr; ptr++) {
 			if (*ptr == ' ')
 				break;
@@ -2412,32 +2148,32 @@ smtp_help(char *arg)
 				_exit(1);
 		}
 	}
-	out("\r\n");
-	out("214-https://github.com/mbhangui/indimail-mta\r\n");
-	out("214-This server supports the following commands:\r\n");
+	out("\r\n",
+			"214-https://github.com/mbhangui/indimail-mta\r\n",
+			"214-This server supports the following commands:\r\n", 0);
 	switch (smtp_port)
 	{
 	case ODMR_PORT:/*- RFC 2645 */
 		if (hasvirtual)
-			out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n");
+			out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n", 0);
 		else { /*- since we don't have ATRN mechanism, behave like any other non-special port */
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
+			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", 0);
 			if (hostname && *hostname && childargs && *childargs)
-				out("AUTH ");
-			out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n");
+				out("AUTH ", 0);
+			out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n", 0);
 		}
 		break;
 	case SUBM_PORT:/*- RFC 2476 */
-		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
+		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", 0);
 		if (hostname && *hostname && childargs && *childargs)
-			out("AUTH ");
-		out(no_vrfy ? "HELP QUIT\r\n" : "VRFY HELP QUIT\r\n");
+			out("AUTH ", 0);
+		out(no_vrfy ? "HELP QUIT\r\n" : "VRFY HELP QUIT\r\n", 0);
 		break;
 	default:
-		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ");
+		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", 0);
 		if (hostname && *hostname && childargs && *childargs)
-			out("AUTH ");
-		out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n");
+			out("AUTH ", 0);
+		out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n", 0);
 		break;
 	}
 	flush();
@@ -2452,7 +2188,7 @@ smtp_quit(char *arg)
 #endif
 
 	smtp_respond("221 ");
-	out(" closing connection\r\n");
+	out(" closing connection\r\n", 0);
 	flush();
 	if (phandle)
 		closeLibrary(&phandle);
@@ -2577,7 +2313,7 @@ dohelo(char *arg)
 			switch (dnscheck(helohost.s, helohost.len - 1, 1))
 			{
 			case DNS_HARD:
-				err_hmf(remoteip, arg, 0);
+				err_hmf(arg, 0);
 				return;
 			case DNS_SOFT:
 				err_smf();
@@ -2611,11 +2347,9 @@ greetdelay_check(int delay)
 			errno = 0;
 		die_read(!r ? "client dropped connection" : 0, 0);
 	}
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerrf(" SMTP Protocol violation - Early Talking\n");
-	out("554 SMTP protocol violation. Polite people say hello after the server greets them (#5.7.1)\r\n");
+	logerr(1, "SMTP Protocol violation - Early Talking\n", 0);
+	logflush();
+	out("554 SMTP protocol violation. Polite people say hello after the server greets them (#5.7.1)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -2836,10 +2570,9 @@ open_control_files2()
 #endif
 #ifdef HAVESRS
 	if ((r = srs_setup(0)) < 0) {
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerrf(" srs_setup failed\n");
-		out("451 Requested action aborted: unable to read srs controls (#4.3.0)\r\n");
+		logerr(1, "srs_setup failed\n", 0);
+		logflush();
+		out("451 Requested action aborted: unable to read srs controls (#4.3.0)\r\n", 0);
 		flush();
 		_exit(1);
 	}
@@ -2908,15 +2641,10 @@ open_control_files2()
 void
 log_gsasl_version()
 {
-	logerr("qmail-smtpd: ");
 	strnum[fmt_ulong(strnum, getpid())] = 0;
-	logerr("pid ");
-	logerr(strnum);
-	logerr(" gsasl header version=");
-	logerr(GSASL_VERSION);
-	logerr(" library version=");
-	logerr(gsasl_check_version(NULL));
-	logerrf("\n");
+	logerr(1, "gsasl header version=", GSASL_VERSION, " library version=",
+			gsasl_check_version(NULL), "\n", 0);
+	logflush();
 }
 #endif
 
@@ -2953,9 +2681,8 @@ smtp_init(int force_flag)
 #endif
 #ifdef HASLIBGSASL
 	if ((r = gsasl_init(&gsasl_ctx)) < 0) {
-		logerr("gsasl_init: ");
-		logerr(gsasl_strerror(r));
-		logerrf("\r\n");
+		logerr(1, "gsasl_init: ", gsasl_strerror(r), "\n", 0);
+		logflush();
 		_exit(111);
 	}
 	log_gsasl_version();
@@ -2983,7 +2710,6 @@ setup()
 	for (x = Revision.s; *x && *x != ' '; x++);
 	if (*x == ' ')
 		*x = 0;
-	smtp_init(0);
 #ifdef IPV6
 	if (!(remoteip4 = env_get("TCPREMOTEIP")))
 		remoteip4 = "unknown";
@@ -3017,6 +2743,10 @@ setup()
 	greyip = env_get("GREYIP");
 	if (!greyip || !*greyip)
 		greyip = (char *) 0; /*- Disable greylisting if GREYIP="" */
+
+	/*- now that we have set variables, initialize smtp */
+	smtp_init(0);
+
 	/*- Attempt to look up the IP number in control/relayclients. */
 	if (relayclientsok) {
 		for (i = len = str_len(remoteip); i > 0; i--)
@@ -3130,32 +2860,29 @@ smtp_helo(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n");
+		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	case 2:
-		smtp_relayreject(remoteip);
+		smtp_relayreject();
 		return;
 	case 3:
-		smtp_paranoid(remoteip);
+		smtp_paranoid();
 		return;
 	case 4:
-		smtp_ptr(remoteip);
+		smtp_ptr();
 		return;
 	case 5:
 		smtp_badhost(remoteip);
 		return;
 	case 6:
-		smtp_badip(remoteip);
+		smtp_badip();
 		return;
 	}
 	smtp_respond("250 ");
-	if (!arg || !*arg) {
-		out(" [");
-		out(remoteip);
-		out("]");
-	}
-	out("\r\n");
+	if (!arg || !*arg)
+		out(" [", remoteip, "]", 0);
+	out("\r\n", 0);
 	if (!arg || !*arg)
 		dohelo(remotehost);
 	else
@@ -3175,33 +2902,29 @@ smtp_ehlo(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n");
+		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	case 2:
-		smtp_relayreject(remoteip);
+		smtp_relayreject();
 		return;
 	case 3:
-		smtp_paranoid(remoteip);
+		smtp_paranoid();
 		return;
 	case 4:
-		smtp_ptr(remoteip);
+		smtp_ptr();
 		return;
 	case 5:
 		smtp_badhost(remoteip);
 		return;
 	case 6:
-		smtp_badip(remoteip);
+		smtp_badip();
 		return;
 	}
-	out("250-");
-	out(greeting.s);
-	if (!arg || !*arg) {
-		out(" [");
-		out(remoteip);
-		out("]");
-	}
-	out("\r\n");
+	out("250-", greeting.s, 0);
+	if (!arg || !*arg)
+		out(" [", remoteip, "]", 0);
+	out("\r\n", 0);
 	if (hostname && *hostname && childargs && *childargs) {
 		char           *no_auth_login, *no_auth_plain, *no_cram_md5,
 					   *no_cram_sha1, *no_cram_sha224, *no_cram_sha256,
@@ -3254,180 +2977,143 @@ smtp_ehlo(char *arg)
 		if (flags1) { /*- all auth methods enabled */
 #ifdef HASLIBGSASL
 #if 0
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", 0);
 #else
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", 0);
 #endif
 #ifdef TLS
 			if (ssl)
 #if 0
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS", 0);
 #else
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS", 0);
 #endif
 #endif
-			out("\r\n");
+			out("\r\n", 0);
 			if (old_client_bug) {
 #if 0
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512");
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", 0);
 #else
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256");
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", 0);
 #endif
 #ifdef TLS
 				if (ssl)
 #if 0
-					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS");
+					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS", 0);
 #else
-					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS");
+					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS", 0);
 #endif
 #endif
-				out("\r\n");
+				out("\r\n", 0);
 			}
 #else
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", 0);
 			if (old_client_bug)
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n");
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", 0);
 #endif /*- #ifdef HAVELIBGSASL */
 		} else /*- few auth methods disabled */
 		if (flags2) {
 			int             flag = 0;
 
-			out("250-AUTH");
+			out("250-AUTH", 0);
 			if (!no_auth_login)
-				out(" LOGIN");
+				out(" LOGIN", 0);
 			if (!no_auth_plain)
-				out(" PLAIN");
+				out(" PLAIN", 0);
 			if (!no_cram_md5)
-				out(" CRAM-MD5");
+				out(" CRAM-MD5", 0);
 			if (!no_cram_sha1)
-				out(" CRAM-SHA1");
+				out(" CRAM-SHA1", 0);
 			if (!no_cram_sha224)
-				out(" CRAM-SHA224");
+				out(" CRAM-SHA224", 0);
 			if (!no_cram_sha256)
-				out(" CRAM-SHA256");
+				out(" CRAM-SHA256", 0);
 			if (!no_cram_sha384)
-				out(" CRAM-SHA384");
+				out(" CRAM-SHA384", 0);
 			if (!no_cram_sha512)
-				out(" CRAM-SHA512");
+				out(" CRAM-SHA512", 0);
 			if (!no_cram_ripemd)
-				out(" CRAM-RIPEMD");
+				out(" CRAM-RIPEMD", 0);
 			if (!no_digest_md5)
-				out(" DIGEST-MD5");
+				out(" DIGEST-MD5", 0);
 #ifdef HASLIBGSASL
 			if (!no_scram_sha1)
-				out(" SCRAM-SHA-1");
+				out(" SCRAM-SHA-1", 0);
 			if (!no_scram_sha1_plus)
-				out(" SCRAM-SHA-1-PLUS");
+				out(" SCRAM-SHA-1-PLUS", 0);
 			if (!no_scram_sha256)
-				out(" SCRAM-SHA-256");
+				out(" SCRAM-SHA-256", 0);
 			if (!no_scram_sha256_plus)
-				out(" SCRAM-SHA-256-PLUS");
+				out(" SCRAM-SHA-256-PLUS", 0);
 #if 0
 			if (!no_scram_sha512)
-				out(" SCRAM-SHA-512");
+				out(" SCRAM-SHA-512", 0);
 			if (!no_scram_sha512_plus)
-				out(" SCRAM-SHA-512-PLUS");
+				out(" SCRAM-SHA-512-PLUS", 0);
 #endif
 #endif
-			out("\r\n");
+			out("\r\n", 0);
 			if (old_client_bug) {
-				if (!no_auth_login) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("LOGIN");
-				}
-				if (!no_auth_plain) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("PLAIN");
-				}
+				if (!no_auth_login)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "LOGIN", 0);
+				if (!no_auth_plain)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "PLAIN", 0);
 				if (!no_cram_md5) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("CRAM-MD5");
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-MD5", 0);
 				}
-				if (!no_cram_sha1) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("CRAM-SHA1");
-				}
-				if (!no_cram_sha224) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("CRAM-SHA224");
-				}
-				if (!no_cram_sha256) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("CRAM-SHA256");
-				}
-				if (!no_cram_sha384) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("CRAM-SHA384");
-				}
-				if (!no_cram_sha512) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("CRAM-SHA512");
-				}
-				if (!no_cram_ripemd) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("CRAM-RIPEMD");
-				}
-				if (!no_digest_md5) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("DIGEST-MD5");
-				}
+				if (!no_cram_sha1)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA1", 0);
+				if (!no_cram_sha224)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA224", 0);
+				if (!no_cram_sha256)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA256", 0);
+				if (!no_cram_sha384)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA384", 0);
+				if (!no_cram_sha512)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA512", 0);
+				if (!no_cram_ripemd)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-RIPEMD", 0);
+				if (!no_digest_md5)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "DIGEST-MD5", 0);
 #ifdef HASLIBGSASL
-				if (!no_scram_sha1) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("SCRAM-SHA-1");
-				}
-				if (!no_scram_sha1_plus) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("SCRAM-SHA-1-PLUS");
-				}
-				if (!no_scram_sha256) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("SCRAM-SHA-256");
-				}
-				if (!no_scram_sha256_plus) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("SCRAM-SHA-256-PLUS");
-				}
+				if (!no_scram_sha1)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-1", 0);
+				if (!no_scram_sha1_plus)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-1-PLUS", 0);
+				if (!no_scram_sha256)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-256", 0);
+				if (!no_scram_sha256_plus)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-256-PLUS", 0);
 #if 0
-				if (!no_scram_sha512) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("SCRAM-SHA-512");
-				}
-				if (!no_scram_sha512_plus) {
-					out(flag++ == 0 ? "250-AUTH=" : " ");
-					out("SCRAM-SHA-512-PLUS");
-				}
+				if (!no_scram_sha512)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-512", 0);
+				if (!no_scram_sha512_plus)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-512-PLUS", 0);
 #endif
 #endif
-				out("\r\n");
+				out("\r\n", 0);
 			}
 		}
 	}
 	if (hasvirtual) {
 		if (smtp_port != ODMR_PORT) {
-			out("250-PIPELINING\r\n");
-			out("250-8BITMIME\r\n");
+			out("250-PIPELINING\r\n", "250-8BITMIME\r\n", 0);
 			if (databytes > 0) {
 				size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
-				out("250-SIZE ");
-				out(size_buf);
-				out("\r\n");
+				out("250-SIZE ", size_buf, "\r\n", 0);
 			}
 			if (smtp_port != SUBM_PORT)
-				out("250-ETRN\r\n");
+				out("250-ETRN\r\n", 0);
 		} else
-			out("250-ATRN\r\n");
+			out("250-ATRN\r\n", 0);
 	} else {
-		out("250-PIPELINING\r\n");
-		out("250-8BITMIME\r\n");
+		out("250-PIPELINING\r\n", "250-8BITMIME\r\n", 0);
 		if (databytes > 0) {
 			size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
-			out("250-SIZE ");
-			out(size_buf);
-			out("\r\n");
+			out("250-SIZE ", size_buf, "\r\n", 0);
 		}
 		if (smtp_port != SUBM_PORT)
-			out("250-ETRN\r\n");
+			out("250-ETRN\r\n", 0);
 	}
 #ifdef TLS
 	if (!ssl && env_get("STARTTLS")) {
@@ -3446,17 +3132,17 @@ smtp_ehlo(char *arg)
 				!stralloc_0(&filename))
 			die_nomem();
 		if (!stat(filename.s, &st))
-			out("250-STARTTLS\r\n");
+			out("250-STARTTLS\r\n", 0);
 		alloc_free(filename.s);
 	}
 #endif
 #ifdef SMTPUTF8
 	if (env_get("SMTPUTF8")) {
 		smtputf8_enable = 1;
-		out("250-SMTPUTF8\r\n");
+		out("250-SMTPUTF8\r\n", 0);
 	}
 #endif
-	out("250 HELP\r\n");
+	out("250 HELP\r\n", 0);
 	flush();
 	if (!arg || !*arg)
 		dohelo(remotehost);
@@ -3469,12 +3155,12 @@ void
 smtp_rset(char *arg)
 {
 	if (arg && *arg) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	}
 	seenmail = rcptto.len = mailfrom.len = addr.len = 0;
-	out("250 flushed\r\n");
+	out("250 flushed\r\n", 0);
 	flush();
 	return;
 }
@@ -3593,11 +3279,10 @@ pop_bef_smtp(char *mfrom)
 		if (!env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0"))
 			die_nomem();
 	} else {
-		out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
+		logerr(1, "Database error\n", 0);
+		logflush();
+		out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
 		flush();
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerrf("Database error\n");
 		return (1);
 	}
 	return (0);
@@ -3623,15 +3308,14 @@ domain_compare(char *dom1, char *dom2)
 	if (str_diff(dom1, dom2)) {
 		if (!(tmpdom1 = (*inquery) (DOMAIN_QUERY, dom1, 0)) ||
 				!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
-			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
+			logerr(1, "Database error\n", 0);
+			logflush();
+			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
 			flush();
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerrf("Database error\n");
 			return (-1);
 		}
 		if (str_diff(tmpdom1, tmpdom2)) {
-			err_nogateway(remoteip, mailfrom.s, 0, 1);
+			err_nogateway(mailfrom.s, 0, 1);
 			return (1);
 		}
 	}
@@ -3770,27 +3454,27 @@ smtp_mail(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n");
+		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	case 2:
-		smtp_relayreject(remoteip);
+		smtp_relayreject();
 		return;
 	case 3:
-		smtp_paranoid(remoteip);
+		smtp_paranoid();
 		return;
 	case 4:
-		smtp_ptr(remoteip);
+		smtp_ptr();
 		return;
 	case 5:
 		smtp_badhost(remoteip);
 		return;
 	case 6:
-		smtp_badip(remoteip);
+		smtp_badip();
 		return;
 	}
 	if (!seenhelo) {
-		out("503 Polite people say hello first (#5.5.4)\r\n");
+		out("503 Polite people say hello first (#5.5.4)\r\n", 0);
 		flush();
 		return;
 	}
@@ -3849,12 +3533,12 @@ smtp_mail(char *arg)
 			 * TCPLOCALHOST, TCPREMOTEIP
 			 */
 			open_control_files2();
-			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, f_envret, 0);
+			log_rules(addr.s, authd ? remoteinfo : 0, f_envret, 0);
 		}
 		break;
 	}
 	if (!(ret = tablematch("hostaccess", remoteip, addr.s + str_rchr(addr.s, '@')))) {
-		err_hostaccess(remoteip, addr.s);
+		err_hostaccess(addr.s);
 		return;
 	} else
 	if (ret == -1)
@@ -3872,7 +3556,7 @@ smtp_mail(char *arg)
 	switch (address_match(bhsndFn, &addr, bhfok ? &bhf : 0, bhfok ? &mapbhf : 0, bhpok ? &bhp : 0, &errStr))
 	{
 	case 1:/*- flow through */
-		err_bhf(remoteip, addr.s); /*- This sets NULLQUEUE */
+		err_bhf(addr.s); /*- This sets NULLQUEUE */
 	case 0:
 		break;
 	case -1:
@@ -3885,7 +3569,7 @@ smtp_mail(char *arg)
 	switch (address_match(bmfFn, &addr, bmfok ? &bmf : 0, bmfok ? &mapbmf : 0, bmpok ? &bmp : 0, &errStr))
 	{
 	case 1:
-		err_bmf(remoteip, addr.s);
+		err_bmf(addr.s);
 		return;
 	case 0:
 		break;
@@ -3900,7 +3584,7 @@ smtp_mail(char *arg)
 		switch (dnscheck(addr.s, addr.len - 1, 0))
 		{
 		case DNS_HARD:
-			err_hmf(remoteip, arg, 1);
+			err_hmf(arg, 1);
 			return;
 		case DNS_SOFT:
 			err_smf();
@@ -3910,7 +3594,7 @@ smtp_mail(char *arg)
 		}
 	}
 	if ((bouncemail = env_get("BOUNCEMAIL"))) {
-		err_maps(bouncemail, remoteip, addr.s);
+		err_maps(addr.s, bouncemail);
 		return;
 	}
 	if (env_get("SPAMFILTER")) {
@@ -3969,13 +3653,9 @@ smtp_mail(char *arg)
 	 */
 	if (env_get("CUGMAIL")) {
 		if (!addrallowed(addr.s)) {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" Invalid SENDER address: MAIL from <");
-			logerr(mailfrom.s);
-			logerrf(">\n");
-			out("553 authorization failure (#5.7.1)\r\n");
+			logerr(1, "Invalid SENDER address: MAIL from <", mailfrom.s, ">\n", 0);
+			logflush();
+			out("553 authorization failure (#5.7.1)\r\n", 0);
 			flush();
 			return;
 		}
@@ -3989,22 +3669,16 @@ smtp_mail(char *arg)
 				 * Accept the mail as denial could be stupid
 				 * like the vrfy command
 				 */
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerr(remoteip);
-				logerr(" mail from invalid user <");
-				logerr(mailfrom.s);
-				logerrf(">\n");
-				out("553 authorization failure (#5.7.1)\r\n");
+				logerr(1, "mail from invalid user <", mailfrom.s, ">\n", 0);
+				logflush();
+				out("553 authorization failure (#5.7.1)\r\n", 0);
 				flush();
 				sleep(5); /*- Prevent DOS */
 				return;
 			} else {
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerr(remoteip);
-				logerrf(" Database error\n");
-				out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
+				logerr(1, "Database error\n", 0);
+				logflush();
+				out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
 				flush();
 				return;
 			}
@@ -4014,14 +3688,10 @@ smtp_mail(char *arg)
 				return;
 			}
 			if (*i_inactive || pw->pw_gid & NO_SMTP) {
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerr(remoteip);
-				logerr(" SMTP Access denied to <");
-				logerr(mailfrom.s);
-				logerr("> ");
-				logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
-				out("553 authorization failure (#5.7.1)\r\n");
+				logerr(1, "SMTP Access denied to <", mailfrom.s, "> ",
+						*i_inactive ? "user inactive\n" : "No SMTP Flag\n", 0);
+				logflush();
+				out("553 authorization failure (#5.7.1)\r\n", 0);
 				flush();
 				return;
 			}
@@ -4038,13 +3708,10 @@ smtp_mail(char *arg)
 		if (pop_bef_smtp(mailfrom.s))	  /*- will set the variable authenticated */
 			return;	/*- temp error */
 		if (authenticated != 1) { /*- in case pop-bef-smtp also is negative */
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" unauthenticated local SENDER address: MAIL from <");
-			logerr(mailfrom.s);
-			logerrf(">\n");
-			out("530 authentication required for local users (#5.7.1)\r\n");
+			logerr(1, "unauthenticated local SENDER address: MAIL from <",
+					mailfrom.s, ">\n", 0);
+			logflush();
+			out("530 authentication required for local users (#5.7.1)\r\n", 0);
 			flush();
 			return;
 		}
@@ -4057,7 +3724,7 @@ smtp_mail(char *arg)
 		if (mailfrom.s[at1 = str_rchr(mailfrom.s, '@')]) {
 			dom1 = mailfrom.s + at1 + 1;
 			if (!addrallowed(mailfrom.s)) {
-				err_nogateway(remoteip, mailfrom.s, 0, 1);
+				err_nogateway(mailfrom.s, 0, 1);
 				return;
 			}
 			mailfrom.s[at1] = 0;
@@ -4094,19 +3761,19 @@ smtp_mail(char *arg)
 				}
 				if (iter_pass == 1) {
 					mailfrom.s[at1] = '@';
-					err_nogateway(remoteip, mailfrom.s, 0, 1);
+					err_nogateway(mailfrom.s, 0, 1);
 					break;
 				}
 			} /*- for (;;) */
 		} else {
 			if (x && *x) {
 				if (str_diff(mailfrom.s, x) && str_diff(mailfrom.s, remoteinfo)) {
-					err_nogateway(remoteip, mailfrom.s, 0, 1);
+					err_nogateway(mailfrom.s, 0, 1);
 					return;
 				}
 			} else {
 				if (str_diff(mailfrom.s, remoteinfo)) {
-					err_nogateway(remoteip, mailfrom.s, 0, 1);
+					err_nogateway(mailfrom.s, 0, 1);
 					return;
 				}
 			}
@@ -4152,7 +3819,7 @@ nohasvirtual:
 		case SPF_ERROR:
 			if (spfbehavior < 2)
 				break;
-			out("451 SPF lookup failure (#4.3.0)\r\n");
+			out("451 SPF lookup failure (#4.3.0)\r\n", 0);
 			flush();
 			return;
 		case SPF_NONE:
@@ -4201,16 +3868,11 @@ nohasvirtual:
 		if (!plug[i] || !plug[i]->mail_func)
 			continue;
 		if (plug[i]->mail_func(remoteip, addr.s, &mesg)) {
-			out(mesg);
-			flush();
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr("plugin(from)[");
 			strnum[fmt_ulong(strnum, i)] = 0;
-			logerr(strnum);
-			logerr("]: ");
-			logerr(mesg);
-			logerrf("\n");
+			logerr(1, "plugin(from)[", strnum, "]: ", mesg, "\n", 0);
+			logflush();
+			out(mesg, 0);
+			flush();
 			return;
 		}
 	}
@@ -4218,14 +3880,14 @@ nohasvirtual:
 #ifdef TLS
 	if (env_get("FORCE_TLS")) {
 		if (!ssl) {
-			out("530 must issue STARTTLS first (#5.7.0)\r\n");
+			out("530 must issue STARTTLS first (#5.7.0)\r\n", 0);
 			flush();
 			return;
 		}
 	}
 #endif
 	seenmail = 1;
-	out("250 ok\r\n");
+	out("250 ok\r\n", 0);
 	flush();
 	return;
 }
@@ -4248,23 +3910,23 @@ smtp_rcpt(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n");
+		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	case 2:
-		smtp_relayreject(remoteip);
+		smtp_relayreject();
 		return;
 	case 3:
-		smtp_paranoid(remoteip);
+		smtp_paranoid();
 		return;
 	case 4:
-		smtp_ptr(remoteip);
+		smtp_ptr();
 		return;
 	case 5:
 		smtp_badhost(remoteip);
 		return;
 	case 6:
-		smtp_badip(remoteip);
+		smtp_badip();
 		return;
 	}
 	if (!seenmail) {
@@ -4320,15 +3982,10 @@ smtp_rcpt(char *arg)
 		switch (srsreverse(addr.s))
 		{
 		case -3: /*- srs error */
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" failed to decode srs address ");
-			logerr(addr.s);
-			logerr(": ");
-			logerr(srs_error.s);
-			logerrf("\n");
-			out("451 failed to decode srs address (#4.3.0)\r\n");
+			logerr(1, "failed to decode srs address ", addr.s, ": ",
+					srs_error.s, "\n", 0);
+			logflush();
+			out("451 failed to decode srs address (#4.3.0)\r\n", 0);
 			flush();
 			break;
 		case -2: /*- out of memory */
@@ -4343,13 +4000,9 @@ smtp_rcpt(char *arg)
 			 * srsreverse returns 0 only when setup() in srs.c
 			 * returns 0
 			 */
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" unable to decode SRS address ");
-			logerr(addr.s);
-			logerrf("\n");
-			out("451 unable to decode SRS address (#4.3.5)\r\n");
+			logerr(1, "unable to decode SRS address ", addr.s, "\n", 0);
+			logflush();
+			out("451 unable to decode SRS address (#4.3.5)\r\n", 0);
 			flush();
 			break;
 		case 1:
@@ -4383,7 +4036,7 @@ smtp_rcpt(char *arg)
 		switch (address_match(rcpFn, &addr, rcpok ? &rcp : 0, rcpok ? &maprcp : 0, brpok ? &brp : 0, &errStr))
 		{
 		case 1:
-			err_rcp(remoteip, mailfrom.s, addr.s);
+			err_rcp(mailfrom.s, addr.s);
 			return;
 		case 0:
 			break;
@@ -4398,19 +4051,15 @@ smtp_rcpt(char *arg)
 		switch (mail_acl(&acclist, qregex, mailfrom.s, addr.s, 0))
 		{
 		case 1:
-			err_acl(remoteip, mailfrom.s, addr.s);
+			err_acl(mailfrom.s, addr.s);
 			return;
 		case 0:
 			break;
 		default:
-			out("451 Requested action aborted: local system failure (#4.3.0)\r\n");
+			logerr(1, "accesslist: ", error_str(errno), "\n", 0);
+			logflush();
+			out("451 Requested action aborted: local system failure (#4.3.0)\r\n", 0);
 			flush();
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" accesslist: ");
-			logerr(error_str(errno));
-			logerrf("\n");
 			return;
 		}
 	}
@@ -4428,11 +4077,11 @@ smtp_rcpt(char *arg)
 			if (env_get("CHECKRELAY") && pop_bef_smtp(mailfrom.s))
 				return;
 			if (authenticated != 1) {
-				err_nogateway(remoteip, mailfrom.s, addr.s, 0);
+				err_nogateway(mailfrom.s, addr.s, 0);
 				return;
 			}
 		} else {
-			err_nogateway(remoteip, mailfrom.s, addr.s, 0);
+			err_nogateway(mailfrom.s, addr.s, 0);
 			return;
 		}
 	} /*- if (!allowed_rcpthosts) */
@@ -4518,7 +4167,7 @@ smtp_rcpt(char *arg)
 		switch (address_match(bhrcpFn, &addr, bhrcpok ? &bhrcp : 0, bhrcpok ? &mapbhrcp : 0, bhbrpok ? &bhbrp : 0, &errStr))
 		{
 		case 1:
-			err_bhrcp(remoteip, mailfrom.s, addr.s);
+			err_bhrcp(mailfrom.s, addr.s);
 		case 0:
 			break;
 		case -1:
@@ -4533,23 +4182,18 @@ smtp_rcpt(char *arg)
 		if (!plug[i] || !plug[i]->rcpt_func)
 			continue;
 		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg)) {
-			out(mesg);
-			flush();
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr("plugin(rcpt)[");
 			strnum[fmt_ulong(strnum, i)] = 0;
-			logerr(strnum);
-			logerr("]: ");
-			logerr(mesg);
-			logerrf("\n");
+			logerr(1, "plugin(rcpt)[", strnum, "]: ", mesg, "\n", 0);
+			logflush();
+			out(mesg, 0);
+			flush();
 			return;
 		}
 	}
 #endif
 	/*- Check on max. number of RCPTS */
 	if (maxrcptcount > 0 && (rcptcount + 1) > maxrcptcount) {
-		err_mrc(remoteip, mailfrom.s, arg);
+		err_mrc(mailfrom.s, arg);
 		return;
 	}
 	if (tarpitcount && (rcptcount + 1) >= tarpitcount)
@@ -4571,14 +4215,14 @@ smtp_rcpt(char *arg)
 		break;
 	default:
 		if (d_envret > 0)
-			log_rules(remoteip, addr.s, authd ? remoteinfo : 0, d_envret, 1);
+			log_rules(addr.s, authd ? remoteinfo : 0, d_envret, 1);
 	}
 	rcptcount++;
 	if (!stralloc_cats(&rcptto, "T") ||
 			!stralloc_cats(&rcptto, addr.s) ||
 			!stralloc_0(&rcptto))
 		die_nomem();
-	out("250 ok\r\n");
+	out("250 ok\r\n", 0);
 	flush();
 	return;
 }
@@ -4916,13 +4560,10 @@ acceptmessage(unsigned long qp)
 	datetime_sec    when;
 
 	when = now();
-	out("250 ok ");
 	accept_buf[fmt_ulong(accept_buf, (unsigned long) when)] = 0;
-	out(accept_buf);
-	out(" qp ");
+	out("250 ok ", accept_buf, " qp ", 0);
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
-	out(accept_buf);
-	out("\r\n");
+	out(accept_buf, "\r\n", 0);
 	flush();
 	return;
 }
@@ -4970,7 +4611,7 @@ smtp_data(char *arg)
 		sqlmatch_close_db();
 #endif
 	if (arg && *arg) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	}
@@ -4999,7 +4640,7 @@ smtp_data(char *arg)
 	seenmail = 0;
 	/*- Return error if incoming SMTP msg exceeds DATABYTES */
 	if (flagsize) {
-		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
+		err_size(mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
 	if (databytes > 0)
@@ -5028,17 +4669,17 @@ smtp_data(char *arg)
 			break;
 		default:
 			if (a_envret > 0) {
-				log_rules(remoteip, "authorized", authd ? remoteinfo : 0, a_envret, 0);
+				log_rules("authorized", authd ? remoteinfo : 0, a_envret, 0);
 			}
 			break;
 		}
 	}
 	if (qmail_open(&qqt) == -1) {
-		err_qqt(remoteip);
+		err_qqt();
 		return;
 	}
 	qp = qmail_qp(&qqt); /*- pid of queue process */
-	out("354 go ahead\r\n");
+	out("354 go ahead\r\n", 0); /* next read will flush the pending data in ssout */
 	/*- flush(); -*/
 #ifdef TLS
 	x = ssl ? 0 : env_get("TLS_PROVIDER");
@@ -5061,7 +4702,13 @@ smtp_data(char *arg)
 #ifdef USE_SPF
 	spfreceived();
 #endif
-	/*- write the body */
+	/*-
+	 * write the body.
+	 * read of ssin (which calls saferead)
+	 * will cause data in ssout to be flushed
+	 * and the client will see the string
+	 * "354 go ahead \r\n
+	 */
 	if (!blast(&hops)) {
 		hops = (hops >= maxhops);
 		if (hops)
@@ -5071,16 +4718,11 @@ smtp_data(char *arg)
 			if (!plug[i] || !plug[i]->data_func)
 				continue;
 			if (plug[i]->data_func(localhost, remoteip, remotehost, remoteinfo, &mesg)) {
-				out(mesg);
-				flush();
-				logerr("qmail-smtpd: ");
-				logerrpid();
-				logerr("plugin(data)[");
 				strnum[fmt_ulong(strnum, i)] = 0;
-				logerr(strnum);
-				logerr("]: ");
-				logerr(mesg);
-				logerrf("\n");
+				logerr(1, "plugin(data)[", strnum, "]: ", mesg, "\n", 0);
+				logflush();
+				out(mesg, 0);
+				flush();
 				return;
 			}
 		}
@@ -5099,7 +4741,7 @@ smtp_data(char *arg)
 	qqx = qmail_close(&qqt);
 	if (!*qqx) { /*- mail is now in queue */
 		acceptmessage(qp);
-		log_trans(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, 0);
+		log_trans(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, 0);
 		return;
 	}
 	/*- you will reach here if qmail_fail() was called or if qmail_close returns error */
@@ -5107,12 +4749,12 @@ smtp_data(char *arg)
 		sigsok = sigsok_orig;
 		bodyok = bodyok_orig;
 		if (flagexecutable) {
-			log_virus(remoteip, virus_desc, mailfrom.s, rcptto.s, rcptto.len, flagblackhole);
+			log_virus(virus_desc, mailfrom.s, rcptto.s, rcptto.len, flagblackhole);
 			flagexecutable = flagblackhole = 0;
 			return;
 		}
 		if (flagbody) {
-			log_virus(remoteip, content_desc, mailfrom.s, rcptto.s, rcptto.len, flagblackhole);
+			log_virus(content_desc, mailfrom.s, rcptto.s, rcptto.len, flagblackhole);
 			flagbody = flagblackhole = 0;
 			return;
 		}
@@ -5122,17 +4764,16 @@ smtp_data(char *arg)
 		return;
 	}
 	if (databytes > 0 && !BytesToOverflow) {
-		err_size(remoteip, mailfrom.s, rcptto.s, rcptto.len);
+		err_size(mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
 	if (*qqx == 'D')
-		out("554 ");
+		out("554 ", 0);
 	else
-		out("451 ");
-	out(qqx + 1);
-	out("\r\n");
+		out("451 ", 0);
+	out(qqx + 1, "\r\n", 0);
 	flush();
-	err_queue(remoteip, mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
+	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
 	return;
 }
 
@@ -5279,9 +4920,7 @@ authenticate(int method)
 			die_nomem();
 		if (!stralloc_0(&resp))
 			die_nomem();
-		out("334 ");
-		out(resp.s);
-		out("\r\n");
+		out("334 ", resp.s, "\r\n", 0);
 		flush();
 		/*- digest-md5 requires a special okay response ...  */
 		if ((n = saferead(0, respbuf, 512)) == -1)
@@ -5306,7 +4945,7 @@ auth_login(char *arg)
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &user)) == 1)
 			return err_input();
 	} else {
-		out("334 VXNlcm5hbWU6\r\n");
+		out("334 VXNlcm5hbWU6\r\n", 0);
 		flush(); /*- Username: */
 		if (authgetl() < 0)
 			return -1;
@@ -5315,7 +4954,7 @@ auth_login(char *arg)
 	}
 	if (r == -1)
 		die_nomem();
-	out("334 UGFzc3dvcmQ6\r\n");
+	out("334 UGFzc3dvcmQ6\r\n", 0);
 	flush(); /*- Password: */
 	if (authgetl() < 0)
 		return -1;
@@ -5344,7 +4983,7 @@ auth_plain(char *arg)
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
 			return err_input();
 	} else {
-		out("334 \r\n");
+		out("334 \r\n", 0);
 		flush();
 		if (authgetl() < 0)
 			return -1;
@@ -5392,9 +5031,8 @@ auth_cram(int method)
 			!stralloc_0(&slop))
 		die_nomem();
 
-	out("334 "); /*- "334 mychallenge \r\n" */
-	out(slop.s);
-	out("\r\n");
+	/*- "334 mychallenge \r\n" */
+	out("334 ", slop.s, "\r\n", 0);
 	flush();
 	if (authgetl() < 0) /*- got response */
 		return -1;
@@ -5455,22 +5093,16 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 			 * Accept the mail as denial could be stupid
 			 * like the vrfy command
 			 */
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" mail from invalid user <");
-			logerr(u);
-			logerrf(">\n");
-			out("553 authorization failure (#5.7.1)\r\n");
+			logerr(1, "mail from invalid user <", u, ">\n", 0);
+			logflush();
+			out("553 authorization failure (#5.7.1)\r\n", 0);
 			flush();
 			sleep(5); /*- Prevent DOS */
 			return ((PASSWD *) NULL);
 		} else {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerrf(" Database error\n");
-			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n");
+			logerr(1, "Database error\n", 0);
+			logflush();
+			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
 			flush();
 			return ((PASSWD *) NULL);
 		}
@@ -5481,32 +5113,25 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 			return ((PASSWD *) NULL);
 		}
 		if (*i_inactive || gsasl_pw->pw_gid & NO_SMTP) {
-			logerr("qmail-smtpd: ");
-			logerrpid();
-			logerr(remoteip);
-			logerr(" SMTP Access denied to <");
-			logerr(u);
-			logerr("> ");
-			logerrf(*i_inactive ? "user inactive" : "No SMTP Flag");
-			out("553 authorization failure (#5.7.1)\r\n");
+			logerr(1, "SMTP Access denied to <", u, "> ",
+					*i_inactive ? "user inactive\n" : "No SMTP Flag\n", 0);
+			logflush();
+			out("553 authorization failure (#5.7.1)\r\n", 0);
 			flush();
 			gsasl_pw = (PASSWD *) NULL;
 			return ((PASSWD *) NULL);
 		}
 	}
 	if (str_diffn(gsasl_pw->pw_passwd, scram_method.s, scram_method.len)) {
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(remoteip);
-		logerr(" SCRAM AUTH Method not supported for user ");
-		logerr(scram_method.s);
+		logerr(1, "SCRAM AUTH Method not supported for user ", scram_method.s, 0);
 		i = str_chr(gsasl_pw->pw_passwd, '}');
 		if (gsasl_pw->pw_passwd[i]) {
-			logerr(" != ");
+			logerr(0, " != ", 0);
 			substdio_put(&sserr, gsasl_pw->pw_passwd, i + 1);
 		}
-		logerrf("\n");
-		out("553 authorization failure (#5.7.1)\r\n");
+		logerr(0, "\n", 0);
+		logflush();
+		out("553 authorization failure (#5.7.1)\r\n", 0);
 		flush();
 		gsasl_pw = (PASSWD *) NULL;
 		return ((PASSWD *) NULL);
@@ -5514,13 +5139,9 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 		*mech = 0;
 	i = get_scram_secrets(gsasl_pw->pw_passwd, mech, iter, salt, stored_key, server_key, hexsaltpw, cleartxt, saltedpw);
 	if (i != 6 && i != 8) {
-		logerr("qmail-smtpd: ");
-		logerrpid();
-		logerr(remoteip);
-		logerr(" Unable to get secrets for <");
-		logerr(u);
-		logerrf(">\n");
-		out("553 authorization failure (#5.7.1)\r\n");
+		logerr(1, "Unable to get secrets for <", u, ">\n", 0);
+		logflush();
+		out("553 authorization failure (#5.7.1)\r\n", 0);
 		flush();
 		gsasl_pw = (PASSWD *) NULL;
 		return ((PASSWD *) NULL);
@@ -5551,7 +5172,8 @@ get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
 	int             rc;
 
 	if (!*u && !(*u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
-		logerr("gsasl_property_fast: unable to get GSASL_AUTHID\n");
+		logerr(1, "gsasl_property_fast: unable to get GSASL_AUTHID\n", 0);
+		logflush();
 		return GSASL_NO_CALLBACK;
 	}
 	if (!(gsasl_pw = get_scram_record(*u, mech, iter, salt, stored_key,
@@ -5559,17 +5181,15 @@ get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
 		return gs_callback_err = GSASL_NO_CALLBACK;
 	if (!is_scram_method(*mech)) {
 		strnum[fmt_int(strnum, *mech)] = 0;
-		logerr("unknown SCRAM AUTH method [");
-		logerr(strnum);
-		logerr("]\n");
+		logerr(1, "unknown SCRAM AUTH method [", strnum, "]\n", 0);
+		logflush();
 		return GSASL_NO_CALLBACK;
 	}
 	strnum[fmt_int(strnum, *iter)] = 0;
 #if GSASL_VERSION_MAJOR > 1
 	if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum)) != GSASL_OK) {
-		logerr("gsasl_property_set: GSASL_SCRAM_ITER: ");
-		logerr(gsasl_strerror(rc));
-		logerrf("\n");
+		logerr(1, "gsasl_property_set: GSASL_SCRAM_ITER: ", gsasl_strerror(rc), "\n", 0);
+		logflush();
 		return GSASL_NO_CALLBACK;
 	}
 #else
@@ -5582,24 +5202,12 @@ get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
 void
 err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
 {
-	out(err_code1);
-	out(" ");
-	out(mesg);
-	out(" (#");
-	out(err_code2);
-	out(")\r\n");
+	logerr(1, mesg, 0);
+	if (str)
+		logerr(0, " [", str, "]", 0);
+	logerr(0, "\n", 0);
+	out(err_code1, " ", mesg, " (#", err_code2, ")\r\n", 0);
 	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" ");
-	logerr(mesg);
-	if (str) {
-		logerr(" [");
-		logerr(str);
-		logerr("]");
-	}
-	logerrf("\n");
 }
 
 #ifdef TLS
@@ -5704,9 +5312,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		}
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_PASSWORD, cleartxt)) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_PASSWORD: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_PASSWORD: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_PASSWORD, cleartxt);
@@ -5722,9 +5330,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		}
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALT, salt)) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_SCRAM_SALT: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_SCRAM_SALT: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_SCRAM_SALT, salt);
@@ -5741,9 +5349,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		}
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SERVERKEY, server_key)) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_SCRAM_SERVERKEY: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_SCRAM_SERVERKEY: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_SCRAM_SERVERKEY, server_key);
@@ -5759,9 +5367,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		}
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_STOREDKEY, stored_key)) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_SCRAM_STOREDKEY: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_SCRAM_STOREDKEY: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_SCRAM_STOREDKEY, stored_key);
@@ -5778,9 +5386,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		}
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, hexsaltpw)) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_SCRAM_SALTED_PASSWORD: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_SCRAM_SALTED_PASSWORD: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, hexsaltpw);
@@ -5791,9 +5399,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	case GSASL_SERVICE:
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SERVICE, "smtp")) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_SERVICE: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_SERVICE: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_SERVICE, "smtp");
@@ -5803,9 +5411,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	case GSASL_HOSTNAME:
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_HOSTNAME, hostname)) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_HOSTNAME: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_HOSTNAME: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_HOSTNAME, hostname);
@@ -5822,9 +5430,9 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		strnum[fmt_int(strnum, iter)] = 0;
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum)) != GSASL_OK) {
-			logerr("gsasl_property_set: GSASL_SCRAM_ITER: ");
-			logerr(gsasl_strerror(rc));
-			logerrf("\n");
+			logerr(1, "gsasl_property_set: GSASL_SCRAM_ITER: ",
+					gsasl_strerror(rc), "\n", 0);
+			logflush();
 		}
 #else
 		gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum);
@@ -5839,16 +5447,17 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		if ((p = get_finish_message(tls_unique))) {
 #if GSASL_VERSION_MAJOR > 1
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p)) != GSASL_OK) {
-				logerr("gsasl_property_set: GSASL_CB_TLS_UNIQUE: ");
-				logerr(gsasl_strerror(rc));
-				logerrf("\n");
+				logerr(1, "gsasl_property_set: GSASL_CB_TLS_UNIQUE: ",
+						gsasl_strerror(rc), "\n", 0);
+				logflush();
 			}
 #else
 			gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p);
 			rc = GSASL_OK;
 #endif
 		} else {
-			logerrf("unable to get finish message for GSASL_CB_TLS_UNIQUE\n");
+			logerr(1, "unable to get finish message for GSASL_CB_TLS_UNIQUE\n", 0);
+			logflush();
 			return gs_callback_err = GSASL_NO_CALLBACK;
 		}
 		break;
@@ -5857,12 +5466,13 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	case GSASL_CB_TLS_EXPORTER:
 		if ((p = get_finish_message(tls_exporter))) {
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK) {
-				logerr("gsasl_property_set: GSASL_CB_TLS_EXPORTER: ");
-				logerr(gsasl_strerror(rc));
-				logerrf("\n");
+				logerr(1, "gsasl_property_set: GSASL_CB_TLS_EXPORTER: ",
+						gsasl_strerror(rc), "\n", 0);
+				logflush();
 			}
 		} else {
-			logerrf("unable to get finish message for GSASL_CB_TLS_EXPORTER\n");
+			logerr(1, "unable to get finish message for GSASL_CB_TLS_EXPORTER\n", 0);
+			logflush();
 			return gs_callback_err = GSASL_NO_CALLBACK;
 		}
 		break;
@@ -5870,9 +5480,8 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #endif
 	default:
 		strnum[fmt_int(strnum, prop)] = 0;
-		logerr("unknown callback [");
-		logerr(strnum);
-		logerrf("]\n");
+		logerr(1, "unknown callback [", strnum, "]\n", 0);
+		logflush();
 		break;
 	}
 	return gs_callback_err = rc;
@@ -5903,9 +5512,7 @@ gsasl_server_auth(Gsasl_session *session)
 			return 1;
 		r = gsasl_step64(session, authin.s, &p);
 		if (r == GSASL_NEEDS_MORE || (r == GSASL_OK && p && *p)) {
-			out("334 ");
-			out(p);
-			out("\r\n");
+			out("334 ", p, "\r\n", 0);
 			flush();
 			gsasl_free(p);
 			if (authgetl() < 0) /*- got response */
@@ -5914,9 +5521,8 @@ gsasl_server_auth(Gsasl_session *session)
 	} while (r == GSASL_NEEDS_MORE);
 
 	if (r != GSASL_OK) {
-		logerr("gsasl_step64: ");
-		logerr(gsasl_strerror(r));
-		logerrf("\n");
+		logerr(1, "gsasl_step64: ", gsasl_strerror(r), "\n", 0);
+		logflush();
 		return 1;
 	}
 	return 0;
@@ -5994,12 +5600,11 @@ auth_scram(int method)
 #endif
 	} /*- switch(method) */
 	if (r != GSASL_OK) {
-		logerr("gsasl_server_start: ");
-		logerr(gsasl_strerror(r));
-		logerrf("\n");
+		logerr(1, "gsasl_server_start: ", gsasl_strerror(r), "\n", 0);
+		logflush();
 		_exit(111);
 	}
-	out("334 \r\n");
+	out("334 \r\n", 0);
 	flush();
 
 	if (authgetl() < 0) /*- got response */
@@ -6277,12 +5882,12 @@ auth_digest_md5()
 			!stralloc_cats(&slop, ",algorithm=md5-sess") ||
 			b64encode(&slop, &tmp) != 0)
 		die_nomem();
-	out("334 ");
+	out("334 ", 0);
 	if (substdio_put(&ssout, tmp.s, tmp.len) == -1) {
 		flush();
 		return err_write();
 	}
-	out("\r\n");
+	out("\r\n", 0);
 	flush();
 
 	/*- get digest-response */
@@ -6393,27 +5998,27 @@ smtp_auth(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n");
+		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	case 2:
-		smtp_relayreject(remoteip);
+		smtp_relayreject();
 		return;
 	case 3:
-		smtp_paranoid(remoteip);
+		smtp_paranoid();
 		return;
 	case 4:
-		smtp_ptr(remoteip);
+		smtp_ptr();
 		return;
 	case 5:
 		smtp_badhost(remoteip);
 		return;
 	case 6:
-		smtp_badip(remoteip);
+		smtp_badip();
 		return;
 	}
 	if (!hostname || !*hostname || !childargs || !*childargs) {
-		out("503 auth not available (#5.3.3)\r\n");
+		out("503 auth not available (#5.3.3)\r\n", 0);
 		flush();
 		return;
 	}
@@ -6451,23 +6056,23 @@ smtp_auth(char *arg)
 			die_nomem();
 		if (!env_put2("AUTHINFO", remoteinfo))
 			die_nomem();
-		out("235 ok, go ahead (#2.0.0)\r\n");
+		out("235 ok, go ahead (#2.0.0)\r\n", 0);
 		flush();
 		break;
 	case 1:/*- auth fail */
 	case 2:/*- misuse */
-		err_authfailure(remoteip, user.len ? user.s : 0, j);
+		err_authfailure(user.len ? user.s : 0, j);
 		sleep(5);
-		out("553 authorization failure (#5.7.1)\r\n");
+		out("535 authorization failure (#5.7.8)\r\n", 0);
 		flush();
 		break;
 	case -1:
-		err_authfailure(remoteip, user.len ? user.s : 0, j);
-		out("454 temporary authentication failure (#4.3.0)\r\n");
+		err_authfailure(user.len ? user.s : 0, j);
+		out("454 temporary authentication failure (#4.3.0)\r\n", 0);
 		flush();
 		break;
 	case -2: /*- returned by err_noauthallowed() when SECURE_AUTH is set and TLS isn't used */
-		err_authinsecure(remoteip, j);
+		err_authinsecure(j);
 		break;
 	default:
 		err_child();
@@ -6487,7 +6092,7 @@ smtp_etrn(char *arg)
 		return;
 	}
 	if (!seenhelo) {
-		out("503 Polite people say hello first (#5.5.4)\r\n");
+		out("503 Polite people say hello first (#5.5.4)\r\n", 0);
 		flush();
 		return;
 	}
@@ -6498,7 +6103,7 @@ smtp_etrn(char *arg)
 	if (!isalnum((int) *arg))
 		arg++;
 	if (!valid_hostname(arg)) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n");
+		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
 		flush();
 		return;
 	}
@@ -6511,7 +6116,7 @@ smtp_etrn(char *arg)
 		switch (dnscheck(tmpbuf, i, 1))
 		{
 		case DNS_HARD:
-			err_hmf(remoteip, tmpbuf, 1);
+			err_hmf(tmpbuf, 1);
 			return;
 		case DNS_SOFT:
 			err_smf();
@@ -6529,44 +6134,33 @@ smtp_etrn(char *arg)
 	switch ((status = etrn_queue(arg, remoteip)))
 	{
 	case 0:
-		log_etrn(remoteip, arg, 0);
-		out("250 OK, queueing for node <");
-		out(arg);
-		out("> started\r\n");
+		log_etrn(arg, 0);
+		out("250 OK, queueing for node <", arg, "> started\r\n", 0);
 		flush();
 		return;
 	case -1:
-		log_etrn(remoteip, arg, "ETRN Error");
-		out("451 Unable to queue messages (#4.3.0)\r\n");
+		log_etrn(arg, "ETRN Error");
+		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
 		flush();
 		return;
 	case -2:
-		log_etrn(remoteip, arg, "ETRN Rejected");
-		out("553 <");
-		out(arg);
-		out(">: etrn service unavailable (#5.7.1)\r\n");
+		log_etrn(arg, "ETRN Rejected");
+		out("553 <", arg, ">: etrn service unavailable (#5.7.1)\r\n", 0);
 		flush();
 		return;
 	case -3:
-		out("250 OK, No message waiting for node <");
-		out(arg);
-		out(">\r\n");
+		out("250 OK, No message waiting for node <", arg, ">\r\n", 0);
 		flush();
 		return;
 	case -4:
-		out("252 OK, pending message for node <");
-		out(arg);
-		out("> started\r\n");
+		out("252 OK, pending message for node <", arg, "> started\r\n", 0);
 		flush();
 		return;
 	default:
 		status_buf[fmt_ulong(status_buf, (unsigned long) status)] = 0;
 		if (status > 0) {
-			out("253 OK, <");
-			out(status_buf);
-			out("> pending message for node <");
-			out(arg);
-			out("> started\r\n");
+			out("253 OK, <", status_buf, "> pending message for node <",
+					arg, "> started\r\n", 0);
 			flush();
 			return;
 		}
@@ -6578,10 +6172,8 @@ smtp_etrn(char *arg)
 		if (i > 1023)
 			die_nomem();
 		err_buff[i] = 0;
-		log_etrn(remoteip, arg, err_buff);
-		out("451 Unable to queue messages, status <");
-		out(status_buf);
-		out("> (#4.3.0)\r\n");
+		log_etrn(arg, err_buff);
+		out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", 0);
 		flush();
 		return;
 	}
@@ -6605,7 +6197,7 @@ smtp_atrn(char *arg)
 		return;
 	}
 	if (!seenhelo) {
-		out("503 Polite people say hello first (#5.5.4)\r\n");
+		out("503 Polite people say hello first (#5.5.4)\r\n", 0);
 		flush();
 		return;
 	}
@@ -6666,7 +6258,7 @@ smtp_atrn(char *arg)
 			} else
 				end_flag = 1;
 			if (!valid_hostname(arg)) {
-				out("501 invalid parameter syntax (#5.3.2)\r\n");
+				out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
 				flush();
 				return;
 			}
@@ -6684,41 +6276,37 @@ smtp_atrn(char *arg)
 	}
 	(*iclose) ();
 	if (Reject) {
-		log_atrn(remoteip, remoteinfo, domain_ptr, "ATRN Rejected");
+		log_atrn(remoteinfo, domain_ptr, "ATRN Rejected");
 		if (Accept)
-			out("450 atrn service unavailable (#5.7.1)\r\n");
+			out("450 atrn service unavailable (#5.7.1)\r\n", 0);
 		else
-			out("553 atrn service unavailable (#5.7.1)\r\n");
+			out("553 atrn service unavailable (#5.7.1)\r\n", 0);
 		flush();
 		return;
 	}
 	switch ((status = atrn_queue(arg, remoteip)))
 	{
 	case 0:
-		log_atrn(remoteip, remoteinfo, arg, 0);
-		out("QUIT\r\n");
+		log_atrn(remoteinfo, arg, 0);
+		out("QUIT\r\n", 0);
 		flush();
 		_exit(0);
 	case -1:
-		log_atrn(remoteip, remoteinfo, arg, "ATRN Error");
-		out("451 Unable to queue messages (#4.3.0)\r\n");
+		log_atrn(remoteinfo, arg, "ATRN Error");
+		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
 		flush();
 		return;
 	case -2:
-		log_atrn(remoteip, remoteinfo, arg, "ATRN Rejected");
-		out("553 <");
-		out(arg);
-		out(">: atrn service unavailable (#5.7.1)\r\n");
+		log_atrn(remoteinfo, arg, "ATRN Rejected");
+		out("553 <", arg, ">: atrn service unavailable (#5.7.1)\r\n", 0);
 		flush();
 		return;
 	case -3:
-		out("453 No message waiting for node(s) <");
-		out(arg);
-		out(">\r\n");
+		out("453 No message waiting for node(s) <", arg, ">\r\n", 0);
 		flush();
 		return;
 	case -4:
-		out("451 Unable to queue messages (#4.3.0)\r\n");
+		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
 		flush();
 		return;
 	default:
@@ -6732,10 +6320,8 @@ smtp_atrn(char *arg)
 			if (i > 1023)
 				die_nomem();
 			err_buff[i] = 0;
-			log_atrn(remoteip, remoteinfo, arg, err_buff);
-			out("451 Unable to queue messages, status <");
-			out(status_buf);
-			out("> (#4.3.0)\r\n");
+			log_atrn(remoteinfo, arg, err_buff);
+			out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", 0);
 			flush();
 		}
 		return;
@@ -6754,7 +6340,7 @@ smtp_tls(char *arg)
 		err_unimpl("unimplimented");
 	else
 	if (*arg) {
-		out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n");
+		out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n", 0);
 		flush();
 	} else {
 		do_tls();
@@ -6769,12 +6355,10 @@ tls_nogateway()
 	/*- there may be cases when relayclient is set */
 	if (relayclient)
 		return;
-	out("; no valid cert for gateway");
-	if (ssl_verify_err) {
-		out(": ");
-		out((char *) ssl_verify_err);
-	}
-	out(" ");
+	out("; no valid cert for gateway", 0);
+	if (ssl_verify_err)
+		out(": ", (char *) ssl_verify_err, 0);
+	out(" ", 0);
 	flush();
 	return;
 }
@@ -6784,24 +6368,13 @@ tls_err(const char *err_code1, const char *err_code2, const char *s)
 {
 	const char     *err;
 
-	out(err_code1);
-	out(" ");
-	out(s);
-	out(" (#");
-	out(err_code2);
-	out(")\r\n");
+	logerr(1, s, 0);
+	if ((err = myssl_error_str()))
+		logerr(0, ": ", err, 0);
+	logerr(0, "\n", 0);
+	logflush();
+	out(err_code1, " ", s, " (#", err_code2, ")\r\n", 0);
 	flush();
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" ");
-	logerr(s);
-	err = myssl_error_str();
-	if (err) {
-		logerr(": ");
-		logerr(err);
-	}
-	logerrf("\n");
 	return;
 }
 
@@ -6913,13 +6486,8 @@ tls_verify()
 void
 log_ssl_version()
 {
-	logerr("qmail-smtpd: ");
-	logerrpid();
-	logerr(remoteip);
-	logerr(" ");
-	logerr("ssl-version=");
-	logerr(SSL_get_version(ssl));
-	logerrf("\n");
+	logerr(1, "ssl-version=", SSL_get_version(ssl), "\n", 0);
+	logflush();
 	return;
 }
 
@@ -7002,7 +6570,7 @@ do_tls()
 	SSL_CTX_free(ctx);
 	ctx = NULL;
 	if (!smtps) {
-		out("220 ready for tls\r\n");
+		out("220 ready for tls\r\n", 0);
 		flush();
 	}
 	if (tls_accept(timeout, 0, 1, ssl)) {
@@ -7147,10 +6715,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		ptr = "VIRTUAL_PKG_LIB";
 	loadLibrary(&phandle, ptr, &i, &errstr);
 	if (i) {
-		logerr("Error loading virtual package shared lib: ");
-		logerr(errstr);
-		logerrf("\n");
-		out("451 Requested action aborted: unable to load shared library (#4.3.0)\r\n");
+		logerr(1, "Error loading virtual package shared lib: ", errstr, "\n", 0);
+		logflush();
+		out("451 Requested action aborted: unable to load shared library (#4.3.0)\r\n", 0);
 		flush();
 		_exit(1);
 	}
@@ -7168,65 +6735,51 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				str_copyb(strnum, ptr, 4);
 				strnum[4] = 0;
 				smtp_respond(strnum);
-				out(ptr + 3);
+				out(ptr + 3, 0);
 			}
 		} else {
 			smtp_respond("421 ");
-			out(" SMTP service unavailable (#4.3.2)");
+			out(" SMTP service unavailable (#4.3.2)", 0);
 		}
 		setup_state = 1;
 	} else {
 		if (dobadipcheck && badipcheck(remoteip)) {
 			smtp_respond("421 ");
-			out(" sorry, your IP (");
-			out(remoteip);
-			out(") is temporarily denied (#4.7.1)");
+			out(" sorry, your IP (", remoteip, ") is temporarily denied (#4.7.1)", 0);
 			setup_state = 6;
 		} else
 		if (dobadhostcheck && badhostcheck()) {
 			smtp_respond("553 ");
-			out(" sorry, your host (");
-			out(remotehost);
-			out(") has been denied (#5.7.1)");
+			out(" sorry, your host (", remotehost, ") has been denied (#5.7.1)", 0);
 			setup_state = 5;
 		} else
 		if (env_get("OPENRELAY")) {
 			smtp_respond("553 ");
-			out(" No mail accepted from an open relay (");
-			out(remoteip);
-			out("); check your server configs (#5.7.1)");
+			out(" No mail accepted from an open relay (", remoteip,
+					"); check your server configs (#5.7.1)", 0);
 			setup_state = 2;
 		} else
 		if ((ptr = env_get("TCPPARANOID"))) {
 			smtp_respond("553 ");
-			out(" sorry, your IP address (");
-			out(remoteip);
-			if (*ptr) {
-				out(") PTR (reverse DNS) record points to wrong hostname ");
-				out(ptr);
-				out(" (#5.7.1)");
-			} else
-				out(") PTR (reverse DNS) record points to wrong hostname (#5.7.1)");
+			out(" sorry, your IP address (", remoteip,
+					") PTR (reverse DNS) record points to wrong hostname", 0);
+			if (*ptr)
+				out(" ", ptr, 0);
+			out(" (#5.7.1)", 0);
 			setup_state = 3;
 		} else
 		if ((ptr = env_get("REQPTR")) && str_equal(remotehost, "unknown")) {
 			smtp_respond("553 ");
-			if (*ptr) {
-				out(" ");
-				out(ptr);
-				out(": from ");
-				out(remoteip);
-				out(": (#5.7.1)");
-			} else {
-				out(" Sorry, no PTR (reverse DNS) record for (");
-				out(remoteip);
-				out(") (#5.7.1)");
-			}
+			if (*ptr)
+				out(" ", ptr, ": from ", remoteip, ": (#5.7.1)", 0);
+			else
+				out(" Sorry, no PTR (reverse DNS) record for (", remoteip,
+						") (#5.7.1)", 0);
 			setup_state = 4;
 		} else
 			smtp_respond("220 ");
 	}
-	out("\r\n");
+	out("\r\n", 0);
 	flush();
 	switch (smtp_port)
 	{
@@ -7383,6 +6936,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.286  2023-01-15 12:41:14+05:30  Cprogrammer
+ * logerr(), out() changed to have varargs
+ *
  * Revision 1.285  2023-01-11 08:17:49+05:30  Cprogrammer
  * Use env variable CLIENT_RENEGOTIATION to allow client-side renegotiation
  *
@@ -7689,7 +7245,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.285 2023-01-11 08:17:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.286 2023-01-15 12:41:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

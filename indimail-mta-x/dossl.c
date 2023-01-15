@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.1 2023-01-06 17:43:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.2 2023-01-15 12:25:54+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -19,6 +19,7 @@
 #include <alloc.h>
 #include <fmt.h>
 #include "variables.h"
+#include "varargs.h"
 #include "control.h"
 #include "dossl.h"
 #include "auto_sysconfdir.h"
@@ -62,7 +63,6 @@ void
 do_pkix(SSL *ssl, char *servercert, char *fqdn,
 		void(*tlsquit)(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *s),
 		void(*mem_err)(),
-		void(*do_quit)(char *s1, char *s2, int code, int err),
 		stralloc *stext)
 {
 	X509           *peercert;
@@ -155,7 +155,11 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		void(*mem_err)(),
 		void(*ctrl_err)(),
 		void(*write_err)(),
-		void(*do_quit)(char *s1, char *s2, int code, int e),
+#ifdef HAVE_STDARG_H
+		void(*quit)(int code, int e, char *p, ...),
+#else
+		void(*quit)(),
+#endif
 		stralloc *stext,
 		saa *ehlokw,
 		int verbose)
@@ -413,9 +417,9 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		tlsquit("Z", "TLS connect failed: ", t, 0, 0, 0);
 	}
 	if (smtps && (code = smtpcode()) != 220)
-		do_quit("ZTLS Connected to ", " but greeting failed", code, -1);
+		quit(code, 1, "ZTLS Connected to ", " but greeting failed", 0);
 	if (pkix && _needtlsauth) /*- 220 ready for tls */
-		do_pkix(myssl, servercert, fqdn, tlsquit, mem_err, do_quit, stext);
+		do_pkix(myssl, servercert, fqdn, tlsquit, mem_err, stext);
 	return (1);
 }
 #endif /*- ifdef TLS */
@@ -674,13 +678,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	static char    *x = "$Id: dossl.c,v 1.1 2023-01-06 17:43:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dossl.c,v 1.2 2023-01-15 12:25:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.2  2023-01-15 12:25:54+05:30  Cprogrammer
+ * prototype change for quit function with varargs
+ *
  * Revision 1.1  2023-01-06 17:43:57+05:30  Cprogrammer
  * Initial revision
  *

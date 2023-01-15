@@ -1,3 +1,4 @@
+# todo-proc.c
 # Don't edit Makefile! Use conf-* for configuration.
 SHELL=/bin/sh
 include Makevars.$(SYSTEM)
@@ -460,15 +461,15 @@ compile dns.h1 trynameser.sh
 	(sh ./trynameser.sh) > dns.h
 
 dns.lib: \
-tryrsolv.c compile load socket.lib dns.o socket_v6any.o \
+trylib.c compile load socket.lib dns.o socket_v6any.o \
 tlsarralloc.o socket_v4mappedprefix.o ipalloc.o ip.o strsalloc.o \
 socket.lib
-	( ( ./compile tryrsolv.c && ./load tryrsolv dns.o \
+	( ( ./compile trylib.c && ./load trylib dns.o \
 	socket_v6any.o socket_v4mappedprefix.o \
 	tlsarralloc.o ipalloc.o ip.o strsalloc.o \
 	-lresolv `cat socket.lib` $(QMAILLIB) ) >/dev/null 2>&1 \
 	&& echo -lresolv || exit 0 ) > dns.lib
-	rm -f tryrsolv.o tryrsolv
+	rm -f trylib.o trylib
 
 dns.o: \
 compile dns.c ip.h ipalloc.h strsalloc.h dns.h tlsarralloc.h \
@@ -703,6 +704,10 @@ tryrresvport.c compile load
 	2>&1 \
 	&& echo "#define HASRRESVPORT 1" || exit 0 ) > hasrresvport.h
 	rm -f tryrresvport.o tryrresvport
+
+varargs.h: \
+choose compile load hasvarargs.h hasstdarg.h
+	./choose c trystdarg hasvarargs.h hasstdarg.h > varargs.h
 
 headerbody.o: \
 compile headerbody.c hfield.h headerbody.h
@@ -1633,13 +1638,13 @@ compile qmail-remote.c control.h dns.h quote.h ip.h auto_sysconfdir.h \
 ipalloc.h query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
 variables.h auto_control.h cdb_match.h haslibgsasl.h dossl.h parse_env.h \
 hastlsa.h tlsacheck.h fn_handler.h tlsarralloc.h hassmtputf8.h batv.h \
-conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
+varargs.h conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
 		conf-batv` qmail-remote.c
 
 dossl.o: \
 compile dossl.c variables.h control.h auto_sysconfdir.h \
-dossl.h hastlsa.h auto_control.h conf-tls
+varargs.h dossl.h hastlsa.h auto_control.h conf-tls
 	./compile `grep -h -v "^#" conf-tls` dossl.c
 
 qmail-send: \
@@ -1686,7 +1691,7 @@ auto_split.o auto_control.o variables.o syncdir.o rt.lib
 	$(dynamic_option) `cat rt.lib`
 
 todo-proc.o: \
-compile todo-proc.c auto_qmail.h control.h syncdir.h \
+compile todo-proc.c auto_qmail.h control.h syncdir.h varargs.h \
 fmtqfn.h readsubdir.h trigger.h variables.h qscheduler.h \
 haslibrt.h auto_control.h auto_split.h auto_uids.h conf-sync
 	./compile `grep -h -v "^#" conf-sync` todo-proc.c
@@ -1723,7 +1728,7 @@ slowq-send.o: \
 compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
+varargs.h conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-loglock conf-bounce` slowq-send.c
 
@@ -1955,7 +1960,7 @@ haslibgsasl.h auto_control.h auto_sysconfdir.h
 	conf-ip conf-batv conf-plugin mysql_inc` qmail-smtpd.c
 
 smtpd.o: \
-compile smtpd.c control.h received.h \
+compile smtpd.c control.h received.h varargs.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
 matchregex.o variables.h rcpthosts.h etrn.h batv.h \
 envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h \
@@ -2160,7 +2165,7 @@ compile qsmhook.c
 
 qsutil.o: \
 compile qsutil.c qsutil.h variables.h conf-loglock \
-auto_control.h
+varargs.h auto_control.h
 	./compile `grep -h -v "^#" conf-loglock` qsutil.c
 
 quote.o: \
@@ -3473,7 +3478,7 @@ control.o tablematch.o cdb_match.o
 qmail-greyd.o: \
 compile qmail-greyd.c ip.h control.h variables.h greylist.h \
 tablematch.h socket.h cdb_match.h auto_control.h haveip6.h \
-conf-ip
+varargs.h conf-ip
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` qmail-greyd.c
 
 qmail-daned: \
@@ -3505,7 +3510,7 @@ qmail-daned.9 conf-qmail conf-sysconfdir
 starttls.o: compile starttls.c conf-tls hastlsa.h conf-ip \
 socket.h ip.h dns.h control.h variables.h tlsacheck.h \
 ipalloc.h tlsarralloc.h auto_control.h auto_sysconfdir.h \
-dossl.h haveip6.h
+dossl.h haveip6.h varargs.h
 	./compile `grep -h -v "^#" conf-ip conf-tls` starttls.c
 
 tlsacheck.o: \
@@ -3625,11 +3630,11 @@ tryldap.c compile load
 	rm -f tryldap.o tryldap
 
 shadow.lib: \
-tryshadow.c compile load
-	( ( ./compile tryshadow.c && \
-	./load tryshadow -lshadow ) >/dev/null 2>&1 \
+trylib.c compile load
+	( ( ./compile trylib.c && \
+	./load trylib -lshadow ) >/dev/null 2>&1 \
 	&& echo -lshadow || exit 0 ) > shadow.lib
-	rm -f tryshadow.o tryshadow
+	rm -f trylib.o trylib
 
 ldap-checkpwd: \
 load ldap-checkpwd.o ldap.lib crypt.lib
