@@ -1,6 +1,6 @@
 /*
  * $Log: qsutil.c,v $
- * Revision 1.24  2023-01-15 12:37:21+05:30  Cprogrammer
+ * Revision 1.24  2023-01-15 20:42:50+05:30  Cprogrammer
  * use slog() function with varargs to replace all log functions
  *
  * Revision 1.23  2022-03-16 20:01:53+05:30  Cprogrammer
@@ -232,6 +232,7 @@ slog(va_alist)
 			break;
 		substdio_puts(&sserr, str);
 	}
+	va_end(ap);
 	if (do_flush)
 		substdio_flush(&sserr);
 #ifdef LOGLOCK
@@ -323,7 +324,7 @@ logsafe(char *s, char *argv0)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.24 2023-01-15 12:37:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.24 2023-01-15 20:42:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
