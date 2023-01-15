@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.286 2023-01-15 12:41:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.287 2023-01-15 18:29:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -151,7 +151,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.286 $";
+static char    *revision = "$Revision: 1.287 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -471,10 +471,14 @@ logerr(va_alist)
 	case 1:
 		strnum[i = fmt_ulong(strnum, getpid())] = 0;
 		if (substdio_put(&sserr, "qmail-smtpd: pid ", 17) == -1 ||
-				substdio_put(&sserr, strnum, i) == -1 ||
-				substdio_put(&sserr, " from ", 6) == -1 ||
-				substdio_puts(&sserr, remoteip) == -1 ||
-				substdio_put(&sserr, " ", 1) == -1)
+				substdio_put(&sserr, strnum, i) == -1)
+			_exit(1);
+		if (remoteip) {
+			if (substdio_put(&sserr, " from ", 6) == -1 ||
+					substdio_puts(&sserr, remoteip) == -1)
+				_exit(1);
+		}
+		if (substdio_put(&sserr, " ", 1) == -1)
 			_exit(1);
 		break;
 	}
@@ -2648,6 +2652,47 @@ log_gsasl_version()
 }
 #endif
 
+static void
+setup_main_env()
+{
+	static char     Hostname[128];
+
+#ifdef IPV6
+	if (!(remoteip4 = env_get("TCPREMOTEIP")))
+		remoteip4 = "unknown";
+	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = remoteip4))
+		remoteip = "unknown";
+	if (!(localip = env_get("TCP6LOCALIP")))
+		localip = env_get("TCPLOCALIP");
+	if (!localip)
+		localip = "unknown";
+#else
+	if (!(remoteip = env_get("TCPREMOTEIP")))
+		remoteip = "unknown";
+	if (!(localip = env_get("TCPLOCALIP")))
+		localip = "unknown";
+#endif
+	if (!(localhost = env_get("TCPLOCALHOST"))) {
+		if (hostname && *hostname)
+			localhost = hostname;
+		else
+		if (!(localhost = env_get("HOSTNAME"))) {
+			if (gethostname(Hostname, sizeof(Hostname) - 1) == -1)
+				localhost = "unknown";
+			else
+				localhost = Hostname;
+		}
+	}
+	if (!(remotehost = env_get("TCPREMOTEHOST")))
+		remotehost = "unknown";
+	remoteinfo = env_get("TCPREMOTEINFO");
+	relayclient = env_get("RELAYCLIENT");
+	greyip = env_get("GREYIP");
+	if (!greyip || !*greyip)
+		greyip = (char *) 0; /*- Disable greylisting if GREYIP="" */
+}
+
+
 void
 smtp_init(int force_flag)
 {
@@ -2702,7 +2747,6 @@ setup()
 {
 	unsigned int    i, len;
 	char           *x;
-	char            Hostname[128];
 
 	if (!stralloc_copys(&Revision, revision + 11) ||
 			!stralloc_0(&Revision))
@@ -2710,41 +2754,9 @@ setup()
 	for (x = Revision.s; *x && *x != ' '; x++);
 	if (*x == ' ')
 		*x = 0;
-#ifdef IPV6
-	if (!(remoteip4 = env_get("TCPREMOTEIP")))
-		remoteip4 = "unknown";
-	if (!(remoteip = env_get("TCP6REMOTEIP")) && !(remoteip = remoteip4))
-		remoteip = "unknown";
-	if (!(localip = env_get("TCP6LOCALIP")))
-		localip = env_get("TCPLOCALIP");
-	if (!localip)
-		localip = "unknown";
-#else
-	if (!(remoteip = env_get("TCPREMOTEIP")))
-		remoteip = "unknown";
-	if (!(localip = env_get("TCPLOCALIP")))
-		localip = "unknown";
-#endif
-	if (!(localhost = env_get("TCPLOCALHOST"))) {
-		if (hostname && *hostname)
-			localhost = hostname;
-		else
-		if (!(localhost = env_get("HOSTNAME"))) {
-			if (gethostname(Hostname, sizeof(Hostname) - 1) == -1)
-				localhost = "unknown";
-			else
-				localhost = Hostname;
-		}
-	}
-	if (!(remotehost = env_get("TCPREMOTEHOST")))
-		remotehost = "unknown";
-	remoteinfo = env_get("TCPREMOTEINFO");
-	relayclient = env_get("RELAYCLIENT");
-	greyip = env_get("GREYIP");
-	if (!greyip || !*greyip)
-		greyip = (char *) 0; /*- Disable greylisting if GREYIP="" */
 
 	/*- now that we have set variables, initialize smtp */
+	setup_main_env();
 	smtp_init(0);
 
 	/*- Attempt to look up the IP number in control/relayclients. */
@@ -6936,6 +6948,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.287  2023-01-15 18:29:19+05:30  Cprogrammer
+ * set remoteip variable before first use of logerr()
+ * make logerr safe by checking for remoteip
+ *
  * Revision 1.286  2023-01-15 12:41:14+05:30  Cprogrammer
  * logerr(), out() changed to have varargs
  *
@@ -7245,7 +7261,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.286 2023-01-15 12:41:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.287 2023-01-15 18:29:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

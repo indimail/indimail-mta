@@ -1,4 +1,3 @@
-# todo-proc.c
 # Don't edit Makefile! Use conf-* for configuration.
 SHELL=/bin/sh
 include Makevars.$(SYSTEM)
@@ -2386,7 +2385,7 @@ variables.h indimail_stub.h auto_control.h
 
 spf.o: \
 compile spf.c ipme.h ip.h ipalloc.h strsalloc.h \
-dns.h conf-spf conf-tls conf-ip
+dns.h spf.h conf-spf conf-tls conf-ip
 	./compile `grep -h -v "^#" conf-spf conf-tls conf-ip` spf.c
 
 spfquery: \

@@ -1,5 +1,8 @@
 /*
  * $Log: uacl.c,v $
+ * Revision 1.8  2023-01-15 18:33:35+05:30  Cprogrammer
+ * out() changed to have varargs
+ *
  * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -35,17 +38,39 @@
 #include "matchregex.h"
 #include "mail_acl.h"
 #include "wildmat.h"
+#include "varargs.h"
 
 #define FATAL "uacl: fatal: "
 
 void
-out(char *str)
+#ifdef  HAVE_STDARG_H
+out(char *s1, ...)
+#else
+out(va_alist)
+#endif
 {
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdout, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
+	va_list         ap;
+	char           *str;
+#ifndef HAVE_STDARG_H
+	char           *s1;
+#endif
+
+#ifdef HAVE_STDARG_H
+	va_start(ap, s1);
+#else
+	va_start(ap);
+	s1 = va_arg(ap, char *);
+#endif
+
+	if (substdio_puts(subfdout, s1) == -1)
+		_exit(1);
+	while (1) {
+		str = va_arg(ap, char *);
+		if (!str)
+			break;
+		if (substdio_puts(subfdout, str) == -1)
+			_exit(1);
+	}
 }
 
 void
@@ -117,7 +142,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.8 2023-01-15 18:33:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

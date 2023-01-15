@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.22 2022-12-21 12:23:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spf.c,v 1.23 2023-01-15 18:30:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
@@ -403,7 +403,7 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 		split = spec;
 	switch (ch)
 	{
-	case 'l':
+	case 'l': /*- local part of sender */
 		pos = byte_rchr(addr.s, addr.len, '@');
 		if (pos < addr.len) {
 			if (!stralloc_copyb(&sa, addr.s, pos))
@@ -412,22 +412,22 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 		if (!stralloc_copys(&sa, "postmaster"))
 			return 0;
 		break;
-	case 's':
+	case 's': /*- sender of the received address */
 		if (!stralloc_copys(&sa, addr.s))
 			return 0;
 		break;
-	case 'o':
+	case 'o': /*- domain of sender address */
 		pos = byte_rchr(addr.s, addr.len, '@') + 1;
 		if (pos > addr.len)
 			break;
 		if (!stralloc_copys(&sa, addr.s + pos))
 			return 0;
 		break;
-	case 'd':
+	case 'd': /*- authorative domain */
 		if (!stralloc_copys(&sa, domain_p))
 			return 0;
 		break;
-	case 'i':
+	case 'i': /*- source IP address */
 		if (!stralloc_ready(&sa, IPFMT))
 			return 0;
 #ifdef IPV6
@@ -439,12 +439,12 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 		sa.len = ip4_fmt(sa.s, &ip);
 #endif
 		break;
-	case 't':
+	case 't': /*- current time */
 		if (!stralloc_ready(&sa, FMT_ULONG))
 			return 0;
 		sa.len = fmt_ulong(sa.s, (unsigned long) now());
 		break;
-	case 'p':
+	case 'p': /*- validated reverse-DNS domain of the source IP */
 		if (!sender_fqdn.len)
 			spf_ptr(domain_p, 0);
 		if (sender_fqdn.len) {
@@ -454,23 +454,32 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 		if (!stralloc_copys(&sa, "unknown"))
 			return 0;
 		break;
-	case 'v':
+	case 'v': /*- The static string in-addr or ip6 depending on the protocol version of the source IP */
+#ifdef IPV6
+		if (ipv6use) {
+			if (!stralloc_copys(&sa, "ip6"))
+				return 0;
+		} else
 		if (!stralloc_copys(&sa, "in-addr"))
 			return 0;
+#else
+		if (!stralloc_copys(&sa, "in-addr"))
+			return 0;
+#endif
 		break;
-	case 'h':
+	case 'h': /*- helohost */
 		if (!stralloc_copys(&sa, helohost.s))
-			return 0;			/*- FIXME: FQDN?  */
+			return 0; /*- FIXME: FQDN?  */
 		break;
-	case 'E':
+	case 'E': /*- error message */
 		if (errormsg.len && !stralloc_copy(&sa, &errormsg))
 			return 0;
 		break;
-	case 'R':
+	case 'R': /*- IP address of local host */
 		if (!stralloc_copys(&sa, localhost))
 			return 0;
 		break;
-	case 'S':
+	case 'S': /*- SPF record for the domain of the sender */
 		if (expdomain.len > 0) {
 			if (!stralloc_copys(&sa, "SPF record at ") ||
 					!stralloc_cats(&sa, expdomain.s))
@@ -1370,13 +1379,16 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.22 2022-12-21 12:23:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.23 2023-01-15 18:30:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: spf.c,v $
+ * Revision 1.23  2023-01-15 18:30:42+05:30  Cprogrammer
+ * documented macros
+ *
  * Revision 1.22  2022-12-21 12:23:42+05:30  Cprogrammer
  * changed scope of strsalloc ssa variable to local
  *
