@@ -1,5 +1,5 @@
 /*
- * $Id: starttls.c,v 1.15 2023-01-06 17:40:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: starttls.c,v 1.16 2023-01-15 12:42:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -42,6 +42,7 @@
 #include "auto_control.h"
 #include "auto_sysconfdir.h"
 #include "dossl.h"
+#include "varargs.h"
 
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 #define SSL_ST_BEFORE 0x4000
@@ -104,7 +105,7 @@ flush()
 	return;
 }
 
-void
+no_return void
 die(int e)
 {
 	if (ssl) {
@@ -282,23 +283,49 @@ outsmtptext()
  * code =  xxx - smtp code
  * code =    0 - temporary failure
  */
-void
-quit(char *prepend, char *append, int code, int e)
+no_return void
+#ifdef  HAVE_STDARG_H
+quit(int code, int e, char *prepend, ...)
+#else
+#include <varargs.h>
+quit(va_alist)
+va_dcl
+#endif
 {
-	substdio_putsflush(&smtpto, "QUIT\r\n");
+	va_list         ap;
+	char           *str;
+#ifndef HAVE_STDARG_H
+	int             code, e;
+	char           *prepend;
+#endif
+
+#ifdef HAVE_STDARG_H
+	va_start(ap, prepend);
+#else
+	va_start(ap);
+	code = va_arg(ap, int);
+	e = va_arg(ap, int);
+	prepend = va_arg(ap, char *);
+#endif
+	substdio_putflush(&smtpto, "QUIT\r\n", 6);
 	if (verbose == 2)
 		substdio_putsflush(subfdout, "Client: QUIT\n");
-	/*- waiting for remote side is just too ridiculous */
 	logerr(prepend);
 	outhost();
-	logerr(append);
+
+	while (1) {
+		str = va_arg(ap, char *);
+		if (!str)
+			break;
+		logerr(str);
+	}
 	logerr(".\n");
+	va_end(ap);
 	outsmtptext();
-	substdio_flush(subfderr);
-	die (e == -1 ? 111 : e);
+	die(e == -1 ? 111 : e);
 }
 
-void
+no_return void
 tls_quit(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *peer_sa)
 {
 	char            ch;
@@ -688,13 +715,13 @@ do_dane_validation(char *host, int port)
 	if (verbose)
 		flush();
 	if (code >= 500 && code < 600)
-		quit("Connected to ", " but greeting failed", code, 1);
+		quit(code, 1, "Connected to ", " but greeting failed", 0);
 	else
 	if (code >= 400 && code < 500)
-		quit("Connected to ", " but greeting failed", code, -1);
+		quit(code, 1, "Connected to ", " but greeting failed", 0);
 	else
 	if (code != 220)
-		quit("Connected to ", " but greeting failed", code, -1);
+		quit(code, 1, "Connected to ", " but greeting failed", 0);
 	if (!smtps)
 		code = ehlo();
 	match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
@@ -747,7 +774,7 @@ do_dane_validation(char *host, int port)
 	 */
 	if ((!match0Or512 && authsha256) || match0Or512) {
 		if (needtlsauth && usage == 2)
-			do_pkix(ssl, servercert, partner_fqdn, tls_quit, die_nomem, quit, 0);
+			do_pkix(ssl, servercert, partner_fqdn, tls_quit, die_nomem, 0);
 	} else { /*- dane validation failed */
 		substdio_putsflush(&smtpto, "QUIT\r\n");
 		if (verbose == 2)
@@ -901,13 +928,16 @@ unsigned long smtpcode() { return(550);}
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.15 2023-01-06 17:40:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.16 2023-01-15 12:42:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: starttls.c,v $
+ * Revision 1.16  2023-01-15 12:42:12+05:30  Cprogrammer
+ * quit() function changed to have varargs
+ *
  * Revision 1.15  2023-01-06 17:40:27+05:30  Cprogrammer
  * moved tls/ssl functions to dossl.c
  *

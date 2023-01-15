@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.35  2023-01-15 12:28:58+05:30  Cprogrammer
+ * logerr(), out() changed to have varargs
+ *
  * Revision 1.34  2023-01-03 23:55:08+05:30  Cprogrammer
  * removed __USE_GNU
  *
@@ -142,6 +145,7 @@
 #include "haveip6.h"
 #include "socket.h"
 #include "cdb_match.h"
+#include "varargs.h"
 #include <search.h>
 
 #define FATAL "qmail-greyd: fatal: "
@@ -221,13 +225,34 @@ die_control(char *arg)
 }
 
 void
-out(char *str)
+#ifdef  HAVE_STDARG_H
+out(char *s1, ...)
+#else
+out(va_alist)
+#endif
 {
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdout, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
+	va_list         ap;
+	char           *str;
+#ifndef HAVE_STDARG_H
+	char           *s1;
+#endif
+
+#ifdef HAVE_STDARG_H
+	va_start(ap, s1);
+#else
+	va_start(ap);
+	s1 = va_arg(ap, char *);
+#endif
+
+	if (substdio_puts(subfdout, s1) == -1)
+		_exit(1);
+	while (1) {
+		str = va_arg(ap, char *);
+		if (!str)
+			break;
+		if (substdio_puts(subfdout, str) == -1)
+			_exit(1);
+	}
 }
 
 void
@@ -239,24 +264,42 @@ flush()
 }
 
 void
-logerr(char *str)
+#ifdef  HAVE_STDARG_H
+logerr(char *s1, ...)
+#else
+logerr(va_alist)
+#endif
 {
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfderr, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
+	va_list         ap;
+	char           *str;
+#ifndef HAVE_STDARG_H
+	char           *s1;
+#endif
+
+#ifdef HAVE_STDARG_H
+	va_start(ap, s1);
+#else
+	va_start(ap);
+	s1 = va_arg(ap, char *);
+#endif
+
+	if (substdio_puts(subfderr, s1) == -1)
+		_exit(1);
+	while (1) {
+		str = va_arg(ap, char *);
+		if (!str)
+			break;
+		if (substdio_puts(subfderr, str) == -1)
+			_exit(1);
+	}
 }
 
 void
-logerrf(char *str)
+logflush()
 {
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfderr, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
 	if (substdio_flush(subfderr) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+		_exit(1);
+	return;
 }
 
 /*
@@ -268,12 +311,9 @@ cidr2IPrange(char *ipaddr, int mask, struct netspec *spec)
 {
 	ip_addr         ip;
 
-	if (!ip4_scan(ipaddr, &ip))
-	{
-		logerr("failed to scan ip");
-		logerr("[");
-		logerr(ipaddr);
-		logerrf("]\n");
+	if (!ip4_scan(ipaddr, &ip)) {
+		logerr("failed to scan ip", "[", ipaddr, "]\n", 0);
+		logflush();
 		return (-1);
 	}
 	spec->min = BUILD_IP(ip.d) & (~((1 << (32 - mask)) -1) & 0xFFFFFFFF);
@@ -288,14 +328,18 @@ struct constmap mapwhite;
 void
 whitelist_init(char *arg)
 {
-	if (verbose > 2)
-		logerr("initializing whitelist\n");
+	if (verbose > 2) {
+		logerr("initializing whitelist\n", 0);
+		logflush();
+	}
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
 		die_control(arg);
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
-	if (verbose > 2)
-		logerrf("initialized  whitelist\n");
+	if (verbose > 2) {
+		logerr("initialized  whitelist\n", 0);
+		logflush();
+	}
 	return;
 }
 
@@ -338,18 +382,14 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 				if (errStr) 
 					*errStr = error_str(errno);
 				ptr[x] = '/';
-				logerr("invalid IP in CIDR format: ");
-				logerr(ptr);
-				logerrf("\n");
+				logerr("invalid IP in CIDR format: ", ptr, "\n", 0);
+				logflush();
 				return (-1);
 			}
 			ptr[x] = '/';
-			if (!ip4_scan(ipaddr->s, &ip)) /*- record contains invalid IP */
-			{
-				logerr("failed to scan ip");
-				logerr("[");
-				logerr(ipaddr->s);
-				logerrf("]\n");
+			if (!ip4_scan(ipaddr->s, &ip)) { /*- record contains invalid IP */
+				logerr("failed to scan ip", "[", ipaddr->s, "]\n", 0);
+				logflush();
 				return (0);
 			}
 			tmp_ip = BUILD_IP(ip.d);
@@ -383,9 +423,8 @@ is_white(char *ip)
 		return (0);
 	default:
 		substdio_flush(subfdout);
-		logerr("error in ip_match: ");
-		logerr(errStr);
-		logerrf("\n");
+		logerr("error in ip_match: ", errStr, "\n", 0);
+		logflush();
 		_exit (1);
 	}
 	/*- Not reached */
@@ -404,10 +443,8 @@ copy_grey(struct greylst *ptr, char *ipaddr, char *rpath, char *rcpt, int rcptle
 	if (!ip4_scan(ipaddr, &ptr->ip.ip))
 #endif
 	{
-		logerr("failed to scan ip");
-		logerr("[");
-		logerr(ipaddr);
-		logerrf("]\n");
+		logerr("failed to scan ip", "[", ipaddr, "]\n", 0);
+		logflush();
 		return (-1);
 	}
 	len = str_len(rpath);
@@ -443,49 +480,42 @@ print_record(char *ip, char *rpath, char *rcpt, int rcptlen, time_t timestamp,
 	char           *ptr;
 
 	strnum[fmt_ulong(strnum, (unsigned long) timestamp)] = 0;
-	out(strnum);
-	out(" IP: ");
-	out(ip);
-	out(" FROM: ");
-	out(rpath); /*- from */
-	out(" RCPT: [");
+	out(strnum, " IP: ", ip, " FROM: ", rpath, " RCPT: [", 0);
 	for (ptr = rcpt;ptr < rcpt + rcptlen;) {
-		out(ptr + 1);
+		out(ptr + 1, 0);
 		ptr += (str_len(ptr) + 1);
 		if (ptr < rcpt + rcptlen)
-			out(" ");
+			out(" ", 0);
 		else
-			out("]");
+			out("]", 0);
 	}
-	out(" status=");
+	out(" status=", 0);
 	switch(status)
 	{
 	case RECORD_NEW:
-		out("RECORD_NEW");
+		out("RECORD_NEW", 0);
 		break;
 	case RECORD_EARLY:
-		out("RECORD_EARLY");
+		out("RECORD_EARLY", 0);
 		break;
 	case RECORD_STALE:
-		out("RECORD_STALE");
+		out("RECORD_STALE", 0);
 		break;
 	case RECORD_WHITE:
-		out("RECORD_WHITE");
+		out("RECORD_WHITE", 0);
 		break;
 	case RECORD_OK:
-		out("RECORD_OK");
+		out("RECORD_OK", 0);
 		break;
 	case RECORD_GREY:
-		out("RECORD_GREY");
+		out("RECORD_GREY", 0);
 		break;
 	case RECORD_BOUNCE:
-		out("RECORD_BOUNCE");
+		out("RECORD_BOUNCE", 0);
 		break;
 	}
-	out(" rcptlen=");
 	strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
-	out(strnum);
-	out(operation ? " expired\n" : "\n");
+	out(" rcptlen=", strnum, operation ? " expired\n" : "\n", 0);
 	flush();
 	return;
 }
@@ -528,16 +558,13 @@ create_hash(struct greylst *curr)
 			hdestroy();
 			hcount = 0;
 			curr = 0;
-			logerr("WARNING!! recreating hash table, size=");
 			strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
-			logerr(strnum);
-			logerrf("\n");
+			logerr("WARNING!! recreating hash table, size=", strnum, "\n", 0);
+			logflush();
 		} else { /*- first time/expiry */
 			if (verbose > 2) {
-				out("creating hash table, size=");
 				strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
-				out(strnum);
-				out("\n");
+				out("creating hash table, size=", strnum, "\n", 0);
 			}
 		}
 		if (!hcreate((125 * hash_size * h_allocated)/100)) /*- be 25% generous */
@@ -551,7 +578,8 @@ create_hash(struct greylst *curr)
 		if (!(ep = hsearch(e, FIND))) { /*- add entries when hash table is new or after destruction */
 			e.data = ptr;
 			if (!(ep = hsearch(e, ENTER))) {
-				logerrf("unable to add to hash table\n");
+				logerr("unable to add to hash table\n", 0);
+				logflush();
 				return (-1);
 			} else
 				hcount++;
@@ -576,7 +604,7 @@ expire_records(time_t cur_time)
 	struct greylst *ptr;
 	time_t          start;
 
-	logerr("expiring records\n");
+	logerr("expiring records\n", 0);
 	/*- find all records that are expired where timestamp < start */
 	start = cur_time - timeout;
 	for (ptr = head; ptr; ptr = ptr->next) {
@@ -596,7 +624,8 @@ expire_records(time_t cur_time)
 		free(ptr->rcpt);
 		free(ptr);
 	}
-	logerrf("expired  records\n");
+	logerr("expired  records\n", 0);
+	logflush();
 	/*- destroy and recreate the hash */
 	if (create_hash(0))
 		die_nomem();
@@ -683,10 +712,8 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	if (!ip4_scan(remoteip, &r_ip.ip))
 #endif
 	{
-		logerr("failed to scan ip");
-		logerr("[");
-		logerr(remoteip);
-		logerrf("]\n");
+		logerr("failed to scan ip [", remoteip, "]\n", 0);
+		logflush();
 		return (0);
 	}
 	e.key = remoteip;
@@ -795,9 +822,9 @@ send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
 	switch (search_record(ip, rpath, rcpt, rcptlen, min_resend, resend_win, fr_int, grey))
 	{
 	case RECORD_NEW:
-		if (!add_record(ip, rpath, rcpt, rcptlen, grey))
-		{
-			logerrf("unable to add record\n");
+		if (!add_record(ip, rpath, rcpt, rcptlen, grey)) {
+			logerr("unable to add record\n", 0);
+			logflush();
 			resp = "\0\4";
 			n = -4;
 		} else {
@@ -872,8 +899,10 @@ save_context()
 
 	if (!grey_count)
 		return;
-	if (verbose > 2)
-		logerr("saving context file\n");
+	if (verbose > 2) {
+		logerr("saving context file\n", 0);
+		logflush();
+	}
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
@@ -899,8 +928,10 @@ save_context()
 			break;
 	} /*- for (ptr = head;ptr;ptr = ptr->next) */
 	close(context_fd);
-	if (verbose > 2)
-		logerrf("saved  context file\n");
+	if (verbose > 2) {
+		logerr("saved  context file\n", 0);
+		logflush();
+	}
 	return;
 }
 
@@ -923,7 +954,7 @@ load_context()
 	struct greylst *ptr;
 
 	if (verbose > 2) {
-		out("loading context\n");
+		out("loading context\n", 0);
 		flush();
 	}
 	if ((fd = open(context_file.s, O_RDONLY)) == -1) {
@@ -1025,16 +1056,13 @@ void
 ready()
 {
 	char            strnum[FMT_ULONG];
-	out("Ready for connections, grey_count=");
+
 	strnum[fmt_ulong(strnum, (unsigned long) grey_count)] = 0;
-	out(strnum);
-	out(", hcount=");
+	out("Ready for connections, grey_count=", strnum, ", hcount=", 0);
 	strnum[fmt_ulong(strnum, (unsigned long) hcount)] = 0;
-	out(strnum);
-	out(", hash_size=");
+	out(strnum, ", hash_size=", 0);
 	strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
-	out(strnum);
-	out("\n");
+	out(strnum, "\n", 0);
 	flush();
 }
 
@@ -1053,15 +1081,12 @@ sigusr2()
 	if (verbose > 2) {
 		for (i = 1, ptr = head; ptr; ptr = ptr->next, i++) {
 			strnum[fmt_ulong(strnum, (unsigned long) i)] = 0;
-			out(strnum);
-			out(" ");
+			out(strnum, " ", 0);
 			print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
 				ptr->status, 0);
 			for (j = 1, ip_ptr = ptr->ip_next;ip_ptr;ip_ptr = ip_ptr->ip_next, j++) {
-				out(" ");
 				strnum[fmt_ulong(strnum, (unsigned long) j)] = 0;
-				out(strnum);
-				out(" ");
+				out(" ", strnum, " ", 0);
 				print_record(ip_ptr->ip_str, ip_ptr->rpath, ip_ptr->rcpt, ip_ptr->rcptlen, ip_ptr->timestamp,
 					ptr->status, 0);
 			}
@@ -1076,7 +1101,8 @@ no_return void
 sigterm()
 {
 	sig_block(SIGTERM);
-	logerrf("ARGH!! Committing suicide on SIGTERM\n");
+	logerr("ARGH!! Committing suicide on SIGTERM\n", 0);
+	logflush();
 	save_context();
 	flush();
 	_exit(0);
@@ -1378,27 +1404,27 @@ main(int argc, char **argv)
 		}
 		save = 1;
 		if (verbose) {
-			out("qmail-greyd IP: ");
+			out("qmail-greyd IP: ", 0);
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 			if (noipv6)
-				out(inet_ntoa(from.sa4.sin_addr));
+				out(inet_ntoa(from.sa4.sin_addr), 0);
 			else {
 				static char     addrBuf[INET6_ADDRSTRLEN];
 				if (from.sa.sa_family == AF_INET) {
 					out((char *) inet_ntop(AF_INET,
 						(void *) &from.sa4.sin_addr, addrBuf,
-						INET_ADDRSTRLEN));
+						INET_ADDRSTRLEN), 0);
 				} else
 				if (from.sa.sa_family == AF_INET6) {
 					out((char *) inet_ntop(AF_INET6,
 						(void *) &from.sa6.sin6_addr, addrBuf,
-						INET6_ADDRSTRLEN));
+						INET6_ADDRSTRLEN), 0);
 				} else
 				if (from.sa.sa_family == AF_UNSPEC)
-					out("::1");
+					out("::1", 0);
 			}
 #else
-			out(inet_ntoa(from.sa4.sin_addr));
+			out(inet_ntoa(from.sa4.sin_addr), 0);
 #endif
 		}
 		/*- 
@@ -1409,70 +1435,65 @@ main(int argc, char **argv)
 		switch (rdata[0])
 		{
 		case 'I': /*- process exactly like greydaemon */
-			out(" [");
+			out(" [", 0);
 			for (state = 0, ptr = rdata, rcpt_head = (char *) 0, rcptlen = 0;ptr < rdata + n - 1;) {
 				switch (*ptr)
 				{
 					case 'I':
-						out("Remote IP: ");
+						out("Remote IP: ", 0);
 						client_ip = ptr + 1;
 						state++;
 						break;
 					case 'F':
-						out("FROM: ");
+						out("FROM: ", 0);
 						rpath = ptr + 1;
 						state++;
 						break;
 					case 'T':
-						out("RCPT: ");
+						out("RCPT: ", 0);
 						if (!rcpt_head)
 							rcpt_head = ptr;
 						break;
 				} /*- switch (*ptr) */
-				out(ptr + 1);
+				out(ptr + 1, 0);
 				len = str_len(ptr) + 1;
 				if (*ptr == 'T')
 					rcptlen += len;
 				ptr += len; /*- skip past \0 */
 				if (ptr < (rdata + n - 2))
-					out(" ");
+					out(" ", 0);
 				if (ptr == rdata + n)
 					state = 0;
 			} /*- for (ptr = rdata;ptr < rdata + n - 1;) */
-			out("] bufsiz=");
 			strnum[fmt_ulong(strnum, (unsigned long) n)] = 0;
-			out(strnum);
-			out(", rcptlen=");
+			out("] bufsiz=", strnum, ", rcptlen=", 0);
 			strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
-			out(strnum);
+			out(strnum, 0);
 			if (state != 2 || !rcptlen) {
-				out(", Response: RECORD INVALID\n");
+				out(", Response: RECORD INVALID\n", 0);
+				flush();
 				break;
 			} else
-			n = send_response(s, &from, fromlen, client_ip, rpath, rcpt_head, rcptlen,
+				n = send_response(s, &from, fromlen, client_ip, rpath, rcpt_head, rcptlen,
 					min_resend, resend_window, free_interval, &grey, &rec_added);
-			if (n == -2) {
-				logerrf("qmail-greyd: invalid send_response - report bug to author\n");
-			} else
-			if (n == -3) {
-				logerrf("qmail-greyd: invalid IP address format\n");
-			} else
-			if (n == -4) {
-				logerrf("qmail-greyd: copy failed\n");
-			} else
+			if (n == -2)
+				logerr("qmail-greyd: invalid send_response - report bug to author\n", 0);
+			else
+			if (n == -3)
+				logerr("qmail-greyd: invalid IP address format\n", 0);
+			else
+			if (n == -4)
+				logerr("qmail-greyd: copy failed\n", 0);
+			else
 			if (n < 0)
 				strerr_warn2(WARN, "sendto failed: ", &strerr_sys);
+			logflush();
 			if (grey) {
-				out(", attempts=");
 				strnum[fmt_ulong(strnum, (unsigned long) grey->attempts)] = 0;
-				out(strnum);
-				out(", Reponse: ");
-				out(print_status(grey->status));
-			} else {
-				out(", Reponse: ");
-				n == -3 ? out(print_status(RECORD_IPV6)) : out(print_status(RECORD_WHITE));
-			}
-			out("\n");
+				out(", attempts=", strnum, ", Reponse: ", print_status(grey->status), "\n", 0);
+			} else
+				out(", Reponse: ", n == -3 ? print_status(RECORD_IPV6) : print_status(RECORD_WHITE), "\n", 0);
+			flush();
 			if (rec_added && grey && create_hash(grey)) /*- add the record to hash list if new. group on ip_str if not new */
 				die_nomem();
 			break;
@@ -1499,7 +1520,7 @@ main(int argc, char **argv)
 		case 'Q': /*- query a whitelist record */
 			break;
 		default:
-			out(", Response: RECORD INVALID\n");
+			out(", Response: RECORD INVALID\n", 0);
 			break;
 		} /*- switch (rdata[0]) */
 		flush();
@@ -1510,7 +1531,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.34 2023-01-03 23:55:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.35 2023-01-15 12:28:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

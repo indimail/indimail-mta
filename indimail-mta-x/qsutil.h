@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.23  2023-01-15 12:38:42+05:30  Cprogrammer
+ * use slog() function with varargs to replace all log functions
+ *
  * Revision 1.22  2022-03-16 20:02:03+05:30  Cprogrammer
  * added log5_noflush() function
  *
@@ -65,24 +68,15 @@
 #define QSUTIL_H
 #include <stralloc.h>
 #include <sys/types.h>
+#include "varargs.h"
 
 void            loglock_open(char *, int);
 void            lockerr(void);
-void            log1(char *);
-void            log1_noflush(char *);
-void            my_log2(char *, char *);
-void            log2_noflush(char *, char *);
-void            log3_noflush(char *, char *, char *);
-void            log4_noflush(char *, char *, char *, char *);
-void            log5_noflush(char *, char *, char *, char *, char *);
-void            log3(char *, char *, char *);
-void            log4(char *, char *, char *, char *);
-void            log5(char *, char *, char *, char *, char *);
-void            log7(char *, char *, char *, char *, char *, char *, char *);
-void            log9(char *, char *, char *, char *, char *, char *, char *, char *, char *);
-void            log11(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
-void            log13(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
-void            log15(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
+#ifdef HAVE_STDARG_H
+void            slog(int, ...);
+#else
+void            slog();
+#endif
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            log_stat(stralloc *, stralloc *, unsigned long, size_t);

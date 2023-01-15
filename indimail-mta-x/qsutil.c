@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.24  2023-01-15 12:37:21+05:30  Cprogrammer
+ * use slog() function with varargs to replace all log functions
+ *
  * Revision 1.23  2022-03-16 20:01:53+05:30  Cprogrammer
  * added log5_noflush() function
  *
@@ -81,6 +84,7 @@
 #include <error.h>
 #include "auto_control.h"
 #include "qsutil.h"
+#include "varargs.h"
 #include "variables.h"
 
 static stralloc foo = { 0 };
@@ -98,9 +102,9 @@ void
 lockerr()
 {
 	if (queuedesc)
-		log3("alert: ", queuedesc, ": problem with lock/unlock, sleeping...\n");
+		slog(1, "alert: ", queuedesc, ": problem with lock/unlock, sleeping...\n", 0);
 	else
-		log1("alert: problem with lock/unlock, sleeping...\n");
+		slog(1, "alert: problem with lock/unlock, sleeping...\n", 0);
 	sleep(10);
 }
 
@@ -126,13 +130,13 @@ loglock_open(char *ident, int preopen)
 			nomem(ident);
 		if ((loglock_fd = open_read(lockfn.s)) == -1) {
 			if (queuedesc)
-				log5("alert: ", ident, ": ", queuedesc, ": cannot start: unable to open defaultdelivery\n");
+				slog(1, "alert: ", ident, ": ", queuedesc, ": cannot start: unable to open defaultdelivery\n", 0);
 			else
-				log3("alert: ", ident, ": cannot start: unable to open defaultdelivery\n");
+				slog(1, "alert: ", ident, ": cannot start: unable to open defaultdelivery\n", 0);
 			lockerr();
 		}
 	}
-	/*- log5("info: ", ident, ": ", queuedesc, loglock_fd == -1 ? ": loglock disabled\n" : ": loglock enabled\n"); -*/
+	/*- slog(1, "info: ", ident, ": ", queuedesc, loglock_fd == -1 ? ": loglock disabled\n" : ": loglock enabled\n", 0); -*/
 }
 #endif
 
@@ -199,237 +203,37 @@ logsa(stralloc *sa)
 }
 
 void
-log1_noflush(char *s1)
+#ifdef  HAVE_STDARG_H
+slog(int do_flush, ...)
+#else
+slog(va_alist)
+#endif
 {
-	substdio_puts(&sserr, s1);
-}
+	va_list         ap;
+	char           *str;
+#ifndef HAVE_STDARG_H
+	int             do_flush;
+#endif
 
-void
-log2_noflush(char *s1, char *s2)
-{
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-}
+#ifdef HAVE_STDARG_H
+	va_start(ap, do_flush);
+#else
+	va_start(ap);
+	do_flush = va_arg(ap, int);
+#endif
 
-void
-log3_noflush(char *s1, char *s2, char *s3)
-{
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-}
-
-void
-log4_noflush(char *s1, char *s2, char *s3, char *s4)
-{
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-}
-
-void
-log5_noflush(char *s1, char *s2, char *s3, char *s4, char *s5)
-{
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_puts(&sserr, s5);
-}
-
-void
-log1(char *s1)
-{
 #ifdef LOGLOCK
 	if (loglock_fd != -1)
 		lock_exnb(loglock_fd);
 #endif
-	substdio_putsflush(&sserr, s1);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log3(char *s1, char *s2, char *s3)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_flush(&sserr);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log4(char *s1, char *s2, char *s3, char *s4)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_flush(&sserr);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log5(char *s1, char *s2, char *s3, char *s4, char *s5)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_puts(&sserr, s5);
-	substdio_flush(&sserr);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log7(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_puts(&sserr, s5);
-	substdio_puts(&sserr, s6);
-	substdio_puts(&sserr, s7);
-	substdio_flush(&sserr);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log9(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
-		char *s8, char *s9)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_puts(&sserr, s5);
-	substdio_puts(&sserr, s6);
-	substdio_puts(&sserr, s7);
-	substdio_puts(&sserr, s8);
-	substdio_puts(&sserr, s9);
-	substdio_flush(&sserr);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log11(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
-		char *s8, char *s9, char *s10, char *s11)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_puts(&sserr, s5);
-	substdio_puts(&sserr, s6);
-	substdio_puts(&sserr, s7);
-	substdio_puts(&sserr, s8);
-	substdio_puts(&sserr, s9);
-	substdio_puts(&sserr, s10);
-	substdio_puts(&sserr, s11);
-	substdio_flush(&sserr);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log13(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
-		char *s8, char *s9, char *s10, char *s11, char *s12, char *s13)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_puts(&sserr, s5);
-	substdio_puts(&sserr, s6);
-	substdio_puts(&sserr, s7);
-	substdio_puts(&sserr, s8);
-	substdio_puts(&sserr, s9);
-	substdio_puts(&sserr, s10);
-	substdio_puts(&sserr, s11);
-	substdio_puts(&sserr, s12);
-	substdio_puts(&sserr, s13);
-	substdio_flush(&sserr);
-#ifdef LOGLOCK
-	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
-		lockerr();
-#endif
-}
-
-void
-log15(char *s1, char *s2, char *s3, char *s4, char *s5, char *s6, char *s7,
-		char *s8, char *s9, char *s10, char *s11, char *s12, char *s13,
-		char *s14, char *s15)
-{
-#ifdef LOGLOCK
-	if (loglock_fd != -1)
-		lock_exnb(loglock_fd);
-#endif
-	substdio_puts(&sserr, s1);
-	substdio_puts(&sserr, s2);
-	substdio_puts(&sserr, s3);
-	substdio_puts(&sserr, s4);
-	substdio_puts(&sserr, s5);
-	substdio_puts(&sserr, s6);
-	substdio_puts(&sserr, s7);
-	substdio_puts(&sserr, s8);
-	substdio_puts(&sserr, s9);
-	substdio_puts(&sserr, s10);
-	substdio_puts(&sserr, s11);
-	substdio_puts(&sserr, s12);
-	substdio_puts(&sserr, s13);
-	substdio_puts(&sserr, s14);
-	substdio_puts(&sserr, s15);
-	substdio_flush(&sserr);
+	while (1) {
+		str = va_arg(ap, char *);
+		if (!str)
+			break;
+		substdio_puts(&sserr, str);
+	}
+	if (do_flush)
+		substdio_flush(&sserr);
 #ifdef LOGLOCK
 	if (loglock_fd != -1 && lock_un(loglock_fd) == -1)
 		lockerr();
@@ -448,11 +252,11 @@ log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, size_t bytes)
 	*strnum2 = ' ';
 	for (ptr = mailto->s; ptr < mailto->s + mailto->len;) {
 		if (queuedesc)
-			log9(*ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
-				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes ", queuedesc, "\n");
+			slog(1, *ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes ", queuedesc, "\n", 0);
 		else
-			log7(*ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
-				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes\n");
+			slog(1, *ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes\n", 0);
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom->len = mailto->len = 0;
@@ -462,9 +266,9 @@ void
 nomem(char *argv0)
 {
 	if (queuedesc)
-		log5("alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n");
+		slog(1, "alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n", 0);
 	else
-		log3("alert: ", argv0, ": out of memory, sleeping...\n");
+		slog(1, "alert: ", argv0, ": out of memory, sleeping...\n", 0);
 	sleep(10);
 }
 
@@ -472,9 +276,9 @@ void
 pausedir(char *dir)
 {
 	if (queuedesc)
-		log5("alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n");
+		slog(1, "alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", 0);
 	else
-		log3("alert: unable to opendir ", dir, ", sleeping...\n");
+		slog(1, "alert: unable to opendir ", dir, ", sleeping...\n", 0);
 	sleep(10);
 }
 
@@ -519,7 +323,7 @@ logsafe(char *s, char *argv0)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.23 2022-03-16 20:01:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.24 2023-01-15 12:37:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

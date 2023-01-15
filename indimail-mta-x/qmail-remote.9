@@ -79,10 +79,12 @@ QMTP connection attempt succeeds but mail delivery through that connection
 fails. You can disable MXPS by setting \fBDISABLE_MXPS\fR environment
 variable.
 
-\fBqmail-remote\fR will issue the STARTTLS command if it finds the remote
-server supports STARTTLS and it finds a valid certificate in
-\fISYSCONF/certs/clientcert.pem\fR. \fBqmail-remote\fR will revert
-to non-encrypted session if the TLS connection fails. If the environment
+\fBqmail-remote\fR will initiate a TLS connection immediately on
+connection if the environment variable \fBSMTPS\fR is set. If \fBSMTPS\fR
+is not set, \fBqmail-remote\fR will issue the STARTTLS command if it finds
+the remote server supports STARTTLS and it finds a valid certificate in
+\fISYSCONF/certs/clientcert.pem\fR. \fBqmail-remote\fR will revert to
+non-encrypted session if the TLS connection fails. If the environment
 variable SMPTS is set or an artificial SMTP route has a \fIport\fR value of
 465 (deprecated smtps port), \fBqmail-remote\fR will start a TLS session
 and exit if the TLS session cannot be initiated.
