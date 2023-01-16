@@ -368,7 +368,7 @@ checkSSP(char *domain, int *bTesting)
 	}
 	/*-
 	 * PG.1 2013-01-03
-	 * Bug fix by Piotr Gronek, Faculy of Physics & Applied Computer Science, Poland 2013-01-03
+	 * Bug fix by Piotr Gronek, Faculty of Physics & Applied Computer Science, Poland 2013-01-03
 	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
 	 *
 	 */
@@ -444,7 +444,7 @@ checkADSP(char *domain)
 	}
 	/*-
 	 * PG.1 2013-01-03
-	 * Bug fix by Piotr Gronek, Faculy of Physics & Applied Computer Science, Poland 2013-01-03
+	 * Bug fix by Piotr Gronek, Faculty of Physics & Applied Computer Science, Poland 2013-01-03
 	 *
 	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
 	 *
