@@ -1,5 +1,8 @@
 /*
  * $Log: received.c,v $
+ * Revision 1.9  2023-01-16 23:13:08+05:30  Cprogrammer
+ * folded received line to put date below
+ *
  * Revision 1.8  2022-10-22 13:08:35+05:30  Cprogrammer
  * added program identifier to Received header
  *
@@ -57,7 +60,8 @@ safeput(struct qmail *qqt, char *s)
 
 /*
  * "Received: from relay1.uu.net (HELO uunet.uu.net) (7@192.48.96.5)\n" 
- * "  by silverton.berkeley.edu with SMTP; 26 Sep 1995 04:46:54 -0000\n" 
+ * "  by silverton.berkeley.edu with SMTP;"
+ * "  26 Sep 1995 04:46:54 -0000\n" 
  */
 
 void
@@ -90,7 +94,7 @@ received(struct qmail *qqt, char *program, char *protocol, char *local, char *re
 	safeput(qqt, local);
 	qmail_puts(qqt, " with ");
 	qmail_puts(qqt, protocol);
-	qmail_puts(qqt, "; ");
+	qmail_puts(qqt, ";\n  ");
 	datetime_tai(&dt, now());
 	qmail_put(qqt, buf, date822fmt(buf, &dt));
 }
@@ -98,7 +102,7 @@ received(struct qmail *qqt, char *program, char *protocol, char *local, char *re
 void
 getversion_received_c()
 {
-	static char    *x = "$Id: received.c,v 1.8 2022-10-22 13:08:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: received.c,v 1.9 2023-01-16 23:13:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

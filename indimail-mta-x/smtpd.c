@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.286 2023-01-15 23:28:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.287 2023-01-16 23:14:38+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -108,6 +108,7 @@
 static void     do_tls();
 static int      tls_verify();
 static void     tls_nogateway();
+static void     ssl_proto();
 #endif
 ssize_t         safewrite(int, char *, int);
 ssize_t         saferead(int, char *, int);
@@ -130,7 +131,7 @@ static int      auth_scram_sha256_plus();
 static int      auth_scram_sha512();
 static int      auth_scram_sha512_plus();
 #endif
-#endif
+#endif /*- #ifdef HASLIBGSASL */
 static int      err_noauth();
 #ifdef TLS
 static int      err_noauthallowed();
@@ -151,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.286 $";
+static char    *revision = "$Revision: 1.287 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3521,6 +3522,8 @@ smtp_mail(char *arg)
 	if (authd && !stralloc_append(&proto, "A"))
 		die_nomem();
 
+	if (ssl)
+		ssl_proto();
 #ifdef BATV
 	if (batvok) {
 		(void) check_batv_sig(); /*- unwrap in case it's ours */
@@ -6506,6 +6509,24 @@ log_ssl_version()
 	return;
 }
 
+static void
+ssl_proto()
+{
+	int             i;
+
+	/*- populate the protocol string, used in Received */
+	SSL_get_cipher_bits(ssl, &i);
+	strnum[i = fmt_int(strnum, i)] = 0;
+	if (!stralloc_catb(&proto, " (", 2) ||
+			!stralloc_cats(&proto, (char *) SSL_get_version(ssl)) ||
+			!stralloc_catb(&proto, " ", 1) ||
+			!stralloc_cats(&proto, (char *) SSL_CIPHER_get_name(SSL_get_current_cipher(ssl))) ||
+			!stralloc_catb(&proto, " bits=", 6) ||
+			!stralloc_catb(&proto, strnum, i) ||
+			!stralloc_append(&proto, ")"))
+		die_nomem();
+	return;
+}
 void
 do_tls()
 {
@@ -6549,12 +6570,12 @@ do_tls()
 		crlfile.len = 0;
 
 	if (!ciphers) {
+		int             i;
 		/* - set cipher list */
 		if (!(ciphers = env_get("TLS_CIPHER_LIST"))) {
 			if (control_readfile(&saciphers, "tlsserverciphers", 0) == -1)
 				die_control("tlsserverciphers");
 			if (saciphers.len) {
-				int             i;
 				/*- convert all '\0's except the last one to ':' */
 				for (i = 0; i < saciphers.len - 1; ++i)
 					if (!saciphers.s[i])
@@ -6596,13 +6617,6 @@ do_tls()
 			_exit(1);
 	}
 	log_ssl_version();
-	/*- populate the protocol string, used in Received */
-	if (!stralloc_append(&proto, "(") ||
-			!stralloc_cats(&proto, (char *) SSL_get_version(ssl)) ||
-			!stralloc_catb(&proto, " ", 1) ||
-			!stralloc_cats(&proto, (char *) SSL_CIPHER_get_name(SSL_get_current_cipher(ssl))) ||
-			!stralloc_catb(&proto, " encrypted) ", 12))
-		die_nomem();
 	return;
 }
 #endif
@@ -6951,6 +6965,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.287  2023-01-16 23:14:38+05:30  Cprogrammer
+ * added ssl cipher bits in Received header
+ *
  * Revision 1.286  2023-01-15 23:28:20+05:30  Cprogrammer
  * set remoteip variable before first use of logerr()
  * make logerr safe by checking for remoteip
@@ -7262,7 +7279,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.286 2023-01-15 23:28:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.287 2023-01-16 23:14:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
