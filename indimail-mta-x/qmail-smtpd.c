@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.9  2023-01-18 00:02:13+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.8  2022-11-23 15:08:03+05:30  Cprogrammer
  * rename mysql_lib to libmysql on upgrade
  *
@@ -123,114 +126,97 @@ print_details()
 		"TCPLOCALPORT", "TCPPARANOID", "TCPREMOTEHOST", "TCPREMOTEINFO", "TCPREMOTEIP", 0};
 
 
-	qprintf(subfdout, "Basic Information\n--------------------------------------------\n", "%s");
-	qprintf(subfdout, "qmail-smtpd version", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "Basic Information\n--------------------------------------------\n");
+	subprintf(subfdout, "%-35s: ", "qmail-smtpd version");
 	ptr = getversion_smtpd_c();
 	str_copyb(revision, ptr, 27);
 	i = str_chr(revision, ' ');
 	if (revision[i])
 		revision[i] = 0;
-	qprintf(subfdout, revision, "%s");
-	qprintf(subfdout, "\n", "%s");
+	subprintf(subfdout, "%s\n", revision);
 
 #ifdef TLS
 #if defined(OPENSSL_FULL_VERSION_STR) || defined(OPENSSL_VERSION_STR)
-	qprintf(subfdout, "OpenSSL", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "OpenSSL");
 #if defined(OPENSSL_VERSION_TEXT)
-	qprintf(subfdout, OPENSSL_VERSION_TEXT, "%s");
+	subprintf(subfdout, "%s", OPENSSL_VERSION_TEXT, "%s");
 #elif defined(OPENSSL_FULL_VERSION_STR)
-	qprintf(subfdout, OPENSSL_FULL_VERSION_STR, "%s");
+	subprintf(subfdout, "%s", OPENSSL_FULL_VERSION_STR, "%s");
 #elif defined(OPENSSL_VERSION_STR)
-	qprintf(subfdout, OPENSSL_VERSION_STR, "%s");
+	subprintf(subfdout, "%s", OPENSSL_VERSION_STR, "%s");
 #endif
-	qprintf(subfdout, "\n", "%s");
+	subprintf(subfdout, "\n");
 #endif
 #endif
-	qprintf(subfdout, "SMTPS", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "SMTPS");
 #ifdef TLS
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "STARTTLS", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "STARTTLS");
 #ifdef TLS
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
 
-	qprintf(subfdout, "SASL", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "SASL");
 #ifdef HASLIBGSASL
-	qprintf(subfdout, "Yes, GSASL ", "%s");
-	qprintf(subfdout, gsasl_check_version(GSASL_VERSION), "%s");
+	subprintf(subfdout, "Yes, GSASL %s\n", gsasl_check_version(GSASL_VERSION));
 #else
-	qprintf(subfdout, "No", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "\n", "%s");
 
-	qprintf(subfdout, "SPF", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "SPF");
 #ifdef USE_SPF
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "Control files in CDB", "%-35s");
-	qprintf(subfdout, ": ", "%s");
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "%-35s: Yes\n", "Control files in CDB");
 
-	qprintf(subfdout, "Control files in MySQL", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "Control files in MySQL");
 #ifdef HAS_MYSQL
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "Bounce Address Tag Validation", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "Bounce Address Tag Validation");
 #ifdef BATV
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "SMTP Plugins", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "SMTP Plugins");
 #ifdef SMTP_PLUGIN
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "GSASL", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "GSASL");
 #ifdef HASLIBGSASL
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "IPv6", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "IPv6");
 #ifdef IPV6
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
-	qprintf(subfdout, "Email Address Internationalization", "%-35s");
-	qprintf(subfdout, ": ", "%s");
+	subprintf(subfdout, "%-35s: ", "Email Address Internationalization");
 #ifdef SMTPUTF8
-	qprintf(subfdout, "Yes\n", "%s");
+	subprintf(subfdout, "Yes\n");
 #else
-	qprintf(subfdout, "No\n", "%s");
+	subprintf(subfdout, "No\n");
 #endif
 	for (p = auth_methods; *p; p++) {
 		qprintf(subfdout, "AUTH ", "%s");
 		qprintf(subfdout, *p, "%-30s");
 		qprintf(subfdout, ": ", "%s");
-		qprintf(subfdout, "Yes\n", "%s");
+		subprintf(subfdout, "Yes\n");
 	}
 
 	qprintf(subfdout, "\nControl Files\n--------------------------------------------\n", "%s");
@@ -277,7 +263,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.8 2022-11-23 15:08:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.9 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
