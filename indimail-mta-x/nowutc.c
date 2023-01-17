@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.9  2023-01-17 23:53:25+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.8  2023-01-03 16:36:07+05:30  Cprogrammer
  * removed auto_sysconfdir.h dependency
  *
@@ -44,7 +47,6 @@ struct tai      sec;
 struct caltime  ct;
 
 char            x[TAIA_FMTFRAC];
-char            strnum[FMT_ULONG];
 
 int
 main()
@@ -58,32 +60,9 @@ main()
 	taia_tai(&cur, &sec);
 	caltime_utc(&ct, &sec, (int *) 0, (int *) 0);
 
-	strnum[fmt_int(strnum, ct.date.year)] = 0;
-	qprintf(subfdoutsmall, strnum, "%+02d");
-	qprintf(subfdoutsmall, "-", "%s");
-
-	strnum[fmt_int(strnum, ct.date.month)] = 0;
-	qprintf(subfdoutsmall, strnum, "%+02d");
-	qprintf(subfdoutsmall, "-", "%s");
-
-	strnum[fmt_int(strnum, ct.date.day)] = 0;
-	qprintf(subfdoutsmall, strnum, "%+02d");
-	qprintf(subfdoutsmall, " ", "%s");
-
-	strnum[fmt_int(strnum, ct.hour)] = 0;
-	qprintf(subfdoutsmall, strnum, "%+02d");
-	qprintf(subfdoutsmall, ":", "%s");
-
-	strnum[fmt_int(strnum, ct.minute)] = 0;
-	qprintf(subfdoutsmall, strnum, "%+02d");
-	qprintf(subfdoutsmall, ":", "%s");
-
-	strnum[fmt_int(strnum, ct.second)] = 0;
-	qprintf(subfdoutsmall, strnum, "%+02d");
-	qprintf(subfdoutsmall, ".", "%s");
-
-	qprintf(subfdoutsmall, x, "%s");
-	qprintf(subfdoutsmall, "\n", "%s");
+	subprintf(subfdoutsmall, "%02d-%02d-%02d %02d:%02d:%02d.%s\n",
+			ct.date.year, ct.date.month, ct.date.day, ct.hour,
+			ct.minute, ct.second, x);
 	qprintf_flush(subfdoutsmall);
 	return (0);
 }
@@ -91,7 +70,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *z = "$Id: nowutc.c,v 1.8 2023-01-03 16:36:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *z = "$Id: nowutc.c,v 1.9 2023-01-17 23:53:25+05:30 Cprogrammer Exp mbhangui $";
 
 	z++;
 }

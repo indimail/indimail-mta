@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.10  2023-01-18 00:02:13+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.9  2022-11-23 15:07:55+05:30  Cprogrammer
  * rename mysql_lib to libmysql on upgrade
  *
@@ -107,25 +110,18 @@ do_int(char *fn, char *def, char *pre, char *post)
 {
 	int             i;
 
-	qprintf(subfdout, fn, "%22s");
-	substdio_puts(subfdout, ": ");
+	subprintf(subfdout, "%-22s: ", fn);
 	switch (control_readint(&i, fn))
 	{
 	case -1:
 		strerr_die3sys(111, "unable to read ", fn, ": ");
 	case 0:
-		substdio_puts(subfdout, pre);
-		substdio_puts(subfdout, def);
-		substdio_puts(subfdout, post);
-		substdio_puts(subfdout, " (Default)\n\n");
+		subprintf(subfdout, "%s:%s:%s (Default)\n\n", pre, def, post);
 		break;
 	case 1:
 		if (i < 0)
 			i = 0;
-		substdio_puts(subfdout, pre);
-		substdio_put(subfdout, num, fmt_uint(num, i));
-		substdio_puts(subfdout, post);
-		substdio_puts(subfdout, "\n\n");
+		subprintf(subfdout, "%s%d%s\n\n", pre, i, post);
 		break;
 	}
 }
@@ -135,8 +131,7 @@ do_str(char *fn, int flagme, char *def, char *pre)
 {
 	int             i = 0;
 
-	qprintf(subfdout, fn, "%22s");
-	substdio_puts(subfdout, ": ");
+	subprintf(subfdout, "%-22s: ", fn);
 	switch (control_readline(&line, fn))
 	{
 	case -1:
@@ -163,27 +158,23 @@ do_lst(char *fn, char *def, char *pre, char *post)
 {
 	int             i, j;
 
-	qprintf(subfdout, fn, "%22s");
-	substdio_puts(subfdout, ": ");
+	subprintf(subfdout, "%-22s: ", fn);
 	switch (control_readfile(&line, fn, 0))
 	{
 	case -1:
 		strerr_die3sys(111, "unable to read ", fn, ": ");
 	case 0:
-		substdio_puts(subfdout, def);
-		substdio_puts(subfdout, " (Default)\n");
-		substdio_puts(subfdout, "\n");
+		subprintf(subfdout, "%s (Default)\n\n", def);
 		return 0;
 	case 1:
 		i = 0;
 		for (j = 0; j < line.len; ++j)
 			if (!line.s[j]) {
 				if (i)
-					qprintf(subfdout, " ", "%24s");
+					subprintf(subfdout, "%24s", " ");
 				substdio_puts(subfdout, pre);
 				safeput(line.s + i, j - i);
-				substdio_puts(subfdout, post);
-				substdio_puts(subfdout, "\n");
+				subprintf(subfdout, "%s\n", post);
 				i = j + 1;
 			}
 		substdio_puts(subfdout, "\n");
@@ -284,8 +275,7 @@ display_control()
 		do_lst("morercpthosts", "No rcpthosts; morercpthosts is irrelevant.",
 			   "No rcpthosts; doesn't matter that morercpthosts has ", ".");
 	/*- XXX: check morercpthosts.cdb contents */
-	qprintf(subfdout, "morercpthosts.cdb", "%22s");
-	substdio_puts(subfdout, ": ");
+	subprintf(subfdout, "%-22s: ", "morercpthosts.cdb");
 	if (stat("morercpthosts", &stmrh) == -1)
 		if (stat("morercpthosts.cdb", &stmrhcdb) == -1)
 			substdio_puts(subfdout, "(Default.) No effect\n");
@@ -723,11 +713,7 @@ show_queues()
 			qdir.len = save + 6 + j;
 			if (!stralloc_0(&qdir))
 				strerr_die2x(111, FATAL, "out of memory");
-			substdio_puts(subfdout, "queue ");
-			qprintf(subfdout, strnum, "%+03d");
-			substdio_puts(subfdout, " ");
-			substdio_puts(subfdout, qdir.s);
-			substdio_puts(subfdout, "\n");
+			subprintf(subfdout, "queue %03d %s\n", i, qdir.s);
 		} else
 			break;
 	}
@@ -749,10 +735,7 @@ show_queues()
 			qdir.len = l;
 			if (!stralloc_0(&qdir))
 				strerr_die2x(111, FATAL, "out of memory");
-			qprintf(subfdout, *ptr, "%6s");
-			substdio_puts(subfdout, " ");
-			substdio_puts(subfdout, qdir.s);
-			substdio_puts(subfdout, "\n");
+			subprintf(subfdout, "%-6s %s\n", *ptr, qdir.s);
 		}
 	}
 }
@@ -889,7 +872,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.9 2022-11-23 15:07:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.10 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

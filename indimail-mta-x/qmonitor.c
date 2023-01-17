@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.4 2022-08-14 21:57:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.5 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -27,10 +27,9 @@ char           *usage =
 int
 main(int argc, char **argv)
 {
-	int             i, j, opt, qcount, qconf, interval = 60,
+	int             i, opt, qcount, qconf, interval = 60,
 					verbose = 0;
 	double          threshold, total_load[2], qload;
-	char            strnum[FMT_DOUBLE];
 	QDEF           *queue = (QDEF *) NULL;
 
 	set_environment(WARN, FATAL, 0);
@@ -54,42 +53,18 @@ main(int argc, char **argv)
 	for (;;) {
 		queue_load("qmonitor", &qcount, &qconf, total_load, &queue);
 		if (verbose || ((total_load[0] + total_load[1]) > 2 * qcount * threshold)) {
-			substdio_put(subfdout, "queue load avg (local[", 22);
-			strnum[i = fmt_double(strnum, total_load[0], 2)] = 0;
-			qprintf(subfdout, strnum, "%+6");
-			substdio_put(subfdout, "] + remote[", 11);
-			strnum[i = fmt_double(strnum, total_load[1], 2)] = 0;
-			qprintf(subfdout, strnum, "%+6s");
-			substdio_put(subfdout, "])/2 = ", 7);
-			strnum[i = fmt_double(strnum, (total_load[0] + total_load[1])/2, 2)] = 0;
-			qprintf(subfdout, strnum, "%+6s");
-			if ((total_load[0] + total_load[1]) > 2 * qcount * threshold)
-				substdio_put(subfdout, " >  (", 5);
-			else
-				substdio_put(subfdout, " <= (", 5);
-			strnum[i = fmt_int(strnum, threshold)] = 0;
-			substdio_put(subfdout, strnum, i);
-			substdio_put(subfdout, " * ", 3);
-			strnum[i = fmt_int(strnum, qcount)] = 0;
-			substdio_put(subfdout, strnum, i);
-			substdio_put(subfdout, ") = ", 4);
-			strnum[i = fmt_double(strnum, qcount * threshold, 2)] = 0;
-			substdio_put(subfdout, strnum, i);
-			substdio_put(subfdout, "\n", 1);
+			subprintf(subfdout, "queue load avg (local[%6.2f] + remote[%6.2f])/2 = %6.2f %2s (%.0f * %d) = %.2f\n",
+					total_load[0], total_load[1], (total_load[0] + total_load[1])/2,
+					((total_load[0] + total_load[1]) > 2 * qcount * threshold) ?  ">" : "<=",
+					threshold, qcount, (qcount * threshold));
 			substdio_flush(subfdout);
 		}
 		if ((total_load[0] + total_load[1]) > 2 * qcount * threshold) {
-			for (j = 0; j < qcount; j++) {
-				qload = (double) queue[j].lcur * 100/queue[j].lmax + (double) queue[j].rcur * 100/queue[j].rmax;
-				substdio_put(subfdout, "queue[", 6);
-				strnum[i = fmt_int(strnum, j)] = 0;
-				substdio_put(subfdout, strnum, i);
-				substdio_put(subfdout, "] load = ", 9);
-				strnum[i = fmt_double(strnum, qload, 2)] = 0;
-				substdio_put(subfdout, strnum, i);
-				substdio_put(subfdout, "\n", 1);
+			for (i = 0; i < qcount; i++) {
+				qload = (double) queue[i].lcur * 100/queue[i].lmax + (double) queue[i].rcur * 100/queue[i].rmax;
+				subprintf(subfdout, "queue[%d] load = %.2f\n", i, qload);
 				substdio_flush(subfdout);
-				send_qload("/qscheduler", j + 1, qload, 10);
+				send_qload("/qscheduler", i + 1, qload, 10);
 			}
 		}
 		sleep(interval);
@@ -116,13 +91,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.4 2022-08-14 21:57:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmonitor.c,v 1.5 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.5  2023-01-18 00:02:13+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.4  2022-08-14 21:57:53+05:30  Cprogrammer
  * fix compilation warning if HASLIBRT is undefined
  *

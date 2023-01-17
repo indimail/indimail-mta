@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.43 2022-04-23 09:44:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.44 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -271,77 +271,43 @@ putcounts(char *pre_str, int lCount, int rCount, int bCount, int tCount)
 void
 display(QDEF *queue, int queue_count, int queue_conf)
 {
-	char            strnum[FMT_DOUBLE];
-	int             i, j, x, lcur = 0, rcur = 0, min = -1;
+	int             i, x, lcur = 0, rcur = 0, min = -1;
 	double          threshold;
 	double          load_l = 0.0, load_r = 0.0;
 
 	getEnvConfigDouble(&threshold,   "QUEUE_LOAD",   QUEUE_LOAD);
-	for (j = 0; j < queue_count; j++) {
-		x = queue[j].lcur + queue[j].rcur;
+	for (i = 0; i < queue_count; i++) {
+		x = queue[i].lcur + queue[i].rcur;
 		if (min == -1 || x < min)
 			min = x; /*- minimum concurrency */
 	}
-	for (j = 0; j < queue_count; j++) {
-		if (!j)
+	for (i = 0; i < queue_count; i++) {
+		if (!i)
 			substdio_put(subfdout, "queue      local  Remote   +/- flag\n", 36);
-		if (!queue[j].lmax || !queue[j].rmax) {
+		if (!queue[i].lmax || !queue[i].rmax) {
 			substdio_put(subfderr, "invalid concurrency = 0 ", 24);
-			if (!queue[j].lmax)
+			if (!queue[i].lmax)
 				substdio_put(subfderr, "[local] ", 8);
-			if (!queue[j].rmax)
+			if (!queue[i].rmax)
 				substdio_put(subfderr, "[remote] ", 9);
 			substdio_put(subfderr, "for queue ", 10);
-			substdio_put(subfderr, queue[j].queue.s, queue[j].queue.len);
+			substdio_put(subfderr, queue[i].queue.s, queue[i].queue.len);
 			substdio_put(subfderr, "\n", 1);
 			substdio_flush(subfderr);
 			continue;
 		}
-		lcur += queue[j].lcur;
-		rcur += queue[j].rcur;
-		load_l += (double) queue[j].lcur / queue[j].lmax;
-		load_r += (double) queue[j].rcur / queue[j].rmax;
-		qprintf(subfdout, queue[j].queue.s, "%-08s");
-		substdio_put(subfdout, " ", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].lcur)] = 0;
-		qprintf(subfdout, strnum, "%+3s");
-		substdio_put(subfdout, "/", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].lmax)] = 0;
-		qprintf(subfdout, strnum, "%-4s");
-		substdio_put(subfdout, " ", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].rcur)] = 0;
-		qprintf(subfdout, strnum, "%+3s");
-		substdio_put(subfdout, "/", 1);
-		strnum[i = fmt_ulong(strnum, queue[j].rmax)] = 0;
-		qprintf(subfdout, strnum, "%-4s");
-		x = queue[j].lcur + queue[j].rcur;
-		substdio_put(subfdout, x == min ? " - " : " + ", 3);
-		substdio_put(subfdout, queue[j].flag ? " disabled\n" : "  enabled\n", 10);
+		lcur += queue[i].lcur;
+		rcur += queue[i].rcur;
+		load_l += (double) queue[i].lcur / queue[i].lmax;
+		load_r += (double) queue[i].rcur / queue[i].rmax;
+		x = queue[i].lcur + queue[i].rcur;
+		subprintf(subfdout, "%-08s %3s/%-4s %3s/%-4s %c %s\n",
+				queue[i].queue.s, queue[i].lcur, queue[i].lmax,
+				queue[i].rcur, queue[i].rmax, x == min ? '-' : '+',
+				queue[i].flag ? "disabled" : "enabled");
 	}
-	substdio_put(subfdout, "threshold = ", 12);
-	strnum[i = fmt_double(strnum, threshold, 2)] = 0;
-	qprintf(subfdout, strnum, "%+6s");
-	substdio_put(subfdout, ", qcount = ", 11);
-	strnum[i = fmt_ulong(strnum, queue_count)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", qconf = ", 10);
-	strnum[i = fmt_ulong(strnum, queue_conf)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", local = ", 10);
-	strnum[i = fmt_ulong(strnum, lcur)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", remote = ", 11);
-	strnum[i = fmt_ulong(strnum, rcur)] = 0;
-	substdio_put(subfdout, strnum, i);
-
-	substdio_put(subfdout, ", qload_av = ", 10);
-	strnum[i = fmt_double(strnum, 50 * (load_l + load_r)/queue_count, 2)] = 0;
-	qprintf(subfdout, strnum, "%+6s");
-	substdio_put(subfdout, "\n", 1);
-	substdio_flush(subfdout);
+	subprintf(subfdout, "threshold = %-6.2f, qcount = %ld, qconf = %ld, local = %ld, remote = %ld, qload_av = %6.2f",
+			threshold, queue_count, queue_conf, lcur, rcur, 50 * (load_l + load_r)/queue_count);
 }
 #endif
 
@@ -597,7 +563,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.43 2022-04-23 09:44:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.44 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -605,6 +571,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.44  2023-01-18 00:02:13+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
  * Revision 1.43  2022-04-23 09:44:19+05:30  Cprogrammer
  * display qload average instead of total load
  *

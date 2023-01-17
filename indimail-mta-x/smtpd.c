@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.287 2023-01-16 23:14:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.287 2023-01-18 00:07:30+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -6965,7 +6965,7 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.287  2023-01-16 23:14:38+05:30  Cprogrammer
+ * Revision 1.287  2023-01-18 00:07:30+05:30  Cprogrammer
  * added ssl cipher bits in Received header
  *
  * Revision 1.286  2023-01-15 23:28:20+05:30  Cprogrammer
@@ -7279,7 +7279,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.287 2023-01-16 23:14:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.287 2023-01-18 00:07:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
