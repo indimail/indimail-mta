@@ -1,5 +1,8 @@
 /*
  * $Log: dktest.c,v $
+ * Revision 1.19  2023-01-21 21:11:46+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -121,7 +124,7 @@ main(int argc, char *argv[])
 			cp = txtrec;
 			printf("%ld\n", (long) strlen(cp));
 			while (*cp) {
-				printf("%02x ", *cp++);
+				printf("%02x ", (unsigned) *cp++);
 				if ((cp - txtrec) % 16 == 0)
 					printf("\n");
 			}
@@ -435,7 +438,7 @@ main(int argc, char *argv[])
 void
 getversion_dktest_c()
 {
-	static char    *x = "$Id: dktest.c,v 1.18 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dktest.c,v 1.19 2023-01-21 21:11:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
