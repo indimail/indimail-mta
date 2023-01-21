@@ -1,1 +1,1 @@
--I/usr/local/include -I/usr/local/include/qmail -Wno-incompatible-pointer-types-discards-qualifiers
+-I/usr/local/include -I/usr/local/include/qmail -Wno-incompatible-pointer-types-discards-qualifiers -Wformat=2 -Wformat-security -Wmissing-format-attribute
