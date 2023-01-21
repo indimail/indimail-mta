@@ -116,7 +116,7 @@ do_int(char *fn, char *def, char *pre, char *post)
 	case -1:
 		strerr_die3sys(111, "unable to read ", fn, ": ");
 	case 0:
-		subprintf(subfdout, "%s:%s:%s (Default)\n\n", pre, def, post);
+		subprintf(subfdout, "%s%s%s (Default)\n\n", pre, def, post);
 		break;
 	case 1:
 		if (i < 0)
