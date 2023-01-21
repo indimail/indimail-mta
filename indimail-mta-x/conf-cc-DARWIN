@@ -1,1 +1,1 @@
--DBIND_8_COMPAT -I/opt/local/include -I/opt/local/include/qmail -Wno-incompatible-pointer-types-discards-qualifiers
+-DBIND_8_COMPAT -I/opt/local/include -I/opt/local/include/qmail -Wno-incompatible-pointer-types-discards-qualifiers -Wformat=2 -Wformat-security -Wmissing-format-attribute
