@@ -195,8 +195,8 @@ This library from ALT-N Technologies is required for qmail-dkim. If you don't ha
 ```
 $ cd /usr/local/src/indimail-mta/libdkim-x
 $ ./default.configure
-$ ./make
-$ sudo ./make -s install-strip
+$ make
+$ sudo make -s install-strip
 ```
 
 (check version in indimail-mta/libdkim-x/conf-version)
@@ -208,8 +208,8 @@ This library from [libsrs2.org](https://www.libsrs2.org/) is required for [SRS](
 ```
 $ cd /usr/local/src/indimail-mta/libsrs2-x
 $ ./default.configure
-$ ./make
-$ sudo ./make install-strip
+$ make
+$ sudo make install-strip
 ```
 
 (check version in indimail-mta/libsrs2-x/conf-version)
