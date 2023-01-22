@@ -53,6 +53,7 @@ build-stamp:
 	sed 's{SHAREDDIR{${shareddir}{'    conf-shared.in     > conf-shared
 	sed 's{LIBEXECDIR{${libexecdir}{'  conf-libexec.in    > conf-libexec
 	sed 's{SERVICEDIR{${servicedir}{'  conf-servicedir.in > conf-servicedir
+	sed -i 's/-Wformat.*//g' conf-cc-LINUX
 	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
 	touch build-stamp
 
