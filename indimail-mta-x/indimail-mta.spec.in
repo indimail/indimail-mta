@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.369 2023-01-13 12:09:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.370 2023-01-22 13:17:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -329,6 +329,9 @@ else
 fi
 ./catChangeLog doc/ChangeLog > ChangeLog-indimail-mta
 echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wunused -Wcomment -Wchar-subscripts -Wuninitialized -Wshadow -Wcast-align -Wwrite-strings -Wno-discarded-qualifiers -I/usr/include/qmail > conf-cc
+%if %build_on_obs == 1
+> conf-cc-LINUX
+%endif
 %if %{defined nodebug}
   echo %{__cc} -O2 -fPIE -pie -s > conf-ld
 %else
