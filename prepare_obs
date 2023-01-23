@@ -48,8 +48,10 @@ if [ -f $name.packages ] ; then
       fi
       if [ -f Makefile ] ; then
         echo cleaning $pkg_name-$ver
-        make clean >/dev/null 2>&1
-        find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
+        set +e
+        make clean && make distclean >/dev/null 2>&1
+        find . -type d name autom4te.cache -exec /bin/rm -rf '{}' '+'
+        set -e
       fi
       # remove debian directory from archive
       #/bin/rm -rf debian .git RCS
@@ -154,8 +156,10 @@ if [ -f extra_src ] ; then
 fi
 if [ -f Makefile ] ; then
   echo cleaning $name-$version
-  make clean >/dev/null 2>&1
-  find . -type d \( -name autom4te.cache -o -name .deps \) -exec /bin/rm -rf {} +
+  set +e
+  make clean && make distclean >/dev/null 2>&1
+  find . -type d name autom4te.cache -exec /bin/rm -rf '{}' '+'
+  set -e
 fi
 
 # clean meta packages
