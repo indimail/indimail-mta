@@ -134,4 +134,5 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 102. Bruce Guenter - qmail-remote patch to reduce cpu
 103. Rolf Eike Beer <eike@sf-mail.de> gen\_allocdefs.h, GEN\_ALLOC refactoring changes to fix memory overflow
 104. Fefe - felix-libowfat@fefe.de for functions taken from libowfat & ipv6 in ucspi-tcp
-105. RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / EH Hoffman unicode address support patch for qmail.
+105. RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / Erwin Hoffman's unicode address support patch for qmail.
+106. RFC 8463 - Ed25519 cryptographic method adapted from Erwin Hoffman's s/qmail dkim implementation
