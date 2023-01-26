@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.31 2022-11-09 20:15:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.32 2023-01-26 22:26:01+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -164,7 +164,7 @@ if [ -z "$NODKIM" -a -n "$DKIMVERIFY" ] ; then
 fi
 /bin/cat > /tmp/dk.$$
 if [ $dkimsign -eq 1 ] ; then
-	# DKIMSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
+	# DKIMSIGNOPTIONS="-z 1 -x - -y $dkimselector -s $dkimkeyfn"
 	set -- $(getopt lqthb:c:d:i:x:z:y:s: $DKIMSIGNOPTIONS)
 	bopt=0
 	xopt=0
@@ -237,9 +237,6 @@ if [ $dkimsign -eq 1 ] ; then
 	done
 	if [ $zopt -eq 0 ] ; then
 		dkimopts="$dkimopts -z 1"
-	fi
-	if [ $bopt -eq 0 ] ; then
-		dkimopts="$dkimopts -b 2"
 	fi
 	if [ $xopt -eq 0 ] ; then
 		dkimopts="$dkimopts -x -"
@@ -356,6 +353,9 @@ exec 0</tmp/dk.$$
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.32  2023-01-26 22:26:01+05:30  Cprogrammer
+# removed setting redundant -b option
+#
 # Revision 1.31  2022-11-09 20:15:17+05:30  Cprogrammer
 # replaced deprecated egrep with grep -E
 #

@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.14 2022-11-27 09:32:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.15 2023-01-26 22:29:12+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -10,6 +10,7 @@ usage()
 	echo "       [-r | --remove]         : remove DKIM keys"
 	echo "       [-d | --domain domain]  : domain name"
 	echo "       [-b | --bits   size]    : DKIM private key size"
+	echo "       [-t | --type   type]    : Key type (RSA or ED25619)"
 	echo "       [-f]                    : force DKIM private key creation"
 	exit $1
 }
@@ -44,16 +45,16 @@ split_str()
 	done
 }
 
-gen_pub_key()
+write_pub_key()
 {
 	local selector=$(basename $1)
 	local domain=$2
 	local pubkey=$3
 	if [ $bits -lt 2048 ] ; then
-		printf "%s._domainkey.%s. IN TXT (\"v=DKIM1; k=rsa; t=y; p=%s\")\n" "$selector" "$domain" "$pubkey" > $selector.pub
+		printf "%s._domainkey.%s. IN TXT (\"v=DKIM1; k=%s; t=y; p=%s\")\n" "$selector" "$domain" "$ktype" "$pubkey"
 	else
 		printf "%s._domainkey.%s. IN TXT (" "$selector" "$domain"
-		split_str "v=DKIM1; k=rsa; t=y; p=$pubkey"
+		split_str "v=DKIM1; k=$ktype; t=y; p=$pubkey"
 		printf ")\n"
 	fi
 }
@@ -100,9 +101,9 @@ print_key()
 controldir=@qsysconfdir@/control
 SYSTEM=$(uname -s)
 if [ "$SYSTEM" = "FreeBSD" ] ; then
-	options=$(getopt prfd:b: "$@")
+	options=$(getopt prfd:b:t: "$@")
 else
-	options=$(getopt -a -n dknewkey -o "prfd:b:" -l print,remove,force,domain:,bits: -- "$@")
+	options=$(getopt -a -n dknewkey -o "prfd:b:t:" -l print,remove,force,domain:,bits:type: -- "$@")
 fi
 if [ $? != 0 ]; then
 	usage 100
@@ -115,7 +116,8 @@ fi
 do_print=0
 remove=0
 force=0
-bits=1024
+bits=2048
+ktype="rsa"
 domain=""
 eval set -- "$options"
 while :; do
@@ -143,6 +145,14 @@ while :; do
 	;;
 	-b | --bits)
 	bits="$2"
+	shift 2
+	;;
+	-t | --ktype)
+	ktype="$2"
+	if [ "$kype" != "rsa" -a "$ktype" != "ed25519" ] ; then
+		echo "Key type must be rsa or ed25519" 1>&2
+		exit 1
+	fi
 	shift 2
 	;;
 	--) # end of options
@@ -223,20 +233,28 @@ else
 	exec 2>$err
 	exec 0<$err
 	/bin/rm -f $err
-	echo "Generating DKIM private key keysize=$bits, file $dir/$selector"
-	/usr/bin/openssl genrsa -out $selector $bits
+	echo "Generating $ktype DKIM private key keysize=$bits, file $dir/$selector"
+	if [ "$ktype" = "rsa" ] ; then
+		/usr/bin/openssl genrsa -out $selector $bits
+	else
+		/usr/bin/openssl genpkey -algorithm Ed25519 -out $selector
+	fi
 	if [ $? -ne 0 ] ; then
 		/bin/cat
 		exit 1
 	fi
 
-	pubkey=$(/usr/bin/openssl rsa -in $selector -pubout -outform PEM | grep -v '^--' | tr -d '\n')
+	echo "Generating $ktype DKIM public  key keysize=$bits for $selector.domainkey.$domain, file $dir/$selector.pub"
+	if [ "$ktype" = "rsa" ] ; then
+		pubkey=$(/usr/bin/openssl  rsa -in $selector -pubout -outform PEM | grep -v '^--' | tr -d '\n')
+	else
+		pubkey=$(/usr/bin/openssl pkey -in $selector -pubout | grep -v '^--' | tr -d '\n')
+	fi
 	if [ $? -ne 0 ] ; then
 		/bin/cat
 		exit 1
 	fi
-	echo "Generating DKIM public  key keysize=$bits for $selector.domainkey.$domain, file $dir/$selector.pub"
-	gen_pub_key "$selector" "$domain" "$pubkey" > $selector.pub
+	write_pub_key "$selector" "$domain" "$pubkey" > $selector.pub
 	if [ $? -ne 0 ] ; then
 		/bin/cat
 		exit 1
@@ -252,6 +270,9 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.15  2023-01-26 22:29:12+05:30  Cprogrammer
+# added option to generate ed25519 DKIM keys
+#
 # Revision 1.14  2022-11-27 09:32:51+05:30  Cprogrammer
 # list public, private key using ls
 #

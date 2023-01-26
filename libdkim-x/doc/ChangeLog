@@ -79,6 +79,12 @@ Release 1.5 Start 19/03/2009 End 08/09/2022
 - 08/09/2022 - indimail-mta-3.0.1
 - 27/11/2022
 39. dkim.c: updated help message for -h option
+- 26/01/2023
+40. dkim.cpp: removed -b option. Option kept for backward compatibility
+41. dkim.cpp: added -z 4 for setting Ed25519 DKIM signature
+42. dkim.h: added definition for DKIM_HASH_ED25519
+43. dkimsign.cpp: added creation of Ed25519 DKIM signatures
+44. dkimverify.cpp: added verification of Ed25519 DKIM signatures
 
 *
 ----------------------

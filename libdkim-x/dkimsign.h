@@ -1,5 +1,9 @@
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.7  2023-01-26 22:46:01+05:30  Cprogrammer
+ * removed allman code
+ * updated for ed25519 DKIM signatures
+ *
  * Revision 1.6  2021-08-28 21:42:40+05:30  Cprogrammer
  * added ReplaceSelector to replace selector
  *
@@ -58,7 +62,7 @@ public:
 	char           *DKIM_CALL GetDomain(void);
 
 protected:
-	void            Hash(const char *szBuffer, int nBufLength, bool bHdr, bool bAllmanOnly = false);
+	void            Hash(const char* szBuffer,int nBufLength,bool bHdr);
 	bool            SignThisTag(const string & sTag);
 	void            GetHeaderParams(const string & sHdr);
 	void            ProcessHeader(const string & sHdr);
@@ -69,7 +73,7 @@ protected:
 	void            AddInterTagSpace(int nSizeOfNextTag);
 	void            AddFoldedValueToSig(const string & sValue, char cbrk);
 	bool            IsRequiredHeader(const string & sTag);
-	int             ConstructSignature(char *szPrivKey, bool bUseIetfBodyHash, bool bUseSha256);
+	int             ConstructSignature(char *szPrivKey, int nSigAlg);
 	int             AssembleReturnedSig(char *szPrivKey);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *m_Hdr_ietf_sha1ctx = NULL;	/* the header hash for ietf sha1  */
@@ -78,7 +82,7 @@ protected:
 	EVP_MD_CTX     *m_Hdr_ietf_sha256ctx = NULL;	/* the header hash for ietf sha256 */
 	EVP_MD_CTX     *m_Bdy_ietf_sha256ctx = NULL;	/* the body hash for ietf sha256 */
 #endif
-	EVP_MD_CTX     *m_allman_sha1ctx = NULL;	/* the hash for allman sha1  */
+	EVP_MD_CTX     *m_Hdr_ed25519ctx = NULL; /* the PureEd25519 signature */
 #else
 	EVP_MD_CTX      m_Hdr_ietf_sha1ctx;	/* the header hash for ietf sha1  */
 	EVP_MD_CTX      m_Bdy_ietf_sha1ctx;	/* the body hash for ietf sha1  */
@@ -86,9 +90,8 @@ protected:
 	EVP_MD_CTX      m_Hdr_ietf_sha256ctx;	/* the header hash for ietf sha256 */
 	EVP_MD_CTX      m_Bdy_ietf_sha256ctx;	/* the body hash for ietf sha256 */
 #endif
-	EVP_MD_CTX      m_allman_sha1ctx;	/* the hash for allman sha1  */
 #endif
-	int             m_Canon;	// canonization method
+	int             m_Canon;	/* canonization method */
 	int             m_EmptyLineCount;
 	string          hParam;
 	string          sFrom;
@@ -97,23 +100,23 @@ protected:
 	string          sReturnPath;
 	string          sBouncedAddr; /*- used for bounces */
 	string          sDomain;
-	string          sIdentity;	// for i= tag, if empty tag will not be included in sig
+	string          sIdentity;	/* for i= tag, if empty tag will not be included in sig */
 	string          sRequiredHeaders;
 	bool            m_IncludeBodyLengthTag;
 	int             m_nBodyLength;
 	time_t          m_ExpireTime;
-	int             m_nIncludeTimeStamp;	// 0 = don't include t= tag, 1 = include t= tag
-	int             m_nIncludeQueryMethod;	// 0 = don't include q= tag, 1 = include q= tag
-	int             m_nHash;	// use one of the DKIM_HASH_xx constants here
-	int             m_nIncludeCopiedHeaders;	// 0 = don't include z= tag, 1 = include z= tag
-	int             m_nIncludeBodyHash;	// 0 = calculate sig using draft 0, 1 = include bh= tag and 
-	// use new signature computation algorithm
-	DKIMHEADERCALLBACK m_pfnHdrCallback;
+	int             m_nIncludeTimeStamp;		/* 0 = don't include t= tag, 1 = include t= tag */
+	int             m_nIncludeQueryMethod;		/* 0 = don't include q= tag, 1 = include q= tag */
+	int             m_nHash;					/* use one of the DKIM_HASH_xx constants here */
+	int             m_nIncludeCopiedHeaders;	/* 0 = don't include z= tag, 1 = include z= tag */
+	DKIMHEADERCALLBACK m_pfnHdrCallback;		/* use new signature computation algorithm */
 	string          m_sSig;
 	int             m_nSigPos;
 	string          m_sReturnedSig;
 	bool            m_bReturnedSigAssembled;
 	string          m_sCopiedHeaders;
+    string          SigHdrs;
+    size_t          m_SigHdrs;
 };
 
 #endif	/*- DKIMSIGN_H */

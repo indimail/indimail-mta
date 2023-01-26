@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.10  2023-01-26 22:46:59+05:30  Cprogrammer
+ * added ed25519 signatures
+ *
  * Revision 1.9  2019-06-14 21:25:11+05:30  Cprogrammer
  * BUG - honor body length tag in verification. Changed data type for BodyLength
  *
@@ -104,13 +107,14 @@ public:
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *m_Hdr_ctx = NULL;
 	EVP_MD_CTX     *m_Bdy_ctx = NULL;
+	EVP_MD_CTX     *m_Msg_ctx = NULL;
 #else
 	EVP_MD_CTX      m_Hdr_ctx;
 	EVP_MD_CTX      m_Bdy_ctx;
 #endif
 	SelectorInfo   *m_pSelector;
 	int             Status;
-	int             m_nHash;	// use one of the DKIM_HASH_xxx constants here
+	int             m_nHash;	/* use one of the DKIM_HASH_xxx constants here */
 	unsigned        EmptyLineCount;
 	bool            m_SaveCanonicalizedData;
 };
@@ -136,11 +140,11 @@ protected:
 	int             GetSSP(const string &sDomain, int &iSSP, bool & bTesting);
 	list <SignatureInfo> Signatures;
 	list <SelectorInfo> Selectors;
-	DKIMDNSCALLBACK m_pfnSelectorCallback;	// selector record callback
-	DKIMDNSCALLBACK m_pfnPracticesCallback;	// SSP record callback
+	DKIMDNSCALLBACK m_pfnSelectorCallback;	/* selector record callback */
+	DKIMDNSCALLBACK m_pfnPracticesCallback;	/* SSP record callback */
 	bool            m_HonorBodyLengthTag;
 	bool            m_CheckPractices;
-	bool            m_Accept3ps;		//TBS(Luc) : accept 3rd party signature(s)
+	bool            m_Accept3ps;		/* TBS(Luc) : accept 3rd party signature(s) */
 	bool            m_SubjectIsRequired;
 	bool            m_SaveCanonicalizedData;
 	bool            m_AllowUnsignedFromHeaders;

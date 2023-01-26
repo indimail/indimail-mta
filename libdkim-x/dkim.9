@@ -14,8 +14,16 @@ exercises the dkim library. Both signing and verification merely print out the D
 They do not keep a copy of the input file. You will need to do something like this:
 
 .EX
- (./dkim -s INDIMAIL/control/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\
+This example verifies using DNS
+
+ (./dkim -s INDIMAIL/control/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\\
  | ./dkim -v
+
+This example does not use DNS. Useful for testing
+
+ (./dkim -z 4 -s /tmp/domainkeys/efgh </tmp/mail.txt;cat /tmp/mail.txt) \\
+ | ./dkim -v -T \\
+ "v=DKIM1; k=ed25519; t=y; p=MCowBQYDK2VwAyEAokZUL1G6RmS4IWfCpCX3xjGKhVssoM4KfKpkmW8IERg="
 .EE
 
 .SH OPTIONS
@@ -47,30 +55,34 @@ ADU9NbAcpDh+E2YQwzCX
 .TP
 -l
 include body length tag when signing. Honor body length tag when verifying
+
 .TP
 -q
 include query method tag
+
 .TP
 -t
 include a timestamp tag
+
 .TP
 -f
 issue error if not all message's From headers are in signature
+
 .TP
 -S
 Allow unsigned subject in signature
+
 .TP
 -h
 include Copied Headers. This adds the z= tag with a list of the message's
 original headers and may differ from the headers listed in the h= tag. This
 tag may be used by some mailbox providers in the process of diagnosing a
 verification error. Its value is not well defined.
+
 .TP
 -p \fIssp\fR | \fIadsp\fR
 0 - disable practice (default), 1- SSP, or 2 - ADSP verification
-.TP
--b \fIstandard\fR
-1 - allman, 2 - ietf or 3 - both
+
 .TP
 -c \fIcanonicalization\fR
 r for relaxed [DEFAULT], s - simple, t relaxed/simple, u - simple/relaxed
@@ -78,21 +90,31 @@ r for relaxed [DEFAULT], s - simple, t relaxed/simple, u - simple/relaxed
 .TP
 -d \fIdomain\fR
 the domain tag, if not provided, determined from the return-path/sender/from header
+
 .TP
 -i \fIidentity\fR
 the identity, if not provided it will not be included
+
 .TP
 -x \fIexpire_time\fR
 the expire time in seconds since epoch ( DEFAULT = current time + 604800). If set to - then it will not be included
+
 .TP
 -z \fIhash\fR
-1 for sha1, 2 for sha256, 3 for both
+1 - sha1, 2 - sha256, 3 - sha1+sha256
+
 .TP
 -y \fIselector\fR
 the selector tag DEFAULT=private
+
 .TP
 -s \fIprivkeyfile\fR
 sign the message using the private key in privkeyfile
+
+.TP
+-T \fIselectorRecord\fR
+Bypass DNS and use \fIselectorRecord\fR instead of fetching the record using DNS.
+
 .TP
 -H
 this help
