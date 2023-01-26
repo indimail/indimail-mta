@@ -53,7 +53,6 @@ You can set various DKIM options in getopt style, by setting the environment var
 .B DKIMSIGNOPTIONS
 
 .nf
-b <standard>         1 - allman, 2 - ietf or 3 - both
 c <canonicalization> r for relaxed [DEFAULT], s - simple,
                      t relaxed/simple, u - simple/relaxed
 l                    include body length tag
@@ -66,12 +65,12 @@ i <identity>         the identity, if not provided it will not be included
 x <expire_time>      the expire time in seconds since epoch
                      ( DEFAULT = current time + 604800)
                      if set to - then it will not be included
-z <hash>             1 for sha1, 2 for sha256, 3 for both
+z <hash>             1 for RSA-SHA1, 2 for RSA-SHA256, 3 for both, 4 for Ed25519-SHA256
 .fi
 
 .EX
-DKIMSIGNOPTIONS="-b 1 -c r -q"
-sets allman standard, with relaxed canonicalization and include query method tag
+DKIMSIGNOPTIONS="-z 2 -c r -q"
+Use RSA SHA256 hash, set relaxed canonicalization and include query method tag
 .EE
 
 Apart from setting

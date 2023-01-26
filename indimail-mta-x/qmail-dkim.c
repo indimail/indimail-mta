@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.68 2022-10-17 19:44:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.69 2023-01-26 22:32:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -517,11 +517,11 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		code = "X.7.5";
 		break;
 	case DKIM_SIGNATURE_BAD:	/*- -3 */
-		dkimStatus = "signature error: RSA verify failed";
+		dkimStatus = "signature error: RSA/ED25519 verify failed";
 		code = "X.7.5";
 		break;
 	case DKIM_SIGNATURE_BAD_BUT_TESTING:
-		dkimStatus = "signature error: RSA verify failed but testing";
+		dkimStatus = "signature error: RSA/ED25519 verify failed but testing";
 		code = "X.7.5";
 		break;
 	case DKIM_SIGNATURE_EXPIRED:
@@ -777,7 +777,6 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 	int             ch, argc;
 	char          **argv;
 
-	opts->nIncludeBodyHash = DKIM_BODYHASH_IETF_1;
 	opts->nCanon = DKIM_SIGN_RELAXED;					/*- c */
 	opts->nIncludeBodyLengthTag = 0;					/*- l */
 	opts->nIncludeQueryMethod = 0;						/*- q */
@@ -804,21 +803,6 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 		switch (ch)
 		{
 		case 'b':
-			switch (*optarg)
-			{
-			case '1':
-				opts->nIncludeBodyHash = DKIM_BODYHASH_ALLMAN_1;
-				break;
-			case '2':
-				opts->nIncludeBodyHash = DKIM_BODYHASH_IETF_1;
-				break;
-			case '3':
-				opts->nIncludeBodyHash = DKIM_BODYHASH_BOTH;
-				break;
-			default:
-				free_makeargs(argv);
-				return (1);
-			}
 			break;
 		case 'c':
 			switch (*optarg)
@@ -1206,7 +1190,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.68 2022-10-17 19:44:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.69 2023-01-26 22:32:01+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1220,6 +1204,10 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.69  2023-01-26 22:32:01+05:30  Cprogrammer
+ * removed setting redundant -b option
+ * update verification message to include ED25519 failure
+ *
  * Revision 1.68  2022-10-17 19:44:32+05:30  Cprogrammer
  * use exit codes defines from qmail.h
  *

@@ -1,91 +1,4 @@
 /*
- * $Log: dkim.cpp,v $
- * Revision 1.28  2022-11-27 09:41:38+05:30  Cprogrammer
- * updated help message for -h option
- *
- * Revision 1.27  2021-07-20 23:20:09+05:30  Cprogrammer
- * removed use of register
- *
- * Revision 1.26  2020-10-01 14:14:34+05:30  Cprogrammer
- * Darwin Port
- *
- * Revision 1.25  2020-06-08 23:16:27+05:30  Cprogrammer
- * quench compiler warnings
- *
- * Revision 1.24  2019-06-24 23:14:33+05:30  Cprogrammer
- * fixed return value interpretation of DKIMVERIFY
- *
- * Revision 1.23  2019-06-14 21:24:59+05:30  Cprogrammer
- * BUG - honor body length tag in verification
- *
- * Revision 1.22  2019-01-13 10:10:27+05:30  Cprogrammer
- * added missing usage string for allowing unsigned subject.
- *
- * Revision 1.21  2018-08-08 23:57:02+05:30  Cprogrammer
- * issue success if at lease one one good signature is found
- *
- * Revision 1.20  2018-05-22 10:03:26+05:30  Cprogrammer
- * changed return type of writeHeader() to void
- *
- * Revision 1.19  2016-03-01 16:23:38+05:30  Cprogrammer
- * added -S option to allow email with unsigned subject
- *
- * Revision 1.18  2016-02-01 10:53:32+05:30  Cprogrammer
- * use basename of private key as the selector in absense of -y option
- *
- * Revision 1.17  2015-12-15 15:36:01+05:30  Cprogrammer
- * added case 3 for 3rd party signature without SSP and ADSP
- * increased buffer size for Apple mail with X-BrightMail-Tracker header issue
- *
- * Revision 1.16  2012-08-16 08:01:19+05:30  Cprogrammer
- * do not skip X-Mailer headers
- *
- * Revision 1.15  2011-06-04 13:55:50+05:30  Cprogrammer
- * set AllowUnsignedFromHeaders
- *
- * Revision 1.14  2011-06-04 09:36:36+05:30  Cprogrammer
- * added AllowUnsignedFromHeaders option
- *
- * Revision 1.13  2011-02-07 22:05:23+05:30  Cprogrammer
- * added case DKIM_3PS_SIGNATURE
- *
- * Revision 1.12  2010-05-04 14:00:13+05:30  Cprogrammer
- * make option '-z' work on systems without SHA_256
- *
- * Revision 1.11  2009-04-20 08:35:45+05:30  Cprogrammer
- * corrected usage()
- *
- * Revision 1.10  2009-04-15 21:30:32+05:30  Cprogrammer
- * added DKIM-Signature to list of excluded headers
- *
- * Revision 1.9  2009-04-15 20:45:04+05:30  Cprogrammer
- * corrected usage
- *
- * Revision 1.8  2009-04-05 19:04:44+05:30  Cprogrammer
- * improved formating of usage
- *
- * Revision 1.7  2009-04-03 12:05:25+05:30  Cprogrammer
- * minor changes on usage display
- *
- * Revision 1.6  2009-03-28 20:15:23+05:30  Cprogrammer
- * invoke DKIMVerifyGetDetails()
- *
- * Revision 1.5  2009-03-27 20:43:48+05:30  Cprogrammer
- * added HAVE_OPENSSL_EVP_H conditional
- *
- * Revision 1.4  2009-03-27 20:19:28+05:30  Cprogrammer
- * added ADSP
- *
- * Revision 1.3  2009-03-26 15:10:53+05:30  Cprogrammer
- * added ADSP
- *
- * Revision 1.2  2009-03-25 08:37:45+05:30  Cprogrammer
- * added dkim_error
- *
- * Revision 1.1  2009-03-21 08:24:47+05:30  Cprogrammer
- * Initial revision
- *
- *
  * This code incorporates intellectual property owned by Yahoo! and licensed 
  * pursuant to the Yahoo! DomainKeys Patent License Agreement.
  *
@@ -96,8 +9,8 @@
  * limitations under the License.
  */
 /*
- * (cat /tmp/test.msg|./dkimtest -z 2 -b 1 -y private \
- * -s /var/indimail/control/domainkeys/private ;cat /tmp/test.msg )|./dkimtest -v
+ * (cat /tmp/mail.txt|./dkim -z 2 -b 1 -y private \
+ * -s /var/indimail/control/domainkeys/private ;cat /tmp/mail.txt )|./dkim -v
  */
 #ifndef __cplusplus
 #error A C++ compiler is required!
@@ -126,6 +39,8 @@
 #define DKIM_MALLOC(s)     malloc(s)
 #define DKIM_MFREE(s)      free(s); s = NULL;
 #endif
+
+static char   *callbackdata;
 
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
@@ -161,17 +76,17 @@ usage()
 	fprintf(stderr, "S                    allow Unsigned Subject (default is to reject if Subject field is not signed)\n");
 	fprintf(stderr, "v                    verify the message\n");
 	fprintf(stderr, "p <ssp|adsp>         0 - disable practice (default), 1- SSP, or 2 - ADSP verification\n");
-	fprintf(stderr, "b <standard>         1 - allman, 2 - ietf or 3 - both\n");
 	fprintf(stderr, "c <canonicalization> r for relaxed [DEFAULT], s - simple, t relaxed/simple, u - simple/relaxed\n");
 	fprintf(stderr, "d <domain>           the domain tag, if not provided, determined from the sender/from header\n");
 	fprintf(stderr, "i <identity>         the identity, if not provided it will not be included\n");
 	fprintf(stderr, "x <expire_time>      the expire time in seconds since epoch ( DEFAULT = current time + 604800)\n");
 	fprintf(stderr, "                     if set to - then it will not be included\n");
 #ifdef HAVE_EVP_SHA256
-	fprintf(stderr, "z <hash>             1 for sha1, 2 for sha256, 3 for both\n");
+	fprintf(stderr, "z <hash>             1 - sha1, 2 - sha256, 3 - sha1+sha256, 4 - ed25519\n");
 #endif
-	fprintf(stderr, "y <selector>         the selector tag DEFAULT=private\n");
+	fprintf(stderr, "y <selector>         the selector tag DEFAULT=basename of privkeyfile\n");
 	fprintf(stderr, "s <privkeyfile>      sign the message using the private key in privkeyfile\n");
+	fprintf(stderr, "T DNSText            Use DNSText as domainkey text record instead of using DNS\n");   
 	fprintf(stderr, "V                    set verbose mode\n");
 	fprintf(stderr, "H                    this help\n");
 	exit(1);
@@ -264,10 +179,10 @@ void writeHeader(int ret, int resDKIMSSP, int resDKIMADSP, int useSSP, int useAD
 		dkimStatus = (char *) "signature error: DKIM-Signature could not parse or has bad tags/values";
 		break;
 	case DKIM_SIGNATURE_BAD:
-		dkimStatus = (char *) "signature error: RSA verify failed";
+		dkimStatus = (char *) "signature error: RSA/ED25519 verify failed";
 		break;
 	case DKIM_SIGNATURE_BAD_BUT_TESTING:
-		dkimStatus = (char *) "signature error: RSA verify failed but testing";
+		dkimStatus = (char *) "signature error: RSA/ED25519 verify failed but testing";
 		break;
 	case DKIM_SIGNATURE_EXPIRED:
 		dkimStatus = (char *) "signature error: x= is old";
@@ -457,7 +372,7 @@ GetSSP(char *domain, int *bTesting)
 		if (strcasecmp(values[0], "strict") == 0)
 			iSSP = DKIM_SSP_STRICT;
 	}
-	// flags
+	/* flags */
 	if (values[1] != NULL) {
 		char           *s, *p;
 		for (p = values[1], s = values[1]; *p; p++) {
@@ -532,6 +447,13 @@ GetADSP(char *domain)
 }
 
 int
+dns_bypass(const char *domain, char *buffer, int maxlen)
+{
+	strcpy(buffer, callbackdata);
+	return 0;
+}
+
+int
 main(int argc, char **argv)
 {
 	char           *PrivKey, *PrivKeyFile = NULL, *pSig = NULL, *dkimverify;
@@ -554,7 +476,7 @@ main(int argc, char **argv)
 		program++;
 	t = time(0);
 #ifdef HAVE_EVP_SHA256
-	opts.nHash = DKIM_HASH_SHA1_AND_256;
+	opts.nHash = DKIM_HASH_SHA1_AND_SHA256;
 #else
 	opts.nHash = DKIM_HASH_SHA1;
 #endif
@@ -562,13 +484,12 @@ main(int argc, char **argv)
 	opts.nIncludeBodyLengthTag = 0;
 	opts.nIncludeQueryMethod = 0;
 	opts.nIncludeTimeStamp = 0;
-	opts.expireTime = t + 604800;	// expires in 1 week
+	opts.expireTime = t + 604800;	/* expires in 1 week */
 	opts.nIncludeCopiedHeaders = 0;
-	opts.nIncludeBodyHash = DKIM_BODYHASH_BOTH;
 	strcpy(opts.szRequiredHeaders, "NonExistent");
 	opts.pfnHeaderCallback = SignThisHeader;
 	while (1) {
-		if ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:y:z:")) == -1)
+		if ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:y:z:T:")) == -1)
 			break;
 		switch (ch)
 		{
@@ -627,22 +548,7 @@ main(int argc, char **argv)
 				return (1);
 			}
 			break;
-		case 'b': /*- allman or ietf draft 1 or both */
-			switch (*optarg)
-			{
-			case '1':
-				opts.nIncludeBodyHash = DKIM_BODYHASH_ALLMAN_1;
-				break;
-			case '2':
-				opts.nIncludeBodyHash = DKIM_BODYHASH_IETF_1;
-				break;
-			case '3':
-				opts.nIncludeBodyHash = DKIM_BODYHASH_BOTH;
-				break;
-			default:
-				fprintf(stderr, "%s: unrecognized standard %c.\n", program, *optarg);
-				return (1);
-			}
+		case 'b': /*- dummy option kept for backward compatibility */
 			break;
 		case 'c':
 			switch (*optarg)
@@ -697,8 +603,13 @@ main(int argc, char **argv)
 				opts.nHash = DKIM_HASH_SHA256;
 				break;
 			case '3':
-				opts.nHash = DKIM_HASH_SHA1_AND_256;
+				opts.nHash = DKIM_HASH_SHA1_AND_SHA256;
 				break;
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			case '4':
+				opts.nHash = DKIM_HASH_ED25519;
+				break;
+#endif
 			default:
 				fprintf(stderr, "%s: unrecognized hash.\n", program);
 				return (1);
@@ -706,6 +617,9 @@ main(int argc, char **argv)
 #else
 			opts.nHash = DKIM_HASH_SHA1;
 #endif
+			break;
+		case 'T':
+			callbackdata = optarg;
 			break;
 		} /*- switch (ch) */
 	}
@@ -782,10 +696,13 @@ main(int argc, char **argv)
 		else
 			vopts.nCheckPractices = 0;
 		vopts.nAccept3ps = accept3ps;
-		vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
+		if (callbackdata)
+			vopts.pfnSelectorCallback = dns_bypass; /*- SelectorCallback; */
+		else
+			vopts.pfnSelectorCallback = NULL; /*- SelectorCallback; */
 		vopts.nAllowUnsignedFromHeaders = nAllowUnsignedFromHeaders;
 		vopts.nSubjectRequired = nAllowUnsignedSubject;
-		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
+		DKIMVerifyInit(&ctxt, &vopts); /*- this is always successful */
 		for (;;) {
 			if ((i = read(0, Buffer, sizeof(Buffer) - 1)) == -1) {
 				fprintf(stderr, "read: %s\n", strerror(errno));
@@ -803,8 +720,9 @@ main(int argc, char **argv)
 		}
 		if (!ret) {
 			ret = DKIMVerifyResults(&ctxt, &sCount, &sSize);
-			if (ret != DKIM_SUCCESS && ret != DKIM_3PS_SIGNATURE && ret != DKIM_NEUTRAL)
+			if (ret != DKIM_SUCCESS && ret != DKIM_3PS_SIGNATURE && ret != DKIM_NEUTRAL) {
 				dkim_error(ret);
+			}
 			if ((ret = DKIMVerifyGetDetails(&ctxt, &nSigCount, &pDetails, szPolicy)) != DKIM_SUCCESS)
 				dkim_error(ret);
 			else {
@@ -852,7 +770,7 @@ main(int argc, char **argv)
 					if ((resDKIMSSP == DKIM_SSP_UNKNOWN || resDKIMSSP == DKIM_SSP_ALL))
 						ret = (sCount == sSize ? DKIM_SUCCESS : DKIM_PARTIAL_SUCCESS);
 				}
-				// if the SSP is testing, return neutral
+				/* if the SSP is testing, return neutral */
 				if (bTestingPractices)
 					return(DKIM_NEUTRAL);
 				/* if the message should be signed, return fail */
@@ -891,7 +809,99 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.28 2022-11-27 09:41:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.29 2023-01-26 22:33:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: dkim.cpp,v $
+ * Revision 1.29  2023-01-26 22:33:53+05:30  Cprogrammer
+ * removed -b option. Option kept for backward compatibility
+ * added -z 4 for setting Ed25519 DKIM signature
+ *
+ * Revision 1.28  2022-11-27 09:41:38+05:30  Cprogrammer
+ * updated help message for -h option
+ *
+ * Revision 1.27  2021-07-20 23:20:09+05:30  Cprogrammer
+ * removed use of register
+ *
+ * Revision 1.26  2020-10-01 14:14:34+05:30  Cprogrammer
+ * Darwin Port
+ *
+ * Revision 1.25  2020-06-08 23:16:27+05:30  Cprogrammer
+ * quench compiler warnings
+ *
+ * Revision 1.24  2019-06-24 23:14:33+05:30  Cprogrammer
+ * fixed return value interpretation of DKIMVERIFY
+ *
+ * Revision 1.23  2019-06-14 21:24:59+05:30  Cprogrammer
+ * BUG - honor body length tag in verification
+ *
+ * Revision 1.22  2019-01-13 10:10:27+05:30  Cprogrammer
+ * added missing usage string for allowing unsigned subject.
+ *
+ * Revision 1.21  2018-08-08 23:57:02+05:30  Cprogrammer
+ * issue success if at lease one one good signature is found
+ *
+ * Revision 1.20  2018-05-22 10:03:26+05:30  Cprogrammer
+ * changed return type of writeHeader() to void
+ *
+ * Revision 1.19  2016-03-01 16:23:38+05:30  Cprogrammer
+ * added -S option to allow email with unsigned subject
+ *
+ * Revision 1.18  2016-02-01 10:53:32+05:30  Cprogrammer
+ * use basename of private key as the selector in absense of -y option
+ *
+ * Revision 1.17  2015-12-15 15:36:01+05:30  Cprogrammer
+ * added case 3 for 3rd party signature without SSP and ADSP
+ * increased buffer size for Apple mail with X-BrightMail-Tracker header issue
+ *
+ * Revision 1.16  2012-08-16 08:01:19+05:30  Cprogrammer
+ * do not skip X-Mailer headers
+ *
+ * Revision 1.15  2011-06-04 13:55:50+05:30  Cprogrammer
+ * set AllowUnsignedFromHeaders
+ *
+ * Revision 1.14  2011-06-04 09:36:36+05:30  Cprogrammer
+ * added AllowUnsignedFromHeaders option
+ *
+ * Revision 1.13  2011-02-07 22:05:23+05:30  Cprogrammer
+ * added case DKIM_3PS_SIGNATURE
+ *
+ * Revision 1.12  2010-05-04 14:00:13+05:30  Cprogrammer
+ * make option '-z' work on systems without SHA_256
+ *
+ * Revision 1.11  2009-04-20 08:35:45+05:30  Cprogrammer
+ * corrected usage()
+ *
+ * Revision 1.10  2009-04-15 21:30:32+05:30  Cprogrammer
+ * added DKIM-Signature to list of excluded headers
+ *
+ * Revision 1.9  2009-04-15 20:45:04+05:30  Cprogrammer
+ * corrected usage
+ *
+ * Revision 1.8  2009-04-05 19:04:44+05:30  Cprogrammer
+ * improved formating of usage
+ *
+ * Revision 1.7  2009-04-03 12:05:25+05:30  Cprogrammer
+ * minor changes on usage display
+ *
+ * Revision 1.6  2009-03-28 20:15:23+05:30  Cprogrammer
+ * invoke DKIMVerifyGetDetails()
+ *
+ * Revision 1.5  2009-03-27 20:43:48+05:30  Cprogrammer
+ * added HAVE_OPENSSL_EVP_H conditional
+ *
+ * Revision 1.4  2009-03-27 20:19:28+05:30  Cprogrammer
+ * added ADSP
+ *
+ * Revision 1.3  2009-03-26 15:10:53+05:30  Cprogrammer
+ * added ADSP
+ *
+ * Revision 1.2  2009-03-25 08:37:45+05:30  Cprogrammer
+ * added dkim_error
+ *
+ * Revision 1.1  2009-03-21 08:24:47+05:30  Cprogrammer
+ * Initial revision
+ */

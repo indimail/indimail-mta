@@ -1,79 +1,4 @@
 /*
- * $Log: dkimverify.cpp,v $
- * Revision 1.24  2020-09-30 20:46:33+05:30  Cprogrammer
- * Darwin Port
- *
- * Revision 1.23  2019-05-22 11:29:09+05:30  Cprogrammer
- * fix for 32 bit systems where time_t is 4 bytes & encounters year 2038 issue
- *
- * Revision 1.22  2019-05-21 22:27:17+05:30  Cprogrammer
- * increased buffer size
- *
- * Revision 1.21  2019-02-17 11:32:05+05:30  Cprogrammer
- * made scope of sFromDomain static
- *
- * Revision 1.20  2018-12-14 11:05:20+05:30  Cprogrammer
- * fixed 'conversion from 'int' to 'char' inside {}” for cross compiling on arm
- *
- * Revision 1.19  2018-08-08 23:56:27+05:30  Cprogrammer
- * changed comment style
- *
- * Revision 1.18  2017-09-05 11:00:33+05:30  Cprogrammer
- * removed extra whitespace
- *
- * Revision 1.17  2017-09-03 14:02:04+05:30  Cprogrammer
- * call EVP_MD_CTX_init() only once
- *
- * Revision 1.16  2017-09-01 12:46:05+05:30  Cprogrammer
- * removed dkimd2i_PUBKEY function
- *
- * Revision 1.15  2017-08-31 17:04:34+05:30  Cprogrammer
- * replaced d2i_PUBKEY() with dkimd2i_PUBKEY() to avoid SIGSEGV on X509_PUBKEY_free()
- *
- * Revision 1.14  2017-08-09 21:59:39+05:30  Cprogrammer
- * fixed segmentation fault. Use EVP_MD_CTX_reset() instead of EVP_MD_CTX_free()
- *
- * Revision 1.13  2017-08-08 23:50:41+05:30  Cprogrammer
- * openssl 1.1.0 port
- *
- * Revision 1.12  2017-05-23 09:23:45+05:30  Cprogrammer
- * use strtok_r instead of strtok() for thread safe operation
- *
- * Revision 1.11  2016-03-01 16:24:00+05:30  Cprogrammer
- * reverse value of m_SubjectIsRequired
- *
- * Revision 1.10  2015-12-15 16:05:00+05:30  Cprogrammer
- * fixed issue with time comparision. Use time_t for time variables
- *
- * Revision 1.9  2011-06-04 10:05:01+05:30  Cprogrammer
- * added signature and identity domain information to
- *     DKIMVerifyDetails structure
- *
- * Revision 1.8  2011-06-04 09:37:13+05:30  Cprogrammer
- * added AllowUnsignedFromHeaders
- *
- * Revision 1.7  2009-06-11 13:58:34+05:30  Cprogrammer
- * port for DARWIN
- *
- * Revision 1.6  2009-05-31 21:09:29+05:30  Cprogrammer
- * changed cast
- *
- * Revision 1.5  2009-03-27 20:19:58+05:30  Cprogrammer
- * added ADSP code
- *
- * Revision 1.4  2009-03-26 15:12:05+05:30  Cprogrammer
- * added ADSP code
- *
- * Revision 1.3  2009-03-25 08:38:20+05:30  Cprogrammer
- * fixed indentation
- *
- * Revision 1.2  2009-03-21 11:57:40+05:30  Cprogrammer
- * fixed indentation
- *
- * Revision 1.1  2009-03-21 08:43:13+05:30  Cprogrammer
- * Initial revision
- *
- *
  *  Copyright 2005 Alt-N Technologies, Ltd. 
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); 
@@ -105,8 +30,14 @@
 #include "dkim.h"
 #include "dkimverify.h"
 #include "dns.h"
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
 #define MAX_SIGNATURES	10		/*- maximum number of DKIM signatures to process in a message */
+
+string          SigHdr;
+size_t          m_SigHdr;
+int             HashVal;
 
 SignatureInfo::SignatureInfo(bool s)
 {
@@ -121,6 +52,10 @@ SignatureInfo::SignatureInfo(bool s)
 		EVP_MD_CTX_init(m_Bdy_ctx);
 	else
 		m_Bdy_ctx = EVP_MD_CTX_new();
+	if (m_Msg_ctx)
+		EVP_MD_CTX_init(m_Msg_ctx);
+	else
+		m_Msg_ctx = EVP_MD_CTX_new();
 #else
 	EVP_MD_CTX_init(&m_Hdr_ctx);
 	EVP_MD_CTX_init(&m_Bdy_ctx);
@@ -139,6 +74,8 @@ SignatureInfo::~SignatureInfo()
 		EVP_MD_CTX_reset(m_Hdr_ctx);
 	if (m_Bdy_ctx)
 		EVP_MD_CTX_reset(m_Bdy_ctx);
+	if (m_Msg_ctx)
+		EVP_MD_CTX_reset(m_Msg_ctx);
 #else
 	EVP_MD_CTX_cleanup(&m_Hdr_ctx);
 	EVP_MD_CTX_cleanup(&m_Bdy_ctx);
@@ -472,6 +409,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 	unsigned int    SuccessCount = 0;
 	int             TestingFailures = 0;
 	int             RealFailures = 0;
+	int             r;
 	list <string>   SuccessfulDomains;	/* can contain duplicates */
 	string          sFromDomain; /*- get the From address's domain if we might need it -*/
 
@@ -504,14 +442,15 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			string          sSignedSig = i->Header;
 			string          sSigValue = sSignedSig.substr(sSignedSig.find(':') + 1);
 			static const char *tags[] = { "b", NULL };
+			int             res = -1;
 			char           *values[sizeof (tags) / sizeof (tags[0])] = { NULL };
 			char           *pSigValue = (char *) sSigValue.c_str();
-			if (ParseTagValueList(pSigValue, tags, values) && values[0] != NULL) {
+
+			if (ParseTagValueList(pSigValue, tags, values) && values[0] != NULL)
 				sSignedSig.erase(15 + values[0] - pSigValue, strlen(values[0]));
-			}
-			if (i->HeaderCanonicalization == DKIM_CANON_RELAXED) {
+			if (i->HeaderCanonicalization == DKIM_CANON_RELAXED)
 				sSignedSig = RelaxHeader(sSignedSig);
-			} else
+			else
 			if (i->HeaderCanonicalization == DKIM_CANON_NOWSP) {
 				RemoveSWSP(sSignedSig);
 				/* convert "DKIM-Signature" to lower case */
@@ -519,12 +458,39 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			}
 			i->Hash(sSignedSig.c_str(), sSignedSig.length());
 			assert(i->m_pSelector != NULL);
+			if (HashVal != DKIM_HASH_ED25519) {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-			int             res = EVP_VerifyFinal(i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
-							i->SignatureData.length(), i->m_pSelector->PublicKey);
+				res = EVP_VerifyFinal(i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
+						i->SignatureData.length(), i->m_pSelector->PublicKey);
 #else
-			int             res = EVP_VerifyFinal(&i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
-							i->SignatureData.length(), i->m_pSelector->PublicKey);
+				res = EVP_VerifyFinal(&i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
+						i->SignatureData.length(), i->m_pSelector->PublicKey);
+#endif
+				if (res != 1) {
+					while ((r = ERR_get_error()))
+						fprintf(stderr, "EVP_VerifyFinal: %s\n", ERR_error_string(r, NULL));
+				}
+			}
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+			else {
+				unsigned char  *SignMsg;
+				if (EVP_PKEY_base_id(i->m_pSelector->PublicKey) == EVP_PKEY_ED25519) {
+					res = EVP_DigestVerifyInit(i->m_Msg_ctx, NULL, NULL, NULL,
+							i->m_pSelector->PublicKey);  /* late initialization */
+					if (res != 1) {
+						while ((r = ERR_get_error()))
+							fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
+					} else {
+						SignMsg = (unsigned char *) SigHdr.data();
+						res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
+								(size_t) i->SignatureData.length(), SignMsg,m_SigHdr);
+						if (res != 1) {
+							while ((r = ERR_get_error()))
+								fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
+						}
+					}
+				}
+			}
 #endif
 			if (res == 1) {
 				if (i->UnverifiedBodyCount == 0)
@@ -620,6 +586,8 @@ SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 	} else {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		EVP_VerifyUpdate(m_Hdr_ctx, szBuffer, nBufLength);
+		SigHdr.append(szBuffer, nBufLength);
+		m_SigHdr += nBufLength;
 #else
 		EVP_VerifyUpdate(&m_Hdr_ctx, szBuffer, nBufLength);
 #endif
@@ -675,7 +643,7 @@ CDKIMVerify::ProcessHeaders(void)
 			if ((sig.m_nHash == DKIM_HASH_SHA1 && !sel.AllowSHA1))
 #endif
 				sig.Status = DKIM_SELECTOR_ALGORITHM_MISMATCH;	/* causes signature to fail */
-			/*- check for same domain -*/
+			/*- check for same domain RFC5672 -*/
 			if (sel.SameDomain && _stricmp(sig.Domain.c_str(), sig.IdentityDomain.c_str()) != 0)
 				sig.Status = DKIM_BAD_SYNTAX;
 		}
@@ -683,7 +651,6 @@ CDKIMVerify::ProcessHeaders(void)
 			continue;
 		/*- initialize the hashes -*/
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
-#ifdef HAVE_EVP_SHA256
 		if (sig.m_nHash == DKIM_HASH_SHA256) {
 			EVP_VerifyInit(sig.m_Hdr_ctx, EVP_sha256());
 			EVP_DigestInit(sig.m_Bdy_ctx, EVP_sha256());
@@ -691,10 +658,6 @@ CDKIMVerify::ProcessHeaders(void)
 			EVP_VerifyInit(sig.m_Hdr_ctx, EVP_sha1());
 			EVP_DigestInit(sig.m_Bdy_ctx, EVP_sha1());
 		}
-#else
-		EVP_VerifyInit(sig.m_Hdr_ctx, EVP_sha1());
-		EVP_DigestInit(sig.m_Bdy_ctx, EVP_sha1());
-#endif
 #else
 #ifdef HAVE_EVP_SHA256
 		if (sig.m_nHash == DKIM_HASH_SHA256) {
@@ -708,6 +671,13 @@ CDKIMVerify::ProcessHeaders(void)
 		EVP_VerifyInit(&sig.m_Hdr_ctx, EVP_sha1());
 		EVP_DigestInit(&sig.m_Bdy_ctx, EVP_sha1());
 #endif
+#endif
+
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	if (sig.m_nHash == DKIM_HASH_SHA256) {
+		SigHdr.assign("");
+		m_SigHdr = 0;
+	}
 #endif
 		/*- compute the hash of the header -*/
 		vector < list < string >::reverse_iterator > used;
@@ -848,14 +818,25 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 	/*- algorithm can be "rsa-sha1" or "rsa-sha256" -*/
 	if (strcmp(values[1], "rsa-sha1") == 0) {
 		sig.m_nHash = DKIM_HASH_SHA1;
+		HashVal = sig.m_nHash;
 	}
 #ifdef HAVE_EVP_SHA256
 	else
-	if (strcmp(values[1], "rsa-sha256") == 0)
+	if (strcmp(values[1], "rsa-sha256") == 0) {
 		sig.m_nHash = DKIM_HASH_SHA256;
+		HashVal = sig.m_nHash;
+	}
+#endif
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+	else
+	if (strcmp(values[1],"ed25519") == 0) {
+		sig.m_nHash = DKIM_HASH_SHA256;
+		HashVal = DKIM_HASH_ED25519;
+	}
 #endif
 	else
 		return DKIM_BAD_SYNTAX;	/* todo: maybe create a new error code for unknown algorithm */
+
 	/*- make sure the signature data is not empty -*/
 	unsigned SigDataLen = DecodeBase64(values[2]);
 	if (SigDataLen == 0)
@@ -1148,9 +1129,13 @@ SelectorInfo::Parse(char *Buffer)
 	}
 	/*- key type -*/
 	if (values[3] != NULL) {
-		/*- key type MUST be "rsa" -*/
-		if (strcmp(values[3], "rsa") != 0)
+		/* key type MUST be "rsa" or "ed25519" */
+		if (strcmp(values[3], "rsa") && strcmp(values[3], "ed25519"))
 			return DKIM_SELECTOR_INVALID;
+		if (!strcmp(values[3],"ed25519")) {
+			AllowSHA1 = false;
+			AllowSHA256 = true;
+		}
 	}
 	/*- service type -*/
 	if (values[5] != NULL) {
@@ -1196,10 +1181,10 @@ SelectorInfo::Parse(char *Buffer)
 		pkey = d2i_PUBKEY(NULL, &qq, PublicKeyLen);
 		if (!pkey)
 			return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
-		/*- make sure public key is the correct type (we only support rsa) */
+		/*- make sure public key is the correct type (we only support rsa & ed25519) */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		rtype = EVP_PKEY_base_id(pkey);
-		if (rtype == EVP_PKEY_RSA || rtype == EVP_PKEY_RSA2)
+		if (rtype == EVP_PKEY_RSA || rtype == EVP_PKEY_RSA2 || rtype == EVP_PKEY_ED25519)
 #else
 		if (pkey->type == EVP_PKEY_RSA || pkey->type == EVP_PKEY_RSA2)
 #endif
@@ -1295,7 +1280,86 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.24 2020-09-30 20:46:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.25 2023-01-26 22:46:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: dkimverify.cpp,v $
+ * Revision 1.25  2023-01-26 22:46:48+05:30  Cprogrammer
+ * verify ed25519 signatures
+ *
+ * Revision 1.24  2020-09-30 20:46:33+05:30  Cprogrammer
+ * Darwin Port
+ *
+ * Revision 1.23  2019-05-22 11:29:09+05:30  Cprogrammer
+ * fix for 32 bit systems where time_t is 4 bytes & encounters year 2038 issue
+ *
+ * Revision 1.22  2019-05-21 22:27:17+05:30  Cprogrammer
+ * increased buffer size
+ *
+ * Revision 1.21  2019-02-17 11:32:05+05:30  Cprogrammer
+ * made scope of sFromDomain static
+ *
+ * Revision 1.20  2018-12-14 11:05:20+05:30  Cprogrammer
+ * fixed 'conversion from 'int' to 'char' inside {}” for cross compiling on arm
+ *
+ * Revision 1.19  2018-08-08 23:56:27+05:30  Cprogrammer
+ * changed comment style
+ *
+ * Revision 1.18  2017-09-05 11:00:33+05:30  Cprogrammer
+ * removed extra whitespace
+ *
+ * Revision 1.17  2017-09-03 14:02:04+05:30  Cprogrammer
+ * call EVP_MD_CTX_init() only once
+ *
+ * Revision 1.16  2017-09-01 12:46:05+05:30  Cprogrammer
+ * removed dkimd2i_PUBKEY function
+ *
+ * Revision 1.15  2017-08-31 17:04:34+05:30  Cprogrammer
+ * replaced d2i_PUBKEY() with dkimd2i_PUBKEY() to avoid SIGSEGV on X509_PUBKEY_free()
+ *
+ * Revision 1.14  2017-08-09 21:59:39+05:30  Cprogrammer
+ * fixed segmentation fault. Use EVP_MD_CTX_reset() instead of EVP_MD_CTX_free()
+ *
+ * Revision 1.13  2017-08-08 23:50:41+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
+ * Revision 1.12  2017-05-23 09:23:45+05:30  Cprogrammer
+ * use strtok_r instead of strtok() for thread safe operation
+ *
+ * Revision 1.11  2016-03-01 16:24:00+05:30  Cprogrammer
+ * reverse value of m_SubjectIsRequired
+ *
+ * Revision 1.10  2015-12-15 16:05:00+05:30  Cprogrammer
+ * fixed issue with time comparision. Use time_t for time variables
+ *
+ * Revision 1.9  2011-06-04 10:05:01+05:30  Cprogrammer
+ * added signature and identity domain information to
+ *     DKIMVerifyDetails structure
+ *
+ * Revision 1.8  2011-06-04 09:37:13+05:30  Cprogrammer
+ * added AllowUnsignedFromHeaders
+ *
+ * Revision 1.7  2009-06-11 13:58:34+05:30  Cprogrammer
+ * port for DARWIN
+ *
+ * Revision 1.6  2009-05-31 21:09:29+05:30  Cprogrammer
+ * changed cast
+ *
+ * Revision 1.5  2009-03-27 20:19:58+05:30  Cprogrammer
+ * added ADSP code
+ *
+ * Revision 1.4  2009-03-26 15:12:05+05:30  Cprogrammer
+ * added ADSP code
+ *
+ * Revision 1.3  2009-03-25 08:38:20+05:30  Cprogrammer
+ * fixed indentation
+ *
+ * Revision 1.2  2009-03-21 11:57:40+05:30  Cprogrammer
+ * fixed indentation
+ *
+ * Revision 1.1  2009-03-21 08:43:13+05:30  Cprogrammer
+ * Initial revision
+ */
