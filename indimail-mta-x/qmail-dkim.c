@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.69 2023-01-26 22:32:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.69 2023-01-26 22:59:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -859,7 +859,7 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 				opts->nHash = DKIM_HASH_SHA256;
 				break;
 			case '3':
-				opts->nHash = DKIM_HASH_SHA1_AND_256;
+				opts->nHash = DKIM_HASH_SHA1_AND_SHA256;
 				break;
 			default:
 				free_makeargs(argv);
@@ -1190,7 +1190,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.69 2023-01-26 22:32:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.69 2023-01-26 22:59:19+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1204,7 +1204,7 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
- * Revision 1.69  2023-01-26 22:32:01+05:30  Cprogrammer
+ * Revision 1.69  2023-01-26 22:59:19+05:30  Cprogrammer
  * removed setting redundant -b option
  * update verification message to include ED25519 failure
  *
