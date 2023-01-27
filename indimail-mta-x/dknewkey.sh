@@ -10,7 +10,7 @@ usage()
 	echo "       [-r | --remove]         : remove DKIM keys"
 	echo "       [-d | --domain domain]  : domain name"
 	echo "       [-b | --bits   size]    : DKIM private key size"
-	echo "       [-t | --type   type]    : Key type (RSA or ED25619)"
+	echo "       [-t | --type   type]    : Key type (RSA or ED25519)"
 	echo "       [-f]                    : force DKIM private key creation"
 	exit $1
 }
