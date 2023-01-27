@@ -56,7 +56,9 @@ protected:
 	EVP_MD_CTX     *m_Bdy_ietf_sha1ctx = NULL;	/* the body hash for ietf sha1  */
 	EVP_MD_CTX     *m_Hdr_ietf_sha256ctx = NULL;	/* the header hash for ietf sha256 */
 	EVP_MD_CTX     *m_Bdy_ietf_sha256ctx = NULL;	/* the body hash for ietf sha256 */
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	EVP_MD_CTX     *m_Hdr_ed25519ctx = NULL; /* the PureEd25519 signature */
+#endif
 #else
 	EVP_MD_CTX      m_Hdr_ietf_sha1ctx;	/* the header hash for ietf sha1  */
 	EVP_MD_CTX      m_Bdy_ietf_sha1ctx;	/* the body hash for ietf sha1  */
@@ -97,6 +99,9 @@ protected:
 
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.8  2023-01-27 19:38:53+05:30  Cprogrammer
+ * fixed openssl version for ed25519
+ *
  * Revision 1.7  2023-01-27 17:16:00+05:30  Cprogrammer
  * removed allman code
  * updated for ed25519 DKIM signatures

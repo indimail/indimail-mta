@@ -1,5 +1,8 @@
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.11  2023-01-27 19:39:01+05:30  Cprogrammer
+ * fixed openssl version for ed25519
+ *
  * Revision 1.10  2023-01-26 22:46:59+05:30  Cprogrammer
  * added ed25519 signatures
  *
@@ -107,7 +110,9 @@ public:
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *m_Hdr_ctx = NULL;
 	EVP_MD_CTX     *m_Bdy_ctx = NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	EVP_MD_CTX     *m_Msg_ctx = NULL;
+#endif
 #else
 	EVP_MD_CTX      m_Hdr_ctx;
 	EVP_MD_CTX      m_Bdy_ctx;

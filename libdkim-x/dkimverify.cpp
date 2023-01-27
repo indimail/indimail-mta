@@ -35,8 +35,10 @@
 
 #define MAX_SIGNATURES	10		/*- maximum number of DKIM signatures to process in a message */
 
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 string          SigHdr;
 size_t          m_SigHdr;
+#endif
 int             HashVal;
 
 SignatureInfo::SignatureInfo(bool s)
@@ -52,10 +54,12 @@ SignatureInfo::SignatureInfo(bool s)
 		EVP_MD_CTX_init(m_Bdy_ctx);
 	else
 		m_Bdy_ctx = EVP_MD_CTX_new();
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	if (m_Msg_ctx)
 		EVP_MD_CTX_init(m_Msg_ctx);
 	else
 		m_Msg_ctx = EVP_MD_CTX_new();
+#endif
 #else
 	EVP_MD_CTX_init(&m_Hdr_ctx);
 	EVP_MD_CTX_init(&m_Bdy_ctx);
@@ -74,8 +78,10 @@ SignatureInfo::~SignatureInfo()
 		EVP_MD_CTX_reset(m_Hdr_ctx);
 	if (m_Bdy_ctx)
 		EVP_MD_CTX_reset(m_Bdy_ctx);
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	if (m_Msg_ctx)
 		EVP_MD_CTX_reset(m_Msg_ctx);
+#endif
 #else
 	EVP_MD_CTX_cleanup(&m_Hdr_ctx);
 	EVP_MD_CTX_cleanup(&m_Bdy_ctx);
@@ -471,7 +477,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 						fprintf(stderr, "EVP_VerifyFinal: %s\n", ERR_error_string(r, NULL));
 				}
 			}
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 			else {
 				unsigned char  *SignMsg;
 				if (EVP_PKEY_base_id(i->m_pSelector->PublicKey) == EVP_PKEY_ED25519) {
@@ -586,8 +592,10 @@ SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 	} else {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		EVP_VerifyUpdate(m_Hdr_ctx, szBuffer, nBufLength);
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		SigHdr.append(szBuffer, nBufLength);
 		m_SigHdr += nBufLength;
+#endif
 #else
 		EVP_VerifyUpdate(&m_Hdr_ctx, szBuffer, nBufLength);
 #endif
@@ -673,7 +681,7 @@ CDKIMVerify::ProcessHeaders(void)
 #endif
 #endif
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	if (sig.m_nHash == DKIM_HASH_SHA256) {
 		SigHdr.assign("");
 		m_SigHdr = 0;
@@ -827,7 +835,7 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 		HashVal = sig.m_nHash;
 	}
 #endif
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	else
 	if (strcmp(values[1],"ed25519") == 0) {
 		sig.m_nHash = DKIM_HASH_SHA256;
@@ -1130,12 +1138,17 @@ SelectorInfo::Parse(char *Buffer)
 	/*- key type -*/
 	if (values[3] != NULL) {
 		/* key type MUST be "rsa" or "ed25519" */
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		if (strcmp(values[3], "rsa") && strcmp(values[3], "ed25519"))
 			return DKIM_SELECTOR_INVALID;
 		if (!strcmp(values[3],"ed25519")) {
 			AllowSHA1 = false;
 			AllowSHA256 = true;
 		}
+#else
+		if (strcmp(values[3], "rsa"))
+			return DKIM_SELECTOR_INVALID;
+#endif
 	}
 	/*- service type -*/
 	if (values[5] != NULL) {
@@ -1184,7 +1197,11 @@ SelectorInfo::Parse(char *Buffer)
 		/*- make sure public key is the correct type (we only support rsa & ed25519) */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		rtype = EVP_PKEY_base_id(pkey);
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		if (rtype == EVP_PKEY_RSA || rtype == EVP_PKEY_RSA2 || rtype == EVP_PKEY_ED25519)
+#else
+		if (rtype == EVP_PKEY_RSA || rtype == EVP_PKEY_RSA2)
+#endif
 #else
 		if (pkey->type == EVP_PKEY_RSA || pkey->type == EVP_PKEY_RSA2)
 #endif
@@ -1280,13 +1297,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.25 2023-01-26 22:46:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.26 2023-01-27 19:38:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.26  2023-01-27 19:38:57+05:30  Cprogrammer
+ * fixed openssl version for ed25519
+ *
  * Revision 1.25  2023-01-26 22:46:48+05:30  Cprogrammer
  * verify ed25519 signatures
  *

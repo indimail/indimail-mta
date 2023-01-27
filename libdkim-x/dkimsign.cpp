@@ -52,8 +52,10 @@ CDKIMSign::CDKIMSign()
 		m_Bdy_ietf_sha256ctx = EVP_MD_CTX_new();
 	EVP_DigestInit(m_Bdy_ietf_sha256ctx, EVP_sha256());
 
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	if (!m_Hdr_ed25519ctx)
 		m_Hdr_ed25519ctx = EVP_MD_CTX_new();
+#endif
 #else
 	EVP_SignInit(&m_Hdr_ietf_sha1ctx, EVP_sha1());
 	EVP_DigestInit(&m_Bdy_ietf_sha1ctx, EVP_sha1());
@@ -71,7 +73,9 @@ CDKIMSign::~CDKIMSign()
 	EVP_MD_CTX_reset(m_Bdy_ietf_sha1ctx);
 	EVP_MD_CTX_reset(m_Hdr_ietf_sha256ctx);
 	EVP_MD_CTX_reset(m_Bdy_ietf_sha256ctx);
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	EVP_MD_CTX_free(m_Hdr_ed25519ctx);
+#endif
 #else
 	EVP_MD_CTX_cleanup(&m_Hdr_ietf_sha1ctx);
 	EVP_MD_CTX_cleanup(&m_Bdy_ietf_sha1ctx);
@@ -118,7 +122,7 @@ CDKIMSign::Init(DKIMSignOptions *pOptions)
 	m_nHash = pOptions->nHash;
 	m_bReturnedSigAssembled = false;
 	m_sCopiedHeaders.erase();
-#if ((OPENSSL_VERSION_NUMBER > 0x10101000L))
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	SigHdrs.assign("");
 	m_SigHdrs = 0;
 #endif
@@ -644,13 +648,19 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	const char     *ptr, *dptr, *sptr;
 	unsigned char   Hash[EVP_MAX_MD_SIZE];
 	unsigned int   nHashLen = 0;
-	EVP_MD_CTX     *p1, *p2, *p3, *p4, *p5;
+	EVP_MD_CTX     *p1, *p2, *p3, *p4;
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+	EVP_MD_CTX     *p5;
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	p1 = m_Hdr_ietf_sha1ctx;
 	p2 = m_Hdr_ietf_sha256ctx;
 	p3 = m_Bdy_ietf_sha1ctx;
 	p4 = m_Bdy_ietf_sha256ctx;
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	p5 = m_Hdr_ed25519ctx;
+#endif
 #else
 	p1 = &m_Hdr_ietf_sha1ctx;
 #ifdef HAVE_EVP_SHA256
@@ -902,11 +912,15 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 	if (ParseFromAddress() == false) {
 		/* return DKIM_NO_SENDER; */
 	}
-	string          ed25519Sig,
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+	string          ed25519Sig, ietfsha256Sig, ietfsha1Sig;
+#else
 #ifdef HAVE_EVP_SHA256
-		ietfsha256Sig,
+	string          ietfsha256Sig, ietfsha1Sig;
+#else
+	string          ietfsha1Sig;
 #endif
-		ietfsha1Sig;
+#endif
 	if (m_nHash == DKIM_HASH_SHA256 || m_nHash == DKIM_HASH_SHA1_AND_SHA256) {
 		nRet = ConstructSignature(szPrivKey, DKIM_HASH_SHA256);
 		if (nRet == DKIM_SUCCESS)
@@ -921,6 +935,7 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 		else
 			return nRet;
 	}
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	if (m_nHash == DKIM_HASH_ED25519) {
 		nRet = ConstructSignature(szPrivKey, DKIM_HASH_ED25519);
 		if (nRet == DKIM_SUCCESS)
@@ -933,6 +948,7 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 			m_sReturnedSig.append("\n");
 		m_sReturnedSig.assign(ed25519Sig);
 	}
+#endif
 	if (!ietfsha1Sig.empty()) {
 		if (!m_sReturnedSig.empty())
 			m_sReturnedSig.append("\n");
@@ -950,13 +966,16 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.20 2023-01-27 17:13:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.21 2023-01-27 19:38:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.21  2023-01-27 19:38:49+05:30  Cprogrammer
+ * fixed openssl version for ed25519
+ *
  * Revision 1.20  2023-01-27 17:13:53+05:30  Cprogrammer
  * added ed25519 encryption for DKIM signatues
  *

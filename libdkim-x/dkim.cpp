@@ -605,7 +605,7 @@ main(int argc, char **argv)
 			case '3':
 				opts.nHash = DKIM_HASH_SHA1_AND_SHA256;
 				break;
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 			case '4':
 				opts.nHash = DKIM_HASH_ED25519;
 				break;
@@ -808,13 +808,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.29 2023-01-27 17:11:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.30 2023-01-27 19:38:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.30  2023-01-27 19:38:28+05:30  Cprogrammer
+ * fixed openssl version for ed25519
+ *
  * Revision 1.29  2023-01-27 17:11:41+05:30  Cprogrammer
  * removed -b option. Option kept for backward compatibility
  * added -z 4 for setting Ed25519 DKIM signature
