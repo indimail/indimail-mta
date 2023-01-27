@@ -28,7 +28,8 @@
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
 
-[README-indimail](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) is a detailed wiki for indimail-mta.
+[README-indimail](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) is a detailed wiki for indimail-mta.  
+[Man Pages](https://github.com/mbhangui/indimail-mta/wiki/1-Man-Pages) has man page documentation for all indimail-mta commands
 
 indimail-mta is the default MTA installed when you install [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).
 
