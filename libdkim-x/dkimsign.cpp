@@ -1,81 +1,19 @@
 /*
- * $Log: dkimsign.cpp,v $
- * Revision 1.20  2023-01-26 22:51:21+05:30  Cprogrammer
- * added ed25519 encryption for DKIM signatues
+ *  Copyright 2005 Alt-N Technologies, Ltd.
  *
- * Revision 1.19  2021-08-28 21:42:23+05:30  Cprogrammer
- * added ReplaceSelector to replace selector
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Revision 1.18  2020-04-11 08:37:12+05:30  Cprogrammer
- * renamed DKKIMDOMAIN to BOUNCEDOMAIN
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Revision 1.17  2020-04-10 21:36:20+05:30  Cprogrammer
- * fixed BUG with domain assignment
- *
- * Revision 1.16  2020-04-09 21:21:04+05:30  Cprogrammer
- * check for null domain after DKIMDOMAIN replacement
- *
- * Revision 1.15  2019-06-26 19:08:18+05:30  Cprogrammer
- * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
- *
- * Revision 1.14  2019-06-24 22:22:15+05:30  Cprogrammer
- * use DKIMDOMAIN only if Return-Path, From, Sender header are empty
- *
- * Revision 1.13  2018-08-25 18:01:59+05:30  Cprogrammer
- * fixed dkim signing for From address containing company name
- *
- * Revision 1.12  2018-05-23 13:07:58+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.11  2017-09-05 10:59:03+05:30  Cprogrammer
- * removed compiler warnings
- *
- * Revision 1.10  2017-08-09 22:02:13+05:30  Cprogrammer
- * replaced EVP_MD_CTX_free() with EVP_MD_CTX_reset()
- *
- * Revision 1.9  2017-08-08 23:50:19+05:30  Cprogrammer
- * openssl 1.1.0 port
- *
- * Revision 1.8  2013-07-16 20:18:03+05:30  Cprogrammer
- * replace '%' with domain name in selector
- *
- * Revision 1.7  2013-06-11 00:02:39+05:30  Cprogrammer
- * removed header iostream
- *
- * Revision 1.6  2013-06-09 16:41:28+05:30  Cprogrammer
- * parse address properly from From and Sender header
- *
- * Revision 1.5  2009-04-16 10:32:38+05:30  Cprogrammer
- * added DKIMDOMAIN env variable
- *
- * Revision 1.4  2009-04-15 21:32:12+05:30  Cprogrammer
- * added DKIM-Signature, Received to list of excluded headers
- *
- * Revision 1.3  2009-03-26 15:11:46+05:30  Cprogrammer
- * added GetDomain
- *
- * Revision 1.2  2009-03-21 11:57:19+05:30  Cprogrammer
- * fixed indentation
- *
- * Revision 1.1  2009-03-21 08:43:11+05:30  Cprogrammer
- * Initial revision
- *
- *
- *  Copyright 2005 Alt-N Technologies, Ltd. 
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); 
- *  you may not use this file except in compliance with the License. 
- *  You may obtain a copy of the License at 
- *
- *      http://www.apache.org/licenses/LICENSE-2.0 
- *
- *  This code incorporates intellectual property owned by Yahoo! and licensed 
+ *  This code incorporates intellectual property owned by Yahoo! and licensed
  *  pursuant to the Yahoo! DomainKeys Patent License Agreement.
  *
- *  Unless required by applicable law or agreed to in writing, software 
- *  distributed under the License is distributed on an "AS IS" BASIS, 
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *  See the License for the specific language governing permissions and 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
  */
@@ -144,8 +82,7 @@ CDKIMSign::~CDKIMSign()
 #endif
 }
 
-
-/* 
+/*
  * Init - save the options
  */
 int
@@ -237,7 +174,7 @@ CDKIMSign::Hash(const char *szBuffer, int nBufLength, bool bHdr)
 }
 
 
-/* 
+/*
  * SignThisTag - return boolean whether or not to sign this tag
  */
 bool CDKIMSign::SignThisTag(const string &sTag)
@@ -278,7 +215,7 @@ ConvertHeaderToQuotedPrintable(const char *source, char *dest)
 }
 
 
-/* 
+/*
  * GetHeaderParams - Extract any needed header parameters
  */
 void
@@ -526,7 +463,7 @@ bool CDKIMSign::ParseFromAddress(void)
 }
 
 
-/* 
+/*
  * InitSig - initialize signature folding algorithm
  */
 void
@@ -537,7 +474,7 @@ CDKIMSign::InitSig(void)
 	m_nSigPos = m_sSig.size();
 }
 
-/* 
+/*
  * AddTagToSig - add tag and value to signature folding if necessary
  *               if bFold, fold at cbrk char
  */
@@ -559,7 +496,7 @@ void CDKIMSign::AddTagToSig(char *Tag, const string & sValue, char cbrk, bool bF
 }
 
 
-/* 
+/*
  * AddTagToSig - add tag and numeric value to signature folding if necessary
  */
 void CDKIMSign::AddTagToSig(char *Tag, unsigned long nValue)
@@ -569,7 +506,7 @@ void CDKIMSign::AddTagToSig(char *Tag, unsigned long nValue)
 	AddTagToSig(Tag, szValue, 0, false);
 }
 
-/* 
+/*
  * AddInterTagSpace - add space or fold here
  */
 void CDKIMSign::AddInterTagSpace(int nSizeOfNextTag)
@@ -584,7 +521,7 @@ void CDKIMSign::AddInterTagSpace(int nSizeOfNextTag)
 }
 
 
-/* 
+/*
  * AddTagToSig - add value to signature folding if necessary
  *               if cbrk == 0 fold anywhere, otherwise fold only at cbrk
  */
@@ -633,7 +570,7 @@ void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
 }
 
 
-/* 
+/*
  * GetSig - compute hash and return signature header in szSignature
  */
 int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength)
@@ -647,13 +584,13 @@ int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLengt
 		return nRet;
 	if (m_sReturnedSig.size() + 1 < nSigLength)
 		strcpy(szSignature, m_sReturnedSig.c_str());
-	else 
+	else
 		return DKIM_BUFFER_TOO_SMALL;
 	return DKIM_SUCCESS;
 }
 
 
-/* 
+/*
  * GetSig - compute hash and return signature header in szSignature
  */
 int CDKIMSign::GetSig2(char *szPrivKey, char **pszSignature)
@@ -670,7 +607,7 @@ int CDKIMSign::GetSig2(char *szPrivKey, char **pszSignature)
 }
 
 
-/* 
+/*
  * IsRequiredHeader - Check if header in required list. If so, delete
  *                    header from list.
  */
@@ -703,7 +640,7 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	BIO            *bio, *b64;
 	unsigned int    siglen;
 	int             size, len;
-	char           *buf, *cptr; 
+	char           *buf, *cptr;
 	const char     *ptr, *dptr, *sptr;
 	unsigned char   Hash[EVP_MAX_MD_SIZE];
 	unsigned int   nHashLen = 0;
@@ -1013,7 +950,70 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.20 2023-01-26 22:51:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.20 2023-01-27 17:13:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: dkimsign.cpp,v $
+ * Revision 1.20  2023-01-27 17:13:53+05:30  Cprogrammer
+ * added ed25519 encryption for DKIM signatues
+ *
+ * Revision 1.19  2021-08-28 21:42:23+05:30  Cprogrammer
+ * added ReplaceSelector to replace selector
+ *
+ * Revision 1.18  2020-04-11 08:37:12+05:30  Cprogrammer
+ * renamed DKKIMDOMAIN to BOUNCEDOMAIN
+ *
+ * Revision 1.17  2020-04-10 21:36:20+05:30  Cprogrammer
+ * fixed BUG with domain assignment
+ *
+ * Revision 1.16  2020-04-09 21:21:04+05:30  Cprogrammer
+ * check for null domain after DKIMDOMAIN replacement
+ *
+ * Revision 1.15  2019-06-26 19:08:18+05:30  Cprogrammer
+ * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
+ *
+ * Revision 1.14  2019-06-24 22:22:15+05:30  Cprogrammer
+ * use DKIMDOMAIN only if Return-Path, From, Sender header are empty
+ *
+ * Revision 1.13  2018-08-25 18:01:59+05:30  Cprogrammer
+ * fixed dkim signing for From address containing company name
+ *
+ * Revision 1.12  2018-05-23 13:07:58+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.11  2017-09-05 10:59:03+05:30  Cprogrammer
+ * removed compiler warnings
+ *
+ * Revision 1.10  2017-08-09 22:02:13+05:30  Cprogrammer
+ * replaced EVP_MD_CTX_free() with EVP_MD_CTX_reset()
+ *
+ * Revision 1.9  2017-08-08 23:50:19+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
+ * Revision 1.8  2013-07-16 20:18:03+05:30  Cprogrammer
+ * replace '%' with domain name in selector
+ *
+ * Revision 1.7  2013-06-11 00:02:39+05:30  Cprogrammer
+ * removed header iostream
+ *
+ * Revision 1.6  2013-06-09 16:41:28+05:30  Cprogrammer
+ * parse address properly from From and Sender header
+ *
+ * Revision 1.5  2009-04-16 10:32:38+05:30  Cprogrammer
+ * added DKIMDOMAIN env variable
+ *
+ * Revision 1.4  2009-04-15 21:32:12+05:30  Cprogrammer
+ * added DKIM-Signature, Received to list of excluded headers
+ *
+ * Revision 1.3  2009-03-26 15:11:46+05:30  Cprogrammer
+ * added GetDomain
+ *
+ * Revision 1.2  2009-03-21 11:57:19+05:30  Cprogrammer
+ * fixed indentation
+ *
+ * Revision 1.1  2009-03-21 08:43:11+05:30  Cprogrammer
+ * Initial revision
+ */

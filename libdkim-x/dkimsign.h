@@ -1,43 +1,19 @@
 /*
- * $Log: dkimsign.h,v $
- * Revision 1.7  2023-01-26 22:46:01+05:30  Cprogrammer
- * removed allman code
- * updated for ed25519 DKIM signatures
+ *  Copyright 2005 Alt-N Technologies, Ltd.
  *
- * Revision 1.6  2021-08-28 21:42:40+05:30  Cprogrammer
- * added ReplaceSelector to replace selector
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Revision 1.5  2019-06-26 19:09:07+05:30  Cprogrammer
- * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Revision 1.4  2017-09-05 10:59:20+05:30  Cprogrammer
- * removed compiler warnings
- *
- * Revision 1.3  2017-08-09 22:03:09+05:30  Cprogrammer
- * initialized EVP_MD_CTX variables
- *
- * Revision 1.2  2017-08-08 23:50:33+05:30  Cprogrammer
- * openssl 1.1.0 port
- *
- * Revision 1.1  2009-04-16 10:34:02+05:30  Cprogrammer
- * Initial revision
- *
- *
- *  Copyright 2005 Alt-N Technologies, Ltd. 
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); 
- *  you may not use this file except in compliance with the License. 
- *  You may obtain a copy of the License at 
- *
- *      http://www.apache.org/licenses/LICENSE-2.0 
- *
- *  This code incorporates intellectual property owned by Yahoo! and licensed 
+ *  This code incorporates intellectual property owned by Yahoo! and licensed
  *  pursuant to the Yahoo! DomainKeys Patent License Agreement.
  *
- *  Unless required by applicable law or agreed to in writing, software 
- *  distributed under the License is distributed on an "AS IS" BASIS, 
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *  See the License for the specific language governing permissions and 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
  */
@@ -78,10 +54,8 @@ protected:
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *m_Hdr_ietf_sha1ctx = NULL;	/* the header hash for ietf sha1  */
 	EVP_MD_CTX     *m_Bdy_ietf_sha1ctx = NULL;	/* the body hash for ietf sha1  */
-#ifdef HAVE_EVP_SHA256
 	EVP_MD_CTX     *m_Hdr_ietf_sha256ctx = NULL;	/* the header hash for ietf sha256 */
 	EVP_MD_CTX     *m_Bdy_ietf_sha256ctx = NULL;	/* the body hash for ietf sha256 */
-#endif
 	EVP_MD_CTX     *m_Hdr_ed25519ctx = NULL; /* the PureEd25519 signature */
 #else
 	EVP_MD_CTX      m_Hdr_ietf_sha1ctx;	/* the header hash for ietf sha1  */
@@ -120,3 +94,28 @@ protected:
 };
 
 #endif	/*- DKIMSIGN_H */
+
+/*
+ * $Log: dkimsign.h,v $
+ * Revision 1.7  2023-01-27 17:16:00+05:30  Cprogrammer
+ * removed allman code
+ * updated for ed25519 DKIM signatures
+ *
+ * Revision 1.6  2021-08-28 21:42:40+05:30  Cprogrammer
+ * added ReplaceSelector to replace selector
+ *
+ * Revision 1.5  2019-06-26 19:09:07+05:30  Cprogrammer
+ * added sBouncedAddr variable for X-Bounced-Address header added by qmail-send for bounces
+ *
+ * Revision 1.4  2017-09-05 10:59:20+05:30  Cprogrammer
+ * removed compiler warnings
+ *
+ * Revision 1.3  2017-08-09 22:03:09+05:30  Cprogrammer
+ * initialized EVP_MD_CTX variables
+ *
+ * Revision 1.2  2017-08-08 23:50:33+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
+ * Revision 1.1  2009-04-16 10:34:02+05:30  Cprogrammer
+ * Initial revision
+ */

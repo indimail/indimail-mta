@@ -1,11 +1,11 @@
 /*
- * This code incorporates intellectual property owned by Yahoo! and licensed 
+ * This code incorporates intellectual property owned by Yahoo! and licensed
  * pursuant to the Yahoo! DomainKeys Patent License Agreement.
  *
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 /*
@@ -50,7 +50,7 @@ SignThisHeader(const char *szHeader)
 		|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
 		|| !strncasecmp(szHeader, "Authentication-Results:", 23)
 		|| !strncasecmp(szHeader, "DomainKey-Signature", 19)
-		|| !strncasecmp(szHeader, "Return-Path:", 12)) 
+		|| !strncasecmp(szHeader, "Return-Path:", 12))
 	{
 		return 0;
 	}
@@ -86,7 +86,7 @@ usage()
 #endif
 	fprintf(stderr, "y <selector>         the selector tag DEFAULT=basename of privkeyfile\n");
 	fprintf(stderr, "s <privkeyfile>      sign the message using the private key in privkeyfile\n");
-	fprintf(stderr, "T DNSText            Use DNSText as domainkey text record instead of using DNS\n");   
+	fprintf(stderr, "T DNSText            Use DNSText as domainkey text record instead of using DNS\n");
 	fprintf(stderr, "V                    set verbose mode\n");
 	fprintf(stderr, "H                    this help\n");
 	exit(1);
@@ -385,7 +385,7 @@ GetSSP(char *domain, int *bTesting)
 			else
 			if (!strcmp(s, "s")) {
 				if (bIsParentSSP) {
-					/* 
+					/*
 					 * this is a parent's SSP record that should not apply to subdomains
 					 * the message is non-suspicious
 					 */
@@ -720,9 +720,8 @@ main(int argc, char **argv)
 		}
 		if (!ret) {
 			ret = DKIMVerifyResults(&ctxt, &sCount, &sSize);
-			if (ret != DKIM_SUCCESS && ret != DKIM_3PS_SIGNATURE && ret != DKIM_NEUTRAL) {
+			if (ret != DKIM_SUCCESS && ret != DKIM_3PS_SIGNATURE && ret != DKIM_NEUTRAL)
 				dkim_error(ret);
-			}
 			if ((ret = DKIMVerifyGetDetails(&ctxt, &nSigCount, &pDetails, szPolicy)) != DKIM_SUCCESS)
 				dkim_error(ret);
 			else {
@@ -744,7 +743,7 @@ main(int argc, char **argv)
 				if (!nSigCount)
 					ret = DKIM_NO_SIGNATURES;
 			}
-		} 
+		}
 		if (ret < 0 || ret == DKIM_3PS_SIGNATURE) {
 			if (useADSP) {
 				char           *domain;
@@ -754,7 +753,7 @@ main(int argc, char **argv)
 				if (sCount > 0) {
 					if (resDKIMADSP == DKIM_ADSP_UNKNOWN || resDKIMADSP == DKIM_ADSP_ALL)
 						ret = (sCount == sSize ? DKIM_SUCCESS : DKIM_PARTIAL_SUCCESS);
-				} 
+				}
 				/* if the message should be signed, return fail */
 				if (resDKIMADSP == DKIM_ADSP_DISCARDABLE)
 					ret = DKIM_FAIL;
@@ -809,14 +808,14 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.29 2023-01-26 22:33:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.29 2023-01-27 17:11:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
- * Revision 1.29  2023-01-26 22:33:53+05:30  Cprogrammer
+ * Revision 1.29  2023-01-27 17:11:41+05:30  Cprogrammer
  * removed -b option. Option kept for backward compatibility
  * added -z 4 for setting Ed25519 DKIM signature
  *
