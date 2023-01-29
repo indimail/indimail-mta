@@ -45,15 +45,13 @@ static char   *callbackdata;
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
-	if ((!strncasecmp(szHeader, "X-", 2) && strncasecmp(szHeader, "X-Mailer", 8))
-		|| !strncasecmp(szHeader, "Received:", 9)
-		|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
-		|| !strncasecmp(szHeader, "Authentication-Results:", 23)
-		|| !strncasecmp(szHeader, "DomainKey-Signature", 19)
-		|| !strncasecmp(szHeader, "Return-Path:", 12))
-	{
+	if ((!strncasecmp(szHeader, "X-", 2) && strncasecmp(szHeader, "X-Mailer:", 9))
+			|| !strncasecmp(szHeader, "Received:", 9)
+			|| !strncasecmp(szHeader, "Authentication-Results:", 23)
+			|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
+			|| !strncasecmp(szHeader, "DomainKey-Signature:", 20)
+			|| !strncasecmp(szHeader, "Return-Path:", 12))
 		return 0;
-	}
 	return 1;
 }
 
@@ -466,9 +464,9 @@ main(int argc, char **argv)
 	time_t          t;
 	struct stat     statbuf;
 	DKIMContext     ctxt;
-	DKIMSignOptions opts = { 0 };
-	DKIMVerifyDetails *pDetails;
+	DKIMSignOptions   sopts = { 0 };
 	DKIMVerifyOptions vopts = { 0 };
+	DKIMVerifyDetails *pDetails;
 
 	if (!(program = strrchr(argv[0], '/')))
 		program = argv[0];
@@ -476,18 +474,18 @@ main(int argc, char **argv)
 		program++;
 	t = time(0);
 #ifdef HAVE_EVP_SHA256
-	opts.nHash = DKIM_HASH_SHA1_AND_SHA256;
+	sopts.nHash = DKIM_HASH_SHA1_AND_SHA256;
 #else
-	opts.nHash = DKIM_HASH_SHA1;
+	sopts.nHash = DKIM_HASH_SHA1;
 #endif
-	opts.nCanon = DKIM_SIGN_RELAXED;
-	opts.nIncludeBodyLengthTag = 0;
-	opts.nIncludeQueryMethod = 0;
-	opts.nIncludeTimeStamp = 0;
-	opts.expireTime = t + 604800;	/* expires in 1 week */
-	opts.nIncludeCopiedHeaders = 0;
-	strcpy(opts.szRequiredHeaders, "NonExistent");
-	opts.pfnHeaderCallback = SignThisHeader;
+	sopts.nCanon = DKIM_SIGN_RELAXED;
+	sopts.nIncludeBodyLengthTag = 0;
+	sopts.nIncludeQueryMethod = 0;
+	sopts.nIncludeTimeStamp = 0;
+	sopts.expireTime = t + 604800;	/* expires in 1 week */
+	sopts.nIncludeCopiedHeaders = 0;
+	strcpy(sopts.szRequiredHeaders, "NonExistent");
+	sopts.pfnHeaderCallback = SignThisHeader;
 	while (1) {
 		if ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:y:z:T:")) == -1)
 			break;
@@ -495,10 +493,10 @@ main(int argc, char **argv)
 		{
 		case 'l': /*- body length tag */
 			vopts.nHonorBodyLengthTag = 1;
-			opts.nIncludeBodyLengthTag = 1;
+			sopts.nIncludeBodyLengthTag = 1;
 			break;
 		case 'q': /*- query method tag */
-			opts.nIncludeQueryMethod = 1;
+			sopts.nIncludeQueryMethod = 1;
 			break;
 		case 'S':
 			nAllowUnsignedSubject = 0;
@@ -506,10 +504,10 @@ main(int argc, char **argv)
 		case 'f':
 			nAllowUnsignedFromHeaders = 1;
 		case 't': /*- timestamp tag */
-			opts.nIncludeTimeStamp = 1;
+			sopts.nIncludeTimeStamp = 1;
 			break;
 		case 'h':
-			opts.nIncludeCopiedHeaders = 1;
+			sopts.nIncludeCopiedHeaders = 1;
 			break;
 		case 'H':
 			usage();
@@ -518,6 +516,8 @@ main(int argc, char **argv)
 			bSign = 0;
 			break;
 		case 'V': /*- verbose */
+			vopts.verbose = 1;
+			sopts.verbose = 1;
 			verbose = 1;
 			break;
 		case 'p':
@@ -554,16 +554,16 @@ main(int argc, char **argv)
 			switch (*optarg)
 			{
 			case 'r':
-				opts.nCanon = DKIM_SIGN_RELAXED;
+				sopts.nCanon = DKIM_SIGN_RELAXED;
 				break;
 			case 's':
-				opts.nCanon = DKIM_SIGN_SIMPLE;
+				sopts.nCanon = DKIM_SIGN_SIMPLE;
 				break;
 			case 't':
-				opts.nCanon = DKIM_SIGN_RELAXED_SIMPLE;
+				sopts.nCanon = DKIM_SIGN_RELAXED_SIMPLE;
 				break;
 			case 'u':
-				opts.nCanon = DKIM_SIGN_SIMPLE_RELAXED;
+				sopts.nCanon = DKIM_SIGN_SIMPLE_RELAXED;
 				break;
 			default:
 				fprintf(stderr, "%s: unrecognized canonicalization.\n", program);
@@ -571,13 +571,13 @@ main(int argc, char **argv)
 			}
 			break;
 		case 'd':
-			strncpy(opts.szDomain, optarg, sizeof (opts.szDomain) - 1);
+			strncpy(sopts.szDomain, optarg, sizeof (sopts.szDomain) - 1);
 			break;
 		case 'i':	/*- identity */
 			if (*optarg == '-')
-				opts.szIdentity[0] = '\0';
+				sopts.szIdentity[0] = '\0';
 			else
-				strncpy(opts.szIdentity, optarg, sizeof (opts.szIdentity) - 1);
+				strncpy(sopts.szIdentity, optarg, sizeof (sopts.szIdentity) - 1);
 			break;
 		case 's': /*- sign */
 			bSign = 1;
@@ -585,29 +585,29 @@ main(int argc, char **argv)
 			break;
 		case 'x': /*- expire time */
 			if (*optarg == '-')
-				opts.expireTime = 0;
+				sopts.expireTime = 0;
 			else
-				opts.expireTime = t + atoi(optarg);
+				sopts.expireTime = t + atoi(optarg);
 			break;
 		case 'y':
-			strncpy(opts.szSelector, optarg, sizeof (opts.szSelector) - 1);
+			strncpy(sopts.szSelector, optarg, sizeof (sopts.szSelector) - 1);
 			break;
 		case 'z': /*- sign w/ sha1, sha256 or both */
 #ifdef HAVE_EVP_SHA256
 			switch (*optarg)
 			{
 			case '1':
-				opts.nHash = DKIM_HASH_SHA1;
+				sopts.nHash = DKIM_HASH_SHA1;
 				break;
 			case '2':
-				opts.nHash = DKIM_HASH_SHA256;
+				sopts.nHash = DKIM_HASH_SHA256;
 				break;
 			case '3':
-				opts.nHash = DKIM_HASH_SHA1_AND_SHA256;
+				sopts.nHash = DKIM_HASH_SHA1_AND_SHA256;
 				break;
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 			case '4':
-				opts.nHash = DKIM_HASH_ED25519;
+				sopts.nHash = DKIM_HASH_ED25519;
 				break;
 #endif
 			default:
@@ -615,7 +615,7 @@ main(int argc, char **argv)
 				return (1);
 			}
 #else
-			opts.nHash = DKIM_HASH_SHA1;
+			sopts.nHash = DKIM_HASH_SHA1;
 #endif
 			break;
 		case 'T':
@@ -629,12 +629,12 @@ main(int argc, char **argv)
 			usage();
 			return (1);
 		}
-		if (!opts.szSelector[0]) {
+		if (!sopts.szSelector[0]) {
 			if ((pSig = strrchr(PrivKeyFile, '/'))) {
 				pSig++;
-				strcpy(opts.szSelector, pSig);
+				strcpy(sopts.szSelector, pSig);
 			} else
-				strcpy(opts.szSelector, "private");
+				strcpy(sopts.szSelector, "private");
 		}
 		if ((PrivKeyFD = open(PrivKeyFile, O_RDONLY)) == -1) {
 			fprintf(stderr, "%s: %s\n", PrivKeyFile, strerror(errno));
@@ -658,7 +658,7 @@ main(int argc, char **argv)
 		}
 		close(PrivKeyFD);
 		PrivKey[nPrivKeyLen] = '\0';
-		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) {
+		if (DKIMSignInit(&ctxt, &sopts) != DKIM_SUCCESS) {
 			fprintf(stderr, "DKIMSignInit: failed to initialize signature %s\n", PrivKeyFile);
 			return (1);
 		}
@@ -808,13 +808,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.30 2023-01-27 19:38:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.31 2023-01-29 22:13:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.31  2023-01-29 22:13:26+05:30  Cprogrammer
+ * set verbose flag for dkimvery, dkimsign methods
+ *
  * Revision 1.30  2023-01-27 19:38:28+05:30  Cprogrammer
  * fixed openssl version for ed25519
  *

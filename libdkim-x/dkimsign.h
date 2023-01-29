@@ -39,7 +39,7 @@ public:
 
 protected:
 	void            Hash(const char* szBuffer,int nBufLength,bool bHdr);
-	bool            SignThisTag(const string & sTag);
+	bool            SignThisHeader(const string & sTag);
 	void            GetHeaderParams(const string & sHdr);
 	void            ProcessHeader(const string & sHdr);
 	bool            ParseFromAddress(void);
@@ -99,6 +99,9 @@ protected:
 
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.9  2023-01-29 22:11:35+05:30  Cprogrammer
+ * renamed SignThisTag to SignThiHeader
+ *
  * Revision 1.8  2023-01-27 19:38:53+05:30  Cprogrammer
  * fixed openssl version for ed25519
  *

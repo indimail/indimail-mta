@@ -1,38 +1,4 @@
 /*
- * $Log: dkim.h,v $
- * Revision 1.10  2023-01-26 22:38:16+05:30  Cprogrammer
- * added definition for DKIM_HASH_ED25519
- *
- * Revision 1.9  2021-08-28 21:41:40+05:30  Cprogrammer
- * added DKIMSignReplaceSelector to replace selector
- *
- * Revision 1.8  2015-12-15 16:03:18+05:30  Cprogrammer
- * use time_t for expireTime
- *
- * Revision 1.7  2011-06-04 13:56:06+05:30  Cprogrammer
- * corrected return codes
- *
- * Revision 1.6  2011-06-04 10:04:00+05:30  Cprogrammer
- * unified error code for signing & verifcation
- * added signature and identity domain information to
- *     DKIMVerifyDetails structure
- *
- * Revision 1.5  2009-03-27 20:19:05+05:30  Cprogrammer
- * major changes made for incorporating ADSP
- *
- * Revision 1.4  2009-03-26 19:28:15+05:30  Cprogrammer
- * removed DKIM_3PS_PARTIAL_SUCCESS
- *
- * Revision 1.3  2009-03-26 15:11:33+05:30  Cprogrammer
- * added ADSP
- *
- * Revision 1.2  2009-03-25 08:37:58+05:30  Cprogrammer
- * changed definitions of constants to avoid clash between error and success
- *
- * Revision 1.1  2009-03-21 08:50:19+05:30  Cprogrammer
- * Initial revision
- *
- *
  *  Copyright 2005 Alt-N Technologies, Ltd. 
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); 
@@ -60,6 +26,10 @@ extern          "C" {
 #endif
 
 #include <time.h>
+
+/* DKIM encryption method rsa or ed25519 */
+#define DKIM_ENCRYPTION_RSA         1
+#define DKIM_ENCRYPTION_ED25519     2
 
 /* DKIM hash algorithms */
 #define DKIM_HASH_SHA1              1
@@ -154,6 +124,7 @@ typedef struct DKIMSignOptions_t {
 	int             nHash;                  /* use one of the DKIM_HASH_xx constants here, even if not present in the message */
 	int             nIncludeCopiedHeaders;  /* 0 = don't include z= tag, 1 = include z= tag */
 	int             nIncludeBodyHash;       /* use one of the DKIM_BODYHASH_xx constants here */
+	int             verbose;
 } DKIMSignOptions;
 
 typedef struct DKIMVerifyOptions_t {
@@ -165,6 +136,7 @@ typedef struct DKIMVerifyOptions_t {
 	int             nSaveCanonicalizedData;    /* 0 = canonicalized data is not saved, 1 = canonicalized data is saved */
 	int             nAllowUnsignedFromHeaders; /* 0 = From headers not included in the signature are not allowed, 1 = allowed */
 	int             nAccept3ps;                /* 0 = don't check 3rd party signature(s), 1 = check 3rd party signature(s) */
+	int             verbose;
 } DKIMVerifyOptions;
 
 typedef struct DKIMVerifyDetails_t {
@@ -196,3 +168,41 @@ int  DKIM_CALL  DKIMSignReplaceSelector(DKIMContext *pSignContext, DKIMSignOptio
 #ifdef __cplusplus
 }
 #endif
+
+/*
+ * $Log: dkim.h,v $
+ * Revision 1.11  2023-01-29 22:03:53+05:30  Cprogrammer
+ * added defines for encryption methods
+ *
+ * Revision 1.10  2023-01-26 22:38:16+05:30  Cprogrammer
+ * added definition for DKIM_HASH_ED25519
+ *
+ * Revision 1.9  2021-08-28 21:41:40+05:30  Cprogrammer
+ * added DKIMSignReplaceSelector to replace selector
+ *
+ * Revision 1.8  2015-12-15 16:03:18+05:30  Cprogrammer
+ * use time_t for expireTime
+ *
+ * Revision 1.7  2011-06-04 13:56:06+05:30  Cprogrammer
+ * corrected return codes
+ *
+ * Revision 1.6  2011-06-04 10:04:00+05:30  Cprogrammer
+ * unified error code for signing & verifcation
+ * added signature and identity domain information to
+ *     DKIMVerifyDetails structure
+ *
+ * Revision 1.5  2009-03-27 20:19:05+05:30  Cprogrammer
+ * major changes made for incorporating ADSP
+ *
+ * Revision 1.4  2009-03-26 19:28:15+05:30  Cprogrammer
+ * removed DKIM_3PS_PARTIAL_SUCCESS
+ *
+ * Revision 1.3  2009-03-26 15:11:33+05:30  Cprogrammer
+ * added ADSP
+ *
+ * Revision 1.2  2009-03-25 08:37:58+05:30  Cprogrammer
+ * changed definitions of constants to avoid clash between error and success
+ *
+ * Revision 1.1  2009-03-21 08:50:19+05:30  Cprogrammer
+ * Initial revision
+ */

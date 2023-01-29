@@ -1,19 +1,19 @@
 /*
- *  Copyright 2005 Alt-N Technologies, Ltd. 
+ *  Copyright 2005 Alt-N Technologies, Ltd.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); 
- *  you may not use this file except in compliance with the License. 
- *  You may obtain a copy of the License at 
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0 
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  This code incorporates intellectual property owned by Yahoo! and licensed 
+ *  This code incorporates intellectual property owned by Yahoo! and licensed
  *  pursuant to the Yahoo! DomainKeys Patent License Agreement.
  *
- *  Unless required by applicable law or agreed to in writing, software 
- *  distributed under the License is distributed on an "AS IS" BASIS, 
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *  See the License for the specific language governing permissions and 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
  */
@@ -36,10 +36,14 @@
 #define MAX_SIGNATURES	10		/*- maximum number of DKIM signatures to process in a message */
 
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
+/*
+ * Much of the code related to ED25519 comes from
+ * Erwin Hoffmann's s/qmail code
+ */
 string          SigHdr;
-size_t          m_SigHdr;
+size_t          SigHdrLen;
 #endif
-int             HashVal;
+static int     verbose;
 
 SignatureInfo::SignatureInfo(bool s)
 {
@@ -95,11 +99,9 @@ isswsp(char ch)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Parse a DKIM tag-list.  Returns true for success
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Parse a DKIM tag-list.  Returns true for success
+ */
 bool
 ParseTagValueList(char *tagvaluelist, const char *wanted[], char *values[])
 {
@@ -185,11 +187,9 @@ tohex(char ch)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Decode quoted printable string in-place
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Decode quoted printable string in-place
+ */
 void
 DecodeQuotedPrintable(char *ptr)
 {
@@ -211,11 +211,9 @@ DecodeQuotedPrintable(char *ptr)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Decode base64 string in-place, returns number of bytes output
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Decode base64 string in-place, returns number of bytes output
+ */
 unsigned
 DecodeBase64(char *ptr)
 {
@@ -253,12 +251,10 @@ DecodeBase64(char *ptr)
 	return (char *) d - ptr;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Match a string with a pattern (used for g= value)
-// Supports a single, optional "*" wildcard character.
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Match a string with a pattern (used for g= value)
+ * Supports a single, optional "*" wildcard character.
+ */
 bool
 WildcardMatch(const char *p, const char *s)
 {
@@ -278,11 +274,9 @@ WildcardMatch(const char *p, const char *s)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Parse addresses from a string.  Returns true if at least one address found
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Parse addresses from a string.  Returns true if at least one address found
+ */
 bool
 ParseAddresses(string str, vector < string > &Addresses)
 {
@@ -345,7 +339,7 @@ ParseAddresses(string str, vector < string > &Addresses)
 			} else {
 				/*- copy any other char -*/
 				*to = *from++;
-				// save pointer to '<' for later...
+				/* save pointer to '<' for later... */
 				if (*to == '<')
 					lt = to;
 				to++;
@@ -401,9 +395,10 @@ CDKIMVerify::Init(DKIMVerifyOptions *pOptions)
 	m_HonorBodyLengthTag = pOptions->nHonorBodyLengthTag != 0;
 	m_CheckPractices = pOptions->nCheckPractices != 0;
 	m_SubjectIsRequired = pOptions->nSubjectRequired != 0;
-	m_Accept3ps = pOptions->nAccept3ps != 0;		//TBS(Luc)
+	m_Accept3ps = pOptions->nAccept3ps != 0;		/*TBS(Luc) */
 	m_SaveCanonicalizedData = pOptions->nSaveCanonicalizedData != 0;
 	m_AllowUnsignedFromHeaders = pOptions->nAllowUnsignedFromHeaders != 0;
+	verbose = pOptions->verbose;
 	return nRet;
 }
 
@@ -464,7 +459,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			}
 			i->Hash(sSignedSig.c_str(), sSignedSig.length());
 			assert(i->m_pSelector != NULL);
-			if (HashVal != DKIM_HASH_ED25519) {
+			if (i->m_pSelector->method == DKIM_ENCRYPTION_RSA) {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 				res = EVP_VerifyFinal(i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
 						i->SignatureData.length(), i->m_pSelector->PublicKey);
@@ -472,7 +467,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				res = EVP_VerifyFinal(&i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
 						i->SignatureData.length(), i->m_pSelector->PublicKey);
 #endif
-				if (res != 1) {
+				if (res != 1 && verbose == true) {
 					while ((r = ERR_get_error()))
 						fprintf(stderr, "EVP_VerifyFinal: %s\n", ERR_error_string(r, NULL));
 				}
@@ -480,20 +475,25 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 			else {
 				unsigned char  *SignMsg;
+
 				if (EVP_PKEY_base_id(i->m_pSelector->PublicKey) == EVP_PKEY_ED25519) {
 					res = EVP_DigestVerifyInit(i->m_Msg_ctx, NULL, NULL, NULL,
 							i->m_pSelector->PublicKey);  /* late initialization */
 					if (res != 1) {
-						while ((r = ERR_get_error()))
-							fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
+						if (verbose == true) {
+							while ((r = ERR_get_error()))
+								fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
+						}
 					} else {
 						SignMsg = (unsigned char *) SigHdr.data();
 						res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
-								(size_t) i->SignatureData.length(), SignMsg,m_SigHdr);
-						if (res != 1) {
+								(size_t) i->SignatureData.length(), SignMsg, SigHdrLen);
+						if (res != 1 && verbose == true) {
 							while ((r = ERR_get_error()))
 								fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
 						}
+						SigHdr.erase(SigHdrLen - sSignedSig.length(), SigHdrLen);
+						SigHdrLen = SigHdr.length();
 					}
 				}
 			}
@@ -516,14 +516,14 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				}
 			}
 		} else
-		if (i->Status == DKIM_SELECTOR_GRANULARITY_MISMATCH 
+		if (i->Status == DKIM_SELECTOR_GRANULARITY_MISMATCH
 			|| i->Status == DKIM_SELECTOR_ALGORITHM_MISMATCH
 			|| i->Status == DKIM_SELECTOR_KEY_REVOKED) {
 			/*- treat these as failures -*/
 			/*- todo: maybe see if the selector is in testing mode? -*/
 			RealFailures++;
 		}
-	}
+	} /* for (list < SignatureInfo >::iterator i = Signatures.begin(); i != Signatures.end(); ++i) */
 	if (SuccessCount > 0 || m_CheckPractices) {
 		for (list < string >::iterator i = HeaderList.begin(); i != HeaderList.end(); ++i) {
 			if (_strnicmp(i->c_str(), "From", 4) == 0) {
@@ -564,11 +564,9 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 	return DKIM_3PS_SIGNATURE;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Hash - update the hash
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Hash - update the hash
+ */
 void
 SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 {
@@ -594,7 +592,7 @@ SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 		EVP_VerifyUpdate(m_Hdr_ctx, szBuffer, nBufLength);
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		SigHdr.append(szBuffer, nBufLength);
-		m_SigHdr += nBufLength;
+		SigHdrLen += nBufLength;
 #endif
 #else
 		EVP_VerifyUpdate(&m_Hdr_ctx, szBuffer, nBufLength);
@@ -610,7 +608,6 @@ SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 int
 CDKIMVerify::ProcessHeaders(void)
 {
-
 	/*- look for DKIM-Signature header(s) -*/
 	for (list < string >::iterator i = HeaderList.begin(); i != HeaderList.end(); ++i) {
 		if (_strnicmp(i->c_str(), "DKIM-Signature", 14) == 0) {
@@ -619,7 +616,7 @@ CDKIMVerify::ProcessHeaders(void)
 			while (*s == ' ' || *s == '\t')
 				s++;
 			if (*s == ':') {
-				// found
+				/* found */
 				SignatureInfo   sig(m_SaveCanonicalizedData);
 				sig.Status = ParseDKIMSignature(*i, sig);
 				Signatures.push_back(sig);
@@ -682,10 +679,10 @@ CDKIMVerify::ProcessHeaders(void)
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-	if (sig.m_nHash == DKIM_HASH_SHA256) {
-		SigHdr.assign("");
-		m_SigHdr = 0;
-	}
+		if (sig.m_nHash == DKIM_HASH_SHA256) {
+			SigHdr.assign("");
+			SigHdrLen = 0;
+		}
 #endif
 		/*- compute the hash of the header -*/
 		vector < list < string >::reverse_iterator > used;
@@ -757,12 +754,10 @@ CDKIMVerify::ProcessHeaders(void)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Strictly parse an unsigned integer.  Don't allow spaces, negative sign,
-// 0x prefix, etc.  Values greater than 2^32-1 are capped at 2^32-1
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Strictly parse an unsigned integer.  Don't allow spaces, negative sign,
+ * 0x prefix, etc.  Values greater than 2^32-1 are capped at 2^32-1
+ */
 bool
 ParseUnsigned(const char *s, unsigned long *result)
 {
@@ -814,33 +809,26 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 		 * prior to 0.2, there MUST NOT have been a v=
 		 * (optionally) support these signatures, for backwards compatibility
 		 */
-		if (true) {
+		if (true)
 			sig.Version = DKIM_SIG_VERSION_PRE_02;
-		} else {
+		else
 			return DKIM_BAD_SYNTAX;
-		}
 	}
 	/*- signature MUST have a=, b=, d=, h=, s= -*/
 	if (values[1] == NULL || values[2] == NULL || values[3] == NULL || values[4] == NULL || values[5] == NULL)
 		return DKIM_BAD_SYNTAX;
 	/*- algorithm can be "rsa-sha1" or "rsa-sha256" -*/
-	if (strcmp(values[1], "rsa-sha1") == 0) {
+	if (strcmp(values[1], "rsa-sha1") == 0)
 		sig.m_nHash = DKIM_HASH_SHA1;
-		HashVal = sig.m_nHash;
-	}
 #ifdef HAVE_EVP_SHA256
 	else
-	if (strcmp(values[1], "rsa-sha256") == 0) {
+	if (strcmp(values[1], "rsa-sha256") == 0)
 		sig.m_nHash = DKIM_HASH_SHA256;
-		HashVal = sig.m_nHash;
-	}
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	else
-	if (strcmp(values[1],"ed25519") == 0) {
+	if (strcmp(values[1],"ed25519") == 0)
 		sig.m_nHash = DKIM_HASH_SHA256;
-		HashVal = DKIM_HASH_ED25519;
-	}
 #endif
 	else
 		return DKIM_BAD_SYNTAX;	/* todo: maybe create a new error code for unknown algorithm */
@@ -947,7 +935,7 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 			s = strtok_r(NULL, ": \t", &saveptr);
 		}
 		if (!HasDNS)
-			return DKIM_BAD_SYNTAX;	// todo: maybe create a new error code for unknown query method
+			return DKIM_BAD_SYNTAX;	/* todo: maybe create a new error code for unknown query method */
 	}
 #if SIZEOF_TIME_T  == 8
 	/*- signature time -*/
@@ -992,7 +980,7 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 	while (s != NULL) {
 		if (_stricmp(s, "From") == 0)
 			HasFrom = true;
-		else 
+		else
 		if (_stricmp(s, "Subject") == 0)
 			HasSubject = true;
 		sig.SignedHeaders.push_back(s);
@@ -1068,16 +1056,13 @@ SelectorInfo::SelectorInfo(const string &sSelector, const string &sDomain):Selec
 	Status = DKIM_SUCCESS;
 } SelectorInfo::~SelectorInfo()
 {
-	if (PublicKey != NULL) {
+	if (PublicKey != NULL)
 		EVP_PKEY_free(PublicKey);
-	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Parse - Parse a DKIM selector
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Parse - Parse a DKIM selector
+ */
 int
 SelectorInfo::Parse(char *Buffer)
 {
@@ -1123,7 +1108,8 @@ SelectorInfo::Parse(char *Buffer)
 			if (strcmp(s, "sha1") == 0)
 				AllowSHA1 = true;
 #ifdef HAVE_EVP_SHA256
-			else if (strcmp(s, "sha256") == 0)
+			else
+			if (strcmp(s, "sha256") == 0)
 				AllowSHA256 = true;
 #endif
 			s = strtok_r(NULL, ":", &saveptr);
@@ -1144,8 +1130,11 @@ SelectorInfo::Parse(char *Buffer)
 		if (!strcmp(values[3],"ed25519")) {
 			AllowSHA1 = false;
 			AllowSHA256 = true;
-		}
+			method = DKIM_ENCRYPTION_ED25519;
+		} else
+			method = DKIM_ENCRYPTION_RSA;
 #else
+		method = DKIM_ENCRYPTION_RSA;
 		if (strcmp(values[3], "rsa"))
 			return DKIM_SELECTOR_INVALID;
 #endif
@@ -1297,13 +1286,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.26 2023-01-27 19:38:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.27 2023-01-29 22:05:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.27  2023-01-29 22:05:00+05:30  Cprogrammer
+ * multiple DKIM-Signature of different methods verification fixed
+ *
  * Revision 1.26  2023-01-27 19:38:57+05:30  Cprogrammer
  * fixed openssl version for ed25519
  *

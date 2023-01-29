@@ -31,6 +31,11 @@
 #include "dkim.h"
 #include "dkimsign.h"
 
+/*
+ * Much of the code related to ED25519 comes from
+ * Erwin Hoffmann's s/qmail code
+ */
+
 CDKIMSign::CDKIMSign()
 {
 	m_EmptyLineCount = 0;
@@ -179,15 +184,16 @@ CDKIMSign::Hash(const char *szBuffer, int nBufLength, bool bHdr)
 
 
 /*
- * SignThisTag - return boolean whether or not to sign this tag
+ * SignThisHeader - return boolean whether or not to sign this tag
  */
-bool CDKIMSign::SignThisTag(const string &sTag)
+bool CDKIMSign::SignThisHeader(const string &sTag)
 {
 	bool            bRet = true;
 
 	if (_strnicmp(sTag.c_str(), "X-", 2) == 0
 		|| _stricmp(sTag.c_str(), "Authentication-Results:") == 0
 		|| _stricmp(sTag.c_str(), "DKIM-Signature:") == 0
+		|| _stricmp(sTag.c_str(), "Domainkey-Signature:") == 0
 		|| _stricmp(sTag.c_str(), "Received:") == 0
 		|| _stricmp(sTag.c_str(), "Return-Path:") == 0)
 	{
@@ -289,7 +295,7 @@ CDKIMSign::ProcessHeaders(void)
 				if (m_pfnHdrCallback)
 					nSignThisTag = m_pfnHdrCallback(iter->c_str());
 				else
-					nSignThisTag = SignThisTag(sTag) ? 1 : 0;
+					nSignThisTag = SignThisHeader(sTag) ? 1 : 0;
 			}
 			/* save header parameters */
 			GetHeaderParams(*iter);
@@ -966,13 +972,16 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.21 2023-01-27 19:38:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.22 2023-01-29 22:11:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.22  2023-01-29 22:11:23+05:30  Cprogrammer
+ * renamed SignThisTag to SignThisHeader
+ *
  * Revision 1.21  2023-01-27 19:38:49+05:30  Cprogrammer
  * fixed openssl version for ed25519
  *

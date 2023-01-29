@@ -85,6 +85,12 @@ Release 1.5 Start 19/03/2009 End 08/09/2022
 42. dkim.h: added definition for DKIM_HASH_ED25519
 43. dkimsign.cpp: added creation of Ed25519 DKIM signatures
 44. dkimverify.cpp: added verification of Ed25519 DKIM signatures
+- 29/02/2023
+45. dkimverify.cpp: multiple DKIM-Signature of different methods verification
+    fixed
+46. dkimverify.h: added member 'method' to store encryption method
+47. dkimsign.cpp, dkimsign.h: renamed SignThisTag() to SignThisHeader()
+48. dkim.cpp: set verbose flag for dkimvery, dkimsign methods
 
 *
 ----------------------

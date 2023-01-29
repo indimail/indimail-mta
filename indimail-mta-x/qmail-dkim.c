@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.69 2023-01-26 22:59:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.70 2023-01-29 22:37:42+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -90,13 +90,13 @@ sigbug()
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
-	if ((!strncasecmp((char *) szHeader, "X-", 2)
-			&& strncasecmp((char *) szHeader, "X-Mailer", 8))
-		|| strncasecmp((char *) szHeader, "Received:", 9) == 0
-		|| strncasecmp((char *) szHeader, "Authentication-Results:", 23) == 0
-		|| strncasecmp((char *) szHeader, "Return-Path:", 12) == 0) {
+	if ((!strncasecmp((char *) szHeader, "X-", 2) && strncasecmp((char *) szHeader, "X-Mailer:", 9))
+			|| strncasecmp((char *) szHeader, "Received:", 9) == 0
+			|| strncasecmp((char *) szHeader, "Authentication-Results:", 23) == 0
+			|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
+			|| !strncasecmp(szHeader, "DomainKey-Signature:", 20)
+			|| strncasecmp((char *) szHeader, "Return-Path:", 12) == 0)
 		return 0;
-	}
 	return 1;
 }
 
@@ -517,11 +517,19 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		code = "X.7.5";
 		break;
 	case DKIM_SIGNATURE_BAD:	/*- -3 */
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		dkimStatus = "signature error: RSA/ED25519 verify failed";
+#else
+		dkimStatus = "signature error: RSA verify failed";
+#endif
 		code = "X.7.5";
 		break;
 	case DKIM_SIGNATURE_BAD_BUT_TESTING:
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		dkimStatus = "signature error: RSA/ED25519 verify failed but testing";
+#else
+		dkimStatus = "signature error: RSA verify failed but testing";
+#endif
 		code = "X.7.5";
 		break;
 	case DKIM_SIGNATURE_EXPIRED:
@@ -795,11 +803,7 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 	if (!(argv = makeargs(dkimopts.s)))
 		die(QQ_OUT_OF_MEMORY, 0);
 	for (argc = 0;argv[argc];argc++);
-#ifdef HAVE_EVP_SHA256
 	while ((ch = sgopt(argc, argv, "b:c:li:qthx:z:")) != sgoptdone) {
-#else
-	while ((ch = sgopt(argc, argv, "b:c:li:qthx:")) != sgoptdone) {
-#endif
 		switch (ch)
 		{
 		case 'b':
@@ -848,25 +852,30 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 			else
 				opts->expireTime = starttime + atoi(optarg);
 			break;
-#ifdef HAVE_EVP_SHA256
-		case 'z': /*- sign w/ sha1, sha256 or both */
+		case 'z': /*- sign rsa-sha1, rsa-sha256, rsa-sha1+rsa-sha256 or ed25519 */
 			switch (*optarg)
 			{
 			case '1':
 				opts->nHash = DKIM_HASH_SHA1;
 				break;
+#ifdef HAVE_EVP_SHA256
 			case '2':
 				opts->nHash = DKIM_HASH_SHA256;
 				break;
 			case '3':
 				opts->nHash = DKIM_HASH_SHA1_AND_SHA256;
 				break;
+#endif
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+			case '4':
+				opts->nHash = DKIM_HASH_ED25519;
+				break;
+#endif
 			default:
 				free_makeargs(argv);
 				return (1);
 			}
 			break;
-#endif
 		default:
 			free_makeargs(argv);
 			return (1);
@@ -887,8 +896,8 @@ main(int argc, char *argv[])
 	unsigned long   pid;
 	char           *selector = NULL, *ptr;
 	stralloc        dkimfn = {0};
-	DKIMSignOptions opts = { 0 };
 	DKIMVerifyDetails *pDetails;
+	DKIMSignOptions   sopts = { 0 };
 	DKIMVerifyOptions vopts = { 0 };
 
 	starttime = now();
@@ -918,21 +927,21 @@ main(int argc, char *argv[])
 				selector = ptr + 1;
 			ptr++;
 		}
-		str_copyb(opts.szSelector, selector, sizeof(opts.szSelector) - 1);
+		str_copyb(sopts.szSelector, selector, sizeof(sopts.szSelector) - 1);
 
-		if (dkim_setoptions(&opts, env_get("DKIMSIGNOPTIONS")))
+		if (dkim_setoptions(&sopts, env_get("DKIMSIGNOPTIONS")))
 			custom_error("qmail-dkim", "Z", "Invalid DKIMSIGNOPTIONS", 0, "X.3.0");
 		ptr = env_get("DKIMIDENTITY");
 		if (ptr && *ptr)
-			str_copyb(opts.szIdentity, ptr, sizeof(opts.szIdentity) - 1);
+			str_copyb(sopts.szIdentity, ptr, sizeof(sopts.szIdentity) - 1);
 		ptr = env_get("DKIMEXPIRE");
 		if (ptr && *ptr)
-			opts.expireTime = starttime + atol(ptr);
+			sopts.expireTime = starttime + atol(ptr);
 		else
 		if (ptr)
-			opts.expireTime = 0;
-		opts.pfnHeaderCallback = SignThisHeader;
-		if (DKIMSignInit(&ctxt, &opts) != DKIM_SUCCESS) /*- failed to initialize signature */
+			sopts.expireTime = 0;
+		sopts.pfnHeaderCallback = SignThisHeader;
+		if (DKIMSignInit(&ctxt, &sopts) != DKIM_SUCCESS) /*- failed to initialize signature */
 			custom_error("qmail-dkim", "Z", "dkim initialization failed", 0, "X.3.0");
 	} else {
 		char           *x;
@@ -1022,7 +1031,7 @@ main(int argc, char *argv[])
 				DKIMSignFree(&ctxt);
 				maybe_die_dkim(DKIM_INVALID_CONTEXT);
 			}
-			write_signature(t, &opts, sizeof(opts.szSelector) - 1); /*- calls DKIMSignFree(&ctxt) */
+			write_signature(t, &sopts, sizeof(sopts.szSelector) - 1); /*- calls DKIMSignFree(&ctxt) */
 		} else
 		if (dkimverify) {
 			char            szPolicy[512];
@@ -1141,7 +1150,19 @@ main(int argc, char *argv[])
 		if (fd_move(0, pim[0]) == -1)
 			die(QQ_DUP_ERR, 0);
 		restore_gid();
-		return (qmulti("DKIMQUEUE", argc, argv));
+		if (!(ptr = env_get("DKIMSIGNEXTRA")))
+			return (qmulti("DKIMQUEUE", argc, argv));
+		else {
+			if (!env_put2("DKIMSIGN", ptr))
+				die(QQ_OUT_OF_MEMORY, 1);
+			else
+			if ((ptr = env_get("DKIMSIGNOPTIONSEXTRA")) && !env_put2("DKIMSIGNOPTIONS", ptr))
+				die(QQ_OUT_OF_MEMORY, 1);
+			if (!env_unset("DKIMSIGNEXTRA"))
+				die(QQ_OUT_OF_MEMORY, 1);
+			execv(argv[0], argv);
+			_exit(111);
+		}
 	}
 	close(pim[0]);
 	substdio_fdbuf(&ssin, read, readfd, inbuf, sizeof(inbuf));
@@ -1163,8 +1184,6 @@ main(int argc, char *argv[])
 	if (wait_crashed(wstat))
 		die(QQ_CRASHED, 0);
 	die(wait_exitcode(wstat), 0);
-	/*- Not Reached */
-	exit(0);
 }
 #else
 #warning "not compiled with -DHASDKIM"
@@ -1175,9 +1194,7 @@ static char     sserrbuf[512];
 struct substdio sserr;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
 	substdio_puts(&sserr, "not compiled with -DHASDKIM\n");
@@ -1190,7 +1207,7 @@ main(argc, argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.69 2023-01-26 22:59:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.70 2023-01-29 22:37:42+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1204,6 +1221,10 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.70  2023-01-29 22:37:42+05:30  Cprogrammer
+ * fixed ed25519 signature
+ * added DKIMSIGNEXTRA, DKIMSIGNOPTIONSEXTRA env variables to insert additional signature
+ *
  * Revision 1.69  2023-01-26 22:59:19+05:30  Cprogrammer
  * removed setting redundant -b option
  * update verification message to include ED25519 failure

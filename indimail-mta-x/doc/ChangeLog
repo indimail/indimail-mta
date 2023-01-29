@@ -252,6 +252,11 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
 137.dknewkey.sh: added option to generate ed25519 DKIM keys
 138.qmail-dkim.c, dk-filter.sh: removed setting redundant -b option
 139.qmail-dkim.c: update verification message to include ED25519 failure
+- 29/01/2023
+140.qmail-dkim.c: fixed getopt setting to set ed25519 signing
+141.qmail-dkim.c: added DKIMSIGNEXTRA, DKIMSIGNOPTIONSEXTRA env variables to
+    insert additional signature
+
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022
