@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.70 2023-01-29 22:37:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.71 2023-01-30 10:42:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -885,6 +885,18 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 	return (0);
 }
 
+static char    *callbackdata;
+
+int
+dns_bypass(const char *domain, char *buffer, int maxlen)
+{
+	if (callbackdata) {
+		str_copy(buffer, callbackdata);
+		return 0;
+	} else
+		return 1;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -972,7 +984,10 @@ main(int argc, char *argv[])
 		else
 			vopts.nCheckPractices = 0;
 		vopts.nAccept3ps = accept3ps;
-		vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
+		if (!(callbackdata = env_get("SELECTOR_DATA")))
+			vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
+		else
+			vopts.pfnSelectorCallback = dns_bypass;
 		if (env_get("UNSIGNED_FROM"))
 			vopts.nAllowUnsignedFromHeaders = 1;
 		vopts.nSubjectRequired = env_get("UNSIGNED_SUBJECT") ? 0 : 1;
@@ -1207,7 +1222,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.70 2023-01-29 22:37:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.71 2023-01-30 10:42:16+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1221,6 +1236,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.71  2023-01-30 10:42:16+05:30  Cprogrammer
+ * set pfnSelectorCallback to dns_bypass if SELECTOR_DATA is set
+ *
  * Revision 1.70  2023-01-29 22:37:42+05:30  Cprogrammer
  * fixed ed25519 signature
  * added DKIMSIGNEXTRA, DKIMSIGNOPTIONSEXTRA env variables to insert additional signature
