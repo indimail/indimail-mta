@@ -99,7 +99,7 @@ dkim-signature, it is necessary to set \fBDKIMSIGNOPTIONSEXTRA\fR="-z 4".
 To verify a message, set the \fBDKIMVERIFY\fR environment variable to a
 desired set of letters.  Precisely, if you want a libdkim return status to
 generate an error, include that letter, where A is the first return status
-(DKIM_SUCCESS), B is the second (DKIM_FINISHED_BODY), etc.  The letter
+(DKIM_SUCCESS), B is the second (DKIM_FINISHED_BODY), etc. The letter
 should be uppercase if you want a permanent error to be returned, and
 lowercase if you want a temporary error to be returned (exit code 88). If
 you omit the letter, qmail-dkim will not issue any error inspite of DKIM
@@ -243,6 +243,10 @@ result in all mails which do not have a signature to pass DKIM test (unless
 the domain is listed in the control file \fBsignaturedomains\fR). The name
 of this control file can be overriden by the environment variable
 \fBNOSIGNATUREDOMAINS\fR.
+
+\fBqmail-dkim\fR will use the environment variable \fBSELECTOR_DATA\fR
+instead of dns for the public key text record. This can be used to test
+signatures without deploying the public key in dns.
 
 Typically, you would sign messages generated on-host by setting
 \fBDKIMSIGN\fR in the environment before running an \fBqmail-smtpd\fR(8) or

@@ -1,10 +1,26 @@
-* XXX XX XXX XXXX xx:xx:xx +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
-Release @version@-@release@ Start 08/09/2022
+* Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
+Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
 ======= Release Highlights ================================================
 o SRS decoding in qmail-smtpd avoiding the need to create virtualdomain for
   srs and .qmail-srs-default in /var/indimail/alias
 o qmail-remote can use credentials stored in remote_auth.cdb using simple or
   wildcard assignments
+o qmail-smtpd: display auth method used in logs when SECURE_AUTH is set
+o sys-checkpwd.c: display auth method in logs if DEBUG is set
+o qmail-dkim: recursively replace all '%' characters with domain
+o qmail.c, qmail.h: use exit code defines from qmail.h
+o qmulti.c, qmail-spamfilter.c, qmail-queue.c, qmail-qfilter.c,
+  qmail-multi.c, qmail-dkim.c, qmail-dk.c, mailfilter.c: use exit code
+  defines from qmail.h
+o moved tls functions to libqmail. Use common tls functions in smtpd.c,
+  qmail-remote.c from libqmail
+o modified log functions to use varargs
+o use subprintf (printf like function that can print to substdio).
+o smtpd.c: added ssl cipher bits in Received header
+o conf-cc Added flags to warn issues with variadic functions
+o qmail-dkim: sign and verify ed25519 DKIM-Signature
+o qmail-dkim.c: added DKIMSIGNEXTRA, DKIMSIGNOPTIONSEXTRA env variables to
+    insert additional signature
 ===========================================================================
 - 08/09/2022
 01.  First change
@@ -163,7 +179,7 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
 89. smtpd.c: log timeouts, regex compilation error, Bare LF errors in error
     log
 - 24/12/2022
-90. smtpd.c: removed ncorrect call to constmap_free()
+90. smtpd.c: removed incorrect call to constmap_free()
 - 25/12/2022
 91. sslerator.c: refactored code
 91. sslerator.c: added options to specify cipher file, CA file and TLS method
@@ -173,7 +189,8 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
     variable
 - 03/01/2023
 94. 822date.c, 822print.c, 822received.c, maildirserial.c, new-inject.c,
-    nowutc.c, ofmipd.c, parsedate.c, set_environment.c: removed auto_sysconfdir.h dependency
+    nowutc.c, ofmipd.c, parsedate.c, set_environment.c: removed
+    auto_sysconfdir.h dependency
 95. dnstlsarr.c, qmail-daned.c: use tls.h from libqmail
 96. Makefile: removed ssl functions and auto_sysconfdir dependency for
     programs not using auto_sysconfdir
@@ -256,7 +273,8 @@ o qmail-remote can use credentials stored in remote_auth.cdb using simple or
 140.qmail-dkim.c: fixed getopt setting to set ed25519 signing
 141.qmail-dkim.c: added DKIMSIGNEXTRA, DKIMSIGNOPTIONSEXTRA env variables to
     insert additional signature
-
+- 30/01/2023
+Final Release 3.0.2
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.1-1.1%{?dist}
 Release 3.0.1 Start 21/05/2022 End 08/09/2022

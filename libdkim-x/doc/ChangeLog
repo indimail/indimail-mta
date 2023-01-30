@@ -8,6 +8,30 @@ By making, using, selling, offering for sale, importing, and/or sublicensing
 Implementations as permitted, you agree to the terms and conditions of the 
 Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 
+* Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
+Release 1.6 Start 27/11/2022 End 30/11/2023
+======= Release Highlights ================================================
+o added rfc8463 ed25519 cryptographic method for signing and verification.
+o removed allman legacy code
+===========================================================================
+- 27/11/2022
+1.  dkim.c: updated help message for -h option
+- 26/01/2023
+2.  dkim.cpp: removed -b option. Option kept for backward compatibility
+3.  dkim.cpp: added -z 4 for setting Ed25519 DKIM signature
+4.  dkim.h: added definition for DKIM_HASH_ED25519
+5.  dkimsign.cpp: added creation of Ed25519 DKIM signatures
+6.  dkimverify.cpp: added verification of Ed25519 DKIM signatures
+- 29/02/2023
+7.  dkimverify.cpp: fixed verification for mail having  multiple
+    DKIM-Signature of different methods
+8.  dkimverify.h: added member 'method' to store encryption method
+9.  dkimsign.cpp, dkimsign.h: renamed SignThisTag() to SignThisHeader()
+10. dkim.cpp: set verbose flag for dkimvery, dkimsign methods
+- 30/01/2023
+11. released libdkim-1.6
+- 30/01/2023 - indimail-mta-3.0.2
+
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.5-1.1%{?dist}
 Release 1.5 Start 19/03/2009 End 08/09/2022
 - 19/03/2009
@@ -77,20 +101,6 @@ Release 1.5 Start 19/03/2009 End 08/09/2022
 - 12/09/2021 - indimail-mta-2.14.0
 - 18/05/2022 - indimail-mta-3.0.0
 - 08/09/2022 - indimail-mta-3.0.1
-- 27/11/2022
-39. dkim.c: updated help message for -h option
-- 26/01/2023
-40. dkim.cpp: removed -b option. Option kept for backward compatibility
-41. dkim.cpp: added -z 4 for setting Ed25519 DKIM signature
-42. dkim.h: added definition for DKIM_HASH_ED25519
-43. dkimsign.cpp: added creation of Ed25519 DKIM signatures
-44. dkimverify.cpp: added verification of Ed25519 DKIM signatures
-- 29/02/2023
-45. dkimverify.cpp: multiple DKIM-Signature of different methods verification
-    fixed
-46. dkimverify.h: added member 'method' to store encryption method
-47. dkimsign.cpp, dkimsign.h: renamed SignThisTag() to SignThisHeader()
-48. dkim.cpp: set verbose flag for dkimvery, dkimsign methods
 
 *
 ----------------------

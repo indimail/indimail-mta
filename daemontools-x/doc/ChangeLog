@@ -1,7 +1,7 @@
-*
-Release 1.1.1 Start 12/09/2022
+* Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
+Release 1.1.1 Start 12/09/2022 End 30/11/2023
 ======= Release Highlights ================================================
-o added auto-start, auto-stop feature
+o added auto-start, auto-stop feature based on presence/absense of down file
 o added subreaper functionality - ability to reap grandchilds
 ===========================================================================
 - 12/09/2022
@@ -51,6 +51,7 @@ o added subreaper functionality - ability to reap grandchilds
     of info, warn messages.
 - 18/12/2022
 24. fghack.c: handle wait status with details
+- 30/01/2023 - indimail-mta-3.0.2
 
 * Thu 08 Sep 2022 12:31:45 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.0-1.1%{?dist}
 Release 1.1.0 Start 27/02/2021 End 08/09/2022
