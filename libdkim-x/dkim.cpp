@@ -19,7 +19,6 @@
 #include "config.h"
 #endif
 
-#include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
@@ -808,14 +807,14 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.31 2023-01-29 22:13:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.31 2023-01-30 10:41:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
- * Revision 1.31  2023-01-29 22:13:26+05:30  Cprogrammer
+ * Revision 1.31  2023-01-30 10:41:09+05:30  Cprogrammer
  * set verbose flag for dkimvery, dkimsign methods
  *
  * Revision 1.30  2023-01-27 19:38:28+05:30  Cprogrammer
