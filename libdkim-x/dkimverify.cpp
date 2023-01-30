@@ -41,7 +41,6 @@
  * Erwin Hoffmann's s/qmail code
  */
 string          SigHdr;
-size_t          SigHdrLen;
 #endif
 static int     verbose;
 
@@ -435,10 +434,8 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 					}
 					continue;
 				}
-			} else {
-				/* hash CRLF separating the body from the signature */
+			} else /* hash CRLF separating the body from the signature */
 				i->Hash("\r\n", 2);
-			}
 			/*- check the header hash -*/
 			string          sSignedSig = i->Header;
 			string          sSigValue = sSignedSig.substr(sSignedSig.find(':') + 1);
@@ -448,7 +445,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			char           *pSigValue = (char *) sSigValue.c_str();
 
 			if (ParseTagValueList(pSigValue, tags, values) && values[0] != NULL)
-				sSignedSig.erase(15 + values[0] - pSigValue, strlen(values[0]));
+				sSignedSig.erase(15 + values[0] - pSigValue, strlen(values[0])); /*- erase b= value */
 			if (i->HeaderCanonicalization == DKIM_CANON_RELAXED)
 				sSignedSig = RelaxHeader(sSignedSig);
 			else
@@ -474,8 +471,6 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			}
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 			else {
-				unsigned char  *SignMsg;
-
 				if (EVP_PKEY_base_id(i->m_pSelector->PublicKey) == EVP_PKEY_ED25519) {
 					res = EVP_DigestVerifyInit(i->m_Msg_ctx, NULL, NULL, NULL,
 							i->m_pSelector->PublicKey);  /* late initialization */
@@ -485,15 +480,19 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 								fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
 						}
 					} else {
-						SignMsg = (unsigned char *) SigHdr.data();
 						res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
-								(size_t) i->SignatureData.length(), SignMsg, SigHdrLen);
+								(size_t) i->SignatureData.length(), (unsigned char *) SigHdr.data(), SigHdr.length());
 						if (res != 1 && verbose == true) {
 							while ((r = ERR_get_error()))
 								fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
 						}
-						SigHdr.erase(SigHdrLen - sSignedSig.length(), SigHdrLen);
-						SigHdrLen = SigHdr.length();
+						/*-
+						 * remove current dkim-signature so that in case
+						 * mail has multiple signatures, the new signature
+						 * will always be the first signature after the mail
+						 * body
+						 */
+						SigHdr.erase(SigHdr.length() - sSignedSig.length(), SigHdr.length());
 					}
 				}
 			}
@@ -592,7 +591,6 @@ SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 		EVP_VerifyUpdate(m_Hdr_ctx, szBuffer, nBufLength);
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		SigHdr.append(szBuffer, nBufLength);
-		SigHdrLen += nBufLength;
 #endif
 #else
 		EVP_VerifyUpdate(&m_Hdr_ctx, szBuffer, nBufLength);
@@ -679,10 +677,8 @@ CDKIMVerify::ProcessHeaders(void)
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-		if (sig.m_nHash == DKIM_HASH_SHA256) {
+		if (sig.m_nHash == DKIM_HASH_SHA256)
 			SigHdr.assign("");
-			SigHdrLen = 0;
-		}
 #endif
 		/*- compute the hash of the header -*/
 		vector < list < string >::reverse_iterator > used;
@@ -781,7 +777,13 @@ ParseUnsigned(const char *s, unsigned long *result)
 }
 
 
-/*- ParseDKIMSignature - Parse a DKIM-Signature header field -*/
+/*-
+ * ParseDKIMSignature - Parse a DKIM-Signature header field 
+ * The received DKIM header includes two cryptographic relevant informations:
+ *
+ * a) The 'body hash' => bh=[sha1|sha256]                     - values[12]
+ * b) The signature   =>  b=[RSA-SHA1|RSA-SHA256|PureEd25519] - values[2]
+ */
 int
 CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 {
@@ -861,9 +863,8 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 		return DKIM_BAD_SYNTAX;
 	sig.Selector = values[5];
 	/*- canonicalization -*/
-	if (values[6] == NULL) {
+	if (values[6] == NULL)
 		sig.HeaderCanonicalization = sig.BodyCanonicalization = DKIM_CANON_SIMPLE;
-	}
 	else
 	if (sig.Version == DKIM_SIG_VERSION_PRE_02 && strcmp(values[6], "nowsp") == 0) /*- for backwards compatibility -*/
 		sig.HeaderCanonicalization = sig.BodyCanonicalization = DKIM_CANON_NOWSP;
@@ -915,12 +916,11 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 		sig.IdentityDomain = idomain;
 	}
 	/*- body count -*/
-	if (values[8] == NULL || !m_HonorBodyLengthTag) {
+	if (values[8] == NULL || !m_HonorBodyLengthTag)
 		sig.BodyLength = -1;
-	} else {
-		if (!ParseUnsigned(values[8], (unsigned long *) &sig.BodyLength))
-			return DKIM_BAD_SYNTAX;
-	}
+	else
+	if (!ParseUnsigned(values[8], (unsigned long *) &sig.BodyLength))
+		return DKIM_BAD_SYNTAX;
 	/*- query methods -*/
 	if (values[9] != NULL) {
 
@@ -948,9 +948,9 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 			return DKIM_BAD_SYNTAX;
 	}
 	/*- expiration time -*/
-	if (values[11] == NULL) {
+	if (values[11] == NULL)
 		sig.ExpireTime = -1;
-	} else {
+	else {
 		if (!ParseUnsigned(values[11], (unsigned long *) &sig.ExpireTime))
 			return DKIM_BAD_SYNTAX;
 		if (sig.ExpireTime != -1) {
@@ -1121,7 +1121,7 @@ SelectorInfo::Parse(char *Buffer)
 #endif
 			return DKIM_SELECTOR_INVALID;	/*- todo: maybe create a new error code for unsupported hash algorithm */
 	}
-	/*- key type -*/
+	/*- key type a= -*/
 	if (values[3] != NULL) {
 		/* key type MUST be "rsa" or "ed25519" */
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
@@ -1130,11 +1130,11 @@ SelectorInfo::Parse(char *Buffer)
 		if (!strcmp(values[3],"ed25519")) {
 			AllowSHA1 = false;
 			AllowSHA256 = true;
-			method = DKIM_ENCRYPTION_ED25519;
+			method = DKIM_ENCRYPTION_ED25519; /*- k=ed25519 in selector */
 		} else
-			method = DKIM_ENCRYPTION_RSA;
+			method = DKIM_ENCRYPTION_RSA; /*- k=rsa in selector */
 #else
-		method = DKIM_ENCRYPTION_RSA;
+		method = DKIM_ENCRYPTION_RSA; /*- k=rsa in selector */
 		if (strcmp(values[3], "rsa"))
 			return DKIM_SELECTOR_INVALID;
 #endif
@@ -1286,13 +1286,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.27 2023-01-29 22:05:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.28 2023-01-30 18:28:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.28  2023-01-30 18:28:59+05:30  Cprogrammer
+ * added comments for documenting code
+ *
  * Revision 1.27  2023-01-29 22:05:00+05:30  Cprogrammer
  * multiple DKIM-Signature of different methods verification fixed
  *
