@@ -140,6 +140,12 @@ CDKIMSign::ReplaceSelector(DKIMSignOptions *pOptions)
 	sSelector.assign(pOptions->szSelector);
 }
 
+void
+CDKIMSign::ReplaceHash(DKIMSignOptions *pOptions)
+{
+	m_nHash = pOptions->nHash;
+}
+
 /* Hash - update the hash */
 void
 CDKIMSign::Hash(const char *szBuffer, int nBufLength, bool bHdr)
@@ -168,10 +174,8 @@ CDKIMSign::Hash(const char *szBuffer, int nBufLength, bool bHdr)
 		EVP_SignUpdate(p2, szBuffer, nBufLength);
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-		if (m_nHash == DKIM_HASH_ED25519) {
-			SigHdrs.append(szBuffer, nBufLength);
-			m_SigHdrs += nBufLength;
-		}
+		SigHdrs.append(szBuffer, nBufLength);
+		m_SigHdrs += nBufLength;
 #endif
 	} else { /* lets go for body hash values: bh=... */
 		if (m_nHash == DKIM_HASH_SHA1 || m_nHash == DKIM_HASH_SHA1_AND_SHA256)
@@ -972,13 +976,16 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.22 2023-01-29 22:11:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.23 2023-02-01 18:04:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.23  2023-02-01 18:04:33+05:30  Cprogrammer
+ * new function DKIMSignReplaceHash to alter current Hash method
+ *
  * Revision 1.22  2023-01-29 22:11:23+05:30  Cprogrammer
  * renamed SignThisTag to SignThisHeader
  *

@@ -8,6 +8,14 @@ By making, using, selling, offering for sale, importing, and/or sublicensing
 Implementations as permitted, you agree to the terms and conditions of the 
 Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 
+* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @verison@-@release@%{?dist}
+Release @version@-@release@ Start 01/02/2023 End --/--/20--
+======= Release Highlights ================================================
+o ability to alter Hash Method after DKIMSignInit
+===========================================================================
+- 01/02/2023
+01. new function DKIMSignReplaceHash to alter current Hash method
+
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023
 ======= Release Highlights ================================================

@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.4  2023-02-01 18:14:02+05:30  Cprogrammer
+ * added feature to set environment variables in dkimkeys facilitating multi-signature generation with mixed encryption methods
+ *
  * Revision 1.3  2021-08-28 23:05:10+05:30  Cprogrammer
  * moved dtype enum delivery variable from variables.h to getDomainToken.h
  *
@@ -14,9 +17,9 @@
 #include <regex.h>
 #include <stralloc.h>
 #include <env.h>
-#include <regex.h>
 #include "wildmat.h"
 #include "getDomainToken.h"
+#include "parse_env.h"
 
 #define REGCOMP(X,Y)    regcomp(&X, Y, REG_EXTENDED|REG_ICASE)
 #define REGEXEC(X,Y)    regexec(&X, Y, (size_t) 0, (regmatch_t *) 0, (int) 0)
@@ -31,6 +34,9 @@ dtype           delivery;
  * 1. domain:local:command with args
  * 2. domain:remote:command with args
  * 3. domain:command with args
+ * 4. domain:local:command with args:env1, env2, ...
+ * 5. domain:remote:command with args:env1, env2, ...
+ * 6. domain:command with args:env1, env2, ...
  * here domain can be a wildcard or a regular expression if
  * QREGEX environment variable is defined
  */
@@ -39,13 +45,26 @@ getDomainToken(char *domain, stralloc *sa)
 {
 	regex_t         qreg;
 	int             len, n, retval;
-	char           *ptr, *p;
+	char           *ptr, *p1, *p2;
 
 	for (len = 0, ptr = sa->s;len < sa->len;) {
 		len += ((n = str_len(ptr)) + 1);
-		for (p = ptr;*p && *p != ':';p++);
-		if (*p == ':') {
-			*p = 0;
+		for (p1 = ptr;*p1 && *p1 != ':';p1++);
+		if (*p1 == ':') {
+			*p1 = 0;
+			/*- check for env strings after command */
+			if (!str_diffn(p1 + 1, "remote:", 7))
+				for (p2 = p1 + 8; *p2 && *p2 != ':'; p2++);
+			else
+			if (!str_diffn(p1 + 1, "local:", 6))
+				for (p2 = p1 + 7; *p2 && *p2 != ':'; p2++);
+			else {
+				for (p2 = p1 + 1; *p2 && *p2 != ':'; p2++);
+			}
+			if (*p2 == ':') {
+				*p2 = 0;
+				parse_env(p2 + 1);
+			}
 			/*- build the regex */
 			if ((retval = str_diff(ptr, domain))) {
 				if (env_get("QREGEX")) {
@@ -55,31 +74,31 @@ getDomainToken(char *domain, stralloc *sa)
 				} else
 					retval = !wildmat_internal(domain, ptr);
 			}
-			*p = ':';
+			*p1 = ':';
 			if (!retval) { /*- match occurred for domain or wildcard */
 				/* check for local/remote directives */
 				if (delivery == remote_delivery) { /*- domain:remote:command - remote delivery */
-					if (!str_diffn(p + 1, "remote:", 7))
-						return (p + 8);
-					if (!str_diffn(p + 1, "local:", 6)) {
+					if (!str_diffn(p1 + 1, "remote:", 7))
+						return (p1 + 8);
+					if (!str_diffn(p1 + 1, "local:", 6)) {
 						ptr = sa->s + len;
 						continue; /*- skip local directives for remote mails */
 					}
 				} else
 				if (delivery == local_delivery) { /*- domain:local:command - local delivery */
-					if (!str_diffn(p + 1, "local:", 6))
-						return (p + 7);
-					if (!str_diffn(p + 1, "remote:", 7)) {
+					if (!str_diffn(p1 + 1, "local:", 6))
+						return (p1 + 7);
+					if (!str_diffn(p1 + 1, "remote:", 7)) {
 						ptr = sa->s + len;
 						continue; /*- skip remote directives for local mails */
 					}
 				} if (delivery == local_or_remote) { /*- local/remote delivery */
-					if (!str_diffn(p + 1, "local:", 6))
-						return (p + 7);
-					if (!str_diffn(p + 1, "remote:", 7))
-						return (p + 8);
+					if (!str_diffn(p1 + 1, "local:", 6))
+						return (p1 + 7);
+					if (!str_diffn(p1 + 1, "remote:", 7))
+						return (p1 + 8);
 				}
-				return (p + 1); /*- domain:command */
+				return (p1 + 1); /*- domain:command */
 			}
 		}
 		ptr = sa->s + len;
@@ -90,7 +109,7 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.3 2021-08-28 23:05:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getDomainToken.c,v 1.4 2023-02-01 18:14:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;

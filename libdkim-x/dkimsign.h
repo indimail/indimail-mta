@@ -30,6 +30,7 @@ public:
 	~CDKIMSign();
 	int             Init(DKIMSignOptions *pOptions);
 	void            ReplaceSelector(DKIMSignOptions *pOptions);
+	void            ReplaceHash(DKIMSignOptions *pOptions);
 	int             GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength);
 	int             GetSig2(char *szPrivKey, char **pszSignature);
 	virtual int     ProcessHeaders(void);
@@ -99,6 +100,9 @@ protected:
 
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.10  2023-02-01 18:04:37+05:30  Cprogrammer
+ * new function DKIMSignReplaceHash to alter current Hash method
+ *
  * Revision 1.9  2023-01-29 22:11:35+05:30  Cprogrammer
  * renamed SignThisTag to SignThiHeader
  *

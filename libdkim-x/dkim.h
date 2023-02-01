@@ -164,6 +164,7 @@ void DKIM_CALL  DKIMVerifyFree(DKIMContext *pVerifyContext);
 char           *DKIM_CALL DKIMVersion();
 char           *DKIM_CALL DKIMGetErrorString(int ErrorCode);
 int  DKIM_CALL  DKIMSignReplaceSelector(DKIMContext *pSignContext, DKIMSignOptions *pOptions);
+int  DKIM_CALL  DKIMSignReplaceHash(DKIMContext *pSignContext, DKIMSignOptions *pOptions);
 #include "macros.h"
 #ifdef __cplusplus
 }
@@ -171,6 +172,9 @@ int  DKIM_CALL  DKIMSignReplaceSelector(DKIMContext *pSignContext, DKIMSignOptio
 
 /*
  * $Log: dkim.h,v $
+ * Revision 1.12  2023-02-01 18:02:45+05:30  Cprogrammer
+ * new function DKIMSignReplaceHash to alter current Hash method
+ *
  * Revision 1.11  2023-01-29 22:03:53+05:30  Cprogrammer
  * added defines for encryption methods
  *

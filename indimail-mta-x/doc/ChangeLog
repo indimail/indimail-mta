@@ -1,3 +1,15 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
+Release @version@-@release@ Start 01/02/2023 End --/--/20--
+======= Release Highlights ================================================
+o ability to set environment variables usig dkimkeys and facilitate
+multi-signature generation
+===========================================================================
+- 01/02/2022
+01. qmail-dkim.c, getDomainToken.c: use dkimkeys to set env variables. Can be
+    used to facilitate rsa/ed25519 multi-signature generation
+02. qmail-dkim.c: use DKIMSignReplaceHash() to change signature encryption
+    method
+
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
 ======= Release Highlights ================================================
