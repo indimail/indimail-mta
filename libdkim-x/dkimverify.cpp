@@ -607,6 +607,8 @@ int
 CDKIMVerify::ProcessHeaders(void)
 {
 	/*- look for DKIM-Signature header(s) -*/
+	int sigStatus = 0;
+
 	for (list < string >::iterator i = HeaderList.begin(); i != HeaderList.end(); ++i) {
 		if (_strnicmp(i->c_str(), "DKIM-Signature", 14) == 0) {
 			/*- skip over whitespace between the header name and : -*/
@@ -616,7 +618,7 @@ CDKIMVerify::ProcessHeaders(void)
 			if (*s == ':') {
 				/* found */
 				SignatureInfo   sig(m_SaveCanonicalizedData);
-				sig.Status = ParseDKIMSignature(*i, sig);
+				sigStatus = sig.Status = ParseDKIMSignature(*i, sig);
 				Signatures.push_back(sig);
 				if (Signatures.size() >= MAX_SIGNATURES)
 					break;
@@ -633,22 +635,22 @@ CDKIMVerify::ProcessHeaders(void)
 		SelectorInfo &sel = GetSelector(sig.Selector, sig.Domain);
 		sig.m_pSelector = &sel;
 		if (sel.Status != DKIM_SUCCESS) {
-			sig.Status = sel.Status;
+			sigStatus = sig.Status = sel.Status;
 			return (sig.Status);
 		} else {
 			/*- check the granularity -*/
 			if (!WildcardMatch(sel.Granularity.c_str(), sig.IdentityLocalPart.c_str()))
-				sig.Status = DKIM_SELECTOR_GRANULARITY_MISMATCH;	/* this error causes the signature to fail */
+				sigStatus = sig.Status = DKIM_SELECTOR_GRANULARITY_MISMATCH;	/* this error causes the signature to fail */
 			/*- check the hash algorithm -*/
 #ifdef HAVE_EVP_SHA256
 			if ((sig.m_nHash == DKIM_HASH_SHA1 && !sel.AllowSHA1) || (sig.m_nHash == DKIM_HASH_SHA256 && !sel.AllowSHA256))
 #else
 			if ((sig.m_nHash == DKIM_HASH_SHA1 && !sel.AllowSHA1))
 #endif
-				sig.Status = DKIM_SELECTOR_ALGORITHM_MISMATCH;	/* causes signature to fail */
+				sigStatus = sig.Status = DKIM_SELECTOR_ALGORITHM_MISMATCH;	/* causes signature to fail */
 			/*- check for same domain RFC5672 -*/
 			if (sel.SameDomain && _stricmp(sig.Domain.c_str(), sig.IdentityDomain.c_str()) != 0)
-				sig.Status = DKIM_BAD_SYNTAX;
+				sigStatus = sig.Status = DKIM_BAD_SYNTAX;
 		}
 		if (sig.Status != DKIM_SUCCESS)
 			continue;
@@ -738,14 +740,14 @@ CDKIMVerify::ProcessHeaders(void)
 			}
 			if (i != HeaderList.rend()) {
 				/*- treat signature as invalid -*/
-				sig.Status = DKIM_UNSIGNED_FROM;
+				sigStatus = sig.Status = DKIM_UNSIGNED_FROM;
 				continue;
 			}
 		}
 		ValidSigFound = true;
 	} /*- for (list < SignatureInfo >::iterator s = Signatures.begin(); s != Signatures.end(); ++s) { */
 	if (!ValidSigFound)
-		return DKIM_NO_VALID_SIGNATURES;
+		return sigStatus ? sigStatus: DKIM_NO_VALID_SIGNATURES;
 	return DKIM_SUCCESS;
 }
 
@@ -1079,9 +1081,8 @@ SelectorInfo::Parse(char *Buffer)
 		/*- make sure v= is the first tag in the response  */
 		/*- todo: maybe don't enforce this, it seems unnecessary */
 		for (unsigned int j = 1; j < sizeof (values) / sizeof (values[0]); j++) {
-			if (values[j] != NULL && values[j] < values[0]) {
+			if (values[j] != NULL && values[j] < values[0])
 				return DKIM_SELECTOR_INVALID;
-			}
 		}
 	}
 	/*- selector MUST have p= tag -*/
@@ -1286,13 +1287,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.28 2023-01-30 18:28:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.29 2023-02-02 17:38:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.29  2023-02-02 17:38:00+05:30  Cprogrammer
+ * return actual signature error in ProcessHeaders instead of "no valid sigs"
+ *
  * Revision 1.28  2023-01-30 18:28:59+05:30  Cprogrammer
  * added comments for documenting code
  *
