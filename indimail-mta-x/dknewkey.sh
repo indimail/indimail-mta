@@ -149,7 +149,7 @@ while :; do
 	;;
 	-t | --ktype)
 	ktype="$2"
-	if [ "$kype" != "rsa" -a "$ktype" != "ed25519" ] ; then
+	if [ "$ktype" != "rsa" -a "$ktype" != "ed25519" ] ; then
 		echo "Key type must be rsa or ed25519" 1>&2
 		exit 1
 	fi
