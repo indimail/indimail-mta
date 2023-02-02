@@ -1,9 +1,12 @@
 #
-# $Id: dk-filter.sh,v 1.32 2023-01-26 22:26:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.33 2023-02-02 17:30:12+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
 	domain=$1
+	if [ ! -f $CONTROLDIR/dkimkeys ] ; then
+		return 0
+	fi
 	(
 	awk -F: '{print $1" "$2}' $CONTROLDIR/dkimkeys | while read line
 	do
@@ -17,6 +20,10 @@ get_dkimkeys()
 	)
 }
 
+#
+# replace % with domain in private key filename
+# sets keyfn
+#
 replace_percent()
 {
 	percent_found=0
@@ -51,121 +58,51 @@ replace_percent()
 	fi
 }
 
-if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
-	echo "dk-filter should be run by spawn-filter" 1>&2
-	exit 1
-fi
-dksign=0
-dkimsign=0
-dkverify=0
-dkimverify=0
-prefix=PREFIX
-if [ " $CONTROLDIR" = " " ] ; then
-	CONTROLDIR=@controldir@
-fi
-if [ -n "$NODK" -a -n "$NODKIM" ] ; then
-	exec /bin/cat
-fi
+dk_setoptions()
+{
+	#dktest: [-f] [-b advice_length] [-c nofws|simple] [-v|-s selector] [-h] [-t#] [-r] [-T][-d dnsrecord]
+	# DKSIGNOPTIONS="-z 1 -b 2 -x - -y $dkselector -s $dkkeyfn"
+	set -- $(getopt hrb:c:s: $DKSIGNOPTIONS)
+	dkopts="$prefix/bin/dktest"
+	sopt=0
+	while [ $1 != -- ]
+	do
+		case $1 in
+		-h)
+		dkopts="$dkopts -h"
+		;;
 
-if [ -z "$NODK" -a ! -f $prefix/bin/dktest ] ; then
-	echo "$prefix/bin/dktest: No such file or directory" 1>&2
-	exit 1
-fi
-if [ -z "$NODKIM" -a ! -f $prefix/bin/dkim ] ; then
-	echo "$prefix/bin/dkim: No such file or directory" 1>&2
-	exit 1
-fi
+		-r)
+		dkopts="$dkopts -r"
+		;;
 
-if [ -z "$DEFAULT_DKIM_KEY" ] ; then
-	default_key=$CONTROLDIR/domainkeys/default
-else
-	default_key=$DEFAULT_DKIM_KEY
-fi
-slash=$(echo $CONTROLDIR | cut -c1)
-if [ " $slash" != " /" ] ; then
-	cd SYSCONFDIR
-fi
+		-b)
+		dkopts="$dkopts -b $2"
+		shift
+		;;
 
-# set private key for dk / dkim signing
-if [ \( -z "$NODK" -a -z "$DKVERIFY" \) -o \( -z "$NODKIM" -a -z "$DKIMVERIFY" \) ] ; then
-	if [ -f $CONTROLDIR/dkimkeys ] ; then
-		domain=$(echo $_SENDER | cut -d@ -f2)
-		t=$(get_dkimkeys $domain)
-		if [ -n "$t" ] ; then
-			if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
-				DKSIGN=$t
-			fi
-			if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
-				DKIMSIGN=$t
-			fi
-		fi
-	fi
-	if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
-		if [ -z "$DKSIGN" ] ; then
-			DKSIGN=$CONTROLDIR/domainkeys/%/default
-			dksign=2 # key, selector selected as control/domainkeys/defaut
-		elif [ " $DKSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-			dksign=2 # key, selector selected as control/domainkeys/defaut
-		fi
-	fi
-	if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
-		if [ -z "$DKIMSIGN" ] ; then
-			DKIMSIGN=$CONTROLDIR/domainkeys/%/default
-			dkimsign=2 # key, selector selected as control/domainkeys/defaut
-		elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-			dkimsign=2 # key, selector selected as control/domainkeys/defaut
-		fi
-	fi
-fi
+		-c)
+		dkopts="$dkopts -c $2"
+		shift
+		;;
 
-#dk signing
-if [ -z "$NODK" -a -n "$DKSIGN" ] ; then
-	replace_percent $DKSIGN
-	dkkeyfn=$keyfn
-	if [ $dksign -eq 2 -a ! -f $dkkeyfn ] ; then
-		dkkeyfn=$default_key
+		-s)
+		sopt=1
+		dkopts="$dkopts -s $2"
+		shift
+		;;
+		esac
+		shift   # next flag
+	done
+	if [ $sopt -eq 0 ] ; then
+		dkopts="$dkopts -s $dkkeyfn"
 	fi
-	if [ ! -f $dkkeyfn ] ; then
-		dksign=0
-		if [ $percent_found -eq 0 ] ; then
-			echo "private key does not exist" 1>&2
-			exit 35 # private key does not exist
-		fi
-	else
-		dksign=1
-	fi
-	dkselector=$(basename $dkkeyfn)
-fi
+}
 
-# dkim signing
-if [ -z "$NODKIM" -a -n "$DKIMSIGN" ] ; then
-	replace_percent $DKIMSIGN
-	dkimkeyfn=$keyfn
-	if [ $dkimsign -eq 2 -a ! -f $dkimkeyfn ] ; then
-		dkimkeyfn=$default_key
-	fi
-	if [ ! -f $dkimkeyfn ] ; then
-		dkimsign=0
-		if [ $percent_found -eq 0 ] ; then
-			echo "private key does not exist" 1>&2
-			exit 35 # private key does not exist
-		fi
-	else
-		dkimsign=1
-	fi
-	dkimselector=$(basename $dkimkeyfn)
-fi
-
-if [ -z "$NODK" -a -n "$DKVERIFY" ] ; then
-	dkverify=1
-fi
-if [ -z "$NODKIM" -a -n "$DKIMVERIFY" ] ; then
-	dkimverify=1
-fi
-/bin/cat > /tmp/dk.$$
-if [ $dkimsign -eq 1 ] ; then
+dkim_setoptions()
+{
 	# DKIMSIGNOPTIONS="-z 1 -x - -y $dkimselector -s $dkimkeyfn"
-	set -- $(getopt lqthb:c:d:i:x:z:y:s: $DKIMSIGNOPTIONS)
+	set -- $(getopt lqthb:c:d:i:x:z:y:s: "$1")
 	bopt=0
 	xopt=0
 	zopt=0
@@ -236,7 +173,7 @@ if [ $dkimsign -eq 1 ] ; then
 		shift   # next flag
 	done
 	if [ $zopt -eq 0 ] ; then
-		dkimopts="$dkimopts -z 1"
+		dkimopts="$dkimopts -z 2"
 	fi
 	if [ $xopt -eq 0 ] ; then
 		dkimopts="$dkimopts -x -"
@@ -247,58 +184,189 @@ if [ $dkimsign -eq 1 ] ; then
 	if [ $sopt -eq 0 ] ; then
 		dkimopts="$dkimopts -s $dkimkeyfn"
 	fi
-	exec 0</tmp/dk.$$
-	eval $dkimopts
-	if [ $? -ne 0 ] ; then
-		/bin/rm -f /tmp/dk.$$
-		echo "$prefix/bin/dkim failed" 1>&2
-		exit 1
+}
+
+#
+# sets keyfn, selector
+#
+set_selector()
+{
+	if [ -z "$1" -o -z "$2" ] ; then
+		return 1
+	fi
+	replace_percent $2
+	case $1 in
+		"dk")
+		dkkeyfn=$keyfn
+		if [ $dksign -eq 2 -a ! -f $dkkeyfn ] ; then
+			dkkeyfn=$default_key
+		fi
+		if [ ! -f $dkkeyfn ] ; then
+			dksign=0
+			if [ $percent_found -eq 0 ] ; then
+				echo "private key does not exist" 1>&2
+				exit $priv_key_err # private key does not exist
+			else
+				dksign=1
+			fi
+		else
+			dksign=1
+		fi
+		dkselector=$(basename $dkkeyfn)
+		;;
+		"dkim")
+		dkimkeyfn=$keyfn
+		# dkimsign is first set by get_dkimfn
+		if [ $dkimsign -eq 2 -a ! -f $dkimkeyfn ] ; then
+			dkimkeyfn=$default_key
+		fi
+		if [ ! -f $dkimkeyfn ] ; then
+			dkimsign=0
+			if [ $percent_found -eq 0 ] ; then
+				echo "private key does not exist" 1>&2
+				exit $priv_key_err # private key does not exist
+			else
+				dkimsign=1
+			fi
+		else
+			dkimsign=1
+		fi
+		dkimselector=$(basename $dkimkeyfn)
+		;;
+	esac
+}
+
+#
+# uses dkimkeys to set DKIMSIGN. Overrides original DKIMSIGN
+#
+get_dkimfn()
+{
+# set private key for dk / dkim signing
+if [ \( -z "$NODK" -a -z "$DKVERIFY" \) -o \( -z "$NODKIM" -a -z "$DKIMVERIFY" \) ] ; then
+	if [ -f $CONTROLDIR/dkimkeys ] ; then
+		domain=$(echo $_SENDER | cut -d@ -f2)
+		t=$(get_dkimkeys $domain)
+		if [ -n "$t" ] ; then
+			if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
+				DKSIGN=$t
+			fi
+			if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
+				DKIMSIGN=$t
+			fi
+		fi
+	fi
+	if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
+		if [ -z "$DKSIGN" ] ; then
+			DKSIGN=$CONTROLDIR/domainkeys/%/default
+			dksign=2 # key, selector selected as control/domainkeys/defaut
+		elif [ " $DKSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
+			dksign=2 # key, selector selected as control/domainkeys/defaut
+		fi
+	fi
+	if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
+		if [ -z "$DKIMSIGN" ] ; then
+			DKIMSIGN=$CONTROLDIR/domainkeys/%/default
+			dkimsign=2 # key, selector selected as control/domainkeys/defaut
+		elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
+			dkimsign=2 # key, selector selected as control/domainkeys/defaut
+		fi
 	fi
 fi
-if [ $dksign -eq 1 ] ; then
-	#dktest: [-f] [-b advice_length] [-c nofws|simple] [-v|-s selector] [-h] [-t#] [-r] [-T][-d dnsrecord]
-	# DKSIGNOPTIONS="-z 1 -b 2 -x - -y $dkimselector -s $dkimkeyfn"
-	set -- $(getopt hrb:c:s: $DKSIGNOPTIONS)
-	dkopts="$prefix/bin/dktest"
-	sopt=0
-	while [ $1 != -- ]
-	do
-		case $1 in
-		-h)
-		dkopts="$dkopts -h"
-		;;
+}
 
-		-r)
-		dkopts="$dkopts -r"
-		;;
+if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
+	echo "dk-filter should be run by spawn-filter" 1>&2
+	exit 1
+fi
+dksign=0
+dkimsign=0
+dkverify=0
+dkimverify=0
+prefix=PREFIX
 
-		-b)
-		dkopts="$dkopts -b $2"
-		shift
-		;;
+if [ "$prefix" = "/usr" ] ; then
+	priv_key_err=35 # indimail
+else
+	priv_key_err=32 # netqmail, notqmail
+	BOUNCEDOMAIN=$DKIMDOMAIN
+fi
+if [ " $CONTROLDIR" = " " ] ; then
+	CONTROLDIR=@controldir@
+fi
+if [ -n "$NODK" -a -n "$NODKIM" ] ; then
+	exec /bin/cat
+fi
 
-		-c)
-		dkopts="$dkopts -c $2"
-		shift
-		;;
+if [ -z "$NODK" -a ! -f $prefix/bin/dktest ] ; then
+	echo "$prefix/bin/dktest: No such file or directory" 1>&2
+	exit 1
+fi
+if [ -z "$NODKIM" -a ! -f $prefix/bin/dkim ] ; then
+	echo "$prefix/bin/dkim: No such file or directory" 1>&2
+	exit 1
+fi
 
-		-s)
-		sopt=1
-		dkopts="$dkopts -s $2"
-		shift
-		;;
-		esac
-		shift   # next flag
-	done
-	if [ $sopt -eq 0 ] ; then
-		dkopts="$dkopts -s $dkkeyfn"
+if [ -z "$DEFAULT_DKIM_KEY" ] ; then
+	default_key=$CONTROLDIR/domainkeys/default
+else
+	default_key=$DEFAULT_DKIM_KEY
+fi
+slash=$(echo $CONTROLDIR | cut -c1)
+if [ " $slash" != " /" ] ; then
+	cd SYSCONFDIR
+fi
+
+if [ -z "$NODK" ] ; then
+	if [ -n "$DKVERIFY" ] ; then
+		dkverify=1
+	else
+		get_dkimfn
 	fi
-	exec 0</tmp/dk.$$
+fi
+if [ -z "$NODKIM" ] ; then
+	if [ -n "$DKIMVERIFY" ] ; then
+		dkimverify=1
+	else
+		get_dkimfn
+	fi
+fi
+tmpfn=$(mktemp -t dk-filterXXXXXX)
+/bin/cat > $tmpfn
+if [ -n "$DKIMSIGN" ] ; then
+	set_selector "dkim" "$DKIMSIGN"
+	if [ -n "$dkimkeyfn" -a -f "$dkimkeyfn" ] ; then
+		dkim_setoptions "$DKIMSIGNOPTIONS"
+		exec 0<$tmpfn
+		eval $dkimopts
+		if [ $? -ne 0 ] ; then
+			/bin/rm -f $tmpfn
+			echo "$prefix/bin/dkim failed" 1>&2
+			exit 1
+		fi
+	fi
+	if [ -n "$DKIMSIGNEXTRA" ] ; then
+		set_selector "dkim" "$DKIMSIGNEXTRA"
+		dkim_setoptions "$DKIMSIGNOPTIONSEXTRA"
+		if [ -n "$dkimkeyfn" -a -f "$dkimkeyfn" ] ; then
+			exec 0$tmpfn
+			eval $dkimopts
+			if [ $? -ne 0 ] ; then
+				/bin/rm -f $tmpfn
+				echo "$prefix/bin/dkim failed" 1>&2
+				exit 1
+			fi
+		fi
+	fi
+fi
+if [ -n "$DKSIGN" ] ; then
+	set_selector "dk" "$DKSIGN"
+	dk_setoptions "$DKSIGNOPTIONS"
+	exec 0<$tmpfn
 	eval $dkopts
 	exit_val=$?
 	# allow error due to duplicate DomainKey-Header
 	if [ $exit_val -ne 0 -a $exit_val -ne 12 ] ; then
-		/bin/rm -f /tmp/dk.$$
+		/bin/rm -f $tmpfn
 		echo "$prefix/bin/dktest failed" 1>&2
 		exit $exit_val
 	fi
@@ -312,7 +380,7 @@ if [ $dkimverify -eq 1 ] ; then
 	elif [ " $practice" = " adsp" ] ; then
 		practice=2
 	fi
-	exec 0</tmp/dk.$$
+	exec 0<$tmpfn
 	dkimvargs="-p $practice"
 	if [ -n "$UNSIGNED_SUBJECT" ] ; then
 		dkimvargs="$dkimvargs -S"
@@ -320,39 +388,46 @@ if [ $dkimverify -eq 1 ] ; then
 	if [ -n "$UNSIGNED_FROM" ] ; then
 		dkimvargs="$dkimvargs -f"
 	fi
-	$prefix/bin/dkim $dkimvargs -v
+	if [ -n "$SELECTOR_DATA" ] ; then
+		$prefix/bin/dkim $dkimvargs -v -T "$SELECTOR_DATA"
+	else
+		$prefix/bin/dkim $dkimvargs -v
+	fi
 	ret=$?
 	case $ret in
 		14) # permanent error
-		/bin/rm -f /tmp/dk.$$
+		/bin/rm -f $tmpfn
 		exit 100
 		;;
 		88) # temporary error
-		/bin/rm -f /tmp/dk.$$
+		/bin/rm -f $tmpfn
 		exit 111
 		;;
 	esac
 	if [ $ret -lt 0 ] ; then
 		echo "$prefix/bin/dkim failed" 1>&2
-		/bin/rm -f /tmp/dk.$$
+		/bin/rm -f $tmpfn
 		exit 1
 	fi
 fi
 if [ $dkverify -eq 1 ] ; then
-	exec 0</tmp/dk.$$
+	exec 0<$tmpfn
 	$prefix/bin/dktest -v
 	if [ $? -ne 0 ] ; then
 		echo "$prefix/bin/dktest failed" 1>&2
-		/bin/rm -f /tmp/dk.$$
+		/bin/rm -f $tmpfn
 		exit 1
 	fi
 fi
-exec 0</tmp/dk.$$
-/bin/rm -f /tmp/dk.$$
+exec 0<$tmpfn
+/bin/rm -f $tmpfn
 /bin/cat
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.33  2023-02-02 17:30:12+05:30  Cprogrammer
+# refactored for multi-signature generation
+#
 # Revision 1.32  2023-01-26 22:26:01+05:30  Cprogrammer
 # removed setting redundant -b option
 #
