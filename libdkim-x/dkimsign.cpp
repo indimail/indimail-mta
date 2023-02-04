@@ -101,9 +101,8 @@ CDKIMSign::Init(DKIMSignOptions *pOptions)
 	m_Canon = pOptions->nCanon;
 
 	/*- as of draft 01, these are the only allowed signing types: */
-	if ((m_Canon != DKIM_SIGN_SIMPLE_RELAXED) && (m_Canon != DKIM_SIGN_RELAXED) && (m_Canon != DKIM_SIGN_RELAXED_SIMPLE)) {
+	if (m_Canon != DKIM_SIGN_SIMPLE_RELAXED && m_Canon != DKIM_SIGN_RELAXED && m_Canon != DKIM_SIGN_RELAXED_SIMPLE)
 		m_Canon = DKIM_SIGN_SIMPLE;
-	}
 	sSelector.assign(pOptions->szSelector);
 	m_pfnHdrCallback = pOptions->pfnHeaderCallback;
 	sDomain.assign(pOptions->szDomain);
@@ -122,14 +121,13 @@ CDKIMSign::Init(DKIMSignOptions *pOptions)
 	 */
 
 	/*- make sure there is a colon after the last header in the list */
-	if ((sRequiredHeaders.size() > 0) && sRequiredHeaders.at(sRequiredHeaders.size() - 1) != ':')
+	if (sRequiredHeaders.size() > 0 && sRequiredHeaders.at(sRequiredHeaders.size() - 1) != ':')
 		sRequiredHeaders.append(":");
 	m_nHash = pOptions->nHash;
 	m_bReturnedSigAssembled = false;
 	m_sCopiedHeaders.erase();
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-	SigHdrs.assign("");
-	m_SigHdrs = 0;
+	SigHdrs.erase();
 #endif
 	return nRet;
 }
@@ -175,7 +173,6 @@ CDKIMSign::Hash(const char *szBuffer, int nBufLength, bool bHdr)
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		SigHdrs.append(szBuffer, nBufLength);
-		m_SigHdrs += nBufLength;
 #endif
 	} else { /* lets go for body hash values: bh=... */
 		if (m_nHash == DKIM_HASH_SHA1 || m_nHash == DKIM_HASH_SHA1_AND_SHA256)
@@ -233,7 +230,7 @@ ConvertHeaderToQuotedPrintable(const char *source, char *dest)
  * GetHeaderParams - Extract any needed header parameters
  */
 void
-CDKIMSign::GetHeaderParams(const string & sHdr)
+CDKIMSign::GetHeaderParams(const string &sHdr)
 {
 	if (_strnicmp(sHdr.c_str(), "X-Bounced-Address:", 18) == 0)
 		sBouncedAddr.assign(sHdr.c_str() + 21);
@@ -251,6 +248,7 @@ CDKIMSign::GetHeaderParams(const string & sHdr)
 		if (pos != string::npos) {
 			string          sTag, sValue;
 			char           *workBuffer = new char[sHdr.size() * 3 + 1];
+
 			sTag.assign(sHdr.substr(0, pos));
 			sValue.assign(sHdr.substr(pos + 1, string::npos));
 			ConvertHeaderToQuotedPrintable(sTag.c_str(), workBuffer);
@@ -344,6 +342,8 @@ CDKIMSign::GetDomain(void)
 void
 CDKIMSign::ProcessHeader(const string &sHdr)
 {
+	string          sTemp;
+
 	switch (HIWORD(m_Canon))
 	{
 	case DKIM_CANON_SIMPLE:
@@ -351,8 +351,7 @@ CDKIMSign::ProcessHeader(const string &sHdr)
 		Hash("\r\n", 2, true);
 		break;
 	case DKIM_CANON_NOWSP:
-		{
-		string sTemp = sHdr;
+		sTemp = sHdr;
 		RemoveSWSP(sTemp);
 		/* convert characters before ':' to lower case */
 		for (char *s = (char *)sTemp.c_str(); *s != '\0' && *s != ':'; s++) {
@@ -361,14 +360,11 @@ CDKIMSign::ProcessHeader(const string &sHdr)
 		}
 		Hash(sTemp.c_str(), sTemp.size(), true);
 		Hash("\r\n", 2, true);
-		}
 		break;
 	case DKIM_CANON_RELAXED:
-		{
-		string sTemp = RelaxHeader(sHdr);
+		sTemp = RelaxHeader(sHdr);
 		Hash(sTemp.c_str(), sTemp.length(), true);
 		Hash("\r\n", 2, true);
-		}
 		break;
 	}
 }
@@ -492,7 +488,7 @@ CDKIMSign::InitSig(void)
  * AddTagToSig - add tag and value to signature folding if necessary
  *               if bFold, fold at cbrk char
  */
-void CDKIMSign::AddTagToSig(char *Tag, const string & sValue, char cbrk, bool bFold)
+void CDKIMSign::AddTagToSig(char *Tag, const string &sValue, char cbrk, bool bFold)
 {
 	int             nTagLen = strlen(Tag);
 
@@ -516,6 +512,7 @@ void CDKIMSign::AddTagToSig(char *Tag, const string & sValue, char cbrk, bool bF
 void CDKIMSign::AddTagToSig(char *Tag, unsigned long nValue)
 {
 	char            szValue[64];
+
 	sprintf(szValue, "%lu", nValue);
 	AddTagToSig(Tag, szValue, 0, false);
 }
@@ -539,9 +536,10 @@ void CDKIMSign::AddInterTagSpace(int nSizeOfNextTag)
  * AddTagToSig - add value to signature folding if necessary
  *               if cbrk == 0 fold anywhere, otherwise fold only at cbrk
  */
-void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
+void CDKIMSign::AddFoldedValueToSig(const string &sValue, char cbrk)
 {
 	string::size_type pos = 0;
+
 	if (cbrk == 0) {
 		/* fold anywhere */
 		while (pos < sValue.size()) {
@@ -567,9 +565,8 @@ void CDKIMSign::AddFoldedValueToSig(const string & sValue, char cbrk)
 				brkpos = sValue.rfind(cbrk, pos + len);
 			if (brkpos == string::npos || brkpos < pos) {
 				brkpos = sValue.find(cbrk, pos);
-				if (brkpos == string::npos) {
+				if (brkpos == string::npos)
 					brkpos = sValue.size();
-				}
 			}
 			len = brkpos - pos + 1;
 			m_sSig.append(sValue.substr(pos, len));
@@ -625,7 +622,7 @@ int CDKIMSign::GetSig2(char *szPrivKey, char **pszSignature)
  * IsRequiredHeader - Check if header in required list. If so, delete
  *                    header from list.
  */
-bool CDKIMSign::IsRequiredHeader(const string & sTag)
+bool CDKIMSign::IsRequiredHeader(const string &sTag)
 {
 	string::size_type start = 0;
 	string::size_type end = sRequiredHeaders.find(':');
@@ -648,12 +645,13 @@ bool CDKIMSign::IsRequiredHeader(const string & sTag)
 int
 CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 {
-	string          sSignedSig;
+	string          sSignedSig, sTemp;
 	unsigned char  *sig;
 	EVP_PKEY       *pkey;
 	BIO            *bio, *b64;
 	unsigned int    siglen;
 	int             size, len;
+	int             nSignRet = 0;
 	char           *buf, *cptr;
 	const char     *ptr, *dptr, *sptr;
 	unsigned char   Hash[EVP_MAX_MD_SIZE];
@@ -681,7 +679,6 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	p4 = &m_Bdy_ietf_sha256ctx;
 #endif
 #endif
-	int             nSignRet = 0;
 
 	/*- construct the DKIM-Signature: header and add to hash */
 	InitSig();
@@ -756,24 +753,23 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	AddTagToSig((char *) "h", hParam, ':', true);
 	if (m_nIncludeCopiedHeaders)
 		AddTagToSig((char *) "z", m_sCopiedHeaders, 0, true);
+	switch (nSigAlg)
 	{
-		switch (nSigAlg)
-		{
-		case DKIM_HASH_SHA1:
-			EVP_DigestFinal(p3, Hash, &nHashLen);
-			break;
+	case DKIM_HASH_SHA1:
+		EVP_DigestFinal(p3, Hash, &nHashLen);
+		break;
 #ifdef HAVE_EVP_SHA256
-		case DKIM_HASH_SHA256:
-			EVP_DigestFinal(p4, Hash, &nHashLen);
-			break;
+	case DKIM_HASH_SHA256:
+		EVP_DigestFinal(p4, Hash, &nHashLen);
+		break;
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-		case DKIM_HASH_ED25519:
-			EVP_DigestFinal(p4, Hash, &nHashLen);
-			break;
+	case DKIM_HASH_ED25519:
+		EVP_DigestFinal(p4, Hash, &nHashLen);
+		break;
 #endif
-		}
-		if (nHashLen) {
+	}
+	if (nHashLen) {
 		if (!(bio = BIO_new(BIO_s_mem())))
 			return DKIM_OUT_OF_MEMORY;
 		if (!(b64 = BIO_new(BIO_f_base64()))) {
@@ -802,7 +798,6 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 		buf[size] = 0;
 		AddTagToSig((char *) "bh", buf, 0, true);
 		delete[]buf;
-		}
 	}
 	AddInterTagSpace(3);
 	m_sSig.append("b=");
@@ -813,7 +808,6 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	 * note that since we're not calling hash here, need to dump this
 	 * to the debug file if you want the full canonical form
 	 */
-	string          sTemp;
 	if (HIWORD(m_Canon) == DKIM_CANON_RELAXED)
 		sTemp = RelaxHeader(sSignedSig);
 	else
@@ -831,32 +825,35 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	case DKIM_HASH_ED25519:
 		SigHdrs.append(sTemp.c_str(), sTemp.size());
-		m_SigHdrs += sTemp.size();
 		break;
 #endif
 	}
 
 	if (!(bio = BIO_new_mem_buf(szPrivKey, -1)))
 		return DKIM_OUT_OF_MEMORY;
-	pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
-	BIO_free(bio);
-	if (!pkey)
+	if (!(pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL))) {
+		BIO_free(bio);
 		return DKIM_BAD_PRIVATE_KEY;
-	siglen = EVP_PKEY_size(pkey);
-	sig = (unsigned char *) OPENSSL_malloc(siglen);
-	if (sig == NULL) {
-		EVP_PKEY_free(pkey);
-		return DKIM_OUT_OF_MEMORY;
 	}
-
+	BIO_free(bio);
 	/*- Finish streaming signature and potentially go for Ed25519 signatures */
 	switch (nSigAlg)
 	{
 	case DKIM_HASH_SHA1:
+		siglen = EVP_PKEY_size(pkey);
+		if (!(sig = (unsigned char *) OPENSSL_malloc(siglen))) {
+			EVP_PKEY_free(pkey);
+			return DKIM_OUT_OF_MEMORY;
+		}
 		nSignRet = EVP_SignFinal(p1, sig, &siglen, pkey);
 		break;
 #ifdef HAVE_EVP_SHA256
 	case DKIM_HASH_SHA256:
+		siglen = EVP_PKEY_size(pkey);
+		if (!(sig = (unsigned char *) OPENSSL_malloc(siglen))) {
+			EVP_PKEY_free(pkey);
+			return DKIM_OUT_OF_MEMORY;
+		}
 		nSignRet = EVP_SignFinal(p2, sig, &siglen, pkey);
 		break;
 #endif
@@ -864,11 +861,18 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	case DKIM_HASH_ED25519:
 		size_t          sig_len;
 		unsigned char  *SignMsg;
-		EVP_DigestSignInit(p5, NULL, NULL, NULL, pkey);
+
+		if (!EVP_DigestSignInit(p5, NULL, NULL, NULL, pkey)) {
+			EVP_PKEY_free(pkey);
+			return DKIM_BAD_PRIVATE_KEY;
+		}
 		SignMsg = (unsigned char *) SigHdrs.c_str();
-		EVP_DigestSign(p5, NULL, &sig_len, SignMsg, m_SigHdrs);
+		if (!EVP_DigestSign(p5, NULL, &sig_len, SignMsg, SigHdrs.length())) {
+			EVP_PKEY_free(pkey);
+			return DKIM_BAD_PRIVATE_KEY;
+		}
 		sig = (unsigned char *) OPENSSL_malloc(sig_len);
-		nSignRet = EVP_DigestSign(p5, sig, &sig_len, SignMsg, m_SigHdrs);
+		nSignRet = EVP_DigestSign(p5, sig, &sig_len, SignMsg, SigHdrs.length());
 		siglen = (unsigned int) sig_len;
 		break;
 #endif
@@ -976,13 +980,16 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.23 2023-02-01 18:04:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.24 2023-02-04 18:06:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.24  2023-02-04 18:06:01+05:30  Cprogrammer
+ * fixed memory leak
+ *
  * Revision 1.23  2023-02-01 18:04:33+05:30  Cprogrammer
  * new function DKIMSignReplaceHash to alter current Hash method
  *
