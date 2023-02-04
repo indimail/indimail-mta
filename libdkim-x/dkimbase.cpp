@@ -1,36 +1,19 @@
 /*
- * $Log: dkimbase.cpp,v $
- * Revision 1.5  2019-06-14 21:24:03+05:30  Cprogrammer
- * BUG - honor body length tag in verification
+ *  Copyright 2005 Alt-N Technologies, Ltd.
  *
- * Revision 1.4  2017-09-05 10:58:26+05:30  Cprogrammer
- * removed compiler warnings
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Revision 1.3  2009-03-26 15:10:32+05:30  Cprogrammer
- * fixed indentation
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- * Revision 1.2  2009-03-25 08:37:27+05:30  Cprogrammer
- * fixed indentation
- *
- * Revision 1.1  2009-03-21 08:43:08+05:30  Cprogrammer
- * Initial revision
- *
- *
- *  Copyright 2005 Alt-N Technologies, Ltd. 
- *
- *  Licensed under the Apache License, Version 2.0 (the "License"); 
- *  you may not use this file except in compliance with the License. 
- *  You may obtain a copy of the License at 
- *
- *      http://www.apache.org/licenses/LICENSE-2.0 
- *
- *  This code incorporates intellectual property owned by Yahoo! and licensed 
+ *  This code incorporates intellectual property owned by Yahoo! and licensed
  *  pursuant to the Yahoo! DomainKeys Patent License Agreement.
  *
- *  Unless required by applicable law or agreed to in writing, software 
- *  distributed under the License is distributed on an "AS IS" BASIS, 
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *  See the License for the specific language governing permissions and 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
  */
@@ -67,11 +50,9 @@ CDKIMBase::Init(void)
 	return DKIM_SUCCESS;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Alloc - allocate buffer
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Alloc - allocate buffer
+ */
 int CDKIMBase::Alloc(char *&szBuffer, int nRequiredSize)
 {
 	szBuffer = new char[nRequiredSize];
@@ -80,11 +61,9 @@ int CDKIMBase::Alloc(char *&szBuffer, int nRequiredSize)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// ReAlloc - extend buffer if necessary, leaving room for future expansion
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * ReAlloc - extend buffer if necessary, leaving room for future expansion
+ */
 int CDKIMBase::ReAlloc(char *&szBuffer, int &nBufferSize, int nRequiredSize)
 {
 	if (nRequiredSize > nBufferSize) {
@@ -101,28 +80,24 @@ int CDKIMBase::ReAlloc(char *&szBuffer, int &nBufferSize, int nRequiredSize)
 			szBuffer = newp;
 			nBufferSize = nNewSize;
 		} else {
-			return DKIM_OUT_OF_MEMORY;	// memory alloc error!
+			return DKIM_OUT_OF_MEMORY;	/* memory alloc error! */
 		}
 	}
 	return DKIM_SUCCESS;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Process - split buffers into lines without any CRs or LFs at the end.
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Process - split buffers into lines without any CRs or LFs at the end.
+ */
 void CDKIMBase::Free(char *szBuffer)
 {
 	if (szBuffer)
 		delete[]szBuffer;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// Process - split buffers into lines without any CRs or LFs at the end.
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * Process - split buffers into lines without any CRs or LFs at the end.
+ */
 int CDKIMBase::Process(char *szBuffer, int nBufLength, bool bEOF)
 {
 	char           *p = szBuffer;
@@ -144,26 +119,26 @@ int CDKIMBase::Process(char *szBuffer, int nBufLength, bool bEOF)
 			if (*p == '\r' && p + 1 < e && *(p + 1) == '\n')
 				p++;
 			if (m_InHeaders) {
-			// process header line
+				/* process header line */
 				if (m_LinePos == 0) {
 					m_InHeaders = false;
 					int Result = ProcessHeaders();
 					if (Result != DKIM_SUCCESS)
 						return Result;
 				} else {
-				// append the header to the headers list
-					if (m_Line[0] != ' ' && m_Line[0] != '\t') {
+					/* append the header to the headers list */
+					if (m_Line[0] != ' ' && m_Line[0] != '\t')
 						HeaderList.push_back(string(m_Line, m_LinePos));
-					} else {
-						if (!HeaderList.empty()) {
+					else {
+						if (!HeaderList.empty())
 							HeaderList.back().append("\r\n", 2).append(m_Line, m_LinePos);
-						} else {
-						// no header to append to...
+						else {
+							/* no header to append to... */
 						}
 					}
 				}
 			} else {
-				// process body line
+				/* process body line */
 				int Result = ProcessBody(m_Line, m_LinePos, bEOF);
 				if (Result != DKIM_SUCCESS && Result != DKIM_FINISHED_BODY) {
 					m_LinePos = 0;
@@ -178,55 +153,43 @@ int CDKIMBase::Process(char *szBuffer, int nBufLength, bool bEOF)
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// ProcessFinal - process leftovers if stopping before the body or mid-line
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * ProcessFinal - process leftovers if stopping before the body or mid-line
+ */
 int CDKIMBase::ProcessFinal(void)
 {
-	if (m_LinePos > 0) {
+	if (m_LinePos > 0)
 		Process((char *) "\r\n", 2, true);
-	}
-
 	if (m_InHeaders) {
 		m_InHeaders = false;
 		ProcessHeaders();
 		ProcessBody((char *) "", 0, true);
 	}
-
 	return DKIM_SUCCESS;
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// ProcessHeaders - process the headers (to be implemented by derived class)
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * ProcessHeaders - process the headers (to be implemented by derived class)
+ */
 int CDKIMBase::ProcessHeaders()
 {
 	return DKIM_SUCCESS;
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// ProcessBody - process body line (to be implemented by derived class)
-//
-////////////////////////////////////////////////////////////////////////////////
+/*
+ * ProcessBody - process body line (to be implemented by derived class)
+ */
 int CDKIMBase::ProcessBody(char *szBuffer, int nBufLength, bool bEOF)
 {
 	return DKIM_SUCCESS;
 }
 
 
-////////////////////////////////////////////////////////////////////////////////
-// 
-// RemoveSWSP - remove streaming white space from buffer/string inline
-//
-////////////////////////////////////////////////////////////////////////////////
-
+/*
+ * RemoveSWSP - remove streaming white space from buffer/string inline
+ */
 struct isswsp {
 	bool
 	operator() (char ch) {
@@ -250,12 +213,9 @@ void CDKIMBase::RemoveSWSP(string &sBuffer)
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// 
-// CompressSWSP - compress streaming white space into single spaces from buffer/string inline
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-
+/*
+ * CompressSWSP - compress streaming white space into single spaces from buffer/string inline
+ */
 void CDKIMBase::CompressSWSP(char *pBuffer, int &nBufLength)
 {
 	char           *pSrc = pBuffer;
@@ -297,14 +257,11 @@ void CDKIMBase::CompressSWSP(string &sBuffer)
 	sBuffer.erase(iDst, iEnd);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// 
-// RelaxHeader - relax a header field (lower case the name, remove swsp before and after :)
-//
-// modified 4/21/06 STB to remove white space before colon
-//
-//////////////////////////////////////////////////////////////////////////////////////////
-
+/*
+ * RelaxHeader - relax a header field (lower case the name, remove swsp before and after :)
+ *
+ * modified 4/21/06 STB to remove white space before colon
+ */
 string CDKIMBase::RelaxHeader(const string &sHeader)
 {
 	string sTemp = sHeader;
@@ -313,17 +270,17 @@ string CDKIMBase::RelaxHeader(const string &sHeader)
 
 	int cpos = sTemp.find(':');
 	if (cpos == -1) {
-	// no colon?!
+		/* no colon?! */
 	} else {
-	// lower case the header field name
+		/* lower case the header field name */
 		for (int i = 0; i < cpos; i++) {
 			if (sTemp[i] >= 'A' && sTemp[i] <= 'Z')
 				sTemp[i] += 'a' - 'A';
 		}
-	// remove the space after the :
+		/* remove the space after the : */
 		if ((unsigned int) (cpos + 1) < sTemp.length() && sTemp[cpos + 1] == ' ')
 			sTemp.erase(cpos + 1, 1);
-	// remove the space before the :
+		/* remove the space before the : */
 		if (cpos > 0 && sTemp[cpos - 1] == ' ')
 			sTemp.erase(cpos - 1, 1);
 	}
@@ -333,7 +290,28 @@ string CDKIMBase::RelaxHeader(const string &sHeader)
 void
 getversion_dkimbase_cpp()
 {
-	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.5 2019-06-14 21:24:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.6 2023-02-04 07:55:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: dkimbase.cpp,v $
+ * Revision 1.6  2023-02-04 07:55:12+05:30  Cprogrammer
+ * converted comments to traditional C style comments
+ *
+ * Revision 1.5  2019-06-14 21:24:03+05:30  Cprogrammer
+ * BUG - honor body length tag in verification
+ *
+ * Revision 1.4  2017-09-05 10:58:26+05:30  Cprogrammer
+ * removed compiler warnings
+ *
+ * Revision 1.3  2009-03-26 15:10:32+05:30  Cprogrammer
+ * fixed indentation
+ *
+ * Revision 1.2  2009-03-25 08:37:27+05:30  Cprogrammer
+ * fixed indentation
+ *
+ * Revision 1.1  2009-03-21 08:43:08+05:30  Cprogrammer
+ * Initial revision
+ */
