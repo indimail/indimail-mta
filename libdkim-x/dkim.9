@@ -30,10 +30,11 @@ This example does not use DNS. Useful for testing
 .TP
 -s \fIkey\fR
 .I key
-is a path to a file containing a PEM-format private key. The base name of
-the file is  used  as  the  selector. Reads the email message on stdin. Prints the
-.B DKIM-Signature
-header.
+is a path to a file containing a PEM-format private key. Without the 'y'
+option, the base name of the file is used as the selector. Reads the email
+message on stdin. Prints the \fBDKIM-Signature\fR header. You can pass
+multiple \fIkey\fR to generate multiple signatures. For each \fB-s\fR
+option, you can pass \fB-y\fR, \fB-z\fR option before the \fB-s\fR option.
 
 .TP
 -v

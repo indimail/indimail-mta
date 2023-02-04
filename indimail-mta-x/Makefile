@@ -1395,7 +1395,8 @@ compile report.c report.h
 	./compile report.c
 
 getDomainToken.o: \
-compile getDomainToken.c getDomainToken.h wildmat.h
+compile getDomainToken.c getDomainToken.h wildmat.h \
+parse_env.h
 	./compile getDomainToken.c
 
 drate.1: \
@@ -1486,7 +1487,7 @@ dknewkey.8: dknewkey.9
 	$(edit) dknewkey.9 > $@
 
 qmail-dk: \
-load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o \
+load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o parse_env.o \
 variables.o dns.o strsalloc.o ip.o pidopen.o ipalloc.o \
 socket_v4mappedprefix.o socket_v6any.o wildmat.o custom_error.o \
 domainkeys.o dktrace.o control.o dns_text.o getDomainToken.o \
@@ -1495,7 +1496,7 @@ auto_prefix.o auto_qmail.o getqueue.o dns.lib rt.lib
 	socket_v4mappedprefix.o tlsarralloc.o socket_v6any.o dns.o \
 	strsalloc.o ip.o ipalloc.o wildmat.o domainkeys.o dktrace.o \
 	control.o dns_text.o getDomainToken.o pidopen.o auto_qmail.o \
-	auto_prefix.o getqueue.o $(static_option) $(QMAILLIB) \
+	auto_prefix.o getqueue.o parse_env.o $(static_option) $(QMAILLIB) \
 	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
 
 qmail-dk.o: \
@@ -1538,11 +1539,11 @@ trydkim.c compile dns.lib dkim.lib conf-indi
 
 qmail-dkim: qmail-dkim.o auto_control.o pidopen.o auto_prefix.o \
 variables.o control.o dns_text.o wildmat.o getDomainToken.o \
-qmulti.o auto_qmail.o custom_error.o getqueue.o \
+qmulti.o auto_qmail.o custom_error.o getqueue.o parse_env.o \
 dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o auto_prefix.o \
 	variables.o control.o pidopen.o dns_text.o custom_error.o \
-	-L../libdkim-x/.libs `cat dkim.lib` wildmat.o \
+	-L../libdkim-x/.libs `cat dkim.lib` wildmat.o parse_env.o \
 	getDomainToken.o getqueue.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	auto_qmail.o $(static_option) $(QMAILLIB) \
 	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
@@ -1648,7 +1649,7 @@ varargs.h dossl.h hastlsa.h auto_control.h conf-tls
 
 qmail-send: \
 load qmail-send.o qsutil.o control.o newfield.o prioq.o parse_env.o \
-trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o\
+trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
 variables.o getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
 auto_prefix.o delivery_rate.o syncdir.o srs.lib rt.lib
@@ -3671,8 +3672,9 @@ warn-auto.sh surblqueue.sh conf-prefix
 
 drate: \
 load drate.o variables.o auto_uids.o auto_qmail.o \
-auto_control.o control.o do_rate.o getDomainToken.o
-	./load drate variables.o auto_uids.o \
+auto_control.o control.o do_rate.o getDomainToken.o \
+parse_env.o
+	./load drate variables.o auto_uids.o parse_env.o \
 	auto_qmail.o do_rate.o getDomainToken.o wildmat.o \
 	auto_control.o control.o -lm $(QMAILLIB)
 

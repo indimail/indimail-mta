@@ -1,4 +1,5 @@
 .TH dk-filter 8
+
 .SH NAME
 dk-filter \- sign/verify using DK/DKIM (SSP/ADSP optionally) and deliver a
 mail message for delivery
@@ -8,8 +9,8 @@ mail message for delivery
 
 .SH DESCRIPTION
 \fBdk-filter\fR is a qfilter which can be set as a filter for
-\fBspawn-filter\fR(8). The filter can be set either as \fBFILTERARGS\fR or
-in the control file \fBfilterargs\fR.
+\fBspawn-filter\fR(8) or \fBqmail-qfilter\fR(1). The filter can be set
+either as \fBFILTERARGS\fR or in the control file \fBfilterargs\fR.
 
 \fBdk-filter\fR supports DK/DKIM signing and verification and can
 optionally use \fBSender Signing Practice (SSP)\fR or \fBAuthor Domain
@@ -29,7 +30,8 @@ rejected with error 35. The default private key
 \fBDKIM_DEFAULT_KEY\fR environment variable.
 
 The selector (s=) will be taken from the basename of the file. The private
-key should be created by \fBdknewkey(8)\fR.
+key should be created by \fBdknewkey(8)\fR with RSA or ED25519 encryption
+method.
 
 You can set various DK options in getopt style, by setting the environment
 variable DKSIGNOPTIONS
@@ -74,7 +76,7 @@ DKIMSIGNOPTIONS="-b 1 -c r -q"
 sets allman standard, with relaxed canonicalization and include query method tag
 .EE
 
-when signing \fBdk-filter\fR uses the domain found in the Return-Path,
+When signing \fBdk-filter\fR uses the domain found in the Return-Path,
 Sender, From headers to set the domain tag. If not it uses the value
 of \fBBOUNCEDOMAIN\fR environment variable. \fBBOUNCEDOMAIN\fR can be set
 to an email address or a domain (without the at sign).
@@ -97,10 +99,19 @@ DKVERIFY) are defined, dk-filter will do signing by default.
 You can set environment variable NODK to disable domainkeys and set NODKIM
 environment variable to disable DKIM.
 
+\fBdk-filter\fR can insert an additional DKIM-signature if
+\fBDKIMSIGNEXTRA\fR is set. This is useful for inserting both RSA and
+ED25519 signature when signing. As an example you can have \fBDKIMSIGN\fR
+pointing to a RSA private key, \fBDKIMSIGNOPTIONS\fR having "-z 2" along
+with other options if any. Additionally set \fBDKIMSIGNEXTRA\fR pointing to
+an ed25519 private key and set \fBDKIMSIGNOPTIONSEXTRA\fR to have "-z 4"
+along with other options if any.
+
 .SH "EXIT CODES"
 0 for success, non-zero failure
 
 .SH "SEE ALSO"
+qmail-qfilter(1),
 dknewkey(8),
 dktest(8),
 dkim(8),

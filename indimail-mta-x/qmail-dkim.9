@@ -15,12 +15,13 @@ in the environment when you send or receive email.
 than \fBqmail-multi\fR set DKIMQUEUE=bin/qmail-queue for example.
 
 \fBqmail-dkim\fR supports RSA-SHA1, RSA-SHA256 and ED25519-SHA256 (rfc8463)
-encryption methods for signing and verification. By define RSA-SHA256 is
+encryption methods for signing and verification. By default RSA-SHA256 is
 used.
 
 \fBqmail-dkim\fR supports DKIM signing and verification and can optionally
 use \fBSender Signing Practice (SSP)\fR or \fBAuthor Domain Signing Practice\fR.
-\fBqmail-dkim\fR uses the libdkim and OpenSSL libraries.
+\fBqmail-dkim\fR uses libdkim and OpenSSL libraries for signing and
+verification.
 
 To sign a message, set the \fBDKIMSIGN\fR environment variable to the
 pathname of the private key that will be used to sign the message. You can
@@ -28,15 +29,24 @@ run \fBdknewkey\fR(8) to create a private key. Any % character in the
 environment variable are removed and replaced by the domain name in the
 From: header. The selector (s=) will be taken from the basename of the
 file. If, after substituting the %, that file does not exist, the %
-character will be removed to check if the file exists.  In addition to
+character will be removed to check if the file exists. In addition to
 \fBDKIMSIGN\fR environment variable, you can have the domain and the
 pathname of the private key in the control file \fIdkimkeys\fR which has
 the following format
 
 .EX
-domain:private_key_path
+domain:private_key_path:envstr
 .EE
 
+.fi
+Here \fIenvstr\fR is a string of environment variable additions or
+removals. e.g.
+
+.EX
+QREGEX=1,DKIMSIGNOPTIONS=-z 4
+.EX
+
+.fi
 If an entry for \fIdomain\fR exists in \fIdkimkeys\fR, the value of
 \fBDKIMSIGN\fR environment variable is ignored.
 
@@ -91,10 +101,11 @@ the private key file to be a RSA private key. This can be changed by
 setting DKIMOPTIONS="-z 4" to insert ed25519 signature. \fBqmail-dkim\fR
 can insert an additional DKIM-signature if \fBDKIMSIGNEXTRA\fR is set. This
 is useful for inserting both RSA and ED25519 signature when signing. As an
-example you can have DKIMSIGN pointing to a RSA private key and
-DKIMSIGNEXTRA pointing to an ed25519 private key. When using
-\fBDKIMSIGNEXTRA\fR like this to insert and additional ed25519
-dkim-signature, it is necessary to set \fBDKIMSIGNOPTIONSEXTRA\fR="-z 4".
+example you can have \fBDKIMSIGN\fR pointing to a RSA private key,
+\fBDKIMSIGNOPTIONS\fR having "-z 2" along with other options if any.
+Additionally set \fBDKIMSIGNEXTRA\fR pointing to an ed25519 private key and
+set \fBDKIMSIGNOPTIONSEXTRA\fR to have "-z 4" along with other options if
+any.
 
 To verify a message, set the \fBDKIMVERIFY\fR environment variable to a
 desired set of letters.  Precisely, if you want a libdkim return status to
@@ -164,16 +175,17 @@ SELECTOR_KEY_REVOKED, DOMAIN_NAME_TOO_LONG, SELECTOR_PUBLIC_KEY_INVALID,
 NO_VALID_SIGNATURES and BODY_HASH_MISMATCH errors, and temporarily
 SIGNATURE_BAD_BUT_TESTING and DNS_TEMP_FAILURE. Add in \fBS\fR if you want
 to reject messages that do not have a DKIM signature. You can use the
-control files signaturedomains and nosignature domains (See Below) to
-further fine tune the action to be taken when a mail arrives with no DKIM
-signature.  Note that \fBqmail-dkim\fR always inserts the \fBDKIM-Status\fR
-header, so that messages can be rejected later at delivery time, or in the
-mail reader. In that case you may set \fBDKIMVERIFY\fR to an empty string.
-If you want to check all message's From header in signature set the
-\fBUNSIGNED_FROM\fR environment variable to an empty string. If you want to
-check messages without signed subject header, set \fBUNSIGNED_SUBJECT\fR
-environment variable. If you want to honor body lengh tag (l=), set
-\fBHONOR_BODYLENGTHTAG\fR environment variable.
+control files \fBsignaturedomains\fR and \fBnosignaturedomains\fR (See
+Below) to further fine tune the action to be taken when a mail arrives with
+no DKIM signature. Note that \fBqmail-dkim\fR always inserts the
+\fBDKIM-Status\fR header, so that messages can be rejected later at
+delivery time, or in the mail reader. In that case you may set
+\fBDKIMVERIFY\fR to an empty string. If you want to check all message's
+From header in signature set the \fBUNSIGNED_FROM\fR environment variable
+to an empty string. If you want to check messages without signed subject
+header, set \fBUNSIGNED_SUBJECT\fR environment variable. If you want to
+honor body lengh tag (l=), set \fBHONOR_BODYLENGTHTAG\fR environment
+variable.
 
 qmail-dkim supports signing practice which can be additonall checked when a
 signature verifcation fails -
@@ -271,6 +283,10 @@ code 35.
 By default \fBqmail-dkim\fR will use all of the headers when signing a
 message.
 
+.SH NOTES
+If the environment variable \fBCONTROLDIR\fR is set, \fBqmail-dkim\fR uses
+that instead of @controldir@ to read control files and the private key.
+
 .SH "EXIT CODES"
 \fBqmail-dkim\fR returns the same exit codes as qmail-queue with these additions:
 
@@ -289,6 +305,11 @@ Unable to vfork.
 .TP 5
 \fB59\fR
 Unable to create a pipe to qmail-queue.
+
+.TP 5
+\fB88\fR
+For custom errors. Additionally diagnostic information of the error will be
+written to descriptor 2.
 
 .SH "SEE ALSO"
 addresses(5),

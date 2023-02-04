@@ -1,5 +1,8 @@
 /*
  * $Log: dkimfuncs.cpp,v $
+ * Revision 1.6  2023-02-01 18:02:03+05:30  Cprogrammer
+ * new function DKIMSignReplaceHash to alter current Hash method
+ *
  * Revision 1.5  2021-08-28 21:41:03+05:30  Cprogrammer
  * added function to replace selector
  *
@@ -85,6 +88,16 @@ DKIMSignReplaceSelector(DKIMContext *pSignContext, DKIMSignOptions *pOptions)
 
 	if (pSign)
 		pSign->ReplaceSelector(pOptions);
+	return DKIM_INVALID_CONTEXT;
+}
+
+int             DKIM_CALL
+DKIMSignReplaceHash(DKIMContext *pSignContext, DKIMSignOptions *pOptions)
+{
+	CDKIMSign      *pSign = (CDKIMSign *) ValidateContext(pSignContext, true);
+
+	if (pSign)
+		pSign->ReplaceHash(pOptions);
 	return DKIM_INVALID_CONTEXT;
 }
 
@@ -243,7 +256,7 @@ DKIMGetErrorString(int ErrorCode)
 void
 getversion_dkimfuncs_cpp()
 {
-	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.5 2021-08-28 21:41:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.6 2023-02-01 18:02:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

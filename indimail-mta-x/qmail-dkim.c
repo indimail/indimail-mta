@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.71 2023-01-30 10:42:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.72 2023-02-01 18:15:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -35,12 +35,17 @@
 #include "qmulti.h"
 #include "pidopen.h"
 #include "custom_error.h"
+#include <openssl/evp.h>
 
+#define DKIM_MALLOC(n)     OPENSSL_malloc(n)
+#define DKIM_MFREE(s)      OPENSSL_free(s); s = NULL;
 #define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
 #define HAVE_EVP_SHA256
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
 #define strcasecmp(x,y)    case_diffs((x), (y))
+
+extern char    *dns_text(char *);
 
 char            inbuf[4096];
 char            outbuf[256];
@@ -52,6 +57,7 @@ struct datetime dt;
 unsigned long   uid;
 int             readfd;
 DKIMContext     ctxt;
+char           *dkimsignoptions;
 
 no_return void
 die(int e, int what)
@@ -186,6 +192,112 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 	}
 }
 
+int
+dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
+{
+	int             ch, argc;
+	char          **argv;
+
+	opts->nCanon = DKIM_SIGN_RELAXED;					/*- c */
+	opts->nIncludeBodyLengthTag = 0;					/*- l */
+	opts->nIncludeQueryMethod = 0;						/*- q */
+	opts->nIncludeTimeStamp = 0;						/*- t */
+	opts->nIncludeCopiedHeaders = 0;					/*- h */
+	opts->szIdentity[0] = '\0';
+	opts->expireTime = starttime + 604800;	// expires in 1 week
+	opts->nHash = DKIM_HASH_SHA256;
+	str_copy(opts->szRequiredHeaders, "NonExistent");
+	if (!signOptions)
+		return (0);
+	if (!stralloc_copys(&dkimopts, "dkim ") ||
+			!stralloc_cats(&dkimopts, signOptions) ||
+			!stralloc_0(&dkimopts))
+		die(QQ_OUT_OF_MEMORY, 0);
+	if (!(argv = makeargs(dkimopts.s)))
+		die(QQ_OUT_OF_MEMORY, 0);
+	for (argc = 0;argv[argc];argc++);
+	while ((ch = sgopt(argc, argv, "b:c:li:qthx:z:")) != sgoptdone) {
+		switch (ch)
+		{
+		case 'b':
+			break;
+		case 'c':
+			switch (*optarg)
+			{
+			case 'r':
+				opts->nCanon = DKIM_SIGN_RELAXED;
+				break;
+			case 's':
+				opts->nCanon = DKIM_SIGN_SIMPLE;
+				break;
+			case 't':
+				opts->nCanon = DKIM_SIGN_RELAXED_SIMPLE;
+				break;
+			case 'u':
+				opts->nCanon = DKIM_SIGN_SIMPLE_RELAXED;
+				break;
+			default:
+				free_makeargs(argv);
+				return (1);
+			}
+			break;
+		case 'l': /*- body length tag */
+			opts->nIncludeBodyLengthTag = 1;
+			break;
+		case 'q': /*- query method tag */
+			opts->nIncludeQueryMethod = 1;
+			break;
+		case 't': /*- timestamp tag */
+			opts->nIncludeTimeStamp = 1;
+			break;
+		case 'h':
+			opts->nIncludeCopiedHeaders = 1;
+			break;
+		case 'i':	/*- identity */
+			if (*optarg == '-') /* do not use i= tag */
+				opts->szIdentity[0] = '\0';
+			else
+				str_copyb(opts->szIdentity, optarg, sizeof(opts->szIdentity) - 1);
+			break;
+		case 'x': /*- expire time */
+			if (*optarg == '-')
+				opts->expireTime = 0;
+			else
+				opts->expireTime = starttime + atoi(optarg);
+			break;
+		case 'z': /*- sign rsa-sha1, rsa-sha256, rsa-sha1+rsa-sha256 or ed25519 */
+			switch (*optarg)
+			{
+			case '1':
+				opts->nHash = DKIM_HASH_SHA1;
+				break;
+#ifdef HAVE_EVP_SHA256
+			case '2':
+				opts->nHash = DKIM_HASH_SHA256;
+				break;
+			case '3':
+				opts->nHash = DKIM_HASH_SHA1_AND_SHA256;
+				break;
+#endif
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+			case '4':
+				opts->nHash = DKIM_HASH_ED25519;
+				break;
+#endif
+			default:
+				free_makeargs(argv);
+				return (1);
+			}
+			break;
+		default:
+			free_makeargs(argv);
+			return (1);
+		} /*- switch (ch) */
+	} /*- while (1) */
+	free_makeargs(argv);
+	return (0);
+}
+
 static void
 write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 {
@@ -199,7 +311,16 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 	if (!i || !(keyfn = getDomainToken(domain, &dkimkeys))) {
 		i = 0;
 		keyfn = dkimsign;
+	} else {
+		ptr = env_get("DKIMSIGNOPTIONS");
+		if (!dkimsignoptions || str_diff(dkimsignoptions, ptr)) {
+			dkimsignoptions = ptr;
+			if (dkim_setoptions(opts, dkimsignoptions))
+				custom_error("qmail-dkim", "Z", "Invalid DKIMSIGNOPTIONS", 0, "X.3.0");
+			DKIMSignReplaceHash(&ctxt, opts);
+		}
 	}
+
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -246,7 +367,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 		 */
 		if (pct_found)
 			return;
-		die(QQ_NO_PRIVATE_KEY, 0);
+		custom_error("qmail-dkim", "Z", "unable to read private key.", 0, "X.3.0");
 	case 1:
 		restore_gid();
 		break;
@@ -281,11 +402,6 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 	}
 	DKIMSignFree(&ctxt);
 }
-
-#include <openssl/evp.h>
-#define DKIM_MALLOC(n)     OPENSSL_malloc(n)
-#define DKIM_MFREE(s)      OPENSSL_free(s); s = NULL;
-char           *dns_text(char *);
 
 int
 ParseTagValues(char *list, char *letters[], char *values[])
@@ -779,112 +895,6 @@ checkPractice(int dkimRet, int useADSP, int useSSP)
 	return (0);
 }
 
-int
-dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
-{
-	int             ch, argc;
-	char          **argv;
-
-	opts->nCanon = DKIM_SIGN_RELAXED;					/*- c */
-	opts->nIncludeBodyLengthTag = 0;					/*- l */
-	opts->nIncludeQueryMethod = 0;						/*- q */
-	opts->nIncludeTimeStamp = 0;						/*- t */
-	opts->nIncludeCopiedHeaders = 0;					/*- h */
-	opts->szIdentity[0] = '\0';
-	opts->expireTime = starttime + 604800;	// expires in 1 week
-	opts->nHash = DKIM_HASH_SHA1;
-	str_copy(opts->szRequiredHeaders, "NonExistent");
-	if (!signOptions)
-		return (0);
-	if (!stralloc_copys(&dkimopts, "dkim ") ||
-			!stralloc_cats(&dkimopts, signOptions) ||
-			!stralloc_0(&dkimopts))
-		die(QQ_OUT_OF_MEMORY, 0);
-	if (!(argv = makeargs(dkimopts.s)))
-		die(QQ_OUT_OF_MEMORY, 0);
-	for (argc = 0;argv[argc];argc++);
-	while ((ch = sgopt(argc, argv, "b:c:li:qthx:z:")) != sgoptdone) {
-		switch (ch)
-		{
-		case 'b':
-			break;
-		case 'c':
-			switch (*optarg)
-			{
-			case 'r':
-				opts->nCanon = DKIM_SIGN_RELAXED;
-				break;
-			case 's':
-				opts->nCanon = DKIM_SIGN_SIMPLE;
-				break;
-			case 't':
-				opts->nCanon = DKIM_SIGN_RELAXED_SIMPLE;
-				break;
-			case 'u':
-				opts->nCanon = DKIM_SIGN_SIMPLE_RELAXED;
-				break;
-			default:
-				free_makeargs(argv);
-				return (1);
-			}
-			break;
-		case 'l': /*- body length tag */
-			opts->nIncludeBodyLengthTag = 1;
-			break;
-		case 'q': /*- query method tag */
-			opts->nIncludeQueryMethod = 1;
-			break;
-		case 't': /*- timestamp tag */
-			opts->nIncludeTimeStamp = 1;
-			break;
-		case 'h':
-			opts->nIncludeCopiedHeaders = 1;
-			break;
-		case 'i':	/*- identity */
-			if (*optarg == '-') /* do not use i= tag */
-				opts->szIdentity[0] = '\0';
-			else
-				str_copyb(opts->szIdentity, optarg, sizeof(opts->szIdentity) - 1);
-			break;
-		case 'x': /*- expire time */
-			if (*optarg == '-')
-				opts->expireTime = 0;
-			else
-				opts->expireTime = starttime + atoi(optarg);
-			break;
-		case 'z': /*- sign rsa-sha1, rsa-sha256, rsa-sha1+rsa-sha256 or ed25519 */
-			switch (*optarg)
-			{
-			case '1':
-				opts->nHash = DKIM_HASH_SHA1;
-				break;
-#ifdef HAVE_EVP_SHA256
-			case '2':
-				opts->nHash = DKIM_HASH_SHA256;
-				break;
-			case '3':
-				opts->nHash = DKIM_HASH_SHA1_AND_SHA256;
-				break;
-#endif
-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
-			case '4':
-				opts->nHash = DKIM_HASH_ED25519;
-				break;
-#endif
-			default:
-				free_makeargs(argv);
-				return (1);
-			}
-			break;
-		default:
-			free_makeargs(argv);
-			return (1);
-		} /*- switch (ch) */
-	} /*- while (1) */
-	free_makeargs(argv);
-	return (0);
-}
-
 static char    *callbackdata;
 
 int
@@ -941,7 +951,7 @@ main(int argc, char *argv[])
 		}
 		str_copyb(sopts.szSelector, selector, sizeof(sopts.szSelector) - 1);
 
-		if (dkim_setoptions(&sopts, env_get("DKIMSIGNOPTIONS")))
+		if (dkim_setoptions(&sopts, dkimsignoptions = env_get("DKIMSIGNOPTIONS")))
 			custom_error("qmail-dkim", "Z", "Invalid DKIMSIGNOPTIONS", 0, "X.3.0");
 		ptr = env_get("DKIMIDENTITY");
 		if (ptr && *ptr)
@@ -1222,7 +1232,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.71 2023-01-30 10:42:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.72 2023-02-01 18:15:33+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1236,6 +1246,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.72  2023-02-01 18:15:33+05:30  Cprogrammer
+ * use dkimkeys for setting env variables facilitating multi-signature generation with mixed encryption methods
+ *
  * Revision 1.71  2023-01-30 10:42:16+05:30  Cprogrammer
  * set pfnSelectorCallback to dns_bypass if SELECTOR_DATA is set
  *
