@@ -40,16 +40,16 @@ public:
 
 protected:
 	void            Hash(const char* szBuffer,int nBufLength,bool bHdr);
-	bool            SignThisHeader(const string & sTag);
-	void            GetHeaderParams(const string & sHdr);
-	void            ProcessHeader(const string & sHdr);
+	bool            SignThisHeader(const string &sTag);
+	void            GetHeaderParams(const string &sHdr);
+	void            ProcessHeader(const string &sHdr);
 	bool            ParseFromAddress(void);
 	void            InitSig(void);
-	void            AddTagToSig(char *Tag, const string & sValue, char cbrk, bool bFold);
+	void            AddTagToSig(char *Tag, const string &sValue, char cbrk, bool bFold);
 	void            AddTagToSig(char *Tag, unsigned long nValue);
 	void            AddInterTagSpace(int nSizeOfNextTag);
-	void            AddFoldedValueToSig(const string & sValue, char cbrk);
-	bool            IsRequiredHeader(const string & sTag);
+	void            AddFoldedValueToSig(const string &sValue, char cbrk);
+	bool            IsRequiredHeader(const string &sTag);
 	int             ConstructSignature(char *szPrivKey, int nSigAlg);
 	int             AssembleReturnedSig(char *szPrivKey);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -100,6 +100,9 @@ protected:
 
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.11  2023-02-04 18:06:15+05:30  Cprogrammer
+ * fixed formatting
+ *
  * Revision 1.10  2023-02-01 18:04:37+05:30  Cprogrammer
  * new function DKIMSignReplaceHash to alter current Hash method
  *
