@@ -33,28 +33,27 @@
 #ifdef HAVE_OPENSSL_EVP_H
 #include <openssl/evp.h>
 #define DKIM_MALLOC(s)     OPENSSL_malloc(s)
+#define DKIM_REALLOC(s, n) OPENSSL_realloc((s), (n))
 #define DKIM_MFREE(s)      OPENSSL_free(s); s = NULL;
 #else
 #define DKIM_MALLOC(s)     malloc(s)
 #define DKIM_MFREE(s)      free(s); s = NULL;
 #endif
+#ifndef TMPDIR
+#define TMPDIR "/tmp"
+#endif
 
 static char   *callbackdata;
-
-int DKIM_CALL
-SignThisHeader(const char *szHeader)
-{
-	if ((!strncasecmp(szHeader, "X-", 2) && strncasecmp(szHeader, "X-Mailer:", 9))
-			|| !strncasecmp(szHeader, "Received:", 9)
-			|| !strncasecmp(szHeader, "Authentication-Results:", 23)
-			|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
-			|| !strncasecmp(szHeader, "DomainKey-Signature:", 20)
-			|| !strncasecmp(szHeader, "Return-Path:", 12))
-		return 0;
-	return 1;
-}
-
+const char    *defaultkey = "private";
 char           *program;
+typedef struct
+{
+	char           *fn;
+	char           *selector;
+	int             hash;
+	char           *key;
+	int             len;
+} PRIVKEY;
 
 void
 usage()
@@ -87,6 +86,19 @@ usage()
 	fprintf(stderr, "V                    set verbose mode\n");
 	fprintf(stderr, "H                    this help\n");
 	exit(1);
+}
+
+int DKIM_CALL
+SignThisHeader(const char *szHeader)
+{
+	if ((!strncasecmp(szHeader, "X-", 2) && strncasecmp(szHeader, "X-Mailer:", 9))
+			|| !strncasecmp(szHeader, "Received:", 9)
+			|| !strncasecmp(szHeader, "Authentication-Results:", 23)
+			|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
+			|| !strncasecmp(szHeader, "DomainKey-Signature:", 20)
+			|| !strncasecmp(szHeader, "Return-Path:", 12))
+		return 0;
+	return 1;
 }
 
 unsigned int str_chr(char *s, int c)
@@ -451,15 +463,57 @@ dns_bypass(const char *domain, char *buffer, int maxlen)
 }
 
 int
+mktempfile(int seekfd)
+{
+	char            filename[sizeof (TMPDIR) + 19] = TMPDIR "/dkim.XXXXXX";
+	char            buffer[4096];
+	int             fd, ret;
+
+	if (lseek(seekfd, 0, SEEK_SET) == 0)
+		return 0;
+	if ((fd = mkstemp(filename)) == -1)
+		return -1;
+	if (unlink(filename))
+		return -1;
+	for (;;) {
+		if ((ret = read(0, buffer, sizeof(buffer) - 1)) == -1) {
+			close(fd);
+			return -1;
+		} else
+		if (!ret)
+			break;
+		if (write(fd, buffer, ret) != ret) {
+			close(fd);
+			return -1;
+		}
+	}
+	if (fd != seekfd) {
+		if (dup2(fd, seekfd) == -1) {
+			close(fd);
+			return -1;
+		}
+		close(fd);
+	}
+	if (lseek(seekfd, 0, SEEK_SET) == -1) {
+		close(seekfd);
+		return -1;
+	}
+	return (0);
+}
+
+int
 main(int argc, char **argv)
 {
-	char           *PrivKey, *PrivKeyFile = NULL, *pSig = NULL, *dkimverify;
-	int             i, ret, ch, nPrivKeyLen, PrivKeyFD, verbose = 0;
+	PRIVKEY        *PrivKey = NULL;
+	int             PrivKeyLen = 0, len, nHash = 0;
+	char           *pSig = NULL, *dkimverify;
+	int             i, ret, ch, fd, verbose = 0;
 	int             bSign = 1, nSigCount = 0, useSSP = 0, useADSP = 0, accept3ps = 0;
 	int             sCount = 0, sSize = 0, resDKIMSSP = -1, resDKIMADSP = -1;
 	int             nAllowUnsignedFromHeaders = 0;
 	int             nAllowUnsignedSubject = 1;
-	char            Buffer[4096], szPolicy[512];
+	char           *ptr, *selector = NULL;
+	char            buffer[4096], szPolicy[512];
 	time_t          t;
 	struct stat     statbuf;
 	DKIMContext     ctxt;
@@ -578,9 +632,32 @@ main(int argc, char **argv)
 			else
 				strncpy(sopts.szIdentity, optarg, sizeof (sopts.szIdentity) - 1);
 			break;
-		case 's': /*- sign */
-			bSign = 1;
-			PrivKeyFile = optarg;
+		case 'y':
+			selector = optarg;
+			break;
+		case 'z': /*- sign w/ sha1, sha256 or both */
+			switch (*optarg)
+			{
+			case '1':
+				nHash = DKIM_HASH_SHA1;
+				break;
+#ifdef HAVE_EVP_SHA256
+			case '2':
+				nHash = DKIM_HASH_SHA256;
+				break;
+			case '3':
+				nHash = DKIM_HASH_SHA1_AND_SHA256;
+				break;
+#endif
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+			case '4':
+				nHash = DKIM_HASH_ED25519;
+				break;
+#endif
+			default:
+				fprintf(stderr, "%s: unrecognized hash.\n", program);
+				return (1);
+			}
 			break;
 		case 'x': /*- expire time */
 			if (*optarg == '-')
@@ -588,34 +665,52 @@ main(int argc, char **argv)
 			else
 				sopts.expireTime = t + atoi(optarg);
 			break;
-		case 'y':
-			strncpy(sopts.szSelector, optarg, sizeof (sopts.szSelector) - 1);
-			break;
-		case 'z': /*- sign w/ sha1, sha256 or both */
-#ifdef HAVE_EVP_SHA256
-			switch (*optarg)
-			{
-			case '1':
-				sopts.nHash = DKIM_HASH_SHA1;
-				break;
-			case '2':
-				sopts.nHash = DKIM_HASH_SHA256;
-				break;
-			case '3':
-				sopts.nHash = DKIM_HASH_SHA1_AND_SHA256;
-				break;
-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
-			case '4':
-				sopts.nHash = DKIM_HASH_ED25519;
-				break;
-#endif
-			default:
-				fprintf(stderr, "%s: unrecognized hash.\n", program);
+		case 's': /*- sign */
+			if (!PrivKeyLen)
+				PrivKey = (PRIVKEY *) DKIM_MALLOC(sizeof(PRIVKEY));
+			else
+				PrivKey = (PRIVKEY *) DKIM_REALLOC(PrivKey, sizeof(PRIVKEY) * (PrivKeyLen + 1));
+			if (!PrivKey)
+				fprintf(stderr, "malloc: %ld bytes: %s\n", sizeof(PRIVKEY) * PrivKeyLen, strerror(errno));
+
+			if ((fd = open(optarg, O_RDONLY)) == -1) {
+				fprintf(stderr, "%s: %s\n", optarg, strerror(errno));
 				return (1);
 			}
+			if (fstat(fd, &statbuf) == -1) {
+				fprintf(stderr, "fstat: %s: %s\n", optarg, strerror(errno));
+				return (1);
+			}
+			if (!(ptr = (char *) DKIM_MALLOC(sizeof(char) * ((len = statbuf.st_size) + 1)))) {
+#ifdef DARWIN
+				fprintf(stderr, "malloc: %lld bytes: %s\n", statbuf.st_size + 1, strerror(errno));
 #else
-			sopts.nHash = DKIM_HASH_SHA1;
+				fprintf(stderr, "malloc: %ld bytes: %s\n", statbuf.st_size + 1, strerror(errno));
 #endif
+				return (1);
+			}
+			if (read(fd, ptr, len) != len) {
+				fprintf(stderr, "%s: read: %s\n", strerror(errno), program);
+				return (1);
+			}
+			close(fd);
+			ptr[len] = '\0';
+			PrivKey[PrivKeyLen].fn = optarg;
+			PrivKey[PrivKeyLen].key = ptr;
+			PrivKey[PrivKeyLen].len = len;
+			if (selector)
+				PrivKey[PrivKeyLen].selector = selector;
+			else
+			if ((ptr = strrchr(optarg, '/'))) {
+				ptr++;
+				PrivKey[PrivKeyLen].selector = ptr;
+			} else
+				PrivKey[PrivKeyLen].selector = (char *) defaultkey;
+			PrivKey[PrivKeyLen].hash = nHash ? nHash : DKIM_HASH_SHA256;
+			PrivKeyLen++;
+			bSign = 1;
+			selector = NULL;
+			nHash = 0;
 			break;
 		case 'T':
 			callbackdata = optarg;
@@ -623,68 +718,53 @@ main(int argc, char **argv)
 		} /*- switch (ch) */
 	}
 	if (bSign) { /*- sign */
-		if (!PrivKeyFile) {
-			fprintf(stderr, "Private Key not provided\n");
+		if (!PrivKey) {
+			fprintf(stderr, "Private Key(s) not provided\n");
 			usage();
 			return (1);
 		}
-		if (!sopts.szSelector[0]) {
-			if ((pSig = strrchr(PrivKeyFile, '/'))) {
-				pSig++;
-				strcpy(sopts.szSelector, pSig);
-			} else
-				strcpy(sopts.szSelector, "private");
+		if (PrivKeyLen > 1 && mktempfile(0)) {
+			fprintf(stderr, "unable to make descriptor 0 seekable\n");
+			return 1;
 		}
-		if ((PrivKeyFD = open(PrivKeyFile, O_RDONLY)) == -1) {
-			fprintf(stderr, "%s: %s\n", PrivKeyFile, strerror(errno));
-			return (1);
-		}
-		if (fstat(PrivKeyFD, &statbuf) == -1) {
-			fprintf(stderr, "fstat: %s: %s\n", PrivKeyFile, strerror(errno));
-			return (1);
-		}
-		if (!(PrivKey = (char *) DKIM_MALLOC(sizeof(char) * ((nPrivKeyLen = statbuf.st_size) + 1)))) {
-#ifdef DARWIN
-			fprintf(stderr, "malloc: %lld bytes: %s\n", statbuf.st_size + 1, strerror(errno));
-#else
-			fprintf(stderr, "malloc: %ld bytes: %s\n", statbuf.st_size + 1, strerror(errno));
-#endif
-			return (1);
-		}
-		if (read(PrivKeyFD, PrivKey, nPrivKeyLen) != nPrivKeyLen) {
-			fprintf(stderr, "%s: read: %s\n", strerror(errno), program);
-			return (1);
-		}
-		close(PrivKeyFD);
-		PrivKey[nPrivKeyLen] = '\0';
-		if (DKIMSignInit(&ctxt, &sopts) != DKIM_SUCCESS) {
-			fprintf(stderr, "DKIMSignInit: failed to initialize signature %s\n", PrivKeyFile);
-			return (1);
-		}
-		for (;;) {
-			if ((ret = read(0, Buffer, sizeof(Buffer) - 1)) == -1) {
-				fprintf(stderr, "read: %s\n", strerror(errno));
-				DKIMSignFree(&ctxt);
+		for (i = 0; i < PrivKeyLen; i++) {
+			strcpy(sopts.szSelector, PrivKey[i].selector);
+			sopts.nHash = PrivKey[i].hash;
+			if (DKIMSignInit(&ctxt, &sopts) != DKIM_SUCCESS) {
+				fprintf(stderr, "DKIMSignInit: failed to initialize signature %s\n", PrivKey[i].fn);
 				return (1);
-			} else
-			if (!ret)
-				break;
-			if (DKIMSignProcess(&ctxt, Buffer, ret) == DKIM_INVALID_CONTEXT) {
+			}
+			/* process mail on descriptor 0 */
+			if (PrivKeyLen > 1 && lseek(0, 0, SEEK_SET) == -1) {
+				fprintf(stderr, "lseek: descriptor 0: %s\n", strerror(errno));
+				return 1;
+			}
+			for (;;) {
+				if ((ret = read(0, buffer, sizeof(buffer) - 1)) == -1) {
+					fprintf(stderr, "read: %s\n", strerror(errno));
+					DKIMSignFree(&ctxt);
+					return (1);
+				} else
+				if (!ret)
+					break;
+				buffer[ret] = 0;
+				if (DKIMSignProcess(&ctxt, buffer, ret) == DKIM_INVALID_CONTEXT) {
+					fprintf(stderr, "DKIMSignProcess: DKIMContext structure invalid for this operation\n");
+					DKIMSignFree(&ctxt);
+					return (1);
+				}
+			}
+			if (DKIMSignGetSig2(&ctxt, PrivKey[i].key, &pSig) == DKIM_INVALID_CONTEXT) {
 				fprintf(stderr, "DKIMSignProcess: DKIMContext structure invalid for this operation\n");
 				DKIMSignFree(&ctxt);
 				return (1);
 			}
-		}
-		if (DKIMSignGetSig2(&ctxt, PrivKey, &pSig) == DKIM_INVALID_CONTEXT) {
-			fprintf(stderr, "DKIMSignProcess: DKIMContext structure invalid for this operation\n");
+			if (pSig) {
+				fwrite(pSig, 1, strlen(pSig), stdout);
+				fwrite("\n", 1, 1, stdout);
+			}
 			DKIMSignFree(&ctxt);
-			return (1);
 		}
-		if (pSig) {
-			fwrite(pSig, 1, strlen(pSig), stdout);
-			fwrite("\n", 1, 1, stdout);
-		}
-		DKIMSignFree(&ctxt);
 		return 0;
 	} else { /*- verify */
 		if (useADSP)
@@ -703,14 +783,14 @@ main(int argc, char **argv)
 		vopts.nSubjectRequired = nAllowUnsignedSubject;
 		DKIMVerifyInit(&ctxt, &vopts); /*- this is always successful */
 		for (;;) {
-			if ((i = read(0, Buffer, sizeof(Buffer) - 1)) == -1) {
+			if ((i = read(0, buffer, sizeof(buffer) - 1)) == -1) {
 				fprintf(stderr, "read: %s\n", strerror(errno));
 				DKIMVerifyFree(&ctxt);
 				return (1);
 			} else
 			if (!i)
 				break;
-			ret = DKIMVerifyProcess(&ctxt, Buffer, i);
+			ret = DKIMVerifyProcess(&ctxt, buffer, i);
 			dkim_error(ret);
 			if (ret > 0 && ret < DKIM_FINISHED_BODY)
 				ret = DKIM_FAIL;
@@ -807,13 +887,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.31 2023-01-30 10:41:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.32 2023-02-04 11:56:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.32  2023-02-04 11:56:10+05:30  Cprogrammer
+ * generate DKIM-Signature for each -s option
+ *
  * Revision 1.31  2023-01-30 10:41:09+05:30  Cprogrammer
  * set verbose flag for dkimvery, dkimsign methods
  *
