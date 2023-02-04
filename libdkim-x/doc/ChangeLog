@@ -15,6 +15,7 @@ o ability to alter Hash Method after DKIMSignInit
 ===========================================================================
 - 01/02/2023
 01. new function DKIMSignReplaceHash to alter current Hash method
+- 04/02/2023
 02. dkim.cpp: Generate dkim-signature for each -s option passed on command
     line
 03. dkimverify.cpp: return actual signature error in ProcessHeaders instead of
