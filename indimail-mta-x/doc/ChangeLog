@@ -11,6 +11,11 @@ multi-signature generation
     method
 - 04/02/2022
 03. dk-filter.sh: refactored for multi-signature generation
+- 05/02/2022
+04. dknewkey.sh: made key type case insensitive
+05. dknewkey.sh: removed newlines from public key records
+06. dknewkey.sh: added -e, --enforce option to disable testing mode for dkim
+    key
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

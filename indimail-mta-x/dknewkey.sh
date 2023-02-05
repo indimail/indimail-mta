@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.15 2023-01-26 22:29:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.16 2023-02-05 22:53:15+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -11,12 +11,16 @@ usage()
 	echo "       [-d | --domain domain]  : domain name"
 	echo "       [-b | --bits   size]    : DKIM private key size"
 	echo "       [-t | --type   type]    : Key type (RSA or ED25519)"
+	echo "       [-e | --enforce]        : Key is not in testing"
 	echo "       [-f]                    : force DKIM private key creation"
 	exit $1
 }
 
 # This function comes from Tatsuya Yokota
 # https://github.com/kotaroman/domainkey
+#
+# split a long string into multiple strings
+# of length 255 or less
 split_str()
 {
 	local STR="$1"
@@ -32,14 +36,10 @@ split_str()
 		if [ ${#LINE} -eq 0 ]; then
 			break
 		fi
-		if [ $START -ne 0 ]; then
-			if [ ${#LINE} -ne $SPLIT ]; then
-				printf "\t\"${LINE}\""
-			else
-				printf "\t\"${LINE}\"\n"
-			fi
+		if [ $START -eq 0 ]; then
+			printf "\"${LINE}\"" # first line
 		else
-			printf "\"${LINE}\"\n"
+			printf " \"${LINE}\""
 		fi
 		STR_COUNT=$(expr $STR_COUNT + $SPLIT)
 	done
@@ -50,11 +50,16 @@ write_pub_key()
 	local selector=$(basename $1)
 	local domain=$2
 	local pubkey=$3
-	if [ $bits -lt 2048 ] ; then
-		printf "%s._domainkey.%s. IN TXT (\"v=DKIM1; k=%s; t=y; p=%s\")\n" "$selector" "$domain" "$ktype" "$pubkey"
+	if [ $testing -eq 1 ] ; then
+		t=" t=y;"
+	else
+		t=""
+	fi
+	if [ $bits -lt 2048 -o "$ktype" = "ed25519" ] ; then
+		printf "%s._domainkey.%s. IN TXT (\"v=DKIM1; k=%s;%s p=%s\")\n" "$selector" "$domain" "$ktype" "$t" "$pubkey"
 	else
 		printf "%s._domainkey.%s. IN TXT (" "$selector" "$domain"
-		split_str "v=DKIM1; k=$ktype; t=y; p=$pubkey"
+		split_str "v=DKIM1; k=$ktype;$t p=$pubkey"
 		printf ")\n"
 	fi
 }
@@ -101,9 +106,9 @@ print_key()
 controldir=@qsysconfdir@/control
 SYSTEM=$(uname -s)
 if [ "$SYSTEM" = "FreeBSD" ] ; then
-	options=$(getopt prfd:b:t: "$@")
+	options=$(getopt eprfd:b:t: "$@")
 else
-	options=$(getopt -a -n dknewkey -o "prfd:b:t:" -l print,remove,force,domain:,bits:type: -- "$@")
+	options=$(getopt -a -n dknewkey -o "eprfd:b:t:e" -l enforce,print,remove,force,domain:,bits:,type: -- "$@")
 fi
 if [ $? != 0 ]; then
 	usage 100
@@ -115,6 +120,7 @@ fi
 
 do_print=0
 remove=0
+testing=1
 force=0
 bits=2048
 ktype="rsa"
@@ -148,12 +154,16 @@ while :; do
 	shift 2
 	;;
 	-t | --ktype)
-	ktype="$2"
+	ktype=$(echo "$2" | tr '[:upper:]' '[:lower:]')
 	if [ "$ktype" != "rsa" -a "$ktype" != "ed25519" ] ; then
 		echo "Key type must be rsa or ed25519" 1>&2
 		exit 1
 	fi
 	shift 2
+	;;
+	-e | --enforce)
+	testing=0
+	shift 1
 	;;
 	--) # end of options
 	shift
@@ -270,6 +280,10 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.16  2023-02-05 22:53:15+05:30  Cprogrammer
+# made key time argument case insenstive
+# added -e, --enforce option to disable dkim key test mode
+#
 # Revision 1.15  2023-01-26 22:29:12+05:30  Cprogrammer
 # added option to generate ed25519 DKIM keys
 #

@@ -4,7 +4,7 @@ dknewkey \- create a new domain key
 
 .SH SYNOPSIS
 \fBdknewkey\fR [-\fBt\fR \fItype\fR] [-\fBd\fR \fIdomain\fR | --\fBdomain\fR \fIdomain\fR]
-[-\fBb\fR | --\fBbits\fR \fIbits\fR] [-\fBf\fR | --\fBforce\fR]
+[-\fBb\fR | --\fBbits\fR \fIbits\fR] [-\fBf\fR | --\fBforce\fR] [-\fBe\fR | --\fBenforce\fR]
 \fIselector\fR
 
 or
@@ -86,6 +86,10 @@ Specify the key size for the DKIM record. Default is 1024
 -\fBf\fR | --\fBforce\fR
 Force creation of DKIM key even if it exists. Without this, \fBdknewkey\fR will not
 overwrite an existing DKIM key
+
+.TP
+-\fBe\fR | --\fBenforce\fR
+Create a production key. This will not have the t=y in the selector record
 
 .SH "SEE ALSO"
 qmail-dk(8),
