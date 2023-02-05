@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.33 2023-02-02 17:30:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.34 2023-02-05 20:59:55+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -205,6 +205,7 @@ set_selector()
 			dksign=0
 			if [ $percent_found -eq 0 ] ; then
 				echo "private key does not exist" 1>&2
+				/bin/rm -f $tmpfn
 				exit $priv_key_err # private key does not exist
 			else
 				dksign=1
@@ -224,6 +225,7 @@ set_selector()
 			dkimsign=0
 			if [ $percent_found -eq 0 ] ; then
 				echo "private key does not exist" 1>&2
+				/bin/rm -f $tmpfn
 				exit $priv_key_err # private key does not exist
 			else
 				dkimsign=1
@@ -425,6 +427,9 @@ exec 0<$tmpfn
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.34  2023-02-05 20:59:55+05:30  Cprogrammer
+# fixed temp files not removed for private key not found
+#
 # Revision 1.33  2023-02-02 17:30:12+05:30  Cprogrammer
 # refactored for multi-signature generation
 #
