@@ -348,7 +348,7 @@ if [ -n "$DKIMSIGN" ] ; then
 		set_selector "dkim" "$DKIMSIGNEXTRA"
 		dkim_setoptions "$DKIMSIGNOPTIONSEXTRA"
 		if [ -n "$dkimkeyfn" -a -f "$dkimkeyfn" ] ; then
-			exec 0$tmpfn
+			exec 0<$tmpfn
 			eval $dkimopts
 			if [ $? -ne 0 ] ; then
 				/bin/rm -f $tmpfn
