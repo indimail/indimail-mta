@@ -9,15 +9,27 @@ qmail-multi \- queue multiplexor and filter
 .SH DESCRIPTION
 \fBqmail-multi(8)\fR is a queue multiplexor and filter for
 \fBqmail-queue(8)\fR. The multiplexor can be turned on by defining
-environment variable \fBQMAILQUEUE\fR=PREFIX/sbin/qmail-multi.
+environment variable \fBQMAILQUEUE\fR=PREFIX/sbin/qmail-multi. Following
+programs use \fBqmail-multi\fR to deposit the mail to the queue - 
+\fBqmail-dk(8)\fR, \fBqmail-dkim(8)\fR, \fBqmail-qfilter(1)\fR,
+\fBqmail-spamfilter(8)\fR, \fBqscanq-stdin(8)\fR.
+
+\fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. This can
+be changed by setting environment variable \fBQUEUEPROG\fR to the path of
+any qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want
+to use write your own queue frontend, with the queue path available in
+\fBQUEUEDIR\fR environment variable. if \fBQUEUEDIR\fB is set
+\fBqmail-multi\fR execs \fBqmail-queue\fR (or program defined by
+\fBQUEUEPROG\fR without any processing or setting up any environment
+variables.
 
 The deposition and balancing of mail across multiple queues is controlled
 by the following environment variables.
 
 .TP 5
-\fBQUEUE_BASE\fR The base directory having all the indimail queues. If this is not defined,
-the control file \fIqueue_base\fR is used. This is typically
-QMAILHOME/queue.
+\fBQUEUE_BASE\fR The base directory having all the indimail queues. If this
+is not defined, the control file \fIqueue_base\fR is used. This is
+typically QMAILHOME/queue.
 
 .TP 5
 \fBQUEUE_START\fR This is a number which defines the first queue that
@@ -72,15 +84,6 @@ also needs a program like \fBqscheduler(8)\fR which invokes multiple
 \fBqmail-send(8)\fR with the \fBQUEUEDIR\fR set individualy to path of
 these \fIN\fR queues.
 
-\fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. This can
-be changed by setting environment variable \fBQUEUEPROG\fR to the path of
-any qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want
-to use write your own queue frontend, with the queue path available in
-\fBQUEUEDIR\fR environment variable. if \fBQUEUEDIR\fB is set
-\fBqmail-multi\fR execs \fBqmail-queue\fR (or program defined by
-\fBQUEUEPROG\fR without any processing or setting up any environment
-variables.
-
 \fBqmail-multi\fR has the ability to run any filter defined by setting the
 FILTERARGS environment variable. Any command defined by FILTERARGS will be
 run using /bin/sh. The input to this filter will be fd 0 and the output
@@ -90,40 +93,39 @@ will be piped to \fBqmail-queue\fR. e.g.
 FILTERARGS="/usr/bin/altermime --input=- --disclaimer=/etc/motd"
 .EE
 
+.fi
 will append the output of altermime command to all mails.
 
 The sequence in which the filter program is run is given below
 
-.TP 5
+.TP 3
 1. create a pipe and fork
-.TP 5
+
+.TP 3
 2. dup write end of the pipe to descriptor 1 in the child and exec the
 filter program
-.TP 5
+
+.TP 3
 3. dup read end of the pipe to descriptor 0 in parent and exec
 \fBqmail-queue\fR.
-.TP 0
 
+.PP
+.fi
 This gives the ability for the FILTERARG program to read the mail message
 from descriptor 0 before passing it to \fBqmail-queue\fR through the pipe.
 
 \fBqmail-multi\fR will attempt to make the descriptor 0 seekable if the
 environment variable MAKE_SEEKABLE is defined. This may be necessary for
-certain filter programs which allocate memory to store the message on
-lseek(2) failure.
-
+certain filter programs which require descriptor to be seekable.
 
 \fBqmail-multi(8)\fR will bounce the message if the return status from the
 filter program is 100. The mail will be blackholed if the return status is
 2. If the return status is non-zero, qmail-multi will exit issuing a
 temporary error.
 
-.SH
-Multiplexing LOGIC
-\fBqmail-multi\fR gets the current time in seconds since epoch and divides
-it by QUEUE_COUNT. This remainder is added to QUEUE_START to arrive at
-which queue to use. It then sets the QUEUEDIR=PREFIX/sbin/qmail-queue to
-queue the mail.
+\fBqmail-multi\fR generates a random number and divides it by QUEUE_COUNT.
+This remainder is added to QUEUE_START to arrive at which queue to use. It
+then sets the QUEUEDIR=PREFIX/sbin/qmail-queue to queue the mail.
 
 .SH "EXIT CODES"
 \fBqmail-multi\fR does not print diagnostics. It exits 120 if it is not

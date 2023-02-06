@@ -281,30 +281,25 @@ subdirectory must be in the same filesystem as the
 directory.
 
 .SH "Qmail High Performance Scanner Interface"
-A large fraction of today's emails is infected by a virus
-or a worm. It is necessary to recognize those malicious
-emails as soon as possible -- already in the DATA phase
-of the SMTP conversation and to reject them.
+A large fraction of today's emails is infected by a virus or a worm. It is
+necessary to recognize those malicious emails as soon as possible --
+already in the DATA phase of the SMTP conversation and to reject them.
 
 Typically, this is facilitated my means of
 .BR AMaViS , 
 .BR qmail-scanner ,
 or
 .B qscanq
-which facilitate as "wrapper" of
-the original qmail-queue program invoked by means 
-of QMAILQUEUE path (
-.BR qmail-multi ).
+which facilitate as "wrapper" of the original qmail-queue program invoked
+by means of QMAILQUEUE environment variable.
 
-However -- in case of virus attacks -- those umbrella
-programs become part of the problem itself due to their
-resource requirements.
+However -- in case of virus attacks -- those umbrella programs become part
+of the problem itself due to their resource requirements.
 
-Today's virus scanner -- in particluar Clam AV -- work in 
-resource efficient client/server mode (clamd/clamdscan)
-and include the feature to detect virii/worms in the base64
-encoded data stream. Thus, there is no necessity to call
-additional programs (like reformime or ripmime) except 
+Today's virus scanner -- in particluar Clam AV -- work in resource
+efficient client/server mode (clamd/clamdscan) and include the feature to
+detect virii/worms in the base64 encoded data stream. Thus, there is no
+necessity to call additional programs (like reformime or ripmime) except
 for the virus scanner itself.
 
 The QHPSI extension for qmail-queue allows to call an arbitary virus scanner
@@ -318,19 +313,27 @@ for the symbol \fIvirusscan\fR to invoke the scanner. The symbol can be
 changed by setting the environment variable \fBQUEUE_PLUGIN_SYMB\fR to the
 desired symbol.
 
-In order to use the QHPSI, the virus scanner has to have
-the following qualifications:
+In order to use the QHPSI, the virus scanner has to have the following
+qualifications:
 
-a) Correct interpretation of the base64 and perhaps the
-   uudecoded data in order to detect the virii/worms therein.
+.TP 3
+a. Correct interpretation of the base64 and perhaps the uudecoded data in
+order to detect the virii/worms therein.
 
-b) Results have to be made available on stderr/stdout.
+.TP 3
+b. Results have to be made available on stderr/stdout.
 
+.TP 0
+.fi
 And perhaps:
 
-c) Suppression of 'negative' scan results. 
+.TP 3
+c. Suppression of 'negative' scan results. 
 
-Details on setting the virus scanner interface is given below.
+.TP 0
+.fi
+You can set environment variables to set the QPHSI interface as given
+below.
 
 .B QHPSI
 can be set either to the full path of a scanner or to a list of plugins.
@@ -568,398 +571,6 @@ Comments:
 You can also set these variables outside tcp.smtp. e.g.
   # echo @prefix@/bin/clamdscan %s --quiet --no-summary \\
      > @servicedir@/qmail.smtpd.25/variables/QHPSI
-
-.SH Compliance
-.TP
-\fBBasel II\fR \fIInternational\fR
-Affects - International Banking
-
-Basel II is an international banking accord that replaces the original Basel
-agreement of 1988.  The accord brings in a major shift in the way that
-financial institutions assess and manage risk in relation to investments.
-
-Given that the emphasis is in the main risk assessment, the impact on emails
-is likely to be the requirement to retain all emails relating to a trade for
-a period of not less than 5 years, starting from January 2003. Financial
-institutions must ensure that data and communication is secure, accessible
-and accurate.
-
-.TP
-\fBCanadian Privacy Act\fR \fICanada\fR
-Affects - This policy is applicable to anyone who is storing any personal
-data.
-
-The Privacy Act was established to protect the personal information of
-individuals collected by the government. It also gives these individuals
-the right to access this information. It is a law governing how private
-sector organizations collect, use and disclose personal information in the
-course of commercial business.
-
-In order to comply with the Canadian Privacy Act, a law which guarantees
-individuals access to public records kept by government agencies, an
-efficient archiving system for compliance is a must. Email is a public
-record, just like any other document, it is vital that a system is in
-place to control the increasing amount of email data - in addition to
-the ability to quickly respond to compliance requests.
-
-.TP
-\fBData Proection Act 1988\fR \fIEU\fR
-Affects - This policy is applicable to anyone who is storing any personal
-data.
-
-The purpose of the act is to protect the individual rights and freedoms
-of persons; especially their right to privacy with respect to the processing
-of personal data.
-
-Given that email is a major medium for exchange and storage of personal
-information, principles 5 & 7 effectively rule out all current mail server
-platforms as effective means for storing personal data. Only a purpose built
-archiving system can meet these requirements. Furthermore, given the
-individuals right to issue “Subject Access Request”, SAR’s, detailed search
-capabilities are required within an archive repository to support these
-requirements in a cost effective manner. A standard mail server platform
-does not meet these requirements.
-
-.TP
-\fBEU Data Protection Directive 95/46/FC\fR
-\fIAll organizations, members of EU member states\fR
-Affects - All organizations, members of EU member states
-
-The European Union adopted a Directive 95/46/EC on the protection of
-individuals with regard to the processing of personal data and on the
-free movement of such data ("data protection directive"). A key objective
-of the data protection Directive was to allow the free flow of personal
-data between Member States by harmonizing the level of adequate protection
-granted to individuals. Similar to the UK Data Protection Act the principles
-of security and retention of data for only as long as is required are
-common.
-
-The need for a comprehensive email archiving solution is clear. The Data
-Controller must implement appropriate technical and organizational measures
-to protect personal data against accidental or unlawful destruction or
-accidental loss, alteration, unauthorized disclosure or access – such elements
-cannot be provided by generic mail servers as already indicated by compliance
-with the UK Data Protection Act.
-
-.TP
-\fBFederal Information Security Management Act (FISMA)\fR \fIUSA\fR
-Affects - United States Federal, State & Local Government
-
-Federal Information Security Management Act (FISMA) places the onus
-squarely on agencies and their partners to develop information security
-risk assessments and mitigation strategies. It defines three security
-objectives for information and information systems (Confidentiality,
-Integrity and Availability) and requires every government agency to
-secure the information and information systems that support its
-operations and assets, including those provided or managed by another
-agency, contractor, or other source. As part of FISMA compliance,
-agencies and departments should implement ways to track the contents of
-all outgoing emails.
-
-Email is a prime medium for exchange and storage of company records. Storage
-in the mail-server does not protect against falsification, nor does it
-protect against accidental loss or malicious removal. A purpose built
-email archive system will ensure that relevant data can be maintained for
-the desired retention period and maintain integrity of the records through
-tamper-proof mechanisms. Furthermore, the system will provide easy search
-access to recover data if required by an external auditor.
-
-.TP
-\fBFederal Rules of Civil Procedure (FRCP)\fR \fIUSA\fR
-Affects - Any organization in any industry that has the potential of being
-involved in litigation in the U.S. Federal Court system.
-
-The amendments, which went into effect on December 1, 2006, mandate that
-companies be prepared for electronic discovery. The organization must know
-where their data is, how to retrieve it, how to meet data requests and
-they must determine what data will not be subject to search.
-
-Organizations that do not have an automated system in place to help them
-effectively store, search and retrieve email data in real-time face paying
-high costs for “rush job” discovery requests. In some instances, failure to
-produce the requested data in a timely fashion may even lead to the loss of
-a lawsuit.
-
-.TP
-\fBFinancial Services Act 198, regulated by FSA\fR \fIUK\fR
-Affects - Financial Services Industry Sector
-
-The Financial Services Act was passed to consolidate the regulatory
-authority of numerous agencies in the United Kingdom. The FSA (Financial
-Services Authority) was created, which is an agency with broad regulatory
-powers to govern the financial industry. Whilst the act itself is not
-specific with regard to email retention, the FSA has imposed some guidance
-in relation to records retention. For example, in relation to guidance on
-Money Laundering, records relating to transactions, reports and “information
-not acted on” must be retained for a period of 5 years.
-
-Financial organizations need to review their compliance with FSA guidance in
-relation to the email.  Given the need to retain records for varying numbers
-of years, a dedicated email archive store is required to ensure that that
-these requirements are met.
-
-.TP
-\fBFreedom of Information Act (FOIA)\fR \fIUSA\fR
-Affects - United States Federal, State & Local Government
-
-Freedom of Information Act requires that federal agencies disclose their
-records to anyone making a written request. The speed and economy of email
-often makes it the preferred means of delivery, carrying risks that the
-wrong information might be sent or the wrong recipient addressed. Because
-email has become so prevalent for interdepartmental communications,
-security of communications has become a serious concern.
-
-In order to comply with the FOI, a law guaranteeing individuals access to
-public records kept by government agencies, an efficient archiving system
-for compliance is a must. Email is a public record, just like any other
-document, it is vital that a system is in place to control the increasing
-amount of email data. In addition to the ability to quickly respond to
-compliance requests
-
-.TP
-\fBFreedom of Information Act (in force January 2005)\fR \fIUK\fR
-Affects - All UK Government Organizations
-
-The Freedom of information Act gives anyone the right to request information
-from a government organization (including central and local government,
-the health sector, police and armed forces, the education sector and other
-public bodies), about any subject that they are interested in.
-
-It is clear that organizations reliant upon existing email technology will
-not be able to adequately meet the SAR (Subject Access Requests) in a timely
-and cost-effective manner. A centralized email archive store will address
-all these issues, ensuring that those covered by the FOI can meet their
-obligations.
-
-.TP
-\fBThe Gramm-Leach-Bliley Act (GLB)\fR \fIUS Financial Institutions\fR
-Affects - US Financial Institutions
-
-The GLB Act applies to “financial institutions” – businesses that offer
-financial products or services to individuals to be used primarily for
-their personal, family, or household purposes. Financial institutions
-include, for example, banks, securities firms and insurance companies; such
-entities are covered by the SEC (Securities and Exchange Commission).
-Businesses that provide many other types of financial products and services
-to consumers fall under jurisdiction of the FTC (Federal Trade Commission)
-for the purposes of enforcing GLB.
-
-Violation of GLBA may result in a civil action brought by the U.S. Attorney
-General. The penalties include those for the financial institution of up to
-$100,000 for each violation. In addition, “the officers and directors of
-the financial institution shall be subject to, and shall be personally liable
-for, a civil penalty of not more than $10,000 for each such violation”.
-Criminal penalties may include up to 5 years in prison.
-
-Today, the vast majority of organizations use email to communicate
-internally and as a vehicle for the exchange of documents and
-correspondence between businesses and consumers. Since personal financial
-information can be transmitted by and retained in electronic formats, it
-is critical to ensure that the management of such records complies with GLB.
-
-.TP
-\fBHealth Insurance Portability & Accountability Act (HIPAA)\fR \fIUSA\fR
-Affects - Virtually all organizations that deal with electronic patient
-healthcare information are affected.
-
-All patient information, authorizations, policies, procedures and contracts
-with business associates must be retained for at least 6 years. Information
-must be stored in robust data centers that provide minimum guarantees uptime
-and very high security. Anyone who obtains and discloses information with
-the intent to sell, transfer or use it for commercial gain or malicious harm
-can face penalties of up to $250K in fines and 10 years in jail.
-
-All patient information, authorizations, policies, procedures and contracts
-with business associates must be retained for at least 6 years.
-
-.TP
-\fBIRS Circular 230\fR \fIUSA\fR
-Affects - All Financial Services Organizations/Departments
-
-The new Circular 230 regulations issued by the Treasury Department were
-effective on June 20, 2005 in response to some situations in which tax
-professionals issued tax advice or opinions to clients so that the clients
-would have penalty protection, even though the advice or opinions were
-based upon facts, assumptions, or representations that were not reasonable.
-These new regulations established very high standards that a tax advisor
-must meet if he or she wishes to provide a client with written tax advice
-that may be relied upon for tax penalty protection. Circular 230 prescribes
-standards of practice for lawyers and accountants before the Internal
-Revenue Service, including ethical and professional responsibilities.
-
-The need for Disclaimers - As a result of the Circular 230 regulations, any
-written tax advice (including tax advice included in an email or other form
-of electronic written communication) must include a prominent disclaimer. The
-disclaimer must be near the top of an opinion in a typeface the same size
-or larger than the typeface of the tax advice. Exclaimer Mail Utilities helps
-ensure regulation compliance. For example, Circular 230 requires that the
-disclaimer must be inserted prior to the body of the email, and at a larger
-font size.  Exclaimer Mail Utilities handles this requirement with ease.
-
-.TP
-\fBMiFID (Markets in Financial Instruments Directives)\fR \fIEU\fR
-Affects - EU financial markets - Investment banks, Portfolio Managers,
-Stockbrokers, Broker Dealers, Corporate Finance Firms
-
-MiFID – the Markets in Financial Instruments Directive – comes into
-effect on 1 November 2007, when it will replace the existing Investment
-Services Directive (ISD). MiFID extends the coverage of the current
-ISD and introduces new and more extensive requirements that firms will
-have to adapt to, in particular for their conduct of business and internal
-organization.
-
-Email is a prime medium for exchange and storage of company records. Storage
-in the mail-server does not protect against falsification, nor does it
-protect against accidental loss or malicious removal. A purpose built email
-archive system will ensure that relevant data can be maintained for the desired
-retention period and maintain integrity of the records through tamper-proof
-mechanisms. Furthermore, the system will provide easy search access to recover
-data if required by an external auditor.
-
-.TP
-\fBPIPEDA (Personal Information Protection and Electronic Documents Act)\fR
-\fICanada\fR
-Affects - This policy is applicable to anyone who is storing any personal
-data.
-
-The Personal Information Protection and Electronic Documents Act is a
-Canadian law designed to ensure that personal information collected by
-businesses will be kept secure and will only be collected, used and
-given out under a strict set of circumstances. The Act, based on ten
-privacy principles was developed by the Canadian Standards Association.
-
-In order to comply with the PIPEDA an effective archiving system for
-compliance is a must. Email is a public record, just like any other
-document, it is vital that a system is in place to control the increasing
-amount of email data. In addition to the ability to quickly respond to
-compliance requests
-
-.TP
-\fBThe Public Information Act, Texas State\fR \fIUSA, Texas State\fR
-Affects - Anyone who is storing public records kept by government
-agencies.
-
-Texas Government Code, Chapter 552, gives anyone the right to access
-government records; and an officer for public information and the officer's
-agent may not ask why you want them. All government information is presumed
-to be available to the public. Certain exceptions may apply to the
-disclosure of the information. Governmental bodies shall promptly release
-requested information that is not confidential by law, either constitutional,
-statutory, or by judicial decision, or information for which an exception
-to disclosure has not been sought.
-
-In order to comply with the Public Information Act, a law guaranteeing
-individuals access to public records kept by government agencies, an
-efficient archiving system for compliance is a must. Email is a public
-record, just like any other document, it is vital that a system is in place
-to control the increasing amount of email data. In addition to the ability
-to quickly respond to compliance requests
-
-.TP
-\fBSarbanes-Oxley 2002\fR \fIUSA\fR
-Affects - All US public companies and many private organizations, and any
-UK companies trading on US stock exchange.
-
-Sarbanes Oxley is all about corporate governance. It came as a result of
-the large corporate financial scandals involving Enron, WorldCom, Global
-Crossing and Arthur Andersen. Effective in 2004, all publicly-traded
-companies are required to submit an annual report of the effectiveness of
-their internal accounting controls to the US Securities and Exchange
-Commission (SEC). Essentially, SOX legislates what used to be IT security
-best practices. The major provisions of the Sarbanes Oxley Act (SOX)
-include criminal and civil penalties. Anyone who knowingly alters,
-falsifies, destroys, or otherwise tampers with a document or record can
-be fined and/or imprisoned for up to 20 years.
-
-Specifically all relevant audit-related documentation must be retained for
-a period of at least seven years. This includes contracts, policies,
-authorizations, verifications, recommendations, performance reviews and
-financial data. SOX also addresses the need for companies to effectively
-manage risk in all its forms—including ensuring that data residing on
-corporate computers is adequately archived and protected from damage or
-tampering. To comply with these needs, an effective archiving system is
-needed
-
-.TP
-\fBSEC Rule 17a-4/ NASD 3010 (Securities Exchange Act 1934)\fR \fIUS, UK\fR
-Affects - All US Financial institutions and UK organizations trading on the NYSE
-
-Among the most visible record keeping regulations are those imposed by SEC
-and related exchanges on communication between securities traders/brokers
-and the public. SEC rules 17a-3 and 17a-4 require broker-dealers to create,
-and preserve in an accessible manner, a comprehensive record of each
-securities transaction they effect and of their securities business in
-general.
-
-The US Financial Services market is perhaps one of the most heavily
-regulated markets in the world when it comes to document and email
-archiving. All US financial organizations and any UK organizations that
-trade on the NYSE are required to meet these regulations. The member,
-broker, or dealer must have in place an audit system providing for
-accountability regarding inputting of records required to be maintained and
-preserved pursuant to Rule 17a-3 and Rule 17a-4 to electronic storage media
-and inputting of any changes made to every original and duplicate record
-maintained and preserved thereby.
-
-a) At all times, a member, broker, or dealer must be able to have the
-results of such audit system available for examination by the staffs of the
-Commission and the self-regulatory organizations of which the broker or
-dealer is a member.
-b) The audit results must be preserved for the time required for the
-audited records. The need to guarantee capture, store and maintain messages
-in a non-erasable manner is a key requirement that mail servers or indeed
-home grown archive systems cannot deliver. Speed of retrieval is also a key
-factor when dealing with Legal Discovery orders. Noncompliance is not an
-option with huge fines in the region of several million dollars being
-leveled at organizations.
-
-.TP
-\fBUK Companies Act 1985\fR \fIUK\fR
-Affects - All private and public companies
-
-Every company must keep accounting records which sufficiently show and
-explain the company’s transactions that (a) disclose with reasonable
-accuracy, at any time, the financial position of the company at that time,
-and (b) enable the directors to ensure that any balance sheet and profit
-and loss account prepared under this Part complies with the requirements of
-this Act. A company’s accounting records shall be kept at its registered
-office or such other place as the directors think fit, and shall at all
-times be open to inspection by the company’s officers. From the date on
-which the record is made, private companies must retain this information
-for 3 years and public companies must retain it for 6 years.
-
-Email is a prime medium for exchange and storage of company records.
-Storage in the mail-server does not protect against falsification, nor does
-it protect against accidental loss or malicious removal. A purpose built
-email archive system will ensure that relevant data can be maintained for
-the desired retention period and maintain integrity of the records through
-tamper-proof mechanisms. Furthermore, the system will provide easy search
-access to recover data if required by an external auditor.
-
-.TP
-\fBUK Companies Act 2006 (amended 2007)\fR \fIUK\fR
-Affects - All private and public companies
-
-In addition to the requirements of the UK Companies Act 1985, every company
-should list its company registration number, place of registration and
-registered office address on its website as a result of an update to the
-legislation of 1985. The information, which must be in legible characters,
-should also appear on order forms and in emails. Such information is
-already required on 'business letters' but the duty is being extended to
-websites, order forms and electronic documents.
-
-Need for Disclaimer - If your business is a private or public limited
-company or a Limited Liability Partnership, the Companies Act 1985 requires
-all of your business emails (and your letterhead and order forms) to
-include the following details in legible characters:
-
- o Your company registration number;
- o Your place of registration (e.g. Scotland or England & Wales)
- o Your registered office address
-
-This information should also appear on your company's website. Failure to
-comply with these requirements puts a company at risk of a fine of up to
-£1000.
 
 .SH "SEE ALSO"
 addresses(5),
