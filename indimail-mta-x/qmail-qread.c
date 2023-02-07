@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.44 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.45 2023-02-07 20:36:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -19,6 +19,7 @@
 #include <getEnvConfig.h>
 #include <qprintf.h>
 #include <alloc.h>
+#include <env.h>
 #ifndef MULTI_QUEUE
 #include <env.h>
 #include "auto_qmail.h"
@@ -51,7 +52,7 @@ static stralloc sender = { 0 };
 static datetime_sec curtime;
 static int      flagbounce, doLocal = 0, doRemote = 0, doTodo = 0, doCount = 0, silent = 0;
 #ifdef HASLIBRT
-static int      doshm = 0;
+static int      doshm = 0, dynamic_queue = -1;
 #endif
 static unsigned long   id;
 static unsigned long   size;
@@ -301,13 +302,14 @@ display(QDEF *queue, int queue_count, int queue_conf)
 		load_l += (double) queue[i].lcur / queue[i].lmax;
 		load_r += (double) queue[i].rcur / queue[i].rmax;
 		x = queue[i].lcur + queue[i].rcur;
-		subprintf(subfdout, "%-08s %3s/%-4s %3s/%-4s %c %s\n",
+		subprintf(subfdout, "%-08s %3d/%-4d %3d/%-4d %c %s\n",
 				queue[i].queue.s, queue[i].lcur, queue[i].lmax,
 				queue[i].rcur, queue[i].rmax, x == min ? '-' : '+',
 				queue[i].flag ? "disabled" : "enabled");
 	}
-	subprintf(subfdout, "threshold = %-6.2f, qcount = %ld, qconf = %ld, local = %ld, remote = %ld, qload_av = %6.2f",
+	subprintf(subfdout, "threshold = %-6.2f, qcount = %d, qconf = %d, local = %d, remote = %d, qload_av = %6.2f\n",
 			threshold, queue_count, queue_conf, lcur, rcur, 50 * (load_l + load_r)/queue_count);
+	substdio_flush(subfdout);
 }
 #endif
 
@@ -519,9 +521,17 @@ main(int argc, char **argv)
 		putcounts("Total ", lCount, rCount, bCount, tCount);
 #ifdef HASLIBRT
 	if (doshm) {
-		set_environment(WARN, FATAL, 0);
-		queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
-		display(queue, qcount, qconf);
+		/*- if dynamic_queue is set, don't bother with set_environment */
+		if (dynamic_queue == -1) {
+			set_environment(WARN, FATAL, 0);
+			dynamic_queue = env_get("DYNAMIC_QUEUE") ? 1 : 0;
+		}
+		if (!dynamic_queue)
+			doshm = 0;
+		if (doshm) {
+			queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
+			display(queue, qcount, qconf);
+		}
 	}
 #endif
 #endif
@@ -545,15 +555,32 @@ main(int argc, char **argv)
 	}
 	if (doLocal || doRemote || doTodo || doCount) {
 		process_queue(WARN, FATAL, main_function, &lcount, &rcount, &bcount, &tcount);
+#ifdef HASLIBRT
+		/*-
+		 * process queue calls set_environment
+		 * so we set dynamic_queue here to prevent calling
+		 * set_environment again later and avoid duplicating
+		 * envdir
+		 */
+		dynamic_queue = env_get("DYNAMIC_QUEUE") ? 1 : 0;
+#endif
 		if (doCount)
 			putcounts("Total ", lcount, rcount, bcount, tcount);
 		substdio_flush(subfdout);
 	}
 #ifdef HASLIBRT
 	if (doshm) {
-		set_environment(WARN, FATAL, 1);
-		queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
-		display(queue, qcount, qconf);
+		/*- if dynamic_queue is set, don't bother with set_environment */
+		if (dynamic_queue == -1) {
+			set_environment(WARN, FATAL, 1);
+			dynamic_queue = env_get("DYNAMIC_QUEUE") ? 1 : 0;
+		}
+		if (!dynamic_queue)
+			doshm = 0;
+		if (doshm) {
+			queue_load("qmail-qread", &qcount, &qconf, 0, &queue);
+			display(queue, qcount, qconf);
+		}
 	}
 #endif
 	return(0);
@@ -563,7 +590,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.44 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.45 2023-02-07 20:36:05+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -571,6 +598,10 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.45  2023-02-07 20:36:05+05:30  Cprogrammer
+ * BUG: Fixed SIGSEGV
+ * skip dynamic queue if DYNAMIC_QUEUE is not set
+ *
  * Revision 1.44  2023-01-18 00:02:13+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
