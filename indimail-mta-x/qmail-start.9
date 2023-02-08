@@ -59,15 +59,16 @@ be increased or decreased.
 \fBqscheduler\fR also monitors each \fBtodo-proc\fR, \fBqmail-send\fR
 instances and restarts them if they go down.
 
-\fBqmail-start\fR or \fBqscheduler\fR arranges for \fBqmail-send 's
+\fBqmail-start\fR or \fBqscheduler\fR arranges for \fBqmail-send\fR's
 activity record to be sent to \fBqmail-start\fR's output. See
 \fBqmail-log\fR(5) for the format of the activity record. Other than this,
 \fBqmail-start\fR does not print anything, even on failure.
 \fBqscheduler\fR announces its startup, exit and failures on stdout
-and stderr. \fBqscheduler\fR sets the environment variable \fBQIDENT\fR
-representing the queue directory number. This is used by \fBqmail-send\fR
-to append the \fBQIDENT\fR number to the delivery number in the logs,
-facilitating processing of logs by \fBmatchup\fR(1).
+and stderr. \fBqscheduler\fR sets the environment variable \fBQIDENT\fR,
+before invoking \fBqmail-start\fR. \fBQIDENT\fR is the queue directory
+number and this is used by \fBqmail-send\fR to append the \fBQIDENT\fR
+number to the delivery number in the logs, facilitating processing of logs
+by \fBmatchup\fR(1).
 
 Resource limits, controlling ttys, et al. are also passed from
 \fBqmail-start\fR or \fBqscheduler\fR to \fBqmail-local\fR.
