@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.45 2023-02-07 20:36:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.46 2023-02-08 09:38:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -180,7 +180,12 @@ get_arguments(int argc, char **argv)
 	errflag = 0;
 	doTodo = doCount = doLocal = doRemote = 0;
 #ifdef HASLIBRT
-	doshm = 0;
+	if (access("/dev/shm/qscheduler", F_OK)) {
+		if (errno != error_noent)
+			strerr_die2sys(111, FATAL, "/dev/shm/qscheduler: ");
+		doshm = -1;
+	} else
+		doshm = 0;
 	while (!errflag && (c = getopt(argc, argv, "calrsti")) != opteof) {
 #else
 	while (!errflag && (c = getopt(argc, argv, "calrst")) != opteof) {
@@ -198,7 +203,8 @@ get_arguments(int argc, char **argv)
 			doLocal = 1;
 			doRemote = 1;
 #ifdef HASLIBRT
-			doshm = 2;
+			if (!doshm)
+				doshm = 2;
 #endif
 			break;
 		case 'l':
@@ -212,6 +218,8 @@ get_arguments(int argc, char **argv)
 			break;
 #ifdef HASLIBRT
 		case 'i':
+			if (doshm == -1)
+				strerr_die2x(100, FATAL, "dynamic queue not configured");
 			doshm = 1;
 			break;
 #endif
@@ -222,6 +230,8 @@ get_arguments(int argc, char **argv)
 			break;
 		}
 	}
+	if (doshm == -1)
+		doshm = 0;
 #ifdef HASLIBRT
 	if (!doTodo && !doLocal && !doRemote && !doshm)
 #else
@@ -590,7 +600,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.45 2023-02-07 20:36:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 09:38:05+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -598,6 +608,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.46  2023-02-08 09:38:05+05:30  Cprogrammer
+ * auto determine dynamic queue using /dev/shm/qscheduler
+ *
  * Revision 1.45  2023-02-07 20:36:05+05:30  Cprogrammer
  * BUG: Fixed SIGSEGV
  * skip dynamic queue if DYNAMIC_QUEUE is not set
