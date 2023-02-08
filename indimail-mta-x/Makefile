@@ -2077,6 +2077,9 @@ qmail-start.9 conf-qmail
 	cat qmail-start.9 \
 	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
+	| sed s}@tload\@}"`head -1 conf-queue|sed 's{.*QUEUE_LOAD{QUEUE_LOAD{g'|cut -d= -f2|awk '{print $$1}'|awk '{print $$1 * 2}'`"}g \
+	| sed s}@qload\@}"`head -1 conf-queue|sed 's{.*QUEUE_LOAD{QUEUE_LOAD{g'|cut -d= -f2|awk '{print $$1}'`"}g \
+	| sed s}@qmax\@}"`head -1 conf-queue|sed 's{.*QUEUE_MAX{QUEUE_MAX{g'|cut -d= -f2|awk '{print $$1}'`"}g \
 	> qmail-start.8
 
 qmail-start.o: \
