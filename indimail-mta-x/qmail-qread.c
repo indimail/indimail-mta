@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.46 2023-02-08 11:17:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.46 2023-02-08 15:10:42+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -230,9 +230,9 @@ get_arguments(int argc, char **argv)
 			break;
 		}
 	}
+#ifdef HASLIBRT
 	if (doshm == -1)
 		doshm = 0;
-#ifdef HASLIBRT
 	if (!doTodo && !doLocal && !doRemote && !doshm)
 #else
 	if (!doTodo && !doLocal && !doRemote)
@@ -600,7 +600,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 11:17:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 15:10:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -608,7 +608,7 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
- * Revision 1.46  2023-02-08 11:17:14+05:30  Cprogrammer
+ * Revision 1.46  2023-02-08 15:10:42+05:30  Cprogrammer
  * auto determine dynamic queue using /dev/shm/qscheduler
  *
  * Revision 1.45  2023-02-07 20:36:05+05:30  Cprogrammer
