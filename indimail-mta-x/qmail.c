@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.34 2022-10-17 19:44:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.35 2023-02-08 18:48:56+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -187,7 +187,7 @@ qmail_close(struct qmail *qq)
 	exitcode = wait_exitcode(wstat);
 	switch (exitcode)
 	{
-	case 115: /*- compatibility */
+	case QQ_COMPAT: /*- compatibility */
 	case QQ_ENVELOPE_TOO_LONG:
 		return "Dqq envelope address too long (#5.1.3)";
 	case QQ_PERM_MSG_REJECT:
@@ -288,22 +288,23 @@ qmail_close(struct qmail *qq)
 			return errstr;
 		return "Zqq temporary problem (#4.3.0)";
 	default:
-		if ((exitcode >= 11) && (exitcode <= 40))
-			return "Dqq permanent problem (#5.3.0)";
-		return "Zqq temporary problem (#4.3.0)";
+		return (perm_error(exitcode)) ?  "Dqq permanent problem (#5.3.0)" : "Zqq temporary problem (#4.3.0)";
 	}
 }
 
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.34 2022-10-17 19:44:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.35 2023-02-08 18:48:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.35  2023-02-08 18:48:56+05:30  Cprogrammer
+ * use perm_error/temp_error from qmail.h to evaluate perm/temp error
+ *
  * Revision 1.34  2022-10-17 19:44:15+05:30  Cprogrammer
  * use exit codes defines from qmail.h
  *

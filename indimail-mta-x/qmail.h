@@ -1,5 +1,8 @@
 /*
  * $Log: qmail.h,v $
+ * Revision 1.9  2023-02-08 18:47:31+05:30  Cprogrammer
+ * added perm_error, temp_error macro to evaluate perm/temp errors
+ *
  * Revision 1.8  2022-10-17 19:44:36+05:30  Cprogrammer
  * define qmail-queue exit codes
  *
@@ -31,6 +34,7 @@
 #define CUSTOM_ERR_FD 2
 #endif
 
+
 struct qmail
 {
 	int             flagerr;
@@ -52,13 +56,27 @@ char           *qmail_close(struct qmail *);
 unsigned long   qmail_qp(struct qmail *);
 
 #define QQ_OK                  0
+#define QQ_COMPAT             115
+
+/*-
+ * if you add new errors relook
+ * at QQ_MIN_PERM and QQ_MAX_PERM
+ */
+#define QQ_MIN_PERM           11
+#define QQ_MAX_PERM           40
+#define perm_error(x)         ((x) == QQ_COMPAT || ((x) >= QQ_MIN_PERM && (x) <= QQ_MAX_PERM))
+#define temp_error(x)         (((x) && (x) < QQ_MIN_PERM) || ((x) > QQ_MAX_PERM && (x) != QQ_COMPAT))
+
+/*- permanent errors QQ_MIN_PERM to QQ_MAX_PERM */
 #define QQ_ENVELOPE_TOO_LONG  11
 #define QQ_PERM_MSG_REJECT    31
 #define QQ_SPAM_THRESHOLD     32
 #define QQ_VIRUS_IN_MSG       33
 #define QQ_BANNED_ATTACHMENT  34
 #define QQ_NO_PRIVATE_KEY     35
-/*- define errors > 40 */
+
+/*- define temporary errors > QQ_MAX_PERM */
+/*- temporary errors */
 #define QQ_DUP_ERR            41
 #define QQ_VIRUS_SCANNER_PRIV 50
 #define QQ_OUT_OF_MEMORY      51
