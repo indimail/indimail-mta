@@ -22,6 +22,9 @@ multi-signature generation
 - 08/02/2022
 09. qmail-qread.c: auto determine dynamic queue using /dev/shm/qscheduler
 10. qscheduler.c: merged sigterm, die() functions
+11. getqueue.c: include stdint.h for uint32_t definition
+12. qmail-smtpd.c, qmail-qread.c, nowutc.c: fixed format string for subprintf
+13. hasstdarg.h: fixed HAVE_STDARG_H define
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
