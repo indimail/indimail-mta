@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.8  2023-02-08 09:40:36+05:30  Cprogrammer
+ * merged sigterm(), die() functions
+ *
  * Revision 1.7  2022-09-26 00:02:05+05:30  Cprogrammer
  * handle SIGUSR1, SIGUSR2
  *
@@ -159,14 +162,29 @@ queuenum_to_dir(int queue_no)
 }
 
 no_return void
-die()
+die(int how)
 {
 	int             i, child, wstat;
+	pid_t           pid;
 	char           *qptr;
 
-	flagexitasap = 1;
+	flagexitasap = how ? 1 : 2;
 	sig_block(sig_term);
 	sig_block(sig_child);
+	if ((pid = getpid()) != selfpid)
+		_exit(0);
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	strerr_warn3("alert: qscheduler: pid ", strnum1, how ? " ARGH!! Committing suicide" : " got TERM", 0);
+#ifdef HASLIBRT
+	if (shm_queue) {
+		for (i = 0; i < qcount; i++)
+			close(shm_queue[i]);
+	}
+	if (mq_sch != (mqd_t) -1)
+		mq_close(mq_sch);
+	if (shm_conf != -1)
+		close(shm_conf);
+#endif
 	for (i = 0; queue_table && i <= qcount;i++) {
 		if (queue_table[i].pid == -1)
 			continue;
@@ -196,70 +214,39 @@ die()
 			}
 		}
 	} /*- for (child = 0;;) */
-	sig_unblock(sig_term);
+#ifdef HASLIBRT
+	shm_unlink("/qscheduler");
+#endif
 	strnum1[fmt_ulong(strnum1, selfpid)] = 0;
-	strerr_die3x(111, "info: qscheduler: pid ", strnum1, " exiting");
+	strerr_die3x(flagexitasap == 2 ? 0 : 111, "info: qscheduler: pid ", strnum1, " exiting");
+	sig_unblock(sig_term);
 }
 
 static void
 nomem()
 {
 	strerr_warn1("alert: qscheduler: out of memory", 0);
-	die();
+	die(1);
 }
 
 static void
 die_opendir(char *fn)
 {
 	strerr_warn3("alert: qscheduler: unable to opendir ", fn, ": ", &strerr_sys);
-	die();
+	die(1);
 }
 
 static void
 die_chdir(char *s)
 {
 	strerr_warn3("alert: qscheduler: unable to switch to ", s, ": ", &strerr_sys);
-	die();
+	die(1);
 }
 
 void
 sigterm()
 {
-	int             i;
-	pid_t           pid;
-	char           *qptr;
-
-	flagexitasap = 1;
-	sig_block(sig_child);
-	sig_block(sig_term);
-	if ((pid = getpid()) != selfpid)
-		_exit(0);
-	strnum1[fmt_ulong(strnum1, pid)] = 0;
-	strerr_warn3("alert: qscheduler: pid ", strnum1, " got TERM", 0);
-#ifdef HASLIBRT
-	if (shm_queue) {
-		for (i = 0; i < qcount; i++)
-			close(shm_queue[i]);
-	}
-	if (mq_sch != (mqd_t) -1)
-		mq_close(mq_sch);
-	if (shm_conf != -1)
-		close(shm_conf);
-#endif
-	for (i = 0; queue_table && i <= qcount;i++) {
-		if (queue_table[i].pid == -1)
-			continue;
-		qptr = queuenum_to_dir(i);
-		strnum1[fmt_ulong(strnum1, queue_table[i].pid)] = 0;
-		log_out("info: qscheduler: issue SIGTERM to ");
-		log_out(strnum1);
-		log_out(", queue ");
-		log_out(qptr);
-		log_outf("\n");
-		kill(queue_table[i].pid, sig_term);
-	}
-	sig_unblock(sig_term);
-	_exit(111);
+	die(0);
 }
 
 void
@@ -490,7 +477,7 @@ start_send(int queueNum, pid_t pid)
 		if (queue_table[i].pid != pid) {
 			strnum1[fmt_ulong(strnum1, pid)] = 0;
 			strerr_warn2("alert: qscheduler: could not locate pid ", strnum1, 0); 
-			die();
+			die(1);
 		}
 		queue_no = i;
 		qptr = queuenum_to_dir(queue_no);
@@ -502,7 +489,7 @@ start_send(int queueNum, pid_t pid)
 		}
 		if (i) {
 			strerr_warn2("alert: qscheduler: could not shutdown pid ", strnum1, 0); 
-			die();
+			die(1);
 		}
 	} else { /*- first instance */
 		queue_no = queueNum;
@@ -512,7 +499,7 @@ start_send(int queueNum, pid_t pid)
 	{
 	case -1:
 		strerr_warn1("alert: qscheduler: unable to fork: ", &strerr_sys);
-		die();
+		die(1);
 	case 0:
 		sig_catch(sig_term, SIG_DFL);
 		sig_catch(sig_hangup, SIG_DFL);
@@ -557,7 +544,7 @@ set_queue_variables()
 		{
 		case -1:
 			strerr_warn1("alert: unable to read control file qbase: ", &strerr_sys);
-			die();
+			die(1);
 		case 0:
 			if (!stralloc_copys(&QueueBase, auto_qmail) ||
 					!stralloc_catb(&QueueBase, "/queue", 6) ||
@@ -583,7 +570,7 @@ static_queue()
 		nqueue = !access(qptr, F_OK);
 		if (!nqueue && errno != error_noent) {
 			strerr_warn3("alert: queue ", qptr, ": ", &strerr_sys);
-			die();
+			die(1);
 		}
 	} else
 		nqueue = 0;
@@ -616,9 +603,10 @@ static_queue()
 		if (!i && !nqueue)
 			continue;
 		if (check_send(i))
-			die();
+			die(1);
 		start_send(i, -1);
 	} /*- for (i = 0; i <= qcount; i++) */
+
 	for (;!flagexitasap;) {
 		if ((child = wait_pid(&wstat, -1)) == -1) {
 			if (errno == error_intr)
@@ -630,6 +618,7 @@ static_queue()
 		start_send(-1, child);
 		sleep(1);
 	} /*- for (; !flagexitasap;) */
+
 	for (; flagexitasap;) {
 		if ((child = wait_pid(&wstat, -1)) == -1) {
 			if (errno == error_intr)
@@ -638,7 +627,8 @@ static_queue()
 		}
 		strnum1[fmt_ulong(strnum1, child)] = 0;
 		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
-	}
+	} /* for (; flagexitasap;) */
+
 	strnum1[fmt_ulong(strnum1, selfpid)] = 0;
 	strerr_die3x(flagexitasap ? 0 : 111, "info: qscheduler: pid ", strnum1, " exiting");
 }
@@ -660,7 +650,7 @@ queue_fix(char *queuedir)
 	{
 	case -1:
 		strerr_warn1("alert: qscheduler: unable to fork: ", &strerr_sys);
-		die();
+		die(1);
 	case 0:
 		sig_catch(sig_term, SIG_DFL);
 		sig_catch(sig_hangup, SIG_DFL);
@@ -679,17 +669,17 @@ queue_fix(char *queuedir)
 	sig_unblock(sig_int);
 	if (wait_pid(&wstat, pid) != pid) {
 		strerr_warn1("alert: qscheduler: queue-fix waitpid surprise", 0);
-		die();
+		die(1);
 	}
 	if (wait_crashed(wstat)) {
 		strerr_warn1("alert: qscheduler: queue-fix crashed", 0);
-		die();
+		die(1);
 	}
 	exitcode = wait_exitcode(wstat);
 	if (exitcode) {
 		strnum1[fmt_int(strnum1, exitcode)] = 0;
 		strerr_warn4("alert: qscheduler: queue-fix exit code ", strnum1, ": trouble fixing queue directory ", queuedir, 0);
-		die();
+		die(1);
 	} else {
 		log_out("info: qscheduler: queue-fix: queue OK ");
 		log_out(queuedir);
@@ -714,17 +704,17 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 
 	if (uidinit(1, 1) == -1 || auto_uidq == -1 || auto_uids == -1 || auto_gidq == -1) {
 		strerr_warn1("alert: qscheduler: failed to get uids, gids: ", &strerr_sys);
-		die();
+		die(1);
 	}
 	if ((i = control_readint(msgqueue_len, "msgqueuelen")) == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file msgqueuelen: ", &strerr_sys);
-		die();
+		die(1);
 	} else
 	if (!i)
 		*msgqueue_len = 65534;
 	if ((i = control_readint(msgqueue_size, "msgqueuesize")) == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file msgqueuelen: ", &strerr_sys);
-		die();
+		die(1);
 	} else
 	if (!i)
 		*msgqueue_size = 1024;
@@ -753,7 +743,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 		if (shm_queue[j] == -1) {
 			if (errno != error_exist) {
 				strerr_warn3("alert: qscheduler: failed to create POSIX shared memory ", ipc_name, ": ", &strerr_sys);
-				die();
+				die(1);
 			}
 #ifdef LINUX
 			if (!access("/dev/shm", F_OK)) {
@@ -766,11 +756,11 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 				i = 0;
 				if (chmod(shm_dev_name, 0644) == -1) {
 					strerr_warn3("alert: qscheduler: failed to set permissions for POSIX shared memory ", shm_dev_name, ": ", &strerr_sys);
-					die();
+					die(1);
 				}
 				if (chown(shm_dev_name, auto_uids, auto_gidq) == -1) {
 					strerr_warn3("alert: qscheduler: failed to set ownership for POSIX shared memory ", shm_dev_name, ": ", &strerr_sys);
-					die();
+					die(1);
 				}
 			}
 #endif
@@ -778,13 +768,13 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 			if (fchown(shm_queue[j], auto_uids, auto_gidq) == -1) {
 				strerr_warn3("alert: qscheduler: failed to set ownership for POSIX shared memory ", ipc_name, ": ", &strerr_sys);
 				close(shm_queue[j]);
-				die();
+				die(1);
 			}
 			close(shm_queue[j]);
 		}
 		if ((shm_queue[j] = shm_open(ipc_name, O_RDONLY, 0644)) == -1) {
 			strerr_warn2("alert: qscheduler: failed to open POSIX shared memory ", ipc_name, &strerr_sys);
-			die();
+			die(1);
 		}
 		/*- message queue for communication between todo-proc, qmail-queue */
 #ifdef FREEBSD
@@ -801,7 +791,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 		if (mq_queue == (mqd_t) -1) {
 			if (errno != error_exist)  {
 				strerr_warn3("alert: qscheduler: failed to create POSIX message queue ", ipc_name, ": ", &strerr_sys);
-				die();
+				die(1);
 			}
 #ifdef LINUX
 			if (!access("/dev/mqueue", F_OK)) {
@@ -814,11 +804,11 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 				i = 0;
 				if (chmod(mq_dev_name, 0640) == -1) {
 					strerr_warn3("alert: qscheduler: failed to set permissions for POSIX message queue ", mq_dev_name, ":", &strerr_sys);
-					die();
+					die(1);
 				}
 				if (chown(mq_dev_name, auto_uidq, auto_gidq) == -1) {
 					strerr_warn3("alert: qscheduler: failed to set ownership for POSIX message queue ", mq_dev_name, ":", &strerr_sys);
-					die();
+					die(1);
 				}
 			}
 #endif
@@ -830,7 +820,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 #endif
 				strerr_warn3("alert: qscheduler: failed to set ownership for POSIX message queue ", ipc_name, ":", &strerr_sys);
 				mq_close(mq_queue);
-				die();
+				die(1);
 			}
 			mq_close(mq_queue);
 		}
@@ -840,17 +830,17 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 	if ((mq_sch = mq_open("/qscheduler", O_CREAT|O_EXCL|O_RDWR, 0600, NULL)) == (mqd_t) -1) {
 		if (errno != error_exist) {
 			strerr_warn1("alert: qscheduler: failed to create POSIX message queue /qscheduler: ", &strerr_sys);
-			die();
+			die(1);
 		}
 #ifdef LINUX
 		if (!access("/dev/mqueue", F_OK)) {
 			if (chmod("/dev/mqueue/qscheduler", 0600) == -1) {
 				strerr_warn1("alert: qscheduler: failed to set permissions for POSIX message queue /dev/mqueue/qscheduler: ", &strerr_sys);
-				die();
+				die(1);
 			}
 			if (chown("/dev/mqueue/qscheduler", auto_uido, auto_gidq) == -1) {
 				strerr_warn1("alert: qscheduler: failed to set ownership for POSIX message queue /dev/mqueue/qscheduler: ", &strerr_sys);
-				die();
+				die(1);
 			}
 		}
 #endif
@@ -859,7 +849,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 
 	if ((mq_sch = mq_open("/qscheduler", O_RDONLY,  0600, NULL)) == (mqd_t) -1) {
 		strerr_warn1("alert: qscheduler: failed to open POSIX message queue /qscheduler: ", &strerr_sys);
-		die();
+		die(1);
 	}
 
 	/*- shared memory /qscheduler for storing qcount, qconf */
@@ -871,17 +861,17 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 	if (shm_conf == -1) {
 		if (errno != error_exist) {
 			strerr_warn1("alert: qscheduler: failed to create POSIX shared memory /qscheduler: ", &strerr_sys);
-			die();
+			die(1);
 		}
 #ifdef LINUX
 		if (!access("/dev/shm", F_OK)) {
 			if (chmod("/dev/shm/qscheduler", 0644) == -1) {
 				strerr_warn1("alert: qscheduler: failed to set permissions for POSIX message queue /dev/shm/qscheduler: ", &strerr_sys);
-				die();
+				die(1);
 			}
 			if (chown("/dev/shm/qscheduler", auto_uido, auto_gidq) == -1) {
 				strerr_warn1("alert: qscheduler: failed to set ownership for POSIX message queue /dev/shm/qscheduler: ", &strerr_sys);
-				die();
+				die(1);
 			}
 		}
 #endif
@@ -899,12 +889,12 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 #endif
 	if (shm_conf == -1) {
 		strerr_warn1("alert: qscheduler: failed to open POSIX shared memory /qscheduler: ", &strerr_sys);
-		die();
+		die(1);
 	}
 #ifdef FREEBSD /*- another FreeBSD idiosyncrasies */
 	if (ftruncate(shm_conf, getpagesize()) < 0) {
 		strerr_warn1("alert: qscheduler: failed to truncate POSIX shared memory /qscheduler: ", &strerr_sys);
-		die();
+		die(1);
 	}
 #endif
 	return;
@@ -919,11 +909,11 @@ write_queue2shm(int update_qcount)
 	q[1] = qconf;  /*- existing no of queues in /var/indimail/queue dir */
 	if (lseek(shm_conf, 0, SEEK_SET) == -1 || write(shm_conf, (char *) q, sizeof(int) * 2) <= 0) {
 		strerr_warn1("alert: qscheduler: unable to write to shared memory /qscheduler: ", &strerr_sys);
-		die();
+		die(1);
 	}
 	if (update_qcount && control_writeint(qcount, "qcount") == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
-		die();
+		die(1);
 	}
 }
 
@@ -941,7 +931,7 @@ dynamic_queue()
 		nqueue = !access(qptr, F_OK);
 		if (!nqueue && errno != error_noent) {
 			strerr_warn3("alert: qscheduler: queue ", qptr, ": ", &strerr_sys);
-			die();
+			die(1);
 		}
 	} else
 		nqueue = 0;
@@ -956,7 +946,7 @@ dynamic_queue()
 			if (errno == error_noent)
 				break;
 			strerr_warn3("alert: qscheduler: queue ", qptr, ": ", &strerr_sys);
-			die();
+			die(1);
 		}
 	} /*- for (qconf = 0; qconf < qmax; qconf++) */
 
@@ -971,7 +961,7 @@ dynamic_queue()
 	 */
 	if ((r = control_readint(&i, "qcount")) == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
-		die();
+		die(1);
 	}
 	if (r && i > qcount)
 		qcount = i;
@@ -1035,7 +1025,7 @@ dynamic_queue()
 		if (!i && !nqueue)
 			continue;
 		if (check_send(i))
-			die();
+			die(1);
 		start_send(i, -1);
 	} /*- for (i = 0; i <= qcount; i++) */
 	for (; !flagexitasap;) {
@@ -1248,7 +1238,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.7 2022-09-26 00:02:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.8 2023-02-08 09:40:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
