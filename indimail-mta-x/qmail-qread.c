@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.46 2023-02-08 09:38:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.46 2023-02-08 11:17:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -312,7 +312,7 @@ display(QDEF *queue, int queue_count, int queue_conf)
 		load_l += (double) queue[i].lcur / queue[i].lmax;
 		load_r += (double) queue[i].rcur / queue[i].rmax;
 		x = queue[i].lcur + queue[i].rcur;
-		subprintf(subfdout, "%-08s %3d/%-4d %3d/%-4d %c %s\n",
+		subprintf(subfdout, "%-8s %3d/%-4d %3d/%-4d %c %s\n",
 				queue[i].queue.s, queue[i].lcur, queue[i].lmax,
 				queue[i].rcur, queue[i].rmax, x == min ? '-' : '+',
 				queue[i].flag ? "disabled" : "enabled");
@@ -600,7 +600,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 09:38:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 11:17:14+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -608,7 +608,7 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
- * Revision 1.46  2023-02-08 09:38:05+05:30  Cprogrammer
+ * Revision 1.46  2023-02-08 11:17:14+05:30  Cprogrammer
  * auto determine dynamic queue using /dev/shm/qscheduler
  *
  * Revision 1.45  2023-02-07 20:36:05+05:30  Cprogrammer
