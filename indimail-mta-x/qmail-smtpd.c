@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.10  2023-02-08 11:19:49+05:30  Cprogrammer
+ * fixed format string for subprintf
+ *
  * Revision 1.9  2023-01-18 00:02:13+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -139,11 +142,11 @@ print_details()
 #if defined(OPENSSL_FULL_VERSION_STR) || defined(OPENSSL_VERSION_STR)
 	subprintf(subfdout, "%-35s: ", "OpenSSL");
 #if defined(OPENSSL_VERSION_TEXT)
-	subprintf(subfdout, "%s", OPENSSL_VERSION_TEXT, "%s");
+	subprintf(subfdout, "%s", OPENSSL_VERSION_TEXT);
 #elif defined(OPENSSL_FULL_VERSION_STR)
-	subprintf(subfdout, "%s", OPENSSL_FULL_VERSION_STR, "%s");
+	subprintf(subfdout, "%s", OPENSSL_FULL_VERSION_STR);
 #elif defined(OPENSSL_VERSION_STR)
-	subprintf(subfdout, "%s", OPENSSL_VERSION_STR, "%s");
+	subprintf(subfdout, "%s", OPENSSL_VERSION_STR);
 #endif
 	subprintf(subfdout, "\n");
 #endif
@@ -263,7 +266,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.9 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.10 2023-02-08 11:19:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

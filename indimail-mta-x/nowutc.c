@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.10  2023-02-08 11:19:07+05:30  Cprogrammer
+ * fixed format string for subprintf
+ *
  * Revision 1.9  2023-01-17 23:53:25+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *
@@ -60,7 +63,7 @@ main()
 	taia_tai(&cur, &sec);
 	caltime_utc(&ct, &sec, (int *) 0, (int *) 0);
 
-	subprintf(subfdoutsmall, "%02d-%02d-%02d %02d:%02d:%02d.%s\n",
+	subprintf(subfdoutsmall, "%02ld-%02d-%02d %02d:%02d:%02d.%s\n",
 			ct.date.year, ct.date.month, ct.date.day, ct.hour,
 			ct.minute, ct.second, x);
 	qprintf_flush(subfdoutsmall);
@@ -70,7 +73,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *z = "$Id: nowutc.c,v 1.9 2023-01-17 23:53:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *z = "$Id: nowutc.c,v 1.10 2023-02-08 11:19:07+05:30 Cprogrammer Exp mbhangui $";
 
 	z++;
 }

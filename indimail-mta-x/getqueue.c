@@ -1,5 +1,8 @@
 /*
  * $Log: getqueue.c,v $
+ * Revision 1.4  2023-02-08 11:18:07+05:30  Cprogrammer
+ * include stdint.h for uint32_t definition
+ *
  * Revision 1.3  2022-04-14 08:17:55+05:30  Cprogrammer
  * added feature to disable a queue and skip disabled queues
  * refactored code and added comments
@@ -17,6 +20,7 @@
 #include <env.h>
 #include <error.h>
 #include <arc4random.h>
+#include <stdint.h>
 #include "haslibrt.h"
 #ifdef HASLIBRT
 #include <sys/mman.h>
@@ -135,7 +139,7 @@ queueNo_from_env()
 void
 getversion_getqueue_c()
 {
-	static char    *x = "$Id: getqueue.c,v 1.3 2022-04-14 08:17:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getqueue.c,v 1.4 2023-02-08 11:18:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
