@@ -1,5 +1,8 @@
 /*
  * $Log: cdbget.c,v $
+ * Revision 1.6  2023-02-12 13:29:59+05:30  Cprogrammer
+ * added -n option for searching cdb created by cdb-database
+ *
  * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -17,11 +20,13 @@
  *
  */
 #include <unistd.h>
+#include <sgetopt.h>
 #include <scan.h>
 #include <str.h>
 #include <subfd.h>
 #include <strerr.h>
 #include <cdb.h>
+#include <stralloc.h>
 #include <noreturn.h>
 
 #define FATAL "cdbget: fatal: "
@@ -41,38 +46,48 @@ die_write(void)
 no_return void
 die_usage(void)
 {
-	strerr_die1x(111, "cdbget: usage: cdbget key [skip]");
+	strerr_die1x(111, "cdbget: usage: cdbget [-n] key [skip]");
 }
 
-static struct cdb c;
-char            buf[1024];
 
 int
 main(int argc, char **argv)
 {
 	char           *key;
-	int             r;
-	uint32          pos;
-	uint32          len;
+	int             r, i, put_null = 0;
+	uint32          pos, len;
 	unsigned long   u = 0;
+	char            buf[1024];
+	struct        cdb c;
+	static stralloc _key = { 0 };
 
+	while ((i = getopt(argc, argv, "n")) != opteof) {
+		switch (i)
+		{
+		case 'n':
+			put_null = 1;
+			break;
+		default:
+			die_usage();
+		}
+	}
+	argv += optind;
 	if (!*argv)
-		die_usage();
-
-	if (!*++argv)
 		die_usage();
 	key = *argv;
 
-	if (*++argv) {
+	if (*++argv)
 		scan_ulong(*argv, &u);
-	}
 
 	cdb_init(&c, 0);
 	cdb_findstart(&c);
 
+	if (!stralloc_copys(&_key, key) || !stralloc_0(&_key))
+		_exit(111);
+	if (!put_null)
+		_key.len--;
 	for (;;) {
-		r = cdb_findnext(&c, key, str_len(key));
-		if (r == -1)
+		if ((r = cdb_findnext(&c, _key.s, _key.len)) == -1)
 			die_read();
 		if (!r)
 			_exit(100);
@@ -103,7 +118,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdbget.c,v 1.6 2023-02-12 13:29:59+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

@@ -3,20 +3,37 @@
 cdbget \- search for records in cdb
 
 .SH SYNOPSIS
-\fBcdbget\fR \fIk\fR [\fIs\fR]
+\fBcdbget\fR [ \-\fBn\fR ] \fIk\fR [\fIs\fR]
 
 .SH DESCRIPTION
-\fBcdbget\fR searches for a record with key \fIk\fR in a constant database. The constant
-database must be readable (and seekable) on \fBcdbget\fR's standard input.
+\fBcdbget\fR searches for a record with key \fIk\fR in a constant database.
+The constant database must be readable (and seekable) on \fBcdbget\fR's
+standard input.
 
-Normally \fBcdbget\fR prints the data in the first record with key \fIk\fR and exits 0. If
-there is no record with the key \fIk\fR, \fBcdbget\fR exits 100 without printing anything.
+Normally \fBcdbget\fR prints the data in the first record with key \fIk\fR
+and exits 0. If there is no record with the key \fIk\fR, \fBcdbget\fR exits
+100 without printing anything.
 
-If \fBcdbget\fR encounters a read error, write error, or database format error, it complains
-and exits 111.
+If \fBcdbget\fR encounters a read error, write error, or database format
+error, it complains and exits 111.
 
-Given a numeric \fIs\fR argument, \fBcdbget\fR skips past the first \fIs\fR records with key
-\fIk\fR, and prints the data in the next record. 
+Given a numeric \fIs\fR argument, \fBcdbget\fR skips past the first \fIs\fR
+records with key \fIk\fR, and prints the data in the next record. 
+
+The \-\fBn\fR arguments append a null character to the key. This can be
+used to search for records created by \fBcdb-database\fR(8) which appends a
+null character to the key.
+
+.EX
+# Get records for domain example.com from /etc/indimail/users/cdb
+$ cdbget '!example.com-' < /etc/indimail/users/cdb  |cat -e;echo
+example.com^@555^@555^@/var/indimail/domains/example.com^@-^@
+
+# Get authentication api token for entry 'gmail' in
+# the cdb file /etc/indmail/control/remote_auth.cdb
+$ cdbget -n '!gmail' < /etc/indimail/control/remote_auth.cdb  |cat -e;echo
+mbhangui@gmail.com wwwwxxxxyyyyzzzz AUTH_SMTP=PLAIN
+.EE
 
 .SH SEE ALSO
 cdbgetm(1), cdbmake(1), cdbdump(1)
