@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.72 2023-02-01 18:15:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.73 2023-02-12 13:20:06+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -107,8 +107,7 @@ SignThisHeader(const char *szHeader)
 }
 
 void
-maybe_die_dkim(e)
-	int             e;
+maybe_die_dkim(int e)
 {
 	switch (e)
 	{
@@ -1017,9 +1016,9 @@ main(int argc, char *argv[])
 	if ((ret = pidopen(starttime, ptr))) /*- set pidfn and open with fd = messfd */
 		die(ret, 0);
 	if ((readfd = open_read(pidfn)) == -1)
-		die(70, dkimsign ? 1 : 2);
+		die(QQ_PID_FILE, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
-		die(70, dkimsign ? 1 : 2);
+		die(QQ_PID_FILE, dkimsign ? 1 : 2);
 	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
 	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf)); /*- message content */
 	for (ret = 0;;) {
@@ -1069,9 +1068,9 @@ main(int argc, char *argv[])
 					maybe_die_dkim(ret);
 				else
 				for (ret = DKIM_FAIL,i = 0; i < nSigCount; i++) {
-					if (pDetails[i].nResult >= 0) {
+					if (pDetails[i].nResult >= 0)
 						ret = 0;
-					} else {
+					else {
 						if (ret == DKIM_FAIL)
 							ret = pDetails[i].nResult;
 					}
@@ -1232,7 +1231,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.72 2023-02-01 18:15:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.73 2023-02-12 13:20:06+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1246,6 +1245,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.73  2023-02-12 13:20:06+05:30  Cprogrammer
+ * replaced exit code 70 with QQ_PID_FILE
+ *
  * Revision 1.72  2023-02-01 18:15:33+05:30  Cprogrammer
  * use dkimkeys for setting env variables facilitating multi-signature generation with mixed encryption methods
  *
