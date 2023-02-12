@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newu.c,v $
+ * Revision 1.13  2023-02-12 13:28:28+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -132,8 +135,7 @@ main(int argc, char **argv)
 		die_writet();
 	if (!stralloc_copys(&wildchars, ""))
 		die_nomem();
-	for (;;)
-	{
+	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') != 0)
 			die_reada();
 		if (line.len && (line.s[0] == '.'))
@@ -147,36 +149,25 @@ main(int argc, char **argv)
 			die_format();
 		if (i == 0)
 			die_format();
-		if (!stralloc_copys(&key, "!"))
+		if (!stralloc_copys(&key, "!") ||
+				!stralloc_catb(&key, line.s + 1, i - 1))
 			die_nomem();
-		if (line.s[0] == '+')
-		{
-			if (!stralloc_catb(&key, line.s + 1, i - 1))
-				die_nomem();
-			case_lowerb(key.s, key.len);
-			if (i >= 2)
-			{
-				if (byte_chr(wildchars.s, wildchars.len, line.s[i - 1]) == wildchars.len)
-				{
+		case_lowerb(key.s, key.len);
+		if (line.s[0] == '+') {
+			if (i >= 2) {
+				if (byte_chr(wildchars.s, wildchars.len, line.s[i - 1]) == wildchars.len) {
 					if (!stralloc_append(&wildchars, line.s + i - 1))
 						die_nomem();
 				}
 			}
 		} else
-		{
-			if (!stralloc_catb(&key, line.s + 1, i - 1))
-				die_nomem();
-			if (!stralloc_0(&key))
-				die_nomem();
-			case_lowerb(key.s, key.len);
-		}
+		if (!stralloc_0(&key))
+			die_nomem();
 		if (!stralloc_copyb(&data, line.s + i + 1, line.len - i - 1))
 			die_nomem();
 		numcolons = 0;
-		for (i = 0; i < data.len; ++i)
-		{
-			if (data.s[i] == ':')
-			{
+		for (i = 0; i < data.len; ++i) {
+			if (data.s[i] == ':') {
 				data.s[i] = 0;
 				if (++numcolons == 6)
 					break;
@@ -206,7 +197,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	static char    *x = "$Id: qmail-newu.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-newu.c,v 1.13 2023-02-12 13:28:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: cdb-database.c,v $
+ * Revision 1.3  2023-02-12 13:29:01+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.2  2022-10-31 09:07:47+05:30  Cprogrammer
  * look at last colon when parsing data
  *
@@ -28,20 +31,15 @@
 
 int             rename(const char *, const char *);
 
-struct cdbmss   cdbmss;
-stralloc        key = { 0 };
-stralloc        data = { 0 };
-stralloc        line = { 0 };
-stralloc        wildchars = { 0 };
-stralloc        fntmp = {0};
-stralloc        fncdb = {0};
-char            inbuf[1024];
-substdio        ssin;
-
 int
 main(int argc, char **argv)
 {
 	int             i, fd, fdtemp, match;
+	struct cdbmss   cdbmss;
+	stralloc        key = { 0 }, data = { 0 }, line = { 0 }, wildchars = { 0 },
+					fntmp = {0}, fncdb = {0};
+	char            inbuf[1024];
+	substdio        ssin;
 
 	if (argc != 2)
 		strerr_die1x(100, "usage: cdb-database filename");
@@ -69,25 +67,22 @@ main(int argc, char **argv)
 		if (!match || byte_chr(line.s, line.len, '\0') < line.len)
 			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
 		i = byte_chr(line.s, line.len, ':');
-		if (i == line.len || !i || i < 2)
+		if (i == line.len || !i || i < 2) /*- =.*:, +.*: */
 			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
-		if (!stralloc_copys(&key, "!"))
+		if (!stralloc_copys(&key, "!") ||
+				!stralloc_catb(&key, line.s + 1, i - 1))
 			strerr_die2sys(111, FATAL, "out of memory");
+		case_lowerb(key.s, key.len);
 		if (line.s[0] == '+') {
-			if (!stralloc_catb(&key, line.s + 1, i - 1))
-				strerr_die2sys(111, FATAL, "out of memory");
-			case_lowerb(key.s, key.len);
 			if (i >= 2) {
 				if (byte_chr(wildchars.s, wildchars.len, line.s[i - 1]) == wildchars.len) {
 					if (!stralloc_append(&wildchars, line.s + i - 1))
 						strerr_die2sys(111, FATAL, "out of memory");
 				}
 			}
-		} else {
-			if (!stralloc_catb(&key, line.s + 1, i - 1) || !stralloc_0(&key))
-				strerr_die2sys(111, FATAL, "out of memory");
-			case_lowerb(key.s, key.len);
-		}
+		} else
+		if (!stralloc_0(&key))
+			strerr_die2sys(111, FATAL, "out of memory");
 		if (!stralloc_copyb(&data, line.s + i + 1, line.len - i - 1))
 			strerr_die2sys(111, FATAL, "out of memory");
 		if (data.s[data.len - 2] != ':')
@@ -114,7 +109,7 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	static char    *x = "$Id: cdb-database.c,v 1.2 2022-10-31 09:07:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdb-database.c,v 1.3 2023-02-12 13:29:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
