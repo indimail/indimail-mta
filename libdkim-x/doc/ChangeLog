@@ -28,6 +28,8 @@ o ability to alter Hash Method after DKIMSignInit
 07. dkimsign.cpp: fixed a= tag to "ed25519-sha256"
 08. dkimverify.cpp: fixed verification of ed25519 signature without ASN.1
     structure
+- 12/02/2023
+09. dkimverify.cpp: fixed multi-signature verfication (rsa+ed25519)
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023

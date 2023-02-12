@@ -202,9 +202,8 @@ DecodeQuotedPrintable(char *ptr)
 		if (*s == '=' && isxdigit(s[1]) && isxdigit(s[2])) {
 			*d++ = (tohex(s[1]) << 4) | tohex(s[2]);
 			s += 3;
-		} else {
+		} else
 			*d++ = *s++;
-		}
 	} while (*s != '\0');
 	*d = '\0';
 }
@@ -280,11 +279,13 @@ bool
 ParseAddresses(string str, vector < string > &Addresses)
 {
 	char           *s = (char *) str.c_str();
+
 	while (*s != '\0') {
 		char           *start = s;
 		char           *from = s;
 		char           *to = s;
 		char           *lt = NULL;	/*- pointer to less than character (<) which starts the address if found */
+
 		while (*from != '\0') {
 			if (*from == '(') {
 				/*- skip over comment -*/
@@ -470,32 +471,31 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				}
 			}
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-			else {
-				if (EVP_PKEY_base_id(i->m_pSelector->PublicKey) == EVP_PKEY_ED25519) {
-					res = EVP_DigestVerifyInit(i->m_Msg_ctx, NULL, NULL, NULL,
-							i->m_pSelector->PublicKey);  /* late initialization */
-					if (res != 1) {
-						if (verbose == true) {
-							while ((r = ERR_get_error()))
-								fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
-						}
-					} else {
-						res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
-								(size_t) i->SignatureData.length(), (unsigned char *) SigHdr.data(), SigHdr.length());
-						if (res != 1 && verbose == true) {
-							while ((r = ERR_get_error()))
-								fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
-						}
-						/*-
-						 * remove current dkim-signature so that in case
-						 * mail has multiple signatures, the new signature
-						 * will always be the first signature after the mail
-						 * body
-						 */
-						SigHdr.erase(SigHdr.length() - sSignedSig.length(), SigHdr.length());
+			else 
+			if (EVP_PKEY_base_id(i->m_pSelector->PublicKey) == EVP_PKEY_ED25519) {
+				res = EVP_DigestVerifyInit(i->m_Msg_ctx, NULL, NULL, NULL,
+						i->m_pSelector->PublicKey);  /* late initialization */
+				if (res != 1) {
+					if (verbose == true) {
+						while ((r = ERR_get_error()))
+							fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
+					}
+				} else {
+					res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
+							(size_t) i->SignatureData.length(), (unsigned char *) SigHdr.data(), SigHdr.length());
+					if (res != 1 && verbose == true) {
+						while ((r = ERR_get_error()))
+							fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
 					}
 				}
 			}
+			/*-
+			 * remove current dkim-signature so that in case
+			 * mail has multiple signatures, the new signature
+			 * will always be the first signature after the mail
+			 * body
+			 */
+			SigHdr.erase(SigHdr.length() - sSignedSig.length(), SigHdr.length());
 #endif
 			if (res == 1) {
 				if (i->UnverifiedBodyCount == 0)
@@ -596,9 +596,8 @@ SignatureInfo::Hash(const char *szBuffer, unsigned nBufLength, bool IsBody)
 		EVP_VerifyUpdate(&m_Hdr_ctx, szBuffer, nBufLength);
 #endif
 	}
-	if (m_SaveCanonicalizedData) {
+	if (m_SaveCanonicalizedData)
 		CanonicalizedData.append(szBuffer, nBufLength);
-	}
 }
 
 
@@ -945,10 +944,8 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 #else
 	long long       SignedTime = -1;
 #endif
-	if (values[10] != NULL) {
-		if (!ParseUnsigned(values[10], (unsigned long *) &SignedTime))
-			return DKIM_BAD_SYNTAX;
-	}
+	if (values[10] != NULL && !ParseUnsigned(values[10], (unsigned long *) &SignedTime))
+		return DKIM_BAD_SYNTAX;
 	/*- expiration time -*/
 	if (values[11] == NULL)
 		sig.ExpireTime = -1;
@@ -979,6 +976,7 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 	bool            HasFrom = false, HasSubject = false;
 	RemoveSWSP(values[4]);		/*- header names shouldn't have spaces in them so this should be ok... */
 	char           *s = strtok_r(values[4], ":", &saveptr);
+	
 	while (s != NULL) {
 		if (_stricmp(s, "From") == 0)
 			HasFrom = true;
@@ -1003,41 +1001,41 @@ CDKIMVerify::ProcessBody(char *szBuffer, int nBufLength, bool bEOF)
 	bool            MoreBodyNeeded = false;
 
 	for (list < SignatureInfo >::iterator i = Signatures.begin(); i != Signatures.end(); ++i) {
-		if (i->Status == DKIM_SUCCESS) {
-			if (i->BodyCanonicalization == DKIM_CANON_SIMPLE) {
-				if (nBufLength > 0) {
-					while (i->EmptyLineCount > 0) {
-						i->Hash("\r\n", 2, true);
-						i->EmptyLineCount--;
-					}
-					i->Hash(szBuffer, nBufLength, true);
+		if (i->Status != DKIM_SUCCESS)
+			continue;
+		if (i->BodyCanonicalization == DKIM_CANON_SIMPLE) {
+			if (nBufLength > 0) {
+				while (i->EmptyLineCount > 0) {
 					i->Hash("\r\n", 2, true);
-				} else {
-					i->EmptyLineCount++;
-					if (bEOF)
-						i->Hash("\r\n", 2, true);
+					i->EmptyLineCount--;
 				}
-			} else
-			if (i->BodyCanonicalization == DKIM_CANON_RELAXED) {
-				CompressSWSP(szBuffer, nBufLength);
-				if (nBufLength > 0) {
-					while (i->EmptyLineCount > 0) {
-						i->Hash("\r\n", 2, true);
-						i->EmptyLineCount--;
-					}
-					i->Hash(szBuffer, nBufLength, true);
-					if (!bEOF)
-						i->Hash("\r\n", 2, true);
-				} else
-					i->EmptyLineCount++;
-			} else
-			if (i->BodyCanonicalization == DKIM_CANON_NOWSP) {
-				RemoveSWSP(szBuffer, nBufLength);
 				i->Hash(szBuffer, nBufLength, true);
+				i->Hash("\r\n", 2, true);
+			} else {
+				i->EmptyLineCount++;
+				if (bEOF)
+					i->Hash("\r\n", 2, true);
 			}
-			if (i->UnverifiedBodyCount == 0)
-				MoreBodyNeeded = true;
+		} else
+		if (i->BodyCanonicalization == DKIM_CANON_RELAXED) {
+			CompressSWSP(szBuffer, nBufLength);
+			if (nBufLength > 0) {
+				while (i->EmptyLineCount > 0) {
+					i->Hash("\r\n", 2, true);
+					i->EmptyLineCount--;
+				}
+				i->Hash(szBuffer, nBufLength, true);
+				if (!bEOF)
+					i->Hash("\r\n", 2, true);
+			} else
+				i->EmptyLineCount++;
+		} else
+		if (i->BodyCanonicalization == DKIM_CANON_NOWSP) {
+			RemoveSWSP(szBuffer, nBufLength);
+			i->Hash(szBuffer, nBufLength, true);
 		}
+		if (i->UnverifiedBodyCount == 0)
+			MoreBodyNeeded = true;
 	}
 	if (!MoreBodyNeeded)
 		return DKIM_FINISHED_BODY;
@@ -1105,6 +1103,7 @@ SelectorInfo::Parse(char *Buffer)
 	} else {
 		/*- MUST include "sha1" or "sha256" -*/
 		char           *s = strtok_r(values[2], ":", &saveptr);
+
 		while (s != NULL) {
 			if (strcmp(s, "sha1") == 0)
 				AllowSHA1 = true;
@@ -1220,9 +1219,8 @@ SelectorInfo &CDKIMVerify::GetSelector(const string &sSelector, const string &sD
 {
 	/*- see if we already have this selector -*/
 	for (list < SelectorInfo >::iterator i = Selectors.begin(); i != Selectors.end(); ++i) {
-		if (_stricmp(i->Selector.c_str(), sSelector.c_str()) == 0 && _stricmp(i->Domain.c_str(), sDomain.c_str()) == 0) {
+		if (_stricmp(i->Selector.c_str(), sSelector.c_str()) == 0 && _stricmp(i->Domain.c_str(), sDomain.c_str()) == 0)
 			return *i;
-		}
 	}
 	Selectors.push_back(SelectorInfo(sSelector, sDomain));
 	SelectorInfo &sel = Selectors.back();
@@ -1236,7 +1234,8 @@ SelectorInfo &CDKIMVerify::GetSelector(const string &sSelector, const string &sD
 		DNSResult = m_pfnSelectorCallback(sFQDN.c_str(), Buffer, sizeof(Buffer));
 	else
 		DNSResult = DNSGetTXT(sFQDN.c_str(), Buffer, sizeof(Buffer));
-	switch (DNSResult) {
+	switch (DNSResult)
+	{
 	case DNSRESP_SUCCESS:
 		sel.Status = sel.Parse(Buffer);
 		break;
@@ -1299,13 +1298,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.30 2023-02-12 08:11:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.31 2023-02-12 10:37:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.31  2023-02-12 10:37:15+05:30  Cprogrammer
+ * fixed multi-signature verfication (rsa+ed25519)
+ *
  * Revision 1.30  2023-02-12 08:11:20+05:30  Cprogrammer
  * fixed verification of ed25519 signature without ASN.1 structure
  *
