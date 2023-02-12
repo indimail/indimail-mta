@@ -694,7 +694,7 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 		break;
 #endif
 	case DKIM_HASH_ED25519:
-		AddTagToSig((char *) "a", "ed25519", 0, false);
+		AddTagToSig((char *) "a", "ed25519-sha256", 0, false);
 		break;
 	}
 	switch (m_Canon)
@@ -756,16 +756,19 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	switch (nSigAlg)
 	{
 	case DKIM_HASH_SHA1:
-		EVP_DigestFinal(p3, Hash, &nHashLen);
+		if (!EVP_DigestFinal(p3, Hash, &nHashLen))
+			return DKIM_EVP_DIGEST_FAILURE;
 		break;
 #ifdef HAVE_EVP_SHA256
 	case DKIM_HASH_SHA256:
-		EVP_DigestFinal(p4, Hash, &nHashLen);
+		if (!EVP_DigestFinal(p4, Hash, &nHashLen))
+			return DKIM_EVP_DIGEST_FAILURE;
 		break;
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	case DKIM_HASH_ED25519:
-		EVP_DigestFinal(p4, Hash, &nHashLen);
+		if (!EVP_DigestFinal(p4, Hash, &nHashLen))
+			return DKIM_EVP_DIGEST_FAILURE;
 		break;
 #endif
 	}
@@ -815,11 +818,13 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	switch (nSigAlg)
 	{
 	case DKIM_HASH_SHA1:
-		EVP_SignUpdate(p1, sTemp.c_str(), sTemp.size());
+		if (!EVP_SignUpdate(p1, sTemp.c_str(), sTemp.size()))
+			return DKIM_EVP_SIGN_FAILURE;
 		break;
 #ifdef HAVE_EVP_SHA256
 	case DKIM_HASH_SHA256:
-		EVP_SignUpdate(p2, sTemp.c_str(), sTemp.size());
+		if (!EVP_SignUpdate(p2, sTemp.c_str(), sTemp.size()))
+			return DKIM_EVP_SIGN_FAILURE;
 		break;
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
@@ -980,13 +985,17 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.24 2023-02-04 18:06:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.25 2023-02-11 22:51:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.25  2023-02-11 22:51:43+05:30  Cprogrammer
+ * check for EVP sign and digest failures
+ * fixed a= tag to "ed25519-sha256"
+ *
  * Revision 1.24  2023-02-04 18:06:01+05:30  Cprogrammer
  * fixed memory leak
  *

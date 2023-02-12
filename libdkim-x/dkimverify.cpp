@@ -831,7 +831,7 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	else
-	if (strcmp(values[1],"ed25519") == 0)
+	if (strcmp(values[1], "ed25519-sha256") == 0)
 		sig.m_nHash = DKIM_HASH_SHA256;
 #endif
 	else
@@ -1128,7 +1128,7 @@ SelectorInfo::Parse(char *Buffer)
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		if (strcmp(values[3], "rsa") && strcmp(values[3], "ed25519"))
 			return DKIM_SELECTOR_INVALID;
-		if (!strcmp(values[3],"ed25519")) {
+		if (!strcmp(values[3], "ed25519")) {
 			AllowSHA1 = false;
 			AllowSHA256 = true;
 			method = DKIM_ENCRYPTION_ED25519; /*- k=ed25519 in selector */
@@ -1159,30 +1159,41 @@ SelectorInfo::Parse(char *Buffer)
 	if (values[6] != NULL) {
 		char           *s = strtok_r(values[6], ":", &saveptr);
 		while (s != NULL) {
-			if (strcmp(s, "y") == 0) {
+			if (strcmp(s, "y") == 0)
 				Testing = true;
-			} else
-			if (strcmp(s, "s") == 0) {
+			else
+			if (strcmp(s, "s") == 0)
 				SameDomain = true;
-			}
 			s = strtok_r(NULL, ":", &saveptr);
 		}
 	}
-#define M_ToConstUCharPtr(p)       reinterpret_cast<const unsigned char*>(p) /* Cast to unsigned char* */
 	/*- public key data */
-	unsigned        PublicKeyLen = DecodeBase64(values[4]);
-	if (PublicKeyLen == 0)
-		return DKIM_SELECTOR_KEY_REVOKED; /*- this error causes the signature to fail */
-	else {
+	{
+		unsigned        PublicKeyLen;
 		EVP_PKEY       *pkey;
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 		int             rtype;
 #endif
-		const unsigned char  *qq; /*- public key data */
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+		char            ed25519[61];
+#endif
+		char           *qq; /*- public key data */
 
-		qq = M_ToConstUCharPtr(values[4]);
-		pkey = d2i_PUBKEY(NULL, &qq, PublicKeyLen);
-		if (!pkey)
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+		if (!strcmp(values[3], "ed25519")) {
+			strcpy(ed25519, "MCowBQYDK2VwAyEA");
+			if (strlen(values[4]) > 44)
+				return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
+			strcat(ed25519, values[4]);
+			qq = ed25519;
+		} else
+#endif
+			qq = values[4];
+
+		PublicKeyLen = DecodeBase64(qq);
+		if (PublicKeyLen == 0)
+			return DKIM_SELECTOR_KEY_REVOKED; /*- this error causes the signature to fail */
+		if (!(pkey = d2i_PUBKEY(NULL, (const unsigned char **) &qq, PublicKeyLen)))
 			return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
 		/*- make sure public key is the correct type (we only support rsa & ed25519) */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -1245,7 +1256,7 @@ SelectorInfo &CDKIMVerify::GetSelector(const string &sSelector, const string &sD
 
 /*- GetDetails - Get DKIM verification details (per signature) -*/
 int
-CDKIMVerify::GetDetails(int *nSigCount, DKIMVerifyDetails ** pDetails)
+CDKIMVerify::GetDetails(int *nSigCount, DKIMVerifyDetails **pDetails)
 {
 	Details.clear();
 	for (list < SignatureInfo >::iterator i = Signatures.begin(); i != Signatures.end(); ++i) {
@@ -1256,7 +1267,8 @@ CDKIMVerify::GetDetails(int *nSigCount, DKIMVerifyDetails ** pDetails)
 		d.nResult = i->Status;
 		d.szCanonicalizedData = (char *) i->CanonicalizedData.c_str();
 		Details.push_back(d);
-	} *nSigCount = Details.size();
+	}
+	*nSigCount = Details.size();
 	*pDetails = (*nSigCount != 0) ? &Details[0] : NULL;
 	return DKIM_SUCCESS;
 }
@@ -1287,13 +1299,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.29 2023-02-02 17:38:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.30 2023-02-12 08:11:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.30  2023-02-12 08:11:20+05:30  Cprogrammer
+ * fixed verification of ed25519 signature without ASN.1 structure
+ *
  * Revision 1.29  2023-02-02 17:38:00+05:30  Cprogrammer
  * return actual signature error in ProcessHeaders instead of "no valid sigs"
  *

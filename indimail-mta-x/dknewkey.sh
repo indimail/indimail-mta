@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.16 2023-02-05 22:53:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.17 2023-02-11 23:01:57+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -247,18 +247,19 @@ else
 	if [ "$ktype" = "rsa" ] ; then
 		/usr/bin/openssl genrsa -out $selector $bits
 	else
-		/usr/bin/openssl genpkey -algorithm Ed25519 -out $selector
+		/usr/bin/openssl genpkey -algorithm ed25519 -out $selector
 	fi
 	if [ $? -ne 0 ] ; then
 		/bin/cat
 		exit 1
 	fi
 
-	echo "Generating $ktype DKIM public  key keysize=$bits for $selector.domainkey.$domain, file $dir/$selector.pub"
 	if [ "$ktype" = "rsa" ] ; then
+		echo "Generating $ktype DKIM public  key for $selector.domainkey.$domain, file $dir/$selector.pub, keysize=$bits"
 		pubkey=$(/usr/bin/openssl  rsa -in $selector -pubout -outform PEM | grep -v '^--' | tr -d '\n')
 	else
-		pubkey=$(/usr/bin/openssl pkey -in $selector -pubout | grep -v '^--' | tr -d '\n')
+		echo "Generating $ktype DKIM public  key for $selector.domainkey.$domain, file $dir/$selector.pub"
+		pubkey=$(/usr/bin/openssl pkey -pubout -in $selector | /usr/bin/openssl asn1parse -offset 12 -noout -out /dev/stdout | /usr/bin/openssl base64)
 	fi
 	if [ $? -ne 0 ] ; then
 		/bin/cat
@@ -280,6 +281,9 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.17  2023-02-11 23:01:57+05:30  Cprogrammer
+# generate ed25519 public key without ASN.1 structure (skip first 12 bytes)
+#
 # Revision 1.16  2023-02-05 22:53:15+05:30  Cprogrammer
 # made key time argument case insenstive
 # added -e, --enforce option to disable dkim key test mode

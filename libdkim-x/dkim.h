@@ -82,7 +82,9 @@ extern          "C" {
 #define DKIM_NO_SENDER                      -21 /* signing error: Could not find From: or Sender: header in message */
 #define DKIM_BAD_PRIVATE_KEY                -22 /* signing error: Could not parse private key */
 #define DKIM_BUFFER_TOO_SMALL               -23 /* signing error: Buffer passed in is not large enough */
-#define DKIM_MAX_ERROR                      -24 /* set this to 1 greater than the highest error code (but negative) */
+#define DKIM_EVP_SIGN_FAILURE               -24 /* signing error: evp signing failure */
+#define DKIM_EVP_DIGEST_FAILURE             -25 /* signing error: evp digest failure */
+#define DKIM_MAX_ERROR                      -26 /* set this to 1 greater than the highest error code (but negative) */
 
 #define DKIM_SSP_UNKNOWN                      1 /*- some messages may be signed */
 #define DKIM_SSP_ALL                          2 /*- all messages are signed, 3rd party allowed */
@@ -172,6 +174,9 @@ int  DKIM_CALL  DKIMSignReplaceHash(DKIMContext *pSignContext, DKIMSignOptions *
 
 /*
  * $Log: dkim.h,v $
+ * Revision 1.13  2023-02-11 22:50:12+05:30  Cprogrammer
+ * added DKIM_EVP_SIGN_FAILURE, DKIM_EVP_DIGEST_FAILURE definitions for EVP signing and digest failures
+ *
  * Revision 1.12  2023-02-01 18:02:45+05:30  Cprogrammer
  * new function DKIMSignReplaceHash to alter current Hash method
  *

@@ -20,6 +20,14 @@ o ability to alter Hash Method after DKIMSignInit
     line
 03. dkimverify.cpp: return actual signature error in ProcessHeaders instead of
     "no valid sigs"
+- 11/02/2023
+04. dkim.cpp: added dkim_error_str function to return DKIM error
+05. dkim.h: added DKIM_EVP_SIGN_FAILURE, DKIM_EVP_DIGEST_FAILURE
+    definitions for EVP signing and digest failures
+06. dkimsign.cpp: check for EVP sign and digest failures
+07. dkimsign.cpp: fixed a= tag to "ed25519-sha256"
+08. dkimverify.cpp: fixed verification of ed25519 signature without ASN.1
+    structure
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023

@@ -133,27 +133,92 @@ unsigned int str_chr(char *s, int c)
 	return t - s;
 }
 
+const char *dkim_error_str(int ret, int flag)
+{
+	switch (ret)
+	{
+	case DKIM_SUCCESS:			/*- 0 */ /*- A */
+		return flag ? "good        " : NULL;
+	case DKIM_FAIL:				/*- -1 */ /*- F */
+		return flag ? "bad         " : "DKIM Signature verification failed";
+	case DKIM_FINISHED_BODY:	/*- 1 process result: no more message body is needed */
+		return "process result: no more message body is needed";
+	case DKIM_PARTIAL_SUCCESS:	/*- 2 verify result: at least one but not all signatures verified */
+		return "verify result: at least one but not all signatures verified";
+	case DKIM_NEUTRAL:			/*- 3 verify result: no signatures verified but message is not suspicious */
+		return "verify result: no signatures verified but message is not suspicious";
+	case DKIM_SUCCESS_BUT_EXTRA:/*- 4 signature result: signature verified but it did not include all of the body */
+		return "signature result: signature verified but it did not include all of the body";
+	case DKIM_3PS_SIGNATURE:
+		break;
+	case DKIM_BAD_SYNTAX:		/*- -2 */ /*- G */
+		return "signature error: DKIM-Signature could not parse or has bad tags/values";
+	case DKIM_SIGNATURE_BAD:	/*- -3 */
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+		return "signature error: RSA/ED25519 verify failed";
+#else
+		return "signature error: RSA verify failed";
+#endif
+	case DKIM_SIGNATURE_BAD_BUT_TESTING:
+#if OPENSSL_VERSION_NUMBER >= 0x10101000L
+		return "signature error: RSA/ED25519 verify failed but testing";
+#else
+		return "signature error: RSA verify failed but testing";
+#endif
+	case DKIM_SIGNATURE_EXPIRED:
+		return "signature error: x= is old";
+	case DKIM_SELECTOR_INVALID:
+		return "signature error: selector doesn't parse or contains invalid values";
+	case DKIM_SELECTOR_GRANULARITY_MISMATCH:
+		return "signature error: selector g= doesn't match i=";
+	case DKIM_SELECTOR_KEY_REVOKED:
+		return "signature error: selector p= empty";
+	case DKIM_SELECTOR_DOMAIN_NAME_TOO_LONG:
+		return "signature error: selector domain name too long to request";
+	case DKIM_SELECTOR_DNS_TEMP_FAILURE:
+		return "signature error: temporary dns failure requesting selector";
+	case DKIM_SELECTOR_DNS_PERM_FAILURE:
+		return "signature error: permanent dns failure requesting selector";
+	case DKIM_SELECTOR_PUBLIC_KEY_INVALID:
+		return "signature error: selector p= value invalid or wrong format";
+	case DKIM_NO_SIGNATURES:
+		return "no signatures";
+	case DKIM_NO_VALID_SIGNATURES:
+		return "no valid signatures";
+	case DKIM_BODY_HASH_MISMATCH:
+		return "signature verify error: message body does not hash to bh value";
+	case DKIM_SELECTOR_ALGORITHM_MISMATCH:
+		return "signature error: selector h= doesn't match signature a=";
+	case DKIM_STAT_INCOMPAT:
+		return "signature error: incompatible v=";
+	case DKIM_UNSIGNED_FROM:
+		return "signature error: not all message's From headers in signature";
+	case DKIM_OUT_OF_MEMORY:
+		return "memory allocation failed";
+	case DKIM_INVALID_CONTEXT:
+		return "DKIMContext structure invalid for this operation";
+	case DKIM_NO_SENDER:
+		return "signing error: Could not find From: or Sender: header in message";
+	case DKIM_BAD_PRIVATE_KEY:
+		return "signing error: Could not parse private key";
+	case DKIM_BUFFER_TOO_SMALL:
+		return "signing error: Buffer passed in is not large enough";
+	case DKIM_EVP_SIGN_FAILURE:
+		return "signing error: evp signing failure";
+	case DKIM_EVP_DIGEST_FAILURE:
+		return "signing error: evp digest failure";
+	}
+	return "unknown error";
+}
+
 void
 dkim_error(int e)
 {
-	switch (e)
-	{
-	case DKIM_OUT_OF_MEMORY:
-		fprintf(stderr, "memory allocation failed\n");
-		break;
-	case DKIM_INVALID_CONTEXT:
-		fprintf(stderr, "DKIMContext structure invalid for this operation\n");
-		break;
-	case DKIM_NO_SENDER:
-		fprintf(stderr, "Could not find From: or Sender: header in message\n");
-		break;
-	case DKIM_BAD_PRIVATE_KEY:
-		fprintf(stderr, "Could not parse private key\n");
-		break;
-	case DKIM_BUFFER_TOO_SMALL:
-		fprintf(stderr, "Buffer passed in is not large enough");
-		break;
-	}
+	const char     *ptr;
+	
+	if ((ptr = dkim_error_str(e, 0)))
+		fprintf(stderr, "%s\n", ptr);
+	return;
 }
 
 /*
@@ -163,81 +228,9 @@ void writeHeader(int ret, int resDKIMSSP, int resDKIMADSP, int useSSP, int useAD
 {
 	char           *dkimStatus, *sspStatus, *adspStatus;
 
-	dkimStatus = sspStatus = adspStatus = (char *) "";
-	switch (ret)
-	{
-	case DKIM_SUCCESS_BUT_EXTRA:/*- 4 signature result: signature verified but it did not include all of the body */
-		dkimStatus = (char *) "signature result: signature verified but it did not include all of the body";
-		break;
-	case DKIM_NEUTRAL:			/*- 3 verify result: no signatures verified but message is not suspicious */
-		dkimStatus = (char *) "verify result: no signatures verified but message is not suspicious";
-		break;
-	case DKIM_PARTIAL_SUCCESS:	/*- 2 verify result: at least one but not all signatures verified */
-		dkimStatus = (char *) "verify result: at least none but not all signatures verified";
-		break;
-	case DKIM_FINISHED_BODY:	/*- 1 process result: no more message body is needed */
-		dkimStatus = (char *) "process result: no more message body is needed";
-		break;
-	case DKIM_SUCCESS:
-		dkimStatus = (char *) "good        ";
-		break;
-	case DKIM_FAIL:
-		dkimStatus = (char *) "failed      ";
-		break;
-	case DKIM_BAD_SYNTAX:
-		dkimStatus = (char *) "signature error: DKIM-Signature could not parse or has bad tags/values";
-		break;
-	case DKIM_SIGNATURE_BAD:
-		dkimStatus = (char *) "signature error: RSA/ED25519 verify failed";
-		break;
-	case DKIM_SIGNATURE_BAD_BUT_TESTING:
-		dkimStatus = (char *) "signature error: RSA/ED25519 verify failed but testing";
-		break;
-	case DKIM_SIGNATURE_EXPIRED:
-		dkimStatus = (char *) "signature error: x= is old";
-		break;
-	case DKIM_SELECTOR_INVALID:
-		dkimStatus = (char *) "signature error: selector doesn't parse or contains invalid values";
-		break;
-	case DKIM_SELECTOR_GRANULARITY_MISMATCH:
-		dkimStatus = (char *) "signature error: selector g= doesn't match i=";
-		break;
-	case DKIM_SELECTOR_KEY_REVOKED:
-		dkimStatus = (char *) "signature error: selector p= empty";
-		break;
-	case DKIM_SELECTOR_DOMAIN_NAME_TOO_LONG:
-		dkimStatus = (char *) "signature error: selector domain name too long to request";
-		break;
-	case DKIM_SELECTOR_DNS_TEMP_FAILURE:
-		dkimStatus = (char *) "signature error: temporary dns failure requesting selector";
-		break;
-	case DKIM_SELECTOR_DNS_PERM_FAILURE:
-		dkimStatus = (char *) "signature error: permanent dns failure requesting selector";
-		break;
-	case DKIM_SELECTOR_PUBLIC_KEY_INVALID:
-		dkimStatus = (char *) "signature error: selector p= value invalid or wrong format";
-		break;
-	case DKIM_NO_SIGNATURES:
-		dkimStatus = (char *) "process error, no sigs";
-		break;
-	case DKIM_NO_VALID_SIGNATURES:
-		dkimStatus = (char *) "process error, no valid sigs";
-		break;
-	case DKIM_BODY_HASH_MISMATCH:
-		dkimStatus = (char *) "sigature verify error: message body does not hash to bh value";
-		break;
-	case DKIM_SELECTOR_ALGORITHM_MISMATCH:
-		dkimStatus = (char *) "signature error: selector h= doesn't match signature a=";
-		break;
-	case DKIM_STAT_INCOMPAT:
-		dkimStatus = (char *) "signature error: incompatible v=";
-		break;
-	default:
-		dkimStatus = (char *) "error";
-		break;
-	}
-	if (useSSP && resDKIMSSP != -1)
-	{
+	sspStatus = adspStatus = (char *) "";
+	dkimStatus = (char *) dkim_error_str(ret, 1);
+	if (useSSP && resDKIMSSP != -1) {
 		switch(resDKIMSSP)
 		{
 			case DKIM_SSP_ALL:
@@ -275,7 +268,7 @@ void writeHeader(int ret, int resDKIMSSP, int resDKIMADSP, int useSSP, int useAD
 				break;
 			case DKIM_ADSP_UNKNOWN:
 			default:
-				adspStatus = (char *) "unknown ;";
+				adspStatus = (char *) "unknown;";
 				break;
 		}
 	}
@@ -748,14 +741,14 @@ main(int argc, char **argv)
 				if (!ret)
 					break;
 				buffer[ret] = 0;
-				if (DKIMSignProcess(&ctxt, buffer, ret) == DKIM_INVALID_CONTEXT) {
-					fprintf(stderr, "DKIMSignProcess: DKIMContext structure invalid for this operation\n");
+				if ((ret = DKIMSignProcess(&ctxt, buffer, ret)) != DKIM_SUCCESS) {
+					dkim_error(ret);
 					DKIMSignFree(&ctxt);
 					return (1);
 				}
 			}
-			if (DKIMSignGetSig2(&ctxt, PrivKey[i].key, &pSig) == DKIM_INVALID_CONTEXT) {
-				fprintf(stderr, "DKIMSignProcess: DKIMContext structure invalid for this operation\n");
+			if ((ret = DKIMSignGetSig2(&ctxt, PrivKey[i].key, &pSig)) != DKIM_SUCCESS) {
+				dkim_error(ret);
 				DKIMSignFree(&ctxt);
 				return (1);
 			}
@@ -790,8 +783,8 @@ main(int argc, char **argv)
 			} else
 			if (!i)
 				break;
-			ret = DKIMVerifyProcess(&ctxt, buffer, i);
-			dkim_error(ret);
+			if ((ret = DKIMVerifyProcess(&ctxt, buffer, i)))
+				dkim_error(ret);
 			if (ret > 0 && ret < DKIM_FINISHED_BODY)
 				ret = DKIM_FAIL;
 			if (ret)
@@ -806,17 +799,17 @@ main(int argc, char **argv)
 			else {
 				for (ret = DKIM_FAIL, i = 0; i < nSigCount; i++) {
 					if (verbose)
-						printf("Signature # %02d: ", i + 1);
+						fprintf(stderr, "Signature # %02d: ", i + 1);
 					if (pDetails[i].nResult >= 0) {
 						ret = 0;
 						if (verbose)
-							printf("Success\n");
+							fprintf(stderr, "Success\n");
 						continue;
 					} else {
 						if (ret == DKIM_FAIL)
 							ret = pDetails[i].nResult;
 						if (verbose)
-							printf("Failure %d\n", pDetails[i].nResult);
+							fprintf(stderr, "Failure %d\n", pDetails[i].nResult);
 					}
 				}
 				if (!nSigCount)
@@ -887,13 +880,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.32 2023-02-04 11:56:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.33 2023-02-12 08:07:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.33  2023-02-12 08:07:00+05:30  Cprogrammer
+ * added dkim_error_str function to return DKIM error
+ *
  * Revision 1.32  2023-02-04 11:56:10+05:30  Cprogrammer
  * generate DKIM-Signature for each -s option
  *
