@@ -31,6 +31,10 @@ multi-signature generation
 - 11/02/2022
 16. dknewkey.sh: generate ed25519 public key without ASN.1 structure (skip
     first 12 bytes)
+- 12/02/2022
+17. qmail-dkim.c: replaced exit code 70 with QQ_PID_FILE
+18. cdbget.c: added -n option for searching cdb created by cdb-database
+19. qmail-newu.c, cdb-database.c: refactored code
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
