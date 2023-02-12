@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.73 2023-02-12 13:20:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.74 2023-02-12 18:37:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <sgetopt.h>
 #include <substdio.h>
+#include <subfd.h>
 #include <open.h>
 #include <sig.h>
 #include <scan.h>
@@ -27,6 +28,7 @@
 #include <dkim.h>
 #include <makeargs.h>
 #include <noreturn.h>
+#include <qprintf.h>
 #include "control.h"
 #include "auto_control.h"
 #include "qmail.h"
@@ -912,7 +914,7 @@ main(int argc, char *argv[])
 	int             pim[2];
 	int             wstat;
 	int             resDKIMSSP = -1, resDKIMADSP = -1, useSSP = 0, useADSP = 0, accept3ps = 0;
-	int             sCount = 0, sSize = 0;
+	int             sCount = 0, sSize = 0, verbose = 0;
 	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
 	unsigned long   pid;
 	char           *selector = NULL, *ptr;
@@ -1062,19 +1064,29 @@ main(int argc, char *argv[])
 
 			restore_gid();
 			if (!ret) {
+				if (env_get("VERBOSE"))
+					verbose = 1;
 				if ((ret = DKIMVerifyResults(&ctxt, &sCount, &sSize)) != DKIM_SUCCESS)
 					maybe_die_dkim(ret);
 				if ((ret = DKIMVerifyGetDetails(&ctxt, &nSigCount, &pDetails, szPolicy)) != DKIM_SUCCESS)
 					maybe_die_dkim(ret);
 				else
 				for (ret = DKIM_FAIL,i = 0; i < nSigCount; i++) {
-					if (pDetails[i].nResult >= 0)
+					if (verbose)
+						subprintf(subfderr, "Signature # %02d: ", i + 1);
+					if (pDetails[i].nResult >= 0) {
 						ret = 0;
-					else {
+						if (verbose)
+							subprintf(subfderr, "Success\n");
+					} else {
 						if (ret == DKIM_FAIL)
 							ret = pDetails[i].nResult;
+						if (verbose)
+							subprintf(subfderr, "Failure %d\n", pDetails[i].nResult);
 					}
 				}
+				if (verbose)
+					substdio_flush(subfderr);
 				if (!nSigCount)
 					ret = DKIM_NO_SIGNATURES;
 			}
@@ -1231,7 +1243,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.73 2023-02-12 13:20:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.74 2023-02-12 18:37:37+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1245,6 +1257,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.74  2023-02-12 18:37:37+05:30  Cprogrammer
+ * use VERBOSE variable to turn on debug for signature verification status on fd 2
+ *
  * Revision 1.73  2023-02-12 13:20:06+05:30  Cprogrammer
  * replaced exit code 70 with QQ_PID_FILE
  *

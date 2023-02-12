@@ -35,6 +35,8 @@ multi-signature generation
 17. qmail-dkim.c: replaced exit code 70 with QQ_PID_FILE
 18. cdbget.c: added -n option for searching cdb created by cdb-database
 19. qmail-newu.c, cdb-database.c: refactored code
+20. dk-filter.sh, qmail-dkim.c: use VERBOSE variable to turn on debug for
+    signature verification status on fd 2
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

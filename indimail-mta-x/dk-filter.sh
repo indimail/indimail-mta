@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.34 2023-02-05 20:59:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.35 2023-02-12 18:17:21+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -390,6 +390,9 @@ if [ $dkimverify -eq 1 ] ; then
 	if [ -n "$UNSIGNED_FROM" ] ; then
 		dkimvargs="$dkimvargs -f"
 	fi
+	if [ -n "$VERBOSE" ] ; then
+		dkimvargs="$dkimvargs -V"
+	fi
 	if [ -n "$SELECTOR_DATA" ] ; then
 		$prefix/bin/dkim $dkimvargs -v -T "$SELECTOR_DATA"
 	else
@@ -427,6 +430,9 @@ exec 0<$tmpfn
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.35  2023-02-12 18:17:21+05:30  Cprogrammer
+# use VERBOSE variable to turn on debug for signature verification status on fd 2
+#
 # Revision 1.34  2023-02-05 20:59:55+05:30  Cprogrammer
 # fixed temp files not removed for private key not found
 #
