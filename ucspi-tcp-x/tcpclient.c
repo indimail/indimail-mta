@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.28 2023-01-08 07:47:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.29 2023-02-13 20:19:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.28 2023-01-08 07:47:25+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.29 2023-02-13 20:19:20+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -757,9 +757,11 @@ CONNECTED:
 		if (!(ctx = tls_init(tls_method, certfile.s,
 				cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 				ciphers, client)))
-			_exit(111);
-		if (!(ssl = tls_session(ctx, s)))
-			_exit(111);
+			strerr_die2x(111, FATAL, "unable to initialize TLS");
+		if (!(ssl = tls_session(ctx, s))) {
+			SSL_CTX_free(ctx);
+			strerr_die2x(111, FATAL, "unable to setup SSL session");
+		}
 		SSL_CTX_free(ctx);
 		ctx = NULL;
 		if (stls != unknown)
@@ -813,6 +815,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.29  2023-02-13 20:19:20+05:30  Cprogrammer
+ * added error message for tls_init, tls_session failures
+ *
  * Revision 1.28  2023-01-08 07:47:25+05:30  Cprogrammer
  * added -z option to turn on setting of TLS_PROVIDER env variable
  * replace internal TLS function with TLS functions from libqmail

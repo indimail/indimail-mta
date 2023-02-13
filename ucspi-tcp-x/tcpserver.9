@@ -153,9 +153,15 @@ Switch group ID to \fIgid\fR after preparing to receive connections.
 \fIgid\fR must be a positive integer. 
 
 .TP
-.B \-u \fIuid
-Switch user ID to \fIuid\fR after preparing to receive connections.
-\fIuid\fR must be a positive integer. 
+\fB\-u \fIuid\fR | \fB\-u \fIuser
+One can either pass a positive integer \fIuid\fR or a user in /etc/passwd.
+
+If \fIuid\fR is passed, then switch user ID to \fIuid\fR after preparing to
+receive connections.
+
+If \fIuser\fR is passed, then switch user ID to uid, group ID to gid and
+set all supplementary groups associated with the user preparing to receive
+connnection.
 
 .TP
 .B \-U

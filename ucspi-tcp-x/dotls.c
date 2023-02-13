@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.21 2023-01-11 08:19:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.22 2023-02-13 20:15:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -41,7 +41,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.21 2023-01-11 08:19:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.22 2023-02-13 20:15:42+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -918,7 +918,7 @@ main(int argc, char **argv)
 	if (!(ctx = tls_init(tls_method, certfile.s,
 			cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 			ciphers, client_mode ? client : server)))
-		_exit(111);
+		strerr_die2x(111, FATAL, "unable to initialize TLS");
 #ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
 	if (client_renegotiation && !client_mode)
 		SSL_CTX_set_options(ctx, SSL_OP_ALLOW_CLIENT_RENEGOTIATION);
@@ -958,8 +958,10 @@ main(int argc, char **argv)
 	default:
 		break;
 	}
-	if (!(ssl = tls_session(ctx, client_mode ? 6 : 0)))
+	if (!(ssl = tls_session(ctx, client_mode ? 6 : 0))) {
+		SSL_CTX_free(ctx);
 		strerr_die2x(111, FATAL, "unable to setup SSL session");
+	}
 	SSL_CTX_free(ctx);
 	ctx = NULL;
 	if (!stralloc_copys(&tls_server_version, SSL_get_version(ssl)) ||
@@ -1093,6 +1095,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.22  2023-02-13 20:15:42+05:30  Cprogrammer
+ * added error message for tls_init failure
+ *
  * Revision 1.21  2023-01-11 08:19:33+05:30  Cprogrammer
  * added -N option to allow client side renegotiation
  *

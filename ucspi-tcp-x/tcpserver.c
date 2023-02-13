@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.83 2023-01-11 08:19:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.85 2023-02-13 22:39:06+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -21,6 +21,27 @@
 #include <byte.h>
 #include <fmt.h>
 #include <scan.h>
+#include <fd.h>
+#include <env.h>
+#include <prot.h>
+#include <open.h>
+#include <wait.h>
+#include <stralloc.h>
+#include <alloc.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <error.h>
+#include <strerr.h>
+#include <sig.h>
+#include <setuserid.h>
+#include <noreturn.h>
+#include <ndelay.h>
+#include <iopause.h>
+#ifdef DARWIN
+#define opteof -1
+#else
+#include <sgetopt.h>
+#endif
 #include <uint16.h>
 #include "haveip6.h"
 #include "ip4.h"
@@ -31,30 +52,10 @@
 #if defined(IPV6) && defined(FREEBSD)
 #include <sys/select.h>
 #endif
-#include <fd.h>
-#include <env.h>
-#include "prot.h"
-#include <open.h>
-#include <wait.h>
-#include <stralloc.h>
-#include <alloc.h>
-#include <substdio.h>
-#include <subfd.h>
-#include <error.h>
-#include <strerr.h>
-#include <sig.h>
-#include <noreturn.h>
-#ifdef DARWIN
-#define opteof -1
-#else
-#include <sgetopt.h>
-#endif
 #include "upathexec.h"
 #include "socket.h"
-#include <ndelay.h>
 #include "tcpremoteinfo.h"
 #include "rules.h"
-#include "iopause.h"
 #include "dns.h"
 #ifdef MYSQL_CONNFIG
 #include "hasmysql.h"
@@ -64,7 +65,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.83 2023-01-11 08:19:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.85 2023-02-13 22:39:06+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -134,6 +135,7 @@ static stralloc limitFile;
 
 static uid_t    uid = -1;
 static gid_t    gid = -1;
+static char    *user = NULL;
 
 struct iptable
 {
@@ -1272,7 +1274,7 @@ main(int argc, char **argv, char **envp)
 #endif
 	struct servent *se;
 	unsigned long   port, ipcount = -1;
-	int             s, t, pid, opt, tmpLimit;
+	int             sfd, asd, pid, opt, tmpLimit, i;
 #ifdef IPV6
 	int             fakev4 = 0;
 #ifdef FREEBSD
@@ -1409,7 +1411,16 @@ main(int argc, char **argv, char **envp)
 				scan_uint(x, &gid);
 			break;
 		case 'u':
-			scan_uint(optarg, &uid);
+			for (i = 0, x = optarg; *x; x++) {
+				if (!isdigit(*x)) {
+					i = 1;
+					break;
+				}
+			}
+			if (i)
+				user = optarg;
+			else
+				scan_uint(optarg, &uid);
 			break;
 		case 'g':
 			scan_uint(optarg, &gid);
@@ -1600,7 +1611,7 @@ main(int argc, char **argv, char **envp)
 		if (!(ctx = tls_init(tls_method, certfile.s,
 				cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 				ciphers, server)))
-			_exit(111);
+			strerr_die2x(111, FATAL, "unable to initialize TLS");
 #ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
 		if (client_renegotiation)
 			SSL_CTX_set_options(ctx, SSL_OP_ALLOW_CLIENT_RENEGOTIATION);
@@ -1611,42 +1622,42 @@ main(int argc, char **argv, char **envp)
 #ifdef FREEBSD
 	if ((s6 = socket_tcp6()) == -1)
 #else
-	if ((s = socket_tcp6()) == -1)
+	if ((sfd = socket_tcp6()) == -1)
 #endif
 #else
-	if ((s = socket_tcp()) == -1)
+	if ((sfd = socket_tcp()) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to create socket: ");
 #ifdef IPV6
 #ifdef FREEBSD
 	if (socket_bind6_reuse(s6, localip, localport, netif) == -1)
 #else
-	if (socket_bind6_reuse(s, localip, localport, netif) == -1)
+	if (socket_bind6_reuse(sfd, localip, localport, netif) == -1)
 #endif
 #else
-	if (socket_bind4_reuse(s, localip, localport) == -1)
+	if (socket_bind4_reuse(sfd, localip, localport) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to bind: ");
 #ifdef IPV6
 #ifdef FREEBSD
 	if (socket_local6(s6, localip, &localport, &netif) == -1)
 #else
-	if (socket_local6(s, localip, &localport, &netif) == -1)
+	if (socket_local6(sfd, localip, &localport, &netif) == -1)
 #endif
 #else
-	if (socket_local4(s, localip, &localport) == -1)
+	if (socket_local4(sfd, localip, &localport) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to get local address: ");
 #if defined(IPV6) && defined(FREEBSD)
 	if (socket_listen(s6, backlog) == -1)
 #else
-	if (socket_listen(s, backlog) == -1)
+	if (socket_listen(sfd, backlog) == -1)
 #endif
 		strerr_die2sys(111, FATAL, "unable to listen: ");
 #if defined(IPV6) && defined(FREEBSD)
 	ndelay_off(s6);
 #else
-	ndelay_off(s);
+	ndelay_off(sfd);
 #endif
 #if defined(IPV6) && defined(FREEBSD)
 	/*
@@ -1671,10 +1682,15 @@ main(int argc, char **argv, char **envp)
 		noipv6 = 0;
 	}
 #endif /*- #if defined(IPV6) && defined(FREEBSD) */
-	if (gid != -1 && prot_gid(gid) == -1)
-		strerr_die2sys(111, FATAL, "unable to set gid: ");
-	if (uid != -1 && prot_uid(uid) == -1)
-		strerr_die2sys(111, FATAL, "unable to set uid: ");
+	if (user) {
+		if (setuserid(user) == -1)
+			strerr_die2sys(111, FATAL, "unable to set user: ");
+	} else {
+		if (gid != -1 && prot_gid(gid) == -1)
+			strerr_die2sys(111, FATAL, "unable to set gid: ");
+		if (uid != -1 && prot_uid(uid) == -1)
+			strerr_die2sys(111, FATAL, "unable to set uid: ");
+	}
 	if (tcpserver_plugin(envp, 1))
 		_exit(111);
 	localportstr[fmt_ulong(localportstr, localport)] = 0;
@@ -1704,21 +1720,21 @@ main(int argc, char **argv, char **envp)
 			}
 			if (r) {
 				if (FD_ISSET(s6, &rfds))
-					s = s6;
+					sfd = s6;
 				else
 				if (FD_ISSET(s4, &rfds))
-					s = s4;
+					sfd = s4;
 				break;
 			}
 		}
 #endif
 #ifdef IPV6
-		t = socket_accept6(s, remoteip, &remoteport, &netif);
+		asd = socket_accept6(sfd, remoteip, &remoteport, &netif);
 #else
-		t = socket_accept4(s, remoteip, &remoteport);
+		asd = socket_accept4(sfd, remoteip, &remoteport);
 #endif
 		sig_block(sig_child);
-		if (t == -1)
+		if (asd == -1)
 			continue;
 		++numchildren;
 		if (!flagssl)
@@ -1741,19 +1757,19 @@ main(int argc, char **argv, char **envp)
 			strerr_warn4("tcpserver: end ", remoteipstr, " perIPlimit ", strnum2, 0);
 			--numchildren;
 			errno = error_acces;
-			close(t);
+			close(asd);
 			continue;
 		}
 		switch (pid = fork())
 		{
 		case 0:
-			close(s);
+			close(sfd);
 #if defined(HAS_MYSQL)
 			if (use_sql && conn)
 				check_db(conn);
 #endif
-			doit(t); /*- MAXPERIP can only be checked after this */
-			if (fd_move(0, t) == -1 || fd_copy(1, 0) == -1)
+			doit(asd); /*- MAXPERIP can only be checked after this */
+			if (fd_move(0, asd) == -1 || fd_copy(1, 0) == -1)
 				strerr_die2sys(111, DROP, "unable to set up descriptors: ");
 			sig_uncatch(sig_child);
 			sig_unblock(sig_child);
@@ -1800,8 +1816,10 @@ main(int argc, char **argv, char **envp)
 				default:
 					break;
 				} /*- switch fork() */
-				if (!(ssl = tls_session(ctx, 0)))
+				if (!(ssl = tls_session(ctx, 0))) {
+					SSL_CTX_free(ctx);
 					strerr_die2x(111, DROP, "unable to setup SSL session");
+				}
 				if (!stralloc_copys(&tls_server_version, SSL_get_version(ssl)) ||
 						!stralloc_0(&tls_server_version))
 					strerr_die2x(111, FATAL, "out of memory");
@@ -1833,7 +1851,7 @@ main(int argc, char **argv, char **envp)
 		default:
 			add_ip(pid);
 		} /*- switch (pid = fork()) */
-		close(t);
+		close(asd);
 	}
 }
 
@@ -1846,6 +1864,12 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.85  2023-02-13 22:39:06+05:30  Cprogrammer
+ * allow both user and uid to be passed to -u option
+ *
+ * Revision 1.84  2023-02-13 20:20:19+05:30  Cprogrammer
+ * added error message for tls_init failure
+ *
  * Revision 1.83  2023-01-11 08:19:41+05:30  Cprogrammer
  * added -N option to allow client side renegotiation
  *
