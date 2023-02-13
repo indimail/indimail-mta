@@ -27,7 +27,7 @@ die(char *arg)
 }
 
 /*
- * return 0 if userlist (USE_SETGROUPS env vairable is not set
+ * return 0 if userlist (USE_SETGROUPS env variable is not set
  * return 1 if userlist is set and == 1
  * else userlist is a list of users seperated by colon ':'
  *   return 1 if user is present in the list
