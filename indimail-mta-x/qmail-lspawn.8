@@ -4,6 +4,7 @@ qmail-lspawn \- schedule local deliveries
 .SH SYNOPSIS
 .B qmail-lspawn
 .I defaultdelivery
+
 .SH DESCRIPTION
 .B qmail-lspawn
 reads a series of local delivery commands from descriptor 0,
@@ -80,9 +81,12 @@ PWSTRUCT to "No such user". However, a delivery agent like
 \fBvdelivermail(8)\fR reroutes the email to the correct destination host
 which has the user account, using \fBqmail-remote\fR.
 
-.B
-qmail-lspawn goes ahead without attempting to load external library if
+.B qmail-lspawn
+goes ahead without attempting to load external library if
 AUTHSELF was not set.
+
+.B qmail-lspawn
+runs with uid 0.
 
 .SH "SEE ALSO"
 envelopes(5),
