@@ -492,7 +492,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			/*-
 			 * remove current dkim-signature so that in case
 			 * mail has multiple signatures, the new signature
-			 * will always be the first signature after the mail
+			 * will always be the first signature before the mail
 			 * body
 			 */
 			SigHdr.erase(SigHdr.length() - sSignedSig.length(), SigHdr.length());
@@ -1298,14 +1298,14 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.31 2023-02-12 10:37:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.31 2023-02-13 10:01:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
- * Revision 1.31  2023-02-12 10:37:15+05:30  Cprogrammer
+ * Revision 1.31  2023-02-13 10:01:35+05:30  Cprogrammer
  * fixed multi-signature verfication (rsa+ed25519)
  *
  * Revision 1.30  2023-02-12 08:11:20+05:30  Cprogrammer
