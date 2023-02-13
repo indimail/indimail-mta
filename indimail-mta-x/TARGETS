@@ -151,10 +151,6 @@ dk-filter.8
 dkim.lib
 dknewkey
 dknewkey.8
-dktest
-dktest.8
-dktest.o
-dktrace.o
 dnsblcheck
 dnsblcheck.o
 dnsbl.o
@@ -388,12 +384,9 @@ qmaildirmake
 qmaildirmake.o
 qmaildirwatch
 qmaildirwatch.o
-qmail-dk
-qmail-dk.8
 qmail-dkim
 qmail-dkim.8
 qmail-dkim.o
-qmail-dk.o
 qmail-getpw
 qmail-getpw.8
 qmail-getpw.o

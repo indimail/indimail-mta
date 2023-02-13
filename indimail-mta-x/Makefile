@@ -25,7 +25,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	atrn autoresponder batv binm1 binm1+df binm2 binm2+df binm3 binm3+df \
 	bouncesaying cdb-database cdbdump cdbget cdbgetm cdbmake cdbmake-12 \
 	cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
-	create_services cronlist.q ctrlenv datemail dk-filter dknewkey dktest \
+	create_services cronlist.q ctrlenv datemail dk-filter dknewkey \
 	dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt \
 	dot-forward drate etrn except fastforward forward generic.so greydaemon \
 	home home+df hostname iftocc indimail-mta.changes setqload qmonitor \
@@ -37,7 +37,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	predate preline printforward printmaillist proc proc+df qaes qarf \
 	qbase64 qdane qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat \
 	qmail-cdb qmail-clean qmailconfig qmail-daned qmail-direct qtop \
-	qmaildirmake qmaildirwatch qmail-dk qmail-dkim qmail-getpw qmail-greyd \
+	qmaildirmake qmaildirwatch qmail-dkim qmail-getpw qmail-greyd \
 	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newu \
 	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
 	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
@@ -53,12 +53,12 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	yearcal
 
 man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
-	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 dktest.8 \
+	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.5 forward.1 maildirserial.1 mlmatchup.8 multi-queue.7 \
 	new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 \
 	qmail-cdb.8 qmail-clean.8 indimail-control.5 qmail-daned.8 qtop.1 \
-	qmail-direct.8 qmail-dk.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
+	qmail-direct.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
 	qmail-limits.7 qmail-local.8 qmail-multi.8 qmonitor.8 indimail-mta.7 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 sslerator.8 \
 	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
@@ -472,8 +472,8 @@ socket.lib
 
 dns.o: \
 compile dns.c ip.h ipalloc.h strsalloc.h dns.h tlsarralloc.h \
-conf-tls conf-spf conf-domainkeys conf-ip conf-tlsa
-	./compile `grep -h -v "^#" conf-tls conf-spf conf-domainkeys \
+conf-tls conf-spf conf-ip conf-tlsa
+	./compile `grep -h -v "^#" conf-tls conf-spf \
 		conf-ip conf-tlsa` dns.c
 
 dnscname: \
@@ -1451,32 +1451,8 @@ auto_split.h conf-sync conf-qhpsi conf-ip conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 	qmail-queue.c
 
-domainkeys.o: compile domainkeys.c conf-domainkeys
-	./compile `grep -h -v "^#" conf-domainkeys` domainkeys.c
-
-dktrace.o: compile dktrace.c dktrace.h conf-domainkeys
-	./compile `grep -h -v "^#" conf-domainkeys` dktrace.c
-
-dktest: load dktest.o domainkeys.o dktrace.o dns.o ip.o strsalloc.o ipalloc.o \
-socket_v4mappedprefix.o socket_v6any.o tlsarralloc.o dns_text.o dns.lib
-	./load dktest domainkeys.o dktrace.o dns.o ip.o strsalloc.o ipalloc.o \
-	socket_v4mappedprefix.o socket_v6any.o tlsarralloc.o \
-	dns_text.o -lcrypto `cat dns.lib` $(QMAILLIB)
-
-dktest.o: compile dktest.c domainkeys.h conf-domainkeys
-	./compile `grep -h -v "^#" conf-domainkeys` dktest.c
-
-testtrace: load testtrace.o dns.o case_diffs.o case_diffb.o domainkeys.o dktrace.o \
-scan_xlong.o ip.o iperror.o strsfmt_str.o socket_v4mappedprefix.o socket_v6any.o \
-dns.lib
-	./load testtrace dns.o domainkeys.o dktrace.o ip.o ipalloc.o strsalloc.o \
-	socket_v4mappedprefix.o socket_v6any.o `cat dns.lib` -lcrypto $(QMAILLIB)
-
 dns_text.o: compile dns_text.c dns.h
-	./compile -DDOMAIN_KEYS dns_text.c
-
-testtrace.o: compile testtrace.c dktrace.h
-	./compile testtrace.c
+	./compile dns_text.c
 
 dknewkey: dknewkey.sh warn-auto.sh conf-sysconfdir
 	rm -f dknewkey
@@ -1485,35 +1461,6 @@ dknewkey: dknewkey.sh warn-auto.sh conf-sysconfdir
 
 dknewkey.8: dknewkey.9
 	$(edit) dknewkey.9 > $@
-
-qmail-dk: \
-load qmail-dk.o tlsarralloc.o auto_control.o qmulti.o parse_env.o \
-variables.o dns.o strsalloc.o ip.o pidopen.o ipalloc.o \
-socket_v4mappedprefix.o socket_v6any.o wildmat.o custom_error.o \
-domainkeys.o dktrace.o control.o dns_text.o getDomainToken.o \
-auto_prefix.o auto_qmail.o getqueue.o dns.lib rt.lib
-	./load qmail-dk auto_control.o qmulti.o variables.o custom_error.o \
-	socket_v4mappedprefix.o tlsarralloc.o socket_v6any.o dns.o \
-	strsalloc.o ip.o ipalloc.o wildmat.o domainkeys.o dktrace.o \
-	control.o dns_text.o getDomainToken.o pidopen.o auto_qmail.o \
-	auto_prefix.o getqueue.o parse_env.o $(static_option) $(QMAILLIB) \
-	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
-
-qmail-dk.o: \
-compile qmail-dk.c qmail.h control.h domainkeys.h \
-variables.h conf-domainkeys auto_control.h qmulti.h pidopen.h \
-custom_error.h getDomainToken.h
-	./compile `grep -h -v "^#" conf-domainkeys` qmail-dk.c
-
-qmail-dk.8: qmail-dk.9 conf-sysconfdir
-	cat qmail-dk.9 \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> qmail-dk.8
-
-dktest.8: dktest.9 conf-sysconfdir
-	cat dktest.9 \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> dktest.8
 
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
@@ -1549,9 +1496,8 @@ dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
 	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
 
 qmail-dkim.o: \
-compile qmail-dkim.c qmail.h control.h domainkeys.h \
-hasdkim.h variables.h auto_control.h qmulti.h pidopen.h \
-custom_error.h getDomainToken.h
+compile qmail-dkim.c qmail.h control.h hasdkim.h variables.h \
+auto_control.h qmulti.h pidopen.h custom_error.h getDomainToken.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
 		-I../libdkim-x -I/opt/local/include/dkim qmail-dkim.c
 
@@ -3243,18 +3189,6 @@ update_tmprsadh: conf-qmail update_tmprsadh.sh conf-sysconfdir
 tmprsadh: update_tmprsadh
 	echo "Creating new temporary RSA and DH parameters"
 	./update_tmprsadh
-
-#
-# Domain KEYS
-#
-domainkeys.h: domainkeys.c makeheader dktrace.h
-	./makeheader <domainkeys.c >domainkeys.h
-
-makeheader: load makeheader.o
-	./load makeheader
-
-makeheader.o: makeheader.c compile
-	./compile makeheader.c
 
 dot-forward: \
 load dot-forward.o control.o qmail.o variables.o \

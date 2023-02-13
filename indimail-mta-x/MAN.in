@@ -147,7 +147,6 @@ f:::0644:/man8/:cleanq.8:cleanq.8
 f:::0644:/man8/:ctrlenv.8:ctrlenv.8
 f:::0644:/man8/:dk-filter.8:dk-filter.8
 f:::0644:/man8/:dknewkey.8:dknewkey.8
-f:::0644:/man8/:dktest.8:dktest.8
 f:::0644:/man8/:greydaemon.8:greydaemon.8
 f:::0644:/man8/:ipmeprint.8:ipmeprint.8
 f:::0644:/man8/:irmail.8:irmail.8
@@ -164,7 +163,6 @@ f:::0644:/man8/:qscheduler.8:qscheduler.8
 f:::0644:/man8/:qmonitor.8:qmonitor.8
 f:::0644:/man8/:setqload.8:setqload.8
 f:::0644:/man8/:qmail-daned.8:qmail-daned.8
-f:::0644:/man8/:qmail-dk.8:qmail-dk.8
 f:::0644:/man8/:qmail-dkim.8:qmail-dkim.8
 f:::0644:/man8/:qmail-getpw.8:qmail-getpw.8
 f:::0644:/man8/:qmail-greyd.8:qmail-greyd.8

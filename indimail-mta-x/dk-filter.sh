@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.35 2023-02-12 18:17:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.36 2023-02-13 10:07:28+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -55,47 +55,6 @@ replace_percent()
 		fi
 	else
 		keyfn=$1
-	fi
-}
-
-dk_setoptions()
-{
-	#dktest: [-f] [-b advice_length] [-c nofws|simple] [-v|-s selector] [-h] [-t#] [-r] [-T][-d dnsrecord]
-	# DKSIGNOPTIONS="-z 1 -b 2 -x - -y $dkselector -s $dkkeyfn"
-	set -- $(getopt hrb:c:s: $DKSIGNOPTIONS)
-	dkopts="$prefix/bin/dktest"
-	sopt=0
-	while [ $1 != -- ]
-	do
-		case $1 in
-		-h)
-		dkopts="$dkopts -h"
-		;;
-
-		-r)
-		dkopts="$dkopts -r"
-		;;
-
-		-b)
-		dkopts="$dkopts -b $2"
-		shift
-		;;
-
-		-c)
-		dkopts="$dkopts -c $2"
-		shift
-		;;
-
-		-s)
-		sopt=1
-		dkopts="$dkopts -s $2"
-		shift
-		;;
-		esac
-		shift   # next flag
-	done
-	if [ $sopt -eq 0 ] ; then
-		dkopts="$dkopts -s $dkkeyfn"
 	fi
 }
 
@@ -196,25 +155,6 @@ set_selector()
 	fi
 	replace_percent $2
 	case $1 in
-		"dk")
-		dkkeyfn=$keyfn
-		if [ $dksign -eq 2 -a ! -f $dkkeyfn ] ; then
-			dkkeyfn=$default_key
-		fi
-		if [ ! -f $dkkeyfn ] ; then
-			dksign=0
-			if [ $percent_found -eq 0 ] ; then
-				echo "private key does not exist" 1>&2
-				/bin/rm -f $tmpfn
-				exit $priv_key_err # private key does not exist
-			else
-				dksign=1
-			fi
-		else
-			dksign=1
-		fi
-		dkselector=$(basename $dkkeyfn)
-		;;
 		"dkim")
 		dkimkeyfn=$keyfn
 		# dkimsign is first set by get_dkimfn
@@ -244,25 +184,14 @@ set_selector()
 get_dkimfn()
 {
 # set private key for dk / dkim signing
-if [ \( -z "$NODK" -a -z "$DKVERIFY" \) -o \( -z "$NODKIM" -a -z "$DKIMVERIFY" \) ] ; then
+if [ \( -z "$NODKIM" -a -z "$DKIMVERIFY" \) ] ; then
 	if [ -f $CONTROLDIR/dkimkeys ] ; then
 		domain=$(echo $_SENDER | cut -d@ -f2)
 		t=$(get_dkimkeys $domain)
 		if [ -n "$t" ] ; then
-			if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
-				DKSIGN=$t
-			fi
 			if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
 				DKIMSIGN=$t
 			fi
-		fi
-	fi
-	if [ -z "$NODK" -a -z "$DKVERIFY" -a -x $prefix/bin/dktest ] ; then
-		if [ -z "$DKSIGN" ] ; then
-			DKSIGN=$CONTROLDIR/domainkeys/%/default
-			dksign=2 # key, selector selected as control/domainkeys/defaut
-		elif [ " $DKSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-			dksign=2 # key, selector selected as control/domainkeys/defaut
 		fi
 	fi
 	if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
@@ -280,9 +209,7 @@ if [ -z "$QMAILREMOTE" -a -z "$QMAILLOCAL" ]; then
 	echo "dk-filter should be run by spawn-filter" 1>&2
 	exit 1
 fi
-dksign=0
 dkimsign=0
-dkverify=0
 dkimverify=0
 prefix=PREFIX
 
@@ -295,14 +222,10 @@ fi
 if [ " $CONTROLDIR" = " " ] ; then
 	CONTROLDIR=@controldir@
 fi
-if [ -n "$NODK" -a -n "$NODKIM" ] ; then
+if [ -n "$NODKIM" ] ; then
 	exec /bin/cat
 fi
 
-if [ -z "$NODK" -a ! -f $prefix/bin/dktest ] ; then
-	echo "$prefix/bin/dktest: No such file or directory" 1>&2
-	exit 1
-fi
 if [ -z "$NODKIM" -a ! -f $prefix/bin/dkim ] ; then
 	echo "$prefix/bin/dkim: No such file or directory" 1>&2
 	exit 1
@@ -318,13 +241,6 @@ if [ " $slash" != " /" ] ; then
 	cd SYSCONFDIR
 fi
 
-if [ -z "$NODK" ] ; then
-	if [ -n "$DKVERIFY" ] ; then
-		dkverify=1
-	else
-		get_dkimfn
-	fi
-fi
 if [ -z "$NODKIM" ] ; then
 	if [ -n "$DKIMVERIFY" ] ; then
 		dkimverify=1
@@ -358,19 +274,6 @@ if [ -n "$DKIMSIGN" ] ; then
 				exit 1
 			fi
 		fi
-	fi
-fi
-if [ -n "$DKSIGN" ] ; then
-	set_selector "dk" "$DKSIGN"
-	dk_setoptions "$DKSIGNOPTIONS"
-	exec 0<$tmpfn
-	eval $dkopts
-	exit_val=$?
-	# allow error due to duplicate DomainKey-Header
-	if [ $exit_val -ne 0 -a $exit_val -ne 12 ] ; then
-		/bin/rm -f $tmpfn
-		echo "$prefix/bin/dktest failed" 1>&2
-		exit $exit_val
 	fi
 fi
 if [ $dkimverify -eq 1 ] ; then
@@ -415,21 +318,15 @@ if [ $dkimverify -eq 1 ] ; then
 		exit 1
 	fi
 fi
-if [ $dkverify -eq 1 ] ; then
-	exec 0<$tmpfn
-	$prefix/bin/dktest -v
-	if [ $? -ne 0 ] ; then
-		echo "$prefix/bin/dktest failed" 1>&2
-		/bin/rm -f $tmpfn
-		exit 1
-	fi
-fi
 exec 0<$tmpfn
 /bin/rm -f $tmpfn
 /bin/cat
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.36  2023-02-13 10:07:28+05:30  Cprogrammer
+# removed yahoo domainkeys
+#
 # Revision 1.35  2023-02-12 18:17:21+05:30  Cprogrammer
 # use VERBOSE variable to turn on debug for signature verification status on fd 2
 #

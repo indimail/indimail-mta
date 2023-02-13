@@ -37,6 +37,8 @@ multi-signature generation
 19. qmail-newu.c, cdb-database.c: refactored code
 20. dk-filter.sh, qmail-dkim.c: use VERBOSE variable to turn on debug for
     signature verification status on fd 2
+- 13/02/2022
+21. removed yahoo domainkeys
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

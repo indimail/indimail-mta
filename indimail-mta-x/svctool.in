@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.653 2022-12-14 13:59:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.654 2023-02-13 10:00:02+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.653 2022-12-14 13:59:26+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.654 2023-02-13 10:00:02+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -84,8 +84,8 @@ Known values for OPTION are:
   [--forcetls]
   [--shared-objects=0|1]
   [--use-dlmopen=0|1]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
   [--password-cache] [--query-cache]
   [--smtp-plugin]
   [--utf8]
@@ -209,8 +209,8 @@ Known values for OPTION are:
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--logfilter=logfifo]
   [--localfilter --remotefilter]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
   [--utf8]
@@ -282,8 +282,8 @@ Known values for OPTION are:
   [--cname-lookup]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--localfilter --remotefilter]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
   [--utf8]
@@ -339,8 +339,8 @@ Known values for OPTION are:
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
 
  Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -424,8 +424,8 @@ Known values for OPTION are:
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
 
  Installs a new queue with a QMTP Listener
   m              - Concurrency of connections to allow
@@ -470,8 +470,8 @@ Known values for OPTION are:
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
 
  Installs a new queue with a QMQP Listener
   m              - Concurrency of connections to allow
@@ -653,7 +653,7 @@ Known values for OPTION are:
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e]
   [--qhpsi=q]
-  [--dkverify=dk|dkim|both|none]
+  [--dkverify=dkim|none]
 
   Install Fetchmail Server
   queue_path     - Path where the queues are installed. If this is different from
@@ -2694,7 +2694,7 @@ if [ $shared_objects -eq 1 ] ; then
 fi
 case "$dkverify_option" in
 	dkimstrict)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo FGHIKLMNOQRTUVWjp > $conf_dir/DKIMVERIFY
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
@@ -2709,7 +2709,7 @@ case "$dkverify_option" in
 	fi
 	;;
 	dkim)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
 	echo > $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
@@ -2723,70 +2723,8 @@ case "$dkverify_option" in
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	fi
 	;;
-	dkstrict)
-	echo BDEGIJKfh > $conf_dir/DKVERIFY
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	if [ -n  "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter"  > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	dk)
-	echo > $conf_dir/DKVERIFY
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	if [ -n  "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter"  > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	bothstrict)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo FGHIKLMNOQRTUVWjp > $conf_dir/DKIMVERIFY
-	echo BDEGIJKfh > $conf_dir/DKVERIFY
-	> $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ -n  "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter"  > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk"   > $conf_dir/SPAMQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	both)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo > $conf_dir/DKIMVERIFY
-	echo > $conf_dir/DKVERIFY
-	echo > $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ -n  "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter"  > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk"   > $conf_dir/SPAMQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
 	none|*)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	if [ $no_multi -eq 1 ] ; then
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 		if [ -n  "$spamfilter" ] ; then
@@ -3024,7 +2962,7 @@ fi
 /bin/rm -f $conf_dir/QUEUEDIR
 case "$dksign_option" in
 	dkim)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKIMSIGN
 	if [ -n "$spamfilter" ] ; then
 		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
@@ -3036,37 +2974,8 @@ case "$dksign_option" in
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	fi
 	;;
-	dk)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo "$private_key" > $conf_dir/DKSIGN
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	both)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo "$private_key" > $conf_dir/DKSIGN
-	echo "$private_key" > $conf_dir/DKIMSIGN
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
 	none|*)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	if [ $no_multi -eq 1 ] ; then
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 		if [ -n "$spamfilter" ] ; then
@@ -3190,7 +3099,7 @@ else
 fi
 case "$dkverify_option" in
 	dkimstrict)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo FGHIKLMNOQRTUVWjp > $conf_dir/DKIMVERIFY
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
@@ -3205,7 +3114,7 @@ case "$dkverify_option" in
 	fi
 	;;
 	dkim)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo > $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	echo > $conf_dir/DKIMVERIFY
@@ -3219,70 +3128,8 @@ case "$dkverify_option" in
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	fi
 	;;
-	dkstrict)
-	echo BDEGIJKfh > $conf_dir/DKVERIFY
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	dk)
-	echo > $conf_dir/DKVERIFY
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	bothstrict)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo FGHIKLMNOQRTUVWjp > $conf_dir/DKIMVERIFY
-	echo BDEGIJKfh > $conf_dir/DKVERIFY
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	fi
-	> $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	both)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo > $conf_dir/DKIMVERIFY
-	echo > $conf_dir/DKVERIFY
-	echo > $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
 	none|*)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	if [ $no_multi -eq 1 ] ; then
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 		if [ -n  "$spamfilter" ] ; then
@@ -6199,7 +6046,7 @@ else
 fi
 case "$dkverify_option" in
 	dkimstrict)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo FGHIKLMNOQRTUVWjp > $conf_dir/DKIMVERIFY
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
@@ -6214,7 +6061,7 @@ case "$dkverify_option" in
 	fi
 	;;
 	dkim)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo > $conf_dir/DKIMVERIFY
 	echo > $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
@@ -6228,70 +6075,8 @@ case "$dkverify_option" in
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 	fi
 	;;
-	dkstrict)
-	echo BDEGIJKfh > $conf_dir/DKVERIFY
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	dk)
-	echo > $conf_dir/DKVERIFY
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	bothstrict)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo FGHIKLMNOQRTUVWjp > $conf_dir/DKIMVERIFY
-	echo BDEGIJKfh > $conf_dir/DKVERIFY
-	> $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
-	both)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo > $conf_dir/DKIMVERIFY
-	echo > $conf_dir/DKVERIFY
-	echo > $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/SPAMQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	else
-		echo "$QmailBinPrefix/sbin/qmail-dk" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/DKQUEUE
-	fi
-	if [ $no_multi -eq 1 ] ; then
-		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
-	fi
-	;;
 	none|*)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	if [ $no_multi -eq 1 ] ; then
 		echo "$QUEUE_BASE"/queue1 > $conf_dir/QUEUEDIR
 		if [ -n "$spamfilter" ] ; then
@@ -6700,7 +6485,7 @@ fi
 echo > $conf_dir/LOGLOCK
 case "$dksign_option" in
 	dkim)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKIMSIGN
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
@@ -6708,24 +6493,8 @@ case "$dksign_option" in
 		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
-	dk)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo "$private_key" > $conf_dir/DKSIGN
-	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
-	fi
-	;;
-	both)
-	echo "$private_key" > $conf_dir/DKSIGN
-	echo "$private_key" > $conf_dir/DKIMSIGN
-	echo > $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
-	fi
-	;;
 	none|*)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	;;
 esac
 (
@@ -6967,7 +6736,7 @@ if [ -n "$default_domain" ] ; then
 fi
 case "$dksign_option" in
 	dkim)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKIMSIGN
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
@@ -6975,24 +6744,8 @@ case "$dksign_option" in
 		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
-	dk)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
-	echo "$private_key" > $conf_dir/DKSIGN
-	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
-	fi
-	;;
-	both)
-	echo "$private_key" > $conf_dir/DKSIGN
-	echo "$private_key" > $conf_dir/DKIMSIGN
-	echo > $conf_dir/UNSIGNED_SUBJECT
-	> $conf_dir/UNSIGNED_FROM
-	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
-	fi
-	;;
 	none|*)
-	/bin/rm -f $conf_dir/DKSIGN $conf_dir/DKIMSIGN $conf_dir/DKVERIFY $conf_dir/DKIMVERIFY $conf_dir/DKQUEUE $conf_dir/DKIMQUEUE
+	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	;;
 esac
 (
@@ -10457,7 +10210,7 @@ case $option in
 	fi
 	if [ -z "$odmr" ] ; then
 		case "$dkverify_option" in
-			dkim|dk|both)
+			dkim)
 			;;
 			none|"")
 			;;
@@ -10467,7 +10220,7 @@ case $option in
 			;;
 		esac
 		case "$dksign_option" in
-			dkim|dk|both)
+			dkim)
 			if [ " $private_key" = " " ] ; then
 				echo "--private_key not specfied" 1>&2
 				usage 1
@@ -11384,7 +11137,7 @@ case $option in
 		usage 1
 	fi
 	case "$dkverify_option" in
-		dkim|dk|both)
+		dkim)
 		;;
 		none|"")
 		;;
@@ -11394,7 +11147,7 @@ case $option in
 		;;
 	esac
 	case "$dksign_option" in
-		dkim|dk|both)
+		dkim)
 		if [ " $private_key" = " " ] ; then
 			echo "--private_key not specfied" 1>&2
 			usage 1
@@ -11411,7 +11164,7 @@ case $option in
 	create_queuedef "$qbase" "$qcount" "$qstart" "$queuedef"
 	;;
 
-	26) # crete_delivery
+	26) # create_delivery
 	if [ " $servicedir" = " " ] ; then
 		echo "Supervise Directory not specified" 1>&2
 		usage 1
@@ -11436,7 +11189,7 @@ case $option in
 		usage 1
 	fi
 	case "$dkverify_option" in
-		dkim|dk|both)
+		dkim)
 		;;
 		none|"")
 		;;
@@ -11446,7 +11199,7 @@ case $option in
 		;;
 	esac
 	case "$dksign_option" in
-		dkim|dk|both)
+		dkim)
 		if [ " $private_key" = " " ] ; then
 			echo "--private_key not specfied" 1>&2
 			usage 1
@@ -11767,7 +11520,7 @@ case $option in
 		usage 1
 	fi
 	case "$dkverify_option" in
-		dkim|dk|both)
+		dkim)
 		;;
 		none|"")
 		;;
@@ -11777,7 +11530,7 @@ case $option in
 		;;
 	esac
 	case "$dksign_option" in
-		dkim|dk|both)
+		dkim)
 		if [ " $private_key" = " " ] ; then
 			echo "--private_key not specfied" 1>&2
 			usage 1

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.370 2023-01-22 13:17:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.371 2023-02-13 09:59:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -604,7 +604,6 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/bin/new-inject
 %attr(755,root,root)                    %{_prefix}/bin/filterto
 %attr(755,root,root)                    %{_prefix}/bin/822body
-%attr(755,root,root)                    %{_prefix}/bin/dktest
 %attr(755,root,root)                    %{_prefix}/bin/iftoccfrom
 %attr(755,root,root)                    %{_prefix}/bin/qreceipt
 %attr(755,root,root)                    %{_prefix}/bin/except
@@ -832,7 +831,6 @@ echo ../resolv.conf 1>&3
 %if %{defined suse_version} || %{defined sles_version}
 %verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
 %verify (not user group mode caps) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
-%verify (not user group mode caps) %attr(2551, root, qmail)     %{_prefix}/sbin/qmail-dk
 %verify (not user group mode caps) %attr(2551, root, qmail)     %{_prefix}/sbin/qmail-dkim
 %verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
 %verify (not user group mode caps) %attr(4551, qscand, qscand)  %{_prefix}/sbin/qscanq
@@ -840,7 +838,6 @@ echo ../resolv.conf 1>&3
 %else
 %attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
-%attr(2551,root,qmail)                  %{_prefix}/sbin/qmail-dk
 %attr(2551,root,qmail)                  %{_prefix}/sbin/qmail-dkim
 %attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
 %attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
@@ -1074,7 +1071,6 @@ fi
 %verify_permissions -e %{_prefix}/sbin/qmail-queue
 %verify_permissions -e %{_prefix}/sbin/qscanq
 %verify_permissions -e %{_prefix}/sbin/sys-checkpwd
-%verify_permissions -e %{_prefix}/sbin/qmail-dk
 %verify_permissions -e %{_prefix}/sbin/qmail-dkim
 %verify_permissions -e %{qmaildir}/alias/
 %verify_permissions -e %{qmaildir}/autoturn/
@@ -1323,7 +1319,6 @@ fi
   %set_permissions %{_prefix}/sbin/qscanq
   %set_permissions %{_prefix}/sbin/run-cleanq
   %set_permissions %{_prefix}/sbin/sys-checkpwd
-  %set_permissions %{_prefix}/sbin/qmail-dk
   %set_permissions %{_prefix}/sbin/qmail-dkim
   %set_permissions %{qmaildir}/alias/
   %set_permissions %{qmaildir}/autoturn/

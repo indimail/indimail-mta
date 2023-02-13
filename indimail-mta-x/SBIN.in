@@ -62,5 +62,4 @@ f:qscand:qmail:06551:/sbin/:qhpsi:qhpsi
 f:qscand:qscand:04551:/sbin/:qscanq:qscanq
 f:root:qscand:02551:/sbin/:run-cleanq:run-cleanq
 f:root::04551:/sbin/:sys-checkpwd:sys-checkpwd
-f::qmail:02551:/sbin/:qmail-dk:qmail-dk
 f::qmail:02551:/sbin/:qmail-dkim:qmail-dkim

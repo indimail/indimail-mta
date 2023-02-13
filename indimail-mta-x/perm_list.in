@@ -56,7 +56,6 @@
 %attr(0755,root,root)  @prefix@/bin/datemail #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/dk-filter
 %attr(0755,root,root)  @prefix@/bin/dknewkey
-%attr(0755,root,root)  @prefix@/bin/dktest
 %attr(0755,root,root)  @prefix@/bin/dot-forward
 %attr(0755,root,root)  @prefix@/bin/drate
 %attr(0755,root,root)  @prefix@/bin/except
@@ -257,7 +256,6 @@
 %attr(6551,qmailq,qmail)  @prefix@/sbin/qmail-queue
 %attr(6551,qscand,qmail)  @prefix@/sbin/qhpsi
 %attr(4551,root,root)     @prefix@/sbin/sys-checkpwd
-%attr(2551,root,qmail)    @prefix@/sbin/qmail-dk
 %attr(2551,root,qmail)    @prefix@/sbin/qmail-dkim
 #
 # Boot
@@ -454,7 +452,6 @@
 %attr(0644,root,root) @mandir@/man8/dk-filter.8.gz
 %attr(0644,root,root) @mandir@/man8/dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/dknewkey.8.gz
-%attr(0644,root,root) @mandir@/man8/dktest.8.gz
 %attr(0644,root,root) @mandir@/man8/greydaemon.8.gz
 %attr(0644,root,root) @mandir@/man8/ldap-checkpwd.8.gz
 %attr(0644,root,root) @mandir@/man8/mlmatchup.8.gz
@@ -466,7 +463,6 @@
 %attr(0644,root,root) @mandir@/man8/qscheduler.8.gz
 %attr(0644,root,root) @mandir@/man8/setqload.8.gz
 %attr(0644,root,root) @mandir@/man8/qmonitor.8.gz
-%attr(0644,root,root) @mandir@/man8/qmail-dk.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-getpw.8.gz
 %attr(0644,root,root) @mandir@/man8/qmail-greyd.8.gz
