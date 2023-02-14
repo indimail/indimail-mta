@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.19  2023-02-15 02:20:53+05:30  Cprogrammer
+# fixed arch linux build
+#
 # Revision 1.18  2023-02-15 00:44:47+05:30  Cprogrammer
 # added group ID qcerts for certificate group permissions
 #
@@ -57,7 +60,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.18 2023-02-15 00:44:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.19 2023-02-15 02:20:53+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -125,12 +128,7 @@ build() {
   echo "passwd user, the queue user, the remote user, the send user, the"
   echo "indimail user and the virus scan user."
   ) > /tmp/conf-users
-  diff /tmp/conf-users conf-users > /dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-    mv /tmp/conf-users conf-users
-  else
-    rm -f /tmp/conf-users
-  fi
+  diff /tmp/conf-users conf-users >/dev/null && rm -f /tmp/conf-users || mv /tmp/conf-users conf-users
   # create conf-groups
   (
   echo "qmail"
@@ -139,16 +137,12 @@ build() {
   echo "qscand"
   echo "qcerts"
   echo
-  echo "These are the qmail groups. The second group should not have access to"
-  echo "any files, but it must be usable for processes; this requirement"
-  echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
+  echo "These are the qmail,indimail groups. The second group should not"
+  echo "have access to any files, but it must be usable for processes;"
+  echo "this requirements excludes the \`\`nogroup'' and \`\`nobody''"
+  echo "groups on many systems."
   ) > /tmp/conf-groups
-  diff /tmp/conf-groups conf-groups > /dev/null 2>&1
-  if [ $? -ne 0 ] ; then
-    mv /tmp/conf-groups conf-groups
-  else
-    rm -f /tmp/conf-groups
-  fi
+  diff /tmp/conf-groups conf-groups >/dev/null && rm -f /tmp/conf-groups || mv /tmp/conf-groups conf-groups
   ./catChangeLog doc/ChangeLog > ChangeLog-indimail-mta
   ./qmake -s
 }
