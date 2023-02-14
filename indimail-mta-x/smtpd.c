@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.287 2023-01-18 00:07:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.288 2023-02-14 09:18:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.287 $";
+static char    *revision = "$Revision: 1.288 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6588,9 +6588,10 @@ do_tls()
 	if (!(ctx = tls_init(ssl_option.s, certfile.s,
 			cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 			ciphers, qsmtpd))) {
-		tls_err("454", "4.3.0", "unable to set initialize TLS");
+		tls_err("454", "4.3.0", "unable to initialize TLS");
 		if (smtps)
 			_exit(1);
+		return;
 	}
 #ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
 	if (env_get("CLIENT_RENEGOTIATION"))
@@ -6602,9 +6603,12 @@ do_tls()
 		tls_err("454", "4.3.0", "unable to initialize ssl");
 		if (smtps)
 			_exit(1);
+		return;
 	}
-	SSL_CTX_free(ctx);
-	ctx = NULL;
+	if (ctx) {
+		SSL_CTX_free(ctx);
+		ctx = NULL;
+	}
 	if (!smtps) {
 		out("220 ready for tls\r\n", 0);
 		flush();
@@ -6615,6 +6619,7 @@ do_tls()
 		tls_err("454", "4.3.0", "failed to accept TLS connection");
 		if (smtps)
 			_exit(1);
+		return;
 	}
 	log_ssl_version();
 	return;
@@ -6965,6 +6970,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.288  2023-02-14 09:18:52+05:30  Cprogrammer
+ * fix dossl function - return on error
+ *
  * Revision 1.287  2023-01-18 00:07:30+05:30  Cprogrammer
  * added ssl cipher bits in Received header
  *
@@ -7279,7 +7287,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.287 2023-01-18 00:07:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.288 2023-02-14 09:18:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

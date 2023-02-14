@@ -1,5 +1,11 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.5  2023-02-14 07:49:06+05:30  Cprogrammer
+ * added qcerts group ID for certificate group permission
+ * renamed auto_uidc, auto_gidc to auto_uidv, auto_gidv
+ * renamed auto_uidv, auto_gidv to auto_uidi, auto_gidi
+ * added auto_gidc for qcerts group ID
+ *
  * Revision 1.4  2022-03-09 13:03:12+05:30  Cprogrammer
  * use qendpwent(), qendgrent() when using functions from qgetpwgr.c
  *
@@ -57,7 +63,7 @@ UIDARRAY        uid_a[] = {{ALIASU,-1,-1}, {QMAILD,-1,-1}, {QMAILL,-1,-1},
 					{QMAILR,-1,-1}, {QMAILS,-1,-1}, {INDIUSER,-1,-1},
 					{QSCANDU,-1,-1}, {0}};
 GIDARRAY        gid_a[] = {{QMAILG,-1,-1}, {NOFILESG,-1,-1},
-					{INDIGROUP,-1,-1}, {QSCANDG,-1,-1}, {0}};
+					{INDIGROUP,-1,-1}, {QSCANDG,-1,-1}, {QCERTSG, -1, -1}, {0}};
 
 static int
 get_uid(char *user, int exit_on_error)
@@ -160,12 +166,13 @@ uidinit(int closeflag, int exit_on_error)
 	DO_UID(auto_uidq, u, QMAILQ, exit_on_error, not_found);
 	DO_UID(auto_uidr, u, QMAILR, exit_on_error, not_found);
 	DO_UID(auto_uids, u, QMAILS, exit_on_error, not_found);
-	DO_UID(auto_uidv, u, INDIUSER, exit_on_error, not_found);
-	DO_UID(auto_uidc, u, QSCANDU, exit_on_error, not_found);
+	DO_UID(auto_uidi, u, INDIUSER, exit_on_error, not_found);
+	DO_UID(auto_uidv, u, QSCANDU, exit_on_error, not_found);
 	DO_GID(auto_gidq, g, QMAILG, exit_on_error, not_found);
 	DO_GID(auto_gidn, g, NOFILESG, exit_on_error, not_found);
-	DO_GID(auto_gidv, g, INDIGROUP, exit_on_error, not_found);
-	DO_GID(auto_gidc, g, QSCANDG, exit_on_error, not_found);
+	DO_GID(auto_gidi, g, INDIGROUP, exit_on_error, not_found);
+	DO_GID(auto_gidv, g, QSCANDG, exit_on_error, not_found);
+	DO_GID(auto_gidc, g, QCERTSG, exit_on_error, not_found);
 	if (closeflag) {
 		use_pwgr ? qendpwent() : endpwent();
 		use_pwgr ? qendgrent() : endgrent();
@@ -201,8 +208,8 @@ get_user(uid_t uid)
 	GET_USER(uid, auto_uidq, QMAILQ);
 	GET_USER(uid, auto_uidr, QMAILR);
 	GET_USER(uid, auto_uids, QMAILS);
-	GET_USER(uid, auto_uidv, INDIUSER);
-	GET_USER(uid, auto_uidc, QSCANDU);
+	GET_USER(uid, auto_uidi, INDIUSER);
+	GET_USER(uid, auto_uidv, QSCANDU);
 	if (!(pw = (use_pwgr ? qgetpwuid : getpwuid) (uid))) {
 		strnum[fmt_ulong(strnum, uid)] = 0;
 		strerr_die3sys(111, "get_user: unable to get uid for uid ", strnum, ": ");
@@ -219,8 +226,9 @@ get_group(gid_t gid)
 		return ((char *) 0);
 	GET_GROUP(gid, auto_gidq, QMAILG);
 	GET_GROUP(gid, auto_gidn, NOFILESG);
-	GET_GROUP(gid, auto_gidv, INDIGROUP);
-	GET_GROUP(gid, auto_gidc, QSCANDG);
+	GET_GROUP(gid, auto_gidi, INDIGROUP);
+	GET_GROUP(gid, auto_gidv, QSCANDG);
+	GET_GROUP(gid, auto_gidc, QCERTSG);
 	GET_GROUP(gid, 0, "root");
 	if (!(gr = (use_pwgr ? qgetgrgid : getgrgid) (gid))) {
 		strnum[fmt_ulong(strnum, gid)] = 0;
@@ -232,7 +240,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.4 2022-03-09 13:03:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: get_uid.c,v 1.5 2023-02-14 07:49:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

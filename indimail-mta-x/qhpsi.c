@@ -1,5 +1,8 @@
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.11  2023-02-14 08:39:26+05:30  Cprogrammer
+ * renamed auto_uidc to auto_uidv
+ *
  * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -68,7 +71,7 @@ main(int argc, char **argv)
 	 * Set the real and effective user id to qscand to
 	 * prevent rogue programs from creating mischief
 	 */
-	if (setreuid(auto_uidc, auto_uidc)) {
+	if (setreuid(auto_uidv, auto_uidv)) {
 		if (flaglog)
 			strerr_die2sys(50, FATAL, "setreuid failed: ");
 		_exit(50);
@@ -140,6 +143,6 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qhpsi.c,v 1.11 2023-02-14 08:39:26+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

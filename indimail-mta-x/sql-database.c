@@ -1,5 +1,8 @@
 /*
  * $Log: sql-database.c,v $
+ * Revision 1.4  2023-02-14 09:19:46+05:30  Cprogrammer
+ * renamed auto_uidv to auto_uidi, auto_gidv to auto_gidi
+ *
  * Revision 1.3  2021-06-13 17:23:25+05:30  Cprogrammer
  * do chdir(controldir) instead of chdir(auto_sysconfdir)
  *
@@ -259,7 +262,7 @@ main(int argc, char **argv)
 	if (dbserver && user && pass && dbname && table_name) {
 		if ((fd = open(fn.s, O_CREAT|O_TRUNC|O_WRONLY, 0644)) == -1)
 			strerr_die4sys(111, FATAL, "open: ", fn.s, ": ");
-		if (fchown(fd, auto_uidv, auto_gidv))
+		if (fchown(fd, auto_uidi, auto_gidi))
 			strerr_die4sys(111, FATAL, "fchown: ", fn.s, ": ");
 		if (!stralloc_copys(&str, dbserver) || !stralloc_catb(&str, ":", 1) ||
 				!stralloc_cats(&str, user) || !stralloc_catb(&str, ":", 1) ||
@@ -327,7 +330,7 @@ main(int argc, char **argv)
 void
 getversion_sql_database_c()
 {
-	static char    *x = "$Id: sql-database.c,v 1.3 2021-06-13 17:23:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sql-database.c,v 1.4 2023-02-14 09:19:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

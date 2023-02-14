@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.117 2022-11-07 20:45:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.118 2023-02-14 17:58:06+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -453,7 +453,7 @@ do
     e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
     e_opt="$e_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-    e_opt="$e_opt --dmemory=$send_soft_mem --utf8"
+    e_opt="$e_opt --dmemory=$send_soft_mem --setgroups --utf8"
   fi
   if [ $tcpserver_plugin -eq 1 ] ; then
     e_opt="$e_opt --shared-objects=1 --use-dlmopen=1"
@@ -498,7 +498,7 @@ eval $svctool --slowq --servicedir=$servicedir --qbase=$qbase \
   --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
   --dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
   --remote-authsmtp=plain --localfilter --remotefilter \
-  --deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
 #
 # Greylist
 #
@@ -758,6 +758,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.118  2023-02-14 17:58:06+05:30  Cprogrammer
+# added --setgroups to set USE_SETGROUPS env variable for qmail-start
+#
 # Revision 2.117  2022-11-07 20:45:29+05:30  Cprogrammer
 # removed domainkeys for new installs
 #

@@ -1,5 +1,8 @@
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.13  2023-02-14 07:45:58+05:30  Cprogrammer
+ * renamed auto_uidc, auto_gidc to auto_uidv, auto_gidv
+ *
  * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -231,7 +234,7 @@ main(int argc, char **argv)
 	if (optind + 1 == argc && chdir(argv[optind++]) == -1)
 		strerr_die3sys(111, FATAL, "chdir: ", argv[optind]);
 	uid = getuid();
-	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc))
+	if (uid != auto_uidv && setreuid(auto_uidv, auto_uidv))
 		strerr_die2sys(111, FATAL, "setreuid failed: ");
 	if ((fdsourcedir = open(".", O_RDONLY | O_NDELAY)) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
@@ -246,7 +249,7 @@ main(int argc, char **argv)
 			_exit(111);
 		if (stat(".", &st) == -1)
 			strerr_die2sys(111, FATAL, "unable to stat '.'");
-		if (st.st_uid != auto_uidc) {
+		if (st.st_uid != auto_uidv) {
 			strerr_warn2(FATAL, "current directory not owned by qscand", 0);
 			_exit(111);
 		}
@@ -274,7 +277,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.13 2023-02-14 07:45:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

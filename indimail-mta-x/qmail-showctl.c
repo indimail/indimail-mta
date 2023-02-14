@@ -1,5 +1,9 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.12  2023-02-14 09:15:23+05:30  Cprogrammer
+ * renamed auto_uidv to auto_uidi, auto_uidc to auto_uidv, auto_gidv to auto_gidi
+ * added auto_uidc for qcerts id
+ *
  * Revision 1.11  2023-01-22 13:17:57+05:30  Cprogrammer
  * fixed do_int
  *
@@ -585,10 +589,10 @@ show_internals(char *home)
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uids));
 	substdio_put(subfdout, "\n", 1);
 	substdio_put(subfdout, " indimail: ", 11);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidv));
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidi));
 	substdio_put(subfdout, "\n", 1);
 	substdio_put(subfdout, " qscand  : ", 11);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidc));
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_uidv));
 	substdio_put(subfdout, "\n\n", 2);
 	substdio_put(subfdout, "group ids\n", 10);
 	substdio_put(subfdout, " nofiles : ", 11);
@@ -598,9 +602,12 @@ show_internals(char *home)
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidq));
 	substdio_put(subfdout, "\n", 1);
 	substdio_put(subfdout, " indimail: ", 11);
-	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidv));
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidi));
 	substdio_put(subfdout, "\n", 1);
 	substdio_put(subfdout, " qscand  : ", 11);
+	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidv));
+	substdio_put(subfdout, "\n", 1);
+	substdio_put(subfdout, " qcerts  : ", 11);
 	substdio_put(subfdout, num, fmt_ulong(num, (unsigned long) auto_gidc));
 	substdio_put(subfdout, "\n", 1);
 }
@@ -875,7 +882,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.11 2023-01-22 13:17:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.12 2023-02-14 09:15:23+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

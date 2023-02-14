@@ -33,11 +33,11 @@ d:::0755:@prefix@/lib/indimail/plugins::
 d:root:qmail:02755:@qsysconfdir@::
 d:root:qmail:02775:@qsysconfdir@/control::
 d:indimail:qmail:02775:@qsysconfdir@/control/cache::
-d:root:qmail:02755:@qsysconfdir@/control/domainkeys::
+d:root:qcerts:02755:@qsysconfdir@/control/domainkeys::
 d:qmailr:qmail:02775:@qsysconfdir@/control/ratelimit::
 d:root:qmail:0755:@qsysconfdir@/control/defaultqueue::
 d:root:qmail:02775:@qsysconfdir@/users::
-d:root:qmail:02775:@qsysconfdir@/certs::
+d:root:qcerts:02775:@qsysconfdir@/certs::
 d:root:qmail:02775:@qsysconfdir@/tcp::
 d:root:root:0755:@qsysconfdir@/perms.d::
 d:root:root:0755:@qsysconfdir@/perms.d/indimail-mta::

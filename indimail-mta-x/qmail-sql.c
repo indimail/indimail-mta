@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.11  2023-02-14 09:16:35+05:30  Cprogrammer
+ * renamed auto_uidv, auto_gidv to auto_uidi, auto_gidi
+ *
  * Revision 1.10  2021-06-13 17:19:57+05:30  Cprogrammer
  * do chdir(controldir) instead of chdir(auto_sysconfdir)
  *
@@ -213,7 +216,7 @@ main(int argc, char **argv)
 			strerr_die2x(111, FATAL, "out of memory");
 		if (write(fd, str.s, str.len) == -1)
 			strerr_die4sys(111, FATAL, "write: ", fn.s, ": ");
-		if (fchown(fd, auto_uidv, auto_gidv))
+		if (fchown(fd, auto_uidi, auto_gidi))
 			strerr_die4sys(111, FATAL, "fchown: ", fn.s, ": ");
 		if (close(fd))
 			strerr_die4sys(111, FATAL, "close: ", fn.s, ": ");
@@ -272,7 +275,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.10 2021-06-13 17:19:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-sql.c,v 1.11 2023-02-14 09:16:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
