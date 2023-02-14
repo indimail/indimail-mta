@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.18  2023-02-15 00:44:47+05:30  Cprogrammer
+# added group ID qcerts for certificate group permissions
+#
 # Revision 1.17  2022-11-22 19:06:27+05:30  Cprogrammer
 # added gzip to makedepends
 #
@@ -54,7 +57,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.17 2022-11-22 19:06:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.18 2023-02-15 00:44:47+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -117,7 +120,7 @@ build() {
   echo "The qmail system is heavily partitioned for security; it does almost"
   echo "nothing as root."
   echo
-  echo "The first nine lines of this file are the alias user, the daemon user,"
+  echo "The first ten lines of this file are the alias user, the daemon user,"
   echo "the log user, the owner of miscellaneous files such as binaries, the"
   echo "passwd user, the queue user, the remote user, the send user, the"
   echo "indimail user and the virus scan user."
@@ -134,6 +137,7 @@ build() {
   echo "nofiles"
   echo ${_groupname}
   echo "qscand"
+  echo "qcerts"
   echo
   echo "These are the qmail groups. The second group should not have access to"
   echo "any files, but it must be usable for processes; this requirement"
@@ -396,17 +400,18 @@ pre_install() {
   /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
   /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
   /usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
+  /usr/bin/getent group qcerts    > /dev/null || /usr/sbin/groupadd qcerts   || true
 
   /usr/bin/getent passwd ${_username} > /dev/null || /usr/sbin/useradd -r -g ${_groupname} -u ${_uid} -d ${_qmaildir} ${_username} || true
   if [ $? = 4 ] ; then
     /usr/sbin/useradd -r -g ${_groupname} -d ${_qmaildir} ${_username}
   fi
   /usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir}/alias  -s /usr/bin/nologin alias  || true
-  /usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir}        -s /usr/bin/nologin qmaild || true
+  /usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir}        -s /sbin/nologin qmaild -G qcerts || true
   /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_logdir}          -s /usr/bin/nologin qmaill || true
   /usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d ${_qmaildir}        -s /usr/bin/nologin qmailp || true
   /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${_qmaildir}        -s /usr/bin/nologin qmailq || true
-  /usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${_qmaildir}        -s /usr/bin/nologin qmailr || true
+  /usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${_qmaildir}        -s /sbin/nologin qmailr -G qcerts || true
   /usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d ${_qmaildir}        -s /usr/bin/nologin qmails || true
   /usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d ${_qmaildir}/qscanq -G qmail,qscand -s /usr/bin/nologin qscand || true
 
@@ -516,7 +521,7 @@ post_install() {
       extra_opt="--remote-authsmtp=plain --localfilter --remotefilter"
       extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
       extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-      extra_opt="$extra_opt --dmemory=${send_soft_mem} --utf8"
+      extra_opt="$extra_opt --dmemory=${send_soft_mem} --setgroups --utf8"
     fi
     if [ ${_tcpserver_plugin} -eq 1 ] ; then
       extra_opt="$extra_opt --shared-objects=1 --use-dlmopen=1"
@@ -555,7 +560,7 @@ post_install() {
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
     --dksign=${sign_opt} --private_key=${_sysconfdir}/control/domainkeys/%/${dkimkeyfn} \
     --remote-authsmtp=plain --localfilter --remotefilter \
-    --deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+    --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
 
   # ODMR service
   eval ${_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${_servicedir} \
@@ -839,7 +844,7 @@ post_remove() {
     echo "Removing user $i"
     /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
   done
-  for i in qmail qscand indimail
+  for i in qmail qscand indimail qcerts
   do
     echo "Removing group $i"
     /usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
