@@ -91,7 +91,7 @@ if [ " $1" = " purge" ] ; then
 		echo "removing user $i"
 		/usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 	done
-	for i in qmail qscand indimail
+	for i in qmail qscand indimail qcerts
 	do
 		echo "removing group $i"
 		/usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
