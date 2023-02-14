@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.654 2023-02-13 10:00:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.656 2023-02-14 12:20:03+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.654 2023-02-13 10:00:02+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.656 2023-02-14 12:20:03+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -88,6 +88,7 @@ Known values for OPTION are:
   [--dksign=dkim|none --private_key=private_key]
   [--password-cache] [--query-cache]
   [--smtp-plugin]
+  [--setgroups]
   [--utf8]
   --default-domain=domain
 
@@ -188,6 +189,7 @@ Known values for OPTION are:
   shared-objects - Enabled tcpserver plugins, 0 - disabled, 1 - enabled
   use-dlmopen    - Use dlmopen() instead of dlopen() to load shared objects
   smtp-plugin    - Enable SMTP Plugin support
+  setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
@@ -213,6 +215,7 @@ Known values for OPTION are:
   [--dksign=dkim|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
+  [--setgroups]
   [--utf8]
   --default-domain=domain
 
@@ -266,6 +269,7 @@ Known values for OPTION are:
                    delivery times.
   b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
   ssl            - Use SSL encrypted communication in qmail-remote
+  setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
 
 --slowq --qbase=queue_path
@@ -286,6 +290,7 @@ Known values for OPTION are:
   [--dksign=dkim|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
+  [--setgroups]
   [--utf8]
   --default-domain=domain
 
@@ -324,6 +329,7 @@ Known values for OPTION are:
                    delivery times.
   b              - Authenticated SMTP method to use by qmail-remote (plain, login, cram-md5)
   ssl            - Use SSL encrypted communication in qmail-remote
+  setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
@@ -2816,7 +2822,7 @@ else
 fi
 echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
 echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
-echo "-u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
+echo "-u qmaild \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
 if [ -f /bin/false ] ; then
 	false="/bin/false"
 else
@@ -3578,7 +3584,7 @@ if [ $run_file_only -ne 1 ] ; then
 		# this will have all variables of "$cdb_f"_config_ssl also
 		create_"$cdb_f"_config $COURIER_PORT $infifo > $conf_dir/.courier_variables
 	fi
-	echo "/tmp/inquery" > $conf_dir/TMPDIR
+	echo "/tmp/inquery" > $conf_dir/FIFOTMPDIR
 	echo "0660" > $conf_dir/FIFO_MODE
 	if [ ! " $memory" = " " ] ; then
 		echo $memory > $conf_dir/SOFT_MEM
@@ -6384,6 +6390,11 @@ fi
 if [ $qmr_ssl -eq 1 ] ; then
 echo $sysconfdir/certs > $conf_dir/CERTDIR #for qmail-remote
 fi
+if [ $setgroups -eq 1 ] ; then
+	echo 1 > $conf_dir/USE_SETGROUPS
+else
+	> $conf_dir/USE_SETGROUPS
+fi
 if [ $utf8 -eq 1 ] ; then
 	echo $utf8 > $conf_dir/UTF8
 else
@@ -6629,6 +6640,11 @@ else
 fi
 if [ $qmr_ssl -eq 1 ] ; then
 echo $sysconfdir/certs > $conf_dir/CERTDIR #for qmail-remote
+fi
+if [ $setgroups -eq 1 ] ; then
+	echo 1 > $conf_dir/USE_SETGROUPS
+else
+	> $conf_dir/USE_SETGROUPS
 fi
 if [ $utf8 -eq 1 ] ; then
 	echo $utf8 > $conf_dir/UTF8
@@ -7580,8 +7596,8 @@ create_users()
 		;;
 	esac
 
-	# qmail, nofiles, qscand group
-	for i in qmail nofiles qscand; do
+	# qmail, nofiles, qscand, qcerts group
+	for i in qmail nofiles qscand qcerts; do
 		case "$host" in
 		*-*-darwin*)
 		groupid=`dscl . -list /Groups PrimaryGroupID | awk '{print $2}' | sort -n | tail -1`
@@ -7590,10 +7606,20 @@ create_users()
 		if [ $? -ne 0 ]; then
 			echo "creating group $i"
 			macOSgroupadd -g $groupid $i
+			if [ "$i" = "qcerts" ] ; then
+				/usr/bin/dscl . -list Users/apache >/dev/null 2>&1
+				if [ $? -eq 0 ] ; then
+					echo "added supplementary group qcerts to apache"
+					/usr/bin/dscl . append /Groups/qcerts GroupMembership apache
+				fi
+			fi
 		fi
 		;;
 		*)
 		linuxgroupadd $i
+		if [ "$i" = "qcerts" ] ; then
+			/usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qcerts apache
+		fi
 		;;
 		esac
 	done
@@ -7643,11 +7669,19 @@ create_users()
 			/usr/bin/dscl . -list Users/$i >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
 				echo "Creating $t"
-				macOSuseradd -M -u $userid -g nofiles -d $QmailHOME -s $safe_shell $i
+				if [ "$i" = "qmaild" ] ; then
+					macOSuseradd -M -u $userid -g nofiles -d $QmailHOME -s $safe_shell -G qcerts $i
+				else
+					macOSuseradd -M -u $userid -g nofiles -d $QmailHOME -s $safe_shell $i
+				fi
 			fi
 			;;
 			*)
-			linuxuseradd -c "$t" -M -g nofiles -d $QmailHOME -s $safe_shell $i
+			if [ "$i" = "qmaild" ] ; then
+				linuxuseradd -c "$t" -M -g nofiles -d $QmailHOME -s $safe_shell -G qcerts $i
+			else
+				linuxuseradd -c "$t" -M -g nofiles -d $QmailHOME -s $safe_shell $i
+			fi
 			;;
 		esac
 	done
@@ -7671,11 +7705,19 @@ create_users()
 			/usr/bin/dscl . -list Users/$i >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
 				echo "Creating $t"
-				macOSuseradd -M -u $userid -g qmail -d $QmailHOME -s $safe_shell $i
+				if [ "$i" = "qmailr" ] ; then
+					macOSuseradd -M -u $userid -g qmail -d $QmailHOME -s $safe_shell -G qcerts $i
+				else
+					macOSuseradd -M -u $userid -g qmail -d $QmailHOME -s $safe_shell $i
+				fi
 			fi
 			;;
 			*)
-			linuxuseradd -c "$t" -M -g qmail -d $QmailHOME -s $safe_shell $i
+			if [ "$i" = "qmailr" ] ; then
+				linuxuseradd -c "$t" -M -g qmail -d $QmailHOME -s $safe_shell -G qcerts $i
+			else
+				linuxuseradd -c "$t" -M -g qmail -d $QmailHOME -s $safe_shell $i
+			fi
 			;;
 		esac
 	done
@@ -9149,7 +9191,7 @@ create_cert()
 		/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
 		change_config $conf_file $TMPDIR/config.cnf.$$
 		/bin/chmod 640 $conf_file
-		$chown indimail:qmail $conf_file
+		$chown root:qcerts $conf_file
 	fi
 	if [ -f "$DESTDIR"$sysconfdir/certs/servercert.pem -a $force -ne 1 ] ; then
 		echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
@@ -9163,7 +9205,7 @@ create_cert()
 		exit 1
 	fi
 	/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
-	$chown indimail:qmail "$DESTDIR"$sysconfdir/certs/servercert.pem
+	$chown root:qcerts "$DESTDIR"$sysconfdir/certs/servercert.pem
 	if [ -f "$DESTDIR"$sysconfdir/certs/clientcert.pem ] ; then
 		t=$(readlink "$DESTDIR"$sysconfdir/certs/clientcert.pem)
 		t=$(basename $t)
@@ -9362,6 +9404,7 @@ use_starttls=0
 forcetls=0
 nooverwrite=0
 run_file_only=0
+setgroups=0
 utf8=0
 usefsync=0
 usefdatasync=0
@@ -9656,6 +9699,9 @@ while test $# -gt 0; do
 	;;
 	--utf8)
 	utf8=1
+	;;
+	--setgroups)
+	setgroups=1
 	;;
 	--cname-lookup)
 	enable_cname_lookup="yes"

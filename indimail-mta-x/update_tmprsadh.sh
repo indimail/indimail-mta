@@ -4,6 +4,9 @@
 # Frederik Vermeulen 2004-04-19 GPL
 #
 # $Log: update_tmprsadh.sh,v $
+# Revision 1.13  2023-02-14 09:27:09+05:30  Cprogrammer
+# create rsa/dh parameter files with root:qcerts owner:group
+#
 # Revision 1.12  2022-05-18 13:30:52+05:30  Cprogrammer
 # added --maxbits argument to specify maximum bits
 #
@@ -85,13 +88,13 @@ while true
 do
 	/usr/bin/openssl genrsa -out $CERTDIR/rsa"$i".new $i &&
 	$chmod 640 $CERTDIR/rsa"$i".new &&
-	$chown indimail:qmail $CERTDIR/rsa"$i".new &&
+	$chown root:qcerts $CERTDIR/rsa"$i".new &&
 	$mv -f $CERTDIR/rsa"$i".new $CERTDIR/rsa"$i".pem
 	echo rsa"$i".pem
 
 	/usr/bin/openssl dhparam -2 -out $CERTDIR/dh"$i".new $i &&
 	$chmod 640 $CERTDIR/dh"$i".new &&
-	$chown indimail:qmail $CERTDIR/dh"$i".new &&
+	$chown root:qcerts $CERTDIR/dh"$i".new &&
 	$mv -f $CERTDIR/dh"$i".new $CERTDIR/dh"$i".pem
 	echo dh"$i".pem
 	i=$(expr $i / 2)

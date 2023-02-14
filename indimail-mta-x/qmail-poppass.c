@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.7  2023-02-14 09:13:01+05:30  Cprogrammer
+ * renamed auto_uidv to auto_uidi
+ *
  * Revision 1.6  2022-01-30 08:40:59+05:30  Cprogrammer
  * replaced execvp with execv
  *
@@ -240,10 +243,10 @@ main(int argc, char **argv)
 	host = argv[1];
 	authargs = argv + 2;
 	uid = getuid();
-	if (uid != auto_uidv && uid != 0)
+	if (uid != auto_uidi && uid != 0)
 	{
 		out("500 you should run this program with uid 0 or uid ");
-		strnum[fmt_ulong(strnum, auto_uidv)] = 0;
+		strnum[fmt_ulong(strnum, auto_uidi)] = 0;
 		out(strnum);
 		out("\r\n");
 		flush();
@@ -359,7 +362,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.6 2022-01-30 08:40:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.7 2023-02-14 09:13:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

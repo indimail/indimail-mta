@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.371 2023-02-13 09:59:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.373 2023-02-14 12:14:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -74,6 +74,7 @@ Provides: user(qscand)      > 999
 Provides: group(%groupname) = %gid
 Provides: group(qmail)      > 999
 Provides: group(qscand)     > 999
+Provides: group(qcerts)     > 999
 %if %build_on_obs == 0
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
@@ -299,7 +300,7 @@ echo
 echo "The qmail system is heavily partitioned for security; it does almost"
 echo "nothing as root."
 echo
-echo "The first nine lines of this file are the alias user, the daemon user,"
+echo "The first ten lines of this file are the alias user, the daemon user,"
 echo "the log user, the owner of miscellaneous files such as binaries, the"
 echo "passwd user, the queue user, the remote user, the send user, the"
 echo "indimail user and the virus scan user."
@@ -316,10 +317,12 @@ echo "qmail"
 echo "nofiles"
 echo %groupname
 echo "qscand"
+echo "qcerts"
 echo
-echo "These are the qmail groups. The second group should not have access to"
-echo "any files, but it must be usable for processes; this requirement"
-echo "excludes the \`\`nogroup'' and \`\`nobody'' groups on many systems."
+echo "These are the qmail,indimail groups. The second group should not"
+echo "have access to any files, but it must be usable for processes;"
+echo "this requirements excludes the \`\`nogroup'' and \`\`nobody''"
+echo "groups on many systems."
 ) > /tmp/conf-groups
 diff /tmp/conf-groups conf-groups > /dev/null 2>&1
 if [ $? -ne 0 ] ; then
@@ -422,10 +425,18 @@ do
   touch %{buildroot}%{qsysconfdir}/control/$i
 done
 
-for i in rsa2048.pem rsa1024.pem servercert.cnf servercert.pem dh1024.pem \
-dh2048.pem dh512.pem rsa512.pem servercert.rand
+for i in rsa dh
 do
-  echo "%ghost %attr(0640,indimail,qmail) %config(noreplace,missingok) %{qsysconfdir}/certs/$i"
+  for j in 512 1024 2048 4096
+  do
+    echo "%ghost %attr(0640,indimail,qcerts) %config(noreplace,missingok) %{qsysconfdir}/certs/"$i""$j".pem"
+    echo ../certs/"$i""$j".pem 1>&3
+    touch %{buildroot}%{qsysconfdir}/certs/"$i""$j".pem
+  done
+done
+for i in servercert.cnf servercert.pem servercert.rand
+do
+  echo "%ghost %attr(0640,indimail,qcerts) %config(noreplace,missingok) %{qsysconfdir}/certs/$i"
   echo ../certs/$i 1>&3
   touch %{buildroot}%{qsysconfdir}/certs/$i
 done
@@ -480,10 +491,10 @@ echo ../resolv.conf 1>&3
 %dir %attr(2775,alias,qmail)                       %{qmaildir}/alias
 %dir %attr(2775,indimail,qmail)                    %{qmaildir}/autoturn
 %dir %attr(2755,root,qmail)                        %{qsysconfdir}
-%dir %attr(2775,root,qmail)                        %{qsysconfdir}/certs
+%dir %attr(2775,root,qcerts)                       %{qsysconfdir}/certs
 %dir %attr(2775,root,qmail)                        %{qsysconfdir}/control
 %dir %attr(2775,indimail,qmail)                    %{qsysconfdir}/control/cache
-%dir %attr(2755,root,qmail)                        %{qsysconfdir}/control/domainkeys
+%dir %attr(2755,root,qcerts)                       %{qsysconfdir}/control/domainkeys
 %dir %attr(0755,root,qmail)                        %{qsysconfdir}/control/defaultqueue
 %dir %attr(0755,root,qmail)                        %{qsysconfdir}/control/global_vars
 %dir %attr(0755,root,root)                         %{qsysconfdir}/perms.d
@@ -1163,19 +1174,20 @@ fi
 /usr/bin/getent group nofiles   > /dev/null || /usr/sbin/groupadd nofiles  || true
 /usr/bin/getent group qmail     > /dev/null || /usr/sbin/groupadd qmail    || true
 /usr/bin/getent group qscand    > /dev/null || /usr/sbin/groupadd qscand   || true
+/usr/bin/getent group qcerts    > /dev/null || /usr/sbin/groupadd qcerts   || true
 
 /usr/bin/getent passwd %username > /dev/null || /usr/sbin/useradd -r -g %groupname -u %uid -d %{qmaildir} %username || true
 if [ $? = 4 ] ; then
   /usr/sbin/useradd -r -g %groupname -d %{qmaildir} %username
 fi
 /usr/bin/getent passwd alias    > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}/alias  -s /sbin/nologin alias  || true
-/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmaild || true
+/usr/bin/getent passwd qmaild   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmaild -G qcerts || true
 /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{logdir}          -s /sbin/nologin qmaill || true
 /usr/bin/getent passwd qmailp   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{qmaildir}        -s /sbin/nologin qmailp || true
 /usr/bin/getent passwd qmailq   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailq || true
-/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailr || true
+/usr/bin/getent passwd qmailr   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmailr -G qcerts || true
 /usr/bin/getent passwd qmails   > /dev/null || /usr/sbin/useradd -M -g qmail    -d %{qmaildir}        -s /sbin/nologin qmails || true
-/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -G qmail,qscand -s /sbin/nologin qscand || true
+/usr/bin/getent passwd qscand   > /dev/null || /usr/sbin/useradd -M -g qscand   -d %{qmaildir}/qscanq -s /sbin/nologin qscand -G qmail,qscand || true
 
 for i in %username alias qmaild qmaill qmailp qmailq qmailr qmails qscand
 do
@@ -1379,7 +1391,7 @@ do
     extra_opt="--remote-authsmtp=login --localfilter --remotefilter"
     extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-    extra_opt="$extra_opt --dmemory=%{send_soft_mem} --utf8"
+    extra_opt="$extra_opt --dmemory=%{send_soft_mem} --setgroups --utf8"
   fi
 %if %{tcpserver_plugin} == 1
     extra_opt="$extra_opt --shared-objects=1 --use-dlmopen=1"

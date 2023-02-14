@@ -223,36 +223,38 @@ auto_uids.h: conf-users conf-groups
 	echo ""; \
 	echo "#include <sys/types.h>"; \
 	echo ""; \
-	echo "#define ALIASU    \"`head -1 conf-users  | tail -1`\""; \
-	echo "#define QMAILD    \"`head -2 conf-users  | tail -1`\""; \
-	echo "#define QMAILL    \"`head -3 conf-users  | tail -1`\""; \
-	echo "#define ROOTUSER  \"`head -4 conf-users  | tail -1`\""; \
-	echo "#define QMAILP    \"`head -5 conf-users  | tail -1`\""; \
-	echo "#define QMAILQ    \"`head -6 conf-users  | tail -1`\""; \
-	echo "#define QMAILR    \"`head -7 conf-users  | tail -1`\""; \
-	echo "#define QMAILS    \"`head -8 conf-users  | tail -1`\""; \
-	echo "#define INDIUSER  \"`head -9 conf-users  | tail -1`\""; \
+	echo "#define ALIASU    \"`head -1  conf-users | tail -1`\""; \
+	echo "#define QMAILD    \"`head -2  conf-users | tail -1`\""; \
+	echo "#define QMAILL    \"`head -3  conf-users | tail -1`\""; \
+	echo "#define ROOTUSER  \"`head -4  conf-users | tail -1`\""; \
+	echo "#define QMAILP    \"`head -5  conf-users | tail -1`\""; \
+	echo "#define QMAILQ    \"`head -6  conf-users | tail -1`\""; \
+	echo "#define QMAILR    \"`head -7  conf-users | tail -1`\""; \
+	echo "#define QMAILS    \"`head -8  conf-users | tail -1`\""; \
+	echo "#define INDIUSER  \"`head -9  conf-users | tail -1`\""; \
 	echo "#define QSCANDU   \"`head -10 conf-users | tail -1`\""; \
 	echo "#define QMAILG    \"`head -1 conf-groups | tail -1`\""; \
 	echo "#define NOFILESG  \"`head -2 conf-groups | tail -1`\""; \
 	echo "#define INDIGROUP \"`head -3 conf-groups | tail -1`\""; \
 	echo "#define QSCANDG   \"`head -4 conf-groups | tail -1`\""; \
+	echo "#define QCERTSG   \"`head -5 conf-groups | tail -1`\""; \
 	echo ""; \
-	echo "extern int auto_uida;" ;\
-	echo "extern int auto_uidd;" ;\
-	echo "extern int auto_uidl;" ;\
-	echo "extern int auto_uido;" ;\
-	echo "extern int auto_uidp;" ;\
-	echo "extern int auto_uidq;" ;\
-	echo "extern int auto_uidr;" ;\
-	echo "extern int auto_uids;" ;\
-	echo "extern int auto_uidv;" ;\
-	echo "extern int auto_uidc;" ;\
+	echo "extern int auto_uida; /* alias user */" ;\
+	echo "extern int auto_uidd; /* qmail daemon user */" ;\
+	echo "extern int auto_uidl; /* qmail log user */" ;\
+	echo "extern int auto_uido; /* root user */" ;\
+	echo "extern int auto_uidp; /* password access user */" ;\
+	echo "extern int auto_uidq; /* qmail queue user */" ;\
+	echo "extern int auto_uidr; /* qmail remote user */" ;\
+	echo "extern int auto_uids; /* qmail send user */" ;\
+	echo "extern int auto_uidi; /* indimail user */" ;\
+	echo "extern int auto_uidv; /* virus scan user */" ;\
 	echo ""; \
-	echo "extern int auto_gidq;" ;\
-	echo "extern int auto_gidn;" ;\
-	echo "extern int auto_gidv;" ;\
-	echo "extern int auto_gidc;" ;\
+	echo "extern int auto_gidq; /* qmail group */" ;\
+	echo "extern int auto_gidn; /* nofiles gorup */" ;\
+	echo "extern int auto_gidi; /* indimail user */" ;\
+	echo "extern int auto_gidv; /* virus scan group */" ;\
+	echo "extern int auto_gidc; /* certs access user */" ;\
 	echo ""; \
 	echo "int             uidinit(int, int);"; \
 	echo "char           *get_user(uid_t);"; \
@@ -262,20 +264,21 @@ auto_uids.h: conf-users conf-groups
 	) > auto_uids.h
 
 auto_uids.c: auto-uid auto-gid conf-users conf-groups
-	(./auto-uid auto_uidv `head -9  conf-users | tail -1` \
-	&& ./auto-uid auto_uida `head -1  conf-users` \
+	( ./auto-uid auto_uida `head -1  conf-users` \
 	&&./auto-uid auto_uidd `head -2  conf-users | tail -1` \
 	&&./auto-uid auto_uidl `head -3  conf-users | tail -1` \
+	&&./auto-uid auto_uido `head -4  conf-users | tail -1` \
 	&&./auto-uid auto_uidp `head -5  conf-users | tail -1` \
 	&&./auto-uid auto_uidq `head -6  conf-users | tail -1` \
 	&&./auto-uid auto_uidr `head -7  conf-users | tail -1` \
 	&&./auto-uid auto_uids `head -8  conf-users | tail -1` \
-	&&./auto-uid auto_uidc `head -10 conf-users | tail -1` \
-	&&./auto-uid auto_uido `head -4  conf-users | tail -1` \
-	&&./auto-gid auto_gidv `head -3  conf-groups | tail -1` \
+	&&./auto-uid auto_uidi `head -9  conf-users | tail -1` \
+	&&./auto-uid auto_uidv `head -10 conf-users | tail -1` \
 	&&./auto-gid auto_gidq `head -1  conf-groups` \
 	&&./auto-gid auto_gidn `head -2  conf-groups | tail -1` \
-	&&./auto-gid auto_gidc `head -4  conf-groups | tail -1` \
+	&&./auto-gid auto_gidi `head -3  conf-groups | tail -1` \
+	&&./auto-gid auto_gidv `head -4  conf-groups | tail -1` \
+	&&./auto-gid auto_gidc `head -5  conf-groups | tail -1` \
 	) > auto_uids.c.tmp && mv auto_uids.c.tmp auto_uids.c
 
 auto_uids.o: compile auto_uids.c

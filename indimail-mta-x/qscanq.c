@@ -1,5 +1,8 @@
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.12  2023-02-14 09:17:24+05:30  Cprogrammer
+ * renamed auto_uidc to auto_uidv
+ *
  * Revision 1.11  2022-10-03 12:25:19+05:30  Cprogrammer
  * fixed return exit codes
  *
@@ -110,7 +113,7 @@ main(int argc, char *argv[])
 	umask(0);
 
 	uid = getuid();
-	if (uid != auto_uidc && setreuid(auto_uidc, auto_uidc)) {
+	if (uid != auto_uidv && setreuid(auto_uidv, auto_uidv)) {
 		if (flaglog)
 			strerr_die2sys(QQ_XTEMP, FATAL, "setreuid failed: ");
 		_exit(QQ_XTEMP);
@@ -196,7 +199,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.11 2022-10-03 12:25:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.12 2023-02-14 09:17:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

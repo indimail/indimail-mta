@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.17 2023-02-11 23:01:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.18 2023-02-14 07:48:10+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -125,6 +125,8 @@ force=0
 bits=2048
 ktype="rsa"
 domain=""
+cert_user="root"
+cert_group="qcerts"
 eval set -- "$options"
 while :; do
 	case "$1" in
@@ -218,7 +220,7 @@ else
 		selector=$(basename $selector)
 	fi
 	if [ ! -d $dir ] ; then
-		if (! mkdir -p $dir || ! chown root:qmail $dir || ! chmod 755 $dir) ; then
+		if (! mkdir -p $dir || ! chown $cert_user:$cert_group $dir || ! chmod 755 $dir) ; then
 			exit 1
 		fi
 	fi
@@ -272,7 +274,7 @@ else
 	fi
 
 	exec 2>&3 # restore stderr
-	if ( ! chown root:qmail $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
+	if ( ! chown $cert_user:$cert_group $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
 		exit 1
 	fi
 	print_key "$domain" "$selector"
@@ -281,6 +283,9 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.18  2023-02-14 07:48:10+05:30  Cprogrammer
+# use qcerts group for certificate group permission
+#
 # Revision 1.17  2023-02-11 23:01:57+05:30  Cprogrammer
 # generate ed25519 public key without ASN.1 structure (skip first 12 bytes)
 #

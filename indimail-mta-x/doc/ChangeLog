@@ -39,6 +39,36 @@ multi-signature generation
     signature verification status on fd 2
 - 13/02/2022
 21. removed yahoo domainkeys
+- 14/02/2022
+22. cleanq.c, qhpsi.c, qscanq.c: renamed auto_uidc, auto_gidc to auto_uidv, auto_gidv
+23. dknewkey.sh: use qcerts group for certificate group permission
+24. get_uid.c: added qcerts group ID for certificate group permissionA
+25. get_uid.c: renamed auto_uidv, auto_gidv to auto_uidi, auto_gidi
+26. get_uid.c: added auto_gidc for qcerts group ID
+27. indimail-mta.spec: added group ID qcerts for certificate group permissions.
+28. perm_list.in: updated group ownership of certs, domainkeys directory to
+    qcerts
+29. qlocal_upgrade.in: add group ID qcerts
+30. qlocal_upgrade.in: updated group id of certs to qcerts
+31. qlocal_upgrade.in: added qcerts as supplementary group for qmaild, qmailr
+    and apache
+32. qmail-poppass.c, sql-database.c: renamed auto_uidv to auto_uidi, auto_gidv
+    to auto_gidi
+33. qmail-showctl.c: renamed auto_uidv to auto_uidi, auto_uidc to auto_uidv,
+    auto_gidv to auto_gidi
+34. qmail-showctl.c: added auto_uidc for qcerts group ID
+35. qmail-sql.c: renamed auto_uidv, auto_gidv to auto_uidi, auto_gidi
+36. smtpd.c: fix dossl function - return on error
+37. svctool.in: use tcpserver -u qmaild for running qmail-smtpd for qcerts
+    supplememtary group
+38. svctool.in: create qcerts group ID and added qcerts as supplementary group
+    for qmailr, qmaild, apache
+39. svctool.in: create certs with root:qcerts owner:group
+40. update_tmprsadh: create rsa/dh parameter files with root:qcerts
+    owner:group
+41. create_services.in, svctool.in, indimail-mta.spec.in,
+    debian/indimail-mta.postinst.in: added --setgroups to set USE_SETGROUPS
+    env variable for qmail-start
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

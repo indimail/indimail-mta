@@ -2,7 +2,9 @@ qmail
 nofiles
 indimail
 qscand
+qcerts
 
-These are the qmail groups. The second group should not have access to
-any files, but it must be usable for processes; this requirement
-excludes the ``nogroup'' and ``nobody'' groups on many systems.
+These are the qmail,indimail groups. The second group should not
+have access to any files, but it must be usable for processes;
+this requirements excludes the ``nogroup'' and ``nobody''
+groups on many systems.

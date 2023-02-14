@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.51 2022-12-02 10:45:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.52 2023-02-14 08:40:32+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -27,7 +27,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.51 2022-12-02 10:45:09+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.52 2023-02-14 08:40:32+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -36,7 +36,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.51 2022-12-02 10:45:09+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.51 2022-12-02 10:45:09+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.52 2023-02-14 08:40:32+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -156,16 +156,55 @@ if [ ! -f $sysconfdir/certs/clientcert.pem -a ! -L $sysconfdir/certs/clientcert.
 	$ln -s servercert.pem clientcert.pem
 fi
 
-getent group apache > /dev/null
-if [ $? -ne 2 ] ; then
-	for i in servercert.pem dh2048.pem rsa2048.pem dh1024.pem rsa1024.pem dh512.pem rsa512.pem
+t=$(getent group qcerts)
+if [ $? -eq 2 ] ; then
+	groupadd qcerts
+	usermod -aG qcerts qmaild
+	usermod -aG qcerts qmailr
+	/usr/bin/getent group apache > /dev/null && /usr/sbin/usermod -aG qcerts apache
+	chgrp -R qcerts $sysconfdir/certs
+	chgrp -R qcerts $sysconfdir/control/domainkeys
+else
+	t1=0
+	t2=0
+	t3=0
+	for t in $(echo $t | cut -d: -f4 | sed -e 's{,{ {g')
 	do
-		# roundcube (php) will require read access to certs
-		if [ -f $sysconfdir/certs/$i ] ; then
-			$chgrp qmail $sysconfdir/certs/$i
+		if [ "$t" = "qmailr" ] ; then
+			t1=1
+		elif [ "$t" = "qmaild" ] ; then
+			t2=1
+		elif [ "$t" = "apache" ] ; then
+			t3=1
 		fi
 	done
+	if [ $t1 -eq 0 ] ; then
+		echo usermod -aG qcerts qmailr
+	fi
+	if [ $t2 -eq 0 ] ; then
+		echo usermod -aG qcerts qmaild
+	fi
+	if [ $t3 -eq 0 ] ; then
+		/usr/bin/getent group apache > /dev/null && usermod -aG qcerts apache
+	fi
 fi
+
+for i in rsa dh
+do
+	for j in 512 1024 2048 4096
+	do
+	if [ -f $sysconfdir/certs/$i"$j".pem ] ; then
+		$chgrp qcerts $sysconfdir/certs/$i"$j".pem
+	fi
+	done
+done
+for i in servercert.cnf servercert.pem servercert.rand
+do
+	if [ -f $sysconfdir/certs/$i ] ; then
+		$chgrp qcerts $sysconfdir/certs/$i
+	fi
+done
+
 cd $sysconfdir/control
 if [ $? -eq 0 ] ; then
 	if [ ! -f servercert.pem ] ; then
@@ -326,6 +365,11 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.52  2023-02-14 08:40:32+05:30  Cprogrammer
+# added group ID qcerts
+# fix permissions of existing certificates to group permissions qcerts
+# added qcerts as supplementary group for qmaild, qmailr and apache
+#
 # Revision 1.51  2022-12-02 10:45:09+05:30  Cprogrammer
 # add AUTOSCAN env variable for svscan
 #
