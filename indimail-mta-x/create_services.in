@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.118 2023-02-14 12:12:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.118 2023-02-14 17:58:06+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -498,7 +498,7 @@ eval $svctool --slowq --servicedir=$servicedir --qbase=$qbase \
   --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
   --dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
   --remote-authsmtp=plain --localfilter --remotefilter \
-  --deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
 #
 # Greylist
 #
@@ -758,7 +758,7 @@ fi
 
 #
 # $Log: create_services.in,v $
-# Revision 2.118  2023-02-14 12:12:27+05:30  Cprogrammer
+# Revision 2.118  2023-02-14 17:58:06+05:30  Cprogrammer
 # added --setgroups to set USE_SETGROUPS env variable for qmail-start
 #
 # Revision 2.117  2022-11-07 20:45:29+05:30  Cprogrammer
