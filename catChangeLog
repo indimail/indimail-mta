@@ -167,13 +167,13 @@ do
 		flag=2
 		continue
 	fi
-	echo $line | egrep "^o " > /dev/null
+	echo $line | grep -E "^o " > /dev/null
 	if [ $? -eq 0 ] ; then
 		bullet=1
 	else
 		bullet=0
 	fi
-	echo "$line" |egrep "^[0-9]|^[0-9][0-9]|^[0-9][0-9][0-9]" > /dev/null
+	echo "$line" |grep -E "^[0-9]|^[0-9][0-9]|^[0-9][0-9][0-9]" > /dev/null
 	if [ $? -eq 0 ] ; then
 		if [ $option -eq 2 -a $nonewline -eq 1 ] ; then
 			echo
