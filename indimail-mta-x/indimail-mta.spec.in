@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.373 2023-02-14 12:14:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.373 2023-02-14 18:02:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1430,7 +1430,7 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
   --dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
   --remote-authsmtp=login --localfilter --remotefilter \
-  --deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \

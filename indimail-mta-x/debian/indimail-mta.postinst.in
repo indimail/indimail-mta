@@ -350,7 +350,7 @@ eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} 
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
 	--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/${dkimkeyfn} \
 	--remote-authsmtp=login --localfilter --remotefilter \
-	--deliverylimit-count="-1" --deliverylimit-size="-1" --utf8
+	--deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
 
 #odmr
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${servicedir} \
