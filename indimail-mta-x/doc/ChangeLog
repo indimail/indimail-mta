@@ -69,6 +69,8 @@ multi-signature generation
 41. create_services.in, svctool.in, indimail-mta.spec.in,
     debian/indimail-mta.postinst.in: added --setgroups to set USE_SETGROUPS
     env variable for qmail-start
+- 15/02/2023
+41. svctool.in: run indisrvr with additional qcert group ID privilege
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

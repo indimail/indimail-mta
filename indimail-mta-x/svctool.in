@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.656 2023-02-14 12:20:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.657 2023-02-15 14:33:56+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.656 2023-02-14 12:20:03+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.657 2023-02-15 14:33:56+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4147,11 +4147,12 @@ echo "fi"
 echo ""
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
-echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 if [ " $indisrvr_ssl" = " 1" ] ; then
+	echo "exec $QmailBinPrefix/bin/setuidgid -g qcerts indimail \\"
 	echo "$QmailBinPrefix/sbin/indisrvr -i \\\$LOCALIP -p \\\$PORT -b \\\$MAXDAEMONS \\"
 	echo "-t \\\$DATA_TIMEOUT -n \\\$CERTFILE\""
 else
+	echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 	echo "$QmailBinPrefix/sbin/indisrvr -i \\\$LOCALIP -p \\\$PORT -b \\\$MAXDAEMONS \\"
 	echo "-t \\\$DATA_TIMEOUT\""
 fi
