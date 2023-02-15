@@ -169,6 +169,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
   else
     makepkg -sf
   fi
+  mv *.zst $HOME/stage/arch
 fi
 echo -n "Remove Source (Y/N) - "
 read key

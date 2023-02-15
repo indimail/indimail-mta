@@ -10,7 +10,12 @@ if [ ! -f /etc/arch-release ] ; then
   echo "you can't make arch package on a non Arch Linux system" 1>&2
   exit 1
 fi
+if [ ! -f conf-version ] ; then
+  echo "conf-version not found" 1>&2
+  exit 1
+fi
 
+echo "DEBUG name=$name"
 verbose=0
 release=1
 clean=0
@@ -169,6 +174,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
   else
     makepkg -sf
   fi
+  mv *.zst $HOME/stage/arch
 fi
 echo -n "Remove Source (Y/N) - "
 read key
