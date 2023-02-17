@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.36 2023-02-13 10:07:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.37 2023-02-17 20:17:51+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -8,12 +8,21 @@ get_dkimkeys()
 		return 0
 	fi
 	(
-	awk -F: '{print $1" "$2}' $CONTROLDIR/dkimkeys | while read line
+	awk -F: '{print $1" "$2" "$3}' $CONTROLDIR/dkimkeys | while read line
 	do
 		set $line
 		echo $domain | grep -E "$1" >/dev/null
 		if [ $? -eq 0 ] ; then
 			echo $2
+			shift 2
+			if [ $# -gt 0 ] ; then
+				echo "$*" | tr , \\n | while read "line"
+				do
+					var=$(echo $line | cut -d= -f1)
+					val=$(echo $line | cut -d= -f2-)
+					echo "export $var=\"$val\"" 1>&3
+				done
+			fi
 			break
 		fi
 	done
@@ -184,7 +193,7 @@ set_selector()
 get_dkimfn()
 {
 # set private key for dk / dkim signing
-if [ \( -z "$NODKIM" -a -z "$DKIMVERIFY" \) ] ; then
+if [ -z "$NODKIM" -a -z "$DKIMVERIFY" ] ; then
 	if [ -f $CONTROLDIR/dkimkeys ] ; then
 		domain=$(echo $_SENDER | cut -d@ -f2)
 		t=$(get_dkimkeys $domain)
@@ -245,7 +254,11 @@ if [ -z "$NODKIM" ] ; then
 	if [ -n "$DKIMVERIFY" ] ; then
 		dkimverify=1
 	else
+		envfn=$(mktemp -t envfilterXXXXXX)
+		exec 3>$envfn
 		get_dkimfn
+		source $envfn
+		/bin/rm -f $envfn
 	fi
 fi
 tmpfn=$(mktemp -t dk-filterXXXXXX)
@@ -324,6 +337,9 @@ exec 0<$tmpfn
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.37  2023-02-17 20:17:51+05:30  Cprogrammer
+# set environment variables from dkimkeys
+#
 # Revision 1.36  2023-02-13 10:07:28+05:30  Cprogrammer
 # removed yahoo domainkeys
 #

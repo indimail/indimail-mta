@@ -77,6 +77,7 @@ multi-signature generation
 44. qmail-dkim.c: added env variable NODKIMKEYS to disable reading of dkimkeys
     control file
 45. qmail-dkim.c: disable dkimkeys when doing DKIMSIGNEXTRA
+46. dk-filter.sh: set environment variables set in dkimkeys control file
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
