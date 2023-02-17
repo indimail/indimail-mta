@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.288 2023-02-14 09:18:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.289 2023-02-17 11:41:45+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.288 $";
+static char    *revision = "$Revision: 1.289 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -561,7 +561,7 @@ die_read(char *str, char *err)
 	logerr(0, "\n", 0);
 	logflush();
 	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Requested action aborted: read error (#4.4.2)\r\n", 0);
+	out("451 Sorry, I got read error (#4.4.2)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -583,7 +583,7 @@ die_write(char *str, char *err)
 	logerr(0, "\n", 0);
 	logflush();
 	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Requested action aborted: write error (#4.4.2)\r\n", 0);
+	out("451 Sorry, I got write error (#4.4.2)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -593,7 +593,7 @@ die_alarm()
 {
 	logerr(1, "timeout reached reading data from client\n", 0);
 	logflush();
-	out("451 Requested action aborted: timeout (#4.4.2)\r\n", 0);
+	out("451 Sorry, I reached a timeout reading from client (#4.4.2)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -696,11 +696,33 @@ err_badhelo(char *arg1, char *arg2)
 }
 
 no_return void
-die_lcmd()
+die_lcmd(int i)
 {
-	logerr(1, "command too long!\n", 0);
+	switch (i)
+	{
+	case -2:
+		logerr(1, "command too long\n", 0);
+		break;
+	case -3:
+		logerr(1, "out of memory\n", 0);
+		break;
+	default:
+		logerr(1, "read error: ", error_str(errno), "\n", 0);
+		break;
+	}
 	logflush();
-	out("553 sorry, the given command is too long! (#5.5.2)\r\n", 0);
+	switch (i)
+	{
+	case -2:
+		out("553 sorry, the given command is too long! (#5.5.2)\r\n", 0);
+		break;
+	case -3:
+		out("451 sorry, I ran out of memory (#4.3.0))\r\n", 0);
+		break;
+	default:
+		out("451 sorry, unable to read from client (#5.5.2)\r\n", 0);
+		break;
+	}
 	flush();
 	_exit(1);
 }
@@ -710,7 +732,7 @@ die_regex()
 {
 	logerr(1, "regex compilation failed\n", 0);
 	logflush();
-	out("451 Requested action aborted: regex compilation failed (#4.3.0)\r\n", 0);
+	out("451 Sorry, regex compilation failed (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -720,7 +742,7 @@ die_nomem()
 {
 	logerr(1, "out of memory\n", 0);
 	logflush();
-	out("451 Requested action aborted: out of memory (#4.3.0)\r\n", 0);
+	out("451 Sorry, I ran out of memory (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -757,7 +779,7 @@ die_control(char *fn)
 	if (fn)
 		logerr(0, " [", fn, "]\n", 0);
 	logflush();
-	out("451 Requested action aborted: unable to read controls (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to read controls (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -767,7 +789,7 @@ die_ipme()
 {
 	logerr(1, "unable to figure out my IP address\n", 0);
 	logflush();
-	out("451 Requested action aborted: unable to figure out my IP addresses (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to figure out my IP addresses (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -805,7 +827,7 @@ die_logfilter()
 {
 	logerr(1, "unable create temporary files: ", error_str(errno), "\n", 0);
 	logflush();
-	out("451 Requested action aborted: unable to create temporary files (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to create temporary files (#4.3.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -815,7 +837,7 @@ err_addressmatch(char *errstr, char *fn)
 {
 	logerr(1, "address_match: ", fn, ": ", errstr, "\n", 0);
 	logflush();
-	out("451 Requested action aborted: local system failure (#4.3.0)\r\n", 0);
+	out("451 Sorry, there is a local system failure (#4.3.0)\r\n", 0);
 	flush();
 }
 
@@ -824,7 +846,7 @@ straynewline()
 {
 	logerr(1, "Bare LF received\n", 0);
 	logflush();
-	out("451 Requested action aborted: Bare LF received. (#4.6.0)\r\n", 0);
+	out("451 Sorry, I received Bare LF. (#4.6.0)\r\n", 0);
 	flush();
 	_exit(1);
 }
@@ -1112,7 +1134,7 @@ msg_notify()
 void
 err_smf()
 {
-	out("451 Requested action aborted: DNS temporary failure (#4.4.3)\r\n", 0);
+	out("451 Sorry, there is a DNS temporary failure (#4.4.3)\r\n", 0);
 	flush();
 }
 
@@ -1514,7 +1536,7 @@ err_qqt()
 {
 	logerr(1, "qqt failure\n", 0);
 	logflush();
-	out("451 Requested action aborted: qqt failure (#4.3.0)\r\n", 0);
+	out("451 Sorry, I got a temporary queue failure (#4.3.0)\r\n", 0);
 	flush();
 	return;
 }
@@ -1522,7 +1544,7 @@ err_qqt()
 int
 err_child()
 {
-	out("451 Requested action aborted: problem with child and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, there is a problem with my child and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1534,7 +1556,7 @@ err_library(char *arg)
 		logerr(1, arg, "\n", 0);
 		logflush();
 	}
-	out("451 Requested action aborted: problem loading virtual domain library (#4.3.0)\r\n", 0);
+	out("451 Sorry, there is a problem loading indimail virtual domain library (#4.3.0)\r\n", 0);
 	flush();
 	return;
 }
@@ -1544,7 +1566,7 @@ err_fork()
 {
 	logerr(1, "fork: ", error_str(errno), "\n", 0);
 	logflush();
-	out("451 Requested action aborted: child won't start and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, my child won't start and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1554,7 +1576,7 @@ err_pipe()
 {
 	logerr(1, "trouble creating pipes: ", error_str(errno), "\n", 0);
 	logflush();
-	out("451 Requested action aborted: unable to open pipe and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to open pipe and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1564,7 +1586,7 @@ err_write()
 {
 	logerr(1, "write error: ", error_str(errno), "\n", 0);
 	logflush();
-	out("451 Requested action aborted: unable to write pipe and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to write pipe and I can't auth (#4.3.0)\r\n", 0);
 	flush();
 	return -1;
 }
@@ -1916,7 +1938,7 @@ check_recipient_pwd(char *rcpt, int len)
 	if ((fd = open_read("/etc/passwd")) == -1) {
 		logerr(1, "passwd database error\n", 0);
 		logflush();
-		out("451 Requested action aborted: unable to read passwd database (#4.3.0)\r\n", 0);
+		out("451 Sorry, I'm unable to read passwd database (#4.3.0)\r\n", 0);
 		flush();
 		_exit(1);
 	}
@@ -1998,7 +2020,7 @@ check_recipient_sql(char *rcpt, int len)
 	}
 	logerr(1, "sql database error\n", 0);
 	logflush();
-	out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
+	out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
 	flush();
 	_exit(1);
 	/*- Not Reached */
@@ -2580,7 +2602,7 @@ open_control_files2()
 	if ((r = srs_setup(0)) < 0) {
 		logerr(1, "srs_setup failed\n", 0);
 		logflush();
-		out("451 Requested action aborted: unable to read srs controls (#4.3.0)\r\n", 0);
+		out("451 Sorry, I'm unable to read srs controls (#4.3.0)\r\n", 0);
 		flush();
 		_exit(1);
 	}
@@ -3297,7 +3319,7 @@ pop_bef_smtp(char *mfrom)
 	} else {
 		logerr(1, "Database error\n", 0);
 		logflush();
-		out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
+		out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
 		flush();
 		return (1);
 	}
@@ -3326,7 +3348,7 @@ domain_compare(char *dom1, char *dom2)
 				!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
 			logerr(1, "Database error\n", 0);
 			logflush();
-			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
+			out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
 			flush();
 			return (-1);
 		}
@@ -3696,7 +3718,7 @@ smtp_mail(char *arg)
 			} else {
 				logerr(1, "Database error\n", 0);
 				logflush();
-				out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
+				out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
 				flush();
 				return;
 			}
@@ -4076,7 +4098,7 @@ smtp_rcpt(char *arg)
 		default:
 			logerr(1, "accesslist: ", error_str(errno), "\n", 0);
 			logflush();
-			out("451 Requested action aborted: local system failure (#4.3.0)\r\n", 0);
+			out("451 Sorry, there is a local system failure (#4.3.0)\r\n", 0);
 			flush();
 			return;
 		}
@@ -5120,7 +5142,7 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 		} else {
 			logerr(1, "Database error\n", 0);
 			logflush();
-			out("451 Requested action aborted: temporary database error (#4.3.2)\r\n", 0);
+			out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
 			flush();
 			return ((PASSWD *) NULL);
 		}
@@ -6751,7 +6773,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if (i) {
 		logerr(1, "Error loading virtual package shared lib: ", errstr, "\n", 0);
 		logflush();
-		out("451 Requested action aborted: unable to load shared library (#4.3.0)\r\n", 0);
+		out("451 Sorry, there is a problem loading indimail virtual domain library (#4.3.0)\r\n", 0);
 		flush();
 		_exit(1);
 	}
@@ -6932,7 +6954,7 @@ command:
 #ifdef TLS
 	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
 #endif
-	if ((i = commands(&ssin, cmdptr)) == 0) {
+	if (!(i = commands(&ssin, cmdptr))) {
 #ifdef TLS
 		if (ssl) {
 			while (SSL_shutdown(ssl) == 0)
@@ -6943,8 +6965,8 @@ command:
 #endif
 		die_read("client dropped connection", 0);
 	} else
-	if (i == -1)
-		die_lcmd();
+	if (i < 0)
+		die_lcmd(i);
 }
 
 /*- Rejection of relay probes. */
@@ -6970,6 +6992,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.289  2023-02-17 11:41:45+05:30  Cprogrammer
+ * reworded smtp errors
+ * handle error code from commands() function
+ *
  * Revision 1.288  2023-02-14 09:18:52+05:30  Cprogrammer
  * fix dossl function - return on error
  *
@@ -7287,7 +7313,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.288 2023-02-14 09:18:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.289 2023-02-17 11:41:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

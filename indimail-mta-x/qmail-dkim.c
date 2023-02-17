@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.74 2023-02-12 18:37:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.75 2023-02-17 11:49:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -306,19 +306,24 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 	int             i, r_selector, pct_found;
 	static stralloc tmp = { 0 };
 
-	if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
-		custom_error("qmail-dkim", "Z", "unable to read dkimkeys.", 0, "X.3.0");
-	else
-	if (!i || !(keyfn = getDomainToken(domain, &dkimkeys))) {
+	if (env_get("NODKIMKEYS")) {
 		i = 0;
 		keyfn = dkimsign;
 	} else {
-		ptr = env_get("DKIMSIGNOPTIONS");
-		if (!dkimsignoptions || str_diff(dkimsignoptions, ptr)) {
-			dkimsignoptions = ptr;
-			if (dkim_setoptions(opts, dkimsignoptions))
-				custom_error("qmail-dkim", "Z", "Invalid DKIMSIGNOPTIONS", 0, "X.3.0");
-			DKIMSignReplaceHash(&ctxt, opts);
+		if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
+			custom_error("qmail-dkim", "Z", "unable to read dkimkeys.", 0, "X.3.0");
+		else
+		if (!i || !(keyfn = getDomainToken(domain, &dkimkeys))) {
+			i = 0;
+			keyfn = dkimsign;
+		} else { /*- has reading dkimkeys altered DKIMSIGNOPTIONS? */
+			ptr = env_get("DKIMSIGNOPTIONS");
+			if (!dkimsignoptions || str_diff(dkimsignoptions, ptr)) {
+				dkimsignoptions = ptr;
+				if (dkim_setoptions(opts, dkimsignoptions))
+					custom_error("qmail-dkim", "Z", "Invalid DKIMSIGNOPTIONS", 0, "X.3.0");
+				DKIMSignReplaceHash(&ctxt, opts);
+			}
 		}
 	}
 
@@ -1189,12 +1194,15 @@ main(int argc, char *argv[])
 		if (!(ptr = env_get("DKIMSIGNEXTRA")))
 			return (qmulti("DKIMQUEUE", argc, argv));
 		else {
+			if (!env_put2("NODKIMKEYS", "qmail-dkim")) /* prevent recursive call of qmail-dkim */
+				die(QQ_OUT_OF_MEMORY, 1);
+			else
 			if (!env_put2("DKIMSIGN", ptr))
 				die(QQ_OUT_OF_MEMORY, 1);
 			else
 			if ((ptr = env_get("DKIMSIGNOPTIONSEXTRA")) && !env_put2("DKIMSIGNOPTIONS", ptr))
 				die(QQ_OUT_OF_MEMORY, 1);
-			if (!env_unset("DKIMSIGNEXTRA"))
+			if (!env_unset("DKIMSIGNEXTRA") || !env_unset("DKIMSIGNOPTIONSEXTRA"))
 				die(QQ_OUT_OF_MEMORY, 1);
 			execv(argv[0], argv);
 			_exit(111);
@@ -1243,7 +1251,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.74 2023-02-12 18:37:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.75 2023-02-17 11:49:48+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1257,6 +1265,10 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.75  2023-02-17 11:49:48+05:30  Cprogrammer
+ * added env variable NODKIMKEYS to disable reading of dkimkeys control file
+ * disable dkimkeys when doing DKIMSIGNEXTRA
+ *
  * Revision 1.74  2023-02-12 18:37:37+05:30  Cprogrammer
  * use VERBOSE variable to turn on debug for signature verification status on fd 2
  *
