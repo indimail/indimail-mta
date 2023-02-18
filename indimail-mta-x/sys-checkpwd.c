@@ -1,5 +1,10 @@
 /*
- * $Id: sys-checkpwd.c,v 1.17 2022-12-18 12:30:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.18 2023-02-18 18:48:49+05:30 Cprogrammer Exp mbhangui $
+ *
+ * Test method
+ * printf "login\0pass\0\0\x01\0" >/tmp/input
+ * as root run
+ * env DEBUG=1 DEBUG_LOGIN=1 sys-checkpwd /bin/false < /tmp/input 3<&0
  */
 #include <unistd.h>
 #include <pwd.h>
@@ -26,6 +31,7 @@
 #include <in_crypt.h>
 #include <pw_comp.h>
 #include <makeargs.h>
+#include <qprintf.h>
 #include <qgetpwgr.h>
 
 #define FATAL "sys-checkpwd: fatal: "
@@ -141,9 +147,8 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 
 	if (!geteuid() && setuid(getuid()))
 		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
-	strnum[fmt_ulong(strnum, getpid())] = 0;
 	if (debug)
-		strerr_warn5("sys-checkpwd: pid [", strnum, "] executing authmodule [", argv[1], "]", 0);
+		subprintf(subfderr, "sys-checkpwd: pid=%d, executing authmodule=%s\n", getpid(), argv[1]);
 	if (pipe(pipe_fd) == -1)
 		strerr_die2sys(111, FATAL, "pipe: ");
 	if (dup2(pipe_fd[0], 3) == -1 || dup2(pipe_fd[1], 4) == -1)
@@ -275,21 +280,23 @@ main(int argc, char **argv)
 #endif
 	if (setuid(getuid()))
 		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
-	strnum[fmt_ulong(strnum, getuid())] = 0;
 	if (env_get("DEBUG_LOGIN")) {
 		i = str_rchr(argv[0], '/');
 		ptr = get_authmethod(auth_method);
-		strerr_warn14(argv[0][i] ? argv[0] + i + 1 : argv[0], ": uid(",
-				strnum, ") login [", login, "] challenge [", challenge,
-				"] response [", response, "] pw_passwd [",
-				enable_cram ? stored : "cram-disabled", "] auth_method [",
-				ptr, "]", 0);
+		subprintf(subfderr,
+				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s\n", 
+				argv[0][i] ? argv[0] + i + 1 : argv[0],
+				getuid(), login, challenge, response, stored,
+				enable_cram ? "Yes" : "No", ptr);
+		substdio_flush(subfderr);
 	} else
 	if (debug) {
 		i = str_rchr(argv[0], '/');
 		ptr = get_authmethod(auth_method);
-		strerr_warn8(argv[0][i] ? argv[0] + i + 1 : argv[0], ": uid(",
-				strnum, ") login [", login, "] auth_method [", ptr, "]", 0);
+		subprintf(subfderr, "%s: uid=%u, login=%s, CRAM=%s AUTH=%s\n",
+				argv[0][i] ? argv[0] + i + 1 : argv[0],
+				getuid(), login, enable_cram ? "Yes" : "No", ptr);
+		substdio_flush(subfderr);
 	}
 	if (!stored)
 		pipe_exec(argv, tmpbuf, offset, save);
@@ -317,7 +324,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.17 2022-12-18 12:30:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.18 2023-02-18 18:48:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -326,6 +333,9 @@ getversion_sys_checkpwd_c()
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.18  2023-02-18 18:48:49+05:30  Cprogrammer
+ * sys-checkpwd.c: replaced strerr_warn with subprintf
+ *
  * Revision 1.17  2022-12-18 12:30:10+05:30  Cprogrammer
  * handle wait status with details
  *
