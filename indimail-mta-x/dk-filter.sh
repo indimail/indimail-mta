@@ -20,7 +20,11 @@ get_dkimkeys()
 				do
 					var=$(echo $line | cut -d= -f1)
 					val=$(echo $line | cut -d= -f2-)
-					echo "export $var=\"$val\"" 1>&3
+					if [ -n "$val" ] ; then
+						echo "export $var=\"$val\"" 1>&3
+					else
+						unset $var
+					fi
 				done
 			fi
 			break
