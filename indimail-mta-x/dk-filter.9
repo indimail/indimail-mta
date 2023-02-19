@@ -53,7 +53,6 @@ You can set various DKIM options in getopt style, by setting the
 environment variable DKIMSIGNOPTIONS
 
 .nf
-b <standard>         1 - allman, 2 - ietf or 3 - both
 c <canonicalization> r for relaxed [DEFAULT], s - simple,
                      t relaxed/simple, u - simple/relaxed
 l                    include body length tag
@@ -72,14 +71,36 @@ y <selector>
 .fi
 
 .EX
-DKIMSIGNOPTIONS="-b 1 -c r -q"
-sets allman standard, with relaxed canonicalization and include query method tag
+DKIMSIGNOPTIONS="-c r -q"
+sets relaxed canonicalization and include query method tag
 .EE
 
 When signing \fBdk-filter\fR uses the domain found in the Return-Path,
 Sender, From headers to set the domain tag. If not it uses the value
 of \fBBOUNCEDOMAIN\fR environment variable. \fBBOUNCEDOMAIN\fR can be set
 to an email address or a domain (without the at sign).
+
+In addition to \fBDKIMSIGN\fR environment variable, you can have the domain
+and the pathname of the private key in the control file \fIdkimkeys\fR
+which has the following format
+
+.EX
+domain:private_key_path:envstr
+.EE
+
+.fi
+Here \fIenvstr\fR is a string of environment variable additions or
+removals. e.g.
+
+.EX
+QREGEX=1,DKIMSIGNOPTIONS=-z 4
+.EX
+
+.fi
+If an entry for \fIdomain\fR exists in \fIdkimkeys\fR, the value of
+\fBDKIMSIGN\fR environment variable is ignored. You can disable
+\fIdkimkeys\fR by setting \fBNODKIMKEYS\fR environment variable.
+
 
 To verify a message, set the \fBDKIMVERIFY\fR or \fBDKVERIFY\fR environment
 variables. \fBdk-filter\fR always inserts the \fBDKIM-Status\fR or
