@@ -16,25 +16,33 @@ They do not keep a copy of the input file. You will need to do something like th
 .EX
 This example verifies using DNS
 
- (./dkim -s INDIMAIL/control/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\\
+ (./dkim -s @controldir@/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\\
  | ./dkim -v
 
 This example does not use DNS. Useful for testing
 
  (./dkim -z 4 -s /tmp/domainkeys/efgh </tmp/mail.txt;cat /tmp/mail.txt) \\
  | ./dkim -v -T \\
- "v=DKIM1; k=ed25519; t=y; p=MCowBQYDK2VwAyEAokZUL1G6RmS4IWfCpCX3xjGKhVssoM4KfKpkmW8IERg="
+ "v=DKIM1; k=ed25519; t=y; p=okZUL1G6RmS4IWfCpCX3xjGKhVssoM4KfKpkmW8IERg="
 .EE
 
 .SH OPTIONS
 .TP
--s \fIkey\fR
-.I key
+-s \fIprivkey\fR
+.I privkey
 is a path to a file containing a PEM-format private key. Without the 'y'
 option, the base name of the file is used as the selector. Reads the email
 message on stdin. Prints the \fBDKIM-Signature\fR header. You can pass
 multiple \fIkey\fR to generate multiple signatures. For each \fB-s\fR
 option, you can pass \fB-y\fR, \fB-z\fR option before the \fB-s\fR option.
+
+.TP
+-z \fIhash\fR
+1 - sha1, 2 - sha256, 3 - sha1+sha256, 4 - ed25519
+
+.TP
+-y \fIselector\fR
+the selector tag DEFAULT=private
 
 .TP
 -v
@@ -101,20 +109,12 @@ the identity, if not provided it will not be included
 the expire time in seconds since epoch ( DEFAULT = current time + 604800). If set to - then it will not be included
 
 .TP
--z \fIhash\fR
-1 - sha1, 2 - sha256, 3 - sha1+sha256, 4 - ed25519
-
-.TP
--y \fIselector\fR
-the selector tag DEFAULT=private
-
-.TP
--s \fIprivkeyfile\fR
-sign the message using the private key in privkeyfile
-
-.TP
 -T \fIselectorRecord\fR
 Bypass DNS and use \fIselectorRecord\fR instead of fetching the record using DNS.
+
+.TP
+-V
+Sets verbose output
 
 .TP
 -H
