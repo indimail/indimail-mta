@@ -30,6 +30,8 @@ o ability to alter Hash Method after DKIMSignInit
     structure
 - 12/02/2023
 09. dkimverify.cpp: fixed multi-signature verfication (rsa+ed25519)
+- 19/02/2023
+10. dkim.cpp: fixed usage strings
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023

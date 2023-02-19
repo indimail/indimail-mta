@@ -9,7 +9,7 @@
  * limitations under the License.
  */
 /*
- * (cat /tmp/mail.txt|./dkim -z 2 -b 1 -y private \
+ * (cat /tmp/mail.txt|./dkim -z 2 -y private \
  * -s /var/indimail/control/domainkeys/private ;cat /tmp/mail.txt )|./dkim -v
  */
 #ifndef __cplusplus
@@ -59,9 +59,11 @@ void
 usage()
 {
 #ifdef HAVE_EVP_SHA256
-	fprintf(stderr, "usage: %s [-lqthvH] [-p <0|1|2>] [-b <1|2|3>] [-c <r|s|t|u>]\n\t[-d domain] [-i you@domain] [-x expire_time] [-z hash] [-y selector] -s privkeyfile\n", program);
+	fprintf(stderr, "usage: %s [-lqthvVHS] [-p <0|1|2>] [-c <r|s|t|u>] [-d domain]\n%s\n", program,
+			"\t[-i you@domain] [-x expire_time] [-z hash] [-y selector] -s privkeyfile [-T dnstext]");
 #else
-	fprintf(stderr, "usage: %s [-lqthvH] [-p <0|1|2>] [-b <1|2|3>] [-c <r|s|t|u>]\n\t[-d domain] [-i you@domain] [-x expire_time] [-y selector] -s privkeyfile\n", program);
+	fprintf(stderr, "usage: %s [-lqthvVHS] [-p <0|1|2>] [-c <r|s|t|u>] [-d domain]\n%s\n", program,
+			"\t[-i you@domain] [-x expire_time] [-y selector] -s privkeyfile [-T dnstext]");
 #endif
 	fprintf(stderr, "l                    include body length tag\n");
 	fprintf(stderr, "q                    include query method tag\n");
@@ -880,13 +882,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.33 2023-02-12 08:07:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.34 2023-02-19 08:48:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.34  2023-02-19 08:48:17+05:30  Cprogrammer
+ * fixed usage strings
+ *
  * Revision 1.33  2023-02-12 08:07:00+05:30  Cprogrammer
  * added dkim_error_str function to return DKIM error
  *
