@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.85 2023-02-13 22:39:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.86 2023-02-20 18:45:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -37,6 +37,7 @@
 #include <noreturn.h>
 #include <ndelay.h>
 #include <iopause.h>
+#include <isnum.h>
 #ifdef DARWIN
 #define opteof -1
 #else
@@ -65,7 +66,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.85 2023-02-13 22:39:06+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.86 2023-02-20 18:45:33+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1268,13 +1269,13 @@ read_provider_data(stralloc *t, int readfd, int writefd)
 int
 main(int argc, char **argv, char **envp)
 {
-	char           *x, *hostname;
+	char           *x, *hostname, *groups = NULL;
 #if defined(HAS_MYSQL)
-	char           *dbfile = 0;
+	char           *dbfile = NULL;
 #endif
 	struct servent *se;
 	unsigned long   port, ipcount = -1;
-	int             sfd, asd, pid, opt, tmpLimit, i;
+	int             sfd, asd, pid, opt, tmpLimit;
 #ifdef IPV6
 	int             fakev4 = 0;
 #ifdef FREEBSD
@@ -1411,19 +1412,15 @@ main(int argc, char **argv, char **envp)
 				scan_uint(x, &gid);
 			break;
 		case 'u':
-			for (i = 0, x = optarg; *x; x++) {
-				if (!isdigit(*x)) {
-					i = 1;
-					break;
-				}
-			}
-			if (i)
+			if (!isnum(optarg))
 				user = optarg;
 			else
 				scan_uint(optarg, &uid);
 			break;
 		case 'g':
-			scan_uint(optarg, &gid);
+			groups = optarg;
+			if (isnum(optarg))
+				scan_uint(optarg, &gid);
 			break;
 		case '1':
 			flag1 = 1;
@@ -1683,10 +1680,14 @@ main(int argc, char **argv, char **envp)
 	}
 #endif /*- #if defined(IPV6) && defined(FREEBSD) */
 	if (user) {
-		if (setuserid(user) == -1)
+		if (setuserid(user, 1, groups) == -1)
 			strerr_die2sys(111, FATAL, "unable to set user: ");
 	} else {
-		if (gid != -1 && prot_gid(gid) == -1)
+		if (gid == -1) {
+			if (groups && set_additional_groups(groups, 1) == -1)
+				strerr_die2sys(111, FATAL, "unable to add additional groups: ");
+		} else
+		if (prot_gid(gid) == -1)
 			strerr_die2sys(111, FATAL, "unable to set gid: ");
 		if (uid != -1 && prot_uid(uid) == -1)
 			strerr_die2sys(111, FATAL, "unable to set uid: ");
@@ -1864,6 +1865,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.86  2023-02-20 18:45:33+05:30  Cprogrammer
+ * added ability to set additional group ids
+ *
  * Revision 1.85  2023-02-13 22:39:06+05:30  Cprogrammer
  * allow both user and uid to be passed to -u option
  *

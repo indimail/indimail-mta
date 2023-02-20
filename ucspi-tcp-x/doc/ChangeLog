@@ -7,6 +7,9 @@ Release 1.1.2 Start 13/02/2023 End XX/XX/XXXX
 02.  tcpclient.c: added error message for tls_init, tls_session failures
 03.  tcpserver.c: allow both user and uid to be passed to -u option. 
      passing user enables setting of supplementary groups
+- 20/02/2023
+04.  tcpserver.c: add additional groups as a comma separated
+     groups to -g
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 18/09/2022 End 30/01/2023

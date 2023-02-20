@@ -18,7 +18,7 @@ is one argument.
 is one argument.
 .I prog
 [.\fIso\fR]
-consists of one or more arguments. 
+consists of one or more arguments.
 
 \fBtcpserver\fR(1) waits for connections from TCP clients. For each
 connection, it runs \fIprog\fR, with descriptor 0 reading from the network
@@ -60,16 +60,16 @@ receives SIGUSR1. \fBtcpserver\fR(1) exits when it receives SIGTERM.
 .B General options:
 .TP
 .B \-q
-Quiet. Do not print error messages. 
+Quiet. Do not print error messages.
 .TP
 .B \-Q
-(Default.) Print error messages. 
+(Default.) Print error messages.
 .TP
 .B \-v
-Verbose. Print error messages and status messages. 
+Verbose. Print error messages and status messages.
 .TP
 .B \-V
-Verbose. Print error messages, status messages and IP connection table. 
+Verbose. Print error messages, status messages and IP connection table.
 .P
 .B Connection options:
 .TP
@@ -100,7 +100,7 @@ for each and every host that is defined in the rules database.
 Follow the rules compiled into \fIcdb\fR by \fBtcprules\fR(1). These rules
 may specify setting environment variables or rejecting connections from bad
 sources. You can rerun \fBtcprules\fR(1) to change the rules while
-\fBtcpserver\fR(1) is running. 
+\fBtcpserver\fR(1) is running.
 
 .TP
 .B \-X
@@ -145,12 +145,7 @@ Write \fIbanner\fR to the network immediately after each connection is made.
 \fBtcpserver\fR(1) writes \fIbanner\fR before looking up
 $\fBTCPREMOTEHOST\fR, before looking up $TCPREMOTEINFO, and before checking
 \fIcdb\fR. This feature can be used to reduce latency in protocols where
-the client waits for a greeting from the server. 
-
-.TP
-.B \-g \fIgid
-Switch group ID to \fIgid\fR after preparing to receive connections.
-\fIgid\fR must be a positive integer. 
+the client waits for a greeting from the server.
 
 .TP
 \fB\-u \fIuid\fR | \fB\-u \fIuser
@@ -160,8 +155,14 @@ If \fIuid\fR is passed, then switch user ID to \fIuid\fR after preparing to
 receive connections.
 
 If \fIuser\fR is passed, then switch user ID to uid, group ID to gid and
-set all supplementary groups associated with the user preparing to receive
-connnection.
+supplementary groups associated with the user \fIuser\fR after preparing to
+receive connnection.
+
+.TP
+\fB\-g \fIgid\fR | \fB\-g \fIgid\fR,\fIgid\fR,..
+Switch group ID to \fIgid\fR after preparing to receive connections.
+\fIgid\fR can be a positive integer or group id from /etc/group. It can
+also be a comma separated list of numerical IDs or groups from /etc/group.
 
 .TP
 .B \-U
@@ -175,7 +176,7 @@ Same as
 .TP
 .B \-1
 After preparing to receive connections, print the local port number to
-standard output. 
+standard output.
 
 .TP
 .B \-4
@@ -201,7 +202,7 @@ This is only defined and needed for IPv6 link-local addresses.
 .B \-b \fIn
 Allow a backlog of approximately \fIn\fR TCP SYNs. On some systems, \fIn\fR
 is silently limited to 5. On systems supporting SYN cookies, the backlog is
-irrelevant. 
+irrelevant.
 
 .TP
 .B \-o
@@ -217,25 +218,25 @@ and to send data, but packets will be sent back along the default route.
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
-future; if you want it, set it explicitly. 
+future; if you want it, set it explicitly.
 
 .TP
 .B \-D
-Never delay sending data; enable TCP_NODELAY. 
+Never delay sending data; enable TCP_NODELAY.
 
 .P
-.B Data-gathering options: 
+.B Data-gathering options:
 
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment variable
-$\fBTCPREMOTEHOST\fR. 
+$\fBTCPREMOTEHOST\fR.
 
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment variable
 $\fBTCPREMOTEHOST\fR. To avoid loops, you must use this option for servers on TCP
-port 53. 
+port 53.
 
 .TP
 .B \-p
@@ -247,18 +248,18 @@ does not match $\fBTCPREMOTEIP\fR
 
 .TP
 .B \-P
-(Default.) Not paranoid. 
+(Default.) Not paranoid.
 
 .TP
 .B \-l \fIlocalname
 Do not look up the local host name in DNS; use \fIlocalname\fR for the
 environment variable $\fBTCPLOCALHOST\fR. A common choice for
 \fIlocalname\fR is 0. To avoid loops, you must use this option for servers
-on TCP port 53. 
+on TCP port 53.
 
 .TP
 .B \-r
-(Default.) Attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host. 
+(Default.) Attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host.
 
 .TP
 .B  \-R
@@ -388,7 +389,7 @@ The above causes \fBtcpserver\fR(1) to load qmail_smtpd.so and execute the smtp_
 function, after changing directory to /var/indimail, in the parent. smtp_init()
 loads all qmail-smtpd control files. Here PLUGIN0 is defined as
 @prefix@/lib/indimail/plugins/qmail_smtpd.so, which causes the function
-qmail_smtpd() to be preloaded. This improves the perfomance of the smtp 
+qmail_smtpd() to be preloaded. This improves the perfomance of the smtp
 service. In the above example, rblsmtpd.so
 is loaded without executing any initialization function and without changing
 directory. On SIGHUP, \fBtcpserver\fR(1) executes the function smtp_init(0). The
