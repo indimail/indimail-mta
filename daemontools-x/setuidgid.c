@@ -1,5 +1,5 @@
 /*
- * $Id: setuidgid.c,v 1.7 2023-02-20 18:37:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: setuidgid.c,v 1.7 2023-02-21 00:19:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -56,8 +56,11 @@ main(int argc, char **argv, char **envp)
 			strerr_die2sys(111, FATAL, "unable to get groups: ");
 	}
 	if (groups) {
-		if ((t = sysconf(_SC_NGROUPS_MAX)) == -1)
-			strerr_die2sys(111, FATAL, "unable to get sysconf NGROUPS_MAX: ");
+		if (ngroups) {
+			if ((t = sysconf(_SC_NGROUPS_MAX)) == -1)
+				strerr_die2sys(111, FATAL, "unable to get sysconf NGROUPS_MAX: ");
+		} else
+			t = 0;
 		old = ngroups;
 		for (ptr = groups; *ptr; ptr++) {
 			if (*ptr == ',')
@@ -104,17 +107,14 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setuidgid_c()
 {
-	static char    *x = "$Id: setuidgid.c,v 1.7 2023-02-20 18:37:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setuidgid.c,v 1.7 2023-02-21 00:19:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: setuidgid.c,v $
- * Revision 1.7  2023-02-20 18:37:54+05:30  Cprogrammer
- * moved set_additional_groups function to libqmail
- *
- * Revision 1.7  2023-02-20 09:55:09+05:30  Cprogrammer
+ * Revision 1.7  2023-02-21 00:19:31+05:30  Cprogrammer
  * moved set_additional_groups function to libqmail
  *
  * Revision 1.6  2021-09-11 10:20:02+05:30  Cprogrammer
