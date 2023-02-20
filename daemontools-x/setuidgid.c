@@ -1,5 +1,5 @@
 /*
- * $Id: setuidgid.c,v 1.7 2023-02-21 00:19:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: setuidgid.c,v 1.8 2023-02-21 01:06:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -28,7 +28,7 @@ main(int argc, char **argv, char **envp)
 	char           *ptr, *cptr, *account, *groups = 0,
 				   *usage = "usage: setuidgid [-s] [-g gid_list] account child";
 	char          **child;
-	int             i, t, ngroups = 0, opt, old;
+	int             i, ngroups = 0, opt, old;
 
 	while ((opt = getopt(argc, argv, "sg:")) != opteof) {
 		switch (opt)
@@ -56,18 +56,13 @@ main(int argc, char **argv, char **envp)
 			strerr_die2sys(111, FATAL, "unable to get groups: ");
 	}
 	if (groups) {
-		if (ngroups) {
-			if ((t = sysconf(_SC_NGROUPS_MAX)) == -1)
-				strerr_die2sys(111, FATAL, "unable to get sysconf NGROUPS_MAX: ");
-		} else
-			t = 0;
 		old = ngroups;
 		for (ptr = groups; *ptr; ptr++) {
 			if (*ptr == ',')
 				ngroups++;
 		}
 		ngroups++;
-		if (!alloc_re((char *) &gidset, t * sizeof(gid_t), ngroups * sizeof(gid_t)))
+		if (!alloc_re((char *) &gidset, old * sizeof(gid_t), ngroups * sizeof(gid_t)))
 			return -1;
 		for (i = old, ptr = cptr = groups; *ptr; ptr++) {
 			if (*ptr == ',') {
@@ -107,13 +102,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setuidgid_c()
 {
-	static char    *x = "$Id: setuidgid.c,v 1.7 2023-02-21 00:19:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: setuidgid.c,v 1.8 2023-02-21 01:06:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: setuidgid.c,v $
+ * Revision 1.8  2023-02-21 01:06:12+05:30  Cprogrammer
+ * re-allocate gidset to actual size
+ *
  * Revision 1.7  2023-02-21 00:19:31+05:30  Cprogrammer
  * moved set_additional_groups function to libqmail
  *
