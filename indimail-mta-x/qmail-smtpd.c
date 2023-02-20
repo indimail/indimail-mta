@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.11  2023-02-20 20:25:37+05:30  Cprogrammer
+ * display GSASL header, library version
+ *
  * Revision 1.10  2023-02-08 11:19:49+05:30  Cprogrammer
  * fixed format string for subprintf
  *
@@ -166,7 +169,7 @@ print_details()
 
 	subprintf(subfdout, "%-35s: ", "SASL");
 #ifdef HASLIBGSASL
-	subprintf(subfdout, "Yes, GSASL %s\n", gsasl_check_version(GSASL_VERSION));
+	subprintf(subfdout, "GSASL header version %s library version %s\n", GSASL_VERSION, gsasl_check_version(GSASL_VERSION));
 #else
 	subprintf(subfdout, "No\n");
 #endif
@@ -193,12 +196,6 @@ print_details()
 #endif
 	subprintf(subfdout, "%-35s: ", "SMTP Plugins");
 #ifdef SMTP_PLUGIN
-	subprintf(subfdout, "Yes\n");
-#else
-	subprintf(subfdout, "No\n");
-#endif
-	subprintf(subfdout, "%-35s: ", "GSASL");
-#ifdef HASLIBGSASL
 	subprintf(subfdout, "Yes\n");
 #else
 	subprintf(subfdout, "No\n");
@@ -266,7 +263,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.10 2023-02-08 11:19:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.11 2023-02-20 20:25:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

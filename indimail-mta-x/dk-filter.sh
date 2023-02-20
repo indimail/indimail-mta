@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.37 2023-02-17 20:17:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.38 2023-02-20 20:22:35+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -341,6 +341,9 @@ exec 0<$tmpfn
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.38  2023-02-20 20:22:35+05:30  Cprogrammer
+# unset variables for var=val when val is not set
+#
 # Revision 1.37  2023-02-17 20:17:51+05:30  Cprogrammer
 # set environment variables from dkimkeys
 #

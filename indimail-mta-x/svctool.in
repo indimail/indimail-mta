@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.657 2023-02-15 14:33:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.658 2023-02-20 20:32:01+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.657 2023-02-15 14:33:56+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.658 2023-02-20 20:32:01+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2822,7 +2822,7 @@ else
 fi
 echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
 echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
-echo "-u qmaild \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
+echo "-u qmaild -g qmail \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
 if [ -f /bin/false ] ; then
 	false="/bin/false"
 else

@@ -81,7 +81,13 @@ multi-signature generation
 - 18/02/2023
 47. sys-checkpwd.c: replaced strerr_warn with subprintf
 - 19/02/2023
-48. dk-filter.sh: added unset variables feature of dkimkeys
+48. dk-filter.sh: added unset variables feature of dkimkeys, for var=val when
+    val is not set
+- 20/02/2023
+49. smtpd.c: use plaintxtread for ssl connection to avoid abnormal exit during
+    smtp auth
+50. svctool.in: run qmail-smtpd with qmail group privilege to access
+    control/host.mysql
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

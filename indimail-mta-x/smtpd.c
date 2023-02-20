@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.289 2023-02-17 11:41:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.290 2023-02-20 20:26:08+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.289 $";
+static char    *revision = "$Revision: 1.290 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -596,6 +596,12 @@ die_alarm()
 	out("451 Sorry, I reached a timeout reading from client (#4.4.2)\r\n", 0);
 	flush();
 	_exit(1);
+}
+
+ssize_t
+plaintxtread(int fd, char *buf, int len)
+{
+	return timeoutread(timeout, fd, buf, len);
 }
 
 ssize_t
@@ -2667,17 +2673,6 @@ open_control_files2()
 	return;
 }
 
-#ifdef HASLIBGSASL
-void
-log_gsasl_version()
-{
-	strnum[fmt_ulong(strnum, getpid())] = 0;
-	logerr(1, "gsasl header version=", GSASL_VERSION, " library version=",
-			gsasl_check_version(NULL), "\n", 0);
-	logflush();
-}
-#endif
-
 static void
 setup_main_env()
 {
@@ -2756,7 +2751,6 @@ smtp_init(int force_flag)
 		logflush();
 		_exit(111);
 	}
-	log_gsasl_version();
 #endif
 
 	open_control_files1();
@@ -3705,7 +3699,7 @@ smtp_mail(char *arg)
 				return;
 			}
 			if (*u_not_found) {
-				/*- 
+				/*-
 				 * Accept the mail as denial could be stupid
 				 * like the vrfy command
 				 */
@@ -3738,7 +3732,7 @@ smtp_mail(char *arg)
 		}
 	} /*- if (env_get("CUGMAIL")) */
 	/*-
-	 * ANTISPOOFING 
+	 * ANTISPOOFING
 	 * Delivery to local domains
 	 * If the mailfrom is local and rcptto is local, do not allow
 	 * receipt without authentication (unless MASQUERADE is set).
@@ -4373,8 +4367,8 @@ put(char *ch)
 									++cp;
 							}
 							/*-
-							 * push the current boundary. 
-							 * Append a null and remember start. 
+							 * push the current boundary.
+							 * Append a null and remember start.
 							 */
 							if (!stralloc_0(&boundary))
 								die_nomem();
@@ -4849,6 +4843,13 @@ authgetl(void)
 	return (authin.len);
 }
 
+/*-
+ * authenticate()
+ * run all auth module chain specified in childargs
+ * which will ultimately exit 0 for successful auth or
+ * 1 for incorrect auth
+ * called by smtp_auth()
+ */
 int
 authenticate(int method)
 {
@@ -4867,7 +4868,7 @@ authenticate(int method)
 		die_nomem();
 	if (pipe(pi) == -1) /*- password input data */
 		return err_pipe();
-	if (pipe(po) == -1) /*- digest md5 */
+	if (pipe(po) == -1) /*- pipe for handling digest md5 */
 		return err_pipe();
 #ifdef TLS
 	if (ssl && pipe(pe) == -1) /*- smtp message pipe */
@@ -4889,6 +4890,10 @@ authenticate(int method)
 			close(pi[0]);
 		}
 		if (po[1] != 6) {
+			/*-
+			 * digest response will be written here
+			 * by the digest_md5() function in libqmail
+			 */
 			if (dup2(po[1], 6) == -1)
 				return err_write();
 			close(po[1]);
@@ -4937,12 +4942,12 @@ authenticate(int method)
 	if ((i = wait_exitcode(wstat))) {
 #ifdef TLS
 		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
-			substdio_fdbuf(&pwd_in, saferead, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
+			substdio_fdbuf(&pwd_in, plaintxtread, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
 			if (substdio_copy(&ssout, &pwd_in) == -2)
 				die_read("error reading checkpassword pipe", 0);
 		}
 #endif
-		/* 
+		/*
 		 * i == 3 - account doesn't have RELAY permissions.
 		 * pw_gid is set with NO_RELAY
 		 * This is returned by vchkpass auth program
@@ -5129,7 +5134,7 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 			return ((PASSWD *) NULL);
 		}
 		if (*u_not_found) {
-			/*- 
+			/*-
 			 * Accept the mail as denial could be stupid
 			 * like the vrfy command
 			 */
@@ -5542,7 +5547,7 @@ gsasl_server_auth(Gsasl_session *session)
 	 * piggy-backing of the terminating server response.  See RFC 2554
 	 * and RFC 4422 for terminology.  That profile results in the
 	 * following loop structure.  Ask on the help-gsasl list if you are
-	 * uncertain.  
+	 * uncertain.
 	 */
 	do {
 		if (gs_callback_err)
@@ -5579,7 +5584,7 @@ auth_scram(int method)
 	cb_required = cb_disabled = 0;
 	gsasl_callback_set(gsasl_ctx, gs_callback);
 	user.len = 0;
-  
+
 	strnum[0] = method;
 	strnum[1] = 0;
 	if (!stralloc_copyb(&authmethod, strnum, 2))
@@ -6429,7 +6434,7 @@ tls_verify()
 	ssl_verified = 1;	/*- don't do this twice */
 	/*-
 	 * request client cert to see if it can be verified by one of our CAs
-	 * and the associated email address matches an entry in tlsclients 
+	 * and the associated email address matches an entry in tlsclients
 	 */
 	switch (control_readfile(&clients, "tlsclients", 0))
 	{
@@ -6440,7 +6445,7 @@ tls_verify()
 		 * if clientca.pem contains all the standard root certificates, a
 		 * 0.9.6b client might fail with SSL_R_EXCESSIVE_MESSAGE_SIZE;
 		 * it is probably due to 0.9.6b supporting only 8k key exchange
-		 * data while the 0.9.6c release increases that limit to 100k 
+		 * data while the 0.9.6c release increases that limit to 100k
 		 */
 		if (!certdir) {
 			if (!(certdir = env_get("CERTDIR")))
@@ -6992,6 +6997,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.290  2023-02-20 20:26:08+05:30  Cprogrammer
+ * use plaintxtread for ssl connection to avoid abnormal exit during smtp auth
+ *
  * Revision 1.289  2023-02-17 11:41:45+05:30  Cprogrammer
  * reworded smtp errors
  * handle error code from commands() function
@@ -7313,7 +7321,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.289 2023-02-17 11:41:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.290 2023-02-20 20:26:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
