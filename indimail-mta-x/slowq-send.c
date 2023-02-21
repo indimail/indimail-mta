@@ -1342,7 +1342,7 @@ injectbounce(unsigned long id)
 		 * Allow bounces to have different rules, queue, controls, etc
 		 */
 		if (chdir(auto_qmail) == -1) {
-			slog(1, "alert: ", argv0, ": ", queuedesc, 
+			slog(1, "alert: ", argv0, ": ", queuedesc,
 					": unable to reread controls: unable to switch to ",
 					auto_qmail, ": ", error_str(errno), "\n", 0);
 			restore_env();
@@ -1916,7 +1916,7 @@ static struct {
 	substdio        ss;
 	char            buf[128];
 } pass[CHANNELS];
- 
+
 /*
  * used by
  * slowq-send
@@ -2910,12 +2910,12 @@ log_stat_todo(unsigned long id, size_t bytes)
 	mailfrom.len = mailto.len = 0;
 }
 
-/*- 
+/*-
  * used by todo processor
  *
  * todo_do calls todo_scan for static queues which
  *
- * 1. scans todo dir recursively 
+ * 1. scans todo dir recursively
  * 2. sets flagtododir if any file found in todo subdir
  * 3. sets nexttodorun
  *
@@ -2960,7 +2960,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 		scan_int(ptr, &split); /*- actual split value from filename */
 		fnmake_todo(id); /*- set fn as todo/split/id */
 		scan_int(fn1.s + 5, &i); /*- split as per calculation by fnmake using auto_split */
-		todo_log(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc, 
+		todo_log(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc,
 			": subdir=todo/", ptr, " fn=", fn1.s,
 			split != i ? " incorrect split\n" : "\n", 0);
 		if (split != i) /*- split doesn't match with split calculation in fnmake_todo() */
@@ -3046,7 +3046,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 			comm_info_todo(id, (unsigned long) st.st_size, todoline.s + 1, pid, uid);
 			break;
 		case 'T':
-			/*- 
+			/*-
 			 * 1. check address in control/locals, controls/virtualdomains
 			 * 2. rewrite address in rwline
 			 */
@@ -3309,7 +3309,7 @@ sigusr2()
 		return;
 	sig_block(sig_usr2);
 	flagdetached = 0;
-	/*- 
+	/*-
 	 * we need to rescan todo if we were earlier in detached mode
 	 * add jobs from todo
 	 */
@@ -3442,7 +3442,7 @@ todo_do_send(fd_set *rfds)
 			nomem(argv0);
 		if (todoline.len > REPORTMAX)
 			todoline.len = REPORTMAX;
-		/*- 
+		/*-
 		 * todo-processor is responsible for keeping it short
 		 * e.g. todo-processor writes a line like this
 		 * local  DL656826\0

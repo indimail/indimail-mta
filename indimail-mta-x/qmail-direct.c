@@ -121,7 +121,7 @@ sigbug()
 }
 
 /*
- * "Received: (qmail-queue invoked by alias); 26 Sep 1995 04:46:54 -0000\n" 
+ * "Received: (qmail-queue invoked by alias); 26 Sep 1995 04:46:54 -0000\n"
  */
 
 static unsigned int

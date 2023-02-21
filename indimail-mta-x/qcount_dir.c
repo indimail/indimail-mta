@@ -36,7 +36,7 @@ skip_system_files(char *filename)
 		"noprefilt",
 		"nopostfilt",
 		"BulkMail",
-		"deliveryCount", 
+		"deliveryCount",
 		"maildirfolder",
 		"maildirsize",
 		"core",

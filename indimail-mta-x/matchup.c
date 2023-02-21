@@ -293,8 +293,8 @@ garbage()
 }
 
 /*
- * turn TAI date into old fashioned date 
- * dates without @ are left alone 
+ * turn TAI date into old fashioned date
+ * dates without @ are left alone
  */
 
 char           *

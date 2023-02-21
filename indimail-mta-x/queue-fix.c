@@ -73,7 +73,7 @@
  * adapted from queue-fix 1.4
  * by Eric Huss
  * e-huss@netmeridian.com
- * 
+ *
  * reconstructs qmail's queue
  */
 #include <stdlib.h>

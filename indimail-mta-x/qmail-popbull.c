@@ -116,7 +116,7 @@ fnmake_maildir()
 			if (errno == error_noent)
 				break;
 		/*
-		 * really should never get to this point 
+		 * really should never get to this point
 		 */
 		if (loop == 2)
 			_exit(1);

@@ -40,7 +40,7 @@ typedef struct sockaddr_in6 sockaddr_in6;
  * Takes a string specifying IP address and port, separated by '@' If IP
  * address and/or port are missing, supplied defaults are used.
  */
-int 
+int
 scan_ip_port(daneip, defaultip, defaultport, ipp, portp)
 	char           *daneip, *defaultip;
 	unsigned int    defaultport;

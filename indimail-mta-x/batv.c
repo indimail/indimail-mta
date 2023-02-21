@@ -257,11 +257,11 @@ signbatv(char *sender)
 		if (!stralloc_catb(&newsender, md5hex, 2))
 			die_nomem();
 	}
-	/*-	separator */    
+	/*-	separator */
 	if (!stralloc_catb(&newsender, "=", 1) ||
 			!stralloc_catb(&newsender, sender, len) ||
 			!stralloc_0(&newsender))
-		die_nomem();    
+		die_nomem();
 	return newsender.s;
 }
 

@@ -85,7 +85,7 @@ main(int argc, char **argv)
 			queue_plugin_symbol = "virusscan";
 		messfn = argv[0] + 7;
 		for (u = 1; argv[u]; u++) {
-			/* 
+			/*
 			 * silently ignore plugins containing path
 			 */
 			if (argv[u][i = str_chr(argv[u], '/')])

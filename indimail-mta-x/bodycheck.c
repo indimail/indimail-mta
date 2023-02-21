@@ -76,8 +76,8 @@ bodycheck(stralloc *body, stralloc *line, char **desc, int in_header)
 						{
 							*cptr = 0;
 							pos1 = cptr;
-						} 
-					} 
+						}
+					}
 					break;
 				}
 			}
@@ -147,7 +147,7 @@ bodycheck(stralloc *body, stralloc *line, char **desc, int in_header)
 					{
 						*cptr = 0;
 						pos1 = cptr;
-					} 
+					}
 				} else
 				{
 					pos1 = pos2;

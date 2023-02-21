@@ -139,7 +139,7 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *s, char *qqeh, char *r
 	static stralloc libfn = { 0 };
 	int             i;
 	char           *ip, *real_domain, *libptr;
-	static char     smtproute[MAX_BUFF]; 
+	static char     smtproute[MAX_BUFF];
 	static int      rcptflag = 1;
 	extern void    *phandle;
 	int            *u_not_found;

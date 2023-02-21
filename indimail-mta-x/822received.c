@@ -107,7 +107,7 @@ doit()
 
 	state = 1;
 	/*
-	 * 1: start; 2: middle; 3: immediately after space; 4: after semicolon 
+	 * 1: start; 2: middle; 3: immediately after space; 4: after semicolon
 	 */
 
 	for (j = i = 0; j < tokens.len; ++j)

@@ -135,7 +135,7 @@ main(int argc, char **argv)
 	substdio_put(subfdout, dnsblhost.s, dnsblhost.len);
 	if (r)
 		substdio_put(subfdout, " blacklisted\n", 13);
-	else 
+	else
 		substdio_put(subfdout, " OK\n", 4);
 	substdio_flush(subfdout);
 	_exit(r ? 1 : 0);

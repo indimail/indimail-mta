@@ -70,7 +70,7 @@ typedef struct sockaddr_in6 sockaddr_in6;
  * Takes a string specifying IP address and port, separated by '@' If IP
  * address and/or port are missing, supplied defaults are used.
  */
-int 
+int
 scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 	char           *gip, *defaultip;
 	unsigned int    defaultport;
@@ -200,7 +200,7 @@ connect_udp(ip, port, errfn)
 stralloc        chkpacket = {0};
 stralloc        ipbuf = {0};
 
-int 
+int
 greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 	char           *gip, *connectingip, *from, *tolist;
 	int             tolen;

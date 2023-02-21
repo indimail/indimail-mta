@@ -549,7 +549,7 @@ iaafmt6(char *s, ip6_addr *i6, char *dom)
 	}
 	return 71;
 	/*
-	 * 1.2.3.4.5.6.7.8.9.a.b.c.d.e.f.1.2.3.4.5.6.7.8.9.a.b.c.d.e.f.ip6.int 
+	 * 1.2.3.4.5.6.7.8.9.a.b.c.d.e.f.1.2.3.4.5.6.7.8.9.a.b.c.d.e.f.ip6.int
 	 */
 }
 
@@ -1011,7 +1011,7 @@ findtlsa(int wanttype)
 		byte_copy((char *) tlsaRR.data, tlsaRR.data_len, (char *) responsepos + 3);
 		responsepos += rrdlen;
 		return 1;
-	} 
+	}
 	responsepos += rrdlen;
 	return 0;
 }

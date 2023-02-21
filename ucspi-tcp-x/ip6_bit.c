@@ -89,7 +89,7 @@ ip6tobitstring(char *ip6address, stralloc * ip6string, unsigned int prefix)
 }
 
 /**
- * This function converts a bit string which is produced by ip6tobitstring() 
+ * This function converts a bit string which is produced by ip6tobitstring()
  * into an IPv6 address. The string may start with a '^'.
  * @param ip6string 	Source string which need to be converted.
  * @param ip6addr 	Destination string.

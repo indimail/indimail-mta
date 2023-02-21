@@ -291,7 +291,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	 *
 	 *  For SASL authentication, the credentials should include the name of the SASL
 	 *  mechanism to use, and may optionally include encoded credential information
-	 *  appropriate for the SASL mechanism. 
+	 *  appropriate for the SASL mechanism.
 	 */
 	if (!(ldap_bind_dn = env_get("LDAP_BIND_DN"))) {
 		ldap_bind_dn = "";

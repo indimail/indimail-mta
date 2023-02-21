@@ -51,35 +51,35 @@ sigalrm()
 }
 
 /*-
- * Some operating systems quickly recycle PIDs, which can lead 
- * to collisions between Maildir-style filenames, which must 
+ * Some operating systems quickly recycle PIDs, which can lead
+ * to collisions between Maildir-style filenames, which must
  * be unique and non-repeatable within one second.
- * 
+ *
  * This uses the format of the revised Maildir protocol,
  * available at:
- * 
+ *
  * http://cr.yp.to/proto/maildir.html
- * 
+ *
  * It uses four unique identifiers:
  * - inode number of the file written to Maildir/tmp
  * - device number of the file written to Maildir/tmp
  * - time in microseconds
  * - the PID of the writing process
  * Additionally it puts the size of the file as S=size
- * 
+ *
  * A Maildir-style filename would look like the following:
- * 
+ *
  * In Maildir/tmp:
  * time.MmicrosecondsPpid.host
  * In Maildir/new:
  * time.IinodeVdeviceMmicrosecondsPpid.host,S=size
- * 
- * Additionally, this patch further comforms to the revised 
- * Maildir protocol by looking through the hostname for 
- * instances of '/' and ':', replacing them with "057" and 
+ *
+ * Additionally, this patch further comforms to the revised
+ * Maildir protocol by looking through the hostname for
+ * instances of '/' and ':', replacing them with "057" and
  * "072", respectively, when writing it to disk.
  *
- * Special thanks go to Matthias Andree for design and 
+ * Special thanks go to Matthias Andree for design and
  * sanity-checking.
  *
  *   --Toby Betts <tmb2@po.cwru.edu>
@@ -231,7 +231,7 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 	}
 #endif
 	/*
-	 * if it was error_exist, almost certainly successful; i hate NFS 
+	 * if it was error_exist, almost certainly successful; i hate NFS
 	 */
 	tryunlinktmp();
 	_exit (0);

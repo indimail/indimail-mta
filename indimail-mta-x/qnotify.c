@@ -389,7 +389,7 @@ parse_email(int get_subj, int get_rpath)
 			if (!stralloc_copy(&email_disp, &addr))
 				my_error("out of memory", 0, MEM_ERR);
 		}
-		if (got_date && got_subj && got_rpath && got_msgid && got_from && 
+		if (got_date && got_subj && got_rpath && got_msgid && got_from &&
 			got_disposition)
 			break;
 	}
@@ -448,7 +448,7 @@ main(int argc, char **argv)
 	parse_email(1, 1);
 	if (!got_disposition || !got_msgid)
 		_exit (0);
-	if ((rpline = env_get("SENDER"))) { 
+	if ((rpline = env_get("SENDER"))) {
 		if (!addrparse(rpline) && !stralloc_copys(&rpath, rpline))
 			my_error("out of memory", 0, MEM_ERR);
 	} else

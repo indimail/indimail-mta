@@ -112,7 +112,7 @@ static int
 srs_error_str(int code)
 {
 	if (!stralloc_copys(&srs_error, "SRS: ") ||
-			!stralloc_cats(&srs_error, (char *) srs_strerror(code)) || 
+			!stralloc_cats(&srs_error, (char *) srs_strerror(code)) ||
 			!stralloc_0(&srs_error))
 		return -2;
 	return -3;

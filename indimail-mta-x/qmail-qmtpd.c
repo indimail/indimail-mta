@@ -200,7 +200,7 @@ main()
 		received(&qq, "qmtpd", "QMTP", local, remoteip,
 				str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, (char *) 0);
 		/*
-		 * XXX: check for loops? only if len is big? 
+		 * XXX: check for loops? only if len is big?
 		 */
 		if (flagdos) {
 			while (len > 0) {

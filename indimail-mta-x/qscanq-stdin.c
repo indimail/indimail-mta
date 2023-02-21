@@ -112,7 +112,7 @@ main(int argc, char *argv[])
 	/*- Check whether we should be logging errors */
 	if (env_get("DEBUG"))
 		flaglog = 1;
-	/* 
+	/*
 	 * Set up stdin with seekable copy of message
 	 * [ fn := timestamp.ppid.n ]
 	 */
@@ -181,7 +181,7 @@ main(int argc, char *argv[])
 	}
 	/*- all done!  */
 	do_cleanq();
-	/* 
+	/*
 	 * unset VIRUSCHECK to prevent
 	 * qscanq getting called recursively
 	 * by qmail-multi

@@ -17,10 +17,10 @@
  *
  *
  * @brief whois client program
- * 
+ *
  * @details This program shall perform whois for a domain and get you the whois
  * data of that domain
- * 
+ *
  * @author Silver Moon ( m00n.silv3r@gmail.com )
  */
 #include <unistd.h>

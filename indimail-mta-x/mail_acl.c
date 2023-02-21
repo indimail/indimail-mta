@@ -67,7 +67,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 	 * e.g.
 	 * rcpt:ceo@indimail.org:country_distribution_list@indimail.org
 	 * rcpt:md@indimail.org:country_distribution_list@indimail.org
-	 * from:recruiter@yahoo.com:hr@indimail.org 
+	 * from:recruiter@yahoo.com:hr@indimail.org
 	 */
 	for (rcpt_reject = len = 0, count = 1, ptr = acclist->s;len < acclist->len;count++)
 	{

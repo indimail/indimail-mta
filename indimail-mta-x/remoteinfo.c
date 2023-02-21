@@ -87,7 +87,7 @@ remoteinfo_get(saremote, salocal, timeout)
 			close(s);
 			return 0;
 		}
-		if (timeoutconn4(s, (ip_addr *) &saremote->sa4.sin_addr, 
+		if (timeoutconn4(s, (ip_addr *) &saremote->sa4.sin_addr,
 			(union v46addr *) &salocal->sa4.sin_addr, 113, timeout) == -1)
 		{
 			close(s);
@@ -133,7 +133,7 @@ remoteinfo_get(saremote, salocal, timeout)
 			close(s);
 			return 0;
 		}
-		if (timeoutconn6(s, (ip6_addr *) &saremote->sa6.sin6_addr, 
+		if (timeoutconn6(s, (ip6_addr *) &saremote->sa6.sin6_addr,
 			(union v46addr *) &salocal->sa6.sin6_addr, 113, timeout) == -1)
 		{
 			close(s);

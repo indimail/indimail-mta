@@ -432,7 +432,7 @@ qhpsiprog(char *program)
 	case -1:
 		die(QQ_FORK_ERR, 1, "qhpsi: unable to fork");
 	case 0:
-		/* 
+		/*
 		 * execute the qhpsi executable for security reasons.
 		 * revoke all privileges and run with qmailq uid
 		 */
@@ -627,7 +627,7 @@ mq_todo(char *queue_ident, unsigned int priority)
 	mqd_t           mqd;
 	q_msg           qmsg;
 
-	/*- 
+	/*-
 	 * send inode and split number for big todo
 	 * send inode and conf_split for small todo
 	 */
@@ -723,7 +723,7 @@ main()
 		read_control(&extraqueue, "EXTRAQUEUE", "extraqueue", 0);
 		read_control(&quarantine, "QUARANTINE", "quarantine", 0);
 		/*-
-	 	* These control files will cause qmail-queue to 
+	 	* These control files will cause qmail-queue to
 	 	* read one line at a time
 	 	*/
 		read_control(&excl, "REMOVEHEADERS", "removeheaders", 1);
@@ -1127,7 +1127,7 @@ main()
 #if !defined(SYNCDIR_H) && defined(USE_FSYNC) && defined(LINUX) /*- asynchronous nature of link() happens only on Linux */
 	if (use_syncdir > 0) {
 		if ((fd = open(todofn, O_RDONLY)) == -1) {
-			/*- 
+			/*-
 			 * check if todofn has been picked up by todo-proc
 			 * and moved to local or remote folder. In such
 			 * a case you will get error_noent

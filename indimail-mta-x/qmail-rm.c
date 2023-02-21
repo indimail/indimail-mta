@@ -68,29 +68,29 @@
  *
  * "Portions Copyright (c) 2000-2001 LinuxMagic Inc. All Rights Reserved.
  * This file contains Original Code and/or Modifications of Original Code as
- * defined in and that are subject to the Wizard Software License Version 
- * 1.0 (the 'License'). You may not use this file except in compliance with 
+ * defined in and that are subject to the Wizard Software License Version
+ * 1.0 (the 'License'). You may not use this file except in compliance with
  * the License. Please obtain a copy of the License at:
  *
  * http://www.linuxmagic.com/opensource/licensing/GPL-2.text
- * 
+ *
  * and read it before using this file.
  *
- * The Original Code and all software distributed under the License are 
- * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER 
- * EXPRESS OR IMPLIED, AND LINUXMAGIC HEREBY DISCLAIMS ALL SUCH WARRANTIES, 
+ * The Original Code and all software distributed under the License are
+ * distributed on an 'AS IS' basis, WITHOUT WARRANTY OF ANY KIND, EITHER
+ * EXPRESS OR IMPLIED, AND LINUXMAGIC HEREBY DISCLAIMS ALL SUCH WARRANTIES,
  * INCLUDING WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY, FITNESS
- * FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT. Please see 
- * the License for the specific language governing rights and limitations 
- * under the License." 
+ * FOR A PARTICULAR PURPOSE, QUIET ENJOYMENT OR NON-INFRINGEMENT. Please see
+ * the License for the specific language governing rights and limitations
+ * under the License."
  *
- * Please read the terms of this license carefully. By using or downloading 
- * this software or file, you are accepting and agreeing to the terms of this 
- * license with LinuxMagic Inc. If you are agreeing to this license on behalf 
- * of a company, you represent that you are authorized to bind the company to 
- * such a license. If you do not meet this criterion or you do not agree to 
- * any of the terms of this license, do NOT download, distribute, use or alter 
- * this software or file in any way. 
+ * Please read the terms of this license carefully. By using or downloading
+ * this software or file, you are accepting and agreeing to the terms of this
+ * license with LinuxMagic Inc. If you are agreeing to this license on behalf
+ * of a company, you represent that you are authorized to bind the company to
+ * such a license. If you do not meet this criterion or you do not agree to
+ * any of the terms of this license, do NOT download, distribute, use or alter
+ * this software or file in any way.
  *
  * This program is loosely based on the python script which
  * does a similar thing and can be found at:
@@ -98,7 +98,7 @@
  * http://www.redwoodsoft.com/~dru/programs/
  *
  *
- * NOTES: 
+ * NOTES:
  *
  *     trash directory is relative to queue directory unless an
  *     absolute path is specified (begins with /) and assumed to
@@ -117,14 +117,14 @@
  *  of messages in the qmail queue to happen in a different time frame than the default Qmail time frame.
  *  this is done by modifying the time stamps on the files in the "INFO" directory of the queue.
  *
- *  -X takes a parameter of the number of seconds to offset the creation/modification time of matching 
+ *  -X takes a parameter of the number of seconds to offset the creation/modification time of matching
  *      messages.  positive values cause the dates to go back in time, essentially making the message "OLDER"
  *      when passing through the Queue, qmail will bounce any messages that are TOO old.
  *      negative values essentially make the message YOUNGER. thereby lengthening the time they spend in the queue
  *      Passing the value 0 will offset into the past all matching files by exactly 7 days.
  *
  *  -x takes a complete date/timestamp as it's parameter.  All matching messages are re-stamped to this exact value
- *      The format of the parameter is the same as the output of the date(8) command. ie: 
+ *      The format of the parameter is the same as the output of the date(8) command. ie:
  *      "Tue Dec 23 11:42:29 PST 2003"
  *      This makes it easy to use the date command to change time stamps relative to "today" see examples below for details
  *
@@ -163,13 +163,13 @@
  *      The X, x and R options are mutually exclusive. Currently R will take precedence
  *
  *      Using the "X" option causes us to change the file time for all matching files
- *      to be OLDER than the queue expiration time. 
+ *      to be OLDER than the queue expiration time.
  *
  *      This is intended as an easy way to clean out crap from the queue without having to shut down qmail, to do it.
  *      By changing the file timestamp, qmail will expire and clean out the queue for us.. of course we don't get to keep
  *      the files when this happens
  *
- *      This can also be used to keep a message in the queue for a longer period of time.  Using a negative offset, or a 
+ *      This can also be used to keep a message in the queue for a longer period of time.  Using a negative offset, or a
  *      date in the future will accomplish this.
  *
  */
@@ -623,7 +623,7 @@ read_file(const char *filename)
 		logerrf("\n");
 		close(fd);
 		return NULL;
-	} 
+	}
 	bytes = fd_stat.st_size;
 	if (!(buff = malloc(bytes + 1))) {
 		logerr("malloc: ");
@@ -896,7 +896,7 @@ remove_file(const char *filename)
  * expire_file()
  *
  * Takes a filename and assumes it is the path to a qmail queue file
- * (named after its inode). It attempts to find it in the INFO dir, and 
+ * (named after its inode). It attempts to find it in the INFO dir, and
  * changes the file time stamp
  *
  * returns the number of successful file changes, or -1 on error.
@@ -1077,7 +1077,7 @@ mk_newpath(char *queue, int inode_name)
  *
  *     Takes a filename and assumes it is the path to a qmail queue file
  * (named after its inode). It attempts to find it in all the queues and
- * removes the file(s). It returns the inode number of the file it removed 
+ * removes the file(s). It returns the inode number of the file it removed
  * from the queue or -1 on an error. This works with version .94 of qmail
  * -remove.
  */

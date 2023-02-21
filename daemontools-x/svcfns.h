@@ -20,7 +20,7 @@ pid_t           start_supervise(const char *dir, int fdin, int fdout);
 int             stop_supervise(const char *dir, pid_t svcpid);
 
 /*
- * Required external functions 
+ * Required external functions
  */
 extern void     err(const char *msg);
 

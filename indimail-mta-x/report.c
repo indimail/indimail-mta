@@ -59,7 +59,7 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 			_exit(111);
 		if (substdio_put(subfdoutsmall, "\0", 1) == -1)
 			_exit(111);
-		if (substdio_puts(subfdoutsmall, 
+		if (substdio_puts(subfdoutsmall,
 			errCode == 111 ?  "Zspawn said: Message deferred" : "Dspawn said: Giving up on filter\n") == -1)
 			_exit(111);
 		if (substdio_put(subfdoutsmall, "\0", 1) == -1)

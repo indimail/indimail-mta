@@ -44,7 +44,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 	char           **e;
 	int             i, unreadable = 0;
 
-	/*- 
+	/*-
 	 * allow $HOME/.defaultqueue for non-root
 	 * or root with non-zero root_rc
 	 */

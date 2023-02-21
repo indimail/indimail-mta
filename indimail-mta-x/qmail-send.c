@@ -1844,7 +1844,7 @@ sigusr2()
 		return;
 	sig_block(sig_usr2);
 	flagdetached = 0;
-	/*- 
+	/*-
 	 * we need to rescan todo if we were earlier in detached mode
 	 * add jobs from todo
 	 */
@@ -1993,7 +1993,7 @@ todo_do(fd_set *rfds)
 			nomem(argv0);
 		if (todoline.len > REPORTMAX)
 			todoline.len = REPORTMAX;
-		/*- 
+		/*-
 		 * todo-proc is responsible for keeping it short
 		 * e.g. todo-proc writes a line like this
 		 * local  DL656826\0
@@ -2414,8 +2414,8 @@ main(int argc, char **argv)
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	slog(1, "info: ", argv0, ": ", queuedir, ": ratelimit=", 
-			do_ratelimit ? "ON, loglock=" : "OFF, loglock=", 
+	slog(1, "info: ", argv0, ": ", queuedir, ": ratelimit=",
+			do_ratelimit ? "ON, loglock=" : "OFF, loglock=",
 			loglock_fd == -1 ? "disabled, conf split=" : "enabled, conf split=",
 			strnum1, "\n", 0);
 #ifdef USE_FSYNC

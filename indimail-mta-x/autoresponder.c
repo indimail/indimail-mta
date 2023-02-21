@@ -371,7 +371,7 @@ get_arguments(int argc, char *argv[])
 			break;
 		case 'n':
 			opt_maxmsgs = strtoul(optarg, &ptr, 10);
-			if ((opt_maxmsgs == ULONG_MAX && errno == ERANGE) 
+			if ((opt_maxmsgs == ULONG_MAX && errno == ERANGE)
 				|| (!opt_maxmsgs && ptr == optarg) || *ptr) {
 				substdio_puts(subfderr, "Invalid number ");
 				if (*ptr) {
@@ -410,7 +410,7 @@ get_arguments(int argc, char *argv[])
 			break;
 		case 't':
 			opt_timelimit = strtoul(optarg, &ptr, 10);
-			if ((opt_timelimit == ULONG_MAX && errno == ERANGE) 
+			if ((opt_timelimit == ULONG_MAX && errno == ERANGE)
 				|| (!opt_timelimit && ptr == optarg) || *ptr) {
 				substdio_puts(subfderr, "Invalid number ");
 				if (*ptr) {
@@ -559,7 +559,7 @@ parse_header(char *str, unsigned length)
 		if (!strncasecmp(start, "junk", end - start) || !strncasecmp(start, "bulk", end - start) ||
 			!strncasecmp(start, "list", end - start))
 			ignore("Message has a junk, bulk, or list precedence header");
-	} else 
+	} else
 	for(pos = 0, ptr = headertab;*ptr;ptr++,pos++) {
 		len = str_len(*ptr);
 		if (!strncasecmp(str, *ptr, len)) {
@@ -863,7 +863,7 @@ count_history(char *sender, unsigned max)
 	time_t          message_time;
 
 	/*
-	 * Translate all '/' to ':', to avoid fake paths in email addresses 
+	 * Translate all '/' to ':', to avoid fake paths in email addresses
 	 */
 	sender_len = str_len(sender);
 	sender_copy = alloc(sender_len + 1);
@@ -871,8 +871,8 @@ count_history(char *sender, unsigned max)
 		sender_copy[i] = (sender[i] == '/') ? ':' : sender[i];
 	sender_copy[i] = 0;
 	/*
-	 * create the filename, format "PID.TIME.SENDER" 
-	 * The PID is added to avoid collisions. 
+	 * create the filename, format "PID.TIME.SENDER"
+	 * The PID is added to avoid collisions.
 	 */
 	filename = (char *) alloc(fmt_ulong(0, (pid = getpid())) + fmt_ulong(0, when) + 2 + sender_len + 1);
 	ptr = filename;
@@ -888,7 +888,7 @@ count_history(char *sender, unsigned max)
 	ptr += i;
 	*ptr = 0;
 	/*
-	 * check if there are too many responses in the logs 
+	 * check if there are too many responses in the logs
 	 */
 	while ((entry = readdir(dir)) != NULL) {
 		if (entry->d_name[0] == '.')
@@ -904,7 +904,7 @@ count_history(char *sender, unsigned max)
 		else {
 			/*
 			 * If the user's count is already over the max,
-			 * don't record any more. 
+			 * don't record any more.
 			 */
 			if (str_equal(end + 1, sender_copy) && ++count >= max)
 				return 1;
@@ -912,7 +912,7 @@ count_history(char *sender, unsigned max)
 		}
 	}
 	/*
-	 * Conserve inodes -- create links when possible 
+	 * Conserve inodes -- create links when possible
 	 */
 	if (last_filename && !opt_nolinks && !link(last_filename, filename))
 		*filename = 0;
@@ -1170,7 +1170,7 @@ main(int argc, char *argv[])
 			strerr_die2sys(111, FATAL, "unable to write: ");
 		if (substdio_put(&ssout, "\n", 1))
 			strerr_die2sys(111, FATAL, "unable to write: ");
-	} 
+	}
 	if (substdio_puts(&ssout, "Subject: "))
 		strerr_die2sys(111, FATAL, "unable to write: ");
 	if (opt_subject_prefix && substdio_puts(&ssout, opt_subject_prefix))

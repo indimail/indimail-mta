@@ -21,11 +21,11 @@
 #include "newfield.h"
 
 /*
- * "Date: 26 Sep 1995 04:46:53 -0000\n" 
+ * "Date: 26 Sep 1995 04:46:53 -0000\n"
  */
 stralloc        newfield_date = { 0 };
 /*
- * "Message-ID: <19950926044653.12345.indimail@org>\n" 
+ * "Message-ID: <19950926044653.12345.indimail@org>\n"
  */
 stralloc        newfield_msgid = { 0 };
 

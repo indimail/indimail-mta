@@ -154,7 +154,7 @@ main(int argc, char **argv)
 		if (!match)
 			break;
 	}
-	if (cdbmss_finish(&cdbmss) == -1 || 
+	if (cdbmss_finish(&cdbmss) == -1 ||
 			fsync(fdtemp) == -1 ||
 			close(fdtemp) == -1)
 		strerr_die6sys(111, FATAL, "unable to write to ", workdir, "/", fn.s + i, ": ");

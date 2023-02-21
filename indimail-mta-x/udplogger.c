@@ -276,7 +276,7 @@ main(int argc, char **argv)
 				freeaddrinfo(res0);
 				errno = EINVAL;
 				strerr_die7x(111, FATAL, "getadrinfo: ", ipaddr, ": ", serv, ":", (char *) gai_strerror(opt));
-			} 
+			}
 			for (res = res0; res; res = res->ai_next) {
 				if (bind(s, res->ai_addr, res->ai_addrlen) == 0)
 					break;
@@ -294,7 +294,7 @@ main(int argc, char **argv)
 		if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
 			strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", serv, ": ");
 #endif
-	} 
+	}
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGHUP, sighup);
 	sig_catch(SIGUSR1, sigusr1);
@@ -320,7 +320,7 @@ main(int argc, char **argv)
 			continue;
 		if (!FD_ISSET(0, &rfds))
 			continue;
-		/* 
+		/*
 		 * Keep on incrementing bufsize till it is
 		 * possible to fetch the entire message
 		 * in one operation. This will allow the

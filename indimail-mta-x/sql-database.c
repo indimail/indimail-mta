@@ -82,7 +82,7 @@ create_db_table(MYSQL *conn, char *table_name, char **error)
 			return (AM_MEMORY_ERR);
 		}
 		return (AM_MYSQL_ERR);
-	} 
+	}
 	return (0);
 }
 
@@ -127,7 +127,7 @@ insert_db(MYSQL *conn, char *fn, char *table_name, int replace, char **errStr)
 		i = str_chr(line.s, ':');
 		if (!line.s[i])
 			continue;
-		if (!stralloc_copyb(&sql, replace ? "replace low_priority into " : "insert  low_priority into ", 26) || 
+		if (!stralloc_copyb(&sql, replace ? "replace low_priority into " : "insert  low_priority into ", 26) ||
 				!stralloc_cats(&sql, table_name) ||
 				!stralloc_catb(&sql, " (addr, value) values (\"", 24) ||
 				!stralloc_catb(&sql, line.s + 1, i - 1) ||
@@ -151,7 +151,7 @@ again:
 				}
 			} else
 			if (m_error == ER_PARSE_ERROR) {
-				if (!stralloc_copyb(&sql, replace ? "replace low_priority into " : "insert  low_priority into ", 26) || 
+				if (!stralloc_copyb(&sql, replace ? "replace low_priority into " : "insert  low_priority into ", 26) ||
 						!stralloc_cats(&sql, table_name) ||
 						!stralloc_catb(&sql, " (addr, value) values ('", 24) ||
 						!stralloc_catb(&sql, line.s + 1, i - i) ||

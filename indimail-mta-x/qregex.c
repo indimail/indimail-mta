@@ -86,13 +86,13 @@ cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
 	if (!stralloc_copys(&controlfile, controldir) || !stralloc_cats(&controlfile, "/")
 			|| !stralloc_cats(&controlfile, fn) || !stralloc_cats(&controlfile, ".cdb")
 			|| !stralloc_0(&controlfile)) {
-		if (errStr) 
+		if (errStr)
 			*errStr = error_str(errno);
 		return AM_MEMORY_ERR;
 	}
 	if ((fd_cdb = open_read(controlfile.s)) == -1) {
 		if (errno != error_noent) {
-			if (errStr) 
+			if (errStr)
 				*errStr = error_str(errno);
 			return AM_FILE_ERR;
 		}
@@ -100,30 +100,30 @@ cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
 			return (0);
 		/*- cdb missing or entry missing */
 		if ((cntrl_ok = control_readfile(&temp, fn, 0)) == -1) {
-			if (errStr) 
+			if (errStr)
 				*errStr = error_str(errno);
 			return AM_FILE_ERR;
 		}
 		if (cntrl_ok == 1 && !constmap_init(maprh, temp.s, temp.len, 0)) {
-			if (errStr) 
+			if (errStr)
 				*errStr = error_str(errno);
 			return AM_MEMORY_ERR;
 		}
 		if (!stralloc_copyb(&temp, addr, len)) {
-			if (errStr) 
+			if (errStr)
 				*errStr = error_str(errno);
 			return AM_MEMORY_ERR;
 		}
 		return (cntrl_ok == 1 ? (constmap(maprh, temp.s, len) ? 1 : 0) : 0);
 	}
 	if (!stralloc_copyb(&temp, addr, len)) {
-		if (errStr) 
+		if (errStr)
 			*errStr = error_str(errno);
 		close(fd_cdb);
 		return AM_MEMORY_ERR;
 	}
 	if ((cntrl_ok = cdb_seek(fd_cdb, temp.s, len, &dlen)) == -1) {
-		if (errStr) 
+		if (errStr)
 			*errStr = error_str(errno);
 		close(fd_cdb);
 		return (AM_LSEEK_ERR);

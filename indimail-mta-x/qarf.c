@@ -314,7 +314,7 @@ parse_email(int get_subj, int get_rpath)
 			if (!stralloc_copy(&email_deliveredto, &addr))
 				my_error("qarf: out of memory", 0, MEM_ERR);
 		}
-		if (got_date && got_subj && got_rpath && got_from && got_msgid 
+		if (got_date && got_subj && got_rpath && got_from && got_msgid
 				&& got_dkimstat && got_deliveredto)
 			break;
 	}
@@ -398,7 +398,7 @@ main(int argc, char **argv)
 			my_putb(rpath.s + at, rpath.len - at);
 		} else
 			my_putb(rpath.s, rpath.len);
-	} else 
+	} else
 		my_puts(to);
 	my_putb("\n", 1);
 	my_puts(

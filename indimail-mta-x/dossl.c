@@ -539,8 +539,8 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 	/*- for (i = (usage == 2 ? 1 : 0); i < (usage == 2 ? sk_X509_num(sk) : 1); i++) -*/
 	i = (usage == 2 ? sk_X509_num(sk) - 1 : 0);
 	xs = sk_X509_value(sk, i);
-	/*- 
-	 * DANE Validation 
+	/*-
+	 * DANE Validation
 	 * server cert - X = 2
 	 * anchor cert - X = 3
 	 * case 1 - match full certificate data -                            - X 0 0

@@ -353,8 +353,8 @@ tls_quit(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *peer_
 		}
 	}
 
-	/*- 
-	 * shouldn't talk to the client unless in an appropriate state 
+	/*-
+	 * shouldn't talk to the client unless in an appropriate state
 	 * https://mta.openssl.org/pipermail/openssl-commits/2015-October/002060.html
 	 */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L

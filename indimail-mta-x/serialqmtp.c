@@ -57,7 +57,7 @@ static stralloc sender = { 0 };
 static int      match;
 
 /*
- * ------------------------------------------------------------------- CHILD 
+ * ------------------------------------------------------------------- CHILD
  */
 
 ssize_t
@@ -115,7 +115,7 @@ doit(int fd)
 	if (substdio_putflush(subfdoutsmall, fn.s, fn.len) == -1)
 		_exit(33);
 	/*
-	 * must occur before writes to net, to avoid deadlock 
+	 * must occur before writes to net, to avoid deadlock
 	 */
 	substdio_put(&ssnet, num, fmt_ulong(num, len));
 	substdio_put(&ssnet, ":\n", 2);
@@ -169,7 +169,7 @@ child()	/*- reading from original stdin, writing to parent */
 
 
 /*
- * ------------------------------------------------------------------ PARENT 
+ * ------------------------------------------------------------------ PARENT
  */
 
 no_return void
@@ -265,7 +265,7 @@ parent()	/*- reading from child, writing to original stdout */
 
 
 /*
- * -------------------------------------------------------------------- MAIN 
+ * -------------------------------------------------------------------- MAIN
  */
 
 

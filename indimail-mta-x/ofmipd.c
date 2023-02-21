@@ -610,7 +610,7 @@ smtp_mail(char *arg)
 				nomem();
 		}
 	}
-	if (!stralloc_copy(&mailfrom, &rwaddr) || 
+	if (!stralloc_copy(&mailfrom, &rwaddr) ||
 			!stralloc_0(&mailfrom) || !stralloc_copys(&rcptto, ""))
 		nomem();
 	seenmail = 1;

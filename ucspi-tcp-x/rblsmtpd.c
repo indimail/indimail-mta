@@ -377,7 +377,7 @@ smtp_ehlo()
   if (rbl_ehlo) {
   substdio_put(&out, "250-", 4);
   substdio_puts(&out, rbl_greeting);
-  substdio_putsflush(&out, 
+  substdio_putsflush(&out,
     "\r\n250-PIPELINING\r\n250-8BITMIME\r\n250-STARTTLS\r\n250 HELP\r\n");
   } else
     accept();

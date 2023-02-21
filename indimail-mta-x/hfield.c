@@ -11,7 +11,7 @@
 
 static char    *(hname[]) =
 {
-	"unknown-header", 
+	"unknown-header",
 	"sender",
 	"from",
 	"reply-to",
@@ -39,7 +39,7 @@ static char    *(hname[]) =
 	"content-type",
 	"content-transfer-encoding",
 	"notice-requested-upon-delivery-to",
-	"mail-followup-to", 
+	"mail-followup-to",
 	0
 };
 

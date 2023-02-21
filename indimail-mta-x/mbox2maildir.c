@@ -19,7 +19,7 @@
  * Initial revision
  *
  *
- * mbox2maildir.c 
+ * mbox2maildir.c
  * Author: Nikola Vladov
  * Converted to substdio by Manvendra Bhangui (mbhangui@gmail.com)
  */
@@ -326,7 +326,7 @@ usage:
 		safe_close(tmpfd);
 
 	/*
-	 * power off 
+	 * power off
 	 */
 	if ((ds = open("new/", O_RDONLY)) == -1) {
 		w2nl("open new/ error\n");

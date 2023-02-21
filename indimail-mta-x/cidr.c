@@ -28,15 +28,15 @@ printNotation(char *cidrNotation)
 
 /*
  *
- * ipToBin - convert an ipv4 address to binary representation 
- *           and pads zeros to the beginning of the string if 
- *           the length is not 32 
+ * ipToBin - convert an ipv4 address to binary representation
+ *           and pads zeros to the beginning of the string if
+ *           the length is not 32
  *           (Important for ranges like 10.10.0.1 - 20.20.20.20 )
  *
  * ip   - ipv4 address on host order
  * pOut - Buffer to store binary.
  *
- * RETURNS: OK or ERROR 
+ * RETURNS: OK or ERROR
  */
 
 int
@@ -93,12 +93,12 @@ ipToBin(uint32_t ip, char *pOut)
 
 /*-
  * rangeToCidr - convert an ip Range to CIDR, and call 'callback' to handle
- * the value. 
- * 
+ * the value.
+ *
  * from     - IP Range start address
  * to       - IP Range end address
  * callback - Callback function to handle cidr.
- * RETURNS: OK or ERROR 
+ * RETURNS: OK or ERROR
  */
 
 void
@@ -128,12 +128,12 @@ rangeToCidr(uint32_t from, uint32_t to, void (callback) (char *cidrNotation))
 			cidrStart++;
 		cidrStart = 32 - cidrStart - 1;
 		/*
-		 * Starting from the found point of difference make all bits on the 
-		 * right side zero 
+		 * Starting from the found point of difference make all bits on the
+		 * right side zero
 		 */
 		newfrom = from >> (cidrStart + 1) << (cidrStart + 1);
 		/*
-		 * Starting from the end iterate reverse direction to find 
+		 * Starting from the end iterate reverse direction to find
 		 * cidrEnd
 		 */
 		while (fromIp[cidrEnd] == '0' && toIp[cidrEnd] == '1')
@@ -172,7 +172,7 @@ main(int argc, char **argv)
 		return (0);
 	}
 	/*
-	 * All operation on host order 
+	 * All operation on host order
 	 */
 	if (inet_aton(argv[1], &addr) == 0)
 		goto error;

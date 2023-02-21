@@ -73,7 +73,7 @@ err(s)
 }
 
 /*
- * Global so cleanup routine can find it. 
+ * Global so cleanup routine can find it.
  */
 void
 reset_sticky(char *scandir)
@@ -162,7 +162,7 @@ main(int argc, char *argv[])
 		_exit(QQ_XTEMP);
 	}
 	/*
-	 * Run a non-privileged process to do actual scanning 
+	 * Run a non-privileged process to do actual scanning
 	 */
 	switch (pid = vfork())
 	{

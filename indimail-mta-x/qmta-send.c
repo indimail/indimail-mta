@@ -2033,7 +2033,7 @@ close23456()
 	close(3);
 	close(4);
 	close(5);
-	close(6); 
+	close(6);
 }
 
 void
@@ -2736,7 +2736,7 @@ main(int argc, char **argv)
 	sig_termcatch(sigterm);
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
-	/*- 
+	/*-
 	 * this will cause problem with
 	 * qmail-close when doing bounces.
 	 * So we need to block SIGCHLD before

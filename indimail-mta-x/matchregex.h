@@ -8,7 +8,7 @@
  *
  */
 /*
- * simple header file for the matchregex prototype 
+ * simple header file for the matchregex prototype
  */
 #ifndef _MATCHREGEX_H_
 #define _MATCHREGEX_H_

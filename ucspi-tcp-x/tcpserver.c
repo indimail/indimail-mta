@@ -467,7 +467,7 @@ doit(int t)
 }
 
 /*
- * ---------------------------- parent 
+ * ---------------------------- parent
  */
 
 #define FATAL "tcpserver: fatal: "
@@ -526,7 +526,7 @@ matchinet(char *ip, char *token)
 		ptr1++;
 
 		/*
-		 * IP Address of client 
+		 * IP Address of client
 		 */
 		for (cptr = field2; *ptr2 && *ptr2 != '.'; *cptr++ = *ptr2++);
 		*cptr = 0;
@@ -551,7 +551,7 @@ matchinet(char *ip, char *token)
 			continue;
 		}
 		/*
-		 * Range match (i.e. "190-193.86.22.11") 
+		 * Range match (i.e. "190-193.86.22.11")
 		 */
 		if ((ptr = my_strchr(field1, '-'))) {
 			*ptr = 0;

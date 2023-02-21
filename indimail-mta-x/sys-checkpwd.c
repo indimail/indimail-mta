@@ -284,7 +284,7 @@ main(int argc, char **argv)
 		i = str_rchr(argv[0], '/');
 		ptr = get_authmethod(auth_method);
 		subprintf(subfderr,
-				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s\n", 
+				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s\n",
 				argv[0][i] ? argv[0] + i + 1 : argv[0],
 				getuid(), login, challenge, response, stored,
 				enable_cram ? "Yes" : "No", ptr);

@@ -5,7 +5,7 @@
  *
  */
 
-int 
+int
 fn_handler(errfn, timeoutfn, option, arg)
 	void              (*errfn)();
 	void              (*timeoutfn)();

@@ -134,7 +134,7 @@ main(int argc, char **argv)
 		wait_pid(&wstat, filt_pid);
 		_exit(QQ_FORK_ERR);
 	case 0:
-		/*- 
+		/*-
 		 * Mail content read from pipfd[0]
 		 * which has been filtered through SPAMFILTER
 		 * Envelope information can be read through recpfd[0]

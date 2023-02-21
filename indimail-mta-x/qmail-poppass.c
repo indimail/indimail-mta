@@ -26,9 +26,9 @@
 
  * Steve Dorner's description of the simple protocol:
  *
- * The server's responses should be like an FTP server's responses; 
+ * The server's responses should be like an FTP server's responses;
  * 1xx for in progress, 2xx for success, 3xx for more information
- * needed, 4xx for temporary failure, and 5xx for permanent failure.  
+ * needed, 4xx for temporary failure, and 5xx for permanent failure.
  * Putting it all together, here's a sample conversation:
  *
  *   S: 200 machine_name popassd v1.4 hello, who are you?\r\n

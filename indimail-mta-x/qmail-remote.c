@@ -1844,7 +1844,7 @@ gsasl_authenticate(Gsasl_session *session, char *mech)
 		}
 		if (rc == GSASL_NEEDS_MORE) {
 			/*
-			 * If the client need more data from server, get it here. 
+			 * If the client need more data from server, get it here.
 			 */
 			if ((code = smtpcode()) != 334) {
 				if (!stralloc_copyb(&gsasl_str, " but authentication was rejected (AUTH ", 39) ||
@@ -1866,7 +1866,7 @@ gsasl_authenticate(Gsasl_session *session, char *mech)
 	}
 	/*
 	 * The client is done.  Here you would typically check if the server
-	 * let the client in.  If not, you could try again. 
+	 * let the client in.  If not, you could try again.
 	 */
 	if ((code = smtpcode()) != 235) {
 		if (!stralloc_copyb(&gsasl_str, " but authentication was rejected (AUTH ", 39) ||
@@ -2004,7 +2004,7 @@ gsasl_client(Gsasl *gsasl_ctx, int method)
 		do_channel_binding(session);
 	/*
 	 * Set username and password in session handle. This info will be
-	 * lost when this session is deallocated below.  
+	 * lost when this session is deallocated below.
 	 */
 #if GSASL_VERSION_MAJOR > 1
 	rc = gsasl_property_set(session, GSASL_AUTHID, user.s);
@@ -2803,7 +2803,7 @@ is_in_tlsadomains(char *domain)
 			!stralloc_0(&_domain))
 		temp_nomem();
 	_domain.len--;
-	switch (dmatch(tlsadomainsfn, &_domain, tlsadomains.len ? &tlsadomains : 0, 
+	switch (dmatch(tlsadomainsfn, &_domain, tlsadomains.len ? &tlsadomains : 0,
 			tlsadomains.len ? &maptlsadomains : 0))
 	{
 	case 1:

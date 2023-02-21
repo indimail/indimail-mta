@@ -65,7 +65,7 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 	if (st.st_size <= 0xffffffff) {
 		x = mmap(0, st.st_size, PROT_READ, MAP_SHARED, fd, 0);
 		xlen = st.st_size;
-		/*- 
+		/*-
 		 * Format of controlfile.sql should be
 		 * server:user:pass:dbname:tablename
 		 */

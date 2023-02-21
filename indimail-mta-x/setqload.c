@@ -32,7 +32,7 @@
 
 char           *usage1 = "-q queue_number total";
 char           *usage2 = "-q queue_number lcur/lmax rcur/rmax";
-char           *desc = 
+char           *desc =
 	"\n\nwhere\n"
 	"   total = lcur/lmax + rcur/rmax\n"
 	"   lcur  = cur local   concurrency\n"

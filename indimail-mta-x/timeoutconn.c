@@ -209,7 +209,7 @@ timeoutconn6(int s, ip6_addr *ipr, union v46addr *ipl, unsigned int port, int ti
 		return ch;
 #endif
 	/*
-	 * use outgoing ipaddr only if bind_socket did not bind on a local IP 
+	 * use outgoing ipaddr only if bind_socket did not bind on a local IP
 	 */
 	if (!bound) {
 		byte_zero((char *) &sa, sizeof(sa));
@@ -334,7 +334,7 @@ timeoutconn4(int s, ip_addr *ipr, union v46addr *ipl, unsigned int port, int tim
 		return ch;
 #endif
 	/*
-	 * use outgoing ipaddr only if bind_socket did not bind on a local IP 
+	 * use outgoing ipaddr only if bind_socket did not bind on a local IP
 	 */
 	if (!bound) {
 		byte_zero((char *) &sin, sizeof(sin));

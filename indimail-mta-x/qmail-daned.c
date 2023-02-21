@@ -156,7 +156,7 @@ is_tlsadomain(char *domain)
 	if (!stralloc_copys(&_domain, domain) ||
 			!stralloc_0(&_domain))
 		die_nomem();
-	switch (domain_match(tlsadomainsfn, &_domain, tlsadomainsok ? &tlsadomains : 0, 
+	switch (domain_match(tlsadomainsfn, &_domain, tlsadomainsok ? &tlsadomains : 0,
 			tlsadomainsok ? &maptlsadomains : 0, &errStr))
 	{
 	case 1:
@@ -182,7 +182,7 @@ is_white(char *domain)
 	if (!stralloc_copys(&_domain, domain) ||
 			!stralloc_0(&_domain))
 		die_nomem();
-	switch (domain_match(whitefn, &_domain, whitelistok ? &whitelist : 0, 
+	switch (domain_match(whitefn, &_domain, whitelistok ? &whitelist : 0,
 			whitelistok ? &mapwhite : 0, &errStr))
 	{
 	case 1:
@@ -279,7 +279,7 @@ create_hash(struct danerec *curr)
 	if (!(hcount % hash_size)) { /*- first time or hash table full. recreate it */
 		if (h_allocated++) {
 			/*-
-			 * keep count of hash table recreation 
+			 * keep count of hash table recreation
 			 * If this happens too often, increase
 			 * the hash table size on command line
 			 */
@@ -301,7 +301,7 @@ create_hash(struct danerec *curr)
 		if (!hcreate((125 * hash_size * h_allocated)/100)) /*- be 25% generous */
 			strerr_die2sys(111, FATAL, "unable to create hash table: ");
 	}
-	/*- 
+	/*-
 	 * if curr is null -> add all entries from linked list.
 	 * this is done when hash is recreated after
 	 * destroying the hash during expiry
@@ -691,7 +691,7 @@ print_status(char status)
  *
  * Failed to add  \0\1
  * unknown record \0\2
- * record bad     \0\3 - bade DANE signature 
+ * record bad     \0\3 - bade DANE signature
  * record new     \1\0
  * record fail    \1\4
  * record white   \1\1
@@ -733,7 +733,7 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 			resp = rbuf;
 			rbuf[0] = 1;
 			rbuf[1] = dane_state = RECORD_NOVRFY;
-		} 
+		}
 		if (qmr == 'D' || qmr == 'E') {
 			dane_state = get_dane_records(domain);
 			if (!save.len)
@@ -1069,7 +1069,7 @@ main(int argc, char **argv)
 		if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
 			strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", a_port, ": ");
 #endif
-	} 
+	}
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGUSR1, sigusr1);
 	sig_catch(SIGUSR2, sigusr2);
@@ -1154,7 +1154,7 @@ main(int argc, char **argv)
 			out(inet_ntoa(from.sa4.sin_addr));
 #endif
 		}
-		/*- 
+		/*-
 		 * danerec(3) protocol packet structure -
 		 * Dgmail.com\0
 		 */

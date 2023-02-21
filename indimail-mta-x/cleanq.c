@@ -154,11 +154,11 @@ tryclean(const char *d)
 	time_t          now;
 
 	/*-
-	 * 1. Ignore "." and ".." 
-	 * 2. Try unlinking non-directories. These should never exist. 
-	 * 3. Ignore files not beginning with "@" 
-	 * 4. Delete if not sticky. 
-	 * 5. Skip if it's not old enough. 
+	 * 1. Ignore "." and ".."
+	 * 2. Try unlinking non-directories. These should never exist.
+	 * 3. Ignore files not beginning with "@"
+	 * 4. Delete if not sticky.
+	 * 5. Skip if it's not old enough.
 	 */
 
 	/*- 1 */
@@ -191,7 +191,7 @@ tryclean(const char *d)
 	if ((now - st.st_ctime) < 3 * MAX_AGE) /*- not old */
 		return;
 	/*
-	 * Delete it. Optionally, log the action. 
+	 * Delete it. Optionally, log the action.
 	 */
 	log_file("deleting: ", d, "too old");
 	remove_files(d);

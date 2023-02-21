@@ -88,7 +88,7 @@ loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
 			if (errstr)
 				*errstr = errbuf.s;
 			return ((void *) 0);
-		} 
+		}
 		if (!stralloc_0(&mysql_libfn)) {
 			if (errstr)
 				*errstr = memerr;

@@ -308,7 +308,7 @@ docmd()
 	}
 	if (st.st_uid != auto_uidq) { /*- aaack! qmailq has to be trusted!  */
 		/*
-		 * your security is already toast at this point. damage control... 
+		 * your security is already toast at this point. damage control...
 		 */
 		close(fdmess);
 		err("ZSorry, message has wrong owner. (#4.3.5)\n");

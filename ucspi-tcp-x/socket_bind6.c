@@ -38,7 +38,7 @@ socket_bind6(int s, char ip[16], uint16 port, uint32 scope_id)
 	sa.sin6_family = AF_INET6;
 	uint16_pack_big((char *) &sa.sin6_port, port);
 	/*
-	 * implicit: sa.sin6_flowinfo = 0; 
+	 * implicit: sa.sin6_flowinfo = 0;
 	 */
 	byte_copy((char *) &sa.sin6_addr, 16, ip);
 	sa.sin6_scope_id = scope_id;

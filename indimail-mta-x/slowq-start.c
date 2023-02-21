@@ -85,12 +85,12 @@ static int      pi6[2];
 
 void
 close23456()
-{ 
+{
 	close(2);
 	close(3);
 	close(4);
 	close(5);
-	close(6); 
+	close(6);
 }
 
 void

@@ -16,9 +16,9 @@
 extern int use_fsync, use_fdatasync, use_syncdir;
 #ifdef DARWIN
 int             qopen(char *, int, ...);
-int             qlink(char *, char *); 
-int             qunlink(char *); 
-int             qrename(char *, char *); 
+int             qlink(char *, char *);
+int             qunlink(char *);
+int             qrename(char *, char *);
 #define open(x, y) qopen(x, y)
 #define link(x, y) qlink(x, y)
 #define unlink(x) qunlink(x)

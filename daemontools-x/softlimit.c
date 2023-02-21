@@ -130,7 +130,7 @@ main(int argc, char **argv, char **envp)
 #endif
 			break;
 		case 'q':
-#ifdef RLIMIT_MSGQUEUE 
+#ifdef RLIMIT_MSGQUEUE
 			doit(RLIMIT_MSGQUEUE, optarg);
 #endif
 			break;

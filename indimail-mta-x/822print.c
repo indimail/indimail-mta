@@ -234,7 +234,7 @@ putaddr(stralloc *a, char *pre, char *post, char *style)
 			if (a->s[i] == '+') {
 				addr = a->s + i + 1;
 				/*
-				 * XXX: replace addr with nickname? 
+				 * XXX: replace addr with nickname?
 				 */
 				if (comment)
 					format(&leftline, a->s + comment, str_len(a->s + comment), pre, "_", "=");

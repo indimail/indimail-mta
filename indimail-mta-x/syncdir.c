@@ -39,21 +39,21 @@
  *
  * syncdir -- emulate synchronous directories
  * Copyright (C) 1998 Bruce Guenter
- * 
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- * 
+ *
  * You can reach me at bruce.guenter@qcc.sk.ca
  */
 
@@ -84,7 +84,7 @@ int             use_fsync = -1, use_fdatasync = -1, use_syncdir = -1;
 #define SYS_FSYNC(FD)            fsync(FD)
 #define SYS_FDATASYNC(FD)        fsync(FD)
 int             open(char *, int, ...);
-int             rename(char *, char *); 
+int             rename(char *, char *);
 #else
 #if defined(SYS_openat) && defined(AT_FDCWD)
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_openat,AT_FDCWD,FILE,FLAG,MODE)
@@ -117,7 +117,7 @@ fdirsync(const char *filename, unsigned length)
 	char            dirname[length + 1];
 	/*
 	 * This could also be:
-	 * char *dirname = alloca(length+1); 
+	 * char *dirname = alloca(length+1);
 	 */
 	int             dirfd;
 	int             retval;
@@ -138,19 +138,19 @@ fdirsyncfn(const char *filename)
 
 	/*
 	 * Skip over trailing slashes, which would be ignored by some
-	 * operations 
+	 * operations
 	 */
 	while (slash > filename && *slash == '/')
 		--slash;
 
 	/*
-	 * Skip back to the next slash 
+	 * Skip back to the next slash
 	 */
 	while (slash > filename && *slash != '/')
 		--slash;
 
 	/*
-	 * slash now either points to a '/' character, or no slash was found 
+	 * slash now either points to a '/' character, or no slash was found
 	 */
 	if (*slash == '/')
 		return fdirsync(filename, (slash == filename) ? 1 : slash - filename);

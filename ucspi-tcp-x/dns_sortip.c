@@ -15,8 +15,8 @@
 #ifdef IPV6
 
 /*
- * XXX: sort servers by configurable notion of closeness? 
- * XXX: pay attention to competence of each server? 
+ * XXX: sort servers by configurable notion of closeness?
+ * XXX: pay attention to competence of each server?
  */
 
 void

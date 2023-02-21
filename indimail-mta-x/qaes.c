@@ -2,7 +2,7 @@
  * AES encryption/decryption demo program using OpenSSL EVP apis
  * gcc -Wall openssl_aes.c -lcrypto
  *
- * this is public domain code. 
+ * this is public domain code.
  *
  * Saju Pillai (saju.pillai@gmail.com)
  *
@@ -145,24 +145,24 @@ aes_encrypt(EVP_CIPHER_CTX *e, unsigned char *plaintext, int *len)
 {
 	/*
 	 * max ciphertext len for a n bytes of plaintext
-	 * is n + AES_BLOCK_SIZE -1 bytes 
+	 * is n + AES_BLOCK_SIZE -1 bytes
 	 */
 	int             c_len = *len + AES_BLOCK_SIZE, f_len = 0;
 	unsigned char  *ciphertext = malloc(c_len);
 
 	/*
-	 * allows reusing of 'e' for multiple encryption cycles 
+	 * allows reusing of 'e' for multiple encryption cycles
 	 */
 	EVP_EncryptInit_ex(e, NULL, NULL, NULL, NULL);
 
 	/*
 	 * update ciphertext, c_len is filled with the length of ciphertext generated,
-	 * *len is the size of plaintext in bytes 
+	 * *len is the size of plaintext in bytes
 	 */
 	EVP_EncryptUpdate(e, ciphertext, &c_len, plaintext, *len);
 
 	/*
-	 * update ciphertext with the final remaining bytes 
+	 * update ciphertext with the final remaining bytes
 	 */
 	EVP_EncryptFinal_ex(e, ciphertext + c_len, &f_len);
 	*len = c_len + f_len;
@@ -176,7 +176,7 @@ unsigned char  *
 aes_decrypt(EVP_CIPHER_CTX *e, unsigned char *ciphertext, int *len)
 {
 /*
- * because we have padding ON, we must allocate an extra cipher block size of memory 
+ * because we have padding ON, we must allocate an extra cipher block size of memory
  */
 	int             p_len = *len, f_len = 0;
 	unsigned char  *plaintext = malloc(p_len + AES_BLOCK_SIZE);
@@ -199,7 +199,7 @@ main(int argc, char **argv)
 					ignore_newline = 0, error_count = 0;
 	/*
 	 * "opaque" encryption, decryption ctx structures that libcrypto uses to record
-	 * status of enc/dec operations 
+	 * status of enc/dec operations
 	 */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_CIPHER_CTX  *en, *de;
@@ -213,11 +213,11 @@ main(int argc, char **argv)
 		case 'k':
 			/*
 			 * 8 bytes to salt the key_data during key generation. This is an example of
-			 * compiled in salt. We just read the bit pattern created by these two 4 byte 
-			 * integers on the stack as 64 bits of contiguous salt material - 
-			 * ofcourse this only works if sizeof(int) >= 4 
+			 * compiled in salt. We just read the bit pattern created by these two 4 byte
+			 * integers on the stack as 64 bits of contiguous salt material -
+			 * ofcourse this only works if sizeof(int) >= 4
 			 *
-			 * the key_data is read from the argument list 
+			 * the key_data is read from the argument list
 			 */
 			key_data = (unsigned char *) optarg;
 			key_data_len = str_len(optarg);
@@ -244,7 +244,7 @@ main(int argc, char **argv)
 		strerr_die1x(100, usage);
 	}
 	/*
-	 * gen key and iv. init the cipher ctx object 
+	 * gen key and iv. init the cipher ctx object
 	 */
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	if (!(en = EVP_CIPHER_CTX_new())) {

@@ -11,7 +11,7 @@
 #include "fn_handler.h"
 #include "stralloc.h"
 
-int 
+int
 query_skt(fd, ipaddr, queryp, responsep, maxresponsesize, timeout, timeoutfn, errfn)
 	int             fd;
 	char           *ipaddr;

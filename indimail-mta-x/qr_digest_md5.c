@@ -78,7 +78,7 @@ qr_digest_md5(char *user, int ulen, char *realm, int rlen, char *pass, int plen,
 	*e = 0;					/* ea2 = ready */
 
 	/*
-	 * resp = hex(a1) + nonce + nc + cnonce + qop + hex(a2) 
+	 * resp = hex(a1) + nonce + nc + cnonce + qop + hex(a2)
 	 */
 	MD5Init(&md5);
 	MD5Update(&md5, ea1, 32);

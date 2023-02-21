@@ -22,11 +22,11 @@
 #define FATAL "leapsecs: fatal: "
 
 /*
- * XXX: breaks tai encapsulation 
+ * XXX: breaks tai encapsulation
  */
 
 /*
- * XXX: output here has to be binary; DOS redirection uses ASCII 
+ * XXX: output here has to be binary; DOS redirection uses ASCII
  */
 
 stralloc        line = { 0 };

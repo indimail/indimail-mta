@@ -7,7 +7,7 @@
  * Initial revision
  *
  *
- * Public domain. 
+ * Public domain.
  */
 
 #include <sys/types.h>
@@ -32,7 +32,7 @@ main()
 		_exit(1);
 
 	/*
-	 * XXX: try to detect and avoid poll() imitation libraries 
+	 * XXX: try to detect and avoid poll() imitation libraries
 	 */
 
 	_exit(0);

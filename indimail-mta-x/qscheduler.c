@@ -351,7 +351,7 @@ sigchld()
 			break;
 		if (child == killed) /*- we killed this as queue was empty */
 			killed = 0;
-		else { 
+		else {
 			start_send(-1, child);
 			sleep(1);
 		}
@@ -476,7 +476,7 @@ start_send(int queueNum, pid_t pid)
 		}
 		if (queue_table[i].pid != pid) {
 			strnum1[fmt_ulong(strnum1, pid)] = 0;
-			strerr_warn2("alert: qscheduler: could not locate pid ", strnum1, 0); 
+			strerr_warn2("alert: qscheduler: could not locate pid ", strnum1, 0);
 			die(1);
 		}
 		queue_no = i;
@@ -488,7 +488,7 @@ start_send(int queueNum, pid_t pid)
 			sleep(5);
 		}
 		if (i) {
-			strerr_warn2("alert: qscheduler: could not shutdown pid ", strnum1, 0); 
+			strerr_warn2("alert: qscheduler: could not shutdown pid ", strnum1, 0);
 			die(1);
 		}
 	} else { /*- first instance */
@@ -626,7 +626,7 @@ static_queue()
 			break;
 		}
 		strnum1[fmt_ulong(strnum1, child)] = 0;
-		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
+		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0);
 	} /* for (; flagexitasap;) */
 
 	strnum1[fmt_ulong(strnum1, selfpid)] = 0;
@@ -950,7 +950,7 @@ dynamic_queue()
 		}
 	} /*- for (qconf = 0; qconf < qmax; qconf++) */
 
-	/*- 
+	/*-
 	 * qcount is usually QUEUE_COUNT compile time default in
 	 * conf-queue or value of QUEUE_COUNT env variable if set.
 	 * But it may have been increased in a previous qscheduler
@@ -1157,7 +1157,7 @@ dynamic_queue()
 			break;
 		}
 		strnum1[fmt_ulong(strnum1, child)] = 0;
-		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0); 
+		strerr_warn3("alert: qscheduler: pid ", strnum1, " has shutdown", 0);
 	}
 #ifdef HASLIBRT
 	shm_unlink("/qscheduler");

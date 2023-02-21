@@ -233,7 +233,7 @@ scan_dirs(void)
 
 	/*-
 	 * For each directory entry, mark the corresponding reader.
-	 * If a matching reader is not found, make one. 
+	 * If a matching reader is not found, make one.
 	 */
 	while ((entry = readdir(dir)) != 0) {
 		struct stat     statbuf;
@@ -267,8 +267,8 @@ scan_dirs(void)
 
 		if (!reader->marked) {
 			/*-
-			 * Don't stop it, since the directory is no longer there 
-			 * stop_reader(reader); 
+			 * Don't stop it, since the directory is no longer there
+			 * stop_reader(reader);
 			 */
 			if (prev)
 				prev->next = next;
@@ -361,7 +361,7 @@ main_loop(void)
 		if (select(fdmax + 1, &readfds, &writefds, 0, 0) == -1)
 			continue;
 		/*
-		 * If an event arrived, skip all other I/O 
+		 * If an event arrived, skip all other I/O
 		 */
 		if (FD_ISSET(selfpipe[0], &readfds)) {
 			read_event();

@@ -315,7 +315,7 @@ mailforward(char **recips)
 		qmail_put(&qqt, messline.s, messline.len);
 	}
 	while (match);
-#ifdef HAVESRS 
+#ifdef HAVESRS
 	switch(srsforward(ueo.s))
 	{
 	case -3:
@@ -333,8 +333,8 @@ mailforward(char **recips)
 		if (!stralloc_copy(&ueo, &srs_result))
 			temp_nomem();
 		break;
-	} 
-#endif 
+	}
+#endif
 	qmail_from(&qqt, ueo.s);
 	while (*recips)
 		qmail_to(&qqt, *recips++);

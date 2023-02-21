@@ -84,8 +84,8 @@ longaddress()
 }
 
 /*
- * 0: reading target; command is empty; instr is empty 
- * 1: target is complete; instr still has to be written; reading command 
+ * 0: reading target; command is empty; instr is empty
+ * 1: target is complete; instr still has to be written; reading command
  */
 
 no_return void

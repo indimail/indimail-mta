@@ -153,7 +153,7 @@ makeenv(void)
 	char           *ext = 0;
 
 	/*
-	 * Parse the recipient address. 
+	 * Parse the recipient address.
 	 */
 	index = byte_rchr(recipient.s, recipient.len, '@');
 	*(recipient.s + index) = '\0';
@@ -162,7 +162,7 @@ makeenv(void)
 	env_put2("HOST", host);
 
 	/*
-	 * Parse the pieces of the recipient domain. 
+	 * Parse the pieces of the recipient domain.
 	 */
 	i = str_len(host);
 	i = byte_rchr(host, i, '.');
@@ -185,7 +185,7 @@ makeenv(void)
 	env_put2("HOST4", foo.s);
 
 	/*
-	 * Get the username associated with the effective UID. 
+	 * Get the username associated with the effective UID.
 	 */
 	pw = (use_pwgr ? qgetpwuid : getpwuid) (getuid());
 	if (!stralloc_copys(&user, pw->pw_name))
@@ -200,7 +200,7 @@ makeenv(void)
 	env_put2("USER", user.s);
 
 	/*
-	 * Compare the username with the local part of the recipient. 
+	 * Compare the username with the local part of the recipient.
 	 */
 	ext = recipient.s;
 	if (str_len(user.s) <= str_len(ext) && !str_diffn(user.s, ext, str_len(user.s)))
@@ -223,7 +223,7 @@ makeenv(void)
 	env_put2("EXT4", ext);
 
 	/*
-	 * Determine the home directory of user 
+	 * Determine the home directory of user
 	 */
 	if (!(pw = (use_pwgr ? qgetpwnam : getpwnam) (user.s))) {
 		if (errno == ENOMEM)
@@ -322,7 +322,7 @@ doit(int fd, char **argv, stralloc *fnam)
 	struct stat     st;
 
 	/*
-	 * Stat the file, and read its age. 
+	 * Stat the file, and read its age.
 	 */
 	if (fstat(fd, &st) == -1)
 		die_statmess();
@@ -332,12 +332,12 @@ doit(int fd, char **argv, stralloc *fnam)
 	env_put2("AGE", line.s);
 
 	/*
-	 * Initialize a substdio buffer. 
+	 * Initialize a substdio buffer.
 	 */
 	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
 
 	/*
-	 * Look up the envelope sender. 
+	 * Look up the envelope sender.
 	 */
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		die_readmess();
@@ -356,7 +356,7 @@ doit(int fd, char **argv, stralloc *fnam)
 	env_put2("RPLINE", line.s);
 
 	/*
-	 * Look up the envelope recipient. 
+	 * Look up the envelope recipient.
 	 */
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		die_readmess();
@@ -373,7 +373,7 @@ doit(int fd, char **argv, stralloc *fnam)
 	env_put2("DTLINE", line.s);
 
 	/*
-	 * Do some quoting on the sender and recipient. 
+	 * Do some quoting on the sender and recipient.
 	 */
 	if (!stralloc_0(&sender))
 		die_nomem();
@@ -383,18 +383,18 @@ doit(int fd, char **argv, stralloc *fnam)
 		die_nomem();
 
 	/*
-	 * Export some environment variables. 
+	 * Export some environment variables.
 	 */
 	env_put2("SENDER", sender.s);
 	env_put2("RECIPIENT", recipient.s);
 
 	/*
-	 * Derive the rest of the environment variables. 
+	 * Derive the rest of the environment variables.
 	 */
 	makeenv();
 
 	/*
-	 * Run the command now. 
+	 * Run the command now.
 	 */
 	argv[0] = "/bin/sh";
 	argv[1] = "-c";

@@ -575,7 +575,7 @@ mqueue_init(void)
 		todo_log("alert: ", argv0, ": failed to open POSIX message queue ",
 			mq_name, ": ", error_str(errno), "\n", 0);
 		comm_die(111);
-	} 
+	}
 	nexttodorun = now();
 	if (clock_getcpuclockid(0, &clock_id)) {
 		todo_log("alert: ", argv0, ": failed to get clockid: ", error_str(errno), "\n", 0);
@@ -798,10 +798,10 @@ todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 	return 0;
 }
 
-/*- 
+/*-
  * todo_do calls todo_scan for static queues which
  *
- * 1. scans todo dir recursively 
+ * 1. scans todo dir recursively
  * 2. sets flagtododir if any file found in todo subdir
  * 3. sets nexttodorun
  *
@@ -873,7 +873,7 @@ todo_do(int *nfds, fd_set *rfds)
 		scan_int(ptr, &split); /*- actual split value from filename */
 		fnmake_todo(id); /*- set fn as todo/split/id */
 		scan_int(fn.s + 5, &i); /*- split as per calculation by fnmake using auto_split */
-		todo_log(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc, 
+		todo_log(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc,
 			": subdir=todo/", ptr, " fn=", fn.s,
 			split != i ? " incorrect split\n" : "\n", 0);
 		if (split != i) /*- split doesn't match with split calculation in fnmake_todo() */
@@ -959,7 +959,7 @@ todo_do(int *nfds, fd_set *rfds)
 			comm_info(id, (unsigned long) st.st_size, todoline.s + 1, pid, uid);
 			break;
 		case 'T':
-			/*- 
+			/*-
 			 * 1. check address in control/locals, controls/virtualdomains
 			 * 2. rewrite address in rwline
 			 */
@@ -1401,8 +1401,8 @@ main(int argc, char **argv)
 				todo_log("warning: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
 		} else {
 			/*-
-			 * we come here on 
-			 * 1. select timeout out 
+			 * we come here on
+			 * 1. select timeout out
 			 * 2. when trigger is pulled
 			 * 3. when message using mq_queue is received
 			 */

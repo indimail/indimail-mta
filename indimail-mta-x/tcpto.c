@@ -135,7 +135,7 @@ tcpto(struct ip_mx *ix, int min_backoff)
 				when = (when << 8) + (unsigned long) (unsigned char ) record[10];
 				when = (when << 8) + (unsigned long) (unsigned char ) record[9];
 				when = (when << 8) + (unsigned long) (unsigned char ) record[8];
-				/* 
+				/*
 				 * ((60 + (getpid() & 31)) << 6) =
 				 * Timeout in seconds: 64 - 97 minutes, depending on pid
 				 */

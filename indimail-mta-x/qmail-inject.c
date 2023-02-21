@@ -248,7 +248,7 @@ exitnicely()
 		if (!stralloc_0(&sender))
 			die_nomem();
 #ifdef HAVESRS
-	if (!env_get("QMAILINJECT_SKIP_SRS") && 
+	if (!env_get("QMAILINJECT_SKIP_SRS") &&
 		(env_get("QMAILINJECT_FORCE_SRS") || (env_get("EXT") && env_get("HOST")))) {
 		switch(srsforward(sender.s))
 		{
@@ -804,7 +804,7 @@ finishheader()
 		my_puts(">\n");
 	}
 	/*
-	 * could check at this point whether there are any recipients 
+	 * could check at this point whether there are any recipients
 	 */
 	if (flagqueue) {
 		static stralloc satmp = { 0 };

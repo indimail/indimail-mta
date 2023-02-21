@@ -127,7 +127,7 @@ dlnamespace(char *fn, char **envp, Lmid_t *id)
 		}
 		return (0);
 	}
-	/*- 
+	/*-
 	 * store operation
 	 * append/store the new id in the form
 	 * id1:filename1^@id2:filename2^@

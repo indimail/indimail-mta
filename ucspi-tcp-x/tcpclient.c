@@ -279,7 +279,7 @@ do_select(char **argv, int flag_tcpclient, int s)
 #ifdef TLS
 	ssl_free();
 #endif
-	return (close(s)); 
+	return (close(s));
 }
 
 #ifdef TLS

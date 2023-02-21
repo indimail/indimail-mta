@@ -359,7 +359,7 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 
 	if (errStr)
 		*errStr = 0;
-	if (whitefn) { 
+	if (whitefn) {
 		switch ((x = cdb_matchaddr(whitefn, ipaddr->s, ipaddr->len - 1)))
 		{
 		case 0:
@@ -383,7 +383,7 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 			ptr[x] = 0;
 			scan_int(ptr + 1, &mask);
 			if (cidr2IPrange(ptr, mask, &netspec) == -1) {
-				if (errStr) 
+				if (errStr)
 					*errStr = error_str(errno);
 				ptr[x] = '/';
 				logerr("invalid IP in CIDR format: ", ptr, "\n", 0);
@@ -418,7 +418,7 @@ is_white(char *ip)
 	if (!stralloc_copys(&ipaddr, ip) ||
 			!stralloc_0(&ipaddr))
 		die_nomem();
-	switch (ip_match(&ipaddr, whitelistok ? &whitelist : 0, 
+	switch (ip_match(&ipaddr, whitelistok ? &whitelist : 0,
 			whitelistok ? &mapwhite : 0, &errStr))
 	{
 	case 1:
@@ -555,7 +555,7 @@ create_hash(struct greylst *curr)
 	if (!(hcount % hash_size)) { /*- first time or hash table full. recreate it */
 		if (h_allocated++) {
 			/*-
-			 * keep count of hash table recreation 
+			 * keep count of hash table recreation
 			 * If this happens too often, increase
 			 * the hash table size on command line
 			 */
@@ -574,7 +574,7 @@ create_hash(struct greylst *curr)
 		if (!hcreate((125 * hash_size * h_allocated)/100)) /*- be 25% generous */
 			strerr_die2sys(111, FATAL, "unable to create hash table: ");
 	}
-	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) { /*- 
+	for (ptr = (curr ? curr : head);ptr;ptr = ptr->next) { /*-
 															* if curr is null -> add all entries from linked list.
 															* this will happen if hash table is new
 															*/
@@ -736,7 +736,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 			break;
 		}
 	}
-	if (found) { 
+	if (found) {
 		*store = ptr;
 		ptr->attempts++;
 		/*- # not older than timeout days */
@@ -1337,7 +1337,7 @@ main(int argc, char **argv)
 		if (bind(s, (struct sockaddr *) &sin.sa4, sizeof(sin)) == -1)
 			strerr_die6sys(111, FATAL, "bind4: ", ipaddr, ":", a_port, ": ");
 #endif
-	} 
+	}
 	sig_catch(SIGTERM, sigterm);
 	sig_catch(SIGUSR1, sigusr1);
 	sig_catch(SIGUSR2, sigusr2);
@@ -1369,7 +1369,7 @@ main(int argc, char **argv)
 		}
 		if (!FD_ISSET(0, &rfds))
 			continue;
-		/* 
+		/*
 		 * Keep on incrementing bufsize till it is
 		 * possible to fetch the entire message
 		 * in one operation. This will allow the
@@ -1431,7 +1431,7 @@ main(int argc, char **argv)
 			out(inet_ntoa(from.sa4.sin_addr), 0);
 #endif
 		}
-		/*- 
+		/*-
 		 * greylist(3) protocol
 		 * packet structure -
 		 * I192.168.2.0\0Fmbhangui@gmail.com\0Tpostmaster@indimail.org\0root@indimail.org\0\0
@@ -1501,7 +1501,7 @@ main(int argc, char **argv)
 			if (rec_added && grey && create_hash(grey)) /*- add the record to hash list if new. group on ip_str if not new */
 				die_nomem();
 			break;
-		/*- 
+		/*-
 		 * maybe we should fork here
 		 * This cases are left for future
 		 * implentation to manipulate in-memory

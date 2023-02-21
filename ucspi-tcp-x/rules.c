@@ -73,8 +73,8 @@ doit(void       (*callback) (char *, unsigned int), char *ip, char *host, char *
 		if (!stralloc_cats(&rules_name, "@"))
 			return -1;
 #ifdef IPV6
-		if (ipv6) { 
-			if(ip6_expandaddr(ip, &ipstring) == 1 && 
+		if (ipv6) {
+			if(ip6_expandaddr(ip, &ipstring) == 1 &&
 				!stralloc_catb(&rules_name, ipstring.s, ipstring.len))
 				return -1;
 		} else

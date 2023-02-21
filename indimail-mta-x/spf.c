@@ -31,8 +31,8 @@
         } while(0)
 
 /*-
- * this table and macro came from wget more or less 
- * and was in turn stolen by me from libspf as is :) 
+ * this table and macro came from wget more or less
+ * and was in turn stolen by me from libspf as is :)
  */
 const static unsigned char urlchr_table[256] = {
 	1, 1, 1, 1, 1, 1, 1, 1,  /*- NUL SOH STX ETX  EOT ENQ ACK BEL */

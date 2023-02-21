@@ -286,7 +286,7 @@ start(char *fn, char *sdir)
 	x[i].flagactive = 1;
 	pid = getpid();
 	if (!x[i].pid) { /*- exec supervise fn only if it is not .svscan/log */
-		/*- 
+		/*-
 		 * we don't have supervise running
 		 * start the service and set flagwantup
 		 * based on the presence of the file 'down'
@@ -331,7 +331,7 @@ start(char *fn, char *sdir)
 			switch (x[i].flagwantup)
 			{
 			case 1: /*- down file was absent when last checked */
-				/*- 
+				/*-
 				 * we have supervise running
 				 * detect automatically if a running service needs to be
 				 * stopped. If the file 'down' is present, it means
@@ -367,7 +367,7 @@ start(char *fn, char *sdir)
 				}
 				break;
 			case 0: /*- down file was present when last checked */
-				/*- 
+				/*-
 				 * we have supervise running
 				 * detect automatically if a down service needs to be
 				 * started. If the file 'down' is present, it means
@@ -612,7 +612,7 @@ get_lock(char *sdir)
 	if ((fd = open(pidfile, O_CREAT|O_WRONLY|O_EXCL, 0644)) >= 0) {
 		pid = getpid();
 		strnum[n = fmt_ulong(strnum, pid)] = 0;
-		if (write(fd, (char *) &pid, sizeof(pid_t)) == -1 || 
+		if (write(fd, (char *) &pid, sizeof(pid_t)) == -1 ||
 				write(fd, "\n", 1) == -1 || write(fd, strnum, n) == -1 ||
 				write(fd, "\n", 1) == -1)
 			strerr_die2sys(111, FATAL, "unable to write pid to lock file: ");
@@ -641,7 +641,7 @@ get_lock(char *sdir)
 
 	if ((fdsource = open(".", O_RDONLY|O_NDELAY, 0)) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
-	/*- 
+	/*-
 	 * let us find out if the process is svscan we will
 	 * use the /proc filesystem to figure out command name
 	 */
@@ -674,7 +674,7 @@ get_lock(char *sdir)
 		return (1);
 	}
 	close(fd);
-	if (buf[0] == 's' && buf[1] == 'v' && buf[2] == 's' && 
+	if (buf[0] == 's' && buf[1] == 'v' && buf[2] == 's' &&
 		buf[3] == 'c' && buf[4] == 'a' && buf[5] == 'n' && buf[6] == '\n') { /*- indeed pid is svscan process */
 		buf[6] = 0;
 		strerr_warn5(FATAL, "[", buf, "] ", "already running", 0);
@@ -829,7 +829,7 @@ main(int argc, char **argv)
 		 */
 		while (!scannow) {
 			sleep(scan_interval ? scan_interval : 60);
-			/* 
+			/*
 			 * on interruption by SIGCHLD or SIGHUP we either
 			 * 1. reap the child
 			 * or

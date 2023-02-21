@@ -1,5 +1,5 @@
 /*-
- * XXX: this program knows quite a bit about tcpto's internals 
+ * XXX: this program knows quite a bit about tcpto's internals
  */
 #include <unistd.h>
 #include <sys/socket.h>

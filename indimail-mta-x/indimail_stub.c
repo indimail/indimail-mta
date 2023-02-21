@@ -244,7 +244,7 @@ getEnvConfigStr(char **source, char *envname, char *defaultValue)
 
 /*
  * parse out user and domain from an email address utility function
- * 
+ *
  * email  = input email address
  * user   = parsed user
  * domain = parsed domain

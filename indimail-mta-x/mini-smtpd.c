@@ -148,7 +148,7 @@ err_nogateway()
 void
 err_size()
 {
-	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n"); 
+	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n");
 }
 
 void
@@ -294,7 +294,7 @@ addrparse(char *arg)
 	}
 
 /*
- * strip source route 
+ * strip source route
  */
 	if (*arg == '@')
 		while (*arg)
@@ -328,7 +328,7 @@ addrparse(char *arg)
 		}
 	}
 	/*
-	 * could check for termination failure here, but why bother? 
+	 * could check for termination failure here, but why bother?
 	 */
 	if (!stralloc_append(&addr, ""))
 		die_nomem();

@@ -213,7 +213,7 @@ do_wait()
 	if (!stralloc_catb(&wait_sv_status, "up", 2) || !stralloc_0(&wait_sv_status))
 		strerr_die2x(111, fatal.s, "out of memory");
 
-	/*- 
+	/*-
 	 * supervise/up is a FIFO
 	 * if the service service_name is running
 	 *   opening supervise/up with O_WRONLY should return
@@ -729,7 +729,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		strerr_die2x(111, fatal.s, "out of memory");
 
 	if (!str_diff(service_dir, "log")) {
-		/*- 
+		/*-
 		 * SV_PWD is the dirname of directory in /service e.g.
 		 * for qmail-smtpd.25/log it will be qmail-smtpd.25
 		 * supervise invocation will be
@@ -748,7 +748,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		if (!stralloc_cats(&run_service_dir, parent_dir) ||
 				!stralloc_append(&run_service_dir, "/"))
 			strerr_die2x(111, fatal.s, "out of memory");
-	} 
+	}
 	/*- full path /run/svscan/service/qmail-smtpd.25 or /run/svscan/service/qmail-smtpd.25/log */
 	if (!stralloc_cats(&run_service_dir, service_dir) ||
 			!stralloc_0(&run_service_dir))
@@ -900,7 +900,7 @@ main(int argc, char **argv)
 		strerr_die2sys(111, fatal.s, "unable to stat current directory: ");
 	initialize_run(dir, st.st_mode, st.st_uid, st.st_gid); /*- this will set dir to new service directory in /run, /var/run */
 #endif
-	if (mkdir("supervise", 0700) && errno != error_exist) 
+	if (mkdir("supervise", 0700) && errno != error_exist)
 		strerr_die2sys(111, fatal.s, "unable to create supervise directory: ");
 
 	if ((fdstatus = open_trunc("supervise/status")) == -1)

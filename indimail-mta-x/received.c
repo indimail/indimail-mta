@@ -59,9 +59,9 @@ safeput(struct qmail *qqt, char *s)
 }
 
 /*
- * "Received: from relay1.uu.net (HELO uunet.uu.net) (7@192.48.96.5)\n" 
+ * "Received: from relay1.uu.net (HELO uunet.uu.net) (7@192.48.96.5)\n"
  * "  by silverton.berkeley.edu with SMTP;"
- * "  26 Sep 1995 04:46:54 -0000\n" 
+ * "  26 Sep 1995 04:46:54 -0000\n"
  */
 
 void

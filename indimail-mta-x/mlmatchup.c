@@ -289,8 +289,8 @@ garbage()
 }
 
 /*
- * turn TAI date into old fashioned date 
- * dates without @ are left alone 
+ * turn TAI date into old fashioned date
+ * dates without @ are left alone
  */
 
 static char     datebuf[FMT_ULONG + FMT_ULONG + 2];	/*- ssssssssss.ffffffffff\n */

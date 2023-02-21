@@ -83,7 +83,7 @@ pathexec_dl(int argc, char **argv, char **envp, int (*func) (int, char **, char 
 		if (!plus.s[i]) {
 			split = str_chr(plus.s + j, '=');
 			for (t = 0; t < elen; ++t) {
-				/*- 
+				/*-
 				 * if existing variable with same
 				 * exists, replace that variable with
 				 * the new definition in plus variable
@@ -142,7 +142,7 @@ upathexec(char **argv)
 		if (!plus.s[i]) {
 			split = str_chr(plus.s + j, '=');
 			for (t = 0; t < elen; ++t) {
-				/*- 
+				/*-
 				 * if existing variable with same
 				 * exists, replace that variable with
 				 * the new definition in plus variable

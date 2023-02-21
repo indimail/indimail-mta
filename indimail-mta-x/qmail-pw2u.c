@@ -254,7 +254,7 @@ doaccount()
 		die_nomem();
 
 	/*
-	 * XXX: avoid recording in allusers unless sub actually needs it 
+	 * XXX: avoid recording in allusers unless sub actually needs it
 	 */
 	if (!stralloc_cats(&allusers, user.s))
 		die_nomem();
@@ -434,7 +434,7 @@ main(argc, argv)
 		die_chdir();
 
 	/*
-	 * no need for control_init() 
+	 * no need for control_init()
 	 * use ./ in path to avoid use control directory
 	 */
 
