@@ -1,5 +1,5 @@
 /*
- * $Id: sys-checkpwd.c,v 1.18 2023-02-18 18:48:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.18 2023-02-22 00:01:10+05:30 Cprogrammer Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
@@ -261,8 +261,8 @@ main(int argc, char **argv)
 	}
 	if (enable_cram)
 		stored = upw->upw_passwd
-	else
-		stored = (auth_method > 2 && auth_method < 11) ? NULL : upw->upw_passwd
+	else /*- fail all CRAM auth methods if enable cram isn't set */
+		stored = (auth_method >= AUTH_CRAM_MD5 && auth_method <= AUTH_DIGEST_MD5) ? NULL : upw->upw_passwd;
 #endif
 #ifdef HASGETSPNAM
 	if (!(spw = getspnam(login))) {
@@ -275,8 +275,8 @@ main(int argc, char **argv)
 	}
 	if (enable_cram)
 		stored = spw->sp_pwdp;
-	else
-		stored = (auth_method > 2 && auth_method < 11) ? NULL : spw->sp_pwdp;
+	else /*- fail all CRAM auth methods if enable cram isn't set */
+		stored = (auth_method >= AUTH_CRAM_MD5 && auth_method <= AUTH_DIGEST_MD5) ? NULL : spw->sp_pwdp;
 #endif
 	if (setuid(getuid()))
 		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
@@ -324,7 +324,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.18 2023-02-18 18:48:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.18 2023-02-22 00:01:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -333,7 +333,7 @@ getversion_sys_checkpwd_c()
 
 /*
  * $Log: sys-checkpwd.c,v $
- * Revision 1.18  2023-02-18 18:48:49+05:30  Cprogrammer
+ * Revision 1.18  2023-02-22 00:01:10+05:30  Cprogrammer
  * sys-checkpwd.c: replaced strerr_warn with subprintf
  *
  * Revision 1.17  2022-12-18 12:30:10+05:30  Cprogrammer
