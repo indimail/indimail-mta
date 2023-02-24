@@ -136,3 +136,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 104. Fefe - felix-libowfat@fefe.de for functions taken from libowfat & ipv6 in ucspi-tcp
 105. RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / Erwin Hoffman's unicode address support patch for qmail.
 106. RFC 8463 - Ed25519 cryptographic method adapted from Erwin Hoffman's s/qmail dkim implementation
+107. qmail-branch patch by Paul Jarc - https://code.dogmap.org./qmail/
