@@ -1,0 +1,84 @@
+.TH create_services 8
+.SH NAME
+create_services \- IndiMail/indimail-mta Service Creation Tool
+
+.SH SYNOPSYS
+.B create_services
+[
+.I options
+]
+
+.SH DESCRIPTION
+
+\fBcreate_services\fR creates all services and configuration for
+indimail/indimail-mta. It is meant to be used if you have installed
+indimail/indimail-mta using the source. You don't require it if you have
+done a binary installation using RPM/DEB/ARCHPKG packages.
+
+.SH OPTIONS
+.TP 3
+\fB\--servicedir=dir\fR
+Use \fIdir\fR for installing \fBsupervise\fR services. Default is
+\fB/service\fR.
+
+.TP
+\fB\--qcount=qcount\fR
+Create \fIqcount\fR indimail queues. Default is 5
+
+.TP
+\fB\--qbase=qbase\fR
+Create indimail queues in \fIqbase\fR directory. Default is @indimaildir@/queue.
+
+.TP
+\fB\--mbase=mbase\fR
+Use \fImbase\fR for user home directories. The user's home directory
+contains the maildir.
+
+.TP
+\fB\--mysqlPrefix=mprefix\fR
+Use \fImprefix\fR as the MySQL prefix. It is expected to find MySQL
+binaries in \fImprefix\fR/bin and \fImprefix\fR/sbin
+
+.TP
+\fB\--no-courier-imap\fR
+Do not create courier-imap services and configuration
+
+.TP
+\fB\--no-proxy\fR
+Do not create imap, pop3 proxiex services and configuration
+
+.TP
+\fB\--no-bogofilter\fR
+Do not create bogofilter configuration and do not configure qmail-smtpd to
+do spam filter.
+
+.TP
+\fB\--nomysql\fR
+Skip creation of MySQL service
+
+.TP
+\fB\--no-nssd\fR
+Skip creation of name service daemon for indimail
+
+.TP
+\fB\--no-fetchmail\fR
+Skip creation of fetchmail service
+
+.TP
+\fB\--chk-install\fR
+Check installation for errors and incorrect, sub-optimal configuration
+
+.TP
+\fB\--shared-objects\fR
+Create configuration for tcpserver to use dlmopen to load shared objects.
+
+.TP
+\fB\--add-boot\fR
+Add indimail startup on boot
+
+.TP
+\fB\--destdir=dir\fR
+Create staged configuration in \fIdir\fR.
+
+.SH SEE ALSO
+svctool(8)
