@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.658 2023-02-20 20:32:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.659 2023-03-03 19:14:09+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.658 2023-02-20 20:32:01+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.659 2023-03-03 19:14:09+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2229,7 +2229,10 @@ if [ ! -f "$DESTDIR"$sysconfdir/procmailrc ] ; then
 fi
 
 if [ -n "$DESTDIR" ] ; then
-	indlib=`ls -d "$DESTDIR"$QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null|sed -e "'s}$DESTDIR}}g'"`
+	indlib=`ls -d "$DESTDIR"$QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+	if [ -z "$indlib" ] ; then
+		indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
+	fi
 else
 	indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
 fi
@@ -6294,50 +6297,46 @@ fi
 
 # Create QUEUES
 #---------------------------------------------------------------------------------------
-if [ ! " $QUEUE_BASE" = " $QmailHOME" ] ; then
-	if [ ! -d "$DESTDIR"$QUEUE_BASE ] ; then
-		/bin/mkdir -p "$DESTDIR"$QUEUE_BASE
-	fi
+if [ ! -d "$DESTDIR"$QUEUE_BASE ] ; then
+	/bin/mkdir -p "$DESTDIR"$QUEUE_BASE
 	/bin/chmod 755 "$DESTDIR"$QUEUE_BASE
 	$chown root:qmail "$DESTDIR"$QUEUE_BASE
 fi
 
-if [ ! -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
-	/bin/mkdir -p "$DESTDIR"$QUEUE_BASE/nqueue
-fi
-if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
-	return 0
-fi
-echo "Creating Queue "$DESTDIR"$QUEUE_BASE/nqueue"
-if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
-	"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
-else
-	./queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
-fi
-
-QUEUE_NO=$QUEUE_START
-COUNT=1
-while true
-do
-	if [ ! -d "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" ] ; then
-		/bin/mkdir -p "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO"
-	fi
-	echo "Creating Queue "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO""
+if [ $nooverwrite -eq 0 -o ! -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
+	echo "Creating Queue "$DESTDIR"$QUEUE_BASE/nqueue"
 	if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
-		"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
+		"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 	else
-		./queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
+		./queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 	fi
-	if [ $COUNT -eq $QUEUE_COUNT ] ; then
-		break
-	fi
-	COUNT=`expr $COUNT + 1`
-	QUEUE_NO=`expr $QUEUE_NO + 1`
-done
-echo $QUEUE_BASE > "$DESTDIR"$CONTROLDIR/queue_base
+	QUEUE_NO=$QUEUE_START
+	COUNT=1
+	while true
+	do
+		if [ ! -d "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" ] ; then
+			/bin/mkdir -p "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO"
+		fi
+		echo "Creating Queue "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO""
+		if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
+			"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
+		else
+			./queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
+		fi
+		if [ $COUNT -eq $QUEUE_COUNT ] ; then
+			break
+		fi
+		COUNT=`expr $COUNT + 1`
+		QUEUE_NO=`expr $QUEUE_NO + 1`
+	done
+	echo $QUEUE_BASE > "$DESTDIR"$CONTROLDIR/queue_base
+fi
 
 # qmail-send script
 conf_dir="$DESTDIR"$SERVICEDIR/qmail-send.$tag/variables
+if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
+	return 0
+fi
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
 		/bin/mv $conf_dir "$conf_dir".bak
@@ -6597,25 +6596,24 @@ utf8=$5
 #---------------------------------------------------------------------------------------
 if [ ! -d "$DESTDIR"$QUEUE_BASE ] ; then
 	/bin/mkdir -p "$DESTDIR"$QUEUE_BASE
+	/bin/chmod 755 "$DESTDIR"$QUEUE_BASE
+	$chown root:qmail "$DESTDIR"$QUEUE_BASE
 fi
-/bin/chmod 755 "$DESTDIR"$QUEUE_BASE
-$chown root:qmail "$DESTDIR"$QUEUE_BASE
 
-if [ ! -d "$DESTDIR"$QUEUE_BASE/$i ] ; then
-	/bin/mkdir -p "$DESTDIR"$QUEUE_BASE/slowq
-fi
-if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$QUEUE_BASE/slowq ] ; then
-	return 0
-fi
-echo "Creating Queue "$DESTDIR"$QUEUE_BASE/slowq"
-if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
-	"$DESTDIR"$QmailBinPrefix/bin/queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
-else
-	./queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
+if [ $nooverwrite -eq 0 -o ! -d "$DESTDIR"$QUEUE_BASE/slowq ] ; then
+	echo "Creating Queue "$DESTDIR"$QUEUE_BASE/slowq"
+	if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
+		"$DESTDIR"$QmailBinPrefix/bin/queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
+	else
+		./queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
+	fi
 fi
 
 # slowq-send script
 conf_dir="$DESTDIR"$SERVICEDIR/slowq-send/variables
+if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
+	return 0
+fi
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
 		/bin/mv $conf_dir "$conf_dir".bak
@@ -9862,7 +9860,10 @@ while test $# -gt 0; do
 		*-*-darwin**)
 		libdir=/opt/local/lib
 		if [ -n "$DESTDIR" ] ; then
-			indlib=`ls -d "$DESTDIR""$libdir"*/libindimail.*.dylib 2>/dev/null|sed -e "'s}$DESTDIR}}g'"`
+			indlib=`ls -d "$DESTDIR""$libdir"*/libindimail.*.dylib 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+			if [ -z "$indlib" ] ; then
+				indlib=`ls -d "$libdir"*/libindimail.*.dylib 2>/dev/null`
+			fi
 		else
 			indlib=`ls -d "$libdir"*/libindimail.*.dylib 2>/dev/null`
 		fi
@@ -9870,7 +9871,10 @@ while test $# -gt 0; do
 		*)
 		libdir=$QmailBinPrefix/lib
 		if [ -n "$DESTDIR" ] ; then
-			indlib=`ls -d "$DESTDIR""$libdir"*/libindimail.so.*.*.* 2>/dev/null|sed -e "'s}$DESTDIR}}g'"`
+			indlib=`ls -d "$DESTDIR""$libdir"*/libindimail.so.*.*.* 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+			if [ -z "$indlib" ] ; then
+				indlib=`ls -d "$libdir"*/libindimail.so.*.*.* 2>/dev/null`
+			fi
 		else
 			indlib=`ls -d "$libdir"*/libindimail.so.*.*.* 2>/dev/null`
 		fi
