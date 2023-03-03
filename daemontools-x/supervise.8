@@ -38,10 +38,12 @@ first argument to \fIalert\fR. The exit value or signal (if killed by
 signal) is passed as the second argument to \fIalert\fR. The third argument
 is either \fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
 
-\fBsupervise\fR(8) creates the directory \fIs\fR/\fIsupervise\fR in
-\fIrun\fR/\fIsvscan\fR where \fIrun\fR is either /run or /var/run tmpfs
-filesystem depending on your operating system. \fBsupervise\fR(8) maintains
-status information in a binary format in the directory
+If the directory \fIrun\fR/\fIsvscan\fR exists, \fBsupervise\fR(8) creates
+the directory \fIs\fR/\fIsupervise\fR in \fIrun\fR/\fIsvscan\fR where
+\fIrun\fR is either /run or /var/run tmpfs filesystem (depending on your
+operating system). The directory \fIrun\fR/\fIsvscan\fR is created by
+\fBsvscan\fR(8) when \fBDISABLE_RUN\fR isn't set. \fBsupervise\fR(8)
+maintains status information in a binary format in the directory
 \fIs\fR/\fIsupervise\fR. The directory \fIs\fR must be writable to
 \fBsupervise\fR(8). The status information can be read by \fBsvstat\fR(8).
 
