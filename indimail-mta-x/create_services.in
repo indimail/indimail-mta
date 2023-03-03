@@ -21,12 +21,12 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.118 2023-02-14 17:58:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.119 2023-03-03 17:04:18+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
   echo "create_service [--servicedir=path] [--qbase=path] [--mbase=path] --mysqlPrefix=path \\
-  destdir=path] [--shared-objects] [--add-boot] [--chk-install] [--nomysql]
+  destdir=path] [--shared-objects] [--add-boot] [--chk-install] [--nomysql] [--help]
 
   servicedir     - path of Supervise service directory
   qbase          - path for createing IndiMail's queue collection
@@ -38,8 +38,10 @@ usage()
   chk-install    - Check indimail/indimail-mta installation
   nomysql        - Do not configure MySQL service
 "
-  echo "Press ENTER or Cntrl C to quit"
-  read key
+  if [ $1 -ne 0 ] ; then
+    echo "Press ENTER or Cntrl C to quit"
+    read key
+  fi
   exit 1
 }
 
@@ -87,6 +89,7 @@ noindimail=0
 nonssd=0
 nomysql=0
 nodksignatures=0
+destdir_given=0
 dkimkeyfn=default
 if [ -x /usr/sbin/mysqld ] ; then # Linux
   mysql_base=/usr
@@ -95,8 +98,9 @@ elif [ -x /usr/local/libexec/mysqld ] ; then # FreeBSD
 elif [ -x /usr/local/mysql/bin/mysqld ] ; then # Darwin
   mysql_base=/usr/local/mysql
 fi
+
+ID=$(id -u)
 default_domain=$(echo $([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n) | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
-ID=`id -u`
 while test $# -gt 0; do
     case "$1" in
     -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
@@ -164,17 +168,26 @@ while test $# -gt 0; do
     --destdir=*)
     extra_opt="--destdir=$optarg"
     dir_prefix=$optarg
+	destdir_given=1
+    ;;
+    --help)
+    usage 0
     ;;
 
     *)
     echo "invalid option [$1]"
     read key
-    usage 1
+    usage 0
     ;;
     esac
 
     shift
 done
+
+if [ $destdir_given -eq 0 -a $ID -ne 0 ] ; then
+  echo "create_services is not meant to be run by mere mortals. Use sudo $0 to get superpowers"
+  exit 100
+fi
 
 if [ ! -x $dir_prefix$prefix/bin/vadddomain -a ! -x $prefix/bin/vadddomain ] ; then
   noindimail=1
@@ -758,6 +771,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.119  2023-03-03 17:04:18+05:30  Cprogrammer
+# exit if not running as root
+#
 # Revision 2.118  2023-02-14 17:58:06+05:30  Cprogrammer
 # added --setgroups to set USE_SETGROUPS env variable for qmail-start
 #
