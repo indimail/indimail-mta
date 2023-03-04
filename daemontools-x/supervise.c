@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.29 2023-03-04 13:38:09+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.30 2023-03-04 18:14:42+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -708,6 +708,35 @@ doit(void)
 
 #ifdef USE_RUNFS
 void
+cleanup(char *d)
+{
+	char           *sv_files[] = { "control", "lock", "ok", "status", "up", 0};
+	char           *sv_dirs[] = {"supervise", "log/supervise", 0};
+	char          **p, **q;
+	int             l;
+	stralloc        tmp = {0};
+
+	for (p = sv_dirs; *p; p++) {
+		if (!access(*p, W_OK)) {
+			if (!stralloc_copys(&tmp, *p) ||
+					!stralloc_append(&tmp, "/"))
+				strerr_die2x(111, fatal.s, "out of memory");
+			l = tmp.len;
+			for (q = sv_files; *q; q++) {
+				if (!stralloc_cats(&tmp, *q) ||
+						!stralloc_0(&tmp))
+					strerr_die2x(111, fatal.s, "out of memory");
+				if (access(tmp.s, W_OK) || unlink(tmp.s))
+					strerr_warn6(warn.s, "unable to remove file ", d, "/", tmp.s, ": ", &strerr_sys);
+				tmp.len = l;
+			}
+			if (rmdir(*p))
+				strerr_warn6(warn.s, "unable to remove dir ", d, "/", *p, ": ", &strerr_sys);
+		}
+	}
+}
+
+void
 initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 {
 	char           *run_dir, *parent_dir = (char *) 0;
@@ -728,6 +757,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		use_runfs = 1;
 	} else
 		return;
+	cleanup(service_dir);
 	if (!stralloc_copyb(&run_service_dir, run_dir, i) ||
 			!stralloc_catb(&run_service_dir, "/svscan/", 8))
 		strerr_die2x(111, fatal.s, "out of memory");
@@ -838,7 +868,7 @@ main(int argc, char **argv)
 	verbose = env_get("VERBOSE") ? 1 : 0;
 	silent = env_get("SILENT") ? 1 : 0;
 	if (!(dir = argv[1]) || argc > 3)
-		strerr_die1x(100, "supervise: usage: supervise dir [log_parent]");
+		strerr_die1x(100, "supervise: usage: supervise dir [parent_ident]");
 	if (*dir == '/' || *dir == '.')
 		strerr_die1x(100, "supervise: dir cannot start with '/' or '.'");
 	if (argc == 2) {
@@ -960,13 +990,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.29 2023-03-04 13:38:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.30 2023-03-04 18:14:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.30  2023-03-04 18:14:42+05:30  Cprogrammer
+ * cleanup supervise directory in service directory when using run fs
+ *
  * Revision 1.29  2023-03-04 13:38:09+05:30  Cprogrammer
  * disable using /run if DISABLE_RUN env variable is set
  *

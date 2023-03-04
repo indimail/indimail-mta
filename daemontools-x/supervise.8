@@ -3,15 +3,18 @@
 supervise \- starts and monitors a service.
 
 .SH SYNOPSIS
-\fBsupervise\fR \fIs\fR
+\fBsupervise\fR \fIs\fR [\fIparent_ident\fR]
 
 .SH DESCRIPTION
 \fBsupervise\fR(8) switches to the directory named \fIs\fR and starts ./init
 if it exists. It restarts ./init if ./init exits with non-zero status. It
 pauses for 60 seconds after starting ./init, so that it does not loop too
-quickly in case ./init exits immediately. \fIdirectory\fR has to be
-relative to the current working directory and cannot start with the dot
-(\fB.\fR) or the slash (\fB/\fR) character.
+quickly in case ./init exits immediately. \fIs\fR has to be relative to the
+current working directory and cannot start with the dot (\fB.\fR) or the
+slash (\fB/\fR) character. \fIparent_ident\fR is passed as a command line
+argument by \fBsvscan\fR(8) when starting supervise log process when
+\fIs\fR/\fIlog\fR exists. This is useful when listing supervised log
+processes using the \fBps\fR(1) command.
 
 After ./init exits with zero exit status, \fBsupervise\fR starts ./run. It
 restarts ./run if ./run exits. It pauses for a second after starting ./run,
