@@ -231,16 +231,6 @@ Overrides the default Disposition-Notification-To header used by \fBqnotify\fR(1
 for sending notifications.
 
 .TP
-\fIDKDOMAIN\fR
-Override the default behaviour of \fBqmail-dk\fR(8) from using the domain from the
-Return-Path, when setting the d= tag
-
-.TP
-\fIDKEXCLUDEHEADERS\fR
-Colon seperated list of headers to exclude from signing by
-\fBqmail-dk\fR(8).
-
-.TP
 \fIDKIMEXPIRE\fR
 Used by \fBqmail-dkim\fR(8) to set the expire time in seconds for the signature.
 This overrides the x option in DKIMSIGNOPTIONS
@@ -279,23 +269,11 @@ getopt sytle list of DKIM options used by \fBqmail-dkim\fR(8)
 If set, \fBqmail-dkim\fR(8) performs DKIM verification for messages.
 
 .TP
-\fIDKKEY\fR
-When both DKSIGN and DKVERIFY are not set, this turns on DK signing
-by \fBqmail-dk\fR(8), only for authenticated users and overrides the
-default domainkeys private key @sysconfdir@/control/domainkeys/default.
-
-.TP
-\fIDKSIGN\fR
-Path to domainkeys private key. By default \fBqmail-dk\fR(8) uses
-@sysconfdir@/control/domainkeys/default
-
-.TP
-\fIDKSIGNOPTIONS\fR
-getopt sytle list of domainkeys options used by \fBqmail-dk\fR(8)
-
-.TP
-\fIDKVERIFY\fR
-If set, \fBqmail-dk\fR(8) performs domainkeys verification on the message.
+\fIBOUNCEDOMAIN\fR
+qmail-dkim uses the domain found in the Return-Path, Sender, From headers
+to set the domain tag. If not it uses the BOUNCEDOMAIN environment
+variable. BOUNCEDOMAIN can be set to an email address or a domain (without
+the at sign).
 
 .TP
 \fIDNSBLLIST\fR
@@ -809,10 +787,6 @@ Set by sendimail, \fBtcpserver\fR(1)
 used by \fBqmail-dkim\fR(8)
 
 .TP
-\fIRELAYCLIENT_NODKVERIFY\fR
-used by \fBqmail-dk\fR(8)
-
-.TP
 \fIREMOTEINFO\fR
 Used by ofmipd
 
@@ -885,8 +859,13 @@ Used by \fBautoresponder\fR(1)
 
 .TP
 \fISETSID\fR
-Used by svscan. If set, the svscan calls setsid(2) to make the child a
-session leader.
+Used by svscan. If set, svscan calls setsid(2) to make the child a session
+leader.
+
+.TP
+\fITERMINATE_SESSION\fR
+Used by svscan. If set along with \fBSETSID\fR, svscan calls kill(0, 15)
+to terminate all supervise processes started by it.
 
 .TP
 \fISHUTDOWN\fR
@@ -995,9 +974,8 @@ Used by sslerator, \fBqmail-smtpd\fR(8)
 .TP
 \fITMPDIR\fR
 Used as path for creating temporary files by \fBautoresponder\fR(1), qarf,
-\fBqmail-dk\fR(8), \fBqmail-dkim\fR(8), \fBqmail-qfilter\fR(1),
-\fBqmail-multi\fR(8), \fBqnotify\fR(1), \fBqmail-smtpd\fR(8),
-\fBspawn-filter\fR(8)
+\fBqmail-dkim\fR(8), \fBqmail-qfilter\fR(1), \fBqmail-multi\fR(8),
+\fBqnotify\fR(1), \fBqmail-smtpd\fR(8), \fBspawn-filter\fR(8)
 
 .TP
 \fITODO_INTERVAL\fR

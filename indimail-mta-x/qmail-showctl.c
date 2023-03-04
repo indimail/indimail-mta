@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.13  2023-03-05 01:35:12+05:30  Cprogrammer
+ * added missing control files
+ *
  * Revision 1.12  2023-02-14 09:15:23+05:30  Cprogrammer
  * renamed auto_uidv to auto_uidi, auto_uidc to auto_uidv, auto_gidv to auto_gidi
  * added auto_uidc for qcerts id
@@ -430,7 +433,7 @@ valid_control_files(char *fn)
 		"doublebouncesubject", "doublebouncemessage", "badhost", "badmailpatterns",
 		"badrcptpatterns", "spamignorepatterns", "filterargs", "spamfilter", "bouncefrom",
 		"bouncehost", "concurrencylocal", "concurrencyremote", "maxdeliveredto",
-		"tlsclientmethod", "tlsservermethod", "domainqueue", "from.envrules",
+		"domainqueue", "from.envrules",
 		"rcpt.envrules", "databytes", "maxhops", "defaultdomain", "defaulthost",
 		"dnsbllist", "doublebouncehost", "doublebounceto", "envnoathost", "extraqueue",
 		"helohost", "idhost", "localiphost", "locals", "me", "morercpthosts", "signatures",
@@ -441,12 +444,15 @@ valid_control_files(char *fn)
 		"etrnhosts", "relayclients", "relaydomains", "tarpitcount", "tarpitdelay",
 		"maxrecipients", "maxcmdlen", "defaultdelivery", "blackholedpatterns",
 		"blackholedrcptpatterns", "goodrcptpatterns", "outgoingip", "domainbindings",
-		"bindroutes", "badextpatterns", "holdremote", "holdlocal", "signaturedomains",
+		"bindroutes", "badextpatterns", "holdremote", "holdlocal",
 		"msgqueuelen", "msgqueuesize", "global_vars", "qfilters", ".qmail_control",
-		"qregex", "recipients", "remote_auth", "remote_auth.cdb", "tlsclients",
+		"qregex", "recipients", "remote_auth", "remote_auth.cdb",
 		".indimail_control",
 #ifdef HAVESRS
 		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
+#endif
+#ifdef HASDKIM
+		"dkimkey", "signaturedomains", "nosignaturedomains", "domainkeys",
 #endif
 #ifdef USE_SPF
 		"spfbehavior", "spfexp", "spfguess", "spfrules",
@@ -454,9 +460,12 @@ valid_control_files(char *fn)
 #ifdef BATV
 		"batvkey", "batvkeystale", "batvnosignremote", "batvnosignlocals",
 #endif
-		"conf-syncdir", "conf-fsync", "conf-fdatasync", "servercert.pem", "tlsserverciphers",
-		"tlsclientciphers", "clientcert.pem", "servicedir.conf", "nosignaturedomains",
-		"domainkeys", "level2-tlds", "level3-tlds", "libmysql", 0};
+#ifdef TLS
+		"tlsclientmethod", "tlsservermethod", "tlsclients", "servercert.pem", "tlsserverciphers",
+		"tlsclientciphers", "clientcert.pem",
+#endif
+		"conf-syncdir", "conf-fsync", "conf-fdatasync", "servicedir.conf",
+		"level2-tlds", "level3-tlds", "libmysql", 0};
 	char          *cdb_sql_files[] = {
 		"authdomains",  "badhelo",  "badext",  "badmailfrom", "badrcptto", "blackholedsender",
 		"blackholedrcpt", "chkrcptdomains", "goodrcptto", "relaymailfrom", "spamignore",
@@ -882,7 +891,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.12 2023-02-14 09:15:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.13 2023-03-05 01:35:12+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

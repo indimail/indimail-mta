@@ -1816,8 +1816,8 @@ auto_prefix.o
 qmail-showctl.o: compile qmail-showctl.c control.h auto_sysconfdir.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
-hassrs.h auto_prefix.h conf-srs conf-spf conf-batv
-	./compile `grep -h -v "^#" conf-spf conf-batv` \
+hassrs.h auto_prefix.h conf-srs conf-spf conf-batv conf-dkim conf-tls
+	./compile `grep -h -v "^#" conf-spf conf-srs conf-batv conf-dkim conf-tls` \
 	qmail-showctl.c
 
 qmail-showctl.8: qmail-showctl.9 conf-split conf-sysconfdir conf-qmail
