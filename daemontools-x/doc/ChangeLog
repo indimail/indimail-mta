@@ -13,6 +13,9 @@ Release 1.1.2 Start 20/02/2023 End --/--/2023
 06. svscan.c: skip directories starting with .
 07. supervise.c: cleanup supervise directory in service directory when using
     run fs
+- 05/03/2023
+08. svscan.c: use TERMINATE_SESSION to terminate all children when running as
+    session leader
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023

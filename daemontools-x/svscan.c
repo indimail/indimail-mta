@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.30 2023-03-04 16:06:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.31 2023-03-05 00:40:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -51,7 +51,7 @@ struct
 	int             pi[2];		/*- defined if flaglog */
 } x[SERVICES];
 static int      numx = 0, scannow = 0, auto_scan = 0, use_run = 1,
-				verbose = 0, silent = 0;
+				verbose = 0, silent = 0, sess_leader = 0;
 static char     fnlog[260];
 static char     fntmp[260];
 static char    *pidfile, *p_exe_name, *run_dir;
@@ -569,6 +569,8 @@ sigterm(int i)
 	strnum[fmt_ulong(strnum, getpid())] = 0;
 	strerr_warn4(INFO, "pid: ", strnum, ": shutdown...", 0);
 	init_cmd(0, 1, 1); /*- run .svscan/shutdown */
+	if (sess_leader && env_get("TERMINATE_SESSION"))
+		kill(0, 15);
 	_exit(0);
 }
 
@@ -798,8 +800,11 @@ main(int argc, char **argv)
 	else
 	if (!env_put2("PWD", sdir))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (env_get("SETSID"))
-		(void) setsid();
+	if (env_get("SETSID")) {
+		if (setsid() == (pid_t) -1)
+			strerr_die2sys(111, FATAL, "unable to become session leader: ");
+		sess_leader = 1;
+	}
 	signal(SIGHUP, sighup);
 	signal(SIGTERM, sigterm);
 	if ((s = env_get("SCANINTERVAL")))
@@ -847,13 +852,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.30 2023-03-04 16:06:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.31 2023-03-05 00:40:57+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.31  2023-03-05 00:40:57+05:30  Cprogrammer
+ * use TERMINATE_SESSION to terminate all children when running as session leader
+ *
  * Revision 1.30  2023-03-04 16:06:43+05:30  Cprogrammer
  * unset use_run if /run, /var/run is missing
  * skip directories starting with .
