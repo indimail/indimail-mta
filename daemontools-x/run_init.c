@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.7  2023-03-04 13:35:55+05:30  Cprogrammer
+ * return -1 for name too long
+ *
  * Revision 1.6  2022-06-20 00:48:20+05:30  Cprogrammer
  * fixed using . for supervise directory
  *
@@ -26,7 +29,15 @@
 #include <fmt.h>
 #include <libgen.h>
 
-/* adapt /run filesystem for supervise */
+/* 
+ * adapt /run filesystem for supervise
+ * returns
+ *  0 - chdir to /run/svscan/service_name
+ *  1 - no run filesystem
+ * -1 - unable to get cwd
+ * -2 - unable to chdir to service_name
+ * -3 - name too long
+ */
 int
 run_init(char *service_dir)
 {
@@ -46,7 +57,7 @@ run_init(char *service_dir)
 		return 1;
 	/*- e.g. /service/qmail-smtpd.25 */
 	if ((i = str_len(service_dir)) > 255)
-		return 1;
+		return -3;
 	s = buf;
 	s += fmt_str(s, service_dir);
 	*s++ = 0;
@@ -77,7 +88,7 @@ run_init(char *service_dir)
 				return -2;
 			i = fmt_str(0, run_dir) + 9 + fmt_str(0, p + 1);
 			if (i > 255)
-				return 1;
+				return -3;
 			s = dirbuf;
 			s += fmt_str(s, run_dir);
 			s += fmt_strn(s, "/svscan/", 8);
@@ -98,7 +109,7 @@ run_init(char *service_dir)
 		p = buf + i + 1; /*- name/log */
 		i = fmt_str(0, run_dir) + 13 + fmt_str(0, p);
 		if (i > 255)
-			return 1;
+			return -3;
 		s = dirbuf;
 		s += fmt_str(s, run_dir);
 		s += fmt_strn(s, "/svscan/", 8);
@@ -109,7 +120,7 @@ run_init(char *service_dir)
 		/*- e.g. /run/svscan/qmail-smtpd.25 */
 		i = fmt_str(0, run_dir) + 9 + fmt_str(0, p);
 		if (i > 255)
-			return 1;
+			return -3;
 		s = dirbuf;
 		s += fmt_str(s, run_dir);
 		s += fmt_strn(s, "/svscan/", 8);
@@ -130,7 +141,7 @@ run_init(char *service_dir)
 void
 getversion_svrun_c()
 {
-	static char    *x = "$Id: run_init.c,v 1.6 2022-06-20 00:48:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: run_init.c,v 1.7 2023-03-04 13:35:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.29 2023-01-08 22:14:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.30 2023-03-04 16:06:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -73,6 +73,7 @@ initialize_run()
 		if (access("/var/run/svscan", F_OK) && mkdir("/var/run/svscan", 0755) == -1)
 			strerr_die2sys(111, FATAL, "unable to mkdir /var/run/svscan: ");
 	} else {
+		use_run = 0;
 		pidfile = PIDFILE;
 		return;
 	}
@@ -181,9 +182,7 @@ start(char *fn, char *sdir)
 	 * .service_name
 	 */
 	if (use_run && fn[0] == '.' && str_diff(fn, SVSCANINFO)) {
-		if (!fn[1] || fn[1] == '.') /*- . and .. */
-			return;
-		if (!run_dir)
+		if (!fn[1] || fn[1] == '.') /*- dir is . or .. */
 			return;
 		if ((fdsource = open(".", O_RDONLY|O_NDELAY, 0)) == -1) {
 			if (!silent)
@@ -208,7 +207,7 @@ start(char *fn, char *sdir)
 			return;
 		}
 		/*
-		 * if if rename a directory in orignal /service, we should rename
+		 * if we rename a directory in orignal /service, we should rename
 		 * it here.
 		 * e.g. if /service/qmail-smtpd.25 is renamed to /service/.qmail-smtpd.25
 		 * then rename /run/svscan/qmail-smtpd.25 to /run/svscan/.qmail-smtpd.25
@@ -227,6 +226,8 @@ start(char *fn, char *sdir)
 		return;
 	}
 #endif
+	if (fn[0] == '.' && str_diff(fn, SVSCANINFO))
+		return;
 	if (stat(fn, &st) == -1) {
 		if (!silent)
 			strerr_warn4(WARN, "unable to stat ", fn, ": ", &strerr_sys);
@@ -846,13 +847,17 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.29 2023-01-08 22:14:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.30 2023-03-04 16:06:43+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.30  2023-03-04 16:06:43+05:30  Cprogrammer
+ * unset use_run if /run, /var/run is missing
+ * skip directories starting with .
+ *
  * Revision 1.29  2023-01-08 22:14:49+05:30  Cprogrammer
  * added comments on auto-start, auto-stop feature of svscan
  *

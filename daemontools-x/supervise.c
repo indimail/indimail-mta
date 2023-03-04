@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.28 2022-12-14 13:35:44+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.29 2023-03-04 13:38:09+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -713,6 +713,10 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 	char           *run_dir, *parent_dir = (char *) 0;
 	int             i;
 
+	if (env_get("DISABLE_RUN")) {
+		use_runfs = 0;
+		return;
+	}
 	if (!access("/run/svscan", F_OK)) {
 		run_dir = "/run";
 		i = 4;
@@ -956,13 +960,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.28 2022-12-14 13:35:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.29 2023-03-04 13:38:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.29  2023-03-04 13:38:09+05:30  Cprogrammer
+ * disable using /run if DISABLE_RUN env variable is set
+ *
  * Revision 1.28  2022-12-14 13:35:44+05:30  Cprogrammer
  * become subreaper if run file has sticky bit set
  * display exit status and termination signal

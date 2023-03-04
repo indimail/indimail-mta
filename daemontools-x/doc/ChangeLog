@@ -2,8 +2,15 @@
 Release 1.1.2 Start 20/02/2023 End --/--/2023
 ======= Release Highlights ================================================
 ===========================================================================
-- 20/02/2022
+- 20/02/2023
 01. setuidgid.c: moved set_additional_groups function to libqmail
+- 04/03/2023
+02. run_init.c: return -1 for name too long
+03. supervise.c: disable using /run if DISABLE_RUN env variable is set
+04. svok.c, svc.c, svstat.c: check for supervise/ok in original service dir
+    before run filesystem
+05. svscan.c: unset use_run if /run, /var/run is missing
+06. svscan.c: skip directories starting with .
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023

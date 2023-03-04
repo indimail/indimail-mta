@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.11  2023-03-04 14:43:01+05:30  Cprogrammer
+ * check for supervise/ok in original service dir before run filesystem
+ *
  * Revision 1.10  2020-11-30 23:20:31+05:30  Cprogrammer
  * change warning text message for missing directory in /run
  *
@@ -49,7 +52,6 @@
 
 char            outbuf[256], errbuf[256];
 substdio        o = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
-substdio        e = SUBSTDIO_FDBUF(write, 2, errbuf, sizeof errbuf);
 
 char            status[21];
 char            strnum[FMT_ULONG];
@@ -62,70 +64,71 @@ void
 doit(char *dir, int *retval)
 {
 	struct stat     st;
-	int             r, fd;
+	int             r, fd = -1;
 	short          *s;
 	char           *x;
 	struct tai      when, now;
 
 	*retval = 111;
 	if (chdir(dir) == -1) {
-		x = error_str(errno);
-		substdio_puts(&e, dir);
-		substdio_puts(&e, ": unable to chdir: ");
-		substdio_puts(&e, x);
-		substdio_puts(&e, "\n");
+		strerr_warn4(WARN, "unable to to chdir to ", dir, ": ", &strerr_sys);
 		return;
 	}
 
 	normallyup = 0;
 	if (stat("down", &st) == -1) {
 		if (errno != error_noent) {
-			x = error_str(errno);
-			substdio_puts(&e, dir);
-			substdio_puts(&e, ": unable to stat down: ");
-			substdio_puts(&e, x);
-			substdio_puts(&e, "\n");
+			strerr_warn4(WARN, "unable to stat ", dir, "/down: ", &strerr_sys);
 			return;
 		}
 		normallyup = 1;
 	}
 
 #ifdef USE_RUNFS
-	switch (run_init(dir))
-	{
-	case 0:
-		break;
-	case -1:
-		strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
-		return;
-	case -2:
-		strerr_warn4(WARN, "No run state information for ", dir, ": ", &strerr_sys);
-		return;
-	}
-#endif
 	if ((fd = open_write("supervise/ok")) == -1) {
 		if (errno == error_nodevice) {
-			substdio_puts(&e, dir);
-			substdio_puts(&e, ": supervise not running\n");
+			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running", &strerr_sys);
+			*retval = 2;
+			return;
+		} else
+		if (errno == error_noent)
+			*retval = 2;
+		else {
+			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: ", &strerr_sys);
+			return;
+		}
+		switch (run_init(dir))
+		{
+		case 0: /*- cwd changed to /run/svscan/service_name */
+			break;
+		case 1: /*- /run, /var/run doesn't exist */
+			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running", &strerr_sys);
+		case -1:
+			strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
+			return;
+		case -2:
+			strerr_warn4(WARN, "No run state information for ", dir, ": ", &strerr_sys);
+			return;
+		case -3:
+			strerr_warn3(WARN, dir, ": name too long", 0);
+			return;
+		}
+	}
+#endif
+	if (fd == -1 && (fd = open_write("supervise/ok")) == -1) {
+		if (errno == error_nodevice || errno == error_noent) {
+			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running", &strerr_sys);
 			*retval = 2;
 			return;
 		}
-		x = error_str(errno);
-		substdio_puts(&e, dir);
-		substdio_puts(&e, ": unable to open supervise/ok: ");
-		substdio_puts(&e, x);
-		substdio_puts(&e, "\n");
+		strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: ", &strerr_sys);
 		return;
 	}
 	close(fd);
 	if ((fd = open_read("supervise/status")) == -1) {
 		if (errno == error_noent)
 			*retval = 2;
-		x = error_str(errno);
-		substdio_puts(&e, dir);
-		substdio_puts(&e, ": unable to open supervise/status: ");
-		substdio_puts(&e, x);
-		substdio_puts(&e, "\n");
+		strerr_warn4(WARN, "unable to open ", dir, "/supervise/status: ", &strerr_sys);
 		return;
 	}
 	r = read(fd, status, sizeof status);
@@ -137,10 +140,7 @@ doit(char *dir, int *retval)
 			*retval = 100;
 			x = "bad format";
 		}
-		substdio_puts(&e, dir);
-		substdio_puts(&e, ": unable to read supervise/status: ");
-		substdio_puts(&e, x);
-		substdio_puts(&e, "\n");
+		strerr_warn5(WARN, "unable to read ", dir, "/supervise/status: ", x, 0);
 		return;
 	}
 	pid = (unsigned char) status[15];
@@ -225,7 +225,6 @@ main(int argc, char **argv)
 		if (fchdir(fdorigdir) == -1)
 			strerr_die2sys(111, FATAL, "unable to revert directory: ");
 	}
-	substdio_flush(&e);
 	substdio_flush(&o);
 	/*
 	 * 111 - system error
@@ -244,7 +243,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.10 2020-11-30 23:20:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svstat.c,v 1.11 2023-03-04 14:43:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

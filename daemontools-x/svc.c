@@ -1,5 +1,8 @@
 /*
  * $Log: svc.c,v $
+ * Revision 1.10  2023-03-04 14:42:52+05:30  Cprogrammer
+ * check for supervise/ok in original service dir before run filesystem
+ *
  * Revision 1.9  2020-11-30 23:19:48+05:30  Cprogrammer
  * change warning text message for missing directory in /run
  *
@@ -73,8 +76,7 @@ main(int argc, char **argv)
 		}
 	}
 	argv += optind;
-	fdorigdir = open_read(".");
-	if (fdorigdir == -1)
+	if ((fdorigdir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	exit_stat = 0;
 	while ((dir = *argv++)) {
@@ -82,26 +84,46 @@ main(int argc, char **argv)
 			strerr_warn4(WARN, "unable to chdir to ", dir, ": ", &strerr_sys);
 			continue;
 		}
+		fd = -1;
 #ifdef USE_RUNFS
-		switch ((i = run_init(dir)))
-		{
-		case 0:
-			break;
-		case -1:
-			strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
-			break;
-		case -2:
-			strerr_warn4(WARN, "No run state information for ", dir, ": ", &strerr_sys);
-			break;
-		}
-#endif
-		if (i) {
-			if (fchdir(fdorigdir) == -1)
-				strerr_die2sys(111, FATAL, "unable to revert directory: ");
-			continue;
-		}
 		if ((fd = open_write("supervise/control")) == -1) {
 			if (errno == error_nodevice) {
+				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running", 0);
+				exit_stat = 2;
+				continue;
+			}
+			if (errno != error_noent) {
+				strerr_warn4(WARN, "unable to open ", dir, "/supervise/control: ", 0);
+				exit_stat = 1;
+				continue;
+			}
+			switch ((i = run_init(dir)))
+			{
+			case 0: /*- cwd changed to /run/svscan/service_name */
+				break;
+			case 1: /*- /run, /var/run doesn't exist */
+				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running", 0);
+				exit_stat = 2;
+				continue;
+			case -1:
+				strerr_die2sys(111, FATAL, "unable to get current working directory: ");
+				break;
+			case -2:
+				strerr_warn4(WARN, "No run state information for ", dir, ": ", &strerr_sys);
+				continue;
+			case -3:
+				strerr_warn3(WARN, dir, ": name too long", 0);
+				continue;
+			}
+			if (i) {
+				if (fchdir(fdorigdir) == -1)
+					strerr_die2sys(111, FATAL, "unable to revert directory: ");
+				continue;
+			}
+		}
+#endif
+		if (fd == -1 && (fd = open_write("supervise/control")) == -1) {
+			if (errno == error_nodevice || errno == error_noent) {
 				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running", 0);
 				exit_stat = 2;
 			} else
@@ -115,14 +137,14 @@ main(int argc, char **argv)
 		}
 		if (fchdir(fdorigdir) == -1)
 			strerr_die2sys(111, FATAL, "unable to revert directory: ");
-	}
+	} /* while ((dir = *argv++)) */
 	_exit(exit_stat);
 }
 
 void
 getversion_svc_c()
 {
-	static char    *x = "$Id: svc.c,v 1.9 2020-11-30 23:19:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: svc.c,v 1.10 2023-03-04 14:42:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
