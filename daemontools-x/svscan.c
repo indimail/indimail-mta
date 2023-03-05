@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.32 2023-03-05 23:01:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.32 2023-03-05 23:48:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -591,8 +591,9 @@ open_svscan_log(char *sdir)
 	if (stat(SVSCANINFO, &st) == 0) {
 		start(SVSCANINFO, sdir);
 		if (i + 1 == numx && x[i].pidlog != 0) {
-			(void) dup2(x[i].pi[1], STDOUT_FILENO);
-			(void) dup2(x[i].pi[1], STDERR_FILENO);
+			if (dup2(x[i].pi[1], STDOUT_FILENO) == -1 ||
+					dup2(x[i].pi[1], STDERR_FILENO) == -1)
+				strerr_die4sys(111, WARN, "unable to dup descriptors for ", SVSCANINFO, ": ");
 			strnum[fmt_ulong(strnum, getpid())] = 0;
 			strerr_warn4(INFO, "pid: ", strnum, ": starting...", 0);
 		}
@@ -854,15 +855,15 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.32 2023-03-05 23:01:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.32 2023-03-05 23:48:25+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
- * Revision 1.32  2023-03-05 23:01:18+05:30  Cprogrammer
- * added code comments
+ * Revision 1.32  2023-03-05 23:48:25+05:30  Cprogrammer
+ * check for dup2 error
  *
  * Revision 1.31  2023-03-05 00:40:57+05:30  Cprogrammer
  * use TERMINATE_SESSION to terminate all children when running as session leader
