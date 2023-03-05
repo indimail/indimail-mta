@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.30 2023-03-04 18:14:42+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.31 2023-03-05 22:59:57+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -698,6 +698,10 @@ doit(void)
 				}
 				break;
 			case 'x': /*- exit supervise */
+				if (verbose) {
+					strnum1[fmt_ulong(strnum1, getpid())] = 0;
+					strerr_warn4(info.s, "pid: ", strnum1, " supervise exiting...", 0);
+				}
 				flagexit = 1;
 				announce(0);
 				break;
@@ -990,13 +994,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.30 2023-03-04 18:14:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.31 2023-03-05 22:59:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.31  2023-03-05 22:59:57+05:30  Cprogrammer
+ * added exit informational message
+ *
  * Revision 1.30  2023-03-04 18:14:42+05:30  Cprogrammer
  * cleanup supervise directory in service directory when using run fs
  *
