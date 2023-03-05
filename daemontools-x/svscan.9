@@ -62,11 +62,10 @@ subdirectory, it starts a new \fBsupervise\fR(8) process. If it sees an old
 subdirectory where a \fBsupervise\fR(8) process has exited, it restarts the
 \fBsupervise\fR(8) process. In the \fBlog\fR case it reuses the same pipe
 so that no data is lost. The default scan interval of 60 secs can be
-changed by setting \fBSCANINTERVAL\fR environment variable. Set
-\fBSCANINTERVAL\fR to 0 to disable the automatic scanning of the service
-directory completely. You can also send a HUP signal to svscan to force a
-directory scan. If running as PID 1, \fBsvscan\fR will automatically scan
-for new subdirectories when any of it's children or any orphaned process die.
+changed by setting \fBSCANINTERVAL\fR environment variable. You can also
+send a HUP signal to svscan to force a directory scan. If running as PID 1,
+\fBsvscan\fR will automatically scan for new subdirectories when any of
+it's children or any orphaned process die.
 
 svscan can auto-start or auto-stop a service based on the presence or
 absence of \fIs\fR/down file. During each scan, svscan will automatically
@@ -84,7 +83,11 @@ startup scripts and eliminates the use of \fBreadproctitle\fR, which does
 not work on some platforms, e.g. FreeBSD 5.1. Redirecting \fBsvscan\fR
 output through \fBmultilog\fR also provides a much better solution than
 other \fBsvscan\fR startup scripts which direct output exclusively to
-console, causing problems to go undetected for a long time.
+console, causing problems to go undetected for a long time. The other big
+advantage of setting \fBSCANLOG\fR is that all \fBsupervise\fR processes
+started by \fBsvscan\fR (and also the children of supervise) inherit the
+descriptors 0, 1 and 2. Any output of these processes not redirected to a
+log file will get logged along with \fBsvscan\fR log.
 
 \fBsvscan\fR can be run with a PID of 1 (init replacement) and reap child
 processes. This feature exploited in docker/podman/kubernates environment.
