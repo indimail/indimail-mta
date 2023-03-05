@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.31 2023-03-05 00:40:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.32 2023-03-05 23:01:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -579,7 +579,6 @@ open_svscan_log(char *sdir)
 {
 	const int       i = numx;
 	struct stat     st;
-	static char     fn[] = SVSCANINFO;	/*- avoid compiler warning on const string */
 	char            strnum[FMT_ULONG];
 
 	/*- (semi-paranoid; could be more so) */
@@ -589,8 +588,8 @@ open_svscan_log(char *sdir)
 		(void) open("/dev/null", O_WRONLY);
 	if (fstat(STDERR_FILENO, &st) != 0 && errno == EBADF)
 		(void) open("/dev/null", O_WRONLY);
-	if (stat(fn, &st) == 0) {
-		start(fn, sdir);
+	if (stat(SVSCANINFO, &st) == 0) {
+		start(SVSCANINFO, sdir);
 		if (i + 1 == numx && x[i].pidlog != 0) {
 			(void) dup2(x[i].pi[1], STDOUT_FILENO);
 			(void) dup2(x[i].pi[1], STDERR_FILENO);
@@ -829,14 +828,17 @@ main(int argc, char **argv)
 		scannow = 0;
 		/*-
 		 * remain in an infinite loop until
-		 * 1. scannow is reset in sighup, sigchld
+		 * 1. scannow is reset in sighup, sigchld, errors in doit()
 		 * or
 		 * 2. auto_scan is set
+		 * error   sets scannow=-1
+		 * sighup  sets scannow=1
+		 * sigchld sets scannow=2
 		 */
 		while (!scannow) {
 			sleep(scan_interval ? scan_interval : 60);
 			/*
-			 * on interruption by SIGCHLD or SIGHUP we either
+			 * on interruption of above sleep by SIGCHLD or SIGHUP we either
 			 * 1. reap the child
 			 * or
 			 * 2. scan the /service directory
@@ -852,13 +854,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.31 2023-03-05 00:40:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.32 2023-03-05 23:01:18+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.32  2023-03-05 23:01:18+05:30  Cprogrammer
+ * added code comments
+ *
  * Revision 1.31  2023-03-05 00:40:57+05:30  Cprogrammer
  * use TERMINATE_SESSION to terminate all children when running as session leader
  *
