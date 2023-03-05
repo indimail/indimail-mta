@@ -88,7 +88,7 @@ main(int argc, char **argv)
 #ifdef USE_RUNFS
 		if ((fd = open_write("supervise/control")) == -1) {
 			if (errno == error_nodevice) {
-				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running", 0);
+				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running: ", 0);
 				exit_stat = 2;
 				continue;
 			}
@@ -102,7 +102,7 @@ main(int argc, char **argv)
 			case 0: /*- cwd changed to /run/svscan/service_name */
 				break;
 			case 1: /*- /run, /var/run doesn't exist */
-				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running", 0);
+				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running: ", 0);
 				exit_stat = 2;
 				continue;
 			case -1:
@@ -124,7 +124,7 @@ main(int argc, char **argv)
 #endif
 		if (fd == -1 && (fd = open_write("supervise/control")) == -1) {
 			if (errno == error_nodevice || errno == error_noent) {
-				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running", 0);
+				strerr_warn4(WARN, "unable to control ", dir, ": supervise not running: ", 0);
 				exit_stat = 2;
 			} else
 				strerr_warn4(WARN, "unable to control ", dir, ": ", &strerr_sys);

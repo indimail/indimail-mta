@@ -87,7 +87,7 @@ doit(char *dir, int *retval)
 #ifdef USE_RUNFS
 	if ((fd = open_write("supervise/ok")) == -1) {
 		if (errno == error_nodevice) {
-			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running", &strerr_sys);
+			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running: ", &strerr_sys);
 			*retval = 2;
 			return;
 		} else
@@ -102,7 +102,7 @@ doit(char *dir, int *retval)
 		case 0: /*- cwd changed to /run/svscan/service_name */
 			break;
 		case 1: /*- /run, /var/run doesn't exist */
-			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running", &strerr_sys);
+			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running: ", &strerr_sys);
 		case -1:
 			strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
 			return;
@@ -117,7 +117,7 @@ doit(char *dir, int *retval)
 #endif
 	if (fd == -1 && (fd = open_write("supervise/ok")) == -1) {
 		if (errno == error_nodevice || errno == error_noent) {
-			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running", &strerr_sys);
+			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running: ", &strerr_sys);
 			*retval = 2;
 			return;
 		}
