@@ -863,6 +863,11 @@ Used by svscan. If set, svscan calls setsid(2) to make the child a session
 leader.
 
 .TP
+\fISETPGID\fR
+Used by supervise. If set, supervise calls setpgid(2) to make the child run
+in its own process group.
+
+.TP
 \fITERMINATE_SESSION\fR
 Used by svscan. If set along with \fBSETSID\fR, svscan calls kill(0, 15)
 to terminate all supervise processes started by it.

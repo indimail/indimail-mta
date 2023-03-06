@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.31 2023-03-05 22:59:57+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.32 2023-03-06 23:13:54+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -45,7 +45,7 @@ static int      fddir;
 static int      verbose = 0, silent = 0;
 static char     flagfailed;
 static unsigned long scan_interval = 60;
-static char     is_subreaper = 0;
+static char     is_subreaper = 0, do_setpgid = 0;
 /*-
  * status[12-15] - pid
  * status[16]    - paused
@@ -114,6 +114,57 @@ announce(short sleep_interval)
 			strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: partial write: ", 0);
 		return;
 	}
+}
+
+static void
+do_kill(int prgrp, int *siglist, char **signame)
+{
+	int            *i;
+	int             j, r;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+
+	for (i = siglist, j = 0; *i != -1; i++, j++) {
+		if (grandchild || prgrp) {
+			if ((r = killpg(childpid, *i)) == -1) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_ulong(strnum2, childpid)] = 0;
+				strerr_warn8(warn.s, "pid ", strnum1, " killpg ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
+			}
+			if (verbose && !r) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_long(strnum2, childpid)] = 0;
+				strerr_warn7(info.s, "pid ", strnum1, " killed pgid ", strnum2, " with signal ", signame[j], 0);
+			}
+		} else {
+			if ((r = kill(childpid, *i)) == -1) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_ulong(strnum2, childpid)] = 0;
+				strerr_warn8(warn.s, "pid ", strnum1, " kill ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
+			}
+			if (verbose && !r) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strnum2[fmt_ulong(strnum2, childpid)] = 0;
+				strerr_warn7(info.s, "pid ", strnum1, " killed pid ", strnum2, " with signal ", signame[j], 0);
+			}
+		}
+	} /*- for (i = siglist, j = 0; *i != -1; i++, j++) */
+}
+
+static void
+sigterm()
+{
+	int             siglist[] = {-1, -1, -1};
+	char           *signame[] = {0, 0};
+
+	if (childpid) {
+		flagwant = 0;
+		flagwantup = 1;
+		siglist[0] = SIGTERM;
+		siglist[1] = -1;
+		signame[0] = "SIGTERM";
+		do_kill(1, siglist, signame);
+	}
+	flagexit = 1;
 }
 
 void
@@ -285,8 +336,8 @@ do_wait()
 void
 trystart(void)
 {
-	int             f;
-	char            strnum[FMT_ULONG];
+	pid_t           f, pgid;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], strnum3[FMT_ULONG];
 
 	do_wait();
 	switch (f = fork())
@@ -305,14 +356,22 @@ trystart(void)
 		if (use_runfs && fchdir(fddir) == -1)
 			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
+		if ((do_setpgid || is_subreaper) && setpgid(0, 0) == -1)
+			strerr_die2sys(111, fatal.s, "unable to set process group id: ");
 		execve(*run, run, environ);
 		strerr_die2sys(111, fatal.s, "unable to start run: ");
 	}
 	grandchild = 0;
 	flagpaused = 0;
-	strnum[fmt_ulong(strnum, f)] = 0;
-	if (verbose)
-		strerr_warn4(info.s, "pid: ", strnum, is_subreaper ? " started service in subreaper mode" : " started service in non-subreaper mode", 0);
+	if (verbose) {
+		pgid = getpgid(f);
+		strnum1[fmt_ulong(strnum1, getpid())] = 0;
+		strnum2[fmt_ulong(strnum2, f)] = 0;
+		strnum3[fmt_ulong(strnum3, pgid)] = 0;
+		strerr_warn8(info.s, "pid ", strnum1, " started child pid ", strnum2,
+				" pgid ", strnum3,
+				is_subreaper ? " in subreaper mode" : " in non-subreaper mode", 0);
+	}
 	pidchange((childpid = f), 1);
 	announce(0);
 	fifo_make("supervise/up", 0600);
@@ -325,7 +384,8 @@ trystart(void)
 void
 tryaction(char **action, pid_t spid, int wstat, int do_alert)
 {
-	int             f, t, i;
+	pid_t           f;
+	int             t, i;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG + 1];
 
 	switch (f = fork())
@@ -370,7 +430,7 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 }
 
 static void
-postmortem(pid_t pid, int wstat, int _status)
+postmortem(pid_t pid, int wstat)
 {
 	int             t;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
@@ -378,53 +438,48 @@ postmortem(pid_t pid, int wstat, int _status)
 	if (silent)
 		return;
 	strnum1[fmt_ulong(strnum1, pid)] = 0;
-	if (!_status) {
-		if (wait_stopped(wstat) || wait_continued(wstat)) {
-			t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
-			strnum2[fmt_ulong(strnum2, t)] = 0;
-			strerr_warn5(warn.s, "pid: ", strnum1,
-				wait_stopped(wstat) ? " stopped by signal " : " started by signal ", strnum2, 0);
-		} else
-		if (wait_signaled(wstat)) {
-			t = wait_termsig(wstat);
-			strnum2[fmt_ulong(strnum2, t)] = 0;
-			strerr_warn5(warn.s, "pid: ", strnum1, " got signal ", strnum2, 0);
-		}
-		return;
-	}
 	if (wait_stopped(wstat) || wait_continued(wstat)) {
 		t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
 		strnum2[fmt_ulong(strnum2, t)] = 0;
-		strerr_warn5(warn.s, "pid: ", strnum1,
-				wait_stopped(wstat) ? " stopped by signal " : " started by signal ", strnum2, 0);
+		strerr_warn5(warn.s, "pid ", strnum1,
+			wait_stopped(wstat) ? " stopped by signal " : " started by signal ", strnum2, 0);
 	} else
 	if (wait_signaled(wstat)) {
 		t = wait_termsig(wstat);
 		strnum2[fmt_ulong(strnum2, t)] = 0;
-		strerr_warn5(warn.s, "pid: ", strnum1, " killed by signal ", strnum2, 0);
+		strerr_warn5(warn.s, "pid ", strnum1, " got signal ", strnum2, 0);
 	} else {
 		t = wait_exitcode(wstat);
 		strnum2[fmt_ulong(strnum2, t)] = 0;
-		strerr_warn5(warn.s, "pid: ", strnum1, " exited with status=", strnum2, 0);
+		strerr_warn5(warn.s, "pid ", strnum1, " exited with status=", strnum2, 0);
 	}
+	return;
 }
 
 void
 doit(void)
 {
 	iopause_fd      x[2];
+	int             siglist[] = {-1, -1, -1};
+	char           *signame[] = {0, 0};
 	struct taia     deadline;
 	struct taia     stamp;
 	static int      double_fork_flag;
-	int             wstat, wstat_reap, r, t, g = 0, do_break;
+	pid_t           r;
+	int             wstat, wstat_reap, t, g = 0, do_break;
 	char            ch, c = 0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
 	announce(0);
 
 	for (;;) {
-		if (flagexit && !childpid)
+		if (flagexit && !childpid) {
+			if (verbose) {
+				strnum1[fmt_ulong(strnum1, getpid())] = 0;
+				strerr_warn4(info.s, "supervise pid ", strnum1, " exiting...", 0);
+			}
 			return;
+		}
 
 		sig_unblock(sig_child);
 
@@ -470,7 +525,7 @@ doit(void)
 				t = wait_stopped(wstat) ? wait_stopsig(wstat) : SIGCONT;
 				strnum2[fmt_ulong(strnum2, t)] = 0;
 				if (!silent)
-					strerr_warn5(warn.s, "pid: ", strnum1,
+					strerr_warn5(warn.s, "pid ", strnum1,
 						wait_stopped(wstat) ? " stopped by signal " : " continued by signal ", strnum2, 0);
 				break;
 			}
@@ -479,7 +534,7 @@ doit(void)
 					strnum1[fmt_ulong(strnum1, childpid)] = 0;
 					strnum2[fmt_ulong(strnum2, r)] = 0;
 					if (!silent)
-						strerr_warn6(warn.s, "pid: ", strnum2, " double fork (orig pid ", strnum1, ")", 0);
+						strerr_warn6(warn.s, "pid ", strnum2, " double fork by ppid ", strnum1, " died", 0);
 					childpid = r;
 				}
 				if (is_subreaper) {
@@ -488,8 +543,8 @@ doit(void)
 							strnum1[fmt_ulong(strnum1, childpid)] = 0;
 							if (!double_fork_flag++)
 								if (!silent)
-									strerr_warn4(warn.s, "pid: ", strnum1, ": double fork detected", 0);
-							postmortem(childpid, wstat, r);
+									strerr_warn4(warn.s, "pid ", strnum1, " did double fork", 0);
+							postmortem(childpid, wstat);
 							grandchild = 1;
 							do_break = 1;
 							break;
@@ -502,18 +557,23 @@ doit(void)
 								break;
 							}
 						}
-					}
+					} /*- for (do_break = 0;;) */
 				}
 				if (do_break)
 					break;
 				double_fork_flag = 0;
-				postmortem(childpid, wstat, r);
+				postmortem(childpid, wstat);
 				childpid = 0;
 				pidchange(svpid, 0);
 				close(fdup);
 				announce(0);
-				if (flagexit)
+				if (flagexit) {
+					if (verbose) {
+						strnum1[fmt_ulong(strnum1, getpid())] = 0;
+						strerr_warn4(info.s, "supervise pid ", strnum1, " exiting...", 0);
+					}
 					return;
+				}
 				if (flagwant && flagwantup) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
@@ -554,12 +614,11 @@ doit(void)
 					if (use_runfs && chdir(dir) == -1)
 						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
 #endif
-					kill(g ? 0 - childpid : childpid, SIGTERM);
-					kill(g ? 0 - childpid : childpid, SIGCONT);
-					if (g) {
-						kill(childpid, SIGTERM);
-						kill(childpid, SIGCONT);
-					}
+					siglist[0] = SIGTERM;
+					siglist[1] = SIGCONT;
+					signame[0] = "SIGTERM";
+					signame[1] = "SIGCONT";
+					do_kill(g, siglist, signame);
 					g = flagpaused = 0;
 				}
 				t = childpid;
@@ -589,12 +648,11 @@ doit(void)
 					if (use_runfs && chdir(dir) == -1)
 						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
 #endif
-					kill(g ? 0 - childpid : childpid, SIGTERM);
-					kill(g ? 0 - childpid : childpid, SIGCONT);
-					if (g) {
-						kill(childpid, SIGTERM);
-						kill(childpid, SIGCONT);
-					}
+					siglist[0] = SIGTERM;
+					siglist[1] = SIGCONT;
+					signame[0] = "SIGTERM";
+					signame[1] = "SIGCONT";
+					do_kill(g, siglist, signame);
 					g = flagpaused = 0;
 				}
 				announce(0);
@@ -614,66 +672,74 @@ doit(void)
 				break;
 			case 'a': /*- send ALRM */
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid, SIGALRM);
-					if (g)
-						kill(childpid, SIGALRM);
+					siglist[0] = SIGALRM;
+					siglist[1] = -1;
+					signame[0] = "SIGALRM";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case 'h': /*- send HUP */
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid, SIGHUP);
-					if (g)
-						kill(childpid, SIGHUP);
+					siglist[0] = SIGHUP;
+					siglist[1] = -1;
+					signame[0] = "SIGHUP";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case 'k': /*- send kill */
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid, SIGKILL);
-					if (g)
-						kill(childpid, SIGKILL);
+					siglist[0] = SIGKILL;
+					siglist[1] = -1;
+					signame[0] = "SIGKILL";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case 't': /*- send TERM */
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid, SIGTERM);
-					if (g)
-						kill(childpid, SIGTERM);
+					siglist[0] = SIGTERM;
+					siglist[1] = -1;
+					signame[0] = "SIGTERM";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case 'i': /*- send INT */
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid, SIGINT);
-					if (g)
-						kill(childpid, SIGINT);
+					siglist[0] = SIGINT;
+					siglist[1] = -1;
+					signame[0] = "SIGINT";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case 'q': /*- send SIGQUIT */
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid,SIGQUIT);
-					if (g)
-						kill(childpid,SIGQUIT);
+					siglist[0] = SIGQUIT;
+					siglist[1] = -1;
+					signame[0] = "SIGQUIT";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case 'U': /*- send USR1 */
 			case '1':
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid,SIGUSR1);
-					if (g)
-						kill(childpid,SIGUSR1);
+					siglist[0] = SIGUSR1;
+					siglist[1] = -1;
+					signame[0] = "SIGUSR1";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case '2': /*- send USR2 */
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid,SIGUSR2);
-					if (g)
-						kill(childpid,SIGUSR2);
+					siglist[0] = SIGUSR2;
+					siglist[1] = -1;
+					signame[0] = "SIGUSR2";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
@@ -681,9 +747,10 @@ doit(void)
 				flagpaused = 1;
 				announce(0);
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid, SIGSTOP);
-					if (g)
-						kill(childpid, SIGSTOP);
+					siglist[0] = SIGSTOP;
+					siglist[1] = -1;
+					signame[0] = "SIGSTOP";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
@@ -691,17 +758,14 @@ doit(void)
 				flagpaused = 0;
 				announce(0);
 				if (childpid) {
-					kill(g ? 0 - childpid : childpid, SIGCONT);
-					if (g)
-						kill(childpid, SIGCONT);
+					siglist[0] = SIGCONT;
+					siglist[1] = -1;
+					signame[0] = "SIGCONT";
+					do_kill(g, siglist, signame);
 					g = 0;
 				}
 				break;
 			case 'x': /*- exit supervise */
-				if (verbose) {
-					strnum1[fmt_ulong(strnum1, getpid())] = 0;
-					strerr_warn4(info.s, "pid: ", strnum1, " supervise exiting...", 0);
-				}
 				flagexit = 1;
 				announce(0);
 				break;
@@ -871,6 +935,7 @@ main(int argc, char **argv)
 
 	verbose = env_get("VERBOSE") ? 1 : 0;
 	silent = env_get("SILENT") ? 1 : 0;
+	do_setpgid = env_get("SETPGID") ? 1 : 0;
 	if (!(dir = argv[1]) || argc > 3)
 		strerr_die1x(100, "supervise: usage: supervise dir [parent_ident]");
 	if (*dir == '/' || *dir == '.')
@@ -900,6 +965,7 @@ main(int argc, char **argv)
 	coe(selfpipe[1]);
 	ndelay_on(selfpipe[0]);
 	ndelay_on(selfpipe[1]);
+	sig_termcatch(sigterm);
 	sig_block(sig_child);
 	sig_catch(sig_child, trigger);
 
@@ -994,13 +1060,18 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.31 2023-03-05 22:59:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.32 2023-03-06 23:13:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.32  2023-03-06 23:13:54+05:30  Cprogrammer
+ * fix termination by svc in subreaper mode
+ * handle SIGTERM to exit and terminate child
+ * set Process Group ID of child when SETPGID env variable is set
+ *
  * Revision 1.31  2023-03-05 22:59:57+05:30  Cprogrammer
  * added exit informational message
  *

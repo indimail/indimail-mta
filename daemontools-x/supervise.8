@@ -21,11 +21,15 @@ restarts ./run if ./run exits. It pauses for a second after starting ./run,
 so that it does not loop too quickly in case ./run exits immediately.
 \fBsupervise\fR expects ./run to run in the foreground. Sometimes daemon
 fork themselves into background, which some consider bad software design.
-If you want to supervise such a daemon, set the sticky bit on ./run. This
+If you want to monitor such a daemon, set the sticky bit on ./run. This
 makes \fBsupervise\fR go into \fBsubreaper\fR mode using \fBprctl\fR(2)
 \fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
-\fBPROC_REAP_ACQUIRE\fR on FreeBSD. This allows \fBsupervise\fR to
-supervise daemons that fork themselves into background.
+\fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper mode or If the
+environment variable \fBSETPGID\fR is set, ./run will have it's process
+Group ID set to the value of it's PID. Setting the process Group ID is
+required to monitor ./run reliably when ./run has a command which double
+forks. It is also required in such cases to make \fBsvc\fR(8) command
+operate reliably for such double forked daemon/commands in ./run.
 
 If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run or to give other
