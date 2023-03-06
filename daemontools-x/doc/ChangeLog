@@ -23,6 +23,8 @@ Release 1.1.2 Start 20/02/2023 End --/--/2023
 12. supervise.c: handle SIGTERM to exit and terminate child
 13. supervise.c: set Process Group ID of child when SETPGID env variable is
     set
+- 07/03/2023
+14. supervise.c: check for sticky bit on run on every restart
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023

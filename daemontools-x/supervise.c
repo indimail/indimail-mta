@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.32 2023-03-06 23:13:54+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.33 2023-03-07 00:06:34+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -337,9 +337,24 @@ void
 trystart(void)
 {
 	pid_t           f, pgid;
+	struct stat     st;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], strnum3[FMT_ULONG];
 
 	do_wait();
+#ifdef USE_RUNFS
+	if (use_runfs && fchdir(fddir) == -1)
+		strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+#endif
+	if (!is_subreaper) {
+		if (stat(*run, &st) == -1)
+			strerr_die4sys(111, fatal.s, "unable to stat ", *run, ": ");
+		if (st.st_mode & S_ISVTX) /*- sticky bit on run file */
+			is_subreaper = subreaper() == 0 ? 1 : 0;
+	}
+#ifdef USE_RUNFS
+	if (use_runfs && chdir(dir) == -1)
+		strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+#endif
 	switch (f = fork())
 	{
 	case -1:
@@ -1060,13 +1075,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.32 2023-03-06 23:13:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.33 2023-03-07 00:06:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.33  2023-03-07 00:06:34+05:30  Cprogrammer
+ * check for sticky bit on run on every restart
+ *
  * Revision 1.32  2023-03-06 23:13:54+05:30  Cprogrammer
  * fix termination by svc in subreaper mode
  * handle SIGTERM to exit and terminate child
