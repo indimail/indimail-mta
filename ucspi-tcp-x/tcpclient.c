@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.29 2023-02-13 20:19:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.30 2023-03-08 00:01:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.29 2023-02-13 20:19:20+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.30 2023-03-08 00:01:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -159,7 +159,8 @@ sigchld()
 		if ((i = wait_exitcode(wstat))) {
 			tmp2[fmt_ulong(tmp2, i)] = 0;
 			strerr_warn4("tcpclient: end ", tmp1, " status ", tmp2, 0);
-		}
+		} else
+			strerr_warn3("tcpclient: end ", tmp1, " status 0", 0);
 	}
 }
 
@@ -215,7 +216,7 @@ do_select(char **argv, SSL *ssl, int flag_tcpclient, int flagssl, int s)
 do_select(char **argv, int flag_tcpclient, int s)
 #endif
 {
-	int             wstat, r, pi1[2], pi2[2], fdin, fdout;
+	int             r, pi1[2], pi2[2], fdin, fdout;
 	pid_t           pid;
 
 	if (flag_tcpclient) {
@@ -269,13 +270,6 @@ do_select(char **argv, int flag_tcpclient, int s)
 	}
 	if ((r = translate(s, s, fdout, fdin, dtimeout)))
 		strerr_warn1("tcpclient: translate returned non-zero: ", &strerr_sys);
-	if (flag_tcpclient) {
-		if (wait_pid(&wstat, pid) == -1)
-			strerr_die2sys(111, FATAL, "unable to get child status: ");
-		if (wait_crashed(wstat))
-			strerr_die2x(111, FATAL, "child crashed");
-		_exit(wait_exitcode(wstat));
-	}
 #ifdef TLS
 	ssl_free();
 #endif
@@ -815,6 +809,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.30  2023-03-08 00:01:41+05:30  Cprogrammer
+ * refactored wait handling
+ *
  * Revision 1.29  2023-02-13 20:19:20+05:30  Cprogrammer
  * added error message for tls_init, tls_session failures
  *
