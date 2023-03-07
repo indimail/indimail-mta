@@ -588,6 +588,7 @@ Known values for OPTION are:
 --imap=Port --servicedir=service_path
   --localip=a --maxdaemons=m --maxperip=i
   --default-domain=domain
+  --certdir=certdir
   [--domainlimits --nolastauth]
   [--proxy=destport]
   [--infifo=fifo_path]
@@ -599,6 +600,7 @@ Known values for OPTION are:
   Installs a new IMAP4 Listner
   Port           - Bind on this port for IMAP
   service_path   - Path where supervise service will be installed
+  certdir        - Path for openssl server certificates
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy and connect to actual imap on destport
@@ -615,11 +617,12 @@ Known values for OPTION are:
   i              - Concurrency of connections to be allowed from a
                    single ip address
   a              - IP Address to listen
-  default-domain - default domain name for which this host will handle mails
+  domain         - default domain name for which this host will handle mails
 
 --pop3=Port --servicedir=service_path
   --localip=a --maxdaemons=m --maxperip=i
   --default-domain=domain
+  --certdir=certdir
   [--domainlimits --nolastauth]
   [--proxy=destport]
   [--legacyserver]
@@ -631,6 +634,7 @@ Known values for OPTION are:
   Installs a new POP3 Listner
   Port           - Bind on this port for POP3
   service_path   - Path where supervise service will be installed
+  certdir        - Path for openssl server certificates
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy
@@ -1000,8 +1004,9 @@ Known values for OPTION are:
   [--common_name=CN]
   [--common_name=CN]
   [--validity_days=days]
-  [--capath=ca_path_dir]
   [--certdir=certdir]
+  [--updatecerts]
+  [--capath=ca_path_dir]
   [--servicedir=service_path]
   [--default-domain=domain]
   [--mysqlPrefix=mysqlPrefix]
@@ -1034,8 +1039,9 @@ Known values for OPTION are:
                    This can also be a remote user i.e. &postmaster@indimail.org
   common_name    - Common Name (CN) for server
   days           - Number of days for which the Certificate should be valid
-  ca_path_dir    - Directory having CA certificate
   certdir        - Directory in which new certificates will be placed
+  updatecerts    - Update CERTDIR, CERTFILE and TLSCACHE for services using them
+  ca_path_dir    - Directory having CA certificate
   service_path   - Path where supervise service have been installed
   default-domain - default domain name for which this host will handle mails
   mysqlPrefix    - Installation Prefix for mysql

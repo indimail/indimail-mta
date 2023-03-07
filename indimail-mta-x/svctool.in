@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.659 2023-03-03 19:14:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.660 2023-03-07 19:15:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.659 2023-03-03 19:14:09+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.660 2023-03-07 19:15:20+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -513,6 +513,7 @@ Known values for OPTION are:
 --imap=Port --servicedir=service_path
   --localip=a --maxdaemons=m --maxperip=i
   --default-domain=domain
+  --certdir=certdir
   [--domainlimits --nolastauth]
   [--proxy=destport]
   [--infifo=fifo_path]
@@ -524,6 +525,7 @@ Known values for OPTION are:
   Installs a new IMAP4 Listner
   Port           - Bind on this port for IMAP
   service_path   - Path where supervise service will be installed
+  certdir        - Path for openssl server certificates
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy and connect to actual imap on destport
@@ -540,11 +542,12 @@ Known values for OPTION are:
   i              - Concurrency of connections to be allowed from a
                    single ip address
   a              - IP Address to listen
-  default-domain - default domain name for which this host will handle mails
+  domain         - default domain name for which this host will handle mails
 
 --pop3=Port --servicedir=service_path
   --localip=a --maxdaemons=m --maxperip=i
   --default-domain=domain
+  --certdir=certdir
   [--domainlimits --nolastauth]
   [--proxy=destport]
   [--legacyserver]
@@ -556,6 +559,7 @@ Known values for OPTION are:
   Installs a new POP3 Listner
   Port           - Bind on this port for POP3
   service_path   - Path where supervise service will be installed
+  certdir        - Path for openssl server certificates
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   nolastauth     - Do not update lastauth
   proxy          - Install as a proxy
@@ -570,7 +574,7 @@ Known values for OPTION are:
   i              - Concurrency of connections to be allowed from a
                    single ip address
   a              - IP Address to listen
-  default-domain - default domain name for which this host will handle mails
+  domain         - default domain name for which this host will handle mails
 
 --inlookup=fifo_path --threads=N
   --servicedir=service_path
@@ -927,8 +931,9 @@ Known values for OPTION are:
   [--common_name=CN]
   [--common_name=CN]
   [--validity_days=days]
-  [--capath=ca_path_dir]
   [--certdir=certdir]
+  [--update-certs]
+  [--capath=ca_path_dir]
   [--servicedir=service_path]
   [--default-domain=domain]
   [--mysqlPrefix=mysqlPrefix]
@@ -961,8 +966,9 @@ Known values for OPTION are:
                    This can also be a remote user i.e. &postmaster@indimail.org
   common_name    - Common Name (CN) for server
   days           - Number of days for which the Certificate should be valid
-  ca_path_dir    - Directory having CA certificate
   certdir        - Directory in which new certificates will be placed
+  update-certs   - Update CERTDIR, CERTFILE and TLSCACHE for services using them
+  ca_path_dir    - Directory having CA certificate
   service_path   - Path where supervise service have been installed
   default-domain - default domain name for which this host will handle mails
   mysqlPrefix    - Installation Prefix for mysql
@@ -9167,6 +9173,11 @@ create_cert()
 	postmaster=$1
 	common_name=$2
 	no_of_days=$3
+	if [ -n "$certdir" ] ; then
+		CERTDIR=$certdir
+	else
+		CERTDIR=$sysconfdir/certs
+	fi
 	if [ -z "$postmaster" ] ; then
 		echo "postmaster not specified" 1>&2
 		exit 1
@@ -9179,97 +9190,88 @@ create_cert()
 		echo "/usr/bin/openssl: No such file or directory" 1>&2
 		exit 1
 	fi
-	rand_file=$DESTDIR"$sysconfdir/certs/servercert.rand"
+	rand_file=$DESTDIR"$CERTDIR/servercert.rand"
 	if [ ! -f $rand_file -o $force -eq 1 ] ; then
+		if [ ! -d "$DESTDIR"$CERTDIR ] ; then
+			mkdir -p "$DESTDIR"$CERTDIR
+		fi
 		head -c 512 /dev/urandom > $rand_file
 	fi
-	conf_file=$DESTDIR"$sysconfdir/certs/servercert.cnf"
+	conf_file=$DESTDIR"$CERTDIR/servercert.cnf"
 	if [ ! -f $conf_file -o $force -eq 1 ] ; then
 		echo "Creating SSL Configuration email=$postmaster cn=$common_name"
 		create_ssl_cnf $postmaster $common_name > $TMPDIR/config.cnf.$$
-		/bin/mkdir -p "$DESTDIR"$sysconfdir/certs
+		/bin/mkdir -p "$DESTDIR"$CERTDIR
 		change_config $conf_file $TMPDIR/config.cnf.$$
 		/bin/chmod 640 $conf_file
 		$chown root:qcerts $conf_file
 	fi
-	if [ -f "$DESTDIR"$sysconfdir/certs/servercert.pem -a $force -ne 1 ] ; then
-		echo ""$DESTDIR"$sysconfdir/certs/servercert.pem exists. Remove to create new" 1>&2
+	if [ -f "$DESTDIR"$CERTDIR/servercert.pem -a $force -ne 1 ] ; then
+		echo ""$DESTDIR"$CERTDIR/servercert.pem exists. Remove to create new" 1>&2
 		exit 1
 	fi
-	echo "Creating openssl Certificate for $no_of_days days in $sysconfdir/certs/servercert.pem"
-	/usr/bin/openssl req -new -x509 -nodes -days $no_of_days -out "$DESTDIR"$sysconfdir/certs/servercert.pem \
-		-keyout "$DESTDIR"$sysconfdir/certs/servercert.pem -config $conf_file
+	echo "Creating openssl Certificate for $no_of_days days in $CERTDIR/servercert.pem"
+	/usr/bin/openssl req -new -x509 -nodes -days $no_of_days -out "$DESTDIR"$CERTDIR/servercert.pem \
+		-keyout "$DESTDIR"$CERTDIR/servercert.pem -config $conf_file
 	if [ $? -ne 0 ] ; then
 		echo "Failed to create openssl x509 certificate" 1>&2
 		exit 1
 	fi
-	/bin/chmod 640 "$DESTDIR"$sysconfdir/certs/servercert.pem
-	$chown root:qcerts "$DESTDIR"$sysconfdir/certs/servercert.pem
-	if [ -f "$DESTDIR"$sysconfdir/certs/clientcert.pem ] ; then
-		t=$(readlink "$DESTDIR"$sysconfdir/certs/clientcert.pem)
+	/bin/chmod 640 "$DESTDIR"$CERTDIR/servercert.pem
+	$chown root:qcerts "$DESTDIR"$CERTDIR/servercert.pem
+	if [ -f "$DESTDIR"$CERTDIR/clientcert.pem ] ; then
+		t=$(readlink "$DESTDIR"$CERTDIR/clientcert.pem)
 		t=$(basename $t)
 		if [ ! "$t" = "servercert.pem" ] ; then
-			/bin/rm -f "$DESTDIR"$sysconfdir/certs/clientcert.pem
+			/bin/rm -f "$DESTDIR"$CERTDIR/clientcert.pem
 		fi
 	fi
-	if [ ! -f $sysconfdir/certs/clientcert.pem ] ; then
-		/bin/ln -sr $sysconfdir/certs/servercert.pem \
-			"$DESTDIR"$sysconfdir/certs/clientcert.pem 2>/dev/null
+	if [ ! -f "$DESTDIR"$CERTDIR/clientcert.pem ] ; then
+		cd "$DESTDIR"$CERTDIR
+		/bin/ln -sr servercert.pem \
+			clientcert.pem 2>/dev/null
 		if [ $? -ne 0 ] ; then
-			cd "$DESTDIR"$sysconfdir/certs
-			/bin/ln -s servercert.pem clientcert.pem
+			echo "Failed to link clientcert.pem to servercert.pem" 1>&2
+			exit 1
 		fi
 	fi
 	echo "Updating temporary RSA and DH keys"
-	"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$sysconfdir/certs
+	if [ -x "$DESTDIR"$libexecdir/update_tmprsadh ] ; then
+		"$DESTDIR"$libexecdir/update_tmprsadh --certdir="$DESTDIR"$CERTDIR
+	elif [ -x $libexecdir/update_tmprsadh ] ; then
+		$libexecdir/update_tmprsadh --certdir="$DESTDIR"$CERTDIR
+	else
+		echo "$libexecdir/update_tmprsadh: No such file or directory" 1>&2
+		echo "generate RSA/DH parameters manually" 1>&2
+	fi
 
-	svc_list=""
-	echo "Fixing CERTDIR variable for services"
-	for i in @servicedir@/*/variables/CERTDIR
-	do
-		j=`/bin/cat $i 2>/dev/null`
-		if [ ! " $j" = " $sysconfdir/certs" ] ; then
-			echo "Fixed $i"
-			echo $sysconfdir/certs > $i
-			x=$(echo $i | cut -d'/' -f1,2,3)
-			if [ -z "$svc_list" ] ; then
-				svc_list="$x"
+	updated=0
+	if [ $updatecerts -eq 1 ] ; then
+		svc_list=""
+		echo "Fixing CERTDIR variable for services"
+		for i in @servicedir@/*/variables/CERTDIR
+		do
+			j=`/bin/cat $i 2>/dev/null`
+			if [ ! " $j" = " $CERTDIR" ] ; then
+				updated=1
+				echo "Fixed $i"
+				echo $CERTDIR > $i
+				x=$(echo $i | cut -d'/' -f1,2,3)
+				if [ -z "$svc_list" ] ; then
+					svc_list="$x"
+				else
+					svc_list="$svc_list $x"
+				fi
 			else
-				svc_list="$svc_list $x"
+				echo "$i: OK"
 			fi
-		else
-			echo "$i: OK"
-		fi
-	done
-	echo "Updating CERT as $sysconfdir/certs/servercert.pem"
-	for i in `ls @servicedir@/*/variables/*CERTFILE \
-		@servicedir@/*/variables/CLIENTCERT \
-		@servicedir@/*/variables/SERVERCERT 2>/dev/null`
-	do
-		x=$(echo $i | cut -d'/' -f1,2,3)
-		echo $svc_list | grep $x >/dev/null
-		if [ $? -ne 0 ] ; then
-			if [ -z "$svc_list" ] ; then
-				svc_list="$x"
-			else
-				svc_list="$svc_list $x"
-			fi
-		fi
-		j=`/bin/cat $i`
-		if [ ! " $j" = " $sysconfdir/certs/servercert.pem" ] ; then
-			echo "Fixed $i"
-			echo "$sysconfdir/certs/servercert.pem" > $i
-		else
-			echo "$i: OK"
-		fi
-	done
-	echo "Updating TLS CACHE as $sysconfdir/certs/couriersslcache"
-	for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
-	do
-		j=`/bin/cat $i`
-		if [ ! " $j" = " $sysconfdir/certs/couriersslcache" ] ; then
-			echo "Fixed $i"
-			echo "$sysconfdir/certs/couriersslcache" > $i
+		done
+
+		echo "Updating CERT as $CERTDIR/servercert.pem"
+		for i in `ls @servicedir@/*/variables/*CERTFILE \
+			@servicedir@/*/variables/CLIENTCERT \
+			@servicedir@/*/variables/SERVERCERT 2>/dev/null`
+		do
 			x=$(echo $i | cut -d'/' -f1,2,3)
 			echo $svc_list | grep $x >/dev/null
 			if [ $? -ne 0 ] ; then
@@ -9279,17 +9281,50 @@ create_cert()
 					svc_list="$svc_list $x"
 				fi
 			fi
-		else
-			echo "$i: OK"
-		fi
-	done
-	echo "====== Certificate $sysconfdir/certs/servercert.pem ========="
-	/usr/bin/openssl x509 -in "$DESTDIR"$sysconfdir/certs/servercert.pem -noout -text
+			j=`/bin/cat $i`
+			if [ ! " $j" = " $CERTDIR/servercert.pem" ] ; then
+				echo "Fixed $i"
+				updated=1
+				echo "$CERTDIR/servercert.pem" > $i
+			else
+				echo "$i: OK"
+			fi
+		done
+		echo "Updating TLS CACHE as $CERTDIR/couriersslcache"
+		for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
+		do
+			j=`/bin/cat $i`
+			if [ ! " $j" = " $CERTDIR/couriersslcache" ] ; then
+				echo "Fixed $i"
+				echo "$CERTDIR/couriersslcache" > $i
+				updated=1
+				x=$(echo $i | cut -d'/' -f1,2,3)
+				echo $svc_list | grep $x >/dev/null
+				if [ $? -ne 0 ] ; then
+					if [ -z "$svc_list" ] ; then
+						svc_list="$x"
+					else
+						svc_list="$svc_list $x"
+					fi
+				fi
+			else
+				echo "$i: OK"
+			fi
+		done
+	else
+		echo "--update-certs not given. Skipping updating Services for CERTDIR, CERTFILE and TLS_CACHE" 1>&2
+	fi
+
+	echo "====== Certificate $CERTDIR/servercert.pem ========="
+	/usr/bin/openssl x509 -in "$DESTDIR"$CERTDIR/servercert.pem -noout -text
 	echo "================================================================"
+
 	# restart services
-	echo "Restarting services using $sysconfdir/certs/servercert.pem"
-	for i in $svc_list; do echo "Restarting service $i"; done
-	svc -r $svc_list
+	if [ $updated -eq 1 ] ; then
+		echo "Restarting services using $CERTDIR/servercert.pem"
+		for i in $svc_list; do echo "Restarting service $i"; done
+		svc -r $svc_list
+	fi
 }
 
 print_all_variables()
@@ -9416,6 +9451,7 @@ databytes=$DATABYTES
 qmailqueue="/usr/sbin/qmail-queue"
 qmailsmtpd=$QmailBinPrefix"/sbin/qmail-smtpd"
 envdir_opts="-c"
+updatecerts=0
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
 else
@@ -9796,6 +9832,9 @@ while test $# -gt 0; do
 	;;
 	--certdir=*)
 	certdir=$optarg
+	;;
+	--update-certs)
+	updatecerts=1
 	;;
 	--mysqlPrefix=*)
 	mysqlPrefix=$optarg
@@ -10809,7 +10848,7 @@ case $option in
 			/bin/ln -sr $sysconfdir/freshclam.conf \
 				/etc/freshclam.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
-				cd /etc/
+				cd /etc
 				/bin/ln -s $sysconfdir/freshclam.conf
 			fi
 		fi
