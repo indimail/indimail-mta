@@ -1,6 +1,6 @@
 /*
  * $Log: srsfilter.c,v $
- * Revision 1.5  2023-03-08 12:17:12+05:30  Cprogrammer
+ * Revision 1.5  2023-03-08 20:06:55+05:30  Cprogrammer
  * discard double, triple bounces
  *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
@@ -221,7 +221,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.5 2023-03-08 12:17:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srsfilter.c,v 1.5 2023-03-08 20:06:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
