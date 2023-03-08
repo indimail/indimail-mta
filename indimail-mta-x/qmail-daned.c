@@ -41,7 +41,7 @@
 #include "variables.h"
 
 #define FATAL "qmail-daned: fatal: "
-#define WARN  "qmail-daned: warning: "
+#define WARN  "qmail-daned: warn: "
 
 #define BLOCK_SIZE 32768
 

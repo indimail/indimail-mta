@@ -70,7 +70,7 @@ queue_load(char *argv0, int *qcount, int *qconf, double total_load[2], QDEF **qu
 		close(shm);
 		if (!q[2] || !q[3]) {
 			substdio_puts(subfderr, argv0);
-			substdio_put(subfderr, ": warning: invalid concurrency = 0 ", 35);
+			substdio_put(subfderr, ": warn: invalid concurrency = 0 ", 35);
 			if (!qdef[j].lmax)
 				substdio_put(subfderr, "[local] ", 8);
 			if (!qdef[j].rmax)

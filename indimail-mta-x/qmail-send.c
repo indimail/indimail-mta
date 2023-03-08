@@ -545,7 +545,7 @@ cleanup_do()
 		return;
 	}
 	if (ch != '+')
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
 }
 
 /*- this file is too long ----------------------------------- PRIORITY QUEUES */
@@ -612,7 +612,7 @@ pqadd(unsigned long id, char delayedflag)
 	}
 	return;
 fail:
-	slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+	slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqfail, &pe))
@@ -661,7 +661,7 @@ pqfinish()
 			fnmake_chanaddr(pe.id, c);
 			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
 			if (utimes(fn1.s, ut) == -1)
-				slog(1, "warning: ", argv0, ": ", queuedesc, "unable to utime ",
+				slog(1, "warn: ", argv0, ": ", queuedesc, "unable to utime ",
 						fn1.s, "; message will be retried too soon\n", 0);
 		}
 	}
@@ -749,7 +749,7 @@ job_close(int j)
 	if (jo[j].flaghiteof && !jo[j].numtodo) {
 		fnmake_chanaddr(jo[j].id, jo[j].channel);
 		if (unlink(fn1.s) == -1) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
 			pe.dt = now() + SLEEP_SYSFAIL;
 		} else {
 			int             c;
@@ -759,7 +759,7 @@ job_close(int j)
 					if (stat(fn1.s, &st) == 0)
 						return;	/*- more channels going */
 					if (errno != error_noent) {
-						slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "\n", 0);
+						slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "\n", 0);
 						break;	/*- this is the only reason for HOPEFULLY */
 					}
 				}
@@ -942,7 +942,7 @@ injectbounce(unsigned long id)
 	if (stat(fn2.s, &st) == -1) {
 		if (errno == error_noent)
 			return 1;
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn2.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn2.s, "\n", 0);
 		return 0;
 	}
 	if (str_equal(sender.s, "#@[]"))
@@ -1013,7 +1013,7 @@ injectbounce(unsigned long id)
 			break;
 		}
 		if (qmail_open(&qqt) == -1) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to start qmail-queue, will try later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to start qmail-queue, will try later\n", 0);
 			restore_env();
 			return 0;
 		}
@@ -1208,7 +1208,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			qmail_to(&qqt, bouncerecip);
 			qmail_close(&qqt);
 			if (unlink(fn2.s) == -1) {
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, ". Will try later\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, ". Will try later\n", 0);
 				return 0;
 			}
 			slog(1, "info: ", argv0, ": delete bounce: discarding ", fn2.s, " ", queuedesc, "\n", 0);
@@ -1220,7 +1220,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_from(&qqt, bouncesender);
 		qmail_to(&qqt, bouncerecip);
 		if (*qmail_close(&qqt)) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble injecting bounce message, will try later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble injecting bounce message, will try later\n", 0);
 			return 0;
 		}
 		strnum1[fmt_ulong(strnum1, id)] = 0;
@@ -1229,7 +1229,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		slog(1, " qp ", strnum1, " ", queuedesc, "\n", 0);
 	}
 	if (unlink(fn2.s) == -1) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, "\n", 0);
 		return 0;
 	}
 	return 1;
@@ -1396,7 +1396,7 @@ markdone(int c, unsigned long id, seek_pos pos)
 		close(fd);
 		return;
 	}
-	slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble marking ", fn1.s, "; message will be delivered twice!\n", 0);
+	slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble marking ", fn1.s, "; message will be delivered twice!\n", 0);
 }
 
 /*
@@ -1436,7 +1436,7 @@ del_dochan(int c)
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", 0);
 			else {
 				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
@@ -1663,7 +1663,7 @@ pass_dochan(int c)
 	/*- read local/split/inode or remote/split/inode */
 	if (getln(&pass[c].ss, &line, &match, '\0') == -1) {
 		fnmake_chanaddr(pass[c].id, c);
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, "; will try again later\n", 0);
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -1699,7 +1699,7 @@ pass_dochan(int c)
 			return;
 		} else
 		if (i == -1)
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n", 0);
 		else /*- i == 1 */
 		if (_do_ratelimit)
 			delayed_jobs = delayed_job_count();
@@ -1710,7 +1710,7 @@ pass_dochan(int c)
 		break;
 	default:
 		fnmake_chanaddr(pass[c].id, c);
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "!\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "!\n", 0);
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -1719,7 +1719,7 @@ pass_dochan(int c)
 	pass[c].mpos += line.len;
 	return;
 trouble:
-	slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n", 0);
+	slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n", 0);
 	pe.dt = recent + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqchan[c], &pe))
 		nomem(argv0);
@@ -1738,7 +1738,7 @@ messdone(unsigned long id)
 		if (stat(fn1.s, &st) == 0)
 			return;	/*- false alarm; consequence of HOPEFULLY */
 		if (errno != error_noent) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 			goto fail;
 		}
 	}
@@ -1746,14 +1746,14 @@ messdone(unsigned long id)
 	if (stat(fn1.s, &st) == 0)
 		return;
 	if (errno != error_noent) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 		goto fail;
 	}
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == -1) {
 		if (errno == error_noent)
 			return;
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 		goto fail;
 	}
 
@@ -1766,7 +1766,7 @@ messdone(unsigned long id)
 	/*- -todo +info -local -remote -bounce */
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
 		goto fail;
 	}
 	/*- -todo -info -local -remote -bounce; we can relax */
@@ -1780,7 +1780,7 @@ messdone(unsigned long id)
 		return;
 	}
 	if (ch != '+')
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
 	return;
 fail:
 	pe.id = id;
@@ -1932,12 +1932,12 @@ todo_del(char *s)
 	case 'X':
 		break;
 	default:
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n", 0);
 		return;
 	}
 	len = scan_ulong(s, &id);
 	if (!len || s[len]) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n", 0);
 		return;
 	}
 	pe.id = id;
@@ -2018,7 +2018,7 @@ todo_do(fd_set *rfds)
 					tododied(); /*- sets flagexitsend, flagtodoalive */
 				break;
 			default:
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": todo-proc speaks an obscure dialect\n", 0);
 				break;
 			}
 			todoline.len = 0;
@@ -2600,7 +2600,7 @@ main(int argc, char **argv)
 				if (flagexitsend)
 					break;
 			} else
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
 		} else {
 			time_needed = 0;
 			recent = now();

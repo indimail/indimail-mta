@@ -60,7 +60,7 @@
 #include "auto_uids.h"
 
 #define FATAL "cleanq: fatal: "
-#define WARNING "cleanq: warning: "
+#define WARNING "cleanq: warn: "
 
 static int      flaglog = 0, dir_flag = 0;
 

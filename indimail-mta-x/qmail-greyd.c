@@ -149,7 +149,7 @@
 #include <search.h>
 
 #define FATAL "qmail-greyd: fatal: "
-#define WARN  "qmail-greyd: warning: "
+#define WARN  "qmail-greyd: warn: "
 
 #define RECORD_FREE  -1
 #define RECORD_NEW    0

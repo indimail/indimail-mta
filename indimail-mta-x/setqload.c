@@ -28,7 +28,7 @@
 #include "send_qload.h"
 
 #define FATAL "setqload: fatal: "
-#define WARN  "setqload: warning: "
+#define WARN  "setqload: warn: "
 
 char           *usage1 = "-q queue_number total";
 char           *usage2 = "-q queue_number lcur/lmax rcur/rmax";

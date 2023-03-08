@@ -16,7 +16,7 @@
 #include "tlsacheck.h"
 
 #define FATAL "qdane: fatal: "
-#define WARN  "qdane: warning: "
+#define WARN  "qdane: warn: "
 
 #ifdef LIBC_HAS_IP6
 int             noipv6 = 0;

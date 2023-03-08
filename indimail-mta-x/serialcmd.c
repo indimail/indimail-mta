@@ -31,7 +31,7 @@
 #include "quote.h"
 
 #define FATAL "serialcmd: fatal: "
-#define WARN  "serialcmd: warning: "
+#define WARN  "serialcmd: warn: "
 
 static int      use_pwgr;
 static stralloc line = { 0 };

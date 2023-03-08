@@ -95,7 +95,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			email[fmt_ulong(email, email_count + 1)] = 0;
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
-			slog(1, "warning: ", queuedesc, " ", domain, " msg ", strnum1,
+			slog(1, "warn: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
 					" secs; will try again later\n", 0);
@@ -136,7 +136,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			email[fmt_ulong(email, email_count + 1)] = 0;
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
-			slog(1, "warning: ", queuedesc, " ", domain, " msg ", strnum1,
+			slog(1, "warn: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
 					" secs; will try again later\n", 0);
@@ -174,7 +174,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			email[fmt_ulong(email, email_count + 1)] = 0;
 			strnum1[fmt_ulong(strnum1, id)] = 0;
 			strnum2[fmt_long(strnum2, *time_needed)] = 0;
-			slog(1, "warning: ", queuedesc, " ", domain, " msg ", strnum1,
+			slog(1, "warn: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
 					" secs; will try again later\n", 0);

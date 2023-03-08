@@ -701,7 +701,7 @@ comm_read_todo(fd_set *wfds, fd_set *rfds)
 				sigterm_todo(); /*-set flagexittodo = 1 */
 				break;
 			default:
-				todo_log("warning: ", argv0, ": ", queuedesc,
+				todo_log("warn: ", argv0, ": ", queuedesc,
 					": slowq-send speaks an obscure dialect\n", 0);
 				break;
 			}
@@ -870,7 +870,7 @@ cleanup_do()
 		return;
 	}
 	if (ch != '+')
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
 }
 
 /*- this file is too long ----------------------------------- PRIORITY QUEUES */
@@ -943,7 +943,7 @@ pqadd(unsigned long id, char delayedflag)
 	}
 	return;
 fail:
-	slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+	slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 	pe.id = id;
 	pe.dt = now() + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqfail, &pe))
@@ -1007,7 +1007,7 @@ pqfinish()
 			fnmake_chanaddr(pe.id, c);
 			ut[0].tv_sec = ut[1].tv_sec = pe.dt;
 			if (utimes(fn1.s, ut) == -1)
-				slog(1, "warning: ", argv0, ": ", queuedesc, "unable to utime ", fn1.s, "; message will be retried too soon\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, "unable to utime ", fn1.s, "; message will be retried too soon\n", 0);
 		}
 	}
 }
@@ -1119,7 +1119,7 @@ job_close(int j)
 	if (jo[j].flaghiteof && !jo[j].numtodo) {
 		fnmake_chanaddr(jo[j].id, jo[j].channel);
 		if (unlink(fn1.s) == -1) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
 			pe.dt = now() + SLEEP_SYSFAIL;
 		} else {
 			int             c;
@@ -1129,7 +1129,7 @@ job_close(int j)
 					if (stat(fn1.s, &st) == 0)
 						return;	/*- more channels going */
 					if (errno != error_noent) {
-						slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "\n", 0);
+						slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "\n", 0);
 						break;	/*- this is the only reason for HOPEFULLY */
 					}
 				}
@@ -1314,7 +1314,7 @@ injectbounce(unsigned long id)
 	if (stat(fn2.s, &st) == -1) {
 		if (errno == error_noent)
 			return 1;
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn2.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn2.s, "\n", 0);
 		return 0;
 	}
 	if (str_equal(sender.s, "#@[]"))
@@ -1385,7 +1385,7 @@ injectbounce(unsigned long id)
 			break;
 		}
 		if (qmail_open(&qqt) == -1) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to start qmail-queue, will try later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to start qmail-queue, will try later\n", 0);
 			restore_env();
 			return 0;
 		}
@@ -1580,7 +1580,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			qmail_to(&qqt, bouncerecip);
 			qmail_close(&qqt);
 			if (unlink(fn2.s) == -1) {
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, ". Will try later\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, ". Will try later\n", 0);
 				return 0;
 			}
 			slog(1, "delete bounce: discarding ", fn2.s, " ", queuedesc, "\n", 0);
@@ -1592,7 +1592,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		qmail_from(&qqt, bouncesender);
 		qmail_to(&qqt, bouncerecip);
 		if (*qmail_close(&qqt)) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble injecting bounce message, will try later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble injecting bounce message, will try later\n", 0);
 			return 0;
 		}
 		strnum2[fmt_ulong(strnum2, id)] = 0;
@@ -1601,7 +1601,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		slog(1, " qp ", strnum2, " ", queuedesc, "\n", 0);
 	}
 	if (unlink(fn2.s) == -1) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn2.s, "\n", 0);
 		return 0;
 	}
 	return 1;
@@ -1780,7 +1780,7 @@ markdone(int c, unsigned long id, seek_pos pos)
 		close(fd);
 		return;
 	}
-	slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble marking ", fn1.s, "; message will be delivered twice!\n", 0);
+	slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble marking ", fn1.s, "; message will be delivered twice!\n", 0);
 }
 
 /*
@@ -1821,7 +1821,7 @@ del_dochan(int c)
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", 0);
 			else {
 				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
@@ -2047,7 +2047,7 @@ pass_dochan(int c)
 	/*- read local/split/inode or remote/split/inode */
 	if (getln(&pass[c].ss, &line, &match, '\0') == -1) {
 		fnmake_chanaddr(pass[c].id, c);
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, "; will try again later\n", 0);
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -2083,7 +2083,7 @@ pass_dochan(int c)
 			return;
 		} else
 		if (i == -1)
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": failed to get delivery rate for ", line.s + 1, "; proceeding to deliver\n", 0);
 		else
 		if (_do_ratelimit) /*- for del_status to display delayed jobs */
 			delayed_jobs = delayed_job_count();
@@ -2094,7 +2094,7 @@ pass_dochan(int c)
 		break;
 	default:
 		fnmake_chanaddr(pass[c].id, c);
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "!\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "!\n", 0);
 		close(pass[c].fd);
 		job_close(pass[c].j);
 		pass[c].id = 0;
@@ -2103,7 +2103,7 @@ pass_dochan(int c)
 	pass[c].mpos += line.len;
 	return;
 trouble:
-	slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n", 0);
+	slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble opening ", fn1.s, "; will try again later\n", 0);
 	pe.dt = recent + SLEEP_SYSFAIL;
 	while (!prioq_insert(min, &pqchan[c], &pe))
 		nomem(argv0);
@@ -2122,7 +2122,7 @@ messdone(unsigned long id)
 		if (stat(fn1.s, &st) == 0)
 			return;	/*- false alarm; consequence of HOPEFULLY */
 		if (errno != error_noent) {
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 			goto fail;
 		}
 	}
@@ -2130,14 +2130,14 @@ messdone(unsigned long id)
 	if (stat(fn1.s, &st) == 0)
 		return;
 	if (errno != error_noent) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 		goto fail;
 	}
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == -1) {
 		if (errno == error_noent)
 			return;
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, "; will try again later\n", 0);
 		goto fail;
 	}
 
@@ -2150,7 +2150,7 @@ messdone(unsigned long id)
 	/*- -todo +info -local -remote -bounce */
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, "; will try again later\n", 0);
 		goto fail;
 	}
 	/*- -todo -info -local -remote -bounce; we can relax */
@@ -2164,7 +2164,7 @@ messdone(unsigned long id)
 		return;
 	}
 	if (ch != '+')
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
 	return;
 fail:
 	pe.id = id;
@@ -2395,7 +2395,7 @@ todo_do(fd_set *rfds)
 		scan_int(ptr, &split);
 		fnmake_todo(id);
 		scan_int(fn1.s + 5, &i);
-		slog(1, split != i ? "warning: " : "info: ", argv0, ": ", queuedesc,
+		slog(1, split != i ? "warn: " : "info: ", argv0, ": ", queuedesc,
 				": subdir=todo/", ptr, " fn=", fn1.s,
 				split != i ? " incorrect split\n" : "\n", 0);
 		if (split != i)
@@ -2403,20 +2403,20 @@ todo_do(fd_set *rfds)
 	} else
 		fnmake_todo(id);
 	if ((fdtodo = open_read(fn1.s)) == -1) {
-		slog(1, "warning: ", argv0, ": unable to open ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": unable to open ", fn1.s, "\n", 0);
 		return;
 	}
 	fnmake_mess(id);
 	/*- just for the statistics */
 	if (stat(fn1.s, &st) == -1) {
-		slog(1, "warning: ", argv0, ": unable to stat ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": unable to stat ", fn1.s, "\n", 0);
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn1.s) == -1) {
 			if (errno != error_noent) {
-				slog(1, "warning: ", argv0, ": unable to unlink: ", fn1.s, ": ", error_str(errno), "\n", 0);
+				slog(1, "warn: ", argv0, ": unable to unlink: ", fn1.s, ": ", error_str(errno), "\n", 0);
 				goto fail;
 			}
 		}
@@ -2424,12 +2424,12 @@ todo_do(fd_set *rfds)
 	fnmake_info(id);
 	if (unlink(fn1.s) == -1) {
 		if (errno != error_noent) {
-			slog(1, "warning: ", argv0, ": unable to unlink ", fn1.s, "\n", 0);
+			slog(1, "warn: ", argv0, ": unable to unlink ", fn1.s, "\n", 0);
 			goto fail;
 		}
 	}
 	if ((fdinfo = open_excl(fn1.s)) == -1) {
-		slog(1, "warning: ", argv0, ": unable to create ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": unable to create ", fn1.s, "\n", 0);
 		goto fail;
 	}
 	strnum1[fmt_ulong(strnum1, id)] = 0;
@@ -2444,7 +2444,7 @@ todo_do(fd_set *rfds)
 		if (getln(&sstodo, &todoline, &match, '\0') == -1) {
 			/*- perhaps we're out of memory, perhaps an I/O error */
 			fnmake_todo(id);
-			slog(1, "warning: ", argv0, ": trouble reading ", fn1.s, "\n", 0);
+			slog(1, "warn: ", argv0, ": trouble reading ", fn1.s, "\n", 0);
 			goto fail;
 		}
 		if (!match)
@@ -2461,14 +2461,14 @@ todo_do(fd_set *rfds)
 		case 'e':
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
 				fnmake_info(id);
-				slog(1, "warning: ", argv0, ": trouble writing to ", fn1.s, "\n", 0);
+				slog(1, "warn: ", argv0, ": trouble writing to ", fn1.s, "\n", 0);
 				goto fail;
 			}
 			break;
 		case 'F':
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
 				fnmake_info(id);
-				slog(1, "warning: ", argv0, ": trouble writing to ", fn1.s, "\n", 0);
+				slog(1, "warn: ", argv0, ": trouble writing to ", fn1.s, "\n", 0);
 				goto fail;
 			}
 			slog(0, "info msg ", strnum1, 0);
@@ -2512,7 +2512,7 @@ todo_do(fd_set *rfds)
 				fnmake_chanaddr(id, c);
 				fdchan[c] = open_excl(fn1.s);
 				if (fdchan[c] == -1) {
-					slog(1, "warning: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, "\n", 0);
+					slog(1, "warn: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, "\n", 0);
 					goto fail;
 				}
 				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
@@ -2520,13 +2520,13 @@ todo_do(fd_set *rfds)
 			}
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
 				fnmake_chanaddr(id, c);
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n", 0);
 				goto fail;
 			}
 			break;
 		default:
 			fnmake_todo(id);
-			slog(1, "warning: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "\n", 0);
+			slog(1, "warn: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, "\n", 0);
 			goto fail;
 		}
 	} /*- for (;;) */
@@ -2534,26 +2534,26 @@ todo_do(fd_set *rfds)
 	fdtodo = -1;
 	fnmake_info(id);
 	if (substdio_flush(&ssinfo) == -1) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n", 0);
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		if (fdchan[c] != -1) {
 			if (substdio_flush(&sschan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, "\n", 0);
 				goto fail;
 			}
 		}
 	}
 #ifdef USE_FSYNC
 	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdinfo) : fsync(fdinfo)) == -1) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
 		goto fail;
 	}
 #else
 	if (fsync(fdinfo) == -1) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
 		goto fail;
 	}
 #endif
@@ -2564,13 +2564,13 @@ todo_do(fd_set *rfds)
 #ifdef USE_FSYNC
 			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdchan[c]) : fsync(fdchan[c])) == -1) {
 				fnmake_chanaddr(id, c);
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
 				goto fail;
 			}
 #else
 			if (fsync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, "\n", 0);
 				goto fail;
 			}
 #endif
@@ -2588,7 +2588,7 @@ todo_do(fd_set *rfds)
 		return;
 	}
 	if (ch != '+') {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, "\n", 0);
 		return;
 	}
 	pe.id = id;
@@ -2960,7 +2960,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 		scan_int(ptr, &split); /*- actual split value from filename */
 		fnmake_todo(id); /*- set fn as todo/split/id */
 		scan_int(fn1.s + 5, &i); /*- split as per calculation by fnmake using auto_split */
-		todo_log(split != i ? "warning: " : "info: ", argv0, ": ", queuedesc,
+		todo_log(split != i ? "warn: " : "info: ", argv0, ": ", queuedesc,
 			": subdir=todo/", ptr, " fn=", fn1.s,
 			split != i ? " incorrect split\n" : "\n", 0);
 		if (split != i) /*- split doesn't match with split calculation in fnmake_todo() */
@@ -2968,33 +2968,33 @@ todo_do_todo(int *nfds, fd_set *rfds)
 	} else
 		fnmake_todo(id); /*- set fn as todo/id */
 	if ((fd = open_read(fn1.s)) == -1) { /*- envelope in todo/split/id */
-		todo_log("warning: ", argv0, ": ", queuedesc, ": open ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": open ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		return -1;
 	}
 	fnmake_mess(id); /*- change fn to mess/split/id */
 	/*- just for the statistics, stat on mess/split file */
 	if (stat(fn1.s, &st) == -1) {
-		todo_log("warning: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn1.s) == -1 && errno != error_noent) {
-			todo_log("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, ": ",
+			todo_log("warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, ": ",
 				error_str(errno), "\n", 0);
 			goto fail;
 		}
 	}
 	fnmake_info(id); /*- now fn is info/split/id */
 	if (unlink(fn1.s) == -1 && errno != error_noent) { /*- delete any existing info/split/id */
-		todo_log("warning: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		goto fail;
 	}
 	if ((fdinfo = open_excl(fn1.s)) == -1) { /*- create info/split/id */
-		todo_log("warning: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		goto fail;
 	}
@@ -3010,7 +3010,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 		if (getln(&ss, &todoline, &match, '\0') == -1) {
 			/*- perhaps we're out of memory, perhaps an I/O error */
 			fnmake_todo(id); /* todo/split/id */
-			todo_log("warning: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, ": ",
+			todo_log("warn: ", argv0, ": ", queuedesc, ": trouble reading ", fn1.s, ": ",
 				error_str(errno), "\n", 0);
 			goto fail;
 		}
@@ -3027,14 +3027,14 @@ todo_do_todo(int *nfds, fd_set *rfds)
 		case 'h': /*- envheader */
 		case 'e': /*- qqeh */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				todo_log("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
 					error_str(errno), "\n", 0);
 				goto fail;
 			}
 			break;
 		case 'F': /*- from */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
-				todo_log("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
 					error_str(errno), "\n", 0);
 				goto fail;
 			}
@@ -3074,7 +3074,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 				/*- create local/split/id or remote/split/id */
 				fnmake_chanaddr(id, c);
 				if ((fdchan[c] = open_excl(fn1.s)) == -1) {
-					todo_log("warning: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, ": ",
+					todo_log("warn: ", argv0, ": ", queuedesc, ": unable to create ", fn1.s, ": ",
 						error_str(errno), "\n", 0);
 					goto fail;
 				}
@@ -3083,14 +3083,14 @@ todo_do_todo(int *nfds, fd_set *rfds)
 			}
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
 				fnmake_chanaddr(id, c);
-				todo_log("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
 					error_str(errno), "\n", 0);
 				goto fail;
 			}
 			break;
 		default:
 			fnmake_todo(id); /* todo/split/id */
-			todo_log("warning: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, ": ",
+			todo_log("warn: ", argv0, ": ", queuedesc, ": unknown record type in ", fn1.s, ": ",
 				error_str(errno), "\n", 0);
 			goto fail;
 		}
@@ -3099,7 +3099,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 	fd = -1;
 	fnmake_info(id); /* info/split/id */
 	if (substdio_flush(&ssinfo) == -1) {
-		todo_log("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		goto fail;
 	}
@@ -3107,7 +3107,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 		if (fdchan[c] != -1) {
 			if (substdio_flush(&sschan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				todo_log("warning: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
+				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn1.s, ": ",
 					error_str(errno), "\n", 0);
 				goto fail;
 			}
@@ -3115,13 +3115,13 @@ todo_do_todo(int *nfds, fd_set *rfds)
 	}
 #ifdef USE_FSYNC
 	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdinfo) : fsync(fdinfo)) == -1) {
-		todo_log("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		goto fail;
 	}
 #else
 	if (fsync(fdinfo) == -1) {
-		todo_log("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		goto fail;
 	}
@@ -3133,14 +3133,14 @@ todo_do_todo(int *nfds, fd_set *rfds)
 #ifdef USE_FSYNC
 			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdchan[c]) : fsync(fdchan[c])) == -1) {
 				fnmake_chanaddr(id, c);
-				todo_log("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
 					error_str(errno), "\n", 0);
 				goto fail;
 			}
 #else
 			if (fdatasync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
-				todo_log("warning: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
+				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn1.s, ": ",
 					error_str(errno), "\n", 0);
 				goto fail;
 			}
@@ -3159,7 +3159,7 @@ todo_do_todo(int *nfds, fd_set *rfds)
 		return -1;
 	}
 	if (ch != '+') {
-		todo_log("warning: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, ": ",
+		todo_log("warn: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn1.s, ": ",
 			error_str(errno), "\n", 0);
 		return -1;
 	}
@@ -3228,7 +3228,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 			break;
 		}
 		if (c != 'C') {
-			todo_log("warning: ", argv0, ": ", queuedesc, ": slowq-send speaks an obscure dialect\n", 0);
+			todo_log("warn: ", argv0, ": ", queuedesc, ": slowq-send speaks an obscure dialect\n", 0);
 			comm_die_send(100);
 		}
 		while (!flagexitsend) {
@@ -3263,7 +3263,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 					if (flagexitsend)
 						break;
 				} else
-					todo_log("warning: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
+					todo_log("warn: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
 			} else {
 				recent = now();
 				while (todo_do_todo(&nfds, &rfds) == 2);
@@ -3381,12 +3381,12 @@ todo_del(char *s)
 	case 'X':
 		break;
 	default:
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n", 0);
 		return;
 	}
 	len = scan_ulong(s, &id);
 	if (!len || s[len]) {
-		slog(1, "warning: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n", 0);
+		slog(1, "warn: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n", 0);
 		return;
 	}
 	pe.id = id;
@@ -3467,7 +3467,7 @@ todo_do_send(fd_set *rfds)
 					tododied(); /*- sets flagexitsend, flagtodoalive */
 				break;
 			default:
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": todo-processor speaks an obscure dialect\n", 0);
 				break;
 			}
 			todoline.len = 0;
@@ -3700,7 +3700,7 @@ main(int argc, char **argv)
 				if (flagexitsend)
 					break;
 			} else
-				slog(1, "warning: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
+				slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
 		} else {
 			time_needed = 0;
 			recent = now();

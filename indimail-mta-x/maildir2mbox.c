@@ -39,7 +39,7 @@
 #include "gfrom.h"
 
 #define FATAL   "maildir2mbox: fatal: "
-#define WARNING "maildir2mbox: warning: "
+#define WARNING "maildir2mbox: warn: "
 
 int             rename(const char *, const char *);
 

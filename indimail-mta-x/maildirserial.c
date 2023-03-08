@@ -94,7 +94,7 @@
 #include "set_environment.h"
 
 #define FATAL "maildirserial: fatal: "
-#define WARNING "maildirserial: warning: "
+#define WARNING "maildirserial: warn: "
 #define INFO "maildirserial: info: "
 
 static char    *prefix;

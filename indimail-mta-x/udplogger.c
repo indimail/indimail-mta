@@ -51,7 +51,7 @@
 #define LOGTIMEOUT     3
 
 #define FATAL "udplogger: fatal: "
-#define WARN  "udplogger: warning: "
+#define WARN  "udplogger: warn: "
 
 union sockunion
 {
