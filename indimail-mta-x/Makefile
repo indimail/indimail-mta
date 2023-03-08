@@ -1677,9 +1677,9 @@ slowq-send.o: \
 compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-varargs.h conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
+varargs.h conf-mime conf-sync conf-batv conf-loglock conf-bounce conf-srs
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-loglock conf-bounce` slowq-send.c
+	conf-loglock conf-bounce conf-srs` slowq-send.c
 
 slowq-send.8: \
 slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1736,7 +1736,7 @@ variables.h prioq.h qmail.h newfield.h quote.h set_environment.h \
 auto_split.h auto_uids.h auto_prefix.h set_queuedir.h conf-mime \
 conf-sync conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-loglock conf-bounce` qmta-send.c
+	conf-loglock conf-bounce conf-srs` qmta-send.c
 
 qmta-send.8: \
 qmta-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir \

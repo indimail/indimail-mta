@@ -1,5 +1,8 @@
 /*
  * $Log: srsfilter.c,v $
+ * Revision 1.5  2023-03-08 12:17:12+05:30  Cprogrammer
+ * discard double, triple bounces
+ *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -18,19 +21,24 @@
 #include <unistd.h>
 #include <sig.h>
 #include <env.h>
+#include <str.h>
 #include <strerr.h>
 #include <substdio.h>
 #include <fmt.h>
 #include <stralloc.h>
 #include <noreturn.h>
+#include "control.h"
 #include "qmail.h"
 #include "srs.h"
 
 #define FATAL  "srsfilter: fatal: "
+#define WARN   "srsfilter: warn: "
 #define IGNORE "srsfilter: ignore: "
 
 static struct qmail    qqt;
 static stralloc line = { 0 };
+static stralloc doublebounceto = { 0 };
+static stralloc doublebouncehost = { 0 };
 static int      flagbody = 0, flagnewline = 0, flagto = 0, seento = 0;
 
 no_return void
@@ -67,12 +75,10 @@ printheader()
 }
 
 ssize_t
-mywrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+mywrite(int fd, char *buf, int len)
 {
 	int             i;
+
 	if (flagbody) {
 		qmail_put(&qqt, buf, len);
 		return len;
@@ -103,9 +109,8 @@ mywrite(fd, buf, len)
 						continue;
 					}
 					newheader();
-				} else {
+				} else
 					flagto = 0;
-				}
 				printheader();
 				flagnewline = 1;
 			} else {
@@ -117,6 +122,20 @@ mywrite(fd, buf, len)
 		}
 		return len;
 	}
+}
+
+void
+do_control()
+{
+	if (control_init() == -1 ||
+			control_rldef(&doublebouncehost, "doublebouncehost", 1, "doublebouncehost") != 1 ||
+			control_rldef(&doublebounceto, "doublebounceto", 0, "postmaster") != 1)
+		strerr_die2x(111, FATAL, "unable to read controls");
+	if (!stralloc_cats(&doublebounceto, "@") ||
+			!stralloc_cat(&doublebounceto, &doublebouncehost) ||
+			!stralloc_0(&doublebounceto))
+		die_nomem();
+	return;
 }
 
 int
@@ -136,6 +155,7 @@ main(int argc, char **argv)
 		strerr_die2x(100, FATAL, "EXT2 not set");
 	if (!(host = env_get("HOST")))
 		strerr_die2x(100, FATAL, "HOST not set");
+	do_control();
 	switch (srsreverse(ext2))
 	{
 	case -3:
@@ -151,23 +171,30 @@ main(int argc, char **argv)
 		strerr_die2x(100, FATAL, "unable to rewrite envelope");
 		break;
 	}
-	if (qmail_open(&qqt) == -1)
-		strerr_die2x(111, FATAL, "unable to fork");
-	if (substdio_copy(&ssout, &ssin) != 0)
-		strerr_die2x(111, FATAL, "unable to read message");
-	substdio_flush(&ssout);
-	if (!flagbody) {
-		qmail_fail(&qqt);
-		strerr_die2x(100, FATAL, "unable to read message body");
+	if (str_equal(srs_result.s, "#@[]"))
+		strerr_warn2(WARN, "triple bounce: discarding message", 0);
+	else
+	if (!srs_result.len && *doublebounceto.s == '@')
+		strerr_warn2(WARN, "double bounce: discarding message", 0);
+	else {
+		if (qmail_open(&qqt) == -1)
+			strerr_die2x(111, FATAL, "unable to fork");
+		if (substdio_copy(&ssout, &ssin) != 0)
+			strerr_die2x(111, FATAL, "unable to read message");
+		substdio_flush(&ssout);
+		if (!flagbody) {
+			qmail_fail(&qqt);
+			strerr_die2x(100, FATAL, "unable to read message body");
+		}
+		num[fmt_ulong(num, qmail_qp(&qqt))] = 0;
+		/* Always from nullsender */
+		qmail_from(&qqt, "");
+		qmail_to(&qqt, srs_result.s);
+		qqx = qmail_close(&qqt);
+		if (*qqx)
+			strerr_die2x(*qqx == 'D' ? 100 : 111, FATAL, qqx + 1);
+		strerr_die2x(0, "srsfilter: qp ", num);
 	}
-	num[fmt_ulong(num, qmail_qp(&qqt))] = 0;
-	/* Always from nullsender */
-	qmail_from(&qqt, "");
-	qmail_to(&qqt, srs_result.s);
-	qqx = qmail_close(&qqt);
-	if (*qqx)
-		strerr_die2x(*qqx == 'D' ? 100 : 111, FATAL, qqx + 1);
-	strerr_die2x(0, "srsfilter: qp ", num);
 	/*- no return */
 	return (0);
 }
@@ -194,7 +221,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srsfilter.c,v 1.5 2023-03-08 12:17:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

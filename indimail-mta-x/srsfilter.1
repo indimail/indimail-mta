@@ -4,8 +4,7 @@
 srsfilter - in dot-qmail filter messages using SRS
 
 .SH SYNOPSIS
-in
-.BR .qmail-srs-default : |/bin/srsfilter
+in .\fBqmail-srs-default\fR: | /bin/srsfilter
 
 .SH DESCRIPTION
 For each email message it processes, \fBsrsfilter\fR validates the address
@@ -16,8 +15,9 @@ responses. The criteria is simply: any incoming messages with an empty
 envelope sender which go to my main email address must be spam. Real
 bounces will go to an SRS address instead, and will then be forwarded to a
 real address. \fBsrsfilter\fR rewrites To header with the SRS decoded
-address. It only accepts messages from null-sender, Return-Path:<>. It also
-rejects messages without body.
+address. It only accepts messages from null-sender, Return-Path:<>.
+\fBsrsfilter\fR discards double and triple bounces. It also rejects
+messages without body.
 
 .SH "SEE ALSO"
 srs(1), qmail-inject(8), sendmail(1), indimail-srs(5),
