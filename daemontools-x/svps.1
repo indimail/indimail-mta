@@ -7,18 +7,16 @@ svps \- prints the status of all services started by \fBsvscan\fR
 [--\fIall\fR | -a] [--\fImain\fR | -m] [--\fIlogs\fR | -l] [--\fIhup\fR | -h | ] [--no-pager | -n]
 
 .SH DESCRIPTION
-.B svps
-prints one human-readable line for all supervise services started by
-\fIsvscan\fR(8). It prints human readable information for all
-directories where
-.BR supervise (8)
-is successfully running in that directory, and reporting the status
-information maintained by
-.BR supervise (8).
+\fBsvps\fR prints one human-readable line for all supervise services
+started by \fIsvscan\fR(8). It prints human readable information for each
+directory where \fBsupervise\fR(8) is successfully running and reporting
+the status information maintained by \fBsupervise\fR(8).
+
+Typical output of svps on a fully configured IndiMail system will be like
+below. If a service is up, svps displays the PID of the service. If the
+service is down, the PID of the \fBsupervise\fR(8) process is displayed.
 
 .EX
-Typical output of svps on a fully configured IndiMail system will be like below
-
 ------------ svscan ---------------
 /usr/sbin/svscan /service          up         3 secs  pid   74847
 
@@ -84,8 +82,8 @@ Typical output of svps on a fully configured IndiMail system will be like below
 /service/udplogger.3000/log        up         3 secs  pid   74993
 .EE
 
-Status can be down, wait or up. When service is in wait status, svps will display
-the number of seconds supervise will wait before starting it up
+Status can be down, wait or up. When service is in wait status, svps will
+display the number of seconds supervise will wait before starting it up.
 The process id can be of the service (pid) or the supervise process (spid)
 
 .SH OPTIONS
