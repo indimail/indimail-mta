@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.29 2023-01-15 23:26:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.30 2023-03-08 20:04:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1431,8 +1431,7 @@ injectbounce(unsigned long id)
 			}
 			bouncesender = "";
 			bouncerecip = sender.s;
-		} else
-		if (*sender.s) {
+		} else {
 			bouncesender = "#@[]";
 			bouncerecip = doublebounceto.s;
 		}
@@ -3763,7 +3762,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.29 2023-01-15 23:26:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.30 2023-03-08 20:04:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3773,6 +3772,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.30  2023-03-08 20:04:03+05:30  Cprogrammer
+ * fixed but with handling SRS address
+ *
  * Revision 1.29  2023-01-15 23:26:06+05:30  Cprogrammer
  * use slog() function with varargs to log error messages
  * use todo_log() function with varargs to communicate with todo process

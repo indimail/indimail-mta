@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.22  2023-03-08 20:03:42+05:30  Cprogrammer
+ * fixed but with handling SRS address
+ *
  * Revision 1.21  2023-01-15 12:36:52+05:30  Cprogrammer
  * use slog() function with varargs to log error messages
  *
@@ -1765,8 +1768,7 @@ injectbounce(unsigned long id)
 			}
 			bouncesender = "";
 			bouncerecip = sender.s;
-		} else
-		if (*sender.s) {
+		} else {
 			bouncesender = "#@[]";
 			bouncerecip = doublebounceto.s;
 		}
@@ -2816,7 +2818,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.21 2023-01-15 12:36:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.22 2023-03-08 20:03:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

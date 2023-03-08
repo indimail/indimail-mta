@@ -98,6 +98,7 @@ multi-signature generation
 - 08/03/2023
 55. srsfilter.c: discard double, triple bounces
 56. qmta-send, slowq-send: Fixed makefile to enable SRS
+57. qmta-send.c, slowq-send.c: fixed but with handling SRS address
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
