@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.660 2023-03-07 19:15:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.661 2023-03-09 22:44:51+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.660 2023-03-07 19:15:20+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.661 2023-03-09 22:44:51+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7871,7 +7871,9 @@ default_alias_config()
 create_qmail_config()
 {
 	default_qmail_control
-	default_alias_config
+	if [ -n "$postmaster" ] ; then
+		default_alias_config
+	fi
 }
 
 create_startup()
@@ -10680,10 +10682,6 @@ case $option in
 		;;
 
 		qmail)
-		if [ " $postmaster" = " " ] ; then
-			echo "postmaster not specified" 1>&2
-			exit 1
-		fi
 		create_qmail_config # calls default_qmail_control
 		;;
 
