@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.290 2023-02-20 20:26:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.291 2023-03-09 23:31:08+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.290 $";
+static char    *revision = "$Revision: 1.291 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3237,7 +3237,6 @@ check_batv_sig()
 		return BATV_BADFORMAT;
 	if ((unsigned) (daynumber - signday) > batvkeystale)
 		return BATV_STALE; /*- stale bounce */
-	addr.len--;
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	if (!(md = EVP_MD_fetch(NULL, "md5", NULL)))
 		die_custom("qmail-smtpd: batv: unable to fetch digest implementation for MD5");
@@ -3245,7 +3244,7 @@ check_batv_sig()
 		die_nomem();
 	if (!EVP_DigestInit_ex(mdctx, md, NULL) ||
 			!EVP_DigestUpdate(mdctx, kdate, 4) ||/*- date */
-			!EVP_DigestUpdate(mdctx, addr.s + slpos + 1, addr.len - slpos - 1) ||
+			!EVP_DigestUpdate(mdctx, addr.s + slpos + 1, addr.len - slpos - 2) || /*- addr.len - slpos -2 because addr.len includes null character */
 			!EVP_DigestUpdate(mdctx, batvkey.s, batvkey.len) ||
 			!EVP_DigestFinal_ex(mdctx, md5digest, &md_len))
 		die_custom("qmail-smtpd: batv: unable to hash md5 message digest");
@@ -3253,7 +3252,7 @@ check_batv_sig()
 #else
 	MD5_Init(&md5);
 	MD5_Update(&md5, kdate, 4);
-	MD5_Update(&md5, addr.s + slpos + 1, addr.len - slpos - 1);
+	MD5_Update(&md5, addr.s + slpos + 1, addr.len - slpos - 2);
 	MD5_Update(&md5, batvkey.s, batvkey.len);
 	MD5_Final(md5digest, &md5);
 #endif
@@ -3287,6 +3286,7 @@ check_batv_sig()
 	}
 	/*- peel off the signature */
 	addr.len -= slpos;
+	addr.len--;
 	byte_copy(addr.s, addr.len, addr.s + slpos + 1);
 	return BATV_OK;
 }
@@ -6997,6 +6997,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.291  2023-03-09 23:31:08+05:30  Cprogrammer
+ * fixed error "Non-existing DNS_MX: MAIL" for invalid batv signatures
+ *
  * Revision 1.290  2023-02-20 20:26:08+05:30  Cprogrammer
  * use plaintxtread for ssl connection to avoid abnormal exit during smtp auth
  *
@@ -7321,7 +7324,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.290 2023-02-20 20:26:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.291 2023-03-09 23:31:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
