@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.661 2023-03-09 22:44:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.662 2023-03-10 22:04:33+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.661 2023-03-09 22:44:51+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.662 2023-03-10 22:04:33+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3640,7 +3640,7 @@ echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/bin/tcpserver -v -c variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 echo "-x $sysconfdir/tcp/tcp.$cdb_f.cdb -X \\"
 if [ " $imap_ssl" = " 1" ] ; then
-	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$MYUID -g \$MYGID \\\$SSLADDRESS \\\$SSLPORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$MYUID -g \$MYGID,qcerts \\\$SSLADDRESS \\\$SSLPORT \\"
 	echo "\$prefix/bin/couriertls -server -tcpd \\"
 else
 	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\"
@@ -6257,7 +6257,11 @@ if [ -f /bin/false ] ; then
 else
 	false="/usr/bin/false"
 fi
+if [ " $poppass_ssl" = " 1" ] ; then
+echo "-u \$MYUID -g \$MYGID,qcerts \\\$LOCALIP \\\$PORT \\"
+else
 echo "-u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\"
+fi
 echo "$QmailBinPrefix/sbin/qmail-poppass \$HOSTNAME $QmailBinPrefix/sbin/vchkpass $false\""
 ) > $TMPDIR/poppass-run.$$
 /bin/mv $TMPDIR/poppass-run.$$ "$DESTDIR"$SERVICEDIR/qmail-poppass.$tag/run
@@ -9198,6 +9202,8 @@ create_cert()
 			mkdir -p "$DESTDIR"$CERTDIR
 		fi
 		head -c 512 /dev/urandom > $rand_file
+		chown indimail:qcerts $rand_file
+		chmod 644 $rand_file
 	fi
 	conf_file=$DESTDIR"$CERTDIR/servercert.cnf"
 	if [ ! -f $conf_file -o $force -eq 1 ] ; then
