@@ -90,7 +90,7 @@ variable SMPTS is set or an artificial SMTP route has a \fIport\fR value of
 and exit if the TLS session cannot be initiated.
 
 \fBqmail-remote\fR can use authenticated SMTP for remote deliveries if
-username and secret is provided in the \fiSYSCONF/control/remote_auth.cdb\fR
+username and secret is provided in the \fISYSCONF/control/remote_auth.cdb\fR
 or \fISYSCONF/control/smtproutes\fR control file. This is described in
 detail in the section \fBCONTROL FILES\fR. \fBqmail-remote\fR uses libgsasl
 to use GNU Simple Authentication and Security Layer detailed here
@@ -224,8 +224,9 @@ Z
 Connected to
 .I host
 but authentication was rejected (AUTH LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1,
-CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-RIPEMD, DIGEST-MD5,
-SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS)
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD,
+DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS,
+SCRAM-SHA-256-PLUS)
 
 .TP 5
 Z
@@ -551,7 +552,7 @@ When sender address matches joe.shmoe@indimail.org, the username, password
 for authenticated SMTP will be set as testuser@example.com, supersecret.
 When mail is sent to \fIgmail.com\fR, the username, password will be set as
 some_user@gmail.com with password gmail_app_password. Also the environment
-variable AUTH_SMTP will be to "LOGIN" since gmail supports AUTH=LOGIN
+variable AUTH_SMTP will be set to "LOGIN" since gmail supports AUTH=LOGIN
 authenticated SMTP. The cdb file remote_auth.cdb allows you to store
 username and passwords more securely compared to storing them in
 \fIsmtproutes\fR control file. You can set read access for remote_auth.cdb
@@ -603,16 +604,22 @@ the address \fBbill\fR is handled by the first line.
 You can create \fISYSCONF/control/remote_auth.cdb\fR from
 \fISYSCONF/control/remote_auth\fR using the program \fBcdb-database\fR(8).
 
-AUTH_SMTP can have the values SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA256,
-SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS, DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA1,
-CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-MD5, LOGIN or
-PLAIN to use the desired authentication method.
+\fBAUTH_SMTP\fR can have the values SCRAM-SHA-256-PLUS, SCRAM-SHA-256,
+SCRAM-SHA-1-PLUS, SCRAM-SHA-1, DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA512,
+CRAM-SHA384, CRAM-SHA256, CRAM-SHA224, CRAM-SHA1, CRAM-MD5, LOGIN or PLAIN
+to use the desired authentication method. AUTH_SMTP can also be an empty
+string to let qmail-remote choose an authentication method in the order
+listed above. If no method from the above list is found supported by the
+remote server, qmail-remote will continue without using authentication.
+Remember that authenticated smtp gets disabled if username and password
+have not been configured in \fBsmtproutes\fR control file or the
+\fBSMTPROUTE\fR / \fBX-SMTPROUTES\fR environment variable.
 
 When using SCRAM authentication, the secret can be a clear text password or
 a salted password. The salted password should be a hex-encoded string (40
 characters for SCRAM-SHA-1 and 64 characters for SCRAM-SHA-256) with the
 user’s PBKDF2-prepared password. The salted password value can be derived
-by using the --mkpasswd parameter for the gsasl(1) utility.  indimail has
+by using the --mkpasswd parameter for the gsasl(1) utility. indimail has
 vpasswd(1) / vmoduser(1), which use gsasl_scram_secrets_from_password(3)
 API to set passwords for AUTH PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1,
 CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD,

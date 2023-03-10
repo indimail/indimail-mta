@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.164 2023-01-15 12:32:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.165 2023-03-10 13:12:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -1597,7 +1597,7 @@ auth_digest_md5(int use_size)
 			substdio_flush(&smtpto) == -1)
 		temp_write();
 	if ((code = smtpcode()) != 235)
-		decode_smtpauth_err(code, "auth", "digest-md5");
+		decode_smtpauth_err(code, "AUTH ", "DIGEST-MD5");
 	mailfrom_xtext(use_size);
 }
 
@@ -1721,7 +1721,7 @@ auth_cram(int type, int use_size)
 		temp_write();
 	substdio_flush(&smtpto);
 	if ((code = smtpcode()) != 235)
-		decode_smtpauth_err(code, "auth", get_authmethod(type));
+		decode_smtpauth_err(code, "AUTH ", get_authmethod(type));
 	mailfrom_xtext(use_size);
 }
 
@@ -1748,7 +1748,7 @@ auth_plain(int use_size)
 			substdio_flush(&smtpto) == -1)
 		temp_nomem();
 	if ((code = smtpcode()) != 235)
-		decode_smtpauth_err(code, "auth", "plain");
+		decode_smtpauth_err(code, "AUTH ", "PLAIN");
 	mailfrom_xtext(use_size);
 }
 
@@ -1783,7 +1783,7 @@ auth_login(int use_size)
 			substdio_flush(&smtpto) == -1)
 		temp_nomem();
 	if ((code = smtpcode()) != 235)
-		decode_smtpauth_err(code, "auth", "login");
+		decode_smtpauth_err(code, "AUTH ", "LOGIN");
 	mailfrom_xtext(use_size);
 }
 
@@ -2075,10 +2075,6 @@ smtp_auth(char *type, int use_size)
 	char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha1_plus, *no_scram_sha256_plus;
 #endif
 
-	if (!type) {
-		mailfrom(use_size);
-		return;
-	}
 	/*-
 	 * cycle through all lines got as response to EHLO
 	 * break when you find 2XX-AUTH or 2XX AUTH
@@ -2113,17 +2109,17 @@ smtp_auth(char *type, int use_size)
 				cram_md5_supp = 1;
 #if defined(HASLIBGSASL) && defined(TLS)
 			else
-			if (ssl && case_starts(ptr - 5, "SCRAM-SHA-1-PLUS"))
-				scram_sha1_plus_supp = 1;
-			else
-			if (case_starts(ptr - 5, "SCRAM-SHA-1"))
-				scram_sha1_supp = 1;
-			else
 			if (ssl && case_starts(ptr - 5, "SCRAM-SHA-256-PLUS"))
 				scram_sha256_plus_supp = 1;
 			else
 			if (case_starts(ptr - 5, "SCRAM-SHA-256"))
 				scram_sha256_supp = 1;
+			else
+			if (ssl && case_starts(ptr - 5, "SCRAM-SHA-1-PLUS"))
+				scram_sha1_plus_supp = 1;
+			else
+			if (case_starts(ptr - 5, "SCRAM-SHA-1"))
+				scram_sha1_supp = 1;
 #endif
 		} else
 		if (*ptr == 'L') {
@@ -2163,12 +2159,12 @@ smtp_auth(char *type, int use_size)
 			auth_scram(AUTH_SCRAM_SHA256_PLUS, use_size);
 			return;
 		} else
-		if (!no_scram_sha1_plus && scram_sha1_plus_supp) {
-			auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
-			return;
-		} else
 		if (!no_scram_sha256 && scram_sha256_supp) {
 			auth_scram(AUTH_SCRAM_SHA256, use_size);
+			return;
+		} else
+		if (!no_scram_sha1_plus && scram_sha1_plus_supp) {
+			auth_scram(AUTH_SCRAM_SHA1_PLUS, use_size);
 			return;
 		} else
 		if (!no_scram_sha1 && scram_sha1_supp) {
@@ -2176,6 +2172,14 @@ smtp_auth(char *type, int use_size)
 			return;
 		}
 #endif
+		if (!no_digest_md5 && digest_md5_supp) {
+			auth_digest_md5(use_size);
+			return;
+		}
+		if (!no_cram_ripemd && cram_rmd_supp) {
+			auth_cram(AUTH_CRAM_RIPEMD, use_size);
+			return;
+		}
 		if (!no_cram_sha512 && cram_sha512_supp) {
 			auth_cram(AUTH_CRAM_SHA512, use_size);
 			return;
@@ -2196,10 +2200,6 @@ smtp_auth(char *type, int use_size)
 			auth_cram(AUTH_CRAM_SHA1, use_size);
 			return;
 		}
-		if (!no_cram_ripemd && cram_rmd_supp) {
-			auth_cram(AUTH_CRAM_RIPEMD, use_size);
-			return;
-		}
 		if (!no_cram_md5 && cram_md5_supp) {
 			auth_cram(AUTH_CRAM_MD5, use_size);
 			return;
@@ -2210,10 +2210,6 @@ smtp_auth(char *type, int use_size)
 		}
 		if (!no_auth_login && login_supp) {
 			auth_login(use_size);
-			return;
-		}
-		if (!no_digest_md5 && digest_md5_supp) {
-			auth_digest_md5(use_size);
 			return;
 		}
 	} else
@@ -2460,7 +2456,7 @@ do_smtp(char *fqdn)
 {
 	unsigned long   code;
 	int             flagbother;
-	int             i, use_size = 0, is_esmtp = 1;
+	int             i, use_size = 0, is_esmtp = 1, auth_capa = 0;
 #if defined(TLS) && defined(HASTLSA)
 	char           *err_str = NULL, *servercert = NULL;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
@@ -2602,17 +2598,21 @@ do_smtp(char *fqdn)
 		i = 0;
 		do {
 			i += 5 + str_chr(smtptext.s + i, '\n');
-			use_size = !case_diffb(smtptext.s + i, 4, "SIZE");
+			if (!use_size)
+				use_size = !case_diffb(smtptext.s + i, 4, "SIZE");
+			if (use_auth_smtp) {/*- check if remote supports AUTH */
+				if (!auth_capa)
+					auth_capa = !case_diffb(smtptext.s + i, 4, "AUTH");
+			}
 #ifdef SMTPUTF8
-			smtputf8 = enable_utf8 ? !case_diffb(smtptext.s + i, 9, "SMTPUTF8") : 0;
 			if (enable_utf8) {
-				if (use_size && smtputf8)
-					break;
-			} else
-			if (use_size)
+				if (!smtputf8)
+					smtputf8 = enable_utf8 ? !case_diffb(smtptext.s + i, 9, "SMTPUTF8") : 0;
+			}
+			if (use_size && smtputf8 && auth_capa)
 				break;
 #else
-			if (use_size)
+			if (use_size && auth_capa)
 				break;
 #endif
 		} while (smtptext.s[i - 1] == '-');
@@ -2625,7 +2625,10 @@ do_smtp(char *fqdn)
 			quit(553, 1, "DConnected to ", " but server does not support unicode in email addresses", 0);
 	}
 #endif
-	smtp_auth(use_auth_smtp, use_size);
+	if (auth_capa)
+		smtp_auth(use_auth_smtp, use_size);
+	else
+		mailfrom(use_size);
 	substdio_flush(&smtpto);
 	code = smtpcode();
 	if (code >= 500)
@@ -3681,13 +3684,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.164 2023-01-15 12:32:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.165 2023-03-10 13:12:05+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.165  2023-03-10 13:12:05+05:30  Cprogrammer
+ * skip smtp_auth function if remote doesn't support authenticated smtp
+ *
  * Revision 1.164  2023-01-15 12:32:37+05:30  Cprogrammer
  * Use env variable SMPTS to immediately start in encrypted
  * quit() function changed to have varargs
