@@ -468,3 +468,4 @@ SHARED
 dossl.o
 parse_env.o
 varargs.h
+indimail-services.7

@@ -1,0 +1,276 @@
+.\" vim: tw=75
+.TH indimail-services 7
+.SH NAME
+indimail-services \- Overview of IndiMail Services
+
+.SH SYNOPSYS
+/service/*
+
+.SH DESCRIPTION
+indimail uses various services configured to run under \fBsvscan\fR(8) and
+\fBsupervise\fR(8). These services provide SMTP, SMTPS, IMAP, IMAPS, POP3,
+POP3S and mail transfer protocols. Apart from the services which provide
+the basic protocols, there are few ancillary services needed to run these
+protocols.
+
+.PP
+.TP 3
+\fB.svscan\fR svscan logger service
+Runs logger for \fBsvscan\fR(8) using \fBmultilog\fR(8) to log \fBsvscan\fR
+output to \fI@logdir@/svscan\fR directory. This also binds
+\fI@sysconfdir@/resolv.conf\fR as \fI/etc/resolv.conf\fR during
+\fBsvscan\fR startup.
+
+.TP 3
+\fBqmail-smtpd.25\fR SMTP service on PORT 25
+Runs \fBtcpserver\fR(1) with -u \fIqmaild\fR -g \fIqmail\fR option to run
+\fBqmail-smtpd\fR(8) on TCP/IP port 25, to provide the standard SMTP
+protocol with STARTTLS capability. The -u and -g options makes qmail-smtpd
+run with uid and all supplementary groups of \fIqmaild\fR user.  The -g
+option additionally adds \fIqmail\fR group ID privilege. The log directory
+for this service is \fI@logdir@/smtpd.25\fR. This service provides
+the PIPELINING, 8BITMIME, SIZE, ETRN, STARTTLS capabilities. This service
+doesn't have AUTH capability enabled to prevent dicitionary attacks.
+
+.TP 3
+\fBqmail-smtpd.366\fR ODMR service on PORT 366
+Runs \fBtcpserver\fR(1) with -u \fIqmaild\fR -g \fIqmail\fR option to run
+\fBqmail-smtpd\fR(8) on TCP/IP port 366, to provide On Demand Mail Relay
+(ODMR) RFC-2645 protocol. The -u and -g options makes qmail-smtpd run with
+uid and all supplementary groups of \fIqmaild\fR user.  The -g option
+additionally adds \fIqmail\fR group ID privilege. The log directory for
+this service is \fI@logdir@/smtpd.366\fR. This service provides AUTH
+and ATRN capabilities.
+
+.TP 3
+\fBqmail-smtpd.465\fR SMTPS service on PORT 465
+Runs \fBtcpserver\fR(1) with -u \fIqmaild\fR -g \fIqmail\fR option to run
+\fBqmail-smtpd\fR(8) on TCP/IP port 465, to provide encrypted SMTP. The -u
+and -g options makes qmail-smtpd run with uid and all supplementary groups
+of \fIqmaild\fR user.  The -g option additionally adds \fIqmail\fR group ID
+privilege. The log directory for this service is
+\fI@logdir@/smtpd.465\fR. This service provides the PIPELINING,
+8BITMIME, SIZE, ETRN, AUTH capabilities.
+
+.TP 3
+\fBqmail-smtpd.587\fR SMTP Submission on PORT 587
+Runs \fBtcpserver\fR(1) with -u \fIqmaild\fR -g \fIqmail\fR option to run
+\fBqmail-smtpd\fR(8) on TCP/IP port 587, to provide standard SMTP
+submission port. The -u and -g options makes qmail-smtpd run with uid and
+all supplementary groups of \fIqmaild\fR user.  The -g option additionally
+adds \fIqmail\fR group ID privilege. The log directory for this service is
+\fI@logdir@/smtpd.587\fR. This service provides the PIPELINING,
+8BITMIME, SIZE, ETRN, STARTTLS, AUTH capabilities.
+
+.TP 3
+\fBqmail-send.25\fR deliver mail messages from the queue
+This services runs \fBqmail-send\fR(8) to deliver mails injected into the
+system by the qmail-smtpd services mentioned above and mails injected into
+the system by programs like \fBsendmail\fR(1), \fBqmail-inject\fR(8). The
+log directory for this service is \fI@logdir@/deliver.25\fR.
+
+.TP 3
+\fBslowq-send\fR deliver mail messages from the queue with rate control
+This services runs \fBqmail-send\fR(8) to deliver mails injected into the
+queue @indimaildir@/queue/slowq by programs like \fBsendmail\fR(1),
+\fBqmail-inject\fR(8). The deliver from \fBslowq-send\fR can be rate
+controlled. The log directory for this service is
+\fI@logdir@/slowq-send\fR.
+
+.TP 3
+\fBqmail-qmqpd.628\fR Quick Mail Queueing Protocol service
+This service runs tcpserver on port 628 to run \fBqmail-qmqpd\fR(8) to
+provide Quick Mail Queueing Protocol (QMQP) service. This service runs with
+uid and gid of \fIqmaild\fR user. The log directory for this service is
+\fI@logdir@/qmqpd.628\fR.
+
+.TP 3
+\fBqmail-qmtpd.209\fR Quick Mail Transfer Protocol service
+This service runs tcpserver on port 209 to run \fBqmail-qmtpd\fR(8) to
+provide Quick Mail Transfer Protocol (QMTP) service. This service runs with
+uid and gid of \fIqmaild\fR user. The log directory for this service is
+\fI@logdir@/qmtpd.209\fR.
+
+.TP 3
+\fBclamd\fR Anti-Virus scanning Service
+This provides anti-virus scanning service for mails injected into the
+queue. It uses \fBclamd\fR(8) to do the actual scanning. The scanning is
+done inline using \fBqhpsi\fR(8). The service runs with \fIqscanq\fR user
+privileges. The log directory for this service is \fI@logdir@/clamd\fR.
+
+.TP 3
+\fBfreshclam\fR Anti-Virus signature update service
+This services pulls the latest anti-virus definitions for \fBclamd\fR(8)
+daemon. The definitions are maintained in the directory
+@indimaildir@/clamd. The service runs with \fIqscanq\fR user privileges.
+The log directory for this service is \fI@logdir@/freshclam\fR.
+
+.TP 3
+\fBqscanq\fR qscanq - qmail virus scanner
+This service runs qscanq which initiates a scan on an incoming email, and
+returns the exit status of the scanner or of qmail-multi / qmail-queue to
+the caller. The service runs with \fIqscanq\fR user privileges. The log
+directory for this service is \fI@logdir@/qscanq\fR.
+
+.TP 3
+\fBdnscache\fR DNS cache service
+This runs \fBdnscache\fR(8) to provide dns cache service on port 53 for
+indimail. This is done by binding /etc/resolv.conf for indimail during
+startup. The service which does the binding is \fBresolvconf\fR described
+below. The service runs with \fIGdnscache\fR user privileges. The log
+directory for this service is \fI@logdir@/dnscache\fR.
+
+.TP 3
+\fBresolvconf\fR
+This service binds \fI@sysconfdir@/resolv.conf\fR as
+\fI/etc/resolv.conf\fR. If any changes made to @sysconfdir@/resolv.conf are
+automatically detected using \fBinotify\fR(1). This service runs with uid 0
+so that it can using mount --bind option. The log directory for this
+service is \fI@logdir@/resolvconf\fR.
+
+.TP 3
+\fBpwdlookup\fR Name Service Switch Daemon for IndiMail
+This service runs \fBnssd\fR(8) daemon which provides IndiMail´s database
+as an alternate Unix configuration database for /etc/passwd, /etc/shadow
+and /etc/group. This program runs as \fIindimail\fR user without
+supplementary groups for \fIindimail\fR user if any. The log directory for
+this service is \fI@logdir@/pwdlookup\fR
+
+.TP 3
+\fBqmail-logfifo\fR
+This services provides a logger service by providing a writeable FIFO using
+the \fBqmail-cat\fR(1) program \fI/run/indimail/logfifo\fR. Anything
+written to the FIFO goes to \fI@logdir@/logfifo\fR. This service is used by
+qmail-smtpd to write SMTP transaction details to the log when spam
+filtering is turned on.
+
+.TP 3
+\fBqmail-daned.1998\fR TLSA Record Fetcher Daemon
+This service runs \fBqmail-daned\fR(8) on port 1998 to fetch TLSA records
+for domains and is used by \fBqmail-remote\fR to verify the domain TLSA
+records. This service runs qmail-daned with uid and gid of \fIqmaild\fR
+user. The log directory for this service is \fI@logdir@/daned.1998\fR.
+
+.TP 3
+\fBfetchmail\fR
+This service runs the \fBfetchmail\fR(1) mail retrieval daemon. It runs
+fetchmail with the uid and gid of \fIindimail\fR user. The log directory for this
+service is \fI@logdir@/fetchmail\fR
+
+.TP 3
+\fBgreylist.1999\fR
+This service runs \fRqmail-greyd\fB(8) program on port 1999 to provide
+greylisting service for \fBqmail-smtpd\fR(8) service on port 25. It runs
+qmail-greyd with the uid and gid of \fIindimail\fR user. The log directory
+for this service is \fI@logdir@/greylist.1999\fR
+
+.TP 3
+\fBindisrvr.4000\fR IndiMail administration Service
+This service runs the indimail administration server \fBindisrvr\fR(8) on
+port 4000 and provides the \fBadminclient\fR protocol provided by
+\fBadminclient\fR(8) program. It uses \fBsetuidgid\fR(1) to run indisrvr
+with uid and gid of \fIindimail\fR user and addition gid \fIqcerts\fR for
+accessing certificates in \fI@sysconfdir@/certs\fR directory. The log
+directory for this service is \fI@logdir@/indisrvr.4000\fR.
+
+.TP 3
+\fBinlookup.infifo\fR Connection Pooling Service for Name Lookups
+This service runs \fBinlookup\fR service which provides FIFOs in
+\fI@indimaildir@/inquery\fR directory with write/read access to
+\fIindimail\fR user and \fBqmail\fR group. The FIFOs have write/read access
+to \fIqmaild\fR user and \fIindimail\fR group. The service uses
+\fBsetuidgid\fR(8) to run inlookup daemon with uid, gid for \fIqmaild\fR
+user (\fIqmaild\fR:\fInofiles\fR) and additional gids \fIindimail\fR,
+\fIqmail\fR. The log directory for this service is
+\fI@logdir@/inlookup.infifo\fR.
+
+.TP 3
+\fBmrtg\fR Create MRTG graphs for indimail
+This service runs \fBmrtg\fR(1) program to create graphs for SMTP, IMAP,
+POP3, delivery, concurrency, queue size, CPU usage, system load, network
+traffic, disk usage, memory and swap usage. It uses the config file
+\fI@servicedir@/etc/indimail.mrtg.cfg\fR. This service runs with root
+privileges so that it can write the images to \fI/var/www/html/mailmrtg\fR.
+
+.TP 3
+\fBmysql.3306\fR
+This service runs MySQL server on port 3306 as well as the UNIX domain
+socket \fI/var/run/mysqld/mysqld.sock\fR with uid and gid of the user
+\fImysql\fR. The log directory for this user is \fI@logdir@/mysql.3306\fR.
+
+.TP 0
+.nf
+\fBproxy-imapd.4143\fR
+\fBproxy-imapd-ssl.9143\fR
+\fBproxy-pop3d.4110\fR
+\fBproxy-pop3d-ssl.9110\fR
+.fi
+.in 11
+This service runs proxy services using \fBproxyimap\fR(8) and
+\fBproxypop3\fR(8) for indmail cluster for IMAP on port 143, IMAPS on port
+993, POP3 on port 110, POP3S on port 995. The proxy services use the
+username to correctly locate the actual IMAP/POP3 server and connect the
+user to the correct server where the user's mailbox lies. For the non-ssl
+services (proxy-imapd.4143, proxy-pop3d.4110), the service runs proxyimap,
+proxypop3 with the uid and gid of \fIindimail\fR user. For the ssl services
+(proxy-imapd-ssl.9143, proxy-pop3d-ssl.9110) proxyimap and proxyimap is run
+with uid, gid of \fIindimail\fR user and additional group ID \fIqcert\fR.
+
+.TP 3
+\fBqmail-imapd.143\fR IMAP service on PORT 143
+Runs \fBtcpserver\fR(1) with -u \fIindimail_uid\fR -g \fIindimail_gid\fR
+option to run \fBimapd\fR(8) on TCP/IP port 143 and provide the standard
+IMAP protocol. The -u and -g options makes imapd run with uid and gid of
+\fIindimail\fR user. The log directory for this service is
+\fI@logdir@/imapd.143\fR.
+
+.TP 3
+\fBqmail-imapd-ssl.993\fR IMAPS service on PORT 993
+Runs \fBtcpserver\fR(1) with -u \fIindimail_uid\fR and
+-g \fIindimail_gid,mycerts\fR option to run \fBimapd\fR(8) on TCP/IP port
+993 and provide the standard IMAPS protocol. The -u and -g options makes
+imapd run with uid and gid of \fIindimail\fR user and an additional gid
+\fIqcerts\fR. The log directory for this service is
+\fI@logdir@/imapd-ssl.993\fR.
+
+.TP 3
+\fBqmail-pop3d.110\fR POP3 service on PORT 110
+Runs \fBtcpserver\fR(1) with -u \fIindimail_uid\fR -g \fIindimail_gid\fR
+option to run \fBpop3d\fR(8) on TCP/IP port 110 and provide the standard
+POP3 protocol. The -u and -g options makes imapd run with uid and gid of
+\fIindimail\fR user. The log directory for this service is
+\fI@logdir@/pop3d.110\fR.
+
+.TP 3
+\fBqmail-pop3d-ssl.995\fR POP3S service on PORT 995
+Runs \fBtcpserver\fR(1) with -u \fIindimail_uid\fR and
+-g \fIindimail_gid,mycerts\fR option to run \fBpop3d\fR(8) on TCP/IP port
+995 and provide the standard POP3S protocol. The -u and -g options makes
+imapd run with uid and gid of \fIindimail\fR user and an additional gid
+\fIqcerts\fR. The log directory for this service is
+\fI@logdir@/pop3d-ssl.995\fR.
+
+.TP 3
+\fBqmail-poppass.106\fR Password Change Service
+This service runs \fBqmail-poppass\fR(8) on TCP/IP port 106 to allow
+password change from across the network using the setpassword interface.
+The log directory for this service is \fI@logdir@/poppass.106\fR.
+
+.TP 3
+\fBudplogger.3000\fR
+Runs a logging service on UDP port 3000 to allow clients to log simple
+messages on the UDP port 3000. The log directory for this service is
+\fI@logdir@/udplogger.3000\fR
+
+.PP
+The above services also has logging enabled with logs in \fI@logdir@\fR.
+These contain both informational and error logs.
+
+.SH SEE ALSO
+svctool(8), create_services(8), rfc-2645(5), qmail-inject(8), qhpsi(8),
+qmail-qmqpc(8), qmail-send(8),  qmail-smtpd(8), qmail-multi(8), nssd(8),
+qmail-spamfilter(8), qmail-nullqueue(8), qmail-direct(8), multi-queue(7),
+qmail-queue-clients(7), dnscache(8), qmail-showctl(8), imapd(8), pop3d(8),
+qmail-qmqpd(8), qmail-qmtpd(8), proxyimap(8), proxypop3(8), indimail(7),
+qmail-poppass(8), qmail-cat(1), slowq-send(8), fetchmail(1),
+qmail-greyd(8), qmail-daned(8), udplogger(8), svscan(8), supervise(8)

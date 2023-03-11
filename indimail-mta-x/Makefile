@@ -66,7 +66,8 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	indimail-srs.5 qmail-start.8 todo-proc.8 qmail-users.5 qmta-send.8 \
 	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 replier.1 make-recipients.1 \
 	test-recipients.1 rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 \
-	slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8 dnstlsarr.1
+	slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8 dnstlsarr.1 \
+	indimail-services.7
 
 include Makefile.$(SYSTEM)
 
@@ -3871,6 +3872,10 @@ indimail-env.5: indimail-env.9 conf-split conf-sysconfdir
 	$(edit) indimail-env.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	>$@
+
+indimail-services.7: indimail-services.9 conf-split conf-sysconfdir \
+conf-logdir
+	$(edit) indimail-services.9 >$@
 
 
 #################################################################
