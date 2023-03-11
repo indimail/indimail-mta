@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.165 2023-03-10 13:12:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.166 2023-03-11 16:09:04+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -2695,7 +2695,11 @@ do_smtp(char *fqdn)
 		quit(code, 1, "D", " failed after I sent the message", 0);
 	if (code >= 400)
 		quit(code, 1, "Z", " failed after I sent the message", 0);
+#ifdef TLS
+	quit(code, 0, "K", ssl ? " accepted message - Protocol SMTPS" : " accepted message - Protocol SMTP", 0);
+#else
 	quit(code, 0, "K", " accepted message - Protocol SMTP", 0);
+#endif
 }
 
 static stralloc canonhost = { 0 };
@@ -3684,13 +3688,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.165 2023-03-10 13:12:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.166 2023-03-11 16:09:04+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.166  2023-03-11 16:09:04+05:30  Cprogrammer
+ * display protocol as SMTPS when using TLS
+ *
  * Revision 1.165  2023-03-10 13:12:05+05:30  Cprogrammer
  * skip smtp_auth function if remote doesn't support authenticated smtp
  *
