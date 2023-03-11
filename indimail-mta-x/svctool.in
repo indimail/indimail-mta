@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.662 2023-03-10 22:04:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.663 2023-03-11 16:14:07+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.662 2023-03-10 22:04:33+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.663 2023-03-11 16:14:07+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2529,6 +2529,27 @@ fi
 if [ " $smtp_ssl" = " 1" -o " $force_tls" = " 1" ] ; then
 	echo $sysconfdir/certs > $conf_dir/CERTDIR
 fi
+if [ $use_starttls -eq 0 ] ; then
+	> $conf_dir/STARTTLS
+else
+	echo > $conf_dir/STARTTLS
+	echo $sysconfdir/certs > $conf_dir/CERTDIR
+fi
+if [ " $min_free" = " " ] ; then
+	echo 52428800 > $conf_dir/MIN_FREE
+else
+	echo $min_free > $conf_dir/MIN_FREE
+fi
+if [ " $QmailBinPrefix" = " /usr" ] ; then
+	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
+else
+	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
+fi
+if [ $enablecram -eq 1 ] ; then
+	echo 1 > $conf_dir/ENABLE_CRAM
+else
+	> $conf_dir/ENABLE_CRAM
+fi
 if [ " $odmr" = " " ] ; then
 	if [ $no_multi -eq 1 ] ; then
 		echo $qmailqueue > $conf_dir/QMAILQUEUE
@@ -2551,12 +2572,6 @@ if [ " $odmr" = " " ] ; then
 		if [ ! "$t" = "$QUEUE_START" ] ; then
 			echo $QUEUE_START  > $conf_dir/QUEUE_START
 		fi
-	fi
-	if [ $use_starttls -eq 0 ] ; then
-		> $conf_dir/STARTTLS
-	else
-		echo > $conf_dir/STARTTLS
-		echo $sysconfdir/certs > $conf_dir/CERTDIR
 	fi
 	if [ " $qregex" = " " ] ; then
 		> $conf_dir/QREGEX
@@ -2590,16 +2605,6 @@ if [ " $odmr" = " " ] ; then
 	fi
 	if [ $usesyncdir -ne 0 ] ; then
 		echo 1 > $conf_dir/USE_SYNCDIR
-	fi
-	if [ " $min_free" = " " ] ; then
-		echo 52428800 > $conf_dir/MIN_FREE
-	else
-		echo $min_free > $conf_dir/MIN_FREE
-	fi
-	if [ " $QmailBinPrefix" = " /usr" ] ; then
-		echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
-	else
-		echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
 	fi
 	if [ ! " $spamfilter" = " " ] ; then
 		echo "$spamfilter" > $conf_dir/SPAMFILTER
@@ -2662,11 +2667,6 @@ if [ " $odmr" = " " ] ; then
 		> $conf_dir/PARANOID
 		> $conf_dir/DOMAIN_MASQUERADE
 	fi
-	if [ $enablecram -eq 1 ] ; then
-		echo 1 > $conf_dir/ENABLE_CRAM
-	else
-		> $conf_dir/ENABLE_CRAM
-	fi
 	if [ ! " $forceauthsmtp" = " " ] ; then
 		echo > $conf_dir/REQUIREAUTH
 		> $conf_dir/AUTH_ALL
@@ -2689,6 +2689,12 @@ if [ " $odmr" = " " ] ; then
 		echo > $conf_dir/UTF8
 	else
 		> $conf_dir/UTF8
+	fi
+else
+	if [ ! " $forceauthsmtp" = " " ] ; then
+		echo > $conf_dir/REQUIREAUTH
+	else
+		> $conf_dir/REQUIREAUTH
 	fi
 fi # odmr
 if [ $shared_objects -eq 1 ] ; then
