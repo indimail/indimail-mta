@@ -354,7 +354,8 @@ eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} 
 
 #odmr
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${servicedir} \
-	--infifo="" --query-cache --password-cache --skipsend --memory=$smtp_soft_mem
+	--infifo="" --forceauthsmtp --starttls --query-cache --password-cache --skipsend \
+	--memory=$smtp_soft_mem
 
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=${servicedir} --min-resend-min=2 \

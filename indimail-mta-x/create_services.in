@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.120 2023-03-03 19:09:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.121 2023-03-11 16:07:54+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -495,7 +495,8 @@ do
 done
 
 [ $ID -eq 0 ] && $svctool --smtp=366 --odmr --servicedir=$servicedir --skipsend \
-  --infifo="" --query-cache --password-cache --memory=$smtp_soft_mem $extra_opt
+  --infifo="" --forceauthsmtp --starttls --query-cache --password-cache \
+  --memory=$smtp_soft_mem $extra_opt
 
 append_opt=""
 if [ $clamav_os -eq 1 ] ; then
@@ -773,6 +774,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.121  2023-03-11 16:07:54+05:30  Cprogrammer
+# add --forceauthsmtp, --starttls options for odmr service on port 366
+#
 # Revision 2.120  2023-03-03 19:09:57+05:30  Cprogrammer
 # run svctool only when running as uid 0
 #

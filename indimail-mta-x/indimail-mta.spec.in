@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.374 2023-02-15 00:42:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.375 2023-03-11 16:08:38+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1434,7 +1434,8 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
-  --infifo="" --query-cache --password-cache --skipsend --memory=%{smtp_soft_mem}
+  --infifo="" --forceauthsmtp --starttls --query-cache --password-cache --skipsend \
+  --memory=%{smtp_soft_mem}
 
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
