@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.291 2023-03-09 23:31:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.292 2023-03-11 16:09:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.291 $";
+static char    *revision = "$Revision: 1.292 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -965,7 +965,11 @@ log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notif
 	tmpLine.len = 0;
 	for (ptr = recipients + 1, idx = 0; idx < rcpt_len; idx++) {
 		if (!recipients[idx]) {
-			/*- write data to spamlogger and get X-Bogosity line in tmpLine */
+			/*-
+			 * write data to /run/indimail/logfifo provided 
+			 * by qmail-logfifo service and get X-Bogosity
+			 * line in tmpLine
+			 */
 			if (!notify)
 				log_fifo(mfrom, ptr, msg_size, &tmpLine);
 			logerr(1, " ", 0);
@@ -6751,7 +6755,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	else
 		smtp_port = -1;
 	if (smtp_port == ODMR_PORT && (!hostname || !*hostname || !childargs || !*childargs)) {
-		if (!env_put("SHUTDOWN=1"))
+		if (!env_put2("SHUTDOWN", ""))
 			die_nomem();
 	}
 	if (envp)
@@ -6790,9 +6794,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		greetdelay_check(greetdelay);
 	if ((ptr = env_get("SHUTDOWN"))) {
 		if (*ptr) {
-			if (!isdigit(ptr[0]) || !isdigit(ptr[1]) || !isdigit(ptr[2])) {
+			if (!isdigit(ptr[0]) || !isdigit(ptr[1]) || !isdigit(ptr[2]))
 				smtp_respond("421 ");
-			} else {
+			else {
 				str_copyb(strnum, ptr, 4);
 				strnum[4] = 0;
 				smtp_respond(strnum);
@@ -6997,6 +7001,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.292  2023-03-11 16:09:28+05:30  Cprogrammer
+ * set SHUTDOWN env variable as an empty string for ODMR when childprog is not provided
+ *
  * Revision 1.291  2023-03-09 23:31:08+05:30  Cprogrammer
  * fixed error "Non-existing DNS_MX: MAIL" for invalid batv signatures
  *
@@ -7324,7 +7331,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.291 2023-03-09 23:31:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.292 2023-03-11 16:09:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
