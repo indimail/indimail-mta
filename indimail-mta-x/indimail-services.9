@@ -13,6 +13,13 @@ POP3S and mail transfer protocols. Apart from the services which provide
 the basic protocols, there are few ancillary services needed to run these
 protocols.
 
+Detailed below are the services configured for indimail. Each service name
+is also a directory in @servicedir@, which has a file named \fIrun\fR and
+\fIlog/run\fR. The file \fIrun\fR contains commands to be executed to bring
+up the service. The file \fIlog/run\fR usually contains an invocation of
+\fBmultilog\fR(8) to log the output of the service to a directory in
+@logdir@.
+
 .PP
 .TP 3
 \fB.svscan\fR svscan logger service
@@ -200,10 +207,10 @@ socket \fI/var/run/mysqld/mysqld.sock\fR with uid and gid of the user
 
 .TP 0
 .nf
-\fBproxy-imapd.4143\fR
-\fBproxy-imapd-ssl.9143\fR
-\fBproxy-pop3d.4110\fR
-\fBproxy-pop3d-ssl.9110\fR
+\fBproxy-imapd.4143\fR Proxy IMAP service on PORT 4143
+\fBproxy-imapd-ssl.9143\fR Proxy IMAPS service on PORT 9143
+\fBproxy-pop3d.4110\fR Proxy POP3 service on PORT 110
+\fBproxy-pop3d-ssl.9110\fR Proxy POP3S service on PORT 9110
 .fi
 .in 11
 This service runs proxy services using \fBproxyimap\fR(8) and
@@ -262,15 +269,11 @@ Runs a logging service on UDP port 3000 to allow clients to log simple
 messages on the UDP port 3000. The log directory for this service is
 \fI@logdir@/udplogger.3000\fR
 
-.PP
-The above services also has logging enabled with logs in \fI@logdir@\fR.
-These contain both informational and error logs.
-
 .SH SEE ALSO
 svctool(8), create_services(8), rfc-2645(5), qmail-inject(8), qhpsi(8),
 qmail-qmqpc(8), qmail-send(8),  qmail-smtpd(8), qmail-multi(8), nssd(8),
 qmail-spamfilter(8), qmail-nullqueue(8), qmail-direct(8), multi-queue(7),
 qmail-queue-clients(7), dnscache(8), qmail-showctl(8), imapd(8), pop3d(8),
 qmail-qmqpd(8), qmail-qmtpd(8), proxyimap(8), proxypop3(8), indimail(7),
-qmail-poppass(8), qmail-cat(1), slowq-send(8), fetchmail(1),
+qmail-poppass(8), qmail-cat(1), slowq-send(8), fetchmail(1), multilog(8),
 qmail-greyd(8), qmail-daned(8), udplogger(8), svscan(8), supervise(8)
