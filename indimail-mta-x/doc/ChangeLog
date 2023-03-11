@@ -108,6 +108,14 @@ multi-signature generation
     authenticated smtp
 61. svctool.in: run imapd, pop3d with additional qcert group privilege for
     certificate access
+- 11/03/2023
+62. smtpd.c: set SHUTDOWN env variable as an empty string for ODMR when
+    childprog is not provided
+63. qmail-remote.c: display protocol as SMTPS when using TLS
+64. create_services.in, indimail-mta.spec, debian/indimail-mta.postinst.in:
+    use --forceauthsmtp, --starttls options for odmr service on port 366
+65. svctool.in: Fixed setting AUTH variables (REQUIREAUTH, AUTHMODULES) for
+    ODMR service
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
