@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-cdb 8
 .SH NAME
 qmail-cdb \- prepare data in cdb format for
@@ -12,31 +13,30 @@ qmail-cdb \- prepare data in cdb format for
 .I filename
 
 .SH DESCRIPTION
-With the -\fIr\fR option \fBqmail-cdb\fR does a chdir to ASSIGN and reads the
-addresses provided in \fIrecipients\fR, converts them into lowercase, and
-writes them into \fIfilename.cdb\fR in a binary format suited for quick
-access by \fBqmail-smtpd\fR. Each line in \fIfilename\fR should be a
-local email address. \fIfilename.cdb\fR is compatible with
-\fBsetforward\fR(1)'s generated \'fastforward\' cdbs and it's format is
-portable across machines. With the -\fIr\fR option, and ASSIGN/recipients
-is used as the \fIfilename\fR.
+With the -\fIr\fR option \fBqmail-cdb\fR does a chdir to \fI@sysconfdir@\fR
+directory. Without the -\fIr\fR option \fBqmail-cdb\fR does a chdir to
+\fI@controldir@\fR directory. \fI@sysconfdir@\fR directory can be overriden
+by setting \fBSYSCONFDIR\fR environment variable. \fI@controldir@\fR
+directory can be overriden by setting \fBCONTROLDIR\fR environment
+variable. for -\fIr\fR option \fIfilename\fR can be omitted to use a
+default of \fIrecipients\fR for the filename.
 
-Without the -\fIr\fR option \fBqmail-cdb\fR does a chdir to @controldir@ and
-reads the instructions in \fIfilename\fR, converts them into lowercase, and
-writes them into \fIfilename.cdb\fR in a binary format suited for quick
-access by \fBqmail-smtpd\fR or \fBspawn-filter\fR.
+\fBqmail-cdb\fR then reads the addresses provided in \fIfilename\fR,
+converts them into lowercase, and writes them into \fIfilename.cdb\fR in a
+binary format suited for quick access by \fBqmail-smtpd\fR. Each line in
+\fIfilename\fR should be a local email address. \fIfilename.cdb\fR is
+compatible with \fBsetforward\fR(1)'s generated \'fastforward\' cdbs and
+it's format is portable across machines.
 
-If there is a problem with \fIfilename\fR, \fBqmail-cdb\fR complains and
-leaves \fIfilename.cdb\fR alone.
+The cdb binary format suited for quick access by \fBqmail-smtpd\fR,
+\fBspawn-filter\fR and many other programs. If there is a problem with
+\fIfilename\fR, \fBqmail-cdb\fR complains and leaves \fIfilename.cdb\fR
+alone.
 
 \fBqmail-cdb\fR ensures that \fIfilename.cdb\fR is updated atomically, so
 \fBqmail-smtpd\fR or \fBspawn-filter\fR never has to wait for
 \fBqmail-cdb\fR to finish. However, \fBqmail-cdb\fR makes no attempt to
 protect against two simultaneous updates of \fBfilename.cdb\fR.
-
-The binary \fIfilename.cdb\fR format is portable across machines.
-\fBqmail-cdb\fR renames \fIfilename\fR to \fIfilename.bak\fR if it
-succeeds.
 
 The \fI\-m\fR option moves \fIfilename\fR to \fIfilename.bak\fR after a
 successfull conversion to cdb.
@@ -65,4 +65,4 @@ and
 
 .SH "SEE ALSO"
 qmail-sql(8), cdb-database(8), qmail-smtpd(8), spawn-filter(8), setforward(1),
-fastforward(1), qmail-multi(8)
+fastforward(1), qmail-multi(8), make-recipients(8), test-recipients(8)

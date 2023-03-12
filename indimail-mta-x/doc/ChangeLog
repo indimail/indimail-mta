@@ -116,6 +116,13 @@ multi-signature generation
     use --forceauthsmtp, --starttls options for odmr service on port 366
 65. svctool.in: Fixed setting AUTH variables (REQUIREAUTH, AUTHMODULES) for
     ODMR service
+- 12/03/2023
+66. qmail-smtpd.c: change cwd using SYSCONFDIR env variable
+67. qmail-cdb.c: allow workdir to be overriden by SYSCONFDIR, CONTROLDIR env
+    variables
+68. test-recipients.c: use env variable SYSCONFDIR to override /etc/indimail
+    for user/recipients
+69. recipients.c: refactored recipients extension
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

@@ -9,7 +9,7 @@ edit = sed \
 	-e 's,@mandir\@,$(mandir),g' \
 	-e 's,@qsysconfdir\@,$(qsysconfdir),g' \
 	-e 's,@sysconfdir\@,$(qsysconfdir),g' \
-	-e 's,@controldir\@,"$(qsysconfdir)/control",g' \
+	-e 's,@controldir\@,$(qsysconfdir)/control,g' \
 	-e 's,@shareddir\@,$(shareddir),g' \
 	-e 's,@libexecdir\@,$(libexecdir),g' \
 	-e 's,@logdir\@,$(logdir),g' \
@@ -1177,8 +1177,8 @@ variables.h conf-tls conf-ip conf-virtual
 	qmail-rspawn.c
 
 qmail-cdb: \
-load qmail-cdb.o variables.o auto_control.o auto_assign.o
-	./load qmail-cdb auto_control.o auto_assign.o variables.o $(QMAILLIB)
+load qmail-cdb.o auto_control.o auto_sysconfdir.o
+	./load qmail-cdb auto_control.o auto_sysconfdir.o $(QMAILLIB)
 
 qmail-cdb.o: \
 compile qmail-cdb.c variables.h auto_control.h
@@ -1186,12 +1186,7 @@ compile qmail-cdb.c variables.h auto_control.h
 
 qmail-cdb.8: \
 qmail-cdb.9 conf-break conf-spawn conf-sysconfdir
-	cat qmail-cdb.9 \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	| sed s}BREAK}"`head -1 conf-break`"}g \
-	| sed s}SPAWN}"`head -1 conf-spawn`"}g \
-	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
-	> qmail-cdb.8
+	$(edit) qmail-cdb.9 > qmail-cdb.8
 
 qmail-newu: \
 load qmail-newu.o auto_assign.o
@@ -1923,12 +1918,7 @@ conf-smtputf8 mysql_config mysql_inc
 
 qmail-smtpd.8: \
 qmail-smtpd.9 conf-qmail conf-sysconfdir conf-prefix
-	cat qmail-smtpd.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}ASSIGN}"`head -1 conf-sysconfdir`/users"}g \
-	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
-	> qmail-smtpd.8
+	$(edit) qmail-smtpd.9 > qmail-smtpd.8
 
 mini-smtpd: \
 load mini-smtpd.o ipme.o socket_v6any.o socket_v4mappedprefix.o \

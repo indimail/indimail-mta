@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-smtpd 8
 .SH NAME
 qmail-smtpd \- receive mail via SMTP
@@ -22,14 +23,15 @@ exit. This option gets activated only when the first argument to
 \fBqmail-smtpd\fR is -\fBv\fR.
 
 .SH DESCRIPTION
-.B qmail-smtpd
-receives mail messages via the Simple Mail Transfer Protocol (SMTP)
-and invokes
-.B qmail-queue
-or
-.B qmail-multi
-(if QMAILQUEUE environment variables is defined as PREFIX/sbin/qmail-multi)
-to deposit them into the outgoing queue.
+\fBqmail-smtpd\fR receives mail messages via the Simple Mail Transfer
+Protocol (SMTP) and invokes the program defined by \fBQMAILQUEUE\fR
+environment variables to deposit the message into the outgoing queue. If
+\fBQMAILQUEUE\fR isn't defined then @prefix@/sbin/qmail-queue is used as a
+default.
+
+\fBqmail-smtpd\fR uses @sysconfdir@ as its working directory which can be
+changed by setting \fBSYSCONFDIR\fR environment variable.
+
 .B qmail-smtpd
 must be supplied several environment variables;
 see
@@ -1171,7 +1173,7 @@ ignores \fIdnsbllist\fR, and the dnsbl check is not performed. The check is
 skipped even if some other authentication method succedeed which authorize
 the client to relay (smtp-auth or tls client certificate), or if
 \fBRELAYCLIENT\fR enviromnent variable is set. The \fIdnsbllist\fR
-functionality is provided by PREFIX/lib/indimail/plugins/smtpd-plugin0
+functionality is provided by @prefix@/lib/indimail/plugins/smtpd-plugin0
 plugin.
 
 .TP 5
@@ -1265,7 +1267,7 @@ detecting or finds in moreipme.
 Extra allowed RCPT domains. If \fIrcpthosts\fR and \fImorercpthosts\fR both
 exist, \fImorercpthosts\fR is effectively appended to \fIrcpthosts\fR.
 
-You must run PREFIX/sbin/qmail-cdb on \fImorercpthosts\fR whenever it
+You must run @prefix@/sbin/qmail-cdb on \fImorercpthosts\fR whenever it
 changes.
 
 Rule of thumb for large sites: Put your 50 most commonly used domains into
@@ -1309,7 +1311,7 @@ always allowed through.
 .TP 5
 \fIetrnhosts\fR
 domain names for which ETRN is allowed. Delivery for these domains should
-should be set to the Maildir QMAILHOME/autoturn/domain_name/Maildir where
+should be set to the Maildir @qmaildir@/autoturn/domain_name/Maildir where
 domain_name is the name of the domain.
 
 .TP 5
@@ -1383,6 +1385,8 @@ the domain part of the recipient envelope address specified on the left
 side of the \fIrecipients\fR file, while the external resource is provided
 right from the delimiter.
 
+.TP
+.po +5
 The addresses' domain part is evaluted in lower-case.
 .IP \[bu] 2
 An entry 'example.com' is used to match 'example.com' and in addition all
@@ -1390,7 +1394,7 @@ subdomain addresses '*.example.com'; depending of course control/rcpthosts.
 .IP \[bu]
 An entry '@example.com' serves as exact match for the domain address
 .IP \[bu]
-The entry '*' will match all domains for the respective lookup.
+The entry '*' will match all domains for the cdb or pam lookup.
 .IP \[bu]
 Reversely, domains flagged as '!domain.com' are not queried and all
 recipients for this domain are accepted.
@@ -1398,6 +1402,8 @@ recipients for this domain are accepted.
 Additionally, a '!*' can be used as wildcard for all domains not
 encountered before in \fIrecipients\fR (pass-thru).
 
+.po
+.in +3
 A \fIrecipients\fR file is always constructed like 'domain:cdb',
  'domain|pam', or simply 'cdb':
 
@@ -1422,8 +1428,8 @@ the beginning of the \fIrecipients\fR control file for performance reasons,
 while the pass-thru statement '!*' has to be on the last line. The
 recipients check is applied after the \fIrcpthosts\fR evaluation.
 
-\fBqmail-cdb\fR may be used to construct a \fIASSIGN/recipients.cdb\fR
-from \fIASSIGN/recipients\fR.
+\fBqmail-cdb\fR may be used to construct \fIrecipients.cdb\fR from
+\fIrecipients\fR in the \fI@sysconfdir@/users\fR directory.
 
 The \fBqmail-smtpd\fR recipients mechanism supports qmail's address
 extension (VERP). Unqualified envelope recipients are appended with
@@ -1613,7 +1619,7 @@ specifies that any emails to *@domain be queued in
 queue mails for certain domains into specific domains and specify
 individual concurrencies for these queues (see qmail-send(8)). e.g. having
 
-yahoo.com:QUEUEDIR=QMAILHOME/queue/queue6
+yahoo.com:QUEUEDIR=@qmaildir@/queue/queue6
 in @sysconfdir@/control/domainqueue and
 
 10
@@ -1776,7 +1782,7 @@ and DATA phase of SMTP. You can disable the loading of plugins by setting
 \fBDISABLE_PLUGIN\fR environment variable.
 
 By default \fBqmail-smtpd\fR looks for plugins in
-PREFIX/lib/indimail/plugins directory. You can change this by defining
+@prefix@/lib/indimail/plugins directory. You can change this by defining
 \fBPLUGINDIR\fR environment variable. You can also load multiple plugins by
 creating smtpd-plugin0.so, smtpd-plugin1.so, and so on. You can also test
 the plugins using the \fBplugtest(1)\fR command.

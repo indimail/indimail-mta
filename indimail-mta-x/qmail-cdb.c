@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cdb.c,v $
+ * Revision 1.15  2023-03-12 19:03:59+05:30  Cprogrammer
+ * allow workdir to be overriden by SYSCONFDIR, CONTROLDIR env variables
+ *
  * Revision 1.14  2022-10-31 23:52:38+05:30  Cprogrammer
  * ignore filename with -r option
  *
@@ -58,8 +61,7 @@
 #include <env.h>
 #include <cdbmss.h>
 #include "auto_control.h"
-#include "auto_assign.h"
-#include "variables.h"
+#include "auto_sysconfdir.h"
 
 #define FATAL "qmail-cdb: fatal: "
 
@@ -90,19 +92,26 @@ main(int argc, char **argv)
 			strerr_die1x(100, "qmail-cdb [-r] [-m] filename");
 		}
 	}
-	if (!recipient_cdb) {
-		if (optind + 1 != argc)
+	if (optind + 1 != argc) {
+		if (!recipient_cdb)
 			strerr_die1x(100, "qmail-cdb [-r] [-m] filename");
-		arg = argv[optind++];
-		if (!(controldir = env_get("CONTROLDIR")))
-			controldir = auto_control;
-		workdir = controldir;
-	} else {
 		arg = "recipients";
-		workdir = auto_assign;
+	} else
+		arg = argv[optind++];
+	if (recipient_cdb) {
+		if (!(workdir = env_get("SYSCONFDIR")))
+			workdir = auto_sysconfdir;
+		if (chdir(workdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", workdir, ": ");
+		else
+		if (chdir("users") == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", workdir, "/users: ");
+	} else {
+		if (!(workdir = env_get("CONTROLDIR")))
+			workdir = auto_control;
+		if (chdir(workdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", workdir, ": ");
 	}
-	if (chdir(workdir) == -1)
-		strerr_die4sys(111, FATAL, "unable to chdir to ", workdir, ": ");
 	/* fn = argv.cdb\0argv.bak */
 	if (!stralloc_copys(&fn, arg) ||
 			!stralloc_catb(&fn, ".cdb", 4) ||
@@ -134,9 +143,8 @@ main(int argc, char **argv)
 			}
 			if (line.s[0] != '#') {
 				if (recipient_cdb) {
-					if (!stralloc_copys(&key, ":"))
-						strerr_die2x(111, FATAL, "out of memory");
-					if (!stralloc_cat(&key, &line))
+					if (!stralloc_copys(&key, ":") ||
+							!stralloc_cat(&key, &line))
 						strerr_die2x(111, FATAL, "out of memory");
 					case_lowerb(key.s, key.len);
 					ptr = key.s;
@@ -174,7 +182,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.14 2022-10-31 23:52:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cdb.c,v 1.15 2023-03-12 19:03:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

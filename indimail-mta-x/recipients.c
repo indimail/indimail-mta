@@ -1,30 +1,6 @@
 /*
- * $Log: recipients.c,v $
- * Revision 1.8  2022-10-31 23:17:19+05:30  Cprogrammer
- * refactored code to collaps stralloc, substdio statements.
- * fix for SRS addresses
- *
- * Revision 1.7  2011-01-14 22:19:52+05:30  Cprogrammer
- * upgrade to verion 0.7 of EH's recipients extension
- *
- * Revision 1.6  2009-09-01 21:24:52+05:30  Cprogrammer
- * use break character from auto_break.c
- *
- * Revision 1.5  2009-09-01 20:38:15+05:30  Cprogrammer
- * update to RECIPIENTS extension 0.6 by Erwin Hoffmann
- *
- * Revision 1.4  2009-04-27 21:00:45+05:30  Cprogrammer
- * fix for formatting
- *
- * Revision 1.3  2009-04-10 13:31:20+05:30  Cprogrammer
- * upgrade to RECIPIENTS extension (0.5.19) (by Erwin Hoffman - http://www.fehcom.de/qmail/qmail.html##recipients)
- *
- * Revision 1.2  2004-10-22 20:29:56+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-09-22 23:27:38+05:30  Cprogrammer
- * Initial revision
- *
+ * RCS log at bottom
+ * $Id: recipients.c,v 1.9 2023-03-12 19:10:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "cdb.h"
@@ -48,7 +24,6 @@
 
 static stralloc key = { 0 };
 static stralloc domain = { 0 };
-static stralloc wildhost = { 0 };
 static stralloc address = { 0 };
 static stralloc rcptline = { 0 };
 static stralloc vkey = { 0 };
@@ -73,9 +48,7 @@ char            ssrcptbuf[512];
 substdio        ssrcpt = SUBSTDIO_FDBUF(safewrite, FDAUTH, ssrcptbuf, sizeof (ssrcptbuf));
 
 int
-callapam(pam, addr)
-	char           *pam;
-	char           *addr;
+callapam(char *pam, char *addr)
 {
 	int             i, j = 0, wstat, child;
 	int             pi[2];
@@ -171,89 +144,85 @@ recipients_init()
 	return 0;
 }
 
-int
-recipients_parse(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vaddr, char *v_key, int vlen)
+static int
+parse_recips(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vaddr, char *v_key, int vlen)
 {
-	int             i, r, j = 0, k = 0, seenhost = 0;
+	int             len, r, i, j, k, seenhost = 0;
 	uint32          dlen;
-	static stralloc line = { 0 };
+	char           *p;
 
-	wildhost.len = 0;
-	line.len = 0;
-
-	if (!stralloc_copys(&wildhost, "!") ||
-			!stralloc_cats(&wildhost, rhost) ||
-			!stralloc_0(&wildhost))
-		return -2;
-
-	for (i = 0; i < rcptline.len; ++i) {
-		if (!stralloc_append(&line, &rcptline.s[i]))
-			return -2;
-		if (rcptline.s[i] == '\0') {
-			if (!stralloc_0(&line))
-				return -2;
-
-			j = byte_chr(line.s, line.len, ':');
-			k = byte_chr(line.s, line.len, '|');
-			if (!str_diffn(line.s, wildhost.s, wildhost.len - 1))
-				return 3; /*- wilddomain */
-
-			if (j > 0 || k > 0) {
-				if (!str_diffn(line.s, "@", 1))	/*- exact */
-					if (!str_diffn(line.s + 1, rhost, rlen - 1))
-						seenhost = 1;
-			}
-			if (!seenhost) { /*- domain */
-				if (j > 0 && rlen >= j &&
-						!str_diffn(line.s, rhost + rlen - j - 1, j - 1))
-					seenhost = 2;
-				if (k > 0 && rlen >= k &&
-						!str_diffn(line.s, rhost + rlen - k - 1, k - 1))
-					seenhost = 3;
-			}
-			if (!seenhost && !str_diffn(line.s, "!*", 2)) /*- pass-thru */
+	for (len = 0, p = rcptline.s;len < rcptline.len;) {
+		i = str_len(p) + 1;
+		seenhost = 0;
+		if (p[0] == '!') {
+			if (!str_diffn(p + 1, rhost, rlen))
+				return 3; /*- wildcard */
+			if (!str_diffn(p, "!*", 2))   /*- pass-thru */
 				return 4;
-
-			if (k > 0 && k < line.len) { /*- pam */
-				if (seenhost || !str_diffn(line.s, "*", 1)) {
-					r = callapam(line.s + k + 1, addr);
-					if (vlen > 0 && r != 0)
-						r = callapam(line.s + k + 1, vaddr);
-					if (r == 0)
-						return 2;
-					if (r == 111)
-						return r;
-				}
+			p += (i = str_len(p) + 1);
+			len += i;
+			continue;
+		}
+		j = byte_chr(p, i, ':'); /*- cdb */
+		k = byte_chr(p, i, '|'); /*- pam */
+		if (j > 0 || k > 0) {
+			if (!str_diffn(p, "@", 1)) /*- exact */
+				if (!str_diffn(p + 1, rhost, rlen - 1))
+					seenhost = 1;
+		}
+		if (!seenhost && p[0] != '@') { /*- sub domain */
+			if (j > 0 && rlen >= j) {
+				p[j] = '\0';
+				if (rhost[rlen - j - 2] == '.' && !str_diffn(p, rhost + rlen - j - 1, j + 1))
+					seenhost = 2;
+				p[j] = ':';
 			}
-
-			if (j > 0 && j < line.len) { /*- cdb */
-				if (seenhost || !str_diffn(line.s, "*", 1)) {
-					fdrcps = open_read(line.s + j + 1);
-					if (fdrcps != -1) {
-						r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
-						if (vlen > 0 && r == 0)
-							r = cdb_seek(fdrcps, v_key, vlen - 2, &dlen);
-						close(fdrcps);
-						if (r)
-							return 1;
-					}
-				}
+			if (k > 0 && rlen >= k) {
+				p[k] = '\0';
+				if (rhost[rlen - k - 2] == '.' && !str_diffn(p, rhost + rlen - k - 1, k + 1))
+					seenhost = 3;
+				p[k] = '|';
 			}
+		}
 
-			if (!seenhost) {
-				fdrcps = open_read(line.s);	/*- legacy cdb */
-				if (fdrcps != -1) {
+		if (j > 0 && j < i) { /*- cdb */
+			if (seenhost || !str_diffn(p, "*:", 2)) {
+				if ((fdrcps = open_read(p + j + 1)) != -1) {
 					r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
 					if (vlen > 0 && r == 0)
 						r = cdb_seek(fdrcps, v_key, vlen - 2, &dlen);
 					close(fdrcps);
 					if (r)
-						return 1;
+						return 1; /*- CDB lookup succeeded */
 				}
 			}
-
-			line.len = 0;
 		}
+
+		if (k > 0 && k < i) { /*- pam */
+			if (seenhost || !str_diffn(p, "*|", 2)) {
+				r = callapam(p + k + 1, addr);
+				if (vlen > 0 && r != 0)
+					r = callapam(p + k + 1, vaddr);
+				if (r == 0)
+					return 2; /*- PAM lookup succeeded */
+				if (r == 111)
+					return r;
+			}
+		}
+
+		if (!seenhost && !j && !k) {
+			if ((fdrcps = open_read(p)) != -1) { /*- legacy cdb */
+				r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
+				if (vlen > 0 && r == 0)
+					r = cdb_seek(fdrcps, v_key, vlen - 2, &dlen);
+				close(fdrcps);
+				if (r)
+					return 1;
+			}
+		}
+
+		p += i;
+		len += i;
 	}
 	return 0;
 }
@@ -268,7 +237,7 @@ recipients(char *buf, int len)
 	address.len = 0; /*- multiple recipients */
 	domain.len = 0;
 	at = byte_rchr(buf, len, '@');
-	if (at < len) {
+	if (at < len) { /*- address has domain component */
 		if (!stralloc_copyb(&domain, buf + at + 1, len - at - 1) ||
 				!stralloc_copyb(&address, buf, len))
 			return -2;
@@ -303,7 +272,7 @@ recipients(char *buf, int len)
 		}
 	}
 
-	if ((r = recipients_parse(domain.s, domain.len, address.s, key.s, key.len, verp.s, vkey.s, vkey.len)))
+	if ((r = parse_recips(domain.s, domain.len, address.s, key.s, key.len, verp.s, vkey.s, vkey.len)))
 		return r;
 	return 0;
 }
@@ -311,7 +280,39 @@ recipients(char *buf, int len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.8 2022-10-31 23:17:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recipients.c,v 1.9 2023-03-12 19:10:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: recipients.c,v $
+ * Revision 1.9  2023-03-12 19:10:57+05:30  Cprogrammer
+ * refactored recipients extension
+ *
+ * Revision 1.8  2022-10-31 23:17:19+05:30  Cprogrammer
+ * refactored code to collaps stralloc, substdio statements.
+ * fix for SRS addresses
+ *
+ * Revision 1.7  2011-01-14 22:19:52+05:30  Cprogrammer
+ * upgrade to verion 0.7 of EH's recipients extension
+ *
+ * Revision 1.6  2009-09-01 21:24:52+05:30  Cprogrammer
+ * use break character from auto_break.c
+ *
+ * Revision 1.5  2009-09-01 20:38:15+05:30  Cprogrammer
+ * update to RECIPIENTS extension 0.6 by Erwin Hoffmann
+ *
+ * Revision 1.4  2009-04-27 21:00:45+05:30  Cprogrammer
+ * fix for formatting
+ *
+ * Revision 1.3  2009-04-10 13:31:20+05:30  Cprogrammer
+ * upgrade to RECIPIENTS extension (0.5.19) (by Erwin Hoffman - http://www.fehcom.de/qmail/qmail.html##recipients)
+ *
+ * Revision 1.2  2004-10-22 20:29:56+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-09-22 23:27:38+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

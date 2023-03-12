@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.12  2023-03-12 18:39:18+05:30  Cprogrammer
+ * change cwd using SYSCONFDIR env variable
+ *
  * Revision 1.11  2023-02-20 20:25:37+05:30  Cprogrammer
  * display GSASL header, library version
  *
@@ -252,9 +255,12 @@ print_details()
 int
 main(int argc, char **argv)
 {
+	char           *ptr;
+
 	if (argc > 1 && !str_diff(argv[1], "-v"))
 		print_details();
-	if (chdir(auto_sysconfdir) == -1)
+	ptr = (ptr = env_get("SYSCONFDIR")) ? ptr : auto_sysconfdir;
+	if (chdir(ptr) == -1)
 		strerr_die3sys(111, "chdir: ", auto_sysconfdir, ": ");
 	qmail_smtpd(argc, argv, 0);
 	return(0);
@@ -263,7 +269,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.11 2023-02-20 20:25:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.12 2023-03-12 18:39:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: test-recipients.c,v 1.1 2022-11-01 18:07:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: test-recipients.c,v 1.2 2023-03-12 19:07:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -84,7 +84,7 @@ int
 main(int argc, char **argv)
 {
 	int             i, do_recipient = 0, do_sql = 0;
-	char           *arg;
+	char           *arg, *sysconfdir;
 
 	while ((i = getopt(argc, argv, "rst:")) != opteof) {
 		switch (i)
@@ -129,8 +129,9 @@ main(int argc, char **argv)
 		}
 	} else
 	if (do_recipient == 1) {
-		if (chdir(auto_sysconfdir) == -1)
-			strerr_die4sys(111, FATAL, "unable to chdir to ", auto_sysconfdir, ": ");
+		sysconfdir = (sysconfdir = env_get("SYSCONFDIR")) ? sysconfdir : auto_sysconfdir;
+		if (chdir(sysconfdir) == -1)
+			strerr_die4sys(111, FATAL, "unable to chdir to ", sysconfdir, ": ");
 		if (recipients_init() == -1)
 			strerr_die2x(111, FATAL, "unable to initialize recipients extension");
 		/*-
