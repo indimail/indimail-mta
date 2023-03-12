@@ -123,6 +123,7 @@ multi-signature generation
 68. test-recipients.c: use env variable SYSCONFDIR to override /etc/indimail
     for user/recipients
 69. recipients.c: refactored recipients extension
+70. recipients.c: fixed bug with string comparisions
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

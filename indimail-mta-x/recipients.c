@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: recipients.c,v 1.9 2023-03-12 19:10:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: recipients.c,v 1.10 2023-03-13 00:09:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "cdb.h"
@@ -157,18 +157,43 @@ parse_recips(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vadd
 		if (p[0] == '!') {
 			if (!str_diffn(p + 1, rhost, rlen))
 				return 3; /*- wildcard */
-			if (!str_diffn(p, "!*", 2))   /*- pass-thru */
+			if (!str_diffn(p, "!*", 2)) /*- pass-thru */
 				return 4;
-			p += (i = str_len(p) + 1);
+			p += i;
 			len += i;
 			continue;
 		}
-		j = byte_chr(p, i, ':'); /*- cdb */
-		k = byte_chr(p, i, '|'); /*- pam */
+		j = byte_chr(p, i - 1, ':'); /*- cdb */
+		k = byte_chr(p, i - 1, '|'); /*- pam */
+		if (j == (i - 1))
+			j = 0;
+		if (k == (i - 1))
+			k = 0;
+		if (!j && !k) {
+			if ((fdrcps = open_read(p)) != -1) { /*- legacy cdb */
+				r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
+				if (vlen > 0 && r == 0)
+					r = cdb_seek(fdrcps, v_key, vlen - 2, &dlen);
+				close(fdrcps);
+				if (r)
+					return 1;
+			}
+			p += i;
+			len += i;
+			continue;
+		}
 		if (j > 0 || k > 0) {
-			if (!str_diffn(p, "@", 1)) /*- exact */
-				if (!str_diffn(p + 1, rhost, rlen - 1))
-					seenhost = 1;
+			if (j > 0)
+				p[j] = '\0';
+			if (k > 0)
+				p[k] = '\0';
+			if (!str_diffn(p, "@", 1) &&
+					!str_diffn(p + 1, rhost, rlen)) /*- exact */
+				seenhost = 1;
+			if (j > 0)
+				p[j] = ':';
+			if (k > 0)
+				p[k] = '|';
 		}
 		if (!seenhost && p[0] != '@') { /*- sub domain */
 			if (j > 0 && rlen >= j) {
@@ -207,17 +232,6 @@ parse_recips(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vadd
 					return 2; /*- PAM lookup succeeded */
 				if (r == 111)
 					return r;
-			}
-		}
-
-		if (!seenhost && !j && !k) {
-			if ((fdrcps = open_read(p)) != -1) { /*- legacy cdb */
-				r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
-				if (vlen > 0 && r == 0)
-					r = cdb_seek(fdrcps, v_key, vlen - 2, &dlen);
-				close(fdrcps);
-				if (r)
-					return 1;
 			}
 		}
 
@@ -280,13 +294,16 @@ recipients(char *buf, int len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.9 2023-03-12 19:10:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: recipients.c,v 1.10 2023-03-13 00:09:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: recipients.c,v $
+ * Revision 1.10  2023-03-13 00:09:59+05:30  Cprogrammer
+ * fixed bug with string comparisions
+ *
  * Revision 1.9  2023-03-12 19:10:57+05:30  Cprogrammer
  * refactored recipients extension
  *
