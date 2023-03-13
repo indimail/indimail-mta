@@ -90,7 +90,7 @@
 static stralloc target = { 0 };
 static char    *user, *group, *to;
 const char      FATAL[] = "installer: fatal: ";
-const char      WARN[] = "installer: warning: ";
+const char      WARN[] = "installer: warn: ";
 static char     strnum[FMT_ULONG], inbuf[SUBSTDIO_INSIZE], outbuf[SUBSTDIO_OUTSIZE];
 static substdio ssin, ssout;
 static uid_t    my_uid;
