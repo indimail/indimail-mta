@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH indimail-mta 7
 .SH "NAME"
 indimail-mta \- overview of indimail-mta documentation
@@ -27,9 +28,10 @@ and
 
 System administrators who want to control the entire \fBindimail-mta\fR
 system should start with \fBsvscan\fR(8), \fBsupervise\fR(8),
-\fBindimail-control\fR(5) and \fBqmail-start\fR(8) / \fBslowq-start\fR(8)
+\fBindimail-control\fR(5), \fBindimail-env\fR(5),
+\fBindimail-services\fR(7) and \fBqmail-start\fR(8) / \fBslowq-start\fR(8)
 (\fBqmail-start\fR also has documentation on \fBqscheduler\fR(8)). There is
-a web administration tool \fBiwebadmin\fR (1) to carry out basic admin
+a web administration tool \fBiwebadmin\fR(1) to carry out basic admin
 activities like user addition, deletion, modification, basic mailing list
 adminisration, setting forwards and autoresponders.
 
@@ -63,12 +65,13 @@ and
 
 This documentation describes version @version@ of
 .BR indimail-mta .
+
 .SH "SEE ALSO"
 addcr(1),
 addresses(5),
 alloc(3),
 argv0(1),
-batv,
+batv(1),
 bouncesaying(1),
 caldate(3),
 caldate_mjd(3),
@@ -88,19 +91,20 @@ coe(3),
 columnt(1),
 condredirect(1),
 config(3),
+create_services(8),
 ctrlenv(8),
 date@(1),
 datetime(3),
 delcr(1),
 direntry(3),
-dnsblcheck,
-dnscname,
-dnsfq,
-dnsip,
-dnsmxip,
-dnsptr,
-dnstlsarr,
-dnstxt,
+dnsblcheck(1),
+dnscname(1),
+dnsfq(1),
+dnsip(1),
+dnsmxip(1),
+dnsptr(1),
+dnstlsarr(1),
+dnstxt(1),
 dot-qmail(5),
 env(3),
 envdir(8),
@@ -124,7 +128,9 @@ getln2(3),
 getln(3),
 http@(1),
 indimail-control(5),
-ipmeprint,
+indimail-env(5),
+indimail-services(7),
+ipmeprint(8),
 ldap-checkpwd(8),
 leapsecs(3),
 maildir2mbox(1),
