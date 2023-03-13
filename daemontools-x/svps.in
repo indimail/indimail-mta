@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.15 2022-11-09 20:15:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.16 2023-03-13 17:47:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -104,6 +104,18 @@ case "$option" in
 		fi
 	fi
 	;;
+	term)
+	if [ ! -f $pidfile ] ; then
+		echo "$pidfile: No such file or directory" 1>&2
+		exit 1
+	else
+		echo "Sending TERM to svscan with PID $svpid"
+		kill -TERM $svpid
+		if [ $? -ne 0 ] ; then
+			echo "Failed to send HUP signal to pid $svpid" 1>&2
+		fi
+	fi
+	;;
 esac
 }
 
@@ -128,6 +140,9 @@ while test $# -gt 0; do
 	-h|--hup)
 	option=hup
 	;;
+	-t|--term)
+	option=term
+	;;
     -m|--main)
 	option=main
     ;;
@@ -139,7 +154,7 @@ while test $# -gt 0; do
     ;;
     *)
     echo "invalid option [$1]" 1>&2
-	echo "svps [--all | --main | --logs]" 1>&2
+	echo "usage: svps [-a|--all | -m|--main | -h|--hup | -t|--term | -n|--no-pager | -l|--logs]" 1>&2
     read key
 	exit 1
     ;;
@@ -201,7 +216,7 @@ do
 	fi
 done < /tmp/svps.$$
 
-if [ "$option" = "hup" ] ; then
+if [ "$option" = "hup" -o "$option" = "term" ] ; then
 	PAGER=""
 fi
 if [ -n "$PAGER" ] ; then
@@ -213,6 +228,9 @@ fi
 /bin/rm -f /tmp/svps.$$
 #
 # $Log: svps.in,v $
+# Revision 1.16  2023-03-13 17:47:47+05:30  Cprogrammer
+# added -t, --term option
+#
 # Revision 1.15  2022-11-09 20:15:01+05:30  Cprogrammer
 # replaced deprecated egrep with grep -E
 #
