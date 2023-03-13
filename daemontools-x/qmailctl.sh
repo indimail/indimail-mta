@@ -10,7 +10,7 @@
 # Short-Description: Start/Stop svscan
 ### END INIT INFO
 #
-# $Id: qmailctl.sh,v 1.73 2022-11-17 08:44:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: qmailctl.sh,v 1.74 2023-03-13 17:46:16+05:30 Cprogrammer Exp mbhangui $
 #
 #
 SERVICE=@servicedir@
@@ -127,6 +127,10 @@ set_esc_seq() {
 }
 
 myecho_success() {
+	tty --silent
+	if [ $? -ne 0 ] ; then
+		return 0
+	fi
 	$MOVE_TO_COL
 	$ECHO -n "["
 	$SETCOLOR_SUCCESS
@@ -163,14 +167,14 @@ noindimail() {
 
 # Log that something succeeded
 mysuccess() {
-	myecho_success
+	tty --silent && myecho_success
 	return 0
 }
 
 # Log that something failed
 myfailure() {
 	local rc=$?
-	myecho_failure
+	tty --silent && myecho_failure
 	return $rc
 }
 
