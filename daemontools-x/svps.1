@@ -4,7 +4,8 @@ svps \- prints the status of all services started by \fBsvscan\fR
 
 .SH SYNOPSIS
 .B svps
-[--\fIall\fR | -a] [--\fImain\fR | -m] [--\fIlogs\fR | -l] [--\fIhup\fR | -h | ] [--no-pager | -n]
+[--\fIall\fR | -a] [--\fImain\fR | -m] [--\fIlogs\fR | -l]
+  [--\fIhup\fR | -h | ] [--\fIterm\fR | -t | ] [--no-pager | -n]
 
 .SH DESCRIPTION
 \fBsvps\fR prints one human-readable line for all supervise services
@@ -98,14 +99,19 @@ Print status for both main and log processes
 Print status for main processes
 
 .TP
-.B \-\-logs or -l
-
-Print status for log processes
-
-.TP
 \-\-\fIhup\fR or -h
 
 Send HUP signal to svscan
+
+.TP
+\-\-\fIterm\fR or -t
+
+Send TERM signal to svscan
+
+.TP
+.B \-\-logs or -l
+
+Print status for log processes
 
 .TP
 .B \-\-no-pager or -n
