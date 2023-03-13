@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.18 2023-02-14 07:48:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.19 2023-03-13 16:37:10+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -16,32 +16,34 @@ usage()
 	exit $1
 }
 
-# This function comes from Tatsuya Yokota
-# https://github.com/kotaroman/domainkey
-#
 # split a long string into multiple strings
-# of length 255 or less
+# of length 255 or less. This uses the
+# fold command
 split_str()
 {
-	local STR="$1"
-	local START=0
-	local STR_COUNT=0
-	local LINE=""
-	local SPLIT=255
-
-	while true
+	if [ -n "$2" ] ; then
+		j=4
+		k=6
+	else
+		j=3
+		k=5
+	fi
+	count=1
+	str=$(echo -n "v=DKIM1; k=$1;$2 p=$3"|fold -w255)
+	for i in $str
 	do
-		START=$STR_COUNT
-		LINE=${STR:$START:$SPLIT}
-		if [ ${#LINE} -eq 0 ]; then
-			break
-		fi
-		if [ $START -eq 0 ]; then
-			printf "\"${LINE}\"" # first line
+		if [ $count -eq 1 ] ; then
+			echo -n "\"$i "
+		elif [ $count -lt $j ] ; then
+			echo -n "$i "
+		elif [ $count -eq $j ] ; then
+			echo -n "$i\" "
+		elif [ $count -lt $k ] ; then
+			echo -n "\"$i\" "
 		else
-			printf " \"${LINE}\""
+			echo -n "\"$i\""
 		fi
-		STR_COUNT=$(expr $STR_COUNT + $SPLIT)
+		count=$(expr $count + 1)
 	done
 }
 
@@ -59,7 +61,7 @@ write_pub_key()
 		printf "%s._domainkey.%s. IN TXT (\"v=DKIM1; k=%s;%s p=%s\")\n" "$selector" "$domain" "$ktype" "$t" "$pubkey"
 	else
 		printf "%s._domainkey.%s. IN TXT (" "$selector" "$domain"
-		split_str "v=DKIM1; k=$ktype;$t p=$pubkey"
+		split_str "$ktype" "$t" "$pubkey"
 		printf ")\n"
 	fi
 }
@@ -145,7 +147,7 @@ while :; do
 	-d | --domain)
 	grep -w "$2" $controldir/rcpthosts >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
-		echo "$domain not in rcpthsots" 1>&2
+		echo "$domain not in rcpthosts" 1>&2
 		exit 1
 	fi
 	domain="$2"
@@ -283,6 +285,9 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.19  2023-03-13 16:37:10+05:30  Cprogrammer
+# use fold command to split public key string
+#
 # Revision 1.18  2023-02-14 07:48:10+05:30  Cprogrammer
 # use qcerts group for certificate group permission
 #
