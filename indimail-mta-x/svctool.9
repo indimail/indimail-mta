@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH svctool 8
 .SH NAME
 svctool \- IndiMail/indimail-mta Service Configuration Tool
@@ -159,8 +160,8 @@ Known values for OPTION are:
   [--forcetls]
   [--shared-objects=0|1]
   [--use-dlmopen=0|1]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
   [--password-cache] [--query-cache]
   [--smtp-plugin]
   [--setgroups]
@@ -286,8 +287,8 @@ Known values for OPTION are:
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--logfilter=logfifo]
   [--localfilter --remotefilter]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
   [--setgroups]
@@ -361,8 +362,8 @@ Known values for OPTION are:
   [--cname-lookup]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--localfilter --remotefilter]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
   [--remote-authsmtp=b]
   [--ssl]
   [--setgroups]
@@ -420,8 +421,8 @@ Known values for OPTION are:
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
 
  Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -505,8 +506,8 @@ Known values for OPTION are:
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
 
  Installs a new queue with a QMTP Listener
   m              - Concurrency of connections to allow
@@ -551,8 +552,8 @@ Known values for OPTION are:
   [--spamfilter=spamfilter_args]
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e]
-  [--dkverify=dk|dkim|both|none]
-  [--dksign=dk|dkim|both|none --private_key=private_key]
+  [--dkverify=dkim|none]
+  [--dksign=dkim|none --private_key=private_key]
 
  Installs a new queue with a QMQP Listener
   m              - Concurrency of connections to allow
@@ -649,7 +650,7 @@ Known values for OPTION are:
   i              - Concurrency of connections to be allowed from a
                    single ip address
   a              - IP Address to listen
-  default-domain - default domain name for which this host will handle mails
+  domain         - default domain name for which this host will handle mails
 
 --inlookup=fifo_path --threads=N
   --servicedir=service_path
@@ -738,7 +739,7 @@ Known values for OPTION are:
   [--logfilter=logfifo]
   [--rejectspam=r --spamexitcode=e]
   [--qhpsi=q]
-  [--dkverify=dk|dkim|both|none]
+  [--dkverify=dkim|none]
 
   Install Fetchmail Server
   queue_path     - Path where the queues are installed. If this is different from
@@ -766,6 +767,7 @@ Known values for OPTION are:
                    2 - Blackhole SPAM Mails
   e              - Exit value of spamfilter that should be treated as spam
   default-domain - default domain name for which this host will handle mails
+  silent         - be less verbose
 
 --qscanq --servicedir=service_path [--scanint=n]
 
@@ -946,7 +948,7 @@ Known values for OPTION are:
 --import-variables=file
   --servicedir=service_path
   --service-name=service_name
-  [--force]
+  [--force] [--silent]
 
   Import new environment variables from a file having one more multiple
   key=value pairs
@@ -955,6 +957,7 @@ Known values for OPTION are:
   service_name   - name of supervise service without path
                    e.g. (qmail-smtpd.25)
   force          - Set the variable if variable already exists
+  silent         - be less verbose
 
 --export-variables=file
   --servicedir=service_path
@@ -1005,13 +1008,15 @@ Known values for OPTION are:
   [--common_name=CN]
   [--validity_days=days]
   [--certdir=certdir]
-  [--updatecerts]
+  [--update-certs]
   [--capath=ca_path_dir]
   [--servicedir=service_path]
   [--default-domain=domain]
   [--mysqlPrefix=mysqlPrefix]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--mysqlport=port | --mysqlsocket=socket]
+  [--cntrldir=cntrl_path]
+  [--sysconfdir=sysconfdir]
   [--databasedir=databasedir]
   [--use-grant]
   [--stdout]
@@ -1039,8 +1044,10 @@ Known values for OPTION are:
                    This can also be a remote user i.e. &postmaster@indimail.org
   common_name    - Common Name (CN) for server
   days           - Number of days for which the Certificate should be valid
+  cntrl_path     - Path where Qmail control files are stored
+  sysconfdir     - Path for config files
   certdir        - Directory in which new certificates will be placed
-  updatecerts    - Update CERTDIR, CERTFILE and TLSCACHE for services using them
+  update-certs   - Update CERTDIR, CERTFILE and TLSCACHE for services using them
   ca_path_dir    - Directory having CA certificate
   service_path   - Path where supervise service have been installed
   default-domain - default domain name for which this host will handle mails
@@ -1082,7 +1089,7 @@ Known values for OPTION are:
 
 --fixsharedlibs
 
-  fix mysql shared library in @sysconfdir@/control/mysql_lib
+  fix mysql shared library in @sysconfdir@/control/libmysql
 
 --report=all| zddist| zdeferrals| zfailures| zoverall| zrecipients| zrhosts|
   zrxdelay| zsenders| zsendmail| zsuccesses| zsuids | zsmtp | zspam
@@ -1100,6 +1107,14 @@ Known values for OPTION are:
 --version
 
   output version information
+
+Global Directory Options
+
+--cntrldir     - sets directory for indimail/qmail control files
+--indimaildir  - sets base directory for mysqldb, domains, clamd, inquery
+                 directory
+--qmaildir     - sets base directory for alias, autoturn, qscanq, queue
+                 directory
 .EE
 
 .SH RETURN VALUE
@@ -1108,3 +1123,8 @@ Known values for OPTION are:
 .SH "SEE ALSO"
 create_services(8), IndiMail(7), initsvc(1), svscan(8), svstat(8), svc(8),
 supervise(8), multilog(8), indimail-services(7), qmail-showctl(8)
+drwxrwxr-x   5 root     indimail 4096 Mar 16 23:47 domains
+drwxrwx---   2 indimail qmail    4096 Mar 17 07:31 inquery
+drwxr-xr-x.  4 mysql    mysql    4096 Dec  6 20:44 mysqldb
+drwxr-x---   3 qscand   qscand   4096 Mar 14 12:03 qscanq
+drwxr-xr-x. 20 root     qmail    4096 Mar 14 12:03 queue
