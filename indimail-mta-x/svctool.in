@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.663 2023-03-11 16:14:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.664 2023-03-17 20:51:51+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.663 2023-03-11 16:14:07+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.664 2023-03-17 20:51:51+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -63,7 +63,7 @@ Known values for OPTION are:
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
-  [--authsmtp --forceauthsmtp --authall --enable-cram]
+  [--authsmtp --forceauthsmtp --enablecram --authall]
   [--chkrecipient --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
@@ -939,6 +939,8 @@ Known values for OPTION are:
   [--mysqlPrefix=mysqlPrefix]
   [--mysqlhost=mysqlhost --mysqluser=mysqluser --mysqlpass=mysqlpass]
   [--mysqlport=port | --mysqlsocket=socket]
+  [--cntrldir=cntrl_path]
+  [--sysconfdir=sysconfdir]
   [--databasedir=databasedir]
   [--use-grant]
   [--stdout]
@@ -966,6 +968,8 @@ Known values for OPTION are:
                    This can also be a remote user i.e. &postmaster@indimail.org
   common_name    - Common Name (CN) for server
   days           - Number of days for which the Certificate should be valid
+  cntrl_path     - Path where Qmail control files are stored
+  sysconfdir     - Path for config files
   certdir        - Directory in which new certificates will be placed
   update-certs   - Update CERTDIR, CERTFILE and TLSCACHE for services using them
   ca_path_dir    - Directory having CA certificate
@@ -1027,6 +1031,14 @@ Known values for OPTION are:
 --version
 
   output version information
+
+Global Directory Options
+
+--cntrldir     - sets directory for indimail/qmail control files
+--indimaildir  - sets base directory for mysqldb, domains, clamd, inquery
+                 directory
+--qmaildir     - sets base directory for alias, autoturn, qscanq, queue
+                 directory
 EOF
 exit $1
 }
@@ -1594,8 +1606,17 @@ else
 fi
 }
 
+# This creates
+# sysconfdir/tcp/tcp.*
+# sysconfdir/tcp/tcp.*.cdb
+# sysconfdir/host.mysql
+# qmailhome/domains
+# qmailhome/alias
 default_indimail_control()
 {
+if [ $nooverwrite -eq 1 ] ; then
+	return 0
+fi
 if [ -z "$CONTROLDIR" ] ; then
 	CONTROLDIR=$sysconfdir/control
 fi
@@ -5529,7 +5550,7 @@ fi
 (
 dump_run_header
 echo "exec 2>&1"
-echo "socket_dir=\`dirname \$(grep socket $sysconfdir/indimail.cnf 2>/dev/null| head -1 | cut -d= -f2) 2>/dev/null\`"
+echo "socket_dir=\`dirname \$(grep \"socket.* = \" $conf_file 2>/dev/null| head -1 | cut -d= -f2) 2>/dev/null\`"
 echo "if [ -z \"\$socket_dir\" ] ; then"
 echo "    socket_dir=`dirname $mysqlSocket`"
 echo "fi"
@@ -5548,6 +5569,7 @@ echo "exec $QmailBinPrefix/bin/softlimit -o 1024 -p 1024 \\"
 echo "$QmailBinPrefix/bin/setuidgid mysql \$MYSQL_BASE/$mysqld --defaults-file=$conf_file \\"
 echo "--port=$port --basedir=\$MYSQL_BASE \\"
 echo "--datadir=\$DATABASE/data \\"
+check_mysqld_veriable --skip-mysqlx 1
 check_mysqld_variable --memlock 1
 #check_mysqld_variable --ssl 1
 check_mysqld_variable --require-secure-transport 1
@@ -5569,7 +5591,7 @@ check_mysqld_variable --log-queries-not-using-indexes 1
 # the errors are written to stderr (usually, the command line).
 # Few mysql-community have a bug where if you don't have --log-error
 # Error-log destination "stderr" is not a file. Can not restore error log messages from previous run.
-check_mysqld_variable --log-error=\$DATABASE/logs/mysql-error.log 1
+#check_mysqld_variable --log-error=\$DATABASE/logs/mysql-error.log 1
 check_mysqld_variable --log-error-verbosity=2 1
 if [ $mariadb -eq 1 ] ; then
 check_mysqld_variable --log-warnings=2 1
@@ -5730,6 +5752,7 @@ else
 	check_mysqld_ini_variable "ssl" 1
 fi
 check_mysqld_ini_variable "require_secure_transport = ON" 1
+check_mysqld_ini_variable "mysqlx = 0" 1
 check_mysqld_ini_variable "explicit_defaults_for_timestamp=TRUE" 1
 echo "user     = mysql"
 echo "socket   = $mysqlSocket"
@@ -9531,6 +9554,11 @@ while test $# -gt 0; do
 	--servicedir=*)
 	servicedir=$optarg
 	;;
+	--qmaildir=*)
+	qmaildir=$optarg
+	QmailHOME=$qmaildir
+	export QmailHOME
+	;;
 	--cntrldir=*)
 	slash=`echo $optarg | cut -c1`
 	if [ " $slash" = " /" ] ; then
@@ -10587,9 +10615,17 @@ case $option in
 			echo "mysqld: No such File or directory" 1>&2
 			exit 1
 		fi
+		if [ $nooverwrite -eq 1 ] ; then
+			echo "conf_file exists" 1>&2
+			exit 1
+		fi
+		if [ -n "$mysysconfdir" ] ; then
+			sysconfdir=$mysysconfdir
+		fi
 		conf_file="$DESTDIR"$sysconfdir/indimail.cnf
 		mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
-		echo "Creating MySQL config for MySQL $mysql_version prefix=$mysqlPrefix socket=$mysqlSocket port=$mysql_port dbdir=$databasedir"
+		echo "Creating MySQL config $conf_file for MySQL $mysql_version prefix=$mysqlPrefix socket=$mysqlSocket port=$mysql_port dbdir=$databasedir"
+		echo conf_file=$conf_file
 		create_mysql_config > $TMPDIR/config.cnf.$$
 		conf_dir=`dirname $conf_file`
 		if [ ! -d $conf_dir ] ; then

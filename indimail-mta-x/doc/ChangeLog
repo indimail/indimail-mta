@@ -126,6 +126,8 @@ multi-signature generation
 70. recipients.c: fixed bug with string comparisions
 - 13/03/2023
 71. dknewkey.sh: use fold command to split public key string
+- 17/03/2023
+72. svctool.in: fixed using sysconfdir for indimail.cnf
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
