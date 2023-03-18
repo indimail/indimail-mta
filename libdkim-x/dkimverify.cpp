@@ -1122,7 +1122,9 @@ SelectorInfo::Parse(char *Buffer)
 			return DKIM_SELECTOR_INVALID;	/*- todo: maybe create a new error code for unsupported hash algorithm */
 	}
 	/*- key type a= -*/
-	if (values[3] != NULL) {
+	if (values[3] == NULL)
+		method = DKIM_ENCRYPTION_RSA; /*- equivalent to k=rsa in selector */
+	else {
 		/* key type MUST be "rsa" or "ed25519" */
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		if (strcmp(values[3], "rsa") && strcmp(values[3], "ed25519"))
@@ -1179,7 +1181,7 @@ SelectorInfo::Parse(char *Buffer)
 		char           *qq; /*- public key data */
 
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-		if (!strcmp(values[3], "ed25519")) {
+		if (values[3] && !strcmp(values[3], "ed25519")) {
 			strcpy(ed25519, "MCowBQYDK2VwAyEA");
 			if (strlen(values[4]) > 44)
 				return DKIM_SELECTOR_PUBLIC_KEY_INVALID;
@@ -1298,13 +1300,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.31 2023-02-13 10:01:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.32 2023-03-18 09:52:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.32  2023-03-18 09:52:00+05:30  Cprogrammer
+ * Fixed SIGSEGV with missing k= tag in DKIM txt record
+ *
  * Revision 1.31  2023-02-13 10:01:35+05:30  Cprogrammer
  * fixed multi-signature verfication (rsa+ed25519)
  *
