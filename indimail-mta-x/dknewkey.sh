@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.19 2023-03-13 16:37:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.20 2023-03-20 09:18:08+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -17,33 +17,21 @@ usage()
 }
 
 # split a long string into multiple strings
-# of length 255 or less. This uses the
-# fold command
+# of length 255 or less.
+# Credits: J
+# See https://notes.sagredo.eu/en/qmail-notes-185/configuring-dkim-for-qmail-92.html#comment2961
 split_str()
 {
-	if [ -n "$2" ] ; then
-		j=4
-		k=6
-	else
-		j=3
-		k=5
-	fi
-	count=1
-	str=$(echo -n "v=DKIM1; k=$1;$2 p=$3"|fold -w255)
-	for i in $str
+	local INPUT="$1"
+	local LEN=$(printf "$INPUT" | wc -c)
+	local COUNT=$((LEN / 255))
+	for i in $(seq 0 $COUNT)
 	do
-		if [ $count -eq 1 ] ; then
-			echo -n "\"$i "
-		elif [ $count -lt $j ] ; then
-			echo -n "$i "
-		elif [ $count -eq $j ] ; then
-			echo -n "$i\" "
-		elif [ $count -lt $k ] ; then
-			echo -n "\"$i\" "
-		else
-			echo -n "\"$i\""
+		LINE=$(echo "$INPUT" | cut -c $((i * 255 + 1))-$(((i + 1) * 255)))
+		if [ $i -ne 0 ]; then
+			printf " "
 		fi
-		count=$(expr $count + 1)
+		printf "\"%s\"" "${LINE}"
 	done
 }
 
@@ -61,7 +49,7 @@ write_pub_key()
 		printf "%s._domainkey.%s. IN TXT (\"v=DKIM1; k=%s;%s p=%s\")\n" "$selector" "$domain" "$ktype" "$t" "$pubkey"
 	else
 		printf "%s._domainkey.%s. IN TXT (" "$selector" "$domain"
-		split_str "$ktype" "$t" "$pubkey"
+		split_str "v=DKIM1; k=$ktype;$t p=$pubkey"
 		printf ")\n"
 	fi
 }
@@ -285,6 +273,9 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.20  2023-03-20 09:18:08+05:30  Cprogrammer
+# new split_str function REF: sagredo.edu comment2961
+#
 # Revision 1.19  2023-03-13 16:37:10+05:30  Cprogrammer
 # use fold command to split public key string
 #
