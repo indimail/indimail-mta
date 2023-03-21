@@ -93,7 +93,7 @@ main(int argc, char **argv)
 				continue;
 			}
 			if (errno != error_noent) {
-				strerr_warn4(WARN, "unable to open ", dir, "/supervise/control: ", 0);
+				strerr_warn4(WARN, "unable to open ", dir, "/supervise/control: ", &strerr_sys);
 				exit_stat = 1;
 				continue;
 			}

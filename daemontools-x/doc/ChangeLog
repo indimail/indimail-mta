@@ -29,6 +29,8 @@ Release 1.1.2 Start 20/02/2023 End --/--/2023
 15. svps: added -t, --term option
 16. installer.c: changed string warning: to warn:
 17. qmailctl: supress echo when not running on terminal
+- 21/03/2023
+18. svc: display system error for error opening supervise/control
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023
