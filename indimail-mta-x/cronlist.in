@@ -3,7 +3,7 @@
 #
 # Rotate the logs at midnight
 5 01 * * * root @prefix@/bin/svc -a @servicedir@/*/log > /dev/null 2>&1
-0 01 * * * root @prefix@/sbin/svctool --report=all --attach --postmaster=postmaster
+6 10 * * * root @prefix@/sbin/svctool --report=all --attach --postmaster=postmaster
 #
 # qmail-smtpd TLS
 #
