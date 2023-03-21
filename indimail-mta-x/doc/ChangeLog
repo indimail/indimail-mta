@@ -134,6 +134,8 @@ multi-signature generation
 75. svctool: updated logging options for mysqld service
 76. svctool: create logrotate.mysql for rotating mysqld logs in cron
 77. svctool: use sysconfdir variable for indimail.cnf
+- 21/03/2023
+78. svctool: new function do_exit to premature exit normally
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

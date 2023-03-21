@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.665 2023-03-20 09:30:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.666 2023-03-21 12:26:45+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.665 2023-03-20 09:30:52+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.666 2023-03-21 12:26:45+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1074,7 +1074,7 @@ if [ -f $conf_file ] ; then
 		/bin/rm -f $temp_file
 	fi
 else
-	echo "Creating $conf_file"
+	echo "change_config: Creating $conf_file"
 	/bin/mv $temp_file $conf_file
 fi
 }
@@ -10378,6 +10378,19 @@ while test $# -gt 0; do
 	shift
 done
 
+do_exit()
+{
+	if [ ! " $prog_args" = " " ] ; then
+		if [ " $nolog" = " " ] ; then
+			if [ ! -d "$DESTDIR"$LOGDIR ] ; then
+				/bin/mkdir -p "$DESTDIR"$LOGDIR
+			fi
+			echo "`date` $prog_args" >> "$DESTDIR"$LOGDIR/svctool.log
+		fi
+	fi
+	exit 0
+}
+
 #
 # Main
 #
@@ -10686,7 +10699,7 @@ case $option in
 		fi
 		change_config $conf_file $TMPDIR/config.cnf.$$ 1
 		if [ -n "$mysysconfdir" ] ; then
-			return 0
+			do_exit
 		fi
 		echo $mysql_version |grep MariaDB > /dev/null 2>&1
 		if [ $? -eq 0 ] ; then
@@ -11752,13 +11765,5 @@ case $option in
 	fi
 	;;
 esac
-
-if [ ! " $prog_args" = " " ] ; then
-	if [ " $nolog" = " " ] ; then
-		if [ ! -d "$DESTDIR"$LOGDIR ] ; then
-			/bin/mkdir -p "$DESTDIR"$LOGDIR
-		fi
-		echo "`date` $prog_args" >> "$DESTDIR"$LOGDIR/svctool.log
-	fi
-fi
+do_exit
 exit 0
