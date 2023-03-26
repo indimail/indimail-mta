@@ -1,5 +1,5 @@
 /*
- * $Id: serialcmd.c,v 1.7 2022-12-18 12:29:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: serialcmd.c,v 1.8 2023-03-26 08:23:01+05:30 Cprogrammer Exp mbhangui $
  *
  * serialcmd -- apply a command to a mail message.
  * Copyright 1999,  Len Budney
@@ -288,7 +288,7 @@ runcmd(char **cmd, int fd, stralloc *fnam)
 			strnum1[fmt_ulong(strnum1, pid)] = 0;
 			strerr_die3x(111, FATAL, strnum1, ": waitpid surprise");
 		}
-		if (!(i = wait_handler(status, &werr))) {
+		if (!(i = wait_handler(status, &werr)) && werr) {
 			strnum1[fmt_ulong(strnum1, pid)] = 0;
 			strnum2[fmt_int(strnum2, werr)] = 0;
 			strerr_warn4(WARN, strnum1, wait_stopped(status) ? ": stopped by signal " : ": started by signal ", strnum2, 0);
@@ -308,6 +308,7 @@ runcmd(char **cmd, int fd, stralloc *fnam)
 			strerr_warn4(WARN, strnum1, ": normal exit return status ", strnum2, 0);
 			r = i;
 		}
+		break;
 	}
 	result(fnam, r, msg);
 }
@@ -426,6 +427,9 @@ main(int argc, char *argv[])
 
 /*
  * $Log: serialcmd.c,v $
+ * Revision 1.8  2023-03-26 08:23:01+05:30  Cprogrammer
+ * fixed code for wait_handler
+ *
  * Revision 1.7  2022-12-18 12:29:59+05:30  Cprogrammer
  * handle wait status with details
  *
@@ -452,7 +456,7 @@ main(int argc, char *argv[])
 void
 getversion_serialcmd_c()
 {
-	static char    *x = "$Id: serialcmd.c,v 1.7 2022-12-18 12:29:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialcmd.c,v 1.8 2023-03-26 08:23:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

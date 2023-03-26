@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.37 2022-12-18 12:31:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.38 2023-03-26 01:52:43+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -700,7 +700,7 @@ pclose_inject(int fdout)
 		}
 		if (i != inject_pid)
 			strerr_die2x(111, FATAL, "waitpid surprise");
-		if (!(i = wait_handler(status, &werr)))
+		if (!(i = wait_handler(status, &werr)) && werr)
 			continue;
 		else
 		if (werr == -1)
@@ -714,6 +714,7 @@ pclose_inject(int fdout)
 			strnum[fmt_int(strnum, i)] = 0;
 			strerr_die3x(111, FATAL, "qmail-inject exit code ", strnum);
 		}
+		break;
 	}
 }
 
@@ -1249,13 +1250,16 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.37 2022-12-18 12:31:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.38 2023-03-26 01:52:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.38  2023-03-26 01:52:43+05:30  Cprogrammer
+ * fixed code using wait_handler.
+ *
  * Revision 1.37  2022-12-18 12:31:42+05:30  Cprogrammer
  * handle wait status with details
  *

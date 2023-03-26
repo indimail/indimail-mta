@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.9 2023-01-11 08:18:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sslerator.c,v 1.10 2023-03-26 08:23:16+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -384,7 +384,7 @@ main(int argc, char **argv)
 			strerr_warn3(FATAL, strnum1, ": waitpid surprise: ", 0);
 			break;
 		}
-		if (!(r = wait_handler(status, &werr))) {
+		if (!(r = wait_handler(status, &werr)) && werr) {
 			if (verbose) {
 				strnum1[fmt_ulong(strnum1, pid)] = 0;
 				strnum2[fmt_int(strnum2, werr)] = 0;
@@ -412,6 +412,7 @@ main(int argc, char **argv)
 			}
 			ret = r;
 		}
+		break;
 	} /*- for (; pid = waitpid(-1, &status, WNOHANG | WUNTRACED);) -*/
 	if (n)
 		_exit(n);
@@ -435,13 +436,16 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.9 2023-01-11 08:18:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.10 2023-03-26 08:23:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.10  2023-03-26 08:23:16+05:30  Cprogrammer
+ * fixed code for wait_handler
+ *
  * Revision 1.9  2023-01-11 08:18:09+05:30  Cprogrammer
  * added -N option to allow client side renegotiation
  *

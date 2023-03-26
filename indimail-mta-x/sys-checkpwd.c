@@ -1,5 +1,5 @@
 /*
- * $Id: sys-checkpwd.c,v 1.18 2023-02-22 00:01:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.19 2023-03-26 08:23:19+05:30 Cprogrammer Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
@@ -107,7 +107,7 @@ runcmmd(char *cmmd)
 			strerr_warn3(FATAL, strnum1, ": waitpid surprise: ", 0);
 			continue;
 		}
-		if (!(i = wait_handler(status, &werr))) {
+		if (!(i = wait_handler(status, &werr)) && werr) {
 			if (debug) {
 				strnum1[fmt_ulong(strnum1, pid)] = 0;
 				strnum2[fmt_int(strnum2, werr)] = 0;
@@ -135,6 +135,7 @@ runcmmd(char *cmmd)
 			}
 			retval = i;
 		}
+		break;
 	} /*- for (retval = -1;;) */
 	return (retval);
 }
@@ -324,7 +325,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.18 2023-02-22 00:01:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.19 2023-03-26 08:23:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -333,6 +334,9 @@ getversion_sys_checkpwd_c()
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.19  2023-03-26 08:23:19+05:30  Cprogrammer
+ * fixed code for wait_handler
+ *
  * Revision 1.18  2023-02-22 00:01:10+05:30  Cprogrammer
  * sys-checkpwd.c: replaced strerr_warn with subprintf
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qfilter.c,v 1.19 2022-12-18 11:50:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qfilter.c,v 1.20 2023-03-26 08:22:44+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -333,7 +333,7 @@ run_filters(const command * first)
 			}
 			if (i != pid)
 				_exit(QQ_WAITPID_SURPRISE);
-			if (!(i = wait_handler(status, &werr)))
+			if (!(i = wait_handler(status, &werr)) && werr)
 				continue;
 			else
 			if (werr == -1)
@@ -353,6 +353,7 @@ run_filters(const command * first)
 				strnum[fmt_int(strnum, i)] = 0;
 				custom_error("qmail-qfilter", "Z", "non zero exit status", strnum, "X.3.0");
 			}
+			_exit(i);
 		} /*- for (;;) */
 		move_unless_empty(MSGOUT, MSGIN, c->next, &msg_len);
 		move_unless_empty(ENVOUT, ENVIN, c->next, &env_len);
@@ -386,7 +387,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.19 2022-12-18 11:50:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.20 2023-03-26 08:22:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -395,6 +396,9 @@ getversion_qmail_qfilter_c()
 
 /*
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.20  2023-03-26 08:22:44+05:30  Cprogrammer
+ * fixed code for wait_handler
+ *
  * Revision 1.19  2022-12-18 11:50:05+05:30  Cprogrammer
  * handle wait status with details
  *
