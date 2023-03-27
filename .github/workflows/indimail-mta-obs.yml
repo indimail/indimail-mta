@@ -8,6 +8,7 @@ on:
       - '**/catChangeLog'
       - .github/workflows/indimail-mta-obs.yml
       - '!**/indimail-mta-x/qmail-perf/*'
+      - '!**/indimail-mta-x/tests/*'
       - '!**/doc/*'
       - '!**.md'
       - '!**/*.freebsd.yml'

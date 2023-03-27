@@ -11,6 +11,7 @@ on:
       - '!**/libdkim-x/libdkim.spec.in'
       - '!**/libdkim-x/libsrs2.spec.in'
       - '!**/indimail-mta-x/qmail-perf/*'
+      - '!**/indimail-mta-x/tests/*'
       - '!**/indimail-mta-x/debian/*'
       - '!**/libdkim-x/debian/*'
       - '!**/libsrs2-x/debian/*'
