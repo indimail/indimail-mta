@@ -1323,6 +1323,7 @@ sudo /bin/rm -rf $logdir
 sudo /bin/rm -rf $testdir/queue
 sudo /bin/rm -rf $testdir/sleep.out
 sudo /bin/rm -rf $testdir/svscan.out
+sudo /bin/rm -rf $testdir/tcpclient.smtp
 sudo /bin/rm -rf $sysconfdir/users
 echo
 echo "All $tcount tests succeeded"
