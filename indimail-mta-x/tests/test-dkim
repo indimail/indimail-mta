@@ -13,6 +13,7 @@ dk_filter=$bindir/dk-filter
 dknewkey=$bindir/dknewkey
 nokeyerror=35
 out=/dev/null
+tcount=0
 
 if [ ! -d $domainkey_dir ] ; then
 	sudo mkdir -p $domainkey_dir
@@ -128,6 +129,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
 fi
+tcount=$(expr $tcount + 1)
 
 failed=0
 echo "testing multi-signature real domain $real_domain (rsa4096+ed25519) signing+verification by dkim with selector from dns"
@@ -171,6 +173,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
 fi
+tcount=$(expr $tcount + 1)
 
 failed=0
 echo "testing multi-signature real domain $real_domain (rsa4096+ed25519) signing by qmail-dkim, verification by dkim with selector from dns"
@@ -219,6 +222,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
 fi
+tcount=$(expr $tcount + 1)
 
 failed=0
 echo "testing real domain $real_domain (rsa2048+rsa4096+ed25519) using qmail-dkim with selector from dns"
@@ -288,6 +292,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $qmail_dkim with selector from dns"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing dkim with different key types (rsa2048+rsa4096+ed25519) signing+verification by dkim"
 failed=0
@@ -355,6 +360,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for $dkim with different key types (rsa+ed25519)"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing multi-signature signing+verification by dkim"
 failed=0
@@ -418,6 +424,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for  multi-signature signing+verification by $dkim"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing multi-signature signing by qmail-dkim + verification by dkim DKIMSIGNEXTRA in env"
 failed=0
@@ -487,6 +494,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for  multi-signature signing by $qmail_dkim + verification by $dkim DKIMSIGNEXTRA in env"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing multi-signature signing by qmail-dkim + verification by dkim DKIMSIGNEXTRA in dkimkeys"
 (
@@ -557,6 +565,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for  multi-signature signing by $qmail_dkim + verification by $dkim DKIMSIGNEXTRA in dkimkeys"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing multi-signature signing+verification by qmail-dkim"
 failed=0
@@ -630,6 +639,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for  multi-signature signing+verification by $qmail_dkim"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing multi-signature signing+verification by dk-filter"
 failed=0
@@ -705,6 +715,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for  multi-signature signing+verification by dk-filter"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing qmail-dkim signing+verification by qmail-dkim"
 failed=0
@@ -871,6 +882,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for $qmail_dkim signing+verification by $qmail_dkim"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing dk-filter signing"
 failed=0
@@ -961,6 +973,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for dk-filter signing"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing dk-filter signing+verification by dk-filter"
 failed=0
@@ -1026,6 +1039,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for dk-filter signing+verification by dk-filter"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing dkimkeys control file feature"
 failed=0
@@ -1139,6 +1153,7 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for dkimkeys"
 fi
+tcount=$(expr $tcount + 1)
 
 echo "testing multi-signature signing+verification by dk-filter DKIMSIGNEXTRA in dkimkeys"
 (
@@ -1217,7 +1232,8 @@ if [ $failed -eq 1 ] ; then
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for  multi-signature signing+verification by dk-filter DKIMSIGNEXTRA in dkimkeys"
 fi
+tcount=$(expr $tcount + 1)
 
 #sudo /bin/rm -f $domainkey_dir
-echo "All Tests succeeded"
+echo "All $tcount tests succeeded"
 exit 0
