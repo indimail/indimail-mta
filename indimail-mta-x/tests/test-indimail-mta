@@ -48,7 +48,7 @@ function check_mail()
 	) >> $logdir/mail/mail.log 2>&1
 }
 
-function check_mail_dkim()
+function check_mail_header()
 {
 	count=0
 	ret=1
@@ -58,11 +58,12 @@ function check_mail_dkim()
 		mcount=$(ls $maildir/new | wc -l)
 		if [ $mcount -gt 0 ] ; then
 			mail_file=$(ls -lt $maildir/new|head -2|tail -1|awk '{print $9}')
-			grep "DKIM-Status: good" $maildir/new/$mail_file
+			grep "$1" $maildir/new/$mail_file
 			if [ $? -eq 0 ] ; then
 				/bin/rm -f $maildir/new/$mail_file
 				return 0
 			else
+				cat $maildir/new/$mail_file
 				/bin/rm -f $maildir/new/$mail_file
 				return 1
 			fi
@@ -136,6 +137,8 @@ function setup_config()
 	sudo /usr/sbin/svctool --cntrldir=$cntrldir --config=qmail
 	sudo /usr/sbin/svctool --certdir=$certdir    --config=cert \
 		--postmaster=postmaster@$HOSTNAME --common_name=$HOSTNAME
+	cp /etc/indimail/bogofilter.cf.example $sysconfdir
+	sudo /usr/sbin/svctool --sysconfdir=$sysconfdir --config=bogofilter
 	sudo chown -R $user $cntrldir
 	echo @$HOSTNAME > $cntrldir/nodnscheck
 	tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16 > $cntrldir/batvkey
@@ -342,7 +345,11 @@ function start_tcpserver_smtp()
 		ENABLE_CRAM=1 \
 		DEBUG=1 \
 		DEBUG_LOGIN=1 \
-		QMAILQUEUE=$sbindir/qmail-dkim \
+		QMAILQUEUE="$sbindir/qmail-dkim $sbindir/qmail-spamfilter" \
+		SPAMFILTER="/usr/bin/bogofilter -p -d /etc/indimail" \
+		SPAMEXITCODE=0 \
+		REJECTSPAM=0 \
+		MAKE_SEEKABLE=1 \
 		DKIMVERIFY="" \
 		$tcpserver -u qmaild -g qmail -v -HR 0 2025 $qmail_smtpd $HOSTNAME /tmp/authsmtp /sbin/sys-checkpwd /bin/false > $logdir/smtpd/smtpd.log 2>&1
 	) &
@@ -416,12 +423,33 @@ function test_smtp_dkimverify()
 	cat $testdir/mail.txt|dkim -z 2 -s $dkim_key
 	cat $testdir/mail.txt && rm -f $testdir/mail.txt
 	) | swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port 2025
-	check_mail_dkim
+	check_mail_header "DKIM-Status: good"
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing mail using SMTP for DKIM verification succeeded"
 	else
 		echo "  testing mail using SMTP for DKIM verification failed"
+		sudo kill $send_pid $smtp_pid
+		exit 1
+	fi
+}
+
+function test_smtp_bogofilter()
+{
+	(
+	echo "To: $user@$HOSTNAME"
+	echo "From: $user@$HOSTNAME"
+	echo "Subject: Testing DKIM"
+	echo "Date: $(date -R)"
+	echo
+	echo "This is an email to test DKIM"
+	) | swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port 2025
+	check_mail_header "X-Bogosity"
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing mail using SMTP for spamfilter succeeded"
+	else
+		echo "  testing mail using SMTP for spamfilter failed"
 		sudo kill $send_pid $smtp_pid
 		exit 1
 	fi
@@ -1248,6 +1276,7 @@ function do_without_svscan()
 	test_smtp_tls
 	test_smtp_notls
 	test_smtp_dkimverify
+	test_smtp_bogofilter
 	test_smtp_auth_login
 	test_smtp_auth_plain
 	test_smtp_auth_cram_md5
