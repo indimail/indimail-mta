@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.667 2023-03-28 17:53:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.668 2023-03-28 22:13:53+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.667 2023-03-28 17:53:23+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.668 2023-03-28 22:13:53+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -11002,10 +11002,19 @@ case $option in
 		;;
 
 		bogofilter)
+		if [ ! -f $mysysconfdir/bogofilter.cf.example -a -f $sysconfdir/bogofilter.cf.example ] ; then
+			if [ ! -d $mysysconfdir ] ; then
+				mkdir -p $mysysconfdir
+			fi
+			/bin/cp -p $sysconfdir/bogofilter.cf.example $mysysconfdir
+		fi
+		if [ -n "$mysysconfdir" ] ; then
+			sysconfdir=$mysysconfdir
+		fi
 		conf_file="$DESTDIR"$sysconfdir/bogofilter.cf
 		create_bogofilter_conf > $TMPDIR/config.cnf.$$
 		if [ $? -eq 0 ] ; then
-			change_config $conf_file $TMPDIR/config.cnf.$$
+			change_config $conf_file $TMPDIR/config.cnf.$$ >/dev/null
 		else
 			/bin/rm -f $TMPDIR/config.cnf.$$
 		fi
