@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-queue-clients 7
 
 .SH NAME
@@ -21,7 +22,7 @@ message from descriptor 0. It then reads envelope information from
 descriptor 1. This allow a qmail-queue frontend to intercept mail message
 before it goes into the outgoing queue. This opens the possibility to act
 on the mail message before it reaches the outgoing queue. indimail-mta
-provides \fBqmail-dk\fR(8), \fBqmail-dkim\fR(8), \fBqmail-spamfilter\fR(8),
+provides \fBqmail-dkim\fR(8), \fBqmail-spamfilter\fR(8),
 \fBqmail-multi\fR(8), and \fBqmail-nullqueue\fR(8) as qmail queue
 frontends.
 
@@ -90,7 +91,6 @@ The following programs are qmail-queue frontends and get called by
 the above programs by setting the QMAILQUEUE environment variable.
 
 .nf
-\p\fBqmail-dk\fR(8)         - sign/verify using domainkeys
 \p\fBqmail-dkim\fR(8)       - sign/verify using DKIM
 \p\fBqmail-spamfilter\fR(8) - spam filter
 \p\fBqmail-multi\fR(8)      - queue multiplexor and filter

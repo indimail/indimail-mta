@@ -1,27 +1,38 @@
+.\" vim: tw=75
 .TH qmail-dkim 8
 .SH NAME
-qmail-dkim \- sign/verify using DKIM (SSP/ADSP optionally) and queue a mail message for delivery
+qmail-dkim \- sign/verify using DKIM (SSP/ADSP optionally) and queue a mail
+message for delivery
 
 .SH SYNOPSIS
-.B qmail-dkim
+\fBqmail-dkim\fR [ \fIqqf\fR] \fIarg1\fR] [\fIarg2\fR] ... ]
 
 .SH DESCRIPTION
 \fBqmail-dkim\fR has the same interface as \fBqmail-queue\fR except that it
 inserts an appropriate DKIM header (rfc4871, rfc6376) before it queues the
-message. To invoke \fBqmail-dkim\fR, set QMAILQUEUE to point to qmail-dkim
-in the environment when you send or receive email.
+message. To invoke \fBqmail-dkim\fR, set QMAILQUEUE to full path of
+qmail-dkim in the environment, when you send or receive email.
 
-\fBqmail-dkim\fR will call \fBqmail-multi\fR. To invoke an executable other
-than \fBqmail-multi\fR set DKIMQUEUE=bin/qmail-queue for example.
+After inserting the DKIM header, \fBqmail-dkim\fR will call
+\fBqmail-multi\fR as a default, to deposit message in the queue. If you
+want to call something pass it as in the command line arguments to
+\fBqmail-dkim\fR or set the \fBDKIMQUEUE\fR environment variable. Command
+line arguments takes precedence over environment variable.
+
+.EX
+DKIMQUEUE=PREFIX/sbin/qmail-queue
+.EE
+
+Will make qmail-dkim call qmail-queue instead of qmail-multi.
 
 \fBqmail-dkim\fR supports RSA-SHA1, RSA-SHA256 and ED25519-SHA256 (rfc8463)
 encryption methods for signing and verification. By default RSA-SHA256 is
 used.
 
 \fBqmail-dkim\fR supports DKIM signing and verification and can optionally
-use \fBSender Signing Practice (SSP)\fR or \fBAuthor Domain Signing Practice\fR.
-\fBqmail-dkim\fR uses libdkim and OpenSSL libraries for signing and
-verification.
+use \fBSender Signing Practice (SSP)\fR or \fBAuthor Domain Signing
+Practice\fR. \fBqmail-dkim\fR uses libdkim and OpenSSL libraries for
+signing and verification.
 
 To sign a message, set the \fBDKIMSIGN\fR environment variable to the
 pathname of the private key that will be used to sign the message. You can

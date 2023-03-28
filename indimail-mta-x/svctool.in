@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.666 2023-03-21 12:26:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.667 2023-03-28 17:53:23+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.666 2023-03-21 12:26:45+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.667 2023-03-28 17:53:23+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2741,8 +2741,8 @@ case "$dkverify_option" in
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ -n  "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter"  > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/SPAMQUEUE
+		echo "$QmailBinPrefix/sbin/qmail-spamfilter $QmailBinPrefix/sbin/qmail-dkim" \
+			> $conf_dir/QMAILQUEUE
 	else
 		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	fi
@@ -2756,8 +2756,8 @@ case "$dkverify_option" in
 	echo > $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ -n  "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter"  > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/SPAMQUEUE
+		echo "$QmailBinPrefix/sbin/qmail-spamfilter $QmailBinPrefix/sbin/qmail-dkim" \
+			> $conf_dir/QMAILQUEUE
 	else
 		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	fi
@@ -3007,8 +3007,8 @@ case "$dksign_option" in
 	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	echo "$private_key" > $conf_dir/DKIMSIGN
 	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/SPAMQUEUE
+		echo "$QmailBinPrefix/sbin/qmail-spamfilter $QmailBinPrefix/sbin/qmail-dkim" \
+			> $conf_dir/QMAILQUEUE
 	else
 		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	fi
@@ -3146,8 +3146,8 @@ case "$dkverify_option" in
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/SPAMQUEUE
+		echo "$QmailBinPrefix/sbin/qmail-spamfilter $QmailBinPrefix/sbin/qmail-dkim" \
+			> $conf_dir/QMAILQUEUE
 	else
 		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	fi
@@ -3161,8 +3161,8 @@ case "$dkverify_option" in
 	> $conf_dir/UNSIGNED_FROM
 	echo > $conf_dir/DKIMVERIFY
 	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/SPAMQUEUE
+		echo "$QmailBinPrefix/sbin/qmail-spamfilter $QmailBinPrefix/sbin/qmail-dkim" \
+			> $conf_dir/QMAILQUEUE
 	else
 		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	fi
@@ -6149,8 +6149,8 @@ case "$dkverify_option" in
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/SPAMQUEUE
+		echo "$QmailBinPrefix/sbin/qmail-spamfilter $QmailBinPrefix/sbin/qmail-dkim" \
+			> $conf_dir/QMAILQUEUE
 	else
 		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	fi
@@ -6164,8 +6164,8 @@ case "$dkverify_option" in
 	echo > $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ -n "$spamfilter" ] ; then
-		echo "$QmailBinPrefix/sbin/qmail-spamfilter" > $conf_dir/QMAILQUEUE
-		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/SPAMQUEUE
+		echo "$QmailBinPrefix/sbin/qmail-spamfilter $QmailBinPrefix/sbin/qmail-dkim" \
+			> $conf_dir/QMAILQUEUE
 	else
 		echo "$QmailBinPrefix/sbin/qmail-dkim" > $conf_dir/QMAILQUEUE
 	fi

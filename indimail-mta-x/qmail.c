@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.35 2023-02-08 18:48:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.36 2023-03-28 17:35:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -9,6 +9,8 @@
 #include <env.h>
 #include <stralloc.h>
 #include <error.h>
+#include <str.h>
+#include <makeargs.h>
 #include "qmail.h"
 #include "auto_prefix.h"
 
@@ -20,6 +22,7 @@ qmail_open(struct qmail *qq)
 	int             pie[2];
 	int             pic[2], e, errfd; /* custom error message from custom error patch by Flavio Curti */
 	char           *x, *binqqargs[2] = { 0, 0 };
+	char          **ptr;
 	stralloc        q = {0};
 
 	if (!(x = env_get("ERROR_FD")))
@@ -64,34 +67,36 @@ qmail_open(struct qmail *qq)
 		if (errfd != -1)
 			close(pic[0]); /*- we want to write error message */
 		if (fd_move(0, pim[0]) == -1)
-			_exit(120);
+			_exit(QQ_PIPE_SOCKET);
 		if (fd_move(1, pie[0]) == -1)
-			_exit(120);
+			_exit(QQ_PIPE_SOCKET);
 		if (errfd != -1) {
 			if (fd_move(errfd, pic[1]) == -1)
-				_exit(120);
+				_exit(QQ_PIPE_SOCKET);
 		}
 		if (chdir("/") == -1)
-			_exit(63);
-		if (!(x = env_get("NULLQUEUE"))) {
-			if (!stralloc_copys(&q, auto_prefix) ||
-					!stralloc_catb(&q, "/sbin/qmail-nullqueue", 21) ||
-					!stralloc_0(&q))
-				_exit(51);
-			binqqargs[0] = q.s;
-		}
-		if (!x)
+			_exit(QQ_CD_ROOT);
+		if (!(x = env_get("NULLQUEUE")))
 			x = env_get("QMAILQUEUE");
 		if (!x) {
 			if (!stralloc_copys(&q, auto_prefix) ||
 					!stralloc_catb(&q, "/sbin/qmail-queue", 17) ||
 					!stralloc_0(&q))
-				_exit(51);
+				_exit(QQ_OUT_OF_MEMORY);
 			binqqargs[0] = q.s;
-		} else
-			binqqargs[0] = x;
-		execv(*binqqargs, binqqargs);
-		_exit(120);
+			ptr = binqqargs;
+		} else {
+			e = str_rchr(x, ' ');
+			if (x[e] && x[e + 1]) { /*- more than one argument */
+				if (!(ptr = makeargs(x)))
+					_exit(QQ_OUT_OF_MEMORY);
+			} else {
+				binqqargs[0] = x;
+				ptr = binqqargs;
+			}
+		}
+		execv(*ptr, ptr);
+		_exit(QQ_EXEC_QMAILQUEUE);
 	}
 	qq->fdm = pim[1];
 	close(pim[0]);
@@ -295,13 +300,18 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.35 2023-02-08 18:48:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.36 2023-03-28 17:35:25+05:30 Cprogrammer Exp mbhangui $";
 
+	x = sccsidmakeargsh;
 	x++;
 }
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.36  2023-03-28 17:35:25+05:30  Cprogrammer
+ * replaced few left-over exit codes with constants from qmail.h
+ * new feature: QMAILQUEUE with one or more arguments
+ *
  * Revision 1.35  2023-02-08 18:48:56+05:30  Cprogrammer
  * use perm_error/temp_error from qmail.h to evaluate perm/temp error
  *

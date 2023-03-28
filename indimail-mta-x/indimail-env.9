@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH indimail-environ 5
 
 .SH NAME
@@ -771,16 +772,16 @@ Set by \fBqmail-local\fR(8), \fBserialcmd\fR(1)k
 
 .TP
 \fIREJECTVIRUS\fR \fIVIRUSFORWARD\fR
-Used by \fBqmail-queue\fR(8). Infected mails will be quarantined to the email
-defined by VIRUSFORWARD. This will work only if REJECTVIRUS is not equal to
-1. Setting VIRUSFORWARD sets the X-Quarantine-ID containing the list of
-original recipient list is added.
+Used by \fBqmail-queue\fR(8). Infected mails will be quarantined to the
+email defined by VIRUSFORWARD. This will work only if REJECTVIRUS is not
+equal to 1. Setting VIRUSFORWARD sets the X-Quarantine-ID containing the
+list of original recipient list is added.
 
 .TP
 \fIRELAYCLIENT\fR
-Used by dnsbl, ofmipd, qmail-dk, \fBqmail-dkim\fR(8), qmail-qmtpd,
-\fBqmail-queue\fR(8), \fBqmail-spamfilter\fR(8), \fBqmail-smtpd\fR(8).
-Set by sendimail, \fBtcpserver\fR(1)
+Used by dnsbl, ofmipd, \fBqmail-dkim\fR(8), qmail-qmtpd,
+\fBqmail-queue\fR(8), \fBqmail-spamfilter\fR(8), \fBqmail-smtpd\fR(8). Set
+by sendimail, \fBtcpserver\fR(1)
 
 .TP
 \fIRELAYCLIENT_NODKIMVERIFY\fR

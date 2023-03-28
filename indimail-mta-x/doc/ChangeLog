@@ -139,6 +139,11 @@ multi-signature generation
 - 26/03/2023
 79. autoresponder.c, doc/ChangeLog, qmail-qfilter.c, serialcmd.c, sslerator.c,
     sys-checkpwd.c: fixed code for wait_handler
+- 28/03/2023
+80. qmail.c: replaced few left-over exit codes with constants from qmail.h
+81. qmail.c: new feature: QMAILQUEUE with one or more arguments
+82. qmulti.c: queue program can be specified on command line
+83. svctool.in: use qmail-dkim qmail-spamfilter chain in QMAILQUEUE
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023

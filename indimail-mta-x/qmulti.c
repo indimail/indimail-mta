@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.64 2022-10-17 19:45:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.65 2023-03-28 17:50:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -72,6 +72,10 @@ qmulti(char *queue_env, int argc, char **argv)
 
 	if (chdir("/") == -1)
 		_exit(QQ_CHDIR);
+	if (argc > 1) {
+		execv(argv[1], argv + 1);
+		_exit(QQ_EXEC_QMAILQUEUE);
+	} else
 	if (queue_env && (ptr = env_get(queue_env)) && *ptr) {
 		binqqargs[0] = ptr;
 		execv(*binqqargs, binqqargs);
@@ -117,6 +121,7 @@ qmulti(char *queue_env, int argc, char **argv)
 		env_put(Queuedir.s);
 		ptr = Queuedir.s + 9;
 	}
+	/* call qmail-queue with queue directory as argv[1] */
 	qqargs[1] = ptr;
 	switch (getfreespace(ptr))
 	{
@@ -125,6 +130,9 @@ qmulti(char *queue_env, int argc, char **argv)
 	case 1: /*- Disk full */
 		_exit(QQ_WRITE_ERR);
 	}
+	if (argc > 1)
+		execv(argv[1], argv + 1);
+	else
 	if ((ptr = env_get("QUEUEPROG"))) {
 		argv[0] = qqargs[0] = ptr;
 		execv(*qqargs, argv);
@@ -202,7 +210,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.64 2022-10-17 19:45:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.65 2023-03-28 17:50:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -211,6 +219,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.65  2023-03-28 17:50:31+05:30  Cprogrammer
+ * queue program can be specified on command line
+ *
  * Revision 1.64  2022-10-17 19:45:03+05:30  Cprogrammer
  * use exit codes defines from qmail.h
  *

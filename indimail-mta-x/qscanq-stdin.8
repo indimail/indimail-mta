@@ -1,196 +1,154 @@
+.\" vim: tw=75
 .TH qscanq-stdin 8
 .SH NAME
 qscanq-stdin \- qmail virus scanner
 .SH SYNOPSIS
-.B qscanq-stdin
-[
-prog
-arg1
-arg2
-arg3 ...
-]
+\fBqscanq-stdin\fR [ prog arg1 arg2 arg3 ...  ]
 
 .SH DESCRIPTION
-.B qscanq-stdin
-is invoked by
-.BR qscanq .
-It ensures that the message on stdin is seekable, extracts its MIME components to the current
+\fBqscanq-stdin\fR is invoked by \fBqscanq\fR. It ensures that the message
+on stdin is seekable, extracts its MIME components to the current
 directory, and runs the virus / bad attachment scanner on them.
 
-Like
-.B qscanq
-and
-.BR qmail-multi ,
-.B qscanq-stdin
-needs no arguments. If arguments are supplied, they are used as the command to run instead of
-.BR qmail-multi .
-In this way, further qmail-multi wrappers--such as spam filters--can be chained with
-.BR qscanq .
+Like \fBqscanq\fR and \fB qmail-multi\fR \fBqscanq-stdin\fR needs no
+arguments. If arguments are supplied, they are used as the command to run
+instead of \fBqmail-multi\fR.  In this way, further qmail-multi
+wrappers--such as spam filters--can be chained with \fBqscanq\fR.
 
-.B qscanq-stdin
-expects an email message on file descriptor 1, its envelope on file descriptor 0, and writes
-nothing to descriptor 2. It returns an exit code which is interpreted by the caller
-(usually
-.B qmail-smtpd
-or
-.B qmail-inject
-).
+\fBqscanq-stdin\fR expects an email message on file descriptor 1, its
+envelope on file descriptor 0, and writes nothing to descriptor 2. It
+returns an exit code which is interpreted by the caller (usually
+\fBqmail-smtpd\fR or \fBqmail-inject\fR).
 
-The first thing
-.B qscanq-stdin
-does is to copy stdin to a file in the current directory named "msg". It then closes and reopens
-the file read-only on file descriptor 0, and unlinks the file. This presents the same interface
-to downstream programs while ensuring that the file is seekable, read-only, and not directly
-accessible to other programs.
+The first thing \fBqscanq-stdin\fR does is to copy stdin to a file in the
+current directory named "msg". It then closes and reopens the file
+read-only on file descriptor 0, and unlinks the file. This presents the
+same interface to downstream programs while ensuring that the file is
+seekable, read-only, and not directly accessible to other programs.
 
-After making stdin seekable, 
-.B qscanq-stdin
-creates a second copy of the message in a file also named "msg". Some viruses are only detected by
+After making stdin seekable, \fBqscanq-stdin\fR creates a second copy of
+the message in a file also named "msg". Some viruses are only detected by
 looking at the raw message, so we need a copy in the working folder.
 
-Once stdin is seekable,
-.B qscanq-stdin
-runs
-.B RipMIME
-to extract the MIME components of stdin into files in the current directory. 
-.B RipMIME
-is run with descriptors 1 and 2 closed, so it can't read the message envelope or print any output.
-If
-.B RipMIME
-fails,
-.B qscanq-stdin
-returns temporary error code 71, resulting in message deferral. After
-.B RipMIME
-exits, stdin is rewound to the start of the file.
+Once stdin is seekable, \fBqscanq-stdin\fR runs \fBRipMIME\fR(1) to extract
+the MIME components of stdin into files in the current directory.
+\fBRipMIME\fR(1) is run with descriptors 1 and 2 closed, so it can't read
+the message envelope or print any output. If \fBRipMIME\fR fails,
+\fBqscanq-stdin\fR returns temporary error code 71, resulting in message
+deferral. After \fBRipMIME\fR exits, stdin is rewound to the start of the
+file.
 
-After \fBRipMIME\fR completes, \fBqscanq-stdin\fR runs bad attachment check or \fBclamdscan\fR
-for the virus scanner, depending on the value of \fBVIRUSCHECK\fR environment variable. The
-viruscanner can be changed by setting the \fBSCANCMD\fR environment variable. All three
-descriptors, 0, 1 and 2, are closed before running run-antivir. If it can't be run, or crashes,
-then \fBqscanq-stdin\fR returns code 71, causing the message to be deferred.
+After \fBRipMIME\fR completes, \fBqscanq-stdin\fR runs bad attachment check
+or \fBclamdscan\fR for the virus scanner, depending on the value of
+\fBVIRUSCHECK\fR environment variable. The viruscanner can be changed by
+setting the \fBSCANCMD\fR environment variable. All three descriptors, 0, 1
+and 2, are closed before running run-antivir. If it can't be run, or
+crashes, then \fBqscanq-stdin\fR returns code 71, causing the message to be
+deferred.
 
-If \fBclamdscan\fR returns code 2, indicating that a virus has been found, then \fBclamdscan\fR
-returns error code 33, permanently rejecting the message. \fBqscanq-stdin\fR will return 34,
-permanently rejecting the message, in case the attachment extension matches any prohibited extensions
+If \fBclamdscan\fR returns code 2, indicating that a virus has been found,
+then \fBclamdscan\fR returns error code 33, permanently rejecting the
+message. \fBqscanq-stdin\fR will return 34, permanently rejecting the
+message, in case the attachment extension matches any prohibited extensions
 in the \fIbadext\fR control file.
 
 If the virus scanning or bad attachment scanning passes all tests,
-.B qscanq-stdin
-will run the command supplied on its command line, or if none is supplied will run
-.BR qmail-multi .
-It also requests cleanup of its working directory by calling
-.B run-cleanq
+\fBqscanq-stdin\fR will run the command supplied on its command line, or if
+none is supplied will run \fBqmail-multi\fR. It also requests cleanup of
+its working directory by calling \fBrun-cleanq\fR
 
-Upon startup,
-.B qscanq-stdin
-sets an alarm for the time specified in conf-ageout (default: 1 hour). When the alarm fires,
-.B qscanq-stdin
-sends SIGKILL to
-.B RipMIME
-or to the virus scanner, whichever may be running, and exits with code 71 (or code 54 if
-.B ripmime
-is killed). Once
-.B qmail-queue
-has started (invoked by
-.B qmail-multi
-), it sets its own alarm, independent of qscanq's alarm (default: 1 day).
-.B qscanq
-will wait forever if need be, so its longest runtime is equal to conf-ageout plus the timeout used
-by
-.BR qmail-queue .
+Upon startup, \fBqscanq-stdin\fR sets an alarm for the time specified in
+conf-ageout (default: 1 hour). When the alarm fires, \fBqscanq-stdin\fR
+sends SIGKILL to \fBRipMIME\fR or to the virus scanner, whichever may be
+running, and exits with code 71 (or code 54 if \fBripmime\fR is killed).
+Once \fBqmail-queue\fR has started (invoked by \fBqmail-multi\fR), it sets
+its own alarm, independent of qscanq's alarm (default: 1 day). \fBqscanq\fR
+will wait forever if need be, so its longest runtime is equal to
+conf-ageout plus the timeout used by \fBqmail-queue\fR
 
 .SH "CONTROL FILES"
 
 .TP 5
-.I badext
-Unacceptable extensions for attachments.
-.B qscanq-stdin
-will reject mail if extensions of attachments in the mail matches lines in
-.IR badext .
-A line in
-.I badext
-may be of the form
-.BR .\fIext ,
-meaning any attachment having the extension
-.IR ext .
-The filename can be overriden by the environment variable BADEXT.
+\fIbadext\fR
+Unacceptable extensions for attachments. \fBqscanq-stdin\fR will reject
+mail if extensions of attachments in the mail matches lines in
+\fIbadext\fR. A line in \fIbadext\fR may be of the form .\fIext\fR, meaning
+any attachment having the extension \fIext\fR. The filename can be
+overriden by the environment variable \fBBADEXT\fR.
 
 .TP 5
-.I badextpatterns
-Gives 
-.B qscanq-stdin 
-the ability to filter E-Mails by comparing the attachment extensions  
-with a REGEX pattern in 
-.IR badextpatterns . 
-Example:
+\fIbadextpatterns\fR
+Gives \fBqscanq-stdin\fR the ability to filter E-Mails by comparing the
+attachment extensions  with a REGEX pattern in \fIbadextpatterns\fR. 
 
+Example:
+.EX
   *.doc
   !document.doc
   [0-9][0-9][0-9][0-9][0-9]@[0-9][0-9][0-9].doc
   *%*
+.EE
 
-.I badextpatterns
-file with this contents stops all mail having attachment with extension .doc
-except for document.doc. It also rejects all mail with extensions like:
-12345@123.doc. Further, any E-Mail with a sender address containing a percent sign
-(%) is rejected. The filename can be overriden by the environment variable BADEXTPATTERNS.
+\fIbadextpatterns\fR file with this contents stops all mail having
+attachment with extension .doc except for document.doc. It also rejects all
+mail with extensions like 12345@123.doc. Further, any E-Mail with a sender
+address containing a percent sign (%) is rejected. The filename can be
+overriden by the environment variable BADEXTPATTERNS.
 
 .SH Environment Variables
 
-.B qscanq-stdin
-sets no environment variables.
-It does pass its environment to
-.B qmail-queue
-(or PROG, if supplied instead). This means that any qmail-queue wrapper must be able to handle its
-environment safely.
+\fBqscanq-stdin\fR sets no environment variables. It does pass its
+environment to \fBqmail-queue\fR (or PROG, if supplied instead). This means
+that any qmail-queue wrapper must be able to handle its environment safely.
 
 If the DEBUG environment variable is set to any value whatsoever, then
-.B qscanq-stdin
-will print diagnostic messages to stderr whenever an error occurs. This is for use in debugging a
-new configuration, and should never be used to capture "extra log information" during runtime.
-If DEBUG is set for
-.BR qscanq ,
-then
-.B qscanq
-will set DEBUG=1 when calling
-.BR qscanq-stdin .
+\fBqscanq-stdin\fR will print diagnostic messages to stderr whenever an
+error occurs. This is for use in debugging a new configuration, and should
+never be used to capture "extra log information" during runtime.  If DEBUG
+is set for \fBqscanq\fR, then \fBqscanq\fR will set DEBUG=1 when calling
+\fBqscanq-stdin\fR.
 
-It should be stressed that the value of DEBUG is ignored. Setting DEBUG to "1", "TRUE", "yes", etc.,
-will turn on debug messages. Setting it to "0", "FALSE", "no", "N", etc., will also turn on debug
-messages. If you don't want debug messages, don't set DEBUG at all.
+It should be stressed that the value of DEBUG is ignored. Setting DEBUG to
+"1", "TRUE", "yes", etc., will turn on debug messages. Setting it to "0",
+"FALSE", "no", "N", etc., will also turn on debug messages. If you don't
+want debug messages, don't set DEBUG at all.
 
-The default scanner to be called is set during compilation in conf-scancmd. This can
-be overriden at run time by the environment variable SCANCMD.
+The default scanner to be called is set during compilation in conf-scancmd.
+This can be overriden at run time by the environment variable SCANCMD.
 
-You can run \fBqscanq\fR with virus checkers other than \fBclamdscan\fR. Just edit conf-scancmd with the
-command-line you want \fBqscanq\fR to use. The command must obey the following rules:
+You can run \fBqscanq\fR with virus checkers other than \fBclamdscan\fR.
+Just edit conf-scancmd with the command-line you want \fBqscanq\fR to use.
+The command must obey the following rules:
 
-1.  The current directory is recursively scanned.
+.LP
+.nr step 1 1
+.IP \n[step] 2
+The current directory is recursively scanned.
 
-2.  The scanner returns a 0 exit code if directory is clean.
+.IP \n+[step]
+The scanner returns a 0 exit code if directory is clean.
 
-3.  The scanner returns a 1 exit code if a virus is found.
+.IP \n+[step]
+The scanner returns a 1 exit code if a virus is found.
 
-4.  The scanner returns a 2 if some runtime error prevented the current directory from being scanned completely.
+.IP \n+[step]
+The scanner returns a 2 if some runtime error prevented the current
+directory from being scanned completely.
+.LP
 
-If your scanner's exit codes do not conform to the specification above, then you will need to
-provide a wrapper which interprets your scanners return codes, and returns the above codes.
-Then edit conf-scancmd or set SCANCMD environment variable with the command-line used to run your
+If your scanner's exit codes do not conform to the specification above,
+then you will need to provide a wrapper which interprets your scanners
+return codes, and returns the above codes.  Then edit conf-scancmd or set
+SCANCMD environment variable with the command-line used to run your
 wrapper.
 
 .SH Return Codes
 
 In addition to the return codes from
-.BR qmail-queue ,
-.B qscanq-stdin
-returns 53 (write error) if it can't create a seekable copy of stdin, and 54 (read error) if it
-can't reopen that file in read-only mode or if
-.B RipMIME
-fails. If
-.B clamdscan
-or
-.B qmail-queue
-fails, it returns code 71 (temporary rejection).
+\fBqmail-queue\fR, \fBqscanq-stdin\fR returns 53 (write error) if it can't
+create a seekable copy of stdin, and 54 (read error) if it can't reopen
+that file in read-only mode or if \fBRipMIME\fR fails. If \fBclamdscan\fR
+or \fBqmail-queue\fR fails, it returns code 71 (temporary rejection).
 
 .SH "SEE ALSO"
 qscanq(8),

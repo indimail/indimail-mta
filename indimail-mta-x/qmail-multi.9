@@ -1,23 +1,28 @@
+.\" vim: tw=75
 .TH qmail-multi 8
 
 .SH NAME
 qmail-multi \- queue multiplexor and filter
 
 .SH SYNOPSIS
-\fBqmail-multi\fR
+\fBqmail-multi\fR [\fIqqf\fR] [\fIarg1\fR] [\fIarg2\fR] ...
 
 .SH DESCRIPTION
 \fBqmail-multi(8)\fR is a queue multiplexor and filter for
 \fBqmail-queue(8)\fR. The multiplexor can be turned on by defining
 environment variable \fBQMAILQUEUE\fR=PREFIX/sbin/qmail-multi. Following
 programs use \fBqmail-multi\fR to deposit the mail to the queue - 
-\fBqmail-dk(8)\fR, \fBqmail-dkim(8)\fR, \fBqmail-qfilter(1)\fR,
-\fBqmail-spamfilter(8)\fR, \fBqscanq-stdin(8)\fR.
+\fBqmail-dkim(8)\fR, \fBqmail-qfilter(1)\fR, \fBqmail-spamfilter(8)\fR,
+\fBqscanq-stdin(8)\fR.
 
-\fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. This can
-be changed by setting environment variable \fBQUEUEPROG\fR to the path of
-any qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want
-to use write your own queue frontend, with the queue path available in
+\fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. One can
+call any other program by passing command line arguments. If passed
+arguments, \fBqmail-queue\fR will call \fIqqf\fR and any arguments after
+\fIqqf\fR will be passed as arguments to \fIqqf\fR. Without any command
+line arguments you can change the program that \fBqmail-multi\fR calls, by
+setting the environment variable \fBQUEUEPROG\fR, to the path of any
+qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want to
+use write your own queue frontend, with the queue path available in
 \fBQUEUEDIR\fR environment variable. if \fBQUEUEDIR\fB is set
 \fBqmail-multi\fR execs \fBqmail-queue\fR (or program defined by
 \fBQUEUEPROG\fR without any processing or setting up any environment
