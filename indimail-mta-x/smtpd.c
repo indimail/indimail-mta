@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.292 2023-03-11 16:09:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.293 2023-03-30 16:10:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.292 $";
+static char    *revision = "$Revision: 1.293 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -622,14 +622,12 @@ saferead(int fd, char *buf, int len)
 	if (r <= 0) {
 #ifdef TLS
 		if (ssl) {
-			if (r)
-				die_read("ssl_timeoutread", myssl_error_str());
 			logerr(1, "client closed connection: ", myssl_error_str(), "\n", 0);
 			logflush();
-			while (SSL_shutdown(ssl) == 0)
-				usleep(100);
-			SSL_free(ssl);
+			ssl_free();
 			ssl = 0;
+			if (r) /*- what's the point in doing this. ssl is already closed */
+				die_read("ssl_timeoutread", myssl_error_str());
 		} else
 		if (r)
 			die_read("timeoutread", 0);
@@ -654,12 +652,10 @@ safewrite(int fd, char *buf, int len)
 	if (r <= 0) {
 #ifdef TLS
 		if (ssl) {
+			ssl_free();
+			ssl = 0;
 			if (r)
 				die_write("ssl_timeoutwrite", myssl_error_str());
-			while (SSL_shutdown(ssl) == 0)
-				usleep(100);
-			SSL_free(ssl);
-			ssl = 0;
 		} else
 			die_write("timeoutwrite", 0);
 #else
@@ -2240,9 +2236,7 @@ smtp_quit(char *arg)
 #endif
 #ifdef TLS
 	if (ssl) {
-		while (SSL_shutdown(ssl) == 0)
-			usleep(100);
-		SSL_free(ssl);
+		ssl_free();
 		ssl = 0;
 	}
 #endif
@@ -2385,6 +2379,12 @@ greetdelay_check(int delay)
 	if (r <= 0) {
 		if (!r)
 			errno = 0;
+#ifdef TLS
+		if (ssl) {
+			ssl_free();
+			ssl = 0;
+		}
+#endif
 		die_read(!r ? "client dropped connection" : 0, 0);
 	}
 	logerr(1, "SMTP Protocol violation - Early Talking\n", 0);
@@ -4829,6 +4829,12 @@ authgetl(void)
 		if (i != 1) {
 			if (!i)
 				errno = 0;
+#ifdef TLS
+			if (ssl) {
+				ssl_free();
+				ssl = 0;
+			}
+#endif
 			die_read("client dropped connection", 0);
 		}
 		if (authin.s[authin.len] == '\n')
@@ -4972,8 +4978,15 @@ authenticate(int method)
 		out("334 ", resp.s, "\r\n", 0);
 		flush();
 		/*- digest-md5 requires a special okay response ...  */
-		if ((n = saferead(0, respbuf, 512)) == -1)
+		if ((n = saferead(0, respbuf, 512)) == -1) {
+#ifdef TLS
+			if (ssl) {
+				ssl_free();
+				ssl = 0;
+			}
+#endif
 			die_read("failed to get OK from client", 0);
+		}
 		if (n)
 			respbuf[n] = 0;
 		return (0);
@@ -6966,9 +6979,7 @@ command:
 	if (!(i = commands(&ssin, cmdptr))) {
 #ifdef TLS
 		if (ssl) {
-			while (SSL_shutdown(ssl) == 0)
-				usleep(100);
-			SSL_free(ssl);
+			ssl_free();
 			ssl = 0;
 		}
 #endif
@@ -7001,6 +7012,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.293  2023-03-30 16:10:02+05:30  Cprogrammer
+ * replaced SSL_shutdown(), SSL_free() with ssl_free() to fix SIGSEGV in qmail/tls.c
+ *
  * Revision 1.292  2023-03-11 16:09:28+05:30  Cprogrammer
  * set SHUTDOWN env variable as an empty string for ODMR when childprog is not provided
  *
@@ -7331,7 +7345,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.292 2023-03-11 16:09:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.293 2023-03-30 16:10:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

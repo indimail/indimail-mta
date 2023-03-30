@@ -148,6 +148,9 @@ multi-signature generation
 - 29/03/2023
 85. qlocal_upgrade.in: upgrade qmail-send, slowq-send service to use
     --setgroups
+- 30/03/2023
+86. smtpd.c: replaced SSL_shutdown(), SSL_free() with ssl_free() to fix
+    SIGSEGV in qmail/tls.c
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
