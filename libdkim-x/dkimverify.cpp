@@ -465,7 +465,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				res = EVP_VerifyFinal(&i->m_Hdr_ctx, (unsigned char *) i->SignatureData.data(),
 						i->SignatureData.length(), i->m_pSelector->PublicKey);
 #endif
-				if (res != 1 && verbose == true) {
+				if (res == -1 && verbose == true) {
 					while ((r = ERR_get_error()))
 						fprintf(stderr, "EVP_VerifyFinal: %s\n", ERR_error_string(r, NULL));
 				}
@@ -476,14 +476,14 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				res = EVP_DigestVerifyInit(i->m_Msg_ctx, NULL, NULL, NULL,
 						i->m_pSelector->PublicKey);  /* late initialization */
 				if (res != 1) {
-					if (verbose == true) {
+					if (res != 0 && verbose == true) {
 						while ((r = ERR_get_error()))
 							fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
 					}
 				} else {
 					res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
 							(size_t) i->SignatureData.length(), (unsigned char *) SigHdr.data(), SigHdr.length());
-					if (res != 1 && verbose == true) {
+					if (res != 1 && res != 0 && verbose == true) {
 						while ((r = ERR_get_error()))
 							fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
 					}
@@ -1300,13 +1300,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.32 2023-03-18 09:52:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.33 2023-03-28 22:16:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.33  2023-03-28 22:16:10+05:30  Cprogrammer
+ * use error routine only for EVP functions failure
+ *
  * Revision 1.32  2023-03-18 09:52:00+05:30  Cprogrammer
  * Fixed SIGSEGV with missing k= tag in DKIM txt record
  *
