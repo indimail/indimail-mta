@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.668 2023-03-28 22:13:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.669 2023-03-30 18:48:49+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.668 2023-03-28 22:13:53+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.669 2023-03-30 18:48:49+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2256,12 +2256,24 @@ if [ ! -f "$DESTDIR"$sysconfdir/procmailrc ] ; then
 fi
 
 if [ -n "$DESTDIR" ] ; then
-	indlib=`ls -d "$DESTDIR"$QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+	if [ -r /etc/debian_version ] ; then
+		indlib=`ls -d "$DESTDIR"$QmailBinPrefix/lib/*-linux-gnu/libindimail.so.*.*.* 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+	else
+		indlib=`ls -d "$DESTDIR"$QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+	fi
 	if [ -z "$indlib" ] ; then
-		indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
+		if [ -r /etc/debian_version ] ; then
+			indlib=`ls -d $QmailBinPrefix/lib/*-linux-gnu/libindimail.so.*.*.* 2>/dev/null`
+		else
+			indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
+		fi
 	fi
 else
-	indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
+	if [ -r /etc/debian_version ] ; then
+		indlib=`ls -d $QmailBinPrefix/lib/*-linux-gnu/libindimail.so.*.*.* 2>/dev/null`
+	else
+		indlib=`ls -d $QmailBinPrefix/lib*/libindimail.so.*.*.* 2>/dev/null`
+	fi
 fi
 if [ -n "$indlib" ] ; then
 	check_update_if_diff $t/libindimail $indlib
@@ -4934,10 +4946,11 @@ fi
 # Generate public & private key
 /usr/bin/openssl genrsa  -out private_key.pem 2048
 /usr/bin/openssl rsa -in private_key.pem -pubout -out public_key.pem
-$chown mysql:mysql $ca_path/ca-key.pem $ca_path/ca.pem server-key.pem server-cert.pem \
+$chown mysql:indimail $ca_path/ca-key.pem $ca_path/ca.pem server-key.pem server-cert.pem \
 	client-key.pem client-cert.pem private_key.pem public_key.pem
-/bin/chmod 600 $ca_path/ca-key.pem server-key.pem client-key.pem private_key.pem
-/bin/chmod 644 $ca_path/ca.pem server-cert.pem client-cert.pem public_key.pem
+/bin/chmod 600 $ca_path/ca-key.pem server-key.pem private_key.pem server-cert.pem
+/bin/chmod 640 client-cert.pem client-key.pem $ca_path/ca.pem
+/bin/chmod 644 public_key.pem
 /bin/rm -f ca-req.pem server-req.pem client-req.pem
 echo ""
 echo "Verifying server and client certs with ca.pem"
@@ -10003,14 +10016,26 @@ while test $# -gt 0; do
 		fi
 		;;
 		*)
-		libdir=$QmailBinPrefix/lib
+		libdir=$QmailBinPrefix/lib*
 		if [ -n "$DESTDIR" ] ; then
-			indlib=`ls -d "$DESTDIR""$libdir"*/libindimail.so.*.*.* 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+			if [ -r /etc/debian_version ] ; then
+				indlib=`ls -d "$DESTDIR""$libdir"/*-linux-gnu/libindimail.so.*.*.* 2>/dev/null`
+			else
+				indlib=`ls -d "$DESTDIR""$libdir"*/libindimail.so.*.*.* 2>/dev/null|sed -e "s}$DESTDIR}}g"`
+			fi
 			if [ -z "$indlib" ] ; then
-				indlib=`ls -d "$libdir"*/libindimail.so.*.*.* 2>/dev/null`
+				if [ -r /etc/debian_version ] ; then
+					indlib=`ls -d "$libdir"/*-linux-gnu/libindimail.so.*.*.* 2>/dev/null`
+				else
+					indlib=`ls -d "$libdir"*/libindimail.so.*.*.* 2>/dev/null`
+				fi
 			fi
 		else
-			indlib=`ls -d "$libdir"*/libindimail.so.*.*.* 2>/dev/null`
+			if [ -r /etc/debian_version ] ; then
+				indlib=`ls -d "$libdir"/*-linux-gnu/libindimail.so.*.*.* 2>/dev/null`
+			else
+				indlib=`ls -d "$libdir"*/libindimail.so.*.*.* 2>/dev/null`
+			fi
 		fi
 		;;
 	esac

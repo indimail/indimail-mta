@@ -2375,7 +2375,7 @@ for i in indimail alias qmailq qmailr qmails qscand; do
   echo "removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 done
-for i in indimail nofiles qmail qscand qcerts; do
+for i in indimail nofiles qmail qscand; do
   echo "removing group $i"
   /usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
 done

@@ -112,13 +112,13 @@ install: build
 		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-mini/indimail/indimail-mini.perms; \
 		install -m 0644 indimail-mta.perms  $(DESTDIR)/etc-qmta/indimail/qmta.perms; \
 	fi
-	if [ -f qupgrade.sh ] ; then \
+	if [ -f qupgrade ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 qupgrade.sh "$(DESTDIR)$(libexecdir)"/qupgrade.sh; \
+		install -m 0755 qupgrade "$(DESTDIR)$(libexecdir)"/qupgrade; \
 	fi
-	if [ -f qlocal_upgrade.sh ] ; then \
+	if [ -f qlocal_upgrade ] ; then \
 		mkdir -p $(DESTDIR)$(libexecdir); \
-		install -m 0755 qlocal_upgrade.sh "$(DESTDIR)$(libexecdir)"/qlocal_upgrade.sh; \
+		install -m 0755 qlocal_upgrade "$(DESTDIR)$(libexecdir)"/qlocal_upgrade; \
 	fi
 
 binary-indep: build install
