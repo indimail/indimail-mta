@@ -122,6 +122,14 @@ esac
 
 #DEBHELPER#
 
+if [ $upgrade -eq 1 ] ; then # upgrade
+	(
+	if [ -f ${libexecdir}/qupgrade ] ; then
+		echo "Running Custom Upgrade Script for post upgrade"
+		/bin/sh ${libexecdir}/qupgrade post upgrade @version@ $* || true
+	fi
+	) >> /var/log/indimail-mta-setup.log 2>&1
+fi
 #
 # We need to do this for debian. SIGH!!
 #
@@ -134,7 +142,7 @@ if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
 		fi
 		fixperms $line
 	done
-	) > ${qsysconfdir}/indimail-mta-stat.override
+	) > ${qsysconfdir}/indimail-mta-stat.override 2>> /var/log/indimail-mta-setup.log
 	if [ ! -s ${qsysconfdir}/indimail-mta-stat.override ] ; then
 		/bin/rm -f ${qsysconfdir}/indimail-mta-stat.override
 	fi
@@ -144,10 +152,6 @@ fi
 # by the preinst script
 if [ $upgrade -eq 1 ] ; then # upgrade
 	(
-	if [ -f ${libexecdir}/qupgrade.sh ] ; then
-		echo "Running Custom Upgrade Script for post upgrade"
-		/bin/sh ${libexecdir}/qupgrade.sh post upgrade @version@ $* || true
-	fi
 	# refresh indimail-mta services
 	svc_list=""
 	for i in clamd greylist.1999 qmail-qmqpd.628 \
