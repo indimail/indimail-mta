@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.669 2023-03-30 18:48:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.670 2023-03-30 20:22:39+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.669 2023-03-30 18:48:49+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.670 2023-03-30 20:22:39+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2278,8 +2278,10 @@ fi
 if [ -n "$indlib" ] ; then
 	check_update_if_diff $t/libindimail $indlib
 else
-	echo "removing $t/libindimail"
-	/bin/rm -f $t/libindimail
+	if [ -f $t/libindimail ] ; then
+		echo "removing $t/libindimail"
+		/bin/rm -f $t/libindimail
+	fi
 fi
 check_libmysqlclient_lib
 if [ ! -f $sysconfdir/backup.conf ] ; then
@@ -10016,7 +10018,7 @@ while test $# -gt 0; do
 		fi
 		;;
 		*)
-		libdir=$QmailBinPrefix/lib*
+		libdir=$QmailBinPrefix/lib
 		if [ -n "$DESTDIR" ] ; then
 			if [ -r /etc/debian_version ] ; then
 				indlib=`ls -d "$DESTDIR""$libdir"/*-linux-gnu/libindimail.so.*.*.* 2>/dev/null`
@@ -10041,7 +10043,7 @@ while test $# -gt 0; do
 	esac
 	if [ -n "$indlib" ] ; then
 		check_update_if_diff "$DESTDIR"$CONTROLDIR/libindimail $indlib
-	else
+	elif [ -f "$DESTDIR"$CONTROLDIR/libindimail ] ; then
 		echo "removing "$DESTDIR"$CONTROLDIR/libindimail"
 		/bin/rm -f "$DESTDIR"$CONTROLDIR/libindimail
 	fi
@@ -11027,13 +11029,13 @@ case $option in
 		;;
 
 		bogofilter)
-		if [ ! -f $mysysconfdir/bogofilter.cf.example -a -f $sysconfdir/bogofilter.cf.example ] ; then
-			if [ ! -d $mysysconfdir ] ; then
-				mkdir -p $mysysconfdir
-			fi
-			/bin/cp -p $sysconfdir/bogofilter.cf.example $mysysconfdir
-		fi
 		if [ -n "$mysysconfdir" ] ; then
+			if [ ! -f $mysysconfdir/bogofilter.cf.example -a -f $sysconfdir/bogofilter.cf.example ] ; then
+				if [ ! -d $mysysconfdir ] ; then
+					mkdir -p $mysysconfdir
+				fi
+				/bin/cp -p $sysconfdir/bogofilter.cf.example $mysysconfdir
+			fi
 			sysconfdir=$mysysconfdir
 		fi
 		conf_file="$DESTDIR"$sysconfdir/bogofilter.cf
