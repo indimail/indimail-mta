@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.52 2023-02-14 08:40:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.53 2023-03-30 07:53:11+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -27,7 +27,7 @@ check_update_if_diff()
 do_install()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.52 2023-02-14 08:40:32+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.53 2023-03-30 07:53:11+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -36,7 +36,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.52 2023-02-14 08:40:32+05:30 Cprogra
 do_post_upgrade()
 {
 date
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.52 2023-02-14 08:40:32+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.53 2023-03-30 07:53:11+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -353,6 +353,17 @@ for i in `grep -l fsync /service/*/variables/.options`
 do
 	sed -i -e 's{--fsync{--fdatasync{g' $i
 done
+for i in `ls -d /service/*-send*/variables`
+do
+	grep -- '--setgroups' $i/.options > /dev/null
+	if [ $? -ne 0 ] ; then
+		t="`cat $i/.options`"
+		echo "$t --setgroups" > $i/.options
+	fi
+	if [ ! -f $i/USE_SETGROUPS ] ; then
+		echo 1 > $i/USE_SETGROUPS
+	fi
+done
 }
 
 case $1 in
@@ -365,6 +376,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.53  2023-03-30 07:53:11+05:30  Cprogrammer
+# upgrade qmail-send, slowq-send service to use --setgroups
+#
 # Revision 1.52  2023-02-14 08:40:32+05:30  Cprogrammer
 # added group ID qcerts
 # fix permissions of existing certificates to group permissions qcerts
