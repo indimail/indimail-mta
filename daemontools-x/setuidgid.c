@@ -24,7 +24,7 @@ main(int argc, char **argv, char **envp)
 {
 	struct passwd  *pw;
 	struct group   *gr;
-	gid_t          *gidset, g;
+	gid_t          *gidset = (gid_t *) NULL, g;
 	char           *ptr, *cptr, *account, *groups = 0,
 				   *usage = "usage: setuidgid [-s] [-g gid_list] account child";
 	char          **child;
