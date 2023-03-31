@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.670 2023-03-30 20:22:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.670 2023-03-31 08:18:50+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.670 2023-03-30 20:22:39+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.670 2023-03-31 08:18:50+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2872,7 +2872,7 @@ else
 fi
 echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
 echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
-echo "-u qmaild -g qmail \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
+echo "-u qmaild -g qmail,indimail \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
 if [ -f /bin/false ] ; then
 	false="/bin/false"
 else
@@ -4777,7 +4777,7 @@ echo "echo \"initializing fifo count=\$count ...\""
 echo "/bin/rm -f \$home/inquery/infifo.*"
 echo "for i in \$(seq 1 \$count); do f=\$home/inquery/infifo.\$i; mkfifo \$f && /bin/chmod 660 \$f && $chown qmaild:indimail \$f; done"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
-echo "exec $QmailBinPrefix/bin/setuidgid -g qmail,indimail qmaild $QmailBinPrefix/sbin/inlookup \\"
+echo "exec $QmailBinPrefix/bin/setuidgid -g qmail,indimail,qcerts qmaild $QmailBinPrefix/sbin/inlookup \\"
 echo "  -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
@@ -4950,10 +4950,10 @@ fi
 /usr/bin/openssl rsa -in private_key.pem -pubout -out public_key.pem
 $chown mysql:indimail $ca_path/ca-key.pem $ca_path/ca.pem server-key.pem server-cert.pem \
 	client-key.pem client-cert.pem private_key.pem public_key.pem
-/bin/chmod 600 $ca_path/ca-key.pem server-key.pem private_key.pem server-cert.pem
-/bin/chmod 640 client-cert.pem client-key.pem $ca_path/ca.pem
-/bin/chmod 644 public_key.pem
-/bin/rm -f ca-req.pem server-req.pem client-req.pem
+/bin/chmod 600 $ca_path/ca-key.pem server-key.pem private_key.pem server-key.pem
+/bin/chmod 640 client-cert.pem server-cert.pem $ca_path/ca.pem client-key.pem
+/bin/chmod 644 public_key.pem server_cert.pem
+/bin/rm -f $ca_path/ca-req.pem server-req.pem client-req.pem
 echo ""
 echo "Verifying server and client certs with ca.pem"
 /usr/bin/openssl verify -CAfile $ca_path/ca.pem server-cert.pem client-cert.pem
