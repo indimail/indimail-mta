@@ -82,8 +82,8 @@ Install the following packages using apt
 Universal
 cdbs debhelper gcc g++ automake autoconf libtool libldap2-dev
 libssl-dev libidn2-0-dev mime-support m4 gawk openssl procps
-sed findutils diffutils readline gzip binutils coreutils grep
-libgsasl7-dev
+sed findutils diffutils readline libreadline-dev gzip binutils
+coreutils grep libgsasl7-dev
 
 Ubuntu 16.04, Debian 8 - libmysqlclient-dev
 Ubuntu 16.04 - libcom-err2 additionally

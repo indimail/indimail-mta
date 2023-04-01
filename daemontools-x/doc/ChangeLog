@@ -31,6 +31,8 @@ Release 1.1.2 Start 20/02/2023 End --/--/2023
 17. qmailctl: supress echo when not running on terminal
 - 21/03/2023
 18. svc: display system error for error opening supervise/control
+- 31/03/2023
+19. setuidgid.c: fixed illegal free
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023
