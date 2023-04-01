@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.12  2023-04-01 19:27:18+05:30  Cprogrammer
+ * refactored getlibObject function
+ *
  * Revision 1.11  2022-11-23 15:25:15+05:30  Cprogrammer
  * renamed mysql_lib to libmysql
  *
@@ -172,26 +175,19 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 		*handle = loadLibrary(handle, libenv, 0, errstr);
 	if (!*handle)
 		return ((void *) 0);
-	i = dlsym(*handle, plugin_symb);
-	if (!i && (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
-			!stralloc_cats(&errbuf, plugin_symb) ||
-			!stralloc_catb(&errbuf, ": ", 2))) {
-		if (errstr)
+	if (!(i = dlsym(*handle, plugin_symb)) && errstr) {
+		if (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
+				!stralloc_cats(&errbuf, plugin_symb))
 			*errstr = memerr;
-	}
-	ptr = dlerror();
-	if (!i && ptr && !stralloc_cats(&errbuf, ptr)) {
-		if (errstr)
+		if ((ptr = dlerror())) {
+			if (!stralloc_cats(&errbuf, ptr) ||
+					!stralloc_catb(&errbuf, ": ", 2))
+				*errstr = memerr;
+		}
+		if (!stralloc_0(&errbuf))
 			*errstr = memerr;
-	} else
-	if (!i)
-		errbuf.len--;
-	if (!i && !stralloc_0(&errbuf)) {
-		if (errstr)
-			*errstr = memerr;
-	}
-	if (!i && errstr)
 		*errstr = errbuf.s;
+	}
 	return (i);
 }
 
@@ -264,7 +260,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.11 2022-11-23 15:25:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: load_mysql.c,v 1.12 2023-04-01 19:27:18+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

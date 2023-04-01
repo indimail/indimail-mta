@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.17  2023-04-01 19:26:44+05:30  Cprogrammer
+ * refactored getlibObject function
+ *
  * Revision 1.16  2021-06-28 16:58:47+05:30  Cprogrammer
  * fix SIGSEGV when libenv argument is NULL
  *
@@ -210,27 +213,19 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 		*handle = loadLibrary(handle, libenv, 0, errstr);
 	if (!*handle)
 		return ((void *) 0);
-	i = dlsym(*handle, plugin_symb);
-	if (!i && (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
-			!stralloc_cats(&errbuf, plugin_symb) ||
-			!stralloc_catb(&errbuf, ": ", 2)))
-	{
-		if (errstr)
+	if (!(i = dlsym(*handle, plugin_symb)) && errstr) {
+		if (!stralloc_copyb(&errbuf, "getlibObject: ", 14) ||
+				!stralloc_cats(&errbuf, plugin_symb))
 			*errstr = memerr;
-	}
-	ptr = dlerror();
-	if (!i && ptr && !stralloc_cats(&errbuf, ptr)) {
-		if (errstr)
+		if ((ptr = dlerror())) {
+			if (!stralloc_cats(&errbuf, ptr) ||
+					!stralloc_catb(&errbuf, ": ", 2))
+				*errstr = memerr;
+		}
+		if (!stralloc_0(&errbuf))
 			*errstr = memerr;
-	} else
-	if (!i)
-		errbuf.len--;
-	if (!i && !stralloc_0(&errbuf)) {
-		if (errstr)
-			*errstr = memerr;
-	}
-	if (!i && errstr)
 		*errstr = errbuf.s;
+	}
 	return (i);
 }
 
@@ -284,7 +279,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.16 2021-06-28 16:58:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: indimail_stub.c,v 1.17 2023-04-01 19:26:44+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
