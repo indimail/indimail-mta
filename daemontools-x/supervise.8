@@ -1,4 +1,6 @@
+.\" vim: tw=75
 .TH supervise 8
+
 .SH NAME
 supervise \- starts and monitors a service.
 
@@ -44,6 +46,8 @@ whenever run exits. The pid of the process that exited is passed as the
 first argument to \fIalert\fR. The exit value or signal (if killed by
 signal) is passed as the second argument to \fIalert\fR. The third argument
 is either \fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
+
+The last argument to ./run, ./shutdown and ./alert is full path of \fIs\fR.
 
 If the directory \fIrun\fR/\fIsvscan\fR exists, \fBsupervise\fR(8) creates
 the directory \fIs\fR/\fIsupervise\fR in \fIrun\fR/\fIsvscan\fR where

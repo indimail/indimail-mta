@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.33 2023-03-07 00:06:34+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.34 2023-04-02 23:16:34+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -174,10 +174,6 @@ trigger(void)
 		;
 }
 
-char           *run[2] = { "./run", 0 };
-char           *shutdown[3] = { "./shutdown", 0, 0 };
-char           *alert[5] = { "./alert", 0, 0, 0, 0 }; /*- alert pid chilld_exit_value signal_value */
-
 int
 get_wait_params(unsigned short *interval, char **sv_name)
 {
@@ -233,6 +229,10 @@ get_wait_params(unsigned short *interval, char **sv_name)
 		strerr_warn5(info.s, "wait ", strnum, " seconds for service ", *sv_name, 0);
 	return 0;
 }
+
+char           *run[3] = { "./run", 0 , 0};
+char           *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
+char           *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
 
 void
 do_wait()
@@ -334,7 +334,7 @@ do_wait()
 }
 
 void
-trystart(void)
+trystart()
 {
 	pid_t           f, pgid;
 	struct stat     st;
@@ -373,6 +373,7 @@ trystart(void)
 #endif
 		if ((do_setpgid || is_subreaper) && setpgid(0, 0) == -1)
 			strerr_die2sys(111, fatal.s, "unable to set process group id: ");
+		run[1] = dir;
 		execve(*run, run, environ);
 		strerr_die2sys(111, fatal.s, "unable to start run: ");
 	}
@@ -421,6 +422,7 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 		strnum1[fmt_ulong(strnum1, spid)] = 0;
 		action[1] = strnum1;
 		if (do_alert) {
+			action[4] = dir;
 			if (WIFSTOPPED(wstat) || WIFSIGNALED(wstat)) {
 				action[3] = "stopped/signalled";
 				strnum2[fmt_uint(strnum2, WIFSTOPPED(wstat) ? WSTOPSIG(wstat) : WTERMSIG(wstat))] = 0;
@@ -435,8 +437,10 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 					strnum2[fmt_uint(strnum2, t)] = 0;
 			}
 			action[2] = strnum2;
-		} else
-			action[2] = NULL;
+		} else {
+			action[2] = dir;
+			action[3] = NULL;
+		}
 		execve(*action, action, environ);
 		strerr_die4sys(111, fatal.s, "unable to exec ", *action, ": ");
 	default:
@@ -472,7 +476,7 @@ postmortem(pid_t pid, int wstat)
 }
 
 void
-doit(void)
+doit()
 {
 	iopause_fd      x[2];
 	int             siglist[] = {-1, -1, -1};
@@ -1075,13 +1079,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.33 2023-03-07 00:06:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.34 2023-04-02 23:16:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.34  2023-04-02 23:16:34+05:30  Cprogrammer
+ * pass directory as the last argument to ./run, ./shutdown, ./alert scripts
+ *
  * Revision 1.33  2023-03-07 00:06:34+05:30  Cprogrammer
  * check for sticky bit on run on every restart
  *
