@@ -36,6 +36,8 @@ Release @version@-@release@ Start 20/02/2023 End --/--/2023
 - 02/04/2023
 20. supervise.c: pass the directory as the last arugment to ./run, ./shutdown,
     ./alert scripts.
+- 03/04/2023
+21. qmailctl: use portable test -t to test for tty
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023
