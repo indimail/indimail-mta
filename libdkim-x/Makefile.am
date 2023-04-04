@@ -45,7 +45,7 @@ edit = sed \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
 dkim.8: dkim.9
-	cat $^ | sed s}@controldir\@}$(sysconfdir)/indimail/control}g > $@
+	cat $@.in | sed s}@controldir\@}$(sysconfdir)/indimail/control}g > $@
 libdkim.spec: libdkim.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 libdkim.changes: doc/ChangeLog conf-version conf-release conf-email
