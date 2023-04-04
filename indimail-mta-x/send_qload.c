@@ -17,7 +17,7 @@ send_qload(char *queue_ident, unsigned int queue_no,
 	mqd_t           mqd;
 	qtab            queue_tab;
 
-	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == -1) {
+	if ((mqd = mq_open(queue_ident, O_WRONLY,  0600, NULL)) == (mqd_t) -1) {
 		strerr_warn3("send_qload: ", queue_ident, ": ", &strerr_sys);
 		return -1;
 	}
