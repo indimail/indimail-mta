@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.670 2023-03-31 08:18:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.671 2023-04-04 23:09:12+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.670 2023-03-31 08:18:50+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.671 2023-04-04 23:09:12+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6912,6 +6912,129 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 }
 
+mrtg_extra()
+{
+	for i in POP3.110.pop3d.110 POP3-SSL.995.pop3d-ssl.995 \
+		IMAP.143.imapd.143 IMAP-SSL.993.imapd-ssl.993 \
+		PROXYIMAP.4143.proxyIMAP.4143 PROXYPOP3.4143.proxyPOP3.4110 \
+		PROXYIMAP-SSL.4143.proxyIMAP.9143 PROXYPOP3-SSL.4143.proxyPOP3.9110
+	do
+		t1=$(echo $i | cut -d. -f1)
+		t2=$(echo $i | cut -d. -f2)
+		t3=$(echo $i | cut -d. -f3-)
+		if [ ! -d $LOGDIR/$t3 ] ; then
+			continue
+		fi
+		echo "#-------------------------------------------------------------------"
+		echo "Title[$t1-total]: $t1 Totals (port $t2) - $1"
+		echo "MaxBytes[$t1-total]: 1000"
+		echo "AbsMax[$t1-total]: 100000"
+		echo "Options[$t1-total]: growright,unknaszero,nopercent,gauge,pngdate"
+		echo "Target[$t1-total]: \`$libexecdir/qmailmrtg7 a $LOGDIR/$t3\`"
+		echo "PageTop[$t1-total]: <B>$t1 Totals</B><BR>"
+		echo "ShortLegend[$t1-total]: $t1"
+		echo "YLegend[$t1-total]: $t1/hour"
+		echo "Legend1[$t1-total]: Allowed Connections&nbsp;"
+		echo "Legend2[$t1-total]: Denied Connections&nbsp;"
+		echo "LegendI[$t1-total]: Allow&nbsp;"
+		echo "LegendO[$t1-total]: Deny&nbsp;"
+		echo "WithPeak[$t1-total]: ymwd"
+		echo "XSize[$t1-total]: 350"
+		echo "YSize[$t1-total]: 150"
+		echo ""
+		echo "#-------------------------------------------------------------------"
+		echo "Title[$t1]: $t1 Concurrency (port $t2) - $1"
+		echo "MaxBytes[$t1]: 100"
+		echo "AbsMax[$t1]: 500"
+		echo "Options[$t1]: growright,unknaszero,nopercent,gauge,pngdate"
+		echo "Target[$t1]: \`$libexecdir/qmailmrtg7 t $LOGDIR/$t3\`"
+		echo "PageTop[$t1]: <B>$t1 Concurrency</B><BR>"
+		echo "ShortLegend[$t1]: $t1"
+		echo "YLegend[$t1]: max $t1"
+		echo "Legend1[$t1]: Peak Connections&nbsp;"
+		echo "Legend2[$t1]: Max Concurrency&nbsp;"
+		echo "LegendI[$t1]: $t1 Concurrency&nbsp;"
+		echo "LegendO[$t1]: Max Configured $t1&nbsp;"
+		echo "WithPeak[$t1]: ymwd"
+		echo "XSize[$t1]: 350"
+		echo "YSize[$t1]: 150"
+		echo ""
+	done
+	for i in $(grep -E -v "lo:|virb|ztk|ztr|vbox" /proc/net/dev|tail -n +3|cut -d: -f1)
+	do
+		echo "# ----- interface $i -----------------------"
+		echo "Title[$i]: $i bits - $1"
+		echo "Options[$i]: bits,growright,pngdate"
+		echo "Target[$i]: \`grep $i /proc/net/dev | sed 's/$i://' | awk '{print \$1; print \$9; print \"\"; print \"\"}'\`"
+		echo "PageTop[$i]: $i bits - $i"
+		echo "MaxBytes[$i]: 100000000"
+		echo "Ylegend[$i]: bits"
+		echo "ShortLegend[$i]: bits"
+		echo "XSize[$i]: 350"
+		echo "YSize[$i]: 150"
+		echo "Legend1[$i]: bits&nbsp;"
+		echo "LegendI[$i]: input&nbsp;"
+		echo "LegendO[$i]: output&nbsp;"
+		echo "WithPeak[$i]: ymwd"
+		echo
+	done
+	if [ -d $LOGDIR/mysql.3306 ] ; then
+		echo "#"
+		echo "# MySQL QUERIES"
+		echo "#"
+		echo "Title[mysql_queries]: MySQL query count - $1"
+		echo "Target[mysql_queries]: \`/usr/bin/mysqladmin -u admin -p$ADMIN_PASS ver|awk '/Qu/{q=\$4;s=\$7}/Up/{u=\$0}/Se/{v=\$3}END{print q\"\\n\"s\"\\n\"u\"\\nMySQL version \"v}'|sed 's/Uptime:[[:space:]]\+//'\`"
+		echo "Options[mysql_queries]: nopercent, growright, integer, perminute, pngdate"
+		echo "MaxBytes[mysql_queries]: 250000"
+		echo "PageTop[mysql_queries]: <h1>MySQL query count</h1>"
+		echo "ShortLegend[mysql_queries]: q/m"
+		echo "YLegend[mysql_queries]: Count"
+		echo "LegendI[mysql_queries]: queries"
+		echo "LegendO[mysql_queries]: slow queries"
+		echo "Legend1[mysql_queries]: queries"
+		echo "Legend2[mysql_queries]: slow queries"
+		echo "XSize[mysql_queries]: 350"
+		echo "YSize[mysql_queries]: 150"
+		echo ""
+		echo "#"
+		echo "# MySQL CPU / MEMORY"
+		echo "#"
+		echo "Title[mysql_cpumem]: MySQL cpu / memory usage - $1"
+		echo "Target[mysql_cpumem]: \`ps ax -o %cpu,%mem,comm|grep mysqld|awk 'BEGIN{cpu=0;mem=0}{cpu+=\$1;mem+=\$2}END{print cpu\"\\n\"mem\"\\nUNKNOWN\\nUNKNOWN\"}'\`"
+		echo "Options[mysql_cpumem]: nopercent, growright, gauge, noinfo, unknaszero, pngdate"
+		echo "MaxBytes[mysql_cpumem]: 100"
+		echo "PageTop[mysql_cpumem]: <h1>MySQL cpu / memory usage</h1>"
+		echo "ShortLegend[mysql_cpumem]: %"
+		echo "YLegend[mysql_cpumem]: Percents"
+		echo "Unscaled[mysql_cpumem]: ymwd"
+		echo "LegendI[mysql_cpumem]: CPU"
+		echo "LegendO[mysql_cpumem]: Memory"
+		echo "Legend1[mysql_cpumem]: CPU"
+		echo "Legend2[mysql_cpumem]: Memory"
+		echo "XSize[mysql_cpumem]: 350"
+		echo "YSize[mysql_cpumem]: 150"
+	fi
+	if [ -d $LOGDIR/clamd ] ; then
+		echo "#-------------------------------------------------------------------"
+		echo "Title[clamd]: clamd - $1"
+		echo "MaxBytes[clamd]: 10000"
+		echo "AbsMax[clamd]: 100000"
+		echo "Options[clamd]: growright,unknaszero,nopercent,gauge,pngdate"
+		echo "Target[clamd]: \`$libexecdir/qmailmrtg7 C $LOGDIR/clamd\`"
+		echo "PageTop[clamd]: <B>ClamAV</B><br>"
+		echo "ShortLegend[clamd]: Msg"
+		echo "YLegend[clamd]: viri/hour"
+		echo "Legend1[clamd]: Virus&nbsp;"
+		echo "Legend2[clamd]: Errors&nbsp;"
+		echo "LegendI[clamd]: found&nbsp;"
+		echo "LegendO[clamd]: errors:&nbsp;"
+		echo "WithPeak[clamd]: ymwd"
+		echo "XSize[clamd]: 350"
+		echo "YSize[clamd]: 150"
+		echo ""
+	fi
+}
+
 create_mrtg()
 {
 if [ $# -lt 2 ] ; then
@@ -6945,8 +7068,11 @@ $chown root:0 $conf_dir
 $chown root:0 $conf_dir/../etc
 echo C > $conf_dir/LANG
 hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
-sed "s{MRTGHOSTNAME{$hostname{;  s{HTMLDIR{$htmldir\/{" \
-	$sysconfdir/indimail.mrtg.cfg > $conf_dir/../etc/indimail.mrtg.cfg
+(
+sed "s{MRTGHOSTNAME{$hostname{;  s{HTMLDIR{$htmldir\/{" $sysconfdir/indimail.mrtg.cfg
+mrtg_extra $hostname
+) > $conf_dir/../etc/indimail.mrtg.cfg
+chmod 600 $conf_dir/../etc/indimail.mrtg.cfg
 #
 # Create index.html in htmldir
 #
