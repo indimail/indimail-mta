@@ -1001,7 +1001,8 @@ Known values for OPTION are:
   Print environment variables all services
   service_path   - Path where supervise service will be installed
 
---config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
+--config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers
+--config=snmpdconf|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
   [--common_name=CN]
@@ -1028,6 +1029,7 @@ Known values for OPTION are:
   qmail          - Create default qmail control files
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
+  snmpdconf      - create v2 /etc/snmpd/snmpd.conf
   clamd          - Create clamd configuration file
   bogofilter     - Create bogofilter.cf configuration file
   cert           - Generate SSL Certificate

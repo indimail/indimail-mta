@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.671 2023-04-04 23:09:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.672 2023-04-05 20:34:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.671 2023-04-04 23:09:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.672 2023-04-05 20:34:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -925,7 +925,8 @@ Known values for OPTION are:
   Print environment variables all services
   service_path   - Path where supervise service will be installed
 
---config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
+--config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers
+--config=snmpdconf|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
   [--common_name=CN]
@@ -952,6 +953,7 @@ Known values for OPTION are:
   qmail          - Create default qmail control files
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
+  snmpdconf      - create v2 /etc/snmpd/snmpd.conf
   clamd          - Create clamd configuration file
   bogofilter     - Create bogofilter.cf configuration file
   cert           - Generate SSL Certificate
@@ -8052,6 +8054,120 @@ delUsers()
 	fi
 }
 
+create_snmpd_conf()
+{
+	if [ ! -d /etc/snmp ] ; then
+		mkdir /etc/snmp
+		chown root:0 /etc/snmp
+	fi
+	snmpdconf=@qsysconfdir@/snmpd.conf
+	flag=0
+	if [ -L /etc/snmp/snmpd.conf ] ; then
+		t=$(readlink /etc/snmp/snmpd.conf)
+		if [ "$t" != $snmpdconf ] ; then
+			flag=1
+		fi
+	elif [ -f /etc/snmp/snmpd.conf ] ; then
+		flag=1
+	fi
+	if [ $flag -eq 1 ] ; then
+		echo "/etc/snmp/snmpd.conf exists!!!. Merge manually with $snmpdconf" 1>&2
+	fi
+	hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+	(
+	echo "# snmpd.conf:"
+	echo ""
+	echo "###############################################################################"
+	echo "# Access Control"
+	echo "###############################################################################"
+	echo "# First, map the community name \"public\" into a \"security name\""
+	echo "rocommunity indimail"
+	echo ""
+	echo "#       sec.name  source          community"
+	echo "#com2sec notConfigUser  default       public"
+	echo "com2sec local     localhost           public"
+	echo "com2sec mynetwork 192.168.2.0/24      public"
+	echo ""
+	echo "####"
+	echo "# Second, map the security name into a group name:"
+	echo ""
+	echo "#       groupName      securityModel securityName"
+	echo "group MyRWGroup v1         local"
+	echo "group MyRWGroup v2c        local"
+	echo "group MyRWGroup usm        local"
+	echo "group MyROGroup v1         mynetwork"
+	echo "group MyROGroup v2c        mynetwork"
+	echo "group MyROGroup usm        mynetwork"
+	echo ""
+	echo "####"
+	echo "# Third, create a view for us to let the group have rights to:"
+	echo ""
+	echo "# Make at least  snmpwalk -v 1 localhost -c public system fast again."
+	echo "#       name           incl/excl     subtree         mask(optional)"
+	echo "view    all           included   .1                   80"
+	echo ""
+	echo "####"
+	echo "# Finally, grant the group read-only access to the systemview view."
+	echo ""
+	echo "#       group          context sec.model sec.level prefix read   write  notif"
+	echo "access MyROGroup \"\"      any       noauth    exact  all    none   none"
+	echo "access MyRWGroup \"\"      any       noauth    exact  all    all    none"
+	echo ""
+	echo ""
+	echo "###############################################################################"
+	echo "# System contact information"
+	echo "#"
+	echo ""
+	echo "# It is also possible to set the sysContact and sysLocation system"
+	echo "# variables through the snmpd.conf file:"
+	echo ""
+	echo "syslocation IndiMail ($hostname), Mail Server"
+	echo "syscontact IndiMail <postmaster@$hostname>"
+	echo ""
+	echo "# proc: Check for processes that should be running."
+	echo "#     proc NAME [MAX=0] [MIN=0]"
+	echo "#   "
+	echo "#     NAME:  the name of the process to check for.  It must match"
+	echo "#            exactly (ie, http will not find httpd processes)."
+	echo "#     MAX:   the maximum number allowed to be running.  Defaults to 0."
+	echo "#     MIN:   the minimum number to be running.  Defaults to 0."
+	echo "#   "
+	echo "#   The results are reported in the prTable section of the UCD-SNMP-MIB tree"
+	echo "#   Special Case:  When the min and max numbers are both 0, it assumes"
+	echo "#   you want a max of infinity and a min of 1."
+	echo ""
+	echo "proc  svscan 1 "
+	echo ""
+	echo "# load: Check for unreasonable load average values."
+	echo "#   Watch the load average levels on the machine."
+	echo "#   "
+	echo "#    load [1MAX=12.0] [5MAX=12.0] [15MAX=12.0]"
+	echo "#   "
+	echo "#    1MAX:   If the 1 minute load average is above this limit at query"
+	echo "#            time, the errorFlag will be set."
+	echo "#    5MAX:   Similar, but for 5 min average."
+	echo "#    15MAX:  Similar, but for 15 min average."
+	echo "#   "
+	echo "#   The results are reported in the laTable section of the UCD-SNMP-MIB tree"
+	echo ""
+	echo "load  20 10 5"
+	) > $snmpdconf.bak
+	chmod 400 $snmpdconf.bak
+	chown root:0 $snmpdconf.bak
+	if [ -f $snmpdconf ] ; then
+		diff $snmpdconf $snmpdconf.bak >/dev/null
+		if [ $? -ne 0 ] ; then
+			change_config $snmpdconf $snmpdconf.bak
+			echo "$snmpdconf changed: Restart snmpd!!!" 1>&2
+		fi
+	else
+		change_config $snmpdconf $snmpdconf.bak
+	fi
+	if [ $flag -eq 0 -a ! -L /etc/snmp/snmpd.conf ] ; then
+		ln -s $snmpdconf /etc/snmp/snmpd.conf
+	fi
+}
+
 default_alias_config()
 {
 	t=$QmailHOME/alias/Maildir
@@ -10978,6 +11094,10 @@ case $option in
 
 		rmusers)
 		delUsers
+		;;
+
+		snmpdconf)
+		create_snmpd_conf
 		;;
 
 		clamd)

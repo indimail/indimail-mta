@@ -158,6 +158,8 @@ multi-signature generation
 90. indimail_stub.c: refactored getlibObject() function
 - 04/04/2023
 91. svctool: updated mrtg graphs
+- 05/04/2023
+92. svctool: added --config=snmpdconf for creating /etc/indimail/snmpd.conf
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.2-1.1%{?dist}
 Release 3.0.2-1.1 Start 08/09/2022 End 30/11/2023
