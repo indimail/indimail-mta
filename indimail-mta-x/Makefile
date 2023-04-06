@@ -27,9 +27,10 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
 	create_services cronlist.q ctrlenv datemail dk-filter dknewkey \
 	dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt \
-	dot-forward drate etrn except fastforward forward generic.so greydaemon \
-	home home+df hostname iftocc indimail-mta.changes setqload qmonitor \
-	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
+	dot-forward drate etrn except fastforward favicon.base64 \
+	forward generic.so greydaemon home home+df hostname iftocc \
+	indimail-mta.changes setqload qmonitor indimail-mta.perms \
+	inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
 	mailsubj make-recipients mbox2maildir mini-smtpd multirotate \
@@ -3834,6 +3835,9 @@ create_services: create_services.in \
 conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared conf-servicedir
 	$(edit) $@.in > $@; chmod 755 $@
+
+favicon.base64: favicon.png
+	base64 < favicon.png > favicon.base64
 
 qlocal_upgrade: \
 warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \

@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.121 2023-03-11 16:07:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.122 2023-04-06 22:42:30+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -710,6 +710,7 @@ fi
 
 # mrtg service
 if [ -x /usr/bin/mrtg -a -f "$dir_prefix"$sysconfdir/indimail.mrtg.cfg ] ; then
+  [ $ID -eq 0 ] && $svctool --config=snmpdconf
   [ $ID -eq 0 ] && $svctool --mrtg=/var/www/html/mailmrtg --servicedir=$servicedir $extra_opt
 fi
 
@@ -774,6 +775,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.122  2023-04-06 22:42:30+05:30  Cprogrammer
+# added command to create /etc/indimail/snmpd.conf
+#
 # Revision 2.121  2023-03-11 16:07:54+05:30  Cprogrammer
 # add --forceauthsmtp, --starttls options for odmr service on port 366
 #

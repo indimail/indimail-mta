@@ -469,3 +469,4 @@ dossl.o
 parse_env.o
 varargs.h
 indimail-services.7
+favicon.base64

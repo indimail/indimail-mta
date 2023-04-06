@@ -1239,6 +1239,7 @@ function test_recipients()
 
 function do_setup()
 {
+	echo "Starting Setup"
 	# basic setup for maildir, assign config and queue
 	sudo /bin/rm -rf $logdir
 	mkdir -p $logdir/setup

@@ -690,3 +690,4 @@ parse_env.o
 varargs.h
 trystdarg.o
 indimail-services.7
+favicon.base64

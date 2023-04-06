@@ -27,6 +27,7 @@ f:root:qmail:0644:/:foxhole_all.cdb:foxhole_all.cdb
 f:root:qmail:0644:/control/:nodnscheck:nodnscheck
 f:root:qmail:0644:/control/:level2-tlds:level2-tlds
 f:root:qmail:0644:/control/:level3-tlds:level3-tlds
+f:root:qmail:0644:/:favicon.base64:favicon.base64
 #
 # Permissions for instcheck
 #

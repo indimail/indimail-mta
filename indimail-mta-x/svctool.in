@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.672 2023-04-05 20:34:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.673 2023-04-06 22:44:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.672 2023-04-05 20:34:14+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.673 2023-04-06 22:44:43+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7080,6 +7080,10 @@ chmod 600 $conf_dir/../etc/indimail.mrtg.cfg
 #
 $indexmaker --title="IndiMail Statistics" --section=title \
 	--output=$htmldir/index.html  $conf_dir/../etc/indimail.mrtg.cfg
+if [ -f @qsysconfdir@/favicon.base64 ] ; then
+	base64 -d < @qsysconfdir@/favicon.base64 > $htmldir/favicon.png
+	sed -i '/<TITLE>IndiMail Statistics<\/TITLE>/a\'$'\n''\    <link rel="icon" type="image/x-icon" href="favicon.png">' $htmldir/index.html 
+fi
 # mrtg run script
 (
 dump_run_header
