@@ -36,6 +36,8 @@ o ability to alter Hash Method after DKIMSignInit
 11. dkimverify.cpp: Fixed SIGSEGV with missing k= tag in DKIM txt record
 - 28/03/2023
 12. dkimverify.cpp: use error routine only for EVP functions failure
+- 06/04/2023
+13. dkimsign.cpp: fixed compiler warning of use of uninitialized variable
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023

@@ -646,7 +646,7 @@ int
 CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 {
 	string          sSignedSig, sTemp;
-	unsigned char  *sig;
+	unsigned char  *sig = NULL;
 	EVP_PKEY       *pkey;
 	BIO            *bio, *b64;
 	unsigned int    siglen;
@@ -696,6 +696,8 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 	case DKIM_HASH_ED25519:
 		AddTagToSig((char *) "a", "ed25519-sha256", 0, false);
 		break;
+	default:
+		return DKIM_INVALID_CONTEXT;
 	}
 	switch (m_Canon)
 	{
@@ -771,6 +773,8 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 			return DKIM_EVP_DIGEST_FAILURE;
 		break;
 #endif
+	default:
+		return DKIM_INVALID_CONTEXT;
 	}
 	if (nHashLen) {
 		if (!(bio = BIO_new(BIO_s_mem())))
@@ -985,13 +989,16 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.25 2023-02-11 22:51:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.26 2023-04-06 21:41:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.26  2023-04-06 21:41:30+05:30  Cprogrammer
+ * fixed compiler warning of use of uninitialized variable
+ *
  * Revision 1.25  2023-02-11 22:51:43+05:30  Cprogrammer
  * check for EVP sign and digest failures
  * fixed a= tag to "ed25519-sha256"
