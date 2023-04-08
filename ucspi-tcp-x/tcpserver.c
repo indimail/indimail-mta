@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.86 2023-02-20 18:45:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.87 2023-04-08 23:12:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -66,7 +66,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.86 2023-02-20 18:45:33+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.87 2023-04-08 23:12:44+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -985,9 +985,9 @@ printstatus(char *str)
 		SSL_get_cipher_bits(ssl, &i);
 		strnum1[fmt_ulong(strnum1, i)] = 0;
 		safecats(strnum1);
-		append("\n");
-		substdio_putflush(subfderr, tmp.s, tmp.len);
 	}
+	append("\n");
+	substdio_putflush(subfderr, tmp.s, tmp.len);
 	return;
 }
 
@@ -1865,6 +1865,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.87  2023-04-08 23:12:44+05:30  Cprogrammer
+ * fixed status not getting printed in logs
+ *
  * Revision 1.86  2023-02-20 18:45:33+05:30  Cprogrammer
  * added ability to set additional group ids
  *

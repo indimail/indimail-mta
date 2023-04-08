@@ -14,6 +14,8 @@ Release @version@-@release@ Start 13/02/2023 End XX/XX/XXXX
 05. tcpclient.c: refactored wait handling
 - 01/04/2023
 06. load_mysql.c: refactored getlibObject() function
+- 08/04/2023
+07. tcpserver.c: fixed status not getting printed
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 18/09/2022 End 30/01/2023
