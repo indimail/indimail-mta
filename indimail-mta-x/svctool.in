@@ -6984,7 +6984,7 @@ mrtg_extra()
 			echo "AbsMax[inlookup-$i]: 100000"
 			echo "Options[inlookup-$i]: nopercent,growright,integer,gauge,pngdate"
 			echo "Target[inlookup-$i]: \`svc -1 $SERVICEDIR/inlookup.infifo && $libexecdir/qmailmrtg -i $opt $LOGDIR/inlookup.infifo $SERVICEDIR/inlookup.infifo\`"
-			echo "PageTop[inlookup-$i]: <B>Inlookup $i query rate</B><br>"
+			echo "PageTop[inlookup-$i]: <B>Inlookup $i query count</B><br>"
 			echo "ShortLegend[inlookup-$i]: q"
 			echo "YLegend[inlookup-$i]: queries"
 			echo "Legend1[inlookup-$i]: $i queries"
