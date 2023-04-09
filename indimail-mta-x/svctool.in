@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.675 2023-04-09 12:22:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.676 2023-04-09 22:32:37+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.675 2023-04-09 12:22:40+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.676 2023-04-09 22:32:37+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6920,6 +6920,77 @@ fi
 
 mrtg_extra()
 {
+	systemctl is-enabled qmta-send >/dev/null
+	if [ $? -eq 0 ] ; then
+		echo "#-------------------------------------------------------------------"
+		echo "Title[qmta-msg1]: qmta-send Messages (Success, Attempts) - $1"
+		echo "MaxBytes[qmta-msg1]: 10000"
+		echo "AbsMax[qmta-msg1]: 20000"
+		echo "Options[qmta-msg1]: growright,unknaszero,nopercent,gauge,pngdate"
+		echo "Target[qmta-msg1]: \`$libexecdir/journal2mrtg qmta-send -m\`"
+		echo "PageTop[qmta-msg1]: <B>Stats for Messages</B><br>"
+		echo "ShortLegend[qmta-msg1]: msg"
+		echo "YLegend[qmta-msg1]: msg/hour"
+		echo "Legend1[qmta-msg1]: Total Msg&nbsp;"
+		echo "Legend2[qmta-msg1]: Total Attempts&nbsp;"
+		echo "LegendI[qmta-msg1]: Deliveries:&nbsp;"
+		echo "LegendO[qmta-msg1]: Attempts:&nbsp;"
+		echo "WithPeak[qmta-msg1]: ymwd"
+		echo "XSize[qmta-msg1]: 350"
+		echo "YSize[qmta-msg1]: 150"
+		echo ""
+		echo "#-------------------------------------------------------------------"
+		echo "Title[qmta-msg2]: qmta-send Message Status (Success, Failure) - $1"
+		echo "MaxBytes[qmta-msg2]: 10000"
+		echo "AbsMax[qmta-msg2]: 100000"
+		echo "Options[qmta-msg2]: growright,unknaszero,nopercent,gauge,pngdate"
+		echo "Target[qmta-msg2]: \`$libexecdir/journal2mrtg qmta-send -s\`"
+		echo "PageTop[qmta-msg2]: <B>Message Status</B><BR>"
+		echo "ShortLegend[qmta-msg2]: msg"
+		echo "YLegend[qmta-msg2]: msg/hour"
+		echo "Legend1[qmta-msg2]: msg&nbsp;"
+		echo "LegendI[qmta-msg2]: success&nbsp;"
+		echo "LegendO[qmta-msg2]: failures&nbsp;"
+		echo "WithPeak[qmta-msg2]: ymwd"
+		echo "XSize[qmta-msg2]: 350"
+		echo "YSize[qmta-msg2]: 150"
+		echo ""
+		echo "#-------------------------------------------------------------------"
+		echo "Title[qmta-conc]: qmta-send Local/Remote Concurrency - $1"
+		echo "MaxBytes[qmta-conc]: 500"
+		echo "AbsMax[qmta-conc]: 10000"
+		echo "Options[qmta-conc]: growright,unknaszero,nopercent,gauge,pngdate"
+		echo "Target[qmta-conc]: \`$libexecdir/journal2mrtg qmta-send -c\`"
+		echo "PageTop[qmta-conc]: <B>Local/Remote Concurrency</B><br>"
+		echo "ShortLegend[qmta-conc]: concurrency"
+		echo "YLegend[qmta-conc]: max concurrency"
+		echo "Legend1[qmta-conc]: Local Concurrency&nbsp;"
+		echo "Legend2[qmta-conc]: Remote Concurrency&nbsp;"
+		echo "LegendI[qmta-conc]: local&nbsp;"
+		echo "LegendO[qmta-conc]: remote&nbsp;"
+		echo "WithPeak[qmta-conc]: ymwd"
+		echo "XSize[qmta-conc]: 350"
+		echo "YSize[qmta-conc]: 150"
+		echo ""
+		echo "#-------------------------------------------------------------------"
+		echo "Title[qmta-ibits]: qmta-send Bits Transfered - $1"
+		echo "MaxBytes[qmta-ibits]: 1540000"
+		echo "AbsMax[qmta-ibits]: 100000000"
+		echo "Options[qmta-ibits]: growright,unknaszero,nopercent,gauge,pngdate"
+		echo "Target[qmta-ibits]: \`$libexecdir/journal2mrtg qmta-send -b\`"
+		echo "PageTop[qmta-ibits]: <B>Bits Transfered</B><br>"
+		echo "ShortLegend[qmta-ibits]: bits"
+		echo "YLegend[qmta-ibits]: bits/sec"
+		echo "Legend1[qmta-ibits]: bits&nbsp;"
+		echo "Legend2[qmta-ibits]: bits&nbsp;"
+		echo "LegendI[qmta-ibits]: bits&nbsp;"
+		echo "LegendO[qmta-ibits]: bits&nbsp;"
+		echo "WithPeak[qmta-ibits]: ymwd"
+		echo "XSize[qmta-ibits]: 350"
+		echo "YSize[qmta-ibits]: 150"
+		echo ""
+	fi
+
 	for i in POP3.110.pop3d.110 POP3-SSL.995.pop3d-ssl.995 \
 		IMAP.143.imapd.143 IMAP-SSL.993.imapd-ssl.993 \
 		PROXYIMAP.4143.proxyIMAP.4143 PROXYPOP3.4110.proxyPOP3.4110 \
