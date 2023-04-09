@@ -351,7 +351,7 @@ function start_tcpserver_smtp()
 		REJECTSPAM=0 \
 		MAKE_SEEKABLE=1 \
 		DKIMVERIFY="" \
-		$tcpserver -u qmaild -g qmail -v -HR 0 2025 $qmail_smtpd $HOSTNAME /tmp/authsmtp /sbin/sys-checkpwd /bin/false > $logdir/smtpd/smtpd.log 2>&1
+		$tcpserver -u qmaild -g qmail -HR 0 2025 $qmail_smtpd $HOSTNAME /tmp/authsmtp /sbin/sys-checkpwd /bin/false > $logdir/smtpd/smtpd.log 2>&1
 	) &
 
 	count=0
@@ -709,7 +709,7 @@ function start_tcpserver_smtps
 		QUEUEDIR=$testdir/queue \
 		CONTROLDIR=$cntrldir \
 		CERTDIR=$certdir \
-		$tcpserver -u qmaild -g qmail -v -HR 0 2025 $qmail_smtpd > $logdir/smtpd/smtpd.log 2>&1
+		$tcpserver -u qmaild -g qmail -HR 0 2025 $qmail_smtpd > $logdir/smtpd/smtpd.log 2>&1
 	) &
 
 	count=0
@@ -1317,7 +1317,7 @@ function do_svscan_with_svscanlog()
 {
 	# start svscan with svscanlog
 	setup_svscan_with_svscanlog
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -n $certdir/servercert.pem -u qmaild -g qmail -v -HR 0 2025 $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -n $certdir/servercert.pem -u qmaild -g qmail -HR 0 2025 $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
 	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
@@ -1330,7 +1330,7 @@ function do_svscan_with_svscanlog()
 	echo 1 > $servicedir/.svscan/variables/AUTOSCAN
 	echo 5 > $servicedir/.svscan/variables/SCANINTERVAL
 	echo 1 > $servicedir/smtpd/variables/SMTPS
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 2025 $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 2025 $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	start_new_service 1
