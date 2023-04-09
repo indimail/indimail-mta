@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.674 2023-04-08 23:35:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.675 2023-04-09 12:22:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -25,7 +25,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.674 2023-04-08 23:35:46+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.675 2023-04-09 12:22:40+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4784,7 +4784,7 @@ echo "/bin/rm -f \$home/inquery/infifo.*"
 echo "for i in \$(seq 1 \$count); do f=\$home/inquery/infifo.\$i; mkfifo \$f && /bin/chmod 660 \$f && $chown qmaild:indimail \$f; done"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid -g qmail,indimail,qcerts qmaild $QmailBinPrefix/sbin/inlookup \\"
-echo "  -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
+echo "  -v -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
 ) > "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/run
 
@@ -6983,7 +6983,7 @@ mrtg_extra()
 			echo "MaxBytes[inlookup-$i]: 1000"
 			echo "AbsMax[inlookup-$i]: 100000"
 			echo "Options[inlookup-$i]: nopercent,growright,integer,gauge,pngdate"
-			echo "Target[inlookup-$i]: \`svc -1 $SERVICEDIR/inlookup.infifo && $libexecdir/qmailmrtg -i $opt $LOGDIR/inlookup.infifo $SERVICEDIR/inlookup.infifo\`"
+			echo "Target[inlookup-$i]: \`$libexecdir/qmailmrtg -i $opt $LOGDIR/inlookup.infifo $SERVICEDIR/inlookup.infifo\`"
 			echo "PageTop[inlookup-$i]: <B>Inlookup $i query count</B><br>"
 			echo "ShortLegend[inlookup-$i]: q"
 			echo "YLegend[inlookup-$i]: queries"
@@ -6996,7 +6996,62 @@ mrtg_extra()
 			echo "YSize[inlookup-$i]: 150"
 			echo ""
 		done
+		echo "#-------------------------------------------------------------------"
+		echo "Title[inlookup-cachehit]: inlookup Cache Hits - $1"
+		echo "MaxBytes[inlookup-cachehit]: 1000"
+		echo "AbsMax[inlookup-cachehit]: 100000"
+		echo "Options[inlookup-cachehit]: nopercent,growright,integer,gauge,pngdate"
+		echo "Target[inlookup-cachehit]: \`$libexecdir/qmailmrtg -i C $LOGDIR/inlookup.infifo $SERVICEDIR/inlookup.infifo\`"
+		echo "PageTop[inlookup-cachehit]: <B>Inlookup Cache Hits</B><br>"
+		echo "ShortLegend[inlookup-cachehit]: hits/hour"
+		echo "YLegend[inlookup-cachehit]: cache hits/hour"
+		echo "Legend1[inlookup-cachehit]: cache hits/hour"
+		echo "Legend2[inlookup-cachehit]: queries/hour"
+		echo "LegendI[inlookup-cachehit]: cache hits/hour"
+		echo "LegendO[inlookup-cachehit]: queries/hour"
+		echo "WithPeak[inlookup-cachehit]: ymwd"
+		echo "XSize[inlookup-cachehit]: 350"
+		echo "YSize[inlookup-cachehit]: 150"
+		echo ""
 	fi
+	if [ -d $LOGDIR/dnscache ] ; then
+		echo "#-------------------------------------------------------------------"
+		echo "Title[dnscache]: dnscache Queries - $1"
+		echo "MaxBytes[dnscache]: 1000"
+		echo "AbsMax[dnscache]: 100000"
+		echo "Options[dnscache]: nopercent,growright,gauge,pngdate"
+		echo "Target[dnscache]: \`$libexecdir/qmailmrtg -d $LOGDIR/dnscache $SERVICEDIR/dnscache\`"
+		echo "PageTop[dnscache]: <B>dnscache Queries</B><br>"
+		echo "ShortLegend[dnscache]: &nbsp;"
+		echo "YLegend[dnscache]: Queries/hour"
+		echo "Legend1[dnscache]: Cached&nbsp;"
+		echo "Legend2[dnscache]: Queries&nbsp;"
+		echo "LegendI[dnscache]: Cached&nbsp;"
+		echo "LegendO[dnscache]: Queries&nbsp;"
+		echo "WithPeak[dnscache]: ymwd"
+		echo "XSize[dnscache]: 350"
+		echo "YSize[dnscache]: 150"
+		echo ""
+	fi
+	if [ -d $LOGDIR/tinydns ] ; then
+		echo "#-------------------------------------------------------------------"
+		echo "Title[tinydns]: tinydns Queries - $1"
+		echo "MaxBytes[tinydns]: 1000"
+		echo "AbsMax[tinydns]: 100000"
+		echo "Options[tinydns]: nopercent,growright,gauge,pngdate"
+		echo "Target[tinydns]: \`$libexecdir/qmailmrtg -l $LOGDIR/tinydns $SERVICEDIR/tinydns\`"
+		echo "PageTop[tinydns]: <B>tinydns Queries</B><br>"
+		echo "ShortLegend[tinydns]: Queries"
+		echo "YLegend[tinydns]: Queries/hour"
+		echo "Legend1[tinydns]: Queries&nbsp;"
+		echo "LegendI[tinydns]: Queries&nbsp;"
+		echo "LegendO[tinydns]: &nbsp;"
+		echo "WithPeak[tinydns]: ymwd"
+		echo "XSize[tinydns]: 350"
+		echo "YSize[tinydns]: 150"
+		echo ""
+	fi
+
 	if [ -d $LOGDIR/mysql.3306 ] ; then
 		echo "#"
 		echo "# MySQL QUERIES"
