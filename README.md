@@ -128,7 +128,7 @@ You need libgsasl for SCRAM AUTH methods (SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-
 
 ```
 FreeBSD
-# pkg install pkgconf libidn2 libgsasl
+# pkg install pkgconf libidn2 libgsasl base64
 
 Darwin
 # port install pkgconfig libidn2 gsasl
