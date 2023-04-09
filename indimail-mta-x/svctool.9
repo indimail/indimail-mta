@@ -42,16 +42,15 @@ passwords used for accessing MySQL. You can set
 
 .EX
 \fBMYSQL_PASS\fR - password for accessing IndiMail MySQL database
-\fBPRIV_PASS\fR  - password for accessing MySQL as an admin user
-\fBADMIN_PASS\fR - password for MySQL user having shutdown privileges
-\fBREPL_PASS\fR  - password for MySQL user having privileges to replicate
-                   from master
+\fBPRIV_PASS\fR  - password for MySQL user with admin privileges
+\fBADMIN_PASS\fR - password for MySQL user with shutdown privileges
+\fBREPL_PASS\fR  - password for MySQL user with replication privileges
 .EE
 
 If the above file is not present, svctool uses hard coded, installation
 time defaults in the script. If you change any of the above passwords,
-you can store them in svctool.conf. Please ensure that no unprivileged
-users have read/write access to svctool.conf. When you run \fBsvctool\fR
+you can store them in svctool.cnf. Please ensure that no unprivileged
+users have read/write access to svctool.cnf. When you run \fBsvctool\fR
 the permissions of these file will be automatically changed for not
 allowing non-root users to have read/write access.
 
