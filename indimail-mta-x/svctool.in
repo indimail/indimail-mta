@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.676 2023-04-09 22:32:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.677 2023-04-09 23:14:55+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -21,11 +21,12 @@ MASTER_HOST=localhost
 MYSQL_HOST=localhost
 MYSQL_USER=indimail
 PRIV_USER=mysql
+REPL_USER=repl
 host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.676 2023-04-09 22:32:37+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.677 2023-04-09 23:14:55+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -7128,7 +7129,7 @@ mrtg_extra()
 		echo "# MySQL QUERIES"
 		echo "#"
 		echo "Title[mysql_queries]: MySQL query count - $1"
-		echo "Target[mysql_queries]: \`/usr/bin/mysqladmin -u admin -p$ADMIN_PASS ver|awk '/Qu/{q=\$20;s=\$7}/Up/{u=\$0}/Se/{v=\$3}END{print q\"\\n\"s\"\\n\"u\"\\nMySQL version \"v}'|sed 's/Uptime:[[:space:]]\+//'\`"
+		echo "Target[mysql_queries]: \`/usr/bin/mysqladmin -u $REPL_USER -p$REPL_PASS ver|awk '/Qu/{q=\$20;s=\$7}/Up/{u=\$0}/Se/{v=\$3}END{print q\"\\n\"s\"\\n\"u\"\\nMySQL version \"v}'|sed 's/Uptime:[[:space:]]\+//'\`"
 		echo "Options[mysql_queries]: nopercent, growright, integer, perminute, pngdate"
 		echo "MaxBytes[mysql_queries]: 250000"
 		echo "PageTop[mysql_queries]: <h1>MySQL query count</h1>"
@@ -9931,6 +9932,7 @@ fi
 [ -z "$MYSQL_PASS" ] && MYSQL_PASS="ssh-1.5-"
 [ -z "$PRIV_PASS" ]  && PRIV_PASS="4-57343-"
 [ -z "$ADMIN_PASS" ] && ADMIN_PASS="benhur20"
+[ -z "$REPL_PASS" ] && REPL_PASS="slaveserver"
 [ -z "$TMPDIR" ] && TMPDIR="/tmp/indimail"
 [ ! -d "$TMPDIR" ] && mkdir -m 0700 -p $TMPDIR
 if [ ! -d $TMPDIR ] ; then
