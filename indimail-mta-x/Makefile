@@ -1860,6 +1860,7 @@ gsasl.lib mysql_config
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
 		$(static_option) $(QMAILLIB) $(dynamic_option) \
+		-L../libsrs2-x/libsrs2/.libs \
 		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib`; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 -o qmail_smtpd.so \
@@ -1872,6 +1873,7 @@ gsasl.lib mysql_config
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
 		-Wl,-Bstatic $(QMAILLIB) -Wl,-Bdynamic \
+		-L../libsrs2-x/libsrs2/.libs \
 		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib`; \
 	fi
 
@@ -1896,6 +1898,7 @@ tls.lib gsasl.lib srs.lib mysql_config conf-sql
 	auto_control.o auto_assign.o query_skt.o fn_handler.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	parse_env.o $(static_option) $(QMAILLIB) \
+	-L../libsrs2-x/libsrs2/.libs \
 	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib srs.lib` \
 	-lcrypto -ldl
 
