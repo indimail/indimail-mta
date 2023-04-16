@@ -5112,6 +5112,8 @@ echo "$prog_args"
 echo ""
 ) > "$DESTDIR"$databasedir/.create_db
 chmod +x "$DESTDIR"$databasedir/.create_db
+$chown mysql:mysql "$DESTDIR"$databasedir
+$chown -R mysql:mysql "$DESTDIR"$databasedir/data "$DESTDIR"$databasedir/logs
 if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
 	if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
 		echo "Creating MySQL SSL/TLS Certificates" 1>&2
@@ -5125,7 +5127,6 @@ elif [ $mariadb -eq 1 ] ; then
 		mariadb_ssl_rsa_setup "$DESTDIR"$databasedir/ssl "$DESTDIR"$databasedir/ssl
 	fi
 fi
-$chown -R mysql:mysql "$DESTDIR"$databasedir
 echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
 if [ $mariadb -eq 1 ] ; then
 	echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp" 1>&2
@@ -5179,7 +5180,8 @@ else
 		fi
 	fi
 fi
-$chown -R mysql:mysql "$DESTDIR"$databasedir
+$chown mysql:mysql "$DESTDIR"$databasedir
+$chown -R mysql:mysql "$DESTDIR"$databasedir/data "$DESTDIR"$databasedir/logs
 #
 # Pretty Dumb stuff in packing MySQL on openSUSE, creating /usr/my.cnf.
 #
@@ -5249,7 +5251,8 @@ create_mysql_user $mysql_version
 ) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysqlSocket
 kill $pid
 wait_for_mysqld 1
-$chown -R mysql:mysql "$DESTDIR"$databasedir
+$chown mysql:mysql "$DESTDIR"$databasedir
+$chown -R mysql:mysql "$DESTDIR"$databasedir/data "$DESTDIR"$databasedir/logs
 }
 
 check_mysqld_variable()
