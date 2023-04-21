@@ -47,10 +47,10 @@ crashes, then \fBqscanq-stdin\fR returns code 71, causing the message to be
 deferred.
 
 If \fBclamdscan\fR returns code 2, indicating that a virus has been found,
-then \fBclamdscan\fR returns error code 33, permanently rejecting the
-message. \fBqscanq-stdin\fR will return 34, permanently rejecting the
-message, in case the attachment extension matches any prohibited extensions
-in the \fIbadext\fR control file.
+then \fBqscanq-stdin\fR returns error code 33, permanently rejecting the
+message. In case the attachment extension matches any prohibited extensions
+in the \fIbadext\fR control file,\fBqscanq-stdin\fR will return 34,
+permanently rejecting the message
 
 If the virus scanning or bad attachment scanning passes all tests,
 \fBqscanq-stdin\fR will run the command supplied on its command line, or if
