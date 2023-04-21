@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.678 2023-04-17 10:06:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.679 2023-04-21 08:24:22+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.678 2023-04-17 10:06:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.679 2023-04-21 08:24:22+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1503,7 +1503,7 @@ else
 fi
 LOGDIRS="`ls -d $logdir/* 2>/dev/null`"
 for i in $LOGDIRS; do
-  if [ $i = $logdir"/svctool.log" -o $i = $logdir"/services.log" ] ; then
+  if [ $i = $logdir"/services.log" ] ; then
     continue
   fi
   echo $i
@@ -4957,8 +4957,8 @@ fi
 /usr/bin/openssl rsa -in private_key.pem -pubout -out public_key.pem
 $chown mysql:indimail $ca_path/ca-key.pem $ca_path/ca.pem server-key.pem server-cert.pem \
 	client-key.pem client-cert.pem private_key.pem public_key.pem
-/bin/chmod 600 $ca_path/ca-key.pem client-key.pem private_key.pem server-key.pem
-/bin/chmod 640 client-cert.pem server-cert.pem $ca_path/ca.pem
+/bin/chmod 600 $ca_path/ca-key.pem private_key.pem server-key.pem
+/bin/chmod 640 client-key.pem client-cert.pem server-cert.pem $ca_path/ca.pem
 /bin/chmod 644 public_key.pem
 /bin/rm -f $ca_path/ca-req.pem server-req.pem client-req.pem
 echo ""
@@ -5028,11 +5028,11 @@ set_mysql_ssl_permission()
 	do
 		$chown mysql:indimail $ssl_dir/$i
 	done
-	for i in ca-key.pem client-key.pem private_key.pem server-key.pem
+	for i in ca-key.pem private_key.pem server-key.pem
 	do
 		/bin/chmod 600 $ssl_dir/$i
 	done
-	for i in client-cert.pem server-cert.pem ca.pem
+	for i in client-key.pem client-cert.pem server-cert.pem ca.pem
 	do
 		/bin/chmod 640 $ssl_dir/$i
 	done
@@ -10852,7 +10852,7 @@ do_exit()
 			if [ ! -d "$DESTDIR"$LOGDIR ] ; then
 				/bin/mkdir -p "$DESTDIR"$LOGDIR
 			fi
-			echo "`date` $prog_args" >> "$DESTDIR"$LOGDIR/svctool.log
+			echo "`date` $prog_args" >> "$DESTDIR"$LOGDIR/services.log
 		fi
 	fi
 	exit 0
