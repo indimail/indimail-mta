@@ -80,11 +80,12 @@ the service which service \fIs\fR should wait \fIt\fR secs after service
 secs. Any value above this value will be limited to 60 secs.
 \fIsupervise\fR(8) opens \fIw\fR/\fIsupervise\fR/\fIup\fR in write mode. If
 service \fIw\fR is up, the write returns immediately. If service \fIw\fR is
-done, write will block till \fIw\fR is up and running. If service \fIw\fR
+down, write will block till \fIw\fR is up and running. If service \fIw\fR
 doesn't have \fBsupervise\fR running, \fPsupervise\fR will wait for 60
 seconds before opening for write the file \fIw\fR/\fIsupervise\fR/\fIup\fR
 again. The default value of 60 seconds gets overriden by the
-\fBSCANINTERVAL\fR environment variable used by \fBsvscan\fR(8).
+\fBSCANINTERVAL\fR environment variable used by \fBsvscan\fR(8). If service
+\fIw\fR doesn't exist, \fIs\fR/\fIwait\fR will be ignored.
 
 \fBsupervise\fR(8) creates the following FIFOs for with O_RDONLY|O_NDELAY
 mode. See open(2) for description of O_RDONLY, O_NDELAY

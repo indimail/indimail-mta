@@ -248,17 +248,27 @@ do_wait()
 		strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 	/* get sleep interval and the service name for which we are waiting */
-	i = get_wait_params(&sleep_interval, &service_name);
+	if (!(i = get_wait_params(&sleep_interval, &service_name))) {
+		if (!stralloc_copyb(&wait_sv_status, "../", 3) ||
+				!stralloc_cats(&wait_sv_status, service_name) ||
+				!stralloc_0(&wait_sv_status))
+			strerr_die2x(111, fatal.s, "out of memory");
+		wait_sv_status.len--;
+		/*-
+		 * if the service for which we are supposed to
+		 * wait doesn't exist, dont wait
+		 */
+		if (access(wait_sv_status.s, F_OK))
+			i = 1;
+	}
 #ifdef USE_RUNFS
-	if (use_runfs && chdir(dir) == -1)
-		strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+	if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+		strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
 	if (i)
 		return;
 	pidchange(svpid, 0);
-	if (!stralloc_copyb(&wait_sv_status, "../", 3) ||
-			!stralloc_cats(&wait_sv_status, service_name) ||
-			!stralloc_catb(&wait_sv_status, "/supervise/", 11))
+	if (!stralloc_catb(&wait_sv_status, "/supervise/", 11))
 		strerr_die2x(111, fatal.s, "out of memory");
 	len = wait_sv_status.len;
 	if (!stralloc_catb(&wait_sv_status, "up", 2) || !stralloc_0(&wait_sv_status))
@@ -343,7 +353,7 @@ trystart()
 	do_wait();
 #ifdef USE_RUNFS
 	if (use_runfs && fchdir(fddir) == -1)
-		strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+		strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 	if (!is_subreaper) {
 		if (stat(*run, &st) == -1)
@@ -352,8 +362,8 @@ trystart()
 			is_subreaper = subreaper() == 0 ? 1 : 0;
 	}
 #ifdef USE_RUNFS
-	if (use_runfs && chdir(dir) == -1)
-		strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+	if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+		strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
 	switch (f = fork())
 	{
@@ -601,8 +611,8 @@ doit()
 					if (!access(*alert, F_OK))
 						tryaction(alert, r, wstat, 1);
 #ifdef USE_RUNFS
-					if (use_runfs && chdir(dir) == -1)
-						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
 					trystart();
 				}
@@ -630,8 +640,8 @@ doit()
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
-					if (use_runfs && chdir(dir) == -1)
-						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
 					siglist[0] = SIGTERM;
 					siglist[1] = SIGCONT;
@@ -659,13 +669,13 @@ doit()
 				if (childpid) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
-						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
-					if (use_runfs && chdir(dir) == -1)
-						strerr_die2sys(111, fatal.s, "unable to switch back to run directory: ");
+					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
 					siglist[0] = SIGTERM;
 					siglist[1] = SIGCONT;
@@ -1004,7 +1014,7 @@ main(int argc, char **argv)
 
 	if ((ptr = env_get("SCANINTERVAL")))
 		scan_ulong(ptr, &scan_interval);
-	if (chdir(dir) == -1)
+	if (chdir(dir) == -1) /*- chdir to /service */
 		strerr_die4sys(111, fatal.s, "unable to chdir to ", dir, ": ");
 	if (stat("down", &st) != -1)
 		flagwantup = 0;
@@ -1012,7 +1022,7 @@ main(int argc, char **argv)
 	if (errno != error_noent)
 		strerr_die4sys(111, fatal.s, "unable to stat ", dir, "/down: ");
 
-	if ((fddir = open_read(".")) == -1)
+	if ((fddir = open_read(".")) == -1) /*- save dir for /service */
 		strerr_die2sys(111, fatal.s, "unable to open current directory: ");
 	if (stat("run", &st) == -1)
 		strerr_die4sys(111, fatal.s, "unable to stat ", dir, "/run: ");

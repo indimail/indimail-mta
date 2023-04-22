@@ -38,6 +38,9 @@ Release @version@-@release@ Start 20/02/2023 End --/--/2023
     ./alert scripts.
 - 03/04/2023
 21. qmailctl: use portable test -t to test for tty
+- 22/04/2023
+22. supervise.c: ignore wait if service for which supervise should wait does
+    not exist.
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023
