@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.682 2023-04-23 16:30:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.683 2023-04-23 17:45:21+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.682 2023-04-23 16:30:28+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.683 2023-04-23 17:45:21+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3662,8 +3662,6 @@ if [ $run_file_only -ne 1 ] ; then
 fi
 (
 dump_run_header
-echo "MYUID=\`/usr/bin/id -u indimail\`"
-echo "MYGID=\`/usr/bin/id -g indimail\`"
 echo "HOSTNAME=\`uname -n\`"
 echo ""
 echo "prefix=$QmailBinPrefix"
@@ -3684,10 +3682,10 @@ echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/bin/tcpserver -v -c variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 echo "-x $sysconfdir/tcp/tcp.$cdb_f.cdb -X \\"
 if [ " $imap_ssl" = " 1" ] ; then
-	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$MYUID -g \$MYGID,qcerts \\\$SSLADDRESS \\\$SSLPORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u indimail -g indimail,qmail,qcerts \\\$SSLADDRESS \\\$SSLPORT \\"
 	echo "\$prefix/bin/couriertls -server -tcpd \\"
 else
-	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u indimail -g indimail,qmail \\\$LOCALIP \\\$PORT \\"
 fi
 if [ " $proxy_port" = " " ] ;then
 	echo "\$prefix/sbin/"$cdb_f"login \\\$IMAPAUTHMODULES \$bindir/$stype Maildir\""
