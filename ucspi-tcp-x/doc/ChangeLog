@@ -1,6 +1,8 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release @version@-@release@ Start 13/02/2023 End XX/XX/XXXX
+* Sun Apr 23 2023 17:50:00 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.2-1.1%{?dist}
+Release 1.1.2-1.1 Start 13/02/2023 End 23/04/2023
 ======= Release Highlights ================================================
+o ability to pass username or uid in -u option
+o ability to pass multiple groups to -g
 ===========================================================================
 - 13/02/2023
 01. dotls.c, tcpserver.c: added error message for tls_init failure
@@ -16,6 +18,7 @@ Release @version@-@release@ Start 13/02/2023 End XX/XX/XXXX
 06. load_mysql.c: refactored getlibObject() function
 - 08/04/2023
 07. tcpserver.c: fixed status not getting printed
+- 23/04/2023 - indimail-mta-3.0.3
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 18/09/2022 End 30/01/2023

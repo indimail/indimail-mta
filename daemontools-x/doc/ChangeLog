@@ -1,6 +1,9 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release @version@-@release@ Start 20/02/2023 End --/--/2023
+* Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontols@indimail.org> 1.1.2-1.1%{?dist}
+Release 1.1.2-1.1 Start 20/02/2023 End 23/04/2023
 ======= Release Highlights ================================================
+o terminate all childs if TERMINATE_SESSION is set
+o set process group of child when SETGPID is set
+o set sticky bit on run file to run in subreaper mode
 ===========================================================================
 - 20/02/2023
 01. setuidgid.c: moved set_additional_groups function to libqmail
@@ -41,6 +44,7 @@ Release @version@-@release@ Start 20/02/2023 End --/--/2023
 - 22/04/2023
 22. supervise.c: ignore wait if service for which supervise should wait does
     not exist.
+- 23/04/2023 - indimail-mta-3.0.3
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.1-1.1%{?dist}
 Release 1.1.1 Start 12/09/2022 End 30/11/2023
