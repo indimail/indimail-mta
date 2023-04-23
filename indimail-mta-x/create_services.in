@@ -21,7 +21,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.122 2023-04-06 22:42:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.123 2023-04-23 16:27:42+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -168,7 +168,7 @@ while test $# -gt 0; do
     --destdir=*)
     extra_opt="--destdir=$optarg"
     dir_prefix=$optarg
-	destdir_given=1
+    destdir_given=1
     ;;
     --help)
     usage 0
@@ -368,6 +368,7 @@ if [ $ID -eq 0 -a $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
   [ $ID -eq 0 ] && $svctool --config=mysql   --mysqlPrefix=$mysql_base \
       --databasedir=$indimaildir/mysqldb $extra_opt
   [ $ID -eq 0 ] && $svctool --config=mysqldb --mysqlPrefix=$mysql_base \
+    --mysqluser="indimail" --mysqlpass="ssh-1.5-" \
     --databasedir=$indimaildir/mysqldb --base_path=$mail_path \
     $extra_opt
   [ $ID -eq 0 ] && $svctool --mysql=3306 --servicedir=$servicedir \
@@ -387,8 +388,8 @@ if [ $noindimail -eq 0 ] ; then
   else
     mysqlSocket=/run/mysqld/mysqld.sock
   fi
-  [ $ID -eq 0 ] && $svctool --config=indimail --mysqlhost=localhost --mysqluser=indimail  \
-    --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket $extra_opt
+  [ $ID -eq 0 ] && $svctool --config=indimail --mysqlhost=localhost \
+    --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket $extra_opt
 fi
 
 if [ $nodksignatures -eq 0 ] ; then
@@ -627,9 +628,8 @@ if [ $noindimail -eq 0 ] ; then
       mysqlSocket=/run/mysqld/mysqld.sock
     fi
     [ $ID -eq 0 ] && $svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
-      --mysqlhost=localhost --mysqluser=indimail \
-      --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket \
-      --servicedir=$servicedir $extra_opt
+      --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
+      --mysqlsocket=$mysqlSocket --servicedir=$servicedir $extra_opt
   fi
   #
   # poppassd protocol
@@ -775,6 +775,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.123  2023-04-23 16:27:42+05:30  Cprogrammer
+# pass username and password argument for mysqldb creation
+#
 # Revision 2.122  2023-04-06 22:42:30+05:30  Cprogrammer
 # added command to create /etc/indimail/snmpd.conf
 #

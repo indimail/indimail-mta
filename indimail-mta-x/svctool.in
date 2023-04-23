@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.681 2023-04-22 11:28:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.682 2023-04-23 16:30:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.681 2023-04-22 11:28:26+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.682 2023-04-23 16:30:28+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5082,12 +5082,14 @@ set_mysql_ssl_permission()
 
 create_mysql_db()
 {
-if [ $# -ne 2 ] ; then
-	echo "USAGE: create_mysql_db databasedir mysql_socket" 1>&2
+if [ $# -ne 4 ] ; then
+	echo "USAGE: create_mysql_db user password databasedir mysql_socket" 1>&2
 	return 1
 fi
-databasedir=$1
-mysqlSocket=$2
+user=$1
+pass=$2
+databasedir=$3
+mysqlSocket=$4
 if [ -z "$mysqlSocket" ] ; then
 	if [ -n "$MYSQL_SOCKET" ] ; then
 		mysqlSocket=$MYSQL_SOCKET
@@ -5312,10 +5314,10 @@ fi
 pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
 (
 # Create user mysql with all privileges
-echo "Creating MySQL admin User for Database in "$DESTDIR"$databasedir/data" 1>&2
+echo "Creating MySQL admin User 'mysql' for Database in "$DESTDIR"$databasedir/data" 1>&2
 create_mysql_rootuser $mysql_version $mariadb $mysql_community_server $pass_str $auth_str $plugin_str
-echo "Creating MySQL indimail User for Database in "$DESTDIR"$databasedir/data" 1>&2
-create_mysql_user $mysql_version
+echo "Creating MySQL indimail User '$user' for Database in "$DESTDIR"$databasedir/data" 1>&2
+create_mysql_user "$user" "$pass" "$mysql_version"
 ) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysqlSocket
 kill $pid
 wait_for_mysqld 1
@@ -5461,7 +5463,9 @@ create_mysql_user()
 		echo "/usr/bin/openssl: No such file or directory" 1>&2
 		return 1
 	fi
-	mysql_version=$1
+	mysql_user=$1
+	mysql_pass=$2
+	mysql_version=$3
 	case "$mysql_version" in
 		8.*)
 			mysql_version_8=1
@@ -5546,7 +5550,7 @@ create_mysql_user()
 	mecho $c_d
 
 	mecho "use mysql;"
-	mecho "CREATE USER 'indimail'@'%' identified by '$MYSQL_PASS';"
+	mecho "CREATE USER '$mysql_user'@'%' identified by '$mysql_pass';"
 	mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
 	mecho "CREATE USER 'repl'@'%'     identified by 'slaveserver';"
 	if [ $mariadb -eq 1 -a $mariadb_version_10 -eq 1 ] ; then
@@ -11281,6 +11285,14 @@ case $option in
 			usage 1
 			exit 1
 		fi
+		if [ -z "$mysql_user" ] ; then
+			echo "MySQL user not specified. Using default user" 1>&2
+			mysql_user=$MYSQL_USER
+		fi
+		if [ -z "$mysql_pass" ] ; then
+			echo "MySQL password not specified. Using default password" 1>&2
+			mysql_pass=$MYSQL_PASS
+		fi
 		if [ -z "$mysqlSocket" ]; then
 			if [ -n "$MYSQL_SOCKET" ] ; then
 				mysqlSocket=$MYSQL_SOCKET
@@ -11294,7 +11306,7 @@ case $option in
 				mysqlSocket=/run/mysqld/mysqld.sock
 			fi
 		fi
-		create_mysql_db "$databasedir" "$mysqlSocket"
+		create_mysql_db "$mysql_user" "$mysql_pass" "$databasedir" "$mysqlSocket"
 		if [ -d "$DESTDIR"$databasedir/ssl ] ; then
 			set_mysql_ssl_permission "$DESTDIR"$databasedir/ssl
 		elif [ -d "$DESTDIR"$databasedir/data ] ; then
