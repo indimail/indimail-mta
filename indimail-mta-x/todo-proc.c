@@ -170,9 +170,9 @@ sigterm(void)
 {
 	sig_block(sig_term);
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	todo_log("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n", 0);
+	todo_log("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n", NULL);
 	if (!flagexittodo)
-		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", 0);
+		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
 	flagexittodo = 1;
 }
 
@@ -182,7 +182,7 @@ sighup(void)
 {
 	flagreadasap = 1;
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	todo_log("alert: ", argv0, ": pid ", strnum1, " got HUP: ", queuedesc, "\n", 0);
+	todo_log("alert: ", argv0, ": pid ", strnum1, " got HUP: ", queuedesc, "\n", NULL);
 }
 
 void
@@ -197,21 +197,21 @@ senddied(void)
 void
 nomem()
 {
-	todo_log("alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n", 0);
+	todo_log("alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n", NULL);
 	sleep(10);
 }
 
 void
 pausedir(char *dir)
 {
-	todo_log("alert: ", argv0, ": ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", 0);
+	todo_log("alert: ", argv0, ": ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", NULL);
 	sleep(10);
 }
 
 void
 cleandied()
 {
-	todo_log("alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n", 0);
+	todo_log("alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n", NULL);
 	flagexittodo = 1;
 }
 
@@ -497,14 +497,14 @@ comm_do(fd_set *wfds, fd_set *rfds)
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				todo_log("alert: ", argv0, ": pid ", strnum1,
 					" got 'A' command: todo-proc attached: ",
-					queuedesc, "\n", 0);
+					queuedesc, "\n", NULL);
 				break;
 			case 'D': /*- detached mode */
 				flagdetached = 1;
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				todo_log("alert: ", argv0, ": pid ", strnum1,
 					" got 'D' command: todo-proc detached: ",
-					queuedesc, "\n", 0);
+					queuedesc, "\n", NULL);
 				break;
 			case 'H':
 				sighup(); /*- set flagreadasap = 1 */
@@ -514,7 +514,7 @@ comm_do(fd_set *wfds, fd_set *rfds)
 				break;
 			default:
 				todo_log("warn: ", argv0, ": ", queuedesc,
-					": qmail-send speaks an obscure dialect\n", 0, 0);
+					": qmail-send speaks an obscure dialect\n", 0, NULL);
 				break;
 			}
 		}
@@ -543,7 +543,7 @@ comm_die(int i)
 	nfds = 1;
 	comm_selprep(&nfds, &wfds, &rfds);
 	comm_do(&wfds, &rfds);
-	todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", 0);
+	todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
 	_exit(i);
 }
 
@@ -573,12 +573,12 @@ mqueue_init(void)
 	/*- message queue /queueN for communication between todo-proc, qmail-queue */
 	if ((mq_queue = mq_open(mq_name, O_RDONLY,  0600, NULL)) == (mqd_t)-1) {
 		todo_log("alert: ", argv0, ": failed to open POSIX message queue ",
-			mq_name, ": ", error_str(errno), "\n", 0);
+			mq_name, ": ", error_str(errno), "\n", NULL);
 		comm_die(111);
 	}
 	nexttodorun = now();
 	if (clock_getcpuclockid(0, &clock_id)) {
-		todo_log("alert: ", argv0, ": failed to get clockid: ", error_str(errno), "\n", 0);
+		todo_log("alert: ", argv0, ": failed to get clockid: ", error_str(errno), "\n", NULL);
 		comm_die(111);
 	}
 }
@@ -612,18 +612,18 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 		return 4;
 	if (mq_getattr(mq_queue, &attr) == -1) {
 		todo_log("warn: ", argv0, ": ", queuedesc,
-			": unable to get message queue attributes:  ", error_str(errno), "\n", 0);
+			": unable to get message queue attributes:  ", error_str(errno), "\n", NULL);
 		return -1;
 	}
 	if (!msgbuflen) {
 		if (!(msgbuf = (char *) alloc(attr.mq_msgsize))) {
-			todo_log("warn: ", argv0, ": ", queuedesc, ": out of memory\n", 0);
+			todo_log("warn: ", argv0, ": ", queuedesc, ": out of memory\n", NULL);
 			return -1;
 		}
 	} else
 	if (msgbuflen < attr.mq_msgsize) {
 		if (!alloc_re((char *) &msgbuf, msgbuflen, attr.mq_msgsize)) {
-			todo_log("warn: ", argv0, ": ", queuedesc, ": out of memory\n", 0);
+			todo_log("warn: ", argv0, ": ", queuedesc, ": out of memory\n", NULL);
 			return -1;
 		}
 	}
@@ -632,7 +632,7 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 	for (;;) {
 		if (clock_gettime(clock_id, &tsp) == -1) {
 			todo_log("warn: ", argv0, ": ", queuedesc,
-				": unable to get RTC time:  ", error_str(errno), "\n", 0);
+				": unable to get RTC time:  ", error_str(errno), "\n", NULL);
 			return -1;
 		}
 		tsp.tv_sec += chunk_wait;
@@ -644,7 +644,7 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 			if (errno == error_intr)
 				continue;
 			todo_log("warn: ", argv0, ": ", queuedesc,
-				": unable to read message queue: ", error_str(errno), "\n", 0);
+				": unable to read message queue: ", error_str(errno), "\n", NULL);
 			mq_close(mq_queue);
 			mq_queue = (mqd_t)-1;
 			do_readsubdir = 1;
@@ -661,7 +661,7 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 		if (!stralloc_copyb(&qfn, strnum1, i) || !stralloc_0(&qfn)) {
 			if (!do_readsubdir) {
 				todo_log("warn: ", argv0, ": ", queuedesc,
-					": out of memory. Resetting to opendir mode\n", 0);
+					": out of memory. Resetting to opendir mode\n", NULL);
 				do_readsubdir = 1;
 				trigger_set();
 			}
@@ -742,7 +742,7 @@ log_stat(unsigned long id, size_t bytes)
 #endif
 		todo_log(*ptr == 'L' ? "local: " : "remote: ", mailfrom.len > 3 ? mailfrom.s + 1 : "<>",
 				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2,
-				" bytes ", queuedesc, mode, 0);
+				" bytes ", queuedesc, mode, NULL);
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom.len = mailto.len = 0;
@@ -783,10 +783,10 @@ todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 #ifdef HASLIBRT
 		if (dynamic_queue && do_readsubdir) {
 			if (compat_mode_flag == 2) {
-				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n", 0);
+				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n", NULL);
 				trigger_clear(nfds, rfds);
 			} else
-				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n", 0);
+				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n", NULL);
 			do_readsubdir = 0;
 		}
 #endif
@@ -847,13 +847,13 @@ todo_do(int *nfds, fd_set *rfds)
 		if (compat_mode_flag < 2 && trigger_pulled(rfds) && !(flagtododir = 0) &&
 				!todo_scan(nfds, rfds, &id, 1)) { /*- found message without using mq_queue as trigger */
 			if (!compat_mode_flag)
-				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n", 0);
+				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to compat mode\n", NULL);
 			compat_mode_flag = 1;
 			ptr = readsubdir_name(&todosubdir);
 		} else {
 			if (compat_mode_flag == 1) {
 				compat_mode_flag = 0;
-				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n", 0);
+				todo_log("info: ", argv0, ": ", queuedesc, ": Resetting to mqueue mode\n", NULL);
 			}
 			if ((i = mqueue_scan(rfds, &id))) /*- message pushed and intimated through mq_queue */
 				return i;
@@ -875,44 +875,44 @@ todo_do(int *nfds, fd_set *rfds)
 		scan_int(fn.s + 5, &i); /*- split as per calculation by fnmake using auto_split */
 		todo_log(split != i ? "warn: " : "info: ", argv0, ": ", queuedesc,
 			": subdir=todo/", ptr, " fn=", fn.s,
-			split != i ? " incorrect split\n" : "\n", 0);
+			split != i ? " incorrect split\n" : "\n", NULL);
 		if (split != i) /*- split doesn't match with split calculation in fnmake_todo() */
 			return -1;
 	} else
 		fnmake_todo(id); /*- set fn as todo/id */
 	if ((fd = open_read(fn.s)) == -1) { /*- envelope in todo/split/id */
 		todo_log("warn: ", argv0, ": ", queuedesc, ": open ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		return -1;
 	}
 	fnmake_mess(id); /*- change fn to mess/split/id */
 	/*- just for the statistics, stat on mess/split file */
 	if (stat(fn.s, &st) == -1) {
 		todo_log("warn: ", argv0, ": ", queuedesc, ": unable to stat ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
 		fnmake_chanaddr(id, c);
 		if (unlink(fn.s) == -1 && errno != error_noent) {
 			todo_log("warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn.s, ": ",
-				error_str(errno), "\n", 0);
+				error_str(errno), "\n", NULL);
 			goto fail;
 		}
 	}
 	fnmake_info(id); /*- now fn is info/split/id */
 	if (unlink(fn.s) == -1 && errno != error_noent) { /*- delete any existing info/split/id */
 		todo_log("warn: ", argv0, ": ", queuedesc, ": unable to unlink ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		goto fail;
 	}
 	if ((fdinfo = open_excl(fn.s)) == -1) { /*- create info/split/id */
 		todo_log("warn: ", argv0, ": ", queuedesc, ": unable to create ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		goto fail;
 	}
 	strnum1[fmt_ulong(strnum1, id)] = 0;
-	todo_log("new msg ", strnum1, " ", queuedesc, "\n", 0);
+	todo_log("new msg ", strnum1, " ", queuedesc, "\n", NULL);
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
 	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf)); /*- read envelope */
@@ -924,7 +924,7 @@ todo_do(int *nfds, fd_set *rfds)
 			/*- perhaps we're out of memory, perhaps an I/O error */
 			fnmake_todo(id); /* todo/split/id */
 			todo_log("warn: ", argv0, ": ", queuedesc, ": trouble reading ", fn.s, ": ",
-				error_str(errno), "\n", 0);
+				error_str(errno), "\n", NULL);
 			goto fail;
 		}
 		if (!match)
@@ -941,14 +941,14 @@ todo_do(int *nfds, fd_set *rfds)
 		case 'e': /*- qqeh */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
 				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn.s, ": ",
-					error_str(errno), "\n", 0);
+					error_str(errno), "\n", NULL);
 				goto fail;
 			}
 			break;
 		case 'F': /*- from */
 			if (substdio_put(&ssinfo, todoline.s, todoline.len) == -1) {
 				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn.s, ": ",
-					error_str(errno), "\n", 0);
+					error_str(errno), "\n", NULL);
 				goto fail;
 			}
 			if (!stralloc_copy(&mailfrom, &todoline) || !stralloc_0(&mailfrom)) {
@@ -988,7 +988,7 @@ todo_do(int *nfds, fd_set *rfds)
 				fnmake_chanaddr(id, c);
 				if ((fdchan[c] = open_excl(fn.s)) == -1) {
 					todo_log("warn: ", argv0, ": ", queuedesc, ": unable to create ", fn.s, ": ",
-						error_str(errno), "\n", 0);
+						error_str(errno), "\n", NULL);
 					goto fail;
 				}
 				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
@@ -997,14 +997,14 @@ todo_do(int *nfds, fd_set *rfds)
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
 				fnmake_chanaddr(id, c);
 				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn.s, ": ",
-					error_str(errno), "\n", 0);
+					error_str(errno), "\n", NULL);
 				goto fail;
 			}
 			break;
 		default:
 			fnmake_todo(id); /* todo/split/id */
 			todo_log("warn: ", argv0, ": ", queuedesc, ": unknown record type in ", fn.s, ": ",
-				error_str(errno), "\n", 0);
+				error_str(errno), "\n", NULL);
 			goto fail;
 		}
 	}
@@ -1013,7 +1013,7 @@ todo_do(int *nfds, fd_set *rfds)
 	fnmake_info(id); /* info/split/id */
 	if (substdio_flush(&ssinfo) == -1) {
 		todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		goto fail;
 	}
 	for (c = 0; c < CHANNELS; ++c) {
@@ -1021,7 +1021,7 @@ todo_do(int *nfds, fd_set *rfds)
 			if (substdio_flush(&sschan[c]) == -1) {
 				fnmake_chanaddr(id, c);
 				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble writing to ", fn.s, ": ",
-					error_str(errno), "\n", 0);
+					error_str(errno), "\n", NULL);
 				goto fail;
 			}
 		}
@@ -1029,13 +1029,13 @@ todo_do(int *nfds, fd_set *rfds)
 #ifdef USE_FSYNC
 	if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdinfo) : fsync(fdinfo)) == -1) {
 		todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		goto fail;
 	}
 #else
 	if (fsync(fdinfo) == -1) {
 		todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		goto fail;
 	}
 #endif
@@ -1047,14 +1047,14 @@ todo_do(int *nfds, fd_set *rfds)
 			if ((use_fsync > 0 || use_fdatasync > 0) && (use_fdatasync ? fdatasync(fdchan[c]) : fsync(fdchan[c])) == -1) {
 				fnmake_chanaddr(id, c);
 				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
-					error_str(errno), "\n", 0);
+					error_str(errno), "\n", NULL);
 				goto fail;
 			}
 #else
 			if (fdatasync(fdchan[c]) == -1) {
 				fnmake_chanaddr(id, c);
 				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble fsyncing ", fn.s, ": ",
-					error_str(errno), "\n", 0);
+					error_str(errno), "\n", NULL);
 				goto fail;
 			}
 #endif
@@ -1073,7 +1073,7 @@ todo_do(int *nfds, fd_set *rfds)
 	}
 	if (ch != '+') {
 		todo_log("warn: ", argv0, ": ", queuedesc, ": qmail-clean unable to clean up ", fn.s, ": ",
-			error_str(errno), "\n", 0);
+			error_str(errno), "\n", NULL);
 		return -1;
 	}
 	comm_write(id, flagchan[0], flagchan[1]); /*- e.g. "DL656826\0" */
@@ -1155,32 +1155,32 @@ regetcontrols(void)
 	if (!(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
 	if (control_readfile(&newlocals, "locals", 1) != 1) {
-		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/locals\n", 0);
+		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/locals\n", NULL);
 		return;
 	}
 	if ((r = control_readfile(&newvdoms, "virtualdomains", 0)) == -1) {
-		todo_log("alert: ", argv0, ": ", queuedesc, ": reread ", controldir, "/virtualdomains\n", 0);
+		todo_log("alert: ", argv0, ": ", queuedesc, ": reread ", controldir, "/virtualdomains\n", NULL);
 		return;
 	}
 	if (control_readint(&todo_interval, "todointerval") == -1) {
-		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/todointerval\n", 0);
+		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/todointerval\n", NULL);
 		return;
 	}
 	if (control_rldef(&envnoathost, "envnoathost", 1, "envnoathost") != 1) {
-		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/envnoathost\n", 0);
+		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/envnoathost\n", NULL);
 		return;
 	}
 #ifdef USE_FSYNC
 	if (control_readint(&use_syncdir, "conf-syncdir") == -1) {
-		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-syncdir\n", 0);
+		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-syncdir\n", NULL);
 		return;
 	}
 	if (control_readint(&use_fsync, "conf-fsync") == -1) {
-		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fsync\n", 0);
+		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fsync\n", NULL);
 		return;
 	}
 	if (control_readint(&use_fdatasync, "conf-fdatasync") == -1) {
-		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fdatasync\n", 0);
+		todo_log("alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/conf-fdatasync\n", NULL);
 		return;
 	}
 #endif
@@ -1206,7 +1206,7 @@ reread(void)
 	if (chdir(auto_qmail) == -1) {
 		todo_log("alert: ", argv0, ": ", queuedesc,
 				": cannot start: unable to switch to ", auto_qmail, ": ",
-				error_str(errno), "\n", 0);
+				error_str(errno), "\n", NULL);
 		return;
 	}
 	regetcontrols();
@@ -1215,7 +1215,7 @@ reread(void)
 	while (chdir(queuedir) == -1) {
 		todo_log("alert: ", argv0, ": ", queuedesc,
 				": unable to switch back to queue directory ", queuedir,
-				": ", error_str(errno), "HELP! sleeping...\n", 0);
+				": ", error_str(errno), "HELP! sleeping...\n", NULL);
 		sleep(10);
 	}
 }
@@ -1241,7 +1241,7 @@ main(int argc, char **argv)
 	if (chdir(auto_qmail) == -1) {
 		todo_log("alert: ", argv0, ": ", queuedesc,
 				": cannot start: unable to switch to ", auto_qmail, ": ",
-				error_str(errno), "\n", 0);
+				error_str(errno), "\n", NULL);
 		comm_die(111);
 	}
 	getEnvConfigInt(&chunk_wait, "CHUNK_WAIT", CHUNK_WAIT);
@@ -1255,7 +1255,7 @@ main(int argc, char **argv)
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	strnum2[fmt_ulong(strnum2, todo_chunk_size)] = 0;
 	todo_log("info: ", argv0, ": ", queuedir, ": conf split=", strnum1,
-		", todo chunk size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n", 0);
+		", todo chunk size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n", NULL);
 #ifdef USE_FSYNC
 	ptr = env_get("USE_FSYNC");
 	use_fsync = (ptr && *ptr) ? 1 : 0;
@@ -1290,13 +1290,13 @@ main(int argc, char **argv)
 #endif
 	if (!getcontrols()) {
 		todo_log("alert: ", argv0, ": ", queuedesc,
-				": cannot start: unable to read controls or out of memory\n", 0);
+				": cannot start: unable to read controls or out of memory\n", NULL);
 		comm_die(111);
 	}
 	if (chdir(queuedir) == -1) {
 		todo_log("alert: ", argv0, ": ", queuedesc,
 				": cannot start: unable to switch to queue directory",
-				queuedir, ": ", error_str(errno), "\n", 0);
+				queuedir, ": ", error_str(errno), "\n", NULL);
 		comm_die(111);
 	}
 	sig_pipeignore();
@@ -1312,7 +1312,7 @@ main(int argc, char **argv)
 				break;
 			case 'd':
 #ifndef HASLIBRT
-				todo_log("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n", 0);
+				todo_log("alert: ", argv0, ": ", queuedesc, ": dynamic queue not supported\n", NULL);
 				comm_die(100);
 #endif
 				dynamic_queue = 1;
@@ -1354,7 +1354,7 @@ main(int argc, char **argv)
 		break;
 	}
 	if (c != 'C') {
-		todo_log("warn: ", argv0, ": ", queuedesc, ": qmail-send speaks an obscure dialect\n", 0);
+		todo_log("warn: ", argv0, ": ", queuedesc, ": qmail-send speaks an obscure dialect\n", NULL);
 		_exit(100);
 	}
 	for (;;) {
@@ -1398,7 +1398,7 @@ main(int argc, char **argv)
 		if (select(nfds, &rfds, &wfds, (fd_set *) 0, &tv) == -1) {
 			if (errno == error_intr);
 			else
-				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble in select\n", 0);
+				todo_log("warn: ", argv0, ": ", queuedesc, ": trouble in select\n", NULL);
 		} else {
 			/*-
 			 * we come here on
@@ -1417,7 +1417,7 @@ main(int argc, char **argv)
 		}
 	} /*- for (;;) */
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	todo_log("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n", 0);
+	todo_log("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n", NULL);
 	_exit(0);
 }
 

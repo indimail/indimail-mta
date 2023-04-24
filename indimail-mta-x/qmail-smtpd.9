@@ -260,17 +260,17 @@ Recipients who have exhausted their current mailbox quota.
 If the status of the recipient fall into any of the above category, the
 mail is rejected with a permanent error.
 
-NOTE: To turn on recipient status check for selected domains, include the
-domains in the control file
-.IR chkrcptdomains .
-Check the \fBCONTROL FILES\fR section below for the syntax for
-\fIchkrcptdomains\fR control file.
+\fBNOTE\fR: To turn on recipient status check for selected domains, include
+the domains in the \fIchkrcptdomains\fR control file. Check the \fBCONTROL
+FILES\fR section below for the syntax for \fIchkrcptdomains\fR control
+file.
 
-If the control file \fIchkrcptdomains\fR is absent, the  recipient status
-check is turned on for all domains. If the environment variable
-\fBMAX_RCPT_ERRCOUNT\fR is set, \fBqmail-smtpd\fR will reject mails if
-number of errors while doing recipient status Check equals/exceeds the
-value defined by \fBBR MAX_RCPT_ERRCOUNT\fR.
+If \fBCHECKRECIPIENT\fR is defined and if the control file
+\fIchkrcptdomains\fR is absent, the  recipient status check is turned on
+for all domains. If the environment variable \fBMAX_RCPT_ERRCOUNT\fR is
+set, \fBqmail-smtpd\fR will reject mails if number of errors while doing
+recipient status check equals/exceeds the value defined by
+\fBMAX_RCPT_ERRCOUNT\fR.
 
 .IP \n+[step]
 .B Check Sender Status

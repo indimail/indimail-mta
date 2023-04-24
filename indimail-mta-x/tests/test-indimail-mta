@@ -20,6 +20,7 @@ setuidgid=$bindir/setuidgid
 tcpserver=$bindir/tcpserver
 qmail_queue=$sbindir/qmail-queue
 s_nail=/usr/bin/s-nail
+smtp_port=2050
 sleep_int=2
 HOSTNAME=$(uname -n)
 
@@ -223,9 +224,9 @@ function test_tcpclient_script()
 	) > $testdir/tcpclient.smtp
 	chmod +x $testdir/tcpclient.smtp
 	if [ $# -eq 0 ] ; then
-		tcpclient -vDHR 0 2025 $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
+		tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
 	else
-		tcpclient -n $certdir/servercert.pem -vDHR 0 2025 $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
+		tcpclient -n $certdir/servercert.pem -vDHR 0 $smtp_port $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
 	fi
 	/bin/rm -f $testdir/tcpclient.smtp
 	check_mail
@@ -332,7 +333,7 @@ function create_authsmtp()
 function start_tcpserver_smtp()
 {
 	echo
-	echo "Starting SMTP on port 2025 using tcpserver"
+	echo "Starting SMTP on port $smtp_port using tcpserver"
 	(
 	sudo env - \
 		USE_QPWGR=1 \
@@ -351,15 +352,15 @@ function start_tcpserver_smtp()
 		REJECTSPAM=0 \
 		MAKE_SEEKABLE=1 \
 		DKIMVERIFY="" \
-		$tcpserver -u qmaild -g qmail -HR 0 2025 $qmail_smtpd $HOSTNAME /tmp/authsmtp /sbin/sys-checkpwd /bin/false > $logdir/smtpd/smtpd.log 2>&1
+		$tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd $HOSTNAME /tmp/authsmtp /sbin/sys-checkpwd /bin/false > $logdir/smtpd/smtpd.log 2>&1
 	) &
 
 	count=0
 	while true
 	do
-		bash -c "</dev/tcp/0/2025" 2>/dev/null
+		bash -c "</dev/tcp/0/$smtp_port" 2>/dev/null
 		if [ $? -eq 0 ] ; then
-			#echo "Port 0:2025 is alive" 1>&2
+			#echo "Port 0:$smtp_port is alive" 1>&2
 			break
 		fi
 		count=$(expr $count + 1)
@@ -369,13 +370,13 @@ function start_tcpserver_smtp()
 		fi
 		sleep 1
 	done
-	smtp_pid=$(/bin/ps -ef|grep 2025|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
+	smtp_pid=$(/bin/ps -ef|grep $smtp_port|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
 	sudo kill -0 $smtp_pid
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		echo "  testing SMTP on port 2025 using tcpserver succeeded"
+		echo "  testing SMTP on port $smtp_port using tcpserver succeeded"
 	else
-		echo "  testing SMTP on port 2025 using tcpserver failed"
+		echo "  testing SMTP on port $smtp_port using tcpserver failed"
 		sudo kill $send_pid $smtp_pid
 		exit 1
 	fi
@@ -383,7 +384,7 @@ function start_tcpserver_smtp()
 
 function test_smtp_tls()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port 2025 -tls
+	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port -tls
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -397,7 +398,7 @@ function test_smtp_tls()
 
 function test_smtp_notls()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port 2025
+	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -422,7 +423,7 @@ function test_smtp_dkimverify()
 	(
 	cat $testdir/mail.txt|dkim -z 2 -s $dkim_key
 	cat $testdir/mail.txt && rm -f $testdir/mail.txt
-	) | swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port 2025
+	) | swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port $smtp_port
 	check_mail_header "DKIM-Status: good"
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -443,7 +444,7 @@ function test_smtp_bogofilter()
 	echo "Date: $(date -R)"
 	echo
 	echo "This is an email to test DKIM"
-	) | swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port 2025
+	) | swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port $smtp_port
 	check_mail_header "X-Bogosity"
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -457,7 +458,7 @@ function test_smtp_bogofilter()
 
 function test_smtps()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port 2025 --tls-on-connect
+	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -471,7 +472,7 @@ function test_smtps()
 
 function test_smtp_auth_login()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port 2025 --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
+	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "AUTH LOGIN:")
@@ -492,7 +493,7 @@ function test_smtp_auth_login()
 
 function test_smtp_auth_plain()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port 2025 --a PLAIN -au $user@$HOSTNAME -ap "abcd12345678"
+	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --a PLAIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "AUTH PLAIN:")
@@ -514,7 +515,7 @@ function test_smtp_auth_plain()
 function test_smtp_auth_cram_md5()
 {
 	pass=$(sudo grep $user /etc/shadow|cut -d: -f2)
-	swaks -S --to $user@$HOSTNAME --server localhost --port 2025 --a CRAM-MD5 -au "$user" -ap "$pass"
+	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --a CRAM-MD5 -au "$user" -ap "$pass"
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "AUTH CRAM-MD5:")
@@ -553,7 +554,7 @@ function test_qmail_remote_auth()
 	echo
 	echo "Test message"
 	) | env - \
-		SMTPROUTE="$HOSTNAME:127.0.0.1:2025 $u $pass" \
+		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port $u $pass" \
 		AUTH_SMTP="$1" \
 		CONTROLDIR=$cntrldir \
 		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
@@ -602,7 +603,7 @@ function test_qmail_remote_routing()
 	
 	/bin/rm -f $cntrldir/batvkey
 	env - \
-		SMTPROUTE="$HOSTNAME:127.0.0.1:2025" \
+		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port" \
 		CONTROLDIR=$cntrldir \
 		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
@@ -617,7 +618,7 @@ function test_qmail_remote_routing()
 		exit 1
 	fi
 
-	echo "$HOSTNAME:127.0.0.1:2025" > $cntrldir/smtproutes
+	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
 	env - \
 		CONTROLDIR=$cntrldir \
 		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
@@ -636,7 +637,7 @@ function test_qmail_remote_routing()
 
 function test_qmail_remote_auth_cdb()
 {
-	echo "$HOSTNAME:127.0.0.1:2025 /s" > $cntrldir/smtproutes
+	echo "$HOSTNAME:127.0.0.1:$smtp_port /s" > $cntrldir/smtproutes
 	(
 	echo "=$user@$HOSTNAME:$user@$HOSTNAME abcd12345678 AUTH_SMTP=plain:"
 	echo "."
@@ -660,7 +661,7 @@ function test_qmail_remote_auth_cdb()
 	) > $testdir/mail.txt
 
 	env - \
-		SMTPROUTE="$HOSTNAME:127.0.0.1:2025 /s" \
+		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port /s" \
 		AUTH_SMTP="" \
 		CONTROLDIR=$cntrldir \
 		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
@@ -699,7 +700,7 @@ function terminate_send()
 function start_tcpserver_smtps
 {
 	echo
-	echo "Starting SMTPS on port 2025 using tcpserver"
+	echo "Starting SMTPS on port $smtp_port using tcpserver"
 	(
 	sudo env - \
 		USE_QPWGR=1 \
@@ -709,15 +710,15 @@ function start_tcpserver_smtps
 		QUEUEDIR=$testdir/queue \
 		CONTROLDIR=$cntrldir \
 		CERTDIR=$certdir \
-		$tcpserver -u qmaild -g qmail -HR 0 2025 $qmail_smtpd > $logdir/smtpd/smtpd.log 2>&1
+		$tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd > $logdir/smtpd/smtpd.log 2>&1
 	) &
 
 	count=0
 	while true
 	do
-		bash -c "</dev/tcp/0/2025" 2>/dev/null
+		bash -c "</dev/tcp/0/$smtp_port" 2>/dev/null
 		if [ $? -eq 0 ] ; then
-			#echo "Port 0:2025 is alive" 1>&2
+			#echo "Port 0:$smtp_port is alive" 1>&2
 			break
 		fi
 		count=$(expr $count + 1)
@@ -728,13 +729,13 @@ function start_tcpserver_smtps
 		fi
 		sleep 1
 	done
-	smtp_pid=$(/bin/ps -ef|grep 2025|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
+	smtp_pid=$(/bin/ps -ef|grep $smtp_port|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
 	sudo kill -0 $smtp_pid
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		echo "  testing SMTPS on port 2025 using tcpserver succeeded"
+		echo "  testing SMTPS on port $smtp_port using tcpserver succeeded"
 	else
-		echo "  testing SMTPS on port 2025 using tcpserver failed"
+		echo "  testing SMTPS on port $smtp_port using tcpserver failed"
 		sudo kill $send_pid $smtp_pid
 		exit 1
 	fi
@@ -757,7 +758,7 @@ function setup_svscan_without_svscanlog()
 	echo $cntrldir      > $servicedir/smtpd/variables/CONTROLDIR
 	echo $testdir/queue > $servicedir/smtpd/variables/QUEUEDIR
 	echo $certdir       > $servicedir/smtpd/variables/CERTDIR
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 2025 $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
 	printf "#!/bin/sh\nexec /usr/sbin/multilog t $logdir/smtpd\n" > $servicedir/smtpd/log/run
 	chmod +x $servicedir/smtpd/run
 	chmod +x $servicedir/smtpd/log/run
@@ -816,7 +817,7 @@ function test_stop_smtps()
 {
 	sudo svc -d $servicedir/smtpd
 	sleep $sleep_int
-	swaks -S --to $user@$HOSTNAME --server localhost --port 2025 --tls-on-connect 2>/dev/null
+	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect 2>/dev/null
 	if [ $? -eq 2 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing stopping of service using svc succeeded"
@@ -890,9 +891,9 @@ function test_multilog()
 function test_blocked()
 {
 	if [ $# -eq 0 ] ; then
-		swaks -S --to blocked@$HOSTNAME --server localhost --port 2025 --tls-on-connect >/dev/null
+		swaks -S --to blocked@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect >/dev/null
 	else
-		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port 2025 --tls-on-connect >/dev/null
+		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port --tls-on-connect >/dev/null
 	fi
 	if [ $? -eq 0 ] ; then
 		if [ $# -eq 0 ] ; then
@@ -1218,14 +1219,14 @@ function test_recipients()
 	) > $testdir/tcpclient.smtp
 	chmod +x $testdir/tcpclient.smtp
 
-	tcpclient -vDHR 0 2025 $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
+	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	status1=$?
 	sed -i '72d;75d' $testdir/tcpclient.smtp 
 	echo "!*" >> $cntrldir/recipients
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
 
-	tcpclient -vDHR 0 2025 $testdir/tcpclient.smtp >> $logdir/tcpclient/tcpclient.log 2>&1
+	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp >> $logdir/tcpclient/tcpclient.log 2>&1
 	status2=$?
 	if [ $status1 -eq 0 -a $status2 -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -1267,7 +1268,7 @@ function do_without_svscan()
 	# start smtp using tcpserver
 	start_tcpserver_smtp
 	create_authsmtp
-	smtp_pid=$(/bin/ps -ef|grep 2025|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
+	smtp_pid=$(/bin/ps -ef|grep $smtp_port|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
 	sleep $sleep_int
 	test_qmail_remote_auth "PLAIN"
 	test_qmail_remote_auth "LOGIN"
@@ -1286,7 +1287,7 @@ function do_without_svscan()
 
 	# start smtps using tcpserver
 	start_tcpserver_smtps
-	smtp_pid=$(/bin/ps -ef|grep 2025|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
+	smtp_pid=$(/bin/ps -ef|grep $smtp_port|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
 	test_smtps "testing mail using SMTPS by qmail-smtpd"
 	test_tcpclient_script 1 # test smtps using tcpclient
 	terminate_smtp $smtp_pid
@@ -1317,7 +1318,7 @@ function do_svscan_with_svscanlog()
 {
 	# start svscan with svscanlog
 	setup_svscan_with_svscanlog
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -n $certdir/servercert.pem -u qmaild -g qmail -HR 0 2025 $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -n $certdir/servercert.pem -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
 	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
@@ -1330,7 +1331,7 @@ function do_svscan_with_svscanlog()
 	echo 1 > $servicedir/.svscan/variables/AUTOSCAN
 	echo 5 > $servicedir/.svscan/variables/SCANINTERVAL
 	echo 1 > $servicedir/smtpd/variables/SMTPS
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 2025 $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	start_new_service 1

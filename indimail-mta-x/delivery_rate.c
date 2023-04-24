@@ -98,7 +98,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			slog(1, "warn: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
-					" secs; will try again later\n", 0);
+					" secs; will try again later\n", NULL);
 			if (do_ratelimit)
 				*do_ratelimit = 1;
 			return 0;
@@ -111,7 +111,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
 				slog(1, "info: ", queuedesc, " ", domain, " msg ", strnum1,
 						": rate [", email, "/", strdouble1, "/", strdouble2,
-						"] ok since ", strnum2 + 1, " secs\n", 0);
+						"] ok since ", strnum2 + 1, " secs\n", NULL);
 			}
 			if (do_ratelimit && i == 1)
 				*do_ratelimit = 1;
@@ -139,7 +139,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			slog(1, "warn: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
-					" secs; will try again later\n", 0);
+					" secs; will try again later\n", NULL);
 			if (do_ratelimit)
 				*do_ratelimit = 1;
 			return 0;
@@ -152,7 +152,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
 				slog(1, "info: ", queuedesc, " ", domain, " msg ", strnum1,
 						": rate [", email, "/", strdouble1, "/", strdouble2,
-						"] ok since ", strnum2 + 1, " secs\n", 0);
+						"] ok since ", strnum2 + 1, " secs\n", NULL);
 			}
 			if (do_ratelimit && i == 1)
 				*do_ratelimit = 1;
@@ -177,7 +177,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 			slog(1, "warn: ", queuedesc, " ", domain, " msg ", strnum1,
 					": rate exceeded [", email, "/", strdouble1,
 					"/", strdouble2, "] need ", strnum2,
-					" secs; will try again later\n", 0);
+					" secs; will try again later\n", NULL);
 			if (do_ratelimit)
 				*do_ratelimit = 1;
 			return 0;
@@ -190,7 +190,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 				strnum2[fmt_long(strnum2, *time_needed)] = 0;
 				slog(1, "info: ", queuedesc, " ", domain, " msg ", strnum1,
 						": rate [", email, "/", strdouble1, "/", strdouble2,
-						"] ok since ", strnum2 + 1, " secs\n", 0);
+						"] ok since ", strnum2 + 1, " secs\n", NULL);
 			}
 			if (do_ratelimit && i == 1)
 				*do_ratelimit = 1;

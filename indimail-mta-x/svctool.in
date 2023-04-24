@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.683 2023-04-23 17:45:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.684 2023-04-24 19:47:38+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.683 2023-04-23 17:45:21+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.684 2023-04-24 19:47:38+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9735,14 +9735,14 @@ orig=$(cat "$DESTDIR"$CONTROLDIR/me)
 # plusdomain, locals, rcpthosts, virtualdomains
 /usr/libexec/indimail/config-fast --quiet $defaultDomain
 out=$(mktemp -t recontrolXXXXXX)
-for i in nodnscheck locals rcpthosts smtpgreeting
+for i in nodnscheck locals rcpthosts smtpgreeting me
 do
 	if [ -f "$DESTDIR"$CONTROLDIR/$i ] ; then
-		sed -e "s{$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i > $out
+		sed -e "s{^$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i > $out
 		diff "$DESTDIR"$CONTROLDIR/$i $out > /dev/null
 		if [ $? -ne 0 ] ; then
 			echo "updating $DESTDIR""$CONTROLDIR/$i with $defaultHost"
-			sed -i "s{$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i
+			sed -i "s{^$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i
 		fi
 		/bin/rm -f $out
 	fi

@@ -1387,7 +1387,8 @@ compile do_rate.c do_rate.h
 
 delivery_rate.o: \
 compile delivery_rate.c delivery_rate.h qsutil.h \
-variables.h do_rate.h getDomainToken.h control.h
+variables.h do_rate.h getDomainToken.h control.h \
+varargs.h
 	./compile delivery_rate.c
 
 report.o: \
@@ -1612,7 +1613,7 @@ qmail-send.o: \
 compile qmail-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-haslibrt.h conf-mime conf-sync conf-batv conf-srs \
+varargs.h haslibrt.h conf-mime conf-sync conf-batv conf-srs \
 conf-bounce conf-loglock
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-bounce conf-loglock` qmail-send.c
@@ -1730,8 +1731,8 @@ ipalloc.h auto_control.h variables.h conf-tls conf-ip
 qmta-send.o: \
 compile qmta-send.c qsutil.h fmtqfn.h readsubdir.h trigger.h \
 variables.h prioq.h qmail.h newfield.h quote.h set_environment.h \
-auto_split.h auto_uids.h auto_prefix.h set_queuedir.h conf-mime \
-conf-sync conf-batv conf-srs conf-loglock conf-bounce
+auto_split.h auto_uids.h auto_prefix.h set_queuedir.h varargs.h \
+conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-loglock conf-bounce conf-srs` qmta-send.c
 
@@ -1938,7 +1939,7 @@ compile mini-smtpd.c auto_qmail.h control.h received.h ipme.h ip.h \
 qmail.h rcpthosts.h
 	./compile mini-smtpd.c
 
-mail_acl.o: compile mail_acl.c matchregex.h wildmat.h
+mail_acl.o: compile mail_acl.c matchregex.h wildmat.h varargs.h
 	./compile mail_acl.c
 
 indimail_stub.o: \
@@ -3478,7 +3479,8 @@ variables.o qregex.o auto_control.o
 	variables.o qregex.o auto_control.o $(QMAILLIB)
 
 uacl.o: \
-compile uacl.c qregex.h mail_acl.h matchregex.h control.h wildmat.h
+compile uacl.c qregex.h mail_acl.h matchregex.h control.h \
+wildmat.h varargs.h
 	./compile uacl.c
 
 qmail-sql: \

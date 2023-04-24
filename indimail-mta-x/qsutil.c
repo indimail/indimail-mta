@@ -102,9 +102,9 @@ void
 lockerr()
 {
 	if (queuedesc)
-		slog(1, "alert: ", queuedesc, ": problem with lock/unlock, sleeping...\n", 0);
+		slog(1, "alert: ", queuedesc, ": problem with lock/unlock, sleeping...\n", NULL);
 	else
-		slog(1, "alert: problem with lock/unlock, sleeping...\n", 0);
+		slog(1, "alert: problem with lock/unlock, sleeping...\n", NULL);
 	sleep(10);
 }
 
@@ -130,13 +130,13 @@ loglock_open(char *ident, int preopen)
 			nomem(ident);
 		if ((loglock_fd = open_read(lockfn.s)) == -1) {
 			if (queuedesc)
-				slog(1, "alert: ", ident, ": ", queuedesc, ": cannot start: unable to open defaultdelivery\n", 0);
+				slog(1, "alert: ", ident, ": ", queuedesc, ": cannot start: unable to open defaultdelivery\n", NULL);
 			else
-				slog(1, "alert: ", ident, ": cannot start: unable to open defaultdelivery\n", 0);
+				slog(1, "alert: ", ident, ": cannot start: unable to open defaultdelivery\n", NULL);
 			lockerr();
 		}
 	}
-	/*- slog(1, "info: ", ident, ": ", queuedesc, loglock_fd == -1 ? ": loglock disabled\n" : ": loglock enabled\n", 0); -*/
+	/*- slog(1, "info: ", ident, ": ", queuedesc, loglock_fd == -1 ? ": loglock disabled\n" : ": loglock enabled\n", NULL); -*/
 }
 #endif
 
@@ -255,10 +255,10 @@ log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, size_t bytes)
 	for (ptr = mailto->s; ptr < mailto->s + mailto->len;) {
 		if (queuedesc)
 			slog(1, *ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
-				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes ", queuedesc, "\n", 0);
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes ", queuedesc, "\n", NULL);
 		else
 			slog(1, *ptr == 'L' ? "local: " : "remote: ", mailfrom->len > 3 ? mailfrom->s + 1 : "<>",
-				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes\n", 0);
+				" ", *(ptr + 2) ? ptr + 2 : "<>", strnum1, strnum2, " bytes\n", NULL);
 		ptr += str_len(ptr) + 1;
 	}
 	mailfrom->len = mailto->len = 0;
@@ -268,9 +268,9 @@ void
 nomem(char *argv0)
 {
 	if (queuedesc)
-		slog(1, "alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n", 0);
+		slog(1, "alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n", NULL);
 	else
-		slog(1, "alert: ", argv0, ": out of memory, sleeping...\n", 0);
+		slog(1, "alert: ", argv0, ": out of memory, sleeping...\n", NULL);
 	sleep(10);
 }
 
@@ -278,9 +278,9 @@ void
 pausedir(char *dir)
 {
 	if (queuedesc)
-		slog(1, "alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", 0);
+		slog(1, "alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", NULL);
 	else
-		slog(1, "alert: unable to opendir ", dir, ", sleeping...\n", 0);
+		slog(1, "alert: unable to opendir ", dir, ", sleeping...\n", NULL);
 	sleep(10);
 }
 
