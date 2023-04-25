@@ -115,7 +115,7 @@ do
 		echo "FAILED : [ret=$ret] domain=$real_domain key=$k"
 		echo
 		echo FAILURE [$ret] ======================== >$out
-		echo >$out
+		echo >>$out
 		failed=1
 	fi
 done
@@ -160,7 +160,7 @@ else
 	echo "FAILED : [ret=$ret] domain=$real_domain key=$real_domain_rsa4096+$real_domain_ed25519"
 	echo
 	echo FAILURE [$ret] ======================== >$out
-	echo >$out
+	echo >>$out
 	failed=1
 fi
 
@@ -209,7 +209,7 @@ else
 	echo "FAILED : [ret=$ret] domain=$real_domain key=$real_domain_rsa4096+$real_domain_ed25519"
 	echo
 	echo FAILURE [$ret] ======================== >$out
-	echo >$out
+	echo >>$out
 	failed=1
 fi
 
@@ -278,7 +278,7 @@ do
 		echo "FAILED : [ret=$ret] domain=$real_domain key=$real_domain_key"
 		echo
 		echo FAILURE [$ret] ======================== >$out
-		echo >$out
+		echo >>$out
 		failed=1
 	fi
 done
@@ -345,7 +345,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$j key=$domainkey_dir/$j/$i $selector"
 			echo
 			echo FAILURE [$ret] ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -408,7 +408,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$i sig_count=$sig_count dkim -s $key1 -s $key2..."
 			echo
 			echo FAILURE [$ret] ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -478,7 +478,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$i sig_count=$sig_count $qmail_dkim"
 			echo
 			echo FAILURE [$ret] ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -548,7 +548,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$i sig_count=$sig_count dkimkeys $qmail_dkim"
 			echo
 			echo FAILURE [$ret] ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -624,7 +624,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$i sig_count=$sig_count env - DKIMSIGN=$key1 DKIMSIGNEXTRA=$key2... $qmail_dkim"
 			echo
 			echo FAILURE [$ret] ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -699,7 +699,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$i sig_count=$sig_count env - DKIMSIGN=$key1 DKIMSIGNEXTRA=$key2... dk-filter"
 			echo
 			echo FAILURE [$ret] ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -787,7 +787,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$j key=$i env - DKIMSIGN=$i DKIMQUEUE=/bin/cat $qmail_dkim"
 			echo
 			echo FAILURE [$ret] domain=$j ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -823,7 +823,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$j key=$i env - DKIMSIGN=$i DKIMQUEUE=/bin/cat $qmail_dkim"
 			echo
 			echo FAILURE [$ret] domain=$j ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -854,14 +854,14 @@ do
 			echo "FAILED : [ret=$ret] domain=$j key=$i env - DKIMSIGN=$i DKIMQUEUE=/bin/cat $qmail_dkim"
 			echo
 			echo FAILURE [$ret] domain=$j ======================== > $out
-			echo >$out
+			echo >>$out
 			failed=1
 		else
 			if [ $ret -ne $nokeyerror -a $ret -ne 88 ] ; then
 				echo "FAILED : [ret=$ret] domain=$j key=$i env - DKIMSIGN=$i DKIMQUEUE=/bin/cat $dkim"
 				echo
 				echo FAILURE [$ret] domain=$j ======================== > $out
-				echo >$out
+				echo >>$out
 				failed=1
 			else
 				if [ $verbose -gt 0 ] ; then
@@ -918,7 +918,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$j key=$i env - NODK=1 QMAILREMOTE=1 _SENDER=postmaster@$j DKIMSIGN=$i DKIMQUEUE=/bin/cat $dk_filter"
 			echo
 			echo FAILURE [$ret] domain=$j ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -953,7 +953,7 @@ do
 				echo "FAILED : [ret=$ret] domain=$j key=$i env - NODK=1 QMAILREMOTE=1 _SENDER=postmaster@$j DKIMSIGN=$i DKIMQUEUE=/bin/cat $dk_filter"
 				echo
 				echo FAILURE [$ret] domain=$j ======================== > $out
-				echo >$out
+				echo >>$out
 				failed=1
 			else
 				if [ $verbose -gt 0 ] ; then
@@ -1024,7 +1024,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$j key=$i env - NODK=1 QMAILREMOTE=1 _SENDER=postmaster@$j DKIMSIGN=$i DKIMQUEUE=/bin/cat $dk_filter"
 			echo
 			echo FAILURE [$ret] domain=$j ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -1094,7 +1094,7 @@ do
 		echo "FAILED : [ret=$ret] domain=$i dkimkeys"
 		echo
 		echo FAILURE [$ret] domain=$i ======================== >$out
-		echo >$out
+		echo >>$out
 		failed=1
 	fi
 done
@@ -1126,14 +1126,14 @@ do
 		echo "FAILED : [ret=$ret] domain=$i key=dkimkeys"
 		echo
 		echo FAILURE [$ret] domain=$j ======================== > $out
-		echo >$out
+		echo >>$out
 		failed=1
 	else
 		if [ $ret -ne $nokeyerror -a $ret -ne 88 ] ; then
 			echo "FAILED : [ret=$ret] domain=$i key=dkimkeys"
 			echo
 			echo FAILURE [$ret] domain=$j ======================== > $out
-			echo >$out
+			echo >>$out
 			failed=1
 		else
 			if [ $verbose -gt 0 ] ; then
@@ -1215,7 +1215,7 @@ do
 			echo "FAILED : [ret=$ret] domain=$i sig_count=$sig_count ... dk-filter"
 			echo
 			echo FAILURE [$ret] ======================== >$out
-			echo >$out
+			echo >>$out
 			failed=1
 		fi
 	done
@@ -1232,6 +1232,106 @@ if [ $failed -eq 1 ] ; then
 	exit 1
 elif [ $verbose -ne 0 ] ; then
 	echo "All Tests succeeded for  multi-signature signing+verification by dk-filter DKIMSIGNEXTRA in dkimkeys"
+fi
+tcount=$(expr $tcount + 1)
+
+key1=$domainkey_dir/example.com/dkimkeys1
+qmail_inject=$bindir/qmail-inject
+qmail_queue=$sbindir/qmail-queue
+echo "testing qmail-dkim custom error feature"
+(
+	echo "From: postmaster@$real_domain"
+	echo "To: $user@$real_domain"
+	echo "Subject: Test"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+) > /tmp/mail.txt 
+for i in PQ pq
+do
+	echo "  testing return value  for DKIMVERIFY=$i"
+	(cat /tmp/mail.txt | $bindir/dkim -z 2 -s $key1; cat /tmp/mail.txt) | env - \
+		QUEUEDIR=/var/indimail/queue/queue1 \
+		CONFSPLIT=23 \
+		BIGTODO=0 \
+		DKIMVERIFY="$i" \
+		QMAILQUEUE=$qmail_dkim \
+		FASTQUEUE=1 \
+		ERROR_FD=4 \
+		$qmail_inject -a $user 2>/tmp/out.$$
+	ret=$?
+	echo "    return value=$ret"
+	case $i in
+		PQ)
+		if [ $ret -eq 100 ] ; then
+			if [ $verbose -gt 0 ] ; then
+				echo "SUCCESS: [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error"
+				echo
+			fi
+			echo SUCCESS ======================== >$out
+		else
+			failed=1
+			echo "FAILED : [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error"
+			echo
+			echo FAILURE [$ret] ======================== >$out
+			echo >>$out
+		fi
+		echo "  testing error message for DKIMVERIFY=$i"
+		echo "    error message=$(cat /tmp/out.$$)"
+		grep "qmail-inject: fatal: qmail-dkim: signature error: permanent dns failure requesting selector (#5.7.0)" /tmp/out.$$ > /dev/null
+		if [ $? -eq 0 ] ; then
+			if [ $verbose -gt 0 ] ; then
+				echo "SUCCESS: [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error message"
+				echo
+			fi
+			echo SUCCESS ======================== >$out
+		else
+			failed=1
+			echo "FAILED : [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error message"
+			echo
+			echo FAILURE [$ret] ======================== >$out
+			echo >>$out
+		fi
+		;;
+		pq)
+		if [ $ret -eq 111 ] ; then
+			if [ $verbose -gt 0 ] ; then
+				echo "SUCCESS: [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error"
+				echo
+			fi
+			echo SUCCESS ======================== >$out
+		else
+			failed=1
+			echo "FAILED : [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error"
+			echo
+			echo FAILURE [$ret] ======================== >$out
+			echo >>$out
+		fi
+		echo "  testing error message for DKIMVERIFY=$i"
+		echo "    error message=$(cat /tmp/out.$$)"
+		grep "qmail-inject: fatal: qmail-dkim: signature error: permanent dns failure requesting selector (#4.7.0)" /tmp/out.$$ > /dev/null
+		if [ $? -eq 0 ] ; then
+			if [ $verbose -gt 0 ] ; then
+				echo "SUCCESS: [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error message"
+				echo
+			fi
+			echo SUCCESS ======================== >$out
+		else
+			failed=1
+			echo "FAILED : [ret=$ret] DKIMVERIFY=$i qmail-dkim custom error message"
+			echo
+			echo FAILURE [$ret] ======================== >$out
+			echo >>$out
+		fi
+		;;
+	esac
+done
+/bin/rm -f /tmp/mail.txt /tmp/out.$$
+if [ $failed -eq 1 ] ; then
+	echo "Test Failed for qmail-dkim custom error"
+	exit 1
+elif [ $verbose -ne 0 ] ; then
+	echo "Test succeeded for qmail-dkim custom error"
 fi
 tcount=$(expr $tcount + 1)
 
