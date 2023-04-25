@@ -2,9 +2,12 @@
 Release @version@-@release@ Start 24/04/2023 End --/--/20--
 ======= Release Highlights ================================================
 ===========================================================================
+- 24/04/2023
 01. svctool: when replacing in recontrol, use exact match
 02. qmail-send.c, qmta-send.c, slowq-send.c, qsutil.c, delivery_rate.c: Use
     NULL instead of 0 for null pointer
+- 25/04/2023
+03. custom_error.c: removed use of static variables as function is noreturn
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023
