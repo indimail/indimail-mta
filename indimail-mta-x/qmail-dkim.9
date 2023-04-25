@@ -5,7 +5,7 @@ qmail-dkim \- sign/verify using DKIM (SSP/ADSP optionally) and queue a mail
 message for delivery
 
 .SH SYNOPSIS
-\fBqmail-dkim\fR [ \fIqqf\fR] \fIarg1\fR] [\fIarg2\fR] ... ]
+\fBqmail-dkim\fR [ \fIqqf\fR [\fIarg1\fR] [\fIarg2\fR] [...] ]
 
 .SH DESCRIPTION
 \fBqmail-dkim\fR has the same interface as \fBqmail-queue\fR except that it
@@ -320,8 +320,8 @@ Unable to create a pipe to qmail-queue.
 
 .TP 5
 \fB88\fR
-For custom errors. Additionally diagnostic information of the error will be
-written to descriptor 2.
+For custom errors, any error will be written to descriptor 2 or the value
+of the environment variable \fBERROR_FD\fR, if set.
 
 .SH "SEE ALSO"
 addresses(5),
