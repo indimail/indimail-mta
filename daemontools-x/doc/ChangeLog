@@ -1,4 +1,11 @@
-* Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontols@indimail.org> 1.1.2-1.1%{?dist}
+* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @release@-@version@%{?dist}
+Release @version@-@release@ Start 27/04/2023 End XX/XX/XXXX
+======= Release Highlights ================================================
+===========================================================================
+- 27/04/2023
+01. reduce sleep to 1 when service being waited for hasn't started
+
+* Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 20/02/2023 End 23/04/2023
 ======= Release Highlights ================================================
 o terminate all childs if TERMINATE_SESSION is set

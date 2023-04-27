@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.34 2023-04-02 23:16:34+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.35 2023-04-27 13:25:24+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -240,7 +240,7 @@ do_wait()
 	int             fd, fd_depend, i, r, len;
 	unsigned short  sleep_interval = 60;
 	unsigned long   wpid;
-	char            wstatus[20];
+	char            wstatus[20], strnum[FMT_ULONG];
 	char           *service_name;
 
 #ifdef USE_RUNFS
@@ -281,20 +281,26 @@ do_wait()
 	 * if the service service_name is down
 	 *   opening supervise/up with O_WRONLY should block
 	 */
-	for (;;) {
+	for (i = 0;;) {
 		if ((fd_depend = open(wait_sv_status.s, O_WRONLY)) == -1) {
 			if (errno == error_noent) {/*- supervise for service_name is not running */
 				if (!silent)
 					strerr_warn3(warn.s, "supervise not running for service ", service_name, 0);
-				sleep(scan_interval);
+				i++;
+				sleep(1); /* prevent high cpu utilization */
 				continue;
 			}
-			sleep(scan_interval); /* prevent high cpu utilization */
+			if (errno == error_intr)
+				continue;
 			strerr_die4sys(111, fatal.s, "unable to write ", wait_sv_status.s, ": ");
 		} else {
 			close(fd_depend);
 			break;
 		}
+	}
+	if (!silent && i) {
+		strnum[fmt_int(strnum, i)] = 0;
+		strerr_warn6(warn.s, "service ", service_name, " up after ~", strnum, " seconds", 0);
 	}
 
 	/*- now open the status file of service_name */
@@ -334,7 +340,7 @@ do_wait()
 		/*- supervise started and not in paused and not in want down */
 		if (wpid && (!wstatus[16] && wstatus[17] != 'd'))
 			break;
-	} /*- for (i = -1;;) */
+	} /*- for (;;) */
 	pidchange(svpid, 0); /*- update start time */
 	announce(sleep_interval);
 	deepsleep(sleep_interval);
@@ -1089,13 +1095,17 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.34 2023-04-02 23:16:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.35 2023-04-27 13:25:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.35  2023-04-27 13:25:24+05:30  Cprogrammer
+ * ignore wait if service for which supervise should wait doesn't exit
+ * reduce sleep to 1 when service being waited for hasn't started
+ *
  * Revision 1.34  2023-04-02 23:16:34+05:30  Cprogrammer
  * pass directory as the last argument to ./run, ./shutdown, ./alert scripts
  *
