@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.684 2023-04-24 19:47:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.685 2023-05-03 16:52:36+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.684 2023-04-24 19:47:38+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.685 2023-05-03 16:52:36+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5995,6 +5995,27 @@ if [ -x /usr/bin/unshare -a $use_unshare -eq 1 ] ; then
 else
 	> $conf_dir/UNSHARE
 fi
+
+if [ -x /usr/bin/mount ] ; then
+	mount=/usr/bin/mount
+elif [ -x /bin/mount ] ; then
+	mount=/bin/mount
+elif [ -x /sbin/mount ] ; then
+	mount=/sbin/mount
+else
+	echo "mount command not found" 1>&2
+	return 1
+fi
+if [ -x /usr/bin/umount ] ; then
+	umount=/usr/binu/mount
+elif [ -x /bin/umount ] ; then
+	umount=/bin/umount
+elif [ -x /sbin/umount ] ; then
+	umount=/sbin/umount
+else
+	echo "umount command not found" 1>&2
+	return 1
+fi
 echo 1 > $conf_dir/AUTOSCAN
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 /bin/mkdir -p "$DESTDIR"$sysconfdir
@@ -6108,10 +6129,10 @@ if [ $mount_resolvconf -eq 1 -a \
 	echo "	list=\`grep nameserver /etc/resolv.conf\` > /dev/null"
 	echo "	if [ \$? -eq 0 ] ; then"
 	echo "		echo \$list"
-	echo "		echo \"/usr/bin/umount /etc/resolv.conf\""
-	echo "		/usr/bin/umount /etc/resolv.conf"
-	echo "		echo \"/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf\""
-	echo "		/usr/bin/mount --bind /etc/indimail/resolv.conf /etc/resolv.conf"
+	echo "		echo \"$umount /etc/resolv.conf\""
+	echo "		$umount /etc/resolv.conf"
+	echo "		echo \"$mount --bind $sysconfdir/resolv.conf /etc/resolv.conf\""
+	echo "		$mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
 	echo "	fi"
 	echo "done"
 	echo ") &"

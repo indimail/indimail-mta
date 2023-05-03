@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.34 2022-11-14 19:57:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.35 2023-05-03 16:50:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.34 2022-11-14 19:57:33+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.35 2023-05-03 16:50:28+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -269,6 +269,48 @@ echo "exec $prefix/bin/setuidgid qmaill \\"
 echo "  $prefix/sbin/multilog t $LOGDIR/$1"
 }
 
+link_with_global()
+{
+if [ $# -ne 1 ] ; then
+	echo "USAGE: link_with_global conf_dir" 1>&2
+	return 1
+fi
+conf_dir=$1
+if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
+	return 0
+fi
+if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
+	mkdir -p "$DESTDIR"$sysconfdir/control/global_vars
+	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
+	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
+fi
+if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
+	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+fi
+if [ $usefsync -eq 1 -o $usefdatasync -eq 1 ] ; then
+	echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
+else
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_FSYNC
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
+fi
+if [ $usesyncdir -eq 1 ] ; then
+	SYSTEM=$(uname -s)
+	case "$SYSTEM" in
+		Linux)
+		echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
+		;;
+		*)
+		> "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
+		;;
+	esac
+else
+	> "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
+fi
+if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then
+	echo $sysconfdir/control/global_vars > $conf_dir/.envdir
+fi
+}
+
 create_svscan()
 {
 if [ $# -lt 1 ] ; then
@@ -303,6 +345,7 @@ if [ $run_file_only -eq 1 ] ; then
 fi
 /bin/mkdir -p $conf_dir
 /bin/chmod 500 $conf_dir
+link_with_global $conf_dir
 echo "$prog_args" > $conf_dir/.options
 if [ -z $init_cmd ] ; then
 	echo           > $conf_dir/INITCMD
@@ -312,14 +355,14 @@ fi
 echo "/usr/bin:/bin:/usr/local/bin:/usr/sbin:/sbin:/usr/local/sbin" > $conf_dir/PATH
 if [ " $scan_interval" = " " ] ; then
 	echo           "300"  > $conf_dir/SCANINTERVAL
-	else
+else
 	echo "$scan_interval" > $conf_dir/SCANINTERVAL
 fi
 echo > $conf_dir/SCANLOG
 if [ -x /usr/bin/unshare -a $use_unshare -eq 1 ] ; then
 	echo > $conf_dir/UNSHARE
 else
-     > $conf_dir/UNSHARE
+	> $conf_dir/UNSHARE
 fi
 
 if [ -x /usr/bin/mount ] ; then
@@ -342,6 +385,7 @@ else
 	echo "umount command not found" 1>&2
 	return 1
 fi
+echo 1 > $conf_dir/AUTOSCAN
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/.svscan/log
 /bin/mkdir -p "$DESTDIR"$sysconfdir
 if [ $mount_resolvconf -eq 1 ] ; then
@@ -350,14 +394,23 @@ if [ $mount_resolvconf -eq 1 ] ; then
 	dump_run_header
 	echo "echo svscan \$PPID initialization PID \$\$"
 	echo "exec 2>&1"
-	echo "$mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
-	echo "$mount -l"
+	echo "if [ -f $sysconfdir/resolv.conf ] ; then"
+	echo "  /usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
+	echo "  /usr/bin/mount -l"
+	echo "fi"
+	echo ""
+	echo "echo \"Environment Variable List\""
+	echo "env"
 	) > "$DESTDIR"$SERVICEDIR/.svscan/run
-	(
-	echo "# $prog_args"
-	echo "search `uname -n`"
-	echo "nameserver 127.0.0.1"
-	) > "$DESTDIR"$sysconfdir/resolv.conf
+	if [ ! -f "$DESTDIR"$sysconfdir/resolv.conf -o $force -eq 1 ] ; then
+		hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
+		(
+		echo "# $prog_args"
+		echo "# generated at `date`"
+		echo "search $hostname"
+		echo "nameserver 127.0.0.1"
+		) > "$DESTDIR"$sysconfdir/resolv.conf
+	fi
 	/bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/run
 else
 	if [ -x "$DESTDIR"$SERVICEDIR/.svscan/run ] ; then
@@ -368,6 +421,9 @@ fi
 (
 dump_run_header
 echo "exec 2>&1"
+if [ $mount_resolvconf -eq 1 ] ; then
+	echo "/usr/bin/umount /etc/resolv.conf"
+fi
 echo "exec $prefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
@@ -404,6 +460,7 @@ if [ $mount_resolvconf -eq 1 -a \
 	fi
 	/bin/mkdir -p $conf_dir
 	/bin/chmod 500 $conf_dir
+	link_with_global $conf_dir
 	echo "$prog_args" > $conf_dir/.options
 	# resolvconf run script
 	(
@@ -413,17 +470,13 @@ if [ $mount_resolvconf -eq 1 -a \
 	echo "function clean_up"
 	echo "{"
 	echo "	echo \"shutting down\""
-	echo "	pkill -P \`jobs -p\` inotify"
+	echo "	pkill -P \$(jobs -p) inotify"
 	echo "	exit"
 	echo "}"
 	echo ""
 	echo "exec 2>&1"
-	echo "if [ -f /etc/resolv.conf -a ! -L /etc/resolv.conf ] ; then"
-	echo "	file=/etc/resolv.conf"
-	echo "else"
-	echo "	file=\`file /etc/resolv.conf |awk '{print \$5}'\`"
-	echo "fi"
-	echo "dir=\`dirname \$file\`"
+	echo "file=\$(realpath /etc/resolv.conf)"
+	echo "dir=\$(dirname \$file)"
 	echo "echo \"starting with resolv_conf_dir=\$dir\""
 	echo "/bin/cat /etc/resolv.conf"
 	echo "exec 2>&1"
@@ -2751,6 +2804,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.35  2023-05-03 16:50:28+05:30  Cprogrammer
+# synced daemontools/minisvc, indimail-mta/svctool create_svscan function
+#
 # Revision 1.34  2022-11-14 19:57:33+05:30  Cprogrammer
 # when importing variables don't treat existing variables as error
 #
