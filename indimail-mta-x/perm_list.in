@@ -26,7 +26,6 @@
 %dir %attr(2775,root,qmail)        @qsysconfdir@/control #indimail-mini #qmta
 %dir %attr(2775,indimail,qmail)    @qsysconfdir@/control/cache
 %dir %attr(2755,root,qcerts)       @qsysconfdir@/control/domainkeys
-%dir %attr(2775,qmailr,qmail)      @qsysconfdir@/control/ratelimit
 %dir %attr(0755,root,qmail)        @qsysconfdir@/control/defaultqueue #indimail-mini #qmta
 %dir %attr(0755,root,qmail)        @qsysconfdir@/control/global_vars #indimail-mini #qmta
 %dir %attr(2775,root,qmail)        @qsysconfdir@/tcp
