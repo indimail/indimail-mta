@@ -1104,6 +1104,8 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 (
+echo "===== Start %{name} installation ====="
+date
 if [ -d /run ] ; then
   rundir=/run/svscan
 elif [ -d /var/run ] ; then
@@ -1111,7 +1113,7 @@ elif [ -d /var/run ] ; then
 else
   rundir=%{servicedir}
 fi
-echo "shutting down indimail-mta services"
+echo "shutting down %{name} services"
 for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
   qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
@@ -1131,7 +1133,7 @@ if [ -f %{libexecdir}/qupgrade ] ; then
   echo "Running Custom Upgrade Script for pretrans"
   /bin/sh %{libexecdir}/qupgrade pretrans noargs %{version} $*
 fi
-) > /var/log/%{name}-setup.log 2>&1
+) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %pre
