@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.685 2023-05-03 16:52:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.686 2023-05-06 21:30:54+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.685 2023-05-03 16:52:36+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.686 2023-05-06 21:30:54+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -928,7 +928,7 @@ Known values for OPTION are:
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers
 --config=snmpdconf|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
---config=add-alt|remove-alt|qselinux|iselinux|inittab|recontrol
+--config=add-alt|remove-alt|selinux|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--common_name=CN]
@@ -945,6 +945,7 @@ Known values for OPTION are:
   [--sysconfdir=sysconfdir]
   [--databasedir=databasedir]
   [--use-grant]
+  [--module=module]
   [--stdout]
   [--wipe]
 
@@ -962,6 +963,7 @@ Known values for OPTION are:
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
   add-alt        - Install indiamil as default MTA
   remove-alt     - Remove indimail as the default MTA
+  selinux        - create selinux module from @sysconfdir@/module.te
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
   inittab        - Install svscan started by configuration in /etc/inittab
@@ -8817,10 +8819,10 @@ remove_alternatives()
 
 selinux_module()
 {
-config_name=$1
-policy_file=$2
-# selinux
-status=0
+	config_name=$1
+	policy_file=$2
+	# selinux
+	status=0
 	if [ ! -x /usr/sbin/selinuxenabled ] ; then
 		exit 1
 	fi
@@ -8834,8 +8836,13 @@ status=0
 		if [ $status -eq 0 ] ; then
 			status=$?
 		fi
-		echo "/usr/bin/semodule_package -o "$policy_file".pp -m "$policy_file".mod -f "$policy_file".fc `date`"
-		/usr/bin/semodule_package -o "$policy_file".pp -m "$policy_file".mod -f "$policy_file".fc
+		if [ -f $policy_file.fc ] ; then
+			echo "/usr/bin/semodule_package -o "$policy_file".pp -m "$policy_file".mod -f "$policy_file".fc `date`"
+			/usr/bin/semodule_package -o "$policy_file".pp -m "$policy_file".mod -f "$policy_file".fc
+		else
+			echo "/usr/bin/semodule_package -o "$policy_file".pp -m "$policy_file".mod `date`"
+			/usr/bin/semodule_package -o "$policy_file".pp -m "$policy_file".mod
+		fi
 		if [ $status -eq 0 ] ; then
 			status=$?
 		fi
@@ -8846,6 +8853,9 @@ status=0
 				status=$?
 			fi
 		fi
+	fi
+	if [ " $config_name" = " selinux" ] ; then
+		exit $status
 	fi
 
 	if [ " $config_name" = " qselinux" ] ; then
@@ -10666,6 +10676,14 @@ while test $# -gt 0; do
 	fi
 	;;
 
+	--module=*)
+	if [ -z "$config_name" ] ; then
+		echo "--config option not specified" 1>&2
+		exit 1
+	fi
+	module_name=$optarg
+	;;
+
 	--check-install)
 	option=11
 	;;
@@ -11611,10 +11629,13 @@ case $option in
 		;;
 
 		iselinux)
-		selinux_module $config_name $sysconfdir/indimail
+		selinux_module iselinux $sysconfdir/indimail
 		;;
 		qselinux)
-		selinux_module $config_name $sysconfdir/indimail-mta
+		selinux_module qselinux $sysconfdir/indimail-mta
+		;;
+		selinux)
+		selinux_module selinux $sysconfdir/$module_name
 		;;
 
 		inittab)

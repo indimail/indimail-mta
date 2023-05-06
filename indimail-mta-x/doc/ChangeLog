@@ -10,6 +10,10 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
 03. custom_error.c: removed use of static variables as function is noreturn
 04. svctool: synced daemontools/minisvc, indimail-mta/svctool create_svscan
     function
+- 06/05/2023
+04. svctool: added --config=selinux option to create selinux module from .te
+    file
+05. indimail-mta.te: updated selinux rules
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

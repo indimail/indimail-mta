@@ -1004,7 +1004,7 @@ Known values for OPTION are:
 
 --config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers
 --config=snmpdconf|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
---config=add-alt|remove-alt|qselinux|iselinux|inittab|recontrol
+--config=add-alt|remove-alt|selinux|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
   [--common_name=CN]
   [--common_name=CN]
@@ -1021,6 +1021,7 @@ Known values for OPTION are:
   [--sysconfdir=sysconfdir]
   [--databasedir=databasedir]
   [--use-grant]
+  [--module=module]
   [--stdout]
   [--wipe]
 
@@ -1038,6 +1039,7 @@ Known values for OPTION are:
   rm-boot        - Remove Startup scripts to prevent IndiMail to get started after boot
   add-alt        - Install indiamil as default MTA
   remove-alt     - Remove indimail as the default MTA
+  selinux        - create selinux module from @sysconfdir@/module.te
   iselinux       - Enable selinux module for indimail
   qselinux       - Enable selinux module for indimail-mta
   inittab        - Install svscan started by configuration in /etc/inittab
