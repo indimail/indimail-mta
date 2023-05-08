@@ -399,10 +399,7 @@ conf-libexec conf-servicedir
 	) > svscanboot
 
 svscanboot.8: svscanboot.9 conf-libexec conf-servicedir
-	( \
-	cat warn-auto.sh; \
-	$(edit) svscanboot.9 \
-	) > svscanboot.8
+	$(edit) svscanboot.9 > svscanboot.8
 
 svscan_rc: \
 warn-auto.sh conf-prefix svscan_rc.in \
