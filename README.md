@@ -724,7 +724,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
 
 ```
-Currently, the list of supported binary distributions for indimail-mta is
+Currently, the list of supported binary distributions for indimail-mta are
 
     * Arch Linux
 
@@ -745,16 +745,30 @@ Currently, the list of supported binary distributions for indimail-mta is
           o SUSE Linux Enterprise 15 SP4
 
     * Red Hat
-          o Fedora 36
           o Fedora 37
+          o Fedora 38
           o Red Hat Enterprise Linux 7
+          o Red Hat Enterprise Linux 8
+          o Red Hat Enterprise Linux 9
+          o EPEL 8
+          o EPEL 9
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
           o CentOS 8 Stream
           o CentOS 9 Stream
+          o RockyLinux 8
+          o RockyLinux 9
+          o OracleLinux 8
+          o OracleLinux 9
           o AlmaLinux 8
           o AlmaLinux 9
+
+    Some of the above distributions are available on
+    copr - https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/).
+    You can install indimail packages on a redhat/fedora system by doing
+
+    $ sudo dnf copr enable cprogrammer/indimail
 
     * Debian
           o Debian 10.0
