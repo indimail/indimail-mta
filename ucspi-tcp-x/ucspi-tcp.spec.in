@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.20 2021-08-05 17:46:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.21 2023-05-13 20:21:27+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -77,7 +77,7 @@ BuildRequires: -post-build-checks
 ##############################################################################
 
 %if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
 Requires: procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
@@ -160,6 +160,7 @@ echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/inc
 %endif
 
 %install
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %{__mkdir_p} %{buildroot}%{_prefix}
 
 # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
@@ -217,8 +218,8 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0755,root,root)                     %{_prefix}/bin/recordio
 %attr(0755,root,root)                     %{_prefix}/bin/dotls
 
-%attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
-%attr(0444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
+%attr(0444,root,root)                     %{qsysconfdir}/%{name}-release
+%attr(0444,root,root)                     %{qsysconfdir}/%{name}-rpm.info
 %attr(0644,root,root)  %config(noreplace) %{qsysconfdir}/perms.d/%{name}/*
 %attr(0755,root,root)                     %{plugindir}/rblsmtpd.so
 %attr(0755,root,root)                     %{libexecdir}/instcheck.ucspi-tcp

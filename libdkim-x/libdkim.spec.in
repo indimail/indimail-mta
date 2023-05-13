@@ -1,6 +1,6 @@
 #
 #
-# $Id: libdkim.spec.in,v 1.3 2021-03-26 11:35:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: libdkim.spec.in,v 1.4 2023-05-13 20:21:51+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -78,7 +78,7 @@ Provides: dkim-libs = %{version}
 Provides: dkim-libs%{?_isa} = %{version}
 
 %if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
 Requires: coreutils glibc openssl findutils pkgconfig
 
@@ -117,6 +117,7 @@ or both.
 %configure --prefix=%{_prefix} --mandir=%{mandir}
 
 %install
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if 0%{?build_cflags:1}
   CFLAGS="%{build_cflags}"
 %else

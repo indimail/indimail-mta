@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.31 2022-09-19 21:20:07+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.32 2023-05-13 20:20:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -102,7 +102,7 @@ Requires: /sbin/chkconfig
 %endif
 
 %if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-build
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %endif
 #
 # IndiMail is choosy and runs on reliable OS only
@@ -167,6 +167,7 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 %endif
 
 %install
+[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %{__mkdir_p} %{buildroot}%{_prefix}
 
 # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
@@ -268,8 +269,8 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %attr(0755,root,root)                    %{libexecdir}/installer
 %attr(0755,root,root)                    %{libexecdir}/instcheck.daemontools
 %attr(0755,root,root)                    %{libexecdir}/set-network-wait
-%attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-release
-%attr(444,root,root)  %config(noreplace) %{qsysconfdir}/%{name}-rpm.info
+%attr(444,root,root)                     %{qsysconfdir}/%{name}-release
+%attr(444,root,root)                     %{qsysconfdir}/%{name}-rpm.info
 %attr(644,root,root)  %config(noreplace) %{qsysconfdir}/perms.d/%{name}/*
 
 %attr(0644,root,root)                    %{shareddir}/boot/upstart
