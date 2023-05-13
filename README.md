@@ -18,15 +18,16 @@
 
 # indimail-mta
 
-[qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following packages
+[qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following
 
 * [daemontools](https://cr.yp.to/daemontools.html "daemontools")
 * [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
 * [qmailanalog](http://cr.yp.to/qmailanalog.html "qmailanalog")
 * [serialmail](https://cr.yp.to/serialmail.html "serialmail")
-* [dotforward](https://cr.yp.to/dot-forward.html "dot-foward")
+* [dot-forward](https://cr.yp.to/dot-forward.html "dot-foward")
 * [fastforward](https://cr.yp.to/fastforward.html "fastforward")
 * [mess822](https://cr.yp.to/mess822.html "mess822")
+* [libtai](http://cr.yp.to/libtai.html "libtai")
 
 [README-indimail](https://github.com/mbhangui/indimail-virtualdomains/blob/master/.github/README-indimail.md) is a detailed wiki for indimail-mta.  
 [Man Pages](https://github.com/mbhangui/indimail-mta/wiki/1-Man-Pages) has man page documentation for all indimail-mta commands

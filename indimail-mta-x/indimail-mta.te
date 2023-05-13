@@ -110,6 +110,7 @@ allow antivirus_t var_t:file { create open getattr read write rename unlink appe
 allow antivirus_t crond_tmp_t:file write;
 allow antivirus_t var_run_t:sock_file { create write unlink setattr };
 allow antivirus_t svc_start_t:unix_stream_socket connectto;
+allow antivirus_t unconfined_service_t:unix_stream_socket connectto;
 
 #============= mandb_t ==============
 allow mandb_t var_t:file { open read getattr ioctl };
