@@ -45,9 +45,9 @@ Version: @version@
 Release: @release@%{?dist}
 
 %if %build_on_obs == 1
-License: GPL-3.0+
+License: GPL-2.0-only
 %else
-License: GPLv3
+License: GPLv2
 %endif
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Libraries
@@ -134,16 +134,36 @@ of the SPF/SRS protocol pair.
 %else
   %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install
 %endif
+for i in %{name} %{name}-devel
+do
+  %{__mkdir_p} %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 COPYING %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 LICENSE.BSD %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 LICENSE.GPL-2 %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 AUTHORS %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 doc/ChangeLog %{buildroot}%{_prefix}/share/doc/$i
+done
 %{__rm} -f %{buildroot}%{_libdir}/libsrs2.la
 
 %files
 %defattr(-, root, root,-)
 %{_libdir}/libsrs2.so.1
 %{_libdir}/libsrs2.so.1.0.0
-%doc AUTHORS doc/ChangeLog COPYING LICENSE.BSD LICENSE.GPL-2
 %doc %attr(644,root,root)               %{mandir}/man1/srs.1.gz
 
 %attr(755,root,root)                    %{_prefix}/bin/srs
+
+%if %build_on_obs == 0
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}/COPYING
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}/LICENSE.BSD
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}/LICENSE.GPL-2
+%else
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/COPYING
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/LICENSE.BSD
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/LICENSE.GPL-2
+%endif
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/AUTHORS
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/ChangeLog
 
 %files devel
 %dir %attr(755,root,root)               %{_prefix}/include/srs2
@@ -151,6 +171,18 @@ of the SPF/SRS protocol pair.
 %{_libdir}/libsrs2.so
 %{_libdir}/libsrs2.a
 %{_pkg_config_path}/libsrs2.pc
+
+%if %build_on_obs == 0
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}-devel/COPYING
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}-devel/LICENSE.BSD
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}-devel/LICENSE.GPL-2
+%else
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/COPYING
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/LICENSE.BSD
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/LICENSE.GPL-2
+%endif
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/AUTHORS
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/ChangeLog
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}

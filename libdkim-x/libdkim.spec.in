@@ -1,6 +1,6 @@
 #
 #
-# $Id: libdkim.spec.in,v 1.4 2023-05-13 20:21:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: libdkim.spec.in,v 1.5 2023-05-14 22:43:39+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -21,7 +21,6 @@
 
 %global _prefix            /usr
 %global mandir             /usr/share/man
-%global docdir             /usr/share/doc/libdkim
 %global _pkg_config_path   /usr/%{_lib}/pkgconfig
 
 %global _verbose           0
@@ -46,9 +45,9 @@ Version: @version@
 Release: @release@%{?dist}
 
 %if %build_on_obs == 1
-License: GPL-3.0+
+License: Apache-2.0
 %else
-License: GPLv3
+License: ASL 2.0
 %endif
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Libraries
@@ -150,16 +149,35 @@ or both.
 %else
   %{__make} -s %{?_smp_mflags} DESTDIR=%{buildroot} install
 %endif
+for i in %{name} %{name}-devel
+do
+  %{__mkdir_p} %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 COPYING %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 yahoo-patent-license-1.2.txt %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 AUTHORS %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 README %{buildroot}%{_prefix}/share/doc/$i
+  install -p -m 0644 doc/ChangeLog %{buildroot}%{_prefix}/share/doc/$i
+done
 %{__rm} -f %{buildroot}%{_libdir}/libdkim.la
 
 %files
 %defattr(-, root, root,-)
 %{_libdir}/libdkim.so.1
 %{_libdir}/libdkim.so.1.0.0
-%doc AUTHORS COPYING README doc/ChangeLog yahoo-patent-license-1.2.txt
 %doc %attr(644,root,root)               %{mandir}/man8/dkim.8.gz
 
 %attr(755,root,root)                    %{_prefix}/bin/dkim
+
+%if %build_on_obs == 0
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}/COPYING
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}/yahoo-patent-license-1.2.txt
+%else
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/COPYING
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/yahoo-patent-license-1.2.txt
+%endif
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/AUTHORS
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/README
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}/ChangeLog
 
 %files devel
 %dir %attr(755,root,root)               %{_prefix}/include/dkim
@@ -169,6 +187,17 @@ or both.
 %{_libdir}/libdkim.so
 %{_libdir}/libdkim.a
 %{_pkg_config_path}/libdkim.pc
+
+%if %build_on_obs == 0
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}-devel/COPYING
+%license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}-devel/yahoo-patent-license-1.2.txt
+%else
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/COPYING
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/yahoo-patent-license-1.2.txt
+%endif
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/AUTHORS
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/README
+%attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/ChangeLog
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
