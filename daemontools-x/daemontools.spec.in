@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.32 2023-05-13 20:20:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.33 2023-05-15 10:20:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -88,9 +88,6 @@ Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/group
 Requires: procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc
 Requires: diffutils sed findutils
-%if %{undefined suse_version} && %{undefined sles_version}
-Requires: /usr/bin /usr/sbin
-%endif
 
 %if 0%{?suse_version} && 0%{?suse_version} < 1550
 Requires: insserv-compat

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.378 2023-05-13 20:20:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.379 2023-05-15 10:19:54+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -143,9 +143,6 @@ Requires: /usr/sbin/useradd /usr/sbin/userdel /usr/sbin/groupadd /usr/sbin/group
 Requires: procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: diffutils sed findutils pkgconfig
-%if %{undefined suse_version} && %{undefined sles_version}
-Requires: /usr/bin /usr/sbin
-%endif
 
 %if 0%{?fedora_version} > 30 || 0%{?centos_version} > 700 || 0%{?rhel_version} > 700 || 0%{?centos_ver} > 7
 Requires: policycoreutils
@@ -200,9 +197,6 @@ Conflicts: indimail-mini < 2.0
 PreReq: permissions
 %endif
 Requires: coreutils /bin/sh glibc openssl procps
-%if %{undefined suse_version} && %{undefined sles_version}
-Requires: /usr/bin /usr/sbin
-%endif
 %if %{defined suse_version} || %{defined sles_version}
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
@@ -230,9 +224,6 @@ Conflicts: indimail-mini
 PreReq: permissions
 %endif
 Requires: coreutils /bin/sh glibc openssl procps
-%if %{undefined suse_version} && %{undefined sles_version}
-Requires: /usr/bin /usr/sbin
-%endif
 %if %{defined suse_version} || %{defined sles_version}
 Requires(post): update-alternatives
 Requires(postun): update-alternatives
