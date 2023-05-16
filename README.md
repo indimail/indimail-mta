@@ -689,7 +689,7 @@ You can have the old non-fhs behaviour by having /var/indimail in the above 5 fi
 /usr/lib/indimail - plugins, modules (architecture-dependent files)
 ```
 
-# Binary Builds on openSUSE Build Service
+# Binary Builds on openSUSE Build Service and Copr
 
 **[Build Status on](https://build.opensuse.org/project/monitor/home:mbhangui) [Open Build Service](https://build.opensuse.org/project/show/home:mbhangui)**
 
@@ -706,16 +706,18 @@ You can have the old non-fhs behaviour by having /var/indimail in the above 5 fi
 [![libdkim](https://build.opensuse.org/projects/home:mbhangui/packages/libdkim/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libdkim)
 [![libsrs2](https://build.opensuse.org/projects/home:mbhangui/packages/libsrs2/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libsrs2)
 
-
 You can get binary RPM / Debian packages at
 
 * [Stable Releases](http://download.opensuse.org/repositories/home:/indimail/)
 * [Experimental Releases](http://download.opensuse.org/repositories/home:/mbhangui/)
+* [copr Releases](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail)
 
 If you want to use DNF / YUM / apt-get, the corresponding install instructions for the two repositories, depending on whether you want to install a stable or an experimental release, are
 
 * [Stable](https://software.opensuse.org/download.html?project=home%3Aindimail&package=indimail-mta)
 * [Experimental](https://software.opensuse.org/download.html?project=home%3Ambhangui&package=indimail-mta)
+* [copr Releases](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail). The copr repository can be enabled by running the command 
+  `$ sudo dnf copr enable cprogrammer/indimail`
 
 NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to install the additional software
 
@@ -723,6 +725,15 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 2. [indimail-auth](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-auth) (nssd - providing Name Service Switch and pam-multi providing multiple PAM modules for flexible, configurable authentication methods)
 3. [indimail-spamfilter](https://github.com/mbhangui/indimail-virtualdomains/tree/master/bogofilter-x) - SPAM filter capabillity using bogofilter - https://bogofilter.sourceforge.io
 4. [indimail-utils](https://github.com/mbhangui/indimail-virtualdomains/tree/master/indimail-utils) (Multiple utilities that can work with indimail/indimail-mta - [altermime](http://pldaniels.com/altermime/), [ripMIME](https://pldaniels.com/ripmime/), [mpack](https://github.com/mbhangui/indimail-virtualdomains/tree/master/mpack-x), [fortune](https://en.wikipedia.org/wiki/Fortune_(Unix)) and [flash](https://github.com/mbhangui/indimail-virtualdomains/tree/master/flash-x) - customizable menu based admin interface)
+
+**[Build Status on](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/monitor/) [copr](https://copr.fedorainfracloud.org/coprs/)**
+
+[![indimail-mta](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-mta/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/indimail-mta/)
+[![daemontools](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/daemontools/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/daemontools/)
+[![ucspi-tcp](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ucspi-tcp/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ucspi-tcp/)
+[![libqmail](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libqmail/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libqmail/)
+[![libdkim](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim/)
+[![libsrs2](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libsrs2/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libsrs2/)
 
 ```
 Currently, the list of supported binary distributions for indimail-mta are
@@ -749,10 +760,10 @@ Currently, the list of supported binary distributions for indimail-mta are
           o Fedora 37
           o Fedora 38
           o Red Hat Enterprise Linux 7
-          o Red Hat Enterprise Linux 8
-          o Red Hat Enterprise Linux 9
-          o EPEL 8
-          o EPEL 9
+          o Red Hat Enterprise Linux 8 +
+          o Red Hat Enterprise Linux 9 +
+          o EPEL 8 +
+          o EPEL 9 +
           o Scientific Linux 7
           o CentOS 7
           o CentOS 8
@@ -765,11 +776,8 @@ Currently, the list of supported binary distributions for indimail-mta are
           o AlmaLinux 8
           o AlmaLinux 9
 
-    Some of the above distributions are available on
-    copr - https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/).
-    You can install indimail packages on a redhat/fedora system by doing
-
-    $ sudo dnf copr enable cprogrammer/indimail
+          +: Some of the above Red Hat flavoured distributions are available
+             only on copr (RHEL 8, RHEL9, EPEL9, EPEL9)
 
     * Debian
           o Debian 10.0
