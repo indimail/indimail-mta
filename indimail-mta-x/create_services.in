@@ -13,6 +13,8 @@ prefix=@prefix@
 sysconfdir=@sysconfdir@
 controldir=@sysconfdir@/control
 libexecdir=@libexecdir@
+mysql_user="indimail"
+mysql_pass="ssh-1.5-"
 chown=$(which chown)
 mkdir=$(which mkdir)
 cp=$(which cp)
@@ -21,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.123 2023-04-23 16:27:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.124 2023-05-20 12:08:38+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -97,6 +99,8 @@ elif [ -x /usr/local/libexec/mysqld ] ; then # FreeBSD
   mysql_base=/usr/local
 elif [ -x /usr/local/mysql/bin/mysqld ] ; then # Darwin
   mysql_base=/usr/local/mysql
+else
+  nomysql=1
 fi
 
 ID=$(id -u)
@@ -318,7 +322,7 @@ fi
 #
 # MySQL
 #
-if [ $ID -eq 0 -a $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
+if [ $ID -eq 0 -a $nomysql -eq 0 ] ; then
   echo "Attempting to Stop & Disable MySQL service"
   if [ -f /usr/local/etc/rc.d/mysql-server ] ; then
     if [ -f /var/db/mysql/FreeBSD.org.pid ] ; then
@@ -367,8 +371,12 @@ if [ $ID -eq 0 -a $noindimail -eq 0 -a $nomysql -eq 0 ] ; then
   fi
   [ $ID -eq 0 ] && $svctool --config=mysql   --mysqlPrefix=$mysql_base \
       --databasedir=$indimaildir/mysqldb $extra_opt
+  if [ $noindimail -eq 1 ] ; then
+    mysql_user=""
+    mysql_pass=""
+  fi
   [ $ID -eq 0 ] && $svctool --config=mysqldb --mysqlPrefix=$mysql_base \
-    --mysqluser="indimail" --mysqlpass="ssh-1.5-" \
+    --mysqluser="$mysql_user" --mysqlpass="$mysql_pass" \
     --databasedir=$indimaildir/mysqldb --base_path=$mail_path \
     $extra_opt
   [ $ID -eq 0 ] && $svctool --mysql=3306 --servicedir=$servicedir \
@@ -389,7 +397,7 @@ if [ $noindimail -eq 0 ] ; then
     mysqlSocket=/run/mysqld/mysqld.sock
   fi
   [ $ID -eq 0 ] && $svctool --config=indimail --mysqlhost=localhost \
-    --mysqluser=indimail --mysqlpass=ssh-1.5- --mysqlsocket=$mysqlSocket $extra_opt
+    --mysqluser=$mysql_user --mysqlpass=$mysql_pass- --mysqlsocket=$mysqlSocket $extra_opt
 fi
 
 if [ $nodksignatures -eq 0 ] ; then
@@ -628,7 +636,7 @@ if [ $noindimail -eq 0 ] ; then
       mysqlSocket=/run/mysqld/mysqld.sock
     fi
     [ $ID -eq 0 ] && $svctool --pwdlookup=$nssd_sock --threads=5 --timeout=-1 \
-      --mysqlhost=localhost --mysqluser=indimail --mysqlpass=ssh-1.5- \
+      --mysqlhost=localhost --mysqluser=$mysql_user --mysqlpass=$mysql_pass \
       --mysqlsocket=$mysqlSocket --servicedir=$servicedir $extra_opt
   fi
   #
@@ -775,6 +783,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.124  2023-05-20 12:08:38+05:30  Cprogrammer
+# allow creation of mysql db even if indimail is not installed
+#
 # Revision 2.123  2023-04-23 16:27:42+05:30  Cprogrammer
 # pass username and password argument for mysqldb creation
 #
