@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.125 2023-05-20 19:43:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.126 2023-05-20 23:13:10+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -195,6 +195,7 @@ fi
 
 if [ ! -x $dir_prefix$prefix/bin/vadddomain -a ! -x $prefix/bin/vadddomain ] ; then
   noindimail=1
+  nonssd=1
 fi
 if [ $noindimail -eq 0 ] ; then
   if [ $nomysql -eq 1 ] ; then
@@ -382,7 +383,6 @@ if [ $ID -eq 0 -a $nomysql -eq 0 ] ; then
   [ $ID -eq 0 ] && $svctool --mysql=3306 --servicedir=$servicedir \
     --mysqlPrefix=$mysql_base --databasedir=$indimaildir/mysqldb \
     --config=$sysconfdir/indimail.cnf $extra_opt
-  $prefix/sbin/ischema -u
 fi
 if [ $noindimail -eq 0 ] ; then
   if [ -n "$MYSQL_SOCKET" ] ; then
@@ -396,6 +396,7 @@ if [ $noindimail -eq 0 ] ; then
   else
     mysqlSocket=/run/mysqld/mysqld.sock
   fi
+  $prefix/sbin/ischema -u
   [ $ID -eq 0 ] && $svctool --config=indimail --mysqlhost=localhost \
     --mysqluser=$mysql_user --mysqlpass=$mysql_pass- --mysqlsocket=$mysqlSocket $extra_opt
 fi
@@ -783,6 +784,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.126  2023-05-20 23:13:10+05:30  Cprogrammer
+# run ischema only if noindimail=0
+#
 # Revision 2.125  2023-05-20 19:43:57+05:30  Cprogrammer
 # fix for alpine linux
 #
