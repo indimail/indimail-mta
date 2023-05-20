@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.686 2023-05-06 21:30:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.687 2023-05-20 20:43:56+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.686 2023-05-06 21:30:54+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.687 2023-05-20 20:43:56+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1129,7 +1129,7 @@ else
     echo ""$DESTDIR"$QmailHOME exists"
   fi
   echo "Checking Critical IndiMail directories"
-  if [ -f "$DESTDIR"$QmailBinPrefix/vuserinfo ] ; then
+  if [ -f "$DESTDIR"$QmailBinPrefix/vadddomain ] ; then
     indimail_installed=1
     LIST1="alias autoturn bin qscanq sbin" # qmaildir/indimaildir
     LIST2="boot doc" # shareddir
@@ -5475,6 +5475,32 @@ create_mysql_user()
 			;;
 	esac
 
+	# for non-indimail database, just create admin, repl and remove root user
+	if [ -z "$mysql_user" ] ; then
+		mecho "use mysql;"
+		mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
+		mecho "CREATE USER 'repl'@'%'     identified by 'slaveserver';"
+		if [ $mariadb -eq 1 -a $mariadb_version_10 -eq 1 ] ; then
+			ver2=`echo $mysql_version | cut -d. -f2`
+			if [ -n "$ver2" -a $ver2 -gt 0 ] ; then
+				mecho "DROP USER if exists mysql@localhost;"
+			fi
+		fi
+		mecho "CREATE USER 'mysql'@'%' identified by '$PRIV_PASS';"
+		mecho "GRANT ALL on *.* to mysql;"
+		if [ $mysql_version_8 -eq 1 -o $mariadb_version_10 -eq 1 ] ; then
+			mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
+		fi
+		mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
+		mecho "GRANT REPLICATION SLAVE on *.* to repl;"
+		if [ $mysql_version_8 -eq 1 ] ; then
+			c_d=""
+			c_d="$c_d UPDATE global_grants set user='mysql' where user='root';"
+			mecho $c_d
+		fi
+		mecho "FLUSH PRIVILEGES;"
+		return 0
+	fi
 	# Bootstrap Indimail tables
 	mecho "CREATE database indimail;"
 	mecho "use indimail;"
@@ -11322,11 +11348,11 @@ case $option in
 			usage 1
 			exit 1
 		fi
-		if [ -z "$mysql_user" ] ; then
+		if [ -z "$mysql_user" -a -x "$DESTDIR"$QmailBinPrefix/vadddomain ] ; then
 			echo "MySQL user not specified. Using default user" 1>&2
 			mysql_user=$MYSQL_USER
 		fi
-		if [ -z "$mysql_pass" ] ; then
+		if [ -z "$mysql_pass" -a -x "$DESTDIR"$QmailBinPrefix/vadddomain ] ; then
 			echo "MySQL password not specified. Using default password" 1>&2
 			mysql_pass=$MYSQL_PASS
 		fi

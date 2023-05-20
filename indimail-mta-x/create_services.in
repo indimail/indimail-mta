@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.124 2023-05-20 12:08:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.125 2023-05-20 19:43:57+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -93,7 +93,7 @@ nomysql=0
 nodksignatures=0
 destdir_given=0
 dkimkeyfn=default
-if [ -x /usr/sbin/mysqld ] ; then # Linux
+if [ -x /usr/sbin/mysqld -o -x /usr/bin/mysqld ] ; then # Linux
   mysql_base=/usr
 elif [ -x /usr/local/libexec/mysqld ] ; then # FreeBSD
   mysql_base=/usr/local
@@ -783,6 +783,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.125  2023-05-20 19:43:57+05:30  Cprogrammer
+# fix for alpine linux
+#
 # Revision 2.124  2023-05-20 12:08:38+05:30  Cprogrammer
 # allow creation of mysql db even if indimail is not installed
 #
