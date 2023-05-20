@@ -7946,7 +7946,7 @@ linuxuseradd()
 		esac
 		shift
 	done
-	getent passwd $1 >/dev/null && echo "user $1 exists" 1>&2 && return 0
+	getent passwd $1 >/dev/null && echo "user $1 exists" && return 0
 	echo "creating user $1"
 	if [ -n "$userid" ] ; then
 		args="$args -u $userid"
@@ -8026,7 +8026,7 @@ linuxgroupadd()
 	if [ -n "$groupid" ] ; then
 		args="$args -g $groupid"
 	fi
-	getent group $1 >/dev/null && echo "group $1 exists" 1>&2 && return 0
+	getent group $1 >/dev/null && echo "group $1 exists" && return 0
 	echo "creating group $1"
 	if [ -f /etc/alpine-release ] ; then
 		echo /usr/sbin/addgroup -S $args $1
