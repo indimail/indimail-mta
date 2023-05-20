@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.21 2023-05-13 20:21:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.22 2023-05-20 12:11:22+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -28,7 +28,7 @@
 %global see_base           For a description of ucspi-tcp visit https://github.com/mbhangui/indimail-mta
 
 %if %build_on_obs == 1
-%global packager Manvendra Bhangui <ucspi-tcp@indimail.org>
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 %if 0%{?suse_version}
@@ -76,9 +76,6 @@ BuildRequires: -post-build-checks
 %endif
 ##############################################################################
 
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 Requires: procps /usr/bin/awk /usr/bin/which
 Requires: coreutils grep /bin/sh glibc openssl
 Requires: diffutils sed findutils pkgconfig
@@ -160,7 +157,6 @@ echo %{__cc} -g -Wall -Wshadow -fPIC %{optflags} -fno-strict-aliasing -I/usr/inc
 %endif
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %{__mkdir_p} %{buildroot}%{_prefix}
 
 # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
@@ -292,10 +288,6 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     fi
   done
 fi
-
-%clean
-[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 # fix changelog for openSUSE buildservice
 %changelog

@@ -1,6 +1,6 @@
 #
 #
-# $Id: libdkim.spec.in,v 1.5 2023-05-14 22:43:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: libdkim.spec.in,v 1.6 2023-05-20 12:11:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -26,7 +26,7 @@
 %global _verbose           0
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 %if 0%{?suse_version}
@@ -39,7 +39,7 @@
 %global disttag fedora
 %endif
 
-Summary: A Flexible SMTP server
+Summary: DKIM Library for indimail-mta
 Name: libdkim
 Version: @version@
 Release: @release@%{?dist}
@@ -75,10 +75,6 @@ BuildRequires: -post-build-checks
 AutoReqProv: Yes
 Provides: dkim-libs = %{version}
 Provides: dkim-libs%{?_isa} = %{version}
-
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
 Requires: coreutils glibc openssl findutils pkgconfig
 
 %description
@@ -116,7 +112,6 @@ or both.
 %configure --prefix=%{_prefix} --mandir=%{mandir}
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %if 0%{?build_cflags:1}
   CFLAGS="%{build_cflags}"
 %else
@@ -198,10 +193,6 @@ done
 %attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/AUTHORS
 %attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/README
 %attr(0644,root,root)                   %{_prefix}/share/doc/%{name}-devel/ChangeLog
-
-%clean
-[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 %post
 argv1=$1

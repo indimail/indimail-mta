@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.379 2023-05-15 10:19:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.380 2023-05-20 12:10:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -36,7 +36,7 @@
 %global dkimkeyfn          default
 
 %if %build_on_obs == 1
-%global packager @email@
+%global packager           Manvendra Bhangui <@email@>
 %endif
 
 %if 0%{?suse_version}
@@ -133,7 +133,7 @@ BuildRequires: -post-build-checks
 ##############################################################################
 
 %if %{defined suse_version} && %{defined sles_version}
-PreReq: permissions
+Requires: permissions
 BuildRequires: openldap2-devel
 %else
 BuildRequires: openldap-devel
@@ -161,14 +161,6 @@ Requires: initscripts
 
 Requires: daemontools >= 1.0
 Requires: ucspi-tcp >= 1.0
-#
-%if %build_on_obs == 1
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-%endif
-#
-# IndiMail is choosy and runs on reliable OS only
-#
-Excludeos: windows
 
 %description
 indimail-mta provides a MTA that is part of the IndiMail
@@ -333,7 +325,6 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
 %endif
 
 %install
-[ "%{buildroot}" != "/" ] && /bin/rm -fr %{buildroot}
 %{__mkdir_p} %{buildroot}%{_prefix}
 
 # rpm macros are complicated. Read https://rpm.org/user_doc/macros.html
@@ -1032,10 +1023,6 @@ echo ../resolv.conf 1>&3
 %attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
 %attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
 %endif
-
-%clean
-[ "%{buildroot}" != "/" ] && %{__rm} -fr %{buildroot}
-%{__rm} -fr %{_builddir}/%{name}-%{version}
 
 # value of argv1 ($1) passed to scriptlets
 #            install   erase   upgrade  reinstall
