@@ -1238,7 +1238,7 @@ tcount=$(expr $tcount + 1)
 key1=$domainkey_dir/example.com/dkimkeys1
 qmail_inject=$bindir/qmail-inject
 qmail_queue=$sbindir/qmail-queue
-echo "testing qmail-dkim custom error feature"
+echo "testing qmail-dkim custom error feature for permanent(100)/temporary(111) failures"
 (
 	echo "From: postmaster@$real_domain"
 	echo "To: $user@$real_domain"
