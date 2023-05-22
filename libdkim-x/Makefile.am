@@ -22,7 +22,7 @@ noinst_DATA = libdkim.spec libdkim.changes PKGBUILD
 dkim_SOURCES = dkim.cpp
 dkim_LDFLAGS = $(LDFLAGS)
 dkim_LDADD = libdkim.la $(LIB_RESOLV) $(LIB_CRYPTO)
-dkim_CXXFLAGS = $(CXXFLAGS)
+dkim_CXXFLAGS = $(CXXFLAGS) -fPIE
 
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA = libdkim.pc
