@@ -1,5 +1,5 @@
 #
-# $Id: indimail-mta.te,v 1.9 2023-05-13 20:20:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.te,v 1.10 2023-05-22 10:57:39+05:30 Cprogrammer Exp mbhangui $
 # 
 # semanage permissive -a svc_start_t
 # semanage permissive -d svc_start_t
@@ -243,6 +243,9 @@ allow init_t svc_svc_t:lnk_file read;
 
 #
 # $Log: indimail-mta.te,v $
+# Revision 1.10  2023-05-22 10:57:39+05:30  Cprogrammer
+# updated selinux rules
+#
 # Revision 1.9  2023-05-13 20:20:21+05:30  Cprogrammer
 # added antivirus definitions
 #
