@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.381 2023-05-22 10:57:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.382 2023-05-22 17:20:50+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -117,7 +117,7 @@ Obsoletes: indimail-mta < 2.0
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: sed findutils diffutils gzip coreutils grep
 BuildRequires: glibc glibc-devel binutils libidn2-devel
-%if 0%{?rhel_version} != 700 && %{undefined sles_version} && %{undefined suse_version}
+%if 0%{?rhel_version} != 700 && %{undefined sles_version} && %{undefined suse_version} && %{undefined mgaversion}
 BuildRequires: glibc-static
 %endif
 BuildRequires: openssl openssl-devel mysql-devel libgsasl-devel
@@ -337,7 +337,7 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
   LDFLAGS="%{build_ldflags} $LDFLAGS"
 %endif
 # no static linking for RHEL7 and opensuse, sles versions
-%if 0%{?rhel_version} == 700 || %{defined sles_version} || %{defined suse_version}
+%if 0%{?rhel_version} != 700 && %{undefined sles_version} && %{undefined suse_version} && %{undefined mgaversion}
   %{__sed} -i -e 's{^static_option{#static_option{' \
     -e 's{^dynamic_option{#dynamic_option{' Makefile.LINUX
 %endif

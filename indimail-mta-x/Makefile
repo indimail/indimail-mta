@@ -1875,7 +1875,7 @@ gsasl.lib mysql_config
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_sysconfdir.o \
 		-Wl,-Bstatic $(QMAILLIB) -Wl,-Bdynamic \
 		-L../libsrs2-x/libsrs2/.libs \
-		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib`; \
+		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib` -ldl; \
 	fi
 
 qmail-smtpd: \
