@@ -64,8 +64,13 @@ Conflicts: indimail-mta < 2.11
 BuildRequires: gcc gcc-c++ make pkgconfig
 BuildRequires: sed findutils diffutils gzip coreutils grep
 BuildRequires: glibc glibc-devel
-BuildRequires: openssl openssl-devel mysql-devel
+BuildRequires: openssl openssl-devel
 BuildRequires: libqmail-devel
+%if %{defined amzn}
+BuildRequires: mariadb-connector-c-devel
+%else
+BuildRequires: mysql-devel
+%endif
 
 ##################################### OBS ####################################
 %if %build_on_obs == 1

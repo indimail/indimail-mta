@@ -72,7 +72,11 @@ Requires(postun): shadow-utils
 BuildRequires: gcc gcc-c++ make
 BuildRequires: sed findutils diffutils gzip coreutils grep
 BuildRequires: glibc glibc-devel
+%if %{defined amzn}
+BuildRequires: mariadb-connector-c-devel
+%else
 BuildRequires: mysql-devel
+%endif
 BuildRequires: libqmail-devel
 
 ##################################### OBS ####################################
