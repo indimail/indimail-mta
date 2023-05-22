@@ -159,7 +159,7 @@ done
 %defattr(-, root, root,-)
 %{_libdir}/libdkim.so.1
 %{_libdir}/libdkim.so.1.0.0
-%doc %attr(644,root,root)               %{mandir}/man8/dkim.8.gz
+%doc %attr(644,root,root)               %{mandir}/man8/*
 
 %attr(755,root,root)                    %{_prefix}/bin/dkim
 
