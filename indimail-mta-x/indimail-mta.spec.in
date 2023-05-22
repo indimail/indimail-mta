@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.380 2023-05-20 12:10:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.381 2023-05-22 10:57:14+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -376,9 +376,6 @@ touch %{buildroot}%{qsysconfdir}/control/defaultqueue/QUEUEDIR
 
 # remove devel files as we are not building a devel package
 %{__rm} -rf %{buildroot}%{mandir}/man3
-
-# Compress the man pages
-find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 
 # Create these files so that %%ghost does not complain
 for i in tcp.smtp tcp.smtp.cdb tcp.qmtp tcp.qmtp.cdb tcp.qmqp \
@@ -873,20 +870,20 @@ echo ../resolv.conf 1>&3
 %ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 %ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/global_vars/CONFSPLIT
 #
-%attr(0644,root,root)              %{mandir}/man1/srsfilter.1.gz
-%attr(0644,root,root)              %{mandir}/man1/predate.1.gz
-%attr(0644,root,root)              %{mandir}/man1/datemail.1.gz
-%attr(0644,root,root)              %{mandir}/man1/mailsubj.1.gz
+%attr(0644,root,root)              %{mandir}/man1/srsfilter.1.*
+%attr(0644,root,root)              %{mandir}/man1/predate.1.*
+%attr(0644,root,root)              %{mandir}/man1/datemail.1.*
+%attr(0644,root,root)              %{mandir}/man1/mailsubj.1.*
 #
-%attr(0644,root,root)              %{mandir}/man5/indimail-srs.5.gz
+%attr(0644,root,root)              %{mandir}/man5/indimail-srs.5.*
 #
-%attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.gz
-%attr(0644,root,root)              %{mandir}/man8/isendmail.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.gz
-%attr(0644,root,root)              %{mandir}/man8/mini-smtpd.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-direct.8.gz
-%attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.gz
+%attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.*
+%attr(0644,root,root)              %{mandir}/man8/isendmail.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.*
+%attr(0644,root,root)              %{mandir}/man8/mini-smtpd.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-direct.8.*
+%attr(0644,root,root)              %{mandir}/man8/irmail.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.*
 
 %if %build_on_obs == 0
 %license %attr(0644,root,root)     %{shareddir}/doc/COPYING-indimail-mta
@@ -963,33 +960,33 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)  %config(noreplace,missingok) %{_sysconfdir}/permissions.d/indimail-mta-permissions.secure
 %endif
 #
-%attr(0644,root,root)              %{mandir}/man1/forward.1.gz
-%attr(0644,root,root)              %{mandir}/man1/predate.1.gz
-%attr(0644,root,root)              %{mandir}/man1/datemail.1.gz
-%attr(0644,root,root)              %{mandir}/man1/mailsubj.1.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.gz
-%attr(0644,root,root)              %{mandir}/man1/qmaildirmake.1.gz
-%attr(0644,root,root)              %{mandir}/man1/maildir2mbox.1.gz
-%attr(0644,root,root)              %{mandir}/man1/qmaildirwatch.1.gz
-%attr(0644,root,root)              %{mandir}/man1/srsfilter.1.gz
-%attr(0644,root,root)              %{mandir}/man5/indimail-srs.5.gz
-%attr(0644,root,root)              %{mandir}/man8/queue-fix.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-direct.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmta-send.8.gz
-%attr(0644,root,root)              %{mandir}/man8/mini-smtpd.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-queue.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-lspawn.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-local.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-rspawn.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-remote.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-clean.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-tcpok.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-tcpto.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qhpsi.8.gz
-%attr(0644,root,root)              %{mandir}/man8/isendmail.8.gz
-%attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.gz
-%attr(0644,root,root)              %{mandir}/man8/irmail.8.gz
+%attr(0644,root,root)              %{mandir}/man1/forward.1.*
+%attr(0644,root,root)              %{mandir}/man1/predate.1.*
+%attr(0644,root,root)              %{mandir}/man1/datemail.1.*
+%attr(0644,root,root)              %{mandir}/man1/mailsubj.1.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.*
+%attr(0644,root,root)              %{mandir}/man1/qmaildirmake.1.*
+%attr(0644,root,root)              %{mandir}/man1/maildir2mbox.1.*
+%attr(0644,root,root)              %{mandir}/man1/qmaildirwatch.1.*
+%attr(0644,root,root)              %{mandir}/man1/srsfilter.1.*
+%attr(0644,root,root)              %{mandir}/man5/indimail-srs.5.*
+%attr(0644,root,root)              %{mandir}/man8/queue-fix.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-qmqpc.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-direct.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmta-send.8.*
+%attr(0644,root,root)              %{mandir}/man8/mini-smtpd.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-queue.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-lspawn.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-local.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-rspawn.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-remote.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-clean.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-tcpok.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-tcpto.8.*
+%attr(0644,root,root)              %{mandir}/man8/qhpsi.8.*
+%attr(0644,root,root)              %{mandir}/man8/isendmail.8.*
+%attr(0644,root,root)              %{mandir}/man8/qmail-inject.8.*
+%attr(0644,root,root)              %{mandir}/man8/irmail.8.*
 
 %if %build_on_obs == 0
 %license %attr(0644,root,root)     %{shareddir}/doc/COPYING-indimail-mta
@@ -1875,9 +1872,14 @@ if [ -f %{_sysconfdir}/pam.d/smtp -a ! -L %{_sysconfdir}/pam.d/smtp ] ; then
   %{__mv} %{_sysconfdir}/pam.d/smtp %{_sysconfdir}/pam.d/smtp.old
 fi
 for i in mailq newaliases; do
-  if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
-    echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
-    %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+  if [ -f %{mandir}/man1/$i.1.xz ] ; then
+    ext="xz"
+  else
+    ext="gz"
+  fi
+  if [ -f %{mandir}/man1/$i.1."$ext" -a ! -L %{mandir}/man1/$i.1."$ext" ] ; then
+    echo "! %{mandir}/man1/$i.1.$ext is a file, should be a link" 1>&2
+    %{__mv} %{mandir}/man1/$i.1."$ext" %{mandir}/man1/$i.old.1."$ext"
   fi
 done
 echo "configuring indimail-mini as alternatives"
@@ -1895,10 +1897,15 @@ if [ -n "$alternatives_cmd" ] ; then
       %{__mv} $i $i.old
     fi
   done
+  if [ -f %{mandir}/man8/isendmail.8.xz ] ; then
+    ext="xz"
+  else
+    ext="gz"
+  fi
   $alternatives_cmd --install \
     /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
-    --slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-      %{mandir}/man8/isendmail.8.gz \
+    --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
+      %{mandir}/man8/isendmail.8."$ext" \
     --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
   $alternatives_cmd --set mta %{_prefix}/bin/sendmail
 else
@@ -1987,9 +1994,14 @@ for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
   fi
 done
 for i in mailq newaliases; do
-  if [ -f /usr/share/man/man1/$i.old.1.gz ] ; then
-    echo "restoring /usr/share/man/man1/$i.1.gz"
-    %{__mv} /usr/share/man/man1/$i.old.1.gz /usr/share/man/man1/$i.1.gz
+  if [ -f %{mandir}/man1/$i.old.1.xz ] ; then
+    ext="xz"
+  else
+    ext="gz"
+  fi
+  if [ -f %{mandir}/man1/$i.old.1."$ext" ] ; then
+    echo "restoring %{mandir}/man1/$i.1.$ext"
+    %{__mv} %{mandir}/man1/$i.old.1."$ext" %{mandir}/man1/$i.1."$ext"
   fi
 done
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
@@ -2222,19 +2234,29 @@ if [ -n "$alternatives_cmd" ] ; then
     fi
   done
   for i in mailq newaliases; do
-    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
-      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
-      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+    if [ -f %{mandir}/man1/$i.1.xz ] ; then
+      ext="xz"
+    else
+      ext="gz"
+    fi
+    if [ -f %{mandir}/man1/$i.1."$ext" -a ! -L %{mandir}/man1/$i.1."$ext" ] ; then
+      echo "! %{mandir}/man1/$i.1.$ext is a file, should be a link" 1>&2
+      %{__mv} %{mandir}/man1/$i.1."$ext" %{mandir}/man1/$i.old.1."$ext"
     fi
   done
   if [ -f %{_sysconfdir}/pam.d/smtp -a ! -L %{_sysconfdir}/pam.d/smtp ] ; then
     echo "! %{_sysconfdir}/pam.d/smtp is a file, should be a link" 1>&2
     %{__mv} %{_sysconfdir}/pam.d/smtp %{_sysconfdir}/pam.d/smtp.old
   fi
+  if [ -f %{mandir}/man8/isendmail.8.xz ] ; then
+    ext="xz"
+  else
+    ext="gz"
+  fi
   $alternatives_cmd --install \
     /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
-    --slave /usr/share/man/man8/sendmail.8.gz mta-sendmailman \
-      %{mandir}/man8/isendmail.8.gz \
+    --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
+      %{mandir}/man8/isendmail.8."$ext" \
     --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
     --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
   $alternatives_cmd --set mta %{_prefix}/bin/sendmail
@@ -2258,9 +2280,14 @@ else
     /bin/ln -s %{_sysconfdir}/pam.d/pam.multi %{_sysconfdir}/pam.d/smtp
   fi
   for i in mailq newaliases; do
-    if [ -f /usr/share/man/man1/$i.1.gz -a ! -L /usr/share/man/man1/$i.1.gz ] ; then
-      echo "! /usr/share/man/man1/$i.1.gz is a file, should be a link" 1>&2
-      %{__mv} /usr/share/man/man1/$i.1.gz /usr/share/man/man1/$i.old.1.gz
+    if [ -f %{mandir}/man1/$i.1.xz ] ; then
+      ext="xz"
+    else
+      ext="gz"
+    fi
+    if [ -f %{mandir}/man1/$i.1."$ext" -a ! -L %{mandir}/man1/$i.1."$ext" ] ; then
+      echo "! %{mandir}/man1/$i.1.$ext is a file, should be a link" 1>&2
+      %{__mv} %{mandir}/man1/$i.1."$ext" %{mandir}/man1/$i.old.1."$ext"
     fi
   done
 fi
@@ -2343,9 +2370,14 @@ for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
   fi
 done
 for i in mailq newaliases; do
-  if [ -f /usr/share/man/man1/$i.old.1.gz ] ; then
-    echo "restoring /usr/share/man/man1/$i.1.gz"
-    %{__mv} /usr/share/man/man1/$i.old.1.gz /usr/share/man/man1/$i.1.gz
+  if [ -f %{mandir}/man1/$i.old.1.xz ] ; then
+    ext="xz"
+  else
+    ext="gz"
+  fi
+  if [ -f %{mandir}/man1/$i.old.1."$ext" ] ; then
+    echo "restoring %{mandir}/man1/$i.1.$ext"
+    %{__mv} %{mandir}/man1/$i.old.1."$ext" %{mandir}/man1/$i.1."$ext"
   fi
 done
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then

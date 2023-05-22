@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.34 2023-05-20 12:11:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.35 2023-05-22 10:58:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -191,7 +191,6 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %endif
 
 # Compress the man pages
-find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %if %{undefined nodebug}
  /bin/chmod -R 755 %{buildroot}%{_prefix}/bin
  /bin/chmod -R 755 %{buildroot}%{_prefix}/sbin
@@ -270,38 +269,38 @@ find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %docdir %{shareddir}/doc
 %attr(0644,root,root)                    %{shareddir}/doc/ChangeLog-daemontools
 %attr(0644,root,root)                    %{shareddir}/doc/README.logselect
-%attr(0644,root,root)                    %{mandir}/man1/spipe.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/qfilelog.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/multipipe.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/teepipe.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/qlogselect.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/tai2tai64n.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/tai64n2tai.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/svps.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/inotify.1.gz
-%attr(0644,root,root)                    %{mandir}/man1/runpod.1.gz
-%attr(0644,root,root)                    %{mandir}/man8/envdir.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/fghack.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/multilog.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/pgrphack.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/readproctitle.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/setlock.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/setuidgid.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/softlimit.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/supervise.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/svc.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/svok.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/svscan.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/svstat.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/tai64n.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/tai64nlocal.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/tai64nunix.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/logselect.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/svscanboot.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/qmailctl.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/minisvc.8.gz
-%attr(0644,root,root)                    %{mandir}/man8/docker-entrypoint.8.gz
+%attr(0644,root,root)                    %{mandir}/man1/spipe.1.*
+%attr(0644,root,root)                    %{mandir}/man1/qfilelog.1.*
+%attr(0644,root,root)                    %{mandir}/man1/multipipe.1.*
+%attr(0644,root,root)                    %{mandir}/man1/teepipe.1.*
+%attr(0644,root,root)                    %{mandir}/man1/qlogselect.1.*
+%attr(0644,root,root)                    %{mandir}/man1/tai2tai64n.1.*
+%attr(0644,root,root)                    %{mandir}/man1/tai64n2tai.1.*
+%attr(0644,root,root)                    %{mandir}/man1/svps.1.*
+%attr(0644,root,root)                    %{mandir}/man1/inotify.1.*
+%attr(0644,root,root)                    %{mandir}/man1/runpod.1.*
+%attr(0644,root,root)                    %{mandir}/man8/envdir.8.*
+%attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.*
+%attr(0644,root,root)                    %{mandir}/man8/fghack.8.*
+%attr(0644,root,root)                    %{mandir}/man8/multilog.8.*
+%attr(0644,root,root)                    %{mandir}/man8/pgrphack.8.*
+%attr(0644,root,root)                    %{mandir}/man8/readproctitle.8.*
+%attr(0644,root,root)                    %{mandir}/man8/setlock.8.*
+%attr(0644,root,root)                    %{mandir}/man8/setuidgid.8.*
+%attr(0644,root,root)                    %{mandir}/man8/softlimit.8.*
+%attr(0644,root,root)                    %{mandir}/man8/supervise.8.*
+%attr(0644,root,root)                    %{mandir}/man8/svc.8.*
+%attr(0644,root,root)                    %{mandir}/man8/svok.8.*
+%attr(0644,root,root)                    %{mandir}/man8/svscan.8.*
+%attr(0644,root,root)                    %{mandir}/man8/svstat.8.*
+%attr(0644,root,root)                    %{mandir}/man8/tai64n.8.*
+%attr(0644,root,root)                    %{mandir}/man8/tai64nlocal.8.*
+%attr(0644,root,root)                    %{mandir}/man8/tai64nunix.8.*
+%attr(0644,root,root)                    %{mandir}/man8/logselect.8.*
+%attr(0644,root,root)                    %{mandir}/man8/svscanboot.8.*
+%attr(0644,root,root)                    %{mandir}/man8/qmailctl.8.*
+%attr(0644,root,root)                    %{mandir}/man8/minisvc.8.*
+%attr(0644,root,root)                    %{mandir}/man8/docker-entrypoint.8.*
 
 ### SCRIPTLET ###############################################################################
 %pretrans

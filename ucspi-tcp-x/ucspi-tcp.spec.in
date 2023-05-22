@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.22 2023-05-20 12:11:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.23 2023-05-22 10:58:32+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -183,8 +183,6 @@ install -m 0644 %{name}-rpm.info %{buildroot}%{qsysconfdir}/%{name}-rpm.info
 install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-ucspi-tcp
 %{__rm} -f ChangeLog
 
-# Compress the man pages
-find %{buildroot}%{mandir} -type f -exec gzip -q {} \;
 %if %{undefined nodebug}
 chmod -R 755 %{buildroot}%{_prefix}/bin
 chmod -R 755 %{buildroot}%{libexecdir}
@@ -228,24 +226,24 @@ chmod -R 755 %{buildroot}%{plugindir}
 %endif
 
 %docdir %{mandir}
-%attr(0644,root,root)                     %{mandir}/man1/tcpserver.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/tcprules.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/tcprulescheck.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/tcpclient.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/who@.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/date@.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/finger@.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/http@.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/tcpcat.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/mconnect.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/mconnect-io.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/rblsmtpd.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/argv0.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/addcr.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/delcr.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/fixcrio.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/recordio.1.gz
-%attr(0644,root,root)                     %{mandir}/man1/dotls.1.gz
+%attr(0644,root,root)                     %{mandir}/man1/tcpserver.1.*
+%attr(0644,root,root)                     %{mandir}/man1/tcprules.1.*
+%attr(0644,root,root)                     %{mandir}/man1/tcprulescheck.1.*
+%attr(0644,root,root)                     %{mandir}/man1/tcpclient.1.*
+%attr(0644,root,root)                     %{mandir}/man1/who@.1.*
+%attr(0644,root,root)                     %{mandir}/man1/date@.1.*
+%attr(0644,root,root)                     %{mandir}/man1/finger@.1.*
+%attr(0644,root,root)                     %{mandir}/man1/http@.1.*
+%attr(0644,root,root)                     %{mandir}/man1/tcpcat.1.*
+%attr(0644,root,root)                     %{mandir}/man1/mconnect.1.*
+%attr(0644,root,root)                     %{mandir}/man1/mconnect-io.1.*
+%attr(0644,root,root)                     %{mandir}/man1/rblsmtpd.1.*
+%attr(0644,root,root)                     %{mandir}/man1/argv0.1.*
+%attr(0644,root,root)                     %{mandir}/man1/addcr.1.*
+%attr(0644,root,root)                     %{mandir}/man1/delcr.1.*
+%attr(0644,root,root)                     %{mandir}/man1/fixcrio.1.*
+%attr(0644,root,root)                     %{mandir}/man1/recordio.1.*
+%attr(0644,root,root)                     %{mandir}/man1/dotls.1.*
 
 %attr(0644,root,root)                     %{shareddir}/doc/ChangeLog-ucspi-tcp
 %attr(0644,root,root)                     %{shareddir}/doc/README.ucspi-tcp
