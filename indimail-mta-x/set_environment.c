@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.9  2023-05-31 12:06:05+05:30  Cprogrammer
+ * skip local env variable processing of .defaultqueue if SKIP_LOCAL_ENVIRONMENT is set
+ *
  * Revision 1.8  2023-01-03 17:01:54+05:30  Cprogrammer
  * removed auto_sysconfdir.h dependency
  *
@@ -47,8 +50,10 @@ set_environment(char *warn, char *fatal, int root_rc)
 	/*-
 	 * allow $HOME/.defaultqueue for non-root
 	 * or root with non-zero root_rc
+	 * root_rc is non-zero for qmail-inject, new-inject,
+	 * qmail-qread, maildirserial
 	 */
-	if ((home = env_get("HOME")) && (getuid() || root_rc)) {
+	if (!env_get("SKIP_LOCAL_ENVIRONMENT") && (home = env_get("HOME")) && (getuid() || root_rc)) {
 		if (!stralloc_copys(&tmp, home) ||
 				!stralloc_catb(&tmp, "/.defaultqueue", 14) ||
 				!stralloc_0(&tmp))
@@ -86,7 +91,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.8 2023-01-03 17:01:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: set_environment.c,v 1.9 2023-05-31 12:06:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
