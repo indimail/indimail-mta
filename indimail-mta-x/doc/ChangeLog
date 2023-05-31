@@ -22,6 +22,7 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
 08. Fixes for amazon linux in indimail-mta.spec
 09. set_environment.c: skip local env variable processing of .defaultqueue if
     SKIP_LOCAL_ENVIRONMENT is set
+10. qmail-showctl.c: restore HOME env variable after env_clear
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

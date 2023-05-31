@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.14  2023-05-31 16:31:02+05:30  Cprogrammer
+ * restore HOME env variable after env_clear
+ *
  * Revision 1.13  2023-03-05 01:35:12+05:30  Cprogrammer
  * added missing control files
  *
@@ -819,7 +822,10 @@ main(int argc, char **argv)
 	if (!do_control && !do_concurrency && !do_internals && !do_errors && !do_queue && !do_env)
 		do_queue = do_internals = 1;
 
+	ptr = env_get("HOME");
 	env_clear();
+	if (ptr && !env_put2("HOME", ptr))
+		die_nomem();
 	set_environment(WARN, FATAL, 1);
 	if (do_env) {
 		substdio_puts(subfdout, "------------------ begin show env ----------------------------\n");
@@ -891,7 +897,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.13 2023-03-05 01:35:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.14 2023-05-31 16:31:02+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
