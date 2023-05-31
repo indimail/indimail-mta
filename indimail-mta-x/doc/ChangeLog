@@ -24,8 +24,8 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
     SKIP_LOCAL_ENVIRONMENT is set
 10. qmail-showctl.c: restore HOME env variable after env_clear
 11. dknewkey: allow non-root user to execute dknewkey
-12. indimail-mta.spec, debian/indimail-mta.postinst: create defaultqueue
-    parameters without DKIM signing
+12. indimail-mta.spec, debian/indimail-mta.postinst, create_services: create
+    defaultqueue parameters without DKIM signing
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

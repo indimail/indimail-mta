@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.126 2023-05-20 23:13:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.127 2023-05-31 20:34:11+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -515,8 +515,7 @@ fi
 [ $ID -eq 0 ] && eval $svctool --queueParam=defaultqueue \
   --qbase=$qbase --qcount=$qcount --qstart=1 \
   --min-free=52428800 --virus-filter \
-  --dkverify="none" --dksign=$sign_opt \
-  --private_key=$controldir/domainkeys/%/$dkimkeyfn \
+  --dkverify="none" --dksign="none" \
   $append_opt $extra_opt
 
 [ $ID -eq 0 ] && eval $svctool --slowq --servicedir=$servicedir --qbase=$qbase \
@@ -784,6 +783,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.127  2023-05-31 20:34:11+05:30  Cprogrammer
+# create defaultqueue parameters without DKIM signing
+#
 # Revision 2.126  2023-05-20 23:13:10+05:30  Cprogrammer
 # run ischema only if noindimail=0
 #
