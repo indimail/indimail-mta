@@ -18,6 +18,10 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
 06. create_services: allow creation of mysql db even if indimail is not
     installed
 07. skip creation of indimail user, database if mysql_user is null
+- 31/05/2023
+08. Fixes for amazon linux in indimail-mta.spec
+09. set_environment.c: skip local env variable processing of .defaultqueue if
+    SKIP_LOCAL_ENVIRONMENT is set
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023
