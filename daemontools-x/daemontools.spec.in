@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.35 2023-05-22 10:58:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.36 2023-05-31 22:25:01+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
