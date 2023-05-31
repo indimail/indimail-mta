@@ -39,8 +39,9 @@ user.
 See
 .BR qmail-getpw (8).
 
-If running as non-root, \fBfastforward\fR uses environment set according
-to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
+If running as non-root, \fBfast-forward\fR uses environment set according
+to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
+if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If \fBQUEUE_BASE\fR environment
 variable is not set, it additionally uses environment set according to
 files in @controldir@/defaultqueue directory (for any uid).
 

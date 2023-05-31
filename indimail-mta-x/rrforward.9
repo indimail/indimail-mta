@@ -31,7 +31,8 @@ is read from
 file.
 
 If running as non-root, \fBrrforward\fR uses environment set according
-to files in $HOME/.defaultqueue directory. If QUEUE_BASE environment
+to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
+if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If \fBQUEUE_BASE\fR environment
 variable is not set, it additionally uses environment set according to
 files in @controldir@/defaultqueue directory (for any uid).
 

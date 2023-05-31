@@ -109,10 +109,11 @@ can use the \fB-s\fR option to run with any split dir value.
 \fIintd\fR having subdirectory split. Set the environment variable
 \fBBIGTODO\fR to process a big \fItodo\fR, \fIintd\fR subdirectory.
 
-If running as non-root \fBqmta-send\fR uses environment set according to
-files $HOME/.defaultqueue directory. If running as root and if
-\fBQUEUE_BASE\fR environment variable is not set, environment variables
-from @controldir@/defaultqueue are additionally set.
+If running as non-root, \fBqmta-send\fR uses environment set according
+to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
+if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If \fBQUEUE_BASE\fR environment
+variable is not set, it additionally uses environment set according to
+files in @controldir@/defaultqueue directory (for any uid).
 
 .SH OPTIONS
 .TP
