@@ -6034,7 +6034,7 @@ else
 	return 1
 fi
 if [ -x /usr/bin/umount ] ; then
-	umount=/usr/binu/mount
+	umount=/usr/bin/umount
 elif [ -x /bin/umount ] ; then
 	umount=/bin/umount
 elif [ -x /sbin/umount ] ; then
