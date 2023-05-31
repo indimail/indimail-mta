@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH dknewkey 8
 .SH NAME
 dknewkey \- create a new domain key
@@ -51,6 +52,10 @@ openssl genpkey -algorithm Ed25519 -out \fIselector\fR # for Ed25519
 .IP \[bu]
 openssl rsa -in \fIselector\fR -out \fIselector.pub\fR -pubout -outform PEM
 
+When run as root, \fBdknewkey\fR creates the private and public key files
+with root:qcerts permission and 0640 as the mode for the private key. This
+ensures that only the root user or users having qcerts as a supplementary
+group can access this file.
 
 .SH OPTIONS
 .TP

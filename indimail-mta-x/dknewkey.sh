@@ -1,5 +1,5 @@
 #
-# $Id: dknewkey.sh,v 1.20 2023-03-20 09:18:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: dknewkey.sh,v 1.21 2023-05-31 18:38:52+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -103,9 +103,10 @@ fi
 if [ $? != 0 ]; then
 	usage 100
 fi
-if [ $(id -u) -ne 0 ] ; then
-	echo "dknewkey is not meant to be run by mere mortals. Use sudo to get superpowers"
-	exit 100
+if [ $(id -u) -eq 0 ] ; then
+	root_user=1
+else
+	root_user=0
 fi
 
 do_print=0
@@ -204,14 +205,20 @@ elif [ $remove -eq 1 ] ; then
 	fi
 else
 	t=$(dirname $selector)
-	if [ "$t" != "$dir" -a "$t" != "." ] ; then
+	if [ "$t" != "$dir" ] ; then
 		echo "WARNING!!!. Generating DKIM keys outside $dir"
 		dir=$t
 		selector=$(basename $selector)
 	fi
 	if [ ! -d $dir ] ; then
-		if (! mkdir -p $dir || ! chown $cert_user:$cert_group $dir || ! chmod 755 $dir) ; then
-			exit 1
+		if [ $root_user -eq 1 ] ; then
+			if (! mkdir -p $dir || ! chown $cert_user:$cert_group $dir || ! chmod 755 $dir) ; then
+				exit 1
+			fi
+		else
+			if (! mkdir -p $dir || ! chmod 700 $dir) ; then
+				exit 1
+			fi
 		fi
 	fi
 	cd $dir
@@ -264,8 +271,14 @@ else
 	fi
 
 	exec 2>&3 # restore stderr
-	if ( ! chown $cert_user:$cert_group $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
-		exit 1
+	if [ $root_user -eq 1 ] ; then
+		if ( ! chown $cert_user:$cert_group $selector $selector.pub || ! chmod 640 $selector || ! chmod 644 $selector.pub) ; then
+			exit 1
+		fi
+	else
+		if ( ! chmod 600 $selector || ! chmod 600 $selector.pub) ; then
+			exit 1
+		fi
 	fi
 	print_key "$domain" "$selector"
 fi
@@ -273,6 +286,9 @@ exit 0
 
 #
 # $Log: dknewkey.sh,v $
+# Revision 1.21  2023-05-31 18:38:52+05:30  Cprogrammer
+# allow non-root user to execute dknewkey
+#
 # Revision 1.20  2023-03-20 09:18:08+05:30  Cprogrammer
 # new split_str function REF: sagredo.edu comment2961
 #
