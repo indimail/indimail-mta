@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.383 2023-05-31 12:05:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.384 2023-05-31 18:58:11+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1404,8 +1404,7 @@ fi
 eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
   --min-free=52428800 --virus-filter \
-  --dkverify="none" --dksign=$sign_opt \
-  --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
+  --dkverify="none" --dksign="none" \
   $extra_opt
 
 # slowq service

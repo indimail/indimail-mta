@@ -344,8 +344,7 @@ fi
 eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 	--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 	--min-free=52428800 --virus-filter \
-	--dkverify="none" --dksign=$sign_opt \
-	--private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
+	--dkverify="none" --dksign="none" \
 	$extra_opt
 
 # slowq service
