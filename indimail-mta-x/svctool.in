@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.687 2023-05-20 20:43:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.688 2023-05-31 12:06:41+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.687 2023-05-20 20:43:56+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.688 2023-05-31 12:06:41+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -930,7 +930,6 @@ Known values for OPTION are:
 --config=snmpdconf|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|selinux|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
-  [--common_name=CN]
   [--common_name=CN]
   [--validity_days=days]
   [--certdir=certdir]
