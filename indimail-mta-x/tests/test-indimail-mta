@@ -430,7 +430,6 @@ function test_smtp_tls()
 		tcount=$(expr $tcount + 1)
 		echo "  testing mail using SMTP with STARTTLS succeeded"
 	else
-		sudo kill $send_pid $smtp_pid
 		(
 		echo "  testing mail using SMTP with STARTTLS failed"
 		echo "smtpd.log"
@@ -439,9 +438,8 @@ function test_smtp_tls()
 		elif [ -f $logdir/smtpd/current ] ; then
 			cat $logdir/smtpd/current
 		fi
-		echo "qmail-send.log"
-		cat $logdir/qmail-send/qmail-send.log
 		) |less
+		sudo kill $send_pid $smtp_pid
 		exit 1
 	fi
 }
@@ -837,25 +835,21 @@ function test_qmail_remote_auth_cdb()
 			tcount=$(expr $tcount + 1)
 			echo "  testing qmail-remote using remote_auth.cdb qmail-remote send+receive succeeded"
 		else
-			sudo kill $send_pid $smtp_pid
 			(
 			echo "  testing qmail-remote using remote_auth.cdb qmail-remote send+receive failed"
 			echo "qmail-remote.log"
-			$testdir/qremote.$$
-			echo "smtpd.log"
-			cat $logdir/smtpd/smtpd.log
+			cat $testdir/qremote.$$
 			) | less
+			sudo kill $send_pid $smtp_pid
 			exit 1
 		fi
 	else
-		sudo kill $send_pid $smtp_pid
 		(
 		echo "  testing qmail-remote using remote_auth.cdb qmail-remote send+receive failed"
 		echo "qmail-remote.log"
-		$testdir/qremote.$$
-		echo "smtpd.log"
-		cat $logdir/smtpd/smtpd.log
+		cat $testdir/qremote.$$
 		) | less
+		sudo kill $send_pid $smtp_pid
 		exit 1
 	fi
 	/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
