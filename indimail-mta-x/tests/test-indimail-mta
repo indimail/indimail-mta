@@ -426,7 +426,7 @@ function start_tcpserver_smtp()
 
 function test_smtp_tls()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port -tls
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port -tls
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -448,7 +448,7 @@ function test_smtp_tls()
 
 function test_smtp_notls()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -484,7 +484,7 @@ function test_smtp_dkimverify()
 	cat $testdir/mail1.txt|dkim -z 2 -s $dkim_key
 	cat $testdir/mail1.txt && rm -f $testdir/mail1.txt
 	) >/tmp/mail2.txt
-	swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port $smtp_port < /tmp/mail2.txt
+	swaks --data - -n -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port < /tmp/mail2.txt
 	check_mail_header "DKIM-Status: good"
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -518,7 +518,7 @@ function test_smtp_bogofilter()
 	echo "Date: $(date -R)"
 	echo
 	echo "This is an email to test DKIM"
-	) | swaks --data - -n -S --to $user@$HOSTNAME --server localhost --port $smtp_port
+	) | swaks --data - -n -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port
 	check_mail_header "X-Bogosity"
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -540,7 +540,7 @@ function test_smtp_bogofilter()
 
 function test_smtps()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -562,7 +562,7 @@ function test_smtps()
 
 function test_smtp_auth_login()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "AUTH LOGIN:")
@@ -591,7 +591,7 @@ function test_smtp_auth_login()
 
 function test_smtp_auth_plain()
 {
-	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --a PLAIN -au $user@$HOSTNAME -ap "abcd12345678"
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --a PLAIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "AUTH PLAIN:")
@@ -621,7 +621,7 @@ function test_smtp_auth_plain()
 function test_smtp_auth_cram_md5()
 {
 	pass=$(sudo grep $user /etc/shadow|cut -d: -f2)
-	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --a CRAM-MD5 -au "$user" -ap "$pass"
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --a CRAM-MD5 -au "$user" -ap "$pass"
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "AUTH CRAM-MD5:")
@@ -1007,7 +1007,7 @@ function test_stop_smtps()
 {
 	sudo svc -d $servicedir/smtpd
 	sleep $sleep_int
-	swaks -S --to $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect 2>/dev/null
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect 2>/dev/null
 	if [ $? -eq 2 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing stopping of service using svc succeeded"
@@ -1101,7 +1101,7 @@ function test_multilog()
 function test_blocked()
 {
 	if [ $# -eq 0 ] ; then
-		swaks -S --to blocked@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect >/dev/null
+		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect >/dev/null
 	else
 		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port --tls-on-connect >/dev/null
 	fi
