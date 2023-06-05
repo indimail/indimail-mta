@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.35 2023-04-27 13:25:24+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.36 2023-06-05 16:17:06+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -547,7 +547,7 @@ doit()
 
 		/*- handle child exits */
 		for (do_break = 0;;) {
-			if (!(r = waitpid(-1, &wstat, WNOHANG|WSTOPPED|WCONTINUED)))
+			if (!(r = waitpid(-1, &wstat, WNOHANG|WUNTRACED|WCONTINUED)))
 				break;
 			if (r == -1) {
 				if (errno != error_intr)
@@ -1095,13 +1095,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.35 2023-04-27 13:25:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.36 2023-06-05 16:17:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.36  2023-06-05 16:17:06+05:30  Cprogrammer
+ * Fix waitpid returning EINVAL on OSX
+ *
  * Revision 1.35  2023-04-27 13:25:24+05:30  Cprogrammer
  * ignore wait if service for which supervise should wait doesn't exit
  * reduce sleep to 1 when service being waited for hasn't started

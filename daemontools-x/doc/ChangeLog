@@ -7,6 +7,8 @@ Release @version@-@release@ Start 27/04/2023 End XX/XX/XXXX
 - 03/05/2023
 02. minisvc.in: synced daemontools/minisvc, indimail-mta/svctool create_svscan
     function
+- 05/05/2023
+03. supervise.c: fixed waitpid returning EINVAL on OSX
 
 * Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 20/02/2023 End 23/04/2023
