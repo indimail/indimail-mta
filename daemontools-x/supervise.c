@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.36 2023-06-05 16:17:06+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.36 2023-06-05 17:53:16+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -550,9 +550,10 @@ doit()
 			if (!(r = waitpid(-1, &wstat, WNOHANG|WUNTRACED|WCONTINUED)))
 				break;
 			if (r == -1) {
-				if (errno != error_intr)
+				if (errno != error_intr) {
+					do_break = 1;
 					break;
-				else
+				} else
 					continue;
 			}
 			if (wait_stopped(wstat) || wait_continued(wstat)) {
@@ -623,7 +624,7 @@ doit()
 					trystart();
 				}
 				break;
-			}
+			} /*- if (r == childpid || (r != -1 && grandchild)) */
 		} /*- for (;;) */
 		if (flagfailed && flagwant && flagwantup) {
 			flagfailed = 0;
@@ -1095,14 +1096,14 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.36 2023-06-05 16:17:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.36 2023-06-05 17:53:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
- * Revision 1.36  2023-06-05 16:17:06+05:30  Cprogrammer
+ * Revision 1.36  2023-06-05 17:53:16+05:30  Cprogrammer
  * Fix waitpid returning EINVAL on OSX
  *
  * Revision 1.35  2023-04-27 13:25:24+05:30  Cprogrammer
