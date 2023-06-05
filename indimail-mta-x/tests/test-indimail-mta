@@ -32,7 +32,9 @@ function do_cleanup_failed()
 	if [ $failed -eq 0 ] ; then
 		return 0
 	fi
-	shutdown_svscan $svpid
+	if [ -n "$svpid" ] ; then
+		shutdown_svscan $svpid
+	fi
 	sudo /bin/rm -rf $servicedir
 	sudo /bin/rm -rf $logdir
 	sudo /bin/rm -rf $testdir/queue
