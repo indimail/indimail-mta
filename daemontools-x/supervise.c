@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.36 2023-06-05 17:53:16+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.37 2023-06-05 18:17:16+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -125,7 +125,7 @@ do_kill(int prgrp, int *siglist, char **signame)
 
 	for (i = siglist, j = 0; *i != -1; i++, j++) {
 		if (grandchild || prgrp) {
-			if ((r = killpg(childpid, *i)) == -1) {
+			if ((r = killpg(childpid, *i)) == -1 && errno != error_srch) {
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				strnum2[fmt_ulong(strnum2, childpid)] = 0;
 				strerr_warn8(warn.s, "pid ", strnum1, " killpg ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
@@ -136,7 +136,7 @@ do_kill(int prgrp, int *siglist, char **signame)
 				strerr_warn7(info.s, "pid ", strnum1, " killed pgid ", strnum2, " with signal ", signame[j], 0);
 			}
 		} else {
-			if ((r = kill(childpid, *i)) == -1) {
+			if ((r = kill(childpid, *i)) == -1 && errno != error_srch) {
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
 				strnum2[fmt_ulong(strnum2, childpid)] = 0;
 				strerr_warn8(warn.s, "pid ", strnum1, " kill ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
@@ -1096,13 +1096,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.36 2023-06-05 17:53:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.37 2023-06-05 18:17:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.37  2023-06-05 18:17:16+05:30  Cprogrammer
+ * disable warning message if pid does not exist
+ *
  * Revision 1.36  2023-06-05 17:53:16+05:30  Cprogrammer
  * Fix waitpid returning EINVAL on OSX
  *
