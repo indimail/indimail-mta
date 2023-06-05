@@ -143,10 +143,37 @@ On most Linux distros, svscan is started using a systemd(1) unit file
 /usr/lib/systemd/system/svscan.service. On FreeBSD, it is started using rc
 script in /usr/local/etc/rc.d/svscan. On Darwin, it is started by
 launchd(8) using /Library/LaunchDaemons/org.indimail.svscan.plist. On
-alpine linux, it is started by openrc using /etc/init.d/svscan. In a
-container environment, it is started using an docker/podman entrypoint and
-starts as PID 1. The entrypoint is enabled using the
-\fBdocker-entrypoint\fR(8) script.
+alpine linux, it is started by openrc using /etc/init.d/svscan when using
+the \fBservice\fR(8) command. Few examples of starting and stopping svscan
+are given below.
+
+.EX
+Linux
+-----
+sudo systemctl start/stop svscan
+or
+sudo systemctl start/stop indimail
+or
+sudo systemctl start/stop indimail-mta
+or
+sudo service svscan start/stop
+
+FreeBSD
+-------
+sudo service svscan start/stop
+
+Mac OSX
+-------
+sudo launchctl start/stop org.indimail.svscan
+
+Universal
+---------
+sudo qmailctl start/stop
+.EE
+
+In a container environment, \fBsvscan\fR(8) is started through an
+entrypoint for docker/podman and starts as PID 1. This entrypoint is
+implemented using the \fBdocker-entrypoint\fR(8) script.
 
 .SH OPTIONS
 .TP
@@ -192,6 +219,13 @@ envdir(8),
 dnscache(8),
 softlimit(8),
 setlock(8),
-docker-entrypoint(8)
+docker-entrypoint(8),
+systemctl(1),
+systemd(1),
+service(1),
+init(1),
+launchd(8),
+openrc-init(8),
+openrc-run(8)
 
 http://cr.yp.to/daemontools.html
