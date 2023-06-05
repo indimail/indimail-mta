@@ -10,6 +10,7 @@ Release @version@-@release@ Start 27/04/2023 End XX/XX/XXXX
 - 05/05/2023
 03. supervise.c: fixed waitpid returning EINVAL on OSX
 04. supervise.c: disable warning message if pid does not exist
+05. svscan.c: turn on verbose, silent using env variables VERBOSE, SILENT
 
 * Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 20/02/2023 End 23/04/2023

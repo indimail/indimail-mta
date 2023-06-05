@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH svscan 8
 .SH NAME
 svscan \- starts and monitors a collection of services
@@ -151,12 +152,20 @@ starts as PID 1. The entrypoint is enabled using the
 .TP
 .B \-v
 Display informational messages. Normally this is suppressed. You can toggle
-this by sending \fBsvscan\fR \fBUSR1\fR signal.
+this by sending \fBsvscan\fR \fBUSR1\fR signal. Setting this also sets
+\fBVERBOSE\fR environment variable, which gets inherited by all processes
+started by svscan. Informational messages can also be turned on by setting
+\fBVERBOSE\fR environment variable. Note that \fBsupervise\fR(8) uses
+\fBVERBOSE\fR environment variable.
 
 .TP
 .B \-s
 Suppress warning message. Normally this is printed on the standard error.
-You can toggle this by sending \fBsvscan\fR \fBUSR2\fR signal.
+You can toggle this by sending \fBsvscan\fR \fBUSR2\fR signal. Setting this
+also sets \fBSILENT\fR environment variable, which gets inherited by all
+processes started by svscan. Warning messages can also be suppressed by
+setting \fBSILENT\fR environment variable. Note that \fBsupervise\fR(8)
+uses \fBSILENT\fR environment variable.
 
 .SH SEE ALSO
 proc(5),

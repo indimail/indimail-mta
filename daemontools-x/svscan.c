@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.32 2023-03-05 23:48:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.33 2023-06-05 19:00:51+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -764,6 +764,10 @@ main(int argc, char **argv)
 			break;
 		}
 	}
+	if (!verbose && env_get("VERBOSE"))
+		verbose = 1;
+	if (!silent && env_get("SILENT"))
+		silent = 1;
 	/*- setup handler for sigchild if running as pid 1 or SCANNOW is set */
 	if (env_get("SCANNOW") || 1 == (pid = getpid())) {
 		byte_zero((char *) &sa, sizeof(struct sigaction));
@@ -855,13 +859,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.32 2023-03-05 23:48:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *y = "$Id: svscan.c,v 1.33 2023-06-05 19:00:51+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.33  2023-06-05 19:00:51+05:30  Cprogrammer
+ * turn on verbose, silent using env variables VERBOSE, SILENT
+ *
  * Revision 1.32  2023-03-05 23:48:25+05:30  Cprogrammer
  * check for dup2 error
  *
