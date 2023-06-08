@@ -79,12 +79,6 @@ fixperms()
   fi
 }
 
-ID=`id -u`
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" >&2
-  exit 1
-fi
-
 upgrade=0
 case "$1" in
     configure)
@@ -129,6 +123,26 @@ if [ -f ${qsysconfdir}/daemontools.perms ] ; then
 	if [ ! -s ${qsysconfdir}/daemontools-stat.override ] ; then
 		/bin/rm -f ${qsysconfdir}/daemontools-stat.override
 	fi
+fi
+
+if [ -d /run ] ; then
+	rundir=/run
+elif [ -d /var/run ] ; then
+	rundir=/var/run
+else
+	rundir=""
+fi
+if [ -d ${prefix}/lib/tmpfiles.d -a -n "${rundir}" ] ; then
+  if [ ! -f ${prefix}/lib/tmpfiles.d/svscan.conf ] ; then
+    echo "d ${rundir}/svscan 0755 root root" > ${prefix}/lib/tmpfiles.d/svscan.conf
+  else
+    set +e
+    echo "d {rundir}/svscan 0755 root root" | cmp -s ${prefix}/lib/tmpfiles.d/svscan.conf 2>/dev/null
+    if [ $? -ne 0 ] ; then
+      echo "d ${rundir}/svscan 0755 root root" > ${prefix}/lib/tmpfiles.d/svscan.conf
+    fi
+    set -e
+  fi
 fi
 
 if [ $upgrade -eq 1 ] ; then # upgrade

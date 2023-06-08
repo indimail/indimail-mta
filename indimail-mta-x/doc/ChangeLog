@@ -26,6 +26,9 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
 11. dknewkey: allow non-root user to execute dknewkey
 12. indimail-mta.spec, debian/indimail-mta.postinst, create_services: create
     defaultqueue parameters without DKIM signing
+- 08/06/2023
+13. svctool:updated for pwdlookup, inlookup changes for using /run, /var/run
+14. svctool: fixes for clamd service
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

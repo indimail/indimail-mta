@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.36 2023-05-31 22:25:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.37 2023-06-08 22:22:43+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -68,6 +68,7 @@ Provides: group(nofiles)    > 999
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
 %endif
+Requires: filesystem
 
 BuildRequires: gcc gcc-c++ make
 BuildRequires: sed findutils diffutils gzip coreutils grep
@@ -210,6 +211,22 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}
 %ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}/*
 %ghost      %attr(-,qmaill,nofiles)      %{logdir}/*/*
+%ghost      %attr(0644,root,root)        %{_prefix}/lib/tmpfiles.d/svscan.conf
+%ghost %dir %attr(0755,root,root)        %{_rundir}/svscan
+%ghost %dir %attr(0755,root,root)        %{_rundir}/svscan/*
+%ghost %dir %attr(0700,-,-)              %{_rundir}/svscan/*/supervise
+%ghost      %attr(-,-,-)                 %{_rundir}/svscan/*/supervise/control
+%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/supervise/lock
+%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/supervise/ok
+%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/supervise/up
+%ghost      %attr(0644,root,root)        %{_rundir}/svscan/*/supervise/status
+%ghost %dir %attr(0755,root,root)        %{_rundir}/svscan/*/log
+%ghost %dir %attr(0700,root,root)        %{_rundir}/svscan/*/log/supervise
+%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/control
+%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/lock
+%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/ok
+%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/up
+%ghost      %attr(0644,root,root)        %{_rundir}/svscan/*/log/supervise/status
 %endif
 
 %dir %attr(0755,root,root)               %{libexecdir}
@@ -309,11 +326,6 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 ### SCRIPTLET ###############################################################################
 %pretrans
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -f %{_prefix}/sbin/initsvc ] ; then
   %{_prefix}/sbin/initsvc -status
 fi
@@ -367,17 +379,22 @@ fi
 ### SCRIPTLET ###############################################################################
 %post
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
 if [ ! -d %{logdir} ] ; then
   echo "Creating %{logdir}"
   %{__mkdir_p} %{logdir}
+fi
+if [ -d %{_prefix}/lib/tmpfiles.d -a -n "%{_rundir}" ] ; then
+  if [ ! -f %{_prefix}/lib/tmpfiles.d/svscan.conf ] ; then
+    echo "d %{_rundir}/svscan 0755 root root" > %{_prefix}/lib/tmpfiles.d/svscan.conf
+  else
+    echo "d %{_rundir}/svscan 0755 root root" | cmp -s %{_prefix}/lib/tmpfiles.d/svscan.conf 2>/dev/null
+    if [ $? -ne 0 ] ; then
+      echo "d %{_rundir}/svscan 0755 root root" > %{_prefix}/lib/tmpfiles.d/svscan.conf
+    fi
+  fi
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
@@ -482,11 +499,6 @@ fi
 ### SCRIPTLET ###############################################################################
 %preun
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 (
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -554,11 +566,6 @@ echo "removing svscan startup"
 ### SCRIPTLET ###############################################################################
 %postun
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi

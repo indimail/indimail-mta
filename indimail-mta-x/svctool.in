@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.688 2023-05-31 12:06:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.689 2023-06-08 22:20:19+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.688 2023-05-31 12:06:41+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.689 2023-06-08 22:20:19+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -532,7 +532,7 @@ Known values for OPTION are:
   proxy          - Install as a proxy and connect to actual imap on destport
   legacyserver   - To be set if destination IMAP server is not Indimail's IMAP server
   fifo_path      - Install fifo specified by this path
-                   (e.g. @qmaildir@/inquery/infifo)
+                   (e.g. /run/indimail/inlookup/infifo)
   postmaster     - name of the user who will be the contact for Certificates.
   common_name    - Common Name (CN) for server
   query-cache    - Enable caching of queries
@@ -589,7 +589,7 @@ Known values for OPTION are:
 
   Installs a new Fifo Server
   fifo_path      - Install fifo specified by this path
-                   (e.g. @qmaildir@/inquery/infifo)
+                   (e.g. /run/indimail/inlookup/infifo)
   N              - No of parallel inlookup threads to spawn
   A              - Max days for which a user has been active
   service_path   - Path where supervise service will be installed
@@ -1515,7 +1515,7 @@ for i in $LOGDIRS; do
     OK=0
   elif [ "`ls -ld $i|awk '{print $3}'`" != "qmaill" ]; then
     echo "! $i has wrong owner, should be qmaill" 1>&2
-    echo "...try: chown qmaill $i" 1>&2
+    echo "...try: $chown qmaill $i" 1>&2
     OK=0
   elif [ "$perm" != "drwxr-xr-x" -a "$perm" != "drwxr-sr-x" ]; then
     echo "! $i has wrong mode, should be 755" 1>&2
@@ -1754,14 +1754,6 @@ if [ ! -d "$DESTDIR"$QmailHOME/domains ] ; then
 	fi
 	$chown root:qmail "$DESTDIR"$QmailHOME/domains
 	/bin/chmod 775 "$DESTDIR"$QmailHOME/domains
-fi
-if [ ! -d "$DESTDIR"$QmailHOME/inquery ] ; then
-	/bin/mkdir -p "$DESTDIR"$QmailHOME/inquery
-	if [ $? -ne 0 ] ; then
-		return 1
-	fi
-	$chown indimail:qmail "$DESTDIR"$QmailHOME/inquery
-	/bin/chmod 770 "$DESTDIR"$QmailHOME/inquery
 fi
 }
 
@@ -2408,15 +2400,13 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 dump_run_header
 echo "exec 2>&1"
 echo "LOGFILTER=\`/bin/cat variables/LOGFILTER\`"
-echo "FIFODIR=\`dirname \$LOGFILTER\`"
-echo "if [ ! -d \$FIFODIR ] ; then"
-echo "    mkdir -p \$FIFODIR"
-echo "    chown indimail:indimail \$FIFODIR"
-echo "    /bin/chmod 775 \$FIFODIR"
+echo "LOGFIFODIR=\`dirname \$LOGFILTER\`"
+echo "if [ ! -d \$LOGFIFODIR ] ; then"
+echo "  mkdir -p \$LOGFIFODIR"
 echo "fi"
 echo "if [ ! -p \$LOGFILTER ] ; then"
-echo "    /bin/rm -f \$LOGFILTER"
-echo "    /usr/bin/mkfifo -m 666 \$LOGFILTER"
+echo "  /bin/rm -f \$LOGFILTER"
+echo "  /usr/bin/mkfifo -m 666 \$LOGFILTER"
 echo "fi"
 echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
 echo "$QmailBinPrefix/bin/qmail-cat \$LOGFILTER"
@@ -2482,11 +2472,18 @@ link_with_global $conf_dir
 if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/down
 fi
+if [ -d /run ] ; then
+	rundir=/run/indimail
+elif [ -d /var/run ] ; then
+	rundir=/var/run/indimail
+else
+	rundir=/tmp/indimail
+fi
 if [ -n "$infifo" ] ; then
 	fifo_name=`basename $infifo`
-	fifo_dir=`dirname $infifo`
-	if [ $fifo_dir = "." ] ; then
-		fifo_dir=$QmailHOME/inquery
+	infifo_dir=`dirname $infifo`
+	if [ $infifo_dir = "." ] ; then
+		infifo_dir=$rundir/inlookup
 	fi
 fi
 if [ " $ipaddress" = " " ] ; then
@@ -2501,8 +2498,8 @@ else
 	echo $CONCURRENCYINCOMING > $conf_dir/MAXDAEMONS
 fi
 if [ -n "$infifo" ] ; then
-echo $fifo_name > $conf_dir/INFIFO
-echo $fifo_dir > $conf_dir/FIFODIR
+	echo $fifo_name  > $conf_dir/INFIFO
+	echo $infifo_dir > $conf_dir/INFIFODIR
 fi
 
 if [ " $enable_smtp_plugin" = " " ] ; then
@@ -3065,7 +3062,7 @@ else
 	> $conf_dir/LOGFILTER
 fi
 chmod 644 $conf_dir/*
-chown -R indimail:qmail $conf_dir
+$chown -R indimail:qmail $conf_dir
 }
 
 create_qmtp_or_qmqp()
@@ -3626,6 +3623,13 @@ $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
 link_with_global $conf_dir
 
+if [ -d /run ] ; then
+	fifo_tmpdir="/run/indimail/inquery"
+elif [ -d /var/run ] ; then
+	fifo_tmpdir="/var/run/indimail/inquery"
+else
+	fifo_tmpdir="/tmp/indimail/inquery"
+fi
 if [ $run_file_only -ne 1 ] ; then
 	if [ " $imap_ssl" = " 1" ] ; then
 		# /service/[qmail|proxy]-[pop3d|imapd]-ssl.nnn/variables
@@ -3638,7 +3642,7 @@ if [ $run_file_only -ne 1 ] ; then
 		# this will have all variables of "$cdb_f"_config_ssl also
 		create_"$cdb_f"_config $COURIER_PORT $infifo > $conf_dir/.courier_variables
 	fi
-	echo "/tmp/inquery" > $conf_dir/FIFOTMPDIR
+	echo $fifo_tmpdir > $conf_dir/FIFOTMPDIR
 	echo "0660" > $conf_dir/FIFO_MODE
 	if [ ! " $memory" = " " ] ; then
 		echo $memory > $conf_dir/SOFT_MEM
@@ -3669,9 +3673,11 @@ echo "prefix=$QmailBinPrefix"
 echo "bindir=\${prefix}/bin"
 echo "libexecdir=${libexecdir}"
 echo ""
-echo "mkdir -p /tmp/inquery"
-echo "chmod 2770 /tmp/inquery"
-echo "chown qmaild:indimail /tmp/inquery"
+echo "if [ ! -d $fifo_tmpdir ] ; then"
+echo "  mkdir -p $fifo_tmpdir"
+echo "  chmod 2770 $fifo_tmpdir"
+echo "  $chown qmaild:indimail $fifo_tmpdir"
+echo "fi"
 echo "exec 2>&1"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "IMAPAUTHMODULES=\\\"\\\""
@@ -3766,13 +3772,20 @@ if [ " $IMAP_PORT" = " " ] ; then
 else
 	echo "PORT=$IMAP_PORT"
 fi
+if [ -d /run ] ; then
+	rundir=/run/indimail
+elif [ -d /var/run ] ; then
+	rundir=/var/run/indimail
+else
+	rundir=/tmp/indimail
+fi
 fifo_name=`basename $2`
-fifo_dir=`dirname $2`
-if [ $fifo_dir = "." ] ; then
-	fifo_dir=$QmailHOME/inquery
+infifo_dir=`dirname $2`
+if [ $infifo_dir = "." ] ; then
+	infifo_dir=$rundir/inlookup
 fi
 echo "INFIFO=$fifo_name"
-echo "FIFODIR=$fifo_dir"
+echo "INFIFODIR=$infifo_dir"
 
 if [ " $ipaddress" = " " ] ; then
 	echo "LOCALIP=0"
@@ -3992,13 +4005,20 @@ if [ " $POP3_PORT" = " " ] ; then
 else
 	echo "PORT=$POP3_PORT"
 fi
+if [ -d /run ] ; then
+	rundir=/run/indimail
+elif [ -d /var/run ] ; then
+	rundir=/var/run/indimail
+else
+	rundir=/tmp/indimail
+fi
 fifo_name=`basename $2`
-fifo_dir=`dirname $2`
-if [ $fifo_dir = "." ] ; then
-	fifo_dir=$QmailHOME/inquery
+infifo_dir=`dirname $2`
+if [ $infifo_dir = "." ] ; then
+	infifo_dir=$rundir/inlookup
 fi
 echo "INFIFO=$fifo_name"
-echo "FIFODIR=$fifo_dir"
+echo "INFIFODIR=$infifo_dir"
 
 if [ " $ipaddress" = " " ] ; then
 	echo "LOCALIP=0"
@@ -4353,54 +4373,53 @@ dump_run_header
 echo "exec 2>&1"
 echo "CLAMD_SOCK=\`grep -w ^LocalSocket $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$CLAMD_SOCK\" ] ; then"
-echo "	echo \"LocalSocket not defined in $mysysconfdir/scan.conf\" 1>&2"
-echo "	sleep 10"
-echo "	exit 1"
+echo "  echo \"LocalSocket not defined in $mysysconfdir/scan.conf\" 1>&2"
+echo "  sleep 60"
+echo "  exit 1"
 echo "fi"
 echo "SOCKET_DIR=\`dirname \$CLAMD_SOCK\`"
 echo "if [ ! -d \"\$SOCKET_DIR\" ] ; then"
-echo "	/bin/mkdir -p \"\$SOCKET_DIR\""
+echo "  /bin/mkdir -p \"\$SOCKET_DIR\""
 echo "fi"
-echo "if [ ! \"\$SOCKET_DIR\" = \"/tmp\" -a ! \"\$SOCKET_DIR\" = \"/\" ] ; then"
-echo "  $chown qscand:qmail \"\$SOCKET_DIR\""
-echo "  /bin/chmod 750 \"\$SOCKET_DIR\""
-echo "fi"
+echo "$chown qscand:qmail \"\$SOCKET_DIR\""
+echo "/bin/chmod 750 \"\$SOCKET_DIR\""
 echo ""
 echo "# Check for a leftover socket."
 echo "if [ -e \$CLAMD_SOCK ] ; then"
-echo "	echo \"run: WARNING: file \$CLAMD_SOCK exists\""
-echo "	SCAN_FILE=\$0"
-echo "	if $clamdPrefix/bin/clamdscan \$SCAN_FILE --quiet --no-summary"
-echo "	then"
-echo "		echo \"run: FATAL: clamd is already running. quitting...\""
-echo "		sleep 300"
-echo "	else"
-echo "		echo \"run: INFO: clamd is not running. Deleting \$CLAMD_SOCK\""
-echo "		/bin/rm -f \$CLAMD_SOCK"
-echo "	fi"
+echo "  echo \"run: WARNING: file \$CLAMD_SOCK exists\""
+echo "  SCAN_FILE=\$0"
+echo "  if $clamdPrefix/bin/clamdscan \$SCAN_FILE --quiet --no-summary"
+echo "    then"
+echo "    echo \"run: FATAL: clamd is already running. quitting...\""
+echo "    sleep 300"
+echo "    exit 1"
+echo "  else"
+echo "    echo \"run: INFO: clamd is not running. Deleting \$CLAMD_SOCK\""
+echo "    /bin/rm -f \$CLAMD_SOCK"
+echo "  fi"
 echo "fi"
 echo ""
 echo "dbd=\`grep -w \"^DatabaseDirectory\" $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$dbd\" ] ; then"
-echo "	echo \"DatabaseDirectory not defined in $mysysconfdir/scan.conf\" 1>&2"
-echo "	sleep 10"
-echo "	exit 1"
+echo "  echo \"DatabaseDirectory not defined in $mysysconfdir/scan.conf\" 1>&2"
+echo "  sleep 10"
+echo "  exit 1"
 echo "fi"
 echo "if [ ! -f \$dbd/main.cvd -a ! -f \$dbd/main.cld ] ; then"
-echo "	echo \"run: FATAL: no signatures found...\""
-echo "	sleep 300"
-echo "	exit 1"
+echo "  echo \"run: FATAL: no signatures found...\""
+echo "  sleep 300"
+echo "  exit 1"
 echo "fi"
 echo "fgd=\`grep -w \"^Foreground\" $mysysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$fgd\" ] ; then"
-echo "	echo \"Foreground not defined in $mysysconfdir/scan.conf\" 1>&2"
-echo "	sleep 10"
-echo "	exit 1"
+echo "  echo \"Foreground not defined in $mysysconfdir/scan.conf\" 1>&2"
+echo "  sleep 10"
+echo "  exit 1"
 echo "fi"
 echo ""
 echo "# Run the scanner daemon."
 echo "exec $clamdPrefix/sbin/clamd \\"
-echo "	--config-file=$mysysconfdir/scan.conf"
+echo "  --config-file=$mysysconfdir/scan.conf"
 ) > "$DESTDIR"$SERVICEDIR/clamd/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/clamd/run
 
@@ -4554,21 +4573,25 @@ link_with_global $conf_dir
 if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/pwdlookup/down
 fi
+if [ -d /run ] ; then
+	rundir="/run/indimail/pwdlookup"
+elif [ -d /var/run ] ; then
+	rundir="/var/run/indimail/pwdlookup"
+else
+	rundir="/tmp/pwdlookup"
+fi
+echo "$rundir/nssd.sock" > $conf_dir/NSSD_SOCKET
 (
 dump_run_header
-echo "if [ -d /run ] ; then"
-echo "  mkdir -p /run/indimail"
-echo "  chown indimail:indimail /run/indimail"
-echo "  chmod 775 /run/indimail"
-echo "elif [ -d /var/run ] ; then"
-echo "  mkdir -p /var/run/indimail"
-echo "  chown indimail:indimail /var/run/indimail"
-echo "  chmod 775 /var/run/indimail"
+echo "if [ ! -d $rundir ] ; then"
+echo "  mkdir -p $rundir"
+echo "  $chown root:indimail $rundir"
+echo "  chmod 775 $rundir"
 echo "fi"
 echo "exec 2>&1"
 echo ""
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables \\"
-echo "$QmailBinPrefix/bin/setuidgid indimail $QmailBinPrefix/sbin/nssd -d notice"
+echo "$QmailBinPrefix/bin/setuidgid -g qmail indimail $QmailBinPrefix/sbin/nssd -d notice"
 ) > "$DESTDIR"$SERVICEDIR/pwdlookup/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/pwdlookup/run
 (
@@ -4581,7 +4604,7 @@ else
 	touch "$DESTDIR"$SERVICEDIR/pwdlookup/down
 fi
 
-for i in "$DESTDIR"$SERVICEDIR/qmail-send.* "$DESTDIR"$SERVICEDIR/slowq-send.*
+for i in "$DESTDIR"$SERVICEDIR/qmail-send.* "$DESTDIR"$SERVICEDIR/slowq-send
 do
 	if [ -d "$DESTDIR"$SERVICEDIR/mysql.3306 ] ; then
 		if [ ! -f "$i"/wait ] ; then
@@ -4614,6 +4637,8 @@ else
 	if [ $? -eq 0 ] ; then
 		conf_file=$DESTDIR"$sysconfdir/nssd.conf"
 		change_config $conf_file $TMPDIR/config.cnf.$$
+		/bin/chmod 640 $conf_file
+		$chown root:qmail $conf_file
 	fi
 fi
 }
@@ -4682,11 +4707,11 @@ else
 	fi
 fi
 if [ -d /run ] ; then
-echo "pidfile     /run/indimail/nssd.pid"
+echo "pidfile     /run/indimail/pwdlookup/nssd.pid"
 elif [ -d /var/run ] ; then
-echo "pidfile     /var/run/indimail/nssd.pid"
+echo "pidfile     /var/run/indimail/pwdlookup/nssd.pid"
 else
-echo "pidfile     /tmp/indimail/nssd.pid"
+echo "pidfile     /tmp/indimail/pwdlookup/nssd.pid"
 fi
 echo "threads     $THREAD_COUNT"
 echo "timeout     $LISTEN_TIMEOUT"
@@ -4704,10 +4729,18 @@ INFIFO_PATH=$1
 THREAD_COUNT=$2
 activeDays=$3
 SERVICEDIR=$4
+if [ -d /run ] ; then
+	rundir=/run/indimail
+elif [ -d /var/run ] ; then
+	rundir=/var/run/indimail
+else
+	rundir=/tmp/indimail
+fi
+fifo_tmpdir="$rundir/inquery"
 fifo_name=`basename $INFIFO_PATH`
-fifo_dir=`dirname $INFIFO_PATH`
-if [ $fifo_dir = "." ] ; then
-	fifo_dir=$QmailHOME/inquery
+infifo_dir=`dirname $INFIFO_PATH`
+if [ $infifo_dir = "." ] ; then
+	infifo_dir=$rundir/inlookup
 fi
 
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/variables ] ; then
@@ -4728,8 +4761,8 @@ if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/inlookup.$fifo_name/down
 fi
 
-echo "$fifo_name" > $conf_dir/INFIFO
-echo "$fifo_dir" > $conf_dir/FIFODIR
+echo "$fifo_name"  > $conf_dir/INFIFO
+echo "$infifo_dir" > $conf_dir/INFIFODIR
 echo $THREAD_COUNT > $conf_dir/THREAD_COUNT
 echo "0660" > $conf_dir/FIFO_MODE
 if [ " $activeDays"  = " " ] ; then
@@ -4775,33 +4808,24 @@ echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
 dump_run_header
 echo "exec 2>&1"
 echo ""
-case $host in
-	*-*-darwin*)
-	echo "home=\$(dscl . -read /Users/indimail|grep NFS|awk '{print \$2}')"
-	;;
-	*)
-	echo "home=\$(getent passwd indimail|awk -F: '{print \$6}')"
-	;;
-esac
-echo "if [ -z \"\$home\" ] ; then"
-echo "  echo \"unable to get homedir for indimail\" 1>&2"
-echo "  exit 1"
+echo "if [ ! -d $infifo_dir ] ; then"
+echo "  /bin/mkdir -p $infifo_dir"
+echo "  $chown indimail:qmail $infifo_dir"
+echo "  chmod 770 $infifo_dir"
 echo "fi"
-echo "if [ ! -d \$home/inquery ] ; then"
-echo "  /bin/mkdir \$home/inquery"
-echo "  $chown indimail:qmail \$home/inquery"
+echo "if [ ! -d $fifo_tmpdir ] ; then"
+echo "  /bin/mkdir -p $fifo_tmpdir"
+echo "  chmod 2770 $fifo_tmpdir"
+echo "  $chown qmaild:indimail $fifo_tmpdir"
 echo "fi"
-echo "/bin/mkdir -p /tmp/inquery"
-echo "$chown indimail:qmail /tmp/inquery"
-echo "chmod 770 /tmp/inquery"
 echo "if [ -f variables/THREAD_COUNT ] ; then"
 echo "  count=\$(cat variables/THREAD_COUNT)"
 echo "else"
 echo "  count=5"
 echo "fi"
 echo "echo \"initializing fifo count=\$count ...\""
-echo "/bin/rm -f \$home/inquery/infifo.*"
-echo "for i in \$(seq 1 \$count); do f=\$home/inquery/infifo.\$i; mkfifo \$f && /bin/chmod 660 \$f && $chown qmaild:indimail \$f; done"
+echo "/bin/rm -f $infifo_dir/infifo.*"
+echo "for i in \$(seq 1 \$count); do f=$infifo_dir/infifo.\$i; mkfifo \$f && /bin/chmod 660 \$f && $chown qmaild:indimail \$f; done"
 echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "exec $QmailBinPrefix/bin/setuidgid -g qmail,indimail,qcerts qmaild $QmailBinPrefix/sbin/inlookup \\"
 echo "  -v -i \\\$THREAD_COUNT -c \\\$CACHE_COUNT\""
@@ -5179,7 +5203,7 @@ echo ""
 chmod +x "$DESTDIR"$databasedir/.create_db
 $chown mysql:mysql "$DESTDIR"$databasedir
 $chown -R mysql:mysql "$DESTDIR"$databasedir/logs
-find "$DESTDIR"$databasedir/data -not -name '*'.pem -exec chown mysql:mysql {} \;
+find "$DESTDIR"$databasedir/data -not -name '*'.pem -exec $chown mysql:mysql {} \;
 if [ -x $mysqlPrefix/bin/mysql_ssl_rsa_setup ] ; then
 	if [ ! -f "$DESTDIR"$databasedir/data/ca.pem ] ; then
 		echo "Creating MySQL SSL/TLS Certificates" 1>&2
@@ -5250,7 +5274,7 @@ else
 fi
 $chown mysql:mysql "$DESTDIR"$databasedir
 $chown -R mysql:mysql "$DESTDIR"$databasedir/logs
-find "$DESTDIR"$databasedir/data -not -name '*'.pem -exec chown mysql:mysql {} \;
+find "$DESTDIR"$databasedir/data -not -name '*'.pem -exec $chown mysql:mysql {} \;
 #
 # Pretty Dumb stuff in packing MySQL on openSUSE, creating /usr/my.cnf.
 #
@@ -5322,7 +5346,7 @@ kill $pid
 wait_for_mysqld 1
 $chown mysql:mysql "$DESTDIR"$databasedir
 $chown -R mysql:mysql "$DESTDIR"$databasedir/logs
-find "$DESTDIR"$databasedir/data -not -name '*'.pem -exec chown mysql:mysql {} \;
+find "$DESTDIR"$databasedir/data -not -name '*'.pem -exec $chown mysql:mysql {} \;
 }
 
 check_mysqld_variable()
@@ -11525,6 +11549,17 @@ case $option in
 				exit 1
 			fi
 		fi
+		if [ -d /etc/tmpfiles.d ] ; then
+			if [ -d /run ] ; then
+				echo "d /run/clamd.scan 0770 qscand qmail" > $TMPDIR/config.cnf.$$
+			elif [ -d /var/run ] ; then
+				echo "d /var/run/clamd.scan 0770 qscand qmail" > $TMPDIR/config.cnf.$$
+			fi
+			if [ -s $TMPDIR/config.cnf.$$ ] ; then
+				conf_file="/etc/tmpfiles.d/clamd.scan.conf"
+				change_config $conf_file $TMPDIR/config.cnf.$$
+			fi
+		fi
 		if [ -f /usr/bin/freshclam ] ; then
 			conf_file=$sysconfdir/freshclam.conf
 		else
@@ -11553,7 +11588,7 @@ case $option in
 			fi
 			if [ -s $TMPDIR/config.cnf.$$ ] ; then
 				/bin/rm -f $conf_file
-				change_config $conf_file $TMPDIR/config.cnf.$$
+				change_config $conf_file $TMPDIR/config.cnf.$$ >/dev/null
 				/bin/rm -f /etc/freshclam.conf.rpmnew
 			else
 				echo "error generating $conf_file" 1>&1
