@@ -27,18 +27,16 @@ rm=/bin/rm
 mv=/bin/mv
 nocourierimap=0
 
-ID=`id -u`
-if [ $ID -ne 0 ] ; then
-	echo "You are not root" >&2
-	exit 1
-fi
+log_it() {
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
 
 case "$1" in
     remove|upgrade|deconfigure)
 	(
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
-		echo "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/qupgrade.sh prerm $1 @version@ $* || true
+		log_it "Running Custom Upgrade Script for pre $1"
+		/bin/sh ${libexecdir}/qupgrade.sh prerm $1 @version@ $* | tai64n | tai64nlocal
 	fi
 	if [ -d /run ] ; then
 		rundir=/run
@@ -48,7 +46,7 @@ case "$1" in
 		rundir=${servicedir}
 	fi
 	set +e
-	echo "shutting down indimail services"
+	log_it "shutting down indimail services"
 	for i in greylist.1999 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 		qmail-smtpd.465 qmail-smtpd.587 qmail-daned.1998 \
@@ -86,16 +84,16 @@ fi
 
 (
 if [ -s ${qsysconfdir}/indimail-mta-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-	echo "reverting permissions"
+	log_it "reverting permissions"
 	/bin/cat ${qsysconfdir}/indimail-mta-stat.override | while read line
 	do
 		if [ -f $line ] ; then
-			echo "reverting permission for $line"
+			log_it "reverting permission for $line"
 			/usr/sbin/dpkg-statoverride --remove $line || true
 		fi
 	done
 fi
-echo "removing indimail-mta as an alternative"
+log_it "removing indimail-mta as an alternative"
 $prefix/sbin/svctool --config=remove-alt
 
 if [ $nocourierimap -eq 0 ] ; then

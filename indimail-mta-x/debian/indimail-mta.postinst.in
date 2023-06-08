@@ -38,6 +38,10 @@ notlsarr=0
 tcpserver_plugin=1
 dkimkeyfn=default
 
+log_it() {
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
+
 setperm()
 {
 	local user="$1"; shift
@@ -88,12 +92,6 @@ fixperms()
 	fi
 }
 
-ID=`id -u`
-if [ $ID -ne 0 ] ; then
-	echo "You are not root" >&2
-	exit 1
-fi
-
 upgrade=0
 case "$1" in
 	configure)
@@ -125,8 +123,8 @@ esac
 if [ $upgrade -eq 1 ] ; then # upgrade
 	(
 	if [ -f ${libexecdir}/qupgrade ] ; then
-		echo "Running Custom Upgrade Script for post upgrade"
-		/bin/sh ${libexecdir}/qupgrade post upgrade @version@ $* || true
+		log_it "Running Custom Upgrade Script for post upgrade"
+		/bin/sh ${libexecdir}/qupgrade post upgrade @version@ $* | tai64n | tai64nlocal
 	fi
 	) >> /var/log/indimail-mta-setup.log 2>&1
 fi
@@ -169,7 +167,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 		fi
 	done
 	svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
-	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list"
+	${prefix}/sbin/svctool --servicedir=${servicedir} --refreshsvc="$svc_list" | tai64n | tai64nlocal
 
 	set +e
 	if [ -d /run ] ; then
@@ -179,7 +177,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 	else
 		rundir=${servicedir}
 	fi
-	echo "starting indimail-mta services"
+	log_it "starting indimail-mta services"
 	for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
 		qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
@@ -202,7 +200,7 @@ fi
 if [ ! "${prefix}" = "/usr" ] ; then
 	# Recreate ld.so links and cache
 	if [ -d ${sysconfdir}/ld.so.conf.d ] ; then
-	echo "recreating ld.so cache"
+	log_it "recreating ld.so cache"
 	(
 		if [ -d /usr/lib64 ] ; then
 			echo /usr/lib64
@@ -216,7 +214,7 @@ else
 	/sbin/ldconfig
 fi
 
-echo "Doing Post Install"
+log_it "Doing Post Install"
 echo ""
 echo " 1. Configure ${logdir} for multilog"
 echo " 2. Configure ${servicedir}"
@@ -238,15 +236,16 @@ echo "17. Configure indimail-mta startup"
 echo ""
 
 (
-echo "Creating ${logdir}"
+log_it "Creating ${logdir}"
 if [ ! -d ${logdir} ] ; then
 	/bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
 
 # Misc/Configuration
-echo "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
-${prefix}/sbin/svctool --config=qmail --fsync --syncdir  --postmaster=${qmaildir}/alias/Maildir/
+log_it "Creating default qmail configuraton and catch-all alias (${qmaildir}/alias/Maildir) for all system users"
+${prefix}/sbin/svctool --config=qmail --fsync --syncdir \
+	--postmaster=${qmaildir}/alias/Maildir/ | tai64n | tai64nlocal
 
 if [ $nodksignature -eq 0 ] ; then
 	if [ -x ${prefix}/bin/dknewkey ] ; then
@@ -277,7 +276,7 @@ else
 	send_soft_mem=83886080
 fi
 
-echo "Checking if clamav is installed"
+log_it "Checking if clamav is installed"
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
 	have_clamav=1
 	clamdPrefix="/usr"
@@ -333,7 +332,7 @@ do
 		--dmasquerade --infifo=infifo \
 		--dkverify=${ver_opt} \
 		--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/$dkimkeyfn \
-		$extra_opt
+		$extra_opt | tai64n | tai64nlocal
 done
 
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
@@ -345,7 +344,7 @@ eval ${prefix}/sbin/svctool --queueParam=defaultqueue \
 	--qbase=${qbase} --qcount=${qcount} --qstart=1 \
 	--min-free=52428800 --virus-filter \
 	--dkverify="none" --dksign="none" \
-	$extra_opt
+	$extra_opt | tai64n | tai64nlocal
 
 # slowq service
 eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} \
@@ -353,17 +352,17 @@ eval ${prefix}/sbin/svctool --slowq --servicedir=${servicedir} --qbase=${qbase} 
     --dmemory=${send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
 	--dksign=${sign_opt} --private_key=${qsysconfdir}/control/domainkeys/%/${dkimkeyfn} \
 	--remote-authsmtp=login --localfilter --remotefilter \
-	--deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
+	--deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8 | tai64n | tai64nlocal
 
 #odmr
 ${prefix}/sbin/svctool --smtp=366 --odmr --servicedir=${servicedir} \
 	--infifo="" --forceauthsmtp --starttls --query-cache --password-cache --skipsend \
-	--memory=$smtp_soft_mem
+	--memory=$smtp_soft_mem | tai64n | tai64nlocal
 
 # Greylist daemon
 ${prefix}/sbin/svctool --greylist=1999 --servicedir=${servicedir} --min-resend-min=2 \
 	--resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-	--hash-size=65535 --save-interval=5 --whitelist=greylist.white
+	--hash-size=65535 --save-interval=5 --whitelist=greylist.white | tai64n | tai64nlocal
 
 if [ ${notlsarr} -eq 0 ] ; then
 	# qmail-daned tlsa daemon
@@ -371,7 +370,7 @@ if [ ${notlsarr} -eq 0 ] ; then
 	(test $? -ne 100 && ${prefix}/sbin/svctool \
 		--tlsa=1998 --servicedir=${servicedir} \
 		--timeout-days=30 --context-file=tlsa.context \
-		--hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) || \
+		--hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) | tai64n | tai64nlocal || \
 	echo "Not enabling qmail-daned service" 1>&2
 fi
 
@@ -379,40 +378,40 @@ fi
 ${prefix}/sbin/svctool --qmtp=209 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
-	--memory=$qmtp_soft_mem --min-free=52428800
+	--memory=$qmtp_soft_mem --min-free=52428800 | tai64n | tai64nlocal
 
 # qmail-qmqpd service
 ${prefix}/sbin/svctool --qmqp=628 --servicedir=${servicedir} --qbase=${qbase} \
 	--qcount=${qcount} --qstart=1 --cntrldir=control --localip=0 \
 	--maxdaemons=75 --maxperip=25 \
-	--memory=$qmqp_soft_mem --min-free=52428800
+	--memory=$qmqp_soft_mem --min-free=52428800 | tai64n | tai64nlocal
 /bin/touch ${servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
-${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200
+${prefix}/sbin/svctool --qscanq --servicedir=${servicedir} --scanint=200 | tai64n | tai64nlocal
 if [ $have_clamav -eq 1 ] ; then
-	${prefix}/sbin/svctool --config=clamd
-	${prefix}/sbin/svctool --config=foxhole
+	${prefix}/sbin/svctool --config=clamd | tai64n | tai64nlocal
+	${prefix}/sbin/svctool --config=foxhole | tai64n | tai64nlocal
 	# create clamd, freshclam service
 	${prefix}/sbin/svctool --clamd --servicedir=${servicedir} --clamdPrefix=$clamdPrefix \
-		--sysconfdir=$mysysconfdir
+		--sysconfdir=$mysysconfdir | tai64n | tai64nlocal
 	if [ $have_clamav -eq 1 ] ; then
-		echo "Checking if clamd/freshclam is running"
+		log_it "Checking if clamd/freshclam is running"
 		count=`ps -e|grep clamd|wc -l`
 		if [ $count -gt 0 ] ; then
-			echo "Disabling clamd service"
+			log_it "Disabling clamd service"
 			$TOUCH ${servicedir}/clamd/down
 		fi
 		count=`ps -e|grep freshclam|wc -l`
 		if [ $count -gt 0 ] ; then
-			echo "Disabling freshclam service"
+			log_it "Disabling freshclam service"
 			$TOUCH ${servicedir}/freshclam/down
 		fi
 	fi
 fi
 
 # udplogger service
-${prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=${servicedir}
+${prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=${servicedir} | tai64n | tai64nlocal
 
 /bin/cat <<EOFUU > ${qsysconfdir}/control/signatures
 # Windows executables seen in active virii
@@ -461,7 +460,7 @@ if [ $have_clamav -eq 1 ] ; then
 		) > ${sysconfdir}/apparmor.d/local/usr.bin.freshclam
 		fi
 		if [ $reload -ne 0 ] ; then
-			echo "Reloading apparmor profiles..."
+			log_it "Reloading apparmor profiles..."
 			/usr/sbin/service apparmor reload || true
 		fi
 	fi
@@ -480,7 +479,7 @@ do
 			t2=0
 		fi
 		if [ $t1 -gt $t2 ] ; then
-			echo "Creating CDB $j.cdb"
+			log_it "Creating CDB $j.cdb"
 			${prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
 				&& /bin/chown indimail:indimail $j.cdb
 		fi
@@ -499,13 +498,13 @@ do
 		svc_list="$svc_list ${servicedir}/$i"
 		# save variables
 		${prefix}/sbin/svctool --servicedir=${servicedir} --service-name=$i \
-			--export-variables=${servicedir}/$i/variables/.variables  --force
+			--export-variables=${servicedir}/$i/variables/.variables  --force | tai64n | tai64nlocal
 	fi
 done
 svc_list="$svc_list ${qsysconfdir}/control/defaultqueue"
-${prefix}/sbin/svctool --servicedir=${servicedir} --autorefresh="0 $svc_list"
+${prefix}/sbin/svctool --servicedir=${servicedir} --autorefresh="0 $svc_list" | tai64n | tai64nlocal
 
-echo "compressing man pages"
+log_it "compressing man pages"
 find ${mandir} -type f -exec gzip -q {} \;
 if [ -f ${mandir}/man7/authlib.7.gz ] ; then
 	for i in authshadow.7 authpwd.7 authpam.7 authcustom.7
@@ -517,7 +516,7 @@ fi
 
 #
 if [ /usr/lib/sm.bin/sendmail ] ; then
-	echo "removing sendmail as alternative"
+	log_it "removing sendmail as alternative"
 	if [ -x /usr/sbin/update-alternatives ] ; then
 	/usr/sbin/update-alternatives --remove-all sendmail-mta || true
 	/usr/sbin/update-alternatives --remove-all sendmail-msp || true
@@ -526,12 +525,12 @@ if [ /usr/lib/sm.bin/sendmail ] ; then
 	/usr/bin/update-alternatives --remove-all sendmail-msp || true
 	fi
 fi
-${prefix}/sbin/svctool --disable-service sendmail exim4 postfix
-echo "adding indimail-mta as an alternative"
-${prefix}/sbin/svctool --config=add-alt
+${prefix}/sbin/svctool --disable-service sendmail exim4 postfix | tai64n | tai64nlocal
+log_it "adding indimail-mta as an alternative"
+${prefix}/sbin/svctool --config=add-alt | tai64n | tai64nlocal
 
 if [ -x ${libexecdir}/instcheck.indimail-mta ] ; then
-	echo "Checking Installed Permissions"
+	log_it "Checking Installed Permissions"
 	${libexecdir}/instcheck.indimail-mta > /dev/null 2>&1
 fi
 
@@ -568,6 +567,6 @@ echo "   Execute the following command to create the certificate"
 echo "   ${prefix}/sbin/svctool --config=cert --postmaster=postmaster@${default_domain} --common_name=${default_domain}"
 fi
 echo
-echo "Look at /var/log/indimail-mta-setup.log for the installation log"
+log_it "Look at /var/log/indimail-mta-setup.log for the installation log"
 
 exit 0

@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.384 2023-05-31 18:58:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.385 2023-06-08 23:18:17+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -166,6 +166,11 @@ Requires: initscripts
 
 Requires: daemontools >= 1.0
 Requires: ucspi-tcp >= 1.0
+
+%define log \
+log_it() { \
+  echo "$(echo  ""|tai64n|tai64nlocal)$*" \
+}
 
 %description
 indimail-mta provides a MTA that is part of the IndiMail
@@ -1078,15 +1083,10 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %pretrans
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 (
-echo "===== Start %{name} installation ====="
-date
+log_it "===== Start %{name} installation ====="
 if [ -d /run ] ; then
   rundir=/run/svscan
 elif [ -d /var/run ] ; then
@@ -1094,7 +1094,7 @@ elif [ -d /var/run ] ; then
 else
   rundir=%{servicedir}
 fi
-echo "shutting down %{name} services"
+log_it "shutting down %{name} services"
 for i in greylist.1999 qmail-daned.1998 qmail-qmqpd.628 \
   qmail-qmtpd.209 qmail-send.25 qmail-smtpd.25 \
   qmail-smtpd.366 qmail-smtpd.465 qmail-smtpd.587 \
@@ -1111,19 +1111,15 @@ do
   fi
 done
 if [ -f %{libexecdir}/qupgrade ] ; then
-  echo "Running Custom Upgrade Script for pretrans"
-  /bin/sh %{libexecdir}/qupgrade pretrans noargs %{version} $*
+  log_it "Running Custom Upgrade Script for pretrans"
+  /bin/sh %{libexecdir}/qupgrade pretrans noargs %{version} $* | tai64n | tai64nlocal
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %pre
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1131,8 +1127,8 @@ fi
 if [ $argv1 -eq 2 ] ; then
   if [ -f %{libexecdir}/qupgrade ] ; then
   (
-    echo "Running Custom Upgrade Script for pre upgrade"
-    /bin/sh %{libexecdir}/qupgrade pre upgrade %{version} $*
+    log_it "Running Custom Upgrade Script for pre upgrade"
+    /bin/sh %{libexecdir}/qupgrade pre upgrade %{version} $* | tai64n | tai64nlocal
   ) >> /var/log/%{name}-setup.log 2>&1
   fi
   exit 0
@@ -1150,7 +1146,7 @@ if [ $nscd_up -ge 1 ] ; then
     /bin/systemctl stop nscd.service >/dev/null 2>&1
   fi
 fi
-echo "Adding indimail-mta users/groups"
+log_it "Adding indimail-mta users/groups"
 /usr/bin/getent group %groupname  > /dev/null || /usr/sbin/groupadd -r -g %gid %groupname || true
 if [ $? = 4 ] ; then
   /usr/sbin/groupadd %groupname
@@ -1188,27 +1184,23 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %post
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
-  echo "doing post upgrade activities"
+  log_it "doing post upgrade activities"
   if [ -f %{libexecdir}/qupgrade ] ; then
     if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
       /sbin/ldconfig
     fi
-    echo "Running Custom Upgrade Script for post upgrade"
-    /bin/sh %{libexecdir}/qupgrade post upgrade %{version} $*
+    log_it "Running Custom Upgrade Script for post upgrade"
+    /bin/sh %{libexecdir}/qupgrade post upgrade %{version} $* | tai64n | tai64nlocal
   fi
   # selinux
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux | tai64n | tai64nlocal
   if [ -f %{_sysconfdir}/inittab ] ; then # one of these days, this will disappear
     /bin/grep "^#SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
@@ -1233,9 +1225,9 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     fi
   done
   svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list"
+  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list" | tai64n | tai64nlocal
 
-  echo "starting indimail-mta services"
+  log_it "starting indimail-mta services"
   if [ -d /run ] ; then
     rundir=/run/svscan
   elif [ -d /var/run ] ; then
@@ -1262,7 +1254,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
   exit 0
 fi
 
-echo "Doing Post Install"
+log_it "Doing Post Install"
 echo ""
 echo " 1. Configure %{logdir} for multilog"
 echo " 2. Configure %{servicedir}"
@@ -1282,13 +1274,14 @@ echo "15. Configure tcprules database for SMTP, QMTP, QMQP"
 echo ""
 
 if [ ! -d %{logdir} ] ; then
-  echo "Creating %{logdir}"
+  log_it "Creating %{logdir}"
   %{__mkdir_p} %{logdir}
 fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
 (
-%{_prefix}/sbin/svctool --config=qmail --fsync --syncdir  --postmaster=%{qmaildir}/alias/Maildir/
+%{_prefix}/sbin/svctool --config=qmail --fsync --syncdir \
+  --postmaster=%{qmaildir}/alias/Maildir/ | tai64n | tai64nlocal
 
 if [ %nodksignatures -eq 0 ] ; then
   if [ -x %{_prefix}/bin/dknewkey ] ; then
@@ -1298,7 +1291,7 @@ if [ %nodksignatures -eq 0 ] ; then
     if [ " $key_bit" = " " ] ; then
       key_bit=1024
     fi
-    %{_prefix}/bin/dknewkey -b $key_bit %{dkimkeyfn}
+    %{_prefix}/bin/dknewkey -b $key_bit %{dkimkeyfn} | tai64n | tai64nlocal
   else
     ver_opt="none"
     sign_opt="none"
@@ -1393,7 +1386,7 @@ do
     --dmasquerade --infifo=infifo \
     --dkverify=${ver_opt} \
     --dksign=${sign_opt} --private_key="%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn}" \
-    $extra_opt
+    $extra_opt | tai64n | tai64nlocal
 done
 
 # queue parameters in control/defaultqueue for qmail-inject, sendmail
@@ -1405,7 +1398,7 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
   --min-free=52428800 --virus-filter \
   --dkverify="none" --dksign="none" \
-  $extra_opt
+  $extra_opt | tai64n | tai64nlocal
 
 # slowq service
 %{_prefix}/sbin/svctool --slowq --servicedir=%{servicedir} --qbase=%{qbase} \
@@ -1413,54 +1406,54 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
   --dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
   --remote-authsmtp=login --localfilter --remotefilter \
-  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8 | tai64n | tai64nlocal
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
   --infifo="" --forceauthsmtp --starttls --query-cache --password-cache --skipsend \
-  --memory=%{smtp_soft_mem}
+  --memory=%{smtp_soft_mem} | tai64n | tai64nlocal
 
 # Greylist daemon
 %{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
-    --hash-size=65535 --save-interval=5 --whitelist=greylist.white
+    --hash-size=65535 --save-interval=5 --whitelist=greylist.white | tai64n | tai64nlocal
 if [ %{notlsarr} -eq 0 ] ; then
   # qmail-daned tlsa daemon
   %{_prefix}/sbin/qmail-daned > /dev/null 2>&1 || \
   (test $? -ne 100 && %{_prefix}/sbin/svctool \
     --tlsa=1998 --servicedir=%{servicedir} \
     --timeout-days=30 --context-file=tlsa.context \
-    --hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) || \
-    echo "Not enabling qmail-daned service" 1>&2
+    --hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) | tai64n | tai64nlocal || \
+    log_it "Not enabling qmail-daned service" 1>&2
 fi
 # qmail-qmtpd service
 eval %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-  --memory=%{qmtp_soft_mem} --min-free=52428800 $extra_opt
+  --memory=%{qmtp_soft_mem} --min-free=52428800 $extra_opt | tai64n | tai64nlocal
 # qmail-qmqpd service
 eval %{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
-  --memory=%{qmqp_soft_mem} --min-free=52428800 $extra_opt
+  --memory=%{qmqp_soft_mem} --min-free=52428800 $extra_opt | tai64n | tai64nlocal
 touch %{servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
-%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200
+%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200 | tai64n | tai64nlocal
 if [ $have_clamav -eq 1 ] ; then
-  %{_prefix}/sbin/svctool --config=clamd
-  %{_prefix}/sbin/svctool --config=foxhole
+  %{_prefix}/sbin/svctool --config=clamd | tai64n | tai64nlocal
+  %{_prefix}/sbin/svctool --config=foxhole | tai64n | tai64nlocal
   # create clamd, freshclam service
   eval %{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
-    --sysconfdir=${mysysconfdir}
+    --sysconfdir=${mysysconfdir} | tai64n | tai64nlocal
   if [ $have_clamav -eq 1 ] ; then
-    echo "Checking if clamd/freshclam is running"
+    log_it "Checking if clamd/freshclam is running"
     count=`ps -e|grep clamd|wc -l`
     if [ $count -gt 0 ] ; then
-      echo "Disabling clamd service"
+      log_it "Disabling clamd service"
       touch %{servicedir}/clamd/down
     fi
     count=`ps -e|grep freshclam|wc -l`
     if [ $count -gt 0 ] ; then
-      echo "Disabling freshclam service"
+      log_it "Disabling freshclam service"
       touch %{servicedir}/freshclam/down
     fi
   fi
@@ -1491,7 +1484,8 @@ EOF
 %{__chown} qscand:qscand %{qsysconfdir}/control/signatures
 
 # udplogger service
-%{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 --servicedir=%{servicedir}
+%{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 \
+  --servicedir=%{servicedir} | tai64n | tai64nlocal
 
 # Recreate ld.so links and cache
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
@@ -1513,7 +1507,7 @@ do
       t2=0
     fi
     if [ $t1 -gt $t2 ] ; then
-      echo "Creating CDB $j.cdb"
+      log_it "Creating CDB $j.cdb"
       %{_prefix}/bin/tcprules $j.cdb $j.tmp < $j && /bin/chmod 664 $j.cdb \
         && chown indimail:indimail $j.cdb
     fi
@@ -1533,25 +1527,25 @@ do
   svc_list="$svc_list %{servicedir}/$i"
   # save variables
   %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
-    --export-variables=%{servicedir}/$i/variables/.variables  --force
+    --export-variables=%{servicedir}/$i/variables/.variables  --force | tai64n | tai64nlocal
 done
 svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list"
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list" | tai64n | tai64nlocal
 
 # selinux
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux
+%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux | tai64n | tai64nlocal
 
-echo "configuring indimail-mta as alternatives"
-%{_prefix}/sbin/svctool --config=add-alt
+log_it "configuring indimail-mta as alternatives"
+%{_prefix}/sbin/svctool --config=add-alt | tai64n | tai64nlocal
 
 if [ -f %{qsysconfdir}/cronlist.q -a -d %{_sysconfdir}/cron.d ] ; then
-  echo "adding cron entries"
+  log_it "adding cron entries"
   %{__cp} %{qsysconfdir}/cronlist.q %{_sysconfdir}/cron.d
 fi
 
 if [ -f %{libexecdir}/qupgrade ] ; then
-  echo "Running Custom Installation Script for post install"
-  /bin/sh %{libexecdir}/qupgrade post install %{version} $*
+  log_it "Running Custom Installation Script for post install"
+  /bin/sh %{libexecdir}/qupgrade post install %{version} $* | tai64n | tai64nlocal
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
 if [ -f %{_sysconfdir}/init/svscan.conf -o -f %{_sysconfdir}/event.d/svscan ] ; then
@@ -1583,16 +1577,12 @@ echo "   Execute the following command to create the certificate"
 echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
 echo
-echo "Look at /var/log/%{name}-setup.log for the installation log"
+log_it "Look at /var/log/%{name}-setup.log for the installation log"
 
 ### SCRIPTLET ###############################################################################
 %preun
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 (
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -1601,19 +1591,19 @@ fi
 if [ $argv1 -eq 1 ] ; then
   (
   if [ -f %{libexecdir}/qupgrade ] ; then
-    echo "Running Custom Un-Installation Script for preun upgrade"
-    /bin/sh %{libexecdir}/qupgrade preun upgrade %{version} "$argv1"
+    log_it "Running Custom Un-Installation Script for preun upgrade"
+    /bin/sh %{libexecdir}/qupgrade preun upgrade %{version} "$argv1" | tai64n | tai64nlocal
   fi
   ) >> /var/log/%{name}-setup.log 2>&1
   exit 0
 fi
 
 if [ -f %{libexecdir}/qupgrade ] ; then
-  echo "Running Custom Un-Installation Script for preun pre-uninstall"
-  /bin/sh %{libexecdir}/qupgrade preun uninstall %{version} "$argv1"
+  log_it "Running Custom Un-Installation Script for preun pre-uninstall"
+  /bin/sh %{libexecdir}/qupgrade preun uninstall %{version} "$argv1" | tai64n | tai64nlocal
 fi
 
-echo "shutting down and removing indimail-mta/indimail-mta-log services"
+log_it "shutting down and removing indimail-mta/indimail-mta-log services"
 for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
   slowq-send qscanq qmail-smtpd.465 qmail-smtpd.587 \
   qmail-qmtpd.209 qmail-qmqpd.628 greylist.1999 \
@@ -1637,18 +1627,14 @@ if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
     /sbin/chkconfig --add sendmail
   fi
 fi
-echo "removing indimail-mta as alternatives"
-%{_prefix}/sbin/svctool --config=remove-alt
+log_it "removing indimail-mta as alternatives"
+%{_prefix}/sbin/svctool --config=remove-alt | tai64n | tai64nlocal
 ) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1656,12 +1642,12 @@ fi
 if [ $argv1 -eq 1 ] ; then
   if [ -f %{libexecdir}/qupgrade ] ; then
     (
-    echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $*
+    log_it "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $* | tai64n | tai64nlocal
     ) >> /var/log/%{name}-setup.log
   fi
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-    echo "recreating ld.so cache"
+    log_it "recreating ld.so cache"
     /sbin/ldconfig
   fi
   exit 0
@@ -1678,12 +1664,12 @@ if [ $nscd_up -ge 1 ] ; then
 fi
 for i in alias qmaild qmailp qmailq qmailr qmails qscand indimail
 do
-  echo "Removing user $i"
+  log_it "Removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 done
 for i in qmail qscand indimail qcerts
 do
-  echo "Removing group $i"
+  log_it "Removing group $i"
   /usr/bin/getent group $i > /dev/null && /usr/sbin/groupdel $i  >/dev/null || true
 done
 if [ $nscd_up -ge 1 ] ; then
@@ -1700,7 +1686,7 @@ do
 done
 %{__rm} -rf %{qmaildir}/alias/Maildir
 
-echo "removing svscan supervised startup services"
+log_it "removing svscan supervised startup services"
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
   for i in clamd freshclam
   do
@@ -1718,10 +1704,10 @@ if [ $count -eq 0 ] ; then # ignore disabled services
 fi
 
 if [ -d %{_sysconfdir}/cron.d ] ; then
-  echo "removing cron entries"
+  log_it "removing cron entries"
   %{__rm} -f %{_sysconfdir}/cron.d/cronlist.q
 fi
-echo "removing logs"
+log_it "removing logs"
 for i in deliver.25 greylist.1999 qmqpd.628 qmtpd.209 \
   qscanq smtpd.25 smtpd.366 smtpd.465 smtpd.587 \
   daned.1998 resolvconf udplogger.3000 slowq-send \
@@ -1733,7 +1719,7 @@ do
 done
 
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-  echo "recreating ld.so cache"
+  log_it "recreating ld.so cache"
   /sbin/ldconfig
 fi
 
@@ -1741,29 +1727,25 @@ fi
 if [ -x /usr/sbin/selinuxenabled ] ; then
   /usr/sbin/selinuxenabled
   if [ $? -eq 0 -a -x /usr/sbin/semodule ] ; then
-    echo "disabling selinux module"
-    /usr/sbin/semodule -r indimail-mta
+    log_it "disabling selinux module"
+    /usr/sbin/semodule -r indimail-mta | tai64n | tai64nlocal
   fi
 fi
 
 if [ -f %{libexecdir}/qupgrade ] ; then
-  echo "Running Custom Un-Installation Script for postun uninstall"
-  /bin/sh %{libexecdir}/qupgrade postun uninstall %{version} $*
+  log_it "Running Custom Un-Installation Script for postun uninstall"
+  /bin/sh %{libexecdir}/qupgrade postun uninstall %{version} $* | tai64n | tai64nlocal
 fi
 ) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %posttrans
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -f %{libexecdir}/qupgrade ] ; then
 (
-  echo "Running Custom Installation Script for posttrans"
-  /bin/sh %{libexecdir}/qupgrade posttrans noargs %{version} $*
+  log_it "Running Custom Installation Script for posttrans"
+  /bin/sh %{libexecdir}/qupgrade posttrans noargs %{version} $* | tai64n | tai64nlocal
 ) >> /var/log/%{name}-setup.log 2>&1
 fi
 
@@ -1780,12 +1762,8 @@ fi
 %endif
 
 %pre -n indimail-mini
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1808,7 +1786,7 @@ if [ $nscd_up -ge 1 ] ; then
     /bin/systemctl stop nscd.service >/dev/null 2>&1
   fi
 fi
-echo "Adding IndiMail users/groups"
+log_it "Adding IndiMail users/groups"
 /usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
 if [ $? = 4 ] ; then
   /usr/sbin/groupadd indimail
@@ -1830,12 +1808,8 @@ fi
 ) >> /var/log/%{name}-setup.log
 
 %post -n indimail-mini
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -1886,7 +1860,7 @@ for i in mailq newaliases; do
     %{__mv} %{mandir}/man1/$i.1."$ext" %{mandir}/man1/$i.old.1."$ext"
   fi
 done
-echo "configuring indimail-mini as alternatives"
+log_it "configuring indimail-mini as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -1940,12 +1914,13 @@ if [ ! -f %{qsysconfdir}/control/idhost ] ; then
   echo $default_host > %{qsysconfdir}/control/idhost
 fi
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-  echo "recreating ld.so cache"
+  log_it "recreating ld.so cache"
   /sbin/ldconfig
 fi
 ) >> /var/log/%{name}-setup.log
 
 %postun -n indimail-mini
+%log
 argv1=$1
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -1954,18 +1929,18 @@ fi
 if [ $argv1 -eq 1 ] ; then
   (
   if [ -f %{libexecdir}/qupgrade ] ; then
-    echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $*
+    log_it "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $* | tai64n | tai64nlocal
   fi
   ) >> /var/log/%{name}-setup.log
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-    echo "recreating ld.so cache"
+    log_it "recreating ld.so cache"
     /sbin/ldconfig
   fi
   exit 0
 fi
 (
-echo "removing indimail-mini as alternatives"
+log_it "removing indimail-mini as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -1978,7 +1953,7 @@ if [ -n $alternatives_cmd ] ; then
   $alternatives_cmd --auto mta
   for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
     if [ -f $i.old -o -L $i.old ]; then
-      echo "restoring $i"
+      log_it "restoring $i"
       %{__mv} $i.old $i
     fi
   done
@@ -1993,7 +1968,7 @@ else
 fi
 for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
   if [ -f $i.old -o -L $i.old ]; then
-    echo "restoring $i"
+    log_it "restoring $i"
     %{__mv} $i.old $i
   fi
 done
@@ -2004,19 +1979,19 @@ for i in mailq newaliases; do
     ext="gz"
   fi
   if [ -f %{mandir}/man1/$i.old.1."$ext" ] ; then
-    echo "restoring %{mandir}/man1/$i.1.$ext"
+    log_it "restoring %{mandir}/man1/$i.1.$ext"
     %{__mv} %{mandir}/man1/$i.old.1."$ext" %{mandir}/man1/$i.1."$ext"
   fi
 done
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-  echo "recreating ld.so cache"
+  log_it "recreating ld.so cache"
   /sbin/ldconfig
 fi
 
-echo "removing user indimail"
+log_it "removing user indimail"
 /usr/bin/getent passwd indimail > /dev/null && /usr/sbin/userdel indimail >/dev/null || true
 for i in indimail qmail ; do
-  echo "removing group $i"
+  log_it "removing group $i"
   /usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
 done
 
@@ -2056,12 +2031,14 @@ fi
 %endif
 
 %pretrans -n qmta
+%log
+%log
 if [ -d /run ] ; then
   rundir=/run/qmta
 else
   rundir=/var/run/qmta
 fi
-echo "Giving qmta-send exactly 5 seconds to exit nicely"
+log_it "Giving qmta-send exactly 5 seconds to exit nicely"
 count=$(ps -ef|grep qmta-send|grep -v grep|wc -l)
 if [ $count -gt 0 ] ; then
   mkdir -p $rundir
@@ -2079,12 +2056,8 @@ fi
 sleep 5
 
 %pre -n qmta
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -2097,7 +2070,7 @@ if [ $argv1 -eq 2 ] ; then
     rundir=/var/run/qmta
   fi
   mkdir -p $rundir
-  echo "checking if system boot scripts need upgrade"
+  log_it "checking if system boot scripts need upgrade"
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s %{shareddir}/boot/qmta-send.service /lib/systemd/system/qmta-send.service >/dev/null 2>&1
     if [ $? -ne 0 ] ; then
@@ -2114,7 +2087,7 @@ if [ $argv1 -eq 2 ] ; then
   # restart svscan service if we find $rundir/.qmta-send.down
   if [ -f $rundir/.qmta-send.down ] ; then
     %{__rm} -f $rundir/.qmta-send.down
-    echo "Starting qmta-send"
+    log_it "Starting qmta-send"
     if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
     then
       /bin/systemctl start qmta-send >/dev/null 2>&1
@@ -2137,7 +2110,7 @@ if [ $nscd_up -ge 1 ] ; then
     /bin/systemctl stop nscd.service >/dev/null 2>&1
   fi
 fi
-echo "Adding IndiMail users/groups"
+log_it "Adding IndiMail users/groups"
 /usr/bin/getent group indimail  > /dev/null || /usr/sbin/groupadd -r -g 555 indimail || true
 if [ $? = 4 ] ; then
   /usr/sbin/groupadd indimail
@@ -2166,12 +2139,8 @@ fi
 ) >> /var/log/%{name}-setup.log
 
 %post -n qmta
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 if [ -z "$argv1" ] ; then
   argv1=0
 fi
@@ -2222,7 +2191,7 @@ if [ -L /usr/sbin ] ; then
 else
   move="$move /usr/sbin/sendmail"
 fi
-echo "configuring qmta as alternatives"
+log_it "configuring qmta as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -2298,12 +2267,8 @@ fi
 ) >> /var/log/%{name}-setup.log
 
 %preun -n qmta
+%log
 argv1=$1
-ID=$(id -u)
-if [ $ID -ne 0 ] ; then
-  echo "You are not root" 1>&2
-  exit 1
-fi
 (
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -2313,7 +2278,7 @@ if [ $argv1 -eq 1 ] ; then
   exit 0
 fi
 
-echo "Giving qmta-send exactly 5 seconds to exit nicely"
+log_it "Giving qmta-send exactly 5 seconds to exit nicely"
 if test -f %{_sysconfdir}/systemd/system/multi-user.target.wants/qmta-send.service
 then
   /bin/systemctl stop qmta-send >/dev/null 2>&1
@@ -2322,6 +2287,7 @@ sleep 5
 ) >> /var/log/qmta-setup.log 2>&1
 
 %postun -n qmta
+%log
 argv1=$1
 if [ -z "$argv1" ] ; then
   argv1=0
@@ -2330,18 +2296,18 @@ fi
 if [ $argv1 -eq 1 ] ; then
   (
   if [ -f %{libexecdir}/qupgrade ] ; then
-    echo "Running Custom Un-Installation Script for postun upgrade"
-    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $*
+    log_it "Running Custom Un-Installation Script for postun upgrade"
+    /bin/sh %{libexecdir}/qupgrade postun upgrade %{version} $* | tai64n | tai64nlocal
   fi
   ) >> /var/log/%{name}-setup.log
   if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-    echo "recreating ld.so cache"
+    log_it "recreating ld.so cache"
     /sbin/ldconfig
   fi
   exit 0
 fi
 (
-echo "removing qmta as alternatives"
+log_it "removing qmta as alternatives"
 if [ -x /usr/sbin/alternatives ] ; then
   alternatives_cmd=/usr/sbin/alternatives
 elif [ -x /usr/sbin/update-alternatives ] ; then
@@ -2354,7 +2320,7 @@ if [ -n $alternatives_cmd ] ; then
   $alternatives_cmd --auto mta
   for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
     if [ -f $i.old -o -L $i.old ]; then
-      echo "restoring $i"
+      log_it "restoring $i"
       %{__mv} $i.old $i
     fi
   done
@@ -2369,7 +2335,7 @@ else
 fi
 for i in /usr/lib/sendmail /usr/sbin/sendmail %{_sysconfdir}/pam.d/smtp; do
   if [ -f $i.old -o -L $i.old ]; then
-    echo "restoring $i"
+    log_it "restoring $i"
     %{__mv} $i.old $i
   fi
 done
@@ -2380,21 +2346,21 @@ for i in mailq newaliases; do
     ext="gz"
   fi
   if [ -f %{mandir}/man1/$i.old.1."$ext" ] ; then
-    echo "restoring %{mandir}/man1/$i.1.$ext"
+    log_it "restoring %{mandir}/man1/$i.1.$ext"
     %{__mv} %{mandir}/man1/$i.old.1."$ext" %{mandir}/man1/$i.1."$ext"
   fi
 done
 if [ "%{_libdir}" != "/usr/lib64" -a "%{_libdir}" != "/usr/lib" ] ; then
-  echo "recreating ld.so cache"
+  log_it "recreating ld.so cache"
   /sbin/ldconfig
 fi
 
 for i in indimail alias qmailq qmailr qmails qscand; do
-  echo "removing user $i"
+  log_it "removing user $i"
   /usr/bin/getent passwd $i > /dev/null && /usr/sbin/userdel $i >/dev/null || true
 done
 for i in indimail nofiles qmail qscand; do
-  echo "removing group $i"
+  log_it "removing group $i"
   /usr/bin/getent group $i  > /dev/null && /usr/sbin/groupdel $i >/dev/null || true
 done
 

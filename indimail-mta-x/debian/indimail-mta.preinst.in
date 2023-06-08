@@ -19,18 +19,16 @@ rm=/bin/rm
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
-ID=`id -u`
-if [ $ID -ne 0 ] ; then
-	echo "You are not root" >&2
-	exit 1
-fi
+log_it() {
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
 
 case "$1" in
     upgrade)
 	(
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
-		echo "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/qupgrade.sh pre $1 @version@ $* || true
+		log_it "Running Custom Upgrade Script for pre $1"
+		/bin/sh ${libexecdir}/qupgrade.sh pre $1 @version@ $* | tai64n | tai64nlocal
 	fi
 	if [ -d /run ] ; then
 		rundir=/run
@@ -40,7 +38,7 @@ case "$1" in
 		rundir=${servicedir}
 	fi
 	set +e
-	echo "shutting down indimail services"
+	log_it "shutting down indimail services"
 	for i in greylist.1999 qmail-qmqpd.628 \
 		qmail-qmtpd.209 qmail-smtpd.25 qmail-smtpd.366 \
 		qmail-smtpd.465 qmail-smtpd.587 qmail-send.25 \
@@ -67,8 +65,8 @@ case "$1" in
 	touch /tmp/indimail-mta/.install
 	if [ -f ${libexecdir}/qupgrade.sh ] ; then
 		(
-		echo "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/qupgrade.sh pre $1 @version@ $* || true
+		log_it "Running Custom Upgrade Script for pre $1"
+		/bin/sh ${libexecdir}/qupgrade.sh pre $1 @version@ $* | tai64n | tai64nlocal
 		) >> /var/log/indimail-mta-setup.log 2>&1
 	fi
 	#
@@ -76,7 +74,7 @@ case "$1" in
 	# exists.
 	#
 	(
-	echo "Adding indimail-mta users/groups"
+	log_it "Adding indimail-mta users/groups"
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
