@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.37 2023-06-08 22:22:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.38 2023-06-09 23:47:04+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -193,6 +193,11 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
     %{__mkdir_p} %{buildroot}%{logdir}/$i
     touch %{buildroot}%{logdir}/$i/current
   done
+%if %{defined _rundir}
+  %{__mkdir_p} %{buildroot}%{_prefix}/lib/tmpfiles.d
+  touch %{buildroot}%{_prefix}/lib/tmpfiles.d/svscan.conf
+  %{__mkdir_p} %{buildroot}%{_rundir}/svscan
+%endif
 %endif
 
 # Compress the man pages
@@ -211,22 +216,10 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}
 %ghost %dir %attr(0755,qmaill,nofiles)   %{logdir}/*
 %ghost      %attr(-,qmaill,nofiles)      %{logdir}/*/*
+%if %{defined _rundir}
 %ghost      %attr(0644,root,root)        %{_prefix}/lib/tmpfiles.d/svscan.conf
 %ghost %dir %attr(0755,root,root)        %{_rundir}/svscan
-%ghost %dir %attr(0755,root,root)        %{_rundir}/svscan/*
-%ghost %dir %attr(0700,-,-)              %{_rundir}/svscan/*/supervise
-%ghost      %attr(-,-,-)                 %{_rundir}/svscan/*/supervise/control
-%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/supervise/lock
-%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/supervise/ok
-%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/supervise/up
-%ghost      %attr(0644,root,root)        %{_rundir}/svscan/*/supervise/status
-%ghost %dir %attr(0755,root,root)        %{_rundir}/svscan/*/log
-%ghost %dir %attr(0700,root,root)        %{_rundir}/svscan/*/log/supervise
-%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/control
-%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/lock
-%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/ok
-%ghost      %attr(0600,root,root)        %{_rundir}/svscan/*/log/supervise/up
-%ghost      %attr(0644,root,root)        %{_rundir}/svscan/*/log/supervise/status
+%endif
 %endif
 
 %dir %attr(0755,root,root)               %{libexecdir}
@@ -386,6 +379,7 @@ if [ ! -d %{logdir} ] ; then
   echo "Creating %{logdir}"
   %{__mkdir_p} %{logdir}
 fi
+%if %{defined _rundir}
 if [ -d %{_prefix}/lib/tmpfiles.d -a -n "%{_rundir}" ] ; then
   if [ ! -f %{_prefix}/lib/tmpfiles.d/svscan.conf ] ; then
     echo "d %{_rundir}/svscan 0755 root root" > %{_prefix}/lib/tmpfiles.d/svscan.conf
@@ -396,6 +390,7 @@ if [ -d %{_prefix}/lib/tmpfiles.d -a -n "%{_rundir}" ] ; then
     fi
   fi
 fi
+%endif
 if [ $argv1 -eq 2 ] ; then # upgrade
   (
   echo "checking if system boot scripts need upgrade"
