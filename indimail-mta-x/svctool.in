@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.689 2023-06-08 22:20:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.690 2023-06-10 17:45:23+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.689 2023-06-08 22:20:19+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.690 2023-06-10 17:45:23+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -926,7 +926,7 @@ Known values for OPTION are:
   Print environment variables all services
   service_path   - Path where supervise service will be installed
 
---config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers
+--config=mysql|ssl_rsa|mysqldb|qmail|users|rmusers|nssd
 --config=snmpdconf|clamd|foxhole|bogofilter|cert|add-boot|rm-boot
 --config=add-alt|remove-alt|selinux|qselinux|iselinux|inittab|recontrol
   [--postmaster=user[@domain]]
@@ -955,6 +955,7 @@ Known values for OPTION are:
   users          - Create Internal System Users used by IndiMail
   rmusers        - Remove Internal System Users used by IndiMail
   snmpdconf      - create v2 /etc/snmpd/snmpd.conf
+  nssd           - create @sysconfdir@/nssd.conf
   clamd          - Create clamd configuration file
   bogofilter     - Create bogofilter.cf configuration file
   cert           - Generate SSL Certificate
@@ -4635,6 +4636,9 @@ if [ $run_file_only -eq 1 ] ; then
 else
 	create_pwdlookup_conf "$5" "$6" "$7" "$8" "$9" > $TMPDIR/config.cnf.$$
 	if [ $? -eq 0 ] ; then
+		if [ -n "$mysysconfdir" ] ; then
+			sysconfdir=$mysysconfdir
+		fi
 		conf_file=$DESTDIR"$sysconfdir/nssd.conf"
 		change_config $conf_file $TMPDIR/config.cnf.$$
 		/bin/chmod 640 $conf_file
@@ -4646,7 +4650,7 @@ fi
 create_pwdlookup_conf()
 {
 if [ $# -ne 5 ] ; then
-	echo "USAGE: create_pwdlookup_conf mysql_user mysql_pass mysql_port mysql_socket" 1>&2
+	echo "USAGE: create_pwdlookup_conf mysql_host mysql_user mysql_pass mysql_port mysql_socket" 1>&2
 	return 1
 fi
 mysql_host=$1
@@ -11224,23 +11228,27 @@ case $option in
 	;;
 
 	10) # --config
-	# config creation for MySQL, MySQL Database creation, imap,
 	# 1  MySQL Config creation
 	# 2  MySQL Database creation
 	# 3  MariaDB SSL/RSA cert creation
-	# 4  IMAP config creation
-	# 5  POP3 config creation
-	# 6  qmail config creation
-	# 7  create indimail users from system (/etc/passwd,etc)
-	# 8  remove indimail users from system (/etc/passwd, etc)
-	# 9  create clamd, freschclam config, foxhole_all.cdb
-	# 10 create bogofilter config and wordlist.db
-	# 11 create CERTS
-	# 12 add startup for indimail at boot
-	# 13 remove startup for indimail from boot
-	# 14 enable selinux module
-	# 15 enable svscan in inittab
-	# 16 recontrol
+	# 4  Create default indimail control files
+	# 5  Create default qmail control files
+	# 6  create indimail users from system (/etc/passwd,etc)
+	# 7  remove indimail users from system (/etc/passwd, etc)
+	# 8  nssd config creation
+	# 9  snmpd config creation
+	# 10 create clamd, freschclam config
+	# 11 create foxhole_all.cdb
+	# 12 create bogofilter config and wordlist.db
+	# 13 create CERTS
+	# 14 add startup for indimail at boot
+	# 15 remove startup for indimail from boot
+	# 16 add indimail-mta as alternative mta
+	# 17 remove indimail-mta as alternative mta
+	# 18 enable selinux module for indimail
+	# 19 enable selinux module for indimail-mta
+	# 20 enable svscan in inittab
+	# 21 recontrol
 
 	case $config_name in
 		mysql)
@@ -11450,6 +11458,40 @@ case $option in
 
 		snmpdconf)
 		create_snmpd_conf
+		;;
+
+		nssd)
+		if [ " $mysql_host" = " " ] ; then
+			echo "MySQL Host not specified" 1>&2
+			usage 1
+		elif [ " $mysql_user" = " " ] ; then
+			echo "MySQL User not specified" 1>&2
+			usage 1
+		elif [ " $mysql_pass" = " " ] ; then
+			echo "MySQL Passwd not specified" 1>&2
+			usage 1
+		elif [ -z "$mysql_port" -a -z "$mysqlSocket" ] ; then
+			echo "MySQL Port/Socket not specified" 1>&2
+			usage 1
+		elif [ " $thread_count" = " " ] ; then
+			echo "Thread Count not specified" 1>&2
+			usage 1
+		elif [ " $timeout" = " " ] ; then
+			echo "Listen Timeout not specified" 1>&2
+			usage 1
+		fi
+		THREAD_COUNT=$thread_count
+		LISTEN_TIMEOUT=$timeout
+		create_pwdlookup_conf "$mysql_host" "$mysql_user" "$mysql_pass" "$mysql_port" "$mysqlSocket" > $TMPDIR/config.cnf.$$
+		if [ $? -eq 0 ] ; then
+			if [ -n "$mysysconfdir" ] ; then
+				sysconfdir=$mysysconfdir
+			fi
+			conf_file=$DESTDIR"$sysconfdir/nssd.conf"
+			change_config $conf_file $TMPDIR/config.cnf.$$
+			/bin/chmod 640 $conf_file
+			$chown root:qmail $conf_file
+		fi
 		;;
 
 		clamd)
@@ -11886,9 +11928,11 @@ case $option in
 		echo "MySQL Port/Socket not specified" 1>&2
 		usage 1
 	fi
-	echo "Creating pwdLookup Daemon on socket $socket_path, Service $servicedir, Threads $thread_count"
-	create_pwdlookup "$socket_path" "$thread_count" "$timeout" "$servicedir" "$mysql_host" "$mysql_user" \
-	"$mysql_pass" "$mysql_port" "$mysqlSocket"
+	echo "Creating pwdLookup Daemon on socket $socket_path, thread_count $thread_count"
+	echo "  listen_timeout $timeout, Service $servicedir, mysql_user $mysql_user"
+	echo "  mysql_pass $mysql_pass, mysql_port $mysql_port, mysql_socket $mysqlSocket"
+	create_pwdlookup "$socket_path" "$thread_count" "$timeout" "$servicedir" \
+		"$mysql_host" "$mysql_user" "$mysql_pass" "$mysql_port" "$mysqlSocket"
 	;;
 
 	21) # dump config
