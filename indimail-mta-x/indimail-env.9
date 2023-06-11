@@ -35,6 +35,11 @@ Set by \fBqmail-smtpd\fR(8) on successful auhentication
 Set by \fBqmail-smtpd\fR(8) to the authenticated envelope sender address
 
 .TP
+\fIDISABLE_EXTRA_GREET\fR
+Used by \fBqmail-smtpd\fR to skip additional lines in the
+\fIsmtpgreeting\fR control file.
+
+.TP
 \fIAUTHSELF\fR
 If set, \fBqmail-lspawn\fR(8) authenticates against local database,
 existence of users before delivery, rather than accepting delivery and then
@@ -414,8 +419,18 @@ Used by \fBcondredirect\fR(1) \fBdot-forward\fR(1) \fBfastforward\fR(1)
 process_queue \fBqmail-inject\fR(8) \fBqmail-qread\fR(8)
 \fBqmail-showctl\fR(8) \fBqmta-send\fR(8) \fBqnotify\fR(1)
 \fBqreceipt\fR(1) \fBqueue-fix\fR(8) \fBreplier\fR(1)
-\fBrrforward\fR(1) \fBrrt\fR(1) to load envirnment variables from
+\fBrrforward\fR(1) \fBrrt\fR(1) to load environment variables from
 $HOME/.defaultqueue directory
+
+.TP
+\fISKIP_LOCAL_ENVIRONMENT\fR
+Used by \fBcondredirect\fR(1) \fBdot-forward\fR(1) \fBfastforward\fR(1)
+\fBfilterto\fR(1) forward maildirserial \fBnew-inject\fR(8)
+process_queue \fBqmail-inject\fR(8) \fBqmail-qread\fR(8)
+\fBqmail-showctl\fR(8) \fBqmta-send\fR(8) \fBqnotify\fR(1)
+\fBqreceipt\fR(1) \fBqueue-fix\fR(8) \fBreplier\fR(1)
+\fBrrforward\fR(1) \fBrrt\fR(1) to skip $HOME/.defaultqueue directory for
+environment variables.
 
 .TP
 \fIHONOR_BODYLENGTHTAG\fR
@@ -1270,6 +1285,9 @@ RELAY_CLEAR_MINUTES       |clearopensmtp |No of minutes after which the
 RELAY_TABLE               |authindi      |MySQL table name containing user
                           |inlookup      |authentication timestamps for
                           |clearopensmtp |implementing POP/IMAP before SMTP.
+--------------------------|--------------|--------------------------------------
+AUTHENTICATED             |authindi      |Set by authindi when
+                          |              |authentication is successful
 --------------------------|--------------|--------------------------------------
 .TE
 
