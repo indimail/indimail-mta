@@ -115,7 +115,7 @@ static char     ipstr[IP4_FMT];
 static uint16   portlocal;
 static uint16   portremote;
 static char    *forcelocal;
-static char    *hostname;
+static char    *hostname, *cn_host;
 static stralloc addresses;
 static stralloc moreaddresses;
 static stralloc tmp;
@@ -366,7 +366,7 @@ main(int argc, char **argv)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "n:c:s:mf:M:L:z"))
+	if (!stralloc_cats(&options, "n:c:s:m:f:M:L:z"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -422,6 +422,7 @@ main(int argc, char **argv)
 			break;
 		case 'm':
 			match_cn = 1;
+			cn_host = optarg;
 			break;
 		case 'f':
 			cipherfile = optarg;
@@ -785,7 +786,7 @@ do_data:
 				!stralloc_0(&tls_server_version))
 			strerr_die2x(111, FATAL, "out of memory");
 		tls_server_version.len--;
-		if (tls_connect(ctimeout[0] + ctimeout[1], s, s, ssl, match_cn ? hostname : 0) == -1)
+		if (tls_connect(ctimeout[0] + ctimeout[1], s, s, ssl, match_cn ? cn_host : 0) == -1)
 			_exit(111);
 		if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
 				!stralloc_0(&tls_client_version))
