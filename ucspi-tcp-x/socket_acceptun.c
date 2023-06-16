@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: socket_acceptun.c,v $
+ * Revision 1.1  2023-06-16 23:46:22+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <sys/socket.h>
 #include <sys/un.h>

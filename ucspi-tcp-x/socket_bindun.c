@@ -1,5 +1,8 @@
 /*
- * Log: $
+ * $Log: socket_bindun.c,v $
+ * Revision 1.1  2023-06-16 23:47:59+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <unistd.h>
 #include <sys/socket.h>

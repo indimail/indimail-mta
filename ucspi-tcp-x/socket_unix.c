@@ -1,5 +1,8 @@
 /*
- * $Log: $
+ * $Log: socket_unix.c,v $
+ * Revision 1.1  2023-06-16 23:46:39+05:30  Cprogrammer
+ * Initial revision
+ *
  */
 #include <sys/types.h>
 #include <sys/socket.h>
