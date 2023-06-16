@@ -1741,7 +1741,10 @@ do_socket:
 			noipv6 = 1;
 			if ((s4 = socket_tcp6()) == -1)
 				strerr_die2sys(111, FATAL, "unable to create socket: ");
-			if (socket_bind6_reuse(s4, localip, localport, netif) == -1)
+			i = 1;
+			if (setsockopt(s4, SOL_SOCKET, SO_REUSEADDR, (char *) &i, sizeof(i)) < 0)
+				strerr_die4sys(111, FATAL, "unable to do set SO_REUSEADDR ", hostname, ": ");
+			if (socket_bind6(s4, localip, localport, netif) == -1)
 				strerr_die2sys(111, FATAL, "unable to bind: ");
 			if (socket_local6(s4, localip, &localport, &netif) == -1)
 				strerr_die2sys(111, FATAL, "unable to get local address: ");
