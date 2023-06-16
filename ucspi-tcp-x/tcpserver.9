@@ -465,7 +465,7 @@ Default is @qsysconfdir@/certs.
 A script \fIupdate_tmprsadh\fR in cron uses the following openssl commands
 to pre-generate 2048 bites RSA and DH parameters. You can pass --maxbits
 argument to \fIupdate_tmprsadh\fR to generate these with higher bits. You
-can set the environment variable \fBSSL_BITS\fR to make tcpclient choose
+can set the environment variable \fBSSL_BITS\fR to make tcpserver choose
 specific bits for the RSA/DH parameters. These files are generated in
 @qsysconfdir@/certs. \fIupdate_rmprsadh\fR is installed to be run by cron
 if you have installed indimail from Open Build Service.
