@@ -1,59 +1,49 @@
+.\" vim: tw=75
 .TH tcpclient 1
 .SH NAME
 tcpclient \- creates an outgoing TLS/non-TLS TCP IPv4/IPv6 connection.
 .SH SYNOPSIS
-\fBtcpclient\fR [\fIopts\fR] \fIhost\fR \fIport\fR [\fIprog\fR]
+\fBtcpclient\fR [\fIopts\fR] \fIhost\fR/\fIsocket\fR [\fIport\fR] [\fIprog\fR]
 
 .SH DESCRIPTION
-.I opts
-is a series of getopt-style options.
-.I host
-is one argument.
-.I port
-is one argument.
-.I prog
-consists of one or more arguments. If \fIprog\fR is omitted, tcpclient
-enters client mode where it passes data from descriptor 0 to the network
-and data from the network to descriptor 1. client mode is similar to how
-you would use programs like telnet(1), ssh(1), etc.
+\fIopts\fR is a series of getopt-style options. \fIhost\fR/\fIsocket\fR is
+one argument. If \fIsocket\fR is provided as a path, \fBtcpclient\fR using
+UNIX domain socket unix(7) socket to connect. In this case \fIport\fR is
+not provided. If \fIhost\fR is not a filesystem path, \fIhost\fR is used as
+a TCP/IP address and TCP port is used where \fIport\fR is one argument.
+\fIprog\fR consists of one or more arguments. If \fIprog\fR is omitted,
+tcpclient enters client mode where it passes data from descriptor 0 to the
+network and data from the network to descriptor 1. client mode is similar
+to how you would use programs like telnet(1), ssh(1), etc.
 
-.B tcpclient
-attempts to connect to a TCP server. If it is successful, it runs
-.IR prog ,
-with descriptor 6 reading from the network and descriptor 7 writing to the
-network. It also sets up several environment variables (see
-.BR tcp-environ (5)
-). In client mode, when \fIprog\fR is not run, \fBtcpclient\fR will pass
-data from descriptor 0 to the network and from the network to descriptor 1.
+\fBtcpclient\fR attempts to connect to a TCP server or a UNIX socket. If it
+is successful, it runs \fIprog\fR, with descriptor 6 reading from the
+network/socket and descriptor 7 writing to the network. It also sets up
+several environment variables (see .BR tcp-environ (5)). In client mode,
+when \fIprog\fR is not run, \fBtcpclient\fR will pass data from descriptor
+0 to the network and from the network to descriptor 1.
 
-.B tcpclient
-can also initiate a SSL/TLS session with a remote host (-n option). This
-requires a \fIclientcert\fR to be provided. One can also do opportunistic
-TLS by using \fB\-s\fR \fIstarttls\fR option. The currently supported
-option for \fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR. \fBimap\fR will be
-added later.
+\fBtcpclient\fR can also initiate a SSL/TLS session with a remote host (-n
+option). This requires a \fIclientcert\fR to be provided. One can also do
+opportunistic TLS by using \fB\-s\fR \fIstarttls\fR option. The
+currently supported option for \fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR.
+\fBimap\fR will be added later.
 
 For TLS/SSL sessions, \fBtcpclient\fR sets the environment variable
 \fBTLS_PROVIDER\fR with details of the TLS connnection if passed the -z
 option.
 
-The server's address is given by
-.I host
-and
-.IR port .
-.I port
-may be a name from /etc/services or a number.
-.I host
-may be 0, referring to the local machine, or a dotted-decimal IP address or
-IPv6 address, or a host name; it is fed through qualification using
-dns_ip4_qualify.
+The server's address is given by a \fIsocket\fR path or \fIhost\fR and
+\fIport\fR. \fIport\fR may be a name from /etc/services or a number.
+\fIhost\fR may be 0, referring to the local machine, or a dotted-decimal IP
+address or IPv6 address, or a host name; it is fed through qualification
+using dns_ip4_qualify.
 
-If the server has several IP addresses,
-.B tcpclient
-tries each address in turn.
+If the server has several IP addresses, \fBtcpclient\fR tries each address
+in turn.
 
 .SH OPTIONS
-.B General options:
+\fBGeneral options\fR:
 
 .TP
 .B \-q
@@ -87,7 +77,8 @@ to skip the second try. Before version 0.88,
 .BR tcpserver (1)
 will use only
 .I x
-(default: 60).
+(default: 60). For a UNIX domain socket, there is just one connection
+attempt.
 
 .TP
 .B \-i \fIlocalip
@@ -97,7 +88,8 @@ as the IP address for the local side of the connection; quit if
 .I localip
 is not available. Normally
 .B tcpclient
-lets the operating system choose an address.
+lets the operating system choose an address. This option is not used for
+UNIX domain sockets.
 
 .TP
 .B \-p \fIlocalport
@@ -107,17 +99,20 @@ as the TCP port for the local side of the connection; quit if
 .I localport
 is not available. Normally
 .B tcpclient
-lets the operating system choose a port.
+lets the operating system choose a port. This option is not used for UNIX
+domain sockets.
 
 .TP
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
-future; if you want it, set it explicitly.
+future; if you want it, set it explicitly. This option is not used for UNIX
+domain sockets.
 
 .TP
 .B \-D
-Never delay sending data; enable TCP_NODELAY.
+Never delay sending data; enable TCP_NODELAY. This option is not used for
+UNIX domain sockets.
 
 .TP
 .B \-C \fIcertdir
@@ -200,33 +195,35 @@ seconds.
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment
-variable $TCPREMOTEHOST.
+variable $TCPREMOTEHOST. This option is not used for UNIX domain sockets.
 
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment
-variable $TCPREMOTEHOST.
+variable $TCPREMOTEHOST. This option is not used for UNIX domain sockets.
 
 .TP
 .B \-l \fIlocalname
 Do not look up the local host name in DNS; use
 .I localname
 for the environment variable $TCPLOCALHOST. A common choice for localname
-is 0.
+is 0. This option is not used for UNIX domain sockets.
 
 .TP
 .B \-r
-(Default.) Attempt to obtain $TCPREMOTEINFO from the remote host.
+(Default.) Attempt to obtain $TCPREMOTEINFO from the remote host. This
+option is not used for UNIX domain sockets.
 
 .TP
 .B \-R
-Do not attempt to obtain $TCPREMOTEINFO from the remote host.
+Do not attempt to obtain $TCPREMOTEINFO from the remote host. This option
+is not used for UNIX domain sockets.
 
 .TP
 .B \-t \fIn
 Timeout on the $TCPREMOTEINFO connection attempt after
 .I n
-seconds. Default: 26.
+seconds. Default: 26. This option is not used for UNIX domain sockets.
 
 .SH ENVIRONMENT
 .TP 0
