@@ -32,11 +32,11 @@ fed through qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
 For AF_UNIX family, the address is given by the path referred by
 \fIsocket\fR argument.
 
-.B tcpserver
-can also do SSL/TLS encryption with remote clients. This requires a SSL
-certificate to be provided using the -n option. For TLS/SSL sessions,
-\fBtcpserver\fR -z option sets the environment variable \fBTLS_PROVIDER\fR
-with details of the TLS connnection.
+\fBtcpserver\fR can also do SSL/TLS encryption with remote clients. This
+requires a SSL certificate to be provided using the -n option. For TLS/SSL
+sessions, \fBtcpserver\fR -z option sets the environment variable
+\fBTLS_PROVIDER\fR with details of the TLS connnection. SSL/TLS encryption
+works for both TCP and UNIX sockets.
 
 \fBtcpserver(1)\fR works differently on Linux and FreeBSD. By default,
 FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The default
@@ -82,9 +82,9 @@ reread when \fBtcpserver\fR(1) receives SIGHUP.
 .TP
 .B \-C \fIn
 Do not handle more than \fIn\fR simultaneous connections from a particular
-host. If there are \fIn\fR simultaneous copies of prog running, defer
-acceptance of a new connection until one copy finishes. \fIn\fR must be a
-positive integer. Default: 20. This can be also handled by having the
+host/socket. If there are \fIn\fR simultaneous copies of prog running,
+defer acceptance of a new connection until one copy finishes. \fIn\fR must
+be a positive integer. Default: 20. This can be also handled by having the
 environment variable $\fBMAXPERIP\fR compiled in the \fIrules\fR cdb
 database. The $\fBMAXPERIP\fR environment variables gives
 \fBtcpserver\fR(1) the ability to have different per host concurrency limit
@@ -95,7 +95,7 @@ for each and every host that is defined in the rules database.
 Follow the rules compiled into \fIcdb\fR by \fBtcprules\fR(1). These rules
 may specify setting environment variables or rejecting connections from bad
 sources. You can rerun \fBtcprules\fR(1) to change the rules while
-\fBtcpserver\fR(1) is running. This option is ignored for AF_UNIX sockets.
+\fBtcpserver\fR(1) is running. This option is ignored for UNIX sockets.
 
 .TP
 .B \-X
@@ -103,7 +103,7 @@ With
 .B -x \fIcdb,
 allow connections even if \fIcdb\fR does not exist. Normally
 \fBtcpserver\fR(1) will drop the connection if \fIcdb\fR does not exist.
-This option is ignored for AF_UNIX sockets.
+This option is ignored for UNIX sockets.
 
 .TP
 .B \-m \fIdb.conf
@@ -134,7 +134,7 @@ You can set $\fBMYSQL_LIB\fR environment variable in
 /service/\fIname\fR/variables/MYSQL_LIB (here \fIname\fR refers to a service
 under \fIsupervise\fR(8)). You can also set the value in the control file
 \fImysql_lib\fR. Environment variable takes precedence over the control
-file. This option is ignored for AF_UNIX sockets.
+file. This option is ignored for UNIX sockets.
 
 .TP
 .B \-B \fIbanner
@@ -173,7 +173,7 @@ Same as
 .TP
 .B \-1
 After preparing to receive connections, print the local port number to
-standard output. This option is ignored for AF_UNIX sockets.
+standard output. This option is ignored for UNIX sockets.
 
 .TP
 .B \-4
@@ -182,20 +182,20 @@ systems like OpenBSD which will not let IPv6 sockets connect to
 V4-mapped IPv6 addresses. Please note that this also applies to DNS
 lookups, so you will have to use an DNS resolver with an IPv6 address to
 accept IPv6 connections. Use \fBDNSCACHEIP\fR to set the DNS resolver
-IP dynamically. This option is ignored for AF_UNIX sockets.
+IP dynamically. This option is ignored for UNIX sockets.
 
 .TP
 .B \-6
 Force IPv6 mode in \fBUCSPI\fR environment variables, even for
 IPv4 connections. This will set $\fBPROTO\fR to \fBTCP6\fR and put
 IPv4-mapped IPv6 addresses in $\fBTCP6LOCALIP\fR and $\fBTCP6REMOTEIP\fR.
-This option is ignored for AF_UNIX sockets.
+This option is ignored for UNIX sockets.
 
 .TP
 .B \-I\fIinterface
 Bind to the network interface \fIinterface\fR ("eth0" on Linux, for example).
 This is only defined and needed for IPv6 link-local addresses. This option
-is ignored for AF_UNIX sockets.
+is ignored for UNIX sockets.
 
 .TP
 .B \-b \fIn
@@ -207,25 +207,25 @@ irrelevant.
 .B \-o
 Leave IP options alone. If the client is sending packets along an IP source
 route, send packets back along the same route. This option is ignored for
-AF_UNIX sockets.
+UNIX sockets.
 
 .TP
 .B \-O
 (Default.) Kill IP options. A client can still use source routing to connect
 and to send data, but packets will be sent back along the default route.
-This option is ignored for AF_UNIX sockets.
+This option is ignored for UNIX sockets.
 
 .TP
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
 future; if you want it, set it explicitly. This option is ignored for
-AF_UNIX sockets.
+UNIX sockets.
 
 .TP
 .B \-D
 Never delay sending data; enable TCP_NODELAY. This option is ignored for
-AF_UNIX sockets.
+UNIX sockets.
 
 .P
 .B Data-gathering options:
@@ -233,13 +233,13 @@ AF_UNIX sockets.
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment variable
-$\fBTCPREMOTEHOST\fR. (ignored for AF_UNIX).
+$\fBTCPREMOTEHOST\fR. This option is ignored for UNIX sockets.
 
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment variable
 $\fBTCPREMOTEHOST\fR. To avoid loops, you must use this option for servers on TCP
-port 53. (ignored for AF_UNIX)
+port 53. This option is ignored for UNIX sockets.
 
 .TP
 .B \-p
@@ -247,7 +247,7 @@ Paranoid. After looking up the remote host name in DNS, look up the IP
 addresses in DNS for that host name, and remove the environment variable
 $TCPREMOTEHOST if none of the addresses match the client's IP address. The
 environment variable $\fBTCPPARANOID\fR is set if host has a reverse dns but IP
-does not match $\fBTCPREMOTEIP\fR. (ignored for AF_UNIX)
+does not match $\fBTCPREMOTEIP\fR. This option is ignored for UNIX sockets.
 
 .TP
 .B \-P
@@ -258,23 +258,23 @@ does not match $\fBTCPREMOTEIP\fR. (ignored for AF_UNIX)
 Do not look up the local host name in DNS; use \fIlocalname\fR for the
 environment variable $\fBTCPLOCALHOST\fR. A common choice for
 \fIlocalname\fR is 0. To avoid loops, you must use this option for servers
-on TCP port 53. (ignored for AF_UNIX)
+on TCP port 53. This option is ignored for UNIX sockets.
 
 .TP
 .B \-r
 (Default.) Attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host.
-(Ignored for AF_UNIX)
+(Ignored for UNIX)
 
 .TP
 .B  \-R
 Do not attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host. To
 avoid loops, you must use this option for servers on TCP ports 53 and 113.
-(Ignored for AF_UNIX)
+(Ignored for UNIX)
 
 .TP
 .B \-t \fIn
 Give up on the $TCPREMOTEINFO connection attempt after
-\fIn\fR seconds. Default: 26. (Ignored for AF_UNIX)
+\fIn\fR seconds. Default: 26. (Ignored for UNIX)
 
 .TP
 .B \-T \fIn
@@ -338,7 +338,7 @@ to avoid version-specific methods since they are now deprecated.
 .TP
 -\fBN\fR
 Client-initiated renegotiation is disabled by default. This option enables
-it. This option is ignored for AF_UNIX sockets.
+it. This option is ignored for UNIX sockets.
 
 .TP
 -\fBz\fR
