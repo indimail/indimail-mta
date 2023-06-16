@@ -19,15 +19,19 @@
 #include "uint32.h"
 #endif
 #include <sys/socket.h>
+#include <sys/un.h>
 
 int             socket_tcp(void);
 int             socket_udp(void);
+int             socket_unix(void);
 int             socket_connect4(int, char ip[4], uint16);
+int             socket_connect_un(int, char *);
 int             socket_connected(int);
 int             socket_bind4(int, char ip[4], uint16);
-int             socket_bind4_reuse(int, char ip[4], uint16);
+int             socket_bindun(int, char *);
 int             socket_listen(int, int);
 int             socket_accept4(int, char *, uint16 *);
+int             socket_acceptun(int, struct sockaddr_un *, char *);
 int             socket_recv4(int, char *, int, char *, uint16 *);
 int             socket_send4(int, char *, int, char *, uint16);
 int             socket_local4(int, char *, uint16 *);
@@ -38,7 +42,6 @@ int             socket_tcp6(void);
 int             socket_udp6(void);
 int             socket_connect6(int, char ip[16], uint16, uint32);
 int             socket_bind6(int, char ip[16], uint16, uint32);
-int             socket_bind6_reuse(int, char ip[16], uint16, uint32);
 int             socket_accept6(int, char ip[16], uint16 *, uint32 *);
 int             socket_recv6(int, char *, unsigned int, char ip[16], uint16 *, uint32 *);
 int             socket_send6(int, char *, unsigned int, char ip[16], uint16, uint32);

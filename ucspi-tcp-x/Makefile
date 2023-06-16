@@ -323,9 +323,17 @@ socket_accept.o: \
 compile socket_accept.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_accept.c
 
+socket_acceptun.o: \
+compile socket_acceptun.c socket.h
+	./compile socket_acceptun.c
+
 socket_bind.o: \
 compile socket_bind.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_bind.c
+
+socket_bindun.o: \
+compile socket_bindun.c socket.h
+	./compile socket_bindun.c
 
 socket_conn.o: \
 compile socket_conn.c socket.h haveip6.h conf-ip
@@ -362,6 +370,10 @@ compile socket_tcp.c socket.h haveip6.h conf-ip
 socket_udp.o: \
 compile socket_udp.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_udp.c
+
+socket_unix.o: \
+compile socket_unix.c socket.h
+	./compile socket_unix.c
 
 systype: find-systype.sh conf-cc conf-ld trycpp.c x86cpuid.c
 	( cat warn-auto.sh; \
@@ -483,27 +495,38 @@ compile timeoutconn.c socket.h haveip6.h timeoutconn.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` timeoutconn.c
 
 unix.a: \
-makelib upathexec_env.o socket_accept.o socket_bind.o \
+makelib upathexec_env.o socket_accept.o socket_bind.o socket_unix.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
-socket_opts.o socket_opts6.o socket_remote.o socket_tcp.o socket_udp.o \
-socket_conn6.o socket_bind6.o socket_accept6.o socket_recv6.o \
-socket_send6.o socket_local6.o socket_tcp6.o ip4_fmt.o ip6_fmt.o \
-ip4_bit.o ip6_bit.o ip4_scan.o ip6_scan.o socket_getifname.o \
-socket_getifidx.o socket_v4mappedprefix.o socket_ip4loopback.o \
-socket_v6any.o socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o
-	./makelib unix.a upathexec_env.o socket_accept.o \
-	socket_bind.o socket_conn.o socket_delay.o socket_listen.o \
-	socket_local.o socket_opts.o socket_opts6.o socket_remote.o \
-	socket_tcp.o socket_udp.o socket_conn6.o socket_bind6.o \
-	socket_accept6.o socket_recv6.o socket_send6.o socket_local6.o \
-	socket_tcp6.o ip4_fmt.o ip6_fmt.o ip4_bit.o ip6_bit.o \
-	ip4_scan.o ip6_scan.o socket_getifname.o socket_getifidx.o \
-	socket_v4mappedprefix.o socket_ip4loopback.o socket_v6any.o \
-	socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o
+socket_bindun.o socket_opts.o socket_opts6.o socket_remote.o \
+socket_tcp.o socket_udp.o socket_conn6.o socket_bind6.o \
+socket_accept6.o socket_recv6.o socket_send6.o socket_local6.o \
+socket_tcp6.o ip4_fmt.o ip6_fmt.o ip4_bit.o ip6_bit.o ip4_scan.o \
+ip6_scan.o socket_getifname.o socket_getifidx.o socket_acceptun.o \
+socket_v4mappedprefix.o socket_ip4loopback.o socket_v6any.o \
+socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o \
+socket_conn_un.o timeoutconn_un.o
+	./makelib unix.a upathexec_env.o socket_accept.o socket_unix.o \
+	socket_bind.o socket_bindun.o socket_conn.o socket_delay.o \
+	socket_listen.o socket_local.o socket_opts.o socket_opts6.o \
+	socket_remote.o socket_tcp.o socket_udp.o socket_conn6.o \
+	socket_bind6.o socket_accept6.o socket_recv6.o socket_send6.o \
+	socket_local6.o socket_tcp6.o ip4_fmt.o ip6_fmt.o ip4_bit.o \
+	ip6_bit.o ip4_scan.o ip6_scan.o socket_getifname.o socket_acceptun.o \
+	socket_getifidx.o socket_v4mappedprefix.o socket_ip4loopback.o \
+	socket_v6any.o socket_v6loopback.o ip6_compactaddr.o ip6_expandaddr.o \
+	socket_conn_un.o timeoutconn_un.o
 
 socket_conn6.o: \
 compile socket_conn6.c socket.h ip4.h ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_conn6.c
+
+socket_conn_un.o: \
+compile socket_conn_un.c socket.h
+	./compile socket_conn_un.c
+
+timeoutconn_un.o: \
+compile timeoutconn_un.c timeoutconn.h
+	./compile timeoutconn_un.c
 
 socket_bind6.o: \
 compile socket_bind6.c socket.h ip6.h haveip6.h conf-ip

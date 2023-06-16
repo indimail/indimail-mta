@@ -55,13 +55,4 @@ socket_bind6(int s, char ip[16], uint16 port, uint32 scope_id)
 	return -1;
 #endif
 }
-
-int
-socket_bind6_reuse(int s, char ip[16], uint16 port, uint32 scope_id)
-{
-	int             opt = 1;
-
-	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof opt);
-	return socket_bind6(s, ip, port, scope_id);
-}
 #endif
