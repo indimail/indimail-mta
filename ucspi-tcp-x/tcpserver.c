@@ -541,7 +541,7 @@ matchinet(char *ip, char *token)
 	/*- Exact match / match all */
 	if (!str_diff(token, ip))
 		return (1);
-	/*
+	/*-
 	 * If our token is a valid internet address then we don't need to
 	 * check any further
 	 * if (inet_aton(token, &inp))
@@ -555,9 +555,7 @@ matchinet(char *ip, char *token)
 		*cptr = 0;
 		ptr1++;
 
-		/*
-		 * IP Address of client
-		 */
+		/*- IP Address of client */
 		for (cptr = field2; *ptr2 && *ptr2 != '.'; *cptr++ = *ptr2++);
 		*cptr = 0;
 		ptr2++;
@@ -568,7 +566,7 @@ matchinet(char *ip, char *token)
 			match++;
 			continue;
 		}
-		/*
+		/*-
 		 * Network address wildcard match (i.e.
 		 * "192.86.2?.12?")
 		 */
