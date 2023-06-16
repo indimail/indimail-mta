@@ -2,9 +2,12 @@
 .TH tcpserver 1
 
 .SH NAME
-tcpserver \- accepts incoming TLS/non-TLS TCP IPv4/IPv6 connections
+tcpserver \- accept incoming TCP IPv4/IPv6, UNIX TLS/non-TLS connections
+
 .SH SYNOPSIS
-\fBtcpserver\fR [ \fIopts\fR ] \fIhost\fR/\fIsocket\fR [ \fIport\fR ] \fI prog[.so]
+.lf
+\fBtcpserver\fR [ \fIopts\fR ] \fIhost\fR / \fIsocket\fR [ \fIport\fR ]
+\fIprog[.so]
 
 .SH DESCRIPTION
 \fIopts\fR is a series of getopt-style options. \fIhost\fR is one argument.
