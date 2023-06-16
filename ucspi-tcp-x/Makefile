@@ -673,7 +673,8 @@ DIRS: DIRS.in
 	$(edit) $@.in > $@
 
 ucspi-tcp.spec: ucspi-tcp.spec.in conf-prefix \
-conf-shared conf-sysconfdir doc/ChangeLog conf-email
+conf-shared conf-sysconfdir conf-version conf-release \
+doc/ChangeLog conf-email
 	(cat $@.in; sh ./catChangeLog) | $(edit) > $@
 
 ucspi-tcp.changes: catChangeLog doc/ChangeLog conf-version \
