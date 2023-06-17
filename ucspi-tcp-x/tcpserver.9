@@ -2,7 +2,9 @@
 .TH tcpserver 1
 
 .SH NAME
-tcpserver \- accept incoming TCP IPv4/IPv6, UNIX TLS/non-TLS connections
+.lf
+tcpserver \- accept incoming TCP IPv4/IPv6, UNIX and TLS/non-TLS
+connections
 
 .SH SYNOPSIS
 .lf
@@ -24,7 +26,7 @@ runs \fIprog\fR, with descriptor 0 reading from the network and descriptor
 object, which gets loaded using dlopen(3) call. Specifying a shared object
 can significantly improve performance by loading the object only once.
 
-For AF_INET family, the server's address is given by \fIhost\fR and
+For TCP sockets, the server's address is given by \fIhost\fR and
 \fIport\fR. \fIport\fR may be a name from /etc/services or a number; if it
 is 0, \fBtcpserver\fR(1) will choose a free TCP port. \fIhost\fR may be 0,
 allowing connections to any local IP address; or a dotted-decimal IP
@@ -32,8 +34,13 @@ address, allowing connections only to that address; or a host name,
 allowing connections to the first IP address for that host. Host names are
 fed through qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
 
-For AF_UNIX family, the address is given by the path referred by
-\fIsocket\fR argument.
+For UNIX sockets, the address is given by the path referred by \fIsocket\fR
+argument. tcpserver removes the socket on _exit(2). In case tcpserver is
+killed or exits abnormally, the socket will be left on the filesystem. Next
+invocation of tcpserver will result in the 'address already in use' for
+\fIsocket\fR. One can use the \fB\-e\fR \fIpidfile\fR option to have a pid
+file in which case, tcpserver will remove the stale socket if it finds the
+pid in \fIpidfile\fR is not running.
 
 \fBtcpserver\fR can also do SSL/TLS encryption with remote clients. This
 requires a SSL certificate to be provided using the -n option. For TLS/SSL
@@ -68,6 +75,13 @@ Verbose. Print error messages and status messages.
 .TP
 .B \-V
 Verbose. Print error messages, status messages and IP connection table.
+.TP
+.B \-e \fIpidfile
+Write pid to \fIpidfile\fR and prevent multiple invocation of
+\fBtcpserver\fR. This is useful when using UNIX sockets where there is
+possibility of stale sockets being left on the filesystem. This option also
+removes stale sockets if tcpserver is not found to be running.
+
 .P
 .B Connection options:
 .TP
