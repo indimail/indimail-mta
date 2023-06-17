@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/ipc.h>
