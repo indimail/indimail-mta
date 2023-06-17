@@ -146,7 +146,7 @@ struct iptable
 };
 typedef struct iptable IPTABLE;
 static IPTABLE **IpTable;
-static char        *af_unix;
+static char        *af_unix, *pidfile;
 
 void            add_ip(pid_t);
 void            print_ip();
@@ -1297,6 +1297,36 @@ read_provider_data(stralloc *t, int readfd, int writefd)
 #endif
 
 int
+check_pid(char *fn)
+{
+	int             i, j;
+
+	if ((i = open_read(fn)) == -1) {
+		if (af_unix && !access(af_unix, F_OK) && unlink(af_unix) == -1)
+			strerr_die4sys(111, FATAL, "couldn't remove ", af_unix, ": ");
+		close(i);
+	} else {
+		j = read(i, strnum1, FMT_ULONG);
+		close(i);
+		if (j < FMT_ULONG) {
+			strnum1[j] = 0;
+			scan_int(strnum1, &j);
+			if (!kill(j, 0))
+				return 1;
+		}
+	}
+	if (af_unix && !access(af_unix, F_OK) && unlink(af_unix) == -1)
+		strerr_die4sys(111, FATAL, "couldn't remove ", af_unix, ": ");
+	if ((i = open_trunc(fn)) == -1)
+		strerr_die4sys(111, FATAL, "couldn't open ", fn, " for write: ");
+	j = fmt_ulong(strnum1, getpid());
+	if (write(i, strnum1, j) != j)
+		strerr_die4sys(111, FATAL, "couldn't open ", fn, " for write: ");
+	close(i);
+	return 0;
+}
+
+int
 main(int argc, char **argv, char **envp)
 {
 	char           *x, *hostname, *groups = NULL;
@@ -1334,9 +1364,9 @@ main(int argc, char **argv, char **envp)
 	}
 	/*
 	 * unused options
-	 * 0, 1, 2, 3, 5, 7, 8, 9, e, E, F, G, j, J, k, K, w, W, y, Y, z, Z
+	 * 0, 2, 3, 5, 7, 8, 9, E, F, G, j, J, k, K, w, W, y, Y, z, Z
 	 */
-	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
+	if (!stralloc_copys(&options, "dDe:vqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
 	if (!stralloc_cats(&options, "46I:"))
@@ -1352,9 +1382,12 @@ main(int argc, char **argv, char **envp)
 #endif
 	if (!stralloc_0(&options))
 		strerr_die2x(111, FATAL, "out of memory");
-	while ((opt = getopt(argc, argv, options.s)) != opteof)
+	while ((opt = getopt(argc, argv, options.s)) != opteof) {
 		switch (opt)
 		{
+		case 'e':
+			pidfile = optarg;
+			break;
 		case 'c':
 			for (x = optarg;*x;x++) {
 				if (*x == '/' || *x == '.' || *x < '0' || *x > '9')
@@ -1511,7 +1544,8 @@ main(int argc, char **argv, char **envp)
 #endif
 		default:
 			usage();
-		}
+		} /*- switch (opt) */
+	} /* while ((opt = getopt(argc, argv, options.s)) != opteof) */
 	argc -= optind;
 	argv += optind;
 	if (!verbosity)
@@ -1539,6 +1573,8 @@ main(int argc, char **argv, char **envp)
 	}
 	if (!*argv)
 		usage();
+	if (pidfile && check_pid(pidfile))
+		strerr_die2x(111, FATAL, " already running");
 #if defined(HAS_MYSQL)
 	if (initMySQLlibrary(&x))
 		strerr_die3x(111, FATAL, "couldn't load MySQL shared lib: ", x);
