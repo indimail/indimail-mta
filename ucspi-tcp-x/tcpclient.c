@@ -115,7 +115,7 @@ static char     ipstr[IP4_FMT];
 static uint16   portlocal;
 static uint16   portremote;
 static char    *forcelocal;
-static char    *hostname;
+static char    *hostname, *cn_host;
 static stralloc addresses;
 static stralloc moreaddresses;
 static stralloc tmp;
@@ -130,6 +130,7 @@ static char     seed[128];
 static struct stralloc certfile, cafile, crlfile;
 struct stralloc saciphers;
 #endif
+static char    *af_unix;
 
 no_return void
 sigterm()
@@ -365,7 +366,7 @@ main(int argc, char **argv)
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 #ifdef TLS
-	if (!stralloc_cats(&options, "n:c:s:mf:M:L:z"))
+	if (!stralloc_cats(&options, "n:c:s:m:f:M:L:z"))
 		strerr_die2x(111, FATAL, "out of memory");
 #endif
 	if (!stralloc_0(&options))
@@ -421,6 +422,7 @@ main(int argc, char **argv)
 			break;
 		case 'm':
 			match_cn = 1;
+			cn_host = optarg;
 			break;
 		case 'f':
 			cipherfile = optarg;
@@ -494,17 +496,21 @@ main(int argc, char **argv)
 #else
 		hostname = "127.0.0.1";
 #endif
-	if (!(x = *++argv))
-		usage();
-	if (!x[scan_ulong(x, &u)])
-		portremote = u;
-	else {
-		struct servent *se;
+	if (*hostname == '/')
+		af_unix = hostname;
+	if (!af_unix) {
+		if (!(x = *++argv))
+			usage();
+		if (!x[scan_ulong(x, &u)])
+			portremote = u;
+		else {
+			struct servent *se;
 
-		if (!(se = getservbyname(x, "tcp")))
-			strerr_die3x(111, FATAL, "unable to figure out port number for ", x);
-		portremote = ntohs(se->s_port);
-		/*- i continue to be amazed at the stupidity of the s_port interface */
+			if (!(se = getservbyname(x, "tcp")))
+				strerr_die3x(111, FATAL, "unable to figure out port number for ", x);
+			portremote = ntohs(se->s_port);
+			/*- i continue to be amazed at the stupidity of the s_port interface */
+		}
 	}
 	if (*++argv)
 		flag_tcpclient = 1;
@@ -564,79 +570,93 @@ main(int argc, char **argv)
 	if (!flagssl && stls != unknown)
 		strerr_die2x(100, FATAL, "STARTTLS options require Certificates");
 #endif
-	if (!stralloc_copys(&tmp, hostname))
-		nomem();
-#ifdef IPV6
-	if (dns_ip6_qualify(&addresses, &fqdn, &tmp) == -1)
-		strerr_die4sys(111, FATAL, "temporarily unable to figure out IP address for ", hostname, ": ");
-	if (addresses.len < 16)
-		strerr_die3x(111, FATAL, "no IP address for ", hostname);
-	if (addresses.len == 16)
-#else
-	if (dns_ip4_qualify(&addresses, &fqdn, &tmp) == -1)
-		strerr_die4sys(111, FATAL, "temporarily unable to figure out IP address for ", hostname, ": ");
-	if (addresses.len < 4)
-		strerr_die3x(111, FATAL, "no IP address for ", hostname);
-	if (addresses.len == 4)
-#endif
-	{
+	if (af_unix) {
+		if ((s = socket_unix()) == -1)
+			strerr_die2sys(111, FATAL, "unable to create AF_UNIX socket: ");
 		ctimeout[0] += ctimeout[1];
-		ctimeout[1] = 0;
-	}
-	for (cloop = 0; cloop < 2; ++cloop) {
-		if (!stralloc_copys(&moreaddresses, ""))
+		if (timeoutconn_un(s, hostname, ctimeout[0]) == -1)
+			strerr_warn3("tcpclient: unable to connect to socket ", hostname, ": ", &strerr_sys);
+		goto CONNECTED;
+	} else {
+		if (!stralloc_copys(&tmp, hostname))
 			nomem();
 #ifdef IPV6
-		for (j = 0; j + 16 <= addresses.len; j += 4)
+		if (dns_ip6_qualify(&addresses, &fqdn, &tmp) == -1)
+			strerr_die4sys(111, FATAL, "temporarily unable to figure out IP address for ", hostname, ": ");
+		if (addresses.len < 16)
+			strerr_die3x(111, FATAL, "no IP address for ", hostname);
+		if (addresses.len == 16)
 #else
-		for (j = 0; j + 4 <= addresses.len; j += 4)
+		if (dns_ip4_qualify(&addresses, &fqdn, &tmp) == -1)
+			strerr_die4sys(111, FATAL, "temporarily unable to figure out IP address for ", hostname, ": ");
+		if (addresses.len < 4)
+			strerr_die3x(111, FATAL, "no IP address for ", hostname);
+		if (addresses.len == 4)
 #endif
 		{
-#ifdef IPV6
-			if ((s = socket_tcp6()) == -1)
-#else
-			if ((s = socket_tcp()) == -1)
-#endif
-				strerr_die2sys(111, FATAL, "unable to create socket: ");
-#ifdef IPV6
-			if (socket_bind6(s, iplocal, portlocal, netif) == -1)
-#else
-			if (socket_bind4(s, iplocal, portlocal) == -1)
-#endif
-				strerr_die2sys(111, FATAL, "unable to bind socket: ");
-#ifdef IPV6
-			if (timeoutconn6(s, addresses.s + j, portremote, ctimeout[cloop], netif) == 0)
-#else
-			if (timeoutconn(s, addresses.s + j, portremote, ctimeout[cloop]) == 0)
-#endif
-				goto CONNECTED;
-			close(s);
-			if (!cloop && ctimeout[1] && (errno == error_timeout)) {
-#ifdef IPV6
-				if (!stralloc_catb(&moreaddresses, addresses.s + j, 16))
-#else
-				if (!stralloc_catb(&moreaddresses, addresses.s + j, 4))
-#endif
-					nomem();
-			} else {
-				strnum[fmt_ulong(strnum, portremote)] = 0;
-#ifdef IPV6
-				if (ip6_isv4mapped(addresses.s + j))
-					ipstr[ip4_fmt(ipstr, addresses.s + j + 12)] = 0;
-				else
-					ipstr[ip6_fmt(ipstr, addresses.s + j)] = 0;
-#else
-				ipstr[ip4_fmt(ipstr, addresses.s + j)] = 0;
-#endif
-				strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ", strnum, ": ", &strerr_sys);
-			}
+			ctimeout[0] += ctimeout[1];
+			ctimeout[1] = 0;
 		}
-		if (!stralloc_copy(&addresses, &moreaddresses))
-			nomem();
+		for (cloop = 0; cloop < 2; ++cloop) {
+			if (!stralloc_copys(&moreaddresses, ""))
+				nomem();
+#ifdef IPV6
+			for (j = 0; j + 16 <= addresses.len; j += 4)
+#else
+			for (j = 0; j + 4 <= addresses.len; j += 4)
+#endif
+			{
+#ifdef IPV6
+				if ((s = socket_tcp6()) == -1)
+#else
+				if ((s = socket_tcp()) == -1)
+#endif
+					strerr_die2sys(111, FATAL, "unable to create AF_INET socket: ");
+#ifdef IPV6
+				if (socket_bind6(s, iplocal, portlocal, netif) == -1)
+#else
+				if (socket_bind4(s, iplocal, portlocal) == -1)
+#endif
+					strerr_die2sys(111, FATAL, "unable to bind socket: ");
+#ifdef IPV6
+				if (timeoutconn6(s, addresses.s + j, portremote, ctimeout[cloop], netif) == 0)
+#else
+				if (timeoutconn(s, addresses.s + j, portremote, ctimeout[cloop]) == 0)
+#endif
+					goto CONNECTED;
+				close(s);
+				if (!cloop && ctimeout[1] && (errno == error_timeout)) {
+#ifdef IPV6
+					if (!stralloc_catb(&moreaddresses, addresses.s + j, 16))
+#else
+					if (!stralloc_catb(&moreaddresses, addresses.s + j, 4))
+#endif
+						nomem();
+				} else {
+					strnum[fmt_ulong(strnum, portremote)] = 0;
+#ifdef IPV6
+					if (ip6_isv4mapped(addresses.s + j))
+						ipstr[ip4_fmt(ipstr, addresses.s + j + 12)] = 0;
+					else
+						ipstr[ip6_fmt(ipstr, addresses.s + j)] = 0;
+#else
+					ipstr[ip4_fmt(ipstr, addresses.s + j)] = 0;
+#endif
+					strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ", strnum, ": ", &strerr_sys);
+				}
+			}
+			if (!stralloc_copy(&addresses, &moreaddresses))
+				nomem();
+		}
+		_exit(111);
 	}
-	_exit(111);
 
 CONNECTED:
+	if (af_unix) {
+		if (!upathexec_env("PROTO", "UNIX"))
+			nomem();
+		goto do_data;
+	}
 	if (!flagdelay)
 		socket_tcpnodelay(s);	/*- if it fails, bummer */
 #ifndef IPV6
@@ -727,6 +747,8 @@ CONNECTED:
 	}
 	if (!upathexec_env("TCPREMOTEINFO", x))
 		nomem();
+
+do_data:
 #ifdef TLS
 	if (flagssl) {
 		if (cipherfile) {
@@ -764,7 +786,7 @@ CONNECTED:
 				!stralloc_0(&tls_server_version))
 			strerr_die2x(111, FATAL, "out of memory");
 		tls_server_version.len--;
-		if (tls_connect(ctimeout[0] + ctimeout[1], s, s, ssl, match_cn ? hostname : 0) == -1)
+		if (tls_connect(ctimeout[0] + ctimeout[1], s, s, ssl, match_cn ? cn_host : 0) == -1)
 			_exit(111);
 		if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
 				!stralloc_0(&tls_client_version))

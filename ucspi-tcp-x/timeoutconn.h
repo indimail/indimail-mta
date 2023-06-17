@@ -26,5 +26,6 @@ int             timeoutconn(int, char ip[4], uint16, unsigned int);
 #ifdef LIBC_HAS_IP6
 int             timeoutconn6(int, char ip[16], uint16, unsigned int, uint32);
 #endif
+int             timeoutconn_un(int, char *, unsigned int);
 
 #endif

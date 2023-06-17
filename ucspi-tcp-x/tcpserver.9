@@ -1,47 +1,52 @@
+.\" vim: tw=75
 .TH tcpserver 1
+
 .SH NAME
-tcpserver \- accepts incoming TLS/non-TLS TCP IPv4/IPv6 connections
+.lf
+tcpserver \- accept incoming TCP IPv4/IPv6, UNIX and TLS/non-TLS
+connections
+
 .SH SYNOPSIS
-.B tcpserver
-[
-.I opts
-]
-.I host
-.I port
-.I prog[.so]
+.lf
+\fBtcpserver\fR [ \fIopts\fR ] \fIhost\fR / \fIsocket\fR [ \fIport\fR ]
+\fIprog[.so]
+
 .SH DESCRIPTION
-.I opts
-is a series of getopt-style options.
-.I host
-is one argument.
-.I port
-is one argument.
-.I prog
-[.\fIso\fR]
-consists of one or more arguments.
+\fIopts\fR is a series of getopt-style options. \fIhost\fR is one argument.
+\fIport\fR is one argument. \fIprog\fR [.\fIso\fR] consists of one or more
+arguments.
 
-\fBtcpserver\fR(1) waits for connections from TCP clients. For each
-connection, it runs \fIprog\fR, with descriptor 0 reading from the network
-and descriptor 1 writing to the network. It also sets up several
-environment variables. if \fIprog.so\fR is specified, it is expected that
-prog.so points to a shared object, which gets loaded using dlopen(3) call.
-Specifying a shared object can significantly improve performance by loading
-the object only once.
+\fBtcpserver\fR(1) waits for connections from TCP clients (using AF_INET
+address family sockets) or UNIX domain socket clients (AF_UNIX address
+family sockets). If \fIsocket\fR starts with '/', \fBtcpserver\fR uses UNIX
+domain sockets and ignores \fIport\fR argument. For each connection, it
+runs \fIprog\fR, with descriptor 0 reading from the network and descriptor
+1 writing to the network. It also sets up several environment variables. if
+\fIprog.so\fR is specified, it is expected that prog.so points to a shared
+object, which gets loaded using dlopen(3) call. Specifying a shared object
+can significantly improve performance by loading the object only once.
 
-The server's address is given by \fIhost\fR and \fIport\fR. \fIport\fR may
-be a name from /etc/services or a number; if it is 0, \fBtcpserver\fR(1)
-will choose a free TCP port.
-\fIhost\fR may be 0, allowing connections to any local IP address; or a
-dotted-decimal IP address, allowing connections only to that address; or a
-host name, allowing connections to the first IP address for that host.
-Host names are fed through qualification using dns_ip4_qualify
-(dns_ip6_qualify for ipv6).
+For TCP sockets, the server's address is given by \fIhost\fR and
+\fIport\fR. \fIport\fR may be a name from /etc/services or a number; if it
+is 0, \fBtcpserver\fR(1) will choose a free TCP port. \fIhost\fR may be 0,
+allowing connections to any local IP address; or a dotted-decimal IP
+address, allowing connections only to that address; or a host name,
+allowing connections to the first IP address for that host. Host names are
+fed through qualification using dns_ip4_qualify (dns_ip6_qualify for ipv6).
 
-.B tcpserver
-can also do SSL/TLS encryption with remote clients. This requires a SSL
-certificate to be provided using the -n option. For TLS/SSL sessions,
-\fBtcpserver\fR -z option sets the environment variable \fBTLS_PROVIDER\fR
-with details of the TLS connnection.
+For UNIX sockets, the address is given by the path referred by \fIsocket\fR
+argument. tcpserver removes the socket on _exit(2). In case tcpserver is
+killed or exits abnormally, the socket will be left on the filesystem. Next
+invocation of tcpserver will result in the 'address already in use' for
+\fIsocket\fR. One can use the \fB\-e\fR \fIpidfile\fR option to have a pid
+file in which case, tcpserver will remove the stale socket if it finds the
+pid in \fIpidfile\fR is not running.
+
+\fBtcpserver\fR can also do SSL/TLS encryption with remote clients. This
+requires a SSL certificate to be provided using the -n option. For TLS/SSL
+sessions, \fBtcpserver\fR -z option sets the environment variable
+\fBTLS_PROVIDER\fR with details of the TLS connnection. SSL/TLS encryption
+works for both TCP and UNIX sockets.
 
 \fBtcpserver(1)\fR works differently on Linux and FreeBSD. By default,
 FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The default
@@ -70,6 +75,13 @@ Verbose. Print error messages and status messages.
 .TP
 .B \-V
 Verbose. Print error messages, status messages and IP connection table.
+.TP
+.B \-e \fIpidfile
+Write pid to \fIpidfile\fR and prevent multiple invocation of
+\fBtcpserver\fR. This is useful when using UNIX sockets where there is
+possibility of stale sockets being left on the filesystem. This option also
+removes stale sockets if tcpserver is not found to be running.
+
 .P
 .B Connection options:
 .TP
@@ -87,9 +99,9 @@ reread when \fBtcpserver\fR(1) receives SIGHUP.
 .TP
 .B \-C \fIn
 Do not handle more than \fIn\fR simultaneous connections from a particular
-host. If there are \fIn\fR simultaneous copies of prog running, defer
-acceptance of a new connection until one copy finishes. \fIn\fR must be a
-positive integer. Default: 20. This can be also handled by having the
+host/socket. If there are \fIn\fR simultaneous copies of prog running,
+defer acceptance of a new connection until one copy finishes. \fIn\fR must
+be a positive integer. Default: 20. This can be also handled by having the
 environment variable $\fBMAXPERIP\fR compiled in the \fIrules\fR cdb
 database. The $\fBMAXPERIP\fR environment variables gives
 \fBtcpserver\fR(1) the ability to have different per host concurrency limit
@@ -100,7 +112,7 @@ for each and every host that is defined in the rules database.
 Follow the rules compiled into \fIcdb\fR by \fBtcprules\fR(1). These rules
 may specify setting environment variables or rejecting connections from bad
 sources. You can rerun \fBtcprules\fR(1) to change the rules while
-\fBtcpserver\fR(1) is running.
+\fBtcpserver\fR(1) is running. This option is ignored for UNIX sockets.
 
 .TP
 .B \-X
@@ -108,6 +120,7 @@ With
 .B -x \fIcdb,
 allow connections even if \fIcdb\fR does not exist. Normally
 \fBtcpserver\fR(1) will drop the connection if \fIcdb\fR does not exist.
+This option is ignored for UNIX sockets.
 
 .TP
 .B \-m \fIdb.conf
@@ -137,7 +150,8 @@ to the mysql shared library. e.g.
 You can set $\fBMYSQL_LIB\fR environment variable in
 /service/\fIname\fR/variables/MYSQL_LIB (here \fIname\fR refers to a service
 under \fIsupervise\fR(8)). You can also set the value in the control file
-\fImysql_lib\fR. Environment variable takes precedence over the control file.
+\fImysql_lib\fR. Environment variable takes precedence over the control
+file. This option is ignored for UNIX sockets.
 
 .TP
 .B \-B \fIbanner
@@ -176,7 +190,7 @@ Same as
 .TP
 .B \-1
 After preparing to receive connections, print the local port number to
-standard output.
+standard output. This option is ignored for UNIX sockets.
 
 .TP
 .B \-4
@@ -185,18 +199,20 @@ systems like OpenBSD which will not let IPv6 sockets connect to
 V4-mapped IPv6 addresses. Please note that this also applies to DNS
 lookups, so you will have to use an DNS resolver with an IPv6 address to
 accept IPv6 connections. Use \fBDNSCACHEIP\fR to set the DNS resolver
-IP dynamically.
+IP dynamically. This option is ignored for UNIX sockets.
 
 .TP
 .B \-6
 Force IPv6 mode in \fBUCSPI\fR environment variables, even for
 IPv4 connections. This will set $\fBPROTO\fR to \fBTCP6\fR and put
 IPv4-mapped IPv6 addresses in $\fBTCP6LOCALIP\fR and $\fBTCP6REMOTEIP\fR.
+This option is ignored for UNIX sockets.
 
 .TP
 .B \-I\fIinterface
 Bind to the network interface \fIinterface\fR ("eth0" on Linux, for example).
-This is only defined and needed for IPv6 link-local addresses.
+This is only defined and needed for IPv6 link-local addresses. This option
+is ignored for UNIX sockets.
 
 .TP
 .B \-b \fIn
@@ -207,22 +223,26 @@ irrelevant.
 .TP
 .B \-o
 Leave IP options alone. If the client is sending packets along an IP source
-route, send packets back along the same route.
+route, send packets back along the same route. This option is ignored for
+UNIX sockets.
 
 .TP
 .B \-O
 (Default.) Kill IP options. A client can still use source routing to connect
 and to send data, but packets will be sent back along the default route.
+This option is ignored for UNIX sockets.
 
 .TP
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
-future; if you want it, set it explicitly.
+future; if you want it, set it explicitly. This option is ignored for
+UNIX sockets.
 
 .TP
 .B \-D
-Never delay sending data; enable TCP_NODELAY.
+Never delay sending data; enable TCP_NODELAY. This option is ignored for
+UNIX sockets.
 
 .P
 .B Data-gathering options:
@@ -230,13 +250,13 @@ Never delay sending data; enable TCP_NODELAY.
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment variable
-$\fBTCPREMOTEHOST\fR.
+$\fBTCPREMOTEHOST\fR. This option is ignored for UNIX sockets.
 
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment variable
 $\fBTCPREMOTEHOST\fR. To avoid loops, you must use this option for servers on TCP
-port 53.
+port 53. This option is ignored for UNIX sockets.
 
 .TP
 .B \-p
@@ -244,7 +264,7 @@ Paranoid. After looking up the remote host name in DNS, look up the IP
 addresses in DNS for that host name, and remove the environment variable
 $TCPREMOTEHOST if none of the addresses match the client's IP address. The
 environment variable $\fBTCPPARANOID\fR is set if host has a reverse dns but IP
-does not match $\fBTCPREMOTEIP\fR
+does not match $\fBTCPREMOTEIP\fR. This option is ignored for UNIX sockets.
 
 .TP
 .B \-P
@@ -255,21 +275,23 @@ does not match $\fBTCPREMOTEIP\fR
 Do not look up the local host name in DNS; use \fIlocalname\fR for the
 environment variable $\fBTCPLOCALHOST\fR. A common choice for
 \fIlocalname\fR is 0. To avoid loops, you must use this option for servers
-on TCP port 53.
+on TCP port 53. This option is ignored for UNIX sockets.
 
 .TP
 .B \-r
 (Default.) Attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host.
+(Ignored for UNIX)
 
 .TP
 .B  \-R
 Do not attempt to obtain $\fBTCPREMOTEINFO\fR from the remote host. To
 avoid loops, you must use this option for servers on TCP ports 53 and 113.
+(Ignored for UNIX)
 
 .TP
 .B \-t \fIn
 Give up on the $TCPREMOTEINFO connection attempt after
-\fIn\fR seconds. Default: 26.
+\fIn\fR seconds. Default: 26. (Ignored for UNIX)
 
 .TP
 .B \-T \fIn
@@ -333,7 +355,7 @@ to avoid version-specific methods since they are now deprecated.
 .TP
 -\fBN\fR
 Client-initiated renegotiation is disabled by default. This option enables
-it.
+it. This option is ignored for UNIX sockets.
 
 .TP
 -\fBz\fR
@@ -457,7 +479,7 @@ Default is @qsysconfdir@/certs.
 A script \fIupdate_tmprsadh\fR in cron uses the following openssl commands
 to pre-generate 2048 bites RSA and DH parameters. You can pass --maxbits
 argument to \fIupdate_tmprsadh\fR to generate these with higher bits. You
-can set the environment variable \fBSSL_BITS\fR to make tcpclient choose
+can set the environment variable \fBSSL_BITS\fR to make tcpserver choose
 specific bits for the RSA/DH parameters. These files are generated in
 @qsysconfdir@/certs. \fIupdate_rmprsadh\fR is installed to be run by cron
 if you have installed indimail from Open Build Service.
@@ -512,6 +534,7 @@ SSL_CTX or SSL object as a result of this call, and so the caller should
 not free it if the function call is succesful..
 
 .SH SEE ALSO
+unix(7),
 tcprules(1),
 tcprulescheck(1),
 argv0(1),
@@ -531,6 +554,9 @@ supervise(8),
 svscan(8),
 tcp-environ(5),
 socket(2),
+bind(2),
+listen(2),
+connect(2),
 select(2),
 accept(2)
 

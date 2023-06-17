@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #include <sys/ipc.h>
@@ -112,6 +113,7 @@ static char     localipstr[IP4_FMT];
 static char     remoteip[4];
 static char     remoteipstr[IP4_FMT];
 #endif
+struct sockaddr_un un;
 static stralloc localhostsa;
 static char    *localhost;
 static uint16   remoteport;
@@ -145,6 +147,7 @@ struct iptable
 };
 typedef struct iptable IPTABLE;
 static IPTABLE **IpTable;
+static char        *af_unix, *pidfile;
 
 void            add_ip(pid_t);
 void            print_ip();
@@ -252,7 +255,35 @@ found(char *data, unsigned int datalen)
 }
 
 void
-doit(int t)
+doit_unix(int t, char *hostname)
+{
+	str_copyb(remoteipstr, "0.0.0.0", 8);
+	if (verbosity >= 2) {
+		strnum1[fmt_ulong(strnum1, getpid())] = 0;
+		strerr_warn4("tcpserver: pid ", strnum1, " from ", hostname, 0);
+	}
+	if (*banner) {
+		substdio_fdbuf(&b, write, t, bspace, sizeof bspace);
+		if (substdio_puts(&b, banner) == -1)
+			strerr_die2sys(111, DROP, "unable to print banner: ");
+	}
+	env("PROTO", "UNIX");
+	env("UNIXLOCALPATH", hostname);
+	if (verbosity >= 2) {
+		if (!stralloc_copys(&tmp, "tcpserver: ok "))
+			drop_nomem();
+		strnum1[fmt_ulong(strnum1, getpid())] = 0;
+		safecats(strnum1);
+		cats(" ");
+		cats("[");
+		safecats(hostname);
+		cats("]\n");
+		substdio_putflush(subfderr, tmp.s, tmp.len);
+	}
+}
+
+void
+doit_tcp(int t, char *hostname)
 {
 	int             j;
 #ifdef IPV6
@@ -262,7 +293,7 @@ doit(int t)
 
 #ifdef IPV6
 	if (!forcev6 && ip6_isv4mapped(remoteip))
-		fakev4 = 1;
+			fakev4 = 1;
 	if (fakev4)
 		remoteipstr[ip4_fmt(remoteipstr, remoteip + 12)] = 0;
 	else
@@ -511,7 +542,7 @@ matchinet(char *ip, char *token)
 	/*- Exact match / match all */
 	if (!str_diff(token, ip))
 		return (1);
-	/*
+	/*-
 	 * If our token is a valid internet address then we don't need to
 	 * check any further
 	 * if (inet_aton(token, &inp))
@@ -525,9 +556,7 @@ matchinet(char *ip, char *token)
 		*cptr = 0;
 		ptr1++;
 
-		/*
-		 * IP Address of client
-		 */
+		/*- IP Address of client */
 		for (cptr = field2; *ptr2 && *ptr2 != '.'; *cptr++ = *ptr2++);
 		*cptr = 0;
 		ptr2++;
@@ -538,7 +567,7 @@ matchinet(char *ip, char *token)
 			match++;
 			continue;
 		}
-		/*
+		/*-
 		 * Network address wildcard match (i.e.
 		 * "192.86.2?.12?")
 		 */
@@ -1137,6 +1166,8 @@ print_ip()
 no_return void
 sigterm()
 {
+	if (af_unix)
+		unlink(af_unix);
 	_exit(0);
 }
 
@@ -1267,6 +1298,36 @@ read_provider_data(stralloc *t, int readfd, int writefd)
 #endif
 
 int
+check_pid(char *fn)
+{
+	int             i, j;
+
+	if ((i = open_read(fn)) == -1) {
+		if (af_unix && !access(af_unix, F_OK) && unlink(af_unix) == -1)
+			strerr_die4sys(111, FATAL, "couldn't remove ", af_unix, ": ");
+		close(i);
+	} else {
+		j = read(i, strnum1, FMT_ULONG);
+		close(i);
+		if (j < FMT_ULONG) {
+			strnum1[j] = 0;
+			scan_int(strnum1, &j);
+			if (!kill(j, 0))
+				return 1;
+		}
+	}
+	if (af_unix && !access(af_unix, F_OK) && unlink(af_unix) == -1)
+		strerr_die4sys(111, FATAL, "couldn't remove ", af_unix, ": ");
+	if ((i = open_trunc(fn)) == -1)
+		strerr_die4sys(111, FATAL, "couldn't open ", fn, " for write: ");
+	j = fmt_ulong(strnum1, getpid());
+	if (write(i, strnum1, j) != j)
+		strerr_die4sys(111, FATAL, "couldn't open ", fn, " for write: ");
+	close(i);
+	return 0;
+}
+
+int
 main(int argc, char **argv, char **envp)
 {
 	char           *x, *hostname, *groups = NULL;
@@ -1295,6 +1356,8 @@ main(int argc, char **argv, char **envp)
 	struct stat     st;
 #endif
 	struct stralloc options = {0};
+	struct linger   cflinger;
+	int             i = 1;
 
 	if ((x = env_get("MAXPERIP"))) { /*- '-C' option overrides this */
 		scan_ulong(x, &PerHostLimit);
@@ -1302,9 +1365,9 @@ main(int argc, char **argv, char **envp)
 	}
 	/*
 	 * unused options
-	 * 0, 1, 2, 3, 5, 7, 8, 9, e, E, F, G, j, J, k, K, w, W, y, Y, z, Z
+	 * 0, 2, 3, 5, 7, 8, 9, E, F, G, j, J, k, K, w, W, y, Y, z, Z
 	 */
-	if (!stralloc_copys(&options, "dDvqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
+	if (!stralloc_copys(&options, "dDe:vqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
 	if (!stralloc_cats(&options, "46I:"))
@@ -1320,9 +1383,12 @@ main(int argc, char **argv, char **envp)
 #endif
 	if (!stralloc_0(&options))
 		strerr_die2x(111, FATAL, "out of memory");
-	while ((opt = getopt(argc, argv, options.s)) != opteof)
+	while ((opt = getopt(argc, argv, options.s)) != opteof) {
 		switch (opt)
 		{
+		case 'e':
+			pidfile = optarg;
+			break;
 		case 'c':
 			for (x = optarg;*x;x++) {
 				if (*x == '/' || *x == '.' || *x < '0' || *x > '9')
@@ -1479,7 +1545,8 @@ main(int argc, char **argv, char **envp)
 #endif
 		default:
 			usage();
-		}
+		} /*- switch (opt) */
+	} /* while ((opt = getopt(argc, argv, options.s)) != opteof) */
 	argc -= optind;
 	argv += optind;
 	if (!verbosity)
@@ -1488,21 +1555,27 @@ main(int argc, char **argv, char **envp)
 		usage();
 	if (str_equal(hostname, ""))
 		hostname = "0";
-	if (!(x = *argv++))
-		usage();
-	if (!x[scan_ulong(x, &port)])
-		localport = port;
-	else {
-		if (!(se = getservbyname(x, "tcp")))
-			strerr_die3x(111, FATAL, "unable to figure out port number for ", x);
+	if (*hostname == '/')
+		af_unix = hostname;
+	if (!af_unix) {
+		if (!(x = *argv++))
+			usage();
+		if (!x[scan_ulong(x, &port)])
+			localport = port;
+		else {
+			if (!(se = getservbyname(x, "tcp")))
+				strerr_die3x(111, FATAL, "unable to figure out port number for ", x);
 #ifdef IPV6
-		uint16_unpack_big((char*) &se->s_port, &localport);
+			uint16_unpack_big((char*) &se->s_port, &localport);
 #else
-		localport = ntohs(se->s_port);
+			localport = ntohs(se->s_port);
 #endif
+		}
 	}
 	if (!*argv)
 		usage();
+	if (pidfile && check_pid(pidfile))
+		strerr_die2x(111, FATAL, " already running");
 #if defined(HAS_MYSQL)
 	if (initMySQLlibrary(&x))
 		strerr_die3x(111, FATAL, "couldn't load MySQL shared lib: ", x);
@@ -1515,6 +1588,9 @@ main(int argc, char **argv, char **envp)
 	sig_catch(sig_hangup, sighangup);
 	sig_catch(sig_usr1, siguser1);
 	sig_ignore(sig_pipe);
+
+	if (af_unix)
+		goto do_socket;
 	if (str_equal(hostname, "0") || str_equal(hostname, "::"))
 		byte_zero(localip, sizeof(localip));
 	else {
@@ -1540,6 +1616,10 @@ main(int argc, char **argv, char **envp)
 		byte_copy(localip, 4, addresses.s);
 #endif
 	}
+
+do_socket:
+	cflinger.l_onoff = 1;
+	cflinger.l_linger = 60;
 #ifdef TLS
 	if (!certdir && !(certdir = env_get("CERTDIR")))
 		certdir = "/etc/indimail/certs";
@@ -1615,26 +1695,52 @@ main(int argc, char **argv, char **envp)
 #endif
 	}
 #endif
+
+	if (af_unix) {
+		if ((sfd = socket_unix()) == -1)
+			strerr_die4sys(111, FATAL, "unable to create socket ", hostname, ": ");
+		if (socket_bindun(sfd, hostname) == -1)
+			strerr_die4sys(111, FATAL, "unable to bind to ", hostname, ": ");
+		if (socket_listen(sfd, backlog) == -1)
+			strerr_die4sys(111, FATAL, "unable to listen on socket  ", hostname, ": ");
+		ndelay_off(sfd);
+	} else {
 #ifdef IPV6
 #ifdef FREEBSD
-	if ((s6 = socket_tcp6()) == -1)
+		if ((s6 = socket_tcp6()) == -1)
 #else
-	if ((sfd = socket_tcp6()) == -1)
+		if ((sfd = socket_tcp6()) == -1)
 #endif
 #else
-	if ((sfd = socket_tcp()) == -1)
+		if ((sfd = socket_tcp()) == -1)
 #endif
-		strerr_die2sys(111, FATAL, "unable to create socket: ");
+			strerr_die2sys(111, FATAL, "unable to create socket: ");
+
+#if defined(IPV6) && defined(FREEBSD)
+		if (setsockopt(s6, SOL_SOCKET, SO_LINGER, (char *) &cflinger, sizeof (struct linger)) == -1)
+#else
+		if (setsockopt(sfd, SOL_SOCKET, SO_LINGER, (char *) &cflinger, sizeof (struct linger)) == -1)
+#endif
+			strerr_die4sys(111, FATAL, "unable to do setsockopt SO_LINGER ", hostname, ": ");
+
+#if defined(IPV6) && defined(FREEBSD)
+		if (setsockopt(s6, SOL_SOCKET, SO_REUSEADDR, (char *) &i, sizeof(i)) < 0)
+#else
+		if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, (char *) &i, sizeof(i)) < 0)
+#endif
+			strerr_die4sys(111, FATAL, "unable to do set SO_REUSEADDR ", hostname, ": ");
+
 #ifdef IPV6
 #ifdef FREEBSD
-	if (socket_bind6_reuse(s6, localip, localport, netif) == -1)
+		if (socket_bind6(s6, localip, localport, netif) == -1)
 #else
-	if (socket_bind6_reuse(sfd, localip, localport, netif) == -1)
+		if (socket_bind6(sfd, localip, localport, netif) == -1)
 #endif
 #else
-	if (socket_bind4_reuse(sfd, localip, localport) == -1)
+		if (socket_bind4(sfd, localip, localport) == -1)
 #endif
-		strerr_die2sys(111, FATAL, "unable to bind: ");
+			strerr_die2sys(111, FATAL, "unable to bind: ");
+
 #ifdef IPV6
 #ifdef FREEBSD
 	if (socket_local6(s6, localip, &localport, &netif) == -1)
@@ -1644,41 +1750,47 @@ main(int argc, char **argv, char **envp)
 #else
 	if (socket_local4(sfd, localip, &localport) == -1)
 #endif
-		strerr_die2sys(111, FATAL, "unable to get local address: ");
-#if defined(IPV6) && defined(FREEBSD)
-	if (socket_listen(s6, backlog) == -1)
-#else
-	if (socket_listen(sfd, backlog) == -1)
-#endif
-		strerr_die2sys(111, FATAL, "unable to listen: ");
-#if defined(IPV6) && defined(FREEBSD)
-	ndelay_off(s6);
-#else
-	ndelay_off(sfd);
-#endif
-#if defined(IPV6) && defined(FREEBSD)
-	/*
-	 * By default, FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The
-	 * default behavior intentionally violates RFC2553 for security reasons.
-	 * Listen to two sockets if you want to accept both IPv4 and IPv6 traffic.
-	 * IPv4 traffic may be routed with certain per-socket/per-node configura-
-	 * tion, however, it is not recommended to do so. Consult ip6(4) for
-	 * details.
-	 */
-	if (!noipv6) {
-		noipv6 = 1;
-		if ((s4 = socket_tcp6()) == -1)
-			strerr_die2sys(111, FATAL, "unable to create socket: ");
-		if (socket_bind6_reuse(s4, localip, localport, netif) == -1)
-			strerr_die2sys(111, FATAL, "unable to bind: ");
-		if (socket_local6(s4, localip, &localport, &netif) == -1)
 			strerr_die2sys(111, FATAL, "unable to get local address: ");
-		if (socket_listen(s4, backlog) == -1)
+
+#if defined(IPV6) && defined(FREEBSD)
+		if (socket_listen(s6, backlog) == -1)
+#else
+		if (socket_listen(sfd, backlog) == -1)
+#endif
 			strerr_die2sys(111, FATAL, "unable to listen: ");
-		ndelay_off(s4);
-		noipv6 = 0;
-	}
+#if defined(IPV6) && defined(FREEBSD)
+		ndelay_off(s6);
+#else
+		ndelay_off(sfd);
+#endif
+#if defined(IPV6) && defined(FREEBSD)
+		/*
+		 * By default, FreeBSD does not route IPv4 traffic to AF_INET6 sockets. The
+		 * default behavior intentionally violates RFC2553 for security reasons.
+		 * Listen to two sockets if you want to accept both IPv4 and IPv6 traffic.
+		 * IPv4 traffic may be routed with certain per-socket/per-node configura-
+		 * tion, however, it is not recommended to do so. Consult ip6(4) for
+		 * details.
+		 */
+		if (!noipv6) {
+			noipv6 = 1;
+			if ((s4 = socket_tcp6()) == -1)
+				strerr_die2sys(111, FATAL, "unable to create socket: ");
+			i = 1;
+			if (setsockopt(s4, SOL_SOCKET, SO_REUSEADDR, (char *) &i, sizeof(i)) < 0)
+				strerr_die4sys(111, FATAL, "unable to do set SO_REUSEADDR ", hostname, ": ");
+			if (socket_bind6(s4, localip, localport, netif) == -1)
+				strerr_die2sys(111, FATAL, "unable to bind: ");
+			if (socket_local6(s4, localip, &localport, &netif) == -1)
+				strerr_die2sys(111, FATAL, "unable to get local address: ");
+			if (socket_listen(s4, backlog) == -1)
+				strerr_die2sys(111, FATAL, "unable to listen: ");
+			ndelay_off(s4);
+			noipv6 = 0;
+		}
 #endif /*- #if defined(IPV6) && defined(FREEBSD) */
+	} /* if (not af_unix) */
+
 	if (user) {
 		if (setuserid(user, 1, groups) == -1)
 			strerr_die2sys(111, FATAL, "unable to set user: ");
@@ -1694,8 +1806,8 @@ main(int argc, char **argv, char **envp)
 	}
 	if (tcpserver_plugin(envp, 1))
 		_exit(111);
-	localportstr[fmt_ulong(localportstr, localport)] = 0;
-	if (flag1) {
+	if (flag1 && !af_unix) {
+		localportstr[fmt_ulong(localportstr, localport)] = 0;
 		substdio_fdbuf(&b, write, 1, bspace, sizeof bspace);
 		substdio_puts(&b, localportstr);
 		substdio_puts(&b, "\n");
@@ -1708,51 +1820,57 @@ main(int argc, char **argv, char **envp)
 		while (numchildren >= limit)
 			sig_pause();
 		sig_unblock(sig_child);
+		if (af_unix)
+			asd = socket_acceptun(sfd, &un, hostname);
+		else {
 #if defined(IPV6) && defined(FREEBSD)
-		while (1) {
-			FD_ZERO(&rfds);
-			FD_SET(s6, &rfds);
-			FD_SET(s4, &rfds);
-			if ((r = select(s4 + 1, &rfds, 0, 0, 0)) == -1) {
-				if (errno == error_intr)
-					continue;
-				else
-					strerr_die2sys(111, FATAL, "select: ");
+			while (1) {
+				FD_ZERO(&rfds);
+				FD_SET(s6, &rfds);
+				FD_SET(s4, &rfds);
+				if ((r = select(s4 + 1, &rfds, 0, 0, 0)) == -1) {
+					if (errno == error_intr)
+						continue;
+					else
+						strerr_die2sys(111, FATAL, "select: ");
+				}
+				if (r) {
+					if (FD_ISSET(s6, &rfds))
+						sfd = s6;
+					else
+					if (FD_ISSET(s4, &rfds))
+						sfd = s4;
+					break;
+				}
 			}
-			if (r) {
-				if (FD_ISSET(s6, &rfds))
-					sfd = s6;
-				else
-				if (FD_ISSET(s4, &rfds))
-					sfd = s4;
-				break;
-			}
-		}
 #endif
 #ifdef IPV6
-		asd = socket_accept6(sfd, remoteip, &remoteport, &netif);
+			asd = socket_accept6(sfd, remoteip, &remoteport, &netif);
 #else
-		asd = socket_accept4(sfd, remoteip, &remoteport);
+			asd = socket_accept4(sfd, remoteip, &remoteport);
 #endif
+		} /* if (!af_unix) */
 		sig_block(sig_child);
 		if (asd == -1)
 			continue;
 		++numchildren;
 		if (!flagssl)
 			printstatus("un-encrypted session");
+		if (!af_unix) {
 #ifdef IPV6
-		if (!forcev6 && ip6_isv4mapped(remoteip))
-			fakev4 = 1;
-		if (fakev4)
-			remoteipstr[ip4_fmt(remoteipstr, remoteip + 12)] = 0;
-		else
-		if (noipv6 && !forcev6)
-			remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
-		else
-			remoteipstr[ip6_fmt(remoteipstr, remoteip)] = 0;
+			if (!forcev6 && ip6_isv4mapped(remoteip))
+				fakev4 = 1;
+			if (fakev4)
+				remoteipstr[ip4_fmt(remoteipstr, remoteip + 12)] = 0;
+			else
+			if (noipv6 && !forcev6)
+				remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
+			else
+				remoteipstr[ip6_fmt(remoteipstr, remoteip)] = 0;
 #else
-		remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
+			remoteipstr[ip4_fmt(remoteipstr, remoteip)] = 0;
 #endif
+		}
 		if (PerHostLimit && (ipcount = check_ip()) >= PerHostLimit) {
 			strnum2[fmt_ulong(strnum2, ipcount)] = 0;
 			strerr_warn4("tcpserver: end ", remoteipstr, " perIPlimit ", strnum2, 0);
@@ -1769,7 +1887,7 @@ main(int argc, char **argv, char **envp)
 			if (use_sql && conn)
 				check_db(conn);
 #endif
-			doit(asd); /*- MAXPERIP can only be checked after this */
+			(af_unix ? doit_unix : doit_tcp) (asd, hostname); /*- MAXPERIP can only be checked after this */
 			if (fd_move(0, asd) == -1 || fd_copy(1, 0) == -1)
 				strerr_die2sys(111, DROP, "unable to set up descriptors: ");
 			sig_uncatch(sig_child);
@@ -1853,7 +1971,7 @@ main(int argc, char **argv, char **envp)
 			add_ip(pid);
 		} /*- switch (pid = fork()) */
 		close(asd);
-	}
+	} /*- for (;;) */
 }
 
 void
@@ -2070,7 +2188,7 @@ getversion_tcpserver_c()
  * corrected compilation warning for fedora core
  *
  * Revision 1.23  2003-12-31 20:06:13+05:30  Cprogrammer
- * print receipt of sighup on stderr
+ * print receipt of sighup on descriptor 2
  *
  * Revision 1.22  2003-12-30 00:33:45+05:30  Cprogrammer
  * made concurrency configurable.

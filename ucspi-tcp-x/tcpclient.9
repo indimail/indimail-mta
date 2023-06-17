@@ -1,59 +1,53 @@
+.\" vim: tw=75
 .TH tcpclient 1
+
 .SH NAME
 tcpclient \- creates an outgoing TLS/non-TLS TCP IPv4/IPv6 connection.
+
 .SH SYNOPSIS
-\fBtcpclient\fR [\fIopts\fR] \fIhost\fR \fIport\fR [\fIprog\fR]
+.lf
+\fBtcpclient\fR [\fIopts\fR] \fIhost\fR/\fIsocket\fR [\fIport\fR]
+[\fIprog\fR]
 
 .SH DESCRIPTION
-.I opts
-is a series of getopt-style options.
-.I host
-is one argument.
-.I port
-is one argument.
-.I prog
-consists of one or more arguments. If \fIprog\fR is omitted, tcpclient
-enters client mode where it passes data from descriptor 0 to the network
-and data from the network to descriptor 1. client mode is similar to how
-you would use programs like telnet(1), ssh(1), etc.
+\fIopts\fR is a series of getopt-style options. \fIhost\fR/\fIsocket\fR is
+one argument. If \fIsocket\fR is provided as a path, \fBtcpclient\fR uses
+UNIX domain socket to connect (See unix(7)). In this case \fIport\fR is
+not provided. If \fIhost\fR is not a filesystem path, \fIhost\fR is used as
+a TCP/IP address and TCP port is used where \fIport\fR is one argument.
+\fIprog\fR consists of one or more arguments. If \fIprog\fR is omitted,
+tcpclient enters client mode where it passes data from descriptor 0 to the
+network and data from the network to descriptor 1. client mode is similar
+to how you would use programs like telnet(1), ssh(1), etc.
 
-.B tcpclient
-attempts to connect to a TCP server. If it is successful, it runs
-.IR prog ,
-with descriptor 6 reading from the network and descriptor 7 writing to the
-network. It also sets up several environment variables (see
-.BR tcp-environ (5)
-). In client mode, when \fIprog\fR is not run, \fBtcpclient\fR will pass
-data from descriptor 0 to the network and from the network to descriptor 1.
+\fBtcpclient\fR attempts to connect to a TCP server or a UNIX socket. If it
+is successful, it runs \fIprog\fR, with descriptor 6 reading from the
+network/socket and descriptor 7 writing to the network/socket. It also sets
+up several environment variables (see .BR tcp-environ (5)). In client mode,
+when \fIprog\fR is not run, \fBtcpclient\fR will pass data from descriptor
+0 to the network/socket and from the network/socket to descriptor 1.
 
-.B tcpclient
-can also initiate a SSL/TLS session with a remote host (-n option). This
-requires a \fIclientcert\fR to be provided. One can also do opportunistic
-TLS by using \fB\-s\fR \fIstarttls\fR option. The currently supported
-option for \fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR. \fBimap\fR will be
-added later.
+\fBtcpclient\fR can also initiate a SSL/TLS session with a remote host (-n
+option). This requires a \fIclientcert\fR to be provided. One can also do
+opportunistic TLS by using \fB\-s\fR \fIstarttls\fR option. The
+currently supported option for \fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR.
+\fBimap\fR will be added later.
 
 For TLS/SSL sessions, \fBtcpclient\fR sets the environment variable
 \fBTLS_PROVIDER\fR with details of the TLS connnection if passed the -z
 option.
 
-The server's address is given by
-.I host
-and
-.IR port .
-.I port
-may be a name from /etc/services or a number.
-.I host
-may be 0, referring to the local machine, or a dotted-decimal IP address or
-IPv6 address, or a host name; it is fed through qualification using
-dns_ip4_qualify.
+The server's address is given by a \fIsocket\fR path or \fIhost\fR and
+\fIport\fR. \fIport\fR may be a name from /etc/services or a number.
+\fIhost\fR may be 0, referring to the local machine, or a dotted-decimal IP
+address or IPv6 address, or a host name; it is fed through qualification
+using dns_ip4_qualify.
 
-If the server has several IP addresses,
-.B tcpclient
-tries each address in turn.
+If the server has several IP addresses, \fBtcpclient\fR tries each address
+in turn.
 
 .SH OPTIONS
-.B General options:
+\fBGeneral options\fR:
 
 .TP
 .B \-q
@@ -87,7 +81,8 @@ to skip the second try. Before version 0.88,
 .BR tcpserver (1)
 will use only
 .I x
-(default: 60).
+(default: 60). For a UNIX domain socket, there is just one connection
+attempt.
 
 .TP
 .B \-i \fIlocalip
@@ -97,7 +92,8 @@ as the IP address for the local side of the connection; quit if
 .I localip
 is not available. Normally
 .B tcpclient
-lets the operating system choose an address.
+lets the operating system choose an address. This option is not used for
+UNIX domain sockets.
 
 .TP
 .B \-p \fIlocalport
@@ -107,17 +103,20 @@ as the TCP port for the local side of the connection; quit if
 .I localport
 is not available. Normally
 .B tcpclient
-lets the operating system choose a port.
+lets the operating system choose a port. This option is not used for UNIX
+domain sockets.
 
 .TP
 .B \-d
 Delay sending data for a fraction of a second whenever the remote host is
 responding slowly. This is currently the default, but it may not be in the
-future; if you want it, set it explicitly.
+future; if you want it, set it explicitly. This option is not used for UNIX
+domain sockets.
 
 .TP
 .B \-D
-Never delay sending data; enable TCP_NODELAY.
+Never delay sending data; enable TCP_NODELAY. This option is not used for
+UNIX domain sockets.
 
 .TP
 .B \-C \fIcertdir
@@ -186,7 +185,7 @@ add \fBSTARTTLS\fR capability for clients. It will initiate a TLS session
 only when it receives \fBSTARTTLS\fR command from client.
 
 .TP
-.B \-m
+.B \-m \fIhost
 Match \fIhost\fR with common name in certificate (CN)
 
 .TP
@@ -200,33 +199,35 @@ seconds.
 .TP
 .B \-h
 (Default.) Look up the remote host name in DNS to set the environment
-variable $TCPREMOTEHOST.
+variable $TCPREMOTEHOST. This option is not used for UNIX domain sockets.
 
 .TP
 .B \-H
 Do not look up the remote host name in DNS; remove the environment
-variable $TCPREMOTEHOST.
+variable $TCPREMOTEHOST. This option is not used for UNIX domain sockets.
 
 .TP
 .B \-l \fIlocalname
 Do not look up the local host name in DNS; use
 .I localname
 for the environment variable $TCPLOCALHOST. A common choice for localname
-is 0.
+is 0. This option is not used for UNIX domain sockets.
 
 .TP
 .B \-r
-(Default.) Attempt to obtain $TCPREMOTEINFO from the remote host.
+(Default.) Attempt to obtain $TCPREMOTEINFO from the remote host. This
+option is not used for UNIX domain sockets.
 
 .TP
 .B \-R
-Do not attempt to obtain $TCPREMOTEINFO from the remote host.
+Do not attempt to obtain $TCPREMOTEINFO from the remote host. This option
+is not used for UNIX domain sockets.
 
 .TP
 .B \-t \fIn
 Timeout on the $TCPREMOTEINFO connection attempt after
 .I n
-seconds. Default: 26.
+seconds. Default: 26. This option is not used for UNIX domain sockets.
 
 .SH ENVIRONMENT
 .TP 0
@@ -281,68 +282,16 @@ Default is @qsysconfdir@/certs.
    read from descriptor 6 reads from network, write to descriptor 7 writes
    to network. Certificate used is the value of TLS_CERTFILE env variable.
    tcpclient -n "" 0 5555 /usr/bin/my_script
+
+6. Connect to qmail-smtpd on UNIX socket /run/indimail/smtpd like telnet
+   read from descriptor 0 & write to socket, read from socket & write to
+   descriptor 1.
+   a) run tcpserver
+   tcpserver -vn /etc/indimail/certs/servercert.pem \\
+     /run/indimail/smtpd /usr/sbin/qmail-smtpd
+   b) run tcpclient
+   tcpclient -n /etc/indimail/certs/servercert.pem /run/indimail/smtpd
 .EE
-
-.SH NOTES
-
-This NOTE is valid only when \fBtcpclient\fR(1) is acting as a server.
-
-A script \fIupdate_tmprsadh\fR in cron uses the following openssl commands
-to pre-generate 2048 bites RSA and DH parameters. You can pass --maxbits
-argument to \fIupdate_tmprsadh\fR to generate these with higher bits. You
-can set the environment variable \fBSSL_BITS\fR to make tcpclient choose
-specific bits for the RSA/DH parameters. These files are generated in
-@qsysconfdir@/certs. \fIupdate_rmprsadh\fR is installed to be run by cron
-if you have installed indimail from Open Build Service.
-
-.EX
-cd @qsysconfdir@/certs
-/usr/bin/openssl genrsa  -out    rsa2048.pem 2048
-/usr/bin/openssl dhparam -out -2  dh2048.pem 2048
-.EE
-
-Some ciphersuites may use ephemeral Diffie-Hellman (DH) key exchange. In
-these cases, the session data is negotiated using the ephemeral/temporary
-DH key and the key supplied and certified by the certificate chain is only
-used for signing. Anonymous ciphers (without a permanent server key) also
-use ephemeral DH keys.
-
-Using ephemeral DH key exchange yields forward secrecy as the connection
-can only be decrypted when the DH key is known. By generating a temporary
-DH key inside the server application that is lost when the application is
-left, it becomes impossible for an attacker to decrypt past sessions, even
-if they get hold of the normal (certified) key, as this key was only used
-for signing.
-
-In order to perform a DH key exchange the server must use a DH group (DH
-parameters) and generate a DH key. The server will always generate a new DH
-key during the negotiation.
-
-As generating DH parameters is extremely time consuming, an application
-should not generate the parameters on the fly. DH parameters can be reused,
-as the actual key is newly generated during the negotiation.
-
-Typically applications should use well known DH parameters that have
-built-in support in OpenSSL. The macro SSL_set_dh_auto(3ossl) configures
-OpenSSL to use the default built-in DH parameters for the SSL object.
-Passing a value of 1 in the onoff parameter switches the feature on, and
-passing a value of 0 switches it off. The default setting is off.
-
-If "auto" DH parameters are switched on then the parameters will be
-selected to be consistent with the size of the key associated with the
-server's certificate. If there is no certificate (e.g. for PSK
-ciphersuites), then it it will be consistent with the size of the
-negotiated symmetric cipher key.
-
-Applications may supply their own DH parameters instead of using the
-built-in values. This approach is discouraged and applications should in
-preference use the built-in parameter support described above. Applications
-wishing to supply their own DH parameters should call
-SSL_set0_tmp_dh_pkey(3ossl) to supply the parameters for SSL. The
-parameters should be supplied in the dhpkey argument as an EVP_PKEY
-containg DH parameters. Ownership of the dhpkey value is passed to the
-SSL_CTX or SSL object as a result of this call, and so the caller should
-not free it if the function call is succesful..
 
 .SH SEE ALSO
 tcpserver(1),
