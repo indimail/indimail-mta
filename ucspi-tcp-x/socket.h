@@ -1,5 +1,8 @@
 /*
  * $Log: socket.h,v $
+ * Revision 1.5  2023-06-18 13:22:33+05:30  Cprogrammer
+ * added unix domain socket functions
+ *
  * Revision 1.4  2021-05-12 21:04:07+05:30  Cprogrammer
  * define arguments as array subscripts to fix gcc 11 warnings
  *

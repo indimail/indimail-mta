@@ -1,5 +1,8 @@
 /*
  * $Log: socket_bind6.c,v $
+ * Revision 1.3  2023-06-18 13:25:03+05:30  Cprogrammer
+ * removed socket_bind6_reuse()
+ *
  * Revision 1.2  2020-08-03 17:29:50+05:30  Cprogrammer
  * use qmail library
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.87 2023-04-08 23:12:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.88 2023-06-18 13:24:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -67,7 +67,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.87 2023-04-08 23:12:44+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.88 2023-06-18 13:24:32+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1983,6 +1983,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.88  2023-06-18 13:24:32+05:30  Cprogrammer
+ * handle UNIX sockets
+ *
  * Revision 1.87  2023-04-08 23:12:44+05:30  Cprogrammer
  * fixed status not getting printed in logs
  *

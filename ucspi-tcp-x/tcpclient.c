@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.30 2023-03-08 00:01:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.31 2023-06-18 13:24:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.30 2023-03-08 00:01:41+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.31 2023-06-18 13:24:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -831,6 +831,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.31  2023-06-18 13:24:14+05:30  Cprogrammer
+ * handle UNIX sockets
+ *
  * Revision 1.30  2023-03-08 00:01:41+05:30  Cprogrammer
  * refactored wait handling
  *

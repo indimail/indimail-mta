@@ -1,5 +1,8 @@
 /*
  * $Log: socket_tcp6.c,v $
+ * Revision 1.5  2023-06-18 13:23:48+05:30  Cprogrammer
+ * removed not needed include
+ *
  * Revision 1.4  2020-08-03 17:27:09+05:30  Cprogrammer
  * use qmail library
  *

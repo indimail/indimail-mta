@@ -324,7 +324,7 @@ compile socket_accept.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_accept.c
 
 socket_acceptun.o: \
-compile socket_acceptun.c socket.h
+compile socket_acceptun.c socket.h haveip6.h
 	./compile socket_acceptun.c
 
 socket_bind.o: \
@@ -332,7 +332,7 @@ compile socket_bind.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_bind.c
 
 socket_bindun.o: \
-compile socket_bindun.c socket.h
+compile socket_bindun.c socket.h haveip6.h
 	./compile socket_bindun.c
 
 socket_conn.o: \
@@ -372,7 +372,7 @@ compile socket_udp.c socket.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_udp.c
 
 socket_unix.o: \
-compile socket_unix.c socket.h
+compile socket_unix.c socket.h haveip6.h
 	./compile socket_unix.c
 
 systype: find-systype.sh conf-cc conf-ld trycpp.c x86cpuid.c
@@ -521,11 +521,11 @@ compile socket_conn6.c socket.h ip4.h ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_conn6.c
 
 socket_conn_un.o: \
-compile socket_conn_un.c socket.h
+compile socket_conn_un.c socket.h haveip6.h
 	./compile socket_conn_un.c
 
 timeoutconn_un.o: \
-compile timeoutconn_un.c timeoutconn.h
+compile timeoutconn_un.c timeoutconn.h socket.h haveip6.h
 	./compile timeoutconn_un.c
 
 socket_bind6.o: \
