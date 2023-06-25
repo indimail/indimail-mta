@@ -1743,12 +1743,12 @@ do_socket:
 
 #ifdef IPV6
 #ifdef FREEBSD
-	if (socket_local6(s6, localip, &localport, &netif) == -1)
+		if (socket_local6(s6, localip, &localport, &netif) == -1)
 #else
-	if (socket_local6(sfd, localip, &localport, &netif) == -1)
+		if (socket_local6(sfd, localip, &localport, &netif) == -1)
 #endif
 #else
-	if (socket_local4(sfd, localip, &localport) == -1)
+		if (socket_local4(sfd, localip, &localport) == -1)
 #endif
 			strerr_die2sys(111, FATAL, "unable to get local address: ");
 
