@@ -32,6 +32,8 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
 15. indimail-mta.spec, debian/*: add timestamps to installation logs
 - 10/06/2023
 16. svctool: added --config=nssd option to create nssd config file
+- 25/06/2023
+17. qsutil.c: removed extra / from defaultdelivery control filename path
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

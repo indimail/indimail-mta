@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.25  2023-06-25 20:11:21+05:30  Cprogrammer
+ * removed extra / from path
+ *
  * Revision 1.24  2023-01-15 23:22:49+05:30  Cprogrammer
  * use slog() function with varargs to replace all log functions
  *
@@ -124,7 +127,6 @@ loglock_open(char *ident, int preopen)
 		if (!(controldir = env_get("CONTROLDIR")))
 			controldir = auto_control;
 		if (!stralloc_copys(&lockfn, controldir)
-				|| !stralloc_append(&lockfn, "/")
 				|| !stralloc_catb(&lockfn, "/defaultdelivery", 16)
 				|| !stralloc_0(&lockfn))
 			nomem(ident);
@@ -325,7 +327,7 @@ logsafe(char *s, char *argv0)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.24 2023-01-15 23:22:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qsutil.c,v 1.25 2023-06-25 20:11:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
