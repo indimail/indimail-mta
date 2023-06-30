@@ -1502,8 +1502,9 @@ auto_control.h qmulti.h pidopen.h custom_error.h getDomainToken.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
 		-I../libdkim-x -I/opt/local/include/dkim qmail-dkim.c
 
-qmail-dkim.8: qmail-dkim.9 conf-sysconfdir
+qmail-dkim.8: qmail-dkim.9 conf-prefix conf-sysconfdir
 	cat qmail-dkim.9 \
+	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dkim.8
 
