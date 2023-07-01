@@ -1365,7 +1365,7 @@ main(int argc, char **argv, char **envp)
 	}
 	/*
 	 * unused options
-	 * 0, 2, 3, 5, 7, 8, 9, E, F, G, j, J, k, K, w, W, y, Y, z, Z
+	 * 0, 2, 3, 5, 7, 8, 9, E, F, G, j, J, k, K, w, W, y, Y, Z
 	 */
 	if (!stralloc_copys(&options, "dDe:vqQhHrR1UXx:m:M:t:T:u:g:l:b:B:c:C:pPoO"))
 		strerr_die2x(111, FATAL, "out of memory");
