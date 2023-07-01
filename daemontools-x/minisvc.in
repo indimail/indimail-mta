@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.35 2023-05-03 16:50:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.36 2023-07-01 11:24:48+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.35 2023-05-03 16:50:28+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.36 2023-07-01 11:24:48+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -284,8 +284,11 @@ if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
 	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
 	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
 fi
-if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
-	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
+if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then
+	echo $sysconfdir/control/global_vars > $conf_dir/.envdir
+fi
+if [ ! -x "$DESTDIR"$prefix/sbin/qmail-send ] ; then
+	return 0
 fi
 if [ $usefsync -eq 1 -o $usefdatasync -eq 1 ] ; then
 	echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
@@ -305,9 +308,6 @@ if [ $usesyncdir -eq 1 ] ; then
 	esac
 else
 	> "$DESTDIR"$sysconfdir/control/global_vars/USE_SYNCDIR
-fi
-if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then
-	echo $sysconfdir/control/global_vars > $conf_dir/.envdir
 fi
 }
 
@@ -2804,6 +2804,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.36  2023-07-01 11:24:48+05:30  Cprogrammer
+# skip indimail-mta variables when creating svscan service
+#
 # Revision 1.35  2023-05-03 16:50:28+05:30  Cprogrammer
 # synced daemontools/minisvc, indimail-mta/svctool create_svscan function
 #
