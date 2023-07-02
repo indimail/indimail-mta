@@ -1,0 +1,14 @@
+Format: 3.0
+Source: indimail-mta
+Section: Misc
+Priority: extra
+Binary: indimail-mta
+Architecture: any
+Version: @version@-@release@
+Maintainer: @email@
+Homepage: https://github.com/mbhangui/indimail-mta
+Debtransform-Release: 1
+Debtransform-Tar: indimail-mta-@version@.tar.gz
+Debtransform-Files-Tar: debian.tar.gz
+Standards-Version: 3.9.5
+Build-Depends: cdbs, debhelper (>= 10), gcc, g++, coreutils, automake, libqmail-dev, libdkim-dev, libsrs2-dev, libldap2-dev, libssl-dev, libidn2-0-dev, libgsasl-dev, default-libmysqlclient-dev, mime-support, m4, gawk

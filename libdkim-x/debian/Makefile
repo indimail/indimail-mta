@@ -1,4 +1,4 @@
-all: debian.tar.gz libdkim.dsc
+all: debian.tar.gz libdkim.dsc libdkim-Debian_12.dsc
 version=$(shell cat ../conf-version)
 arch=$(shell uname -m)
 email=$(shell cat ../conf-email)
@@ -19,6 +19,8 @@ copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
 
 libdkim.dsc: libdkim.dsc.in ../conf-release ../conf-version
+	$(edit) $@.in > $@
+libdkim-Debian_12.dsc: libdkim-Debian_12.dsc.in ../conf-release ../conf-version
 	$(edit) $@.in > $@
 
 libdkim.install: libdkim.install.in

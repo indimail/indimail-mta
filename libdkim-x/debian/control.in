@@ -3,7 +3,7 @@ Section: libs
 Priority: optional
 Maintainer: @email@
 Standards-Version: 3.9.5
-Build-Depends: debhelper (>= 9), libssl-dev, pkg-config
+Build-Depends: cdbs, debhelper (>= 9), gcc, g++, binutils, automake, libssl-dev, pkg-config
 Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x
 
 Package: libdkim

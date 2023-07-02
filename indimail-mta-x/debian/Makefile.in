@@ -17,10 +17,12 @@ all: rules indimail-mta.prerm indimail-mta.preinst \
 indimail-mta.postrm indimail-mta.postinst \
 indimail-mini.prerm indimail-mini.preinst \
 indimail-mini.postrm indimail-mini.postinst \
-qmta.prerm qmta.preinst qmta.postrm qmta.postinst indimail-mta.install \
-indimail-mta.dsc indimail-mta-xUbuntu_16.04.dsc indimail-mta-xUbuntu_18.04.dsc \
-indimail-mta-Debian_11.dsc indimail-mta-xUbuntu_21.04.dsc indimail-mta-xUbuntu_21.10.dsc \
-indimail-mta-xUbuntu_22.04.dsc debian.tar.gz
+qmta.prerm qmta.preinst qmta.postrm qmta.postinst \
+indimail-mta.install indimail-mta.dsc \
+indimail-mta-xUbuntu_16.04.dsc indimail-mta-xUbuntu_18.04.dsc \
+indimail-mta-Debian_11.dsc indimail-mta-Debian_12.dsc \
+indimail-mta-xUbuntu_21.04.dsc indimail-mta-xUbuntu_21.10.dsc \
+indimail-mta-xUbuntu_22.04.dsc indimail-mta-xUbuntu_23.04.dsc debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -95,6 +97,9 @@ indimail-mta-xUbuntu_18.04.dsc: indimail-mta-xUbuntu_18.04.dsc.in Makefile \
 indimail-mta-Debian_11.dsc: indimail-mta-Debian_11.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
+indimail-mta-Debian_12.dsc: indimail-mta-Debian_12.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
+	$(edit) $@.in > $@
 indimail-mta-xUbuntu_21.04.dsc: indimail-mta-xUbuntu_21.04.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
@@ -102,6 +107,9 @@ indimail-mta-xUbuntu_21.10.dsc: indimail-mta-xUbuntu_21.10.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 indimail-mta-xUbuntu_22.04.dsc: indimail-mta-xUbuntu_22.04.dsc.in Makefile \
+../conf-version ../conf-release ../conf-email
+	$(edit) $@.in > $@
+indimail-mta-xUbuntu_23.04.dsc: indimail-mta-xUbuntu_23.04.dsc.in Makefile \
 ../conf-version ../conf-release ../conf-email
 	$(edit) $@.in > $@
 
