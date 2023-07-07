@@ -29,7 +29,7 @@ jobs:
         path: libqmail
     - name: build ucspi-tcp
       id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.3.0
+      uses: vmactions/freebsd-vm@v0.3.1
       with:
         envs: 'MYTOKEN'
         usesh: true
