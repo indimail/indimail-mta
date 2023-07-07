@@ -1470,8 +1470,8 @@ compile trydkim.c dns_text.o conf-dkim dns.lib
 	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim1.o && \
 	c++ -o trydkim1 trydkim1.o dns_text.o \
 	`cat dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
-	-L../libdkim-x/.libs -ldkim -lcrypto -ldkim $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& echo "-ldkim" || "WARNING!!! Not linked with libdkim" 1>&2 ) > dkim.lib
+	-L../libdkim-x/.libs -ldkim2 -lcrypto -ldkim2 $(QMAILLIB) ) >/dev/null 2>&1 \
+	&& echo "-ldkim2" || "WARNING!!! Not linked with libdkim" 1>&2 ) > dkim.lib
 	rm -f trydkim1.o trydkim1
 
 hasdkim.h: dns_text.o \

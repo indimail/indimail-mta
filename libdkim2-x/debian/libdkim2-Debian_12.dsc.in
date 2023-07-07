@@ -1,12 +1,12 @@
 Format: 3.0 (quilt)
-Source: libdkim
-Binary: libdkim, libdkim-dev
+Source: libdkim2
+Binary: libdkim2, libdkim2-dev
 Architecture: any
 Version: @version@-@release@
 Maintainer: @email@
-Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x
+Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libdkim2-x
 Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
-Debtransform-Tar: libdkim-@version@.tar.gz
+Debtransform-Tar: libdkim2-@version@.tar.gz
 Standards-Version: 3.9.5
 Build-Depends: cdbs, debhelper (>= 10), gcc, g++, binutils, coreutils, automake, autoconf, m4, gawk, libssl-dev, pkg-config

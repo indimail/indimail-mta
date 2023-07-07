@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.385 2023-06-08 23:18:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.386 2023-07-07 20:50:34+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -121,7 +121,7 @@ BuildRequires: glibc glibc-devel binutils libidn2-devel
 BuildRequires: glibc-static
 %endif
 BuildRequires: openssl openssl-devel libgsasl-devel
-BuildRequires: libqmail-devel libdkim-devel libsrs2-devel
+BuildRequires: libqmail-devel libdkim2-devel libsrs2-devel
 %if %{defined amzn}
 BuildRequires: mariadb-connector-c-devel
 %else

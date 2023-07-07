@@ -1,12 +1,12 @@
-Source: libdkim
+Source: libdkim2
 Section: libs
 Priority: optional
 Maintainer: @email@
 Standards-Version: 3.9.5
 Build-Depends: cdbs, debhelper (>= 9), gcc, g++, binutils, automake, libssl-dev, pkg-config
-Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x
+Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libdkim2-x
 
-Package: libdkim
+Package: libdkim2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
@@ -17,15 +17,15 @@ Description: cryptographically identify the sender of email
  contents of messages by either Mail Transport Agents (MTAs) or Mail
  User Agents (MUAs).
  .
- libdkim is a library, developed by Alt-N Technologies, that allows
+ libdkim2 is a library, developed by Alt-N Technologies, that allows
  incorporating DKIM into an existing MTA or other application. It
  provides full support for signing, verifying, and SSP. See the
  changelogs for information on compliance with specifications.
 
-Package: libdkim-dev
+Package: libdkim2-dev
 Section: libdevel
 Architecture: any
-Depends: libdkim (= ${binary:Version}), libssl-dev, ${misc:Depends}
+Depends: libdkim2 (= ${binary:Version}), libssl-dev, ${misc:Depends}
 Description: cryptographically identify the sender of email
  DomainKeys Identified Mail (DKIM) defines a domain-level
  authentication framework for email using public-key cryptography and
@@ -33,10 +33,10 @@ Description: cryptographically identify the sender of email
  contents of messages by either Mail Transport Agents (MTAs) or Mail
  User Agents (MUAs).
  .
- libdkim is a library, developed by Alt-N Technologies, that allows
+ libdkim2 is a library, developed by Alt-N Technologies, that allows
  incorporating DKIM into an existing MTA or other application. It
  provides full support for signing, verifying, and SSP. See the
  changelogs for information on compliance with specifications.
  .
  This package contains the development files needed to compile and link
- programs with libdkim.
+ programs with libdkim2.

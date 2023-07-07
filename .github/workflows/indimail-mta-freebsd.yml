@@ -4,16 +4,16 @@ on:
   push:
     paths:
       - '**/indimail-mta-x/**'
-      - '**/libdkim-x/**'
+      - '**/libdkim2-x/**'
       - '**/libsrs2-x/**'
       - .github/workflows/indimail-mta-freebsd.yml
       - '!**/indimail-mta-x/indimail-mta.spec.in'
-      - '!**/libdkim-x/libdkim.spec.in'
-      - '!**/libdkim-x/libsrs2.spec.in'
+      - '!**/libdkim2-x/libdkim2.spec.in'
+      - '!**/libsrs2-x/libsrs2.spec.in'
       - '!**/indimail-mta-x/qmail-perf/*'
       - '!**/indimail-mta-x/tests/*'
       - '!**/indimail-mta-x/debian/*'
-      - '!**/libdkim-x/debian/*'
+      - '!**/libdkim2-x/debian/*'
       - '!**/libsrs2-x/debian/*'
       - '!**/*.9'
       - '!**/*.8'
@@ -46,6 +46,6 @@ jobs:
         prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap24-client libgsasl base64
         run: |
           cd libqmail; ./default.configure; make; make install-strip
-          cd ../main/libdkim-x; ./default.configure; make; make install-strip
+          cd ../main/libdkim2-x; ./default.configure; make; make install-strip
           cd ../libsrs2-x; ./default.configure; make; make install-strip
           cd ../indimail-mta-x; ./default.configure; ./qmake

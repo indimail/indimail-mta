@@ -5,20 +5,19 @@ if [ ! -f /etc/debian_version ] ; then
 fi
 version=$(cat conf-version)
 release=$(cat conf-release)
-ucspi_tcp_version=$(cat ../ucspi-tcp-x/conf-version)
 make -s debian/Makefile
 make -s -C debian
 echo "Cleaning Stage"
-/bin/rm -rf           $HOME/stage/indimail-mta
-mkdir -p              $HOME/stage/indimail-mta
+/bin/rm -rf           $HOME/stage/indimail-mta/indimail-mta-$version
+mkdir -p              $HOME/stage/indimail-mta/indimail-mta-$version
 echo "Copying Stage"
 cp -rp .              $HOME/stage/indimail-mta/indimail-mta-$version
-cp -rp ../ucspi-tcp-x $HOME/stage/indimail-mta/ucspi-tcp-$ucspi_tcp_version
-cp -rp ./debian       $HOME/stage/indimail-mta
-cd                    $HOME/stage/indimail-mta
+cp -rp ./debian       $HOME/stage/indimail-mta/indimail-mta-$version
+cp catChangeLog       $HOME/stage/indimail-mta
+cd                    $HOME/stage/indimail-mta/indimail-mta-$version
 echo "Building Stage"
 dpkg-buildpackage -tc -b
 if [ $? -eq 0 ] ; then
-	/bin/rm -rf           $HOME/stage/indimail-mta
+	/bin/rm -rf           $HOME/stage/indimail-mta/indimail-mta-$version
 	ls -lt $HOME/stage
 fi

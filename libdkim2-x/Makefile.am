@@ -8,24 +8,24 @@ include_HEADERS = dkim.h macros.h
 COMMONSOURCES= dkimfuncs.cpp dns.cpp dkimbase.cpp dkimsign.cpp dkimverify.cpp
 includedir=@prefix@/include/dkim
 
-libdkim_LTLIBRARIES=libdkim.la
-libdkim_la_SOURCES=$(COMMONSOURCES) 
-libdkim_la_LIBADD = $(LIB_RESOLV) $(LIB_CRYPTO)
-libdkim_la_LDFLAGS = -version-info @LIBVER@ -pie
-libdkim_la_CXXFLAGS = -fPIE
+libdkim2_LTLIBRARIES=libdkim2.la
+libdkim2_la_SOURCES=$(COMMONSOURCES) 
+libdkim2_la_LIBADD = $(LIB_RESOLV) $(LIB_CRYPTO)
+libdkim2_la_LDFLAGS = -version-info @LIBVER@ -pie
+libdkim2_la_CXXFLAGS = -fPIE
 
-libdkimdir=@libdir@
+libdkim2dir=@libdir@
 dkimbindir=@prefix@/bin
 dkimbin_PROGRAMS = dkim
-noinst_DATA = libdkim.spec libdkim.changes PKGBUILD
+noinst_DATA = libdkim2.spec libdkim2.changes PKGBUILD
 
 dkim_SOURCES = dkim.cpp
 dkim_LDFLAGS = $(LDFLAGS)
-dkim_LDADD = libdkim.la $(LIB_RESOLV) $(LIB_CRYPTO)
+dkim_LDADD = libdkim2.la $(LIB_RESOLV) $(LIB_CRYPTO)
 dkim_CXXFLAGS = $(CXXFLAGS) -fPIE
 
 pkgconfigdir=@pkgconfigdir@
-pkgconfig_DATA = libdkim.pc
+pkgconfig_DATA = libdkim2.pc
 
 man_MANS=dkim.8
 
@@ -46,12 +46,12 @@ edit = sed \
 	-e 's}@prefix\@}$(prefix)}g'
 dkim.8: dkim.9
 	cat dkim.9 | sed s}@controldir\@}$(sysconfdir)/indimail/control}g > $@
-libdkim.spec: libdkim.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
+libdkim2.spec: libdkim2.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
-libdkim.changes: doc/ChangeLog conf-version conf-release conf-email
+libdkim2.changes: doc/ChangeLog conf-version conf-release conf-email
 	./catChangeLog --changes doc/ChangeLog > $@
 PKGBUILD: PKGBUILD.in catChangeLog Makefile conf-email \
-conf-version conf-release doc/ChangeLog libdkim.changes
+conf-version conf-release doc/ChangeLog libdkim2.changes
 	cat $@.in | $(edit) > $@
 
 LIBTOOL_DEPS = @LIBTOOL_DEPS@

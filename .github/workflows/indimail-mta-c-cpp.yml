@@ -4,16 +4,16 @@ on:
   push:
     paths:
       - '**/indimail-mta-x/**'
-      - '**/libdkim-x/**'
+      - '**/libdkim2-x/**'
       - '**/libsrs2-x/**'
       - .github/workflows/indimail-mta-c-cpp.yml
       - '!**/indimail-mta-x/indimail-mta.spec.in'
-      - '!**/libdkim-x/libdkim.spec.in'
-      - '!**/libdkim-x/libsrs2.spec.in'
+      - '!**/libdkim2-x/libdkim2.spec.in'
+      - '!**/libsrs2-x/libsrs2.spec.in'
       - '!**/indimail-mta-x/qmail-perf/*'
       - '!**/indimail-mta-x/tests/*'
       - '!**/indimail-mta-x/debian/*'
-      - '!**/libdkim-x/debian/*'
+      - '!**/libdkim2-x/debian/*'
       - '!**/libsrs2-x/debian/*'
       - '!**/*.9'
       - '!**/*.8'
@@ -54,8 +54,8 @@ jobs:
 
     - name: install_qmail
       run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
-    - name: install_libdkim
-      run: cd main/libdkim-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
+    - name: install_libdkim2
+      run: cd main/libdkim2-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
     - name: install_libsrs2
       run: cd main/libsrs2-x; ./default.configure; make; sudo make install-strip
     - name: build_indimail-mta

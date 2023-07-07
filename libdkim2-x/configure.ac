@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.59])
-AC_INIT([libdkim],m4_normalize(m4_include([conf-version])), m4_normalize(m4_include([conf-email])), libdkim)
+AC_INIT([libdkim2],m4_normalize(m4_include([conf-version])), m4_normalize(m4_include([conf-email])), libdkim2)
 PACKAGE=$PACKAGE_NAME
 VERSION=$PACKAGE_VERSION
 AC_CONFIG_SRCDIR([dkimverify.h])
@@ -104,6 +104,6 @@ AC_C_INLINE
 AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strchr strerror strncasecmp])
 
-AC_CONFIG_FILES([libdkim.pc:libdkim.pc.in],[], [])
+AC_CONFIG_FILES([libdkim2.pc:libdkim2.pc.in],[], [])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

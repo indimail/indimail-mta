@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.6  2023-07-07 20:59:31+05:30  Cprogrammer
+# renamed libdkim to libdkim2
+#
 # Revision 1.5  2022-11-27 09:41:26+05:30  Cprogrammer
 # added --clean argument
 #
@@ -16,11 +19,11 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.5 2022-11-27 09:41:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.6 2023-07-07 20:59:31+05:30 Cprogrammer Exp mbhangui $
 #
 curdir=`pwd`
 version=$(cat conf-version)
-name=libdkim
+name=libdkim2
 
 if [ -f /etc/debian_version ] ; then
   echo "you can't do rpmbuild on an insane system" 1>&2

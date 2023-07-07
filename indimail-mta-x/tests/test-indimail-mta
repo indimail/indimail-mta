@@ -1654,7 +1654,6 @@ function do_without_svscan()
 	start_tcpserver_smtp_unix
 	smtp_pid=$(/bin/ps -ef|grep $smtp_socket|grep qmail-smtpd|awk '{print $2}')
 	test_tcpclient_script 3 # test smtp using tcpclient
-	echo "Terminating $smtp_pid"
 	terminate_smtp $smtp_pid
 
 	start_tcpserver_smtps_unix

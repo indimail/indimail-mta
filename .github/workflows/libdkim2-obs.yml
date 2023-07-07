@@ -1,12 +1,12 @@
-name: libdkim obs trigger
+name: libdkim2 obs trigger
 
 on:
   push:
     paths:
-      - '**/libdkim-x/**'
+      - '**/libdkim2-x/**'
       - '**/prepare_obs'
       - '**/catChangeLog'
-      - .github/workflows/libdkim-obs.yml
+      - .github/workflows/libdkim2-obs.yml
       - '!**/doc/*'
       - '!**.md'
   workflow_dispatch:
@@ -15,14 +15,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout_libdkim
+    - name: checkout_libdkim2
       uses: actions/checkout@v2
 
     - name: prepare obs
-      run: cd libdkim-x; ./prepare_obs libdkim
+      run: cd libdkim2-x; ./prepare_obs libdkim2
     - uses: actions/upload-artifact@v2
       with:
-        name: libdkim
+        name: libdkim2
         path: ~/stage
     - shell: bash
       name: trigger_obs
@@ -39,13 +39,13 @@ jobs:
         gpg --list-secret-keys --keyid-format LONG
         # create archive and transfer
         cd ~/stage
-        tar cvfz $GITHUB_WORKSPACE/libdkim-obs.tar.gz *
+        tar cvfz $GITHUB_WORKSPACE/libdkim2-obs.tar.gz *
         # create detached signature for obs archive
         echo "${{secrets.software_passphrase}}" | gpg2 --pinentry-mode loopback \
           --passphrase-fd 0 --default-key "${{secrets.software_user}}" \
-          -o libdkim-obs.sig --detach-sig $GITHUB_WORKSPACE/libdkim-obs.tar.gz
+          -o libdkim2-obs.sig --detach-sig $GITHUB_WORKSPACE/libdkim2-obs.tar.gz
         # copy to /home/frs/project/indimail/github
-        scp -q -i ~/.private_key $GITHUB_WORKSPACE/libdkim-obs.tar.gz \
-          ~/stage/libdkim-obs.sig "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
-        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/libdkim-obs.tar.gz
+        scp -q -i ~/.private_key $GITHUB_WORKSPACE/libdkim2-obs.tar.gz \
+          ~/stage/libdkim2-obs.sig "${{secrets.sf_user}}:${{secrets.sf_upload_path}}"
+        rm -f ~/.private_key ~/.ssh/known_hosts $GITHUB_WORKSPACE/libdkim2-obs.tar.gz
         rm -rf ~/stage

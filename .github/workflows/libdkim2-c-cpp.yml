@@ -1,12 +1,12 @@
-name: libdkim Ubuntu, Mac OSX CI
+name: libdkim2 Ubuntu, Mac OSX CI
 
 on:
   push:
     paths:
-      - '**/libdkim-x/**'
-      - .github/workflows/libdkim-c-cpp.yml
-      - '!**/libdkim-x/debian/*'
-      - '!**/libdkim-x/libdkim.spec.in'
+      - '**/libdkim2-x/**'
+      - .github/workflows/libdkim2-c-cpp.yml
+      - '!**/libdkim2-x/debian/*'
+      - '!**/libdkim2-x/libdkim2.spec.in'
       - '!**/doc/*'
       - '!**.md'
   workflow_dispatch:
@@ -26,8 +26,8 @@ jobs:
       env:
         OS: ${{ matrix.host }}
 
-    - name: checkout_libdkim
+    - name: checkout_libdkim2
       uses: actions/checkout@v2
 
-    - name: build_libdkim
-      run: cd libdkim-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make
+    - name: build_libdkim2
+      run: cd libdkim2-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make

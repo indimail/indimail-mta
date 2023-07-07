@@ -1,3 +1,3 @@
 usr/include/dkim /usr/include
-usr/@libd@/libdkim.a /usr/@libd@
+usr/@libd@/libdkim2.a /usr/@libd@
 usr/@libd@/*.so       /usr/@libd@

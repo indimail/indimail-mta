@@ -6,10 +6,11 @@ fi
 make -s -C debian
 libsrs2_version=$(cat conf-version)
 echo "Cleaning Stage"
-/bin/rm -rf $HOME/stage/libsrs2
+/bin/rm -rf $HOME/stage/libsrs2-$libsrs2_version
 echo "Copying Stage"
 mkdir -p    $HOME/stage/libsrs2-$libsrs2_version
 cp -rp .    $HOME/stage/libsrs2-$libsrs2_version
+cp catChangeLog  $HOME/stage
 cd          $HOME/stage/libsrs2-$libsrs2_version
 dpkg-buildpackage -tc -b
 if [ $? -eq 0 ] ; then

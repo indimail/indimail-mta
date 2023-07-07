@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.20  2023-07-07 20:50:59+05:30  Cprogrammer
+# libdkim renamed to libdkim2
+#
 # Revision 1.19  2023-02-15 02:20:53+05:30  Cprogrammer
 # fixed arch linux build
 #
@@ -60,7 +63,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.19 2023-02-15 02:20:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.20 2023-07-07 20:50:59+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -70,7 +73,7 @@ arch=('i686' 'x86_64')
 url="https://github.com/mbhangui/indimail-mta"
 license=('GPL3')
 groups=('base-devel')
-makedepends=('pkgconfig' 'findutils' 'sed' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim' 'libsrs2' 'libldap' 'gsasl' 'gzip')
+makedepends=('pkgconfig' 'findutils' 'sed' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim2' 'libsrs2' 'libldap' 'gsasl' 'gzip')
 source=("$pkgname-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 _sysconfdir=@sysconfdir@
@@ -152,7 +155,7 @@ package_indimail-mta() {
         ${_myconfdir}/{'leapsecs.dat','leapsecs.txt','foxhole_all.cdb'}
         ${_myconfdir}/control/{'nodnscheck','level2-tlds','level3-tlds'}
         ${_myconfdir}/tcp/{'tcp.smtp','tcp.qmtp','tcp.qmqp'})
-  depends=('shadow' 'coreutils' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim' 'libsrs2' 'libldap' 'daemontools>=1.0' 'ucspi-tcp>=1.0')
+  depends=('shadow' 'coreutils' 'openssl' 'libidn2' 'mariadb-libs' 'libqmail' 'libdkim2' 'libsrs2' 'libldap' 'daemontools>=1.0' 'ucspi-tcp>=1.0')
   install=archpkg1.install
   provides=('indimail-mta')
   cd $srcdir/$pkgname-${pkgver}

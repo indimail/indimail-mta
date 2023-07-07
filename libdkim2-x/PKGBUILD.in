@@ -1,5 +1,5 @@
 # Maintainer: @email@
-pkgname=libdkim
+pkgname=libdkim2
 pkgver=@version@
 pkgrel=@release@
 pkgdesc="DKIM Library by Alt-N Tehnologies"
@@ -27,7 +27,7 @@ build() {
 package() {
   cd $srcdir/$pkgname-${pkgver}
   make DESTDIR=${pkgdir} install
-  for i in AUTHORS COPYING README libdkim.changes yahoo-patent-license-1.2.txt
+  for i in AUTHORS COPYING README libdkim2.changes yahoo-patent-license-1.2.txt
   do
     install -D -m 0644 $i "$pkgdir"${_prefix}/share/doc/$pkgname/$i
   done

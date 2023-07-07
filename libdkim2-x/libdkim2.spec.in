@@ -1,6 +1,6 @@
 #
 #
-# $Id: libdkim.spec.in,v 1.6 2023-05-20 12:11:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: libdkim2.spec.in,v 1.6 2023-05-20 12:11:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -40,7 +40,7 @@
 %endif
 
 Summary: DKIM Library for indimail-mta
-Name: libdkim
+Name: libdkim2
 Version: @version@
 Release: @release@%{?dist}
 
@@ -54,8 +54,8 @@ Group: System Environment/Libraries
 %else
 Group: System/Libraries
 %endif
-Source0: http://downloads.sourceforge.net/indimail/libdkim-%{version}.tar.gz
-Source1: http://downloads.sourceforge.net/indimail/libdkim-rpmlintrc
+Source0: http://downloads.sourceforge.net/indimail/libdkim2-%{version}.tar.gz
+Source1: http://downloads.sourceforge.net/indimail/libdkim2-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-mta
 #AutoReqProv: No
@@ -83,22 +83,22 @@ framework for email using public-key cryptography and key server technology
 to permit verification of the source and contents of messages by either
 Mail Transport Agents (MTAs) or Mail User Agents (MUAs).
 
-libdkim is a library, developed by Alt-N Technologies, that allows
+libdkim2 is a library, developed by Alt-N Technologies, that allows
 incorporating DKIM into an existing MTA or other application. It provides
 full support for signing, verifying, and SSP. See the changelogs for
 information on compliance with specifications.
 
 This package contains the development files needed to compile and link
-programs with libdkim.
+programs with libdkim2.
 
 %package devel
-Summary: Development header files and static library for libdkim
+Summary: Development header files and static library for libdkim2
 %if %{undefined suse_version} && %{undefined sles_version}
 Group: System Environment/Libraries
 %else
 Group: Development/Tools/Other
 %endif
-Requires: libdkim = %{version}
+Requires: libdkim2 = %{version}
 
 %description devel
 This package contains the development header files and libraries
@@ -106,7 +106,7 @@ necessary to applications that incorporates DKIM signing, DKIM verification
 or both.
 
 %prep
-%setup -q -n libdkim-%{version}
+%setup -q -n libdkim2-%{version}
 
 %build
 %configure --prefix=%{_prefix} --mandir=%{mandir}
@@ -153,12 +153,12 @@ do
   install -p -m 0644 README %{buildroot}%{_prefix}/share/doc/$i
   install -p -m 0644 doc/ChangeLog %{buildroot}%{_prefix}/share/doc/$i
 done
-%{__rm} -f %{buildroot}%{_libdir}/libdkim.la
+%{__rm} -f %{buildroot}%{_libdir}/libdkim2.la
 
 %files
 %defattr(-, root, root,-)
-%{_libdir}/libdkim.so.1
-%{_libdir}/libdkim.so.1.0.0
+%{_libdir}/libdkim2.so.1
+%{_libdir}/libdkim2.so.1.0.0
 %doc %attr(644,root,root)               %{mandir}/man8/*
 
 %attr(755,root,root)                    %{_prefix}/bin/dkim
@@ -179,9 +179,9 @@ done
 
 %attr(644,root,root)                    %{_prefix}/include/dkim/dkim.h
 %attr(644,root,root)                    %{_prefix}/include/dkim/macros.h
-%{_libdir}/libdkim.so
-%{_libdir}/libdkim.a
-%{_pkg_config_path}/libdkim.pc
+%{_libdir}/libdkim2.so
+%{_libdir}/libdkim2.a
+%{_pkg_config_path}/libdkim2.pc
 
 %if %build_on_obs == 0
 %license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}-devel/COPYING

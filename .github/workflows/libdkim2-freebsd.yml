@@ -1,12 +1,12 @@
-name: libdkim FreeBSD CI
+name: libdkim2 FreeBSD CI
 
 on:
   push:
     paths:
-      - '**/libdkim-x/**'
-      - .github/workflows/libdkim-freebsd.yml
-      - '!**/libdkim-x/debian/*'
-      - '!**/libdkim-x/libdkim.spec.in'
+      - '**/libdkim2-x/**'
+      - .github/workflows/libdkim2-freebsd.yml
+      - '!**/libdkim2-x/debian/*'
+      - '!**/libdkim2-x/libdkim2.spec.in'
       - '!**/doc/*'
       - '!**.md'
   workflow_dispatch:
@@ -19,11 +19,11 @@ jobs:
       MYTOKEN : ${{ secrets.MYTOKEN }}
     steps:
     - uses: actions/checkout@v2
-    - name: build libdkim
+    - name: build libdkim2
       id: FreeBSD
       uses: vmactions/freebsd-vm@v0.3.0
       with:
         envs: 'MYTOKEN'
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2
-        run: cd libdkim-x; ./default.configure; make
+        run: cd libdkim2-x; ./default.configure; make

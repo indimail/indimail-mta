@@ -11,14 +11,14 @@
 
 [![libqmail Ubuntu, Mac OSX](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-c-cpp.yml)
 [![libqmail FreeBSD](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml/badge.svg)](https://github.com/mbhangui/libqmail/actions/workflows/libqmail-freebsd.yml)
-[![libdkim Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-c-cpp.yml)
-[![libdkim FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-freebsd.yml)
+[![libdkim2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-c-cpp.yml)
+[![libdkim2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-freebsd.yml)
 [![libsrs2 Ubuntu, Mac OSX CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-c-cpp.yml)
 [![libsrs2 FreeBSD CI](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-freebsd.yml)
 
 # indimail-mta
 
-[qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following
+[qmail](http://cr.yp.to/qmail.html "qmail") fork with [DKIM](https://github.com/mbhangui/indimail-mta/tree/master/libdkim2-x), [SRS2](https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x) &amp; [IndiMail Virtual Domains](https://github.com/mbhangui/indimail-virtualdomains).  indimail-mta additionally includes forks of the following
 
 * [daemontools](https://cr.yp.to/daemontools.html "daemontools")
 * [ucspi-tcp](https://cr.yp.to/ucspi-tcp.html "ucspi-tcp")
@@ -188,20 +188,20 @@ $ cd /usr/local/src
 $ git clone https://github.com/mbhangui/indimail-mta.git
 ```
 
-After you clone indimail-mta, you will find two subfolders under indimail-mta directory (libdkim-x and libsrs2-x). We now need to build libdkim and libsrs2. If you skip these two steps, indimail-mta will get built without DKIM and SRS2 support.
+After you clone indimail-mta, you will find two subfolders under indimail-mta directory (libdkim2-x and libsrs2-x). We now need to build libdkim2 and libsrs2. If you skip these two steps, indimail-mta will get built without DKIM and SRS2 support.
 
-## Compile libdkim-x (with dynamic libaries)
+## Compile libdkim2-x (with dynamic libaries)
 
 This library from ALT-N Technologies is required for qmail-dkim. If you don't have this library, indimail-mta will be built without DKIM support.
 
 ```
-$ cd /usr/local/src/indimail-mta/libdkim-x
+$ cd /usr/local/src/indimail-mta/libdkim2-x
 $ ./default.configure
 $ make
 $ sudo make -s install-strip
 ```
 
-(check version in indimail-mta/libdkim-x/conf-version)
+(check version in indimail-mta/libdkim2-x/conf-version)
 
 ## Compile libsrs2-x (with dynamic libaries)
 
@@ -696,14 +696,14 @@ You can have the old non-fhs behaviour by having /var/indimail in the above 5 fi
 [![indimail-mta obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/indimail-mta-obs.yml)
 [![daemontools obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/daemontools-obs.yml)
 [![ucspi-tcp obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/ucspi-tcp-obs.yml)
-[![libdkim obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim-obs.yml)
+[![libdkim2 obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libdkim2-obs.yml)
 [![libsrs2 obs trigger](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml/badge.svg)](https://github.com/mbhangui/indimail-mta/actions/workflows/libsrs2-obs.yml)
 
 [![daemontools](https://build.opensuse.org/projects/home:mbhangui/packages/daemontools/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/daemontools)
 [![ucspi-tcp](https://build.opensuse.org/projects/home:mbhangui/packages/ucspi-tcp/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/ucspi-tcp)
 [![indimail-mta](https://build.opensuse.org/projects/home:mbhangui/packages/indimail-mta/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/indimail-mta)
 [![libqmail](https://build.opensuse.org/projects/home:mbhangui/packages/libqmail/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libqmail)
-[![libdkim](https://build.opensuse.org/projects/home:mbhangui/packages/libdkim/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libdkim)
+[![libdkim2](https://build.opensuse.org/projects/home:mbhangui/packages/libdkim2/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libdkim2)
 [![libsrs2](https://build.opensuse.org/projects/home:mbhangui/packages/libsrs2/badge.svg?type=percent)](https://build.opensuse.org/package/show/home:mbhangui/libsrs2)
 
 You can get binary RPM / Debian packages at
@@ -732,7 +732,7 @@ NOTE: Once you have setup your DNF / YUM / apt-get repo, you an also decide to i
 [![daemontools](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/daemontools/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/daemontools/)
 [![ucspi-tcp](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ucspi-tcp/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/ucspi-tcp/)
 [![libqmail](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libqmail/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libqmail/)
-[![libdkim](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim/)
+[![libdkim2](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim2/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libdkim2/)
 [![libsrs2](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libsrs2/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/cprogrammer/indimail/package/libsrs2/)
 
 ```

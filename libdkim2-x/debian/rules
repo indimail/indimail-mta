@@ -17,7 +17,7 @@ libd=$(shell if [ -d $(prefix)/lib/$(arch)-linux-gnu ] ; then echo lib/$(arch)-l
 cp=/bin/cp
 rm=/bin/rm
 
-DESTDIR=$(CURDIR)/debian/libdkim.tmp
+DESTDIR=$(CURDIR)/debian/libdkim2.tmp
 
 build: build-stamp
 build-stamp:
@@ -52,10 +52,10 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	find $(DESTDIR)$(mandir) -name '*'.? -type f -exec gzip -q {} \;
-	sed -i -e 's,@libd\@,$(libd),g' debian/libdkim.install
-	sed -i -e 's,@libd\@,$(libd),g' debian/libdkim-dev.install
-	dh_install --sourcedir=$(DESTDIR) -plibdkim
-	dh_install --sourcedir=$(DESTDIR) -plibdkim-dev
+	sed -i -e 's,@libd\@,$(libd),g' debian/libdkim2.install
+	sed -i -e 's,@libd\@,$(libd),g' debian/libdkim2-dev.install
+	dh_install --sourcedir=$(DESTDIR) -plibdkim2
+	dh_install --sourcedir=$(DESTDIR) -plibdkim2-dev
 	dh_installchangelogs
 	dh_installcron
 	dh_installdocs
