@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.2 2023-01-15 12:25:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.3 2023-07-07 10:36:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -73,18 +73,22 @@ do_pkix(SSL *ssl, char *servercert, char *fqdn,
 	/*- PKIX */
 	if ((r = SSL_get_verify_result(ssl)) != X509_V_OK) {
 		t = (char *) X509_verify_cert_error_string(r);
-		if (!stralloc_copyb(stext, "TLS unable to verify server with ", 33) ||
-				!stralloc_cats(stext, servercert) ||
-				!stralloc_catb(stext, ": ", 2) ||
-				!stralloc_cats(stext, t))
-			mem_err();
+		if (stext) {
+			if (!stralloc_copyb(stext, "TLS unable to verify server with ", 33) ||
+					!stralloc_cats(stext, servercert) ||
+					!stralloc_catb(stext, ": ", 2) ||
+					!stralloc_cats(stext, t))
+				mem_err();
+		}
 		tlsquit("Z", "TLS unable to verify server with ", servercert, ": ", t, 0);
 	}
 	if (!(peercert = SSL_get_peer_certificate(ssl))) {
-		if (!stralloc_copyb(stext, "TLS unable to verify server ", 28) ||
-				!stralloc_cats(stext, fqdn) ||
-				!stralloc_catb(stext, ": no certificate provided", 25))
-			mem_err();
+		if (stext) {
+			if (!stralloc_copyb(stext, "TLS unable to verify server ", 28) ||
+					!stralloc_cats(stext, fqdn) ||
+					!stralloc_catb(stext, ": no certificate provided", 25))
+				mem_err();
+		}
 		tlsquit("Z", "TLS unable to verify server ", fqdn, ": no certificate provided", 0, 0);
 	}
 
@@ -120,19 +124,23 @@ do_pkix(SSL *ssl, char *servercert, char *fqdn,
 			}
 		}
 		if (peer.len <= 0) {
-			if (!stralloc_copyb(stext, "TLS unable to verify server ", 28) ||
-					!stralloc_cats(stext, fqdn) ||
-					!stralloc_catb(stext, ": certificate contains no valid commonName", 42))
-				mem_err();
+			if (stext) {
+				if (!stralloc_copyb(stext, "TLS unable to verify server ", 28) ||
+						!stralloc_cats(stext, fqdn) ||
+						!stralloc_catb(stext, ": certificate contains no valid commonName", 42))
+					mem_err();
+			}
 			tlsquit("Z", "TLS unable to verify server ", fqdn, ": certificate contains no valid commonName", 0, 0);
 		}
 		if (!match_partner((char *) peer.s, peer.len, fqdn)) {
-			if (!stralloc_copyb(stext, "TLS unable to verify server ", 28) ||
-					!stralloc_cats(stext, fqdn) ||
-					!stralloc_catb(stext, ": received certificate for ", 27) ||
-					!stralloc_cat(stext, &peer) ||
-					!stralloc_0(stext))
-				mem_err();
+			if (stext) {
+				if (!stralloc_copyb(stext, "TLS unable to verify server ", 28) ||
+						!stralloc_cats(stext, fqdn) ||
+						!stralloc_catb(stext, ": received certificate for ", 27) ||
+						!stralloc_cat(stext, &peer) ||
+						!stralloc_0(stext))
+					mem_err();
+			}
 			tlsquit("Z", "TLS unable to verify server ", fqdn, ": received certificate for ", 0, &peer);
 		}
 	}
@@ -261,10 +269,12 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		if (!len) {
 			if (!_needtlsauth) /*- file certdir/notlshosts/fqdn.pem doesn't exist */
 				return (0);
-			if (!stralloc_copyb(stext, "No TLS achieved while ", 22) ||
-					!stralloc_cats(stext, servercert) ||
-					!stralloc_catb(stext, " exists", 7))
-				mem_err();
+			if (stext) {
+				if (!stralloc_copyb(stext, "No TLS achieved while ", 22) ||
+						!stralloc_cats(stext, servercert) ||
+						!stralloc_catb(stext, " exists", 7))
+					mem_err();
+			}
 			tlsquit("Z", "No TLS achieved while", tlsFilename.s, " exists", 0, 0);
 		}
 	}
@@ -285,9 +295,11 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		if (!smtps && !_needtlsauth)
 			return (0);
 		t = myssl_error();
-		if (!stralloc_copyb(stext, "TLS error initializing ctx: ", 28) ||
-				!stralloc_cats(stext, t))
-			mem_err();
+		if (stext) {
+			if (!stralloc_copyb(stext, "TLS error initializing ctx: ", 28) ||
+					!stralloc_cats(stext, t))
+				mem_err();
+		}
 		switch (method_fail)
 		{
 		case 1:
@@ -321,11 +333,13 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 	if (_needtlsauth) {
 		if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
 			t = myssl_error();
-			if (!stralloc_copyb(stext, "TLS unable to load ", 19) ||
-					!stralloc_cats(stext, servercert) ||
-					!stralloc_catb(stext, ": ", 2) ||
-					!stralloc_cats(stext, t))
-				mem_err();
+			if (stext) {
+				if (!stralloc_copyb(stext, "TLS unable to load ", 19) ||
+						!stralloc_cats(stext, servercert) ||
+						!stralloc_catb(stext, ": ", 2) ||
+						!stralloc_cats(stext, t))
+					mem_err();
+			}
 			SSL_CTX_free(ctx);
 			ctx = (SSL_CTX *) 0;
 			tlsquit("Z", "TLS unable to load ", servercert, ": ", t, 0);
@@ -349,9 +363,11 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 			ctx = (SSL_CTX *) 0;
 			return (0);
 		}
-		if (!stralloc_copyb(stext, "TLS error initializing ssl: ", 28) ||
-				!stralloc_cats(stext, t))
-			mem_err();
+		if (stext) {
+			if (!stralloc_copyb(stext, "TLS error initializing ssl: ", 28) ||
+					!stralloc_cats(stext, t))
+				mem_err();
+		}
 		SSL_CTX_free(ctx);
 		ctx = (SSL_CTX *) 0;
 		tlsquit("Z", "TLS error initializing ssl: ", t, 0, 0, 0);
@@ -401,19 +417,23 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 			myssl = NULL;
 			if (!_needtlsauth)
 				return (0);
-			if (!stralloc_copyb(stext, "STARTTLS rejected while ", 24) ||
-					!stralloc_cats(stext, tlsFilename.s) ||
-					!stralloc_catb(stext, " exists", 7))
-				mem_err();
+			if (stext) {
+				if (!stralloc_copyb(stext, "STARTTLS rejected while ", 24) ||
+						!stralloc_cats(stext, tlsFilename.s) ||
+						!stralloc_catb(stext, " exists", 7))
+					mem_err();
+			}
 			tlsquit("Z", "STARTTLS rejected while ", tlsFilename.s, " exists", 0, 0);
 		}
 	}
 	*ssl = myssl;
 	if (ssl_timeoutconn(timeoutconn, smtpfd, smtpfd, myssl) <= 0) {
 		t = myssl_error_str();
-		if (!stralloc_copyb(stext, "TLS connect failed: ", 20) ||
-				!stralloc_cats(stext, t))
-			mem_err();
+		if (stext) {
+			if (!stralloc_copyb(stext, "TLS connect failed: ", 20) ||
+					!stralloc_cats(stext, t))
+				mem_err();
+		}
 		tlsquit("Z", "TLS connect failed: ", t, 0, 0, 0);
 	}
 	if (smtps && (code = smtpcode()) != 220)
@@ -678,13 +698,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	static char    *x = "$Id: dossl.c,v 1.2 2023-01-15 12:25:54+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dossl.c,v 1.3 2023-07-07 10:36:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.3  2023-07-07 10:36:31+05:30  Cprogrammer
+ * fix potential SIGSEGV
+ *
  * Revision 1.2  2023-01-15 12:25:54+05:30  Cprogrammer
  * prototype change for quit function with varargs
  *

@@ -1,5 +1,9 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.6  2023-07-07 10:43:40+05:30  Cprogrammer
+ * use NULL instead of 0 for null pointer
+ * fixed call to out()
+ *
  * Revision 1.5  2023-01-15 18:28:03+05:30  Cprogrammer
  * changed function out() to match function in qmail-smtpd
  *
@@ -16,6 +20,7 @@
  * Initial revision
  *
  */
+#include <stddef.h>
 #include <str.h>
 #include <stralloc.h>
 #include <fmt.h>
@@ -39,25 +44,21 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 	char            count_buf[FMT_ULONG];
 
 	/*- Cannot reject bounces */
-	if (!*sender || !str_diff(sender, "#@[]"))
-	{
-		if (verb)
-		{
-			out("access allowed for bounces\n");
+	if (!*sender || !str_diff(sender, "#@[]")) {
+		if (verb) {
+			out("access allowed for bounces\n", NULL);
 			flush();
 		}
 		return(0);
 	}
-	if (!str_diffn(recipient, "postmaster@", 11) || !str_diff(recipient, "postmaster"))
-	{
+	if (!str_diffn(recipient, "postmaster@", 11) || !str_diff(recipient, "postmaster")) {
 		if (verb)
-			out("access allowed for postmaster\n");
+			out("access allowed for postmaster\n", NULL);
 		return(0);
 	}
-	if (!str_diffn(recipient, "abuse@", 6) || !str_diff(recipient, "abuse"))
-	{
+	if (!str_diffn(recipient, "abuse@", 6) || !str_diff(recipient, "abuse")) {
 		if (verb)
-			out("access allowed for this email\n");
+			out("access allowed for this email\n", NULL);
 		return(0);
 	}
 	/*
@@ -69,8 +70,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 	 * rcpt:md@indimail.org:country_distribution_list@indimail.org
 	 * from:recruiter@yahoo.com:hr@indimail.org
 	 */
-	for (rcpt_reject = len = 0, count = 1, ptr = acclist->s;len < acclist->len;count++)
-	{
+	for (rcpt_reject = len = 0, count = 1, ptr = acclist->s;len < acclist->len;count++) {
 		len += (str_len(ptr) + 1); /*- length of each rule */
 		/*
 		 * recipient is cptr + 1
@@ -83,71 +83,51 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 		rcpt_found = 0;
 		from_match = rcpt_match = 0;
 		/*- find if a match for recipient occurs in the rule */
-		if (!str_diff(recipient, cptr + 1)) /*- recipient */
-		{
+		if (!str_diff(recipient, cptr + 1)) { /*- recipient */
 			rcpt_found = 1;
 			rcpt_match = cptr + 1;
-		} else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(recipient, cptr + 1, &err_str)) < 0)
-				{
+		} else {
+			if (qregex) {
+				if ((err = matchregex(recipient, cptr + 1, &err_str)) < 0) {
 					*cptr = 0;
 					return (err);
 				} else
-				if (err == 1)
-				{
+				if (err == 1) {
 					rcpt_found = 1;
 					rcpt_match = cptr + 1;
 				}
 			} else
-			if (wildmat_internal(recipient, cptr + 1))
-			{
+			if (wildmat_internal(recipient, cptr + 1)) {
 				rcpt_found = 1;
 				rcpt_match = cptr + 1;
 			}
 		}
-		if (!rcpt_found)
-		{
+		if (!rcpt_found) {
 			*cptr = ':';
 			ptr = acclist->s + len;
 			continue;
 		}
-		if (!str_diffn(ptr, "rcpt:", 5))
-		{
+		if (!str_diffn(ptr, "rcpt:", 5)) {
 			rcpt_reject = 1;
-			if (verb)
-			{
-				out("rule no ");
+			if (verb) {
 				count_buf[fmt_ulong(count_buf, (unsigned long) count)] = 0;
-				out(count_buf);
-				out(": ");
 				*cptr = ':';
-				out(ptr);
+				out("rule no ", count_buf, ": ", ptr, "\n",
+						"\tmatched recipient     [", recipient, "] with [",
+						rcpt_match, "]\n", NULL);
 				*cptr = 0;
-				out("\n");
-				out("\tmatched recipient     [");
-				out(recipient);
-				out("] with [");
-				out(rcpt_match);
-				out("]\n");
 			}
 		}
-		if (!rcpt_reject)
-		{
+		if (!rcpt_reject) {
 			*cptr = ':';
 			ptr = acclist->s + len;
 			continue;
 		}
 		if (!str_diff(sender, ptr + 5)) /*- sender */
 			from_match = ptr + 5;
-		else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(sender, ptr + 5, &err_str)) < 0)
-				{
+		else {
+			if (qregex) {
+				if ((err = matchregex(sender, ptr + 5, &err_str)) < 0) {
 					*cptr = ':';
 					if (verb)
 						die_regex(err_str);
@@ -158,32 +138,20 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 			if (wildmat_internal(sender, ptr + 5))
 				from_match = ptr + 5;
 		}
-		if (rcpt_reject)
-		{
-			if (from_match) /*- explicit allow rule found for sender */
-			{
+		if (rcpt_reject) {
+			if (from_match) { /*- explicit allow rule found for sender */
 				if (verb)
-				{
-					out("\tmatched sender        [");
-					out(sender);
-					out("] with [");
-					out(from_match);
-					out("] --> access allowed\n");
-				}
+					out("\tmatched sender        [", sender, "] with [",
+							from_match, "] --> access allowed\n", NULL);
 				return (0);
 			}
 			if (verb)
-			{
-				out("\tsender not matched    [");
-				out(sender);
-				out("] --> access denied\n");
-			}
+				out("\tsender not matched    [", sender, "] --> access denied\n", NULL);
 		}
 		*cptr = ':';
 		ptr = acclist->s + len; /*- go to the next rule */
 	}
-	for (from_reject = len = 0, count = 1, ptr = acclist->s;len < acclist->len;count++)
-	{
+	for (from_reject = len = 0, count = 1, ptr = acclist->s;len < acclist->len;count++) {
 		len += (str_len(ptr) + 1); /*- length of each rule */
 		/*
 		 * sender is ptr + 5
@@ -196,72 +164,52 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 		from_found = 0;
 		from_match = rcpt_match = 0;
 		/*- find if a match for sender occurs in the rule */
-		if (!str_diff(sender, ptr + 5)) /*- sender */
-		{
+		if (!str_diff(sender, ptr + 5)) { /*- sender */
 			from_found = 1;
 			from_match = ptr + 5;
-		} else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(sender, ptr + 5, &err_str)) < 0)
-				{
+		} else {
+			if (qregex) {
+				if ((err = matchregex(sender, ptr + 5, &err_str)) < 0) {
 					*cptr = ':';
 					if (verb)
 						die_regex(err_str);
 					return (err);
-				} else
-				{
+				} else {
 					from_found = 1;
 					from_match = ptr + 5;
 				}
 			} else
-			if (wildmat_internal(sender, ptr + 5))
-			{
+			if (wildmat_internal(sender, ptr + 5)) {
 				from_found = 1;
 				from_match = ptr + 5;
 			}
 		}
-		if (!from_found) /*- this rule is irrelevant for the sender */
-		{
+		if (!from_found) { /*- this rule is irrelevant for the sender */
 			*cptr = ':';
 			ptr = acclist->s + len;
 			continue;
 		}
-		if (!str_diffn(ptr, "from:", 5))
-		{
+		if (!str_diffn(ptr, "from:", 5)) {
 			from_reject = 1;
-			if (verb)
-			{
-				out("rule no ");
+			if (verb) {
 				count_buf[fmt_ulong(count_buf, (unsigned long) count)] = 0;
-				out(count_buf);
-				out(": ");
 				*cptr = ':';
-				out(ptr);
+				out("rule no ", count_buf, ": ", ptr, "\n",
+						"\tmatched sender        [",
+						sender, "] with [", from_match, "]\n", NULL);
 				*cptr = 0;
-				out("\n");
-				out("\tmatched sender        [");
-				out(sender);
-				out("] with [");
-				out(from_match);
-				out("]\n");
 			}
 		}
-		if (!from_reject)
-		{
+		if (!from_reject) {
 			*cptr = ':';
 			ptr = acclist->s + len;
 			continue;
 		}
 		if (!str_diff(recipient, cptr + 1)) /*- recipient */
 			rcpt_match = cptr + 1;
-		else
-		{
-			if (qregex)
-			{
-				if ((err = matchregex(recipient, cptr + 1, &err_str)) < 0)
-				{
+		else {
+			if (qregex) {
+				if ((err = matchregex(recipient, cptr + 1, &err_str)) < 0) {
 					*cptr = ':';
 					if (verb)
 						die_regex(err_str);
@@ -272,26 +220,15 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 			if (wildmat_internal(recipient, cptr + 1))
 				rcpt_match = cptr + 1;
 		}
-		if (from_reject)
-		{
-			if (rcpt_match) /*- explicit allow rule found for recipient */
-			{
+		if (from_reject) {
+			if (rcpt_match) { /*- explicit allow rule found for recipient */
 				if (verb)
-				{
-					out("\tmatched recipient     [");
-					out(recipient);
-					out("] with [");
-					out(rcpt_match);
-					out("] --> access allowed\n");
-				}
+					out("\tmatched recipient     [", recipient, "] with [",
+							rcpt_match, "] --> access allowed\n", NULL);
 				return (0);
 			}
 			if (verb)
-			{
-				out("\trecipient not matched [ ");
-				out(recipient);
-				out("] --> access denied\n");
-			}
+				out("\trecipient not matched [ ", recipient, "] --> access denied\n", NULL);
 		}
 		*cptr = ':';
 		ptr = acclist->s + len; /*- go to the next rule */
@@ -302,7 +239,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.5 2023-01-15 18:28:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.6 2023-07-07 10:43:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

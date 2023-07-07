@@ -1,5 +1,5 @@
 /*
- * $Id: starttls.c,v 1.16 2023-01-15 12:42:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: starttls.c,v 1.17 2023-07-07 10:51:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -715,13 +715,13 @@ do_dane_validation(char *host, int port)
 	if (verbose)
 		flush();
 	if (code >= 500 && code < 600)
-		quit(code, 1, "Connected to ", " but greeting failed", 0);
+		quit(code, 1, "Connected to ", " but greeting failed", NULL);
 	else
 	if (code >= 400 && code < 500)
-		quit(code, 1, "Connected to ", " but greeting failed", 0);
+		quit(code, 1, "Connected to ", " but greeting failed", NULL);
 	else
 	if (code != 220)
-		quit(code, 1, "Connected to ", " but greeting failed", 0);
+		quit(code, 1, "Connected to ", " but greeting failed", NULL);
 	if (!smtps)
 		code = ehlo();
 	match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
@@ -774,7 +774,7 @@ do_dane_validation(char *host, int port)
 	 */
 	if ((!match0Or512 && authsha256) || match0Or512) {
 		if (needtlsauth && usage == 2)
-			do_pkix(ssl, servercert, partner_fqdn, tls_quit, die_nomem, 0);
+			do_pkix(ssl, servercert, partner_fqdn, tls_quit, die_nomem, NULL);
 	} else { /*- dane validation failed */
 		substdio_putsflush(&smtpto, "QUIT\r\n");
 		if (verbose == 2)
@@ -928,13 +928,16 @@ unsigned long smtpcode() { return(550);}
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.16 2023-01-15 12:42:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.17 2023-07-07 10:51:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: starttls.c,v $
+ * Revision 1.17  2023-07-07 10:51:32+05:30  Cprogrammer
+ * use NULL instead of 0 for null pointer
+ *
  * Revision 1.16  2023-01-15 12:42:12+05:30  Cprogrammer
  * quit() function changed to have varargs
  *

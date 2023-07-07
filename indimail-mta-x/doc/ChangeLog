@@ -36,6 +36,12 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
 17. qsutil.c: removed extra / from defaultdelivery control filename path
 - 26/06/2023
 18. svctool: set permission of logrotate.mysql to mysql:mysql
+- 07/07/2023
+19. svctool: fix MySQL db creation for MariaDB 11.x
+20. qmail-remote.c, smtpd.c, qmail-greyd.c, mail_acl.c, starttls.c: use NULL
+    instead of 0 for null pointer
+21. mail_acl.c: fixed incorrect call to out()
+22. dossl.c: fixed potential SIGSEGV
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

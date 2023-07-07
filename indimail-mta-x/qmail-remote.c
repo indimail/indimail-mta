@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.166 2023-03-11 16:09:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.167 2023-07-07 10:35:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -264,17 +264,17 @@ run_script(char code, int succ)
 		return (0);
 	remote_code[0] = code;
 	if (!env_put2("SMTPSTATUS", remote_code)) {
-		my_error("alert: Out of memory", 0, 0);
+		my_error("alert: Out of memory", NULL, NULL);
 		_exit(1);
 	}
 	if (!(args = (char **) alloc(my_argc + 1))) {
-		my_error("alert: Out of memory", 0, 0);
+		my_error("alert: Out of memory", NULL, NULL);
 		_exit(1);
 	}
 	switch (child = fork())
 	{
 	case -1:
-		my_error("alert: fork failed", 0, 0);
+		my_error("alert: fork failed", NULL, NULL);
 		_exit(0);
 		return (1);
 	case 0:
@@ -282,31 +282,31 @@ run_script(char code, int succ)
 		{
 		case 1:/*- success */
 			if (!env_unset("ONFAILURE_REMOTE")) {
-				my_error("alert: out of memory", 0, 0);
+				my_error("alert: out of memory", NULL, NULL);
 				_exit(1);
 			}
 			if (!env_unset("ONTEMPORARY_REMOTE")) {
-				my_error("alert: out of memory", 0, 0);
+				my_error("alert: out of memory", NULL, NULL);
 				_exit(1);
 			}
 			break;
 		case 0:/*- failure */
 			if (!env_unset("ONSUCCESS_REMOTE")) {
-				my_error("alert: Out of memory", 0, 0);
+				my_error("alert: Out of memory", NULL, NULL);
 				_exit(1);
 			}
 			if (!env_unset("ONTEMPORARY_REMOTE")) {
-				my_error("alert: Out of memory", 0, 0);
+				my_error("alert: Out of memory", NULL, NULL);
 				_exit(1);
 			}
 			break;
 		case -1:
 			if (!env_unset("ONSUCCESS_REMOTE")) {
-				my_error("alert: Out of memory", 0, 0);
+				my_error("alert: Out of memory", NULL, NULL);
 				_exit(1);
 			}
 			if (!env_unset("ONFAILURE_REMOTE")) {
-				my_error("alert: Out of memory", 0, 0);
+				my_error("alert: Out of memory", NULL, NULL);
 				_exit(1);
 			}
 			break;
@@ -316,7 +316,7 @@ run_script(char code, int succ)
 			args[i] = my_argv[i];
 		args[i] = NULL;
 		execv(prog, args);
-		my_error("alert: Unable to run", prog, 0);
+		my_error("alert: Unable to run", prog, NULL);
 		_exit(1);
 	}
 	wait_pid(&wstat, child);
@@ -1474,28 +1474,28 @@ decode_smtpauth_err(int code, char *s1, char *s2)
 	switch(code)
 	{
 	case 432:
-		quit(code, 1, "ZConnected to ", " but a password transition is needed ", "(", s1, s2, ") (#4.7.12).", 0);
+		quit(code, 1, "ZConnected to ", " but a password transition is needed ", "(", s1, s2, ") (#4.7.12).", NULL);
 		break;
 	case 454:
-		quit(code, 1, "ZConnected to ", " but got temporary authentication failure ", s1, s2, ") (#4.7.0).", 0);
+		quit(code, 1, "ZConnected to ", " but got temporary authentication failure ", s1, s2, ") (#4.7.0).", NULL);
 		break;
 	case 534:
-		quit(code, 1, "DConnected to ", " but authentication mechanism is too weak ", s1, s2, ") (#5.7.9).", 0);
+		quit(code, 1, "DConnected to ", " but authentication mechanism is too weak ", s1, s2, ") (#5.7.9).", NULL);
 		break;
 	case 535:
-		quit(code, 1, "DConnected to ", " but authentication credentials invalid ", s1, s2, ") (#5.7.8).", 0);
+		quit(code, 1, "DConnected to ", " but authentication credentials invalid ", s1, s2, ") (#5.7.8).", NULL);
 		break;
 	case 500:
-		quit(code, 1, "DConnected to ", " but authentication Exchange line is too long ", s1, s2, ") (#5.5.6).", 0);
+		quit(code, 1, "DConnected to ", " but authentication Exchange line is too long ", s1, s2, ") (#5.5.6).", NULL);
 		break;
 	case 530:
-		quit(code, 1, "DConnected to ", " but authentication required ", s1, s2, ") (#5.7.0).", 0);
+		quit(code, 1, "DConnected to ", " but authentication required ", s1, s2, ") (#5.7.0).", NULL);
 		break;
 	case 538:
-		quit(code, 1, "DConnected to ", " but encryption required for requested authentication mechanism ", s1, s2, ") (#5.7.11).", 0);
+		quit(code, 1, "DConnected to ", " but encryption required for requested authentication mechanism ", s1, s2, ") (#5.7.11).", NULL);
 		break;
 	default:
-		quit(code, 1, "ZConnected to ", " but authentication was rejected ", s1, s2, ") (#4.7.0)", 0);
+		quit(code, 1, "ZConnected to ", " but authentication was rejected ", s1, s2, ") (#4.7.0)", NULL);
 		break;
 	}
 }
@@ -1514,15 +1514,15 @@ auth_digest_md5(int use_size)
 			substdio_flush(&smtpto) == -1)
 		temp_write();
 	if ((code = smtpcode()) != 334)
-		quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH DIGEST-MD5)", 0);
+		quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH DIGEST-MD5)", NULL);
 	if ((i = str_chr(smtptext.s + 5, '\n')) > 0) {	/*- Challenge */
 		slop.len = 0;
 		if (!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
 			temp_nomem();
 		if (b64decode((unsigned char *) slop.s, slop.len, &chal))
-			quit(-1, -1, "ZConnected to ", " but unable to base64decode challenge", 0);
+			quit(-1, -1, "ZConnected to ", " but unable to base64decode challenge", NULL);
 	} else
-		quit(-1, 1, "ZConnected to ", " but got no challenge", 0);
+		quit(-1, 1, "ZConnected to ", " but got no challenge", NULL);
 
 	if (scan_response(&nonce, &chal, "nonce") == 0)
 		quit(-1, 1, "ZConnected to ", " but got no response= in challenge");
@@ -1579,20 +1579,20 @@ auth_digest_md5(int use_size)
 		(s =
 		 (unsigned char *) qr_digest_md5(user.s, user.len, realm.s, realm.len, pass.s, pass.len, 0, nonce.s, nonce.len, digesturi.s,
 									  digesturi.len, (char *) cnonce, "00000001", "auth")))
-		quit(-1, -1, "ZConnected to ", " but unable to generate response", 0);
+		quit(-1, -1, "ZConnected to ", " but unable to generate response", NULL);
 	if (!stralloc_cats(&slop, (char *) s) ||
 			!stralloc_catb(&slop, ",username=\"", 11) ||
 			!stralloc_cat(&slop, &user) ||
 			!stralloc_catb(&slop, "\"", 1))
 		temp_nomem();
 	if (b64encode(&slop, &auth))
-		quit(-1, -1, "ZConnected to ", " but unable to base64encode username+digest", 0);
+		quit(-1, -1, "ZConnected to ", " but unable to base64encode username+digest", NULL);
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
 		temp_write();
 	if ((code = smtpcode()) != 334)
-		quit(code, 1, "ZConnected to ", " but authentication was rejected (username+digest)", 0);
+		quit(code, 1, "ZConnected to ", " but authentication was rejected (username+digest)", NULL);
 	if (substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
 		temp_write();
@@ -1616,7 +1616,7 @@ auth_cram(int type, int use_size)
 				substdio_flush(&smtpto) == -1)
 			temp_write();
 		if ((code = smtpcode()) != 334)
-			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5)", 0);
+			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-MD5)", NULL);
 		break;
 	case AUTH_CRAM_RIPEMD:
 		iter = RIPEMD160_DIGEST_LENGTH;
@@ -1624,7 +1624,7 @@ auth_cram(int type, int use_size)
 				substdio_flush(&smtpto) == -1)
 			temp_write();
 		if ((code = smtpcode()) != 334)
-			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD)", 0);
+			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-RIPEMD)", NULL);
 		break;
 	case AUTH_CRAM_SHA1:
 		iter = SHA_DIGEST_LENGTH;
@@ -1632,7 +1632,7 @@ auth_cram(int type, int use_size)
 				substdio_flush(&smtpto) == -1)
 			temp_write();
 		if ((code = smtpcode()) != 334)
-			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA1)", 0);
+			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA1)", NULL);
 		break;
 	case AUTH_CRAM_SHA224:
 		iter = SHA224_DIGEST_LENGTH;
@@ -1640,7 +1640,7 @@ auth_cram(int type, int use_size)
 				substdio_flush(&smtpto) == -1)
 			temp_write();
 		if ((code = smtpcode()) != 334)
-			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA224)", 0);
+			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA224)", NULL);
 		break;
 	case AUTH_CRAM_SHA256:
 		iter = SHA256_DIGEST_LENGTH;
@@ -1648,7 +1648,7 @@ auth_cram(int type, int use_size)
 				substdio_flush(&smtpto) == -1)
 			temp_write();
 		if ((code = smtpcode()) != 334)
-			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA256)", 0);
+			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA256)", NULL);
 		break;
 	case AUTH_CRAM_SHA384:
 		iter = SHA384_DIGEST_LENGTH;
@@ -1656,7 +1656,7 @@ auth_cram(int type, int use_size)
 				substdio_flush(&smtpto) == -1)
 			temp_write();
 		if ((code = smtpcode()) != 334)
-			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA384)", 0);
+			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA384)", NULL);
 		break;
 	case AUTH_CRAM_SHA512:
 		iter = SHA512_DIGEST_LENGTH;
@@ -1664,7 +1664,7 @@ auth_cram(int type, int use_size)
 				substdio_flush(&smtpto) == -1)
 			temp_write();
 		if ((code = smtpcode()) != 334)
-			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA512)", 0);
+			quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH CRAM-SHA512)", NULL);
 		break;
 	}
 	if ((j = str_chr(smtptext.s + 5, '\n')) > 0) {	/*- Challenge */
@@ -1672,9 +1672,9 @@ auth_cram(int type, int use_size)
 				!stralloc_copyb(&slop, smtptext.s + 4, smtptext.len - 5))
 			temp_nomem();
 		if (b64decode((unsigned char *) slop.s, slop.len, &chal))
-			quit(-1, -1, "ZConnected to ", " but unable to base64decode challenge", 0);
+			quit(-1, -1, "ZConnected to ", " but unable to base64decode challenge", NULL);
 	} else
-		quit(-1, 1, "ZConnected to ", " but got no challenge", 0);
+		quit(-1, 1, "ZConnected to ", " but got no challenge", NULL);
 	switch (type)
 	{
 	case AUTH_CRAM_MD5:
@@ -1715,7 +1715,7 @@ auth_cram(int type, int use_size)
 		temp_nomem();
 
 	if (b64encode(&slop, &auth))
-		quit(-1, -1, "ZConnected to ", " but unable to base64encode username+digest", 0);
+		quit(-1, -1, "ZConnected to ", " but unable to base64encode username+digest", NULL);
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1)
 		temp_write();
@@ -1734,7 +1734,7 @@ auth_plain(int use_size)
 			substdio_flush(&smtpto) == -1)
 		temp_write();
 	if ((code = smtpcode()) != 334)
-		quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH PLAIN)", 0);
+		quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH PLAIN)", NULL);
 	if (!stralloc_copy(&plain, &smtp_sender) || /*- Mail From: <auth-id> */
 			!stralloc_0(&plain) ||
 			!stralloc_cat(&plain, &user) || /*- userid */
@@ -1742,7 +1742,7 @@ auth_plain(int use_size)
 			!stralloc_cat(&plain, &pass)) /*- password */
 		temp_nomem();
 	if (b64encode(&plain, &auth))
-		quit(-1, -1, "ZConnected to ", " but unable to base64encode (plain)", 0);
+		quit(-1, -1, "ZConnected to ", " but unable to base64encode (plain)", NULL);
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
@@ -1761,23 +1761,23 @@ auth_login(int use_size)
 			substdio_flush(&smtpto) == -1)
 		temp_write();
 	if ((code = smtpcode()) != 334)
-		quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH LOGIN)", 0);
+		quit(code, 1, "ZConnected to ", " but authentication was rejected (AUTH LOGIN)", NULL);
 
 	if (!stralloc_copys(&auth, ""))
 		temp_nomem();
 	if (b64encode(&user, &auth))
-		quit(-1, -1, "ZConnected to ", " but unable to base64encode user", 0);
+		quit(-1, -1, "ZConnected to ", " but unable to base64encode user", NULL);
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
 		temp_nomem();
 	if ((code = smtpcode()) != 334)
-		quit(code, 1, "ZConnected to ", " but authentication was rejected (username)", 0);
+		quit(code, 1, "ZConnected to ", " but authentication was rejected (username)", NULL);
 
 	if (!stralloc_copys(&auth, ""))
 		temp_nomem();
 	if (b64encode(&pass, &auth))
-		quit(-1, -1, "ZConnected to ", " but unable to base64encode pass", 0);
+		quit(-1, -1, "ZConnected to ", " but unable to base64encode pass", NULL);
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
@@ -1823,7 +1823,7 @@ gsasl_authenticate(Gsasl_session *session, char *mech)
 				!stralloc_append(&gsasl_str, ")") ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(code, 1, "ZConnected to ", gsasl_str.s, 0);
+		quit(code, 1, "ZConnected to ", gsasl_str.s, NULL);
 	}
 
 	if (!stralloc_0(&gsasl_str))
@@ -1852,7 +1852,7 @@ gsasl_authenticate(Gsasl_session *session, char *mech)
 						!stralloc_append(&gsasl_str, ")") ||
 						!stralloc_0(&gsasl_str))
 					temp_nomem();
-				quit(code, 1, "ZConnected to ", gsasl_str.s, 0);
+				quit(code, 1, "ZConnected to ", gsasl_str.s, NULL);
 			}
 			remove_newline();
 		}
@@ -1862,7 +1862,7 @@ gsasl_authenticate(Gsasl_session *session, char *mech)
 				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(-1, 1, "ZConnected to ", gsasl_str.s, 0);
+		quit(-1, 1, "ZConnected to ", gsasl_str.s, NULL);
 	}
 	/*
 	 * The client is done.  Here you would typically check if the server
@@ -1874,7 +1874,7 @@ gsasl_authenticate(Gsasl_session *session, char *mech)
 				!stralloc_append(&gsasl_str, ")") ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(code, 1, "ZConnected to ", gsasl_str.s, 0);
+		quit(code, 1, "ZConnected to ", gsasl_str.s, NULL);
 	}
 }
 
@@ -1937,10 +1937,10 @@ do_channel_binding(Gsasl_session *sctx)
 	{
 	case TLS1_2_VERSION:
 		if (!(p = get_finish_message(tls_unique)))
-			quit(-1, -1, "ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", 0);
+			quit(-1, -1, "ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", NULL);
 #if GSASL_VERSION_MAJOR > 1
 		if (gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p) != GSASL_OK)
-			quit(-1, -1, "ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", 0);
+			quit(-1, -1, "ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_UNIQUE", NULL);
 #else
 		gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p);
 #endif
@@ -1949,14 +1949,14 @@ do_channel_binding(Gsasl_session *sctx)
 #if defined(TLS1_3_VERSION)
 	case TLS1_3_VERSION:
 		if(!(p = get_finish_message(tls_exporter)))
-			quit(-1, -1, "ZConnected to ", " but unable to get finish message for GSASL_CB_TLS_EXPORTER", 0);
+			quit(-1, -1, "ZConnected to ", " but unable to get finish message for GSASL_CB_TLS_EXPORTER", NULL);
 		if (gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p) != GSASL_OK)
-			quit(-1, -1, "ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_EXPORTER", 0);
+			quit(-1, -1, "ZConnected to ", " but unable to set channel binding for GSASL_CB_TLS_EXPORTER", NULL);
 		break;
 #endif
 #endif
 	default:
-		quit(-1, -1, "ZConnected to ", " but got unknown channel binding", 0);
+		quit(-1, -1, "ZConnected to ", " but got unknown channel binding", NULL);
 	}
 }
 
@@ -1988,7 +1988,7 @@ gsasl_client(Gsasl *gsasl_ctx, int method)
 				!stralloc_catb(&gsasl_str, strnum, i) ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(-1, 1, "ZConnected to ", gsasl_str.s, 0);
+		quit(-1, 1, "ZConnected to ", gsasl_str.s, NULL);
 		break;
 	}
 	/* Create new authentication session.  */
@@ -1997,7 +1997,7 @@ gsasl_client(Gsasl *gsasl_ctx, int method)
 				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(-1, -1, "ZConnected to ", gsasl_str.s, 0);
+		quit(-1, -1, "ZConnected to ", gsasl_str.s, NULL);
 	}
 
 	if (method == AUTH_SCRAM_SHA1_PLUS || method == AUTH_SCRAM_SHA256_PLUS)
@@ -2013,7 +2013,7 @@ gsasl_client(Gsasl *gsasl_ctx, int method)
 				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(-1, -1, "ZConnected to ", gsasl_str.s, 0);
+		quit(-1, -1, "ZConnected to ", gsasl_str.s, NULL);
 		return;
 	}
 	rc = gsasl_property_set(session, env_get("SALTED_PASSWORD") ? GSASL_SCRAM_SALTED_PASSWORD : GSASL_PASSWORD, pass.s);
@@ -2022,7 +2022,7 @@ gsasl_client(Gsasl *gsasl_ctx, int method)
 				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(-1, -1, "ZConnected to ", gsasl_str.s, 0);
+		quit(-1, -1, "ZConnected to ", gsasl_str.s, NULL);
 		return;
 	}
 #else
@@ -2046,7 +2046,7 @@ auth_scram(int method, int use_size)
 				!stralloc_cats(&gsasl_str, gsasl_strerror(rc)) ||
 				!stralloc_0(&gsasl_str))
 			temp_nomem();
-		quit(-1, -1, "ZConnected to ", gsasl_str.s, 0);
+		quit(-1, -1, "ZConnected to ", gsasl_str.s, NULL);
 	}
 	/* Do it.  */
 	gsasl_client(gsasl_ctx, method);
@@ -2321,7 +2321,7 @@ qmtp(stralloc *h, char *ip, int port_num)
 	char            num[FMT_ULONG];
 
 	if (fstat(0, &st) == -1)
-		quit(-1, -1, "Z", "unable to fstat fd 0", 0);
+		quit(-1, -1, "Z", "unable to fstat fd 0", NULL);
 	len = st.st_size;
 	/*-
  	 * the following code was substantially taken from serialmail'ss serialqmtp.c
@@ -2481,13 +2481,13 @@ do_smtp(char *fqdn)
 #endif /*- #ifdef TLS */
 	inside_greeting = 0;
 	if (code >= 500 && code < 600)
-		quit(code, 1, "DConnected to ", " but greeting failed", 0);
+		quit(code, 1, "DConnected to ", " but greeting failed", NULL);
 	else
 	if (code >= 400 && code < 500)
 		return;		/*- try next MX, see RFC-2821 */
 	else
 	if (code != 220)
-		quit(code, 1, "ZConnected to ", " but greeting failed", 0);
+		quit(code, 1, "ZConnected to ", " but greeting failed", NULL);
 	/*-
  	 * RFC2487 says we should issue EHLO (even if we might not need
  	 * extensions); at the same time, it does not prohibit a server
@@ -2499,11 +2499,11 @@ do_smtp(char *fqdn)
 #ifdef HASTLSA
 	if (do_tlsa && ta.len) {
 		if (notls)
-			quit(430, 1, "ZConnected to ", " but host is in notlshosts", 0);
+			quit(430, 1, "ZConnected to ", " but host is in notlshosts", NULL);
 		match0Or512 = authfullMatch = authsha256 = authsha512 = 0;
 		if (!do_tls(&ssl, 0, smtps, smtpfd, &needtlsauth, &servercert, partner_fqdn, host.s, host.len, tls_quit,
 					temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0)) /*- tls is needed for DANE */
-			quit(430, -1, "ZConnected to ", " but unable to intiate TLS for DANE", 0);
+			quit(430, -1, "ZConnected to ", " but unable to intiate TLS for DANE", NULL);
 		for (j = 0, usage = -1; j < ta.len; ++j) {
 			rp = &(ta.rr[j]);
 			if (!rp->mtype || rp->mtype == 2)
@@ -2550,19 +2550,21 @@ do_smtp(char *fqdn)
 		} else { /*- dane validation failed */
 			if (use_daned)
 				(void) tlsacheck(do_tlsa, fqdn, UPDATE_FAILURE, rbuf, timeoutfn, err_tmpfail);
-			quit(534, 1, "DConnected to ", " but recpient failed DANE validation", 0);
+			quit(534, 1, "DConnected to ", " but recpient failed DANE validation", NULL);
 		}
 	} else /*- no tlsa rr records */
 	if (notls) /*- if found in control/notlshosts control file */
 		code = ehlo();
 	else
-	if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len, tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
+	if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len,
+				tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
 		code = ehlo();
 #else
 	if (notls) /*- if found in control/notlshosts control file */
 		code = ehlo();
 	else
-	if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len, tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
+	if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len,
+				tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
 		code = ehlo();
 #endif /*- #ifdef HASTLSA */
 #else
@@ -2588,7 +2590,7 @@ do_smtp(char *fqdn)
 				!stralloc_cats(&helo_str, "<-- was rejected :(") ||
 				!stralloc_0(&helo_str))
 			temp_nomem();
-		quit(code, 1, code >= 500 ? "DConnected to " : "ZConnected to ", helo_str.s, 0);
+		quit(code, 1, code >= 500 ? "DConnected to " : "ZConnected to ", helo_str.s, NULL);
 	}
 	/*-
  	 * go through all lines of the multi line answer until one begins
@@ -2622,7 +2624,7 @@ do_smtp(char *fqdn)
 		if (!flagutf8)
 			checkutf8message();
 		if (flagutf8 && !smtputf8)
-			quit(553, 1, "DConnected to ", " but server does not support unicode in email addresses", 0);
+			quit(553, 1, "DConnected to ", " but server does not support unicode in email addresses", NULL);
 	}
 #endif
 	if (auth_capa)
@@ -2632,9 +2634,9 @@ do_smtp(char *fqdn)
 	substdio_flush(&smtpto);
 	code = smtpcode();
 	if (code >= 500)
-		quit(code, 1, "DConnected to ", " but sender was rejected", 0);
+		quit(code, 1, "DConnected to ", " but sender was rejected", NULL);
 	if (code >= 400)
-		quit(code, 1, "ZConnected to ", " but sender was rejected", 0);
+		quit(code, 1, "ZConnected to ", " but sender was rejected", NULL);
 	flagbother = 0;
 	for (i = 0; i < smtp_reciplist.len; ++i) {
 		if (substdio_put(&smtpto, "RCPT TO:<", 9) == -1 ||
@@ -2675,14 +2677,14 @@ do_smtp(char *fqdn)
 		}
 	}
 	if (!flagbother)
-		quit(code, 1, "DGiving up on ", "", 0);
+		quit(code, 1, "DGiving up on ", "", NULL);
 	if (substdio_putflush(&smtpto, "DATA\r\n", 6) == -1)
 		temp_write();
 	code = smtpcode();
 	if (code >= 500)
-		quit(code, 1, "D", " failed on DATA command", code, 0);
+		quit(code, 1, "D", " failed on DATA command", code, NULL);
 	if (code >= 400)
-		quit(code, 1, "Z", " failed on DATA command", code, 0);
+		quit(code, 1, "Z", " failed on DATA command", code, NULL);
 #ifdef SMTPUTF8
 	if (enable_utf8 && header.len &&
 			substdio_put(&smtpto, header.s, header.len) == -1)
@@ -2692,13 +2694,13 @@ do_smtp(char *fqdn)
 	code = smtpcode();
 	flagcritical = 0;
 	if (code >= 500)
-		quit(code, 1, "D", " failed after I sent the message", 0);
+		quit(code, 1, "D", " failed after I sent the message", NULL);
 	if (code >= 400)
-		quit(code, 1, "Z", " failed after I sent the message", 0);
+		quit(code, 1, "Z", " failed after I sent the message", NULL);
 #ifdef TLS
-	quit(code, 0, "K", ssl ? " accepted message - Protocol SMTPS" : " accepted message - Protocol SMTP", 0);
+	quit(code, 0, "K", ssl ? " accepted message - Protocol SMTPS" : " accepted message - Protocol SMTP", NULL);
 #else
-	quit(code, 0, "K", " accepted message - Protocol SMTP", 0);
+	quit(code, 0, "K", " accepted message - Protocol SMTP", NULL);
 #endif
 }
 
@@ -2833,7 +2835,7 @@ getcontrols()
 	static stralloc outgoingipfn;
 
 	if (control_init() == -1)
-		temp_control("Unable to initialize control files", 0);
+		temp_control("Unable to initialize control files", NULL);
 	if (control_readint(&timeoutdata, "timeoutremote") == -1)
 		temp_control("Unable to read control file", "timeoutremote");
 	if (control_readint(&timeoutconn, "timeoutconnect") == -1)
@@ -3589,7 +3591,7 @@ main(int argc, char **argv)
 							do_tlsa = (char *) 0;
 						else
 						if (e && rbuf[1] == RECORD_NOVRFY)
-							quit(534, 1, "DConnected to ", " but recpient failed DANE validation", 0);
+							quit(534, 1, "DConnected to ", " but recpient failed DANE validation", NULL);
 						else
 						if (!e)
 							use_daned = 1; /*- do inbuilt DANE Verification and update qmail-daned */
@@ -3680,7 +3682,7 @@ main(int argc, char **argv)
 		x[j - 1] = 0; /*- remove the last ',' */
 		temp_noconn(&host, x, port);
 	} else
-		temp_noconn(&host, 0, 0);
+		temp_noconn(&host, NULL, 0);
 	/*- Not reached */
 	return (0);
 }
@@ -3688,13 +3690,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.166 2023-03-11 16:09:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.167 2023-07-07 10:35:43+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.167  2023-07-07 10:35:43+05:30  Cprogrammer
+ * use NULL instead of 0 for null pointer
+ *
  * Revision 1.166  2023-03-11 16:09:04+05:30  Cprogrammer
  * display protocol as SMTPS when using TLS
  *

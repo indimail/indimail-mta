@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.691 2023-06-26 16:16:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.692 2023-07-07 10:52:37+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.691 2023-06-26 16:16:15+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.692 2023-07-07 10:52:37+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1790,7 +1790,7 @@ check_libmysqlclient_lib()
 			mysqlPrefix=/usr/local/mysql
 		elif [ -L /usr/local/mysql/lib ] ; then
 			mysqlPrefix=/usr/local/mysql
-		elif [ -x /usr/bin/mysqld -o -x /usr/sbin/mysqld ] ; then
+		elif [ -x /usr/bin/mysqld -o -x /usr/sbin/mysqld -o -x /usr/sbin/mariadbd ] ; then
 			mysqlPrefix=/usr
 		else
 			echo "check_libmysqlclient_lib: Couldn't figure out mysqlPrefix. Specify --mysqlPrefix" 1>&2
@@ -5130,7 +5130,9 @@ if [ -z "$mysqlSocket" ] ; then
 		mysqlSocket=/run/mysqld/mysqld.sock
 	fi
 fi
-if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+	mysqld=sbin/mariadbd
+elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
 	mysqld=libexec/mysqld
 elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
 	mysqld=sbin/mysqld
@@ -5173,7 +5175,9 @@ case "$mysql_version" in
 	mysql_version_8=0
 	;;
 esac
-if [ -x $mysqlPrefix/bin/mysql_install_db ] ; then
+if [ -x $mysqlPrefix/bin/mariadb-install-db ] ; then
+	install_db=$mysqlPrefix/bin/mariadb-install-db
+elif [ -x $mysqlPrefix/bin/mysql_install_db ] ; then
 	install_db=$mysqlPrefix/bin/mysql_install_db
 elif [ -x $mysqlPrefix/scripts/mysql_install_db ] ; then
 	install_db=$mysqlPrefix/scripts/mysql_install_db
@@ -5339,13 +5343,18 @@ if [ ! -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
 	return 1
 fi
 pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
+if [ -x $mysqlPrefix/bin/mariadb ] ; then
+	mysql=$mysqlPrefix/bin/mariadb
+else
+	mysql=$mysqlPrefix/bin/mysql
+fi
 (
 # Create user mysql with all privileges
 echo "Creating MySQL admin User 'mysql' for Database in "$DESTDIR"$databasedir/data" 1>&2
 create_mysql_rootuser $mysql_version $mariadb $mysql_community_server $pass_str $auth_str $plugin_str
 echo "Creating MySQL indimail User '$user' for Database in "$DESTDIR"$databasedir/data" 1>&2
 create_mysql_user "$user" "$pass" "$mysql_version"
-) | eval $mysqlPrefix/bin/mysql -u root --skip-password -S $mysqlSocket
+) | eval $mysql -u root --skip-password -S $mysqlSocket
 kill $pid
 wait_for_mysqld 1
 $chown mysql:mysql "$DESTDIR"$databasedir
@@ -5359,7 +5368,9 @@ if [ $# -ne 2 ] ; then
 	echo "USAGE: check_mysqld_variable variable_name print" 1>&2
 	return 1
 fi
-if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+	mysqld=sbin/mariadbd
+elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
 	mysqld=libexec/mysqld
 elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
 	mysqld=sbin/mysqld
@@ -5388,7 +5399,9 @@ if [ $# -ne 2 ] ; then
 	echo "USAGE: check_mysqld_ini_variable variable_name print" 1>&2
 	return 1
 fi
-if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+	mysqld=sbin/mariadbd
+elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
 	mysqld=libexec/mysqld
 elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
 	mysqld=sbin/mysqld
@@ -5442,6 +5455,9 @@ create_mysql_rootuser()
 	plugin_str=$6
 	mysql_version_8=0
 	mariadb_version_10=0
+	if [ $mariadb -eq 1 ] ; then
+		major=$(echo $mysql_version | cut -d. -f1)
+	fi
 	case "$mysql_version" in
 		8.*)
 		mysql_version_8=1
@@ -5453,9 +5469,15 @@ create_mysql_rootuser()
 		;;
 	esac
 	if [ $mariadb -eq 1 ] ; then
-		ver2=`echo $mysql_version | cut -d. -f2`
-		if [ -n "$ver2" -a $ver2 -ge 2 ] ; then
+		if [ $major -gt 10 ] ; then
 			mecho "ALTER USER 'root'@'localhost' identified by '$PRIV_PASS';"
+		elif [ $mariadb_version_10 ] ; then
+			ver2=`echo $mysql_version | cut -d. -f2`
+			if [ -n "$ver2" -a $ver2 -ge 2 ] ; then
+				mecho "ALTER USER 'root'@'localhost' identified by '$PRIV_PASS';"
+			else
+				mecho "set PASSWORD for 'root'@'localhost' = PASSWORD('$PRIV_PASS');"
+			fi
 		else
 			mecho "set PASSWORD for 'root'@'localhost' = PASSWORD('$PRIV_PASS');"
 		fi
@@ -5467,19 +5489,23 @@ create_mysql_rootuser()
 		fi
 	fi
 	mecho "use mysql;"
-	mecho "drop procedure if exists remove_unsafe;"
-	mecho "delimiter ';;'"
-	mecho "create procedure remove_unsafe()"
-	mecho "begin"
-	mecho "  if exists (select * from information_schema.columns where table_name = 'user' and column_name = 'password') then"
-	mecho "    DELETE FROM user where user='' or password='';"
-	mecho "  ELSE"
-	mecho "    DELETE FROM user where user='';"
-	mecho "  end if;"
-	mecho "end;;"
-	mecho "delimiter \';\'"
-	mecho "call remove_unsafe();"
-	mecho "drop procedure if exists remove_unsafe;"
+	if [ $mariadb -eq 0 ] ; then
+		mecho "drop procedure if exists remove_unsafe;"
+		mecho "delimiter ';;'"
+		mecho "create procedure remove_unsafe()"
+		mecho "begin"
+		mecho "  if exists (select * from information_schema.columns where table_name = 'user' and column_name = 'password') then"
+		mecho "    DELETE FROM user where user='' or password='';"
+		mecho "  ELSE"
+		mecho "    DELETE FROM user where user='';"
+		mecho "  end if;"
+		mecho "end;;"
+		mecho "delimiter \';\'"
+		mecho "call remove_unsafe();"
+		mecho "drop procedure if exists remove_unsafe;"
+	else
+		mecho "DELETE FROM user where user='';"
+	fi
 	mecho "DROP database if exists test;"
 	mecho "DELETE from db where db like 'test%';"
 }
@@ -5493,6 +5519,9 @@ create_mysql_user()
 	mysql_user=$1
 	mysql_pass=$2
 	mysql_version=$3
+	if [ $mariadb -eq 1 ] ; then
+		major=$(echo $mysql_version | cut -d. -f1)
+	fi
 	case "$mysql_version" in
 		8.*)
 			mysql_version_8=1
@@ -5507,16 +5536,24 @@ create_mysql_user()
 		mecho "use mysql;"
 		mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
 		mecho "CREATE USER 'repl'@'%'     identified by 'slaveserver';"
-		if [ $mariadb -eq 1 -a $mariadb_version_10 -eq 1 ] ; then
-			ver2=`echo $mysql_version | cut -d. -f2`
-			if [ -n "$ver2" -a $ver2 -gt 0 ] ; then
+		if [ $mariadb -eq 1 ] ; then
+			if [ $major -gt 10 ] ; then
 				mecho "DROP USER if exists mysql@localhost;"
+			elif [ $mariadb_version_10 -eq 1 ] ; then
+				ver2=`echo $mysql_version | cut -d. -f2`
+				if [ -n "$ver2" -a $ver2 -gt 0 ] ; then
+					mecho "DROP USER if exists mysql@localhost;"
+				fi
 			fi
 		fi
 		mecho "CREATE USER 'mysql'@'%' identified by '$PRIV_PASS';"
-		mecho "GRANT ALL on *.* to mysql;"
-		if [ $mysql_version_8 -eq 1 -o $mariadb_version_10 -eq 1 ] ; then
+		mecho "GRANT ALL on *.* TO mysql;"
+		if [ $mysql_version_8 -eq 1 ] ; then
 			mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
+		elif [ $mariadb -eq 1 ] ; then
+			if [ $mariadb_version_10 -eq 1 -o $major -gt 10 ] ; then
+				mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
+			fi
 		fi
 		mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
 		mecho "GRANT REPLICATION SLAVE on *.* to repl;"
@@ -5606,16 +5643,24 @@ create_mysql_user()
 	mecho "CREATE USER '$mysql_user'@'%' identified by '$mysql_pass';"
 	mecho "CREATE USER 'admin'@'%'    identified by '$ADMIN_PASS';"
 	mecho "CREATE USER 'repl'@'%'     identified by 'slaveserver';"
-	if [ $mariadb -eq 1 -a $mariadb_version_10 -eq 1 ] ; then
-		ver2=`echo $mysql_version | cut -d. -f2`
-		if [ -n "$ver2" -a $ver2 -gt 0 ] ; then
+	if [ $mariadb -eq 1 ] ; then
+		if [ $major -gt 10 ] ; then
 			mecho "DROP USER if exists mysql@localhost;"
+		elif [ $mariadb_version_10 -eq 1 ] ; then
+			ver2=`echo $mysql_version | cut -d. -f2`
+			if [ -n "$ver2" -a $ver2 -gt 0 ] ; then
+				mecho "DROP USER if exists mysql@localhost;"
+			fi
 		fi
 	fi
 	mecho "CREATE USER 'mysql'@'%' identified by '$PRIV_PASS';"
-	mecho "GRANT ALL on *.* to mysql;"
-	if [ $mysql_version_8 -eq 1 -o $mariadb_version_10 -eq 1 ] ; then
+	mecho "GRANT ALL on *.* TO mysql;"
+	if [ $mysql_version_8 -eq 1 ] ; then
 		mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
+	elif [ $mariadb -eq 1 ] ; then
+		if [ $mariadb_version_10 -eq 1 -o $major -gt 10 ] ; then
+			mecho "GRANT USAGE ON *.* TO mysql WITH GRANT OPTION;"
+		fi
 	fi
 	mecho "GRANT SELECT,CREATE,ALTER,INDEX,INSERT,UPDATE,DELETE,CREATE TEMPORARY TABLES,LOCK TABLES ON indimail.* to indimail;"
 	mecho "GRANT RELOAD,SHUTDOWN,PROCESS,SUPER on *.* to admin;"
@@ -5642,7 +5687,9 @@ SERVICEDIR=$5
 if [ $nooverwrite -eq 1 -a -d "$DESTDIR"$SERVICEDIR/mysql.$port/variables ] ; then
 	return 0
 fi
-if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+	mysqld=sbin/mariadbd
+elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
 	mysqld=libexec/mysqld
 elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
 	mysqld=sbin/mysqld
@@ -5833,7 +5880,9 @@ fi
 
 create_mysql_config()
 {
-if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+	mysqld=sbin/mariadbd
+elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
 	mysqld=libexec/mysqld
 elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
 	mysqld=sbin/mysqld
@@ -5865,7 +5914,12 @@ if [ $? -eq 0 ] ; then
 else
 	mariadb=0
 fi
-$mysqlPrefix/bin/mysql --version 2>/dev/null | grep MariaDB >/dev/null 2>&1
+if [ -x $mysqlPrefix/bin/mariadb ] ; then
+	mysql=$mysqlPrefix/bin/mariadb
+else
+	mysql=$mysqlPrefix/bin/mysql
+fi
+$mysql --version 2>/dev/null | grep MariaDB >/dev/null 2>&1
 if [ $? -eq 0 ] ; then
 	mariadb_client=1
 else
@@ -9120,15 +9174,20 @@ fi
 repair_tables()
 {
 	MYSQL_DB="indimail"
+	if [ -x $mysqlPrefix/bin/mariadb ] ; then
+		mysql=$mysqlPrefix/bin/mariadb
+	else
+		mysql=$mysqlPrefix/bin/mysql
+	fi
 	if [ -f $HOME/.mylogin.cnf ] ; then
 	(
-	$mysqlPrefix/bin/mysql --login-path=admin -s --database=$MYSQL_DB \
+	$mysql --login-path=admin -s --database=$MYSQL_DB \
 		--execute="show tables" | while read i
 	do
-		$mysqlPrefix/bin/mysql --login-path=admin -s --database=$MYSQL_DB \
+		$mysql --login-path=admin -s --database=$MYSQL_DB \
 			--execute="check table $i"
 	done
-	) | awk -v prefix=$mysqlPrefix \
+	) | awk -v mysql=$mysql \
 		-v database=$MYSQL_DB '{
 		table=$1
 		operation=$2
@@ -9139,21 +9198,21 @@ repair_tables()
 		printf("%03d %-30s %-9s %-8s %s\n", FNR, table, operation, msg_type, msg_text);
 		if (msg_text != "OK")
 		{
-			cmd=sprintf("%s/bin/mysql --login-path=admin -s --database=%s \
+			cmd=sprintf("%s --login-path=admin -s --database=%s \
 				--execute=\"repair table %s;\"", \
-				prefix, database, table);
+				mysql, database, table);
 			system(cmd);
 		}
 	}'
 	else
 	(
-	$mysqlPrefix/bin/mysql -s -u $PRIV_USER -p$PRIV_PASS --database=$MYSQL_DB \
+	$mysql -s -u $PRIV_USER -p$PRIV_PASS --database=$MYSQL_DB \
 		--execute="show tables" | while read i
 	do
-		$mysqlPrefix/bin/mysql -s -u $PRIV_USER -p$PRIV_PASS --database=$MYSQL_DB \
+		$mysql -s -u $PRIV_USER -p$PRIV_PASS --database=$MYSQL_DB \
 			--execute="check table $i"
 	done
-	) | awk -v prefix=$mysqlPrefix -v mysql_user=$PRIV_USER -v mysql_pass=$PRIV_PASS \
+	) | awk -v mysql=$mysql -v mysql_user=$PRIV_USER -v mysql_pass=$PRIV_PASS \
 		-v database=$MYSQL_DB '{
 		table=$1
 		operation=$2
@@ -9164,9 +9223,9 @@ repair_tables()
 		printf("%03d %-30s %-9s %-8s %s\n", FNR, table, operation, msg_type, msg_text);
 		if (msg_text != "OK")
 		{
-			cmd=sprintf("%s/bin/mysql -s -u %s -p%s --database=%s \
+			cmd=sprintf("%s -s -u %s -p%s --database=%s \
 				--execute=\"repair table %s;\"", \
-				prefix, mysql_user, mysql_pass, database, table);
+				mysql, mysql_user, mysql_pass, database, table);
 			system(cmd);
 		}
 	}'
@@ -11277,7 +11336,9 @@ case $option in
 				mysqlSocket=/run/mysqld/mysqld.sock
 			fi
 		fi
-		if [ -x $mysqlPrefix/libexec/mysqld ] ; then
+		if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+			mysqld=sbin/mariadbd
+		elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
 			mysqld=libexec/mysqld
 		elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
 			mysqld=sbin/mysqld
@@ -11825,12 +11886,17 @@ case $option in
 	dump_config "$servicedir" "$cntrldir" > /root/indimail_config.txt
 	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indimail-backup.$EXT.tar.gz
 	/bin/rm -f /root/indimail_config.txt
+	if [ -x $mysqlPrefix/bin/mariadb-dump ] ; then
+		$mysqlPrefix/bin/mariadb-dump
+	else
+		$mysqlPrefix/bin/mysqldump
+	fi
 	if [ -f $HOME/.mylogin.cnf ] ; then
-		$mysqlPrefix/bin/mysqldump --login-path=admin --extended-insert \
+		$mysqldump --login-path=admin --extended-insert \
 			--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
 			--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
 	else
-		$mysqlPrefix/bin/mysqldump -u mysql -p$PRIV_PASS --extended-insert \
+		$mysqldump -u mysql -p$PRIV_PASS --extended-insert \
 			--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
 			--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
 	fi

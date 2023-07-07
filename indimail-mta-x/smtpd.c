@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.293 2023-03-30 16:10:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.294 2023-07-07 10:51:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.293 $";
+static char    *revision = "$Revision: 1.294 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -551,17 +551,17 @@ flush_io()
 no_return void
 die_read(char *str, char *err)
 {
-	logerr(1, "read error", 0);
+	logerr(1, "read error", NULL);
 	if (str)
-		logerr(0, ": ", str, 0);
+		logerr(0, ": ", str, NULL);
 	if (errno)
-		logerr(0, ": ", error_str(errno), 0);
+		logerr(0, ": ", error_str(errno), NULL);
 	if (err)
-		logerr(0, ": ", err, 0);
-	logerr(0, "\n", 0);
+		logerr(0, ": ", err, NULL);
+	logerr(0, "\n", NULL);
 	logflush();
 	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Sorry, I got read error (#4.4.2)\r\n", 0);
+	out("451 Sorry, I got read error (#4.4.2)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -573,17 +573,17 @@ die_write(char *str, char *err)
 
 	if (i++)
 		_exit(1);
-	logerr(1, "write error", 0);
+	logerr(1, "write error", NULL);
 	if (str)
-		logerr(0, ": ", str, 0);
+		logerr(0, ": ", str, NULL);
 	if (errno)
-		logerr(0, ": ", error_str(errno), 0);
+		logerr(0, ": ", error_str(errno), NULL);
 	if (err)
-		logerr(0, ": ", err, 0);
-	logerr(0, "\n", 0);
+		logerr(0, ": ", err, NULL);
+	logerr(0, "\n", NULL);
 	logflush();
 	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Sorry, I got write error (#4.4.2)\r\n", 0);
+	out("451 Sorry, I got write error (#4.4.2)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -591,9 +591,9 @@ die_write(char *str, char *err)
 no_return void
 die_alarm()
 {
-	logerr(1, "timeout reached reading data from client\n", 0);
+	logerr(1, "timeout reached reading data from client\n", NULL);
 	logflush();
-	out("451 Sorry, I reached a timeout reading from client (#4.4.2)\r\n", 0);
+	out("451 Sorry, I reached a timeout reading from client (#4.4.2)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -622,7 +622,7 @@ saferead(int fd, char *buf, int len)
 	if (r <= 0) {
 #ifdef TLS
 		if (ssl) {
-			logerr(1, "client closed connection: ", myssl_error_str(), "\n", 0);
+			logerr(1, "client closed connection: ", myssl_error_str(), "\n", NULL);
 			logflush();
 			ssl_free();
 			ssl = 0;
@@ -630,10 +630,10 @@ saferead(int fd, char *buf, int len)
 				die_read("ssl_timeoutread", myssl_error_str());
 		} else
 		if (r)
-			die_read("timeoutread", 0);
+			die_read("timeoutread", NULL);
 #else
 		if (r)
-			die_read("timeoutread", 0);
+			die_read("timeoutread", NULL);
 #endif
 	}
 	return r;
@@ -657,9 +657,9 @@ safewrite(int fd, char *buf, int len)
 			if (r)
 				die_write("ssl_timeoutwrite", myssl_error_str());
 		} else
-			die_write("timeoutwrite", 0);
+			die_write("timeoutwrite", NULL);
 #else
-		die_write("timeoutwrite", 0);
+		die_write("timeoutwrite", NULL);
 #endif
 		_exit(1);
 	}
@@ -669,9 +669,9 @@ safewrite(int fd, char *buf, int len)
 no_return void
 die_nohelofqdn(char *arg)
 {
-	logerr(1, "non-FQDN HELO: ", arg, "\n", 0);
+	logerr(1, "non-FQDN HELO: ", arg, "\n", NULL);
 	logflush();
-	out("451 unable to accept non-FQDN HELO (#4.3.0)\r\n", 0);
+	out("451 unable to accept non-FQDN HELO (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -679,8 +679,8 @@ die_nohelofqdn(char *arg)
 void
 err_localhelo(char *l, char *lip, char *arg)
 {
-	logerr(1, "invalid HELO greeting: HELO <", arg, "> for local ", l, ", ", lip, "\n", 0);
-	out("451 invalid HELO greeting for local (#4.3.0)\r\n", 0);
+	logerr(1, "invalid HELO greeting: HELO <", arg, "> for local ", l, ", ", lip, "\n", NULL);
+	out("451 invalid HELO greeting for local (#4.3.0)\r\n", NULL);
 	logflush();
 	flush();
 }
@@ -688,9 +688,9 @@ err_localhelo(char *l, char *lip, char *arg)
 void
 err_badhelo(char *arg1, char *arg2)
 {
-	logerr(1, "Invalid HELO greeting: HELO <", arg1, "> FQDN <", arg2, ">\n", 0);
+	logerr(1, "Invalid HELO greeting: HELO <", arg1, "> FQDN <", arg2, ">\n", NULL);
 	logflush();
-	out("553 sorry, your HELO/EHLO greeting is in my badhelo list (#5.7.1)\r\n", 0);
+	out("553 sorry, your HELO/EHLO greeting is in my badhelo list (#5.7.1)\r\n", NULL);
 	flush();
 #ifdef QUITASAP
 	_exit(1);
@@ -703,26 +703,26 @@ die_lcmd(int i)
 	switch (i)
 	{
 	case -2:
-		logerr(1, "command too long\n", 0);
+		logerr(1, "command too long\n", NULL);
 		break;
 	case -3:
-		logerr(1, "out of memory\n", 0);
+		logerr(1, "out of memory\n", NULL);
 		break;
 	default:
-		logerr(1, "read error: ", error_str(errno), "\n", 0);
+		logerr(1, "read error: ", error_str(errno), "\n", NULL);
 		break;
 	}
 	logflush();
 	switch (i)
 	{
 	case -2:
-		out("553 sorry, the given command is too long! (#5.5.2)\r\n", 0);
+		out("553 sorry, the given command is too long! (#5.5.2)\r\n", NULL);
 		break;
 	case -3:
-		out("451 sorry, I ran out of memory (#4.3.0))\r\n", 0);
+		out("451 sorry, I ran out of memory (#4.3.0))\r\n", NULL);
 		break;
 	default:
-		out("451 sorry, unable to read from client (#5.5.2)\r\n", 0);
+		out("451 sorry, unable to read from client (#5.5.2)\r\n", NULL);
 		break;
 	}
 	flush();
@@ -732,9 +732,9 @@ die_lcmd(int i)
 no_return void
 die_regex()
 {
-	logerr(1, "regex compilation failed\n", 0);
+	logerr(1, "regex compilation failed\n", NULL);
 	logflush();
-	out("451 Sorry, regex compilation failed (#4.3.0)\r\n", 0);
+	out("451 Sorry, regex compilation failed (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -742,9 +742,9 @@ die_regex()
 no_return void
 die_nomem()
 {
-	logerr(1, "out of memory\n", 0);
+	logerr(1, "out of memory\n", NULL);
 	logflush();
-	out("451 Sorry, I ran out of memory (#4.3.0)\r\n", 0);
+	out("451 Sorry, I ran out of memory (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -752,9 +752,9 @@ die_nomem()
 no_return void
 die_custom(char *arg)
 {
-	logerr(1, arg, "\n", 0);
+	logerr(1, arg, "\n", NULL);
 	logflush();
-	out("451 ", arg, " (#4.3.0)\r\n", 0);
+	out("451 ", arg, " (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -763,12 +763,12 @@ die_custom(char *arg)
 void
 err_batv(char *arg1, char *arg2, char *arg3)
 {
-	logerr(1, arg1, 0);
+	logerr(1, arg1, NULL);
 	if (arg2)
-		logerr(0, " recipient ", arg2, 0);
-	logerr(0, "\n", 0);
+		logerr(0, " recipient ", arg2, NULL);
+	logerr(0, "\n", NULL);
 	logflush();
-	out(arg3, 0);
+	out(arg3, NULL);
 	flush();
 	return;
 }
@@ -777,11 +777,11 @@ err_batv(char *arg1, char *arg2, char *arg3)
 no_return void
 die_control(char *fn)
 {
-	logerr(1, "unable to read controls", 0);
+	logerr(1, "unable to read controls", NULL);
 	if (fn)
-		logerr(0, " [", fn, "]\n", 0);
+		logerr(0, " [", fn, "]\n", NULL);
 	logflush();
-	out("451 Sorry, I'm unable to read controls (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to read controls (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -789,9 +789,9 @@ die_control(char *fn)
 no_return void
 die_ipme()
 {
-	logerr(1, "unable to figure out my IP address\n", 0);
+	logerr(1, "unable to figure out my IP address\n", NULL);
 	logflush();
-	out("451 Sorry, I'm unable to figure out my IP addresses (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to figure out my IP addresses (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -799,27 +799,27 @@ die_ipme()
 no_return void
 die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
 {
-	logerr(1, ": ", 0);
-	out("451 ", 0);
+	logerr(1, ": ", NULL);
+	out("451 ", NULL);
 	if (arg1) {
-		logerr(0, arg1, 0);
-		out(arg1, 0);
+		logerr(0, arg1, NULL);
+		out(arg1, NULL);
 	}
 	if (arg2) {
-		logerr(0, arg2, 0);
-		out(arg2, 0);
+		logerr(0, arg2, NULL);
+		out(arg2, NULL);
 	}
 	if (arg3) {
-		logerr(0, arg3, 0);
-		out(arg3, 0);
+		logerr(0, arg3, NULL);
+		out(arg3, NULL);
 	}
 	if (arg4) {
-		logerr(0, arg4, 0);
-		out(arg4, 0);
+		logerr(0, arg4, NULL);
+		out(arg4, NULL);
 	}
-	logerr(0, "\n", 0);
+	logerr(0, "\n", NULL);
 	logflush();
-	out(" (#4.3.0)\r\n", 0);
+	out(" (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -827,9 +827,9 @@ die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
 no_return void
 die_logfilter()
 {
-	logerr(1, "unable create temporary files: ", error_str(errno), "\n", 0);
+	logerr(1, "unable create temporary files: ", error_str(errno), "\n", NULL);
 	logflush();
-	out("451 Sorry, I'm unable to create temporary files (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to create temporary files (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -837,18 +837,18 @@ die_logfilter()
 void
 err_addressmatch(char *errstr, char *fn)
 {
-	logerr(1, "address_match: ", fn, ": ", errstr, "\n", 0);
+	logerr(1, "address_match: ", fn, ": ", errstr, "\n", NULL);
 	logflush();
-	out("451 Sorry, there is a local system failure (#4.3.0)\r\n", 0);
+	out("451 Sorry, there is a local system failure (#4.3.0)\r\n", NULL);
 	flush();
 }
 
 no_return void
 straynewline()
 {
-	logerr(1, "Bare LF received\n", 0);
+	logerr(1, "Bare LF received\n", NULL);
 	logflush();
-	out("451 Sorry, I received Bare LF. (#4.6.0)\r\n", 0);
+	out("451 Sorry, I received Bare LF. (#4.6.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -887,9 +887,9 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	if ((logfifo = open(fifo_name, O_NDELAY | O_WRONLY)) == -1) {
 		if (errno == ENXIO)
 			return;
-		logerr(1, "fifo ", fifo_name, ": ", error_str(errno), "\n", 0);
+		logerr(1, "fifo ", fifo_name, ": ", error_str(errno), "\n", NULL);
 		logflush();
-		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
+		out("451 Unable to queue messages (#4.3.0)\r\n", NULL);
 		flush();
 		_exit(1);
 	}
@@ -924,7 +924,7 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 		}
 		substdio_fdbuf(&logfifo_in, read, logfd, inbuf, sizeof (inbuf));
 		if (getln(&logfifo_in, line, &match, '\n') == -1) {
-			logerr(1, "read error: ", error_str(errno), "\n", 0);
+			logerr(1, "read error: ", error_str(errno), "\n", NULL);
 			logflush();
 			close(logfd);
 			return;
@@ -934,13 +934,13 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 			die_nomem();
 		if (line->len) {
 			if (substdio_puts(&logfifo_out, line->s) == -1) {
-				logerr(1, "write error: ", error_str(errno), "\n", 0);
+				logerr(1, "write error: ", error_str(errno), "\n", NULL);
 				logflush();
 			}
 		}
 	}
 	if (substdio_puts(&logfifo_out, "\n") == -1) {
-		logerr(1, "write error: ", error_str(errno), "\n", 0);
+		logerr(1, "write error: ", error_str(errno), "\n", NULL);
 		logflush();
 	}
 	if (substdio_flush(&logfifo_out) == -1) {
@@ -968,56 +968,56 @@ log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notif
 			 */
 			if (!notify)
 				log_fifo(mfrom, ptr, msg_size, &tmpLine);
-			logerr(1, " ", 0);
+			logerr(1, " ", NULL);
 			if (!notify)
-				logerr(0, "HELO <", helohost.s, "> ", 0);
+				logerr(0, "HELO <", helohost.s, "> ", NULL);
 			else
-				logerr(0, "NOTIFY: ", 0);
-			logerr(0, "MAIL from <", mfrom, "> RCPT <", ptr, 0);
+				logerr(0, "NOTIFY: ", NULL);
+			logerr(0, "MAIL from <", mfrom, "> RCPT <", ptr, NULL);
 			if (!notify) {
-				logerr(0, "> AUTH <", 0);
+				logerr(0, "> AUTH <", NULL);
 				if (authuser && *authuser)
-					logerr(0, authuser, ": AUTH ", get_authmethod(authd), 0);
+					logerr(0, authuser, ": AUTH ", get_authmethod(authd), NULL);
 				if (addrallowed(ptr)) {
 					if (authuser && *authuser)
-						logerr(0, ": ", 0);
-					logerr(0, "local-rcpt", 0);
+						logerr(0, ": ", NULL);
+					logerr(0, "local-rcpt", NULL);
 				} else
 				if (!authuser || !*authuser)
-					logerr(0, "auth-ip/pop", 0);
+					logerr(0, "auth-ip/pop", NULL);
 			}
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
-			logerr(0, "> Size: ", strnum, " TLS=", 0);
+			logerr(0, "> Size: ", strnum, " TLS=", NULL);
 #ifdef TLS
 			if (ssl)
-				logerr(0, SSL_get_version(ssl), 0);
+				logerr(0, SSL_get_version(ssl), NULL);
 			else {
 				if (!(p = env_get("TLS_PROVIDER")))
-					logerr(0, "No", 0);
+					logerr(0, "No", NULL);
 				else {
 					i = str_chr(p, ',');
 					if (p[i]) {
 						p[i] = 0;
-						logerr(0, p, 0);
+						logerr(0, p, NULL);
 						p[i] = ',';
 					}
 				}
 			}
 #else
 			if (!(p = env_get("TLS_PROVIDER")))
-				logerr(0, "No", 0);
+				logerr(0, "No", NULL);
 			else {
 				i = str_chr(p, ',');
 				if (p[i]) {
 					p[i] = 0;
-					logerr(0, p, 0);
+					logerr(0, p, NULL);
 					p[i] = ',';
 				}
 			}
 #endif
 			if (!notify && tmpLine.len)
-				logerr(0, " ", tmpLine.s, 0);
-			logerr(0, "\n", 0);
+				logerr(0, " ", tmpLine.s, NULL);
+			logerr(0, "\n", NULL);
 			ptr = recipients + idx + 2;
 		}
 	}
@@ -1039,53 +1039,53 @@ err_queue(char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx
 		if (!recipients[idx]) {
 			/*- write data to spamlogger */
 			log_fifo(mfrom, ptr, msg_size, &tmpLine);
-			logerr(1, qqx, 0);
+			logerr(1, qqx, NULL);
 			if (permanent)
-				logerr(0, " (permanent): ", 0);
+				logerr(0, " (permanent): ", NULL);
 			else
-				logerr(0, " (temporary): ", 0);
-			logerr(0, "HELO <", helohost.s, "> MAIL from <", mfrom, "> RCPT <", ptr, "> AUTH <", 0);
+				logerr(0, " (temporary): ", NULL);
+			logerr(0, "HELO <", helohost.s, "> MAIL from <", mfrom, "> RCPT <", ptr, "> AUTH <", NULL);
 			if (authuser && *authuser)
-				logerr(0, authuser, ": AUTH ", get_authmethod(authd), 0);
+				logerr(0, authuser, ": AUTH ", get_authmethod(authd), NULL);
 			if (addrallowed(ptr)) {
 				if (authuser && *authuser)
-					logerr(0, ": ", 0);
-				logerr(0, "local-rcpt", 0);
+					logerr(0, ": ", NULL);
+				logerr(0, "local-rcpt", NULL);
 			} else
 			if (!authuser || !*authuser)
-				logerr(0, "auth-ip/pop", 0);
-			logerr(0, "> Size: ", size, 0);
+				logerr(0, "auth-ip/pop", NULL);
+			logerr(0, "> Size: ", size, NULL);
 			if (tmpLine.len)
-				logerr(0, " ", tmpLine.s, 0); /*- X-Bogosity line */
-			logerr(0, " TLS=", 0);
+				logerr(0, " ", tmpLine.s, NULL); /*- X-Bogosity line */
+			logerr(0, " TLS=", NULL);
 #ifdef TLS
 			if (ssl)
-				logerr(0, SSL_get_version(ssl), 0);
+				logerr(0, SSL_get_version(ssl), NULL);
 			else {
 				if (!(p = env_get("TLS_PROVIDER")))
-					logerr(0, "No", 0);
+					logerr(0, "No", NULL);
 				else {
 					i = str_chr(p, ',');
 					if (p[i]) {
 						p[i] = 0;
-						logerr(0, p, 0);
+						logerr(0, p, NULL);
 						p[i] = ',';
 					}
 				}
 			}
 #else
 			if (!(p = env_get("TLS_PROVIDER")))
-				logerr(0, "No", 0);
+				logerr(0, "No", NULL);
 			else {
 				i = str_chr(p, ',');
 				if (p[i]) {
 					p[i] = 0;
-					logerr(0, p, 0);
+					logerr(0, p, NULL);
 					p[i] = ',';
 				}
 			}
 #endif
-			logerr(0, " qp ", accept_buf, "\n", 0);
+			logerr(0, " qp ", accept_buf, "\n", NULL);
 			ptr = recipients + idx + 2;
 		}
 	}
@@ -1101,7 +1101,7 @@ msg_notify()
 	struct datetime dt;
 
 	if (qmail_open(&qqt) == -1) {
-		logerr(1, "qqt failure", 0);
+		logerr(1, "qqt failure", NULL);
 		logflush();
 		return;
 	}
@@ -1140,7 +1140,7 @@ msg_notify()
 void
 err_smf()
 {
-	out("451 Sorry, there is a DNS temporary failure (#4.4.3)\r\n", 0);
+	out("451 Sorry, there is a DNS temporary failure (#4.4.3)\r\n", NULL);
 	flush();
 }
 
@@ -1150,7 +1150,7 @@ err_size(char *mfrom, char *rcpt, int len)
 	int             idx;
 	char           *ptr;
 
-	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n", 0);
+	out("552 sorry, that message size exceeds my databytes limit (#5.3.4)\r\n", NULL);
 	flush();
 	if (env_get("DATABYTES_NOTIFY"))
 		msg_notify();
@@ -1158,7 +1158,7 @@ err_size(char *mfrom, char *rcpt, int len)
 		if (!rcpt[idx]) {
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
 			logerr(1, "data size exceeded: MAIL from <", mfrom,
-					"> RCPT <", ptr, "> Size: ", strnum, "\n", 0);
+					"> RCPT <", ptr, "> Size: ", strnum, "\n", NULL);
 			ptr = rcpt + idx + 2;
 		}
 	}
@@ -1168,7 +1168,7 @@ err_size(char *mfrom, char *rcpt, int len)
 void
 err_hops()
 {
-	out("554 too many hops, this message is looping (#5.4.6)\r\n", 0);
+	out("554 too many hops, this message is looping (#5.4.6)\r\n", NULL);
 	flush();
 }
 
@@ -1176,15 +1176,15 @@ void
 err_hmf(char *arg1, int arg2)
 {
 	if (arg2)
-		logerr(1, "Non-existing DNS_MX: MAIL ", 0);
+		logerr(1, "Non-existing DNS_MX: MAIL ", NULL);
 	else
-		logerr(1, "Non-existing DNS_MX: HELO ", 0);
-	logerr(0, arg1, "\n", 0);
+		logerr(1, "Non-existing DNS_MX: HELO ", NULL);
+	logerr(0, arg1, "\n", NULL);
 	logflush();
 	if (arg2)
-		out("553 Bad sender's system address (#5.1.8)\r\n", 0);
+		out("553 Bad sender's system address (#5.1.8)\r\n", NULL);
 	else
-		out("553 sorry, helo domain must exist (#5.1.8)\r\n", 0);
+		out("553 sorry, helo domain must exist (#5.1.8)\r\n", NULL);
 	flush();
 }
 
@@ -1193,45 +1193,45 @@ err_nogateway(char *arg1, char *arg2, int flag)
 {
 	char           *x;
 
-	logerr(1, "Invalid RELAY client: MAIL from <", arg1, 0);
+	logerr(1, "Invalid RELAY client: MAIL from <", arg1, NULL);
 	if (arg2 && *arg2)
-		logerr(0, "> RCPT <", arg2, 0);
-	logerr(0, ">", 0);
+		logerr(0, "> RCPT <", arg2, NULL);
+	logerr(0, ">", NULL);
 	if (authd) {
-		logerr(0, ", Auth <", remoteinfo, ">", 0);
+		logerr(0, ", Auth <", remoteinfo, ">", NULL);
 		x = env_get("MASQUERADE");
 		if (x && *x)
-			logerr(0, ", MASQUERADE <", x, ">", 0);
+			logerr(0, ", MASQUERADE <", x, ">", NULL);
 	}
-	logerr(0, "\n", 0);
+	logerr(0, "\n", NULL);
 	logflush();
 	if (flag)
-		out("553 sorry, this MTA does not accept masquerading/forging ", 0);
+		out("553 sorry, this MTA does not accept masquerading/forging ", NULL);
 	else
-		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication ", 0);
+		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication ", NULL);
 	if (authd)
-		out(", auth <", remoteinfo, "> ", 0);
+		out(", auth <", remoteinfo, "> ", NULL);
 #ifdef TLS
 	if (ssl)
 		tls_nogateway();
 #endif
-	out("#5.7.1\r\n", 0);
+	out("#5.7.1\r\n", NULL);
 	flush();
 }
 
 void
 err_badbounce()
 {
-	out("553 sorry, bounce messages should have a single envelope recipient (#5.7.1)\r\n", 0);
+	out("553 sorry, bounce messages should have a single envelope recipient (#5.7.1)\r\n", NULL);
 	flush();
 }
 
 void
 err_bmf(char *arg1)
 {
-	logerr(1, "Invalid SENDER address: MAIL from <", arg1, ">\n", 0);
+	logerr(1, "Invalid SENDER address: MAIL from <", arg1, ">\n", NULL);
 	logflush();
-	out("553 sorry, your envelope sender has been denied (#5.7.1)\r\n", 0);
+	out("553 sorry, your envelope sender has been denied (#5.7.1)\r\n", NULL);
 	flush();
 }
 
@@ -1245,10 +1245,10 @@ err_spf()
 		j = byte_chr(spfbarfmsg.s + i, spfbarfmsg.len - i, '\n') + i;
 		if (j < spfbarfmsg.len) {
 			spfbarfmsg.s[j] = 0;
-			out("550-", spfbarfmsg.s, "\r\n", 0);
+			out("550-", spfbarfmsg.s, "\r\n", NULL);
 			spfbarfmsg.s[j] = '\n';
 		} else
-			out("550 ", spfbarfmsg.s, " (#5.7.1)\r\n", 0);
+			out("550 ", spfbarfmsg.s, " (#5.7.1)\r\n", NULL);
 	}
 	flush();
 }
@@ -1257,9 +1257,9 @@ err_spf()
 void
 err_hostaccess(char *arg)
 {
-	logerr(1, "Invalid SENDER host IP address: MAIL from <", arg, ">\n", 0);
+	logerr(1, "Invalid SENDER host IP address: MAIL from <", arg, ">\n", NULL);
 	logflush();
-	out("553 sorry, your host has been denied (#5.7.1)\r\n", 0);
+	out("553 sorry, your host has been denied (#5.7.1)\r\n", NULL);
 	flush();
 }
 
@@ -1272,14 +1272,14 @@ log_virus(char *arg1, char *arg2, char *arg3, int len, int blackhole)
 	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
 		if (!arg3[idx]) {
 			strnum[fmt_ulong(strnum, msg_size)] = 0;
-			logerr(1, "virus/banned content: ", arg1, ": MAIL from <", arg2, "> RCPT <", ptr, "> Size: ", strnum, "\n", 0);
+			logerr(1, "virus/banned content: ", arg1, ": MAIL from <", arg2, "> RCPT <", ptr, "> Size: ", strnum, "\n", NULL);
 			ptr = arg3 + idx + 2;
 		}
 	}
 	logflush();
 	if (!blackhole) {
 		out("552-we don't accept email with the below content (#5.3.4)\r\n",
-				"552 Further Information: ", arg1, "\r\n", 0);
+				"552 Further Information: ", arg1, "\r\n", NULL);
 		flush();
 	}
 }
@@ -1287,9 +1287,9 @@ log_virus(char *arg1, char *arg2, char *arg3, int len, int blackhole)
 void
 err_acl(char *arg1, char *arg2)
 {
-	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT ", arg2, "\n", 0);
+	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT ", arg2, "\n", NULL);
 	logflush();
-	out("553 sorry, sites access list denies transaction (#5.7.1)\r\n", 0);
+	out("553 sorry, sites access list denies transaction (#5.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1297,9 +1297,9 @@ err_acl(char *arg1, char *arg2)
 void
 err_rcp(char *arg1, char *arg2)
 {
-	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT ", arg2, "\n", 0);
+	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT ", arg2, "\n", NULL);
 	logflush();
-	out("553 sorry, your envelope recipient has been denied (#5.7.1)\r\n", 0);
+	out("553 sorry, your envelope recipient has been denied (#5.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1307,10 +1307,10 @@ err_rcp(char *arg1, char *arg2)
 void
 smtp_badip()
 {
-	logerr(1, "BAD IP client\n", 0);
+	logerr(1, "BAD IP client\n", NULL);
 	logflush();
 	sleep(5);
-	out("421 sorry, your IP (", remoteip, ") is temporarily denied (#4.7.1)\r\n", 0);
+	out("421 sorry, your IP (", remoteip, ") is temporarily denied (#4.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1318,10 +1318,10 @@ smtp_badip()
 void
 smtp_badhost(char *arg)
 {
-	logerr(1, "BAD HOST ", remotehost, "\n", 0);
+	logerr(1, "BAD HOST ", remotehost, "\n", NULL);
 	logflush();
 	sleep(5);
-	out("553 sorry, your host (", remotehost, ") has been denied (#5.7.1)\r\n", 0);
+	out("553 sorry, your host (", remotehost, ") has been denied (#5.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1329,11 +1329,11 @@ smtp_badhost(char *arg)
 void
 smtp_relayreject()
 {
-	logerr(1, "OPEN RELAY client\n", 0);
+	logerr(1, "OPEN RELAY client\n", NULL);
 	logflush();
 	sleep(5);
 	out("553 No mail accepted from an open relay (", remoteip,
-			"); check your server configs (#5.7.1)\r\n", 0);
+			"); check your server configs (#5.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1343,15 +1343,15 @@ smtp_paranoid()
 {
 	char           *ptr;
 
-	logerr(1, "PTR (reverse DNS) record points to wrong hostname\n", 0);
+	logerr(1, "PTR (reverse DNS) record points to wrong hostname\n", NULL);
 	logflush();
 	sleep(5);
 	ptr = env_get("TCPPARANOID");
-	out("553 sorry, your IP address (", remoteip, 0);
-	out(") PTR (reverse DNS) record points to wrong hostname", 0);
+	out("553 sorry, your IP address (", remoteip, NULL);
+	out(") PTR (reverse DNS) record points to wrong hostname", NULL);
 	if (ptr && *ptr)
-		out(" [", ptr, "]", 0);
-	out(" (#5.7.1)\r\n", 0);
+		out(" [", ptr, "]", NULL);
+	out(" (#5.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1361,16 +1361,16 @@ smtp_ptr()
 {
 	char           *ptr;
 
-	logerr(1, "unable to obain PTR (reverse DNS) record\n", 0);
+	logerr(1, "unable to obain PTR (reverse DNS) record\n", NULL);
 	logflush();
 	sleep(5);
 	ptr = env_get("REQPTR");
-	out("553 ", 0);
+	out("553 ", NULL);
 	if (*ptr)
-		out(ptr, ": from ", remoteip, ": (#5.7.1)\r\n", 0);
+		out(ptr, ": from ", remoteip, ": (#5.7.1)\r\n", NULL);
 	else
 		out(" Sorry, no PTR (reverse DNS) record for (",
-				remoteip, ") (#5.7.1)\r\n", 0);
+				remoteip, ") (#5.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1379,17 +1379,17 @@ void
 log_rules(char *arg1, char *arg2, int arg3, int arg4)
 {
 	strnum[fmt_ulong(strnum, arg3)] = 0;
-	logerr(1, arg4 == 0 ? "Setting EnvRule No " : "Setting DomainQueue Rule No ", strnum, ": MAIL from <", arg1, 0);
+	logerr(1, arg4 == 0 ? "Setting EnvRule No " : "Setting DomainQueue Rule No ", strnum, ": MAIL from <", arg1, NULL);
 	if (authd)
-		logerr(0, "> AUTH ", get_authmethod(authd), " <", arg2, 0);
-	logerr(0, ">\n", 0);
+		logerr(0, "> AUTH ", get_authmethod(authd), " <", arg2, NULL);
+	logerr(0, ">\n", NULL);
 	logflush();
 }
 
 void
 err_relay()
 {
-	out("550 we don't relay (#5.7.1)\r\n", 0);
+	out("550 we don't relay (#5.7.1)\r\n", NULL);
 	flush();
 }
 
@@ -1397,40 +1397,40 @@ void
 err_unimpl(char *arg)
 {
 	if (!case_diffs(arg, "unimplemented"))
-		out("502 unimplemented (#5.5.1)\r\n", 0);
+		out("502 unimplemented (#5.5.1)\r\n", NULL);
 	else
 	if (!case_diffs(arg, "help"))
-		out("502 disabled by the lord in her infinite wisdom (#5.5.1)\r\n", 0);
+		out("502 disabled by the lord in her infinite wisdom (#5.5.1)\r\n", NULL);
 	else
-		out("502 command ", arg, " not recognized (#5.5.2)\r\n", 0);
+		out("502 command ", arg, " not recognized (#5.5.2)\r\n", NULL);
 	flush();
 }
 
 void
 err_syntax()
 {
-	out("555 syntax error in address (#5.1.3)\r\n", 0);
+	out("555 syntax error in address (#5.1.3)\r\n", NULL);
 	flush();
 }
 
 void
 err_wantmail()
 {
-	out("503 MAIL first (#5.5.1)\r\n", 0);
+	out("503 MAIL first (#5.5.1)\r\n", NULL);
 	flush();
 }
 
 void
 err_wantrcpt()
 {
-	out("503 RCPT first (#5.5.1)\r\n", 0);
+	out("503 RCPT first (#5.5.1)\r\n", NULL);
 	flush();
 }
 
 void
 err_bhf(char *arg1)
 {
-	logerr(1, "Blackholed SENDER address: MAIL ", arg1, "\n", 0);
+	logerr(1, "Blackholed SENDER address: MAIL ", arg1, "\n", NULL);
 	logflush();
 	if (!env_put("NULLQUEUE=1"))
 		die_nomem();
@@ -1439,7 +1439,7 @@ err_bhf(char *arg1)
 void
 err_bhrcp(char *arg2, char *arg3)
 {
-	logerr(1, "Blackholed RECIPIENT address: MAIL from <", arg2, "> RCPT ", arg3, "\n", 0);
+	logerr(1, "Blackholed RECIPIENT address: MAIL from <", arg2, "> RCPT ", arg3, "\n", NULL);
 	logflush();
 	if (!env_put("NULLQUEUE=1"))
 		die_nomem();
@@ -1448,9 +1448,9 @@ err_bhrcp(char *arg2, char *arg3)
 no_return void
 err_maps(char *from, char *reason)
 {
-	logerr(1, "Blackholed SENDER address: MAIL from <", from, "> Reason ", reason, "\n", 0);
+	logerr(1, "Blackholed SENDER address: MAIL from <", from, "> Reason ", reason, "\n", NULL);
 	logflush();
-	out("553 ", reason, " (#5.7.1)\r\n", 0);
+	out("553 ", reason, " (#5.7.1)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -1458,9 +1458,9 @@ err_maps(char *from, char *reason)
 void
 err_mrc(char *arg1, char *arg2)
 {
-	logerr(1, "Too many RECIPIENTS: MAIL from <", arg1, "> Last RCPT <", arg2, ">\n", 0);
+	logerr(1, "Too many RECIPIENTS: MAIL from <", arg1, "> Last RCPT <", arg2, ">\n", NULL);
 	logflush();
-	out("557 sorry, too many recipients (#5.7.1)\r\n", 0);
+	out("557 sorry, too many recipients (#5.7.1)\r\n", NULL);
 	flush();
 }
 
@@ -1468,7 +1468,7 @@ void
 smtp_noop(char *arg)
 {
 	if (arg && *arg) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
+		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -1477,7 +1477,7 @@ smtp_noop(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
+		out("503 bad sequence of commands (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	case 2:
@@ -1496,7 +1496,7 @@ smtp_noop(char *arg)
 		smtp_badip();
 		return;
 	}
-	out("250 ok\r\n", 0);
+	out("250 ok\r\n", NULL);
 	flush();
 	return;
 }
@@ -1513,7 +1513,7 @@ smtp_vrfy(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
+		out("503 bad sequence of commands (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	case 2:
@@ -1532,7 +1532,7 @@ smtp_vrfy(char *arg)
 		smtp_badip();
 		return;
 	}
-	out("252 Cannot VRFY user, but will accept message and attempt delivery (#2.7.0)\r\n", 0);
+	out("252 Cannot VRFY user, but will accept message and attempt delivery (#2.7.0)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1540,9 +1540,9 @@ smtp_vrfy(char *arg)
 void
 err_qqt()
 {
-	logerr(1, "qqt failure\n", 0);
+	logerr(1, "qqt failure\n", NULL);
 	logflush();
-	out("451 Sorry, I got a temporary queue failure (#4.3.0)\r\n", 0);
+	out("451 Sorry, I got a temporary queue failure (#4.3.0)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1550,7 +1550,7 @@ err_qqt()
 int
 err_child()
 {
-	out("451 Sorry, there is a problem with my child and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, there is a problem with my child and I can't auth (#4.3.0)\r\n", NULL);
 	flush();
 	return -1;
 }
@@ -1559,10 +1559,10 @@ void
 err_library(char *arg)
 {
 	if (arg) {
-		logerr(1, arg, "\n", 0);
+		logerr(1, arg, "\n", NULL);
 		logflush();
 	}
-	out("451 Sorry, there is a problem loading indimail virtual domain library (#4.3.0)\r\n", 0);
+	out("451 Sorry, there is a problem loading indimail virtual domain library (#4.3.0)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1570,9 +1570,9 @@ err_library(char *arg)
 int
 err_fork()
 {
-	logerr(1, "fork: ", error_str(errno), "\n", 0);
+	logerr(1, "fork: ", error_str(errno), "\n", NULL);
 	logflush();
-	out("451 Sorry, my child won't start and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, my child won't start and I can't auth (#4.3.0)\r\n", NULL);
 	flush();
 	return -1;
 }
@@ -1580,9 +1580,9 @@ err_fork()
 int
 err_pipe()
 {
-	logerr(1, "trouble creating pipes: ", error_str(errno), "\n", 0);
+	logerr(1, "trouble creating pipes: ", error_str(errno), "\n", NULL);
 	logflush();
-	out("451 Sorry, I'm unable to open pipe and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to open pipe and I can't auth (#4.3.0)\r\n", NULL);
 	flush();
 	return -1;
 }
@@ -1590,9 +1590,9 @@ err_pipe()
 int
 err_write()
 {
-	logerr(1, "write error: ", error_str(errno), "\n", 0);
+	logerr(1, "write error: ", error_str(errno), "\n", NULL);
 	logflush();
-	out("451 Sorry, I'm unable to write pipe and I can't auth (#4.3.0)\r\n", 0);
+	out("451 Sorry, I'm unable to write pipe and I can't auth (#4.3.0)\r\n", NULL);
 	flush();
 	return -1;
 }
@@ -1605,48 +1605,48 @@ err_authfailure(char *authuser, int ret)
 	int             i;
 
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
-	logerr(1, " AUTH USER [", 0);
+	logerr(1, " AUTH USER [", NULL);
 	if (authuser) {
-		logerr(0, authuser, 0);
+		logerr(0, authuser, NULL);
 	}
-	logerr(0, "] status=[", 0);
+	logerr(0, "] status=[", NULL);
 	if (ret < 0)
-		logerr(0, "-", 0);
-	logerr(0, retstr, "]", 0);
+		logerr(0, "-", NULL);
+	logerr(0, retstr, "]", NULL);
 	if (authmethod.len) {
 		i = authmethod.s[0];
-		logerr(0, " AUTH ", get_authmethod(i), 0);
+		logerr(0, " AUTH ", get_authmethod(i), NULL);
 	} else
-		logerr(0, " AUTH Unknown ", 0);
-	logerr(0, " TLS=", 0);
+		logerr(0, " AUTH Unknown ", NULL);
+	logerr(0, " TLS=", NULL);
 #ifdef TLS
 	if (ssl)
-		logerr(0, SSL_get_version(ssl), 0);
+		logerr(0, SSL_get_version(ssl), NULL);
 	else {
 		if (!(ptr = env_get("TLS_PROVIDER")))
-			logerr(0, "No", 0);
+			logerr(0, "No", NULL);
 		else {
 			i = str_chr(ptr, ',');
 			if (ptr[i]) {
 				ptr[i] = 0;
-				logerr(0, ptr, 0);
+				logerr(0, ptr, NULL);
 				ptr[i] = ',';
 			}
 		}
 	}
 #else
 	if (!(ptr = env_get("TLS_PROVIDER")))
-		logerr(0, "No", 0);
+		logerr(0, "No", NULL);
 	else {
 		i = str_chr(ptr, ',');
 		if (ptr[i]) {
 			ptr[i] = 0;
-			logerr(0, ptr, 0);
+			logerr(0, ptr, NULL);
 			ptr[i] = ',';
 		}
 	}
 #endif
-	logerr(0, " auth failure\n", 0);
+	logerr(0, " auth failure\n", NULL);
 	logflush();
 }
 
@@ -1660,69 +1660,69 @@ err_authinsecure(int ret)
 	strnum[fmt_ulong(retstr, ret > 0 ? ret : 0 - ret)] = 0;
 	if (authmethod.len) {
 		i = authmethod.s[0];
-		logerr(1, " AUTH ", get_authmethod(i), 0);
+		logerr(1, " AUTH ", get_authmethod(i), NULL);
 	} else
-		logerr(1, " AUTH Unknown ", 0);
-	logerr(0, "status=[", 0);
+		logerr(1, " AUTH Unknown ", NULL);
+	logerr(0, "status=[", NULL);
 	if (ret < 0)
-		logerr(0, "-", 0);
-	logerr(0, retstr, "] TLS=", 0);
+		logerr(0, "-", NULL);
+	logerr(0, retstr, "] TLS=", NULL);
 #ifdef TLS
 	if (ssl)
-		logerr(0, SSL_get_version(ssl), 0);
+		logerr(0, SSL_get_version(ssl), NULL);
 	else {
 		if (!(ptr = env_get("TLS_PROVIDER")))
-			logerr(0, "No", 0);
+			logerr(0, "No", NULL);
 		else {
 			i = str_chr(ptr, ',');
 			if (ptr[i]) {
 				ptr[i] = 0;
-				logerr(0, ptr, 0);
+				logerr(0, ptr, NULL);
 				ptr[i] = ',';
 			}
 		}
 	}
 #else
 	if (!(ptr = env_get("TLS_PROVIDER")))
-		logerr(0, "No", 0);
+		logerr(0, "No", NULL);
 	else {
 		i = str_chr(ptr, ',');
 		if (ptr[i]) {
 			ptr[i] = 0;
-			logerr(0, ptr, 0);
+			logerr(0, ptr, NULL);
 			ptr[i] = ',';
 		}
 	}
 #endif
-	logerr(0, " auth failure\n", 0);
+	logerr(0, " auth failure\n", NULL);
 	logflush();
 }
 
 void
 err_authd()
 {
-	out("503 you're already authenticated (#5.5.0)\r\n", 0);
+	out("503 you're already authenticated (#5.5.0)\r\n", NULL);
 	flush();
 }
 
 void
 err_authrequired()
 {
-	out("530 authentication required (#5.7.1)\r\n", 0);
+	out("530 authentication required (#5.7.1)\r\n", NULL);
 	flush();
 }
 
 void
 err_transaction(char *arg)
 {
-	out("503 no ", arg, " during mail transaction (#5.5.0)\r\n", 0);
+	out("503 no ", arg, " during mail transaction (#5.5.0)\r\n", NULL);
 	flush();
 }
 
 int
 err_noauth()
 {
-	out("504 auth type unimplemented (#5.5.1)\r\n", 0);
+	out("504 auth type unimplemented (#5.5.1)\r\n", NULL);
 	flush();
 	return -1;
 }
@@ -1731,7 +1731,7 @@ err_noauth()
 int
 err_noauthallowed()
 {
-	out("538 Encryption required for requested authentication mechanism (#5.7.11)\r\n", 0);
+	out("538 Encryption required for requested authentication mechanism (#5.7.11)\r\n", NULL);
 	flush();
 	return -2;
 }
@@ -1740,7 +1740,7 @@ err_noauthallowed()
 int
 err_authabrt()
 {
-	out("501 auth exchange cancelled (#5.0.0)\r\n", 0);
+	out("501 auth exchange cancelled (#5.0.0)\r\n", NULL);
 	flush();
 	return -1;
 }
@@ -1748,7 +1748,7 @@ err_authabrt()
 int
 err_input()
 {
-	out("501 malformed auth input (#5.5.4)\r\n", 0);
+	out("501 malformed auth input (#5.5.4)\r\n", NULL);
 	flush();
 	return -1;
 }
@@ -1757,9 +1757,9 @@ void
 err_mailbox(char *arg1, char *arg2, char *arg3)
 {
 	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT <",
-			arg2, "> state <", arg3, ">\n", 0);
+			arg2, "> state <", arg3, ">\n", NULL);
 	logflush();
-	out("550 sorry, ", arg1, " mailbox <", arg2, "> ", arg3, "\r\n", 0);
+	out("550 sorry, ", arg1, " mailbox <", arg2, "> ", arg3, "\r\n", NULL);
 	flush();
 	return;
 }
@@ -1769,9 +1769,9 @@ err_rcpt_errcount(char *arg1, int count)
 {
 	strnum[fmt_ulong(strnum, count)] = 0;
 	logerr(1, "Too many Invalid RECIPIENTS (", strnum, "): MAIL from <",
-			arg1, ">\n", 0);
+			arg1, ">\n", NULL);
 	logflush();
-	out("421 too many invalid addresses, goodbye (#4.7.1)\r\n", 0);
+	out("421 too many invalid addresses, goodbye (#4.7.1)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1779,9 +1779,9 @@ err_rcpt_errcount(char *arg1, int count)
 no_return void
 err_greytimeout()
 {
-	logerr(1, "Timeout (no response from greylisting server)\n", 0);
+	logerr(1, "Timeout (no response from greylisting server)\n", NULL);
 	logflush();
-	out("451 greylist temporary failure - Timeout (#4.3.0)\r\n", 0);
+	out("451 greylist temporary failure - Timeout (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -1789,12 +1789,12 @@ err_greytimeout()
 no_return void
 err_grey_tmpfail(char *arg)
 {
-	logerr(1, "greylisting temporary failure: ", 0);
+	logerr(1, "greylisting temporary failure: ", NULL);
 	if (arg)
-		logerr(0, arg, ": ", 0);
-	logerr(0, error_str(errno), "\n", 0);
+		logerr(0, arg, ": ", NULL);
+	logerr(0, error_str(errno), "\n", NULL);
 	logflush();
-	out("451 greylist temporary failure (#4.3.0)\r\n", 0);
+	out("451 greylist temporary failure (#4.3.0)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -1808,16 +1808,16 @@ err_grey()
 	arg = rcptto.s;
 	for (ptr = arg + 1, idx = 0; idx < rcptto.len; idx++) {
 		if (!arg[idx]) {
-			logerr(1, "HELO <", helohost.s, "> MAIL from <", mailfrom.s, "> RCPT <", ptr, ">\n", 0);
+			logerr(1, "HELO <", helohost.s, "> MAIL from <", mailfrom.s, "> RCPT <", ptr, ">\n", NULL);
 			ptr = arg + idx + 2;
 		}
 	}
-	logerr(1, "greylist ", " <", mailfrom.s, "> to <", arg + 1, ">", 0);
+	logerr(1, "greylist ", " <", mailfrom.s, "> to <", arg + 1, ">", NULL);
 	if (rcptcount > 1)
-		logerr(0, "...", 0); /* > 1 address sent for greylist check */
-	logerr(0, "\n", 0);
+		logerr(0, "...", NULL); /* > 1 address sent for greylist check */
+	logerr(0, "\n", NULL);
 	logflush();
-	out("450 try again later (#4.3.0)\r\n", 0);
+	out("450 try again later (#4.3.0)\r\n", NULL);
 	flush();
 	return;
 }
@@ -1918,9 +1918,9 @@ check_recipient_cdb(char *rcpt)
 		return 0;
 	case -3:
 	case 111:
-		logerr(1, "recipients database error\n", 0);
+		logerr(1, "recipients database error\n", NULL);
 		logflush();
-		out("451 unable to check recipients (#4.3.2)\r\n", 0);
+		out("451 unable to check recipients (#4.3.2)\r\n", NULL);
 		flush();
 		_exit(1);
 		/*- Not Reached */
@@ -1942,9 +1942,9 @@ check_recipient_pwd(char *rcpt, int len)
 	substdio        pwss;
 
 	if ((fd = open_read("/etc/passwd")) == -1) {
-		logerr(1, "passwd database error\n", 0);
+		logerr(1, "passwd database error\n", NULL);
 		logflush();
-		out("451 Sorry, I'm unable to read passwd database (#4.3.0)\r\n", 0);
+		out("451 Sorry, I'm unable to read passwd database (#4.3.0)\r\n", NULL);
 		flush();
 		_exit(1);
 	}
@@ -1952,7 +1952,7 @@ check_recipient_pwd(char *rcpt, int len)
 	for (;;) {
 		if (getln(&pwss, &line, &match, '\n') == -1) {
 			close(fd);
-			die_read("/etc/passwd", 0);
+			die_read("/etc/passwd", NULL);
 		}
 		if (!line.len) {
 			close(fd);
@@ -2024,9 +2024,9 @@ check_recipient_sql(char *rcpt, int len)
 			return (0);
 		return (*ptr);
 	}
-	logerr(1, "sql database error\n", 0);
+	logerr(1, "sql database error\n", NULL);
 	logflush();
-	out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
+	out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
 	flush();
 	_exit(1);
 	/*- Not Reached */
@@ -2072,22 +2072,22 @@ dnscheck(char *address, int len, int paranoid)
 void
 log_etrn(char *arg1, char *arg2)
 {
-	logerr(1, "ETRN ", arg1, 0);
+	logerr(1, "ETRN ", arg1, NULL);
 	if (arg2)
-		logerr(0, " ", arg2, 0);
-	logerr(0, "\n", 0);
+		logerr(0, " ", arg2, NULL);
+	logerr(0, "\n", NULL);
 	logflush();
 }
 
 void
 log_atrn(char *arg1, char *arg2, char *arg3)
 {
-	logerr(1, "ATRN ", arg1, 0);
+	logerr(1, "ATRN ", arg1, NULL);
 	if (arg2)
-		logerr(0, arg2, 0);
+		logerr(0, arg2, NULL);
 	if (arg3)
-		logerr(0, ": ", arg3, 0);
-	logerr(0, "\n", 0);
+		logerr(0, ": ", arg3, NULL);
+	logerr(0, "\n", NULL);
 	logflush();
 }
 
@@ -2158,9 +2158,9 @@ no_return void
 sigterm()
 {
 	smtp_respond("421 ");
-	logerr(1, "going down on SIGTERM\n", 0);
+	logerr(1, "going down on SIGTERM\n", NULL);
 	logflush();
-	out(" Service not available, closing tranmission channel (#4.3.2)\r\n", 0);
+	out(" Service not available, closing tranmission channel (#4.3.2)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -2176,7 +2176,7 @@ smtp_help(char *arg)
 	}
 	ptr = revision + 11;
 	if (*ptr) {
-		out("214-This is IndiMail SMTP Version ", 0);
+		out("214-This is IndiMail SMTP Version ", NULL);
 		for (; *ptr; ptr++) {
 			if (*ptr == ' ')
 				break;
@@ -2186,30 +2186,30 @@ smtp_help(char *arg)
 	}
 	out("\r\n",
 			"214-https://github.com/mbhangui/indimail-mta\r\n",
-			"214-This server supports the following commands:\r\n", 0);
+			"214-This server supports the following commands:\r\n", NULL);
 	switch (smtp_port)
 	{
 	case ODMR_PORT:/*- RFC 2645 */
 		if (hasvirtual)
-			out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n", 0);
+			out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n", NULL);
 		else { /*- since we don't have ATRN mechanism, behave like any other non-special port */
-			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", 0);
+			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", NULL);
 			if (hostname && *hostname && childargs && *childargs)
-				out("AUTH ", 0);
-			out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n", 0);
+				out("AUTH ", NULL);
+			out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n", NULL);
 		}
 		break;
 	case SUBM_PORT:/*- RFC 2476 */
-		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", 0);
+		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", NULL);
 		if (hostname && *hostname && childargs && *childargs)
-			out("AUTH ", 0);
-		out(no_vrfy ? "HELP QUIT\r\n" : "VRFY HELP QUIT\r\n", 0);
+			out("AUTH ", NULL);
+		out(no_vrfy ? "HELP QUIT\r\n" : "VRFY HELP QUIT\r\n", NULL);
 		break;
 	default:
-		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", 0);
+		out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", NULL);
 		if (hostname && *hostname && childargs && *childargs)
-			out("AUTH ", 0);
-		out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n", 0);
+			out("AUTH ", NULL);
+		out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n", NULL);
 		break;
 	}
 	flush();
@@ -2224,7 +2224,7 @@ smtp_quit(char *arg)
 #endif
 
 	smtp_respond("221 ");
-	out(" closing connection\r\n", 0);
+	out(" closing connection\r\n", NULL);
 	flush();
 	if (phandle)
 		closeLibrary(&phandle);
@@ -2290,7 +2290,7 @@ badhostcheck()
 		if (!stralloc_copyb(&curregex, brh.s + j, (i - j)) ||
 				!stralloc_0(&curregex))
 			die_nomem();
-		x = matchregex(remotehost, curregex.s, 0);
+		x = matchregex(remotehost, curregex.s, NULL);
 		if ((negate) && (x == 0))
 			return 1;
 		if (!(negate) && (x > 0))
@@ -2385,11 +2385,11 @@ greetdelay_check(int delay)
 			ssl = 0;
 		}
 #endif
-		die_read(!r ? "client dropped connection" : 0, 0);
+		die_read(!r ? "client dropped connection" : 0, NULL);
 	}
-	logerr(1, "SMTP Protocol violation - Early Talking\n", 0);
+	logerr(1, "SMTP Protocol violation - Early Talking\n", NULL);
 	logflush();
-	out("554 SMTP protocol violation. Polite people say hello after the server greets them (#5.7.1)\r\n", 0);
+	out("554 SMTP protocol violation. Polite people say hello after the server greets them (#5.7.1)\r\n", NULL);
 	flush();
 	_exit(1);
 }
@@ -2610,9 +2610,9 @@ open_control_files2()
 #endif
 #ifdef HAVESRS
 	if ((r = srs_setup(0)) < 0) {
-		logerr(1, "srs_setup failed\n", 0);
+		logerr(1, "srs_setup failed\n", NULL);
 		logflush();
-		out("451 Sorry, I'm unable to read srs controls (#4.3.0)\r\n", 0);
+		out("451 Sorry, I'm unable to read srs controls (#4.3.0)\r\n", NULL);
 		flush();
 		_exit(1);
 	}
@@ -2751,7 +2751,7 @@ smtp_init(int force_flag)
 #endif
 #ifdef HASLIBGSASL
 	if ((r = gsasl_init(&gsasl_ctx)) < 0) {
-		logerr(1, "gsasl_init: ", gsasl_strerror(r), "\n", 0);
+		logerr(1, "gsasl_init: ", gsasl_strerror(r), "\n", NULL);
 		logflush();
 		_exit(111);
 	}
@@ -2896,7 +2896,7 @@ smtp_helo(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
+		out("503 bad sequence of commands (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	case 2:
@@ -2917,8 +2917,8 @@ smtp_helo(char *arg)
 	}
 	smtp_respond("250 ");
 	if (!arg || !*arg)
-		out(" [", remoteip, "]", 0);
-	out("\r\n", 0);
+		out(" [", remoteip, "]", NULL);
+	out("\r\n", NULL);
 	if (!arg || !*arg)
 		dohelo(remotehost);
 	else
@@ -2938,7 +2938,7 @@ smtp_ehlo(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
+		out("503 bad sequence of commands (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	case 2:
@@ -2957,10 +2957,10 @@ smtp_ehlo(char *arg)
 		smtp_badip();
 		return;
 	}
-	out("250-", greeting.s, 0);
+	out("250-", greeting.s, NULL);
 	if (!arg || !*arg)
-		out(" [", remoteip, "]", 0);
-	out("\r\n", 0);
+		out(" [", remoteip, "]", NULL);
+	out("\r\n", NULL);
 	if (hostname && *hostname && childargs && *childargs) {
 		char           *no_auth_login, *no_auth_plain, *no_cram_md5,
 					   *no_cram_sha1, *no_cram_sha224, *no_cram_sha256,
@@ -3013,143 +3013,143 @@ smtp_ehlo(char *arg)
 		if (flags1) { /*- all auth methods enabled */
 #ifdef HASLIBGSASL
 #if 0
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", 0);
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", NULL);
 #else
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", 0);
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", NULL);
 #endif
 #ifdef TLS
 			if (ssl)
 #if 0
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS", 0);
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS", NULL);
 #else
-				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS", 0);
+				out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS", NULL);
 #endif
 #endif
-			out("\r\n", 0);
+			out("\r\n", NULL);
 			if (old_client_bug) {
 #if 0
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", 0);
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", NULL);
 #else
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", 0);
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", NULL);
 #endif
 #ifdef TLS
 				if (ssl)
 #if 0
-					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS", 0);
+					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS SCRAM-SHA-512-PLUS", NULL);
 #else
-					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS", 0);
+					out(" SCRAM-SHA-1-PLUS SCRAM-SHA-256-PLUS", NULL);
 #endif
 #endif
-				out("\r\n", 0);
+				out("\r\n", NULL);
 			}
 #else
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", 0);
+			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", NULL);
 			if (old_client_bug)
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", 0);
+				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", NULL);
 #endif /*- #ifdef HAVELIBGSASL */
 		} else /*- few auth methods disabled */
 		if (flags2) {
 			int             flag = 0;
 
-			out("250-AUTH", 0);
+			out("250-AUTH", NULL);
 			if (!no_auth_login)
-				out(" LOGIN", 0);
+				out(" LOGIN", NULL);
 			if (!no_auth_plain)
-				out(" PLAIN", 0);
+				out(" PLAIN", NULL);
 			if (!no_cram_md5)
-				out(" CRAM-MD5", 0);
+				out(" CRAM-MD5", NULL);
 			if (!no_cram_sha1)
-				out(" CRAM-SHA1", 0);
+				out(" CRAM-SHA1", NULL);
 			if (!no_cram_sha224)
-				out(" CRAM-SHA224", 0);
+				out(" CRAM-SHA224", NULL);
 			if (!no_cram_sha256)
-				out(" CRAM-SHA256", 0);
+				out(" CRAM-SHA256", NULL);
 			if (!no_cram_sha384)
-				out(" CRAM-SHA384", 0);
+				out(" CRAM-SHA384", NULL);
 			if (!no_cram_sha512)
-				out(" CRAM-SHA512", 0);
+				out(" CRAM-SHA512", NULL);
 			if (!no_cram_ripemd)
-				out(" CRAM-RIPEMD", 0);
+				out(" CRAM-RIPEMD", NULL);
 			if (!no_digest_md5)
-				out(" DIGEST-MD5", 0);
+				out(" DIGEST-MD5", NULL);
 #ifdef HASLIBGSASL
 			if (!no_scram_sha1)
-				out(" SCRAM-SHA-1", 0);
+				out(" SCRAM-SHA-1", NULL);
 			if (!no_scram_sha1_plus)
-				out(" SCRAM-SHA-1-PLUS", 0);
+				out(" SCRAM-SHA-1-PLUS", NULL);
 			if (!no_scram_sha256)
-				out(" SCRAM-SHA-256", 0);
+				out(" SCRAM-SHA-256", NULL);
 			if (!no_scram_sha256_plus)
-				out(" SCRAM-SHA-256-PLUS", 0);
+				out(" SCRAM-SHA-256-PLUS", NULL);
 #if 0
 			if (!no_scram_sha512)
-				out(" SCRAM-SHA-512", 0);
+				out(" SCRAM-SHA-512", NULL);
 			if (!no_scram_sha512_plus)
-				out(" SCRAM-SHA-512-PLUS", 0);
+				out(" SCRAM-SHA-512-PLUS", NULL);
 #endif
 #endif
-			out("\r\n", 0);
+			out("\r\n", NULL);
 			if (old_client_bug) {
 				if (!no_auth_login)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "LOGIN", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "LOGIN", NULL);
 				if (!no_auth_plain)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "PLAIN", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "PLAIN", NULL);
 				if (!no_cram_md5) {
-					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-MD5", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-MD5", NULL);
 				}
 				if (!no_cram_sha1)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA1", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA1", NULL);
 				if (!no_cram_sha224)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA224", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA224", NULL);
 				if (!no_cram_sha256)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA256", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA256", NULL);
 				if (!no_cram_sha384)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA384", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA384", NULL);
 				if (!no_cram_sha512)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA512", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-SHA512", NULL);
 				if (!no_cram_ripemd)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-RIPEMD", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-RIPEMD", NULL);
 				if (!no_digest_md5)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "DIGEST-MD5", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "DIGEST-MD5", NULL);
 #ifdef HASLIBGSASL
 				if (!no_scram_sha1)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-1", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-1", NULL);
 				if (!no_scram_sha1_plus)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-1-PLUS", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-1-PLUS", NULL);
 				if (!no_scram_sha256)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-256", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-256", NULL);
 				if (!no_scram_sha256_plus)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-256-PLUS", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-256-PLUS", NULL);
 #if 0
 				if (!no_scram_sha512)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-512", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-512", NULL);
 				if (!no_scram_sha512_plus)
-					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-512-PLUS", 0);
+					out(flag++ == 0 ? "250-AUTH=" : " ", "SCRAM-SHA-512-PLUS", NULL);
 #endif
 #endif
-				out("\r\n", 0);
+				out("\r\n", NULL);
 			}
 		}
 	}
 	if (hasvirtual) {
 		if (smtp_port != ODMR_PORT) {
-			out("250-PIPELINING\r\n", "250-8BITMIME\r\n", 0);
+			out("250-PIPELINING\r\n", "250-8BITMIME\r\n", NULL);
 			if (databytes > 0) {
 				size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
-				out("250-SIZE ", size_buf, "\r\n", 0);
+				out("250-SIZE ", size_buf, "\r\n", NULL);
 			}
 			if (smtp_port != SUBM_PORT)
-				out("250-ETRN\r\n", 0);
+				out("250-ETRN\r\n", NULL);
 		} else
-			out("250-ATRN\r\n", 0);
+			out("250-ATRN\r\n", NULL);
 	} else {
-		out("250-PIPELINING\r\n", "250-8BITMIME\r\n", 0);
+		out("250-PIPELINING\r\n", "250-8BITMIME\r\n", NULL);
 		if (databytes > 0) {
 			size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
-			out("250-SIZE ", size_buf, "\r\n", 0);
+			out("250-SIZE ", size_buf, "\r\n", NULL);
 		}
 		if (smtp_port != SUBM_PORT)
-			out("250-ETRN\r\n", 0);
+			out("250-ETRN\r\n", NULL);
 	}
 #ifdef TLS
 	if (!ssl && env_get("STARTTLS")) {
@@ -3168,17 +3168,17 @@ smtp_ehlo(char *arg)
 				!stralloc_0(&filename))
 			die_nomem();
 		if (!stat(filename.s, &st))
-			out("250-STARTTLS\r\n", 0);
+			out("250-STARTTLS\r\n", NULL);
 		alloc_free(filename.s);
 	}
 #endif
 #ifdef SMTPUTF8
 	if (env_get("SMTPUTF8")) {
 		smtputf8_enable = 1;
-		out("250-SMTPUTF8\r\n", 0);
+		out("250-SMTPUTF8\r\n", NULL);
 	}
 #endif
-	out("250 HELP\r\n", 0);
+	out("250 HELP\r\n", NULL);
 	flush();
 	if (!arg || !*arg)
 		dohelo(remotehost);
@@ -3191,12 +3191,12 @@ void
 smtp_rset(char *arg)
 {
 	if (arg && *arg) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
+		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	}
 	seenmail = rcptto.len = mailfrom.len = addr.len = 0;
-	out("250 flushed\r\n", 0);
+	out("250 flushed\r\n", NULL);
 	flush();
 	return;
 }
@@ -3315,9 +3315,9 @@ pop_bef_smtp(char *mfrom)
 		if (!env_put2("AUTHENTICATED", authenticated == 1 ? "1" : "0"))
 			die_nomem();
 	} else {
-		logerr(1, "Database error\n", 0);
+		logerr(1, "Database error\n", NULL);
 		logflush();
-		out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
+		out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
 		flush();
 		return (1);
 	}
@@ -3344,9 +3344,9 @@ domain_compare(char *dom1, char *dom2)
 	if (str_diff(dom1, dom2)) {
 		if (!(tmpdom1 = (*inquery) (DOMAIN_QUERY, dom1, 0)) ||
 				!(tmpdom2 = (*inquery) (DOMAIN_QUERY, dom2, 0))) {
-			logerr(1, "Database error\n", 0);
+			logerr(1, "Database error\n", NULL);
 			logflush();
-			out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
+			out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
 			flush();
 			return (-1);
 		}
@@ -3490,7 +3490,7 @@ smtp_mail(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
+		out("503 bad sequence of commands (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	case 2:
@@ -3510,7 +3510,7 @@ smtp_mail(char *arg)
 		return;
 	}
 	if (!seenhelo) {
-		out("503 Polite people say hello first (#5.5.4)\r\n", 0);
+		out("503 Polite people say hello first (#5.5.4)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -3691,9 +3691,9 @@ smtp_mail(char *arg)
 	 */
 	if (env_get("CUGMAIL")) {
 		if (!addrallowed(addr.s)) {
-			logerr(1, "Invalid SENDER address: MAIL from <", mailfrom.s, ">\n", 0);
+			logerr(1, "Invalid SENDER address: MAIL from <", mailfrom.s, ">\n", NULL);
 			logflush();
-			out("553 authorization failure (#5.7.1)\r\n", 0);
+			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
 			return;
 		}
@@ -3707,16 +3707,16 @@ smtp_mail(char *arg)
 				 * Accept the mail as denial could be stupid
 				 * like the vrfy command
 				 */
-				logerr(1, "mail from invalid user <", mailfrom.s, ">\n", 0);
+				logerr(1, "mail from invalid user <", mailfrom.s, ">\n", NULL);
 				logflush();
-				out("553 authorization failure (#5.7.1)\r\n", 0);
+				out("553 authorization failure (#5.7.1)\r\n", NULL);
 				flush();
 				sleep(5); /*- Prevent DOS */
 				return;
 			} else {
-				logerr(1, "Database error\n", 0);
+				logerr(1, "Database error\n", NULL);
 				logflush();
-				out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
+				out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
 				flush();
 				return;
 			}
@@ -3727,9 +3727,9 @@ smtp_mail(char *arg)
 			}
 			if (*i_inactive || pw->pw_gid & NO_SMTP) {
 				logerr(1, "SMTP Access denied to <", mailfrom.s, "> ",
-						*i_inactive ? "user inactive\n" : "No SMTP Flag\n", 0);
+						*i_inactive ? "user inactive\n" : "No SMTP Flag\n", NULL);
 				logflush();
-				out("553 authorization failure (#5.7.1)\r\n", 0);
+				out("553 authorization failure (#5.7.1)\r\n", NULL);
 				flush();
 				return;
 			}
@@ -3747,9 +3747,9 @@ smtp_mail(char *arg)
 			return;	/*- temp error */
 		if (authenticated != 1) { /*- in case pop-bef-smtp also is negative */
 			logerr(1, "unauthenticated local SENDER address: MAIL from <",
-					mailfrom.s, ">\n", 0);
+					mailfrom.s, ">\n", NULL);
 			logflush();
-			out("530 authentication required for local users (#5.7.1)\r\n", 0);
+			out("530 authentication required for local users (#5.7.1)\r\n", NULL);
 			flush();
 			return;
 		}
@@ -3857,7 +3857,7 @@ nohasvirtual:
 		case SPF_ERROR:
 			if (spfbehavior < 2)
 				break;
-			out("451 SPF lookup failure (#4.3.0)\r\n", 0);
+			out("451 SPF lookup failure (#4.3.0)\r\n", NULL);
 			flush();
 			return;
 		case SPF_NONE:
@@ -3907,9 +3907,9 @@ nohasvirtual:
 			continue;
 		if (plug[i]->mail_func(remoteip, addr.s, &mesg)) {
 			strnum[fmt_ulong(strnum, i)] = 0;
-			logerr(1, "plugin(from)[", strnum, "]: ", mesg, "\n", 0);
+			logerr(1, "plugin(from)[", strnum, "]: ", mesg, "\n", NULL);
 			logflush();
-			out(mesg, 0);
+			out(mesg, NULL);
 			flush();
 			return;
 		}
@@ -3918,14 +3918,14 @@ nohasvirtual:
 #ifdef TLS
 	if (env_get("FORCE_TLS")) {
 		if (!ssl) {
-			out("530 must issue STARTTLS first (#5.7.0)\r\n", 0);
+			out("530 must issue STARTTLS first (#5.7.0)\r\n", NULL);
 			flush();
 			return;
 		}
 	}
 #endif
 	seenmail = 1;
-	out("250 ok\r\n", 0);
+	out("250 ok\r\n", NULL);
 	flush();
 	return;
 }
@@ -3948,7 +3948,7 @@ smtp_rcpt(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
+		out("503 bad sequence of commands (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	case 2:
@@ -4021,9 +4021,9 @@ smtp_rcpt(char *arg)
 		{
 		case -3: /*- srs error */
 			logerr(1, "failed to decode srs address ", addr.s, ": ",
-					srs_error.s, "\n", 0);
+					srs_error.s, "\n", NULL);
 			logflush();
-			out("451 failed to decode srs address (#4.3.0)\r\n", 0);
+			out("451 failed to decode srs address (#4.3.0)\r\n", NULL);
 			flush();
 			break;
 		case -2: /*- out of memory */
@@ -4038,9 +4038,9 @@ smtp_rcpt(char *arg)
 			 * srsreverse returns 0 only when setup() in srs.c
 			 * returns 0
 			 */
-			logerr(1, "unable to decode SRS address ", addr.s, "\n", 0);
+			logerr(1, "unable to decode SRS address ", addr.s, "\n", NULL);
 			logflush();
-			out("451 unable to decode SRS address (#4.3.5)\r\n", 0);
+			out("451 unable to decode SRS address (#4.3.5)\r\n", NULL);
 			flush();
 			break;
 		case 1:
@@ -4094,9 +4094,9 @@ smtp_rcpt(char *arg)
 		case 0:
 			break;
 		default:
-			logerr(1, "accesslist: ", error_str(errno), "\n", 0);
+			logerr(1, "accesslist: ", error_str(errno), "\n", NULL);
 			logflush();
-			out("451 Sorry, there is a local system failure (#4.3.0)\r\n", 0);
+			out("451 Sorry, there is a local system failure (#4.3.0)\r\n", NULL);
 			flush();
 			return;
 		}
@@ -4221,9 +4221,9 @@ smtp_rcpt(char *arg)
 			continue;
 		if (plug[i]->rcpt_func(remoteip, mailfrom.s, addr.s, &mesg)) {
 			strnum[fmt_ulong(strnum, i)] = 0;
-			logerr(1, "plugin(rcpt)[", strnum, "]: ", mesg, "\n", 0);
+			logerr(1, "plugin(rcpt)[", strnum, "]: ", mesg, "\n", NULL);
 			logflush();
-			out(mesg, 0);
+			out(mesg, NULL);
 			flush();
 			return;
 		}
@@ -4260,7 +4260,7 @@ smtp_rcpt(char *arg)
 			!stralloc_cats(&rcptto, addr.s) ||
 			!stralloc_0(&rcptto))
 		die_nomem();
-	out("250 ok\r\n", 0);
+	out("250 ok\r\n", NULL);
 	flush();
 	return;
 }
@@ -4599,9 +4599,9 @@ acceptmessage(unsigned long qp)
 
 	when = now();
 	accept_buf[fmt_ulong(accept_buf, (unsigned long) when)] = 0;
-	out("250 ok ", accept_buf, " qp ", 0);
+	out("250 ok ", accept_buf, " qp ", NULL);
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
-	out(accept_buf, "\r\n", 0);
+	out(accept_buf, "\r\n", NULL);
 	flush();
 	return;
 }
@@ -4649,7 +4649,7 @@ smtp_data(char *arg)
 		sqlmatch_close_db();
 #endif
 	if (arg && *arg) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
+		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -4717,7 +4717,7 @@ smtp_data(char *arg)
 		return;
 	}
 	qp = qmail_qp(&qqt); /*- pid of queue process */
-	out("354 go ahead\r\n", 0); /* next read will flush the pending data in ssout */
+	out("354 go ahead\r\n", NULL); /* next read will flush the pending data in ssout */
 	/*- flush(); -*/
 #ifdef TLS
 	x = ssl ? 0 : env_get("TLS_PROVIDER");
@@ -4757,9 +4757,9 @@ smtp_data(char *arg)
 				continue;
 			if (plug[i]->data_func(localhost, remoteip, remotehost, remoteinfo, &mesg)) {
 				strnum[fmt_ulong(strnum, i)] = 0;
-				logerr(1, "plugin(data)[", strnum, "]: ", mesg, "\n", 0);
+				logerr(1, "plugin(data)[", strnum, "]: ", mesg, "\n", NULL);
 				logflush();
-				out(mesg, 0);
+				out(mesg, NULL);
 				flush();
 				return;
 			}
@@ -4806,10 +4806,10 @@ smtp_data(char *arg)
 		return;
 	}
 	if (*qqx == 'D')
-		out("554 ", 0);
+		out("554 ", NULL);
 	else
-		out("451 ", 0);
-	out(qqx + 1, "\r\n", 0);
+		out("451 ", NULL);
+	out(qqx + 1, "\r\n", NULL);
 	flush();
 	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
 	return;
@@ -4835,7 +4835,7 @@ authgetl(void)
 				ssl = 0;
 			}
 #endif
-			die_read("client dropped connection", 0);
+			die_read("client dropped connection", NULL);
 		}
 		if (authin.s[authin.len] == '\n')
 			break;
@@ -4942,7 +4942,7 @@ authenticate(int method)
 	byte_zero(upbuf, sizeof upbuf);
 	if (method == AUTH_DIGEST_MD5) {
 		if ((n = saferead(po[0], respbuf, 33)) == -1)
-			die_read("err reading digest md5 response", 0);
+			die_read("err reading digest md5 response", NULL);
 		respbuf[n] = 0;
 		close(po[0]);
 	}
@@ -4954,7 +4954,7 @@ authenticate(int method)
 		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
 			substdio_fdbuf(&pwd_in, plaintxtread, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
 			if (substdio_copy(&ssout, &pwd_in) == -2)
-				die_read("error reading checkpassword pipe", 0);
+				die_read("error reading checkpassword pipe", NULL);
 		}
 #endif
 		/*
@@ -4975,7 +4975,7 @@ authenticate(int method)
 			die_nomem();
 		if (!stralloc_0(&resp))
 			die_nomem();
-		out("334 ", resp.s, "\r\n", 0);
+		out("334 ", resp.s, "\r\n", NULL);
 		flush();
 		/*- digest-md5 requires a special okay response ...  */
 		if ((n = saferead(0, respbuf, 512)) == -1) {
@@ -4985,7 +4985,7 @@ authenticate(int method)
 				ssl = 0;
 			}
 #endif
-			die_read("failed to get OK from client", 0);
+			die_read("failed to get OK from client", NULL);
 		}
 		if (n)
 			respbuf[n] = 0;
@@ -5007,7 +5007,7 @@ auth_login(char *arg)
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &user)) == 1)
 			return err_input();
 	} else {
-		out("334 VXNlcm5hbWU6\r\n", 0);
+		out("334 VXNlcm5hbWU6\r\n", NULL);
 		flush(); /*- Username: */
 		if (authgetl() < 0)
 			return -1;
@@ -5016,7 +5016,7 @@ auth_login(char *arg)
 	}
 	if (r == -1)
 		die_nomem();
-	out("334 UGFzc3dvcmQ6\r\n", 0);
+	out("334 UGFzc3dvcmQ6\r\n", NULL);
 	flush(); /*- Password: */
 	if (authgetl() < 0)
 		return -1;
@@ -5045,7 +5045,7 @@ auth_plain(char *arg)
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
 			return err_input();
 	} else {
-		out("334 \r\n", 0);
+		out("334 \r\n", NULL);
 		flush();
 		if (authgetl() < 0)
 			return -1;
@@ -5094,7 +5094,7 @@ auth_cram(int method)
 		die_nomem();
 
 	/*- "334 mychallenge \r\n" */
-	out("334 ", slop.s, "\r\n", 0);
+	out("334 ", slop.s, "\r\n", NULL);
 	flush();
 	if (authgetl() < 0) /*- got response */
 		return -1;
@@ -5155,16 +5155,16 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 			 * Accept the mail as denial could be stupid
 			 * like the vrfy command
 			 */
-			logerr(1, "mail from invalid user <", u, ">\n", 0);
+			logerr(1, "mail from invalid user <", u, ">\n", NULL);
 			logflush();
-			out("553 authorization failure (#5.7.1)\r\n", 0);
+			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
 			sleep(5); /*- Prevent DOS */
 			return ((PASSWD *) NULL);
 		} else {
-			logerr(1, "Database error\n", 0);
+			logerr(1, "Database error\n", NULL);
 			logflush();
-			out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", 0);
+			out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
 			flush();
 			return ((PASSWD *) NULL);
 		}
@@ -5176,24 +5176,24 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 		}
 		if (*i_inactive || gsasl_pw->pw_gid & NO_SMTP) {
 			logerr(1, "SMTP Access denied to <", u, "> ",
-					*i_inactive ? "user inactive\n" : "No SMTP Flag\n", 0);
+					*i_inactive ? "user inactive\n" : "No SMTP Flag\n", NULL);
 			logflush();
-			out("553 authorization failure (#5.7.1)\r\n", 0);
+			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
 			gsasl_pw = (PASSWD *) NULL;
 			return ((PASSWD *) NULL);
 		}
 	}
 	if (str_diffn(gsasl_pw->pw_passwd, scram_method.s, scram_method.len)) {
-		logerr(1, "SCRAM AUTH Method not supported for user ", scram_method.s, 0);
+		logerr(1, "SCRAM AUTH Method not supported for user ", scram_method.s, NULL);
 		i = str_chr(gsasl_pw->pw_passwd, '}');
 		if (gsasl_pw->pw_passwd[i]) {
-			logerr(0, " != ", 0);
+			logerr(0, " != ", NULL);
 			substdio_put(&sserr, gsasl_pw->pw_passwd, i + 1);
 		}
-		logerr(0, "\n", 0);
+		logerr(0, "\n", NULL);
 		logflush();
-		out("553 authorization failure (#5.7.1)\r\n", 0);
+		out("553 authorization failure (#5.7.1)\r\n", NULL);
 		flush();
 		gsasl_pw = (PASSWD *) NULL;
 		return ((PASSWD *) NULL);
@@ -5201,9 +5201,9 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 		*mech = 0;
 	i = get_scram_secrets(gsasl_pw->pw_passwd, mech, iter, salt, stored_key, server_key, hexsaltpw, cleartxt, saltedpw);
 	if (i != 6 && i != 8) {
-		logerr(1, "Unable to get secrets for <", u, ">\n", 0);
+		logerr(1, "Unable to get secrets for <", u, ">\n", NULL);
 		logflush();
-		out("553 authorization failure (#5.7.1)\r\n", 0);
+		out("553 authorization failure (#5.7.1)\r\n", NULL);
 		flush();
 		gsasl_pw = (PASSWD *) NULL;
 		return ((PASSWD *) NULL);
@@ -5234,7 +5234,7 @@ get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
 	int             rc;
 
 	if (!*u && !(*u = gsasl_property_fast(sctx, GSASL_AUTHID))) {
-		logerr(1, "gsasl_property_fast: unable to get GSASL_AUTHID\n", 0);
+		logerr(1, "gsasl_property_fast: unable to get GSASL_AUTHID\n", NULL);
 		logflush();
 		return GSASL_NO_CALLBACK;
 	}
@@ -5243,14 +5243,14 @@ get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
 		return gs_callback_err = GSASL_NO_CALLBACK;
 	if (!is_scram_method(*mech)) {
 		strnum[fmt_int(strnum, *mech)] = 0;
-		logerr(1, "unknown SCRAM AUTH method [", strnum, "]\n", 0);
+		logerr(1, "unknown SCRAM AUTH method [", strnum, "]\n", NULL);
 		logflush();
 		return GSASL_NO_CALLBACK;
 	}
 	strnum[fmt_int(strnum, *iter)] = 0;
 #if GSASL_VERSION_MAJOR > 1
 	if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum)) != GSASL_OK) {
-		logerr(1, "gsasl_property_set: GSASL_SCRAM_ITER: ", gsasl_strerror(rc), "\n", 0);
+		logerr(1, "gsasl_property_set: GSASL_SCRAM_ITER: ", gsasl_strerror(rc), "\n", NULL);
 		logflush();
 		return GSASL_NO_CALLBACK;
 	}
@@ -5264,11 +5264,11 @@ get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
 void
 err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
 {
-	logerr(1, mesg, 0);
+	logerr(1, mesg, NULL);
 	if (str)
-		logerr(0, " [", str, "]", 0);
-	logerr(0, "\n", 0);
-	out(err_code1, " ", mesg, " (#", err_code2, ")\r\n", 0);
+		logerr(0, " [", str, "]", NULL);
+	logerr(0, "\n", NULL);
+	out(err_code1, " ", mesg, " (#", err_code2, ")\r\n", NULL);
 	flush();
 }
 
@@ -5323,7 +5323,7 @@ get_finish_message(cb_type type)
 					!stralloc_0(&res))
 				die_nomem();
 		}
-		err_scram("410", "4.3.5", res.s, 0);
+		err_scram("410", "4.3.5", res.s, NULL);
 		return ((char *) NULL);
 	}
 	/*
@@ -5375,7 +5375,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_PASSWORD, cleartxt)) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_PASSWORD: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5393,7 +5393,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALT, salt)) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_SCRAM_SALT: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5412,7 +5412,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SERVERKEY, server_key)) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_SCRAM_SERVERKEY: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5430,7 +5430,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_STOREDKEY, stored_key)) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_SCRAM_STOREDKEY: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5449,7 +5449,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_SALTED_PASSWORD, hexsaltpw)) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_SCRAM_SALTED_PASSWORD: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5462,7 +5462,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SERVICE, "smtp")) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_SERVICE: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5474,7 +5474,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_HOSTNAME, hostname)) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_HOSTNAME: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5493,7 +5493,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 		if ((rc = gsasl_property_set(sctx, GSASL_SCRAM_ITER, strnum)) != GSASL_OK) {
 			logerr(1, "gsasl_property_set: GSASL_SCRAM_ITER: ",
-					gsasl_strerror(rc), "\n", 0);
+					gsasl_strerror(rc), "\n", NULL);
 			logflush();
 		}
 #else
@@ -5510,7 +5510,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #if GSASL_VERSION_MAJOR > 1
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_UNIQUE, p)) != GSASL_OK) {
 				logerr(1, "gsasl_property_set: GSASL_CB_TLS_UNIQUE: ",
-						gsasl_strerror(rc), "\n", 0);
+						gsasl_strerror(rc), "\n", NULL);
 				logflush();
 			}
 #else
@@ -5518,7 +5518,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 			rc = GSASL_OK;
 #endif
 		} else {
-			logerr(1, "unable to get finish message for GSASL_CB_TLS_UNIQUE\n", 0);
+			logerr(1, "unable to get finish message for GSASL_CB_TLS_UNIQUE\n", NULL);
 			logflush();
 			return gs_callback_err = GSASL_NO_CALLBACK;
 		}
@@ -5529,11 +5529,11 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 		if ((p = get_finish_message(tls_exporter))) {
 			if ((rc = gsasl_property_set(sctx, GSASL_CB_TLS_EXPORTER, p)) != GSASL_OK) {
 				logerr(1, "gsasl_property_set: GSASL_CB_TLS_EXPORTER: ",
-						gsasl_strerror(rc), "\n", 0);
+						gsasl_strerror(rc), "\n", NULL);
 				logflush();
 			}
 		} else {
-			logerr(1, "unable to get finish message for GSASL_CB_TLS_EXPORTER\n", 0);
+			logerr(1, "unable to get finish message for GSASL_CB_TLS_EXPORTER\n", NULL);
 			logflush();
 			return gs_callback_err = GSASL_NO_CALLBACK;
 		}
@@ -5542,7 +5542,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 #endif
 	default:
 		strnum[fmt_int(strnum, prop)] = 0;
-		logerr(1, "unknown callback [", strnum, "]\n", 0);
+		logerr(1, "unknown callback [", strnum, "]\n", NULL);
 		logflush();
 		break;
 	}
@@ -5574,7 +5574,7 @@ gsasl_server_auth(Gsasl_session *session)
 			return 1;
 		r = gsasl_step64(session, authin.s, &p);
 		if (r == GSASL_NEEDS_MORE || (r == GSASL_OK && p && *p)) {
-			out("334 ", p, "\r\n", 0);
+			out("334 ", p, "\r\n", NULL);
 			flush();
 			gsasl_free(p);
 			if (authgetl() < 0) /*- got response */
@@ -5583,7 +5583,7 @@ gsasl_server_auth(Gsasl_session *session)
 	} while (r == GSASL_NEEDS_MORE);
 
 	if (r != GSASL_OK) {
-		logerr(1, "gsasl_step64: ", gsasl_strerror(r), "\n", 0);
+		logerr(1, "gsasl_step64: ", gsasl_strerror(r), "\n", NULL);
 		logflush();
 		return 1;
 	}
@@ -5662,11 +5662,11 @@ auth_scram(int method)
 #endif
 	} /*- switch(method) */
 	if (r != GSASL_OK) {
-		logerr(1, "gsasl_server_start: ", gsasl_strerror(r), "\n", 0);
+		logerr(1, "gsasl_server_start: ", gsasl_strerror(r), "\n", NULL);
 		logflush();
 		_exit(111);
 	}
-	out("334 \r\n", 0);
+	out("334 \r\n", NULL);
 	flush();
 
 	if (authgetl() < 0) /*- got response */
@@ -5695,7 +5695,7 @@ auth_scram(int method)
 			 * Client does not support channel binding. Since selected auth mechanism
 			 * requires cb, we do support this option.
 			 */
-			err_scram("535", "5.7.4", "client doesn't support channel binding, but selected mechanism does", 0);
+			err_scram("535", "5.7.4", "client doesn't support channel binding, but selected mechanism does", NULL);
 		}
 		/*- check if the syntax is correct by checking for comma */
 		if (slop.s[1] != ',') {
@@ -5712,7 +5712,7 @@ auth_scram(int method)
 			 * does not. Server must fail authentication if it supports channel binding,
 			 * which is the case if a connection is using TLS.
 			 */
-			err_scram("535", "5.7.4", "client supports channel binding, but thinks server doesn't", 0);
+			err_scram("535", "5.7.4", "client supports channel binding, but thinks server doesn't", NULL);
 			return 1;
 		}
 #endif
@@ -5944,12 +5944,12 @@ auth_digest_md5()
 			!stralloc_cats(&slop, ",algorithm=md5-sess") ||
 			b64encode(&slop, &tmp) != 0)
 		die_nomem();
-	out("334 ", 0);
+	out("334 ", NULL);
 	if (substdio_put(&ssout, tmp.s, tmp.len) == -1) {
 		flush();
 		return err_write();
 	}
-	out("\r\n", 0);
+	out("\r\n", NULL);
 	flush();
 
 	/*- get digest-response */
@@ -6060,7 +6060,7 @@ smtp_auth(char *arg)
 	case 0:
 		break;
 	case 1:
-		out("503 bad sequence of commands (#5.3.2)\r\n", 0);
+		out("503 bad sequence of commands (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	case 2:
@@ -6080,7 +6080,7 @@ smtp_auth(char *arg)
 		return;
 	}
 	if (!hostname || !*hostname || !childargs || !*childargs) {
-		out("503 auth not available (#5.3.3)\r\n", 0);
+		out("503 auth not available (#5.3.3)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -6118,19 +6118,19 @@ smtp_auth(char *arg)
 			die_nomem();
 		if (!env_put2("AUTHINFO", remoteinfo))
 			die_nomem();
-		out("235 ok, go ahead (#2.0.0)\r\n", 0);
+		out("235 ok, go ahead (#2.0.0)\r\n", NULL);
 		flush();
 		break;
 	case 1:/*- auth fail */
 	case 2:/*- misuse */
 		err_authfailure(user.len ? user.s : 0, j);
 		sleep(5);
-		out("535 authorization failure (#5.7.8)\r\n", 0);
+		out("535 authorization failure (#5.7.8)\r\n", NULL);
 		flush();
 		break;
 	case -1:
 		err_authfailure(user.len ? user.s : 0, j);
-		out("454 temporary authentication failure (#4.3.0)\r\n", 0);
+		out("454 temporary authentication failure (#4.3.0)\r\n", NULL);
 		flush();
 		break;
 	case -2: /*- returned by err_noauthallowed() when SECURE_AUTH is set and TLS isn't used */
@@ -6154,7 +6154,7 @@ smtp_etrn(char *arg)
 		return;
 	}
 	if (!seenhelo) {
-		out("503 Polite people say hello first (#5.5.4)\r\n", 0);
+		out("503 Polite people say hello first (#5.5.4)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -6165,7 +6165,7 @@ smtp_etrn(char *arg)
 	if (!isalnum((int) *arg))
 		arg++;
 	if (!valid_hostname(arg)) {
-		out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
+		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -6196,33 +6196,33 @@ smtp_etrn(char *arg)
 	switch ((status = etrn_queue(arg, remoteip)))
 	{
 	case 0:
-		log_etrn(arg, 0);
-		out("250 OK, queueing for node <", arg, "> started\r\n", 0);
+		log_etrn(arg, NULL);
+		out("250 OK, queueing for node <", arg, "> started\r\n", NULL);
 		flush();
 		return;
 	case -1:
 		log_etrn(arg, "ETRN Error");
-		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
+		out("451 Unable to queue messages (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	case -2:
 		log_etrn(arg, "ETRN Rejected");
-		out("553 <", arg, ">: etrn service unavailable (#5.7.1)\r\n", 0);
+		out("553 <", arg, ">: etrn service unavailable (#5.7.1)\r\n", NULL);
 		flush();
 		return;
 	case -3:
-		out("250 OK, No message waiting for node <", arg, ">\r\n", 0);
+		out("250 OK, No message waiting for node <", arg, ">\r\n", NULL);
 		flush();
 		return;
 	case -4:
-		out("252 OK, pending message for node <", arg, "> started\r\n", 0);
+		out("252 OK, pending message for node <", arg, "> started\r\n", NULL);
 		flush();
 		return;
 	default:
 		status_buf[fmt_ulong(status_buf, (unsigned long) status)] = 0;
 		if (status > 0) {
 			out("253 OK, <", status_buf, "> pending message for node <",
-					arg, "> started\r\n", 0);
+					arg, "> started\r\n", NULL);
 			flush();
 			return;
 		}
@@ -6235,7 +6235,7 @@ smtp_etrn(char *arg)
 			die_nomem();
 		err_buff[i] = 0;
 		log_etrn(arg, err_buff);
-		out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", 0);
+		out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -6259,7 +6259,7 @@ smtp_atrn(char *arg)
 		return;
 	}
 	if (!seenhelo) {
-		out("503 Polite people say hello first (#5.5.4)\r\n", 0);
+		out("503 Polite people say hello first (#5.5.4)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -6320,7 +6320,7 @@ smtp_atrn(char *arg)
 			} else
 				end_flag = 1;
 			if (!valid_hostname(arg)) {
-				out("501 invalid parameter syntax (#5.3.2)\r\n", 0);
+				out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
 				flush();
 				return;
 			}
@@ -6340,35 +6340,35 @@ smtp_atrn(char *arg)
 	if (Reject) {
 		log_atrn(remoteinfo, domain_ptr, "ATRN Rejected");
 		if (Accept)
-			out("450 atrn service unavailable (#5.7.1)\r\n", 0);
+			out("450 atrn service unavailable (#5.7.1)\r\n", NULL);
 		else
-			out("553 atrn service unavailable (#5.7.1)\r\n", 0);
+			out("553 atrn service unavailable (#5.7.1)\r\n", NULL);
 		flush();
 		return;
 	}
 	switch ((status = atrn_queue(arg, remoteip)))
 	{
 	case 0:
-		log_atrn(remoteinfo, arg, 0);
-		out("QUIT\r\n", 0);
+		log_atrn(remoteinfo, arg, NULL);
+		out("QUIT\r\n", NULL);
 		flush();
 		_exit(0);
 	case -1:
 		log_atrn(remoteinfo, arg, "ATRN Error");
-		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
+		out("451 Unable to queue messages (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	case -2:
 		log_atrn(remoteinfo, arg, "ATRN Rejected");
-		out("553 <", arg, ">: atrn service unavailable (#5.7.1)\r\n", 0);
+		out("553 <", arg, ">: atrn service unavailable (#5.7.1)\r\n", NULL);
 		flush();
 		return;
 	case -3:
-		out("453 No message waiting for node(s) <", arg, ">\r\n", 0);
+		out("453 No message waiting for node(s) <", arg, ">\r\n", NULL);
 		flush();
 		return;
 	case -4:
-		out("451 Unable to queue messages (#4.3.0)\r\n", 0);
+		out("451 Unable to queue messages (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	default:
@@ -6383,7 +6383,7 @@ smtp_atrn(char *arg)
 				die_nomem();
 			err_buff[i] = 0;
 			log_atrn(remoteinfo, arg, err_buff);
-			out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", 0);
+			out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", NULL);
 			flush();
 		}
 		return;
@@ -6402,7 +6402,7 @@ smtp_tls(char *arg)
 		err_unimpl("unimplimented");
 	else
 	if (*arg) {
-		out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n", 0);
+		out("501 Syntax error (no parameters allowed) (#5.5.4)\r\n", NULL);
 		flush();
 	} else {
 		do_tls();
@@ -6417,10 +6417,10 @@ tls_nogateway()
 	/*- there may be cases when relayclient is set */
 	if (relayclient)
 		return;
-	out("; no valid cert for gateway", 0);
+	out("; no valid cert for gateway", NULL);
 	if (ssl_verify_err)
-		out(": ", (char *) ssl_verify_err, 0);
-	out(" ", 0);
+		out(": ", (char *) ssl_verify_err, NULL);
+	out(" ", NULL);
 	flush();
 	return;
 }
@@ -6430,12 +6430,12 @@ tls_err(const char *err_code1, const char *err_code2, const char *s)
 {
 	const char     *err;
 
-	logerr(1, s, 0);
+	logerr(1, s, NULL);
 	if ((err = myssl_error_str()))
-		logerr(0, ": ", err, 0);
-	logerr(0, "\n", 0);
+		logerr(0, ": ", err, NULL);
+	logerr(0, "\n", NULL);
 	logflush();
-	out(err_code1, " ", s, " (#", err_code2, ")\r\n", 0);
+	out(err_code1, " ", s, " (#", err_code2, ")\r\n", NULL);
 	flush();
 	return;
 }
@@ -6548,7 +6548,7 @@ tls_verify()
 void
 log_ssl_version()
 {
-	logerr(1, "ssl-version=", SSL_get_version(ssl), "\n", 0);
+	logerr(1, "ssl-version=", SSL_get_version(ssl), "\n", NULL);
 	logflush();
 	return;
 }
@@ -6654,7 +6654,7 @@ do_tls()
 		ctx = NULL;
 	}
 	if (!smtps) {
-		out("220 ready for tls\r\n", 0);
+		out("220 ready for tls\r\n", NULL);
 		flush();
 	}
 	if (tls_accept(timeout, 0, 1, ssl)) {
@@ -6738,7 +6738,7 @@ load_plugin(char *library, char *plugin_symb, int j)
 		die_plugin("dlsym ", plugin_symb, " failed: ", error);
 	/*- execute the function */
 	if (!(plug[j] = (*func) ()))	 /*- this function returns a pointer to PLUGIN */
-		die_plugin("function ", plugin_symb, " failed", 0);
+		die_plugin("function ", plugin_symb, " failed", NULL);
 	return;
 }
 #endif
@@ -6793,9 +6793,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		ptr = "VIRTUAL_PKG_LIB";
 	loadLibrary(&phandle, ptr, &i, &errstr);
 	if (i) {
-		logerr(1, "Error loading virtual package shared lib: ", errstr, "\n", 0);
+		logerr(1, "Error loading virtual package shared lib: ", errstr, "\n", NULL);
 		logflush();
-		out("451 Sorry, there is a problem loading indimail virtual domain library (#4.3.0)\r\n", 0);
+		out("451 Sorry, there is a problem loading indimail virtual domain library (#4.3.0)\r\n", NULL);
 		flush();
 		_exit(1);
 	}
@@ -6813,51 +6813,51 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				str_copyb(strnum, ptr, 4);
 				strnum[4] = 0;
 				smtp_respond(strnum);
-				out(ptr + 3, 0);
+				out(ptr + 3, NULL);
 			}
 		} else {
 			smtp_respond("421 ");
-			out(" SMTP service unavailable (#4.3.2)", 0);
+			out(" SMTP service unavailable (#4.3.2)", NULL);
 		}
 		setup_state = 1;
 	} else {
 		if (dobadipcheck && badipcheck(remoteip)) {
 			smtp_respond("421 ");
-			out(" sorry, your IP (", remoteip, ") is temporarily denied (#4.7.1)", 0);
+			out(" sorry, your IP (", remoteip, ") is temporarily denied (#4.7.1)", NULL);
 			setup_state = 6;
 		} else
 		if (dobadhostcheck && badhostcheck()) {
 			smtp_respond("553 ");
-			out(" sorry, your host (", remotehost, ") has been denied (#5.7.1)", 0);
+			out(" sorry, your host (", remotehost, ") has been denied (#5.7.1)", NULL);
 			setup_state = 5;
 		} else
 		if (env_get("OPENRELAY")) {
 			smtp_respond("553 ");
 			out(" No mail accepted from an open relay (", remoteip,
-					"); check your server configs (#5.7.1)", 0);
+					"); check your server configs (#5.7.1)", NULL);
 			setup_state = 2;
 		} else
 		if ((ptr = env_get("TCPPARANOID"))) {
 			smtp_respond("553 ");
 			out(" sorry, your IP address (", remoteip,
-					") PTR (reverse DNS) record points to wrong hostname", 0);
+					") PTR (reverse DNS) record points to wrong hostname", NULL);
 			if (*ptr)
-				out(" ", ptr, 0);
-			out(" (#5.7.1)", 0);
+				out(" ", ptr, NULL);
+			out(" (#5.7.1)", NULL);
 			setup_state = 3;
 		} else
 		if ((ptr = env_get("REQPTR")) && str_equal(remotehost, "unknown")) {
 			smtp_respond("553 ");
 			if (*ptr)
-				out(" ", ptr, ": from ", remoteip, ": (#5.7.1)", 0);
+				out(" ", ptr, ": from ", remoteip, ": (#5.7.1)", NULL);
 			else
 				out(" Sorry, no PTR (reverse DNS) record for (", remoteip,
-						") (#5.7.1)", 0);
+						") (#5.7.1)", NULL);
 			setup_state = 4;
 		} else
 			smtp_respond("220 ");
 	}
-	out("\r\n", 0);
+	out("\r\n", NULL);
 	flush();
 	switch (smtp_port)
 	{
@@ -6884,7 +6884,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 			die_nomem();
 	} else {
 		if (*plugindir != '/')
-			die_plugin(plugindir, "plugindir must have an absolute path", 0, 0);
+			die_plugin(plugindir, "plugindir must have an absolute path", 0, NULL);
 		if (!stralloc_copys(&plugin, plugindir) ||
 				!stralloc_append(&plugin, "/"))
 			die_nomem();
@@ -6901,7 +6901,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		if (!plugin_count) {
 			if (access(plugin.s, R_OK)) {
 				if (errno != error_noent)
-					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
+					die_plugin("unable to access plugin: ", plugin.s, 0, NULL);
 				plugin.len -= 4;
 				strnum[fmt_ulong(strnum, i++)] = 0;
 				if (!stralloc_catb(&plugin, strnum, 1) ||
@@ -6910,7 +6910,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 					die_nomem();
 				if (access(plugin.s, R_OK)) {
 					if (errno != error_noent)
-						die_plugin("unable to access plugin: ", plugin.s, 0, 0);
+						die_plugin("unable to access plugin: ", plugin.s, 0, NULL);
 					goto command;
 				}
 			}
@@ -6923,7 +6923,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				die_nomem();
 			if (access(plugin.s, R_OK)) {
 				if (errno != error_noent)
-					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
+					die_plugin("unable to access plugin: ", plugin.s, 0, NULL);
 				break;
 			}
 		}
@@ -6939,7 +6939,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		if (!j) {
 			if (access(plugin.s, R_OK)) { /*- smtpd-plugin.so */
 				if (errno != error_noent)
-					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
+					die_plugin("unable to access plugin: ", plugin.s, 0, NULL);
 				plugin.len -= 4;
 				strnum[fmt_ulong(strnum, i)] = 0;
 				if (!stralloc_catb(&plugin, strnum, 1) ||
@@ -6948,7 +6948,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 					die_nomem();
 				if (access(plugin.s, R_OK)) {		/*- smtpd-plugin0.so */
 					if (errno != error_noent)
-						die_plugin("unable to access plugin: ", plugin.s, 0, 0);
+						die_plugin("unable to access plugin: ", plugin.s, 0, NULL);
 					goto command;
 				}
 				load_plugin(plugin.s, plugin_symb, j++);
@@ -6964,7 +6964,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 				die_nomem();
 			if (access(plugin.s, R_OK)) {
 				if (errno != error_noent)
-					die_plugin("unable to access plugin: ", plugin.s, 0, 0);
+					die_plugin("unable to access plugin: ", plugin.s, 0, NULL);
 				break;
 			}
 			load_plugin(plugin.s, plugin_symb, j++);
@@ -6983,7 +6983,7 @@ command:
 			ssl = 0;
 		}
 #endif
-		die_read("client dropped connection", 0);
+		die_read("client dropped connection", NULL);
 	} else
 	if (i < 0)
 		die_lcmd(i);
@@ -7012,6 +7012,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.294  2023-07-07 10:51:01+05:30  Cprogrammer
+ * use NULL instead of 0 for null pointer
+ *
  * Revision 1.293  2023-03-30 16:10:02+05:30  Cprogrammer
  * replaced SSL_shutdown(), SSL_free() with ssl_free() to fix SIGSEGV in qmail/tls.c
  *
@@ -7345,7 +7348,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.293 2023-03-30 16:10:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.294 2023-07-07 10:51:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

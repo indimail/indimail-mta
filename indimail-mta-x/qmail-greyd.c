@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.36  2023-07-07 10:40:56+05:30  Cprogrammer
+ * use NULL instead of 0 for null pointer
+ *
  * Revision 1.35  2023-01-15 23:14:40+05:30  Cprogrammer
  * logerr(), out() changed to have varargs
  *
@@ -316,7 +319,7 @@ cidr2IPrange(char *ipaddr, int mask, struct netspec *spec)
 	ip_addr         ip;
 
 	if (!ip4_scan(ipaddr, &ip)) {
-		logerr("failed to scan ip", "[", ipaddr, "]\n", 0);
+		logerr("failed to scan ip", "[", ipaddr, "]\n", NULL);
 		logflush();
 		return (-1);
 	}
@@ -333,7 +336,7 @@ void
 whitelist_init(char *arg)
 {
 	if (verbose > 2) {
-		logerr("initializing whitelist\n", 0);
+		logerr("initializing whitelist\n", NULL);
 		logflush();
 	}
 	if ((whitelistok = control_readfile(&whitelist, arg, 0)) == -1)
@@ -341,7 +344,7 @@ whitelist_init(char *arg)
 	if (whitelistok && !constmap_init(&mapwhite, whitelist.s, whitelist.len, 0))
 		die_nomem();
 	if (verbose > 2) {
-		logerr("initialized  whitelist\n", 0);
+		logerr("initialized  whitelist\n", NULL);
 		logflush();
 	}
 	return;
@@ -386,13 +389,13 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 				if (errStr)
 					*errStr = error_str(errno);
 				ptr[x] = '/';
-				logerr("invalid IP in CIDR format: ", ptr, "\n", 0);
+				logerr("invalid IP in CIDR format: ", ptr, "\n", NULL);
 				logflush();
 				return (-1);
 			}
 			ptr[x] = '/';
 			if (!ip4_scan(ipaddr->s, &ip)) { /*- record contains invalid IP */
-				logerr("failed to scan ip", "[", ipaddr->s, "]\n", 0);
+				logerr("failed to scan ip", "[", ipaddr->s, "]\n", NULL);
 				logflush();
 				return (0);
 			}
@@ -427,7 +430,7 @@ is_white(char *ip)
 		return (0);
 	default:
 		substdio_flush(subfdout);
-		logerr("error in ip_match: ", errStr, "\n", 0);
+		logerr("error in ip_match: ", errStr, "\n", NULL);
 		logflush();
 		_exit (1);
 	}
@@ -447,7 +450,7 @@ copy_grey(struct greylst *ptr, char *ipaddr, char *rpath, char *rcpt, int rcptle
 	if (!ip4_scan(ipaddr, &ptr->ip.ip))
 #endif
 	{
-		logerr("failed to scan ip", "[", ipaddr, "]\n", 0);
+		logerr("failed to scan ip", "[", ipaddr, "]\n", NULL);
 		logflush();
 		return (-1);
 	}
@@ -484,42 +487,42 @@ print_record(char *ip, char *rpath, char *rcpt, int rcptlen, time_t timestamp,
 	char           *ptr;
 
 	strnum[fmt_ulong(strnum, (unsigned long) timestamp)] = 0;
-	out(strnum, " IP: ", ip, " FROM: ", rpath, " RCPT: [", 0);
+	out(strnum, " IP: ", ip, " FROM: ", rpath, " RCPT: [", NULL);
 	for (ptr = rcpt;ptr < rcpt + rcptlen;) {
-		out(ptr + 1, 0);
+		out(ptr + 1, NULL);
 		ptr += (str_len(ptr) + 1);
 		if (ptr < rcpt + rcptlen)
-			out(" ", 0);
+			out(" ", NULL);
 		else
-			out("]", 0);
+			out("]", NULL);
 	}
-	out(" status=", 0);
+	out(" status=", NULL);
 	switch(status)
 	{
 	case RECORD_NEW:
-		out("RECORD_NEW", 0);
+		out("RECORD_NEW", NULL);
 		break;
 	case RECORD_EARLY:
-		out("RECORD_EARLY", 0);
+		out("RECORD_EARLY", NULL);
 		break;
 	case RECORD_STALE:
-		out("RECORD_STALE", 0);
+		out("RECORD_STALE", NULL);
 		break;
 	case RECORD_WHITE:
-		out("RECORD_WHITE", 0);
+		out("RECORD_WHITE", NULL);
 		break;
 	case RECORD_OK:
-		out("RECORD_OK", 0);
+		out("RECORD_OK", NULL);
 		break;
 	case RECORD_GREY:
-		out("RECORD_GREY", 0);
+		out("RECORD_GREY", NULL);
 		break;
 	case RECORD_BOUNCE:
-		out("RECORD_BOUNCE", 0);
+		out("RECORD_BOUNCE", NULL);
 		break;
 	}
 	strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
-	out(" rcptlen=", strnum, operation ? " expired\n" : "\n", 0);
+	out(" rcptlen=", strnum, operation ? " expired\n" : "\n", NULL);
 	flush();
 	return;
 }
@@ -563,12 +566,12 @@ create_hash(struct greylst *curr)
 			hcount = 0;
 			curr = 0;
 			strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
-			logerr("WARNING!! recreating hash table, size=", strnum, "\n", 0);
+			logerr("WARNING!! recreating hash table, size=", strnum, "\n", NULL);
 			logflush();
 		} else { /*- first time/expiry */
 			if (verbose > 2) {
 				strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
-				out("creating hash table, size=", strnum, "\n", 0);
+				out("creating hash table, size=", strnum, "\n", NULL);
 			}
 		}
 		if (!hcreate((125 * hash_size * h_allocated)/100)) /*- be 25% generous */
@@ -582,7 +585,7 @@ create_hash(struct greylst *curr)
 		if (!(ep = hsearch(e, FIND))) { /*- add entries when hash table is new or after destruction */
 			e.data = ptr;
 			if (!(ep = hsearch(e, ENTER))) {
-				logerr("unable to add to hash table\n", 0);
+				logerr("unable to add to hash table\n", NULL);
 				logflush();
 				return (-1);
 			} else
@@ -608,7 +611,7 @@ expire_records(time_t cur_time)
 	struct greylst *ptr;
 	time_t          start;
 
-	logerr("expiring records\n", 0);
+	logerr("expiring records\n", NULL);
 	/*- find all records that are expired where timestamp < start */
 	start = cur_time - timeout;
 	for (ptr = head; ptr; ptr = ptr->next) {
@@ -628,7 +631,7 @@ expire_records(time_t cur_time)
 		free(ptr->rcpt);
 		free(ptr);
 	}
-	logerr("expired  records\n", 0);
+	logerr("expired  records\n", NULL);
 	logflush();
 	/*- destroy and recreate the hash */
 	if (create_hash(0))
@@ -716,7 +719,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 	if (!ip4_scan(remoteip, &r_ip.ip))
 #endif
 	{
-		logerr("failed to scan ip [", remoteip, "]\n", 0);
+		logerr("failed to scan ip [", remoteip, "]\n", NULL);
 		logflush();
 		return (0);
 	}
@@ -827,7 +830,7 @@ send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
 	{
 	case RECORD_NEW:
 		if (!add_record(ip, rpath, rcpt, rcptlen, grey)) {
-			logerr("unable to add record\n", 0);
+			logerr("unable to add record\n", NULL);
 			logflush();
 			resp = "\0\4";
 			n = -4;
@@ -904,7 +907,7 @@ save_context()
 	if (!grey_count)
 		return;
 	if (verbose > 2) {
-		logerr("saving context file\n", 0);
+		logerr("saving context file\n", NULL);
 		logflush();
 	}
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
@@ -933,7 +936,7 @@ save_context()
 	} /*- for (ptr = head;ptr;ptr = ptr->next) */
 	close(context_fd);
 	if (verbose > 2) {
-		logerr("saved  context file\n", 0);
+		logerr("saved  context file\n", NULL);
 		logflush();
 	}
 	return;
@@ -958,7 +961,7 @@ load_context()
 	struct greylst *ptr;
 
 	if (verbose > 2) {
-		out("loading context\n", 0);
+		out("loading context\n", NULL);
 		flush();
 	}
 	if ((fd = open(context_file.s, O_RDONLY)) == -1) {
@@ -1062,11 +1065,11 @@ ready()
 	char            strnum[FMT_ULONG];
 
 	strnum[fmt_ulong(strnum, (unsigned long) grey_count)] = 0;
-	out("Ready for connections, grey_count=", strnum, ", hcount=", 0);
+	out("Ready for connections, grey_count=", strnum, ", hcount=", NULL);
 	strnum[fmt_ulong(strnum, (unsigned long) hcount)] = 0;
-	out(strnum, ", hash_size=", 0);
+	out(strnum, ", hash_size=", NULL);
 	strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
-	out(strnum, "\n", 0);
+	out(strnum, "\n", NULL);
 	flush();
 }
 
@@ -1085,12 +1088,12 @@ sigusr2()
 	if (verbose > 2) {
 		for (i = 1, ptr = head; ptr; ptr = ptr->next, i++) {
 			strnum[fmt_ulong(strnum, (unsigned long) i)] = 0;
-			out(strnum, " ", 0);
+			out(strnum, " ", NULL);
 			print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
 				ptr->status, 0);
 			for (j = 1, ip_ptr = ptr->ip_next;ip_ptr;ip_ptr = ip_ptr->ip_next, j++) {
 				strnum[fmt_ulong(strnum, (unsigned long) j)] = 0;
-				out(" ", strnum, " ", 0);
+				out(" ", strnum, " ", NULL);
 				print_record(ip_ptr->ip_str, ip_ptr->rpath, ip_ptr->rcpt, ip_ptr->rcptlen, ip_ptr->timestamp,
 					ptr->status, 0);
 			}
@@ -1105,7 +1108,7 @@ no_return void
 sigterm()
 {
 	sig_block(SIGTERM);
-	logerr("ARGH!! Committing suicide on SIGTERM\n", 0);
+	logerr("ARGH!! Committing suicide on SIGTERM\n", NULL);
 	logflush();
 	save_context();
 	flush();
@@ -1408,27 +1411,27 @@ main(int argc, char **argv)
 		}
 		save = 1;
 		if (verbose) {
-			out("qmail-greyd IP: ", 0);
+			out("qmail-greyd IP: ", NULL);
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 			if (noipv6)
-				out(inet_ntoa(from.sa4.sin_addr), 0);
+				out(inet_ntoa(from.sa4.sin_addr), NULL);
 			else {
 				static char     addrBuf[INET6_ADDRSTRLEN];
 				if (from.sa.sa_family == AF_INET) {
 					out((char *) inet_ntop(AF_INET,
 						(void *) &from.sa4.sin_addr, addrBuf,
-						INET_ADDRSTRLEN), 0);
+						INET_ADDRSTRLEN), NULL);
 				} else
 				if (from.sa.sa_family == AF_INET6) {
 					out((char *) inet_ntop(AF_INET6,
 						(void *) &from.sa6.sin6_addr, addrBuf,
-						INET6_ADDRSTRLEN), 0);
+						INET6_ADDRSTRLEN), NULL);
 				} else
 				if (from.sa.sa_family == AF_UNSPEC)
-					out("::1", 0);
+					out("::1", NULL);
 			}
 #else
-			out(inet_ntoa(from.sa4.sin_addr), 0);
+			out(inet_ntoa(from.sa4.sin_addr), NULL);
 #endif
 		}
 		/*-
@@ -1439,64 +1442,64 @@ main(int argc, char **argv)
 		switch (rdata[0])
 		{
 		case 'I': /*- process exactly like greydaemon */
-			out(" [", 0);
+			out(" [", NULL);
 			for (state = 0, ptr = rdata, rcpt_head = (char *) 0, rcptlen = 0;ptr < rdata + n - 1;) {
 				switch (*ptr)
 				{
 					case 'I':
-						out("Remote IP: ", 0);
+						out("Remote IP: ", NULL);
 						client_ip = ptr + 1;
 						state++;
 						break;
 					case 'F':
-						out("FROM: ", 0);
+						out("FROM: ", NULL);
 						rpath = ptr + 1;
 						state++;
 						break;
 					case 'T':
-						out("RCPT: ", 0);
+						out("RCPT: ", NULL);
 						if (!rcpt_head)
 							rcpt_head = ptr;
 						break;
 				} /*- switch (*ptr) */
-				out(ptr + 1, 0);
+				out(ptr + 1, NULL);
 				len = str_len(ptr) + 1;
 				if (*ptr == 'T')
 					rcptlen += len;
 				ptr += len; /*- skip past \0 */
 				if (ptr < (rdata + n - 2))
-					out(" ", 0);
+					out(" ", NULL);
 				if (ptr == rdata + n)
 					state = 0;
 			} /*- for (ptr = rdata;ptr < rdata + n - 1;) */
 			strnum[fmt_ulong(strnum, (unsigned long) n)] = 0;
-			out("] bufsiz=", strnum, ", rcptlen=", 0);
+			out("] bufsiz=", strnum, ", rcptlen=", NULL);
 			strnum[fmt_ulong(strnum, (unsigned long) rcptlen)] = 0;
-			out(strnum, 0);
+			out(strnum, NULL);
 			if (state != 2 || !rcptlen) {
-				out(", Response: RECORD INVALID\n", 0);
+				out(", Response: RECORD INVALID\n", NULL);
 				flush();
 				break;
 			} else
 				n = send_response(s, &from, fromlen, client_ip, rpath, rcpt_head, rcptlen,
 					min_resend, resend_window, free_interval, &grey, &rec_added);
 			if (n == -2)
-				logerr("qmail-greyd: invalid send_response - report bug to author\n", 0);
+				logerr("qmail-greyd: invalid send_response - report bug to author\n", NULL);
 			else
 			if (n == -3)
-				logerr("qmail-greyd: invalid IP address format\n", 0);
+				logerr("qmail-greyd: invalid IP address format\n", NULL);
 			else
 			if (n == -4)
-				logerr("qmail-greyd: copy failed\n", 0);
+				logerr("qmail-greyd: copy failed\n", NULL);
 			else
 			if (n < 0)
 				strerr_warn2(WARN, "sendto failed: ", &strerr_sys);
 			logflush();
 			if (grey) {
 				strnum[fmt_ulong(strnum, (unsigned long) grey->attempts)] = 0;
-				out(", attempts=", strnum, ", Reponse: ", print_status(grey->status), "\n", 0);
+				out(", attempts=", strnum, ", Reponse: ", print_status(grey->status), "\n", NULL);
 			} else
-				out(", Reponse: ", n == -3 ? print_status(RECORD_IPV6) : print_status(RECORD_WHITE), "\n", 0);
+				out(", Reponse: ", n == -3 ? print_status(RECORD_IPV6) : print_status(RECORD_WHITE), "\n", NULL);
 			flush();
 			if (rec_added && grey && create_hash(grey)) /*- add the record to hash list if new. group on ip_str if not new */
 				die_nomem();
@@ -1524,7 +1527,7 @@ main(int argc, char **argv)
 		case 'Q': /*- query a whitelist record */
 			break;
 		default:
-			out(", Response: RECORD INVALID\n", 0);
+			out(", Response: RECORD INVALID\n", NULL);
 			break;
 		} /*- switch (rdata[0]) */
 		flush();
@@ -1535,7 +1538,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.35 2023-01-15 23:14:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.36 2023-07-07 10:40:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
