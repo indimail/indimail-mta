@@ -1020,15 +1020,15 @@ main(int argc, char *argv[])
 	get_arguments(argc, argv);
 	/*- Fail if SENDER or DTLINE are not set */
 	if (!(sender = env_get("SENDER")))
-		usage("SENDER is not set, must be run from qmail.");
+		usage("SENDER is not set, must be run from .qmail");
 	if (!(dtrecip = dtline = env_get("DTLINE")))
-		usage("DTLINE is not set; must be run from qmail.");
+		usage("DTLINE is not set; must be run from .qmail");
 	dtline_len = str_len(dtline);
 
 	if (!(recipient = env_get("RECIPIENT")))
-		usage("RECIPIENT is not set; must be run from qmail.");
+		usage("RECIPIENT is not set; must be run from .qmail");
 	if (!(host = env_get("HOST")))
-		usage("HOST is not set; must be run from qmail.");
+		usage("HOST is not set; must be run from .qmail");
 	recipient += (match = str_len(host)) + 1; /*- example.com-mbhangui@example.com */
 	dtrecip += match + 15; /*- Delivered-To: example.com-mbhangui@example.com */
 	if (!str_diffn(recipient, dtrecip, str_len(recipient)))

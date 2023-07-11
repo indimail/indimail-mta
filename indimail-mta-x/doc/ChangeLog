@@ -42,6 +42,11 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
     instead of 0 for null pointer
 21. mail_acl.c: fixed incorrect call to out()
 22. dossl.c: fixed potential SIGSEGV
+- 10/07/2023
+23. svctool: set permission of logrotate.mysql to mysql:mysql
+- 11/07/2023
+24. condredirect.c, condtomaildir.c: added -r reverse option to forward when
+    program fails instead of when program succeeds.
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

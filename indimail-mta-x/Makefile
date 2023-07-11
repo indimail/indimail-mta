@@ -390,7 +390,7 @@ auto_control.o auto_prefix.o set_environment.o
 	auto_control.o auto_prefix.o set_environment.o $(QMAILLIB)
 
 condredirect.o: compile condredirect.c qmail.h \
-set_environment.h
+set_environment.h srs.h
 	./compile `grep -h -v "^#" conf-spf` condredirect.c
 
 condredirect.1: condredirect.9 conf-qmail conf-sysconfdir
@@ -2607,12 +2607,12 @@ filterto.1: filterto.9 conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> filterto.1
 
-condtomaildir: load condtomaildir.o syncdir.o
-	./load condtomaildir syncdir.o $(QMAILLIB)
+condtomaildir: load condtomaildir.o syncdir.o maildir_deliver.o
+	./load condtomaildir syncdir.o maildir_deliver.o $(QMAILLIB)
 
 condtomaildir.o: \
-compile condtomaildir.c syncdir.h conf-sync
-	./compile `grep -h -v "^#" conf-sync` condtomaildir.c
+compile condtomaildir.c maildir_deliver.h
+	./compile condtomaildir.c
 
 iftoccfrom: load iftoccfrom.o
 	./load iftoccfrom $(QMAILLIB)

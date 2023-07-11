@@ -2,53 +2,50 @@
 .TH condredirect 1
 .SH NAME
 condredirect \- perhaps redirect mail to another address
+
 .SH SYNOPSIS
 in
 .BR .qmail :
 .B |condredirect
+[
+.B \-r
+]
 .I newaddress
 .I program
 [
 .I arg ...
 ]
+
 .SH DESCRIPTION
-.B condredirect
-feeds each new mail message to
-.I program
-with the given arguments.
-If
-.I program
-exits 0,
-.B condredirect
-forwards the mail message to
-.IR newaddress ,
-and then exits 99,
-so further commands in
-.B .qmail
-are ignored.
+\fBcondredirect\fR feeds each new mail message to \fIprogram\fR with the
+given arguments.
 
-If
-.I program
-exits 111,
-.B condredirect
-exits 111,
-so delivery will be retried later.
+Without the \fB\-r\fR option, if \fIprogram\fR exits 0, \fBcondredirect\fR
+forwards the mail message to \fInewaddress\fR, and then exits 99, so
+further commands in \fB.qmail\fR are ignored.
 
-If
-.I program
-exits anything else
-(or does not exist),
-.B condredirect
-exits 0,
-so the rest of
-.B .qmail
+With the \fB\-r\fR option \fBcondredirect\fR forwards the mail message to
+\fInewaddress\fR when \fIprogram\fR exits non-zero (other than 100 or 111)
+and then exits 99, so that further commands in \fB.qmail\fR are ignored.
+
+If \fIprogram\fR exits 111, \fBcondredirect\fR exits 111, so delivery will
+be retried later.
+
+If \fIprogram\fR exits 100, \fBcondredirect\fR exits 100, so delivery will
+be discarded and mail bounced back to the sender.
+
+Without the \fB\-r\fR option, if \fIprogram\fR exits anything else (or
+doesn't exist), \fBcondredirect\fR exits 0, so the rest of \fB.qmail\fR
 will be processed as usual.
 
-Note that
-it is not safe for
-.I program
-to fork a child that
-reads the message in the background.
+With the \fB\-r\fR option, if \fIprogram\fR exits anything else (or doesn't
+exist), \fBcondredirect\fB forwards the mail message to \fInewaddress\fR
+and then exits 99, so further commands in \fB.qmail\fR are ignored. If
+\fIprogram\fR exits 0, \fBcondredirect\fR also exits 0, so that the rest of
+\fB.qmail\fR will be processed as usual.
+
+Note that it is not safe for \fBprogram\fR to fork a child that reads the
+message in the background.
 
 If running as non-root, \fBcondredirect\fR uses environment set according
 to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
@@ -56,17 +53,13 @@ if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If \fBQUEUE_BASE\fR environment
 variable is not set, it additionally uses environment set according to
 files in @controldir@/defaultqueue directory (for any uid).
 
-.B WARNING:
-If you create a
-.B .qmail
-file to enable
-.BR condredirect ,
-make sure to also add a line specifying delivery to your normal mailbox.
+\fBWARNING:\fR If you create a \fB.qmail\fR file to enable
+\fBcondredirect\fR, make sure to also add a line specifying delivery to
+your normal mailbox.
 
-.B condredirect
-rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configured. See
-.B indimail-srs(5)
-for information on how to do this.
+\fBcondredirect\fR rewrites the sender using Sender Rewriting Scheme if
+\fISRS\fB has been configured. See \fBindimail-srs\fR(5) for information on
+how to do this.
 
 .SH "SEE ALSO"
 ifaddr(1),

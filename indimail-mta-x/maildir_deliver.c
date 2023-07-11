@@ -234,7 +234,7 @@ maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
 	 * if it was error_exist, almost certainly successful; i hate NFS
 	 */
 	tryunlinktmp();
-	_exit (0);
+	return (0);
 fail:
 	if (errno == error_dquot) {
 		tryunlinktmp();
