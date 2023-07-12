@@ -1,5 +1,5 @@
 /*
- * $Id: dnstlsarr.c,v 1.17 2023-01-06 17:31:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dnstlsarr.c,v 1.18 2023-07-13 02:39:46+05:30 Cprogrammer Exp mbhangui $
  */
 #include "substdio.h"
 #include "subfd.h"
@@ -25,18 +25,13 @@ int             timeoutdata = 300;
 int             timeoutconn = 60;
 int             verbose;
 stralloc        helohost = { 0 };
-
-void
-pusage()
-{
-	substdio_puts(subfderr,      "usage: dnstlsarr [-p port] [-c timeoutc] [-t timeoutd] [host\n");
-	substdio_putsflush(subfderr, "         -p port       - port to connect to\n");
-	substdio_putsflush(subfderr, "         -c timoutconn - Timeout for connection to remote\n");
-	substdio_putsflush(subfderr, "         -t timoutdata - Timeout for data from remote\n");
-	substdio_putsflush(subfderr, "         -v level      - verbosity level for STARTTLS\n");
-	substdio_putsflush(subfderr, "         -s            - Initiate STARTTLS to initiate DANE verification\n");
-	_exit (111);
-}
+static char    *usage_str =
+	"usage: dnstlsarr [-p port] [-c timeoutc] [-t timeoutd] [host\n"
+	"         -p port       - port to connect to\n"
+	"         -c timoutconn - Timeout for connection to remote\n"
+	"         -t timoutdata - Timeout for data from remote\n"
+	"         -v level      - verbosity level for STARTTLS\n"
+	"         -s            - Initiate STARTTLS to initiate DANE verification\n";
 
 int
 main(int argc, char **argv)
@@ -68,13 +63,16 @@ main(int argc, char **argv)
 			verbose = *optarg - '0';
 			break;
 		default:
-			pusage();
+			substdio_putsflush(subfderr, usage_str);
+			_exit(100);
 		}
 	}
 	if (optind < argc)
 		host = argv[optind++];
-	else
-		pusage();
+	else {
+		substdio_putsflush(subfderr, usage_str);
+		_exit(100);
+	}
 	if (verify) { /*- DANE Verification */
 		if (control_init() == -1)
 			die_control("unable to read control file ", "me");
@@ -91,6 +89,7 @@ main(int argc, char **argv)
 				out("MX query for ");
 				out(host);
 				out("\n");
+				flush();
 			}
 			dnsdoe(dns_mxip(&ia, &sahost, r));
 			for (j = 0; j < ia.len; ++j) {
@@ -122,16 +121,14 @@ main(int argc, char **argv)
 			out("MX query for ");
 			out(host);
 			out("\n");
+			flush();
 		}
 		dnsdoe(dns_mxip(&ia, &sahost, r));
 		for (k = 0; k < ia.len; ++k) {
-			if (!stralloc_copyb(&sa, "_", 1))
-				die_nomem();
-			if (!stralloc_cats(&sa, port))
-				die_nomem();
-			if (!stralloc_catb(&sa, "._tcp.", 6))
-				die_nomem();
-			if (!stralloc_cats(&sa, ia.ix[k].fqdn))
+			if (!stralloc_copyb(&sa, "_", 1) ||
+					!stralloc_cats(&sa, port) ||
+					!stralloc_catb(&sa, "._tcp.", 6) ||
+					!stralloc_cats(&sa, ia.ix[k].fqdn))
 				die_nomem();
 			out("MX ");
 			out(ia.ix[k].fqdn);
@@ -148,9 +145,10 @@ main(int argc, char **argv)
 			break;
 #endif
 			default:
-				substdio_puts(subfdout, "Unknown address family = ");
+				out(" Unknown address family = ");
 				substdio_put(subfdout, temp, fmt_ulong(temp, ia.ix[k].af));
 			}
+			out(" ");
 			substdio_put(subfdout, temp, fmt_ulong(temp, (unsigned long) ia.ix[k].pref));
 			out("\n");
 			if (verbose) {
@@ -178,13 +176,10 @@ main(int argc, char **argv)
 			}
 		}
 	} else {
-		if (!stralloc_copyb(&sa, "_", 1))
-			die_nomem();
-		if (!stralloc_cats(&sa, port))
-			die_nomem();
-		if (!stralloc_catb(&sa, "._tcp.", 6))
-			die_nomem();
-		if (!stralloc_cats(&sa, host))
+		if (!stralloc_copyb(&sa, "_", 1) ||
+				!stralloc_cats(&sa, port) ||
+				!stralloc_catb(&sa, "._tcp.", 6) ||
+				!stralloc_cats(&sa, host))
 			die_nomem();
 		if (verbose) {
 			out("TLSA RR query for ");
@@ -233,7 +228,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.17 2023-01-06 17:31:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstlsarr.c,v 1.18 2023-07-13 02:39:46+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -243,6 +238,9 @@ getversion_dnstlsarr_c()
 
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.18  2023-07-13 02:39:46+05:30  Cprogrammer
+ * refactored code to reduce loc
+ *
  * Revision 1.17  2023-01-06 17:31:49+05:30  Cprogrammer
  * changed scope of variables te,, sahost to static
  * added timeoutdata, timeconn variables for dossl.c

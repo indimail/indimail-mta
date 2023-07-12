@@ -1,5 +1,8 @@
 /*
  * $Log: whois.c,v $
+ * Revision 1.6  2023-07-13 02:49:30+05:30  Cprogrammer
+ * replaced logerr(), logerrf() with subprintf()
+ *
  * Revision 1.5  2022-05-10 20:56:35+05:30  Cprogrammer
  * replaced strstr with str_str from libqmail
  *
@@ -31,6 +34,7 @@
 #include <str.h>
 #include <stralloc.h>
 #include <noreturn.h>
+#include <qprintf.h>
 #include <tcpopen.h>
 
 #define FATAL "whois: fatal: "
@@ -67,24 +71,6 @@ die_nomem()
 	substdio_puts(subfderr, "out of memory\n");
 	substdio_flush(subfderr);
 	_exit(111);
-}
-
-void
-logerr(char *s)
-{
-	if (substdio_puts(subfderr, s) == -1)
-		_exit(111);
-	return;
-}
-
-void
-logerrf(char *s)
-{
-	if (substdio_puts(subfderr, s) == -1)
-		_exit(111);
-	if (substdio_flush(subfderr) == -1)
-		_exit(111);
-	return;
 }
 
 int
@@ -149,9 +135,8 @@ get_whois_data(char *domain)
 
 	i = str_chr(ptr, '.');
 	if (!ptr[i]) {
-		logerr("invalid domain ");
-		logerr(ptr);
-		logerrf("\n");
+		subprintf(subfderr, "invalid domain %s\n", ptr);
+		substdio_flush(subfderr);
 		_exit (100);
 	} else
 		ext = ptr + i + 1;
@@ -160,7 +145,8 @@ get_whois_data(char *domain)
 	 * org
 	 */
 	if (whois_query("whois.iana.org", ext, &response_1)) {
-		logerrf("whois query failed\n");
+		subprintf(subfderr, "whois query failed\n");
+		substdio_flush(subfderr);
 		_exit (100);
 	}
 
@@ -171,9 +157,8 @@ get_whois_data(char *domain)
 	 * server of the specific domain :)
 	 */
 	if (!wch) {
-		logerr("TLD whois server for ");
-		logerr(ext);
-		logerrf(" not found\n");
+		subprintf(subfderr, "TLD whois server for %s not found\n", ext);
+		substdio_flush(subfderr);
 		_exit(100);
 	}
 	out("TLD whois server is: ");
@@ -182,7 +167,8 @@ get_whois_data(char *domain)
 	out(ptr);
 	out("\n");
 	if (whois_query(wch, ptr, &response_2)) {
-		logerrf("whois query failed\n");
+		subprintf(subfderr, "whois query failed\n");
+		substdio_flush(subfderr);
 		_exit (100);
 	}
 	/* Again search for a whois server in this response. :) */
@@ -202,7 +188,8 @@ get_whois_data(char *domain)
 		out(ptr);
 		out("\n");
 		if (whois_query(wch, ptr, &response_1)) {
-			logerrf("whois query failed\n");
+			subprintf(subfderr, "whois query failed\n");
+			substdio_flush(subfderr);
 			_exit (100);
 		}
 		out(response_1.s);
@@ -228,11 +215,8 @@ whois_query(char *server, char *query, stralloc *response)
 	if ((sock = tcpopen(server, "nicname", 0)) == -1)
 		strerr_die4sys(111, FATAL, "tcpopen: ", server, ": ");
 	if (verbose) {
-		logerr("querying ");
-		logerr(server);
-		logerr(" for ");
-		logerr(query);
-		logerrf("\n");
+		subprintf(subfderr, "querying %s for %s\n", server, query);
+		substdio_flush(subfderr);
 	}
 	if (!stralloc_copys(&message, query))
 		die_nomem();
@@ -255,7 +239,7 @@ whois_query(char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	static char    *x = "$Id: whois.c,v 1.5 2022-05-10 20:56:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: whois.c,v 1.6 2023-07-13 02:49:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

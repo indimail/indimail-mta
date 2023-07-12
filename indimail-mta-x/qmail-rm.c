@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.25  2023-07-13 02:45:04+05:30  Cprogrammer
+ * replaced out(), logerr() with subprintf
+ *
  * Revision 1.24  2022-03-27 20:21:52+05:30  Cprogrammer
  * define non returning functions as no_return
  *
@@ -193,13 +196,14 @@
 #include <fmt.h>
 #include <env.h>
 #include <sgetopt.h>
+#include <qprintf.h>
 #include <noreturn.h>
 #include "control.h"
 #include "auto_split.h"
 #include "getEnvConfig.h"
 #include "auto_qmail.h"
 
-const char      cvsrid[] = "$Id: qmail-rm.c,v 1.24 2022-03-27 20:21:52+05:30 Cprogrammer Exp mbhangui $";
+const char      cvsrid[] = "$Id: qmail-rm.c,v 1.25 2023-07-13 02:45:04+05:30 Cprogrammer Exp mbhangui $";
 
 /*- many linux fcntl.h's seem to be broken */
 #ifndef O_NOFOLLOW
@@ -261,42 +265,23 @@ flush()
 }
 
 void
-out(char *s)
+errflush()
 {
-	substdio_puts(&ssout, s);
-}
-
-void
-logerr(char *s)
-{
-	if (substdio_puts(&sserr, s) == -1)
-		_exit(1);
-}
-
-void
-logerrf(char *s)
-{
-	if (substdio_puts(&sserr, s) == -1)
-		_exit(1);
-	if (substdio_flush(&sserr) == -1)
-		_exit(1);
+	substdio_flush(&sserr);
 }
 
 no_return void
 die_nomem()
 {
-	substdio_puts(&sserr, "fatal: out of memory\n");
+	substdio_putsflush(&sserr, "fatal: out of memory\n");
 	_exit(111);
 }
 
 no_return void
 die_chdir(char *dir)
 {
-	logerr("chdir: ");
-	logerr(dir);
-	logerr(": ");
-	logerr(error_str(errno));
-	logerrf("\n");
+	subprintf(&sserr, "chdir: %s: %s\n", dir, error_str(errno));
+	errflush();
 	_exit(111);
 }
 
@@ -307,47 +292,37 @@ check_send(char *queuedir)
 	int             fd;
 
 	if (!stralloc_copys(&lockfile, queuedir)) {
-		logerrf("alert: out of memory\n");
+		substdio_putsflush(&sserr, "alert: out of memory\n");
 		_exit(111);
 	}
 	if (!stralloc_cats(&lockfile, "/lock/sendmutex")) {
-		logerrf("alert: out of memory\n");
+		substdio_putsflush(&sserr, "alert: out of memory\n");
 		_exit(111);
 	}
 	if (!stralloc_0(&lockfile)) {
-		logerrf("alert: out of memory\n");
+		substdio_putsflush(&sserr, "alert: out of memory\n");
 		_exit(111);
 	}
 	if ((fd = open_write(lockfile.s)) == -1) {
-		logerr("alert: cannot start: unable to open ");
-		logerr(lockfile.s);
-		logerr(": ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "alert: cannot start: unable to open %s: %s\n", lockfile.s, error_str(errno));
+		errflush();
 		_exit(111);
 	} else
 	if (lock_exnb(fd) == -1) {
 		close(fd); /*- send already running */
-		logerr("alert: cannot start: qmail-send with queue ");
-		logerr(queuedir);
-		logerrf(" is already running\n");
+		subprintf(&sserr, "alert: cannot start: qmail-send with queue %s is already running\n", queuedir);
+		errflush();
 		_exit(111);
 	}
 	if (access(yank_dir, F_OK)) {
 		if (errno != error_noent) {
-			logerr("alert: cannot access: ");
-			logerr(yank_dir);
-			logerr(": ");
-			logerr(error_str(errno));
-			logerrf("\n");
+			subprintf(&sserr, "alert: cannot access: %s: %s\n", yank_dir, error_str(errno));
+			errflush();
 			_exit(111);
 		}
 		if (mkdir(yank_dir, 0700)) {
-			logerr("alert: cannot do mkdir: ");
-			logerr(yank_dir);
-			logerr(": ");
-			logerr(error_str(errno));
-			logerrf("\n");
+			subprintf(&sserr, "alert: cannot do mkdir: %s: %s\n", yank_dir, error_str(errno));
+			errflush();
 			_exit(111);
 		}
 	}
@@ -387,18 +362,13 @@ main(int argc, char **argv)
 		case 'n':
 			read_bytes = strtoul(optarg, &ptr, 10);
 			if ((read_bytes == ULONG_MAX && errno == ERANGE) || (!read_bytes && ptr == optarg)) {
-				logerr(optarg);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "%s: %s\n", optarg, error_str(errno));
+				errflush();
 				_exit(111);
 			}
 			if (*ptr) {
-				logerr("invalid char [");
-				logerr(ptr);
-				logerr("] in ");
-				logerr(optarg);
-				logerrf("\n");
+				subprintf(&sserr, "invalid char [%s] in %s\n", ptr, optarg);
+				errflush();
 				_exit(111);
 			}
 			break;
@@ -411,18 +381,13 @@ main(int argc, char **argv)
 		case 's':
 			tmp = strtoul(optarg, &ptr, 10);
 			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg)) {
-				logerr(optarg);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "%s: %s\n", optarg, error_str(errno));
+				errflush();
 				_exit(111);
 			}
 			if (*ptr) {
-				logerr("invalid char [");
-				logerr(ptr);
-				logerr("] in ");
-				logerr(optarg);
-				logerrf("\n");
+				subprintf(&sserr, "invalid char [%s] in %s\n", ptr, optarg);
+				errflush();
 				_exit(111);
 			}
 			conf_split = tmp;
@@ -433,25 +398,17 @@ main(int argc, char **argv)
 			/*- lets see if they specified a parameter for seconds */
 			tmp = strtoul(optarg, &ptr, 10);
 			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg)) {
-				logerr(optarg);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "%s: %s\n", optarg, error_str(errno));
+				errflush();
 				_exit(111);
 			}
 			if (*ptr) {
-				logerr("invalid char [");
-				logerr(ptr);
-				logerr("] in ");
-				logerr(optarg);
-				logerrf("\n");
+				subprintf(&sserr, "invalid char [%s] in %s\n", ptr, optarg);
+				errflush();
 				_exit(111);
 			}
 			expire_offset = (tmp == 0 ? expire_offset : tmp);
-			out("Offsetting timestamps by ");
-			strnum[fmt_ulong(strnum, expire_offset)] = 0;
-			out(strnum);
-			out("seconds\n");
+			subprintf(&ssout, "Offsetting timestamps by %ld seconds\n", expire_offset);
 			flush();
 			break;
 		case 'x':
@@ -461,22 +418,10 @@ main(int argc, char **argv)
 			ptr = strptime(optarg, "%+", &stime);
 			expire_date = mktime(&stime);
 			if (expire_date >= 0) {
-				out("time in seconds: ");
-				strnum[fmt_ulong(strnum, expire_date)] = 0;
-				out(strnum);
-				out(" [");
-				out(optarg);
-				out("]\n");
+				subprintf(&ssout, "time in seconds: %ld [%s]\n", expire_date, optarg);
 				flush();
 			} else {
-				out("Error parsing the date specified at: [");
-				out(ptr);
-				out("] col ");
-				strnum[fmt_ulong(strnum, ptr - optarg)] = 0;
-				out(strnum);
-				out(" [");
-				out(optarg);
-				out("]\n");
+				subprintf(&ssout, "Error parsing the date specified at: [%s] col %ld [%s]\n", ptr, ptr - optarg, optarg);
 				flush();
 				_exit(111);
 			}
@@ -498,7 +443,7 @@ main(int argc, char **argv)
 		switch (control_readfile(&QueueBase, "queue_base", 0))
 		{
 		case -1:
-			logerrf("fatal: unable to read controls\n");
+			substdio_putsflush(&sserr, "fatal: unable to read controls\n");
 			_exit(111);
 			break;
 		case 0:
@@ -514,10 +459,8 @@ main(int argc, char **argv)
 		}
 	}
 	if (access(qbase, F_OK)) {
-		logerr(qbase);
-		logerr(": ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "%s: %s\n", qbase, error_str(errno));
+		errflush();
 		_exit(111);
 	}
 	getEnvConfigInt(&qcount, "QUEUE_COUNT", QUEUE_COUNT);
@@ -530,19 +473,14 @@ main(int argc, char **argv)
 			die_nomem();
 		if (access(Queuedir.s, F_OK)) {
 			if (errno != error_noent) {
-				logerr("alert: cannot access: ");
-				logerr(Queuedir.s);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "alert: cannot access: %s: %s\n", Queuedir.s, error_str(errno));
+				errflush();
 				_exit(111);
 			}
 			break;
 		}
 		queuedir = Queuedir.s;
-		out("processing queue ");
-		out(queuedir);
-		out("\n");
+		subprintf(&ssout, "processing queue %s\n", queuedir);
 		flush();
 		if (remove_files)
 			fd = check_send(queuedir);
@@ -550,9 +488,7 @@ main(int argc, char **argv)
 			die_chdir(queuedir);
 		matches = find_files(queuedir, (char **) queues, (pattern ? pattern : default_pattern));
 		if (matches >= 0) {
-			strnum[fmt_ulong(strnum, matches)] = 0;
-			out(strnum);
-			out(" file(s) match\n");
+			subprintf(&ssout, "%d file(s) match\n", matches);
 			flush();
 		}
 		if (remove_files)
@@ -565,34 +501,33 @@ main(int argc, char **argv)
 no_return void
 usage(void)
 {
-	logerr((char *) __progname);
-	logerr(" [options]\n");
-	logerr("  -e            use extended POSIX regular expressions\n");
-	logerr("  -h, -?        this help message\n");
-	logerr("  -i            search case insensitively [default: case sensitive]\n");
-	logerr("  -n <bytes>    limit our search to the first <bytes> bytes of each file\n");
-	logerr("  -p <pattern>  specify the pattern to search for\n");
-	logerr("  -q <qbase>    specify the base qmail queue dir [default: ");
-	logerr(auto_qmail);
-	logerr("/queue]\n");
-	logerr("  -d            actually remove files not yank them, no -p will delete all the messages!\n");
-	logerr("  -r            actually remove files, without this we'll only print them\n");
-	logerr("  -s <split>    specify your conf-split value if non-standard [default: ");
-	strnum[fmt_ulong(strnum, auto_split)] = 0;
-	logerr(strnum);
-	logerr("]\n");
-	logerr("  -v            increase verbosity (can be used more than once)\n");
-	logerr("  -y <trash>    directory to put files removed from the queue [default: <queuedir>/trash]\n");
+	subprintf(&sserr, "%s [options]\n", (char *) __progname);
+	subprintf(&sserr,
+			"  -e            use extended POSIX regular expressions\n"
+			"  -h, -?        this help message\n"
+			"  -i            search case insensitively [default: case sensitive]\n"
+			"  -n <bytes>    limit our search to the first <bytes> bytes of each file\n"
+			"  -p <pattern>  specify the pattern to search for\n");
+	subprintf(&sserr,
+			"  -q <qbase>    specify the base qmail queue dir [default: %s/queue]\n", auto_qmail);
+	subprintf(&sserr,
+			"  -d            actually remove files not yank them, no -p will delete all the messages!\n"
+			"  -r            actually remove files, without this we'll only print them\n");
+	subprintf(&sserr,
+			"  -s <split>    specify your conf-split value if non-standard [default: %d]\n", auto_split);
+	subprintf(&sserr,
+			"  -v            increase verbosity (can be used more than once)\n"
+			"  -y <trash>    directory to put files removed from the queue [default: <queuedir>/trash]\n"
 	/*- Begin CLM 12/23/2003 */
-	logerr("  -X <secs>     modify timestamp on matching files, to make qmail expire mail\n");
-	logerr("                <secs> is the number of seconds we want to move the file into the past.\n");
-	logerr("                specifying a value of 0 causes this to default to [");
-	strnum[fmt_ulong(strnum, expire_offset)] = 0;
-	logerr(strnum);
-	logerr("]\n");
-	logerr("  -x <timespec> modify timestamp on matching files, to make qmail expire mail\n");
-	logerr("                <timespec> is a date/time string in the format of output of the \"date\" program.\n");
-	logerrf("                see manpage for strptime(2) for details of this format\n");
+			"  -X <secs>     modify timestamp on matching files, to make qmail expire mail\n"
+			"                <secs> is the number of seconds we want to move the file into the past.\n");
+	subprintf(&sserr,
+			"                specifying a value of 0 causes this to default to [%ld]\n", expire_offset);
+	subprintf(&sserr,
+			"  -x <timespec> modify timestamp on matching files, to make qmail expire mail\n"
+			"                <timespec> is a date/time string in the format of output of the \"date\" program.\n"
+			"                see manpage for strptime(2) for details of this format\n");
+	errflush();
 	/*- End CLM 12/23/2003 */
 	_exit(111);
 }
@@ -608,27 +543,20 @@ read_file(const char *filename)
 	if (filename == NULL)
 		return NULL;
 	if ((fd = open(filename, (O_RDONLY | O_NOFOLLOW), 0)) == -1) {
-		logerr("open: ");
-		logerr((char *) filename);
-		logerr(": ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "open: %s: %s\n", filename, error_str(errno));
+		errflush();
 		return NULL;
 	}
 	if (fstat(fd, &fd_stat)) {
-		logerr("fstat: ");
-		logerr((char *) filename);
-		logerr(": ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "fstat: %s: %s\n", filename, error_str(errno));
+		errflush();
 		close(fd);
 		return NULL;
 	}
 	bytes = fd_stat.st_size;
 	if (!(buff = malloc(bytes + 1))) {
-		logerr("malloc: ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "malloc: %s\n", error_str(errno));
+		errflush();
 		close(fd);
 		return NULL;
 	}
@@ -636,8 +564,8 @@ read_file(const char *filename)
 	if (read(fd, buff, bytes) != bytes) {
 		free(buff);
 		close(fd);
-		logerr((char *) __progname);
-		logerrf(": read too short\n");
+		subprintf(&sserr, "%s: read too short\n", (char *) __progname);
+		errflush();
 		return NULL;
 	}
 	close(fd);
@@ -663,9 +591,8 @@ search_file(const char *filename, const char *pattern)
 		} else {
 			/*- regex error */
 			regerror(err_code, &match_me, err_string, 128);
-			logerr("regcomp(): ");
-			logerr(err_string);
-			logerrf("\n");
+			subprintf(&sserr, "regcomp(): %s\n", err_string);
+			errflush();
 		}
 		regfree(&match_me);
 		free(file_inards);
@@ -687,9 +614,8 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 	argv[0] = dir_list[0];
 	argv[1] = NULL;
 	if ((fts = fts_open((char **) argv, FTS_PHYSICAL, NULL)) == NULL) {
-		logerr("fts_open: ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "fts_open: %s\n", error_str(errno));
+		errflush();
 		return -1;
 	}
 	errno = 0;
@@ -697,12 +623,9 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 		switch (ftsp->fts_info)
 		{
 		case FTS_F:
-			out(queuedir);
-			out("/");
-			out(ftsp->fts_path);
-			out(": ");
+			subprintf(&ssout, "%s/%s: ", queuedir, ftsp->fts_path);
 			if (search_file(ftsp->fts_accpath, pattern) == 0) {
-				out("yes\n");
+				subprintf(&ssout, "yes\n");
 				flush();
 				i++;
 				tmp_fd = open(".", O_RDONLY);
@@ -711,9 +634,8 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 						die_chdir(queuedir);
 					remove_file(ftsp->fts_name);
 					if (fchdir(tmp_fd) != 0) {
-						logerr("fchdir: ");
-						logerr(error_str(errno));
-						logerrf("\n");
+						subprintf(&sserr, "fchdir: %s\n", error_str(errno));
+						errflush();
 					}
 				} else
 				if ((tmp_fd >= 0) && (delete_files == 1)) {
@@ -721,9 +643,8 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 						die_chdir(queuedir);
 					delete_file(ftsp->fts_name);
 					if (fchdir(tmp_fd) != 0) {
-						logerr("fchdir: ");
-						logerr(error_str(errno));
-						logerrf("\n");
+						subprintf(&sserr, "fchdir: %s\n", error_str(errno));
+						errflush();
 					}
 				} else
 				if ((tmp_fd >= 0) && (expire_files == 1)) {	/* this makes sure the the Remove option takes precedence over the eXpire options. */
@@ -731,9 +652,8 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 						die_chdir(queuedir);
 					expire_file(ftsp->fts_name);
 					if (fchdir(tmp_fd) != 0) {
-						logerr("fchdir: ");
-						logerr(error_str(errno));
-						logerrf("\n");
+						subprintf(&sserr, "fchdir: %s\n", error_str(errno));
+						errflush();
 					}
 				}
 				if (tmp_fd >= 0) {
@@ -741,18 +661,15 @@ find_files(char *queuedir, char *dir_list[], const char *pattern)
 					tmp_fd = -1;
 				}
 			} else {
-				out("no\n");
+				subprintf(&ssout, "no\n");
 				flush();
 			}
 			break;
 		case FTS_DNR:	/*- couldn't read */
 		case FTS_ERR:	/*- error */
 		case FTS_NS: 	/*- no stat info */
-			logerr("fts_read: ");
-			logerr(ftsp->fts_path);
-			logerr(": ");
-			logerr(error_str(ftsp->fts_errno));
-			logerrf("\n");
+			subprintf(&sserr, "fts_read: %s: %s\n", ftsp->fts_path, error_str(errno));
+			errflush();
 			break;
 		default:
 			break;
@@ -780,7 +697,7 @@ remove_file(const char *filename)
 	struct stat     statinfo;
 
 	if (filename == NULL) {
-		logerrf("remove_file: no filename\n");
+		substdio_putsflush(&sserr, "remove_file: no filename\n");
 		return -1;
 	}
 	if (!(my_name = strrchr(filename, '/')))
@@ -789,16 +706,13 @@ remove_file(const char *filename)
 		my_name++;
 	inode_num = strtoul(my_name, &ptr, 10);
 	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name)) {
-		logerr(my_name);
-		logerrf(" doesn't look like an inode number\n");
+		subprintf(&sserr, "%s doesn't look like an inode number\n", my_name);
+		errflush();
 		return -1;
 	}
 	if (*ptr) {
-		logerr("Invalid char [");
-		logerr(ptr);
-		logerr("] in filename ");
-		logerr(my_name);
-		logerrf("\n");
+		subprintf(&sserr, "Invalid char [%s] in filename %s\n", ptr, my_name);
+		errflush();
 		return -1;
 	}
 	for (i = 0; (queues[i] != NULL); i++) {
@@ -810,22 +724,15 @@ remove_file(const char *filename)
 		}
 		if (!rename(old_name, new_name)) {
 			/*- succeeded */
-			out("moved ");
-			out(old_name);
-			out(" to ");
-			out(new_name);
-			out("\n");
+			subprintf(&ssout, "moved %s to %s\n", old_name, new_name);
 			flush();
 			count++;
 		} else {
 			if (errno == ENOENT) {
 				if (old_name) {
 					if (verbosity >= 2) {
-						logerr("remove_file: ");
-						logerr(old_name);
-						logerr(": ");
-						logerr(error_str(errno));
-						logerrf("\n");
+						subprintf(&sserr, "remove_file: %s: %s\n", old_name, error_str(errno));
+						errflush();
 					}
 					free(old_name);
 					old_name = NULL;
@@ -836,48 +743,31 @@ remove_file(const char *filename)
 				}
 				if (stat(old_name, &statinfo) == -1) {
 					if (verbosity >= 2) {
-						logerr("remove_file: stat: ");
-						logerr(old_name);
-						logerr(": ");
-						logerr(error_str(errno));
-						logerrf("\n");
+						subprintf(&sserr, "remove_file: stat %s: %s\n", old_name, error_str(errno));
+						errflush();
 					}
 					continue;
 				}
 				if (!S_ISREG(statinfo.st_mode)) {
 					if (verbosity >= 2) {
-						logerr("remove_file: ");
-						logerr(old_name);
-						logerrf(": not a file\n");
+						subprintf(&sserr, "remove_file: %s not a file\n", old_name);
+						errflush();
 					}
 					continue;
 				}
 				if (!rename(old_name, new_name)) {
 					/*- succeeded */
-					out("moved ");
-					out(old_name);
-					out(" to ");
-					out(new_name);
-					out(new_name);
-					out("\n");
+					subprintf(&ssout, "moved %s to %s\n", old_name, new_name);
 					flush();
 					count++;
 				} else
 				if (errno != ENOENT) {
-					logerr("rename: ");
-					logerr(old_name);
-					logerr("->");
-					logerr(new_name);
-					logerr(error_str(errno));
-					logerrf("\n");
+					subprintf(&sserr, "rename: %s -> %s: %s\n", old_name, new_name, error_str(errno));
+					errflush();
 				}
 			} else { /*- failed but exists */
-				logerr("rename: ");
-				logerr(old_name);
-				logerr("->");
-				logerr(new_name);
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "rename: %s -> %s: %s\n", old_name, new_name, error_str(errno));
+				errflush();
 			}
 		}
 	}
@@ -911,7 +801,7 @@ expire_file(const char *filename)
 	struct timeval  ut[2] = { {0} };
 
 	if (filename == NULL) {
-		logerrf("expire_file: no filename\n");
+		substdio_putsflush(&sserr, "expire_file: no filename\n");
 		return -1;
 	}
 	if (!(my_name = strrchr(filename, '/')))
@@ -921,16 +811,13 @@ expire_file(const char *filename)
 	/*- make sure the INODE NUMBER is really an INODE */
 	inode_num = strtoul(my_name, &ptr, 10);
 	if ((inode_num == ULONG_MAX && errno == ERANGE) || (inode_num == 0 && ptr == my_name)) {
-		logerr(my_name);
-		logerrf(" doesn't look like an inode number\n");
+		subprintf(&sserr, "%s doesn't look like an inode number\n", my_name);
+		errflush();
 		return -1;
 	}
 	if (*ptr) {
-		logerr("Invalid char [");
-		logerr(ptr);
-		logerr("] in filename ");
-		logerr(my_name);
-		logerrf("\n");
+		subprintf(&sserr, "Invalid char [%s] in filename %s\n", ptr, my_name);
+		errflush();
 		return -1;
 	}
 	/*- generate the relative path to the specified file */
@@ -948,11 +835,8 @@ expire_file(const char *filename)
 		/*- do some error detection */
 		if (errno == ENOENT && old_name) {
 			if (verbosity >= 2) {
-				logerr("expire_file: ");
-				logerr(old_name);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "expire_file: %s: %s\n", old_name, error_str(errno));
+				errflush();
 			}
 			free(old_name);
 			old_name = NULL;
@@ -961,19 +845,15 @@ expire_file(const char *filename)
 	}
 	/*- now, update the time stamp */
 	if (utimes(old_name, ut) == 0) {
-		logerr("Set timestamp on ");
-		logerr(old_name);
-		logerrf("\n");
+		subprintf(&sserr, "Set timestamp on %s\n", old_name);
+		errflush();
 		count++;
 	} else
 	if (errno == ENOENT) {
 		if (old_name) {
 			if (verbosity >= 2) {
-				logerr("expire_file: ");
-				logerr(old_name);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "expire_file: %s: %s\n", old_name, error_str(errno));
+				errflush();
 			}
 			free(old_name);
 			old_name = NULL;
@@ -1004,9 +884,8 @@ mk_nohashpath(char *queue, int inode_name)
 		old_name[len] = 0;
 		return(old_name);
 	} else {
-		logerr("mk_nohashpath: malloc: ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "mk_nohashpath: malloc: %s\n", error_str(errno));
+		errflush();
 		return NULL;
 	}
 }
@@ -1034,9 +913,8 @@ mk_hashpath(char *queue, int inode_name)
 		old_name[len] = 0;
 		return old_name;
 	} else {
-		logerr("mk_hashpath: malloc: ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "mk_nohashpath: malloc: %s\n", error_str(errno));
+		errflush();
 		return NULL;
 	}
 }
@@ -1048,7 +926,8 @@ mk_newpath(char *queue, int inode_name)
 	char           *new_name = NULL;
 
 	if ((queue == NULL) || (inode_name <= 0)) {
-		logerrf("mk_newpath: invalid queue\n");
+		substdio_putsflush(&sserr, "mk_newpath: invalid queue\n");
+		errflush();
 		return NULL;
 	}
 	len = strlen(queue);
@@ -1065,9 +944,8 @@ mk_newpath(char *queue, int inode_name)
 		new_name[len] = 0;
 		return new_name;
 	} else {
-		logerr("mk_newpath: malloc: ");
-		logerr(error_str(errno));
-		logerrf("\n");
+		subprintf(&sserr, "mk_newpath: malloc: %s\n", error_str(errno));
+		errflush();
 		return NULL;
 	}
 }
@@ -1090,7 +968,7 @@ delete_file(const char *filename)
 	struct stat     statinfo;
 
 	if (filename == NULL) {
-		logerrf("expire_file: no filename\n");
+		substdio_putsflush(&sserr, "expire_file: no filename\n");
 		return -1;
 	}
 	my_name = strrchr(filename, '/');
@@ -1102,29 +980,27 @@ delete_file(const char *filename)
 
 	inode_num = strtoul(my_name, NULL, 10);
 	if ((inode_num == ULONG_MAX) || (inode_num == 0)) {
-		logerr(my_name);
-		logerr(" ");
-		logerrf("doesn't look like an inode number\n");
+		subprintf(&sserr, "%s doesn't look like an inode number\n", my_name);
+		errflush();
 		return -1;
 	}
 
 	for (i = 0; (queues[i] != NULL); i++) {
 		old_name = mk_hashpath((char *) queues[i], inode_num);
 		if (old_name == NULL) {
-			logerrf("delete_file(): unable to create old name\n");
+			substdio_putsflush(&sserr, "delete_file(): unable to create old name\n");
 			return -1;
 		}
 		if (unlink(old_name) == 0) { /*- succeeded */
-			logerr("remove ");
-			logerrf(old_name);
+			subprintf(&sserr, "remove %s\n", old_name);
+			errflush();
 			count++;
 		} else {
 			if (errno == ENOENT) {
 				if (old_name) {
 					if (verbosity >= 2) {
-						logerr("delete_file(");
-						logerr(old_name);
-						logerrf("): not a file\n");
+						subprintf(&sserr, "delete_file(%s): not a file\n", old_name);
+						errflush();
 					}
 					free(old_name);
 					old_name = NULL;
@@ -1133,42 +1009,33 @@ delete_file(const char *filename)
 					return -1;
 				if (stat(old_name, &statinfo) == -1) {
 					if (verbosity >= 2) {
-						logerr("delete_file(");
-						logerr(old_name);
-						logerrf("): no stat info\n");
+						subprintf(&sserr, "delete_file(%s): no stat info\n", old_name);
+						errflush();
 					}
 					continue;
 				}
 				if (!S_ISREG(statinfo.st_mode)) {
 					if (verbosity >= 2) {
-						logerr("delete_file(");
-						logerr(old_name);
-						logerrf("): not a file\n");
+						subprintf(&sserr, "delete_file(%s): not a file\n", old_name);
+						errflush();
 					}
 					continue;
 				}
 				if (unlink(old_name) == 0) {
 					/*- succeeded */
-					logerr("remove ");
-					logerr(old_name);
-					logerrf("\n");
+					subprintf(&sserr, "remove %s\n", old_name);
+					errflush();
 					count++;
 				} else {
 					if (errno != ENOENT) {
-						logerr("unlink: ");
-						logerr(old_name);
-						logerr(": ");
-						logerr(error_str(errno));
-						logerrf("\n");
+						subprintf(&sserr, "unlink: %s: %s\n", old_name, error_str(errno));
+						errflush();
 					}
 				}
 			} else {
 				/*- failed but exists */
-				logerr("unlink: ");
-				logerr(old_name);
-				logerr(": ");
-				logerr(error_str(errno));
-				logerrf("\n");
+				subprintf(&sserr, "unlink: %s: %s\n", old_name, error_str(errno));
+				errflush();
 			}
 		}
 	}
@@ -1200,7 +1067,7 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.24 2022-03-27 20:21:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-rm.c,v 1.25 2023-07-13 02:45:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

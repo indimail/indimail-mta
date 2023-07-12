@@ -1,5 +1,5 @@
 /*
- * $Id: sys-checkpwd.c,v 1.19 2023-03-26 08:23:19+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.20 2023-07-13 02:43:57+05:30 Cprogrammer Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
@@ -40,32 +40,11 @@
 static int      debug;
 
 void
-out(char *str)
-{
-	if (!str || !*str)
-		return;
-	if (substdio_puts(subfdout, str) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
-}
-
-void
-flush()
-{
-	if (substdio_flush(subfdout) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
-	return;
-}
-
-void
 print_error(char *str)
 {
-	out("454-");
-	out(str);
-	out(": ");
-	out(error_str(errno));
-	out(" (#4.3.0)\r\n");
-	flush();
+	subprintf(subfdout, "454-%s: %s (#4.3.0)\r\n", str, error_str(errno));
+	if (substdio_flush(subfdout) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
 }
 
 static int
@@ -325,7 +304,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.19 2023-03-26 08:23:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.20 2023-07-13 02:43:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -334,6 +313,9 @@ getversion_sys_checkpwd_c()
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.20  2023-07-13 02:43:57+05:30  Cprogrammer
+ * replaced out() with subprintf()
+ *
  * Revision 1.19  2023-03-26 08:23:19+05:30  Cprogrammer
  * fixed code for wait_handler
  *

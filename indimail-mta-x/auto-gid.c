@@ -1,5 +1,8 @@
 /*
  * $Log: auto-gid.c,v $
+ * Revision 1.9  2023-07-13 02:42:15+05:30  Cprogrammer
+ * replaced outs() with subprintf
+ *
  * Revision 1.8  2020-11-24 13:43:49+05:30  Cprogrammer
  * removed exit.h
  *
@@ -19,55 +22,35 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <grp.h>
-#include "subfd.h"
-#include "substdio.h"
-#include "scan.h"
-#include "fmt.h"
+#include <subfd.h>
+#include <substdio.h>
+#include <qprintf.h>
 
 char            buf1[256];
 substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
 
-void
-outs(s)
-	char           *s;
-{
-	if (substdio_puts(&ss1, s) == -1)
-		_exit(111);
-}
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *name;
 	char           *value;
 	struct group   *gr;
-	char            strnum[FMT_ULONG];
 
-	name = argv[1];
-	if (!name)
+	if (!(name = argv[1]))
 		_exit(100);
-	value = argv[2];
-	if (!value)
+	if (!(value = argv[2]))
 		_exit(100);
 	if (!(gr = getgrnam(value))) {
 		if (!(gr = getgrgid(getegid())))
 			gr = getgrnam("mail");
 	}
 	if (!gr) {
-		substdio_puts(subfderr, "fatal: unable to find group ");
-		substdio_puts(subfderr, value);
-		substdio_puts(subfderr, "\n");
+		subprintf(subfderr, "fatal: unable to find group %s\n", value);
 		substdio_flush(subfderr);
 		_exit(111);
 	}
-	strnum[fmt_ulong(strnum, (unsigned long) gr->gr_gid)] = 0;
-	outs("int ");
-	outs(name);
-	outs(" = ");
-	outs(strnum);
-	outs(";\n");
+	if (subprintf(&ss1, "int %s = %u;\n", name, gr->gr_gid) == -1)
+		_exit(111);
 	if (substdio_flush(&ss1) == -1)
 		_exit(111);
 	_exit(0);

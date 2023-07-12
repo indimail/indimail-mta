@@ -1,5 +1,8 @@
 /*
  * $Log: auto-uid.c,v $
+ * Revision 1.11  2023-07-13 02:41:56+05:30  Cprogrammer
+ * replaced outs() with subprintf
+ *
  * Revision 1.10  2020-11-24 13:44:05+05:30  Cprogrammer
  * removed exit.h
  *
@@ -25,39 +28,25 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-#include "subfd.h"
-#include "substdio.h"
-#include "fmt.h"
+#include <subfd.h>
+#include <substdio.h>
+#include <qprintf.h>
 
 char            buf1[256];
 substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
 
-void
-outs(s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
-	char           *s;
-{
-	if (substdio_puts(&ss1, s) == -1)
-		_exit(111);
-}
-
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *name;
 	char           *value;
 	struct passwd  *pw;
-	char            strnum[FMT_ULONG];
 
-	name = argv[1];
-	if (!name)
+	if (!(name = argv[1]))
 		_exit(100);
-	value = argv[2];
-	if (!value)
+	if (!(value = argv[2]))
 		_exit(100);
-	if (!(pw = getpwnam(value)))
-	{
+	if (!(pw = getpwnam(value))) {
 		if (!(pw = getpwuid(getuid())))
 #ifndef DARWIN
 			pw = getpwnam("mail");
@@ -65,20 +54,13 @@ main(argc, argv)
 			pw = getpwnam("daemon");
 #endif
 	}
-	if (!pw)
-	{
-		substdio_puts(subfderr, "fatal: unable to find user ");
-		substdio_puts(subfderr, value);
-		substdio_puts(subfderr, "\n");
+	if (!pw) {
+		subprintf(subfderr, "fatal: unable to find user %s\n", value);
 		substdio_flush(subfderr);
 		_exit(111);
 	}
-	strnum[fmt_ulong(strnum, (unsigned long) pw->pw_uid)] = 0;
-	outs("int ");
-	outs(name);
-	outs(" = ");
-	outs(strnum);
-	outs(";\n");
+	if (subprintf(&ss1, "int %s = %u;\n", name, pw->pw_uid) == -1)
+		_exit(111);
 	if (substdio_flush(&ss1) == -1)
 		_exit(111);
 	return(0);
@@ -87,6 +69,6 @@ main(argc, argv)
 void
 getversion_auto_uid_c()
 {
-	static char    *x = "$Id: auto-uid.c,v 1.10 2020-11-24 13:44:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: auto-uid.c,v 1.11 2023-07-13 02:41:56+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

@@ -1,6 +1,9 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
 Release @version@-@release@ Start 24/04/2023 End --/--/20--
 ======= Release Highlights ================================================
+o fixed functions using variable args dumping core
+o RPM builds for amazon linux and mageia
+o added timestamp in installation logs
 ===========================================================================
 - 24/04/2023
 01. svctool: when replacing in recontrol, use exact match
@@ -34,19 +37,23 @@ Release @version@-@release@ Start 24/04/2023 End --/--/20--
 16. svctool: added --config=nssd option to create nssd config file
 - 25/06/2023
 17. qsutil.c: removed extra / from defaultdelivery control filename path
-- 26/06/2023
-18. svctool: set permission of logrotate.mysql to mysql:mysql
 - 07/07/2023
-19. svctool: fix MySQL db creation for MariaDB 11.x
-20. qmail-remote.c, smtpd.c, qmail-greyd.c, mail_acl.c, starttls.c: use NULL
+18. svctool: fix MySQL db creation for MariaDB 11.x
+19. qmail-remote.c, smtpd.c, qmail-greyd.c, mail_acl.c, starttls.c: use NULL
     instead of 0 for null pointer
-21. mail_acl.c: fixed incorrect call to out()
-22. dossl.c: fixed potential SIGSEGV
+20. mail_acl.c: fixed incorrect call to out()
+21. dossl.c: fixed potential SIGSEGV
 - 10/07/2023
-23. svctool: set permission of logrotate.mysql to mysql:mysql
+22. svctool: set permission of logrotate.mysql to mysql:mysql
 - 11/07/2023
-24. condredirect.c, condtomaildir.c: added -r reverse option to forward when
+23. condredirect.c, condtomaildir.c: added -r reverse option to forward when
     program fails instead of when program succeeds.
+- 13/07/2023
+24. dnstlsarr.c: refactored code to reduce loc
+25. auto-uid.c, auto-gid.c: replaced outs() with subprintf
+26. ldap-checkpwd.c, sys-checkpwd.c: replaced out() with subprintf()
+27. qmail-rm.c: replaced out(), logerr() with subprintf()
+28. whois.c: replaced logerr(), logerrf() with subprintf()
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.13  2023-07-13 02:43:28+05:30  Cprogrammer
+ * replaced out() with subprintf()
+ *
  * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -55,6 +58,7 @@
 #include <scan.h>
 #include <subfd.h>
 #include <substdio.h>
+#include <qprintf.h>
 #include <strerr.h>
 #include <stralloc.h>
 #include <noreturn.h>
@@ -202,11 +206,7 @@ main(int argc, char *argv[])
 			my_error("out of mem", 0, -1);
 	}
 	if (debug) {
-		out("login [");
-		out(login);
-		out("] password [");
-		out(password);
-		out("]\n");
+		subprintf(subfdout, "login [%s] password [%s]\n", login, password);
 		flush();
 	}
 	if ((i = ldap_lookup(login, password, &error, &uid, &gid)) == -1)
@@ -405,11 +405,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 	}
 	if (debug)
 	{
-		out("ldap_search: base=[");
-		out(ldap_base);
-		out("] filter=[");
-		out(filter.s);
-		out("]\n");
+		subprintf(subfdout, "ldap_search: base=[%s] filter=[%s]\n", ldap_base, filter.s);
 		flush();
 	}
 	if ((ret = ldap_search_s(ld, ldap_base, scope, filter.s, attrs, 0, &res))) {
@@ -463,15 +459,11 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 		return (-1);
 	}
 	if (debug) {
-		out("ldap_get_dn: dn=[");
-		out(dn);
-		out("]\n");
+		subprintf(subfdout, "ldap_get_dn: dn=[%s]\n", dn);
 		flush();
 	}
 	if (debug) {
-		out("ldap_simple_bind: password=[");
-		out(password);
-		out("]\n");
+		subprintf(subfdout, "ldap_simple_bind: password=[%s]\n", password);
 		flush();
 	}
 	/*- bind with the user dn to test the password */
@@ -539,10 +531,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 				scan_ulong(values[0], (unsigned long *) groupId);
 		}
 		if (debug && values && values[0]) {
-			out(environ[i]);
-			out("=[");
-			out(values[0]);
-			out("]\n");
+			subprintf(subfdout, "%s=[%s]\n", environ[i], values[0]);
 			flush();
 		}
 		ldap_value_free(values);
@@ -575,7 +564,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ldap-checkpwd.c,v 1.13 2023-07-13 02:43:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
