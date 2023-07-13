@@ -229,7 +229,7 @@ main(int argc, char **argv)
 	if (enable_cram)
 		stored = pw->pw_passwd;
 	else
-		stored = (auth_method > 2 && auth_method < 11) ? NULL : pw->pw_passwd;
+		stored = (auth_method >= AUTH_CRAM_MD5 && auth_method <= AUTH_DIGEST_MD5) ? NULL : pw->pw_passwd;
 #ifdef HASUSERPW
 	if (!(upw = getuserpw(login))) {
 		if (errno != ETXTBSY)
@@ -266,7 +266,7 @@ main(int argc, char **argv)
 		subprintf(subfderr,
 				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s\n",
 				argv[0][i] ? argv[0] + i + 1 : argv[0],
-				getuid(), login, challenge, response, stored,
+				getuid(), login, challenge, response, stored ? stored : "null",
 				enable_cram ? "Yes" : "No", ptr);
 		substdio_flush(subfderr);
 	} else
@@ -287,7 +287,7 @@ main(int argc, char **argv)
 	status = 0;
 	if ((ptr = (char *) env_get("POSTAUTH"))) {
 		if (!access(ptr, X_OK)) {
-			if (stralloc_copys(&buf, ptr) || !stralloc_append(&buf, " ")
+			if (!stralloc_copys(&buf, ptr) || !stralloc_append(&buf, " ")
 					|| !stralloc_cats(&buf, login) || !stralloc_0(&buf))
 				strerr_die2x(111, WARN, "out of memory");
 			status = runcmmd(buf.s);
