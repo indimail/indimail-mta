@@ -1466,22 +1466,22 @@ dknewkey.8: dknewkey.9
 dkim.lib: \
 compile trydkim.c dns_text.o conf-dkim dns.lib
 	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
-	-I/usr/include/dkim -I../libdkim-x \
+	-I/usr/include/dkim -I../libdkim2-x \
 	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim1.o && \
 	c++ -o trydkim1 trydkim1.o dns_text.o \
 	`cat dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
-	-L../libdkim-x/.libs -ldkim2 -lcrypto -ldkim2 $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& echo "-ldkim2" || "WARNING!!! Not linked with libdkim" 1>&2 ) > dkim.lib
+	-L../libdkim2-x/.libs -ldkim2 -lcrypto -ldkim2 $(QMAILLIB) ) >/dev/null 2>&1 \
+	&& echo "-ldkim2" || echo "WARNING!!! Not linked with libdkim2" 1>&2 ) > dkim.lib
 	rm -f trydkim1.o trydkim1
 
 hasdkim.h: dns_text.o \
 trydkim.c compile dns.lib dkim.lib conf-indi
 	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
-	-I/usr/include/dkim -I../libdkim-x \
+	-I/usr/include/dkim -I../libdkim2-x \
 	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim2.o && \
 	c++ -o trydkim2 trydkim2.o dns_text.o \
 	`cat dkim.lib dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
-	-L../libdkim-x/.libs -lcrypto $(QMAILLIB) ) >/dev/null 2>&1 \
+	-L../libdkim2-x/.libs -lcrypto $(QMAILLIB) ) >/dev/null 2>&1 \
 	&& (echo "#define HASDKIM 1") || echo "WARNING!!! Not compiled with -DHASDKIM" 1>&2 ) > hasdkim.h; \
 	rm -f trydkim2.o trydkim2
 
@@ -1491,7 +1491,7 @@ qmulti.o auto_qmail.o custom_error.o getqueue.o parse_env.o \
 dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o auto_prefix.o \
 	variables.o control.o pidopen.o dns_text.o custom_error.o \
-	-L../libdkim-x/.libs `cat dkim.lib` wildmat.o parse_env.o \
+	-L../libdkim2-x/.libs `cat dkim.lib` wildmat.o parse_env.o \
 	getDomainToken.o getqueue.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
 	auto_qmail.o $(static_option) $(QMAILLIB) \
 	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
@@ -1500,7 +1500,7 @@ qmail-dkim.o: \
 compile qmail-dkim.c qmail.h control.h hasdkim.h variables.h \
 auto_control.h qmulti.h pidopen.h custom_error.h getDomainToken.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
-		-I../libdkim-x -I/opt/local/include/dkim qmail-dkim.c
+		-I../libdkim2-x -I/opt/local/include/dkim qmail-dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-prefix conf-sysconfdir
 	cat qmail-dkim.9 \
