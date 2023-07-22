@@ -84,8 +84,8 @@ set_defaults()
         cap_args="$cap_args--cap-add SYS_ADMIN "
       fi
     fi
-    if [ -z "$host_arg" ] ; then
-      host_arg="-h indimail.org"
+    if [ -z "$host_args" ] ; then
+      host_args="-h indimail.org"
     fi
     if [ -z "$vol_args" ] ; then
       if [ -d /home/$command/queue ] ; then
@@ -149,7 +149,7 @@ do
   ;;
 
   -h | --host)
-  host_arg="-h $2"
+  host_args="-h $2"
   shift 2
   ;;
 
@@ -227,8 +227,8 @@ fi
 echo "$command run $cgroup $extra_args"
 echo "  --publish-all --name $name"
 echo "  --device /dev/fuse"
-if [ -n "$host_arg" ] ; then
-  echo "  $host_arg"
+if [ -n "$host_args" ] ; then
+  echo "  $host_args"
 fi
 if [ -n "$cap_args" ] ; then
   echo $extra_args | grep "\--privileged" >/dev/null
@@ -254,7 +254,7 @@ echo "  $imageid $*"
 $command run $cgroup $extra_args \
   --publish-all --name $name \
   --device /dev/fuse \
-  $host_arg $cap_args $port_args $vol_args \
+  $host_args $cap_args $port_args $vol_args \
   $imageid $*
 if [ $? -eq 0 ] ; then
   if [ $detached -eq 1 ] ; then

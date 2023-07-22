@@ -44,6 +44,34 @@ e.g. The below passes the timezone parameter to indimail's
 runpod --id=2a13c928f3aa --name=svscan \-\- -t UTC
 .EE
 
+.SH Examples with indimail, indimail-mta, indimail-web containers
+
+indimail-mta, indimail-virtualdomains and indimail-web containers use
+docker-entrypoint(8). The docker-entrypoint does few initialization and
+configuration to self configure for your domain. The examples below give
+you a general idea on how to use the \fBrunpod\fR command with indimail
+contianers. Here --id=9f0e74d71e91 refers to an indimail-mta-web container
+image.
+
+.EX
+Execute ls -l in indimail's webmail container, pass -t Asia/Kolkata to the
+docker-entrypoint. Pass additional \-\- before ls -l so that the
+docker-entrypoint doesn't interpret -l option.
+
+runpod -a "--rm" --id=9f0e74d71e91 -n webmail -- \\
+  -t Asia/Kolkata -- /bin/ls -l
+
+Execute bash
+
+runpod -a "--rm" --id=9f0e74d71e91 -n webmail -- \\
+  -t Asia/Kolkata -- /bin/bash
+
+Execute repair shell. You can fix things in the container and commit the
+image before coming out
+
+runpod -a "--rm" --id=9f0e74d71e91 -n webmail -- -r
+.EE
+
 .SH OPTIONS
 .TP 2
 \fB\-\-id\fR=\fIimageID\fR | -i \fIimageID\fR
@@ -102,3 +130,4 @@ times.
 .SH SEE ALSO
 docker(1),
 podman(1)
+docker-entrypoint(8)

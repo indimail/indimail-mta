@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH docker-entrypoint 8
 .SH NAME
 docker-entrypoint \- entry point for indimail docker/podman images
@@ -12,8 +13,8 @@ docker-entrypoint \- entry point for indimail docker/podman images
 docker-entrypoint(8) is the entrypoint for indimail, indimail-mta runtime
 docker(1) / podman(1) images. It gets automatically invoked when you start
 a docker/podman image. Depending on the image (indimail-mta, indimail or
-indimail image with Roundcube Mail), it is passed specific options on the
-command line. Normally, it is not meant to be executed by the user, but you
+indimail-web image with Roundcubemail), it is passed specific options on
+the command line. Normally, it is not meant to be executed by the user, but you
 can pass options and other arguments as part of the \fIcommand\fR argument
 to podman(1) / docker(1) command.
 

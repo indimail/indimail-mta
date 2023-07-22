@@ -1,15 +1,17 @@
 #
-# $Id: docker-entrypoint.sh,v 1.15 2022-11-09 09:59:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.16 2023-07-22 23:23:39+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
 {
+	(
 	echo "Usage: svscan|indimail|indimail-mta|webmail"
 	echo "              [ -r | --repair"
 	echo "              [ -d | --domain   domain]"
 	echo "              [ -t | --timezone timezone ]"
 	echo "              [command] [args]"
 	echo "default command is svscan"
+	) 1>&2
 	exit 100
 }
 
@@ -17,18 +19,6 @@ fix_podman()
 {
 if [ -f @prefix@/sbin/qmail-queue -a ! -p @indimaildir@/queue/queue1/lock/trigger ] ; then
 	echo "Your podman/docker container suffers from named pipe bug. Applying hotfix" 1>&2
-	if [ -f @prefix@/sbin/inlookup -a -d @indimaildir@/inquery ] ; then
-		cd @indimaildir@/inquery
-		for i in 1 2 3 4 5
-		do
-			if [ ! -p infifo.$i ] ; then
-				echo creating infifo.$i
-				mkfifo infifo.$i
-				chown indimail:indimail infifo.$i
-				chmod 600 infifo.$i
-			fi
-		done
-	fi
 	if [ -d @indimaildir@/queue -a ! -f @servicedir@/.svscan/run ] ; then
 		cd @indimaildir@/queue
 		for i in queue*; do if [ -d $i -a ! -p $i/lock/trigger ] ; then @prefix@/bin/queue-fix -v $i; fi; done
@@ -61,18 +51,22 @@ do
 			ln -s /usr/share/zoneinfo/$timezone localtime
 			echo $timezone > /etc/timezone
 		else
-			echo "WARNING: unable to set timezone $timezone" 1>&2
+			(
+			echo "ERROR: unable to open /usr/share/zoneinfo/$timezone"
+			echo "WARNING: unable to set timezone $timezone"
+			) 1>&2
+			exit 1
 		fi
 	;;
 	-r | --repair)
-	/bin/sh
+		/bin/sh
 	;;
 	--) # end of options
 		shift
 		break
 	;;
 	*)
-		echo "Unexpected option: $1 - this should not happen."
+		echo "Unexpected option: $1 - this should not happen." 1>&2
 		usage
 	;;
 	esac
@@ -95,13 +89,11 @@ fi
 
 if [ $# -eq 0 ] ; then
 	program=svscan
-elif [ $# -eq 1 -a "$1" = "bash" ] ; then
-	program=svscan
 else
 	program=$1
 fi
 case "$program" in
-indimail|indimail-mta|svscan|webmail)
+	indimail|indimail-mta|svscan|webmail)
 	if [ ! -f /etc/mtab ] ; then
 		if [ -f /proc/self/mounts ] ; then
 			echo "Warning  linking /etc/mtab to /proc/self/mounts" 1>&2
@@ -114,18 +106,18 @@ indimail|indimail-mta|svscan|webmail)
 		fi
 	fi
 	case "$program" in
-	webmail)
-			if [ -f @servicedir@/php-fpm/down ] ; then
-				echo "enabling @servicedir@/php-fpm"
-				/bin/rm -f @servicedir@/php-fpm/down
-			fi
-			if [ -f @servicedir@/httpd/down ] ; then
-				echo "enabling @servicedir@/httpd"
-				/bin/rm -f @servicedir@/httpd/down
-			else
-				echo "/usr/sbin/apachectl start"
-				/usr/sbin/apachectl start
-			fi
+		webmail)
+		if [ -f @servicedir@/php-fpm/down ] ; then
+			echo "enabling @servicedir@/php-fpm"
+			/bin/rm -f @servicedir@/php-fpm/down
+		fi
+		if [ -f @servicedir@/httpd/down ] ; then
+			echo "enabling @servicedir@/httpd"
+			/bin/rm -f @servicedir@/httpd/down
+		else
+			echo "/usr/sbin/apachectl start"
+			/usr/sbin/apachectl start
+		fi
 		;;
 	esac
 	if [ -d @servicedir@/.svscan/variables ] ; then
@@ -136,13 +128,17 @@ indimail|indimail-mta|svscan|webmail)
    		exec @prefix@/sbin/svscan @servicedir@
 	fi
 	;;
-*)
+	*)
 	echo "docker-entrypoint: executing $@"
 	exec "$@"
 	;;
 esac
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.16  2023-07-22 23:23:39+05:30  Cprogrammer
+# removed now redundant inlookup fix of creating named piples
+# fixed indentation
+#
 # Revision 1.15  2022-11-09 09:59:43+05:30  Cprogrammer
 # fixed fix-queue argument for slowq
 #
