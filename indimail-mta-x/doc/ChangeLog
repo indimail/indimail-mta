@@ -55,6 +55,8 @@ o added timestamp in installation logs
 27. qmail-rm.c: replaced out(), logerr() with subprintf()
 28. whois.c: replaced logerr(), logerrf() with subprintf()
 29. sys-checkpwd.c: Fixed out of memory error for POSTAUTH
+- 24/07/2023
+30. create_services: fixed typo for mysql_pass in create_services
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

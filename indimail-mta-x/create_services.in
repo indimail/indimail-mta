@@ -398,7 +398,7 @@ if [ $noindimail -eq 0 ] ; then
   fi
   $prefix/sbin/ischema -u
   [ $ID -eq 0 ] && $svctool --config=indimail --mysqlhost=localhost \
-    --mysqluser=$mysql_user --mysqlpass=$mysql_pass- --mysqlsocket=$mysqlSocket $extra_opt
+    --mysqluser=$mysql_user --mysqlpass=$mysql_pass --mysqlsocket=$mysqlSocket $extra_opt
 fi
 
 if [ $nodksignatures -eq 0 ] ; then
