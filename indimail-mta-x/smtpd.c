@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.294 2023-07-07 10:51:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.295 2023-07-26 22:23:11+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -152,7 +152,7 @@ static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
 #endif
-static char    *revision = "$Revision: 1.294 $";
+static char    *revision = "$Revision: 1.295 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1901,12 +1901,11 @@ sigscheck(stralloc *line, char **desc, int in_header)
  * >0: if user is found
  */
 int
-check_recipient_cdb(char *rcpt)
+recipients_ext(char *rcpt)
 {
 	int             r;
 
-	r = recipients(rcpt, str_len(rcpt));
-	switch (r)
+	switch ((r = recipients(rcpt, str_len(rcpt))))
 	{
 	case -1:
 		die_control("recipients");
@@ -4145,7 +4144,7 @@ smtp_rcpt(char *arg)
 		if (!chkrcptok) {
 			if (isgoodrcpt != 4) { /*- not in goodrcptto, goodrcptpatterns */
 				if (hasvirtual) {
-					if (*tmp)
+					if (*tmp) /*- CHECKRECIPIENT is set */
 						scan_int(tmp, &isgoodrcpt);
 					else
 						isgoodrcpt = 3;	/*- default is cdb */
@@ -4161,12 +4160,12 @@ smtp_rcpt(char *arg)
 					isLocal = 1;
 				result = (isLocal ? check_recipient_pwd : check_recipient_sql) (addr.s, at);
 				break;
-			case 2:	/* reject if user not in both recipient.cdb and sql db */
+			case 2:	/* reject if user not found through recipients extension and sql db */
 				if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1)
 					isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
 				else
 					isLocal = 1;
-				if ((result = !check_recipient_cdb(addr.s)))
+				if ((result = !recipients_ext(addr.s)))
 					result = (isLocal ? check_recipient_pwd : check_recipient_sql) (addr.s, at);
 				break;
 			case 4:
@@ -4174,7 +4173,7 @@ smtp_rcpt(char *arg)
 				break;
 			case 3:	/* reject if user not in recipient */
 			default:
-				result = (!check_recipient_cdb(addr.s) ? 1 : 0);
+				result = (!recipients_ext(addr.s) ? 1 : 0);
 				break;
 			}
 			if (result > 0) {
@@ -7012,6 +7011,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.295  2023-07-26 22:23:11+05:30  Cprogrammer
+ * renamed check_recipient_cdb() to recipients_ext()
+ *
  * Revision 1.294  2023-07-07 10:51:01+05:30  Cprogrammer
  * use NULL instead of 0 for null pointer
  *
@@ -7348,7 +7350,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.294 2023-07-07 10:51:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.295 2023-07-26 22:23:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
