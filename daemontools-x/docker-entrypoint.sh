@@ -1,5 +1,5 @@
 #
-# $Id: docker-entrypoint.sh,v 1.16 2023-07-22 23:23:39+05:30 Cprogrammer Exp mbhangui $
+# $Id: docker-entrypoint.sh,v 1.17 2023-07-26 22:17:03+05:30 Cprogrammer Exp mbhangui $
 #
 
 usage()
@@ -111,12 +111,18 @@ case "$program" in
 			echo "enabling @servicedir@/php-fpm"
 			/bin/rm -f @servicedir@/php-fpm/down
 		fi
-		if [ -f @servicedir@/httpd/down ] ; then
-			echo "enabling @servicedir@/httpd"
-			/bin/rm -f @servicedir@/httpd/down
+		if [ -f @servicedir@/httpd ] ; then
+			if [ -f @servicedir@/httpd/down ] ; then
+				echo "enabling @servicedir@/httpd"
+				/bin/rm -f @servicedir@/httpd/down
+			fi
 		else
-			echo "/usr/sbin/apachectl start"
-			/usr/sbin/apachectl start
+			if [ -x /usr/sbin/apachectl ] ; then
+				echo "/usr/sbin/apachectl start"
+				/usr/sbin/apachectl start
+			elif [ -x /usr/sbin/start_apache2 ] ; then
+				/usr/sbin/start_apache2 -k start
+			fi
 		fi
 		;;
 	esac
@@ -135,6 +141,9 @@ case "$program" in
 esac
 #
 # $Log: docker-entrypoint.sh,v $
+# Revision 1.17  2023-07-26 22:17:03+05:30  Cprogrammer
+# use start_apache2 for openSUSE tumbleweed
+#
 # Revision 1.16  2023-07-22 23:23:39+05:30  Cprogrammer
 # removed now redundant inlookup fix of creating named piples
 # fixed indentation

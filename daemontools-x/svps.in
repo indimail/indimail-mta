@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.16 2023-03-13 17:47:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.17 2023-07-26 22:16:10+05:30 Cprogrammer Exp mbhangui $
 #
 
 doit()
@@ -176,7 +176,12 @@ elif [ -d /var/run/svscan ] ; then
 else
 	pidfile=@servicedir@/.svscan.pid
 fi
-svpid=$(sed -n '$p' $pidfile)
+if [ -f $pidfile ] ; then
+	svpid=$(sed -n '$p' $pidfile)
+else
+	echo "svscan not running: $pdfile: No such file or directory" 1>&2
+	exit 1
+fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
 	Darwin|FreeBSD)
@@ -228,6 +233,9 @@ fi
 /bin/rm -f /tmp/svps.$$
 #
 # $Log: svps.in,v $
+# Revision 1.17  2023-07-26 22:16:10+05:30  Cprogrammer
+# display svscan not running if svscan is not up
+#
 # Revision 1.16  2023-03-13 17:47:47+05:30  Cprogrammer
 # added -t, --term option
 #
