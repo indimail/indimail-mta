@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# $Id: test-indimail-mta,v 1.1 2023-07-26 23:56:10+05:30 Cprogrammer Exp mbhangui $
+#
+start=$(date +'%s')
 user=mbhangui
 real_domain=argos.indimail.org
 dkim_key=/etc/indimail/control/domainkeys/$real_domain/$(echo $real_domain | cut -d. -f1)
@@ -1736,4 +1740,15 @@ sudo /bin/rm -rf $sysconfdir/users
 echo
 echo "All $tcount tests succeeded"
 failed=0
+end=$(date +'%s')
+secs=$(($end-$start))
+printf '%d days, %d hours, %d minutes, %d seconds\n' $((secs/86400)) $((secs%86400/3600)) $((secs%3600/60)) \
+	  $((secs%60))
 exit 0
+
+#
+# $Log: test-indimail-mta,v $
+# Revision 1.1  2023-07-26 23:56:10+05:30  Cprogrammer
+# Initial revision
+#
+#

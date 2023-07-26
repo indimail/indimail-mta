@@ -1,4 +1,8 @@
 #!/bin/sh
+#
+# $Id: test-dkim,v 1.1 2023-07-26 23:56:03+05:30 Cprogrammer Exp mbhangui $
+#
+start=$(date +'%s')
 verbose=0
 testdir=/tmp/qmail-test
 domainkey_dir=$testdir/domainkeys
@@ -1337,4 +1341,14 @@ tcount=$(expr $tcount + 1)
 
 #sudo /bin/rm -f $domainkey_dir
 echo "All $tcount tests succeeded"
+end=$(date +'%s')
+secs=$(($end-$start))
+printf '%d days, %d hours, %d minutes, %d seconds\n' $((secs/86400)) $((secs%86400/3600)) $((secs%3600/60)) \
+	  $((secs%60))
 exit 0
+#
+# $Log: test-dkim,v $
+# Revision 1.1  2023-07-26 23:56:03+05:30  Cprogrammer
+# Initial revision
+#
+#
