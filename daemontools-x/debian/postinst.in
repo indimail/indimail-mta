@@ -217,7 +217,6 @@ if [ $upgrade -eq 1 ] ; then # upgrade
 fi
 (
 if [ ! -d ${logdir} ] ; then
-  echo "Creating ${logdir}"
   /bin/mkdir ${logdir}
 fi
 /bin/chown -R qmaill:nofiles ${logdir}
