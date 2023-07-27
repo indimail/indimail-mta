@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.693 2023-07-10 12:46:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.694 2023-07-27 19:43:03+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.693 2023-07-10 12:46:23+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.694 2023-07-27 19:43:03+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5806,8 +5806,13 @@ echo "--pid-file=\$PIDFILE 2>&1"
 dump_run_header
 echo "MYSQL_BASE=$mysqlPrefix"
 echo ""
+echo "if [ -x \$MYSQL_BASE/bin/mariadb-admin ] ; then"
+echo "  mysqladmin=\$MYSQL_BASE/bin/mariadb-admin"
+echo "else"
+echo "  mysqladmin=\$MYSQL_BASE/bin/mysqladmin"
+echo "fi"
 echo "exec 2>&1"
-echo "exec \$MYSQL_BASE/bin/mysqladmin --defaults-file=$conf_file \\"
+echo "exec \$mysqladmin --defaults-file=$conf_file \\"
 echo "  -u admin -p$ADMIN_PASS shutdown"
 ) > "$DESTDIR"$SERVICEDIR/mysql.$port/shutdown
 /bin/chmod 500 "$DESTDIR"$SERVICEDIR/mysql.$port/shutdown
@@ -5864,10 +5869,15 @@ if [ $force -eq 1 -o ! -f $sysconfdir/logrotate.mysql ] ; then
 	echo "    compress"
 	echo "  postrotate"
 	echo "    # just if mysqld is really running"
-	echo "    if test -x /usr/bin/mysqladmin && \\"
-	echo "       $mysqlPrefix/bin/mysqladmin ping &>/dev/null"
+	echo "    if [ -x /usr/bin/mariadb-admin ] ; then"
+	echo "      mysqladmin=$mysqlPrefix/bin/mariadb-admin"
+	echo "    else"
+	echo "      mysqladmin=$mysqlPrefix/bin/mysqladmin"
+	echo "    fi"
+	echo "    if test -x $mysqladmin && \\"
+	echo "       $mysqladmin ping &>/dev/null"
 	echo "    then"
-	echo "      $mysqlPrefix/bin/mysqladmin --defaults-file=$sysconfdir/indimail.cnf \\"
+	echo "      $mysqladmin --defaults-file=$sysconfdir/indimail.cnf \\"
 	echo "        -u admin -p$ADMIN_PASS flush-logs"
 	echo "    fi"
 	echo "  endscript"
@@ -7329,11 +7339,16 @@ mrtg_extra()
 	fi
 
 	if [ -d $LOGDIR/mysql.3306 ] ; then
+		if [ -x \$MYSQL_BASE/bin/mariadb-admin ] ; then
+		  mysqladmin=/usr/bin/mariadb-admin
+		else
+		  mysqladmin=/usr/bin/mysqladmin
+		fi
 		echo "#"
 		echo "# MySQL QUERIES"
 		echo "#"
 		echo "Title[mysql_queries]: MySQL query count - $1"
-		echo "Target[mysql_queries]: \`/usr/bin/mysqladmin -u $REPL_USER -p$REPL_PASS ver|awk '/Qu/{q=\$20;s=\$7}/Up/{u=\$0}/Se/{v=\$3}END{print q\"\\n\"s\"\\n\"u\"\\nMySQL version \"v}'|sed 's/Uptime:[[:space:]]\+//'\`"
+		echo "Target[mysql_queries]: \`$mysqladmin -u $REPL_USER -p$REPL_PASS ver|awk '/Qu/{q=\$20;s=\$7}/Up/{u=\$0}/Se/{v=\$3}END{print q\"\\n\"s\"\\n\"u\"\\nMySQL version \"v}'|sed 's/Uptime:[[:space:]]\+//'\`"
 		echo "Options[mysql_queries]: nopercent, growright, integer, perminute, pngdate"
 		echo "MaxBytes[mysql_queries]: 250000"
 		echo "PageTop[mysql_queries]: <h1>MySQL query count</h1>"

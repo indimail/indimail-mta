@@ -59,6 +59,8 @@ o added timestamp in installation logs
 30. create_services: fixed typo for mysql_pass in create_services
 - 26/07/2023
 31. smtpd.c: renamed check_recipient_cdb() to recipients_ext()
+- 27/07/2023
+32. svctool: use mariadb-admin if present instead of mysqladmin
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023
