@@ -111,7 +111,7 @@ case "$program" in
 			echo "enabling @servicedir@/php-fpm"
 			/bin/rm -f @servicedir@/php-fpm/down
 		fi
-		if [ -f @servicedir@/httpd ] ; then
+		if [ -d @servicedir@/httpd ] ; then
 			if [ -f @servicedir@/httpd/down ] ; then
 				echo "enabling @servicedir@/httpd"
 				/bin/rm -f @servicedir@/httpd/down
