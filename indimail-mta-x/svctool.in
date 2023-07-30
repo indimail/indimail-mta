@@ -9905,7 +9905,7 @@ do
 		diff "$DESTDIR"$CONTROLDIR/$i $out > /dev/null
 		if [ $? -ne 0 ] ; then
 			echo "updating $DESTDIR""$CONTROLDIR/$i with $defaultHost"
-			/bin/mv $out "$DESTDIR"$CONTROLDIR/$i
+			/bin/cp $out "$DESTDIR"$CONTROLDIR/$i
 		fi
 		/bin/rm -f $out
 	fi
