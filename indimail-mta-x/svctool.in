@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.694 2023-07-27 19:43:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.695 2023-07-30 19:03:19+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.694 2023-07-27 19:43:03+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.695 2023-07-30 19:03:19+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9889,6 +9889,7 @@ if [ -z "$defaultHost" -o -z "$defaultDomain" ] ; then
 	exit 1
 fi
 orig=$(cat "$DESTDIR"$CONTROLDIR/me)
+
 # config-fast - me, defaulthost, envnoathost, defaultdomain,
 # plusdomain, locals, rcpthosts, virtualdomains
 /usr/libexec/indimail/config-fast --quiet $defaultDomain
@@ -9896,11 +9897,15 @@ out=$(mktemp -t recontrolXXXXXX)
 for i in nodnscheck locals rcpthosts smtpgreeting me
 do
 	if [ -f "$DESTDIR"$CONTROLDIR/$i ] ; then
-		sed -e "s{^$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i > $out
+		if [ "$i" = "nodnscheck" ] ; then
+			sed -e "s{^@"$orig"{@"$defaultHost"{g" "$DESTDIR"$CONTROLDIR/$i > $out
+		else
+			sed -e "s{^$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i > $out
+		fi
 		diff "$DESTDIR"$CONTROLDIR/$i $out > /dev/null
 		if [ $? -ne 0 ] ; then
 			echo "updating $DESTDIR""$CONTROLDIR/$i with $defaultHost"
-			sed -i "s{^$orig{$defaultHost{g" "$DESTDIR"$CONTROLDIR/$i
+			/bin/mv $out "$DESTDIR"$CONTROLDIR/$i
 		fi
 		/bin/rm -f $out
 	fi
