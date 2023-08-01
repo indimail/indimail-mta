@@ -1,5 +1,8 @@
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.29  2023-08-02 02:10:06+05:30  Cprogrammer
+ * added argument for -b to specify bigtodo or nobigtodo
+ *
  * Revision 1.28  2022-01-30 09:29:09+05:30  Cprogrammer
  * fixed return status when creating a queue
  * allow configurable big/small todo/intd
@@ -160,7 +163,7 @@ usage()
 	char            strnum1[FMT_ULONG];
 	char            strnum2[FMT_ULONG];
 
-	strnum1[fmt_int(strnum1, auto_split)] = 0;
+	strnum1[fmt_int(strnum1, split)] = 0;
 	strnum2[fmt_int(strnum2, bigtodo)] = 0;
 	strerr_warn6(WARN,
 			"usage: queue-fix [-irmNv] [-s split] queue_dir\n"
@@ -1030,11 +1033,11 @@ main(int argc, char **argv)
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
 		split = auto_split;
-	while ((opt = getopt(argc, argv, "bimNvs:r")) != opteof) {
+	while ((opt = getopt(argc, argv, "b:imNvs:r")) != opteof) {
 		switch (opt)
 		{
 		case 'b':
-			bigtodo = 1;
+			scan_int(optarg, &bigtodo);
 			break;
 		case 'i':
 			flag_interactive = 1;
@@ -1097,7 +1100,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.28 2022-01-30 09:29:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.29 2023-08-02 02:10:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

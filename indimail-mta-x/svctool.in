@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.695 2023-07-30 19:03:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.696 2023-08-02 02:10:42+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.695 2023-07-30 19:03:19+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.696 2023-08-02 02:10:42+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2227,9 +2227,14 @@ if [ ! -f $t/tlsserverciphers ] ; then
 		fi
 	fi
 fi
+max=$(openssl ciphers -v | grep TLS | awk '{print $2}' | sort | uniq | tail -1)
+if [ -z "$max" ] ; then
+	max=$(openssl ciphers -v | grep SSL | awk '{print $2}' | sort | uniq | tail -1)
+	[ -z "$max" ] && m="TLSv1_2"
+fi
 if [ ! -f $t/tlsservermethod ] ; then
 	echo tlsservermethod
-	echo TLSv1_2 > $t/tlsservermethod
+	echo $max > $t/tlsservermethod
 fi
 if [ ! -f $t/tlsclientciphers ] ; then
 	echo "tlsclientciphers"
@@ -2237,7 +2242,7 @@ if [ ! -f $t/tlsclientciphers ] ; then
 fi
 if [ ! -f $t/tlsclientmethod ] ; then
 	echo tlsclientmethod
-	echo TLSv1_2 > $t/tlsclientmethod
+	echo $max > $t/tlsclientmethod
 fi
 
 if [ ! -f "$DESTDIR"$sysconfdir/procmailrc ] ; then

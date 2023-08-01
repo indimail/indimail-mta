@@ -1,8 +1,9 @@
+.\" vim: tw=75
 .TH queue-fix 8
 .SH NAME
 queue-fix \- Create or Repair a qmail queue structure
 .SH SYNOPSIS
-\fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBr\fR -\fBb\fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
+\fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBr\fR -\fBb \fIbig\fR \fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
 
 .SH DESCRIPTION
 \fBqueue-fix\fR is a small utility for checking and repairing the qmail queue
@@ -21,7 +22,7 @@ files in @controldir@/defaultqueue directory (for any uid).
 to set permissions for various directories.
 
 .SH OPTIONS
-.TP
+.TP 3
 \fB\-i\fR
 Interactive mode
 
@@ -31,8 +32,9 @@ Test mode. This option will report inconsistencies in the queue and
 not make any changes.
 
 .TP
-\fB\-b\fR
-Create \fItodo\fR and \fIintd\fR directory with queue subdirectory split.
+\fB\-b\fR \fIbig\fR
+Create \fItodo\fR and \fIintd\fR directory with queue subdirectory split if
+\fIbig\fR is specified as non-zero.
 
 .TP
 \fB\-s\fR \fIsplit\fR

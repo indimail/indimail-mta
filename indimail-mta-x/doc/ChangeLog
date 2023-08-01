@@ -63,6 +63,9 @@ o added timestamp in installation logs
 32. svctool: use mariadb-admin if present instead of mysqladmin
 - 30/07/2023
 33. svctool: fixed nodnscheck update in recontrol
+- 02/08/2023
+34. svctool: put max supported protocol in tls[client|server]method
+35. queue-fix.c: added argument for -b option to specify bigtodo or nobigtodo
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023
