@@ -2227,9 +2227,9 @@ if [ ! -f $t/tlsserverciphers ] ; then
 		fi
 	fi
 fi
-max=$(openssl ciphers -v | grep TLS | awk '{print $2}' | sort | uniq | tail -1)
+max=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 | sed 's{\.{_{')
 if [ -z "$max" ] ; then
-	max=$(openssl ciphers -v | grep SSL | awk '{print $2}' | sort | uniq | tail -1)
+	max=$(openssl ciphers -v | awk '{print $2}' | grep SSL | sort | uniq | tail -1)
 	[ -z "$max" ] && m="TLSv1_2"
 fi
 if [ ! -f $t/tlsservermethod ] ; then
