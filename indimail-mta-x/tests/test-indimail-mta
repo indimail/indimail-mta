@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.1 2023-07-26 23:56:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.2 2023-08-04 00:09:43+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=mbhangui
@@ -21,6 +21,7 @@ qmail_newu=$sbindir/qmail-newu
 qmail_start=$sbindir/qmail-start
 qmail_inject=$bindir/qmail-inject
 qmail_smtpd=$sbindir/qmail-smtpd
+qmail_remote=$sbindir/qmail-remote
 setuidgid=$bindir/setuidgid
 tcpserver=$bindir/tcpserver
 qmail_queue=$sbindir/qmail-queue
@@ -32,7 +33,7 @@ HOSTNAME=$(uname -n)
 
 trap do_cleanup_failed EXIT
 
-function do_cleanup_failed()
+do_cleanup_failed()
 {
 	if [ $failed -eq 0 ] ; then
 		return 0
@@ -52,7 +53,7 @@ function do_cleanup_failed()
 	sudo /bin/rm -rf $sysconfdir/users
 }
 
-function check_mail()
+check_mail()
 {
 	count=0
 	ret=1
@@ -77,7 +78,7 @@ function check_mail()
 	) >> $logdir/mail/mail.log 2>&1
 }
 
-function check_mail_header()
+check_mail_header()
 {
 	count=0
 	ret=1
@@ -109,7 +110,7 @@ function check_mail_header()
 	) >> $logdir/mail/mail.log 2>&1
 }
 
-function shutdown_svscan()
+shutdown_svscan()
 {
 	if [ -d $servicedir/.svscan/log ] ; then
 		sudo kill $1
@@ -122,7 +123,7 @@ function shutdown_svscan()
 	fi
 }
 
-function setup_maildir()
+setup_maildir()
 {
 	if [ -d $maildir/new ] ; then
 		find $maildir/new -type f -exec /bin/rm -f {} \;
@@ -136,7 +137,7 @@ function setup_maildir()
 	done
 }
 
-function setup_assign()
+setup_assign()
 {
 	echo "Creating $sysconfdir/users/assign" 1>&2
 	(
@@ -148,13 +149,13 @@ function setup_assign()
 	$qmail_newu $sysconfdir/users
 }
 
-function setup_queue()
+setup_queue()
 {
 	echo "Creating queue in $testdir/queue" 1>&2
 	sudo queue-fix $testdir/queue
 }
 
-function setup_config()
+setup_config()
 {
 	echo "Creating default config files in $cntrldir"
 	env CONTROLDIR=$cntrldir config-fast $HOSTNAME
@@ -173,7 +174,7 @@ function setup_config()
 	tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16 > $cntrldir/batvkey
 }
 
-function test_tcpclient_script()
+test_tcpclient_script()
 {
 	(
 	echo "#!/bin/sh"
@@ -288,7 +289,7 @@ function test_tcpclient_script()
 	fi
 }
 
-function run_qmail_send()
+run_qmail_send()
 {
 	(
 	sudo env - \
@@ -304,7 +305,7 @@ function run_qmail_send()
 	) &
 }
 
-function get_send_pid()
+get_send_pid()
 {
 	while true
 	do
@@ -317,7 +318,7 @@ function get_send_pid()
 	echo $send_pid
 }
 
-function test_qmail_inject()
+test_qmail_inject()
 {
 	echo "Starting qmail-inject"
 	(
@@ -349,7 +350,7 @@ function test_qmail_inject()
 	fi
 }
 
-function create_authsmtp()
+create_authsmtp()
 {
 	if [ -f $testdir/bin/authsmtp ] ; then
 		return 0
@@ -375,7 +376,7 @@ function create_authsmtp()
 	chmod +x $testdir/bin/authsmtp
 }
 
-function start_tcpserver_smtp()
+start_tcpserver_smtp()
 {
 	echo
 	echo "Starting SMTP on port $smtp_port using tcpserver"
@@ -433,7 +434,7 @@ function start_tcpserver_smtp()
 	fi
 }
 
-function start_tcpserver_smtp_unix()
+start_tcpserver_smtp_unix()
 {
 	echo
 	echo "Starting SMTP on socket $smtp_socket using tcpserver"
@@ -475,7 +476,7 @@ function start_tcpserver_smtp_unix()
 	fi
 }
 
-function test_smtp_tls()
+test_smtp_tls()
 {
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port -tls
 	check_mail
@@ -498,7 +499,7 @@ function test_smtp_tls()
 	fi
 }
 
-function test_smtp_notls()
+test_smtp_notls()
 {
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port
 	check_mail
@@ -523,7 +524,7 @@ function test_smtp_notls()
 	fi
 }
 
-function test_smtp_dkimverify()
+test_smtp_dkimverify()
 {
 	(
 	echo "To: $user@$HOSTNAME"
@@ -563,7 +564,7 @@ function test_smtp_dkimverify()
 	fi
 }
 
-function test_smtp_bogofilter()
+test_smtp_bogofilter()
 {
 	(
 	echo "To: $user@$HOSTNAME"
@@ -593,7 +594,7 @@ function test_smtp_bogofilter()
 	fi
 }
 
-function test_smtps()
+test_smtps()
 {
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect
 	check_mail
@@ -616,7 +617,7 @@ function test_smtps()
 	fi
 }
 
-function test_smtp_auth_login()
+test_smtp_auth_login()
 {
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
@@ -645,7 +646,7 @@ function test_smtp_auth_login()
 	fi
 }
 
-function test_smtp_auth_plain()
+test_smtp_auth_plain()
 {
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --a PLAIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
@@ -674,7 +675,7 @@ function test_smtp_auth_plain()
 	fi
 }
 
-function test_smtp_auth_cram_md5()
+test_smtp_auth_cram_md5()
 {
 	pass=$(sudo grep $user /etc/shadow|cut -d: -f2)
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --a CRAM-MD5 -au "$user" -ap "$pass"
@@ -704,7 +705,7 @@ function test_smtp_auth_cram_md5()
 	fi
 }
 
-function test_qmail_remote_auth()
+test_qmail_remote_auth()
 {
 	case $1 in
 		"CRAM-MD5")
@@ -727,7 +728,7 @@ function test_qmail_remote_auth()
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port $u $pass" \
 		AUTH_SMTP="$1" \
 		CONTROLDIR=$cntrldir \
-		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	addr=$(batv -k $(cat $cntrldir/batvkey) -v $(sed -n 1p $testdir/qremote.$$|awk '{print $2}'|sed 's/^.\(.*\).$/\1/') 2>/dev/null)
 	batv_status=$?
@@ -793,7 +794,7 @@ function test_qmail_remote_auth()
 	fi
 }
 
-function test_qmail_remote_routing()
+test_qmail_remote_routing()
 {
 	(
 	echo "From: $user@$HOSTNAME"
@@ -808,7 +809,7 @@ function test_qmail_remote_routing()
 	env - \
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port" \
 		CONTROLDIR=$cntrldir \
-		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	/bin/rm -f $testdir/qremote.$$
 	check_mail
@@ -835,7 +836,7 @@ function test_qmail_remote_routing()
 	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
 	env - \
 		CONTROLDIR=$cntrldir \
-		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 	check_mail
@@ -860,7 +861,7 @@ function test_qmail_remote_routing()
 	fi
 }
 
-function test_qmail_remote_auth_cdb()
+test_qmail_remote_auth_cdb()
 {
 	echo "$HOSTNAME:127.0.0.1:$smtp_port /s" > $cntrldir/smtproutes
 	(
@@ -889,7 +890,7 @@ function test_qmail_remote_auth_cdb()
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port /s" \
 		AUTH_SMTP="" \
 		CONTROLDIR=$cntrldir \
-		/usr/sbin/qmail-remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	check_mail
 	if [ $? -eq 0 ] ; then
@@ -918,7 +919,7 @@ function test_qmail_remote_auth_cdb()
 	/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 }
 
-function terminate_smtp()
+terminate_smtp()
 {
 	if [ -n "$1" ] ; then
 		sudo kill $*
@@ -926,7 +927,7 @@ function terminate_smtp()
 	fi
 }
 
-function terminate_send()
+terminate_send()
 {
 	if [ -n "$1" ] ; then
 		sudo kill $*
@@ -934,7 +935,7 @@ function terminate_send()
 	fi
 }
 
-function start_tcpserver_smtps
+start_tcpserver_smtps()
 {
 	echo
 	echo "Starting SMTPS on port $smtp_port using tcpserver"
@@ -986,7 +987,7 @@ function start_tcpserver_smtps
 	fi
 }
 
-function start_tcpserver_smtps_unix
+start_tcpserver_smtps_unix()
 {
 	echo
 	echo "Starting SMTPS on socket $smtp_socket using tcpserver"
@@ -1018,7 +1019,7 @@ function start_tcpserver_smtps_unix
 	fi
 }
 
-function setup_svscan_without_svscanlog()
+setup_svscan_without_svscanlog()
 {
 	echo
 	echo "Starting svscan services without svscanlog"
@@ -1056,7 +1057,7 @@ function setup_svscan_without_svscanlog()
 	chmod +x $servicedir/qmail-send/log/run
 }
 
-function start_svscan_without_svscanlog()
+start_svscan_without_svscanlog()
 {
 	(
 	sudo env - \
@@ -1100,7 +1101,7 @@ function start_svscan_without_svscanlog()
 	done
 }
 
-function test_stop_smtps()
+test_stop_smtps()
 {
 	sudo svc -d $servicedir/smtpd
 	sleep $sleep_int
@@ -1119,7 +1120,7 @@ function test_stop_smtps()
 	fi
 }
 
-function test_stop_supervise()
+test_stop_supervise()
 {
 	sudo svc -dx $servicedir/smtpd
 	sleep $sleep_int
@@ -1138,7 +1139,7 @@ function test_stop_supervise()
 	fi
 }
 
-function test_restart_service_using_hup()
+test_restart_service_using_hup()
 {
 	sudo kill -1 $svpid
 	sleep $sleep_int
@@ -1157,7 +1158,7 @@ function test_restart_service_using_hup()
 	fi
 }
 
-function test_restart_service_using_svc()
+test_restart_service_using_svc()
 {
 	tcpserver_pid1=$(sudo svstat $servicedir/smtpd|awk '{print $6}')
 	sudo svc -r $servicedir/smtpd
@@ -1178,7 +1179,7 @@ function test_restart_service_using_svc()
 	fi
 }
 
-function test_multilog()
+test_multilog()
 {
 	grep "HELO <$HOSTNAME> MAIL from <mbhangui@$HOSTNAME> RCPT <mbhangui@$HOSTNAME> AUTH <local-rcpt> Size: .* TLS=TLSv1.3" $logdir/smtpd/current >/dev/null
 	if [ $? -eq 0 ] ; then
@@ -1195,7 +1196,7 @@ function test_multilog()
 	fi
 }
 
-function test_blocked()
+test_blocked()
 {
 	if [ $# -eq 0 ] ; then
 		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect >/dev/null
@@ -1225,7 +1226,7 @@ function test_blocked()
 	fi
 }
 
-function setup_svscan_with_svscanlog()
+setup_svscan_with_svscanlog()
 {
 	echo
 	echo "Starting svscan services with svscanlog"
@@ -1248,7 +1249,7 @@ function setup_svscan_with_svscanlog()
 	#SMTPS
 }
 
-function start_svscan_with_svscanlog()
+start_svscan_with_svscanlog()
 {
 	(
 	cd $servicedir/.svscan
@@ -1271,7 +1272,7 @@ function start_svscan_with_svscanlog()
 	fi
 }
 
-function test_svscan_log()
+test_svscan_log()
 {
 	grep "@.* svscan: info: pid: .*: starting..." $logdir/svscan/current >/dev/null
 	if [ $? -eq 0 ] ; then
@@ -1288,7 +1289,7 @@ function test_svscan_log()
 	fi
 }
 
-function test_svscan_run()
+test_svscan_run()
 {
 	if [ "$(cat $testdir/svscan.out 2>/dev/null)" = "hello world" ] ; then
 		tcount=$(expr $tcount + 1)
@@ -1304,7 +1305,7 @@ function test_svscan_run()
 	fi
 }
 
-function test_svscan_shutdown()
+test_svscan_shutdown()
 {
 	shutdown_svscan $svpid
 	if [ "$(cat $testdir/svscan.out 2>/dev/null)" = "goodbye world" ] ; then
@@ -1321,7 +1322,7 @@ function test_svscan_shutdown()
 	fi
 }
 
-function start_new_service()
+start_new_service()
 {
 	sudo /bin/rm -rf $servicedir/sleep
 	/bin/rm -f $testdir/sleep.out
@@ -1411,7 +1412,7 @@ function start_new_service()
 	fi
 }
 
-function remove_new_service()
+remove_new_service()
 {
 	mv $servicedir/sleep $servicedir/.sleep
 	sudo svc -dx $servicedir/.sleep $servicedir/.sleep/log
@@ -1432,7 +1433,7 @@ function remove_new_service()
 	fi
 }
 
-function test_supervise_subreaper()
+test_supervise_subreaper()
 {
 	printf "#!/bin/sh\nsleep 2244 &\n" > $servicedir/sleep/run
 	chmod +t $servicedir/sleep/run
@@ -1475,7 +1476,7 @@ function test_supervise_subreaper()
 	fi
 }
 
-function test_recipients()
+test_recipients()
 {
 	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	(
@@ -1597,7 +1598,7 @@ function test_recipients()
 	fi
 }
 
-function do_setup()
+do_setup()
 {
 	echo "Starting Setup"
 	# basic setup for maildir, assign config and queue
@@ -1621,7 +1622,7 @@ function do_setup()
 	) > $logdir/setup/setup.log 2>&1
 }
 
-function do_without_svscan()
+do_without_svscan()
 {
 	# use qmail-start to start qmail-send
 	run_qmail_send
@@ -1669,7 +1670,7 @@ function do_without_svscan()
 	terminate_send $send_pid
 }
 
-function do_svscan_without_svscanlog()
+do_svscan_without_svscanlog()
 {
 	# start svscan without svscanlog
 	setup_svscan_without_svscanlog
@@ -1687,7 +1688,7 @@ function do_svscan_without_svscanlog()
 	shutdown_svscan $svpid
 }
 
-function do_svscan_with_svscanlog()
+do_svscan_with_svscanlog()
 {
 	# start svscan with svscanlog
 	setup_svscan_with_svscanlog
@@ -1748,6 +1749,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.2  2023-08-04 00:09:43+05:30  Cprogrammer
+# removed bashism
+#
 # Revision 1.1  2023-07-26 23:56:10+05:30  Cprogrammer
 # Initial revision
 #
