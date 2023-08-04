@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.167 2023-07-07 10:35:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.168 2023-08-04 08:48:21+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -2627,8 +2627,8 @@ do_smtp(char *fqdn)
 			quit(553, 1, "DConnected to ", " but server does not support unicode in email addresses", NULL);
 	}
 #endif
-	if (auth_capa)
-		smtp_auth(use_auth_smtp, use_size);
+	if (auth_capa && user.len && pass.len)
+		smtp_auth(env_get("AUTH_SMTP"), use_size);
 	else
 		mailfrom(use_size);
 	substdio_flush(&smtpto);
@@ -3496,7 +3496,6 @@ main(int argc, char **argv)
 	protocol_t = smtps ? 'S' : 's';
 	use_auth_smtp = env_get("AUTH_SMTP");
 	relayhost = get_relayhost(recips);
-	use_auth_smtp = env_get("AUTH_SMTP");
 #ifdef SMTPUTF8
 	enable_utf8 = env_get("SMTPUTF8");
 #endif
@@ -3690,13 +3689,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.167 2023-07-07 10:35:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.168 2023-08-04 08:48:21+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.168  2023-08-04 08:48:21+05:30  Cprogrammer
+ * BUG: SMTP Auth being tried when it shouldn't
+ *
  * Revision 1.167  2023-07-07 10:35:43+05:30  Cprogrammer
  * use NULL instead of 0 for null pointer
  *
