@@ -11912,9 +11912,9 @@ case $option in
 	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indimail-backup.$EXT.tar.gz
 	/bin/rm -f /root/indimail_config.txt
 	if [ -x $mysqlPrefix/bin/mariadb-dump ] ; then
-		$mysqlPrefix/bin/mariadb-dump
+		mysqldump=$mysqlPrefix/bin/mariadb-dump
 	else
-		$mysqlPrefix/bin/mysqldump
+		mysqldump=$mysqlPrefix/bin/mysqldump
 	fi
 	if [ -f $HOME/.mylogin.cnf ] ; then
 		$mysqldump --login-path=admin --extended-insert \
