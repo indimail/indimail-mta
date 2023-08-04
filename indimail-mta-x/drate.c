@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.22  2023-08-04 21:16:57+05:30  Cprogrammer
+ * added missing call to uidinit
+ *
  * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -399,6 +402,8 @@ new:
 		strerr_die4sys(111, FATAL, "unable to write: ", domain, ": ");
 	if (lock_ex(wfd) == -1)
 		cleanup(domain, "unable to lock", t);
+	if (uidinit(1, 0) == -1 || auto_uids == -1 || auto_gidq == -1)
+		strerr_die2sys(111, FATAL, "unable to initialize uids/gids: ");
 	if (chown(domain, auto_uids, auto_gidq))
 		cleanup(domain, "unable to chown", t);
 	if (ftruncate(wfd, 0) == -1)
@@ -628,7 +633,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.21 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: drate.c,v 1.22 2023-08-04 21:16:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;

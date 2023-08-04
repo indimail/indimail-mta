@@ -702,7 +702,7 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 	struct mq_attr  attr;
 	mqd_t           mq_queue;
 
-	if (uidinit(1, 1) == -1 || auto_uidq == -1 || auto_uids == -1 || auto_gidq == -1) {
+	if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_uids == -1 || auto_gidq == -1) {
 		strerr_warn1("alert: qscheduler: failed to get uids, gids: ", &strerr_sys);
 		die(1);
 	}

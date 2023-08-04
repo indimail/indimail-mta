@@ -3611,10 +3611,10 @@ warn-auto.sh surblqueue.sh conf-prefix
 drate: \
 load drate.o variables.o auto_uids.o auto_qmail.o \
 auto_control.o control.o do_rate.o getDomainToken.o \
-parse_env.o
+parse_env.o get_uid.o
 	./load drate variables.o auto_uids.o parse_env.o \
 	auto_qmail.o do_rate.o getDomainToken.o wildmat.o \
-	auto_control.o control.o -lm $(QMAILLIB)
+	auto_control.o control.o get_uid.o -lm $(QMAILLIB)
 
 drate.o: \
 compile drate.c variables.h auto_uids.h auto_qmail.h \
