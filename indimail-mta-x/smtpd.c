@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.295 2023-07-26 22:23:11+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.296 2023-08-07 00:15:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -31,6 +31,7 @@
 #include <date822fmt.h>
 #include <base64.h>
 #include <getln.h>
+#include <strerr.h>
 #include "auto_control.h"
 #include "auto_prefix.h"
 #include "control.h"
@@ -151,8 +152,10 @@ static stralloc ssl_option = {0}, certfile = {0}, cafile = {0}, crlfile = {0}, s
 static char   *ciphers;
 static int     smtps = 0;
 static SSL     *ssl = NULL;
+static struct strerr *se;
 #endif
-static char    *revision = "$Revision: 1.295 $";
+static int      tr_success = 0;
+static char    *revision = "$Revision: 1.296 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -549,42 +552,82 @@ flush_io()
 }
 
 no_return void
-die_read(char *str, char *err)
+die_read(char *str, int flag)
 {
-	logerr(1, "read error", NULL);
+	logerr(1, tr_success ? "read error after mail queue" : "read error before mail queue", NULL);
 	if (str)
 		logerr(0, ": ", str, NULL);
-	if (errno)
-		logerr(0, ": ", error_str(errno), NULL);
-	if (err)
-		logerr(0, ": ", err, NULL);
+	if (flag == 0 || flag == 2) {
+		if (errno)
+			logerr(0, ": ", error_str(errno), NULL);
+	}
+#ifdef TLS
+	else {
+		logerr(0, ": ", NULL);
+		while (se) {
+			if (se->v)
+				logerr(0, se->v, NULL);
+			if (se->w)
+				logerr(0, se->w, NULL);
+			if (se->x)
+				logerr(0, se->x, NULL);
+			if (se->y)
+				logerr(0, se->y, NULL);
+			if (se->z)
+				logerr(0, se->z, NULL);
+			se = se->who;
+		}
+	}
+#endif
 	logerr(0, "\n", NULL);
 	logflush();
-	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Sorry, I got read error (#4.4.2)\r\n", NULL);
-	flush();
+	if (flag == 2 && !tr_success) {
+		/*- generally this will not work when read/write from/to 0/1 happens */
+		out("451 Sorry, I got read error (#4.4.2)\r\n", NULL);
+		flush();
+	}
 	_exit(1);
 }
 
 no_return void
-die_write(char *str, char *err)
+die_write(char *str, int flag)
 {
 	static int      i;
 
-	if (i++)
+	if (i++) /*- safety net for recursive call to die_write if out() gets called */
 		_exit(1);
-	logerr(1, "write error", NULL);
+	logerr(1, tr_success ? "write error after mail queue" : "write error before mail queue", NULL);
 	if (str)
 		logerr(0, ": ", str, NULL);
-	if (errno)
-		logerr(0, ": ", error_str(errno), NULL);
-	if (err)
-		logerr(0, ": ", err, NULL);
+	if (flag == 0 || flag == 2) {
+		if (errno)
+			logerr(0, ": ", error_str(errno), NULL);
+	}
+#ifdef TLS
+	else {
+		logerr(0, ": ", NULL);
+		while (se) {
+			if (se->v)
+				logerr(0, se->v, NULL);
+			if (se->w)
+				logerr(0, se->w, NULL);
+			if (se->x)
+				logerr(0, se->x, NULL);
+			if (se->y)
+				logerr(0, se->y, NULL);
+			if (se->z)
+				logerr(0, se->z, NULL);
+			se = se->who;
+		}
+	}
+#endif
+	if (flag == 2 && !tr_success) {
+		/*- generally this will not work when read/write from/to 0/1 happens */
+		out("451 Sorry, I got write error (#4.4.2)\r\n", NULL);
+		flush();
+	}
 	logerr(0, "\n", NULL);
 	logflush();
-	/*- generally this will not work when read/write from/to 0/1 happens */
-	out("451 Sorry, I got write error (#4.4.2)\r\n", NULL);
-	flush();
 	_exit(1);
 }
 
@@ -611,6 +654,7 @@ saferead(int fd, char *buf, int len)
 
 	flush();
 #ifdef TLS
+	se = (struct strerr *) NULL;
 	r = tlsread(fd, buf, len, timeout);
 #else
 	r = timeoutread(timeout, fd, buf, len);
@@ -622,19 +666,12 @@ saferead(int fd, char *buf, int len)
 	if (r <= 0) {
 #ifdef TLS
 		if (ssl) {
-			logerr(1, "client closed connection: ", myssl_error_str(), "\n", NULL);
-			logflush();
+			se = &strerr_tls;
 			ssl_free();
 			ssl = 0;
-			if (r) /*- what's the point in doing this. ssl is already closed */
-				die_read("ssl_timeoutread", myssl_error_str());
-		} else
-		if (r)
-			die_read("timeoutread", NULL);
-#else
-		if (r)
-			die_read("timeoutread", NULL);
+		}
 #endif
+		die_read(!r ?  "client dropped connection" : "connection with client terminated", 1);
 	}
 	return r;
 }
@@ -645,6 +682,7 @@ safewrite(int fd, char *buf, int len)
 	int             r;
 
 #ifdef TLS
+	se = (struct strerr *) NULL;
 	r = tlswrite(fd, buf, len, timeout);
 #else
 	r = timeoutwrite(timeout, fd, buf, len);
@@ -652,15 +690,12 @@ safewrite(int fd, char *buf, int len)
 	if (r <= 0) {
 #ifdef TLS
 		if (ssl) {
+			se = &strerr_tls;
 			ssl_free();
 			ssl = 0;
-			if (r)
-				die_write("ssl_timeoutwrite", myssl_error_str());
-		} else
-			die_write("timeoutwrite", NULL);
-#else
-		die_write("timeoutwrite", NULL);
+		}
 #endif
+		die_write("unable to write to client", 1);
 		_exit(1);
 	}
 	return r;
@@ -1951,7 +1986,7 @@ check_recipient_pwd(char *rcpt, int len)
 	for (;;) {
 		if (getln(&pwss, &line, &match, '\n') == -1) {
 			close(fd);
-			die_read("/etc/passwd", NULL);
+			die_read("/etc/passwd", 2);
 		}
 		if (!line.len) {
 			close(fd);
@@ -2384,7 +2419,7 @@ greetdelay_check(int delay)
 			ssl = 0;
 		}
 #endif
-		die_read(!r ? "client dropped connection" : 0, NULL);
+		die_read(!r ?  "client dropped connection" : "connection with client terminated", 0);
 	}
 	logerr(1, "SMTP Protocol violation - Early Talking\n", NULL);
 	logflush();
@@ -3480,6 +3515,12 @@ smtp_mail(char *arg)
 	 * the environmnent in the previous session
 	 */
 	restore_env();
+	/*-
+	 * record transaction success/failure for
+	 * microsoft server notorious for closing
+	 * connection without sending QUIT
+	 */
+	tr_success = 0;
 	if (f_envret || d_envret || a_envret) {	/* reload control files if in an earlier session, envrules was used */
 		open_control_files2();
 		f_envret = 0;
@@ -4778,6 +4819,7 @@ smtp_data(char *arg)
 	qqx = qmail_close(&qqt);
 	if (!*qqx) { /*- mail is now in queue */
 		acceptmessage(qp);
+		tr_success = 1;
 		log_trans(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, 0);
 		return;
 	}
@@ -4834,7 +4876,7 @@ authgetl(void)
 				ssl = 0;
 			}
 #endif
-			die_read("client dropped connection", NULL);
+			die_read(!i ?  "communication pipe closed" : "communication pipe terminated", 0);
 		}
 		if (authin.s[authin.len] == '\n')
 			break;
@@ -4941,7 +4983,7 @@ authenticate(int method)
 	byte_zero(upbuf, sizeof upbuf);
 	if (method == AUTH_DIGEST_MD5) {
 		if ((n = saferead(po[0], respbuf, 33)) == -1)
-			die_read("err reading digest md5 response", NULL);
+			die_read("err reading digest md5 response", 0);
 		respbuf[n] = 0;
 		close(po[0]);
 	}
@@ -4953,7 +4995,7 @@ authenticate(int method)
 		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
 			substdio_fdbuf(&pwd_in, plaintxtread, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
 			if (substdio_copy(&ssout, &pwd_in) == -2)
-				die_read("error reading checkpassword pipe", NULL);
+				die_read("error reading diget-md5 pipe", 0);
 		}
 #endif
 		/*
@@ -4984,7 +5026,7 @@ authenticate(int method)
 				ssl = 0;
 			}
 #endif
-			die_read("failed to get OK from client", NULL);
+			die_read("failed to read digest-md5 reponse", 0);
 		}
 		if (n)
 			respbuf[n] = 0;
@@ -6982,7 +7024,7 @@ command:
 			ssl = 0;
 		}
 #endif
-		die_read("client dropped connection", NULL);
+		die_read("client dropped connection, waiting for command", 2);
 	} else
 	if (i < 0)
 		die_lcmd(i);
@@ -7011,6 +7053,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.296  2023-08-07 00:15:53+05:30  Cprogrammer
+ * refactored error logging using die_read, die_write
+ *
  * Revision 1.295  2023-07-26 22:23:11+05:30  Cprogrammer
  * renamed check_recipient_cdb() to recipients_ext()
  *
@@ -7350,7 +7395,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.295 2023-07-26 22:23:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.296 2023-08-07 00:15:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
