@@ -1,3 +1,10 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @release@-@version@%{?dist}
+Release @version@-@release@ Start 27/04/2023 End XX/XX/XXXX
+======= Release Highlights ================================================
+===========================================================================
+- 08/07/2023
+01. tcpclient.c, dotls.c: use strerr_tls for tls errors
+
 * Sun Apr 23 2023 17:50:00 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 13/02/2023 End 23/04/2023
 ======= Release Highlights ================================================

@@ -123,7 +123,7 @@ sslio(SSL *myssl, int err_to_net, int out, int clearout, int clearerr, unsigned 
 			if (n == 0)
 				flagexitasap = 1;
 			if ((r = safewrite(sslout, tbuf, n)) < 0) {
-				strerr_warn2(FATAL, "sslio: unable to write to network: ", &strerr_sys);
+				strerr_warn2(FATAL, "sslio: unable to write to network: ", &strerr_tls);
 				return (1);
 			}
 		}
@@ -137,15 +137,14 @@ sslio(SSL *myssl, int err_to_net, int out, int clearout, int clearerr, unsigned 
 				flagexitasap = 1;
 			if ((r = (err_to_net ? safewrite(sslout, tbuf, n) : write(2, tbuf, n))) < 0) {
 				strerr_warn3(FATAL, "sslio: unable to write to ",
-						err_to_net ? "network: " : "stderr: ", &strerr_sys);
+						err_to_net ? "network: " : "stderr: ", &strerr_tls);
 				return (1);
 			}
 		}
 		if (FD_ISSET(sslin, &rfds)) {
 			/*- data on sslin */
 			if ((n = saferead(sslin, tbuf, sizeof(tbuf))) < 0) {
-				strerr_warn3(FATAL, "sslio: unable to read from network: ",
-						ERR_error_string(SSL_get_error(myssl, n), 0), 0);
+				strerr_warn2(FATAL, "sslio: unable to read from network: ", &strerr_tls);
 				flagexitasap = 1;
 			} else
 			if (n == 0)

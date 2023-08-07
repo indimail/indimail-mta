@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.31 2023-06-18 13:24:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.32 2023-08-08 00:23:24+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.31 2023-06-18 13:24:14+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.32 2023-08-08 00:23:24+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -293,7 +293,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 	case smtp:
 		/*- read greeting */
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+			strerr_die2(111, FATAL, "getln: read-smtpd: ", &strerr_tls);
 		if (!line.len || !match)
 			strerr_die2x(111, FATAL, "failed to get greeting");
 		if (verbose && write(1, line.s, line.len) == -1)
@@ -304,9 +304,9 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 			strerr_die2x(111, FATAL, "connected but greeting failed");
 		/*- issue STARTTLS command and check response */
 		if (tlswrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
-			strerr_die2sys(111, FATAL, "unable to write to network: ");
+			strerr_die2(111, FATAL, "unable to write to network: ", &strerr_tls);
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+			strerr_die2(111, FATAL, "getln: read-smtpd: ", &strerr_tls);
 		if (!line.len || !match)
 			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
 		line.s[line.len - 1] = 0;
@@ -314,15 +314,16 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 		if (code != 220)
 			strerr_die4x(111, FATAL, "STARTTLS rejected while ", clientcert, " exists");
 		ssin.p = 0;
-		substdio_flush(&ssin);
+		if (substdio_flush(&ssin) == -1)
+			strerr_die2(111, FATAL, "substdio_flush: ", &strerr_tls);
 		break;
 	case pop3:
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "getln: read-pop3d: ");
+			strerr_die2(111, FATAL, "getln: read-pop3d: ", &strerr_tls);
 		if (tlswrite(sfd, "STLS\r\n", 6, dtimeout) == -1)
-			strerr_die2sys(111, FATAL, "unable to write to network: ");
+			strerr_die2(111, FATAL, "unable to write to network: ", &strerr_tls);
 		if (getln(&ssin, &line, &match, '\n') == -1)
-			strerr_die2sys(111, FATAL, "getln: read-pop3d: ");
+			strerr_die2(111, FATAL, "getln: read-pop3d: ", &strerr_tls);
 		if (!line.len || !match)
 			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
 		if (!case_startb(line.s, 3, "+OK"))
@@ -831,6 +832,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.32  2023-08-08 00:23:24+05:30  Cprogrammer
+ * use strerr_tls for tls errors
+ *
  * Revision 1.31  2023-06-18 13:24:14+05:30  Cprogrammer
  * handle UNIX sockets
  *

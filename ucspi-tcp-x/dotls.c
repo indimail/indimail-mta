@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.22 2023-02-13 20:15:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.23 2023-08-08 00:23:03+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -41,7 +41,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.22 2023-02-13 20:15:42+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.23 2023-08-08 00:23:03+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -190,7 +190,7 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 	for (;;) {
 		if ((i = substdio_get(ss, &ch, 1)) <= 0) {
 			if (i < 0)
-				strerr_die2sys(111, FATAL, "read: ");
+				strerr_die2(111, FATAL, "read: ", &strerr_tls);
 			/*- premature close or read error */
 			return i;
 		}
@@ -229,19 +229,19 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 		case smtp:
 			if (substdio_put(&ssto, "220 ready for tls\r\n", 19) == -1 ||
 					substdio_flush(&ssto) == -1)
-				strerr_die2sys(111, FATAL, "write: ");
+				strerr_die2(111, FATAL, "write: ", &strerr_tls);
 			break;
 		case pop3:
 			if (substdio_put(&ssto, "+OK Begin SSL/TLS negotiation now.\r\n", 37) == -1 ||
 					substdio_flush(&ssto) == -1)
-				strerr_die2sys(111, FATAL, "write: ");
+				strerr_die2(111, FATAL, "write: ", &strerr_tls);
 			break;
 		default:
 			if ((ptr = env_get("BANNER"))) {
 				if (substdio_puts(&ssto, ptr) == -1 ||
 						substdio_put(&ssto, "\n", 1) == -1 ||
 					substdio_flush(&ssto) == -1)
-				strerr_die2sys(111, FATAL, "write: ");
+				strerr_die2(111, FATAL, "write: ", &strerr_tls);
 			}
 			break;
 		}
@@ -521,7 +521,7 @@ smtp_ehlo(char *arg, char *cmmd, int cmmdlen)
 	}
 	if (substdio_put(&ssto, capatext.s, capatext.len) == -1 ||
 			substdio_flush(&ssto) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+		strerr_die2(111, FATAL, "write: ", &strerr_tls);
 	return 0;
 }
 
@@ -599,7 +599,7 @@ pop3_capa(char *arg, char *cmmd, int cmmdlen)
 			substdio_put(&ssto, capatext.s, capatext.len) == -1 ||
 			substdio_put(&ssto, ".\n", 2) == -1 ||
 			substdio_flush(&ssto) == -1)
-		strerr_die2sys(111, FATAL, "write: ");
+		strerr_die2(111, FATAL, "write: ", &strerr_tls);
 	return 0;
 }
 
@@ -1015,7 +1015,7 @@ main(int argc, char **argv)
 				if (substdio_puts(&ssto, ptr) == -1 ||
 						substdio_put(&ssto, "\n", 1) == -1 ||
 					substdio_flush(&ssto) == -1)
-				strerr_die2sys(111, FATAL, "write: ");
+				strerr_die2(111, FATAL, "write: ", &strerr_tls);
 			}
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 			getEnvConfigInt(&bits, "SSL_BITS", 2048);
@@ -1095,6 +1095,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.23  2023-08-08 00:23:03+05:30  Cprogrammer
+ * use strerr_tls for tls errors
+ *
  * Revision 1.22  2023-02-13 20:15:42+05:30  Cprogrammer
  * added error message for tls_init failure
  *
