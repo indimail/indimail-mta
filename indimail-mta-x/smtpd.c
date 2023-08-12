@@ -554,7 +554,7 @@ flush_io()
 no_return void
 die_read(char *str, int flag)
 {
-	logerr(1, tr_success ? "read error after mail queue" : "read error before mail queue", NULL);
+	logerr(1, tr_success ? "read error after mail queue" : "read error", NULL);
 	if (str)
 		logerr(0, ": ", str, NULL);
 	if (flag == 0 || flag == 2) {
@@ -596,7 +596,7 @@ die_write(char *str, int flag)
 
 	if (i++) /*- safety net for recursive call to die_write if out() gets called */
 		_exit(1);
-	logerr(1, tr_success ? "write error after mail queue" : "write error before mail queue", NULL);
+	logerr(1, tr_success ? "write error after mail queue" : "write error", NULL);
 	if (str)
 		logerr(0, ": ", str, NULL);
 	if (flag == 0 || flag == 2) {
