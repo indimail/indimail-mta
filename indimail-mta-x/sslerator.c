@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.10 2023-03-26 08:23:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sslerator.c,v 1.11 2023-08-13 00:43:40+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -435,13 +435,16 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.10 2023-03-26 08:23:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.11 2023-08-13 00:43:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.11  2023-08-13 00:43:40+05:30  Cprogrammer
+ * use strerr_tls for ssl/tls error
+ *
  * Revision 1.10  2023-03-26 08:23:16+05:30  Cprogrammer
  * fixed code for wait_handler
  *
