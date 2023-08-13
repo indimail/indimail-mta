@@ -1372,11 +1372,12 @@ verification during the SMTP session.
 The external sources can be either \fBfastforward\fR compliant cdbs
 including the envelope addresses, where the path to a cdb has to be
 referenced relative to @sysconfdir@ directory - or - \fBcheckpassword\fR
-compatible Plugable Authentication Modules (PAM), receiving the envelope
-address on FD 3 as 'recip@domain\\0\\0\\0' and returning '0' in case of
-success and '1' in case of failure. The use of a PAM is indicated with a
-delimiting '|' and it will be called with up to five additional parameters;
-while a cdb follows a ':', which can be omitted.
+compatible Plugable Address Verificaiton Modules (PAVM), receiving the
+envelope address on FD 3 as 'recip@domain\\0\\0\\0' and returning '0' in
+case of success and '1' in case of failure. The use of a PAVM is indicated
+with a delimiting '|' and the program following '|' will be called along
+with addition parameters if given; while a cdb follows a ':', which can be
+omitted.
 
 The list of external sources is consulted line-by-line for each recipient
 envelope address until the first positive answer, or a final negative
