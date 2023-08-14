@@ -123,9 +123,9 @@ parse_recips(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vadd
 		j = byte_chr(p, i - 1, ':'); /*- cdb */
 		k = byte_chr(p, i - 1, '|'); /*- pavm */
 		if (j == (i - 1))
-			j = 0;
+			j = 0; /*- ':' not present */
 		if (k == (i - 1))
-			k = 0;
+			k = 0; /*- '|' not present */
 		if (!j && !k) {
 			if ((fdrcps = open_read(p)) != -1) { /*- legacy cdb */
 				r = cdb_seek(fdrcps, rkey, klen - 2, &dlen);
@@ -141,29 +141,29 @@ parse_recips(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vadd
 		}
 		if (j > 0 || k > 0) {
 			if (j > 0)
-				p[j] = '\0';
+				p[j] = '\0'; /*- remove ':' */
 			if (k > 0)
-				p[k] = '\0';
+				p[k] = '\0'; /*- remove '|' */
 			if (!str_diffn(p, "@", 1) &&
 					!str_diffn(p + 1, rhost, rlen)) /*- exact */
 				seenhost = 1;
 			if (j > 0)
-				p[j] = ':';
+				p[j] = ':'; /*- restore ':' */
 			if (k > 0)
-				p[k] = '|';
+				p[k] = '|'; /*- restore '|' */
 		}
 		if (!seenhost && p[0] != '@') { /*- sub domain */
-			if (j > 0 && rlen >= j) {
-				p[j] = '\0';
+			if (j > 0 && rlen >= j) { /*- cdb */
+				p[j] = '\0'; /*- remove ':' */
 				if (rhost[rlen - j - 2] == '.' && !str_diffn(p, rhost + rlen - j - 1, j + 1))
 					seenhost = 2;
-				p[j] = ':';
+				p[j] = ':'; /*- restore ':' */
 			}
-			if (k > 0 && rlen >= k) {
-				p[k] = '\0';
+			if (k > 0 && rlen >= k) { /*- pavm */
+				p[k] = '\0'; /*- remove '|' */
 				if (rhost[rlen - k - 2] == '.' && !str_diffn(p, rhost + rlen - k - 1, k + 1))
 					seenhost = 3;
-				p[k] = '|';
+				p[k] = '|'; /*- restore '|' */
 			}
 		}
 

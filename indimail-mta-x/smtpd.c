@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.296 2023-08-07 00:15:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.297 2023-08-14 07:58:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.296 $";
+static char    *revision = "$Revision: 1.297 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3749,9 +3749,9 @@ smtp_mail(char *arg)
 				 */
 				logerr(1, "mail from invalid user <", mailfrom.s, ">\n", NULL);
 				logflush();
+				sleep(5); /*- Prevent DOS */
 				out("553 authorization failure (#5.7.1)\r\n", NULL);
 				flush();
-				sleep(5); /*- Prevent DOS */
 				return;
 			} else {
 				logerr(1, "Database error\n", NULL);
@@ -5198,9 +5198,9 @@ get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
 			 */
 			logerr(1, "mail from invalid user <", u, ">\n", NULL);
 			logflush();
+			sleep(5); /*- Prevent DOS */
 			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
-			sleep(5); /*- Prevent DOS */
 			return ((PASSWD *) NULL);
 		} else {
 			logerr(1, "Database error\n", NULL);
@@ -7053,6 +7053,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.297  2023-08-14 07:58:28+05:30  Cprogrammer
+ * use sleep before sending message to client
+ *
  * Revision 1.296  2023-08-07 00:15:53+05:30  Cprogrammer
  * refactored error logging using die_read, die_write
  *
@@ -7395,7 +7398,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.296 2023-08-07 00:15:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.297 2023-08-14 07:58:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

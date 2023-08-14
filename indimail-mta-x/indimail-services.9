@@ -183,13 +183,15 @@ directory for this service is \fI@logdir@/indisrvr.4000\fR.
 .TP 3
 \fBinlookup.infifo\fR Connection Pooling Service for Name Lookups
 This service runs \fBinlookup\fR service which provides FIFOs in
-\fI@indimaildir@/inquery\fR directory with write/read access to
-\fIindimail\fR user and \fBqmail\fR group. The FIFOs have write/read access
-to \fIqmaild\fR user and \fIindimail\fR group. The service uses
+\fIrun/indimaildir/inlookup\fR directory with write/read access to
+\fIindimail\fR user and \fBqmail\fR group. The FIFOs have write/read
+accesss to \fIqmaild\fR user and \fIindimail\fR group. The service uses
 \fBsetuidgid\fR(8) to run inlookup daemon with uid, gid for \fIqmaild\fR
 user (\fIqmaild\fR:\fInofiles\fR) and additional gids \fIindimail\fR,
 \fIqmail\fR. The log directory for this service is
-\fI@logdir@/inlookup.infifo\fR.
+\fI@logdir@/inlookup.infifo\fR. Note that \fIrun\fR in
+\fIrun/indimaildir/inlookup\fR directory refers to \fI/run\fR or
+\fI/var/run\fR depending on the operating system.
 
 .TP 3
 \fBmrtg\fR Create MRTG graphs for indimail

@@ -15,33 +15,35 @@ test-recipients \- Test Recipients in MySQL or via RECIPIENTS extension.
 .I addr
 
 .SH DESCRIPTION
-\fBtest-recipients\fR(1) tests recipients in indimail's MySQL database or
-using recipients extension. The recipients extension in indimail-mta comes
+\fBtest-recipients\fR(1) tests recipients by checking it in in indimail's
+MySQL database or by using the recipients extension. The recipients
+extension in indimail-mta is an adaptation of the recipients extension
 from s/qmail at https://www.fehcom.de/sqmail/sqmail.html.
 
-The \-\fIr\fR option makes \fBtest-recipients\fR do chdir to
-\fI@sysconfdir@\fR directory. It then opens the control file recipients from
-\fI@controldir@\fR directory. If there are any rules to open a cdb database
-in the \fIrecipients\fI control file, it will be opened relative to the
-current working directory of \fBqmail-cdb\fR which will be
-\fIsysconfdir\fR. You can override \fI@sysconfdir@\fR by setting
-\fBSYSCONFDIR\fR environment variable and override \fI@controldir@\fR by
-setting \fBCONTROLDIR\fR environment variable.
+The \-\fBr\fR option makes \fBtest-recipients\fR do chdir to
+\fI@sysconfdir@\fR directory. It then opens the control/recipients. If
+there are any rules to open a cdb database in the \fIrecipients\fI control
+file, it will be opened relative to the current working directory of
+\fBqmail-cdb\fR which will be \fIsysconfdir\fR. You can override
+\fI@sysconfdir@\fR by setting \fBSYSCONFDIR\fR environment variable and
+override \fI@controldir@\fR by setting \fBCONTROLDIR\fR environment
+variable.
 
-The \-\fIs\fR option makes \fBtest-recipients\fR loads the indimail.so
-shared library for submittig query to \fBinlookup\fR(8) daemon using the
-\fBinquery\fR(3) function. The default timeout used to get result from
-\fBinlookup\fR(8) daemon is 60 seconds and can be changed by specifying the
-\-\fBt\fR \fItimeout\fR argument. Note that to submit query to
-\fBinlookup\fR daemon, you will require access to
-\fI@indimaildir@/inquery\fR directory owned by \fBindimail:qmail\fR with
+The \-\fBs\fR option makes \fBtest-recipients\fR loads the indimail.so
+shared library. This enables submittig query to \fBinlookup\fR(8) daemon
+using the \fBinquery\fR(3) function. The default timeout used to get result
+from \fBinlookup\fR(8) daemon is 60 seconds and can be changed by
+specifying the \-\fBt\fR \fItimeout\fR argument. Note that to submit query
+to \fBinlookup\fR daemon, you will require access to
+\fIrun/indimail/inlookup\fR directory owned by \fBindimail:qmail\fR with
 \fB0770\fR permissions. You will also require write access to FIFOs in this
 directory owned by \fBqmaild:indimail\fR with \fB0660\fR permissions.
 
 \fBqmail-smtpd\fR(8) checks recipients in RCPT TO dialog when the
 environment variable \fBCHECKRECIPIENT\fR is set and rejects email when the
-recipient is missing. Rejecting emails during SMTP session is better than
-accepting it and bouncing it later.
+recipient is missing. Rejecting emails during SMTP session enables
+rejecting emails immediately rather than accepting it and bouncing it
+later.
 
 \fBtest-recipient\fR(1) is located in @libexecdir@ directory.
 
@@ -50,6 +52,9 @@ accepting it and bouncing it later.
 The inlookup daemon creates named pipes that can be accessed by
 \fBqmaild\fR user. To test users in MySQL it is neccessary to execute it
 with the privileges of the user \fBqmaild\fR
+
+In \fIrun/indiail/inlookup\fR, \fIrun\fR refers to \fI/run\fR or
+\fI/var/run\fR depending on the OS.
 
 .EX
 $ sudo bash

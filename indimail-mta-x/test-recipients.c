@@ -1,5 +1,5 @@
 /*
- * $Id: test-recipients.c,v 1.2 2023-03-12 19:07:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: test-recipients.c,v 1.3 2023-08-14 08:38:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -135,12 +135,12 @@ main(int argc, char **argv)
 		if (recipients_init() == -1)
 			strerr_die2x(111, FATAL, "unable to initialize recipients extension");
 		/*-
-		 * return -3: problem with PAM
+		 * return -3: problem with PAVM
 		 * return -2: out of memory
 		 * return -1: error reading control file
 		 * return  0: address not found; fatal
 		 * return  1: CDB lookup
-		 * return  2: PAM lookup
+		 * return  2: PAVM lookup
 		 * return  3: Wildcarded domain
 		 * return  4: Pass-thru
 		 * return 10: none existing control file; pass-thru
@@ -152,13 +152,23 @@ main(int argc, char **argv)
 		case 1:
 			strerr_die1x(0, "test-recipients: user found in cdb");
 		case 2:
-			strerr_die1x(0, "test-recipients: user found through PAM");
+			strerr_die1x(0, "test-recipients: user found through PAVM");
 		case 3:
 			strerr_die1x(0, "test-recipients: user matched through wildcard");
 		case 4:
 			strerr_die1x(0, "test-recipients: user matched through pass through");
 		case 10:
 			strerr_die1x(111, "test-recipients: control file missing");
+		case -1:
+			strerr_die1x(111, "test-recipients: error reading control/recipients");
+		case -2:
+			strerr_die1x(111, "test-recipients: out of memory");
+		case -3:
+			strerr_die1x(111, "test-recipients: Error running PAVM");
+		case 111:
+			strerr_die1x(111, "test-recipients: command configured for PAVM failed");
+		default:
+			strerr_die1x(111, "test-recipients: unknown/unhandled error in recipients extension");
 		}
 	}
 }
