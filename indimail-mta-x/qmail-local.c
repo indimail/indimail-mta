@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-local.c,v 1.44 2022-10-09 23:05:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-local.c,v 1.45 2023-08-17 22:59:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -78,9 +78,12 @@ temp_rewind()
 }
 
 no_return void
-temp_childcrashed()
+temp_childcrashed(char *p)
 {
-	strerr_die1x(111, "Aack, child crashed. (#4.3.0)");
+	if (p)
+		strerr_die3x(111, "Aack, child [", p, "] crashed. (#4.3.0)");
+	else
+		strerr_die1x(111, "Aack, child crashed. (#4.3.0)");
 }
 
 no_return void
@@ -144,7 +147,7 @@ maildir(char *fn)
 	}
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat))
-		temp_childcrashed();
+		temp_childcrashed(NULL);
 	switch (wait_exitcode(wstat))
 	{
 	case 0:
@@ -265,7 +268,7 @@ mailprogram(char *prog)
 
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat))
-		temp_childcrashed();
+		temp_childcrashed(prog);
 	switch (wait_exitcode(wstat))
 	{
 	case 100:
@@ -877,7 +880,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.44 2022-10-09 23:05:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.45 2023-08-17 22:59:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
@@ -885,6 +888,9 @@ getversion_qmail_local_c()
 
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.45  2023-08-17 22:59:05+05:30  Cprogrammer
+ * display program/command if crashed in logs
+ *
  * Revision 1.44  2022-10-09 23:05:44+05:30  Cprogrammer
  * added comments for fastforward usage
  * fixed localdomains restricted delivery
