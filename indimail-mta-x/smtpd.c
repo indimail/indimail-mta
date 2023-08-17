@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.297 2023-08-14 07:58:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.298 2023-08-17 13:12:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.297 $";
+static char    *revision = "$Revision: 1.298 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -189,12 +189,11 @@ static stralloc slop = { 0 };
 static stralloc authmethod = { 0 };
 static stralloc locals = { 0 };
 static CONSTMAP maplocals;
+static stralloc libfn = { 0 };
 
 #ifdef BATV
 static stralloc batvkey = { 0 };
-static char    *batvfn = 0;
-static stralloc libfn = { 0 };
-
+static char    *batvFn = NULL;
 static int      batvok;
 static int      batvkeystale = 7; /*- accept batvkey for a week */
 static int      batvkeystaleok;
@@ -259,8 +258,8 @@ static CONSTMAP mapbmf;
 static int      bmpok = 0;
 static stralloc bmp = { 0 };
 
-static char    *bmfFn = 0;
-static char    *bmfFnp = 0;
+static char    *bmfFn = NULL;
+static char    *bmfFnp = NULL;
 /*- blackholedrcpt */
 static int      bhrcpok = 0;
 static stralloc bhrcp = { 0 };
@@ -269,8 +268,8 @@ static CONSTMAP mapbhrcp;
 static int      bhbrpok = 0;
 static stralloc bhbrp = { 0 };
 
-static char    *bhrcpFn = 0;
-static char    *bhrcpFnp = 0;
+static char    *bhrcpFn = NULL;
+static char    *bhrcpFnp = NULL;
 /*- BLACKHOLE Sender Check Variables */
 static int      bhfok = 0;
 static stralloc bhf = { 0 };
@@ -279,8 +278,8 @@ static CONSTMAP mapbhf;
 static int      bhpok = 0;
 static stralloc bhp = { 0 };
 
-static char    *bhsndFn = 0;
-static char    *bhsndFnp = 0;
+static char    *bhsndFn = NULL;
+static char    *bhsndFnp = NULL;
 /*- badrcptto */
 static int      rcpok = 0;
 static stralloc rcp = { 0 };
@@ -289,13 +288,13 @@ static CONSTMAP maprcp;
 static int      brpok = 0;
 static stralloc brp = { 0 };
 
-static char    *rcpFn = 0;
-static char    *rcpFnp = 0;
+static char    *rcpFn = NULL;
+static char    *rcpFnp = NULL;
 /*- accesslist */
 static int      acclistok = 0;
 static stralloc acclist = { 0 };
 
-static char    *accFn = 0;
+static char    *accFn = NULL;
 /*- RELAYCLIENT Check Variables */
 static int      relayclientsok = 0;
 static stralloc relayclients = { 0 };
@@ -316,26 +315,26 @@ static int      nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
 
 static CONSTMAP mapnodnschecks;
-static char    *nodnsFn;
+static char    *nodnsFn = NULL;
 /*- badip Check */
-static char    *dobadipcheck = (char *) 0;
-static char    *badipfn = (char *) 0;
+static char    *dobadipcheck = NULL;
+static char    *badipFn = NULL;
 static int      briok = 0;
 static stralloc bri = { 0 };
 
-static char    *badhostfn = (char *) 0;
+static char    *badhostFn = NULL;
 static stralloc ipaddr = { 0 };
 
 static CONSTMAP mapbri;
 /*- badhost Check */
-static char    *dobadhostcheck = (char *) 0;
+static char    *dobadhostcheck = NULL;
 static int      brhok = 0;
 static stralloc brh = { 0 };
 
 static CONSTMAP mapbrh;
 /*- Helo Check */
-static char    *dohelocheck = (char *) 0;
-static char    *badhelofn = (char *) 0;
+static char    *dohelocheck = NULL;
+static char    *badheloFn = NULL;
 static int      badhelook = 0;
 static stralloc badhelo = { 0 };
 
@@ -353,8 +352,8 @@ static CONSTMAP mapgrcpt;
 static int      chkgrcptokp = 0;
 static stralloc grcptp = { 0 };
 
-static char    *grcptFn = 0;
-static char    *grcptFnp = 0;
+static char    *grcptFn = NULL;
+static char    *grcptFnp = NULL;
 /*- SPAM Ingore Sender Check Variables */
 static int      spfok = 0;
 static stralloc spf = { 0 };
@@ -363,8 +362,8 @@ static CONSTMAP mapspf;
 static int      sppok = 0;
 static stralloc spp = { 0 };
 
-static char    *spfFn = 0;
-static char    *spfFnp = 0;
+static char    *spfFn = NULL;
+static char    *spfFnp = NULL;
 /*- check recipients using inquery chkrcptdomains */
 static int      chkrcptok = 0;
 static stralloc chkrcpt = { 0 };
@@ -389,7 +388,7 @@ static int      bodyok = 0;
 static int      bodyok_orig = 0;
 static stralloc body = { 0 };
 
-static char    *bodyFn = 0;
+static char    *bodyFn = NULL;
 static char    *content_desc;
 #ifdef SMTP_PLUGIN
 PLUGIN        **plug = (PLUGIN **) 0;
@@ -2284,7 +2283,7 @@ badipcheck(char *arg)
 	if (!stralloc_copys(&ipaddr, arg) ||
 			!stralloc_0(&ipaddr))
 		die_nomem();
-	switch (address_match((badipfn && *badipfn) ? badipfn : "badip", &ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr))
+	switch (address_match((badipFn && *badipFn) ? badipFn : "badip", &ipaddr, briok ? &bri : 0, briok ? &mapbri : 0, 0, &errStr))
 	{
 	case 1:
 		return (1);
@@ -2360,8 +2359,8 @@ dohelo(char *arg)
 		if (case_diffs(localip, remoteip) && (!case_diffs(localhost, helohost.s) || case_diffs(localip, helohost.s)))
 			err_localhelo(localhost, localip, arg);
 		switch (address_match
-				((badhelofn
-				  && *badhelofn) ? badhelofn : "badhelo", &helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0,
+				((badheloFn
+				  && *badheloFn) ? badheloFn : "badhelo", &helohost, badhelook ? &badhelo : 0, badhelook ? &maphelo : 0, 0,
 				 &errStr))
 		{
 		case 1:
@@ -2594,7 +2593,7 @@ open_control_files2()
 	 * is defined
 	 */
 	if ((dobadipcheck = (env_get("BADIPCHECK") ? "" : env_get("BADIP"))))
-		open_control_once(&briok, 0, &badipfn, 0, "BADIP", 0, "badip", 0, &bri, &mapbri, 0);
+		open_control_once(&briok, 0, &badipFn, 0, "BADIP", 0, "badip", 0, &bri, &mapbri, 0);
 	/*-
 	 * Enable badhost if
 	 * BADHOSTCHECK is defined (default control file badhost)
@@ -2603,7 +2602,7 @@ open_control_files2()
 	 * is defined
 	 */
 	if ((dobadhostcheck = (env_get("BADHOSTCHECK") ? "" : env_get("BADHOST"))))
-		open_control_once(&brhok, 0, &badhostfn, 0, "BADHOST", 0, "badhost", 0, &brh, &mapbrh, 0);
+		open_control_once(&brhok, 0, &badhostFn, 0, "BADHOST", 0, "badhost", 0, &brh, &mapbrh, 0);
 	/*-
 	 * Enable badhelo if
 	 * BADHELOCHECK is defined (default control file badhelo)
@@ -2612,9 +2611,9 @@ open_control_files2()
 	 * is defined
 	 */
 	if ((dohelocheck = (env_get("BADHELOCHECK") ? "" : env_get("BADHELO"))))
-		open_control_once(&badhelook, 0, &badhelofn, 0, "BADHELO", 0, "badhelo", 0, &badhelo, &maphelo, 0);
+		open_control_once(&badhelook, 0, &badheloFn, 0, "BADHELO", 0, "badhelo", 0, &badhelo, &maphelo, 0);
 #ifdef BATV
-	open_control_once(&batvok, 0, &batvfn, 0, "BATVKEY", 0, "batvkey", 0, &batvkey, 0, 0);
+	open_control_once(&batvok, 0, &batvFn, 0, "BATVKEY", 0, "batvkey", 0, &batvkey, 0, 0);
 	if (batvok) {
 		batvkey.len--;
 		if (!nosignlocals.len) {
@@ -2769,15 +2768,15 @@ smtp_init(int force_flag)
 	chkgrcptok = chkgrcptokp = spfok = sppok = nodnschecksok = 0;
 	briok = brhok = badhelook = acclistok = bodyok = 0;
 	tarpitcount = tarpitdelay = maxrcptcount = sigsok = greetdelay = qregex = 0;
-	bmfFn = bmfFnp = bhsndFn = bhsndFnp = bhrcpFn = bhrcpFnp = rcpFn = rcpFnp = grcptFn = grcptFnp = 0;
-	spfFn = spfFnp = bmfFn = badipfn = badhostfn = badhelofn = accFn = bodyFn = 0;
-	sigsFn = 0;
+	batvFn = bmfFn = bmfFnp = bhrcpFn = bhrcpFnp = bhsndFn = bhsndFnp = rcpFn = NULL;
+	rcpFnp = accFn = nodnsFn = badipFn = badhostFn = badheloFn = NULL;
+	grcptFn = grcptFnp = spfFn = spfFnp = sigsFn = bodyFn = NULL;
 	tarpitcountok = tarpitdelayok = maxrcptcountok = greetdelayok = qregexok = 0;
 	proto.len = 0;
 #ifdef BATV
 	batvok = 0;
 	batvkeystale = 7;
-	batvfn = 0;
+	batvFn = 0;
 	batvkeystaleok = 0;
 #endif
 #ifdef USE_SPF
@@ -7053,6 +7052,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.298  2023-08-17 13:12:02+05:30  Cprogrammer
+ * initialize few left out variables in smtp_init
+ *
  * Revision 1.297  2023-08-14 07:58:28+05:30  Cprogrammer
  * use sleep before sending message to client
  *
@@ -7398,7 +7400,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.297 2023-08-14 07:58:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.298 2023-08-17 13:12:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

@@ -78,6 +78,8 @@ o added timestamp in installation logs
     verification module
 41. smtpd.c: use sleep before sending message to client
 42. test-recipients.c: handle all exit codes of pavm
+- 17/08/2023
+43. smtpd.c: initialize few left out variables in smtp_init
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023
