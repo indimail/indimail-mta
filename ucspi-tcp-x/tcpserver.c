@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.88 2023-06-18 13:24:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.89 2023-08-20 15:17:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -67,7 +67,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.88 2023-06-18 13:24:32+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.89 2023-08-20 15:17:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1348,7 +1348,7 @@ main(int argc, char **argv, char **envp)
 	SSL_CTX        *ctx = NULL;
 	char           *certdir = NULL, *ciphers = NULL,
 				   *cipherfile = NULL, *tls_method = NULL;
-	int             pi2c[2], pi4c[2];
+	int             pi2c[2], pi4c[2], method;
 	int             provide_data = 0;
 #ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
 	int             client_renegotiation = 0;
@@ -1683,8 +1683,10 @@ do_socket:
 				}
 			ciphers = saciphers.s;
 		} else
-		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
-			ciphers = "PROFILE=SYSTEM";
+		if (!ciphers) {
+			method = get_tls_method(tls_method);
+			ciphers = env_get(method < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE");
+		}
 		if (!(ctx = tls_init(tls_method, certfile.s,
 				cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 				ciphers, server)))
@@ -1983,6 +1985,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.89  2023-08-20 15:17:17+05:30  Cprogrammer
+ * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
+ *
  * Revision 1.88  2023-06-18 13:24:32+05:30  Cprogrammer
  * handle UNIX sockets
  *

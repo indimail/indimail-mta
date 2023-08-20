@@ -340,8 +340,9 @@ will be checked for revocation. If this is not provided, the file
 .TP
 -\fBf\fR \fIcipher_list\fR
 Use ciphers listed in \fIcipher_list\fR. Without this \fBtcpserver\fR uses
-TLS_CIPHER_LIST environment variable if set or system configured
-PROFILE=SYSTEM ciphers.
+TLS_CIPHER_LIST environment variable if set (or system configured
+PROFILE=SYSTEM ciphers for TLSv1.2 and below). For TLSv1.3 the environment
+variable TLS_CIPHER_SUITE is used instead. See openssl-ciphers(1ossl).
 
 .TP
 -\fBM\fR \fItls_method\fR
@@ -558,6 +559,7 @@ bind(2),
 listen(2),
 connect(2),
 select(2),
-accept(2)
+accept(2),
+openssl-ciphers(1ossl).
 
 http://cr.yp.to/ucspi-tcp.html

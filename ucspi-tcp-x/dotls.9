@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH "dotls" "1" "06 Mar 2010" "Manvendra Bhangui" ""
 
 .SH NAME
@@ -95,8 +96,9 @@ will be checked for revocation. If this is not provided, the file
 .TP
 -\fBf\fR \fIcipher_list\fR
 Use ciphers listed in \fIcipher_list\fR. Without this \fBdotls\fR uses
-TLS_CIPHER_LIST environment variable if set or system configured
-PROFILE=SYSTEM ciphers.
+TLS_CIPHER_LIST environment variable if set (or system configured
+PROFILE=SYSTEM ciphers for TLSv1.2 and below). For TLSv1.3 the environment
+variable TLS_CIPHER_SUITE is used instead. See openssl-ciphers(1ossl).
 
 .TP
 -\fBM\fR \fItls_method\fR
@@ -275,4 +277,5 @@ not free it if the function call is succesful..
 \fBtcpclient\fR(1),
 \fBtcpserver\fR(1),
 \fBqmail-smtpd\fR(8),
-\fBqmail-pop3d\fR(8)
+\fBqmail-pop3d\fR(8),
+openssl-ciphers(1ossl).

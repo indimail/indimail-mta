@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.32 2023-08-08 00:23:24+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@
 #define FATAL "tcpclient: fatal: "
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.32 2023-08-08 00:23:24+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 extern int      socket_tcpnodelay(int);
@@ -352,7 +352,7 @@ main(int argc, char **argv)
 	char           *certdir, *ciphers = NULL,
 				   *cipherfile = NULL, *tls_method = NULL;
 	enum starttls   stls = unknown;
-	int             match_cn = 0;
+	int             match_cn = 0, method;
 	struct stat     st;
 #endif
 
@@ -769,8 +769,10 @@ do_data:
 				}
 			ciphers = saciphers.s;
 		} else
-		if (!(ciphers = env_get("TLS_CIPHER_LIST")))
-			ciphers = "PROFILE=SYSTEM";
+		if (!ciphers) {
+			method = get_tls_method(tls_method);
+			ciphers = env_get(method < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE");
+		}
 		if (!(ctx = tls_init(tls_method, certfile.s,
 				cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
 				ciphers, client)))
@@ -832,6 +834,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.33  2023-08-20 15:17:12+05:30  Cprogrammer
+ * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
+ *
  * Revision 1.32  2023-08-08 00:23:24+05:30  Cprogrammer
  * use strerr_tls for tls errors
  *

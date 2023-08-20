@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.23 2023-08-08 00:23:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -41,7 +41,7 @@
 #define HUGECAPATEXT  5000
 
 #ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.23 2023-08-08 00:23:03+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 int             do_data();
@@ -912,8 +912,10 @@ main(int argc, char **argv)
 			}
 		ciphers = saciphers.s;
 	} else
-	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
-		ciphers = "PROFILE=SYSTEM";
+	if (!ciphers) {
+		i = get_tls_method(tls_method);
+		ciphers = env_get(i < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE");
+	}
     /*- setup SSL context (load key and cert into ctx) */
 	if (!(ctx = tls_init(tls_method, certfile.s,
 			cafile.len ? cafile.s : NULL, crlfile.len ? crlfile.s : NULL,
@@ -1095,6 +1097,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.24  2023-08-20 15:16:12+05:30  Cprogrammer
+ * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
+ *
  * Revision 1.23  2023-08-08 00:23:03+05:30  Cprogrammer
  * use strerr_tls for tls errors
  *
