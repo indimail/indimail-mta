@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.2 2023-08-04 00:09:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.3 2023-08-22 20:25:14+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=mbhangui
@@ -159,19 +159,26 @@ setup_config()
 {
 	echo "Creating default config files in $cntrldir"
 	env CONTROLDIR=$cntrldir config-fast $HOSTNAME
-	echo ./Maildir/        > $cntrldir/defaultdelivery
-	echo TLSv1_3           > $cntrldir/tlsclientmethod
-	echo TLSv1_3           > $cntrldir/tlsservermethod
-	echo blocked@$HOSTNAME > $cntrldir/badmailfrom
-	echo blocked@$HOSTNAME > $cntrldir/badrcptto
 	sudo /usr/sbin/svctool --cntrldir=$cntrldir --config=qmail
 	sudo /usr/sbin/svctool --certdir=$certdir    --config=cert \
 		--postmaster=postmaster@$HOSTNAME --common_name=$HOSTNAME
 	cp /etc/indimail/bogofilter.cf.example $sysconfdir
 	sudo /usr/sbin/svctool --sysconfdir=$sysconfdir --config=bogofilter
-	sudo chown -R $user $cntrldir
-	echo @$HOSTNAME > $cntrldir/nodnscheck
 	tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16 > $cntrldir/batvkey
+	echo ./Maildir/                           > $cntrldir/defaultdelivery
+	echo "TLS_AES_128_GCM_SHA256"             > $cntrldir/clientciphersuite
+	echo "TLS_AES_128_GCM_SHA256"             > $cntrldir/serverciphersuite
+	echo ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP:SSLv3 > $cntrldir/clientcipherlist
+	echo ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP:SSLv3 > $cntrldir/servercipherlist
+	echo TLSv1_2:TLSv1_3                      > $cntrldir/tlsclientmethod
+	echo TLSv1_2:TLSv1_3                      > $cntrldir/tlsservermethod
+	echo blocked@$HOSTNAME                    > $cntrldir/badmailfrom
+	echo blocked@$HOSTNAME                    > $cntrldir/badrcptto
+	echo @$HOSTNAME                           > $cntrldir/nodnscheck
+	sudo chown -R $user $cntrldir
+	#/bin/rm -f $cntrldir/global_vars/TLS_CIPHER_LIST
+	#/bin/rm -f $cntrldir/global_vars/TLS_CIPHER_SUITE
+	ls -l $cntroldir/global_vars
 }
 
 test_tcpclient_script()
@@ -254,27 +261,39 @@ test_tcpclient_script()
 	chmod +x $testdir/tcpclient.smtp
 	case $1 in
 		1)
-		tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
+		tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 		;;
 		2)
-		tcpclient -vDHRn $certdir/servercert.pem 0 $smtp_port $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
+		if [ $# -eq 2 ] ; then
+			tcpclient -M $2 -vDHRn $certdir/servercert.pem 0 \
+				$smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
+		else
+			tcpclient -vDHRn $certdir/servercert.pem 0 \
+				$smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
+		fi
 		;;
 		3)
-		tcpclient -v $smtp_socket $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
+		tcpclient -v $smtp_socket $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 		;;
 		4)
-		tcpclient -vn $certdir/servercert.pem $smtp_socket $testdir/tcpclient.smtp  > $logdir/tcpclient/tcpclient.log 2>&1
+		tcpclient -vn $certdir/servercert.pem $smtp_socket $testdir/tcpclient.smtp \
+			> $logdir/tcpclient/tcpclient.log 2>&1
 		;;
 	esac
 	/bin/rm -f $testdir/tcpclient.smtp
+	if [ $# -eq 2 ] ; then
+		tls="$2"
+	else
+		tls="auto"
+	fi
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
-		echo "  testing mail doing SMTP with tcpclient succeeded"
+		echo "  testing mail doing SMTP with tcpclient TLS=$tls succeeded"
 	else
 		(
-		echo "  testing mail doing SMTPS with tcpclient failed"
-		echo "tcpclient.log.log"
+		echo "  testing mail doing SMTPS with tcpclient TLS=$tls failed"
+		echo "tcpclient.log"
 		cat $logdir/tcpclient/tcpclient.log
 		if [ $log_type -eq 1 ] ; then
 			echo "$logdir/smtpd/smtpd.log"
@@ -363,8 +382,8 @@ create_authsmtp()
 	echo "var=\`tr [\"\\0\"] [\"\\n\"] 0<&3\`"
 	echo "user=\`echo \$var | cut -d ' ' -f1\`"
 	echo "pass=\`echo \$var | cut -d ' ' -f2\`"
-	echo "echo user=\$user 1>&2"
-	echo "echo pass=\$pass 1>&2"
+	#echo "echo user=\$user 1>&2"
+	#echo "echo pass=\$pass 1>&2"
 	echo "exec 4>$testdir/tmp/authsmtp.\$\$ 3<$testdir/tmp/authsmtp.\$\$"
 	echo "/bin/rm -f $testdir/tmp/authsmtp.\$\$"
 	echo "echo \$var | tr [\" \"] [\"\\0\"] 1>&4"
@@ -405,20 +424,12 @@ start_tcpserver_smtp()
 	count=0
 	while true
 	do
-		bash -c "</dev/tcp/0/$smtp_port" 2>/dev/null
-		if [ $? -eq 0 ] ; then
+		smtp_pid=$(/bin/ps -ef|grep -v sudo|grep $smtp_port|grep qmail-smtpd|awk '{print $2}')
+		if [ -n "$smtp_pid" ] ; then
 			break
-		fi
-		count=$(expr $count + 1)
-		if [ $count -gt 5 ] ; then
-			echo "Failed to start qmail-smtpd" 1>&2
-			echo "$logdir/smtpd/smtpd.log"
-			cat $logdir/smtpd/smtpd.log
-			exit 1
 		fi
 		sleep 1
 	done
-	smtp_pid=$(/bin/ps -ef|grep -v sudo|grep $smtp_port|grep qmail-smtpd|awk '{print $2}')
 	sudo kill -0 $smtp_pid
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -727,7 +738,7 @@ test_qmail_remote_auth()
 	) | env - \
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port $u $pass" \
 		AUTH_SMTP="$1" \
-		CONTROLDIR=$cntrldir \
+		CONTROLDIR="$cntrldir" \
 		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	addr=$(batv -k $(cat $cntrldir/batvkey) -v $(sed -n 1p $testdir/qremote.$$|awk '{print $2}'|sed 's/^.\(.*\).$/\1/') 2>/dev/null)
@@ -937,8 +948,29 @@ terminate_send()
 
 start_tcpserver_smtps()
 {
+	if [ $# -eq 0 ] ; then
+		tls_ver=TLSv1_3
+	elif [ -n "$1" ] ; then
+		tls_ver=$1
+	else
+		tls_ver=""
+	fi
+	if [ "$tls_ver" = "TLSv1_3"  ] ; then
+		echo TLSv1_2:TLSv1_3         > $cntrldir/tlsclientmethod
+		echo TLSv1_2:TLSv1_3         > $cntrldir/tlsservermethod
+	elif [ "$tls_ver" = "TLSv1_2"  ] ; then
+		echo TLSv1_2                 > $cntrldir/tlsclientmethod
+		echo TLSv1_2                 > $cntrldir/tlsservermethod
+	else
+		/bin/rm -f                     $cntrldir/tlsclientmethod
+		/bin/rm -f                     $cntrldir/tlsservermethod
+	fi
 	echo
-	echo "Starting SMTPS on port $smtp_port using tcpserver"
+	if [ -n "$tls_ver" ] ; then
+		echo "Starting SMTPS on port $smtp_port TLS=$tls_ver using tcpserver"
+	else
+		echo "Starting SMTPS on port $smtp_port TLS=auto    using tcpserver"
+	fi
 	(
 	sudo env - \
 		USE_QPWGR=1 \
@@ -954,24 +986,12 @@ start_tcpserver_smtps()
 	count=0
 	while true
 	do
-		bash -c "</dev/tcp/0/$smtp_port" 2>/dev/null
-		if [ $? -eq 0 ] ; then
-			#echo "Port 0:$smtp_port is alive" 1>&2
+		smtp_pid=$(/bin/ps -ef|grep -v sudo|grep $smtp_port|grep qmail-smtpd|awk '{print $2}')
+		if [ -n "$smtp_pid" ] ; then
 			break
-		fi
-		count=$(expr $count + 1)
-		if [ $count -gt 5 ] ; then
-			sudo kill $send_pid
-			(
-			echo "Failed to start qmail-smtpd" 1>&2
-			echo "$logdir/smtpd/smtpd.log"
-			cat $logdir/smtpd/smtpd.log
-			) | less
-			exit 1
 		fi
 		sleep 1
 	done
-	smtp_pid=$(/bin/ps -ef|grep -v sudo|grep $smtp_port|grep qmail-smtpd|awk '{print $2}')
 	sudo kill -0 $smtp_pid
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -1650,11 +1670,20 @@ do_without_svscan()
 	terminate_smtp $smtp_pid
 
 	# start smtps using tcpserver
-	start_tcpserver_smtps
-	smtp_pid=$(/bin/ps -ef|grep $smtp_port|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
-	test_smtps "testing mail using SMTPS by qmail-smtpd"
-	test_tcpclient_script 2 # test smtps using tcpclient
-	terminate_smtp $smtp_pid
+	for i in TLSv1_2 TLSv1_3
+	do
+		start_tcpserver_smtps $i
+		if [ -n "$i" ] ; then
+			test_smtps "testing mail doing SMTPS with swaks     qmail-smtpd-TLS=$i"
+		else
+			test_smtps "testing mail doing SMTPS with swaks     qmail-smtpd-TLS=auto"
+		fi
+		for j in TLSv1_2 TLSv1_3
+		do
+			test_tcpclient_script 2 $j # test smtps using tcpclient
+		done
+		terminate_smtp $smtp_pid
+	done
 
 	start_tcpserver_smtp_unix
 	smtp_pid=$(/bin/ps -ef|grep $smtp_socket|grep qmail-smtpd|awk '{print $2}')
@@ -1749,6 +1778,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.3  2023-08-22 20:25:14+05:30  Cprogrammer
+# added tests for TLSv1.2, TLSv1.3
+#
 # Revision 1.2  2023-08-04 00:09:43+05:30  Cprogrammer
 # removed bashism
 #
