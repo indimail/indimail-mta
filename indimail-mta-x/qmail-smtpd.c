@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.13  2023-08-20 18:45:17+05:30  Cprogrammer
+ * added TLS_CIPHER_SUITE env variables in print_details
+ *
  * Revision 1.12  2023-03-12 18:39:18+05:30  Cprogrammer
  * change cwd using SYSCONFDIR env variable
  *
@@ -125,7 +128,7 @@ print_details()
 		"SRS_ALWAYSREWRITE", "SRS_SEPARATOR",
 #endif
 		"STARTTLS", "TARPITCOUNT", "TARPITDELAY", "GREETDELAY",
-		"TLS_CIPHER_LIST", "TMPDIR", "VIRTUAL_PKG_LIB", "VIRUSCHECK", 0};
+		"TLS_CIPHER_LIST", "TLS_CIPHER_SUITE", "TMPDIR", "VIRTUAL_PKG_LIB", "VIRUSCHECK", 0};
 	char          *write_env_vars[] = {
 		"AUTHENTICATED", "AUTHINFO", "NULLQUEUE",
 #ifdef USE_SPF
@@ -269,7 +272,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.12 2023-03-12 18:39:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.13 2023-08-20 18:45:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

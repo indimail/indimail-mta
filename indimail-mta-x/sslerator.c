@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.11 2023-08-13 00:43:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sslerator.c,v 1.12 2023-08-20 18:50:17+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -318,9 +318,10 @@ main(int argc, char **argv)
 				break;
 			}
 		ciphers = saciphers.s;
-	} else
-	if (!(ciphers = env_get("TLS_CIPHER_LIST")))
-		ciphers = "PROFILE=SYSTEM";
+	} else {
+		r = get_tls_method(tls_method);
+		ciphers = env_get(r < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE");
+	}
 
 	if (starttls_smtp) { /*- special case for SMTP */
 		if ((r = timeoutread(timeoutdata, pi2[0], tbuf, sizeof(tbuf) - 1)) == -1) {
@@ -435,13 +436,17 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.11 2023-08-13 00:43:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sslerator.c,v 1.12 2023-08-20 18:50:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.12  2023-08-20 18:50:17+05:30  Cprogrammer
+ * let default ciphers be set by tls_init()
+ * use TLS_CIPHER_LIST for tlsv1_2 and below, TLS_CIPHER_SUITE for tlsv1_3 and above
+ *
  * Revision 1.11  2023-08-13 00:43:40+05:30  Cprogrammer
  * use strerr_tls for ssl/tls error
  *

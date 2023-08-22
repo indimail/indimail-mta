@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-remote 8
 .SH NAME
 qmail-remote \- send mail via SMTP / ESMTP or QMTP
@@ -84,10 +85,10 @@ connection if the environment variable \fBSMTPS\fR is set. If \fBSMTPS\fR
 is not set, \fBqmail-remote\fR will issue the STARTTLS command if it finds
 the remote server supports STARTTLS and it finds a valid certificate in
 \fISYSCONF/certs/clientcert.pem\fR. \fBqmail-remote\fR will revert to
-non-encrypted session if the TLS connection fails. If the environment
-variable SMPTS is set or an artificial SMTP route has a \fIport\fR value of
-465 (deprecated smtps port), \fBqmail-remote\fR will start a TLS session
-and exit if the TLS session cannot be initiated.
+non-encrypted session if the TLS connection fails for TLS negotiation
+fails. If the environment variable SMPTS is set or an artificial SMTP route
+has a \fIport\fR value of 465 (deprecated smtps port), \fBqmail-remote\fR
+will start a TLS session and exit if the TLS session cannot be initiated.
 
 \fBqmail-remote\fR can use authenticated SMTP for remote deliveries if
 username and secret is provided in the \fISYSCONF/control/remote_auth.cdb\fR
@@ -749,14 +750,28 @@ TLS_client_method(3ossl) where the actual protocol version used will be
 negotiated to the highest version mutually supported by the client and the
 server. The supported protocols are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and
 TLSv1.3. The default location of SYSCONF/control can be overriden by
-environment variable \fBCONTROLDIR\fR.
+environment variable \fBCONTROLDIR\fR. You can specify the minimum and
+maximum protocol by using min:max format. e.g. TLSv1_2:TLSv1_3
 
 .TP 5
-.I tlsclientciphers
-A set of OpenSSL client cipher strings. Multiple ciphers contained in a
+\fIclientcipherlist\fR | \fIclientciphersuite\fR
+A set of OpenSSL cipher strings. Multiple ciphers contained in a
 string should be separated by a colon. The default location of
 SYSCONF/control can be overriden by environment variable
-\fBCONTROLDIR\fR
+\fBCONTROLDIR\fR. The control file can be overriden by setting the cipher
+strings in the environment variable \fBTLS_CIPHER_LIST\fR for TLSv1.2 and
+below and \fBTLS_CIPHER_SUITE\fR for TLSv1.3 and above.
+\fIservercipherlist\fR is used for TLSv1.2 and below.
+\fIserverciphersuite\fR is used for TLSv1.3 and above. TLSv1.3 changed the
+way ciphersuites work quite significantly. As a result ciphersuites defined
+for TLSv1.2 and below do not work in TLSv1.3 and vice versa. For this
+reason OpenSSL handles them separately internally as well and they are
+configured in different ways - even though "on the wire" the list of
+TLSv1.2 and TLSv1.3 ciphersuites get merged. The openssl ciphers command
+reports the merged list of TLSv1.2 and TLSv1.3 ciphersuites. Earlier
+verions of qmail-remote used \fItlsclientciphers\fR. The changes for TLSv1.3
+has necessitated having \fIclientciphersuite\fR for TLSv1.3 and
+\fIclientcipherlist\fR for TLSv1.2 and below.
 
 .TP 5
 .I notlhosts

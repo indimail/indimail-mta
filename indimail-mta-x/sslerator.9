@@ -1,10 +1,11 @@
+.\" vim: tw=75
 .TH "sslerator" "8" "06 Mar 2010" "Manvendra Bhangui" ""
 
 .SH NAME
 sslerator \- TLS/SSL protocol wrapper
 .SH SYNOPSIS
 
-\fBsslerator\fR [ \fB\fIoption\fB\fR\fI ...\fR ] \fB\fIprog\fB\fR \fB\fIarg\fB\fR\fI ...\fR
+\fBsslerator\fR [ \fIoptions\fR ] \fIprog\fR \fIarg\fR ...
 
 .SH "DESCRIPTION"
 .PP
@@ -46,7 +47,8 @@ close any gap in the certificate chain.
 \fB-c\fR \fIcipherfile\fR
 Use ciphers listed in \fIcipherfile\fR. Without this \fBdotls\fR uses
 TLS_CIPHER_LIST environment variable if set or system configured
-PROFILE=SYSTEM ciphers.
+PROFILE=SYSTEM ciphers for TLSv1.2 and below. For TLSv1.3 and above,
+\fBTLS_CIPHER_SUITE\fR is used instead.
 
 .TP
 -\fBM\fR \fItls_method\fR

@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.697 2023-08-18 11:51:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.698 2023-08-20 18:56:37+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.697 2023-08-18 11:51:30+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.698 2023-08-20 18:56:37+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2036,9 +2036,11 @@ if [ -n "$verbose" ] ; then
 	echo "timeoutremote"
 	echo "dnsbllist"
 	echo "tcp/tcp.[smtp,qmtp,qmqp]"
-	echo "tlsserverciphers"
+	echo "servercipherlist"
+	echo "serverciphersuite"
 	echo "tlsservermethod"
-	echo "tlsclientciphers"
+	echo "clientcipherlist"
+	echo "clientciphersuite"
 	echo "tlsclientmethod"
 	echo "procmailrc"
 	echo "libindimail"
@@ -2207,24 +2209,46 @@ do
 	chmod 644 $t/$i
 done
 
-if [ ! -f $t/tlsserverciphers ] ; then
-	echo "tlsserverciphers"
+n1=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f1)
+n2=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f2)
+max=$(expr 10 \* $n1 + $n2)
+if [ ! -f $t/servercipherlist ] ; then
+	echo "servercipherlist"
 	(
 	/bin/echo -n "ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:"
 	/bin/echo -n "-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA:"
 	/bin/echo -n "-DES-CBC3-MD5:+SSLv3:+TLSv1:-SSLv2:!DES:!MD5:!PSK:!RC4:"
 	/bin/echo -n "!3DES:!SHA1:!SHA256:!SHA384"
 	echo
-	) > $t/tlsserverciphers
-	if [ ! -d $t/global_vars ] ; then
-		mkdir -p $t/global_vars
+	) > $t/servercipherlist
+fi
+if [ ! -f $t/serverciphersuite ] ; then
+	echo "serverciphersuite"
+	echo "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256" > $t/serverciphersuite
+fi
+if [ ! -f $t/clientcipherlist ] ; then
+	echo "clientcipherlist"
+	echo "ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP" > $t/clientcipherlist
+fi
+if [ ! -f $t/clientciphersuite ] ; then
+	echo "clientciphersuite"
+	echo "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256" > $t/clientciphersuite
+fi
+[ ! -d $t/global_vars ] && mkdir -p $t/global_vars
+[ $max -gt 12 ] && fn=serverciphersuite || fn=""
+if [ -n "$fn" -a ! -f $t/global_vars/TLS_CIPHER_SUITE -a ! -L $t/global_vars/TLS_CIPHER_SUITE ] ; then
+	/bin/ln -sr $CONTROLDIR/$fn $t/global_vars/TLS_CIPHER_SUITE 2>/dev/null
+	if [ $? -ne 0 ] ; then
+		cd $t/global_vars
+		ln -s ../$fn TLS_CIPHER_SUITE
 	fi
-	if [ ! -f $t/global_vars/TLS_CIPHER_LIST -a ! -L $t/global_vars/TLS_CIPHER_LIST ] ; then
-		/bin/ln -sr $CONTROLDIR/tlsserverciphers $t/global_vars/TLS_CIPHER_LIST 2>/dev/null
-		if [ $? -ne 0 ] ; then
-			cd $t/global_vars
-			ln -s ../tlsserverciphers TLS_CIPHER_LIST
-		fi
+fi
+fn=servercipherlist
+if [ ! -f $t/global_vars/TLS_CIPHER_LIST -a ! -L $t/global_vars/TLS_CIPHER_LIST ] ; then
+	/bin/ln -sr $CONTROLDIR/$fn $t/global_vars/TLS_CIPHER_LIST 2>/dev/null
+	if [ $? -ne 0 ] ; then
+		cd $t/global_vars
+		ln -s ../$fn TLS_CIPHER_LIST
 	fi
 fi
 max=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 | sed 's{\.{_{')
@@ -2235,10 +2259,6 @@ fi
 if [ ! -f $t/tlsservermethod ] ; then
 	echo tlsservermethod
 	echo $max > $t/tlsservermethod
-fi
-if [ ! -f $t/tlsclientciphers ] ; then
-	echo "tlsclientciphers"
-	echo "ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP" > $t/tlsclientciphers
 fi
 if [ ! -f $t/tlsclientmethod ] ; then
 	echo tlsclientmethod

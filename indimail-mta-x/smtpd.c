@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.298 2023-08-17 13:12:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.299 2023-08-22 00:39:51+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.298 $";
+static char    *revision = "$Revision: 1.299 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -6611,15 +6611,18 @@ ssl_proto()
 		die_nomem();
 	return;
 }
+
 void
 do_tls()
 {
 	SSL_CTX        *ctx;
+	int             method;
 
-	if (control_rldef(&ssl_option, "tlsservermethod", 0, "TLSv1_2") != 1)
+	if (control_readline(&ssl_option, "tlsservermethod") == -1)
 		die_control("tlsservermethod");
-	if (!stralloc_0(&ssl_option))
+	if (ssl_option.len && !stralloc_0(&ssl_option))
 		die_nomem();
+	method = get_tls_method(ssl_option.len ? ssl_option.s : 0);
 	if (!certdir) {
 		if (!(certdir = env_get("CERTDIR")))
 			certdir = auto_control;
@@ -6656,9 +6659,9 @@ do_tls()
 	if (!ciphers) {
 		int             i;
 		/* - set cipher list */
-		if (!(ciphers = env_get("TLS_CIPHER_LIST"))) {
-			if (control_readfile(&saciphers, "tlsserverciphers", 0) == -1)
-				die_control("tlsserverciphers");
+		if (!(ciphers = env_get(method < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE"))) {
+			if (control_readfile(&saciphers, method < 7 ? "servercipherlist" : "serverciphersuite", 0) == -1)
+				die_control(method < 7 ? "servercipherlist" : "serverciphersuite");
 			if (saciphers.len) {
 				/*- convert all '\0's except the last one to ':' */
 				for (i = 0; i < saciphers.len - 1; ++i)
@@ -7052,6 +7055,11 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.299  2023-08-22 00:39:51+05:30  Cprogrammer
+ * use servercipherlist for tlsv1_2 and below, serverciphersuite for tlsv1_3 and above
+ * use TLS_CIPHER_LIST for tlsv1_2 and below, TLS_CIPHER_SUITE for tlsv1_3 and above
+ * No defaults for missing tlsservermethod, tlsclientmethod
+ *
  * Revision 1.298  2023-08-17 13:12:02+05:30  Cprogrammer
  * initialize few left out variables in smtp_init
  *
@@ -7400,7 +7408,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.298 2023-08-17 13:12:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.299 2023-08-22 00:39:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

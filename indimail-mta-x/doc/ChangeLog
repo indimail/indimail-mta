@@ -83,6 +83,37 @@ o added timestamp in installation logs
 44. qmail-local.c: display program/command if crashed in logs
 - 18/08/2023
 45. svctool: preserve permission of control files in recontrol
+- 20/08/2023
+46. dossl.c: use clientcipherlist for tlsv1_2 and below, clientciphersuite for
+    tlsv1_3 and above
+47. dossl.c: use TLS_CIPHER_LIST for tlsv1_2 and below, TLS_CIPHER_SUITE for
+   tlsv1_3 and above
+48. dossl.c: use SSL_set_cipher_list for tlsv1_2 and below,
+    SSL_set_ciphersuits for tlsv1_3 and above.
+49. dossl.c: return 0 for connnection/negotiation failure in do_tls()
+    for qmail-remote to retry connection in non-tls mode
+50. qmail-remote.c: removed unused function perm_tlslcientmethod()
+51. qmail-remote.c: BUG: Fixed wrong usage of quit()
+52. qmail-remote.c: retry failed TLS/SSL connection attempt with non-TLS connection
+53. qlocal_uprade.in: move tlsclientciphers to clientcipherlist,
+    move tlsserverciphers to servercipherlist
+54. smtpd.c: use servercipherlist for tlsv1_2 and below, serverciphersuite for tlsv1_3 and above
+55. smtpd.c: use TLS_CIPHER_LIST for tlsv1_2 and below, TLS_CIPHER_SUITE for
+    tlsv1_3 and above
+56. smtpd.c, qmail-remote.c: No defaults for missing tlsservermethod,
+    tlsclientmethod
+57. qmail-smtpd.c: added TLS_CIPHER_SUITE env variables in print_details
+58. sslerator.c: let default ciphers be set by tls_init()
+59. sslerator.c: use TLS_CIPHER_LIST for tlsv1_2 and below, TLS_CIPHER_SUITE
+    for tlsv1_3 and above
+60. svctool: renamed tlsclientciphers, tlsserverciphers to clientcipherlist,
+    servercipherlist for TLSv1_2
+61. svctool: added clientciphersuite, serverciphersuite control files for
+    TLSv1_3
+62. svctool: link TLS_CIPHER_LIST to servercipherlist, TLS_CIPHER_SUITE to
+    serverciphersuite as default CIPHERS for TLSv1_2, TLSv1_3
+63. smtpd.c, dossl.c: new feature Min:Max format for tlsclientmethod,
+    tlservermethod
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

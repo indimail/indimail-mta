@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.168 2023-08-04 08:48:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.169 2023-08-20 18:40:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -634,20 +634,6 @@ perm_ambigmx()
 			!stralloc_cats(&smtptext, controldir) ||
 			!stralloc_cats(&smtptext, "/locals file, so I don't treat it as local. (#5.4.6)"))
 		temp_nomem();
-	if (setsmtptext(0, protocol_t))
-		smtpenv.len = 0;
-	zerodie(r, 0);
-}
-
-no_return void
-perm_tlsclientmethod()
-{
-	char           *r = "DInvalid TLS method configured. (#5.3.5)\n";
-
-	out(r);
-	if (!stralloc_copys(&smtptext, r + 3))
-		temp_nomem();
-	smtptext.len--;
 	if (setsmtptext(0, protocol_t))
 		smtpenv.len = 0;
 	zerodie(r, 0);
@@ -2451,6 +2437,12 @@ err_tmpfail(char *arg)
 }
 #endif
 
+/*-
+ * do_smtp returns
+ * when the next MX is to be tried
+ *   or
+ * when TLS session fails (sets notls = 2)
+ */
 void
 do_smtp(char *fqdn)
 {
@@ -2555,17 +2547,27 @@ do_smtp(char *fqdn)
 	} else /*- no tlsa rr records */
 	if (notls) /*- if found in control/notlshosts control file */
 		code = ehlo();
-	else
-	if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len,
-				tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
-		code = ehlo();
+	else {
+		if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len,
+					tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
+			code = ehlo();
+		else { /*- try non TLS session */
+			notls = 2;
+			return;
+		}
+	}
 #else
 	if (notls) /*- if found in control/notlshosts control file */
 		code = ehlo();
-	else
-	if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len,
-				tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
-		code = ehlo();
+	else {
+		if (do_tls(&ssl, 0, smtps, smtpfd, 0, 0, partner_fqdn, host.s, host.len,
+					tls_quit, temp_nomem, temp_control, temp_write, quit, &smtptext, &ehlokw, 0))
+			code = ehlo();
+		else { /*- try non TLS session */
+			notls = 2;
+			return;
+		}
+	}
 #endif /*- #ifdef HASTLSA */
 #else
 	code = ehlo();
@@ -2682,9 +2684,9 @@ do_smtp(char *fqdn)
 		temp_write();
 	code = smtpcode();
 	if (code >= 500)
-		quit(code, 1, "D", " failed on DATA command", code, NULL);
+		quit(code, 1, "D", " failed on DATA command", NULL);
 	if (code >= 400)
-		quit(code, 1, "Z", " failed on DATA command", code, NULL);
+		quit(code, 1, "Z", " failed on DATA command", NULL);
 #ifdef SMTPUTF8
 	if (enable_utf8 && header.len &&
 			substdio_put(&smtpto, header.s, header.len) == -1)
@@ -3467,7 +3469,7 @@ int
 main(int argc, char **argv)
 {
 	static ipalloc  ip = { 0 };
-	int             i, j, errors, flagallaliases, flagalias, smtp_error;
+	int             i, j, t, errors, flagallaliases, flagalias, smtp_error, notls_orig;
 	unsigned long   random, prefme;
 	char          **recips;
 	char           *relayhost, *x;
@@ -3490,6 +3492,7 @@ main(int argc, char **argv)
 	msgsize = argv[4];
 	recips = argv + 5;
 	getcontrols();
+	notls_orig = notls;
 	dns_init(0);
 	if (env_get("SMTPS"))
 		smtps = 1;
@@ -3563,120 +3566,152 @@ main(int argc, char **argv)
 #ifdef MXPS
 	mxps = env_get("DISABLE_MXPS") ? 0 : 2;
 #endif
-	for (i = j = 0; i < ip.len; ++i) {
+	/* the big monstrous loop */
+	for (i = j = 0; i < ip.len;) {
 #ifdef MXPS
 		if (!mxps && qmtp_priority(ip.ix[i].pref))
 			mxps = 1;
-		if (protocol_t == 'q' || mxps == 1 || ip.ix[i].pref < prefme)
+		if (!(protocol_t == 'q' || mxps == 1 || ip.ix[i].pref < prefme))
+			continue;
 #else
-		if (protocol_t == 'q' || ip.ix[i].pref < prefme)
+		if (!(protocol_t == 'q' || ip.ix[i].pref < prefme))
+			continue;
 #endif
-		{
-			if (flagtcpto && tcpto(&ip.ix[i], min_penalty))
-				continue;
+		if (flagtcpto && tcpto(&ip.ix[i], min_penalty)) {
+			++i;
+			continue;
+		}
 #if defined(TLS) && defined(HASTLSA)
-			use_daned = 0;
-			if (do_tlsa) {
-				if (tlsadomains.len && !is_in_tlsadomains(ip.ix[i].fqdn))
-					do_tlsa = (char *) 0;
-				else {
-					for (x = do_tlsa; *x; x++)
-						if (*x == '@')
-							break;
-					if (*x == '@') {
-						/*- connect to qmail-daned */
-						e = tlsacheck(do_tlsa, ip.ix[i].fqdn, QUERY_MODE, rbuf, timeoutfn, err_tmpfail);
-						if (e && rbuf[1] == RECORD_OK)
-							do_tlsa = (char *) 0;
-						else
-						if (e && rbuf[1] == RECORD_NOVRFY)
-							quit(534, 1, "DConnected to ", " but recpient failed DANE validation", NULL);
-						else
-						if (!e)
-							use_daned = 1; /*- do inbuilt DANE Verification and update qmail-daned */
-					}
+		use_daned = 0;
+		if (do_tlsa) {
+			if (tlsadomains.len && !is_in_tlsadomains(ip.ix[i].fqdn))
+				do_tlsa = (char *) 0;
+			else {
+				for (x = do_tlsa; *x; x++)
+					if (*x == '@')
+						break;
+				if (*x == '@') {
+					/*- connect to qmail-daned */
+					e = tlsacheck(do_tlsa, ip.ix[i].fqdn, QUERY_MODE, rbuf, timeoutfn, err_tmpfail);
+					if (e && rbuf[1] == RECORD_OK)
+						do_tlsa = (char *) 0;
+					else
+					if (e && rbuf[1] == RECORD_NOVRFY)
+						quit(534, 1, "DConnected to ", " but recpient failed DANE validation", NULL);
+					else
+					if (!e)
+						use_daned = 1; /*- do inbuilt DANE Verification and update qmail-daned */
 				}
 			}
+		}
 #endif
 #ifdef IPV6
-			if ((smtpfd = (ip.ix[i].af == AF_INET ? socket_tcp4() : socket_tcp6())) == -1)
+		if ((smtpfd = (ip.ix[i].af == AF_INET ? socket_tcp4() : socket_tcp6())) == -1)
 #else
-			if ((smtpfd = socket_tcp4()) == -1)
+		if ((smtpfd = socket_tcp4()) == -1)
 #endif
-				temp_oserr();
-			if (!x) {
-				if (!(x = alloc(IPFMT + 1)))
-					temp_nomem();
-			} else
-			if (!alloc_re((char *) &x, j, j + IPFMT + 1))
+			temp_oserr();
+		if (!x) {
+			if (!(x = alloc(IPFMT + 1)))
 				temp_nomem();
-			j += ip4_fmt(x + j, &ip.ix[i].addr.ip);
-			x[j++] = ',';
-			x[j] = 0;
+		} else
+		if (!alloc_re((char *) &x, j, j + IPFMT + 1))
+			temp_nomem();
+		j += ip4_fmt(x + j, &ip.ix[i].addr.ip);
+		x[j++] = ',';
+		x[j] = 0;
 #if defined(TLS) && defined(HASTLSA)
-			if (!relayhost && do_tlsa) {
-				switch (get_tlsa_rr(ip.ix[i].fqdn, port))
-				{
-				case DNS_HARD:
-					do_tlsa = (char *) 0;
-					break;
-				case DNS_SOFT:
-					temp_dns_rr();
-				case DNS_MEM:
-					temp_nomem();
-				}
+		if (!relayhost && do_tlsa) {
+			switch (get_tlsa_rr(ip.ix[i].fqdn, port))
+			{
+			case DNS_HARD:
+				do_tlsa = (char *) 0;
+				break;
+			case DNS_SOFT:
+				temp_dns_rr();
+			case DNS_MEM:
+				temp_nomem();
 			}
-#endif
-			for (;;) {
-				if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconn)) {
-					if (flagtcpto)	   /*- clear the error */
-						tcpto_err(&ip.ix[i], 0, max_tolerance);
-					partner = ip.ix[i];
-#ifdef TLS
-					partner_fqdn = ip.ix[i].fqdn;
-#else
-					partner_fqdn = NULL;
-#endif
-#ifdef MXPS
-					if (mxps != -1 && (protocol_t == 'q' || mxps == 1))
-#else
-					if (protocol_t == 'q')
-#endif
-					{
-						if (j)
-							x[j - 1] = 0;
-						qmtp(&host, x, port); /*- does not return */
-					} else
-						do_smtp(partner_fqdn);	/*- only returns when the next MX is to be tried */
-					smtp_error = 1;
-					break;
-				} else { /*- connect failed */
-
-#ifdef MXPS
-					if (mxps == 1) { /*- QMTP failed; try SMTP */
-						mxps = -1;
-						port = PORT_SMTP;
-						continue;
-					}
-#endif
-					smtp_error = 0;
-					break;
-				}
-			} /*- for (;;) */
-			/*-
-			 * Add network errors preventing smtp connections.
-			 * Add the IP address to tcp timeout table
-			 * and try the next MX
-			 */
-			if (flagtcpto) {
-				errors = (errno == error_timeout || errno == error_connrefused || errno == error_hostdown
-						  || errno == error_netunreach || errno == error_hostunreach || smtp_error);
-				tcpto_err(&ip.ix[i], errors, max_tolerance);
-			}
-			smtpfrom.p = 0; /*- clear anything in buffer if any - Franz Sirl */
-			close(smtpfd);
 		}
-	} /*- for (i = j = 0; i < ip.len; ++i) */
+#endif
+		for (;;) {
+			smtp_error = 0;
+			if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconn)) {
+				if (flagtcpto)	   /*- clear the error */
+					tcpto_err(&ip.ix[i], 0, max_tolerance);
+				partner = ip.ix[i];
+#ifdef TLS
+				partner_fqdn = ip.ix[i].fqdn;
+#else
+				partner_fqdn = NULL;
+#endif
+#ifdef MXPS
+				if (mxps != -1 && (protocol_t == 'q' || mxps == 1))
+#else
+				if (protocol_t == 'q')
+#endif
+				{
+					if (j)
+						x[j - 1] = 0;
+					qmtp(&host, x, port); /*- does not return */
+				} else {
+					/*-
+					 * do_smtp returns
+					 * when the next MX is to be tried
+					 *   or
+					 * when TLS session fails (notls == 2)
+					 */
+					do_smtp(partner_fqdn);
+					if (notls == 2) {
+						notls = 1;
+						smtpfrom.p = 0;
+						t = errno;
+						close(smtpfd);
+						errno = t;
+						if (!smtp_error)
+							smtp_error = 2;
+						break;
+					}
+				}
+				smtp_error = 1;
+				break;
+			} else { /*- connect failed */
+#ifdef MXPS
+				if (mxps == 1) { /*- QMTP failed; try SMTP */
+					mxps = -1;
+					port = PORT_SMTP;
+					smtpfrom.p = 0;
+					t = errno;
+					close(smtpfd);
+					errno = t;
+					if (!smtp_error)
+						smtp_error = 2;
+					break;
+				}
+#endif
+				smtp_error = 0;
+				break;
+			} /* if (!timeoutconn46(smtpfd, &ip.ix[i], &outip, (unsigned int) port, timeoutconn)) */
+		} /*- for (;;) */
+		if (smtp_error == 2) { /*- QMTP or TLS failed, retry with SMTP */
+			smtp_error = 3;
+			continue;
+		}
+		/*-
+		 * Add network errors preventing smtp connections.
+		 * Add the IP address to tcp timeout table
+		 * and try the next MX
+		 */
+		if (flagtcpto) {
+			errors = (errno == error_timeout || errno == error_connrefused || errno == error_hostdown
+					  || errno == error_netunreach || errno == error_hostunreach || smtp_error == 1);
+			tcpto_err(&ip.ix[i], errors, max_tolerance);
+		}
+		smtpfrom.p = 0; /*- clear anything in buffer if any - Franz Sirl */
+		close(smtpfd);
+		notls = notls_orig;
+		++i;
+	} /*- for (i = j = 0; i < ip.len;) */
 	if (j) {
 		x[j - 1] = 0; /*- remove the last ',' */
 		temp_noconn(&host, x, port);
@@ -3689,13 +3724,18 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.168 2023-08-04 08:48:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.169 2023-08-20 18:40:41+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.169  2023-08-20 18:40:41+05:30  Cprogrammer
+ * removed unused function perm_tlslcientmethod()
+ * BUG: Fixed wrong usage of quit()
+ * retry failed TLS/SSL connection attempt with non-TLS connection
+ *
  * Revision 1.168  2023-08-04 08:48:21+05:30  Cprogrammer
  * BUG: SMTP Auth being tried when it shouldn't
  *

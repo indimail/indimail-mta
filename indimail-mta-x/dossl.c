@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.3 2023-07-07 10:36:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.4 2023-08-22 19:52:06+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -149,7 +149,7 @@ do_pkix(SSL *ssl, char *servercert, char *fqdn,
 }
 
 /*
- * 1. returns 0 --> fallback to non-tls
+ * 1. returns 0 or 2 --> fallback to non-tls
  *    if certs do not exist
  *    host is in notlshosts
  *    smtps == 0 and tls session cannot be initiated
@@ -172,7 +172,7 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		saa *ehlokw,
 		int verbose)
 {
-	int             code, i = 0, _needtlsauth = 0;
+	int             code, i = 0, _needtlsauth = 0, method;
 	static char     ssl_initialized;
 	const char     *ciphers = NULL;
 	char           *t, *servercert = NULL, *certfile;
@@ -283,15 +283,15 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		SSL_library_init();
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-	if (control_rldef(&ssl_option, "tlsclientmethod", 0, "TLSv1_2") != 1)
+#if OPENSSL_VERSION_NUMBER >= 0x1010107f /* openssl 1.1.1 */
+	if (control_readline(&ssl_option, "tlsclientmethod") == -1)
 #else
-	if (control_rldef(&ssl_option, "tlsclientmethod", 0, "TLSv1_3") != 1)
+	if (control_readline(&ssl_option, "tlsclientmethod") == -1)
 #endif
 		ctrl_err("Unable to read control files", "tlsclientmethod");
-	if (!stralloc_0(&ssl_option))
+	if (ssl_option.len && !stralloc_0(&ssl_option))
 		mem_err();
-	if (!(ctx = set_tls_method(ssl_option.s, client, &method_fail))) {
+	if (!(ctx = set_tls_method(ssl_option.len ? ssl_option.s : 0, &method, qremote, &method_fail))) {
 		if (!smtps && !_needtlsauth)
 			return (0);
 		t = myssl_error();
@@ -303,10 +303,12 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		switch (method_fail)
 		{
 		case 1:
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#if OPENSSL_VERSION_NUMBER >= 0x1010107f
+			tlsquit("Z", "TLS Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLSv1_3", t, 0, 0, 0);
+#elif OPENSSL_VERSION_NUMBER >= 0x10100000L
 			tlsquit("Z", "TLS Supported methods: SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2", t, 0, 0, 0);
 #else
-			tlsquit("Z", "TLS Supported methods: TLSv1, TLSv1_1, TLSv1_2 TLSv1_3", t, 0, 0, 0);
+			tlsquit("Z", "TLS Supported methods: SSLv23, SSLv3", t, 0, 0, 0);
 #endif
 			break;
 		case 2:
@@ -324,11 +326,15 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		case 6:
 			tlsquit("Z", "TLS error initializing TLSv1_2 ctx: ", t, 0, 0, 0);
 			break;
+#if OPENSSL_VERSION_NUMBER >= 0x1010107f
 		case 7:
 			tlsquit("Z", "TLS error initializing TLSv1_3 ctx: ", t, 0, 0, 0);
 			break;
+#endif
 		}
 	}
+	/*- POODLE Vulnerability */
+	SSL_CTX_set_options(ctx, SSL_OP_NO_SSLv2 | SSL_OP_NO_SSLv3);
 
 	if (_needtlsauth) {
 		if (!SSL_CTX_load_verify_locations(ctx, servercert, NULL)) {
@@ -357,12 +363,12 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 #endif
 
 	if (!(myssl = SSL_new(ctx))) {
-		t = myssl_error();
 		if (!smtps && !_needtlsauth) {
 			SSL_CTX_free(ctx);
 			ctx = (SSL_CTX *) 0;
 			return (0);
 		}
+		t = myssl_error();
 		if (stext) {
 			if (!stralloc_copyb(stext, "TLS error initializing ssl: ", 28) ||
 					!stralloc_cats(stext, t))
@@ -387,13 +393,13 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 	}
 
 	/*- while the server is preparing a response, do something else */
-	if (!ciphers) {
-		if (control_readfile(&saciphers, "tlsclientciphers", 0) == -1) {
+	if (!(ciphers = env_get(method < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE"))) {
+		if (control_readfile(&saciphers, method < 7 ? "clientcipherlist" : "clientciphersuite", 0) == -1) {
 			while (SSL_shutdown(myssl) == 0)
 				usleep(100);
 			SSL_free(myssl);
 			myssl = NULL;
-			ctrl_err("Unable to read control file", "tlsclientciphers");
+			ctrl_err("Unable to read control file", method < 7 ? "clientcipherlist" : "clientciphersuite");
 		}
 		if (saciphers.len) {
 			/*- convert all '\0's except the last one to ':' */
@@ -403,7 +409,25 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 			ciphers = saciphers.s;
 		}
 	}
-	SSL_set_cipher_list(myssl, ciphers);
+	if (ciphers) {
+#if OPENSSL_VERSION_NUMBER >= 0x1010107f
+		i = (method < 7 ? SSL_set_cipher_list : SSL_set_ciphersuites) (myssl, ciphers);
+#else
+		i = SSL_set_cipher_list(myssl, ciphers);
+#endif
+		if (!i) {
+			t = myssl_error();
+			if (stext) {
+				if (!stralloc_copyb(stext, "TLS error seting cipher", 23) ||
+						!stralloc_cats(stext, method < 7 ? "list: " : "suite: ") ||
+						!stralloc_cats(stext, t))
+					mem_err();
+			}
+			SSL_free(myssl);
+			myssl = NULL;
+			tlsquit("Z", "TLS error setting cipher", method < 7 ? "list: " : "suite: ", t, 0, 0);
+		}
+	}
 
 	/*- SSL_set_options(myssl, SSL_OP_NO_TLSv1); */
 	SSL_set_fd(myssl, smtpfd);
@@ -428,6 +452,15 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 	}
 	*ssl = myssl;
 	if (ssl_timeoutconn(timeoutconn, smtpfd, smtpfd, myssl) <= 0) {
+		if (!smtps && !_needtlsauth) {
+			i = errno;
+			while (SSL_shutdown(myssl) == 0)
+				usleep(100);
+			SSL_free(myssl);
+			*ssl = myssl = NULL;
+			errno = i;
+			return (0);
+		}
 		t = myssl_error_str();
 		if (stext) {
 			if (!stralloc_copyb(stext, "TLS connect failed: ", 20) ||
@@ -698,13 +731,18 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	static char    *x = "$Id: dossl.c,v 1.3 2023-07-07 10:36:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dossl.c,v 1.4 2023-08-22 19:52:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.4  2023-08-22 19:52:06+05:30  Cprogrammer
+ * use SSL_set_cipher_list for tlsv1_2 and below, SSL_set_ciphersuite for tlsv1_3 and above
+ * return 0 for connnection/negotiation failure in do_tls() for qmail-remote to retry connection in non-tls mode
+ * No defaults for missing tlsservermethod, tlsclientmethod
+ *
  * Revision 1.3  2023-07-07 10:36:31+05:30  Cprogrammer
  * fix potential SIGSEGV
  *
