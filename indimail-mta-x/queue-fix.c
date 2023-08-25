@@ -1,78 +1,6 @@
-/*
- * $Log: queue-fix.c,v $
- * Revision 1.29  2023-08-02 02:10:06+05:30  Cprogrammer
- * added argument for -b to specify bigtodo or nobigtodo
- *
- * Revision 1.28  2022-01-30 09:29:09+05:30  Cprogrammer
- * fixed return status when creating a queue
- * allow configurable big/small todo/intd
- *
- * Revision 1.27  2021-11-27 22:24:03+05:30  Cprogrammer
- * fixed return status for queue creation
- *
- * Revision 1.26  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.25  2021-07-20 09:04:36+05:30  Cprogrammer
- * added missing options in usage string
- *
- * Revision 1.24  2021-07-05 21:36:52+05:30  Cprogrammer
- * allow processing $HOME/.defaultqueue for root
- *
- * Revision 1.23  2021-07-04 23:33:11+05:30  Cprogrammer
- * added -m option for qmta-send where dirs are owned by qmailq
- *
- * Revision 1.22  2021-06-27 10:38:56+05:30  Cprogrammer
- * uidnit new argument to disable/enable error on missing uids
- *
- * Revision 1.21  2021-05-30 00:15:57+05:30  Cprogrammer
- * added -r option to create ratelimit dir
- *
- * Revision 1.20  2021-05-16 00:49:33+05:30  Cprogrammer
- * use configurable conf_split instead of auto_split variable
- *
- * Revision 1.19  2021-05-13 14:44:29+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.18  2021-05-12 18:48:05+05:30  Cprogrammer
- * use envdir_set to load environment from .defaultqueue/defaultqueue
- *
- * Revision 1.17  2021-05-12 15:51:58+05:30  Cprogrammer
- * set conf_split from CONFSPLIT env variable
- *
- * Revision 1.16  2020-11-30 10:19:51+05:30  Cprogrammer
- * replaced stdio with substdio and added option to specify queue subdirectory split
- *
- * Revision 1.15  2009-12-09 23:57:41+05:30  Cprogrammer
- * additional closeflag argument to uidinit()
- *
- * Revision 1.14  2005-07-04 18:05:19+05:30  Cprogrammer
- * size of tcpto changed to TCPTO_BUFSIZ
- *
- * Revision 1.13  2004-10-22 20:29:50+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.12  2004-10-11 14:00:13+05:30  Cprogrammer
- * use scan_int() instead of scan_ulong()
- *
- * Revision 1.11  2003-12-07 13:06:36+05:30  Cprogrammer
- * return non-zero for errors/warnings
- *
- * Revision 1.10  2003-10-23 01:27:16+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.9  2003-10-12 01:14:03+05:30  Cprogrammer
- * added yanked dir
- *
- * Revision 1.8  2003-08-22 23:16:11+05:30  Cprogrammer
- * removed compiler warnings for multi-line strings
- *
- * Revision 1.7  2003-07-29 19:55:28+05:30  Cprogrammer
- * added RCS log
- *
- */
-
 /*-
+ * $Id: queue-fix.c,v 1.30 2023-08-25 08:26:03+05:30 Cprogrammer Exp mbhangui $
+ *
  * adapted from queue-fix 1.4
  * by Eric Huss
  * e-huss@netmeridian.com
@@ -167,15 +95,15 @@ usage()
 	strnum2[fmt_int(strnum2, bigtodo)] = 0;
 	strerr_warn6(WARN,
 			"usage: queue-fix [-irmNv] [-s split] queue_dir\n"
-			"                 -s - queue split number (default ", strnum1,
+			"                 -s split - where split = queue split number (default ", strnum1,
 			")\n"
-			"                 -b - Big Todo (default ", strnum2,
+			"                 -b 0|1   - 0 for no big todo, 1 for big todo (default ", strnum2,
 			")\n"
-			"                 -i - Interactive Mode\n"
-			"                 -r - create ratelimit directory\n"
-			"                 -m - qmta mode\n"
-			"                 -v - Verbose Mode\n"
-			"                 -N - Test Mode", 0);
+			"                 -i       - Interactive Mode\n"
+			"                 -r       - create ratelimit directory\n"
+			"                 -m       - qmta mode\n"
+			"                 -v       - Verbose Mode\n"
+			"                 -N       - Test Mode", 0);
 	_exit(100);
 }
 
@@ -1100,7 +1028,84 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.29 2023-08-02 02:10:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.30 2023-08-25 08:26:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: queue-fix.c,v $
+ * Revision 1.30  2023-08-25 08:26:03+05:30  Cprogrammer
+ * updated usage
+ *
+ * Revision 1.29  2023-08-02 02:10:06+05:30  Cprogrammer
+ * added argument for -b to specify bigtodo or nobigtodo
+ *
+ * Revision 1.28  2022-01-30 09:29:09+05:30  Cprogrammer
+ * fixed return status when creating a queue
+ * allow configurable big/small todo/intd
+ *
+ * Revision 1.27  2021-11-27 22:24:03+05:30  Cprogrammer
+ * fixed return status for queue creation
+ *
+ * Revision 1.26  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.25  2021-07-20 09:04:36+05:30  Cprogrammer
+ * added missing options in usage string
+ *
+ * Revision 1.24  2021-07-05 21:36:52+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
+ * Revision 1.23  2021-07-04 23:33:11+05:30  Cprogrammer
+ * added -m option for qmta-send where dirs are owned by qmailq
+ *
+ * Revision 1.22  2021-06-27 10:38:56+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
+ * Revision 1.21  2021-05-30 00:15:57+05:30  Cprogrammer
+ * added -r option to create ratelimit dir
+ *
+ * Revision 1.20  2021-05-16 00:49:33+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
+ *
+ * Revision 1.19  2021-05-13 14:44:29+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.18  2021-05-12 18:48:05+05:30  Cprogrammer
+ * use envdir_set to load environment from .defaultqueue/defaultqueue
+ *
+ * Revision 1.17  2021-05-12 15:51:58+05:30  Cprogrammer
+ * set conf_split from CONFSPLIT env variable
+ *
+ * Revision 1.16  2020-11-30 10:19:51+05:30  Cprogrammer
+ * replaced stdio with substdio and added option to specify queue subdirectory split
+ *
+ * Revision 1.15  2009-12-09 23:57:41+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
+ * Revision 1.14  2005-07-04 18:05:19+05:30  Cprogrammer
+ * size of tcpto changed to TCPTO_BUFSIZ
+ *
+ * Revision 1.13  2004-10-22 20:29:50+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.12  2004-10-11 14:00:13+05:30  Cprogrammer
+ * use scan_int() instead of scan_ulong()
+ *
+ * Revision 1.11  2003-12-07 13:06:36+05:30  Cprogrammer
+ * return non-zero for errors/warnings
+ *
+ * Revision 1.10  2003-10-23 01:27:16+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.9  2003-10-12 01:14:03+05:30  Cprogrammer
+ * added yanked dir
+ *
+ * Revision 1.8  2003-08-22 23:16:11+05:30  Cprogrammer
+ * removed compiler warnings for multi-line strings
+ *
+ * Revision 1.7  2003-07-29 19:55:28+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

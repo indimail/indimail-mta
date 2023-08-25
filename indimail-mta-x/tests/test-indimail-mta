@@ -1,9 +1,11 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.3 2023-08-22 20:25:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.4 2023-08-25 08:27:05+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
-user=mbhangui
+user=$(whoami)
+myuid=$(id -u)
+mygid=$(id -g)
 real_domain=argos.indimail.org
 dkim_key=/etc/indimail/control/domainkeys/$real_domain/$(echo $real_domain | cut -d. -f1)
 #
@@ -141,8 +143,8 @@ setup_assign()
 {
 	echo "Creating $sysconfdir/users/assign" 1>&2
 	(
-	echo "=$user:$user:1000:1000:$testdir/$user:::"
-	echo "+$user-:$user:1000:1000:$testdir/$user:-::"
+	echo "=$user:$user:$myuid:$mygid:$testdir/$user:::"
+	echo "+$user-:$user:$myuid:$mygid:$testdir/$user:-::"
 	echo "."
 	) > $sysconfdir/users/assign
 	echo "Creating $sysconfdir/users/cdb" 1>&2
@@ -152,7 +154,7 @@ setup_assign()
 setup_queue()
 {
 	echo "Creating queue in $testdir/queue" 1>&2
-	sudo queue-fix $testdir/queue
+	sudo queue-fix -s 23 -b 0 $testdir/queue
 }
 
 setup_config()
@@ -1778,6 +1780,10 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.4  2023-08-25 08:27:05+05:30  Cprogrammer
+# fixed queue-fix
+# removed use of hardcoded uid, gid in assign file
+#
 # Revision 1.3  2023-08-22 20:25:14+05:30  Cprogrammer
 # added tests for TLSv1.2, TLSv1.3
 #

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-dkim,v 1.1 2023-07-26 23:56:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-dkim,v 1.2 2023-08-25 08:26:58+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 verbose=0
@@ -29,7 +29,6 @@ for i in example.com example.org
 do
 	if [ ! -d $domainkey_dir/$i ] ; then
 		sudo mkdir -p $domainkey_dir/$i
-		#sudo chown root:qmail $domainkey_dir/$i
 	fi
 	if [ ! -f $domainkey_dir/$i/default ] ; then
 		echo "Creating private key bits 4096 $domainkey_dir/$i/default"
@@ -61,7 +60,6 @@ for i in example.com example.org
 do
 	if [ ! -d $domainkey_dir/$i ] ; then
 		sudo mkdir -p $domainkey_dir/$i
-		#sudo chown root:qmail $domainkey_dir/$i
 	fi
 	if [ ! -f $domainkey_dir/$i/ed25519 ] ; then
 		echo "Creating private key $domainkey_dir/$i/ed25519"
@@ -1339,7 +1337,6 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
-#sudo /bin/rm -f $domainkey_dir
 echo "All $tcount tests succeeded"
 end=$(date +'%s')
 secs=$(($end-$start))
@@ -1348,6 +1345,9 @@ printf '%d days, %d hours, %d minutes, %d seconds\n' $((secs/86400)) $((secs%864
 exit 0
 #
 # $Log: test-dkim,v $
+# Revision 1.2  2023-08-25 08:26:58+05:30  Cprogrammer
+# removed comments
+#
 # Revision 1.1  2023-07-26 23:56:03+05:30  Cprogrammer
 # Initial revision
 #
