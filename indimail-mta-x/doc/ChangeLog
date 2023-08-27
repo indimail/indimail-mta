@@ -114,6 +114,9 @@ o added timestamp in installation logs
     serverciphersuite as default CIPHERS for TLSv1_2, TLSv1_3
 63. smtpd.c, dossl.c: new feature Min:Max format for tlsclientmethod,
     tlservermethod
+- 27/08/2023
+64. smtpd.c: changed location of flagbarfspf check
+65. test-indimail-mta: use default ciphers set by svctool
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

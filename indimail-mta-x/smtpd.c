@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.299 2023-08-22 00:39:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.300 2023-08-26 22:12:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.299 $";
+static char    *revision = "$Revision: 1.300 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3918,12 +3918,12 @@ nohasvirtual:
 				die_nomem();
 			flagbarfspf = 1;
 		}
+		if (flagbarfspf) {
+			err_spf();
+			return;
+		}
 	} else
 		env_unset("SPFRESULT");
-	if (flagbarfspf) {
-		err_spf();
-		return;
-	}
 #endif /*- #ifdef USE_SPF */
 	/*- authdomains */
 	if (chkdomok) {
@@ -7055,6 +7055,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.300  2023-08-26 22:12:32+05:30  Cprogrammer
+ * changed location of flagbarfspf check
+ *
  * Revision 1.299  2023-08-22 00:39:51+05:30  Cprogrammer
  * use servercipherlist for tlsv1_2 and below, serverciphersuite for tlsv1_3 and above
  * use TLS_CIPHER_LIST for tlsv1_2 and below, TLS_CIPHER_SUITE for tlsv1_3 and above
@@ -7408,7 +7411,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.299 2023-08-22 00:39:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.300 2023-08-26 22:12:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

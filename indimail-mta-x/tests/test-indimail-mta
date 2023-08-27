@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.4 2023-08-25 08:27:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.5 2023-08-26 23:18:32+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -168,18 +168,12 @@ setup_config()
 	sudo /usr/sbin/svctool --sysconfdir=$sysconfdir --config=bogofilter
 	tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16 > $cntrldir/batvkey
 	echo ./Maildir/                           > $cntrldir/defaultdelivery
-	echo "TLS_AES_128_GCM_SHA256"             > $cntrldir/clientciphersuite
-	echo "TLS_AES_128_GCM_SHA256"             > $cntrldir/serverciphersuite
-	echo ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP:SSLv3 > $cntrldir/clientcipherlist
-	echo ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP:SSLv3 > $cntrldir/servercipherlist
 	echo TLSv1_2:TLSv1_3                      > $cntrldir/tlsclientmethod
 	echo TLSv1_2:TLSv1_3                      > $cntrldir/tlsservermethod
 	echo blocked@$HOSTNAME                    > $cntrldir/badmailfrom
 	echo blocked@$HOSTNAME                    > $cntrldir/badrcptto
 	echo @$HOSTNAME                           > $cntrldir/nodnscheck
 	sudo chown -R $user $cntrldir
-	#/bin/rm -f $cntrldir/global_vars/TLS_CIPHER_LIST
-	#/bin/rm -f $cntrldir/global_vars/TLS_CIPHER_SUITE
 	ls -l $cntroldir/global_vars
 }
 
@@ -384,8 +378,6 @@ create_authsmtp()
 	echo "var=\`tr [\"\\0\"] [\"\\n\"] 0<&3\`"
 	echo "user=\`echo \$var | cut -d ' ' -f1\`"
 	echo "pass=\`echo \$var | cut -d ' ' -f2\`"
-	#echo "echo user=\$user 1>&2"
-	#echo "echo pass=\$pass 1>&2"
 	echo "exec 4>$testdir/tmp/authsmtp.\$\$ 3<$testdir/tmp/authsmtp.\$\$"
 	echo "/bin/rm -f $testdir/tmp/authsmtp.\$\$"
 	echo "echo \$var | tr [\" \"] [\"\\0\"] 1>&4"
@@ -1780,6 +1772,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.5  2023-08-26 23:18:32+05:30  Cprogrammer
+# use default cipherlist, ciphersuite created by svctool
+#
 # Revision 1.4  2023-08-25 08:27:05+05:30  Cprogrammer
 # fixed queue-fix
 # removed use of hardcoded uid, gid in assign file
