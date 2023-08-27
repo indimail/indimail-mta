@@ -104,10 +104,11 @@ variable TLS_CIPHER_SUITE is used instead. See openssl-ciphers(1ossl).
 -\fBM\fR \fItls_method\fR
 Use \fItls_method\fR to set client/server method / protocol. This will be
 one of SSLv23, SSLv3, TLSv1, TLSv1_1, TLSv1_2, TLSv1_3 values.
-The actual protocol version used will be negotiated to the highest version
-mutually supported by the client and the server. The supported protocols
-are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and TLSv1.3. Ths option must not be used
-to avoid version-specific methods since they are now deprecated.
+Without this option, the actual protocol version used will be negotiated to
+the highest version mutually supported by the client and the server. The
+supported protocols at this moment are TLSv1.2 and TLSv1.3. Older protocols
+have been deprecated and removed. It is best not to use this option to let
+\fBdotls\fR chose the highest protocol supported.
 
 .TP
 -\fBN\fR
