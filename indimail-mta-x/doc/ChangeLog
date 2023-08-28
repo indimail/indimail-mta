@@ -117,6 +117,10 @@ o added timestamp in installation logs
 - 27/08/2023
 64. smtpd.c: changed location of flagbarfspf check
 65. test-indimail-mta: use default ciphers set by svctool
+- 28/08/2023
+66. qmail-remote.c: BUG from 52: fixed extra connect being made for servers
+    without STARTTLS capability
+67. dossl.c: return 2 for tls connection/negotiation failure
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

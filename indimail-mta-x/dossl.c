@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.4 2023-08-26 21:34:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.5 2023-08-28 22:24:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -459,7 +459,7 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 			SSL_free(myssl);
 			*ssl = myssl = NULL;
 			errno = i;
-			return (0);
+			return (2);
 		}
 		t = myssl_error_str();
 		if (stext) {
@@ -731,13 +731,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	static char    *x = "$Id: dossl.c,v 1.4 2023-08-26 21:34:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dossl.c,v 1.5 2023-08-28 22:24:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.5  2023-08-28 22:24:25+05:30  Cprogrammer
+ * return 2 for tls connection failure
+ *
  * Revision 1.4  2023-08-26 21:34:17+05:30  Cprogrammer
  * use SSL_set_cipher_list for tlsv1_2 and below, SSL_set_ciphersuite for tlsv1_3 and above
  * return 0 for connnection/negotiation failure in do_tls() for qmail-remote to retry connection in non-tls mode
