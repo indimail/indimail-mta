@@ -47,7 +47,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	todo-proc qmail-upq qmta-send qnotify qpq qquote qreceipt qsmhook \
 	qtools qscheduler queue-fix test-recipients relaytest rewind rpmattr \
 	rrforward rrt sendmail serialcmd serialqmtp serialsmtp setforward \
-	setmaillist slowq-send slowq-start smtpd-plugin0.so smtpd-plugin.so \
+	setmaillist slowq-send slowq-start smtpd-plugin.so \
 	sortedtest spawn-filter spfquery splogger srsfilter sslerator \
 	surblfilter surblqueue svctool swaks sys-checkpwd tcp-env testzero \
 	tokenize uacl udpclient udplogger update_tmprsadh viruscanner whois \
@@ -3731,25 +3731,25 @@ sslerator.8: sslerator.9 conf-sysconfdir
 
 ################### PLUGINS ########################################
 # dnsblcheck plugin
-smtpd-plugin0.so: dnsbl.o control.o auto_control.o variables.o \
+smtpd-plugin.so: dnsbl.o control.o auto_control.o variables.o \
 socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 strsalloc.o tlsarralloc.o dns.o dns.lib conf-ld-$(SYSTEM)
 	if test $(SYSTEM) = DARWIN ; then \
-		$(CC) -dynamiclib -o smtpd-plugin0.so dnsbl.o \
+		$(CC) -dynamiclib -o smtpd-plugin.so dnsbl.o \
 		control.o auto_control.o variables.o \
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 		strsalloc.o tlsarralloc.o dns.o \
 		$(static_option) `cat conf-ld-$(SYSTEM) 2>/dev/null` $(QMAILLIB) \
 		$(dynamic_option) `cat dns.lib`; \
 	elif test $(SYSTEM) = FREEBSD ; then \
-		$(LD) -shared -o smtpd-plugin0.so dnsbl.o control.o \
+		$(LD) -shared -o smtpd-plugin.so dnsbl.o control.o \
 		auto_control.o variables.o socket_v6any.o \
 		socket_v4mappedprefix.o ip.o ipalloc.o \
 		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
 		`cat conf-ld-$(SYSTEM) 2>/dev/null` $(QMAILLIB); \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 \
-		-o smtpd-plugin0.so dnsbl.o control.o auto_control.o variables.o \
+		-o smtpd-plugin.so dnsbl.o control.o auto_control.o variables.o \
 		socket_v6any.o socket_v4mappedprefix.o ip.o ipalloc.o \
 		strsalloc.o tlsarralloc.o dns.o `cat dns.lib` \
 		$(static_option) `cat conf-ld-$(SYSTEM) 2>/dev/null` $(QMAILLIB) \
@@ -3759,14 +3759,14 @@ strsalloc.o tlsarralloc.o dns.o dns.lib conf-ld-$(SYSTEM)
 dnsbl.o: compile dnsbl.c smtp_plugin.h dns.h control.h
 	./compile dnsbl.c
 
-smtpd-plugin.so: smtp_plugin.o
+smtpd-plugin0.so: smtp_plugin.o
 	if test $(SYSTEM) = DARWIN ; then \
-		$(CC) -dynamiclib -o smtpd-plugin.so smtp_plugin.o; \
+		$(CC) -dynamiclib -o smtpd-plugin0.so smtp_plugin.o; \
 	elif test $(SYSTEM) = FREEBSD ; then \
-		$(LD) -shared -o smtpd-plugin.so smtp_plugin.o; \
+		$(LD) -shared -o smtpd-plugin0.so smtp_plugin.o; \
 	else \
 		$(CC) -shared -rdynamic -nostartfiles -fPIC -s -O4 \
-		-o smtpd-plugin.so smtp_plugin.o; \
+		-o smtpd-plugin0.so smtp_plugin.o; \
 	fi
 
 smtp_plugin.o: compile smtp_plugin.c smtp_plugin.h

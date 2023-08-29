@@ -9,6 +9,6 @@ d:::0755:::
 #
 d:::0755:/plugins::
 f:::0755:/plugins/:smtpd-plugin.so:smtpd-plugin.so
-f:::0755:/plugins/:smtpd-plugin0.so:smtpd-plugin0.so
+#f:::0755:/plugins/:smtpd-plugin0.so:smtpd-plugin0.so
 f:::0755:/plugins/:generic.so:generic.so
 f:::0755:/plugins/:qmail_smtpd.so:qmail_smtpd.so

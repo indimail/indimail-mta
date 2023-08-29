@@ -173,6 +173,8 @@ setup_config()
 	echo blocked@$HOSTNAME                    > $cntrldir/badmailfrom
 	echo blocked@$HOSTNAME                    > $cntrldir/badrcptto
 	echo @$HOSTNAME                           > $cntrldir/nodnscheck
+	echo 10                                   > $cntrldir/timeoutremote
+	echo 10                                   > $cntrldir/timeoutsmtpd
 	sudo chown -R $user $cntrldir
 	ls -l $cntroldir/global_vars
 }
@@ -396,8 +398,8 @@ start_tcpserver_smtp()
 	(
 	sudo env - \
 		USE_QPWGR=1 \
-		STARTTLS=1 \
 		BIGTODO=0 \
+		STARTTLS=1 \
 		CONFSPLIT=23 \
 		QUEUEDIR=$testdir/queue \
 		CONTROLDIR=$cntrldir \
@@ -922,6 +924,119 @@ test_qmail_remote_auth_cdb()
 		exit 1
 	fi
 	/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
+}
+
+test_qmail_remote_starttls()
+{
+	(
+	echo "From: $user@$HOSTNAME"
+	echo "To: $user@$HOSTNAME"
+	echo "Subject: Test"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+	) | env - \
+		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port" \
+		CONTROLDIR="$cntrldir" \
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
+	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
+	/bin/rm -f $testdir/qremote.$$
+	check_mail
+	if [ $? -eq 0 ] ; then
+		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "TLS=TLSv.*")
+		if [ $? -eq 0 ] ; then
+			last_line=$(echo $last_line|awk '{print $17}')
+			tcount=$(expr $tcount + 1)
+			echo "  testing qmail-remote STARTTLS $last_line, qmail-remote send+receive succeeded"
+		else
+			sudo kill $send_pid $smtp_pid
+			(
+			echo "  testing qmail-remote STARTTLS, qmail-remote send+receive failed"
+			if [ $log_type -eq 1 ] ; then
+				echo "$logdir/smtpd/smtpd.log"
+				cat $logdir/smtpd/smtpd.log
+			elif [ -f $logdir/smtpd/current ] ; then
+				echo "$logdir/smtpd/current"
+				cat $logdir/smtpd/current
+			fi
+			echo "qmail-remote.log"
+			cat $testdir/qremote.$$
+			) | less
+			exit 1
+		fi
+	else
+		sudo kill $send_pid $smtp_pid
+		(
+		echo "  testing qmail-remote STARTTLS, qmail-remote send+receive failed"
+		if [ $log_type -eq 1 ] ; then
+			echo "$logdir/smtpd/smtpd.log"
+			cat $logdir/smtpd/smtpd.log
+		elif [ -f $logdir/smtpd/current ] ; then
+			echo "$logdir/smtpd/current"
+			cat $logdir/smtpd/current
+		fi
+		echo "qmail-remote.log"
+		cat $testdir/qremote.$$
+		) | less
+		exit 1
+	fi
+}
+
+test_qmail_remote_smtps()
+{
+	(
+	echo "From: $user@$HOSTNAME"
+	echo "To: $user@$HOSTNAME"
+	echo "Subject: Test"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+	) | env - \
+		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port" \
+		SMTPS=1 \
+		CONTROLDIR="$cntrldir" \
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
+	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
+	/bin/rm -f $testdir/qremote.$$
+	check_mail
+	if [ $? -eq 0 ] ; then
+		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "TLS=TLSv.*")
+		if [ $? -eq 0 ] ; then
+			last_line=$(echo $last_line|awk '{print $17}')
+			tcount=$(expr $tcount + 1)
+			echo "  testing qmail-remote SMTPS $last_line, qmail-remote send+receive succeeded"
+		else
+			sudo kill $send_pid $smtp_pid
+			(
+			echo "  testing qmail-remote SMTPS, qmail-remote send+receive failed"
+			if [ $log_type -eq 1 ] ; then
+				echo "$logdir/smtpd/smtpd.log"
+				cat $logdir/smtpd/smtpd.log
+			elif [ -f $logdir/smtpd/current ] ; then
+				echo "$logdir/smtpd/current"
+				cat $logdir/smtpd/current
+			fi
+			echo "qmail-remote.log"
+			cat $testdir/qremote.$$
+			) | less
+			exit 1
+		fi
+	else
+		sudo kill $send_pid $smtp_pid
+		(
+		echo "  testing qmail-remote SMTPS, qmail-remote send+receive failed"
+		if [ $log_type -eq 1 ] ; then
+			echo "$logdir/smtpd/smtpd.log"
+			cat $logdir/smtpd/smtpd.log
+		elif [ -f $logdir/smtpd/current ] ; then
+			echo "$logdir/smtpd/current"
+			cat $logdir/smtpd/current
+		fi
+		echo "qmail-remote.log"
+		cat $testdir/qremote.$$
+		) | less
+		exit 1
+	fi
 }
 
 terminate_smtp()
@@ -1653,6 +1768,7 @@ do_without_svscan()
 	test_qmail_remote_auth "CRAM-MD5"
 	test_qmail_remote_routing
 	test_qmail_remote_auth_cdb
+	test_qmail_remote_starttls
 	test_smtp_tls
 	test_smtp_notls
 	test_smtp_dkimverify
@@ -1672,6 +1788,8 @@ do_without_svscan()
 		else
 			test_smtps "testing mail doing SMTPS with swaks     qmail-smtpd-TLS=auto"
 		fi
+		echo $i > $cntrldir/tlsclientmethod
+		test_qmail_remote_smtps
 		for j in TLSv1_2 TLSv1_3
 		do
 			test_tcpclient_script 2 $j # test smtps using tcpclient

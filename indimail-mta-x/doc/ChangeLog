@@ -121,6 +121,11 @@ o added timestamp in installation logs
 66. qmail-remote.c: BUG from 52: fixed extra connect being made for servers
     without STARTTLS capability
 67. dossl.c: return 2 for tls connection/negotiation failure
+- 29/08/2023
+68. Makefile, indimail-mta.spec, PLUGINS: removed example plugin
+69. debian/rules: added -fno-lto flag
+70. tests/test-indimail-mta: added test for qmail-remote to do STARTTLS and
+    SMTPS
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023

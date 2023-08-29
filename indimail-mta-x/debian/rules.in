@@ -3,6 +3,9 @@
 # -*- makefile -*-
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_CFLAGS_MAINT_APPEND = "-fno-lto"
+export DEB_LDFLAGS_MAINT_APPEND = "-fno-lto"
 
 # This is the debhelper compatibility version to use.
 # export DH_COMPAT=4
@@ -54,7 +57,7 @@ build-stamp:
 	sed 's{LIBEXECDIR{${libexecdir}{'  conf-libexec.in    > conf-libexec
 	sed 's{SERVICEDIR{${servicedir}{'  conf-servicedir.in > conf-servicedir
 	sed -i 's/-Wformat.*//g' conf-cc-LINUX
-	$(MAKE) SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
+	$(MAKE) CFLAGS="$(dpkg-buildflags --get CFLAGS) ${CFLAGS}" LDFLAGS="$(dpkg-buildflags --get LDFLAGS) ${LDFLAGS}"  SYSTEM=LINUX -s DESTDIR=$(DESTDIR)
 	touch build-stamp
 
 clean:
