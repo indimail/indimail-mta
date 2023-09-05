@@ -877,10 +877,10 @@ compile getqueue.c getqueue.h haslibrt.h custom_error.h conf-queue
 qscanq-stdin: load qscanq-stdin.o auto_qmail.o \
 auto_prefix.o auto_spool.o mkfn.o do_ripmime.o auto_ripmime_cmd.o \
 do_scan.o auto_scancmd.o do_cleanq.o auto_cleaner.o qregex.o \
-wildmat.o matchregex.o variables.o control.o auto_control.o \
+wildmat.o variables.o control.o auto_control.o \
 fmt_xpid.o qmulti.o custom_error.o getqueue.o rt.lib
 	./load qscanq-stdin auto_qmail.o \
-	auto_prefix.o matchregex.o auto_spool.o mkfn.o do_ripmime.o \
+	auto_prefix.o auto_spool.o mkfn.o do_ripmime.o \
 	auto_ripmime_cmd.o do_scan.o auto_scancmd.o do_cleanq.o \
 	auto_cleaner.o qregex.o wildmat.o control.o variables.o \
 	auto_control.o fmt_xpid.o qmulti.o custom_error.o \
@@ -1064,10 +1064,10 @@ qlx.h
 
 qmail-inject: load qmail-inject.o headerbody.o hfield.o \
 newfield.o quote.o control.o qmail.o envrules.o wildmat.o \
-matchregex.o srs.o rcpthosts.o auto_control.o parse_env.o \
+srs.o rcpthosts.o auto_control.o parse_env.o \
 variables.o set_environment.o auto_qmail.o auto_prefix.o srs.lib
 	./load qmail-inject headerbody.o hfield.o newfield.o \
-	quote.o control.o qmail.o matchregex.o envrules.o \
+	quote.o control.o qmail.o envrules.o \
 	wildmat.o srs.o rcpthosts.o auto_control.o variables.o \
 	auto_qmail.o auto_prefix.o parse_env.o \
 	set_environment.o $(static_option) $(QMAILLIB) \
@@ -1086,7 +1086,7 @@ hassrs.h set_environment.h conf-srs
 	./compile qmail-inject.c
 
 envrules.o: \
-compile envrules.c envrules.h matchregex.o control.h \
+compile envrules.c envrules.h control.h \
 qregex.h wildmat.h parse_env.h
 	./compile envrules.c
 
@@ -1361,11 +1361,11 @@ compile mailfilter.c mailfilter.h qmulti.h qmail.h
 spawn-filter: \
 load spawn-filter.o variables.o report.o auto_qmail.o \
 auto_prefix.o control.o wildmat.o qregex.o parse_env.o \
-auto_control.o matchregex.o envrules.o getDomainToken.o \
+auto_control.o envrules.o getDomainToken.o \
 socket.lib dns.lib
 	./load spawn-filter variables.o report.o auto_qmail.o \
 	auto_prefix.o control.o wildmat.o qregex.o auto_control.o \
-	matchregex.o getDomainToken.o envrules.o parse_env.o \
+	getDomainToken.o envrules.o parse_env.o \
 	$(static_option) $(QMAILLIB) $(dynamic_option) \
 	`cat dns.lib socket.lib` -lm
 
@@ -1424,11 +1424,11 @@ qmail-direct.9 conf-sysconfdir
 
 qmail-queue: \
 load qmail-queue.o triggerpull.o fmtqfn.o get_uid.o auto_split.o \
-auto_uids.o variables.o matchregex.o auto_prefix.o auto_qmail.o \
+auto_uids.o variables.o auto_prefix.o auto_qmail.o \
 control.o auto_control.o strsalloc.o custom_error.o getqueue.o \
 syncdir.o socket.lib rt.lib
 	./load qmail-queue triggerpull.o fmtqfn.o get_uid.o auto_split.o \
-	auto_uids.o auto_prefix.o variables.o matchregex.o auto_qmail.o \
+	auto_uids.o auto_prefix.o variables.o auto_qmail.o \
 	control.o auto_control.o strsalloc.o custom_error.o getqueue.o \
 	syncdir.o $(static_option) $(QMAILLIB) $(dynamic_option) \
 	`cat socket.lib rt.lib`
@@ -1445,7 +1445,7 @@ qmail-queue-clients.9 conf-prefix
 	> qmail-queue-clients.7
 
 qmail-queue.o: \
-compile qmail-queue.c matchregex.h triggerpull.h \
+compile qmail-queue.c triggerpull.h \
 control.h auto_uids.h fmtqfn.h variables.h qmail.h \
 qscheduler.h syncdir.h haslibrt.h auto_prefix.h \
 auto_split.h conf-sync conf-qhpsi conf-ip conf-mailarch
@@ -1597,14 +1597,14 @@ varargs.h dossl.h hastlsa.h auto_control.h conf-tls
 
 qmail-send: \
 load qmail-send.o qsutil.o control.o newfield.o prioq.o parse_env.o \
-trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
+trigger.o fmtqfn.o quote.o readsubdir.o qmail.o \
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
 variables.o getDomainToken.o do_rate.o envrules.o qregex.o wildmat.o \
 auto_prefix.o delivery_rate.o syncdir.o srs.lib rt.lib
 	./load qmail-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	getDomainToken.o do_rate.o wildmat.o qmail.o auto_qmail.o \
-	auto_split.o variables.o envrules.o matchregex.o srs.o \
+	auto_split.o variables.o envrules.o srs.o \
 	delivery_rate.o rcpthosts.o auto_control.o auto_prefix.o \
 	syncdir.o parse_env.o $(static_option) \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB) \
@@ -1658,7 +1658,7 @@ compile set_queuedir.c set_queuedir.h auto_qmail.h control.h
 
 slowq-send: \
 load slowq-send.o qsutil.o control.o newfield.o prioq.o \
-trigger.o fmtqfn.o quote.o readsubdir.o qmail.o matchregex.o \
+trigger.o fmtqfn.o quote.o readsubdir.o qmail.o \
 auto_qmail.o srs.o rcpthosts.o auto_control.o auto_split.o \
 variables.o envrules.o parse_env.o qregex.o wildmat.o \
 getDomainToken.o do_rate.o delivery_rate.o auto_prefix.o \
@@ -1666,7 +1666,7 @@ syncdir.o srs.lib
 	./load slowq-send qsutil.o control.o newfield.o \
 	prioq.o trigger.o fmtqfn.o quote.o readsubdir.o \
 	do_rate.o wildmat.o qmail.o auto_qmail.o auto_split.o \
-	variables.o envrules.o parse_env.o matchregex.o srs.o \
+	variables.o envrules.o parse_env.o srs.o \
 	rcpthosts.o delivery_rate.o auto_control.o getDomainToken.o \
 	auto_prefix.o syncdir.o \
 	$(static_option) -L../libsrs2-x/libsrs2/.libs \
@@ -1843,7 +1843,7 @@ qmail_smtpd.so: \
 smtpd.o rcpthosts.o recipients.o indimail_stub.o ip.o ipme.o \
 ipalloc.o strsalloc.o control.o etrn.o atrn.o received.o \
 wildmat.o qmail.o variables.o envrules.o auto_qmail.o \
-bodycheck.o sqlmatch.o matchregex.o qcount_dir.o mail_acl.o \
+bodycheck.o sqlmatch.o qcount_dir.o mail_acl.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o spf.o dns.o auto_uids.o qregex_sql.o srs.o \
 tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
@@ -1856,7 +1856,7 @@ gsasl.lib mysql_config
 		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o \
 		etrn.o atrn.o received.o wildmat.o qmail.o auto_qmail.o \
 		variables.o envrules.o bodycheck.o spf.o dns.o srs.o \
-		sqlmatch.o matchregex.o socket_v4mappedprefix.o parse_env.o \
+		sqlmatch.o socket_v4mappedprefix.o parse_env.o \
 		socket_ip4loopback.o socket_v6loopback.o socket_v6any.o \
 		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
@@ -1869,7 +1869,7 @@ gsasl.lib mysql_config
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
 		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 		received.o wildmat.o qmail.o variables.o envrules.o parse_env.o srs.o \
-		bodycheck.o spf.o dns.o sqlmatch.o matchregex.o auto_qmail.o \
+		bodycheck.o spf.o dns.o sqlmatch.o auto_qmail.o \
 		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
@@ -1883,7 +1883,7 @@ qmail-smtpd: \
 load qmail-smtpd.o smtpd.o rcpthosts.o recipients.o parse_env.o \
 ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 received.o wildmat.o qmail.o variables.o auto_control.o \
-envrules.o bodycheck.o sqlmatch.o matchregex.o indimail_stub.o \
+envrules.o bodycheck.o sqlmatch.o indimail_stub.o \
 socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o mail_acl.o spf.o dns.o auto_uids.o auto_qmail.o \
 qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
@@ -1894,7 +1894,7 @@ tls.lib gsasl.lib srs.lib mysql_config conf-sql
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	qcount_dir.o received.o wildmat.o qmail.o variables.o \
 	envrules.o bodycheck.o spf.o dns.o sqlmatch.o auto_qmail.o \
-	matchregex.o socket_v4mappedprefix.o socket_ip4loopback.o \
+	socket_v4mappedprefix.o socket_ip4loopback.o \
 	socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	indimail_stub.o qregex_sql.o tablematch.o greylist.o auto_break.o \
 	auto_control.o auto_assign.o query_skt.o fn_handler.o \
@@ -1913,8 +1913,8 @@ haslibgsasl.h auto_control.h auto_sysconfdir.h
 smtpd.o: \
 compile smtpd.c control.h received.h varargs.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
-matchregex.o variables.h rcpthosts.h etrn.h batv.h \
-envrules.h tablematch.h matchregex.h qregex.h sqlmatch.h \
+variables.h rcpthosts.h etrn.h batv.h \
+envrules.h tablematch.h qregex.h sqlmatch.h \
 smtp_plugin.h auto_prefix.h hasmysql.h indimail_stub.h \
 auto_control.h dns.h hassmtputf8.h haslibgsasl.h \
 hassrs.h conf-tls conf-spf conf-ip conf-plugin conf-batv \
@@ -1940,7 +1940,7 @@ compile mini-smtpd.c auto_qmail.h control.h received.h ipme.h ip.h \
 qmail.h rcpthosts.h
 	./compile mini-smtpd.c
 
-mail_acl.o: compile mail_acl.c matchregex.h wildmat.h varargs.h
+mail_acl.o: compile mail_acl.c wildmat.h varargs.h
 	./compile mail_acl.c
 
 indimail_stub.o: \
@@ -1949,7 +1949,7 @@ variables.h indimail_stub.h
 	./compile indimail_stub.c
 
 qregex.o: \
-compile qregex.c qregex.h matchregex.h control.h \
+compile qregex.c qregex.h control.h \
 variables.h auto_control.h wildmat.h
 	./compile qregex.c
 
@@ -1958,7 +1958,7 @@ mysql_inc: mysql_config
 
 # qregex.c compiled with sqlmatch()
 qregex_sql.o: \
-compile qregex.c qregex.h sqlmatch.h matchregex.h \
+compile qregex.c qregex.h sqlmatch.h \
 control.h variables.h hasmysql.h mysql_config \
 mysql_inc conf-sql
 	./compile `grep -h -v "^#" conf-sql mysql_inc` \
@@ -1968,10 +1968,6 @@ load_mysql.o: compile load_mysql.c indimail_stub.h \
 mysql_config conf-sql auto_control.h variables.h \
 hasmysql.h mysql_inc
 	./compile `grep -h -v "^#" conf-sql mysql_inc` load_mysql.c
-
-matchregex.o: \
-compile matchregex.c qregex.h
-	./compile matchregex.c
 
 qmail-nullqueue: load qmail-nullqueue.o
 	./load qmail-nullqueue $(QMAILLIB)
@@ -2516,11 +2512,11 @@ qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 autoresponder: load autoresponder.o auto_sysconfdir.o \
 variables.o control.o quote.o auto_control.o \
 ip.o ipme.o ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
-qregex.o matchregex.o wildmat.o auto_prefix.o
+qregex.o wildmat.o auto_prefix.o
 	./load autoresponder auto_control.o auto_sysconfdir.o \
 	variables.o control.o quote.o ip.o ipme.o ipalloc.o \
 	socket_v4mappedprefix.o socket_v6any.o qregex.o \
-	matchregex.o wildmat.o auto_prefix.o $(QMAILLIB)
+	wildmat.o auto_prefix.o $(QMAILLIB)
 
 autoresponder.o: \
 compile autoresponder.c auto_sysconfdir.h control.h ip.h ipme.h \
@@ -3474,13 +3470,13 @@ batv.o: compile batv.c conf-batv batv.h
 	./compile `grep -h -v "^#" conf-batv` batv.c
 
 uacl: \
-load uacl.o mail_acl.o matchregex.o wildmat.o control.o \
+load uacl.o mail_acl.o wildmat.o control.o \
 variables.o qregex.o auto_control.o
-	./load uacl mail_acl.o matchregex.o wildmat.o control.o \
+	./load uacl mail_acl.o wildmat.o control.o \
 	variables.o qregex.o auto_control.o $(QMAILLIB)
 
 uacl.o: \
-compile uacl.c qregex.h mail_acl.h matchregex.h control.h \
+compile uacl.c qregex.h mail_acl.h control.h \
 wildmat.h varargs.h
 	./compile uacl.c
 

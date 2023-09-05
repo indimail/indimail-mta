@@ -69,8 +69,9 @@ do
 done
 mkdir -p /tmp/control
 
+# Test No 1
 failed=0
-echo "testing real domain $real_domain (rsa2048+rsa4096+ed25519) using dkim with selector from dns"
+echo "testing real domain $real_domain (rsa2048,rsa4096,ed25519) using dkim with selector from dns"
 for k in $real_domain_rsa2048 $real_domain_rsa4096 $real_domain_ed25519
 do
 	case $k in
@@ -127,13 +128,14 @@ if [ $verbose -eq 0 -a $failed -eq 0 ] ; then
 	echo
 fi
 if [ $failed -eq 1 ] ; then
-	echo "Test Failed for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
+	echo "Test Failed for real domain $real_domain (rsa2048,rsa4096,ed25519) using $dkim with selector from dns"
 	exit 1
 elif [ $verbose -ne 0 ] ; then
-	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
+	echo "All Tests succeeded for real domain $real_domain (rsa2048,rsa4096,ed25519) using $dkim with selector from dns"
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 2
 failed=0
 echo "testing multi-signature real domain $real_domain (rsa4096+ed25519) signing+verification by dkim with selector from dns"
 if [ $verbose -gt 0 ] ; then
@@ -171,13 +173,14 @@ if [ $verbose -eq 0 -a $failed -eq 0 ] ; then
 	echo
 fi
 if [ $failed -eq 1 ] ; then
-	echo "Test Failed for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
+	echo "Test Failed for multi-signature real domain $real_domain (rsa4096+ed25519) using $dkim with selector from dns"
 	exit 1
 elif [ $verbose -ne 0 ] ; then
-	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
+	echo "All Tests succeeded for multi-signature real domain $real_domain (rsa4096+ed25519) using $dkim with selector from dns"
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 3
 failed=0
 echo "testing multi-signature real domain $real_domain (rsa4096+ed25519) signing by qmail-dkim, verification by dkim with selector from dns"
 if [ $verbose -gt 0 ] ; then
@@ -220,13 +223,14 @@ if [ $verbose -eq 0 -a $failed -eq 0 ] ; then
 	echo
 fi
 if [ $failed -eq 1 ] ; then
-	echo "Test Failed for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
+	echo "Test Failed for multi-signature real domain $real_domain (rsa4096+ed25519) using $dkim with selector from dns"
 	exit 1
 elif [ $verbose -ne 0 ] ; then
-	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $dkim with selector from dns"
+	echo "All Tests succeeded for multi-signature real domain $real_domain (rsa4096+ed25519) using $dkim with selector from dns"
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 4
 failed=0
 echo "testing real domain $real_domain (rsa2048+rsa4096+ed25519) using qmail-dkim with selector from dns"
 for k in $real_domain_rsa2048 $real_domain_rsa4096 $real_domain_ed25519
@@ -290,14 +294,15 @@ if [ $verbose -eq 0 -a $failed -eq 0 ] ; then
 	echo
 fi
 if [ $failed -eq 1 ] ; then
-	echo "Test Failed for real domain $real_domain (rsa2048+rsa4096+ed25519) using $qmail_dkim with selector from dns"
+	echo "Test Failed for real domain $real_domain (rsa2048,rsa4096,ed25519) using $qmail_dkim with selector from dns"
 	exit 1
 elif [ $verbose -ne 0 ] ; then
-	echo "All Tests succeeded for real domain $real_domain (rsa2048+rsa4096+ed25519) using $qmail_dkim with selector from dns"
+	echo "All Tests succeeded for real domain $real_domain (rsa2048,rsa4096,ed25519) using $qmail_dkim with selector from dns"
 fi
 tcount=$(expr $tcount + 1)
 
-echo "testing dkim with different key types (rsa2048+rsa4096+ed25519) signing+verification by dkim"
+# Test No 5
+echo "testing dkim with different key types (rsa2048,rsa4096,ed25519) signing+verification by dkim"
 failed=0
 for i in dkimkeys1 default ed25519
 do
@@ -358,13 +363,14 @@ if [ $verbose -eq 0 -a $failed -eq 0 ] ; then
 	echo
 fi
 if [ $failed -eq 1 ] ; then
-	echo "Test Failed for $dkim with different key types (rsa+ed25519)"
+	echo "Test Failed for $dkim with different key types (rsa,ed25519)"
 	exit 1
 elif [ $verbose -ne 0 ] ; then
-	echo "All Tests succeeded for $dkim with different key types (rsa+ed25519)"
+	echo "All Tests succeeded for $dkim with different key types (rsa,ed25519)"
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 6
 echo "testing multi-signature signing+verification by dkim"
 failed=0
 for i in example.com example.org
@@ -429,6 +435,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 7
 echo "testing multi-signature signing by qmail-dkim + verification by dkim DKIMSIGNEXTRA in env"
 failed=0
 key1=$domainkey_dir/%/default
@@ -499,6 +506,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 8
 echo "testing multi-signature signing by qmail-dkim + verification by dkim DKIMSIGNEXTRA in dkimkeys"
 (
 echo "ex*.com:$domainkey_dir/%/dkimkeys1:DKIMSIGNEXTRA=$domainkey_dir/%/dkimkeys2,DKIMSIGNOPTIONS=-z 4"
@@ -570,6 +578,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 9
 echo "testing multi-signature signing+verification by qmail-dkim"
 failed=0
 key1=$domainkey_dir/%/default
@@ -644,6 +653,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 10
 echo "testing multi-signature signing+verification by dk-filter"
 failed=0
 key1=$domainkey_dir/%/default
@@ -720,6 +730,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 11
 echo "testing qmail-dkim signing+verification by qmail-dkim"
 failed=0
 for i in $domainkey_dir/test $domainkey_dir/%/default $domainkey_dir/%/test $domainkey_dir/%/ed25519
@@ -887,6 +898,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 12
 echo "testing dk-filter signing"
 failed=0
 for i in $domainkey_dir/test $domainkey_dir/%/default $domainkey_dir/%/test $domainkey_dir/%/notexist $domainkey_dir/%
@@ -978,6 +990,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 13
 echo "testing dk-filter signing+verification by dk-filter"
 failed=0
 for i in default ed25519
@@ -1044,6 +1057,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 14
 echo "testing dkimkeys control file feature"
 failed=0
 if [ ! -d /tmp/control ] ; then
@@ -1158,6 +1172,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 15
 echo "testing multi-signature signing+verification by dk-filter DKIMSIGNEXTRA in dkimkeys"
 (
 echo "ex*.com:$domainkey_dir/%/dkimkeys1:DKIMSIGNEXTRA=$domainkey_dir/%/dkimkeys2,DKIMSIGNOPTIONSEXTRA=-z 4"
@@ -1237,6 +1252,7 @@ elif [ $verbose -ne 0 ] ; then
 fi
 tcount=$(expr $tcount + 1)
 
+# Test No 16
 key1=$domainkey_dir/example.com/dkimkeys1
 qmail_inject=$bindir/qmail-inject
 qmail_queue=$sbindir/qmail-queue

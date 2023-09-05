@@ -65,12 +65,12 @@ If an entry for \fIdomain\fR exists in \fIdkimkeys\fR, the value of
 If a private key file does not exist and does not have a % character, the
 message will be rejected with error 35.
 
-In the absense of DKSIGN and DKVERIFY environment variable, qmail-dkim will
-sign the message if RELAYCLIENT or AUTHINFO environment variable is set. It
-will verify the message if RELAYCLIENT or AUTHINFO environment variable is
-not set. Even if DKVERIFY is set, you can disable dkim verification, if
-RELAYCLIENT or AUTHINFO is set, by setting RELAYCLIENT_NODKVERIFY
-environment variable.
+In the absense of DKIMSIGN and DKIMVERIFY environment variable, qmail-dkim
+will sign the message if RELAYCLIENT or AUTHINFO environment variable is
+set. It will verify the message if RELAYCLIENT or AUTHINFO environment
+variable is not set. Even if DKIMVERIFY is set, you can disable dkim
+verification, if RELAYCLIENT or AUTHINFO is set, by setting
+RELAYCLIENT_NODKIMVERIFY environment variable.
 
 You can set various DKIM options in getopt style, by setting the
 environment variable \fBDKIMSIGNOPTIONS\fR

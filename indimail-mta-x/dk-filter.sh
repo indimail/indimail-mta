@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.38 2023-02-20 20:22:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.39 2023-09-05 20:59:16+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -197,23 +197,20 @@ set_selector()
 get_dkimfn()
 {
 # set private key for dk / dkim signing
-if [ -z "$NODKIM" -a -z "$DKIMVERIFY" ] ; then
-	if [ -f $CONTROLDIR/dkimkeys ] ; then
+if [ -z "$DKIMVERIFY" ] ; then
+	# set DKIMSIGN from dkimkeys
+	if [ -z "$NODKIMKEYS" -a -f $CONTROLDIR/dkimkeys ] ; then
 		domain=$(echo $_SENDER | cut -d@ -f2)
 		t=$(get_dkimkeys $domain)
 		if [ -n "$t" ] ; then
-			if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
-				DKIMSIGN=$t
-			fi
+			DKIMSIGN=$t
 		fi
 	fi
-	if [ -z "$NODKIM" -a -z "$DKIMVERIFY" -a -x $prefix/bin/dkim ] ; then
-		if [ -z "$DKIMSIGN" ] ; then
-			DKIMSIGN=$CONTROLDIR/domainkeys/%/default
-			dkimsign=2 # key, selector selected as control/domainkeys/defaut
-		elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
-			dkimsign=2 # key, selector selected as control/domainkeys/defaut
-		fi
+	if [ -z "$DKIMSIGN" ] ; then
+		DKIMSIGN=$CONTROLDIR/domainkeys/%/default
+		dkimsign=2 # key, selector selected as control/domainkeys/defaut
+	elif [ " $DKIMSIGN" = " $CONTROLDIR/domainkeys/%/default" ] ; then
+		dkimsign=2 # key, selector selected as control/domainkeys/defaut
 	fi
 fi
 }
@@ -239,7 +236,7 @@ if [ -n "$NODKIM" ] ; then
 	exec /bin/cat
 fi
 
-if [ -z "$NODKIM" -a ! -f $prefix/bin/dkim ] ; then
+if [ ! -f $prefix/bin/dkim ] ; then
 	echo "$prefix/bin/dkim: No such file or directory" 1>&2
 	exit 1
 fi
@@ -254,16 +251,14 @@ if [ " $slash" != " /" ] ; then
 	cd SYSCONFDIR
 fi
 
-if [ -z "$NODKIM" ] ; then
-	if [ -n "$DKIMVERIFY" ] ; then
-		dkimverify=1
-	else
-		envfn=$(mktemp -t envfilterXXXXXX)
-		exec 3>$envfn
-		get_dkimfn
-		source $envfn
-		/bin/rm -f $envfn
-	fi
+if [ -n "$DKIMVERIFY" ] ; then
+	dkimverify=1
+else
+	envfn=$(mktemp -t envfilterXXXXXX)
+	exec 3>$envfn
+	get_dkimfn
+	. $envfn
+	/bin/rm -f $envfn
 fi
 tmpfn=$(mktemp -t dk-filterXXXXXX)
 /bin/cat > $tmpfn
@@ -341,6 +336,9 @@ exec 0<$tmpfn
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.39  2023-09-05 20:59:16+05:30  Cprogrammer
+# Added missing NODKIMKEY feature to turn off dkimkeyfn
+#
 # Revision 1.38  2023-02-20 20:22:35+05:30  Cprogrammer
 # unset variables for var=val when val is not set
 #
