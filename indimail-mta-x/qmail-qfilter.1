@@ -10,7 +10,7 @@ qmail-qfilter \- front end for qmail-multi that does filtering
 ]
 .SH DESCRIPTION
 \fBqmail-qfilter\fR sends the message text through each of the filter
-commands named on the command line. Each filter is run seperately, with
+commands named on the command line. Each filter is run separately, with
 standard input opened to the input email, and standard output opened to a
 new temporary file that will become the input to either the next filter, or
 \fBqmail-multi\fR. If the filter does not modify the message it passes
@@ -23,7 +23,7 @@ provides compatibility for existing filters that do not know about the
 envelope. \fBqmail-qfilter\fR also opens up file descriptor 5 to a
 temporary file. If this file is empty after all the filters have executed,
 its contents are read and used to specify a program to execute in place of
-\fBqmail-multi\fR. Each filter on the command line in seperated with
+\fBqmail-multi\fR. Each filter on the command line is separated by
 \fB--\fR.
 
 .SH "RETURN VALUES"

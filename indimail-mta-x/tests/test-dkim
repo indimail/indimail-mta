@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-dkim,v 1.2 2023-08-25 08:26:58+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-dkim,v 1.3 2023-09-08 00:55:02+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 verbose=0
@@ -1361,6 +1361,9 @@ printf '%d days, %d hours, %d minutes, %d seconds\n' $((secs/86400)) $((secs%864
 exit 0
 #
 # $Log: test-dkim,v $
+# Revision 1.3  2023-09-08 00:55:02+05:30  Cprogrammer
+# updated comments
+#
 # Revision 1.2  2023-08-25 08:26:58+05:30  Cprogrammer
 # removed comments
 #

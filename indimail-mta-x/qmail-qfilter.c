@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qfilter.c,v 1.20 2023-03-26 08:22:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qfilter.c,v 1.21 2023-09-08 00:57:21+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -179,7 +179,7 @@ move_fd(int currfd, int newfd)
  * Copy from one FD to a temporary FD
  */
 void
-copy_fd(int fdin, int fdout, size_t * var)
+copy_fd(int fdin, int fdout, size_t *var)
 {
 	unsigned long   bytes;
 	int             tmp = mktmpfile();
@@ -213,7 +213,7 @@ struct command {
 typedef struct command command;
 
 /*
- * Split up the command line into a linked list of seperate commands
+ * Split up the command line into a linked list of separate commands
  */
 command        *
 parse_args(int argc, char *argv[])
@@ -290,7 +290,7 @@ read_qqfd(void)
  * Run each of the filters in sequence
  */
 void
-run_filters(const command * first)
+run_filters(const command *first)
 {
 	const command  *c;
 	int             i, werr;
@@ -329,6 +329,8 @@ run_filters(const command * first)
 				if (errno == error_intr)
 #endif
 					continue;
+				if (errno == ECHILD)
+					break;
 				custom_error("qmail-qfilter", "Z", "waitpid error.", 0, "X.3.0");
 			}
 			if (i != pid)
@@ -343,9 +345,6 @@ run_filters(const command * first)
 				strnum[fmt_ulong(strnum, werr)] = 0;
 				custom_error("qmail-qfilter", "Z", "killed by signal", strnum, "X.3.0");
 			} else
-			if (i == -1)
-				_exit(QQ_INTERNAL);
-			else
 			if (i == QQ_DROP_MSG)
 				_exit(0);
 			else
@@ -353,7 +352,6 @@ run_filters(const command * first)
 				strnum[fmt_int(strnum, i)] = 0;
 				custom_error("qmail-qfilter", "Z", "non zero exit status", strnum, "X.3.0");
 			}
-			_exit(i);
 		} /*- for (;;) */
 		move_unless_empty(MSGOUT, MSGIN, c->next, &msg_len);
 		move_unless_empty(ENVOUT, ENVIN, c->next, &env_len);
@@ -379,7 +377,7 @@ main(int argc, char *argv[])
 	if (x)
 		execl(x, x, (char *) 0);
 	else
-		return(qmulti("QQF_QMAILQUEUE", argc, argv));
+		return(qmulti("QQF_QMAILQUEUE", 1, argv));
 	return QQ_INTERNAL;
 }
 
@@ -387,7 +385,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.20 2023-03-26 08:22:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.21 2023-09-08 00:57:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -396,6 +394,9 @@ getversion_qmail_qfilter_c()
 
 /*
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.21  2023-09-08 00:57:21+05:30  Cprogrammer
+ * BUG FIX: qmail-multi, qmail-queue wasn't getting executed
+ *
  * Revision 1.20  2023-03-26 08:22:44+05:30  Cprogrammer
  * fixed code for wait_handler
  *

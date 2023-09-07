@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.5 2023-08-26 23:18:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.6 2023-09-08 00:54:00+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1826,7 +1826,6 @@ do_svscan_without_svscanlog()
 	test_multilog
 	start_new_service
 	remove_new_service
-	shutdown_svscan $svpid
 }
 
 do_svscan_with_svscanlog()
@@ -1845,8 +1844,8 @@ do_svscan_with_svscanlog()
 	# start svscan with svscanlog and AUTOSCAN
 	echo 1 > $servicedir/.svscan/variables/AUTOSCAN
 	echo 5 > $servicedir/.svscan/variables/SCANINTERVAL
-	echo 1 > $servicedir/smtpd/variables/SMTPS
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	#echo 1 > $servicedir/smtpd/variables/SMTPS
+	#printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	start_new_service 1
@@ -1854,7 +1853,65 @@ do_svscan_with_svscanlog()
 	remove_new_service
 	test_blocked
 	test_blocked 1
-	shutdown_svscan $svpid
+}
+
+do_qmail_qfilter()
+{
+	echo $testdir/bin/qfrontend > $servicedir/smtpd/variables/QMAILQUEUE
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	(
+	echo "#!/bin/sh"
+	echo "exec qmail-qfilter $testdir/bin/filter1 -- $testdir/bin/filter2"
+	) > $testdir/bin/qfrontend
+	(
+	echo "#!/bin/sh"
+	echo "sed -e 's{abcd{$HOSTNAME{' -e 's{Subject: .*{Subject: Testing qmail-qfilter{'"
+	echo "exit 0"
+	) > $testdir/bin/filter1
+	(
+	echo "#!/bin/sh"
+	echo "cat"
+	echo "echo Recipients"
+	echo "echo \$QMAILRCPTS"
+	echo "echo \"Envelope Size \$ENVSIZE\""
+	echo "echo \"Message Size \$MSGSIZE\""
+	echo "echo Regards Manny"
+	echo "exit 0"
+	) > $testdir/bin/filter2
+
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
+	chmod +x $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
+	(
+	echo "Sending mail from abcd"
+	) | swaks -S --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
+		--server localhost --port $smtp_port --body -
+	count=0
+	ret=1
+	while true
+	do
+		mcount=$(ls $maildir/new | wc -l)
+		if [ $mcount -gt 0 ] ; then
+			mail_file=$(ls -lt $maildir/new|head -2|tail -1|awk '{print $9}')
+			grep "Sending mail from $HOSTNAME" $maildir/new/$mail_file >/dev/null
+			if [ $? -eq 0 ] ; then
+				tcount=$(expr $tcount + 1)
+				echo "  testing qmail-qfilter succeeded"
+				return 0
+			else
+				echo "  testing qmail-qfilter failed"
+				exit 1
+			fi
+		fi
+		sleep 1
+		count=$(expr "$count" + 1)
+		echo count=$count
+		if [ $count -gt 5 ] ; then
+			echo "Failed to receive Mail" 1>&2
+			break
+		fi
+	done
+	return 1
 }
 
 sudo ls /tmp > /dev/null 2>&1
@@ -1868,7 +1925,10 @@ log_type=1
 do_without_svscan
 log_type=2
 do_svscan_without_svscanlog
+shutdown_svscan $svpid
 do_svscan_with_svscanlog
+do_qmail_qfilter
+shutdown_svscan $svpid
 
 wait
 # Cleanup
@@ -1890,6 +1950,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.6  2023-09-08 00:54:00+05:30  Cprogrammer
+# added test for qmail-qfilter
+#
 # Revision 1.5  2023-08-26 23:18:32+05:30  Cprogrammer
 # use default cipherlist, ciphersuite created by svctool
 #
