@@ -192,7 +192,8 @@ Below) to further fine tune the action to be taken when a mail arrives with
 no DKIM signature. Note that \fBqmail-dkim\fR always inserts the
 \fBDKIM-Status\fR header, so that messages can be rejected later at
 delivery time, or in the mail reader. In that case you may set
-\fBDKIMVERIFY\fR to an empty string. If you want to check all message's
+\fBDKIMVERIFY\fR to an empty string or "p" to issue temporary error for
+temporary DNS resolution failure. If you want to check all message's
 From header in signature set the \fBUNSIGNED_FROM\fR environment variable
 to an empty string. If you want to check messages without signed subject
 header, set \fBUNSIGNED_SUBJECT\fR environment variable. If you want to

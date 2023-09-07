@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH dkim 8
 .SH NAME
 dkim \- exercise the domainkeys library
@@ -10,8 +11,9 @@ is a series of getopt-style options.
 
 .SH DESCRIPTION
 .B dkim
-exercises the dkim library. Both signing and verification merely print out the DKIM header.
-They do not keep a copy of the input file. You will need to do something like this:
+exercises the dkim library. Both signing and verification merely print out
+the DKIM header. They do not keep a copy of the input file. You will need
+to do something like this:
 
 .EX
 This example verifies using DNS
@@ -46,10 +48,11 @@ the selector tag DEFAULT=private
 
 .TP
 -v
-Verifies the email on stdin. Exits with a non-zero exit code and a message to
-stderr if there was a problem with the signature. Always prints a
+Verifies the email on stdin. Exits with a non-zero exit code and a message
+to stderr if there was a problem with the signature. Always prints a
 .B DKIM-Status:
-header to stdout. This option requires the \fBs\fR._domainkey.\fBd\fR txt record in
+header to stdout. This option requires the \fBs\fR._domainkey.\fBd\fR txt
+record in
 dns (public key). Here \fBs\fR is the selector and \fBd\fR is the domain
 
 .EX
@@ -98,7 +101,8 @@ r for relaxed [DEFAULT], s - simple, t relaxed/simple, u - simple/relaxed
 
 .TP
 -d \fIdomain\fR
-the domain tag, if not provided, determined from the return-path/sender/from header
+the domain tag, if not provided, determined from the
+return-path/sender/from header
 
 .TP
 -i \fIidentity\fR
@@ -106,11 +110,13 @@ the identity, if not provided it will not be included
 
 .TP
 -x \fIexpire_time\fR
-the expire time in seconds since epoch ( DEFAULT = current time + 604800). If set to - then it will not be included
+the expire time in seconds since epoch ( DEFAULT = current time + 604800).
+If set to - then it will not be included
 
 .TP
 -T \fIselectorRecord\fR
-Bypass DNS and use \fIselectorRecord\fR instead of fetching the record using DNS.
+Bypass DNS and use \fIselectorRecord\fR instead of fetching the record
+using DNS.
 
 .TP
 -V
@@ -125,16 +131,17 @@ When signing, \fBdkim\fR returns 0 on success and non-zero on any failure.
 
 When verifying, you can set the environment variable \fBDKIMVERIFY\fR to
 set the exit code corresponding to the DKIM verifcation status by setting
-\fBDKIMVERIFY\fR environment variable to a desired set of letters. Precisely,
-if you want a dkim return status to generate an error, include that
-letter, where A is the first return status (DKIM_SUCCESS), B is the
+\fBDKIMVERIFY\fR environment variable to a desired set of letters.
+Precisely, if you want a dkim return status to generate an error, include
+that letter, where A is the first return status (DKIM_SUCCESS), B is the
 second (DKIM_FINISHED_BODY), etc.  The letter should be uppercase if you
-want a permanent error (exit code 14) to be returned, and lowercase if you want a temporary
-error to be returned (exit code 88). If you omit the letter, \fBdkim\fR will
-not issue any error inspite of DKIM verification failure. It will return
-success.
+want a permanent error (exit code 14) to be returned, and lowercase if you
+want a temporary error to be returned (exit code 88). If you omit the
+letter, \fBdkim\fR will not issue any error inspite of DKIM verification
+failure. It will return success.
 
-The complete set of letters with the corresponding return status is given below
+The complete set of letters with the corresponding return status is given
+below
 .nf
 A - DKIM_SUCCESS                        - Function executed successfully
 B - DKIM_FINISHED_BODY                  - process result: no more message
@@ -187,13 +194,15 @@ signature that is expired, include the letter 'K' in the
 .B DKIMVERIFY
 environment variable.  A conservative set of letters is
 .BR FGHIKLMNOQRTUVWjp .
-Reject permanently 3PS, FAILURE, SYNTAX, SIGNATURE_BAD, SIGNATURE_EXPIRED, SELECTOR_INVALID,
-GRANULARITY_MISMATCH, SELECTOR_KEY_REVOKED, DOMAIN_NAME_TOO_LONG, SELECTOR_PUBLIC_KEY_INVALID,
-NO_VALID_SIGNATURES and BODY_HASH_MISMATCH errors, and temporarily SIGNATURE_BAD_BUT_TESTING and DNS_TEMP_FAILURE .
-Add in \fBS\fR if you want to reject messages that do not have a DKIM signature.
-Note that \fBdkim\fR always inserts the \fBDKIM-Status\fR header, so that messages can be
-rejected later at delivery time, or in the mail reader. In that case you need not set
-\fBDKIMVERIFY\fR. 
+Reject permanently 3PS, FAILURE, SYNTAX,
+SIGNATURE_BAD, SIGNATURE_EXPIRED, SELECTOR_INVALID, GRANULARITY_MISMATCH,
+SELECTOR_KEY_REVOKED, DOMAIN_NAME_TOO_LONG, SELECTOR_PUBLIC_KEY_INVALID,
+NO_VALID_SIGNATURES and BODY_HASH_MISMATCH errors, and temporarily
+SIGNATURE_BAD_BUT_TESTING and DNS_TEMP_FAILURE. Add in \fBS\fR if you want
+to reject messages that do not have a DKIM signature. Note that \fBdkim\fR
+always inserts the \fBDKIM-Status\fR header, so that messages can be
+rejected later at delivery time, or in the mail reader. In that case you
+need not set \fBDKIMVERIFY\fR or set it as "p" as the maximum.
 
 .SH "SEE ALSO"
 dktest(8),
