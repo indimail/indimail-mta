@@ -1,53 +1,5 @@
 /*
- * $Log: surblfilter.c,v $
- * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.15  2021-06-14 01:22:01+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.14  2021-05-26 10:47:29+05:30  Cprogrammer
- * handle access() error other than ENOENT
- *
- * Revision 1.13  2020-05-11 10:58:19+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.12  2019-05-24 14:14:14+05:30  Cprogrammer
- * removed requirement of env variable SURBL for surblfilter to work
- *
- * Revision 1.11  2017-05-16 12:35:22+05:30  Cprogrammer
- * refactored dns_test() function
- *
- * Revision 1.10  2017-05-10 15:00:18+05:30  Cprogrammer
- * increase responselen to 1024 for long text records
- *
- * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.8  2015-08-24 19:09:25+05:30  Cprogrammer
- * replace ip_fmt() with ip4_fmt()
- *
- * Revision 1.7  2014-01-29 14:06:21+05:30  Cprogrammer
- * fix for nameser_commpat.h on OS X
- *
- * Revision 1.6  2011-11-07 09:36:14+05:30  Cprogrammer
- * use ERROR_FD, CUSTOM_ERR_FD for standard error
- *
- * Revision 1.5  2011-07-15 11:48:19+05:30  Cprogrammer
- * added base64 decoding
- *
- * Revision 1.4  2011-07-13 22:28:32+05:30  Cprogrammer
- * use configurable controldir
- *
- * Revision 1.3  2011-07-13 22:11:13+05:30  Cprogrammer
- * skip surblrcpt if QMAILRCPTS is not defined
- *
- * Revision 1.2  2011-07-13 22:02:13+05:30  Cprogrammer
- * added surblrcpt functionality
- *
- * Revision 1.1  2011-07-13 20:56:34+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: surblfilter.c,v 1.17 2023-09-07 19:18:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -111,8 +63,8 @@ stralloc        l3 = { 0 };
 int             l3ok = 0;
 struct constmap mapl3;
 
-struct substdio ssin, ssout, sserr;
-static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512];
+struct substdio ssin, ssout, sserr, ssdbg;
+static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512], ssdbgbuf[512];
 
 static struct
 {
@@ -142,15 +94,15 @@ print_debug(char *arg1, char *arg2, char *arg3)
 {
 	if (!debug)
 		return;
-	if (arg1 && substdio_puts(&sserr, arg1) == -1)
+	if (arg1 && substdio_puts(&ssdbg, arg1) == -1)
 		_exit(1);
-	if (arg2 && substdio_puts(&sserr, arg2) == -1)
+	if (arg2 && substdio_puts(&ssdbg, arg2) == -1)
 		_exit(1);
-	if (arg3 && substdio_puts(&sserr, arg3) == -1)
+	if (arg3 && substdio_puts(&ssdbg, arg3) == -1)
 		_exit(1);
-	if ((arg1 || arg2 || arg3) && substdio_puts(&sserr, "\n"))
+	if ((arg1 || arg2 || arg3) && substdio_puts(&ssdbg, "\n") == -1)
 		_exit(1);
-	if (substdio_flush(&sserr) == -1)
+	if (substdio_flush(&ssdbg) == -1)
 		_exit(1);
 }
 
@@ -295,8 +247,7 @@ static stralloc txt = { 0 };
 static stralloc result = { 0 };
 
 static int
-findtxt(wanttype)
-	int             wanttype;
+findtxt(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -343,8 +294,7 @@ findtxt(wanttype)
 }
 
 static int
-dns_txtplus(domain)
-	char           *domain;
+dns_txtplus(char *domain)
 {
 	int             r;
 
@@ -657,6 +607,13 @@ getreason(int code, char **text)
 	return (code >= 2);
 }
 
+/*
+ * You can use uri
+ * http://surbl-org-permanent-test-point.com/
+ * or
+ * http://127.0.0.2/
+ * to test surblfilter
+ */
 static int
 checksurbl(char *uri, int urilen, char *surb_domain, char **text)
 {
@@ -895,6 +852,7 @@ main(int argc, char **argv)
 		errfd = CUSTOM_ERR_FD;
 	else
 		scan_int(x, &errfd);
+	substdio_fdbuf(&ssdbg, write, 5, ssdbgbuf, sizeof(ssdbgbuf));
 	substdio_fdbuf(&sserr, write, errfd, sserrbuf, sizeof(sserrbuf));
 	substdio_fdbuf(&ssout, write, 1, ssoutbuf, sizeof(ssoutbuf));
 	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
@@ -1005,7 +963,62 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.16 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.17 2023-09-07 19:18:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: surblfilter.c,v $
+ * Revision 1.17  2023-09-07 19:18:02+05:30  Cprogrammer
+ * redirect debug output to descriptor 5
+ *
+ * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.15  2021-06-14 01:22:01+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.14  2021-05-26 10:47:29+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
+ * Revision 1.13  2020-05-11 10:58:19+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.12  2019-05-24 14:14:14+05:30  Cprogrammer
+ * removed requirement of env variable SURBL for surblfilter to work
+ *
+ * Revision 1.11  2017-05-16 12:35:22+05:30  Cprogrammer
+ * refactored dns_test() function
+ *
+ * Revision 1.10  2017-05-10 15:00:18+05:30  Cprogrammer
+ * increase responselen to 1024 for long text records
+ *
+ * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.8  2015-08-24 19:09:25+05:30  Cprogrammer
+ * replace ip_fmt() with ip4_fmt()
+ *
+ * Revision 1.7  2014-01-29 14:06:21+05:30  Cprogrammer
+ * fix for nameser_commpat.h on OS X
+ *
+ * Revision 1.6  2011-11-07 09:36:14+05:30  Cprogrammer
+ * use ERROR_FD, CUSTOM_ERR_FD for standard error
+ *
+ * Revision 1.5  2011-07-15 11:48:19+05:30  Cprogrammer
+ * added base64 decoding
+ *
+ * Revision 1.4  2011-07-13 22:28:32+05:30  Cprogrammer
+ * use configurable controldir
+ *
+ * Revision 1.3  2011-07-13 22:11:13+05:30  Cprogrammer
+ * skip surblrcpt if QMAILRCPTS is not defined
+ *
+ * Revision 1.2  2011-07-13 22:02:13+05:30  Cprogrammer
+ * added surblrcpt functionality
+ *
+ * Revision 1.1  2011-07-13 20:56:34+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

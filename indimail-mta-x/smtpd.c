@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.300 2023-08-26 22:12:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.301 2023-09-07 19:23:58+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.300 $";
+static char    *revision = "$Revision: 1.301 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4675,7 +4675,7 @@ create_logfilter()
 void
 smtp_data(char *arg)
 {
-	int             hops;
+	int             hops, j;
 	unsigned long   qp;
 	char           *qqx, *x;
 #ifdef SMTP_PLUGIN
@@ -4845,13 +4845,42 @@ smtp_data(char *arg)
 		err_size(mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
-	if (*qqx == 'D')
-		out("554 ", NULL);
-	else
-		out("451 ", NULL);
-	out(qqx + 1, "\r\n", NULL);
+	j = str_rchr(qqx, '\n');
+	if (qqx[j]) {
+		/*-
+		 * handle multi line output due to custom error patch
+		 * use the last line for the error message
+		 */
+		if (*(qqx + j + 1) == 'D') {
+			out("554 ", NULL);
+			out(qqx + j + 2, "\r\n", NULL);
+			qqx[j] = '\0';
+			j = 1;
+		} else
+		if (*(qqx + j + 1) == 'Z') {
+			out("451 ", NULL);
+			out(qqx + j + 2, "\r\n", NULL);
+			qqx[j] = '\0';
+			j = 0;
+		} else {
+			out("451 ", NULL);
+			out(qqx + j + 1, "\r\n", NULL);
+			qqx[j] = '\0';
+			j = 0;
+		}
+		out(qqx, "\r\n", NULL);
+	} else {
+		if (*qqx == 'D') {
+			j = 1;
+			out("554 ", NULL);
+		} else {
+			j = 0;
+			out("451 ", NULL);
+		}
+		out(qqx + 1, "\r\n", NULL);
+	}
 	flush();
-	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, *qqx == 'D', qp);
+	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, j, qp);
 	return;
 }
 
@@ -7055,6 +7084,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.301  2023-09-07 19:23:58+05:30  Cprogrammer
+ * Use last line to set error message from error strings returned by qmail_close
+ *
  * Revision 1.300  2023-08-26 22:12:32+05:30  Cprogrammer
  * changed location of flagbarfspf check
  *
@@ -7411,7 +7443,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.300 2023-08-26 22:12:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.301 2023-09-07 19:23:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

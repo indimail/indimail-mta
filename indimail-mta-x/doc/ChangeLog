@@ -129,6 +129,12 @@ o added timestamp in installation logs
 - 05/09/2023
 71. qregex.h, matchregex.[c.h]: moved matchregex.c, matchregex.h to libqmail
 72. dk-filter.sh: Added missing NODKIMKEY feature to turn off dkimkeyfn
+- 07/09/2023
+73. surbfilter.c: Log debug messages on descriptor 5
+74. surblqueue: Redirect debug messages from surbfilter to SURBL_DEBUG_FN if
+    set
+75. smtpd.c: Use last line to set error message from error strings returned by
+    qmail_close()
 
 * Sun Apr 23 2023 17:51:54 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.3-1.1%{?dist}
 Release 3.0.3-1.1 Start 01/02/2023 End 23/04/2023
