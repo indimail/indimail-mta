@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.17 2023-09-07 19:18:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: surblfilter.c,v 1.18 2023-09-07 20:50:26+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -842,7 +842,7 @@ int
 main(int argc, char **argv)
 {
 	stralloc        base64out = { 0 }, boundary = { 0 };
-	stralloc        line = { 0 };
+	stralloc        line = { 0 }, uri = {0};
 	stralloc       *ptr;
 	char           *x, *reason = 0;
 	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match, html_plain_text,
@@ -931,6 +931,8 @@ main(int argc, char **argv)
 			for (blacklisted = -1, i = 0;i < ptr->len; i++) {
 				if (case_startb(line.s + i, ptr->len - i, "http:")) {
 					x = ptr->s + i;
+					if (!stralloc_copyb(&uri, ptr->s + i, ptr->len - i) || !stralloc_0(&uri))
+						die_nomem();
 					switch (checkuri(&x, &reason, ptr->len - i))
 					{
 					case -1:
@@ -954,7 +956,12 @@ main(int argc, char **argv)
 	if (substdio_flush(&ssout) == -1)
 		die_write();
 	if (do_surbl && total_bl) {
-		logerrf("Dmessage contains an URL listed in SURBL blocklist");
+		logerr("Dmessage contains an URL listed in SURBL blocklist [");
+		i = str_chr(uri.s, '\n');
+		if (uri.s[i])
+			uri.s[i] = '\0';
+		logerr(uri.s);
+		logerrf("]");
 		_exit (88); /*- custom error */
 	}
 	return (0);
@@ -963,13 +970,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.17 2023-09-07 19:18:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.18 2023-09-07 20:50:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.18  2023-09-07 20:50:26+05:30  Cprogrammer
+ * display the SURB blocked uri in message
+ *
  * Revision 1.17  2023-09-07 19:18:02+05:30  Cprogrammer
  * redirect debug output to descriptor 5
  *
