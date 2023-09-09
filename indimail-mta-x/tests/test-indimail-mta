@@ -3339,12 +3339,69 @@ do_dkim_tests()
 	tcount=$(expr $tcount + 1)
 }
 
+usage()
+{
+	echo "test-indimail-mta [-h|--help]" 1>&2
+}
+
+display_tests()
+{
+	echo "test svscan startup without svscan log"
+	echo "test service startup (qmail-smtpd, qmail-send)"
+	echo "test SMTPS using swaks"
+	echo "test recipient extension"
+	echo "test autoresponder"
+	echo "test qmail-qfilter"
+	echo "test stopping of service using svc"
+	echo "test startup of new service by sending HUP to svscan"
+	echo "test restart of service by using svc -r"
+	echo "test starting of service by using svc -u"
+	echo "test stopping of service by using svc -d"
+	echo "test multilog"
+	echo "test svscan startup with svscan log"
+	echo "test svscan execution of run /service/.svscan/run"
+	echo "test svscan start services configured in /service"
+	echo "test SMTPS service and mail submission using swaks"
+	echo "test svscan autoscan"
+	echo "test svscan subreaper feature"
+	echo "test blocking (badmailfrom, badrcptto)"
+	echo "test DKIM using dkim, qmail-dkim, dk-filter"
+}
+
+failed=0
+options=$(getopt -a -n test-indimail-mta -o "h" -l help -- "$@")
+if [ $? != 0 ]; then
+  usage
+  exit 1
+fi
+eval set -- "$options"
+while :
+do
+	case "$1" in
+		-h | --help)
+		usage
+		display_tests
+  		exit 1
+		;;
+		--) # end of options
+		shift
+		break
+		;;
+		*)
+		echo "Unexpected option: $1 - this should'nt happen." 1>&2
+		usage
+  		exit 1
+		;;
+	esac
+done
+## end getopt
+
 sudo ls /tmp > /dev/null 2>&1
 if [ $? -ne 0 ] ; then
 	echo "This script requires sudo privileges" 1>&2
 	exit 1
 fi
-failed=1
+failed=0
 do_setup
 log_type=1
 do_without_svscan
