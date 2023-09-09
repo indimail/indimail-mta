@@ -3414,6 +3414,7 @@ shutdown_svscan $svpid
 wait
 
 echo
+non_dkim_tcount=$tcount
 do_dkim_tests
 
 # Cleanup
@@ -3425,7 +3426,7 @@ sudo /bin/rm -rf $testdir/svscan.out
 sudo /bin/rm -rf $testdir/tcpclient.smtp
 sudo /bin/rm -rf $sysconfdir/users
 echo
-echo "All $tcount tests succeeded"
+echo "All $tcount tests succeeded (non-dkim tests=$non_dkim_tcount)"
 failed=0
 end=$(date +'%s')
 secs=$(($end-$start))
