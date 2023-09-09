@@ -1,5 +1,10 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release @version@-@release@ Start 24/04/2023 End --/--/20--
+Release @version@-@release@ Start XX/XX/XXXX End --/--/----
+======= Release Highlights ================================================
+===========================================================================
+
+* Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
+Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023
 ======= Release Highlights ================================================
 o fixed functions using variable args dumping core
 o RPM builds for amazon linux and mageia
