@@ -763,17 +763,18 @@ test_qmail_remote_auth()
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	addr=$(batv -k $(cat $cntrldir/batvkey) -v $(sed -n 1p $testdir/qremote.$$|awk '{print $2}'|sed 's/^.\(.*\).$/\1/') 2>/dev/null)
 	batv_status=$?
-	/bin/rm -f $testdir/qremote.$$
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "AUTH $1:")
 		if [ $? -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
 			echo "  testing qmail-remote AUTH $1, qmail-remote send+receive succeeded"
+			/bin/rm -f $testdir/qremote.$$
 		else
 			sudo kill $send_pid $smtp_pid
 			(
 			echo "  testing qmail-remote AUTH $1, qmail-remote send+receive failed"
+			echo "Last line does not have AUTH"
 			if [ $log_type -eq 1 ] ; then
 				echo "$logdir/smtpd/smtpd.log"
 				cat $logdir/smtpd/smtpd.log
@@ -784,12 +785,14 @@ test_qmail_remote_auth()
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			) | less
+			/bin/rm -f $testdir/qremote.$$
 			exit 1
 		fi
 	else
 		sudo kill $send_pid $smtp_pid
 		(
 		echo "  testing qmail-remote AUTH $1, qmail-remote send+receive failed"
+		echo "Failed to receive mail"
 		if [ $log_type -eq 1 ] ; then
 			echo "$logdir/smtpd/smtpd.log"
 			cat $logdir/smtpd/smtpd.log
@@ -800,6 +803,7 @@ test_qmail_remote_auth()
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		) | less
+		/bin/rm -f $testdir/qremote.$$
 		exit 1
 	fi
 	if [ " $1" = " CRAM-MD5" ] ; then
@@ -842,11 +846,11 @@ test_qmail_remote_routing()
 		CONTROLDIR=$cntrldir \
 		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
-	/bin/rm -f $testdir/qremote.$$
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing qmail-remote SMTPROUTE env qmail-remote send+receive succeeded"
+		/bin/rm -f $testdir/qremote.$$
 	else
 		sudo kill $send_pid $smtp_pid
 		(
@@ -861,6 +865,7 @@ test_qmail_remote_routing()
 			cat $logdir/smtpd/current
 		fi
 		) | less
+		/bin/rm -f $testdir/qremote.$$
 		exit 1
 	fi
 
@@ -869,15 +874,16 @@ test_qmail_remote_routing()
 		CONTROLDIR=$cntrldir \
 		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
-	/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 	check_mail
 	if [ $? -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
 		echo "  testing qmail-remote smtproutes control file qmail-remote send+receive succeeded"
+		/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 	else
 		sudo kill $send_pid $smtp_pid
 		(
 		echo "  testing qmail-remote smtproutes control file qmail-remote send+receive failed"
+		echo "Failed to receive mail"
 		echo "qmail-remote.log"
 		$testdir/qremote.$$
 		if [ $log_type -eq 1 ] ; then
@@ -888,6 +894,7 @@ test_qmail_remote_routing()
 			cat $logdir/smtpd/current
 		fi
 		) | less
+		/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 		exit 1
 	fi
 }
@@ -929,25 +936,29 @@ test_qmail_remote_auth_cdb()
 		if [ $? -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
 			echo "  testing qmail-remote using remote_auth.cdb qmail-remote send+receive succeeded"
+			/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 		else
 			(
 			echo "  testing qmail-remote using remote_auth.cdb qmail-remote send+receive failed"
+			echo "Last does not have AUTH PLAIN"
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			) | less
 			sudo kill $send_pid $smtp_pid
+			/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 			exit 1
 		fi
 	else
 		(
 		echo "  testing qmail-remote using remote_auth.cdb qmail-remote send+receive failed"
+		echo "Failed to receive mail"
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		) | less
 		sudo kill $send_pid $smtp_pid
+		/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 		exit 1
 	fi
-	/bin/rm -f $testdir/qremote.$$ $testdir/mail.txt
 }
 
 test_qmail_remote_starttls()
@@ -964,7 +975,6 @@ test_qmail_remote_starttls()
 		CONTROLDIR="$cntrldir" \
 		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
-	/bin/rm -f $testdir/qremote.$$
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "TLS=TLSv.*")
@@ -972,10 +982,12 @@ test_qmail_remote_starttls()
 			last_line=$(echo $last_line|awk '{print $17}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing qmail-remote STARTTLS $last_line, qmail-remote send+receive succeeded"
+			/bin/rm -f $testdir/qremote.$$
 		else
 			sudo kill $send_pid $smtp_pid
 			(
 			echo "  testing qmail-remote STARTTLS, qmail-remote send+receive failed"
+			echo "Last line does not have TLS"
 			if [ $log_type -eq 1 ] ; then
 				echo "$logdir/smtpd/smtpd.log"
 				cat $logdir/smtpd/smtpd.log
@@ -986,12 +998,14 @@ test_qmail_remote_starttls()
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			) | less
+			/bin/rm -f $testdir/qremote.$$
 			exit 1
 		fi
 	else
 		sudo kill $send_pid $smtp_pid
 		(
 		echo "  testing qmail-remote STARTTLS, qmail-remote send+receive failed"
+		echo "Failed to receive mail"
 		if [ $log_type -eq 1 ] ; then
 			echo "$logdir/smtpd/smtpd.log"
 			cat $logdir/smtpd/smtpd.log
@@ -1002,6 +1016,7 @@ test_qmail_remote_starttls()
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		) | less
+		/bin/rm -f $testdir/qremote.$$
 		exit 1
 	fi
 }
@@ -1021,7 +1036,6 @@ test_qmail_remote_smtps()
 		CONTROLDIR="$cntrldir" \
 		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
-	/bin/rm -f $testdir/qremote.$$
 	check_mail
 	if [ $? -eq 0 ] ; then
 		last_line=$(tail -1 $logdir/smtpd/smtpd.log|grep "TLS=TLSv.*")
@@ -1029,10 +1043,12 @@ test_qmail_remote_smtps()
 			last_line=$(echo $last_line|awk '{print $17}')
 			tcount=$(expr $tcount + 1)
 			echo "  testing qmail-remote SMTPS $last_line, qmail-remote send+receive succeeded"
+			/bin/rm -f $testdir/qremote.$$
 		else
 			sudo kill $send_pid $smtp_pid
 			(
 			echo "  testing qmail-remote SMTPS, qmail-remote send+receive failed"
+			echo "Last line does not have TLS"
 			if [ $log_type -eq 1 ] ; then
 				echo "$logdir/smtpd/smtpd.log"
 				cat $logdir/smtpd/smtpd.log
@@ -1043,12 +1059,14 @@ test_qmail_remote_smtps()
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			) | less
+			/bin/rm -f $testdir/qremote.$$
 			exit 1
 		fi
 	else
 		sudo kill $send_pid $smtp_pid
 		(
 		echo "  testing qmail-remote SMTPS, qmail-remote send+receive failed"
+		echo "Failed to receive mail"
 		if [ $log_type -eq 1 ] ; then
 			echo "$logdir/smtpd/smtpd.log"
 			cat $logdir/smtpd/smtpd.log
@@ -1059,6 +1077,7 @@ test_qmail_remote_smtps()
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		) | less
+		/bin/rm -f $testdir/qremote.$$
 		exit 1
 	fi
 }
