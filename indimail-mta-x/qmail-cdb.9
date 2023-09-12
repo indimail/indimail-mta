@@ -5,33 +5,47 @@ qmail-cdb \- prepare data in cdb format for
 .BR qmail .
 
 .SH SYNOPSIS
+.PP
+.B qmail-cdb
+\fB\-r\fR
+[
+\fB\-m\fR
+]
+[
+.I filename
+]
+
+.PP
+or
+.PP
 .B qmail-cdb
 [
-\fB\-r\fR
 \fB\-m\fR
 ]
 .I filename
 
 .SH DESCRIPTION
-With the -\fIr\fR option \fBqmail-cdb\fR does a chdir to \fI@sysconfdir@\fR
-directory. Without the -\fIr\fR option \fBqmail-cdb\fR does a chdir to
-\fI@controldir@\fR directory. \fI@sysconfdir@\fR directory can be overriden
-by setting \fBSYSCONFDIR\fR environment variable. \fI@controldir@\fR
-directory can be overriden by setting \fBCONTROLDIR\fR environment
-variable. for -\fIr\fR option \fIfilename\fR can be omitted to use a
-default of \fIrecipients\fR for the filename.
+\fBqmail-cdb\fR does a chdir to \fI@sysconfdir@\fR directory with the
+-\fIr\fR option and proceeds to read \fIusers/filename\fR. You can override
+\fI@sysconfdir@\fR directory by setting \fBSYSCONFDIR\fR environment
+variable.
 
-\fBqmail-cdb\fR then reads the addresses provided in \fIfilename\fR,
-converts them into lowercase, and writes them into \fIfilename.cdb\fR in a
-binary format suited for quick access by \fBqmail-smtpd\fR. Each line in
-\fIfilename\fR should be a local email address. \fIfilename.cdb\fR is
-compatible with \fBsetforward\fR(1)'s generated \'fastforward\' cdbs and
-it's format is portable across machines.
+\fBqmail-cdb\fR does a chdir to \fI@controldir@\fR directory without the
+-\fIr\fR option and proceeds to read \fIfilename\fR. You can override
+\fI@controldir@\fR directory by setting \fBCONTROLDIR\fR environment
+variable. \fIfilename\fR can be omitted to use a default of
+\fIuser/recipients\fR for the -\fIr\fR option.
 
-The cdb binary format suited for quick access by \fBqmail-smtpd\fR,
-\fBspawn-filter\fR and many other programs. If there is a problem with
-\fIfilename\fR, \fBqmail-cdb\fR complains and leaves \fIfilename.cdb\fR
-alone.
+\fBqmail-cdb\fR then reads the addresses provided in \fIfilename\fR (or
+\fIusers/filename\fR for -r option), converts them into lowercase, and
+writes them into \fIfilename.cdb\fR in a binary format suited for quick
+access by \fBqmail-smtpd\fR, \fBspawn-filter\fR and many other programs.
+Each line in \fIfilename\fR should be a local email address.
+\fIfilename.cdb\fR is compatible with \fBsetforward\fR(1)'s generated
+\'fastforward\' cdbs and it's format is portable across machines. If there
+is a problem with \fIfilename\fR, \fBqmail-cdb\fR complains and leaves
+\fIfilename.cdb\fR alone. \fIfilename.cdb\fR is created in the same
+directory as \fIfilename\fR.
 
 \fBqmail-cdb\fR ensures that \fIfilename.cdb\fR is updated atomically, so
 \fBqmail-smtpd\fR or \fBspawn-filter\fR never has to wait for

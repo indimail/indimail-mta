@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.698 2023-08-20 18:56:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.699 2023-09-11 09:04:12+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.698 2023-08-20 18:56:37+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.699 2023-09-11 09:04:12+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1978,6 +1978,7 @@ echo ""
 if [ -n "$verbose" ] ; then
 	echo "Creating Default qmail Control Files"
 	echo "me"
+	echo "localiphost"
 	echo "defaulthost"
 	echo "envnoathost"
 	echo "defaultdomain"
@@ -2000,11 +2001,15 @@ else
 		"$DESTDIR"$libexecdir/config-fast --quiet --destdir=$DESTDIR $hostname
 	fi
 fi
+if [ ! -f $t/localiphost ] ; then
+	[ -n "$verbose" ] && echo "localiphost"
+	/bin/cp $t/me $t/localiphost
+fi
 if [ ! -d $t/global_vars ] ; then
 	mkdir -p $t/global_vars
 fi
 if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] ; then
-	echo "global variable DEFAULT_DOMAIN"
+	[ -n "$verbose" ] && echo "global variable DEFAULT_DOMAIN"
 	/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $t/global_vars
@@ -2012,7 +2017,7 @@ if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] 
 	fi
 fi
 if [ ! -f $t/global_vars/QMAILDEFAULTHOST -a ! -L $t/global_vars/QMAILDEFAULTHOST ] ; then
-	echo "global variable QMAILDEFAULTHOST"
+	[ -n "$verbose" ] && echo "global variable QMAILDEFAULTHOST"
 	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOST 2>/dev/null
 	if [ $? -ne 0 ] ; then
 		cd $t/global_vars
@@ -2026,7 +2031,7 @@ if [ -n "$verbose" ] ; then
 	echo "defaultdelivery"
 	echo "servicedir.conf"
 	echo "nodnscheck"
-	echo "localiphost"
+	echo "hostip"
 	echo "users/assign"
 	echo "greylist.white"
 	echo "chkrcptdomains"
@@ -2048,16 +2053,16 @@ if [ -n "$verbose" ] ; then
 	echo "backup.conf"
 fi
 if [ ! -f $t/servicedir.conf ] ; then
-	echo "servicedir.conf"
+	[ -n "$verbose" ] && echo "servicedir.conf"
 	echo "$servicedir" > $t/servicedir.conf
 fi
 if [ ! -f $t/defaultdelivery ] ; then
-	echo "defaultdelivery"
+	[ -n "$verbose" ] && echo "defaultdelivery"
 	echo "./Maildir/" > $t/defaultdelivery
 fi
 if [ ! -f $t/nodnscheck ] ; then
 	# qmail-smtpd
-	echo "nodnscheck"
+	[ -n "$verbose" ] && echo "nodnscheck"
 	(
 	echo "@gmail.com"
 	echo "@yahoo.com"
@@ -2075,59 +2080,51 @@ fi
 
 "$DESTDIR"$libexecdir/ipmeprint | \
 	grep -Evw "::|::1|0\.0\.0\.0|127\.0\.0\.1|172.17.0|0000:0000:0000:0000:0000:0000:0000:0000" | \
-	head -1|awk '{print $3}'> $TMPDIR/localiphost.$$
-if [ -s $TMPDIR/localiphost.$$ ] ; then
-	diff $TMPDIR/localiphost.$$ $t/localiphost >/dev/null 2>&1
+	head -1|awk '{print $3}'> $TMPDIR/hostip.$$
+if [ -s $TMPDIR/hostip.$$ ] ; then
+	diff $TMPDIR/hostip.$$ $t/hostip >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
-		ip=$(cat $TMPDIR/localiphost.$$)
-		echo "localiphost [$ip]"
-		/bin/mv $TMPDIR/localiphost.$$ $t/localiphost
+		ip=$(cat $TMPDIR/hostip.$$)
+		echo "hostip [$ip]"
+		/bin/mv $TMPDIR/hostip.$$ $t/hostip
 	fi
 else
-	echo "localiphost [127.0.0.1]"
-	echo 127.0.0.1 > $t/localiphost
-fi
-if [ ! -f $t/hostip ] ; then
-	echo "hostip"
-	/bin/ln -sr $CONTROLDIR/localiphost $t/hostip 2>/dev/null
-	if [ $? -ne 0 ] ; then
-		cd $t
-		/bin/ln -s localiphost hostip
-	fi
+	[ -n "$verbose" ] && echo "hostip [127.0.0.1]"
+	echo 127.0.0.1 > $t/hostip
 fi
 
 if [ ! -f $t/smtpgreeting ] ; then
-	echo "smtpgreeting"
+	[ -n "$verbose" ] && echo "smtpgreeting"
 	echo "$hostname"            > $t/smtpgreeting
 fi
 
 if [ ! -f $t/databytes ] ; then
-	echo "databytes"
+	[ -n "$verbose" ] && echo "databytes"
 	echo "$databytes"           > $t/databytes
 fi
 
 if [ ! -f $t/timeoutsmtpd ] ; then
-	echo "timeoutsmtpd"
+	[ -n "$verbose" ] && echo "timeoutsmtpd"
 	echo 300                    > $t/timeoutsmtpd
 fi
 
 if [ ! -f $t/timeoutremote ] ; then
-	echo "timeoutremote"
+	[ -n "$verbose" ] && echo "timeoutremote"
 	echo 300                    > $t/timeoutremote
 fi
 
 if [ ! -f $t/chkrcptdomains -a -n "$default_domain" ] ; then
-	echo "chkrcptdomains"
+	[ -n "$verbose" ] && echo "chkrcptdomains"
 	echo $default_domain > $t/chkrcptdomains
 fi
 
 if [ ! -f $t/greylist.white ] ; then
-	echo "greylist.white"
-	/bin/cat $t/localiphost > $t/greylist.white
+	[ -n "$verbose" ] && echo "greylist.white"
+	/bin/cp $t/hostip $t/greylist.white
 fi
 
 if [ " $wipe_option" = " 1" -o ! -f "$DESTDIR"/$sysconfdir/users/assign ] ; then
-	echo "assign"
+	[ -n "$verbose" ] && echo "assign"
 	echo "." > "$DESTDIR"$sysconfdir/users/assign
 	if [ -f "$DESTDIR"$QmailBinPrefix/sbin/qmail-newu ] ; then
 		"$DESTDIR"$QmailBinPrefix/sbin/qmail-newu "$DESTDIR"$sysconfdir/users
@@ -2135,14 +2132,14 @@ if [ " $wipe_option" = " 1" -o ! -f "$DESTDIR"/$sysconfdir/users/assign ] ; then
 fi
 
 if [ ! -f $t/dnsbllist ] ; then
-	echo "dnsbllist"
+	[ -n "$verbose" ] && echo "dnsbllist"
 	echo "zen.spamhaus.org"     > $t/dnsbllist
 fi
 
 for i in smtp qmtp qmqp
 do
 	if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.$i ] ; then
-		echo "tcp.$i"
+		[ -n "$verbose" ] && echo "tcp.$i"
 	fi
 done
 if [ ! -f "$DESTDIR"$sysconfdir/tcp/tcp.smtp ] ; then
@@ -2195,7 +2192,7 @@ fi
 for i in locals rcpthosts
 do
 	if [ ! -f $t/$i ] ; then
-		echo $i
+		[ -n "$verbose" ] && echo $i
 		echo "localhost" > $t/$i
 		sort -u $t/$i -o $t/$i
 	else
@@ -2213,7 +2210,7 @@ n1=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |c
 n2=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 |cut -c5- |cut -d. -f2)
 max=$(expr 10 \* $n1 + $n2)
 if [ ! -f $t/servercipherlist ] ; then
-	echo "servercipherlist"
+	[ -n "$verbose" ] && echo "servercipherlist"
 	(
 	/bin/echo -n "ALL:!aNULL:!ADH:!eNULL:!LOW:!EXP:RC4+RSA:+HIGH:+MEDIUM:"
 	/bin/echo -n "-EDH-RSA-DES-CBC3-SHA:-EDH-DSS-DES-CBC3-SHA:-DES-CBC3-SHA:"
@@ -2223,15 +2220,15 @@ if [ ! -f $t/servercipherlist ] ; then
 	) > $t/servercipherlist
 fi
 if [ ! -f $t/serverciphersuite ] ; then
-	echo "serverciphersuite"
+	[ -n "$verbose" ] && echo "serverciphersuite"
 	echo "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256" > $t/serverciphersuite
 fi
 if [ ! -f $t/clientcipherlist ] ; then
-	echo "clientcipherlist"
+	[ -n "$verbose" ] && echo "clientcipherlist"
 	echo "ALL:!aNULL:!ADH:!eNULL:!LOW:!DH:!EXP" > $t/clientcipherlist
 fi
 if [ ! -f $t/clientciphersuite ] ; then
-	echo "clientciphersuite"
+	[ -n "$verbose" ] && echo "clientciphersuite"
 	echo "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256" > $t/clientciphersuite
 fi
 [ ! -d $t/global_vars ] && mkdir -p $t/global_vars
@@ -2257,11 +2254,11 @@ if [ -z "$max" ] ; then
 	[ -z "$max" ] && m="TLSv1_2"
 fi
 if [ ! -f $t/tlsservermethod ] ; then
-	echo tlsservermethod
+	[ -n "$verbose" ] && echo "tlsservermethod"
 	echo $max > $t/tlsservermethod
 fi
 if [ ! -f $t/tlsclientmethod ] ; then
-	echo tlsclientmethod
+	[ -n "$verbose" ] && echo "tlsclientmethod"
 	echo $max > $t/tlsclientmethod
 fi
 
@@ -2270,7 +2267,7 @@ if [ ! -f "$DESTDIR"$sysconfdir/procmailrc ] ; then
 	# ensure call to procmail in .qmail-default
 	# |preline procmail -p -m $sysconfdir/procmailrc || exit 111
 	#
-	echo "procmailrc"
+	[ -n "$verbose" ] && echo "procmailrc"
 	(
 	echo :0w
 	echo "|$QmailBinPrefix/sbin/vfilter '' bounce-no-mailbox"
@@ -2307,7 +2304,7 @@ else
 fi
 check_libmysqlclient_lib
 if [ ! -f $sysconfdir/backup.conf ] ; then
-	echo "Creating "$DESTDIR"$sysconfdir/backup.conf file"
+	[ -n "$verbose" ] && echo "Creating "$DESTDIR"$sysconfdir/backup.conf file"
 	(
 	for i in $servicedir $sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
 		$QmailHOME/alias/.qmail-\* /etc/inittab /etc/init.d/svscan \
@@ -9920,7 +9917,7 @@ orig=$(cat "$DESTDIR"$CONTROLDIR/me)
 /usr/libexec/indimail/config-fast --quiet $defaultDomain
 SYSTEM=$(uname -s)
 out=$(mktemp -t recontrolXXXXXX)
-for i in nodnscheck locals rcpthosts smtpgreeting me
+for i in nodnscheck locals rcpthosts smtpgreeting me localiphost
 do
 	if [ -f "$DESTDIR"$CONTROLDIR/$i ] ; then
 		if [ "$i" = "nodnscheck" ] ; then

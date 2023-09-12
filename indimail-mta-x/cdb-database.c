@@ -1,5 +1,8 @@
 /*
  * $Log: cdb-database.c,v $
+ * Revision 1.4  2023-09-11 09:04:29+05:30  Cprogrammer
+ * allow comments in input file
+ *
  * Revision 1.3  2023-02-12 13:29:01+05:30  Cprogrammer
  * refactored code
  *
@@ -24,6 +27,7 @@
 #include <open.h>
 #include <error.h>
 #include <case.h>
+#include <fmt.h>
 #include "auto_control.h"
 #include "variables.h"
 
@@ -34,11 +38,11 @@ int             rename(const char *, const char *);
 int
 main(int argc, char **argv)
 {
-	int             i, fd, fdtemp, match;
+	int             i, fd, fdtemp, match, l_no;
 	struct cdbmss   cdbmss;
 	stralloc        key = { 0 }, data = { 0 }, line = { 0 }, wildchars = { 0 },
 					fntmp = {0}, fncdb = {0};
-	char            inbuf[1024];
+	char            inbuf[1024], strnum[FMT_ULONG];
 	substdio        ssin;
 
 	if (argc != 2)
@@ -59,16 +63,24 @@ main(int argc, char **argv)
 		strerr_die3sys(111, FATAL, fntmp.s, ": write: ");
 	if (!stralloc_copys(&wildchars, ""))
 		strerr_die2sys(111, FATAL, "out of memory");
-	for (;;) {
+	for (l_no = 1;;l_no++) {
 		if (getln(&ssin, &line, &match, '\n') != 0)
 			strerr_die4sys(111, FATAL, "read: ", argv[1], ": ");
-		if (line.len && (line.s[0] == '.'))
-			break;
-		if (!match || byte_chr(line.s, line.len, '\0') < line.len)
-			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
+		if (line.len) {
+			if (line.s[0] == '#')
+				continue;
+			if (line.s[0] == '.')
+				break;
+		}
+		if (!match || byte_chr(line.s, line.len, '\0') < line.len) { /*- NULL char not allowed */
+			strnum[fmt_ulong(strnum, l_no)] = 0;
+			strerr_die5x(100, FATAL, "bad format in ", argv[1], " line ", strnum);
+		}
 		i = byte_chr(line.s, line.len, ':');
-		if (i == line.len || !i || i < 2) /*- =.*:, +.*: */
-			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
+		if (i == line.len || !i || i < 2) { /*- =.*:, +.*: */
+			strnum[fmt_ulong(strnum, l_no)] = 0;
+			strerr_die5x(100, FATAL, "bad format in ", argv[1], " line ", strnum);
+		}
 		if (!stralloc_copys(&key, "!") ||
 				!stralloc_catb(&key, line.s + 1, i - 1))
 			strerr_die2sys(111, FATAL, "out of memory");
@@ -85,8 +97,10 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "out of memory");
 		if (!stralloc_copyb(&data, line.s + i + 1, line.len - i - 1))
 			strerr_die2sys(111, FATAL, "out of memory");
-		if (data.s[data.len - 2] != ':')
-			strerr_die3x(100, FATAL, "bad format in ", argv[1]);
+		if (data.s[data.len - 2] != ':') {
+			strnum[fmt_ulong(strnum, l_no)] = 0;
+			strerr_die5x(100, FATAL, "bad format in ", argv[1], " line ", strnum);
+		}
 		data.s[data.len - 2] = 0;
 		data.len -= 2;
 		if (cdbmss_add(&cdbmss, (unsigned char *) key.s, key.len, (unsigned char *) data.s, data.len) == -1)
@@ -109,7 +123,7 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	static char    *x = "$Id: cdb-database.c,v 1.3 2023-02-12 13:29:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cdb-database.c,v 1.4 2023-09-11 09:04:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

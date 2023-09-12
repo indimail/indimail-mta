@@ -27,6 +27,8 @@ f:::0644:/man1/:cdbdump.1:cdbdump.1
 f:::0644:/man1/:cdbget.1:cdbget.1
 f:::0644:/man1/:cdbgetm.1:cdbgetm.1
 f:::0644:/man1/:cdbmake.1:cdbmake.1
+f:::0644:/man1/:cdbmake-12.1:cdbmake-12.1
+f:::0644:/man1/:cdbmake-sv.1:cdbmake-sv.1
 f:::0644:/man1/:cdbstats.1:cdbstats.1
 f:::0644:/man1/:cdbtest.1:cdbtest.1
 f:::0644:/man1/:checkaddr.1:checkaddr.1

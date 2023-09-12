@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.15  2023-09-11 09:02:35+05:30  Cprogrammer
+ * fixed descriptions fo localiphost, outgoingip
+ *
  * Revision 1.14  2023-05-31 16:31:02+05:30  Cprogrammer
  * restore HOME env variable after env_clear
  *
@@ -352,8 +355,8 @@ display_control()
 	do_str("envnoathost", 1, "envnoathost", "Presumed domain name is ");
 	do_str("helohost", 1, "helohost", "SMTP client HELO host name is ");
 	do_str("idhost", 1, "idhost", "Message-ID host name is ");
-	do_str("localiphost", 0, local_ip ? local_ip : "0.0.0.0", "Local IP address becomes ");
-	do_str("outgoingip", 0, local_ip ? local_ip : "0.0.0.0", "Outgoingip host name is ");
+	do_str("localiphost", 0, local_ip ? local_ip : "0.0.0.0", "Hostname for local ip addresses ");
+	do_str("outgoingip", 0, local_ip ? local_ip : "0.0.0.0", "Outgoingip IP address is ");
 	do_str("plusdomain", 1, "plusdomain", "Plus domain name is ");
 
 	do_int("maxhops", "100", "MAX Hops is ", " hops");
@@ -897,7 +900,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.14 2023-05-31 16:31:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.15 2023-09-11 09:02:35+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

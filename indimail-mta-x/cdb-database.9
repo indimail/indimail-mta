@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH cdb-database 8
 .SH NAME
 cdb-database \- prepare cdb assignments for ctrlenv
@@ -8,7 +9,10 @@ cdb-database \- prepare cdb assignments for ctrlenv
 \fBcdb-database\fR reads the assignments in \fICONTROL/filename\fR and
 writes them into \fICONTROL/filename.cdb\fR in a binary format suited for
 quick access by \fBctrlenv\fR. Extra arguments provided after
-\fIfilename\fR are silently ignored.
+\fIfilename\fR are silently ignored. \fBcdb-database\fR can be used for
+creating \fICONTROL/remote_auth.cdb\fR from \fICONTROL/remote_auth\fR, for
+use by user/password lookup by \fBqmail-remote\fR, when using authenticated
+SMTP.
 
 If there is a problem with \fICONTROL/filename\fR, \fBcdb-database\fR
 complains and leaves \fICONTROL/filename.cdb\fR alone.
@@ -21,10 +25,11 @@ simultaneous updates of \fICONTROL/filename.cdb\fR.
 The binary \fICONTROL/filename.cdb\fR format is portable across machines.
 
 \fBCONTROL/filename\fR is a series of assignments, one per line. It ends
-with a line containing a single dot. Lines must not contain NUL.
+with a line containing a single dot. Lines must not contain NUL. You can
+have comments by having '#' as the first charactor in any line.
 
-Lines in \fICONTROL/filename\fR consists of \fIaddress\fR separated by
-\fIvalue\fR
+Lines in \fICONTROL/filename\fR consists of \fIaddress\fR and \fIvalue\fR
+separated by the ':' character.
 
 .EX
 =joe.shmoe@indimail.org:DKIMSIGN=CONTROL/domainkeys/joe:

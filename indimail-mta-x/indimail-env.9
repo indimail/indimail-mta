@@ -35,6 +35,11 @@ Set by \fBqmail-smtpd\fR(8) on successful auhentication
 Set by \fBqmail-smtpd\fR(8) to the authenticated envelope sender address
 
 .TP
+\fIDISABLE_CNAME_LOOKUP\fR
+Used by \fBqmail-remote\fR to disable cname lookups when it fails to find
+MX record for a host.
+
+.TP
 \fIDISABLE_EXTRA_GREET\fR
 Used by \fBqmail-smtpd\fR to skip additional lines in the
 \fIsmtpgreeting\fR control file.
@@ -74,6 +79,13 @@ entries in badhost control file. Used by \fBqmail-smtpd\fR(8)
 \fIBADIPCHECK\fR
 Enforce badip check which rejects connections with TCPREMOTEIP matching
 entries in badip control file. Used by \fBqmail-smtpd\fR(8)
+
+.TP
+\fIBIGTODO\fR
+This is a boolean which enables (1) or disables (0) bigtodo. Used by
+qmail-clean, qmail-qread, qmail-queue, qmail-send, qmta-send, qscheduler,
+queue-fix, slowq-send, todo-proc. If BIGTODO is non-zero, these programs
+will use \fICONFSPLIT\fR directories in the todo directory of each queue.
 
 .TP
 \fIBODYCHECK\fR
@@ -360,7 +372,7 @@ programs that use \fBqmail-queue\fR(8) to queue messages. Setting ERROR_FD
 to -1 disables custom error message.
 
 .TP
-\fIEXT\fR \fIEXT2\fR
+\fIEXT\fR \fIEXT2\fR \fIEXT3\fR \fIEXT4\fR
 Set by \fBqmail-local\fR(8), \fBserialcmd\fR(1)
 
 .TP
@@ -528,6 +540,17 @@ Override @sysconfdir@/control/mailarchive control file used by
 Used by maildir2mbox, mbox2maildir and maildirwatch programs
 
 .TP
+\fIMAILDIRSIZE_MAX_AGE\fR
+Used by vdelivermail to recalculate quota if the age for maildirsize exceeds
+this value
+
+.TP
+\fIMAILDIRSIZE_MAX_SIZE\fR
+Used by vdelivermail to recalcuate quota if the size for maildirsize exceeds
+this value. Multiple quota lines in maildirsize is collapsed to a single
+line containing the totals
+
+.TP
 \fIMAILHOST\fR
 \fINAME\fR
 Used by \fBnew-inject\fR(8), \fBqmail-inject\fR(8) and unset by
@@ -577,9 +600,18 @@ Used by \fBqmail-remote\fR(8) when delivery to remote host result in
 temporary errors.
 
 .TP
+\fIMESSID\fR
+Set by qmail-lspawn, qmail-rspawn to the message file path in the queue
+
+.TP
 \fIMORESMTPROUTESCDB\fR
 Override @sysconfdir@/control/moresmtproutes.cdb used by
 \fBqmail-remote\fR(8)
+
+.TP
+\fIMSGQSIZE\fR
+Set in services variables to decide POSIX message queue size limit for
+qscheduler.
 
 .TP
 \fIMYSQL_LIB\fR
@@ -637,6 +669,10 @@ The password command to execute by the qmail-poppass daemon
 used by \fBqmail-smtpd\fR(8) to load smtp plugins
 
 .TP
+\fISOFT_MEM\fR
+Set in services variables to decide soft limit for various services
+
+.TP
 \fIPLUGINDIR\fR
 Directory to look for plugins by \fBqhpsi\fR(8) and \fBqmail-smtpd\fR(8)
 
@@ -656,6 +692,12 @@ Set by \fBtcpclient\fR(1), \fBtcpserver\fR(1), \fBsendmail\fR(8), \fBtcp-env\fR(
 .TP
 \fIPWD\fR
 Used by svscan to get the current working directory
+
+.TP
+\fIQIDENT\fR
+queue identifier set by qscheduler. Each invocation of qmail-send uses a
+queue with a unique identifier. e.g. QIDENT is 1 for queue1, 2 for queue2
+and so on.
 
 .TP
 \fIQHPSI\fR \fIQHPSIMAXSIZE\fR \fIQHPSIMINSIZE\fR \fIQHPSIRC\fR \fIQHPSIRN\fR
@@ -989,8 +1031,8 @@ Override @sysconfdir@/control/tlsadomains used by \fBqmail-remote\fR(8)
 Used by sslerator
 
 .TP
-\fITLS_CIPHER_LIST\fR
-Used by sslerator, \fBqmail-smtpd\fR(8)
+\fITLS_CIPHER_LIST\fR \fITLS_CIPHER_SUITE\fR
+Used by sslerator, \fBqmail-smtpd\fR(8), qmail-remote
 
 .TP
 \fITMPDIR\fR

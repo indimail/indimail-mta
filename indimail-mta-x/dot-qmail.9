@@ -1,29 +1,25 @@
+.\" vim: tw=75
 .TH dot-qmail 5
 .SH NAME
 dot-qmail \- control the delivery of mail messages
 .SH DESCRIPTION
-Normally the
-.B qmail-local
-program delivers each incoming message to your system mailbox,
-.IR homedir\fB/Mailbox ,
-where
-.I homedir
-is your home directory.
+Normally the \fBqmail-local\fR program delivers each incoming message to
+your system Maildir, \fIhomedir\fR\fB/Maildir/\fR, where \fIhomedir\fR is
+your Maildir directory. If you omit the slash, e.g.
+\fIhomedir\fR\fB/Mailbox\fR, it delivers it to your system mailbox file
+instead of Maildir.
 
 It can instead write the mail to a different file or directory, forward it
 to another address, distribute it to a mailing list, or even execute
 programs, all under your control.
-.SH "THE QMAIL FILE"
-To change
-.BR qmail-local 's
-behavior, set up a
-.B .qmail
-file in your home directory.
 
-.B .qmail
-contains one or more lines. Each line is a delivery instruction.
-.B qmail-local
-follows each instruction in turn. There are five types of delivery instructions:
+.SH "THE QMAIL FILE"
+To change \fBqmail-local\fR's behavior, set up a \fB.qmail\fR file in your
+home directory.
+
+\fB.qmail\fR contains one or more lines. Each line is a delivery
+instruction. \fBqmail-local\fR follows each instruction in turn. There are
+five types of delivery instructions:
 (1) comment; (2) program; (3) forward; (4) mbox; (5) maildir; (6) branch;
 
 .TP 5

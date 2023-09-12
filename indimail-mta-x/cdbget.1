@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH cdbget 1
 .SH NAME
 cdbget \- search for records in cdb
@@ -31,9 +32,9 @@ example.com^@555^@555^@/var/indimail/domains/example.com^@-^@
 
 # Get authentication api token for entry 'gmail' in
 # the cdb file /etc/indmail/control/remote_auth.cdb
-$ cdbget -n '!gmail' < /etc/indimail/control/remote_auth.cdb  |cat -e;echo
+$ cdbget -n '!gmail' < /etc/indimail/control/remote_auth.cdb |cat -e;echo
 mbhangui@gmail.com wwwwxxxxyyyyzzzz AUTH_SMTP=PLAIN
 .EE
 
 .SH SEE ALSO
-cdbgetm(1), cdbmake(1), cdbdump(1)
+cdbgetm(1), cdbmake(1), cdbdump(1), cdbmake-12(1), cdbmake-sv(1)

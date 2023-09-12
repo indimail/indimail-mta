@@ -1,7 +1,12 @@
+.\" vim: tw=75
 .TH cdbmake 1
 .SH NAME
 .PP
 cdbmake \- write cdb by reading series of encoded records on input
+.PP
+cdbmake-12 \- write cdb by reading key value pair records on input
+.PP
+cdbmake-sv \- write cdb by reading /etc/services records on input
 .PP
 cdbdump \- read cdb in stdin and print database in \fBcdbmake\fR format.
 
@@ -12,17 +17,76 @@ cdbdump \- read cdb in stdin and print database in \fBcdbmake\fR format.
 
 .SH DESCRIPTION
 
-\fBcdbmake\fR reads a series of encoded records from its standard input and writes a
-constant database to \fIf\fR.
+\fBcdbmake\fR reads a series of encoded records from its standard input and
+writes a constant database to \fIf\fR. See the section "CDB ENCODING".
 
-\fBcdbmake\fR ensures that \fIf\fR is updated atomically, so programs reading \fIf\fR never
-have to wait for \fBcdbmake\fR to finish. It does this by first writing the database to 
-\fIftmp\fR and then moving \fIftmp\fR on top of \fIf\fR. If \fIftmp\fR already exists, it is
-destroyed. The directories containing \fIftmp\fR and \fIf\fR must be writable to \fBcdbmake\fR;
-they must also be on the same filesystem.
+\fBcdbmake\fR ensures that \fIf\fR is updated atomically, so programs
+reading \fIf\fR never have to wait for \fBcdbmake\fR to finish. It does
+this by first writing the database to \fIftmp\fR and then moving \fIftmp\fR
+on top of \fIf\fR. If \fIftmp\fR already exists, it is destroyed. The
+directories containing \fIftmp\fR and \fIf\fR must be writable to
+\fBcdbmake\fR; they must also be on the same filesystem.
 
-\fBcdbdump\fR reads a constant database from its standard input and prints the database
-contents, in \fBcdbmake(1)\fR format, on standard output. 
+\fBcdbdump\fR reads a constant database from its standard input and prints
+the database contents, in \fBcdbmake(1)\fR format, on standard output.
+
+.SH CDB ENCODING
+
+The input data for \fBcdbmake\fR multiple lines, with each lines as per
+following format
+
+.EX
++keylen,datalen:key->data
+.EE
+
+where key and data can be any string including ASCII or binary characters.
+Positions, lengths, and hash values are 32-bit quantities, stored in
+little-endian form in 4 bytes. Thus a cdb must fit into 4 gigabytes. If you
+have a file with each line in key value pairs, you can convert it into the
+above format using the \fBcdbmake-12\fR script.
+
+.SH CDB FORMAT SPECIFICATION
+
+A structure for constant databases
+19960914
+Copyright 1996
+D. J. Bernstein, djb@pobox.com
+
+A cdb is an associative array: it maps strings (``keys'') to strings
+(``data'').
+
+A cdb contains 256 pointers to linearly probed open hash tables. The
+hash tables contain pointers to (key,data) pairs. A cdb is stored in
+a single file on disk:
+
+.EX
+    +----------------+---------+-------+-------+-----+---------+
+    | p0 p1 ... p255 | records | hash0 | hash1 | ... | hash255 |
+    +----------------+---------+-------+-------+-----+---------+
+.EE
+
+Each of the 256 initial pointers states a position and a length. The
+position is the starting byte position of the hash table. The length
+is the number of slots in the hash table.
+
+Records are stored sequentially, without special alignment. A record
+states a key length, a data length, the key, and the data.
+
+Each hash table slot states a hash value and a byte position. If the
+byte position is 0, the slot is empty. Otherwise, the slot points to
+a record whose key has that hash value.
+
+Positions, lengths, and hash values are 32-bit quantities, stored in
+little-endian form in 4 bytes. Thus a cdb must fit into 4 gigabytes.
+
+A record is located as follows. Compute the hash value of the key in
+the record. The hash value modulo 256 is the number of a hash table.
+The hash value divided by 256, modulo the length of that table, is a
+slot number. Probe that slot, the next higher slot, and so on, until
+you find the record or run into an empty slot.
+
+The cdb hash function is ``h = ((h << 5) + h) ^ c'', with a starting
+hash of 5381.
 
 .SH "SEE ALSO"
-cdbdump(1)
+cdbdump(1), cdbget(1), cdbgetm(1), cdbmake-12(1), cdbmake-sv(1)
