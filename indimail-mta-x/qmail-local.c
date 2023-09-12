@@ -775,11 +775,11 @@ main(int argc, char **argv)
 				if (i)
 					break;
 				strerr_die1x(111, "Uh-oh: first line of .qmail file is blank. (#4.2.1)");
-			case '#':
-			case ':':
+			case '#': /*- comment */
+			case ':': /*- end branch */
 				break;
-			case '.':
-			case '/':
+			case '.': /* mailbox or maildir */
+			case '/': /* mailbox or maildir */
 				++count_file;
 				if (flagforwardonly)
 					strerr_die1x(111, "Uh-oh: .qmail has file delivery but has x bit set. (#4.7.0)");
@@ -794,7 +794,8 @@ main(int argc, char **argv)
 				else
 					sayit("mbox ", cmds.s + i, k - i);
 				break;
-			case '|':
+			case '-': /*- filterit */
+			case '|': /*- command */
 				++count_program;
 				if (flagforwardonly)
 					strerr_die1x(111, "Uh-oh: .qmail has prog delivery but has x bit set. (#4.7.0)");

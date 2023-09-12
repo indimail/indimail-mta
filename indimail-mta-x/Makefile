@@ -28,7 +28,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	create_services cronlist.q ctrlenv datemail dk-filter dknewkey \
 	dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt \
 	dot-forward drate etrn except fastforward favicon.base64 \
-	forward generic.so greydaemon home home+df hostname iftocc \
+	filterit forward generic.so greydaemon home home+df hostname iftocc \
 	indimail-mta.changes setqload qmonitor indimail-mta.perms \
 	inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
@@ -3815,6 +3815,15 @@ make-recipients: make-recipients.sh conf-qmail conf-sysconfdir
 make-recipients.1: \
 make-recipients.9 conf-sysconfdir
 	$(edit) make-recipients.9 > $@
+
+filterit.o: \
+compile filterit.c cdb_match.o
+	./compile filterit.c
+
+filterit: \
+load filterit.o variables.o auto_control.o cdb_match.o
+	./load filterit variables.o auto_control.o \
+		cdb_match.o $(QMAILLIB)
 
 indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
