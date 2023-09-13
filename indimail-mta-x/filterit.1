@@ -1,0 +1,63 @@
+.\" vim: tw=75
+.TH filterit 1
+
+.SH "NAME"
+filterit \- Filter incoming mails based on email headers
+
+.SH "SYNOPSIS"
+.B filterit
+[ -n ]
+[ -r ]
+-h \fIheader\fR -k \fIkeyword\fR -c \fIcomparision\fR -a \fIaction\fR
+-v \fIaction_val\fR
+
+.SH "DESCRIPTION"
+\fBfilterit\fR is a filter that can be used in \fBdot-qmail\fR(5). It can
+be used to exit user defined values when a match value. Depending on the
+exit value, you can decide if you want to deliver, forward, drop or bounce
+the message.
+
+.SH "OPTIONS"
+.TP 3
+\fB\-n\fR
+Do not take any action. Just display the result of filtering
+
+.TP
+\fB\-r\fR
+Reverse the match. A match becomes no match. No match becomes match
+
+.TP
+\fB\-n\fR \fIheader\fR
+Use \fIheader\fR to match all headers in a 822-format message.
+
+.TP
+\fB\-k\fR \fIkeyword\fR
+Use the string \fIkeyword\fR in \fIheader\fR from a 822-format message. The
+criteria for a match depends on the type of comparision used (-c option)
+
+.TP
+\fB\-c\fR \fIcomparision\fR
+Use \fIcomparision\fR as the criteria for deciding a match. This is a
+string with one of the following values:
+.TS
+l l.
+Comparision Type             Criteria for match
+_
+equals                       match happens when header value = keyword
+contains                     match happens when header value contains keyword
+starts with                  match happens when header value starts with keyword
+ends with                    match happens when header value ends with keyword
+numerical logical expression Here %p in keyword gets replaced with header
+                             value
+regexp                       Match happens when a regular expression in
+                             keyword matches the header value
+address not in To, Cc, Bcc.  match happens when the recipient address is
+                             present in either To, Cc, Bcc headers
+.TE
+
+.SH "SEE ALSO"
+dot-qmail(5),
+qmail-local(8),
+maildir(5),
+forward(1),
+qmail-qfilter(1)
