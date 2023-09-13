@@ -1,5 +1,8 @@
 /*
  * $Log: maildirdeliver.c,v $
+ * Revision 1.3  2023-09-13 19:36:53+05:30  Cprogrammer
+ * BUG. Remove NULL character appended to rpline, dtline
+ *
  * Revision 1.2  2022-04-04 11:10:12+05:30  Cprogrammer
  * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
  *
@@ -46,10 +49,12 @@ main(int argc, char **argv)
 	if ((ptr = env_get("RPLINE"))) {
 		if (!stralloc_copys(&rpline, ptr) || !stralloc_0(&rpline))
 			strerr_die1x(111, "Out of memory. (#4.3.0)");
+		rpline.len--;
 	}
 	if ((ptr = env_get("DTLINE"))) {
 		if (!stralloc_copys(&dtline, ptr) || !stralloc_0(&dtline))
 			strerr_die1x(111, "Out of memory. (#4.3.0)");
+		dtline.len--;
 	}
 	ptr = env_get("QQEH");
 	i = maildir_deliver(dir, &rpline, &dtline, ptr);
@@ -74,7 +79,7 @@ main(int argc, char **argv)
 void
 getversion_maildirdeliver_c()
 {
-	static char    *x = "$Id: maildirdeliver.c,v 1.2 2022-04-04 11:10:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirdeliver.c,v 1.3 2023-09-13 19:36:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
