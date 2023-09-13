@@ -1,4 +1,6 @@
+.\" vim: tw=75
 .TH MAILDIRDELIVER 1
+
 .SH NAME
 maildirdeliver \- deliver a mail message to a maildir
 
@@ -7,51 +9,28 @@ maildirdeliver \- deliver a mail message to a maildir
 .I dir
 
 .SH DESCRIPTION
-.B maildirdeliver
-reads a mail message from the standard input,
-and stores it in a maildir,
-.IR dir .
+\fBmaildirdeliver\fR reads a mail message from the standard input, and
+stores it in a maildir, \fIdir\fR.
 
-.B maildirdeliver
-exits 0 on a successful delivery.
-On a temporary failure,
-it exits 111.
-On a permanent failure,
-it exits 100.
+\fBmaildirdeliver\fR exits 0 on a successful delivery.  On a temporary
+failure, it exits 111.  On a permanent failure, it exits 100.
 
-Unlike a maildir line in
-.B .qmail
-files,
-.B maildirdeliver
-does
-.I not
-prepend a
-.B Return-Path
-line nor a
-.B Delivered-To
-line to the incoming message. \fBmaildirdeliver\fR will use \fBRPLINE\fR
-if set, to prepend a \fBReturn-Path\fR line to the incoming message.
+Unlike a maildir line in \fB.qmail\fR files, \fBmaildirdeliver does not
+prepend a \fBReturn-Path\fR line nor a \fBDelivered-To\fR line to the
+incoming message. \fBmaildirdeliver\fR will use \fBRPLINE\fR if set, to
+prepend a \fBReturn-Path\fR line to the incoming message.
 \fBmaildirdeliver\fR will use \fBDTLINE\fR if set, to prepend a
 \fBDelivered-To\fR line to the incoming message. If \fBRPLINE\fR or
-\fBDTLINE\fR are not defined and if you use
-.B maildirdeliver
-in a program line in a
-.B .qmail
-file,
-you may want to invoke it under
-.BR preline .
+\fBDTLINE\fR are not defined and if you use \fBmaildirdeliver\fR in a
+program line in a script, you may want to invoke it under \fBpreline\fR.
 For example:
 
 .EX
      |preline -f maildirdeliver Maildir
 .EE
 
-.B maildirdeliver
-is heavily based on
-.B qmail-local.c
-from D. J. Bernstein's
-.B qmail
-package.
+\fBmaildirdeliver\fR is heavily based on \fBqmail-local.c\fR from D. J. Bernstein's
+qmail package.
 
 .SH "SEE ALSO"
 dot-qmail(5),

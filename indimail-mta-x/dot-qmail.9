@@ -371,6 +371,9 @@ envelope sender of the original message. Exception:
 always retains the original envelope sender if it is the empty address or
 .BR #@[] ,
 i.e., if this is a bounce message.
+.B qmail-local
+sets the environment variable \fBNEWSENDER\fR to the envelope sender for
+the forwarded message.
 
 .B qmail-local
 also supports
