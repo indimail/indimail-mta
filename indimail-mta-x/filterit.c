@@ -29,21 +29,25 @@ usage()
 {
 	strerr_die1x(100,
 			"USAGE: filterit [ -n ] [ -r ] -h header -k keyword\n"
-			"         -c comparision -a action -v action_value\n"
-			"where\n"
-			"  header       - Header Name\n"
-			"  keyword      - keyword for match\n"
-			"  comparision  - One of Equals, Contains, Starts with, Ends with,\n"
-			"                 Numerical Expression, RegExp,\n"
-			"                 Recipient not in To, CC, Bcc\n"
-			"  action       - One of forward, exit, maildir, mailbox, bounce,\n"
-			"                 drop\n"
-			"  action_value - value if action is exit , maildir or mailbox");
+			"         -c comparision -a action -A action_value\n"
+			"         -d default_action -D default_action_value\n\n"
+			"where\n\n"
+			"  header             - Header Name\n"
+			"  keyword            - keyword for match\n"
+			"  comparision        - One of Equals, Contains, Starts with, Ends with,\n"
+			"                       Numerical Expression, RegExp,\n"
+			"                       Recipient not in To, CC, Bcc\n"
+			"  action             - One of exit, forward, maildir, mailbox\n"
+			"  action_val         - value if action is exit , forward, maildir or mailbox\n"
+			"  defaultaction      - One of forward, exit, forward, maildir, mailbox\n"
+			"                       Used when there is no match\n"
+			"  default_action_val - value if action is exit , forward, maildir or mailbox\n"
+			"                       used when there no match");
 	_exit(100);
 }
 
 int
-numerical_compare(char *data, char *expression)
+logical_exp(char *data, char *expression)
 {
 	char           *ptr;
 	int             i;
@@ -84,6 +88,8 @@ numerical_compare(char *data, char *expression)
 int
 take_action(substdio *ss, char *result, int len, int act_type, char *act_val)
 {
+	subprintf(ss, "action=%d, action_val = %s\n", act_type, act_val);
+	substdio_flush(ss);
 	if (lseek(0, 0, SEEK_SET) == -1)
 		strerr_die2sys(111, FATAL, "unable to seek");
 	if (!doit) {
@@ -91,17 +97,13 @@ take_action(substdio *ss, char *result, int len, int act_type, char *act_val)
 	}
 	switch (act_type)
 	{
-	case 0: /*- forword */
+	case 0: /*- exit */
 		break;
-	case 1: /*- exit */
+	case 1: /*- forward */
 		break;
 	case 2: /*- maildir */
 		break;
 	case 3: /*- mailbox */
-		break;
-	case 4: /*- bounce */
-		break;
-	case 5: /*- drop */
 		break;
 	}
 	return 0;
@@ -111,20 +113,21 @@ int
 main(int argc, char **argv)
 {
 	char           *local, *domain, *header, *keyword,
-				   *action, *action_val, *comparision, *ptr;
+				   *action, *action_val, *d_action,
+				   *d_action_val, *comparision, *ptr;
 	char           *comp[] = { "Equals", "Contains",
-					"Starts with", "Ends with",
-					"Numerical Logical Expression", "RegExp",
-					"address not in To, CC, Bcc", 0 };
-	char           *act[] = {"forward", "exit", "maildir", "mailbox", "bounce", "drop", 0};
+						"Starts with", "Ends with",
+						"Numerical Logical Expression", "RegExp",
+						"address not in To, CC, Bcc", 0 };
+	char           *act[] = {"exit", "forward", "maildir", "mailbox", 0};
 	char            ssinbuf[1024], ssoutbuf[512];
 	int             opt, i, match, negate = 0, keep_continue = 0, 
-					c_opt = 0, a_opt = 0;
+					c_opt = 0, a_opt = 0, default_a_opt = 0;
 	substdio        ssin, ssout;
 	stralloc        line = { 0 }, addr = { 0 }, tmp = { 0 }, result = { 0 };
 
-	header = comparision = keyword = action = action_val = NULL;
-	while ((opt = getopt(argc, argv, "nrh:c:k:a:")) != opteof) {
+	header = comparision = keyword = action = action_val = d_action = d_action_val = NULL;
+	while ((opt = getopt(argc, argv, "nrh:c:k:a:A:d:D:")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -159,8 +162,21 @@ main(int argc, char **argv)
 			a_opt = i;
 			action = act[i];
 			break;
-		case 'v':
+		case 'A':
 			action_val = optarg;
+			break;
+		case 'd':
+			for (i = 0; act[i]; i++) {
+				if (!case_diffs(optarg, act[i]))
+					break;
+			}
+			if (!act[i])
+				usage();
+			default_a_opt = i;
+			d_action = act[i];
+			break;
+		case 'D':
+			d_action_val = optarg;
 			break;
 		default:
 			usage();
@@ -168,6 +184,8 @@ main(int argc, char **argv)
 	} /*- while ((opt = getopt(argc, argv, "h:b:c:k:a:")) != opteof) */
 	if (!header || !comparision || !action || (c_opt == 0 && !keyword)
 			|| (a_opt < 4 && !action_val))
+		usage();
+	if ((default_a_opt < 4 && !d_action_val))
 		usage();
 	if (!(local = env_get("LOCAL")))
 		strerr_die1x(111, "No LOCAL environment variable");
@@ -223,6 +241,8 @@ main(int argc, char **argv)
 			match = !match;
 		if (match)
 			take_action(&ssout, result.s, result.len, a_opt, action_val);
+		else
+			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
 		break;
 	case 1: /*- Contains */
 		i = str_len(keyword);
@@ -233,6 +253,8 @@ main(int argc, char **argv)
 			match = !match;
 		if (match)
 			take_action(&ssout, result.s, result.len, a_opt, action_val);
+		else
+			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
 		break;
 	case 2: /*- Starts with */
 		if (!stralloc_append(&tmp, " ") ||
@@ -245,6 +267,8 @@ main(int argc, char **argv)
 			match = !match;
 		if (match)
 			take_action(&ssout, result.s, result.len, a_opt, action_val);
+		else
+			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
 		break;
 	case 3: /*- Ends with */
 		i = str_len(keyword);
@@ -253,14 +277,18 @@ main(int argc, char **argv)
 			match = !match;
 		if (match)
 			take_action(&ssout, result.s, result.len, a_opt, action_val);
+		else
+			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
 		break;
 	case 4: /*- Numerical Logical Expression */
 		for (ptr = result.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
-		match = numerical_compare(result.s + tmp.len, keyword);
+		match = logical_exp(result.s + tmp.len, keyword);
 		if (negate)
 			match = !match;
 		if (match)
 			take_action(&ssout, result.s, result.len, a_opt, action_val);
+		else
+			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
 		break;
 	case 5: /*- RegExp */
 		for (ptr = result.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
@@ -269,6 +297,8 @@ main(int argc, char **argv)
 			match = !match;
 		if (match)
 			take_action(&ssout, result.s, result.len, a_opt, action_val);
+		else
+			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
 		break;
 	case 6: /*- Recipient not in To, Cc, Bcc */
 		break;

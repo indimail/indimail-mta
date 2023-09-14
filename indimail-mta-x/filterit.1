@@ -8,8 +8,9 @@ filterit \- Filter incoming mails based on email headers
 .B filterit
 [ -n ]
 [ -r ]
--h \fIheader\fR -k \fIkeyword\fR -c \fIcomparision\fR -a \fIaction\fR
--v \fIaction_val\fR
+-h \fIheader\fR -k \fIkeyword\fR -c \fIcomparision\fR
+-a \fIaction\fR -A \fIaction_val\fR
+-d \fIdefault_action\fR -D \fIdefault_action_val\fR
 
 .SH "DESCRIPTION"
 \fBfilterit\fR is a filter that can be used in \fBdot-qmail\fR(5). It can
@@ -53,6 +54,19 @@ regexp                       Match happens when a regular expression in
                              keyword matches the header value
 address not in To, Cc, Bcc.  match happens when the recipient address is
                              present in either To, Cc, Bcc headers
+.TE
+
+.TP
+\fB\-a\fR \fIaction_value\fR
+Action to take when there is a match. This has one of the following values:
+.TS
+l l.
+Action type Description
+_
+exit        exit
+forward     Forward to another address
+maildir     Deliver to a Maildir
+mailbox     Write the mail to a mailbox
 .TE
 
 .SH "SEE ALSO"
