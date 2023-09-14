@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.89 2023-08-20 15:17:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.90 2023-09-14 21:28:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -67,7 +67,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.89 2023-08-20 15:17:17+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.90 2023-09-14 21:28:10+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -293,7 +293,7 @@ doit_tcp(int t, char *hostname)
 
 #ifdef IPV6
 	if (!forcev6 && ip6_isv4mapped(remoteip))
-			fakev4 = 1;
+		fakev4 = 1;
 	if (fakev4)
 		remoteipstr[ip4_fmt(remoteipstr, remoteip + 12)] = 0;
 	else
@@ -977,9 +977,12 @@ usage(void)
 }
 
 void
-printstatus(char *str)
+printstatus(char *str, pid_t pid, pid_t childpid)
 {
 	int             i;
+#ifdef IPV6
+	int             fakev4 = 0;
+#endif
 
 	if (verbosity < 2)
 		return;
@@ -993,6 +996,20 @@ printstatus(char *str)
 	cats(strnum2);
 	append(" ");
 	cats(str);
+	if (flagssl && ssl) {
+		strnum1[fmt_ulong(strnum1, pid)] = 0;
+		strnum2[fmt_ulong(strnum2, childpid)] = 0;
+		cats(", sslpid=");
+		cats(strnum1);
+		if (childpid != -1) {
+			cats(", childpid=");
+			cats(strnum2);
+		}
+	} else {
+		strnum1[fmt_ulong(strnum1, pid)] = 0;
+		cats(", pid=");
+		cats(strnum1);
+	}
 	if (!str_diffn(str, "startup", 8)) {
 		cats(flagssl ? ", TLS=enabled" : ", TLS=disabled");
 #ifdef HAS_MYSQL
@@ -1002,6 +1019,16 @@ printstatus(char *str)
 #endif
 		substdio_putflush(subfderr, tmp.s, tmp.len);
 		return;
+	} else
+	if (str_diffn(str, "shutdown", 9)) {
+		cats(", IP ");
+#ifdef IPV6
+		if (!forcev6 && ip6_isv4mapped(remoteip))
+			fakev4 = 1;
+		safecats((fakev4 || (noipv6 && !forcev6)) ? remoteipstr : remoteipstr6);
+#else
+		safecats(remoteipstr);
+#endif
 	}
 	if (flagssl && ssl) {
 		cats(", TLS Server=");
@@ -1043,8 +1070,7 @@ init_ip()
 }
 
 void
-add_ip(pid)
-	pid_t           pid;
+add_ip(pid_t pid)
 {
 	int             i;
 #ifdef IPV6
@@ -1110,8 +1136,7 @@ check_ip()
 }
 
 void
-remove_ip(pid)
-	pid_t           pid;
+remove_ip(pid_t pid)
 {
 	int             i;
 	IPTABLE       **iptable;
@@ -1166,6 +1191,8 @@ print_ip()
 no_return void
 sigterm()
 {
+	if (verbosity >= 2)
+		printstatus("shutdown", getpid(), -1);
 	if (af_unix)
 		unlink(af_unix);
 	_exit(0);
@@ -1244,7 +1271,7 @@ sigchld()
 			--numchildren;
 			remove_ip(pid);
 		}
-		printstatus("sigchild");
+		printstatus("sigchild", pid, -1);
 	}
 }
 
@@ -1336,7 +1363,8 @@ main(int argc, char **argv, char **envp)
 #endif
 	struct servent *se;
 	unsigned long   port, ipcount = -1;
-	int             sfd, asd, pid, opt, tmpLimit;
+	int             sfd, asd, opt, tmpLimit;
+	pid_t           pid;
 #ifdef IPV6
 	int             fakev4 = 0;
 #ifdef FREEBSD
@@ -1350,6 +1378,7 @@ main(int argc, char **argv, char **envp)
 				   *cipherfile = NULL, *tls_method = NULL;
 	int             pi2c[2], pi4c[2], method;
 	int             provide_data = 0;
+	pid_t           child_pid;
 #ifdef SSL_OP_ALLOW_CLIENT_RENEGOTIATION
 	int             client_renegotiation = 0;
 #endif
@@ -1817,7 +1846,7 @@ do_socket:
 	}
 	close(0);
 	close(1);
-	printstatus("startup");
+	printstatus("startup", getpid(), -1);
 	for (;;) {
 		while (numchildren >= limit)
 			sig_pause();
@@ -1856,8 +1885,6 @@ do_socket:
 		if (asd == -1)
 			continue;
 		++numchildren;
-		if (!flagssl)
-			printstatus("un-encrypted session");
 		if (!af_unix) {
 #ifdef IPV6
 			if (!forcev6 && ip6_isv4mapped(remoteip))
@@ -1881,8 +1908,12 @@ do_socket:
 			close(asd);
 			continue;
 		}
-		switch (pid = fork())
+		switch ((pid = fork()))
 		{
+		case -1:
+			strerr_warn2(DROP, "unable to fork: ", &strerr_sys);
+			--numchildren;
+			printstatus("Failure", getpid(), -1);
 		case 0:
 			close(sfd);
 #if defined(HAS_MYSQL)
@@ -1911,7 +1942,7 @@ do_socket:
 					strerr_die2sys(111, DROP, "unable to create pipe: ");
 				if (pipe(pi4c) != 0)
 					strerr_die2sys(111, DROP, "unable to create pipe: ");
-				switch (fork())
+				switch ((child_pid = fork()))
 				{
 				case 0:
 					SSL_CTX_free(ctx);
@@ -1952,7 +1983,7 @@ do_socket:
 				if (!stralloc_copys(&tls_client_version, SSL_get_version(ssl)) ||
 						!stralloc_0(&tls_client_version))
 					strerr_die2x(111, FATAL, "out of memory");
-				printstatus("encrypted session");
+				printstatus("encrypted session", getpid(), child_pid);
 				tls_client_version.len--;
 				if (provide_data)
 					write_provider_data(ssl, pi4c[1], pi2c[0]);
@@ -1961,14 +1992,13 @@ do_socket:
 				translate(0, 1, pi2c[1], pi4c[0], dtimeout);
 				ssl_free();
 				_exit(0);
-			} /*- if (flagssl == 1) */
+			} else
+				printstatus("un-encrypted session", getpid(), -1);
+#else
+			printstatus("un-encrypted session", getpid(), -1);
 #endif
 			upathexec(argv);
 			strerr_die4sys(111, DROP, "unable to run ", *argv, ": ");
-		case -1:
-			strerr_warn2(DROP, "unable to fork: ", &strerr_sys);
-			--numchildren;
-			printstatus("Failure");
 		default:
 			add_ip(pid);
 		} /*- switch (pid = fork()) */
@@ -1985,6 +2015,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.90  2023-09-14 21:28:10+05:30  Cprogrammer
+ * display pid, ip in printstatus
+ *
  * Revision 1.89  2023-08-20 15:17:17+05:30  Cprogrammer
  * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
  *

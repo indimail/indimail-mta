@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.699 2023-09-11 09:04:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.700 2023-09-14 18:10:13+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.699 2023-09-11 09:04:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.700 2023-09-14 18:10:13+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2895,7 +2895,7 @@ else
 	) > $conf_dir/RBLCOMMAND
 fi
 echo "-x $sysconfdir/tcp/tcp.smtp.cdb \\"
-echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
+echo "-c ./variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u qmaild -g qmail,indimail \\\$LOCALIP \\\$PORT \\\$RBLCOMMAND \\"
 if [ -f /bin/false ] ; then
 	false="/bin/false"
@@ -3298,7 +3298,7 @@ case $type in
 	echo "-x $sysconfdir/tcp/tcp.qmqp.cdb \\"
 	;;
 esac
-echo "-c variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
+echo "-c ./variables/MAXDAEMONS -o -b \\\$MAXDAEMONS \\"
 echo "-u \$MYUID -g \$MYGID \\\$LOCALIP \\\$PORT \\"
 echo "$QmailBinPrefix/sbin/qmail-$type\""
 ) > "$DESTDIR"$SERVICEDIR/qmail-$type.$tag/run
@@ -3709,7 +3709,7 @@ echo "do"
 echo "	IMAPAUTHMODULES=\\\"\\\$IMAPAUTHMODULES \$libexecdir/imapmodules/\\\$f\\\""
 echo "done"
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
-echo "$QmailBinPrefix/bin/tcpserver -v -c variables/MAXDAEMONS -C \\\$MAXPERIP \\"
+echo "$QmailBinPrefix/bin/tcpserver -v -c ./variables/MAXDAEMONS -C \\\$MAXPERIP \\"
 echo "-x $sysconfdir/tcp/tcp.$cdb_f.cdb -X \\"
 if [ " $imap_ssl" = " 1" ] ; then
 	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u indimail -g indimail,qmail,qcerts \\\$SSLADDRESS \\\$SSLPORT \\"
@@ -6588,7 +6588,7 @@ echo "exec $QmailBinPrefix/bin/envdir $envdir_opts variables sh -c \""
 echo "exec $QmailBinPrefix/bin/softlimit -m \\\$SOFT_MEM -o 1024 \\"
 echo "$QmailBinPrefix/bin/tcpserver -v -H -R -l \$HOSTNAME \\"
 echo "-x $sysconfdir/tcp/tcp.poppass.cdb -X \\"
-echo "-c variables/MAXDAEMONS -C \\\$MAXPERIP -o -b \\\$MAXDAEMONS \\"
+echo "-c ./variables/MAXDAEMONS -C \\\$MAXPERIP -o -b \\\$MAXDAEMONS \\"
 if [ " $poppass_ssl" = " 1" ] ; then
 	echo "-n \\\$CERTFILE \\"
 fi
