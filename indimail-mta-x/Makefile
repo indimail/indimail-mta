@@ -3817,12 +3817,13 @@ make-recipients.9 conf-sysconfdir
 	$(edit) make-recipients.9 > $@
 
 filterit.o: \
-compile filterit.c cdb_match.o auto_prefix.h
+compile filterit.c cdb_match.o auto_prefix.h quote.h maildir_deliver.h
 	./compile filterit.c
 
 filterit: \
-load filterit.o variables.o quote.o
-	./load filterit variables.o auto_prefix.o quote.o $(QMAILLIB)
+load filterit.o variables.o quote.o maildir_deliver.o syncdir.o
+	./load filterit variables.o auto_prefix.o quote.o \
+	maildir_deliver.o syncdir.o $(QMAILLIB)
 
 indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared

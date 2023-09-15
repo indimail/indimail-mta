@@ -12,6 +12,7 @@ in
   -a \fIaction\fR -A \fIaction_val\fR
   -d \fIdefault_action\fR -D \fIdefault_action_val\fR
   [ -b bounce_message ]
+  [ -e exit_value_on_match ]
 
 .SH "DESCRIPTION"
 \fBfilterit\fR is a filter that can be used in \fBdot-qmail\fR(5). It can
@@ -21,22 +22,19 @@ specified on the command line. \fBfilterit\fR can be used to decide if you
 want to deliver, deliver to a specific folder, forward to any email
 address, drop or bounce the message.
 
-\fBfilterit\fR uses \fBmaildirdeliver\fR(1) to deliver mail to a Maildir
-and \fBforward\fR(1) to forward mail to an email address.
-
 When delivering to a Maildir, \fBfilterit\fR expects \fBHOME\fR environment
 variable to be present. If \fBRPLINE\fR environment variable is not
 present, it expects \fBSENDER\fR environment variable to set the
-\fBRPLINE\fR environment variable for maildirdeliver to set the Return-Path
-header. If the \fBDTLINE\fR environment variable is not present, it expects
-\fBLOCAL\fR, \fBHOST\fR, environment variables to be present to set the
-\fBDTLINE\fR environment variable for maildirdeliver to set the the
-Delivered-To header. This is not a problem when being called from a
-\fB.qmail\fR file as \fBqmail-local\fR sets these environment variables.
-But if called from a script that is not executed by qmail-local,
-\fBfilterit\fR will exit 100, if these environment variables are not set.
-Also, \fBfilterit\fR will exit 100 if it finds the maildir path has ".." in
-it. \fIfilterit\fR will create the Maildir if it does not exist.
+\fBRPLINE\fR environment variable to set the Return-Path header. If the
+\fBDTLINE\fR environment variable is not present, it expects \fBLOCAL\fR,
+	\fBHOST\fR, environment variables to be present to set the \fBDTLINE\fR
+	environment variable to set the the Delivered-To header. This is not a
+	problem when being called from a \fB.qmail\fR file as \fBqmail-local\fR
+	sets these environment variables. But if called from a script that is
+	not executed by qmail-local, \fBfilterit\fR will exit 100, if these
+	environment variables are not set. Also, \fBfilterit\fR will exit 100
+	if it finds the maildir path has ".." in it. \fIfilterit\fR will create
+	the Maildir if it does not exist.
 
 When bouncing a message (-a bounce -A 100 or -d bounce -D 100), message
 will be bounced with the text
@@ -111,10 +109,14 @@ maildir     Deliver to a Maildir \fIaction_value\fR. This has to start with
 \fB\-b\fR \fIbounce_message\fR
 Set \fIbounce_message\fR as the default bounce message.
 
+.TP
+\fB\-e\fR \fIexit_value_on_match\fR
+When a match occurs, \fBfilterit\fR will exit 99 to prevent subsequent
+instructions in \fB.qmail\fR to run. Using this changes the default exit
+value to \fIexit_value_on_match\fR instead of \fI99\fR.
+
 .SH "SEE ALSO"
 dot-qmail(5),
 qmail-local(8),
 maildir(5),
-maildirdeliver(1),
-forward(1),
 qmail-qfilter(1)

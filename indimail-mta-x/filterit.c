@@ -20,13 +20,17 @@
 #include <matchregex.h>
 #include <scan.h>
 #include <r_mkdir.h>
+#include "maildir_deliver.h"
 #include "quote.h"
 #include "auto_prefix.h"
+#ifdef USE_FSYNC
+#include "syncdir.h"
+#endif
 
 #define FATAL "filterit: fatal: "
 #define WARN  "filterit: warn: "
 
-static int      doit = 1;
+static int      doit = 1, exit_val_on_match = 99;
 static stralloc line, addr, tmp, rpline, dtline, matched_header;
 
 void
@@ -35,8 +39,10 @@ usage()
 	strerr_die1x(100,
 			"USAGE: filterit [ -n ] [ -r ] -h header -k keyword\n"
 			"         -c comparision -a action -A action_value\n"
-			"         -d default_action -D default_action_value\n\n"
-			"where\n\n"
+			"         -d default_action -D default_action_value\n"
+			"         -b bounce_message\n"
+			"         -e exit_value_on_match\n"
+			"\nwhere\n\n"
 			"  header             - Header Name\n"
 			"  keyword            - keyword for match\n"
 			"  comparision        - One of Equals, Contains, Starts with, Ends with,\n"
@@ -46,7 +52,9 @@ usage()
 			"  defaultaction      - One of forward, exit, forward, maildir\n"
 			"                       Used when there is no match\n"
 			"  default_action_val - value if action is exit , forward, maildir\n"
-			"                       used when there no match");
+			"                       used when there no match\n"
+			" bounce_message      - Text to be used for bounce message\n"
+			" exit_value_on_match - Exit value to be used when a match occurs");
 	_exit(100);
 }
 
@@ -148,7 +156,7 @@ take_action(substdio *ss, char *header, int act_type, char *act_val,
 	uid_t           uid;
 	gid_t           gid;
 	char           *(args[3]) = {0, 0, 0};
-	char           *home;
+	char           *home, *ptr;
 	char           *MailDirNames[] = { "cur", "new", "tmp", };
 
 	if (lseek(0, 0, SEEK_SET) == -1)
@@ -193,8 +201,10 @@ take_action(substdio *ss, char *header, int act_type, char *act_val,
 		if (!(home = env_get("HOME")))
 			strerr_die2x(111, FATAL, "No HOME environment variable");
 		if (!stralloc_copys(&addr, home) ||
-				!stralloc_cats(&addr, act_val + 1))
+				!stralloc_cats(&addr, act_val + 1) ||
+				!stralloc_0(&addr))
 			strerr_die2x(111, FATAL, "out of memory");
+		addr.len--;
 		if (doit) {
 			uid = getuid();
 			gid = getgid();
@@ -215,14 +225,24 @@ take_action(substdio *ss, char *header, int act_type, char *act_val,
 				do_rpline();
 			if (!env_get("DTLINE"))
 				do_dtline();
-			if (!stralloc_copys(&tmp, auto_prefix) ||
-					!stralloc_catb(&tmp, "/bin/maildirdeliver", 19) ||
-					!stralloc_0(&tmp))
-				strerr_die2x(111, FATAL, "out of memory");
-			args[0] = tmp.s;
-			args[1] = addr.s;
-			execv(*args, args); /*- run maildirdeliver */
-			strerr_die6sys(111, FATAL, "execv: maildirdeliver ", addr.s, " ", tmp.s, ": ");
+			ptr = env_get("QQEH");
+			i = maildir_deliver(addr.s, &rpline, &dtline, ptr);
+			switch (i)
+			{
+			case 0:
+				break;
+			case 2:
+				strerr_die1x(111, "Unable to chdir to maildir. (#4.2.1)");
+			case 3:
+				strerr_die1x(111, "Timeout on maildir delivery. (#4.3.0)");
+			case 4:
+				strerr_die1x(111, "Unable to read message. (#4.3.0)");
+			case 5:
+				strerr_die1x(100, "Recipient's mailbox is full");
+			default:
+				strerr_die1x(111, "Temporary error on maildir delivery. (#4.3.0)");
+			}
+			_exit(exit_val_on_match);
 		}
 		if (subprintf(ss, "action=deliver to Maildir [%s]\n", addr.s) == -1)
 			strerr_die2sys(111, FATAL, "unable to write output: ");
@@ -252,7 +272,7 @@ main(int argc, char **argv)
 
 	header = comparision = keyword = action = action_val = d_action
 		= d_action_val = bounce_message = NULL;
-	while ((opt = getopt(argc, argv, "nrh:c:k:a:A:d:D:b:")) != opteof) {
+	while ((opt = getopt(argc, argv, "nrh:c:k:a:A:d:D:b:e:")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -305,10 +325,24 @@ main(int argc, char **argv)
 			break;
 		case 'b':
 			bounce_message = optarg;
+			break;
+		case 'e':
+			scan_int(optarg, &exit_val_on_match);
+			break;
 		default:
 			usage();
 		}
 	} /*- while ((opt = getopt(argc, argv, "h:b:c:k:a:")) != opteof) */
+#ifdef USE_FSYNC
+	if (doit) {
+		ptr = env_get("USE_FSYNC");
+		use_fsync = (ptr && *ptr) ? 1 : 0;
+		ptr = env_get("USE_FDATASYNC");
+		use_fdatasync = (ptr && *ptr) ? 1 : 0;
+		ptr = env_get("USE_SYNCDIR");
+		use_syncdir = (ptr && *ptr) ? 1 : 0;
+	}
+#endif
 	if (!header || !comparision || !action || (c_opt != 6 && !keyword)
 			|| !action_val || !d_action_val)
 		usage();
