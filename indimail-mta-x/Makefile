@@ -56,10 +56,10 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
-	indimail-env.5 forward.1 maildirserial.1 mlmatchup.8 multi-queue.7 \
-	new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 qfrontend.1 \
-	qmail-cdb.8 qmail-clean.8 indimail-control.5 qmail-daned.8 qtop.1 \
-	qmail-direct.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
+	indimail-env.5 filterit.1 forward.1 maildirserial.1 mlmatchup.8 \
+	multi-queue.7 new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 \
+	qfrontend.1 qmail-cdb.8 qmail-clean.8 indimail-control.5 qmail-daned.8 \
+	qtop.1 qmail-direct.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
 	qmail-limits.7 qmail-local.8 qmail-multi.8 qmonitor.8 indimail-mta.7 \
 	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 sslerator.8 \
 	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
@@ -3817,13 +3817,21 @@ make-recipients.9 conf-sysconfdir
 	$(edit) make-recipients.9 > $@
 
 filterit.o: \
-compile filterit.c cdb_match.o auto_prefix.h quote.h maildir_deliver.h
+compile filterit.c cdb_match.o quote.h maildir_deliver.h \
+qmail.h set_environment.h
 	./compile filterit.c
 
 filterit: \
-load filterit.o variables.o quote.o maildir_deliver.o syncdir.o
-	./load filterit variables.o auto_prefix.o quote.o \
-	maildir_deliver.o syncdir.o $(QMAILLIB)
+load filterit.o variables.o quote.o maildir_deliver.o syncdir.o \
+qmail.o set_environment.o auto_control.o auto_prefix.o
+	./load filterit variables.o auto_control.o auto_prefix.o \
+	quote.o qmail.o maildir_deliver.o syncdir.o set_environment.o \
+	$(QMAILLIB)
+
+filterit.1: filterit.9 conf-sysconfdir
+	cat filterit.9 \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> filterit.1
 
 indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
