@@ -1,5 +1,8 @@
 /*
  * $Log: preline.c,v $
+ * Revision 1.11  2023-09-15 21:15:16+05:30  Cprogrammer
+ * moved check for env variables after getopt
+ *
  * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -34,16 +37,17 @@
 #define FATAL "preline: fatal: "
 
 no_return void
-die_usage()
+die_usage(char *arg)
 {
-	strerr_die1x(100, "preline: usage: preline cmd [ arg ... ]");
+	if (arg)
+		strerr_die4x(111, FATAL, "No ", arg, " environment variable");
+	else
+		strerr_die1x(100, "preline: usage: preline cmd [ arg ... ]");
 }
 
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             pi[2];
 	int             flagufline = 1, flagrpline = 1, flagdtline = 1,
@@ -55,12 +59,6 @@ main(argc, argv)
 
 	sig_pipeignore();
 
-	if (!(ufline = env_get("UFLINE")))
-		die_usage();
-	if (!(rpline = env_get("RPLINE")))
-		die_usage();
-	if (!(dtline = env_get("DTLINE")))
-		die_usage();
 	while ((opt = getopt(argc, argv, "frde")) != opteof) {
 		switch (opt)
 		{
@@ -77,13 +75,21 @@ main(argc, argv)
 			flagqqeh = 0;
 			break;
 		default:
-			die_usage();
+			die_usage(0);
 		}
 	}
+	if (flagufline && !(ufline = env_get("UFLINE")))
+		die_usage("UFLINE");
+	if (flagrpline && !(rpline = env_get("RPLINE")))
+		die_usage("RPLINE");
+	if (flagdtline && !(dtline = env_get("DTLINE")))
+		die_usage("DTLINE");
+	if (flagqqeh && !(qqeh = env_get("QQEH")))
+		die_usage("QQEH");
 	argc -= optind;
 	argv += optind;
 	if (!*argv)
-		die_usage();
+		die_usage(0);
 	if (pipe(pi) == -1)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 	pid = fork();
@@ -126,7 +132,7 @@ main(argc, argv)
 void
 getversion_preline_c()
 {
-	static char    *x = "$Id: preline.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: preline.c,v 1.11 2023-09-15 21:15:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

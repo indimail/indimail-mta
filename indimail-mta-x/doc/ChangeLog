@@ -11,6 +11,8 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 05. updated dot-qmail, maildirdeliver, qmail-command man pages
 - 14/09/2023
 06. svctool: fixed path/MAXDAEMONS in tcpserver run scripts
+- 15/09/2023
+07. preline.c: moved check for env variables after getopt
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023
