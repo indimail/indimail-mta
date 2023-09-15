@@ -18,11 +18,16 @@
 #include <evaluate.h>
 #include <replacestr.h>
 #include <matchregex.h>
+#include <scan.h>
+#include <r_mkdir.h>
+#include "quote.h"
+#include "auto_prefix.h"
 
 #define FATAL "filterit: fatal: "
 #define WARN  "filterit: warn: "
 
 static int      doit = 1;
+static stralloc line, addr, tmp, rpline, dtline, matched_header;
 
 void
 usage()
@@ -36,12 +41,11 @@ usage()
 			"  keyword            - keyword for match\n"
 			"  comparision        - One of Equals, Contains, Starts with, Ends with,\n"
 			"                       Numerical Expression, RegExp,\n"
-			"                       Recipient not in To, CC, Bcc\n"
-			"  action             - One of exit, forward, maildir, mailbox\n"
-			"  action_val         - value if action is exit , forward, maildir or mailbox\n"
-			"  defaultaction      - One of forward, exit, forward, maildir, mailbox\n"
+			"  action             - One of exit, forward, maildir\n"
+			"  action_val         - value if action is exit , forward, maildir\n"
+			"  defaultaction      - One of forward, exit, forward, maildir\n"
 			"                       Used when there is no match\n"
-			"  default_action_val - value if action is exit , forward, maildir or mailbox\n"
+			"  default_action_val - value if action is exit , forward, maildir\n"
 			"                       used when there no match");
 	_exit(100);
 }
@@ -85,28 +89,148 @@ logical_exp(char *data, char *expression)
 	return (0);
 }
 
-int
-take_action(substdio *ss, char *result, int len, int act_type, char *act_val)
+void
+do_rpline()
 {
-	subprintf(ss, "action=%d, action_val = %s\n", act_type, act_val);
-	substdio_flush(ss);
+	char           *sender;
+	int             i;
+
+	if (!(sender = env_get("SENDER")))
+		strerr_die2x(111, FATAL, "No SENDER environment variable");
+	if (!quote2(&tmp, sender)
+			|| !stralloc_copys(&rpline, "Return-Path: <")
+			|| !stralloc_cat(&rpline, &tmp))
+		strerr_die2x(111, FATAL, "out of memory");
+	for (i = 0; i < rpline.len; ++i)
+		if (rpline.s[i] == '\n')
+			rpline.s[i] = '_';
+	if (!stralloc_cats(&rpline, ">\n")
+			|| !stralloc_copy(&tmp, &rpline)
+			|| !stralloc_0(&tmp))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (!env_put2("RPLINE", tmp.s))
+		strerr_die2x(111, FATAL, "out of memory");
+}
+
+void
+do_dtline()
+{
+	char           *local, *host;
+	int             i;
+
+	if (!(local = env_get("LOCAL")))
+		strerr_die2x(111, FATAL, "No LOCAL environment variable");
+	if (!(host = env_get("HOST")))
+		strerr_die2x(111, FATAL, "No HOST environment variable");
+	if (!stralloc_copys(&tmp, local)
+			|| !stralloc_cats(&tmp, "@")
+			|| !stralloc_cats(&tmp, host))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (!stralloc_copys(&dtline, "Delivered-To: ")
+			|| !stralloc_cat(&dtline, &tmp))
+		strerr_die2x(111, FATAL, "out of memory");
+	for (i = 0; i < dtline.len; ++i)
+		if (dtline.s[i] == '\n')
+			dtline.s[i] = '_';
+	if (!stralloc_append(&dtline, "\n") ||
+			!stralloc_copy(&tmp, &dtline) ||
+			!stralloc_0(&tmp))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (!env_put2("DTLINE", tmp.s))
+		strerr_die2x(111, FATAL, "out of memory");
+}
+
+no_return int
+take_action(substdio *ss, char *header, int act_type, char *act_val,
+		int matched, char *bounce_message)
+{
+	int             i;
+	uid_t           uid;
+	gid_t           gid;
+	char           *(args[3]) = {0, 0, 0};
+	char           *home;
+	char           *MailDirNames[] = { "cur", "new", "tmp", };
+
 	if (lseek(0, 0, SEEK_SET) == -1)
-		strerr_die2sys(111, FATAL, "unable to seek");
-	if (!doit) {
-		return 0;
-	}
+		strerr_die2sys(111, FATAL, "unable to seek: ");
+	if (!doit && 
+			subprintf(ss, matched ? "Matched Header=[%s], " : "Unmatched Header=[%s], ", header) == -1)
+		strerr_die2sys(111, FATAL, "unable to write output: ");
 	switch (act_type)
 	{
 	case 0: /*- exit */
+		scan_int(act_val, &i);
+		if (!doit) {
+			if (subprintf(ss, "action=[exit %d]\n", i) == -1)
+				strerr_die2sys(111, FATAL, "unable to write output: ");
+			if (substdio_flush(ss) == -1)
+				strerr_die2sys(111, FATAL, "unable to write output: ");
+		}
+		if (i == 100) {
+			if (substdio_puts(ss, bounce_message ? bounce_message : "message failed to evade a local filter set by recipient") == -1 ||
+					substdio_put(ss, "\n", 1))
+				strerr_die2sys(111, FATAL, "unable to write output: ");
+			if (substdio_flush(ss) == -1)
+				strerr_die2sys(111, FATAL, "unable to write output: ");
+		}
+		_exit(i);
 		break;
 	case 1: /*- forward */
+		if (doit) {
+			if (!stralloc_copys(&tmp, auto_prefix) ||
+					!stralloc_catb(&tmp, "/bin/forward", 12) ||
+					!stralloc_0(&tmp))
+				strerr_die2x(111, FATAL, "out of memory");
+			args[0] = tmp.s;
+			args[1] = act_val;
+			execv(*args, args); /*- run forward */
+			strerr_die4sys(111, FATAL, "execv: forward ", act_val, ": ");
+		}
+		if (subprintf(ss, "action=forward to [%s]\n", act_val) == -1)
+			strerr_die2sys(111, FATAL, "unable to write output: ");
 		break;
 	case 2: /*- maildir */
-		break;
-	case 3: /*- mailbox */
+		if (!(home = env_get("HOME")))
+			strerr_die2x(111, FATAL, "No HOME environment variable");
+		if (!stralloc_copys(&addr, home) ||
+				!stralloc_cats(&addr, act_val + 1))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (doit) {
+			uid = getuid();
+			gid = getgid();
+			for (i = 0; i < 3; i++) {
+				if (!stralloc_catb(&addr, MailDirNames[i], 3) ||
+						!stralloc_0(&addr))
+					strerr_die2x(111, FATAL, "out of memory");
+				addr.len--;
+				if (access(addr.s, F_OK)) {
+					if (r_mkdir(addr.s, 0700, uid, gid))
+						strerr_die4sys(111, FATAL, "mkdir ", addr.s, ": ");
+				}
+				addr.len -= 3; /*- remove cur, new or tmp */
+			}
+			if (!stralloc_0(&addr))
+				strerr_die2x(111, FATAL, "out of memory");
+			if (!env_get("RPLINE"))
+				do_rpline();
+			if (!env_get("DTLINE"))
+				do_dtline();
+			if (!stralloc_copys(&tmp, auto_prefix) ||
+					!stralloc_catb(&tmp, "/bin/maildirdeliver", 19) ||
+					!stralloc_0(&tmp))
+				strerr_die2x(111, FATAL, "out of memory");
+			args[0] = tmp.s;
+			args[1] = addr.s;
+			execv(*args, args); /*- run maildirdeliver */
+			strerr_die6sys(111, FATAL, "execv: maildirdeliver ", addr.s, " ", tmp.s, ": ");
+		}
+		if (subprintf(ss, "action=deliver to Maildir [%s]\n", addr.s) == -1)
+			strerr_die2sys(111, FATAL, "unable to write output: ");
 		break;
 	}
-	return 0;
+	if (!doit && substdio_flush(ss) == -1)
+		strerr_die2sys(111, FATAL, "unable to write output: ");
+	_exit(0);
 }
 
 int
@@ -114,20 +238,21 @@ main(int argc, char **argv)
 {
 	char           *local, *domain, *header, *keyword,
 				   *action, *action_val, *d_action,
-				   *d_action_val, *comparision, *ptr;
-	char           *comp[] = { "Equals", "Contains",
+				   *d_action_val, *comparision, *bounce_message, *ptr;
+	char           *comp[] = {
+						"Equals", "Contains",
 						"Starts with", "Ends with",
-						"Numerical Logical Expression", "RegExp",
-						"address not in To, CC, Bcc", 0 };
-	char           *act[] = {"exit", "forward", "maildir", "mailbox", 0};
+						"Numerical Logical Expression", "RegExp", 0
+					};
+	char           *act[] = {"exit", "forward", "maildir", 0};
 	char            ssinbuf[1024], ssoutbuf[512];
 	int             opt, i, match, negate = 0, keep_continue = 0, 
-					c_opt = 0, a_opt = 0, default_a_opt = 0;
+					c_opt = 0, a_opt = 0, default_a_opt = 0, in_header;
 	substdio        ssin, ssout;
-	stralloc        line = { 0 }, addr = { 0 }, tmp = { 0 }, result = { 0 };
 
-	header = comparision = keyword = action = action_val = d_action = d_action_val = NULL;
-	while ((opt = getopt(argc, argv, "nrh:c:k:a:A:d:D:")) != opteof) {
+	header = comparision = keyword = action = action_val = d_action
+		= d_action_val = bounce_message = NULL;
+	while ((opt = getopt(argc, argv, "nrh:c:k:a:A:d:D:b:")) != opteof) {
 		switch (opt)
 		{
 		case 'n':
@@ -178,19 +303,38 @@ main(int argc, char **argv)
 		case 'D':
 			d_action_val = optarg;
 			break;
+		case 'b':
+			bounce_message = optarg;
 		default:
 			usage();
 		}
 	} /*- while ((opt = getopt(argc, argv, "h:b:c:k:a:")) != opteof) */
-	if (!header || !comparision || !action || (c_opt == 0 && !keyword)
-			|| (a_opt < 4 && !action_val))
+	if (!header || !comparision || !action || (c_opt != 6 && !keyword)
+			|| !action_val || !d_action_val)
 		usage();
-	if ((default_a_opt < 4 && !d_action_val))
+	if ((a_opt == 2 && str_diffn(action_val, "./Maildir/", 10)) ||
+			(default_a_opt == 2 && str_diffn(d_action_val, "./Maildir/", 10))) {
+		strerr_warn2(WARN, "Maildir path must start with ./Maildir/", 0);
 		usage();
+	}
+	if (a_opt == 2) {
+		i = str_len(action_val);
+		if (action_val[i - 1] != '/') {
+			strerr_warn2(WARN, "Maildir path must end with /", 0);
+			usage();
+		}
+	}
+	if (default_a_opt == 2) {
+		i = str_len(d_action_val);
+		if (d_action_val[i - 1] != '/') {
+			strerr_warn2(WARN, "Maildir path must end with /", 0);
+			usage();
+		}
+	}
 	if (!(local = env_get("LOCAL")))
-		strerr_die1x(111, "No LOCAL environment variable");
+		strerr_die2x(111, FATAL, "No LOCAL environment variable");
 	if (!(domain = env_get("HOST")))
-		strerr_die1x(111, "No HOST environment variable");
+		strerr_die2x(111, FATAL, "No HOST environment variable");
 	if (!stralloc_copys(&addr, local) || !stralloc_append(&addr, "@"))
 		strerr_die2x(111, FATAL, "out of memory");
 	else
@@ -203,31 +347,39 @@ main(int argc, char **argv)
 	if (!stralloc_cats(&tmp, header) ||
 			!stralloc_append(&tmp, ":"))
 		strerr_die2x(111, FATAL, "out of memory");
-	for (;;) {
+	for (in_header = 1;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
+		if (!line.len)
+			break;
 		if (!mess822_ok(&line)) /*- that ends the body */
-				break;
+			in_header = 0;
+		if (!doit && substdio_put(&ssout, line.s, line.len) == -1)
+			strerr_die2sys(111, FATAL, "unable to write output: ");
 		line.len--;
+		if (!in_header)
+			continue;
 		if (line.s[0] == ' ' || line.s[0] == '\t') /*- RFC 822 LWSP char */ {
 			if (keep_continue) {
-				if (!stralloc_cat(&result, &line))
+				if (!stralloc_cat(&matched_header, &line))
 					strerr_die2x(111, FATAL, "out of memory");
 			}
 		} else {
 			keep_continue = 0;
 			if (!case_diffb(tmp.s, tmp.len, line.s)) {
-				if (!stralloc_cat(&result, &line))
+				if (!stralloc_cat(&matched_header, &line))
 					strerr_die2x(111, FATAL, "out of memory");
 				keep_continue = 1;
 			}
 		}
 	}
-	if (!result.len) /*- no headers matched -h value */
+	if (!matched_header.len) { /*- no headers matched -h value */
+		take_action(&ssout, header, default_a_opt, d_action_val, 0, bounce_message);
 		return 0;
-	if (!stralloc_0(&result))
+	}
+	if (!stralloc_0(&matched_header))
 		strerr_die2x(111, FATAL, "out of memory");
-	result.len--;
+	matched_header.len--;
 	switch (c_opt)
 	{
 	case 0: /*- Equals */
@@ -236,25 +388,21 @@ main(int argc, char **argv)
 				!stralloc_0(&tmp))
 			strerr_die2x(111, FATAL, "out of memory");
 		tmp.len--;
-		match = !case_diffs(result.s, tmp.s);
+		match = !case_diffs(matched_header.s, tmp.s);
 		if (negate)
 			match = !match;
 		if (match)
-			take_action(&ssout, result.s, result.len, a_opt, action_val);
-		else
-			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
+			take_action(&ssout, matched_header.s, a_opt, action_val, 1, bounce_message);
 		break;
 	case 1: /*- Contains */
 		i = str_len(keyword);
-		case_lowers(result.s);
+		case_lowers(matched_header.s);
 		case_lowers(keyword);
-		match = str_str(result.s + i, keyword) ? 1 : 0;
+		match = str_str(matched_header.s + i, keyword) ? 1 : 0;
 		if (negate)
 			match = !match;
 		if (match)
-			take_action(&ssout, result.s, result.len, a_opt, action_val);
-		else
-			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
+			take_action(&ssout, matched_header.s, a_opt, action_val, 1, bounce_message);
 		break;
 	case 2: /*- Starts with */
 		if (!stralloc_append(&tmp, " ") ||
@@ -262,47 +410,38 @@ main(int argc, char **argv)
 				!stralloc_0(&tmp))
 			strerr_die2x(111, FATAL, "out of memory");
 		tmp.len--;
-		match = !case_diffb(result.s, tmp.len, tmp.s);
+		match = !case_diffb(matched_header.s, tmp.len, tmp.s);
 		if (negate)
 			match = !match;
 		if (match)
-			take_action(&ssout, result.s, result.len, a_opt, action_val);
-		else
-			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
+			take_action(&ssout, matched_header.s, a_opt, action_val, 1, bounce_message);
 		break;
 	case 3: /*- Ends with */
 		i = str_len(keyword);
-		match = !case_diffb(result.s + i, i, keyword);
+		match = !case_diffb(matched_header.s + i, i, keyword);
 		if (negate)
 			match = !match;
 		if (match)
-			take_action(&ssout, result.s, result.len, a_opt, action_val);
-		else
-			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
+			take_action(&ssout, matched_header.s, a_opt, action_val, 1, bounce_message);
 		break;
 	case 4: /*- Numerical Logical Expression */
-		for (ptr = result.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
-		match = logical_exp(result.s + tmp.len, keyword);
+		for (ptr = matched_header.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
+		match = logical_exp(matched_header.s + tmp.len, keyword);
 		if (negate)
 			match = !match;
 		if (match)
-			take_action(&ssout, result.s, result.len, a_opt, action_val);
-		else
-			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
+			take_action(&ssout, matched_header.s, a_opt, action_val, 1, bounce_message);
 		break;
 	case 5: /*- RegExp */
-		for (ptr = result.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
-		match = matchregex(result.s + tmp.len, keyword, 0);
+		for (ptr = matched_header.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
+		match = matchregex(matched_header.s + tmp.len, keyword, 0);
 		if (negate)
 			match = !match;
 		if (match)
-			take_action(&ssout, result.s, result.len, a_opt, action_val);
-		else
-			take_action(&ssout, result.s, result.len, default_a_opt, d_action_val);
+			take_action(&ssout, matched_header.s, a_opt, action_val, 1, bounce_message);
 		break;
-	case 6: /*- Recipient not in To, Cc, Bcc */
-		break;
-	}
+	} /* switch (c_opt) */
+	take_action(&ssout, matched_header.s, default_a_opt, d_action_val, 0, bounce_message);
 }
 
 void

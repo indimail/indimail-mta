@@ -604,6 +604,7 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/bin/replier-config
 %attr(755,root,root)                    %{_prefix}/bin/forward
 %attr(755,root,root)                    %{_prefix}/bin/new-inject
+%attr(755,root,root)                    %{_prefix}/bin/filterit
 %attr(755,root,root)                    %{_prefix}/bin/filterto
 %attr(755,root,root)                    %{_prefix}/bin/822body
 %attr(755,root,root)                    %{_prefix}/bin/iftoccfrom
@@ -938,6 +939,7 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/sendmail
 %attr(0755,root,root)              %{_prefix}/bin/qmail-inject
 %attr(0755,root,root)              %{_prefix}/bin/irmail
+%attr(0755,root,root)              %{_prefix}/bin/filterit
 %attr(0755,root,root)              %{_prefix}/bin/forward
 %attr(0755,root,root)              %{_prefix}/bin/predate
 %attr(0755,root,root)              %{_prefix}/bin/datemail
@@ -945,6 +947,7 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/qmail-showctl
 %attr(0755,root,root)              %{_prefix}/bin/qmaildirmake
 %attr(0755,root,root)              %{_prefix}/bin/maildir2mbox
+%attr(0755,root,root)              %{_prefix}/bin/maildirdeliver
 %attr(0755,root,root)              %{_prefix}/bin/qmaildirwatch
 %attr(0755,root,root)              %{_prefix}/bin/srsfilter
 %attr(0755,root,root)              %{_prefix}/bin/queue-fix

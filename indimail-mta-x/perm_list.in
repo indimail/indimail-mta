@@ -59,6 +59,7 @@
 %attr(0755,root,root)  @prefix@/bin/drate
 %attr(0755,root,root)  @prefix@/bin/except
 %attr(0755,root,root)  @prefix@/bin/fastforward
+%attr(0755,root,root)  @prefix@/bin/filterit
 %attr(0755,root,root)  @prefix@/bin/filterto
 %attr(0755,root,root)  @prefix@/bin/forward #qmta
 %attr(0755,root,root)  @prefix@/bin/ifaddr
@@ -359,6 +360,7 @@
 %attr(0644,root,root) @mandir@/man1/drate.1.gz
 %attr(0644,root,root) @mandir@/man1/except.1.gz
 %attr(0644,root,root) @mandir@/man1/fastforward.1.gz
+%attr(0644,root,root) @mandir@/man1/filterit.1.gz
 %attr(0644,root,root) @mandir@/man1/filterto.1.gz
 %attr(0644,root,root) @mandir@/man1/forward.1.gz #qmta
 %attr(0644,root,root) @mandir@/man1/ifaddr.1.gz

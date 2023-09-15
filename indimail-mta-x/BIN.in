@@ -64,6 +64,7 @@ f:::0755:/bin/:822addr:822addr
 f:::0755:/bin/:822fields:822fields
 f:::0755:/bin/:checkaddr:checkaddr
 f:::0755:/bin/:checkdomain:checkdomain
+f:::0755:/bin/:filterit:filterit
 f:::0755:/bin/:filterto:filterto
 f:::0755:/bin/:condtomaildir:condtomaildir
 f:::0755:/bin/:replier:replier
