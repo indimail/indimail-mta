@@ -7,31 +7,32 @@ filterit \- Filter incoming mails based on email headers
 .SH "SYNOPSIS"
 in
 .BR .qmail\fIext :
-.B | filterit [ -n ] [ -r ]
--h \fIheader\fR -k \fIkeyword\fR -c \fIcomparision\fR
+.B | filterit [ -n ] [ -r ] [ -x ]
+  -h \fIheader\fR -k \fIkeyword\fR -c \fIcomparision\fR
   -a \fIaction\fR -A \fIaction_val\fR
   -d \fIdefault_action\fR -D \fIdefault_action_val\fR
   [ -b bounce_message ]
   [ -e exit_value_on_match ]
 
 .SH "DESCRIPTION"
-\fBfilterit\fR is a filter that can be used in \fBdot-qmail\fR(5). It can
-be used to deliver mail to a Maildir folder, forward mail to an address or
-simple exit with some status when it matches a user-defined criteria
-specified on the command line. \fBfilterit\fR can be used to decide if you
-want to deliver, deliver to a specific folder, forward to any email
-address, drop or bounce the message.
+\fBfilterit\fR is a filter that can be used in \fBdot-qmail\fR(5). It
+expects descriptor 0 to be seekable and reads it to get all email headers.
+It can be used to deliver mail to a Maildir folder, forward mail to an
+address or simply exit with some status when it matches a user-defined
+criteria specified on the command line. \fBfilterit\fR can be used to
+decide if you want to deliver, deliver to a specific folder, forward to any
+email address, drop or bounce the message.
 
 When delivering to a Maildir, \fBfilterit\fR expects \fBHOME\fR,
 \fBRPLINE\fR, \fBDTLINE\fR environment variables to be present. If
 \fBRPLINE\fR environment variable is not present, it expects \fBSENDER\fR
-environment variable to set the \fBRPLINE\fR environment variable to insert
-the Return-Path header. If the \fBDTLINE\fR environment variable is not
-present, it expects \fBLOCAL\fR, \fBHOST\fR, environment variables to be
-present to set the \fBDTLINE\fR environment variable to insert the the
+environment variable to set the \fBRPLINE\fR environment variable and
+insert the Return-Path header. If the \fBDTLINE\fR environment variable is
+not present, it expects \fBLOCAL\fR, \fBHOST\fR, environment variables to
+be present to set the \fBDTLINE\fR environment variable and insert the the
 Delivered-To header. This is not a problem when being called from a
-\fB.qmail\fR file as \fBqmail-local\fR sets these environment variables.
-But if called from a script that is not executed by qmail-local,
+\fB.qmail\fR file as \fBqmail-local\fR sets all these environment
+variables. But if called from a script that is not executed by qmail-local,
 \fBfilterit\fR will exit 100, if these environment variables are not set.
 Also, \fBfilterit\fR will exit 100 if it finds the maildir path has ".." in
 it. \fIfilterit\fR will create the Maildir if it does not exist.
@@ -40,8 +41,8 @@ When forwarding to an address, \fBfilterit\fR expects \fBNEWSENDER\fR,
 \fBDLINE\fR environment variables to be present. If the \fBDTLINE\fR
 environment variable is not present, it expects \fBLOCAL\fR, \fBHOST\fR,
 environment variables to be present to set the \fBDTLINE\fR environment
-variable to insert the the Delivered-To header. This is not a problem when
-being called from a \fB.qmail\fR file as \fBqmail-local\fR sets these
+variable and insert the the Delivered-To header. This is not a problem when
+being called from a \fB.qmail\fR file as \fBqmail-local\fR sets all these
 environment variables. But if called from a script that is not executed by
 qmail-local, \fBfilterit\fR will exit 100, if these environment variables
 are not set. If running as non-root, \fBfilterit\fR uses environment set
@@ -54,7 +55,7 @@ directory (for any uid).
 When bouncing a message (-a bounce -A 100 or -d bounce -D 100), message
 will be bounced with the text
 .EX
-  "message failed to evade a local filter set by recipient"
+  "message failed to evade local filter(s) set by recipient"
 .EE
 You can use the -m option to change the bounce message;
 
@@ -66,6 +67,11 @@ Do not take any action. Just display the result of filtering
 .TP
 \fB\-r\fR
 Reverse the match. A match becomes no match. No match becomes match
+
+.TP
+\fB\-x\fR
+Insert X-FilterIT header which shows the filterit invocation arguments and
+if a matched occurred
 
 .TP
 \fB\-n\fR \fIheader\fR
