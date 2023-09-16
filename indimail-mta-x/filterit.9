@@ -34,8 +34,9 @@ Delivered-To header. This is not a problem when being called from a
 \fB.qmail\fR file as \fBqmail-local\fR sets all these environment
 variables. But if called from a script that is not executed by qmail-local,
 \fBfilterit\fR will exit 100, if these environment variables are not set.
-Also, \fBfilterit\fR will exit 100 if it finds the maildir path has ".." in
-it. \fIfilterit\fR will create the Maildir if it does not exist.
+Also, \fBfilterit\fR will exit 100 if it finds the maildir path two
+consequent dots. \fIfilterit\fR will create the Maildir if it does not
+exist.
 
 When forwarding to an address, \fBfilterit\fR expects \fBNEWSENDER\fR,
 \fBDLINE\fR environment variables to be present. If the \fBDTLINE\fR
@@ -50,7 +51,9 @@ according to files in $HOME/.defaultqueue directory. You can skip
 $HOME/.defaultqueue if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If
 \fBQUEUE_BASE\fR environment variable is not set, it additionally uses
 environment set according to files in @controldir@/defaultqueue
-directory (for any uid).
+directory (for any uid). When forwarding, \fBfilterit\fR rewrites the
+sender using Sender Rewriting Scheme if \fISRS\fB has been configured. See
+\fBindimail-srs\fR(5) for information on how to do this.
 
 When bouncing a message (-a bounce -A 100 or -d bounce -D 100), message
 will be bounced with the text
@@ -110,7 +113,8 @@ _
 exit        Exit with \fIaction_value\fR
 forward     Forward to address \fIaction_value\fR
 maildir     Deliver to a Maildir \fIaction_value\fR. This has to start with
-            './Maildir/' and end with '/' and must not contain '..'
+            './Maildir/' and end with '/' and must not contain two
+			consequent dots
 .TE
 
 .TP
@@ -123,7 +127,8 @@ _
 exit        Exit with \fIaction_value\fR
 forward     Forward to address \fIaction_value\fR
 maildir     Deliver to a Maildir \fIaction_value\fR. This has to start with
-            './Maildir/' and end with '/' and must not contain '..'
+            './Maildir/' and end with '/' and must not contain two
+			consequent dots
 .TE
 
 .TP
@@ -132,12 +137,14 @@ Set \fIbounce_message\fR as the default bounce message.
 
 .TP
 \fB\-e\fR \fIexit_value_on_match\fR
-When a match occurs, \fBfilterit\fR will exit 99 to prevent subsequent
+When a match occurs and when \fBfilterit\fR is either doing maildir
+delivery or forwarding, \fBfilterit\fR will exit 99 to prevent subsequent
 instructions in \fB.qmail\fR to run. Using this changes the default exit
-value to \fIexit_value_on_match\fR instead of \fI99\fR.
+value of \fI99\fR to \fIexit_value_on_match\fR.
 
 .SH "SEE ALSO"
 dot-qmail(5),
 qmail-local(8),
 maildir(5),
+indimail-srs(5),
 qmail-qfilter(1)
