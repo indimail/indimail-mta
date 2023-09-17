@@ -7,7 +7,7 @@ filterit \- Filter incoming mails based on email headers
 .SH "SYNOPSIS"
 in
 .BR .qmail\fIext :
-.B | filterit [ -n ] [ -r ] [ -x ]
+.B | [@prefix@/bin]filterit [ -n ] [ -r ] [ -x ]
   -h \fIheader\fR -k \fIkeyword\fR -c \fIcomparision\fR
   -a \fIaction\fR -A \fIaction_val\fR
   -d \fIdefault_action\fR -D \fIdefault_action_val\fR
@@ -21,9 +21,12 @@ It can be used to deliver mail to a Maildir folder, forward mail to an
 address or simply exit with some status when it matches a user-defined
 criteria specified on the command line. \fBfilterit\fR can be used to
 decide if you want to deliver, deliver to a specific folder, forward to any
-email address, drop or bounce the message.
+email address, drop or bounce the message. If \fBfilterit\fR is called in
+\fB.qmail\fR without a path, it is executed as an internal command by
+\fBqmail-local\fR.
 
-When delivering to a Maildir, \fBfilterit\fR expects \fBHOME\fR,
+When delivering to a Maildir, \fBfilterit\fR forks a child and does the
+Malidir delivery in the child. \fBfilterit\fR expects \fBHOME\fR,
 \fBRPLINE\fR, \fBDTLINE\fR environment variables to be present. If
 \fBRPLINE\fR environment variable is not present, it expects \fBSENDER\fR
 environment variable to set the \fBRPLINE\fR environment variable and

@@ -1114,12 +1114,14 @@ syncdir.o: compile syncdir.c conf-sync
 qmail-local: \
 load qmail-local.o qmail.o quote.o gfrom.o slurpclose.o srs.o \
 auto_patrn.o rcpthosts.o auto_control.o variables.o control.o \
-maildir_deliver.o auto_prefix.o syncdir.o socket.lib srs.lib
+maildir_deliver.o filterit_sub.o auto_prefix.o syncdir.o \
+set_environment.o socket.lib srs.lib
 	./load qmail-local qmail.o quote.o gfrom.o slurpclose.o srs.o \
 	rcpthosts.o auto_patrn.o variables.o auto_control.o control.o \
-	maildir_deliver.o auto_prefix.o syncdir.o \
+	maildir_deliver.o filterit_sub.o auto_prefix.o syncdir.o \
+	set_environment.o \
 	$(static_option) -L../libsrs2-x/libsrs2/.libs `cat srs.lib` \
-	$(QMAILLIB) $(dynamic_option) `cat socket.lib`
+	$(QMAILLIB) $(dynamic_option) `cat socket.lib` -lm
 
 qmail-local.o: \
 compile qmail-local.c quote.h qmail.h slurpclose.h \
@@ -3816,20 +3818,25 @@ make-recipients.1: \
 make-recipients.9 conf-sysconfdir
 	$(edit) make-recipients.9 > $@
 
+filterit: \
+load filterit.o filterit_sub.o variables.o quote.o maildir_deliver.o \
+syncdir.o qmail.o set_environment.o auto_control.o auto_prefix.o
+	./load filterit filterit_sub.o variables.o auto_control.o \
+	auto_prefix.o quote.o qmail.o maildir_deliver.o syncdir.o \
+	set_environment.o $(QMAILLIB)
+
 filterit.o: \
-compile filterit.c cdb_match.o quote.h maildir_deliver.h \
-qmail.h set_environment.h
+compile filterit.c filterit.h
 	./compile filterit.c
 
-filterit: \
-load filterit.o variables.o quote.o maildir_deliver.o syncdir.o \
-qmail.o set_environment.o auto_control.o auto_prefix.o
-	./load filterit variables.o auto_control.o auto_prefix.o \
-	quote.o qmail.o maildir_deliver.o syncdir.o set_environment.o \
-	$(QMAILLIB)
+filterit_sub.o: \
+compile filterit_sub.c cdb_match.o quote.h maildir_deliver.h \
+qmail.h set_environment.h filterit.h
+	./compile filterit_sub.c
 
-filterit.1: filterit.9 conf-sysconfdir
+filterit.1: filterit.9 conf-sysconfdir conf-prefix
 	cat filterit.9 \
+	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> filterit.1
 
