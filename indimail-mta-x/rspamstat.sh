@@ -1,4 +1,7 @@
 # $Log: rspamstat.sh,v $
+# Revision 1.6  2023-09-17 22:21:49+05:30  Cprogrammer
+# fixed division by zero when total=0
+#
 # Revision 1.5  2016-06-17 20:19:23+05:30  Cprogrammer
 # use SYSCONFDIR for bogofilter.cf
 #
@@ -71,9 +74,15 @@ awk -v spamheader_name=$spamheader_name '
 			tunsure += unsure[host]
 		}
 		total = tspam + tunsure + tham
-		spam_percent = (tspam * 100)/total
-		ham_percent = (tham * 100)/total
-		unsure_percent = (tunsure * 100)/total
+		if (total == 0) {
+			spam_percent = 0;
+			ham_percent = 0;
+			unsure_percent = 0;
+		} else {
+			spam_percent = (tspam * 100)/total
+			ham_percent = (tham * 100)/total
+			unsure_percent = (tunsure * 100)/total
+		}
 		printf("%d %d %d (%.2f) %d (%.2f) %d (%.2f) Total\n", tsize, total, tspam, 
 			spam_percent, tunsure, unsure_percent, tham, ham_percent)
 	}
