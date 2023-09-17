@@ -15,15 +15,13 @@ stores it in a maildir, \fIdir\fR.
 \fBmaildirdeliver\fR exits 0 on a successful delivery.  On a temporary
 failure, it exits 111.  On a permanent failure, it exits 100.
 
-Unlike a maildir line in \fB.qmail\fR files, \fBmaildirdeliver does not
+Unlike a maildir line in \fB.qmail\fR files, \fBmaildirdeliver\fR does not
 prepend a \fBReturn-Path\fR line nor a \fBDelivered-To\fR line to the
-incoming message. \fBmaildirdeliver\fR will use \fBRPLINE\fR if set, to
-prepend a \fBReturn-Path\fR line to the incoming message.
-\fBmaildirdeliver\fR will use \fBDTLINE\fR if set, to prepend a
-\fBDelivered-To\fR line to the incoming message. If \fBRPLINE\fR or
-\fBDTLINE\fR are not defined and if you use \fBmaildirdeliver\fR in a
-program line in a script, you may want to invoke it under \fBpreline\fR.
-For example:
+incoming message. Instead, \fBmaildirdeliver\fR will use \fBRPLINE\fR,
+\fBDTLINE\fR if set, to prepend a \fBReturn-Path\fR, \fRDelivered-To\fR
+lines to the incoming message. If \fBRPLINE\fR or \fBDTLINE\fR are not
+defined and if you use \fBmaildirdeliver\fR in a program line in a script,
+you may want to invoke it under \fBpreline\fR. For example:
 
 .EX
      |preline -f maildirdeliver Maildir

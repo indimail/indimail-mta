@@ -5,6 +5,7 @@
 822field
 822fields
 822header
+filterit
 822headerfilter
 822headerok
 822print
@@ -470,3 +471,4 @@ parse_env.o
 varargs.h
 indimail-services.7
 favicon.base64
+filterit.1

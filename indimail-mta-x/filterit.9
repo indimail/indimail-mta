@@ -1,0 +1,203 @@
+.\" vim: tw=75
+.TH filterit 1
+
+.SH "NAME"
+filterit \- Filter incoming mails based on email headers
+
+.SH "SYNOPSIS"
+in
+.BR .qmail\fIext :
+.B | [@prefix@/bin]filterit [ -n ] [ -r ] [ -x ]
+  -h \fIheader\fR -k \fIkeyword\fR -c \fIcomparision\fR
+  -a \fIaction\fR -A \fIaction_val\fR
+  -d \fIdefault_action\fR -D \fIdefault_action_val\fR
+  [ -b bounce_message ]
+  [ -e exit_value_on_match ]
+
+.SH "DESCRIPTION"
+\fBfilterit\fR is a filter that can be used in \fBdot-qmail\fR(5). It
+expects descriptor 0 to be seekable and reads it to get all email headers.
+It can be used to deliver mail to a Maildir folder, forward mail to an
+address or simply exit with some status when it matches a user-defined
+criteria specified on the command line. \fBfilterit\fR can be used to
+decide if you want to deliver to a specific folder, forward to any email
+address, drop or bounce the message. If \fBfilterit\fR is called in
+\fB.qmail\fR without a path, it is executed as an internal command by
+\fBqmail-local\fR.
+
+When delivering to a Maildir, \fBfilterit\fR forks a child and does the
+Maildir delivery in the child. \fBfilterit\fR expects \fBHOME\fR,
+\fBRPLINE\fR, \fBDTLINE\fR environment variables to be present. If
+\fBRPLINE\fR environment variable is not present, it expects \fBSENDER\fR
+environment variable in order to set the \fBRPLINE\fR environment variable
+and insert the Return-Path header. If the \fBDTLINE\fR environment variable
+is not present, it expects \fBLOCAL\fR, \fBHOST\fR, environment variables
+to be present in order to set the \fBDTLINE\fR environment variable and
+insert the the Delivered-To header. This is not a problem when being called
+from a \fB.qmail\fR file as \fBqmail-local\fR sets all these environment
+variables. But if called from a script that is not executed by qmail-local.
+\fBfilterit\fR will exit 100, if these environment variables are not set.
+Also, \fBfilterit\fR will exit 100 if it finds the maildir path two
+consequent dots. \fIfilterit\fR will create the Maildir if it does not
+exist.
+
+When forwarding to an address, \fBfilterit\fR expects \fBNEWSENDER\fR,
+\fBDLINE\fR environment variables to be present. If the \fBDTLINE\fR
+environment variable is not present, it expects \fBLOCAL\fR, \fBHOST\fR,
+environment variables to be present in order to set the \fBDTLINE\fR
+environment variable and insert the the Delivered-To header. This is not a
+problem when being called from a \fB.qmail\fR file as \fBqmail-local\fR
+sets all these environment variables. But if called from a script that is
+not executed by qmail-local, \fBfilterit\fR will exit 100, if these
+environment variables are not set. If running as non-root, \fBfilterit\fR
+uses environment set according to files in $HOME/.defaultqueue directory.
+You can skip $HOME/.defaultqueue if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If
+\fBQUEUE_BASE\fR environment variable is not set, it additionally uses
+environment set according to files in @controldir@/defaultqueue
+directory (for any uid). When forwarding, \fBfilterit\fR rewrites the
+sender using Sender Rewriting Scheme if \fISRS\fB has been configured. See
+\fBindimail-srs\fR(5) for information on how to do this. \ffilterit\fR uses
+\fBqmail-queue\fR(8) to put an email to be forwarded in the queue.
+
+When bouncing a message (-a bounce -A 100 or -d bounce -D 100), message
+will be bounced with the text
+
+.EX
+  "message failed to evade local filter(s) set by recipient"
+.EE
+
+You can use the -b option to change the bounce message;
+
+.SH "OPTIONS"
+.TP 3
+\fB\-n\fR
+Do not take any action. Just display the result of filtering
+
+.TP
+\fB\-r\fR
+Reverse the match. A match becomes no match. No match becomes match
+
+.TP
+\fB\-x\fR
+Insert X-FilterIT header which shows the filterit invocation arguments and
+if a matched occurred
+
+.TP
+\fB\-n\fR \fIheader\fR
+Use \fIheader\fR to match all headers in a 822-format message.
+
+.TP
+\fB\-k\fR \fIkeyword\fR
+Use the string \fIkeyword\fR in \fIheader\fR from a 822-format message. The
+criteria for a match depends on the type of comparision used (-c option)
+
+.TP
+\fB\-c\fR \fIcomparision\fR
+Use \fIcomparision\fR as the criteria for deciding a match. This is a
+string with one of the following values:
+.TS
+l l.
+Comparision Type             Criteria for match
+_
+equals                       match happens when header value = keyword
+contains                     match happens when header value contains keyword
+starts with                  match happens when header value starts with keyword
+ends with                    match happens when header value ends with keyword
+numerical logical expression Here %p in keyword gets replaced with header
+                             value
+regexp                       Match happens when a regular expression in
+                             keyword matches the header value
+.TE
+
+.TP
+\fB\-a\fR \fItype\fR -A \fIaction_value\fR
+Action to take when there is a match. This has one of the following values:
+.TS
+l l.
+Action type Description
+_
+exit        Exit with \fIaction_value\fR
+forward     Forward to address \fIaction_value\fR
+maildir     Deliver to a Maildir \fIaction_value\fR. This has to start with
+            './Maildir/' and end with '/' and must not contain two
+            consequent dots
+.TE
+
+.TP
+\fB\-d\fR \fItype\fR -D \fIaction_value\fR
+default action to take when there is no match. This has one of the following values:
+.TS
+l l.
+Action type Description
+_
+exit        Exit with \fIaction_value\fR
+forward     Forward to address \fIaction_value\fR
+maildir     Deliver to a Maildir \fIaction_value\fR. This has to start with
+            './Maildir/' and end with '/' and must not contain two
+            consequent dots
+.TE
+
+.TP
+\fB\-b\fR \fIbounce_message\fR
+Set \fIbounce_message\fR as the default bounce message.
+
+.TP
+\fB\-e\fR \fIexit_value_on_match\fR
+When a match occurs and when \fBfilterit\fR is either doing maildir
+delivery or forwarding, \fBfilterit\fR will exit 99 to prevent subsequent
+instructions in \fB.qmail\fR to run. Using this changes the default exit
+value of \fI99\fR to \fIexit_value_on_match\fR.
+
+.SH "EXAMPLES"
+The below example shows three invocations of filterit with the final
+instructions to deliver it to the Maildir.
+
+\fBNOTE:\fR It is important to test the filter before including it in a
+\fB.qmail\fR file. You can pass the -n option to the filterit command line
+argument. Wrong usage can lead to mails boucing, getting dropped or
+deferred.
+
+.EX
+  # Move mail to Quarantine folder and exit 99, else exit 0
+  # qmail-queue qhspi puts the header X-QHPSI: clean. passing
+  # -r option to filterit makes the filter match when the header
+  # does not have "clean" as the header value
+  # this filter will exit 99 on match, causing qmail-local to
+  # stop at this line
+  | filterit -xr -h X-QHPSI -k "clean" -c "Equals" -a Maildir
+      -A ./Maildir/.Quarantine/ -d exit -D 0
+
+  # Move mail to Spam folder and exit 99, else exit 0
+  # bogofilter inserts the X-bogosity header like below
+  # X-Bogosity: No, spamicity=0.520000, cutoff=9.90e-01, ...
+  # The filter below will move the mail to Spam folder if X-Bogosity
+  # value starts with "Yes".
+  # additionally -e 0 is passed which makes the filter exit 0 on a
+  # match. This allows qmail-local to go to the next filter even
+  # though the filter has a match
+  | filterit -x -h X-Bogosity -k "Yes" -c "Starts with" -a Maildir
+      -A ./Maildir/.Spam/ -d exit -D 0 -e 0
+
+  # match criteria same as above, but this filter forwards spam mails
+  # to spam_collection@yourdomain.org instead of putting it in Maildir
+  # this filter will exit 99 on match, causing qmail-local to
+  # stop at this line
+  | filterit -x -h X-Bogosity -k "Yes" -c "Starts with" -a forward
+      -A spam_collection@yourdomain.org -d exit -D 0
+
+  # If the mail passes through the above filters, deliver it to Maildir
+  ./Maildir/
+
+  # NOTE: The command lines above have been broken into two lines
+          for readability. In a real dot-qmail you will have those
+          as a single line
+.EX
+
+.SH "SEE ALSO"
+dot-qmail(5),
+qmail-local(8),
+qmail-queue(8),
+maildir(5),
+indimail-srs(5),
+qmail-command(8),
+qmail-qfilter(1)

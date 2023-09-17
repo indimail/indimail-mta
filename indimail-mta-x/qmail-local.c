@@ -43,6 +43,7 @@
 #include "variables.h"
 #include "maildir_deliver.h"
 #include "auto_patrn.h"
+#include "filterit.h"
 
 static char    *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
 static char    *user, *homedir, *local, *dash, *ext, *host, *sender, *aliasempty, *qqeh;
@@ -132,7 +133,7 @@ die_srs()
 void
 maildir(char *fn)
 {
-	int             child;
+	pid_t           child;
 	int             wstat;
 
 	if (seek_begin(0) == -1)
@@ -147,7 +148,7 @@ maildir(char *fn)
 	}
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat))
-		temp_childcrashed(NULL);
+		temp_childcrashed("maildir delivery");
 	switch (wait_exitcode(wstat))
 	{
 	case 0:
@@ -162,6 +163,32 @@ maildir(char *fn)
 		strerr_die1x(100, overquota);
 	default:
 		strerr_die1x(111, "Temporary error on maildir delivery. (#4.3.0)");
+	}
+}
+
+void
+filterit(char *cmd)
+{
+	char           *x;
+
+	if (seek_begin(0) == -1)
+		temp_rewind();
+
+	if (!env_put2("QQEH", qqeh))
+		temp_nomem();
+	switch (filterit_sub2(cmd))
+	{
+	case 0: /*- filterit may set QQEH if -x option is passed */
+		if ((x = env_get("QQEH")))
+			qqeh = x;
+		break;
+	case 100:
+		_exit (100);
+	case 99:
+		flag99 = 1;
+		break;
+	default:
+		_exit (111);
 	}
 }
 
@@ -243,7 +270,7 @@ writeerrs:
 void
 mailprogram(char *prog)
 {
-	int             child;
+	pid_t           child;
 	char           *(args[4]);
 	int             wstat;
 
@@ -775,11 +802,11 @@ main(int argc, char **argv)
 				if (i)
 					break;
 				strerr_die1x(111, "Uh-oh: first line of .qmail file is blank. (#4.2.1)");
-			case '#':
-			case ':':
+			case '#': /*- comment */
+			case ':': /*- end branch */
 				break;
-			case '.':
-			case '/':
+			case '.': /* mailbox or maildir */
+			case '/': /* mailbox or maildir */
 				++count_file;
 				if (flagforwardonly)
 					strerr_die1x(111, "Uh-oh: .qmail has file delivery but has x bit set. (#4.7.0)");
@@ -794,13 +821,18 @@ main(int argc, char **argv)
 				else
 					sayit("mbox ", cmds.s + i, k - i);
 				break;
-			case '|':
+			case '|': /*- command */
 				++count_program;
 				if (flagforwardonly)
 					strerr_die1x(111, "Uh-oh: .qmail has prog delivery but has x bit set. (#4.7.0)");
-				if (flagdoit)
-					mailprogram(cmds.s + i + 1);
-				else
+				if (flagdoit) {
+					x = cmds.s + i + 1;
+					for (;*x && (*x == ' ' || *x == '\t'); x++);
+					if (!str_diffn(x, "filterit ", 9))
+						filterit(x);
+					else
+						mailprogram(cmds.s + i + 1);
+				} else
 					sayit("program ", cmds.s + i + 1, k - i - 1);
 				break;
 			case '?': /* branch */
