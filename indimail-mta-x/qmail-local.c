@@ -133,7 +133,7 @@ die_srs()
 void
 maildir(char *fn)
 {
-	int             child;
+	pid_t           child;
 	int             wstat;
 
 	if (seek_begin(0) == -1)
@@ -148,7 +148,7 @@ maildir(char *fn)
 	}
 	wait_pid(&wstat, child);
 	if (wait_crashed(wstat))
-		temp_childcrashed(NULL);
+		temp_childcrashed("maildir delivery");
 	switch (wait_exitcode(wstat))
 	{
 	case 0:
@@ -270,7 +270,7 @@ writeerrs:
 void
 mailprogram(char *prog)
 {
-	int             child;
+	pid_t           child;
 	char           *(args[4]);
 	int             wstat;
 

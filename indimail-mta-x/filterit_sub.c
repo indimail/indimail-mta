@@ -297,13 +297,14 @@ take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
 		}
 		return i;
 	case 1: /*- forward */
-		if (doit) {
-			if (!env_get("DTLINE"))
-				do_dtline();
-			i = forward(ssin, act_val, matched, argc, argv);
+		if (!doit) {
+			if (subprintf(ssout, "action=forward to [%s]\n", act_val) == -1)
+				strerr_die2sys(111, FATAL, "unable to write output: ");
 		}
-		if (subprintf(ssout, "action=forward to [%s]\n", act_val) == -1)
-			strerr_die2sys(111, FATAL, "unable to write output: ");
+		if (!env_get("DTLINE"))
+			do_dtline();
+		forward(ssin, act_val, matched, argc, argv);
+		/*- does not return */
 		break;
 	case 2: /*- maildir */
 		if (!(home = env_get("HOME")))
@@ -313,60 +314,59 @@ take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
 				!stralloc_0(&addr))
 			strerr_die2x(111, FATAL, "out of memory");
 		addr.len--;
-		if (doit) {
-			uid = getuid();
-			gid = getgid();
-			for (i = 0; i < 3; i++) {
-				if (!stralloc_catb(&addr, MailDirNames[i], 3) ||
-						!stralloc_0(&addr))
-					strerr_die2x(111, FATAL, "out of memory");
-				addr.len--;
-				if (access(addr.s, F_OK)) {
-					if (r_mkdir(addr.s, 0700, uid, gid))
-						strerr_die4sys(111, FATAL, "mkdir ", addr.s, ": ");
-				}
-				addr.len -= 3; /*- remove cur, new or tmp */
-			}
-			if (!stralloc_0(&addr))
-				strerr_die2x(111, FATAL, "out of memory");
-			if (!env_get("RPLINE"))
-				do_rpline();
-			if (!env_get("DTLINE"))
-				do_dtline();
-			if (xfilter_header)
-				write_xfilter_header(&ptr, matched, argc, argv);
-			else
-				ptr = env_get("QQEH");
-			switch (child = fork())
-			{
-			case -1:
-				strerr_die3x(111, "Unable to fork: ", error_str(errno), ". (#4.3.0)");
-			case 0:
-				_exit(maildir_deliver(addr.s, &rpline, &dtline, ptr));
-			}
-			wait_pid(&wstat, child);
-			if (wait_crashed(wstat))
-				strerr_die1x(111, "Aack, child crashed. (#4.3.0)");
-			switch (wait_exitcode(wstat))
-			{
-			case 0:
-				break;
-			case 2:
-				strerr_die1x(111, "Unable to chdir to maildir. (#4.2.1)");
-			case 3:
-				strerr_die1x(111, "Timeout on maildir delivery. (#4.3.0)");
-			case 4:
-				strerr_die1x(111, "Unable to read message. (#4.3.0)");
-			case 5:
-				strerr_die1x(100, overquota);
-			default:
-				strerr_die1x(111, "Temporary error on maildir delivery. (#4.3.0)");
-			}
-			return exit_val_on_match;
+		if (!doit) {
+			if (subprintf(ssout, "action=deliver to Maildir [%s]\n", addr.s) == -1)
+				strerr_die2sys(111, FATAL, "unable to write output: ");
 		}
-		if (subprintf(ssout, "action=deliver to Maildir [%s]\n", addr.s) == -1)
-			strerr_die2sys(111, FATAL, "unable to write output: ");
-		break;
+		uid = getuid();
+		gid = getgid();
+		for (i = 0; i < 3; i++) {
+			if (!stralloc_catb(&addr, MailDirNames[i], 3) ||
+					!stralloc_0(&addr))
+				strerr_die2x(111, FATAL, "out of memory");
+			addr.len--;
+			if (access(addr.s, F_OK)) {
+				if (r_mkdir(addr.s, 0700, uid, gid))
+					strerr_die4sys(111, FATAL, "mkdir ", addr.s, ": ");
+			}
+			addr.len -= 3; /*- remove cur, new or tmp */
+		}
+		if (!stralloc_0(&addr))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (!env_get("RPLINE"))
+			do_rpline();
+		if (!env_get("DTLINE"))
+			do_dtline();
+		if (xfilter_header)
+			write_xfilter_header(&ptr, matched, argc, argv);
+		else
+			ptr = env_get("QQEH");
+		switch (child = fork())
+		{
+		case -1:
+			strerr_die3x(111, "Unable to fork: ", error_str(errno), ". (#4.3.0)");
+		case 0:
+			_exit(maildir_deliver(addr.s, &rpline, &dtline, ptr));
+		}
+		wait_pid(&wstat, child);
+		if (wait_crashed(wstat))
+			strerr_die1x(111, "Aack, child [maildir delivery] crashed. (#4.3.0)");
+		switch (wait_exitcode(wstat))
+		{
+		case 0:
+			break;
+		case 2:
+			strerr_die1x(111, "Unable to chdir to maildir. (#4.2.1)");
+		case 3:
+			strerr_die1x(111, "Timeout on maildir delivery. (#4.3.0)");
+		case 4:
+			strerr_die1x(111, "Unable to read message. (#4.3.0)");
+		case 5:
+			strerr_die1x(100, overquota);
+		default:
+			strerr_die1x(111, "Temporary error on maildir delivery. (#4.3.0)");
+		}
+		return exit_val_on_match;
 	} /* switch (act_type) */
 	if (!doit && substdio_flush(ssout) == -1)
 		strerr_die2sys(111, FATAL, "unable to write output: ");

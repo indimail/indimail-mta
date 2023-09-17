@@ -117,7 +117,7 @@ exit        Exit with \fIaction_value\fR
 forward     Forward to address \fIaction_value\fR
 maildir     Deliver to a Maildir \fIaction_value\fR. This has to start with
             './Maildir/' and end with '/' and must not contain two
-			consequent dots
+            consequent dots
 .TE
 
 .TP
@@ -131,7 +131,7 @@ exit        Exit with \fIaction_value\fR
 forward     Forward to address \fIaction_value\fR
 maildir     Deliver to a Maildir \fIaction_value\fR. This has to start with
             './Maildir/' and end with '/' and must not contain two
-			consequent dots
+            consequent dots
 .TE
 
 .TP
@@ -144,6 +144,52 @@ When a match occurs and when \fBfilterit\fR is either doing maildir
 delivery or forwarding, \fBfilterit\fR will exit 99 to prevent subsequent
 instructions in \fB.qmail\fR to run. Using this changes the default exit
 value of \fI99\fR to \fIexit_value_on_match\fR.
+
+.SH "EXAMPLES"
+The below example shows three invocations of filterit with the final
+instructions to deliver it to the Maildir.
+
+\fBNOTE:\fR It is important to test the filter before including it in a
+\fB.qmail\fR file. You can pass the -n option to the filterit command line
+argument. Wrong usage can lead to mails boucing, getting dropped or
+deferred.
+
+.EX
+  # Move mail to Quarantine folder and exit 99, else exit 0
+  # qmail-queue qhspi puts the header X-QHPSI: clean. passing
+  # -r option to filterit makes the filter match when the header
+  # does not have "clean" as the header value
+  # this filter will exit 99 on match, causing qmail-local to
+  # stop at this line
+  | filterit -xr -h X-QHPSI -k "clean" -c "Equals" -a Maildir
+      -A ./Maildir/.Quarantine/ -d exit -D 0
+
+  # Move mail to Spam folder and exit 99, else exit 0
+  # bogofilter inserts the X-bogosity header like below
+  # X-Bogosity: No, spamicity=0.520000, cutoff=9.90e-01, ...
+  # The filter below will move the mail to Spam folder if X-Bogosity
+  # value starts with "Yes".
+  # additionally -e 0 is passed which makes the filter exit 0 on a
+  # match. This allows qmail-local to go to the next filter even
+  # though the filter has a match
+  | filterit -x -h X-Bogosity -k "Yes" -c "Starts with" -a Maildir
+      -A ./Maildir/.Spam/ -d exit -D 0 -e 0
+
+  # match criteria same as above, but this filter forwards spam mails
+  # to spam_collection@yourdomain.org instead of putting it in Maildir
+  # this filter will exit 99 on match, causing qmail-local to
+  # stop at this line
+  | filterit -x -h X-Bogosity -k "Yes" -c "Starts with" -a forward
+      -A spam_collection@yourdomain.org -d exit -D 0
+
+  # If the mail passes through the above filters, deliver it to Maildir
+  ./Maildir/
+
+  # NOTE: The command lines above have been broken into two lines
+          for readability. In a real dot-qmail you will have those
+          as a single line
+.EX
+
 
 .SH "SEE ALSO"
 dot-qmail(5),
