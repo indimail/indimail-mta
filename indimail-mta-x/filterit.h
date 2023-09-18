@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: filterit.h,v 1.1 2023-09-19 01:09:48+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef _FILTERIT_H_
 #define _FILTERIT_H_
@@ -12,5 +12,8 @@ int             filterit_sub2(char *);
 #endif
 
 /*
- * $Log: $
+ * $Log: filterit.h,v $
+ * Revision 1.1  2023-09-19 01:09:48+05:30  Cprogrammer
+ * Initial revision
+ *
  */

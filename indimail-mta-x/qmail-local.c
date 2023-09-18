@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-local.c,v 1.45 2023-08-17 22:59:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-local.c,v 1.46 2023-09-19 01:09:06+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -170,9 +170,6 @@ void
 filterit(char *cmd)
 {
 	char           *x;
-
-	if (seek_begin(0) == -1)
-		temp_rewind();
 
 	if (!env_put2("QQEH", qqeh))
 		temp_nomem();
@@ -912,7 +909,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.45 2023-08-17 22:59:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.46 2023-09-19 01:09:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
@@ -920,6 +917,9 @@ getversion_qmail_local_c()
 
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.46  2023-09-19 01:09:06+05:30  Cprogrammer
+ * added internal qmail-local filterit command
+ *
  * Revision 1.45  2023-08-17 22:59:05+05:30  Cprogrammer
  * display program/command if crashed in logs
  *

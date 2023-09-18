@@ -1,11 +1,10 @@
 /*
- * $Id: *
+ *  *
  */
 #include <ctype.h>
 #include <unistd.h>
 #include <errno.h>
 #include <qprintf.h>
-#include <subfd.h>
 #include <getln.h>
 #include <stralloc.h>
 #include <env.h>
@@ -13,7 +12,7 @@
 #include <error.h>
 #include <strerr.h>
 #include <noreturn.h>
-#include <sgetopt.h>
+#include <subgetopt.h>
 #include <case.h>
 #include <mess822.h>
 #include <evaluate.h>
@@ -303,6 +302,8 @@ take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
 		}
 		if (!env_get("DTLINE"))
 			do_dtline();
+		if (lseek(0, 0, SEEK_SET) == -1)
+			strerr_die2sys(111, FATAL, "unable to seek: ");
 		forward(ssin, act_val, matched, argc, argv);
 		/*- does not return */
 		break;
@@ -341,6 +342,8 @@ take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
 			write_xfilter_header(&ptr, matched, argc, argv);
 		else
 			ptr = env_get("QQEH");
+		if (lseek(0, 0, SEEK_SET) == -1)
+			strerr_die2sys(111, FATAL, "unable to seek: ");
 		switch (child = fork())
 		{
 		case -1:
@@ -392,8 +395,8 @@ filterit_sub1(int argc, char **argv)
 
 	header = comparision = keyword = action = action_val = d_action = d_action_val = NULL;
 	bounce_message = "message failed to evade local filter(s) set by recipient";
-	optind = 1;
-	while ((opt = subgetopt(argc, argv, "xnrh:c:k:a:A:d:D:b:e:")) != opteof) {
+	sgoptind = 1;
+	while ((opt = subgetopt(argc, argv, "xnrh:c:k:a:A:d:D:b:e:")) != sgoptdone) {
 		switch (opt)
 		{
 		case 'n':
@@ -500,9 +503,11 @@ filterit_sub1(int argc, char **argv)
 		strerr_die2x(111, FATAL, "out of memory");
 	addr.len--;
 
+	if (lseek(0, 0, SEEK_SET) == -1)
+		strerr_die2sys(111, FATAL, "unable to seek: ");
 	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
 	substdio_fdbuf(&ssout, write, 1, ssoutbuf, sizeof(ssoutbuf));
-	if (!stralloc_cats(&tmp, header) ||
+	if (!stralloc_copys(&tmp, header) ||
 			!stralloc_append(&tmp, ":"))
 		strerr_die2x(111, FATAL, "out of memory");
 	for (in_header = 1;;) {
@@ -633,5 +638,8 @@ getversion_filterit_c()
 }
 
 /*
- * $Log: $
+ * $Log: filterit_sub.c,v $
+ * Revision 1.1  2023-09-19 01:09:56+05:30  Cprogrammer
+ * Initial revision
+ *
  */

@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.8 2023-09-08 16:11:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.9 2023-09-19 01:17:35+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
-tuser=tuser
+testuser=tuser
 myuid=$(id -u)
 mygid=$(id -g)
 real_domain=argos.indimail.org
@@ -66,6 +66,10 @@ do_cleanup_failed()
 	sudo /bin/rm -rf $testdir/svscan.out
 	sudo /bin/rm -rf $testdir/tcpclient.smtp
 	sudo /bin/rm -rf $testdir/.vacation.dir/*
+	sudo /bin/rm -rf $testdir/$user/Maildir/new/*
+	sudo /bin/rm -rf $testdir/$testuser/Maildir/new/*
+	sudo /bin/rm -rf $testdir/$testuser/Maildir/.Quarantine
+	sudo /bin/rm -rf $testdir/$testuser/Maildir/.Spam
 	sudo /bin/rm -rf $sysconfdir/users
 }
 
@@ -146,11 +150,11 @@ shutdown_svscan()
 
 setup_maildir()
 {
-	if [ -d $maildir/new ] ; then
-		find $maildir/new -type f -exec /bin/rm -f {} \;
+	if [ -d $maildir ] ; then
+		find $maildir -type f -exec /bin/rm -f {} \;
 	fi
-	if [ -d $testdir/tuser/Maildir/new ] ; then
-		find $testdir/tuser/Maildir/new -type f -exec /bin/rm -f {} \;
+	if [ -d $testdir/$testuser/Maildir ] ; then
+		find $testdir/$testuser/Maildir -type f -exec /bin/rm -f {} \;
 	fi
 	mkdir -p $cntrldir
 	mkdir -p $sysconfdir/users
@@ -158,7 +162,7 @@ setup_maildir()
 	for i in cur new tmp
 	do
 		mkdir -p $maildir/$i
-		mkdir -p $testdir/tuser/Maildir/$i
+		mkdir -p $testdir/$testuser/Maildir/$i
 	done
 }
 
@@ -168,8 +172,8 @@ setup_assign()
 	(
 	echo "=$user:$user:$myuid:$mygid:$testdir/$user:::"
 	echo "+$user-:$user:$myuid:$mygid:$testdir/$user:-::"
-	echo "=tuser:tuser:$myuid:$mygid:$testdir/tuser:::"
-	echo "+tuser-:tuser:$myuid:$mygid:$testdir/tuser:-::"
+	echo "=$testuser:$testuser:$myuid:$mygid:$testdir/$testuser:::"
+	echo "+$testuser-:$testuser:$myuid:$mygid:$testdir/$testuser:-::"
 	echo "."
 	) > $sysconfdir/users/assign
 	echo "Creating $sysconfdir/users/cdb" 1>&2
@@ -1801,6 +1805,11 @@ do_without_svscan()
 	send_pid=$(get_send_pid)
 	test_qmail_inject $user $user $user
 
+	echo "Testing qmail-local internal filterit command"
+	test_filterit 1
+	echo "Testing qmail-local external filterit command"
+	test_filterit 2
+
 	# start smtp using tcpserver
 	start_tcpserver_smtp
 	create_authsmtp
@@ -1969,12 +1978,12 @@ do_autoresponder()
 	echo "I'm on leave" > $testdir/.vacation.msg
 	(
 	echo "|/usr/bin/autoresponder -q $testdir/.vacation.msg $testdir/.vacation.dir" 
-	echo "$testdir/tuser/Maildir/"
-	) > $testdir/tuser/.qmail
+	echo "$testdir/$testuser/Maildir/"
+	) > $testdir/$testuser/.qmail
 	subject="Testing Autoresponder"
 	(
 	echo "From: $user@$real_domain"
-	echo "To: tuser@$real_domain"
+	echo "To: $testuser@$real_domain"
 	echo "Subject: $subject"
 	echo "Date: $(date -R)"
 	echo
@@ -1985,7 +1994,7 @@ do_autoresponder()
 		CONTROLDIR=$cntrldir \
 		BIGTODO=0 \
 		CONFSPLIT=23 \
-	$qmail_inject -f$user@$real_domain tuser
+	$qmail_inject -f$user@$real_domain $testuser
 	reply_subject="Subject: Autoreply: Re: $subject"
 	count=0
 	ret=1
@@ -2017,6 +2026,152 @@ do_autoresponder()
 		echo "qmail-send.log"
 		cat $logdir/qmail-send/qmail-send.log
 		) |less
+		exit 1
+	fi
+}
+
+test_filterit()
+{
+	(
+	if [ $1 -eq 1 ] ; then
+		echo "| filterit -xr -h X-QHPSI -k clean -c Equals -a Maildir -A ./Maildir/.Quarantine/ -d exit -D 0"
+		echo "| filterit -x -h X-Bogosity -k Yes -c \"Starts with\" -a Maildir -A ./Maildir/.Spam/ -d exit -D 0"
+	else
+		echo "| /bin/filterit -xr -h X-QHPSI -k clean -c Equals -a Maildir -A ./Maildir/.Quarantine/ -d exit -D 0"
+		echo "| /bin/filterit -x -h X-Bogosity -k Yes -c \"Starts with\" -a Maildir -A ./Maildir/.Spam/ -d exit -D 0"
+	fi
+	echo "./Maildir/"
+	) > $testdir/$testuser/.qmail
+	if [ $1 -eq 1 ] ; then
+	subject="Testing qmail-local internal filterit command"
+	else
+	subject="Testing qmail-local external filterit command"
+	fi
+	(
+	echo "From: $user@$real_domain"
+	echo "To: $testuser@$real_domain"
+	echo "Subject: $subject"
+	echo "Date: $(date -R)"
+	echo "X-QHPSI: clean"
+	echo
+	echo "Test message"
+	) | sudo $setuidgid -g qcerts $user env - \
+		QUEUEDIR=$testdir/queue \
+		QMAILQUEUE=$qmail_queue \
+		CONTROLDIR=$cntrldir \
+		BIGTODO=0 \
+		CONFSPLIT=23 \
+	$qmail_inject -f$user@$real_domain $testuser
+	check_mail $testdir/$testuser/Maildir
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		if [ $1 -eq 1 ] ; then
+			echo "  testing internal filterit with no-match succeeded"
+		else
+			echo "  testing external filterit with no-match succeeded"
+		fi
+	else
+		sudo kill $send_pid
+		(
+		if [ $1 -eq 1 ] ; then
+			echo "  testing internal filterit with no-match failed"
+		else
+			echo "  testing external filterit with no-match failed"
+		fi
+		cat $logdir/qmail-send/qmail-send.log
+		) | less
+		exit 1
+	fi
+
+	(
+	echo "From: $user@$real_domain"
+	echo "To: $testuser@$real_domain"
+	echo "Subject: $subject"
+	echo "Date: $(date -R)"
+	echo "X-QHPSI: virus infected"
+	echo
+	echo "Test message"
+	) | sudo $setuidgid -g qcerts $user env - \
+		QUEUEDIR=$testdir/queue \
+		QMAILQUEUE=$qmail_queue \
+		CONTROLDIR=$cntrldir \
+		BIGTODO=0 \
+		CONFSPLIT=23 \
+	$qmail_inject -f$user@$real_domain $testuser
+	check_mail $testdir/$testuser/Maildir/.Quarantine
+	if [ $? -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		if [ $1 -eq 1 ] ; then
+			echo "  testing internal filterit with negative match deliver to folder succeeded"
+		else
+			echo "  testing external filterit with negative match deliver to folder succeeded"
+		fi
+	else
+		sudo kill $send_pid
+		(
+		if [ $1 -eq 1 ] ; then
+			echo "  testing internal filterit with negative match deliver to folder failed"
+		else
+			echo "  testing external filterit with negative match deliver to folder failed"
+		fi
+		cat $logdir/qmail-send/qmail-send.log
+		) | less
+		exit 1
+	fi
+
+	(
+	echo "From: $user@$real_domain"
+	echo "To: $testuser@$real_domain"
+	echo "Subject: $subject"
+	echo "Date: $(date -R)"
+	echo "X-Bogosity: No, spamicity=0.520000, cutoff=9.90e-01, ham_cutoff=0.00e+00,version=1.0.0,register-No 42 words 1 msg"
+	echo
+	echo "Test message"
+	) | sudo $setuidgid -g qcerts $user env - \
+		QUEUEDIR=$testdir/queue \
+		QMAILQUEUE=$qmail_queue \
+		CONTROLDIR=$cntrldir \
+		BIGTODO=0 \
+		CONFSPLIT=23 \
+	$qmail_inject -f$user@$real_domain $testuser
+	check_mail $testdir/$testuser/Maildir
+	ret1=$?
+
+	(
+	echo "From: $user@$real_domain"
+	echo "To: $testuser@$real_domain"
+	echo "Subject: $subject"
+	echo "Date: $(date -R)"
+	echo "X-Bogosity: Yes, spamicity=0.520000, cutoff=9.90e-01, ham_cutoff=0.00e+00,version=1.0.0,register-No 42 words 1 msg"
+	echo
+	echo "Test message"
+	) | sudo $setuidgid -g qcerts $user env - \
+		QUEUEDIR=$testdir/queue \
+		QMAILQUEUE=$qmail_queue \
+		CONTROLDIR=$cntrldir \
+		BIGTODO=0 \
+		CONFSPLIT=23 \
+	$qmail_inject -f$user@$real_domain $testuser
+	check_mail $testdir/$testuser/Maildir/.Spam
+	ret2=$?
+
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		if [ $1 -eq 1 ] ; then
+			echo "  testing internal filterit with positive match deliver to folder succeeded"
+		else
+			echo "  testing external filterit with positive match deliver to folder succeeded"
+		fi
+	else
+		sudo kill $send_pid
+		(
+		if [ $1 -eq 1 ] ; then
+			echo "  testing internal filterit with positive match deliver to folder failed"
+		else
+			echo "  testing external filterit with positive match deliver to folder failed"
+		fi
+		cat $logdir/qmail-send/qmail-send.log
+		) | less
 		exit 1
 	fi
 }
@@ -3455,6 +3610,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.9  2023-09-19 01:17:35+05:30  Cprogrammer
+# added filterit tests
+#
 # Revision 1.8  2023-09-08 16:11:12+05:30  Cprogrammer
 # added dkim tests
 #

@@ -17,6 +17,11 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 08. rspamstat.sh: Fixed division by zero when total=0
 09. qmail-local: added internal filter command for dot-qmail
 10. filterit: added external filter command for dot-qmail
+- 19/09/2023
+11. filterit_sub.c: fixed multiple invocation of filterit_sub1()
+12. updated RCS logs for qmail-local.c, indimail-mta.spec, Makefile,
+    filterit.c, filterit_sub.c
+13. test-indimail-mta: added tests for internal and external filterit command
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023
