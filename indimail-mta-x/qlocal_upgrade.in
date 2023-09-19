@@ -361,6 +361,14 @@ do
 	if [ ! -f $i/USE_SETGROUPS ] ; then
 		echo 1 > $i/USE_SETGROUPS
 	fi
+	grep -- '--setuser-priv' $i/.options > /dev/null
+	if [ $? -ne 0 ] ; then
+		t="`cat $i/.options`"
+		echo "$t --setuser-priv" > $i/.options
+	fi
+	if [ ! -f $i/SETUSER_PRIVILEGES ] ; then
+		echo 1 > $i/SETUSER_PRIVILEGES
+	fi
 done
 if  [ -f $sysconfdir/control/tlsclientciphers ] ; then
 	$mv $sysconfdir/control/tlsclientciphers $sysconfdir/control/clientcipherlist

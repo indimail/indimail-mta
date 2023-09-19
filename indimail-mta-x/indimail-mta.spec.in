@@ -1370,7 +1370,7 @@ do
     extra_opt="--remote-authsmtp=login --localfilter --remotefilter"
     extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-    extra_opt="$extra_opt --dmemory=%{send_soft_mem} --setgroups --utf8"
+    extra_opt="$extra_opt --dmemory=%{send_soft_mem} --setgroups --setuser-priv --utf8"
   fi
 %if %{tcpserver_plugin} == 1
     extra_opt="$extra_opt --shared-objects=1 --use-dlmopen=1"
@@ -1408,7 +1408,7 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
   --dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
   --remote-authsmtp=login --localfilter --remotefilter \
-  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8 | tai64n | tai64nlocal
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --setuser-priv --utf8 | tai64n | tai64nlocal
 
 # ODMR service
 %{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
