@@ -19,10 +19,10 @@ it is more programmable since \fIaddress\fR can be constructed on the fly.
 \fBforward\fR uses the \fBDTLINE\fR environment variable set by
 \fBqmail-local\fR to insert the \fBDelivered-To\fR header, \fBSENDER\fR
 environment variable to set the \fBX-Forwarded-For\fR header. For each
-\fIaddress\fR, it inserts the \fBX-Forwarded-To\fR header headers.
+\fIaddress\fR, it inserts the \fBX-Forwarded-To\fR header.
 
 \fBforward\fR rewrites the sender using Sender Rewriting Scheme if
-\fISRS\fB has been configured. See \fBindimail-srs\fR(5) for information on
+\fISRS\fR has been configured. See \fBindimail-srs\fR(5) for information on
 how to do this.
 
 If running as non-root, \fBforward\fR uses environment set according
