@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH forward 1.
 
 .SH NAME
@@ -10,22 +11,19 @@ in
 .I address ....
 
 .SH DESCRIPTION
-.B forward
-forwards each new mail message to the specified list of addresses.
-It is a simple wrapper around
-.BR qmail-queue .
-It achieves the same results as listing each
-.I address
-separately in
-.BR .qmail ,
-but it is more programmable since
-.I address
-can be constructed on the fly.
+\fBforward\fR forwards each new mail message to the specified list of
+addresses. It is a simple wrapper around \fBqmail-queue\fR. It achieves the
+same results as listing each \fIaddress\fR separately in \fB.qmail\fR, but
+it is more programmable since \fIaddress\fR can be constructed on the fly.
 
-.B forward
-rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configured. See
-.B indimail-srs(5)
-for information on how to do this.
+\fBforward\fR uses the \fBDTLINE\fR environment variable set by
+\fBqmail-local\fR to insert the \fBDelivered-To\fR header, \fBSENDER\fR
+environment variable to set the \fBX-Forwarded-For\fR header. For each
+\fIaddress\fR, it inserts the \fBX-Forwarded-To\fR header headers.
+
+\fBforward\fR rewrites the sender using Sender Rewriting Scheme if
+\fISRS\fB has been configured. See \fBindimail-srs\fR(5) for information on
+how to do this.
 
 If running as non-root, \fBforward\fR uses environment set according
 to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue

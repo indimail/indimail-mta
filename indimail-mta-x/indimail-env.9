@@ -1100,6 +1100,12 @@ groups for daemons \fBtodo-proc\fR(8), \fBqmail-send\fR(8),
 \fBqmail-lspawn\fR(8), \fBqmail-rspawn\fR(8) and \fBqmail-clean\fR(8)
 
 .TP
+\fISETUSER_PRIVILEGES\fR
+Used by \fBqmail-lspawn\fR to run \fBqmail-local\fR with user's
+supplementary groups. Without this, \fBqmail-local\fR is run with the
+primary uid, primary gid of the user.
+
+.TP
 \fIVIRTUAL_PKG_LIB\fR
 Used by \fBqmail-smtpd\fR(8), \fBqmail-lspawn\fR(8), \fBqmail-rspawn\fR(8),
 \fBmaildirsize\fR(1), \fBqmail-showctl\fR(8) to load

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-lspawn.c,v 1.42 2022-03-20 12:29:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-lspawn.c,v 1.43 2023-09-19 22:32:07+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -18,6 +18,7 @@
 #include <env.h>
 #include <str.h>
 #include <fmt.h>
+#include <setuserid.h>
 #include "auto_assign.h"
 #include "auto_control.h"
 #include "auto_uids.h"
@@ -99,6 +100,9 @@ report_SPAWN(substdio *ss, int wstat, char *s, int len)
 	case QLX_EXECPW:
 		substdio_puts(ss, "ZUnable to run qmail-getpw.\n");
 		return;
+	case QLX_UIDGID:
+		substdio_puts(ss, "ZUnable to set proper uid, gid.\n");
+		return;
 	case 111:
 	case 71:
 	case 74:
@@ -130,6 +134,9 @@ static stralloc libfn = { 0 };
 
 char           *cdbdir;
 
+/*
+ * nughde - name, uid, gid, homedir, dash, ext
+ */
 void
 nughde_get(char *local)
 {
@@ -208,9 +215,9 @@ nughde_get(char *local)
 		_exit (QLX_SYS);
 	case 0:
 		if (prot_gid(auto_gidn) == -1)
-			_exit (QLX_USAGE);
+			_exit (QLX_UIDGID);
 		if (prot_uid(auto_uidp) == -1)
-			_exit (QLX_USAGE);
+			_exit (QLX_UIDGID);
 		close(pi[0]);
 		if (fd_move(1, pi[1]) == -1)
 			_exit (QLX_SYS);
@@ -434,40 +441,40 @@ noauthself: /*- deliver to local user in control/locals */
 			_exit (QLX_NOMEM);
 		args[0] = q.s;
 		args[1] = "--";
-		args[2] = x; /*- user */
+		args[2] = x; /*- n = user */
 		n = byte_chr(x, xlen, 0);
 		if (n++ == xlen)
 			_exit (QLX_USAGE);
 		x += n;
 		xlen -= n;
 		scan_ulong(x, &u);
-		uid = u;
+		uid = u; /*- u = uid */
 		n = byte_chr(x, xlen, 0);
 		if (n++ == xlen)
 			_exit (QLX_USAGE);
 		x += n;
 		xlen -= n;
 		scan_ulong(x, &u);
-		gid = u;
+		gid = u; /*- g = uid */
 		n = byte_chr(x, xlen, 0);
 		if (n++ == xlen)
 			_exit (QLX_USAGE);
 		x += n;
 		xlen -= n;
-		args[3] = x; /*- homedir */
+		args[3] = x; /*- h = homedir */
 		n = byte_chr(x, xlen, 0);
 		if (n++ == xlen)
 			_exit (QLX_USAGE);
 		x += n;
 		xlen -= n;
 		args[4] = recip; /*- local */
-		args[5] = x; /*- dash */
+		args[5] = x; /*- d = dash */
 		n = byte_chr(x, xlen, 0);
 		if (n++ == xlen)
 			_exit (QLX_USAGE);
 		x += n;
 		xlen -= n;
-		args[6] = x; /*- Ext */
+		args[6] = x; /*- e = Ext */
 		n = byte_chr(x, xlen, 0);
 		if (n++ == xlen)
 			_exit (QLX_USAGE);
@@ -480,8 +487,12 @@ noauthself: /*- deliver to local user in control/locals */
 		args[11] = 0;
 		if (fd_move(0, fdmess) == -1 || fd_move(1, fdout) == -1 || fd_copy(2, 1) == -1)
 			_exit (QLX_SYS);
+		if (env_get("SETUSER_PRIVILEGES")) {
+			if (setuser_privileges(uid, gid, args[2]) == -1)
+				_exit (QLX_UIDGID);
+		} else
 		if (prot_gid(gid) == -1 || prot_uid(uid) == -1)
-			_exit (QLX_USAGE);
+			_exit (QLX_UIDGID);
 		if (!getuid())
 			_exit (QLX_ROOT);
 		ptr = setup_qlargs();
@@ -496,7 +507,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.42 2022-03-20 12:29:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.43 2023-09-19 22:32:07+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -504,6 +515,10 @@ getversion_qmail_lspawn_c()
 
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.43  2023-09-19 22:32:07+05:30  Cprogrammer
+ * set supplementary groups for user if SETUSER_PRIVILEGES is defined
+ * New exit code QLX_UIDGID for uid, gid, group setting errors
+ *
  * Revision 1.42  2022-03-20 12:29:02+05:30  Cprogrammer
  * bypass indimail if AUTHSELF is not set
  *

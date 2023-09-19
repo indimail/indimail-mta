@@ -655,10 +655,10 @@ fmtqfn.o: compile fmtqfn.c fmtqfn.h
 	./compile fmtqfn.c
 
 forward: \
-load forward.o qmail.o variables.o \
-auto_prefix.o auto_control.o set_environment.o
-	./load forward qmail.o variables.o \
-	auto_prefix.o auto_control.o set_environment.o \
+load forward.o qmail.o variables.o auto_prefix.o auto_control.o \
+control.o rcpthosts.o set_environment.o srs.o srs.lib
+	./load forward qmail.o variables.o auto_prefix.o auto_control.o \
+	control.o rcpthosts.o set_environment.o srs.o `cat srs.lib` \
 	$(QMAILLIB)
 
 forward.1: forward.9 conf-sysconfdir
@@ -666,8 +666,8 @@ forward.1: forward.9 conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> forward.1
 
-forward.o: compile forward.c qmail.h set_environment.h
-	./compile `grep -h -v "^#" conf-spf` forward.c
+forward.o: compile forward.c qmail.h set_environment.h hassrs.h
+	./compile forward.c
 
 gfrom.o: \
 compile gfrom.c gfrom.h
@@ -3820,10 +3820,12 @@ make-recipients.9 conf-sysconfdir
 
 filterit: \
 load filterit.o filterit_sub.o variables.o quote.o maildir_deliver.o \
-syncdir.o qmail.o set_environment.o auto_control.o auto_prefix.o
+syncdir.o qmail.o srs.o set_environment.o auto_control.o auto_prefix.o \
+control.o rcpthosts.o srs.lib
 	./load filterit filterit_sub.o variables.o auto_control.o \
 	auto_prefix.o quote.o qmail.o maildir_deliver.o syncdir.o \
-	set_environment.o $(QMAILLIB)
+	set_environment.o control.o rcpthosts.o srs.o \
+	`cat srs.lib` $(QMAILLIB)
 
 filterit.o: \
 compile filterit.c filterit.h
@@ -3831,7 +3833,7 @@ compile filterit.c filterit.h
 
 filterit_sub.o: \
 compile filterit_sub.c cdb_match.o quote.h maildir_deliver.h \
-qmail.h set_environment.h filterit.h
+qmail.h set_environment.h filterit.h hassrs.h
 	./compile filterit_sub.c
 
 filterit.1: filterit.9 conf-sysconfdir conf-prefix

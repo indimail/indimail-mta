@@ -5,7 +5,7 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 - 11/09/2023
 01. cdb-database: allow comments in input file
 02. svctool: localiphost incorrectly configured with IP instead of hostname
-03. qmail-showctl.c: fixed descriptions fo localiphost, outgoingip
+03. qmail-showctl.c: fixed descriptions for localiphost, outgoingip
 - 13/09/2023
 04. maildirdeliver.c: BUG. Remove NULL character appended to rpline, dtline
 05. updated dot-qmail, maildirdeliver, qmail-command man pages
@@ -23,6 +23,12 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
     filterit.c, filterit_sub.c
 13. test-indimail-mta: added tests for internal and external filterit command
 14. svctool: prevent dangling symbolic links in global_vars
+15. filterit_sub.c, forward.c: added X-Forwarded-To, X-Forwarded-For headers
+16. filterit_sub.c, forward.c: include hassrs.h to enable SRS
+17. qmail-lspawn.c: set supplementary groups for user if SETUSER_PRIVILEGES is
+    defined
+18. qmail-lspawn.c: New exit code QLX_UIDGID for uid, gid, group setting
+    errors
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023

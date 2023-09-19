@@ -56,8 +56,10 @@ You can skip $HOME/.defaultqueue if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If
 environment set according to files in @controldir@/defaultqueue
 directory (for any uid). When forwarding, \fBfilterit\fR rewrites the
 sender using Sender Rewriting Scheme if \fISRS\fB has been configured. See
-\fBindimail-srs\fR(5) for information on how to do this. \ffilterit\fR uses
-\fBqmail-queue\fR(8) to put an email to be forwarded in the queue.
+\fBindimail-srs\fR(5) for information on how to do this.\fBfilterit\fR
+inserts \fBX-Forwarded-To\fR header as the forwarding address and
+\fBX-Forwarded-For\fR header as the \fBNEWSENDER\fR address. \fBfilterit\fR
+uses \fBqmail-queue\fR(8) to put an email to be forwarded in the queue.
 
 When bouncing a message (-a bounce -A 100 or -d bounce -D 100), message
 will be bounced with the text

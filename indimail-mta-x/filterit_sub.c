@@ -27,10 +27,10 @@
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
-
+#include "hassrs.h"
 #ifdef HAVESRS
 #include <stralloc.h>
-#include <srs.h>
+#include "srs.h"
 #endif
 #include <sig.h>
 #include <fmt.h>
@@ -39,7 +39,8 @@
 #include "filterit.h"
 
 static int      doit = 1, xfilter_header = 0, exit_val_on_match = 99;
-static stralloc line, addr, tmp, rpline, dtline, matched_header;
+static stralloc line, addr, tmp, rpline, dtline, forwarded_for,
+				forwarded_to, matched_header;
 struct qmail    qqt;
 
 static void
@@ -236,7 +237,17 @@ forward(substdio *ssin, char *faddr, int matched, int argc, char **argv)
 #endif
 	if (qmail_open(&qqt) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
+	if (!stralloc_copyb(&forwarded_to, "X-Forwarded-To: ", 16) ||
+			!stralloc_cats(&forwarded_to, faddr) ||
+			!stralloc_append(&forwarded_to, "\n"))
+		strerr_die2x(111, FATAL, "out of memory");
+	if (!stralloc_copyb(&forwarded_for, "X-Forwarded-For: ", 17) ||
+			!stralloc_cats(&forwarded_for, sender) ||
+			!stralloc_append(&forwarded_for, "\n"))
+		strerr_die2x(111, FATAL, "out of memory");
 	qmail_puts(&qqt, dt);
+	qmail_put(&qqt, forwarded_to.s, forwarded_to.len);
+	qmail_put(&qqt, forwarded_for.s, forwarded_for.len);
 	if (xfilter_header)
 		write_xfilter_header(&ptr, matched, argc, argv);
 	else
@@ -639,6 +650,10 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.2  2023-09-19 22:27:19+05:30  Cprogrammer
+ * added X-Forwarded-To, X-Forwarded-For headers
+ * include hassrs.h to enable SRS
+ *
  * Revision 1.1  2023-09-19 01:09:56+05:30  Cprogrammer
  * Initial revision
  *
