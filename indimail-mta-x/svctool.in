@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.700 2023-09-14 18:10:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.701 2023-09-19 17:27:38+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.700 2023-09-14 18:10:13+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.701 2023-09-19 17:27:38+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1976,6 +1976,7 @@ echo "$prog_args"
 echo ""
 ) > $t/.qmail_control
 if [ -n "$verbose" ] ; then
+	# created by config-fast
 	echo "Creating Default qmail Control Files"
 	echo "me"
 	echo "localiphost"
@@ -2009,19 +2010,27 @@ if [ ! -d $t/global_vars ] ; then
 	mkdir -p $t/global_vars
 fi
 if [ ! -f $t/global_vars/DEFAULT_DOMAIN -a ! -L $t/global_vars/DEFAULT_DOMAIN ] ; then
-	[ -n "$verbose" ] && echo "global variable DEFAULT_DOMAIN"
-	/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN 2>/dev/null
-	if [ $? -ne 0 ] ; then
-		cd $t/global_vars
-		ln -s ../defaultdomain DEFAULT_DOMAIN
+	if [ -f $CONTROLDIR/defaultdomain ] ; then
+		[ -n "$verbose" ] && echo "global variable DEFAULT_DOMAIN"
+		/bin/ln -sr $CONTROLDIR/defaultdomain $t/global_vars/DEFAULT_DOMAIN 2>/dev/null
+		if [ $? -ne 0 ] ; then
+			cd $t/global_vars
+			ln -s ../defaultdomain DEFAULT_DOMAIN
+		fi
+	else
+		echo "Warning!!! $CONTROLDIR/defaultdomain missing" 1>&2
 	fi
 fi
 if [ ! -f $t/global_vars/QMAILDEFAULTHOST -a ! -L $t/global_vars/QMAILDEFAULTHOST ] ; then
-	[ -n "$verbose" ] && echo "global variable QMAILDEFAULTHOST"
-	/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOST 2>/dev/null
-	if [ $? -ne 0 ] ; then
-		cd $t/global_vars
-		ln -s ../defaulthost QMAILDEFAULTHOST
+	if [ -f $CONTROLDIR/defaulthost ] ; then
+		[ -n "$verbose" ] && echo "global variable QMAILDEFAULTHOST"
+		/bin/ln -sr $CONTROLDIR/defaulthost $t/global_vars/QMAILDEFAULTHOST 2>/dev/null
+		if [ $? -ne 0 ] ; then
+			cd $t/global_vars
+			ln -s ../defaulthost QMAILDEFAULTHOST
+		fi
+	else
+		echo "Warning!!! $CONTROLDIR/defaulthost missing" 1>&2
 	fi
 fi
 if [ -n "$verbose" ] ; then
@@ -2234,18 +2243,28 @@ fi
 [ ! -d $t/global_vars ] && mkdir -p $t/global_vars
 [ $max -gt 12 ] && fn=serverciphersuite || fn=""
 if [ -n "$fn" -a ! -f $t/global_vars/TLS_CIPHER_SUITE -a ! -L $t/global_vars/TLS_CIPHER_SUITE ] ; then
-	/bin/ln -sr $CONTROLDIR/$fn $t/global_vars/TLS_CIPHER_SUITE 2>/dev/null
-	if [ $? -ne 0 ] ; then
-		cd $t/global_vars
-		ln -s ../$fn TLS_CIPHER_SUITE
+	if [ -f $CONTROLDIR/$fn ] ; then
+		[ -n "$verbose" ] && echo "global variable TLS_CIPHER_SUITE"
+		/bin/ln -sr $CONTROLDIR/$fn $t/global_vars/TLS_CIPHER_SUITE 2>/dev/null
+		if [ $? -ne 0 ] ; then
+			cd $t/global_vars
+			ln -s ../$fn TLS_CIPHER_SUITE
+		fi
+	else
+		echo "Warning!!! $CONTROLDIR/$fn missing" 1>&2
 	fi
 fi
 fn=servercipherlist
 if [ ! -f $t/global_vars/TLS_CIPHER_LIST -a ! -L $t/global_vars/TLS_CIPHER_LIST ] ; then
-	/bin/ln -sr $CONTROLDIR/$fn $t/global_vars/TLS_CIPHER_LIST 2>/dev/null
-	if [ $? -ne 0 ] ; then
-		cd $t/global_vars
-		ln -s ../$fn TLS_CIPHER_LIST
+	if [ -f $CONTROLDIR/$fn ] ; then
+		[ -n "$verbose" ] && echo "global variable TLS_CIPHER_LIST"
+		/bin/ln -sr $CONTROLDIR/$fn $t/global_vars/TLS_CIPHER_LIST 2>/dev/null
+		if [ $? -ne 0 ] ; then
+			cd $t/global_vars
+			ln -s ../$fn TLS_CIPHER_LIST
+		fi
+	else
+		echo "Warning!!! $CONTROLDIR/$fn missing" 1>&2
 	fi
 fi
 max=$(openssl ciphers -v | awk '{print $2}' | grep TLS | sort | uniq | tail -1 | sed 's{\.{_{')
@@ -2986,10 +3005,15 @@ else
 			val=$(eval "echo \${$i}")
 			echo $val > $conf_dir/$i
 			if [ ! -f "$DESTDIR"$cntrldir/global_vars/$i -a ! -L "$DESTDIR"$cntrldir/global_vars/$i ] ; then
-				ln -srf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i 2>/dev/null
-				if [ $? -ne 0 ] ; then
-					cd "$DESTDIR"$cntrldir/global_vars
-					ln -s $conf_dir/$i $i
+				if [ -f $conf_dir/$i ] ; then
+					[ -n "$verbose" ] && echo "global variable $i"
+					ln -srf $conf_dir/$i "$DESTDIR"$cntrldir/global_vars/$i 2>/dev/null
+					if [ $? -ne 0 ] ; then
+						cd "$DESTDIR"$cntrldir/global_vars
+						ln -s $conf_dir/$i $i
+					fi
+				else
+					echo "Warning!!! $conf_dir/$i missing" 1>&2
 				fi
 			fi
 	done
@@ -12056,8 +12080,15 @@ case $option in
 		usage 1
 	fi
 	echo "Creating pwdLookup Daemon on socket $socket_path, thread_count $thread_count"
-	echo "  listen_timeout $timeout, Service $servicedir, mysql_user $mysql_user"
-	echo "  mysql_pass $mysql_pass, mysql_port $mysql_port, mysql_socket $mysqlSocket"
+	echo "  listen_timeout $timeout, Service $servicedir"
+	ehco "  mysql_user $mysql_user, mysql_pass $mysql_pass"
+	if [ -n "$mysql_port" -a -n "$mysqlSocket" ] ; then
+		echo "  mysql_port $mysql_port, mysql_socket $mysqlSocket"
+	elif [ -n "$mysqlSocket" ] ; then
+		echo "  mysql_socket $mysqlSocket"
+	elif [ -n "$mysql_port" ] ; then
+		echo "  mysql_port $mysql_port"
+	fi
 	create_pwdlookup "$socket_path" "$thread_count" "$timeout" "$servicedir" \
 		"$mysql_host" "$mysql_user" "$mysql_pass" "$mysql_port" "$mysqlSocket"
 	;;
