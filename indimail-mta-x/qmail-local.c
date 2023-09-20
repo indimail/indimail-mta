@@ -1,7 +1,6 @@
 /*
- * $Id: qmail-local.c,v 1.47 2023-09-20 08:23:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-local.c,v 1.48 2023-09-20 21:26:31+05:30 Cprogrammer Exp mbhangui $
  */
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -984,7 +983,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.47 2023-09-20 08:23:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.48 2023-09-20 21:26:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
@@ -992,6 +991,9 @@ getversion_qmail_local_c()
 
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.48  2023-09-20 21:26:31+05:30  Cprogrammer
+ * added '%' option in dot-qmail to add env variables from a directory
+ *
  * Revision 1.47  2023-09-20 08:23:28+05:30  Cprogrammer
  * added X-Forwarded-To, X-Forwarded-For headers when forwarding
  *
