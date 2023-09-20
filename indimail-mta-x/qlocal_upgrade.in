@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.55 2023-08-19 11:33:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.56 2023-09-20 08:22:42+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -26,7 +26,7 @@ check_update_if_diff()
 
 do_install()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.55 2023-08-19 11:33:26+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.56 2023-09-20 08:22:42+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -34,7 +34,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.55 2023-08-19 11:33:26+05:30 Cprogra
 
 do_post_upgrade()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.55 2023-08-19 11:33:26+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.56 2023-09-20 08:22:42+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -388,6 +388,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.56  2023-09-20 08:22:42+05:30  Cprogrammer
+# append --setuser-priv svctool option to .options
+#
 # Revision 1.55  2023-08-19 11:33:26+05:30  Cprogrammer
 # move tlsclientciphers to clientcipherlist
 # move tlsserverciphers to servercipherlist
