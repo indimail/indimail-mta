@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-local.c,v 1.46 2023-09-19 01:09:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-local.c,v 1.47 2023-09-20 08:23:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -45,20 +45,12 @@
 #include "auto_patrn.h"
 #include "filterit.h"
 
-static char    *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
 static char    *user, *homedir, *local, *dash, *ext, *host, *sender, *aliasempty, *qqeh;
+static char    *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
 static char     buf[1024], outbuf[1024];
 static int      flagdoit, flag99;
-static stralloc safeext = { 0 };
-static stralloc ufline = { 0 };
-static stralloc rpline = { 0 };
-static stralloc envrecip = { 0 };
-static stralloc dtline = { 0 };
-static stralloc qme = { 0 };
-static stralloc ueo = { 0 };
-static stralloc cmds = { 0 };
-static stralloc messline = { 0 };
-static stralloc foo = { 0 };
+static stralloc safeext, ufline, rpline, envrecip, dtline, qme, ueo, cmds,
+				messline, foo, forwarded_for, forwarded_to;
 
 no_return void
 usage()
@@ -321,8 +313,9 @@ mailforward(char **recips)
 {
 	struct qmail    qqt;
 	char           *qqx;
+	char          **a;
 	substdio        ss;
-	int             match;
+	int             match, x;
 
 	if (seek_begin(0) == -1)
 		temp_rewind();
@@ -333,6 +326,21 @@ mailforward(char **recips)
 		temp_fork();
 	mailforward_qp = qmail_qp(&qqt);
 	qmail_put(&qqt, dtline.s, dtline.len);
+	if (!stralloc_copyb(&forwarded_to, "X-Forwarded-To: ", 16))
+		strerr_die2x(111, FATAL, "out of memory");
+	x = forwarded_to.len;
+	for (a = recips; *a; a++) {
+		if (!stralloc_cats(&forwarded_to, *a) ||
+				!stralloc_append(&forwarded_to, "\n"))
+			strerr_die2x(111, FATAL, "out of memory");
+		qmail_put(&qqt, forwarded_to.s, forwarded_to.len);
+		forwarded_to.len = x;
+	}
+	if (!stralloc_copyb(&forwarded_for, "X-Forwarded-For: ", 17) ||
+			!stralloc_cats(&forwarded_for, ueo.s) ||
+			!stralloc_append(&forwarded_for, "\n"))
+		strerr_die2x(111, FATAL, "out of memory");
+	qmail_put(&qqt, forwarded_for.s, forwarded_for.len);
 	qmail_puts(&qqt, qqeh);
 	do {
 		if (getln(&ss, &messline, &match, '\n') != 0) {
@@ -340,8 +348,7 @@ mailforward(char **recips)
 			break;
 		}
 		qmail_put(&qqt, messline.s, messline.len);
-	}
-	while (match);
+	} while (match);
 #ifdef HAVESRS
 	switch(srsforward(ueo.s))
 	{
@@ -909,7 +916,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.46 2023-09-19 01:09:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.47 2023-09-20 08:23:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
@@ -917,6 +924,9 @@ getversion_qmail_local_c()
 
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.47  2023-09-20 08:23:28+05:30  Cprogrammer
+ * added X-Forwarded-To, X-Forwarded-For headers when forwarding
+ *
  * Revision 1.46  2023-09-19 01:09:06+05:30  Cprogrammer
  * added internal qmail-local filterit command
  *
