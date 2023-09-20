@@ -59,6 +59,7 @@ Source1: http://downloads.sourceforge.net/indimail/libdkim2-rpmlintrc
 
 URL: https://github.com/mbhangui/indimail-mta
 #AutoReqProv: No
+Conflicts: libdkim
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: findutils diffutils gzip coreutils
 BuildRequires: glibc glibc-devel binutils

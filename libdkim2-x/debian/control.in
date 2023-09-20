@@ -10,6 +10,8 @@ Package: libdkim2
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libdkim
+Replaces: libdkim
 Description: cryptographically identify the sender of email
  DomainKeys Identified Mail (DKIM) defines a domain-level
  authentication framework for email using public-key cryptography and
