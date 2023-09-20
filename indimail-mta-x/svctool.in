@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.702 2023-09-20 00:33:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.703 2023-09-20 21:25:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.702 2023-09-20 00:33:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.703 2023-09-20 21:25:28+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -70,6 +70,7 @@ Known values for OPTION are:
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
   [--setuser-priv]
+  [--sanitize-env=env_list]
   [--min-free=M --skipsend --deliverylimit-count=D --deliverylimit-size=S]
   [--rbl=list]
   [--content-filter=c]
@@ -161,6 +162,8 @@ Known values for OPTION are:
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
   cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
   setuser-priv   - Set supplementary groups when run qmail-local
+  env_list       - List of env variables to preserve when --sanitize-env
+                   is given
   masquerade     - Allow user to change Mail From when using authenticated smtp
   rbl            - Deploy RBL lookups
   skipsend       - Skip creation of send script
@@ -212,6 +215,7 @@ Known values for OPTION are:
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
   [--setuser-priv]
+  [--sanitize-env=env_list]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--logfilter=logfifo]
   [--localfilter --remotefilter]
@@ -259,6 +263,8 @@ Known values for OPTION are:
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
   cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
   setuser-priv   - Set supplementary groups when run qmail-local
+  env_list       - List of env variables to preserve when --sanitize-env
+                   is given
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
   paranoid       - Paranoid hostaccess check
@@ -290,6 +296,7 @@ Known values for OPTION are:
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
   [--setuser-priv]
+  [--sanitize-env=env_list]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--localfilter --remotefilter]
   [--dkverify=dkim|none]
@@ -321,6 +328,8 @@ Known values for OPTION are:
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
   cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
   setuser-priv   - Set supplementary groups when run qmail-local
+  env_list       - List of env variables to preserve when --sanitize-env
+                   is given
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
   paranoid       - Paranoid hostaccess check
@@ -6795,6 +6804,11 @@ if [ $setuser_privilege -eq 1 ] ; then
 else
 	> $conf_dir/SETUSER_PRIVILEGES
 fi
+if [ -n "$sanitized_env" ] ; then
+	echo $sanitized_env > $conf_dir/SANITIZE_ENV
+else
+	> $conf_dir/SANITIZE_ENV
+fi
 if [ ! " $CONTROLDIR" = " " ] ; then
 	echo "$CONTROLDIR" > $conf_dir/CONTROLDIR
 else
@@ -7044,6 +7058,16 @@ if [ " $enable_cname_lookup" = " " ] ; then
 	echo 1 > $conf_dir/DISABLE_CNAME_LOOKUP
 else
 	> $conf_dir/DISABLE_CNAME_LOOKUP
+fi
+if [ $setuser_privilege -eq 1 ] ; then
+	echo 1 > $conf_dir/SETUSER_PRIVILEGES
+else
+	> $conf_dir/SETUSER_PRIVILEGES
+fi
+if [ -n "$sanitized_env" ] ; then
+	echo $sanitized_env > $conf_dir/SANITIZE_ENV
+else
+	> $conf_dir/SANITIZE_ENV
 fi
 if [ ! " $CONTROLDIR" = " " ] ; then
 	echo "$CONTROLDIR" > $conf_dir/CONTROLDIR
@@ -10280,6 +10304,7 @@ qmailsmtpd=$QmailBinPrefix"/sbin/qmail-smtpd"
 envdir_opts="-c"
 updatecerts=0
 setuser_privilege=0
+sanitized_env=""
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
 else
@@ -10576,6 +10601,9 @@ while test $# -gt 0; do
 	;;
 	--setuser-priv)
 	setuser_privilege=1
+	;;
+	--sanitize-env=*)
+	sanitized_env=$optarg
 	;;
 	--odmr)
 	odmr=1

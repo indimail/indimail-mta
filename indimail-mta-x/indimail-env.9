@@ -886,6 +886,13 @@ Used by condtomaildir, \fBdot-forward\fR(1), maildirdeliver, preline,
 \fBserialcmd\fR(1), \fBvacation\fR(8)
 
 .TP
+\fISANITIZE_ENV\R
+Used by \fBqmail-local\fR(8) to clear all environment variables other than
+USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR. You can set additional environment
+variables to preserve by setting SANITIZE_ENV as a colon ':' separated list
+of environment variables to preserve.
+
+.TP
 \fISCANCMD\fR \fISCANDIR\fR
 Used by \fBqscanq-stdin\fR(8), \fBqhpsi\fR(8)
 

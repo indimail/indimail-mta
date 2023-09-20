@@ -85,6 +85,14 @@ The environment variable \fBUSE_FSYNC\fR, \fBUSE_FDATASYNC\fR,
 \fBUSE_SYNCDIR\fR is controlled by \fBqmail-send\fR(8) /
 \fBtodo-proc\fR(8).
 
+If the environment variable \fBSANITIZE_ENV\fR is enabled \fBqmail-local\fR
+will first clear all environment variables other than USE_FSYNC,
+USE_FDATASYNC, USE_SYNCDIR. You can set additional environment variables to
+preserve by setting SANITIZE_ENV as a colon ':' separated list of
+environment variables to preserve. The purpose of \fBSANITIZE_ENV\fR is to
+ensure programs run using \fBdot-qmail\fR(5) will run without any
+environment variable inherited from the startup scripts.
+
 .SH "OPTIONS"
 .TP
 .B \-n

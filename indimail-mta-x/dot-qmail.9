@@ -32,8 +32,7 @@ A comment line begins with a number sign:
   # this is a comment
 .EE
 
-.B qmail-local
-ignores the line.
+\fBqmail-local\fR ignores the line.
 
 .TP 5
 (2)
@@ -177,6 +176,28 @@ is a little ugly, but it gets the job done. The same functionality is
 already available with |command lines, but then you need multiple
 \fB.qmail\fR files, which exposes extra addresses to outside senders, so it
 gets a little more complicated.
+
+.TP 5
+(7)
+A envdir line begins with a percent sign:
+
+.EX
+     % envdir_path
+.EE
+
+\fBqmail-local\fR takes the rest of the line as a directory with
+environment variables and sets/unsets environment variables like the
+\fBenvdir\fR(8) command. An command executed using a command line in
+\fBdot-qmail\fR(5) will inherit these environment variables. You can also
+ensure that the commands run just with the environment variables from
+\fIenvdir_path\fR by setting \fBSANITIZE_ENV\fR environment variable for
+\fBqmail-local\fR. If \fBSANITIZE_ENV\fR is enabled \fBqmail-local\fR
+will first clear all environment variables other than USE_FSYNC,
+USE_FDATASYNC, USE_SYNCDIR. You can set additional environment variables to
+preserve by setting SANITIZE_ENV as a colon ':' separated list of
+environment variables to preserve. The purpose of \fBSANITIZE_ENV\fR is to
+ensure programs run using \fBdot-qmail\fR(5) will run without any
+environment variable inherited from the startup scripts.
 
 .PP
 If \fB.qmail\fR has the execute bit set, it must not contain any program

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-local.c,v 1.47 2023-09-20 08:23:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-local.c,v 1.48 2023-09-20 21:26:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -27,6 +27,8 @@
 #include <case.h>
 #include <qtime.h>
 #include <constmap.h>
+#include <envdir.h>
+#include <pathexec.h>
 #include "hassrs.h"
 #ifdef HAVESRS
 #include "srs.h"
@@ -278,7 +280,7 @@ mailprogram(char *prog)
 		args[2] = prog;
 		args[3] = 0;
 		sig_pipedefault();
-		execv(*args, args);
+		pathexec(args);
 		strerr_die3x(111, "Unable to run /bin/sh: ", error_str(errno), ". (#4.3.0)");
 	}
 
@@ -574,12 +576,66 @@ sayit(char *type, char *cmd, unsigned int len)
 	substdio_putsflush(subfdoutsmall, "\n");
 }
 
+void
+sanitize_env(char *x)
+{
+	char           *e;
+	int             i, j;
+	struct env_tab {
+		char           *env_name;
+		char           *env_val;
+	} etable[] = {
+		{ "USE_FSYNC", 0 },
+		{ "USE_FDATASYNC", 0 },
+		{ "USE_SYNCDIR", 0 },
+		{ 0, 0 }
+	};
+	struct env_tab *p, *q;
+
+	if (*x) {
+		if (!stralloc_copys(&cmds, x) ||
+				!stralloc_0(&cmds))
+			temp_nomem();
+		for (i = 0; *x;)
+			if (*x++ == ':')
+				i++;
+	} else
+		i = 0;
+	if (!(p = (struct env_tab *) alloc(sizeof(struct env_tab) * (i + 4))))
+		temp_nomem();
+	for (j = 0, q = etable; q->env_name; q++, j++) {
+		p[j].env_name = q->env_name;
+		p[j].env_val = env_get(q->env_name);
+	}
+	if (i) {
+		x = cmds.s;
+		for (e = x; *x; x++) {
+			if (*x == ':') {
+				*x = 0;
+				p[j].env_name = e;
+				p[j++].env_val = env_get(e);
+				e = x + 1;
+			}
+		}
+		p[j].env_name = e;
+		p[j++].env_val = env_get(e);
+	}
+	p[j].env_name = (char *) NULL;
+	env_clear();
+	for (q = p; q->env_name; q++) {
+		if (q->env_val && !env_put2(q->env_name, q->env_val))
+			temp_nomem();
+	}
+	execl("/bin/sh", "sh", (char *) NULL);
+	return;
+}
+
 int
 main(int argc, char **argv)
 {
-	char           *x;
+	char           *x, *e;
 	char          **recips;
-	int             opt, fd, flagforwardonly;
+	int             opt, fd, flagforwardonly, r;
 	unsigned int    i, j, numforward;
 	datetime_sec    starttime;
 
@@ -587,6 +643,10 @@ main(int argc, char **argv)
 	sig_pipeignore();
 	if (!env_init())
 		temp_nomem();
+	if (!stralloc_ready(&cmds, 0))
+		temp_nomem();
+	if ((x = env_get("SANITIZE_ENV")))
+		sanitize_env(x);
 	flagdoit = 1;
 	while ((opt = getopt(argc, argv, "nN")) != opteof) {
 		switch (opt)
@@ -750,7 +810,7 @@ main(int argc, char **argv)
 	}
 	if (!stralloc_0(&ueo))
 		temp_nomem();
-	if (!env_put2("NEWSENDER", ueo.s) || !stralloc_ready(&cmds, 0))
+	if (!env_put2("NEWSENDER", ueo.s))
 		temp_nomem();
 	cmds.len = 0;
 	if (fd != -1)
@@ -770,6 +830,7 @@ main(int argc, char **argv)
 		if (cmds.s[j] == '\n') {
 			switch (cmds.s[i])
 			{
+			case '%':
 			case '#':
 			case '.':
 			case '/':
@@ -806,6 +867,12 @@ main(int argc, char **argv)
 				if (i)
 					break;
 				strerr_die1x(111, "Uh-oh: first line of .qmail file is blank. (#4.2.1)");
+			case '%': /*- envdir */
+				x = cmds.s + i + 1;
+				for (;*x && (*x == ' ' || *x == '\t'); x++);
+				if ((r = envdir(x, &e, 1, 0)))
+					strerr_die5sys(111, "Uh-oh: ", envdir_str(i), ": ", e, ": ");
+				break;
 			case '#': /*- comment */
 			case ':': /*- end branch */
 				break;
@@ -900,7 +967,7 @@ main(int argc, char **argv)
 			if (flag99)
 				break;
 		}
-	}
+	} /* for (j = 0; j < cmds.len; ++j) */
 	if (numforward) {
 		if (flagdoit) {
 			recips[numforward] = 0;
@@ -916,7 +983,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.47 2023-09-20 08:23:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.48 2023-09-20 21:26:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
@@ -924,6 +991,9 @@ getversion_qmail_local_c()
 
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.48  2023-09-20 21:26:31+05:30  Cprogrammer
+ * added '%' option in dot-qmail to add env variables from a directory
+ *
  * Revision 1.47  2023-09-20 08:23:28+05:30  Cprogrammer
  * added X-Forwarded-To, X-Forwarded-For headers when forwarding
  *

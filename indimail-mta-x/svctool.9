@@ -146,6 +146,7 @@ Known values for OPTION are:
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
   [--setuser-priv]
+  [--sanitize-env=env_list]
   [--min-free=M --skipsend --deliverylimit-count=D --deliverylimit-size=S]
   [--rbl=list]
   [--content-filter=c]
@@ -237,6 +238,8 @@ Known values for OPTION are:
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
   cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
   setuser-priv   - Set supplementary groups when run qmail-local
+  env_list       - List of env variables to preserve when --sanitize-env
+                   is given
   masquerade     - Allow user to change Mail From when using authenticated smtp
   rbl            - Deploy RBL lookups
   skipsend       - Skip creation of send script
@@ -288,7 +291,7 @@ Known values for OPTION are:
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
   [--setuser-priv]
-  [--setuser-priv]
+  [--sanitize-env=env_list]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--logfilter=logfifo]
   [--localfilter --remotefilter]
@@ -336,6 +339,8 @@ Known values for OPTION are:
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
   cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
   setuser-priv   - Set supplementary groups when run qmail-local
+  env_list       - List of env variables to preserve when --sanitize-env
+                   is given
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
   paranoid       - Paranoid hostaccess check
@@ -367,6 +372,7 @@ Known values for OPTION are:
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
   [--setuser-priv]
+  [--sanitize-env=env_list]
   [--min-free=M --deliverylimit-count=D --deliverylimit-size=S]
   [--localfilter --remotefilter]
   [--dkverify=dkim|none]
@@ -398,6 +404,8 @@ Known values for OPTION are:
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
   cname-lookup   - Perform CNAME lookup for recipient host in qmail-remote
   setuser-priv   - Set supplementary groups when run qmail-local
+  env_list       - List of env variables to preserve when --sanitize-env
+                   is given
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
   paranoid       - Paranoid hostaccess check
