@@ -31,6 +31,10 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
     errors
 19. svctool: added --setuser-priv option to make qmail-lspawn set
     supplementary groups when running qmail-local
+- 20/09/2023
+20. indimail-mta.spec, qlocal_upgrade: pass --setuser-priv to svctool for qmail-send service
+31. qmail-local.c: added X-Forwarded-To, X-Forwarded-For headers when
+    forwarding
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023
