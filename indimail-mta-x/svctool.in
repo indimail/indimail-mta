@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.703 2023-09-20 21:25:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.704 2023-09-23 00:23:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.703 2023-09-20 21:25:28+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.704 2023-09-23 00:23:47+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4182,6 +4182,45 @@ echo "TLS_CACHESIZE=524288"
 echo "TLS_ALPN=pop3"
 }
 
+mysql_opt_reconnect()
+{
+mysqlPrefix=/usr
+if [ -x $mysqlPrefix/sbin/mariadbd ] ; then
+	mysqld=sbin/mariadbd
+elif [ -x $mysqlPrefix/libexec/mysqld ] ; then
+	mysqld=libexec/mysqld
+elif [ -x $mysqlPrefix/sbin/mysqld ] ; then
+	mysqld=sbin/mysqld
+elif [ -x $mysqlPrefix/bin/mysqld ] ; then
+	mysqld=bin/mysqld
+else
+	return 1
+fi
+mysql_version=`$mysqlPrefix/$mysqld --version 2>&1 | grep Ver | awk '{print $3}'`
+echo $mysql_version |grep MariaDB > /dev/null 2>&1
+if [ $? -eq 0 ] ; then
+	mysql_version=`echo $mysql_version|cut -d- -f1`
+	return 0
+else
+	major=$(echo $mysql_version|cut -d. -f1)
+	minor1=$(echo $mysql_version|cut -d. -f2)
+	minor2=$(echo $mysql_version|cut -d. -f3)
+	if [ $major -lt 8 ] ; then
+		return 0
+	elif [ $major -gt 8 ] ; then
+		return 1
+	elif [ $major -eq 8 ] ; then
+		if [ $minor1 -gt 0 ] ; then
+			return 1
+		fi
+		if [ $minor2 -gt 34 ] ; then
+			return 1
+		fi
+		return 0
+	fi
+fi
+}
+
 create_indisrvr()
 {
 if [ $# -ne 9 ] ; then
@@ -4272,7 +4311,8 @@ if [ " $indisrvr_ssl" = " 1" ] ; then
 else
 	> $conf_dir/CERTFILE
 fi
-echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
+mysql_opt_reconnect
+[ $? -eq 0 ] && echo 1 > $conf_dir/MYSQL_OPT_RECONNECT || > $conf_dir/MYSQL_OPT_RECONNECT
 echo 300 > $conf_dir/DATA_TIMEOUT
 (
 dump_run_header
@@ -4867,7 +4907,8 @@ else
 fi
 echo $sysconfdir/indimail.cnf > $conf_dir/MYSQL_READ_DEFAULT_FILE
 echo "inlookup" > $conf_dir/MYSQL_READ_DEFAULT_GROUP
-echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
+mysql_opt_reconnect
+[ $? -eq 0 ] && echo 1 > $conf_dir/MYSQL_OPT_RECONNECT || > $conf_dir/MYSQL_OPT_RECONNECT
 
 (
 dump_run_header
@@ -5221,7 +5262,7 @@ mysql_version_8=0
 mariadb_version_10=0
 case "$mysql_version" in
 	8.*)
-	# the monkeys at Oracle have again succeeded in introducing incompatibility with previous
+	# the monkeys at Or$cle have again succeeded in introducing incompatibility with previous
 	# database initialization methods
 	mysql_version_8=1
 	;;
@@ -6854,7 +6895,8 @@ fi
 if [ " $persistdb" = " 1" ] ; then
 	echo postmaster > $conf_dir/ROUTE_NULL_USER
 	echo > $conf_dir/AUTHSELF
-	echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
+	mysql_opt_reconnect
+	[ $? -eq 0 ] && echo 1 > $conf_dir/MYSQL_OPT_RECONNECT || > $conf_dir/MYSQL_OPT_RECONNECT
 else
 	> $conf_dir/ROUTE_NULL_USER
 	> $conf_dir/AUTHSELF
@@ -7114,7 +7156,7 @@ fi
 if [ " $persistdb" = " 1" ] ; then
 	echo postmaster > $conf_dir/ROUTE_NULL_USER
 	echo > $conf_dir/AUTHSELF
-	echo 1 > $conf_dir/MYSQL_OPT_RECONNECT
+	[ $? -eq 0 ] && echo 1 > $conf_dir/MYSQL_OPT_RECONNECT || > $conf_dir/MYSQL_OPT_RECONNECT
 else
 	> $conf_dir/ROUTE_NULL_USER
 	> $conf_dir/AUTHSELF
