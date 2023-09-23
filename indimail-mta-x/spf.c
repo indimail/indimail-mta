@@ -1,24 +1,24 @@
 /*
- * $Id: spf.c,v 1.23 2023-01-15 18:30:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spf.c,v 1.24 2023-09-24 00:47:02+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
 #include <unistd.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include "stralloc.h"
+#include <stralloc.h>
+#include <alloc.h>
+#include <str.h>
+#include <fmt.h>
+#include <scan.h>
+#include <byte.h>
+#include <now.h>
+#include <case.h>
 #include "strsalloc.h"
-#include "alloc.h"
 #include "ip.h"
 #include "ipalloc.h"
 #include "ipme.h"
-#include "str.h"
-#include "fmt.h"
-#include "scan.h"
-#include "byte.h"
-#include "now.h"
 #include "dns.h"
-#include "case.h"
 #include "spf.h"
 
 #define SPF_EXT    -1
@@ -63,24 +63,14 @@ const static unsigned char urlchr_table[256] = {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 };
 
-static stralloc sa = { 0 };
-static stralloc domain = { 0 };
-static ipalloc  ia = { 0 };
-
 extern stralloc addr;
 extern stralloc helohost;
 extern char    *localhost;
 
-extern stralloc spflocal;
-extern stralloc spfguess;
-extern stralloc spfexp;
+extern stralloc spflocal, spfguess, spfexp;
 
-static stralloc sender_fqdn = { 0 };
-static stralloc explanation = { 0 };
-static stralloc expdomain = { 0 };
-static stralloc errormsg = { 0 };
+static stralloc sender_fqdn, explanation, expdomain, errormsg;
 static char    *received;
-
 static int      recursion;
 static ip_addr  ip;
 #ifdef IPV6
@@ -227,8 +217,7 @@ getip4mask(char *mask)
 
 	if (!mask)
 		return 32;
-	pos = scan_ulong(mask, &r);
-	if (!pos)
+	if (!(pos = scan_ulong(mask, &r)))
 		return -1;
 	if (r > 32)
 		return -1;
@@ -243,8 +232,7 @@ getip6mask(char *mask)
 
 	if (!mask)
 		return 128;
-	pos = scan_ulong(mask, &r);
-	if (!pos)
+	if (!(pos = scan_ulong(mask, &r)))
 		return -1;
 	if (r > 128)
 		return -1;
@@ -259,7 +247,6 @@ getipmask(char *mask, int ipv6)
 
 	if (!mask)
 		return 32;
-
 	pos = scan_ulong(mask, &r);
 	if (!pos || (mask[pos] && !(mask[pos] == '/' && ipv6)))
 		return -1;
@@ -363,6 +350,7 @@ int
 spfsubst(stralloc *expand, char *spec, char *domain_p)
 {
 	static char     hexdigits[] = "0123456789abcdef";
+	static stralloc sa = { 0 };
 	char            ch;
 	char           *split = ".";
 	int             digits = -1, urlencode = 0, reverse = 0,
@@ -375,8 +363,7 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 		++spec;
 	} else
 		i = 0;
-	ch = *spec++;
-	if (!ch)
+	if (!(ch = *spec++))
 		return 1;
 	if (ch >= 'A' && ch <= 'Z') {
 		ch += 32;
@@ -556,7 +543,6 @@ spfexpand(stralloc *sa_p, char *spec, char *domain_p)
 	if (!stralloc_readyplus(sa_p, 0))
 		return 0;
 	sa_p->len = 0;
-
 	for (p = spec; *p; p++) {
 		append = *p;
 		if (*p == '%') {
@@ -597,6 +583,7 @@ static int
 spf_include(char *spec, char *mask)
 {
 	int             r;
+	static stralloc sa = { 0 };
 
 	if (!stralloc_copys(&sa, spec))
 		return SPF_NOMEM;
@@ -621,6 +608,8 @@ spf_include(char *spec, char *mask)
 static int
 spf_a(char *spec, char *mask)
 {
+	static ipalloc  ia = { 0 };
+	static stralloc sa = { 0 };
 #ifdef IPV6
 	int             ip4mask = 0, ip6mask = 0;
 #else
@@ -682,6 +671,8 @@ spf_a(char *spec, char *mask)
 static int
 spf_mx(char *spec, char *mask)
 {
+	static stralloc sa = { 0 };
+	static ipalloc  ia = { 0 };
 #ifdef IPV6
 	int             ip4mask = 0, ip6mask = 0;
 #else
@@ -741,6 +732,7 @@ static int
 spf_ptr(char *spec, char *mask)
 {
 	int             len = str_len(spec), r, j, k, pos;
+	static ipalloc  ia = { 0 };
 	strsalloc       ssa = { 0 };
 
 	/*- we didn't find host with the matching ip before */
@@ -878,9 +870,8 @@ spf_ip(char *spec, char *mask)
 	ip_addr         net;
 	int             ipmask;
 
-	if ((ipmask = getip4mask(mask)) < 0)
-		return SPF_SYNTAX;
-	if (!ip4_scan(spec, &net))
+	if ((ipmask = getip4mask(mask)) < 0 ||
+			!ip4_scan(spec, &net))
 		return SPF_SYNTAX;
 	if (matchip(&net, ipmask, &ip))
 		return SPF_OK;
@@ -893,9 +884,8 @@ spf_ip(char *spec, char *mask)
 	ip_addr         net;
 	int             ipmask = getipmask(mask, 0);
 
-	if (ipmask < 0)
-		return SPF_SYNTAX;
-	if (!ip4_scan(spec, &net))
+	if (ipmask < 0 ||
+			!ip4_scan(spec, &net))
 		return SPF_SYNTAX;
 	if (matchip(&net, ipmask, &ip))
 		return SPF_OK;
@@ -906,12 +896,13 @@ spf_ip(char *spec, char *mask)
 static int
 spf_exists(char *spec, char *mask)
 {
+	static stralloc sa = { 0 };
+	static ipalloc  ia = { 0 };
 	int             r;
 
 	if (!stralloc_copys(&sa, spec) ||
 			!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
-
 	switch (dns_ip(&ia, &sa))
 	{
 	case DNS_MEM:
@@ -959,8 +950,8 @@ static int
 spfmech(char *mechanism, char *spec, char *mask, char *domain_p)
 {
 	struct mechanisms *mech;
-	int             r;
-	int             pos;
+	int             r, pos;
+	static stralloc sa = { 0 };
 
 	for (mech = mechanisms; mech->mechanism; mech++) {
 		if (str_equal(mech->mechanism, mechanism))
@@ -968,9 +959,8 @@ spfmech(char *mechanism, char *spec, char *mask, char *domain_p)
 	}
 	if (mech->takes_spec && !spec && mech->filldomain)
 		spec = domain_p;
-	if (!mech->takes_spec != !spec)
-		return SPF_SYNTAX;
-	if (!mech->takes_mask && mask)
+	if (!mech->takes_spec != !spec ||
+			(!mech->takes_mask && mask))
 		return SPF_SYNTAX;
 	if (!mech->func)
 		return mech->defresult;
@@ -1012,6 +1002,7 @@ static struct default_aliases
 static int
 spflookup(stralloc *domain_s)
 {
+	static stralloc sa = { 0 };
 	stralloc        spf_v = { 0 };
 	strsalloc       ssa = { 0 };
 	struct default_aliases *da;
@@ -1284,9 +1275,9 @@ int
 spfcheck(char *remoteip)
 {
 	int             pos, r;
+	static stralloc domain = {0};
 
-	pos = byte_rchr(addr.s, addr.len, '@') + 1;
-	if (pos < addr.len) {
+	if ((pos = byte_rchr(addr.s, addr.len, '@') + 1) < addr.len) {
 		if (!stralloc_copys(&domain, addr.s + pos))
 			return SPF_NOMEM;
 	} else {
@@ -1298,9 +1289,8 @@ spfcheck(char *remoteip)
 		if (!stralloc_copys(&domain, helohost.s))
 			return SPF_NOMEM;
 	}
-	if (!stralloc_copys(&explanation, spfexp.s))
-		return SPF_NOMEM;
-	if (!stralloc_0(&explanation))
+	if (!stralloc_copys(&explanation, spfexp.s) ||
+			!stralloc_0(&explanation))
 		return SPF_NOMEM;
 	recursion = 0;
 #ifdef IPV6
@@ -1322,9 +1312,8 @@ spfcheck(char *remoteip)
 		return SPF_UNKNOWN;
 	}
 #endif
-	if (!stralloc_readyplus(&expdomain, 0))
-		return SPF_NOMEM;
-	if (!stralloc_readyplus(&errormsg, 0))
+	if (!stralloc_readyplus(&expdomain, 0) ||
+			!stralloc_readyplus(&errormsg, 0))
 		return SPF_NOMEM;
 	expdomain.len = 0;
 	errormsg.len = 0;
@@ -1379,13 +1368,16 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.23 2023-01-15 18:30:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.24 2023-09-24 00:47:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: spf.c,v $
+ * Revision 1.24  2023-09-24 00:47:02+05:30  Cprogrammer
+ * refactored code
+ *
  * Revision 1.23  2023-01-15 18:30:42+05:30  Cprogrammer
  * documented macros
  *
