@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.12  2023-09-23 21:22:02+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
  * Revision 1.11  2022-10-03 12:27:48+05:30  Cprogrammer
  * added dependency on stralloc.h
  *
@@ -69,26 +72,21 @@ static int      numanswers;
 static char     name[MAXDNAME];
 
 static int
-resolve(domain, type)
-	char           *domain;
-	int             type;
+resolve(char *domain, int type)
 {
 	int             n;
 	int             i;
 
 	errno = 0;
-	if (!responsebuflen)
-	{
+	if (!responsebuflen) {
 		if ((response.buf = (unsigned char *) alloc(PACKETSZ + 1)))
 			responsebuflen = PACKETSZ + 1;
 		else
 			return DNS_MEM;
 	}
 	responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
-	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc)))
-	{
-		if (responsebuflen < 65536)
-		{
+	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
+		if (responsebuflen < 65536) {
 			if (alloc_re((char *) &response.buf, responsebuflen, 65536))
 				responsebuflen = 65536;
 			else
@@ -99,8 +97,7 @@ resolve(domain, type)
 		responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
 		_res.options = saveresoptions;
 	}
-	if (responselen <= 0)
-	{
+	if (responselen <= 0) {
 		if (errno == ECONNREFUSED)
 			return DNS_SOFT;
 		if (h_errno == TRY_AGAIN)
@@ -110,8 +107,7 @@ resolve(domain, type)
 	responseend = response.buf + responselen;
 	responsepos = response.buf + sizeof(HEADER);
 	n = ntohs(((HEADER *) response.buf)->qdcount);
-	while (n-- > 0)
-	{
+	while (n-- > 0) {
 		if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 			return DNS_SOFT;
 		responsepos += i;
@@ -128,8 +124,7 @@ static stralloc txt = { 0 };
 static stralloc result = { 0 };
 
 static unsigned short
-getshort(c)
-	unsigned char  *c;
+getshort(unsigned char *c)
 {
 	unsigned short  u;
 	u = c[0];
@@ -137,8 +132,7 @@ getshort(c)
 }
 
 static int
-findtxt(wanttype)
-	int             wanttype;
+findtxt(int wanttype)
 {
 	unsigned short  rrtype;
 	unsigned short  rrdlen;
@@ -150,13 +144,11 @@ findtxt(wanttype)
 	if (responsepos == responseend)
 		return DNS_SOFT;
 
-	i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME);
-	if (i < 0)
+	if ((i = dn_expand(response.buf, responseend, responsepos, name, MAXDNAME)) < 0)
 		return DNS_SOFT;
 	responsepos += i;
 
-	i = responseend - responsepos;
-	if (i < 4 + 3 * 2)
+	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
 
 	rrtype = getshort(responsepos);
@@ -185,8 +177,7 @@ findtxt(wanttype)
 }
 
 static int
-dns_txtplus(domain)
-	char           *domain;
+dns_txtplus(char *domain)
 {
 	int             r;
 
@@ -238,7 +229,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.11 2022-10-03 12:27:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dns_text.c,v 1.12 2023-09-23 21:22:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: dnstxt.c,v $
+ * Revision 1.9  2023-09-23 21:22:06+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
  * Revision 1.8  2020-11-24 13:45:05+05:30  Cprogrammer
  * removed exit.h
  *
@@ -35,9 +38,7 @@
 char           *dns_text(char *);
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *txtrec;
 	int             len;
@@ -46,13 +47,11 @@ main(argc, argv)
 	if (!argv[1])
 		_exit(100);
 	txtrec = dns_text(argv[1]);
-	if (!str_diff(txtrec, "e=perm;"))
-	{
+	if (!str_diff(txtrec, "e=perm;")) {
 		substdio_putsflush(subfderr, "hard error\n");
 		_exit(100);
 	} else
-	if (!str_diff(txtrec, "e=temp;"))
-	{
+	if (!str_diff(txtrec, "e=temp;")) {
 		substdio_putsflush(subfderr, "soft error\n");
 		_exit(100);
 	}
@@ -71,7 +70,7 @@ main(argc, argv)
 void
 getversion_dnstxt_c()
 {
-	static char    *x = "$Id: dnstxt.c,v 1.8 2020-11-24 13:45:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnstxt.c,v 1.9 2023-09-23 21:22:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

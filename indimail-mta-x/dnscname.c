@@ -1,5 +1,8 @@
 /*
  * $Log: dnscname.c,v $
+ * Revision 1.8  2023-09-23 21:21:03+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
  * Revision 1.7  2020-11-24 13:44:44+05:30  Cprogrammer
  * removed exit.h
  *
@@ -23,15 +26,12 @@
 stralloc        sa = { 0 };
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	if (!argv[1])
 		_exit(100);
 
-	if (!stralloc_copys(&sa, argv[1]))
-	{
+	if (!stralloc_copys(&sa, argv[1])) {
 		substdio_putsflush(subfderr, "out of memory\n");
 		_exit(111);
 	}
@@ -45,7 +45,7 @@ main(argc, argv)
 void
 getversion_dnscname_c()
 {
-	static char    *x = "$Id: dnscname.c,v 1.7 2020-11-24 13:44:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnscname.c,v 1.8 2023-09-23 21:21:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: dnsip.c,v $
+ * Revision 1.9  2023-09-23 21:21:46+05:30  Cprogrammer
+ * use ansic proto for functions.
+ *
  * Revision 1.8  2020-11-24 13:44:53+05:30  Cprogrammer
  * removed exit.h
  *
@@ -33,25 +36,21 @@ stralloc        sa = { 0 };
 ipalloc         ia = { 0 };
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             j;
 
 	if (!argv[1])
 		_exit(100);
 
-	if (!stralloc_copys(&sa, argv[1]))
-	{
+	if (!stralloc_copys(&sa, argv[1])) {
 		substdio_putsflush(subfderr, "out of memory\n");
 		_exit(111);
 	}
 
 	dns_init(0);
 	dnsdoe(dns_ip(&ia, &sa));
-	for (j = 0; j < ia.len; ++j)
-	{
+	for (j = 0; j < ia.len; ++j) {
 		switch(ia.ix[j].af)
 		{
 		case AF_INET:
@@ -74,7 +73,7 @@ main(argc, argv)
 void
 getversion_dnsip_c()
 {
-	static char    *x = "$Id: dnsip.c,v 1.8 2020-11-24 13:44:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsip.c,v 1.9 2023-09-23 21:21:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

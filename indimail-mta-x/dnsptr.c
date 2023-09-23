@@ -1,5 +1,8 @@
 /*
  * $Log: dnsptr.c,v $
+ * Revision 1.10  2023-09-23 21:21:55+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
  * Revision 1.9  2020-11-24 13:44:58+05:30  Cprogrammer
  * removed exit.h
  *
@@ -33,9 +36,7 @@
 #endif
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	ip_addr         ip;
 #ifdef USE_SPF
@@ -51,8 +52,7 @@ main(argc, argv)
 	dns_init(0);
 #ifdef USE_SPF
 	dnsdoe(dns_ptr(&ssa, &ip));
-	for (j = 0; j < ssa.len; ++j)
-	{
+	for (j = 0; j < ssa.len; ++j) {
 		substdio_putflush(subfdout, ssa.sa[j].s, ssa.sa[j].len);
 		substdio_putsflush(subfdout, "\n");
 	}
@@ -67,7 +67,7 @@ main(argc, argv)
 void
 getversion_dnsptr_c()
 {
-	static char    *x = "$Id: dnsptr.c,v 1.9 2020-11-24 13:44:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsptr.c,v 1.10 2023-09-23 21:21:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

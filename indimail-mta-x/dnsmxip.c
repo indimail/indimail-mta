@@ -1,5 +1,8 @@
 /*
  * $Log: dnsmxip.c,v $
+ * Revision 1.11  2023-09-23 21:21:52+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
  * Revision 1.10  2022-08-21 17:58:04+05:30  Cprogrammer
  * fix compilation error when TLS is not defined in conf-tls
  *
@@ -41,9 +44,7 @@ stralloc        sa = { 0 };
 ipalloc         ia = { 0 };
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             j;
 	unsigned long   r;
@@ -51,16 +52,14 @@ main(argc, argv)
 	if (!argv[1])
 		_exit(100);
 
-	if (!stralloc_copys(&sa, argv[1]))
-	{
+	if (!stralloc_copys(&sa, argv[1])) {
 		substdio_putsflush(subfderr, "out of memory\n");
 		_exit(111);
 	}
 	r = now() + getpid();
 	dns_init(0);
 	dnsdoe(dns_mxip(&ia, &sa, r));
-	for (j = 0; j < ia.len; ++j)
-	{
+	for (j = 0; j < ia.len; ++j) {
 #ifdef TLS
 		substdio_puts(subfdout, ia.ix[j].fqdn);
 		substdio_put(subfdout, " ", 1);
@@ -89,7 +88,7 @@ main(argc, argv)
 void
 getversion_dnsmxip_c()
 {
-	static char    *x = "$Id: dnsmxip.c,v 1.10 2022-08-21 17:58:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsmxip.c,v 1.11 2023-09-23 21:21:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

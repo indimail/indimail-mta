@@ -1,5 +1,8 @@
 /*
  * $Log: dnsdoe.c,v $
+ * Revision 1.5  2023-09-23 21:21:38+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
  * Revision 1.4  2020-11-24 13:44:47+05:30  Cprogrammer
  * removed exit.h
  *
@@ -17,8 +20,7 @@
 #include "dnsdoe.h"
 
 void
-dnsdoe(r)
-	int             r;
+dnsdoe(int r)
 {
 	switch (r)
 	{
@@ -37,7 +39,7 @@ dnsdoe(r)
 void
 getversion_dnsdoe_c()
 {
-	static char    *x = "$Id: dnsdoe.c,v 1.4 2020-11-24 13:44:47+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsdoe.c,v 1.5 2023-09-23 21:21:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

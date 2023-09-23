@@ -1,5 +1,8 @@
 /*
  * $Log: dnsfq.c,v $
+ * Revision 1.10  2023-09-23 21:21:42+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
  * Revision 1.9  2020-11-24 13:44:50+05:30  Cprogrammer
  * removed exit.h
  *
@@ -36,9 +39,7 @@ stralloc        sa = { 0 };
 ipalloc         ia = { 0 };
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 #ifdef USE_SPF
 	int             j;
@@ -47,15 +48,13 @@ main(argc, argv)
 
 	if (!argv[1])
 		_exit(100);
-	if (!stralloc_copys(&sa, argv[1]))
-	{
+	if (!stralloc_copys(&sa, argv[1])) {
 		substdio_putsflush(subfderr, "out of memory\n");
 		_exit(111);
 	}
 	dns_init(1);
 	dnsdoe(dns_ip(&ia, &sa));
-	if (ia.len <= 0)
-	{
+	if (ia.len <= 0) {
 		substdio_putsflush(subfderr, "no IP addresses\n");
 		_exit(100);
 	}
@@ -66,8 +65,7 @@ main(argc, argv)
 	else
 		dnsdoe(dns_ptr6(&ssa, &ia.ix[0].addr.ip6));
 #endif
-	for (j = 0; j < ssa.len; ++j)
-	{
+	for (j = 0; j < ssa.len; ++j) {
 		substdio_putflush(subfdout, ssa.sa[j].s, ssa.sa[j].len);
 		substdio_putsflush(subfdout, "\n");
 	}
@@ -87,7 +85,7 @@ main(argc, argv)
 void
 getversion_dnsfq_c()
 {
-	static char    *x = "$Id: dnsfq.c,v 1.9 2020-11-24 13:44:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dnsfq.c,v 1.10 2023-09-23 21:21:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
