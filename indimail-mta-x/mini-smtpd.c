@@ -1,5 +1,8 @@
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.6  2023-09-24 00:23:57+05:30  Cprogrammer
+ * minor code style changes
+ *
  * Revision 1.5  2022-10-22 13:07:14+05:30  Cprogrammer
  * added program identifier to Received header
  *
@@ -74,8 +77,7 @@ ssize_t
 safewrite(int fd, char *buf, size_t len)
 {
 	ssize_t         r;
-	r = timeoutwrite(timeout, fd, buf, len);
-	if (r <= 0)
+	if ((r = timeoutwrite(timeout, fd, buf, len)) <= 0)
 		_exit(1);
 	return r;
 }
@@ -221,9 +223,8 @@ smtp_quit(char *arg)
 void
 dohelo(char *arg)
 {
-	if (!stralloc_copys(&helohost, arg))
-		die_nomem();
-	if (!stralloc_0(&helohost))
+	if (!stralloc_copys(&helohost, arg) ||
+			!stralloc_0(&helohost))
 		die_nomem();
 	fakehelo = case_diffs(remotehost, helohost.s) ? helohost.s : 0;
 }
@@ -234,22 +235,15 @@ setup()
 	char           *x;
 	unsigned long   u;
 
-	if (control_init() == -1)
-		die_control();
-	if (control_rldef(&greeting, "smtpgreeting", 1, (char *) 0) != 1)
-		die_control();
-	if ((liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1)
-		die_control();
-	if (control_readint(&timeout, "timeoutsmtpd") == -1)
+	if (control_init() == -1 ||
+			control_rldef(&greeting, "smtpgreeting", 1, (char *) 0) != 1 ||
+			(liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1 ||
+			control_readint(&timeout, "timeoutsmtpd") == -1 ||
+			rcpthosts_init() == -1 ||
+			control_readint(&databytes, "databytes") == -1)
 		die_control();
 	if (timeout <= 0)
 		timeout = 1;
-
-	if (rcpthosts_init() == -1)
-		die_control();
-
-	if (control_readint(&databytes, "databytes") == -1)
-		die_control();
 	if ((x = env_get("DATABYTES"))) {
 		scan_ulong(x, &u);
 		databytes = u;
@@ -284,7 +278,7 @@ addrparse(char *arg)
 	i = str_chr(arg, '<');
 	if (arg[i])
 		arg += i + 1;
-	else {						/* partner should go read rfc 821 */
+	else {	/* partner should go read rfc 821 */
 		terminator = ' ';
 		arg += str_chr(arg, ':');
 		if (*arg == ':')
@@ -293,9 +287,7 @@ addrparse(char *arg)
 			++arg;
 	}
 
-/*
- * strip source route
- */
+	/*- strip source route */
 	if (*arg == '@')
 		while (*arg)
 			if (*arg++ == ':')
@@ -334,7 +326,7 @@ addrparse(char *arg)
 		die_nomem();
 	if (liphostok) {
 		i = byte_rchr(addr.s, addr.len, '@');
-		if (i < addr.len)		/* if not, partner should go read rfc 821 */
+		if (i < addr.len) /* if not, partner should go read rfc 821 */
 			if (addr.s[i + 1] == '[')
 				if (!addr.s[i + 1 + ip4_scanbracket(addr.s + i + 1, &ip)])
 					if (ipme_is(&ip)) {
@@ -468,19 +460,17 @@ smtp_rcpt(char *arg)
 	}
 	if (relayclient) {
 		--addr.len;
-		if (!stralloc_cats(&addr, relayclient))
+		if (!stralloc_cats(&addr, relayclient) ||
+				!stralloc_0(&addr))
 			die_nomem();
-		if (!stralloc_0(&addr))
-			die_nomem();
-	} else if (!addrallowed()) {
+	} else
+	if (!addrallowed()) {
 		err_nogateway();
 		return;
 	}
-	if (!stralloc_cats(&rcptto, "T"))
-		die_nomem();
-	if (!stralloc_cats(&rcptto, addr.s))
-		die_nomem();
-	if (!stralloc_0(&rcptto))
+	if (!stralloc_cats(&rcptto, "T") ||
+			!stralloc_cats(&rcptto, addr.s) ||
+			!stralloc_0(&rcptto))
 		die_nomem();
 	out("250 ok\r\n");
 }
@@ -489,11 +479,12 @@ ssize_t
 saferead(int fd, char *buf, size_t len)
 {
 	int             r;
+
 	flush();
-	r = timeoutread(timeout, fd, buf, len);
-	if (r == -1)
+	if ((r = timeoutread(timeout, fd, buf, len)) == -1) {
 		if (errno == error_timeout)
 			die_alarm();
+	}
 	if (r <= 0)
 		die_read();
 	return r;
@@ -502,9 +493,8 @@ saferead(int fd, char *buf, size_t len)
 void
 put(char *ch)
 {
-	if (bytestooverflow)
-		if (!--bytestooverflow)
-			qmail_fail(&qqt);
+	if (bytestooverflow && !--bytestooverflow)
+		qmail_fail(&qqt);
 	qmail_put(&qqt, ch, 1);
 }
 
@@ -622,7 +612,7 @@ blast(int *hops)
 			}
 		}
 		put(&ch);
-	}
+	} /* for (;;) */
 }
 
 char            accept_buf[FMT_ULONG];
@@ -741,7 +731,7 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.5 2022-10-22 13:07:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.6 2023-09-24 00:23:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
