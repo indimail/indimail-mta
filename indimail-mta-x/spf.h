@@ -1,5 +1,8 @@
 /*
  * $Log: spf.h,v $
+ * Revision 1.5  2023-09-24 09:34:28+05:30  Cprogrammer
+ * removed reference to dead SPF explanation pages
+ *
  * Revision 1.4  2023-01-15 18:31:47+05:30  Cprogrammer
  * changed SPF_DEFEXP to use open-spf.org/Why
  *
@@ -25,11 +28,14 @@
 #define SPF_ERROR    6
 #define SPF_NOMEM    7
 
-/*
- * "http://spf.pobox.com/why.html?sender=%{S}&ip=%{I}&receiver=%{xR}"
- */
+#if 0 /*- these spf explanation urls are dead or do not work */
+#define SPF_DEFEXP   "See http://spf.pobox.com/" \
+                     "why.html?sender=%{S}&ip=%{I}&receiver=%{xR}"
 #define SPF_DEFEXP   "See http://www.open-spf.org/Why" \
-                     "?v=1&s=mfrom&id=%{s}&ip=%{i}&receiver=%{xR}"
+                     "?v=1&s=mfrom&id=%{S}&ip=%{C}&r=%{R}"
+#else
+#define SPF_DEFEXP   ""
+#endif
 
 int             spfcheck(char *);
 int             spfexplanation(stralloc *);
