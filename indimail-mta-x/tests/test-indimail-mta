@@ -2180,7 +2180,7 @@ do_spf_tests()
 {
 	echo "Starting SPF Tests"
 	count=1
-	cat spfquery.txt | while read line
+	while read line
 	do
 		first=${line:0:1}
 		if [ "$first" = "#" ] ; then
@@ -2192,10 +2192,12 @@ do_spf_tests()
 		ret=$?
 		if [ $ret -eq $exit_val ] ; then
 			tcount=$(expr $tcount + 1)
-			l1=$(cat /tmp/spf.out|sed -n 1p)
-			l2=$(cat /tmp/spf.out|sed -n 2p)
-			echo "  $l1"
-			echo "  $l2"
+			if [ $verbose -gt 0 ] ; then
+				l1=$(cat /tmp/spf.out|sed -n 1p)
+				l2=$(cat /tmp/spf.out|sed -n 2p)
+				echo "  $l1"
+				echo "  $l2"
+			fi
 			echo "  testing spf test$count succeeded ret=$ret == $exit_val"
 		else
 			cat /tmp/spf.err
@@ -2204,7 +2206,7 @@ do_spf_tests()
 			exit 1
 		fi
 		count=$(expr $count + 1)
-	done
+	done < spfquery.txt
 	/bin/rm -f /tmp/spf.out /tmp/spf.err
 }
 
@@ -3619,13 +3621,13 @@ shutdown_svscan $svpid
 
 wait
 
-echo
-non_dkim_tcount=$tcount
-do_dkim_tests
 if [ -f ./spfquery.txt ] ; then
 	echo
 	do_spf_tests
 fi
+echo
+non_dkim_tcount=$tcount
+do_dkim_tests
 
 # Cleanup
 sudo /bin/rm -rf $servicedir
