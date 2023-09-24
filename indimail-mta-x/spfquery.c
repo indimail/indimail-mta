@@ -1,32 +1,5 @@
 /*
- * $Log: spfquery.c,v $
- * Revision 1.9  2022-12-20 23:00:49+05:30  Cprogrammer
- * updated usage string
- *
- * Revision 1.8  2022-10-14 22:42:11+05:30  Cprogrammer
- * changed variable name for localhost to localhost
- *
- * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.6  2020-11-24 13:49:42+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.5  2018-07-31 21:22:27+05:30  Cprogrammer
- * removed redundant variable remoteip
- *
- * Revision 1.4  2012-04-10 20:38:03+05:30  Cprogrammer
- * added remoteip argument (ipv4) to spfcheck()
- *
- * Revision 1.3  2009-04-05 12:52:26+05:30  Cprogrammer
- * added preprocessor warning
- *
- * Revision 1.2  2004-10-22 20:30:41+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-08-15 19:50:44+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: spfquery.c,v 1.10 2023-09-24 19:38:38+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -138,10 +111,15 @@ main(int argc, char **argv)
 	}
 
 	if (r == SPF_FAIL) {
-		substdio_puts(subfdout, ": ");
 		if (!spfexplanation(&sa))
 			die_nomem();
-		substdio_put(subfdout, sa.s, sa.len);
+		if (sa.len > 1) {
+			if (!stralloc_0(&sa))
+				die_nomem();
+			sa.len--;
+			substdio_puts(subfdout, ": ");
+			substdio_put(subfdout, sa.s, sa.len);
+		}
 	}
 	substdio_putsflush(subfdout, "\n");
 	substdio_puts(subfdout, "Received-SPF: ");
@@ -149,7 +127,7 @@ main(int argc, char **argv)
 		die_nomem();
 	substdio_put(subfdout, sa.s, sa.len);
 	substdio_putsflush(subfdout, "\n");
-	_exit(0);
+	_exit(r);
 	/*- Not reached */
 	return(0);
 }
@@ -168,7 +146,41 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.9 2022-12-20 23:00:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spfquery.c,v 1.10 2023-09-24 19:38:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: spfquery.c,v $
+ * Revision 1.10  2023-09-24 19:38:38+05:30  Cprogrammer
+ * exit with return value of spfcheck()
+ *
+ * Revision 1.9  2022-12-20 23:00:49+05:30  Cprogrammer
+ * updated usage string
+ *
+ * Revision 1.8  2022-10-14 22:42:11+05:30  Cprogrammer
+ * changed variable name for localhost to localhost
+ *
+ * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.6  2020-11-24 13:49:42+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.5  2018-07-31 21:22:27+05:30  Cprogrammer
+ * removed redundant variable remoteip
+ *
+ * Revision 1.4  2012-04-10 20:38:03+05:30  Cprogrammer
+ * added remoteip argument (ipv4) to spfcheck()
+ *
+ * Revision 1.3  2009-04-05 12:52:26+05:30  Cprogrammer
+ * added preprocessor warning
+ *
+ * Revision 1.2  2004-10-22 20:30:41+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-08-15 19:50:44+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH spfquery 1
 .SH NAME
 spfquery - SPF query tool
@@ -15,7 +16,7 @@ spfquery
 
 .SH DESCRIPTION
 \fBspfquery\fR is a tool that can be used for checking if a \fIsender-ip\fR
-is authorized to send emails for the domain in \fIenvelope-from\fR
+is authorized to send emails for the domain in \fIenvelope-from\fR.
 
 .SH OPTIONS
 .TP 3
@@ -46,6 +47,23 @@ record. The local spfrules are always executed afterwards.
 .TP 3
 \fIspfexp\fR
 Use spfexp as explanation in case of a reject
+
+.SH "EXIT STATUS"
+\fBspfquery\fR exits with a code depicting success or failure as below.
+
+.EX
+0  - SPF_OK       IP is authorized to send email for the domain
+1  - SPF_NONE     No SPF records found for the domain
+2  - SPF_UNKNOWN  Unknown SPF failure
+3  - SPF_NEUTRAL  happens when the domain owner doesn’t want to assert
+                  that the sending IP addresses are authorized.
+4  - SPF_SOFTFAIL The sender is either authorized or not authorized to
+                  send email from the domain.
+5  - SPF Failure  sending IP address is NOT authorized to send from the
+                  domain.
+6  - SPF_ERROR    Temporary error in getting SPF records from DNS
+7  - SPF_NOMEM    Out of memory failure
+.EE
 
 .SH "SEE ALSO"
 qmail-smtpd(8)

@@ -44,6 +44,8 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 - 24/09/2023
 36. spf.c: refactored code
 37. spf.h: removed reference to dead/not working spf explanation URLs
+38. spfquery.c: exit with return value of spfcheck()
+39. tests/test-indimail-mta: added spf tests
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023

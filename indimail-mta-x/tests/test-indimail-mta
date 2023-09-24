@@ -2176,6 +2176,38 @@ test_filterit()
 	fi
 }
 
+do_spf_tests()
+{
+	echo "Starting SPF Tests"
+	count=1
+	cat spfquery.txt | while read line
+	do
+		first=${line:0:1}
+		if [ "$first" = "#" ] ; then
+			continue
+		fi
+		exit_val=$(echo $line |cut -d: -f1)
+		cmd=$(echo $line |cut -d: -f2-)
+		$cmd > /tmp/spf.out 2>/tmp/spf.err
+		ret=$?
+		if [ $ret -eq $exit_val ] ; then
+			tcount=$(expr $tcount + 1)
+			l1=$(cat /tmp/spf.out|sed -n 1p)
+			l2=$(cat /tmp/spf.out|sed -n 2p)
+			echo "  $l1"
+			echo "  $l2"
+			echo "  testing spf test$count succeeded ret=$ret == $exit_val"
+		else
+			cat /tmp/spf.err
+			/bin/rm -f /tmp/spf.out /tmp/spf.err
+			echo "  testing spf test$count failed ret=$ret != $exit_val"
+			exit 1
+		fi
+		count=$(expr $count + 1)
+	done
+	/bin/rm -f /tmp/spf.out /tmp/spf.err
+}
+
 do_dkim_tests()
 {
 	echo "Starting DKIM Tests"
@@ -3590,6 +3622,10 @@ wait
 echo
 non_dkim_tcount=$tcount
 do_dkim_tests
+if [ -f ./spfquery.txt ] ; then
+	echo
+	do_spf_tests
+fi
 
 # Cleanup
 sudo /bin/rm -rf $servicedir

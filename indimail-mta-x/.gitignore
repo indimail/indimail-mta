@@ -472,3 +472,4 @@ varargs.h
 indimail-services.7
 favicon.base64
 filterit.1
+tests/spfquery.txt

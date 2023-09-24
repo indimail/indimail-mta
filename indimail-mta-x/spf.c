@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.24 2023-09-24 00:47:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spf.c,v 1.25 2023-09-24 19:35:55+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
@@ -540,6 +540,8 @@ spfexpand(stralloc *sa_p, char *spec, char *domain_p)
 	char            append;
 	int             pos;
 
+	if (!spec)
+		return 1;
 	if (!stralloc_readyplus(sa_p, 0))
 		return 0;
 	sa_p->len = 0;
@@ -1177,6 +1179,7 @@ redirect:
 					alloc_free(spf_v.s);
 					return SPF_NOMEM;
 				}
+				explanation.len--;
 			}	/*- and unknown modifiers are ignored */
 		} else
 		if (!done) {
@@ -1289,9 +1292,15 @@ spfcheck(char *remoteip)
 		if (!stralloc_copys(&domain, helohost.s))
 			return SPF_NOMEM;
 	}
-	if (!stralloc_copys(&explanation, spfexp.s) ||
+	if (spfexp.len) {
+		if (!stralloc_copy(&explanation, &spfexp) ||
+				!stralloc_0(&explanation))
+			return SPF_NOMEM;
+	} else
+	if (!stralloc_copyb(&explanation, "SPF FAIL", 8) ||
 			!stralloc_0(&explanation))
 		return SPF_NOMEM;
+	explanation.len--;
 	recursion = 0;
 #ifdef IPV6
 	if (!remoteip) {
@@ -1368,13 +1377,16 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.24 2023-09-24 00:47:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spf.c,v 1.25 2023-09-24 19:35:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: spf.c,v $
+ * Revision 1.25  2023-09-24 19:35:55+05:30  Cprogrammer
+ * fix for empty spf explanation
+ *
  * Revision 1.24  2023-09-24 00:47:02+05:30  Cprogrammer
  * refactored code
  *
