@@ -2184,6 +2184,7 @@ do_spf_tests()
 	do
 		first=${line:0:1}
 		if [ "$first" = "#" ] ; then
+			count=$(expr $count + 1)
 			continue
 		fi
 		exit_val=$(echo $line |cut -d: -f1)
@@ -2201,6 +2202,10 @@ do_spf_tests()
 			echo "  testing spf test$count succeeded ret=$ret == $exit_val"
 		else
 			cat /tmp/spf.err
+			l1=$(cat /tmp/spf.out|sed -n 1p)
+			l2=$(cat /tmp/spf.out|sed -n 2p)
+			echo "  $l1"
+			echo "  $l2"
 			/bin/rm -f /tmp/spf.out /tmp/spf.err
 			echo "  testing spf test$count failed ret=$ret != $exit_val"
 			exit 1
