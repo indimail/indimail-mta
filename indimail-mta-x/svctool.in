@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.704 2023-09-23 00:23:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.705 2023-09-27 13:20:49+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.704 2023-09-23 00:23:47+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.705 2023-09-27 13:20:49+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2111,8 +2111,11 @@ if [ -s $TMPDIR/hostip.$$ ] ; then
 		ip=$(cat $TMPDIR/hostip.$$)
 		echo "hostip [$ip]"
 		/bin/mv $TMPDIR/hostip.$$ $t/hostip
+	else
+		/bin/rm -f $TMPDIR/hostip.$$
 	fi
 else
+	/bin/rm -f $TMPDIR/hostip.$$
 	[ -n "$verbose" ] && echo "hostip [127.0.0.1]"
 	echo 127.0.0.1 > $t/hostip
 fi
