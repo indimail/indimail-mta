@@ -160,50 +160,30 @@ relay privileges. You can have as long chain of checkprogram subprogram1
 subpgoram2 ... as long as the number of authentication mehods/databases
 you want to support.
 
-Once a user has authenticated or authentication is enforced MASQUERADE env
-variable can be used to enforce a certain behaviour.
+Once a user has authenticated or authentication is enforced,
+\fBMASQUERADE\fR environment variable can be set to enforce a certain
+behaviour.
 
-If the environment variable \fBMASQUERADE\fR is set,
 .LP
 .nr step 1 1
 .IP \n[step] 2
-after successful authentication, relaying to outside domains will be
-allowed with any sender address (if \fBMASQUERADE\fR is set but empty).
+relaying to outside domains will be allowed with any sender address, if
+\fBMASQUERADE\fR is set but empty.
 .IP \n+[step]
-after successful authentication, relaying to outside domains will be
-allowed with the sender address equal to the value of \fBMASQUERADE\fR
-environment variable
+relaying to outside domains will be allowed with the sender address equal
+to the value of \fBMASQUERADE\fR environment variable
 .IP \n+[step]
-mails to local domain will be allowed without authentication
-.LP
-If the variable is not set,
-.nr step 1 1
-.IP \n[step] 2
 relaying will be allowed only if the IMAP/POP3 authenticated userid matches
-the "MAIL from:" sender address.
-.IP \n+[step]
-mails to local domains will be allowed only via authenticated SMTP or if
-user has authenticated via IMAP/POP3
+the "MAIL from:" sender address, if \fBMASQUERADE\fR is not set
 .LP
 
-.B qmail-smtpd
-will reject the authentication attempt if it receives a nonzero return
-value from
-.I checkprogram
-or
-.IR subprogram .
-There can be multiple
-.I subprograms
-for a particular type of authentication. The last
-.I subprogram
-should typically be /bin/false or /usr/bin/false depending on your
-Operating System.
-.B qmail-smtpd
-advertizes AUTH capability only if
-.IR hostname
-and
-.IR checkprogram
-are passed as the minimum arguments.
+\fBqmail-smtpd\fR will reject the authentication attempt if it receives a
+nonzero return value from \fIcheckprogram\fR or \fIsubprogram\fR. There can
+be multiple \fIsubprograms\fR for a particular type of authentication. The
+last \fIsubprogram\fR should typically be /bin/false or /usr/bin/false
+depending on your Operating System. \fBqmail-smtpd\fR advertizes AUTH
+capability only if \fIhostname\fR and \fIcheckprogram\fR are passed as the
+minimum arguments.
 
 \fBqmail-smtpd\fR prevents unauthorized relaying and also reject mails
 addressed to invalid mailboxes. To do this, \fBqmail-smtpd\fR employs the
@@ -216,34 +196,35 @@ by looking up in \fBMySQL\fR, email addresses logged in the relay table
 within past 30 Minutes, corresponding to the remote ip address of the
 client. This effectively prevents the user to give any "RCPT TO:" recipient
 address other than those belonging to local domains in \fIrcpthosts\fi,
-\fIlocals\fR control files.  This option is turned on by defining the
-environment variable \fBCHECKRELAY\fR.  Email address and IP address is
+\fIlocals\fR control files. This option is turned on by defining the
+environment variable \fBCHECKRELAY\fR. Email address and IP address is
 logged into the relay table when the user does a IMAP or POP3 access. This
 mechanism 'pop before smtp' allows \fBqmail-smtpd\fR to relay out mails
 after a successful IMAP/POP3 authentication.
 
 NOTE: Only domains not listed in \fIrcpthosts\fR are checked. Users can
-send emails domains in \fIrcpthosts\fR without authentication.
+send emails for domains in \fIrcpthosts\fR without authentication.
 Authentication can be forced for everyone by having the \fBAUTH_ALL\fR
 environment variable. If you desire forced authentication for certain
 domains, you can do it so by having the domain listed in the control file
 \fIauthdomains\fR. In such cases of enforced authentication, an email
 transaction will succeed only if the sender has authenticated using SMTP
-AUTH, IMAP or POP3.  If the environment variable \fBREQUIREAUTH\fR is set,
+AUTH, IMAP or POP3. If the environment variable \fBREQUIREAUTH\fR is set,
 qmail-smtpd will not accept any \fBMAIL FROM\fR commands until and unless
-the client has authenticated using the \fBAUTH\fR command. If the
-environment variable \fBANTISPOOFING\fR set set, qmail-smtpd will force
-local users to authenticate (using AUTH, IMAP or POP3) before accepting
-mails.
+the client has authenticated using the SMTP \fBAUTH\fR command.
 
 .IP \n+[step]
 .B Check Recipient Status
-by looking up in \fBMySQL\fR, status of recipients is determined before
-accepting the mails. This option is turned on by defining the environment
-variable \fBCHECKRECIPIENT\fR to one of the following values
+by looking up in \fBMySQL\fR or recipients extension, status of recipients
+is determined before accepting the mails. This option is turned on by
+defining the environment variable \fBCHECKRECIPIENT\fR to one of the
+following values
+
  1. Reject if recipient not in MySQL
  2. Reject if recipient not in both MySQL and recipients extension (See below)
  3. Reject if recipient not found through recipients extension (See below)
+
+The following status for the user is checked
 
 .IP \[bu] 2
 .I Inactive Recipients
@@ -266,7 +247,7 @@ FILES\fR section below for the syntax for \fIchkrcptdomains\fR control
 file.
 
 If \fBCHECKRECIPIENT\fR is defined and if the control file
-\fIchkrcptdomains\fR is absent, the  recipient status check is turned on
+\fIchkrcptdomains\fR is absent, the recipient status check is turned on
 for all domains. If the environment variable \fBMAX_RCPT_ERRCOUNT\fR is
 set, \fBqmail-smtpd\fR will reject mails if number of errors while doing
 recipient status check equals/exceeds the value defined by
@@ -274,11 +255,41 @@ recipient status check equals/exceeds the value defined by
 
 .IP \n+[step]
 .B Check Sender Status
-by looking up in the \fBMySQL\fR, status of the sender is determined before
-accepting the mails. For local senders, mail is accepted only if the
-recipient is an active user and does not have the NO_SMTP flag set for the
-user. If the CUGMAIL environment variable is defined, mails will be
-accepted only from local domains (defined in rcpthosts).
+This enforces local user to authenticate via authenticated SMTP, IMAP/POP3
+before accepting mail from the user. This option is turned on by setting
+\fBCHECKSENDER\fR environment variable. The following status for the user
+is checked
+
+.IP \[bu] 2
+.I Inactive Senders
+Senders who have not logged on to the mailing system for more than 60
+days (works only virtual users)
+.IP \[bu]
+.I Invalid Senders
+Senders who do not have any accounts in MySQL or /etc/passwd
+.IP \[bu]
+.I NO_SMTP flag
+Senders who have NO_SMTP flag set by \fBvmoduser\fR(1). This is applicable
+only for virtual users.
+
+If the status of the sender fall into any of the above category, the
+mail is rejected with a permanent error. If the sender doesn't fall into
+the above category, mail will be accepted.
+
+Setting \fBCHECKSENDER\fR environment variable also turns on anti-spoofing
+feature for the domain where the user cannot forge the MAIL FROM address.
+If the MASQUERADE option is set, the user will be able to use any MAIL
+FROM, but since \fBqmail-smtpd\fR logs all transactions, the actual user id
+used for authentication will be logged.
+
+\fBNOTE\fR: To turn on sender status check for selected domains, include
+the domains in the \fIchksenderdomains\fR control file. Check the
+\fBCONTROL FILES\fR section below for the syntax for \fIchksenderdomains\fR
+control file.
+
+.PP
+If the CUGMAIL environment variable is defined qmail-smtpd accepts mail
+only from/to local domains (domains listed in rcpthosts).
 
 .PP
 qmail-smtpd can greet clients "421 service unavailable" if you set
@@ -371,17 +382,11 @@ distributed architecture). The information of all databases that
 \fBmcdinfo\fR. Without this file, \fBinlookup\fR will use the
 \fIhost.mysql\fR control file.
 
-The information of all the databases that
-.B qmail-smtpd
-can connect to connect to can be maintained in the file
-.BR mcdinfo .
-You can use
-.B dbinfo(1)
-program to edit
-.BR mcdinfo .
-For each database that
-.B qmail-smtpd
-needs to connect to, the following lines need to be maintained
+The information of all the databases that \fBqmail-smtpd\fR can connect to
+connect to can be maintained in the file \fImcdinfo\fR. You can use
+\fBdbinfo\fR(1) program to edit \fImcdinfo\fR. For each database that
+\fBqmail-smtpd\fR needs to connect to, the following lines need to be
+maintained
 
  domain   indimail.org 1
  server   localhost
@@ -391,48 +396,44 @@ needs to connect to, the following lines need to be maintained
  user     indimail
  pass     passwd
 
-.B domain
-has two arguments, the first is the domain name and the second if non-zero
-specifies a clustered domain
+\fBdomain\fR has two arguments, the first is the domain name and the second
+if non-zero specifies a clustered domain
 .LP
-.B server
-specifies the server to which connection for database needs to be made to.
+\fBserver\fR specifies the server to which connection for database needs to
+be made to.
 .LP
-.B mdahost
+\fBmdahost\fR
 specifies where the mails for this domain needs to be delivered to.
 .LP
-.B port
-specifies the port on which the database server listens.
+\fBport\fR specifies the port on which the database server listens.
 .LP
-.B database
-specifies the name of the database containing the mail users information.
+\fBdatabase\fR specifies the name of the database containing the mail users
+information.
 .LP
-.B user
-specifies the database user having privilege to connect and carry out
-various activity in the mail database.
+\fBuser\fR specifies the database user having privilege to connect and
+carry out various activity in the mail database.
 .LP
-.B pass
-specifies the password of the database user
+\fBpass\fR specifies the password of the database user.
 
 .SH ETRN, AUTOTURN, ODMR
-.B qmail-smtpd
-supports ETRN, AUTOTURN (RFC 1985) and ODMR (RFC 2645). The parameter to an
-ETRN request is normally a domain name.
-.B qmail-smtpd
-issues a new connection when a client issues ETRN command and uses the best
-MX for the domain, thus avoiding security problems.
+\fBqmail-smtpd\fR supports ETRN, AUTOTURN (RFC 1985) and ODMR (RFC 2645).
+The parameter to an ETRN request is normally a domain name.
+\fBqmail-smtpd\fR issues a new connection when a client issues ETRN command
+and uses the best MX for the domain, thus avoiding security problems.
 
 For AUTOTURN, no client support is required. A connect to port 25 will cause
-.B qmail-smtpd
-to connect back to $TCPREMOTEIP on port 25.  For enabling AUTOTURN, the
-following entry should be present in
-.B virtualdomains.
+\fBqmail-smtpd\fR to connect back to $TCPREMOTEIP on port 25. For enabling
+AUTOTURN, the following entry should be present in \fBvirtualdomains\fR.
 
+.EX
 virt.dom:autoturn-202.144.44.3
+.EE
 
 and the following entry in the assign file
 
+.EX
 +autoturn-:indimail:508:508:/var/qmail/autoturn:-::
+.EE
 
 The above specifies that AUTOTURN be enabled for domain virt.dom. Clients
 only from the IP Address 202.144.44.3 can then issue the AUTOTURN command.
@@ -450,45 +451,33 @@ solution.
 The On-Demand Mail Relay (ODMR), which is a profile of SMTP [SMTP, ESMTP],
 provides a secure, extensible, easy to implement approach to the problem.
 For ODMR, access is granted to domains for a user (specified by an email
-address). This is done through the
-.B vatrn
-command. The client has to use CRAM-MD5 authentication. To setup ODMR,
-setup
-.B qmail-smtpd
-on port 366 without any delivery queue. ODMR uses
-.B maildirserial(1)
-and 
-.B serialsmtp(1)
-to act as an SMTP client.
+address). This is done through the \fBvatrn\fR command. The client has to
+use CRAM-MD5 authentication. To setup ODMR, setup \fBqmail-smtpd\fR to on
+port 366 without any delivery queue. ODMR uses \fBmaildirserial\fR(1) and 
+\fBserialsmtp\fR(1) to act as an SMTP client.
 
 ETRN/AUTOTURN/ODMR command is enabled only for domains listed in the
-control file
-.B etrnhosts
-.
+control file \fBetrnhosts\fR.
 
 .B NOTE:
 User Status Check does not work on ETRN/AUTOTURN/ODMR domains. Hence to
 turn on User Status Check for selected domains, include non
-ETRN/AUTOTURN/ODMR domains in the control file
-.IR chkrcptdomains .
-If the control file 
-.I chkrcptdomains
-is absent and User Status Check is enabled, the  User Status Check is
-turned on for all domains. In this case mails to ETRN/AUTOTURN/ODMR domains
-will bounce.
+ETRN/AUTOTURN/ODMR domains in the control file \fIchkrcptdomains\fR.
+If the control file \fIchkrcptdomains\fR is absent and User Status Check is
+enabled, the User Status Check is turned on for all domains. In this case
+mails to ETRN/AUTOTURN/ODMR domains will bounce.
 
 .SH TRANSPARENCY
-.B qmail-smtpd
-converts the SMTP newline convention into the UNIX newline convention by
-converting CR LF into LF. It also accepts connections on bare LFs even
-though such messages violate the SMTP protocol. Strangely some Windows MUAs
-do it (which is strange since CR LF is the natural Windows way of doing
-things). But what else can you expect from an Organization famous for
-stealing things. Also if sendmail is mis-configured it can cause this.
+\fBqmail-smtpd\fR converts the SMTP newline convention into the UNIX
+newline convention by converting CR LF into LF. It also accepts connections
+on bare LFs even though such messages violate the SMTP protocol. Strangely
+some Windows MUAs do it (which is strange since CR LF is the natural
+Windows way of doing things). But what else can you expect from an
+Organization famous for stealing things. Also if sendmail is mis-configured
+it can cause this.
 
-.B qmail-smtpd
-accepts messages that contain long lines or non-ASCII characters,
-even though such messages violate the SMTP protocol.
+\fBqmail-smtpd\fR accepts messages that contain long lines or non-ASCII
+characters, even though such messages violate the SMTP protocol.
 
 .SH "CONTROL FILES"
 \fBqmail-smtpd\fR by default looks at @sysconfdir@/control for all control
@@ -499,110 +488,73 @@ if they have the \fI.sql\fR extension. If you desire that the control file
 to be in MySQL, the file (with \fI.sql\fR extension) should have an entry
 in the following format.
 
-.BR dbase_server_ip:dbase_user:dbase_password:dbase_name:table_name .
-See indimail-control(5) to see the full list of control files which support
-.cdb and .sql extensions
+\fBdbase_server_ip:dbase_user:dbase_password:dbase_name:table_name\fR
+
+See indimail-control(5) to see the full list of control files which
+support .cdb and .sql extensions.
 
 .TP 5
 .I authdomains
 Any sender domain listed in this file will require authentication to be
-able to send mails to any domain (local or remote). Having a domain in this
-control file turns on anti-spoofing feature for the domain where the user
-cannot forge the MAIL FROM address. If the MASQUERADE option is set, the
-user will be able to use any MAIL FROM, but since
-.B qmail-smtpd
-logs all transactions, the actual user id used for authentication will be
-logged.
-A line in
-.I authdomains
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I authdomains
-can also be in cdb format. if \fIauthdomains\fR.\fIcdb\fR file is present,
-it will be searched first. \fIauthdomains\fR.\fIcdb\fR can be built using
-\fBqmail\fR-\fBcdb\fR(8). The filename can be overriden by the environment
-variable
-.BR BADHOST .
+able to send mails to any domain (local or remote). A line in
+\fIauthdomains\fR may be of the form \fB@\fIhost\fR\fR, meaning every
+address at \fIhost\fR. \fIauthdomains\fR can also be in cdb format. if
+\fIauthdomains\fR.\fIcdb\fR file is present, it will be searched first.
+\fIauthdomains\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).
+The filename can be overriden by the environment variable \fBBADHOST\fR.
 You can set QREGEX environment variable if you want to use regex patterns
 for addresses in \fIauthdomains\fR.
 
 .TP 5
 .I badhelo
-Unacceptable HELO/EHLO greeting strings.
-.B qmail-smtpd
-will reject every connection attempt 
-if the client MTA's HELO/EHLO greeting compares with 
-a REGEX pattern provided in
-.IR badhelo .
-To enable badhelo check, define the environment variable BADHELOCHECK or
-set the environment variable BADHELO to a control file containing
-unacceptable HELO/EHLO greetings strings. When badhelocheck is enabled,
-.B qmail-smtpd
-will reject email sent using HELO hostname equal to your IP address, your
+Unacceptable HELO/EHLO greeting strings. \fBqmail-smtpd\fR will reject
+every connection attempt if the client MTA's HELO/EHLO greeting compares
+with a REGEX pattern provided in \fIbadhelo\fR. To enable badhelo check,
+define the environment variable BADHELOCHECK or set the environment
+variable BADHELO to a control file containing unacceptable HELO/EHLO
+greetings strings. When badhelocheck is enabled, \fBqmail-smtpd\fR will
+reject email sent using HELO hostname equal to your IP address, your
 hostname or any hostname without dots. if ENFORCE_FQDN_HELO is set
-.B qmail-smtpd
-will reject emails from hosts which pass HELO hostname without dots.
-A line in
-.I badhelo
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I badhelo
-can also be in cdb format. if \fIbadhelo\fR.\fIcdb\fR file is present, it
-will be searched first.
-\fIbadhelo\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).  The
-filename can be overriden by the environment variable
-.BR BADHELO .
+\fBqmail-smtpd\fR will reject emails from hosts which pass HELO hostname
+without dots. A line in \fIbadhelo\fR may be of the form \fB@\fIhost\fR\fR,
+meaning every address at \fIhost\fR. \fIbadhelo\fR can also be in cdb
+format. if \fIbadhelo\fR.\fIcdb\fR file is present, it will be searched
+first, \fIbadhelo\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).
+The filename can be overriden by the environment variable \fBBADHELO\fR.
 You can set QREGEX environment variable if you want to use regex patterns
 for addresses in \fIbadhelo\fR.
 
 .TP 5
 .I badip
-Unacceptable IP address in environment variable
-.BR TCPREMOTEIP .
-.B qmail-smtpd
-will reject with a temporary error code, every host listed in
-.IR badip .
-A line in
-.I badip
-may be case insensitive regular expression. To enable badip check, define
-the environment variable BADIPCHECK or set the environment variable
-\fBBADIP\fR to a control file containing unacceptable IP addresses.
-.I badip
-can also be in cdb format. if \fIbadip\fR.\fIcdb\fR file is present, it
-will be searched first.  \fIbadip\fR.\fIcdb\fR can be built using
-\fBqmail\fR-\fBcdb\fR(8).  The filename can be overriden
-by the environment variable
-.BR BADIP .
-You can set QREGEX environment variable if you want to use regex patterns
-for addresses in \fIbadip\fR.
+Unacceptable IP address in environment variable \fBTCPREMOTEIP\fR.
+\fBqmail-smtpd\fR will reject with a temporary error code, every host
+listed in \fIbadip\fR. A line in \fIbadip\fR may be case insensitive
+regular expression. To enable badip check, define the environment variable
+BADIPCHECK or set the environment variable \fBBADIP\fR to a control file
+containing unacceptable IP addresses. \fIbadip\fR can also be in cdb
+format. if \fIbadip\fR.\fIcdb\fR file is present, it will be searched
+first. \fIbadip\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).
+The filename can be overriden by the environment variable \fBBADIP\fR. You
+can set QREGEX environment variable if you want to use regex patterns for
+addresses in \fIbadip\fR.
 
 .TP 5
 .I badhost
-Unacceptable remote host in environment variable
-.BR TCPREMOTEHOST .
-.B qmail-smtpd
-will reject every host listed in
-.IR badhost .
-A line in
-.I badhost
-may be a case insensitive regular expression.
-To enable badhost check, define the environment variable BADHOSTCHECK or
-set the environment variable BADHOST to a control file containing
-unacceptable remote hosts.
+Unacceptable remote host in environment variable \fBTCPREMOTEHOST\fR.
+\fBqmail-smtpd\fR will reject every host listed in \fIbadhost\fR. A line in
+\fIbadhost\fR may be a case insensitive regular expression. To enable
+badhost check, define the environment variable BADHOSTCHECK or set the
+environment variable BADHOST to a control file containing unacceptable
+remote hosts.
 
 .TP 5
 .I accesslist
-.B qmail-smtpd
-will apply access list to allow email transaction between
-sender and recipient. A line in
-.I accesslist
-is of the form
+\fBqmail-smtpd\fR will apply access list to allow email transaction between
+sender and recipient. A line in \fIaccesslist\fR is of the form
 
+.EX
  type:sender:recipient
+.EE
 
 where type is either the word 'from' or 'rcpt' and \fIsender\fR and
 \fIrecipient\fR can be the actual sender, recipient or a wildcard. The
@@ -626,33 +578,22 @@ postmaster or abuse. This is to prevent violating RFCs. A utility
 
 .TP 5
 .I badmailfrom
-Unacceptable envelope sender addresses.
-.B qmail-smtpd
-will reject every recipient address for a message
-if the envelope sender address is listed in
-.IR badmailfrom .
-A line in
-.I badmailfrom
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I badmailfrom
+Unacceptable envelope sender addresses. \fBqmail-smtpd\fR will reject every
+recipient address for a message if the envelope sender address is listed in
+\fIbadmailfrom\fR. A line in \fIbadmailfrom\fR may be of the form
+\fB@\fIhost\fR\fR, meaning every address at \fIhost\fR. \fIbadmailfrom\fR
 can also be in cdb format. if \fIbadmailfrom\fR.\fIcdb\fR file is present,
 it will be searched first. \fIbadmailfrom\fR.\fIcdb\fR can be built using
-\fBqmail\fR-\fBcdb\fR(8).  The filename can be overriden by the environment
-variable
-.BR BADMAILFROM .
-You can set QREGEX environment variable if you want to use regex patterns
-for envelope sender addresses.
+\fBqmail\fR-\fBcdb\fR(8). The filename can be overriden by the environment
+variable \fBBADMAILFROM\fR. You can set QREGEX environment variable if you
+want to use regex patterns for envelope sender addresses.
 
 .TP 5
 .I badmailpatterns
-Gives 
-.B qmail-smtpd 
-the ability to filter E-Mails by comparing the sender  
-address with a REGEX pattern in 
-.IR badmailpatterns . 
+gives \fBqmail-smtpd \fR the ability to filter E-Mails by comparing the
+sender address with a REGEX pattern in \fIbadmailpatterns\fR. 
+
+.EX
 Example:
 
   *@earthlink.net
@@ -660,14 +601,14 @@ Example:
   [0-9][0-9][0-9][0-9][0-9]@[0-9][0-9][0-9].com
   answerme@save*
   *%*
+.EE
 
 .I badmailpatterns
 file with this contents stops all mail from Earthlink except from
 fred@earthlink.net. It also stops all mail with addresses like:
-12345@123.com and answerme@savetrees.com. Further, any E-Mail with       
-a sender address containing a percent sign (%) is rejected.
-The filename can be overriden by the environment variable
-.BR BADMAILPATTERNS .
+12345@123.com and answerme@savetrees.com. Further, any E-Mail with a sender
+address containing a percent sign (%) is rejected. The filename can be
+overriden by the environment variable \fBBADMAILPATTERNS\fR.
 \fIbadmailpatterns\fR gets disabled of you set \fBQREGEX\fR environment
 variable. \fIbadmailpatterns\fR uses simple shell-style pattern matching
 unlike regular expressions used by setting \fBQREGEX\fR environment
@@ -707,13 +648,10 @@ has necessitated having \fIserverciphersuite\fR for TLSv1.3 and
 
 .TP 5
 .I tlsclients
-A list of email addresses. When relay rules would reject an incoming message,
-.B qmail-smtpd
-can allow it if the client presents a certificate that can be verified against
-the CA list in
-.I clientca.pem
-and the certificate email address is in
-.IR tlsclients .
+A list of email addresses. When relay rules would reject an incoming
+message, \fBqmail-smtpd\fR can allow it if the client presents a
+certificate that can be verified against the CA list in \fIclientca.pem\fR
+and the certificate email address is in \fItlsclients\fR.
 
 .TP 5
 .I servercert.pem
@@ -735,55 +673,42 @@ environment variable CERTDIR.
 .TP 5
 .I clientcrl.pem
 A list of Certificate Revocation Lists (CRLs). If present it
-should contain the CRLs of the CAs in 
-.I clientca.pem 
-and client certs that will be checked for revocation. The
-filename can be overriden by the environment variable \fBCLIENTCRL\fR.
-The default location of @sysconfdir@/certs can be overriden by
-environment variable CERTDIR.
+should contain the CRLs of the CAs in \fIclientca.pem\fR and client certs
+that will be checked for revocation. The filename can be overriden by the
+environment variable \fBCLIENTCRL\fR. The default location of
+@sysconfdir@/certs can be overriden by environment variable CERTDIR.
 
 .TP 5
 .I rsa512.pem
-If this 512 bit RSA key is provided,
-.B qmail-smtpd
-will use it for TLS sessions instead of generating one on-the-fly.
-The default location of @sysconfdir@/certs can be overriden by
-environment variable CERTDIR.
+If this 512 bit RSA key is provided, \fBqmail-smtpd\fR will use it for TLS
+sessions instead of generating one on-the-fly. The default location of
+@sysconfdir@/certs can be overriden by environment variable CERTDIR.
 
 .TP 5
 .I dh1024.pem
-If these 1024 bit DH parameters are provided,
-.B qmail-smtpd
-will use them for TLS sessions instead of generating one on-the-fly 
-(which is very timeconsuming).
-The default location of @sysconfdir@/certs can be overriden by
-environment variable CERTDIR.
+If these 1024 bit DH parameters are provided, \fBqmail-smtpd\fR will use
+them for TLS sessions instead of generating one on-the-fly (which is very
+timeconsuming). The default location of @sysconfdir@/certs can be overriden
+by environment variable CERTDIR.
 
 .TP 5
 .I dh512.pem
-512 bit counterpart for 
-.B dh1024.pem. 
-The default location of @sysconfdir@/certs can be overriden by
-environment variable CERTDIR.
+512 bit counterpart for \fBdh1024.pem\fR. The default location of
+@sysconfdir@/certs can be overriden by environment variable CERTDIR.
 
 .TP 5
 .I signatures
-Unacceptable base64 encoded MIME types in message.
-.B qmail-smtpd
-will reject every message if the first 9 significant
-characters (eg.
-.BR TVqQAAMAA )
-of any of it's embedded MIME types is identical with one
-present in
-.IR signatures.
-The control file
-.I signatures
-is evaluated if the environment variable VIRUSCHECK
-is set but empty. All matches will be logged. Additionally a description
-for the pattern can be set by appending it just after the pattern, with a
-colon \fB:\fR as a separator. i.e.
+Unacceptable base64 encoded MIME types in message. \fBqmail-smtpd\fR will
+reject every message if the first 9 significant characters (eg.
+\fBTVqQAAMAA\fR) of any of it's embedded MIME types is identical with one
+present in \fIsignatures\fR. The control file \fIsignatures\fR is evaluated
+if the environment variable VIRUSCHECK is set but empty. All matches will
+be logged. Additionally a description for the pattern can be set by
+appending it just after the pattern, with a colon \fB:\fR as a separator. i.e.
 
+.EX
 TvqQAAMAA:An Executable from a Dirty OS
+.EE
 
 By default the pattern is matched in both the headers and the body
 The word -header or -body can be appended to the comment (with \fB:\fR as a
@@ -792,22 +717,23 @@ respectively. The word -headerblackhole or -bodyblackhole can be appended
 to the comment to run the check only on the mail header or mail body
 respectively and also blackhole the mail. i.e.
 
+.EX
 TvqQAAMAA:An Executable from a Dirty OS:-body
+.EE
 
-The filename can be overriden by the environment variable
-.BR SIGNATURES .
+The filename can be overriden by the environment variable \fBSIGNATURES\fR.
 
 .TP 5
 .I bodycheck
-This control file gives
-.B qmail-smtpd
-content-filtering ability. Any regex
-pattern in this file will be matched againt all lines entered in the SMTP
-data session. e.g. To block files with an extension created by a widely
-used brain-dead word processor used by some modern cave men
+This control file gives \fBqmail-smtpd\fR content-filtering ability. Any
+regex pattern in this file will be matched againt all lines entered in the
+SMTP data session. e.g. To block files with an extension created by a
+widely used brain-dead word processor used by some modern cave men
 
+.EX
  ^Content-Disposition:.*filename=".*.doc":Prehistoric documents from M$
  ^X-QHPSI:.*Virus found: Virus email from M$
+.EE
 
 By default the pattern is matched in both the headers and the body
 The word -header or -body can be appended (with colon \fB:\fR as a
@@ -815,130 +741,85 @@ separator) to the comment to run bodycheck only on the mail header or mail
 body respectively. The word blackhole can be appended to -header or -body
 to silently discard the email in case of a match. All attemts for emails
 which get rejected when they match a pattern get logged. The bodycheck
-control gets enabled if the environment variable
-.B BODYCHECK
-is set.
-The filename can be overriden by the environment variable
-.B BODYCHECK
-provided
-that the value of
-.B BODYCHECK
-environment variable is non-empty.
-e.g. BODYCHECK=bodycheck.paranoid
+control gets enabled if the environment variable \fBBODYCHECK\fR is set.
+The filename can be overriden by the environment variable \fBBODYCHECK\fR
+provided that the value of \fBBODYCHECK\fR environment variable is
+non-empty. e.g. BODYCHECK=bodycheck.paranoid
 
 .TP 5
 .I badrcptto
-Unacceptable envelope recipient addresses.
-.B qmail-smtpd
-will reject every incoming message
-if the envelope recipient address is listed in
-.IR badrcptto .
-This control file is complementary to
-.IR badmailfrom .
-A line in
-.I badrcptto
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I badrcptto
-can also be in cdb format. if \fIbadrcptto\fR.\fIcdb\fR file is present, it
-will be searched first. \fIbadrcptto\fR.\fIcdb\fR can be built using
-\fBqmail\fR-\fBcdb\fR(8).  The filename can be overriden by the environment variable
-.BR BADRCPTTO .
-You can set QREGEX environment variable if you want to use regex patterns
-for addresses in \fIBADRCPTTO\fR.
+Unacceptable envelope recipient addresses. \fBqmail-smtpd\fR will reject
+every incoming message if the envelope recipient address is listed in
+\fIbadrcptto\fR. This control file is complementary to \fIbadmailfrom\fR. A
+line in \fIbadrcptto\fR may be of the form \fB@\fIhost\fR\fR, meaning every
+address at \fIhost\fR. \fBbadrcptto\fR can also be in cdb format. if
+\fIbadrcptto\fR.\fIcdb\fR file is present, it will be searched first.
+\fIbadrcptto\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8). The
+filename can be overriden by the environment variable \fBBADRCPTTO\fR. You
+can set QREGEX environment variable if you want to use regex patterns for
+addresses in \fIBADRCPTTO\fR.
 
 .TP 5
 .I badrcptpatterns
 employes the same filtering logic for the envelope recipient as
-.IR badmailpatterns .
-It allows
-.B qmail-smtpd
-to reject SPAM E-Mail including the signature
+\fIbadmailpatterns\fR. It allows \fBqmail-smtpd\fR to reject SPAM E-Mail
+including the signature
 
 .EX
   *\\[dd.dd.dd.dd\\]*
 .EE 
 
-in the
-.IR badrcptpatterns
-file, where dd.dd.dd is the IP address in brackets. 
-The filename can be overriden by the environment variable
-.BR BADRCPTPATTERNS .
-\fIbadrcptpatterns\fR gets disabled of you set \fBQREGEX\fR environment
-variable. \fIbadrcptpatterns\fR uses simple shell-style pattern matching
-unlike regular expressions used by setting \fBQREGEX\fR environment
-variable. You can use regex patterns in \fIbadrcpt\fR itself if
-\fBQREGEX\fR is enabled.
+in the \fIbadrcptpatterns\fR file, where dd.dd.dd is the IP address in
+brackets. The filename can be overriden by the environment variable
+\fBBADRCPTPATTERNS\fR. \fIbadrcptpatterns\fR gets disabled of you set
+\fBQREGEX\fR environment variable. \fIbadrcptpatterns\fR uses simple
+shell-style pattern matching unlike regular expressions used by setting
+\fBQREGEX\fR environment variable. You can use regex patterns in
+\fIbadrcpt\fR itself if \fBQREGEX\fR is enabled.
 
 .TP 5
 .I goodrcptto
 If CHECKRECIPIENT environment variable is defined, user status check will
 not be carried out for addresses listed in this file. Addresses listed in
-this file will additionally bypass
-.IR badrcptto ,
-.IR badrcptpatterns ,
-.I blackholedrcpt
-and
-.IR blackholedrcptpatterns .
-A line in
-.I goodrcptto
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I goodrcptto
-can also be in cdb format. If
-.I goodrcptto.cdb
-is present, it will be searched first.
-The filename can be overriden by the environment variable
-.BR GOODRCPTTO .
-You can set QREGEX environment variable if you want to use regex patterns
-for good envelope recipient addresses.
+this file will additionally bypass \fIbadrcptto\fR, \fIbadrcptpatterns\fR,
+\fIblackholedrcp\fR and \fIblackholedrcptpatterns\fR. A line in
+\fIgoodrcptto\fR may be of the form \fB@\fIhost\fR\fR, meaning every
+address at \fIhost\fR. \fIgoodrcptto\fR can also be in cdb format. If
+\fIgoodrcptto.cdb\fR is present, it will be searched first. The filename
+can be overriden by the environment variable \fBGOODRCPTTO\fR. You can set
+QREGEX environment variable if you want to use regex patterns for good
+envelope recipient addresses.
 
 .TP 5
 .I goodrcptpatterns
 REGEX patterns of envelope recipient addresses which should bypass
 CHECKRECIPIENT checks. The filename can be overriden by the environment
-variable
-.BR GOODRCPTPATTERNS .
-\fIgoodrcptpatterns\fR gets disabled of you set \fBQREGEX\fR environment
-variable. \fIgoodrcptpatterns\fR uses simple shell-style pattern matching
-unlike regular expressions used by setting \fBQREGEX\fR environment
-variable. You can use regex patterns in \fIgoodrcpt\fR itself if
-\fBQREGEX\fR is enabled.
+variable \fBGOODRCPTPATTERNS\fR. \fIgoodrcptpatterns\fR gets disabled of
+you set \fBQREGEX\fR environment variable. \fIgoodrcptpatterns\fR uses
+simple shell-style pattern matching unlike regular expressions used by
+setting \fBQREGEX\fR environment variable. You can use regex patterns in
+\fIgoodrcpt\fR itself if \fBQREGEX\fR is enabled.
 
 .TP 5
 .I blackholedsender
 Envelope sender address causing delivery of mail to a blackhole.
-.B qmail-smtpd
-will carry on the SMTP connection without writing the mail to the queue
-after recognizing an envelope sender address listed in
-.IR blackholedsender .
-The peer (Client) is notified of success. This is called blackholing where
-the mail is forever lost. A line in
-.I blackholedsender
-may be of the form
-.BR \fI@host ,
-meaning every address at
-.IR host .
-.I blackholedsender
-can also be in cdb format. If
-.I blackholedsender.cdb
-is present, it will be searched first.
-The filename can be overriden by the environment variable
-.IR BLACKHOLEDSENDER .
+\fBqmail-smtpd\fR will carry on the SMTP connection without writing the
+mail to the queue after recognizing an envelope sender address listed in
+\fIblackholedsender\fR. The peer (Client) is notified of success. This is
+called blackholing where the mail is forever lost. A line in
+\fIblackholedsender\fR may be of the form \fB\fI@host\fR\fR, meaning every
+address at \fIhost\fR. \fIblackholedsender\fR can also be in cdb format. If
+\fIblackholedsender.cdb\fR is present, it will be searched first. The
+filename can be overriden by the environment variable \fBBLACKHOLEDSENDER\fR
 You can set QREGEX environment variable if you want to use regex patterns
 for blackholed envelope sender addresses.
 
 .TP 5
 .I blackholedpatterns
-Gives 
-.B qmail-smtpd 
-the ability to blackhole E-Mails by comparing the sender  
-address with a REGEX pattern in 
-.IR blackholedpatterns . 
+Gives \fBqmail-smtpd\fR the ability to blackhole E-Mails by comparing the
+sender address with a REGEX pattern in \fIblackholedpatterns\fR.
+
+.EX
 Example:
 
   *@earthlink.net
@@ -946,14 +827,14 @@ Example:
   [0-9][0-9][0-9][0-9][0-9]@[0-9][0-9][0-9].com
   answerme@save*
   *%*
+.EE
 
 .I blackholedpatterns
 file with this contents stops all mail from Earthlink except from
 fred@earthlink.net. It also stops all mail with addresses like:
-12345@123.com and answerme@savetrees.com. Further, any E-Mail with       
-a sender address containing a percent sign (%) is rejected.
-The filename can be overriden by the environment variable
-.IR BLACKHOLEDPATTERNS .
+12345@123.com and answerme@savetrees.com. Further, any E-Mail with a sender
+address containing a percent sign (%) is rejected. The filename can be
+overriden by the environment variable \fIBLACKHOLEDPATTERNS\fR.
 \fIblackholedpatterns\fR gets disabled of you set \fBQREGEX\fR environment
 variable. \fIblackholedpatterns\fR uses simple shell-style pattern matching
 unlike regular expressions used by setting \fBQREGEX\fR environment
@@ -963,38 +844,25 @@ variable. You can use regex patterns in \fIblackholedsender\fR itself if
 .TP 5
 .I blackholedrcpt
 Envelope recipient address causing delivery of mail to a blackhole.
-.B qmail-smtpd
-will cause the mail not to be written to the queue. However the client
-will be notified of success.
-A line in
-.I blackholedrcpt
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I blackholedrcpt
-can also be in cdb format. If
-.I blackholedrcpt.cdb
-is present, it will be searched first.
-The filename can be overriden by the environment variable
-.BR BLACKHOLERCPT .
+\fBqmail-smtpd\fR will cause the mail not to be written to the queue.
+However the client will be notified of success. A line in
+\fIblackholedrcpt\fR may be of the form \fB@\fIhost\fR\fR, meaning every
+address at \fIhost\fR. \fIblackholedrcpt\fR can also be in cdb format. If
+\fIblackholedrcpt.cdb\fR is present, it will be searched first. The
+filename can be overriden by the environment variable \fBBLACKHOLERCPT\fR.
 You can set QREGEX environment variable if you want to use regex patterns
 for blackholed envelope recipient addresses.
 
 .TP 5
 .I blackholedrcptpatterns
-Gives
-.B qmail-smtpd
-the ability to blackhole E-Mails by comparing the recipient address with a
-REGEX pattern in
-.IR blackholedrcptpatterns .
-The filename can be overriden by the environment variable
-.BR BLACKHOLERCPTPATTERNS .
-\fIblackholedrcptpatterns\fR gets disabled of you set \fBQREGEX\fR
-environment variable. \fIblackholedrcptpatterns\fR uses simple shell-style
-pattern matching unlike regular expressions used by setting \fBQREGEX\fR
-environment variable. You can use regex patterns in \fIblackholedrcpt\fR
-itself if \fBQREGEX\fR is enabled.
+Gives \fBqmail-smtpd\fR the ability to blackhole E-Mails by comparing the
+recipient address with a REGEX pattern in \fIblackholedrcptpatterns\fR. The
+filename can be overriden by the environment variable
+\fBBLACKHOLERCPTPATTERN\fR. \fIblackholedrcptpatterns\fR gets disabled of
+you set \fBQREGEX\fR environment variable. \fIblackholedrcptpatterns\fR
+uses simple shell-style pattern matching unlike regular expressions used by
+setting \fBQREGEX\fR environment variable. You can use regex patterns in
+\fIblackholedrcpt\fR itself if \fBQREGEX\fR is enabled.
 
 .TP 5
 .I hostaccess
@@ -1027,58 +895,43 @@ the control file, domains not matching the pair will still be allowed.
 
 .TP 5
 .I maxcmdlen
-When a clients sends a commandline which is longer than
-.IR maxcmdlen ,
+When a clients sends a commandline which is longer than \fImaxcmdlen\fR,
 than the client gets tarpitted and the connection is closed.
 
 .TP 5
 .I spamignore
 envelope sender addresses which should bypass spam filter (whitelisted).
-.B qmail-smtpd
-will unset SPAMFILTER environment variable for a message
-if the envelope sender address is listed in
-.IR spamignore .
-A line in
-.I spamignore
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-If SPAMFILTER is not defined, 
-.B qmail-multi
-does not apply spam filter on the message See
-.B qmail-multi(8)
-for more details.
-.I spamignore
-can also be in cdb format. If
-.I spamignore.cdb
-is present, it will be searched first.
-The filename can be overriden by the environment variable
-.BR SPAMIGNORE .
-You can set QREGEX environment variable if you want to use regex patterns for
-whitelised envelope sender addresses.
+\fBqmail-smtpd\fR will unset SPAMFILTER environment variable for a message
+if the envelope sender address is listed in \fIspamignore\fR. A line in
+\fIspamignore\fR may be of the form \fB@\fIhost\fR\fR, meaning every
+address at \fIhost\fR. If SPAMFILTER is not defined, \fBqmail-multi\fR does
+not apply spam filter on the message See \fBqmail-multi\fR(8) for more details.
+\fIspamignore\fR can also be in cdb format. If \fIspamignore.cdb\fR is
+present, it will be searched first. The filename can be overriden by the
+environment variable \fBSPAMIGNORE\fR. You can set QREGEX environment
+variable if you want to use regex patterns for whitelised envelope sender
+addresses.
 
 .TP 5
 .I spamignorepatterns
 REGEX patterns of envelope sender addresses which should bypass spam filter.
 The filename can be overriden by the environment variable
-.BR SPAMIGNOREPATTERNS .
-\fIspamignorepatterns\fR gets disabled of you set \fBQREGEX\fR environment
-variable. \fIspamignorepatterns\fR uses simple shell-style pattern matching
-unlike regular expressions used by setting \fBQREGEX\fR environment
-variable.  You can use regex patterns in \fIspamignore\fR itself if
-\fBQREGEX\fR is enabled.
+\fBSPAMIGNOREPATTERNS\fR. \fIspamignorepatterns\fR gets disabled of you
+set \fBQREGEX\fR environment variable. \fIspamignorepatterns\fR uses simple
+shell-style pattern matching unlike regular expressions used by setting
+\fBQREGEX\fR environment variable. You can use regex patterns in
+\fIspamignore\fR itself if \fBQREGEX\fR is enabled.
 
 .TP 5
 .I QREGEX
 
 The files badhelo, badmailfrom, badrcptto, blackholedsender, spamignore,
-relaymailfrom, authdomains, chkrcptdomains, goodrcptto, blackholedrcpt
-can be used with regular expressions if the environment variable QREGEX is
-defined (in which case, the control files badhelopatterns,
-badmailfrompatterns, badrcpttopatterns, blackholedpatterns,
-blackholedrcptpatterns, goodrcptpatterns etc are not required and
-get disabled).
+relaymailfrom, authdomains, chkrcptdomains, chksenderdomains, goodrcptto,
+blackholedrcpt can be used with regular expressions if the environment
+variable QREGEX is defined (in which case, the control files
+badhelopatterns, badmailfrompatterns, badrcpttopatterns,
+blackholedpatterns, blackholedrcptpatterns, goodrcptpatterns etc are not
+required and get disabled).
 
 # drop everything containing the word spam
 
@@ -1097,13 +950,9 @@ For badrcptto you then can have the following
 
 .TP 5
 .I maxrecipients 
-maxrecipients is the number of RCPT TO:'s
-.B qmail-smtpd
-will accept in a SMTP session.
-Default: 0 which means no restriction.
-The environment variable 
-.B MAXRECIPIENTS
-overrides the value in this control file.
+maxrecipients is the number of RCPT TO:'s \fBqmail-smtpd\fR will accept in
+a SMTP session. Default: 0 which means no restriction. The environment
+variable \fBMAXRECIPIENTS\fR overrides the value in this control file.
 
 .TP 5
 .I databytes
@@ -1149,19 +998,18 @@ This can be helpful to trap junk SMTP traffic (well-behaved MTAs will wait
 for the welcome prompt before sending). Time enough to discourage a typical
 Spambot's SMTP client from continuing the SMTP session (the session will be
 aborted by the client). Setting of GREETDELAY does not harm 'regular' mail
-clients, but will reduce Spam traffic. It has been argued, that the sleeping
-.B qmail-smtpd
-blocks local resources and it should be better to send the client a 55x
-reply (in case of protocol violations) by having a negative value for the
-greet delay. However, one should keep in mind, that not only the resources
-on the mail server are used, but in addition those of the spam mail sender
-are blocked for that particular session. Thus, the
-.B GREETDELAY
-will not only save you for spam mails, but unlike Greylisting and/or
-filtering a la SpamAssassin, this is the only mean to really reduce the
-overall amount of spam because the timeslot required for the spam sender to
-deliver messages (whether successfully or unsuccessfully) is raised from
-typically one second to (<=) GREETDELAY seconds.
+clients, but will reduce Spam traffic. It has been argued, that the
+sleeping \fBqmail-smtpd\fR blocks local resources and it should be better
+to send the client a 55x reply (in case of protocol violations) by having a
+negative value for the greet delay. However, one should keep in mind, that
+not only the resources on the mail server are used, but in addition those
+of the spam mail sender are blocked for that particular session. Thus, the
+\fBGREETDELAY\fR will not only save you for spam mails, but unlike
+Greylisting and/or filtering a la SpamAssassin, this is the only mean to
+really reduce the overall amount of spam because the timeslot required for
+the spam sender to deliver messages (whether successfully or
+unsuccessfully) is raised from typically one second to (<=) GREETDELAY
+seconds.
 
 The delay can also be set via the environment variable
 .BR GREETDELAY ,
@@ -1170,7 +1018,7 @@ which is typically set by means of
 rule-set file. A value of GREETDELAY="30" will delay the qmail-smtpd's
 greeting for 30 seconds. A value of GREETDELAY="-30" will delay the
 qmail-smtpd's greeting by 30 seconds and as well as terminate the session
-if any input is received before 30 seconds.  If the environment variable
+if any input is received before 30 seconds. If the environment variable
 .B GREETDELAY
 is set, it overrides
 .I greetdelay
@@ -1225,23 +1073,23 @@ Local IP addresses can be displayed by means of the program
 \fBqmail-smtpd\fR will ignore detected local IP addresses included in
 \fInotipme\fR. This has precedence over \fImoreipme\fR. \fImoreipme\fR,
 \fInotipme\fR can be used in some configurations that involve network
-address translation or port forwarding.  It prevents a problem caused
+address translation or port forwarding. It prevents a problem caused
 by an MX or other mail routing directive instructing qmail to connect to
-itself without realizing it's connecting to itself.  When this happens,
+itself without realizing it's connecting to itself. When this happens,
 it accepts the message, finds out where to deliver it to (itself), and
-promptly reconnects to itself to deliver the message.  Eventually, when
+promptly reconnects to itself to deliver the message. Eventually, when
 it has done this 20 or 30 times, it will give up and bounce the message,
 but not before sucking up all of your CPU while it's happening.
 
 It may also be useful in some configurations that have multiple qmail
-servers configured on different interfaces of the same system.  qmail
+servers configured on different interfaces of the same system. qmail
 will normally refuse to deliver mail by SMTP to the machine it's
 running on, but with multiple copies of qmail, you may want to prevent
 this behavior.
 
 Normally, qmail can detect what IP addresses refer to itself by getting
 a list of all network interfaces with IP addresses from the operating
-system.  It uses this list to determine whether connecting to an address
+system. It uses this list to determine whether connecting to an address
 will cause it to connect to itself, and avoid the situation (it calls
 the perm_ambigmx() function, which prints the message:
 
@@ -1251,7 +1099,7 @@ the perm_ambigmx() function, which prints the message:
 
 But in situations where the OS is not aware of all IP addresses that
 connect back to itself, this detection fails, causing the CPU-sucking
-phenomenon described above.  This can happen if there is a network
+phenomenon described above. This can happen if there is a network
 address translation device in front of the qmail server, such as a
 load-balancer or a router which allows you to share one IP address among
 several machines; if there is a port forwarder forwarding connections
@@ -1345,7 +1193,7 @@ may be wildcarded:
 .EX
    192.168.0.1:
    192.168.1.:
-.EE
+EE
 
 .TP 5
 \fIrelaydomains\fR
@@ -1493,7 +1341,7 @@ variable \fBTARPITCOUNT\fR can be used instead.
 .TP 5
 \fItarpitdelay\fR
 tarpitdelay is the time in seconds of delay to be introduced after each
-subsequent RCPT TO:.  Default: 5. The environment variable
+subsequent RCPT TO:. Default: 5. The environment variable
 \fBTARPITDELAY\fR can be used instead.
 
 .TP 5
@@ -1586,7 +1434,7 @@ should at least also use tcprules (to modify \fBSPFBEHAVIOR\fR).
 
 .TP 5
 \fIspfipv6\fR
-You can turn on spf for ipv6 connections by setting to  value 1; 0 to
+You can turn on spf for ipv6 connections by setting to value 1; 0 to
 disable. You can override this control file with environment variable
 \fBUSE_SPFIPV6\fR.
 
@@ -1646,16 +1494,18 @@ will set 10 as the remote concurrency for all emails sent to yahoo.com
 .TP 5
 \fIfrom.envrules\fR
 Specific environment variables can be set for specific senders.
-The format of this file is of the form                                       
+The format of this file is of the form
+
+.EX
 pat:envar1=val,envar2=val,...]
+.EE
+
 where \fIpat\fR is a regular expression which matches a sender. envar1,
-envar2 are list of environment variables to be set. If
-.I val
-is omitted, the environment variable is unset.
+envar2 are list of environment variables to be set. If \fIval\fR is
+omitted, the environment variable is unset.
 
 The name of the control file can be overriden by the environment
-variable
-.BR FROMRULES .
+variable \fBFROMRULES\fR.
 
 Example:
   answerme@save*:DATABYTES=2000000, MAXRECIPIENT=2,QMAILQUEUE=

@@ -367,8 +367,11 @@ static char    *spfFnp = NULL;
 /*- check recipients using inquery chkrcptdomains */
 static int      chkrcptok = 0;
 static stralloc chkrcpt = { 0 };
-
 static CONSTMAP mapchkrcpt;
+/*- check senders using inquery chksndrdomains */
+static int      chksndrok = 0;
+static stralloc chksndr = { 0 };
+static CONSTMAP mapchksndr;
 /*- TARPIT Check Variables */
 static int      tarpitcount = 0;
 static int      tarpitdelay = 5;
@@ -896,7 +899,7 @@ addrallowed(char *rcpt)
 		die_control("rcpthosts");
 #ifdef TLS
 	if (r == 0 && tls_verify())
-		r = -2;
+		r = 1;
 #endif
 	return r;
 }
@@ -996,7 +999,7 @@ log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notif
 	for (ptr = recipients + 1, idx = 0; idx < rcpt_len; idx++) {
 		if (!recipients[idx]) {
 			/*-
-			 * write data to /run/indimail/logfifo provided 
+			 * write data to /run/indimail/logfifo provided
 			 * by qmail-logfifo service and get X-Bogosity
 			 * line in tmpLine
 			 */
@@ -1263,7 +1266,7 @@ err_badbounce()
 void
 err_bmf(char *arg1)
 {
-	logerr(1, "Invalid SENDER address: MAIL from <", arg1, ">\n", NULL);
+	logerr(1, "Invalid SENDER address: BAD MAIL from <", arg1, ">\n", NULL);
 	logflush();
 	out("553 sorry, your envelope sender has been denied (#5.7.1)\r\n", NULL);
 	flush();
@@ -1967,7 +1970,7 @@ recipients_ext(char *rcpt)
  *  0: if user is found
  */
 int
-check_recipient_pwd(char *rcpt, int len)
+check_user_pwd(char *rcpt, int len)
 {
 	int             fd, match, i;
 	char            inbuf[4096];
@@ -1975,7 +1978,7 @@ check_recipient_pwd(char *rcpt, int len)
 	substdio        pwss;
 
 	if ((fd = open_read("/etc/passwd")) == -1) {
-		logerr(1, "passwd database error\n", NULL);
+		logerr(1, "unable to open /etc/passwd\n", NULL);
 		logflush();
 		out("451 Sorry, I'm unable to read passwd database (#4.3.0)\r\n", NULL);
 		flush();
@@ -2041,7 +2044,7 @@ load_virtual()
  * -1: System Error
  */
 int
-check_recipient_sql(char *rcpt, int len)
+check_user_sql(char *rcpt, int len)
 {
 	char           *ptr, *errstr;
 	void           *(*inquery) (char, char *, char *);
@@ -2531,10 +2534,17 @@ open_control_files1()
 		die_control("relaymailfrom");
 	if (rmfok && !constmap_init(&maprmf, rmf.s, rmf.len, 0))
 		die_nomem();
+
 	if ((chkrcptok = control_readfile(&chkrcpt, "chkrcptdomains", 0)) == -1)
 		die_control("chkrcptdomains");
 	if (chkrcptok && !constmap_init(&mapchkrcpt, chkrcpt.s, chkrcpt.len, 0))
 		die_nomem();
+
+	if ((chksndrok = control_readfile(&chksndr, "chksenderdomains", 0)) == -1)
+		die_control("chksenderdomains");
+	if (chksndrok && !constmap_init(&mapchksndr, chksndr.s, chksndr.len, 0))
+		die_nomem();
+
 	if ((chkdomok = control_readfile(&chkdom, "authdomains", 0)) == -1)
 		die_control("authdomains");
 	if (chkdomok && !constmap_init(&mapchkdom, chkdom.s, chkdom.len, 0))
@@ -3493,13 +3503,180 @@ mailfrom_parms(char *arg)
 
 static int      f_envret = 0, d_envret = 0, a_envret = 0;
 
+int
+check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
+		int in_rcpthosts)
+{
+	char           *x;
+	PASSWD         *pw;
+	int             at, isLocal;
+	int            *u_not_found, *i_inactive;
+
+	switch (address_match("chksenderdomains", &addr, chksndrok ? &chksndr : 0,
+				chksndrok ? &mapchksndr : 0, 0, &errStr))
+	{
+	case 1: /*- in chksenderdomains */
+		chksndrok = 0;
+		break;
+	case 0:
+		break;
+	case -1:
+		die_nomem();
+	default:
+		err_addressmatch(errStr, "chksenderdomains");
+		return -1;
+	}
+	if (chksndrok)
+		return 0;
+	if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1)
+		isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
+	else
+		isLocal = 1;
+	if (isLocal) {
+		if (check_user_pwd(addr.s, at)) {
+			logerr(1, "mail from invalid user <", mailfrom.s, ">\n", NULL);
+			logflush();
+			sleep(5); /*- Prevent DOS */
+			out("553 authorization failure (#5.7.1)\r\n", NULL);
+			flush();
+			return 1;
+		}
+	} else
+	if (in_rcpthosts) {
+		if (!(pw = (*inquery) (PWD_QUERY, mailfrom.s, 0))) {
+			if (!(u_not_found = (int *) getlibObject(lib_fn, &phandle, "userNotFound", &x))) {
+				err_library(x);
+				return -1;
+			}
+			if (*u_not_found) {
+				/*-
+				 * Accept the mail as denial could be stupid
+				 * like the vrfy command
+				 */
+				logerr(1, "mail from invalid user <", mailfrom.s, ">\n", NULL);
+				logflush();
+				sleep(5); /*- Prevent DOS */
+				out("553 authorization failure (#5.7.1)\r\n", NULL);
+				flush();
+				return 1;
+			} else {
+				logerr(1, "Database error\n", NULL);
+				logflush();
+				out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
+				flush();
+				return 1;
+			}
+		} else {
+			if (!(i_inactive = (int *) getlibObject(lib_fn, &phandle, "is_inactive", &x))) {
+				err_library(x);
+				return -1;
+			}
+			if (*i_inactive || pw->pw_gid & NO_SMTP) {
+				logerr(1, "SMTP Access denied to <", mailfrom.s, "> ",
+						*i_inactive ? "user inactive\n" : "No SMTP Flag\n", NULL);
+				logflush();
+				out("553 authorization failure (#5.7.1)\r\n", NULL);
+				flush();
+				return 1;
+			}
+		}
+	} /* if (in_rcpthosts) */
+	/*-
+	 * ANTISPOOFING
+	 * Delivery to local domains
+	 * If the mailfrom is local do not allow receipt without
+	 * authentication. (do not allow spoofing for local users)
+	 * This will force setting of remoteinfo variable as the
+	 * authenticated user
+	 */
+	if (!relayclient && !authd) {
+		if (pop_bef_smtp(mailfrom.s))	  /*- will set the variable authenticated */
+			return -1;	/*- temp error */
+		if (authenticated != 1) { /*- in case pop-bef-smtp also is negative */
+			logerr(1, "unauthenticated local SENDER address: MAIL from <",
+					mailfrom.s, ">\n", NULL);
+			logflush();
+			out("530 authentication required for local users (#5.7.1)\r\n", NULL);
+			flush();
+			return 1;
+		}
+	}
+	x = env_get("MASQUERADE");
+	if ((!x || (x && *x)) && authd) {
+		int             at1, at2, iter_pass, flag;
+		char           *dom1, *dom2, *allowed;
+
+		if (mailfrom.s[at1 = str_rchr(mailfrom.s, '@')]) {
+			dom1 = mailfrom.s + at1 + 1;
+			if (!addrallowed(mailfrom.s)) {
+				err_nogateway(mailfrom.s, 0, 1);
+				return 1;
+			}
+			mailfrom.s[at1] = 0;
+			/*- this loop will do two passes */
+			for (flag = 0, iter_pass = 0;; iter_pass++) {
+				if (x && *x) /*- allow x first and if it does not match, allow remoteinfo */
+					allowed = iter_pass ? remoteinfo : x;
+				else {
+					allowed = remoteinfo;
+					iter_pass++;
+				}
+				/*-
+				 * domain portion of the authenticated user
+				 * or the value of MASQUERADE
+				 */
+				if (allowed[at2 = str_rchr(allowed, '@')]) {
+					dom2 = allowed + at2 + 1;
+					allowed[at2] = 0;
+					if (str_diff(mailfrom.s, allowed)) {
+						allowed[at2] = '@';
+						flag = 1;
+					}
+					allowed[at2] = '@';
+					/*- now compare real domains */
+					if (domain_compare(dom1, dom2) == 1)
+						flag = 1;
+				} else {
+					if (str_diff(mailfrom.s, allowed))
+						flag = 1;
+					/*- now compare real mailfrom domain with $DEFAULT_DOMAIN */
+					if ((dom2 = env_get("DEFAULT_DOMAIN"))) {
+						if (domain_compare(dom1, dom2) == 1)
+							flag = 1;
+					}
+				}
+				if (!flag) {
+					mailfrom.s[at1] = '@';
+					break;
+				}
+				if (iter_pass == 1) {
+					mailfrom.s[at1] = '@';
+					err_nogateway(mailfrom.s, 0, 1);
+					break;
+				}
+			} /*- for (;;) */
+		} else { /*- mailfrom doesn't have @ */
+			if (x && *x) {
+				if (str_diff(x, remoteinfo)) {
+					err_nogateway(mailfrom.s, 0, 1);
+					return 1;
+				}
+			} else {
+				if (str_diff(mailfrom.s, remoteinfo)) {
+					err_nogateway(mailfrom.s, 0, 1);
+					return 1;
+				}
+			}
+		}
+	} /* if ((!x || (x && *x)) && authd) */
+	return 0;
+}
+
 void
 smtp_mail(char *arg)
 {
-	PASSWD         *pw;
 	char           *x, *ptr;
-	int             ret, i;
-	int            *u_not_found, *i_inactive;
+	int             ret, i, in_rcpthosts = -1;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
 #endif
@@ -3714,6 +3891,20 @@ smtp_mail(char *arg)
 			return;
 		}
 	}
+	/*-
+	 * closed user group mailing
+	 * allow only sender domains listed in rcpthosts to
+	 * send mails.
+	 */
+	if (env_get("CUGMAIL")) {
+		if (!(in_rcpthosts = addrallowed(addr.s))) {
+			logerr(1, "Invalid CUG SENDER address: MAIL from <", mailfrom.s, ">\n", NULL);
+			logflush();
+			out("553 sorry, this MTA is a closed user group system (#5.7.1)\r\n", NULL);
+			flush();
+			return;
+		}
+	} /*- if (env_get("CUGMAIL")) */
 	if (!hasvirtual)
 		goto nohasvirtual;
 	if (!(ptr = load_virtual()))
@@ -3723,139 +3914,15 @@ smtp_mail(char *arg)
 		err_library(x);
 		return;
 	}
-	/*-
-	 * closed user group mailing
-	 * allow only sender domains listed in rcpthosts to
-	 * send mails.
-	 */
-	if (env_get("CUGMAIL")) {
-		if (!addrallowed(addr.s)) {
-			logerr(1, "Invalid SENDER address: MAIL from <", mailfrom.s, ">\n", NULL);
-			logflush();
-			out("553 authorization failure (#5.7.1)\r\n", NULL);
-			flush();
-			return;
-		}
-		if (!(pw = (*inquery) (PWD_QUERY, mailfrom.s, 0))) {
-			if (!(u_not_found = (int *) getlibObject(ptr, &phandle, "userNotFound", &x))) {
-				err_library(x);
-				return;
-			}
-			if (*u_not_found) {
-				/*-
-				 * Accept the mail as denial could be stupid
-				 * like the vrfy command
-				 */
-				logerr(1, "mail from invalid user <", mailfrom.s, ">\n", NULL);
-				logflush();
-				sleep(5); /*- Prevent DOS */
-				out("553 authorization failure (#5.7.1)\r\n", NULL);
-				flush();
-				return;
-			} else {
-				logerr(1, "Database error\n", NULL);
-				logflush();
-				out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
-				flush();
-				return;
-			}
-		} else {
-			if (!(i_inactive = (int *) getlibObject(ptr, &phandle, "is_inactive", &x))) {
-				err_library(x);
-				return;
-			}
-			if (*i_inactive || pw->pw_gid & NO_SMTP) {
-				logerr(1, "SMTP Access denied to <", mailfrom.s, "> ",
-						*i_inactive ? "user inactive\n" : "No SMTP Flag\n", NULL);
-				logflush();
-				out("553 authorization failure (#5.7.1)\r\n", NULL);
-				flush();
-				return;
-			}
-		}
-	} /*- if (env_get("CUGMAIL")) */
-	/*-
-	 * ANTISPOOFING
-	 * Delivery to local domains
-	 * If the mailfrom is local and rcptto is local, do not allow
-	 * receipt without authentication (unless MASQUERADE is set).
-	 * (do not allow spoofing for local users)
-	 */
-	if (!relayclient && !authd && env_get("ANTISPOOFING") && addrallowed(mailfrom.s)) {
-		if (pop_bef_smtp(mailfrom.s))	  /*- will set the variable authenticated */
-			return;	/*- temp error */
-		if (authenticated != 1) { /*- in case pop-bef-smtp also is negative */
-			logerr(1, "unauthenticated local SENDER address: MAIL from <",
-					mailfrom.s, ">\n", NULL);
-			logflush();
-			out("530 authentication required for local users (#5.7.1)\r\n", NULL);
-			flush();
-			return;
-		}
+	if (in_rcpthosts == -1)
+		in_rcpthosts = addrallowed(addr.s);
+	i = in_rcpthosts;
+	if (!in_rcpthosts && (authenticated || authd)) {
+		if ((in_rcpthosts = addrallowed(remoteinfo)) == 1) /*- for the authenticated user */
+			in_rcpthosts = 2;
 	}
-	x = env_get("MASQUERADE");
-	if ((!x || (x && *x)) && authd) {
-		int             at1, at2, iter_pass, flag;
-		char           *dom1, *dom2, *allowed;
-
-		if (mailfrom.s[at1 = str_rchr(mailfrom.s, '@')]) {
-			dom1 = mailfrom.s + at1 + 1;
-			if (!addrallowed(mailfrom.s)) {
-				err_nogateway(mailfrom.s, 0, 1);
-				return;
-			}
-			mailfrom.s[at1] = 0;
-			for (flag = 0, iter_pass = 0;; iter_pass++) {
-				if (x && *x)
-					allowed = iter_pass ? remoteinfo : x;
-				else {
-					allowed = remoteinfo;
-					iter_pass++;
-				}
-				if (allowed[at2 = str_rchr(allowed, '@')]) {
-					dom2 = allowed + at2 + 1;
-					allowed[at2] = 0;
-					if (str_diff(mailfrom.s, allowed)) {
-						allowed[at2] = '@';
-						flag = 1;
-					}
-					allowed[at2] = '@';
-					/*- now compare domains */
-					if (domain_compare(dom1, dom2) == 1)
-						flag = 1;
-				} else {
-					if (str_diff(mailfrom.s, allowed))
-						flag = 1;
-					/*- now compare mailfrom domain with $DEFAULT_DOMAIN */
-					if ((dom2 = env_get("DEFAULT_DOMAIN"))) {
-						if (domain_compare(dom1, dom2) == 1)
-							flag = 1;
-					}
-				}
-				if (!flag) {
-					mailfrom.s[at1] = '@';
-					break;
-				}
-				if (iter_pass == 1) {
-					mailfrom.s[at1] = '@';
-					err_nogateway(mailfrom.s, 0, 1);
-					break;
-				}
-			} /*- for (;;) */
-		} else {
-			if (x && *x) {
-				if (str_diff(mailfrom.s, x) && str_diff(mailfrom.s, remoteinfo)) {
-					err_nogateway(mailfrom.s, 0, 1);
-					return;
-				}
-			} else {
-				if (str_diff(mailfrom.s, remoteinfo)) {
-					err_nogateway(mailfrom.s, 0, 1);
-					return;
-				}
-			}
-		}
-	}
+	if (in_rcpthosts > 0 && (x = env_get("CHECKSENDER")) && check_sender(inquery, ptr, i))
+		return;
 nohasvirtual:
 #ifdef USE_SPF
 	flagbarfspf = 0;
@@ -3972,7 +4039,8 @@ nohasvirtual:
 void
 smtp_rcpt(char *arg)
 {
-	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, at, isLocal, do_srs;
+	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, at,
+					isLocal, do_srs;
 	char           *tmp;
 #if BATV
 	int             ws = -1 /*- was signed */, skip_batv;
@@ -4013,6 +4081,15 @@ smtp_rcpt(char *arg)
 	if (!addrparse(arg)) {
 		err_syntax();
 		return;
+	}
+	if (env_get("CUGMAIL")) {
+		if (!addrallowed(addr.s)) {
+			logerr(1, "Invalid CUG RECIPIENT address: RCPT TO <", addr.s, ">\n", NULL);
+			logflush();
+			out("553 sorry, this MTA is a closed user group system (#5.7.1)\r\n", NULL);
+			flush();
+			return;
+		}
 	}
 #ifdef BATV
 	if (batvok) {
@@ -4198,7 +4275,7 @@ smtp_rcpt(char *arg)
 					isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
 				else
 					isLocal = 1;
-				result = (isLocal ? check_recipient_pwd : check_recipient_sql) (addr.s, at);
+				result = (isLocal ? check_user_pwd : check_user_sql) (addr.s, at);
 				break;
 			case 2:	/* reject if user not found through recipients extension and sql db */
 				if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1)
@@ -4206,7 +4283,7 @@ smtp_rcpt(char *arg)
 				else
 					isLocal = 1;
 				if ((result = !recipients_ext(addr.s)))
-					result = (isLocal ? check_recipient_pwd : check_recipient_sql) (addr.s, at);
+					result = (isLocal ? check_user_pwd : check_user_sql) (addr.s, at);
 				break;
 			case 4:
 				result = 0;
@@ -4233,7 +4310,7 @@ smtp_rcpt(char *arg)
 				return;
 			}
 		}
-	}
+	} /* if (allowed_rcpthosts == 1 && (tmp = env_get("CHECKRECIPIENT"))) */
 	if (max_rcpt_errcount != -1 && rcpt_errcount >= max_rcpt_errcount) {
 		err_rcpt_errcount(mailfrom.s, rcpt_errcount);
 		return;
@@ -6177,9 +6254,9 @@ smtp_auth(char *arg)
 	}
 	switch ((j = authcmds[i].fun(arg)))
 	{
-	case 0:
+	case 0: /* sets remoteinfo and relayclient */
 		relayclient = "";
-	case 3:/*- relayclient is not set, relaying is denied */
+	case 3:/*- sets remoteinfo but not relayclient, relaying is denied */
 		remoteinfo = user.s;
 		if (!env_unset("TCPREMOTEINFO"))
 			die_nomem();

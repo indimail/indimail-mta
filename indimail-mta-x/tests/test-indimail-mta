@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.10 2023-09-25 18:09:35+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.11 2023-09-27 01:52:08+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -8,6 +8,7 @@ testuser=tuser
 myuid=$(id -u)
 mygid=$(id -g)
 real_domain=argos.indimail.org
+ext_domain=gmail.com
 dkim_key=/etc/indimail/control/domainkeys/$real_domain/$(echo $real_domain | cut -d. -f1)
 #
 #
@@ -740,6 +741,134 @@ test_smtp_auth_cram_md5()
 	fi
 }
 
+test_smtp_cugmail()
+{
+	echo 1 > $servicedir/smtpd/variables/CUGMAIL
+	       > $servicedir/smtpd/variables/CHECKRECIPIENT
+	       > $servicedir/smtpd/variables/QUERY_CACHE
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
+	swaks -S -S -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
+		--port $smtp_port > /tmp/swaks.$$
+	ret1=$?
+	l1=$(sed -n 1p < /tmp/swaks.$$)
+	/bin/rm -f /tmp/swaks.$$
+	swaks -S -S -S --to $user@$ext_domain --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" > /tmp/swaks.$$
+	ret2=$?
+	l2=$(sed -n 1p < /tmp/swaks.$$)
+	swaks -S -S -S --to $user@$ext_domain --from $user@$ext_domain --server localhost \
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" > /tmp/swaks.$$
+	ret3=$?
+	l3=$(sed -n 1p < /tmp/swaks.$$)
+	/bin/rm -f /tmp/swaks.$$
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
+	ret4=$?
+	if [ "$l1" = "$l2" -a "$l1" = "$l3" -a "$l1" = "<** 553 sorry, this MTA is a closed user group system (#5.7.1)" ] ; then
+		ret5=0
+	else
+		ret5=1
+	fi
+	check_mail
+	if [ $? -eq 0 -a $ret1 -ne 0 -a $ret2 -ne 0 -a $ret3 -ne 0 -a $ret4 -eq 0 -a $ret5 -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing mail using SMTP with CUGMAIL succeeded"
+	else
+		shutdown_svscan $svpid
+		(
+		echo "  testing mail using SMTP with CUGMAIL failed"
+		echo l1=$l1
+		echo l2=$l2
+		echo l3=$l3
+		echo "$logdir/smtpd/current"
+		cat $logdir/smtpd/current
+		) | less
+		exit 1
+	fi
+}
+
+test_smtp_chk_sender()
+{
+	echo 0 > $servicedir/smtpd/variables/CHECKSENDER
+	       > $servicedir/smtpd/variables/CUGMAIL
+	       > $servicedir/smtpd/variables/CHECKRECIPIENT
+	       > $servicedir/smtpd/variables/QUERY_CACHE
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
+	swaks -S --to $user@$ext_domain --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
+	check_mail
+	ret1=$?
+	swaks --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" |tee /tmp/swaks.$$
+	ret2=$?
+	echo "Press ENTER"
+	read key
+	l1=$(sed -n 1p < /tmp/swaks.$$)
+	/bin/rm -f /tmp/swaks.$$
+	if [ "$l1" = "<** 553 sorry, this MTA does not accept masquerading/forging , auth <mbhangui@argos.indimail.org> #5.7.1" ] ; then
+		ret4=0
+	else
+		ret4=1
+	fi
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
+	ret3=$?
+	> $servicedir/smtpd/variables/CHECKSENDER
+	check_mail
+	if [ $? -eq 0 -a $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing mail using SMTP with CHECKSENDER succeeded"
+	else
+		echo shutdown_svscan $svpid
+		shutdown_svscan $svpid
+		(
+		echo "l1=$l1"
+		echo "  testing mail using SMTP with CHECKSENDER failed"
+		echo "$logdir/smtpd/current"
+		cat $logdir/smtpd/current
+		) | less
+		exit 1
+	fi
+}
+
+test_smtp_surbl()
+{
+	echo /usr/sbin/surblqueue > $servicedir/smtpd/variables/QMAILQUEUE
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
+	(
+	echo This is a test message for surbl
+	echo http://surbl-org-permanent-test-point.com/
+	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
+		--server localhost --port $smtp_port --body - > /tmp/swaks.$$
+	ret1=$?
+	l1=$(sed -n 1p < /tmp/swaks.$$)
+	/bin/rm -f /tmp/swaks.$$
+	if [ "$l1" = "<** 554 message contains an URL listed in SURBL blocklist [http://surbl-org-permanent-test-point.com/]" ] ; then
+		ret2=0
+	else
+		ret2=1
+	fi
+	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 ] ; then
+		tcount=$(expr $tcount + 1)
+		echo "  testing mail using SMTP for SURBL succeeded"
+	else
+		shutdown_svscan $svpid
+		(
+		echo "l1=$l1"
+		echo "  testing mail using SMTP for SURBL failed"
+		echo "$logdir/smtpd/current"
+		cat $logdir/smtpd/current
+		) | less
+		exit 1
+	fi
+}
+
 test_qmail_remote_auth()
 {
 	case $1 in
@@ -1212,7 +1341,11 @@ setup_svscan_without_svscanlog()
 	echo $cntrldir      > $servicedir/smtpd/variables/CONTROLDIR
 	echo $testdir/queue > $servicedir/smtpd/variables/QUEUEDIR
 	echo $certdir       > $servicedir/smtpd/variables/CERTDIR
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	(
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 "
+	printf "$smtp_port $qmail_smtpd $HOSTNAME $testdir/bin/authsmtp "
+	printf "/bin/false 2>&1\n"
+	) > $servicedir/smtpd/run
 	printf "#!/bin/sh\nexec /usr/sbin/multilog t $logdir/smtpd\n" > $servicedir/smtpd/log/run
 	chmod +x $servicedir/smtpd/run
 	chmod +x $servicedir/smtpd/log/run
@@ -1660,6 +1793,7 @@ test_recipients()
 	echo "mediacenter.indimail.org"
 	echo "nocheck.com"
 	) >> $cntrldir/rcpthosts
+	sort -u $cntrldir/rcpthosts -o $cntrldir/rcpthosts
 	echo           3 > $servicedir/smtpd/variables/CHECKRECIPIENT
 	echo $sysconfdir > $servicedir/smtpd/variables/SYSCONFDIR
 	sudo svc -r $servicedir/smtpd
@@ -1871,6 +2005,9 @@ do_svscan_without_svscanlog()
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	test_smtps "testing mail using SMTPS by qmail-smtpd"
 	test_recipients
+	test_smtp_cugmail
+	test_smtp_chk_sender
+	test_smtp_surbl
 	do_autoresponder
 	do_qmail_qfilter
 	test_stop_smtps
@@ -1886,7 +2023,11 @@ do_svscan_with_svscanlog()
 {
 	# start svscan with svscanlog
 	setup_svscan_with_svscanlog
-	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -n $certdir/servercert.pem -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	(
+	printf "#!/bin/sh\nexec envdir ./variables $tcpserver -n $certdir/servercert.pem -u qmaild -g qmail -HR 0 "
+	printf "$smtp_port $qmail_smtpd $HOSTNAME $testdir/bin/authsmtp "
+	printf "/bin/false 2>&1\n"
+	) > $servicedir/smtpd/run
 	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
@@ -1898,8 +2039,6 @@ do_svscan_with_svscanlog()
 	# start svscan with svscanlog and AUTOSCAN
 	echo 1 > $servicedir/.svscan/variables/AUTOSCAN
 	echo 5 > $servicedir/.svscan/variables/SCANINTERVAL
-	#echo 1 > $servicedir/smtpd/variables/SMTPS
-	#printf "#!/bin/sh\nexec envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	start_new_service 1
@@ -1919,7 +2058,7 @@ do_qmail_qfilter()
 	) > $testdir/bin/qfrontend
 	(
 	echo "#!/bin/sh"
-	echo "sed -e 's{abcd{$HOSTNAME{' -e 's{Subject: .*{Subject: Testing qmail-qfilter{'"
+	echo "sed -e 's/abcd/$HOSTNAME/' -e 's/Subject: .*/Subject: Testing qmail-qfilter/'"
 	echo "exit 0"
 	) > $testdir/bin/filter1
 	(
@@ -1935,6 +2074,7 @@ do_qmail_qfilter()
 
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
+	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE
 	chmod +x $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 	(
 	echo "Sending mail from abcd"
@@ -2286,7 +2426,7 @@ do_dkim_tests()
 		if [ $verbose -gt 0 ] ; then
 			echo "testing real domain $real_domain $ktype DKIM record"
 		fi
-		ktype=$(cat $k.pub| grep "k="|sed 's{v=DKIM1;{{'|cut -d= -f2|cut -d';' -f1)
+		ktype=$(cat $k.pub| grep "k="|sed 's/v=DKIM1;//'|cut -d= -f2|cut -d';' -f1)
 		case $ktype in
 			"rsa")
 			enc="2"
@@ -2350,8 +2490,8 @@ do_dkim_tests()
 	(cat /tmp/mail.txt | $bindir/dkim -z 2 -s $real_domain_rsa4096 -z 4 -s $real_domain_ed25519; cat /tmp/mail.txt) | $bindir/dkim -vV >$out 2>/tmp/err.out
 	ret=$?
 	/bin/rm -f /tmp/mail.txt
-	grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-		-e 's{01{rsa-256{' -e 's{02{ed25519{' -e 's{Failure.*{Failure - Correct{'
+	grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+		-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 	if [ $ret -eq 0 ] ; then
 		if [ $verbose -gt 0 ] ; then
 			echo "SUCCESS: [ret=$ret] domain=$real_domain key=$real_domain_rsa4096+$real_domain_ed25519"
@@ -2400,8 +2540,8 @@ do_dkim_tests()
 			DKIMQUEUE=/bin/cat \
 			$qmail_dkim | $bindir/dkim -vV >$out 2>/tmp/err.out
 	ret=$?
-	grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-		-e 's{01{ed25519{' -e 's{02{rsa-256{' -e 's{Failure.*{Failure - Correct{'
+	grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+		-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 	if [ $ret -eq 0 ] ; then
 		if [ $verbose -gt 0 ] ; then
 			echo "SUCCESS: [ret=$ret] domain=$real_domain key=$real_domain_rsa4096+$real_domain_ed25519"
@@ -2447,7 +2587,7 @@ do_dkim_tests()
 			echo "    testing ed25519"
 			;;
 		esac
-		ktype=$(cat $k.pub| grep "k="|sed 's{v=DKIM1;{{'|cut -d= -f2|cut -d';' -f1)
+		ktype=$(cat $k.pub| grep "k="|sed 's/v=DKIM1;//'|cut -d= -f2|cut -d';' -f1)
 		case $ktype in
 			"rsa")
 			enc="2"
@@ -2525,7 +2665,7 @@ do_dkim_tests()
 		esac
 		for j in example.com example.org
 		do
-			selector=$(cat $domainkey_dir/$j/$i.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$j/$i.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			if [ $verbose -gt 0 ] ; then
 				echo "($dkim -z $enc -s $domainkey_dir/$j/$i </tmp/mail.txt;cat /tmp/mail.txt) | $dkim -v -T $selector"
 			fi
@@ -2590,7 +2730,7 @@ do_dkim_tests()
 			if [ $verbose -gt 0 ] ; then
 				echo key $j domain $i
 			fi
-			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			case $j in
 				default)
 				echo "  rsa+ed25519 with rsa-256 selector"
@@ -2602,8 +2742,8 @@ do_dkim_tests()
 			sig_count=$(grep DKIM-Signature /tmp/result.out|wc -l)
 			$dkim -vV -T "$selector" > $out 2>/tmp/err.out < /tmp/result.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-				-e 's{01{rsa-256{' -e 's{02{ed25519{' -e 's{Failure.*{Failure - Correct{'
+			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+				-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				if [ $verbose -gt 0 ] ; then
 					echo "SUCCESS: [ret=$ret]  dkim -s $key1 -s $key2..."
@@ -2662,7 +2802,7 @@ do_dkim_tests()
 			if [ $verbose -gt 0 ] ; then
 				echo key $j domain $i
 			fi
-			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			case $j in
 				default)
 				echo "  rsa+ed25519 with rsa-256 selector"
@@ -2673,8 +2813,8 @@ do_dkim_tests()
 			esac
 			$dkim -vV -T "$selector" >$out 2>/tmp/err.out < /tmp/result.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-				-e 's{01{ed25519{' -e 's{02{rsa-256{' -e 's{Failure.*{Failure - Correct{'
+			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+				-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				if [ $verbose -gt 0 ] ; then
 					echo "SUCCESS: [ret=$ret] domain=$i sig_count=$sig_count $qmail_dkim"
@@ -2733,7 +2873,7 @@ do_dkim_tests()
 			if [ $verbose -gt 0 ] ; then
 				echo key $j domain $i
 			fi
-			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			case $j in
 				dkimkeys1)
 				echo "  rsa+ed25519 with rsa-256 selector"
@@ -2744,8 +2884,8 @@ do_dkim_tests()
 			esac
 			$dkim -vV -T "$selector" >$out 2>/tmp/err.out < /tmp/result.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-				-e 's{01{ed25519{' -e 's{02{rsa-256{' -e 's{Failure.*{Failure - Correct{'
+			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+				-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				if [ $verbose -gt 0 ] ; then
 					echo "SUCCESS: [ret=$ret] domain=$i sig_count=$sig_count dkimkeys $qmail_dkim" 
@@ -2805,7 +2945,7 @@ do_dkim_tests()
 			if [ $verbose -gt 0 ] ; then
 				echo key $j domain $i
 			fi
-			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			case $j in
 				default)
 				echo "  rsa+ed25519 with rsa-256 selector"
@@ -2821,8 +2961,8 @@ do_dkim_tests()
 					VERBOSE=1 \
 					$qmail_dkim >$out 2>/tmp/err.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-				-e 's{01{ed25519{' -e 's{02{rsa-256{' -e 's{Failure.*{Failure - Correct{'
+			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+				-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				if [ $verbose -gt 0 ] ; then
 					echo "SUCCESS: [ret=$ret] domain=$i sig_count=$sig_count env - DKIMSIGN=$key1 DKIMSIGNEXTRA=$key2... $qmail_dkim"
@@ -2880,7 +3020,7 @@ do_dkim_tests()
 			if [ $verbose -gt 0 ] ; then
 				echo key $j domain $i
 			fi
-			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			case $j in
 				default)
 				echo "  rsa+ed25519 with rsa-256 selector"
@@ -2897,8 +3037,8 @@ do_dkim_tests()
 				SELECTOR_DATA="$selector" \
 			$dk_filter >$out 2>/tmp/err.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-				-e 's{01{rsa-256{' -e 's{02{ed25519{' -e 's{Failure.*{Failure - Correct{'
+			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+				-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				if [ $verbose -gt 0 ] ; then
 					echo "SUCCESS: [ret=$ret] domain=$i sig_count=$sig_count env - DKIMSIGN=$key1 DKIMSIGNEXTRA=$key2... dk-filter"
@@ -2937,32 +3077,32 @@ do_dkim_tests()
 		do
 			selector=""
 			if [ "$i" = "$domainkey_dir/test" -a -f $i.pub ] ; then
-				selector=$(cat $i.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+				selector=$(cat $i.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			fi
 			if [ -z "$selector" ] ; then
 				case $i in
 				$domainkey_dir/%/default)
 				enc="-z 2"
 				if [ -f $domainkey_dir/$j/default.pub ] ; then
-					selector=$(cat $domainkey_dir/$j/default.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+					selector=$(cat $domainkey_dir/$j/default.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 				elif [ -f $domainkey_dir/default.pub ] ; then
-					selector=$(cat $domainkey_dir/default.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+					selector=$(cat $domainkey_dir/default.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 				fi
 				;;
 				$domainkey_dir/%/test)
 				enc="-z 2"
 				if [ -f $domainkey_dir/$j/test.pub ] ; then
-					selector=$(cat $domainkey_dir/$j/test.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+					selector=$(cat $domainkey_dir/$j/test.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 				elif [ -f $domainkey_dir/test.pub ] ; then
-					selector=$(cat $domainkey_dir/test.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+					selector=$(cat $domainkey_dir/test.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 				fi
 				;;
 				$domainkey_dir/%/ed25519)
 				enc="-z 4"
 				if [ -f $domainkey_dir/$j/ed25519.pub ] ; then
-					selector=$(cat $domainkey_dir/$j/ed25519.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+					selector=$(cat $domainkey_dir/$j/ed25519.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 				elif [ -f $domainkey_dir/ed25519.pub ] ; then
-					selector=$(cat $domainkey_dir/ed25519.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+					selector=$(cat $domainkey_dir/ed25519.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 				fi
 				;;
 				esac
@@ -3206,7 +3346,7 @@ do_dkim_tests()
 					enc="-z 4"
 					;;
 			esac
-			selector=$(cat $domainkey_dir/$j/$i.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$j/$i.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			(
 			echo "From: postmaster@$j"
 			echo "To: postmaster@$j"
@@ -3272,9 +3412,9 @@ do_dkim_tests()
 			echo domain $i
 		fi
 		if [ "$i" = "example.com" ] ; then
-			selector=$(cat $domainkey_dir/$i/dkimkeys1.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/dkimkeys1.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 		else
-			selector=$(cat $domainkey_dir/$i/dkimkeys2.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/dkimkeys2.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 		fi
 		(
 		echo "From: postmaster@$i"
@@ -3401,7 +3541,7 @@ do_dkim_tests()
 			if [ $verbose -gt 0 ] ; then
 				echo key $j domain $i
 			fi
-			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's{.*({{' -e 's{).*{{' -e '/^$/d' -e 's{"{{g' -e 's{\t{{g' | tr -d '\n')
+			selector=$(cat $domainkey_dir/$i/$j.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			case $j in
 				dkimkeys1)
 				echo "  rsa+ed25519 with rsa-256 selector"
@@ -3418,8 +3558,8 @@ do_dkim_tests()
 				SELECTOR_DATA="$selector" \
 			$dk_filter >$out 2>/tmp/err.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's{Signature #{    Signature{g' \
-				-e 's{01{rsa-256{' -e 's{02{ed25519{' -e 's{Failure.*{Failure - Correct{'
+			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+				-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				if [ $verbose -gt 0 ] ; then
 					echo "SUCCESS: [ret=$ret] domain=$i sig_count=$sig_count ... dk-filter"
@@ -3578,6 +3718,7 @@ display_tests()
 	echo "test svscan autoscan"
 	echo "test svscan subreaper feature"
 	echo "test blocking (badmailfrom, badrcptto)"
+	echo "test SPF"
 	echo "test DKIM using dkim, qmail-dkim, dk-filter"
 }
 
@@ -3653,6 +3794,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.11  2023-09-27 01:52:08+05:30  Cprogrammer
+# added test for CUGMAIL, CHECKSENDER, SURBL
+#
 # Revision 1.10  2023-09-25 18:09:35+05:30  Cprogrammer
 # updated RCS
 #

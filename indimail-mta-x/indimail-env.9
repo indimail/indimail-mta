@@ -11,12 +11,6 @@ indimail-environ \- indimail-mta environment variables
 Override @sysconfdir@/control/accesslist. Used by \fBqmail-smtpd\fR(8)
 
 .TP
-\fIANTISPOOFING\fR
-If the mailfrom is local and rcptto is local, do not accept
-mail without authentication. This allows you to prevent users
-from forging envelope sender address (unless MASQUERADE is set).
-
-.TP
 \fIASSIGNDIR\fR
 Override @sysconfdir@/users/assign. Used by \fBqmail-lspawn\fR(8),
 qmail-newu, \fBqmail-smtpd\fR
@@ -128,6 +122,15 @@ recipients.cdb or indimail-virtualdomain's MySQL database.
 If set, \fBqmail-smtpd\fR(8) will check if the user from indimail-virtual
 domains is successfully authenticated in the last 30 minutes and allows the
 user to relay mails.
+
+.TP
+\fICHECKSENDER\fR
+If set, \fBqmail-smtpd\fR(8) enforces user to authenticate when MAIL FROM
+domain is in \fIrcpthosts\fR control file. It also prevents user from
+forging the envelope sender address (MAIL FROM) by ensuring that the MAIL
+FROM is the same as the authenticated user unless the environment variable
+\fBMASQUERADE\fR is set.
+
 
 .TP
 \fIRELAY_CLEAR_MINUTES\fR
