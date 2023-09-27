@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.11 2023-09-27 01:52:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.12 2023-09-27 18:43:30+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -746,19 +746,20 @@ test_smtp_cugmail()
 	echo 1 > $servicedir/smtpd/variables/CUGMAIL
 	       > $servicedir/smtpd/variables/CHECKRECIPIENT
 	       > $servicedir/smtpd/variables/QUERY_CACHE
+	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
 	swaks -S -S -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port > /tmp/swaks.$$
+		--port $smtp_port >/tmp/swaks.$$
 	ret1=$?
 	l1=$(sed -n 1p < /tmp/swaks.$$)
 	/bin/rm -f /tmp/swaks.$$
 	swaks -S -S -S --to $user@$ext_domain --from $user@$HOSTNAME --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" > /tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
 	ret2=$?
 	l2=$(sed -n 1p < /tmp/swaks.$$)
 	swaks -S -S -S --to $user@$ext_domain --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" > /tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
 	ret3=$?
 	l3=$(sed -n 1p < /tmp/swaks.$$)
 	/bin/rm -f /tmp/swaks.$$
@@ -772,7 +773,7 @@ test_smtp_cugmail()
 	fi
 	check_mail
 	if [ $? -eq 0 -a $ret1 -ne 0 -a $ret2 -ne 0 -a $ret3 -ne 0 -a $ret4 -eq 0 -a $ret5 -eq 0 ] ; then
-		tcount=$(expr $tcount + 1)
+		tcount=$(expr $tcount + 4)
 		echo "  testing mail using SMTP with CUGMAIL succeeded"
 	else
 		shutdown_svscan $svpid
@@ -794,31 +795,50 @@ test_smtp_chk_sender()
 	       > $servicedir/smtpd/variables/CUGMAIL
 	       > $servicedir/smtpd/variables/CHECKRECIPIENT
 	       > $servicedir/smtpd/variables/QUERY_CACHE
+	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
+	# First: This should work
 	swaks -S --to $user@$ext_domain --from $user@$HOSTNAME --server localhost \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
 	ret1=$?
-	swaks --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" |tee /tmp/swaks.$$
+
+	# Second: This should be denied
+	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
 	ret2=$?
-	echo "Press ENTER"
-	read key
 	l1=$(sed -n 1p < /tmp/swaks.$$)
 	/bin/rm -f /tmp/swaks.$$
-	if [ "$l1" = "<** 553 sorry, this MTA does not accept masquerading/forging , auth <mbhangui@argos.indimail.org> #5.7.1" ] ; then
-		ret4=0
+	echo "$l1" | grep ".*553 sorry, this MTA does not accept masquerading/forging,.*" >/dev/null
+	if [ $? -eq 0 ] ; then
+		ret3=0
 	else
-		ret4=1
+		ret3=1
 	fi
+
+	# Third: This should work
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
-	ret3=$?
-	> $servicedir/smtpd/variables/CHECKSENDER
 	check_mail
-	if [ $? -eq 0 -a $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 ] ; then
-		tcount=$(expr $tcount + 1)
+	ret4=$?
+
+	# fourth: This should be denied
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port >/tmp/swaks.$$
+	ret5=$?
+	l2=$(sed -n 1p < /tmp/swaks.$$)
+	/bin/rm -f /tmp/swaks.$$
+	echo "$l2" | grep ".*530 authentication required for local users (#5.7.1)" >/dev/null
+	if [ $? -eq 0 ] ; then
+		ret6=0
+	else
+		ret6=1
+	fi
+
+	> $servicedir/smtpd/variables/CHECKSENDER
+	if [ $? -eq 0 -a $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 -a $ret5 -ne 0 -a $ret6 -eq 0 ] ; then
+		tcount=$(expr $tcount + 4)
 		echo "  testing mail using SMTP with CHECKSENDER succeeded"
 	else
 		echo shutdown_svscan $svpid
@@ -842,7 +862,7 @@ test_smtp_surbl()
 	echo This is a test message for surbl
 	echo http://surbl-org-permanent-test-point.com/
 	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
-		--server localhost --port $smtp_port --body - > /tmp/swaks.$$
+		--server localhost --port $smtp_port --body - >/tmp/swaks.$$
 	ret1=$?
 	l1=$(sed -n 1p < /tmp/swaks.$$)
 	/bin/rm -f /tmp/swaks.$$
@@ -851,11 +871,21 @@ test_smtp_surbl()
 	else
 		ret2=1
 	fi
+
+	(
+	echo This is a test message for surbl
+	echo without surb blacklisted url
+	echo https://github.com/mbhangui/indimail-mta
+	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
+		--server localhost --port $smtp_port --body - >/tmp/swaks.$$
+	check_mail
+	ret3=$?
+
 	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
-	if [ $ret1 -ne 0 -a $ret2 -eq 0 ] ; then
-		tcount=$(expr $tcount + 1)
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret4 -eq 0 ] ; then
+		tcount=$(expr $tcount + 2)
 		echo "  testing mail using SMTP for SURBL succeeded"
 	else
 		shutdown_svscan $svpid
@@ -3794,6 +3824,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.12  2023-09-27 18:43:30+05:30  Cprogrammer
+# updated CHECKSENDER, SURB tests
+#
 # Revision 1.11  2023-09-27 01:52:08+05:30  Cprogrammer
 # added test for CUGMAIL, CHECKSENDER, SURBL
 #

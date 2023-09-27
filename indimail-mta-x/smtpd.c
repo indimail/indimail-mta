@@ -1230,7 +1230,10 @@ err_nogateway(char *arg1, char *arg2, int flag)
 {
 	char           *x;
 
-	logerr(1, "Invalid RELAY client: MAIL from <", arg1, NULL);
+	if (flag)
+		logerr(1, "Invalid masquerade: MAIL from <", arg1, NULL);
+	else
+		logerr(1, "Invalid RELAY client: MAIL from <", arg1, NULL);
 	if (arg2 && *arg2)
 		logerr(0, "> RCPT <", arg2, NULL);
 	logerr(0, ">", NULL);
@@ -1243,9 +1246,9 @@ err_nogateway(char *arg1, char *arg2, int flag)
 	logerr(0, "\n", NULL);
 	logflush();
 	if (flag)
-		out("553 sorry, this MTA does not accept masquerading/forging ", NULL);
+		out("553 sorry, this MTA does not accept masquerading/forging", NULL);
 	else
-		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication ", NULL);
+		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication", NULL);
 	if (authd)
 		out(", auth <", remoteinfo, "> ", NULL);
 #ifdef TLS
@@ -3505,14 +3508,25 @@ static int      f_envret = 0, d_envret = 0, a_envret = 0;
 
 int
 check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
-		int in_rcpthosts)
+		int in_rcpt1, int in_rcpt2)
 {
 	char           *x;
 	PASSWD         *pw;
 	int             at, isLocal;
 	int            *u_not_found, *i_inactive;
+	static stralloc t_addr = { 0 };
 
-	switch (address_match("chksenderdomains", &addr, chksndrok ? &chksndr : 0,
+	if (in_rcpt1 == 1) {
+		if (!stralloc_copy(&t_addr, &addr))
+			die_nomem();
+	} else
+	if (in_rcpt2 == 1) {
+		if (!stralloc_copys(&t_addr, remoteinfo) ||
+				!stralloc_0(&t_addr))
+			die_nomem();
+	} else
+		return 0;
+	switch (address_match("chksenderdomains", &t_addr, chksndrok ? &chksndr : 0,
 				chksndrok ? &mapchksndr : 0, 0, &errStr))
 	{
 	case 1: /*- in chksenderdomains */
@@ -3528,22 +3542,21 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 	}
 	if (chksndrok)
 		return 0;
-	if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1)
-		isLocal = (constmap(&maplocals, addr.s + at + 1, addr.len - at - 2) ? 1 : 0);
+	if ((at = byte_rchr(t_addr.s, t_addr.len - 1, '@')) < t_addr.len - 1)
+		isLocal = (constmap(&maplocals, t_addr.s + at + 1, t_addr.len - at - 2) ? 1 : 0);
 	else
 		isLocal = 1;
 	if (isLocal) {
-		if (check_user_pwd(addr.s, at)) {
-			logerr(1, "mail from invalid user <", mailfrom.s, ">\n", NULL);
+		if (check_user_pwd(t_addr.s, at)) {
+			logerr(1, "CHECKSENDER: SMTP Access denied to <", t_addr.s, ">: user does not exist\n", NULL);
 			logflush();
 			sleep(5); /*- Prevent DOS */
 			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
 			return 1;
 		}
-	} else
-	if (in_rcpthosts) {
-		if (!(pw = (*inquery) (PWD_QUERY, mailfrom.s, 0))) {
+	} else {
+		if (!(pw = (*inquery) (PWD_QUERY, t_addr.s, 0))) {
 			if (!(u_not_found = (int *) getlibObject(lib_fn, &phandle, "userNotFound", &x))) {
 				err_library(x);
 				return -1;
@@ -3553,14 +3566,14 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 				 * Accept the mail as denial could be stupid
 				 * like the vrfy command
 				 */
-				logerr(1, "mail from invalid user <", mailfrom.s, ">\n", NULL);
+				logerr(1, "CHECKSENDER: SMTP Access denied to <", t_addr.s, ">: user does not exist\n", NULL);
 				logflush();
 				sleep(5); /*- Prevent DOS */
 				out("553 authorization failure (#5.7.1)\r\n", NULL);
 				flush();
 				return 1;
 			} else {
-				logerr(1, "Database error\n", NULL);
+				logerr(1, "Database error getting record for user ", t_addr.s, "\n", NULL);
 				logflush();
 				out("451 Sorry, I got a temporary database error (#4.3.2)\r\n", NULL);
 				flush();
@@ -3572,7 +3585,7 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 				return -1;
 			}
 			if (*i_inactive || pw->pw_gid & NO_SMTP) {
-				logerr(1, "SMTP Access denied to <", mailfrom.s, "> ",
+				logerr(1, "CHECKSENDER: SMTP Access denied to <", t_addr.s, ">: ",
 						*i_inactive ? "user inactive\n" : "No SMTP Flag\n", NULL);
 				logflush();
 				out("553 authorization failure (#5.7.1)\r\n", NULL);
@@ -3590,13 +3603,13 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 	 * authenticated user
 	 */
 	if (!relayclient && !authd) {
-		if (pop_bef_smtp(mailfrom.s))	  /*- will set the variable authenticated */
+		if (isLocal == 0 && pop_bef_smtp(t_addr.s)) /*- will set the variable authenticated */
 			return -1;	/*- temp error */
 		if (authenticated != 1) { /*- in case pop-bef-smtp also is negative */
-			logerr(1, "unauthenticated local SENDER address: MAIL from <",
+			logerr(1, "CHECKSENDER: unauthenticated local SENDER address: MAIL from <",
 					mailfrom.s, ">\n", NULL);
 			logflush();
-			out("530 authentication required for local users (#5.7.1)\r\n", NULL);
+			out("530 authentication required (#5.7.1)\r\n", NULL);
 			flush();
 			return 1;
 		}
@@ -3676,7 +3689,7 @@ void
 smtp_mail(char *arg)
 {
 	char           *x, *ptr;
-	int             ret, i, in_rcpthosts = -1;
+	int             ret, i, in_rcpt1 = -1, in_rcpt2 = -1;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
 #endif
@@ -3897,7 +3910,7 @@ smtp_mail(char *arg)
 	 * send mails.
 	 */
 	if (env_get("CUGMAIL")) {
-		if (!(in_rcpthosts = addrallowed(addr.s))) {
+		if (!(in_rcpt1 = addrallowed(addr.s))) {
 			logerr(1, "Invalid CUG SENDER address: MAIL from <", mailfrom.s, ">\n", NULL);
 			logflush();
 			out("553 sorry, this MTA is a closed user group system (#5.7.1)\r\n", NULL);
@@ -3914,15 +3927,14 @@ smtp_mail(char *arg)
 		err_library(x);
 		return;
 	}
-	if (in_rcpthosts == -1)
-		in_rcpthosts = addrallowed(addr.s);
-	i = in_rcpthosts;
-	if (!in_rcpthosts && (authenticated || authd)) {
-		if ((in_rcpthosts = addrallowed(remoteinfo)) == 1) /*- for the authenticated user */
-			in_rcpthosts = 2;
+	if (in_rcpt1 == -1)
+		in_rcpt1 = addrallowed(addr.s);
+	if (authenticated || authd)
+		in_rcpt2 = addrallowed(remoteinfo); /*- for the authenticated user */
+	if ((in_rcpt1 == 1 || in_rcpt2 == 1) && (x = env_get("CHECKSENDER"))) {
+		if (check_sender(inquery, ptr, in_rcpt1, in_rcpt2))
+			return;
 	}
-	if (in_rcpthosts > 0 && (x = env_get("CHECKSENDER")) && check_sender(inquery, ptr, i))
-		return;
 nohasvirtual:
 #ifdef USE_SPF
 	flagbarfspf = 0;
