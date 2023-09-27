@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.301 2023-09-07 19:23:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.302 2023-09-28 01:12:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.301 $";
+static char    *revision = "$Revision: 1.302 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -7173,6 +7173,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.302  2023-09-28 01:12:49+05:30  Cprogrammer
+ * added check sender feature
+ *
  * Revision 1.301  2023-09-07 19:23:58+05:30  Cprogrammer
  * Use last line to set error message from error strings returned by qmail_close
  *
@@ -7532,7 +7535,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.301 2023-09-07 19:23:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.302 2023-09-28 01:12:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
