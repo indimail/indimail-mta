@@ -36,6 +36,7 @@ in
 .IR badrcptpatterns ,
 .IR bodycheck ,
 .IR chkrcptdomains ,
+.IR chksenderdomains ,
 .IR dkimkeys ,
 .IR domainbindings,
 .IR earlytalkerdroptime ,
@@ -92,6 +93,7 @@ MySQL.
 .IR blackholedsender ,
 .IR blackholedrcpt ,
 .IR chkrcptdomains ,
+.IR chksenderdomains ,
 .IR goodrcptto ,
 .IR relaymailfrom ,
 .IR spamignore ,
@@ -148,6 +150,7 @@ QREGEX environment variable is defined
 .IR authdomains ,
 .IR badrcptto ,
 .IR chkrcptdomains ,
+.IR chksenderdomains ,
 .IR badext ,
 .IR goodrcptto ,
 and
@@ -228,6 +231,7 @@ control	default	used by
 .I plusdomain	\fIme	\fRqmail-inject
 .I qmqpservers	\fR(none)	\fRqmail-qmqpc
 .I chkrcptdomains	\fR(none)	\fRqmail-smtpd
+.I chksenderdomains	\fR(none)	\fRqmail-smtpd
 .I queuelifetime	\fR604800	\fRqmail-send
 .I relayclients	\fR$RELAYCLIENT	\fRqmail-smtpd
 .I relaydomains	\fR$RELAYCLIENT	\fRqmail-smtpd
