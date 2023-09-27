@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.90 2023-09-14 21:28:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.91 2023-09-27 19:37:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -67,7 +67,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.90 2023-09-14 21:28:10+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.91 2023-09-27 19:37:36+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1020,7 +1020,7 @@ printstatus(char *str, pid_t pid, pid_t childpid)
 		substdio_putflush(subfderr, tmp.s, tmp.len);
 		return;
 	} else
-	if (str_diffn(str, "shutdown", 9)) {
+	if (str_diffn(str, "shutdown", 9) && str_diffn(str, "sigchild", 9)) {
 		cats(", IP ");
 #ifdef IPV6
 		if (!forcev6 && ip6_isv4mapped(remoteip))
@@ -2015,6 +2015,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.91  2023-09-27 19:37:36+05:30  Cprogrammer
+ * skip IP display in printstatus for sigchild
+ *
  * Revision 1.90  2023-09-14 21:28:10+05:30  Cprogrammer
  * display pid, ip in printstatus
  *
