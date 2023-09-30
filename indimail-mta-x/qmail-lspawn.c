@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-lspawn.c,v 1.43 2023-09-19 22:32:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-lspawn.c,v 1.44 2023-09-30 19:46:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -29,7 +29,12 @@
 #include "indimail_stub.h"
 
 static char    *aliasempty;
-static stralloc q = {0};
+static int      local_user;
+static stralloc q, user, pwstruct;
+static char     strnum[FMT_ULONG];
+#ifdef ENABLE_VIRTUAL_PKG
+static stralloc save;
+#endif
 
 static char *setup_qlargs()
 {
@@ -101,7 +106,13 @@ report_SPAWN(substdio *ss, int wstat, char *s, int len)
 		substdio_puts(ss, "ZUnable to run qmail-getpw.\n");
 		return;
 	case QLX_UIDGID:
-		substdio_puts(ss, "ZUnable to set proper uid, gid.\n");
+		substdio_puts(ss, "ZUnable to set proper uid, gid");
+		if (user.len) {
+			substdio_puts(ss, " for ");
+			substdio_put(ss, user.s, user.len - 1);
+			substdio_put(ss, ".\n", 2);
+		} else
+			substdio_put(ss, ".\n", 2);
 		return;
 	case 111:
 	case 71:
@@ -144,6 +155,7 @@ nughde_get(char *local)
 	int             pi[2];
 	int             gpwpid, gpwstat, r, fd, flagwild;
 
+	local_user = 0;
 	if (!cdbdir) {
 		if (!(cdbdir = env_get("ASSIGNDIR")))
 			cdbdir = auto_assign;
@@ -214,10 +226,18 @@ nughde_get(char *local)
 	case -1:
 		_exit (QLX_SYS);
 	case 0:
-		if (prot_gid(auto_gidn) == -1)
+		if (prot_gid(auto_gidn) == -1) {
+			if (!stralloc_copys(&user, local) ||
+					!stralloc_0(&user))
+				_exit (QLX_NOMEM);
 			_exit (QLX_UIDGID);
-		if (prot_uid(auto_uidp) == -1)
+		}
+		if (prot_uid(auto_uidp) == -1) {
+			if (!stralloc_copys(&user, local) ||
+					!stralloc_0(&user))
+				_exit (QLX_NOMEM);
 			_exit (QLX_UIDGID);
+		}
 		close(pi[0]);
 		if (fd_move(1, pi[1]) == -1)
 			_exit (QLX_SYS);
@@ -233,11 +253,8 @@ nughde_get(char *local)
 		if (wait_exitcode(gpwstat) != 0)
 			_exit (wait_exitcode(gpwstat));
 	}
+	local_user = 1;
 }
-
-stralloc        pwstruct = { 0 };
-
-static char     strnum[FMT_ULONG];
 
 void
 copy_pwstruct(struct passwd *pw, char *recip, int at, int is_inactive)
@@ -270,9 +287,6 @@ copy_pwstruct(struct passwd *pw, char *recip, int at, int is_inactive)
 		_exit (-1);
 	return;
 }
-
-stralloc        user = { 0 };
-stralloc        save = { 0 };
 
 int
 SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, char *recip_t, int at_t)
@@ -487,12 +501,20 @@ noauthself: /*- deliver to local user in control/locals */
 		args[11] = 0;
 		if (fd_move(0, fdmess) == -1 || fd_move(1, fdout) == -1 || fd_copy(2, 1) == -1)
 			_exit (QLX_SYS);
-		if (env_get("SETUSER_PRIVILEGES")) {
-			if (setuser_privileges(uid, gid, args[2]) == -1)
+		if (local_user == 1 && env_get("SETUSER_PRIVILEGES")) {
+			if (setuser_privileges(uid, gid, args[2]) == -1) {
+				if (!stralloc_copys(&user, args[2]) ||
+						!stralloc_0(&user))
+					_exit (QLX_NOMEM);
 				_exit (QLX_UIDGID);
+			}
 		} else
-		if (prot_gid(gid) == -1 || prot_uid(uid) == -1)
+		if (prot_gid(gid) == -1 || prot_uid(uid) == -1) {
+			if (!stralloc_copys(&user, args[2]) ||
+					!stralloc_0(&user))
+				_exit (QLX_NOMEM);
 			_exit (QLX_UIDGID);
+		}
 		if (!getuid())
 			_exit (QLX_ROOT);
 		ptr = setup_qlargs();
@@ -507,7 +529,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.43 2023-09-19 22:32:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.44 2023-09-30 19:46:05+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -515,6 +537,9 @@ getversion_qmail_lspawn_c()
 
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.44  2023-09-30 19:46:05+05:30  Cprogrammer
+ * skip setuser_privileges for non-etc-passwd users
+ *
  * Revision 1.43  2023-09-19 22:32:07+05:30  Cprogrammer
  * set supplementary groups for user if SETUSER_PRIVILEGES is defined
  * New exit code QLX_UIDGID for uid, gid, group setting errors

@@ -24,9 +24,9 @@ For each recipient address, \fBqmail-lspawn\fR finds out which local user
 controls that address. It first checks the \fBqmail-users\fR mechanism; if
 the address is not listed there, it invokes \fBqmail-getpw\fR.
 \fBqmail-lspawn\fR then runs \fBqmail-local\fR under the user's uid and
-gid. If the environment variable \fBSETUSER_PRIVILEGES\fR is set, it sets
-up supplementary groups for the user. \fBqmail-lspawn\fR does not perform
-deliveries as root.
+gid. For address fetched using \fBqmail-getpw\fR, it sets up supplementary
+groups for the user if the environment variable \fBSETUSER_PRIVILEGES\fR is
+set. \fBqmail-lspawn\fR does not perform deliveries as root.
 
 If the environment variable \fBAUTHSELF\fR is set, \fBqmail-lspawn\fR
 connects to MySQL and fetches user records for virtual domains in
