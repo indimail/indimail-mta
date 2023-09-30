@@ -141,7 +141,7 @@ Known values for OPTION are:
   [--overquota_mailsize=o]
   [--domainlimits]
   [--authsmtp --forceauthsmtp --enablecram --authall]
-  [--chkrecipient --chkrelay --cugmail]
+  [--chkrecipient --chksender --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
@@ -200,6 +200,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   chkrecipient   - Perform a User Status query before accepting mails
                    (qmail-smtpd)
+  chksender      - Enforce checks on local user and force authenticaion
+                   (qmail-smtpd)
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP
@@ -212,7 +214,8 @@ Known values for OPTION are:
                    POP/IMAP before SMTP (closed relay)
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains,
+                   chksenderdomains
   q              - Full path to an external virus scanner (like clamdscan)
   v              - Enable Virus/Attachment scanner. v can have following values
                    1 - Internal Scanner
@@ -324,7 +327,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains,
+                   chksenderdomains
   spamfilter     - Spamfilter program along with arguments
   logfifo        - Capture additional status message from spamfilter in
                    qmail-logfifo logfile via logfifo
@@ -398,7 +402,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains,
+                   chksenderdomains
   localfilter    - enable filtering of mails to qmail-local
   remotefilter   - enable filtering of mails to qmail-remote
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
@@ -454,7 +459,8 @@ Known values for OPTION are:
   qmailq         - Path to any qmail-queue compatabile binary
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains
+                   chksenderdomains
   q              - Full path to an external virus scanner (like clamdscan)
   v              - Enable Virus/Attachment scanner. v can have following values
                    1 - Internal Scanner

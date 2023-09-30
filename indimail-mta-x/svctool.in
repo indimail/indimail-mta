@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.705 2023-09-27 13:20:49+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.706 2023-09-30 11:10:32+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -26,7 +26,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.705 2023-09-27 13:20:49+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.706 2023-09-30 11:10:32+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -65,7 +65,7 @@ Known values for OPTION are:
   [--overquota_mailsize=o]
   [--domainlimits]
   [--authsmtp --forceauthsmtp --enablecram --authall]
-  [--chkrecipient --chkrelay --cugmail]
+  [--chkrecipient --chksender --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
   [--cname-lookup]
@@ -124,6 +124,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   chkrecipient   - Perform a User Status query before accepting mails
                    (qmail-smtpd)
+  chksender      - Enforce checks on local user and force authenticaion
+                   (qmail-smtpd)
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP
@@ -136,7 +138,8 @@ Known values for OPTION are:
                    POP/IMAP before SMTP (closed relay)
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains,
+                   chksenderdomains
   q              - Full path to an external virus scanner (like clamdscan)
   v              - Enable Virus/Attachment scanner. v can have following values
                    1 - Internal Scanner
@@ -248,7 +251,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains,
+                   chksenderdomains
   spamfilter     - Spamfilter program along with arguments
   logfifo        - Capture additional status message from spamfilter in
                    qmail-logfifo logfile via logfifo
@@ -322,7 +326,8 @@ Known values for OPTION are:
   domainlimits   - Apply Domain Limits configured by vmoddomlimits(1)
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains,
+                   chksenderdomains
   localfilter    - enable filtering of mails to qmail-local
   remotefilter   - enable filtering of mails to qmail-remote
   routes         - Perform SMTPROUTE / QMTPROUTE / static routing
@@ -378,7 +383,8 @@ Known values for OPTION are:
   qmailq         - Path to any qmail-queue compatabile binary
   qregex         - Use regular expressions for matching entries in
                    badmailfrom, badrcptto, blackholedsenders, spamignore
-                   relaymailfrom, authdomains, chkuserdomains
+                   relaymailfrom, authdomains, chkrcptdomains,
+                   chksenderdomains
   q              - Full path to an external virus scanner (like clamdscan)
   v              - Enable Virus/Attachment scanner. v can have following values
                    1 - Internal Scanner
@@ -2059,6 +2065,7 @@ if [ -n "$verbose" ] ; then
 	echo "users/assign"
 	echo "greylist.white"
 	echo "chkrcptdomains"
+	echo "chksenderomains"
 	echo "smtpgreeting"
 	echo "databytes"
 	echo "timeoutsmtpd"
@@ -2143,6 +2150,11 @@ fi
 if [ ! -f $t/chkrcptdomains -a -n "$default_domain" ] ; then
 	[ -n "$verbose" ] && echo "chkrcptdomains"
 	echo $default_domain > $t/chkrcptdomains
+fi
+
+if [ ! -f $t/chksenderdomains -a -n "$default_domain" ] ; then
+	[ -n "$verbose" ] && echo "chksenderdomains"
+	echo $default_domain > $t/chksenderdomains
 fi
 
 if [ ! -f $t/greylist.white ] ; then
@@ -2493,7 +2505,7 @@ fi
 create_smtp()
 {
 if [ $# -ne 11 ] ; then
-	echo "USAGE: create_smtp qbase queue_count first_queue_no supervise_dir smtp_port check_user=0|1 check_relay=0|1 use_ssl=0|1 force_tls=0|1 infifo=fifo_path utf8=0|1" 1>&2
+	echo "USAGE: create_smtp qbase queue_count first_queue_no supervise_dir smtp_port use_ssl=0|1 force_tls=0|1 infifo=fifo_path utf8=0|1" 1>&2
 	return 1
 fi
 QUEUE_BASE=$1
@@ -2501,12 +2513,10 @@ QUEUE_COUNT=$2
 QUEUE_START=$3
 SERVICEDIR=$4
 SMTP_PORT=$5
-chkrecipient=$6
-chkrelay=$7
-smtp_ssl=$8
-force_tls=$9
-infifo=${10}
-utf8=${11}
+smtp_ssl=$6
+force_tls=$7
+infifo=$8
+utf8=$9
 
 # qmail-smtpd script
 if [ " $servicetag" = " " ] ; then
@@ -2728,7 +2738,12 @@ if [ " $odmr" = " " ] ; then
 	else
 		> $conf_dir/DOMAIN_LIMITS
 	fi
-	if [ ! " $chkrecipient" = " " ] ; then
+	if [ $chkrecipient -eq 1 ] ; then
+		echo 1 > $conf_dir/CHECKRECIPIENT
+	else
+		> $conf_dir/CHECKRECIPIENT
+	fi
+	if [ $chksender -eq 1 ] ; then
 		echo 1 > $conf_dir/CHECKRECIPIENT
 	else
 		> $conf_dir/CHECKRECIPIENT
@@ -10350,6 +10365,9 @@ envdir_opts="-c"
 updatecerts=0
 setuser_privilege=0
 sanitized_env=""
+chkrecipient=0
+chksender=0
+chkrelay=0
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
 else
@@ -10567,6 +10585,9 @@ while test $# -gt 0; do
 	;;
 	--chkrecipient)
 	chkrecipient=1
+	;;
+	--chksender)
+	chksender=1
 	;;
 	--antispoof)
 	antispoof=1
@@ -11295,7 +11316,7 @@ case $option in
 	else
 	echo "Creating SMTP Listener Port $smtp_port, Service $servicedir"
 	fi
-	create_smtp "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$chkrecipient" "$chkrelay" "$use_ssl" "$forcetls" "$infifo" "$utf8"
+	create_smtp "$qbase" "$qcount" "$qstart" "$servicedir" "$smtp_port" "$use_ssl" "$forcetls" "$infifo" "$utf8"
 	;;
 
 	2) # IMAP Service
