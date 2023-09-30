@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH srs 1
 .SH NAME
 srs \- command line interface to libsrs2
@@ -78,15 +79,16 @@ This program and library are documented fully at
 .IR "http://www.libsrs2.org/" .
 
 .SH EXAMPLES
-.EX
 Rewrite postmaster@argos.indimail.org
-
-$ srs -k 'kdjf93oupoxlpNlR[cUyXEY(YuYH' -i srs.argos.indimail.org postmaster@argos.indimail.org
+.EX
+$ srs -k 'kdjf93oupoxlpNlR[cUyXEY(YuYH' -i srs.argos.indimail.org \\
+		postmaster@argos.indimail.org
 SRS0=B3Wp=2M=argos.indimail.org=postmaster@srs.argos.indimail.org
 
 Translate SRS0=B3Wp=2M=argos.indimail.org=postmaster@srs.argos.indimail.org
 
-$ srs -k 'kdjf93oupoxlpNlR[cUyXEY(YuYH' -i srs.argos.indimail.org -v SRS0=B3Wp=2M=argos.indimail.org=postmaster@srs.argos.indimail.org
+$ srs -k 'kdjf93oupoxlpNlR[cUyXEY(YuYH' -i srs.argos.indimail.org \\
+	-v SRS0=B3Wp=2M=argos.indimail.org=postmaster@srs.argos.indimail.org
 postmaster@argos.indimail.org
 .EE
 
