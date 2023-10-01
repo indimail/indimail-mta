@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.38 2023-03-26 01:52:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.39 2023-10-01 11:44:44+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -46,6 +46,10 @@
 #include <tai.h>
 #include <constmap.h>
 #include <noreturn.h>
+#include "hassrs.h"
+#ifdef HAVESRS
+#include "srs.h"
+#endif
 #include "qregex.h"
 #include "ip.h"
 #include "ipme.h"
@@ -57,6 +61,7 @@
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
 #define FATAL "autoresponder: fatal: "
+#define WARN  "autoresponder: warn: "
 
 static int      opt_quiet, opt_copyinput, opt_nosend, opt_nolinks, msgfilefd, fixed_subject;
 static int      liphostok, dtline_len, opt_laxmode;
@@ -1000,6 +1005,8 @@ main(int argc, char *argv[])
 	stralloc        line = { 0 };
 	stralloc        bouncefrom = { 0 };
 	stralloc        bouncehost = { 0 };
+	stralloc        doublebounceto = { 0 };
+	stralloc        doublebouncehost = { 0 };
 #ifdef QUOTE
 	stralloc        quoted = { 0 };
 #endif
@@ -1013,6 +1020,10 @@ main(int argc, char *argv[])
 		strerr_die2sys(111, FATAL, "unable to read bouncefrom controls: ");
 	if (control_rldef(&bouncehost, "bouncehost", 1, "bouncehost") != 1)
 		strerr_die2sys(111, FATAL, "unable to read bouncehost controls: ");
+	if (control_rldef(&doublebouncehost, "doublebouncehost", 1, "doublebouncehost") != 1)
+		strerr_die2sys(111, FATAL, "unable to read doublebouncehost controls: ");
+	if (control_rldef(&doublebounceto, "doublebounceto", 0, "postmaster") != 1)
+		strerr_die2sys(111, FATAL, "unable to read doublebounceto controls: ");
 	if ((liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1)
 		strerr_die2sys(111, FATAL, "unable to read localiphost controls: ");
 	if (env_get("MAKE_SEEKABLE") && mkTempFile(0))
@@ -1024,6 +1035,31 @@ main(int argc, char *argv[])
 	if (!(dtrecip = dtline = env_get("DTLINE")))
 		usage("DTLINE is not set; must be run from .qmail");
 	dtline_len = str_len(dtline);
+#ifdef HAVESRS
+	if (*sender && (case_starts(sender, "SRS0=") || case_starts(sender, "SRS1="))) {
+		switch (srsreverse(sender))
+		{
+		case -3:
+			strerr_die2x(100, FATAL, srs_error.s);
+			break;
+		case -2:
+			strerr_die2x(111, FATAL, "out of memory");
+			break;
+		case -1:
+			strerr_die2x(111, FATAL, "unable to read controls");
+			break;
+		case 0:
+			strerr_die2x(100, FATAL, "unable to rewrite envelope");
+			break;
+		}
+		if (!str_diffn(srs_result.s, "#@[]", 4))
+			strerr_warn2(WARN, "triple bounce: discarding message", 0);
+		else
+		if (!srs_result.len && *doublebounceto.s == '@')
+			strerr_warn2(WARN, "double bounce: discarding message", 0);
+		sender = srs_result.s;
+	}
+#endif
 
 	if (!(recipient = env_get("RECIPIENT")))
 		usage("RECIPIENT is not set; must be run from .qmail");
@@ -1250,13 +1286,16 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.38 2023-03-26 01:52:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.39 2023-10-01 11:44:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.39  2023-10-01 11:44:44+05:30  Cprogrammer
+ * decode SRS return path address
+ *
  * Revision 1.38  2023-03-26 01:52:43+05:30  Cprogrammer
  * fixed code using wait_handler.
  *

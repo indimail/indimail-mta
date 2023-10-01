@@ -172,10 +172,10 @@ main(int argc, char **argv)
 		break;
 	}
 	if (str_equal(srs_result.s, "#@[]"))
-		strerr_warn2(WARN, "triple bounce: discarding message", 0);
+		strerr_die2x(0, WARN, "triple bounce: discarding message");
 	else
 	if (!srs_result.len && *doublebounceto.s == '@')
-		strerr_warn2(WARN, "double bounce: discarding message", 0);
+		strerr_die2x(0, WARN, "double bounce: discarding message");
 	else {
 		if (qmail_open(&qqt) == -1)
 			strerr_die2x(111, FATAL, "unable to fork");

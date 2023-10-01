@@ -1,5 +1,5 @@
 /*
- *  *
+ * $Id: filterit_sub.c,v 1.4 2023-10-01 02:11:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -293,11 +293,13 @@ take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
 			if (substdio_flush(ssout) == -1)
 				strerr_die2sys(111, FATAL, "unable to write output: ");
 		}
+#if 0
 		if (xfilter_header) {
 			write_xfilter_header(&ptr, matched, argc, argv);
 			if (ptr && !env_put2("QQEH", ptr))
 				strerr_die2x(111, FATAL, "out of memory");
 		}
+#endif
 		if (i == 100) {
 			if (substdio_puts(ssout, bounce_message) == -1 ||
 					substdio_put(ssout, "\n", 1))
@@ -650,6 +652,12 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.4  2023-10-01 02:11:00+05:30  Cprogrammer
+ * removed setting of QQEH for X-FilterIT header
+ *
+ * Revision 1.3  2023-10-01 01:24:19+05:30  Cprogrammer
+ * added RCS id
+ *
  * Revision 1.2  2023-09-19 22:27:19+05:30  Cprogrammer
  * added X-Forwarded-To, X-Forwarded-For headers
  * include hassrs.h to enable SRS

@@ -289,13 +289,27 @@ control	default	used by
 .I batvkeystale	\fR7	\fRqmail-smtpd
 .I nosignremote	\fR(none)	\fRqmail-remote, qmail-smtpd
 .I nosignlocals	\fR(none)	\fRqmail-remote
-.I srs_domains	\fR(none)	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
-.I srs_secrets	\fR(none)	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
-.I srs_maxage	\fR7	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
-.I srs_hashlength	\fR4	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
-.I srs_hashmin	\fR4	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
-.I srs_separator	\fR=	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
-.I srs_alwaysrewrite	\fR0	\fRqmail-smtpd, qmail-local, qmail-send, qmail-inject, condredirect, forward
+.I srs_domains	\fR(none)	\fRqmail-smtpd, qmail-local, qmail-send, slowq-send,
+		qmta-send, qmail-inject, condredirect, forward,
+		autoresponder, filterit, srsfilter
+.I srs_secrets	\fR(none)	\fRqmail-smtpd, qmail-local, qmail-send, slowq-send,
+		qmta-send, qmail-inject, condredirect, forward,
+		autoresponder, filterit, srsfilter
+.I srs_maxage	\fR7	\fRqmail-smtpd, qmail-local, qmail-send, slowq-send,
+		qmta-send, qmail-inject, condredirect, forward,
+		autoresponder, filterit, srsfilter
+.I srs_hashlength	\fR4	\fRqmail-smtpd, qmail-local, qmail-send, slowq-send,
+		qmta-send, qmail-inject, condredirect, forward,
+		autoresponder, filterit, srsfilter
+.I srs_hashmin	\fR4	\fRqmail-smtpd, qmail-local, qmail-send, slowq-send,
+		qmta-send, qmail-inject, condredirect, forward,
+		autoresponder, filterit, srsfilter
+.I srs_separator	\fR=	\fRqmail-smtpd, qmail-local, qmail-send, slowq-send,
+		qmta-send, qmail-inject, condredirect, forward,
+		autoresponder, filterit, srsfilter
+.I srs_alwaysrewrite	\fR0	\fRqmail-smtpd, qmail-local, qmail-send, slowq-send,
+		qmta-send, qmail-inject, condredirect, forward,
+		autoresponder, filterit, srsfilter
 .I servicedir.conf	\fR/service	\fRsvctool
 .fi
 

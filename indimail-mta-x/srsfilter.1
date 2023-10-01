@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH srsfilter 1
 
 .SH NAME
@@ -18,6 +19,12 @@ real address. \fBsrsfilter\fR rewrites To header with the SRS decoded
 address. It only accepts messages from null-sender, Return-Path:<>.
 \fBsrsfilter\fR discards double and triple bounces. It also rejects
 messages without body.
+
+\fBsrsfilter\fR is not needed when the MTA can decode SRS addresses. This
+is the case in a MTA like the indimail-mta, which have programs that can
+fully rewrite SRS address back to the original sender address like the
+following programs \fBautoresponder\fR(1), \fBqmail-send\fR(8),
+\fBqmta-send\fR(8), \fBslowq-send\fR(8), \fBqmail-smtpd\fR(8).
 
 .SH "SEE ALSO"
 srs(1), qmail-inject(8), sendmail(1), indimail-srs(5),

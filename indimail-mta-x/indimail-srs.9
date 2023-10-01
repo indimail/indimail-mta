@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH indimail-srs 5
 
 .SH "NAME"
@@ -14,16 +15,36 @@ way to fix it. SRS is a simple way for forwarding MTAs to rewrite the
 sender address. indimail-mta's SRS implementation has been adapted from Marcelo
 Coelho's qmail SRS patch. The base SRS functions comes from libsrs2.
 
-You can configure indimail system for SRS by modifying
-.BR indimail-mta 's
-.I control files
-in
-.BR @controldir@ .
-You can set the environment variable \fBCONTROLDIR\fR to make indimail-mta
-look for control files in a different directory. The control files
-\fIsrs_domain\fR and \fIsrs_secrets\fR are mandatory.
+You can configure indimail system for SRS by modifying \fBindimail-mta\fR's
+\fIcontrol files\fR in \fB@controldir@\fR. You can set the environment
+variable \fBCONTROLDIR\fR to make indimail-mta look for control files in a
+different directory. The control files \fIsrs_domain\fR and
+\fIsrs_secrets\fR are mandatory.
 
-You can also configure SRS by setting environment variables.
+You can also configure SRS by setting environment variables
+\fBSRS_DOMAIN\fR, \fBSRS_SECRETS\fR, \fBSRS_MAXAGE\fR,
+\fBSRS_HASHLENGTH\fR, \fBSRS_HASHMIN\fR, \fBSRS_SEPARATOR\fR,
+\fBSRS_ALWAYSREWRITE\fR.
+
+The table below lists programs that use SRS and the SRS operation they do.
+
+.TS
+box;
+l l l l.
+Program                SRS operation
+_
+condredirect           Rewrites sender address using SRS
+filterit               Rewrites sender address using SRS
+forward                Rewrites sender address using SRS
+qmail-inject           Rewrites sender address using SRS
+qmail-local            Rewrites sender address using SRS
+autoresponder          Converts SRS address to the original sender address
+qmail-send             Converts SRS address to the original sender address
+qmta-send              Converts SRS address to the original sender address
+slowq-send             Converts SRS address to the original sender address
+qmail-smtpd            Converts SRS address to the original sender address
+srsfilter              Converts SRS address to the original sender address
+.TE
 
 .SH CONTROL FILES
 

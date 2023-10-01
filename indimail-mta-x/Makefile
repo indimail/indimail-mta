@@ -2512,17 +2512,18 @@ qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 	> qmail-rm.1
 
 autoresponder: load autoresponder.o auto_sysconfdir.o \
-variables.o control.o quote.o auto_control.o \
+variables.o control.o quote.o auto_control.o srs.o rcpthosts.o \
 ip.o ipme.o ipalloc.o socket_v4mappedprefix.o socket_v6any.o \
-qregex.o wildmat.o auto_prefix.o
+qregex.o wildmat.o auto_prefix.o conf-srs
 	./load autoresponder auto_control.o auto_sysconfdir.o \
 	variables.o control.o quote.o ip.o ipme.o ipalloc.o \
 	socket_v4mappedprefix.o socket_v6any.o qregex.o \
-	wildmat.o auto_prefix.o $(QMAILLIB)
+	wildmat.o auto_prefix.o srs.o rcpthosts.o $(QMAILLIB) \
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib`
 
 autoresponder.o: \
 compile autoresponder.c auto_sysconfdir.h control.h ip.h ipme.h \
-auto_prefix.h quote.h qregex.h conf-mime
+auto_prefix.h quote.h qregex.h conf-mime hassrs.h
 	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` autoresponder.c
 
 822field: \

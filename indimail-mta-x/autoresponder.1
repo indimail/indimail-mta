@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH autoresponder 1
 .SH NAME
 autoresponder \- Rate and time limited autoresponder for qmail/indimail
@@ -47,6 +48,10 @@ name which will appear in the 'from address'. For a service responder, the addre
 determined by the \fIbouncefrom\fR and \fIbouncehost\fR control files. The Return-Path however in
 both the cases will be null to prevent brain damaged MTA like M$Exchange to send bounces/reply to
 autoresponder.
+
+If Sender Rewriting Schme (\fISRS\fR) has been configured, sender address
+rewritten using \fISRS\fR, \fBautoresponder\fR replies to the original
+sender using \fBSRS\fR. See \fBindimail-srs\fR(5) to know how to do this.
 
 .B autoresponder
 replaces occurrences of the following special characters in the \fImessagefile\fR.
@@ -105,4 +110,5 @@ replaces occurrences of the following special characters in the \fImessagefile\f
  - RFC 3834 compliant
 
 .SH SEE ALSO
-vacation(8), vmoduser(1), vdelivermail(8), dot-qmail(5)
+vacation(8), vmoduser(1), vdelivermail(8), dot-qmail(5), indimail-srs(5),
+srsfilter(1)
