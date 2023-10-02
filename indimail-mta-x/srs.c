@@ -1,5 +1,8 @@
 /*
  * $Log: srs.c,v $
+ * Revision 1.5  2023-10-02 21:25:29+05:30  Cprogrammer
+ * fix srs_result len due to stralloc_0()
+ *
  * Revision 1.4  2022-10-12 19:15:03+05:30  Cprogrammer
  * added feature to set SRS parameters using environment variables
  *
@@ -165,6 +168,7 @@ srsforward(char *address)
 	if (!stralloc_copys(&srs_result, srsaddress) ||
 			!stralloc_0(&srs_result))
 		return -2;
+	srs_result.len--;
 	srs_free(srs);
 	return 1;
 }
@@ -208,6 +212,7 @@ srsreverse(char *srsaddress)
 	if (!stralloc_copys(&srs_result, address) ||
 			!stralloc_0(&srs_result))
 		return -2;
+	srs_result.len--;
 	srs_free(srs);
 	return 1;
 }
@@ -216,7 +221,7 @@ srsreverse(char *srsaddress)
 void
 getversion_srs_c()
 {
-	static char    *x = "$Id: srs.c,v 1.4 2022-10-12 19:15:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: srs.c,v 1.5 2023-10-02 21:25:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
