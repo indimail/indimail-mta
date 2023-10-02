@@ -58,6 +58,8 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 46. autoresponder.c: decode SRS return path address
 47. srs.c: fix srs_result len due to stralloc_0()
 48. tests/tests-indimail-mta: Added tests for SRS
+49. qmail-inject.c, qmail-local.c, qmail-send.c, qmta-send.c, slowq-send.c,
+    smtpd.c: Fixed copying srs_result
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023
