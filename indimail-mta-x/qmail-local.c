@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-local.c,v 1.49 2023-09-23 00:05:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-local.c,v 1.50 2023-10-02 22:50:22+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -366,8 +366,10 @@ mailforward(char **recips)
 	case 0:
 		break;
 	case 1:
-		if (!stralloc_copy(&ueo, &srs_result))
+		if (!stralloc_copy(&ueo, &srs_result) ||
+				!stralloc_0(&ueo))
 			temp_nomem();
+		ueo.len--;
 		break;
 	}
 #endif
@@ -984,7 +986,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.49 2023-09-23 00:05:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-local.c,v 1.50 2023-10-02 22:50:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
@@ -992,6 +994,9 @@ getversion_qmail_local_c()
 
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.50  2023-10-02 22:50:22+05:30  Cprogrammer
+ * fix copy of srs_result
+ *
  * Revision 1.49  2023-09-23 00:05:49+05:30  Cprogrammer
  * added MESSID to the environment variables to be preserved
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-inject.c,v 1.48 2022-10-09 22:57:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-inject.c,v 1.49 2023-10-02 22:49:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -264,8 +264,10 @@ exitnicely()
 		case 0:
 			break;
 		case 1:
-			if (!stralloc_copy(&sender, &srs_result))
+			if (!stralloc_copy(&sender, &srs_result) ||
+					!stralloc_0(&sender))
 				die_nomem();
+			sender.len--;
 			break;
 		}
 	}
@@ -1075,13 +1077,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.48 2022-10-09 22:57:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.49 2023-10-02 22:49:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.49  2023-10-02 22:49:57+05:30  Cprogrammer
+ * fix copy of srs_result
+ *
  * Revision 1.48  2022-10-09 22:57:14+05:30  Cprogrammer
  * removed wildmat.h
  * moved RCS log to bottom

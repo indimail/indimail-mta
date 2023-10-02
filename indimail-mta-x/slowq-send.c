@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.30 2023-03-08 20:04:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.31 2023-10-02 22:50:46+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1418,6 +1418,9 @@ injectbounce(unsigned long id)
 						case 1:
 							while (!stralloc_copy(&sender, &srs_result))
 								nomem(argv0);
+							while (!stralloc_0(&sender))
+								nomem(argv0);
+							sender.len--;
 							break;
 						}
 						while (chdir(auto_qmail) == -1) {
@@ -3762,7 +3765,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.30 2023-03-08 20:04:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.31 2023-10-02 22:50:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3772,6 +3775,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.31  2023-10-02 22:50:46+05:30  Cprogrammer
+ * fix copy of srs_result
+ *
  * Revision 1.30  2023-03-08 20:04:03+05:30  Cprogrammer
  * fixed but with handling SRS address
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.107 2023-01-15 12:35:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.108 2023-10-02 22:50:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1046,6 +1046,9 @@ injectbounce(unsigned long id)
 						case 1:
 							while (!stralloc_copy(&sender, &srs_result))
 								nomem(argv0);
+							while (!stralloc_0(&sender))
+								nomem(argv0);
+							sender.len--;
 							break;
 						}
 						while (chdir(auto_qmail) == -1) {
@@ -2664,7 +2667,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.107 2023-01-15 12:35:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.108 2023-10-02 22:50:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2674,6 +2677,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.108  2023-10-02 22:50:35+05:30  Cprogrammer
+ * fix copy of srs_result
+ *
  * Revision 1.107  2023-01-15 12:35:40+05:30  Cprogrammer
  * use slog() function with varargs to log error messages
  *

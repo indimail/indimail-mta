@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.303 2023-10-02 17:46:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.304 2023-10-02 22:50:51+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.303 $";
+static char    *revision = "$Revision: 1.304 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -4174,7 +4174,8 @@ smtp_rcpt(char *arg)
 			flush();
 			break;
 		case 1:
-			if (!stralloc_copy(&addr, &srs_result))
+			if (!stralloc_copy(&addr, &srs_result) ||
+					!stralloc_0(&addr))
 				die_nomem();
 			break;
 		}
@@ -7178,6 +7179,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.304  2023-10-02 22:50:51+05:30  Cprogrammer
+ * fix copy of srs_result
+ *
  * Revision 1.303  2023-10-02 17:46:10+05:30  Cprogrammer
  * Fix (double) error message for unsupported AUTH method
  * Fix SEGV when decoding SRS recipient address
@@ -7544,7 +7548,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.303 2023-10-02 17:46:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.304 2023-10-02 22:50:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

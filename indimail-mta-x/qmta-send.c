@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.23  2023-10-02 22:50:40+05:30  Cprogrammer
+ * fix copy of srs_result
+ *
  * Revision 1.22  2023-03-08 20:03:42+05:30  Cprogrammer
  * fixed but with handling SRS address
  *
@@ -1761,6 +1764,9 @@ injectbounce(unsigned long id)
 						case 1:
 							while (!stralloc_copy(&sender, &srs_result))
 								nomem(argv0);
+							while (!stralloc_0(&sender))
+								nomem(argv0);
+							sender.len--;
 							break;
 						}
 					}
@@ -2818,7 +2824,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.22 2023-03-08 20:03:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.23 2023-10-02 22:50:40+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
