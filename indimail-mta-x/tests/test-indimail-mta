@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.20 2023-10-02 21:24:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.21 2023-10-02 22:49:08+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -144,7 +144,6 @@ check_mail_header()
 		fi
 		sleep 1
 		count=$(expr "$count" + 1)
-		echo count=$count
 		if [ $count -gt 5 ] ; then
 			echo "Failed to receive Mail" 1>&2
 			return 1
@@ -154,7 +153,7 @@ check_mail_header()
 	sleep_secs=$(echo $tx1 $tx2 | awk '{printf("%0.4f\n", $2-$1)}')
 	header=$(822header -I $1 < $maildir/new/$mail_file)
 	/bin/rm -f $maildir/new/$mail_file
-	return 1
+	return 0
 }
 
 shutdown_svscan()
@@ -207,6 +206,7 @@ setup_assign()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "  testing create assign/user.cdb failed [%.4f sec]\n" $secs
+		failed=1
 		exit 1
 	fi
 }
@@ -225,6 +225,7 @@ setup_queue()
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
 		printf "  testing create qmail queue failed [%.4f sec]\n" $secs
+		failed=1
 		exit 1
 	fi
 }
@@ -253,7 +254,8 @@ setup_config()
 		(
 		printf "  testing qmail configuration failed [%.4f sec]\n" $secs
 		cat $testdir/setup/setup.log
-		) |less
+		)|less
+		failed=1
 		exit 1
 	fi
 	if [ ! -f $certdir/servercert.pem ] ; then
@@ -272,7 +274,8 @@ setup_config()
 			(
 			printf "  testing create self signed certificate failed [%.4f sec]\n" $secs
 			cat $testdir/setup/setup.log
-			) |less
+			)|less
+			failed=1
 			exit 1
 		fi
 	fi
@@ -435,7 +438,7 @@ test_tcpclient_script()
 			cat $logdir/smtpd/current
 		fi
 		)
-		sudo kill $send_pid $smtp_pid
+		failed=1
 		exit 1
 	fi
 }
@@ -452,6 +455,7 @@ run_qmail_send()
 		CONFSPLIT=23 \
 		QUEUEDIR=$testdir/queue \
 		ASSIGNDIR=$sysconfdir/users \
+		PASSWD_FILE=$sysconfdir/passwd \
 		$qmail_start -s ./Maildir/ > $logdir/qmail-send/qmail-send.log 2>&1
 	) &
 }
@@ -472,7 +476,7 @@ get_send_pid()
 test_qmail_inject()
 {
 	t1=$(date +"%s.%4N")
-	echo "Starting qmail-inject"
+	echo "Starting qmail-inject tests"
 	(
 	echo "From: $2"
 	echo "To: $3"
@@ -494,13 +498,13 @@ test_qmail_inject()
 		tcount=$(expr $tcount + 1)
 		printf "  testing qmail-inject, qmail send+receive succeeded %51s [%.4f sec]\n" " " $secs
 	else
-		sudo kill $send_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
 		echo "  testing qmail-inject, qmail send+receive failed [$secs sec]"
 		cat $logdir/qmail-send/qmail-send.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -575,14 +579,14 @@ start_tcpserver_smtp()
 		tcount=$(expr $tcount + 1)
 		printf "  testing SMTP on port %4d smtp_port using tcpserver succeeded %40s [%.4f sec]\n" $smtp_port " " $secs
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
 		echo "  testing SMTP on port $smtp_port using tcpserver failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
 		cat $logdir/smtpd/smtpd.log
-		) |less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -622,14 +626,14 @@ start_tcpserver_smtp_unix()
 		tcount=$(expr $tcount + 1)
 		printf "  testing SMTP on socket %-26s using tcpserver succeeded %26s [%.4f sec]\n" $smtp_socket " " $secs
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		(
 		echo "  testing SMTP on socket $smtp_socket using tcpserver failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
 		cat $logdir/smtpd/smtpd.log
-		) |less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -656,8 +660,8 @@ test_smtp_tls()
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 		fi
-		) |less
-		sudo kill $send_pid $smtp_pid
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -673,7 +677,6 @@ test_smtp_notls()
 		tcount=$(expr $tcount + 1)
 		printf "  testing mail using SMTP without STARTTLS succeeded %51s [%.4f sec]\n" " " $secs
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
@@ -687,7 +690,8 @@ test_smtp_notls()
 		fi
 		echo "qmail-send.log"
 		cat $logdir/qmail-send/qmail-send.log
-		) |less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -731,9 +735,9 @@ test_smtp_dkimverify()
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 		fi
-		) | less
-		sudo kill $send_pid $smtp_pid
+		)|less
 		/bin/rm -f $testdir/tmp/mail1.txt $testdir/tmp/mail2.txt
+		failed=1
 		exit 1
 	fi
 }
@@ -757,7 +761,6 @@ test_smtp_bogofilter()
 		tcount=$(expr $tcount + 1)
 		printf "  testing mail using SMTP for spamfilter succeeded %53s [%.4f sec]\n" " " $secs
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
@@ -769,7 +772,8 @@ test_smtp_bogofilter()
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 		fi
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -786,7 +790,6 @@ test_smtps()
 		str="$1 succeeded"
 		printf "  testing %-94s [%.4f sec]\n" "$str" $secs
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
@@ -798,7 +801,8 @@ test_smtps()
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 		fi
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -816,25 +820,25 @@ test_smtp_auth_login()
 			tcount=$(expr $tcount + 1)
 			printf "  testing mail using SMTP with LOGIN authentication succeeded %42s [%.4f sec]\n" " " $secs
 		else
-			sudo kill $send_pid $smtp_pid
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			(
 			echo "  testing mail using SMTP with LOGIN authentication failed [$secs sec]"
 			echo "$logdir/smtpd/smtpd.log"
 			cat $logdir/smtpd/smtpd.log
-			) | less
+			)|less
+			failed=1
 			exit 1
 		fi
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
 		echo "  testing mail using SMTP with LOGIN authentication failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
 		cat $logdir/smtpd/smtpd.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -852,25 +856,25 @@ test_smtp_auth_plain()
 			tcount=$(expr $tcount + 1)
 			printf "  testing mail using SMTP with PLAIN authentication succeeded %42s [%.4f sec]\n" " " $secs
 		else
-			sudo kill $send_pid $smtp_pid
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			(
 			echo "  testing mail using SMTP with PLAIN authentication failed [$secs sec]"
 			echo "$logdir/smtpd/smtpd.log"
 			cat $logdir/smtpd/smtpd.log
-			) | less
+			)|less
+			failed=1
 			exit 1
 		fi
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
 		echo "  testing mail using SMTP with PLAIN authentication failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
 		cat $logdir/smtpd/smtpd.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -889,25 +893,25 @@ test_smtp_auth_cram_md5()
 			tcount=$(expr $tcount + 1)
 			printf "  testing mail using SMTP with CRAM-MD5 authentication succeeded %39s [%.4f sec]\n" " " $secs
 		else
-			sudo kill $send_pid $smtp_pid
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			(
 			echo "  testing mail using SMTP with CRAM-MD5 authentication failed [$secs sec]"
 			echo "$logdir/smtpd/smtpd.log"
 			cat $logdir/smtpd/smtpd.log
-			) | less
+			)|less
+			failed=1
 			exit 1
 		fi
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
 		echo "  testing mail using SMTP with CRAM-MD5 authentication failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
 		cat $logdir/smtpd/smtpd.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -959,7 +963,6 @@ test_smtp_cugmail()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing mail using SMTP with CUGMAIL failed [$secs sec]"
 		echo l1=$l1
@@ -967,7 +970,8 @@ test_smtp_cugmail()
 		echo l3=$l3
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1026,7 +1030,6 @@ test_smtp_chk_sender()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
-		shutdown_svscan $svpid
 		> $servicedir/smtpd/variables/CHECKSENDER
 		(
 		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4, ret5=$ret5, ret6=$ret6"
@@ -1035,7 +1038,8 @@ test_smtp_chk_sender()
 		echo "  testing mail using SMTP with CHECKSENDER failed [$secs sec]"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 
@@ -1067,8 +1071,8 @@ test_smtp_chk_sender()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-(2*$4))}')
-		shutdown_svscan $svpid
 		echo "  testing chksender control file failed    [$secs sec]"
+		failed=1
 		exit 1
 	fi
 }
@@ -1113,13 +1117,13 @@ test_smtp_surbl()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-(2*$4))}')
-		shutdown_svscan $svpid
 		(
 		echo "l1=$l1"
 		echo "  testing mail using SMTP for SURBL failed [$secs sec]"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1162,7 +1166,6 @@ test_qmail_remote_auth()
 			printf "  testing qmail-remote AUTH %-8s qmail-remote send+receive succeeded %31s [%.4f sec]\n" "$1" " " $secs
 			/bin/rm -f $testdir/qremote.$$
 		else
-			sudo kill $send_pid $smtp_pid
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			(
@@ -1177,12 +1180,12 @@ test_qmail_remote_auth()
 			fi
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
-			) | less
+			)|less
 			/bin/rm -f $testdir/qremote.$$
+			failed=1
 			exit 1
 		fi
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
@@ -1197,8 +1200,9 @@ test_qmail_remote_auth()
 		fi
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
-		) | less
+		)|less
 		/bin/rm -f $testdir/qremote.$$
+		failed=1
 		exit 1
 	fi
 	if [ " $1" = " CRAM-MD5" ] ; then
@@ -1208,7 +1212,6 @@ test_qmail_remote_auth()
 			tcount=$(expr $tcount + 1)
 			printf "  testing BATV signing+verification succeeded %58s [%.4f sec]\n" " " $secs
 		else
-			sudo kill $send_pid $smtp_pid
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			(
@@ -1222,7 +1225,8 @@ test_qmail_remote_auth()
 			fi
 			echo "qmail-remote.log"
 			$testdir/qremote.$$
-			) | less
+			)|less
+			failed=1
 			exit 1
 		fi
 	fi
@@ -1254,7 +1258,6 @@ test_qmail_remote_routing()
 		printf "  testing qmail-remote SMTPROUTE env qmail-remote send+receive succeeded %31s [%.4f sec]\n" " " $secs
 		/bin/rm -f $testdir/qremote.$$
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
@@ -1268,8 +1271,9 @@ test_qmail_remote_routing()
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 		fi
-		) | less
+		)|less
 		/bin/rm -f $testdir/qremote.$$
+		failed=1
 		exit 1
 	fi
 	s1=$sleep_secs
@@ -1286,7 +1290,6 @@ test_qmail_remote_routing()
 		printf "  testing qmail-remote smtproutes control file qmail-remote send+receive succeeded %21s [%.4f sec]\n" " " $secs
 		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $s1 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		(
@@ -1301,8 +1304,9 @@ test_qmail_remote_routing()
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 		fi
-		) | less
+		)|less
 		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		failed=1
 		exit 1
 	fi
 }
@@ -1322,10 +1326,10 @@ test_qmail_remote_auth_cdb()
 		tcount=$(expr $tcount + 1)
 		printf "  testing cdb-database for qmail-remote authentication succeeded %39s [%.4f sec]\n" " " $secs
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		echo "  testing cdb-database for qmail-remote authentication failed [$secs sec]"
+		failed=1
 		exit 1
 	fi
 	(
@@ -1360,9 +1364,9 @@ test_qmail_remote_auth_cdb()
 			echo "Last does not have AUTH PLAIN"
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
-			) | less
-			sudo kill $send_pid $smtp_pid
+			)|less
 			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			failed=1
 			exit 1
 		fi
 	else
@@ -1373,9 +1377,9 @@ test_qmail_remote_auth_cdb()
 		echo "Failed to receive mail"
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
-		) | less
-		sudo kill $send_pid $smtp_pid
+		)|less
 		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		failed=1
 		exit 1
 	fi
 }
@@ -1406,7 +1410,6 @@ test_qmail_remote_starttls()
 			printf "  testing qmail-remote STARTTLS %-11s, qmail-remote send+receive succeeded %23s [%.4f sec]\n" $last_line " " $secs
 			/bin/rm -f $testdir/qremote.$$
 		else
-			sudo kill $send_pid $smtp_pid
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			(
@@ -1421,12 +1424,12 @@ test_qmail_remote_starttls()
 			fi
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
-			) | less
+			)|less
 			/bin/rm -f $testdir/qremote.$$
+			failed=1
 			exit 1
 		fi
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
@@ -1441,8 +1444,9 @@ test_qmail_remote_starttls()
 		fi
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
-		) | less
+		)|less
 		/bin/rm -f $testdir/qremote.$$
+		failed=1
 		exit 1
 	fi
 }
@@ -1474,7 +1478,6 @@ test_qmail_remote_smtps()
 			printf "  testing qmail-remote SMTPS %11s, qmail-remote send+receive succeeded %26s [%.4f sec]\n" $last_line " " $secs
 			/bin/rm -f $testdir/qremote.$$
 		else
-			sudo kill $send_pid $smtp_pid
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			(
@@ -1489,12 +1492,12 @@ test_qmail_remote_smtps()
 			fi
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
-			) | less
+			)|less
 			/bin/rm -f $testdir/qremote.$$
+			failed=1
 			exit 1
 		fi
 	else
-		sudo kill $send_pid $smtp_pid
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		(
@@ -1509,8 +1512,9 @@ test_qmail_remote_smtps()
 		fi
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
-		) | less
+		)|less
 		/bin/rm -f $testdir/qremote.$$
+		failed=1
 		exit 1
 	fi
 }
@@ -1595,7 +1599,8 @@ start_tcpserver_smtps()
 		echo "  testing SMTPS on port $smtp_port using tcpserver failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
 		cat $logdir/smtpd/smtpd.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1632,7 +1637,8 @@ start_tcpserver_smtps_unix()
 		echo "  testing SMTPS on socket $smtp_socket using tcpserver failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
 		cat $logdir/smtpd/smtpd.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1701,12 +1707,12 @@ start_svscan_without_svscanlog()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1-1)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing svscan (without svscanlog) startup failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/svscan.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 	for i in smtpd smtpd/log qmail-send qmail-send/log
@@ -1720,14 +1726,14 @@ start_svscan_without_svscanlog()
 		else
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1-1)}')
-			shutdown_svscan $svpid
 			(
 			echo "  testing service $i startup failed [$secs sec]"
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 			echo "qmail-send.log"
 			cat $logdir/qmail-send/current
-			) | less
+			)|less
+			failed=1
 			exit 1
 		fi
 	done
@@ -1747,12 +1753,12 @@ test_stop_smtps()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing stopping of service using svc failed [$secs sec]"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1771,12 +1777,12 @@ test_stop_supervise()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing stopping of supervise using svc failed [$secs sec]"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1795,12 +1801,12 @@ test_restart_service_using_hup()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing restarting of supervise by sending hup to svscan failed [$secs sec]"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1821,12 +1827,12 @@ test_restart_service_using_svc()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing restarting of supervise using svc failed [$secs sec]"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1843,12 +1849,12 @@ test_multilog()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing logging using multilog failed [$secs sec]"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1864,7 +1870,6 @@ test_blocked()
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-		shutdown_svscan $svpid
 		(
 		if [ $# -eq 0 ] ; then
 			echo "  testing badrcptto failed [$secs sec]"
@@ -1873,7 +1878,8 @@ test_blocked()
 		fi
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	else
 		t2=$(date +"%s.%4N")
@@ -1928,12 +1934,12 @@ start_svscan_with_svscanlog()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing svscan (with svscanlog) startup failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1950,12 +1956,12 @@ test_svscan_log()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing svscan log failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1971,12 +1977,12 @@ test_svscan_run()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing svscan run script execution failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -1998,7 +2004,8 @@ test_svscan_shutdown()
 		echo "  testing svscan shutdown script execution failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -2035,7 +2042,6 @@ start_new_service()
 		fi
 	else
 		t2=$(date +"%s.%4N")
-		shutdown_svscan $svpid
 		(
 		if [ $# -eq 0 ] ; then
 			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1-5)}')
@@ -2046,7 +2052,8 @@ start_new_service()
 		fi
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 	ps -ef |grep "sleep 2243"|grep -v grep > /dev/null
@@ -2063,7 +2070,6 @@ start_new_service()
 		fi
 	else
 		t2=$(date +"%s.%4N")
-		shutdown_svscan $svpid
 		(
 		if [ $# -eq 0 ] ; then
 			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1-5)}')
@@ -2074,7 +2080,8 @@ start_new_service()
 		fi
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 	t1=$(date +"%s.%4N")
@@ -2084,12 +2091,12 @@ start_new_service()
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing stopping of new service failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	else
 		t2=$(date +"%s.%4N")
@@ -2105,12 +2112,12 @@ start_new_service()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing shutdown script of new service failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -2125,12 +2132,12 @@ remove_new_service()
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing removal of new service failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	else
 		sudo /bin/rm -rf $servicedir/.sleep
@@ -2157,12 +2164,12 @@ test_supervise_subreaper()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing starting of new service in supbreaper mode failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 	pgid=$(ps ajx|grep "sleep 2244"|grep -v grep|awk '{print $3}')
@@ -2175,12 +2182,12 @@ test_supervise_subreaper()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		echo "  testing setting of PGID ($pgid = $$) in subreaper mode failed [$secs sec]"
-		shutdown_svscan $svpid
 		(
 		echo "  testing starting of new service in supbreaper mode failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 	sudo svc -d $servicedir/sleep
@@ -2189,12 +2196,12 @@ test_supervise_subreaper()
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-(2*$3))}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing stopping of new service in subreaper mode failed [$secs sec]"
 		echo "svscan.log"
 		cat $logdir/svscan/current
-		) | less
+		)|less
+		failed=1
 		exit 1
 	else
 		t2=$(date +"%s.%4N")
@@ -2302,9 +2309,9 @@ test_recipients()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		echo "  testing qmail-cdb failed [$secs sec]"
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
+		failed=1
 		exit 1
 	fi
 
@@ -2322,13 +2329,13 @@ test_recipients()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-		shutdown_svscan $svpid
 		(
 		echo "  testing recipient extension (positive match) failed [$secs sec]"
 		echo "tcpclient.log"
 		cat $logdir/tcpclient/tcpclient.log
-		) | less
+		)|less
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
+		failed=1
 		exit 1
 	fi
 
@@ -2354,15 +2361,15 @@ test_recipients()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-5)}')
-		shutdown_svscan $svpid
 		(
 		echo "l1=$l1"
 		echo "ret2=$ret2, ret3=$ret3"
 		echo "  testing recipient extension (negative match) failed [$secs sec]"
 		echo "tcpclient.log"
 		cat $logdir/tcpclient/tcpclient.log
-		) | less
+		)|less
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
+		failed=1
 		exit 1
 	fi
 
@@ -2382,13 +2389,13 @@ test_recipients()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
 		(
 		echo "  testing recipient extension (wildcard match) failed [$secs sec]"
 		echo "tcpclient.log"
 		cat $logdir/tcpclient/tcpclient.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 
@@ -2411,7 +2418,6 @@ test_recipients()
 	if [ $ret1 -ne 1 -o $ret2 -ne 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-5)}')
-		shutdown_svscan $svpid
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
 		(
 		echo "l1=$l1"
@@ -2419,7 +2425,8 @@ test_recipients()
 		echo "  testing recipient extension (chkrcptdomains control file) failed [$secs sec]"
 		echo "tcpclient.log"
 		cat $logdir/tcpclient/tcpclient.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 
@@ -2432,14 +2439,14 @@ test_recipients()
 	if [ $ret1 -ne 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		shutdown_svscan $svpid
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
 		/bin/rm -f $cntrldir/chkrcptdomains
 		(
 		echo "  testing recipient extension (chkrcptdomains control file) failed [$secs sec]"
 		echo "tcpclient.log"
 		cat $logdir/tcpclient/tcpclient.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 
@@ -2465,15 +2472,15 @@ test_recipients()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1-5)}')
-		shutdown_svscan $svpid
 		(
 		echo "l1=$l1"
 		echo "ret1=$ret1, ret2=$ret2"
 		echo "  testing recipient extension (chkrcptdomains control file) failed [$secs sec]"
 		echo "tcpclient.log"
 		cat $logdir/tcpclient/tcpclient.log
-		) | less
+		)|less
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
+		failed=1
 		exit 1
 	fi
 }
@@ -2691,6 +2698,7 @@ test_srs()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		printf "  testing SRS rewrite qmail-inject failed [%.4f sec]\n" $secs
+		echo "$header != Return-Path: <$srs_addr>"
 		failed=1
 		exit 1
 	fi
@@ -2749,12 +2757,54 @@ test_srs()
 	fi
 }
 
+test_alias()
+{
+	for alias in root mailer-daemon
+	do
+		t1=$(date +"%s.%4N")
+		subject="Testing alias mechanism for $alias"
+		(
+		echo "From: $user@$HOSTNAME"
+		echo "To: $alias@$HOSTNAME"
+		echo "Subject: $subject"
+		echo "Date: $(date -R)"
+		echo
+		echo "Test message for $alias"
+		) | sudo $setuidgid -g qcerts $user env - \
+			QUEUEDIR=$testdir/queue \
+			QMAILQUEUE=$qmail_queue \
+			CONTROLDIR=$cntrldir \
+			BIGTODO=0 \
+			CONFSPLIT=23 \
+		$qmail_inject -f$user@$HOSTNAME root@$HOSTNAME
+		check_mail_header To
+		a_ret=$?
+		if [ $a_ret -eq 0 -a "$header" = "To: $alias@$HOSTNAME" ] ; then
+			t2=$(date +"%s.%4N")
+			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+			tcount=$(expr $tcount + 1)
+			printf "  testing alias for %-13s succeeded %60s [%.4f sec]\n" $alias " " $secs
+		else
+			t2=$(date +"%s.%4N")
+			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+			echo "  testing alias for $alias failed [$secs sec]\n" $secs
+			(
+			echo "ret=$a_ret, \"$header\" != \"To: $alias@$HOSTNAME\""
+			cat $logdir/qmail-send/qmail-send.log
+			)|less
+			failed=1
+			exit 1
+		fi
+	done
+}
+
 do_without_svscan()
 {
 	# use qmail-start to start qmail-send
 	run_qmail_send
 	send_pid=$(get_send_pid)
 	test_qmail_inject $user $user $user
+	test_alias
 
 	echo "Testing qmail-local internal filterit command"
 	t1x=$(date +"%s.%4N")
@@ -2941,6 +2991,7 @@ do_qmail_qfilter()
 				t2=$(date +"%s.%4N")
 				secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
 				echo "  testing qmail-qfilter [$secs sec]"
+				failed=1
 				exit 1
 			fi
 		fi
@@ -3010,7 +3061,8 @@ test_filterit()
 			echo "  testing external filterit with no-match failed [$secs sec]"
 		fi
 		cat $logdir/qmail-send/qmail-send.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 
@@ -3052,7 +3104,8 @@ test_filterit()
 			echo "  testing external filterit with negative match deliver to folder failed [$secs sec]"
 		fi
 		cat $logdir/qmail-send/qmail-send.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 
@@ -3116,7 +3169,8 @@ test_filterit()
 			echo "  testing external filterit with positive match deliver to folder failed [$secs sec]"
 		fi
 		cat $logdir/qmail-send/qmail-send.log
-		) | less
+		)|less
+		failed=1
 		exit 1
 	fi
 }
@@ -3158,6 +3212,7 @@ do_spf_tests()
 			echo "  $l2"
 			/bin/rm -f /tmp/spf.out /tmp/spf.err
 			printf "  testing spf test%02d failed   ret=%d == %d [%0.4f sec]\n" $count $ret $exit_val $secs
+			failed=1
 			exit 1
 		fi
 		count=$(expr $count + 1)
@@ -4619,6 +4674,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.21  2023-10-02 22:49:08+05:30  Cprogrammer
+# added alias tests
+#
 # Revision 1.20  2023-10-02 21:24:03+05:30  Cprogrammer
 # added SRS tests
 #
