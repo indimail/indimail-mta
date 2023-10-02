@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.39 2023-10-01 11:44:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.39 2023-10-02 17:40:58+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -73,7 +73,7 @@ static char     ssinbuf[512], ssoutbuf[512];
 static char     strnum[FMT_ULONG];
 substdio        ssin, ssout;
 static pid_t    inject_pid;
-static stralloc liphost = { 0 }, content_type = { 0 };
+static stralloc liphost = { 0 }, content_type = { 0 }, srs_domain = { 0 };
 struct header
 {
 	char           *returnpath;
@@ -993,7 +993,7 @@ mkTempFile(int seekfd)
 int
 main(int argc, char *argv[])
 {
-	int             fdout, match;
+	int             fdout, match, len, do_srs = 0, at;
 	char           *sender, *dtrecip, *host, *ptr;
 	char            dbuf[DATE822FMT];
 #ifdef MIME
@@ -1026,6 +1026,11 @@ main(int argc, char *argv[])
 		strerr_die2sys(111, FATAL, "unable to read doublebounceto controls: ");
 	if ((liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1)
 		strerr_die2sys(111, FATAL, "unable to read localiphost controls: ");
+	if (control_readline(&srs_domain, (ptr = env_get("SRS_DOMAIN")) && *ptr ? ptr : (ptr = "srs_domain")) == -1)
+		strerr_die4sys(111, FATAL, "unable to read ", ptr, " controls: ");
+	if (srs_domain.len && !stralloc_0(&srs_domain))
+		strerr_die2x(111, FATAL, "out of memory");
+	srs_domain.len--; /*- substract length due to stralloc_0 */
 	if (env_get("MAKE_SEEKABLE") && mkTempFile(0))
 		strerr_die2sys(111, FATAL, "makeseekable: ");
 	get_arguments(argc, argv);
@@ -1036,7 +1041,15 @@ main(int argc, char *argv[])
 		usage("DTLINE is not set; must be run from .qmail");
 	dtline_len = str_len(dtline);
 #ifdef HAVESRS
-	if (*sender && (case_starts(sender, "SRS0=") || case_starts(sender, "SRS1="))) {
+	if (srs_domain.len && (case_starts(sender, "SRS0=") || case_starts(sender, "SRS1="))) {
+		len = str_len(sender);
+		if ((at = byte_rchr(sender, len, '@')) < len - 2) {
+			if (!str_diffn(srs_domain.s, sender + at + 1,
+						srs_domain.len > (len - at - 1) ? srs_domain.len + 1 : len - at))
+				do_srs = 1;
+		}
+	}
+	if (do_srs) {
 		switch (srsreverse(sender))
 		{
 		case -3:
@@ -1286,15 +1299,15 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.39 2023-10-01 11:44:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.39 2023-10-02 17:40:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: autoresponder.c,v $
- * Revision 1.39  2023-10-01 11:44:44+05:30  Cprogrammer
- * decode SRS return path address
+ * Revision 1.39  2023-10-02 17:40:58+05:30  Cprogrammer
+ * decode srs return path address
  *
  * Revision 1.38  2023-03-26 01:52:43+05:30  Cprogrammer
  * fixed code using wait_handler.

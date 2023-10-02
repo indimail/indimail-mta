@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.302 2023-09-28 01:12:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.303 2023-10-02 17:46:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.302 $";
+static char    *revision = "$Revision: 1.303 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1764,7 +1764,7 @@ err_noauth()
 {
 	out("504 auth type unimplemented (#5.5.1)\r\n", NULL);
 	flush();
-	return -1;
+	return -3;
 }
 
 #ifdef TLS
@@ -2556,8 +2556,6 @@ open_control_files1()
 		die_control("locals");
 	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
 		die_nomem();
-#ifdef USE_SPF
-#endif
 }
 
 /*
@@ -2655,6 +2653,11 @@ open_control_files2()
 	}
 #endif
 #ifdef HAVESRS
+	if (control_readline(&srs_domain, (x = env_get("SRS_DOMAIN")) && *x ? x : "srs_domain") == -1)
+		die_control(x);
+	if (srs_domain.len && !stralloc_0(&srs_domain))
+		die_nomem();
+	srs_domain.len--; /*- substract length due to stralloc_0 */
 	if ((r = srs_setup(0)) < 0) {
 		logerr(1, "srs_setup failed\n", NULL);
 		logflush();
@@ -2662,8 +2665,6 @@ open_control_files2()
 		flush();
 		_exit(1);
 	}
-	if (r)
-		srs_domain.len--; /*- substract length due to stralloc_0 */
 #endif
 	open_control_once(&acclistok, 0, &accFn, 0, "ACCESSLIST", 0, "accesslist", 0, &acclist, 0, 0);
 	if ((x = env_get("BODYCHECK"))) {
@@ -4139,8 +4140,9 @@ smtp_rcpt(char *arg)
 #ifdef HAVESRS
 	do_srs = 0;
 	if (srs_domain.len && (case_starts(addr.s, "SRS0=") || case_starts(addr.s, "SRS1="))) {
-		if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 1) {
-			if (!str_diffn(srs_domain.s, addr.s + at + 1, srs_domain.len > (addr.len - 2 - at) ? srs_domain.len : addr.len - at - 1))
+		if ((at = byte_rchr(addr.s, addr.len - 1, '@')) < addr.len - 3) {
+			if (!str_diffn(srs_domain.s, addr.s + at + 1,
+						srs_domain.len > (addr.len - at - 2) ? srs_domain.len + 1 : addr.len - at - 1))
 				do_srs = 1;
 		}
 	}
@@ -6294,6 +6296,9 @@ smtp_auth(char *arg)
 	case -2: /*- returned by err_noauthallowed() when SECURE_AUTH is set and TLS isn't used */
 		err_authinsecure(j);
 		break;
+	case -3: /*- returned by err_noauth() for invalid auth type */
+		err_authfailure(user.len ? user.s : 0, j);
+		break;
 	default:
 		err_child();
 		break;
@@ -7173,6 +7178,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.303  2023-10-02 17:46:10+05:30  Cprogrammer
+ * Fix (double) error message for unsupported AUTH method
+ * Fix SEGV when decoding SRS recipient address
+ *
  * Revision 1.302  2023-09-28 01:12:49+05:30  Cprogrammer
  * added check sender feature
  *
@@ -7535,7 +7544,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.302 2023-09-28 01:12:49+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.303 2023-10-02 17:46:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

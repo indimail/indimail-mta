@@ -1,19 +1,20 @@
 #
-# $Id: svctool.in,v 2.706 2023-09-30 11:10:32+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.707 2023-10-02 02:44:38+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
 # User Configuration
 #
-QmailHOME=@qmaildir@
-indimaildir=@indimaildir@
+[ -z "$QmailHOME" ] && QmailHOME="/var/indimail"
+[ -z "$INDIMAILDIR" ] && INDIMAILDIR="/var/indimail"
+#indimaildir=`awk -F: '{print $6}' /etc/passwd|grep indimail|head -1`
+indimaildir=$INDIMAILDIR
 QmailBinPrefix=@prefix@
 mandir=@mandir@
 libexecdir=@libexecdir@
 sysconfdir=@sysconfdir@
 shareddir=@shareddir@
 LOGDIR=@logdir@
-#indimaildir=`awk -F: '{print $6}' /etc/passwd|grep indimail|head -1`
 CONCURRENCYINCOMING=150
 min_free=52428800
 DATABYTES=20971520
@@ -26,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.706 2023-09-30 11:10:32+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.707 2023-10-02 02:44:38+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -8700,6 +8701,9 @@ default_alias_config()
 	if [ ! -d $t -o ! -d $t/new -o ! -d $t/cur -o ! -d $t/tmp ] ; then
 		echo "Creating catch-all alias ($t) for all system users"
 	fi
+	if [ ! -d $QmailHOME/alias ] ; then
+		mkdir -p $QmailHOME/alias
+	fi
 	if [ -x "$DESTDIR"$QmailBinPrefix/bin/maildirmake ] ; then
 		"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$t >/dev/null 2>&1
 	else
@@ -8711,29 +8715,35 @@ default_alias_config()
 		$chown -R alias:qmail "$DESTDIR"$t
 		/bin/chmod -R 775 "$DESTDIR"$t
 	fi
-	/bin/rm -f "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
-	first_char=`echo $postmaster | cut -c1`
-	if [ " $first_char" = " /" ] ; then
-		if [ -x "$DESTDIR"$QmailBinPrefix/bin/maildirmake ] ; then
-			"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$postmaster >/dev/null 2>&1
-		else
-			/bin/mkdir -p "$DESTDIR"$postmaster/tmp >/dev/null 2>&1
-			/bin/mkdir -p "$DESTDIR"$postmaster/new >/dev/null 2>&1
-			/bin/mkdir -p "$DESTDIR"$postmaster/cur >/dev/null 2>&1
+	if [ $force -eq 1 -o ! -f "$DESTDIR"$QmailHOME/alias/.qmail-postmaster ] ; then
+		/bin/rm -f "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
+		first_char=`echo $postmaster | cut -c1`
+		if [ " $first_char" = " /" ] ; then
+			if [ -x "$DESTDIR"$QmailBinPrefix/bin/maildirmake ] ; then
+				"$DESTDIR"$QmailBinPrefix/bin/maildirmake "$DESTDIR"$postmaster >/dev/null 2>&1
+			else
+				/bin/mkdir -p "$DESTDIR"$postmaster/tmp >/dev/null 2>&1
+				/bin/mkdir -p "$DESTDIR"$postmaster/new >/dev/null 2>&1
+				/bin/mkdir -p "$DESTDIR"$postmaster/cur >/dev/null 2>&1
+			fi
+			if [ $? -eq 0 ] ; then
+				$chown -R alias:qmail "$DESTDIR"$postmaster
+				/bin/chmod -R 775 "$DESTDIR"$postmaster
+			fi
 		fi
-		if [ $? -eq 0 ] ; then
-			$chown -R alias:qmail "$DESTDIR"$postmaster
-			/bin/chmod -R 775 "$DESTDIR"$postmaster
-		fi
+		echo $postmaster > "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
+		$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
 	fi
-	echo $postmaster > "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
-	$chown -R alias:qmail "$DESTDIR"$QmailHOME/alias/.qmail-postmaster
 	cd "$DESTDIR"$QmailHOME/alias
 	if [ $? -eq 0 ] ; then
-		/bin/rm -f .qmail-root
-		/bin/rm -f .qmail-mailer-daemon
-		/bin/ln -s .qmail-postmaster .qmail-root
-		/bin/ln -s .qmail-postmaster .qmail-mailer-daemon
+		if [ ! -f .qmail-root -o $force -eq 1 ] ; then
+			/bin/rm -f .qmail-root
+			/bin/ln -s .qmail-postmaster .qmail-root
+		fi
+		if [ ! -f .qmail-mailer-daemon -o $force -eq 1 ] ; then
+			/bin/rm -f .qmail-mailer-daemon
+			/bin/ln -s .qmail-postmaster .qmail-mailer-daemon
+		fi
 	fi
 }
 
