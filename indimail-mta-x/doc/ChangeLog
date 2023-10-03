@@ -60,6 +60,11 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 48. tests/tests-indimail-mta: Added tests for SRS
 49. qmail-inject.c, qmail-local.c, qmail-send.c, qmta-send.c, slowq-send.c,
     smtpd.c: Fixed copying srs_result
+- 03/10/2023
+50. qmail-lspawn.c: use env variable QMAILGETPW to execute alternate
+    qmail-getpw
+51. spawn-filter.c: use env variable QLOCAL, QREMOTE to execute alternate
+    qmail-local, qmail-remote
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-lspawn.c,v 1.44 2023-09-30 19:46:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-lspawn.c,v 1.45 2023-10-03 22:48:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -50,6 +50,22 @@ static char *setup_qlargs()
 		qlargs = q.s;
 	}
 	return qlargs;
+}
+
+static char *setup_qgargs()
+{
+	static char    *qgargs;
+
+	if (!qgargs)
+		qgargs= env_get("QMAILGETPW");
+	if (!qgargs) {
+		if (!stralloc_copys(&q, auto_prefix) ||
+				!stralloc_catb(&q, "/sbin/qmail-getpw", 17) ||
+				!stralloc_0(&q))
+			_exit (QLX_NOMEM);
+		qgargs = q.s;
+	}
+	return qgargs;
 }
 
 void
@@ -152,6 +168,7 @@ void
 nughde_get(char *local)
 {
 	char           *(args[3]);
+	char           *x;
 	int             pi[2];
 	int             gpwpid, gpwstat, r, fd, flagwild;
 
@@ -214,13 +231,6 @@ nughde_get(char *local)
 	}
 	if (pipe(pi) == -1)
 		_exit (QLX_SYS);
-	if (!stralloc_copys(&q, auto_prefix) ||
-			!stralloc_catb(&q, "/sbin/qmail-getpw", 17) ||
-			!stralloc_0(&q))
-		_exit (QLX_NOMEM);
-	args[0] = q.s;
-	args[1] = local;
-	args[2] = 0;
 	switch (gpwpid = vfork())
 	{
 	case -1:
@@ -241,7 +251,11 @@ nughde_get(char *local)
 		close(pi[0]);
 		if (fd_move(1, pi[1]) == -1)
 			_exit (QLX_SYS);
-		execv(*args, args);
+		x = setup_qgargs();
+		args[0] = x;
+		args[1] = local;
+		args[2] = 0;
+		execv(x, args);
 		_exit (QLX_EXECPW);
 	}
 	close(pi[1]);
@@ -529,7 +543,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.44 2023-09-30 19:46:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.45 2023-10-03 22:48:03+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -537,6 +551,9 @@ getversion_qmail_lspawn_c()
 
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.45  2023-10-03 22:48:03+05:30  Cprogrammer
+ * use env variable QMAILGETPW to execute alternet qmail-getpw
+ *
  * Revision 1.44  2023-09-30 19:46:05+05:30  Cprogrammer
  * skip setuser_privileges for non-etc-passwd users
  *

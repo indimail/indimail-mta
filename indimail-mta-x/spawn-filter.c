@@ -407,6 +407,22 @@ check_size(char *size)
 		return(0);
 }
 
+static char *setup_qargs(char t)
+{
+	static char    *qargs;
+
+	if (!qargs)
+		qargs= env_get(t == 'l' ? "QLOCAL" : "QREMOTE");
+	if (!qargs) {
+		if (!stralloc_copys(&q, auto_prefix) ||
+				!stralloc_catb(&q, t == 'l' ? "/sbin/qmail-local" : "/sbin/qmail-remote", t == 'l' ? 17 : 18) ||
+				!stralloc_0(&q))
+			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
+		qargs = q.s;
+	}
+	return qargs;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -433,11 +449,7 @@ main(int argc, char **argv)
 		ptr++;
 	ptr += 6;
 	if (*ptr == 'l') { /*- qmail-local Filter */
-		if (!stralloc_copys(&q, auto_prefix) ||
-				!stralloc_catb(&q, "/sbin/qmail-local", 17) ||
-				!stralloc_0(&q))
-			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
-		mailprog = q.s;
+		mailprog = setup_qargs(*ptr);
 		if (env_get("MATCH_SENDER_DOMAIN")) {
 			at = str_rchr(argv[8], '@');
 			if (argv[8][at] && argv[8][at + 1])
@@ -476,11 +488,7 @@ main(int argc, char **argv)
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 	} else
 	if (*ptr == 'r') { /*- qmail-remote Filter */
-		if (!stralloc_copys(&q, auto_prefix) ||
-				!stralloc_catb(&q, "/sbin/qmail-remote", 18) ||
-				!stralloc_0(&q))
-			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
-		mailprog = q.s;
+		mailprog = setup_qargs(*ptr);
 		if (env_get("MATCH_RECIPIENT_DOMAIN"))
 			domain = argv[1];
 		else { /*- default for qmail-remote is to match on sender domain */

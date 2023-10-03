@@ -1,52 +1,51 @@
+.\" vim: tw=75
 .TH spawn-filter 8
 .SH NAME
 spawn-filter \- qmail-local / qmail-remote interceptor
+
 .SH SYNOPSIS
 .B spawn-filter args
+
 .SH DESCRIPTION
-.B spawn-filter
-is a \fBqmail-local\fR / \fBqmail-remote\fR interceptor to help qmail run custom filters on email
-being sent to \fBqmail-local\fR / \fBqmail-remote\fR. It can run any filter which reads
-messages on fd 0 and writes the output on fd 1.  Whatever is output on fd 1, will be the
-message that will be delivered to the destination.  The filter can be turned on individually
-for local and remote mails by defining, \fBQMAILLOCAL\fR and \fBQMAILREMOTE\fR
-environment variables, to the path of \fBspawn-filter\fR respectively in \fBqmail-send\fR's
-supervise or rc script. For spam filtering you can additionally, set the environment variable
-\fBSPAMFILTER\fR.  If \fBspawn-filter\fR is invoked as \fBqmail-local\fR, it executes the original
-\fBqmail-local\fR or \fBqmail-remote\fR after running the custom filter.  \fBspawn-filter\fR unsets
-\fBQMAILREMOTE\fR when it runs as \fBqmail-local\fR. Similarly, it unsets \fBQMAILLOCAL\fR when
-it runs as \fBqmail-remote\fR. This is useful in scripts to figure out whether \fBspawn-filter\fR
-is running as \fBqmail-local\fR or \fBqmail-remote\fR.
+\fBspawn-filter\fR is a \fBqmail-local\fR / \fBqmail-remote\fR interceptor
+to help qmail run custom filters on email being sent to \fBqmail-local\fR /
+\fBqmail-remote\fR. It can run any filter which reads messages on fd 0 and
+writes the output on fd 1.  Whatever is output on fd 1, will be the message
+that will be delivered to the destination.  The filter can be turned on
+individually for local and remote mails by defining, \fBQMAILLOCAL\fR and
+\fBQMAILREMOTE\fR environment variables, to the path of \fBspawn-filter\fR
+respectively in \fBqmail-send\fR's supervise or rc script. For spam
+filtering you can additionally, set the environment variable
+\fBSPAMFILTER\fR.  If \fBspawn-filter\fR is invoked as \fBqmail-local\fR,
+it executes the original \fBqmail-local\fR or \fBqmail-remote\fR after
+running the custom filter. \fBspawn-filter\fR unsets \fBQMAILREMOTE\fR
+when it runs as \fBqmail-local\fR. Similarly, it unsets \fBQMAILLOCAL\fR
+when it runs as \fBqmail-remote\fR. This is useful in scripts to figure out
+whether \fBspawn-filter\fR is running as \fBqmail-local\fR or
+\fBqmail-remote\fR. You can set \fBQLOCAL\fR, \fBQREMOTE\fR environment
+variable to make spawn-filter run an alternate \fBqmail-local\fR,
+\fBqmail-remote\fR programs. The alternate programs are expected to support
+the same interface as the original \fBqmail-local\fR and
+\fBqmail-remote\fR.
 
-Filters can be run by defining the environment variable
-.B FILTERARGS
-or by using the control file
-.B filterargs
-(see below).
-.B spawn-filter
+Filters can be run by defining the environment variable \fBFILTERARGS\fR or
+by using the control file \fIfilterargs\fR (see below). \fBspawn-filter\fR
 uses /bin/sh to run the filter (with arguments) specified by the
-.B FILTERARGS
-environment variable (or the control defined in the control file
-.B filterargs
-).
-The environment variable
-.B FILTERARGS
-apply to both local and remote mails. For individual domain level control, it is best to set
-using the control file \fBfilterargs\fR (see below the section on control files).
-The environment variable
-.B FILTERARGS
-takes precedence over the control file.
+\fBFILTERARGS\fR environment variable (or the control defined in the
+control file \fIfilterargs\fR). The environment variable \fBFILTERARGS\fR
+apply to both local and remote mails. For individual domain level control,
+it is best to set using the control file \fBfilterargs\fR (see below the
+section on control files). The environment variable \fBFILTERARGS\fR takes
+precedence over the control file.
 
-.B spawn-filter
-sets multiple environment variables which can be conveniently used in programs/scripts
-which get invoked by setting
-.B FILTERARGS
-environment variable or by rules in the control file
-.BR filterargs .
-See the section on \fBEnvironment Variables\fR below.
+\fBspawn-filter\fR sets multiple environment variables which can be
+conveniently used in programs/scripts which get invoked by setting
+\fBFILTERARGS\fR environment variable or by rules in the \fBfilterargs\fR
+control file. See the section on \fBEnvironment Variables\fR below.
 
-\fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE before running \fBqmail-local\fR
-or \fBqmail-remote\fR. \fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER before running  filter.
+\fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE
+before running \fBqmail-local\fR or \fBqmail-remote\fR. \fBspawn-filter\fR
+unsets FILTERARGS, SPAMFILTER before running  filter.
 
 .SH Control Files
 
@@ -78,12 +77,11 @@ for local deliveries.
 environment variable is defined). If there are multiple lines which match
 \fIdomain\fR, the first line that matches \fIdomain\fR will be used.
 
-For local deliveries, \fIdomain\fR refers to the recipient domain.
-You can have the match done on sender domain by setting
-\fBMATCH_SENDER_DOMAIN\fR.
+For local deliveries, \fIdomain\fR refers to the recipient domain. You can
+have the match done on sender domain by setting \fBMATCH_SENDER_DOMAIN\fR.
 
-For remote deliveries, \fIdomain\fR refers to the sender domain.
-You can have the match done on recipient domain by setting
+For remote deliveries, \fIdomain\fR refers to the sender domain. You can
+have the match done on recipient domain by setting
 \fBMATCH_RECIPIENT_DOMAIN\fR.
 
 .EX
@@ -95,16 +93,20 @@ The sequence in which the filter program is run is given below
 .IP \n[step] 3
 create two pipes and fork
 .IP \n+[step]
-dup write end of the first pipe to descriptor 1, dup write end of the second pipe to descriptor 2 in the child and exec the filter program
+dup write end of the first pipe to descriptor 1, dup write end of the
+second pipe to descriptor 2 in the child and exec the filter program
 .IP \n+[step]
-dup read end of the pipe to descriptor 0 in parent and exec qmail-local for local mails and qmail-remote for remote mails.
+dup read end of the pipe to descriptor 0 in parent and exec qmail-local for
+local mails and qmail-remote for remote mails.
 .IP \n+[step]
-Wait for filter to exit and read read end of second pipe for any error messages.
+Wait for filter to exit and read read end of second pipe for any error
+messages.
 .IP \n+[step]
 Report success or failure
 
-This gives the ability for the any filter program to read the mail message from descriptor 0 before
-passing it to qmail-local/qmail-remote through the pipe.
+This gives the ability for the any filter program to read the mail message
+from descriptor 0 before passing it to qmail-local/qmail-remote through the
+pipe.
 
 .PP
 The other control files that
@@ -114,22 +116,16 @@ uses are
 .TP 5
 .I databytes
 Maximum size of mail that will be accepted before passing it to
-.B qmail-remote
-or
-.B qmail-local
+\fBqmail-remote\fR or \fBqmail-local\fR
 
-If the environment variable
-.B DATABYTES
-is set, it overrides
-.IR databytes .
-The value of databytes determines the maximum size of a message that
-.B spawn-filter
-will accept.
+If the environment variable \fBDATABYTES\fR is set, it overrides
+\fIdatabytes\fR. The value of databytes determines the maximum size of a
+message that \fBspawn-filter\fR will accept.
 
 .TP 5
 .I fromd.envrules
-Specific environment variables can be set for specific senders.
-The format of this file is of the form
+Specific environment variables can be set for specific senders. The format
+of this file is of the form
 
 .EX
 pat:envar1=val,envar2=val,...]
@@ -142,35 +138,28 @@ is omitted, the environment variable is unset. \fBspawn-filter\fR uses
 \fIfromd\fR.\fIenvrules\fR to distinguish from \fIfrom\fR.\fIenvrules\fR used
 by \fBqmail-smtpd(8)\fR
 
-The name of the control file can be overriden by the environment
-variable FROMRULES. Any environment variable used by
-.BR spawn-filter ,
-.B qmail-remote
-or
-.B qmail-local
-can be set sender specific by using fromd.envrules.
+The name of the control file can be overriden by the environment variable
+FROMRULES. Any environment variable used by \fBspawn-filter\fR,
+\fBqmail-remote\fR or \fBqmail-local\fR can be set sender specific by using
+fromd.envrules.
 
 .TP 5
 .I rcpt.envrules
-Specific environment variables can be set for specific recipients.
-The format of this file is of the form                                       
+Specific environment variables can be set for specific recipients. The
+format of this file is of the form
 
 .EX
 pat:envar1=val,envar2=val,...]
 .EE
 
 where pat is a regular expression which matches a sender. envar1, envar2
-are list of environment variables to be set. If
-.I val
-is omitted, the environment variable is unset.
+are list of environment variables to be set. If \fIval\fR is omitted, the
+environment variable is unset.
 
-The name of the control file can be overriden by the environment
-variable RCPTRULES. Any environment variable used by
-.BR spawn-filter ,
-.B qmail-remote
-or
-.B qmail-local
-can be set recpient specific by using rcpt.envrules.
+The name of the control file can be overriden by the environment variable
+RCPTRULES. Any environment variable used by \fBspawn-filter\fR,
+\fBqmail-remote\fR or \fBqmail-local\fR can be set recpient specific by
+using rcpt.envrules.
 
 The following list of environment variables can be modified using envrules
 
@@ -203,8 +192,8 @@ The following list of environment variables can be modified using envrules
 and
 .IR TMPDIR
 
-The following list of environment variables which can be modified using envrules are
-specfic to \fBqmail-remote\fR.
+The following list of environment variables which can be modified using
+envrules are specfic to \fBqmail-remote\fR.
 
 .IR CONTROLDIR ,
 .IR SMTPROUTE ,
@@ -216,35 +205,32 @@ specfic to \fBqmail-remote\fR.
 and
 .IR MAX_TOLERANCE
 
-The following list of environment variables which can be modified using envrules are
-specfic to \fBqmail-local\fR.
+The following list of environment variables which can be modified using
+envrules are specfic to \fBqmail-local\fR.
 .IR USE_SYNCDIR ,
 .IR USE_FSYNC ,
 and
 .IR LOCALDOMAINS
 
 .SH SPAM Filtering
-If SPAMFILTER is defined,
-.B spawn-filter
-additionally runs a command (with command line arguments) defined by SPAMFILTER environment variable. This
-gives
-.B spawn-filter
-the ability to filter mail messages based on the spam classification of the mail.
+If SPAMFILTER is defined, \fBspawn-filter\fR additionally runs a command
+(with command line arguments) defined by SPAMFILTER environment variable.
+This gives \fBspawn-filter\fR the ability to filter mail messages based on
+the spam classification of the mail.
 
-The environment variable SPAMFILTER apply to both local and remote mails. For individual domain level control,
-it is best to set using the control file
-.BR spamfilter .
+The environment variable SPAMFILTER apply to both local and remote mails.
+For individual domain level control, it is best to set using the control
+file \fBspamfilter\fR.
 
-.B spawn-filter
-will attempt to make the descriptor 0 seekable if the environment variable MAKE_SEEKABLE
-is defined. This may be necessary for certain filter programs like bogofilter to
-prevent allocating memory for the mail message.
+\fBspawn-filter\fR will attempt to make the descriptor 0 seekable if the
+environment variable MAKE_SEEKABLE is defined. This may be necessary for
+certain filter programs like bogofilter to prevent allocating memory for
+the mail message.
 
-The spam filter program is expected to return 0, 1 or 2 in case the filter ran
-successfully without any temporary errors. For any other exit code, 
-.B spawn-filter
-will assume that the filter program had some errors and will accordingly
-defer mail delivery.
+The spam filter program is expected to return 0, 1 or 2 in case the filter
+ran successfully without any temporary errors. For any other exit code,
+\fBspawn-filter\fR will assume that the filter program had some errors and
+will accordingly defer mail delivery.
 
 In this case following interpretations on the exit status will be made
 
@@ -256,121 +242,127 @@ In this case following interpretations on the exit status will be made
  anything else   Mail will be rejected with a temporary error
 
 A typical application of this would be to run spam filtering software like
-spamassasin, bogofilter, etc
+spamassasin, bogofilter, etc=
 
-When the exit code of the filter program matches SPAMEXITCODE, the mail
-is considered to be spam.
+When the exit code of the filter program matches SPAMEXITCODE, the mail is
+considered to be spam.
 
-If REJECTSPAM is 0, mail is accepted. If REJECTSPAM is set to 1, the mail will be bounced back
-to the sender. If REJECTSPAM is greater than 1, the mail is blackholed. If
-SPAMREDIRECT is set, mails will be redirected to the recipient specified
-by the SPAMREDIRECT environment variable.  If both REJECTSPAM and SPAMREDIRECT is set, spam mails will
-be bounced back to the sender with a copy redirected to the recipient specified in the
+If REJECTSPAM is 0, mail is accepted. If REJECTSPAM is set to 1, the mail
+will be bounced back to the sender. If REJECTSPAM is greater than 1, the
+mail is blackholed. If SPAMREDIRECT is set, mails will be redirected to the
+recipient specified by the SPAMREDIRECT environment variable.  If both
+REJECTSPAM and SPAMREDIRECT is set, spam mails will be bounced back to the
+sender with a copy redirected to the recipient specified in the
 SPAMREDIRECT environment variable
 
-If individual domain level control is desired on REJECTSPAM and SPAMREDIRECT environment variable,
-the control files
-.B rejectspam
-and
-.B spamredirect
-can be setup without defining the REJECTSPAM and SPAMREDIRECT environment variable.
+If individual domain level control is desired on REJECTSPAM and
+SPAMREDIRECT environment variable, the control files \fBrejectspam\fR and
+\fBspamredirect\fR can be setup without defining the REJECTSPAM and
+SPAMREDIRECT environment variable.
 
 The other control files that control spam filtering are
+
 .TP 5
 .I rejectspam
 The value of environment variable REJECTSPAM overrides this control file.
 The format of this file is
-.B domain:value
-without any extra spaces. The format also can be specified as
-.B domain:remote:value
-and
-.B domain:local:value
 
-where domain is a valid (recipient) domain for which mails are being processed and
-value should be 0 if SPAM mails should be delivered 1 for rejecting and greater
-than 1 for blackholing.
+.EX
+  domain:value
+.EE
+
+without any extra spaces. The format also can be specified as
+
+.EX
+  domain:remote:value
+    and
+  domain:local:value
+.EE
+
+where domain is a valid (recipient) domain for which mails are being
+processed and value should be 0 if SPAM mails should be delivered 1 for
+rejecting and greater than 1 for blackholing.
 
 .TP 5
 .I spamredirect
 The value of environment variable SPAMREDIRECT overrides this control file.
 The format of this file is
-.B domain:value
-without any extra spaces. The format also can be specified as
-.B domain:remote:recipient
-and
-.B domain:local:recipient
 
-where domain is a valid (recipient) domain for which mails are being processed and
-address should be valid recipient where the spam mails should be redirected.
+.EX
+  domain:value
+.EE
+
+without any extra spaces. The format also can be specified as
+
+.EX
+  domain:remote:recipient
+  and
+  domain:local:recipient
+.EE
+
+where domain is a valid (recipient) domain for which mails are being
+processed and address should be valid recipient where the spam mails should
+be redirected.
 
 .TP 5
 .I spamfilter
 The format of this file is of the form
 
-.B domain:args
+.EX
+  domain:args
+.EE
 
 for both local and remote mails.
 
 .EX
-.B domain:remote:args
+  domain:remote:args
 .EE
 
 for remote mails and
 
 .EX
-.B domain:local:args
+  domain:local:args
 .EE
 
 for local mails
 
-where domain is a valid (recipient) domain for which mails are being processed and
-args is a list of aguments to be supplied to the filter program
+where domain is a valid (recipient) domain for which mails are being
+processed and args is a list of aguments to be supplied to the filter
+program
 
 .EX
 indimail.org:bogofilter -c SYSCONFDIR/bogofilter.cf -p -3 -d SYSCONFDIR/indimail.org
 .EE
 
-NOTE: For the control files spamfilter, filterargs, rejectspam, spamredirect
-domain can also be a regular expression or wildcard pattern. If QREGEX envronment variable
-is defined, regex is used, else wildmat)
+NOTE: For the control files spamfilter, filterargs, rejectspam,
+spamredirect domain can also be a regular expression or wildcard pattern.
+If QREGEX envronment variable is defined, regex is used, else wildmat)
 
 .TP 5
 .I spamignore
 envelope sender addresses which should bypass spam filter.
-.B spawn-filter
-will bypass the filter defined by SPAMFILTER and directly exec
-qmail-local/qmail-remote, if the envelope sender address is listed in
-.IR spamignore .
-A line in
-.I spamignore
-may be of the form
-.BR @\fIhost ,
-meaning every address at
-.IR host .
-.I spamignore
-can be overriden by the environment variable
-.BR SPAMIGNORE .
-You can also create
-.I spamignore.cdb
-using
-.BR qmail-cdb ,
-in which case
-.B spawn-filter
-will use cdb function for fast lookup. You should create the cdb file in case you have large number of entries.
+\fBspawn-filter\fR will bypass the filter defined by SPAMFILTER and
+directly exec \fBqmail-local\fR / \fBqmail-remote\fR, if the envelope
+sender address is listed in \fIspamignore\fR. A line in \fIspamignore\fR
+may be of the form \fB@\fIhost\fR\fR, meaning every address at \fIhost\fR.
+\fIspamignore\fR can be overriden by the environment variable
+\fBSPAMIGNORE\fR. You can also create \fIspamignore.cdb\fR using
+\fBqmail-cdb\fR(8), in which case \fBspawn-filter\fR will use cdb function
+for fast lookup. You should create the cdb file in case you have large
+number of entries.
 
 .TP 5
 .I spamignorepatterns
-REGEX patterns of envelope sender addresses which should bypass spam filter.
-.I spamignorepatterns
-can be overriden by the environment variable
-.B SPAMIGNOREPATTERNS
-\fIspamignorepatterns\fR gets disabled of you set \fBQREGEX\fR environment variable.
-\fIspamignorepatterns\fR uses simple shell-style pattern matching unlike regular
-expressions used by setting \fBQREGEX\fR environment variable.
+REGEX patterns of envelope sender addresses which should bypass spam
+filter. \fIspamignorepatterns\fR can be overriden by the environment
+variable \fBSPAMIGNOREPATTERNS\fR \fIspamignorepatterns\fR gets disabled of
+you set \fBQREGEX\fR environment variable. \fIspamignorepatterns\fR uses
+simple shell-style pattern matching unlike regular expressions used by
+setting \fBQREGEX\fR environment variable.
 
 .SH Environment Variables
-\fBspawn-filter\fR sets few environment variables. The following environment variables
-are set for both local and remote deliveries
+\fBspawn-filter\fR sets few environment variables. The following
+environment variables are set for both local and remote deliveries
 
 .TS
 l l.
@@ -394,15 +386,18 @@ QMAILLOCAL           | set for local deliveries
 .TE
 
 .SH "EXIT CODES"
-\fBspawn-filter\fR exits 111 for any error (non-zero exit status by called program) or if it
-is not able to exec QMAILHOME/bin/qmail-local (for local mails) or QMAILHOME/bin/qmail-remote
-(for remote mails). It exits 100 (i.e mail will be bounced) if the REJECTSPAM environment
-variable is set (or the control file has rejectspam set for the domain) and the mail is found
-to be SPAM. It also exits 100 if the program/script defined by \fBFILTERARGS\fR (or defined
-in the control file \fBfilterargs\fR) returns 100. If the program/script defined by
-\fBFILTERARGS\fR returns 2, then the mail gets blackholed. If the program/script defined
-by \fBFILTERARGS\fR exits non-zero status (other than 2), temporary error is issued and the
-mail stays in the queue. For all other cases where no errors occur, it exits 0.
+\fBspawn-filter\fR exits 111 for any error (non-zero exit status by called
+		program) or if it is not able to exec QMAILHOME/bin/qmail-local
+(for local mails) or QMAILHOME/bin/qmail-remote (for remote mails). It
+exits 100 (i.e mail will be bounced) if the REJECTSPAM environment variable
+is set (or the control file has rejectspam set for the domain) and the mail
+is found to be SPAM. It also exits 100 if the program/script defined by
+\fBFILTERARGS\fR (or defined in the control file \fBfilterargs\fR) returns
+100. If the program/script defined by \fBFILTERARGS\fR returns 2, then the
+mail gets blackholed. If the program/script defined by \fBFILTERARGS\fR
+exits non-zero status (other than 2), temporary error is issued and the
+mail stays in the queue. For all other cases where no errors occur, it
+exits 0.
 
 .SH "SEE ALSO"
 qmail-lspawn(8),
