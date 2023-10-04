@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.24 2023-10-04 18:39:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.25 2023-10-04 21:01:42+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -919,6 +919,35 @@ test_smtps()
 	fi
 }
 
+# don't be like EXIM's infamous AUTH NTLM
+test_smtp_invalid_auth()
+{
+	t1=$(date +"%s.%4N")
+	for i in NTLM efgh
+	do
+		swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
+			--a $i -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$ 2>&1
+		l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+		if [ "$l1" != "\*\*\* EFGH is not a recognized auth type, skipping" \
+			-a "$l1" != "\*\*\* Auth not attempted, requested type not available" ] ; then
+			break
+		fi
+	done
+	/bin/rm -f $testdir/tmp/swaks.$$
+	if [ "$l1" != "\*\*\* EFGH is not a recognized auth type, skipping" \
+		-a "$l1" != "\*\*\* Auth not attempted, requested type not available" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "  testing mail using SMTP with invalid AUTH type rejection succeeded %35s [%.4f sec]\n" " " $secs
+	else
+		echo "  testing mail using SMTP with invalid AUTH type rejection failed [$secs sec]"
+		echo $l1
+		failed=1
+		exit 1
+	fi
+}
+
 test_smtp_auth_login()
 {
 	t1=$(date +"%s.%4N")
@@ -1039,23 +1068,24 @@ test_smtp_cugmail()
 
 	# Test1: This should fail
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port >/tmp/swaks.$$
+		--port $smtp_port >$testdir/tmp/swaks.$$
 	ret1=$?
-	l1=$(sed -n 1p < /tmp/swaks.$$)
-	/bin/rm -f /tmp/swaks.$$
+	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	/bin/rm -f $testdir/tmp/swaks.$$
 
 	# Test2: This should fail
 	swaks -S --to $user@$ext_domain --from $user@$HOSTNAME --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
 	ret2=$?
-	l2=$(sed -n 1p < /tmp/swaks.$$)
+	l2=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	/bin/rm -f $testdir/tmp/swaks.$$
 
 	# Test3: This should fail
 	swaks -S --to $user@$ext_domain --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
 	ret3=$?
-	l3=$(sed -n 1p < /tmp/swaks.$$)
-	/bin/rm -f /tmp/swaks.$$
+	l3=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	/bin/rm -f $testdir/tmp/swaks.$$
 
 	# Test4: This should succeed
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
@@ -1114,10 +1144,10 @@ test_smtp_chk_sender()
 
 	# Second: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
 	ret3=$?
-	l1=$(sed -n 1p < /tmp/swaks.$$)
-	/bin/rm -f /tmp/swaks.$$
+	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	/bin/rm -f $testdir/tmp/swaks.$$
 	echo "$l1" | grep ".*553 sorry, this MTA does not accept masquerading/forging,.*" >/dev/null
 	if [ $? -eq 0 ] ; then
 		ret4=0
@@ -1134,10 +1164,10 @@ test_smtp_chk_sender()
 
 	# fourth: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
-		--port $smtp_port >/tmp/swaks.$$
+		--port $smtp_port >$testdir/tmp/swaks.$$
 	ret6=$?
-	l2=$(sed -n 1p < /tmp/swaks.$$)
-	/bin/rm -f /tmp/swaks.$$
+	l2=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	/bin/rm -f $testdir/tmp/swaks.$$
 	echo "$l2" | grep ".*530 authentication required (#5.7.1)" >/dev/null
 	if [ $? -eq 0 ] ; then
 		ret7=0
@@ -1172,18 +1202,19 @@ test_smtp_chk_sender()
 	touch $cntrldir/chksenderdomains
 	# First: This should be allowed
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
 	ret1=$?
 	check_mail
+	/bin/rm -f $testdir/tmp/swaks.$$
 
 	echo "@$HOSTNAME" > $cntrldir/chksenderdomains
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
 	# second: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
 	ret2=$?
-	/bin/rm -f $cntrldir/chksenderdomains
+	/bin/rm -f $cntrldir/chksenderdomains $testdir/tmp/swaks.$$
 	> $servicedir/smtpd/variables/CHECKSENDER
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
@@ -1211,10 +1242,10 @@ test_smtp_surbl()
 	echo This is a test message for surbl
 	echo http://surbl-org-permanent-test-point.com/
 	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
-		--server localhost --port $smtp_port --body - >/tmp/swaks.$$
+		--server localhost --port $smtp_port --body - >$testdir/tmp/swaks.$$
 	ret1=$?
-	l1=$(sed -n 1p < /tmp/swaks.$$)
-	/bin/rm -f /tmp/swaks.$$
+	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	/bin/rm -f $testdir/tmp/swaks.$$
 	if [ "$l1" = "<** 554 message contains an URL listed in SURBL blocklist [http://surbl-org-permanent-test-point.com/]" ] ; then
 		ret2=0
 	else
@@ -1226,11 +1257,11 @@ test_smtp_surbl()
 	echo without surb blacklisted url
 	echo https://github.com/mbhangui/indimail-mta
 	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
-		--server localhost --port $smtp_port --body - >/tmp/swaks.$$
+		--server localhost --port $smtp_port --body - >$testdir/tmp/swaks.$$
 	check_mail
 	ret3=$?
 
-	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE
+	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $testdir/tmp/swaks.$$
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
 	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret4 -eq 0 ] ; then
@@ -1995,12 +2026,12 @@ test_blocked()
 {
 	t1=$(date +"%s.%4N")
 	if [ $# -eq 0 ] ; then
-		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port >/tmp/swaks.$$
+		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port >$testdir/tmp/swaks.$$
 	else
-		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port >/tmp/swaks.$$
+		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port >$testdir/tmp/swaks.$$
 	fi
-	l1=$(sed -n 1p < /tmp/swaks.$$)
-	/bin/rm -f /tmp/swaks.$$
+	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	/bin/rm -f $testdir/tmp/swaks.$$
 	if [ $# -eq 0 ] ; then
 		echo "$l1" | grep ".*553 sorry, your envelope recipient has been denied (#5.7.1).*" >/dev/null
 		if [ $? -eq 0 ] ; then
@@ -3121,6 +3152,7 @@ do_without_svscan()
 	test_smtp_notls
 	test_smtp_dkimverify
 	test_smtp_bogofilter
+	test_smtp_invalid_auth
 	test_smtp_auth_login
 	test_smtp_auth_plain
 	test_smtp_auth_cram_md5
@@ -5099,6 +5131,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.25  2023-10-04 21:01:42+05:30  Cprogrammer
+# added test for invalid auth type
+#
 # Revision 1.24  2023-10-04 18:39:31+05:30  Cprogrammer
 # added test for QMQP, QMTP
 #
