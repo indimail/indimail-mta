@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.83 2022-03-05 13:39:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.84 2023-10-04 23:19:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -672,7 +672,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.83 2022-03-05 13:39:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.84 2023-10-04 23:19:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -683,6 +683,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.84  2023-10-04 23:19:41+05:30  Cprogrammer
+ * use env variable QLOCAL, QREMOTE to execute alternate qmail-local, qmail-remote
+ *
  * Revision 1.83  2022-03-05 13:39:33+05:30  Cprogrammer
  * use auto_prefix/bin for qmail-inject, auto_prefix/sbin for qmail-local, qmail-remote paths
  *
