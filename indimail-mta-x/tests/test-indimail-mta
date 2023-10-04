@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.21 2023-10-02 22:49:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.23 2023-10-04 09:31:42+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -30,6 +30,7 @@ qmail_start=$sbindir/qmail-start
 qmail_inject=$bindir/qmail-inject
 qmail_smtpd=$sbindir/qmail-smtpd
 qmail_remote=$sbindir/qmail-remote
+qmail_getpw=$sbindir/qmail-getpw
 svctool=$sbindir/svctool
 setuidgid=$bindir/setuidgid
 tcpserver=$bindir/tcpserver
@@ -56,7 +57,7 @@ real_domain_ed25519=/etc/indimail/control/domainkeys/argos.indimail.org/ed25519
 nokeyerror=35
 out=/dev/null
 
-trap do_cleanup_failed EXIT
+trap do_cleanup_failed 2 EXIT
 
 do_cleanup_failed()
 {
@@ -96,50 +97,68 @@ do_cleanup_failed()
 	sudo /bin/rm -rf $testdir/$testuser/Maildir/new/*
 	sudo /bin/rm -rf $testdir/$testuser/Maildir/.Quarantine
 	sudo /bin/rm -rf $testdir/$testuser/Maildir/.Spam
+	sudo /bin/rm -rf $qmaildir/alias/Maildir/new/*
 	sudo /bin/rm -rf $sysconfdir/users
 }
 
 check_mail()
 {
+	no_delete=0
 	tx1=$(date +"%s.%4N")
-	if [ $# -eq 1 ] ; then
-		dir=$1
-	else
+	if [ $# -eq 0 ] ; then
 		dir=$maildir
+	elif [ $# -eq 1 ] ; then
+		dir=$1
+	elif [ $# -eq 2 ] ; then
+		dir=$1
+		no_delete=1
 	fi
 	count=0
 	ret=1
 	while true
 	do
-		mcount=$(ls $dir/new | wc -l)
+		mcount=$(ls $dir/new 2>/dev/null | wc -l)
 		if [ $mcount -gt 0 ] ; then
 			mail_file=$(ls -lt $dir/new|head -2|tail -1|awk '{print $9}')
-			/bin/rm -f $dir/new/$mail_file
+			if [ $no_delete -eq 0 ] ; then
+				/bin/rm -f $dir/new/$mail_file
+			fi
 			break
 		fi
 		sleep 1
 		count=$(expr "$count" + 1)
 		if [ $count -gt 5 ] ; then
-			echo "Failed to receive Mail" 1>&2
+			echo "check_mail: Failed to receive Mail" 1>&2
 			return 1
 		fi
 	done
 	tx2=$(date +"%s.%4N")
 	sleep_secs=$(echo $tx1 $tx2 | awk '{printf("%0.4f\n", $2-$1)}')
+	if [ $no_delete -eq 0 ] ; then
+		mail_file=$(ls -lt $dir/new|head -2|tail -1|awk '{print $9}')
+	fi
 	return 0
 }
 
 check_mail_header()
 {
+	if [ $# -lt 2 ] ; then
+		echo "check_mail_header maildir string delete" 1>&2
+		return 1
+	fi
+	dir=$1
+	str=$2
+
 	count=0
 	ret=1
 	tx1=$(date +"%s.%4N")
 	header=""
+	mail_file=""
 	while true
 	do
-		mcount=$(ls $maildir/new | wc -l)
+		mcount=$(ls $dir/new | wc -l)
 		if [ $mcount -gt 0 ] ; then
-			mail_file=$(ls -lt $maildir/new|head -2|tail -1|awk '{print $9}')
+			mail_file=$(ls -lt $dir/new|head -2|tail -1|awk '{print $9}')
 			break
 		fi
 		sleep 1
@@ -151,9 +170,24 @@ check_mail_header()
 	done
 	tx2=$(date +"%s.%4N")
 	sleep_secs=$(echo $tx1 $tx2 | awk '{printf("%0.4f\n", $2-$1)}')
-	header=$(822header -I $1 < $maildir/new/$mail_file)
-	/bin/rm -f $maildir/new/$mail_file
+	header=$(822header -I $str < $dir/new/$mail_file)
+	if [ $# -eq 3 ] ; then
+		if [ $3 -eq 1 ] ; then
+			sudo /bin/rm -f $dir/new/$mail_file
+		fi
+	fi
+	mail_file=$(ls -lt $dir/new|head -2|tail -1|awk '{print $9}')
 	return 0
+}
+
+remove_mail()
+{
+	if [ -d $maildir ] ; then
+		find $maildir -type f -exec /bin/rm -f {} \;
+	fi
+	if [ -d $testdir/$testuser/Maildir ] ; then
+		find $testdir/$testuser/Maildir -type f -exec /bin/rm -f {} \;
+	fi
 }
 
 shutdown_svscan()
@@ -177,12 +211,17 @@ setup_maildir()
 	if [ -d $testdir/$testuser/Maildir ] ; then
 		find $testdir/$testuser/Maildir -type f -exec /bin/rm -f {} \;
 	fi
+	if [ -d $qmaildir/alias/Maildir ] ; then
+		sudo find $qmaildir/alias/Maildir -type f -exec /bin/rm -f {} \;
+	fi
 	mkdir -p $cntrldir
 	mkdir -p $sysconfdir/users
 	for i in cur new tmp
 	do
 		mkdir -p $maildir/$i
 		mkdir -p $testdir/$testuser/Maildir/$i
+		mkdir -p $testdir/$testuser/Maildir/.Quarantine/$i
+		mkdir -p $testdir/$testuser/Maildir/.Spam/$i
 	done
 }
 
@@ -237,7 +276,7 @@ setup_config()
 	(
 	env CONTROLDIR=$cntrldir config-fast $HOSTNAME
 	mkdir -p $qmaildir/alias
-	sudo env QmailHOME=$qmaildir $svctol --cntrldir=$cntrldir --config=qmail \
+	sudo env QmailHOME=$qmaildir $svctool --cntrldir=$cntrldir --config=qmail \
 		--postmaster=$user@$HOSTNAME
 	sudo chown alias:qmail $qmaildir/alias
 	sudo chmod 775 $qmaildir/alias
@@ -260,7 +299,7 @@ setup_config()
 	fi
 	if [ ! -f $certdir/servercert.pem ] ; then
 		t1=$(date +"%s.%4N")
-		sudo $svctol --certdir=$certdir    --config=cert \
+		sudo $svctool --certdir=$certdir    --config=cert \
 			--postmaster=postmaster@$HOSTNAME --common_name=$HOSTNAME >$testdir/setup/setup.log 2>&1
 		if [ -f $certdir/servercert.pem ] ; then
 			t2=$(date +"%s.%4N")
@@ -282,7 +321,7 @@ setup_config()
 	if [ ! -f $sysconfdir/bogofilter.cf ] ; then
 		t1=$(date +"%s.%4N")
 		cp /etc/indimail/bogofilter.cf.example $sysconfdir
-		sudo $svctol --sysconfdir=$sysconfdir --config=bogofilter
+		sudo $svctool --sysconfdir=$sysconfdir --config=bogofilter
 		if [ -f $sysconfdir/bogofilter.cf ] ; then
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -446,22 +485,47 @@ test_tcpclient_script()
 run_qmail_send()
 {
 	(
+	echo "#!/bin/sh"
+	echo "uid=\$(grep \"^\$1\" $testdir/etc/passwd |awk -F: '{print \$3}')"
+	echo "if [ -z \"\$uid\" -o \"\$uid\" = \"0\" ] ; then"
+	echo "  l=\$(grep \"^alias:\" /tmp/qmail-test/etc/passwd | awk -F: '{print \$1\" \"\$3\" \"\$4\" \"\$6}')"
+	echo "  echo \$l \$1 | awk '{print \$1\"\\0\"\$2\"\\0\"\$3\"\\0\"\$4\"\\0-\\0\"\$5\"\\0\"}'"
+	echo "else"
+	echo "  grep \"^\$1:\" $testdir/etc/passwd |awk -F: '{print \$1\"\\0\"\$3\"\\0\"\$4\"\\0\"\$6\"\\0\\0\\0\"}'"
+	echo "fi"
+	echo "if [ \$? -eq 0 ] ; then"
+	echo "  exit 0"
+	echo "else"
+	echo "  exit 100"
+	echo "fi"
+	) > $testdir/bin/qmail-getpw
+	chmod 755 $testdir/bin/qmail-getpw
+	create_qmail_remote $testuser@$HOSTNAME
+	(
+	exec 1>$logdir/qmail-send/qmail-send.log
+	exec 2>$logdir/qmail-send/qmail-send.log
+	exec 0<&2
 	sudo env - \
 		PATH=/bin:/usr/sbin \
 		BIGTODO=0 \
-		QPWGR=1 \
+		USE_QPWGR=1 \
 		CONTROLDIR=$cntrldir \
 		CERTDIR=$certdir \
 		CONFSPLIT=23 \
+		QMAILGETPW=$testdir/bin/qmail-getpw \
 		QUEUEDIR=$testdir/queue \
 		ASSIGNDIR=$sysconfdir/users \
-		PASSWD_FILE=$sysconfdir/passwd \
-		$qmail_start -s ./Maildir/ > $logdir/qmail-send/qmail-send.log 2>&1
+		PASSWD_FILE=$testdir/etc/passwd \
+		QMAILLOCAL=$sbindir/spawn-filter \
+		QMAILREMOTE=$sbindir/spawn-filter \
+		QREMOTE=$testdir/bin/qmail-remote \
+		$qmail_start -s ./Maildir/
 	) &
 }
 
 get_send_pid()
 {
+	count=0
 	while true
 	do
 		send_pid=$(/bin/ps -ef | grep qmail-send |grep $testdir |grep -E -v "qmail-clean|grep" | awk '{print $2}')
@@ -469,44 +533,77 @@ get_send_pid()
 			break
 		fi
 		sleep 1
+		count=$(expr $count + 1)
+		if [ $count -gt 5 ] ; then
+			cat $logdir/qmail-send/qmail-send.log 1>&2
+			echo "Failed to start qmail-send" 1>&2
+			return 1
+		fi
 	done
 	echo $send_pid
 }
 
 test_qmail_inject()
 {
-	t1=$(date +"%s.%4N")
 	echo "Starting qmail-inject tests"
-	(
-	echo "From: $2"
-	echo "To: $3"
-	echo "Subject: Test"
-	echo "Date: $(date -R)"
-	echo
-	echo "Test message"
-	) | sudo $setuidgid -g qcerts $1 env - \
-		QUEUEDIR=$testdir/queue \
-		QMAILQUEUE=$qmail_queue \
-		CONTROLDIR=$cntrldir \
-		BIGTODO=0 \
-		CONFSPLIT=23 \
-		$qmail_inject $3
-	check_mail
-	if [ $? -eq 0 ] ; then
-		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		tcount=$(expr $tcount + 1)
-		printf "  testing qmail-inject, qmail send+receive succeeded %51s [%.4f sec]\n" " " $secs
-	else
-		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+	for i in 1 2
+	do
+		t1=$(date +"%s.%4N")
+		if [ $i -eq 1 ] ; then
+			(
+			echo "=$testuser:$testuser:$myuid:$mygid:$testdir/$testuser:::"
+			echo "+$testuser-:$testuser:$myuid:$mygid:$testdir/$testuser:-::"
+			echo "."
+			) > $sysconfdir/users/assign
+		else
+			(
+			echo "=$user:$user:$myuid:$mygid:$testdir/$user:::"
+			echo "+$user-:$user:$myuid:$mygid:$testdir/$user:-::"
+			echo "=$testuser:$testuser:$myuid:$mygid:$testdir/$testuser:::"
+			echo "+$testuser-:$testuser:$myuid:$mygid:$testdir/$testuser:-::"
+			echo "."
+			) > $sysconfdir/users/assign
+		fi
+		$qmail_newu $sysconfdir/users
 		(
-		echo "  testing qmail-inject, qmail send+receive failed [$secs sec]"
-		cat $logdir/qmail-send/qmail-send.log
-		)|less
-		failed=1
-		exit 1
-	fi
+		echo "From: $2"
+		echo "To: $3"
+		echo "Subject: Test"
+		echo "Date: $(date -R)"
+		echo
+		echo "Test message"
+		) | sudo $setuidgid -g qcerts $1 env - \
+			QUEUEDIR=$testdir/queue \
+			QMAILQUEUE=$qmail_queue \
+			CONTROLDIR=$cntrldir \
+			BIGTODO=0 \
+			CONFSPLIT=23 \
+			$qmail_inject $3
+		check_mail
+		if [ $? -eq 0 ] ; then
+			t2=$(date +"%s.%4N")
+			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+			tcount=$(expr $tcount + 1)
+			if [ $i -eq 1 ] ; then
+				printf "  testing qmail-inject /etc/passwd user, qmail send+receive succeeded %34s [%.4f sec]\n" " " $secs
+			else
+				printf "  testing qmail-inject qmail-user, qmail send+receive succeeded %40s [%.4f sec]\n" " " $secs
+			fi
+		else
+			t2=$(date +"%s.%4N")
+			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+			(
+			if [ $i -eq 1 ] ; then
+				echo "  testing qmail-inject /etc/passwd user, qmail send+receive failed [$secs sec]"
+			else
+				echo "  testing qmail-inject qmail-user, qmail send+receive failed [$secs sec]"
+			fi
+			cat $logdir/qmail-send/qmail-send.log
+			)|less
+			failed=1
+			exit 1
+		fi
+	done
 }
 
 create_authsmtp()
@@ -531,6 +628,16 @@ create_authsmtp()
 	echo "exec \$*"
 	) > $testdir/bin/authsmtp
 	chmod +x $testdir/bin/authsmtp
+}
+
+create_qmail_remote()
+{
+	# qmail-remote host sender qqeh size recip [ recip ... ]
+	(
+	echo "#!/bin/sh"
+	echo "exec $qmail_remote $HOSTNAME \"\$2\" \"\$3\" \"\$4\" \"$1\""
+	) > $testdir/bin/qmail-remote
+	chmod +x $testdir/bin/qmail-remote
 }
 
 start_tcpserver_smtp()
@@ -712,7 +819,7 @@ test_smtp_dkimverify()
 	cat $testdir/mail1.txt && rm -f $testdir/mail1.txt
 	) >$testdir/tmp/mail2.txt
 	swaks --data - -n -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port < $testdir/tmp/mail2.txt
-	check_mail_header "DKIM-Status"
+	check_mail_header $maildir "DKIM-Status" 1
 	echo $header| grep "DKIM-Status: good" > /dev/null
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
@@ -753,7 +860,7 @@ test_smtp_bogofilter()
 	echo
 	echo "This is an email to test DKIM"
 	) | swaks --data - -n -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port
-	check_mail_header "X-Bogosity"
+	check_mail_header $maildir "X-Bogosity" 1
 	echo $header| grep "X-Bogosity" > /dev/null
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
@@ -984,45 +1091,53 @@ test_smtp_chk_sender()
 	sleep $sleep_int
 
 	# First: This should work
+	# and remote mail should be redirectored
+	# to local user $user@$HOSTNAME using
+	# $testdir/bin/qmail-remote
+	create_qmail_remote $testuser@$HOSTNAME
 	swaks -S --to $user@$ext_domain --from $user@$HOSTNAME --server localhost \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
 	ret1=$?
-	check_mail
+	check_mail $testdir/$testuser/Maildir
+	ret2=$?
 	s1=$sleep_secs
+	# ensure that the next time qmail-send is restarted
+	# it will use the original qmail-remote
+	/bin/rm -f $servicedir/qmail-send/variables/QMAILREMOTE
 
 	# Second: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/tmp/swaks.$$
-	ret2=$?
+	ret3=$?
 	l1=$(sed -n 1p < /tmp/swaks.$$)
 	/bin/rm -f /tmp/swaks.$$
 	echo "$l1" | grep ".*553 sorry, this MTA does not accept masquerading/forging,.*" >/dev/null
 	if [ $? -eq 0 ] ; then
-		ret3=0
+		ret4=0
 	else
-		ret3=1
+		ret4=1
 	fi
 
 	# Third: This should work
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678"
 	check_mail
-	ret4=$?
+	ret5=$?
 	s2=$sleep_secs
 
 	# fourth: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
 		--port $smtp_port >/tmp/swaks.$$
-	ret5=$?
+	ret6=$?
 	l2=$(sed -n 1p < /tmp/swaks.$$)
 	/bin/rm -f /tmp/swaks.$$
 	echo "$l2" | grep ".*530 authentication required (#5.7.1)" >/dev/null
 	if [ $? -eq 0 ] ; then
-		ret6=0
+		ret7=0
 	else
-		ret6=1
+		ret7=1
 	fi
-	if [ $ret1 -eq 0 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 -a $ret5 -ne 0 -a $ret6 -eq 0 ] ; then
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -ne 0 -a $ret4 -eq 0 -a $ret5 -eq 0 -a $ret6 -ne 0 -a $ret7 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		tcount=$(expr $tcount + 4)
@@ -1032,7 +1147,7 @@ test_smtp_chk_sender()
 		secs=$(echo $t1 $t2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		> $servicedir/smtpd/variables/CHECKSENDER
 		(
-		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4, ret5=$ret5, ret6=$ret6"
+		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4, ret5=$ret5, ret6=$ret6, ret7=$ret7"
 		echo "l1=$l1"
 		echo "l2=$l2"
 		echo "  testing mail using SMTP with CHECKSENDER failed [$secs sec]"
@@ -1309,6 +1424,7 @@ test_qmail_remote_routing()
 		failed=1
 		exit 1
 	fi
+	/bin/rm -f $cntrldir/smtproutes
 }
 
 test_qmail_remote_auth_cdb()
@@ -1382,6 +1498,7 @@ test_qmail_remote_auth_cdb()
 		failed=1
 		exit 1
 	fi
+	/bin/rm -f $cntrldir/smtproutes
 }
 
 test_qmail_remote_starttls()
@@ -1643,11 +1760,9 @@ start_tcpserver_smtps_unix()
 	fi
 }
 
-setup_svscan_without_svscanlog()
+setup_svscan_basic()
 {
 	t1=$(date +"%s.%4N")
-	echo
-	echo "Starting svscan services without svscanlog"
 	sudo /bin/rm -rf $servicedir
 	sudo /bin/rm -rf $logdir/smtpd
 	sudo /bin/rm -rf $logdir/qmail-send
@@ -1672,14 +1787,17 @@ setup_svscan_without_svscanlog()
 
 	mkdir -p $servicedir/qmail-send/variables
 	mkdir -p $servicedir/qmail-send/log
-	echo /bin:/usr/sbin    > $servicedir/qmail-send/variables/PATH
-	echo 0                 > $servicedir/qmail-send/variables/BIGTODO
-	echo 1                 > $servicedir/qmail-send/variables/QPWGR
-	echo 23                > $servicedir/qmail-send/variables/CONFSPLIT
-	echo $cntrldir         > $servicedir/qmail-send/variables/CONTROLDIR
-	echo $testdir/queue    > $servicedir/qmail-send/variables/QUEUEDIR
-	echo $sysconfdir/users > $servicedir/qmail-send/variables/ASSIGNDIR
-	echo $certdir          > $servicedir/qmail-send/variables/CERTDIR
+	echo /bin:/usr/sbin            > $servicedir/qmail-send/variables/PATH
+	echo 0                         > $servicedir/qmail-send/variables/BIGTODO
+	echo 1                         > $servicedir/qmail-send/variables/USE_QPWGR
+	echo 23                        > $servicedir/qmail-send/variables/CONFSPLIT
+	echo $cntrldir                 > $servicedir/qmail-send/variables/CONTROLDIR
+	echo $testdir/queue            > $servicedir/qmail-send/variables/QUEUEDIR
+	echo $sysconfdir/users         > $servicedir/qmail-send/variables/ASSIGNDIR
+	echo $certdir                  > $servicedir/qmail-send/variables/CERTDIR
+	echo $testdir/bin/qmail-getpw  > $servicedir/qmail-send/variables/QMAILGETPW
+	echo $testdir/bin/qmail-remote > $servicedir/qmail-send/variables/QMAILREMOTE
+	echo $testdir/etc/passwd       > $servicedir/qmail-send/variables/PASSWD_FILE
 	printf "#!/bin/sh\nexec $envdir ./variables $qmail_start -s ./Maildir/ 2>&1\n" > $servicedir/qmail-send/run
 	printf "#!/bin/sh\nexec $multilog t $logdir/qmail-send\n" > $servicedir/qmail-send/log/run
 	chmod +x $servicedir/qmail-send/run
@@ -1863,11 +1981,38 @@ test_blocked()
 {
 	t1=$(date +"%s.%4N")
 	if [ $# -eq 0 ] ; then
-		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port --tls-on-connect >/dev/null
+		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port >/tmp/swaks.$$
 	else
-		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port --tls-on-connect >/dev/null
+		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port >/tmp/swaks.$$
 	fi
-	if [ $? -eq 0 ] ; then
+	l1=$(sed -n 1p < /tmp/swaks.$$)
+	/bin/rm -f /tmp/swaks.$$
+	if [ $# -eq 0 ] ; then
+		echo "$l1" | grep ".*553 sorry, your envelope recipient has been denied (#5.7.1).*" >/dev/null
+		if [ $? -eq 0 ] ; then
+			ret=0
+		else
+			ret=1
+		fi
+	else
+		echo "$l1" | grep ".*553 sorry, your envelope sender has been denied (#5.7.1).*" >/dev/null
+		if [ $? -eq 0 ] ; then
+			ret=0
+		else
+			ret=1
+		fi
+	fi
+	if [ $ret -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		if [ $# -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			printf "  testing badrcptto succeeded %74s [%.4f sec]\n" " " $secs
+		else
+			tcount=$(expr $tcount + 1)
+			printf "  testing badmailfrom succeeded %72s [%.4f sec]\n" " " $secs
+		fi
+	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		(
@@ -1881,23 +2026,11 @@ test_blocked()
 		)|less
 		failed=1
 		exit 1
-	else
-		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-		if [ $# -eq 0 ] ; then
-			tcount=$(expr $tcount + 1)
-			printf "  testing badrcptto succeeded %74s [%.4f sec]\n" " " $secs
-		else
-			tcount=$(expr $tcount + 1)
-			printf "  testing badmailfrom succeeded %72s [%.4f sec]\n" " " $secs
-		fi
 	fi
 }
 
 setup_svscan_with_svscanlog()
 {
-	echo
-	echo "Starting svscan services with svscanlog"
 	sudo /bin/rm -rf $logdir/svscan
 	mkdir -p $logdir/svscan
 	sudo /bin/rm -f $testdir/svscan.out
@@ -2506,6 +2639,8 @@ do_setup()
 	mkdir -p $testdir/bin
 	mkdir -p $testdir/run
 	setup_maildir
+	sed -e "s|/var/indimail|$qmaildir|" -e "s|/home/$user|$testdir/$user|" \
+		/etc/passwd > $testdir/etc/passwd
 	setup_assign
 	setup_config
 	setup_queue
@@ -2514,7 +2649,6 @@ do_setup()
 srs_setup()
 {
 	if [ $1 -eq 1 ] ; then
-		sed "s|/var/indimail|$qmaildir|" /etc/passwd > $testdir/etc/passwd
 		echo "$srs_domain"      > $cntrldir/srs_domain
 		echo "$srs_domain:srs"  > $cntrldir/virtualdomains
 		sudo sh -c "echo \"|$srsfilter\" > $qmaildir/alias/.qmail-srs-default"
@@ -2540,6 +2674,7 @@ srs_setup()
 
 do_autoresponder()
 {
+	remove_mail
 	t1=$(date +"%s.%4N")
 	if [ $# -eq 1 ] ; then
 		do_srs=$1
@@ -2687,7 +2822,7 @@ test_srs()
 		CONFSPLIT=23 \
 		QMAILINJECT_FORCE_SRS=1 \
 	$qmail_inject -f$user@$ext_domain $user@$HOSTNAME
-	check_mail_header Return-Path
+	check_mail_header $maildir Return-Path 1
 	srs_addr=$(srs -k `cat $cntrldir/srs_secrets` -i $srs_domain $user@$ext_domain)
 	if [ "$header" = "Return-Path: <$srs_addr>" ] ; then
 		t2=$(date +"%s.%4N")
@@ -2708,7 +2843,7 @@ test_srs()
 	echo 1 > $cntrldir/srs_alwaysrewrite
 	swaks -S --to $srs_addr --from $user@$HOSTNAME --server localhost --port $smtp_port
 	echo 0 > $cntrldir/srs_alwaysrewrite
-	check_mail_header Delivered-To
+	check_mail_header $maildir Delivered-To 1
 	if [ "$header" = "Delivered-To: $user@$HOSTNAME" ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -2743,7 +2878,7 @@ test_srs()
 		HOST=$HOSTNAME \
 	$srsfilter >/dev/null 2>&1
 	srs_ret=$?
-	check_mail_header Subject
+	check_mail_header $maildir Subject 1
 	if [ $srs_ret -eq 0 -a "$header" = "Subject: $subject" ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -2759,9 +2894,18 @@ test_srs()
 
 test_alias()
 {
-	for alias in root mailer-daemon
+	for alias in root mailer-daemon bumblebee
 	do
 		t1=$(date +"%s.%4N")
+		if [ "$alias" = "root" ] ; then
+			sudo /bin/rm -f $qmaildir/alias/.qmail-root
+			(
+			echo "$qmaildir/alias/Maildir/"
+			echo "$user@$HOSTNAME"
+			) > $testdir/tmp/.qmail-root
+			sudo mv $testdir/tmp/.qmail-root $qmaildir/alias
+			sudo chown root:qmail $qmaildir/alias/.qmail-root
+		fi
 		subject="Testing alias mechanism for $alias"
 		(
 		echo "From: $user@$HOSTNAME"
@@ -2776,18 +2920,45 @@ test_alias()
 			CONTROLDIR=$cntrldir \
 			BIGTODO=0 \
 			CONFSPLIT=23 \
-		$qmail_inject -f$user@$HOSTNAME root@$HOSTNAME
-		check_mail_header To
-		a_ret=$?
-		if [ $a_ret -eq 0 -a "$header" = "To: $alias@$HOSTNAME" ] ; then
+		$qmail_inject -f$user@$HOSTNAME $alias@$HOSTNAME
+		if [ "$alias" = "bumblebee" ] ; then
+			check_mail_header $maildir From 0
+			s1=$sleep_secs
+			from_header=$header
+			check_mail_header $maildir Subject 1
+			s2=$sleep_secs
+			subj_header=$header
+			if [ "$from_header" = "From: MAILER-DAEMON@$HOSTNAME" -a "$subj_header" = "Subject: failure notice" ] ; then
+				a_ret=0
+			else
+				a_ret=1
+			fi
+		else
+			check_mail_header $maildir To 1
+			s1=$sleep_secs
+			s2=0.0
+			a_ret=$?
+			if [ "$header" != "To: $alias@$HOSTNAME" ] ; then
+				a_ret=1
+			fi
+		fi
+		if [ $a_ret -eq 0 ] ; then
 			t2=$(date +"%s.%4N")
-			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+			secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing alias for %-13s succeeded %60s [%.4f sec]\n" $alias " " $secs
+			if [ "$alias" = "bumblebee" ] ; then
+				printf "  testing non-existing alias for %-13s succeeded %47s [%.4f sec]\n" $alias " " $secs
+			else
+				printf "  testing existing alias for %-13s succeeded %51s [%.4f sec]\n" $alias " " $secs
+			fi
 		else
 			t2=$(date +"%s.%4N")
-			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
-			echo "  testing alias for $alias failed [$secs sec]\n" $secs
+			secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+			if [ "$alias" = "bumblebee" ] ; then
+				echo "  testing non-existing alias for $alias failed [$secs sec]"
+			else
+				echo "  testing existing alias for $alias failed [$secs sec]"
+			fi
 			(
 			echo "ret=$a_ret, \"$header\" != \"To: $alias@$HOSTNAME\""
 			cat $logdir/qmail-send/qmail-send.log
@@ -2795,7 +2966,89 @@ test_alias()
 			failed=1
 			exit 1
 		fi
+		if [ "$alias" = "root" ] ; then
+			t2=$(date +"%s.%4N")
+			secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+			tcount=$(expr $tcount + 1)
+			printf "  testing alternate QMAILGETPW for %-13s succeeded %45s [%.4f sec]\n" $alias " " $secs
+		fi
 	done
+}
+
+test_spawn_filter()
+{
+	(
+	echo "#!/bin/sh"
+	echo "sed -e 's/abcd/$HOSTNAME/' -e 's/Subject: .*/Subject: Testing spawn-filter/'"
+	echo "exit 0"
+	) > $testdir/bin/filter1
+	chmod +x $testdir/bin/filter1
+	echo "$HOSTNAME:local:$testdir/bin/filter1" > $cntrldir/filterargs
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "From: $user@$HOSTNAME"
+	echo "To: $user@$HOSTNAME"
+	echo "Subject: Test message using qmail-inject"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message from abcd"
+	) | sudo $setuidgid -g qcerts $user env - \
+		QUEUEDIR=$testdir/queue \
+		QMAILQUEUE=$qmail_queue \
+		CONTROLDIR=$cntrldir \
+		BIGTODO=0 \
+		CONFSPLIT=23 \
+	$qmail_inject -f$user@$HOSTNAME $user@$HOSTNAME
+	check_mail $maildir 1
+	/bin/rm -f $cntrldir/filterargs
+	body=$(822body < $maildir/new/$mail_file)
+	subject=$(822header -I Subject < $maildir/new/$mail_file)
+	/bin/rm -f $maildir/new/$mail_file
+	if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "  testing spawn-filter using QMAILLOCAL succeeded %54s [%.4f sec]\n" " " $secs
+	else
+		echo "  testing spawn-filter using QMAILLOCAL failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
+	echo "$HOSTNAME:remote:$testdir/bin/filter1" > $cntrldir/filterargs
+	(
+	echo "From: $user@$HOSTNAME"
+	echo "To: $user@$ext_domain"
+	echo "Subject: Test message using qmail-inject"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message from abcd"
+	) | sudo $setuidgid -g qcerts $user env - \
+		QUEUEDIR=$testdir/queue \
+		QMAILQUEUE=$qmail_queue \
+		CONTROLDIR=$cntrldir \
+		BIGTODO=0 \
+		CONFSPLIT=23 \
+	$qmail_inject -f$user@$HOSTNAME $user@$ext_domain
+	check_mail_header $testdir/$testuser/Maildir Subject 0
+	subject=$header
+	body=$(822body < $testdir/$testuser/Maildir/new/$mail_file)
+	/bin/rm -f $testdir/$testuser/Maildir/new/$mail_file
+	if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "  testing spawn-filter using QMAILREMOTE succeeded %53s [%.4f sec]\n" " " $secs
+	else
+		echo "  testing spawn-filter using QMAILREMOTE failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+	/bin/rm -f $cntrldir/filterargs
+	/bin/rm -f $cntrldir/smtproutes
 }
 
 do_without_svscan()
@@ -2803,6 +3056,9 @@ do_without_svscan()
 	# use qmail-start to start qmail-send
 	run_qmail_send
 	send_pid=$(get_send_pid)
+	if [ $? -ne 0 ] ; then
+		exit 1
+	fi
 	test_qmail_inject $user $user $user
 	test_alias
 
@@ -2834,6 +3090,9 @@ do_without_svscan()
 	start_tcpserver_smtp
 	smtp_pid=$(/bin/ps -ef|grep $smtp_port|grep -v sudo|grep qmail-smtpd|awk '{print $2}')
 	sleep $sleep_int
+
+	test_spawn_filter
+
 	srs_setup 1
 	test_srs
 	srs_setup 0
@@ -2891,7 +3150,9 @@ do_svscan_without_svscanlog()
 {
 	t1=$(date +"%s.%4N")
 	# start svscan without svscanlog
-	setup_svscan_without_svscanlog
+	echo
+	echo "Starting svscan services without svscanlog"
+	setup_svscan_basic
 	start_svscan_without_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	test_smtps "mail using SMTPS by qmail-smtpd"
@@ -2908,12 +3169,17 @@ do_svscan_without_svscanlog()
 	test_multilog
 	start_new_service
 	remove_new_service
+	test_blocked
+	test_blocked 1
 }
 
 do_svscan_with_svscanlog()
 {
 	t1=$(date +"%s.%4N")
 	# start svscan with svscanlog
+	echo
+	echo "Starting svscan services with svscanlog"
+	setup_svscan_basic
 	setup_svscan_with_svscanlog
 	(
 	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -n $certdir/servercert.pem -u qmaild -g qmail -HR 0 "
@@ -2936,8 +3202,6 @@ do_svscan_with_svscanlog()
 	start_new_service 1
 	test_supervise_subreaper
 	remove_new_service
-	test_blocked
-	test_blocked 1
 }
 
 do_qmail_qfilter()
@@ -2973,37 +3237,21 @@ do_qmail_qfilter()
 	echo "Sending mail from abcd"
 	) | swaks -S --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
 		--server localhost --port $smtp_port --body -
-	count=0
-	ret=1
-	while true
-	do
-		mcount=$(ls $maildir/new | wc -l)
-		if [ $mcount -gt 0 ] ; then
-			mail_file=$(ls -lt $maildir/new|head -2|tail -1|awk '{print $9}')
-			grep "Sending mail from $HOSTNAME" $maildir/new/$mail_file >/dev/null
-			if [ $? -eq 0 ] ; then
-				t2=$(date +"%s.%4N")
-				secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-				tcount=$(expr $tcount + 1)
-				printf "  testing qmail-qfilter succeeded %70s [%.4f sec]\n" " " $secs
-				return 0
-			else
-				t2=$(date +"%s.%4N")
-				secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
-				echo "  testing qmail-qfilter [$secs sec]"
-				failed=1
-				exit 1
-			fi
-		fi
-		sleep 1
-		count=$(expr "$count" + 1)
-		echo count=$count
-		if [ $count -gt 5 ] ; then
-			echo "Failed to receive Mail" 1>&2
-			break
-		fi
-	done
-	return 1
+	check_mail_header $maildir Subject 1
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		tcount=$(expr $tcount + 1)
+		printf "  testing qmail-qfilter succeeded %70s [%.4f sec]\n" " " $secs
+		return 0
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing qmail-qfilter failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+	return 0
 }
 
 test_filterit()
@@ -4578,10 +4826,13 @@ display_tests()
 {
 	echo "test svscan startup without svscan log"
 	echo "test service startup (qmail-smtpd, qmail-send)"
+	echo "test qmail-inject"
+	echo "test alias mechanism"
 	echo "test SMTPS using swaks"
 	echo "test recipient extension"
 	echo "test autoresponder"
 	echo "test qmail-qfilter"
+	echo "test spawn-filter QMAILLOCAL and QMAILREMOTE"
 	echo "test CHECKRECIPIENT feature"
 	echo "test CHECKSENDER feature"
 	echo "test Sender Rewriting Scheme for qmail-smtpd, qmail-inject, autoresponder, srsfilter"
@@ -4663,6 +4914,16 @@ sudo /bin/rm -rf $testdir/sleep.out
 sudo /bin/rm -rf $testdir/svscan.out
 sudo /bin/rm -rf $testdir/tcpclient.smtp
 sudo /bin/rm -rf $sysconfdir/users
+if [ -d $maildir ] ; then
+	find $maildir -type f -exec /bin/rm -f {} \;
+fi
+if [ -d $testdir/$testuser/Maildir ] ; then
+	find $testdir/$testuser/Maildir -type f -exec /bin/rm -f {} \;
+fi
+if [ -d $qmaildir/alias/Maildir ] ; then
+	sudo find $qmaildir/alias/Maildir -type f -exec /bin/rm -f {} \;
+fi
+
 echo
 dkim_count=$(expr $tcount - $non_dkim_tcount)
 echo "All $tcount tests succeeded (indimail-mta tests=$non_dkim_tcount + dkim tests=$dkim_count)"
@@ -4674,6 +4935,12 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.23  2023-10-04 09:31:42+05:30  Cprogrammer
+# updated test_blocked script
+#
+# Revision 1.22  2023-10-04 09:09:18+05:30  Cprogrammer
+# updated test script
+#
 # Revision 1.21  2023-10-02 22:49:08+05:30  Cprogrammer
 # added alias tests
 #
