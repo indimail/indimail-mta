@@ -707,9 +707,18 @@ and so on.
 Used by \fBqhpsi\fR(8)
 
 .TP
+\fIQLOCAL\fR, \fIQREMOTE\R
+Used by spawn-filter to execute alternet \fBqmail-local\fR(8),
+\fBqmail-remote\fR(8) binaries.
+
+.TP
 \fIQMAILDEFAULTDOMAIN\fR
 \fIQMAILDEFAULTHOST\fR
 Used by ofmipd, \fBnew-inject\fR(8) \fBqmail-inject\fR(8), newinclude
+
+.TP
+\fIQMAILGETPW\fR
+Used by \fBqmail-spawn\fR(8) to execute an alternate \fBqmail-getpw\fR(8).
 
 .TP
 \fIQMAILHOST\fR
@@ -738,9 +747,14 @@ Used by \fBnew-inject\fR(8), \fBqmail-inject\fR(8). Unset by
 Used by ofmipd, \fBnew-inject\fR(8), \fBqmail-inject\fR(8), newinclude
 
 .TP
-\fIQMAILLOCAL\fR \fIQMAILREMOTE\fR
-Used by \fBspawn-filter\fR(8) to execute \fBqmail-local\fR(8),
-\fBqmail-remote\fR(8) binaries
+\fIQMAILLOCAL\fR
+Used by \fBqmail-lspawn\fR(8) to execute an alternate \fBqmail-local\fR(8)
+binary.
+
+.TP
+\fIQMAILREMOTE\fR
+Used by \fBqmail-rspawn\fR(8) to execute an alternate \fBqmail-remote\fR(8)
+binary.
 
 .TP
 \fIQMAILQUEUE\fR
@@ -775,9 +789,12 @@ Used by \fBqmail-remote\fR(8)
 
 .TP
 \fIQQEH\fR
-Used by \fBcondredirect\fR(1), forward, maildirdeliver, preline,
-\fBqmail-queue\fR(8). Set by \fBqmail-local\fR(8),
-\fBspawn-filter\fR(8).
+This can be set before calling \fBqmail-queue\fR(8) to insert extra
+headers. Used by \fBcondredirect(1)\fR, \fBcondtomaildir(1)\fR,
+\fBfilterit(1)\fR, \fBforward(1)\fR, \fBmaildirdeliver(1)\fR,
+\fBpreline(1)\fR, \fBqmail-local(8)\fR, \fBqmail-queue(8)\fR. If set,
+qmail-queue passed the value across the queue. Set by \fBqmail-local\fR(8),
+\fBfilterit\fR(1) to set the X-Filterit header.
 
 .TP
 \fIQREGEX\fR
