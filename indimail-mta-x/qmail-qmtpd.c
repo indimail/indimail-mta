@@ -1,46 +1,16 @@
 /*
- * $Log: qmail-qmtpd.c,v $
- * Revision 1.16  2022-10-22 13:07:46+05:30  Cprogrammer
- * added program identifier to Received header
- *
- * Revision 1.15  2021-09-11 19:01:33+05:30  Cprogrammer
- * pass null remotehost to received when remotehost is unknown
- *
- * Revision 1.14  2021-06-12 18:27:09+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.13  2013-08-23 15:32:49+05:30  Cprogrammer
- * validity checks to ensure that input actually conforms to the netstring protocol.
- *
- * Revision 1.12  2008-07-15 19:52:51+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.11  2005-08-23 17:35:06+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.10  2005-06-03 09:06:19+05:30  Cprogrammer
- * code beautification
- *
- * Revision 1.9  2004-10-22 20:28:42+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.8  2004-10-22 15:37:37+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.7  2004-07-17 21:21:12+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail-qmtpd.c,v 1.17 2023-10-04 23:18:55+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
-#include "stralloc.h"
-#include "substdio.h"
+#include <stralloc.h>
+#include <substdio.h>
+#include <now.h>
+#include <str.h>
+#include <fmt.h>
+#include <env.h>
+#include <sig.h>
+#include <scan.h>
 #include "qmail.h"
-#include "now.h"
-#include "str.h"
-#include "fmt.h"
-#include "env.h"
-#include "sig.h"
-#include "scan.h"
 #include "rcpthosts.h"
 #include "control.h"
 #include "received.h"
@@ -58,14 +28,11 @@ resources()
 }
 
 ssize_t
-safewrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+safewrite(int fd, char *buf, size_t len)
 {
 	int             r;
-	r = write(fd, buf, len);
-	if (r <= 0)
+
+	if ((r = write(fd, buf, len)) <= 0)
 		_exit(0);
 	return r;
 }
@@ -74,15 +41,12 @@ char            ssoutbuf[256];
 substdio        ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 
 ssize_t
-saferead(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
+
 	substdio_flush(&ssout);
-	r = read(fd, buf, len);
-	if (r <= 0)
+	if ((r = read(fd, buf, len)) <= 0)
 		_exit(0);
 	return r;
 }
@@ -95,6 +59,7 @@ getlen()
 {
 	unsigned long   len = 0;
 	char            ch;
+
 	for (;;) {
 		substdio_get(&ssin, &ch, 1);
 		if (ch == ':')
@@ -112,26 +77,17 @@ void
 getcomma()
 {
 	char            ch;
+
 	substdio_get(&ssin, &ch, 1);
 	if (ch != ',')
 		badproto();
 }
 
-unsigned int    databytes = 0;
-unsigned int    bytestooverflow = 0;
+unsigned int    databytes = 0, bytestooverflow = 0;
 struct qmail    qq;
-
-char            buf[1000];
-char            buf2[100];
-
-char           *remotehost;
-char           *remoteinfo;
-char           *remoteip;
-char           *local;
-
+char            buf[1000], buf2[100];
+char           *remotehost, *remoteinfo, *remoteip, *local, *relayclient;
 stralloc        failure = { 0 };
-
-char           *relayclient;
 int             relayclientlen;
 
 int
@@ -355,7 +311,44 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	static char    *x = "$Id: qmail-qmtpd.c,v 1.16 2022-10-22 13:07:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmtpd.c,v 1.17 2023-10-04 23:18:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qmail-qmtpd.c,v $
+ * Revision 1.17  2023-10-04 23:18:55+05:30  Cprogrammer
+ * converted to ansic prototypes
+ *
+ * Revision 1.16  2022-10-22 13:07:46+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
+ * Revision 1.15  2021-09-11 19:01:33+05:30  Cprogrammer
+ * pass null remotehost to received when remotehost is unknown
+ *
+ * Revision 1.14  2021-06-12 18:27:09+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.13  2013-08-23 15:32:49+05:30  Cprogrammer
+ * validity checks to ensure that input actually conforms to the netstring protocol.
+ *
+ * Revision 1.12  2008-07-15 19:52:51+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.11  2005-08-23 17:35:06+05:30  Cprogrammer
+ * gcc 4 compliance
+ *
+ * Revision 1.10  2005-06-03 09:06:19+05:30  Cprogrammer
+ * code beautification
+ *
+ * Revision 1.9  2004-10-22 20:28:42+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.8  2004-10-22 15:37:37+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.7  2004-07-17 21:21:12+05:30  Cprogrammer
+ * added RCS log
+ *
+ */
