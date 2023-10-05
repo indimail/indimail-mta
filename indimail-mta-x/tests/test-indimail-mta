@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.26 2023-10-05 23:38:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.27 2023-10-06 02:23:28+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -38,6 +38,8 @@ qmail_getpw=$sbindir/qmail-getpw
 svctool=$sbindir/svctool
 setuidgid=$bindir/setuidgid
 tcpserver=$bindir/tcpserver
+e822header=$bindir/822header
+e822body=$bindir/822body
 qmail_queue=$sbindir/qmail-queue
 dkim=$bindir/dkim
 qmail_dkim=$sbindir"/qmail-dkim"
@@ -209,7 +211,7 @@ check_mail_header()
 	tx2=$(date +"%s.%4N")
 	sleep_secs=$(echo $tx1 $tx2 | awk '{printf("%0.4f\n", $2-$1)}')
 	sudo chmod 644 $dir/new/$mail_file
-	header=$(822header -I $str < $dir/new/$mail_file)
+	header=$($e822header -I $str < $dir/new/$mail_file)
 	if [ $# -eq 3 ] ; then
 		if [ $3 -eq 1 ] ; then
 			sudo /bin/rm -f $dir/new/$mail_file
@@ -2856,7 +2858,7 @@ test_maildirserial()
 			dto_header=""
 		fi
 		if [ -n "$mail_file" ] ; then
-			body=$(822body < $qmaildir/alias/virtual/new/$mail_file)
+			body=$($e822body < $qmaildir/alias/virtual/new/$mail_file)
 			sudo sed -i "s/virtual-$user@$vdomain/virtual-$user@$HOSTNAME/" \
 				$qmaildir/alias/virtual/new/$mail_file
 			sudo mv $qmaildir/alias/virtual/new/$mail_file \
@@ -3274,8 +3276,8 @@ test_spawn_filter()
 	check_mail $maildir 1
 	/bin/rm -f $cntrldir/filterargs
 	if [ -n "$mail_file" ] ; then
-		body=$(822body < $maildir/new/$mail_file)
-		subject=$(822header -I Subject < $maildir/new/$mail_file)
+		body=$($e822body < $maildir/new/$mail_file)
+		subject=$($e822header -I Subject < $maildir/new/$mail_file)
 		/bin/rm -f $maildir/new/$mail_file
 	else
 		body=""
@@ -3316,7 +3318,7 @@ test_spawn_filter()
 	check_mail_header $testdir/$testuser/Maildir Subject 0
 	if [ -n "$mail_file" ] ; then
 		subject=$header
-		body=$(822body < $testdir/$testuser/Maildir/new/$mail_file)
+		body=$($e822body < $testdir/$testuser/Maildir/new/$mail_file)
 		/bin/rm -f $testdir/$testuser/Maildir/new/$mail_file
 	else
 		body=""
@@ -3483,7 +3485,7 @@ test_qmqp()
 	check_mail_header $testdir/$testuser/Maildir Subject 0
 	if [ -n "$mail_file" ] ; then
 		subject=$header
-		body=$(822body < $testdir/$testuser/Maildir/new/$mail_file)
+		body=$($e822body < $testdir/$testuser/Maildir/new/$mail_file)
 		/bin/rm -f $testdir/$testuser/Maildir/new/$mail_file
 	else
 		body=""
@@ -3553,7 +3555,7 @@ test_qmtp()
 	check_mail_header $testdir/$testuser/Maildir Subject 0
 	if [ -n "$mail_file" ] ; then
 		subject=$header
-		body=$(822body < $testdir/$testuser/Maildir/new/$mail_file)
+		body=$($e822body < $testdir/$testuser/Maildir/new/$mail_file)
 		/bin/rm -f $testdir/$testuser/Maildir/new/$mail_file
 	else
 		body=""
@@ -5377,6 +5379,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.27  2023-10-06 02:23:28+05:30  Cprogrammer
+# updated test script
+#
 # Revision 1.26  2023-10-05 23:38:27+05:30  Cprogrammer
 # added tests for maildirserial, serialsmtp, serialqmtp
 #
