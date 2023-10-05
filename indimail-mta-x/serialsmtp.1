@@ -1,35 +1,56 @@
+.\" vim: tw=75
 .TH serialsmtp 1
 .SH NAME
 serialsmtp \- blast files across SMTP
+
 .SH SYNOPSIS
-.B serialsmtp
-.I prefix
-.I helohost
+\fBserialsmtp\fR \fIprefix\fR \fIhelohost\fR [\fIdo-not-quit\fR]
+
 .SH DESCRIPTION
-.B serialsmtp
-is similar to
-.BR serialqmtp ,
-except that it transfers messages over SMTP.
+\fBserialsmtp\fR is similar to \fBserialqmtp\fR(1), except that it
+transfers messages over SMTP. \fBserialsmtp\fR uses \fIhelohost\fR as the
+local host name for saying hello to the remote SMTP server. \fIhelohost\fR
+must be a fully-qualified domain name. If the argument \fIdo-not-quit\fR is
+given, \fBserialsmtp\fR does not issue the SMTP \fBQUIT\fR command when it
+exits. This is useful when \fBserialsmtp\fR is running under
+\fBtcpclient\fR, where \fBserialsmtp\fR can be invoked multiple times in
+the same \fBtcpclient\fR session.
 
-.B serialsmtp
-uses
-.I helohost
-as the local host name for saying hello to the remote SMTP server.
-.I helohost
-must be a fully-qualified domain name.
+\fBserialsmtp\fR supports ESMTP PIPELINING. \fBserialsmtp\fR assumes that
+all sender and recipient domain names have already been canonicalized.
 
-.B serialsmtp
-supports ESMTP PIPELINING.
+\fBserialsmtp\fR sends messages to a SMTP server. It expects to be run
+under an UCSPI client; it sends data to the server on descriptor 7, and
+reads data from the server on descriptor 6..
 
-.B serialsmtp
-assumes that all sender and recipient domain names
-have already been canonicalized.
-.SH REFERENCES
-See
-.B https://cr.yp.to/proto/smtp.html
-for further information on SMTP.
+\fBserialsmtp\fR reads the messages from separate files. It reads the
+filenames from stdin.  Each filename is terminated by a 0 byte.
+
+\fBserialsmtp\fR retrieves a message's envelope sender address and envelope
+recipient address from the \fBReturn-Path\fR and \fBDelivered-To\fR lines
+at the top of the message header. It removes these lines before passing the
+message along.
+
+\fBserialsmtp\fR removes \fIprefix\fR from the beginning of each envelope
+recipient address.  It ignores any message whose recipient address does not
+begin with \fIprefix\fR.
+
+\fBserialsmtp\fR reports its results on stdout. Each result is a
+0-terminated filename, followed by a status byte, followed by an
+LF-terminated readable status message.  The status byte is K if the SMTP
+server has accepted responsibility for the message, Z if the SMTP server
+has temporarily rejected the message, and D if the SMTP server has
+permanently rejected the message. \fBserialsmtp\fR silently truncates
+excessively long status messages. \fBserialsmtp\fR does not necessarily
+print a result for every file:
+
+it may skip files, it may have trouble reading a file from disk, or it may
+have trouble talking to the SMTP server.
+
+\fBserialsmtp\fR uses a 73-second timeout on each network write.
+
 .SH "SEE ASO"
 tcpclient(1),
-serialqmtp(1),
+serialsmtp(1),
 maildirserial(1),
 qmail-smtpd(8)

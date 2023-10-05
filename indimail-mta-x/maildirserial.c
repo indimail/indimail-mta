@@ -1,63 +1,7 @@
 /*
  * $Log: maildirserial.c,v $
- * Revision 1.19  2023-01-03 16:34:26+05:30  Cprogrammer
- * removed auto_sysconfdir.h dependency
- *
- * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.17  2021-07-05 21:26:29+05:30  Cprogrammer
- * allow processing $HOME/.defaultqueue for root
- *
- * Revision 1.16  2021-06-14 00:49:50+05:30  Cprogrammer
- * added missing chdir removed by mistake
- *
- * Revision 1.15  2021-06-03 18:14:12+05:30  Cprogrammer
- * use new prioq functions
- *
- * Revision 1.14  2021-05-13 14:43:28+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.13  2020-05-11 11:02:50+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.12  2020-04-04 11:48:46+05:30  Cprogrammer
- * use auto_sysconfdir instead of auto_qmail
- *
- * Revision 1.11  2020-04-04 11:23:28+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.10  2016-05-21 14:48:06+05:30  Cprogrammer
- * use auto_sysconfdir for leapsecs_init()
- *
- * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.8  2010-07-21 08:57:49+05:30  Cprogrammer
- * use CONTROLDIR environment variable instead of a hardcoded control directory
- *
- * Revision 1.7  2010-06-08 21:59:30+05:30  Cprogrammer
- * use envdir_set() on queuedefault to set default queue parameters
- *
- * Revision 1.6  2004-10-22 20:26:29+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.5  2004-10-22 15:35:41+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.4  2004-10-11 23:50:51+05:30  Cprogrammer
- * made MIME configurable at compile time
- * use config_data() for geting bouncehost
- *
- * Revision 1.3  2004-08-04 18:24:00+05:30  Cprogrammer
- * enclose bounce as MIME
- *
- * Revision 1.2  2004-07-17 21:19:31+05:30  Cprogrammer
- * code beatification
- * added RCS log
- *
- * Revision 1.1  2004-05-14 00:44:57+05:30  Cprogrammer
- * Initial revision
+ * Revision 1.20  2023-10-05 22:29:04+05:30  Cprogrammer
+ * updated coding style
  *
  */
 #include <unistd.h>
@@ -103,7 +47,7 @@ static char   **client;
 static char     messbuf[256];
 static char     buf[1024];
 static char     num[FMT_ULONG];
-static int      pid;			/*- in parent, pid of scanner; in scanner, pid of child */
+static int      pid; /*- in parent, pid of scanner; in scanner, pid of child */
 static int      wstat;
 static int      pis2c[2];
 static int      flagbounce = 0;
@@ -111,7 +55,7 @@ static int      flaglifetime = 0;
 static int      flagtimeout;
 static int      pic2p[2];
 static substdio ssmess;
-static substdio ss;				/*- in parent, reading from child; in scanner, writing to child */
+static substdio ss; /*- in parent, reading from child; in scanner, writing to child */
 static stralloc line = { 0 };
 static stralloc recipient = { 0 };
 static stralloc fn = {0};
@@ -227,13 +171,10 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
-	if (!match)
-		return -3;
-	if (!stralloc_starts(&line, "Return-Path: <"))
-		return -3;
-	if (line.s[line.len - 2] != '>')
-		return -3;
-	if (line.s[line.len - 1] != '\n')
+	if (!match ||
+			!stralloc_starts(&line, "Return-Path: <") ||
+			line.s[line.len - 2] != '>' ||
+			line.s[line.len - 1] != '\n')
 		return -3;
 	if (!stralloc_copyb(&sender, line.s + 14, line.len - 16))
 		die_nomem();
@@ -243,11 +184,9 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 		die_nomem();
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
-	if (!match)
-		return -3;
-	if (!stralloc_starts(&line, "Delivered-To: "))
-		return -3;
-	if (line.s[line.len - 1] != '\n')
+	if (!match ||
+			!stralloc_starts(&line, "Delivered-To: ") ||
+			line.s[line.len - 1] != '\n')
 		return -3;
 	if (!stralloc_copyb(&recipient, line.s + 14, line.len - 15))
 		die_nomem();
@@ -356,9 +295,7 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 }
 
 
-/*
- * ----------------------------------------------------------------- SCANNER
- */
+/*- SCANNER */
 
 int
 hasprefix(int fd)
@@ -372,11 +309,9 @@ hasprefix(int fd)
 		return 0;
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
-	if (!match)
-		return 0;
-	if (!stralloc_starts(&line, "Delivered-To: "))
-		return 0;
-	if (line.s[line.len - 1] != '\n')
+	if (!match ||
+			!stralloc_starts(&line, "Delivered-To: ") ||
+			line.s[line.len - 1] != '\n')
 		return 0;
 	if (!stralloc_copyb(&recipient, line.s + 14, line.len - 15))
 		return -1;
@@ -419,6 +354,7 @@ scanner()
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 	substdio_fdbuf(&ss, write, pis2c[1], buf, sizeof buf);
 	maildir_clean(&filenames);
+	/*- this gets all files older than current time */
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
 		strerr_die1(111, FATAL, &maildir_scan_err);
 	while (prioq_get(&pq, &pe)) {
@@ -443,21 +379,19 @@ scanner()
 	}
 	if (!pid)
 		_exit(0);
-	substdio_flush(&ss);		/*- ignore errors */
+	substdio_flush(&ss); /*- ignore errors */
 	close(pis2c[1]);
 	if (wait_pid(&wstat, pid) == -1)
 		strerr_die2sys(111, FATAL, "unable to get client status: ");
 	if (wait_crashed(wstat))
 		strerr_die2x(111, FATAL, "client crashed");
 	if (wait_exitcode(wstat) == 100)
-		_exit(100);				/*- client has produced error message */
+		_exit(100); /*- client has produced error message */
 	_exit(30);
 }
 
 
-/*
- * ------------------------------------------------------------------ PARENT
- */
+/* PARENT */
 
 void
 info(char *result)
@@ -494,17 +428,14 @@ main(int argc, char **argv)
 		}
 	}
 	argv += optind;
-	dir = *argv++;
-	if (!dir)
+	if (!(dir = *argv++))
 		die_usage();
-	prefix = *argv++;
-	if (!prefix)
+	if (!(prefix = *argv++))
 		die_usage();
 	client = argv;
 	if (!*client)
 		die_usage();
 	readcontrols();
-
 	if (chdir(dir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", dir, ": ");
 	if (!stralloc_copys(&deadfiles, ""))
@@ -608,9 +539,9 @@ main(int argc, char **argv)
 		case 0:
 			_exit(deadfiles.len ? 111 : 0);	/*- scanner says no files */
 		case 100:
-			_exit(100);			/*- scanner has produced error message */
+			_exit(100); /*- scanner has produced error message */
 		case 111:
-			_exit(111);			/*- scanner has produced error message */
+			_exit(111); /*- scanner has produced error message */
 		}
 		if (!progress)
 			strerr_die2x(111, FATAL, "making no progress, giving up");
@@ -621,7 +552,73 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.19 2023-01-03 16:34:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.20 2023-10-05 22:29:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: maildirserial.c,v $
+ * Revision 1.20  2023-10-05 22:29:04+05:30  Cprogrammer
+ * updated coding style
+ *
+ * Revision 1.19  2023-01-03 16:34:26+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
+ * Revision 1.18  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.17  2021-07-05 21:26:29+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
+ * Revision 1.16  2021-06-14 00:49:50+05:30  Cprogrammer
+ * added missing chdir removed by mistake
+ *
+ * Revision 1.15  2021-06-03 18:14:12+05:30  Cprogrammer
+ * use new prioq functions
+ *
+ * Revision 1.14  2021-05-13 14:43:28+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.13  2020-05-11 11:02:50+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.12  2020-04-04 11:48:46+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
+ * Revision 1.11  2020-04-04 11:23:28+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.10  2016-05-21 14:48:06+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
+ * Revision 1.9  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.8  2010-07-21 08:57:49+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
+ * Revision 1.7  2010-06-08 21:59:30+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
+ * Revision 1.6  2004-10-22 20:26:29+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.5  2004-10-22 15:35:41+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.4  2004-10-11 23:50:51+05:30  Cprogrammer
+ * made MIME configurable at compile time
+ * use config_data() for geting bouncehost
+ *
+ * Revision 1.3  2004-08-04 18:24:00+05:30  Cprogrammer
+ * enclose bounce as MIME
+ *
+ * Revision 1.2  2004-07-17 21:19:31+05:30  Cprogrammer
+ * code beatification
+ * added RCS log
+ *
+ * Revision 1.1  2004-05-14 00:44:57+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -65,6 +65,10 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
     qmail-getpw
 51. spawn-filter.c: use env variable QLOCAL, QREMOTE to execute alternate
     qmail-local, qmail-remote
+- 05/10/2023
+51. maildir.c, maildirserial.c, serialqmtp.c, serialsmtp.c: updated coding
+    style
+
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023

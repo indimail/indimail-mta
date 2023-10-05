@@ -1,29 +1,5 @@
 /*
- * $Log: serialsmtp.c,v $
- * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.7  2020-11-24 13:48:10+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.6  2010-07-27 09:47:15+05:30  Cprogrammer
- * added logging of sender and recipients
- *
- * Revision 1.5  2008-07-15 19:53:54+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.4  2005-06-11 21:32:26+05:30  Cprogrammer
- * added ipv6 address support
- *
- * Revision 1.3  2004-10-22 20:30:14+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:39:05+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-05-14 00:45:12+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: serialsmtp.c,v 1.9 2023-10-05 22:31:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -155,8 +131,7 @@ stralloc        smtpline = { 0 };
 int             flagpipelining = 0;
 
 unsigned long
-smtpcode(flagehlo)
-	int             flagehlo;
+smtpcode(int flagehlo)
 {
 	unsigned long   code;
 	int             flagfirst;
@@ -197,7 +172,6 @@ quit()	/*- what a stupid protocol */
 
 
 int             flagneedrset = 0;
-
 char            messbuf[4096];
 substdio        ssmess;
 char           *prefix;
@@ -208,12 +182,10 @@ stralloc        recipient = { 0 };
 stralloc        sender = { 0 };
 stralloc        quosender = { 0 };
 stralloc        quorecip = { 0 };
-
 stralloc        fn = { 0 };
 
 void
-result(code)
-	unsigned long   code;
+result(unsigned long code)
 {
 	char            ch;
 	int             i;
@@ -229,20 +201,15 @@ result(code)
 		if (!stralloc_copyb(&line, "K", 1))
 			die_nomem();
 	}
-	if (!stralloc_cats(&line, "MAIL from <"))
-		die_nomem();
-	if (!stralloc_catb(&line, quosender.s, quosender.len))
-		die_nomem();
-	if (!stralloc_cats(&line, "> RCPT <"))
-		die_nomem();
-	if (!stralloc_catb(&line, quorecip.s, quorecip.len))
-		die_nomem();
-	if (!stralloc_cats(&line, ">, "))
+	if (!stralloc_cats(&line, "MAIL from <") ||
+			!stralloc_catb(&line, quosender.s, quosender.len) ||
+			!stralloc_cats(&line, "> RCPT <") ||
+			!stralloc_catb(&line, quorecip.s, quorecip.len) ||
+			!stralloc_cats(&line, ">, "))
 		die_nomem();
 	if (remoteip) {
-		if (!stralloc_cats(&line, remoteip))
-			die_nomem();
-		if (!stralloc_cats(&line, " said: "))
+		if (!stralloc_cats(&line, remoteip) ||
+				!stralloc_cats(&line, " said: "))
 			die_nomem();
 	}
 	if (!stralloc_cat(&line, &smtpline))
@@ -256,17 +223,14 @@ result(code)
 	}
 	if (!stralloc_catb(&line, "\n", 1))
 		die_nomem();
-	if (substdio_put(subfdoutsmall, fn.s, fn.len) == -1)
-		die_output();
-	if (substdio_put(subfdoutsmall, line.s, line.len) == -1)
-		die_output();
-	if (substdio_flush(subfdoutsmall) == -1)
+	if (substdio_put(subfdoutsmall, fn.s, fn.len) == -1 ||
+			substdio_put(subfdoutsmall, line.s, line.len) == -1 ||
+			substdio_flush(subfdoutsmall) == -1)
 		die_output();
 }
 
 void
-doit(fd)
-	int             fd;
+doit(int fd)
 {
 	int             match;
 	unsigned long   code;
@@ -274,35 +238,27 @@ doit(fd)
 	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		die_readmess();
-	if (!match)
-		return;
-	if (!stralloc_starts(&line, "Return-Path: <"))
-		return;
-	if (line.s[line.len - 2] != '>')
-		return;
-	if (line.s[line.len - 1] != '\n')
+	if (!match ||
+			!stralloc_starts(&line, "Return-Path: <") ||
+			line.s[line.len - 2] != '>' ||
+			line.s[line.len - 1] != '\n')
 		return;
 	if (!stralloc_copyb(&sender, line.s + 14, line.len - 16))
 		die_nomem();
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		die_readmess();
-	if (!match)
-		return;
-	if (!stralloc_starts(&line, "Delivered-To: "))
-		return;
-	if (line.s[line.len - 1] != '\n')
+	if (!match ||
+			!stralloc_starts(&line, "Delivered-To: ") ||
+			line.s[line.len - 1] != '\n')
 		return;
 	if (!stralloc_copyb(&recipient, line.s + 14, line.len - 15))
 		die_nomem();
 	if (!stralloc_starts(&recipient, prefix))
 		return;
-	if (!stralloc_0(&sender))
-		die_nomem();
-	if (!quote2(&quosender, sender.s))
-		die_nomem();
-	if (!stralloc_0(&recipient))
-		die_nomem();
-	if (!quote2(&quorecip, recipient.s + str_len(prefix)))
+	if (!stralloc_0(&sender) ||
+			!quote2(&quosender, sender.s) ||
+			!stralloc_0(&recipient) ||
+			!quote2(&quorecip, recipient.s + str_len(prefix)))
 		die_nomem();
 	if (flagneedrset) {
 		substdio_puts(&ss7, "RSET\r\n");	/*- what a stupid protocol */
@@ -339,12 +295,10 @@ doit(fd)
 	substdio_flush(&ss7);
 	if (flagpipelining) {
 		if (flagneedrset) {
-			code = smtpcode(0);
-			if (code >= 400)
+			if ((code = smtpcode(0)) >= 400)
 				die_proto();
 		}
-		code = smtpcode(0);
-		if (code >= 400) {
+		if ((code = smtpcode(0)) >= 400) {
 			result(code);
 			if (smtpcode(0) < 400)
 				die_proto();	/*- rejected MAIL, accepted RCPT */
@@ -352,16 +306,14 @@ doit(fd)
 				die_proto();	/*- why does the spec allow this?  */
 			return;
 		}
-		code = smtpcode(0);
-		if (code >= 400) {
+		if ((code = smtpcode(0)) >= 400) {
 			result(code);
 			if (smtpcode(0) < 400)
 				die_proto();
 			return;
 		}
 	}
-	code = smtpcode(0);
-	if (code >= 400) {
+	if ((code = smtpcode(0)) >= 400) {
 		result(code);
 		return;
 	}
@@ -370,20 +322,16 @@ doit(fd)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *helohost;
 	int             fd;
 	int             match;
 
 	sig_pipeignore();
-	prefix = *++argv;
-	if (!prefix)
+	if (!(prefix = *++argv))
 		die_usage();
-	helohost = *++argv;
-	if (!helohost)
+	if (!(helohost = *++argv))
 		die_usage();
 #ifdef IPV6
 	if (!(remoteip = env_get("TCP6REMOTEIP")))
@@ -430,7 +378,38 @@ main(argc, argv)
 void
 getversion_serialsmtp_c()
 {
-	static char    *x = "$Id: serialsmtp.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialsmtp.c,v 1.9 2023-10-05 22:31:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: serialsmtp.c,v $
+ * Revision 1.9  2023-10-05 22:31:31+05:30  Cprogrammer
+ * updated coding style
+ *
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.7  2020-11-24 13:48:10+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.6  2010-07-27 09:47:15+05:30  Cprogrammer
+ * added logging of sender and recipients
+ *
+ * Revision 1.5  2008-07-15 19:53:54+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.4  2005-06-11 21:32:26+05:30  Cprogrammer
+ * added ipv6 address support
+ *
+ * Revision 1.3  2004-10-22 20:30:14+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:39:05+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-05-14 00:45:12+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

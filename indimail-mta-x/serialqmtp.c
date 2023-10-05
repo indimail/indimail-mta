@@ -1,29 +1,5 @@
 /*
- * $Log: serialqmtp.c,v $
- * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.7  2020-11-24 13:48:07+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.6  2008-07-15 19:53:48+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.5  2005-08-23 17:35:49+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.4  2004-10-22 20:30:14+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-10-22 15:39:01+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.2  2004-07-15 23:33:04+05:30  Cprogrammer
- * fixed compilation warning
- *
- * Revision 1.1  2004-05-14 00:45:11+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: serialqmtp.c,v 1.9 2023-10-05 22:29:58+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -64,6 +40,7 @@ ssize_t
 safewrite(int fd, char *buf, size_t len)
 {
 	int             w;
+
 	if ((w = timeoutwrite(73, fd, buf, len)) <= 0)
 		_exit(31);
 	return w;
@@ -86,13 +63,10 @@ doit(int fd)
 	if (getln(&ssin, &line, &match, '\n') == -1)
 		_exit(32);
 	len += line.len;
-	if (!match)
-		return;
-	if (!stralloc_starts(&line, "Return-Path: <"))
-		return;
-	if (line.s[line.len - 2] != '>')
-		return;
-	if (line.s[line.len - 1] != '\n')
+	if (!match ||
+			!stralloc_starts(&line, "Return-Path: <") ||
+			line.s[line.len - 2] != '>' ||
+			line.s[line.len - 1] != '\n')
 		return;
 	if (!stralloc_copyb(&sender, line.s + 14, line.len - 16))
 		_exit(36);
@@ -101,15 +75,13 @@ doit(int fd)
 	len += line.len;
 	if (!match)
 		return;
-	if (!stralloc_starts(&line, "Delivered-To: "))
-		return;
-	if (line.s[line.len - 1] != '\n')
+	if (!stralloc_starts(&line, "Delivered-To: ") ||
+			line.s[line.len - 1] != '\n')
 		return;
 	if (!stralloc_copyb(&recipient, line.s + 14, line.len - 15))
 		_exit(36);
-	if (!stralloc_starts(&recipient, prefix))
-		return;
-	if (st.st_size < len)
+	if (!stralloc_starts(&recipient, prefix) ||
+			st.st_size < len)
 		return;					/*- okay, who's the wise guy?  */
 	len = st.st_size + 1 - len;
 	if (substdio_putflush(subfdoutsmall, fn.s, fn.len) == -1)
@@ -233,9 +205,8 @@ parent()	/*- reading from child, writing to original stdout */
 		if (!stralloc_copyb(&line, (char *) &ch, 1))
 			die_nomem();
 		if (remoteip) {
-			if (!stralloc_cats(&line, remoteip))
-				die_nomem();
-			if (!stralloc_cats(&line, " said: "))
+			if (!stralloc_cats(&line, remoteip) ||
+					!stralloc_cats(&line, " said: "))
 				die_nomem();
 		}
 		while (len > 0) {
@@ -251,11 +222,9 @@ parent()	/*- reading from child, writing to original stdout */
 		}
 		if (!stralloc_append(&line, "\n"))
 			die_nomem();
-		if (substdio_put(subfdoutsmall, fn.s, fn.len) == -1)
-			die_output();
-		if (substdio_put(subfdoutsmall, line.s, line.len) == -1)
-			die_output();
-		if (substdio_flush(subfdoutsmall) == -1)
+		if (substdio_put(subfdoutsmall, fn.s, fn.len) == -1 ||
+				substdio_put(subfdoutsmall, line.s, line.len) == -1 ||
+				substdio_flush(subfdoutsmall) == -1)
 			die_output();
 		substdio_get(&ssnet, (char *) &ch, 1);
 		if (ch != ',')
@@ -278,9 +247,7 @@ main(int argc, char **argv)
 	sig_pipeignore();
 
 	remoteip = env_get("TCPREMOTEIP");
-
-	prefix = argv[1];
-	if (!prefix)
+	if (!(prefix = argv[1]))
 		strerr_die1x(100, "serialqmtp: usage: serialqmtp prefix");
 	prefixlen = str_len(prefix);
 
@@ -328,7 +295,38 @@ main(int argc, char **argv)
 void
 getversion_serialqmtp_c()
 {
-	static char    *x = "$Id: serialqmtp.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialqmtp.c,v 1.9 2023-10-05 22:29:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: serialqmtp.c,v $
+ * Revision 1.9  2023-10-05 22:29:58+05:30  Cprogrammer
+ * updated coding style
+ *
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.7  2020-11-24 13:48:07+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.6  2008-07-15 19:53:48+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.5  2005-08-23 17:35:49+05:30  Cprogrammer
+ * gcc 4 compliance
+ *
+ * Revision 1.4  2004-10-22 20:30:14+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.3  2004-10-22 15:39:01+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.2  2004-07-15 23:33:04+05:30  Cprogrammer
+ * fixed compilation warning
+ *
+ * Revision 1.1  2004-05-14 00:45:11+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

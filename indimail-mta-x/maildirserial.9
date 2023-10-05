@@ -1,60 +1,31 @@
+.\" vim: tw=75
 .TH maildirserial 1
+
 .SH NAME
 maildirserial \- send a maildir through a client
+
 .SH SYNOPSIS
-.B maildirserial
-[
-.B \-b
-] [
-.B \-t\fIlifetime
-]
-.I dir
-.I prefix
-.I client
-[
-.I arg ...
-]
+\fBmaildirserial\fR [ \fB\-b\fR ] [ \fB\-t\fIlifetime\fR\fR ]
+\fIdir\fR \fIprefix\fR \fIclient\fR [ \fIarg\fR ... ]
+
 .SH DESCRIPTION
-.B maildirserial
-scans a maildir,
-.IR dir ,
-for messages whose envelope recipient addresses begin with
-.IR prefix .
-It then invokes
-.I client
-(in the
-.I dir
-directory)
-and feeds
-.I client
-a list of 0-terminated filenames.
+\fBmaildirserial\fR scans a maildir, \fIdir\fR, for messages whose envelope
+recipient addresses begin with \fIprefix\fR. It then invokes \fIclient\fR
+(in the \fIdir\fR directory) and feeds \fIclient\fR a list of 0-terminated
+filenames. \fBmaildirserial\fR skips messages which have modification time
+greater or equal than the time at which \fBmaildirserver\fR was run.
 
-.I client
-prints a series of results.
-Each result is a 0-terminated filename,
-a status byte, and an LF-terminated human-readable status message.
-The status byte is K if
-.I client
-has accepted the message,
-Z if
-.I client
-has temporarily rejected the message,
-or D if
-.I client
-has permanently rejected the message.
+\fIclient\fR prints a series of results. Each result is a 0-terminated
+filename, a status byte, and an LF-terminated human-readable status
+message. The status byte is \fBK\fR if \fIclient\fR has accepted the
+message, \fBZ\fR if \fIclient\fR has temporarily rejected the message, or
+\fBD\fR if \fIclient\fR has permanently rejected the message.
 
-.B maildirserial
-will remove messages accepted by
-.IR client .
+\fBmaildirserial\fR will remove messages accepted by \fIclient\fR.
 
-.B maildirserial
-may run
-.I client
-repeatedly if
-.I client
-exits without handling all the files.
-.B maildirserial
-will give up if it is not making any progress.
+\fBmaildirserial\fR may run \fIclient\fR repeatedly if \fIclient\fR exits
+without handling all the files. \fBmaildirserial\fR will give up if it is
+not making any progress.
 
 \fBmaildirserial\fR uses environment set according to files in
 $HOME/.defaultqueue directory. If QUEUE_BASE environment variable is not
@@ -64,17 +35,17 @@ set, it additionally uses environment set according to files in
 .SH OPTIONS
 .TP 5
 .B \-b
-Bounce permanently rejected messages
-back to the envelope sender,
-and then remove them.
+Bounce permanently rejected messages back to the envelope sender, and then
+remove them.
+
 .TP
 .B \-t\fIlifetime
-Treat temporary rejection as permanent rejection
-for messages more than
-.I lifetime
-seconds old.
+Treat temporary rejection as permanent rejection for messages more than
+\fIlifetime\fR seconds old.
 
 .SH "SEE ALSO"
+maildirsmtp(1),
+maildirqmtp(1),
 serialqmtp(1),
 serialsmtp(1),
 tcpclient(1),
