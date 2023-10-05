@@ -387,7 +387,7 @@ scanner()
 		strerr_die2x(111, FATAL, "client crashed");
 	if (wait_exitcode(wstat) == 100)
 		_exit(100); /*- client has produced error message */
-	_exit(30);
+	_exit(30); /* mysterious exit code by djb to make lesser mortals run in circles */
 }
 
 
