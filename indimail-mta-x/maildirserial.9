@@ -13,7 +13,8 @@ maildirserial \- send a maildir through a client
 recipient addresses begin with \fIprefix\fR. It then invokes \fIclient\fR
 (in the \fIdir\fR directory) and feeds \fIclient\fR a list of 0-terminated
 filenames. \fBmaildirserial\fR skips messages which have modification time
-greater or equal than the time at which \fBmaildirserver\fR was run.
+greater than the time (or equal to the time) at which \fBmaildirserver\fR
+was run.
 
 \fIclient\fR prints a series of results. Each result is a 0-terminated
 filename, a status byte, and an LF-terminated human-readable status
