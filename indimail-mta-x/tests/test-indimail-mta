@@ -2929,6 +2929,7 @@ test_maildirserial()
 		failed=1
 		exit 1
 	fi
+	t1=$(date +"%s.%4N")
 	sudo rm -rf $qmaildir/alias/virtual/new
 	sudo mv $qmaildir/alias/virtual/bak $qmaildir/alias/virtual/new
 	tcpclient 0 $smtp_port maildirserial -t1209600 $qmaildir/alias/virtual "virtual-" \
