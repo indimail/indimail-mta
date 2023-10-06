@@ -1,29 +1,25 @@
+.\" vim: tw=75
 .TH qmail-qmtpd 8
+
 .SH NAME
 qmail-qmtpd \- receive mail via QMTP
-.SH SYNOPSIS
-.B qmail-qmtpd
-.SH DESCRIPTION
-.B qmail-qmtpd
-receives mail messages via the Quick Mail Transfer Protocol (QMTP)
-and invokes
-.B qmail-queue
-to deposit them into the outgoing queue.
-.B qmail-qmtpd
-must be supplied several environment variables;
-see
-.BR tcp-environ(5) .
 
-.B qmail-qmtpd
-supports the
-.IR rcpthosts ,
-.IR morercpthosts ,
-.BR RELAYCLIENT ,
-.IR databytes ,
-and
-.B DATABYTES
-mechanisms described in
-.BR qmail-smtpd(8) .
+.SH SYNOPSIS
+\fBqmail-qmtpd\fR
+
+.SH DESCRIPTION
+\fBqmail-qmtpd\fR receives mail messages via the Quick Mail Transfer
+Protocol (QMTP) and invokes \fBqmail-queue\fR to deposit them into the
+outgoing queue. \fBqmail-qmtpd\fR must be supplied several environment
+variables; see \fBtcp-environ\fR(5).
+
+\fBqmail-qmtpd\fR supports the \fIrcpthosts\fR, \fImorercpthosts\fR
+\fBRELAYCLIENT\fR, \fIdatabytes\fR, and \fBDATABYTES\fR mechanisms
+described in \fBqmail-smtpd\fR(8) .
+
+If the environment variable \fBHIDE_HOST\fR is set, \fBqmail-qmtpd\fR does
+not write hostnames and IP addresses in the received header.
+
 .SH "SEE ALSO"
 tcp-env(1),
 tcp-environ(5),

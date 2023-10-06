@@ -1,5 +1,8 @@
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.7  2023-10-07 01:24:51+05:30  Cprogrammer
+ * use env variable HIDE_HOST to hide IP, host in received headers
+ *
  * Revision 1.6  2023-09-24 00:23:57+05:30  Cprogrammer
  * minor code style changes
  *
@@ -72,6 +75,7 @@ static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static struct qmail    qqt;
 static unsigned int    bytestooverflow = 0;
+static int      hide_host;
 
 ssize_t
 safewrite(int fd, char *buf, size_t len)
@@ -661,7 +665,8 @@ smtp_data(char *arg)
 	out("354 go ahead\r\n");
 
 	received(&qqt, "mini-smtpd", "SMTP", local, remoteip,
-			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo,
+			fakehelo, hide_host);
 	blast(&hops);
 	hops = (hops >= MAXHOPS);
 	if (hops)
@@ -717,6 +722,7 @@ main(int argc, char **argv)
 	sig_pipeignore();
 	if (chdir(auto_qmail) == -1)
 		die_control();
+	hide_host = env_get("HIDE_HOST") ? 1 : 0;
 	setup();
 	if (ipme_init() != 1)
 		die_ipme();
@@ -731,7 +737,7 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.6 2023-09-24 00:23:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.7 2023-10-07 01:24:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

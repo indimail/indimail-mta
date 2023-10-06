@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.86 2022-10-22 13:07:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.87 2023-10-07 01:25:50+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -93,6 +93,7 @@ static stralloc arch_email = {0};
 #endif
 static stralloc envheaders = { 0 };
 static stralloc err_str = { 0 };
+static int      hide_host = 0;
 
 void
 cleanup()
@@ -208,24 +209,26 @@ receivedfmt(char *s, int fastqueue)
 	if (s)
 		s += i;
 
-	i = fmt_str(s, " by host ");
-	len += i;
-	if (s)
-		s += i;
-	if (!(host_name = env_get("HOSTNAME"))) {
-		if (gethostname(Hostname, sizeof(Hostname)) == -1)
-			str_copy(Hostname, "unknown");
-		host_name = Hostname;
+	if (!hide_host) {
+		i = fmt_str(s, " by host ");
+		len += i;
+		if (s)
+			s += i;
+		if (!(host_name = env_get("HOSTNAME"))) {
+			if (gethostname(Hostname, sizeof(Hostname)) == -1)
+				str_copy(Hostname, "unknown");
+			host_name = Hostname;
+		}
+		i = fmt_str(s, host_name);
+		len += i;
+		if (s)
+			s += i;
+	
+		i = fmt_str(s, "\n ");
+		len += i;
+		if (s)
+			s += i;
 	}
-	i = fmt_str(s, host_name);
-	len += i;
-	if (s)
-		s += i;
-
-	i = fmt_str(s, "\n ");
-	len += i;
-	if (s)
-		s += i;
 
 	if (uid == auto_uida) {
 		i = fmt_str(s, "(invoked by alias");
@@ -245,17 +248,23 @@ receivedfmt(char *s, int fastqueue)
 			s += i;
 		if (!tcpremoteip)
 			tcpremoteip = env_get("TCPREMOTEIP");
-		if (!fastqueue && !tcpremoteip)
+		if (!hide_host && !fastqueue && !tcpremoteip)
 			tcpgetremoteip();
 		if (tcpremoteip) {
-			i = fmt_str(s, "from network ");
+			i = fmt_str(s, "from network");
 			len += i;
 			if (s)
 				s += i;
-			i = fmt_str(s, tcpremoteip);
-			len += i;
-			if (s)
-				s += i;
+			if (!hide_host) {
+				i = fmt_str(s, " ");
+				len += i;
+				if (s)
+					s += i;
+				i = fmt_str(s, tcpremoteip);
+				len += i;
+				if (s)
+					s += i;
+			}
 			i = fmt_str(s, ", ");
 			len += i;
 			if (s)
@@ -270,7 +279,7 @@ receivedfmt(char *s, int fastqueue)
 		if (s)
 			s += i;
 	}
-	i = fmt_str(s, "); ");
+	i = fmt_str(s, ");\n  ");
 	len += i;
 	if (s)
 		s += i;
@@ -709,6 +718,7 @@ main()
 
 	sig_blocknone();
 	umask(033);
+	hide_host = env_get("HIDE_HOST") ? 1 : 0;
 	qm_custom_err = env_get("QMAIL_QUEUE_CUSTOM_ERROR") ? 1 : 0;
 	if (!(ptr = env_get("FASTQUEUE")))
 		fastqueue = 0;
@@ -1160,7 +1170,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.86 2022-10-22 13:07:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.87 2023-10-07 01:25:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1168,6 +1178,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.87  2023-10-07 01:25:50+05:30  Cprogrammer
+ * use env variable HIDE_HOST to hide IP, host in received headers
+ *
  * Revision 1.86  2022-10-22 13:07:55+05:30  Cprogrammer
  * treat auto_uidd as any other uid for Received header
  *

@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.304 2023-10-02 22:50:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.305 2023-10-07 01:26:46+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.304 $";
+static char    *revision = "$Revision: 1.305 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -446,6 +446,7 @@ typedef enum {
 } cb_type;
 static char    *no_scram_sha1_plus, *no_scram_sha256_plus, *no_scram_sha512_plus;
 #endif
+static int      hide_host;
 
 extern char   **environ;
 
@@ -1150,7 +1151,8 @@ msg_notify()
 	}
 	datetime_tai(&dt, now());
 	received(&qqt, "notify", (char *) protocol, localhost, remoteip,
-			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo,
+			fakehelo, hide_host);
 	strnum[fmt_ulong(strnum, msg_size)] = 0;
 	qmail_puts(&qqt, "X-size-Notification: ");
 	qmail_puts(&qqt, "size=");
@@ -4867,7 +4869,8 @@ smtp_data(char *arg)
 		protocol = proto.s;
 	}
 	received(&qqt, "smtpd", (char *) protocol, localhost, remoteip,
-			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, fakehelo);
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo,
+			fakehelo, hide_host);
 #ifdef USE_SPF
 	spfreceived();
 #endif
@@ -6926,6 +6929,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		hostname = argv[1];
 		childargs = argv + 2;
 	}
+	hide_host = env_get("HIDE_HOST") ? 1 : 0;
 	old_client_bug = env_get("OLD_CLIENT") ? 1 : 0;
 	no_help = env_get("DISABLE_HELP");
 	no_vrfy = env_get("DISABLE_VRFY");
@@ -7179,6 +7183,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.305  2023-10-07 01:26:46+05:30  Cprogrammer
+ * use env variable HIDE_HOST to hide IP, host in received headers
+ *
  * Revision 1.304  2023-10-02 22:50:51+05:30  Cprogrammer
  * fix copy of srs_result
  *
@@ -7548,7 +7555,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.304 2023-10-02 22:50:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.305 2023-10-07 01:26:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH mini-smtpd 8
 
 .SH NAME
@@ -17,10 +18,16 @@ with 100 or more \fBReceived\fR or \fBDelivered-To\fR header fields.
 
 \fBmini-smtpd supports ESMTP, including the 8BITMIME and PIPELINING options.
 
+\fBmini-smtpd\fR writes \fIReceived:\fR header with details of the SMTP
+connection regarding ESMTP, date and time. If the environment variable
+\fBHIDE_HOST\fR is set, \fBmini-smtpd\fR does not write hostnames and IP
+addresses in the received header.
+
 .SH TRANSPARENCY
 \fBmini-smtpd\fR converts the SMTP newline convention into the UNIX newline
 convention by converting CR LF into LF.  It returns a temporary error and
-drops the connection on bare LFs; see \fBhttps://cr.yp.to/docs/smtplf.html\fR.
+drops the connection on bare LFs; see
+\fBhttps://cr.yp.to/docs/smtplf.html\fR.
 
 \fBmini-smtpd\fR accepts messages that contain long lines or non-ASCII
 characters, even though such messages violate the SMTP protocol.
@@ -37,10 +44,7 @@ temporary error code.
 .TP 5
 \fIdatabytes\fR
 counts bytes as stored on disk, not as transmitted through the network.
-It does not count the
-.B mini-smtpd
-Received line, the
-.B qmail-queue
+It does not count the \fBmini-smtpd\fR Received line, the \fBqmail-queue\fR
 Received line, or the envelope.
 
 If the environment variable

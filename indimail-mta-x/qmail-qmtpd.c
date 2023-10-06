@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmtpd.c,v 1.17 2023-10-04 23:18:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qmtpd.c,v 1.18 2023-10-07 01:25:42+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -94,20 +94,15 @@ int
 main()
 {
 	char            ch;
-	int             i;
-	unsigned long   biglen;
-	unsigned long   len;
-	int             flagdos = 0;
-	int             flagsenderok;
-	int             flagbother;
-	unsigned long   qp;
+	unsigned long   biglen, len, qp, u;
+	int             i, flagdos = 0, flagsenderok, flagbother, hide_host;
 	char           *result, *x;
-	unsigned long   u;
 
 	sig_pipeignore();
 	sig_alarmcatch(resources);
 	alarm(3600);
 
+	hide_host = env_get("HIDE_HOST") ? 1 : 0;
 	if (control_init() == -1)
 		resources();
 	if (rcpthosts_init() == -1)
@@ -154,7 +149,8 @@ main()
 		else
 			badproto();
 		received(&qq, "qmtpd", "QMTP", local, remoteip,
-				str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, (char *) 0);
+				str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo,
+				(char *) 0, hide_host);
 		/*
 		 * XXX: check for loops? only if len is big?
 		 */
@@ -311,13 +307,16 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	static char    *x = "$Id: qmail-qmtpd.c,v 1.17 2023-10-04 23:18:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmtpd.c,v 1.18 2023-10-07 01:25:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.18  2023-10-07 01:25:42+05:30  Cprogrammer
+ * use env variable HIDE_HOST to hide IP, host in received headers
+ *
  * Revision 1.17  2023-10-04 23:18:55+05:30  Cprogrammer
  * converted to ansic prototypes
  *

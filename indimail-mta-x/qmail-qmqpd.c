@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.13  2023-10-07 01:34:18+05:30  Cprogrammer
+ * added parameter hide for received
+ *
  * Revision 1.12  2022-10-22 13:07:41+05:30  Cprogrammer
  * added program identifier to Received header
  *
@@ -128,7 +131,7 @@ identify()
 	if (!local)
 		local = "unknown";
 	received(&qq, "qmqpd", "QMQP", local, remoteip,
-			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, (char *) 0);
+			str_diff(remotehost, "unknown") ? remotehost : 0, remoteinfo, (char *) 0, 0);
 }
 
 char            buf[1000];
@@ -224,7 +227,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.12 2022-10-22 13:07:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpd.c,v 1.13 2023-10-07 01:34:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

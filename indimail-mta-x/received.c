@@ -1,5 +1,8 @@
 /*
  * $Log: received.c,v $
+ * Revision 1.10  2023-10-07 01:26:00+05:30  Cprogrammer
+ * added parameter hide to hide IP, Host in received headers
+ *
  * Revision 1.9  2023-01-16 23:13:08+05:30  Cprogrammer
  * folded received line to put date below
  *
@@ -66,7 +69,7 @@ safeput(struct qmail *qqt, char *s)
 
 void
 received(struct qmail *qqt, char *program, char *protocol, char *local, char *remoteip,
-		char *remotehost, char *remoteinfo, char *helo)
+		char *remotehost, char *remoteinfo, char *helo, int hide)
 {
 	struct datetime dt;
 	char            strnum[FMT_ULONG], buf[DATE822FMT];
@@ -75,23 +78,29 @@ received(struct qmail *qqt, char *program, char *protocol, char *local, char *re
 	qmail_puts(qqt, program);
 	qmail_puts(qqt, " ");
 	qmail_put(qqt, strnum, fmt_ulong(strnum, getpid()));
-	if (remotehost) {
+	if (remotehost && !hide) {
 		qmail_puts(qqt, " from ");
 		safeput(qqt, remotehost);
 	}
-	if (helo) {
+	if (helo && !hide) {
 		qmail_puts(qqt, " (HELO ");
 		safeput(qqt, helo);
 		qmail_puts(qqt, ")");
 	}
-	qmail_puts(qqt, " (");
-	if (remoteinfo) {
-		safeput(qqt, remoteinfo);
-		qmail_puts(qqt, "@");
+	if (remoteinfo && remoteip && !hide) {
+		qmail_puts(qqt, " (");
+		if (remoteinfo) {
+			safeput(qqt, remoteinfo);
+			qmail_puts(qqt, "@");
+		}
+		if (remoteip)
+			safeput(qqt, remoteip);
+		qmail_puts(qqt, ")\n");
 	}
-	safeput(qqt, remoteip);
-	qmail_puts(qqt, ")\n  by ");
-	safeput(qqt, local);
+	if (local && !hide) {
+		qmail_puts(qqt, "  by ");
+		safeput(qqt, local);
+	}
 	qmail_puts(qqt, " with ");
 	qmail_puts(qqt, protocol);
 	qmail_puts(qqt, ";\n  ");
@@ -102,7 +111,7 @@ received(struct qmail *qqt, char *program, char *protocol, char *local, char *re
 void
 getversion_received_c()
 {
-	static char    *x = "$Id: received.c,v 1.9 2023-01-16 23:13:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: received.c,v 1.10 2023-10-07 01:26:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

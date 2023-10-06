@@ -169,6 +169,7 @@ Known values for OPTION are:
   [--smtp-plugin]
   [--setgroups]
   [--utf8]
+  [--hide-host]
   --default-domain=domain
 
  Installs a new queue with a SMTP Listener
@@ -276,6 +277,7 @@ Known values for OPTION are:
   smtp-plugin    - Enable SMTP Plugin support
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+  hide-host      - Skip host names and IP addresses in received headers
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
@@ -304,6 +306,7 @@ Known values for OPTION are:
   [--ssl]
   [--setgroups]
   [--utf8]
+  [--hide-host]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -362,6 +365,7 @@ Known values for OPTION are:
   ssl            - Use SSL encrypted communication in qmail-remote
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+  hide-host      - Skip host names and IP addresses in received headers
 
 --slowq --qbase=queue_path
   --servicedir=service_path
@@ -385,6 +389,7 @@ Known values for OPTION are:
   [--ssl]
   [--setgroups]
   [--utf8]
+  [--hide-host]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -428,6 +433,7 @@ Known values for OPTION are:
   ssl            - Use SSL encrypted communication in qmail-remote
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+  hide-host      - Skip host names and IP addresses in received headers
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]
@@ -444,6 +450,7 @@ Known values for OPTION are:
   [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
   [--dkverify=dkim|none]
   [--dksign=dkim|none --private_key=private_key]
+  [--hide-host]
 
  Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -484,6 +491,7 @@ Known values for OPTION are:
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
   private_key    - Path to Private key created by dknewkey
+  hide-host      - Skip host names and IP addresses in received headers
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
   --context-file=f --save_interval=s --whitelist=w --hash-size=s

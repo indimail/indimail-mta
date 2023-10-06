@@ -44,9 +44,8 @@ with -p option), \fBqmail-smtpd\fR returns a permanent error code 553 to
 the client. TCPPARANOID is set by \fBtcpserver(1)\fR if the IP for reverse
 DNS address for \fBTCPREMOTEIP\fR does not match \fBTCPREMOTEIP\fR.
 
-.B qmail-smtpd
-employs DNS look-up for the "MAIL from:" sender address. This can be
-bypassed using the \fInodnscheck\fR control file.
+\fBqmail-smtpd\fR employs DNS look-up for the "MAIL from:" sender address.
+This can be bypassed using the \fInodnscheck\fR control file.
 
 If the environment variable \fBREQPTR\fR is set and \fBTCPREMOTEHOST\fR is
 absent, \fBqmail-smtpd\fR rejects connections from unresolvable IP address
@@ -55,90 +54,67 @@ absent, \fBqmail-smtpd\fR rejects connections from unresolvable IP address
 \fBtcpserver(1)\fR if remote host (TCPREMOTEIP) does not have a reverse DNS
 record.
 
-If the environment variable
-.B SMTPS
-is non-empty,
-.B qmail-smtpd
-starts a TLS session (to support the deprecated SMTPS protocol,
-normally on port 465). Otherwise, if you set the \fBSTARTTLS\fR environment
-variable,
-.B qmail-smtpd
-offers the STARTTLS extension to ESMTP. If you set \fBFORCE_TLS\fR
-environment variable,
-.B qmail-smtpd
-does not accept MAIL FROM, RCPT TO commands unless the client issues a
-STARTTLS command. One can set the environment variable \fBSSL_BITS\fR to
-set the pem file that \fBqmail-smtpd\fR will use. By default this is set to
-2048. This makes \fBqmail-smtpd\fR to use rsa2048.pem for the RSA private
-key and dh2048.pem for the DH parameters. If the environment variable
+If the environment variable \fBSMTPS\fR is non-empty, \fBqmail-smtpd\fR
+starts a TLS session (to support the deprecated SMTPS protocol, normally on
+port 465). Otherwise, if you set the \fBSTARTTLS\fR environment variable,
+\fBqmail-smtpd\fR offers the STARTTLS extension to ESMTP. If you set
+\fBFORCE_TLS\fR environment variable, \fBqmail-smtpd\fR does not accept
+MAIL FROM, RCPT TO commands unless the client issues a \fBSTARTTLS\fR
+command. One can set the environment variable \fBSSL_BITS\fR to set the pem
+file that \fBqmail-smtpd\fR will use. By default this is set to 2048. This
+makes \fBqmail-smtpd\fR to use rsa2048.pem for the RSA private key and
+dh2048.pem for the DH parameters. If the environment variable
 \fBCLIENT_RENEGOTIATION\fR is set, client-initiated TLS renegotiation will
 be enabled
 
-If the environment variable
-.B SMTPUTF8
-is defined and non-empty
-.B qmail-smtpd
-offers RFC 5336 SMTP Email Address Internationalization support and will advertize the
-capability in the EHLO greeting. Since qmail-smtpd is 8 bit clean, setting
-of SMTPUTF8 has no real consequences except for displaying this setting in
-the received headers as \fBUTF8(E)SMTP\fR.
+If the environment variable \fBSMTPUTF8\fR is defined and non-empty
+\fBqmail-smtpd\fR offers RFC 5336 SMTP Email Address Internationalization
+support and will advertize the capability in the EHLO greeting. Since
+qmail-smtpd is 8 bit clean, setting of SMTPUTF8 has no real consequences
+except for displaying this setting in the received headers as
+\fBUTF8(E)SMTP\fR.
 
-.B qmail-smtpd
-is responsible for counting hops.
-It rejects any message with 100 or more 
-.B Received
-or
-.B Delivered-To
-header fields. The default value of 100 hops can be changed by having a
-control file
-.IR maxhops .
+\fBqmail-smtpd\fR is responsible for counting hops. It rejects any message
+with 100 or more \fBReceived\fR or \fBDelivered-To\fR header fields. The
+default value of 100 hops can be changed by having a control file
+\fImaxhops\fR.
 
-.B qmail-smtpd
-supports ESMTP, including the 8BITMIME, DATA, PIPELINING, SIZE, VRFY,
-ETRN, ODMR and AUTH options. You can disable VRFY by setting environment
-variable \fBDISABLE_VRFY\fR.
+\fBqmail-smtpd\fR supports ESMTP, including the 8BITMIME, DATA, PIPELINING,
+SIZE, VRFY, ETRN, ODMR and AUTH options. You can disable VRFY by setting
+environment variable \fBDISABLE_VRFY\fR.
 
-.B qmail-smtpd
-supports basic help usage when you use the HELP command. You can disable
-HELP by setteing environment variable \fBDISABLE_HELP\fR
+\fBqmail-smtpd\fR supports basic help usage when you use the HELP command.
+You can disable HELP by setteing environment variable \fBDISABLE_HELP\fR.
 
-.B qmail-smtpd
-includes a \'MAIL FROM:\' parameter parser and obeys \'AUTH\' and \'SIZE\'
-advertisements.
+\fBqmail-smtpd\fR includes a \'MAIL FROM:\' parameter parser and obeys
+\'AUTH\' and \'SIZE\' advertisements.
 
-.B qmail-smtpd
-can accept LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256,
-CRAM-SHA384, CRAM-RIPEMD, DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-1-PLUS,
-SCRAM-SHA-256, SCRAM-SHA-256-PLUS AUTH types. For auth types other than the
-SCRAM methods, it invokes
-.IR checkprogram ,
-which reads on file descriptor 3 the username, a NULL byte, the password
-or challenge derived from
-.IR hostname ,
-another NULL byte, a CRAM-MD5/CRAM-SHA1/CRAM-SHA256/CRAM-RIPEMD/DIGEST-MD5
+\fBqmail-smtpd\fR can accept LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1,
+CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-RIPEMD, DIGEST-MD5,
+SCRAM-SHA-1, SCRAM-SHA-1-PLUS, SCRAM-SHA-256, SCRAM-SHA-256-PLUS AUTH
+types. For auth types other than the SCRAM methods, it invokes
+\fIcheckprogram\fR, which reads on file descriptor 3 the username, a NULL
+byte, the password or challenge derived from \fIhostname\fR, another NULL
+byte, a CRAM-MD5/CRAM-SHA1/CRAM-SHA256/CRAM-RIPEMD/DIGEST-MD5
 response (if applicable to the AUTH type), and a final NULL byte.
-.I checkprogram
-invokes
-.I subprogram
-upon unsuccessful authentication, passing the same data (read earlier on
-descriptor 3) on a pipe with file descriptor 4 as the write end and file
-descriptor 3 as the read end.
-.I subprogram
-should read file descriptor 3 and should in turn return 0 to
-.BR qmail-smtpd ,
-effectively setting the environment variables TCPREMOTEINFO and AUTHINFO
-(any supplied value replaced with the authenticated username). One can
-specifically disable the AUTH methods by setting DISABLE_AUTH_LOGIN,
-DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5, DISABLE_CRAM_SHA1,
-DISABLE_CRAM_SHA224, DISABLE_CRAM_SHA256, DISABLE_CRAM_SHA384,
-DISABLE_CRAM_SHA512, DISABLE_CRAM_RIPEMD, DISABLE_DIGEST_MD5,
-DISABLE_SCRAM_SHA1, DISABLE_SCRAM_SHA1_PLUS, DISABLE_SCRAM_SHA256,
-DISABLE_SCRAM_SHA256_PLUS, environment variable. If you set the environment
-variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH PLAIN gets disabled unless
-STARTTLS is issued or you run qmail-smtpd under SSL (port 465). You may set
-\fBFORCE_TLS\fR environment variable to deny authentication, if the client
-does not provide the STARTTLS command. The \fIfalsepgm\fR argument is the
-name a program that fails, such as \fB/bin/false\fR.
+\fIcheckprogram\fR invokes \fIsubprogram\fR upon unsuccessful
+authentication, passing the same data (read earlier on descriptor 3) on a
+pipe with file descriptor 4 as the write end and file descriptor 3 as the
+read end. \fIsubprogram\fR should read file descriptor 3 and should in turn
+return 0 to \fBqmail-smtpd\fR, effectively setting the environment
+variables TCPREMOTEINFO and AUTHINFO (any supplied value replaced with the
+authenticated username). One can specifically disable the AUTH methods by
+setting DISABLE_AUTH_LOGIN, DISABLE_AUTH_PLAIN, DISABLE_CRAM_MD5,
+DISABLE_CRAM_SHA1, DISABLE_CRAM_SHA224, DISABLE_CRAM_SHA256,
+DISABLE_CRAM_SHA384, DISABLE_CRAM_SHA512, DISABLE_CRAM_RIPEMD,
+DISABLE_DIGEST_MD5, DISABLE_SCRAM_SHA1, DISABLE_SCRAM_SHA1_PLUS,
+DISABLE_SCRAM_SHA256, DISABLE_SCRAM_SHA256_PLUS, environment variable. If
+you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and AUTH
+PLAIN gets disabled unless STARTTLS is issued or you run qmail-smtpd under
+SSL (port 465). You may set \fBFORCE_TLS\fR environment variable to deny
+authentication, if the client does not provide the STARTTLS command. The
+\fIfalsepgm\fR argument is the name a program that fails, such as
+\fB/bin/false\fR.
 
 qmail-smtpd supports SASL - Simple Authentication and Security Layer
 framework with the GNU SASL library. For SCRAM authentication types,
@@ -150,10 +126,9 @@ from the indimail MySQL database for authentication. If you have used
 authentication methods (-C option), the same passwords will work for SCRAM
 authentication.
 
-.I checkprogram
-returns 0 on successful authentication, terminating the chain. Similarly
-\fIsubprogram\fR exits 0 on successful authentication, terminating the
-chain.
+\fIcheckprogram\fR returns 0 on successful authentication, terminating the
+chain. Similarly \fIsubprogram\fR exits 0 on successful authentication,
+terminating the chain.
 
 \fIcheckprogram\fR, \fIsubprogram\fR should exit 3 if the user doesn't have
 relay privileges. You can have as long chain of checkprogram subprogram1
@@ -362,6 +337,9 @@ Received: indimail-mta smtpd 28500 (HELO argos.indimail.org) (::1)
   Ciphers=TLS_AES_256_GCM_SHA384);
   Mon, 26 Dec 2022 21:02:07 +0530
 .EE
+
+If the environment variable \fBHIDE_HOST\fR is set, \fBqmail-smtpd\fR does
+not write hostnames and IP addresses in the received header.
 
 .SH Database Connections
 \fBqmail-smtpd\fR uses \fBinlookup(8)\fR, instead of directly connecting to

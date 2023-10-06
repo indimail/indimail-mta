@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.707 2023-10-02 02:44:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.708 2023-10-07 01:26:54+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.707 2023-10-02 02:44:38+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.708 2023-10-07 01:26:54+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -94,6 +94,7 @@ Known values for OPTION are:
   [--smtp-plugin]
   [--setgroups]
   [--utf8]
+  [--hide-host]
   --default-domain=domain
 
  Installs a new queue with a SMTP Listener
@@ -201,6 +202,7 @@ Known values for OPTION are:
   smtp-plugin    - Enable SMTP Plugin support
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+  hide-host      - Skip host names and IP addresses in received headers
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
@@ -229,6 +231,7 @@ Known values for OPTION are:
   [--ssl]
   [--setgroups]
   [--utf8]
+  [--hide-host]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -287,6 +290,7 @@ Known values for OPTION are:
   ssl            - Use SSL encrypted communication in qmail-remote
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+  hide-host      - Skip host names and IP addresses in received headers
 
 --slowq --qbase=queue_path
   --servicedir=service_path
@@ -310,6 +314,7 @@ Known values for OPTION are:
   [--ssl]
   [--setgroups]
   [--utf8]
+  [--hide-host]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -353,6 +358,7 @@ Known values for OPTION are:
   ssl            - Use SSL encrypted communication in qmail-remote
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
+  hide-host      - Skip host names and IP addresses in received headers
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]
@@ -369,6 +375,7 @@ Known values for OPTION are:
   [--rejectspam=r --spamexitcode=e --localfilter --remotefilter]
   [--dkverify=dkim|none]
   [--dksign=dkim|none --private_key=private_key]
+  [--hide-host]
 
  Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -409,6 +416,7 @@ Known values for OPTION are:
   fsync          - Sync files and directories when writing files
   syncdir        - Use BSD style sync semantics for flushing directories
   private_key    - Path to Private key created by dknewkey
+  hide-host      - Skip host names and IP addresses in received headers
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
   --context-file=f --save_interval=s --whitelist=w --hash-size=s
@@ -2896,6 +2904,11 @@ else
 	> $conf_dir/AUTHMODULES
 	echo > $conf_dir/DISABLE_VRFY
 fi
+if [ $hidehost -eq 1 ] ; then
+	echo 1 > $conf_dir/HIDE_HOST
+else
+	> $conf_dir/HIDE_HOST
+fi
 (
 dump_run_header
 echo "MYUID=\$(/usr/bin/id -u qmaild)"
@@ -3131,6 +3144,11 @@ case "$dksign_option" in
 	fi
 	;;
 esac
+if [ $hidehost -eq 1 ] ; then
+	echo 1 > $conf_dir/HIDE_HOST
+else
+	> $conf_dir/HIDE_HOST
+fi
 echo "$prog_args" > $conf_dir/.options
 echo "$prog_args" > "$DESTDIR"$cntrldir/global_vars/.options
 if [ ! " $logfilter" = " " ] ; then
@@ -3329,6 +3347,15 @@ if [ " $QmailBinPrefix" = " /usr" ] ; then
 	echo "/bin:/usr/bin:/usr/sbin:/sbin" > $conf_dir/PATH
 else
 	echo "/bin:/usr/bin:$QmailBinPrefix/bin:$QmailBinPrefix/sbin" > $conf_dir/PATH
+fi
+if [ "$type" = "qmtpd" ] ; then
+	if [ $hidehost -eq 1 ] ; then
+		echo 1 > $conf_dir/HIDE_HOST
+	else
+		> $conf_dir/HIDE_HOST
+	fi
+else
+	> $conf_dir/HIDE_HOST
 fi
 (
 dump_run_header
@@ -6968,6 +6995,11 @@ case "$dksign_option" in
 	/bin/rm -f $conf_dir/DKIMSIGN $conf_dir/DKIMVERIFY $conf_dir/DKIMQUEUE
 	;;
 esac
+if [ $hidehost -eq 1 ] ; then
+	echo 1 > $conf_dir/HIDE_HOST
+else
+	> $conf_dir/HIDE_HOST
+fi
 (
 dump_run_header
 echo "exec 2>&1"
@@ -10378,6 +10410,7 @@ sanitized_env=""
 chkrecipient=0
 chksender=0
 chkrelay=0
+hidehost=0
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
 else
@@ -10460,6 +10493,9 @@ while test $# -gt 0; do
 	;;
 	--skipsend)
 	skipsend=1
+	;;
+	--hide-host)
+	hidehost=1
 	;;
 	--qmailqueue=*)
 	qmailqueue=$optarg

@@ -1,5 +1,8 @@
 /*
  * $Log: received.h,v $
+ * Revision 1.5  2023-10-07 01:26:30+05:30  Cprogrammer
+ * added parameter hide to hide IP, Host in received headers
+ *
  * Revision 1.4  2022-10-22 13:08:38+05:30  Cprogrammer
  * added program identifier to Received header
  *
@@ -14,6 +17,6 @@
 #define RECEIVED_H
 #include "qmail.h"
 
-void            received(struct qmail *, char *, char *, char *, char *, char *, char *, char *);
+void            received(struct qmail *, char *, char *, char *, char *, char *, char *, char *, int);
 
 #endif
