@@ -129,7 +129,7 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 97. Pieter Droogendijk <pieter at binky.org.uk> http://binky.org.uk - URL parsing code for SURBL
 98. Marcelo Coelho - qmail-srs-0.8.patch and libsrs2 - http://www.libsrs2.org
 99. Roberto Puzzanghera <roberto.puzzanghera at gmail.com> - using FORCE\_TLS environment variable to force TLS during AUTH
-100. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredo
+100. Ed Neville - allow multiple Delivered-To in qmail-local using control file maxdeliveredto
 101. Ed Neville - configure TLS method in control/tlsclientmethod (qmail-smtpd), control/tlsservermethod (qmail-remote)
 102. Bruce Guenter - qmail-remote patch to reduce cpu
 103. Rolf Eike Beer <eike@sf-mail.de> gen\_allocdefs.h, GEN\_ALLOC refactoring changes to fix memory overflow
@@ -137,3 +137,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 105. RFC 6530-32 EAI - Adapted from Arnt Gulbrandsen / Erwin Hoffman's unicode address support patch for qmail.
 106. RFC 8463 - Ed25519 cryptographic method adapted from Erwin Hoffman's s/qmail dkim implementation
 107. qmail-branch patch by Paul Jarc - https://code.dogmap.org./qmail/
+108. relaytest by Matthew Trout

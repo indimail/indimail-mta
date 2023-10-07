@@ -1,22 +1,7 @@
 /*
  * $Log: relaytest.c,v $
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2016-01-02 19:23:25+05:30  Cprogrammer
- * use indimail.org
- *
- * Revision 1.4  2011-07-29 09:29:58+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.3  2008-07-15 19:53:12+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.2  2005-06-15 22:35:24+05:30  Cprogrammer
- * added rcs version information
- *
- * Revision 1.1  2005-06-15 22:11:43+05:30  Cprogrammer
- * Initial revision
+ * Revision 1.7  2023-10-07 08:42:37+05:30  Cprogrammer
+ * updated with original author
  *
  */
 #include <unistd.h>
@@ -112,8 +97,7 @@ smtpcode()
 	int             match;
 	char            num[4];
 
-	do
-	{
+	do {
 		if (getln(&ss6, &smtpline, &match, '\n') != 0)
 			die_proto();
 		if (!match)
@@ -141,7 +125,7 @@ void
 quit()	/*- what a stupid protocol */
 {
 	substdio_putsflush(&ssout, "client: ");
-	substdio_putsflush(&ssout, "QUIT\r\n");
+	substdio_putsflush(&ssout, "QUIT\n");
 	if (substdio_putsflush(&ss7, "QUIT\r\n"))
 		die_netwrite();
 	smtpcode();
@@ -155,12 +139,12 @@ main(int argc, char **argv)
 		strerr_die2x(111, FATAL, "connected but greeting failed");
 	}
 	substdio_puts(&ssout, "client: ");
-	substdio_putsflush(&ssout, "EHLO indimail.org\r\n");
+	substdio_putsflush(&ssout, "EHLO indimail.org\n");
 	if (substdio_putsflush(&ss7, "EHLO indimail.org\r\n"))
 		die_netwrite();
 	if (smtpcode() != 250) {
 		substdio_puts(&ssout, "client: ");
-		substdio_putsflush(&ssout, "HELO indimail.org\r\n");
+		substdio_putsflush(&ssout, "HELO indimail.org\n");
 		if (substdio_putsflush(&ss7, "HELO indimail.org\r\n"))
 			die_netwrite();
 		if (smtpcode() != 250) {
@@ -169,7 +153,7 @@ main(int argc, char **argv)
 		}
 	}
 	substdio_puts(&ssout, "client: ");
-	substdio_putsflush(&ssout, "MAIL FROM: test@indimail.org\r\n");
+	substdio_putsflush(&ssout, "MAIL FROM: test@indimail.org\n");
 	if (substdio_putsflush(&ss7, "MAIL FROM: test@indimail.org\r\n"))
 		die_netwrite();
 	if (smtpcode() != 250) {
@@ -177,7 +161,7 @@ main(int argc, char **argv)
 		_exit(1);
 	}
 	substdio_puts(&ssout, "client: ");
-	substdio_putsflush(&ssout, "RCPT TO: test@relay-test-invalid.com\r\n");
+	substdio_putsflush(&ssout, "RCPT TO: test@relay-test-invalid.com\n");
 	if (substdio_putsflush(&ss7, "RCPT TO: test@relay-test-invalid.com\r\n"))
 		die_netwrite();
 	if (smtpcode() != 250) {
@@ -185,11 +169,10 @@ main(int argc, char **argv)
 			_exit(1);
 	}
 	substdio_puts(&ssout, "client: ");
-	substdio_putsflush(&ssout, "DATA\r\n");
+	substdio_putsflush(&ssout, "DATA\n");
 	if (substdio_putsflush(&ss7, "DATA\r\n"))
 		die_netwrite();
-	if (smtpcode() != 354)
-	{
+	if (smtpcode() != 354) {
 		quit();
 		_exit(1);
 	}
@@ -202,7 +185,33 @@ main(int argc, char **argv)
 void
 getversion_relaytest_c()
 {
-	static char    *x = "$Id: relaytest.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: relaytest.c,v 1.7 2023-10-07 08:42:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: relaytest.c,v $
+ * Revision 1.7  2023-10-07 08:42:37+05:30  Cprogrammer
+ * updated with original author
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2016-01-02 19:23:25+05:30  Cprogrammer
+ * use indimail.org
+ *
+ * Revision 1.4  2011-07-29 09:29:58+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
+ * Revision 1.3  2008-07-15 19:53:12+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.2  2005-06-15 22:35:24+05:30  Cprogrammer
+ * added rcs version information
+ *
+ * Revision 1.1  2005-06-15 22:11:43+05:30  Cprogrammer
+ * Initial revision
+ *
+ * Original by Matthew Trout
+ */
