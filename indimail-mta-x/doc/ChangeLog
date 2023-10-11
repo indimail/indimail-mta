@@ -70,7 +70,9 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
     style
 - 07/10/2023
 52. smtpd.c, qmail-qmtpd.c, qmail-queue.c, received.c, mini-smtpd.c: use env
-variable HIDE_HOST to hide IP, host in received headers
+    variable HIDE_HOST to hide IP, host in received headers
+- 11/10/2023
+53. qmail-smtpd.c: added env variable HIDE_HOST to be displayed with -v option
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023

@@ -135,23 +135,6 @@ relay privileges. You can have as long chain of checkprogram subprogram1
 subpgoram2 ... as long as the number of authentication mehods/databases
 you want to support.
 
-Once a user has authenticated or authentication is enforced,
-\fBMASQUERADE\fR environment variable can be set to enforce a certain
-behaviour.
-
-.LP
-.nr step 1 1
-.IP \n[step] 2
-relaying to outside domains will be allowed with any sender address, if
-\fBMASQUERADE\fR is set but empty.
-.IP \n+[step]
-relaying to outside domains will be allowed with the sender address equal
-to the value of \fBMASQUERADE\fR environment variable
-.IP \n+[step]
-relaying will be allowed only if the IMAP/POP3 authenticated userid matches
-the "MAIL from:" sender address, if \fBMASQUERADE\fR is not set
-.LP
-
 \fBqmail-smtpd\fR will reject the authentication attempt if it receives a
 nonzero return value from \fIcheckprogram\fR or \fIsubprogram\fR. There can
 be multiple \fIsubprograms\fR for a particular type of authentication. The
@@ -253,9 +236,27 @@ the above category, mail will be accepted.
 
 Setting \fBCHECKSENDER\fR environment variable also turns on anti-spoofing
 feature for the domain where the user cannot forge the MAIL FROM address.
-If the MASQUERADE option is set, the user will be able to use any MAIL
-FROM, but since \fBqmail-smtpd\fR logs all transactions, the actual user id
-used for authentication will be logged.
+If the \fBMASQUERADE\fR environment variable is set, the user will be able
+to use any MAIL FROM, but since \fBqmail-smtpd\fR logs all transactions,
+the actual user id used for authentication will be logged.
+
+Once a user has authenticated or authentication is enforced, you can use
+\fBMASQUERADE\fR environment variable to enforce a certain behaviour.
+
+.LP
+.nr step 1 1
+.IP \n[step] 2
+If \fBMASQUERADE\fR is set to an empty string, mail will be accepted with
+any sender address
+.IP \n+[step]
+If \fBMASQUERADE\fR environment variable set to an address, mail will be
+accepted only when the sender address matches the value of the environment
+variable
+.IP \n+[step]
+If \fBMASQUERADE\fR is not set, mail will be accpeted only if the
+IMAP/POP3/SMTP authenticated userid matches the "MAIL FROM" sender
+address.
+.LP
 
 \fBNOTE\fR: To turn on sender status check for selected domains, include
 the domains in the \fIchksenderdomains\fR control file. Check the

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.14  2023-10-11 14:51:10+05:30  Cprogrammer
+ * added HIDE_HOST environment variable
+ *
  * Revision 1.13  2023-08-20 18:45:17+05:30  Cprogrammer
  * added TLS_CIPHER_SUITE env variables in print_details
  *
@@ -119,7 +122,7 @@ print_details()
 		"DISABLE_SCRAM_SHA1_PLUS", "DISABLE_SCRAM_SHA256", "DISABLE_SCRAM_SHA256_PLUS",
 		"DISABLE_SCRAM_SHA512", "DISABLE_SCRAM_SHA512_PLUS", "DISABLE_VRFY",
 		"DOMAINQUEUE", "ENFORCE_FQDN_HELO", "FORCE_TLS", "FROMRULES", "GREYIP",
-		"LOGFD", "LOGFILTER", "MASQUERADE", "MAX_RCPT_ERRCOUNT", "NODNSCHECK",
+		"HIDE_HOST", "LOGFD", "LOGFILTER", "MASQUERADE", "MAX_RCPT_ERRCOUNT", "NODNSCHECK",
 		"OPENRELAY", "PLUGINDIR", "RELAYCLIENT", "REQPTR", "REQUIREAUTH", "SECURE_AUTH",
 		"SERVERCERT", "SHUTDOWN", "SIGNATURES", "SMTP_PLUGIN", "SMTP_PLUGIN_SYMB",
 		"SMTPS", "SMTPUTF8", "SPAMFILTER",
@@ -272,7 +275,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.13 2023-08-20 18:45:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-smtpd.c,v 1.14 2023-10-11 14:51:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
