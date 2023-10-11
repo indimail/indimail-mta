@@ -43,7 +43,7 @@ jobs:
       with:
         envs: 'MYTOKEN'
         usesh: true
-        prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap24-client libgsasl base64
+        prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap26-client libgsasl base64
         run: |
           cd libqmail; ./default.configure; make; make install-strip
           cd ../main/libdkim2-x; ./default.configure; make; make install-strip
