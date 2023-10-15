@@ -552,7 +552,7 @@ getversion_qmail_lspawn_c()
 /*
  * $Log: qmail-lspawn.c,v $
  * Revision 1.45  2023-10-03 22:48:03+05:30  Cprogrammer
- * use env variable QMAILGETPW to execute alternet qmail-getpw
+ * use env variable QMAILGETPW to execute alternate qmail-getpw
  *
  * Revision 1.44  2023-09-30 19:46:05+05:30  Cprogrammer
  * skip setuser_privileges for non-etc-passwd users

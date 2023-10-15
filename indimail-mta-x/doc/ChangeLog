@@ -1,6 +1,14 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
 Release @version@-@release@ Start 11/09/2023 End --/--/----
 ======= Release Highlights ================================================
+o svctool: fixed path/MAXDAEMONS in tcpserver run scripts - major bug which
+  prevented tcpserver reaching concurrency > 40
+o filterit: New filterit command to implement filters
+o qmail-lspawn: added filterit and envdir command
+o overhaul CHECKSENDER code
+o added feature to hide IP addresses in Received headers by setting HIDE_IP
+  environment variable
+o refactored and tested SPF code
 ===========================================================================
 - 11/09/2023
 01. cdb-database: allow comments in input file
@@ -10,13 +18,13 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 04. maildirdeliver.c: BUG. Remove NULL character appended to rpline, dtline
 05. updated dot-qmail, maildirdeliver, qmail-command man pages
 - 14/09/2023
-06. svctool: fixed path/MAXDAEMONS in tcpserver run scripts
+06. svctool: fixed path/MAXDAEMONS in tcpserver run scripts [major]
 - 15/09/2023
 07. preline.c: moved check for env variables after getopt
 - 17/09/2023
 08. rspamstat.sh: Fixed division by zero when total=0
-09. qmail-local: added internal filter command for dot-qmail
-10. filterit: added external filter command for dot-qmail
+09. qmail-local: added internal filter command for dot-qmail [major]
+10. filterit: added external filter command for dot-qmail [major]
 - 19/09/2023
 11. filterit_sub.c: fixed multiple invocation of filterit_sub1()
 12. updated RCS logs for qmail-local.c, indimail-mta.spec, Makefile,
@@ -53,7 +61,7 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 42. qmail-lspawn.c: skip setuser_privileges for non-etc-passwd users
 - 02/10/2023
 43. smtpd.c: Fix (double) error message for unsupported AUTH method
-44. smtpd.c: Fix SEGV when decoding SRS recipient address
+44. smtpd.c: Fix SEGV when decoding SRS recipient address [major]
 45. svctool: make QmailHOME, INDIMAILDIR configurable through env variable
 46. autoresponder.c: decode SRS return path address
 47. srs.c: fix srs_result len due to stralloc_0()

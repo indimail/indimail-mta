@@ -1,13 +1,4 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <@email@> @version@-@release@%{?dist}
-Release @version@-@release@ Start 14/09/2023 End --/--/----
-======= Release Highlights ================================================
-===========================================================================
-- 14/09/2023
-01. tcpserver.c: display ip, pid in printstatus
-- 27/09/2023
-02. tcpserver.c: skip displaying IP in printstatus for sigchild
-
-* Fri Sep 08 2023 17:37:24 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.3-1.1%{?dist}
 Release 1.1.3-1.1 Start 27/04/2023 End XX/XX/XXXX
 ======= Release Highlights ================================================
 o use of TLS_CIPHER_SUITE for tlsv1_2
@@ -18,6 +9,10 @@ o use of TLS_CIPHER_SUITE for tlsv1_2
 02. tcpclient.c, dotls.c, tcpserver.c: use TLS_CIPHER_LIST, TLS_CIPHER_SUITE
     to set ciphers
 - 08/09/2023 - indimail-mta-3.0.4
+- 14/09/2023
+01. tcpserver.c: display ip, pid in printstatus
+- 27/09/2023
+02. tcpserver.c: skip displaying IP in printstatus for sigchild
 
 * Sun Apr 23 2023 17:50:00 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 13/02/2023 End 23/04/2023
