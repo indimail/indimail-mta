@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.33 2023-10-11 21:02:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.34 2023-10-16 18:38:12+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -312,7 +312,7 @@ setup_assign()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
-		printf "  testing create assign/user.cdb failed [%.4f sec]\n" $secs
+		printf "\r  testing create assign/user.cdb failed [%.4f sec]\n" $secs
 		failed=1
 		exit 1
 	fi
@@ -332,7 +332,7 @@ setup_queue()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "  testing create qmail queue failed [%.4f sec]\n" $secs
+		printf "\r  testing create qmail queue failed [%.4f sec]\n" $secs
 		failed=1
 		exit 1
 	fi
@@ -361,7 +361,7 @@ setup_config()
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
 		(
-		printf "  testing qmail configuration failed [%.4f sec]\n" $secs
+		printf "\r  testing qmail configuration failed [%.4f sec]\n" $secs
 		cat $testdir/setup/setup.log
 		)|less
 		failed=1
@@ -382,7 +382,7 @@ setup_config()
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			tcount=$(expr $tcount + 1)
 			(
-			printf "  testing create self signed certificate failed [%.4f sec]\n" $secs
+			printf "\r  testing create self signed certificate failed [%.4f sec]\n" $secs
 			cat $testdir/setup/setup.log
 			)|less
 			failed=1
@@ -403,7 +403,7 @@ setup_config()
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			tcount=$(expr $tcount + 1)
-			printf "  testing Create bogofilter configuration failed [%.4f sec]\n" $secs
+			printf "\r  testing Create bogofilter configuration failed [%.4f sec]\n" $secs
 		fi
 	fi
 	sudo chown -R $user $cntrldir
@@ -549,7 +549,7 @@ test_tcpclient_script()
 			echo "$logdir/smtpd/current"
 			cat $logdir/smtpd/current
 		fi
-		)
+		)|less
 		failed=1
 		exit 1
 	fi
@@ -668,12 +668,12 @@ test_qmail_inject()
 		else
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+			(
 			if [ $i -eq 1 ] ; then
 				echo "  testing qmail-inject /etc/passwd user, qmail send+receive failed [$secs sec]"
 			else
 				echo "  testing qmail-inject qmail-user, qmail send+receive failed [$secs sec]"
 			fi
-			(
 			cat $logdir/qmail-send/qmail-send.log
 			)|less
 			failed=1
@@ -1184,6 +1184,100 @@ test_smtp_auth_cram_md5()
 		failed=1
 		exit 1
 	fi
+}
+
+test_smtp_secure_auth()
+{
+	# Test secure auth
+	#
+	/bin/rm -f $servicedir/smtpd/variables/SMTPS
+	echo 1 > $servicedir/smtpd/variables/STARTTLS
+	echo 1 > $servicedir/smtpd/variables/SECURE_AUTH
+	sudo svc -r $servicedir/smtpd
+	sleep 2
+
+	t1=$(date +"%s.%4N")
+	# this should fail without using SMTPS or STARTTLS
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
+		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$ 2>&1
+	ret1=$?
+	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	echo "$l1"|grep '*** Auth not attempted, requested type not available' >/dev/null
+	if [ $? -eq 0 ] ; then
+		ret2=0
+	else
+		ret2=1
+	fi
+
+	# this should succeed by using SMTPS or STARTTLS
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
+		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" --tls >/dev/null
+	check_mail
+	ret3=$?
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing mail using SECURE AUTH SMTP authentication succeeded %41s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		(
+		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3"
+		echo "  testing mail using SECURE AUTH SMTP authentication failed [$secs sec]"
+		echo "$logdir/smtpd/current"
+		cat $logdir/smtpd/current
+		)|less
+		failed=1
+		exit 1
+	fi
+
+	/bin/rm -f > $servicedir/smtpd/variables/STARTTLS $servicedir/smtpd/variables/SECURE_AUTH
+	echo 1 > $servicedir/smtpd/variables/SMTPS
+	echo 1 > $servicedir/smtpd/variables/REQUIREAUTH
+	sudo svc -r $servicedir/smtpd
+	sleep 2
+
+	# Test REQUIREAUTH
+	echo "$HOSTNAME:127.0.0.1:$smtp_port $user@$HOSTNAME abcd12345678" > $cntrldir/smtproutes
+	t1=$(date +"%s.%4N")
+	# this should fail without using authentication
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port --tls-on-connect >$testdir/tmp/swaks.$$ 2>&1
+	ret1=$?
+	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	echo "$l1"|grep ".*530 authentication required (#5.7.1)" >/dev/null
+	if [ $? -eq 0 ] ; then
+		ret2=0
+	else
+		ret2=1
+	fi
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
+		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" --tls-on-connect >/dev/null
+	check_mail
+	ret3=$?
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing mail using REQUIRE AUTH SMTP authentication succeeded %40s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		(
+		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3"
+		echo "  testing mail using REQUIRE AUTH SMTP authentication failed [$secs sec]"
+		echo "$logdir/smtpd/current"
+		cat $logdir/smtpd/current
+		)|less
+		failed=1
+		exit 1
+	fi
+	/bin/rm -f $servicedir/smtpd/variables/REQUIREAUTH
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
 }
 
 test_smtp_cugmail()
@@ -3138,7 +3232,7 @@ test_maildirserial()
 	fi
 }
 
-do_autoresponder()
+test_autoresponder()
 {
 	remove_mail
 	t1=$(date +"%s.%4N")
@@ -3314,7 +3408,7 @@ test_srs()
 		failed=1
 		exit 1
 	fi
-	do_autoresponder 1
+	test_autoresponder 1
 	t1=$(date +"%s.%4N")
 	subject="Testing SRS decode using srsfilter"
 	(
@@ -3785,8 +3879,8 @@ test_hide_host_ip()
 	echo 1 > $servicedir/smtpd/variables/SMTPS
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
-	swaks -S --tls-on-connect --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port \
-		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/dev/null
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port \
+		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" --tls-on-connect >/dev/null
 	check_mail_header $maildir Received 0
 	if [ -n "$mail_file" ] ; then
 		$e822header -I Received < $maildir/new/$mail_file > $testdir/tmp/header
@@ -3853,8 +3947,9 @@ do_svscan_without_svscanlog()
 	test_smtp_cugmail
 	test_smtp_chk_sender
 	test_smtp_surbl
-	do_autoresponder 0
-	do_qmail_qfilter
+	test_autoresponder 0
+	test_qmail_qfilter
+	test_smtp_secure_auth
 	test_stop_smtps
 	test_stop_supervise
 	test_restart_service_using_hup
@@ -3898,11 +3993,12 @@ do_svscan_with_svscanlog()
 	remove_new_service
 }
 
-do_qmail_qfilter()
+test_qmail_qfilter()
 {
 	t1=$(date +"%s.%4N")
 	echo $testdir/bin/qfrontend > $servicedir/smtpd/variables/QMAILQUEUE
-	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" > $servicedir/smtpd/run
+	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" \
+		> $servicedir/smtpd/run
 	(
 	echo "#!/bin/sh"
 	echo "exec qmail-qfilter $testdir/bin/filter1 -- $testdir/bin/filter2"
@@ -3938,7 +4034,6 @@ do_qmail_qfilter()
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing qmail-qfilter succeeded %70s [%.4f sec]\n" " " $secs
 		print_pct
-		return 0
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
@@ -3946,6 +4041,13 @@ do_qmail_qfilter()
 		failed=1
 		exit 1
 	fi
+	(
+	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 "
+	printf "$smtp_port $qmail_smtpd $HOSTNAME $testdir/bin/authsmtp "
+	printf "/bin/false 2>&1\n"
+	) > $servicedir/smtpd/run
+	sudo svc -r $servicedir/smtpd
+	sleep $sleep_int
 	return 0
 }
 
@@ -5729,6 +5831,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.34  2023-10-16 18:38:12+05:30  Cprogrammer
+# added test for SECURE AUTH and REQUIREAUTH
+#
 # Revision 1.33  2023-10-11 21:02:53+05:30  Cprogrammer
 # minor modification
 #
