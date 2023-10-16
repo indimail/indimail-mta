@@ -22,6 +22,10 @@ servicedir=@servicedir@
 rm=/bin/rm
 mv=/bin/mv
 
+log_it() {
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
+
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
@@ -31,16 +35,15 @@ fi
 case "$1" in
     remove|upgrade|deconfigure)
 	if [ -f ${libexecdir}/upgrade.sh ] ; then
-		echo "Running Custom Upgrade Script for pre $1"
+		log_it "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/upgrade.sh prerm $1 2.2 $* || true
 	fi
 	(
-	echo "prerm $1"
 	set +e
 	${prefix}/bin/svok /service/.svscan/log
 	if [ $? -eq 0 ] ; then
 		touch ${servicedir}/.svscan.down
-		echo "prerm: Giving svscan exactly 5 seconds to exit nicely"
+		log_it "prerm: Giving svscan exactly 5 seconds to exit nicely"
 		if test -f /etc/init/svscan.conf
 		then
 			/sbin/initctl emit qmailstop
@@ -73,7 +76,7 @@ case "$1" in
 		set -e
 		sleep 5
 	else
-		echo "prerm: svscan not running"
+		echo "prerm: svscan not running" 1>&2
 	fi
 	) > /var/log/daemontools-setup.log 2>&1
     ;;
@@ -82,8 +85,8 @@ case "$1" in
     ;;
 
     *)
-        echo "prerm called with unknown argument \`$1'" >&2
-        exit 1
+    echo "prerm called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 
@@ -98,16 +101,16 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 fi
 
 if [ -s ${qsysconfdir}/daemontools-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
-	echo "reverting permissions"
+	log_it "reverting permissions"
 	/bin/cat ${qsysconfdir}/daemontools-stat.override | while read line
 	do
 		if [ -f $line ] ; then
-			echo "reverting permission for $line"
+			log_it "reverting permission for $line"
 			/usr/sbin/dpkg-statoverride --remove $line || true
 		fi
 	done
 fi
-echo "shutting down and removing .svscan service"
+log_it "shutting down and removing .svscan service"
 if [ -d ${servicedir}/.svscan -o -L ${servicedir}/.svscan ] ; then
   touch ${servicedir}/.svscan/down
   svc -dx ${servicedir}/.svscan >/dev/null 2<&1 || true
@@ -120,7 +123,7 @@ if [ -d ${servicedir}/.svscan -o -L ${servicedir}/.svscan ] ; then
   ${rm} -rf ${servicedir}/.svscan
 fi
 # Remove svscan being started on system boot
-echo "removing svscan startup"
+log_it "removing svscan startup"
 SERVICE_LIST="."
 export SERVICE_LIST
 $prefix/sbin/minisvc --config=rm-boot >/dev/null || true

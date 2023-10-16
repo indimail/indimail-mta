@@ -79,6 +79,10 @@ fixperms()
   fi
 }
 
+log_it() {
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
+
 upgrade=0
 case "$1" in
     configure)
@@ -148,65 +152,58 @@ fi
 if [ $upgrade -eq 1 ] ; then # upgrade
   set +e
   (
-  echo "checking if system boot scripts need upgrade"
+  log_it "checking if system boot scripts need upgrade"
   if [ -f /etc/init.d/svscan ] ; then
     cmp -s ${prefix}/bin/qmailctl /etc/init.d/svscan >/dev/null 2>&1 || \
-      (${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan && echo "installed new /etc/init.d/svscan")
+      (${cp} ${prefix}/bin/qmailctl /etc/init.d/svscan && log_it "installed new /etc/init.d/svscan")
   fi
   if [ -x /bin/systemctl -a -d /lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/systemd /lib/systemd/system/svscan.service >/dev/null 2>&1 || \
       (${cp} ${shareddir}/boot/systemd /lib/systemd/system/svscan.service &&
-      /bin/systemctl daemon-reload && echo "installed new svscan service")
+      /bin/systemctl daemon-reload && log_it "installed new svscan service")
   elif [ -x /bin/systemctl -a -d /usr/lib/systemd/system ] ; then
     cmp -s ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service >/dev/null 2>&1 || \
       (${cp} ${shareddir}/boot/systemd /usr/lib/systemd/system/svscan.service &&
-      /bin/systemctl daemon-reload && echo "installed new svscan service")
+      /bin/systemctl daemon-reload && log_it "installed new svscan service")
   elif [ -f /sbin/initctl -a -d /etc/init ] ; then
     cmp -s ${shareddir}/boot/upstart /etc/init/svscan.conf >/dev/null 2>&1 || \
-      (${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf && echo "insalled new svscan.conf")
+      (${cp} ${shareddir}/boot/upstart /etc/init/svscan.conf && log_it "insalled new svscan.conf")
   elif [ -d /etc/event.d ] ; then
     cmp -s ${shareddir}/boot/upstart /etc/event.d/upstart >/dev/null 2>&1 || \
-      (${cp} ${shareddir}/boot/upstart /etc/event.d && echo "installed new upstart config")
+      (${cp} ${shareddir}/boot/upstart /etc/event.d && log_it "installed new upstart config")
   elif [ -d /System/Library/LaunchDaemons ] ; then
     cmp -s ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons >/dev/null 2>&1 || \
-      (${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons && echo "installed new indimail.plist")
+      (${cp} ${shareddir}/boot/indimail.plist /System/Library/LaunchDaemons && log_it "installed new indimail.plist")
   fi
   # restore svscan service if we find .svscan.down
   if [ -f ${servicedir}/.svscan.down ] ; then
     ${rm} -f ${servicedir}/.svscan.down
-    echo "Starting svscan"
+    log_it "Starting svscan"
     if test -f /etc/init/svscan.conf
     then
-      echo /sbin/initctl emit qmailstart
       /sbin/initctl emit qmailstart
     elif test -f /etc/event.d/svscan
     then
-      echo /sbin/initctl emit qmailstart
       /sbin/initctl emit qmailstart
     elif test -f /etc/systemd/system/multi-user.target.wants/svscan.service
     then
-      echo /bin/systemctl start svscan
       /bin/systemctl start svscan
     elif test -x ${prefix}/sbin/initsvc
     then
       if [ -x /etc/init.d/svscan ] ; then
-        echo "/etc/init.d/svscan start"
         ${prefix}/sbin/initsvc -status || /etc/init.d/svscan start
       else
         ${prefix}/sbin/initsvc -status
       fi
-       echo "initsvc -on"
       ${prefix}/sbin/initsvc -on 
     else
       if [ -x /etc/init.d/svscan ] ; then
-        echo "/etc/init.d/svscan start"
         /etc/init.d/svscan start
       fi
       /bin/grep "^#SV:" /etc/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null
       if [ $? -eq 0 ] ; then
         sed -i 's{^#SV:{SV:{' /etc/inittab
         if [ $? -eq 0 ] ; then
-          echo /sbin/init q
           /sbin/init q
         fi
       fi
@@ -223,7 +220,7 @@ fi
 if [ ! -d ${servicedir} -a ! -L ${servicedir} ] ; then
   mkdir -p ${servicedir}
 fi
-echo "adding svscan startup"
+log_it "adding svscan startup"
 ${prefix}/sbin/minisvc --config=add-boot
 # svscanlog service
 ${prefix}/sbin/minisvc --svscanlog --servicedir=${servicedir} --scanint=60 > /dev/null || true

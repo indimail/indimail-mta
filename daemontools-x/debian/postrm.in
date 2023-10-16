@@ -31,6 +31,10 @@ rmdir=/bin/rmdir
 ####################################
 default_domain=indimail.org
 
+log_it() {
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
+
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
@@ -41,15 +45,15 @@ case "$1" in
     purge|remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
 	if [ -f ${libexecdir}/upgrade.sh ] ; then
 	(
-		echo "Running Custom Upgrade Script for pre $1"
+		log_it "Running Custom Upgrade Script for pre $1"
 		/bin/sh ${libexecdir}/upgrade.sh postrm $1 2.2 $* || true
 	) >> /var/log/daemontools-setup.log 2>&1
 	fi
     ;;
 
     *)
-        echo "postrm called with unknown argument \`$1'" >&2
-        exit 1
+    echo "postrm called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 
@@ -69,23 +73,22 @@ esac
 #
 if [ " $1" = " purge" ] ; then
 	(
-	echo "postrm $1"
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd stop
 		fi
 	fi
-	echo "removing user qmaill"
+	log_it "removing user qmaill"
 	/usr/bin/getent passwd qmaill > /dev/null && /usr/sbin/userdel qmaill >/dev/null || true
-	echo "removing group nofiles"
+	log_it "removing group nofiles"
 	/usr/bin/getent group nofiles > /dev/null && /usr/sbin/groupdel nofiles  >/dev/null || true
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
 			/etc/init.d/nscd start
 		fi
 	fi
-	echo "removing logs"
+	log_it "removing logs"
 	if [ -h ${logdir} ] ; then
 		log_dir=`/bin/ls -ld ${logdir} | /usr/bin/awk '{print $10}'`
 	else

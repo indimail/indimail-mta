@@ -18,6 +18,10 @@ rm=/bin/rm
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
 
+log_it() {
+  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+}
+
 ID=`id -u`
 if [ $ID -ne 0 ] ; then
 	echo "You are not root" >&2
@@ -38,7 +42,7 @@ case "$1" in
 		${prefix}/bin/svok ${servicedir}/.svscan/log
 		if [ $? -eq 0 ] ; then
 			touch ${servicedir}/.svscan.down
-			echo "preinst: Giving svscan exactly 5 seconds to exit nicely"
+			log_it "preinst: Giving svscan exactly 5 seconds to exit nicely"
 			if test -f /etc/init/svscan.conf
 			then
 				/sbin/initctl emit qmailstop
@@ -71,7 +75,7 @@ case "$1" in
 			set -e
 			sleep 5
 		else
-			echo "preinst: svscan not running"
+			echo "preinst: svscan not running" 1>&2
 		fi
 		) >> /var/log/daemontools-setup.log 2>&1
 		exit 0
@@ -84,7 +88,7 @@ case "$1" in
 	mkdir -p /tmp/daemontools
 	chmod 700 /tmp/daemontools
 	touch /tmp/daemontools/.install
-	echo "Adding IndiMail users/groups"
+	log_it "Adding IndiMail users/groups"
 	nscd_up=`ps -ef |grep nscd |grep -v grep|wc -l`
 	if [ $nscd_up -ge 1 ] ; then
 		if [ -x /etc/init.d/nscd ] ; then
@@ -105,8 +109,8 @@ case "$1" in
     ;;
 
     *)
-        echo "preinst called with unknown argument \`$1'" >&2
-        exit 1
+    echo "preinst called with unknown argument \`$1'" >&2
+    exit 1
     ;;
 esac
 
