@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.305 2023-10-07 01:26:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.306 2023-10-16 20:54:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.305 $";
+static char    *revision = "$Revision: 1.306 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1232,10 +1232,18 @@ err_nogateway(char *arg1, char *arg2, int flag)
 {
 	char           *x;
 
-	if (flag)
+	switch (flag)
+	{
+	case 1:
 		logerr(1, "Invalid masquerade: MAIL from <", arg1, NULL);
-	else
+		break;
+	case 2:
+		logerr(1, "Invalid SENDER: MAIL from <", arg1, NULL);
+		break;
+	case 0:
 		logerr(1, "Invalid RELAY client: MAIL from <", arg1, NULL);
+		break;
+	}
 	if (arg2 && *arg2)
 		logerr(0, "> RCPT <", arg2, NULL);
 	logerr(0, ">", NULL);
@@ -3400,7 +3408,7 @@ domain_compare(char *dom1, char *dom2)
 			return (-1);
 		}
 		if (str_diff(tmpdom1, tmpdom2)) {
-			err_nogateway(mailfrom.s, 0, 1);
+			err_nogateway(mailfrom.s, 0, 2);
 			return (1);
 		}
 	}
@@ -3612,8 +3620,7 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 			logerr(1, "CHECKSENDER: unauthenticated local SENDER address: MAIL from <",
 					mailfrom.s, ">\n", NULL);
 			logflush();
-			out("530 authentication required (#5.7.1)\r\n", NULL);
-			flush();
+			err_authrequired();
 			return 1;
 		}
 	}
@@ -3625,7 +3632,7 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 		if (mailfrom.s[at1 = str_rchr(mailfrom.s, '@')]) {
 			dom1 = mailfrom.s + at1 + 1;
 			if (!addrallowed(mailfrom.s)) {
-				err_nogateway(mailfrom.s, 0, 1);
+				err_nogateway(mailfrom.s, 0, 2);
 				return 1;
 			}
 			mailfrom.s[at1] = 0;
@@ -3667,19 +3674,19 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 				}
 				if (iter_pass == 1) {
 					mailfrom.s[at1] = '@';
-					err_nogateway(mailfrom.s, 0, 1);
+					err_nogateway(mailfrom.s, 0, 2);
 					break;
 				}
 			} /*- for (;;) */
 		} else { /*- mailfrom doesn't have @ */
 			if (x && *x) {
 				if (str_diff(x, remoteinfo)) {
-					err_nogateway(mailfrom.s, 0, 1);
+					err_nogateway(mailfrom.s, 0, 2);
 					return 1;
 				}
 			} else {
 				if (str_diff(mailfrom.s, remoteinfo)) {
-					err_nogateway(mailfrom.s, 0, 1);
+					err_nogateway(mailfrom.s, 0, 2);
 					return 1;
 				}
 			}
@@ -7183,6 +7190,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.306  2023-10-16 20:54:00+05:30  Cprogrammer
+ * pass flag=2 to err_nogateway for checksender
+ *
  * Revision 1.305  2023-10-07 01:26:46+05:30  Cprogrammer
  * use env variable HIDE_HOST to hide IP, host in received headers
  *
@@ -7555,7 +7565,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.305 2023-10-07 01:26:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.306 2023-10-16 20:54:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

@@ -87,6 +87,7 @@ o Bugfix SRS code
     SMTP service on port 587
 55. indimail-mta.spec, debian/indimail-mta-postinst: added --secureauth option
     for smtp service on port 587
+56. smtpd.c: pass flag=2 to err_nogateway for checksender
 
 * Fri Sep 08 2023 11:58:03 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.4-1.1%{?dist}
 Release 3.0.4-1.1 Start 24/04/2023 End 08/09/2023
