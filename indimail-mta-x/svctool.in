@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.708 2023-10-07 01:26:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.709 2023-10-16 18:42:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.708 2023-10-07 01:26:54+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.709 2023-10-16 18:42:40+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -65,7 +65,7 @@ Known values for OPTION are:
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
-  [--authsmtp --forceauthsmtp --enablecram --authall]
+  [--authsmtp --forceauthsmtp --secureauth --enablecram --authall]
   [--chkrecipient --chksender --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
@@ -131,6 +131,7 @@ Known values for OPTION are:
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP
+  secureauth     - Disable AUTH PLAIN, LOGIN methods over un-encrypted channel
   forceauthsmtp  - Enforce Authenticated SMTP before accepting MAIL FROM
   enablecram     - Enable the pw_passwd field of indimail table to be used
                    for CRAM authenticated smtp methods
@@ -2787,6 +2788,11 @@ if [ " $odmr" = " " ] ; then
 		> $conf_dir/PARANOID
 		> $conf_dir/DOMAIN_MASQUERADE
 	fi
+	if [ $secureauth -eq 1 ] ; then
+		echo 1 > $conf_dir/SECURE_AUTH
+	else
+		> $conf_dir/SECURE_AUTH
+	fi
 	if [ ! " $forceauthsmtp" = " " ] ; then
 		echo > $conf_dir/REQUIREAUTH
 		> $conf_dir/AUTH_ALL
@@ -2811,6 +2817,11 @@ if [ " $odmr" = " " ] ; then
 		> $conf_dir/UTF8
 	fi
 else
+	if [ $secureauth -eq 1 ] ; then
+		echo 1 > $conf_dir/SECURE_AUTH
+	else
+		> $conf_dir/SECURE_AUTH
+	fi
 	if [ ! " $forceauthsmtp" = " " ] ; then
 		echo > $conf_dir/REQUIREAUTH
 	else
@@ -10411,6 +10422,7 @@ chkrecipient=0
 chksender=0
 chkrelay=0
 hidehost=0
+secureauth=0
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
 else
@@ -10640,6 +10652,9 @@ while test $# -gt 0; do
 	;;
 	--cugmail)
 	cugmail=1
+	;;
+	--secureauth)
+	secureauth=1
 	;;
 	--forceauthsmtp)
 	forceauthsmtp=1

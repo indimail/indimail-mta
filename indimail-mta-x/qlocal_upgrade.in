@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.56 2023-09-20 08:22:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.57 2023-10-16 18:41:20+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -26,7 +26,7 @@ check_update_if_diff()
 
 do_install()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.56 2023-09-20 08:22:42+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.57 2023-10-16 18:41:20+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -34,7 +34,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.56 2023-09-20 08:22:42+05:30 Cprogra
 
 do_post_upgrade()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.56 2023-09-20 08:22:42+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.57 2023-10-16 18:41:20+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -66,7 +66,7 @@ if [ "$servicedir" != "/service" ] && [ ! -d $servicedir ] && [ -d /service -o -
 				&& $mv /service /service.old
 		fi
 		if [ $? -eq 0 ] ; then
-			sed -i \
+			$sed -i \
   			-e 's{ /service{ @servicedir@{' \
   			-e 's{"/service{"@servicedir@{' \
 				$servicedir/*/run $servicedir/*/log/run \
@@ -166,7 +166,7 @@ else
 	t1=0
 	t2=0
 	t3=0
-	for t in $(echo $t | cut -d: -f4 | sed -e 's{,{ {g')
+	for t in $(echo $t | cut -d: -f4 | $sed -e 's{,{ {g')
 	do
 		if [ "$t" = "qmailr" ] ; then
 			t1=1
@@ -275,7 +275,7 @@ if [ ! -f $sysconfdir/control/defaultqueue/DYNAMIC_QUEUE ] ; then
 fi
 
 default_host=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
-default_domain=$(echo $default_host | sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
+default_domain=$(echo $default_host | $sed 's/^\([^\.]*\)\.\([^\.]*\)\./\2\./')
 echo $host | grep "\." > /dev/null
 if [ $? -eq 0 ] ; then
 	check_update_if_diff $sysconfdir/control/envnoathost   $default_host
@@ -288,6 +288,10 @@ $sed -i 's{/bin/qmail-greyd{/sbin/qmail-greyd{' $servicedir/greylist.1999/run
 
 # qmail-daemon changed to qscheduler -s
 $sed -i 's{/sbin/qmail-daemon{/sbin/qscheduler -s{' $servicedir/qmail-send.25/run
+
+# qmail-smtpd.587 add secureauth
+$sed -i 's{--forceauthsmtp --antispoof{--forceauthsmtp --secureauth --antispoof{' \
+		$servicedir/qmail-smtpd.587/variables/.options
 
 # remove STATUSFILE as .svscan.pid serves the same purpose
 rm -f $servicedir/.svscan/variables/STATUSFILE
@@ -349,7 +353,7 @@ do
 done
 for i in `grep -l fsync /service/*/variables/.options`
 do
-	sed -i -e 's{--fsync{--fdatasync{g' $i
+	$sed -i -e 's{--fsync{--fdatasync{g' $i
 done
 for i in `ls -d /service/*-send*/variables`
 do
@@ -388,6 +392,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.57  2023-10-16 18:41:20+05:30  Cprogrammer
+# add --secureauth option for SMTP service on port 587
+#
 # Revision 1.56  2023-09-20 08:22:42+05:30  Cprogrammer
 # append --setuser-priv svctool option to .options
 #

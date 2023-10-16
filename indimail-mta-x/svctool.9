@@ -140,7 +140,7 @@ Known values for OPTION are:
   [--databytes=d]
   [--overquota_mailsize=o]
   [--domainlimits]
-  [--authsmtp --forceauthsmtp --enablecram --authall]
+  [--authsmtp --forceauthsmtp --secureauth --enablecram --authall]
   [--chkrecipient --chksender --chkrelay --cugmail]
   [--masquerade] [--antispoof]
   [--routes=smtp|qmtp|static]
@@ -206,6 +206,7 @@ Known values for OPTION are:
   cugmail        - Allow only local valid senders to use SMTP.
   antispoof      - Turn on antispoofing code
   authsmtp       - Enable Authenticated SMTP
+  secureauth     - Disable AUTH PLAIN, LOGIN methods over un-encrypted channel
   forceauthsmtp  - Enforce Authenticated SMTP before accepting MAIL FROM
   enablecram     - Enable the pw_passwd field of indimail table to be used
                    for CRAM authenticated smtp methods

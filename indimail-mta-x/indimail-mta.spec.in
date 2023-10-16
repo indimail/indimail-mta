@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.389 2023-09-20 08:21:18+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.390 2023-10-16 18:39:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1365,7 +1365,7 @@ do
     extra_opt="--skipsend --authsmtp --ssl --utf8"
     extra_opt="$extra_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   elif [ $port -eq 587 ] ; then
-    extra_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8"
+    extra_opt="--skipsend --forceauthsmtp --secureauth --antispoof --forcetls --utf8"
   else
     extra_opt="--remote-authsmtp=login --localfilter --remotefilter"
     extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"

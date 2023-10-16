@@ -309,7 +309,7 @@ do
 		# if you do, then you have a serious
 		# problem with your organization, not
 		# with IndiMail
-    	extra_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8"
+    	extra_opt="--skipsend --forceauthsmtp --secureauth --antispoof --forcetls --utf8"
 	else
 		extra_opt="--remote-authsmtp=login --localfilter --remotefilter"
 		extra_opt="$extra_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
