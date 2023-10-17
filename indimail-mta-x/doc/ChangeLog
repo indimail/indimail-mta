@@ -4,12 +4,16 @@ Release @version@-@release@ Start 11/09/2023 End --/--/----
 o svctool: fixed path/MAXDAEMONS in tcpserver run scripts - major bug which
   prevented tcpserver reaching concurrency > 40
 o filterit: New filterit command to implement filters
-o qmail-lspawn: added filterit and envdir command
-o overhaul CHECKSENDER code
+  [filterit](https://github.com/mbhangui/indimail-mta/wiki/filterit.1)
+o qmail-lspawn: added filterit and envdir internal command
+  [qmail-lspawn](https://github.com/mbhangui/indimail-mta/wiki/qmail-lspawn.8)
+o refactored and tested CHECKSENDER code
 o added feature to hide IP addresses in Received headers by setting HIDE_IP
   environment variable
 o refactored and tested SPF code
 o Bugfix SRS code
+o Updated test-indimail-mta with additional tests (SPF, SRS, CHECKSENDER,
+  CHECKRECIPIENT, etc)
 ===========================================================================
 - 11/09/2023
 01. cdb-database: allow comments in input file

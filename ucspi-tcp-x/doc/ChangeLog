@@ -10,9 +10,9 @@ o use of TLS_CIPHER_SUITE for tlsv1_2
     to set ciphers
 - 08/09/2023 - indimail-mta-3.0.4
 - 14/09/2023
-01. tcpserver.c: display ip, pid in printstatus
+03. tcpserver.c: display ip, pid in printstatus
 - 27/09/2023
-02. tcpserver.c: skip displaying IP in printstatus for sigchild
+04. tcpserver.c: skip displaying IP in printstatus for sigchild
 
 * Sun Apr 23 2023 17:50:00 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 13/02/2023 End 23/04/2023
