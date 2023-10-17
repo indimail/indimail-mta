@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmta-send 8
 
 .SH NAME
@@ -24,22 +25,28 @@ doesn't require todo-proc, qmail-lspawn, qmail-rspawn, qmail-clean to
 process a queue.
 
 .EX
-1. run qmta-send as a daemon
+1. run qmta-send as a daemon.
+
    # qmta-send -d ./Maildir/
-2. run qmta-send to delivery mails in the queue and exit after delivery
-   $ qmta-send ./Maildir/
-3. run qmta-send and use qmail-lspawn to handle local deliveries,
-   qmail-rspawn to handle remoe delivies, qmail-clean to do cleanups and
-   run it as a daemon
+
+2. jun qmta-send to deliver mails currently in the queue and exit after
+   delivery.
+
+   # qmta-send ./Maildir/
+
+3. run qmta-send as a daemon and use PREFIX/sbin/qmail-lspawn to handle
+   local deliveries, PREFIX/sbin/qmail-rspawn to handle remote deliveries,
+   PREFIX/sbin/qmail-clean to do cleanups.
+
    # qmta-send -dlrc ./Maildir/
 .EE
 
 \fBqmta-send\fR can also invoke \fBqmail-lspawn\fR, \fBqmail-rspawn\fR,
 \fBqmail-clean\fR under the proper uids and gids for a queue defined by the
 environment variable \fBQUEUEDIR\fR. These four daemons cooperate to
-deliver messages from the queue. \fBqmta-send\fR by default  uses
-QMAILHOME/queue/qmta as it's queue for messages. This path can be changed
-by defining the QUEUEDIR environment variable.
+deliver messages from the queue. \fBqmta-send\fR by default uses
+\fIQMAILHOME/queue/qmta\fR as the queue directory for messages. This path
+can be changed by defining the \fBQUEUEDIR\fR environment variable.
 
 \fBqmta-send\fR borrows most of it's code from \fBqmail-send\fR. The todo
 run can be adjusted by setting the environment variable \fBTODO_INTERVAL\fR
@@ -47,11 +54,12 @@ to have only one queue run every \fBTODO_INTERVAL\fR seconds. It remembers
 the last complete queue run and will just return if we get triggered before
 last queue run plus \fBTODO_INTERVAL\fR seconds. If we get triggered before
 \fBTODO_INTERVAL\fR seconds it will schedule a forced queue run at last
-complete queue run plus TODO_INTERVAL seconds to not miss the new additions
-to the queue. \fBTODO_INTERVAL\fR can also be set in the control file
-\fItodointerval\fR. The control file takes precedence over the environment
-variable. If TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
-\fBqmta-send\fR silently uses 10 secs as the value for \fBTODO_INTERVAL\fR.
+complete queue run plus \fBTODO_INTERVAL\fR seconds to not miss the new
+additions to the queue. \fBTODO_INTERVAL\fR can also be set in the control
+file \fItodointerval\fR. The control file takes precedence over the
+environment variable. If TODO_INTERVAL=0, TODO_INTERVAL="" or a value less
+than zero, \fBqmta-send\fR silently uses 10 secs as the value for
+\fBTODO_INTERVAL\fR.
 
 \fBqmta-send\fR uses \fBqmail-local\fR to deliver messages to local
 recipients and \fBqmail-remote\fR to deliver messages to remote recipients.
@@ -60,8 +68,8 @@ If a message is temporarily undeliverable to one or more addresses,
 
 \fBqmta-send\fR uses \fBqmail-queue\fR(8) to queue bounces and
 aliases/forwards. This can be changed by using \fBQMAILQUEUE\fR environment
-variable. If a different queue program is desired for bounces, it can be set
-by using \fBBOUNCEQUEUE\fR environment variable.
+variable. If a different queue program is desired for bounces, it can be
+set by using \fBBOUNCEQUEUE\fR environment variable.
 
 When injecting a bounce for a previously forwarded email, whose sender was
 rewritten using \fISRS\fB, \fBqmta-send\fR rewrites the recipient to the
@@ -74,40 +82,42 @@ is useful for programs that generate DKIM signature to use the domain in
 the \fBX-Bounced-Address\fR for the d= DKIM-Signature tag.
 
 If \fBqmta-send\fR receives a TERM signal, it will exit cleanly, after
-waiting (possibly more than a minute) for current delivery attempts to finish.
+waiting (possibly more than a minute) for current delivery attempts to
+finish.
 
-If \fBqmta-send\fR receives an ALRM signal, it will reschedule every message
-in the queue for immediate delivery.
+If \fBqmta-send\fR receives an ALRM signal, it will reschedule every
+message in the queue for immediate delivery.
 
-If the environment variable USE_FSYNC is set, then \fBqmta-send\fR writes
-all data to disk ("flushes") all modified in-core data of (i.e., modified
-buffer cache pages for) the new message to the disk device (or other
-permanent storage device) so that all changed information can be
-retrieved even if the system crashes or is rebooted. This includes
-writing through or flushing a disk cache if present. The call blocks
-until the device reports that the transfer has completed. This is done
-for the info and mess files. This can also be set by using \fIconf-fsync\fR
-control file.
+If the environment variable \fBUSE_FSYNC\fR is set, then \fBqmta-send\fR
+writes all data to disk ("flushes") all modified in-core data of (i.e.,
+modified buffer cache pages for) the new message to the disk device (or
+other permanent storage device) so that all changed information can be
+retrieved even if the system crashes or is rebooted. This includes writing
+through or flushing a disk cache if present. The call blocks until the
+device reports that the transfer has completed. This is done for the info
+and mess files. This can also be set by using \fIconf-fsync\fR control
+file.
 
-If the environment variable \fBUSE_FDATASYNC\fR is enabled,
-\fBqmta-send\fR uses fdatasync(2) instead of fsync(2). This can also be
-set by using \fIconf-fdatasync\fR control file.
+If the environment variable \fBUSE_FDATASYNC\fR is enabled, \fBqmta-send\fR
+uses fdatasync(2) instead of fsync(2). This can also be set by using
+\fIconf-fdatasync\fR control file.
 
 If the environment variable \fBUSE_SYNCDIR\fR is enabled, \fBqmta-send\fR
 forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
 
-if the value of the environment variables USE_FSYNC, USE_FDATASYNC,
-USE_SYNCDIR  is zero, the corresponding variables is unset. This allows
-setting of these variables for \fBqmail-local\fR(8).
+if the value of the environment variables \fBUSE_FSYNC\fR,
+\fBUSE_FDATASYNC\fR, \fBUSE_SYNCDIR\fR  is zero, the corresponding
+variables is unset. This allows setting of these variables for
+\fBqmail-local\fR(8).
 
 \fBqmta-send\fR can process messages queued by clients with differing
-split directory value. The only required is that \fBqmta-send\fR should
-be running with a higher split dir value than that of the client. You
-can use the \fB-s\fR option to run with any split dir value.
-\fBqmta-send\fR can process queues with or without the \fItodo\fR,
-\fIintd\fR having subdirectory split. Set the environment variable
-\fBBIGTODO\fR to process a big \fItodo\fR, \fIintd\fR subdirectory.
+split directory value. In such cases \fBqmta-send\fR should be running with
+a higher split dir value than that of the client. You can use the \fB-s\fR
+option to run with any split dir value. \fBqmta-send\fR can process queues
+with or without the \fItodo\fR, \fIintd\fR having subdirectory split. Set
+the environment variable \fBBIGTODO\fR to process a big \fItodo\fR,
+\fIintd\fR subdirectory.
 
 If running as non-root, \fBqmta-send\fR uses environment set according
 to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
@@ -116,7 +126,7 @@ variable is not set, it additionally uses environment set according to
 files in @controldir@/defaultqueue directory (for any uid).
 
 .SH OPTIONS
-.TP
+.TP 3
 \fB\-d\fR
 daemon mode. Run continuously in the background.
 
@@ -150,16 +160,10 @@ value takes precedence over the environment variable. Any value greater
 than DIRSPLIT is silently ignored.
 
 .SH "CONTROL FILES"
-.B WARNING:
-.B qmta-send
-reads its control files only when it starts. If you change the control
-files, you must stop and restart
-.BR qmta-send .
-Exception:
-If
-.B qmta-send
-receives a HUP signal,
-it will reread
+\fBWARNING\fR: \fBqmta-send\fR reads its control files only when it starts.
+If you change the control files, you must stop and restart \fBqmta-send\fR.
+
+Exception: If \fBqmta-send\fR receives a HUP signal, it will reread
 .IR concurrencylocal ,
 .IR concurrencyl.qmta ,
 .IR concurrencyremote ,
@@ -174,207 +178,141 @@ it will reread
 and
 .IR conf-fsync .
 
-.B qmta-send
-by default looks at @controldir@ for all control files. This path can be
-changed by defining the \fBCONTROLDIR\fR environment variable.
+\fBqmta-send\fR by default looks at \fI@controldir@\fR for all control
+files. This path can be changed by defining the \fBCONTROLDIR\fR
+environment variable.
 
-.TP 5
-.I bouncefrom
-Bounce username.
-Default:
-.BR MAILER-DAEMON .
+.TP 0
+\fIbouncefrom\fR
+Bounce username. Default: \fBMAILER-DAEMON\fR.
 
-.TP 5
-.I bouncehost
+.TP
+\fIbouncehost\fR
 Bounce host.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR bouncehost ,
-which is probably not what you want.
-If a message is permanently undeliverable,
-.B qmta-send
-sends a
-.B single-bounce
-notice back to the message's envelope sender.
-The notice is
-.B From: \fIbouncefrom\fB@\fIbouncehost\fR,
-although its envelope sender is empty.
+Default: \fIme\fR, if that is supplied; otherwise the literal name
+\fBbouncehost\fR, which is probably not what you want. If a message is
+permanently undeliverable, \fBqmta-send\fR sends a \fBsingle-bounce\fR
+notice back to the message's envelope sender. The notice is
+\fBFrom: \fIbouncefrom\fB@\fIbouncehost\fR, although its envelope sender is
+empty.
 
-.TP 5
-.I bouncemaxbyte
+.TP
+\fIbouncemaxbyte\fR
 Limit the size of bounces. Default: 50000 bytes.
 
-.TP 5
-.I bouncesubject
+.TP
+\fIbouncesubject\fR
 Configures the bounce message subject
 
-.TP 5
-.I bouncemessage
+.TP
+\fIbouncemessage\fR
 Text for bounce message. Remember that this may break QSBMF
 
-.TP 5
-.I doublebouncehost
-Double-bounce host.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR doublebouncehost ,
-which is probably not what you want.
+.TP
+\fIdoublebouncehost\fR
+Double-bounce host. Default: \fIme\fR,if that is supplied; otherwise the
+literal name \fBdoublebouncehost\fR, which is probably not what you want.
 
-.TP 5
-.I doublebounceto
+.TP
+\fIdoublebounceto\fR
 User to receive double-bounces.
 Default:
-.BR postmaster .
-If a single-bounce notice is permanently undeliverable,
-.B qmta-send
-sends a
-.B double-bounce
-notice to
-.IR doublebounceto\fB@\fIdoublebouncehost .
-(If that bounces,
-.B qmta-send
-gives up.)
-As a special case, if the first line of
-.IR doublebounceto
-contains a '@' or is blank (contains a single linefeed), qmta-send will
-not queue the double-bounce at all.
+\fBpostmaster\fR. If a single-bounce notice is permanently undeliverable,
+\fBqmta-send\fR sends a \fBdouble-bounce\fR notice to
+\fIdoublebounceto\fB@\fIdoublebouncehost\fR. (If that bounces,
+\fBqmta-send\fR gives up.) As a special case, if the first line of
+\fIdoublebounceto\fR contains a '@' or is blank (contains a single
+linefeed), qmta-send will not queue the double-bounce at all.
 
-.TP 5
-.I doublebouncesubject
+.TP
+\fIdoublebouncesubject\fR
 Configures the double bounce message subject
 
-.TP 5
-.I doublebouncemessage
+.TP
+\fIdoublebouncemessage\fR
 Text for double bounce message. Remember that this may break QSBMF
 
-.TP 5
-.I concurrencylocal
+.TP
+\fIconcurrencylocal\fR
 Maximum number of simultaneous local delivery attempts.
-Default: 10.
-If 0, local deliveries will be put on hold.
-.I concurrencylocal
-is limited at compile time to SPAWN.
+Default: 10. If 0, local deliveries will be put on hold.
+\fIconcurrencylocal\fR is limited at compile time to SPAWN.
 
-.TP 5
+.TP
 .I concurrencyl.qmta
 Maximum number of simultaneous local delivery attempts for the queue
 \fIqmta\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
 variable, referring to the path of the queue. Here \fIqmta\fR refers to
 the basename of the queue path.
-Default: 10.
-If 0, local deliveries will be put on hold.
-.I concurrencyl.qmta
-is limited at compile time to SPAWN.
+Default: 10. If 0, local deliveries will be put on hold.
+\fIconcurrencyl.qmta\fR is limited at compile time to SPAWN.
 
-.TP 5
-.I concurrencyremote
+.TP
+\fIconcurrencyremote\fR
 Maximum number of simultaneous remote delivery attempts.
-Default: 20.
-If 0, remote deliveries will be put on hold.
-.I concurrencyremote
-is limited at compile time to SPAWN.
+Default: 20. If 0, remote deliveries will be put on hold.
+\fIconcurrencyremote\fR is limited at compile time to SPAWN.
 
-.TP 5
+.TP
 .I concurrencyr.qmta
 Maximum number of simultaneous remote delivery attempts for the queue
 \fIqmta\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
 variable, referring to the path of the queue. Here \fIqmta\fR refers to
 the basename of the queue path.
-Default: 20.
-If 0, remote deliveries will be put on hold.
-.I concurrencyr.qmta
-is limited at compile time to SPAWN.
+Default: 20. If 0, remote deliveries will be put on hold.
+\fIconcurrencyr.qmta\fR is limited at compile time to SPAWN.
 
-.TP 5
-.I envnoathost
+.TP
+\fIenvnoathost\fR
 Presumed domain name for addresses without @ signs.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR envnoathost ,
-which is probably not what you want.
-If
-.B qmta-send
-sees an envelope recipient address without an @ sign,
-it appends
-.B @\fIenvnoathost\fR.
+Default: \fIme\fR, if that is supplied; otherwise the literal name
+\fBenvnoathost\fR, which is probably not what you want. If \fBqmta-send\fR
+sees an envelope recipient address without an @ sign, it appends
+\fB@\fIenvnoathost\fR.
 
-.TP 5
-.I locals
-List of domain names that the current host
-receives mail for,
-one per line.
-Default:
-.IR me ,
-if that is supplied;
-otherwise
-.B qmta-send
-refuses to run.
-An address 
-.I user@domain
-is considered local if
-.I domain
-is listed in
-.IR locals .
+.TP
+\fIlocals\fR
+List of domain names that the current host receives mail for, one per line.
+Default: \fIme\fR, if that is supplied; otherwise \fBqmta-send\fR refuses
+to run. An address \fIuser@domain\fR is considered local if \fIdomain\fR is
+listed in \fIlocals\fR.
 
-.TP 5
-.I percenthack
-List of domain names where the percent hack is applied.
-If
-.I domain
-is listed in
-.IR percenthack ,
-any address of the form
+.TP
+\fIpercenthack\fR
+List of domain names where the percent hack is applied. If \fIdomain\fR is
+listed in \fIpercenthack\fR, any address of the form \fIuser%fqdn@domain\fR
+is rewritten as \fIuser@fqdn\fR. \fIuser\fR may contain %, so the percent
+hack may be applied repeatedly. \fBqmta-send\fR handles \fIpercenthack\fR
+before \fIlocals\fR .
 
-.I user%fqdn@domain
+.TP
+\fIqueuelifetime\fR
+Number of seconds a message can stay in the queue. Default: 604800 (one
+week). After this time expires, \fBqmta-send\fR will try the message once
+more, but it will treat any temporary delivery failures as permanent
+failures.
 
-is rewritten as
-.IR user@fqdn .
-.I user
-may contain %, so the percent hack may be applied repeatedly.
-.B qmta-send
-handles
-.I percenthack
-before
-.IR locals .
+.TP
+\fIbouncelifetime\fR
+Number of seconds a bounce message can stay in the queue. Default: 604800
+(one week). After this time expires, \fBqmta-send\fR will try the message
+once more, but it will treat any temporary delivery failures as permanent
+failures.
 
-.TP 5
-.I queuelifetime
-Number of seconds
-a message can stay in the queue.
-Default: 604800 (one week).
-After this time expires,
-.B qmta-send
-will try the message once more, but it will treat any temporary delivery
-failures as permanent failures.
-
-.TP 5
-.I bouncelifetime
-Number of seconds
-a bounce message can stay in the queue.
-Default: 604800 (one week).
-After this time expires,
-.B qmta-send
-will try the message once more, but it will treat any temporary delivery
-failures as permanent failures.
-
-.TP 5
-.I bounce.envrules
+.TP
+\fIbounce.envrules\fR
 Specific environment variables can be set for bounce recipients. The format
-of this file is of the form pat:envar1=val,envar2=val,...]   where pat is a
-regular expression which matches a bounce recipient. envar1, envar2 are list
-of environment variables to be set. If var is omitted, the environment
+of this file is of the form pat:envar1=val,envar2=val,... where pat is a
+regular expression which matches a bounce recipient. envar1, envar2 are
+list of environment variables to be set. If var is omitted, the environment
 variable is unset.
 
 The name of the control file can be overriden by the environment variable BOUNCERULES
 
-Example:
-answerme@save*:CONTROLDIR=control2,QMAILQUEUE=
+.EX
+  Example:
+  answerme@save*:CONTROLDIR=control2,QMAILQUEUE=
+.EE
 
 sets CONTROLDIR to control2 for the sender answerme@saveme.com and unsets
 QMAILQUEUE environment variable. If there are multiple lines for a pattern,
@@ -383,113 +321,81 @@ multiple lines, the last rule takes precedence. The environment variable
 QREGEX can be set to use regular expressions for matching pat instead of
 the internal wildmat function.
 
-Example:
-answerme@save*:DATABYTES=2000000,MAXRECIPIENT=2,QMAILQUEUE=
-answerme@save*:DATABYTES=4000000
+.EX
+  Example:
+  answerme@save*:DATABYTES=2000000,MAXRECIPIENT=2,QMAILQUEUE=
+  answerme@save*:DATABYTES=4000000
+.EE
 
 DATABYTES gets set to 4 MB in for any email matching answerme@save*
 
-.TP 5
-.I virtualdomains
-List of virtual users or domains, one per line.
-A virtual user has the form
-.IR user\fB@\fIdomain\fB:\fIprepend ,
-without any extra spaces.
-When
-.B qmta-send
-sees the recipient address
-.IR user\fB@\fIdomain ,
-it converts it to
-.I prepend\fB-\fIuser\fB@\fIdomain
-and treats it as local.
+.TP
+\fIvirtualdomains\fR
+List of virtual users or domains, one per line. A virtual user has the form
+\fIuser\fB@\fIdomain\fB:\fIprepend\fR, without any extra spaces. When
+\fBqmta-send\fR sees the recipient address \fIuser\fB@\fIdomain\fR, it
+converts it to \fIprepend\fB-\fIuser\fB@\fIdomain\fR and treats it as local.
 
-A virtual domain has the form
-.IR domain\fB:\fIprepend .
-It applies to any recipient address at
-.IR domain .
-For example, if
+A virtual domain has the form \fIdomain\fB:\fIprepend\fR. It applies to any
+recipient address at \fIdomain\fR. For example, if
 
 .EX
-     nowhere.mil:joeBREAKfoo
+  nowhere.mil:joeBREAKfoo
 .EE
 
-is in
-.IR virtualdomains ,
-and a message arrives for
-.BR info@nowhere.mil ,
-.B qmta-send
-will rewrite the recipient address as
-.B joeBREAKfoo-info@nowhere.mil
-and deliver the message locally.
+is in \fIvirtualdomains\fR, and a message arrives for
+\fBinfo@nowhere.mil\fR, \fBqmta-send\fR will rewrite the recipient address
+as \fBjoeBREAKfoo-info@nowhere.mil\fR and deliver the message locally.
 
-.I virtualdomains
-may contain wildcards:
+\fIvirtualdomains\fR may contain wildcards:
 
 .EX
-     .fax:uucpBREAKfax
-     :aliasBREAKcatchall
-     .nowhere.mil:joeBREAKfoo-host
+ .fax:uucpBREAKfax
+ :aliasBREAKcatchall
+ .nowhere.mil:joeBREAKfoo-host
 .EE
 
-.I virtualdomains
-may also contain exceptions:
-an empty
-.I prepend
-means that
-.I domain
-is not a virtual domain.
+\fIvirtualdomains\fR may also contain exceptions:
+an empty \fIprepend\fR means that \fIdomain\fR is not a virtual domain.
 
-.B qmta-send
-handles
-.I virtualdomains
-after
-.IR locals :
-if a domain is listed in
-.IR locals ,
-.I virtualdomains
-does not apply.
+\fBqmta-send\fR handles \fIvirtualdomains\fR after \fIlocals\fR: if a
+domain is listed in \fIlocals\fR, \fIvirtualdomains\fR does not apply.
 
-.TP 5
-.I holdlocal
-A boolean parameter indicating whether mail for local
-hosts should be queued without delivery.  Zero indicates
-delivery as normal; any other value causes local mail to
-be held.
-Default:
-.IR zero
+.TP
+\fIholdlocal\fR
+A boolean parameter indicating whether mail for local hosts should be
+queued without delivery. Zero indicates delivery as normal; any other value
+causes local mail to be held.
+Default: \fIzero\fR
 
-.TP 5
-.I holdremote
-A boolean parameter indicating whether mail for remote
-hosts should be queued without delivery.  Zero indicates
-delivery as normal; any other value causes remote mail to
-be held.  This is provided to permit use of qmail in a 
-dial-up environment when the remote delivery path may not
-always be available, as an alternative to the use of serialmail.
-Default:
-.IR zero
+.TP
+\fIholdremote\fR
+A boolean parameter indicating whether mail for remote hosts should be
+queued without delivery. Zero indicates delivery as normal; any other value
+causes remote mail to be held.  This is provided to permit use of qmail in
+a dial-up environment when the remote delivery path may not always be
+available, as an alternative to the use of serialmail.
+Default: \fIzero\fR
 
-.TP 5
-.I todointerval
-The seconds to sleep between each todo run. It can be
-overriden by the environment variable \fBTODO_INTERVAL\fR.
+.TP
+\fItodointerval\fR
+The seconds to sleep between each todo run. It can be overriden by the
+environment variable \fBTODO_INTERVAL\fR.
 
-.TP 5
-.I conf-fsync
-A boolean parameter to turn on fsync of file descriptors
-when writing to a file during delivery
+.TP
+\fIconf-fsync\fR
+A boolean parameter to turn on fsync of file descriptors when writing to a
+file during delivery
 
-.TP 5
-.I conf-syncdir
+.TP
+\fIconf-syncdir\fR
 A boolean parameter to turn on BSD style sync semantics for flushing
 directories.
 
 .SH "External BOUNCE Processor"
-.B qmta-send
-will execute an external program defined by the environment variable
-.I BOUNCEPROCESSOR
-when delivery to a recipient fails. The external program will be called with
-the following arguments
+\fBqmta-send\fR will execute an external program defined by the environment
+variable \fIBOUNCEPROCESSOR\fR when delivery to a recipient fails. The
+external program will be called with the following arguments
 
 .I original_message_file
 .I bounce_file
@@ -510,13 +416,12 @@ to retry the bounce that the processor was handling.
 .SH Retry Schedule
 Each message has its own retry schedule. The longer a message remains
 undeliverable, the less frequently qmail tries to send it. The retry
-schedule is not configurable. The following table shows the retry
-schedule for a message that's undeliverable to a recipient
-until it bounces. Local messages a similar, but more frequent,
-schedule than remote messages.
+schedule is not configurable. The following table shows the retry schedule
+for a message that's undeliverable to a recipient until it bounces. Local
+messages a similar, but more frequent, schedule than remote messages.
 
-.B Local Retry Schedule
-is governed by 100 * (x * x), where x is the try number
+\fBLocal Retry Schedule\fR is governed by 100 * (x * x), where x is the try
+number
 
 .TS
 l l.
@@ -601,8 +506,8 @@ l l.
    #74  547600 [06 08:06:40]         14900 [00 04:08:20]
 .TE
 
-.B Remote Retry Schedule
-is governed by 400 * (x * x), where x is the try number
+\fBRemote Retry Schedule\fR is governed by 400 * (x * x), where x is the
+try number
 
 .TS
 l l.

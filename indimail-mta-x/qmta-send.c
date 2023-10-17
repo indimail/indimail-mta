@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.24  2023-10-17 08:22:55+05:30  Cprogrammer
+ * fixed path for qmail-lspawn, qmail-rspawn, qmail-clean
+ *
  * Revision 1.23  2023-10-02 22:50:40+05:30  Cprogrammer
  * fix copy of srs_result
  *
@@ -2137,7 +2140,7 @@ run_daemons(char **oargv, char **argv)
 		if (_qmail_lspawn) {
 			qlargs[2] = queuedir; /*- pass the queue dir as argument for ps command */
 			if (!stralloc_copys(&q, auto_prefix) ||
-					!stralloc_catb(&q, "/bin/qmail-lspawn", 17) ||
+					!stralloc_catb(&q, "/sbin/qmail-lspawn", 18) ||
 					!stralloc_0(&q))
 				nomem(argv0);
 			qlargs[0] = q.s;
@@ -2185,7 +2188,7 @@ run_daemons(char **oargv, char **argv)
 		if (_qmail_rspawn) {
 			qrargs[1] = queuedir; /*- pass the queue dir as argument for ps command */
 			if (!stralloc_copys(&q, auto_prefix) ||
-					!stralloc_catb(&q, "/bin/qmail-rspawn", 17) ||
+					!stralloc_catb(&q, "/sbin/qmail-rspawn", 18) ||
 					!stralloc_0(&q))
 				nomem(argv0);
 			qrargs[0] = q.s;
@@ -2234,7 +2237,7 @@ run_daemons(char **oargv, char **argv)
 			close(pi6[0]);
 			close(pi6[1]);
 			if (!stralloc_copys(&q, auto_prefix) ||
-					!stralloc_catb(&q, "/bin/qmail-clean", 16) ||
+					!stralloc_catb(&q, "/sbin/qmail-clean", 17) ||
 					!stralloc_0(&q))
 				nomem(argv0);
 			qcargs[0] = q.s;
@@ -2824,7 +2827,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.23 2023-10-02 22:50:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.24 2023-10-17 08:22:55+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
