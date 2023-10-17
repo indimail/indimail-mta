@@ -41,12 +41,13 @@ process a queue.
    # qmta-send -dlrc ./Maildir/
 .EE
 
-\fBqmta-send\fR can also invoke \fBqmail-lspawn\fR, \fBqmail-rspawn\fR,
-\fBqmail-clean\fR under the proper uids and gids for a queue defined by the
-environment variable \fBQUEUEDIR\fR. These four daemons cooperate to
-deliver messages from the queue. \fBqmta-send\fR by default uses
-\fIQMAILHOME/queue/qmta\fR as the queue directory for messages. This path
-can be changed by defining the \fBQUEUEDIR\fR environment variable.
+Though not necessary, \fBqmta-send\fR can invoke \fBqmail-lspawn\fR (-l
+option), \fBqmail-rspawn\fR (-r option), \fBqmail-clean\fR (-c option)
+under the proper uids and gids for a queue defined by the environment
+variable \fBQUEUEDIR\fR. These four daemons cooperate to deliver messages
+from the queue. \fBqmta-send\fR by default uses \fIQMAILHOME/queue/qmta\fR
+as the queue directory for messages. This path can be changed by defining
+the \fBQUEUEDIR\fR environment variable.
 
 \fBqmta-send\fR borrows most of it's code from \fBqmail-send\fR. The todo
 run can be adjusted by setting the environment variable \fBTODO_INTERVAL\fR
@@ -107,7 +108,7 @@ forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
 
 if the value of the environment variables \fBUSE_FSYNC\fR,
-\fBUSE_FDATASYNC\fR, \fBUSE_SYNCDIR\fR  is zero, the corresponding
+\fBUSE_FDATASYNC\fR, \fBUSE_SYNCDIR\fR is zero, the corresponding
 variables is unset. This allows setting of these variables for
 \fBqmail-local\fR(8).
 
@@ -124,6 +125,53 @@ to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
 if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If \fBQUEUE_BASE\fR environment
 variable is not set, it additionally uses environment set according to
 files in @controldir@/defaultqueue directory (for any uid).
+
+On Linux distributions, \fBqmta-send\fR can be started by \fBsystemd\fR(1),
+using the unit file \fIPREFIX/share/indimail/boot/qmta-send.service\fR. You
+need to copy this file to /usr/lib/systemd/system and then use the
+\fBsystemctl\fR(1) command to enable it to be started automatically at
+boot. The qmta-send systemd unit file uses \fBsplogger\fR(8) to log
+messages to system journal logs using \fBsyslog\fR(3) function. This
+facilitates viewing, searching entries for \fBqmta-send\fR in the journal
+logs using the \fBjournalctl\fR(1) command.
+
+Few Examples for using qmta-send on Linux are given below
+
+1. Enable qmta-send to be started at boot by \fBsystemd\fR(1)
+
+.EX
+   systemctl enable qmta-send
+.EE
+
+2. Disable qmta-send to be started at boot by \fBsystemd\fR(1)
+
+.EX
+   systemctl disable qmta-send
+.EE
+
+3. Start qmta-send using \fBsystemctl\fR(1)
+
+.EX
+   systemctl start qmta-send
+.EE
+
+4. Stop qmta-send using \fBsystemctl\fR(1)
+
+.EX
+   systemctl stop qmta-send
+.EE
+
+5. View journal log entries for qmta-send using \fBjournalctl\fR(1)
+
+.EX
+   journalctl -u qmta-send
+.EE
+
+6. Continuously watch the journal log for \fBqmta-send\fR
+
+.EX
+   journalctl -u qmta-send -fl
+.EE
 
 .SH OPTIONS
 .TP 3
@@ -243,9 +291,8 @@ Default: 10. If 0, local deliveries will be put on hold.
 Maximum number of simultaneous local delivery attempts for the queue
 \fIqmta\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
 variable, referring to the path of the queue. Here \fIqmta\fR refers to
-the basename of the queue path.
-Default: 10. If 0, local deliveries will be put on hold.
-\fIconcurrencyl.qmta\fR is limited at compile time to SPAWN.
+the basename of the queue path. Default: 10. If 0, local deliveries will be
+put on hold. \fIconcurrencyl.qmta\fR is limited at compile time to SPAWN.
 
 .TP
 \fIconcurrencyremote\fR
@@ -307,27 +354,26 @@ regular expression which matches a bounce recipient. envar1, envar2 are
 list of environment variables to be set. If var is omitted, the environment
 variable is unset.
 
-The name of the control file can be overriden by the environment variable BOUNCERULES
+The name of the control file can be overriden by the environment variable
+\fBBOUNCERULES\fR. An example for \fIbounce.envrules\fR:
 
 .EX
-  Example:
   answerme@save*:CONTROLDIR=control2,QMAILQUEUE=
 .EE
 
-sets CONTROLDIR to control2 for the sender answerme@saveme.com and unsets
-QMAILQUEUE environment variable. If there are multiple lines for a pattern,
-all lines are applied. However if an environment variable is being set in
-multiple lines, the last rule takes precedence. The environment variable
-QREGEX can be set to use regular expressions for matching pat instead of
-the internal wildmat function.
+sets \fBCONTROLDIR\fR to control2 for the sender answerme@saveme.com and
+unsets \fBQMAILQUEUE\fR environment variable. If there are multiple lines
+for a pattern, all lines are applied. However if an environment variable is
+being set in multiple lines, the last rule takes precedence. The
+environment variable i\fBQREGEX\fR can be set to use regular expressions
+for matching pat instead of the internal wildmat function. Another example:
 
 .EX
-  Example:
   answerme@save*:DATABYTES=2000000,MAXRECIPIENT=2,QMAILQUEUE=
   answerme@save*:DATABYTES=4000000
 .EE
 
-DATABYTES gets set to 4 MB in for any email matching answerme@save*
+\fBDATABYTES\fR gets set to 4 MB in for any email matching answerme@save*
 
 .TP
 \fIvirtualdomains\fR
@@ -344,8 +390,8 @@ recipient address at \fIdomain\fR. For example, if
 .EE
 
 is in \fIvirtualdomains\fR, and a message arrives for
-\fBinfo@nowhere.mil\fR, \fBqmta-send\fR will rewrite the recipient address
-as \fBjoeBREAKfoo-info@nowhere.mil\fR and deliver the message locally.
+\fIinfo@nowhere.mil\fR, \fBqmta-send\fR will rewrite the recipient address
+as \fIjoeBREAKfoo-info@nowhere.mil\fR and deliver the message locally.
 
 \fIvirtualdomains\fR may contain wildcards:
 
@@ -355,8 +401,8 @@ as \fBjoeBREAKfoo-info@nowhere.mil\fR and deliver the message locally.
  .nowhere.mil:joeBREAKfoo-host
 .EE
 
-\fIvirtualdomains\fR may also contain exceptions:
-an empty \fIprepend\fR means that \fIdomain\fR is not a virtual domain.
+\fIvirtualdomains\fR may also contain exceptions: an empty \fIprepend\fR
+means that \fIdomain\fR is not a virtual domain.
 
 \fBqmta-send\fR handles \fIvirtualdomains\fR after \fIlocals\fR: if a
 domain is listed in \fIlocals\fR, \fIvirtualdomains\fR does not apply.
@@ -372,7 +418,7 @@ Default: \fIzero\fR
 \fIholdremote\fR
 A boolean parameter indicating whether mail for remote hosts should be
 queued without delivery. Zero indicates delivery as normal; any other value
-causes remote mail to be held.  This is provided to permit use of qmail in
+causes remote mail to be held. This is provided to permit use of qmail in
 a dial-up environment when the remote delivery path may not always be
 available, as an alternative to the use of serialmail.
 Default: \fIzero\fR
@@ -613,4 +659,7 @@ qmail-dkim(8),
 dk-filter(8),
 qmail-rspawn(8),
 fsync(2),
-fdatasync(2)
+fdatasync(2),
+systemd(1),
+systemctl(1),
+journalctl(1)
