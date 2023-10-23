@@ -1199,7 +1199,22 @@ Port for the 'bulkmail' MySQL
 Socket for the 'bulkmail' MySQL
 
 .TP
-\fIDUPLICATE_INTERVAL\fR
+\fIEDITOR\fR
+Used by \fBdbinfo\fR(8) for editing mcdinfo (when passed the -e option)
+
+.TP
+\fIELIMINATE_DUPS\fR
+used by vdelivermail, ismaildup to discard duplicate emails.
+
+.TP
+\fIELIMINATE_DUPS_ARGS\fR
+used by vdelivermail, ismaildup to run a program with the mail as input on
+stdin. The output of this command is used for md5sum calcuation to decide
+if an email is to be discarded or not. If this is not defined, 822header
+program is used.
+
+.TP
+\fIELIMINATE_DUPS_INT\fR
 used by vdelivermail, ismaildup as the interval within which same email
 will be discarded as duplicate
 
@@ -1207,10 +1222,6 @@ will be discarded as duplicate
 \fIHARD_QUOTA\fR
 Used by \fBvadduser\fR(1) as the default quota to set for a user when
 adding users
-
-.TP
-\fIEDITOR\fR
-Used by \fBdbinfo\fR(8) for editing mcdinfo (when passed the -e option)
 
 .TP
 \fIHOLDOVERQUOTA\fR
