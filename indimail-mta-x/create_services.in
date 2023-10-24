@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.127 2023-05-31 20:34:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.128 2023-10-24 21:46:04+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -473,12 +473,12 @@ do
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
   elif [ $port -eq 587 ] ; then
     nobogofilter=1
-    e_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8"
+    e_opt="--skipsend --forceauthsmtp --antispoof --forcetls --utf8 --secureauth"
   else
     e_opt="--remote-authsmtp=plain --localfilter --remotefilter"
     e_opt="$e_opt --deliverylimit-count=-1 --deliverylimit-size=-1"
     e_opt="$e_opt --rbl=-rzen.spamhaus.org --rbl=-rdnsbl-1.uceprotect.net"
-    e_opt="$e_opt --dmemory=$send_soft_mem --setgroups --utf8"
+    e_opt="$e_opt --dmemory=$send_soft_mem --setgroups --utf8 --setuser-priv"
   fi
   if [ $tcpserver_plugin -eq 1 ] ; then
     e_opt="$e_opt --shared-objects=1 --use-dlmopen=1"
@@ -523,7 +523,7 @@ fi
   --dmemory=$send_soft_mem --min-free=52428800 --dkverify=$ver_opt \
   --dksign=$sign_opt --private_key=$controldir/domainkeys/%/$dkimkeyfn \
   --remote-authsmtp=plain --localfilter --remotefilter \
-  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8
+  --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --utf8 --setuser-priv
 #
 # Greylist
 #
@@ -783,6 +783,10 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.128  2023-10-24 21:46:04+05:30  Cprogrammer
+# added --secureauth option for smtp port 587
+# added --setuser-priv for slowq service
+#
 # Revision 2.127  2023-05-31 20:34:11+05:30  Cprogrammer
 # create defaultqueue parameters without DKIM signing
 #
