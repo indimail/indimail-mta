@@ -1,5 +1,8 @@
 /*
  * $Log: uacl.c,v $
+ * Revision 1.9  2023-10-24 20:10:30+05:30  Cprogrammer
+ * use matchregex.h from /usr/include/qmail
+ *
  * Revision 1.8  2023-01-15 23:32:07+05:30  Cprogrammer
  * out() changed to have varargs
  *
@@ -33,9 +36,9 @@
 #include <subfd.h>
 #include <strerr.h>
 #include <noreturn.h>
+#include <matchregex.h>
 #include "qregex.h"
 #include "control.h"
-#include "matchregex.h"
 #include "mail_acl.h"
 #include "wildmat.h"
 #include "varargs.h"
@@ -144,7 +147,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.8 2023-01-15 23:32:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: uacl.c,v 1.9 2023-10-24 20:10:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

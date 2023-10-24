@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.87 2023-10-07 01:25:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.88 2023-10-24 20:07:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,12 +34,12 @@
 #include <makeargs.h>
 #include <getEnvConfig.h>
 #include <noreturn.h>
+#include <matchregex.h>
 #include "control.h"
 #include "variables.h"
 #include "fmtqfn.h"
 #include "triggerpull.h"
 #include "auto_uids.h"
-#include "matchregex.h"
 #include "auto_split.h"
 #include "auto_prefix.h"
 #include "auto_qmail.h"
@@ -542,9 +542,15 @@ int
 set_archive(char *eaddr)
 {
 	char           *rule_ptr, *dest, *ptr, *errStr = 0, *addr, *addr_ptr;
-	int             len, at, type, found;
+	int             len, at, type, found, negate = 0;
 	static stralloc tmpe = {0};
 
+	/*
+	 * eaddr is either
+	 * F<email_addr>
+	 * or
+	 * T<email_adr>
+	 */
 	addr = eaddr + 1;
 	type = *eaddr;
 	for (rule_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++) {
@@ -552,27 +558,39 @@ set_archive(char *eaddr)
 			|| ((*rule_ptr == 'F' || *rule_ptr == 'T') && *rule_ptr != type)) {
 			len += (str_len(rule_ptr) + 1);
 			rule_ptr = ar_rules.s + len;
-			continue; /*- type does not match */
+			continue; /*- skip rule when type does not match */
 		}
 		for (addr_ptr = rule_ptr;*addr_ptr && *addr_ptr != ':';addr_ptr++);
 		if (*addr_ptr != ':') { /*- invalid line in control file */
 			len += (str_len(rule_ptr) + 1);
 			rule_ptr = ar_rules.s + len;
-			continue;
+			continue; /*- skip rule for invalid lines */
 		}
 		addr_ptr++; /*- address field in rule */
+		if (*addr_ptr == '!') {
+			negate = 1;
+			addr_ptr++;
+			if (*addr_ptr == ':') /*- nothing after ! character */
+				continue; /*- skip rule for invalid line */
+		}
 		for (dest = addr_ptr;*dest && *dest != ':';dest++);
 		if (*dest != ':') { /*- invalid line in control file */
 			len += (str_len(rule_ptr) + 1);
 			rule_ptr = ar_rules.s + len;
-			continue;
+			continue; /*- skip rule for invalid lines */
 		}
 		*dest++ = 0; /*- destination archival address */
 		if (!*addr_ptr) /*- treat this as wildcard */
 			addr_ptr = 0;
-		else
-		if (matchregex(addr, addr_ptr, &errStr))
-			addr_ptr = 0;
+		else {
+			if (negate) {
+				if (!matchregex(addr, addr_ptr, &errStr))
+					addr_ptr = 0;
+			} else {
+				if (matchregex(addr, addr_ptr, &errStr))
+					addr_ptr = 0;
+			}
+		}
 		if (*dest && !addr_ptr) { /*- rule matched */
 			*(dest - 1) = ':';
 			if (!stralloc_copys(&tmpe, "T"))
@@ -1170,7 +1188,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.87 2023-10-07 01:25:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.88 2023-10-24 20:07:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1178,6 +1196,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.88  2023-10-24 20:07:31+05:30  Cprogrammer
+ * added feature to negate regexp match
+ *
  * Revision 1.87  2023-10-07 01:25:50+05:30  Cprogrammer
  * use env variable HIDE_HOST to hide IP, host in received headers
  *

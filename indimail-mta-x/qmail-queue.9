@@ -55,7 +55,7 @@ the filesystem.
 
 \fBqmail-queue\fR uses DIRSPLIT as the directory split. It can be
 overriden by environment variable \fBCONFSPLIT\fR upto a max of
-DIRSPLIT
+\fBDIRSPLIT\fR.
 
 The envelope information is an envelope sender address followed by a list
 of envelope recipient addresses. The sender address is preceded by the
@@ -118,10 +118,9 @@ mailarchive control files
 \fBqmail-queue\fR use many control files to provide various features.
 
 .TP
-.B extraqueue
+\fBextraqueue\fR
 If this control file exists, each line in the content is added as a
-recipient to the recipient list. The environment variable
-.B EXTRAQUEUE
+recipient to the recipient list. The environment variable \fBEXTRAQUEUE\fR
 also does the same thing. The value of the environment variable overrides
 the value in the control file. Also the environment variable can be just one
 recipient. There is a potential for loops in case the recipient is local and
@@ -130,17 +129,16 @@ qmail-queue being invoked. If \fBEXTRAQUEUE\fR is set but empty, the
 control will not be read.
 
 .TP
-.B quarantine
+\fBquarantine\fR
 If this control file exists, recipient list is replaced with its content.
-The environment variable
-.B QUARANTINE
-also does the same thing. The value of the environment variable overrides
-the value in the control file. Additionally, comma separated list of
-original recipient list is added to the header \fBX-Quarantine-ID\fR. If
-\fBQUARANTINE\fR is set but empty, the control will not be read.
+The environment variable \fBQUARANTINE\fR also does the same thing. The
+value of the environment variable overrides the value in the control file.
+Additionally, comma separated list of original recipient list is added to
+the header \fBX-Quarantine-ID\fR. If \fBQUARANTINE\fR is set but empty, the
+control will not be read.
 
 .TP
-.B envheaders
+\fBenvheaders\fR
 If this control file exists, \fBqmail-queue\fR passes all headers listed
 in the control file to the queue along with the value. \fBqmail-local\fR
 and \fBqmail-remote\fR will set environment variables corresponding to the
@@ -154,7 +152,7 @@ a different name for this control file. If \fBENVHEADERS\fR is set but
 empty, the control file will not be read.
 
 .TP
-.B logheaders
+\fBlogheaders\fR
 If this control file exists, \fBqmail-queue\fR writes all headers (along
 with values) listed in the control file to file descriptor defined by
 \fBLOGHEADERFD\fR environment variable. The file descriptor needs to be open
@@ -174,7 +172,7 @@ headers in log files. The environment variable \fBLOGHEADERS\fR can be set
 to use a different name for this control file.
 
 .TP
-.B removeheaders
+\fBremoveheaders\fR
 If this control file
 exists, \fBqmail-queue\fR removes all headers listed in the control file
 from the mail message on descriptor 0 before writing it to the disk. The
@@ -196,38 +194,43 @@ set), and passes it into the queue. \fBqmail-local\fR and
 delivered.
 
 .TP
-.B mailarchive
+\fBmailarchive\fR
 if this control file exists, its content can be used for rule based
-archival. The environment variable
-.B MAILARCHIVE
-overrides the name of the \fImailarchive\fR control file. if
-\fBMAILARCHIVE\fR is set but empty, the control file will not be read. A
-line in this control file can be of the form
+archival. The environment variable \fBMAILARCHIVE\fR overrides the name of
+the \fImailarchive\fR control file. If \fBMAILARCHIVE\fR is set but empty,
+the control file will not be read. A line in this control file can be of
+the form
 
 .EX
- type:regexp:dest_mailbox
+  type:regexp:dest_mailbox
 .EE
 
 where \fItype\fR is \fBF\fR  or \fBT\fR. If \fItype\fR is \fBF\fR, rule
 is appled on the sender. If \fItype\fR is \fBT\fR, the rule is applied on
-the recipient. \fItype\fR can be omitted to match all recipients.
-\fIregexp\fR is an expression to match the address (sender or recipient
-as specfied by \fItype\fR) and \fIdest_mailbox\fR is a valid email address.
-\fIregexp\fR can be omitted to match any address. A \fB%\fR in
-\fIdest_mailbox\fR followed by u, d or e gets replaced as below
+the recipient. \fItype\fR can be omitted to match all recipients (but not
+senders). \fIregexp\fR is an expression to match the address (sender or
+recipient as specfied by \fItype\fR) and \fIdest_mailbox\fR is a valid
+email address. \fIregexp\fR can be omitted to match any address. Remember
+that \fIregexp\fR is a real regular expression and not filename glob
+pattern as used by functions like \fBfnmatch\fR(3). Typically
+\fB.*@yourdomain\fR (and not \fB*@yourdomain\fR) is what you intend when
+you want to use it to match all addresses from \fIyourdomain\fR.
+\fIregexp\fR can be preceded by a \fB!\fR sign to negate the expression. A
+\fB%\fR in \fIdest_mailbox\fR followed by \fBu\fR, \fBd\fR or \fBe\fR gets
+replaced as below
 
 .EX
- %u - user component in address without the '@' sign
- %d - domain component in address
- %e - email address
+  %u - user component in address without the '@' sign
+  %d - domain component in address
+  %e - email address
 .EE
 
 As stated above, the address used for matching \fIregexp\fR is the sender
-in case type is \fBF\fR. For bounces, you can use <> to match a null
+in case type is \fBF\fR. For bounces, you can use \fB<>\fR to match a null
 sender. e.g.
 
 .EX
- F:<>:bounce_archive@example.com
+  F:<>:bounce_archive@example.com
 .EE
 
 When a rule matches a sender or any one of the recipients, the
@@ -236,60 +239,58 @@ recipient list. When a rule matches multiple recipients, only one email
 address will be added to recipient list to avoid duplicates.
 
 The below will make a copy all mails for domain \fIyourdomain\fR to
-\fIarchyourdomain\fR
+\fIarchyourdomain\fR (for all senders - practically each and every mail).
 
 .EX
-::%u@arch%d
+  ::%u@arch%d
+.EE
+
+The below will make a copy of all mails sent by anyone from your
+\fIyourdomain\fR address.
+
+.EX
+  F:.*@yourdomain:outgoing@yourdomain
+.EE
+
+The below will make a copy of all mails sent by anyone not from your
+\fIyourdomain\fR address. Here we have used \fB!\fR to negate the
+result of \fIregexp\fR match.
+
+.EX
+  F:!.*@yourdomain:incoming@yourdomain
 .EE
 
 .TP
-.B originipfield
-If this control file is set or if the environment variable 
-.B ORIGINIPFIELD
-is set, a "X-Originating-IP" header will be added to every relayed mail.
-The environment variable 
-.B ORIGINIPFIELD
-overrides the control file 
-.BR originipfield .
+\fBoriginipfield\fR
+If this control file is set or if the environment variable
+\fBORIGINIPFIELD\fR is set, a "X-Originating-IP" header will be added to
+every relayed mail. The environment variable \fBORIGINIPFIELD\fR overrides
+the control file \fBoriginipfield\fR.
 
 .PP
-.B qmail-queue
-does not inspect the message and does not enforce any restrictions on its
-contents. However, the recipients probably expect to see a proper header,
-as described in
-.BR qmail-header(5) .
+\fBqmail-queue\fR does not inspect the message and does not enforce any
+restrictions on its contents. However, the recipients probably expect to
+see a proper header, as described in \fBqmail-header\fR(5) .
 
-Programs included with qmail which invoke
-.B qmail-queue
-will invoke the contents of
-.B $QMAILQUEUE
-instead, if that environment variable is set.
+If \fBQMAILQUEUE\fR environment variable is set, programs included with
+qmail which invoke \fBqmail-queue\fR will invoke the the program set by
+\fBQMAILQUEUE\fR instead.
 
 .SH "FILESYSTEM RESTRICTIONS"
-.B qmail-queue
-imposes two constraints on the queue structure:
-each
-.B mess
-subdirectory must be in the same filesystem as the
-.B pid
-directory; and each
-.B todo
-subdirectory must be in the same filesystem as the
-.B intd
-directory.
+\fBqmail-queue\fR imposes two constraints on the queue structure:
+each \fBmess\fR subdirectory must be in the same filesystem as the
+\fBpid\fR directory; and each \fBtodo\fR subdirectory must be in the same
+filesystem as the \fBintd\fR directory.
 
 .SH "Qmail High Performance Scanner Interface"
 A large fraction of today's emails is infected by a virus or a worm. It is
 necessary to recognize those malicious emails as soon as possible --
 already in the DATA phase of the SMTP conversation and to reject them.
 
-Typically, this is facilitated my means of
-.BR AMaViS , 
-.BR qmail-scanner ,
-or
-.B qscanq
-which facilitate as "wrapper" of the original qmail-queue program invoked
-by means of QMAILQUEUE environment variable.
+Typically, this is facilitated my means of \fBAMaViS\fR,
+\fBqmail-scanner\fR, or \fBqscanq\fR which facilitate as "wrapper" of the
+original qmail-queue program invoked by means of \fBQMAILQUEUE\fR
+environment variable.
 
 However -- in case of virus attacks -- those umbrella programs become part
 of the problem itself due to their resource requirements.
@@ -340,18 +341,15 @@ can be set either to the full path of a scanner or to a list of plugins.
 .nr step 1 1
 .IP \n[step] 2
 is set to full path of the virus scanner, i.e. QHPSI=@prefix@/bin/clamdscan.
-If full path is not specified,
-.B qmail-queue
-will use execvp(2) to run the scanner. Else it uses execv(2).
-Setting QHPSI environment variable turns on the QHPSI interface. 
-The Qmail High Performance Scanner interface QHPSI also allows
-.B qmail-queue
-to read command line arguments taken from the
-.B QHPSI
-environment to be used as a call-interface for an external virus scanner:
+If full path is not specified, \fBqmail-queue\fR will use execvp(2) to run
+the scanner. Else it uses execv(2).  Setting QHPSI environment variable
+turns on the QHPSI interface. The Qmail High Performance Scanner interface
+QHPSI also allows \fBqmail-queue\fR to read command line arguments taken
+from the \fBQHPSI\fR environment to be used as a call-interface for an
+external virus scanner:
 
 .EX
- QHPSI="clamdscan %s --quiet --no-summary"
+  QHPSI="clamdscan %s --quiet --no-summary"
 .EE
 
 Any \fB'%s'\fR in the \fBQHPSI\fR gets replaced with
@@ -361,7 +359,7 @@ the message filename in the queue's '\fImess\fR' directory.
 is set to list of plugins starting with a keyword 'plugin:'.
 
 .EX
- QHPSI="plugin: clamd.so fsecure.so symantec.so"
+  QHPSI="plugin: clamd.so fsecure.so symantec.so"
 .EE
 
 Sets \fBqmail-queue\fR to load three plugins clamd, fsecure and symantec from
@@ -371,8 +369,8 @@ You can also use the plugin generic.so. generic.so plugin can use any scanner
 defined by the \fBSCANCMD\fR environment variable.
 
 .EX
- QHPSI="plugin: generic.so"
- SCANCMD="clamdscan %s --quiet --no-summary"
+  QHPSI="plugin: generic.so"
+  SCANCMD="clamdscan %s --quiet --no-summary"
 .EE
 
 Any \fB'%s'\fR in the \fBSCANCMD\fR gets replaced with
@@ -381,37 +379,36 @@ the message filename in the queue's '\fImess\fR' directory.
 .LP
 
 .TP
-.B QHPSIRC
+\fBQHPSIRC\fR
 To specify the return code of the virus scanner in case of an infection;
 default is 1.
 
 .TP
-.B QHPSIRN
+\fBQHPSIRN\fR
 To specify the return code of the virus scanner in case of no infection;
 default is 0.
 
 .TP
-.B REJECTVIRUS
+\fBREJECTVIRUS\fR
 If set to 1, infected mails will be bounced to sender. If set to 2, infected
 mails will be blackholed. If set to 0, infected mails will be accepted.
 Blackholing does not work if VIRUSFORWARD or QUARANTINE is defined. Setting
 to a value > 2 will bounce infected mails to sender
 
 .TP
-.B VIRUSFORWARD
+\fBVIRUSFORWARD\fR
 Infected mails will be quarantined to the email defined by VIRUSFORWARD.
-This will work only if
-.B REJECTVIRUS
-is not equal to 1. Setting VIRUSFORWARD sets the \fBX-Quarantine-ID\fR
-containing the list of original recipient list is added.
+This will work only if \fBREJECTVIRUS\fR is not equal to 1. Setting
+VIRUSFORWARD sets the \fBX-Quarantine-ID\fR containing the list of original
+recipient list is added.
 
 .TP
-.B QHPSIMINSIZE
+\fBQHPSIMINSIZE\fR
 The minimal size of the message to invoke the virus scanner; default is 0.
 A typical choice would be QHPSIMISIZE=10000 (~10k).
 
 .TP
-.B QHPSIMAXSIZE
+\fBQHPSIMAXSIZE\fR
 The maximal size of the message to invoke the virus scanner; default is
 unrestricted. A typical choice would be QHPPIMAXSIZE=1000000 (~1M).
 
@@ -420,32 +417,24 @@ of which is either 'infected' or 'clean' (depending on whether the mail as
 identifed as infected or not).
 
 .SH "EXIT CODES"
-.B qmail-queue
-does not print diagnostics.
-It exits
-0 if
-it has successfully queued the message.
-It exits between 1 and 99 if
-it has failed to queue the message.
+\fBqmail-queue\fR does not print diagnostics. It exits 0 if it has
+successfully queued the message. It exits between 1 and 99 if it has failed
+to queue the message.
 
-All
-.B qmail-queue
-error codes between 11 and 40 indicate permanent errors:
+All \fBqmail-queue\fR error codes between 11 and 40 indicate permanent errors:
 .TP 5
 .B 11
 Address too long.
 .TP
 .B 31
 Mail server permanently refuses to send the message to any recipients.
-(Not used by
-.BR qmail-queue ,
-but can be used by programs offering the same interface.)
+(Not used by \fBqmail-queue\fR, but can be used by programs offering the
+same interface.)
 .TP
 .B 32
 Spam or Junk Mail threshold exceeded. This is returned when a spam filter
-like
-.B bogofilter
-is used (SPAMFILTER is defined) and the mail is identified as spam.
+like \fBbogofilter\fR is used (SPAMFILTER is defined) and the mail is
+identified as spam.
 .TP
 .B 33
 Message contains a virus.
@@ -463,9 +452,7 @@ Dthis is a custom fatal error message
 Zthis is a custom temporary failure message
 
 .PP
-All other
-.B qmail-queue
-error codes indicate temporary errors:
+All other \fBqmail-queue\fR error codes indicate temporary errors:
 .TP 5
 .B 51
 Out of memory.
@@ -508,23 +495,18 @@ Problem with queue/todo.
 Problem with uids/gids.
 .TP
 .B 71
-Mail server temporarily refuses to send the message to any recipients.
-(Not used by
-.BR qmail-queue .)
+Mail server temporarily refuses to send the message to any recipients. (Not
+used by \fBqmail-queue\fR.)
 .TP
 .B 72
-Connection to mail server timed out.
-(Not used by
-.BR qmail-queue .)
+Connection to mail server timed out. (Not used by \fBqmail-queue\fR.)
 .TP
 .B 73
-Connection to mail server rejected.
-(Not used by
-.BR qmail-queue .)
+Connection to mail server rejected. (Not used by \fBqmail-queue\fR.)
 .TP
 .B 74
 Connection to mail server succeeded, but communication failed. (Not used by
-.BR qmail-queue .)
+\fBqmail-queue\fR.)
 .TP
 .B 79
 Envelope format error.
@@ -536,9 +518,10 @@ Internal bug; e.g., segmentation fault.
 
 Samples with clamd/clamdscan:
 
-Here is a typical sample how to customize QHPSI together
-with Clam AV (clamd/clamdscan) for a tcpserver tcp.smtpd file:
+Here is a typical sample how to customize QHPSI together with Clam AV
+(clamd/clamdscan) for a tcpserver tcp.smtpd file:
 
+.EX
  :allow,QHPSI='@prefix@/bin/clamdscan %s --quiet --no-summary'
 
 Comments:
@@ -567,8 +550,10 @@ Comments:
    exceeds 9.000.000 byte, ~ 8.5MB.
 
 You can also set these variables outside tcp.smtp. e.g.
+
   # echo @prefix@/bin/clamdscan %s --quiet --no-summary \\
      > @servicedir@/qmail.smtpd.25/variables/QHPSI
+.EE
 
 .SH "SEE ALSO"
 addresses(5),

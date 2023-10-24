@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.709 2023-10-16 18:42:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.710 2023-10-24 20:05:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.709 2023-10-16 18:42:40+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.710 2023-10-24 20:05:47+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2365,10 +2365,10 @@ check_libmysqlclient_lib
 if [ ! -f $sysconfdir/backup.conf ] ; then
 	[ -n "$verbose" ] && echo "Creating "$DESTDIR"$sysconfdir/backup.conf file"
 	(
-	for i in $servicedir $sysconfdir $QmailHOME/domains $QmailHOME/autoturn \
-		$QmailHOME/alias/.qmail-\* /etc/inittab /etc/init.d/svscan \
-		/etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
-		/etc/nsswitch.conf /etc/resolv.conf /etc/security /etc/alternativces \
+	for i in $servicedir /etc/clamd.d $sysconfdir $QmailHOME/domains \
+		$QmailHOME/autoturn $QmailHOME/alias/.qmail-\* /etc/inittab \
+		/etc/init.d/svscan /etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
+		/etc/nsswitch.conf /etc/resolv.conf /etc/security /etc/alternatives \
 		$QmailHOME/.bashrc $QmailHOME/.bash_profile $QmailHOME/.indimail $file
 	do
 		echo "$i"
@@ -2514,10 +2514,11 @@ fi
 
 create_smtp()
 {
-if [ $# -ne 11 ] ; then
+if [ $# -ne 9 ] ; then
 	echo "USAGE: create_smtp qbase queue_count first_queue_no supervise_dir smtp_port use_ssl=0|1 force_tls=0|1 infifo=fifo_path utf8=0|1" 1>&2
 	return 1
 fi
+
 QUEUE_BASE=$1
 QUEUE_COUNT=$2
 QUEUE_START=$3

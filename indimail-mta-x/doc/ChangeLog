@@ -1,3 +1,15 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 <@email@> @version@-@release@
+Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
+======= Release Highlights ================================================
+===========================================================================
+- 24/10/2023
+01. use matchregex.h from /usr/include/qmail
+02. svctool: fixed create_smtp argument check
+03. svctool: added /etc/clamd.d to backup.conf
+04. mail_acl.c, qregex.c, smtpd.c, uacl.c: use matchregex.h from
+    /usr/include/qmail
+05. qmail-queue.c: added feature to negate regexp match
+
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
 ======= Release Highlights ================================================

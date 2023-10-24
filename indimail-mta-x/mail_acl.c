@@ -1,5 +1,8 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.7  2023-10-24 20:06:40+05:30  Cprogrammer
+ * use matchregex.h from /usr/include/qmail
+ *
  * Revision 1.6  2023-07-07 10:43:40+05:30  Cprogrammer
  * use NULL instead of 0 for null pointer
  * fixed call to out()
@@ -24,7 +27,7 @@
 #include <str.h>
 #include <stralloc.h>
 #include <fmt.h>
-#include "matchregex.h"
+#include <matchregex.h>
 #include "wildmat.h"
 #include "varargs.h"
 
@@ -239,7 +242,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.6 2023-07-07 10:43:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.7 2023-10-24 20:06:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
