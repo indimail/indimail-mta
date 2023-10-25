@@ -1,10 +1,12 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.35 2023-10-16 20:55:17+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.36 2023-10-26 00:02:38+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
 testuser=tuser
+outarchive=outarchive
+incarchive=incarchive
 myuid=$(id -u)
 mygid=$(id -g)
 real_domain=argos.indimail.org
@@ -115,6 +117,7 @@ do_cleanup_failed()
 	sudo /bin/rm -rf $qmaildir/alias/Maildir/new/*
 	sudo /bin/rm -rf $qmaildir/alias/virtual/new/* $qmaildir/alias/virtual/cur/*
 	sudo /bin/rm -rf $sysconfdir/users
+	sudo /bin/rm -rf $cntrldir/mailarch
 }
 
 check_mail_count()
@@ -278,6 +281,12 @@ setup_maildir()
 	if [ -d $testdir/$testuser/Maildir ] ; then
 		find $testdir/$testuser/Maildir -type f -exec /bin/rm -f {} \;
 	fi
+	if [ -d $testdir/$incarchive ] ; then
+		find $testdir/$incarchive/Maildir -type f -exec /bin/rm -f {} \;
+	fi
+	if [ -d $testdir/$outarchive ] ; then
+		find $testdir/$outarchive/Maildir -type f -exec /bin/rm -f {} \;
+	fi
 	if [ -d $qmaildir/alias/Maildir ] ; then
 		sudo find $qmaildir/alias/Maildir -type f -exec /bin/rm -f {} \;
 	fi
@@ -289,6 +298,8 @@ setup_maildir()
 		mkdir -p $testdir/$testuser/Maildir/$i
 		mkdir -p $testdir/$testuser/Maildir/.Quarantine/$i
 		mkdir -p $testdir/$testuser/Maildir/.Spam/$i
+		mkdir -p $testdir/$incarchive/Maildir/$i
+		mkdir -p $testdir/$outarchive/Maildir/$i
 	done
 }
 
@@ -300,6 +311,10 @@ setup_assign()
 	echo "+$user-:$user:$myuid:$mygid:$testdir/$user:-::"
 	echo "=$testuser:$testuser:$myuid:$mygid:$testdir/$testuser:::"
 	echo "+$testuser-:$testuser:$myuid:$mygid:$testdir/$testuser:-::"
+	echo "=$outarchive:$outarchive:$myuid:$mygid:$testdir/$outarchive:::"
+	echo "+$outarchive-:$outarchive:$myuid:$mygid:$testdir/$outarchive:-::"
+	echo "=$incarchive:$incarchive:$myuid:$mygid:$testdir/$incarchive:::"
+	echo "+$incarchive-:$incarchive:$myuid:$mygid:$testdir/$incarchive:-::"
 	echo "."
 	) > $sysconfdir/users/assign
 	$qmail_newu $sysconfdir/users
@@ -538,6 +553,7 @@ test_tcpclient_script()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		printf "\r%118s\n" " "
 		(
 		echo "  testing mail doing SMTPS with tcpclient TLS=$tls failed [$secs sec]"
 		echo "tcpclient.log"
@@ -636,6 +652,10 @@ test_qmail_inject()
 			echo "+$user-:$user:$myuid:$mygid:$testdir/$user:-::"
 			echo "=$testuser:$testuser:$myuid:$mygid:$testdir/$testuser:::"
 			echo "+$testuser-:$testuser:$myuid:$mygid:$testdir/$testuser:-::"
+			echo "=$outarchive:$outarchive:$myuid:$mygid:$testdir/$outarchive:::"
+			echo "+$outarchive-:$outarchive:$myuid:$mygid:$testdir/$outarchive:-::"
+			echo "=$incarchive:$incarchive:$myuid:$mygid:$testdir/$incarchive:::"
+			echo "+$incarchive-:$incarchive:$myuid:$mygid:$testdir/$incarchive:-::"
 			echo "."
 			) > $sysconfdir/users/assign
 		fi
@@ -668,6 +688,7 @@ test_qmail_inject()
 		else
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+			printf "\r%118s\n" " "
 			(
 			if [ $i -eq 1 ] ; then
 				echo "  testing qmail-inject /etc/passwd user, qmail send+receive failed [$secs sec]"
@@ -765,6 +786,7 @@ start_tcpserver_smtp()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		printf "\r%118s\n" " "
 		(
 		echo "  testing SMTP on port $smtp_port using tcpserver failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
@@ -813,6 +835,7 @@ start_tcpserver_smtp_unix()
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		printf "\r%118s\n" " "
 		(
 		echo "  testing SMTP on socket $smtp_socket using tcpserver failed [$secs sec]"
 		echo "$logdir/smtpd/smtpd.log"
@@ -3165,7 +3188,7 @@ test_maildirserial()
 	do
 		t1=$(date +"%s.%4N")
 		(
-		echo "From: $user@$hostname"
+		echo "From: $user@$HOSTNAME"
 		echo "To: $user@$vdomain"
 		echo "Subject: Test No $i $$"
 		echo "Date: $(date -R)"
@@ -3641,7 +3664,8 @@ test_spawn_filter()
 		printf "\r  testing spawn-filter using QMAILLOCAL succeeded %54s [%.4f sec]\n" " " $secs
 		print_pct
 	else
-		echo "  testing spawn-filter using QMAILLOCAL failed [$secs sec]"
+		echo "body=[$body], subject=[$subject]"
+		printf "\r  testing spawn-filter using QMAILLOCAL failed [$secs sec]"
 		failed=1
 		exit 1
 	fi
@@ -3734,6 +3758,8 @@ do_without_svscan()
 	sleep $sleep_int
 
 	test_spawn_filter
+
+	do_qmail_queue_test
 
 	srs_setup 1
 	test_srs
@@ -3836,7 +3862,7 @@ test_qmqp()
 			BIGTODO=0 \
 			CONFSPLIT=23 \
 			PORT_QMQP=$qmqp_port \
-	$qmail_inject -f$user@$hostname $testuser@$hostname
+	$qmail_inject -f$user@$HOSTNAME $testuser@$HOSTNAME
 	check_mail_header $testdir/$testuser/Maildir Subject 0
 	if [ -n "$mail_file" ] ; then
 		subject=$header
@@ -4338,6 +4364,209 @@ do_spf_tests()
 		count=$(expr $count + 1)
 	done < spfquery.txt
 	/bin/rm -f /tmp/spf.out /tmp/spf.err
+}
+
+do_qmail_inject()
+{
+	# $1 : From
+	# $2 : To
+	# $3 : Subject
+	# $4 : Body
+	(
+	echo "From: $1"
+	echo "To: $2"
+	echo "Subject: $3"
+	echo "Date: $(date -R)"
+	echo "X-Remove-Header1: This header will be removed"
+	echo "X-Remove-Header2: This header will also be removed"
+	echo "X-Log-Test: Test Header"
+	echo
+	echo "$4"
+	) >/tmp/mail.txt
+	#sudo $setuidgid -g qcerts $user env -
+	env - \
+			LOGHEADERFD=45 \
+			QUEUEDIR=$testdir/queue \
+			QMAILQUEUE=$qmail_queue \
+			CONTROLDIR=$cntrldir \
+			BIGTODO=0 \
+			CONFSPLIT=23 \
+		$qmail_inject -f$1 $2 </tmp/mail.txt
+}
+
+do_qmail_queue_test()
+{
+	t1=$(date +"%s.%4N")
+	echo "F:!.*@$HOSTNAME:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
+	do_qmail_inject $user@$vdomain $user@$HOSTNAME "Test Mail Archival" "Test Message for Mail Archival"
+	check_mail $testdir/$incarchive/Maildir
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing incoming mail archival with sender based rule succeeded %38s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing incoming mail archival with sender based rule failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	echo "F:.*@$HOSTNAME:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test outgoing Mail Archival" "Test Message to test outgoing Mail Archival"
+	check_mail $testdir/$outarchive/Maildir
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing outgoing mail archival with sender based rule succeeded %38s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing outgoing mail archival with sender based rule failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	echo "T:.*@$HOSTNAME:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
+	do_qmail_inject $user@$vdomain $user@$HOSTNAME "Test incoming Mail Archival" "Test Message to test incoming Mail Archival"
+	check_mail $testdir/$incarchive/Maildir
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing incoming mail archival with recipient based rule succeeded %35s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing incoming mail archival with recipient based rule failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	virtual_setup 1
+	echo "T:!.*@$HOSTNAME:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
+	do_qmail_inject $user@$HOSTNAME $user@$vdomain "Testing outgoing Mail Archival" "Test Message to test outgoing Mail Archival"
+	check_mail $testdir/$outarchive/Maildir
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing outgoing mail archival with recipient based rule succeeded %35s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing outgoing mail archival with recipient based rule failed [$secs sec]"
+		failed=1
+		virtual_setup 0
+		exit 1
+	fi
+	virtual_setup 0
+	/bin/rm -f $cntrldir/mailarchive
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "$incarchive"
+	echo "$outarchive"
+	) > $cntrldir/extraqueue
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Testing extraqueue" "Test Message for extraqueue"
+	check_mail $testdir/$incarchive/Maildir
+	ret1=$?
+	s1=$sleep_secs
+	check_mail $testdir/$outarchive/Maildir
+	ret2=$?
+	s2=$sleep_secs
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing mail for extraqueue feature succeeded %56s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing mail for extraqueue feature failed [$secs sec]"
+		failed=1
+		/bin/rm -f $cntrldir/extraqueue
+		exit 1
+	fi
+	/bin/rm -f $cntrldir/extraqueue
+
+	t1=$(date +"%s.%4N")
+	echo "X-Log-Test" > $cntrldir/logheaders
+	exec 45>/tmp/logheaderfd
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Testing logheader" "Test Message for logheader"
+	check_mail_header $maildir X-Remove-Header1 0
+	h4=$header
+	s1=$sleep_secs
+	check_mail_header $maildir X-Remove-Header2 0
+	h5=$header
+	s2=$sleep_secs
+	h=$(cat /tmp/logheaderfd)
+	if [ "$h" = "X-Log-Test: Test Header" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing mail for logheader feature succeeded %57s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "h=[$h]"
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing mail for logheader feature failed [$secs sec]"
+		failed=1
+		/bin/rm -f $cntrldir/logheaders
+		exit 1
+	fi
+	check_mail
+	/bin/rm -f $cntrldir/logheaders
+	if [ "$h4" = "X-Remove-Header1: This header will be removed" -a "$h5" = "X-Remove-Header2: This header will also be removed" ] ; then
+		ret1=0
+	else
+		ret1=1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "X-Remove-Header1"
+	echo "X-Remove-Header2"
+	) > $cntrldir/removeheaders
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Testing removeheaders" "Test Message for removeheaders"
+	check_mail_header $maildir X-Remove-Header1 0
+	s1=$sleep_secs
+	h1=$header
+	check_mail_header $maildir X-Remove-Header2 0
+	s2=$sleep_secs
+	h2=$header
+	check_mail_header $maildir X-Log-Test 0
+	s3=$sleep_secs
+	h3=$header
+	if [ $ret1 -eq 0 -a -z "$h1" -a -z "$h2" -a "$h3" = "X-Log-Test: Test Header" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $s1 $s2 $s3 | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing mail for removeheaders feature succeeded %53s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo
+		echo "ret=$ret1, h1=$h1, h2=$h2, h3=[$h3], h4=$h4, h5=$h5"
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		echo "  testing mail for removeheaders feature failed [$secs sec]"
+		failed=1
+		/bin/rm -f $cntrldir/removeheaders
+		exit 1
+	fi
+	check_mail
+	/bin/rm -f $cntrldir/removeheaders
 }
 
 do_dkim_tests()
@@ -5840,7 +6069,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=225
+	total_tests=237
 fi
 failed=0
 do_setup
@@ -5901,6 +6130,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.36  2023-10-26 00:02:38+05:30  Cprogrammer
+# added qmail-queue feature tests
+#
 # Revision 1.35  2023-10-16 20:55:17+05:30  Cprogrammer
 # added test for authdomains, AUTH_ALL env variable setting
 #
