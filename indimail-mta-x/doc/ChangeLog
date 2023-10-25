@@ -11,6 +11,8 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 05. qmail-queue.c: added feature to negate regexp match
 06. create_services.in: added --secureauth option for smtp port 587
 08. create_services.in: added --setuser-priv option for slowq service
+09. autoresponder.c, indimail-spamfilter.c: rewind descriptor 0 regardless of
+    MAKE_SEEKABLE setting
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

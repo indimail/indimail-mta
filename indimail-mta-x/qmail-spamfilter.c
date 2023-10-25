@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.7  2023-10-25 13:26:09+05:30  Cprogrammer
+ * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
+ *
  * Revision 1.6  2022-10-17 19:44:59+05:30  Cprogrammer
  * use exit codes defines from qmail.h
  *
@@ -60,7 +63,7 @@ main(int argc, char **argv)
 	struct substdio ssin, ssout;
 	stralloc        spamfilterargs = { 0 }, q = { 0 };
 	char            inbuf[2048], outbuf[2048];
-	char           *ptr, *makeseekable, *spamf;
+	char           *ptr, *spamf;
 	char          **Argv;
 
 	if (chdir("/") == -1)
@@ -99,8 +102,7 @@ main(int argc, char **argv)
 		if (!(Argv = makeargs(spamfilterargs.s)))
 			_exit(QQ_OUT_OF_MEMORY);
 		/*- Mail content read from fd 0 */
-		makeseekable = env_get("MAKE_SEEKABLE");
-		if (makeseekable && mktempfile(0))
+		if (mktempfile(0))
 			_exit(QQ_TMP_FILES);
 		if (dup2(pipefd[1], 1) == -1)
 			_exit(QQ_DUP_ERR);
@@ -245,7 +247,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.6 2022-10-17 19:44:59+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.7 2023-10-25 13:26:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;

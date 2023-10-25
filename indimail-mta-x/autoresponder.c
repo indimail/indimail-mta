@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.39 2023-10-02 17:40:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.40 2023-10-25 13:25:55+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -46,6 +46,7 @@
 #include <tai.h>
 #include <constmap.h>
 #include <noreturn.h>
+#include <mktempfile.h>
 #include "hassrs.h"
 #ifdef HAVESRS
 #include "srs.h"
@@ -934,59 +935,6 @@ count_history(char *sender, unsigned max)
 	return 0;
 }
 
-int
-mkTempFile(int seekfd)
-{
-	char            inbuf[2048], outbuf[2048];
-	char           *tmpdir;
-	static stralloc tmpFile = {0};
-	struct substdio ssin_t;
-	struct substdio ssout_t;
-	int             fd;
-
-	if (lseek(seekfd, 0, SEEK_SET) == 0)
-		return (0);
-	if(errno == EBADF)
-		strerr_die2sys(111, FATAL, "unable to lseek: ");
-	if (!(tmpdir = env_get("TMPDIR")))
-		tmpdir = "/tmp";
-	if (!stralloc_copys(&tmpFile, tmpdir) ||
-			!stralloc_cats(&tmpFile, "/qmailFilterXXX") ||
-			!stralloc_catb(&tmpFile, strnum, fmt_ulong(strnum, (unsigned long) getpid())) ||
-			!stralloc_0(&tmpFile))
-		strerr_die2x(111, FATAL, "out of memory");
-	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
-		strerr_die3sys(111, FATAL, "unable to open: ", tmpFile.s);
-	unlink(tmpFile.s);
-	substdio_fdbuf(&ssout_t, write, fd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin_t, read, seekfd, inbuf, sizeof(inbuf));
-	switch (substdio_copy(&ssout_t, &ssin_t))
-	{
-	case -2: /*- read error */
-		close(fd);
-		strerr_die2sys(111, FATAL, "unable to read input: ");
-	case -3: /*- write error */
-		close(fd);
-		strerr_die2sys(111, FATAL, "unable to write output: ");
-	}
-	if (substdio_flush(&ssout_t) == -1) {
-		close(fd);
-		strerr_die2sys(111, FATAL, "unable to write: ");
-	}
-	if(fd != seekfd) {
-		if (dup2(fd, seekfd) == -1) {
-			close(fd);
-			strerr_die2sys(111, FATAL, "unable to dup: ");
-		}
-		close(fd);
-	}
-	if (lseek(seekfd, 0, SEEK_SET) != 0) {
-		close(seekfd);
-		strerr_die2sys(111, FATAL, "unable to lseek: ");
-	}
-	return (0);
-}
-
 /*
  * qmail-autoresponder -c -N -n 3 /tmp/test.msg /tmp/abcd < ../scripts/mail.msg |less
  */
@@ -1031,8 +979,8 @@ main(int argc, char *argv[])
 	if (srs_domain.len && !stralloc_0(&srs_domain))
 		strerr_die2x(111, FATAL, "out of memory");
 	srs_domain.len--; /*- substract length due to stralloc_0 */
-	if (env_get("MAKE_SEEKABLE") && mkTempFile(0))
-		strerr_die2sys(111, FATAL, "makeseekable: ");
+	if (mktempfile(0))
+		strerr_die2sys(111, FATAL, "mktempfile: ");
 	get_arguments(argc, argv);
 	/*- Fail if SENDER or DTLINE are not set */
 	if (!(sender = env_get("SENDER")))
@@ -1299,13 +1247,18 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.39 2023-10-02 17:40:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.40 2023-10-25 13:25:55+05:30 Cprogrammer Exp mbhangui $";
 
+	x++;
+	x = sccsidmktempfileh;
 	x++;
 }
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.40  2023-10-25 13:25:55+05:30  Cprogrammer
+ * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
+ *
  * Revision 1.39  2023-10-02 17:40:58+05:30  Cprogrammer
  * decode srs return path address
  *
