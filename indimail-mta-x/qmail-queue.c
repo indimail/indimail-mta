@@ -1076,7 +1076,7 @@ main()
 		for (len = 0; len < ADDR; ++len) {
 			if (substdio_get(&ssin, &ch, 1) < 1)
 				die(QQ_READ_ERR, 1, "trouble reading envelope");
-			if (flagquarantine) {
+			if (flagquarantine) { /*- append all recipients to quarantine */
 				if (ch && !stralloc_append(&qqehextra, &ch))
 					die(QQ_OUT_OF_MEMORY, 1, "out of memory");
 			} else

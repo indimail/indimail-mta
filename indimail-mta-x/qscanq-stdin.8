@@ -10,9 +10,9 @@ qscanq-stdin \- qmail virus scanner
 on stdin is seekable, extracts its MIME components to the current
 directory, and runs the virus / bad attachment scanner on them.
 
-Like \fBqscanq\fR and \fB qmail-multi\fR \fBqscanq-stdin\fR needs no
+Like \fBqscanq\fR and \fB qmail-queue\fR \fBqscanq-stdin\fR needs no
 arguments. If arguments are supplied, they are used as the command to run
-instead of \fBqmail-multi\fR.  In this way, further qmail-multi
+instead of \fBqmail-queue\fR.  In this way, further qmail-queue
 wrappers--such as spam filters--can be chained with \fBqscanq\fR.
 
 \fBqscanq-stdin\fR expects an email message on file descriptor 1, its
@@ -54,17 +54,20 @@ permanently rejecting the message
 
 If the virus scanning or bad attachment scanning passes all tests,
 \fBqscanq-stdin\fR will run the command supplied on its command line, or if
-none is supplied will run \fBqmail-multi\fR. It also requests cleanup of
-its working directory by calling \fBrun-cleanq\fR
+none is supplied will run \fBqmail-queue\fR. It also requests cleanup of
+its working directory by calling \fBrun-cleanq\fR.
 
 Upon startup, \fBqscanq-stdin\fR sets an alarm for the time specified in
 conf-ageout (default: 1 hour). When the alarm fires, \fBqscanq-stdin\fR
 sends SIGKILL to \fBRipMIME\fR or to the virus scanner, whichever may be
 running, and exits with code 71 (or code 54 if \fBripmime\fR is killed).
-Once \fBqmail-queue\fR has started (invoked by \fBqmail-multi\fR), it sets
+Once \fBqmail-queue\fR has started (invoked by \fBqmail-queue\fR), it sets
 its own alarm, independent of qscanq's alarm (default: 1 day). \fBqscanq\fR
 will wait forever if need be, so its longest runtime is equal to
 conf-ageout plus the timeout used by \fBqmail-queue\fR
+
+You can set \fBQUEUEPROG\fR environment variable to call something else
+instead of \fBqmail-queue\fR.
 
 .SH "CONTROL FILES"
 
@@ -93,13 +96,14 @@ Example:
 attachment with extension .doc except for document.doc. It also rejects all
 mail with extensions like 12345@123.doc. Further, any E-Mail with a sender
 address containing a percent sign (%) is rejected. The filename can be
-overriden by the environment variable BADEXTPATTERNS.
+overriden by the environment variable \fBBADEXTPATTERNS\fR.
 
 .SH Environment Variables
 
 \fBqscanq-stdin\fR sets no environment variables. It does pass its
-environment to \fBqmail-queue\fR (or PROG, if supplied instead). This means
-that any qmail-queue wrapper must be able to handle its environment safely.
+environment to \fBqmail-queue\fR (or \fIprog\fR, if supplied instead). This
+means that any qmail-queue wrapper must be able to handle its environment
+safely.
 
 If the DEBUG environment variable is set to any value whatsoever, then
 \fBqscanq-stdin\fR will print diagnostic messages to stderr whenever an
@@ -114,7 +118,8 @@ It should be stressed that the value of DEBUG is ignored. Setting DEBUG to
 want debug messages, don't set DEBUG at all.
 
 The default scanner to be called is set during compilation in conf-scancmd.
-This can be overriden at run time by the environment variable SCANCMD.
+This can be overriden at run time by the environment variable
+\fBSCANCMD\fR.
 
 You can run \fBqscanq\fR with virus checkers other than \fBclamdscan\fR.
 Just edit conf-scancmd with the command-line you want \fBqscanq\fR to use.

@@ -1,26 +1,5 @@
 /*
- * $Log: qmail-spamfilter.c,v $
- * Revision 1.7  2023-10-25 13:26:09+05:30  Cprogrammer
- * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
- *
- * Revision 1.6  2022-10-17 19:44:59+05:30  Cprogrammer
- * use exit codes defines from qmail.h
- *
- * Revision 1.5  2022-04-03 18:44:36+05:30  Cprogrammer
- * refactored qmail_open() error codes
- *
- * Revision 1.4  2022-03-05 13:35:30+05:30  Cprogrammer
- * use auto_prefix/sbin for qscanq path
- *
- * Revision 1.3  2022-01-30 09:14:32+05:30  Cprogrammer
- * removed chdir auto_qmail
- *
- * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.1  2021-06-15 12:16:52+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-spamfilter.c,v 1.8 2023-10-26 23:14:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -57,7 +36,8 @@ sigbug()
 int
 main(int argc, char **argv)
 {
-	int             wstat, filt_exitcode, queueexitcode, n;
+	int             wstat, filt_exitcode, queueexitcode, n, ham_code = 1,
+					spam_code = 0, unsure_code = 2;
 	int             pipefd[2], recpfd[2];
 	pid_t           filt_pid, queuepid;
 	struct substdio ssin, ssout;
@@ -175,45 +155,51 @@ main(int argc, char **argv)
 	/*
 	 * Process message if exit code is 0, 1, 2
 	 */
-	switch (filt_exitcode = wait_exitcode(wstat))
-	{
-	case 0: /*- SPAM */
-	case 1: /*- HAM */
-	case 2: /*- Unsure */
-		if ((ptr = env_get("SPAMEXITCODE"))) {
-			scan_int(ptr, &n);
-			if (n == filt_exitcode) { /*- Message is SPAM */
-				if ((n = rewrite_envelope(recpfd[1])) > 1) { /*- Some error */
-					close(1);
-					close(recpfd[1]);
-					wait_pid(&wstat, queuepid);
-					_exit(n);
-				}
-				if (n == 1 || (ptr = env_get("REJECTSPAM"))) {
-					/*- REJECTSPAM takes precedence over spam notifications */
-					if (ptr && *ptr > '0') {
-						(void) discard_envelope();
-						close(1);
-						close(recpfd[1]);
-						wait_pid(&wstat, queuepid);
-						if (*ptr == '1')
-							_exit(QQ_SPAM_THRESHOLD); /*- bounce */
-						else
-							_exit(0); /*- blackhole */
-					} else /*- spam notification - envelope has been rewritten */ if (n == 1) {
-						(void) discard_envelope();
-						goto finish;
-					}
-				}
+	filt_exitcode = wait_exitcode(wstat);
+	if (!(ptr = env_get("SPAMEXITCODE")))
+		spam_code = 0; /*- default for bogofilter */
+	else
+		scan_int(ptr, &spam_code);
+	if (!(ptr = env_get("HAMEXITCODE")))
+		ham_code = 1; /*- default for bogofilter */
+	else
+		scan_int(ptr, &ham_code);
+	if (!(ptr = env_get("UNSUREEXITCODE")))
+		unsure_code = 2; /*- default for bogofilter */
+	else
+		scan_int(ptr, &unsure_code);
+	if (spam_code == filt_exitcode) { /* Message is SPAM */
+		if ((n = rewrite_envelope(recpfd[1])) > 1) { /*- Some error */
+			close(1);
+			close(recpfd[1]);
+			wait_pid(&wstat, queuepid);
+			_exit(n);
+		}
+		ptr = env_get("REJECTSPAM");
+		if (n == 1 || ptr) {
+			/*- REJECTSPAM takes precedence over spam notifications */
+			if (ptr && *ptr > '0') {
+				(void) discard_envelope();
+				close(1);
+				close(recpfd[1]);
+				wait_pid(&wstat, queuepid);
+				if (*ptr == '1')
+					_exit(QQ_SPAM_THRESHOLD); /*- bounce */
+				else
+					_exit(0); /*- blackhole */
+			} else /*- spam notification - envelope has been rewritten */ if (n == 1) {
+				(void) discard_envelope();
+				goto finish;
 			}
 		}
-		break;
-	default: /*- should not happen normally */
+	} else
+	if (filt_exitcode != ham_code && filt_exitcode != unsure_code) {
 		close(1);
 		close(recpfd[1]);
 		wait_pid(&wstat, queuepid);
 		_exit(QQ_TEMP_SPAM_FILTER); /*- treat this as temp problem with spam filter */
 	}
+
 	/*- Write envelope to qmail-queue */
 	substdio_fdbuf(&ssout, write, recpfd[1], outbuf, sizeof (outbuf));
 	/*- Read envelope from qmail-smtpd */
@@ -247,7 +233,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.7 2023-10-25 13:26:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.8 2023-10-26 23:14:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;
@@ -255,3 +241,31 @@ getversion_qmail_spamfilter_c()
 	x++;
 }
 #endif
+
+/*
+ * $Log: qmail-spamfilter.c,v $
+ * Revision 1.8  2023-10-26 23:14:32+05:30  Cprogrammer
+ * added HAMEXITCODE, UNSUREEXITCODE
+ *
+ * Revision 1.7  2023-10-25 13:26:09+05:30  Cprogrammer
+ * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
+ *
+ * Revision 1.6  2022-10-17 19:44:59+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
+ * Revision 1.5  2022-04-03 18:44:36+05:30  Cprogrammer
+ * refactored qmail_open() error codes
+ *
+ * Revision 1.4  2022-03-05 13:35:30+05:30  Cprogrammer
+ * use auto_prefix/sbin for qscanq path
+ *
+ * Revision 1.3  2022-01-30 09:14:32+05:30  Cprogrammer
+ * removed chdir auto_qmail
+ *
+ * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.1  2021-06-15 12:16:52+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

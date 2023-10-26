@@ -10,7 +10,7 @@ qmail-queue \- queue a mail message for delivery
 .SH DESCRIPTION
 \fBqmail-queue\fR reads a mail message from descriptor 0. It then reads
 envelope information from descriptor 1. It places the message into the
-outgoing queue for future delivery by \fBqmail-send\fR.  The default
+outgoing queue for future delivery by \fBqmail-send\fR. The default
 outgoing queue is @qmaildir@/queue. This can be changed by setting
 environment variable QUEUEDIR to point to a path having a valid
 queue created by the program \fBqueue-fix\fR(8). \fBqmail-queue\fR
@@ -205,7 +205,7 @@ the form
   type:regexp:dest_mailbox
 .EE
 
-where \fItype\fR is \fBF\fR  or \fBT\fR. If \fItype\fR is \fBF\fR, rule
+where \fItype\fR is \fBF\fR or \fBT\fR. If \fItype\fR is \fBF\fR, rule
 is appled on the sender. If \fItype\fR is \fBT\fR, the rule is applied on
 the recipient. \fItype\fR can be omitted to match all recipients (but not
 senders). \fIregexp\fR is an expression to match the address (sender or
@@ -302,15 +302,15 @@ necessity to call additional programs (like reformime or ripmime) except
 for the virus scanner itself.
 
 The QHPSI extension for qmail-queue allows to call an arbitary virus scanner
-directly, scanning the incoming data-stream on STDIN or it allows plugins to
-be loaded from the @prefix@/lib/indimail/plugins directory. This directory
-can be changed by defining \fBPLUGINDIR\fR environment variable. QHPSI can
-be advised to pass multiple arguments to the virus scanner for customization.
-To run external scanner or load scanner plugins, \fBqmail-queue\fR calls
-\fBqhpsi\fR, a program setuid to \fIqscand\fR. By default, \fBqhpsi\fR looks
-for the symbol \fIvirusscan\fR to invoke the scanner. The symbol can be
-changed by setting the environment variable \fBQUEUE_PLUGIN_SYMB\fR to the
-desired symbol.
+directly to scan the message file in \fImess\fR subdirectory or it allows
+plugins to be loaded from the @prefix@/lib/indimail/plugins directory. This
+directory can be changed by defining \fBPLUGINDIR\fR environment variable.
+QHPSI can be advised to pass multiple arguments to the virus scanner for
+customization. To run external scanner or load scanner plugins,
+\fBqmail-queue\fR calls \fBqhpsi\fR, a program setuid to \fIqscand\fR. By
+default, \fBqhpsi\fR looks for the symbol \fIvirusscan\fR to invoke the
+scanner. The symbol can be changed by setting the environment variable
+\fBQUEUE_PLUGIN_SYMB\fR to the desired symbol.
 
 In order to use the QHPSI, the virus scanner has to have the following
 qualifications:
@@ -342,7 +342,7 @@ can be set either to the full path of a scanner or to a list of plugins.
 .IP \n[step] 2
 is set to full path of the virus scanner, i.e. QHPSI=@prefix@/bin/clamdscan.
 If full path is not specified, \fBqmail-queue\fR will use execvp(2) to run
-the scanner. Else it uses execv(2).  Setting QHPSI environment variable
+the scanner. Else it uses execv(2). Setting QHPSI environment variable
 turns on the QHPSI interface. The Qmail High Performance Scanner interface
 QHPSI also allows \fBqmail-queue\fR to read command line arguments taken
 from the \fBQHPSI\fR environment to be used as a call-interface for an
@@ -399,8 +399,8 @@ to a value > 2 will bounce infected mails to sender
 \fBVIRUSFORWARD\fR
 Infected mails will be quarantined to the email defined by VIRUSFORWARD.
 This will work only if \fBREJECTVIRUS\fR is not equal to 1. Setting
-VIRUSFORWARD sets the \fBX-Quarantine-ID\fR containing the list of original
-recipient list is added.
+VIRUSFORWARD sets the \fBX-Quarantine-ID\fR containing the list of all
+recipients.
 
 .TP
 \fBQHPSIMINSIZE\fR

@@ -14,16 +14,17 @@ message. To invoke \fBqmail-dkim\fR, set QMAILQUEUE to full path of
 qmail-dkim in the environment, when you send or receive email.
 
 After inserting the DKIM header, \fBqmail-dkim\fR will call
-\fBqmail-multi\fR as a default, to deposit message in the queue. If you
+\fBqmail-queue\fR as a default, to deposit message in the queue. If you
 want to call something pass it as in the command line arguments to
-\fBqmail-dkim\fR or set the \fBDKIMQUEUE\fR environment variable. Command
-line arguments takes precedence over environment variable.
+\fBqmail-dkim\fR or set the \fBDKIMQUEUE\fR or \fBQUEUEPROG\fR environment
+variable. Command line arguments takes precedence over environment
+variable.
 
 .EX
-DKIMQUEUE=PREFIX/sbin/qmail-queue
+DKIMQUEUE=PREFIX/sbin/qmail-spamfilter
 .EE
 
-Will make qmail-dkim call qmail-queue instead of qmail-multi.
+Will make qmail-dkim call qmail-spamfilter instead of qmail-queue.
 
 \fBqmail-dkim\fR supports RSA-SHA1, RSA-SHA256 and ED25519-SHA256 (rfc8463)
 encryption methods for signing and verification. By default RSA-SHA256 is
