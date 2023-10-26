@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.36 2023-10-26 00:02:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.37 2023-10-26 11:43:33+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -703,6 +703,34 @@ test_qmail_inject()
 	done
 }
 
+do_qmail_inject()
+{
+	# $1 : From
+	# $2 : To
+	# $3 : Subject
+	# $4 : Body
+	(
+	echo "From: $1"
+	echo "To: $2"
+	echo "Subject: $3"
+	echo "Date: $(date -R)"
+	echo "X-Remove-Header1: This header will be removed"
+	echo "X-Remove-Header2: This header will also be removed"
+	echo "X-Log-Test: Test Header"
+	echo
+	echo "$4"
+	) > $testdir/tmp/mail.txt
+	env - \
+			LOGHEADERFD=45 \
+			QUEUEDIR=$testdir/queue \
+			QMAILQUEUE=$qmail_queue \
+			CONTROLDIR=$cntrldir \
+			BIGTODO=0 \
+			CONFSPLIT=23 \
+		$qmail_inject -f$1 $2 <$testdir/tmp/mail.txt
+	/bin/rm -f $testdir/tmp/mail.txt
+}
+
 create_authsmtp()
 {
 	if [ -f $testdir/bin/authsmtp ] ; then
@@ -1207,6 +1235,79 @@ test_smtp_auth_cram_md5()
 		failed=1
 		exit 1
 	fi
+}
+
+test_qqeh()
+{
+	t1=$(date +"%s.%4N")
+	(
+	echo "From: $user@$HOSTNAME"
+	echo "To: $user@$HOSTNAME"
+	echo "Subject: Testing QQEH for qmail-local"
+	echo "Date: $(date -R)"
+	echo
+	echo "Testing QQEH"
+	) > $testdir/tmp/mail.txt
+	env - \
+			QQEH="X-Foobar: Test QQEH for qmail-local" \
+			QUEUEDIR=$testdir/queue \
+			QMAILQUEUE=$qmail_queue \
+			CONTROLDIR=$cntrldir \
+			BIGTODO=0 \
+			CONFSPLIT=23 \
+		$qmail_inject -f$user@$HOSTNAME $user@$HOSTNAME <$testdir/tmp/mail.txt
+
+	check_mail_header $maildir X-Foobar 1
+	if [ $? -eq 0 -a "$header" = "X-Foobar: Test QQEH for qmail-local" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing QQEH header insertion for qmail-local succeeded %46s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		failed=1
+		echo "  testing QQEH header insertion for qmail-local failed"
+		exit 1
+	fi
+
+	create_qmail_remote $testuser@$HOSTNAME
+	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
+	t1=$(date +"%s.%4N")
+	(
+	echo "From: $user@$HOSTNAME"
+	echo "To: $user@$ext_domain"
+	echo "Subject: Testing QQEH for qmail-remote"
+	echo "Date: $(date -R)"
+	echo
+	echo "Testing QQEH"
+	) > $testdir/tmp/mail.txt
+	env - \
+			QQEH="X-Foobar: Test QQEH for qmail-remote" \
+			QUEUEDIR=$testdir/queue \
+			QMAILQUEUE=$qmail_queue \
+			CONTROLDIR=$cntrldir \
+			BIGTODO=0 \
+			CONFSPLIT=23 \
+		$qmail_inject -f$user@$HOSTNAME $user@$ext_domain <$testdir/tmp/mail.txt
+	/bin/rm -f $testdir/tmp/mail.txt
+	check_mail_header $testdir/$testuser/Maildir X-Foobar 1
+	if [ $? -eq 0 -a "$header" = "X-Foobar: Test QQEH for qmail-remote" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing QQEH header insertion for qmail-remote succeeded %45s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		failed=1
+		echo "  testing QQEH header for qmail-remote insertion failed"
+		/bin/rm -f $cntrldir/smtproutes
+		exit 1
+	fi
+	/bin/rm -f $cntrldir/smtproutes
 }
 
 test_smtp_secure_auth()
@@ -3759,7 +3860,8 @@ do_without_svscan()
 
 	test_spawn_filter
 
-	do_qmail_queue_test
+	test_qqeh
+	test_qmail_queue
 
 	srs_setup 1
 	test_srs
@@ -4319,7 +4421,7 @@ test_filterit()
 	fi
 }
 
-do_spf_tests()
+test_spf()
 {
 	echo "Starting SPF Tests"
 	count=1
@@ -4366,35 +4468,7 @@ do_spf_tests()
 	/bin/rm -f /tmp/spf.out /tmp/spf.err
 }
 
-do_qmail_inject()
-{
-	# $1 : From
-	# $2 : To
-	# $3 : Subject
-	# $4 : Body
-	(
-	echo "From: $1"
-	echo "To: $2"
-	echo "Subject: $3"
-	echo "Date: $(date -R)"
-	echo "X-Remove-Header1: This header will be removed"
-	echo "X-Remove-Header2: This header will also be removed"
-	echo "X-Log-Test: Test Header"
-	echo
-	echo "$4"
-	) >/tmp/mail.txt
-	#sudo $setuidgid -g qcerts $user env -
-	env - \
-			LOGHEADERFD=45 \
-			QUEUEDIR=$testdir/queue \
-			QMAILQUEUE=$qmail_queue \
-			CONTROLDIR=$cntrldir \
-			BIGTODO=0 \
-			CONFSPLIT=23 \
-		$qmail_inject -f$1 $2 </tmp/mail.txt
-}
-
-do_qmail_queue_test()
+test_qmail_queue()
 {
 	t1=$(date +"%s.%4N")
 	echo "F:!.*@$HOSTNAME:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
@@ -4569,7 +4643,7 @@ do_qmail_queue_test()
 	/bin/rm -f $cntrldir/removeheaders
 }
 
-do_dkim_tests()
+test_dkim()
 {
 	t1=$(date +"%s.%4N")
 	printf "\r%126s\r" " "
@@ -6069,7 +6143,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=237
+	total_tests=239
 fi
 failed=0
 do_setup
@@ -6085,7 +6159,7 @@ wait
 
 if [ -f ./spfquery.txt ] ; then
 	printf "\r%118s\n" " "
-	do_spf_tests
+	test_spf
 fi
 secs=0.0
 printf "\r%118s\n" " "
@@ -6098,7 +6172,7 @@ do
 done
 printf "\r%118s\n" " "
 non_dkim_tcount=$tcount
-do_dkim_tests
+test_dkim
 
 # Cleanup
 sudo /bin/rm -rf $servicedir
@@ -6130,6 +6204,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.37  2023-10-26 11:43:33+05:30  Cprogrammer
+# added test for QQEH
+#
 # Revision 1.36  2023-10-26 00:02:38+05:30  Cprogrammer
 # added qmail-queue feature tests
 #
