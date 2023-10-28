@@ -1,11 +1,5 @@
 /*
- * $Log: mailfilter.c,v $
- * Revision 1.2  2022-10-17 19:43:40+05:30  Cprogrammer
- * use exit codes defines from qmail.h
- *
- * Revision 1.1  2021-06-09 19:32:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: mailfilter.c,v 1.3 2023-10-27 16:11:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -25,11 +19,11 @@ mailfilter(int argc, char **argv, char *filterargs)
 	int             wstat, filt_exitcode;
 
 	if (pipe(pipefd) == -1)
-		_exit(60);
+		_exit(QQ_PIPE_SOCKET);
 	switch ((filt_pid = fork()))
 	{
 	case -1:
-		_exit(121);
+		_exit(QQ_FORK_ERR);
 	case 0: /*- Filter Program */
 		/*- Mail content read from fd 0 */
 		if (mktempfile(0))
@@ -40,7 +34,7 @@ mailfilter(int argc, char **argv, char *filterargs)
 			close(pipefd[1]);
 		/*- Avoid loop if program(s) defined by FILTERARGS call qmail-inject, etc */
 		if (!env_unset("FILTERARGS") || !env_unset("SPAMFILTER"))
-			_exit(51);
+			_exit(QQ_OUT_OF_MEMORY);
 		execl("/bin/sh", "qmailfilter", "-c", filterargs, (char *) 0);
 		_exit(QQ_EXEC_FAILED);
 	default:
@@ -86,7 +80,7 @@ mailfilter(int argc, char **argv, char *filterargs)
 void
 getversion_mailfilter_c()
 {
-	static char    *x = "$Id: mailfilter.c,v 1.2 2022-10-17 19:43:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mailfilter.c,v 1.3 2023-10-27 16:11:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmailfilterh;
 	x = sccsidmktempfileh;
@@ -94,3 +88,16 @@ getversion_mailfilter_c()
 	x++;
 }
 #endif
+
+/*
+ * $Log: mailfilter.c,v $
+ * Revision 1.3  2023-10-27 16:11:14+05:30  Cprogrammer
+ * replace hard-coded exit values with constants from qmail.h
+ *
+ * Revision 1.2  2022-10-17 19:43:40+05:30  Cprogrammer
+ * use exit codes defines from qmail.h
+ *
+ * Revision 1.1  2021-06-09 19:32:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

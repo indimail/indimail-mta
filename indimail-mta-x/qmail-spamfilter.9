@@ -7,13 +7,15 @@ qmail-spamfilter \- spam filter for indimail
 \fBqmail-spamfilter\fR [ \fIqqf\fR] \fIarg1\fR] [\fIarg2\fR] ... ]
 
 .SH DESCRIPTION
-\fBqmail-spamfilter(8)\fR allows indimail to execute antispam filter. It
+\fBqmail-spamfilter\fR(1) allows indimail to execute antispam filter. It
 gets invoked by indimail programs using qmail-queue frontend when the
-\fBQMAILQUEUE\fR environment is defined or when passed as a command line
-argument to the qmail-queue frontend.
+\fBQMAILQUEUE\fR environment is set to \fBqmail-spamfilter\fR or when
+passed as a command line argument having \fBqmail-spamfilter\fR like below
+(which will have the message pass through \fBqmail-dkim\fR and
+\fBqmail-spamfilter\fR).
 
 .EX
-QMAILQUEUE=PREFIX/sbin/qmail-spamfilter
+QMAILQUEUE="@prefix@/sbin/qmail-dkim @prefix@/sbin/qmail-spamfilter"
 .EE
 
 \fBqmail-spamfilter\fR also calls \fBqscanq\fR(8) to perform virus scanning
@@ -40,10 +42,9 @@ filter program
 This gives the ability for the SPAMFILTER program to read the mail message
 from descriptor 0 before passing it to \fBqmail-queue\fR through the pipe.
 
-\fBqmail-spamfilter\fR will attempt to make the descriptor 0 seekable if
-the environment variable \fBMAKE_SEEKABLE\fR is defined. This may be
-necessary for certain filter programs like bogofilter which allocate memory
-for the mail message when lseek(2) fails.
+\fBqmail-spamfilter\fR will attempt to make the descriptor 0 seekable. This
+may be necessary for certain filter programs like bogofilter which allocate
+memory for the mail message when lseek(2) fails..
 
 \fBqmail-spamfilter\fR by default, interprets the exit status of spam
 filter program as below

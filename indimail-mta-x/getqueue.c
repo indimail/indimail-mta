@@ -1,18 +1,5 @@
 /*
- * $Log: getqueue.c,v $
- * Revision 1.4  2023-02-08 11:18:07+05:30  Cprogrammer
- * include stdint.h for uint32_t definition
- *
- * Revision 1.3  2022-04-14 08:17:55+05:30  Cprogrammer
- * added feature to disable a queue and skip disabled queues
- * refactored code and added comments
- *
- * Revision 1.2  2022-03-30 21:08:38+05:30  Cprogrammer
- * use arc4random() to randomly select queue
- *
- * Revision 1.1  2022-03-26 10:23:34+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: getqueue.c,v 1.5 2023-10-27 16:22:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -21,6 +8,7 @@
 #include <error.h>
 #include <arc4random.h>
 #include <stdint.h>
+#include "qmail.h"
 #include "haslibrt.h"
 #ifdef HASLIBRT
 #include <sys/mman.h>
@@ -52,7 +40,7 @@ queueNo_from_shm(char *ident)
 		custom_error(ident, "Z", "unable to read POSIX shared memory segment /qscheduler", 0, "X.3.0");
 	close(shm);
 	if (!(queue = (int *) alloc(qcount * sizeof(int))))
-		_exit(51);
+		_exit(QQ_OUT_OF_MEMORY);
 	/*- get queue with lowest concurrency */
 	for (j = n = 0, min = -1; j < qcount; j++) {
 		s = shm_name;
@@ -139,8 +127,28 @@ queueNo_from_env()
 void
 getversion_getqueue_c()
 {
-	static char    *x = "$Id: getqueue.c,v 1.4 2023-02-08 11:18:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getqueue.c,v 1.5 2023-10-27 16:22:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 #endif
+
+/*
+ * $Log: getqueue.c,v $
+ * Revision 1.5  2023-10-27 16:22:13+05:30  Cprogrammer
+ * replace hard-coded exit values with constants from qmail.h
+ *
+ * Revision 1.4  2023-02-08 11:18:07+05:30  Cprogrammer
+ * include stdint.h for uint32_t definition
+ *
+ * Revision 1.3  2022-04-14 08:17:55+05:30  Cprogrammer
+ * added feature to disable a queue and skip disabled queues
+ * refactored code and added comments
+ *
+ * Revision 1.2  2022-03-30 21:08:38+05:30  Cprogrammer
+ * use arc4random() to randomly select queue
+ *
+ * Revision 1.1  2022-03-26 10:23:34+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

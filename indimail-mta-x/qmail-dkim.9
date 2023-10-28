@@ -8,10 +8,21 @@ message for delivery
 \fBqmail-dkim\fR [ \fIqqf\fR [\fIarg1\fR] [\fIarg2\fR] [...] ]
 
 .SH DESCRIPTION
-\fBqmail-dkim\fR has the same interface as \fBqmail-queue\fR except that it
-inserts an appropriate DKIM header (rfc4871, rfc6376) before it queues the
-message. To invoke \fBqmail-dkim\fR, set QMAILQUEUE to full path of
-qmail-dkim in the environment, when you send or receive email.
+\fBqmail-dkim\fR(1) allows indimail to add DKIM signature in the message.
+It gets invoked by indimail programs using qmail-queue frontend when the
+\fBQMAILQUEUE\fR environment is set to \fBqmail-dkim\fR or when passed as a
+command line argument having \fBqmail-dkim\fR like below (which will have
+the message pass through \fBqmail-dkim\fR and \fBqmail-spamfilter\fR).
+
+.EX
+QMAILQUEUE="@prefix@/sbin/qmail-dkim @prefix@/sbin/qmail-spamfilter"
+.EE
+
+\fBqmail-dkim\fR has the
+same interface as \fBqmail-queue\fR except that it inserts an appropriate
+DKIM header (rfc4871, rfc6376) before it queues the message. To invoke
+\fBqmail-dkim\fR, set QMAILQUEUE to full path of qmail-dkim in the
+environment, when you send or receive email.
 
 After inserting the DKIM header, \fBqmail-dkim\fR will call
 \fBqmail-queue\fR as a default, to deposit message in the queue. If you

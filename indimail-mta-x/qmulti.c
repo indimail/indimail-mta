@@ -1,11 +1,9 @@
 /*
- * $Id: qmulti.c,v 1.65 2023-03-28 17:50:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.66 2023-10-28 07:29:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
-#ifdef HASLIBRT
 #include <str.h>
-#endif
 #include <env.h>
 #include <stralloc.h>
 #include <substdio.h>
@@ -56,86 +54,118 @@ getfreespace(char *filesystem)
 	return (0);
 }
 
+char           *
+set_queuedir(char **argv)
+{
+	char            strnum[FMT_ULONG];
+	char           *qbase;
+	int             queueNo;
+	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
+#ifdef HASLIBRT
+	char           *ptr;
+	int             i;
+#endif
+
+	if (!(qbase = env_get("QUEUE_BASE"))) {
+		switch (control_readfile(&QueueBase, "queue_base", 0))
+		{
+		case -1:
+			_exit(QQ_CONFIG_ERR);
+			break;
+		case 0:
+			if (!stralloc_copys(&QueueBase, auto_qmail) ||
+					!stralloc_catb(&QueueBase, "/queue", 6) ||
+					!stralloc_0(&QueueBase))
+				_exit(QQ_OUT_OF_MEMORY);
+			qbase = QueueBase.s;
+			break;
+		case 1:
+			qbase = QueueBase.s;
+			break;
+		}
+	}
+#ifdef HASLIBRT
+	i = str_rchr(argv[0], '/');
+	ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
+	if (!(env_get("DYNAMIC_QUEUE")))
+		queueNo = queueNo_from_env();
+	else {
+           if (env_get("DYNAMIC_QUEUE_TIME"))
+			queueNo = queueNo_from_env();
+		else
+		if ((queueNo = queueNo_from_shm(ptr)) == -1)
+			queueNo = queueNo_from_env();
+	}
+#else
+	queueNo = queueNo_from_env();
+#endif
+	if (!stralloc_copys(&Queuedir, "QUEUEDIR=") ||
+			!stralloc_cats(&Queuedir, qbase) ||
+			!stralloc_cats(&Queuedir, "/queue") ||
+			!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) queueNo)) ||
+			!stralloc_0(&Queuedir))
+		_exit(QQ_OUT_OF_MEMORY);
+	env_put(Queuedir.s);
+	return (Queuedir.s + 9);
+}
+
 no_return int
 qmulti(char *queue_env, int argc, char **argv)
 {
-	char            strnum[FMT_ULONG];
-	char           *ptr, *qbase;
-	int             queueNo;
-#ifdef HASLIBRT
-	int             i;
-#endif
-	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
+	char           *queue_prog = NULL, *queuedir;
+	int             i, is_qmailq = 0;
 	char           *qqargs[3] = { 0, 0, NULL };
-	char           *binqqargs[2] = { 0, NULL };
 	stralloc        q = {0};
 
 	if (chdir("/") == -1)
 		_exit(QQ_CHDIR);
 	if (argc > 1) {
-		execv(argv[1], argv + 1);
-		_exit(QQ_EXEC_QMAILQUEUE);
+		i = str_rchr(argv[1], '/');
+		if (argv[1][i] && !str_diffn(argv[1] + i, "/qmail-queue", 13))
+			is_qmailq = 1;
+	} else {
+		if (!queue_env || !(queue_prog = env_get(queue_env)))
+			queue_prog = env_get("QUEUEPROG");
+		if (queue_prog && *queue_prog) {
+			i = str_rchr(queue_prog, '/');
+			if (queue_prog[i] && !str_diffn(queue_prog + i, "/qmail-queue", 13))
+				is_qmailq = 1;
+		} else
+			is_qmailq = 1;
+	}
+	if (is_qmailq) {
+		if (!(queuedir = env_get("QUEUEDIR"))) {
+			queuedir = set_queuedir(argv);
+			if (!env_put2("QUEUEDIR", queuedir))
+				_exit(QQ_OUT_OF_MEMORY);
+		}
+		qqargs[1] = queuedir; /* call qmail-queue with queue directory as argv[1] */
+		switch (getfreespace(queuedir))
+		{
+		case -1:
+			_exit(QQ_READ_ERR);
+		case 1: /*- Disk full */
+			_exit(QQ_WRITE_ERR);
+		}
+	}
+
+	if (argc > 1) {
+		if (is_qmailq) {
+			qqargs[0] = argv[1];
+			qqargs[1] = queuedir;
+			execv(*qqargs, qqargs);
+		} else
+			execv(argv[1], argv + 1);
 	} else
-	if (queue_env && (ptr = env_get(queue_env)) && *ptr) {
-		binqqargs[0] = ptr;
-		execv(*binqqargs, binqqargs);
-		_exit(QQ_EXEC_QMAILQUEUE);
-	}
-	if (!(ptr = env_get("QUEUEDIR"))) {
-		if (!(qbase = env_get("QUEUE_BASE"))) {
-			switch (control_readfile(&QueueBase, "queue_base", 0))
-			{
-			case -1:
-				_exit(QQ_CONFIG_ERR);
-				break;
-			case 0:
-				if (!stralloc_copys(&QueueBase, auto_qmail) ||
-						!stralloc_catb(&QueueBase, "/queue", 6) ||
-						!stralloc_0(&QueueBase))
-					_exit(QQ_OUT_OF_MEMORY);
-				qbase = QueueBase.s;
-				break;
-			case 1:
-				qbase = QueueBase.s;
-				break;
-			}
-		}
-#ifdef HASLIBRT
-		i = str_rchr(argv[0], '/');
-		ptr = argv[0][i] ? argv[0] + i + 1 : argv[0];
-		if (!(env_get("DYNAMIC_QUEUE")))
-			queueNo = queueNo_from_env();
-		else {
-			if ((queueNo = queueNo_from_shm(ptr)) == -1)
-				queueNo = queueNo_from_env();
-		}
-#else
-		queueNo = queueNo_from_env();
-#endif
-		if (!stralloc_copys(&Queuedir, "QUEUEDIR=") ||
-				!stralloc_cats(&Queuedir, qbase) ||
-				!stralloc_cats(&Queuedir, "/queue") ||
-				!stralloc_catb(&Queuedir, strnum, fmt_ulong(strnum, (unsigned long) queueNo)) ||
-				!stralloc_0(&Queuedir))
+	if (queue_prog && *queue_prog) {
+		qqargs[0] = queue_prog;
+		if (queue_env) {
+			if (!env_unset(queue_env))
+				_exit(QQ_OUT_OF_MEMORY);
+		} else
+		if (!env_unset("QUEUEPROG"))
 			_exit(QQ_OUT_OF_MEMORY);
-		env_put(Queuedir.s);
-		ptr = Queuedir.s + 9;
-	}
-	/* call qmail-queue with queue directory as argv[1] */
-	qqargs[1] = ptr;
-	switch (getfreespace(ptr))
-	{
-	case -1:
-		_exit(QQ_READ_ERR);
-	case 1: /*- Disk full */
-		_exit(QQ_WRITE_ERR);
-	}
-	if (argc > 1)
-		execv(argv[1], argv + 1);
-	else
-	if ((ptr = env_get("QUEUEPROG"))) {
-		argv[0] = qqargs[0] = ptr;
-		execv(*qqargs, argv);
+		execv(*qqargs, qqargs);
 	} else {
 		if (!stralloc_copys(&q, auto_prefix) ||
 				!stralloc_catb(&q, "/sbin/qmail-queue", 17) ||
@@ -210,7 +240,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	static char    *x = "$Id: qmulti.c,v 1.65 2023-03-28 17:50:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmulti.c,v 1.66 2023-10-28 07:29:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -219,6 +249,10 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.66  2023-10-28 07:29:59+05:30  Cprogrammer
+ * unset env variables queue_env, QUEUEPROG to prevent recursion
+ * refactored code to handle qmail-queue consistently
+ *
  * Revision 1.65  2023-03-28 17:50:31+05:30  Cprogrammer
  * queue program can be specified on command line
  *

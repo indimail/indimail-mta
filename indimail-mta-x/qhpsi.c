@@ -1,5 +1,120 @@
 /*
+ * $Id: qhpsi.c,v 1.12 2023-10-27 16:11:40+05:30 Cprogrammer Exp mbhangui $
+ */
+#include <unistd.h>
+#include <dlfcn.h>
+#include <strerr.h>
+#include <env.h>
+#include <str.h>
+#include <stralloc.h>
+#include <noreturn.h>
+#include "qmail.h"
+#include "auto_qmail.h"
+#include "auto_uids.h"
+
+#define FATAL "qhpsi: fatal: "
+
+no_return void
+nomem(int flaglog)
+{
+	if (flaglog)
+		strerr_die2x(QQ_OUT_OF_MEMORY, FATAL, "out of memory");
+	_exit(QQ_OUT_OF_MEMORY);
+}
+
+int
+main(int argc, char **argv)
+{
+	int             childrc = -1, i, u, flaglog = 0;
+	void           *handle;
+	int             (*func) (char *);
+	char           *messfn, *error, *queue_plugin_symbol, *plugindir;
+	stralloc        plugin = { 0 };
+
+	if (uidinit(1, 1) == -1)
+		_exit(QQ_GET_UID_GID);
+	if (env_get("DEBUG"))
+		flaglog = 1;
+	/*
+	 * Set the real and effective user id to qscand to
+	 * prevent rogue programs from creating mischief
+	 */
+	if (setreuid(auto_uidv, auto_uidv)) {
+		if (flaglog)
+			strerr_die2sys(QQ_VIRUS_SCANNER_PRIV, FATAL, "setreuid failed: ");
+		_exit(QQ_VIRUS_SCANNER_PRIV);
+	}
+	if (!str_diffn(argv[0], "plugin:", 7)) {
+		if (!(plugindir = env_get("PLUGINDIR")))
+			plugindir = "plugins";
+		if (plugindir[i = str_chr(plugindir, '/')])
+			_exit(QQ_SYSTEM_MISCONFIG);
+		if (!(queue_plugin_symbol = env_get("QUEUE_PLUGIN_SYMB")))
+			queue_plugin_symbol = "virusscan";
+		messfn = argv[0] + 7;
+		for (u = 1; argv[u]; u++) {
+			/*
+			 * silently ignore plugins containing path
+			 */
+			if (argv[u][i = str_chr(argv[u], '/')])
+				_exit(QQ_SYSTEM_MISCONFIG);
+			/*
+			 * Load the plugin with the full path of the shared
+			 * library
+			 */
+			if (!stralloc_copys(&plugin, auto_qmail) ||
+					!stralloc_append(&plugin, "/") ||
+					!stralloc_cats(&plugin, plugindir) ||
+					!stralloc_append(&plugin, "/") ||
+					!stralloc_cats(&plugin, argv[u]) ||
+					!stralloc_0(&plugin))
+				nomem(flaglog);
+			if (!(handle = dlopen(plugin.s, RTLD_LAZY|RTLD_GLOBAL))) {
+				if (flaglog)
+					strerr_die5x(QQ_OPEN_SHARED_OBJ, FATAL, "dlopen: ", plugin.s, ": ", dlerror());
+				_exit(QQ_OPEN_SHARED_OBJ);
+			}
+			dlerror(); /*- man page told me to do this */
+			func = dlsym(handle, queue_plugin_symbol);
+			if ((error = dlerror())) {
+				if (flaglog)
+					strerr_die5x(QQ_RESOLVE_SHARED_SYM, FATAL, "dlsym: ", plugin.s, ": ", error);
+				_exit(QQ_RESOLVE_SHARED_SYM);
+			}
+			childrc = (*func) (messfn); /*- execute the function */
+			if (dlclose(handle)) {
+				if (flaglog)
+					strerr_die5x(QQ_CLOSE_SHARED_OBJ, FATAL, "dlclose: ", plugin.s, ": ", error);
+				_exit(QQ_CLOSE_SHARED_OBJ);
+			}
+			if (childrc)
+				break;
+		}
+		_exit(childrc);
+	} else {
+		if (*argv[0] != '/' && *argv[0] != '.')
+			execvp(*argv, argv);
+		else
+			execv(*argv, argv);
+		if (flaglog)
+			strerr_die2sys(QQ_EXEC_FAILED, FATAL, "execv failed: ");
+		_exit(QQ_EXEC_FAILED);
+	}
+	/*- Not reached */
+}
+
+void
+getversion_qmail_qhpsi_c()
+{
+	static char    *x = "$Id: qhpsi.c,v 1.12 2023-10-27 16:11:40+05:30 Cprogrammer Exp mbhangui $";
+	x++;
+}
+
+/*
  * $Log: qhpsi.c,v $
+ * Revision 1.12  2023-10-27 16:11:40+05:30  Cprogrammer
+ * replace hard-coded exit values with constants from qmail.h
+ *
  * Revision 1.11  2023-02-14 08:39:26+05:30  Cprogrammer
  * renamed auto_uidc to auto_uidv
  *
@@ -34,115 +149,3 @@
  * Initial revision
  *
  */
-#include <unistd.h>
-#include <dlfcn.h>
-#include <strerr.h>
-#include <env.h>
-#include <str.h>
-#include <stralloc.h>
-#include <noreturn.h>
-#include "auto_qmail.h"
-#include "auto_uids.h"
-
-#define FATAL "qhpsi: fatal: "
-
-no_return void
-nomem(int flaglog)
-{
-	if (flaglog)
-		strerr_die2x(51, FATAL, "out of memory");
-	_exit(51);
-}
-
-int
-main(int argc, char **argv)
-{
-	int             childrc = -1, i, u, flaglog = 0;
-	void           *handle;
-	int             (*func) (char *);
-	char           *messfn, *error, *queue_plugin_symbol, *plugindir;
-	stralloc        plugin = { 0 };
-
-	if (uidinit(1, 1) == -1)
-		_exit(67);
-	if (env_get("DEBUG"))
-		flaglog = 1;
-	/*
-	 * Set the real and effective user id to qscand to
-	 * prevent rogue programs from creating mischief
-	 */
-	if (setreuid(auto_uidv, auto_uidv)) {
-		if (flaglog)
-			strerr_die2sys(50, FATAL, "setreuid failed: ");
-		_exit(50);
-	}
-	if (!str_diffn(argv[0], "plugin:", 7)) {
-		if (!(plugindir = env_get("PLUGINDIR")))
-			plugindir = "plugins";
-		if (plugindir[i = str_chr(plugindir, '/')])
-			_exit(87);
-		if (!(queue_plugin_symbol = env_get("QUEUE_PLUGIN_SYMB")))
-			queue_plugin_symbol = "virusscan";
-		messfn = argv[0] + 7;
-		for (u = 1; argv[u]; u++) {
-			/*
-			 * silently ignore plugins containing path
-			 */
-			if (argv[u][i = str_chr(argv[u], '/')])
-				_exit(87);
-			/*
-			 * Load the plugin with the full path of the shared
-			 * library
-			 */
-			if (!stralloc_copys(&plugin, auto_qmail))
-				nomem(flaglog);
-			if (!stralloc_append(&plugin, "/"))
-				nomem(flaglog);
-			if (!stralloc_cats(&plugin, plugindir))
-				nomem(flaglog);
-			if (!stralloc_append(&plugin, "/"))
-				nomem(flaglog);
-			if (!stralloc_cats(&plugin, argv[u]))
-				nomem(flaglog);
-			if (!stralloc_0(&plugin))
-				nomem(flaglog);
-			if (!(handle = dlopen(plugin.s, RTLD_LAZY|RTLD_GLOBAL))) {
-				if (flaglog)
-					strerr_die5x(57, FATAL, "dlopen: ", plugin.s, ": ", dlerror());
-				_exit(57);
-			}
-			dlerror(); /*- man page told me to do this */
-			func = dlsym(handle, queue_plugin_symbol);
-			if ((error = dlerror())) {
-				if (flaglog)
-					strerr_die5x(58, FATAL, "dlsym: ", plugin.s, ": ", error);
-				_exit(58);
-			}
-			childrc = (*func) (messfn); /*- execute the function */
-			if (dlclose(handle)) {
-				if (flaglog)
-					strerr_die5x(59, FATAL, "dlclose: ", plugin.s, ": ", error);
-				_exit(59);
-			}
-			if (childrc)
-				break;
-		}
-		_exit(childrc);
-	} else {
-		if (*argv[0] != '/' && *argv[0] != '.')
-			execvp(*argv, argv);
-		else
-			execv(*argv, argv);
-		if (flaglog)
-			strerr_die2sys(75, FATAL, "execv failed: ");
-		_exit(75);
-	}
-	/*- Not reached */
-}
-
-void
-getversion_qmail_qhpsi_c()
-{
-	static char    *x = "$Id: qhpsi.c,v 1.11 2023-02-14 08:39:26+05:30 Cprogrammer Exp mbhangui $";
-	x++;
-}
