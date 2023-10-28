@@ -1,68 +1,5 @@
 /*
- * $Log: qmail-qmqpc.c,v $
- * Revision 1.25  2022-01-30 08:41:15+05:30  Cprogrammer
- * removed unused function
- *
- * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.23  2021-06-12 18:26:39+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.22  2020-12-07 16:10:05+05:30  Cprogrammer
- * use exit code 79 for envelope format error
- *
- * Revision 1.21  2020-11-24 13:47:09+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.20  2020-05-11 11:10:41+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.19  2020-04-14 12:31:37+05:30  Cprogrammer
- * fixed controlfile name for timeoutremote
- *
- * Revision 1.18  2017-03-23 20:06:57+05:30  Cprogrammer
- * added option to specifiy qmqpservers on command line
- *
- * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.16  2015-08-24 19:08:14+05:30  Cprogrammer
- * replaced ip_scan() with ip4_scan()
- *
- * Revision 1.15  2011-07-04 17:45:05+05:30  Cprogrammer
- * use control_readrandom to pickup up a single IP from outgoingip
- *
- * Revision 1.14  2011-01-11 10:27:37+05:30  Cprogrammer
- * use OUTGOINGIP to override control file outgoingip
- *
- * Revision 1.13  2010-07-24 18:58:41+05:30  Cprogrammer
- * added load distribution logic
- *
- * Revision 1.12  2010-04-06 20:25:20+05:30  Cprogrammer
- * use PORT_QMQP environment variable to configure QMQP port
- *
- * Revision 1.11  2008-07-15 19:57:55+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.10  2008-06-01 15:32:16+05:30  Cprogrammer
- * timeout patch by Eric Huss
- *
- * Revision 1.9  2005-06-17 22:04:38+05:30  Cprogrammer
- * ipv6 support
- *
- * Revision 1.8  2004-10-22 20:28:41+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.7  2004-10-22 15:37:23+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.6  2004-10-11 14:38:43+05:30  Cprogrammer
- * use ip from control file outgoingip
- *
- * Revision 1.5  2004-07-17 21:21:08+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail-qmqpc.c,v 1.26 2023-10-27 16:11:50+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -83,6 +20,7 @@
 #include <fmt.h>
 #include <now.h>
 #include <noreturn.h>
+#include "qmail.h"
 #include "timeoutconn.h"
 #include "socket.h"
 #include "slurpclose.h"
@@ -113,19 +51,19 @@ static stralloc line = { 0 };
 no_return void
 die_success()
 {
-	_exit(0);
+	_exit(QQ_OK);
 }
 
 no_return void
 die_perm()
 {
-	_exit(31);
+	_exit(QQ_PERM_MSG_REJECT);
 }
 
 no_return void
 nomem()
 {
-	_exit(51);
+	_exit(QQ_OUT_OF_MEMORY);
 }
 
 no_return void
@@ -133,45 +71,45 @@ die_read()
 {
 	if (errno == error_nomem)
 		nomem();
-	_exit(54);
+	_exit(QQ_READ_ERR);
 }
 
 no_return void
 die_control()
 {
-	_exit(55);
+	_exit(QQ_CONFIG_ERR);
 }
 
 no_return void
 die_socket()
 {
-	_exit(56);
+	_exit(QQ_NETWORK);
 }
 
 no_return void
 die_temp()
 {
-	_exit(71);
+	_exit(QQ_TEMP_MSG_REJECT);
 }
 
 no_return void
 die_conn()
 {
-	_exit(74);
+	_exit(QQ_CONN_FAILED);
 }
 
 no_return void
 die_format()
 {
-	_exit(79);
+	_exit(QQ_ENVELOPE_FMT_ERR);
 }
 
 ssize_t
 saferead(int fd, char *_buf, size_t len)
 {
 	int             r;
-	r = timeoutread(timeoutremote, qmqpfd, _buf, len);
-	if (r <= 0)
+
+	if ((r = timeoutread(timeoutremote, qmqpfd, _buf, len)) <= 0)
 		die_conn();
 	return r;
 }
@@ -180,8 +118,8 @@ ssize_t
 safewrite(int fd, char *_buf, size_t len)
 {
 	int             r;
-	r = timeoutwrite(timeoutremote, qmqpfd, _buf, len);
-	if (r <= 0)
+
+	if ((r = timeoutwrite(timeoutremote, qmqpfd, _buf, len)) <= 0)
 		die_conn();
 	return r;
 }
@@ -392,7 +330,77 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.25 2022-01-30 08:41:15+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.26 2023-10-27 16:11:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qmail-qmqpc.c,v $
+ * Revision 1.26  2023-10-27 16:11:50+05:30  Cprogrammer
+ * replace hard-coded exit values with constants from qmail.h
+ *
+ * Revision 1.25  2022-01-30 08:41:15+05:30  Cprogrammer
+ * removed unused function
+ *
+ * Revision 1.24  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.23  2021-06-12 18:26:39+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.22  2020-12-07 16:10:05+05:30  Cprogrammer
+ * use exit code 79 for envelope format error
+ *
+ * Revision 1.21  2020-11-24 13:47:09+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.20  2020-05-11 11:10:41+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.19  2020-04-14 12:31:37+05:30  Cprogrammer
+ * fixed controlfile name for timeoutremote
+ *
+ * Revision 1.18  2017-03-23 20:06:57+05:30  Cprogrammer
+ * added option to specifiy qmqpservers on command line
+ *
+ * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.16  2015-08-24 19:08:14+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan()
+ *
+ * Revision 1.15  2011-07-04 17:45:05+05:30  Cprogrammer
+ * use control_readrandom to pickup up a single IP from outgoingip
+ *
+ * Revision 1.14  2011-01-11 10:27:37+05:30  Cprogrammer
+ * use OUTGOINGIP to override control file outgoingip
+ *
+ * Revision 1.13  2010-07-24 18:58:41+05:30  Cprogrammer
+ * added load distribution logic
+ *
+ * Revision 1.12  2010-04-06 20:25:20+05:30  Cprogrammer
+ * use PORT_QMQP environment variable to configure QMQP port
+ *
+ * Revision 1.11  2008-07-15 19:57:55+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.10  2008-06-01 15:32:16+05:30  Cprogrammer
+ * timeout patch by Eric Huss
+ *
+ * Revision 1.9  2005-06-17 22:04:38+05:30  Cprogrammer
+ * ipv6 support
+ *
+ * Revision 1.8  2004-10-22 20:28:41+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.7  2004-10-22 15:37:23+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.6  2004-10-11 14:38:43+05:30  Cprogrammer
+ * use ip from control file outgoingip
+ *
+ * Revision 1.5  2004-07-17 21:21:08+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-inject 8
 .SH NAME
 qmail-inject \- preprocess and send a mail message
@@ -12,144 +13,91 @@ qmail-inject \- preprocess and send a mail message
 ]
 
 .SH DESCRIPTION
-.B qmail-inject
-reads a mail message from its standard input, adds appropriate information
-to the message header, and invokes
-.B qmail-queue
-to send the message to one or more recipients.
+\fBqmail-inject\fR reads a mail message from its standard input, adds
+appropriate information to the message header, and by default invokes
+\fBqmail-queue\fR(8) to send the message to one or more recipients. You can
+set \fBQMAILQUEUE\fR environment variable to call any other program that
+has the same interface as \fBqmail-queue\fR. \fBQMAILQUEUE\fR can be list
+of multiple programs separated by a white space. e.g. you can set
+QMAILQUEUE to insert DKIM header as well as filter spam as below.
 
-.B qmail-inject
-rewrites the sender using Sender Rewriting Scheme if \fISRS\fB has been configured. See
-.B indimail-srs(5)
-for information on how to do this
+.EX
+  QMAILQUEUE="PREFIX/sbin/qmail-dkim PREFIX/sbin/qmail-spamfilter"
+.EE
 
-See
-.B qmail-header(5)
-for information on how
-.B qmail-inject
+\fBqmail-inject\fR rewrites the sender using Sender Rewriting Scheme if
+\fISRS\fB has been configured. See \fBindimail-srs\fR(5) for information on
+how to do this.
+
+See \fBqmail-header\fR(5) for information on how \fBqmail-inject\fR
 rewrites header fields.
 
-.B qmail-inject
-normally exits 0. It exits 100 if it was invoked improperly or if there is
-a severe syntax error in the message.  It exits 111 for temporary errors.
+\fBqmail-inject\fR normally exits 0. It exits 100 if it was invoked
+improperly or if there is a severe syntax error in the message.  It exits
+111 for temporary errors.
 
 .SH "ENVIRONMENT VARIABLES"
-For the convenience of users who do not run
-.B qmail-inject
-directly,
-.B qmail-inject
-takes many options through environment variables.
+For the convenience of users who do not run \fBqmail-inject\fR directly,
+\fBqmail-inject\fR takes many options through environment variables.
 
-The user name in the
-.B From
-header field is set by
-.BR QMAILUSER ,
-.BR MAILUSER ,
-.BR USER ,
-or
-.BR LOGNAME ,
-whichever comes first.
+The user name in the \fBFrom\fR header field is set by \fBQMAILUSER\fR,
+\fBMAILUSER\fR, \fBUSER\fR, or \fBLOGNAME\fR, whichever comes first.
 
-The host name is normally set by the
-.I defaulthost
-control but can be overridden with
-.B QMAILHOST
-or
-.BR MAILHOST .
+The host name is normally set by the \fIdefaulthost\fR control but can be
+overridden with \fBQMAILHOST\fR or \fBMAILHOST\fR.
 
-The personal name is
-.BR QMAILNAME ,
-.BR MAILNAME ,
-or
-.BR NAME .
+The personal name is \fBQMAILNAME\fR, \fBMAILNAME\fR, or \fBNAME\fR.
 
-The default envelope sender address is the same as the default
-.B From
-address, but it can be overridden with
-.B QMAILSUSER
-and
-.BR QMAILSHOST .
-It may also be modified by the
-.B r
-and
-.B m
+The default envelope sender address is the same as the default \fBFrom\fR
+address, but it can be overridden with \fBQMAILSUSER\fR and
+\fBQMAILSHOST\fR. It may also be modified by the \fBr\fR and \fBm\fR
 letters described below. Bounces will be sent to this address.
 
-If
-.B QMAILMFTFILE
-is set,
-.B qmail-inject
-reads a list of mailing list addresses, one per line, from that file. If
-To+Cc includes one of those addresses (without regard to case),
-.B qmail-inject
-adds a Mail-Followup-To field with all the To+Cc addresses.
-.B qmail-inject
+If \fBQMAILMFTFILE\fR is set, \fBqmail-inject\fR reads a list of mailing
+list addresses, one per line, from that file. If To+Cc includes one of
+those addresses (without regard to case), \fBqmail-inject\fR adds a
+Mail-Followup-To field with all the To+Cc addresses.  \fBqmail-inject\fR
 does not add Mail-Followup-To to a message that already has one.
 
-If
-.B QMAILQUEUE
-environment variable is set to PREFIX/sbin/qmail-multi,
-.B qmail-inject
-gets the ability to multiplex queues and filter emails. See qmail-multi(8).
+If \fBQMAILQUEUE\fR environment variable is set to PREFIX/sbin/qmail-multi,
+\fBqmail-inject\fR gets the ability to multiplex queues and filter
+emails. See qmail-multi(8).
 
-The
-.B QMAILINJECT
-environment variable can contain any of the following letters:
+The \fBQMAILINJECT\fR environment variable can contain any of the following
+letters:
 
 .TP
 .B c
-Use address-comment style for the
-.B From
-field. Normally
-.B qmail-inject
-uses name-address style.
+Use address-comment style for the \fBFrom\fR field. Normally
+\fBqmail-inject\fR uses name-address style.
 
 .TP
 .B s
-Do not look at any incoming
-.B Return-Path
-field. Normally, if
-.B Return-Path
-is supplied, it sets the envelope sender address, overriding all
-environment variables.
-.B Return-Path
-is deleted in any case.
+Do not look at any incoming \fBReturn-Path\fR field. Normally, if
+\fBReturn-Path\fR is supplied, it sets the envelope sender address,
+overriding all environment variables. \fBReturn-Path\fR is deleted in any
+case.
 
 .TP
 .B f
-Delete any incoming
-.B From
-field.
-Normally, if
-.B From
-is supplied, it overrides the usual
-.B From
-field created by
-.BR qmail-inject .
+Delete any incoming \fBFrom\fR field. Normally, if \fBFrom\fR is supplied,
+it overrides the usual \fBFrom\fR field created by \fBqmail-inject\fR.
 
 .TP
 .B i
-Delete any incoming
-.B Message-ID
-field. Normally, if
-.B Message-ID
-is supplied, it overrides the usual
-.B Message-ID
-field created by
-.BR qmail-inject .
+Delete any incoming \fBMessage-ID\fR field. Normally, if \fBMessage-ID\fR
+is supplied, it overrides the usual \fBMessage-ID\fR field created by
+\fBqmail-inject\fR.
 
 .TP
 .B r
-Use a per-recipient VERP.
-.B qmail-inject
-will append each recipient address to the envelope sender of the copy going
-to that recipient.
+Use a per-recipient VERP. \fBqmail-inject\fR will append each recipient
+address to the envelope sender of the copy going to that recipient.
 
 .TP
 .B m
-Use a per-message VERP.
-.B qmail-inject
-will append the current date and process ID to the envelope sender.
+Use a per-message VERP. \fBqmail-inject\fR will append the current date and
+process ID to the envelope sender.
 
 .TP
 .B n
@@ -166,63 +114,42 @@ set, it additionally uses environment set according to files in
 
 .TP
 .B \-a
-Send the message to all addresses given as
-.I recip
-arguments; do not use header recipient addresses.
+Send the message to all addresses given as \fIrecip\fR arguments; do not
+use header recipient addresses.
 
 .TP
 .B \-h
 Send the message to all header recipient addresses. For non-forwarded
-messages, this means the addresses listed under
-.BR To ,
-.BR Cc ,
-.BR Bcc ,
-.BR Apparently-To .
-For forwarded messages, this means the addresses listed under
-.BR Resent-To ,
-.BR Resent-Cc ,
-.BR Resent-Bcc .
-Do not use any
-.I recip
-arguments.
+messages, this means the addresses listed under \fBTo\fR, \fBCc\fR,
+\fBBcc\fR, \fBApparently-To\fR. For forwarded messages, this means the
+addresses listed under \fBResent-To\fR, \fBResent-Cc\fR, \fBResent-Bcc\fR.
+Do not use any \fIrecip\fR arguments.
 
 .TP
 .B \-A
 (Default.)
-Send the message to all addresses given as
-.I recip
-arguments.
-If no
-.I recip
-arguments are supplied, send the message to all header recipient addresses.
+Send the message to all addresses given as \fIrecip\fR arguments. If no
+\fIrecip\fR arguments are supplied, send the message to all header
+recipient addresses.
 
 .TP
 .B \-H
 Send the message to all header recipient addresses, and to all addresses
-given as
-.I recip
-arguments.
+given as \fIrecip\fR arguments.
 
 .TP
 .B \-f\fIsender
-Pass
-.I sender
-to
-.B qmail-queue
-as the envelope sender address. This overrides
-.B Return-Path
-and all environment variables.
+Pass \fIsender\fR to \fBqmail-queue\fR as the envelope sender address. This
+overrides \fBReturn-Path\fR and all environment variables.
 
 .TP
 .B \-N
 (Default.)
-Feed the resulting message to
-.BR qmail-queue .
+Feed the resulting message to \fBqmail-queue\fR.
 
 .TP
 .B \-n
-Print the message rather than feeding it to
-.BR qmail-queue .
+Print the message rather than feeding it to \fBqmail-queue\fR.
 
 .SH "CONTROL FILES"
 
@@ -230,108 +157,64 @@ Print the message rather than feeding it to
 .I defaultdomain
 Default domain name.
 Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR defaultdomain ,
-which is probably not what you want.
-.B qmail-inject
-adds this name to any host name without dots, including
-.I defaulthost
-if
-.I defaulthost
-does not have dots. (Exception: see
-.IR plusdomain .)
+\fIme\fR, if that is supplied; otherwise the literal name
+\fBdefaultdomain\fR, which is probably not what you want.
+\fBqmail-inject\fR adds this name to any host name without dots, including
+\fIdefaulthost\fR if \fIdefaulthost\fR does not have dots. (Exception: see
+\fIplusdomain\fR.)
 
-The
-.B QMAILDEFAULTDOMAIN
-environment variable overrides
-.IR defaultdomain .
+The \fBQMAILDEFAULTDOMAIN\fR environment variable overrides \fIdefaultdomain\fR.
 
 .TP 5
 .I defaulthost
 Default host name.
-Default:
-.IR me ,
-if that is supplied; otherwise the literal name
-.BR defaulthost ,
-which is probably not what you want.
-.B qmail-inject
-adds this name to any address without a host name.
-.I defaulthost
-need not be the current host's name. For example, you may prefer that
-outgoing mail show just your domain name.
+Default: \fIme\fR, if that is supplied; otherwise the literal name
+\fBdefaulthost\fR, which is probably not what you want. \fBqmail-inject\fR
+adds this name to any address without a host name. \fIdefaulthost\fR need
+not be the current host's name. For example, you may prefer that outgoing
+mail show just your domain name.
 
-The
-.B QMAILDEFAULTHOST
-environment variable overrides
-.IR defaulthost .
+The \fBQMAILDEFAULTHOST\fR environment variable overrides
+\fIdefaulthost\fR.
 
 .TP 5
 .I idhost
 Host name for Message-IDs.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR idhost ,
-which is certainly not what you want.
-.I idhost
-need not be the current host's name. For example, you may prefer to use
-fake host names in Message-IDs. However,
-.I idhost
-must be a fully-qualified name within your domain, and each host in your
-domain should use a different
-.IR idhost .
+Default: \fIme\fR, if that is supplied; otherwise the literal name
+\fBidhost\fR, which is certainly not what you want. \fIidhost\fR need not
+be the current host's name. For example, you may prefer to use fake host
+names in Message-IDs. However, \fIidhost\fR must be a fully-qualified name
+within your domain, and each host in your domain should use a different
+\fIidhost\fR.
 
-The
-.B QMAILIDHOST
-environment variable overrides
-.IR idhost .
+The \fBQMAILIDHOST\fR environment variable overrides \fIidhost\fR.
 
 .TP 5
 .I plusdomain
 Plus domain name.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR plusdomain ,
-which is probably not what you want.
-.B qmail-inject
+Default: \fIme\fR, if that is supplied; otherwise the literal name
+\fBplusdomain\fR, which is probably not what you want. \fBqmail-inject\fR
 adds this name to any host name that ends with a plus sign, including
-.I defaulthost
-if
-.I defaulthost
-ends with a plus sign. If a host name does not have dots but ends with a
-plus sign,
-.B qmail-inject
-uses
-.IR plusdomain ,
-not
-.IR defaultdomain .
+\fIdefaulthost\fR if \fIdefaulthost\fR ends with a plus sign. If a host
+name does not have dots but ends with a plus sign, \fBqmail-inject\fR uses
+\fIplusdomain\fR, not \fIdefaultdomain\fR.
 
-The
-.B QMAILPLUSDOMAIN
-environment variable overrides
-.IR plusdomain .
+The \fBQMAILPLUSDOMAIN\fR environment variable overrides \fIplusdomain\fR.
 
 .TP 5
 .I maxrecipients 
-maxrecipients is the number of RCPT TO:'s
-.B qmail-inject
-will accept.
-Default: 0 which means no restriction.
-The environment variable 
-.B MAXRECIPIENTS
-overrides the value in this control file.
+maxrecipients is the number of RCPT TO:'s \fBqmail-inject\fR will accept.
+Default: 0 which means no restriction. The environment variable
+\fBMAXRECIPIENTS\fR overrides the value in this control file.
 
 .TP 5
 .I domainqueue
 Specific queue can be assigned to recipient domains. The format of this
 file is of the form
 
-domain:QUEUEDIR=queue_dir
+.EX
+  domain:QUEUEDIR=queue_dir
+.EE
 
 where domain is the recipient domain and queue_dir is any queue which is
 part of indimail's queue collection. You could also specify a set of queues
@@ -340,14 +223,20 @@ for a domain.
 domain:QUEUE_COUNT=5,QUEUE_START=6,QUEUE_BASE=/var/indimail/queue
 
 specifies that any emails to *@domain be queued in
-/var/indimail/queue/queue[6,7,8,9,10]. You can use \fIdomainqueue\fR to
+HOME/queue/queue[6,7,8,9,10]. You can use \fIdomainqueue\fR to
 queue mails for certain domains into specific domains and specify
 individual concurrencies for these queues (see qmail-send(8)). e.g. having
 
-yahoo.com:QUEUEDIR=/var/indimail/queue/queue6
+.EX
+  yahoo.com:QUEUEDIR=HOME/queue/queue6
+.EE
+
 in @controldir@/domainqueue and
 
-10
+.EX
+  10
+.EE
+
 in @controldir@/concurrencyr.queue6
 
 will set 10 as the remote concurrency for all emails sent to yahoo.com
@@ -357,14 +246,15 @@ will set 10 as the remote concurrency for all emails sent to yahoo.com
 Specific environment variables can be set for specific senders. The format
 of this file is of the form
 
-pat:envar1=val,envar2=val,...]
+.EX
+  pat:envar1=val,envar2=val,...]
+.EE
 
 where pat is a regular expression which matches a sender. envar1, envar2
 are list of environment variables to be set.
 
 The name of the control file can be overriden by the environment variable
-FROMRULES. The following environment variables used by
-.B qmail-queue
+FROMRULES. The following environment variables used by \fBqmail-queue\fR
 can be set by using envrules.
 
 .IR SCANCMD ,

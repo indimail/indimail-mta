@@ -22,21 +22,21 @@ by the following environment variables.
 .TP 5
 \fBQUEUE_BASE\fR The base directory having all the indimail queues. If this
 is not defined, the control file \fIqueue_base\fR is used. This is
-typically QMAILHOME/queue.
+typically @qmaildir@/queue.
 
 .TP 5
 \fBQUEUE_START\fR This is a number which defines the first queue that
 should be used.
 
-e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue/queue1
+e.g. QUEUE_START=1 implies the first queue to be @qmaildir@/queue/queue1
 
 .TP 5
 \fBQUEUE_COUNT\fR This defines the number of queues that should be used for
 load balancing. \fBqmail-queue\fR used a random number to select a queue in
 a multi-queue setup.
 
-e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue/queue1,
-QMAILHOME/queue/queue2, ..., QMAILHOME/queue/queue5
+e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues @qmaildir@/queue/queue1,
+@qmaildir@/queue/queue2, ..., @qmaildir@/queue/queue5
 
 .TP 5
 .B MIN_FREE
@@ -416,6 +416,59 @@ When QHPSI is enabled \fBqmail-queue\fR adds the header X-QHPSI, the value
 of which is either 'infected' or 'clean' (depending on whether the mail as
 identifed as infected or not).
 
+.SH PROGRAMS USING \fBQMAILQUEUE\fR
+
+All of the below programs use the setting of \fBQMAILQUEUE\fR environment
+variables to execute \fBqmail-queue\fR. They all can either take
+\fBQMAILQUEUE\fR set to the path of a single \fBqmail-queue\fR frontend or
+as command line chain of \fBqmail-queue\fR frontend programs. If you
+specify \fBqmail-queue\fR as one of the programs in \fBQMAILQUEUE\fR, the
+chain will stop at \fBqmail-queue\fR. Any programs listed after
+\fBqmail-queue\fR will not get executed. So it is important not to have
+\fBqmail-queue\fR in the list.
+
+\fBcondredirect\fR(1),
+\fBdot-forward\fR(1),
+\fBfastforward\fR(1),
+\fBfilterto\fR(1),
+\fBforward\fR(1),
+\fBmaildirserial\fR(1),
+\fBmini-smtpd\fR(8),
+\fBnew-inject\fR(1),
+\fBofmipd\fR(8),
+\fBqmail-inject\fR(8),
+\fBsendmail\fR(8),
+\fBqmail-local\fR(8),
+\fBqmail-qmqpd\fR(8),
+\fBqmail-qmtpd\fR(8),
+\fBqmail-send\fR(8),
+\fBqmta-send\fR(8),
+\fBqnotify\fR(1),
+\fBqreceipt\fR(1),
+\fBreplier\fR(1),
+\fBrrforward\fR(1),
+\fBrrt\fR(1),
+\fBslowq-send\fR(8),
+\fBqmail-smtpd\fR(8),
+\fBsrsfilter\fR(1),
+\fBqmail-spamfilter\fR(8),
+\fBqmail-multi\fR(8),
+\fBqmail-nullqueue\fR(8),
+\fBqmail-qfilter\fR(1),
+\fBqmail-dkim\fR(8),
+\fBqscanq-stdin\fR(8)
+
+The below programs also act as a \fBqmail-queue\fR frontend. They can be
+set in \fBQMAILQUEUE\fR environment variable and will ultimately execute
+\fBqmail-queue\fR in the end as a default.
+
+\fBqmail-spamfilter\fR(8),
+\fBqmail-multi\fR(8),
+\fBqmail-nullqueue\fR(8),
+\fBqmail-qfilter\fR(1),
+\fBqmail-dkim\fR(8),
+\fBqscanq-stdin\fR(8)
+
 .SH "EXIT CODES"
 \fBqmail-queue\fR does not print diagnostics. It exits 0 if it has
 successfully queued the message. It exits between 1 and 99 if it has failed
@@ -539,11 +592,11 @@ Comments:
 
 Sample with McAfee's uvscan:
 
- :allow,QHPSI='/usr/bin/uvscan --secure',QHPSIMAXSIZE='9000000',QHPSIRC='13'
+ :allow,QHPSI='@prefix@/bin/uvscan --secure',QHPSIMAXSIZE='9000000',QHPSIRC='13'
 
 Comments:
 
- - The path of 'uvscan' is '/usr/local/bin' and can be ommitted.
+ - The path of 'uvscan' is '@prefix@/bin' and can be ommitted.
  - 'uvscan' returns with RC=13 in case a virus is found,
    therefore, QHPSIRC has to provide this value.
  - The virus scanning is omitted, if the size of the message

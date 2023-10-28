@@ -778,7 +778,7 @@ load qhpsi.o auto_qmail.o get_uid.o auto_uids.o
 	./load qhpsi auto_qmail.o get_uid.o auto_uids.o \
 	-ldl $(QMAILLIB)
 
-qhpsi.o: compile qhpsi.c auto_qmail.h auto_uids.h
+qhpsi.o: compile qhpsi.c auto_qmail.h auto_uids.h qmail.h
 	./compile qhpsi.c
 
 qscanq: load qscanq.o auto_uids.o get_uid.o \
@@ -871,7 +871,8 @@ conf-servicedir
 custom_error.o: compile custom_error.c qmail.h
 	./compile custom_error.c
 getqueue.o: \
-compile getqueue.c getqueue.h haslibrt.h custom_error.h conf-queue
+compile getqueue.c getqueue.h haslibrt.h custom_error.h \
+qmail.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` getqueue.c
 
 qscanq-stdin: load qscanq-stdin.o auto_qmail.o \
@@ -894,7 +895,7 @@ do_ripmime.o: compile do_ripmime.c exitcodes.h
 	./compile do_ripmime.c
 
 do_scan.o: compile do_scan.c exitcodes.h qregex.h control.h \
-variables.h auto_control.h
+variables.h auto_control.h qmail.h
 	./compile do_scan.c
 
 auto_ripmime_cmd.c: auto-strarr conf-ripmime-cmd
@@ -1073,9 +1074,10 @@ variables.o set_environment.o auto_qmail.o auto_prefix.o srs.lib
 	set_environment.o $(static_option) $(QMAILLIB) \
 	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(dynamic_option)
 
-qmail-inject.8: qmail-inject.9 conf-prefix conf-sysconfdir
+qmail-inject.8: qmail-inject.9 conf-prefix conf-qmail conf-sysconfdir
 	cat qmail-inject.9 \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}HOME}"`head -1 conf-qmail`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-inject.8
 
@@ -1257,8 +1259,8 @@ auto_control.o socket.lib
 
 qmail-qmqpc.o: \
 compile qmail-qmqpc.c auto_control.h slurpclose.h ip.h \
-timeoutconn.h control.h variables.h \
-haveip6.h socket.h conf-ip
+timeoutconn.h control.h variables.h qmail.h socket.h \
+haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` qmail-qmqpc.c
 
 qmail-qmqpd: \
@@ -1326,10 +1328,7 @@ compile qmail-multi.c qmulti.h qmail.h mailfilter.h conf-queue
 
 qmail-multi.8: \
 qmail-multi.9 conf-prefix conf-qmail
-	cat qmail-multi.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> qmail-multi.8
+	$(edit) qmail-multi.9 > qmail-multi.8
 
 qmail-spamfilter: load qmail-spamfilter.o qmulti.o \
 auto_prefix.o auto_qmail.o auto_control.o control.o \
@@ -3286,7 +3285,7 @@ sortedtest: load sortedtest.o sorted.o
 sortedtest.o: compile sortedtest.c sorted.h
 	./compile sortedtest.c
 
-generic.o: compile generic.c
+generic.o: compile generic.c qmail.h
 	./compile generic.c
 
 relaytest.o: compile relaytest.c

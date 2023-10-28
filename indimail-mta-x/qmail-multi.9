@@ -10,20 +10,20 @@ qmail-multi \- queue multiplexor and filter
 .SH DESCRIPTION
 \fBqmail-multi(8)\fR is a queue multiplexor and filter for
 \fBqmail-queue(8)\fR. The multiplexor can be turned on by defining
-environment variable \fBQMAILQUEUE\fR=PREFIX/sbin/qmail-multi. Following
+environment variable \fBQMAILQUEUE\fR=@prefix@/sbin/qmail-multi. Following
 programs use \fBqmail-multi\fR to deposit the mail to the queue - 
 \fBqmail-dkim(8)\fR, \fBqmail-qfilter(1)\fR, \fBqmail-spamfilter(8)\fR,
 \fBqscanq-stdin(8)\fR.
 
 \fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. One can
 call any other program by passing command line arguments. If passed
-arguments, \fBqmail-queue\fR will call \fIqqf\fR and any arguments after
+arguments, \fBqmail-multi\fR will call \fIqqf\fR and any arguments after
 \fIqqf\fR will be passed as arguments to \fIqqf\fR. Without any command
 line arguments you can change the program that \fBqmail-multi\fR calls, by
 setting the environment variable \fBQUEUEPROG\fR, to the path of any
 qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want to
 use write your own queue frontend, with the queue path available in
-\fBQUEUEDIR\fR environment variable. if \fBQUEUEDIR\fB is set
+\fBQUEUEDIR\fR environment variable. if \fBQUEUEDIR\fR is set
 \fBqmail-multi\fR execs \fBqmail-queue\fR (or program defined by
 \fBQUEUEPROG\fR without any processing or setting up any environment
 variables.
@@ -34,21 +34,21 @@ by the following environment variables.
 .TP 5
 \fBQUEUE_BASE\fR The base directory having all the indimail queues. If this
 is not defined, the control file \fIqueue_base\fR is used. This is
-typically QMAILHOME/queue.
+typically @qmaildir@/queue.
 
 .TP 5
 \fBQUEUE_START\fR This is a number which defines the first queue that
 should be used.
 
-e.g. QUEUE_START=1 implies the first queue to be QMAILHOME/queue/queue1
+e.g. QUEUE_START=1 implies the first queue to be @qmaildir@/queue/queue1
 
 .TP 5
 \fBQUEUE_COUNT\fR This defines the number of queues that should be used for
 load balancing. \fBqmail-multi\fR used a random number to select a queue in
 a multi-queue setup.
 
-e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues QMAILHOME/queue/queue1,
-QMAILHOME/queue/queue2, ..., QMAILHOME/queue/queue5
+e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues @qmaildir@/queue/queue1,
+@qmaildir@/queue/queue2, ..., @qmaildir@/queue/queue5
 
 .TP 5
 .B MIN_FREE
@@ -80,7 +80,7 @@ with the lowest \fIC\fR / \fIM\fR ratio.
 
 .PP
 \fBqmail-multi\fR is actually a wrapper for \fBqmail-queue\fR to manage
-multiple queues. \fIN\fR queues can be set up in QMAILHOME as queue\fI1\fR,
+multiple queues. \fIN\fR queues can be set up in @qmaildir@ as queue\fI1\fR,
 queue\fI2\fR, ... queue\fIN\fR. \fBqmail-multi\fR does load balancing
 across these \fIN\fR queues by doing exec of \fB qmail-queue\fR with
 QUEUEDIR set to the path of one of these \fIN\fR queues. Each of these
@@ -130,7 +130,7 @@ temporary error.
 
 \fBqmail-multi\fR generates a random number and divides it by QUEUE_COUNT.
 This remainder is added to QUEUE_START to arrive at which queue to use. It
-then sets the QUEUEDIR=PREFIX/sbin/qmail-queue to queue the mail.
+then sets the QUEUEDIR=@prefix@/sbin/qmail-queue to queue the mail.
 
 .SH "EXIT CODES"
 \fBqmail-multi\fR does not print diagnostics. It exits 120 if it is not
@@ -141,7 +141,7 @@ It exits 51 if it cannot allocate memory
 It exits 55 if it is not able get the free space for the queue filesystem.
 It exits 53 if the free space is below MIN_FREE value.
 It exits 60 if it cannot create pipes or dup file descriptors.
-It exits 61 if cannot change directory to QMAILHOME
+It exits 61 if cannot change directory to @qmaildir@
 It exits 68 if it cannot create temporary files to make the input seekable.
 It exits 121 if fork fails
 It exits 31 if the program/script defined by \fBFILTERARGS\fR returns 100
@@ -152,7 +152,7 @@ If the program/script defined by \fBFILTERARGS\fR exits non-zero status,
 it exits 71 and a temporary error is issued.
 It exits 88 when the filter program exits with return value of 88 and also
 passes the error message printed by the filter program on fd2 to
-\fBqmail-queue\fER
+\fBqmail-queue\fR
 It exits 123 if the filter program crashes.
 For all other cases where no errors occur, it exits 0.
 .EE
