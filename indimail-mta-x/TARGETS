@@ -694,3 +694,4 @@ favicon.base64
 filterit
 filterit.o
 filterit_sub.o
+backup.conf

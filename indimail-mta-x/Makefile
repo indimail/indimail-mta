@@ -22,12 +22,12 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 it = 822date 822field 822header 822print 822received addrlist analyzer \
-	atrn autoresponder batv binm1 binm1+df binm2 binm2+df binm3 binm3+df \
-	bouncesaying cdb-database cdbdump cdbget cdbgetm cdbmake cdbmake-12 \
-	cdbmake-sv cdbstats cdbtest cidr condredirect config-fast \
-	create_services cronlist.q ctrlenv datemail dk-filter dknewkey \
-	dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr dnstxt \
-	dot-forward drate etrn except fastforward favicon.base64 \
+	atrn autoresponder backup.conf batv binm1 binm1+df binm2 binm2+df \
+	binm3 binm3+df bouncesaying cdb-database cdbdump cdbget cdbgetm \
+	cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect \
+	config-fast create_services cronlist.q ctrlenv datemail dk-filter \
+	dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr \
+	dnstxt dot-forward drate etrn except fastforward favicon.base64 \
 	filterit forward generic.so greydaemon home home+df hostname iftocc \
 	indimail-mta.changes setqload qmonitor indimail-mta.perms \
 	inewaliases installer instcheck ipmeprint irmail \
@@ -3899,6 +3899,8 @@ indimail-services.7: indimail-services.9 conf-split conf-sysconfdir \
 conf-logdir
 	$(edit) indimail-services.9 >$@
 
+backup.conf: backup.conf.in
+	(sed -n '2,$$p' warn-auto.sh;cat $@.in) | $(edit) > $@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \

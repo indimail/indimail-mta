@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.710 2023-10-24 20:05:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.711 2023-10-28 20:58:30+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.710 2023-10-24 20:05:47+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.711 2023-10-28 20:58:30+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2091,7 +2091,6 @@ if [ -n "$verbose" ] ; then
 	echo "procmailrc"
 	echo "libindimail"
 	echo "libmysql"
-	echo "backup.conf"
 fi
 if [ ! -f $t/servicedir.conf ] ; then
 	[ -n "$verbose" ] && echo "servicedir.conf"
@@ -2367,7 +2366,8 @@ if [ ! -f $sysconfdir/backup.conf ] ; then
 	(
 	for i in $servicedir /etc/clamd.d $sysconfdir $QmailHOME/domains \
 		$QmailHOME/autoturn $QmailHOME/alias/.qmail-\* /etc/inittab \
-		/etc/init.d/svscan /etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
+		/etc/cron.d/cronlist.i /etc/cron.d/cronlist.q /etc/init.d/svscan \
+		/etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
 		/etc/nsswitch.conf /etc/resolv.conf /etc/security /etc/alternatives \
 		$QmailHOME/.bashrc $QmailHOME/.bash_profile $QmailHOME/.indimail $file
 	do
@@ -9763,7 +9763,7 @@ do
 		echo "$i"
 	fi
 done
-) | sort -u
+) | grep -v '^#' | sort -u
 }
 
 tls_cert_check()
@@ -12140,6 +12140,7 @@ case $option in
 	fi
 	EXT=`date +'%d%m%y-%H%M%S'`
 	dump_config "$servicedir" "$cntrldir" > /root/indimail_config.txt
+	# take backup of config files
 	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indimail-backup.$EXT.tar.gz
 	/bin/rm -f /root/indimail_config.txt
 	if [ -x $mysqlPrefix/bin/mariadb-dump ] ; then

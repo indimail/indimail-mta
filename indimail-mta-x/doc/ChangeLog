@@ -21,6 +21,9 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
     qmail-qmqpc.c: replace hard-coded exit values with constants from qmail.h
 13. qmulti.c: unset env variables queue_env, QUEUEPROG to prevent recursion 
 14. qmulti.c: refactored code to handle qmail-queue consistently
+- 27/10/2023
+15. indimail-mta.spec, Makefile, ETC: added backup.conf for svctool backups
+16. svctool: skip comments in backup.conf file
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
