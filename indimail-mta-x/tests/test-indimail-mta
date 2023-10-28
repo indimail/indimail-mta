@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.39 2023-10-28 07:49:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.40 2023-10-28 20:46:14+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -43,6 +43,7 @@ tcpserver=$bindir/tcpserver
 e822header=$bindir/822header
 e822body=$bindir/822body
 qmail_queue=$sbindir/qmail-queue
+qmail_multi=$sbindir/qmail-multi
 dkim=$bindir/dkim
 qmail_dkim=$sbindir"/qmail-dkim"
 dk_filter=$bindir/dk-filter
@@ -710,6 +711,18 @@ do_qmail_inject()
 	# $2 : To
 	# $3 : Subject
 	# $4 : Body
+	# $5 : QMAILQUEUE
+	# $6 : FILTERARGS
+	if [ $# -gt 4 ] ; then
+		qq=$5
+	else
+		qq=$qmail_queue
+	fi
+	if [ $# -eq 6 ] ; then
+		ff=$6
+	else
+		ff=""
+	fi
 	(
 	echo "From: $1"
 	echo "To: $2"
@@ -721,14 +734,26 @@ do_qmail_inject()
 	echo
 	echo "$4"
 	) > $testdir/tmp/mail.txt
-	env - \
+	if [ -n "$ff" ] ; then
+		env - \
 			LOGHEADERFD=45 \
 			QUEUEDIR=$testdir/queue \
-			QMAILQUEUE=$qmail_queue \
+			QMAILQUEUE=$qq \
+			CONTROLDIR=$cntrldir \
+			BIGTODO=0 \
+			CONFSPLIT=23 \
+			FILTERARGS="$ff" \
+		$qmail_inject -f$1 $2 <$testdir/tmp/mail.txt
+	else
+		env - \
+			LOGHEADERFD=45 \
+			QUEUEDIR=$testdir/queue \
+			QMAILQUEUE=$qq \
 			CONTROLDIR=$cntrldir \
 			BIGTODO=0 \
 			CONFSPLIT=23 \
 		$qmail_inject -f$1 $2 <$testdir/tmp/mail.txt
+	fi
 	/bin/rm -f $testdir/tmp/mail.txt
 }
 
@@ -4280,6 +4305,57 @@ test_spawn_filter()
 	/bin/rm -f $cntrldir/filterargs $cntrldir/smtproutes
 }
 
+test_qmail_multi()
+{
+	t1=$(date +"%s.%4N")
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "Test Message for qmail-multi" $qmail_multi
+	check_mail
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi succeeded %72s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		echo "  testing qmail-multi failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "sed -e 's{I am a{I am not a{'"
+	) > $testdir/bin/filter
+	chmod +x $testdir/bin/filter
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "I am a fool" $qmail_multi $testdir/bin/filter
+	check_mail $maildir 1
+	if [ -n "$mail_file" ] ; then
+		body=$($e822body < $maildir/new/$mail_file)
+		/bin/rm -f $maildir/new/$mail_file
+	else
+		body=""
+	fi
+	if [ "$body" = "I am not a fool" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with FILTERARGS succeeded %56s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		echo "  testing qmail-multi with FILTERARGS failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+	/bin/rm -f $testdir/bin/filter
+}
+
 do_without_svscan()
 {
 	printf "\r%118s\n" " "
@@ -4330,6 +4406,7 @@ do_without_svscan()
 	test_qhpsi
 	test_qqeh
 	test_qmail_queue
+	test_qmail_multi
 
 	srs_setup 1
 	test_srs
@@ -4961,7 +5038,7 @@ test_qmail_queue()
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
 		echo "  testing incoming mail archival with sender based rule failed [$secs sec]"
 		failed=1
@@ -4980,7 +5057,7 @@ test_qmail_queue()
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
 		echo "  testing outgoing mail archival with sender based rule failed [$secs sec]"
 		failed=1
@@ -4999,7 +5076,7 @@ test_qmail_queue()
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
 		echo "  testing incoming mail archival with recipient based rule failed [$secs sec]"
 		failed=1
@@ -5019,7 +5096,7 @@ test_qmail_queue()
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
 		echo "  testing outgoing mail archival with recipient based rule failed [$secs sec]"
 		failed=1
@@ -5049,7 +5126,7 @@ test_qmail_queue()
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		printf "\r%118s\n" " "
 		echo "  testing mail for extraqueue feature failed [$secs sec]"
 		failed=1
@@ -5078,7 +5155,7 @@ test_qmail_queue()
 	else
 		echo "h=[$h]"
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		printf "\r%118s\n" " "
 		echo "  testing mail for logheader feature failed [$secs sec]"
 		failed=1
@@ -5118,7 +5195,7 @@ test_qmail_queue()
 		printf "\r%118s\n" " "
 		echo "ret=$ret1, h1=$h1, h2=$h2, h3=[$h3], h4=$h4, h5=$h5"
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $s1 $s2 $s3 | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		echo "  testing mail for removeheaders feature failed [$secs sec]"
 		failed=1
 		/bin/rm -f $cntrldir/removeheaders
@@ -6628,7 +6705,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=245
+	total_tests=247
 fi
 failed=0
 do_setup
@@ -6689,6 +6766,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.40  2023-10-28 20:46:14+05:30  Cprogrammer
+# added qmail-multi test
+#
 # Revision 1.39  2023-10-28 07:49:28+05:30  Cprogrammer
 # fixed test_smtp_surbl
 #
