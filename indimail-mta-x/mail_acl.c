@@ -1,5 +1,8 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.8  2023-10-30 01:21:58+05:30  Cprogrammer
+ * use QREGEX to use regular expressions, else use wildmat
+ *
  * Revision 1.7  2023-10-24 20:06:40+05:30  Cprogrammer
  * use matchregex.h from /usr/include/qmail
  *
@@ -222,7 +225,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.7 2023-10-24 20:06:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.8 2023-10-30 01:21:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

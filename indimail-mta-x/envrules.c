@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.c,v $
+ * Revision 1.22  2023-10-30 01:21:28+05:30  Cprogrammer
+ * use QREGEX to use regular expressions, else use wildmat
+ *
  * Revision 1.21  2023-01-13 12:09:25+05:30  Cprogrammer
  * moved parse_env function to parse_env.c
  *
@@ -160,7 +163,7 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.21 2023-01-13 12:09:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.22 2023-10-30 01:21:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
