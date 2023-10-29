@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.89 2023-10-29 17:13:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.90 2023-10-30 01:22:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,7 +34,7 @@
 #include <makeargs.h>
 #include <getEnvConfig.h>
 #include <noreturn.h>
-#include <matchregex.h>
+#include "do_match.h"
 #include "control.h"
 #include "variables.h"
 #include "fmtqfn.h"
@@ -542,7 +542,7 @@ int
 set_archive(char *eaddr)
 {
 	char           *rule_ptr, *dest, *ptr, *errStr = 0, *addr, *addr_ptr;
-	int             len, at, type, found, negate = 0;
+	int             len, at, type, found, negate = 0, use_regex = 0;
 	static stralloc tmpe = {0};
 
 	/*
@@ -553,6 +553,8 @@ set_archive(char *eaddr)
 	 */
 	addr = eaddr + 1;
 	type = *eaddr;
+	if (env_get("QREGEX"))
+		use_regex = 1;
 	for (rule_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++) {
 		if (((*rule_ptr == ':' || *rule_ptr == '*') && type == 'F')
 			|| ((*rule_ptr == 'F' || *rule_ptr == 'T') && *rule_ptr != type)) {
@@ -584,10 +586,10 @@ set_archive(char *eaddr)
 			addr_ptr = 0;
 		else {
 			if (negate) {
-				if (matchregex(addr, addr_ptr, &errStr) == 0)
+				if (do_match(use_regex, addr, addr_ptr, &errStr) == 0)
 					addr_ptr = 0;
 			} else {
-				if (matchregex(addr, addr_ptr, &errStr) == 1)
+				if (do_match(use_regex, addr, addr_ptr, &errStr) == 1)
 					addr_ptr = 0;
 			}
 		}
@@ -1188,7 +1190,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.89 2023-10-29 17:13:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.90 2023-10-30 01:22:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1196,6 +1198,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.90  2023-10-30 01:22:25+05:30  Cprogrammer
+ * use QREGEX to use regular expressions, else use wildmat
+ *
  * Revision 1.89  2023-10-29 17:13:32+05:30  Cprogrammer
  * bug - error in regexp treated as match
  *

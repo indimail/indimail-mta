@@ -1,5 +1,8 @@
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.8  2023-10-30 01:21:58+05:30  Cprogrammer
+ * use QREGEX to use regular expressions, else use wildmat
+ *
  * Revision 1.7  2023-10-24 20:06:40+05:30  Cprogrammer
  * use matchregex.h from /usr/include/qmail
  *
@@ -27,8 +30,7 @@
 #include <str.h>
 #include <stralloc.h>
 #include <fmt.h>
-#include <matchregex.h>
-#include "wildmat.h"
+#include "do_match.h"
 #include "varargs.h"
 
 extern void     die_regex(char *);
@@ -42,7 +44,8 @@ extern void     flush();
 int
 mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb)
 {
-	int             err, len, count, from_reject, rcpt_reject, rcpt_found, from_found;
+	int             err, len, count, from_reject, rcpt_reject, rcpt_found,
+					from_found;
 	char           *ptr, *cptr, *rcpt_match, *from_match, *err_str;
 	char            count_buf[FMT_ULONG];
 
@@ -90,17 +93,11 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 			rcpt_found = 1;
 			rcpt_match = cptr + 1;
 		} else {
-			if (qregex) {
-				if ((err = matchregex(recipient, cptr + 1, &err_str)) < 0) {
-					*cptr = 0;
-					return (err);
-				} else
-				if (err == 1) {
-					rcpt_found = 1;
-					rcpt_match = cptr + 1;
-				}
+			if ((err = do_match(qregex, recipient, cptr + 1, &err_str)) < 0) {
+				*cptr = 0;
+				return (err);
 			} else
-			if (wildmat_internal(recipient, cptr + 1)) {
+			if (err == 1) {
 				rcpt_found = 1;
 				rcpt_match = cptr + 1;
 			}
@@ -129,16 +126,12 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 		if (!str_diff(sender, ptr + 5)) /*- sender */
 			from_match = ptr + 5;
 		else {
-			if (qregex) {
-				if ((err = matchregex(sender, ptr + 5, &err_str)) < 0) {
-					*cptr = ':';
-					if (verb)
-						die_regex(err_str);
-					return (err);
-				} else
-					from_match = ptr + 5;
+			if ((err = do_match(qregex, sender, ptr + 5, &err_str)) < 0) {
+				*cptr = ':';
+				if (verb)
+					die_regex(err_str);
+				return (err);
 			} else
-			if (wildmat_internal(sender, ptr + 5))
 				from_match = ptr + 5;
 		}
 		if (rcpt_reject) {
@@ -171,18 +164,12 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 			from_found = 1;
 			from_match = ptr + 5;
 		} else {
-			if (qregex) {
-				if ((err = matchregex(sender, ptr + 5, &err_str)) < 0) {
-					*cptr = ':';
-					if (verb)
-						die_regex(err_str);
-					return (err);
-				} else {
-					from_found = 1;
-					from_match = ptr + 5;
-				}
-			} else
-			if (wildmat_internal(sender, ptr + 5)) {
+			if ((err = do_match(qregex, sender, ptr + 5, &err_str)) < 0) {
+				*cptr = ':';
+				if (verb)
+					die_regex(err_str);
+				return (err);
+			} else {
 				from_found = 1;
 				from_match = ptr + 5;
 			}
@@ -211,16 +198,12 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 		if (!str_diff(recipient, cptr + 1)) /*- recipient */
 			rcpt_match = cptr + 1;
 		else {
-			if (qregex) {
-				if ((err = matchregex(recipient, cptr + 1, &err_str)) < 0) {
-					*cptr = ':';
-					if (verb)
-						die_regex(err_str);
-					return (err);
-				} else
-					rcpt_match = cptr + 1;
+			if ((err = do_match(qregex, recipient, cptr + 1, &err_str)) < 0) {
+				*cptr = ':';
+				if (verb)
+					die_regex(err_str);
+				return (err);
 			} else
-			if (wildmat_internal(recipient, cptr + 1))
 				rcpt_match = cptr + 1;
 		}
 		if (from_reject) {
@@ -242,8 +225,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.7 2023-10-24 20:06:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.8 2023-10-30 01:21:58+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidwildmath;
 	x++;
 }

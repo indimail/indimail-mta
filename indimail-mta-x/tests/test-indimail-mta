@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.41 2023-10-29 18:28:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.42 2023-10-30 01:27:19+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -119,6 +119,7 @@ do_cleanup_failed()
 	sudo /bin/rm -rf $qmaildir/alias/virtual/new/* $qmaildir/alias/virtual/cur/*
 	sudo /bin/rm -rf $sysconfdir/users
 	sudo /bin/rm -rf $cntrldir/mailarch
+	sudo /bin/rm -rf $testdir/variables
 }
 
 check_mail_count()
@@ -711,18 +712,6 @@ do_qmail_inject()
 	# $2 : To
 	# $3 : Subject
 	# $4 : Body
-	# $5 : QMAILQUEUE
-	# $6 : FILTERARGS
-	if [ $# -gt 4 ] ; then
-		qq=$5
-	else
-		qq=$qmail_queue
-	fi
-	if [ $# -eq 6 ] ; then
-		ff=$6
-	else
-		ff=""
-	fi
 	(
 	echo "From: $1"
 	echo "To: $2"
@@ -734,26 +723,7 @@ do_qmail_inject()
 	echo
 	echo "$4"
 	) > $testdir/tmp/mail.txt
-	if [ -n "$ff" ] ; then
-		env - \
-			LOGHEADERFD=45 \
-			QUEUEDIR=$testdir/queue \
-			QMAILQUEUE=$qq \
-			CONTROLDIR=$cntrldir \
-			BIGTODO=0 \
-			CONFSPLIT=23 \
-			FILTERARGS="$ff" \
-		$qmail_inject -f$1 $2 <$testdir/tmp/mail.txt
-	else
-		env - \
-			LOGHEADERFD=45 \
-			QUEUEDIR=$testdir/queue \
-			QMAILQUEUE=$qq \
-			CONTROLDIR=$cntrldir \
-			BIGTODO=0 \
-			CONFSPLIT=23 \
-		$qmail_inject -f$1 $2 <$testdir/tmp/mail.txt
-	fi
+	envdir -c $testdir/variables $qmail_inject -f$1 $2 <$testdir/tmp/mail.txt
 	/bin/rm -f $testdir/tmp/mail.txt
 }
 
@@ -4308,7 +4278,13 @@ test_spawn_filter()
 test_qmail_multi()
 {
 	t1=$(date +"%s.%4N")
-	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "Test Message for qmail-multi" $qmail_multi
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo $qmail_multi   > $testdir/variables/QMAILQUEUE
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "Test Message for qmail-multi"
 	check_mail
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
@@ -4331,7 +4307,9 @@ test_qmail_multi()
 	echo "sed -e 's{I am a{I am not a{'"
 	) > $testdir/bin/filter
 	chmod +x $testdir/bin/filter
-	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "I am a fool" $qmail_multi $testdir/bin/filter
+	echo $qmail_multi        > $testdir/variables/QMAILQUEUE
+	echo $testdir/bin/filter > $testdir/variables/FILTERARGS
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "I am a fool"
 	check_mail $maildir 1
 	if [ -n "$mail_file" ] ; then
 		body=$($e822body < $maildir/new/$mail_file)
@@ -4354,6 +4332,7 @@ test_qmail_multi()
 		exit 1
 	fi
 	/bin/rm -f $testdir/bin/filter
+	/bin/rm -rf $testdir/variables
 }
 
 do_without_svscan()
@@ -4405,7 +4384,8 @@ do_without_svscan()
 	test_spamfilter
 	test_qhpsi
 	test_qqeh
-	test_qmail_queue
+	test_qmail_queue 0
+	test_qmail_queue 1
 	test_qmail_multi
 
 	srs_setup 1
@@ -5028,60 +5008,106 @@ test_qmail_queue()
 {
 	# sender rule
 	t1=$(date +"%s.%4N")
+	if [ $1 -eq 0 ] ; then
+	echo "F:*@$HOSTNAME:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
+	else
 	echo "F:.*@$HOSTNAME$:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
+	fi
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	if [ $1 -eq 0 ] ; then
+	                    > $testdir/variables/QREGEX
+	else
+	echo 1              > $testdir/variables/QREGEX
+	fi
 	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test outgoing Mail Archival" "Test Message to test outgoing Mail Archival"
 	check_mail $testdir/$outarchive/Maildir
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing outgoing mail archival with sender based rule succeeded %38s [%.4f sec]\n" " " $secs
+		if [ $1 -eq 0 ] ; then
+		printf "\r  testing outgoing mail archival with sender based wildmat rule succeeded %30s [%.4f sec]\n" " " $secs
+		else
+		printf "\r  testing outgoing mail archival with sender based REGEXP rule succeeded %31s [%.4f sec]\n" " " $secs
+		fi
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
-		echo "  testing outgoing mail archival with sender based rule failed [$secs sec]"
+		if [ $1 -eq 0 ] ; then
+		echo "  testing outgoing mail archival with sender based wildmat rule failed [$secs sec]"
+		else
+		echo "  testing outgoing mail archival with sender based REGEXP rule failed [$secs sec]"
+		fi
 		failed=1
 		exit 1
 	fi
 
 	# sender negative rule
 	t1=$(date +"%s.%4N")
+	if [ $1 -eq 0 ] ; then
+	echo "F:!*@$HOSTNAME:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
+	else
 	echo "F:!.*@$HOSTNAME$:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
+	fi
 	do_qmail_inject $user@$vdomain $user@$HOSTNAME "Test Mail Archival" "Test Message for Mail Archival"
 	check_mail $testdir/$incarchive/Maildir
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing incoming mail archival with sender based rule succeeded %38s [%.4f sec]\n" " " $secs
+		if [ $1 -eq 0 ] ; then
+		printf "\r  testing incoming mail archival with sender based wildmat rule succeeded %30s [%.4f sec]\n" " " $secs
+		else
+		printf "\r  testing incoming mail archival with sender based REGEXP rule succeeded %31s [%.4f sec]\n" " " $secs
+		fi
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
-		echo "  testing incoming mail archival with sender based rule failed [$secs sec]"
+		if [ $1 -eq 0 ] ; then
+		echo "  testing incoming mail archival with sender based wildmat rule failed [$secs sec]"
+		else
+		echo "  testing incoming mail archival with sender based REGEXP rule failed [$secs sec]"
+		fi
 		failed=1
 		exit 1
 	fi
 
 	# recipient rule
 	t1=$(date +"%s.%4N")
+	if [ $1 -eq 0 ] ; then
+	echo "T:*@$HOSTNAME:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
+	else
 	echo "T:.*@$HOSTNAME$:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
+	fi
 	do_qmail_inject $user@$vdomain $user@$HOSTNAME "Test incoming Mail Archival" "Test Message to test incoming Mail Archival"
 	check_mail $testdir/$incarchive/Maildir
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing incoming mail archival with recipient based rule succeeded %35s [%.4f sec]\n" " " $secs
+		if [ $1 -eq 0 ] ; then
+		printf "\r  testing incoming mail archival with recipient based wildmat rule succeeded %27s [%.4f sec]\n" " " $secs
+		else
+		printf "\r  testing incoming mail archival with recipient based REGEXP rule succeeded %28s [%.4f sec]\n" " " $secs
+		fi
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
-		echo "  testing incoming mail archival with recipient based rule failed [$secs sec]"
+		if [ $1 -eq 0 ] ; then
+		echo "  testing incoming mail archival with recipient based wildmat rule failed [$secs sec]"
+		else
+		echo "  testing incoming mail archival with recipient based REGEXP rule failed [$secs sec]"
+		fi
 		failed=1
 		exit 1
 	fi
@@ -5089,20 +5115,32 @@ test_qmail_queue()
 	# receipient negative rule
 	t1=$(date +"%s.%4N")
 	virtual_setup 1
+	if [ $1 -eq 0 ] ; then
+	echo "T:!*@$HOSTNAME:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
+	else
 	echo "T:!.*@$HOSTNAME$:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
+	fi
 	do_qmail_inject $user@$HOSTNAME $user@$vdomain "Testing outgoing Mail Archival" "Test Message to test outgoing Mail Archival"
 	check_mail $testdir/$outarchive/Maildir
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing outgoing mail archival with recipient based rule succeeded %35s [%.4f sec]\n" " " $secs
+		if [ $1 -eq 0 ] ; then
+		printf "\r  testing outgoing mail archival with recipient based wildmat rule succeeded %27s [%.4f sec]\n" " " $secs
+		else
+		printf "\r  testing outgoing mail archival with recipient based REGEXP rule succeeded %28s [%.4f sec]\n" " " $secs
+		fi
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
-		echo "  testing outgoing mail archival with recipient based rule failed [$secs sec]"
+		if [ $1 -eq 0 ] ; then
+		echo "  testing outgoing mail archival with recipient based wilmat rule failed [$secs sec]"
+		else
+		echo "  testing outgoing mail archival with recipient based REGEXP rule failed [$secs sec]"
+		fi
 		failed=1
 		virtual_setup 0
 		exit 1
@@ -5110,6 +5148,9 @@ test_qmail_queue()
 	virtual_setup 0
 	/bin/rm -f $cntrldir/mailarchive
 
+	if [ $1 -eq 0 ] ; then
+		return 0
+	fi
 	# invalid regex in mailarchive
 	t1=$(date +"%s.%4N")
 	echo "T:*@$vdomain$:$incarchive@$HOSTNAME" > $cntrldir/mailarchive
@@ -5164,6 +5205,7 @@ test_qmail_queue()
 	t1=$(date +"%s.%4N")
 	echo "X-Log-Test" > $cntrldir/logheaders
 	exec 45>/tmp/logheaderfd
+	echo 45             > $testdir/variables/LOGHEADERFD
 	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Testing logheader" "Test Message for logheader"
 	check_mail_header $maildir X-Remove-Header1 0
 	h4=$header
@@ -5202,6 +5244,7 @@ test_qmail_queue()
 	echo "X-Remove-Header1"
 	echo "X-Remove-Header2"
 	) > $cntrldir/removeheaders
+	/bin/rm -f $testdir/variables/LOGHEADERFD
 	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Testing removeheaders" "Test Message for removeheaders"
 	check_mail_header $maildir X-Remove-Header1 0
 	s1=$sleep_secs
@@ -5230,6 +5273,7 @@ test_qmail_queue()
 	fi
 	check_mail
 	/bin/rm -f $cntrldir/removeheaders
+	/bin/rm -rf $testdir/variables
 }
 
 test_dkim()
@@ -6732,7 +6776,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=248
+	total_tests=252
 fi
 failed=0
 do_setup
@@ -6793,6 +6837,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.42  2023-10-30 01:27:19+05:30  Cprogrammer
+# added test to use wildmat instead of regexp for mailarchival
+#
 # Revision 1.41  2023-10-29 18:28:20+05:30  Cprogrammer
 # added test case to test invalid regex expression
 #
