@@ -65,8 +65,6 @@
  * Initial revision
  *
  */
-#include <ctype.h>
-#include <fnmatch.h>
 #include <error.h>
 #include <stralloc.h>
 #include <env.h>
@@ -74,38 +72,7 @@
 #include "parse_env.h"
 #include "control.h"
 #include "envrules.h"
-#include "qregex.h"
-#include "matchregex.h"
-#include "wildmat.h"
-
-int
-do_match(int use_regex, char *text, char *regex, char **errStr)
-{
-	int             i;
-
-	if (errStr)
-		*errStr = 0;
-	if (use_regex)
-		return (matchregex(text, regex, errStr));
-	else
-	if (env_get("USE_FNMATCH")) {
-#ifdef FNM_CASEFOLD
-		i = FNM_PATHNAME|FNM_CASEFOLD;
-#else
-		i = FNM_PATHNAME;
-#endif
-		switch(fnmatch(regex, text, i))
-		{
-		case 0:
-			return (1);
-		case FNM_NOMATCH:
-			return (0);
-		default:
-			return (AM_REGEX_ERR);
-		}
-	} else
-		return (wildmat_internal(text, regex));
-}
+#include "do_match.h"
 
 int
 envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
@@ -195,6 +162,5 @@ getversion_envrules_c()
 {
 	static char    *x = "$Id: envrules.c,v 1.21 2023-01-13 12:09:25+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidwildmath;
 	x++;
 }
