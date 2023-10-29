@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.307 2023-10-24 20:08:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.308 2023-10-29 17:13:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.307 $";
+static char    *revision = "$Revision: 1.308 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2339,10 +2339,11 @@ badhostcheck()
 		if (!stralloc_copyb(&curregex, brh.s + j, (i - j)) ||
 				!stralloc_0(&curregex))
 			die_nomem();
-		x = matchregex(remotehost, curregex.s, NULL);
-		if ((negate) && (x == 0))
-			return 1;
-		if (!(negate) && (x > 0))
+		if ((x = matchregex(remotehost, curregex.s, NULL)) == -1)
+			die_regex();
+		if (negate)
+			x = !x;
+		if (x)
 			return 1;
 		j = i + 1;
 		negate = 0;
@@ -7190,6 +7191,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.308  2023-10-29 17:13:43+05:30  Cprogrammer
+ * bug - error in regexp treated as match
+ *
  * Revision 1.307  2023-10-24 20:08:07+05:30  Cprogrammer
  * use matchregex.h from /usr/include/qmail
  *
@@ -7568,7 +7572,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.307 2023-10-24 20:08:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.308 2023-10-29 17:13:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

@@ -209,8 +209,8 @@ where \fItype\fR is \fBF\fR or \fBT\fR. If \fItype\fR is \fBF\fR, rule
 is appled on the sender. If \fItype\fR is \fBT\fR, the rule is applied on
 the recipient. \fItype\fR can be omitted to match all recipients (but not
 senders). \fIregexp\fR is an expression to match the address (sender or
-recipient as specfied by \fItype\fR) and \fIdest_mailbox\fR is a valid
-email address. \fIregexp\fR can be omitted to match any address. Remember
+recipient as specfied by \fItype\fR). \fIdest_mailbox\fR is a valid email
+address. \fIregexp\fR can be omitted to match any address. Remember
 that \fIregexp\fR is a real regular expression and not filename glob
 pattern as used by functions like \fBfnmatch\fR(3). Typically
 \fB.*@yourdomain\fR (and not \fB*@yourdomain\fR) is what you intend when
@@ -226,7 +226,7 @@ replaced as below
 .EE
 
 As stated above, the address used for matching \fIregexp\fR is the sender
-in case type is \fBF\fR. For bounces, you can use \fB<>\fR to match a null
+when type is \fBF\fR. For bounces, you can use \fB<>\fR to match a null
 sender. e.g.
 
 .EX
@@ -238,8 +238,8 @@ When a rule matches a sender or any one of the recipients, the
 recipient list. When a rule matches multiple recipients, only one email
 address will be added to recipient list to avoid duplicates.
 
-The below will make a copy all mails for domain \fIyourdomain\fR to
-\fIarchyourdomain\fR (for all senders - practically each and every mail).
+The below will make a copy all mails for domain \fIdomain\fR to
+arch\fIdomain\fR (for all recipients - practically each and every mail).
 
 .EX
   ::%u@arch%d
@@ -259,6 +259,8 @@ result of \fIregexp\fR match.
 .EX
   F:!.*@yourdomain:incoming@yourdomain
 .EE
+
+NOTE: Invalid \fIregexp\fR are silently discarded.
 
 .TP
 \fBoriginipfield\fR
