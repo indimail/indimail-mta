@@ -1,11 +1,11 @@
 /*
- * $Id: qregex.c,v 1.34 2023-10-24 20:08:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.35 2023-10-29 17:13:39+05:30 Cprogrammer Exp mbhangui $
  *
  * qregex (v2)
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2023-10-24 20:08:02+05:30 $
- * Revision: $Revision: 1.34 $
+ * Modified: $Date: 2023-10-29 17:13:39+05:30 $
+ * Revision: $Revision: 1.35 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -223,11 +223,12 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 				return (AM_MEMORY_ERR);
 			if (!stralloc_0(&curregex))
 				return (AM_MEMORY_ERR);
-			if ((k = matchregex(addr->s, curregex.s, errStr)) == 1) {
-				if (negate)
-					return (0);
+			if ((k = matchregex(addr->s, curregex.s, errStr)) == -1)
+				return AM_REGEX_ERR;
+			if (negate)
+				k = !k;
+			if (k)
 				match = 1;
-			}
 			j = i + 1;
 			negate = 0;
 		}
@@ -238,7 +239,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.34 2023-10-24 20:08:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qregex.c,v 1.35 2023-10-29 17:13:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
@@ -246,6 +247,9 @@ getversion_qregex_c()
 
 /*
  * $Log: qregex.c,v $
+ * Revision 1.35  2023-10-29 17:13:39+05:30  Cprogrammer
+ * bug - error in regexp treated as match
+ *
  * Revision 1.34  2023-10-24 20:08:02+05:30  Cprogrammer
  * use matchregex.h from /usr/include/qmail
  *

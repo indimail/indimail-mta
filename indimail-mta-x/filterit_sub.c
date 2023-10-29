@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.4 2023-10-01 02:11:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.5 2023-10-29 17:12:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -615,7 +615,8 @@ filterit_sub1(int argc, char **argv)
 		break;
 	case 5: /*- RegExp */
 		for (ptr = matched_header.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
-		match = matchregex(matched_header.s + tmp.len, keyword, 0);
+		if ((match = matchregex(matched_header.s + tmp.len, keyword, 0)) == -1)
+			break;
 		if (negate)
 			match = !match;
 		if (match)
@@ -652,6 +653,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.5  2023-10-29 17:12:48+05:30  Cprogrammer
+ * bug - error in regexp treated as match
+ *
  * Revision 1.4  2023-10-01 02:11:00+05:30  Cprogrammer
  * removed setting of QQEH for X-FilterIT header
  *
