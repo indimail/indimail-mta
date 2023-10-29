@@ -29,6 +29,8 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
     treated as match
 18. test-indimail-mta: added test case to test invalid regex expression
 19. envrules.c, mail_acl.c, do_match.c: moved do_match to do_match.c
+20. use QREGEX to use regexp, else wildmat for control files accelist,
+    mailarchive (qmail-smtpd, qmail-queue)
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
