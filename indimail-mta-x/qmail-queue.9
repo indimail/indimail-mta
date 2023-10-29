@@ -210,11 +210,9 @@ is appled on the sender. If \fItype\fR is \fBT\fR, the rule is applied on
 the recipient. \fItype\fR can be omitted to match all recipients (but not
 senders). \fIregexp\fR is an expression to match the address (sender or
 recipient as specfied by \fItype\fR). \fIdest_mailbox\fR is a valid email
-address. \fIregexp\fR can be omitted to match any address. Remember
-that \fIregexp\fR is a real regular expression and not filename glob
-pattern as used by functions like \fBfnmatch\fR(3). Typically
-\fB.*@yourdomain\fR (and not \fB*@yourdomain\fR) is what you intend when
-you want to use it to match all addresses from \fIyourdomain\fR.
+address. \fIregexp\fR can be omitted to match any address. You can set
+QREGEX environment variable if you want to use actual regex patterns. If
+\fBQREGEX\fR is not set, filename global pattern will be used for match.
 \fIregexp\fR can be preceded by a \fB!\fR sign to negate the expression. A
 \fB%\fR in \fIdest_mailbox\fR followed by \fBu\fR, \fBd\fR or \fBe\fR gets
 replaced as below
