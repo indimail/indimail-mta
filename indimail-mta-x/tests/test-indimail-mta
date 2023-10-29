@@ -5032,7 +5032,7 @@ test_qmail_queue()
 		if [ $1 -eq 0 ] ; then
 		printf "\r  testing outgoing mail archival with sender based wildmat rule succeeded %30s [%.4f sec]\n" " " $secs
 		else
-		printf "\r  testing outgoing mail archival with sender based QREGEX rule succeeded %31s [%.4f sec]\n" " " $secs
+		printf "\r  testing outgoing mail archival with sender based REGEXP rule succeeded %31s [%.4f sec]\n" " " $secs
 		fi
 		print_pct
 	else
@@ -5042,7 +5042,7 @@ test_qmail_queue()
 		if [ $1 -eq 0 ] ; then
 		echo "  testing outgoing mail archival with sender based wildmat rule failed [$secs sec]"
 		else
-		echo "  testing outgoing mail archival with sender based QREGEX rule failed [$secs sec]"
+		echo "  testing outgoing mail archival with sender based REGEXP rule failed [$secs sec]"
 		fi
 		failed=1
 		exit 1
@@ -5064,7 +5064,7 @@ test_qmail_queue()
 		if [ $1 -eq 0 ] ; then
 		printf "\r  testing incoming mail archival with sender based wildmat rule succeeded %30s [%.4f sec]\n" " " $secs
 		else
-		printf "\r  testing incoming mail archival with sender based QREGEX rule succeeded %31s [%.4f sec]\n" " " $secs
+		printf "\r  testing incoming mail archival with sender based REGEXP rule succeeded %31s [%.4f sec]\n" " " $secs
 		fi
 		print_pct
 	else
@@ -5074,7 +5074,7 @@ test_qmail_queue()
 		if [ $1 -eq 0 ] ; then
 		echo "  testing incoming mail archival with sender based wildmat rule failed [$secs sec]"
 		else
-		echo "  testing incoming mail archival with sender based QREGEX rule failed [$secs sec]"
+		echo "  testing incoming mail archival with sender based REGEXP rule failed [$secs sec]"
 		fi
 		failed=1
 		exit 1
@@ -5106,7 +5106,7 @@ test_qmail_queue()
 		if [ $1 -eq 0 ] ; then
 		echo "  testing incoming mail archival with recipient based wildmat rule failed [$secs sec]"
 		else
-		echo "  testing incoming mail archival with recipient based QREGEX rule failed [$secs sec]"
+		echo "  testing incoming mail archival with recipient based REGEXP rule failed [$secs sec]"
 		fi
 		failed=1
 		exit 1
@@ -5129,7 +5129,7 @@ test_qmail_queue()
 		if [ $1 -eq 0 ] ; then
 		printf "\r  testing outgoing mail archival with recipient based wildmat rule succeeded %27s [%.4f sec]\n" " " $secs
 		else
-		printf "\r  testing outgoing mail archival with recipient based QREGEX rule succeeded %28s [%.4f sec]\n" " " $secs
+		printf "\r  testing outgoing mail archival with recipient based REGEXP rule succeeded %28s [%.4f sec]\n" " " $secs
 		fi
 		print_pct
 	else
@@ -5139,7 +5139,7 @@ test_qmail_queue()
 		if [ $1 -eq 0 ] ; then
 		echo "  testing outgoing mail archival with recipient based wilmat rule failed [$secs sec]"
 		else
-		echo "  testing outgoing mail archival with recipient based QREGEX rule failed [$secs sec]"
+		echo "  testing outgoing mail archival with recipient based REGEXP rule failed [$secs sec]"
 		fi
 		failed=1
 		virtual_setup 0
