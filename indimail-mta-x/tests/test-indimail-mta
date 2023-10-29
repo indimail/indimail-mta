@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.40 2023-10-28 20:46:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.41 2023-10-29 18:28:20+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -6793,6 +6793,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.41  2023-10-29 18:28:20+05:30  Cprogrammer
+# added test case to test invalid regex expression
+#
 # Revision 1.40  2023-10-28 20:46:14+05:30  Cprogrammer
 # added qmail-multi test
 #
