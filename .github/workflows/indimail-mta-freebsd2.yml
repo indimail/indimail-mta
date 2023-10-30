@@ -1,4 +1,4 @@
-name: indimail-mta FreeBSD-bad CI
+name: indimail-mta FreeBSD2 CI
 
 on:
   push:
@@ -26,8 +26,8 @@ on:
 jobs:
   testfreebsd:
     runs-on: macos-12
-    name: FreeBSD
-    timeout-minutes: 20 # randomly bootloops https://github.com/vmactions/freebsd-vm/issues/74
+    name: FreeBSD2
+    timeout-minutes: 60 # randomly bootloops https://github.com/vmactions/freebsd-vm/issues/74
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
     steps:
@@ -39,7 +39,7 @@ jobs:
         repository: mbhangui/libqmail
         path: libqmail
     - name: build indimail-mta
-      id: FreeBSD
+      id: FreeBSD2
       uses: vmactions/freebsd-vm@v0.3.1
       with:
         envs: 'MYTOKEN'
