@@ -536,24 +536,26 @@ sender and recipient. A line in \fIaccesslist\fR is of the form
  type:sender:recipient
 .EE
 
-where type is either the word 'from' or 'rcpt' and \fIsender\fR and
-\fIrecipient\fR can be the actual sender, recipient or a wildcard. The
-environment variable QREGEX can be set to match \fIsender\fR,
-\fIrecipient\fR using regular expressions.
+where type is either the word 'from' for access control on sender. It can
+be 'rcpt' for access control on recipient. \fIsender\fR and \fIrecipient\fR
+can be the actual sender, recipient or a wildcard/regexp. The environment
+variable \fBQREGEX\fR can be set to match \fIsender\fR, \fIrecipient\fR
+using regular expressions. If \fBQREGEX\fR environment variable is set to 0
+or not set, simple wildcard matching will be used.
 
 .EX
+ from:recruiter@yahoo.com:hr@indimail.org 
  rcpt:ceo@indimail.org:country_distribution_list@indimail.org
  rcpt:md@indimail.org:country_distribution_list@indimail.org
- from:recruiter@yahoo.com:hr@indimail.org 
 
- - only ceo@indimail.org and md@indimail.org
-   are permitted to send mails to country_distribution_list@indimail.org
- - recruiter@yahoo.com is permitted to send mails to
-   hr@indimail.org only
+ - recruiter@yahoo.com is permitted to send mails only to
+   hr@indimail.org and no one else.
+ - only ceo@indimail.org and md@indimail.org are permitted to send mails to
+   country_distribution_list@indimail.org
 
 These restrictions do not apply when the from is "" or the recipient is
 postmaster or abuse. This is to prevent violating RFCs. A utility
-\fBuacl(1)\fR is provided to test the accesslist.
+\fBuacl\fR(1) is provided to test the accesslist.
 .EE
 
 .TP 5
