@@ -1,6 +1,6 @@
 /*
  * $Log: mail_acl.c,v $
- * Revision 1.8  2023-10-30 01:21:58+05:30  Cprogrammer
+ * Revision 1.8  2023-10-30 20:13:26+05:30  Cprogrammer
  * use QREGEX to use regular expressions, else use wildmat
  *
  * Revision 1.7  2023-10-24 20:06:40+05:30  Cprogrammer
@@ -132,6 +132,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 					die_regex(err_str);
 				return (err);
 			} else
+			if (err == 1)
 				from_match = ptr + 5;
 		}
 		if (rcpt_reject) {
@@ -169,7 +170,8 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 				if (verb)
 					die_regex(err_str);
 				return (err);
-			} else {
+			} else
+			if (err == 1) {
 				from_found = 1;
 				from_match = ptr + 5;
 			}
@@ -204,6 +206,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 					die_regex(err_str);
 				return (err);
 			} else
+			if (err == 1)
 				rcpt_match = cptr + 1;
 		}
 		if (from_reject) {
@@ -225,7 +228,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.8 2023-10-30 01:21:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.8 2023-10-30 20:13:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
