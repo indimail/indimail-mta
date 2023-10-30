@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: envrules.c,v 1.23 2023-10-30 10:27:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <error.h>
 #include <stralloc.h>
@@ -97,13 +97,16 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.22 2023-10-30 01:21:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.23 2023-10-30 10:27:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: envrules.c,v $
+ * Revision 1.23  2023-10-30 10:27:52+05:30  Cprogrammer
+ * use value of QREGEX to use matchregex()
+ *
  * Revision 1.22  2023-10-30 01:21:28+05:30  Cprogrammer
  * use QREGEX to use regular expressions, else use wildmat
  *

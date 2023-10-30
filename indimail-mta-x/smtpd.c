@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.308 2023-10-29 17:13:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.309 2023-10-30 10:30:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.308 $";
+static char    *revision = "$Revision: 1.309 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -7191,6 +7191,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.309  2023-10-30 10:30:25+05:30  Cprogrammer
+ * use do_match() for hostaccess
+ *
  * Revision 1.308  2023-10-29 17:13:43+05:30  Cprogrammer
  * bug - error in regexp treated as match
  *
@@ -7572,7 +7575,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.308 2023-10-29 17:13:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.309 2023-10-30 10:30:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

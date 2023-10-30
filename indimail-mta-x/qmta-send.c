@@ -1,5 +1,8 @@
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.25  2023-10-30 10:29:14+05:30  Cprogrammer
+ * use qregex control file to set QREGEX env variable
+ *
  * Revision 1.24  2023-10-17 08:22:55+05:30  Cprogrammer
  * fixed path for qmail-lspawn, qmail-rspawn, qmail-clean
  *
@@ -2836,7 +2839,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.24 2023-10-17 08:22:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.25 2023-10-30 10:29:14+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

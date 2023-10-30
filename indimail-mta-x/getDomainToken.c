@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.5  2023-10-30 10:28:25+05:30  Cprogrammer
+ * use value of QREGEX to use matchregex()
+ *
  * Revision 1.4  2023-02-01 18:14:02+05:30  Cprogrammer
  * added feature to set environment variables in dkimkeys facilitating multi-signature generation with mixed encryption methods
  *
@@ -112,7 +115,7 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.4 2023-02-01 18:14:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getDomainToken.c,v 1.5 2023-10-30 10:28:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;

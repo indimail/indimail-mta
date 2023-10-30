@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.31 2023-10-02 22:50:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.32 2023-10-30 10:30:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -3774,7 +3774,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.31 2023-10-02 22:50:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.32 2023-10-30 10:30:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3784,6 +3784,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.32  2023-10-30 10:30:18+05:30  Cprogrammer
+ * use qregex control file to set QREGEX env variable
+ *
  * Revision 1.31  2023-10-02 22:50:46+05:30  Cprogrammer
  * fix copy of srs_result
  *

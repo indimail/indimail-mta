@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.90 2023-10-30 01:22:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.91 2023-10-30 10:28:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1190,7 +1190,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.90 2023-10-30 01:22:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.91 2023-10-30 10:28:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1198,6 +1198,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.91  2023-10-30 10:28:40+05:30  Cprogrammer
+ * use value of QREGEX to use matchregex()
+ *
  * Revision 1.90  2023-10-30 01:22:25+05:30  Cprogrammer
  * use QREGEX to use regular expressions, else use wildmat
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.108 2023-10-02 22:50:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.109 2023-10-30 10:28:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2676,7 +2676,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.108 2023-10-02 22:50:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.109 2023-10-30 10:28:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2686,6 +2686,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.109  2023-10-30 10:28:44+05:30  Cprogrammer
+ * use qregex control file to set QREGEX env variable
+ *
  * Revision 1.108  2023-10-02 22:50:35+05:30  Cprogrammer
  * fix copy of srs_result
  *
