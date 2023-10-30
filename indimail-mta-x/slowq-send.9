@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH slowq-send 8
 .SH NAME
 slowq-send \- deliver mail messages from the queue with rate control
@@ -135,6 +136,9 @@ environment variable.
 runs as \fIqmails\fR user, \fIqmail\fR group and with supplementary groups
 defined for \fIqmails\fR user if the environment variable
 \fBUSE_SETGROUPS\fR is set for \fBqmail-start\fR(8).
+
+If the control file \fBqregex\fR is present, \fBslowq-send\fR will set
+\fBQREGEX\fR environment variable with the content of the control file.
 
 .SH "CONTROL FILES"
 \fBWARNING\fR: \fBslowq-send\fR reads its control files only when it

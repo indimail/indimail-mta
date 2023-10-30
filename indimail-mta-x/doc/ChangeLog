@@ -31,6 +31,12 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 19. envrules.c, mail_acl.c, do_match.c: moved do_match to do_match.c
 20. use QREGEX to use regexp, else wildmat for control files accelist,
     mailarchive (qmail-smtpd, qmail-queue)
+- 30/10/2023
+21. qmail-send.c, slowq-send.c, qmta-send.c: Set QREGEX env variable if qregex
+    control file has qregex non-zero
+22. envrules.c, getDomainToken.c, qmail-queue.c, qregex.c: Use value of QREGEX
+    to use matchregex()
+23. smtpd.c: Use do_match for matching host in badhost
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

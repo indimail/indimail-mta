@@ -154,6 +154,8 @@ address_match(char *fn, stralloc *addr, stralloc *bhf, struct constmap *mapbhf,
 #endif
 	if ((ptr = env_get("QREGEX")))
 		scan_int(ptr, &x);
+	else
+		x = 0;
 	if (ptr && x)
 		return (regex_match(addr, bhf, errStr));
 	else

@@ -1,77 +1,11 @@
 /*
- * $Log: envrules.c,v $
- * Revision 1.22  2023-10-30 01:21:28+05:30  Cprogrammer
- * use QREGEX to use regular expressions, else use wildmat
- *
- * Revision 1.21  2023-01-13 12:09:25+05:30  Cprogrammer
- * moved parse_env function to parse_env.c
- *
- * Revision 1.20  2021-05-23 07:09:26+05:30  Cprogrammer
- * include wildmat.h for wildmat_internal
- *
- * Revision 1.19  2019-03-07 00:49:37+05:30  Cprogrammer
- * do not treat regcomp error as matches
- *
- * Revision 1.18  2018-11-29 15:21:26+05:30  Cprogrammer
- * skip white spaces in envrules
- *
- * Revision 1.17  2015-04-14 20:01:15+05:30  Cprogrammer
- * fixed matching of null address
- *
- * Revision 1.16  2014-03-07 02:07:16+05:30  Cprogrammer
- * use env variable USE_FNMATCH to use fnmatch() for pattern matching
- *
- * Revision 1.15  2014-01-29 14:06:00+05:30  Cprogrammer
- * made domainqueue file configurable through env variable DOMAINQUEUE
- *
- * Revision 1.14  2013-11-21 15:40:12+05:30  Cprogrammer
- * added domainqueue functionality
- *
- * Revision 1.13  2010-06-18 19:37:58+05:30  Cprogrammer
- * initialize errStr
- *
- * Revision 1.12  2009-05-01 12:52:03+05:30  Cprogrammer
- * return error if control_readfile() fails
- *
- * Revision 1.11  2009-05-01 10:39:44+05:30  Cprogrammer
- * flipped memory error and file open error
- * added errstr argument to envrules() to relay back errors
- *
- * Revision 1.10  2008-06-11 18:18:32+05:30  Cprogrammer
- * added configurable environment variable name for default rules file
- *
- * Revision 1.9  2008-05-21 16:06:05+05:30  Cprogrammer
- * trivial change
- *
- * Revision 1.8  2007-12-21 14:35:21+05:30  Cprogrammer
- * added documentation
- *
- * Revision 1.7  2006-01-22 11:41:37+05:30  Cprogrammer
- * added ability to have ',' character in environment
- *
- * Revision 1.6  2004-10-22 20:24:50+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.5  2004-10-09 00:57:03+05:30  Cprogrammer
- * removed param.h
- *
- * Revision 1.4  2004-10-08 19:19:46+05:30  Cprogrammer
- * prevent segmentation fault for luser mistakes
- *
- * Revision 1.3  2004-10-02 18:49:58+05:30  Cprogrammer
- * added regular expression for envrules
- *
- * Revision 1.2  2004-05-23 22:16:30+05:30  Cprogrammer
- * added envrules filename as argument
- *
- * Revision 1.1  2004-02-05 18:47:00+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: $
  */
 #include <error.h>
 #include <stralloc.h>
 #include <env.h>
 #include <str.h>
+#include <scan.h>
 #include "parse_env.h"
 #include "control.h"
 #include "envrules.h"
@@ -95,8 +29,8 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 	}
 	if (!count)
 		return (0);
-	if (env_get("QREGEX"))
-		use_regex = 1;
+	if ((ptr = env_get("QREGEX")))
+		scan_int(ptr, &use_regex);
 	for (count = lcount = len = 0, ptr = rules.s; len < rules.len;) {
 		len += (str_len(ptr) + 1);
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
@@ -167,3 +101,74 @@ getversion_envrules_c()
 
 	x++;
 }
+
+/*
+ * $Log: envrules.c,v $
+ * Revision 1.22  2023-10-30 01:21:28+05:30  Cprogrammer
+ * use QREGEX to use regular expressions, else use wildmat
+ *
+ * Revision 1.21  2023-01-13 12:09:25+05:30  Cprogrammer
+ * moved parse_env function to parse_env.c
+ *
+ * Revision 1.20  2021-05-23 07:09:26+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
+ * Revision 1.19  2019-03-07 00:49:37+05:30  Cprogrammer
+ * do not treat regcomp error as matches
+ *
+ * Revision 1.18  2018-11-29 15:21:26+05:30  Cprogrammer
+ * skip white spaces in envrules
+ *
+ * Revision 1.17  2015-04-14 20:01:15+05:30  Cprogrammer
+ * fixed matching of null address
+ *
+ * Revision 1.16  2014-03-07 02:07:16+05:30  Cprogrammer
+ * use env variable USE_FNMATCH to use fnmatch() for pattern matching
+ *
+ * Revision 1.15  2014-01-29 14:06:00+05:30  Cprogrammer
+ * made domainqueue file configurable through env variable DOMAINQUEUE
+ *
+ * Revision 1.14  2013-11-21 15:40:12+05:30  Cprogrammer
+ * added domainqueue functionality
+ *
+ * Revision 1.13  2010-06-18 19:37:58+05:30  Cprogrammer
+ * initialize errStr
+ *
+ * Revision 1.12  2009-05-01 12:52:03+05:30  Cprogrammer
+ * return error if control_readfile() fails
+ *
+ * Revision 1.11  2009-05-01 10:39:44+05:30  Cprogrammer
+ * flipped memory error and file open error
+ * added errstr argument to envrules() to relay back errors
+ *
+ * Revision 1.10  2008-06-11 18:18:32+05:30  Cprogrammer
+ * added configurable environment variable name for default rules file
+ *
+ * Revision 1.9  2008-05-21 16:06:05+05:30  Cprogrammer
+ * trivial change
+ *
+ * Revision 1.8  2007-12-21 14:35:21+05:30  Cprogrammer
+ * added documentation
+ *
+ * Revision 1.7  2006-01-22 11:41:37+05:30  Cprogrammer
+ * added ability to have ',' character in environment
+ *
+ * Revision 1.6  2004-10-22 20:24:50+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.5  2004-10-09 00:57:03+05:30  Cprogrammer
+ * removed param.h
+ *
+ * Revision 1.4  2004-10-08 19:19:46+05:30  Cprogrammer
+ * prevent segmentation fault for luser mistakes
+ *
+ * Revision 1.3  2004-10-02 18:49:58+05:30  Cprogrammer
+ * added regular expression for envrules
+ *
+ * Revision 1.2  2004-05-23 22:16:30+05:30  Cprogrammer
+ * added envrules filename as argument
+ *
+ * Revision 1.1  2004-02-05 18:47:00+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

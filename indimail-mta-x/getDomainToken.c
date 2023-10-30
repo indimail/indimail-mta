@@ -17,6 +17,7 @@
 #include <regex.h>
 #include <stralloc.h>
 #include <env.h>
+#include <scan.h>
 #include "wildmat.h"
 #include "getDomainToken.h"
 #include "parse_env.h"
@@ -44,9 +45,11 @@ char           *
 getDomainToken(char *domain, stralloc *sa)
 {
 	regex_t         qreg;
-	int             len, n, retval;
+	int             len, n, retval, use_regex = 0;
 	char           *ptr, *p1, *p2;
 
+	if ((ptr = env_get("QREGEX")))
+		scan_int(ptr, &use_regex);
 	for (len = 0, ptr = sa->s;len < sa->len;) {
 		len += ((n = str_len(ptr)) + 1);
 		for (p1 = ptr;*p1 && *p1 != ':';p1++);
@@ -67,7 +70,7 @@ getDomainToken(char *domain, stralloc *sa)
 			}
 			/*- build the regex */
 			if ((retval = str_diff(ptr, domain))) {
-				if (env_get("QREGEX")) {
+				if (use_regex) {
 					if ((retval = REGCOMP(qreg, ptr)) == 0)
 						retval = (REGEXEC(qreg, domain) == REG_NOMATCH ? 1 : REG_NOERROR);
 					regfree(&qreg);

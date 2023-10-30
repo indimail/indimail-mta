@@ -1918,7 +1918,7 @@ haslibgsasl.h auto_control.h auto_sysconfdir.h
 smtpd.o: \
 compile smtpd.c control.h received.h varargs.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
-variables.h rcpthosts.h etrn.h batv.h \
+variables.h rcpthosts.h etrn.h batv.h do_match.h \
 envrules.h tablematch.h qregex.h sqlmatch.h \
 smtp_plugin.h auto_prefix.h hasmysql.h indimail_stub.h \
 auto_control.h dns.h hassmtputf8.h haslibgsasl.h \

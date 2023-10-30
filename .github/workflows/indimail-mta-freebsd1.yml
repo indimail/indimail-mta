@@ -1,4 +1,4 @@
-name: indimail-mta FreeBSD-bad CI
+name: indimail-mta FreeBSD1 CI
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - '**/indimail-mta-x/**'
       - '**/libdkim2-x/**'
       - '**/libsrs2-x/**'
-      - .github/workflows/indimail-mta-freebsd-bad.yml
+      - .github/workflows/indimail-mta-freebsd1.yml
       - '!**/indimail-mta-x/indimail-mta.spec.in'
       - '!**/libdkim2-x/libdkim2.spec.in'
       - '!**/libsrs2-x/libsrs2.spec.in'
@@ -25,28 +25,29 @@ on:
 
 jobs:
   testfreebsd:
-    runs-on: macos-12
-    name: FreeBSD
-    timeout-minutes: 20 # randomly bootloops https://github.com/vmactions/freebsd-vm/issues/74
-    env:
-      MYTOKEN : ${{ secrets.MYTOKEN }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    name: FreeBSD1
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         path: main
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         repository: mbhangui/libqmail
         path: libqmail
     - name: build indimail-mta
-      id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.3.1
+      id: FreeBSD1
+      uses: cross-platform-actions/action@v0.20.0
       with:
-        envs: 'MYTOKEN'
-        usesh: true
-        prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap26-client libgsasl base64
+        operating_system: freebsd
+        architecture: x86-64
+        version: '13.2'
+        host: ubuntu-latest
         run: |
-          cd libqmail; ./default.configure; make; make install-strip
-          cd ../main/libdkim2-x; ./default.configure; make; make install-strip
-          cd ../libsrs2-x; ./default.configure; make; make install-strip
+          freebsd-version
+          sudo pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap26-client libgsasl base64
+          cd libqmail; ./default.configure; make; sudo make install-strip
+          cd ../main/libdkim2-x; ./default.configure; make; sudo make install-strip
+          cd ../libsrs2-x; ./default.configure; make; sudo make install-strip
           cd ../indimail-mta-x; ./default.configure; ./qmake
