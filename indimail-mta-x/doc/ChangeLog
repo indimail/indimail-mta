@@ -37,6 +37,8 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 22. envrules.c, getDomainToken.c, qmail-queue.c, qregex.c: Use value of QREGEX
     to use matchregex()
 23. smtpd.c: Use do_match for matching host in badhost
+24. getDomainToken.c: restore original environment on no match when processing
+    dkimkeys
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

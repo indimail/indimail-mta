@@ -1,7 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
- * Revision 1.5  2023-10-30 10:28:25+05:30  Cprogrammer
- * use value of QREGEX to use matchregex()
+ * Revision 1.5  2023-10-30 16:21:01+05:30  Cprogrammer
+ * use value of QREGEX to to use matchregex() or wildmat_internal()
+ * restore original environment on no match when processing dkimkeys
  *
  * Revision 1.4  2023-02-01 18:14:02+05:30  Cprogrammer
  * added feature to set environment variables in dkimkeys facilitating multi-signature generation with mixed encryption methods
@@ -16,6 +17,7 @@
  * Initial revision
  *
  */
+#include <stddef.h>
 #include <str.h>
 #include <regex.h>
 #include <stralloc.h>
@@ -48,11 +50,10 @@ char           *
 getDomainToken(char *domain, stralloc *sa)
 {
 	regex_t         qreg;
-	int             len, n, retval, use_regex = 0;
-	char           *ptr, *p1, *p2;
+	int             len, n, retval, use_regex;
+	char           *ptr, *p1, *p2, *x;
+	char          **orig_env;
 
-	if ((ptr = env_get("QREGEX")))
-		scan_int(ptr, &use_regex);
 	for (len = 0, ptr = sa->s;len < sa->len;) {
 		len += ((n = str_len(ptr)) + 1);
 		for (p1 = ptr;*p1 && *p1 != ':';p1++);
@@ -70,7 +71,13 @@ getDomainToken(char *domain, stralloc *sa)
 			if (*p2 == ':') {
 				*p2 = 0;
 				parse_env(p2 + 1);
-			}
+				orig_env = environ; /* save environ to be restored later in case of non-match */
+			} else
+				orig_env = NULL;
+			if ((x = env_get("QREGEX")))
+				scan_int(x, &use_regex);
+			else
+				use_regex = 0;
 			/*- build the regex */
 			if ((retval = str_diff(ptr, domain))) {
 				if (use_regex) {
@@ -105,7 +112,9 @@ getDomainToken(char *domain, stralloc *sa)
 						return (p1 + 8);
 				}
 				return (p1 + 1); /*- domain:command */
-			}
+			} else
+			if (orig_env)
+				environ = orig_env;
 		}
 		ptr = sa->s + len;
 	} /*- for (len = 0, ptr = sa->s;len < sa->len;) */
@@ -115,7 +124,7 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.5 2023-10-30 10:28:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getDomainToken.c,v 1.5 2023-10-30 16:21:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;
