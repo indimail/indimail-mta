@@ -45,7 +45,6 @@ jobs:
         version: '9.3'
         host: ubuntu-latest
         run: |
-          freebsd-version
           sudo pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap26-client libgsasl base64
           cd libqmail; ./default.configure; make; sudo make install-strip
           cd ../main/libdkim2-x; ./default.configure; make; sudo make install-strip
