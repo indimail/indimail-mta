@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.43 2023-10-30 16:22:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.44 2023-10-30 21:10:56+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -119,7 +119,9 @@ do_cleanup_failed()
 	sudo /bin/rm -rf $qmaildir/alias/Maildir/new/*
 	sudo /bin/rm -rf $qmaildir/alias/virtual/new/* $qmaildir/alias/virtual/cur/*
 	sudo /bin/rm -rf $sysconfdir/users
-	sudo /bin/rm -rf $cntrldir/mailarch
+	sudo /bin/rm -f  $cntrldir/mailarch
+	sudo /bin/rm -f  $cntrldir/accesslist
+	sudo /bin/rm -f  $cntrldir/from.envrules $cntrldir/badmailfrom.custom
 	sudo /bin/rm -rf $testdir/variables
 }
 
@@ -441,6 +443,7 @@ setup_config()
 	echo @$ext_domain
 	echo @$HOSTNAME
 	echo @$srs_domain
+	echo @$vdomain
 	)                                         > $cntrldir/nodnscheck
 }
 
@@ -2172,6 +2175,133 @@ test_smtp_surbl()
 		failed=1
 		exit 1
 	fi
+}
+
+test_envrules()
+{
+	echo $user@$HOSTNAME > $cntrldir/badmailfrom.custom
+	echo "$user@$HOSTNAME:BADMAILFROM=badmailfrom.custom" > $cntrldir/from.envrules
+	if [ $1 -eq 0 ] ; then
+		> $servicedir/smtpd/variables/QREGEX
+	else
+		echo 1 > $servicedir/smtpd/variables/QREGEX
+	fi
+	sudo svc -r $servicedir/smtpd
+	sleep 2
+	t1=$(date +"%s.%4N")
+	swaks -S --to $testuser@$HOSTNAME --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
+	ret1=$?
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	echo $l1 | grep ".*553 sorry, your envelope sender has been denied (#5.7.1)" > /dev/null
+	ret2=$?
+
+	/bin/rm -f $cntrldir/from.envrules $cntrldir/badmailfrom.custom
+	swaks -S --to $testuser@$HOSTNAME --from $user@$HOSTNAME --server localhost \
+		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
+	ret3=$?
+	check_mail $testdir/$testuser/Maildir
+	ret4=$?
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 -a $ret4 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		if [ $1 -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			printf "\r  testing envrules using wildmat succeeded %61s [%.4f sec]\n" " " $secs
+		else
+			tcount=$(expr $tcount + 1)
+			printf "\r  testing envrules using REGEXP succeeded %62s [%.4f sec]\n" " " $secs
+		fi
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		printf "\r%118s\n" " "
+		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4"
+		if [ $1 -eq 0 ] ; then
+			echo "  testing envrules using wildmat failed [$secs sec]"
+		else
+			echo "  testing envrules using REGEXP failed [$secs sec]"
+		fi
+	fi
+	/bin/rm -f $cntrldir/from.envrules $cntrldir/badmailfrom.custom $servicedir/smtpd/variables/QREGEX
+}
+
+test_smtp_accesslist()
+{
+	(
+	echo "rcpt:ceo@$HOSTNAME:$user@$HOSTNAME"
+	echo "from:$user@$vdomain:$testuser@$HOSTNAME"
+	) > $cntrldir/accesslist
+	if [ $1 -eq 0 ] ; then
+		> $servicedir/smtpd/variables/QREGEX
+	else
+		echo 1 > $servicedir/smtpd/variables/QREGEX
+	fi
+	sudo svc -r $servicedir/smtpd
+	sleep 2
+	t1=$(date +"%s.%4N")
+	swaks -S --to $user@$HOSTNAME --from $testuser@$vdomain --server localhost \
+		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
+	ret1=$?
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	echo $l1 | grep ".*553 sorry, sites access list denies transaction (#5.7.1)" > /dev/null
+	ret2=$?
+	swaks -S --to $user@$HOSTNAME --from ceo@$HOSTNAME --server localhost \
+		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
+	ret3=$?
+
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		if [ $1 -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			printf "\r  testing SMTP RECIPIENT accesslist using wildmat succeeded %44s [%.4f sec]\n" " " $secs
+		else
+			tcount=$(expr $tcount + 1)
+			printf "\r  testing SMTP RECIPIENT accesslist using REGEXP succeeded %45s [%.4f sec]\n" " " $secs
+		fi
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		if [ $1 -eq 0 ] ; then
+			echo "  testing SMTP RECIPIENT accesslist using wildmat failed [$secs sec]"
+		else
+			echo "  testing SMTP RECIPIENT accesslist using REGEXP failed [$secs sec]"
+		fi
+	fi
+	swaks -S --to $user@$HOSTNAME --from $user@$vdomain --server localhost \
+		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
+	ret1=$?
+	l2=$(sed -n 1p < $tmpdir/swaks.$$)
+	echo $l1 | grep ".*553 sorry, sites access list denies transaction (#5.7.1)" > /dev/null
+	ret2=$?
+	swaks -S --to $testuser@$HOSTNAME --from $user@$vdomain --server localhost \
+		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
+	check_mail $testdir/$testuser/Maildir
+	ret3=$?
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		if [ $1 -eq 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			printf "\r  testing SMTP SENDER accesslist using wildmat succeeded %47s [%.4f sec]\n" " " $secs
+		else
+			tcount=$(expr $tcount + 1)
+			printf "\r  testing SMTP SENDER accesslist using REGEXP succeeded %48s [%.4f sec]\n" " " $secs
+		fi
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		if [ $1 -eq 0 ] ; then
+			echo "  testing SMTP SENDER accesslist using wildmat failed [$secs sec]"
+		else
+			echo "  testing SMTP SENDER accesslist using REGEXP failed [$secs sec]"
+		fi
+	fi
+	/bin/rm -f $cntrldir/accesslist $servicedir/smtpd/variables/QREGEX
 }
 
 test_qmail_remote_auth()
@@ -3942,6 +4072,7 @@ test_autoresponder()
 		failed=1
 		exit 1
 	fi
+	/bin/rm -f $testdir/.vacation.dir/* $testdir/$testuser/.qmail
 }
 
 test_srs()
@@ -4669,6 +4800,10 @@ do_svscan_without_svscanlog()
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	create_authsmtp
 	test_smtps "mail using SMTPS by qmail-smtpd"
+	test_smtp_accesslist 0
+	test_smtp_accesslist 1
+	test_envrules 0
+	test_envrules 1
 	test_qmqp
 	test_qmtp
 	test_smtp_secure_auth
@@ -6777,7 +6912,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=252
+	total_tests=258
 fi
 failed=0
 do_setup
@@ -6838,6 +6973,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.44  2023-10-30 21:10:56+05:30  Cprogrammer
+# added test for smtp access list
+#
 # Revision 1.43  2023-10-30 16:22:19+05:30  Cprogrammer
 # use tmpdir for all temporary files
 #
