@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.42 2023-10-30 01:27:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.43 2023-10-30 16:22:19+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -28,6 +28,7 @@ logdir=$testdir/logs
 bindir=/usr/bin
 sbindir=/usr/sbin
 libexecdir=/usr/libexec/indimail
+tmpdir=$testdir/tmp
 qmail_newu=$sbindir/qmail-newu
 qmail_start=$sbindir/qmail-start
 qmail_inject=$bindir/qmail-inject
@@ -104,7 +105,7 @@ do_cleanup_failed()
 	sudo /bin/rm -rf $logdir
 	sudo /bin/rm -rf $testdir/queue
 	sudo /bin/rm -rf $testdir/bin
-	sudo /bin/rm -rf $testdir/tmp
+	sudo /bin/rm -rf $tmpdir
 	sudo /bin/rm -rf $testdir/run
 	sudo /bin/rm -rf $testdir/sleep.out
 	sudo /bin/rm -rf $testdir/svscan.out
@@ -583,7 +584,7 @@ run_qmail_send()
 	echo "#!/bin/sh"
 	echo "uid=\$(grep \"^\$1\" $testdir/etc/passwd |awk -F: '{print \$3}')"
 	echo "if [ -z \"\$uid\" -o \"\$uid\" = \"0\" ] ; then"
-	echo "  l=\$(grep \"^alias:\" /tmp/qmail-test/etc/passwd | awk -F: '{print \$1\" \"\$3\" \"\$4\" \"\$6}')"
+	echo "  l=\$(grep \"^alias:\" $testdir/etc/passwd | awk -F: '{print \$1\" \"\$3\" \"\$4\" \"\$6}')"
 	echo "  echo \$l \$1 | awk '{print \$1\"\\0\"\$2\"\\0\"\$3\"\\0\"\$4\"\\0-\\0\"\$5\"\\0\"}'"
 	echo "else"
 	echo "  grep \"^\$1:\" $testdir/etc/passwd |awk -F: '{print \$1\"\\0\"\$3\"\\0\"\$4\"\\0\"\$6\"\\0\\0\\0\"}'"
@@ -722,9 +723,9 @@ do_qmail_inject()
 	echo "X-Log-Test: Test Header"
 	echo
 	echo "$4"
-	) > $testdir/tmp/mail.txt
-	envdir -c $testdir/variables $qmail_inject -f$1 $2 <$testdir/tmp/mail.txt
-	/bin/rm -f $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
+	envdir -c $testdir/variables $qmail_inject -f$1 $2 <$tmpdir/mail.txt
+	/bin/rm -f $tmpdir/mail.txt
 }
 
 create_authsmtp()
@@ -740,8 +741,8 @@ create_authsmtp()
 	echo "var=\`tr [\"\\0\"] [\"\\n\"] 0<&3\`"
 	echo "user=\`echo \$var | cut -d ' ' -f1\`"
 	echo "pass=\`echo \$var | cut -d ' ' -f2\`"
-	echo "exec 4>$testdir/tmp/authsmtp.\$\$ 3<$testdir/tmp/authsmtp.\$\$"
-	echo "/bin/rm -f $testdir/tmp/authsmtp.\$\$"
+	echo "exec 4>$tmpdir/authsmtp.\$\$ 3<$tmpdir/authsmtp.\$\$"
+	echo "/bin/rm -f $tmpdir/authsmtp.\$\$"
 	echo "echo \$var | tr [\" \"] [\"\\0\"] 1>&4"
 	echo "if [ \"\$user\" = \"$user@$HOSTNAME\" -a \"\$pass\" = \"abcd12345678\" ] ; then"
 	echo "	exit 0"
@@ -994,8 +995,8 @@ test_smtp_dkimverify()
 	(
 	cat $testdir/mail1.txt|dkim -z 2 -s $dkim_key
 	cat $testdir/mail1.txt && rm -f $testdir/mail1.txt
-	) >$testdir/tmp/mail2.txt
-	swaks --data - -n -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port < $testdir/tmp/mail2.txt
+	) >$tmpdir/mail2.txt
+	swaks --data - -n -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port < $tmpdir/mail2.txt
 	check_mail_header $maildir "DKIM-Status" 1
 	echo $header| grep "DKIM-Status: good" > /dev/null
 	if [ $? -eq 0 ] ; then
@@ -1004,7 +1005,7 @@ test_smtp_dkimverify()
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing mail using SMTP for DKIM verification succeeded %46s [%.4f sec]\n" " " $secs
 		print_pct
-		/bin/rm -f $testdir/tmp/mail1.txt $testdir/tmp/mail2.txt
+		/bin/rm -f $tmpdir/mail1.txt $tmpdir/mail2.txt
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -1012,7 +1013,7 @@ test_smtp_dkimverify()
 		echo "  testing mail using SMTP for DKIM verification failed [$secs sec]"
 		(
 		echo "mail.txt"
-		cat $testdir/tmp/mail2.txt
+		cat $tmpdir/mail2.txt
 		echo "----------------------------------------"
 		if [ $log_type -eq 1 ] ; then
 			echo "$logdir/smtpd/smtpd.log"
@@ -1022,7 +1023,7 @@ test_smtp_dkimverify()
 			cat $logdir/smtpd/current
 		fi
 		)|less
-		/bin/rm -f $testdir/tmp/mail1.txt $testdir/tmp/mail2.txt
+		/bin/rm -f $tmpdir/mail1.txt $tmpdir/mail2.txt
 		failed=1
 		exit 1
 	fi
@@ -1104,14 +1105,14 @@ test_smtp_invalid_auth()
 	for i in NTLM efgh
 	do
 		swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
-			--a $i -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$ 2>&1
-		l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+			--a $i -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$ 2>&1
+		l1=$(sed -n 1p < $tmpdir/swaks.$$)
 		if [ "$l1" != "\*\*\* EFGH is not a recognized auth type, skipping" \
 			-a "$l1" != "\*\*\* Auth not attempted, requested type not available" ] ; then
 			break
 		fi
 	done
-	/bin/rm -f $testdir/tmp/swaks.$$
+	/bin/rm -f $tmpdir/swaks.$$
 	if [ "$l1" != "\*\*\* EFGH is not a recognized auth type, skipping" \
 		-a "$l1" != "\*\*\* Auth not attempted, requested type not available" ] ; then
 		t2=$(date +"%s.%4N")
@@ -1250,13 +1251,13 @@ test_spamfilter()
 {
 	(
 	echo "#!/bin/sh"
-	echo "testdir=$testdir"
-	echo "cat > \$testdir/tmp/scanner.\$\$"
-	echo "grep \"I am spamming you\" \$testdir/tmp/scanner.\$\$ > /dev/null"
+	echo "tmpdir=$tmpdir"
+	echo "cat > \$tmpdir/scanner.\$\$"
+	echo "grep \"I am spamming you\" \$tmpdir/scanner.\$\$ > /dev/null"
 	echo "ret=\$?"
-	echo "exec 0<\$testdir/tmp/scanner.\$\$"
+	echo "exec 0<\$tmpdir/scanner.\$\$"
 	echo "/bin/cat"
-	echo "/bin/rm -f \$testdir/tmp/scanner.\$\$"
+	echo "/bin/rm -f \$tmpdir/scanner.\$\$"
 	echo "if [ \$ret -ne 0 ] ; then"
 	echo "	exit 24"
 	echo "else"
@@ -1286,10 +1287,10 @@ test_spamfilter()
 		CONTROLDIR=$cntrldir \
 		BIGTODO=0 \
 		CONFSPLIT=23 \
-	$qmail_inject -f$user@$HOSTNAME $testuser@$HOSTNAME 2>$testdir/tmp/inject.error
+	$qmail_inject -f$user@$HOSTNAME $testuser@$HOSTNAME 2>$tmpdir/inject.error
 	ret1=$?
-	l1=$(cat $testdir/tmp/inject.error)
-	/bin/rm -f $testdir/tmp/inject.error
+	l1=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
 	check_mail $testdir/$testuser/Maildir 2>/dev/null
 	ret2=$?
 	s1=$sleep_secs
@@ -1318,7 +1319,7 @@ test_spamfilter()
 	check_mail $testdir/$testuser/Maildir 2>/dev/null
 	ret4=$?
 	s2=$sleep_secs
-	/bin/rm -f $testdir/tmp/inject.error
+	/bin/rm -f $tmpdir/inject.error
 
 	if [ $ret1 -eq 100 -a $ret2 -ne 0 -a $ret3 -eq 0 -a $ret4 -eq 0 -a "$l1" = "qmail-inject: fatal: qq spam or junk mail threshold exceeded (#5.7.1)" ] ; then
 		t2=$(date +"%s.%4N")
@@ -1358,9 +1359,9 @@ test_spamfilter()
 		CONTROLDIR=$cntrldir \
 		BIGTODO=0 \
 		CONFSPLIT=23 \
-	$qmail_inject -f$user@$HOSTNAME $outarchive@$HOSTNAME 2>$testdir/tmp/inject.error
+	$qmail_inject -f$user@$HOSTNAME $outarchive@$HOSTNAME 2>$tmpdir/inject.error
 	ret1=$?
-	l1=$(cat $testdir/tmp/inject.error)
+	l1=$(cat $tmpdir/inject.error)
 	check_mail $testdir/$outarchive/Maildir 2>/dev/null
 	ret2=$?
 	s1=$sleep_secs
@@ -1465,10 +1466,10 @@ test_qhpsi()
 		CONTROLDIR=$cntrldir \
 		BIGTODO=0 \
 		CONFSPLIT=23 \
-	$qmail_inject -f$user@$HOSTNAME $testuser@$HOSTNAME 2>$testdir/tmp/inject.error
+	$qmail_inject -f$user@$HOSTNAME $testuser@$HOSTNAME 2>$tmpdir/inject.error
 	ret1=$?
-	l1=$(cat $testdir/tmp/inject.error)
-	/bin/rm -f $testdir/tmp/inject.error
+	l1=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
 	check_mail $testdir/$testuser/Maildir 2>/dev/null
 	ret2=$?
 	s1=$sleep_secs
@@ -1619,7 +1620,7 @@ test_qqeh()
 	echo "Date: $(date -R)"
 	echo
 	echo "Testing QQEH"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 	env - \
 			QQEH="X-Foobar: Test QQEH for qmail-local" \
 			QUEUEDIR=$testdir/queue \
@@ -1627,7 +1628,7 @@ test_qqeh()
 			CONTROLDIR=$cntrldir \
 			BIGTODO=0 \
 			CONFSPLIT=23 \
-		$qmail_inject -f$user@$HOSTNAME $user@$HOSTNAME <$testdir/tmp/mail.txt
+		$qmail_inject -f$user@$HOSTNAME $user@$HOSTNAME <$tmpdir/mail.txt
 
 	check_mail_header $maildir X-Foobar 1
 	if [ $? -eq 0 -a "$header" = "X-Foobar: Test QQEH for qmail-local" ] ; then
@@ -1655,7 +1656,7 @@ test_qqeh()
 	echo "Date: $(date -R)"
 	echo
 	echo "Testing QQEH"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 	env - \
 			QQEH="X-Foobar: Test QQEH for qmail-remote" \
 			QUEUEDIR=$testdir/queue \
@@ -1663,8 +1664,8 @@ test_qqeh()
 			CONTROLDIR=$cntrldir \
 			BIGTODO=0 \
 			CONFSPLIT=23 \
-		$qmail_inject -f$user@$HOSTNAME $user@$ext_domain <$testdir/tmp/mail.txt
-	/bin/rm -f $testdir/tmp/mail.txt
+		$qmail_inject -f$user@$HOSTNAME $user@$ext_domain <$tmpdir/mail.txt
+	/bin/rm -f $tmpdir/mail.txt
 	check_mail_header $testdir/$testuser/Maildir X-Foobar 1
 	if [ $? -eq 0 -a "$header" = "X-Foobar: Test QQEH for qmail-remote" ] ; then
 		t2=$(date +"%s.%4N")
@@ -1697,9 +1698,9 @@ test_smtp_secure_auth()
 	t1=$(date +"%s.%4N")
 	# this should fail without using SMTPS or STARTTLS
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
-		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$ 2>&1
+		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$ 2>&1
 	ret1=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
 	echo "$l1"|grep '*** Auth not attempted, requested type not available' >/dev/null
 	if [ $? -eq 0 ] ; then
 		ret2=0
@@ -1742,9 +1743,9 @@ test_smtp_secure_auth()
 	t1=$(date +"%s.%4N")
 	# this should fail without using authentication
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
-		--port $smtp_port --tls-on-connect >$testdir/tmp/swaks.$$ 2>&1
+		--port $smtp_port --tls-on-connect >$tmpdir/swaks.$$ 2>&1
 	ret1=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
 	echo "$l1"|grep ".*530 authentication required (#5.7.1)" >/dev/null
 	if [ $? -eq 0 ] ; then
 		ret2=0
@@ -1783,9 +1784,9 @@ test_smtp_secure_auth()
 	t1=$(date +"%s.%4N")
 	echo "@$HOSTNAME" > $cntrldir/authdomains
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
-		--tls-on-connect > $testdir/tmp/swaks.$$ 2>&1
+		--tls-on-connect > $tmpdir/swaks.$$ 2>&1
 	ret1=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
 	echo $l1 | grep ".*553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication; no valid cert for gateway #5.7.1" > /dev/null
 	ret2=$?
 	/bin/rm -f $cntrldir/authdomains
@@ -1820,9 +1821,9 @@ test_smtp_secure_auth()
 	sleep 2
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port \
-		--tls-on-connect > $testdir/tmp/swaks.$$ 2>&1
+		--tls-on-connect > $tmpdir/swaks.$$ 2>&1
 	ret1=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
 	echo $l1 | grep ".*553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication; no valid cert for gateway #5.7.1" > /dev/null
 	ret2=$?
 	if [ $ret1 -ne 0 -a $ret2 -eq 0 ] ; then
@@ -1861,24 +1862,24 @@ test_smtp_cugmail()
 
 	# Test1: This should fail
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port >$testdir/tmp/swaks.$$
+		--port $smtp_port >$tmpdir/swaks.$$
 	ret1=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
-	/bin/rm -f $testdir/tmp/swaks.$$
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
 
 	# Test2: This should fail
 	swaks -S --to $user@$ext_domain --from $user@$HOSTNAME --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$
 	ret2=$?
-	l2=$(sed -n 1p < $testdir/tmp/swaks.$$)
-	/bin/rm -f $testdir/tmp/swaks.$$
+	l2=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
 
 	# Test3: This should fail
 	swaks -S --to $user@$ext_domain --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$
 	ret3=$?
-	l3=$(sed -n 1p < $testdir/tmp/swaks.$$)
-	/bin/rm -f $testdir/tmp/swaks.$$
+	l3=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
 
 	# Test4: This should succeed
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
@@ -1939,10 +1940,10 @@ test_smtp_chk_sender()
 
 	# Second: This should be denied without MASQUERADE
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$
 	ret3=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
-	/bin/rm -f $testdir/tmp/swaks.$$
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
 	echo "$l1" | grep ".*553 sorry, this MTA does not accept masquerading/forging,.*" >/dev/null
 	if [ $? -eq 0 ] ; then
 		ret4=0
@@ -1959,10 +1960,10 @@ test_smtp_chk_sender()
 
 	# fourth: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
-		--port $smtp_port >$testdir/tmp/swaks.$$
+		--port $smtp_port >$tmpdir/swaks.$$
 	ret6=$?
-	l2=$(sed -n 1p < $testdir/tmp/swaks.$$)
-	/bin/rm -f $testdir/tmp/swaks.$$
+	l2=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
 	echo "$l2" | grep ".*530 authentication required (#5.7.1)" >/dev/null
 	if [ $? -eq 0 ] ; then
 		ret7=0
@@ -2001,7 +2002,7 @@ test_smtp_chk_sender()
 	sleep $sleep_int
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" > $testdir/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" > $tmpdir/swaks.$$
 	check_mail
 	ret1=$?
 	if [ $ret1 -eq 0 ] ; then
@@ -2032,9 +2033,9 @@ test_smtp_chk_sender()
 
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server localhost \
-		--port $smtp_port --a LOGIN -au $testuser@$HOSTNAME -ap "abcd87654321" >$testdir/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $testuser@$HOSTNAME -ap "abcd87654321" >$tmpdir/swaks.$$
 	ret1=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
 	if [ $ret1 -eq 0 ] ; then
 		check_mail
 	fi
@@ -2051,7 +2052,7 @@ test_smtp_chk_sender()
 	check_mail
 	ret4=$?
 	s1=$sleep_secs
-	/bin/rm -f $testdir/tmp/swaks.$$
+	/bin/rm -f $tmpdir/swaks.$$
 
 	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 -a $ret4 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
@@ -2080,10 +2081,10 @@ test_smtp_chk_sender()
 	touch $cntrldir/chksenderdomains
 	# First: This should be allowed
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$
 	ret1=$?
 	check_mail
-	/bin/rm -f $testdir/tmp/swaks.$$
+	/bin/rm -f $tmpdir/swaks.$$
 
 	echo "@$HOSTNAME" > $cntrldir/chksenderdomains
 	/bin/rm -f $servicedir/smtpd/variables/MASQUERADE
@@ -2091,7 +2092,7 @@ test_smtp_chk_sender()
 	sleep $sleep_int
 	# second: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server localhost \
-		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$testdir/tmp/swaks.$$
+		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$
 	ret2=$?
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
 		t2=$(date +"%s.%4N")
@@ -2114,7 +2115,7 @@ test_smtp_chk_sender()
 		failed=1
 		exit 1
 	fi
-	/bin/rm -f $cntrldir/chksenderdomains $testdir/tmp/swaks.$$
+	/bin/rm -f $cntrldir/chksenderdomains $tmpdir/swaks.$$
 	> $servicedir/smtpd/variables/CHECKSENDER
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
@@ -2130,10 +2131,10 @@ test_smtp_surbl()
 	echo This is a test message for surbl
 	echo http://surbl-org-permanent-test-point.com/
 	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
-		--server localhost --port $smtp_port --body - >$testdir/tmp/swaks.$$
+		--server localhost --port $smtp_port --body - >$tmpdir/swaks.$$
 	ret1=$?
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
-	/bin/rm -f $testdir/tmp/swaks.$$
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
 	if [ "$l1" = "<** 554 message contains an URL listed in SURBL blocklist [http://surbl-org-permanent-test-point.com/]" ] ; then
 		ret2=0
 	else
@@ -2145,11 +2146,11 @@ test_smtp_surbl()
 	echo without surb blacklisted url
 	echo https://github.com/mbhangui/indimail-mta
 	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
-		--server localhost --port $smtp_port --body - >$testdir/tmp/swaks.$$
+		--server localhost --port $smtp_port --body - >$tmpdir/swaks.$$
 	check_mail
 	ret3=$?
 
-	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $testdir/tmp/swaks.$$
+	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $tmpdir/swaks.$$
 	sudo svc -r $servicedir/smtpd
 	sleep 2
 	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 ] ; then
@@ -2193,13 +2194,13 @@ test_qmail_remote_auth()
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 
 	env - \
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port $u $pass" \
 		AUTH_SMTP="$1" \
 		CONTROLDIR="$cntrldir" \
-		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$ <$testdir/tmp/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$ <$tmpdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	addr=$(batv -k $(cat $cntrldir/batvkey) -v $(sed -n 1p $testdir/qremote.$$|awk '{print $2}'|sed 's/^.\(.*\).$/\1/') 2>/dev/null)
 	batv_status=$?
@@ -2212,7 +2213,7 @@ test_qmail_remote_auth()
 			tcount=$(expr $tcount + 1)
 			printf "\r  testing qmail-remote AUTH %-8s qmail-remote send+receive succeeded %31s [%.4f sec]\n" "$1" " " $secs
 			print_pct
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		else
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -2230,7 +2231,7 @@ test_qmail_remote_auth()
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			)|less
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 			failed=1
 			exit 1
 		fi
@@ -2251,7 +2252,7 @@ test_qmail_remote_auth()
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		)|less
-		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		failed=1
 		exit 1
 	fi
@@ -2294,13 +2295,13 @@ test_qmail_remote_routing()
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 
 	/bin/rm -f $cntrldir/batvkey
 	env - \
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port" \
 		CONTROLDIR=$cntrldir \
-		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/tmp/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$tmpdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	check_mail
 	if [ $? -eq 0 ] ; then
@@ -2334,7 +2335,7 @@ test_qmail_remote_routing()
 	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
 	env - \
 		CONTROLDIR=$cntrldir \
-		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/tmp/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$tmpdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	check_mail
 	if [ $? -eq 0 ] ; then
@@ -2343,7 +2344,7 @@ test_qmail_remote_routing()
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing qmail-remote smtproutes control file qmail-remote send+receive succeeded %21s [%.4f sec]\n" " " $secs
 		print_pct
-		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $s1 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
@@ -2361,7 +2362,7 @@ test_qmail_remote_routing()
 			cat $logdir/smtpd/current
 		fi
 		)|less
-		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		failed=1
 		exit 1
 	fi
@@ -2398,13 +2399,13 @@ test_qmail_remote_auth_cdb()
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 
 	env - \
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port /s" \
 		AUTH_SMTP="" \
 		CONTROLDIR=$cntrldir \
-		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$testdir/tmp/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME 1>$testdir/qremote.$$ <$tmpdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	check_mail
 	if [ $? -eq 0 ] ; then
@@ -2415,7 +2416,7 @@ test_qmail_remote_auth_cdb()
 			tcount=$(expr $tcount + 1)
 			printf "\r  testing qmail-remote using remote_auth.cdb qmail-remote send+receive succeeded %23s [%.4f sec]\n" " " $secs
 			print_pct
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		else
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -2426,7 +2427,7 @@ test_qmail_remote_auth_cdb()
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			)|less
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 			failed=1
 			exit 1
 		fi
@@ -2440,7 +2441,7 @@ test_qmail_remote_auth_cdb()
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		)|less
-		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		failed=1
 		exit 1
 	fi
@@ -2457,11 +2458,11 @@ test_qmail_remote_starttls()
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 	env - \
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port" \
 		CONTROLDIR="$cntrldir" \
-		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$ <$testdir/tmp/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$ <$tmpdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	check_mail
 	if [ $? -eq 0 ] ; then
@@ -2473,7 +2474,7 @@ test_qmail_remote_starttls()
 			tcount=$(expr $tcount + 1)
 			printf "\r  testing qmail-remote STARTTLS %-11s, qmail-remote send+receive succeeded %23s [%.4f sec]\n" $last_line " " $secs
 			print_pct
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		else
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -2491,7 +2492,7 @@ test_qmail_remote_starttls()
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			)|less
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 			failed=1
 			exit 1
 		fi
@@ -2512,7 +2513,7 @@ test_qmail_remote_starttls()
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		)|less
-		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		failed=1
 		exit 1
 	fi
@@ -2528,12 +2529,12 @@ test_qmail_remote_smtps()
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 	env - \
 		SMTPROUTE="$HOSTNAME:127.0.0.1:$smtp_port" \
 		SMTPS=1 \
 		CONTROLDIR="$cntrldir" \
-		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$ <$testdir/tmp/mail.txt
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" 10 $user@$HOSTNAME >$testdir/qremote.$$ <$tmpdir/mail.txt
 	cat $testdir/qremote.$$ >> $logdir/qmail-remote/qmail-remote.log
 	check_mail
 	if [ $? -eq 0 ] ; then
@@ -2545,7 +2546,7 @@ test_qmail_remote_smtps()
 			tcount=$(expr $tcount + 1)
 			printf "\r  testing qmail-remote SMTPS %11s, qmail-remote send+receive succeeded %26s [%.4f sec]\n" $last_line " " $secs
 			print_pct
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		else
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -2563,7 +2564,7 @@ test_qmail_remote_smtps()
 			echo "qmail-remote.log"
 			cat $testdir/qremote.$$
 			)|less
-			/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+			/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 			failed=1
 			exit 1
 		fi
@@ -2584,7 +2585,7 @@ test_qmail_remote_smtps()
 		echo "qmail-remote.log"
 		cat $testdir/qremote.$$
 		)|less
-		/bin/rm -f $testdir/qremote.$$ $testdir/tmp/mail.txt
+		/bin/rm -f $testdir/qremote.$$ $tmpdir/mail.txt
 		failed=1
 		exit 1
 	fi
@@ -2954,12 +2955,12 @@ test_blocked()
 {
 	t1=$(date +"%s.%4N")
 	if [ $# -eq 0 ] ; then
-		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port >$testdir/tmp/swaks.$$
+		swaks -S --to blocked@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port >$tmpdir/swaks.$$
 	else
-		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port >$testdir/tmp/swaks.$$
+		swaks -S --to $user@$HOSTNAME  --from blocked@$HOSTNAME -server localhost --port $smtp_port >$tmpdir/swaks.$$
 	fi
-	l1=$(sed -n 1p < $testdir/tmp/swaks.$$)
-	/bin/rm -f $testdir/tmp/swaks.$$
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
 	if [ $# -eq 0 ] ; then
 		echo "$l1" | grep ".*553 sorry, your envelope recipient has been denied (#5.7.1).*" >/dev/null
 		if [ $? -eq 0 ] ; then
@@ -3646,8 +3647,8 @@ do_setup()
 	mkdir -p $logdir/svscan
 	mkdir -p $logdir/smtpd
 	mkdir -p $logdir/qmtpd
-	mkdir -p $testdir/tmp
-	chmod 1777 $testdir/tmp
+	mkdir -p $tmpdir
+	chmod 1777 $tmpdir
 	mkdir -p $testdir/bin
 	mkdir -p $testdir/run
 	setup_maildir
@@ -3796,7 +3797,7 @@ test_maildirserial()
 	echo "$HOSTNAME:127.0.0.1:$smtp_port $user@$HOSTNAME abcd12345678" > $cntrldir/smtproutes
 	sudo chown -R $user $qmaildir/alias/virtual
 	tcpclient 0 $smtp_port maildirserial -t1209600 $qmaildir/alias/virtual "virtual-" \
-		serialsmtp "virtual-" serialsmtp >$testdir/tmp/tcpclient.log 2>&1
+		serialsmtp "virtual-" serialsmtp >$tmpdir/tcpclient.log 2>&1
 	check_mail_count $maildir 5
 	ret=$?
 	if [ $ret -eq 0 -a $mcount -eq 5 ] ; then
@@ -3824,7 +3825,7 @@ test_maildirserial()
 	sudo rm -rf $qmaildir/alias/virtual/new
 	sudo mv $qmaildir/alias/virtual/bak $qmaildir/alias/virtual/new
 	tcpclient 0 $smtp_port maildirserial -t1209600 $qmaildir/alias/virtual "virtual-" \
-		serialqmtp "virtual-" serialsmtp >$testdir/tmp/tcpclient.log 2>&1
+		serialqmtp "virtual-" serialsmtp >$tmpdir/tcpclient.log 2>&1
 	check_mail_count $maildir 5
 	ret=$?
 	if [ $ret -eq 0 -a $mcount -eq 5 ] ; then
@@ -3880,7 +3881,7 @@ test_autoresponder()
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 
 	if [ $do_srs -eq 0 ] ; then
 		env - \
@@ -3889,7 +3890,7 @@ test_autoresponder()
 			CONTROLDIR=$cntrldir \
 			BIGTODO=0 \
 			CONFSPLIT=23 \
-		$qmail_inject -f$user@$HOSTNAME $testuser <$testdir/tmp/mail.txt
+		$qmail_inject -f$user@$HOSTNAME $testuser <$tmpdir/mail.txt
 	else
 		srs_addr=$(srs -k `cat $cntrldir/srs_secrets` -i $srs_domain $user@$HOSTNAME)
 		env - \
@@ -3898,9 +3899,9 @@ test_autoresponder()
 			CONTROLDIR=$cntrldir \
 			BIGTODO=0 \
 			CONFSPLIT=23 \
-		$qmail_inject -f$srs_addr $testuser <$testdir/tmp/mail.txt
+		$qmail_inject -f$srs_addr $testuser <$tmpdir/mail.txt
 	fi
-	/bin/rm -f $testdir/tmp/mail.txt
+	/bin/rm -f $tmpdir/mail.txt
 	reply_subject="Subject: Autoreply: Re: $subject"
 	count=0
 	ret=1
@@ -4081,8 +4082,8 @@ test_alias()
 			(
 			echo "$qmaildir/alias/Maildir/"
 			echo "$user@$HOSTNAME"
-			) > $testdir/tmp/.qmail-root
-			sudo mv $testdir/tmp/.qmail-root $qmaildir/alias
+			) > $tmpdir/.qmail-root
+			sudo mv $tmpdir/.qmail-root $qmaildir/alias
 			sudo chown root:qmail $qmaildir/alias/.qmail-root
 		fi
 		subject="Testing alias mechanism for $alias"
@@ -4556,13 +4557,13 @@ test_qmtp()
 	echo "Date: $(date -R)"
 	echo
 	echo "QMTP Test message from $HOSTNAME"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 
-	size=$(ls -l $testdir/tmp/mail.txt|awk '{print $5}')
+	size=$(ls -l $tmpdir/mail.txt|awk '{print $5}')
 	env - QMTPROUTE="$HOSTNAME:127.0.0.1:$qmtp_port" CONTROLDIR="$cntrldir" \
-		$qmail_remote $HOSTNAME $user@$HOSTNAME "" $size $testuser@$HOSTNAME </$testdir/tmp/mail.txt \
+		$qmail_remote $HOSTNAME $user@$HOSTNAME "" $size $testuser@$HOSTNAME </$tmpdir/mail.txt \
 		> $logdir/qmail-remote/qmail-remote.log
-	/bin/rm -f $testdir/tmp/mail.txt
+	/bin/rm -f $tmpdir/mail.txt
 	check_mail_header $testdir/$testuser/Maildir Subject 0
 	if [ -n "$mail_file" ] ; then
 		subject=$header
@@ -4608,11 +4609,11 @@ test_hide_host_ip()
 		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" --tls-on-connect >/dev/null
 	check_mail_header $maildir Received 0
 	if [ -n "$mail_file" ] ; then
-		$e822header -I Received < $maildir/new/$mail_file > $testdir/tmp/header
+		$e822header -I Received < $maildir/new/$mail_file > $tmpdir/header
 		/bin/rm -f $mail_file
-		l1=$(sed -n 1p < $testdir/tmp/header)
-		l2=$(sed -n 2p < $testdir/tmp/header)
-		l3=$(sed -n 4p < $testdir/tmp/header)
+		l1=$(sed -n 1p < $tmpdir/header)
+		l2=$(sed -n 2p < $tmpdir/header)
+		l3=$(sed -n 4p < $tmpdir/header)
 		echo $l1 | grep $HOSTNAME > /dev/null
 		ret1=$?
 		echo $l2 | grep 127.0.0.1 > /dev/null
@@ -4971,15 +4972,15 @@ test_spf()
 		fi
 		exit_val=$(echo $line |cut -d: -f1)
 		cmd=$(echo $line |cut -d: -f2-)
-		$cmd > /tmp/spf.out 2>/tmp/spf.err
+		$cmd > $tmpdir/spf.out 2>$tmpdir/spf.err
 		ret=$?
 		if [ $ret -eq $exit_val ] ; then
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 			tcount=$(expr $tcount + 1)
 			if [ $verbose -gt 0 ] ; then
-				l1=$(cat /tmp/spf.out|sed -n 1p)
-				l2=$(cat /tmp/spf.out|sed -n 2p)
+				l1=$(cat $tmpdir/spf.out|sed -n 1p)
+				l2=$(cat $tmpdir/spf.out|sed -n 2p)
 				echo "  $l1"
 				echo "  $l2"
 			fi
@@ -4990,18 +4991,18 @@ test_spf()
 			printf "  testing spf test%02d failed   ret=%d == %d [%0.4f sec]\n" $count $ret $exit_val $secs
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-			cat /tmp/spf.err
-			l1=$(cat /tmp/spf.out|sed -n 1p)
-			l2=$(cat /tmp/spf.out|sed -n 2p)
+			cat $tmpdir/spf.err
+			l1=$(cat $tmpdir/spf.out|sed -n 1p)
+			l2=$(cat $tmpdir/spf.out|sed -n 2p)
 			echo "  $l1"
 			echo "  $l2"
-			/bin/rm -f /tmp/spf.out /tmp/spf.err
+			/bin/rm -f $tmpdir/spf.out $tmpdir/spf.err
 			failed=1
 			exit 1
 		fi
 		count=$(expr $count + 1)
 	done < spfquery.txt
-	/bin/rm -f /tmp/spf.out /tmp/spf.err
+	/bin/rm -f $tmpdir/spf.out $tmpdir/spf.err
 }
 
 test_qmail_queue()
@@ -5204,7 +5205,7 @@ test_qmail_queue()
 	# test logheader
 	t1=$(date +"%s.%4N")
 	echo "X-Log-Test" > $cntrldir/logheaders
-	exec 45>/tmp/logheaderfd
+	exec 45>$tmpdir/logheaderfd
 	echo 45             > $testdir/variables/LOGHEADERFD
 	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Testing logheader" "Test Message for logheader"
 	check_mail_header $maildir X-Remove-Header1 0
@@ -5213,7 +5214,7 @@ test_qmail_queue()
 	check_mail_header $maildir X-Remove-Header2 0
 	h5=$header
 	s2=$sleep_secs
-	h=$(cat /tmp/logheaderfd)
+	h=$(cat $tmpdir/logheaderfd)
 	if [ "$h" = "X-Log-Test: Test Header" ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
@@ -5369,10 +5370,10 @@ test_dkim()
 		echo "Date: $(date -R)"
 		echo
 		echo "Test message"
-		) > $testdir/tmp/mail.txt
-		(cat $testdir/tmp/mail.txt | $bindir/dkim -z $enc -s "$k"; cat $testdir/tmp/mail.txt) | $bindir/dkim -v > $out
+		) > $tmpdir/mail.txt
+		(cat $tmpdir/mail.txt | $bindir/dkim -z $enc -s "$k"; cat $tmpdir/mail.txt) | $bindir/dkim -v > $out
 		ret=$?
-		/bin/rm -f $testdir/tmp/mail.txt
+		/bin/rm -f $tmpdir/mail.txt
 		if [ $ret -eq 0 ] ; then
 			tcount=$(expr $tcount + 1)
 			if [ $verbose -gt 0 ] ; then
@@ -5415,11 +5416,11 @@ test_dkim()
 	echo "Date: $(date -R)"
 	echo
 	echo "Test message"
-	) > $testdir/tmp/mail.txt
-	(cat $testdir/tmp/mail.txt | $bindir/dkim -z 2 -s $real_domain_rsa4096 -z 4 -s $real_domain_ed25519; cat $testdir/tmp/mail.txt) | $bindir/dkim -vV >$out 2>/tmp/err.out
+	) > $tmpdir/mail.txt
+	(cat $tmpdir/mail.txt | $bindir/dkim -z 2 -s $real_domain_rsa4096 -z 4 -s $real_domain_ed25519; cat $tmpdir/mail.txt) | $bindir/dkim -vV >$out 2>$tmpdir/err.out
 	ret=$?
-	/bin/rm -f $testdir/tmp/mail.txt
-	grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+	/bin/rm -f $tmpdir/mail.txt
+	grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 		-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 	if [ $ret -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -5469,9 +5470,9 @@ test_dkim()
 			DKIMSIGNEXTRA="$real_domain_ed25519" \
 			DKIMSIGNOPTIONSEXTRA="-z 4" \
 			DKIMQUEUE=/bin/cat \
-			$qmail_dkim | $bindir/dkim -vV >$out 2>/tmp/err.out
+			$qmail_dkim | $bindir/dkim -vV >$out 2>$tmpdir/err.out
 	ret=$?
-	grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+	grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 		-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 	if [ $ret -eq 0 ] ; then
 		tcount=$(expr $tcount + 1)
@@ -5606,7 +5607,7 @@ test_dkim()
 			printf "\r%126s\r" " "
 			selector=$(cat $domainkey_dir/$j/$i.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n')
 			if [ $verbose -gt 0 ] ; then
-				echo "($dkim -z $enc -s $domainkey_dir/$j/$i <$testdir/tmp/mail.txt;cat $testdir/tmp/mail.txt) | $dkim -v -T $selector"
+				echo "($dkim -z $enc -s $domainkey_dir/$j/$i <$tmpdir/mail.txt;cat $tmpdir/mail.txt) | $dkim -v -T $selector"
 			fi
 			(
 			echo "From: postmaster@$j"
@@ -5615,10 +5616,10 @@ test_dkim()
 			echo "Date: $(date -R)"
 			echo
 			echo "Test message"
-			) > $testdir/tmp/mail.txt
-			(cat $testdir/tmp/mail.txt | $dkim -z $enc -s $domainkey_dir/$j/$i; cat $testdir/tmp/mail.txt) | $dkim -v -T "$selector" > $out
+			) > $tmpdir/mail.txt
+			(cat $tmpdir/mail.txt | $dkim -z $enc -s $domainkey_dir/$j/$i; cat $tmpdir/mail.txt) | $dkim -v -T "$selector" > $out
 			ret=$?
-			/bin/rm -f $testdir/tmp/mail.txt
+			/bin/rm -f $tmpdir/mail.txt
 			if [ $ret -eq 0 ] ; then
 				tcount=$(expr $tcount + 1)
 				if [ $verbose -gt 0 ] ; then
@@ -5664,9 +5665,9 @@ test_dkim()
 		echo "Date: $(date -R)"
 		echo
 		echo "Test message"
-		) > $testdir/tmp/mail.txt
-		(cat $testdir/tmp/mail.txt | $dkim -z 2 -s $key1 -z 4 -s $key2; cat $testdir/tmp/mail.txt) > /tmp/result.out
-		/bin/rm -f $testdir/tmp/mail.txt
+		) > $tmpdir/mail.txt
+		(cat $tmpdir/mail.txt | $dkim -z 2 -s $key1 -z 4 -s $key2; cat $tmpdir/mail.txt) > $tmpdir/result.out
+		/bin/rm -f $tmpdir/mail.txt
 		for j in default ed25519
 		do
 			printf "\r%126s\r" " "
@@ -5682,10 +5683,10 @@ test_dkim()
 				echo "  rsa+ed25519 with ed25519 selector"
 				;;
 			esac
-			sig_count=$(grep DKIM-Signature /tmp/result.out|wc -l)
-			$dkim -vV -T "$selector" > $out 2>/tmp/err.out < /tmp/result.out
+			sig_count=$(grep DKIM-Signature $tmpdir/result.out|wc -l)
+			$dkim -vV -T "$selector" > $out 2>$tmpdir/err.out < $tmpdir/result.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+			grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 				-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				tcount=$(expr $tcount + 1)
@@ -5703,7 +5704,7 @@ test_dkim()
 				failed=1
 			fi
 		done
-		/bin/rm -f /tmp/result.out /tmp/err.out
+		/bin/rm -f $tmpdir/result.out $tmpdir/err.out
 		printf "\r%126s\r" " "
 	done
 
@@ -5741,8 +5742,8 @@ test_dkim()
 			DKIMSIGNEXTRA="$key2" \
 			DKIMSIGNOPTIONSEXTRA="-z 4" \
 			ERR_FD=2 \
-		$qmail_dkim > /tmp/result.out
-		sig_count=$(grep DKIM-Signature /tmp/result.out|wc -l)
+		$qmail_dkim > $tmpdir/result.out
+		sig_count=$(grep DKIM-Signature $tmpdir/result.out|wc -l)
 		for j in default ed25519
 		do
 			printf "\r%126s\r" " "
@@ -5758,9 +5759,9 @@ test_dkim()
 				echo "  rsa+ed25519 with ed25519 selector"
 				;;
 			esac
-			$dkim -vV -T "$selector" >$out 2>/tmp/err.out < /tmp/result.out
+			$dkim -vV -T "$selector" >$out 2>$tmpdir/err.out < $tmpdir/result.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+			grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 				-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				tcount=$(expr $tcount + 1)
@@ -5778,7 +5779,7 @@ test_dkim()
 				failed=1
 			fi
 		done
-		/bin/rm -f /tmp/result.out /tmp/err.out
+		/bin/rm -f $tmpdir/result.out $tmpdir/err.out
 		printf "\r%126s\r" " "
 	done
 
@@ -5797,8 +5798,8 @@ test_dkim()
 	printf "\r%126s\r" " "
 	echo "testing multi-signature signing by qmail-dkim + verification by dkim DKIMSIGNEXTRA in dkimkeys"
 	(
-	echo "ex*.com:$domainkey_dir/%/dkimkeys1:DKIMSIGNEXTRA=$domainkey_dir/%/dkimkeys2,DKIMSIGNOPTIONS=-z 4"
-	echo "ex.*.org:$domainkey_dir/%/dkimkeys1:QREGEX=1,DKIMSIGNEXTRA=$domainkey_dir/%/dkimkeys2,DKIMSIGNOPTIONS=-z 4"
+	echo "ex.*.org$:$domainkey_dir/%/dkimkeys1:QREGEX=1,DKIMSIGNEXTRA=$domainkey_dir/%/dkimkeys2,DKIMSIGNOPTIONS=-z 4"
+	echo "ex*.com:$domainkey_dir/%/dkimkeys1:QREGEX=0,DKIMSIGNEXTRA=$domainkey_dir/%/dkimkeys2,DKIMSIGNOPTIONS=-z 4"
 	) >$cntrldir/dkimkeys
 	failed=0
 	for i in example.com example.org
@@ -5816,8 +5817,8 @@ test_dkim()
 		DKIMSIGNOPTIONS="-z 2" \
 		DKIMQUEUE=/bin/cat \
 		ERR_FD=2 \
-		$qmail_dkim > /tmp/result.out
-		sig_count=$(grep DKIM-Signature /tmp/result.out|wc -l)
+		$qmail_dkim > $tmpdir/result.out
+		sig_count=$(grep DKIM-Signature $tmpdir/result.out|wc -l)
 		for j in dkimkeys1 dkimkeys2
 		do
 			printf "\r%126s\r" " "
@@ -5833,9 +5834,9 @@ test_dkim()
 				echo "  rsa+ed25519 with ed25519 selector"
 				;;
 			esac
-			$dkim -vV -T "$selector" >$out 2>/tmp/err.out < /tmp/result.out
+			$dkim -vV -T "$selector" >$out 2>$tmpdir/err.out < $tmpdir/result.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+			grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 				-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				tcount=$(expr $tcount + 1)
@@ -5846,14 +5847,14 @@ test_dkim()
 				echo SUCCESS ======================== >$out
 				print_pct
 			else
-				echo "FAILED : [ret=$ret] domain=$i sig_count=$sig_count dkimkeys $qmail_dkim"
+				echo "FAILED1 : [ret=$ret] domain=$i sig_count=$sig_count dkimkeys $qmail_dkim"
 				echo
 				echo FAILURE [$ret] ======================== >$out
 				echo >>$out
 				failed=1
 			fi
 		done
-		/bin/rm -f /tmp/result.out /tmp/err.out
+		/bin/rm -f $tmpdir/result.out $tmpdir/err.out
 		printf "\r%126s\r" " "
 	done
 	/bin/rm -f $cntrldir/dkimkeys
@@ -5892,8 +5893,8 @@ test_dkim()
 			DKIMSIGNEXTRA="$key2" \
 			DKIMSIGNOPTIONSEXTRA="-z 4" \
 			ERR_FD=2 \
-			$qmail_dkim > /tmp/result.out
-		sig_count=$(grep DKIM-Signature /tmp/result.out|wc -l)
+			$qmail_dkim > $tmpdir/result.out
+		sig_count=$(grep DKIM-Signature $tmpdir/result.out|wc -l)
 		for j in default ed25519
 		do
 			printf "\r%126s\r" " "
@@ -5909,14 +5910,14 @@ test_dkim()
 				echo "  rsa+ed25519 with ed25519 selector"
 				;;
 			esac
-			cat /tmp/result.out | env - \
+			cat $tmpdir/result.out | env - \
 					DKIMVERIFY="" \
 					SELECTOR_DATA="$selector" \
 					DKIMQUEUE=/bin/cat \
 					VERBOSE=1 \
-					$qmail_dkim >$out 2>/tmp/err.out
+					$qmail_dkim >$out 2>$tmpdir/err.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+			grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 				-e 's/01/ed25519/' -e 's/02/rsa-256/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				tcount=$(expr $tcount + 1)
@@ -5971,8 +5972,8 @@ test_dkim()
 			DKIMSIGN="$key1" \
 			DKIMSIGNOPTIONS="-z 2" \
 			DKIMSIGNEXTRA="$key2" \
-			DKIMSIGNOPTIONSEXTRA="-z 4" $dk_filter > /tmp/result.out
-		sig_count=$(grep DKIM-Signature /tmp/result.out|wc -l)
+			DKIMSIGNOPTIONSEXTRA="-z 4" $dk_filter > $tmpdir/result.out
+		sig_count=$(grep DKIM-Signature $tmpdir/result.out|wc -l)
 		for j in default ed25519
 		do
 			printf "\r%126s\r" " "
@@ -5988,15 +5989,15 @@ test_dkim()
 				echo "  rsa+ed25519 with ed25519 selector"
 				;;
 			esac
-			cat /tmp/result.out | env - \
+			cat $tmpdir/result.out | env - \
 				NODK="1" \
 				QMAILREMOTE="1" \
 				DKIMVERIFY="1" \
 				VERBOSE=1 \
 				SELECTOR_DATA="$selector" \
-			$dk_filter >$out 2>/tmp/err.out
+			$dk_filter >$out 2>$tmpdir/err.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+			grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 				-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				tcount=$(expr $tcount + 1)
@@ -6014,7 +6015,7 @@ test_dkim()
 				failed=1
 			fi
 		done
-		/bin/rm -f /tmp/result.out
+		/bin/rm -f $tmpdir/result.out
 		printf "\r%126s\r" " "
 	done
 
@@ -6435,7 +6436,7 @@ test_dkim()
 		echo "Date: $(date -R)"
 		echo
 		echo "Test message"
-		) >$testdir/tmp/mail.txt
+		) >$tmpdir/mail.txt
 			echo "FAILED : [ret=$ret] domain=$i dkimkeys"
 			echo
 			echo FAILURE [$ret] domain=$i ======================== >$out
@@ -6528,8 +6529,8 @@ test_dkim()
 			CONTROLDIR=$cntrldir \
 			DKIMSIGN="" \
 			DKIMSIGNOPTIONS="-z 2" \
-			$dk_filter > /tmp/result.out
-		sig_count=$(grep DKIM-Signature /tmp/result.out|wc -l)
+			$dk_filter > $tmpdir/result.out
+		sig_count=$(grep DKIM-Signature $tmpdir/result.out|wc -l)
 		for j in dkimkeys1 dkimkeys2
 		do
 			printf "\r%126s\r" " "
@@ -6545,15 +6546,15 @@ test_dkim()
 				echo "  rsa+ed25519 with ed25519 selector"
 				;;
 			esac
-			cat /tmp/result.out | env - \
+			cat $tmpdir/result.out | env - \
 				NODK="1" \
 				QMAILREMOTE="1" \
 				DKIMVERIFY="1" \
 				VERBOSE=1 \
 				SELECTOR_DATA="$selector" \
-			$dk_filter >$out 2>/tmp/err.out
+			$dk_filter >$out 2>$tmpdir/err.out
 			ret=$?
-			grep Signature /tmp/err.out | sed -e 's/Signature #/    Signature/g' \
+			grep Signature $tmpdir/err.out | sed -e 's/Signature #/    Signature/g' \
 				-e 's/01/rsa-256/' -e 's/02/ed25519/' -e 's/Failure.*/Failure - Correct/'
 			if [ $ret -eq 0 -a $sig_count -eq 2 ] ; then
 				tcount=$(expr $tcount + 1)
@@ -6571,7 +6572,7 @@ test_dkim()
 				failed=1
 			fi
 		done
-		/bin/rm -f /tmp/result.out
+		/bin/rm -f $tmpdir/result.out
 		printf "\r%126s\r" " "
 	done
 	/bin/rm -f $cntrldir/dkimkeys
@@ -6600,12 +6601,12 @@ test_dkim()
 		echo "Date: $(date -R)"
 		echo
 		echo "Test message"
-	) > $testdir/tmp/mail.txt
+	) > $tmpdir/mail.txt
 	for i in PQ pq
 	do
 		printf "\r%126s\r" " "
 		echo "  testing return value  for DKIMVERIFY=$i"
-		(cat $testdir/tmp/mail.txt | $bindir/dkim -z 2 -s $key1; cat $testdir/tmp/mail.txt) | env - \
+		(cat $tmpdir/mail.txt | $bindir/dkim -z 2 -s $key1; cat $tmpdir/mail.txt) | env - \
 			QUEUEDIR=/var/indimail/queue/queue1 \
 			CONFSPLIT=23 \
 			BIGTODO=0 \
@@ -6613,7 +6614,7 @@ test_dkim()
 			QMAILQUEUE=$qmail_dkim \
 			FASTQUEUE=1 \
 			ERROR_FD=4 \
-			$qmail_inject -a $user 2>/tmp/out.$$
+			$qmail_inject -a $user 2>$tmpdir/out.$$
 		ret=$?
 		echo "    return value=$ret"
 		case $i in
@@ -6635,8 +6636,8 @@ test_dkim()
 			fi
 			printf "\r%126s\r" " "
 			echo "  testing error message for DKIMVERIFY=$i"
-			echo "    error message=$(cat /tmp/out.$$)"
-			grep "qmail-inject: fatal: qmail-dkim: signature error: permanent dns failure requesting selector (#5.7.0)" /tmp/out.$$ > /dev/null
+			echo "    error message=$(cat $tmpdir/out.$$)"
+			grep "qmail-inject: fatal: qmail-dkim: signature error: permanent dns failure requesting selector (#5.7.0)" $tmpdir/out.$$ > /dev/null
 			if [ $? -eq 0 ] ; then
 				tcount=$(expr $tcount + 1)
 				if [ $verbose -gt 0 ] ; then
@@ -6671,8 +6672,8 @@ test_dkim()
 			fi
 			printf "\r%126s\r" " "
 			echo "  testing error message for DKIMVERIFY=$i"
-			echo "    error message=$(cat /tmp/out.$$)"
-			grep "qmail-inject: fatal: qmail-dkim: signature error: permanent dns failure requesting selector (#4.7.0)" /tmp/out.$$ > /dev/null
+			echo "    error message=$(cat $tmpdir/out.$$)"
+			grep "qmail-inject: fatal: qmail-dkim: signature error: permanent dns failure requesting selector (#4.7.0)" $tmpdir/out.$$ > /dev/null
 			if [ $? -eq 0 ] ; then
 				tcount=$(expr $tcount + 1)
 				if [ $verbose -gt 0 ] ; then
@@ -6691,7 +6692,7 @@ test_dkim()
 			;;
 		esac
 	done
-	/bin/rm -f $testdir/tmp/mail.txt /tmp/out.$$
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/out.$$
 	if [ $failed -eq 1 ] ; then
 		echo "Test Failed for qmail-dkim custom error"
 		exit 1
@@ -6837,6 +6838,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.43  2023-10-30 16:22:19+05:30  Cprogrammer
+# use tmpdir for all temporary files
+#
 # Revision 1.42  2023-10-30 01:27:19+05:30  Cprogrammer
 # added test to use wildmat instead of regexp for mailarchival
 #
