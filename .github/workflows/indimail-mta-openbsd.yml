@@ -6,7 +6,7 @@ on:
       - '**/indimail-mta-x/**'
       - '**/libdkim2-x/**'
       - '**/libsrs2-x/**'
-      - .github/workflows/indimail-mta-freebsd.yml
+      - .github/workflows/indimail-mta-openbsd.yml
       - '!**/indimail-mta-x/indimail-mta.spec.in'
       - '!**/libdkim2-x/libdkim2.spec.in'
       - '!**/libsrs2-x/libsrs2.spec.in'
