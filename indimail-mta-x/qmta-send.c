@@ -2307,10 +2307,19 @@ qmta_initialize(int *nfds, fd_set *rfds)
 int
 do_controls()
 {
+	int             qregex;
+	char           *x;
+
 	if (control_init() == -1)
 		return 0;
 	if (control_readint((int *) &lifetime, "queuelifetime") == -1)
 		return 0;
+	if (!(x = env_get("QREGEX"))) {
+		if (control_readint(&qregex, "qregex") == -1)
+			return 0;
+		if (qregex && !env_put("QREGEX=1"))
+			return 0;
+	}
 	/*- read concurrencylocal */
 	if (control_readint((int *) &concurrency[0], "concurrencylocal") == -1)
 		return 0;

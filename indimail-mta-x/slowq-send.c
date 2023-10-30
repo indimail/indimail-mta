@@ -2627,6 +2627,9 @@ fail:
 static int
 getcontrols()
 {
+	int             qregex;
+	char           *x;
+
 	if (control_init() == -1)
 		return 0;
 	if (control_readint(&bouncemaxbytes, "bouncemaxbytes") == -1)
@@ -2680,6 +2683,12 @@ getcontrols()
 #endif
 	if (control_readint((int *) &lifetime, "queuelifetime") == -1)
 		return 0;
+	if (!(x = env_get("QREGEX"))) {
+		if (control_readint(&qregex, "qregex") == -1)
+			return 0;
+		if (qregex && !env_put("QREGEX=1"))
+			return 0;
+	}
 #ifdef BOUNCELIFETIME
 	if (control_readint(&bouncelifetime, "bouncelifetime") == -1)
 		return 0;
