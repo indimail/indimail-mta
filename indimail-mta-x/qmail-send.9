@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-send 8
 .SH NAME
 qmail-send \- deliver mail messages from the queue with rate control
@@ -198,6 +199,9 @@ If
 .B qmail-send
 receives a INT signal, it will toggle log lock synchronization. If log
 locking is set, it will get turned off and vice versa.
+
+If the control file \fBqregex\fR is present, \fBqmail-send\fR will set
+\fBQREGEX\fR environment variable with the content of the control file.
 
 .B qmail-send
 by default looks at @controldir@ for all control files. This path can be

@@ -135,6 +135,9 @@ messages to system journal logs using \fBsyslog\fR(3) function. This
 facilitates viewing, searching entries for \fBqmta-send\fR in the journal
 logs using the \fBjournalctl\fR(1) command.
 
+If the control file \fBqregex\fR is present, \fBqmta-send\fR will set
+\fBQREGEX\fR environment variable with the content of the control file.
+
 Few Examples for using qmta-send on Linux are given below
 
 1. Enable qmta-send to be started at boot by \fBsystemd\fR(1)
