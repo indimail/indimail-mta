@@ -553,8 +553,8 @@ set_archive(char *eaddr)
 	 */
 	addr = eaddr + 1;
 	type = *eaddr;
-	if (env_get("QREGEX"))
-		use_regex = 1;
+	if ((ptr = env_get("QREGEX")))
+		scan_int(ptr, &use_regex);
 	for (rule_ptr = ar_rules.s, len = 0;len < ar_rules.len;len++) {
 		if (((*rule_ptr == ':' || *rule_ptr == '*') && type == 'F')
 			|| ((*rule_ptr == 'F' || *rule_ptr == 'T') && *rule_ptr != type)) {

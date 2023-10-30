@@ -32,7 +32,6 @@
 #include <base64.h>
 #include <getln.h>
 #include <strerr.h>
-#include <matchregex.h>
 #include "auto_control.h"
 #include "auto_prefix.h"
 #include "control.h"
@@ -53,6 +52,7 @@
 #include "qregex.h"
 #include "hasmysql.h"
 #include "mail_acl.h"
+#include "do_match.h"
 
 #ifdef TLS
 #include <tls.h>
@@ -2339,7 +2339,7 @@ badhostcheck()
 		if (!stralloc_copyb(&curregex, brh.s + j, (i - j)) ||
 				!stralloc_0(&curregex))
 			die_nomem();
-		if ((x = matchregex(remotehost, curregex.s, NULL)) == -1)
+		if ((x = do_match(qregex, remotehost, curregex.s, NULL)) == -1)
 			die_regex();
 		if (negate)
 			x = !x;

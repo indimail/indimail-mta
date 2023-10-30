@@ -522,9 +522,10 @@ addresses in \fIbadip\fR.
 Unacceptable remote host in environment variable \fBTCPREMOTEHOST\fR.
 \fBqmail-smtpd\fR will reject every host listed in \fIbadhost\fR. A line in
 \fIbadhost\fR may be a case insensitive regular expression. To enable
-badhost check, define the environment variable BADHOSTCHECK or set the
-environment variable BADHOST to a control file containing unacceptable
-remote hosts.
+badhost check, define the environment variable \fBBADHOSTCHECK\fR or set
+the environment variable \fBBADHOST\fR to a control file containing
+unacceptable remote hosts. The environment variable \fBQREGEX\fR can be set
+to match \fIhost\fR, \fIrecipient\fR using regular expressions.
 
 .TP 5
 .I accesslist
