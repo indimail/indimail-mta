@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.309 2023-10-30 10:30:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.310 2023-11-03 05:23:38+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.309 $";
+static char    *revision = "$Revision: 1.310 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2094,8 +2094,13 @@ dnscheck(char *address, int len, int paranoid)
 	if (nodnschecksok) {
 		if (constmap(&mapnodnschecks, address, len))
 			return 0;
-		if ((j = byte_rchr(address, len, '@')) < (len - 1)) {
+		j = byte_rchr(address, len, '@');
+		if (j < (len - 1)) {
 			if (constmap(&mapnodnschecks, address + j, len - j))
+				return 0;
+		} else
+		if (j == len) {
+			if (constmap(&mapnodnschecks, address, len))
 				return 0;
 		}
 	}
@@ -2394,7 +2399,7 @@ dohelo(char *arg)
 	}
 	if ((fakehelo = case_diffs(remotehost, helohost.s) ? helohost.s : 0)) {
 		if (dohelocheck && !nodnscheck) {
-			switch (dnscheck(helohost.s, helohost.len - 1, 1))
+			switch (dnscheck(helohost.s, helohost.len - 1, 0))
 			{
 			case DNS_HARD:
 				err_hmf(arg, 0);
@@ -2531,6 +2536,21 @@ open_control_files1()
 		die_control("rcpthosts");
 	if (recipients_init() == -1)
 		die_control("recipients");
+	/*-
+	 * Enable badhelo if
+	 * BADHELOCHECK is defined (default control file badhelo)
+	 * or
+	 * BADHELO (control file defined by BADHELO env variable)
+	 * is defined
+	 */
+	if ((dohelocheck = (env_get("BADHELOCHECK") ? "" : env_get("BADHELO")))) {
+		if (!(badheloFn = env_get("BADHELO")))
+			badheloFn = "badhelo";
+		if ((badhelook = control_readfile(&badhelo, badheloFn, 0)) == -1)
+			die_control(badheloFn);
+		if (badhelook && !constmap_init(&maphelo, badhelo.s, badhelo.len, 0))
+			die_nomem();
+	}
 	if (!relayclient) {
 		if ((relayclientsok = control_readfile(&relayclients, "relayclients", 0)) == -1)
 			die_control("relayclients");
@@ -2625,15 +2645,6 @@ open_control_files2()
 	 */
 	if ((dobadhostcheck = (env_get("BADHOSTCHECK") ? "" : env_get("BADHOST"))))
 		open_control_once(&brhok, 0, &badhostFn, 0, "BADHOST", 0, "badhost", 0, &brh, &mapbrh, 0);
-	/*-
-	 * Enable badhelo if
-	 * BADHELOCHECK is defined (default control file badhelo)
-	 * or
-	 * BADHELO (control file defined by BADHELO env variable)
-	 * is defined
-	 */
-	if ((dohelocheck = (env_get("BADHELOCHECK") ? "" : env_get("BADHELO"))))
-		open_control_once(&badhelook, 0, &badheloFn, 0, "BADHELO", 0, "badhelo", 0, &badhelo, &maphelo, 0);
 #ifdef BATV
 	open_control_once(&batvok, 0, &batvFn, 0, "BATVKEY", 0, "batvkey", 0, &batvkey, 0, 0);
 	if (batvok) {
@@ -7191,6 +7202,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.310  2023-11-03 05:23:38+05:30  Cprogrammer
+ * fix nodnscheck for helo/ehlo
+ *
  * Revision 1.309  2023-10-30 10:30:25+05:30  Cprogrammer
  * use do_match() for hostaccess
  *
@@ -7575,7 +7589,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.309 2023-10-30 10:30:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.310 2023-11-03 05:23:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
