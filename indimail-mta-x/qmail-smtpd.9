@@ -488,18 +488,19 @@ for addresses in \fIauthdomains\fR.
 Unacceptable HELO/EHLO greeting strings. \fBqmail-smtpd\fR will reject
 every connection attempt if the client MTA's HELO/EHLO greeting compares
 with a REGEX pattern provided in \fIbadhelo\fR. To enable badhelo check,
-define the environment variable BADHELOCHECK or set the environment
-variable BADHELO to a control file containing unacceptable HELO/EHLO
+define the environment variable \fBBADHELOCHECK\fR or set the environment
+variable \fBBADHELO\fR to a control file containing unacceptable HELO/EHLO
 greetings strings. When badhelocheck is enabled, \fBqmail-smtpd\fR will
-reject email sent using HELO hostname equal to your IP address, your
-hostname or any hostname without dots. if ENFORCE_FQDN_HELO is set
-\fBqmail-smtpd\fR will reject emails from hosts which pass HELO hostname
-without dots. A line in \fIbadhelo\fR may be of the form \fB@\fIhost\fR\fR,
-meaning every address at \fIhost\fR. \fIbadhelo\fR can also be in cdb
-format. if \fIbadhelo\fR.\fIcdb\fR file is present, it will be searched
-first, \fIbadhelo\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).
-The filename can be overriden by the environment variable \fBBADHELO\fR.
-You can set QREGEX environment variable if you want to use regex patterns
+reject email sent using HELO hostname equal to your IP address, or hostname
+without dns records. You can put an entry in \fBnodnscheck\fR control file
+to bypass dnscheck. If \fBENFORCE_FQDN_HELO\fR is set \fBqmail-smtpd\fR
+will reject emails from hosts which pass HELO hostname without dots. A line
+in \fIbadhelo\fR may be of the form \fB@\fIhost\fR\fR, meaning every
+address at \fIhost\fR. \fIbadhelo\fR can also be in cdb format. if
+\fIbadhelo\fR.\fIcdb\fR file is present, it will be searched first,
+\fIbadhelo\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8). The
+filename can be overriden by the environment variable \fBBADHELO\fR. You
+can set \fBQREGEX\fR environment variable if you want to use regex patterns
 for addresses in \fIbadhelo\fR.
 
 .TP 5
