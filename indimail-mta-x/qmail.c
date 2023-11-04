@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.36 2023-03-28 17:35:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.37 2023-11-05 05:13:56+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -20,7 +20,7 @@ qmail_open(struct qmail *qq)
 {
 	int             pim[2];
 	int             pie[2];
-	int             pic[2], e, errfd; /* custom error message from custom error patch by Flavio Curti */
+	int             pic[2], e, n, errfd; /* custom error message from custom error patch by Flavio Curti */
 	char           *x, *binqqargs[2] = { 0, 0 };
 	char          **ptr;
 	stralloc        q = {0};
@@ -76,8 +76,11 @@ qmail_open(struct qmail *qq)
 		}
 		if (chdir("/") == -1)
 			_exit(QQ_CD_ROOT);
-		if (!(x = env_get("NULLQUEUE")))
+		if (!(x = env_get("NULLQUEUE"))) {
 			x = env_get("QMAILQUEUE");
+			n = 0;
+		} else
+			n = 1;
 		if (!x) {
 			if (!stralloc_copys(&q, auto_prefix) ||
 					!stralloc_catb(&q, "/sbin/qmail-queue", 17) ||
@@ -86,13 +89,22 @@ qmail_open(struct qmail *qq)
 			binqqargs[0] = q.s;
 			ptr = binqqargs;
 		} else {
-			e = str_rchr(x, ' ');
-			if (x[e] && x[e + 1]) { /*- more than one argument */
-				if (!(ptr = makeargs(x)))
+			if (n) {
+				if (!stralloc_copys(&q, auto_prefix) ||
+						!stralloc_catb(&q, "/sbin/qmail-nullqueue", 21) ||
+						!stralloc_0(&q))
 					_exit(QQ_OUT_OF_MEMORY);
-			} else {
-				binqqargs[0] = x;
+				binqqargs[0] = q.s;
 				ptr = binqqargs;
+			} else {
+				e = str_rchr(x, ' ');
+				if (x[e] && x[e + 1]) { /*- more than one argument */
+					if (!(ptr = makeargs(x)))
+						_exit(QQ_OUT_OF_MEMORY);
+				} else {
+					binqqargs[0] = x;
+					ptr = binqqargs;
+				}
 			}
 		}
 		execv(*ptr, ptr);
@@ -300,7 +312,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.36 2023-03-28 17:35:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail.c,v 1.37 2023-11-05 05:13:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -308,6 +320,9 @@ getversion_qmail_c()
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.37  2023-11-05 05:13:56+05:30  Cprogrammer
+ * fixed NULLQEUEUE
+ *
  * Revision 1.36  2023-03-28 17:35:25+05:30  Cprogrammer
  * replaced few left-over exit codes with constants from qmail.h
  * new feature: QMAILQUEUE with one or more arguments

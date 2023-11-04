@@ -764,7 +764,7 @@ shell-style pattern matching unlike regular expressions used by setting
 If CHECKRECIPIENT environment variable is defined, user status check will
 not be carried out for addresses listed in this file. Addresses listed in
 this file will additionally bypass \fIbadrcptto\fR, \fIbadrcptpatterns\fR,
-\fIblackholedrcp\fR and \fIblackholedrcptpatterns\fR. A line in
+\fIblackholedrcpt\fR and \fIblackholedrcptpatterns\fR. A line in
 \fIgoodrcptto\fR may be of the form \fB@\fIhost\fR\fR, meaning every
 address at \fIhost\fR. \fIgoodrcptto\fR can also be in cdb format. If
 \fIgoodrcptto.cdb\fR is present, it will be searched first. The filename
@@ -831,7 +831,7 @@ However the client will be notified of success. A line in
 \fIblackholedrcpt\fR may be of the form \fB@\fIhost\fR\fR, meaning every
 address at \fIhost\fR. \fIblackholedrcpt\fR can also be in cdb format. If
 \fIblackholedrcpt.cdb\fR is present, it will be searched first. The
-filename can be overriden by the environment variable \fBBLACKHOLERCPT\fR.
+filename can be overriden by the environment variable \fBBLACKHOLEDRCPT\fR.
 You can set QREGEX environment variable if you want to use regex patterns
 for blackholed envelope recipient addresses.
 
@@ -840,7 +840,7 @@ for blackholed envelope recipient addresses.
 Gives \fBqmail-smtpd\fR the ability to blackhole E-Mails by comparing the
 recipient address with a REGEX pattern in \fIblackholedrcptpatterns\fR. The
 filename can be overriden by the environment variable
-\fBBLACKHOLERCPTPATTERN\fR. \fIblackholedrcptpatterns\fR gets disabled of
+\fBBLACKHOLEDRCPTPATTERN\fR. \fIblackholedrcptpatterns\fR gets disabled of
 you set \fBQREGEX\fR environment variable. \fIblackholedrcptpatterns\fR
 uses simple shell-style pattern matching unlike regular expressions used by
 setting \fBQREGEX\fR environment variable. You can use regex patterns in
@@ -938,43 +938,28 @@ variable \fBMAXRECIPIENTS\fR overrides the value in this control file.
 
 .TP 5
 .I databytes
-Maximum number of bytes allowed in a message,
-or 0 for no limit.
-Default: 0.
-If a message exceeds this limit,
-.B qmail-smtpd
-returns a permanent error code to the client;
-in contrast, if
-the disk is full or
-.B qmail-smtpd
-hits a resource limit,
-.B qmail-smtpd
+Maximum number of bytes allowed in a message, or 0 for no limit.
+Default: 0. If a message exceeds this limit, \fBqmail-smtpd\fR
+returns a permanent error code to the client; in contrast, if the disk is
+full or \fB qmail-smtpd\fR hits a resourcs limit, \fB qmail-smtpd\fR
 returns a temporary error code. If you define the environment variable
 \fBDATABYTES_NOTIFY\fR, then the recipient gets notified in case a message
 is bounced back to the sender due to crossing the databyte limit.
 
-.I databytes
-counts bytes as stored on disk, not as transmitted through the network.
-It does not count the
-.B qmail-smtpd
-Received line, the
-.B qmail-queue
-Received line, or the envelope.
+\fIdatabytes\fR counts bytes as stored on disk, not as transmitted through
+the network. It does not count the \fB qmail-smtpd\fR Received line, the
+\fB qmail-queue\fR Received line, or the envelope.
 
-If the environment variable
-.B DATABYTES
-is set, it overrides
-.IR databytes .
+If the environment variable \fBDATABYTES\fR is set, it overrides
+\fIdatabytes\fR.
 
 .TP 5
 .I greetdelay
 The greetdelay control file adds a defined delay after the SMTP client has
-initiated the SMTP session and before
-.B qmail-smtpd
-answers with "220 ESMTP" welcome prompt. A negative value in the control
-file causes the session to be terminated if any input is received before
-the welcome prompt. The absolute value in the control file determines the
-delay.
+initiated the SMTP session and before \fBqmail-smtpd\fR answers with "220
+ESMTP" welcome prompt. A negative value in the control file causes the
+session to be terminated if any input is received before the welcome
+prompt. The absolute value in the control file determines the delay.
 
 This can be helpful to trap junk SMTP traffic (well-behaved MTAs will wait
 for the welcome prompt before sending). Time enough to discourage a typical
@@ -993,25 +978,19 @@ the spam sender to deliver messages (whether successfully or
 unsuccessfully) is raised from typically one second to (<=) GREETDELAY
 seconds.
 
-The delay can also be set via the environment variable
-.BR GREETDELAY ,
-which is typically set by means of
-.BR tcpserver 's
+The delay can also be set via the environment variable \fBGREETDELAY\fR,
+which is typically set by means of \fBtcpserver\fR's
 rule-set file. A value of GREETDELAY="30" will delay the qmail-smtpd's
 greeting for 30 seconds. A value of GREETDELAY="-30" will delay the
 qmail-smtpd's greeting by 30 seconds and as well as terminate the session
 if any input is received before 30 seconds. If the environment variable
-.B GREETDELAY
-is set, it overrides
-.I greetdelay
-control file
+\fBGREETDELAY\fR is set, it overrides \fIgreetdelay\fR control file.
 
 .TP 5
 .I dnsbllist
 A list of dnsbl providers that \fBqmail-smtpd\fR checks to identify
 blacklisted ip addresses. The filename can be overriden by the environment
-variable
-.BR DNSBLLIST .
+variable \fBDNSBLLIST\fR.
 
 If the environment variable \fBSKIPDNSBL\fR is set, \fBqmail-smtpd\fR
 ignores \fIdnsbllist\fR, and the dnsbl check is not performed. The check is
@@ -1024,31 +1003,18 @@ plugin.
 .TP 5
 .I localiphost
 Replacement host name for local IP addresses.
-Default:
-.IR me ,
-if that is supplied.
-.B qmail-smtpd
-is responsible for recognizing dotted-decimal addresses for the
-current host.
-When it sees a recipient address of the form
-.IR box@[d.d.d.d] ,
-where
-.I d.d.d.d
-is a local IP address,
-it replaces
-.IR [d.d.d.d]
-with
-.IR localiphost .
-This is done before
-.IR rcpthosts .
+Default: \fIme\fR, if that is supplied. \fBqmail-smtpd\fR is responsible
+for recognizing dotted-decimal addresses for the current host. When it sees
+a recipient address of the form \fIbox@[d.d.d.d]\fR, where \fId.d.d.d\fR is
+a local IP address, it replaces \fI[d.d.d.d]\fR with \fIlocaliphost\fR.
+This is done before \fIrcpthosts\fR.
 
 .TP 5
 .IR moreipme
-.B qmail-smtpd 
-will treat all addresses in this file exactly as if they were local,
-though not identified initially by the OS; eg. in a NAT environment.
-Local IP addresses can be displayed by means of the program
-.B ipmeprint .
+\fBqmail-smtpd\fR will treat all addresses in this file exactly as if they
+were local, though not identified initially by the OS; eg. in a NAT
+environment. Local IP addresses can be displayed by means of the program
+\fBipmeprint\fR.
 
 .TP 5
 \fInotipme\fR
@@ -1520,7 +1486,6 @@ The name of the control file can be overriden by the environment variable
 
 The following list of environment variables can be modified using envrules
 .IR QREGEX ,
-.IR ENFORCE_FQDN_HELO ,
 .IR DATABYTES ,
 .IR TCPPARANOID ,
 .IR VIRUSCHECK ,
@@ -1543,8 +1508,8 @@ The following list of environment variables can be modified using envrules
 .IR SERVERCERT ,
 .IR BLACKHOLEDSENDER ,
 .IR BLACKHOLEDPATTERNS ,
-.IR BLACKHOLERCPT ,
-.IR BLACKHOLERCPTPATTERNS ,
+.IR BLACKHOLEDRCPT ,
+.IR BLACKHOLEDRCPTPATTERNS ,
 .IR BATVKEY ,
 .IR BATVKEYSTALE ,
 .IR SPFBEHAVIOR ,
@@ -1647,26 +1612,17 @@ parse_function(), vshow_atrn_map(), atrn_access(),
 iopen(), iclose(), sql_getpw(), get_real_domain()
 
 .SH GREYLISTING
-.B qmail-smtpd
-has the ability to greylist incoming mails. Subject to the environment
-variable
-.B GREYIP
-being set, greylist checks are made for incoming SMTP connections prior to
-accepting messages.
+\fBqmail-smtpd\fR has the ability to greylist incoming mails. Subject to
+the environment variable \fBGREYIP\fR being set, greylist checks are made
+for incoming SMTP connections prior to accepting messages.
 
 "Full" greylisting is implemented, meaning that the connecting IP address,
 envelope sender and envelope recipient form the triplet that is checked.
 
-.B qmail-greyd
-is used by qmail-smtpd to carry out these checks;
-.B qmail-smtpd
-communicates with qmail-greyd using UDP.
-.B qmail-greyd
-itself is written in Perl.
-To enable greylisting the environment variable
-.B GREYIP
-is used. For the default values (loopback address 127.0.0.1, port 1999)
-use,
+\fBqmail-greyd\fR is used by qmail-smtpd to carry out these checks;
+\fBqmail-smtpd\fR communicates with qmail-greyd using UDP. To enable
+greylisting the environment variable \fBGREYIP\fR is used. For the default
+values (loopback address 127.0.0.1, port 19999 use,
 
 .EX
    GREYIP="127.0.0.1@1999"
@@ -1682,29 +1638,24 @@ in these examples,
 .EE
 
 Exception:
-If the environment variable
-.B RELAYCLIENT
-is set (see details on this above), greylisting does not occur.
+If the environment variable \fBRELAYCLIENT\fR is set (see details on this
+	above), greylisting does not occur.
 
-Greylisting may be explicitly disabled by setting
-.B GREYIP
-to an empty string,
+Greylisting may be explicitly disabled by setting \fBGREYIP\fR to an empty
+string,
 
 .EX
    GREYIP=""
 .EE
 
-Clearly
-.B qmail-greyd
-must be available to respond to greylisting queries. If the
-GREYIP address/port is unavailable and the system detects
-this - perhaps via an ICMP 'unreachable' type response - the
-SMTP session aborts with a temporary error when the
-greylisting check occurs; the errno string is logged to help
-troubleshooting (typically qmail-greyd isn't running or is
-blocked by firewall rules). Otherwise if there is no response
-a timeout occurs, producing the same temporary error but without
-further logging detail.
+Clearly \fBqmail-greyd\fR must be available to respond to greylisting
+queries. If the GREYIP address/port is unavailable and the system detects
+this - perhaps via an ICMP 'unreachable' type response - the SMTP session
+aborts with a temporary error when the greylisting check occurs; the errno
+string is logged to help troubleshooting (typically qmail-greyd isn't
+running or is blocked by firewall rules). Otherwise if there is no response
+a timeout occurs, producing the same temporary error but without further
+logging detail.
 
 .SH "VIRUS SCANNING"
 The environment variable VIRUSCHECK can be set to one of the 7 values given

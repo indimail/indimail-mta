@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.310 2023-11-03 05:23:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.311 2023-11-05 05:15:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.310 $";
+static char    *revision = "$Revision: 1.311 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2610,7 +2610,7 @@ open_control_files2()
 		"BLACKHOLEDSENDER", "BLACKHOLEDPATTERNS", "blackholedsender", "blackholedpatterns", &bhf, &mapbhf, &bhp);
 	/*- BLACKHOLE RECIPIENT Patch - include Control file */
 	open_control_once(&bhrcpok, &bhbrpok, &bhrcpFn, &bhrcpFnp,
-		"BLACKHOLERCPT", "BLACKHOLERCPTPATTERNS", "blackholercpt", "blackholercptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
+		"BLACKHOLEDRCPT", "BLACKHOLEDRCPTPATTERNS", "blackholedrcpt", "blackholedrcptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
 	/*- BADRECIPIENT Patch - include Control file */
 	open_control_once(&rcpok, &brpok, &rcpFn, &rcpFnp,
 		"BADRCPTTO", "BADRCPTPATTERNS", "badrcptto", "badrcptpatterns", &rcp, &maprcp, &brp);
@@ -7202,6 +7202,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.311  2023-11-05 05:15:41+05:30  Cprogrammer
+ * fixed control filename for blackholedrcpt, blackholedrcptpatterns
+ *
  * Revision 1.310  2023-11-03 05:23:38+05:30  Cprogrammer
  * fix nodnscheck for helo/ehlo
  *
@@ -7589,7 +7592,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.310 2023-11-03 05:23:38+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.311 2023-11-05 05:15:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
