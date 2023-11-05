@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.47 2023-11-03 05:25:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.48 2023-11-05 06:45:53+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -440,7 +440,7 @@ setup_config()
 	echo blocked@$HOSTNAME                    > $cntrldir/badmailfrom
 	echo blocked@$HOSTNAME                    > $cntrldir/badrcptto
 	echo blackholed@$HOSTNAME                 > $cntrldir/blackholedsender
-	echo blackholed@$HOSTNAME                 > $cntrldir/blackholercpt
+	echo blackholed@$HOSTNAME                 > $cntrldir/blackholedrcpt
 	echo 10                                   > $cntrldir/timeoutremote
 	echo 10                                   > $cntrldir/timeoutsmtpd
 	(
@@ -3228,12 +3228,12 @@ test_blackholed()
 	ret2=$?
 	s1=$sleep_secs
 	if [ $# -eq 0 ] ; then
-		/bin/rm -f $cntrldir/blackholercpt
+		/bin/rm -f $cntrldir/blackholedrcpt
 	else
 		/bin/rm -f $cntrldir/blackholedsender
 	fi
 	if [ $# -eq 0 ] ; then
-		swaks --to blackholed@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port >$tmpdir/swaks.$$
+		swaks -S --to blackholed@$HOSTNAME --from $user@$HOSTNAME --server localhost --port $smtp_port >$tmpdir/swaks.$$
 	else
 		swaks -S --to $user@$HOSTNAME  --from blackholed@$HOSTNAME -server localhost --port $smtp_port >$tmpdir/swaks.$$
 	fi
@@ -7054,9 +7054,15 @@ display_tests()
 	echo "test svscan execution of run /service/.svscan/run"
 	echo "test svscan start services configured in /service"
 	echo "test SMTPS service and mail submission using swaks"
+	echo "test domainqueue"
+	echo "test authdomains"
+	echo "test SMTP accesslist"
+	echo "test SMTP surbl"
+	echo "test SMTP QQEH"
 	echo "test svscan autoscan"
 	echo "test svscan subreaper feature"
 	echo "test blocking (badmailfrom, badrcptto)"
+	echo "test blachole (blackholedrcpt, blackholedsender)"
 	echo "test SPF"
 	echo "test DKIM using dkim, qmail-dkim, dk-filter"
 }
@@ -7158,6 +7164,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.48  2023-11-05 06:45:53+05:30  Cprogrammer
+# updated test script
+#
 # Revision 1.47  2023-11-03 05:25:26+05:30  Cprogrammer
 # added badhelo test
 #
