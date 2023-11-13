@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.48 2023-11-05 06:45:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.49 2023-11-13 10:38:46+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -846,25 +846,26 @@ create_authsmtp()
 start_tcpserver_smtp()
 {
 	t1=$(date +"%s.%4N")
+	mkdir -p $testdir/smtpd/variables
+	echo 1              > $testdir/smtpd/variables/USE_QPWGR
+	echo 0              > $testdir/smtpd/variables/BIGTODO
+	echo 1              > $testdir/smtpd/variables/STARTTLS
+	echo 23             > $testdir/smtpd/variables/CONFSPLIT
+	echo $testdir/queue > $testdir/smtpd/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/smtpd/variables/CONTROLDIR
+	echo $certdir       > $testdir/smtpd/variables/CERTDIR
+	echo 1              > $testdir/smtpd/variables/ENABLE_CRAM
+	echo 1              > $testdir/smtpd/variables/DEBUG
+	echo 1              > $testdir/smtpd/variables/DEBUG_LOGIN
+	echo 0              > $testdir/smtpd/variables/SPAMEXITCODE
+	echo 0              > $testdir/smtpd/variables/REJECTSPAM
+	echo 1              > $testdir/smtpd/variables/MAKE_SEEKABLE
+	echo ""             > $testdir/smtpd/variables/DKIMVERIFY
+	echo 1              > $testdir/smtpd/variables/BADHELOCHECK
+	echo "$sbindir/qmail-dkim $sbindir/qmail-spamfilter" > $testdir/smtpd/variables/QMAILQUEUE
+	echo "$bogofilter -p -d /etc/indimail" > $testdir/smtpd/variables/SPAMFILTER
 	(
-	sudo env - \
-		USE_QPWGR=1 \
-		BIGTODO=0 \
-		STARTTLS=1 \
-		CONFSPLIT=23 \
-		QUEUEDIR=$testdir/queue \
-		CONTROLDIR=$cntrldir \
-		CERTDIR=$certdir \
-		ENABLE_CRAM=1 \
-		DEBUG=1 \
-		DEBUG_LOGIN=1 \
-		QMAILQUEUE="$sbindir/qmail-dkim $sbindir/qmail-spamfilter" \
-		SPAMFILTER="$bogofilter -p -d /etc/indimail" \
-		SPAMEXITCODE=0 \
-		REJECTSPAM=0 \
-		MAKE_SEEKABLE=1 \
-		DKIMVERIFY="" \
-		BADHELOCHECK=1 \
+	sudo envdir -c $testdir/smtpd/variables \
 		$tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd $HOSTNAME \
 			$testdir/bin/authsmtp /sbin/sys-checkpwd /bin/false
 	) > $logdir/smtpd/smtpd.log 2>&1 &
@@ -4622,16 +4623,18 @@ test_badhelo()
 	ret2=$?
 	check_mail 2>/dev/null
 	ret3=$?
+	s1=$sleep_secs
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port \
 		-h palestine >$tmpdir/swaks.$$
 	ret4=$?
 	check_mail 2>/dev/null
 	ret5=$?
+	s2=$sleep_secs
 	/bin/rm -f $tmpdir/swaks.$$
 
 	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -ne 0 -a $ret4 -eq 0 -a $ret5 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing SMTP badhelo check succeeded %65s [%.4f sec]\n" " " $secs
 		print_pct
@@ -4646,6 +4649,52 @@ test_badhelo()
 		exit 1
 	fi
 	/bin/rm -f $cntrldir/badhelo
+}
+
+test_dnsmx()
+{
+	t1=$(date +"%s.%4N")
+	from="abcdefgh@kfjadjff.com"
+	swaks -S --to $user@$HOSTNAME --from $from --server 127.0.0.1 --port $smtp_port \
+		>$tmpdir/swaks.$$
+	ret1=$?
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	l2=$(sed -n '$p' $logdir/smtpd/smtpd.log)
+	echo "$l1" | grep ".*553 Bad sender's system address (#5.1.8)" >/dev/null
+	ret2=$?
+	echo "$l2" | grep ".*Non-existing DNS_MX: MAIL FROM:<$from>" >/dev/null
+	ret3=$?
+	echo 1 > $testdir/smtpd/variables/NODNSCHECK
+	terminate_smtp_qmtp $smtp_pid
+	start_tcpserver_smtp
+	sleep $sleep_int
+	swaks -S --to $user@$HOSTNAME --from $from --server 127.0.0.1 --port $smtp_port \
+		>$tmpdir/swaks.$$
+	ret4=$?
+	check_mail
+	ret5=$?
+
+	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 -a $ret4 -eq 0 -a $ret5 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing SMTP NODNSCHECK succeeded %68s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret1=$ret1, ret2=$ret2, ret3=$ret3, ret4=$ret4, ret5=$ret5"
+		echo "  testing SMTP NOODNSCHECK failed [$secs sec]"
+		(
+		echo "$logdir/smtpd/smtpd.log"
+		cat $logdir/smtpd/smtpd.log
+		)|less
+		failed=1
+		exit 1
+	fi
+	/bin/rm -f $testdir/smtpd/variables/NODNSCHECK
+	terminate_smtp_qmtp $smtp_pid
+	start_tcpserver_smtp
+	sleep $sleep_int
 }
 
 do_without_svscan()
@@ -4693,6 +4742,7 @@ do_without_svscan()
 	sleep $sleep_int
 	create_qmail_remote $testuser@$HOSTNAME
 
+	test_dnsmx
 	test_badhelo
 	test_spawn_filter
 	create_authsmtp
@@ -7124,7 +7174,7 @@ fi
 secs=0.0
 printf "\r%118s\n" " "
 for i in QMAILQUEUE envdir tcpclient-tcp tcpclient-ssl tcpclient-unix \
-	maildirdeliver bounce 822header 822body qmail-getpw
+	maildirdeliver bounce 822header 822body qmail-getpw nodnscheck
 do
 	tcount=$(expr $tcount + 1)
 	printf "\r  implicit test %20s succeeded %57s [%.4f sec]\n" $i " " $secs
@@ -7164,6 +7214,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.49  2023-11-13 10:38:46+05:30  Cprogrammer
+# added test for nodnscheck
+#
 # Revision 1.48  2023-11-05 06:45:53+05:30  Cprogrammer
 # updated test script
 #
