@@ -25,12 +25,12 @@ exit. This option gets activated only when the first argument to
 .SH DESCRIPTION
 \fBqmail-smtpd\fR receives mail messages via the Simple Mail Transfer
 Protocol (SMTP) and invokes the program defined by \fBQMAILQUEUE\fR
-environment variables to deposit the message into the outgoing queue. If
+environment variable to deposit the message into the outgoing queue. If
 \fBQMAILQUEUE\fR isn't defined then @prefix@/sbin/qmail-queue is used as a
 default.
 
-\fBqmail-smtpd\fR uses @sysconfdir@ as its working directory which can be
-changed by setting \fBSYSCONFDIR\fR environment variable.
+\fBqmail-smtpd\fR uses \fI@sysconfdir@\fR as its working directory which
+can be changed by setting \fBSYSCONFDIR\fR environment variable.
 
 .B qmail-smtpd
 must be supplied several environment variables;
@@ -1090,14 +1090,14 @@ DNS checks are prohibited for sender addresses (Mail from:) included here.
 Addresses can be expressed individually and/or for a domain:
 
 .EX
-   god@heaven.af.mil
-   @heaven.af.mil
+  god@heaven.af.mil
+  @heaven.af.mil
 .EE
 
 If the environment variable \fBNODNSCHECK\fR is set, \fBqmail-smtpd\fR will
-ignore \fInodnscheck\fR and the DNS check will be disabled in general. A
-line in \fInodnschecks\fR may be of the form \fB@\fIhost\fR, meaning every
-address att \fIhost\fR.
+ignore \fInodnscheck\fR and the DNS check will be disabled. A line in
+\fInodnschecks\fR may be of the form \fB@\fIhost\fR, meaning every address
+at \fIhost\fR.
 
 .TP 5
 \fIrcpthosts\fR
@@ -1112,8 +1112,8 @@ Exception: If the environment variable \fBRELAYCLIENT\fR is set,
 \fIrcpthosts\fR may include wildcards:
 
 .EX
-   heaven.af.mil
-   .heaven.af.mil
+ heaven.af.mil
+ .heaven.af.mil
 .EE
 
 Envelope recipient addresses without @ signs are
@@ -1139,8 +1139,8 @@ Addresses in
 may be wildcarded:
 
 .EX
-   192.168.0.1:
-   192.168.1.:
+  192.168.0.1:
+  192.168.1.:
 EE
 
 .TP 5
@@ -1154,8 +1154,8 @@ optional string should be null.
 Addresses in \fIrelaydomains\fR may be wildcarded:
 
 .EX
-   heaven.af.mil:
-   .heaven.af.mil:
+  heaven.af.mil:
+  .heaven.af.mil:
 .EE
  
 .TP 5
@@ -1170,8 +1170,8 @@ If \fIrelaymailfrom.cdb\fR is present, it will be searched first.
 Examples:
 
 .EX
-   joeblow@domain1.com
-   @domain2.com
+  joeblow@domain1.com
+  @domain2.com
 .EE
 
 .TP 5
@@ -1220,12 +1220,12 @@ A \fIrecipients\fR file is always constructed like 'domain:cdb',
  'domain|pam', or simply 'cdb':
 
 .EX
-   !nocheck.com
-   @mydomain.com:users/recipients.cdb
-   example.com|ldap_pam ldapserver host port DN passwd
-   *:control/fastforward.cdb
-   *|ldap_pam otherserver
-   !*
+  !nocheck.com
+  @mydomain.com:users/recipients.cdb
+  example.com|ldap_pam ldapserver host port DN passwd
+  *:control/fastforward.cdb
+  *|ldap_pam otherserver
+  !*
 .EE
 
 Legacy format:
@@ -1625,27 +1625,27 @@ greylisting the environment variable \fBGREYIP\fR is used. For the default
 values (loopback address 127.0.0.1, port 19999 use,
 
 .EX
-   GREYIP="127.0.0.1@1999"
+  GREYIP="127.0.0.1@1999"
 .EE
 
 Alternatively a different IP address and/or port can be specified as
 in these examples,
 
 .EX
-   GREYIP="192.168.1.50"
-   GREYIP="::1@1999"
-   GREYIP="192.168.1.33@1999"
+  GREYIP="192.168.1.50"
+  GREYIP="::1@1999"
+  GREYIP="192.168.1.33@1999"
 .EE
 
 Exception:
 If the environment variable \fBRELAYCLIENT\fR is set (see details on this
-	above), greylisting does not occur.
+above), greylisting does not occur.
 
 Greylisting may be explicitly disabled by setting \fBGREYIP\fR to an empty
 string,
 
 .EX
-   GREYIP=""
+  GREYIP=""
 .EE
 
 Clearly \fBqmail-greyd\fR must be available to respond to greylisting

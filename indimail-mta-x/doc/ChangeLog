@@ -47,6 +47,11 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 28. smtpd.c: fixed control filename for blackholedrcpt, blackholedrcptpatterns
 29. qmail.c: fixed NULLQUEUE
 30. tests/test-indimail-mta: added test for blackholedrcpt, blackholdsender
+- 20/11/2023
+31. qmail-dkim.c: Added env variable EXCLUDE_DKIMSIGN to exclude headers from
+    DKIM signing
+32. qmail-dkim.c: Added Arc-Authentication-Results header to list of headers
+    excluded from DKIM signing
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

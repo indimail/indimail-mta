@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.75 2023-02-17 11:49:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.76 2023-11-20 11:03:04+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -98,12 +98,29 @@ sigbug()
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
+	char           *excl = 0, *cptr, *ptr;
+	int             i;
+
 	if ((!strncasecmp((char *) szHeader, "X-", 2) && strncasecmp((char *) szHeader, "X-Mailer:", 9))
-			|| strncasecmp((char *) szHeader, "Received:", 9) == 0
-			|| strncasecmp((char *) szHeader, "Authentication-Results:", 23) == 0
+			|| !strncasecmp((char *) szHeader, "Received:", 9)
+			|| !strncasecmp((char *) szHeader, "Authentication-Results:", 23)
+			|| !strncasecmp((char *) szHeader, "Arc-Authentication-Results:", 27)
 			|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
 			|| !strncasecmp(szHeader, "DomainKey-Signature:", 20)
-			|| strncasecmp((char *) szHeader, "Return-Path:", 12) == 0)
+			|| !strncasecmp((char *) szHeader, "Return-Path:", 12))
+		return 0;
+	if (!(excl = env_get("EXCLUDE_DKIMSIGN")))
+		return 1;
+	for (i = 0, cptr = ptr = excl; *ptr; ptr++) {
+		if (*ptr == ':') {
+			if (strncasecmp((char *) szHeader, cptr, i) == 0)
+				return 0;
+			cptr = ptr + 1;
+			i = 0;
+		} else
+			i++;
+	}
+	if (strncasecmp((char *) szHeader, cptr, i) == 0)
 		return 0;
 	return 1;
 }
@@ -1251,7 +1268,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.75 2023-02-17 11:49:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.76 2023-11-20 11:03:04+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1265,6 +1282,10 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.76  2023-11-20 11:03:04+05:30  Cprogrammer
+ * Added env variable EXCLUDE_DKIMSIGN to exclude headers from DKIM signing
+ * exclude Arc-Authentication-Results header from DKIM signing
+ *
  * Revision 1.75  2023-02-17 11:49:48+05:30  Cprogrammer
  * added env variable NODKIMKEYS to disable reading of dkimkeys control file
  * disable dkimkeys when doing DKIMSIGNEXTRA

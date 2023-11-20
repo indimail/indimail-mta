@@ -296,17 +296,18 @@ to sign messages sent by that host. \fBDKIMVERIFY\fR should be set for all
 other hosts.
 
 If neither \fBDKIMSIGN\fR nor \fBDKIMVERIFY\fR are set, then \fBDKIMSIGN\fR
-will be set to @controldir@/domainkeys/%/default. The % will be replaced by
-the domain in the From: header. If such a file does not exist, then it will
-be set to @controldir@/domainkeys/default. If such a private key exists, it
-will be used to sign the domain. You can also set \fBDKIMKEY\fR to chose a
-key different from @controldir@/domainkeys/%/default. \fBDKIMKEY\fR can
-also have % character that will be replaced by the domain in the From:
-header. If the private key does not exist, qmail-dkim will exit with return
-code 35.
+will be set to \fI@controldir@/domainkeys/%/default\fR. The % will be
+replaced by the domain in the From: header. If such a file does not exist,
+then it will be set to \fI@controldir@/domainkeys/default\fR. If such a
+private key exists, it will be used to sign the domain. You can also set
+\fBDKIMKEY\fR to chose a key different from
+\fI@controldir@/domainkeys/%/default\fR. \fBDKIMKEY\fR can also have %
+character that will be replaced by the domain in the From: header. If the
+private key does not exist, qmail-dkim will exit with return code 35.
 
 By default \fBqmail-dkim\fR will use all of the headers when signing a
-message.
+message. You an exclude headers from gettng signed by setting a colon
+separated list of headers in \fBEXCLUDE_DKIMSIGN\fR environment variable.
 
 .SH NOTES
 If the environment variable \fBCONTROLDIR\fR is set, \fBqmail-dkim\fR uses

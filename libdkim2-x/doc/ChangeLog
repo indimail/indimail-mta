@@ -43,6 +43,13 @@ o ability to alter Hash Method after DKIMSignInit
 - 20/09/2023
 14. use Replaces, Conflicts in spec,control
 - 17/10/2023 - indimail-mta-3.0.5
+- 14/11/2023
+15. dkim.cpp: Added -X option to have colon seperated list of headers to be
+    excluded from DKIM signing.
+16. dkim.cpp: Added env variable EXCLUDE_DKIMSIGN to exclude headers from
+    DKIM signing
+17. dkim.cpp, dkimsigin.cpp: Exclude Arc-Authentication-Results from DKIM
+    signing
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023

@@ -119,6 +119,13 @@ Bypass DNS and use \fIselectorRecord\fR instead of fetching the record
 using DNS.
 
 .TP
+-X \fIexclude_headers\fR
+\fIexclude_headers\fR is a colon separated list of headers to be excluded
+from DKIM signing. You can also set list of headers to be excluded by
+setting \fBEXCLUDE_DKIMSIGN\fR environment variable. The -X option takes
+precedence.
+
+.TP
 -V
 Sets verbose output
 
@@ -205,7 +212,6 @@ rejected later at delivery time, or in the mail reader. In that case you
 need not set \fBDKIMVERIFY\fR or set it as "p" as the maximum.
 
 .SH "SEE ALSO"
-dktest(8),
 qmail-dk(8),
 qmail-dkim(8),
 dknewkey(8),

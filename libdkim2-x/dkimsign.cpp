@@ -193,6 +193,7 @@ bool CDKIMSign::SignThisHeader(const string &sTag)
 
 	if (_strnicmp(sTag.c_str(), "X-", 2) == 0
 		|| _stricmp(sTag.c_str(), "Authentication-Results:") == 0
+		|| _stricmp(sTag.c_str(), "Arc-Authentication-Results:") == 0
 		|| _stricmp(sTag.c_str(), "DKIM-Signature:") == 0
 		|| _stricmp(sTag.c_str(), "Domainkey-Signature:") == 0
 		|| _stricmp(sTag.c_str(), "Received:") == 0
@@ -989,13 +990,16 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.26 2023-04-06 21:41:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.27 2023-11-20 10:09:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.27  2023-11-20 10:09:06+05:30  Cprogrammer
+ * exclude Arc-Authentication-Results header from signing
+ *
  * Revision 1.26  2023-04-06 21:41:30+05:30  Cprogrammer
  * fixed compiler warning of use of uninitialized variable
  *

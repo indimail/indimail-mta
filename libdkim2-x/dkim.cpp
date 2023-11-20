@@ -43,7 +43,7 @@
 #define TMPDIR "/tmp"
 #endif
 
-static char   *callbackdata;
+static char   *callbackdata, *excl;
 const char    *defaultkey = "private";
 char           *program;
 typedef struct
@@ -85,6 +85,7 @@ usage()
 	fprintf(stderr, "y <selector>         the selector tag DEFAULT=basename of privkeyfile\n");
 	fprintf(stderr, "s <privkeyfile>      sign the message using the private key in privkeyfile\n");
 	fprintf(stderr, "T DNSText            Use DNSText as domainkey text record instead of using DNS\n");
+	fprintf(stderr, "X excl               Exclude header excl from signing\n");
 	fprintf(stderr, "V                    set verbose mode\n");
 	fprintf(stderr, "H                    this help\n");
 	exit(1);
@@ -93,12 +94,32 @@ usage()
 int DKIM_CALL
 SignThisHeader(const char *szHeader)
 {
+	char           *cptr, *ptr;
+	int             i;
+
+	/*
+	 * GHBH-Arc:Arc-Authentication-Results:ABCD-EFGH
+	 */
 	if ((!strncasecmp(szHeader, "X-", 2) && strncasecmp(szHeader, "X-Mailer:", 9))
 			|| !strncasecmp(szHeader, "Received:", 9)
 			|| !strncasecmp(szHeader, "Authentication-Results:", 23)
+			|| !strncasecmp(szHeader, "Arc-Authentication-Results:", 27)
 			|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
 			|| !strncasecmp(szHeader, "DomainKey-Signature:", 20)
 			|| !strncasecmp(szHeader, "Return-Path:", 12))
+		return 0;
+	if (!excl)
+		return 1;
+	for (i = 0, cptr = ptr = excl; *ptr; ptr++) {
+		if (*ptr == ':') {
+			if (strncasecmp((char *) szHeader, cptr, i + 1) == 0)
+				return 0;
+			cptr = ptr + 1;
+			i = 0;
+		} else
+			i++;
+	}
+	if (strncasecmp((char *) szHeader, cptr, i) == 0)
 		return 0;
 	return 1;
 }
@@ -534,8 +555,9 @@ main(int argc, char **argv)
 	sopts.nIncludeCopiedHeaders = 0;
 	strcpy(sopts.szRequiredHeaders, "NonExistent");
 	sopts.pfnHeaderCallback = SignThisHeader;
+	excl = getenv("EXCLUDE_DKIMSIGN");
 	while (1) {
-		if ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:y:z:T:")) == -1)
+		if ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:X:y:z:T:")) == -1)
 			break;
 		switch (ch)
 		{
@@ -710,6 +732,9 @@ main(int argc, char **argv)
 		case 'T':
 			callbackdata = optarg;
 			break;
+		case 'X':
+			excl = optarg;
+			break;
 		} /*- switch (ch) */
 	}
 	if (bSign) { /*- sign */
@@ -882,13 +907,17 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.34 2023-02-19 08:48:17+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.35 2023-11-20 10:07:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.35  2023-11-20 10:07:40+05:30  Cprogrammer
+ * Added -X option to have colon separated list of headers to be excluded from DKIM signing
+ * use EXCLUDE_DKIMSIGN to specify colon separated list of headers to be excluded from DKIM signing
+ *
  * Revision 1.34  2023-02-19 08:48:17+05:30  Cprogrammer
  * fixed usage strings
  *
