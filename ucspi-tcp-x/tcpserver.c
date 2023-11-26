@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.91 2023-09-27 19:37:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -67,7 +67,7 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.91 2023-09-27 19:37:36+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsid[] = "$Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifdef IPV6
@@ -1837,8 +1837,9 @@ do_socket:
 	}
 	if (tcpserver_plugin(envp, 1))
 		_exit(111);
-	if (flag1 && !af_unix) {
+	if (!af_unix)
 		localportstr[fmt_ulong(localportstr, localport)] = 0;
+	if (flag1 && !af_unix) {
 		substdio_fdbuf(&b, write, 1, bspace, sizeof bspace);
 		substdio_puts(&b, localportstr);
 		substdio_puts(&b, "\n");
@@ -1933,7 +1934,8 @@ do_socket:
 				if (ipcount >= maxperip) {
 					strnum2[fmt_ulong(strnum2, ipcount)] = 0;
 					errno = error_acces;
-					strerr_die6sys(111, DROP, "no ip slots for ", remoteipstr, ", perIPlimit ", strnum2, ": ");
+					strerr_die6sys(111, DROP, af_unix ? "no slots for " : "no ip slots for ",
+							af_unix ? af_unix : remoteipstr, ", perIPlimit ", strnum2, ": ");
 				}
 			}
 #ifdef TLS
@@ -2015,6 +2017,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.92  2023-11-26 18:28:05+05:30  Cprogrammer
+ * fixed TCPLOCALPORT not getting set
+ *
  * Revision 1.91  2023-09-27 19:37:36+05:30  Cprogrammer
  * skip IP display in printstatus for sigchild
  *
