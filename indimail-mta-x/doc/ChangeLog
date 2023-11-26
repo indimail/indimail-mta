@@ -52,6 +52,9 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
     DKIM signing
 32. qmail-dkim.c: Added Arc-Authentication-Results header to list of headers
     excluded from DKIM signing
+- 26/11/2023
+33. atrn.c: use auto_libexec for atrn script
+34. smtpd.c: Use TCP6LOCALPORT for smtp_portif TCPLOCALPORT is not set
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

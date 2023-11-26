@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.311 2023-11-05 05:15:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.312 2023-11-26 12:49:46+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -155,7 +155,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.311 $";
+static char    *revision = "$Revision: 1.312 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2138,7 +2138,7 @@ log_atrn(char *arg1, char *arg2, char *arg3)
 {
 	logerr(1, "ATRN ", arg1, NULL);
 	if (arg2)
-		logerr(0, arg2, NULL);
+		logerr(0, " ", arg2, NULL);
 	if (arg3)
 		logerr(0, ": ", arg3, NULL);
 	logerr(0, "\n", NULL);
@@ -6956,6 +6956,9 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if ((ptr = env_get("TCPLOCALPORT")))
 		scan_int(ptr, &smtp_port);
 	else
+	if ((ptr = env_get("TCP6LOCALPORT")))
+		scan_int(ptr, &smtp_port);
+	else
 		smtp_port = -1;
 	if (smtp_port == ODMR_PORT && (!hostname || !*hostname || !childargs || !*childargs)) {
 		if (!env_put2("SHUTDOWN", ""))
@@ -7202,6 +7205,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.312  2023-11-26 12:49:46+05:30  Cprogrammer
+ * Use TCP6LOCALPORT for smtp_portif TCPLOCALPORT is not set
+ * fix space in atrn error
+ *
  * Revision 1.311  2023-11-05 05:15:41+05:30  Cprogrammer
  * fixed control filename for blackholedrcpt, blackholedrcptpatterns
  *
@@ -7592,7 +7599,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.311 2023-11-05 05:15:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.312 2023-11-26 12:49:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

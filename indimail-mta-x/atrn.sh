@@ -1,47 +1,11 @@
 #
-# $Log: atrn.sh,v $
-# Revision 1.11  2021-04-29 10:04:52+05:30  Cprogrammer
-# replaced QMAIL with QMAILHOME
-#
-# Revision 1.10  2017-03-09 16:37:26+05:30  Cprogrammer
-# FHS changes
-#
-# Revision 1.9  2016-05-17 23:11:42+05:30  Cprogrammer
-# fix for configurable control directory
-#
-# Revision 1.8  2009-04-19 13:38:58+05:30  Cprogrammer
-# replaced indimail/bin/echo with echo 1>&2
-#
-# Revision 1.7  2004-07-13 23:10:41+05:30  Cprogrammer
-# use resetquota to set right quota
-#
-# Revision 1.6  2004-06-17 22:18:27+05:30  Cprogrammer
-# prevent argument list too long
-#
-# Revision 1.5  2003-10-28 20:00:23+05:30  Cprogrammer
-# added comment for .qvirtual
-#
-# Revision 1.4  2003-10-17 21:02:35+05:30  Cprogrammer
-# corrected USAGE
-# use full path of rm
-#
-# Revision 1.3  2003-09-16 17:56:25+05:30  Cprogrammer
-# include cur in mail count
-#
-# Revision 1.2  2003-08-22 23:08:58+05:30  Cprogrammer
-# added file .qvirtual to use a different qvirtual
-#
-# Revision 1.1  2003-08-22 22:59:06+05:30  Cprogrammer
-# Initial revision
-#
+# $Id: atrn.sh,v 1.12 2023-11-26 12:50:37+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
 # 2 - Domain Rejected
 # 3 - No Pending message for node
 # 4 - Pending message for node
-#
-# $Id: atrn.sh,v 1.11 2021-04-29 10:04:52+05:30 Cprogrammer Exp mbhangui $
 #
 trap "" 1 2 3
 if [ $# -lt 2 ] ; then
@@ -110,8 +74,47 @@ do
 	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/bin/maildirserial \
 		-b -t $LIFETIME $domains/Maildir "$qvirtual"- \
 		PREFIX/bin/serialsmtp "$qvirtual"- AutoTURN 1
-	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/bin/resetquota \
+	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/sbin/resetquota \
 		$domains/Maildir
 	PREFIX/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
 done
 exit 0
+#
+# $Log: atrn.sh,v $
+# Revision 1.12  2023-11-26 12:50:37+05:30  Cprogrammer
+# fixed path for resetquota
+#
+# Revision 1.11  2021-04-29 10:04:52+05:30  Cprogrammer
+# replaced QMAIL with QMAILHOME
+#
+# Revision 1.10  2017-03-09 16:37:26+05:30  Cprogrammer
+# FHS changes
+#
+# Revision 1.9  2016-05-17 23:11:42+05:30  Cprogrammer
+# fix for configurable control directory
+#
+# Revision 1.8  2009-04-19 13:38:58+05:30  Cprogrammer
+# replaced indimail/bin/echo with echo 1>&2
+#
+# Revision 1.7  2004-07-13 23:10:41+05:30  Cprogrammer
+# use resetquota to set right quota
+#
+# Revision 1.6  2004-06-17 22:18:27+05:30  Cprogrammer
+# prevent argument list too long
+#
+# Revision 1.5  2003-10-28 20:00:23+05:30  Cprogrammer
+# added comment for .qvirtual
+#
+# Revision 1.4  2003-10-17 21:02:35+05:30  Cprogrammer
+# corrected USAGE
+# use full path of rm
+#
+# Revision 1.3  2003-09-16 17:56:25+05:30  Cprogrammer
+# include cur in mail count
+#
+# Revision 1.2  2003-08-22 23:08:58+05:30  Cprogrammer
+# added file .qvirtual to use a different qvirtual
+#
+# Revision 1.1  2003-08-22 22:59:06+05:30  Cprogrammer
+# Initial revision
+#
