@@ -1,5 +1,5 @@
 #
-# $Id: atrn.sh,v 1.12 2023-11-26 12:50:37+05:30 Cprogrammer Exp mbhangui $
+# $Id: atrn.sh,v 1.12 2023-11-26 19:51:03+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
@@ -74,14 +74,16 @@ do
 	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/bin/maildirserial \
 		-b -t $LIFETIME $domains/Maildir "$qvirtual"- \
 		PREFIX/bin/serialsmtp "$qvirtual"- AutoTURN 1
-	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/sbin/resetquota \
-		$domains/Maildir
+	if [ -f $domains/Maildir/maildirsize ] ; then
+		PREFIX/bin/setlock -nx $domains/seriallock PREFIX/sbin/resetquota \
+			$domains/Maildir
+	fi
 	PREFIX/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
 done
 exit 0
 #
 # $Log: atrn.sh,v $
-# Revision 1.12  2023-11-26 12:50:37+05:30  Cprogrammer
+# Revision 1.12  2023-11-26 19:51:03+05:30  Cprogrammer
 # fixed path for resetquota
 #
 # Revision 1.11  2021-04-29 10:04:52+05:30  Cprogrammer
