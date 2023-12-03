@@ -7,7 +7,7 @@ These instructions assume that you have already installed serialmail and
 ucspi-tcp, and that you are running qmail-smtpd from tcpserver -v
 with tcpserver's messages piped through splogger or multilog.
 
-These instructions _do not_ require that your customer install special
+These instructions do not require that your customer install special
 ETRN software. AutoTURN works with all SMTP clients.
 
 
@@ -19,9 +19,9 @@ ETRN software. AutoTURN works with all SMTP clients.
 
 2. Put the line
 
-   +autoturn-:indimail:7770:2108:/var/indimail/autoturn:-::
+   +autoturn-:autoturn:7770:2108:/var/indimail/autoturn:-::
 
-   into /etc/indimail/users/assign, replacing 7770 with the indimail uid and
+   into /etc/indimail/users/assign, replacing 7770 with the qmaild uid and
    2108 with the nofiles gid. Run /usr/sbin/qmail-newu. Now mail for
    autoturn-blah will be controlled by /var/indimail/autoturn/.qmail-blah.
 
@@ -63,7 +63,7 @@ ETRN software. AutoTURN works with all SMTP clients.
 
       # cd /var/indimail/autoturn
       # maildirmake 1.2.3.4
-      # chown -R indimail 1.2.3.4
+      # chown -R qmaild 1.2.3.4
       # echo ./1.2.3.4/ > .qmail-1:2:3:4-default
       # chmod 644 .qmail-1:2:3:4-default
 
@@ -74,7 +74,7 @@ ETRN software. AutoTURN works with all SMTP clients.
 If you have more customers who want AutoTURN service, repeat steps 4
 through 7 for them.
 
-Security note: Both qmail-smtpd and maildirsmtp will run as indimail;
+Security note: Both qmail-smtpd and maildirsmtp will run as qmaild;
 neither one is protected against security holes in the other. You may
 prefer to set up a separate autoturn user, and run maildirsmtp on a
 separate TCP port under that user. One good choice is port 1789, the
