@@ -1,5 +1,127 @@
 #
+# $Id: etrn.sh,v 1.13 2023-12-03 15:30:08+05:30 Cprogrammer Exp mbhangui $
+#
+# 0 - queueing started
+# 1 - System Error
+# 2 - Domain Rejected
+# 3 - No Pending message for node
+# 4 - Pending message for node
+#
+#
+trap "" 1 2 3
+PATH=/bin:/usr/bin:$PATH
+nm=$(basename $0)
+if [ $# -ne 3 ] ; then
+	echo "$nm: USAGE: domain_name dir smtp_host" 1>&2
+	exit 1
+elif [ -z "$TCPREMOTEIP" ] ; then
+	echo "$nm: TCPREMOTEIP not set" 1>&2
+	exit 1
+fi
+domain=$1
+dir=$2
+smtp_host=$3
+cd QMAILHOME/autoturn
+if [ -d $dir ] ; then
+	count=`for i in $dir/new $dir/cur ; do /bin/ls $i; done|wc -l`
+	if [ $count -eq 0 ] ; then
+		echo "$nm: No pending messages for domain $domain, ip=$3 dir=$dir, pid=$$" 1>&2
+		exit 3
+	fi
+else
+	echo "$nm: Trouble accessing directory for domain $domain, ip=$3 dir=$dir, pid=$$" 1>&2
+	exit 1
+fi
+set -o pipefail
+#
+# we need to ensure that the host / ip address to which we
+# are going to send emails for the domain has a valid MX
+# record for the domain. Else we reject the request as we don't
+# want any joe, o[b,s]ama, israel or any terrorist to fetch
+# mails not meant for them
+#
+if [ -d $domain ] ; then
+	ipme=$(LIBEXEC/ipmeprint | awk '{print $3}')
+	if [ $? -ne 0 ] ; then
+		echo "$nm: Unable to get local ip addresses" 1>&2
+		exit 1
+	fi
+	mxip=$(LIBEXEC/dnsmxip $domain | awk '{print $2}')
+	if [ $? -ne 0 ] ; then
+		echo "$nm: Unable to get MX for $domain" 1>&2
+		exit 1
+	fi
+	IP=""
+	for i in $mxip
+	do
+		for j in $TCPREMOTEIP $TCP6REMOTEIP
+		do
+			if [ "$i" = "$j" ] ; then
+				IP="$i"
+				break
+			fi
+		done
+	done
+	if [ -z "$IP" -a -f $domain/ipauth ] ; then
+		for i in $(cat $domain/ipauth)
+		do
+			for j in $TCPREMOTEIP $TCP6REMOTEIP
+			do
+				if [ "$i" = "$j" ] ; then
+					IP="$i"
+					break
+				fi
+			done
+		done
+	fi
+	if [  -z "$IP" ] ; then
+		if [ -n "$TCPREMOTEIP" ] ; then
+			echo "$nm: client $TCPREMOTEIP is not mail exchanger for $domain" 1>&2
+		elif [ -n "$TCPREMOTEIP" -a -n "$TCP6REMOTEIP" ] ; then
+			echo "$nm: client $TCPREMOTEIP, $TCP6REMOTEIP are not mail exchangers for $domain" 1>&2
+		elif [ -n "$TCP6REMOTEIP" ] ; then
+			echo "$nm: client $TCP6REMOTEIP is not mail exchanger for $domain" 1>&2
+		fi
+		exit 2
+	fi
+	IP=""
+	for i in $mxip
+	do
+		for j in $ipme
+		do
+			if [ "$i" = "$j" ] ; then
+				IP="$i"
+				break
+			fi
+		done
+	done
+	if [  -z "$IP" ] ; then
+		echo "$nm: server is not mail exchanger for $domain" 1>&2
+		exit 2
+	fi
+fi
+(
+if [ -d $domain ] ; then
+	prefix="$domain""-"
+elif [ -d $smtp_host ] ; then
+	prefix=autoturn-"$smtp_host"-
+else
+	echo "$nm: Trouble accessing directory for domain $domain, ip=$3 dir=$dir, pid=$$" 1>&2
+	exit 1
+fi
+PREFIX/bin/maildirsmtp $dir $prefix $smtp_host AutoTURN
+if [ -f $dir/maildirsize ] ; then
+	PREFIX/bin/resetquota $dir
+fi
+) &
+exit 0
+
+#
 # $Log: etrn.sh,v $
+# Revision 1.13  2023-12-03 15:30:08+05:30  Cprogrammer
+# use ipauth as IP address whitellist
+# refactored code
+#
 # Revision 1.12  2021-04-29 10:03:52+05:30  Cprogrammer
 # replaced QMAIL with QMAILHOME
 #
@@ -29,92 +151,3 @@
 #
 # Revision 1.3  2003-08-22 22:58:44+05:30  Cprogrammer
 # added RCS identifiers
-#
-#
-# 0 - queueing started
-# 1 - System Error
-# 2 - Domain Rejected
-# 3 - No Pending message for node
-# 4 - Pending message for node
-#
-# $Id: etrn.sh,v 1.12 2021-04-29 10:03:52+05:30 Cprogrammer Exp mbhangui $
-#
-trap "" 1 2 3
-if [ $# -ne 2 ] ; then
-	echo "ERROR: USAGE: domain_name smtp_host" 1>&2
-	exit 1
-elif [ " $TCPREMOTEIP" = " " ] ; then
-	echo "ERROR: TCPREMOTEIP not set" 1>&2
-	exit 1
-fi
-PATH=/bin:/usr/bin:$PATH
-cd QMAILHOME/autoturn
-if [ -d $1 ] ; then
-	count=`for i in $1/Maildir/new $1/Maildir/cur ; do /bin/ls $i; done|wc -l`
-	PREFIX/bin/setlock -nx $1/seriallock rm $1/seriallock
-	if [ -f $1/seriallock ] ; then
-		if [ $count -eq 0 ] ; then
-			exit 3
-		fi
-		exit 4
-	fi
-elif [ -d $TCPREMOTEIP ] ; then
-	count=`ls $TCPREMOTEIP/Maildir/new/* $TCPREMOTEIP/Maildir/cur/* 2>/dev/null | wc -l`
-	PREFIX/bin/setlock -nx $TCPREMOTEIP/seriallock rm $TCPREMOTEIP/seriallock
-	if [ -f $TCPREMOTEIP/seriallock ] ; then
-		if [ $count -eq 0 ] ; then
-			exit 3
-		fi
-		exit 4
-	fi
-fi
-if [ $count -eq 0 ] ; then
-	exit 3
-fi
-set -o pipefail
-if [ -d $1 ] ; then
-	ipme=`LIBEXEC/ipmeprint | awk '{print $3]'`
-	if [ $? -ne 0 ] ; then
-		echo "Unable to get local ip addresses" 1>&2
-		exit 1
-	fi
-	mxip=`LIBEXEC/dnsmxip`
-	if [ $? -ne 0 ] ; then
-		echo "Unable to get MX for $1" 1>&2
-		exit 1
-	fi
-	for i in $mxip
-	do
-		for j in $ipme
-		do
-			if [ ! " $i" = " $j" ] ; then
-				IP=$i
-				break
-			fi
-		done
-		if [ ! " $IP" = " " ] ; then
-			break
-		fi
-	done
-	if [  " $IP" = " " ] ; then
-		echo "Unable to locate MX for $1" 1>&2
-		exit 1
-	fi
-fi
-(
-if [ -d $1 ] ; then
-	PREFIX/bin/setlock -nx $1/seriallock PREFIX/bin/maildirsmtp $1/Maildir/ "$1"- $2 AutoTURN
-	PREFIX/bin/setlock -nx $1/seriallock PREFIX/bin/resetquota \
-		$1/Maildir
-	PREFIX/bin/setlock -nx $1/seriallock rm $1/seriallock
-elif [ -d $TCPREMOTEIP ] ; then
-	PREFIX/bin/setlock -nx $TCPREMOTEIP/seriallock PREFIX/bin/maildirsmtp $TCPREMOTEIP/Maildir/ \
-		autoturn-$TCPREMOTEIP- $TCPREMOTEIP AutoTURN
-	PREFIX/bin/setlock -nx $1/seriallock PREFIX/bin/resetquota \
-		$1/Maildir
-	PREFIX/bin/setlock -nx $TCPREMOTEIP/seriallock rm $TCPREMOTEIP/seriallock
-else
-	exit 4
-fi
-) &
-exit 0

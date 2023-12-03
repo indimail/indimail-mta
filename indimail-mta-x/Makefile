@@ -1841,8 +1841,11 @@ plugtest.o: \
 compile plugtest.c auto_qmail.h auto_prefix.h smtp_plugin.h
 	./compile plugtest.c
 
-
 # $(LD) -bundle -undefined dynamic_lookup -o qmail_smtpd.so \
+
+valid_hname.o: \
+compile valid_hname.c
+	./compile valid_hname.c
 
 qmail_smtpd.so: \
 smtpd.o rcpthosts.o recipients.o indimail_stub.o ip.o ipme.o \
@@ -1853,11 +1856,11 @@ socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o spf.o dns.o auto_uids.o qregex_sql.o srs.o \
 tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o \
-auto_libexec.o parse_env.o auto_sysconfdir.o socket.lib \
+auto_libexec.o parse_env.o auto_sysconfdir.o valid_hname.o socket.lib \
 dns.lib tls.lib gsasl.lib mysql_config
 	if test $(SYSTEM) = DARWIN ; then \
-		$(CC) -dynamiclib -o qmail_smtpd.so \
-		smtpd.o rcpthosts.o recipients.o indimail_stub.o load_mysql.o \
+		$(CC) -dynamiclib -o qmail_smtpd.so smtpd.o rcpthosts.o \
+		valid_hname.o recipients.o indimail_stub.o load_mysql.o \
 		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o \
 		etrn.o atrn.o received.o wildmat.o qmail.o auto_qmail.o \
 		variables.o envrules.o bodycheck.o spf.o dns.o srs.o \
@@ -1874,7 +1877,7 @@ dns.lib tls.lib gsasl.lib mysql_config
 		smtpd.o rcpthosts.o recipients.o auto_control.o auto_assign.o \
 		qcount_dir.o ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 		received.o wildmat.o qmail.o variables.o envrules.o parse_env.o srs.o \
-		bodycheck.o spf.o dns.o sqlmatch.o auto_qmail.o do_match.o \
+		bodycheck.o spf.o dns.o sqlmatch.o auto_qmail.o do_match.o valid_hname.o \
 		socket_v4mappedprefix.o socket_ip4loopback.o socket_v6loopback.o \
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
@@ -1894,7 +1897,8 @@ socket_v6any.o mail_acl.o spf.o dns.o auto_uids.o auto_qmail.o \
 qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
 query_skt.o fn_handler.o tlsarralloc.o load_mysql.o srs.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o auto_libexec.o \
-socket.lib dns.lib tls.lib gsasl.lib srs.lib mysql_config conf-sql
+valid_hname.o socket.lib dns.lib tls.lib gsasl.lib srs.lib \
+mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o srs.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
 	qcount_dir.o received.o wildmat.o qmail.o variables.o \
@@ -1902,7 +1906,7 @@ socket.lib dns.lib tls.lib gsasl.lib srs.lib mysql_config conf-sql
 	socket_v4mappedprefix.o socket_ip4loopback.o do_match.o \
 	socket_v6loopback.o socket_v6any.o mail_acl.o auto_uids.o \
 	indimail_stub.o qregex_sql.o tablematch.o greylist.o auto_break.o \
-	auto_control.o auto_assign.o query_skt.o fn_handler.o \
+	auto_control.o auto_assign.o query_skt.o fn_handler.o valid_hname.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	auto_libexec.o parse_env.o $(static_option) $(QMAILLIB) \
 	-L../libsrs2-x/libsrs2/.libs \
@@ -1922,8 +1926,8 @@ variables.h rcpthosts.h etrn.h batv.h do_match.h \
 envrules.h tablematch.h qregex.h sqlmatch.h \
 smtp_plugin.h auto_prefix.h hasmysql.h indimail_stub.h \
 auto_control.h dns.h hassmtputf8.h haslibgsasl.h \
-hassrs.h conf-tls conf-spf conf-ip conf-plugin conf-batv \
-conf-smtputf8 mysql_config mysql_inc
+hassrs.h valid_hname.h conf-tls conf-spf conf-ip conf-plugin \
+conf-batv conf-smtputf8 mysql_config mysql_inc
 	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` smtpd.c
 
@@ -2454,12 +2458,11 @@ compile variables.c variables.h haveip6.h conf-ip
 	./compile variables.c
 
 etrn.o: compile etrn.c etrn.h rcpthosts.h control.h \
-indimail_stub.h variables.h auto_control.h auto_qmail.h \
-auto_prefix.h
+indimail_stub.h variables.h auto_qmail.h auto_libexec.h
 	./compile etrn.c
 
 atrn.o: \
-compile atrn.c etrn.h rcpthosts.h control.h auto_libexec.h
+compile atrn.c rcpthosts.h control.h auto_qmail.h auto_libexec.h
 	./compile atrn.c
 
 ############### Begin queue-fix

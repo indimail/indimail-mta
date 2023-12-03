@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.711 2023-10-28 20:58:30+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.712 2023-12-03 12:30:01+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.711 2023-10-28 20:58:30+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.712 2023-12-03 12:30:01+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2829,6 +2829,7 @@ else
 		> $conf_dir/REQUIREAUTH
 	fi
 fi # odmr
+echo 1 > $conf_dir/STRIP_DOMAIN # for sys-checkpwd
 if [ $shared_objects -eq 1 ] ; then
 	plugin_count=0
 	if [ -f "$DESTDIR"@prefix@/lib/indimail/plugins/qmail_smtpd.so ] ; then

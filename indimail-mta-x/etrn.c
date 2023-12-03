@@ -1,5 +1,168 @@
 /*
+ * $Id: etrn.c,v 1.19 2023-12-03 12:19:16+05:30 Cprogrammer Exp mbhangui $
+ */
+#include <ctype.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <case.h>
+#include <sig.h>
+#include <stralloc.h>
+#include <constmap.h>
+#include <str.h>
+#include <fmt.h>
+#include <wait.h>
+#include <error.h>
+#include <strerr.h>
+#include <open.h>
+#include <lock.h>
+#include "rcpthosts.h"
+#include "etrn.h"
+#include "control.h"
+#include "variables.h"
+#include "auto_libexec.h"
+#include "auto_qmail.h"
+#include "qcount_dir.h"
+
+int             err_child();
+int             err_library();
+void            die_nomem();
+void            die_control();
+static stralloc etrn, maildir1, maildir2, lockfile;
+
+static char    *binetrnargs[5] = { 0, 0, 0, 0, 0 };
+
+int
+etrn_queue(char *arg, char *remoteip)
+{
+	int             child, flagetrn, len, exitcode, wstat, fd;
+	size_t          mailcount;
+	struct constmap mapetrn;
+	static int      flagrcpt = 1;
+	char           *dir;
+	char            strnum[FMT_ULONG];
+	stralloc        bin = {0};
+
+	if (flagrcpt)
+		flagrcpt = rcpthosts_init();
+	if ((flagetrn = control_readfile(&etrn, "etrnhosts", 0)) == -1)
+		die_control();
+	if (flagrcpt || !flagetrn)
+		return -2;
+	if (!constmap_init(&mapetrn, etrn.s, etrn.len, 0))
+		die_nomem();
+	case_lowerb(arg, len = str_len(arg)); /*- convert into lower case */
+	if (!constmap(&mapetrn, arg, len))
+		return -2;
+	if (rcpthosts(arg, len, 1) != 1)
+		return -2;
+	if (!stralloc_copys(&maildir1, auto_qmail) ||
+			!stralloc_catb(&maildir1, "/autoturn/", 10) ||
+			!stralloc_cats(&maildir1, arg) ||
+			!stralloc_catb(&maildir1, "/Maildir", 8) ||
+			!stralloc_0(&maildir1))
+		die_nomem();
+	if (!stralloc_copys(&maildir2, auto_qmail) ||
+			!stralloc_catb(&maildir2, "/autoturn/", 10) ||
+			!stralloc_cats(&maildir2, remoteip) ||
+			!stralloc_catb(&maildir2, "/Maildir", 8) ||
+			!stralloc_0(&maildir2))
+		die_nomem();
+
+	lockfile.len = 0;
+	mailcount = 0;
+	if (!access(maildir1.s, F_OK))
+		qcount_dir(maildir1.s, &mailcount);
+	else
+	if (errno != error_noent)
+		return -1;
+	if (!mailcount) {
+		if (!access(maildir2.s, F_OK))
+			qcount_dir(maildir2.s, &mailcount);
+		else
+		if (errno != error_noent)
+			return -1;
+		if (mailcount) {
+			dir = maildir2.s;
+			if (!stralloc_copy(&lockfile, &maildir2))
+				die_nomem();
+			lockfile.len -= 8;
+			if (!stralloc_catb(&lockfile, "seriallock", 10) ||
+					!stralloc_0(&lockfile))
+				die_nomem();
+		}
+	} else {
+		dir = maildir1.s;
+		if (!stralloc_copy(&lockfile, &maildir1))
+			die_nomem();
+		lockfile.len -= 8;
+		if (!stralloc_catb(&lockfile, "seriallock", 10) ||
+				!stralloc_0(&lockfile))
+			die_nomem();
+	}
+	if (!mailcount)
+		return -3;
+	if ((fd = open_append(lockfile.s)) == -1)
+		return -5;
+	if (lock_exnb(fd) == -1) {
+		close(fd);
+		unlink(lockfile.s);
+		return -4;
+	}
+	strnum[len = fmt_ulong(strnum, getpid())] = 0;
+	if (write(fd, strnum, len) == -1) {
+		close(fd);
+		unlink(lockfile.s);
+		return -1;
+	}
+	switch (child = fork())
+	{
+	case -1:
+		return -1;
+	case 0:
+		sig_pipedefault();
+		close(1);
+		dup2(2, 1);
+		if (!stralloc_copys(&bin, auto_libexec) ||
+				!stralloc_catb(&bin, "/etrn", 5) ||
+				!stralloc_0(&bin))
+			strerr_die1x(111, "etrn: fatal: out of memory");
+		binetrnargs[0] = bin.s;
+		binetrnargs[1] = arg;
+		binetrnargs[2] = dir;
+		binetrnargs[3] = remoteip;
+		execv(*binetrnargs, binetrnargs);
+		_exit(1);
+	}
+	if (wait_pid(&wstat, child) == -1)
+		return err_child();
+	close(fd);
+	unlink(lockfile.s);
+	if (wait_crashed(wstat))
+		return err_child();
+	if ((exitcode = wait_exitcode(wstat))) {
+		if (exitcode == 4)
+			return (mailcount ? mailcount : -4);
+		exitcode = 0 - exitcode;
+		return (exitcode); /*- no */
+	}
+	return 0;
+}
+
+void
+getversion_etrn_c()
+{
+	static char    *x = "$Id: etrn.c,v 1.19 2023-12-03 12:19:16+05:30 Cprogrammer Exp mbhangui $";
+
+	if (x)
+		x++;
+}
+
+/*
  * $Log: etrn.c,v $
+ * Revision 1.19  2023-12-03 12:19:16+05:30  Cprogrammer
+ * lock dir/seriallock instead of doing it in etrn script
+ * moved hostname validation to valid_hname.c
+ *
  * Revision 1.18  2022-01-30 08:31:52+05:30  Cprogrammer
  * replaced execvp with execv
  *
@@ -55,168 +218,3 @@
  * Initial revision
  *
  */
-#include <ctype.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <case.h>
-#include <sig.h>
-#include <stralloc.h>
-#include <constmap.h>
-#include <str.h>
-#include <fmt.h>
-#include <env.h>
-#include <wait.h>
-#include <error.h>
-#include <strerr.h>
-#include "rcpthosts.h"
-#include "etrn.h"
-#include "control.h"
-#include "variables.h"
-#include "auto_control.h"
-#include "auto_qmail.h"
-#include "auto_prefix.h"
-#include "qcount_dir.h"
-
-int             err_child();
-int             err_library();
-void            die_nomem();
-void            die_control();
-static stralloc etrn = { 0 };
-
-static char    *binetrnargs[4] = { 0, 0, 0, 0 };
-
-int
-etrn_queue(char *arg, char *remoteip)
-{
-	int             child, r, flagetrn, len, exitcode, wstat;
-	size_t          mailcount;
-	char            maildir1[1024], maildir2[1024];
-	struct constmap mapetrn;
-	static int      flagrcpt = 1;
-	stralloc        bin = {0};
-
-	if (flagrcpt)
-		flagrcpt = rcpthosts_init();
-	if ((flagetrn = control_readfile(&etrn, "etrnhosts", 0)) == -1)
-		die_control();
-	if (flagrcpt || !flagetrn)
-		return(-2);
-	if (!constmap_init(&mapetrn, etrn.s, etrn.len, 0))
-		die_nomem();
-	case_lowerb(arg, len = str_len(arg)); /*- convert into lower case */
-	if (!constmap(&mapetrn, arg, len))
-		return(-2);
-	if (rcpthosts(arg, len, 1) != 1)
-		return(-2);
-	if ((r = fmt_strn(maildir1, auto_qmail, 1024)) > 128)
-		return(-1);
-	r += fmt_str(maildir1 + r, "/autoturn/");
-	r += fmt_strn(maildir1 + r, arg, 119);
-	if (r > 256)
-		return(-1);
-	r += fmt_str(maildir1 + r, "/Maildir/");
-	maildir1[r] = 0;
-	if ((r = fmt_strn(maildir2, auto_qmail, 1024)) > 128)
-		return(-1);
-	r += fmt_str(maildir2 + r, "/autoturn/");
-	r += fmt_strn(maildir2 + r, remoteip, 119);
-	if (r > 256)
-		return(-1);
-	r += fmt_str(maildir2 + r, "/Maildir/");
-	maildir2[r] = 0;
-
-	mailcount = 0;
-	if (!access(maildir1, F_OK))
-		qcount_dir(maildir1, &mailcount);
-	else
-	if (errno != error_noent)
-		return (-1);
-	if (!access(maildir2, F_OK))
-		qcount_dir(maildir2, &mailcount);
-	else
-	if (errno != error_noent)
-		return (-1);
-	if (!mailcount)
-		return(-3);
-	switch (child = fork())
-	{
-	case -1:
-		return(-1);
-	case 0:
-		sig_pipedefault();
-		close(1);
-		dup2(2, 1);
-		if (!stralloc_copys(&bin, auto_prefix) ||
-				!stralloc_catb(&bin, "/bin/etrn", 9) ||
-				!stralloc_0(&bin))
-			strerr_die1x(111, "etrn: fatal: out of memory");
-		binetrnargs[0] = bin.s;
-		binetrnargs[1] = arg;
-		binetrnargs[2] = remoteip;
-		execv(*binetrnargs, binetrnargs);
-		_exit(1);
-	}
-	if (wait_pid(&wstat, child) == -1)
-		return err_child();
-	if (wait_crashed(wstat))
-		return err_child();
-	if ((exitcode = wait_exitcode(wstat)))
-	{
-		if (exitcode == 4)
-			return(mailcount ? mailcount : -4);
-		exitcode = 0 - exitcode;
-		return(exitcode); /*- no */
-	}
-	return (0);
-}
-
-int
-valid_hostname(char *name)
-{
-	const char     *cp;
-	int             label_length = 0;
-	int             label_count = 0;
-	int             ch;
-
-	if (!name || !*name)
-		return (0);
-	/*
-	 * Find bad characters or label lengths. Find adjacent delimiters.
-	 */
-	for (cp = name; (ch = *(unsigned char *) cp) != 0; cp++)
-	{
-		if (isalnum(ch) || ch == '_')
-		{
-			if (label_length == 0)
-				label_count++;
-			label_length++;
-			if (label_length > VALID_LABEL_LEN)
-				return (0);
-		} else
-		if (ch == '.')
-		{
-			if (label_length == 0 || cp[1] == 0)
-				return (0);
-			label_length = 0;
-		} else
-		if (ch == '-')
-		{
-			label_length++;
-			if (label_length == 1 || cp[1] == 0 || cp[1] == '.')
-				return (0);
-		} else
-			return (0);
-	}
-	if (cp - name > VALID_HOSTNAME_LEN)
-		return (0);
-	return (1);
-}
-
-void
-getversion_etrn_c()
-{
-	static char    *x = "$Id: etrn.c,v 1.18 2022-01-30 08:31:52+05:30 Cprogrammer Exp mbhangui $";
-
-	if (x)
-		x++;
-}

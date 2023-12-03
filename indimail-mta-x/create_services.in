@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.128 2023-10-24 21:46:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.129 2023-12-03 12:27:46+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -505,8 +505,8 @@ do
 done
 
 [ $ID -eq 0 ] && $svctool --smtp=366 --odmr --servicedir=$servicedir --skipsend \
-  --infifo="" --forceauthsmtp --starttls --query-cache --password-cache \
-  --memory=$smtp_soft_mem $extra_opt
+  --forceauthsmtp --starttls --query-cache --password-cache \
+  --infifo=infifo --memory=$smtp_soft_mem $extra_opt
 
 append_opt=""
 if [ $clamav_os -eq 1 ] ; then
@@ -783,6 +783,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.129  2023-12-03 12:27:46+05:30  Cprogrammer
+# use infifo service in ODMR service for auth
+#
 # Revision 2.128  2023-10-24 21:46:04+05:30  Cprogrammer
 # added --secureauth option for smtp port 587
 # added --setuser-priv for slowq service

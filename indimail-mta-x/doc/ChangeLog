@@ -55,6 +55,13 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 - 26/11/2023
 33. atrn.c: use auto_libexec for atrn script
 34. smtpd.c: Use TCP6LOCALPORT for smtp_portif TCPLOCALPORT is not set
+- 03/12/2023
+35. etrn.c, etrn.h: moved hostname validation to valid_hname.c
+36. atrn.c, etrn.c: lock dir/seriallock instead of doing it in atrn/etrn scripts
+37. create_service, indimail-mta.spec: use infifo service in ODMR service for auth
+38. svctool: add STRIP_DOMAIN env variable for local authentication by sys-checkpwd
+39. smtpd.c, etrn.sh, atrn.sh: refactored ETRN, ATRN code
+40. etrn.sh: use ipauth as IP address whitelist
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

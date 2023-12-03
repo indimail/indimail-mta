@@ -1,5 +1,5 @@
 /*
- * $Id: atrn.c,v 1.8 2023-11-26 12:48:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: atrn.c,v 1.9 2023-12-03 14:58:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include <case.h>
 #include <sig.h>
@@ -7,13 +7,16 @@
 #include <constmap.h>
 #include <str.h>
 #include <wait.h>
+#include <fmt.h>
+#include <open.h>
+#include <lock.h>
 #include <ctype.h>
 #include <strerr.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "etrn.h"
 #include "rcpthosts.h"
 #include "control.h"
+#include "auto_qmail.h"
 #include "auto_libexec.h"
 
 int             err_child();
@@ -21,26 +24,27 @@ void            die_nomem();
 void            die_control();
 
 static char    *binatrnargs[4] = { 0, 0, 0, 0 };
-static stralloc etrn = { 0 };
+static stralloc atrn, lockfile;
 
 int
 atrn_queue(char *arg, char *remoteip)
 {
-	int             child, flagetrn, len, exitcode, wstat, end_flag;
+	int             child, flagatrn, len, exitcode, wstat, end_flag, fd;
 	char           *cptr, *domain_ptr;
+	char            strnum[FMT_ULONG];
 	static int      flagrcpt = 1;
-	struct constmap mapetrn;
+	struct constmap mapatrn;
 	stralloc        bin = {0};
 
 	if (flagrcpt)
 		flagrcpt = rcpthosts_init();
-	if ((flagetrn = control_readfile(&etrn, "etrnhosts", 0)) == -1)
+	if ((flagatrn = control_readfile(&atrn, "etrnhosts", 0)) == -1)
 		die_control();
-	if (flagrcpt || !flagetrn)
-		return(-2);
-	if (!constmap_init(&mapetrn, etrn.s, etrn.len, 0))
+	if (flagrcpt || !flagatrn)
+		return -2;
+	if (!constmap_init(&mapatrn, atrn.s, atrn.len, 0))
 		die_nomem();
-	for(cptr = domain_ptr = arg;;cptr++) {
+	for (cptr = domain_ptr = arg;;cptr++) {
 		if (*cptr == ' ' || *cptr == ',' || !*cptr) {
 			if (*cptr) {
 				end_flag = 0;
@@ -48,10 +52,10 @@ atrn_queue(char *arg, char *remoteip)
 			} else
 				end_flag = 1;
 			case_lowerb(domain_ptr, len = str_len(domain_ptr)); /*- convert into lower case */
-			if (!constmap(&mapetrn, domain_ptr, len))
-				return(-2);
+			if (!constmap(&mapatrn, domain_ptr, len))
+				return -2;
 			if (rcpthosts(domain_ptr, len, 1) != 1)
-				return(-2);
+				return -2;
 			if (end_flag)
 				break;
 			else
@@ -59,13 +63,33 @@ atrn_queue(char *arg, char *remoteip)
 			domain_ptr = cptr + 1;
 		}
 	}
+	if (!stralloc_copys(&lockfile, auto_qmail) ||
+			!stralloc_catb(&lockfile, "/autoturn/", 10) ||
+			!stralloc_cats(&lockfile, arg) ||
+			!stralloc_catb(&lockfile, "/seriallock", 12) ||
+			!stralloc_0(&lockfile))
+		die_nomem();
+	if ((fd = open_append(lockfile.s)) == -1)
+		return -5;
+	if (lock_exnb(fd) == -1) {
+		close(fd);
+		unlink(lockfile.s);
+		return -4;
+	}
+	strnum[len = fmt_ulong(strnum, getpid())] = 0;
+	if (write(fd, strnum, len) == -1) {
+		close(fd);
+		unlink(lockfile.s);
+		return -1;
+	}
 	switch (child = fork())
 	{
 	case -1:
-		return(-1);
+		return -1;
 	case 0:
 		sig_pipedefault();
-		dup2(1, 7);
+		/*- dup 0, 1 to 6,7 for serialsmtp */
+		dup2(1, 7); 
 		dup2(0, 6);
 		if (!stralloc_copys(&bin, auto_libexec) ||
 				!stralloc_catb(&bin, "/atrn", 5) ||
@@ -79,11 +103,13 @@ atrn_queue(char *arg, char *remoteip)
 	}
 	if (wait_pid(&wstat, child) == -1)
 		return err_child();
+	close(fd);
+	unlink(lockfile.s);
 	if (wait_crashed(wstat))
 		return err_child();
 	if ((exitcode = wait_exitcode(wstat))) {
 		exitcode = 0 - exitcode;
-		return(exitcode); /*- no */
+		return (exitcode); /*- no */
 	}
 	return (0);
 }
@@ -91,13 +117,16 @@ atrn_queue(char *arg, char *remoteip)
 void
 getversion_atrn_c()
 {
-	static char    *x = "$Id: atrn.c,v 1.8 2023-11-26 12:48:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: atrn.c,v 1.9 2023-12-03 14:58:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: atrn.c,v $
+ * Revision 1.9  2023-12-03 14:58:12+05:30  Cprogrammer
+ * lock dir/seriallock instead of doing it in atrn script
+ *
  * Revision 1.8  2023-11-26 12:48:18+05:30  Cprogrammer
  * use auto_libexec for atrn script
  *

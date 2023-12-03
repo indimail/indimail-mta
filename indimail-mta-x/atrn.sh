@@ -1,5 +1,5 @@
 #
-# $Id: atrn.sh,v 1.12 2023-11-26 19:51:03+05:30 Cprogrammer Exp mbhangui $
+# $Id: atrn.sh,v 1.13 2023-12-03 15:25:54+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
@@ -15,7 +15,7 @@ elif [ " $TCPREMOTEIP" = " " ] ; then
 	echo "atrn: ERROR: TCPREMOTEIP not set" 1>&2
 	exit 1
 fi
-INDIMAILDIR=`grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1`
+INDIMAILDIR=$(grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1)
 if [ " $INDIMAILDIR" = " " ] ; then
 	echo "atrn: Could not determine indimail home" 1>&2
 	exit 1
@@ -23,12 +23,12 @@ fi
 if [ " $CONTROLDIR" = " " ] ; then
 	CONTROLDIR=@controldir@
 fi
-slash=`echo $CONTROLDIR | cut -c1`
+slash=$(echo $CONTROLDIR | cut -c1)
 if [ ! " $slash" = " /" ] ; then
 	cd SYSCONFDIR
 fi
 if [ -f "$CONTROLDIR"/queuelifetime ] ; then
-	LIFETIME=`cat "$CONTROLDIR"/queuelifetime`
+	LIFETIME=$(cat "$CONTROLDIR"/queuelifetime)
 else
 	LIFETIME=1209600
 fi
@@ -36,21 +36,10 @@ PATH=/bin:/usr/bin:$PATH
 cd QMAILHOME/autoturn
 total=0
 pend=0
-for domains in $1
-do
-	count=`for i in $domains/Maildir/new $domains/Maildir/cur ; do /bin/ls $i; done|wc -l`
-	PREFIX/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
-	if [ -f $domains/seriallock ] ; then
-		pend=1
-	fi
-	total=`expr $total + $count`
-done
-if [ $total -eq 0 ] ; then
-	exit 3
-else
-	if [ $pend -eq 1 ] ; then
-		exit 4
-	fi
+domain=$1
+count=$(for i in $domain/Maildir/new $domain/Maildir/cur ; do /bin/ls $i; done| wc -l)
+if [ $count -eq 0 ] ; then
+	exit 3 # no messages in queue
 fi
 #
 # .qvirtual allows mails for a main domain to be
@@ -60,29 +49,29 @@ fi
 # into directories location1.etrn.dom and location2.etrn.dom
 # specify .qvirtual having etrn.dom in QMAILHOME/autoturn/location1.etrn.dom
 # and QMAILHOME/autoturn/location2.etrn.dom.
-# .qvirtual also allows mails for a domain to be delivered to
-# any directory and the domain identified by looking up the .qvirtual file
+# once you have distributed mails for your users to
+# location1.etrn.dom, location2.etrn.dom using valias or any other mechanism, this
+# script can identify the domain identified by looking up the .qvirtual file
 #
 echo "250 OK now reversing the connection"
-for domains in $1
-do
-	if [ -f $domains/.qvirtual ] ; then
-		qvirtual=`cat $domains/.qvirtual`
-	else
-		qvirtual=$domains
-	fi
-	PREFIX/bin/setlock -nx $domains/seriallock PREFIX/bin/maildirserial \
-		-b -t $LIFETIME $domains/Maildir "$qvirtual"- \
-		PREFIX/bin/serialsmtp "$qvirtual"- AutoTURN 1
-	if [ -f $domains/Maildir/maildirsize ] ; then
-		PREFIX/bin/setlock -nx $domains/seriallock PREFIX/sbin/resetquota \
-			$domains/Maildir
-	fi
-	PREFIX/bin/setlock -nx $domains/seriallock /bin/rm $domains/seriallock
-done
+if [ -f $domain/.qvirtual ] ; then
+	qvirtual=$(cat $domain/.qvirtual)
+else
+	qvirtual=$domain
+fi
+prefix="autoturn-""$qvirtual""-"
+# serialsmtp prefix helohost [do-not-quit]
+PREFIX/bin/maildirserial -b -t $LIFETIME $domain/Maildir "$prefix" \
+	PREFIX/bin/serialsmtp "$prefix" AutoTURN 1
+if [ -f $domain/Maildir/maildirsize ] ; then
+	PREFIX/sbin/resetquota $domain/Maildir
+fi
 exit 0
 #
 # $Log: atrn.sh,v $
+# Revision 1.13  2023-12-03 15:25:54+05:30  Cprogrammer
+# factored code
+#
 # Revision 1.12  2023-11-26 19:51:03+05:30  Cprogrammer
 # fixed path for resetquota
 #

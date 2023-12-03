@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.312 2023-11-26 12:49:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.313 2023-12-03 15:24:26+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -53,6 +53,7 @@
 #include "hasmysql.h"
 #include "mail_acl.h"
 #include "do_match.h"
+#include "valid_hname.h"
 
 #ifdef TLS
 #include <tls.h>
@@ -155,7 +156,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.312 $";
+static char    *revision = "$Revision: 1.313 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1411,7 +1412,7 @@ smtp_ptr()
 {
 	char           *ptr;
 
-	logerr(1, "unable to obain PTR (reverse DNS) record\n", NULL);
+	logerr(1, "unable to obtain PTR (reverse DNS) record\n", NULL);
 	logflush();
 	sleep(5);
 	ptr = env_get("REQPTR");
@@ -6350,16 +6351,16 @@ smtp_etrn(char *arg)
 	}
 	if (!isalnum((int) *arg))
 		arg++;
-	if (!valid_hostname(arg)) {
+	if (!valid_hname(arg)) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
 		flush();
 		return;
 	}
 	if (!nodnscheck) {
 		i = fmt_str(tmpbuf, "@");
-		i += fmt_strn(tmpbuf + i, arg, 1022);
-		if (i > 1023)
-			die_nomem();
+		i += fmt_strn(tmpbuf + i, arg, sizeof(tmpbuf) - 1);
+		if (i > (MAX_HNAME_LEN + 1))
+			out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
 		tmpbuf[i] = 0;
 		switch (dnscheck(tmpbuf, i, 1))
 		{
@@ -6376,8 +6377,8 @@ smtp_etrn(char *arg)
 	/*-
 	 * XXX The implementation borrows heavily from the code that implements
 	 * UCE restrictions. These typically return 450 or 550 when a request is
-	 * rejected. RFC 1985 requires that 459 be sent when the server refuses
-	 * to perform the request.
+	 * rejected. RFC 1985 (ETRN) requires that 459 be sent when the server
+	 * refuses to perform the request.
 	 */
 	switch ((status = etrn_queue(arg, remoteip)))
 	{
@@ -6393,15 +6394,20 @@ smtp_etrn(char *arg)
 		return;
 	case -2:
 		log_etrn(arg, "ETRN Rejected");
-		out("553 <", arg, ">: etrn service unavailable (#5.7.1)\r\n", NULL);
+		out("553 etrn service rejected for ", arg, ". (#5.7.1)\r\n", NULL);
 		flush();
 		return;
 	case -3:
-		out("250 OK, No message waiting for node <", arg, ">\r\n", NULL);
+		out("251 OK, No message waiting for node <", arg, ">\r\n", NULL);
 		flush();
 		return;
 	case -4:
 		out("252 OK, pending message for node <", arg, "> started\r\n", NULL);
+		flush();
+		return;
+	case -5:
+		log_etrn(arg, "ETRN Error acquiring lock");
+		out("453 messages already being processed (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	default:
@@ -6412,16 +6418,16 @@ smtp_etrn(char *arg)
 			flush();
 			return;
 		}
-		i = fmt_str(err_buff, "unable to talk to fast flush service status <");
+		i = fmt_str(err_buff, "unable to flush etrn queue, code=");
 		i += fmt_ulong(err_buff + i, (unsigned long) status);
 		if (i > 1023)
 			die_nomem();
-		i += fmt_str(err_buff + i, ">");
+		i += fmt_str(err_buff + i, ".");
 		if (i > 1023)
 			die_nomem();
 		err_buff[i] = 0;
 		log_etrn(arg, err_buff);
-		out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", NULL);
+		out("451 Unable to queue messages, code=", status_buf, ". (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	}
@@ -6431,7 +6437,7 @@ smtp_etrn(char *arg)
 void
 smtp_atrn(char *arg)
 {
-	char           *ptr, *cptr, *domain_ptr, *user_tmp, *domain_tmp, *errstr;
+	char           *ptr, *domain_ptr, *user_tmp, *domain_tmp, *errstr;
 	int             i, end_flag, status, Reject = 0, Accept = 0;
 	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 	static stralloc a_user = {0}, domain = {0};
@@ -6498,69 +6504,59 @@ smtp_atrn(char *arg)
 		}
 		domain_ptr = domBuf.s;
 	}
-	for (cptr = domain_ptr;; cptr++) {
-		if (*cptr == ' ' || *cptr == ',' || !*cptr) {
-			if (*cptr) {
-				end_flag = 0;
-				*cptr = 0;
-			} else
-				end_flag = 1;
-			if (!valid_hostname(arg)) {
-				out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
-				flush();
-				return;
-			}
-			if ((*atrn_access) (remoteinfo, domain_ptr)) {
-				Reject = 1;
-				break;
-			} else
-				Accept = 1;
-			if (end_flag)
-				break;
-			else
-				*cptr = ' ';
-			domain_ptr = cptr + 1;
-		}
+	if (!valid_hname(domain_ptr)) {
+		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
+		flush();
+		return;
 	}
+	if ((*atrn_access) (remoteinfo, domain_ptr))
+		Reject = 1;
+	else
+		Accept = 1;
 	(*iclose) ();
 	if (Reject) {
 		log_atrn(remoteinfo, domain_ptr, "ATRN Rejected");
 		if (Accept)
-			out("450 atrn service unavailable (#5.7.1)\r\n", NULL);
+			out("451 atrn service unavailable (#5.7.1)\r\n", NULL);
 		else
 			out("553 atrn service unavailable (#5.7.1)\r\n", NULL);
 		flush();
 		return;
 	}
-	switch ((status = atrn_queue(arg, remoteip)))
+	switch ((status = atrn_queue(domain_ptr, remoteip)))
 	{
 	case 0:
-		log_atrn(remoteinfo, arg, NULL);
+		log_atrn(remoteinfo, domain_ptr, NULL);
 		out("QUIT\r\n", NULL);
 		flush();
 		_exit(0);
 	case -1:
-		log_atrn(remoteinfo, arg, "ATRN Error");
+		log_atrn(remoteinfo, domain_ptr, "ATRN Error");
 		out("451 Unable to queue messages (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	case -2:
-		log_atrn(remoteinfo, arg, "ATRN Rejected");
-		out("553 <", arg, ">: atrn service unavailable (#5.7.1)\r\n", NULL);
+		log_atrn(remoteinfo, domain_ptr, "ATRN Rejected");
+		out("553 atrn service rejected for ", domain_ptr, ". (#5.7.1)\r\n", NULL);
 		flush();
 		return;
 	case -3:
-		out("453 No message waiting for node(s) <", arg, ">\r\n", NULL);
+		out("453 No message waiting for node(s) <", domain_ptr, "> (#4.3.0)\r\n", NULL);
 		flush();
 		return;
 	case -4:
 		out("451 Unable to queue messages (#4.3.0)\r\n", NULL);
 		flush();
 		return;
+	case -5:
+		log_atrn(remoteinfo, domain_ptr, "ATRN Error acquiring lock");
+		out("453 messages already being processed (#4.3.0)\r\n", NULL);
+		flush();
+		return;
 	default:
 		status_buf[fmt_ulong(status_buf, (unsigned long) status)] = 0;
 		if (status > 0) {
-			i = fmt_str(err_buff, "unable to talk to fast flush service status <");
+			i = fmt_str(err_buff, "unable to flush etrn queue, code=");
 			i += fmt_ulong(err_buff + i, (unsigned long) status);
 			if (i > 1023)
 				die_nomem();
@@ -6568,8 +6564,8 @@ smtp_atrn(char *arg)
 			if (i > 1023)
 				die_nomem();
 			err_buff[i] = 0;
-			log_atrn(remoteinfo, arg, err_buff);
-			out("451 Unable to queue messages, status <", status_buf, "> (#4.3.0)\r\n", NULL);
+			log_atrn(remoteinfo, domain_ptr, err_buff);
+			out("451 Unable to queue messages, code=", status_buf, ". (#4.3.0)\r\n", NULL);
 			flush();
 		}
 		return;
@@ -7205,6 +7201,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.313  2023-12-03 15:24:26+05:30  Cprogrammer
+ * refactored ETRN, ATRN code
+ *
  * Revision 1.312  2023-11-26 12:49:46+05:30  Cprogrammer
  * Use TCP6LOCALPORT for smtp_portif TCPLOCALPORT is not set
  * fix space in atrn error
@@ -7599,7 +7598,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.312 2023-11-26 12:49:46+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.313 2023-12-03 15:24:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

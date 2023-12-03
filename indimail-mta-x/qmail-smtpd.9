@@ -80,7 +80,7 @@ default value of 100 hops can be changed by having a control file
 \fImaxhops\fR.
 
 \fBqmail-smtpd\fR supports ESMTP, including the 8BITMIME, DATA, PIPELINING,
-SIZE, VRFY, ETRN, ODMR and AUTH options. You can disable VRFY by setting
+SIZE, VRFY, ETRN, ATRN and AUTH options. You can disable VRFY by setting
 environment variable \fBDISABLE_VRFY\fR.
 
 \fBqmail-smtpd\fR supports basic help usage when you use the HELP command.
@@ -394,8 +394,8 @@ carry out various activity in the mail database.
 .LP
 \fBpass\fR specifies the password of the database user.
 
-.SH ETRN, AUTOTURN, ODMR
-\fBqmail-smtpd\fR supports ETRN, AUTOTURN (RFC 1985) and ODMR (RFC 2645).
+.SH ETRN, AUTOTURN, ATRN
+\fBqmail-smtpd\fR supports AUTOTURN, ETRN (RFC 1985) and ATRN (RFC 2645).
 The parameter to an ETRN request is normally a domain name.
 \fBqmail-smtpd\fR issues a new connection when a client issues ETRN command
 and uses the best MX for the domain, thus avoiding security problems.
@@ -411,7 +411,7 @@ virt.dom:autoturn-202.144.44.3
 and the following entry in the assign file
 
 .EX
-+autoturn-:indimail:508:508:/var/qmail/autoturn:-::
++autoturn-:autoturn:508:508:/var/indimail/autoturn:-::
 .EE
 
 The above specifies that AUTOTURN be enabled for domain virt.dom. Clients
@@ -427,24 +427,26 @@ ETRN command [ETRN] can be used. However, systems with dynamic IP addresses
 (which are very common with low-cost connections) have no widely-deployed
 solution.
 
-The On-Demand Mail Relay (ODMR), which is a profile of SMTP [SMTP, ESMTP],
-provides a secure, extensible, easy to implement approach to the problem.
-For ODMR, access is granted to domains for a user (specified by an email
-address). This is done through the \fBvatrn\fR command. The client has to
-use CRAM-MD5 authentication. To setup ODMR, setup \fBqmail-smtpd\fR to on
-port 366 without any delivery queue. ODMR uses \fBmaildirserial\fR(1) and 
-\fBserialsmtp\fR(1) to act as an SMTP client.
+The ATRN command uses On-Demand Mail Relay (ODMR), which is a profile of
+SMTP [SMTP, ESMTP], provides a secure, extensible, easy to implement
+approach to the problem. For ATRN, access is granted to domains for a user
+(specified by an email address). This is done through the \fBvatrn\fR
+command. The client has to use SMTP authentication. To setup ODMR, setup
+\fBqmail-smtpd\fR to on port 366 without any delivery queue. ODMR uses
+\fBmaildirserial\fR(1) and \fBserialsmtp\fR(1) to act as an SMTP client.
+\fBqmail-smtpd\fR(8) running on port 366 dups descriptor 0 to 6 and
+descriptor 1 to 7 for \fBserialsmtp\fR(1) to work.
 
-ETRN/AUTOTURN/ODMR command is enabled only for domains listed in the
+ETRN/AUTOTURN/ATRN command is enabled only for domains listed in the
 control file \fBetrnhosts\fR.
 
 .B NOTE:
-User Status Check does not work on ETRN/AUTOTURN/ODMR domains. Hence to
+User Status Check does not work on ETRN/AUTOTURN/ATRN domains. Hence to
 turn on User Status Check for selected domains, include non
-ETRN/AUTOTURN/ODMR domains in the control file \fIchkrcptdomains\fR.
+ETRN/AUTOTURN/ATRN domains in the control file \fIchkrcptdomains\fR.
 If the control file \fIchkrcptdomains\fR is absent and User Status Check is
 enabled, the User Status Check is turned on for all domains. In this case
-mails to ETRN/AUTOTURN/ODMR domains will bounce.
+mails to ETRN/AUTOTURN/ATRN domains will bounce.
 
 .SH TRANSPARENCY
 \fBqmail-smtpd\fR converts the SMTP newline convention into the UNIX
