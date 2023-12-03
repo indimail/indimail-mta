@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.50 2023-12-01 00:42:40+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.51 2023-12-03 22:21:31+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -118,7 +118,7 @@ do_cleanup_failed()
 	sudo /bin/rm -rf $testdir/$testuser/Maildir/.Quarantine
 	sudo /bin/rm -rf $testdir/$testuser/Maildir/.Spam
 	sudo /bin/rm -rf $qmaildir/alias/Maildir/new/*
-	sudo /bin/rm -rf $qmaildir/alias/virtual/new/* $qmaildir/alias/virtual/cur/*
+	sudo /bin/rm -rf $qmaildir/autoturn/$vdomain/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/cur/*
 	sudo /bin/rm -rf $sysconfdir/users
 	sudo /bin/rm -f  $cntrldir/mailarch
 	sudo /bin/rm -f  $cntrldir/accesslist
@@ -326,6 +326,7 @@ setup_assign()
 	echo "+$outarchive-:$outarchive:$myuid:$mygid:$testdir/$outarchive:-::"
 	echo "=$incarchive:$incarchive:$myuid:$mygid:$testdir/$incarchive:::"
 	echo "+$incarchive-:$incarchive:$myuid:$mygid:$testdir/$incarchive:-::"
+	echo "+$vdomain-:$vdomain:$myuid:$mygid:$qmaildir/autoturn/$vdomain:-::"
 	echo "."
 	) > $sysconfdir/users/assign
 	$qmail_newu $sysconfdir/users
@@ -687,6 +688,7 @@ test_qmail_inject()
 			echo "+$outarchive-:$outarchive:$myuid:$mygid:$testdir/$outarchive:-::"
 			echo "=$incarchive:$incarchive:$myuid:$mygid:$testdir/$incarchive:::"
 			echo "+$incarchive-:$incarchive:$myuid:$mygid:$testdir/$incarchive:-::"
+			echo "+$vdomain-:$vdomain:$myuid:$mygid:$qmaildir/autoturn/$vdomain:-::"
 			echo "."
 			) > $sysconfdir/users/assign
 		fi
@@ -3962,19 +3964,18 @@ srs_setup()
 virtual_setup()
 {
 	if [ $1 -eq 1 ] ; then
-		echo "$vdomain:virtual"  > $cntrldir/virtualdomains
-		if [ ! -d $qmaildir/alias/virtual ] ; then
-			sudo maildirmake $qmaildir/alias/virtual
+		echo "$vdomain:$vdomain" > $cntrldir/virtualdomains
+		if [ ! -d $qmaildir/autoturn/$vdomain/Maildir ] ; then
+			mkdir -p $qmaildir/autoturn/$vdomain
+			maildirmake $qmaildir/autoturn/$vdomain/Maildir
+			sh -c "echo "$qmaildir/autoturn/$vdomain/Maildir/" > $qmaildir/autoturn/$vdomain/.qmail-default"
 		fi
-		sudo chmod -R 0755 $qmaildir/alias/virtual
-		sudo chown -R alias:qmail $qmaildir/alias/virtual
-		sudo sh -c "echo "$qmaildir/alias/virtual/" > $qmaildir/alias/.qmail-virtual-default"
 		send_pid=$(get_send_pid)
 		if [ -n "$send_pid" ] ; then
 			sudo kill -1 $send_pid
 		fi
 	else
-		sudo /bin/rm -rf $qmaildir/alias/.qmail-virtual-default $qmaildir/alias/virtual
+		/bin/rm -rf $qmaildir/autoturn/$vdomain $cntrldir/virtualdomains
 		send_pid=$(get_send_pid)
 		if [ -n "$send_pid" ] ; then
 			sudo kill -1 $send_pid
@@ -4001,14 +4002,14 @@ test_maildirserial()
 			BIGTODO=0 \
 			CONFSPLIT=23 \
 			$qmail_inject -f$user@$HOSTNAME $user@$vdomain
-		check_mail_header $qmaildir/alias/virtual Subject 0
+		check_mail_header $qmaildir/autoturn/$vdomain/Maildir Subject 0
 		s1=$sleep_secs
 		if [ -n "$header" ] ; then
 			subj_header=$header
 		else
 			subj_header=""
 		fi
-		check_mail_header $qmaildir/alias/virtual Delivered-To 0
+		check_mail_header $qmaildir/autoturn/$vdomain/Maildir Delivered-To 0
 		s2=$sleep_secs
 		total=$(echo $s1 $s2 | awk '{printf("%0.4f\n", $1+$2)}')
 		if [ -n "$header" ] ; then
@@ -4017,13 +4018,13 @@ test_maildirserial()
 			dto_header=""
 		fi
 		if [ -n "$mail_file" ] ; then
-			body=$($e822body < $qmaildir/alias/virtual/new/$mail_file)
-			sudo sed -i "s/virtual-$user@$vdomain/virtual-$user@$HOSTNAME/" \
-				$qmaildir/alias/virtual/new/$mail_file
-			sudo mv $qmaildir/alias/virtual/new/$mail_file \
-				$qmaildir/alias/virtual/cur/$mail_file
+			body=$($e822body < $qmaildir/autoturn/$vdomain/Maildir/new/$mail_file)
+			sudo sed -i "s/$vdomain-$user@$vdomain/$vdomain-$user@$HOSTNAME/" \
+				$qmaildir/autoturn/$vdomain/Maildir/new/$mail_file
+			sudo mv $qmaildir/autoturn/$vdomain/Maildir/new/$mail_file \
+				$qmaildir/autoturn/$vdomain/Maildir/cur/$mail_file
 		fi
-		if [ -n "$mail_file" -a "$dto_header" = "Delivered-To: virtual-$user@$vdomain" -a "$subj_header" = "Subject: Test No $i $$"  -a "$body" = "Test Message $i $$" ] ; then
+		if [ -n "$mail_file" -a "$dto_header" = "Delivered-To: $vdomain-$user@$vdomain" -a "$subj_header" = "Subject: Test No $i $$"  -a "$body" = "Test Message $i $$" ] ; then
 			continue
 		else
 			t2=$(date +"%s.%4N")
@@ -4040,7 +4041,7 @@ test_maildirserial()
 			exit 1
 		fi
 	done
-	check_mail_count $qmaildir/alias/virtual 5
+	check_mail_count $qmaildir/autoturn/$vdomain/Maildir 5
 	ret=$?
 	if [ $ret -eq 0 -a $mcount -eq 5 ] ; then
 		t2=$(date +"%s.%4N")
@@ -4064,14 +4065,14 @@ test_maildirserial()
 		exit 1
 	fi
 
-	sudo mkdir $qmaildir/alias/virtual/bak
-	sudo cp -rp $qmaildir/alias/virtual/cur $qmaildir/alias/virtual/bak
+	sudo mkdir $qmaildir/autoturn/$vdomain/Maildir/bak
+	sudo cp -rp $qmaildir/autoturn/$vdomain/Maildir/cur $qmaildir/autoturn/$vdomain/Maildir/bak
 	sleep 1
 	t1=$(date +"%s.%4N")
 	echo "$HOSTNAME:127.0.0.1:$smtp_port $user@$HOSTNAME abcd12345678" > $cntrldir/smtproutes
-	sudo chown -R $user $qmaildir/alias/virtual
-	tcpclient 0 $smtp_port maildirserial -t1209600 $qmaildir/alias/virtual "virtual-" \
-		serialsmtp "virtual-" serialsmtp >$tmpdir/tcpclient.log 2>&1
+	sudo chown -R $user $qmaildir/autoturn/$vdomain/Maildir
+	tcpclient 0 $smtp_port maildirserial -t1209600 $qmaildir/autoturn/$vdomain/Maildir "$vdomain-" \
+		serialsmtp "$vdomain-" serialsmtp >$tmpdir/tcpclient.log 2>&1
 	check_mail_count $maildir 5
 	ret=$?
 	if [ $ret -eq 0 -a $mcount -eq 5 ] ; then
@@ -4096,10 +4097,10 @@ test_maildirserial()
 		exit 1
 	fi
 	t1=$(date +"%s.%4N")
-	sudo rm -rf $qmaildir/alias/virtual/new
-	sudo mv $qmaildir/alias/virtual/bak $qmaildir/alias/virtual/new
-	tcpclient 0 $smtp_port maildirserial -t1209600 $qmaildir/alias/virtual "virtual-" \
-		serialqmtp "virtual-" serialsmtp >$tmpdir/tcpclient.log 2>&1
+	sudo rm -rf $qmaildir/autoturn/$vdomain/Maildir/new
+	sudo mv $qmaildir/autoturn/$vdomain/Maildir/bak $qmaildir/autoturn/$vdomain/Maildir/new
+	tcpclient 0 $smtp_port maildirserial -t1209600 $qmaildir/autoturn/$vdomain/Maildir "$vdomain-" \
+		serialqmtp "$vdomain-" serialsmtp >$tmpdir/tcpclient.log 2>&1
 	check_mail_count $maildir 5
 	ret=$?
 	if [ $ret -eq 0 -a $mcount -eq 5 ] ; then
@@ -5494,7 +5495,7 @@ test_qmail_queue()
 	t1=$(date +"%s.%4N")
 	virtual_setup 1
 	if [ $1 -eq 0 ] ; then
-	echo "T:!*@$HOSTNAME:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
+	echo "T:!*@$HOSTNAME:$outarchive@$HOSTNAME"   > $cntrldir/mailarchive
 	else
 	echo "T:!.*@$HOSTNAME$:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
 	fi
@@ -5510,6 +5511,8 @@ test_qmail_queue()
 		printf "\r  testing outgoing mail archival with recipient based REGEXP rule succeeded %28s [%.4f sec]\n" " " $secs
 		fi
 		print_pct
+		/bin/rm -f $cntrldir/mailarchive
+		virtual_setup 0
 	else
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -5520,11 +5523,10 @@ test_qmail_queue()
 		echo "  testing outgoing mail archival with recipient based REGEXP rule failed [$secs sec]"
 		fi
 		failed=1
+		/bin/rm -f $cntrldir/mailarchive
 		virtual_setup 0
 		exit 1
 	fi
-	virtual_setup 0
-	/bin/rm -f $cntrldir/mailarchive
 
 	if [ $1 -eq 0 ] ; then
 		return 0
@@ -7221,6 +7223,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.51  2023-12-03 22:21:31+05:30  Cprogrammer
+# updated virtual domain setup
+#
 # Revision 1.50  2023-12-01 00:42:40+05:30  Cprogrammer
 # updated test script
 #
