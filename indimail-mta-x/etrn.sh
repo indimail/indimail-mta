@@ -1,5 +1,5 @@
 #
-# $Id: etrn.sh,v 1.13 2023-12-03 15:30:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: etrn.sh,v 1.14 2023-12-03 22:19:45+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
@@ -40,7 +40,19 @@ set -o pipefail
 # want any joe, o[b,s]ama, israel or any terrorist to fetch
 # mails not meant for them
 #
-if [ -d $domain ] ; then
+if [ -d $domain -a -f $domain/ipauth ] ; then
+	for i in $(cat $domain/ipauth)
+	do
+		for j in $TCPREMOTEIP $TCP6REMOTEIP
+		do
+			if [ "$i" = "$j" ] ; then
+				IP="$i"
+				break
+			fi
+		done
+	done
+fi
+if [ -d $domain -a -z "$IP" ] ; then
 	ipme=$(LIBEXEC/ipmeprint | awk '{print $3}')
 	if [ $? -ne 0 ] ; then
 		echo "$nm: Unable to get local ip addresses" 1>&2
@@ -62,18 +74,6 @@ if [ -d $domain ] ; then
 			fi
 		done
 	done
-	if [ -z "$IP" -a -f $domain/ipauth ] ; then
-		for i in $(cat $domain/ipauth)
-		do
-			for j in $TCPREMOTEIP $TCP6REMOTEIP
-			do
-				if [ "$i" = "$j" ] ; then
-					IP="$i"
-					break
-				fi
-			done
-		done
-	fi
 	if [  -z "$IP" ] ; then
 		if [ -n "$TCPREMOTEIP" ] ; then
 			echo "$nm: client $TCPREMOTEIP is not mail exchanger for $domain" 1>&2
@@ -100,15 +100,16 @@ if [ -d $domain ] ; then
 		exit 2
 	fi
 fi
-(
 if [ -d $domain ] ; then
-	prefix="$domain""-"
+	prefix=autoturn-"$domain""-"
 elif [ -d $smtp_host ] ; then
 	prefix=autoturn-"$smtp_host"-
 else
 	echo "$nm: Trouble accessing directory for domain $domain, ip=$3 dir=$dir, pid=$$" 1>&2
 	exit 1
 fi
+echo "$nm: Executing maildirsmtp $dir $prefix $smtp_host AutoTURN" 1>&2
+(
 PREFIX/bin/maildirsmtp $dir $prefix $smtp_host AutoTURN
 if [ -f $dir/maildirsize ] ; then
 	PREFIX/bin/resetquota $dir
@@ -118,6 +119,9 @@ exit 0
 
 #
 # $Log: etrn.sh,v $
+# Revision 1.14  2023-12-03 22:19:45+05:30  Cprogrammer
+# use ipauth before mx check
+#
 # Revision 1.13  2023-12-03 15:30:08+05:30  Cprogrammer
 # use ipauth as IP address whitellist
 # refactored code

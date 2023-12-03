@@ -62,6 +62,7 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 38. svctool: add STRIP_DOMAIN env variable for local authentication by sys-checkpwd
 39. smtpd.c, etrn.sh, atrn.sh: refactored ETRN, ATRN code
 40. etrn.sh: use ipauth as IP address whitelist
+41. etrn.sh: use ipauth before mx check
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
