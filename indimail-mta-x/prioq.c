@@ -27,7 +27,7 @@ GEN_ALLOC_readyplus(prioq, struct prioq_elt, p, len, a, 100, prioq_readyplus)
 static prioq_type type = min;
 
 /*-
- * prioq_insertmin()
+ * prioq_insert()
  * 1. insert into pq member with pq->p[0].dt have the min value
  * or
  * 1. insert into pq member with pq->p[0].dt have the max value
@@ -39,7 +39,7 @@ static prioq_type type = min;
  * struct prioq_elt pe;
  *
  * while (prioq_get(&pq, &pe)) {
- *   prioq_del(min&pq);
+ *   prioq_del(&pq);
  *   process(pe.id, pe.dt);
  * }
  */
