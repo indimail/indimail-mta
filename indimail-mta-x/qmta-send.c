@@ -1,88 +1,5 @@
 /*
- * $Log: qmta-send.c,v $
- * Revision 1.25  2023-10-30 10:29:14+05:30  Cprogrammer
- * use qregex control file to set QREGEX env variable
- *
- * Revision 1.24  2023-10-17 08:22:55+05:30  Cprogrammer
- * fixed path for qmail-lspawn, qmail-rspawn, qmail-clean
- *
- * Revision 1.23  2023-10-02 22:50:40+05:30  Cprogrammer
- * fix copy of srs_result
- *
- * Revision 1.22  2023-03-08 20:03:42+05:30  Cprogrammer
- * fixed but with handling SRS address
- *
- * Revision 1.21  2023-01-15 12:36:52+05:30  Cprogrammer
- * use slog() function with varargs to log error messages
- *
- * Revision 1.20  2022-04-24 08:07:18+05:30  Cprogrammer
- * added exiting log message on exit
- *
- * Revision 1.19  2022-04-04 14:31:21+05:30  Cprogrammer
- * added setting of fdatasync() instead of fsync()
- *
- * Revision 1.18  2022-04-04 00:08:26+05:30  Cprogrammer
- * Use QUEUE_BASE, queue_base control for setting base directory of queue
- *
- * Revision 1.17  2022-03-31 00:42:18+05:30  Cprogrammer
- * replace fsync() with fdatasync()
- *
- * Revision 1.16  2022-03-24 13:16:58+05:30  Cprogrammer
- * added missing loading of concurrencylocal, concurrencyremote
- * added holdjobs functionality
- *
- * Revision 1.15  2022-03-13 20:58:59+05:30  Cprogrammer
- * display bigtodo value in logs on startup
- * fixed SIGSEGV
- *
- * Revision 1.14  2022-03-05 13:36:16+05:30  Cprogrammer
- * use auto_prefix/sbin for queue-fix, qmail-lspawn, qmail-rspawn, qmail-clean paths
- *
- * Revision 1.13  2022-01-30 09:24:30+05:30  Cprogrammer
- * make USE_FSYNC, USE_SYNCDIR consistent across programs
- * allow configurable big/small todo/intd
- * removed chdir auto_qmail
- * fixed signal sent to child
- * replaced execv with execvp
- *
- * Revision 1.12  2021-11-02 17:57:09+05:30  Cprogrammer
- * fixed typo
- *
- * Revision 1.11  2021-10-22 13:56:57+05:30  Cprogrammer
- * removed loglock code
- *
- * Revision 1.10  2021-10-20 22:48:33+05:30  Cprogrammer
- * display program 'qmta-send' in logs for identification
- * add queue directory as argument for identification in ps
- *
- * Revision 1.9  2021-07-26 23:25:32+05:30  Cprogrammer
- * log when sighup, sigalrm is caught
- *
- * Revision 1.8  2021-07-17 14:39:37+05:30  Cprogrammer
- * fix split dir of messages queued with wrong split value
- *
- * Revision 1.7  2021-07-15 22:37:04+05:30  Cprogrammer
- * corrected data type of comm_pos to int
- *
- * Revision 1.6  2021-07-15 13:23:20+05:30  Cprogrammer
- * added missing bounce related control files
- *
- * Revision 1.5  2021-07-15 09:47:21+05:30  Cprogrammer
- * removed chdir auto_qmail as qmta-send just needs queuedir
- * block sigchild after qmail_open
- *
- * Revision 1.4  2021-07-07 15:59:54+05:30  Cprogrammer
- * log lspawn, rspawn die events
- *
- * Revision 1.3  2021-07-05 21:11:22+05:30  Cprogrammer
- * skip $HOME/.defaultqueue for root
- *
- * Revision 1.2  2021-07-04 23:27:45+05:30  Cprogrammer
- * run as qmailq if running without a qmail-clean
- *
- * Revision 1.1  2021-06-30 00:10:30+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmta-send.c,v 1.26 2023-12-04 23:27:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -331,6 +248,7 @@ fnmake_bounce(unsigned long id)
 {
 	fn2.len = fmtqfn(fn2.s, "bounce/", id, 0);
 }
+
 static void
 fnmake_chanaddr(unsigned long id, int c)
 {
@@ -569,9 +487,8 @@ rewrite(char *recip)
 			|| !stralloc_copys(&addr, recip))
 		return 0;
 	if ((i = byte_rchr(addr.s, addr.len, '@')) == addr.len) {
-		if (!stralloc_cats(&addr, "@"))
-			return 0;
-		if (!stralloc_cat(&addr, &envnoathost))
+		if (!stralloc_cats(&addr, "@") ||
+				!stralloc_cat(&addr, &envnoathost))
 			return 0;
 	}
 	while (constmap(&mappercenthack, addr.s + i + 1, addr.len - i - 1)) {
@@ -655,6 +572,12 @@ process_todo(unsigned long id)
 	}
 	strnum1[fmt_ulong(strnum1, id)] = 0;
 	slog(1, "new msg ", strnum1, "\n", NULL);
+	/*
+	 * initialize flagchan so that we don't
+	 * process empty channel
+	 */
+	for (c = 0; c < CHANNELS; ++c)
+		flagchan[c] = 0;
 	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf));
 	substdio_fdbuf(&ssinfo, write, fdinfo, todobufinfo, sizeof (todobufinfo));
 	uid = 0;
@@ -726,9 +649,8 @@ process_todo(unsigned long id)
 			}
 			if (fdchan[c] == -1) {
 				fnmake_chanaddr(id, c);
-				fdchan[c] = open_excl(fn1.s);
-				if (fdchan[c] == -1) {
-					slog(1, "warn: ", argv0, ": unable to create2 ", fn1.s, "\n", NULL);
+				if ((fdchan[c] = open_excl(fn1.s)) == -1) {
+					slog(1, "warn: ", argv0, ": unable to create ", fn1.s, "\n", NULL);
 					goto fail;
 				}
 				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
@@ -1736,6 +1658,14 @@ injectbounce(unsigned long id)
 			slog(1, "alert: ", argv0, ": out of memory; will try again later\n", NULL);
 			return (0);
 		}
+		/*-
+		 * sigchild will cause wait() being called in qmta-send.
+		 * this will cause problem with qmail_close which will not
+		 * get the wait() status when injecting bounces.
+		 *
+		 * So we need to block SIGCHLD before calling qmail_open and
+		 * unblock after qmail_close()
+		 */
 		sig_block(sig_child);
 		if (qmail_open(&qqt) == -1) {
 			slog(1, "warn: ", argv0, ": unable to start qmail-queue, will try later\n", NULL);
@@ -2759,12 +2689,6 @@ main(int argc, char **argv)
 	sig_termcatch(sigterm);
 	sig_alarmcatch(sigalrm);
 	sig_hangupcatch(sighup);
-	/*-
-	 * this will cause problem with
-	 * qmail-close when doing bounces.
-	 * So we need to block SIGCHLD before
-	 * qmail_open
-	 */
 	sig_childcatch(sigchld);
 	if (!do_controls())
 		strerr_die3x(111, "alert: ", argv0, ": cannot start: unable to read controls\n");
@@ -2809,6 +2733,7 @@ main(int argc, char **argv)
 			} else
 				slog(1, "warn: ", argv0, ": trouble in select\n", NULL);
 		else {
+			recent = now();
 			/*- communicate with qmail-lspawn, qmail-rspawn
 			 * These were created as pi1, pi3 in qmail-start.c
 			 * write on fd 1 read by fd 0 in qmail-lspawn,
@@ -2839,8 +2764,98 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.25 2023-10-30 10:29:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.26 2023-12-04 23:27:14+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: qmta-send.c,v $
+ * Revision 1.26  2023-12-04 23:27:14+05:30  Cprogrammer
+ * flagchan wasn't initialized in process_todo()
+ *
+ * Revision 1.25  2023-10-30 10:29:14+05:30  Cprogrammer
+ * use qregex control file to set QREGEX env variable
+ *
+ * Revision 1.24  2023-10-17 08:22:55+05:30  Cprogrammer
+ * fixed path for qmail-lspawn, qmail-rspawn, qmail-clean
+ *
+ * Revision 1.23  2023-10-02 22:50:40+05:30  Cprogrammer
+ * fix copy of srs_result
+ *
+ * Revision 1.22  2023-03-08 20:03:42+05:30  Cprogrammer
+ * fixed but with handling SRS address
+ *
+ * Revision 1.21  2023-01-15 12:36:52+05:30  Cprogrammer
+ * use slog() function with varargs to log error messages
+ *
+ * Revision 1.20  2022-04-24 08:07:18+05:30  Cprogrammer
+ * added exiting log message on exit
+ *
+ * Revision 1.19  2022-04-04 14:31:21+05:30  Cprogrammer
+ * added setting of fdatasync() instead of fsync()
+ *
+ * Revision 1.18  2022-04-04 00:08:26+05:30  Cprogrammer
+ * Use QUEUE_BASE, queue_base control for setting base directory of queue
+ *
+ * Revision 1.17  2022-03-31 00:42:18+05:30  Cprogrammer
+ * replace fsync() with fdatasync()
+ *
+ * Revision 1.16  2022-03-24 13:16:58+05:30  Cprogrammer
+ * added missing loading of concurrencylocal, concurrencyremote
+ * added holdjobs functionality
+ *
+ * Revision 1.15  2022-03-13 20:58:59+05:30  Cprogrammer
+ * display bigtodo value in logs on startup
+ * fixed SIGSEGV
+ *
+ * Revision 1.14  2022-03-05 13:36:16+05:30  Cprogrammer
+ * use auto_prefix/sbin for queue-fix, qmail-lspawn, qmail-rspawn, qmail-clean paths
+ *
+ * Revision 1.13  2022-01-30 09:24:30+05:30  Cprogrammer
+ * make USE_FSYNC, USE_SYNCDIR consistent across programs
+ * allow configurable big/small todo/intd
+ * removed chdir auto_qmail
+ * fixed signal sent to child
+ * replaced execv with execvp
+ *
+ * Revision 1.12  2021-11-02 17:57:09+05:30  Cprogrammer
+ * fixed typo
+ *
+ * Revision 1.11  2021-10-22 13:56:57+05:30  Cprogrammer
+ * removed loglock code
+ *
+ * Revision 1.10  2021-10-20 22:48:33+05:30  Cprogrammer
+ * display program 'qmta-send' in logs for identification
+ * add queue directory as argument for identification in ps
+ *
+ * Revision 1.9  2021-07-26 23:25:32+05:30  Cprogrammer
+ * log when sighup, sigalrm is caught
+ *
+ * Revision 1.8  2021-07-17 14:39:37+05:30  Cprogrammer
+ * fix split dir of messages queued with wrong split value
+ *
+ * Revision 1.7  2021-07-15 22:37:04+05:30  Cprogrammer
+ * corrected data type of comm_pos to int
+ *
+ * Revision 1.6  2021-07-15 13:23:20+05:30  Cprogrammer
+ * added missing bounce related control files
+ *
+ * Revision 1.5  2021-07-15 09:47:21+05:30  Cprogrammer
+ * removed chdir auto_qmail as qmta-send just needs queuedir
+ * block sigchild after qmail_open
+ *
+ * Revision 1.4  2021-07-07 15:59:54+05:30  Cprogrammer
+ * log lspawn, rspawn die events
+ *
+ * Revision 1.3  2021-07-05 21:11:22+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
+ * Revision 1.2  2021-07-04 23:27:45+05:30  Cprogrammer
+ * run as qmailq if running without a qmail-clean
+ *
+ * Revision 1.1  2021-06-30 00:10:30+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
