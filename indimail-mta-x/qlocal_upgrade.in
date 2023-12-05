@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.57 2023-10-16 18:41:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.58 2023-12-05 23:59:42+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -26,7 +26,7 @@ check_update_if_diff()
 
 do_install()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.57 2023-10-16 18:41:20+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.58 2023-12-05 23:59:42+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -34,7 +34,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.57 2023-10-16 18:41:20+05:30 Cprogra
 
 do_post_upgrade()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.57 2023-10-16 18:41:20+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.58 2023-12-05 23:59:42+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -264,12 +264,6 @@ done
 if [ -s $sysconfdir/control/defaultqueue/LOGFILTER ] ; then
 	check_update_if_diff $sysconfdir/control/defaultqueue/LOGFILTER $logfifo
 fi
-if [ -s $servicedir/qmail-send.25/variables/QMAILLOCAL ] ; then
-	check_update_if_diff $servicedir/qmail-send.25/variables/QMAILLOCAL /usr/sbin/qmail-local
-fi
-if [ -s $servicedir/qmail-send.25/variables/QMAILREMOTE ] ; then
-	check_update_if_diff $servicedir/qmail-send.25/variables/QMAILREMOTE /usr/sbin/qmail-remote
-fi
 if [ ! -f $sysconfdir/control/defaultqueue/DYNAMIC_QUEUE ] ; then
 	> $sysconfdir/control/defaultqueue/DYNAMIC_QUEUE
 fi
@@ -392,6 +386,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.58  2023-12-05 23:59:42+05:30  Cprogrammer
+# removed force update of QMAILLOCAL, QMAILREMOTE for qmail-send service
+#
 # Revision 1.57  2023-10-16 18:41:20+05:30  Cprogrammer
 # add --secureauth option for SMTP service on port 587
 #
