@@ -65,6 +65,9 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 41. etrn.sh: use ipauth before mx check
 - 04/12/2023
 42. qmta-send.c: BUG: flagchan wasn't initialized in process_todo()
+- 05/12/2023
+43. rd-remote.c: Added remote mail redirector
+44. envrules.c, mail_acl.c: Fix for invalid rules
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

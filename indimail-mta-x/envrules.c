@@ -1,5 +1,5 @@
 /*
- * $Id: envrules.c,v 1.23 2023-10-30 10:27:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: envrules.c,v 1.24 2023-12-05 22:06:08+05:30 Cprogrammer Exp mbhangui $
  */
 #include <error.h>
 #include <stralloc.h>
@@ -36,8 +36,10 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
-		else
+		else {
+			ptr = rules.s + len;
 			continue;
+		}
 		if (!*email && (!*ptr || !str_diffn(ptr, "<>", 3)))
 			nullflag = 1;
 		else
@@ -81,8 +83,10 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
-		else
+		else {
+			ptr = rules.s + len;
 			continue;
+		}
 		if (do_match(0, domain, ptr, errStr) > 0) {
 			if (parse_env(cptr + 1))
 				return (AM_MEMORY_ERR);
@@ -97,13 +101,16 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.23 2023-10-30 10:27:52+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: envrules.c,v 1.24 2023-12-05 22:06:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: envrules.c,v $
+ * Revision 1.24  2023-12-05 22:06:08+05:30  Cprogrammer
+ * fix for invalid rules
+ *
  * Revision 1.23  2023-10-30 10:27:52+05:30  Cprogrammer
  * use value of QREGEX to use matchregex()
  *

@@ -1,30 +1,5 @@
 /*
- * $Log: mail_acl.c,v $
- * Revision 1.8  2023-10-30 20:13:26+05:30  Cprogrammer
- * use QREGEX to use regular expressions, else use wildmat
- *
- * Revision 1.7  2023-10-24 20:06:40+05:30  Cprogrammer
- * use matchregex.h from /usr/include/qmail
- *
- * Revision 1.6  2023-07-07 10:43:40+05:30  Cprogrammer
- * use NULL instead of 0 for null pointer
- * fixed call to out()
- *
- * Revision 1.5  2023-01-15 18:28:03+05:30  Cprogrammer
- * changed function out() to match function in qmail-smtpd
- *
- * Revision 1.4  2021-05-23 07:10:02+05:30  Cprogrammer
- * include wildmat.h for wildmat_internal
- *
- * Revision 1.3  2014-03-07 02:09:22+05:30  Cprogrammer
- * fix regex match
- *
- * Revision 1.2  2011-11-17 20:03:58+05:30  Cprogrammer
- * fixed diag message getting printed without verbose flag
- *
- * Revision 1.1  2010-11-05 01:06:10+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: mail_acl.c,v 1.9 2023-12-05 22:07:19+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stddef.h>
 #include <str.h>
@@ -84,8 +59,10 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 		for (cptr = ptr + 5;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
-		else
+		else {
+			ptr = acclist->s + len;
 			continue;
+		}
 		rcpt_found = 0;
 		from_match = rcpt_match = 0;
 		/*- find if a match for recipient occurs in the rule */
@@ -156,8 +133,10 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 		for (cptr = ptr + 5;*cptr && *cptr != ':';cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
-		else
+		else {
+			ptr = acclist->s + len;
 			continue;
+		}
 		from_found = 0;
 		from_match = rcpt_match = 0;
 		/*- find if a match for sender occurs in the rule */
@@ -228,7 +207,39 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.8 2023-10-30 20:13:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mail_acl.c,v 1.9 2023-12-05 22:07:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: mail_acl.c,v $
+ * Revision 1.9  2023-12-05 22:07:19+05:30  Cprogrammer
+ * fix for invalid rules
+ *
+ * Revision 1.8  2023-10-30 20:13:26+05:30  Cprogrammer
+ * use QREGEX to use regular expressions, else use wildmat
+ *
+ * Revision 1.7  2023-10-24 20:06:40+05:30  Cprogrammer
+ * use matchregex.h from /usr/include/qmail
+ *
+ * Revision 1.6  2023-07-07 10:43:40+05:30  Cprogrammer
+ * use NULL instead of 0 for null pointer
+ * fixed call to out()
+ *
+ * Revision 1.5  2023-01-15 18:28:03+05:30  Cprogrammer
+ * changed function out() to match function in qmail-smtpd
+ *
+ * Revision 1.4  2021-05-23 07:10:02+05:30  Cprogrammer
+ * include wildmat.h for wildmat_internal
+ *
+ * Revision 1.3  2014-03-07 02:09:22+05:30  Cprogrammer
+ * fix regex match
+ *
+ * Revision 1.2  2011-11-17 20:03:58+05:30  Cprogrammer
+ * fixed diag message getting printed without verbose flag
+ *
+ * Revision 1.1  2010-11-05 01:06:10+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
