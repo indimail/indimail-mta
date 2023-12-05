@@ -1,0 +1,67 @@
+.\" vim: tw=75
+.TH rd-remote 8
+.SH NAME
+rd-remote \- Redirect remote mail to another address or a Maildir
+
+.SH SYNOPSIS
+.B rd-remote
+.I host
+.I sender
+.I qqeh
+.I size
+.I recip
+[ \fIrecip\fR ... ]
+
+.SH DESCRIPTION
+\fBrd-remote\fR reads a mail message from its input and redirects mail to
+another address or a maildir. The redirection is based on rules in control
+file \fIredirectremote\fR on a match with one of destination domain, sender
+address or recipient address. It has the same interface as
+\fBqmail-remote\fR(8). The control file \fIredirectremote\fR has four colon
+separated fields \fIaddr\fR, \fItype\fR, \fIdest\fR, \fIprefix\fR.
+\fIdest\fR can be an email address or a Maildir. When \fIdest\fR is an
+email address, \fBrd-remote\fR calls \fBqmail-remote\fR after adjusting
+argv[1] to be the new destination domain and argv[5] to be the new
+recipient. When \fIdest\fR is a Maildir, \fBrd-remote\fR uses
+\fBmaildirdeliver\fR(1) to deliver the mail. The last field \fIprefix\fR is
+optional. The control file format is discussed below.
+
+.EX
+\fIaddr\fR:\fItype\fR:\fIdest\fR[:\fIprefix\fR]
+
+\fIaddr\fR is destination domain when \fItype\fR is the letter '\fBd\fR'.
+\fIaddr\fR is the recipient address when \fItype\fR is the letter '\fBr\fR'.
+\fIaddr\fR is the sender address when \fItype\fR is the letter '\fBs\fR'.
+
+\fIdest\fR can be an email address or a Maildir. When \fIdest\fR is an
+email address, \fIdest\fR, the mail is delivered to the address using
+\fBqmail-remote\fR. When \fIdest\fR is a maildir, the mail is directly
+delivered to the Maildir \fIdest\fR using \fBmaildirdeliver\fR(1).
+
+\fIprefix\fR is optional. If given \fBrd-remote\fR uses prefix-recip as the
+value for the \fBDelivered-To\fR header. If not given, sender-recip is used
+as the value for the \fBDelivered-To\fR header.
+.EE
+
+Here \fIaddr\fR is destination domain when \fItype\fR is the letter
+'\fBd\fR'. \fIaddr\fR is the recipient address when \fItype\fR is the
+letter '\fBr\fR'. \fIaddr\fR is the sender address when \fItype\fR is the
+letter '\fBs\fR'.
+
+\fIaddr\fR can be an exact match, wildcard or a regular expression if
+\fBQREGEX\fR envrionment variable is defined and is non-zero. So if
+\fIaddr\fR is .*@example.com, it will match all addresses belonging to
+examplecom (for type 'r' or 's'). When type is 'd', you can use the
+regex .*example.com for \fIaddr\fR to match all address with example.com as
+the domain name.
+
+You can set \fBQREMOTE=/usr/sbin/rd-remote\fR for \fBspawn-filter\fR(8) to
+make it use \fBrd-remote\fR for remote deliveries.
+
+.SH SEE ALSO
+qmail-remote(8),
+spawn-filter(8)
+
+.SH "AUTHORS"
+
+"Manvendra Bhangui" <mbhangui@gmail.com>.

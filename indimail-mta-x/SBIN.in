@@ -8,6 +8,7 @@ f:::0755:/sbin/:qmail-poppass:qmail-poppass
 f:::0755:/sbin/:spawn-filter:spawn-filter
 f:::0755:/sbin/:qmail-local:qmail-local
 f:::0755:/sbin/:qmail-remote:qmail-remote
+f:::0755:/sbin/:rd-remote:rd-remote
 f:::0755:/sbin/:qmail-getpw:qmail-getpw
 f:::0755:/sbin/:qmail-pw2u:qmail-pw2u
 f:::0755:/sbin/:cdbdump:cdbdump

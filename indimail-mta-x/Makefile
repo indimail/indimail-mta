@@ -45,9 +45,9 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	qmail-remote qmail-rm qmail-rspawn qmail-send qmail-showctl qmail-smtpd \
 	qmail_smtpd.so qmail-spamfilter qmail-start qmail-tcpok qmail-tcpto \
 	todo-proc qmail-upq qmta-send qnotify qpq qquote qreceipt qsmhook \
-	qtools qscheduler queue-fix test-recipients relaytest rewind rpmattr \
-	rrforward rrt sendmail serialcmd serialqmtp serialsmtp setforward \
-	setmaillist slowq-send slowq-start smtpd-plugin.so \
+	qtools qscheduler queue-fix test-recipients rd-remote relaytest \
+	rewind rpmattr rrforward rrt sendmail serialcmd serialqmtp serialsmtp \
+	setforward setmaillist slowq-send slowq-start smtpd-plugin.so \
 	sortedtest spawn-filter spfquery splogger srsfilter sslerator \
 	surblfilter surblqueue svctool swaks sys-checkpwd tcp-env testzero \
 	tokenize uacl udpclient udplogger update_tmprsadh viruscanner whois \
@@ -3908,6 +3908,17 @@ conf-logdir
 
 backup.conf: backup.conf.in
 	(sed -n '2,$$p' warn-auto.sh;cat $@.in) | $(edit) > $@
+
+rd-remote.o: \
+compile rd-remote.c control.h auto_control.h variables.h \
+do_match.h quote.h auto_prefix.h
+	./compile rd-remote.c
+
+rd-remote: \
+load rd-remote.o control.o variables.o auto_control.o auto_prefix.o \
+do_match.o quote.o
+	./load rd-remote control.o variables.o auto_control.o auto_prefix.o \
+	wildmat.o do_match.o quote.o -lqmail
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \

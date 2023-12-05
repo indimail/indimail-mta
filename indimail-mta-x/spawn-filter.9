@@ -52,8 +52,8 @@ unsets FILTERARGS, SPAMFILTER before running  filter.
 .TP 5
 .I filterargs
 This control file can be used to setup additional filters after running the
-SPAM filters (See Section on Spam Filtering). The format of this file is of
-the form
+SPAM filters (See Section on Spam Filtering). This file has the following
+format.
 
 .EX
 \fBdomain:args\fR
@@ -73,9 +73,9 @@ for remote deliveries and
 
 for local deliveries.
 
-\fIdomain\fR can be a wildcard or a regular expression (if QREGEX
-environment variable is defined). If there are multiple lines which match
-\fIdomain\fR, the first line that matches \fIdomain\fR will be used.
+\fIdomain\fR can be an exact match, wildcard or a regular expression (if
+QREGEX environment variable is defined). If there are multiple lines which
+match \fIdomain\fR, the first line that matches \fIdomain\fR will be used.
 
 For local deliveries, \fIdomain\fR refers to the recipient domain. You can
 have the match done on sender domain by setting \fBMATCH_SENDER_DOMAIN\fR.
@@ -404,6 +404,7 @@ qmail-lspawn(8),
 qmail-rspawn(8),
 qmail-local(8),
 qmail-remote(8),
+rd-remote(8),
 qmail-smtpd(8),
 qmail-multi(8),
 qmail-cdb(8),

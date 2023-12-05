@@ -188,6 +188,7 @@ f:::0644:/man8/:qmail-qread.8:qmail-qread.8
 f:::0644:/man8/:qmail-queue.8:qmail-queue.8
 f:::0644:/man8/:qmail-direct.8:qmail-direct.8
 f:::0644:/man8/:qmail-remote.8:qmail-remote.8
+f:::0644:/man8/:rd-remote.8:rd-remote.8
 f:::0644:/man8/:qmail-rspawn.8:qmail-rspawn.8
 f:::0644:/man8/:qmail-send.8:qmail-send.8
 f:::0644:/man8/:slowq-send.8:slowq-send.8
