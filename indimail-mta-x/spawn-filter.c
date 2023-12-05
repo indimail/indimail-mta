@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.84 2023-10-04 23:19:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.85 2023-12-05 23:19:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -449,7 +449,6 @@ main(int argc, char **argv)
 		ptr++;
 	ptr += 6;
 	if (*ptr == 'l') { /*- qmail-local Filter */
-		mailprog = setup_qargs(*ptr);
 		if (env_get("MATCH_SENDER_DOMAIN")) {
 			at = str_rchr(argv[8], '@');
 			if (argv[8][at] && argv[8][at + 1])
@@ -488,7 +487,6 @@ main(int argc, char **argv)
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 	} else
 	if (*ptr == 'r') { /*- qmail-remote Filter */
-		mailprog = setup_qargs(*ptr);
 		if (env_get("MATCH_RECIPIENT_DOMAIN"))
 			domain = argv[1];
 		else { /*- default for qmail-remote is to match on sender domain */
@@ -521,6 +519,7 @@ main(int argc, char **argv)
 	}
 	if (chdir(auto_qmail) == -1)
 		report(111, "spawn: Unable to switch to ", auto_qmail, ": ", error_str(errno), ". (#4.3.0)", 0);
+
 	if ((ret = envrules(sender.s, "fromd.envrules", "FROMRULES", 0)) == -1)
 		report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 	else
@@ -529,6 +528,7 @@ main(int argc, char **argv)
 	else
 	if (ret == -4)
 		report(111, "spawn: regex compilation failed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+
 	if ((ret = envrules(recipient.s, "rcpt.envrules", "RCPTRULES", 0)) == -1)
 		report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 	else
@@ -537,6 +537,8 @@ main(int argc, char **argv)
 	else
 	if (ret == -4)
 		report(111, "spawn: regex compilation failed: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
+	mailprog = setup_qargs(*ptr); /*- take care not to modify ptr before this line */
+
 	/*- DATABYTES Check */
 	if (check_size(size))
 		report(100, "sorry, that message size exceeds my databytes limit (#5.3.4)", 0, 0, 0, 0, 0);
@@ -672,7 +674,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.84 2023-10-04 23:19:41+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.85 2023-12-05 23:19:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -683,6 +685,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.85  2023-12-05 23:19:48+05:30  Cprogrammer
+ * setup qmail-local, qmail-remote arguments after envrules
+ *
  * Revision 1.84  2023-10-04 23:19:41+05:30  Cprogrammer
  * use env variable QLOCAL, QREMOTE to execute alternate qmail-local, qmail-remote
  *
