@@ -1,5 +1,5 @@
 /*
- * $Id: rd-remote.c,v 1.1 2023-12-05 22:04:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rd-remote.c,v 1.2 2023-12-06 15:28:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -10,6 +10,7 @@
 #include <scan.h>
 #include <fmt.h>
 #include <wait.h>
+#include <getln.h>
 #include <str.h>
 #include "control.h"
 #include "auto_control.h"
@@ -57,9 +58,16 @@ temp_nomem()
 }
 
 no_return void
-temp_read()
+temp_read_msg()
 {
 	out("ZUnable to read message. (#4.3.0)\n");
+	zerodie();
+}
+
+no_return void
+temp_read_maildirdeliver()
+{
+	out("ZUnable to read maildirdeliver error message. (#4.3.0)\n");
 	zerodie();
 }
 
@@ -68,6 +76,15 @@ temp_write()
 {
 	out("ZUnable to write message. (#4.3.0)\n");
 	zerodie();
+}
+
+void
+print_report(char *s1, char *msg, int msglen)
+{
+	out(s1);
+	if (substdio_put(subfdoutsmall, msg, msglen) == -1)
+		_exit(0);
+	zero();
 }
 
 no_return void
@@ -113,17 +130,18 @@ addrmangle(stralloc *saout, char *sender)
 int
 main(int argc, char **argv)
 {
-	int             r, use_regex, lcount, len, nullflag, count, wstat;
-	int             pipefd[2];
+	int             r, use_regex, lcount, len, nullflag, count, wstat,
+					match;
+	int             pipefd[2], errpipe[2];
 	unsigned long   size;
 	char           *ptr, *cptr, *addr, *errStr, *dest_addr, *dest_domain,
 				   *prefix;
-	char            ssibuf[512], ssobuf[512], strnum[FMT_ULONG];
+	char            ssibuf[512], ssobuf[512], ssebuf[512], strnum[FMT_ULONG];
 	char           *(qrargs[]) = { "queue-remote", 0, 0, 0, 0, 0, (char *) 0};
 	char           *(mdargs[]) = { "maildirdeliver", 0, (char *) 0};
 	pid_t           pid;
-	substdio        ssi, sso;
-	stralloc        q = {0}, sender = {0}, recip = {0}, dto = {0};
+	substdio        ssi, sso, sse;
+	stralloc        q = {0}, sender = {0}, recip = {0}, dto = {0}, line = {0};
 
 	if (argc < 6)
 		perm_usage();
@@ -137,12 +155,6 @@ main(int argc, char **argv)
 		temp_control();
 	if ((ptr = env_get("QREGEX")))
 		scan_int(ptr, &use_regex);
-	if (pipe(pipefd) == -1) {
-		out("ZTrouble creating pipe. (#4.3.0)\n");
-		zerodie();
-	}
-	substdio_fdbuf(&ssi, read, 0, ssibuf, sizeof(ssibuf));
-	substdio_fdbuf(&sso, write, pipefd[1], ssobuf, sizeof(ssobuf));
 	/*-
 	 * format for redirectremote is
 	 * address:type:dest
@@ -212,74 +224,131 @@ main(int argc, char **argv)
 				!stralloc_0(&q))
 			temp_nomem();
 		execv(q.s, argv); /* run qmail-remote with original arguments */
-	} else {
-		if (!stralloc_catb(&dto, prefix ? prefix : sender.s, prefix ? str_len(prefix) : sender.len) ||
-				!stralloc_append(&dto, "-") ||
-				!stralloc_catb(&dto, recip.s, recip.len) ||
-				!stralloc_append(&dto, "\n") ||
-				!stralloc_0(&dto))
-			temp_nomem();
-		dto.len--;
-		switch ((pid = fork()))
-		{
-		case -1:
-			out("Zqq unable to fork (#4.3.0)\n");
+		out("ZUnable to run qmail-remote (#4.3.0)\n");
+		zerodie();
+	}
+	if (!stralloc_catb(&dto, prefix ? prefix : sender.s, prefix ? str_len(prefix) : sender.len) ||
+			!stralloc_append(&dto, "-") ||
+			!stralloc_catb(&dto, recip.s, recip.len) ||
+			!stralloc_append(&dto, "\n") ||
+			!stralloc_0(&dto))
+		temp_nomem();
+	dto.len--;
+	if (pipe(pipefd) == -1) {
+		out("ZTrouble creating pipe. (#4.3.0)\n");
+		zerodie();
+	}
+	substdio_fdbuf(&ssi, read, 0, ssibuf, sizeof(ssibuf));
+	substdio_fdbuf(&sso, write, pipefd[1], ssobuf, sizeof(ssobuf));
+	if (*dest_addr == '/') {
+		if (pipe(errpipe) == -1) {
+			out("ZTrouble creating pipe. (#4.3.0)\n");
 			zerodie();
-			break;
-		case 0:
-			close(pipefd[1]);
-			if (dup2(pipefd[0], 0) == -1) {
-				out("Zqq unable to duplicate descriptor (#4.3.0)\n");
+		}
+		substdio_fdbuf(&sse, read, errpipe[0], ssebuf, sizeof(ssebuf));
+	}
+	switch ((pid = fork()))
+	{
+	case -1:
+		out("Zqq unable to fork (#4.3.0)\n");
+		zerodie();
+		break;
+	case 0:
+		close(pipefd[1]);
+		if (dup2(pipefd[0], 0) == -1) {
+			out("Zqq unable to duplicate descriptor for input (#4.3.0)\n");
+			zerodie();
+		}
+		if (*dest_addr == '/') {
+			close(errpipe[0]);
+			if (dup2(errpipe[1], 1) == -1) {
+				out("Zqq unable to duplicate descriptor for output (#4.3.0)\n");
 				zerodie();
 			}
-			if (*dest_addr == '/') {
-				if (!stralloc_copys(&q, auto_prefix) ||
-						!stralloc_catb(&q, "/bin/maildirdeliver", 19) ||
-						!stralloc_0(&q))
-					temp_nomem();
-				mdargs[0] = q.s;
-				mdargs[1] = dest_addr;
-				execv(q.s, mdargs); /*- run maildirdeliver */
-			} else {
-				if (!stralloc_copys(&q, auto_prefix) ||
-						!stralloc_catb(&q, "/sbin/qmail-remote", 18) ||
-						!stralloc_0(&q))
-					temp_nomem();
-				qrargs[0] = q.s;
-				qrargs[1] = dest_domain;
-				qrargs[2] = argv[2];
-				qrargs[3] = argv[3];
-				scan_ulong(argv[4], &size);
-				strnum[fmt_ulong(strnum, size + dto.len)] = 0;
-				qrargs[4] = strnum;
-				qrargs[5] = dest_addr;
-				execv(q.s, qrargs); /*- run qmail-remote */
+			if (dup2(errpipe[1], 2) == -1) {
+				out("Zqq unable to duplicate descriptor for error (#4.3.0)\n");
+				zerodie();
 			}
-			_exit(111);
-		default:
-			close(pipefd[0]);
-			break;
-		} /*- switch ((pid = fork())) */
-		if (substdio_put(&sso, dto.s, dto.len) == -1)
-			temp_read();
-		switch (substdio_copy(&sso, &ssi))
-		{
-		case -2: /*- read error */
-			temp_read();
-		case -3: /*- write error */
-			temp_write();
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/bin/maildirdeliver", 19) ||
+					!stralloc_0(&q))
+				temp_nomem();
+			mdargs[0] = q.s;
+			mdargs[1] = dest_addr;
+			execv(q.s, mdargs); /*- run maildirdeliver */
+		} else {
+			if (!stralloc_copys(&q, auto_prefix) ||
+					!stralloc_catb(&q, "/sbin/qmail-remote", 18) ||
+					!stralloc_0(&q))
+				temp_nomem();
+			qrargs[0] = q.s;
+			qrargs[1] = dest_domain;
+			qrargs[2] = argv[2];
+			qrargs[3] = argv[3];
+			scan_ulong(argv[4], &size);
+			strnum[fmt_ulong(strnum, size + dto.len)] = 0;
+			qrargs[4] = strnum;
+			qrargs[5] = dest_addr;
+			execv(q.s, qrargs); /*- run qmail-remote */
 		}
-		if (substdio_flush(&sso) == -1)
-			temp_write();
-		close(pipefd[1]);
-		if (wait_pid(&wstat, pid) != pid) {
-			out("Zqmail-remote waitpid surprise (#4.3.0)\n");
-			zerodie();
-		}
-		if (wait_crashed(wstat)) {
-			out("Zqmail-remote crashed (#4.3.0)\n");
-			zerodie();
-		}
-		_exit(wait_exitcode(wstat));
+		_exit(111);
+	default:
+		close(pipefd[0]);
+		if (*dest_addr == '/')
+			close(errpipe[1]);
+		break;
+	} /*- switch ((pid = fork())) */
+	if (substdio_put(&sso, dto.s, dto.len) == -1)
+		temp_read_msg();
+	switch (substdio_copy(&sso, &ssi))
+	{
+	case -2: /*- read error */
+		temp_read_msg();
+	case -3: /*- write error */
+		temp_write();
 	}
+	if (substdio_flush(&sso) == -1)
+		temp_write();
+	close(pipefd[1]);
+	if (*dest_addr == '/') {
+		if (getln(&sse, &line, &match, '\n') == -1)
+			temp_read_maildirdeliver();
+		close(errpipe[0]);
+	}
+	if (wait_pid(&wstat, pid) != pid) {
+		out("Zqmail-remote waitpid surprise (#4.3.0)\n");
+		zerodie();
+	}
+	if (wait_crashed(wstat)) {
+		out("Zqmail-remote crashed (#4.3.0)\n");
+		zerodie();
+	}
+	if (*dest_addr == '/') {
+		switch (wait_exitcode(wstat))
+		{
+		case 0:
+			if (match)
+				print_report("r", line.s, line.len);
+			out("Kmail has been successfully redirected\n");
+			zerodie();
+		case 100:
+			if (match)
+				print_report("h", line.s, line.len);
+			out("Dpermanent error while redirecting mail (#5.4.4)\n");
+			zerodie();
+		default:
+			if (match)
+				print_report("s", line.s, line.len);
+			out("Zerror redirecting mail (#4.4.4)\n");
+			zerodie();
+		}
+	} else
+		_exit(wait_exitcode(wstat));
 }
+
+/*
+ * $Log: rd-remote.c,v $
+ * Revision 1.2  2023-12-06 15:28:10+05:30  Cprogrammer
+ * added report for qmail-rspawn for maildir delivery
+ *
+ */
