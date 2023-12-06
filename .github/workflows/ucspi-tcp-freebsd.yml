@@ -15,21 +15,21 @@ on:
 
 jobs:
   testfreebsd:
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     name: FreeBSD
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         path: main
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: mbhangui/libqmail
         path: libqmail
     - name: build ucspi-tcp
       id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.3.1
+      uses: vmactions/freebsd-vm@v1
       with:
         envs: 'MYTOKEN'
         usesh: true
