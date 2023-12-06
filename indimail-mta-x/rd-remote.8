@@ -10,7 +10,6 @@ rd-remote \- Redirect remote mail to another address or a Maildir
 .I qqeh
 .I size
 .I recip
-[ \fIrecip\fR ... ]
 
 .SH DESCRIPTION
 \fBrd-remote\fR reads a mail message from its input and redirects mail to
@@ -57,6 +56,18 @@ the domain name.
 
 You can set \fBQREMOTE=/usr/sbin/rd-remote\fR for \fBspawn-filter\fR(8) to
 make it use \fBrd-remote\fR for remote deliveries.
+
+\fBrd-remote\fR is useful when you want to tempararily redirect mails for a
+busy/ratelimited remote mailserver to a Maildir and use \fBmaildirsmtp\fR(1) or
+\fBmaildirserial\fR(1) and \fBserialsmtp\fR(1) to do the remote delivery
+with a lesser concurrency.
+
+.SH LIMITATIONS
+Unlike \fBqmail-remote\fR, \fBrd-remote\fR cannot handle more than one
+recipient. But that is OK when used with indimail-mta as \fBqmail-rspawn\fR
+never invokes \fBqmail-remote\fR more than one recipient. If used in
+scripts to send an email to multiple recipients, you cannot use
+\fBrd-remopte\fR.
 
 .SH SEE ALSO
 qmail-remote(8),
