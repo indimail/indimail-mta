@@ -74,6 +74,7 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 45. qlocal_upgrade: removed forced update of QMAILLOCAL, QMAILREMOTE env
     variables for qmail-send service
 46. rd-remote: added report for qmail-rspawn for maildir deliver
+47. report.c, rd-remote.c: added comment on report format for qmail-rspawn
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

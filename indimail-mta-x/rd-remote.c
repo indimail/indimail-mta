@@ -1,5 +1,5 @@
 /*
- * $Id: rd-remote.c,v 1.2 2023-12-06 15:28:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rd-remote.c,v 1.3 2023-12-06 17:01:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -78,6 +78,37 @@ temp_write()
 	zerodie();
 }
 
+/*-
+ * qmail-rspawn doesn't use exit code of qmail-remote. It needs a report in
+ * the following format
+ * "[r,h,s]recipient_report\0[K,Z,D]message_report\0"
+ *
+ * recipient_report start with one of the letters r, h, s
+ * as below
+ * r - Recipient report: acceptance.
+ * s - Recipient report: temporary rejection.
+ * h - Recipient report: permanent rejection.
+ *
+ * message_report start with one of the letters K, Z, D
+ * as below
+ * K - Message report: success.
+ * Z - Message report: temporary failure.
+ * D - Message report: permanent failure.
+ *
+ * Examples of qmail-remote report
+ *
+ * Success
+ * "rFrom <xxx@example.com> RCPT <yyy@example.org>\0\n"
+ * "KHost example.com accepted message\0\n"
+ *
+ * temp failure
+ * "sFrom <xxx@example.com> RCPT <yyy@example.org>\0\n"
+ * "ZTemporary failure accepting message\0\n"
+ *
+ * perm failure
+ * "hFrom <xxx@example.com> RCPT <yyy@example.org>\0\n"
+ * "Dexample.org does not like recipient\0\n"
+ */
 void
 print_report(char *s1, char *msg, int msglen)
 {
@@ -348,6 +379,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: rd-remote.c,v $
+ * Revision 1.3  2023-12-06 17:01:44+05:30  Cprogrammer
+ * added comment on report format for qmail-rspawn
+ *
  * Revision 1.2  2023-12-06 15:28:10+05:30  Cprogrammer
  * added report for qmail-rspawn for maildir delivery
  *

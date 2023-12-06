@@ -1,5 +1,8 @@
 /*
  * $Log: report.c,v $
+ * Revision 1.6  2023-12-06 17:02:13+05:30  Cprogrammer
+ * added comment on report format for qmail-rspawn
+ *
  * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -26,6 +29,42 @@
 
 extern dtype    delivery;
 
+/*-
+ * qmail-rspawn doesn't use exit code of qmail-remote. It needs a report in
+ * the following format
+ * "[r,h,s]recipient_report\0[K,Z,D]message_report\0"
+ *
+ * recipient_report start with one of the letters r, h, s
+ * as below
+ * r - Recipient report: acceptance.
+ * s - Recipient report: temporary rejection.
+ * h - Recipient report: permanent rejection.
+ *
+ * message_report start with one of the letters K, Z, D
+ * as below
+ * K - Message report: success.
+ * Z - Message report: temporary failure.
+ * D - Message report: permanent failure.
+ *
+ * Examples of qmail-remote report
+ *
+ * Success
+ * "rFrom <xxx@example.com> RCPT <yyy@example.org>\0\n"
+ * "KHost example.com accepted message\0\n"
+ *
+ * temp failure
+ * "sFrom <xxx@example.com> RCPT <yyy@example.org>\0\n"
+ * "ZTemporary failure accepting message\0\n"
+ *
+ * perm failure
+ * "hFrom <xxx@example.com> RCPT <yyy@example.org>\0\n"
+ * "Dexample.org does not like recipient\0\n"
+ *
+ * qmail-lspawn uses the exit code of qmail-local
+ * 0   - Success
+ * 111 - Temporary failure
+ * 100 - Permanent failure
+ */
 no_return void
 report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 {
@@ -73,7 +112,7 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 void
 getversion_report_c()
 {
-	static char    *x = "$Id: report.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: report.c,v 1.6 2023-12-06 17:02:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
