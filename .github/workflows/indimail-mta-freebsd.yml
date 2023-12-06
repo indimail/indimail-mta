@@ -25,24 +25,24 @@ on:
 
 jobs:
   testfreebsd:
-    runs-on: macos-12
+    runs-on: ubuntu-latest
     name: FreeBSD
     timeout-minutes: 60 # randomly bootloops https://github.com/vmactions/freebsd-vm/issues/74
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         path: main
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         repository: mbhangui/libqmail
         path: libqmail
     - name: build indimail-mta
       id: FreeBSD
-      uses: vmactions/freebsd-vm@v0.3.1
+      uses: vmactions/freebsd-vm@v1
       with:
-        envs: 'MYTOKEN'
+        envs: 'MYTOKEN MYTOKEN2'
         usesh: true
         prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap26-client libgsasl base64
         run: |
