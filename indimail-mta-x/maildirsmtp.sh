@@ -1,5 +1,8 @@
 #
 # $Log: maildirsmtp.sh,v $
+# Revision 1.4  2023-12-08 12:56:22+05:30  Cprogrammer
+# use PORT env variable if set as the SMTP port
+#
 # Revision 1.3  2017-03-09 16:38:46+05:30  Cprogrammer
 # FHS changes
 #
@@ -11,9 +14,7 @@
 #
 #
 
-if [ " $CONTROLDIR" = " " ] ; then
-	CONTROLDIR=@controldir@
-fi
+[ -z "$CONTROLDIR" ] && CONTROLDIR=/etc/indimail/control
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
 	cd SYSCONFDIR
@@ -23,7 +24,8 @@ if [ -f "$CONTROLDIR"/queuelifetime ] ; then
 else
 	LIFETIME=1209600
 fi
+[ -z "$PORT" ] && PORT=25
 exec \
 PREFIX/bin/maildirserial -b -t $LIFETIME -- "$1" "$2" \
-PREFIX/bin/tcpclient -RHl0 -- "$3" 25 \
+PREFIX/bin/tcpclient -RHl0 -- "$3" $PORT \
 PREFIX/bin/serialsmtp "$2" "$4"

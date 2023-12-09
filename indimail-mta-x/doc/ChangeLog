@@ -70,11 +70,23 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 44. envrules.c, mail_acl.c: Fix for invalid rules
 44. spawn-filter.c: setup qmail-local, qmail-remote arguments after envrules
    to allow envrules to set QLOCAL, QREMOTE
-- 06/12/2023
+- 10/12/2023
 45. qlocal_upgrade: removed forced update of QMAILLOCAL, QMAILREMOTE env
     variables for qmail-send service
 46. rd-remote: added report for qmail-rspawn for maildir deliver
 47. report.c, rd-remote.c: added comment on report format for qmail-rspawn
+- 09/12/2023
+48. etrn.c, atrn.c: use users/cdb to get autoturn directory
+49. etrn.c, atrn.c: pass etrn/atrn argument, autoturn dir and domain dir
+    as arguments to libexec/etrn, libexec/atrn
+50. etrn.sh, atrn.sh: read .qmail-domain-default to get Maildir directory
+51. maildirsmtp: use PORT env variable if set as the SMTP port
+52. maildirserial.c: removed use of my_puts(), put() functions
+53. maildir.c: skip non-regular in append() function to prevent breaking
+    maildirserial
+54. serialsmtp: fix skip SMTP QUIT when three args are provided
+55. smtpd.c: allow ODMR protocol on none ODMR ports
+56. smtpd.c: use atrnaccess control file for local users to access atrn domains
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

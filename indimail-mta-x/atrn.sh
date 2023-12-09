@@ -1,5 +1,5 @@
 #
-# $Id: atrn.sh,v 1.13 2023-12-03 15:25:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: atrn.sh,v 1.13 2023-12-09 11:46:33+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
@@ -8,38 +8,51 @@
 # 4 - Pending message for node
 #
 trap "" 1 2 3
-if [ $# -lt 2 ] ; then
-	echo "atrn: ERROR: USAGE: domain_name(s) remoteip" 1>&2
-	exit 1
-elif [ " $TCPREMOTEIP" = " " ] ; then
-	echo "atrn: ERROR: TCPREMOTEIP not set" 1>&2
-	exit 1
-fi
-INDIMAILDIR=$(grep -w "^indimail" /etc/passwd | cut -d: -f6|head -1)
-if [ " $INDIMAILDIR" = " " ] ; then
-	echo "atrn: Could not determine indimail home" 1>&2
-	exit 1
-fi
-if [ " $CONTROLDIR" = " " ] ; then
-	CONTROLDIR=@controldir@
-fi
-slash=$(echo $CONTROLDIR | cut -c1)
-if [ ! " $slash" = " /" ] ; then
-	cd SYSCONFDIR
-fi
-if [ -f "$CONTROLDIR"/queuelifetime ] ; then
-	LIFETIME=$(cat "$CONTROLDIR"/queuelifetime)
-else
-	LIFETIME=1209600
-fi
 PATH=/bin:/usr/bin:$PATH
-cd QMAILHOME/autoturn
-total=0
-pend=0
+nm=$(basename $0)
+
+if [ $# -ne 3 ] ; then
+	echo "$nm: ERROR: USAGE: domain_name autoturn_dir dir" 1>&2
+	exit 1
+elif [ -z "$TCPREMOTEIP" -a -z "$TCP6REMOTEIP" ] ; then
+	echo "$nm: ERROR: TCPREMOTEIP not set" 1>&2
+	exit 1
+fi
+
 domain=$1
-count=$(for i in $domain/Maildir/new $domain/Maildir/cur ; do /bin/ls $i; done| wc -l)
-if [ $count -eq 0 ] ; then
-	exit 3 # no messages in queue
+autoturn_dir=$2
+domain_dir=$3
+echo "$nm: $$: domain=$domain, autoturn=$2, domain_dir=$domain_dir" 1>&2
+
+[ -z "$CONTROLDIR" ] && CONTROLDIR=@controldir@
+slash=$(echo $CONTROLDIR | cut -c1)
+[ ! " $slash" = " /" ] && cd SYSCONFDIR
+[ -f "$CONTROLDIR"/queuelifetime ] && LIFETIME=$(cat "$CONTROLDIR"/queuelifetime) || LIFETIME=1209600
+
+t=$(basename $domain_dir)
+qfn=$(echo $t | sed -e 's{\.{:{g')
+cd $autoturn_dir
+if [ -f $autoturn_dir/.qmail-$qfn-default ] ; then
+	dir=$(cat $autoturn_dir/.qmail-$qfn-default)
+else
+	echo "$nm: $autoturn_dir/.qmail-$qfn-default: No such file or directory"
+	exit 1
+fi
+
+# remember that $domain_dir and $dir need not be same
+if [ -d $dir ] ; then
+	count=$(for i in $dir/new $dir/cur ; do /bin/ls $i; done| wc -l)
+	if [ $? -ne 0 ] ; then
+		echo "$nm: Trouble accessing files in dir $dir for $domain, pid=$$" 1>&2
+		exit 1
+	fi
+	if [ $count -eq 0 ] ; then
+		echo "$nm: No pending messages for domain $domain, dir=$dir, pid=$$" 1>&2
+		exit 3 # no messages in queue
+	fi
+else
+	echo "$nm: Trouble accessing directory for domain $domain, dir=$dir, pid=$$" 1>&2
+	exit 1
 fi
 #
 # .qvirtual allows mails for a main domain to be
@@ -54,23 +67,25 @@ fi
 # script can identify the domain identified by looking up the .qvirtual file
 #
 echo "250 OK now reversing the connection"
-if [ -f $domain/.qvirtual ] ; then
-	qvirtual=$(cat $domain/.qvirtual)
+if [ -f $domain_dir/.qvirtual ] ; then
+	qvirtual=$(cat $domain_dir/.qvirtual)
 else
 	qvirtual=$domain
 fi
+
 prefix="autoturn-""$qvirtual""-"
+echo "$nm: Executing maildirserial -b -t $LIFETIME $dir $prefix serialsmtp $prefix AutoTURN 1 qv=$qvirtual count=$count" 1>&2
 # serialsmtp prefix helohost [do-not-quit]
-PREFIX/bin/maildirserial -b -t $LIFETIME $domain/Maildir "$prefix" \
-	PREFIX/bin/serialsmtp "$prefix" AutoTURN 1
-if [ -f $domain/Maildir/maildirsize ] ; then
-	PREFIX/sbin/resetquota $domain/Maildir
+PREFIX/bin/maildirserial -b -t $LIFETIME $dir "$prefix" \
+	PREFIX/bin/serialsmtp "$prefix" AutoTURN
+if [ -f $dir/maildirsize ] ; then
+	PREFIX/sbin/resetquota $dir
 fi
 exit 0
 #
 # $Log: atrn.sh,v $
-# Revision 1.13  2023-12-03 15:25:54+05:30  Cprogrammer
-# factored code
+# Revision 1.13  2023-12-09 11:46:33+05:30  Cprogrammer
+# read .qmail-domain-default to get Maildir directory
 #
 # Revision 1.12  2023-11-26 19:51:03+05:30  Cprogrammer
 # fixed path for resetquota

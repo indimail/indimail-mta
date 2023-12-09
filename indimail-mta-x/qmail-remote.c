@@ -161,7 +161,7 @@ static stralloc helo_str = { 0 };
 #ifdef BATV
 #include "batv.h"
 #include <openssl/ssl.h>
-#include "byte.h"
+#include <byte.h>
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #include <openssl/evp.h>
 #else

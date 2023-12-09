@@ -1,5 +1,5 @@
 #
-# $Id: etrn.sh,v 1.14 2023-12-03 22:19:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: etrn.sh,v 1.13 2023-12-09 11:47:51+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
@@ -11,37 +11,79 @@
 trap "" 1 2 3
 PATH=/bin:/usr/bin:$PATH
 nm=$(basename $0)
+
 if [ $# -ne 3 ] ; then
-	echo "$nm: USAGE: domain_name dir smtp_host" 1>&2
+	echo "$nm: USAGE: domain_name autoturn_dir dir" 1>&2
 	exit 1
-elif [ -z "$TCPREMOTEIP" ] ; then
+elif [ -z "$TCPREMOTEIP" -a -z "$TCP6REMOTEIP" ] ; then
 	echo "$nm: TCPREMOTEIP not set" 1>&2
 	exit 1
 fi
 domain=$1
-dir=$2
-smtp_host=$3
-cd QMAILHOME/autoturn
+autoturn_dir=$2
+domain_dir=$3
+echo "$nm: $$: domain=$domain, autoturn=$2, domain_dir=$domain_dir" 1>&2
+
+t=$(basename $domain_dir)
+qfn=$(echo $t | sed -e 's{\.{:{g')
+if [ -f $autoturn_dir/.qmail-$qfn-default ] ; then
+	dir=$(cat $autoturn_dir/.qmail-$qfn-default)
+else
+	echo "$nm: $autoturn_dir/.qmail-$qfn-default: No such file or directory"
+	exit 1
+fi
+
 if [ -d $dir ] ; then
 	count=`for i in $dir/new $dir/cur ; do /bin/ls $i; done|wc -l`
+	if [ $? -ne 0 ] ; then
+		echo "$nm: Trouble accessing files in dir $dir for $domain [$domain_dir], pid=$$" 1>&2
+		exit 1
+	fi
 	if [ $count -eq 0 ] ; then
-		echo "$nm: No pending messages for domain $domain, ip=$3 dir=$dir, pid=$$" 1>&2
+		echo "$nm: No pending messages for domain $domain, dir=$dir [$domain_dir], pid=$$" 1>&2
 		exit 3
 	fi
 else
-	echo "$nm: Trouble accessing directory for domain $domain, ip=$3 dir=$dir, pid=$$" 1>&2
+	echo "$nm: Trouble accessing directory dir $dir for $domain [$domain_dir], pid=$$" 1>&2
 	exit 1
 fi
 set -o pipefail
 #
-# we need to ensure that the host / ip address to which we
-# are going to send emails for the domain has a valid MX
-# record for the domain. Else we reject the request as we don't
-# want any joe, o[b,s]ama, israel or any terrorist to fetch
+# we need to ensure the following
+#
+# 1. For domain based etrn domain, the host / ip address to which we
+#    are going to send emails for the domain must ba valid MX
+#    record for the domain or $TCPREMOTEIP should be present in
+#    $domain/ipauth
+#    in virtualdomains entry for domain based etrn domain will be like this
+#    if domain is etrn1.dom
+#    etrn2.dom:autoturn-etrn1.dom
+#    domain based etrn can also be created by using vadddomain -t etrn1.dom
+#
+# 2. For IP based etrn domain if $TCPREMOTEIP is same as the IP
+#    send emails to the IP. Else do same as 1.
+#    in virtualdomains entry for IP based etrn domain will be like this
+#    if domain is etrn2.dom
+#    etrn2.dom:autoturn-etrn2.dom
+#    IP based etrn can also be created by using vadddomain -T IP -t etrn2.dom
+#
+# Else we reject the request as we don't want any
+# genocidal joes, o[b,s]amas, israel or any terrorist to fetch
 # mails not meant for them
 #
-if [ -d $domain -a -f $domain/ipauth ] ; then
-	for i in $(cat $domain/ipauth)
+
+# First check if TCPREMOTEIP matches ip of the ETRN domain
+if [ "$t" = "$TCPREMOTEIP" ] ; then
+	IP=$TCPREMOTEIP
+elif [ "$t" = "$TCP6REMOTEIP" ] ; then
+	IP=$TCP6REMOTEIP
+else
+	IP=""
+fi
+
+# second check if $TCPREMOTEIP is in $domain/ipauth
+if [ -z "$IP" -a -d $domain_dir -a -f $domain_dir/ipauth ] ; then
+	for i in $(cat $domain_dir/ipauth)
 	do
 		for j in $TCPREMOTEIP $TCP6REMOTEIP
 		do
@@ -52,7 +94,10 @@ if [ -d $domain -a -f $domain/ipauth ] ; then
 		done
 	done
 fi
-if [ -d $domain -a -z "$IP" ] ; then
+
+# third check to see if $TCPREMOTEIP is a MX record
+# for the ETRN domain
+if [ -z "$IP" -a -d $domain ] ; then
 	ipme=$(LIBEXEC/ipmeprint | awk '{print $3}')
 	if [ $? -ne 0 ] ; then
 		echo "$nm: Unable to get local ip addresses" 1>&2
@@ -95,22 +140,15 @@ if [ -d $domain -a -z "$IP" ] ; then
 			fi
 		done
 	done
-	if [  -z "$IP" ] ; then
-		echo "$nm: server is not mail exchanger for $domain" 1>&2
-		exit 2
-	fi
 fi
-if [ -d $domain ] ; then
-	prefix=autoturn-"$domain""-"
-elif [ -d $smtp_host ] ; then
-	prefix=autoturn-"$smtp_host"-
-else
-	echo "$nm: Trouble accessing directory for domain $domain, ip=$3 dir=$dir, pid=$$" 1>&2
-	exit 1
+if [  -z "$IP" ] ; then
+	echo "$nm:server not mail exchanger for $domain" 1>&2
+	exit 2
 fi
-echo "$nm: Executing maildirsmtp $dir $prefix $smtp_host AutoTURN" 1>&2
+prefix=autoturn-"$t""-"
+echo "$nm: Executing maildirsmtp $dir $prefix $IP AutoTURN count=$count" 1>&2
 (
-PREFIX/bin/maildirsmtp $dir $prefix $smtp_host AutoTURN
+PREFIX/bin/maildirsmtp $dir $prefix $IP AutoTURN
 if [ -f $dir/maildirsize ] ; then
 	PREFIX/bin/resetquota $dir
 fi
@@ -119,12 +157,8 @@ exit 0
 
 #
 # $Log: etrn.sh,v $
-# Revision 1.14  2023-12-03 22:19:45+05:30  Cprogrammer
-# use ipauth before mx check
-#
-# Revision 1.13  2023-12-03 15:30:08+05:30  Cprogrammer
-# use ipauth as IP address whitellist
-# refactored code
+# Revision 1.13  2023-12-09 11:47:51+05:30  Cprogrammer
+# read .qmail-domain-default to get Maildir directory
 #
 # Revision 1.12  2021-04-29 10:03:52+05:30  Cprogrammer
 # replaced QMAIL with QMAILHOME

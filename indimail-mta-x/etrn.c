@@ -1,5 +1,5 @@
 /*
- * $Id: etrn.c,v 1.19 2023-12-03 12:19:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: etrn.c,v 1.20 2023-12-09 11:43:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <sys/types.h>
@@ -20,16 +20,15 @@
 #include "control.h"
 #include "variables.h"
 #include "auto_libexec.h"
-#include "auto_qmail.h"
 #include "qcount_dir.h"
+#include "read_assign.h"
 
-int             err_child();
-int             err_library();
-void            die_nomem();
-void            die_control();
-static stralloc etrn, maildir1, maildir2, lockfile;
+extern int      err_child();
+extern void     die_nomem();
+extern void     die_control();
+static stralloc etrn, etrndir, lockfile;
 
-static char    *binetrnargs[5] = { 0, 0, 0, 0, 0 };
+static char    *binetrnargs[5] = { 0, 0, 0, 0, (char *) 0 };
 
 int
 etrn_queue(char *arg, char *remoteip)
@@ -55,52 +54,40 @@ etrn_queue(char *arg, char *remoteip)
 		return -2;
 	if (rcpthosts(arg, len, 1) != 1)
 		return -2;
-	if (!stralloc_copys(&maildir1, auto_qmail) ||
-			!stralloc_catb(&maildir1, "/autoturn/", 10) ||
-			!stralloc_cats(&maildir1, arg) ||
-			!stralloc_catb(&maildir1, "/Maildir", 8) ||
-			!stralloc_0(&maildir1))
+	if (!(dir = read_assign("autoturn", NULL, NULL, NULL)))
+		return -2;
+	if (!stralloc_copys(&etrndir, dir) ||
+			!stralloc_append(&etrndir, "/") ||
+			!stralloc_cats(&etrndir, arg) ||
+			!stralloc_0(&etrndir))
 		die_nomem();
-	if (!stralloc_copys(&maildir2, auto_qmail) ||
-			!stralloc_catb(&maildir2, "/autoturn/", 10) ||
-			!stralloc_cats(&maildir2, remoteip) ||
-			!stralloc_catb(&maildir2, "/Maildir", 8) ||
-			!stralloc_0(&maildir2))
-		die_nomem();
-
-	lockfile.len = 0;
 	mailcount = 0;
-	if (!access(maildir1.s, F_OK))
-		qcount_dir(maildir1.s, &mailcount);
-	else
-	if (errno != error_noent)
-		return -1;
-	if (!mailcount) {
-		if (!access(maildir2.s, F_OK))
-			qcount_dir(maildir2.s, &mailcount);
-		else
+	if (!access(etrndir.s, F_OK))
+		qcount_dir(etrndir.s, &mailcount);
+	else {
 		if (errno != error_noent)
 			return -1;
-		if (mailcount) {
-			dir = maildir2.s;
-			if (!stralloc_copy(&lockfile, &maildir2))
-				die_nomem();
-			lockfile.len -= 8;
-			if (!stralloc_catb(&lockfile, "seriallock", 10) ||
-					!stralloc_0(&lockfile))
-				die_nomem();
+		if (!stralloc_copys(&etrndir, dir) ||
+				!stralloc_append(&etrndir, "/") ||
+				!stralloc_cats(&etrndir, remoteip) ||
+				!stralloc_0(&etrndir))
+			die_nomem();
+		if (!access(etrndir.s, F_OK))
+			qcount_dir(etrndir.s, &mailcount);
+		else {
+			if (errno != error_noent)
+				return -1;
+			return -3;
 		}
-	} else {
-		dir = maildir1.s;
-		if (!stralloc_copy(&lockfile, &maildir1))
-			die_nomem();
-		lockfile.len -= 8;
-		if (!stralloc_catb(&lockfile, "seriallock", 10) ||
-				!stralloc_0(&lockfile))
-			die_nomem();
 	}
 	if (!mailcount)
 		return -3;
+	etrndir.len--;
+	if (!stralloc_copy(&lockfile, &etrndir) ||
+			!stralloc_catb(&lockfile, "/seriallock", 11) ||
+			!stralloc_0(&lockfile))
+		die_nomem();
+
 	if ((fd = open_append(lockfile.s)) == -1)
 		return -5;
 	if (lock_exnb(fd) == -1) {
@@ -129,7 +116,7 @@ etrn_queue(char *arg, char *remoteip)
 		binetrnargs[0] = bin.s;
 		binetrnargs[1] = arg;
 		binetrnargs[2] = dir;
-		binetrnargs[3] = remoteip;
+		binetrnargs[3] = etrndir.s;
 		execv(*binetrnargs, binetrnargs);
 		_exit(1);
 	}
@@ -151,7 +138,7 @@ etrn_queue(char *arg, char *remoteip)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.19 2023-12-03 12:19:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.20 2023-12-09 11:43:25+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -159,6 +146,10 @@ getversion_etrn_c()
 
 /*
  * $Log: etrn.c,v $
+ * Revision 1.20  2023-12-09 11:43:25+05:30  Cprogrammer
+ * use users/cdb to get autoturn directory
+ * pass etrn/atrn argument, autoturn dir and domain dir as arguments arguments to libexec/etrn, libexec/atrn
+ *
  * Revision 1.19  2023-12-03 12:19:16+05:30  Cprogrammer
  * lock dir/seriallock instead of doing it in etrn script
  * moved hostname validation to valid_hname.c

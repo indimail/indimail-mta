@@ -1,5 +1,5 @@
 /*
- * $Id: serialsmtp.c,v 1.9 2023-10-05 22:31:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: serialsmtp.c,v 1.10 2023-12-09 11:55:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -368,7 +368,11 @@ main(int argc, char **argv)
 		close(fd);
 		flagneedrset = 1;
 	}
-	if (argc == 3) /*- for ATRN support - Do not quit */
+	/*-
+	 * if argc == 3, then do not quit to allow multiple
+	 * invocation in tcpclient script
+	 */
+	if (argc != 3)
 		quit();
 	_exit(0);
 	/*- Not reached */
@@ -378,13 +382,16 @@ main(int argc, char **argv)
 void
 getversion_serialsmtp_c()
 {
-	static char    *x = "$Id: serialsmtp.c,v 1.9 2023-10-05 22:31:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: serialsmtp.c,v 1.10 2023-12-09 11:55:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.10  2023-12-09 11:55:44+05:30  Cprogrammer
+ * fix skip SMTP QUIT when three args are provided
+ *
  * Revision 1.9  2023-10-05 22:31:31+05:30  Cprogrammer
  * updated coding style
  *

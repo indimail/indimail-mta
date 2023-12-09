@@ -1856,8 +1856,8 @@ socket_ip4loopback.o socket_v6loopback.o socket_v4mappedprefix.o \
 socket_v6any.o spf.o dns.o auto_uids.o qregex_sql.o srs.o \
 tablematch.o greylist.o query_skt.o fn_handler.o load_mysql.o \
 auto_break.o auto_control.o auto_assign.o auto_prefix.o \
-auto_libexec.o parse_env.o auto_sysconfdir.o valid_hname.o socket.lib \
-dns.lib tls.lib gsasl.lib mysql_config
+auto_libexec.o parse_env.o auto_sysconfdir.o valid_hname.o \
+read_assign.o socket.lib dns.lib tls.lib gsasl.lib mysql_config
 	if test $(SYSTEM) = DARWIN ; then \
 		$(CC) -dynamiclib -o qmail_smtpd.so smtpd.o rcpthosts.o \
 		valid_hname.o recipients.o indimail_stub.o load_mysql.o \
@@ -1869,7 +1869,7 @@ dns.lib tls.lib gsasl.lib mysql_config
 		mail_acl.o auto_uids.o qregex_sql.o tablematch.o greylist.o \
 		auto_break.o auto_control.o auto_assign.o query_skt.o fn_handler.o \
 		tlsarralloc.o auto_prefix.o auto_libexec.o auto_sysconfdir.o \
-		$(static_option) $(QMAILLIB) $(dynamic_option) \
+		read_assign.o $(static_option) $(QMAILLIB) $(dynamic_option) \
 		-L../libsrs2-x/libsrs2/.libs \
 		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib`; \
 	else \
@@ -1882,7 +1882,7 @@ dns.lib tls.lib gsasl.lib mysql_config
 		socket_v6any.o mail_acl.o auto_uids.o qregex_sql.o tablematch.o \
 		greylist.o auto_break.o indimail_stub.o load_mysql.o query_skt.o \
 		fn_handler.o tlsarralloc.o auto_prefix.o auto_libexec.o auto_sysconfdir.o \
-		-Wl,-Bstatic $(QMAILLIB) -Wl,-Bdynamic \
+		read_assign.o -Wl,-Bstatic $(QMAILLIB) -Wl,-Bdynamic \
 		-L../libsrs2-x/libsrs2/.libs \
 		`cat gsasl.lib socket.lib dns.lib tls.lib srs.lib` -ldl; \
 	fi
@@ -1897,7 +1897,7 @@ socket_v6any.o mail_acl.o spf.o dns.o auto_uids.o auto_qmail.o \
 qregex_sql.o tablematch.o greylist.o auto_assign.o qcount_dir.o \
 query_skt.o fn_handler.o tlsarralloc.o load_mysql.o srs.o \
 auto_sysconfdir.o auto_break.o auto_prefix.o auto_libexec.o \
-valid_hname.o socket.lib dns.lib tls.lib gsasl.lib srs.lib \
+read_assign.o valid_hname.o socket.lib dns.lib tls.lib gsasl.lib srs.lib \
 mysql_config conf-sql
 	./load qmail-smtpd smtpd.o rcpthosts.o recipients.o srs.o \
 	ip.o ipme.o ipalloc.o strsalloc.o control.o etrn.o atrn.o \
@@ -1908,8 +1908,8 @@ mysql_config conf-sql
 	indimail_stub.o qregex_sql.o tablematch.o greylist.o auto_break.o \
 	auto_control.o auto_assign.o query_skt.o fn_handler.o valid_hname.o \
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
-	auto_libexec.o parse_env.o $(static_option) $(QMAILLIB) \
-	-L../libsrs2-x/libsrs2/.libs \
+	read_assign.o auto_libexec.o parse_env.o \
+	$(static_option) $(QMAILLIB) -L../libsrs2-x/libsrs2/.libs \
 	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib srs.lib` \
 	-lcrypto -ldl
 
@@ -2458,12 +2458,16 @@ compile variables.c variables.h haveip6.h conf-ip
 	./compile variables.c
 
 etrn.o: compile etrn.c etrn.h rcpthosts.h control.h \
-indimail_stub.h variables.h auto_qmail.h auto_libexec.h
+indimail_stub.h variables.h auto_libexec.h
 	./compile etrn.c
 
 atrn.o: \
 compile atrn.c rcpthosts.h control.h auto_qmail.h auto_libexec.h
 	./compile atrn.c
+
+read_assign.o: \
+compile read_assign.c auto_assign.c read_assign.h
+	./compile read_assign.c
 
 ############### Begin queue-fix
 

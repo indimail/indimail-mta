@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.313 2023-12-03 15:24:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.314 2023-12-10 00:01:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.313 $";
+static char    *revision = "$Revision: 1.314 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -386,6 +386,10 @@ static int      sigsok = 0;
 static char    *sigsFn = 0;
 static int      sigsok_orig = 0;
 static stralloc sigs = { 0 };
+
+/*- atrnaccess */
+static int      atrnaccok = 0;
+static stralloc atrnaccess = { 0 };
 
 static char    *virus_desc;
 static int      bodyok = 0;
@@ -2246,11 +2250,11 @@ smtp_help(char *arg)
 	{
 	case ODMR_PORT:/*- RFC 2645 */
 		if (hasvirtual)
-			out("214 HELO EHLO AUTH ATRN HELP QUIT\r\n", NULL);
+			out("214 HELO EHLO AUTH ATRN ETRN HELP QUIT\r\n", NULL);
 		else { /*- since we don't have ATRN mechanism, behave like any other non-special port */
 			out("214 HELO EHLO RSET NOOP MAIL RCPT DATA ", NULL);
 			if (hostname && *hostname && childargs && *childargs)
-				out("AUTH ", NULL);
+				out("AUTH ATRN ", NULL);
 			out(no_vrfy ? "ETRN HELP QUIT\r\n" : "VRFY ETRN HELP QUIT\r\n", NULL);
 		}
 		break;
@@ -2588,6 +2592,9 @@ open_control_files1()
 		die_control("locals");
 	if (!constmap_init(&maplocals, locals.s, locals.len, 0))
 		die_nomem();
+
+	if ((atrnaccok = control_readfile(&atrnaccess, "atrnaccess", 0)) == -1)
+		die_control("atrnaccess");
 }
 
 /*
@@ -3200,27 +3207,16 @@ smtp_ehlo(char *arg)
 				out("\r\n", NULL);
 			}
 		}
-	}
-	if (hasvirtual) {
-		if (smtp_port != ODMR_PORT) {
-			out("250-PIPELINING\r\n", "250-8BITMIME\r\n", NULL);
-			if (databytes > 0) {
-				size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
-				out("250-SIZE ", size_buf, "\r\n", NULL);
-			}
-			if (smtp_port != SUBM_PORT)
-				out("250-ETRN\r\n", NULL);
-		} else
+		if (smtp_port == ODMR_PORT)
 			out("250-ATRN\r\n", NULL);
-	} else {
-		out("250-PIPELINING\r\n", "250-8BITMIME\r\n", NULL);
-		if (databytes > 0) {
-			size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
-			out("250-SIZE ", size_buf, "\r\n", NULL);
-		}
-		if (smtp_port != SUBM_PORT)
-			out("250-ETRN\r\n", NULL);
 	}
+	out("250-PIPELINING\r\n", "250-8BITMIME\r\n", NULL);
+	if (databytes > 0) {
+		size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
+		out("250-SIZE ", size_buf, "\r\n", NULL);
+	}
+	if (smtp_port != SUBM_PORT)
+		out("250-ETRN\r\n", NULL);
 #ifdef TLS
 	if (!ssl && env_get("STARTTLS")) {
 		stralloc        filename = { 0 };
@@ -6434,31 +6430,131 @@ smtp_etrn(char *arg)
 	return;
 }
 
-void
-smtp_atrn(char *arg)
+static stralloc a_user = {0}, domain = {0};
+
+/*
+ * check for atrnaddr in domain_list which is in csv format
+ * leading and trailing white spaces are handled
+ */
+int
+check_atrn_acc(char *atrnaddr, char *domain_list)
 {
-	char           *ptr, *domain_ptr, *user_tmp, *domain_tmp, *errstr;
-	int             i, end_flag, status, Reject = 0, Accept = 0;
-	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
-	static stralloc a_user = {0}, domain = {0};
+	char           *ptr1, *ptr2, *x;
+	int             i, c;
+
+	for (ptr2 = domain_list; isspace(*ptr2);ptr2++);
+	for (ptr1 = ptr2; *ptr1; ptr1++) {
+		if (*ptr1 == ',') {
+			*ptr1 = 0;
+			for (x = ptr1 - 1; x != domain_list && *x != ',' && isspace(*x); x--);
+			if (x != (ptr1 - 1)) {
+				c = *(x + 1);
+				*(x + 1) = 0;
+			} else
+				x = NULL;
+			if (!str_diff(atrnaddr, ptr2)) {
+				*ptr1 = ',';
+				if (x)
+					*(x + 1) = c;
+				return 1;
+			}
+			if (x)
+				*(x + 1) = c;
+			*ptr1 = ',';
+			ptr2 = ptr1 + 1;
+			while (isspace(*ptr2))
+				ptr2++;
+		}
+	}
+	i = str_len(ptr2);
+	for (x = ptr2 + i - 1; x != domain_list && *x != ',' && isspace(*x); x--);
+	if (x != (ptr2 + i - 1)) {
+		c = *(x + 1);
+		*(x + 1) = 0;
+	} else
+		x = NULL;
+	if (!str_diff(atrnaddr, ptr2)) {
+		if (x)
+			*(x + 1) = c;
+		return 1;
+	}
+	if (x)
+		*(x + 1) = c;
+	return 0;
+}
+
+void
+mta_access(char *atrnaddr, int *reject, int *temp)
+{
+	int             r, atpos, lcount, wildcard, len;
+	char           *ptr, *cptr, *errstr;
+
+	*reject = *temp = 1;
+	a_user.len = domain.len = 0;
+	atpos = str_rchr(remoteinfo, '@');
+	ptr = env_get("STRIP_DOMAIN");
+	if (ptr) {
+		if (remoteinfo[atpos]) {
+			if (!stralloc_copyb(&a_user, remoteinfo, atpos) ||
+					!stralloc_0(&a_user) ||
+					!stralloc_copyb(&domain, remoteinfo + atpos + 1, a_user.len - (atpos + 1)) ||
+					!stralloc_0(&a_user))
+				die_nomem();
+		} else
+		if (!stralloc_copyb(&a_user, remoteinfo, atpos) ||
+				!stralloc_0(&a_user))
+			die_nomem();
+	} else
+	if (!stralloc_copyb(&a_user, remoteinfo, atpos) ||
+			!stralloc_0(&a_user))
+		die_nomem();
+	a_user.len--;
+	for (lcount = len = 0, ptr = atrnaccess.s; len < atrnaccess.len;) {
+		len += (str_len(ptr) + 1);
+		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
+		if (*cptr == ':')
+			*cptr = 0;
+		else {
+			ptr = atrnaccess.s + len;
+			continue;
+		}
+		if (!*ptr)
+			wildcard = 1;
+		else
+			wildcard = 0;
+		if (wildcard) {
+			*reject = *temp = 0;
+			return;
+		}
+		if ((r = do_match(qregex, a_user.s, ptr, &errstr)) > 0) {
+			if (check_atrn_acc(atrnaddr, cptr + 1) == 1) {
+				*reject = *temp = 0;
+				return;
+			}
+		} else
+		if (r == -1) {
+			*reject = *temp = 1;
+			return;
+		}
+		ptr = atrnaccess.s + len;
+		lcount++;
+	}
+	*reject = 1;
+	*temp = 0;
+	return;
+}
+
+void
+indimail_virt_access(char *arg, char **dptr, int *reject, int *temp)
+{
+	char           *ptr, *errstr, *user_tmp, *domain_tmp;
+	int             r, end_flag;
 	void            (*iclose) (void);
 	char           *(*show_atrn_map) (char **, char **);
 	int             (*atrn_access) (char *, char *);
 	int             (*parse_email) (char *, stralloc *, stralloc *);
 
-	if (!authd) {
-		err_authrequired();
-		return;
-	}
-	if (!seenhelo) {
-		out("503 Polite people say hello first (#5.5.4)\r\n", NULL);
-		flush();
-		return;
-	}
-	if (seenmail) {
-		err_transaction("ATRN");
-		return;
-	}
+	*reject = *temp = 1;
 	if (!(ptr = load_virtual()))
 		return;
 	if (!(iclose = getlibObject(ptr, &phandle, "iclose", &errstr))) {
@@ -6476,8 +6572,8 @@ smtp_atrn(char *arg)
 	domBuf.len = 0;
 	for (; *arg && !isalnum((int) *arg); arg++);
 	if (*arg)
-		domain_ptr = arg;
-	else {
+		*dptr = arg;
+	else { /*- this is actually not yet implemented */
 		if (!(parse_email = getlibObject(ptr, &phandle, "parse_email", &errstr))) {
 			err_library(errstr);
 			return;
@@ -6497,27 +6593,57 @@ smtp_atrn(char *arg)
 				die_nomem();
 			}
 			end_flag = 1;
-		}
+		} /*- for (user_tmp = a_user.s, domain_tmp = domain.s, end_flag = 0;;) */
 		if (!stralloc_0(&domBuf)) {
 			(*iclose) ();
 			die_nomem();
 		}
-		domain_ptr = domBuf.s;
+		*dptr = domBuf.s;
 	}
-	if (!valid_hname(domain_ptr)) {
+	if (!valid_hname(*dptr)) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
+		flush();
+		*temp = 0;
+		return;
+	}
+	if ((r = (*atrn_access) (remoteinfo, *dptr)))
+		*reject = 1;
+	if (r == -1)
+		*temp = 1;
+	if (!r)
+		*reject = *temp = 0;
+	(*iclose) ();
+}
+
+void
+smtp_atrn(char *arg)
+{
+	char           *domain_ptr;
+	int             i, status, reject = 0, temp = 0;
+	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
+
+	if (!authd) {
+		err_authrequired();
+		return;
+	}
+	if (!seenhelo) {
+		out("503 Polite people say hello first (#5.5.4)\r\n", NULL);
 		flush();
 		return;
 	}
-	if ((*atrn_access) (remoteinfo, domain_ptr))
-		Reject = 1;
-	else
-		Accept = 1;
-	(*iclose) ();
-	if (Reject) {
+	if (seenmail) {
+		err_transaction("ATRN");
+		return;
+	}
+	if (!hasvirtual) {
+		domain_ptr = arg;
+		mta_access(arg, &reject, &temp);
+	} else
+		indimail_virt_access(arg, &domain_ptr, &reject, &temp);
+	if (reject) {
 		log_atrn(remoteinfo, domain_ptr, "ATRN Rejected");
-		if (Accept)
-			out("451 atrn service unavailable (#5.7.1)\r\n", NULL);
+		if (temp)
+			out("453 atrn service unavailable (#4.7.1)\r\n", NULL);
 		else
 			out("553 atrn service unavailable (#5.7.1)\r\n", NULL);
 		flush();
@@ -6933,7 +7059,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 {
 	char           *ptr, *errstr;
 	struct commands *cmdptr;
-	int             i;
+	int             i, port;
 #ifdef SMTP_PLUGIN
 	int             j, len;
 	char           *start_plugin, *plugin_symb, *plugindir;
@@ -6956,6 +7082,11 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		scan_int(ptr, &smtp_port);
 	else
 		smtp_port = -1;
+	port = smtp_port;
+	if ((ptr = env_get("ODMR"))) {/*- support ODMR on port 25 */
+		if (smtp_port != SUBM_PORT)
+			smtp_port = ODMR_PORT;
+	}
 	if (smtp_port == ODMR_PORT && (!hostname || !*hostname || !childargs || !*childargs)) {
 		if (!env_put2("SHUTDOWN", ""))
 			die_nomem();
@@ -7051,7 +7182,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	switch (smtp_port)
 	{
 	case ODMR_PORT:/*- RFC 2645 */
-		cmdptr = odmrcommands;
+		cmdptr = (port == ODMR_PORT) ? odmrcommands : smtpcommands;
 		break;
 	case SUBM_PORT:/*- RFC 2476 */
 		cmdptr = submcommands;
@@ -7201,6 +7332,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.314  2023-12-10 00:01:14+05:30  Cprogrammer
+ * allow ODMR protocol on none ODMR ports
+ * use atrnaccess control file for local users to access atrn domains
+ *
  * Revision 1.313  2023-12-03 15:24:26+05:30  Cprogrammer
  * refactored ETRN, ATRN code
  *
@@ -7598,7 +7733,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.313 2023-12-03 15:24:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.314 2023-12-10 00:01:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

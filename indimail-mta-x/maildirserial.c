@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.21  2023-12-08 13:16:37+05:30  Cprogrammer
+ * removed use of my_puts(), put() functions
+ *
  * Revision 1.20  2023-10-05 22:29:04+05:30  Cprogrammer
  * updated coding style
  *
@@ -149,18 +152,6 @@ readcontrols()
 		die_nomem();
 }
 
-void
-put(char *buffer, int len)
-{
-	qmail_put(&qq, buffer, len);
-}
-
-void
-my_puts(char *buffer)
-{
-	qmail_puts(&qq, buffer);
-}
-
 int
 bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must not contain \n\n */
 {
@@ -182,6 +173,7 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 		return -3;
 	if (!stralloc_0(&sender))
 		die_nomem();
+	sender.len--;
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
 	if (!match ||
@@ -208,69 +200,71 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 	date.known = 1;
 	if (!mess822_date(&datestr, &date))
 		die_nomem();
-	my_puts("Date: ");
-	put(datestr.s, datestr.len);
-	my_puts("\n");
-	my_puts("From: ");
+	qmail_put(&qq, "Date: ", 6);
+	qmail_put(&qq, datestr.s, datestr.len);
+	qmail_put(&qq, "\n", 1);
+	qmail_put(&qq, "From: ", 6);
 	if (!quote(&quoted, config_data(&bouncefrom)))
 		die_nomem();
-	put(quoted.s, quoted.len);
-	my_puts("@");
-	put(config_data(&bouncehost)->s, config_data(&bouncehost)->len);
-	my_puts("\nTo: ");
+	qmail_put(&qq, quoted.s, quoted.len);
+	qmail_put(&qq, "@", 1);
+	qmail_put(&qq, config_data(&bouncehost)->s, config_data(&bouncehost)->len);
+	qmail_put(&qq, "\nTo: ", 5);
 	if (!quote2(&quoted, bouncerecip))
 		die_nomem();
-	put(quoted.s, quoted.len);
+	qmail_put(&qq, quoted.s, quoted.len);
 #ifdef MIME
 	/* MIME header with boundary */
-	my_puts("\nMIME-Version: 1.0\n"
-			"Content-Type: multipart/mixed; "
-			"boundary=\"");
+	qmail_put(&qq, "\nMIME-Version: 1.0\n" /* 19 */
+			"Content-Type: multipart/mixed; " /* 31 */
+			"boundary=\"", 60); /* 10 */
 	if (!stralloc_copyb(&boundary, num, fmt_ulong(num, datetai.x)) ||
 			!stralloc_cats(&boundary, ".qp_") ||
 			!stralloc_catb(&boundary, num, fmt_ulong(num, qp)) ||
 			!stralloc_cats(&boundary, ".KUI@") ||
 			!stralloc_cats(&boundary, config_data(&bouncehost)->s))
 		die_nomem();
-	put(boundary.s, boundary.len);
-	my_puts("\"");
-	my_puts("\nSubject: failure notice\n\n--");
-	put(boundary.s, boundary.len);	/* def type is text/plain */
+	qmail_put(&qq, boundary.s, boundary.len);
+	qmail_put(&qq, "\"", 1);
+	qmail_put(&qq, "\nSubject: failure notice\n\n--", 28);
+	qmail_put(&qq, boundary.s, boundary.len);	/* def type is text/plain */
 #else
-	my_puts("\nSubject: failure notice");
+	qmail_put(&qq, "\nSubject: failure notice", 24);
 #endif
-	my_puts("\n\n");
-	my_puts("Hi. This is the maildirbounce program at ");
-	put(config_data(&bouncehost)->s, config_data(&bouncehost)->len);
-	my_puts(".\n");
-	my_puts(*sender.s ?
-		"I'm afraid I wasn't able to deliver your message to the following address.\n"
-		"This is a permanent error; I've given up. Sorry it didn't work out.\n\n"
+	qmail_put(&qq, "\n\n", 2);
+	qmail_put(&qq, "Hi. This is the maildirbounce program at ", 41);
+	qmail_put(&qq, config_data(&bouncehost)->s, config_data(&bouncehost)->len);
+	qmail_put(&qq, ".\n", 2);
+	qmail_put(&qq, sender.len ?
+		"I'm afraid I wasn't able to deliver your message to the following address.\n" /*- 75 */
+		"This is a permanent error; I've given up. Sorry it didn't work out.\n\n" /* 69 */
 		:
-		"I tried to deliver a bounce message to this address, but the bounce bounced!\n\n"
-	);
-	my_puts("<");
+		"I tried to deliver a bounce message to this address, but the bounce bounced!\n\n" /* 78 */
+	, sender.len ? 144 : 78);
+	qmail_put(&qq, "<", 1);
 	if (stralloc_starts(&recipient, prefix))
-		put(recipient.s + str_len(prefix), recipient.len - str_len(prefix));
+		qmail_put(&qq, recipient.s + str_len(prefix), recipient.len - str_len(prefix));
 	else
-		put(recipient.s, recipient.len);
-	my_puts(">:\n");
-	put(why->s, why->len);
+		qmail_put(&qq, recipient.s, recipient.len);
+	qmail_put(&qq, ">:\n", 3);
+	qmail_put(&qq, why->s, why->len);
 	if (_flagtimeout)
-		my_puts("This message is too old. Giving up.\n");
-	my_puts("\n");
+		qmail_put(&qq, "This message is too old. Giving up.\n", 36);
+	qmail_put(&qq, "\n", 1);
 #ifdef MIME
-	my_puts(*sender.s ? "--- Enclosed is a copy of the message.\n\n--" : "--- Enclosed is the original bounce.\n\n--");
-	put(boundary.s,boundary.len);	/* enclosure boundary */
-	my_puts("\nContent-Type: message/rfc822\n\n");
+	qmail_put(&qq, sender.len ? "--- Enclosed is a copy of the message.\n\n--" : "--- Enclosed is the original bounce.\n\n--",
+			sender.len ? 42 : 40);
+	qmail_put(&qq, boundary.s,boundary.len);	/* enclosure boundary */
+	qmail_put(&qq, "\nContent-Type: message/rfc822\n\n", 31);
 #else
-	my_puts(*sender.s ? "--- Below this line is a copy of the message.\n\n" : "--- Below this line is the original bounce.\n\n");
+	qmail_put(&qq, sender.len ? "--- Below this line is a copy of the message.\n\n" : "--- Below this line is the original bounce.\n\n",
+			sender.len ? 47: 45);
 #endif
-	my_puts("Return-Path: <");
+	qmail_put(&qq, "Return-Path: <", 14);
 	if (!quote2(&quoted, sender.s))
 		die_nomem();
-	put(quoted.s, quoted.len);
-	my_puts(">\n");
+	qmail_put(&qq, quoted.s, quoted.len);
+	qmail_put(&qq, ">\n", 2);
 	for (;;) {
 		n = substdio_feed(&ssmess);
 		if (n < 0)
@@ -278,13 +272,13 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 		if (!n)
 			break;
 		x = substdio_PEEK(&ssmess);
-		put(x, n);
+		qmail_put(&qq, x, n);
 		substdio_SEEK(&ssmess, n);
 	}
 #ifdef MIME
-	my_puts("\n--"); /* end boundary */
-	put(boundary.s,boundary.len);
-	my_puts("--\n");
+	qmail_put(&qq, "\n--", 3); /* end boundary */
+	qmail_put(&qq, boundary.s,boundary.len);
+	qmail_put(&qq, "--\n", 3);
 #endif
 	qmail_from(&qq, bouncesender);
 	qmail_to(&qq, bouncerecip);
@@ -552,13 +546,16 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.20 2023-10-05 22:29:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildirserial.c,v 1.21 2023-12-08 13:16:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.21  2023-12-08 13:16:37+05:30  Cprogrammer
+ * removed use of my_puts(), put() functions
+ *
  * Revision 1.20  2023-10-05 22:29:04+05:30  Cprogrammer
  * updated coding style
  *

@@ -429,13 +429,26 @@ solution.
 
 The ATRN command uses On-Demand Mail Relay (ODMR), which is a profile of
 SMTP [SMTP, ESMTP], provides a secure, extensible, easy to implement
-approach to the problem. For ATRN, access is granted to domains for a user
-(specified by an email address). This is done through the \fBvatrn\fR
-command. The client has to use SMTP authentication. To setup ODMR, setup
-\fBqmail-smtpd\fR to on port 366 without any delivery queue. ODMR uses
-\fBmaildirserial\fR(1) and \fBserialsmtp\fR(1) to act as an SMTP client.
-\fBqmail-smtpd\fR(8) running on port 366 dups descriptor 0 to 6 and
-descriptor 1 to 7 for \fBserialsmtp\fR(1) to work.
+approach to the problem. To setup ODMR, setup \fBqmail-smtpd\fR to listen
+on port 366 without any delivery queue. ODMR uses \fBmaildirserial\fR(1)
+and \fBserialsmtp\fR(1) to act as an SMTP client. \fBqmail-smtpd\fR(8)
+running on port 366 dups descriptor 0 to 6 and descriptor 1 to 7 for
+\fBserialsmtp\fR(1) to work.
+
+For ATRN, access is granted to domains to a user that can perform SMTP
+authentication. There are two ways to allow access to ATRN domains to a
+user. For local users (those that are in the local authentcation database
+like \fBpasswd\fR(5), \fBshadow\fR(5), one has to use the \fIatrnaccess\fR
+control file. The format of this file is
+
+.EX
+user1:atrn1_domain, atrn5_domain, atrn7_domain, ...
+user2:atrn2_domain, atrn3_domain, atrn3_domain, ...
+user3:atrn4_domain, atrn6_domain,...
+.EE
+
+For users in indimail's MySQL database, you can use the \fBvatrn\fR(1)
+command to configure access.
 
 ETRN/AUTOTURN/ATRN command is enabled only for domains listed in the
 control file \fBetrnhosts\fR.

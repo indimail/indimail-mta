@@ -1,5 +1,5 @@
 /*
- * $Id: atrn.c,v 1.9 2023-12-03 14:58:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: atrn.c,v 1.10 2023-12-09 11:41:22+05:30 Cprogrammer Exp mbhangui $
  */
 #include <case.h>
 #include <sig.h>
@@ -16,21 +16,21 @@
 #include <unistd.h>
 #include "rcpthosts.h"
 #include "control.h"
-#include "auto_qmail.h"
 #include "auto_libexec.h"
+#include "read_assign.h"
 
-int             err_child();
-void            die_nomem();
-void            die_control();
+extern int      err_child();
+extern void     die_nomem();
+extern void     die_control();
 
-static char    *binatrnargs[4] = { 0, 0, 0, 0 };
-static stralloc atrn, lockfile;
+static char    *binatrnargs[5] = { 0, 0, 0, 0, (char *) 0 };
+static stralloc atrn, atrndir, lockfile;
 
 int
 atrn_queue(char *arg, char *remoteip)
 {
 	int             child, flagatrn, len, exitcode, wstat, end_flag, fd;
-	char           *cptr, *domain_ptr;
+	char           *cptr, *domain_ptr, *dir;
 	char            strnum[FMT_ULONG];
 	static int      flagrcpt = 1;
 	struct constmap mapatrn;
@@ -63,10 +63,16 @@ atrn_queue(char *arg, char *remoteip)
 			domain_ptr = cptr + 1;
 		}
 	}
-	if (!stralloc_copys(&lockfile, auto_qmail) ||
-			!stralloc_catb(&lockfile, "/autoturn/", 10) ||
-			!stralloc_cats(&lockfile, arg) ||
-			!stralloc_catb(&lockfile, "/seriallock", 12) ||
+	if (!(dir = read_assign("autoturn", NULL, NULL, NULL)))
+		return -2;
+	if (!stralloc_copys(&atrndir, dir) ||
+			!stralloc_append(&atrndir, "/") ||
+			!stralloc_cats(&atrndir, arg) ||
+			!stralloc_0(&atrndir))
+		die_nomem();
+	atrndir.len--;
+	if (!stralloc_copy(&lockfile, &atrndir) ||
+			!stralloc_catb(&lockfile, "/seriallock", 11) ||
 			!stralloc_0(&lockfile))
 		die_nomem();
 	if ((fd = open_append(lockfile.s)) == -1)
@@ -97,7 +103,8 @@ atrn_queue(char *arg, char *remoteip)
 			strerr_die1x(111, "atrn: fatal: out of memory");
 		binatrnargs[0] = bin.s;
 		binatrnargs[1] = arg;
-		binatrnargs[2] = remoteip;
+		binatrnargs[2] = dir;
+		binatrnargs[3] = atrndir.s;
 		execv(*binatrnargs, binatrnargs);
 		_exit(1);
 	}
@@ -117,13 +124,17 @@ atrn_queue(char *arg, char *remoteip)
 void
 getversion_atrn_c()
 {
-	static char    *x = "$Id: atrn.c,v 1.9 2023-12-03 14:58:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: atrn.c,v 1.10 2023-12-09 11:41:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: atrn.c,v $
+ * Revision 1.10  2023-12-09 11:41:22+05:30  Cprogrammer
+ * use users/cdb to get autoturn director
+ * pass etrn/atrn argument, autoturn dir and domain dir as arguments to libexec/etrn, libexec/atrn
+ *
  * Revision 1.9  2023-12-03 14:58:12+05:30  Cprogrammer
  * lock dir/seriallock instead of doing it in atrn script
  *

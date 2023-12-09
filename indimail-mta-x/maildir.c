@@ -1,5 +1,8 @@
 /*
  * $Log: maildir.c,v $
+ * Revision 1.9  2023-12-09 11:48:23+05:30  Cprogrammer
+ * skip non-regular to prevent breaking maildirserial
+ *
  * Revision 1.8  2023-10-05 22:25:03+05:30  Cprogrammer
  * updated coding style
  *
@@ -78,6 +81,11 @@ append(prioq *pq, stralloc *filenames, char *subdir, datetime_sec my_time)
 				!stralloc_0(filenames))
 			break;
 		if (stat(filenames->s + pos, &st) == 0) {
+			if (!S_ISREG(st.st_mode)) { /* a directory in new, cur is enough to break maildirserial */
+				strerr_warn3("warning: ", filenames->s + pos, ": not a regular file", 0);
+				filenames->len = pos; /*- remove current entry */
+				continue;
+			}
 			if (st.st_mtime < my_time) { /*- don't want to mix up the order */
 				/* 
 				 * this also means that when maildirserial is called
@@ -118,13 +126,16 @@ maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 void
 getversion_maildir_c()
 {
-	static char    *x = "$Id: maildir.c,v 1.8 2023-10-05 22:25:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir.c,v 1.9 2023-12-09 11:48:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: maildir.c,v $
+ * Revision 1.9  2023-12-09 11:48:23+05:30  Cprogrammer
+ * skip non-regular to prevent breaking maildirserial
+ *
  * Revision 1.8  2023-10-05 22:25:03+05:30  Cprogrammer
  * updated coding style
  *
