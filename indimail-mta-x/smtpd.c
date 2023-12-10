@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.314 2023-12-10 00:01:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.315 2023-12-10 23:34:26+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.314 $";
+static char    *revision = "$Revision: 1.315 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -3400,6 +3400,13 @@ domain_compare(char *dom1, char *dom2)
 	char           *ptr, *tmpdom1, *tmpdom2, *errstr;
 	void           *(*inquery) (char, char *, char *);
 
+	if (!hasvirtual) {
+		if (str_diff(dom1, dom2)) {
+			err_nogateway(mailfrom.s, 0, 2);
+			return 1;
+		}
+		return 0;
+	}
 	if (!(ptr = load_virtual()))
 		return -1;
 	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
@@ -3575,7 +3582,8 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 			flush();
 			return 1;
 		}
-	} else {
+	} else
+	if (lib_fn) {
 		if (!(pw = (*inquery) (PWD_QUERY, t_addr.s, 0))) {
 			if (!(u_not_found = (int *) getlibObject(lib_fn, &phandle, "userNotFound", &x))) {
 				err_library(x);
@@ -3613,7 +3621,14 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 				return 1;
 			}
 		}
-	} /* if (in_rcpthosts) */
+	} else { /* if (in_rcpthosts) */
+			logerr(1, "CHECKSENDER: SMTP Access denied to <", t_addr.s, ">: user not local\n", NULL);
+			logflush();
+			sleep(5); /*- Prevent DOS */
+			out("553 authorization failure (#5.7.1)\r\n", NULL);
+			flush();
+			return 1;
+	}
 	/*-
 	 * ANTISPOOFING
 	 * Delivery to local domains
@@ -3937,24 +3952,26 @@ smtp_mail(char *arg)
 			return;
 		}
 	} /*- if (env_get("CUGMAIL")) */
-	if (!hasvirtual)
-		goto nohasvirtual;
-	if (!(ptr = load_virtual()))
-		return;
-	else
-	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &x))) {
-		err_library(x);
-		return;
-	}
 	if (in_rcpt1 == -1)
 		in_rcpt1 = addrallowed(addr.s);
 	if (authenticated || authd)
 		in_rcpt2 = addrallowed(remoteinfo); /*- for the authenticated user */
+	if (hasvirtual) {
+		if (!(ptr = load_virtual()))
+			return;
+		else
+		if (!(inquery = getlibObject(ptr, &phandle, "inquery", &x))) {
+			err_library(x);
+			return;
+		}
+	} else {
+		ptr = NULL;
+		inquery = NULL;
+	}
 	if ((in_rcpt1 == 1 || in_rcpt2 == 1) && (x = env_get("CHECKSENDER"))) {
 		if (check_sender(inquery, ptr, in_rcpt1, in_rcpt2))
 			return;
 	}
-nohasvirtual:
 #ifdef USE_SPF
 	flagbarfspf = 0;
 	if (spfbehavior && !relayclient) {
@@ -7332,6 +7349,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.315  2023-12-10 23:34:26+05:30  Cprogrammer
+ * allow CHECKSENDER to work for local users without virtualdomains loaded
+ *
  * Revision 1.314  2023-12-10 00:01:14+05:30  Cprogrammer
  * allow ODMR protocol on none ODMR ports
  * use atrnaccess control file for local users to access atrn domains
@@ -7733,7 +7753,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.314 2023-12-10 00:01:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.315 2023-12-10 23:34:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
