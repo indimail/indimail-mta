@@ -1,0 +1,39 @@
+.\" vim: tw=75
+.TH printass 1
+
+.SH NAME
+printass \- print users/assign, users/cdb entries
+
+.SH SYNOPSIS
+\fBprintass\fR [ \fB\-dug\fR ] [ \fIuser\fR \fIuser\fR ... ]
+
+.SH DESCRIPTION
+\fBprintass\fR prints entries from \fI@sysconfdir@/users/assign\fR file or
+\fI@sysconfdir@/users/cdb\fR binary cdb file. If \fIuser\fR argument is not
+given, it prints all entries from users/assign file. If \fIuser\fR argument
+is given, it prints entries from \fI@sysconfdir@/users/cdb\fR for all user
+arguments passed on the command line.
+
+Without the d, u and g arguments, \fBprintass\fR prints the directory, uid
+and gid for the \fIuser\fR. The options can be used to print only the
+directory the uid, the gid or combination of directory, uid, gid entries.
+
+\fBprintass\fR exits 111 in case of error, else it exits 0. It can be used
+in scripts to automate processing of users, domains configured in
+users/assign file.
+
+.SH OPTIONS
+.TP 3
+\fB\-d\fR
+Display the directory.
+
+.TP 3
+\fB\-u\fR
+Display the uid.
+
+.TP 3
+\fB\-g\fR
+Display the gid.
+
+.SH SEE ALSO
+qmail-users(5)

@@ -33,7 +33,7 @@ read_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 {
 	int             fd;
 	uint32_t        dlen, i;
-	char           *s, *ptr, *cdbdir, *tmpstr, *tmpbuf;
+	char           *s, *ptr, *cdbdir, *cdbkey, *tmpbuf;
 
 	if (!domain || !*domain)
 		return ((char *) 0);
@@ -51,12 +51,12 @@ read_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 			!stralloc_0(&cdbfilename))
 		die_nomem();
 	i = in_dir.len;
-#define FAILURE {if (uid) *uid = -1; if (gid) *gid = -1; if (dir) dir->len = 0; if (tmpstr) alloc_free(tmpstr);}
-	if (!(tmpstr = alloc(sizeof(char ) * (i + 3)))) {
+#define FAILURE {if (uid) *uid = -1; if (gid) *gid = -1; if (dir) dir->len = 0; if (cdbkey) alloc_free(cdbkey);}
+	if (!(cdbkey = alloc(sizeof(char ) * (i + 3)))) {
 		FAILURE
 		return ((char *) 0);
 	}
-	s = tmpstr;
+	s = cdbkey;
 	s += fmt_strn(s, "!", 1);
 	s += fmt_strn(s, in_dir.s, i);
 	s += fmt_strn(s, "-", 1);
@@ -65,13 +65,13 @@ read_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		FAILURE
 		return ((char *) 0);
 	}
-	if ((i = cdb_seek(fd, tmpstr, in_dir.len + 2, &dlen)) == 1) {
+	if ((i = cdb_seek(fd, cdbkey, in_dir.len + 2, &dlen)) == 1) {
 		if (!(tmpbuf = (char *) alloc(dlen + 1))) {
 			close(fd);
 			FAILURE
 			return ((char *) 0);
 		}
-		alloc_free(tmpstr);
+		alloc_free(cdbkey);
 		i = read(fd, tmpbuf, dlen);
 		tmpbuf[dlen] = 0;
 		for (ptr = tmpbuf; *ptr; ptr++);

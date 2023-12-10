@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.393 2023-12-05 22:07:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.394 2023-12-10 10:28:00+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -561,6 +561,7 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/bin/setmaillist
 %attr(755,root,root)                    %{_prefix}/bin/qmail-showctl
 %attr(755,root,root)                    %{_prefix}/bin/822headerok
+%attr(755,root,root)                    %{_prefix}/bin/printass
 %attr(755,root,root)                    %{_prefix}/bin/printforward
 %attr(755,root,root)                    %{_prefix}/bin/preline
 %attr(755,root,root)                    %{_prefix}/bin/822addr

@@ -71,6 +71,7 @@ f:::0755:/bin/:replier:replier
 f:::0755:/bin/:replier-config:replier-config
 f:::0755:/bin/:dot-forward:dot-forward
 f:::0755:/bin/:fastforward:fastforward
+f:::0755:/bin/:printass:printass
 f:::0755:/bin/:printforward:printforward
 f:::0755:/bin/:setforward:setforward
 f:::0755:/bin/:inewaliases:inewaliases

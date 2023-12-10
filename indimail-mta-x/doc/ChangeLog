@@ -87,6 +87,8 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 54. serialsmtp: fix skip SMTP QUIT when three args are provided
 55. smtpd.c: allow ODMR protocol on none ODMR ports
 56. smtpd.c: use atrnaccess control file for local users to access atrn domains
+- 10/12/2023
+57. printass.c: added program to print entries from users/assign, users/cdb
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

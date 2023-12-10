@@ -35,10 +35,10 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
 	mailsubj make-recipients mbox2maildir mini-smtpd multirotate \
 	newinclude new-inject nowutc ofmipd ofmipname parsedate plugtest \
-	predate preline printforward printmaillist proc proc+df qaes qarf \
-	qbase64 qdane qfrontend qf-log-subject qf-smtp-ratelimit qmail-cat \
-	qmail-cdb qmail-clean qmailconfig qmail-daned qmail-direct qtop \
-	qmaildirmake qmaildirwatch qmail-dkim qmail-getpw qmail-greyd \
+	predate preline printass printforward printmaillist proc proc+df \
+	qaes qarf qbase64 qdane qfrontend qf-log-subject qf-smtp-ratelimit \
+	qmail-cat qmail-cdb qmail-clean qmailconfig qmail-daned qmail-direct \
+	qtop qmaildirmake qmaildirwatch qmail-dkim qmail-getpw qmail-greyd \
 	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newu \
 	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
 	qmail-qmqpc qmail-qmqpd qmail-qmtpd qmail-qread qmail-queue \
@@ -57,18 +57,18 @@ man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.5 filterit.1 forward.1 maildirserial.1 mlmatchup.8 \
-	multi-queue.7 new-inject.1 plugin_init.3 plugtest.1 predate.1 qarf.1 \
-	qfrontend.1 qmail-cdb.8 qmail-clean.8 indimail-control.5 qmail-daned.8 \
-	qtop.1 qmail-direct.8 qmail-dkim.8 qmail-getpw.8 qmail-inject.8 \
-	qmail-limits.7 qmail-local.8 qmail-multi.8 qmonitor.8 indimail-mta.7 \
-	qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 qmail-qread.8 sslerator.8 \
-	qmail-queue-clients.7 qmail-queue.8 qmail-remote.8 qmail-rm.1 \
-	qmail-send.8 qmail-showctl.8 qmail-smtpd.8 qmail-spamfilter.8 \
-	indimail-srs.5 qmail-start.8 todo-proc.8 qmail-users.5 qmta-send.8 \
-	qnotify.1 qreceipt.1 qscanq.8 queue-fix.8 replier.1 make-recipients.1 \
-	test-recipients.1 rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 \
-	slowq-start.8 spawn-filter.8 surblfilter.8 svctool.8 dnstlsarr.1 \
-	indimail-services.7
+	multi-queue.7 new-inject.1 plugin_init.3 plugtest.1 predate.1 \
+	printass.1 qarf.1 qfrontend.1 qmail-cdb.8 qmail-clean.8 \
+	indimail-control.5 qmail-daned.8 qtop.1 qmail-direct.8 qmail-dkim.8 \
+	qmail-getpw.8 qmail-inject.8 qmail-limits.7 qmail-local.8 qmail-multi.8 \
+	qmonitor.8 indimail-mta.7 qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 \
+	qmail-qread.8 sslerator.8 qmail-queue-clients.7 qmail-queue.8 \
+	qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 qmail-smtpd.8 \
+	qmail-spamfilter.8 indimail-srs.5 qmail-start.8 todo-proc.8 \
+	qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
+	queue-fix.8 replier.1 make-recipients.1 test-recipients.1 \
+	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 \
+	spawn-filter.8 surblfilter.8 svctool.8 dnstlsarr.1 indimail-services.7
 
 include Makefile.$(SYSTEM)
 
@@ -2458,11 +2458,12 @@ compile variables.c variables.h haveip6.h conf-ip
 	./compile variables.c
 
 etrn.o: compile etrn.c etrn.h rcpthosts.h control.h \
-indimail_stub.h variables.h auto_libexec.h
+indimail_stub.h variables.h auto_libexec.h read_assign.h
 	./compile etrn.c
 
 atrn.o: \
-compile atrn.c rcpthosts.h control.h auto_qmail.h auto_libexec.h
+compile atrn.c rcpthosts.h control.h auto_qmail.h \
+auto_libexec.h read_assign.h
 	./compile atrn.c
 
 read_assign.o: \
@@ -3922,7 +3923,19 @@ rd-remote: \
 load rd-remote.o control.o variables.o auto_control.o auto_prefix.o \
 do_match.o quote.o
 	./load rd-remote control.o variables.o auto_control.o auto_prefix.o \
-	wildmat.o do_match.o quote.o -lqmail
+	wildmat.o do_match.o quote.o $(QMAILLIB)
+
+printass.o: \
+compile printass.c read_assign.h auto_assign.h
+	./compile printass.c
+
+printass: \
+load printass.o read_assign.o auto_assign.o
+	./load printass read_assign.o auto_assign.o $(QMAILLIB)
+
+printass.1: \
+printass.9 conf-sysconfdir
+	$(edit) printass.9 >$@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \
