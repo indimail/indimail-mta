@@ -167,7 +167,7 @@ qmail_from(struct qmail *qq, char *s)
 }
 
 void
-qmail_to(struct qmail *qq, char * s)
+qmail_to(struct qmail *qq, char *s)
 {
 	qmail_put(qq, "T", 1);
 	qmail_puts(qq, s);
