@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.54 2023-12-11 00:17:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.55 2023-12-11 18:49:43+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -767,8 +767,10 @@ test_domainqueue()
 
 	(
 	echo
-	echo "Testing domainqueue"
+	echo "$$: Testing SMTP domainqueue"
 	) > $tmpdir/mail.txt
+
+	# Test SMTP domainqueue
 	swaks -S --data - --to $user@$ext_domain --from $user@$HOSTNAME --server 127.0.0.1 \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" \
 		< $tmpdir/mail.txt >$tmpdir/swaks.$$
@@ -782,12 +784,11 @@ test_domainqueue()
 	else
 		body=""
 	fi
-	sudo kill $send_pid2
-	if [ "$body" = "Testing domainqueue" -a $ret -eq 0 ] ; then
+	if [ "$body" = "$$: Testing SMTP domainqueue" -a $ret -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing SMTP domainqueue succeeded %67s [%.4f sec]\n" " " $secs
+		printf "\r  testing SMTP         domainqueue succeeded %59s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		echo "body=[$body], ret=$ret"
@@ -806,6 +807,48 @@ test_domainqueue()
 		echo "qmail-send.log"
 		echo $logdir/qmail-send/qmail-send.log
 		) |less
+		/bin/rm -f $cntrldir/domainqueue $cntrldir/smtproutes
+		sudo kill $send_pid2
+		failed=1
+		exit 1
+	fi
+
+	# Test qmail-inject domainqueue
+	/bin/rm -rf $testdir/variables
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo $qmail_queue   > $testdir/variables/QMAILQUEUE
+	do_qmail_inject "$user@$HOSTNAME" "$user@$ext_domain" "Testing qmail-inject domainqueue" "$$: Testing qmail-inject domainqueue"
+	t1=$(date +"%s.%4N")
+	check_mail $testdir/$testuser/Maildir 1 2>/dev/null
+	ret=$?
+	if [ -n "$mail_file" ] ; then
+		body=$($e822body < $testdir/$testuser/Maildir/new/$mail_file)
+		/bin/rm -f $testdir/$testuser/Maildir/new/$mail_file
+	else
+		body=""
+	fi
+	sudo kill $send_pid2
+	if [ "$body" = "$$: Testing qmail-inject domainqueue" -a $ret -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-inject domainqueue succeeded %59s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		echo "body=[$body], ret=$ret"
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		printf "\r%118s\n" " "
+		echo "  testing qmail-inject domainqueue failed [$secs sec]"
+		(
+		echo "qmail-send.log"
+		echo $logdir/qmail-send/qmail-send.log
+		) |less
+		/bin/rm -f $cntrldir/domainqueue $cntrldir/smtproutes
 		failed=1
 		exit 1
 	fi
@@ -4461,7 +4504,7 @@ test_srs()
 
 test_alias()
 {
-	for alias in root mailer-daemon bumblebee
+	for alias in bumblebee mailer-daemon root
 	do
 		t1=$(date +"%s.%4N")
 		if [ "$alias" = "root" ] ; then
@@ -4514,9 +4557,9 @@ test_alias()
 			secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 			tcount=$(expr $tcount + 1)
 			if [ "$alias" = "bumblebee" ] ; then
-				printf "\r  testing non-existing alias for %-13s succeeded %47s [%.4f sec]\n" $alias " " $secs
+				printf "\r  testing non-existing alias    for %13s succeeded %44s [%.4f sec]\n" $alias " " $secs
 			else
-				printf "\r  testing existing alias for %-13s succeeded %51s [%.4f sec]\n" $alias " " $secs
+				printf "\r  testing     existing alias    for %13s succeeded %44s [%.4f sec]\n" $alias " " $secs
 			fi
 			print_pct
 		else
@@ -4539,7 +4582,7 @@ test_alias()
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 			tcount=$(expr $tcount + 1)
-			printf "\r  testing alternate QMAILGETPW for %-13s succeeded %45s [%.4f sec]\n" $alias " " $secs
+			printf "\r  testing alternate  QMAILGETPW for %13s succeeded %44s [%.4f sec]\n" $alias " " $secs
 			print_pct
 		fi
 	done
@@ -7724,6 +7767,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.55  2023-12-11 18:49:43+05:30  Cprogrammer
+# added test for qmail-inject domainqueue
+#
 # Revision 1.54  2023-12-11 00:17:11+05:30  Cprogrammer
 # remove libindimail control file
 #
