@@ -91,6 +91,9 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 57. printass.c: added program to print entries from users/assign, users/cdb
 58. smtpd.c: allow CHECKSENDER to work for local users without virtualdomains
     loaded
+- 11/12/2023
+59. qmail-inject.c: do domainqueue on the recipient domain instead of the
+    sender domain
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

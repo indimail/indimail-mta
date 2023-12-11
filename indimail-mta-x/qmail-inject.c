@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-inject.c,v 1.49 2023-10-02 22:49:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-inject.c,v 1.50 2023-12-11 17:29:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -235,6 +235,22 @@ doordie(stralloc *sa, int r)
 	perm();
 }
 
+void
+do_domainqueue(char *recip)
+{
+	int             ret;
+
+	if ((ret = domainqueue(recip, "domainqueue", "DOMAINQUEUE", 0)) == -1)
+		die_nomem();
+	else
+	if (ret == -2)
+		die_control("domainqueue");
+	else
+	if (ret == -4)
+		die_regex();
+	return;
+}
+
 no_return void
 exitnicely()
 {
@@ -276,6 +292,7 @@ exitnicely()
 		for (i = 0; i < reciplist.len; ++i) {
 			if (!stralloc_0(&reciplist.sa[i]))
 				die_nomem();
+			do_domainqueue(reciplist.sa[i].s);
 			qmail_to(&qqt, reciplist.sa[i].s);
 		}
 		if (flagrh) {
@@ -283,12 +300,14 @@ exitnicely()
 				for (i = 0; i < hrrlist.len; ++i) {
 					if (!stralloc_0(&hrrlist.sa[i]))
 						die_nomem();
+					do_domainqueue(hrrlist.sa[i].s);
 					qmail_to(&qqt, hrrlist.sa[i].s);
 				}
 			} else {
 				for (i = 0; i < hrlist.len; ++i) {
 					if (!stralloc_0(&hrlist.sa[i]))
 						die_nomem();
+					do_domainqueue(hrrlist.sa[i].s);
 					qmail_to(&qqt, hrlist.sa[i].s);
 				}
 			}
@@ -688,18 +707,14 @@ dodefaultreturnpath()
 	if (!stralloc_copys(&hackedruser, mailruser))
 		die_nomem();
 	if (flaghackmess) {
-		if (!stralloc_cats(&hackedruser, "-"))
-			die_nomem();
-		if (!stralloc_catb(&hackedruser, strnum, fmt_ulong(strnum, (unsigned long) starttime)))
-			die_nomem();
-		if (!stralloc_cats(&hackedruser, "."))
-			die_nomem();
-		if (!stralloc_catb(&hackedruser, strnum, fmt_ulong(strnum, (unsigned long) getpid())))
+		if (!stralloc_cats(&hackedruser, "-") ||
+				!stralloc_catb(&hackedruser, strnum, fmt_ulong(strnum, (unsigned long) starttime)) ||
+				!stralloc_cats(&hackedruser, ".") ||
+				!stralloc_catb(&hackedruser, strnum, fmt_ulong(strnum, (unsigned long) getpid())))
 			die_nomem();
 	}
-	if (flaghackrecip && !stralloc_cats(&hackedruser, "-"))
-		die_nomem();
-	if (!token822_ready(&drp, 10))
+	if ((flaghackrecip && !stralloc_cats(&hackedruser, "-")) ||
+			!token822_ready(&drp, 10))
 		die_nomem();
 	drp.len = 0;
 	drp.t[drp.len].type = TOKEN822_ATOM;
@@ -769,11 +784,9 @@ finishmft()
 	my_puts("Mail-Followup-To: ");
 	i = tocclist.len;
 	while (i--) {
-		if (!stralloc_copy(&sa, &tocclist.sa[i]))
-			die_nomem();
-		if (!stralloc_0(&sa))
-			die_nomem();
-		if (!quote2(&sa2, sa.s))
+		if (!stralloc_copy(&sa, &tocclist.sa[i]) ||
+				!stralloc_0(&sa) ||
+				!quote2(&sa2, sa.s))
 			die_nomem();
 		put(sa2.s, sa2.len);
 		if (i)
@@ -795,11 +808,9 @@ finishheader()
 		static stralloc sa = { 0 };
 		static stralloc sa2 = { 0 };
 
-		if (!stralloc_copy(&sa, &sender))
-			die_nomem();
-		if (!stralloc_0(&sa))
-			die_nomem();
-		if (!quote2(&sa2, sa.s))
+		if (!stralloc_copy(&sa, &sender) ||
+				!stralloc_0(&sa) ||
+				!quote2(&sa2, sa.s))
 			die_nomem();
 		my_puts("Return-Path: <");
 		put(sa2.s, sa2.len);
@@ -811,23 +822,14 @@ finishheader()
 	if (flagqueue) {
 		static stralloc satmp = { 0 };
 	
-		if (!stralloc_copy(&satmp, &sender))
-			die_nomem();
-		if (!stralloc_0(&satmp))
+		if (!stralloc_copy(&satmp, &sender) ||
+				!stralloc_0(&satmp))
 			die_nomem();
 		if ((ret = envrules(satmp.s, "from.envrules", "FROMRULES", 0)) == -1)
 			die_nomem();
 		else
 		if (ret == -2)
 			die_control("from.envrules");
-		else
-		if (ret == -4)
-			die_regex();
-		if ((ret = domainqueue(satmp.s, "domainqueue", "DOMAINQUEUE", 0)) == -1)
-			die_nomem();
-		else
-		if (ret == -2)
-			die_control("domainqueue");
 		else
 		if (ret == -4)
 			die_regex();
@@ -892,9 +894,8 @@ getcontrols()
 	} else
 	if (!stralloc_copys(&control_defaultdomain, x))
 		die_nomem();
-	if (!stralloc_copys(&sa, "."))
-		die_nomem();
-	if (!stralloc_cat(&sa, &control_defaultdomain))
+	if (!stralloc_copys(&sa, ".") ||
+			!stralloc_cat(&sa, &control_defaultdomain))
 		die_nomem();
 	doordie(&sa, token822_parse(&defaultdomain, &sa, &defaultdomainbuf));
 	if (!(x = env_get("QMAILDEFAULTHOST"))) {
@@ -903,9 +904,8 @@ getcontrols()
 	} else
 	if (!stralloc_copys(&control_defaulthost, x))
 		die_nomem();
-	if (!stralloc_copys(&sa, "@"))
-		die_nomem();
-	if (!stralloc_cat(&sa, &control_defaulthost))
+	if (!stralloc_copys(&sa, "@") ||
+			!stralloc_cat(&sa, &control_defaulthost))
 		die_nomem();
 	doordie(&sa, token822_parse(&defaulthost, &sa, &defaulthostbuf));
 	if (!(x = env_get("QMAILPLUSDOMAIN"))) {
@@ -914,9 +914,8 @@ getcontrols()
 	} else
 	if (!stralloc_copys(&control_plusdomain, x))
 		die_nomem();
-	if (!stralloc_copys(&sa, "."))
-		die_nomem();
-	if (!stralloc_cat(&sa, &control_plusdomain))
+	if (!stralloc_copys(&sa, ".") ||
+			!stralloc_cat(&sa, &control_plusdomain))
 		die_nomem();
 	doordie(&sa, token822_parse(&plusdomain, &sa, &plusdomainbuf));
 	if (!(x = env_get("QMAILIDHOST"))) {
@@ -1010,13 +1009,10 @@ main(int argc, char **argv)
 		htypeseen[i] = 0;
 	recipstrategy = RECIP_DEFAULT;
 	getcontrols();
-	if (!saa_readyplus(&hrlist, 1))
-		die_nomem();
-	if (!saa_readyplus(&tocclist, 1))
-		die_nomem();
-	if (!saa_readyplus(&hrrlist, 1))
-		die_nomem();
-	if (!saa_readyplus(&reciplist, 1))
+	if (!saa_readyplus(&hrlist, 1) ||
+			!saa_readyplus(&tocclist, 1) ||
+			!saa_readyplus(&hrrlist, 1) ||
+			!saa_readyplus(&reciplist, 1))
 		die_nomem();
 	rcptcount = 0;
 	while ((opt = getopt(argc, argv, "asAhHnNf:")) != opteof) {
@@ -1077,13 +1073,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.49 2023-10-02 22:49:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.50 2023-12-11 17:29:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.50  2023-12-11 17:29:53+05:30  Cprogrammer
+ * do domainqueue on the recipient domain instead of sender domain
+ *
  * Revision 1.49  2023-10-02 22:49:57+05:30  Cprogrammer
  * fix copy of srs_result
  *
