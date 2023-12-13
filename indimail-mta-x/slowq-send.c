@@ -3299,6 +3299,23 @@ sigusr1()
 	if (flagdetached == 1)
 		return;
 	sig_block(sig_usr1);
+
+	if (del_canexit()) {
+		slog(1, "alert: ", argv0, ": ", queuedesc,
+				": no pending deliveries. stop scheduling new deliveries...\n", NULL);
+		/*- tell todo-proc to stop sending jobs */
+		if (write(todofdo, "D", 1) != 1) {
+			slog(1, "alert: ", argv0, ": ", queuedesc,
+					": unable to write two bytes to todo-proc! dying...: ",
+					error_str(errno), "\n", NULL);
+			flagexitsend = 1;
+			flagtodoalive = 0;
+		} else
+			flagdetached = 2;
+		sig_unblock(sig_usr1);
+		return;
+	}
+
 	flagdetached = 1;
 	/*- tell todo-processor to stop sending jobs */
 	if (write(todofdo, "D", 1) != 1) {
@@ -3747,7 +3764,7 @@ main(int argc, char **argv)
 			cleanup_do();
 		}
 		if ((can_exit = del_canexit())) {
-			if (flagdetached) {
+			if (flagdetached == 1) {
 				pqstart();
 				/*- tell todo-proc to start sending jobs */
 				if (write(todofdo, "A", 1) != 1) {
@@ -3756,12 +3773,12 @@ main(int argc, char **argv)
 							error_str(errno), "\n", NULL);
 					flagexitsend = 1;
 					flagtodoalive = 0;
-				}
+				} else
+					flagdetached = 0;
 				sig_unblock(sig_usr2);
 				sig_unblock(sig_usr1);
 				slog(1, "info: ", argv0, ": ", queuedesc,
 						": no pending jobs, attaching back to todo-proc\n", NULL);
-				flagdetached = 0;
 			}
 		}
 	} /*- while (!flagexitsend || !del_canexit()) */

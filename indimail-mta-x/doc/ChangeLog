@@ -1,6 +1,9 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 <@email@> @version@-@release@
 Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 ======= Release Highlights ================================================
+o - Refactored ETRN, ATRN code
+o - New program rd-remote with the same interface as qmail-remote for
+    redirecting remote mails
 ===========================================================================
 - 24/10/2023
 01. use matchregex.h from /usr/include/qmail
@@ -29,7 +32,7 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
     treated as match
 18. test-indimail-mta: added test case to test invalid regex expression
 19. envrules.c, mail_acl.c, do_match.c: moved do_match to do_match.c
-20. use QREGEX to use regexp, else wildmat for control files accelist,
+20. use QREGEX to use regexp, else wildmat for control files accesslist,
     mailarchive (qmail-smtpd, qmail-queue)
 - 30/10/2023
 21. qmail-send.c, slowq-send.c, qmta-send.c: Set QREGEX env variable if qregex
@@ -47,53 +50,60 @@ Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
 28. smtpd.c: fixed control filename for blackholedrcpt, blackholedrcptpatterns
 29. qmail.c: fixed NULLQUEUE
 30. tests/test-indimail-mta: added test for blackholedrcpt, blackholdsender
+- 13/11/2023
+31. test-indimail-mta: added test for nodnscheck
 - 20/11/2023
-31. qmail-dkim.c: Added env variable EXCLUDE_DKIMSIGN to exclude headers from
+32. qmail-dkim.c: Added env variable EXCLUDE_DKIMSIGN to exclude headers from
     DKIM signing
-32. qmail-dkim.c: Added Arc-Authentication-Results header to list of headers
+33. qmail-dkim.c: Added Arc-Authentication-Results header to list of headers
     excluded from DKIM signing
 - 26/11/2023
-33. atrn.c: use auto_libexec for atrn script
-34. smtpd.c: Use TCP6LOCALPORT for smtp_portif TCPLOCALPORT is not set
+34. atrn.c: use auto_libexec for atrn script
+35. smtpd.c: Use TCP6LOCALPORT for smtp_portif TCPLOCALPORT is not set
 - 03/12/2023
-35. etrn.c, etrn.h: moved hostname validation to valid_hname.c
-36. atrn.c, etrn.c: lock dir/seriallock instead of doing it in atrn/etrn scripts
-37. create_service, indimail-mta.spec: use infifo service in ODMR service for auth
-38. svctool: add STRIP_DOMAIN env variable for local authentication by sys-checkpwd
-39. smtpd.c, etrn.sh, atrn.sh: refactored ETRN, ATRN code
-40. etrn.sh: use ipauth as IP address whitelist
-41. etrn.sh: use ipauth before mx check
+36. etrn.c, etrn.h: moved hostname validation to valid_hname.c
+37. atrn.c, etrn.c: lock dir/seriallock instead of doing it in atrn/etrn scripts
+38. create_service, indimail-mta.spec: use infifo service in ODMR service for auth
+39. svctool: add STRIP_DOMAIN env variable for local authentication by sys-checkpwd
+40. smtpd.c, etrn.sh, atrn.sh: refactored ETRN, ATRN code
+41. etrn.sh: use ipauth as IP address whitelist
+42. etrn.sh: use ipauth before mx check
 - 04/12/2023
-42. qmta-send.c: BUG: flagchan wasn't initialized in process_todo()
+43. qmta-send.c: BUG: flagchan wasn't initialized in process_todo()
 - 05/12/2023
-43. rd-remote.c: Added remote mail redirector
-44. envrules.c, mail_acl.c: Fix for invalid rules
-44. spawn-filter.c: setup qmail-local, qmail-remote arguments after envrules
+44. rd-remote.c: Added remote mail redirector
+45. envrules.c, mail_acl.c: Fix for invalid rules
+46. spawn-filter.c: setup qmail-local, qmail-remote arguments after envrules
    to allow envrules to set QLOCAL, QREMOTE
 - 10/12/2023
-45. qlocal_upgrade: removed forced update of QMAILLOCAL, QMAILREMOTE env
+47. qlocal_upgrade: removed forced update of QMAILLOCAL, QMAILREMOTE env
     variables for qmail-send service
-46. rd-remote: added report for qmail-rspawn for maildir deliver
-47. report.c, rd-remote.c: added comment on report format for qmail-rspawn
+48. rd-remote: added report for qmail-rspawn for maildir deliver
+49. report.c, rd-remote.c: added comment on report format for qmail-rspawn
 - 09/12/2023
-48. etrn.c, atrn.c: use users/cdb to get autoturn directory
-49. etrn.c, atrn.c: pass etrn/atrn argument, autoturn dir and domain dir
+50. etrn.c, atrn.c: use users/cdb to get autoturn directory
+51. etrn.c, atrn.c: pass etrn/atrn argument, autoturn dir and domain dir
     as arguments to libexec/etrn, libexec/atrn
-50. etrn.sh, atrn.sh: read .qmail-domain-default to get Maildir directory
-51. maildirsmtp: use PORT env variable if set as the SMTP port
-52. maildirserial.c: removed use of my_puts(), put() functions
-53. maildir.c: skip non-regular in append() function to prevent breaking
+52. etrn.sh, atrn.sh: read .qmail-domain-default to get Maildir directory
+53. maildirsmtp: use PORT env variable if set as the SMTP port
+54. maildirserial.c: removed use of my_puts(), put() functions
+55. maildir.c: skip non-regular in append() function to prevent breaking
     maildirserial
-54. serialsmtp: fix skip SMTP QUIT when three args are provided
-55. smtpd.c: allow ODMR protocol on none ODMR ports
-56. smtpd.c: use atrnaccess control file for local users to access atrn domains
+56. serialsmtp: fix skip SMTP QUIT when three args are provided
+57. smtpd.c: allow ODMR protocol on none ODMR ports
+58. smtpd.c: use atrnaccess control file for local users to access atrn domains
+59. test-indimail-mta: added test for ETRN, ATRN
 - 10/12/2023
-57. printass.c: added program to print entries from users/assign, users/cdb
-58. smtpd.c: allow CHECKSENDER to work for local users without virtualdomains
+60. printass.c: added program to print entries from users/assign, users/cdb
+61. smtpd.c: allow CHECKSENDER to work for local users without virtualdomains
     loaded
+62. test-indimail-mta: added test for AUTOTURN
 - 11/12/2023
-59. qmail-inject.c: do domainqueue on the recipient domain instead of the
+63. qmail-inject.c: do domainqueue on the recipient domain instead of the
     sender domain
+- 13/12/2023
+63. qmail-send.c, slowq-send.c: added concept of half-detached/full-detached
+    mode
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.109 2023-10-30 10:28:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.110 2023-12-13 20:48:27+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -123,7 +123,16 @@ unsigned long   delayed_jobs;
 static int      flagexitsend = 0;
 static int      flagrunasap = 0;
 static int      flagreadasap = 0;
-static int      flagdetached = 0; /*- allow qmail-send to stop adding new jobs received from todo-proc */
+/*-
+ * allow qmail-send to stop adding new jobs received from todo-proc
+ * flagdetached values
+ * 0 - attached (todo-proc sends delivery jobs to qmail-send)
+ * 1 - half detached (qmail-send instructs todo-proc to resume
+ *     sending jobs when there no jobs to process)
+ * 2 - full detached (todo-proc stops sending jobs to qmail-send
+ *     until qmail-send gets SIGUSR2
+ */
+static int      flagdetached = 0;
 static int      dynamic_queue = 0;
 #ifdef HASLIBRT
 static int      shm_queue = -1;
@@ -1823,9 +1832,24 @@ static int      todofdi, todofdo, flagtodoalive;
 static void
 sigusr1()
 {
-	if (flagdetached == 1)
+	if (flagdetached)
 		return;
 	sig_block(sig_usr1);
+	if (del_canexit()) {
+		slog(1, "alert: ", argv0, ": ", queuedesc,
+				": no pending deliveries. Instrucing todo-proc to detach...\n", NULL);
+		/*- tell todo-proc to stop sending jobs */
+		if (write(todofdo, "D", 1) != 1) {
+			slog(1, "alert: ", argv0, ": ", queuedesc,
+					": unable to write two bytes to todo-proc! dying...: ",
+					error_str(errno), "\n", NULL);
+			flagexitsend = 1;
+			flagtodoalive = 0;
+		} else
+			flagdetached = 2;
+		sig_unblock(sig_usr1);
+		return;
+	}
 	flagdetached = 1;
 	/*- tell todo-proc to stop sending jobs */
 	if (write(todofdo, "D", 1) != 1) {
@@ -1846,7 +1870,6 @@ sigusr2()
 	if (flagdetached == 0)
 		return;
 	sig_block(sig_usr2);
-	flagdetached = 0;
 	/*-
 	 * we need to rescan todo if we were earlier in detached mode
 	 * add jobs from todo
@@ -1859,7 +1882,8 @@ sigusr2()
 				error_str(errno), "\n", NULL);
 		flagexitsend = 1;
 		flagtodoalive = 0;
-	}
+	} else
+		flagdetached = 0;
 	sig_unblock(sig_usr2);
 	sig_unblock(sig_usr1);
 }
@@ -2646,7 +2670,9 @@ main(int argc, char **argv)
 			cleanup_do();
 		}
 		if ((can_exit = del_canexit())) {
-			if (flagdetached) {
+			if (flagdetached == 1) {
+				slog(1, "info: ", argv0, ": ", queuedesc,
+						": no pending jobs, attaching back to todo-proc\n", NULL);
 				pqstart();
 				/*- tell todo-proc to start sending jobs */
 				if (write(todofdo, "A", 1) != 1) {
@@ -2655,12 +2681,10 @@ main(int argc, char **argv)
 							error_str(errno), "\n", NULL);
 					flagexitsend = 1;
 					flagtodoalive = 0;
-				}
+				} else
+					flagdetached = 0;
 				sig_unblock(sig_usr2);
 				sig_unblock(sig_usr1);
-				slog(1, "info: ", argv0, ": ", queuedesc,
-						": no pending jobs, attaching back to todo-proc\n", NULL);
-				flagdetached = 0;
 			}
 		}
 	} /*- while (!flagexitsend || !can_exit || flagtodoalive) */
@@ -2676,7 +2700,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.109 2023-10-30 10:28:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.110 2023-12-13 20:48:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2686,6 +2710,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.110  2023-12-13 20:48:27+05:30  Cprogrammer
+ * added concept of half-detached/full-detached mode
+ *
  * Revision 1.109  2023-10-30 10:28:44+05:30  Cprogrammer
  * use qregex control file to set QREGEX env variable
  *

@@ -21,15 +21,18 @@ qmta-send \- standalone mail delivery
 \fBqmta-send\fR is on systems that requires a simple delivery mechanism
 for mails generated locally (like in cron scripts). It can be run as a
 daemon running continuously or as and when mail is generated. qmta-send
-doesn't require todo-proc, qmail-lspawn, qmail-rspawn, qmail-clean to
-process a queue.
+doesn't require \fBtodo-proc\fR, \fBqmail-lspawn\fR, \fBqmail-rspawn\fR,
+\fBqmail-clean\fR to process a queue. \fBqmta-send\fR requires users
+\fIqmailq\fR, \fIqmailr\fR and group \fInofiles\fR. It requires additional
+user \fIqmails\fR if \fB\-c\fR is used. If \fIlogger\fR argument is given,
+additional user \fIqmaill\fR and group \fInofiles\fR is required.
 
 .EX
 1. run qmta-send as a daemon.
 
    # qmta-send -d ./Maildir/
 
-2. jun qmta-send to deliver mails currently in the queue and exit after
+2. run qmta-send to deliver mails currently in the queue and exit after
    delivery.
 
    # qmta-send ./Maildir/

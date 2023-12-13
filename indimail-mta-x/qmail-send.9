@@ -32,7 +32,7 @@ directory. This directory can be changed by defining the \fBPLUGINDIR\fR
 environment variable. By default, qmail-send will attempt to load the plugin
 qmail-send.so. This can be changed by defining \fBSTART_PLUGIN\fR environment
 variable. You can define multiple plugins separated by the space character
-in the \fBSTART_PLUGIN\fR environkent variable. \fBqmail-send\fR will use
+in the \fBSTART_PLUGIN\fR environment variable. \fBqmail-send\fR will use
 \fBdlopen(3)\fR function to load all the plugins and by default try to
 execute the function with the symbol \fIstartup\fR. The symbol to be loaded
 can be changed by defining the \fBSTART_PLUGIN_SYMB\fR environment
@@ -67,20 +67,27 @@ messages to remote recipients. If a message is temporarily undeliverable to
 one or more addresses, \fBqmail-send\fR leaves it in the queue and tries
 the addresses again later.
 
-\fBqmail-send\fR can run delivery and todo processing in detached mode if
-it gets \fBSIGUSR1\fR signal. In detached mode, qmail-send processes just
-the existing local and remote queue at the time of the receipt of
-\fBSIGUSR1\fR and schedules delivery jobs for the existing local/remote
-queue. Once there are no existing jobs, \fBqmail-send\fR instructs
-\fBtodo-proc\fR to start sending new jobs. Meanwhile the todo processing
-continues to happen and emails continue to get classied as local, remote,
-but they don't get scheduled for delivery. One can issue the signal
-\fBSIGUSR2\fR to enter the normal attached mode, where emails get scheduled
-immediately after todo processing. \fBtodo-proc\fR start communicationg
-with \fBqmail-send\fR. \fBSIGUSR1\fR should be used if \fBqmail-send\fR is
-unable to cope with high injection rates. One may issue \fBSIGUSR1\fR if
-you want to pre-process the incoming emails but schedule delivery later on
-receipt of \fBSIGUSR2\fR.
+\fBqmail-send\fR can run delivery and todo processing in detached mode on
+receipt of \fBSIGUSR1\fR. In detached mode, \fBqmail-send\fR processes the
+existing local and remote queue present at the time of the receipt of
+\fBSIGUSR1\fR and schedules delivery jobs not yet started, for existing
+local/remote queue. Once there are no existing jobs, \fBqmail-send\fR
+instructs \fBtodo-proc\fR to start sending new jobs. Meanwhile
+\fBtodo-proc\fR continues to process new mails and classify them as local
+or remote, but new jobs are not sent to \fBqmail-send\fR for delivery. One
+can issue the signal \fBSIGUSR2\fR to enter the normal attached mode, where
+mail delivery gets scheduled immediately after todo processing by having
+\fBtodo-proc\fR start communicating with \fBqmail-send\fR. \fBSIGUSR1\fR
+should be used if \fBqmail-send\fR is unable to cope with high injection
+rates. One may issue \fBSIGUSR1\fR if you want to pre-process the incoming
+emails but schedule delivery later on receipt of \fBSIGUSR2\fR. If there
+are no pending deliveries and \fBSIGUSR1\fR is issued, only \fBtodo-proc\fR
+enters detached mode. In this mode, todo-proc continues to classifies
+message but doesn't send the jobs to qmail-send until \fBSIGUSR1\fR is sent
+to \fBqmail-send\fR. With indimail-mta's multi-queue architecture, this
+feature will most probably never be required. But the feature is there in
+case you are running with a single queue and you experience high injection
+causing sluggish delivery.
 
 \fBqmail-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
 recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.

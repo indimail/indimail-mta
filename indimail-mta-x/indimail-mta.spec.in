@@ -371,7 +371,7 @@ fi
 if [ -f indimail-mta.te ] ; then
   install -m 0644 indimail-mta.te %{buildroot}%{qsysconfdir}/indimail-mta.te
 fi
-/bin/rm -f ChangeLog %{name}-rpm.info
+%{__rm} -f ChangeLog %{name}-rpm.info
 
 %if %{defined suse_version} || %{defined sles_version}
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/permissions.d/

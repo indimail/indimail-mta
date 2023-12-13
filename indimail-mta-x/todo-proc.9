@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH todo-proc 8
 .SH NAME
 todo-proc \- process todo messages from the queue
@@ -75,17 +76,27 @@ If \fBtodo-proc\fR receives a HUP signal, it will reread \fIlocals\fR,
 \fItodointerval\fR, \fIvirtualdomains\fR, \fIenvnoathost\fR,
 \fIconf-syncdir\fR, and \fIconf-fsync\fR.
 
-if \fBqmail-send\fR receives USR1 signal, it will instruct \fBtodo-proc\fR
-to stop communicating with \fBqmail-send\fR, but continue to pre-process
-the \fItodo\fR sub directory. This allows \fBqmail-send\fR to dedicate
-itself to complete scheduling of delivery jobs for the local and remote
-queue if any. Once pending delivery jobs are over, \fBqmail-send\fR will
-instruct \fBtodo-proc\fR to start sending new delivery jobs. One can also
-issue the signal \fBSIGUSR2\fR to make \fBtodo-proc\fR start communicationg
-with \fBqmail-send\fR. SIGUSR1 should be used if \fBqmail-send\fR is unable
-to cope with high injection rates.  One may issue SIGUSR1 if you want to
-pre-process the incoming emails but schedule delivery later on receipt of
-SIGUSR2.
+\fBqmail-send\fR can run delivery and todo processing in detached mode on
+receipt of \fBSIGUSR1\fR. In detached mode, \fBqmail-send\fR processes the
+existing local and remote queue present at the time of the receipt of
+\fBSIGUSR1\fR and schedules delivery jobs not yet started, for existing
+local/remote queue. Once there are no existing jobs, \fBqmail-send\fR
+instructs \fBtodo-proc\fR to start sending new jobs. Meanwhile
+\fBtodo-proc\fR continues to process new mails and classify them as local
+or remote, but new jobs are not sent to \fBqmail-send\fR for delivery. One
+can issue the signal \fBSIGUSR2\fR to enter the normal attached mode, where
+mail delivery gets scheduled immediately after todo processing by having
+\fBtodo-proc\fR start communicating with \fBqmail-send\fR. \fBSIGUSR1\fR
+should be used if \fBqmail-send\fR is unable to cope with high injection
+rates. One may issue \fBSIGUSR1\fR if you want to pre-process the incoming
+emails but schedule delivery later on receipt of \fBSIGUSR2\fR. If there
+are no pending deliveries and \fBSIGUSR1\fR is issued, only \fBtodo-proc\fR
+enters detached mode. In this mode, todo-proc continues to classifies
+message but doesn't send the jobs to qmail-send until \fBSIGUSR1\fR is sent
+to \fBqmail-send\fR. With indimail-mta's multi-queue architecture, this
+feature will most probably never be required. But the feature is there in
+case you are running with a single queue and you experience high injection
+causing sluggish delivery.
 
 If the environment variable USE_FSYNC is set, then \fBtodo-proc\fR writes
 all data to disk ("flushes") all modified in-core data of (i.e., modified

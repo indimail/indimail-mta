@@ -27,20 +27,26 @@ TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
 set, \fBslow-send\fR forks and runs a parallel todo-processor named
 \fBslowq-todo\fR. This addresses a problem known as the silly qmail (queue)
 problem sometimes found only on system with high injection rates and an
-inefficient filesystem. With todo-processor running, \fBslowq-send\fR can
-run delivery processing and todo processing in detached mode if it
-gets\fBSIGUSR1\fR signal. In detached mode, \fBslowq-send\fR will process
-just the existing local and remote queue at the time of the receipt of
-\fBSIGUSR1\fR and then schedule delivery jobs for the existing local/remote
-queue. Once there are no existing jobs, \fBslowq-send\fR instructs
-\fBslowq-todo\fR to start sending new jobs. Meanwhile the todo processing
-continues to happen and emails continue to get classied as local, remote,
-but they don't get scheduled for delivery. One can also issue the signal
-\fBSIGUSR2\fR to enter the normal attached mode, where emails get scheduled
-immediately after todo processing. \fBSIGUSR1\fR should be used if
-\fBslowq-send\fR is unable to cope with high injection rates. One may issue
-\fBSIGUSR1\fR if you want to pre-process the incoming emails but schedule
-delivery later by issuing signal \fBSIGUSR2\fR.
+inefficient filesystem.
+
+When \fBTODO_PROCESSOR\fR is defined, \fBslowq-send\fR can run delivery and
+todo processing in detached mode on receipt of \fBSIGUSR1\fR. In detached
+mode, \fBslowq-send\fR processes the existing local and remote queue
+present at the time of the receipt of \fBSIGUSR1\fR and schedules delivery
+jobs not yet started, for existing local/remote queue. Once there are no
+existing jobs, todo-processor starts sending new jobs. Meanwhile
+todo-processor continues to process new mails and classify them as local or
+remote, but new jobs are not sent to \fBslowq-send\fR for delivery. One can
+issue the signal \fBSIGUSR2\fR to enter the normal attached mode, where
+mail delivery gets scheduled immediately after todo processing by having
+todo-processor start communicating with \fBslowq-send\fR. \fBSIGUSR1\fR
+should be used if \fBslowq-send\fR is unable to cope with high injection
+rates. One may issue \fBSIGUSR1\fR if you want to pre-process the incoming
+emails but schedule delivery later on receipt of \fBSIGUSR2\fR. If there
+are no pending deliveries and \fBSIGUSR1\fR is issued, todo-processor
+continues continues to classify newly injected message but doesn't send the
+jobs to slowq-send until \fBSIGUSR1\fR is sent to \fBslowq-send\fR. With
+most modern filesystems, this feature may never be required.
 
 \fBslowq-send\fR(8) sends a single byte 'C' through a pipe to its internal
 todo-processor indicating that it has started. After this slowq-send reads
