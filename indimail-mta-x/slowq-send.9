@@ -9,7 +9,7 @@ slowq-send \- deliver mail messages from the queue with rate control
 .SH DESCRIPTION
 \fBslowq-send\fR handles messages placed into the outgoing queue by
 \fBqmail-queue\fR(8). \fBslowq-send\fR(8) by default looks at
-QMAILHOME/queue/slowq in the todo subdir for messages. This path can be
+QMAILHOME/queue/slowq (in the todo subdir) for messages. This path can be
 changed by defining the QUEUEDIR environment variable. This manual will
 refer \fIqueue\fR as the value of \fBQUEUEDIR\fR. \fBslowq-send\fR borrows
 most of it's code from \fBqmail-send\fR. The todo run can be adjusted by
@@ -22,12 +22,12 @@ TODO_INTERVAL seconds to not miss the new additions to the queue.
 \fBTODO_INTERVAL\fR can also be set in the control file \fItodointerval\fR.
 The control file takes precedence over the environment variable. If
 TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
-\fBslowq-send\fR silently uses 10 secs as the value for
-\fBTODO_INTERVAL\fR. if the environment variable \fBTODO_PROCESSOR\fR is
-set, \fBslow-send\fR forks and runs a parallel todo-processor named
-\fBslowq-todo\fR. This addresses a problem known as the silly qmail (queue)
-problem sometimes found only on system with high injection rates and an
-inefficient filesystem.
+\fBslowq-send\fR silently uses 10 seconds as the value for
+\fBTODO_INTERVAL\fR. If the environment variable \fBTODO_PROCESSOR\fR is
+set to non-zero value, \fBslow-send\fR forks and runs a parallel
+todo-processor named \fBslowq-todo\fR. This addresses a problem known as
+the silly qmail (queue) problem sometimes found only on system with high
+injection rates and an inefficient filesystem.
 
 When \fBTODO_PROCESSOR\fR is defined, \fBslowq-send\fR can run delivery and
 todo processing in detached mode on receipt of \fBSIGUSR1\fR. In detached

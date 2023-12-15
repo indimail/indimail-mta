@@ -104,6 +104,9 @@ o - New program rd-remote with the same interface as qmail-remote for
 - 13/12/2023
 63. qmail-send.c, slowq-send.c: added concept of half-detached/full-detached
     mode
+- 15/12/2023
+64. slowq-send.c: use value of TODO_PROCESSOR env variable to run todo
+    processor
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

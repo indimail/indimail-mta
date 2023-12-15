@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.32 2023-10-30 10:30:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.33 2023-12-15 23:07:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -3519,7 +3519,10 @@ main(int argc, char **argv)
 	do_ratelimit = (ptr && *ptr) ? 1 : 0;
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
-	todoproc = env_get("TODO_PROCESSOR") ? 1 : 0;
+	if (!(ptr = env_get("TODO_PROCESSOR")))
+		todoproc = 0;
+	else
+		scan_int(ptr, &todoproc);
 	/*- get basename of queue directory to define slowq-send instance */
 	for (queuedesc = queuedir; *queuedesc; queuedesc++);
 	for (; queuedesc != queuedir && *queuedesc != '/'; queuedesc--);
@@ -3791,7 +3794,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.32 2023-10-30 10:30:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.33 2023-12-15 23:07:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3801,6 +3804,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.33  2023-12-15 23:07:44+05:30  Cprogrammer
+ * use value of TODO_PROCESSOR env variable to run todo processor
+ *
  * Revision 1.32  2023-10-30 10:30:18+05:30  Cprogrammer
  * use qregex control file to set QREGEX env variable
  *

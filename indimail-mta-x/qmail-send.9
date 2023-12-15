@@ -4,20 +4,17 @@
 qmail-send \- deliver mail messages from the queue with rate control
 
 .SH SYNOPSIS
-.B qmail-send
-[ -\fBs\fR] | -\fBd\fR
+\fBqmail-send\fR [ -\fBs\fR] | -\fBd\fR
 
 .SH DESCRIPTION
-.B qmail-send
-handles messages placed into the outgoing queue by
-.BR qmail-queue .
-.B qmail-send
-by default looks at QMAILHOME/queue for messages. This path can be changed
-by defining the QUEUEDIR environment variable. If you are using
-\fBqscheduler\fR(8) to invoke qmail-send, then \fBqscheduler\fR will
-use environment variables \fBQUEUE_COUNT\fR, \fBQUEUE_START\fR to invoke
-multiple qmail-send processes, with each having its own queue defined by
-the \fBQUEUEDIR\fR environment variable. \fBQUEUEDIR\fR will typically be
+\fBqmail-send\fR handles messages placed into the outgoing queue by
+\fBqmail-queue\fR. \fBqmail-send\fR by default looks at QMAILHOME/queue (in
+the todo subdir) for messages. This path can be changed by defining the
+QUEUEDIR environment variable. If you are using \fBqscheduler\fR(8) to
+invoke qmail-send, then \fBqscheduler\fR will use environment variables
+\fBQUEUE_COUNT\fR, \fBQUEUE_START\fR to invoke multiple qmail-send
+processes, with each having its own queue defined by the \fBQUEUEDIR\fR
+environment variable. \fBQUEUEDIR\fR will typically be
 QMAILHOME/queue/queue1, QMAILHOME/queue/queue2 and so on. This manual will
 refer \fIqueue\fR as the value of \fBQUEUEDIR\fR. For each delivery,
 qmail-send puts a delivery number in the logs. In a multi-queue
@@ -153,10 +150,9 @@ process a queue created with \fItodo\fR, \fIintd\fR with subdirectory split
 instead of without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable.
 
-.B qmail-send
-runs as \fIqmails\fR user, \fIqmail\fR group and with supplementary groups
-defined for \fIqmails\fR user if the environment variable
-\fBUSE_SETGROUPS\fR is set for \fBqmail-start\fR(8).
+\fBqmail-send\fr runs as \fIqmails\fR user, \fIqmail\fR group and with
+supplementary groups defined for \fIqmails\fR user if the environment
+variable \fBUSE_SETGROUPS\fR is set for \fBqmail-start\fR(8).
 
 .SH OPTIONS
 .PP
@@ -174,16 +170,12 @@ creating shared a shared memory segment for writing the current local and
 remote concurrency value.
 
 .SH "CONTROL FILES"
-.B WARNING:
-.B qmail-send
-reads its control files only when it starts. If you change the control files,
-you must stop and restart
-.BR qmail-send .
+\fBWARNING:\fR \fBqmail-send\fR reads its control files only when it
+starts. If you change the control files, you must stop and restart
+\fBqmail-send\fR.
 Exception:
 If
-.B qmail-send
-receives a HUP signal,
-it will reread
+\fBqmail-send\fR receives a HUP signal, it will reread
 .IR concurrencylocal ,
 .IR concurrencyl.queue ,
 .IR concurrencyremote ,
@@ -202,41 +194,34 @@ During startup, \fBqmail-send\fR uses the environment variable
 a line to the log file (or stdout). If multiple qmail-send processes are
 running, all writing to one multilog, lines may get jumbled up in extreme
 situations. This can be avoided by setting LOGLOCK environment variable.
-If
-.B qmail-send
-receives a INT signal, it will toggle log lock synchronization. If log
-locking is set, it will get turned off and vice versa.
+If \fBqmail-send\fR receives a INT signal, it will toggle log lock
+synchronization. If log locking is set, it will get turned off and vice
+versa.
 
 If the control file \fBqregex\fR is present, \fBqmail-send\fR will set
 \fBQREGEX\fR environment variable with the content of the control file.
 
-.B qmail-send
-by default looks at @controldir@ for all control files. This path can be
-changed by defining the \fBCONTROLDIR\fR environment variable.
+\fBqmail-send\fR by default looks at @controldir@ for all control files.
+This path can be changed by defining the \fBCONTROLDIR\fR environment
+variable.
 
 .TP 5
 .I bouncefrom
 Bounce username.
-Default:
-.BR MAILER-DAEMON .
+Default: \fBMAILER-DAEMON\fR.
 
 .TP 5
-.I bouncehost
+\fIbouncehost\fR
 Bounce host.
 Default:
-.IR me ,
+\fIme\fR,
 if that is supplied;
 otherwise the literal name
-.BR bouncehost ,
-which is probably not what you want.
-If a message is permanently undeliverable,
-.B qmail-send
-sends a
-.B single-bounce
-notice back to the message's envelope sender.
-The notice is
-.B From: \fIbouncefrom\fB@\fIbouncehost\fR,
-although its envelope sender is empty.
+\fBbouncehost\fR, which is probably not what you want.  If a message is
+permanently undeliverable, \fBqmail-send\fR sends a \fBsingle-bounce\fR
+notice back to the message's envelope sender. The notice is \fBFrom:
+\fIbouncefrom\fB@\fIbouncehost\fR,\fR although its envelope sender is
+empty.
 
 .TP 5
 .I bouncemaxbyte
@@ -251,158 +236,98 @@ Configures the bounce message subject
 Text for bounce message. Remember that this may break QSBMF
 
 .TP 5
-.I doublebouncehost
+\fIdoublebouncehost\fR
 Double-bounce host.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR doublebouncehost ,
-which is probably not what you want.
+Default: \fIme\fR, if that is supplied; otherwise the literal name
+\fBdoublebouncehost\fR, which is probably not what you want.
 
 .TP 5
-.I doublebounceto
+\fIdoublebounceto\fR
 User to receive double-bounces.
-Default:
-.BR postmaster .
-If a single-bounce notice is permanently undeliverable,
-.B qmail-send
-sends a
-.B double-bounce
-notice to
-.IR doublebounceto\fB@\fIdoublebouncehost .
-(If that bounces,
-.B qmail-send
-gives up.)
-As a special case, if the first line of
-.IR doublebounceto
-contains a '@' or is blank (contains a single linefeed), qmail-send will
-not queue the double-bounce at all.
+Default: \fBpostmaster\fR. If a single-bounce notice is permanently
+undeliverable, \fBqmail-send\fR sends a \fBdouble-bounce\fR notice to
+\fIdoublebounceto\fB@\fIdoublebouncehost\fR. (If that bounces,
+\fBqmail-send\fR gives up). As a special case, if the first line of
+\fIdoublebounceto\fR contains a '@' or is blank (contains a single
+linefeed), qmail-send will not queue the double-bounce at all.
 
 .TP 5
-.I doublebouncesubject
+\fIdoublebouncesubject\fR
 Configures the double bounce message subject
 
 .TP 5
-.I doublebouncemessage
+\fIdoublebouncemessage\fR
 Text for double bounce message. Remember that this may break QSBMF
 
 .TP 5
-.I concurrencylocal
+\fIconcurrencylocal\fR
 Maximum number of simultaneous local delivery attempts.
-Default: 10.
-If 0, local deliveries will be put on hold.
-.I concurrencylocal
-is limited at compile time to
-SPAWN.
+Default: 10. If 0, local deliveries will be put on hold. \fIconcurrencylocal\fR is
+limited at compile time to SPAWN.
 
 .TP 5
-.I concurrencyl.queue
+\fIconcurrencyl.queue\fR
 Maximum number of simultaneous local delivery attempts for the queue
 \fIqueue\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
 variable, referring to the path of the queue. Here \fIqueue\fR refers to
 the basename of the queue path.
-Default: 10.
-If 0, local deliveries will be put on hold.
-.I concurrencyl.queue
-is limited at compile time to SPAWN.
+Default: 10. If 0, local deliveries will be put on hold.
+\fIconcurrencyl.queue\fR is limited at compile time to SPAWN.
 
 .TP 5
-.I concurrencyremote
+\fIconcurrencyremote\fR
 Maximum number of simultaneous remote delivery attempts.
-Default: 20.
-If 0, remote deliveries will be put on hold.
-.I concurrencyremote
-is limited at compile time to SPAWN.
+Default: 20. If 0, remote deliveries will be put on hold.
+\fIconcurrencyremote\fR is limited at compile time to SPAWN.
 
 .TP 5
-.I concurrencyr.queue
+\fIconcurrencyr.queue\fR
 Maximum number of simultaneous remote delivery attempts for the queue
 \fIqueue\fR. A queue can be defined by setting \fBQUEUEDIR\fR environment
 variable, referring to the path of the queue. Here \fIqueue\fR refers to
 the basename of the queue path.
-Default: 20.
-If 0, remote deliveries will be put on hold.
-.I concurrencyr.queue
-is limited at compile time to SPAWN.
+Default: 20. If 0, remote deliveries will be put on hold.
+\fIconcurrencyr.queue\fR is limited at compile time to SPAWN.
 
 .TP 5
-.I envnoathost
+\fIenvnoathost\fR
 Presumed domain name for addresses without @ signs.
-Default:
-.IR me ,
-if that is supplied;
-otherwise the literal name
-.BR envnoathost ,
-which is probably not what you want.
-If
-.B qmail-send
-sees an envelope recipient address without an @ sign,
-it appends
-.B @\fIenvnoathost\fR.
+Default: \fIme\fR, if that is supplied; otherwise the literal name
+\fBenvnoathost\fR, which is probably not what you want. If \fBqmail-send\fR
+sees an envelope recipient address without an @ sign, it appends
+\fB@\fIenvnoathost\fR\fR.
 
 .TP 5
-.I locals
-List of domain names that the current host
-receives mail for,
-one per line.
-Default:
-.IR me ,
-if that is supplied;
-otherwise
-.B qmail-send
-refuses to run.
-An address 
-.I user@domain
-is considered local if
-.I domain
-is listed in
-.IR locals .
+\fIlocals\fR
+List of domain names that the current host receives mail for, one per line.
+Default: \fIme\fR, if that is supplied; otherwise \fBqmail-send\fR refuses
+to run.  An address \fIuser@domain\fR is considered local if \fIdomain\fR
+is listed in \fIlocals\fR.
 
 .TP 5
-.I percenthack
-List of domain names where the percent hack is applied.
-If
-.I domain
-is listed in
-.IR percenthack ,
-any address of the form
-.I user%fqdn@domain
-is rewritten as
-.IR user@fqdn .
-.I user
-may contain %,
-so the percent hack may be applied repeatedly.
-.B qmail-send
-handles
-.I percenthack
-before
-.IR locals .
+\fI percenthack
+List of domain names where the percent hack is applied. If \fIdomain\fR is
+listed in \fIpercenthack\fR, any address of the form \fIuser%fqdn@domain\fR
+is rewritten as \fIuser@fqdn\fR. \fIuser\fR may contain %, so the percent
+hack may be applied repeatedly. \fBqmail-send\fR handles \fIpercenthack\fR
+before \fIlocals\fR.
 
 .TP 5
-.I queuelifetime
-Number of seconds
-a message can stay in the queue.
-Default: 604800 (one week).
-After this time expires,
-.B qmail-send
-will try the message once more,
-but it will treat any temporary delivery failures as
-permanent failures.
+\fIqueuelifetime\fR
+Number of seconds a message can stay in the queue. Default: 604800 (one
+week). After this time expires, \fB qmail-send\fR will try the message once
+more, but it will treat any temporary delivery failures as permanent
+failures.
 
 .TP 5
-.I bouncelifetime
-Number of seconds
-a bounce message can stay in the queue.
-Default: 604800 (one week).
-After this time expires,
-.B qmail-send
-will try the message once more,
-but it will treat any temporary delivery failures as
-permanent failures.
+\fIbouncelifetime\fR
+Number of seconds a bounce message can stay in the queue. Default: 604800
+(one week).  After this time expires, \fBqmail-send\fR will try the message
+once more, but it will treat any temporary delivery failures as permanent
+failures.
 
 .TP 5
-.I bounce.envrules
+\fIbounce.envrules\fR
 Specific environment variables can be set for bounce recipients. The format
 of this file is of the form pat:envar1=val,envar2=val,...] where pat is a
 regular expression which matches a bounce recipient. envar1, envar2 are list
@@ -429,38 +354,25 @@ answerme@save*:DATABYTES=4000000
 DATABYTES gets set to 4 MB in for any email matching answerme@save*
 
 .TP 5
-.I virtualdomains
+\fIvirtualdomains\fR
 List of virtual users or domains, one per line. A virtual user has the form
-.IR user\fB@\fIdomain\fB:\fIprepend ,
-without any extra spaces. When
-.B qmail-send
-sees the recipient address
-.IR user\fB@\fIdomain ,
-it converts it to
-.I prepend\fB-\fIuser\fB@\fIdomain
-and treats it as local.
+\fIuser\fB@\fIdomain\fB:\fIprepend\fR, without any extra spaces. When
+\fBqmail-send\fR sees the recipient address \fIuser\fB@\fIdomain\fR, it
+converts it to \fIprepend\fB-\fIuser\fB@\fIdomain\fR and treats it as
+local.
 
-A virtual domain has the form
-.IR domain\fB:\fIprepend .
-It applies to any recipient address at
-.IR domain .
-For example, if
+A virtual domain has the form \fIdomain\fB:\fIprepend\fR. It applies to any
+recipient address at \fIdomain\fR.  For example, if
 
 .EX
      nowhere.mil:joeBREAKfoo
 .EE
 
-is in
-.IR virtualdomains ,
-and a message arrives for
-.BR info@nowhere.mil ,
-.B qmail-send
-will rewrite the recipient address as
-.B joeBREAKfoo-info@nowhere.mil
-and deliver the message locally.
+is in \fIvirtualdomains\fR, and a message arrives for
+\fBinfo@nowhere.mil\fR, \fBqmail-send\fR will rewrite the recipient address
+as \fBjoeBREAKfoo-info@nowhere.mil\fR and deliver the message locally.
 
-.I virtualdomains
-may contain wildcards:
+\fIvirtualdomains\fR may contain wildcards:
 
 .EX
      .fax:uucpBREAKfax
@@ -468,26 +380,14 @@ may contain wildcards:
      .nowhere.mil:joeBREAKfoo-host
 .EE
 
-.I virtualdomains
-may also contain exceptions:
-an empty
-.I prepend
-means that
-.I domain
-is not a virtual domain.
+\fIvirtualdomains\fR may also contain exceptions: an empty \fIprepend\fR
+means that \fIdomain\fR is not a virtual domain.
 
-.B qmail-send
-handles
-.I virtualdomains
-after
-.IR locals :
-if a domain is listed in
-.IR locals ,
-.I virtualdomains
-does not apply.
+\fBqmail-send\fR handles \fIvirtualdomains\fR after \fIlocals\fR : if a
+domain is listed in \fIlocals\fR, \fIvirtualdomains\fR does not apply.
 
 .TP 5
-.I holdlocal
+\fIholdlocal\fR
 A boolean parameter indicating whether mail for local hosts should be
 queued without delivery. Zero indicates delivery as normal; any other
 value causes local mail to be held.
@@ -495,22 +395,21 @@ Default:
 .IR zero
 
 .TP 5
-.I holdremote
+\fIholdremote\fR
 A boolean parameter indicating whether mail for remote hosts should be
 queued without delivery. Zero indicates delivery as normal; any other
 value causes remote mail to be held. This is provided to permit use of
 qmail in a dial-up environment when the remote delivery path may not always
 be available, as an alternative to the use of serialmail.
-Default:
-.IR zero
+Default: \fIzero\fR
 
 .TP 5
-.I conf-fsync
+\fIconf-fsync\fR
 A boolean parameter to turn on fsync of file descriptors when writing to a
 file during delivery
 
 .TP 5
-.I conf-syncdir
+\fIconf-syncdir\fR
 A boolean parameter to turn on BSD style sync semantics for flushing
 directories.
 
@@ -529,7 +428,7 @@ for a domain in \fIratecontrol\fR file takes precedence over definition
 in .\fIglobal\fR file.
 
 .TP 5
-.I RATELIMIT_DIR/ratecontrol
+\fIRATELIMIT_DIR/ratecontrol\fR
 You can set rate control expression for recipient domains. The format of
 this file is of the form
 pat:mathematical_expression
@@ -539,7 +438,7 @@ rate definition file and the rate control will apply to the individual
 domain that got matched.
 
 .TP 5
-.I RATELIMIT_DIR/.global
+\fIRATELIMIT_DIR/.global\fR
 For recpient domains that do not have a local rate control definition and
 do not match any line in RATELIMIT_DIR/ratecontrol, this file serves as the
 rate control definition for all such domains. This definition does not apply
@@ -547,11 +446,10 @@ individually to the recipient domains but to sum total of all such remaining
 domains that do not have a local definition.
 
 .SH "External BOUNCE Processor"
-.B qmail-send
-will execute an external program defined by the environment variable
-.I BOUNCEPROCESSOR
-(if set) when delivery to a recipient fails. The external program will be
-called with the following arguments
+\fBqmail-send\fR will execute an external program defined by the
+environment variable \fBBOUNCEPROCESSOR\fR (if set) when delivery to a
+recipient fails. The external program will be called with the following
+arguments
 
 .I original_message_file
 .I bounce_file
@@ -577,8 +475,8 @@ schedule for a message that's undeliverable to a recipient
 until it bounces. Local messages a similar, but more frequent,
 schedule than remote messages.
 
-.B Local Retry Schedule
-is governed by 100 * (x * x), where x is the try number
+\fBLocal Retry Schedule\fR is governed by 100 * (x * x), where x is the try
+number
 
 .TS
 l l.
