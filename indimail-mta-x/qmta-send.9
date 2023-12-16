@@ -38,8 +38,8 @@ additional user \fIqmaill\fR and group \fInofiles\fR is required.
    # qmta-send ./Maildir/
 
 3. run qmta-send as a daemon and use PREFIX/sbin/qmail-lspawn to handle
-   local deliveries, PREFIX/sbin/qmail-rspawn to handle remote deliveries,
-   PREFIX/sbin/qmail-clean to do cleanups.
+   local delivery, PREFIX/sbin/qmail-rspawn to handle remote delivery,
+   PREFIX/sbin/qmail-clean to do cleanup.
 
    # qmta-send -dlrc ./Maildir/
 .EE
@@ -186,7 +186,7 @@ daemon mode. Run continuously in the background.
 
 .TP
 \fB\-l\fR
-use qmail-lspawn to spawn local deliveries instead of built-in spawn
+use qmail-lspawn to spawn local delivery instead of built-in spawn
 function
 
 .TP
@@ -195,7 +195,7 @@ Process \fItodo\fR, \fIintd\fR as having subdirectory split.
 
 .TP
 \fB\-r\fR
-use qmail-rspawn to spawn remoe deliveries instead of built-in spawn
+use qmail-rspawn to spawn remote delivery instead of built-in spawn
 function
 
 .TP
