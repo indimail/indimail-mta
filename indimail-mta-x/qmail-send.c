@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.110 2023-12-13 20:48:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.111 2023-12-16 21:41:56+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -93,6 +93,7 @@ static stralloc doublebouncehost = { 0 };
 static cmap     mappercenthack;
 static cmap     maplocals;
 
+static char     mypid[FMT_ULONG];
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 static char    *qident;
@@ -147,24 +148,21 @@ static void
 sigterm()
 {
 	flagexitsend = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
 }
 
 static void
 sigalrm()
 {
 	flagrunasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "alert: ", argv0, ": pid ", strnum1, " got ALRM: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": pid ", mypid, " got ALRM: ", queuedesc, "\n", NULL);
 }
 
 static void
 sighup()
 {
 	flagreadasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "alert: ", argv0, ": pid ", strnum1, " got HUP: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": pid ", mypid, " got HUP: ", queuedesc, "\n", NULL);
 }
 
 static void
@@ -1450,7 +1448,6 @@ del_dochan(int c)
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
 				slog(1, "warn: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", NULL);
 			else {
-				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
 					if (jo[del[c][delnum].j].flagdying) {
 						dline[c].s[2] = 'D';
@@ -1462,6 +1459,7 @@ del_dochan(int c)
 							nomem(argv0);
 					}
 				}
+				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				switch (dline[c].s[2])
 				{
 				case 'K':
@@ -2426,6 +2424,7 @@ main(int argc, char **argv)
 	struct timeval  tv;
 	char           *ptr;
 
+	mypid[fmt_ulong(mypid, getpid())] = 0;
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
 	if (!(queuedir = env_get("QUEUEDIR")))
@@ -2689,8 +2688,7 @@ main(int argc, char **argv)
 		}
 	} /*- while (!flagexitsend || !can_exit || flagtodoalive) */
 	pqfinish();
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n", NULL);
+	slog(1, "info: ", argv0, ": pid ", mypid, " ", queuedesc, " exiting\n", NULL);
 #ifdef HASLIBRT
 	shm_unlink(queuedesc);
 #endif
@@ -2700,7 +2698,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.110 2023-12-13 20:48:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.111 2023-12-16 21:41:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2710,6 +2708,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.111  2023-12-16 21:41:56+05:30  Cprogrammer
+ * removed multiple calls to getpid()
+ *
  * Revision 1.110  2023-12-13 20:48:27+05:30  Cprogrammer
  * added concept of half-detached/full-detached mode
  *

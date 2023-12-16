@@ -107,6 +107,10 @@ o - New program rd-remote with the same interface as qmail-remote for
 - 15/12/2023
 64. slowq-send.c: use value of TODO_PROCESSOR env variable to run todo
     processor
+- 16/12/2023
+65. slowq-send.c, qmail-send.c, qmta-send.c: removed multiple calls to
+    getpid()
+66. qmta-send.c: write pid to queue/lock/pid for identity
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

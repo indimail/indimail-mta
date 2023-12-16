@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.33 2023-12-15 23:07:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.34 2023-12-16 21:35:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -94,6 +94,7 @@ static stralloc doublebouncehost = { 0 };
 static cmap     mappercenthack;
 static cmap     maplocals;
 
+static char     mypid[FMT_ULONG];
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 
@@ -193,18 +194,16 @@ static void
 sigterm()
 {
 	flagexitsend = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	if (todopid)
 		kill(todopid, SIGTERM);
-	slog(1, "alert: ", argv0, ": ", strnum1, ": got TERM: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": ", mypid, ": got TERM: ", queuedesc, "\n", NULL);
 }
 
 static void
 sigterm_todo()
 {
 	sig_block(sig_term);
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	todo_log("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n", NULL);
+	todo_log("alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
 	if (!flagexittodo)
 		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
 	flagexittodo = 1;
@@ -214,16 +213,14 @@ static void
 sigalrm()
 {
 	flagrunasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "alert: ", argv0, ": ", strnum1, ": got ALRM: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": ", mypid, ": got ALRM: ", queuedesc, "\n", NULL);
 }
 
 static void
 sighup()
 {
 	flagreadasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "alert: ", argv0, ": ", strnum1, ": got HUP: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": ", mypid, ": got HUP: ", queuedesc, "\n", NULL);
 }
 
 static void
@@ -543,10 +540,9 @@ comm_write_todo(unsigned long id, int local, int remote)
 	else
 		s = "X";
 	pos = comm_buf_todo.len;
-	strnum1[fmt_ulong(strnum1, id)] = 0;
 	if (!stralloc_cats(&comm_buf_todo, "D") ||
 			!stralloc_cats(&comm_buf_todo, s) ||
-			!stralloc_cats(&comm_buf_todo, strnum1) ||
+			!stralloc_catb(&comm_buf_todo, strnum1, fmt_ulong(strnum1, id)) ||
 			!stralloc_0(&comm_buf_todo))
 		goto fail;
 	return;
@@ -682,15 +678,13 @@ comm_read_todo(fd_set *wfds, fd_set *rfds)
 			{
 			case 'A': /*- attached mode */
 				flagdetached = 0;
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				todo_log("alert: ", argv0, ": pid ", strnum1,
+				todo_log("alert: ", argv0, ": pid ", mypid,
 					" got 'A' command: todo-processor attached: ",
 					queuedesc, "\n", NULL);
 				break;
 			case 'D': /*- detached mode */
 				flagdetached = 1;
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				todo_log("alert: ", argv0, ": pid ", strnum1,
+				todo_log("alert: ", argv0, ": pid ", mypid,
 					" got 'D' command: todo-processor detached: ",
 					queuedesc, "\n", NULL);
 				break;
@@ -749,11 +743,9 @@ comm_info_todo(unsigned long id, unsigned long size, char *from, unsigned long p
 	pos = comm_buf_todo.len;
 	if (!stralloc_cats(&comm_buf_todo, "Linfo msg "))
 		goto fail;
-	strnum1[fmt_ulong(strnum1, id)] = 0;
-	strnum2[fmt_ulong(strnum2, size)] = 0;
-	if (!stralloc_cats(&comm_buf_todo, strnum1) ||
+	if (!stralloc_catb(&comm_buf_todo, strnum1, fmt_ulong(strnum1, id)) ||
 			!stralloc_cats(&comm_buf_todo, ": bytes ") ||
-			!stralloc_cats(&comm_buf_todo, strnum2) ||
+			!stralloc_catb(&comm_buf_todo, strnum2, fmt_ulong(strnum2, size)) ||
 			!stralloc_cats(&comm_buf_todo, " from <"))
 		goto fail;
 	i = comm_buf_todo.len;
@@ -768,11 +760,9 @@ comm_info_todo(unsigned long id, unsigned long size, char *from, unsigned long p
 	}
 	if (!stralloc_cats(&comm_buf_todo, "> qp "))
 		goto fail;
-	strnum1[fmt_ulong(strnum1, pid)] = 0;
-	strnum2[fmt_ulong(strnum2, uid)] = 0;
-	if (!stralloc_cats(&comm_buf_todo, strnum1) ||
+	if (!stralloc_catb(&comm_buf_todo, strnum1, fmt_ulong(strnum1, pid)) ||
 			!stralloc_cats(&comm_buf_todo, " uid ") ||
-			!stralloc_cats(&comm_buf_todo, strnum2) ||
+			!stralloc_catb(&comm_buf_todo, strnum2, fmt_ulong(strnum2, uid)) ||
 			!stralloc_cats(&comm_buf_todo, " ") ||
 			!stralloc_cats(&comm_buf_todo, queuedesc) ||
 			!stralloc_cats(&comm_buf_todo, "\n") ||
@@ -1825,7 +1815,6 @@ del_dochan(int c)
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
 				slog(1, "warn: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", NULL);
 			else {
-				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
 					if (jo[del[c][delnum].j].flagdying) {
 						dline[c].s[2] = 'D';
@@ -1837,6 +1826,7 @@ del_dochan(int c)
 							nomem(argv0);
 					}
 				}
+				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				switch (dline[c].s[2])
 				{
 				case 'K':
@@ -3281,8 +3271,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 				comm_read_todo(&wfds, &rfds); /*- communicate with slowq-send on fd 0, fd 1 */
 			}
 		} /*- while (!flagexitsend) */
-		strnum1[fmt_ulong(strnum1, getpid())] = 0;
-		todo_log("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n", NULL);
+		todo_log("info: ", argv0, ": pid ", mypid, " ", queuedesc, " exiting\n", NULL);
 		_exit(0);
 	default:
 		close(pi1[1]);
@@ -3513,6 +3502,7 @@ main(int argc, char **argv)
 	struct timeval  tv;
 	char           *ptr;
 
+	mypid[fmt_ulong(mypid, getpid())] = 0;
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/slowq"; /*- single queue like qmail */
 	ptr = env_get("RATELIMIT_DIR");
@@ -3786,15 +3776,14 @@ main(int argc, char **argv)
 		}
 	} /*- while (!flagexitsend || !del_canexit()) */
 	pqfinish();
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n", NULL);
+	slog(1, "info: ", argv0, ": pid ", mypid, " ", queuedesc, " exiting\n", NULL);
 	return (0);
 }
 
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.33 2023-12-15 23:07:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.34 2023-12-16 21:35:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3804,6 +3793,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.34  2023-12-16 21:35:23+05:30  Cprogrammer
+ * removed multiple calls to getpid()
+ *
  * Revision 1.33  2023-12-15 23:07:44+05:30  Cprogrammer
  * use value of TODO_PROCESSOR env variable to run todo processor
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.26 2023-12-04 23:27:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.27 2023-12-16 21:44:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -86,6 +86,7 @@ typedef struct constmap cmap;
 static cmap     mappercenthack;
 static cmap     maplocals;
 static cmap     mapvdoms;
+static char     mypid[FMT_ULONG];
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 datetime_sec    recent;
@@ -180,22 +181,19 @@ static void
 sigterm()
 {
 	flagexitasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "info: ", argv0, ": ", strnum1, ": got TERM\n", NULL);
+	slog(1, "info: ", argv0, ": ", mypid, ": got TERM\n", NULL);
 }
 
 void sigalrm()
 {
 	flagrunasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "info: ", argv0, ": ", strnum1, ": got ALRM\n", NULL);
+	slog(1, "info: ", argv0, ": ", mypid, ": got ALRM\n", NULL);
 }
 
 void sighup()
 {
 	flagreadasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	slog(1, "info: ", argv0, ": ", strnum1, ": got HUP\n", NULL);
+	slog(1, "info: ", argv0, ": ", mypid, ": got HUP\n", NULL);
 }
 
 static void
@@ -1316,7 +1314,6 @@ del_dochan(int c)
 			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
 				slog(1, "warn: ", argv0, ": internal error: delivery report out of range\n", NULL);
 			else {
-				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				if (dline[c].s[2] == 'Z') {
 					if (jo[del[c][delnum].j].flagdying) {
 						dline[c].s[2] = 'D';
@@ -1328,6 +1325,7 @@ del_dochan(int c)
 							nomem(argv0);
 					}
 				}
+				strnum1[fmt_ulong(strnum1, del[c][delnum].delid)] = 0;
 				switch (dline[c].s[2])
 				{
 				case 'K':
@@ -2586,12 +2584,13 @@ check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 int
 main(int argc, char **argv)
 {
-	int             c, nfds, fd, daemon_mode, flagqfix;
+	int             c, nfds, fd, pidfd, pidlen, daemon_mode, flagqfix;
 	char           *ptr;
 	datetime_sec    wakeup;
 	fd_set          rfds, wfds;
 	struct timeval  tv;
 
+	mypid[pidlen = fmt_ulong(mypid, getpid())] = 0;
 	c = str_rchr(argv[0], '/');
 	argv0 = (argv[0][c] && argv[0][c + 1]) ? argv[0] + c + 1 : argv[0];
 	check_usage(argc, argv, &daemon_mode, &flagqfix);
@@ -2640,6 +2639,11 @@ main(int argc, char **argv)
 		strerr_die3x(111, "alert: ", argv0, ": cannot start: unable to open mutex");
 	if (lock_exnb(fd) == -1)
 		strerr_die3x(111, "alert: ", argv0, " is already running");
+	if ((pidfd = open_trunc("lock/pid")) == -1)
+		strerr_die3x(111, "alert: ", argv0, ": cannot start: unable to create lock/pid");
+	if (write(pidfd, mypid, pidlen) == -1)
+		strerr_die3x(111, "alert: ", argv0, ": cannot start: unable to write lock/pid");
+	close(pidfd);
 	if (argc - optind > 0)
 		qlargs[1] = argv[optind];
 	run_daemons(argv, argc - optind > 1 ? argv + optind + 1 : 0);
@@ -2764,7 +2768,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.26 2023-12-04 23:27:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.27 2023-12-16 21:44:01+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2772,6 +2776,10 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.27  2023-12-16 21:44:01+05:30  Cprogrammer
+ * write pid to queue/lock/pid
+ * removed multiple calls to getpid()
+ *
  * Revision 1.26  2023-12-04 23:27:14+05:30  Cprogrammer
  * flagchan wasn't initialized in process_todo()
  *
