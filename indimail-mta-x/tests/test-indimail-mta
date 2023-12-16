@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.57 2023-12-16 12:31:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.58 2023-12-16 22:21:07+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -7863,7 +7863,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=283
+	total_tests=282
 fi
 failed=0
 do_setup
@@ -7885,7 +7885,7 @@ secs=0.0
 printf "\r%118s\n" " "
 for i in QMAILQUEUE envdir tcpclient-tcp tcpclient-ssl tcpclient-unix \
 	maildirdeliver bounce 822header 822body qmail-getpw nodnscheck rd-remote \
-	maildirsmtp qmta-send fetchmail
+	maildirsmtp fetchmail
 do
 	tcount=$(expr $tcount + 1)
 	printf "\r  implicit test %20s succeeded %57s [%.4f sec]\n" $i " " $secs
@@ -7925,6 +7925,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.58  2023-12-16 22:21:07+05:30  Cprogrammer
+# updated test script
+#
 # Revision 1.57  2023-12-16 12:31:15+05:30  Cprogrammer
 # added test for qmta-send
 #
