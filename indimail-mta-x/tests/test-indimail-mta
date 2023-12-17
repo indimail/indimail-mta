@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.59 2023-12-17 21:06:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.59 2023-12-17 21:36:23+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -143,9 +143,10 @@ do_cleanup_failed()
 		[ -z "$qmta_pid2" ] && qmta_pid2=$(get_send_pid qmta-send $testdir/qmta2)
 		terminate_send qmta-send "$qmta_pid2"
 	fi
-	sudo /bin/rm -rf $servicedir $logdir $testdir/queue $testdir/slowq1 $testdir/slowq2 $testdir/qmta $testdir/domainqueue \
-		$testdir/bin $tmpdir $testdir/run $testdir/sleep.out $testdir/svscan.out $testdir/tcpclient.smtp \
-		$testdir/.vacation.dir/* $testdir/.vacation.msg \
+	sudo /bin/rm -rf $servicedir $logdir \
+		$testdir/queue $testdir/slowq1 $testdir/slowq2 $testdir/qmta $testdir/qmta1 $testdir/qmta2 \
+		$testdir/domainqueue $testdir/bin $tmpdir $testdir/run $testdir/sleep.out $testdir/svscan.out \
+		$testdir/tcpclient.smtp $testdir/.vacation.dir/* $testdir/.vacation.msg \
 		$testdir/$user/Maildir/new/* $testdir/$testuser/Maildir/new/* \
 		$testdir/$testuser/Maildir/.Quarantine $testdir/$testuser/Maildir/.Spam \
 		$qmaildir/alias/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/cur/* \
@@ -5543,7 +5544,8 @@ do_without_svscan2()
 	test_qmail_inject $user $user $testdir/queue
 	test_qmail_inject $user $user $testdir/slowq1
 	test_qmail_inject $user $user $testdir/slowq2
-	test_qmail_inject $user $user $testdir/qmta
+	test_qmail_inject $user $user $testdir/qmta1
+	test_qmail_inject $user $user $testdir/qmta2
 	echo
 	failed=1
 	exit 1
@@ -7961,7 +7963,7 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
-# Revision 1.59  2023-12-17 21:06:27+05:30  Cprogrammer
+# Revision 1.59  2023-12-17 21:36:23+05:30  Cprogrammer
 # added tests for qmta-send
 #
 # Revision 1.58  2023-12-16 22:21:07+05:30  Cprogrammer
