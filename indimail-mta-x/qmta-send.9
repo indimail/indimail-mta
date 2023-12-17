@@ -27,30 +27,71 @@ doesn't require \fBtodo-proc\fR, \fBqmail-lspawn\fR, \fBqmail-rspawn\fR,
 user \fIqmails\fR if \fB\-c\fR is used. If \fIlogger\fR argument is given,
 additional user \fIqmaill\fR and group \fInofiles\fR is required.
 
+If used without the \fB\-c\fR option, \fBqmta-send\fR needs special
+permissions for the queue, which can be created/fixed by running
+\fBqueue-fix\fR(8) with the \fB\-m\fR option. One can also use the
+\fB\-f\fR option with \fBqmta-send\fR to fix queue permissions during
+startup.
+
+If used with the \fB\-c\fR option, where \fBqmta-send\fR runs
+\fBqmail-clean\fR(8) to handle cleanup job, \fBqmta-send\fR doesn't require
+any special permission for the queue. The same queue permission as required
+for \fBqmail-send\fR or \fBslowq-send\fR will work for \fBqmta-send\fR.
+
 .EX
-1. run qmta-send as a daemon.
+1. Setup a queue for qmta-send
+   mkdir -p /home/johndoe
 
-   # qmta-send -d ./Maildir/
+   # If using qmta-send with -c option
+   queue-fix -m -s 23 -b 0 /home/johndoe/qmta
 
-2. run qmta-send to deliver mails currently in the queue and exit after
+   # If using qmta-send without -c option
+   queue-fix -s 23 -b 0 /home/johndoe/qmta
+
+2. run qmta-send as a daemon.
+
+   $ sudo env - QUEUE_BASE=/home/johndoe QUEUEDIR=/home/johndoe/qmta \
+       CONFSPLIT=23 BIGTODO=0 qmta-send -d ./Maildir/
+
+3. run qmta-send to deliver mails currently in the queue and exit after
    delivery.
 
-   # qmta-send ./Maildir/
+   $ sudo env - QUEUE_BASE=/home/johndoe QUEUEDIR=/home/johndoe/qmta \
+       CONFSPLIT=23 BIGTODO=0 qmta-send ./Maildir/
 
-3. run qmta-send as a daemon and use PREFIX/sbin/qmail-lspawn to handle
+4. run qmta-send as a daemon and use PREFIX/sbin/qmail-lspawn to handle
    local delivery, PREFIX/sbin/qmail-rspawn to handle remote delivery,
-   PREFIX/sbin/qmail-clean to do cleanup.
+   PREFIX/sbin/qmail-clean to do cleanup. Since this is used with -c
+   option, this requires queue to be created using queue-fix with -m
+   option.
 
-   # qmta-send -dlrc ./Maildir/
+   $ sudo env - QUEUE_BASE=/home/johndoe QUEUEDIR=/home/johndoe/qmta \
+       CONFSPLIT=23 BIGTODO=0 qmta-send -dlrc ./Maildir/
+
+5. for the above examples you can inject mail in the qmta queue by setting
+   QUEUEDIR=/home/johndoe/qmta.
+
+   $ env QUEUEDIR=/home/johndoe/qmta mail -s test mbhangui < /etc/hosts
 .EE
 
-Though not necessary, \fBqmta-send\fR can invoke \fBqmail-lspawn\fR (-l
-option), \fBqmail-rspawn\fR (-r option), \fBqmail-clean\fR (-c option)
+Though not necessary, \fBqmta-send\fR can offload the job of local, remote
+deliveries, queue cleanup to \fBqmail-local\fR, \fBqmail-remote\fR and
+\fBqmail-clean\fR respectively. \fBqmta-send\fR invokes \fBqmail-lspawn\fR
+(-l option), \fBqmail-rspawn\fR (-r option), \fBqmail-clean\fR (-c option)
 under the proper uids and gids for a queue defined by the environment
 variable \fBQUEUEDIR\fR. These four daemons cooperate to deliver messages
 from the queue. \fBqmta-send\fR by default uses \fIQMAILHOME/queue/qmta\fR
 as the queue directory for messages. This path can be changed by defining
 the \fBQUEUEDIR\fR environment variable.
+
+If running as non-root, \fBqmta-send\fR uses environment set according
+to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
+if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If \fBQUEUE_BASE\fR environment
+variable is not set, it additionally uses environment set according to
+files in @controldir@/defaultqueue directory (for any uid). You can set
+\fBQUEUE_BASE\fR environment variable to prevent any existing environment
+variable from getting overwritten by environment variable files in
+@controldir@/defaultqueue directory.
 
 \fBqmta-send\fR borrows most of it's code from \fBqmail-send\fR. The todo
 run can be adjusted by setting the environment variable \fBTODO_INTERVAL\fR
@@ -123,12 +164,6 @@ with or without the \fItodo\fR, \fIintd\fR having subdirectory split. Set
 the environment variable \fBBIGTODO\fR to process a big \fItodo\fR,
 \fIintd\fR subdirectory.
 
-If running as non-root, \fBqmta-send\fR uses environment set according
-to files in $HOME/.defaultqueue directory. You can skip $HOME/.defaultqueue
-if \fBSKIP_LOCAL_ENVIRONMENT\fR is set. If \fBQUEUE_BASE\fR environment
-variable is not set, it additionally uses environment set according to
-files in @controldir@/defaultqueue directory (for any uid).
-
 On Linux distributions, \fBqmta-send\fR can be started by \fBsystemd\fR(1),
 using the unit file \fIPREFIX/share/indimail/boot/qmta-send.service\fR. You
 need to copy this file to /usr/lib/systemd/system and then use the
@@ -187,7 +222,7 @@ daemon mode. Run continuously in the background.
 .TP
 \fB\-l\fR
 use qmail-lspawn to spawn local delivery instead of built-in spawn
-function
+function.
 
 .TP
 \fB\-b\fR
@@ -200,11 +235,16 @@ function
 
 .TP
 \fB\-c\fR
-use qmail-clean for cleanup instead of the built-in clean mechansim. 
+use qmail-clean for cleanup instead of the built-in clean mechansim.
+Without this option, special queue permission is required that can be fixed
+by running \fBqueue-fix\fR(8) on the queue with \fB\-m\fR option. This can
+also be done by running \fBqmta-send\fR with the \fB\-f\fR option.
 
 .TP
 \fB\-f\fR
-use queue-fix to fix the queue
+use queue-fix to fix the queue. This can be given if you alternate
+\fBqmta-send\fR runs with \fB\-c\fR option and without \fB\-c\fR option or
+vice-versa.
 
 .TP
 \fB\-s\fR \fIsplit\fR
