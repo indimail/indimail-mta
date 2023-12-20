@@ -20,32 +20,31 @@ invoked instead.
 \fBqmail-lspawn\fR sets the environment variable \fBMESSID\fR pointing
 message file in the queue.
 
-For each recipient address, \fBqmail-lspawn\fR finds out which local user
-controls that address. It first checks the \fBqmail-users\fR mechanism; if
-the address is not listed there, it invokes \fBqmail-getpw\fR(8).
-\fBqmail-lspawn\fR then runs \fBqmail-local\fR under the user's uid and
-gid. For address fetched using \fBqmail-getpw\fR, it sets up supplementary
-groups for the user if the environment variable \fBSETUSER_PRIVILEGES\fR is
-set. \fBqmail-lspawn\fR does not perform deliveries as root. If the
-environment variable \fBQMAILGETPW\fR is set, \fBqmail-lspawn\fR will call
-the binary as set in \fBQMAILGETPW\fR instead of qmail-getpw.
+\fBqmail-lspawn\fR runs with uid 0. For each recipient address,
+\fBqmail-lspawn\fR finds out which local user controls that address. It
+first checks the \fBqmail-users\fR mechanism; if the address is not listed
+there, it invokes \fBqmail-getpw\fR(8). \fBqmail-lspawn\fR then runs
+\fBqmail-local\fR under the user's uid and gid. For address fetched using
+\fBqmail-getpw\fR, it sets up supplementary groups for the user if the
+environment variable \fBSETUSER_PRIVILEGES\fR is set. \fBqmail-lspawn\fR
+does not perform deliveries as root. If the environment variable
+\fBQMAILGETPW\fR is set, \fBqmail-lspawn\fR will call the binary defined by
+\fBQMAILGETPW\fR, instead of qmail-getpw.
 
 If the environment variable \fBAUTHSELF\fR is set, \fBqmail-lspawn\fR
 connects to MySQL and fetches user records for virtual domains in
 \fIvirtualdomains\fR control file. If connecton to MySQL fails,
-\fBqmail-lspawn\fR exits with -2. For an empty mailbox name (e.g. double
-bounces to virtual domains), mails can be routed to user defined by
-\fBROUTE_NULL_USER\fR environment variable. If this variable is set but
-empty, \fBqmail-lspawn\fR will treat the empty mailbox name as a trash
-address. If the domain portion, belongs to a virtual domain on the host,
-the mail will be routed to the mailbox name at the virtual domain. If the
-domain portion, doesn't belong to a virtual domain set in IndiMail, the
-mail will be silently deliverd to local user, ignoring the domain name
-following the '@' sign.
-
-For all other cases not covered by setting \fbAUTHSELF\fR environment
-variable, \fBqmail-lspawn\fR treats an empty mailbox name as a trash
-address.
+\fBqmail-lspawn\fR exits with -2, resulting in a deferral. For an empty
+mailbox name (e.g. double bounces to virtual domains), mails can be routed
+to user defined by \fBROUTE_NULL_USER\fR environment variable. If this
+variable is set but empty, \fBqmail-lspawn\fR will treat the empty mailbox
+name as a trash address. If the domain portion, belongs to a virtual domain
+on the host, the mail will be routed to the mailbox name at the virtual
+domain. If the domain portion, doesn't belong to a virtual domain set in
+IndiMail, the mail will be silently deliverd to local user, ignoring the
+domain name following the '@' sign. For all other cases not covered by
+setting \fbAUTHSELF\fR environment variable, \fBqmail-lspawn\fR treats an
+empty mailbox name as a trash address.
 
 .SH Virtual Package Functionality
 \fBqmail-lspawn\fR can load an external library to add functionality. The
@@ -58,22 +57,23 @@ isn't defined the external library will not be loaded.
 
 Following functions should be provided by the shared library for adding
 features to qmail-lspawn - isvirtualdomain(), iopen(), sql_getpw(),
-iclose(). If such a library is opened \fBqmail-lspawn\fR connects to
-MySQL(1) and sets the environment variable \fBPWSTRUCT\fR having the passwd
-structure for the user. The environment variable is set to "No such user"
-in case the user is not found in the local MySQL database. This environment
-variable can be used by delivery agents without having to read the passwd
-file or a database. For a user-cluster domain, if a mail is injected for a
-user not found in the local MySQL database, \fBqmail-lspawn\fR will set
-PWSTRUCT to "No such user". However, a delivery agent like
-\fBvdelivermail(8)\fR reroutes the email to the correct destination host
-which has the user account, using \fBqmail-remote\fR.
+iclose() (and inquery() if using cache from \fBinlookup\fR(8) daemon. If
+such a library is opened \fBqmail-lspawn\fR connects to MySQL(1) and sets
+the environment variable \fBPWSTRUCT\fR having the passwd structure for the
+user. The environment variable is set to "No such user" in case the user is
+not found in the local MySQL database. This environment variable can be
+used by delivery agents without having to read the passwd file or a
+database. For a user-cluster domain, if a mail is injected for a user not
+found in the local MySQL database, \fBqmail-lspawn\fR will set PWSTRUCT to
+"No such user". However, a delivery agent like \fBvdelivermail(8)\fR
+reroutes the email to the correct destination host which has the user
+account, using \fBqmail-remote\fR. \fBqmail-lspawn\fR can get cached
+results from \fBinlookup\fR(8) daemon if \fBQUERY_CACHE\fR environment
+variable is set. When using cache, \fBqmail-lspawn\fR avoids connecting to
+MySQL each time a record for a user account needs to be fetched.
 
 \fBqmail-lspawn\fR goes ahead without attempting to load external library
-if \fBAUTHSELF\fR was not set.
-
-.B qmail-lspawn
-runs with uid 0.
+if \fBAUTHSELF\fR is not set.
 
 .SH "SEE ALSO"
 envelopes(5),

@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.15  2023-12-20 11:14:46+05:30  Cprogrammer
+ * added -r option to set mailx return path
+ *
  * Revision 1.14  2022-03-05 13:38:12+05:30  Cprogrammer
  * use auto_prefix/sbin for qmail-smtpd, auto_prefix/bin for qmail-inject, qmail-qread path
  *
@@ -146,7 +149,7 @@ main(int argc, char **argv)
 
 	flagh = 0;
 	sender = 0;
-	while ((opt = getopt(argc, argv, "ULhnIAvimte:f:p:o:B:F:EJxb:")) != opteof) {
+	while ((opt = getopt(argc, argv, "ULhnIAvimte:f:r:p:o:B:F:EJxb:")) != opteof) {
 		switch (opt)
 		{
 		case 'B': /*- ignored */
@@ -174,6 +177,7 @@ main(int argc, char **argv)
 			flagh = 1;
 			break;
 		case 'f':
+		case 'r':
 			sender = optarg;
 			break;
 		case 'N': /* ignore DSN option */
@@ -274,7 +278,7 @@ main(int argc, char **argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.14 2022-03-05 13:38:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sendmail.c,v 1.15 2023-12-20 11:14:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

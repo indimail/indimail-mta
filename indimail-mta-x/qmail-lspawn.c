@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-lspawn.c,v 1.45 2023-10-03 22:48:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-lspawn.c,v 1.46 2023-12-20 11:13:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -302,29 +302,89 @@ copy_pwstruct(struct passwd *pw, char *recip, int at, int is_inactive)
 	return;
 }
 
+#ifdef ENABLE_VIRTUAL_PKG
+int
+set_pwstruct(char *recip, int at, char *libptr, void *phandle, int (*isvirtualdomain) (char *))
+{
+	int             f;
+	struct passwd  *pw;
+	int             (*iopen) (char *);
+	void            (*iclose) (void);
+	void           *(*inquery) (char, char *, char *);
+	int            *u_not_found, *i_inactive;
+	struct passwd*  (*sql_getpw) (char *, char *);
+
+	if (env_get("QUERY_CACHE")) {
+		f = str_len(recip + at + 1);
+		if (!(inquery = getlibObject(libptr, &phandle, "inquery", 0)))
+			return -1;
+		if ((pw = (*inquery) (PWD_QUERY, recip + f + 1, 0))) {
+			if (!(i_inactive = (int *) getlibObject(libptr, &phandle, "is_inactive", 0)))
+				return -3;
+			copy_pwstruct(pw, recip, at, *i_inactive);
+			if (!env_put(pwstruct.s))
+				return -1;
+		}
+	} else {
+		if (!(iopen = getlibObject(libptr, &phandle, "iopen", 0)) ||
+				!(sql_getpw = getlibObject(libptr, &phandle, "sql_getpw", 0)) ||
+				!(iclose = getlibObject(libptr, &phandle, "iclose", 0)))
+			return -3;
+		if ((*iopen) ((char *) 0))
+			return -2;
+		if ((pw = (struct passwd *) (*sql_getpw) (user.s, recip + at + 1))) {
+			if (!(i_inactive = (int *) getlibObject(libptr, &phandle, "is_inactive", 0))) {
+				(*iclose) ();
+				return -3;
+			}
+			copy_pwstruct(pw, recip, at, *i_inactive);
+			if (!env_put(pwstruct.s)) {
+				(*iclose) ();
+				return -1;
+			}
+		} else
+			(*iclose) ();
+	}
+	if (pw)
+		return 0;
+	if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
+		return -3;
+	if (*u_not_found) {
+		if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user ") ||
+				!stralloc_cats(&pwstruct, user.s) ||
+				!stralloc_append(&pwstruct, "@") ||
+				!stralloc_cats(&pwstruct, recip + at + 1) ||
+				!stralloc_0(&pwstruct) ||
+				!env_put(pwstruct.s))
+			return -1;
+	} else
+		return -2;
+	return 0;
+}
+#endif
+
+/*
+ * for indimail return
+ * -1 - system error
+ * -2 - temporary mysql error
+ * -3 - error with loading virtual library
+ * -4 - unable to fork
+ */
 int
 SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, char *recip_t, int at_t)
 {
 	int             f, at = at_t;
 	char           *ptr, *recip = recip_t;
-#ifdef ENABLE_VIRTUAL_PKG
-	/*- indimail */
+#ifdef ENABLE_VIRTUAL_PKG /*- for indimail */
 	char           *libptr, *tptr;
 	int             len;
-	struct passwd  *pw;
 	extern void    *phandle;
-	void            (*iclose) (void);
 	int             (*isvirtualdomain) (char *);
-	int             (*iopen) (char *);
-	void *          (*inquery) (char, char *, char *);
-	int            *u_not_found, *i_inactive;
-	struct passwd*  (*sql_getpw) (char *, char *);
 #endif
 
 	if (!env_unset("QMAILREMOTE"))
 		_exit (-1);
 #ifdef ENABLE_VIRTUAL_PKG
-	/*- indimail */
 	if (!env_get("AUTHSELF"))
 		goto noauthself;
 	if (!(libptr = env_get("VIRTUAL_PKG_LIB"))) {
@@ -337,49 +397,31 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 					(libfn.s[libfn.len - 1] != '/' && !stralloc_append(&libfn, "/")) ||
 					!stralloc_catb(&libfn, "libindimail", 11) ||
 					!stralloc_0(&libfn))
-				_exit (-1);
+				return -1;
 		}
 		libptr = libfn.s;
 	} else
 		libptr = "VIRTUAL_PKG_LIB";
 	loadLibrary(&phandle, libptr, &f, 0);
 	if (f)
-		_exit (-3);
+		return -3;
 	if (!phandle)
 		goto noauthself;
-	if (!(isvirtualdomain = getlibObject(libptr, &phandle, "isvirtualdomain", 0)) ||
-			!(iopen = getlibObject(libptr, &phandle, "iopen", 0)) ||
-			!(sql_getpw = getlibObject(libptr, &phandle, "sql_getpw", 0)) ||
-			!(iclose = getlibObject(libptr, &phandle, "iclose", 0)) ||
-			!(inquery = getlibObject(libptr, &phandle, "inquery", 0)))
-		_exit (-3);
+	if (!(isvirtualdomain = getlibObject(libptr, &phandle, "isvirtualdomain", 0)))
+		return -3;
 	/*-
 	 * recip = example1-example2.com-some_user@example1-example2.com
 	 * recip + at + 1 = example1-example2.com
 	 */
-	if (env_get("QUERY_CACHE")) {
-		if ((*isvirtualdomain) (recip + at + 1)) {
-			if (!env_unset("PWSTRUCT"))
-				_exit (-1);
-			f = str_len(recip + at + 1);
-			if ((pw = (*inquery) (PWD_QUERY, recip + f + 1, 0))) {
-				if (!(i_inactive = (int *) getlibObject(libptr, &phandle, "is_inactive", 0)))
-					_exit (-3);
-				copy_pwstruct(pw, recip, at, *i_inactive);
-				if (!env_put(pwstruct.s))
-					_exit (-1);
-			}
-		}
-	} else
-	if ((*isvirtualdomain) (recip + at + 1) && !(*iopen) ((char *) 0)) {
+	if ((*isvirtualdomain) (recip + at + 1)) {
 		if (!env_unset("PWSTRUCT"))
-			_exit (-1);
+			return -1;
 		f = str_len(recip + at + 1); /*- domain length */
 		for (len = 0, ptr = recip + f + 1; *ptr && *ptr != '@'; ptr++, len++);
 		if (len) {
 			if (!stralloc_copyb(&user, recip + f + 1, len) || /*- copy user portion */
 					!stralloc_0(&user))
-				_exit (-1);
+				return -1;
 		} else { /*- NULL user (double bounce) */
 			if (!(ptr = env_get("ROUTE_NULL_USER")))
 				goto noauthself;
@@ -394,7 +436,7 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 				 * copy mailbox@localdomain
 				 */
 				if (!stralloc_copys(&user, ptr) || !stralloc_0(&user))
-					_exit (-1);
+					return -1;
 				recip = user.s;
 				at = len;
 				goto noauthself;
@@ -413,33 +455,14 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 					!stralloc_0(&save) ||
 					!stralloc_copyb(&user, ptr, len) || /*- copy user portion */
 					!stralloc_0(&user))
-				_exit (-1);
+				return -1;
 			recip = save.s;
 			at = f + 1 + len;
 		}
-		if ((pw = (struct passwd *) (*sql_getpw) (user.s, recip + at + 1))) {
-			if (!(i_inactive = (int *) getlibObject(libptr, &phandle, "is_inactive", 0)))
-				_exit (-3);
-			copy_pwstruct(pw, recip, at, *i_inactive);
-			if (!env_put(pwstruct.s))
-				_exit (-1);
-		} else {
-			if (!(u_not_found = (int *) getlibObject(libptr, &phandle, "userNotFound", 0)))
-				_exit (-3);
-			if (*u_not_found) {
-				if (!stralloc_copys(&pwstruct, "PWSTRUCT=No such user ") ||
-						!stralloc_cats(&pwstruct, user.s) ||
-						!stralloc_append(&pwstruct, "@") ||
-						!stralloc_cats(&pwstruct, recip + at + 1) ||
-						!stralloc_0(&pwstruct) ||
-						!env_put(pwstruct.s))
-					_exit (-1);
-			} else {
-				(*iclose) ();
-				_exit (-2);
-			}
-		}
-	} /*- if ((*isvirtualdomain) (recip_t + at_t + 1) && !(*iopen) ((char *) 0)) */
+		/*- set PWSTRUCT env variable for vdelivermail to avoid another MySQL connect */
+		if ((f = set_pwstruct(recip, at, libptr, phandle, isvirtualdomain)))
+			return f;
+	} /*- if ((*isvirtualdomain) (recip + at + 1)) */
 /*- end indimail */
 noauthself: /*- deliver to local user in control/locals */
 #endif
@@ -537,13 +560,13 @@ noauthself: /*- deliver to local user in control/locals */
 			_exit (QLX_EXECSOFT);
 		_exit (QLX_EXECHARD);
 	}
-	return f;
+	return f == -1 ? -4 : f;
 }
 
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.45 2023-10-03 22:48:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-lspawn.c,v 1.46 2023-12-20 11:13:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -551,6 +574,9 @@ getversion_qmail_lspawn_c()
 
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.46  2023-12-20 11:13:33+05:30  Cprogrammer
+ * refactored code for setting PWSTRUCT environment variable
+ *
  * Revision 1.45  2023-10-03 22:48:03+05:30  Cprogrammer
  * use env variable QMAILGETPW to execute alternate qmail-getpw
  *

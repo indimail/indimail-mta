@@ -1,84 +1,5 @@
 /*
- * $Log: spawn.c,v $
- * Revision 1.33  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.32  2021-06-29 09:29:20+05:30  Cprogrammer
- * modularize spawn code
- *
- * Revision 1.31  2021-06-27 10:39:26+05:30  Cprogrammer
- * uidnit new argument to disable/enable error on missing uids
- *
- * Revision 1.30  2021-06-24 12:17:13+05:30  Cprogrammer
- * use uidinit function proto from auto_uids.h
- *
- * Revision 1.29  2021-06-13 17:31:44+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.28  2021-05-08 12:23:15+05:30  Cprogrammer
- * use /var/indimail/queue if QUEUEDIR is not defined
- *
- * Revision 1.27  2020-11-24 13:48:16+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.26  2020-05-11 11:12:35+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.25  2019-05-27 20:29:48+05:30  Cprogrammer
- * use VIRTUAL_PKG_LIB env variable if defined
- *
- * Revision 1.24  2019-05-27 12:39:35+05:30  Cprogrammer
- * set libfn with full path of libindimail control file
- *
- * Revision 1.23  2019-05-26 12:32:58+05:30  Cprogrammer
- * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
- *
- * Revision 1.22  2019-04-20 19:53:05+05:30  Cprogrammer
- * changed interface for loadLibrary(), closeLibrary() and getlibObject()
- *
- * Revision 1.21  2018-07-15 12:24:32+05:30  Cprogrammer
- * added new error string for error related to loading libindimail
- *
- * Revision 1.20  2018-01-09 12:35:11+05:30  Cprogrammer
- * use loadLibrary() to access indimail functions()
- *
- * Revision 1.19  2016-02-08 17:29:14+05:30  Cprogrammer
- * set environment variable MESSID
- *
- * Revision 1.18  2010-07-21 21:24:57+05:30  Cprogrammer
- * added envheader code
- *
- * Revision 1.17  2009-12-10 10:46:46+05:30  Cprogrammer
- * display MySQL error
- *
- * Revision 1.16  2009-12-09 23:58:04+05:30  Cprogrammer
- * additional closeflag argument to uidinit
- *
- * Revision 1.15  2008-08-03 18:26:24+05:30  Cprogrammer
- * use proper proto
- *
- * Revision 1.14  2008-07-14 20:57:56+05:30  Cprogrammer
- * fixed compilation on 64 bit Mac OS X
- *
- * Revision 1.13  2005-06-17 21:52:34+05:30  Cprogrammer
- * removed compilation warning
- *
- * Revision 1.12  2004-10-22 20:30:31+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.11  2004-07-27 22:59:18+05:30  Cprogrammer
- * initialize qqeh
- *
- * Revision 1.10  2004-07-17 21:23:22+05:30  Cprogrammer
- * added qqeh code
- * added RCS log
- *
- * Revision 1.9  2003-12-20 02:24:20+05:30  Cprogrammer
- * make compiler happy
- *
- * Revision 1.8  2003-12-07 13:00:34+05:30  Cprogrammer
- * added out of mem message
- *
+ * $Id: spawn.c,v 1.34 2023-12-20 10:06:56+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -338,13 +259,24 @@ docmd()
 	if (f < 0) {
 		close(pi[0]);
 		close(pi[1]);
-		if (f == -2)
+		switch (f)
+		{
+		case -1:
+			err("Zqmail-spawn out of mem. (#4.3.0)\n");
+			break;
+		case -2:
 			err("Zqmail-spawn temporary MySQL error. (#4.3.0)\n");
-		else
-		if (f == -3)
+			break;
+		case -3:
 			err("Zqmail-spawn error loading indimail library. (#4.3.0)\n");
-		else
-			err("Zqmail-spawn unable to fork or out of mem. (#4.3.0)\n");
+			break;
+		case -4:
+			err("Zqmail-spawn unable to fork. (#4.3.0)\n");
+			break;
+		default:
+			err("Zqmail-spawn unknown error (qmail-lspawn bug). (#4.3.0)\n");
+			break;
+		}
 		return;
 	}
 	d[delnum].fdin = pi[0];
@@ -547,7 +479,7 @@ QSPAWN(int argc, char **argv)
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.33 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.34 2023-12-20 10:06:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -559,3 +491,89 @@ main(int argc, char **argv)
 	getversion_spawn_c(); /*- suppress compiler warning of unused function */
 }
 #endif
+
+/*
+ * $Log: spawn.c,v $
+ * Revision 1.34  2023-12-20 10:06:56+05:30  Cprogrammer
+ * added -4 for unable to fork error
+ *
+ * Revision 1.33  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.32  2021-06-29 09:29:20+05:30  Cprogrammer
+ * modularize spawn code
+ *
+ * Revision 1.31  2021-06-27 10:39:26+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
+ * Revision 1.30  2021-06-24 12:17:13+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
+ * Revision 1.29  2021-06-13 17:31:44+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.28  2021-05-08 12:23:15+05:30  Cprogrammer
+ * use /var/indimail/queue if QUEUEDIR is not defined
+ *
+ * Revision 1.27  2020-11-24 13:48:16+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.26  2020-05-11 11:12:35+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.25  2019-05-27 20:29:48+05:30  Cprogrammer
+ * use VIRTUAL_PKG_LIB env variable if defined
+ *
+ * Revision 1.24  2019-05-27 12:39:35+05:30  Cprogrammer
+ * set libfn with full path of libindimail control file
+ *
+ * Revision 1.23  2019-05-26 12:32:58+05:30  Cprogrammer
+ * use libindimail control file to load libindimail if VIRTUAL_PKG_LIB env variable not defined
+ *
+ * Revision 1.22  2019-04-20 19:53:05+05:30  Cprogrammer
+ * changed interface for loadLibrary(), closeLibrary() and getlibObject()
+ *
+ * Revision 1.21  2018-07-15 12:24:32+05:30  Cprogrammer
+ * added new error string for error related to loading libindimail
+ *
+ * Revision 1.20  2018-01-09 12:35:11+05:30  Cprogrammer
+ * use loadLibrary() to access indimail functions()
+ *
+ * Revision 1.19  2016-02-08 17:29:14+05:30  Cprogrammer
+ * set environment variable MESSID
+ *
+ * Revision 1.18  2010-07-21 21:24:57+05:30  Cprogrammer
+ * added envheader code
+ *
+ * Revision 1.17  2009-12-10 10:46:46+05:30  Cprogrammer
+ * display MySQL error
+ *
+ * Revision 1.16  2009-12-09 23:58:04+05:30  Cprogrammer
+ * additional closeflag argument to uidinit
+ *
+ * Revision 1.15  2008-08-03 18:26:24+05:30  Cprogrammer
+ * use proper proto
+ *
+ * Revision 1.14  2008-07-14 20:57:56+05:30  Cprogrammer
+ * fixed compilation on 64 bit Mac OS X
+ *
+ * Revision 1.13  2005-06-17 21:52:34+05:30  Cprogrammer
+ * removed compilation warning
+ *
+ * Revision 1.12  2004-10-22 20:30:31+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.11  2004-07-27 22:59:18+05:30  Cprogrammer
+ * initialize qqeh
+ *
+ * Revision 1.10  2004-07-17 21:23:22+05:30  Cprogrammer
+ * added qqeh code
+ * added RCS log
+ *
+ * Revision 1.9  2003-12-20 02:24:20+05:30  Cprogrammer
+ * make compiler happy
+ *
+ * Revision 1.8  2003-12-07 13:00:34+05:30  Cprogrammer
+ * added out of mem message
+ *
+ */
