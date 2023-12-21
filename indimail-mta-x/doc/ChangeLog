@@ -101,20 +101,17 @@ o - New program rd-remote with the same interface as qmail-remote for
 - 11/12/2023
 63. qmail-inject.c: do domainqueue on the recipient domain instead of the
     sender domain
-- 13/12/2023
-63. qmail-send.c, slowq-send.c: added concept of half-detached/full-detached
-    mode
-- 15/12/2023
-64. slowq-send.c: use value of TODO_PROCESSOR env variable to run todo
-    processor
 - 16/12/2023
-65. slowq-send.c, qmail-send.c, qmta-send.c: removed multiple calls to
-    getpid()
-66. qmta-send.c: write pid to queue/lock/pid for identity
+64. qmta-send.c: write pid to queue/lock/pid for identity
 - 20/12/2023
-68. spawn.c: added -4 error code for unable to fork
-69. qmail-lspawn.c: refactored code for setting PWSTRUCT environment variable
-70. sendmail.c: added -r option to set mailx return path
+65. spawn.c: added -4 error code for unable to fork
+66. qmail-lspawn.c: refactored code for setting PWSTRUCT environment variable
+67. sendmail.c: added -r option to set mailx return path
+- 21/12/2023
+68. qmail-send.c, slowq-send.c: added concept of half-detached/full-detached
+    mode
+69. slowq-send.c: use value of TODO_PROCESSOR env variable to run todo
+    processor
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.34 2023-12-16 21:35:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.33 2023-12-21 19:53:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -3756,23 +3756,21 @@ main(int argc, char **argv)
 			 */
 			cleanup_do();
 		}
-		if ((can_exit = del_canexit())) {
-			if (flagdetached == 1) {
-				pqstart();
-				/*- tell todo-proc to start sending jobs */
-				if (write(todofdo, "A", 1) != 1) {
-					slog(1, "alert: ", argv0, ": ", queuedesc,
-							": unable to write two bytes to todo-proc! dying...: ",
-							error_str(errno), "\n", NULL);
-					flagexitsend = 1;
-					flagtodoalive = 0;
-				} else
-					flagdetached = 0;
-				sig_unblock(sig_usr2);
-				sig_unblock(sig_usr1);
-				slog(1, "info: ", argv0, ": ", queuedesc,
-						": no pending jobs, attaching back to todo-proc\n", NULL);
-			}
+		if (flagdetached == 1 && (can_exit = del_canexit())) {
+			pqstart();
+			/*- tell todo-proc to start sending jobs */
+			if (write(todofdo, "A", 1) != 1) {
+				slog(1, "alert: ", argv0, ": ", queuedesc,
+						": unable to write two bytes to todo-proc! dying...: ",
+						error_str(errno), "\n", NULL);
+				flagexitsend = 1;
+				flagtodoalive = 0;
+			} else
+				flagdetached = 0;
+			sig_unblock(sig_usr2);
+			sig_unblock(sig_usr1);
+			slog(1, "info: ", argv0, ": ", queuedesc,
+					": no pending jobs, attaching back to todo-proc\n", NULL);
 		}
 	} /*- while (!flagexitsend || !del_canexit()) */
 	pqfinish();
@@ -3783,7 +3781,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.34 2023-12-16 21:35:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.33 2023-12-21 19:53:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3793,11 +3791,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
- * Revision 1.34  2023-12-16 21:35:23+05:30  Cprogrammer
- * removed multiple calls to getpid()
- *
- * Revision 1.33  2023-12-15 23:07:44+05:30  Cprogrammer
- * use value of TODO_PROCESSOR env variable to run todo processor
+ * Revision 1.33  2023-12-21 19:53:01+05:30  Cprogrammer
+ * added concept of half-detached/full-detached
+ * se value of TODO_PROCESSOR env variable to run todo function
  *
  * Revision 1.32  2023-10-30 10:30:18+05:30  Cprogrammer
  * use qregex control file to set QREGEX env variable

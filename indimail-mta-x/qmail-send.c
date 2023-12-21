@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.111 2023-12-16 21:41:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.110 2023-12-21 19:49:08+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2667,24 +2667,24 @@ main(int argc, char **argv)
 			 * communicate with qmail-clean for cleanup
 			 */
 			cleanup_do();
+			if (flagexitsend)
+				break;
 		}
-		if ((can_exit = del_canexit())) {
-			if (flagdetached == 1) {
-				slog(1, "info: ", argv0, ": ", queuedesc,
-						": no pending jobs, attaching back to todo-proc\n", NULL);
-				pqstart();
-				/*- tell todo-proc to start sending jobs */
-				if (write(todofdo, "A", 1) != 1) {
-					slog(1, "alert: ", argv0, ": ", queuedesc,
-							": unable to write two bytes to todo-proc! dying...: ",
-							error_str(errno), "\n", NULL);
-					flagexitsend = 1;
-					flagtodoalive = 0;
-				} else
-					flagdetached = 0;
-				sig_unblock(sig_usr2);
-				sig_unblock(sig_usr1);
-			}
+		if (flagdetached == 1 && (can_exit = del_canexit())) {
+			slog(1, "info: ", argv0, ": ", queuedesc,
+					": no pending jobs, attaching back to todo-proc\n", NULL);
+			pqstart();
+			/*- tell todo-proc to start sending jobs */
+			if (write(todofdo, "A", 1) != 1) {
+				slog(1, "alert: ", argv0, ": ", queuedesc,
+						": unable to write two bytes to todo-proc! dying...: ",
+						error_str(errno), "\n", NULL);
+				flagexitsend = 1;
+				flagtodoalive = 0;
+			} else
+				flagdetached = 0;
+			sig_unblock(sig_usr2);
+			sig_unblock(sig_usr1);
 		}
 	} /*- while (!flagexitsend || !can_exit || flagtodoalive) */
 	pqfinish();
@@ -2698,7 +2698,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.111 2023-12-16 21:41:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.110 2023-12-21 19:49:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2708,11 +2708,8 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
- * Revision 1.111  2023-12-16 21:41:56+05:30  Cprogrammer
- * removed multiple calls to getpid()
- *
- * Revision 1.110  2023-12-13 20:48:27+05:30  Cprogrammer
- * added concept of half-detached/full-detached mode
+ * Revision 1.110  2023-12-21 19:49:08+05:30  Cprogrammer
+ * added concept of half-detached/full-detached
  *
  * Revision 1.109  2023-10-30 10:28:44+05:30  Cprogrammer
  * use qregex control file to set QREGEX env variable
