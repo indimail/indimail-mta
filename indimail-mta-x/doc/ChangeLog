@@ -112,6 +112,8 @@ o - New program rd-remote with the same interface as qmail-remote for
     mode
 69. slowq-send.c: use value of TODO_PROCESSOR env variable to run todo
     processor
+- 23/12/2023
+70. renamed cronlist.q to indimail-mta.cron
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
