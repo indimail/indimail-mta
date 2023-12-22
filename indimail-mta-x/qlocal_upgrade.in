@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.58 2023-12-05 23:59:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.59 2023-12-23 00:16:10+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -26,7 +26,7 @@ check_update_if_diff()
 
 do_install()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.58 2023-12-05 23:59:42+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.59 2023-12-23 00:16:10+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -34,7 +34,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.58 2023-12-05 23:59:42+05:30 Cprogra
 
 do_post_upgrade()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.58 2023-12-05 23:59:42+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.59 2023-12-23 00:16:10+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -374,6 +374,14 @@ fi
 if  [ -f $sysconfdir/control/tlsserverciphers ] ; then
 	$mv $sysconfdir/control/tlsserverciphers $sysconfdir/control/servercipherlist
 fi
+
+# copy updated cron entries
+if [ -f /etc/cron.d/cronlist.q ] ; then
+  $mv /etc/cron.d/cronlist.q /etc/cron.d/indimail-mta.cron
+fi
+if [ ! -f @sysconfdir@/indimail.cron -a -d /etc/cron.d ] ; then
+	$cp @sysconfdir@/indimail.cron /etc/cron.d/indimail.cron
+fi
 }
 
 case $1 in
@@ -386,6 +394,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.59  2023-12-23 00:16:10+05:30  Cprogrammer
+# renamed cronlist.q to indimail-mta.cron
+#
 # Revision 1.58  2023-12-05 23:59:42+05:30  Cprogrammer
 # removed force update of QMAILLOCAL, QMAILREMOTE for qmail-send service
 #

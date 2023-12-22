@@ -89,7 +89,7 @@ conf-servicedir
 conf-shared
 conf-sysconfdir
 create_services
-cronlist.q
+indimail-mta.cron
 ctrlenv
 ctrlenv.8
 ctrlenv.o

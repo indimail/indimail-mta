@@ -25,12 +25,12 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	atrn autoresponder backup.conf batv binm1 binm1+df binm2 binm2+df \
 	binm3 binm3+df bouncesaying cdb-database cdbdump cdbget cdbgetm \
 	cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect \
-	config-fast create_services cronlist.q ctrlenv datemail dk-filter \
-	dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr dnstlsarr \
-	dnstxt dot-forward drate etrn except fastforward favicon.base64 \
-	filterit forward generic.so greydaemon home home+df hostname iftocc \
-	indimail-mta.changes setqload qmonitor indimail-mta.perms \
-	inewaliases installer instcheck ipmeprint irmail \
+	config-fast create_services indimail-mta.cron ctrlenv datemail \
+	dk-filter dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr \
+	dnstlsarr dnstxt dot-forward drate etrn except fastforward \
+	favicon.base64 filterit forward generic.so greydaemon home home+df \
+	hostname iftocc indimail-mta.changes setqload qmonitor \
+	indimail-mta.perms inewaliases installer instcheck ipmeprint irmail \
 	ldap-checkpwd leapsecs leapsecs.dat maildir2mbox maildircmd \
 	maildirdeliver maildirqmtp maildirserial maildirsize maildirsmtp \
 	mailsubj make-recipients mbox2maildir mini-smtpd multirotate \
@@ -627,11 +627,11 @@ indimail-mta.fc.in conf-qmail conf-sysconfdir conf-servicedir
 	| sed s}@sysconfdir\@}"`head -1 conf-sysconfdir`"}g \
 	> indimail-mta.fc
 
-cronlist.q: cronlist.in conf-prefix \
+indimail-mta.cron: indimail-mta.cron.in conf-prefix \
 conf-sysconfdir conf-libexec conf-servicedir
 	( \
 	echo "# WARNING: This file was auto-generated. Do not edit!"; \
-	$(edit) cronlist.in \
+	$(edit) indimail-mta.cron.in \
 	) > $@
 
 except: \

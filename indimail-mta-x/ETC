@@ -22,7 +22,7 @@ d:root:qmail:02775:/users::
 f:root:qmail:0644:/:leapsecs.dat:leapsecs.dat
 f:root:qmail:0644:/:leapsecs.txt:leapsecs.txt
 f:root:root:0644:/:indimail-mta-release:indimail-mta-release
-f:root:root:0444:/:cronlist.q:cronlist.q
+f:root:root:0444:/:indimail-mta.cron:indimail-mta.cron
 f:root:qmail:0644:/:foxhole_all.cdb:foxhole_all.cdb
 f:root:qmail:0644:/control/:nodnscheck:nodnscheck
 f:root:qmail:0644:/control/:level2-tlds:level2-tlds

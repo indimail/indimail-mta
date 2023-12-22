@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-inject.c,v 1.50 2023-12-11 17:29:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-inject.c,v 1.51 2023-12-23 00:17:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1075,13 +1075,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.50 2023-12-11 17:29:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-inject.c,v 1.51 2023-12-23 00:17:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.51  2023-12-23 00:17:13+05:30  Cprogrammer
+ * prevent SIGSEGV in do_domainqueue if recip is null
+ *
  * Revision 1.50  2023-12-11 17:29:53+05:30  Cprogrammer
  * do domainqueue on the recipient domain instead of sender domain
  *

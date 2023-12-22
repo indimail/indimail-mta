@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.394 2023-12-10 10:28:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.394 2023-12-23 00:15:40+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -521,7 +521,7 @@ echo ../resolv.conf 1>&3
 %attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/perms.d/%{name}/*
 %attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.te
 %attr(644,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.fc
-%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/cronlist.q
+%attr(444,root,root)  %config(noreplace)           %{qsysconfdir}/indimail-mta.cron
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.dat
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/leapsecs.txt
 %attr(644,root,qmail) %config(noreplace)           %{qsysconfdir}/backup.conf
@@ -1543,9 +1543,9 @@ svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
 log_it "configuring indimail-mta as alternatives"
 %{_prefix}/sbin/svctool --config=add-alt | tai64n | tai64nlocal
 
-if [ -f %{qsysconfdir}/cronlist.q -a -d %{_sysconfdir}/cron.d ] ; then
+if [ -f %{qsysconfdir}/indimail-mta.cron -a -d %{_sysconfdir}/cron.d ] ; then
   log_it "adding cron entries"
-  %{__cp} %{qsysconfdir}/cronlist.q %{_sysconfdir}/cron.d
+  %{__cp} %{qsysconfdir}/indimail-mta.cron %{_sysconfdir}/cron.d
 fi
 
 if [ -f %{libexecdir}/qupgrade ] ; then
@@ -1710,7 +1710,7 @@ fi
 
 if [ -d %{_sysconfdir}/cron.d ] ; then
   log_it "removing cron entries"
-  %{__rm} -f %{_sysconfdir}/cron.d/cronlist.q
+  %{__rm} -f %{_sysconfdir}/cron.d/indimail-mta.cron
 fi
 log_it "removing logs"
 for i in deliver.25 greylist.1999 qmqpd.628 qmtpd.209 \
