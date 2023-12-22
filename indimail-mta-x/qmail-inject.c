@@ -240,6 +240,8 @@ do_domainqueue(char *recip)
 {
 	int             ret;
 
+	if (!recip)
+		return;
 	if ((ret = domainqueue(recip, "domainqueue", "DOMAINQUEUE", 0)) == -1)
 		die_nomem();
 	else
@@ -307,7 +309,7 @@ exitnicely()
 				for (i = 0; i < hrlist.len; ++i) {
 					if (!stralloc_0(&hrlist.sa[i]))
 						die_nomem();
-					do_domainqueue(hrrlist.sa[i].s);
+					do_domainqueue(hrlist.sa[i].s);
 					qmail_to(&qqt, hrlist.sa[i].s);
 				}
 			}
