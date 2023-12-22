@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH slowq-start 8
 
 .SH NAME
@@ -13,41 +14,42 @@ slowq-start \- turn on mail delivery
 ]
 
 .SH DESCRIPTION
-.B slowq-start
-invokes
-.BR qmail-send ,
-.BR todo-proc ,
-.BR qmail-lspawn ,
-.BR qmail-rspawn ,
-and
-.BR qmail-clean ,
-under the proper uids and gids for a queue defined by the environment
-variable \fBQUEUEDIR\fR. These five daemons cooperate to deliver messages
-from the queue. The uids and gids are obtained from the passwd(5) database
-using standard glibc getpwent(3), getgrent(3) calls which are inherently
-unreliable. You can switch to internal qgetpwent(3), qgetgrent(3) funtions
-by setting the environment variable \fBUSE_QPWGR\fR.
+\fBslowq-start\fR forks and executes \fBqmail-lspawn\fR(8),
+\fBqmail-rspawn\fR(8), and \fBqmail-clean\fR(8) as
+childs, for a queue defined by the environment variable \fBQUEUEDIR\fR. The
+queue can be created by \fBqueue-fix\fR(8). Messages are injected in the
+queue by any qmail-queue client. See \fBqmail-queue-clients\fR(7).
+\fBslowq-start\fR then execs \fBslowq-send\fR(8). \fBslowq-start\fR sets up
+communication channels using pipes between \fBslowq-send\fR and the other
+four daemons. These five daemons cooperate to deliver messages from the
+queue and are executed with the proper uids and gids to achieve a security
+partition. The uids and gids are obtained from the passwd(5) database using
+standard glibc getpwent(3), getgrent(3) calls which are inherently
+unreliable. You can switch to internal qgetpwent(3), qgetgrent(3) functions
+by setting the environment variable \fBUSE_QPWGR\fR. The uids and gids with
+which these give daemons are invoked are as follows. If \fBUSE_SETGROUPS\fR
+environment variable is set, \fBslowq-start\fR sets up additional groups.
+
+.TS
+l l.
+daemon       UNIX user UNIX group
+_
+slowq-send   qmails    qmail
+qmail-clean  qmailq    qmail   + supplementary groups for qmailq
+qmail-lspawn root      qmail
+qmail-rspawn qmailr    qmail   + supplementary groups for qmailr
+logger       qmaill    nofiles + supplementary groups for qmaill
+.TE
 
 \fBslowq-start\fR borrows most of it's code from \fBqmail-start\fR.
 
-.B slowq-start
-arranges for
-.BR slowq-send 's
-activity record to be sent to
-.BR slowq-start 's
-output. See
-.B qmail-log(5)
-for the format of the activity record.
-Other than this,
-.B slowq-start
-does not print anything, even on failure.
+\fBslowq-start\fR arranges for \fBslowq-send\fR's activity record to be
+sent to \fBslowq-start\fR's output. See \fBqmail-log\fR(5) for the format
+of the activity record. \fBslowq-start\fR doesn't print anything other than
+errors on descriptor 2 before it execs \fBslowq-send\fR.
 
-If
-.I defaultdelivery
-is supplied,
-.B slowq-start
-passes it to
-.BR qmail-lspawn .
+If \fIdefaultdelivery\fR is supplied, \fBslowq-start\fR passes it to
+\fBqmail-lspawn\fR.
 
 The default indimail installation, creates a supervised service in
 @servicedir@/slowq. The output goes to @logdir@/slowq/current. The default
@@ -56,40 +58,22 @@ table below outlines the choices for \fBdefaultdelivery\fR control file
 
 .TS
 l l.
-Mailbox | Name  | Location       | defaultdelivery | Comments
-Format  |       |                |                 |
+Mailbox  Name   Location         defaultdelivery  Comments
+Format                                          
 _
-
-mbox    |Mailbox | $HOME         | ./Mailbox       | most common, works with 
-        |        |               |                 | most MUA's
+mbox    Mailbox  $HOME           ./Mailbox        most common, works with 
+maildir Maildir  $HOME           ./Maildir/       more reliable, less
+mbox    username /var/spool/mail See INSTALL.vsm  traditional mailbox
 _
-maildir |Maildir | $HOME         | ./Maildir/      | more reliable, less
-        |        |               |                 | MUA support
-_
-mbox    |username|/var/spool/mail| See INSTALL.vsm | traditional mailbox
-_
-
 .TE
 
+If \fIlogger\fR is supplied, \fBslowq-start\fR invokes \fIlogger\fR with
+the given arguments, and feeds \fBslowq-send\fR's activity record through
+\fIlogger\fR.
 
-If
-.I logger
-is supplied,
-.B slowq-start
-invokes
-.I logger
-with the given arguments, and feeds
-.BR slowq-send 's
-activity record through
-.IR logger .
-
-Environment variables given to
-.B slowq-start
-will eventually be passed on to
-.BR qmail-local ,
-so make sure to clean up the environment if you run
-.B slowq-start
-manually:
+Environment variables given to \fBslowq-start\fR or \fBqscheduler\fR will
+eventually be passed on to \fBqmail-local\fR, so make sure to clean up the
+environment if you run \fBslowq-start\fR manually:
 
 .EX
    # env - PATH="PREFIX/sbin:$PATH"
@@ -100,24 +84,18 @@ manually:
 .EE
 
 Resource limits, controlling ttys, et al. are also passed from
-.B slowq-start
-to
-.BR qmail-local .
+\fBslowq-start\fR to \fBqmail-local\fR.
 
-Note that
-.B slowq-send
-normally juggles several simultaneous deliveries. To reduce
-.BR slowq-send 's
-impact on other programs, you can run
-.B slowq-start
-with a low priority.
+Note that \fBslowq-send\fR normally juggles several simultaneous
+deliveries. To reduce \fBslowq-send\fR's impact on other programs, you can
+run \fBslowq-start\fR with a low priority.
 
 .SH Supplementary Groups
 If you set the environment variable \fBUSE_SETGROUPS\fR, \fBqmail-start\fR
-can set supplementary groups (if defined in /etc/group) for qmail-send
-(for qmails user), qmail-rspawn (for qmailr user), qmail-clean (qmailq user)
-and any logger specified on command line (qmaill user). See group(5) to
-learn how to set supplementary groups.
+can set supplementary groups (if defined in /etc/group) for
+\fBslowq-send\fR (for qmails user), qmail-rspawn (for qmailr user),
+qmail-clean (qmailq user) and any logger specified on command line
+(qmaill user). See group(5) to learn how to set supplementary groups.
 
 .SH "SEE ALSO"
 logger(1),

@@ -1,36 +1,48 @@
+.\" vim: tw=75
 .TH qscheduler 8
 
 .SH NAME
 qscheduler \- turn on mail delivery with fixed number of queues or load dependent dynamic queues
 
 .SH SYNOPSIS
-.B qmail-start
-[ -\fBs\fR] | [-\fBc\fR]-\fBd\fR
-[ \fIdefaultdelivery\fR ]
-[
-.I logger arg ...
-]
-]
+\fBqmail-start\fR
+[ -\fBs\fR | -\fBcd\fR  ] [ \fIdefaultdelivery\fR ]
+[ \fIlogger\fR \fIarg\fR ... ]
 
-.B qscheduler
-[ -\fBs\fR | [-\fBc\fR]-\fBd\fR [-\fBn\fR]
+\fBqscheduler\fR  [ -\fBs\fR | -\fBcdn\fR ]
 [ \fIdefaultdelivery\fR ]
-[
-.I logger arg ...
-]
-]
+[ \fIlogger\fR \fIarg\fR ... ]
 
 .SH DESCRIPTION
-\fBqmail-start\fR invokes \fBqmail-send\fR, \fBtodo-proc\fR,
-\fBqmail-lspawn\fR, \fBqmail-rspawn\fR, and \fBqmail-clean\fR, under the
-proper uids and gids for a queue defined by the environment variable
-\fBQUEUEDIR\fR. These five daemons cooperate to deliver messages from the
-queue. The uids and gids are obtained from the passwd(5) database using
+\fBqmail-start\fR forks and executes \fBtodo-proc\fR(8),
+\fBqmail-lspawn\fR(8), \fBqmail-rspawn\fR(8), and \fBqmail-clean\fR(8) as
+childs, for a queue defined by the environment variable \fBQUEUEDIR\fR. The
+queue can be created by \fBqueue-fix\fR(8). Messages are injected in the
+queue by any qmail-queue client. See \fBqmail-queue-clients\fR(7).
+\fBqmail-start\fR then execs \fBqmail-send\fR(8). \fBqmail-start\fR sets up
+communication channels using pipes between \fBqmail-send\fR and the other
+four daemons. These five daemons cooperate to deliver messages from the
+queue and are executed with the proper uids and gids to achieve a security
+partition. The uids and gids are obtained from the passwd(5) database using
 standard glibc getpwent(3), getgrent(3) calls which are inherently
-unreliable. You can switch to internal qgetpwent(3), qgetgrent(3) funtions
+unreliable. You can switch to internal qgetpwent(3), qgetgrent(3) functions
 by setting the environment variable \fBUSE_QPWGR\fR. \fBqmail-start\fR
 should be used if you desire to run only one queue. For running multiple
-parallel queues use \fBqscheduler\fR.
+parallel queues use \fBqscheduler\fR. The uids and gids with which these
+give daemons are invoked are as follows. If \fBUSE_SETGROUPS\fR environment
+variable is set, \fBqmail-start\fR sets up additional groups.
+
+.TS
+l l.
+daemon       UNIX user UNIX group
+_
+qmail-send   qmails    qmail
+todo-proc    qmails    qmail
+qmail-clean  qmailq    qmail   + supplementary groups for qmailq
+qmail-lspawn root      qmail
+qmail-rspawn qmailr    qmail   + supplementary groups for qmailr
+logger       qmaill    nofiles + supplementary groups for qmaill
+.TE
 
 \fBqscheduler\fR invokes multiple invocations of \fBqmail-start\fR to
 invoke \fBqmail-send\fR, \fBtodo-proc\fR, \fBqmail-lspawn\fR,
@@ -50,7 +62,7 @@ configures an additional queue using \fBqueue-fix\fR(8) and invokes
 \fBqmail-send\fR, \fbtodo-proc\fR, \fBqmail-lspawn\fR, \fBqmail-rspawn\fR
 and \fBqmail-clean\fR on the new queue. \fBqscheduler\fR uses DIRSPLIT as
 the default split value. This can be changed by setting the \fBCONFSPLIT\fR
-environment variable.  Additionally \fBqscheduler\fR can process a queue
+environment variable. Additionally \fBqscheduler\fR can process a queue
 created with \fItodo\fR, \fIintd\fR with subdirectory split instead of
 without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable. If the -n option is provided, queue counts will not
@@ -61,20 +73,20 @@ instances and restarts them if they go down.
 
 \fBqmail-start\fR or \fBqscheduler\fR arranges for \fBqmail-send\fR's
 activity record to be sent to \fBqmail-start\fR's output. See
-\fBqmail-log\fR(5) for the format of the activity record. Other than this,
-\fBqmail-start\fR does not print anything, even on failure.
-\fBqscheduler\fR announces its startup, exit and failures on stdout
-and stderr. \fBqscheduler\fR sets the environment variable \fBQIDENT\fR,
-before invoking \fBqmail-start\fR. \fBQIDENT\fR is the queue directory
-number and this is used by \fBqmail-send\fR to append the \fBQIDENT\fR
-number to the delivery number in the logs, facilitating processing of logs
-by \fBmatchup\fR(1).
+\fBqmail-log\fR(5) for the format of the activity record. \fBqmail-start\fR
+doesn't print anything other than errors on descriptor 2 before it execs
+\fBqmail-send\fR. \fBqscheduler\fR announces its startup, exit and
+failures on descriptor 1 and descriptor 2. \fBqscheduler\fR sets the
+environment variable \fBQIDENT\fR, before invoking \fBqmail-start\fR.
+\fBQIDENT\fR is the queue directory number and this is used by
+\fBqmail-send\fR to append the \fBQIDENT\fR number to the delivery number
+in the logs, facilitating processing of logs by \fBmatchup\fR(1).
 
 Resource limits, controlling ttys, et al. are also passed from
 \fBqmail-start\fR or \fBqscheduler\fR to \fBqmail-local\fR.
 
 Note that \fBqmail-send\fR normally juggles several simultaneous
-deliveries.  To reduce \fBqmail-send\fR's impact on other programs, you can
+deliveries. To reduce \fBqmail-send\fR's impact on other programs, you can
 run \fBqmail-start\fR or \fBqscheduler\fR with a low priority.
 
 .SH OPTIONS
@@ -84,7 +96,7 @@ run \fBqmail-start\fR or \fBqscheduler\fR with a low priority.
 This implies \fBqscheduler\fR will have a fixed number of \fBqmail-start\fR
 invocations. The number of \fBtodo-proc\fR, \fBqmail-send\fR instance it
 runs is defined by the environment variable \fBQUEUE_COUNT\fR. For each
-instance of \fBqmail-start\fR,  the queue is defined by \fBqscheduler\fR by
+instance of \fBqmail-start\fR, the queue is defined by \fBqscheduler\fR by
 setting the environment variable \fBQUEUEDIR\fR. A queue is defined by the
 integers defined by environment variables \fBQUEUE_START\fR and
 \fBQUEUE_COUNT\fR.
@@ -118,7 +130,7 @@ when system is configured to use POSIX IPC for dynamic queues.
 .TP 3
 \fB\-n\fR
 When using dynamic queues, this keeps original queue counts. The queue
-counts are neither decreased or increased
+counts are neither decreased or increased.
 
 .PP
 .TP 3
@@ -134,21 +146,14 @@ control file
 
 .TS
 l l.
-Mailbox | Name  | Location       | defaultdelivery | Comments
-Format  |       |                |                 |
+Mailbox  Name   Location         defaultdelivery  Comments
+Format                                          
 _
-
-mbox    |Mailbox | $HOME         | ./Mailbox       | most common, works with 
-        |        |               |                 | most MUA's
+mbox    Mailbox  $HOME           ./Mailbox        most common, works with 
+maildir Maildir  $HOME           ./Maildir/       more reliable, less
+mbox    username /var/spool/mail See INSTALL.vsm  traditional mailbox
 _
-maildir |Maildir | $HOME         | ./Maildir/      | more reliable, less
-        |        |               |                 | MUA support
-_
-mbox    |username|/var/spool/mail| See INSTALL.vsm | traditional mailbox
-_
-
 .TE
-
 
 .PP
 .TP 3
