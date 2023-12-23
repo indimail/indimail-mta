@@ -1,11 +1,5 @@
 /*
- * $Log: maildir.c,v $
- * Revision 1.9  2023-12-09 11:48:23+05:30  Cprogrammer
- * skip non-regular to prevent breaking maildirserial
- *
- * Revision 1.8  2023-10-05 22:25:03+05:30  Cprogrammer
- * updated coding style
- *
+ * $Id: maildir.c,v 1.8 2023-12-23 09:13:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -126,18 +120,15 @@ maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 void
 getversion_maildir_c()
 {
-	static char    *x = "$Id: maildir.c,v 1.9 2023-12-09 11:48:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: maildir.c,v 1.8 2023-12-23 09:13:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: maildir.c,v $
- * Revision 1.9  2023-12-09 11:48:23+05:30  Cprogrammer
+ * Revision 1.8  2023-12-23 09:13:28+05:30  Cprogrammer
  * skip non-regular to prevent breaking maildirserial
- *
- * Revision 1.8  2023-10-05 22:25:03+05:30  Cprogrammer
- * updated coding style
  *
  * Revision 1.7  2021-06-03 18:09:59+05:30  Cprogrammer
  * use new prioq functions
