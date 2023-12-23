@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.111 2023-12-23 20:19:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.112 2023-12-23 23:58:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -143,12 +143,14 @@ static int      bigtodo;
 static void     reread(int);
 static void     sigusr1();
 static void     sigusr2();
+static void     exit_todo();
 
 static void
 sigterm()
 {
 	flagexitsend = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
+	exit_todo();
 }
 
 static void
@@ -207,7 +209,7 @@ static char     todobuf[2048];
 static int      todofdi, todofdo, flagtodoalive;
 int             flagspawnalive[CHANNELS];
 
-void
+static void
 exit_todo()
 {
 	int             r;
@@ -2465,7 +2467,7 @@ main(int argc, char **argv)
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
-	slog(1, "info: ", argv0, ": ", queuedir, ": ratelimit=",
+	slog(1, "info: ", argv0, ": pid ", mypid, ": ", queuedir, ": ratelimit=",
 			do_ratelimit ? "ON, loglock=" : "OFF, loglock=",
 			loglock_fd == -1 ? "disabled, conf split=" : "enabled, conf split=",
 			strnum1, "\n", NULL);
@@ -2683,10 +2685,6 @@ main(int argc, char **argv)
 			 * communicate with qmail-clean for cleanup
 			 */
 			cleanup_do();
-#if 0
-			if (flagexitsend)
-				break;
-#endif
 		}
 		can_exit = del_canexit();
 		if (can_exit && flagdetached == 1) {
@@ -2717,7 +2715,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.111 2023-12-23 20:19:34+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.112 2023-12-23 23:58:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2727,6 +2725,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.112  2023-12-23 23:58:18+05:30  Cprogrammer
+ * log pid during startup
+ *
  * Revision 1.111  2023-12-23 20:19:34+05:30  Cprogrammer
  * terminate todo process when spawn/clean process terminates
  *

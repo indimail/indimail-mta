@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-start.c,v 1.27 2022-09-29 19:30:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-start.c,v 1.28 2023-12-23 23:29:04+05:30 Cprogrammer Exp mbhangui $
  * RCS log at bottom
  */
 #include <sys/types.h>
@@ -208,25 +208,25 @@ main(int argc, char **argv)
 		if (fd_move(1, pi0[1]) == -1)
 			die("unable to move write end of pipe to fd 1");
 	}
-	if (pipe(pi1) == -1)
+	if (pipe(pi1) == -1) /*- qmail-lspawn */
 		die("failed to create pipe1");
-	if (pipe(pi2) == -1)
+	if (pipe(pi2) == -1) /*- qmail-lspawn */
 		die("failed to create pipe2");
-	if (pipe(pi3) == -1)
+	if (pipe(pi3) == -1) /*- qmail-rspawn */
 		die("failed to create pipe3");
-	if (pipe(pi4) == -1)
+	if (pipe(pi4) == -1) /*- qmail-rspawn */
 		die("failed to create pipe4");
-	if (pipe(pi5) == -1)
+	if (pipe(pi5) == -1) /*- qmail-clean and qmail-send */
 		die("failed to create pipe5");
-	if (pipe(pi6) == -1)
+	if (pipe(pi6) == -1) /*- qmail-clean and qmail-send */
 		die("failed to create pipe6");
-	if (pipe(pi7) == -1)
+	if (pipe(pi7) == -1) /*- todo-proc */
 		die("failed to create pipe7");
-	if (pipe(pi8) == -1)
+	if (pipe(pi8) == -1) /*- todo-proc */
 		die("failed to create pipe9");
-	if (pipe(pi9) == -1)
+	if (pipe(pi9) == -1) /*- qmail-clean and todo-proc */
 		die("failed to create pipe9");
-	if (pipe(pi10) == -1)
+	if (pipe(pi10) == -1) /*- qmail-clean and todo-proc */
 		die("failed to create pipe10");
 	switch (fork()) /*- qmail-lspawn */
 	{
@@ -267,10 +267,10 @@ main(int argc, char **argv)
 		execvp(*qrargs, qrargs); /*- qmail-rspawn */
 		die("unable to exec qmail-rspawn");
 	}
-	switch (fork()) /*- qmail-clean for todo-proc */
+	switch (fork()) /*- qmail-clean for qmail-send */
 	{
 	case -1:
-		die("unable to fork qmail-clean (todo-proc)");
+		die("unable to fork qmail-clean (qmail-send)");
 	case 0:
 		if (check_user(set_supplementary_groups, "qmailq")) {
 			if ((gidset = grpscan("qmailq", &ngroups))) {
@@ -289,9 +289,9 @@ main(int argc, char **argv)
 			die("unable to copy fd1 to pipe6");
 		close2345678();
 		closepipes();
-		qcargs[2] = "todo-proc"; /*- pass todo-proc as argument for the ps command */
+		qcargs[2] = "qmail-send"; /*- pass qmail-send as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
-		die("unable to exec qmail-clean (todo-proc)");
+		die("unable to exec qmail-clean (qmail-send)");
 	}
 	switch (fork()) /*- todo-proc */
 	{
@@ -314,10 +314,10 @@ main(int argc, char **argv)
 		die("unable to exec todo-proc");
 	}
 
-	switch (fork()) /*- qmail-clean for qmail-send */
+	switch (fork()) /*- qmail-clean for todo-proc */
 	{
 	case -1:
-		die("unable to fork qmail-clean (qmail-send)");
+		die("unable to fork qmail-clean (todo-proc)");
 	case 0:
 		if (check_user(set_supplementary_groups, "qmailq")) {
 			if ((gidset = grpscan("qmailq", &ngroups))) {
@@ -336,9 +336,9 @@ main(int argc, char **argv)
 			die("unable to copy fd1 to pipe10");
 		close2345678();
 		closepipes();
-		qcargs[2] = "qmail-send"; /*- pass qmail-send as argument for the ps command */
+		qcargs[2] = "todo-proc"; /*- pass todo-proc as argument for the ps command */
 		execvp(*qcargs, qcargs); /*- qmail-clean */
-		die("unable to exec qmail-clean (qmail-send)");
+		die("unable to exec qmail-clean (todo-proc)");
 	}
 	if (check_user(set_supplementary_groups, "qmails")) {
 		if ((gidset = grpscan("qmails", &ngroups))) {
@@ -379,13 +379,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.27 2022-09-29 19:30:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-start.c,v 1.28 2023-12-23 23:29:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.28  2023-12-23 23:29:04+05:30  Cprogrammer
+ * updated comments
+ *
  * Revision 1.27  2022-09-29 19:30:53+05:30  Cprogrammer
  * moved RCS log to bottom
  *

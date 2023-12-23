@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.34 2023-12-23 20:20:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.35 2023-12-23 23:25:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -212,6 +212,16 @@ sigterm_todo()
 {
 	sig_block(sig_term);
 	todo_log("alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
+	if (!flagexittodo)
+		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
+	flagexittodo = 1;
+}
+
+static void
+stop_todo()
+{
+	sig_block(sig_term);
+	todo_log("alert: ", argv0, ": pid ", mypid, " ordered to quit by slowq-send: ", queuedesc, "\n", NULL);
 	if (!flagexittodo)
 		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
 	flagexittodo = 1;
@@ -717,7 +727,7 @@ comm_read_todo(fd_set *wfds, fd_set *rfds)
 				sighup(); /*- set flagreadasap = 1 */
 				break;
 			case 'X':
-				sigterm_todo(); /*-set flagexittodo = 1 */
+				stop_todo(); /*-set flagexittodo = 1 */
 				break;
 			default:
 				todo_log("warn: ", argv0, ": ", queuedesc,
@@ -3218,6 +3228,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": unable to fork\n", NULL);
 		_exit(111);
 	case 0: /*- ps will show this as slowq-todo */
+		mypid[fmt_ulong(mypid, getpid())] = 0;
 		str_copyb(argv0 + 6, "todo", 4);
 		sendfdi = pi2[0];
 		sendfdo = pi1[1];
@@ -3547,7 +3558,7 @@ main(int argc, char **argv)
 	getEnvConfigInt(&todo_chunk_size, "TODO_CHUNK_SIZE", CHUNK_SIZE);
 	if (todo_chunk_size <= 0)
 		todo_chunk_size = CHUNK_SIZE;
-	slog(1, "info: ", argv0, ": ", queuedir,
+	slog(1, "info: ", argv0, ": pid ", mypid, ": ", queuedir,
 			": todo processor: ", todoproc ? "YES" : "NO",
 			", ratelimit=", do_ratelimit ? "ON" : "OFF",
 			", conf split=", strnum1, bigtodo ? ", bigtodo=1\n" : ", bigtodo=0\n", NULL);
@@ -3797,7 +3808,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.34 2023-12-23 20:20:09+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.35 2023-12-23 23:25:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3807,6 +3818,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.35  2023-12-23 23:25:37+05:30  Cprogrammer
+ * log pid during startup
+ *
  * Revision 1.34  2023-12-23 20:20:09+05:30  Cprogrammer
  * terminate todo process when spawn/clean process terminates
  *

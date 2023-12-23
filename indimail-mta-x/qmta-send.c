@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.27 2023-12-16 21:44:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.28 2023-12-23 23:24:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -2626,7 +2626,9 @@ main(int argc, char **argv)
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	if (substdio_put(subfdout, "info: ", 6) == -1 ||
 			substdio_puts(subfdout, argv0) == -1 ||
-			substdio_puts(subfdout, ": ") == -1 ||
+			substdio_put(subfdout, ": pid ", 6) == -1 ||
+			substdio_puts(subfdout, mypid) == -1 ||
+			substdio_put(subfdout, ": ", 2) == -1 ||
 			substdio_puts(subfdout, queuedir) == -1 ||
 			substdio_put(subfdout, ": conf split=", 13) == -1 ||
 			substdio_puts(subfdout, strnum1) == -1 ||
@@ -2768,7 +2770,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.27 2023-12-16 21:44:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.28 2023-12-23 23:24:35+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2776,6 +2778,9 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.28  2023-12-23 23:24:35+05:30  Cprogrammer
+ * log pid during startup
+ *
  * Revision 1.27  2023-12-16 21:44:01+05:30  Cprogrammer
  * write pid to queue/lock/pid
  * removed multiple calls to getpid()

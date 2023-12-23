@@ -1,5 +1,5 @@
 /*
- * $Id: todo-proc.c,v 1.66 2023-01-15 23:30:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: todo-proc.c,v 1.67 2023-12-23 23:56:26+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -65,6 +65,7 @@ static stralloc envnoathost = { 0 };
 
 static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
+static char     mypid[FMT_ULONG];
 
 /*- if qmail-send.c changes this has to be updated */
 #define CHANNELS 2
@@ -165,24 +166,12 @@ fail:
 	comm_buf.len = pos;
 }
 
-void
-sigterm(void)
-{
-	sig_block(sig_term);
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	todo_log("alert: ", argv0, ": pid ", strnum1, " got TERM: ", queuedesc, "\n", NULL);
-	if (!flagexittodo)
-		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
-	flagexittodo = 1;
-}
-
 int             flagreadasap = 0;
 void
 sighup(void)
 {
 	flagreadasap = 1;
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	todo_log("alert: ", argv0, ": pid ", strnum1, " got HUP: ", queuedesc, "\n", NULL);
+	todo_log("alert: ", argv0, ": pid ", mypid, " got HUP: ", queuedesc, "\n", NULL);
 }
 
 void
@@ -206,13 +195,6 @@ pausedir(char *dir)
 {
 	todo_log("alert: ", argv0, ": ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", NULL);
 	sleep(10);
-}
-
-void
-cleandied()
-{
-	todo_log("alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n", NULL);
-	flagexittodo = 1;
 }
 
 /*
@@ -440,6 +422,36 @@ comm_exit(void)
 }
 
 void
+sigterm(void)
+{
+	sig_block(sig_term);
+	todo_log("alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
+	if (!flagexittodo)
+		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
+	flagexittodo = 1;
+	comm_exit();
+}
+
+void
+exit_todo(void)
+{
+	sig_block(sig_term);
+	todo_log("alert: ", argv0, ": pid ", mypid, " ordered to quit by qmail-send: ", queuedesc, "\n", NULL);
+	if (!flagexittodo)
+		todo_log("info: ", argv0, ": ", queuedesc, " stop todo processing asap\n", NULL);
+	flagexittodo = 1;
+	comm_exit();
+}
+
+void
+cleandied()
+{
+	todo_log("alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n", NULL);
+	flagexittodo = 1;
+	comm_exit();
+}
+
+void
 comm_selprep(int *nfds, fd_set *wfds, fd_set *rfds)
 {
 	if (flagsendalive) {
@@ -494,15 +506,13 @@ comm_do(fd_set *wfds, fd_set *rfds)
 			{
 			case 'A': /*- attached mode */
 				flagdetached = 0;
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				todo_log("alert: ", argv0, ": pid ", strnum1,
+				todo_log("alert: ", argv0, ": pid ", mypid,
 					" got 'A' command: todo-proc attached: ",
 					queuedesc, "\n", NULL);
 				break;
 			case 'D': /*- detached mode */
 				flagdetached = 1;
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				todo_log("alert: ", argv0, ": pid ", strnum1,
+				todo_log("alert: ", argv0, ": pid ", mypid,
 					" got 'D' command: todo-proc detached: ",
 					queuedesc, "\n", NULL);
 				break;
@@ -510,7 +520,7 @@ comm_do(fd_set *wfds, fd_set *rfds)
 				sighup(); /*- set flagreadasap = 1 */
 				break;
 			case 'X':
-				sigterm(); /*-set flagexittodo = 1 */
+				exit_todo(); /*-set flagexittodo = 1 */
 				break;
 			default:
 				todo_log("warn: ", argv0, ": ", queuedesc,
@@ -1063,11 +1073,8 @@ todo_do(int *nfds, fd_set *rfds)
 		}
 	}
 	fnmake_todo(id); /* todo/split/id */
-	if (substdio_putflush(&sstoqc, fn.s, fn.len) == -1) {
-		cleandied();
-		return -1;
-	}
-	if (substdio_get(&ssfromqc, &ch, 1) != 1) {
+	if (substdio_putflush(&sstoqc, fn.s, fn.len) == -1 ||
+			substdio_get(&ssfromqc, &ch, 1) != 1) {
 		cleandied();
 		return -1;
 	}
@@ -1230,6 +1237,7 @@ main(int argc, char **argv)
 	char           *ptr;
 	struct timeval  tv;
 
+	mypid[fmt_ulong(mypid, getpid())] = 0;
 	r = str_rchr(argv[0], '/');
 	argv0 = (argv[0][r] && argv[0][r + 1]) ? argv[0] + r + 1 : argv[0];
 	if (!queuedir && !(queuedir = env_get("QUEUEDIR")))
@@ -1254,7 +1262,7 @@ main(int argc, char **argv)
 		todo_chunk_size = CHUNK_SIZE;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
 	strnum2[fmt_ulong(strnum2, todo_chunk_size)] = 0;
-	todo_log("info: ", argv0, ": ", queuedir, ": conf split=", strnum1,
+	todo_log("info: ", argv0, ": pid ", mypid, ": ", queuedir, ": conf split=", strnum1,
 		", todo chunk size=", strnum2, bigtodo ? ", bigtodo=yes\n" : ", bigtodo=no\n", NULL);
 #ifdef USE_FSYNC
 	ptr = env_get("USE_FSYNC");
@@ -1357,6 +1365,7 @@ main(int argc, char **argv)
 		todo_log("warn: ", argv0, ": ", queuedesc, ": qmail-send speaks an obscure dialect\n", NULL);
 		_exit(100);
 	}
+	sig_catch(sig_term, sigterm);
 	for (;;) {
 		recent = now();
 		if (flagreadasap) {
@@ -1416,15 +1425,14 @@ main(int argc, char **argv)
 			comm_do(&wfds, &rfds); /*- communicate with qmail-send on fd 0, fd 1 */
 		}
 	} /*- for (;;) */
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	todo_log("info: ", argv0, ": pid ", strnum1, " ", queuedesc, " exiting\n", NULL);
+	todo_log("info: ", argv0, ": pid ", mypid, " ", queuedesc, " exiting\n", NULL);
 	_exit(0);
 }
 
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: todo-proc.c,v 1.66 2023-01-15 23:30:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: todo-proc.c,v 1.67 2023-12-23 23:56:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1432,6 +1440,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
+ * Revision 1.67  2023-12-23 23:56:26+05:30  Cprogrammer
+ * handle qmail-clean termination
+ *
  * Revision 1.66  2023-01-15 23:30:27+05:30  Cprogrammer
  * use todo_log() function with varargs to log messages to qmail-send
  *
