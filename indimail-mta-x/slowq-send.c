@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.33 2023-12-21 19:53:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.34 2023-12-23 20:20:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -125,6 +125,14 @@ static int      flagdetached; /*- slowq-send detaches from todo processing */
 static int      todoproc; /*- run a parallel independent todo processor */
 static int      flagtodoalive, flagsendalive = 1; /*- flag to indicate if todo-processor and slowq-send are alive */
 static int      todopid, bigtodo, todofdi, todofdo, sendfdi, sendfdo, todo_chunk_size;
+static datetime_sec nexttodorun, lasttodorun;
+static int      flagtododir = 0;	/*- if 0, have to readsubdir_init again */
+static int      todo_interval = -1;
+static readsubdir todosubdir;
+static stralloc todoline = { 0 };
+static char     todobuf[SUBSTDIO_INSIZE];
+static char     todobufinfo[512];
+static char     todobufchan[CHANNELS][1024];
 
 extern dtype    delivery;
 static int      do_ratelimit;
@@ -236,15 +244,30 @@ chdir_toqueue()
 	}
 }
 
+void
+exit_todo()
+{
+	int             r;
+
+	if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
+	r = read(todofdi, todobuf, sizeof (todobuf));
+	if (r > 0 && todobuf[0] == 'L')
+		slog(1, todobuf + 1, NULL);
+	flagtodoalive = 0;
+}
+
 static void
 cleandied()
 {
 	slog(1, "alert: ", argv0, ": ", queuedesc,
 		": oh no! lost qmail-clean connection! dying...\n", NULL);
 	flagexitsend = 1;
+	if (flagtodoalive)
+		exit_todo();
 }
 
 int             flagspawnalive[CHANNELS];
+
 static void
 spawndied(int c)
 {
@@ -252,6 +275,8 @@ spawndied(int c)
 		": oh no! lost spawn connection! dying...\n", NULL);
 	flagspawnalive[c] = 0;
 	flagexitsend = 1;
+	if (flagtodoalive)
+		exit_todo();
 }
 
 #define REPORTMAX 10000
@@ -2244,16 +2269,6 @@ rewrite(char *recip)
 	return 2;
 }
 
-static datetime_sec nexttodorun, lasttodorun;
-static int      flagtododir = 0;	/*- if 0, have to readsubdir_init again */
-static int      todo_interval = -1;
-static readsubdir todosubdir;
-static stralloc todoline = { 0 };
-
-static char     todobuf[SUBSTDIO_INSIZE];
-static char     todobufinfo[512];
-static char     todobufchan[CHANNELS][1024];
-
 /*
  * used by
  * slowq-send
@@ -3756,7 +3771,8 @@ main(int argc, char **argv)
 			 */
 			cleanup_do();
 		}
-		if (flagdetached == 1 && (can_exit = del_canexit())) {
+		can_exit = del_canexit();
+		if (can_exit && flagdetached == 1) {
 			pqstart();
 			/*- tell todo-proc to start sending jobs */
 			if (write(todofdo, "A", 1) != 1) {
@@ -3781,7 +3797,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.33 2023-12-21 19:53:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.34 2023-12-23 20:20:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3791,6 +3807,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.34  2023-12-23 20:20:09+05:30  Cprogrammer
+ * terminate todo process when spawn/clean process terminates
+ *
  * Revision 1.33  2023-12-21 19:53:01+05:30  Cprogrammer
  * added concept of half-detached/full-detached
  * se value of TODO_PROCESSOR env variable to run todo function

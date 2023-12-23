@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.110 2023-12-21 19:49:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.111 2023-12-23 20:19:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -202,20 +202,40 @@ sigint()
 }
 #endif
 
+static stralloc todoline = { 0 };
+static char     todobuf[2048];
+static int      todofdi, todofdo, flagtodoalive;
+int             flagspawnalive[CHANNELS];
+
+void
+exit_todo()
+{
+	int             r;
+
+	if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
+	r = read(todofdi, todobuf, sizeof (todobuf));
+	if (r > 0 && todobuf[0] == 'L')
+		slog(1, todobuf + 1, NULL);
+	flagtodoalive = 0;
+}
+
 static void
 cleandied()
 {
 	slog(1, "alert: ", argv0, ": ", queuedesc, ": oh no! lost qmail-clean connection! dying...\n", NULL);
 	flagexitsend = 1;
+	if (flagtodoalive)
+		exit_todo();
 }
 
-int             flagspawnalive[CHANNELS];
 static void
 spawndied(int c)
 {
 	slog(1, "alert: ", argv0, ": ", queuedesc, ": oh no! lost spawn connection! dying...\n", NULL);
 	flagspawnalive[c] = 0;
 	flagexitsend = 1;
+	if (flagtodoalive)
+		exit_todo();
 }
 
 #define REPORTMAX 10000
@@ -1823,10 +1843,6 @@ pass_do()
 
 /*- this file is too long ---------------------------------------------- TODO */
 
-static stralloc todoline = { 0 };
-static char     todobuf[2048];
-static int      todofdi, todofdo, flagtodoalive;
-
 static void
 sigusr1()
 {
@@ -2667,10 +2683,13 @@ main(int argc, char **argv)
 			 * communicate with qmail-clean for cleanup
 			 */
 			cleanup_do();
+#if 0
 			if (flagexitsend)
 				break;
+#endif
 		}
-		if (flagdetached == 1 && (can_exit = del_canexit())) {
+		can_exit = del_canexit();
+		if (can_exit && flagdetached == 1) {
 			slog(1, "info: ", argv0, ": ", queuedesc,
 					": no pending jobs, attaching back to todo-proc\n", NULL);
 			pqstart();
@@ -2698,7 +2717,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.110 2023-12-21 19:49:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.111 2023-12-23 20:19:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2708,6 +2727,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.111  2023-12-23 20:19:34+05:30  Cprogrammer
+ * terminate todo process when spawn/clean process terminates
+ *
  * Revision 1.110  2023-12-21 19:49:08+05:30  Cprogrammer
  * added concept of half-detached/full-detached
  *
