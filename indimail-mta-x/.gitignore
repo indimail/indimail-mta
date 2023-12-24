@@ -178,7 +178,7 @@ ifaddr
 iftocc
 iftoccfrom
 indimail-control.5
-indimail-env.5
+indimail-env.7
 indimail-mta.7
 indimail-mta.changes
 indimail-mta.fc

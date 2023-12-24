@@ -309,7 +309,6 @@
 %attr(0444,root,root)  @shareddir@/doc/FROMISP
 %attr(0444,root,root)  @shareddir@/doc/TOISP
 %attr(0444,root,root)  @shareddir@/doc/AUTOTURN
-%attr(0444,root,root)  @shareddir@/doc/INTERNALS
 %attr(0444,root,root)  @shareddir@/doc/INSTALL-MINI #indimail-mini
 %attr(0444,root,root)  @shareddir@/doc/INSTALL.alias
 %attr(0444,root,root)  @shareddir@/doc/INSTALL.control

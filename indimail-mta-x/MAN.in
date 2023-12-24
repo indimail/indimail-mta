@@ -113,7 +113,6 @@ f:::0644:/man3/:tlsacheck.3:tlsacheck.3
 f:::0644:/man5/:addresses.5:addresses.5
 f:::0644:/man5/:dot-qmail.5:dot-qmail.5
 f:::0644:/man5/:envelopes.5:envelopes.5
-f:::0644:/man5/:indimail-env.5:indimail-env.5
 f:::0644:/man5/:maildir.5:maildir.5
 f:::0644:/man5/:mbox.5:mbox.5
 f:::0644:/man5/:indimail-control.5:indimail-control.5
@@ -142,11 +141,13 @@ f:::0644:/man5/:rfc-4871.5:rfc-4871.5
 f:::0644:/man5/:rfc-822.5:rfc-822.5
 f:::0644:/man5/:tcp-environ.5:tcp-environ.5
 f:::0644:/man7/:forgeries.7:forgeries.7
+f:::0644:/man7/:indimail-env.7:indimail-env.7
 f:::0644:/man7/:indimail-mta.7:indimail-mta.7
 f:::0644:/man7/:qmail-limits.7:qmail-limits.7
 f:::0644:/man7/:multi-queue.7:multi-queue.7
 f:::0644:/man7/:qmail-queue-clients.7:qmail-queue-clients.7
 f:::0644:/man7/:indimail-services.7:indimail-services.7
+f:::0644:/man7/:indimail-mta-internals.7:indimail-mta-internals.7
 f:::0644:/man8/:cdb-database.8:cdb-database.8
 f:::0644:/man8/:cleanq.8:cleanq.8
 f:::0644:/man8/:ctrlenv.8:ctrlenv.8

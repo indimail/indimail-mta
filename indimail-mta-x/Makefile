@@ -56,7 +56,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
 	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
-	indimail-env.5 filterit.1 forward.1 maildirserial.1 mlmatchup.8 \
+	indimail-env.7 filterit.1 forward.1 maildirserial.1 mlmatchup.8 \
 	multi-queue.7 new-inject.1 plugin_init.3 plugtest.1 predate.1 \
 	printass.1 qarf.1 qfrontend.1 qmail-cdb.8 qmail-clean.8 \
 	indimail-control.5 qmail-daned.8 qtop.1 qmail-direct.8 qmail-dkim.8 \
@@ -3902,7 +3902,7 @@ qtop.1: qtop.9 conf-logdir
 qmta-send.service: qmta-send.service.in warn-auto.sh
 	(sed -n '2,$$p' warn-auto.sh;cat $@.in) | $(edit) > $@
 
-indimail-env.5: indimail-env.9 conf-split conf-sysconfdir
+indimail-env.7: indimail-env.9 conf-split conf-sysconfdir
 	$(edit) indimail-env.9 \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	>$@

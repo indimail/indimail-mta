@@ -1,15 +1,25 @@
-1. Overview
+.\" vim: tw=75
+.TH indimail-mta-internals 5
 
-Here's the data flow in the qmail suite:
+.SH NAME
+indimail-mta-internals \- Explain internals of indimail-mta
 
- qmail-smtpd --- qmail-multi --- qmail-queue --- todo-proc 
-               /                                 /    \
-qmail-inject _/                                 /      \___ qmail-clean
-                              _________________/
-                             /
-                        qmail-send --- qmail-rspawn --- qmail-remote
-                                   \
-                                    \_ qmail-lspawn --- qmail-local
+.SH Overview
+
+Here's the data flow in the indimail-mta suite:
+
+.EX
+qmail-smtpd ----> qmail-queue ---> todo-proc
+                 /                   /  |
+qmail-inject -->/                   /   |--> qmail-clean
+                    _______________/
+                   /
+              qmail-send ----> qmail-rspawn --> qmail-remote
+                   |      |
+                   |      |--> qmail-lspawn --> qmail-local
+                   |
+                   |---> qmail-clean
+.EE
 
 Every message is added to a central queue directory by qmail-queue.
 qmail-queue is invoked as needed, usually by qmail-inject for locally
@@ -18,14 +28,15 @@ qmail-local for forwarded messages, or qmail-send for bounce messages.
 
 Every message is pre-processed by todo-proc and cleaned up by qmail-clean.
 Every message is then delivered by qmail-send, in cooperation with
-qmail-lspawn and qmail-rspawn. These five programs are long-running daemons.
+qmail-lspawn and qmail-rspawn. These five programs are long-running
+daemons.
 
 The queue is designed to be crashproof, provided that the underlying
 filesystem is crashproof. All cleanups are handled by qmail-send and
 qmail-clean without human intervention. See section 6 for more details.
 
 
-2. Queue structure
+.SH Queue structure
 
 Each message in the queue is identified by a unique number, let's say
 457. The queue is organized into several directories, each of which may
@@ -51,7 +62,7 @@ means it does not exist; ? means it may or may not exist.
 Guarantee: If mess/457 exists, it has inode number 457.
 
 
-3. How messages enter the queue
+.SH How messages enter the queue
 
 To add a message to the queue, qmail-queue first creates a file in a
 separate directory, pid/, with a unique name. The filesystem assigns
@@ -70,7 +81,7 @@ qmail-queue starts a 24-hour timer before touching any files, and
 commits suicide if the timer expires.
 
 
-4. How queued messages are preprocessed
+.SH How queued messages are preprocessed
 
 Once a message has been queued, qmail-send must decide which recipients
 are local and which recipients are remote. It may also rewrite some
@@ -84,7 +95,7 @@ in S4 at this point. Finally qmail-send removes todo/457, moving to S5.
 At that instant the message has been successfully preprocessed.
 
 
-5. How preprocessed messages are delivered
+.SH How preprocessed messages are delivered
 
 Messages at S5 are handled as follows. Each address in local/457 and
 remote/457 is marked either NOT DONE or DONE.
@@ -117,7 +128,7 @@ as described above. Once bounce/457 is definitely gone, qmail-send
 deletes info/457, moving to S2, and finally mess/457, moving to S1.
 
 
-6. Cleanups
+.SH Cleanups
 
 If the computer crashes while qmail-queue is trying to queue a message,
 or while qmail-send is eliminating a message, the message may be left in
@@ -143,7 +154,7 @@ database literature---e.g., keeping log files---amount to saying that
 it's the recipient's computer's job to discard duplicate messages.)
 
 
-7. Further notes
+.SH Further notes
 
 Currently info/457 serves two purposes: first, it records the envelope
 sender; second, its modification time is used to decide when a message

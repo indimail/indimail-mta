@@ -45,7 +45,6 @@ f:::0644:/doc/:README.EXTTODO:doc/README.EXTTODO
 f:::0644:/doc/:FROMISP:doc/FROMISP
 f:::0644:/doc/:TOISP:doc/TOISP
 f:::0644:/doc/:AUTOTURN:doc/AUTOTURN
-f:::0644:/doc/:INTERNALS:doc/INTERNALS
 f:::0644:/doc/:PIC.local2alias:doc/PIC.local2alias
 f:::0644:/doc/:PIC.local2ext:doc/PIC.local2ext
 f:::0644:/doc/:PIC.local2local:doc/PIC.local2local

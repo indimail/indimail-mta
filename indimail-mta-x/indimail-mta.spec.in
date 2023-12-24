@@ -819,7 +819,6 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)                   %{shareddir}/doc/README.surbl
 %attr(0644,root,root)                   %{shareddir}/doc/CREDITS.md
 %attr(0644,root,root)                   %{shareddir}/doc/ChangeLog-indimail-mta
-%attr(0644,root,root)                   %{shareddir}/doc/INTERNALS
 %attr(0644,root,root)                   %{shareddir}/doc/FROMISP
 %attr(0644,root,root)                   %{shareddir}/doc/TOISP
 %attr(0644,root,root)                   %{shareddir}/doc/AUTOTURN
