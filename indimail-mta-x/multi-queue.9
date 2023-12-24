@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH multi-queue 7
 .SH NAME
 multi-queue \- indimail's multi queue architecture
@@ -45,16 +46,22 @@ passed the -\fIs\fR argument
 
 As explained earlier, \fBqscheduler\fR(8) can be used for configuring mail
 delivery with fixed number of queues or load dependent dynamic queues. The
-following additional environment variables are needed when dynamic queues
+following additional environment variables can be set when dynamic queues
 are used.
 
 QUEUE_MAX - defines the maximum queues that qscheduler can use for
 deliveries when dynamic queues is configured (-\fId\fR argument to
-\fBqscheduler\fR(8).
+\fBqscheduler\fR(8). The compile time default is 20.
 
 QUEUE_LOAD - defines the max queue load after which \fBqscheduler\fR(8)
-should increment the queue count by starting an additional
-\fBqmail-send\fR(8), \fBtodo-proc\fR(8) instance.
+should increment the queue count by creating a new queue and starting an
+additional \fBqmail-send\fR(8), \fBtodo-proc\fR(8) instance. The compile
+time default is 90.
+
+ERROR_INTERVAL - Used by \fBqscheduler\fR(8) when in dynamic mode.
+Any failure in accessing message queues, allocating memory, opening
+control files \fBqscheduler\fR sleeps for \fBERROR_INTERVAL\fR seconds
+before continuing. The compile time default is 5 seconds.
 
 .SH Inter-Process Communication
 .

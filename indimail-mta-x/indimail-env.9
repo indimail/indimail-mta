@@ -825,6 +825,25 @@ Used by drate, \fBqscheduler\fR(8), \fBqmail-qread\fR(8),
 to select a queue from indimail's multi queue.
 
 .TP
+\fIERROR_INTERVAL\fR
+Used by \fBqscheduler\fR(8) when in dynamic mode. Any failure in accessing
+message queues, shared memory segments, opening control files
+\fBqscheduler\fR sleeps for \fBERROR_INTERVAL\fR seconds before continuing.
+
+.TP
+\fIQUEUE_LOAD\fR
+Used by \fBqscheduler\fR(8), \fBqmail-send\fR(8) and \fBqmail-qread\fR(8)
+as the threshold for maximum queue load. queue load is the average
+concurrencies of all the queues. When this is exceeded, \fBqscheduler\fR(8)
+creates additional queue and starts \fBtodo-proc\fR(8), \fBqmail-send\fR(8)
+instance to reduce the average concurrency.
+
+.TP
+\fIQUEUE_MAX\fR
+The maximun number of queues \fBqscheduler\fR(8) will create when
+\fIQUEUE_LOAD\fR is exceeded.
+
+.TP
 \fIQUEUE_PLUGIN_SYMB\fR
 Used by \fBqhpsi\fR(8)
 
@@ -1070,6 +1089,18 @@ Used as path for creating temporary files by \fBautoresponder\fR(1), qarf,
 .TP
 \fITODO_INTERVAL\fR
 Used by \fBtodo-proc\fR(8), \fBslowq-send\fR(8) and \fBqmta-send\fR(8)
+
+.TP
+\fITODO_CHUNK_SIZE\fR
+Used by \fBtodo-proc\fR(8) to communicate to \fBqmail-send\fR(8) new
+messages in chunks instead of transmitting a message as soon as it is seen
+in the queue.
+
+.TP
+\fICHUNK_WAIT\fR
+Max number of seconds to wait for \fBTODO_CHUNK_SIZE\fR messages in the
+queue after which \fBtodo-proc\fR(8) communicates to \fBqmail-send\fR(8)
+available messages to be scheduled for delivery.
 
 .TP
 \fITRY_NEXT_MX_HELO_FAIL\fR

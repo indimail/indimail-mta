@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.9  2023-12-24 16:33:11+05:30  Cprogrammer
+ * handle EINTR for mq_receive()
+ *
  * Revision 1.8  2023-02-08 09:40:36+05:30  Cprogrammer
  * merged sigterm(), die() functions
  *
@@ -1050,13 +1053,18 @@ dynamic_queue()
 		}
 		msgbuflen = attr.mq_msgsize;
 		priority = 0;
-		if (mq_receive(mq_sch, msgbuf, msgbuflen, &priority) == -1) {
-			if (errno == error_intr)
-				continue;
-			strerr_warn1("alert: qscheduler: unable to read message queue: ", &strerr_sys);
-			sleep(error_interval);
+		for (;;) {
+			if ((i = mq_receive(mq_sch, msgbuf, msgbuflen, &priority)) == -1) {
+				if (errno == error_intr)
+					continue;
+				strerr_warn1("alert: qscheduler: unable to read message queue: ", &strerr_sys);
+				sleep(error_interval);
+			}
+			break;
 		}
-		if (keep_qcount) {
+		if (i == -1)
+			continue;
+		if (keep_qcount) { /*- just log a warning */
 			strerr_warn1("alert: qscheduler: deferring qmonitor msg to update load as -n option in effect", 0);
 			continue;
 		}
@@ -1238,7 +1246,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.8 2023-02-08 09:40:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.9 2023-12-24 16:33:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
