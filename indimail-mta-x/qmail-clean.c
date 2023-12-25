@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-clean.c,v 1.15 2023-12-25 09:28:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-clean.c,v 1.15 2023-12-25 10:03:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -16,9 +16,9 @@
 #include <scan.h>
 #include <fmt.h>
 #include <error.h>
-#include <fmtqfn.h>
 #include <env.h>
 #include <getEnvConfig.h>
+#include "fmtqfn.h"
 #include "qmail.h"
 #include "variables.h"
 #include "auto_split.h"
@@ -140,14 +140,14 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.15 2023-12-25 09:28:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.15 2023-12-25 10:03:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-clean.c,v $
- * Revision 1.15  2023-12-25 09:28:53+05:30  Cprogrammer
+ * Revision 1.15  2023-12-25 10:03:23+05:30  Cprogrammer
  * made OSSIFIED configurable
  *
  * Revision 1.14  2022-01-30 08:37:53+05:30  Cprogrammer
