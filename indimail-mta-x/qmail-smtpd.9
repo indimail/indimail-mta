@@ -463,12 +463,11 @@ mails to ETRN/AUTOTURN/ATRN domains will bounce.
 
 .SH TRANSPARENCY
 \fBqmail-smtpd\fR converts the SMTP newline convention into the UNIX
-newline convention by converting CR LF into LF. It also accepts connections
-on bare LFs even though such messages violate the SMTP protocol. Strangely
-some Windows MUAs do it (which is strange since CR LF is the natural
-Windows way of doing things). But what else can you expect from an
-Organization famous for stealing things. Also if sendmail is mis-configured
-it can cause this.
+newline convention by converting CR LF into LF. If the environment variable
+\fBALLOW_BARELF\fR is set, It also accepts connections on bare LFs even
+though such messages violate the SMTP protocol. Strangely some Windows MUAs
+do it (which is strange since CR LF is the natural Windows way of doing
+things). Also if sendmail is mis-configured it can cause this.
 
 \fBqmail-smtpd\fR accepts messages that contain long lines or non-ASCII
 characters, even though such messages violate the SMTP protocol.

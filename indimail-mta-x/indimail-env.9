@@ -29,6 +29,11 @@ Set by \fBqmail-smtpd\fR(8) on successful auhentication
 Set by \fBqmail-smtpd\fR(8) to the authenticated envelope sender address
 
 .TP
+\fIALLOW_BARELF\fR
+If set, \fBqmail-smtpd\fR converts bare LF into CRLF, even though such
+messages violate the SMTP protocol.
+
+.TP
 \fIDISABLE_CNAME_LOOKUP\fR
 Used by \fBqmail-remote\fR to disable cname lookups when it fails to find
 MX record for a host.

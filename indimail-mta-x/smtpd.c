@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.315 2023-12-10 23:34:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.316 2023-12-26 00:32:45+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.315 $";
+static char    *revision = "$Revision: 1.316 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -405,6 +405,7 @@ static int      plugin_count;
 #endif
 static int      logfd = 255;
 static int      old_client_bug = 0;
+static int      convertbarelf;
 
 struct authcmd {
 	char           *text;
@@ -4078,6 +4079,7 @@ smtp_mail(char *arg)
 		}
 	}
 #endif
+	convertbarelf = env_get("ALLOW_BARELF") ? 1 : 0;
 	seenmail = 1;
 	out("250 ok\r\n", NULL);
 	flush();
@@ -4632,20 +4634,22 @@ blast(int *hops)
 	dsn = pos = 0;
 	flagmaybew = flagmaybex = flagmaybey = flagmaybez = 1;
 	msg_size = 0;
-	seencr = 0;	/*- qmail-smtpd-newline patch */
+	seencr = 0;	/*- qmail-smtpd allow bare lf */
 	for (;;) {
 		if ((err = substdio_get(&ssin, &ch, 1)) <= 0)
 			return (1);
-		if (ch == '\n') {
-			if (seencr == 0) {
-				substdio_seek(&ssin, -1);
-				ch = '\r';
+		if (convertbarelf) {
+			if (ch == '\n') {
+				if (seencr == 0) {
+					substdio_seek(&ssin, -1);
+					ch = '\r';
+				}
 			}
+			if (ch == '\r')
+				seencr = 1;
+			else
+				seencr = 0;
 		}
-		if (ch == '\r')
-			seencr = 1;
-		else
-			seencr = 0;
 		if (flaginheader) {
 			if (pos > 8 && pos < 14) {
 				if (ch != "return-receipt"[pos] && ch != "RETURN-RECEIPT"[pos])
@@ -7349,6 +7353,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.316  2023-12-26 00:32:45+05:30  Cprogrammer
+ * Convert bare LF into CRLF if env variable ALLOW_BARELF is set
+ *
  * Revision 1.315  2023-12-10 23:34:26+05:30  Cprogrammer
  * allow CHECKSENDER to work for local users without virtualdomains loaded
  *
@@ -7753,7 +7760,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.315 2023-12-10 23:34:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.316 2023-12-26 00:32:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

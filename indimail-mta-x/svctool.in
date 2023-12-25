@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.714 2023-12-25 19:08:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.715 2023-12-26 00:31:12+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.714 2023-12-25 19:08:48+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.715 2023-12-26 00:31:12+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -95,6 +95,7 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
+  [--barelf]
   --default-domain=domain
 
  Installs a new queue with a SMTP Listener
@@ -204,6 +205,7 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
+  barelf         - Convert bare LF into CRLF
 
 --delivery=ident --qbase=queue_path --qcount=N --qstart=I
   --servicedir=service_path
@@ -2833,6 +2835,11 @@ else
 	fi
 fi # odmr
 echo 1 > $conf_dir/STRIP_DOMAIN # for sys-checkpwd
+if [ $barelf -eq 1 ] ; then
+	echo 1 > $conf_dir/ALLOW_BARELF
+else
+	> $conf_dir/ALLOW_BARELF
+fi
 if [ $shared_objects -eq 1 ] ; then
 	plugin_count=0
 	if [ -f "$DESTDIR"@prefix@/lib/indimail/plugins/qmail_smtpd.so ] ; then
@@ -10446,6 +10453,7 @@ chkrelay=0
 hidehost=0
 secureauth=0
 death=86400
+barelf=0
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
 else
@@ -11115,6 +11123,10 @@ while test $# -gt 0; do
 
 	--death=*)
 	death=$optarg
+	;;
+
+	--barelf)
+	barelf=1
 	;;
 
 	--initcmd=*)
