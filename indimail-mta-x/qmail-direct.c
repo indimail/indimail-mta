@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-direct.c,v 1.13 2023-12-25 09:29:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-direct.c,v 1.13 2023-12-25 09:40:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -11,6 +11,7 @@
 #include <open.h>
 #include <sig.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #include <stralloc.h>
 #include <seek.h>
 #include <str.h>
@@ -536,7 +537,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.13 2023-12-25 09:29:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.13 2023-12-25 09:40:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)
@@ -545,7 +546,7 @@ getversion_qmail_direct_c()
 
 /*
  * $Log: qmail-direct.c,v $
- * Revision 1.13  2023-12-25 09:29:13+05:30  Cprogrammer
+ * Revision 1.13  2023-12-25 09:40:23+05:30  Cprogrammer
  * made DEATH configurable
  *
  * Revision 1.12  2022-04-04 14:23:27+05:30  Cprogrammer

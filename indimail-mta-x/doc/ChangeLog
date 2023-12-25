@@ -134,6 +134,7 @@ o - New program printass to print entries in users/cdb, users/assign file
 75. qmail-clean.c, qmail-direct.c, qmail-dkim.c, qmail-multi.c,
     qmail-nullqueue.c, qmail-queue.c, qmail-send.c, qmail-spamfilter.c,
     qmta-send.c, slowq-send.c: Made value of DEATH and OSSIFIED configurable
+76. qmail.h: Added compile time definitions for DEATH, OSSIFIED
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
