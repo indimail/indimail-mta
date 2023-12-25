@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.712 2023-12-03 12:30:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.713 2023-12-25 09:54:55+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.712 2023-12-03 12:30:01+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.713 2023-12-25 09:54:55+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -233,6 +233,7 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
+  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -292,6 +293,8 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
+  death          - Value in seconds maximum time qmail-queue will run after
+                   which it will self terminate
 
 --slowq --qbase=queue_path
   --servicedir=service_path
@@ -316,6 +319,7 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
+  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -360,6 +364,8 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
+  death          - Value in seconds maximum time qmail-queue will run after
+                   which it will self terminate
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]
@@ -6951,6 +6957,11 @@ if [ ! " $dmemory" = " " ] ; then
 else
 	echo 83886080 > $conf_dir/SOFT_MEM
 fi
+if [ $death != 86400 ] ; then
+	echo $death > $conf_dir/DEATH
+	ossified=$(echo $death | awk '{printf("%.0f\n", $1 + $1 * 0.5)}')
+	echo $ossified > $conf_dir/OSSIFIED
+fi
 if [ " $persistdb" = " 1" ] ; then
 	echo postmaster > $conf_dir/ROUTE_NULL_USER
 	echo > $conf_dir/AUTHSELF
@@ -7250,6 +7261,11 @@ if [ $todo_proc -eq 1 ] ; then
 	echo "1" > $conf_dir/TODO_PROCESSOR
 else
 	> $conf_dir/TODO_PROCESSOR
+fi
+if [ $death != 86400 ] ; then
+	echo $death > $conf_dir/DEATH
+	ossified=$(echo $death | awk '{printf("%.0f\n", $1 + $1 * 0.5)}')
+	echo $ossified > $conf_dir/OSSIFIED
 fi
 #
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
@@ -10425,6 +10441,7 @@ chksender=0
 chkrelay=0
 hidehost=0
 secureauth=0
+death=86400
 if [ " $CONTROLDIR" = " " ] ; then
 	cntrldir=$sysconfdir/control
 else
@@ -11090,6 +11107,10 @@ while test $# -gt 0; do
 
 	--resolvconf)
 	mount_resolvconf=1
+	;;
+
+	--death=*)
+	death=$optarg
 	;;
 
 	--initcmd=*)
