@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.35 2023-12-23 23:25:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.36 2023-12-25 09:31:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -62,7 +62,6 @@
 #define SLEEP_FOREVER  86400 /*- absolute maximum time spent in select() */
 #define SLEEP_CLEANUP  76431 /*- time between cleanups */
 #define SLEEP_SYSFAIL    123
-#define OSSIFIED      129600 /*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 #ifndef TODO_INTERVAL
 #define SLEEP_TODO      1500 /*- check todo/ every 25 minutes in any case */
 #define ONCEEVERY         10 /*- Run todo maximal once every N seconds */
@@ -852,7 +851,7 @@ cleanup_do()
 {
 	char            ch;
 	struct stat     st;
-	unsigned long   id;
+	unsigned long   id, ossified;
 
 	if (!flagcleanup) {
 		if (recent < cleanuptime)
@@ -873,7 +872,8 @@ cleanup_do()
 	fnmake_mess(id);
 	if (stat(fn1.s, &st) == -1)
 		return;	/*- probably qmail-queue deleted it */
-	if (recent <= st.st_atime + OSSIFIED)
+	getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
+	if (recent <= st.st_atime + ossified)
 		return;
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == 0)
@@ -3808,7 +3808,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.35 2023-12-23 23:25:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.36 2023-12-25 09:31:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3818,6 +3818,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.36  2023-12-25 09:31:28+05:30  Cprogrammer
+ * made OSSIFIED configurable
+ *
  * Revision 1.35  2023-12-23 23:25:37+05:30  Cprogrammer
  * log pid during startup
  *

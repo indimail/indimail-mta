@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.112 2023-12-23 23:58:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.113 2023-12-25 09:30:51+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -66,7 +66,6 @@
 #define SLEEP_FOREVER  86400 /*- absolute maximum time spent in select() */
 #define SLEEP_CLEANUP  76431 /*- time between cleanups */
 #define SLEEP_SYSFAIL    123
-#define OSSIFIED      129600 /*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 
 static int      lifetime = 604800;
 static int      bouncemaxbytes = 50000;
@@ -531,7 +530,7 @@ cleanup_do()
 {
 	char            ch;
 	struct stat     st;
-	unsigned long   id;
+	unsigned long   id, ossified;
 
 	if (!flagcleanup) {
 		if (recent < cleanuptime)
@@ -552,7 +551,8 @@ cleanup_do()
 	fnmake_mess(id);
 	if (stat(fn1.s, &st) == -1)
 		return;	/*- probably qmail-queue deleted it */
-	if (recent <= st.st_atime + OSSIFIED)
+	getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
+	if (recent <= st.st_atime + ossified)
 		return;
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == 0)
@@ -2715,7 +2715,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.112 2023-12-23 23:58:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.113 2023-12-25 09:30:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2725,6 +2725,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.113  2023-12-25 09:30:51+05:30  Cprogrammer
+ * made OSSIFIED configurable
+ *
  * Revision 1.112  2023-12-23 23:58:18+05:30  Cprogrammer
  * log pid during startup
  *

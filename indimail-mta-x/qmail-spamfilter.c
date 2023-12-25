@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-spamfilter.c,v 1.8 2023-10-26 23:14:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-spamfilter.c,v 1.9 2023-12-25 09:31:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -7,6 +7,7 @@
 #include <stralloc.h>
 #include <sig.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #include <scan.h>
 #include <fmt.h>
 #include <wait.h>
@@ -17,8 +18,6 @@
 #include "auto_prefix.h"
 #include "qmulti.h"
 #include "qmail.h"
-
-#define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 
 no_return void
 sigalrm()
@@ -38,6 +37,7 @@ main(int argc, char **argv)
 {
 	int             wstat, filt_exitcode, queueexitcode, n, ham_code = 1,
 					spam_code = 0, unsure_code = 2;
+	unsigned long   death;
 	int             pipefd[2], recpfd[2];
 	pid_t           filt_pid, queuepid;
 	struct substdio ssin, ssout;
@@ -52,7 +52,8 @@ main(int argc, char **argv)
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
-	alarm(DEATH);
+	getEnvConfiguLong(&death, "DEATH", DEATH);
+	alarm(death);
 	if ((ptr = env_get("VIRUSCHECK")) && *ptr) {
 		scan_int(ptr, &n);
 		if (1 < n && 8 > n) {
@@ -233,7 +234,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.8 2023-10-26 23:14:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.9 2023-12-25 09:31:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;
@@ -244,6 +245,9 @@ getversion_qmail_spamfilter_c()
 
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.9  2023-12-25 09:31:02+05:30  Cprogrammer
+ * made DEATH configurable
+ *
  * Revision 1.8  2023-10-26 23:14:32+05:30  Cprogrammer
  * added HAMEXITCODE, UNSUREEXITCODE
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.76 2023-11-20 11:03:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.77 2023-12-25 09:30:05+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -24,6 +24,7 @@
 #include <now.h>
 #include <wait.h>
 #include <env.h>
+#include <getEnvConfig.h>
 #include <error.h>
 #include <dkim.h>
 #include <makeargs.h>
@@ -41,7 +42,6 @@
 
 #define DKIM_MALLOC(n)     OPENSSL_malloc(n)
 #define DKIM_MFREE(s)      OPENSSL_free(s); s = NULL;
-#define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR 1003
 #define HAVE_EVP_SHA256
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -938,7 +938,7 @@ main(int argc, char *argv[])
 	int             resDKIMSSP = -1, resDKIMADSP = -1, useSSP = 0, useADSP = 0, accept3ps = 0;
 	int             sCount = 0, sSize = 0, verbose = 0;
 	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
-	unsigned long   pid;
+	unsigned long   pid, death;
 	char           *selector = NULL, *ptr;
 	stralloc        dkimfn = {0};
 	DKIMVerifyDetails *pDetails;
@@ -1034,7 +1034,8 @@ main(int argc, char *argv[])
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
-	alarm(DEATH);
+	getEnvConfiguLong(&death, "DEATH", DEATH);
+	alarm(death);
 	if (!(ptr = env_get("TMPDIR")))
 		ptr = "/tmp";
 	if ((ret = pidopen(starttime, ptr))) /*- set pidfn and open with fd = messfd */
@@ -1268,7 +1269,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.76 2023-11-20 11:03:04+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.77 2023-12-25 09:30:05+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1282,6 +1283,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.77  2023-12-25 09:30:05+05:30  Cprogrammer
+ * made DEATH configurable
+ *
  * Revision 1.76  2023-11-20 11:03:04+05:30  Cprogrammer
  * Added env variable EXCLUDE_DKIMSIGN to exclude headers from DKIM signing
  * exclude Arc-Authentication-Results header from DKIM signing

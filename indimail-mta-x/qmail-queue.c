@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.91 2023-10-30 10:28:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.92 2023-12-25 09:30:45+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -53,7 +53,6 @@
 #include "custom_error.h"
 #include "qmail.h"
 
-#define DEATH 86400	/*- 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR  1003
 #ifndef INET_ADDRSTRLEN
 #define INET_ADDRSTRLEN 16
@@ -728,6 +727,7 @@ main()
 #endif
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
 	unsigned int    len, originipfield = 0;
+	unsigned long   death;
 	char            tmp[FMT_ULONG];
 	char            ch;
 	char           *ptr, *qqeh, *tmp_ptr, *qbase;
@@ -832,7 +832,8 @@ main()
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
-	alarm(DEATH);
+	getEnvConfiguLong(&death, "DEATH", DEATH);
+	alarm(death);
 	pidopen();
 	if (fstat(messfd, &pidst) == -1)
 		die(QQ_MESS_FILE, 0, "unable to stat messfn");
@@ -1190,7 +1191,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.91 2023-10-30 10:28:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.92 2023-12-25 09:30:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1198,6 +1199,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.92  2023-12-25 09:30:45+05:30  Cprogrammer
+ * made DEATH configurable
+ *
  * Revision 1.91  2023-10-30 10:28:40+05:30  Cprogrammer
  * use value of QREGEX to use matchregex()
  *

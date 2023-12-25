@@ -87,8 +87,14 @@ changed by passing the path of any qmail-queue frontend (along with
 arguments to the qmail-queue frontend) on the command line. Passing command
 line arguments takes precedence over environment variable.
 
+\fBqmail-spamfilter\fR sets an alarm of 86400 seconds to quit if it doesn't
+complete. This can be changed by setting \fBDEATH\fR environment variable.
+See the man pages for \fBqmail-queue\fR(8) and indimail-mta-internals(7)
+for more details.
+
 .SH "EXIT CODES"
-\fBqmail-spamfilter\fR does not print diagnostics.
+\fBqmail-spamfilter\fR does not print diagnostics. It uses the following
+exit codes indicating the problem.
 .EX
 .\" These codes should be taken from qmail.h
 It exits 51 if it cannot allocate memory
@@ -117,7 +123,8 @@ qscanq(8),
 cleanq(8),
 bogofilter(1),
 queue-fix(8),
-spawn-filter(8)
+spawn-filter(8),
+indimail-mta-internals(7)
 
 .SH "AUTHORS"
 

@@ -34,9 +34,20 @@ permissions for the queue, which can be created/fixed by running
 startup.
 
 If used with the \fB\-c\fR option, where \fBqmta-send\fR runs
-\fBqmail-clean\fR(8) to handle cleanup job, \fBqmta-send\fR doesn't require
-any special permission for the queue. The same queue permission as required
-for \fBqmail-send\fR or \fBslowq-send\fR will work for \fBqmta-send\fR.
+\fBqmail-clean\fR(8) to handle cleanup job. The cleanup is done in
+\fIintd\fR, \fImess\fR queue subdirectory The cleanup is done after a
+successful delivery. \fBqmta-send\fR also does cleanup of files left in
+case of a crash.  Without the \fB\-c\fR option, \fBqmta-send\fR does the
+clean itself. See the section on \fBCleanups\fR in
+\fBindimail-mta-internals(7)\fR. Any left over file not accessed for more
+than 1296000 seconds are removed. The default of 129600 seconds can be
+changed by setting \fBOSSIFIED\fR environment variable. If setting
+\fBOSSIFIED\fR, ensure that it is larger than the value of \fBDEATH\fR
+environment variable used by \fBqmail-queue\fR.
+
+\fBqmta-send\fR doesn't require any special permission for the queue. The
+same queue permission as required for \fBqmail-send\fR or \fBslowq-send\fR
+will work for \fBqmta-send\fR.
 
 .EX
 1. Setup a queue for qmta-send
@@ -688,6 +699,7 @@ nice(1),
 addresses(5),
 envelopes(5),
 indimail-control(5),
+indimail-mta-internals(7),
 indimail-srs(5),
 qmail-log(5),
 qmail-queue(8),

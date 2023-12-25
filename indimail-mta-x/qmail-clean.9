@@ -1,22 +1,47 @@
+.\" vim: tw=75
 .TH qmail-clean 8
 
 .SH NAME
 qmail-clean \- clean up the queue directory
 
 .SH SYNOPSIS
-.B qmail-clean
+\fBqmail-clean\fR
 
 .SH DESCRIPTION
 \fBqmail-clean\fR reads a cleanup command from descriptor 0, performs the
-cleanup, prints the results to descriptor 1, and repeats. \fBqmail-clean\fR
-uses the enivronment \fBCONFSPLIT\fR as the run time directory split value.
-If not set it uses the value DIRSPLIT. A value larger than DIRSPLIT for
-\fBCONFSPLIT\fR is silently ignored.
+cleanup, prints the results to descriptor 1, and repeats. The response is a
+single character 'x' for invalid cleanup command, '!' if it was not able to
+cleanup and '+' if it was successful in cleanup.
+
+\fBqmail-clean\fR uses the enivronment \fBCONFSPLIT\fR as the run time
+directory split value. If not set it uses the value DIRSPLIT. A value
+larger than DIRSPLIT for \fBCONFSPLIT\fR is silently ignored.
 
 \fBqmail-clean\fR can process a queue created with \fItodo\fR and
 \fIintd\fR with subdirectory split by setting the \fBBIGTODO\fR environment
 variable.
 
+\fBqmail-clean\fR cleans up files in \fIintd\fR and \fImess sub directory
+of the queue for \fBqmail-send\fR(8).
+
+\fBqmail-clean\fR cleans up files in \fIintd\fR and \fItodo directory for
+\fBtodo-proc\fR(8).
+
+\fBqmail-clean\fR cleans up files in \fIintd\fR, \fImess\fR and \fItodo\fR
+directory for \fBslowq-send\fR(8).
+
+\fBqmail-clean\fR cleans up files in \fIpid\fR directory accessed more than
+36 hours ago. You can change the default 36 hours by setting \fBOSSIFIED\fR
+environment variable to a value in seconds. This should be greater than the
+value 86400 seconds which is the maximum time \fBqmail-queue\fR will run if
+it doesn't complete. This can be changed by setting \fBDEATH\fR environment
+variable in seconds used by qmail-queue.  Best is to not to set these
+variables unless you know what you are doing.  See the man pages for
+\fBqmail-queue\fR(8) and indimail-mta-internals(7) for more details.
+
 .SH "SEE ALSO"
-qmail-send(8)
-todo-proc(8)
+qmail-send(8),
+todo-proc(8),
+slowq-send(8),
+qmta-send(8),
+indimail-mta-internals(7)

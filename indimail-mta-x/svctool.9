@@ -308,6 +308,7 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
+  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -367,6 +368,8 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
+  death          - Value in seconds maximum time qmail-queue will run after
+                   which it will self terminate
 
 --slowq --qbase=queue_path
   --servicedir=service_path
@@ -391,6 +394,7 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
+  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -435,6 +439,8 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
+  death          - Value in seconds maximum time qmail-queue will run after
+                   which it will self terminate
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]
