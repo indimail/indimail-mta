@@ -1,16 +1,21 @@
+.\" vim: tw=75
 .TH qmail-nullqueue 8
+
 .SH NAME
 qmail-nullqueue - dissapear a message
+
 .SH SYNOPSIS
-.B qmail-nullqueue
+\fBqmail-nullqueue\fR
+
 .SH DESCRIPTION
-.B qmail-nullqueue
-reads a mail message from descriptor 0.
-It then reads envelope information from descriptor 1.
-It places the message for discarding instead of future delivery by \fBqmail-send\fR.
-\fBqmail-nullqueue\fR sets an alarm of 300 seconds after which it exits with code 52. This
-timeout can be changed by setting the environment variable \fBDEATH\fR. You should never be using
-this program unless you know what you are doing.
+\fBqmail-nullqueue\fR reads a mail message from descriptor 0. It then reads
+envelope information from descriptor 1. It places the message for
+discarding instead of future delivery by \fBqmail-send\fR.
+\fBqmail-nullqueue\fR sets an alarm of 86400 seconds after which it exits
+with code 52. This timeout can be changed by setting the environment
+variable \fBDEATH\fR. You should never be using this program unless you
+know what you are doing. See the man pages for \fBqmail-queue\fR(8) and
+indimail-mta-internals(7)for more details.
 
 .SH "SEE ALSO"
 addresses(5),

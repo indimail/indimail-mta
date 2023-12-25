@@ -1,60 +1,30 @@
 /*
- * $Log: qmail-clean.c,v $
- * Revision 1.14  2022-01-30 08:37:53+05:30  Cprogrammer
- * made bigtodo configurable
- *
- * Revision 1.13  2021-06-27 10:45:02+05:30  Cprogrammer
- * moved conf_split variable to fmtqfn.c
- *
- * Revision 1.12  2021-06-14 01:03:48+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.11  2021-05-16 00:40:21+05:30  Cprogrammer
- * use configurable conf_split instead of auto_split variable
- *
- * Revision 1.10  2020-11-24 13:46:37+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.9  2010-02-10 08:58:19+05:30  Cprogrammer
- * removed dependency on indimail
- *
- * Revision 1.8  2007-12-20 12:46:57+05:30  Cprogrammer
- * removed compiler warnings
- *
- * Revision 1.7  2004-10-22 20:28:12+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.6  2004-10-22 15:36:35+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.5  2004-07-17 21:20:36+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail-clean.c,v 1.15 2023-12-25 09:28:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "sig.h"
-#include "now.h"
-#include "str.h"
-#include "direntry.h"
-#include "getln.h"
-#include "stralloc.h"
-#include "substdio.h"
-#include "subfd.h"
-#include "byte.h"
-#include "scan.h"
-#include "fmt.h"
-#include "error.h"
-#include "fmtqfn.h"
-#include "env.h"
+#include <sig.h>
+#include <now.h>
+#include <str.h>
+#include <direntry.h>
+#include <getln.h>
+#include <stralloc.h>
+#include <substdio.h>
+#include <subfd.h>
+#include <byte.h>
+#include <scan.h>
+#include <fmt.h>
+#include <error.h>
+#include <fmtqfn.h>
+#include <env.h>
+#include <getEnvConfig.h>
+#include "qmail.h"
 #include "variables.h"
 #include "auto_split.h"
-#include "getEnvConfig.h"
 
-#define OSSIFIED 129600	/*- see qmail-send.c */
-
-stralloc        line = { 0 };
+static stralloc line = { 0 };
+static char     fnbuf[FMTQFN];
 
 void
 cleanuppid()
@@ -62,11 +32,11 @@ cleanuppid()
 	DIR            *dir;
 	direntry       *d;
 	struct stat     st;
-	datetime_sec    time;
+	datetime_sec    tm;
+	unsigned long   ossified;
 
-	time = now();
-	dir = opendir("pid");
-	if (!dir)
+	tm = now();
+	if (!(dir = opendir("pid")))
 		return;
 	while ((d = readdir(dir))) {
 		if (str_equal(d->d_name, ".") ||
@@ -78,18 +48,16 @@ cleanuppid()
 			continue;
 		if (stat(line.s, &st) == -1)
 			continue;
-		if (time < st.st_atime + OSSIFIED)
+		getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
+		if (tm < st.st_atime + ossified)
 			continue;
 		unlink(line.s);
 	}
 	closedir(dir);
 }
 
-char            fnbuf[FMTQFN];
-
 void
-respond(s)
-	char           *s;
+respond(char *s)
 {
 	if (substdio_putflush(subfdoutsmall, s, 1) == -1)
 		_exit(100);
@@ -172,7 +140,44 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.14 2022-01-30 08:37:53+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-clean.c,v 1.15 2023-12-25 09:28:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qmail-clean.c,v $
+ * Revision 1.15  2023-12-25 09:28:53+05:30  Cprogrammer
+ * made OSSIFIED configurable
+ *
+ * Revision 1.14  2022-01-30 08:37:53+05:30  Cprogrammer
+ * made bigtodo configurable
+ *
+ * Revision 1.13  2021-06-27 10:45:02+05:30  Cprogrammer
+ * moved conf_split variable to fmtqfn.c
+ *
+ * Revision 1.12  2021-06-14 01:03:48+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.11  2021-05-16 00:40:21+05:30  Cprogrammer
+ * use configurable conf_split instead of auto_split variable
+ *
+ * Revision 1.10  2020-11-24 13:46:37+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.9  2010-02-10 08:58:19+05:30  Cprogrammer
+ * removed dependency on indimail
+ *
+ * Revision 1.8  2007-12-20 12:46:57+05:30  Cprogrammer
+ * removed compiler warnings
+ *
+ * Revision 1.7  2004-10-22 20:28:12+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.6  2004-10-22 15:36:35+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.5  2004-07-17 21:20:36+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

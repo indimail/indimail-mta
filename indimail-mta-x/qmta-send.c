@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.28 2023-12-23 23:24:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.29 2023-12-25 09:31:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -51,7 +51,6 @@
 #include "set_environment.h"
 #include "set_queuedir.h"
 
-#define OSSIFIED      129600 /*- 36 hours; _must_ exceed q-q's DEATH (24 hours) */
 #define SLEEP_CLEANUP 76431 /*- time between cleanups */
 #define SLEEP_SYSFAIL 123
 #define SLEEP_FUZZ    1 /*- slop a bit on sleeps to avoid zeno effect */
@@ -274,7 +273,7 @@ cleanup_do(fd_set *wfds)
 {
 	char            ch;
 	struct stat     st;
-	unsigned long   id;
+	unsigned long   id, ossified;
 
 	if (!flagcleanup) {
 		if (recent < cleanuptime)
@@ -296,7 +295,8 @@ cleanup_do(fd_set *wfds)
 	fnmake_mess(id);
 	if (stat(fn1.s, &st) == -1)
 		return;	/*- probably qmail-queue deleted it */
-	if (recent <= st.st_atime + OSSIFIED)
+	getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
+	if (recent <= st.st_atime + ossified)
 		return;
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == 0)
@@ -2770,7 +2770,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.28 2023-12-23 23:24:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.29 2023-12-25 09:31:23+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2778,6 +2778,9 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.29  2023-12-25 09:31:23+05:30  Cprogrammer
+ * made OSSIFIED configurable
+ *
  * Revision 1.28  2023-12-23 23:24:35+05:30  Cprogrammer
  * log pid during startup
  *

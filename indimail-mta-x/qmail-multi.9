@@ -132,6 +132,11 @@ temporary error.
 This remainder is added to QUEUE_START to arrive at which queue to use. It
 then sets the QUEUEDIR=@prefix@/sbin/qmail-queue to queue the mail.
 
+\fBqmail-multi\fR sets an alarm of 86400 seconds to quit if it doesn't
+complete. This can be changed by setting \fBDEATH\fR environment variable.
+See the man pages for \fBqmail-queue\fR(8) and indimail-mta-internals(7)
+for more details.
+
 .SH "EXIT CODES"
 \fBqmail-multi\fR does not print diagnostics. It exits 120 if it is not
 able to exec \fBqmail-queue\fR
@@ -176,7 +181,8 @@ bogofilter(1),
 queue-fix(8),
 spawn-filter(8),
 qscheduler(8),
-multi-queue(7)
+multi-queue(7),
+indimail-mta-internals(7)
 
 .SH "AUTHORS"
 

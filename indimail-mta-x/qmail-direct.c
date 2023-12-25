@@ -1,42 +1,5 @@
 /*
- * $Log: qmail-direct.c,v $
- * Revision 1.12  2022-04-04 14:23:27+05:30  Cprogrammer
- * refactored fastqueue and added setting of fdatasync()
- *
- * Revision 1.11  2022-04-03 18:41:49+05:30  Cprogrammer
- * use custom_error() for error messages
- *
- * Revision 1.10  2021-09-11 19:00:55+05:30  Cprogrammer
- * replace qmail with indimail-mta in received header
- *
- * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.8  2021-07-05 21:23:10+05:30  Cprogrammer
- * use qgetpw interface from libqmail if USE_QPWGR is set
- *
- * Revision 1.7  2021-06-24 12:16:56+05:30  Cprogrammer
- * use uidinit function proto from auto_uids.h
- *
- * Revision 1.6  2021-06-15 21:51:31+05:30  Cprogrammer
- * pass local Maildir/tmp as argument to pidopen
- *
- * Revision 1.5  2021-06-12 18:16:49+05:30  Cprogrammer
- * moved pidopen out to its own file
- *
- * Revision 1.4  2021-05-01 22:31:32+05:30  Cprogrammer
- * use standard Maildir for queue operation
- * removed control file direct_mail_users
- *
- * Revision 1.3  2021-05-01 18:37:30+05:30  Cprogrammer
- * use modified Maildir as queue
- *
- * Revision 1.2  2021-05-01 14:50:33+05:30  Cprogrammer
- * removed uidinit() and auto_uids to run on a minimal system
- *
- * Revision 1.1  2021-04-29 21:16:22+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-direct.c,v 1.13 2023-12-25 09:29:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -65,8 +28,8 @@
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
+#include "qmail.h"
 
-#define DEATH 86400				/* 24 hours; _must_ be below q-s's OSSIFIED (36 hours) */
 #define ADDR   1003
 
 static char     inbuf[2048];
@@ -331,6 +294,7 @@ int
 main(int argc, char **argv)
 {
 	unsigned int    ret, len, rcptcount, use_pwgr, fastqueue;
+	unsigned long   death;
 	uid_t           uid;
 	gid_t           gid;
 	char           *ptr, *home;
@@ -386,7 +350,8 @@ main(int argc, char **argv)
 	sig_miscignore();
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);
-	alarm(DEATH);
+	getEnvConfiguLong(&death, "DEATH", DEATH);
+	alarm(death);
 
 	/*- set pidfn and open with fd = messfd */
 	if ((ret = pidopen(starttime, "tmp"))) {
@@ -571,9 +536,53 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.12 2022-04-04 14:23:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-direct.c,v 1.13 2023-12-25 09:29:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidpidopenh;
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: qmail-direct.c,v $
+ * Revision 1.13  2023-12-25 09:29:13+05:30  Cprogrammer
+ * made DEATH configurable
+ *
+ * Revision 1.12  2022-04-04 14:23:27+05:30  Cprogrammer
+ * refactored fastqueue and added setting of fdatasync()
+ *
+ * Revision 1.11  2022-04-03 18:41:49+05:30  Cprogrammer
+ * use custom_error() for error messages
+ *
+ * Revision 1.10  2021-09-11 19:00:55+05:30  Cprogrammer
+ * replace qmail with indimail-mta in received header
+ *
+ * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.8  2021-07-05 21:23:10+05:30  Cprogrammer
+ * use qgetpw interface from libqmail if USE_QPWGR is set
+ *
+ * Revision 1.7  2021-06-24 12:16:56+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
+ * Revision 1.6  2021-06-15 21:51:31+05:30  Cprogrammer
+ * pass local Maildir/tmp as argument to pidopen
+ *
+ * Revision 1.5  2021-06-12 18:16:49+05:30  Cprogrammer
+ * moved pidopen out to its own file
+ *
+ * Revision 1.4  2021-05-01 22:31:32+05:30  Cprogrammer
+ * use standard Maildir for queue operation
+ * removed control file direct_mail_users
+ *
+ * Revision 1.3  2021-05-01 18:37:30+05:30  Cprogrammer
+ * use modified Maildir as queue
+ *
+ * Revision 1.2  2021-05-01 14:50:33+05:30  Cprogrammer
+ * removed uidinit() and auto_uids to run on a minimal system
+ *
+ * Revision 1.1  2021-04-29 21:16:22+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

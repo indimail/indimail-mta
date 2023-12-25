@@ -1,29 +1,5 @@
 /*
- * $Log: qmail.h,v $
- * Revision 1.9  2023-02-08 18:47:31+05:30  Cprogrammer
- * added perm_error, temp_error macro to evaluate perm/temp errors
- *
- * Revision 1.8  2022-10-17 19:44:36+05:30  Cprogrammer
- * define qmail-queue exit codes
- *
- * Revision 1.7  2022-10-04 23:43:51+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.6  2020-05-12 12:14:13+05:30  Cprogrammer
- * fix integer signedness error in qmail_put() (CVE-2005-1515)
- *
- * Revision 1.5  2009-04-21 14:27:24+05:30  Cprogrammer
- * define CUSTOM_ERR_FD
- *
- * Revision 1.4  2005-05-31 15:45:23+05:30  Cprogrammer
- * added fdc for passing custom error message to qmail-queue
- *
- * Revision 1.3  2004-10-11 13:57:51+05:30  Cprogrammer
- * added function prototypes
- *
- * Revision 1.2  2004-06-18 23:01:26+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail.h,v 1.10 2023-12-25 09:30:13+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef QMAIL_H
 #define QMAIL_H
@@ -34,6 +10,8 @@
 #define CUSTOM_ERR_FD 2
 #endif
 
+#define DEATH         86400  /*- 24 hours; must be below qmail-send's OSSIFIED (36 hours) */
+#define OSSIFIED      129600 /*- 36 hours; must exceed   qmail-queue's DEATH   (24 hours) */
 
 struct qmail
 {
@@ -119,3 +97,34 @@ unsigned long   qmail_qp(struct qmail *);
 #define QQ_CRASHED           123
 
 #endif
+
+/*
+ * $Log: qmail.h,v $
+ * Revision 1.10  2023-12-25 09:30:13+05:30  Cprogrammer
+ * added defintion for DEATH and OSSIFIED
+ *
+ * Revision 1.9  2023-02-08 18:47:31+05:30  Cprogrammer
+ * added perm_error, temp_error macro to evaluate perm/temp errors
+ *
+ * Revision 1.8  2022-10-17 19:44:36+05:30  Cprogrammer
+ * define qmail-queue exit codes
+ *
+ * Revision 1.7  2022-10-04 23:43:51+05:30  Cprogrammer
+ * added comments
+ *
+ * Revision 1.6  2020-05-12 12:14:13+05:30  Cprogrammer
+ * fix integer signedness error in qmail_put() (CVE-2005-1515)
+ *
+ * Revision 1.5  2009-04-21 14:27:24+05:30  Cprogrammer
+ * define CUSTOM_ERR_FD
+ *
+ * Revision 1.4  2005-05-31 15:45:23+05:30  Cprogrammer
+ * added fdc for passing custom error message to qmail-queue
+ *
+ * Revision 1.3  2004-10-11 13:57:51+05:30  Cprogrammer
+ * added function prototypes
+ *
+ * Revision 1.2  2004-06-18 23:01:26+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

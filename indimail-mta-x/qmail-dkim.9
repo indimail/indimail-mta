@@ -309,6 +309,11 @@ By default \fBqmail-dkim\fR will use all of the headers when signing a
 message. You an exclude headers from gettng signed by setting a colon
 separated list of headers in \fBEXCLUDE_DKIMSIGN\fR environment variable.
 
+\fBqmail-dkim\fR sets an alarm of 86400 seconds to quit if it doesn't
+complete. This can be changed by setting \fBDEATH\fR environment variable.
+See the man pages for \fBqmail-queue\fR(8) and indimail-mta-internals(7)
+for more details.
+
 .SH NOTES
 If the environment variable \fBCONTROLDIR\fR is set, \fBqmail-dkim\fR uses
 that instead of @controldir@ to read control files and the private key.
@@ -347,4 +352,5 @@ qmail-inject(8),
 qmail-qmqpc(8),
 qmail-queue(8),
 qmail-send(8),
-qmail-smtpd(8)
+qmail-smtpd(8),
+indimail-mta-internals(7)

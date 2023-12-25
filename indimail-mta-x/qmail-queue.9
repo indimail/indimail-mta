@@ -114,6 +114,18 @@ If the environment variable \fBFASTQUEUE\fR is set, qmail-queue will bypass
 QHPSI, ORIGINIPFIELD, extraqueue, removeheaders, envheaders, logheaders,
 mailarchive control files
 
+\fBqmail-queue\fR sets an alarm of 86400 seconds to quit if it doesn't
+complete. This can be changed by setting \fBDEATH\fR environment variable.
+This should be less than 1296000 seconds or the value of \fBOSSIFIED\fR
+environment variable used by \fBqmail-clean\fR, \fBqmail-send\fR,
+\fBslowq-send\fR, \fBqmta-send\fR. These four programs delete any left over
+files that have not been accessed for more than \fBOSSIFIED\fR seconds in
+the \fIintd\fR, \fImess\fR and \fItodo\fR queue subdirectories. Any file in
+the \fIintd\fR and \fImess\fR sub directory that do not have a
+corresponding file in the \fIinfo\fR and the \fItodo\fR sub directory are
+files probably left due to a situation where \fBqmail-clean\fR didn't
+complete.
+
 .SH CONTROL FILES
 \fBqmail-queue\fR use many control files to provide various features.
 

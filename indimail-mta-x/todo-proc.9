@@ -123,6 +123,15 @@ process a queue created with \fItodo\fR, \fIintd\fR with subdirectory split
 instead of without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable.
 
+\fBtodo-proc\fR uses \fBqmail-clean\fR(8) to cleanup message in \fIintd\fR,
+\fItodo\fR queue subdirectory after a successful delivery. \fBtodo-proc\fR
+also does cleanup of files left in case of a crash. See the section on
+\fBCleanups\fR in \fBindimail-mta-internals(7)\fR. Any left over file not
+accessed for more than 1296000 seconds are removed. The default of 129600
+seconds can be changed by setting \fBOSSIFIED\fR environment variable. If
+setting \fBOSSIFIED\fR, ensure that it is larger than the value of
+\fBDEATH\fR environment variable used by \fBqmail-queue\fR.
+
 The control files conf-syncdir, conf-fsync take precedence over the
 environment variable counterparts. If the control conf-fsync, conf-syncdir
 are present, \fBqmail-send\fR will additionally set or unset the

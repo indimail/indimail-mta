@@ -96,7 +96,15 @@ If a message is temporarily undeliverable to one or more addresses,
 \fBqmail-clean\fR on descriptors 1, 3, and 5, and reads responses from
 descriptors 2, 4, and 6. \fBqmail-send\fR is responsible for avoiding
 deadlock. These descriptors are actually pipes setup by
-\fBqmail-start\fR(8).
+\fBqmail-start\fR(8). \fBqmail-send\fR uses \fBqmail-clean\fR(8) to cleanup
+message in \fIintd\fR, \fImess\fR queue subdirectory after a successful
+delivery. \fBqmail-send\fR also does cleanup of files left in case of a
+crash. See the section on \fBCleanups\fR in
+\fBindimail-mta-internals(7)\fR. Any left over file not accessed for more
+than 1296000 seconds are removed. The default of 129600 seconds can be
+changed by setting \fBOSSIFIED\fR environment variable. If setting
+\fBOSSIFIED\fR, ensure that it is larger than the value of \fBDEATH\fR
+environment variable used by \fBqmail-queue\fR.
 
 \fBqmail-send\fR uses \fBqmail-queue\fR to queue aliases, forwards and
 bounces. This can be changed by using \fBQMAILQUEUE\fR environment
@@ -657,6 +665,7 @@ nice(1),
 addresses(5),
 envelopes(5),
 indimail-control(5),
+indimail-mta-internals(7),
 indimail-srs(5),
 qmail-log(5),
 qmail-queue(8),
