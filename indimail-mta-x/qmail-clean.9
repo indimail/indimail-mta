@@ -33,12 +33,11 @@ directory for \fBslowq-send\fR(8).
 \fBqmail-clean\fR cleans up files in \fIpid\fR directory accessed more than
 36 hours ago. You can change the default 36 hours by setting \fBOSSIFIED\fR
 environment variable to a value in seconds. This should be greater than the
-value 86400 seconds which the time which is the maximum time
-\fBqmail-queue\fR will run if it doesn't complete. This can be changed by
-setting \fBDEATH\fR environment variable in seconds used by qmail-queue.
-Best is to not to set these variables unless you know what you are doing.
-See the man pages for \fBqmail-queue\fR(8) and indimail-mta-internals(7)
-for more details.
+value 86400 seconds which is the maximum time \fBqmail-queue\fR will run if
+it doesn't complete. This can be changed by setting \fBDEATH\fR environment
+variable in seconds used by qmail-queue.  Best is to not to set these
+variables unless you know what you are doing.  See the man pages for
+\fBqmail-queue\fR(8) and indimail-mta-internals(7) for more details.
 
 .SH "SEE ALSO"
 qmail-send(8),

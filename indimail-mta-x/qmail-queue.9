@@ -123,7 +123,7 @@ files that have not been accessed for more than \fBOSSIFIED\fR seconds in
 the \fIintd\fR, \fImess\fR and \fItodo\fR queue subdirectories. Any file in
 the \fIintd\fR and \fImess\fR sub directory that do not have a
 corresponding file in the \fIinfo\fR and the \fItodo\fR sub directory are
-files probably left due to a situation where \fBqmail-clean\fR didn't
+files probably left due to a situation where \fBqmail-queue\fR didn't
 complete.
 
 .SH CONTROL FILES
@@ -482,9 +482,9 @@ set in \fBQMAILQUEUE\fR environment variable and will ultimately execute
 \fBqscanq-stdin\fR(8)
 
 .SH "EXIT CODES"
-\fBqmail-queue\fR does not print diagnostics. It exits 0 if it has
-successfully queued the message. It exits between 1 and 99 if it has failed
-to queue the message.
+\fBqmail-queue\fR does not print diagnostics. It exits with various exit
+codes detailed below. It exits 0 if it has successfully queued the message.
+It exits between 1 and 99 if it has failed to queue the message.
 
 All \fBqmail-queue\fR error codes between 11 and 40 indicate permanent errors:
 .TP 5
