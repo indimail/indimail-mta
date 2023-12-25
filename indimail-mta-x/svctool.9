@@ -308,7 +308,6 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
-  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -368,8 +367,6 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
-  death          - Value in seconds maximum time qmail-queue will run after
-                   which it will self terminate
 
 --slowq --qbase=queue_path
   --servicedir=service_path
@@ -394,7 +391,6 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
-  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -439,8 +435,6 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
-  death          - Value in seconds maximum time qmail-queue will run after
-                   which it will self terminate
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]
@@ -458,6 +452,7 @@ Known values for OPTION are:
   [--dkverify=dkim|none]
   [--dksign=dkim|none --private_key=private_key]
   [--hide-host]
+  [--death=death]
 
  Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -499,6 +494,8 @@ Known values for OPTION are:
   syncdir        - Use BSD style sync semantics for flushing directories
   private_key    - Path to Private key created by dknewkey
   hide-host      - Skip host names and IP addresses in received headers
+  death          - Value in seconds maximum time qmail-queue will run after
+                   which it will self terminate
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
   --context-file=f --save_interval=s --whitelist=w --hash-size=s

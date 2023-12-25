@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.713 2023-12-25 09:54:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.714 2023-12-25 19:08:48+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.713 2023-12-25 09:54:55+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.714 2023-12-25 19:08:48+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -233,7 +233,6 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
-  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -293,8 +292,6 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
-  death          - Value in seconds maximum time qmail-queue will run after
-                   which it will self terminate
 
 --slowq --qbase=queue_path
   --servicedir=service_path
@@ -319,7 +316,6 @@ Known values for OPTION are:
   [--setgroups]
   [--utf8]
   [--hide-host]
-  [--death=death]
   --default-domain=domain
 
  Installs a new queue with a delivery daemon
@@ -364,8 +360,6 @@ Known values for OPTION are:
   setgroups      - Add addition supplementary groups
   utf8           - Enable Email Address Internationalization Support (SMTPUTF8)
   hide-host      - Skip host names and IP addresses in received headers
-  death          - Value in seconds maximum time qmail-queue will run after
-                   which it will self terminate
 
 --queueParam=dir --qbase=queue_path --qcount=N --qstart=I
   [--cntrldir=cntrl_path]
@@ -383,6 +377,7 @@ Known values for OPTION are:
   [--dkverify=dkim|none]
   [--dksign=dkim|none --private_key=private_key]
   [--hide-host]
+  [--death=death]
 
  Installs a new queue without a SMTP Listener
   dir            - dir where to install queuedef environment variable directory
@@ -424,6 +419,8 @@ Known values for OPTION are:
   syncdir        - Use BSD style sync semantics for flushing directories
   private_key    - Path to Private key created by dknewkey
   hide-host      - Skip host names and IP addresses in received headers
+  death          - Value in seconds maximum time qmail-queue will run after
+                   which it will self terminate
 
 --greylist=port --min-resend-min=m --resend-win-hr=g --timeout-days=t
   --context-file=f --save_interval=s --whitelist=w --hash-size=s
@@ -3167,6 +3164,23 @@ if [ $hidehost -eq 1 ] ; then
 	echo 1 > $conf_dir/HIDE_HOST
 else
 	> $conf_dir/HIDE_HOST
+fi
+if [ $death -eq 86400 ] ; then
+	/bin/rm -f "$DESTDIR"$sysconfdir/control/global_vars/DEATH \
+		"$DESTDIR"$sysconfdir/control/global_vars/OSSIFIED
+else
+	if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/DEATH ] ; then
+		ossified=$(echo $death | awk '{printf("%.0f\n", $1 + $1 * 0.5)}')
+		echo $death   > "$DESTDIR"$sysconfdir/control/global_vars/DEATH
+		echo $ossfied > "$DESTDIR"$sysconfdir/control/global_vars/OSSIFIED
+	else
+		t=$(cat "$DESTDIR"$sysconfdir/control/global_vars/DEATH)
+		if [ "$t" != "$death" ] ; then
+			ossified=$(echo $death | awk '{printf("%.0f\n", $1 + $1 * 0.5)}')
+			echo $death > "$DESTDIR"$sysconfdir/control/global_vars/DEATH
+			echo $ossfied > "$DESTDIR"$sysconfdir/control/global_vars/OSSIFIED
+		fi
+	fi
 fi
 echo "$prog_args" > $conf_dir/.options
 echo "$prog_args" > "$DESTDIR"$cntrldir/global_vars/.options
@@ -6957,11 +6971,6 @@ if [ ! " $dmemory" = " " ] ; then
 else
 	echo 83886080 > $conf_dir/SOFT_MEM
 fi
-if [ $death != 86400 ] ; then
-	echo $death > $conf_dir/DEATH
-	ossified=$(echo $death | awk '{printf("%.0f\n", $1 + $1 * 0.5)}')
-	echo $ossified > $conf_dir/OSSIFIED
-fi
 if [ " $persistdb" = " 1" ] ; then
 	echo postmaster > $conf_dir/ROUTE_NULL_USER
 	echo > $conf_dir/AUTHSELF
@@ -7261,11 +7270,6 @@ if [ $todo_proc -eq 1 ] ; then
 	echo "1" > $conf_dir/TODO_PROCESSOR
 else
 	> $conf_dir/TODO_PROCESSOR
-fi
-if [ $death != 86400 ] ; then
-	echo $death > $conf_dir/DEATH
-	ossified=$(echo $death | awk '{printf("%.0f\n", $1 + $1 * 0.5)}')
-	echo $ossified > $conf_dir/OSSIFIED
 fi
 #
 # DEFAULT_DOMAIN will be used by vdelivermail for bounces
