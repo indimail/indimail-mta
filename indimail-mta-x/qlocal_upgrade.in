@@ -373,6 +373,10 @@ if  [ -f $sysconfdir/control/tlsclientciphers ] ; then
 fi
 if  [ -f $sysconfdir/control/tlsserverciphers ] ; then
 	$mv $sysconfdir/control/tlsserverciphers $sysconfdir/control/servercipherlist
+	if [ $? -eq 0 -a -f $sysconfdir/control/global_vars/TLS_CIPHER_LIST ] ; then
+		ln -sf $sysconfdir/control/servercipherlist \
+			$sysconfdir/control/global_vars/TLS_CIPHER_LIST
+	fi
 fi
 
 # copy updated cron entries

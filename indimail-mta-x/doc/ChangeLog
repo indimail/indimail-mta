@@ -141,6 +141,9 @@ o - New program printass to print entries in users/cdb, users/assign file
 79. svctool: added option to set env variable ALLOW_BARELF for qmail-smtpd to
     convert bare LF into CRLF
 80. smtpd.c: Convert bare LF into CRLF if env variable ALLOW_BARELF is set
+- 26/12/2023
+81. qlocal_upgrade.in: Fix symbolic link TLS_CIPHER_LIST in
+    control/global_vars to point to control/servercipherlist
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
