@@ -103,12 +103,12 @@ if [ $copy_src -eq 1 ] ; then
       | gzip -c > $rpmbuild/SOURCES/$name-"$version".tar.gz
   dist=`uname -r |cut -d . -f4`
   if [ -z "$release" ] ; then
-    if [ -d /usr/include/dkim ] ; then
-      qdist=$(rpm -qf /usr/include/dkim|cut -d- -f4|cut -d. -f3)
+    if [ -d /usr/include/srs2 ] ; then
+      qdist=$(rpm -qf /usr/include/srs2|cut -d- -f4|cut -d. -f3)
       if [ " $dist" = " $qdist" ] ; then
-        qversion=$(rpm -qf /usr/include/dkim|cut -d- -f3)
+        qversion=$(rpm -qf /usr/include/srs2|cut -d- -f3)
         if [ "$qversion" = "$version" ] ; then
-          release=$(rpm -qf /usr/include/dkim | cut -d- -f4 | cut -d. -f2)
+          release=$(rpm -qf /usr/include/srs2 | cut -d- -f4 | cut -d. -f2)
           release=$(expr $release + 1)
         else
           release=1
