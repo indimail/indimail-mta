@@ -135,7 +135,6 @@ installer.o
 mysql_inc
 make-makelib
 DIRS
-ucspi-tcp.spec
 addcr
 argv0
 delcr

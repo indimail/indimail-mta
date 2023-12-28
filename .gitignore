@@ -5,3 +5,5 @@ bak
 stage
 libdkim-x/Makefile
 libsrs2-x/Makefile
+.repo-build
+.repo-build.tmp

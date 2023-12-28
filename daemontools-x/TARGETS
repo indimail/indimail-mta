@@ -44,7 +44,6 @@ svscanboot
 svscanboot.8
 svscan.8
 daemontools.perms
-daemontools.spec
 BIN
 SHARED
 SBIN
