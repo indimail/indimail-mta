@@ -32,7 +32,11 @@ rmdir=/bin/rmdir
 default_domain=indimail.org
 
 log_it() {
-  echo "$(echo  ""|tai64n|tai64nlocal)$*"
+  if [ -x ${prefix}/bin/tai64n -a -x ${prefix}/bin/tai64nlocal ] ; then
+    echo "$(echo  ""|tai64n|tai64nlocal)$*"
+  else
+    echo $*
+  fi
 }
 
 ID=`id -u`
