@@ -26,6 +26,8 @@ Release @version@-@release@ Start 27/04/2023 End XX/XX/XXXX
 - 29/12/2023
 11. daemontools.spec, debian/preinst, debian/prerm, debian/postrm: handle
     missing tai64n, tai64nlocal
+12. minisvc.in: added missing definitions for usefsync, usefdatasync,
+    usesyncdir 
 
 * Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 20/02/2023 End 23/04/2023

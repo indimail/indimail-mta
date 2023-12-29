@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.36 2023-07-01 11:24:48+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.37 2023-12-29 23:38:07+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.36 2023-07-01 11:24:48+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.37 2023-12-29 23:38:07+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2084,6 +2084,9 @@ nooverwrite=0
 run_file_only=0
 mount_resolvconf=0
 valid_for=366
+usefsync=0
+usefdatasync=0
+usesyncdir=0
 verbose=""
 
 if [ " $CONTROLDIR" = " " ] ; then
@@ -2804,6 +2807,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.37  2023-12-29 23:38:07+05:30  Cprogrammer
+# added missing definitions for usefsync, usefdatasync, usesyncdir
+#
 # Revision 1.36  2023-07-01 11:24:48+05:30  Cprogrammer
 # skip indimail-mta variables when creating svscan service
 #
