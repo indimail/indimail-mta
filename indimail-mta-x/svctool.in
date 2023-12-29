@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.715 2023-12-26 00:31:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.716 2023-12-29 22:47:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.715 2023-12-26 00:31:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.716 2023-12-29 22:47:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2426,6 +2426,9 @@ fi
 if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
 	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
 fi
+if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/BIGTODO ] ; then
+	echo 0 > "$DESTDIR"$sysconfdir/control/global_vars/BIGTODO
+fi
 if [ $usefsync -eq 1 -o $usefdatasync -eq 1 ] ; then
 	echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC
 else
@@ -4447,10 +4450,10 @@ if [ $# -ne 1 ] ; then
 	return 1
 fi
 SERVICEDIR=$1
-if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
+conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
+if [ $nooverwrite -eq 1 -a -d "$conf_dir" ] ; then
 	return 0
 fi
-conf_dir="$DESTDIR"$SERVICEDIR/qscanq/variables
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
 		/bin/mv $conf_dir "$conf_dir".bak
@@ -4539,10 +4542,10 @@ if [ $# -gt 2 ] ; then
 else
 	mysysconfdir=$sysconfdir
 fi
+conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 	return 0
 fi
-conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 if [ $run_file_only -eq 1 ] ; then
 	if [ -d $conf_dir ] ; then
 		/bin/mv $conf_dir "$conf_dir".bak
@@ -6822,9 +6825,11 @@ fi
 if [ $nooverwrite -eq 0 -o ! -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
 	echo "Creating Queue "$DESTDIR"$QUEUE_BASE/nqueue"
 	if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
-		"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
+		"$DESTDIR"$QmailBinPrefix/bin/queue-fix -s QUEUESPLIT -b 0 \
+			"$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 	else
-		./queue-fix "$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
+		./queue-fix -s QUEUESPLIT -b 0 \
+			"$DESTDIR"$QUEUE_BASE/nqueue > /dev/null
 	fi
 	QUEUE_NO=$QUEUE_START
 	COUNT=1
@@ -6835,9 +6840,11 @@ if [ $nooverwrite -eq 0 -o ! -d "$DESTDIR"$QUEUE_BASE/nqueue ] ; then
 		fi
 		echo "Creating Queue "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO""
 		if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
-			"$DESTDIR"$QmailBinPrefix/bin/queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
+			"$DESTDIR"$QmailBinPrefix/bin/queue-fix -s QUEUESPLIT -b 0 \
+				"$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
 		else
-			./queue-fix "$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
+			./queue-fix -s QUEUESPLIT -b 0 \
+				"$DESTDIR"$QUEUE_BASE/queue"$QUEUE_NO" > /dev/null
 		fi
 		if [ $COUNT -eq $QUEUE_COUNT ] ; then
 			break
@@ -7135,9 +7142,11 @@ fi
 if [ $nooverwrite -eq 0 -o ! -d "$DESTDIR"$QUEUE_BASE/slowq ] ; then
 	echo "Creating Queue "$DESTDIR"$QUEUE_BASE/slowq"
 	if [ -f "$DESTDIR"$QmailBinPrefix/bin/queue-fix ] ; then
-		"$DESTDIR"$QmailBinPrefix/bin/queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
+		"$DESTDIR"$QmailBinPrefix/bin/queue-fix -s QUEUESPLIT -b 0 \
+			-r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
 	else
-		./queue-fix -r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
+		./queue-fix -s QUEUESPLIT -b 0 \
+			-r "$DESTDIR"$QUEUE_BASE/slowq > /dev/null
 	fi
 fi
 
