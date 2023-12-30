@@ -146,7 +146,9 @@ o - New program printass to print entries in users/cdb, users/assign file
     control/global_vars to point to control/servercipherlist
 - 29/12/2023
 82. svctool: use split from conf-split, bigtodo=0 when creating queue
-83. qlocal_upgrade: fixed cron copying cron config
+83. qlocal_upgrade: fixed copying cron config
+- 30/12/2023
+84. qmail-send.c, slowq-send.c: return from exit_todo if flagtodoalive is 0
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

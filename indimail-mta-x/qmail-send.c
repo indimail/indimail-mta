@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.113 2023-12-25 09:30:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.114 2023-12-30 09:21:30+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -205,7 +205,7 @@ sigint()
 
 static stralloc todoline = { 0 };
 static char     todobuf[2048];
-static int      todofdi, todofdo, flagtodoalive;
+static int      todofdi = 8, todofdo = 7, flagtodoalive;
 int             flagspawnalive[CHANNELS];
 
 static void
@@ -213,6 +213,8 @@ exit_todo()
 {
 	int             r;
 
+	if (!flagtodoalive)
+		return;
 	if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
 	r = read(todofdi, todobuf, sizeof (todobuf));
 	if (r > 0 && todobuf[0] == 'L')
@@ -2715,7 +2717,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.113 2023-12-25 09:30:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.114 2023-12-30 09:21:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2725,6 +2727,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.114  2023-12-30 09:21:30+05:30  Cprogrammer
+ * return from exit_todo if flagtodoalive is 0
+ *
  * Revision 1.113  2023-12-25 09:30:51+05:30  Cprogrammer
  * made OSSIFIED configurable
  *

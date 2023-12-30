@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.36 2023-12-25 09:31:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.37 2023-12-30 09:23:58+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -201,9 +201,9 @@ static void
 sigterm()
 {
 	flagexitsend = 1;
+	slog(1, "alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
 	if (todopid)
 		kill(todopid, SIGTERM);
-	slog(1, "alert: ", argv0, ": ", mypid, ": got TERM: ", queuedesc, "\n", NULL);
 }
 
 static void
@@ -230,14 +230,14 @@ static void
 sigalrm()
 {
 	flagrunasap = 1;
-	slog(1, "alert: ", argv0, ": ", mypid, ": got ALRM: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": ", mypid, " got ALRM: ", queuedesc, "\n", NULL);
 }
 
 static void
 sighup()
 {
 	flagreadasap = 1;
-	slog(1, "alert: ", argv0, ": ", mypid, ": got HUP: ", queuedesc, "\n", NULL);
+	slog(1, "alert: ", argv0, ": ", mypid, " got HUP: ", queuedesc, "\n", NULL);
 }
 
 static void
@@ -258,6 +258,8 @@ exit_todo()
 {
 	int             r;
 
+	if (!flagtodoalive)
+		return;
 	if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
 	r = read(todofdi, todobuf, sizeof (todobuf));
 	if (r > 0 && todobuf[0] == 'L')
@@ -3808,7 +3810,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.36 2023-12-25 09:31:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.37 2023-12-30 09:23:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3818,6 +3820,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.37  2023-12-30 09:23:58+05:30  Cprogrammer
+ * return from exit_todo if flagtodoalive is 0
+ *
  * Revision 1.36  2023-12-25 09:31:28+05:30  Cprogrammer
  * made OSSIFIED configurable
  *
