@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.16  2023-12-31 08:57:39+05:30  Cprogrammer
+ * updated control file list
+ *
  * Revision 1.15  2023-09-11 09:02:35+05:30  Cprogrammer
  * fixed descriptions fo localiphost, outgoingip
  *
@@ -439,7 +442,7 @@ valid_control_files(char *fn)
 		"doublebouncesubject", "doublebouncemessage", "badhost", "badmailpatterns",
 		"badrcptpatterns", "spamignorepatterns", "filterargs", "spamfilter", "bouncefrom",
 		"bouncehost", "concurrencylocal", "concurrencyremote", "maxdeliveredto",
-		"domainqueue", "from.envrules",
+		"domainqueue", "from.envrules", "hash_method", "redirectremote", "atrnaccess",
 		"rcpt.envrules", "databytes", "maxhops", "defaultdomain", "defaulthost",
 		"dnsbllist", "doublebouncehost", "doublebounceto", "envnoathost", "extraqueue",
 		"helohost", "idhost", "localiphost", "locals", "me", "morercpthosts", "signatures",
@@ -467,8 +470,8 @@ valid_control_files(char *fn)
 		"batvkey", "batvkeystale", "batvnosignremote", "batvnosignlocals",
 #endif
 #ifdef TLS
-		"tlsclientmethod", "tlsservermethod", "tlsclients", "servercert.pem", "tlsserverciphers",
-		"tlsclientciphers", "clientcert.pem",
+		"tlsclientmethod", "tlsservermethod", "tlsclients", "servercert.pem", "servercipherlist",
+		"clientcipherlist", "serverciphersuite", "clientciphersuite", "clientcert.pem",
 #endif
 		"conf-syncdir", "conf-fsync", "conf-fdatasync", "servicedir.conf",
 		"level2-tlds", "level3-tlds", "libmysql", 0};
@@ -900,7 +903,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.15 2023-09-11 09:02:35+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.16 2023-12-31 08:57:39+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
