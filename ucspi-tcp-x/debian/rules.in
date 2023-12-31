@@ -53,7 +53,7 @@ build-stamp:
 	echo Description=\"Unix Client-Server Program Interface\"; \
 	echo UCSPI_TCP_version=$(version); \
 	echo ID=ucspi-tcp; \
-	echo HOME_URL="https://github.com/mbhangui/indimail-mta"; \
+	echo HOME_URL="https://github.com/indimail/indimail-mta"; \
 	echo PACKAGE_BUGREPORT=\"'@email@'\"; \
 	) > ucspi-tcp-release
 	touch build-stamp

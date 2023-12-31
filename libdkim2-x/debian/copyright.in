@@ -1,7 +1,7 @@
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: libdkim
 Maintainer: @email@
-Source: https://github.com/mbhangui/indimail-mta
+Source: https://github.com/indimail/indimail-mta
 
 Upstream Author: Alt-N Technologies, http://www.altn.com
 

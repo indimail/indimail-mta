@@ -4,7 +4,7 @@ Binary: libsrs2, libsrs2-dev
 Architecture: any
 Version: @version@-@release@
 Maintainer: @email@
-Homepage: https://github.com/mbhangui/indimail-mta/tree/master/libsrs2-x
+Homepage: https://github.com/indimail/indimail-mta/tree/master/libsrs2-x
 Debtransform-Release: 1
 Debtransform-Files-Tar: debian.tar.gz
 Debtransform-Tar: libsrs2-@version@.tar.gz

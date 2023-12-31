@@ -1,7 +1,7 @@
 Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
 Name: IndiMail
 Maintainer: @email@
-Source: https://github.com/mbhangui/indimail-mta
+Source: https://github.com/indimail/indimail-mta
 
 Copyright: 2008-2020, Manvendra Bhangui <mbhangui@gmail.com>
 License: GPL-3+

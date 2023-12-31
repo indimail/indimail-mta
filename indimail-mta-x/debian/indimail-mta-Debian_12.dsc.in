@@ -6,7 +6,7 @@ Binary: indimail-mta
 Architecture: any
 Version: @version@-@release@
 Maintainer: @email@
-Homepage: https://github.com/mbhangui/indimail-mta
+Homepage: https://github.com/indimail/indimail-mta
 Debtransform-Release: 1
 Debtransform-Tar: indimail-mta-@version@.tar.gz
 Debtransform-Files-Tar: debian.tar.gz

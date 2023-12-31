@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: @email@
 Standards-Version: 3.9.5
 Build-Depends: cdbs, debhelper (>= 9), gcc, g++, binutils, automake, libdkim2-dev, libsrs2-dev, libqmail-dev, libldap2-dev, libssl-dev, mime-support, m4, gawk
-Homepage: https://github.com/mbhangui/indimail-mta
+Homepage: https://github.com/indimail/indimail-mta
 
 Package: indimail-mta
 Architecture: any

@@ -149,6 +149,10 @@ o - New program printass to print entries in users/cdb, users/assign file
 83. qlocal_upgrade: fixed copying cron config
 - 30/12/2023
 84. qmail-send.c, slowq-send.c: return from exit_todo if flagtodoalive is 0
+- 31/12/2023
+85. smtpd.c, PKGBUILD.in, indimail-mta.spec.in: moved repository to indimail
+    org
+86. qmail-showctl.c: updated control file list
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

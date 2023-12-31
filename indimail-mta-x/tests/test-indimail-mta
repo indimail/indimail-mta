@@ -2521,7 +2521,7 @@ test_smtp_surbl()
 	(
 	echo This is a test message for surbl
 	echo without surb blacklisted url
-	echo https://github.com/mbhangui/indimail-mta
+	echo https://github.com/indimail/indimail-mta
 	) | swaks -S  --header "Subject: Test Mail" --to $user@$HOSTNAME --from $user@$HOSTNAME \
 		--server 127.0.0.1 --port $smtp_port --body - >$tmpdir/swaks.$$
 	check_mail

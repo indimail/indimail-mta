@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: @email@
 Standards-Version: 3.9.1
 Build-Depends: cdbs, debhelper (>= 9), gcc, g++, automake, libqmail-dev, libssl-dev, m4, gawk
-Homepage: https://github.com/mbhangui/indimail-mta
+Homepage: https://github.com/indimail/indimail-mta
 
 Package: ucspi-tcp
 Architecture: any

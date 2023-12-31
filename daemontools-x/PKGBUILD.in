@@ -1,5 +1,8 @@
 # Maintainer: @email@
 # $Log: PKGBUILD.in,v $
+# Revision 1.5  2023-12-31 08:59:09+05:30  Cprogrammer
+# moved repository to indimail org
+#
 # Revision 1.4  2022-11-22 19:08:11+05:30  Cprogrammer
 # added gzip to makedepends
 #
@@ -13,14 +16,14 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.4 2022-11-22 19:08:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.5 2023-12-31 08:59:09+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=daemontools
 pkgver=@version@
 pkgrel=@release@
 pkgdesc="Tools to manage Unix Services"
 arch=('i686' 'x86_64')
-url="https://github.com/mbhangui/indimail-mta"
+url="https://github.com/indimail/indimail-mta"
 license=('GPL3')
 groups=('base-devel')
 depends=('coreutils' 'findutils' 'sed' 'mariadb-libs' 'libqmail')
@@ -70,7 +73,7 @@ package() {
   echo "Description=\"Daemontools\""
   echo "daemontools_version=${pkgver}-${pkgrel}"
   echo "ID=${pkgname}"
-  echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+  echo "HOME_URL=\"https://github.com/indimail/indimail-mta\""
   echo "PACKAGE_BUGREPORT=\"'@email@'\""
   ) > ${pkgname}-release
   install -Dm 0644 ${pkgname}-release "$pkgdir""${_sysconfdir}"/${pkgname}-release

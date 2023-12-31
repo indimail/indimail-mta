@@ -1,2 +1,2 @@
-Add SCRAM support in indimail-ta
-https://github.com/mbhangui/indimail-mta/issues/30
+Add SCRAM support in indimail-mta
+https://github.com/indimail/indimail-mta/issues/30

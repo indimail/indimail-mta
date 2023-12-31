@@ -10,9 +10,9 @@ For this to work you need few things to be installed on your system. Check your 
 
 ```
 $ cd /usr/local/src
-$ git clone https://github.com/mbhangui/libqmail.git
-$ git clone https://github.com/mbhangui/indimail-mta.git
-$ git clone https://github.com/mbhangui/indimail-virtualdomains.git
+$ git clone https://github.com/indimail/libqmail.git
+$ git clone https://github.com/indimail/indimail-mta.git
+$ git clone https://github.com/indimail/indimail-virtualdomains.git
 ```
 
 ## Build libqmail package

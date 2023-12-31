@@ -1,6 +1,6 @@
 # ucspi-tcp - A collection of tools for building TCP client-server applications
 
-This is a fork of [ucsp-tcp](http://cr.yp.to/ucspi-tcp.html). tcpserver and tcpclient are easy-to-use command-line tools for building TCP client-server applications. This version of ucspi-tcp is part of the [indimail-mta](https://github.com/mbhangui/indimail-mta), but can be used independently.
+This is a fork of [ucsp-tcp](http://cr.yp.to/ucspi-tcp.html). tcpserver and tcpclient are easy-to-use command-line tools for building TCP client-server applications. This version of ucspi-tcp is part of the [indimail-mta](https://github.com/indimail/indimail-mta), but can be used independently.
 
 Few of the changes are
 
@@ -16,7 +16,7 @@ Few of the changes are
 10. Ability to load dynamic libraries to add functionality. tcpserver can load entire qmail-smtpd as a pluggable module.
 11. MySQL support for tcprules. Uses dlopen to load MySQL at runtime.
 12. tcpserver plugins. This version can load entire qmail-smtpd, rblsmtpd as a plugin in memory. Avoid fork/exec and repeated opening of qmail control files for every connection. uses dlopen/dlmopen at runtime.
-13. Linked with [libqmail](https://github.com/mbhangui/libqmail) to avoid duplication of functions and ease of maintenance. This also implies use of substdio interface instead of buffer interface for standard input / output
+13. Linked with [libqmail](https://github.com/indimail/libqmail) to avoid duplication of functions and ease of maintenance. This also implies use of substdio interface instead of buffer interface for standard input / output
 
 ## Build ucsp-tcp
 
@@ -53,4 +53,4 @@ $ sudo make install or sudo ./qmake install
 
 (check version in indimail-mta/ucspi-tcp-x/conf-version)
 
-For more details look at [README](https://github.com/mbhangui/indimail-mta/blob/master/README.md)
+For more details look at [README](https://github.com/indimail/indimail-mta/blob/master/README.md)

@@ -57,7 +57,7 @@ Group: System/Libraries
 Source0: http://downloads.sourceforge.net/indimail/libsrs2-%{version}.tar.gz
 Source1: http://downloads.sourceforge.net/indimail/libsrs2-rpmlintrc
 
-URL: https://github.com/mbhangui/indimail-mta
+URL: https://github.com/indimail/indimail-mta
 BuildRequires: gcc gcc-c++ make autoconf automake libtool pkgconfig
 BuildRequires: findutils diffutils gzip coreutils
 BuildRequires: glibc glibc-devel binutils

@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.316 2023-12-26 00:32:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.317 2023-12-31 08:57:50+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.316 $";
+static char    *revision = "$Revision: 1.317 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -2245,7 +2245,7 @@ smtp_help(char *arg)
 		}
 	}
 	out("\r\n",
-			"214-https://github.com/mbhangui/indimail-mta\r\n",
+			"214-https://github.com/indimail/indimail-mta\r\n",
 			"214-This server supports the following commands:\r\n", NULL);
 	switch (smtp_port)
 	{
@@ -7353,6 +7353,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.317  2023-12-31 08:57:50+05:30  Cprogrammer
+ * moved repository to indimail org
+ *
  * Revision 1.316  2023-12-26 00:32:45+05:30  Cprogrammer
  * Convert bare LF into CRLF if env variable ALLOW_BARELF is set
  *
@@ -7760,7 +7763,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.316 2023-12-26 00:32:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.317 2023-12-31 08:57:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

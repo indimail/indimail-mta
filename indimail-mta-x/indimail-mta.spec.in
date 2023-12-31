@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.395 2023-12-24 23:54:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.396 2023-12-31 08:56:58+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -27,7 +27,7 @@
 %global servicedir         @servicedir@
 %global plugindir          %{_prefix}/lib/indimail/plugins
 %global tcpserver_plugin   1
-%global see_base           For a description of IndiMail visit https://github.com/mbhangui/indimail-mta
+%global see_base           For a description of IndiMail visit https://github.com/indimail/indimail-mta
 %global nodksignatures     0
 %global notlsarr           0
 
@@ -107,7 +107,7 @@ Source3: http://downloads.sourceforge.net/indimail/%{name}-permissions.secure
 Source4: http://downloads.sourceforge.net/indimail/%{name}-permissions.paranoid
 %endif
 
-URL: https://github.com/mbhangui/indimail-mta
+URL: https://github.com/indimail/indimail-mta
 AutoReq: Yes
 Conflicts: indimail-mini
 Conflicts: qmta

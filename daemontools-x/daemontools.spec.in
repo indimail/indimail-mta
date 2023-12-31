@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.41 2023-12-29 23:07:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.42 2023-12-31 08:59:05+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -26,7 +26,7 @@
 %global qsysconfdir        @sysconfdir@
 %global logdir             @logdir@
 %global servicedir         @servicedir@
-%global see_base           For a description of IndiMail visit https://github.com/mbhangui/indimail-mta
+%global see_base           For a description of IndiMail visit https://github.com/indimail/indimail-mta
 
 %if %build_on_obs == 1
 %global packager           Manvendra Bhangui <@email@>
@@ -58,7 +58,7 @@ Group: System Environment/Base
 Group: Productivity/Networking/Email/Servers
 %endif
 Source0: http://downloads.sourceforge.net/indimail/%{name}-%{version}.tar.gz
-URL: https://github.com/mbhangui/indimail-mta
+URL: https://github.com/indimail/indimail-mta
 
 AutoReq: Yes
 Conflicts: indimail-mta < 2.12
@@ -147,7 +147,7 @@ echo "NAME=%{name}"
 echo "Description=\"Daemontools\""
 echo "daemontools_version="%{version}""
 echo "ID=%{name}"
-echo "HOME_URL=\"https://github.com/mbhangui/indimail-mta\""
+echo "HOME_URL=\"https://github.com/indimail/indimail-mta\""
 echo "PACKAGE_BUGREPORT=\"'@email@'\""
 ) > %{name}-release
 

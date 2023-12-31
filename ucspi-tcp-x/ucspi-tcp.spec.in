@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.24 2023-05-31 22:25:57+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.25 2023-12-31 08:59:23+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -25,7 +25,7 @@
 %global libexecdir         @libexecdir@
 %global servicedir         @servicedir@
 %global tcpserver_plugin   1
-%global see_base           For a description of ucspi-tcp visit https://github.com/mbhangui/indimail-mta
+%global see_base           For a description of ucspi-tcp visit https://github.com/indimail/indimail-mta
 
 %if %build_on_obs == 1
 %global packager           Manvendra Bhangui <@email@>

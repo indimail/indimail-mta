@@ -65,7 +65,7 @@ The qmail-perf-test script will create a csv file with the data and averaged tot
 	* VERSION (Workstation Edition)
 * Software
 	* daemontools from openSUSE [Build Service Repo](https://software.opensuse.org//download.html?project=home%3Ambhangui&package=daemontools)
-	* indimail-mta (dynamic-queue branch) from source [indimail-mta](https://github.com/mbhangui/indimail-mta). This included qmailanalog program/scripts matchup and zoverall used by the qmail-perf-test script.
+	* indimail-mta (dynamic-queue branch) from source [indimail-mta](https://github.com/indimail/indimail-mta). This included qmailanalog program/scripts matchup and zoverall used by the qmail-perf-test script.
 	* netqmail from source [netqmail](http://netqmail.org/)
 	* netqmail-exttodo from [netqmail source](http://netqmail.org) + [exttodo patch](https://github.com/bruceg/qmail-patches/blob/master/ext_todo-20030105.patch)
 	* notqmail from source [notqmail](https://github.com/notqmail/notqmail)

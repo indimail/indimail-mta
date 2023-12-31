@@ -49,11 +49,11 @@ WARNING!!! You cannot run this program as root
 This scripts expects the following
 
 1. daemontools installed  from
-   https://github.com/mbhangui/indimail-mta/tree/master/daemontools-x
+   https://github.com/indimail/indimail-mta/tree/master/daemontools-x
    or rpm from
    https://software.opensuse.org//download.html?project=home%3Ambhangui&package=daemontools
 2. standard indimail-mta installation from
-   https://github.com/mbhangui/indimail-mta/tree/master/indimail-mta-x
+   https://github.com/indimail/indimail-mta/tree/master/indimail-mta-x
    or rpm from
    https://software.opensuse.org//download.html?project=home%3Ambhangui&package=indimail-mta
 3. netqmail installed in /var/netqmail with logs in /var/log/svc/netqmail

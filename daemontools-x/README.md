@@ -1,6 +1,6 @@
 # daemontools - collection of tools for managing UNIX services
 
-This is a significant rewrite of [daemontools](https://cr.yp.to/daemontools.html) written by djb. This version of daaemontools is part of the [indimail-mta](https://github.com/mbhangui/indimail-mta), but can be used independently.
+This is a significant rewrite of [daemontools](https://cr.yp.to/daemontools.html) written by djb. This version of daaemontools is part of the [indimail-mta](https://github.com/indimail/indimail-mta), but can be used independently.
 
 Few of the changes are
 
@@ -25,7 +25,7 @@ Few of the changes are
 19. functional as init replacement in docker/podman environment.
 20. ability to become session leader if SETSID env variable is set
 21. create .svscan.pid file
-22. Linked with [libqmail](https://github.com/mbhangui/libqmail) to avoid duplication of functions and ease of maintenance. This also implies use of substdio interface instead of buffer interface for standard input / output
+22. Linked with [libqmail](https://github.com/indimail/libqmail) to avoid duplication of functions and ease of maintenance. This also implies use of substdio interface instead of buffer interface for standard input / output
 
 ## Build daemontools
 
@@ -64,4 +64,4 @@ $ sudo make install or sudo ./qmake install
 
 (check version in indimail-mta/daemontools-x/conf-version)
 
-For more details look at [README](https://github.com/mbhangui/indimail-mta/blob/master/README.md)
+For more details look at [README](https://github.com/indimail/indimail-mta/blob/master/README.md)
