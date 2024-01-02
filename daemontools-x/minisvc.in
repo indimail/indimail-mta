@@ -1819,7 +1819,7 @@ delUsers()
 create_cert()
 {
 	if [ $# -ne 3 ] ; then
-		echo "svctool: create_cert postmaster common_name validity_days" 1>&2
+		echo "minisvc: create_cert postmaster common_name validity_days" 1>&2
 			exit 1
 	fi
 	postmaster=$1

@@ -1,18 +1,18 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 <@email@> @version@-@release@
-Release 3.0.6-1.1 Start 25/10/2023 End XX/XX/XXXX
+* Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
+Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
 ======= Release Highlights ================================================
-o - Multiple bug fixes and optimizations
-o - Refactored ETRN, ATRN code
-o - New program rd-remote with the same interface as qmail-remote for
-    redirecting remote mails
-o - Added half/full detached mode in qmail-send, todo-proc, slowq-send
-o - Added negate option for archival feature in qmail-queue
-o - Added env variable EXCLUDE_DKIMSIGN to exclude headers from
-    DKIM signing
-o - qmta-send major bug fix with flagchan
-o - Added remote mail redirector rd-remote
-o - Fixed maildir.c bug which breaks maildirserial. Skip non-regular files
-o - New program printass to print entries in users/cdb, users/assign file
+- Multiple bug fixes and optimizations
+- Refactored ETRN, ATRN code
+- New program rd-remote with the same interface as qmail-remote for
+  redirecting remote mails
+- Added half/full detached mode in qmail-send, todo-proc, slowq-send
+- Added negate option for archival feature in qmail-queue
+- Added env variable EXCLUDE_DKIMSIGN to exclude headers from
+  DKIM signing
+- qmta-send major bug fix with flagchan
+- Added remote mail redirector rd-remote
+- Fixed maildir.c bug which breaks maildirserial. Skip non-regular files
+- New program printass to print entries in users/cdb, users/assign file
 ===========================================================================
 - 24/10/2023
 01. use matchregex.h from /usr/include/qmail
@@ -153,6 +153,9 @@ o - New program printass to print entries in users/cdb, users/assign file
 85. smtpd.c, PKGBUILD.in, indimail-mta.spec.in: moved repository to indimail
     org
 86. qmail-showctl.c: updated control file list
+- 01/01/2024 - indimail-mta-3.0.6
+87. svctool: fix symbolic links clientcert.pem, scan.conf
+88. Makefile: fix compilation error for forward, filterit
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

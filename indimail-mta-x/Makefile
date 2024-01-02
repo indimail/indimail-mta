@@ -658,8 +658,8 @@ forward: \
 load forward.o qmail.o variables.o auto_prefix.o auto_control.o \
 control.o rcpthosts.o set_environment.o srs.o srs.lib
 	./load forward qmail.o variables.o auto_prefix.o auto_control.o \
-	control.o rcpthosts.o set_environment.o srs.o `cat srs.lib` \
-	$(QMAILLIB)
+	control.o rcpthosts.o set_environment.o srs.o \
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB)
 
 forward.1: forward.9 conf-sysconfdir
 	cat forward.9 \
@@ -3837,7 +3837,7 @@ control.o rcpthosts.o srs.lib
 	./load filterit filterit_sub.o variables.o auto_control.o \
 	auto_prefix.o quote.o qmail.o maildir_deliver.o syncdir.o \
 	set_environment.o control.o rcpthosts.o srs.o \
-	`cat srs.lib` $(QMAILLIB)
+	-L../libsrs2-x/libsrs2/.libs `cat srs.lib` $(QMAILLIB)
 
 filterit.o: \
 compile filterit.c filterit.h

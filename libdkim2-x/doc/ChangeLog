@@ -9,9 +9,10 @@ Implementations as permitted, you agree to the terms and conditions of the
 Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 
 * Sun Apr 23 2023 17:02:10 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.7-1.1%{?dist}
-Release 1.7-1.1 Start 01/02/2023 End 23/04/2023
+Release 1.7-1.1 Start 01/02/2023 End 14/11/2023
 ======= Release Highlights ================================================
-o ability to alter Hash Method after DKIMSignInit
+- ability to alter Hash Method after DKIMSignInit
+- ability to add headers for exclusion from DKIM signing
 ===========================================================================
 - 01/02/2023
 01. new function DKIMSignReplaceHash to alter current Hash method
@@ -50,6 +51,7 @@ o ability to alter Hash Method after DKIMSignInit
     DKIM signing
 17. dkim.cpp, dkimsigin.cpp: Exclude Arc-Authentication-Results from DKIM
     signing
+- 01/01/2024 - indimail-mta-3.0.6
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023

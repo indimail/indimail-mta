@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.716 2023-12-29 22:47:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.717 2024-01-02 17:12:29+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.716 2023-12-29 22:47:14+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.717 2024-01-02 17:12:29+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -10229,7 +10229,7 @@ create_cert()
 	fi
 	if [ ! -f "$DESTDIR"$CERTDIR/clientcert.pem ] ; then
 		cd "$DESTDIR"$CERTDIR
-		/bin/ln -sr servercert.pem \
+		/bin/ln -s servercert.pem \
 			clientcert.pem 2>/dev/null
 		if [ $? -ne 0 ] ; then
 			echo "Failed to link clientcert.pem to servercert.pem" 1>&2
@@ -11876,7 +11876,7 @@ case $option in
 			if [ $? ne 0 ] ; then
 				exit 1
 			fi
-			/bin/ln -sr $sysconfdir/scan.conf
+			/bin/ln -sr $sysconfdir/scan.conf \
 				/etc/clamd.d/scan.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				cd /etc/clamd.d
@@ -11886,7 +11886,7 @@ case $option in
 			if [ ! -f $sysconfdir/scan.conf ] ; then
 				create_clamd_conf > $sysconfdir/scan.conf
 			fi
-			/bin/ln -sr $sysconfdir/scan.conf
+			/bin/ln -sr $sysconfdir/scan.conf \
 				/etc/clamd.d/scan.conf 2>/dev/null
 			if [ $? -ne 0 ] ; then
 				cd /etc/clamd.d
