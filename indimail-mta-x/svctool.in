@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.717 2024-01-02 17:12:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.718 2024-01-02 18:40:52+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.717 2024-01-02 17:12:29+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.718 2024-01-02 18:40:52+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2371,7 +2371,7 @@ if [ ! -f $sysconfdir/backup.conf ] ; then
 	(
 	for i in $servicedir /etc/clamd.d $sysconfdir $QmailHOME/domains \
 		$QmailHOME/autoturn $QmailHOME/alias/.qmail-\* /etc/inittab \
-		/etc/cron.d/cronlist.i /etc/cron.d/cronlist.q /etc/init.d/svscan \
+		/etc/cron.d/indimail.cron /etc/cron.d/indimail-mta.cron /etc/init.d/svscan \
 		/etc/passwd /etc/group /etc/hosts /etc/sysconfig/network \
 		/etc/nsswitch.conf /etc/resolv.conf /etc/security /etc/alternatives \
 		$QmailHOME/.bashrc $QmailHOME/.bash_profile $QmailHOME/.indimail $file

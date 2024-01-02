@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.129 2023-12-03 12:27:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.130 2024-01-02 18:41:13+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -756,13 +756,13 @@ fi
 if [ $noindimail -eq 0 ] ; then
   [ $ID -eq 0 ] && $svctool --servicedir=$servicedir --config=iselinux $extra_opt
 fi
-if [ -f "$dir_prefix"$sysconfdir/cronlist.q -a -d /etc/cron.d ] ; then
+if [ -f "$dir_prefix"$sysconfdir/indimail-mta.cron -a -d /etc/cron.d ] ; then
   echo "adding indimail-mta cron entries"
-  $cp "$dir_prefix"$sysconfdir/cronlist.q /etc/cron.d
+  $cp "$dir_prefix"$sysconfdir/indimail-mta.cron /etc/cron.d
 fi
-if [ -f "$dir_prefix"$sysconfdir/cronlist.i -a -d /etc/cron.d ] ; then
+if [ -f "$dir_prefix"$sysconfdir/indimail.cron -a -d /etc/cron.d ] ; then
   echo "adding indimail cron entries"
-  $cp "$dir_prefix"$sysconfdir/cronlist.i /etc/cron.d
+  $cp "$dir_prefix"$sysconfdir/indimail.cron /etc/cron.d
 fi
 if [ $noindimail -eq 0 ] ; then
   [ $ID -eq 0 ] && $svctool --fixsharedlibs $extra_opt
@@ -783,6 +783,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.130  2024-01-02 18:41:13+05:30  Cprogrammer
+# renamed cronlist.q, cronlist.i to indimail-mta.cron, indimail.cron
+#
 # Revision 2.129  2023-12-03 12:27:46+05:30  Cprogrammer
 # use infifo service in ODMR service for auth
 #

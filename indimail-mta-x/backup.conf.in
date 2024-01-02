@@ -10,8 +10,8 @@
 /etc/alternatives
 /etc/hosts
 /etc/clamd.d
-/etc/cron.d/cronlist.q
-/etc/cron.d/cronlist.i
+/etc/cron.d/indimail-mta.cron
+/etc/cron.d/indimail.cron
 /etc/init.d/svscan
 /etc/inittab
 /etc/nsswitch.conf

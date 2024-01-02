@@ -1,5 +1,5 @@
 #
-# $Id: cronlist.in,v 1.7 2021-07-20 23:09:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.cron.in,v 1.7 2021-07-20 23:09:01+05:30 Cprogrammer Exp mbhangui $
 #
 # Rotate the logs at midnight
 5 01 * * * root @prefix@/bin/svc -a @servicedir@/*/log > /dev/null 2>&1

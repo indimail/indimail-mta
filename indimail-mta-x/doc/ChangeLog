@@ -154,8 +154,10 @@ Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
     org
 86. qmail-showctl.c: updated control file list
 - 01/01/2024 - indimail-mta-3.0.6
+- 02/01/2024
 87. svctool: fix symbolic links clientcert.pem, scan.conf
 88. Makefile: fix compilation error for forward, filterit
+89. renamed cronlist.q, cronlist.i to indimail-mta.cron, indimail.cron
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
