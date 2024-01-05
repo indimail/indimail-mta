@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.6  2024-01-05 11:40:03+05:30  Cprogrammer
+ * return correct domain when local or remote delivery is not set
+ *
  * Revision 1.5  2023-10-30 16:21:01+05:30  Cprogrammer
  * use value of QREGEX to to use matchregex() or wildmat_internal()
  * restore original environment on no match when processing dkimkeys
@@ -58,22 +61,26 @@ getDomainToken(char *domain, stralloc *sa)
 		len += ((n = str_len(ptr)) + 1);
 		for (p1 = ptr;*p1 && *p1 != ':';p1++);
 		if (*p1 == ':') {
-			*p1 = 0;
+			*p1 = 0; /*- NULL at first ':' */
 			/*- check for env strings after command */
 			if (!str_diffn(p1 + 1, "remote:", 7))
 				for (p2 = p1 + 8; *p2 && *p2 != ':'; p2++);
 			else
 			if (!str_diffn(p1 + 1, "local:", 6))
 				for (p2 = p1 + 7; *p2 && *p2 != ':'; p2++);
-			else {
+			else
 				for (p2 = p1 + 1; *p2 && *p2 != ':'; p2++);
-			}
 			if (*p2 == ':') {
 				*p2 = 0;
 				parse_env(p2 + 1);
 				orig_env = environ; /* save environ to be restored later in case of non-match */
 			} else
 				orig_env = NULL;
+			/*-
+			 * allow QREGEX to be set by control file
+			 * hence we put it inside the loop instead of
+			 * outside
+			 */
 			if ((x = env_get("QREGEX")))
 				scan_int(x, &use_regex);
 			else
@@ -105,13 +112,15 @@ getDomainToken(char *domain, stralloc *sa)
 						ptr = sa->s + len;
 						continue; /*- skip remote directives for local mails */
 					}
-				} if (delivery == local_or_remote) { /*- local/remote delivery */
+				} else
+				if (delivery == local_or_remote) { /*- local/remote delivery */
 					if (!str_diffn(p1 + 1, "local:", 6))
 						return (p1 + 7);
 					if (!str_diffn(p1 + 1, "remote:", 7))
 						return (p1 + 8);
-				}
-				return (p1 + 1); /*- domain:command */
+				} else
+				if (str_diffn(p1 + 1, "local:", 6) && str_diffn(p1 + 1, "remote:", 7))
+					return (p1 + 1); /*- domain:command */
 			} else
 			if (orig_env)
 				environ = orig_env;
@@ -124,7 +133,7 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.5 2023-10-30 16:21:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getDomainToken.c,v 1.6 2024-01-05 11:40:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;

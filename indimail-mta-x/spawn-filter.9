@@ -31,12 +31,12 @@ the same interface as the original \fBqmail-local\fR and
 Filters can be run by defining the environment variable \fBFILTERARGS\fR or
 by using the control file \fIfilterargs\fR (see below). \fBspawn-filter\fR
 uses /bin/sh to run the filter (with arguments) specified by the
-\fBFILTERARGS\fR environment variable (or the control defined in the
-control file \fIfilterargs\fR). The environment variable \fBFILTERARGS\fR
-apply to both local and remote mails. For individual domain level control,
-it is best to set using the control file \fBfilterargs\fR (see below the
-section on control files). The environment variable \fBFILTERARGS\fR takes
-precedence over the control file.
+\fBFILTERARGS\fR environment variable (or the control file
+\fIfilterargs\fR). The environment variable \fBFILTERARGS\fR apply to both
+local and remote mails. For individual domain level control, it is best to
+set using the control file \fIfilterargs\fR (see below the section on
+control files). The environment variable \fBFILTERARGS\fR takes precedence
+over the control file.
 
 \fBspawn-filter\fR sets multiple environment variables which can be
 conveniently used in programs/scripts which get invoked by setting
@@ -57,18 +57,24 @@ format.
 
 .EX
 \fBdomain:args\fR
+  or
+\fBdomain:args:envstr\fR
 .EE
 
 for both local and remote deliveries
 
 .EX
 \fBdomain:remote:args\fR
+  or
+\fBdomain:remote:args:envstr\fR
 .EE
 
 for remote deliveries and
 
 .EX
 \fBdomain:local:args\fR
+  or
+\fBdomain:local:args:envstr\fR
 .EE
 
 for local deliveries.
@@ -87,6 +93,16 @@ have the match done on recipient domain by setting
 .EX
 indimail.org:remote:PREFIX/bin/dk-filter
 .EE
+
+\fIenvstr\fR mentioned above is a string of environment variable additions
+or removals. e.g.
+
+.EX
+QREGEX=1,DKIMSIGNOPTIONS=-z 4,HOME=
+.EX
+
+sets QREGEX to 1, DKIMSIGNOPTIONS to "-z 4" and unsets HOME envrionment
+variable.
 
 The sequence in which the filter program is run is given below
 .nr step 1 1

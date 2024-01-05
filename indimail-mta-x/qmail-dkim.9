@@ -115,10 +115,10 @@ expire time by setting \fBDKIMIDENTITY\fR and \fBDKIMEXPIRE\fR
 respectively. \fBDKIMIDENTITY\fR takes precedence over -i option specified
 in \fBDKIMSIGNOPTIONS\fR. Similarly, \fBDKIMEXPIRE\fR takes precedence over
 -x option specifed in \fBR DKIMSIGNOPTIONS\fR. \fBqmail-dkim\fR uses the
-domain found in the Return-Path, Sender, From headers to set the domain
-tag. If not it uses the \fBBOUNCEDOMAIN\fR environment variable.
-\fBBOUNCEDOMAIN\fR can be set to an email address or a domain (without the
-at sign).
+domain found in the Return-Path, Sender, From, X-Bounced-Address headers to
+set the domain tag. If not it uses the \fBBOUNCEDOMAIN\fR environment
+variable. \fBBOUNCEDOMAIN\fR can be set to an email address or a domain
+(without the at sign).
 
 As a default \fBqmail-dkim\fR inserts RSA-SHA256 DKIM-Signature and expects
 the private key file to be a RSA private key. This can be changed by

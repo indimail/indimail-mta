@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.39 2023-09-05 20:59:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.40 2024-01-05 00:36:08+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -81,6 +81,9 @@ dkim_setoptions()
 	yopt=0
 	sopt=0
 	dkimopts="$prefix/bin/dkim"
+	if [ -n "$BOUNCEDOMAIN" -a -z "$_SENDER" ] ; then
+		dkimopts="$dkimopts -d $BOUNCEDOMAIN"
+	fi
 	while [ $1 != -- ]
 	do
 		case $1 in
@@ -227,7 +230,9 @@ if [ "$prefix" = "/usr" ] ; then
 	priv_key_err=35 # indimail
 else
 	priv_key_err=32 # netqmail, notqmail
-	BOUNCEDOMAIN=$DKIMDOMAIN
+	if [ -z "$BOUNCEDOMAIN" -a -n "$DKIMDOMAIN" ] ; then
+		BOUNCEDOMAIN=$DKIMDOMAIN
+	fi
 fi
 if [ " $CONTROLDIR" = " " ] ; then
 	CONTROLDIR=@controldir@
@@ -336,6 +341,10 @@ exec 0<$tmpfn
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.40  2024-01-05 00:36:08+05:30  Cprogrammer
+# fix BOUNCEDOMAIN getting unset
+# use dkim -d bouncedomain for bounces
+#
 # Revision 1.39  2023-09-05 20:59:16+05:30  Cprogrammer
 # Added missing NODKIMKEY feature to turn off dkimkeyfn
 #
