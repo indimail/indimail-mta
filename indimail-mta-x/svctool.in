@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.718 2024-01-02 18:40:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.719 2024-01-06 09:57:38+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.718 2024-01-02 18:40:52+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.719 2024-01-06 09:57:38+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -8547,7 +8547,7 @@ create_users()
 			/usr/bin/dscl . -list Users/$i >/dev/null 2>&1
 			if [ $? -ne 0 ]; then
 				echo "Creating $t"
-				if [ "$i" = "qmailr" ] ; then
+				if [ "$i" = "qmailr" -o "$i" = "qmails" ] ; then
 					macOSuseradd -M -u $userid -g qmail -d $QmailHOME -s $safe_shell -G qcerts $i
 				else
 					macOSuseradd -M -u $userid -g qmail -d $QmailHOME -s $safe_shell $i
@@ -8555,7 +8555,7 @@ create_users()
 			fi
 			;;
 			*)
-			if [ "$i" = "qmailr" ] ; then
+			if [ "$i" = "qmailr" -o "$i" = "qmails" ] ; then
 				linuxuseradd -c "$t" -M -g qmail -d $QmailHOME -s $safe_shell -G qcerts $i
 			else
 				linuxuseradd -c "$t" -M -g qmail -d $QmailHOME -s $safe_shell $i

@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.60 2023-12-29 21:53:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.61 2024-01-06 11:07:19+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -26,7 +26,7 @@ check_update_if_diff()
 
 do_install()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.60 2023-12-29 21:53:04+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.61 2024-01-06 11:07:19+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -34,7 +34,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.60 2023-12-29 21:53:04+05:30 Cprogra
 
 do_post_upgrade()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.60 2023-12-29 21:53:04+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.61 2024-01-06 11:07:19+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -166,23 +166,32 @@ else
 	t1=0
 	t2=0
 	t3=0
+	t4=0
 	for t in $(echo $t | cut -d: -f4 | $sed -e 's{,{ {g')
 	do
 		if [ "$t" = "qmailr" ] ; then
 			t1=1
 		elif [ "$t" = "qmaild" ] ; then
 			t2=1
-		elif [ "$t" = "apache" ] ; then
+		elif [ "$t" = "qmails" ] ; then
 			t3=1
+		elif [ "$t" = "apache" ] ; then
+			t4=1
 		fi
 	done
 	if [ $t1 -eq 0 ] ; then
 		echo usermod -aG qcerts qmailr
+		usermod -aG qcerts qmailr
 	fi
 	if [ $t2 -eq 0 ] ; then
 		echo usermod -aG qcerts qmaild
+		usermod -aG qcerts qmaild
 	fi
 	if [ $t3 -eq 0 ] ; then
+		echo usermod -aG qcerts qmails
+		usermod -aG qcerts qmails
+	fi
+	if [ $t4 -eq 0 ] ; then
 		/usr/bin/getent group apache > /dev/null && usermod -aG qcerts apache
 	fi
 fi
@@ -398,6 +407,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.61  2024-01-06 11:07:19+05:30  Cprogrammer
+# add supplementary group qcerts for qmails user
+#
 # Revision 1.60  2023-12-29 21:53:04+05:30  Cprogrammer
 # fixed qlocal_upgrade
 #
