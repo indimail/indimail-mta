@@ -230,6 +230,8 @@ const char *dkim_error_str(int ret, int flag)
 		return "signing error: evp signing failure";
 	case DKIM_EVP_DIGEST_FAILURE:
 		return "signing error: evp digest failure";
+	case DKIM_BAD_IDENTITY:
+		return "signature error: invalid identity domain";
 	}
 	return "unknown error";
 }
@@ -907,13 +909,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.35 2023-11-20 10:07:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.36 2024-01-06 21:26:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.36  2024-01-06 21:26:06+05:30  Cprogrammer
+ * added new error code DKIM_BAD_IDENTITY for invalid identity domain (i= tag)
+ *
  * Revision 1.35  2023-11-20 10:07:40+05:30  Cprogrammer
  * Added -X option to have colon separated list of headers to be excluded from DKIM signing
  * use EXCLUDE_DKIMSIGN to specify colon separated list of headers to be excluded from DKIM signing

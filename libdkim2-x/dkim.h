@@ -58,7 +58,11 @@ extern          "C" {
 #define DKIM_SUCCESS_BUT_EXTRA                4 /* signature result: signature verified but it did not include all of the body */
 #define DKIM_3PS_SIGNATURE                    5 /* 3rd-party signature */
 
-/* DKIM Error codes */
+/*
+ * DKIM Error codes
+ * If you modify this, you may need to
+ * modify dkim_error_str() in dkim.cpp
+ */
 #define DKIM_FAIL                            -1 /* verify error: message is suspicious */
 #define DKIM_BAD_SYNTAX                      -2 /* signature error: DKIM-Signature could not parse or has bad tags/values */
 #define DKIM_SIGNATURE_BAD                   -3 /* signature error: RSA/ED25519 verify failed */
@@ -84,7 +88,8 @@ extern          "C" {
 #define DKIM_BUFFER_TOO_SMALL               -23 /* signing error: Buffer passed in is not large enough */
 #define DKIM_EVP_SIGN_FAILURE               -24 /* signing error: evp signing failure */
 #define DKIM_EVP_DIGEST_FAILURE             -25 /* signing error: evp digest failure */
-#define DKIM_MAX_ERROR                      -26 /* set this to 1 greater than the highest error code (but negative) */
+#define DKIM_BAD_IDENTITY                   -26 /*- bad/invalid i= tag */
+#define DKIM_MAX_ERROR                      -27 /* set this to 1 greater than the highest error code (but negative) */
 
 #define DKIM_SSP_UNKNOWN                      1 /*- some messages may be signed */
 #define DKIM_SSP_ALL                          2 /*- all messages are signed, 3rd party allowed */
@@ -174,6 +179,9 @@ int  DKIM_CALL  DKIMSignReplaceHash(DKIMContext *pSignContext, DKIMSignOptions *
 
 /*
  * $Log: dkim.h,v $
+ * Revision 1.14  2024-01-06 21:26:47+05:30  Cprogrammer
+ * added new error code DKIM_BAD_IDENTITY for invalid identity domain (i= tag)
+ *
  * Revision 1.13  2023-02-11 22:50:12+05:30  Cprogrammer
  * added DKIM_EVP_SIGN_FAILURE, DKIM_EVP_DIGEST_FAILURE definitions for EVP signing and digest failures
  *

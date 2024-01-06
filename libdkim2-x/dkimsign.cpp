@@ -460,7 +460,7 @@ bool CDKIMSign::ParseFromAddress(void)
 		if (sDomain.empty()) {
 			p = getenv("BOUNCEDOMAIN");
 			if (p && *p) {
-				if (!(at = strchr(p, '@')))
+				if (!(at = strrchr(p, '@')))
 					at = p;
 				else
 					at++;
