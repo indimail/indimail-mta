@@ -342,6 +342,11 @@ Received: indimail-mta smtpd 28500 (HELO argos.indimail.org) (::1)
 If the environment variable \fBHIDE_HOST\fR is set, \fBqmail-smtpd\fR does
 not write hostnames and IP addresses in the received header.
 
+\fBqmail-smtpd\fr should be run as \fIqmaild\fR user, \fIqmail\fR,
+\fIindimail\fR groups. If you are using signing your messages using DKIM or
+if you are are encrypting outgoing connections with TLS/SSL, \fIqcerts\fR
+group should be added as a supplementary group for \fIqmailr\fR user.
+
 .SH Database Connections
 \fBqmail-smtpd\fR uses \fBinlookup(8)\fR, instead of directly connecting to
 MySQL. This allows very a high queries per seconds to be achieved by avoiding

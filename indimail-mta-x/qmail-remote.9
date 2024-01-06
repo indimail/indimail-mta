@@ -339,6 +339,13 @@ response from the remote SMTP server.
 variables can be recipient specific by using envrules. See
 \fBspawn-filter(8)\fR for more details.
 
+\fBqmail-remote\fr runs as \fIqmailr\fR user, \fIqmail\fR group and with
+supplementary groups defined for \fIqmails\fR user, if the environment
+variable \fBUSE_SETGROUPS\fR is set for \fBqmail-start\fR(8). If you are
+using signing your messages using DKIM or if you are are encrypting
+outgoing connections with TLS/SSL, \fIqcerts\fR group should be added
+as a supplementary group for \fIqmailr\fR user.
+
 .SH "CONTROL FILES"
 \fBqmail-remote\fR by default looks at SYSCONF/control for all control
 files. This path can be changed by defining the CONTROLDIR environment

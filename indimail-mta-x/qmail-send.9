@@ -159,8 +159,10 @@ instead of without any split. This can be done by setting the \fBBIGTODO\fR
 environment variable.
 
 \fBqmail-send\fr runs as \fIqmails\fR user, \fIqmail\fR group and with
-supplementary groups defined for \fIqmails\fR user if the environment
-variable \fBUSE_SETGROUPS\fR is set for \fBqmail-start\fR(8).
+supplementary groups defined for \fIqmails\fR user, if the environment
+variable \fBUSE_SETGROUPS\fR is set for \fBqmail-start\fR(8).  If you are
+using signing your messages using DKIM, \fIqcerts\fR group should be added
+as a supplementary group for \fIqmailr\fR user.
 
 .SH OPTIONS
 .PP

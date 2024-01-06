@@ -1,57 +1,45 @@
 Here's how to set up the indimail groups and the indimail users.
 
-On some systems there are commands that make this easy. Solaris and
-Linux:
+On some systems there are commands that make this easy.
+
+Solaris and Linux:
 
    # groupadd nofiles
+   # groupadd qcerts
    # useradd -g nofiles -d /var/indimail/alias alias
-   # useradd -g nofiles -d /var/indimail qmaild
+   # useradd -g nofiles -d /var/indimail -G qcerts qmaild
    # useradd -g nofiles -d /var/indimail qmaill
    # useradd -g nofiles -d /var/indimail qmailp
    # groupadd qmail
    # useradd -g qmail -d /var/indimail qmailq
-   # useradd -g qmail -d /var/indimail qmailr
-   # useradd -g qmail -d /var/indimail qmails
+   # useradd -g qmail -d /var/indimail -G qcerts qmailr
+   # useradd -g qmail -d /var/indimail -G qcerts qmails
    # groupadd indimail
    # useradd -g indimail -d /var/indimail indimail
    # groupadd qscand
    # useradd -g qscand -d /var/indimail/qscanq qscand -G qmail
 
-FreeBSD 2.2:
+FreeBSD:
 
    # pw groupadd nofiles
+   # pw groupadd qcerts
    # pw useradd alias -g nofiles -d /var/indimail/alias -s /nonexistent
-   # pw useradd qmaild -g nofiles -d /var/indimail -s /nonexistent
+   # pw useradd qmaild -g nofiles -d /var/indimail -s /nonexistent -G qcerts
    # pw useradd qmaill -g nofiles -d /var/indimail -s /nonexistent
    # pw useradd qmailp -g nofiles -d /var/indimail -s /nonexistent
    # pw groupadd qmail
    # pw useradd qmailq -g qmail -d /var/indimail -s /nonexistent
-   # pw useradd qmailr -g qmail -d /var/indimail -s /nonexistent
-   # pw useradd qmails -g qmail -d /var/indimail -s /nonexistent
+   # pw useradd qmailr -g qmail -d /var/indimail -s /nonexistent -G qcerts
+   # pw useradd qmails -g qmail -d /var/indimail -s /nonexistent -G qcerts
    # pw groupadd indimail
    # pw useradd indimail -g indimail -d /var/indimail -s /nonexistent
    # pw groupadd qscand
    # pw useradd qscand -g qscand -d /var/indimail/qscanq -G qmail -s /nonexistent
 
-BSDI 2.0:
-
-   # addgroup nofiles
-   # adduser -g nofiles -H/var/indimail/alias -G,,, -s/dev/null -P'*' alias
-   # adduser -g nofiles -H/var/indimail -G,,, -s/dev/null -P'*' qmaild
-   # adduser -g nofiles -H/var/indimail -G,,, -s/dev/null -P'*' qmaill
-   # adduser -g nofiles -H/var/indimail -G,,, -s/dev/null -P'*' qmailp
-   # addgroup qmail
-   # adduser -g qmail -H/var/indimail -G,,, -s/dev/null -P'*' qmailq
-   # adduser -g qmail -H/var/indimail -G,,, -s/dev/null -P'*' qmailr
-   # adduser -g qmail -H/var/indimail -G,,, -s/dev/null -P'*' qmails
-   # addgroup indimail
-   # adduser -g indimail -H/var/indimail -G,,, -s/dev/null -P'*' indimail
-   # addgroup qscand
-   # adduser -g qscand -H/var/indimail/qscanq -Gqmail,,, -s/dev/null -P'*' qscand
-
 AIX:
 
    # mkgroup -A nofiles
+   # mkgroup -A qcerts
    # mkuser pgrp=nofiles home=/var/indimail/alias shell=/bin/true alias
    # mkuser pgrp=nofiles home=/var/indimail shell=/bin/true qmaild
    # mkuser pgrp=nofiles home=/var/indimail shell=/bin/true qmaill
@@ -68,26 +56,30 @@ AIX:
 On other systems, you will have to edit /etc/group and /etc/passwd
 manually. First add two new lines to /etc/group, something like
 
-        qmail:*:2107:qscand
-        nofiles:*:2108:
-        indimail:*:2109:
-        qscand:*:2110:
+    nofiles:x:1001:
+    qmail:x:1002:qscand
+    qscand:x:1003:
+    qcerts:x:1004:qmaild,qmailr,qmails
+    indimail:x:555:
 
-where 2107, 2108, 2109 and 2110 are different from the other gids in /etc/group.
-Next (using vipw) add six new lines to /etc/passwd, something like
+where 1001, 1002, 1003, 1004 and 555 are different from the other gids in
+/etc/group. Make sure that you add qcerts as a supplementary group for the
+users qmaild, qmailr, qmails in order to access SSL certificates and DKIM
+private keys. Next (using vipw) add nine new lines to /etc/passwd,
+something like
 
-        alias:*:7790:2108::/var/indimail/alias:/bin/true
-        qmaild:*:7791:2108::/var/indimail:/bin/true
-        qmaill:*:7792:2108::/var/indimail:/bin/true
-        qmailp:*:7793:2108::/var/indimail:/bin/true
-        qmailq:*:7794:2107::/var/indimail:/bin/true
-        qmailr:*:7795:2107::/var/indimail:/bin/true
-        qmails:*:7796:2107::/var/indimail:/bin/true
-        indimail:*:7797:2109::/var/indimail:/bin/true
-        qscand:*:7798:2110::/var/indimail/qscanq:/bin/true
+    qmaill:x:1001:1001::/var/log/svc:/sbin/nologin
+    alias:x:1002:1001::/var/indimail/alias:/sbin/nologin
+    qmaild:x:1003:1001::/var/indimail:/sbin/nologin
+    qmailp:x:1004:1001::/var/indimail:/sbin/nologin
+    qmailq:x:1005:1002::/var/indimail:/sbin/nologin
+    qmailr:x:1006:1002::/var/indimail:/sbin/nologin
+    qmails:x:1007:1002::/var/indimail:/sbin/nologin
+    qscand:x:1008:1003::/var/indimail/qscanq:/sbin/nologin
+    indimail:*:555:555::/var/indimail:/sbin/nologin
 
-where 7790 through 7798 are _new_ uids, 2107 is the qmail gid, 2108
-is the nofiles gid, 2109 is the indimail gid and 2110 is the qscand gid.
-Make sure you use the nofiles gid for qmaild, qmaill, qmailp, and alias,
-the qmail gid for qmailq, qmailr, and qmails, indimail gid for indimail
-and qscand gid for qscand.
+where 1001 through 1009 are _new_ uids, 1002 is the qmail gid, 1001 is the
+nofiles gid, 555 is the indimail gid, 1003 is the qscand gid and 1004 is
+qcerts gid. Make sure you use the nofiles gid for qmaild, qmaill, qmailp,
+and alias, the qmail gid for qmailq, qmailr, and qmails, indimail gid for
+indimail and qscand gid for qscand.
