@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-spamfilter.c,v 1.9 2023-12-25 09:31:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-spamfilter.c,v 1.10 2024-01-07 01:44:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -64,7 +64,8 @@ main(int argc, char **argv)
 			_exit(QQ_EXEC_FAILED);
 		}
 	}
-	if (!(spamf = env_get("SPAMFILTER")) || env_get("RELAYCLIENT"))
+	ptr = (env_get("RELAYCLIENT") || env_get("AUTHINFO")) ? "" : 0;
+	if (!(spamf = env_get("SPAMFILTER")) || (ptr && env_get("RELAYCLIENT_NOSPAMFILTER")))
 		return (qmulti("SPAMQUEUE", argc, argv)); /*- Does not return */
 	if (pipe(pipefd) == -1)
 		_exit(QQ_PIPE_SOCKET);
@@ -234,7 +235,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.9 2023-12-25 09:31:02+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-spamfilter.c,v 1.10 2024-01-07 01:44:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x = sccsidmakeargsh;
@@ -245,6 +246,9 @@ getversion_qmail_spamfilter_c()
 
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.10  2024-01-07 01:44:35+05:30  Cprogrammer
+ * bypass antispam filter when RELAYCLIENT and RELAYCLIENT_NOSPAMFILTER is set
+ *
  * Revision 1.9  2023-12-25 09:31:02+05:30  Cprogrammer
  * made DEATH configurable
  *

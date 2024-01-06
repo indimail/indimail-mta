@@ -26,6 +26,8 @@ between 2 and 7.
 execute the actual spam filter. The \fBSPAMFILTER\fR env variable can
 contain command line arguments. The spam filter defined by SPAMFILTER
 environment variable should read descriptor 0 and write to descriptor 1.
+Antispam filter is bypassed when \fBSPAMFILTER\fR is not set or if
+\fBRELAYCLIENT\fR and \fBRELAYCLIENT_NOSPAMFILTER\fR is set.
 
 The sequence in which the filter program is run is given below
 

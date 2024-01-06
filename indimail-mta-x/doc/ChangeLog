@@ -170,6 +170,10 @@ Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
 94. dk-filter.sh: use _SENDER for d= tag if USE_SENDER is set
 95. qmail-dkim.c: use new error code DKIM_BAD_IDENTITY for invalid identity
     domain (i= tag)
+- 07/01/2024
+96. qmail-spamfilter.c: bypass antispam filter when RELAYCLIENT and
+    RELAYCLIENT_NOSPAMFILTER is set
+97. svctool: updated bogofilter.cf header_format, log_update_format
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

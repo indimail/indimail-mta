@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.719 2024-01-06 09:57:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.720 2024-01-07 01:52:20+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.719 2024-01-06 09:57:38+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.720 2024-01-07 01:52:20+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9411,8 +9411,8 @@ fi
 	-e 's,#spam_header_place=,spam_header_place=,g' \
 	-e 's,##spamicity_tags = Yes\, No\, Unsure,spamicity_tags = Yes\, No\, Unsure,g' \
 	-e 's,##spamicity_formats = %0.6f\, %0.6f\, %0.6f,spamicity_formats = %0.6f\, %0.6f\, %0.6f,g' \
-	-e 's,#header_format = %h: %c\, tests=bogofilter\, spamicity=%p\, version=%v,header_format = %h: %c\, spamicity=%p\, cutoff=%o\, ham_cutoff=%O\,version=%v\,register-%r %w words %m msg,g' \
-	-e 's,#log_update_format = register-%r\, %w words\, %m messages,log_update_format = register-%r\, %w words\, %m messages,g' \
+	-e 's,#header_format = %h: %c\, tests=bogofilter\, spamicity=%p\, version=%v,header_format = %h: %c\, spamicity=%p\, cutoff=%o\, ham_cutoff=%O\, version=%v,g' \
+	-e 's,#log_update_format = register-%r\, %w words\, %m messages,log_update_format = register-%r %w words %m msg,g' \
 	-e 's,##log_header_format = %h: %c\, spamicity=%f\, ipaddr=%A\, queueID=%Q\, msgID=%I\, subject=%s\, version=%v,log_header_format = %h: %c\, spamicity=%p\, cutoff=%o\, ham_cutoff=%O\, queueID=%Q\, msgID=%I\, ipaddr=%A,g' \
 	-e 's,##ham_cutoff  = 0.00,ham_cutoff  = 0.00,g' \
 	-e 's,##spam_cutoff = 0.99,spam_cutoff = 0.99,g'
