@@ -62,10 +62,13 @@ sets relaxed canonicalization and include query method tag
 .EE
 
 When signing \fBdk-filter\fR uses the domain found in the Return-Path,
-Sender, From, X-Bounced-Address headers to set the domain tag. If not it
-uses the value of \fBBOUNCEDOMAIN\fR environment variable.
-\fBBOUNCEDOMAIN\fR can be set to an email address or a domain (without the
-at sign).
+Sender, From, X-Bounced-Address headers to set the domain tag. If none of
+these are present, it uses the value of \fBBOUNCEDOMAIN\fR environment
+variable. \fBBOUNCEDOMAIN\fR can be set to an email address or a domain
+(without the at sign). You can force \fBdk-filter\fR to use the domain
+found in the sender by setting \fBUSE_SENDER\fR environment variable. The
+sender is present in \fB_SENDER\fR environment variable set by
+\fBspawn-filter\fR(8).
 
 In addition to \fBDKIMSIGN\fR environment variable, you can have the domain
 and the pathname of the private key in the control file \fIdkimkeys\fR

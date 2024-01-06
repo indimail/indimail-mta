@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.77 2023-12-25 09:30:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.78 2024-01-06 21:33:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -727,6 +727,10 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 		dkimStatus = "signature error: not all message's From headers in signature";
 		code = "X.7.7";
 		break;
+	case DKIM_BAD_IDENTITY:
+		dkimStatus = "signature error: invalid identify in signature";
+		code = "X.7.7";
+		break;
 	default:
 		dkimStatus = "error";
 		code = "X.3.0";
@@ -1269,7 +1273,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.77 2023-12-25 09:30:05+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.78 2024-01-06 21:33:37+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1283,6 +1287,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.78  2024-01-06 21:33:37+05:30  Cprogrammer
+ * use new error code DKIM_BAD_IDENTITY for invalid identity domain (i= tag)
+ *
  * Revision 1.77  2023-12-25 09:30:05+05:30  Cprogrammer
  * made DEATH configurable
  *

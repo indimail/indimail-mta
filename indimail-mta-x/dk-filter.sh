@@ -1,5 +1,5 @@
 #
-# $Id: dk-filter.sh,v 1.40 2024-01-05 00:36:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: dk-filter.sh,v 1.41 2024-01-06 21:32:38+05:30 Cprogrammer Exp mbhangui $
 #
 get_dkimkeys()
 {
@@ -75,7 +75,6 @@ dkim_setoptions()
 {
 	# DKIMSIGNOPTIONS="-z 1 -x - -y $dkimselector -s $dkimkeyfn"
 	set -- $(getopt lqthb:c:d:i:x:z:y:s: "$1")
-	bopt=0
 	xopt=0
 	zopt=0
 	yopt=0
@@ -83,6 +82,10 @@ dkim_setoptions()
 	dkimopts="$prefix/bin/dkim"
 	if [ -n "$BOUNCEDOMAIN" -a -z "$_SENDER" ] ; then
 		dkimopts="$dkimopts -d $BOUNCEDOMAIN"
+	fi
+	if [ -n "$USE_SENDER" -a -n "$_SENDER" ] ; then
+		domain=$(echo $_SENDER | cut -d@ -f2)
+		dkimopts="$dkimopts -d $domain"
 	fi
 	while [ $1 != -- ]
 	do
@@ -101,7 +104,6 @@ dkim_setoptions()
 		;;
 
 		-b)
-		bopt=1
 		dkimopts="$dkimopts -b $2"
 		shift
 		;;
@@ -341,6 +343,9 @@ exec 0<$tmpfn
 exit $?
 #
 # $Log: dk-filter.sh,v $
+# Revision 1.41  2024-01-06 21:32:38+05:30  Cprogrammer
+# use _SENDER for d= tag if USE_SENDER is set
+#
 # Revision 1.40  2024-01-05 00:36:08+05:30  Cprogrammer
 # fix BOUNCEDOMAIN getting unset
 # use dkim -d bouncedomain for bounces
