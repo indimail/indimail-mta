@@ -1,25 +1,20 @@
+.\" vim: tw=75
 .TH indimail-control 5
+
 .SH "NAME"
 indimail-control \- indimail configuration files
-.SH "INTRODUCTION"
-You can change the behavior of the
-.B indimail-mta
-system by modifying
-.BR indimail-mta 's
-.I control files
-in
-.BR @controldir@ .
-You can set the environment variable \fBCONTROLDIR\fR to make indimail-mta
-look for control files in a different directory.
 
-.B indimail-mta
-can survive with just one control file,
-.IR me ,
+.SH "INTRODUCTION"
+You can change the behavior of the \fBindimail-mta\fR system by modifying
+\fBindimail-mta\fR's \fIcontrol files\fR in \fB@controldir@\fR. You can set
+the environment variable \fBCONTROLDIR\fR to make indimail-mta look for
+control files in a different directory.
+
+\fBindimail-mta\fR can survive with just one control file, \fIme\fR,
 containing the fully-qualified name of the current host. This file is used
 as the default for other hostname-related control files.
 
-Comments are allowed
-in
+Comments are allowed in
 .IR accesslist ,
 .IR authdomains ,
 .IR badext ,
@@ -106,11 +101,10 @@ and
 .IR badip .
 
 To use the cdb format, the control files should be converted to cdb using
-.BR qmail-cdb
-and have a .cdb extension. To have the control files in MySQL, you should
-have the control file with a .sql extension and a colon separated list of
-paramaters for connecting to MySQL specified in the file. If the files are
-present in all the 3 formats, cdb file will be used.
+\fBqmail-cdb\fR(8) and have a .cdb extension. To have the control files in
+MySQL, you should have the control file with a .sql extension and a colon
+separated list of paramaters for connecting to MySQL specified in the file.
+If the files are present in all the 3 formats, cdb file will be used.
 
 The parameters are as given below.
 
@@ -131,9 +125,9 @@ For database connection to MySQL, one can define \fBMYSQL_LIB\fR
 environment variable or have the control file \fImysql_lib\fR.
 e.g.
 
-.EE
-  MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
 .EX
+  MYSQL_LIB= /usr/lib64/mysql/libmysqlclient.so.21.0.15
+.EE
 
 Environment variable takes precedence over the control file.
 

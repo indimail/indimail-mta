@@ -9,7 +9,7 @@ mail message for delivery
 \fBFILTERARGS=QMAILHOME/bin/dk-filter\fR
 
 .SH DESCRIPTION
-\fBdk-filter\fR is a qfilter which can be set as a filter for
+\fBdk-filter\fR is a script which can be set as a filter for
 \fBspawn-filter\fR(8) or \fBqmail-qfilter\fR(1). The filter can be set for
 \fBspawn-filter\fR(8) either as \fBFILTERARGS\fR or in the control file
 \fIfilterargs\fR. The environment variable \fBFILTERARGS\fR takes
@@ -17,26 +17,27 @@ precendence over \fIfilterargs\fR control file.
 
 \fBdk-filter\fR supports DKIM signing and verification and can
 optionally use \fBSender Signing Practice (SSP)\fR or \fBAuthor Domain
-Signing Practice\fR. It uses the libdkim and OpenSSL libraries. To sign a
+Signing Practice\fR. It uses the libdkim2 and OpenSSL libraries. To sign a
 message, set the \fBDKIMSIGN\fR environment variable to the pathname of the
 private key that will be used to sign the message. If there is a %
 character in the environment variable, it is removed and replaced by the
-domain name in the From: header. If, after substituting the %, that file
-does not exist, @controldir@/domainkeys/%/default will be used as the key.
-If again, after substituting the % sign, the file does not exist,
-@controldir@/domainkeys/default will be used as the key. After all
+domain name in the Return-Path, Sender, X-Bounced-Adress or From: header,
+whichever is found first. If, after substituting the %, that file does not
+exist, \fI@controldir@/domainkeys/%/default\fR will be used as the key. If
+again, after substituting the % sign, the file does not exist,
+\fI@controldir@/domainkeys/default\fR will be used as the key. After all
 substitutions, if the key file does not exist, the message will not be
 signed. If there is no % and the file does not exist, the message will be
 rejected with error 35. The default private key
-@controldir@/domainkeys/default can be overriden by the
+\fI@controldir@/domainkeys/default\fR can be overriden by the
 \fBDKIM_DEFAULT_KEY\fR environment variable.
 
 The selector (s=) will be taken from the basename of the file. The private
-key should be created by \fBdknewkey(8)\fR with RSA or ED25519 encryption
+key should be created by \fBdknewkey\fR(8) with RSA or ED25519 encryption
 method.
 
 You can set various DKIM options in getopt style, by setting the
-environment variable DKIMSIGNOPTIONS
+environment variable \fBDKIMSIGNOPTIONS\fR.
 
 .nf
 c <canonicalization> r for relaxed [DEFAULT], s - simple,
@@ -67,12 +68,12 @@ these are present, it uses the value of \fBBOUNCEDOMAIN\fR environment
 variable. \fBBOUNCEDOMAIN\fR can be set to an email address or a domain
 (without the at sign). You can force \fBdk-filter\fR to use the domain
 found in the sender by setting \fBUSE_SENDER\fR environment variable. The
-sender is present in \fB_SENDER\fR environment variable set by
+sender is present as \fB_SENDER\fR environment variable set by
 \fBspawn-filter\fR(8).
 
 In addition to \fBDKIMSIGN\fR environment variable, you can have the domain
-and the pathname of the private key in the control file \fIdkimkeys\fR
-which has the following format
+and the corresponding pathname of the private key in the control file
+\fIdkimkeys\fR which has the following format
 
 .EX
 domain:private_key_path:envstr
@@ -96,7 +97,7 @@ To verify a message, set the \fBDKIMVERIFY\fR environment variable.
 messages can be rejected later at delivery time, or in the mail reader. In
 that case you may set \fBDKIMVERIFY\fR to an empty string. The exit code of
 \fBdk-filter\fR can be fine tuned by setting \fBDKIMVERIFY\fR environment
-variable. See \fBdkim(8)\fR for a detailed description on setting the
+variable. See \fBdkim\fR(8) for a detailed description on setting the
 \fBDKIMVERIFY\fR environment variable.
 
 \fBdk-filter\fR does not use any signing practice by default. You can
@@ -108,13 +109,13 @@ dk-filter will do signing by default.
 You can set environment variable NODKIM environment variable to disable
 DKIM signing and verification, but why would you do that?
 
-\fBdk-filter\fR can insert an additional DKIM-signature if
+\fBdk-filter\fR can insert an additional \fBDKIM-signature\fR if
 \fBDKIMSIGNEXTRA\fR is set. This is useful for inserting both RSA and
 ED25519 signature when signing. As an example you can have \fBDKIMSIGN\fR
-pointing to a RSA private key, \fBDKIMSIGNOPTIONS\fR having "-z 2" along
+pointing to a RSA private key, \fBDKIMSIGNOPTIONS\fR set as "-z 2" along
 with other options if any. Additionally set \fBDKIMSIGNEXTRA\fR pointing to
-an ed25519 private key and set \fBDKIMSIGNOPTIONSEXTRA\fR to have "-z 4"
-along with other options if any.
+an ed25519 private key and set \fBDKIMSIGNOPTIONSEXTRA\fR as "-z 4" along
+with other options if any.
 
 .SH "EXIT CODES"
 0 for success, non-zero failure
@@ -123,4 +124,5 @@ along with other options if any.
 qmail-qfilter(1),
 dknewkey(8),
 dkim(8),
+qmail-dkim(8),
 spawn-filter(8)
