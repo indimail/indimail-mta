@@ -229,7 +229,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	case 2:
 		report(0, "blackholed", filterargs, 0, 0, 0, 0); /*- Blackhole */
 	case 100:
-		report(100, "Mail Rejected (#5.7.1)", 0, 0, 0, 0, 0);
+		report(100, "Mail Rejected by ", filterargs, " (#5.7.1)", 0, 0, 0);
 	default:
 		e = errno;
 		substdio_fdbuf(&errbuf, read, pipefe[0], inbuf, sizeof(inbuf));

@@ -599,7 +599,6 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/bin/cidr
 %attr(755,root,root)                    %{_prefix}/bin/tcp-env
 %attr(755,root,root)                    %{_prefix}/bin/rrforward
-%attr(755,root,root)                    %{_prefix}/bin/dk-filter
 %attr(755,root,root)                    %{_prefix}/bin/mailsubj
 %attr(755,root,root)                    %{_prefix}/bin/822field
 %attr(755,root,root)                    %{_prefix}/bin/qmail-cat

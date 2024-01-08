@@ -35,7 +35,6 @@ f:::0755:/bin/:autoresponder:autoresponder
 f:::0755:/bin/:qnotify:qnotify
 f:::0755:/bin/:rrt:rrt
 f:::0755:/bin/:qarf:qarf
-f:::0755:/bin/:dk-filter:dk-filter
 f:::0755:/bin/:queue-fix:queue-fix
 f:::0755:/bin/:uacl:uacl
 f:::0755:/bin/:qbase64:qbase64

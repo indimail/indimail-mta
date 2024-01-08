@@ -7035,7 +7035,7 @@ case "$dksign_option" in
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+		echo "*:remote:$QmailBinPrefix/sbin/qmail-dkim:DKIMQUEUE=/bin/cat" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
 	none|*)
@@ -7307,7 +7307,7 @@ case "$dksign_option" in
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/bin/dk-filter" > "$DESTDIR"$CONTROLDIR/filterargs
+		echo "*:remote:$QmailBinPrefix/sbin/qmail-dkim:DKIMQUEUE=/bin/cat" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
 	none|*)
