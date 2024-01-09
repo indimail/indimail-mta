@@ -9,7 +9,7 @@ Implementations as permitted, you agree to the terms and conditions of the
 Yahoo! DomainKeys Patent License Agreement or other agreement contained herein.
 
 * Sun Apr 23 2023 17:02:10 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.7-1.1%{?dist}
-Release 1.7-1.1 Start 01/02/2023 End 14/11/2023
+Release 1.7-1.1 Start 01/02/2023 End 09/01/2024
 ======= Release Highlights ================================================
 - ability to alter Hash Method after DKIMSignInit
 - ability to add headers for exclusion from DKIM signing
@@ -56,6 +56,8 @@ Release 1.7-1.1 Start 01/02/2023 End 14/11/2023
 19. dkimverify.cpp, dkim.cpp: use new error code DKIM_BAD_IDENTITY for
     invalid identity domain (i= tag)
 20. dkimsign.cpp: Use strrchr instead of strchr for extracting domain
+- 09/01/2024
+21. dkim.h: re-arranged DKIM error codes.
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023
