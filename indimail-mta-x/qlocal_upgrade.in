@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.61 2024-01-06 11:07:19+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.in,v 1.62 2024-01-09 12:38:01+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -26,7 +26,7 @@ check_update_if_diff()
 
 do_install()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.61 2024-01-06 11:07:19+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.62 2024-01-09 12:38:01+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -34,7 +34,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.61 2024-01-06 11:07:19+05:30 Cprogra
 
 do_post_upgrade()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.61 2024-01-06 11:07:19+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.in,v 1.62 2024-01-09 12:38:01+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -395,6 +395,33 @@ fi
 if [ ! -f @sysconfdir@/indimail-mta.cron -a -d /etc/cron.d ] ; then
 	$cp @sysconfdir@/indimail-mta.cron /etc/cron.d/indimail-mta.cron
 fi
+
+if [ -f @sysconfdir@/control/filterargs ] ; then
+	out=$(/usr/bin/mktemp -t qlocalXXXXXXXXX)
+	exec 3>$out
+	cat @sysconfdir@/control/filterargs | while read line
+	do
+		echo $line | grep dk-filter >/dev/null
+		if [ $? -ne 0 ] ; then
+			echo "$line" 1>&3
+			continue;
+		fi
+		echo $line | grep DKIMQUEUE >/dev/null
+		if [ $? -eq 0 ] ; then
+			line=$(echo $line | sed -e 's{bin/dk-filter{sbin/qmail-dkim{g')
+		else
+			line=$(echo $line | sed -e 's{bin/dk-filter{sbin/qmail-dkim{g' -e 's{${,DKIMQUEUE=/bin/cat{')
+		fi
+		echo "$line" 1>&3
+	done
+	diff $out @sysconfdir@/control/filterargs >/dev/null
+	if [ $? -eq 0 ] ; then
+		/bin/rm -f $out
+	else
+		echo "Updated @sysconfdir@/control/filterargs"
+		mv $out @sysconfdir@/control/filterargs
+	fi
+fi
 }
 
 case $1 in
@@ -407,6 +434,9 @@ case $1 in
 esac
 #
 # $Log: qlocal_upgrade.in,v $
+# Revision 1.62  2024-01-09 12:38:01+05:30  Cprogrammer
+# replace dk-filter with qmail-dkim
+#
 # Revision 1.61  2024-01-06 11:07:19+05:30  Cprogrammer
 # add supplementary group qcerts for qmails user
 #
