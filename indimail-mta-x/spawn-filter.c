@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.85 2023-12-05 23:19:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.86 2024-01-09 12:38:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -229,7 +229,7 @@ run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
 	case 2:
 		report(0, "blackholed", filterargs, 0, 0, 0, 0); /*- Blackhole */
 	case 100:
-		report(100, "Mail Rejected (#5.7.1)", 0, 0, 0, 0, 0);
+		report(100, "Mail Rejected by ", filterargs, " (#5.7.1)", 0, 0, 0);
 	default:
 		e = errno;
 		substdio_fdbuf(&errbuf, read, pipefe[0], inbuf, sizeof(inbuf));
@@ -674,7 +674,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.85 2023-12-05 23:19:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.86 2024-01-09 12:38:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -685,6 +685,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.86  2024-01-09 12:38:29+05:30  Cprogrammer
+ * display filter used for mail rejected message
+ *
  * Revision 1.85  2023-12-05 23:19:48+05:30  Cprogrammer
  * setup qmail-local, qmail-remote arguments after envrules
  *
