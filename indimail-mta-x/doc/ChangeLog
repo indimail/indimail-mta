@@ -176,6 +176,7 @@ Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
 96. qlocal_upgrade.in: repace dk-filter with qmail-dkim in filterargs control
     file
 97. spawn-filter.c: display filter used for mail rejected message
+98. qmail-dkim.c: added DKIM_BAD_IDENTITY with letter Y
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

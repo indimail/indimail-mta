@@ -188,29 +188,31 @@ V - DKIM_SELECTOR_ALGORITHM_MISMATCH    - signature error: selector
 W - DKIM_STAT_INCOMPAT                  - signature error: incompatible v=
 X - DKIM_UNSIGNED_FROM                  - signature error: not found
                                           message From headers in signature
+Y - DKIM_BAD_IDENTITY                   - signature error: invalid identity
+                                          in signature
 .fi
 
 For example, if you want to permanently reject messages that have a
 signature that is expired, include the letter 'K' in the \fBDKIMVERIFY\fR
 environment variable. A conservative set of letters is
-\fBFGHIKLMNOQRTUVWjp\fR. Reject permanently 3PS, FAILURE, SYNTAX,
+\fBFGHIKLMNORTUVWjp\fR. Reject permanently 3PS, FAILURE, SYNTAX,
 SIGNATURE_BAD, SIGNATURE_EXPIRED, SELECTOR_INVALID, GRANULARITY_MISMATCH,
 SELECTOR_KEY_REVOKED, DOMAIN_NAME_TOO_LONG, SELECTOR_PUBLIC_KEY_INVALID,
-NO_VALID_SIGNATURES and BODY_HASH_MISMATCH errors, and temporarily
-SIGNATURE_BAD_BUT_TESTING and DNS_TEMP_FAILURE. Add in \fBS\fR if you want
-to reject messages that do not have a DKIM signature. You can use the
-control files \fBsignaturedomains\fR and \fBnosignaturedomains\fR (See
-Below) to further fine tune the action to be taken when a mail arrives with
-no DKIM signature. Note that \fBqmail-dkim\fR always inserts the
-\fBDKIM-Status\fR header, so that messages can be rejected later at
-delivery time, or in the mail reader. In that case you may set
-\fBDKIMVERIFY\fR to an empty string or "p" to issue temporary error for
-temporary DNS resolution failure. If you want to check all message's
-From header in signature set the \fBUNSIGNED_FROM\fR environment variable
-to an empty string. If you want to check messages without signed subject
-header, set \fBUNSIGNED_SUBJECT\fR environment variable. If you want to
-honor body lengh tag (l=), set \fBHONOR_BODYLENGTHTAG\fR environment
-variable.
+NO_VALID_SIGNATURES, BODY_HASH_MISMATCH, SELECTOR_ALGORITHM_MISMATCH,
+TAT_INCOMPAT errors, and temporarily SIGNATURE_BAD_BUT_TESTING and
+DNS_TEMP_FAILURE. Add in \fBS\fR if you want to reject messages that do not
+have a DKIM signature. You can use the control files \fBsignaturedomains\fR
+and \fBnosignaturedomains\fR (See Below) to further fine tune the action to
+be taken when a mail arrives with no DKIM signature. Note that
+\fBqmail-dkim\fR always inserts the \fBDKIM-Status\fR header, so that
+messages can be rejected later at delivery time, or in the mail reader. In
+that case you may set \fBDKIMVERIFY\fR to an empty string or "p" to issue
+temporary error for temporary DNS resolution failure. If you want to check
+all message's From header in signature set the \fBUNSIGNED_FROM\fR
+environment variable to an empty string. If you want to check messages
+without signed subject header, set \fBUNSIGNED_SUBJECT\fR environment
+variable. If you want to honor body lengh tag (l=), set
+\fBHONOR_BODYLENGTHTAG\fR environment variable.
 
 qmail-dkim supports signing practice which can be additonall checked when a
 signature verifcation fails -
