@@ -26,7 +26,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	binm3 binm3+df bouncesaying cdb-database cdbdump cdbget cdbgetm \
 	cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect \
 	config-fast create_services indimail-mta.cron ctrlenv datemail \
-	dk-filter dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr \
+	dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr \
 	dnstlsarr dnstxt dot-forward drate etrn except fastforward \
 	favicon.base64 filterit forward generic.so greydaemon home home+df \
 	hostname iftocc indimail-mta.changes setqload qmonitor \
@@ -54,7 +54,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	yearcal
 
 man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
-	condredirect.1 ctrlenv.8 datemail.1 dk-filter.8 dknewkey.8 \
+	condredirect.1 ctrlenv.8 datemail.1 dknewkey.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.7 filterit.1 forward.1 maildirserial.1 mlmatchup.8 \
 	multi-queue.7 new-inject.1 plugin_init.3 plugtest.1 predate.1 \
@@ -1513,12 +1513,6 @@ qmail-dkim.8: qmail-dkim.9 conf-prefix conf-sysconfdir
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dkim.8
 
-dk-filter.8: dk-filter.9 conf-prefix conf-sysconfdir
-	cat dk-filter.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> dk-filter.8
-
 pidopen.o: \
 compile pidopen.h pidopen.c
 	./compile pidopen.c
@@ -2971,15 +2965,6 @@ warn-auto.sh zspam.sh conf-libexec
 	cat warn-auto.sh zspam.sh \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> zspam
-	chmod +x $@
-
-dk-filter: \
-warn-auto.sh dk-filter.sh conf-prefix conf-sysconfdir
-	cat warn-auto.sh dk-filter.sh \
-	| sed s}SYSCONFDIR}"`head -1 conf-sysconfdir`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
-	> dk-filter
 	chmod +x $@
 
 senders: \

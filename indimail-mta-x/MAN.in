@@ -151,7 +151,6 @@ f:::0644:/man7/:indimail-mta-internals.7:indimail-mta-internals.7
 f:::0644:/man8/:cdb-database.8:cdb-database.8
 f:::0644:/man8/:cleanq.8:cleanq.8
 f:::0644:/man8/:ctrlenv.8:ctrlenv.8
-f:::0644:/man8/:dk-filter.8:dk-filter.8
 f:::0644:/man8/:dknewkey.8:dknewkey.8
 f:::0644:/man8/:greydaemon.8:greydaemon.8
 f:::0644:/man8/:ipmeprint.8:ipmeprint.8

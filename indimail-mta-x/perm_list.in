@@ -53,7 +53,6 @@
 %attr(0755,root,root)  @prefix@/bin/condredirect
 %attr(0755,root,root)  @prefix@/bin/condtomaildir
 %attr(0755,root,root)  @prefix@/bin/datemail #indimail-mini #qmta
-%attr(0755,root,root)  @prefix@/bin/dk-filter
 %attr(0755,root,root)  @prefix@/bin/dknewkey
 %attr(0755,root,root)  @prefix@/bin/dot-forward
 %attr(0755,root,root)  @prefix@/bin/drate
@@ -449,7 +448,6 @@
 %attr(0644,root,root) @mandir@/man7/qmail-limits.7.gz
 %attr(0644,root,root) @mandir@/man7/multi-queue.7.gz
 %attr(0644,root,root) @mandir@/man8/cleanq.8.gz
-%attr(0644,root,root) @mandir@/man8/dk-filter.8.gz
 %attr(0644,root,root) @mandir@/man8/dkim.8.gz
 %attr(0644,root,root) @mandir@/man8/dknewkey.8.gz
 %attr(0644,root,root) @mandir@/man8/greydaemon.8.gz
