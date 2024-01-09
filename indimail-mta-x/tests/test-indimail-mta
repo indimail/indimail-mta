@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.60 2023-12-26 00:33:22+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.61 2024-01-09 19:52:56+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -7627,6 +7627,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.61  2024-01-09 19:52:56+05:30  Cprogrammer
+# removed dk-filter
+#
 # Revision 1.60  2023-12-26 00:33:22+05:30  Cprogrammer
 # display mail if dkim verification fails
 #
