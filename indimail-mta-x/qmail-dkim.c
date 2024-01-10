@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.79 2024-01-09 19:18:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.80 2024-01-10 10:05:58+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -153,6 +153,7 @@ static stralloc sigdomains = { 0 };  /*- domains which must have signatures */
 static stralloc nsigdomains = { 0 }; /*- domains which do not have signatures */
 static stralloc dkimopts = { 0 };
 static stralloc dkimkeys = { 0 };
+static stralloc bouncehost = { 0 };
 
 void
 restore_gid()
@@ -334,6 +335,10 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 			i = 0;
 			keyfn = dkimsign;
 		} else { /*- has reading dkimkeys altered DKIMSIGNOPTIONS? */
+			ptr = env_get("DKIMSIGN");
+			/*- don't allow DKIMSIGN to be altered by dkimkeys */
+			if (str_diff(ptr, keyfn) && !env_put2("DKIMSIGN", keyfn))
+				die(QQ_OUT_OF_MEMORY, 1);
 			ptr = env_get("DKIMSIGNOPTIONS");
 			if (!dkimsignoptions || str_diff(dkimsignoptions, ptr)) {
 				dkimsignoptions = ptr;
@@ -978,6 +983,13 @@ main(int argc, char *argv[])
 		}
 	}
 	if (dkimsign) {
+		if (!(ptr = env_get("BOUNCEDOMAIN"))) {
+			if ((ret = control_readfile(&bouncehost, "bouncehost", 1)) == -1)
+				custom_error("qmail-dkim", "Z", "unable to read bouncehost.", 0, "X.3.0");
+			else
+			if (ret && !env_put2("BOUNCEDOMAIN", bouncehost.s))
+				die(QQ_OUT_OF_MEMORY, 0);
+		}
 		/* selector */
 		ptr = dkimsign;
 		selector = ptr;
@@ -1283,7 +1295,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.79 2024-01-09 19:18:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.80 2024-01-10 10:05:58+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1297,6 +1309,10 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.80  2024-01-10 10:05:58+05:30  Cprogrammer
+ * use bouncehost/me control file if BOUNCEDOMAIN is not set
+ * set DKIMSIGN to private key from dkimkeys control file
+ *
  * Revision 1.79  2024-01-09 19:18:44+05:30  Cprogrammer
  * added DKIM_BAD_IDENTITY with letter Y
  *

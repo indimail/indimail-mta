@@ -177,6 +177,10 @@ Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
     file
 97. spawn-filter.c: display filter used for mail rejected message
 98. qmail-dkim.c: added DKIM_BAD_IDENTITY with letter Y
+- 10/01/2024
+99. qmail-dkim.c: use bouncehost/me control file if BOUNCEDOMAIN is not set
+100. qmail-dkim.c: set DKIMSIGN to private key from dkimkeys control file
+
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023
