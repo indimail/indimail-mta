@@ -1,3 +1,35 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
+Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
+- 02/01/2024
+01. svctool: fix symbolic links clientcert.pem, scan.conf
+02. Makefile: fix compilation error for forward, filterit
+03. create_services: renamed cronlist.q, cronlist.i to indimail-mta.cron,
+    indimail.cron
+- 05/01/2024
+04. getDomainToken.c: return correct domain when local or remote delivery is
+    not set
+- 06/01/2024
+05. svctool.in, qlocal_upgrade.in: add supplementary group qcerts for qmails
+    user
+06. qmail-dkim.c: use new error code DKIM_BAD_IDENTITY for invalid identity
+    domain (i= tag)
+- 07/01/2024
+07. qmail-spamfilter.c: bypass antispam filter when RELAYCLIENT and
+    RELAYCLIENT_NOSPAMFILTER is set
+08. svctool: updated bogofilter.cf header_format, log_update_format
+- 09/01/2024
+09. svctool: replace dk-filter with qmail-dkim when creating filterargs
+10. qlocal_upgrade.in: repace dk-filter with qmail-dkim in filterargs control
+    file
+11. spawn-filter.c: display filter used for mail rejected message
+12. qmail-dkim.c: added DKIM_BAD_IDENTITY with letter Y
+- 10/01/2024
+13. qmail-dkim.c: use bouncehost/me control file if BOUNCEDOMAIN is not set
+14. qmail-dkim.c: set DKIMSIGN to private key from dkimkeys control file
+- 10/01/2024
+15. filterit.c: reset sgoptpos for repeated calls to subgetopt
+16. qmail-dkim.c: reset sgoptind, sgoptpos for repeated calls to subgetopt
+
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
 ======= Release Highlights ================================================
@@ -154,33 +186,6 @@ Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
     org
 86. qmail-showctl.c: updated control file list
 - 01/01/2024 - indimail-mta-3.0.6
-- 02/01/2024
-87. svctool: fix symbolic links clientcert.pem, scan.conf
-88. Makefile: fix compilation error for forward, filterit
-89. create_services: renamed cronlist.q, cronlist.i to indimail-mta.cron,
-    indimail.cron
-- 05/01/2024
-90. getDomainToken.c: return correct domain when local or remote delivery is
-    not set
-- 06/01/2024
-91. svctool.in, qlocal_upgrade.in: add supplementary group qcerts for qmails
-    user
-92. qmail-dkim.c: use new error code DKIM_BAD_IDENTITY for invalid identity
-    domain (i= tag)
-- 07/01/2024
-93. qmail-spamfilter.c: bypass antispam filter when RELAYCLIENT and
-    RELAYCLIENT_NOSPAMFILTER is set
-94. svctool: updated bogofilter.cf header_format, log_update_format
-- 09/01/2024
-95. svctool: replace dk-filter with qmail-dkim when creating filterargs
-96. qlocal_upgrade.in: repace dk-filter with qmail-dkim in filterargs control
-    file
-97. spawn-filter.c: display filter used for mail rejected message
-98. qmail-dkim.c: added DKIM_BAD_IDENTITY with letter Y
-- 10/01/2024
-99. qmail-dkim.c: use bouncehost/me control file if BOUNCEDOMAIN is not set
-100. qmail-dkim.c: set DKIMSIGN to private key from dkimkeys control file
-
 
 * Tue Oct 17 2023 18:34:04 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.5-1.1%{?dist}
 Release 3.0.5-1.1 Start 11/09/2023 End 17/10/2023

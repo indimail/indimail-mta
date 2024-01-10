@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.80 2024-01-10 10:05:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.81 2024-01-10 23:01:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -217,6 +217,8 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 	int             ch, argc;
 	char          **argv;
 
+	sgoptind = 1;
+	sgoptpos = 0;
 	opts->nCanon = DKIM_SIGN_RELAXED;					/*- c */
 	opts->nIncludeBodyLengthTag = 0;					/*- l */
 	opts->nIncludeQueryMethod = 0;						/*- q */
@@ -1295,7 +1297,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.80 2024-01-10 10:05:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.81 2024-01-10 23:01:23+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1309,6 +1311,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.81  2024-01-10 23:01:23+05:30  Cprogrammer
+ * reset sgoptind, sgoptpos for repeated calls to subgetopt
+ *
  * Revision 1.80  2024-01-10 10:05:58+05:30  Cprogrammer
  * use bouncehost/me control file if BOUNCEDOMAIN is not set
  * set DKIMSIGN to private key from dkimkeys control file

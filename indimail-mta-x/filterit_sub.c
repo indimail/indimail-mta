@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.5 2023-10-29 17:12:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.6 2024-01-10 22:57:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -409,6 +409,7 @@ filterit_sub1(int argc, char **argv)
 	header = comparision = keyword = action = action_val = d_action = d_action_val = NULL;
 	bounce_message = "message failed to evade local filter(s) set by recipient";
 	sgoptind = 1;
+	sgoptpos = 0;
 	while ((opt = subgetopt(argc, argv, "xnrh:c:k:a:A:d:D:b:e:")) != sgoptdone) {
 		switch (opt)
 		{
@@ -653,6 +654,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.6  2024-01-10 22:57:31+05:30  Cprogrammer
+ * reset sgoptpost for repeated calls to subgetopt
+ *
  * Revision 1.5  2023-10-29 17:12:48+05:30  Cprogrammer
  * bug - error in regexp treated as match
  *
