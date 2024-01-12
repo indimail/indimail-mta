@@ -33,16 +33,18 @@ and a fully qualified domain name.
 restrictions on its contents. However, the recipients probably expect to
 see a proper header, as described in \fBqmail-header\fR(5).
 
-Programs included with qmail which invoke \fBqmail-direct\fR will invoke
-the contents of \fBQMAILQUEUE\fR environment variable instead if set.
+Programs included with qmail which use \fBQMAILQUEUE\fR will invoke
+\fBqmail-direct\fR when \fBQMAILQUEUE\fR is set to
+\fI@prefix@/sbin/qmail-direct\fR. See \fBqmail-queue\fR(8) and
+\fBindimail-env\fR(5) to know which programs use \fBQMAILQUEUE\fR.
 
-\fBqmail-direct\fR allows you to deliver mails without requiring costly
-services and processes to manage queues and deliveries. It is useful on
-single board computers where you might want to conserve the CPU as much
-as possible but want mails generated on the system to get delivered to
-users.
+\fBqmail-direct\fR allows you to deliver mails without requiring resource
+intnsive services and processes to manage queues and deliveries. It is
+useful on single board computers where you might want to conserve the CPU
+as much as possible but want mails generated on the system to get directly
+delivered to users without requiring you to run complicated daemons.
 
-\fBqmail-direct\fR can deliver to any user for the root user. For any
+\fBqmail-direct\fR can deliver to any user when run as uid 0. For any
 other user to deposit mails, the setuid bit needs to be set to root
 for \fBqmail-direct\fR executable.
 
@@ -54,7 +56,7 @@ for more details.
 .SH "EXIT CODES"
 \fBqmail-direct\fR does not print diagnostics. It exits 0 if it has
 successfully queued the message. It exits between 1 and 99 if it has failed
-to queue the message.
+to deliver the message.
 
 All \fBqmail-direct\fR error codes between 11 and 40 indicate permanent
 errors:

@@ -16,17 +16,17 @@ programs use \fBqmail-multi\fR to deposit the mail to the queue -
 \fBqscanq-stdin(8)\fR.
 
 \fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. One can
-call any other program by passing command line arguments. If passed
-arguments, \fBqmail-multi\fR will call \fIqqf\fR and any arguments after
-\fIqqf\fR will be passed as arguments to \fIqqf\fR. Without any command
-line arguments you can change the program that \fBqmail-multi\fR calls, by
-setting the environment variable \fBQUEUEPROG\fR, to the path of any
-qmail-queue frontend. \fBQUEUEPROG\fR is typically used when you want to
-use write your own queue frontend, with the queue path available in
-\fBQUEUEDIR\fR environment variable. if \fBQUEUEDIR\fR is set
-\fBqmail-multi\fR execs \fBqmail-queue\fR (or program defined by
-\fBQUEUEPROG\fR without any processing or setting up any environment
-variables.
+call any other program by passing command line arguments to
+\fBqmail-multi\fR in \fBQMAILQUEUE\fR. If passed arguments,
+\fBqmail-multi\fR will call \fIqqf\fR. Any arguments after \fIqqf\fR will
+be passed as arguments to \fIqqf\fR. You can change the program that
+\fBqmail-multi\fR calls, by setting the environment variable
+\fBQUEUEPROG\fR, to the path of any qmail-queue frontend. \fBQUEUEPROG\fR
+is typically used when you want to use write your own queue frontend, with
+the queue path available in \fBQUEUEDIR\fR environment variable. If
+\fBQUEUEDIR\fR is set \fBqmail-multi\fR execs \fBqmail-queue\fR (or program
+defined by \fBQUEUEPROG\fR without any processing or setting up any
+environment variables.
 
 The deposition and balancing of mail across multiple queues is controlled
 by the following environment variables.

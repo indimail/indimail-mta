@@ -286,20 +286,33 @@ The value of environment variable REJECTSPAM overrides this control file.
 The format of this file is
 
 .EX
-  domain:value
+  \fBdomain:value\fR
+  or
+  \fBdomain:value:envstr\fR
 .EE
 
 without any extra spaces. The format also can be specified as
 
 .EX
-  domain:remote:value
+  \fBdomain:remote:value\fR
+  or
+  \fBdomain:remote:value:envstr\fR
     and
-  domain:local:value
+  \fBdomain:local:value\fR
+  or
+  \fBdomain:local:value:envstr\fR
 .EE
 
 where domain is a valid (recipient) domain for which mails are being
 processed and value should be 0 if SPAM mails should be delivered 1 for
-rejecting and greater than 1 for blackholing.
+rejecting and greater than 1 for blackholing. \fIenvstr\fR mentioned above
+is a string of environment variable additions or removals. e.g.
+
+.EX
+QREGEX=1,HOME=
+.EX
+
+sets QREGEX to 1 and unsets HOME envrionment variable.
 
 .TP 5
 .I spamredirect
@@ -307,49 +320,69 @@ The value of environment variable SPAMREDIRECT overrides this control file.
 The format of this file is
 
 .EX
-  domain:value
+  \fBdomain:value\fR
+  or
+  \fBdomain:value:envstr\fR
 .EE
 
 without any extra spaces. The format also can be specified as
 
 .EX
-  domain:remote:recipient
+  \fBdomain:remote:recipient\fR
+  or
+  \fBdomain:remote:recipient:envstr\fR
   and
-  domain:local:recipient
+  \fBdomain:local:recipient\fR
+  or
+  \fBdomain:remote:recipient:envstr\fR
 .EE
 
 where domain is a valid (recipient) domain for which mails are being
 processed and address should be valid recipient where the spam mails should
-be redirected.
+be redirected. \fIenvstr\fR mentioned above is a string of environment
+variable additions or removals. e.g.
+
+.EX
+QREGEX=1,HOME=
+.EX
+
+sets QREGEX to 1 and unsets HOME envrionment variable.
 
 .TP 5
 .I spamfilter
 The format of this file is of the form
 
 .EX
-  domain:args
+  \fBdomain:args\fR
+  or
+  \fBdomain:args:envstr\fR
 .EE
 
 for both local and remote mails.
 
 .EX
-  domain:remote:args
+  \fBdomain:remote:args\fR
+  or
+  \fBdomain:remote:args:envstr\fR
 .EE
 
 for remote mails and
 
 .EX
-  domain:local:args
+  \fBdomain:local:args\fR
+  or
+  \fBdomain:local:args,envstr\fR
 .EE
 
 for local mails
 
 where domain is a valid (recipient) domain for which mails are being
 processed and args is a list of aguments to be supplied to the filter
-program
+program. \fIenvstr\fR mentioned above is a string of environment
+variable additions or removals. The example below sets SPAMEXITCODE=0.
 
 .EX
-indimail.org:bogofilter -c SYSCONFDIR/bogofilter.cf -p -3 -d SYSCONFDIR/indimail.org
+indimail.org:local:bogofilter -c SYSCONFDIR/bogofilter.cf -p -3 -d SYSCONFDIR/indimail.org:SPAMEXITCODE=0
 .EE
 
 NOTE: For the control files spamfilter, filterargs, rejectspam,
@@ -405,17 +438,16 @@ QMAILLOCAL           | set for local deliveries
 
 .SH "EXIT CODES"
 \fBspawn-filter\fR exits 111 for any error (non-zero exit status by called
-		program) or if it is not able to exec QMAILHOME/bin/qmail-local
-(for local mails) or QMAILHOME/bin/qmail-remote (for remote mails). It
-exits 100 (i.e mail will be bounced) if the REJECTSPAM environment variable
-is set (or the control file has rejectspam set for the domain) and the mail
-is found to be SPAM. It also exits 100 if the program/script defined by
-\fBFILTERARGS\fR (or defined in the control file \fBfilterargs\fR) returns
-100. If the program/script defined by \fBFILTERARGS\fR returns 2, then the
-mail gets blackholed. If the program/script defined by \fBFILTERARGS\fR
-exits non-zero status (other than 2), temporary error is issued and the
-mail stays in the queue. For all other cases where no errors occur, it
-exits 0.
+program) or if it is not able to exec QMAILHOME/bin/qmail-local (for local
+mails) or QMAILHOME/bin/qmail-remote (for remote mails). It exits 100 (i.e
+mail will be bounced) if the REJECTSPAM environment variable is set (or the
+control file has rejectspam set for the domain) and the mail is found to be
+SPAM. It also exits 100 if the program/script defined by \fBFILTERARGS\fR
+(or defined in the control file \fBfilterargs\fR) returns 100. If the
+program/script defined by \fBFILTERARGS\fR returns 2, then the mail gets
+blackholed. If the program/script defined by \fBFILTERARGS\fR exits
+non-zero status (other than 2), temporary error is issued and the mail
+stays in the queue. For all other cases where no errors occur, it exits 0.
 
 .SH "SEE ALSO"
 qmail-lspawn(8),

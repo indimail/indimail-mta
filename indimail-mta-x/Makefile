@@ -1422,8 +1422,9 @@ compile qmail-direct.c pidopen.h custom_error.h syncdir.h conf-sync
 	./compile `grep -h -v "^#" conf-sync` qmail-direct.c
 
 qmail-direct.8: \
-qmail-direct.9 conf-sysconfdir
+qmail-direct.9 conf-sysconfdir conf-prefix
 	cat qmail-direct.9 \
+	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-direct.8
 
@@ -1509,7 +1510,7 @@ auto_control.h qmulti.h pidopen.h custom_error.h getDomainToken.h
 
 qmail-dkim.8: qmail-dkim.9 conf-prefix conf-sysconfdir
 	cat qmail-dkim.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dkim.8
 

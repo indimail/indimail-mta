@@ -465,21 +465,21 @@ chain will stop at \fBqmail-queue\fR. Any programs listed after
 \fBsrsfilter\fR(1),
 \fBqmail-spamfilter\fR(8),
 \fBqmail-multi\fR(8),
-\fBqmail-nullqueue\fR(8),
 \fBqmail-qfilter\fR(1),
 \fBqmail-dkim\fR(8),
 \fBqscanq-stdin\fR(8)
 
 The below programs also act as a \fBqmail-queue\fR frontend. They can be
 set in \fBQMAILQUEUE\fR environment variable and will ultimately execute
-\fBqmail-queue\fR in the end as a default.
+\fBqmail-queue\fR in the end as a default (except for \fBqmail-nullqueue\fR
+which always exits 0).
 
 \fBqmail-spamfilter\fR(8),
 \fBqmail-multi\fR(8),
-\fBqmail-nullqueue\fR(8),
 \fBqmail-qfilter\fR(1),
 \fBqmail-dkim\fR(8),
-\fBqscanq-stdin\fR(8)
+\fBqscanq-stdin\fR(8),
+\fBqmail-nullqueue\fR(8)
 
 .SH "EXIT CODES"
 \fBqmail-queue\fR does not print diagnostics. It exits with various exit

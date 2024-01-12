@@ -8,43 +8,46 @@ message for delivery
 \fBqmail-dkim\fR [ \fIqqf\fR [\fIarg1\fR] [\fIarg2\fR] [...] ]
 
 .SH DESCRIPTION
-\fBqmail-dkim\fR(1) allows indimail to add DKIM signature in the message.
-It gets invoked by indimail programs using qmail-queue frontend when the
-\fBQMAILQUEUE\fR environment is set to \fBqmail-dkim\fR or when passed as a
-command line argument having \fBqmail-dkim\fR like below (which will have
-the message pass through \fBqmail-dkim\fR and \fBqmail-spamfilter\fR).
+\fBqmail-dkim\fR(8) is a DKIM signing or DKIM verification program. It
+reads descriptor 0 for a RFC-5322 message and can either print a
+DKIM-Signature header or it can verify a DKIM signed RFC-5322 message and
+print a DKIM-Status header. \fBqmail-dkim\fR prints the original message
+after the DKIM-Signature or DKIM-Status header. The output of
+DKIM-Signature, DKIM-Status and the message is on a pipe to
+\fBqmail-queue\fR. If \fBDKIMQUEUE\fR is defined, the
+DKIM-Signature/DKIM-Status header and message will be written to the
+program defined by \fBDKIMQUEUE\fR. You can use \fI/bin/cat\fR for
+\fBDKIMQUEUE\fR to have a signed message printed on descriptor 1.
+\fBqmail-dkim\fR is a \fBqmail-queue\fR frontend and can be called by many
+indimail-mta programs by defining \fBQMAILQUEUE\fR as
+\fI@prefix@/sbin/qmail-dkim\fR. You can also use it by setting
+\fBQMAILQUEUE\fR as below. Here the message will pass through
+\fBqmail-dkim\fR followed by \fBqmail-spamfilter\fR) and finally
+\fBqmail-queue\fR, which will deposit the mail in the queue.
 
 .EX
 QMAILQUEUE="@prefix@/sbin/qmail-dkim @prefix@/sbin/qmail-spamfilter"
 .EE
 
-\fBqmail-dkim\fR has the
-same interface as \fBqmail-queue\fR except that it inserts an appropriate
-DKIM header (rfc4871, rfc6376) before it queues the message. To invoke
-\fBqmail-dkim\fR, set QMAILQUEUE to full path of qmail-dkim in the
-environment, when you send or receive email.
-
-After inserting the DKIM header, \fBqmail-dkim\fR will call
-\fBqmail-queue\fR as a default, to deposit message in the queue. If you
-want to call something pass it as in the command line arguments to
-\fBqmail-dkim\fR or set the \fBDKIMQUEUE\fR or \fBQUEUEPROG\fR environment
-variable. Command line arguments takes precedence over environment
-variable.
+You could also set \fBDKIMQUEUE\fR as below to have \fBqmail-dkim\fR call
+\fBqmail-spamfilter\fR
 
 .EX
-DKIMQUEUE=PREFIX/sbin/qmail-spamfilter
+DKIMQUEUE=@prefix@/sbin/qmail-spamfilter
 .EE
 
-Will make qmail-dkim call qmail-spamfilter instead of qmail-queue.
+If you want \fBqmail-dkim\fR to call something other than
+\fBqmail-queue\fR, pass it in the command line arguments to
+\fBqmail-dkim\fR (first example above) or set the \fBDKIMQUEUE\fR or
+\fBQUEUEPROG\fR environment variable (second example above). Command line
+arguments takes precedence over environment variable. Both the examples
+above will make qmail-dkim call qmail-spamfilter instead of qmail-queue.
 
-\fBqmail-dkim\fR supports RSA-SHA1, RSA-SHA256 and ED25519-SHA256 (rfc8463)
-encryption methods for signing and verification. By default RSA-SHA256 is
-used.
-
-\fBqmail-dkim\fR supports DKIM signing and verification and can optionally
-use \fBSender Signing Practice (SSP)\fR or \fBAuthor Domain Signing
-Practice\fR. \fBqmail-dkim\fR uses libdkim and OpenSSL libraries for
-signing and verification.
+\fBqmail-dkim\fR supports RSA-SHA1, RSA-SHA256 and ED25519-SHA256
+(RFC-8463) encryption methods for signing and verification. By default
+RSA-SHA256 is used. \fBqmail-dkim\fR can optionally use \fBSender Signing
+Practice (SSP)\fR or \fBAuthor Domain Signing Practice\fR. \fBqmail-dkim\fR
+uses libdkim and OpenSSL libraries for signing and verification.
 
 To sign a message, set the \fBDKIMSIGN\fR environment variable to the
 pathname of the private key that will be used to sign the message. You can
@@ -61,15 +64,13 @@ the following format
 domain:private_key_path:envstr
 .EE
 
-.fi
 Here \fIenvstr\fR is a string of environment variable additions or
 removals. e.g.
 
 .EX
 QREGEX=1,DKIMSIGNOPTIONS=-z 4
-.EX
+.EE
 
-.fi
 If an entry for \fIdomain\fR exists in \fIdkimkeys\fR, the value of
 \fBDKIMSIGN\fR environment variable is ignored. You can disable
 \fIdkimkeys\fR by setting \fBNODKIMKEYS\fR environment variable.
@@ -77,12 +78,15 @@ If an entry for \fIdomain\fR exists in \fIdkimkeys\fR, the value of
 If a private key file does not exist and does not have a % character, the
 message will be rejected with error 35.
 
-In the absense of DKIMSIGN and DKIMVERIFY environment variable, qmail-dkim
-will sign the message if RELAYCLIENT or AUTHINFO environment variable is
-set. It will verify the message if RELAYCLIENT or AUTHINFO environment
-variable is not set. Even if DKIMVERIFY is set, you can disable dkim
-verification, if RELAYCLIENT or AUTHINFO is set, by setting
-RELAYCLIENT_NODKIMVERIFY environment variable.
+If \fBRELAYCLIENT\fR or \fBAUTHINFO\fR environment variable is set,
+\fBqmail-dkim\fR will sign the message even if \fBDKIMSIGN\fR and
+\fBDKIMVERIFY\fR environment variables are not set. Even if DKIMVERIFY is
+set, you can disable DKIM verification by setting
+\fBRELAYCLIENT_NODKIMVERIFY\fR environment variable.
+
+If \fBRELAYCLIENT\fR or \fBAUTHINFO\fR environment variable is not set,
+\fBqmail-dkim\fR will verify the message.
+
 
 You can set various DKIM options in getopt style, by setting the
 environment variable \fBDKIMSIGNOPTIONS\fR

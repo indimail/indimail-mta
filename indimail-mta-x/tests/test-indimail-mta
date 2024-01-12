@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.61 2024-01-09 19:52:56+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.62 2024-01-11 12:38:16+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -148,9 +148,11 @@ do_cleanup_failed()
 		$testdir/tcpclient.smtp $testdir/.vacation.dir/* $testdir/.vacation.msg \
 		$testdir/$user/Maildir/new/* $testdir/$testuser/Maildir/new/* \
 		$testdir/$testuser/Maildir/.Quarantine $testdir/$testuser/Maildir/.Spam \
-		$qmaildir/alias/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/cur/* \
-		$sysconfdir/users $testdir/variables
-	sudo /bin/rm -f  $cntrldir/mailarch $cntrldir/accesslist $cntrldir/from.envrules $cntrldir/badmailfrom.custom
+		$qmaildir/alias/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/new/* \
+		$qmaildir/autoturn/$vdomain/Maildir/cur/* $sysconfdir/users $testdir/variables
+	sudo /bin/rm -f  $cntrldir/mailarch $cntrldir/accesslist $cntrldir/from.envrules \
+		$cntrldir/badmailfrom.custom $cntrldir/dkimkeys $cntrldir/smtproutes $cntrldir/recipients \
+		$cntrldir/remote-auth $cntrldir/remote_auth.cdb
 }
 
 check_mail_count()
@@ -7627,6 +7629,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.62  2024-01-11 12:38:16+05:30  Cprogrammer
+# updated test script
+#
 # Revision 1.61  2024-01-09 19:52:56+05:30  Cprogrammer
 # removed dk-filter
 #
