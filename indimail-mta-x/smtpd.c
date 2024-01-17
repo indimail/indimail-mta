@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.317 2023-12-31 08:57:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.318 2024-01-14 21:44:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.317 $";
+static char    *revision = "$Revision: 1.318 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1014,7 +1014,7 @@ log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notif
 				log_fifo(mfrom, ptr, msg_size, &tmpLine);
 			logerr(1, " ", NULL);
 			if (!notify)
-				logerr(0, "HELO <", helohost.s, "> ", NULL);
+				logerr(0, "HELO <", helohost.s + 1, "> ", NULL);
 			else
 				logerr(0, "NOTIFY: ", NULL);
 			logerr(0, "MAIL from <", mfrom, "> RCPT <", ptr, NULL);
@@ -1088,7 +1088,7 @@ err_queue(char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx
 				logerr(0, " (permanent): ", NULL);
 			else
 				logerr(0, " (temporary): ", NULL);
-			logerr(0, "HELO <", helohost.s, "> MAIL from <", mfrom, "> RCPT <", ptr, "> AUTH <", NULL);
+			logerr(0, "HELO <", helohost.s + 1, "> MAIL from <", mfrom, "> RCPT <", ptr, "> AUTH <", NULL);
 			if (authuser && *authuser)
 				logerr(0, authuser, ": AUTH ", get_authmethod(authd), NULL);
 			if (addrallowed(ptr)) {
@@ -1864,7 +1864,7 @@ err_grey()
 	arg = rcptto.s;
 	for (ptr = arg + 1, idx = 0; idx < rcptto.len; idx++) {
 		if (!arg[idx]) {
-			logerr(1, "HELO <", helohost.s, "> MAIL from <", mailfrom.s, "> RCPT <", ptr, ">\n", NULL);
+			logerr(1, "HELO <", helohost.s + 1, "> MAIL from <", mailfrom.s, "> RCPT <", ptr, ">\n", NULL);
 			ptr = arg + idx + 2;
 		}
 	}
@@ -2089,7 +2089,7 @@ check_user_sql(char *rcpt, int len)
 }
 
 int
-dnscheck(char *address, int len, int paranoid)
+dnscheck(char *address, int len, int noat)
 {
 	ipalloc         ia = { 0 };
 	unsigned int    random;
@@ -2111,15 +2111,15 @@ dnscheck(char *address, int len, int paranoid)
 		}
 	}
 	random = now() + (getpid() << 16);
-	if ((j = byte_rchr(address, len, '@')) < (len - 1)) {
-		if (!stralloc_copys(&sa, address + j + 1))
+	if (noat) { /*- used in smtp_etrn */
+		if (!stralloc_copys(&sa, address))
 			die_nomem();
 		dns_init(0);
 		if ((j = dns_mxip(&ia, &sa, random)) < 0)
 			return j;
 	} else
-	if (paranoid) {
-		if (!stralloc_copys(&sa, address))
+	if ((j = byte_rchr(address, len, '@')) < (len - 1)) {
+		if (!stralloc_copys(&sa, address + j + 1))
 			die_nomem();
 		dns_init(0);
 		if ((j = dns_mxip(&ia, &sa, random)) < 0)
@@ -2368,9 +2368,11 @@ dohelo(char *arg)
 	int             i;
 
 	seenhelo = 0;
-	if (!stralloc_copys(&helohost, arg) ||
+	if (!stralloc_copyb(&helohost, "@", 1) ||
+			!stralloc_cats(&helohost, arg) ||
 			!stralloc_0(&helohost))
 		die_nomem();
+	helohost.len--;
 	if (!relayclient) { /*- turn on helo check if user not authenticated */
 		if (env_get("ENFORCE_FQDN_HELO")) {
 			i = str_chr(arg, '.');
@@ -2384,7 +2386,7 @@ dohelo(char *arg)
 		 * if not connecting from the local ip interface
 		 * helo must not match localhost or localip
 		 */
-		if (case_diffs(localip, remoteip) && (!case_diffs(localhost, helohost.s) || case_diffs(localip, helohost.s)))
+		if (case_diffs(localip, remoteip) && (!case_diffs(localhost, helohost.s + 1) || case_diffs(localip, helohost.s + 1)))
 			err_localhelo(localhost, localip, arg);
 		switch (address_match
 				((badheloFn
@@ -2392,7 +2394,7 @@ dohelo(char *arg)
 				 &errStr))
 		{
 		case 1:
-			err_badhelo(helohost.s, remotehost);
+			err_badhelo(helohost.s + 1, remotehost);
 			return;
 		case 0:
 			break;
@@ -2403,9 +2405,9 @@ dohelo(char *arg)
 			return;
 		}
 	}
-	if ((fakehelo = case_diffs(remotehost, helohost.s) ? helohost.s : 0)) {
+	if ((fakehelo = case_diffs(remotehost, helohost.s + 1) ? helohost.s + 1 : 0)) {
 		if (dohelocheck && !nodnscheck) {
-			switch (dnscheck(helohost.s, helohost.len - 1, 0))
+			switch (dnscheck(helohost.s, helohost.len, 0))
 			{
 			case DNS_HARD:
 				err_hmf(arg, 0);
@@ -7353,6 +7355,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.318  2024-01-14 21:44:23+05:30  Cprogrammer
+ * prepend '@' to helohost when doing dnscheck
+ *
  * Revision 1.317  2023-12-31 08:57:50+05:30  Cprogrammer
  * moved repository to indimail org
  *
@@ -7763,7 +7768,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.317 2023-12-31 08:57:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.318 2024-01-14 21:44:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

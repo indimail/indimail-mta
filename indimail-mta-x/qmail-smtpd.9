@@ -1105,8 +1105,9 @@ Rule of thumb for large sites: Put your 50 most commonly used domains into
 
 .TP 5
 \fInodnscheck\fR
-DNS checks are prohibited for sender addresses (Mail from:) included here.
-Addresses can be expressed individually and/or for a domain:
+DNS checks are bypassed for domain part of sender addresses (MAIL FROM) and
+helo domain included in this control file. Addresses can be expressed
+individually and/or for a domain:
 
 .EX
   god@heaven.af.mil
@@ -1114,9 +1115,10 @@ Addresses can be expressed individually and/or for a domain:
 .EE
 
 If the environment variable \fBNODNSCHECK\fR is set, \fBqmail-smtpd\fR will
-ignore \fInodnscheck\fR and the DNS check will be disabled. A line in
-\fInodnschecks\fR may be of the form \fB@\fIhost\fR, meaning every address
-at \fIhost\fR.
+ignore \fInodnscheck\fR DNS check will not be carried for MAIL, EHLO or
+HELO commands. A line in \fInodnschecks\fR may be of the form
+\fB@\fIhost\fR, meaning every address at \fIhost\fR. \fB@\fIhost\fR is also
+applicable for argument given to HELO or EHLO command.
 
 .TP 5
 \fIrcpthosts\fR
