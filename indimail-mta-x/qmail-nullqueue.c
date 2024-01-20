@@ -27,7 +27,7 @@ main()
 {
 	int             n;
 	unsigned long   death;
-	char            buf[2048];
+	char            buf[8192];
 
 	sig_alarmcatch(sigalrm);
 	sig_bugcatch(sigbug);

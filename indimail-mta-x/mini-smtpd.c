@@ -1,26 +1,5 @@
 /*
- * $Log: mini-smtpd.c,v $
- * Revision 1.7  2023-10-07 01:24:51+05:30  Cprogrammer
- * use env variable HIDE_HOST to hide IP, host in received headers
- *
- * Revision 1.6  2023-09-24 00:23:57+05:30  Cprogrammer
- * minor code style changes
- *
- * Revision 1.5  2022-10-22 13:07:14+05:30  Cprogrammer
- * added program identifier to Received header
- *
- * Revision 1.4  2021-10-22 15:51:41+05:30  Cprogrammer
- * removed extra arguments to err_size()
- *
- * Revision 1.3  2021-09-11 18:58:03+05:30  Cprogrammer
- * pass null remotehost to received when remotehost is unknown
- *
- * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.1  2021-07-09 21:50:06+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: mini-smtpd.c,v 1.8 2024-01-20 23:38:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -76,6 +55,7 @@ static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static struct qmail    qqt;
 static unsigned int    bytestooverflow = 0;
 static int      hide_host;
+static int      convertbarelf;
 
 ssize_t
 safewrite(int fd, char *buf, size_t len)
@@ -335,9 +315,8 @@ addrparse(char *arg)
 				if (!addr.s[i + 1 + ip4_scanbracket(addr.s + i + 1, &ip)])
 					if (ipme_is(&ip)) {
 						addr.len = i + 1;
-						if (!stralloc_cat(&addr, &liphost))
-							die_nomem();
-						if (!stralloc_0(&addr))
+						if (!stralloc_cat(&addr, &liphost) ||
+								!stralloc_0(&addr))
 							die_nomem();
 					}
 	}
@@ -441,12 +420,11 @@ smtp_mail(char *arg)
 	}
 	flagsize = 0;
 	mailfrom_parms(arg);
+	convertbarelf = env_get("ALLOW_BARELF") ? 1 : 0;
 	seenmail = 1;
-	if (!stralloc_copys(&rcptto, ""))
-		die_nomem();
-	if (!stralloc_copys(&mailfrom, addr.s))
-		die_nomem();
-	if (!stralloc_0(&mailfrom))
+	if (!stralloc_copys(&rcptto, "") || 
+			!stralloc_copys(&mailfrom, addr.s) ||
+			!stralloc_0(&mailfrom))
 		die_nomem();
 	out("250 ok\r\n");
 }
@@ -524,16 +502,18 @@ blast(int *hops)
 	for (;;) {
 		if ((err = substdio_get(&ssin, &ch, 1)) <= 0)
 			return;
-		if (ch == '\n') {
-			if (seencr == 0) {
-				substdio_seek(&ssin, -1);
-				ch = '\r';
+		if (convertbarelf) {
+			if (ch == '\n') {
+				if (seencr == 0) {
+					substdio_seek(&ssin, -1);
+					ch = '\r';
+				}
 			}
+			if (ch == '\r')
+				seencr = 1;
+			else
+				seencr = 0;
 		}
-		if (ch == '\r')
-			seencr = 1;
-		else
-			seencr = 0;
 		if (flaginheader) {
 			if (pos < 9) {
 				if (ch != "delivered"[pos])
@@ -737,7 +717,35 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.7 2023-10-07 01:24:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.8 2024-01-20 23:38:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: mini-smtpd.c,v $
+ * Revision 1.8  2024-01-20 23:38:37+05:30  Cprogrammer
+ * use env variable ALLOW_BARELF to allow bare LF from smtp clients
+ *
+ * Revision 1.7  2023-10-07 01:24:51+05:30  Cprogrammer
+ * use env variable HIDE_HOST to hide IP, host in received headers
+ *
+ * Revision 1.6  2023-09-24 00:23:57+05:30  Cprogrammer
+ * minor code style changes
+ *
+ * Revision 1.5  2022-10-22 13:07:14+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
+ * Revision 1.4  2021-10-22 15:51:41+05:30  Cprogrammer
+ * removed extra arguments to err_size()
+ *
+ * Revision 1.3  2021-09-11 18:58:03+05:30  Cprogrammer
+ * pass null remotehost to received when remotehost is unknown
+ *
+ * Revision 1.2  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.1  2021-07-09 21:50:06+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

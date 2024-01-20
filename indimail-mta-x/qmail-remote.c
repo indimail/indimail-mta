@@ -1051,41 +1051,41 @@ va_dcl
 void
 blast()
 {
-	int             r, i, j, sol;
+	int             r, i, j, eom;
 	char            in[4096], out[4096 * 2 + 1];
 
 	for (r = 0; r < qqeh.len; r++) {
 		if (qqeh.s[r] == '\n' && substdio_put(&smtpto, "\r", 1) == -1)
-				temp_write();
+			temp_write();
 		if (substdio_put(&smtpto, qqeh.s + r, 1) == -1)
 			temp_write();
 	}
-	for (sol = 1;;) {
+	for (eom = 1;;) { /* Bruce Guenter's fastremote patch */
 		if (!(r = substdio_get(&ssin, in, sizeof(in))))
 			break;
 		if (r == -1)
 			temp_read();
 		for (i = j = 0; i < r; ) {
-			if (sol && in[i] == '.') {
+			if (eom && in[i] == '.') {
 				out[j++] = '.';
 				out[j++] = in[i++];
 			}
-			sol = 0;
+			eom = 0;
 			while (i < r) {
 				if (in[i] == '\n') {
 					i++;
-					sol = 1;
+					eom = 1;
 					out[j++] = '\r';
 					out[j++] = '\n';
 					break;
 				}
 				out[j++] = in[i++];
 			} /*- while (i < r) */
-		} /*- for (i = o = 0; i < r; ) */
+		} /*- for (i = j = 0; i < r; ) */
 		if (substdio_put(&smtpto, out, j) == -1)
 			temp_write();
 	}
-	if (!sol)
+	if (!eom)
 		perm_partialline();
 	flagcritical = 1;
 	if (substdio_put(&smtpto, ".\r\n", 3) == -1)

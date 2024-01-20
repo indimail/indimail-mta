@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.318 2024-01-14 21:44:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.319 2024-01-20 23:34:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -156,7 +156,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.318 $";
+static char    *revision = "$Revision: 1.319 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -470,6 +470,7 @@ va_dcl
 #ifndef HAVE_STDARG_H
 	int             what;
 #endif
+	char            _strnum[FMT_ULONG];
 
 #ifdef HAVE_STDARG_H
 	va_start(ap, what);
@@ -483,9 +484,9 @@ va_dcl
 	case 0:
 		break;
 	case 1:
-		strnum[i = fmt_ulong(strnum, getpid())] = 0;
+		_strnum[i = fmt_ulong(_strnum, getpid())] = 0;
 		if (substdio_put(&sserr, "qmail-smtpd: pid ", 17) == -1 ||
-				substdio_put(&sserr, strnum, i) == -1)
+				substdio_put(&sserr, _strnum, i) == -1)
 			_exit(1);
 		if (remoteip) {
 			if (substdio_put(&sserr, " from ", 6) == -1 ||
@@ -2088,10 +2089,11 @@ check_user_sql(char *rcpt, int len)
 	return (0);
 }
 
+static ipalloc  ia = { 0 };
+
 int
 dnscheck(char *address, int len, int noat)
 {
-	ipalloc         ia = { 0 };
 	unsigned int    random;
 	int             j;
 
@@ -3215,7 +3217,7 @@ smtp_ehlo(char *arg)
 	}
 	out("250-PIPELINING\r\n", "250-8BITMIME\r\n", NULL);
 	if (databytes > 0) {
-		size_buf[fmt_ulong(size_buf, (unsigned long) databytes)] = 0;
+		size_buf[fmt_ulong(size_buf, databytes)] = 0;
 		out("250-SIZE ", size_buf, "\r\n", NULL);
 	}
 	if (smtp_port != SUBM_PORT)
@@ -3808,8 +3810,10 @@ smtp_mail(char *arg)
 	if (authd && !stralloc_append(&proto, "A"))
 		die_nomem();
 
+#ifdef TLS
 	if (ssl)
 		ssl_proto();
+#endif
 #ifdef BATV
 	if (batvok) {
 		(void) check_batv_sig(); /*- unwrap in case it's ours */
@@ -7355,6 +7359,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.319  2024-01-20 23:34:14+05:30  Cprogrammer
+ * fixed logerr cloberring strnum
+ *
  * Revision 1.318  2024-01-14 21:44:23+05:30  Cprogrammer
  * prepend '@' to helohost when doing dnscheck
  *
@@ -7768,7 +7775,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.318 2024-01-14 21:44:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.319 2024-01-20 23:34:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

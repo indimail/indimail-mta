@@ -25,9 +25,10 @@ addresses in the received header.
 
 .SH TRANSPARENCY
 \fBmini-smtpd\fR converts the SMTP newline convention into the UNIX newline
-convention by converting CR LF into LF.  It returns a temporary error and
+convention by converting CR LF into LF. It returns a temporary error and
 drops the connection on bare LFs; see
-\fBhttps://cr.yp.to/docs/smtplf.html\fR.
+\fBhttps://cr.yp.to/docs/smtplf.html\fR. If you set \fBALLOW_BARELF\fR, it
+will accept connections on bare LFs.
 
 \fBmini-smtpd\fR accepts messages that contain long lines or non-ASCII
 characters, even though such messages violate the SMTP protocol.

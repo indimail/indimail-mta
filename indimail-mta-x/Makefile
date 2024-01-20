@@ -1905,8 +1905,8 @@ mysql_config conf-sql
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	read_assign.o auto_libexec.o parse_env.o \
 	$(static_option) $(QMAILLIB) -L../libsrs2-x/libsrs2/.libs \
-	$(dynamic_option) `cat gsasl.lib socket.lib dns.lib tls.lib srs.lib` \
-	-lcrypto -ldl
+	$(static_option) `cat srs.lib` \
+	$(dynamic_option) `cat socket.lib dns.lib gsasl.lib tls.lib` -ldl
 
 qmail-smtpd.o: \
 compile qmail-smtpd.c variables.h hassmtputf8.h hasmysql.h \

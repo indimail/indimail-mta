@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.h,v 1.10 2023-12-25 09:30:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.h,v 1.11 2024-01-20 23:27:50+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef QMAIL_H
 #define QMAIL_H
@@ -21,7 +21,7 @@ struct qmail
 	int             fde; /*- fd envelope */
 	int             fdc; /*- fd custom */
 	substdio        ss;
-	char            buf[1024];
+	char            buf[8192];
 };
 
 int             qmail_open(struct qmail *);
@@ -100,6 +100,9 @@ unsigned long   qmail_qp(struct qmail *);
 
 /*
  * $Log: qmail.h,v $
+ * Revision 1.11  2024-01-20 23:27:50+05:30  Cprogrammer
+ * increased qmail-queue buffer to 8192 for performance
+ *
  * Revision 1.10  2023-12-25 09:30:13+05:30  Cprogrammer
  * added defintion for DEATH and OSSIFIED
  *
