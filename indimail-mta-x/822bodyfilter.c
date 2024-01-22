@@ -1,5 +1,8 @@
 /*
  * $Log: 822bodyfilter.c,v $
+ * Revision 1.4  2024-01-23 01:19:54+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.3  2020-11-24 13:42:08+05:30  Cprogrammer
  * removed exit.h
  *
@@ -89,7 +92,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822bodyfilter_c()
 {
-	static char    *x = "$Id: 822bodyfilter.c,v 1.3 2020-11-24 13:42:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822bodyfilter.c,v 1.4 2024-01-23 01:19:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

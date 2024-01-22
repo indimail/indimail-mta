@@ -1,5 +1,8 @@
 /*
  * $Log: filterto.c,v $
+ * Revision 1.13  2024-01-23 01:21:12+05:30  Cprogrammer
+ * convert mywrite to ansic prototype
+ *
  * Revision 1.12  2021-07-05 21:10:21+05:30  Cprogrammer
  * skip $HOME/.defaultqueue for root
  *
@@ -143,7 +146,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.12 2021-07-05 21:10:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: filterto.c,v 1.13 2024-01-23 01:21:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

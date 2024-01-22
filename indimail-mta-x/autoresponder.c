@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.40 2023-10-25 13:25:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.41 2024-01-23 01:20:28+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -1248,7 +1248,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.40 2023-10-25 13:25:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.41 2024-01-23 01:20:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmktempfileh;
@@ -1257,6 +1257,9 @@ getversion_qmail_autoresponder_c()
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.41  2024-01-23 01:20:28+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.40  2023-10-25 13:25:55+05:30  Cprogrammer
  * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
  *

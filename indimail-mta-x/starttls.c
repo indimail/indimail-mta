@@ -1,5 +1,5 @@
 /*
- * $Id: starttls.c,v 1.17 2023-07-07 10:51:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: starttls.c,v 1.18 2024-01-23 01:23:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -929,13 +929,16 @@ unsigned long smtpcode() { return(550);}
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.17 2023-07-07 10:51:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: starttls.c,v 1.18 2024-01-23 01:23:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: starttls.c,v $
+ * Revision 1.18  2024-01-23 01:23:41+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.17  2023-07-07 10:51:32+05:30  Cprogrammer
  * use NULL instead of 0 for null pointer
  *

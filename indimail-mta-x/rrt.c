@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.13  2024-01-23 01:23:26+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.12  2021-12-05 09:16:37+05:30  Cprogrammer
  * fixed command line arguments for return-path and recipient
  *
@@ -497,7 +500,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.12 2021-12-05 09:16:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: rrt.c,v 1.13 2024-01-23 01:23:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

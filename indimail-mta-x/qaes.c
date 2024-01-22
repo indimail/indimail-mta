@@ -7,6 +7,9 @@
  * Saju Pillai (saju.pillai@gmail.com)
  *
  * $Log: qaes.c,v $
+ * Revision 1.7  2024-01-23 01:24:18+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -344,7 +347,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qaes.c,v 1.7 2024-01-23 01:24:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: mini-smtpd.c,v 1.8 2024-01-20 23:38:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -718,13 +718,16 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.8 2024-01-20 23:38:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.9  2024-01-23 01:21:56+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.8  2024-01-20 23:38:37+05:30  Cprogrammer
  * use env variable ALLOW_BARELF to allow bare LF from smtp clients
  *

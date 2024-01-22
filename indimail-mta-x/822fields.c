@@ -1,5 +1,8 @@
 /*
  * $Log: 822fields.c,v $
+ * Revision 1.5  2024-01-23 01:20:03+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.4  2020-11-28 12:43:14+05:30  Cprogrammer
  * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
  *
@@ -107,7 +110,7 @@ main(int argc, char **argv)
 void
 getversion_822fields_c()
 {
-	static char    *x = "$Id: 822fields.c,v 1.4 2020-11-28 12:43:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822fields.c,v 1.5 2024-01-23 01:20:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

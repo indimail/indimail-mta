@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.8  2024-01-23 01:22:46+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.7  2023-02-14 09:13:01+05:30  Cprogrammer
  * renamed auto_uidv to auto_uidi
  *
@@ -363,7 +366,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.7 2023-02-14 09:13:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.8 2024-01-23 01:22:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

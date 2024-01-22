@@ -1,5 +1,8 @@
 /*
  * $Log: iftoccfrom.c,v $
+ * Revision 1.5  2024-01-23 01:24:13+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -98,7 +101,7 @@ main(int argc, char **argv)
 void
 getversion_iftoccfrom_c()
 {
-	static char    *x = "$Id: iftoccfrom.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: iftoccfrom.c,v 1.5 2024-01-23 01:24:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

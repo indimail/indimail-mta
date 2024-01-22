@@ -1,5 +1,8 @@
 /*
  * $Log: qbase64.c,v $
+ * Revision 1.9  2024-01-23 01:22:20+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -103,7 +106,7 @@ main(int argc, char **argv)
 void
 getversion_qbase64_c()
 {
-	static char    *x = "$Id: qbase64.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qbase64.c,v 1.9 2024-01-23 01:22:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

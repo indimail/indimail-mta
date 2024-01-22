@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.14  2024-01-23 01:22:59+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.13  2023-10-07 01:34:18+05:30  Cprogrammer
  * added parameter hide for received
  *
@@ -228,7 +231,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.13 2023-10-07 01:34:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpd.c,v 1.14 2024-01-23 01:22:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

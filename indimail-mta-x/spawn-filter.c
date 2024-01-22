@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.86 2024-01-09 12:38:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.87 2024-01-23 01:23:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -675,7 +675,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.86 2024-01-09 12:38:29+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.87 2024-01-23 01:23:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -686,6 +686,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.87  2024-01-23 01:23:36+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.86  2024-01-09 12:38:29+05:30  Cprogrammer
  * display filter used for mail rejected message
  *

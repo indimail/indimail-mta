@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.h,v $
+ * Revision 1.3  2024-01-23 01:23:45+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.2  2023-01-03 17:43:29+05:30  Cprogrammer
  * define variables used in qmail-daned, dnstlsarr as extern
  *
@@ -15,7 +18,7 @@
 #include "buffer_defs.h"
 
 #ifndef	lint
-static char     sccsidstarttlsh[] = "$Id: starttls.h,v 1.2 2023-01-03 17:43:29+05:30 Cprogrammer Exp mbhangui $";
+static char     sccsidstarttlsh[] = "$Id: starttls.h,v 1.3 2024-01-23 01:23:45+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 void            die_control(char *, char *);

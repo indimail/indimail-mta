@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmqpc.c,v 1.26 2023-10-27 16:11:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qmqpc.c,v 1.27 2024-01-23 01:22:55+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -331,13 +331,16 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.26 2023-10-27 16:11:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.27 2024-01-23 01:22:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.27  2024-01-23 01:22:55+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.26  2023-10-27 16:11:50+05:30  Cprogrammer
  * replace hard-coded exit values with constants from qmail.h
  *

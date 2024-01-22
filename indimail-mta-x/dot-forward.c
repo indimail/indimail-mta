@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.17  2024-01-23 01:24:06+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -522,7 +525,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.16 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.17 2024-01-23 01:24:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

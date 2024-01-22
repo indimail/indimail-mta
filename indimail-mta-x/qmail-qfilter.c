@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qfilter.c,v 1.21 2023-09-08 00:57:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qfilter.c,v 1.22 2024-01-23 01:22:51+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -386,7 +386,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.21 2023-09-08 00:57:21+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.22 2024-01-23 01:22:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -395,6 +395,9 @@ getversion_qmail_qfilter_c()
 
 /*
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.22  2024-01-23 01:22:51+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.21  2023-09-08 00:57:21+05:30  Cprogrammer
  * BUG FIX: qmail-multi, qmail-queue wasn't getting executed
  *

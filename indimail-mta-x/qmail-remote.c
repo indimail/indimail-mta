@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.170 2023-08-28 22:28:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.171 2024-01-23 01:23:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -3729,13 +3729,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.170 2023-08-28 22:28:48+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.171 2024-01-23 01:23:16+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.171  2024-01-23 01:23:16+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.170  2023-08-28 22:28:48+05:30  Cprogrammer
  * BUG: fixed extra connect being made for servers without STARTTLS capability
  *

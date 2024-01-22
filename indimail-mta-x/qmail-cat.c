@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-cat.c,v $
+ * Revision 1.10  2024-01-23 01:24:23+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.9  2021-10-20 23:30:20+05:30  Cprogrammer
  * added SIGTERM handler to flush io
  *
@@ -136,7 +139,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	static char    *x = "$Id: qmail-cat.c,v 1.9 2021-10-20 23:30:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-cat.c,v 1.10 2024-01-23 01:24:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

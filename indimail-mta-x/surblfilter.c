@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.18 2023-09-07 20:50:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: surblfilter.c,v 1.19 2024-01-23 01:23:51+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -971,13 +971,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.18 2023-09-07 20:50:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.19 2024-01-23 01:23:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.19  2024-01-23 01:23:51+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.18  2023-09-07 20:50:26+05:30  Cprogrammer
  * display the SURB blocked uri in message
  *

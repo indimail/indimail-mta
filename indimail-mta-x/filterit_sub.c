@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.6 2024-01-10 22:57:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.7 2024-01-23 01:20:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -655,6 +655,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.7  2024-01-23 01:20:57+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.6  2024-01-10 22:57:31+05:30  Cprogrammer
  * reset sgoptpost for repeated calls to subgetopt
  *

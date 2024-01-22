@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.319 2024-01-20 23:34:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.320 2024-01-23 01:23:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -157,7 +157,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.319 $";
+static char    *revision = "$Revision: 1.320 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -7360,6 +7360,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.320  2024-01-23 01:23:31+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.319  2024-01-20 23:34:14+05:30  Cprogrammer
  * fixed logerr cloberring strnum
  *
@@ -7776,7 +7779,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.319 2024-01-20 23:34:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.320 2024-01-23 01:23:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
