@@ -1,5 +1,8 @@
 /*
  * $Log: 822bodyfilter.c,v $
+ * Revision 1.4  2024-01-23 01:19:54+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.3  2020-11-24 13:42:08+05:30  Cprogrammer
  * removed exit.h
  *
@@ -20,14 +23,15 @@
 #include "fd.h"
 #include "seek.h"
 #include "pathexec.h"
+#include "buffer_defs.h"
 
 #define FATAL "822bodyfilter: fatal: "
 
 stralloc        line = { 0 };
 int             match;
-static char     ssinbuf[1024];
+static char     ssinbuf[BUFSIZE_IN];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static char     ssoutbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 
 int
@@ -88,7 +92,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822bodyfilter_c()
 {
-	static char    *x = "$Id: 822bodyfilter.c,v 1.3 2020-11-24 13:42:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822bodyfilter.c,v 1.4 2024-01-23 01:19:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

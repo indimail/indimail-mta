@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.81 2024-01-10 23:01:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.82 2024-01-23 01:22:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -37,6 +37,7 @@
 #include "variables.h"
 #include "qmulti.h"
 #include "pidopen.h"
+#include "buffer_defs.h"
 #include "custom_error.h"
 #include <openssl/evp.h>
 
@@ -49,8 +50,8 @@
 
 extern char    *dns_text(char *);
 
-char            inbuf[4096];
-char            outbuf[256];
+char            inbuf[BUFSIZE_IN];
+char            outbuf[BUFSIZE_OUT];
 struct substdio ssin;
 struct substdio ssout;
 
@@ -1297,7 +1298,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.81 2024-01-10 23:01:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-dkim.c,v 1.82 2024-01-23 01:22:34+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1311,6 +1312,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.82  2024-01-23 01:22:34+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.81  2024-01-10 23:01:23+05:30  Cprogrammer
  * reset sgoptind, sgoptpos for repeated calls to subgetopt
  *

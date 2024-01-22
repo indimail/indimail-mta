@@ -1,5 +1,8 @@
 /*
  * $Log: qbase64.c,v $
+ * Revision 1.9  2024-01-23 01:22:20+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -23,10 +26,11 @@
 #include <sgetopt.h>
 #include <error.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 
-static char     ssinbuf[1024];
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssinbuf[BUFSIZE_IN];
+static char     ssoutbuf[BUFSIZE_OUT];
+static char     sserrbuf[BUFSIZE_OUT];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
@@ -102,7 +106,7 @@ main(int argc, char **argv)
 void
 getversion_qbase64_c()
 {
-	static char    *x = "$Id: qbase64.c,v 1.8 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qbase64.c,v 1.9 2024-01-23 01:22:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

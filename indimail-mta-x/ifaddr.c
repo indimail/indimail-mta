@@ -1,5 +1,8 @@
 /*
  * $Log: ifaddr.c,v $
+ * Revision 1.5  2024-01-23 01:21:26+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -23,6 +26,7 @@
 #include <case.h>
 #include <env.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 
 #define FATAL "ifaddr: fatal: "
 
@@ -99,7 +103,7 @@ main(int argc, char **argv)
 {
 	int             i, j, match;
 	stralloc        line = { 0 };
-	char            ssinbuf[1024];
+	char            ssinbuf[BUFSIZE_IN];
 	substdio        ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 	mess822_header  h = MESS822_HEADER;
 	mess822_action *a;
@@ -151,7 +155,7 @@ main(int argc, char **argv)
 void
 getversion_ifaddr_c()
 {
-	static char    *x = "$Id: ifaddr.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ifaddr.c,v 1.5 2024-01-23 01:21:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

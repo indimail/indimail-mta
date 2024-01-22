@@ -1,10 +1,11 @@
 /*
- * $Id: qmail.h,v 1.11 2024-01-20 23:27:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.h,v 1.12 2024-01-23 01:22:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef QMAIL_H
 #define QMAIL_H
 
 #include "substdio.h"
+#include "buffer_defs.h"
 
 #ifndef CUSTOM_ERR_FD
 #define CUSTOM_ERR_FD 2
@@ -21,7 +22,7 @@ struct qmail
 	int             fde; /*- fd envelope */
 	int             fdc; /*- fd custom */
 	substdio        ss;
-	char            buf[8192];
+	char            buf[BUFSIZE_MESS];
 };
 
 int             qmail_open(struct qmail *);
@@ -100,6 +101,9 @@ unsigned long   qmail_qp(struct qmail *);
 
 /*
  * $Log: qmail.h,v $
+ * Revision 1.12  2024-01-23 01:22:42+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.11  2024-01-20 23:27:50+05:30  Cprogrammer
  * increased qmail-queue buffer to 8192 for performance
  *

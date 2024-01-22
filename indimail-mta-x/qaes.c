@@ -7,6 +7,9 @@
  * Saju Pillai (saju.pillai@gmail.com)
  *
  * $Log: qaes.c,v $
+ * Revision 1.7  2024-01-23 01:24:18+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -41,6 +44,7 @@
 #include <error.h>
 #include <strerr.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 
 #define READ_ERR  1
 #define WRITE_ERR 2
@@ -48,9 +52,9 @@
 #define USAGE_ERR 4
 #define AES_BLOCK_SIZE 512
 
-static char     ssinbuf[1024];
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssinbuf[BUFSIZE_IN];
+static char     ssoutbuf[BUFSIZE_OUT];
+static char     sserrbuf[BUFSIZE_OUT];
 static char    *usage = "usage: qaes -k key [ -i -d -e -s salt ]\n";
 static char     strnum[FMT_ULONG];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
@@ -343,7 +347,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qaes.c,v 1.7 2024-01-23 01:24:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: 822fields.c,v $
+ * Revision 1.5  2024-01-23 01:20:03+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.4  2020-11-28 12:43:14+05:30  Cprogrammer
  * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
  *
@@ -21,14 +24,15 @@
 #include "mess822.h"
 #include "case.h"
 #include "stralloc.h"
+#include "buffer_defs.h"
 
 #define FATAL "822fields: fatal: "
 
 static int      flag, t = 2;
 stralloc        value = { 0 };
-static char     ssinbuf[1024];
+static char     ssinbuf[BUFSIZE_IN];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static char     ssoutbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 
 mess822_header  h = MESS822_HEADER;
@@ -106,7 +110,7 @@ main(int argc, char **argv)
 void
 getversion_822fields_c()
 {
-	static char    *x = "$Id: 822fields.c,v 1.4 2020-11-28 12:43:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: 822fields.c,v 1.5 2024-01-23 01:20:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

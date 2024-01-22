@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.17  2024-01-23 01:24:06+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -72,6 +75,7 @@
 #include "control.h"
 #include "qmail.h"
 #include "set_environment.h"
+#include "buffer_defs.h"
 
 #define FATAL "dot-forward: fatal: "
 #define WARN  "dot-forward: warn: "
@@ -108,9 +112,9 @@ struct qmail    qq;
 unsigned long   qp;
 char           *qqx;
 char            strnum[FMT_ULONG];
-char            qqbuf[256];
+char            qqbuf[BUFSIZE_OUT];
 substdio        ssqq = SUBSTDIO_FDBUF(mywrite, -1, qqbuf, sizeof qqbuf);
-char            inbuf[256];
+char            inbuf[BUFSIZE_IN];
 
 no_return void
 die_nomem()
@@ -521,7 +525,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.16 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: dot-forward.c,v 1.17 2024-01-23 01:24:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

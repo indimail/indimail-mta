@@ -1,5 +1,8 @@
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.13  2024-01-23 01:23:21+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -56,6 +59,7 @@
 #include <pathexec.h>
 #include <strerr.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 #include "qmail.h"
 #include "sgetopt.h"
 #include "set_environment.h"
@@ -102,8 +106,8 @@
  */
 
 static char     strnum[FMT_ULONG];
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
+static char     sserrbuf[BUFSIZE_OUT];
 static char    *usage = "usage: qnotify [-n][-h]\n";
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
@@ -580,7 +584,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.12 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qnotify.c,v 1.13 2024-01-23 01:23:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

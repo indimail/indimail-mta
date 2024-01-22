@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.8  2024-01-23 01:22:46+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.7  2023-02-14 09:13:01+05:30  Cprogrammer
  * renamed auto_uidv to auto_uidi
  *
@@ -56,11 +59,12 @@
 #include <error.h>
 #include <makeargs.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 #include "auto_uids.h"
 
-static char     ssinbuf[1024];
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssinbuf[BUFSIZE_OUT];
+static char     ssoutbuf[BUFSIZE_IN];
+static char     sserrbuf[BUFSIZE_IN];
 static char     upbuf[128];
 static char   **authargs, **passargs;
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
@@ -362,7 +366,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.7 2023-02-14 09:13:01+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-poppass.c,v 1.8 2024-01-23 01:22:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

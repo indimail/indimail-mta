@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.25  2024-01-23 01:22:02+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.24  2023-01-03 16:38:44+05:30  Cprogrammer
  * removed auto_sysconfdir.h dependency
  *
@@ -102,6 +105,7 @@
 #include <commands.h>
 #include <strerr.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 #include "rwhconfig.h"
 #include "qmail.h"
 #include "control.h"
@@ -141,7 +145,7 @@ static stralloc resp = { 0 };
 static stralloc slop = { 0 };
 static stralloc line = { 0 };
 static unsigned int    databytes = 0;
-static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512];
+static char     ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT], sserrbuf[BUFSIZE_OUT];
 static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(safewrite, 2, sserrbuf, sizeof sserrbuf);
@@ -1242,7 +1246,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.24 2023-01-03 16:38:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: ofmipd.c,v 1.25 2024-01-23 01:22:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

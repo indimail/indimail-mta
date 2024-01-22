@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.92 2023-12-25 09:30:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.93 2024-01-23 01:23:08+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -62,7 +62,7 @@ static char    *tcpremoteip;
 static char    *received;
 static char    *pidfn, *messfn, *todofn, *intdfn;
 static char    *origin; /* "X-Originating-IP: 10.0.0.1\n" */
-static char     inbuf[2048], outbuf[256], logbuf[2048];
+static char     inbuf[BUFSIZE_IN], outbuf[BUFSIZE_OUT], logbuf[BUFSIZE_OUT];
 static int      messfd, intdfd, match;
 static int      flagmademess = 0;
 static int      flagmadeintd = 0;
@@ -1191,7 +1191,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.92 2023-12-25 09:30:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.93 2024-01-23 01:23:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1199,6 +1199,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.93  2024-01-23 01:23:08+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.92  2023-12-25 09:30:45+05:30  Cprogrammer
  * made DEATH configurable
  *

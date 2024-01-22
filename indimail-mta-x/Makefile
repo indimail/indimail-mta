@@ -870,6 +870,7 @@ conf-servicedir
 
 custom_error.o: compile custom_error.c qmail.h
 	./compile custom_error.c
+
 getqueue.o: \
 compile getqueue.c getqueue.h haslibrt.h custom_error.h \
 qmail.h conf-queue
@@ -1264,7 +1265,7 @@ auto_control.o socket.lib
 qmail-qmqpc.o: \
 compile qmail-qmqpc.c auto_control.h slurpclose.h ip.h \
 timeoutconn.h control.h variables.h qmail.h socket.h \
-haveip6.h conf-ip
+haveip6.h buffer_defs.h conf-ip
 	./compile `grep -h -v "^#" conf-ip` qmail-qmqpc.c
 
 qmail-qmqpd: \
@@ -1273,7 +1274,7 @@ load qmail-qmqpd.o received.o qmail.o auto_prefix.o
 	$(static_option) $(QMAILLIB) $(dynamic_option)
 
 qmail-qmqpd.o: \
-compile qmail-qmqpd.c qmail.h received.h
+compile qmail-qmqpd.c buffer_defs.h qmail.h received.h
 	./compile qmail-qmqpd.c
 
 qmail-qmtpd: \
@@ -1285,7 +1286,7 @@ qmail.o auto_control.o auto_prefix.o variables.o
 
 qmail-qmtpd.o: \
 compile qmail-qmtpd.c qmail.h rcpthosts.h control.h received.h \
-recipients.h
+buffer_defs.h recipients.h
 	./compile qmail-qmtpd.c
 
 process_queue.o: \
@@ -1327,7 +1328,8 @@ auto_qmail.o custom_error.o getqueue.o dns.lib socket.lib rt.lib
 	$(dynamic_option) `cat dns.lib socket.lib rt.lib`
 
 qmail-multi.o: \
-compile qmail-multi.c qmulti.h qmail.h mailfilter.h conf-queue
+compile qmail-multi.c qmulti.h qmail.h mailfilter.h \
+conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-multi.c
 
 qmail-multi.8: \
@@ -1355,7 +1357,7 @@ qmail-spamfilter.9 conf-prefix conf-qmail
 
 qmulti.o: \
 compile qmulti.c auto_qmail.h control.h qmulti.h qmail.h \
-auto_prefix.h qscheduler.h custom_error.h haslibrt.h qmail.h \
+auto_prefix.h qscheduler.h custom_error.h haslibrt.h \
 conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmulti.c
 
@@ -1376,7 +1378,7 @@ socket.lib dns.lib
 
 spawn-filter.o: \
 compile spawn-filter.c control.h auto_qmail.h variables.h qregex.h \
-report.h getDomainToken.h auto_prefix.h
+report.h getDomainToken.h auto_prefix.h buffer_defs.h
 	./compile spawn-filter.c
 
 spawn-filter.8: \
@@ -1454,7 +1456,8 @@ qmail-queue.o: \
 compile qmail-queue.c triggerpull.h do_match.h \
 control.h auto_uids.h fmtqfn.h variables.h qmail.h \
 qscheduler.h syncdir.h haslibrt.h auto_prefix.h \
-auto_split.h conf-sync conf-qhpsi conf-ip conf-mailarch
+auto_split.h buffer_defs.h conf-sync conf-qhpsi \
+conf-ip conf-mailarch
 	./compile `grep -h -v "^#" conf-sync conf-qhpsi conf-ip conf-mailarch` \
 	qmail-queue.c
 
@@ -1504,7 +1507,8 @@ dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
 
 qmail-dkim.o: \
 compile qmail-dkim.c qmail.h control.h hasdkim.h variables.h \
-auto_control.h qmulti.h pidopen.h custom_error.h getDomainToken.h
+auto_control.h qmulti.h pidopen.h custom_error.h getDomainToken.h \
+buffer_defs.h
 	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
 		-I../libdkim2-x -I/opt/local/include/dkim qmail-dkim.c
 
@@ -1586,7 +1590,7 @@ compile qmail-remote.c control.h dns.h quote.h ip.h auto_sysconfdir.h \
 ipalloc.h query_skt.h ipme.h tcpto.h timeoutconn.h haveip6.h socket.h \
 variables.h auto_control.h cdb_match.h haslibgsasl.h dossl.h parse_env.h \
 hastlsa.h tlsacheck.h fn_handler.h tlsarralloc.h hassmtputf8.h batv.h \
-varargs.h conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
+buffer_defs.h varargs.h conf-tls conf-ip conf-batv conf-mxps conf-smtputf8
 	./compile `grep -h -v "^#" conf-tls conf-ip conf-mxps \
 		conf-batv` qmail-remote.c
 
@@ -1676,7 +1680,8 @@ slowq-send.o: \
 compile slowq-send.c control.h auto_qmail.h trigger.h newfield.h \
 quote.h qmail.h qsutil.h prioq.h envrules.h syncdir.h delivery_rate.h \
 fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
-varargs.h conf-mime conf-sync conf-batv conf-loglock conf-bounce conf-srs
+varargs.h conf-mime conf-sync conf-batv conf-loglock \
+conf-bounce conf-srs
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-loglock conf-bounce conf-srs` slowq-send.c
 
@@ -1733,7 +1738,8 @@ qmta-send.o: \
 compile qmta-send.c qsutil.h fmtqfn.h readsubdir.h trigger.h \
 variables.h prioq.h qmail.h newfield.h quote.h set_environment.h \
 auto_split.h auto_uids.h auto_prefix.h set_queuedir.h varargs.h \
-conf-mime conf-sync conf-batv conf-srs conf-loglock conf-bounce
+conf-mime conf-sync conf-batv conf-srs conf-loglock \
+conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
 	conf-loglock conf-bounce conf-srs` qmta-send.c
 
@@ -1918,7 +1924,7 @@ smtpd.o: \
 compile smtpd.c control.h received.h varargs.h \
 ipme.h ip.h ipalloc.h qmail.h recipients.h greylist.h \
 variables.h rcpthosts.h etrn.h batv.h do_match.h \
-envrules.h tablematch.h qregex.h sqlmatch.h \
+envrules.h tablematch.h qregex.h sqlmatch.h buffer_defs.h \
 smtp_plugin.h auto_prefix.h hasmysql.h indimail_stub.h \
 auto_control.h dns.h hassmtputf8.h haslibgsasl.h \
 hassrs.h valid_hname.h conf-tls conf-spf conf-ip conf-plugin \
@@ -1941,7 +1947,7 @@ received.o auto_control.o auto_qmail.o auto_prefix.o
 
 mini-smtpd.o: \
 compile mini-smtpd.c auto_qmail.h control.h received.h ipme.h ip.h \
-qmail.h rcpthosts.h
+qmail.h rcpthosts.h buffer_defs.h
 	./compile mini-smtpd.c
 
 mail_acl.o: compile mail_acl.c wildmat.h varargs.h
@@ -2083,7 +2089,7 @@ qmail-users.9 conf-qmail conf-sysconfdir
 	| sed s}@assign@}"`head -1 conf-sysconfdir`/users"}g \
 	> qmail-users.5
 
-qmail.o: compile qmail.c qmail.h auto_prefix.h
+qmail.o: compile qmail.c qmail.h auto_prefix.h buffer_defs.h
 	./compile qmail.c
 
 qreceipt: \
@@ -2529,7 +2535,7 @@ qregex.o wildmat.o auto_prefix.o conf-srs
 
 autoresponder.o: \
 compile autoresponder.c auto_sysconfdir.h control.h ip.h ipme.h \
-auto_prefix.h quote.h qregex.h conf-mime hassrs.h
+auto_prefix.h quote.h qregex.h conf-mime hassrs.h buffer_defs.h
 	./compile -DMAKE_SEEKABLE -DQUOTE `grep -h -v "^#" conf-mime` autoresponder.c
 
 822field: \
@@ -2552,49 +2558,49 @@ compile 822header.c
 822body: load 822body.o
 	./load 822body $(QMAILLIB)
 
-822body.o: compile 822body.c
+822body.o: compile 822body.c buffer_defs.h
 	./compile 822body.c
 
 822headerok: load 822headerok.o
 	./load 822headerok $(QMAILLIB)
 
-822headerok.o: compile 822headerok.c
+822headerok.o: compile 822headerok.c buffer_defs.h
 	./compile 822headerok.c
 
 822bodyfilter: load 822bodyfilter.o
 	./load 822bodyfilter $(QMAILLIB)
 
-822bodyfilter.o: compile 822bodyfilter.c
+822bodyfilter.o: compile 822bodyfilter.c buffer_defs.h
 	./compile 822bodyfilter.c
 
 822headerfilter: load 822headerfilter.o
 	./load 822headerfilter $(QMAILLIB)
 
-822headerfilter.o: compile 822headerfilter.c
+822headerfilter.o: compile 822headerfilter.c buffer_defs.h
 	./compile 822headerfilter.c
 
 822addr: load 822addr.o
 	./load 822addr $(QMAILLIB)
 
-822addr.o: compile 822addr.c
+822addr.o: compile 822addr.c buffer_defs.h
 	./compile 822addr.c
 
 822fields: load 822fields.o
 	./load 822fields $(QMAILLIB)
 
-822fields.o: compile 822fields.c
+822fields.o: compile 822fields.c buffer_defs.h
 	./compile 822fields.c
 
 checkaddr: load checkaddr.o
 	./load checkaddr $(QMAILLIB)
 
-checkaddr.o: compile checkaddr.c
+checkaddr.o: compile checkaddr.c buffer_defs.h
 	./compile checkaddr.c
 
 checkdomain: load checkdomain.o
 	./load checkdomain $(QMAILLIB)
 
-checkdomain.o: compile checkdomain.c
+checkdomain.o: compile checkdomain.c buffer_defs.h
 	./compile checkdomain.c
 
 filterto.o: compile filterto.c qmail.h set_environment.h
@@ -2622,13 +2628,13 @@ compile condtomaildir.c maildir_deliver.h
 iftoccfrom: load iftoccfrom.o
 	./load iftoccfrom $(QMAILLIB)
 
-iftoccfrom.o: compile iftoccfrom.c
+iftoccfrom.o: compile iftoccfrom.c buffer_defs.h
 	./compile iftoccfrom.c
 
 ifaddr: load ifaddr.o
 	./load ifaddr $(QMAILLIB)
 
-ifaddr.o: compile ifaddr.c
+ifaddr.o: compile ifaddr.c buffer_defs.h
 	./compile ifaddr.c
 
 replier: load replier.o qmail.o variables.o getconf.o \
@@ -2991,20 +2997,20 @@ columnt.o: compile columnt.c slurpclose.h \
 qmail-cat: load qmail-cat.o
 	./load qmail-cat $(QMAILLIB)
 
-qmail-cat.o: compile qmail-cat.c
+qmail-cat.o: compile qmail-cat.c buffer_defs.h
 	./compile qmail-cat.c
 
 qaes: load qaes.o
 	./load qaes -lcrypto $(QMAILLIB)
 
-qaes.o: compile qaes.c
+qaes.o: compile qaes.c buffer_defs.h
 	./compile qaes.c
 
 qarf: \
 load qarf.o
 	./load qarf $(QMAILLIB)
 
-qarf.o: compile qarf.c
+qarf.o: compile qarf.c buffer_defs.h
 	./compile qarf.c
 
 set_environment.o: compile set_environment.c \
@@ -3019,7 +3025,7 @@ auto_control.o set_environment.o
 	$(QMAILLIB)
 
 qnotify.o: \
-compile qnotify.c qmail.h set_environment.h
+compile qnotify.c qmail.h set_environment.h buffer_defs.h
 	./compile qnotify.c
 
 rrt: \
@@ -3029,7 +3035,7 @@ auto_prefix.o auto_control.o set_environment.o
 	auto_control.o set_environment.o $(QMAILLIB)
 
 rrt.o: \
-compile rrt.c control.h qmail.h \
+compile rrt.c control.h qmail.h buffer_defs.h \
 variables.h set_environment.h
 	./compile rrt.c
 
@@ -3038,7 +3044,7 @@ load qmail-poppass.o auto_uids.o
 	./load qmail-poppass auto_uids.o $(QMAILLIB)
 
 qmail-poppass.o: \
-compile qmail-poppass.c auto_uids.h
+compile qmail-poppass.c auto_uids.h buffer_defs.h
 	./compile qmail-poppass.c
 
 rpmattr: \
@@ -3072,7 +3078,7 @@ auto_prefix.o control.o auto_control.o variables.o
 	auto_prefix.o auto_control.o variables.o control.o \
 	$(static_option) $(QMAILLIB) $(dynamic_option)
 
-ofmipd.o: compile ofmipd.c qmail.h \
+ofmipd.o: compile ofmipd.c qmail.h buffer_defs.h \
 variables.h rwhconfig.h
 	./compile ofmipd.c
 
@@ -3100,8 +3106,7 @@ new-inject.1: new-inject.9 conf-sysconfdir
 	> new-inject.1
 
 new-inject.o: \
-compile new-inject.c qmail.h \
-rwhconfig.h set_environment.h
+compile new-inject.c qmail.h rwhconfig.h set_environment.h
 	./compile new-inject.c
 
 822date: load 822date.o
@@ -3200,7 +3205,7 @@ dot-forward.1: dot-forward.9 conf-sysconfdir
 	> dot-forward.1
 
 dot-forward.o: compile dot-forward.c control.h qmail.h \
-set_environment.h
+buffer_defs.h set_environment.h
 	./compile dot-forward.c
 
 fastforward: \
@@ -3212,7 +3217,7 @@ auto_control.o auto_prefix.o set_environment.o
 
 fastforward.o: \
 compile fastforward.c strset.h qmail.h slurpclose.h \
-set_environment.h
+buffer_defs.h set_environment.h
 	./compile fastforward.c
 
 fastforward.1: fastforward.9 conf-sysconfdir
@@ -3391,7 +3396,7 @@ variables.o rt.lib
 	getqueue.o `cat rt.lib` $(QMAILLIB)
 
 qmail-qfilter.o: \
-compile qmail-qfilter.c qmail.h qmulti.h custom_error.h
+compile qmail-qfilter.c buffer_defs.h qmail.h qmulti.h custom_error.h
 	./compile qmail-qfilter.c
 
 qfrontend.1: qfrontend.9 conf-libexec
@@ -3443,7 +3448,7 @@ qmail-daned.9 conf-qmail conf-sysconfdir
 starttls.o: compile starttls.c conf-tls hastlsa.h conf-ip \
 socket.h ip.h dns.h control.h variables.h tlsacheck.h \
 ipalloc.h tlsarralloc.h auto_control.h auto_sysconfdir.h \
-dossl.h haveip6.h varargs.h
+buffer_defs.h dossl.h haveip6.h varargs.h
 	./compile `grep -h -v "^#" conf-ip conf-tls` starttls.c
 
 tlsacheck.o: \
@@ -3594,7 +3599,7 @@ dns.lib rt.lib
 
 surblfilter.o: \
 compile surblfilter.c control.h dns.h ip.h \
-ipalloc.h variables.h qmail.h auto_control.h
+ipalloc.h variables.h buffer_defs.h qmail.h auto_control.h
 	./compile surblfilter.c
 
 surblqueue: \
@@ -3831,7 +3836,7 @@ compile filterit.c filterit.h
 
 filterit_sub.o: \
 compile filterit_sub.c cdb_match.o quote.h maildir_deliver.h \
-qmail.h set_environment.h filterit.h hassrs.h
+buffer_defs.h qmail.h set_environment.h filterit.h hassrs.h
 	./compile filterit_sub.c
 
 filterit.1: filterit.9 conf-sysconfdir conf-prefix

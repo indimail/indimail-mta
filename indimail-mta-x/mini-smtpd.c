@@ -1,5 +1,5 @@
 /*
- * $Id: mini-smtpd.c,v 1.8 2024-01-20 23:38:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -26,6 +26,7 @@
 #include "ip.h"
 #include "qmail.h"
 #include "rcpthosts.h"
+#include "buffer_defs.h"
 
 #define MAXHOPS 100
 static int      databytes = 0;
@@ -36,7 +37,7 @@ static int      flagsize = 0;
 static stralloc greeting = { 0 };
 static stralloc helohost = { 0 };
 static stralloc liphost = { 0 };
-static stralloc addr = { 0 };	/* will be 0-terminated, if addrparse returns 1 */
+static stralloc addr = { 0 }; /* will be 0-terminated, if addrparse returns 1 */
 static stralloc mailfrom = { 0 };
 static stralloc rcptto = { 0 };
 static stralloc mfparms = { 0 };
@@ -45,9 +46,9 @@ static char    *remotehost;
 static char    *remoteinfo;
 static char    *local;
 static char    *relayclient;
-static char    *fakehelo;		/* pointer into helohost, or 0 */
-static char     ssinbuf[1024];
-static char     ssoutbuf[512];
+static char    *fakehelo; /* pointer into helohost, or 0 */
+static char     ssinbuf[BUFSIZE_IN];
+static char     ssoutbuf[BUFSIZE_OUT];
 static ssize_t  safewrite(int, char *, size_t);
 static ssize_t  saferead(int, char *, size_t);
 static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
@@ -717,13 +718,16 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.8 2024-01-20 23:38:37+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.9  2024-01-23 01:21:56+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.8  2024-01-20 23:38:37+05:30  Cprogrammer
  * use env variable ALLOW_BARELF to allow bare LF from smtp clients
  *

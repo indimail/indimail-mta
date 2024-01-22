@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmqpc.c,v 1.26 2023-10-27 16:11:50+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qmqpc.c,v 1.27 2024-01-23 01:22:55+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,6 +28,7 @@
 #include "auto_control.h"
 #include "control.h"
 #include "variables.h"
+#include "buffer_defs.h"
 
 #define PORT_QMQP 628
 ssize_t         saferead(int fd, char *_buf, size_t len);
@@ -37,7 +38,7 @@ static int      lasterror = 55;
 static int      timeoutremote = 60;
 static int      timeoutconnect = 10;
 static int      qmqpfd;
-static char     buf[1024];
+static char     buf[BUFSIZE_IN];
 static char     strnum[FMT_ULONG];
 static substdio to = SUBSTDIO_FDBUF(safewrite, -1, buf, sizeof buf);
 static substdio from = SUBSTDIO_FDBUF(saferead, -1, buf, sizeof buf);
@@ -330,13 +331,16 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.26 2023-10-27 16:11:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmqpc.c,v 1.27 2024-01-23 01:22:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.27  2024-01-23 01:22:55+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.26  2023-10-27 16:11:50+05:30  Cprogrammer
  * replace hard-coded exit values with constants from qmail.h
  *

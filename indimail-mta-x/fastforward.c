@@ -1,44 +1,5 @@
 /*
- * $Log: fastforward.c,v $
- * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.12  2021-07-05 21:10:17+05:30  Cprogrammer
- * skip $HOME/.defaultqueue for root
- *
- * Revision 1.11  2021-05-13 14:43:09+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.10  2020-11-24 13:45:14+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.9  2020-04-04 11:41:41+05:30  Cprogrammer
- * use auto_sysconfdir instead of auto_qmail
- *
- * Revision 1.8  2020-04-04 11:17:10+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.7  2019-06-07 11:26:18+05:30  Cprogrammer
- * replaced getopt() with subgetopt()
- *
- * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.5  2010-06-08 21:59:13+05:30  Cprogrammer
- * use envdir_set() on queuedefault to set default queue parameters
- *
- * Revision 1.4  2008-07-15 19:51:02+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.3  2004-10-22 20:25:01+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:35:04+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-10-21 22:46:37+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: fastforward.c,v 1.14 2024-01-23 01:26:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -67,9 +28,22 @@
 #include "strset.h"
 #include "slurpclose.h"
 #include "set_environment.h"
+#include "buffer_defs.h"
 
 #define FATAL "fastforward: fatal: "
 #define WARN  "fastforward: warn: "
+
+ssize_t         qqwrite(int, char *, int);
+
+struct qmail    qq;
+char            qp[FMT_ULONG], qqbuf[1], messbuf[BUFSIZE_REMOTE];
+substdio        ssqq = SUBSTDIO_FDBUF(qqwrite, -1, qqbuf, sizeof qqbuf);
+substdio        ssmess = SUBSTDIO_FDBUF(read, 0, messbuf, sizeof messbuf);
+int             flagdeliver = 1, flagpassthrough = 0, fdcdb, flagdefault = 0;
+char           *dtline, *fncdb;
+stralloc        sender, programs, forward, todo, mailinglist, key, data, recipient;
+strset          done;
+uint32          dlen;
 
 no_return void
 usage()
@@ -104,10 +78,6 @@ printsafe(char *s)
 	}
 }
 
-struct qmail    qq;
-char            qp[FMT_ULONG];
-char            qqbuf[1];
-
 ssize_t
 qqwrite(int fd, char *buf, int len)
 {
@@ -115,26 +85,11 @@ qqwrite(int fd, char *buf, int len)
 	return len;
 }
 
-substdio        ssqq = SUBSTDIO_FDBUF(qqwrite, -1, qqbuf, sizeof qqbuf);
-char            messbuf[4096];
-substdio        ssmess = SUBSTDIO_FDBUF(read, 0, messbuf, sizeof messbuf);
-int             flagdeliver = 1;
-int             flagpassthrough = 0;
-char           *dtline;
-stralloc        sender = { 0 };
-stralloc        programs = { 0 };
-stralloc        forward = { 0 };
-strset          done;
-stralloc        todo = { 0 };
-stralloc        mailinglist = { 0 };
-
 void
 dofile(char *fn)
 {
-	int             fd;
+	int             fd, i, j;
 	struct stat     st;
-	int             i;
-	int             j;
 
 	if (!stralloc_copys(&mailinglist, ""))
 		nomem();
@@ -146,31 +101,22 @@ dofile(char *fn)
 		strerr_die3x(111, FATAL, fn, " is not world-readable");
 	if (slurpclose(fd, &mailinglist, 1024) == -1)
 		strerr_die4sys(111, FATAL, "unable to read ", fn, ": ");
-	i = 0;
-	for (j = 0; j < mailinglist.len; ++j) {
+	for (i = j = 0; j < mailinglist.len; ++j) {
 		if (!mailinglist.s[j]) {
 			if ((mailinglist.s[i] == '.') || (mailinglist.s[i] == '/')) {
-				if (!stralloc_cats(&todo, mailinglist.s + i))
-					nomem();
-				if (!stralloc_0(&todo))
+				if (!stralloc_cats(&todo, mailinglist.s + i) ||
+						!stralloc_0(&todo))
 					nomem();
 			} else
 			if ((mailinglist.s[i] == '&') && (j - i < 900)) {
-				if (!stralloc_cats(&todo, mailinglist.s + i))
-					nomem();
-				if (!stralloc_0(&todo))
+				if (!stralloc_cats(&todo, mailinglist.s + i) ||
+						!stralloc_0(&todo))
 					nomem();
 			}
 			i = j + 1;
 		}
-	} /*- for (j = 0; j < mailinglist.len; ++j) */
+	} /*- for (i = j = 0; j < mailinglist.len; ++j) */
 }
-
-char           *fncdb;
-int             fdcdb;
-stralloc        key = { 0 };
-uint32          dlen;
-stralloc        data = { 0 };
 
 no_return void
 cdbreaderror()
@@ -181,12 +127,10 @@ cdbreaderror()
 int
 findtarget(int flagwild, char *prepend, char *addr)
 {
-	int             r;
-	int             at;
+	int             r, at;
 
-	if (!stralloc_copys(&key, prepend))
-		nomem();
-	if (!stralloc_cats(&key, addr))
+	if (!stralloc_copys(&key, prepend) ||
+			!stralloc_cats(&key, addr))
 		nomem();
 	case_lowerb(key.s, key.len);
 	if ((r = cdb_seek(fdcdb, key.s, key.len, &dlen)) == -1)
@@ -198,18 +142,16 @@ findtarget(int flagwild, char *prepend, char *addr)
 	at = str_rchr(addr, '@');
 	if (!addr[at])
 		return 0;
-	if (!stralloc_copys(&key, prepend))
-		nomem();
-	if (!stralloc_cats(&key, addr + at))
+	if (!stralloc_copys(&key, prepend) ||
+			!stralloc_cats(&key, addr + at))
 		nomem();
 	case_lowerb(key.s, key.len);
 	if ((r = cdb_seek(fdcdb, key.s, key.len, &dlen)) == -1)
 		cdbreaderror();
 	if (r)
 		return 1;
-	if (!stralloc_copys(&key, prepend))
-		nomem();
-	if (!stralloc_catb(&key, addr, at + 1))
+	if (!stralloc_copys(&key, prepend) ||
+			!stralloc_catb(&key, addr, at + 1))
 		nomem();
 	case_lowerb(key.s, key.len);
 	if ((r = cdb_seek(fdcdb, key.s, key.len, &dlen)) == -1)
@@ -236,8 +178,7 @@ void
 doprogram(char *arg)
 {
 	char           *args[5];
-	int             child;
-	int             wstat;
+	int             child, wstat;
 
 	if (!flagdeliver) {
 		print("run ");
@@ -293,8 +234,7 @@ doprogram(char *arg)
 void
 dodata()
 {
-	int             i;
-	int             j;
+	int             i, j;
 
 	i = 0;
 	for (j = 0; j < data.len; ++j) {
@@ -303,15 +243,13 @@ dodata()
 				doprogram(data.s + i);
 			else
 			if ((data.s[i] == '.') || (data.s[i] == '/')) {
-				if (!stralloc_cats(&todo, data.s + i))
-					nomem();
-				if (!stralloc_0(&todo))
+				if (!stralloc_cats(&todo, data.s + i) ||
+						!stralloc_0(&todo))
 					nomem();
 			} else
 			if ((data.s[i] == '&') && (j - i < 900)) {
-				if (!stralloc_cats(&todo, data.s + i))
-					nomem();
-				if (!stralloc_0(&todo))
+				if (!stralloc_cats(&todo, data.s + i) ||
+						!stralloc_0(&todo))
 					nomem();
 			}
 			i = j + 1;
@@ -327,9 +265,8 @@ dorecip(char *addr)
 		dodata();
 		return;
 	}
-	if (!stralloc_cats(&forward, addr))
-		nomem();
-	if (!stralloc_0(&forward))
+	if (!stralloc_cats(&forward, addr) ||
+			!stralloc_0(&forward))
 		nomem();
 }
 
@@ -351,9 +288,6 @@ doorigrecip(char *addr)
 	dodata();
 }
 
-stralloc        recipient = { 0 };
-int             flagdefault = 0;
-
 int
 main(int argc, char **argv)
 {
@@ -365,11 +299,9 @@ main(int argc, char **argv)
 		dtline = "";
 	if (!(x = env_get("SENDER")))
 		x = "original envelope sender";
-	if (!stralloc_copys(&sender, x))
-		nomem();
-	if (!stralloc_copys(&forward, ""))
-		nomem();
-	if (!strset_init(&done))
+	if (!stralloc_copys(&sender, x) ||
+			!stralloc_copys(&forward, "") ||
+			!strset_init(&done))
 		nomem();
 	while ((opt = getopt(argc, argv, "nNpPdD")) != opteof) {
 		switch (opt)
@@ -407,21 +339,18 @@ main(int argc, char **argv)
 			x = env_get("EXT");
 		if (!x)
 			strerr_die2x(100, FATAL, "$DEFAULT or $EXT must be set");
-		if (!stralloc_copys(&recipient, x))
-			nomem();
-		if (!stralloc_cats(&recipient, "@"))
+		if (!stralloc_copys(&recipient, x) ||
+				!stralloc_cats(&recipient, "@"))
 			nomem();
 		if (!(x = env_get("HOST")))
 			strerr_die2x(100, FATAL, "$HOST must be set");
-		if (!stralloc_cats(&recipient, x))
-			nomem();
-		if (!stralloc_0(&recipient))
+		if (!stralloc_cats(&recipient, x) ||
+				!stralloc_0(&recipient))
 			nomem();
 		x = recipient.s;
-	} else {
-		if (!(x = env_get("RECIPIENT")))
-			strerr_die2x(100, FATAL, "$RECIPIENT must be set");
-	}
+	} else
+	if (!(x = env_get("RECIPIENT")))
+		strerr_die2x(100, FATAL, "$RECIPIENT must be set");
 	if (!strset_add(&done, x))
 		nomem();
 	doorigrecip(x);
@@ -498,7 +427,53 @@ main(int argc, char **argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.14 2024-01-23 01:26:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: fastforward.c,v $
+ * Revision 1.14  2024-01-23 01:26:53+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.12  2021-07-05 21:10:17+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
+ * Revision 1.11  2021-05-13 14:43:09+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.10  2020-11-24 13:45:14+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.9  2020-04-04 11:41:41+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
+ * Revision 1.8  2020-04-04 11:17:10+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.7  2019-06-07 11:26:18+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
+ * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.5  2010-06-08 21:59:13+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
+ * Revision 1.4  2008-07-15 19:51:02+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.3  2004-10-22 20:25:01+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:35:04+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-10-21 22:46:37+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.40 2023-10-25 13:25:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.41 2024-01-23 01:20:28+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -58,6 +58,7 @@
 #include "control.h"
 #include "auto_sysconfdir.h"
 #include "auto_prefix.h"
+#include "buffer_defs.h"
 
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -70,7 +71,7 @@ unsigned long   opt_maxmsgs = 1;
 time_t          when, opt_timelimit = 86400 * 7; /*- RFC 3834 */
 static char    *opt_subject_prefix = "Autoreply: Re: ";
 static char    *argv0, *dtline, *recipient, *from_addr = 0;
-static char     ssinbuf[512], ssoutbuf[512];
+static char     ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT];
 static char     strnum[FMT_ULONG];
 substdio        ssin, ssout;
 static pid_t    inject_pid;
@@ -1247,7 +1248,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.40 2023-10-25 13:25:55+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.41 2024-01-23 01:20:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmktempfileh;
@@ -1256,6 +1257,9 @@ getversion_qmail_autoresponder_c()
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.41  2024-01-23 01:20:28+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.40  2023-10-25 13:25:55+05:30  Cprogrammer
  * rewind descriptor 0 regardless of MAKE_SEEKABLE setting
  *

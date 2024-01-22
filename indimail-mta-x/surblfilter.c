@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.18 2023-09-07 20:50:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: surblfilter.c,v 1.19 2024-01-23 01:23:51+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -32,6 +32,7 @@
 #include <base64.h>
 #include <noreturn.h>
 
+#include "buffer_defs.h"
 #include "auto_control.h"
 #include "control.h"
 #include "dns.h"
@@ -64,7 +65,7 @@ int             l3ok = 0;
 struct constmap mapl3;
 
 struct substdio ssin, ssout, sserr, ssdbg;
-static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512], ssdbgbuf[512];
+static char     ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT], sserrbuf[BUFSIZE_OUT], ssdbgbuf[BUFSIZE_OUT];
 
 static struct
 {
@@ -970,13 +971,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.18 2023-09-07 20:50:26+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: surblfilter.c,v 1.19 2024-01-23 01:23:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.19  2024-01-23 01:23:51+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.18  2023-09-07 20:50:26+05:30  Cprogrammer
  * display the SURB blocked uri in message
  *

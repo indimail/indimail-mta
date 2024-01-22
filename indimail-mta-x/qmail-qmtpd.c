@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmtpd.c,v 1.18 2023-10-07 01:25:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qmtpd.c,v 1.19 2024-01-23 01:23:04+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -10,6 +10,7 @@
 #include <env.h>
 #include <sig.h>
 #include <scan.h>
+#include "buffer_defs.h"
 #include "qmail.h"
 #include "rcpthosts.h"
 #include "control.h"
@@ -51,7 +52,7 @@ saferead(int fd, char *buf, size_t len)
 	return r;
 }
 
-char            ssinbuf[512];
+char            ssinbuf[BUFSIZE_OUT];
 substdio        ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
 
 unsigned long
@@ -307,13 +308,16 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	static char    *x = "$Id: qmail-qmtpd.c,v 1.18 2023-10-07 01:25:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qmtpd.c,v 1.19 2024-01-23 01:23:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.19  2024-01-23 01:23:04+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.18  2023-10-07 01:25:42+05:30  Cprogrammer
  * use env variable HIDE_HOST to hide IP, host in received headers
  *

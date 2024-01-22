@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.319 2024-01-20 23:34:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.320 2024-01-23 01:23:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -54,6 +54,7 @@
 #include "mail_acl.h"
 #include "do_match.h"
 #include "valid_hname.h"
+#include "buffer_defs.h"
 
 #ifdef TLS
 #include <tls.h>
@@ -156,7 +157,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.319 $";
+static char    *revision = "$Revision: 1.320 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -217,13 +218,13 @@ static char    *remoteip4;
 #endif
 static char    **childargs;
 
-static char     ssinbuf[1024];
+static char     ssinbuf[BUFSIZE_IN];
 static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
-static char     ssoutbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
-static char     sserrbuf[512];
+static char     sserrbuf[BUFSIZE_OUT];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof (sserrbuf));
-static char     upbuf[128];
+static char     upbuf[BUFSIZE_SMALL];
 static substdio ssup;
 
 static my_ulong databytes = 0;
@@ -2817,7 +2818,7 @@ smtp_init(int force_flag)
 	chkgrcptok = chkgrcptokp = spfok = sppok = nodnschecksok = 0;
 	briok = brhok = badhelook = acclistok = bodyok = 0;
 	tarpitcount = tarpitdelay = maxrcptcount = sigsok = greetdelay = qregex = 0;
-	batvFn = bmfFn = bmfFnp = bhrcpFn = bhrcpFnp = bhsndFn = bhsndFnp = rcpFn = NULL;
+	bmfFn = bmfFnp = bhrcpFn = bhrcpFnp = bhsndFn = bhsndFnp = rcpFn = NULL;
 	rcpFnp = accFn = nodnsFn = badipFn = badhostFn = badheloFn = NULL;
 	grcptFn = grcptFnp = spfFn = spfFnp = sigsFn = bodyFn = NULL;
 	tarpitcountok = tarpitdelayok = maxrcptcountok = greetdelayok = qregexok = 0;
@@ -7359,6 +7360,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.320  2024-01-23 01:23:31+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.319  2024-01-20 23:34:14+05:30  Cprogrammer
  * fixed logerr cloberring strnum
  *
@@ -7775,7 +7779,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.319 2024-01-20 23:34:14+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.320 2024-01-23 01:23:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
