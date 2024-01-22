@@ -72,6 +72,7 @@
 #include "control.h"
 #include "qmail.h"
 #include "set_environment.h"
+#include "buffer_defs.h"
 
 #define FATAL "dot-forward: fatal: "
 #define WARN  "dot-forward: warn: "
@@ -108,9 +109,9 @@ struct qmail    qq;
 unsigned long   qp;
 char           *qqx;
 char            strnum[FMT_ULONG];
-char            qqbuf[256];
+char            qqbuf[BUFSIZE_OUT];
 substdio        ssqq = SUBSTDIO_FDBUF(mywrite, -1, qqbuf, sizeof qqbuf);
-char            inbuf[256];
+char            inbuf[BUFSIZE_IN];
 
 no_return void
 die_nomem()

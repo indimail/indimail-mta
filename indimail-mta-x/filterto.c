@@ -63,10 +63,7 @@ void        (*sig_ignorehandler)() = SIG_IGN;
 struct qmail    qqt;
 
 ssize_t
-mywrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+mywrite(int fd, char *buf, int len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;

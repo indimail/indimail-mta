@@ -62,7 +62,7 @@ static char    *tcpremoteip;
 static char    *received;
 static char    *pidfn, *messfn, *todofn, *intdfn;
 static char    *origin; /* "X-Originating-IP: 10.0.0.1\n" */
-static char     inbuf[2048], outbuf[256], logbuf[2048];
+static char     inbuf[BUFSIZE_IN], outbuf[BUFSIZE_OUT], logbuf[BUFSIZE_IN];
 static int      messfd, intdfd, match;
 static int      flagmademess = 0;
 static int      flagmadeintd = 0;

@@ -29,6 +29,7 @@
 #include "auto_prefix.h"
 #include "variables.h"
 #include "envrules.h"
+#include "buffer_defs.h"
 
 static int      mkTempFile(int);
 static int      run_mailfilter(char *, char *, char *, char *, char **);
@@ -56,7 +57,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 	char           *fifo_name;
 	char            strnum[FMT_ULONG];
 	struct stat     statbuf;
-	static char     spambuf[256], inbuf[1024];
+	static char     spambuf[BUFSIZE_OUT], inbuf[BUFSIZE_IN];
 	static substdio spamin;
 	static substdio spamout;
 

@@ -67,6 +67,7 @@
 #include "strset.h"
 #include "slurpclose.h"
 #include "set_environment.h"
+#include "buffer_defs.h"
 
 #define FATAL "fastforward: fatal: "
 #define WARN  "fastforward: warn: "
@@ -116,7 +117,7 @@ qqwrite(int fd, char *buf, int len)
 }
 
 substdio        ssqq = SUBSTDIO_FDBUF(qqwrite, -1, qqbuf, sizeof qqbuf);
-char            messbuf[4096];
+char            messbuf[BUFSIZE_REMOTE];
 substdio        ssmess = SUBSTDIO_FDBUF(read, 0, messbuf, sizeof messbuf);
 int             flagdeliver = 1;
 int             flagpassthrough = 0;

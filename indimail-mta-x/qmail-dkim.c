@@ -37,6 +37,7 @@
 #include "variables.h"
 #include "qmulti.h"
 #include "pidopen.h"
+#include "buffer_defs.h"
 #include "custom_error.h"
 #include <openssl/evp.h>
 
@@ -49,8 +50,8 @@
 
 extern char    *dns_text(char *);
 
-char            inbuf[4096];
-char            outbuf[256];
+char            inbuf[BUFSIZE_IN];
+char            outbuf[BUFSIZE_OUT];
 struct substdio ssin;
 struct substdio ssout;
 

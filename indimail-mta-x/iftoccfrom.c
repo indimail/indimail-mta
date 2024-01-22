@@ -36,8 +36,7 @@ char           *recipient;
 char          **recips;
 
 void
-check(addr)
-	char           *addr;
+check(char *addr)
 {
 	int             i;
 
@@ -52,9 +51,7 @@ check(addr)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             i, j, match;
 	stralloc        addrlist = { 0 }, line = { 0 };

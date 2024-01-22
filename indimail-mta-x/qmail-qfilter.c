@@ -36,6 +36,7 @@
 #include "qmail.h"
 #include "qmulti.h"
 #include "custom_error.h"
+#include "buffer_defs.h"
 
 #ifndef TMPDIR
 #define TMPDIR "/tmp"
@@ -188,8 +189,8 @@ copy_fd(int fdin, int fdout, size_t *var)
 	 * Copy the message into the temporary file
 	 */
 	for (bytes = 0;;) {
-		char            buf[BUFSIZE];
-		ssize_t         rd = read(fdin, buf, BUFSIZE);
+		char            buf[BUFSIZE_IN];
+		ssize_t         rd = read(fdin, buf, BUFSIZE_IN);
 
 		if (rd == -1)
 			exit(QQ_READ_ERR);
