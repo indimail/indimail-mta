@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: fastforward.c,v 1.14 2024-01-23 01:26:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -427,13 +427,16 @@ main(int argc, char **argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.13 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: fastforward.c,v 1.14 2024-01-23 01:26:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.14  2024-01-23 01:26:53+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
  * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
