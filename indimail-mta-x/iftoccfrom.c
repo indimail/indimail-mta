@@ -21,6 +21,7 @@
 #include <case.h>
 #include <env.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 
 #define FATAL "iftoccfrom: fatal: "
 
@@ -57,7 +58,7 @@ main(argc, argv)
 {
 	int             i, j, match;
 	stralloc        addrlist = { 0 }, line = { 0 };
-	char            ssinbuf[1024];
+	char            ssinbuf[BUFSIZE_IN];
 	substdio        ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 	mess822_header  h = MESS822_HEADER;
 	mess822_action  a[] = {

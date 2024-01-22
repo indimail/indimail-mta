@@ -34,6 +34,7 @@
 #endif
 #include <sig.h>
 #include <fmt.h>
+#include <buffer_defs.h>
 #include "qmail.h"
 #include "set_environment.h"
 #include "filterit.h"
@@ -401,7 +402,7 @@ filterit_sub1(int argc, char **argv)
 						"Numerical Logical Expression", "RegExp", 0
 					};
 	char           *act[] = {"exit", "forward", "maildir", 0};
-	char            ssinbuf[1024], ssoutbuf[512];
+	char            ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT];
 	int             opt, i, match, negate = 0, keep_continue = 0, 
 					c_opt = 0, a_opt = 0, default_a_opt = 0, in_header;
 	substdio        ssin, ssout;

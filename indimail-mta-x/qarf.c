@@ -56,6 +56,7 @@
 #include <error.h>
 #include <sgetopt.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 
 #define READ_ERR  1
 #define WRITE_ERR 2
@@ -65,8 +66,8 @@
 #define LSEEK_ERR 6
 #define USAGE_ERR 7
 
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
+static char     sserrbuf[BUFSIZE_OUT];
 static char     strnum[FMT_ULONG];
 static char    *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);

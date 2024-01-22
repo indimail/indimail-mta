@@ -58,6 +58,7 @@
 #include "control.h"
 #include "auto_sysconfdir.h"
 #include "auto_prefix.h"
+#include "buffer_defs.h"
 
 #define strcasecmp(x,y)    case_diffs((x), (y))
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
@@ -70,7 +71,7 @@ unsigned long   opt_maxmsgs = 1;
 time_t          when, opt_timelimit = 86400 * 7; /*- RFC 3834 */
 static char    *opt_subject_prefix = "Autoreply: Re: ";
 static char    *argv0, *dtline, *recipient, *from_addr = 0;
-static char     ssinbuf[512], ssoutbuf[512];
+static char     ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT];
 static char     strnum[FMT_ULONG];
 substdio        ssin, ssout;
 static pid_t    inject_pid;

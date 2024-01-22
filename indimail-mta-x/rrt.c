@@ -55,6 +55,7 @@
 #include <strerr.h>
 #include <pathexec.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 #include "variables.h"
 #include "control.h"
 #include "qmail.h"
@@ -74,7 +75,7 @@
 #define USAGE_ERR 7
 #define PARSE_ERR 8
 
-static char     ssoutbuf[512], sserrbuf[512], strnum[FMT_ULONG];
+static char     ssoutbuf[BUFSIZE_OUT], sserrbuf[BUFSIZE_OUT], strnum[FMT_ULONG];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 static char    *usage = "usage: rrt [-n][-b]\n";

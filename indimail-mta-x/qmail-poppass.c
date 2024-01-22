@@ -56,11 +56,12 @@
 #include <error.h>
 #include <makeargs.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 #include "auto_uids.h"
 
-static char     ssinbuf[1024];
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssinbuf[BUFSIZE_OUT];
+static char     ssoutbuf[BUFSIZE_IN];
+static char     sserrbuf[BUFSIZE_IN];
 static char     upbuf[128];
 static char   **authargs, **passargs;
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);

@@ -18,10 +18,11 @@
 #include "error.h"
 #include "getln.h"
 #include "mess822.h"
+#include "buffer_defs.h"
 
 stralloc        line = { 0 };
 int             match;
-static char     ssinbuf[1024];
+static char     ssinbuf[BUFSIZE_IN];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 
 int

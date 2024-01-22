@@ -12,6 +12,7 @@
 #define _STARTTLS_H
 #include "ipalloc.h"
 #include "tlsarralloc.h"
+#include "buffer_defs.h"
 
 #ifndef	lint
 static char     sccsidstarttlsh[] = "$Id: starttls.h,v 1.2 2023-01-03 17:43:29+05:30 Cprogrammer Exp mbhangui $";

@@ -20,14 +20,15 @@
 #include "fd.h"
 #include "seek.h"
 #include "pathexec.h"
+#include "buffer_defs.h"
 
 #define FATAL "822bodyfilter: fatal: "
 
 stralloc        line = { 0 };
 int             match;
-static char     ssinbuf[1024];
+static char     ssinbuf[BUFSIZE_IN];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static char     ssoutbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 
 int

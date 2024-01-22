@@ -41,6 +41,7 @@
 #include <error.h>
 #include <strerr.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 
 #define READ_ERR  1
 #define WRITE_ERR 2
@@ -48,9 +49,9 @@
 #define USAGE_ERR 4
 #define AES_BLOCK_SIZE 512
 
-static char     ssinbuf[1024];
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssinbuf[BUFSIZE_IN];
+static char     ssoutbuf[BUFSIZE_OUT];
+static char     sserrbuf[BUFSIZE_OUT];
 static char    *usage = "usage: qaes -k key [ -i -d -e -s salt ]\n";
 static char     strnum[FMT_ULONG];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);

@@ -249,12 +249,13 @@ safewrite(int fd, char *buf, int len)
 	return r;
 }
 
-char            inbuf[1500];
-char            smtptobuf[1500];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+#include "buffer_defs.h"
+static char     inbuf[BUFSIZE_MESS];
+static char     smtpfrombuf[BUFSIZE_SMALL];
+static char     smtptobuf[BUFSIZE_IN];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+static substdio smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
 substdio        smtpto = SUBSTDIO_FDBUF(safewrite, -1, smtptobuf, sizeof smtptobuf);
-char            smtpfrombuf[128];
-substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
 
 void
 outsmtptext()
@@ -920,7 +921,7 @@ get_dane_records(char *host)
 #include <unistd.h>
 #include <substdio.h>
 #include <subfd.h>
-char            smtptobuf[1500];
+char            smtptobuf[1024];
 substdio        smtpto = SUBSTDIO_FDBUF(write, 2, smtptobuf, sizeof smtptobuf);
 unsigned long smtpcode() { return(550);}
 #endif /*- #if defined(HASTLSA) && defined(TLS) */

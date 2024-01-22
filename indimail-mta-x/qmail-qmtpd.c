@@ -10,6 +10,7 @@
 #include <env.h>
 #include <sig.h>
 #include <scan.h>
+#include <buffer_defs.h>
 #include "qmail.h"
 #include "rcpthosts.h"
 #include "control.h"
@@ -51,7 +52,7 @@ saferead(int fd, char *buf, size_t len)
 	return r;
 }
 
-char            ssinbuf[512];
+char            ssinbuf[BUFSIZE_OUT];
 substdio        ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
 
 unsigned long

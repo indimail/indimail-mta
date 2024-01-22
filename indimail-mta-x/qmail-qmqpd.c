@@ -40,14 +40,15 @@
 #include <fmt.h>
 #include <env.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 #include "qmail.h"
 #include "received.h"
 
 ssize_t         saferead(int fd, char *_buf, size_t len);
 ssize_t         safewrite(int fd, char *_buf, size_t len);
 
-static char     ssinbuf[512];
-static char     ssoutbuf[256];
+static char     ssinbuf[BUFSIZE_IN];
+static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static unsigned long   bytesleft = 100;

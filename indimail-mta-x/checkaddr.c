@@ -21,6 +21,7 @@
 #include <case.h>
 #include <env.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 
 #define FATAL "checkaddr: fatal: "
 
@@ -52,7 +53,7 @@ main(int argc, char **argv)
 {
 	stralloc        addrlist = { 0 };
 	int             match;
-	char            ssinbuf[1024];
+	char            ssinbuf[BUFSIZE_IN];
 	substdio        ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 
 	recipient = env_get("RECIPIENT");

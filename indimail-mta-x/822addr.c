@@ -22,11 +22,12 @@
 #include <case.h>
 #include <stralloc.h>
 #include <noreturn.h>
+#include "buffer_defs.h"
 
 #define FATAL "822addr: fatal: "
 
-static char     ssinbuf[1024];
-static char     ssoutbuf[512];
+static char     ssinbuf[BUFSIZE_IN];
+static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static int      flag;

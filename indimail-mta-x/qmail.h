@@ -5,6 +5,7 @@
 #define QMAIL_H
 
 #include "substdio.h"
+#include "buffer_defs.h"
 
 #ifndef CUSTOM_ERR_FD
 #define CUSTOM_ERR_FD 2
@@ -21,7 +22,7 @@ struct qmail
 	int             fde; /*- fd envelope */
 	int             fdc; /*- fd custom */
 	substdio        ss;
-	char            buf[8192];
+	char            buf[BUFSIZE_MESS];
 };
 
 int             qmail_open(struct qmail *);

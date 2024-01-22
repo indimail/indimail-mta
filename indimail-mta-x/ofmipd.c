@@ -102,6 +102,7 @@
 #include <commands.h>
 #include <strerr.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 #include "rwhconfig.h"
 #include "qmail.h"
 #include "control.h"
@@ -141,7 +142,7 @@ static stralloc resp = { 0 };
 static stralloc slop = { 0 };
 static stralloc line = { 0 };
 static unsigned int    databytes = 0;
-static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512];
+static char     ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT], sserrbuf[BUFSIZE_OUT];
 static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(safewrite, 2, sserrbuf, sizeof sserrbuf);

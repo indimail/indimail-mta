@@ -56,6 +56,7 @@
 #include <pathexec.h>
 #include <strerr.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 #include "qmail.h"
 #include "sgetopt.h"
 #include "set_environment.h"
@@ -102,8 +103,8 @@
  */
 
 static char     strnum[FMT_ULONG];
-static char     ssoutbuf[512];
-static char     sserrbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
+static char     sserrbuf[BUFSIZE_OUT];
 static char    *usage = "usage: qnotify [-n][-h]\n";
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));

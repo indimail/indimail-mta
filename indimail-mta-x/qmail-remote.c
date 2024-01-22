@@ -843,12 +843,13 @@ safewrite(int fd, char *buf, int len)
 	return r;
 }
 
-char            inbuf[1500];
-char            smtptobuf[1500];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+#include "buffer_defs.h"
+static char     inbuf[BUFSIZE_REMOTE];
+static char     smtpfrombuf[BUFSIZE_SMALL];
+static char     smtptobuf[BUFSIZE_IN];
+static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+static substdio smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
 substdio        smtpto = SUBSTDIO_FDBUF(safewrite, -1, smtptobuf, sizeof smtptobuf);
-char            smtpfrombuf[128];
-substdio        smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
 
 void
 get1(char *ch)
@@ -1051,8 +1052,8 @@ va_dcl
 void
 blast()
 {
-	int             r, i, j, eom;
-	char            in[4096], out[4096 * 2 + 1];
+	int             r, i, o, eom;
+	char            out[BUFSIZE_REMOTE * 2 + 1];
 
 	for (r = 0; r < qqeh.len; r++) {
 		if (qqeh.s[r] == '\n' && substdio_put(&smtpto, "\r", 1) == -1)
@@ -1061,28 +1062,28 @@ blast()
 			temp_write();
 	}
 	for (eom = 1;;) { /* Bruce Guenter's fastremote patch */
-		if (!(r = substdio_get(&ssin, in, sizeof(in))))
+		if (!(r = substdio_get(&ssin, inbuf, sizeof(inbuf))))
 			break;
 		if (r == -1)
 			temp_read();
-		for (i = j = 0; i < r; ) {
-			if (eom && in[i] == '.') {
-				out[j++] = '.';
-				out[j++] = in[i++];
+		for (i = o = 0; i < r; ) {
+			if (eom && inbuf[i] == '.') {
+				out[o++] = '.';
+				out[o++] = inbuf[i++];
 			}
 			eom = 0;
 			while (i < r) {
-				if (in[i] == '\n') {
+				if (inbuf[i] == '\n') { /* eom */
 					i++;
 					eom = 1;
-					out[j++] = '\r';
-					out[j++] = '\n';
+					out[o++] = '\r';
+					out[o++] = '\n';
 					break;
 				}
-				out[j++] = in[i++];
+				out[o++] = inbuf[i++];
 			} /*- while (i < r) */
-		} /*- for (i = j = 0; i < r; ) */
-		if (substdio_put(&smtpto, out, j) == -1)
+		} /*- for (i = o = 0; i < r; ) */
+		if (substdio_put(&smtpto, out, o) == -1)
 			temp_write();
 	}
 	if (!eom)

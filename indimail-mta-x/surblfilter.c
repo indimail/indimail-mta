@@ -31,6 +31,7 @@
 #include <mess822.h>
 #include <base64.h>
 #include <noreturn.h>
+#include <buffer_defs.h>
 
 #include "auto_control.h"
 #include "control.h"
@@ -64,7 +65,7 @@ int             l3ok = 0;
 struct constmap mapl3;
 
 struct substdio ssin, ssout, sserr, ssdbg;
-static char     ssinbuf[1024], ssoutbuf[512], sserrbuf[512], ssdbgbuf[512];
+static char     ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT], sserrbuf[BUFSIZE_OUT], ssdbgbuf[BUFSIZE_OUT];
 
 static struct
 {

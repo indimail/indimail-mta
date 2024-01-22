@@ -22,16 +22,17 @@
 #include "mess822.h"
 #include "fd.h"
 #include "pathexec.h"
+#include "buffer_defs.h"
 
 #define FATAL "822headerfilter: fatal: "
 
 stralloc        line = { 0 };
 int             match;
 
-char            pipbuf[1024];
-static char     ssinbuf[1024];
+char            pipbuf[BUFSIZE_IN];
+static char     ssinbuf[BUFSIZE_IN];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static char     ssoutbuf[512];
+static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sspip;
 
