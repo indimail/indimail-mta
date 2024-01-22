@@ -34,7 +34,7 @@
 #endif
 #include <sig.h>
 #include <fmt.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 #include "qmail.h"
 #include "set_environment.h"
 #include "filterit.h"

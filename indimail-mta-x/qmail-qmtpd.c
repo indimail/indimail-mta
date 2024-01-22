@@ -10,7 +10,7 @@
 #include <env.h>
 #include <sig.h>
 #include <scan.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 #include "qmail.h"
 #include "rcpthosts.h"
 #include "control.h"

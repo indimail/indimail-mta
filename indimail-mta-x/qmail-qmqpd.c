@@ -40,7 +40,7 @@
 #include <fmt.h>
 #include <env.h>
 #include <noreturn.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 #include "qmail.h"
 #include "received.h"
 

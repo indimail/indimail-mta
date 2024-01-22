@@ -56,7 +56,7 @@
 #include <error.h>
 #include <makeargs.h>
 #include <noreturn.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 #include "auto_uids.h"
 
 static char     ssinbuf[BUFSIZE_OUT];

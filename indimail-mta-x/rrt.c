@@ -55,7 +55,7 @@
 #include <strerr.h>
 #include <pathexec.h>
 #include <noreturn.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 #include "variables.h"
 #include "control.h"
 #include "qmail.h"

@@ -31,8 +31,8 @@
 #include <mess822.h>
 #include <base64.h>
 #include <noreturn.h>
-#include <buffer_defs.h>
 
+#include "buffer_defs.h"
 #include "auto_control.h"
 #include "control.h"
 #include "dns.h"

@@ -56,7 +56,7 @@
 #include <error.h>
 #include <sgetopt.h>
 #include <noreturn.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 
 #define READ_ERR  1
 #define WRITE_ERR 2

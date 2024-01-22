@@ -23,7 +23,7 @@
 #include <case.h>
 #include <env.h>
 #include <noreturn.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 
 #define FATAL "ifaddr: fatal: "
 

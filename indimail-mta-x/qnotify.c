@@ -56,7 +56,7 @@
 #include <pathexec.h>
 #include <strerr.h>
 #include <noreturn.h>
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 #include "qmail.h"
 #include "sgetopt.h"
 #include "set_environment.h"

@@ -54,7 +54,7 @@
 #include "mail_acl.h"
 #include "do_match.h"
 #include "valid_hname.h"
-#include <buffer_defs.h>
+#include "buffer_defs.h"
 
 #ifdef TLS
 #include <tls.h>
