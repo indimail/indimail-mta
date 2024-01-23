@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.398 2024-01-09 12:37:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.399 2024-01-23 22:59:33+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -347,7 +347,7 @@ echo %{__cc} -g %{optflags} -Wall -O2 -Wimplicit -fPIC -fno-strict-aliasing -Wun
   LDFLAGS="%{build_ldflags} $LDFLAGS"
 %endif
 # no static linking for RHEL7 and opensuse, sles versions
-%if 0%{?rhel_version} != 700 && %{undefined sles_version} && %{undefined suse_version} && %{undefined mgaversion}
+%if 0%{?rhel_version} == 700 || %{defined sles_version} || %{defined suse_version} || %{defined mgaversion}
   %{__sed} -i -e 's{^static_option{#static_option{' \
     -e 's{^dynamic_option{#dynamic_option{' Makefile.LINUX
 %endif

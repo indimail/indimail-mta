@@ -1911,7 +1911,7 @@ mysql_config conf-sql
 	tlsarralloc.o load_mysql.o auto_sysconfdir.o auto_prefix.o \
 	read_assign.o auto_libexec.o parse_env.o \
 	$(static_option) $(QMAILLIB) -L../libsrs2-x/libsrs2/.libs \
-	$(static_option) `cat srs.lib` \
+	`cat srs.lib` \
 	$(dynamic_option) `cat socket.lib dns.lib gsasl.lib tls.lib` -ldl
 
 qmail-smtpd.o: \
