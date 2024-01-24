@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.171 2024-01-23 01:23:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.172 2024-01-24 00:54:08+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -1061,7 +1061,16 @@ blast()
 		if (substdio_put(&smtpto, qqeh.s + r, 1) == -1)
 			temp_write();
 	}
-	for (eom = 1;;) { /* Bruce Guenter's fastremote patch */
+	for (eom = 1;;) { /* Bruce Guenter's fastremote patch with modifications */
+		/*
+		 * use the same buffer used for ssin substdio, as below
+		 *
+		 * static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+		 *
+		 * This prevents buffer to buffer copy.
+		 * CAUTION: substdio_get third argument cannot
+		 * be > sizeof(inbuf)
+		 */
 		if (!(r = substdio_get(&ssin, inbuf, sizeof(inbuf))))
 			break;
 		if (r == -1)
@@ -3729,13 +3738,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.171 2024-01-23 01:23:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-remote.c,v 1.172 2024-01-24 00:54:08+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.172  2024-01-24 00:54:08+05:30  Cprogrammer
+ * added comment on avoiding buffer to buffer copy
+ *
  * Revision 1.171  2024-01-23 01:23:16+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
