@@ -146,25 +146,18 @@ fghack: fghack.o load
 fghack.o: compile fghack.c
 	./compile fghack.c
 	
-multilog: load multilog.o match.o deepsleep.o \
-iopause.o
+multilog: load multilog.o match.o deepsleep.o
 	./load multilog match.o deepsleep.o \
-	iopause.o -lqmail
+	-lqmail
 
 multilog.o: compile deepsleep.h match.h multilog.c
 	./compile multilog.c
 
-deepsleep.o: compile deepsleep.c deepsleep.h iopause.h
+deepsleep.o: compile deepsleep.c deepsleep.h
 	./compile deepsleep.c
 
 match.o: compile match.c match.h
 	./compile match.c
-
-iopause.h: choose compile iopause.h1 iopause.h2 load trypoll.c
-	./choose clr trypoll iopause.h1 iopause.h2 > iopause.h
-
-iopause.o: compile iopause.c iopause.h
-	./compile iopause.c
 
 pgrphack: load pgrphack.o
 	./load pgrphack -lqmail
@@ -196,10 +189,10 @@ softlimit: load softlimit.o
 softlimit.o: compile softlimit.c
 	./compile softlimit.c
 
-supervise: deepsleep.o load supervise.o iopause.o subreaper.o
-	./load supervise deepsleep.o iopause.o subreaper.o -lqmail
+supervise: deepsleep.o load supervise.o subreaper.o
+	./load supervise deepsleep.o subreaper.o -lqmail
 
-supervise.o: compile supervise.c deepsleep.h iopause.h \
+supervise.o: compile supervise.c deepsleep.h \
 subreaper.h conf-runfs
 	./compile `grep -v "^#" conf-runfs` supervise.c
 
@@ -281,12 +274,12 @@ tai64n_encode.o: compile tai64n_encode.c tai.h bool.h
 	./compile tai64n_encode.c
 
 recordio.o: \
-compile recordio.c iopause.h
+compile recordio.c
 	./compile recordio.c
 
 recordio: \
-load recordio.o iopause.o
-	./load recordio iopause.o -lqmail
+load recordio.o
+	./load recordio -lqmail
 
 spipe: load spipe.o svcfns.o
 	./load spipe svcfns.o

@@ -1,27 +1,27 @@
 # daemontools - collection of tools for managing UNIX services
 
-This is a significant rewrite of [daemontools](https://cr.yp.to/daemontools.html) written by djb. This version of daaemontools is part of the [indimail-mta](https://github.com/indimail/indimail-mta), but can be used independently.
+This is a significant rewrite of [daemontools](https://cr.yp.to/daemontools.html) written by djb. This version of daaemontools is a component of [indimail-mta](https://github.com/indimail/indimail-mta), but can be used independently.
 
 Few of the changes are
 
-1. run shutdown script on svc -d, svc -r
+1. run shutdown script in <u>dir</u>/shutdown on svc -d, svc -r
 2. run alert scripts when services go down abnormally
 3. systemctl unit file for linux, rc for FreeBSD, launchd unit file for OSX
 4. Use of /run, /var/run to allow readonly service directory
-5. Logging of svscan output
+5. Logging of [svscan](https://github.com/indimail/indimail-mta/wiki/svscan.8) output
 6. Private namespace for filesystems mounted by services under svscan
 7. Configurable scan interval
-8. Run initialiation commands on svscan startup
+8. Run initializtion commands on svscan startup
 9. Addtional actions in svc command (-r, -1, -2)
-10. svps command to pretty print service status
+10. [svps](https://github.com/indimail/indimail-mta/wiki/svps.1) command to pretty print service status
 11. Ability for a service to wait for another service
 12. New fifo supervise/up which services can open to test if service is up or down.
-13. Additional information in svstat (wait status, supervise pid)
+13. Additional information in [svstat](https://github.com/indimail/indimail-mta/wiki/svstat.8) (wait status, supervise pid)
 14. rpm/debian packages along with create\_rpm, create\_debian scripts
 15. Return the status of supervise/service in svstat itself.
-16. enhanced envdir utility that can load environment variables from multiple directories and -c option to clear existing environment variables on startup.
+16. enhanced [envdir](https://github.com/indimail/indimail-mta/wiki/envdir.8) utility that can load environment variables from multiple directories and -c option to clear existing environment variables on startup.
 17. man pages for all commands
-18. docker-entrypoint to svscan
+18. [docker-entrypoint](https://github.com/indimail/indimail-mta/wiki/docker-entrypoint.8) to svscan
 19. functional as init replacement in docker/podman environment.
 20. ability to become session leader if SETSID env variable is set
 21. create .svscan.pid file
