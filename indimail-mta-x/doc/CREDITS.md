@@ -138,3 +138,4 @@ The site http://qmail.org and the qmail mailing list for wealth of information
 106. RFC 8463 - Ed25519 cryptographic method adapted from Erwin Hoffman's s/qmail dkim implementation
 107. qmail-branch patch by Paul Jarc - https://code.dogmap.org./qmail/
 108. relaytest by Matthew Trout
+109. timeoutread(), timeoutwrite() using iopause - Erwin Hofman's fehQlibs
