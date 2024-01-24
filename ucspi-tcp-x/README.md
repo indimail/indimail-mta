@@ -6,16 +6,16 @@ Few of the changes are
 
 1. [IPv6](https://www.fefe.de/ucspi/) (using fefe's patch)
 2. Andre Opperman's SSL/TLS patch for tcpserver
-3. TLS/SSL support in tcpserver, tcpclient
+3. TLS/SSL support in [tcpserver]https://github.com/indimail/indimail-mta/wiki/tcpserver.1), [tcpclient](https://github.com/indimail/indimail-mta/wiki/tcpclient.1)
 4. Option -a to specify CA certificates. Taken from this patch [here](http://malete.org/tar/ucspi-tcp-ssl-20040113.patch.gz)
-5. transparent TLS/SSL proxy with STARTTLS support for SMTP/POP3 servers using dotls
+5. transparent TLS/SSL proxy with STARTTLS support for SMTP/POP3 servers using [dotls](https://github.com/indimail/indimail-mta/wiki/dotls.1).
 6. ucspi-tcp/ip6\_fmt.c: bug fix by Erwin Hoffman
 7. GREETDELAY from Erwin Hoffman's [ucspi-tcp6](http://www.fehcom.de/ipnet/ucspi-tcp6.html)
 8. Jens Wehrenbrecht's IPv4 CIDR extension
 9. Li Minh Bui's IPv6 support for compactified IPv6 addresses and CIDR notation support.
 10. Ability to load dynamic libraries to add functionality. tcpserver can load entire qmail-smtpd as a pluggable module.
 11. MySQL support for tcprules. Uses dlopen to load MySQL at runtime.
-12. tcpserver plugins. This version can load entire qmail-smtpd, rblsmtpd as a plugin in memory. Avoid fork/exec and repeated opening of qmail control files for every connection. uses dlopen/dlmopen at runtime.
+12. tcpserver plugins. This version can load entire [qmail-smtpd](https://github.com/indimail/indimail-mta/wiki/qmail-smtpd.8), [rblsmtpd](https://github.com/indimail/indimail-mta/wiki/rblsmtpd.1) as a plugin in memory. Avoid fork/exec and repeated opening of qmail control files for every connection. uses dlopen/dlmopen at runtime.
 13. Linked with [libqmail](https://github.com/indimail/libqmail) to avoid duplication of functions and ease of maintenance. This also implies use of substdio interface instead of buffer interface for standard input / output
 
 ## Build ucsp-tcp
