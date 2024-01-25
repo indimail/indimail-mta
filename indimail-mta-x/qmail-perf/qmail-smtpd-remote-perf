@@ -1,0 +1,179 @@
+#!/bin/sh
+#
+trap kill_tcpserver 2 EXIT
+
+#
+# script to test perfomance of qmail-remote, qmail-smtpd
+# 
+test_email=$HOME/Downloads/test.eml
+sender=mbhangui@argos.indimail.org
+recip=mbhangui@argos.indimail.org
+domain=argos.indimail.org
+tmpfn=/tmp/qremote.$$
+smtpd=/usr/sbin/mini-smtpd
+
+sqmail1()
+{
+	echo "s/qmail1"
+	tcpserver $smtpd
+	cd /var/sqmail1
+	sudo sh -c "echo \"$domain:127.0.0.1;26\" > control/smtproutes"
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		exec 2>$tmpfn
+		time -p bin/qmail-remote $domain $sender $recip <$test_email >/dev/null
+		real=$(sed -n 1p $tmpfn | awk '{print $2}')
+		user=$(sed -n 2p $tmpfn | awk '{print $2}')
+		sys=$(sed -n 3p $tmpfn | awk '{print $2}')
+		load=$(awk '{print $1}' < /proc/loadavg)
+		echo "s/qmail1,$i,$real,$user,$sys,$load"
+	done
+	echo 
+	kill_tcpserver
+	sleep 2
+}
+
+sqmail2()
+{
+	echo "s/qmail2"
+	tcpserver $smtpd
+	cd /var/sqmail2
+	sudo sh -c "echo \"$domain:127.0.0.1;26\" > control/smtproutes"
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		exec 2>$tmpfn
+		time -p bin/qmail-remote $domain $sender $recip <$test_email >/dev/null
+		real=$(sed -n 1p $tmpfn | awk '{print $2}')
+		user=$(sed -n 2p $tmpfn | awk '{print $2}')
+		sys=$(sed -n 3p $tmpfn | awk '{print $2}')
+		load=$(awk '{print $1}' < /proc/loadavg)
+		echo "s/qmail2,$i,$real,$user,$sys,$load"
+	done
+	echo 
+	kill_tcpserver
+	sleep 2
+}
+
+notqmail()
+{
+	echo "notqmail"
+	tcpserver $smtpd
+	cd /var/notqmail
+	sudo sh -c "echo \"$domain:127.0.0.1:26\" > control/smtproutes"
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		exec 2>$tmpfn
+		time -p bin/qmail-remote $domain $sender $recip <$test_email >/dev/null
+		real=$(sed -n 1p $tmpfn | awk '{print $2}')
+		user=$(sed -n 2p $tmpfn | awk '{print $2}')
+		sys=$(sed -n 3p $tmpfn | awk '{print $2}')
+		load=$(awk '{print $1}' < /proc/loadavg)
+		echo "notqmail,$i,$real,$user,$sys,$load"
+	done
+	echo 
+	kill_tcpserver
+	sleep 2
+}
+
+netqmail()
+{
+	echo "netqmail"
+	tcpserver $smtpd
+	cd /var/qmail
+	sudo sh -c "echo \"$domain:127.0.0.1:26\" > control/smtproutes"
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		exec 2>$tmpfn
+		time -p bin/qmail-remote $domain $sender $recip <$test_email >/dev/null
+		real=$(sed -n 1p $tmpfn | awk '{print $2}')
+		user=$(sed -n 2p $tmpfn | awk '{print $2}')
+		sys=$(sed -n 3p $tmpfn | awk '{print $2}')
+		load=$(awk '{print $1}' < /proc/loadavg)
+		echo "netqmail,$i,$real,$user,$sys,$load"
+	done
+	echo 
+	kill_tcpserver
+	sleep 2
+}
+
+indimail()
+{
+	echo "indimail"
+	tcpserver $smtpd
+	mkdir -p /tmp/control
+	echo $domain > /tmp/control/me
+	echo "$domain:127.0.0.1:26" > /tmp/control/smtproutes
+	echo "$domain" > /tmp/control/notlshosts
+	cd /tmp/control
+	size=$(stat -c %s $test_email)
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		exec 2>$tmpfn
+		env CONTROLDIR=/tmp/control USE_QPWGR=1 \
+			DISABLE_CNAME_LOOKUP=1 \
+			time -p /usr/sbin/qmail-remote $domain $sender "" $size $recip <$test_email >/dev/null
+		real=$(sed -n 1p $tmpfn | awk '{print $2}')
+		user=$(sed -n 2p $tmpfn | awk '{print $2}')
+		sys=$(sed -n 3p $tmpfn | awk '{print $2}')
+		load=$(awk '{print $1}' < /proc/loadavg)
+		echo "indimail-mta,$i,$real,$user,$sys,$load"
+	done
+	echo 
+	kill_tcpserver
+	sleep 2
+}
+
+smtp()
+{
+	echo "$2"
+	tcpserver $1
+	mkdir -p /tmp/control
+	echo $domain > /tmp/control/me
+	echo "$domain:127.0.0.1:26" > /tmp/control/smtproutes
+	echo "$domain" > /tmp/control/notlshosts
+	cd /tmp/control
+	size=$(stat -c %s $test_email)
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		exec 2>$tmpfn
+		env CONTROLDIR=/tmp/control USE_QPWGR=1 \
+			DISABLE_CNAME_LOOKUP=1 \
+			time -p /usr/sbin/qmail-remote $domain $sender "" $size $recip <$test_email >/dev/null
+		real=$(sed -n 1p $tmpfn | awk '{print $2}')
+		user=$(sed -n 2p $tmpfn | awk '{print $2}')
+		sys=$(sed -n 3p $tmpfn | awk '{print $2}')
+		load=$(awk '{print $1}' < /proc/loadavg)
+		echo "$2,$i,$real,$user,$sys,$load"
+	done
+	echo 
+	kill_tcpserver
+	sleep 2
+}
+
+tcpserver()
+{
+	sudo tcpserver -4 -HR 0 26 env QMAILQUEUE=/usr/sbin/qmail-nullqueue \
+		USE_QPWGR=1 NODNSCHECK=1 CONTROLDIR=/tmp/control $1 >/dev/null 2>&1 &
+	tcpserver_pid=$(jobs -p)
+	sleep 2
+}
+
+kill_tcpserver()
+{
+	if [ -n "$tcpserver_pid" ] ; then
+		sudo kill $tcpserver_pid
+	fi
+}
+
+#sqmail1
+#sqmail2
+#indimail
+#notqmail
+#netqmail
+#smtp /var/sqmail1/bin/qmail-smtpd s/qmail1
+#smtp /var/sqmail2/bin/qmail-smtpd s/qmail2
+#smtp /usr/sbin/qmail-smtpd indimail-mta-qmail-smtpd
+smtp /usr/sbin/mini-smtpd indimail-mta-mini-smtpd
+#smtp /var/notqmail/bin/qmail-smtpd notqmail
+#smtp /var/qmail/bin/qmail-smtpd netqmail
+/bin/rm -f $tmpfn
