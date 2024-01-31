@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH envdir 8
 .SH NAME
 envdir \- runs another program with environment modified according to files
@@ -23,13 +24,13 @@ variable. If the file \fIs\fR is completely empty (0 bytes long),
 without adding a new variable. \fBenvdir\fR reads a maximum of 256 bytes
 from \fIs\fR.
 
-If \fBenvdir\fR finds a link named .\fIenvdir\fR pointing to a directory, or a
-directory named .\fIenvdir\fR, it enters that directory and modifies
-environment variables according to files in .\fIenvdir\fR. \fBenvdir\fR avoids
-infinite recursive loops, by storing the inode number of directories
-visited and checking against the list. Any directory already processed is
-silently ignored. Files in .\fIenvdir\fR are read first. This prevents
-environment variables in .\fIenvdir\fR from overriding or deleting
+If \fBenvdir\fR finds a directory named .\fIenvdir\fR or a link named
+.\fIenvdir\fR pointing to a directory, it enters that directory and
+modifies environment variables according to files in .\fIenvdir\fR.
+\fBenvdir\fR avoids infinite recursive loops, by storing the inode number
+of directories visited and checking against the list. Any directory already
+processed is silently ignored. Files in .\fIenvdir\fR are read first. This
+prevents environment variables in .\fIenvdir\fR from overriding or deleting
 environment variables set in \fId\fR.
 
 if \fBenvdir\fR finds a file named .\fIenvdir\fR, it assumes that a file
@@ -37,19 +38,19 @@ contains a list of additional directories to be processed for environment
 variables. Any directory included in this file which have been already
 processed are silently ignored.
 
-if \fBenvdir\fR finds a file named .\fIenvfile\fR, it assumes that a file
-contains envirnoment variables in key=value format. Comments, blank lines
-and leading white spaces are removed from the file. If it finds a line of
-the form \fIs\fR=\fIt\fR, \fBenvdir\fR removes an environment variable
-named \fIs\fR if one exists, and then adds an evironment variable named
-\fIs\fR with value \fIt\fR. Whitespace at end of \fIt\fR are preserved and
-are part of the value. Nulls in \fIt\fR are changed to newlines in the
-environment variable. If \fBenvdir\fR finds a line \fIs\fR, without =,
-\fBenvdir\fR removes an environment variable named \fIs\fR if one exists,
-without adding a new variable.
+if \fBenvdir\fR finds a file or a symbolic link named .\fIenvfile\fR, it
+assumes that a file contains envirnoment variables in key=value format.
+Comments, blank lines and leading white spaces are removed from the file.
+If it finds a line of the form \fIs\fR=\fIt\fR, \fBenvdir\fR removes an
+environment variable named \fIs\fR if one exists, and then adds an
+evironment variable named \fIs\fR with value \fIt\fR. Whitespace at end of
+\fIt\fR are preserved and are part of the value. Nulls in \fIt\fR are
+changed to newlines in the environment variable. If \fBenvdir\fR finds a
+line \fIs\fR, without =, \fBenvdir\fR removes an environment variable named
+\fIs\fR if one exists, without adding a new variable.
 
-Apart from .\fIenvdir\fR and \fI.envfile\fR, \fBenvdir\fR skips all
-files/directories starting with the '.' dot character.
+Apart from .\fIenvdir\fR and \fI.envfile\fR, \fBenvdir\fR skips all files
+and directories starting with the '.' dot character.
 
 In case of any error, \fBenvdir\fR will not modify or add to the existing
 set of environment variables. In case of error, \fBenvdir\fR will exit 111

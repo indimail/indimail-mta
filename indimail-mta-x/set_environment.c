@@ -51,7 +51,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 	 * allow $HOME/.defaultqueue for non-root
 	 * or root with non-zero root_rc
 	 * root_rc is non-zero for qmail-inject, new-inject,
-	 * qmail-qread, maildirserial
+	 * qmail-qread, queue-fix, maildirserial
 	 */
 	if (!env_get("SKIP_LOCAL_ENVIRONMENT") && (home = env_get("HOME")) && (getuid() || root_rc)) {
 		if (!stralloc_copys(&tmp, home) ||

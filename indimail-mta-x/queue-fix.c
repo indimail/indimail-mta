@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.30 2023-08-25 08:26:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue-fix.c,v 1.31 2024-01-31 19:33:44+05:30 Cprogrammer Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -110,18 +110,10 @@ usage()
 no_return void
 die_check(char *arg)
 {
-	strerr_warn3(WARN, arg, ": Failed while checking directory structure.\n"
-		"Make sure the given queue exists and you have permission to access it.\n"
-		"Exiting...\n", 0);
-	_exit(111);
-}
-
-no_return void
-die_recon()
-{
-	strerr_warn2(WARN, "Failed to reconstruct queue.\n"
-			"Make sure the queue exists and you have permission to modify it.\n"
-		   "Exiting...\n", 0);
+	substdio_put(subfderr, "\n", 1);
+	strerr_warn3(FATAL, arg, " failed checking qmail queue structure.\n"
+		"Make sure you fix all warnings displayed, the queue exists and you have\n"
+		"permission to access it. Exiting...", 0);
 	_exit(111);
 }
 
@@ -131,7 +123,7 @@ die_rerun()
 	strerr_warn2(WARN, ".tmp files exist in the queue.\n"
 			"queue-fix may have abnormally terminated in a previous run.\n"
 		   "The queue must be manually cleaned of the .tmp files.\n"
-		   "Exiting...\n", 0);
+		   "Exiting...", 0);
 	_exit(111);
 }
 
@@ -164,7 +156,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
 	/*- check for existence and proper credentials */
-	switch (type) {
+	switch (type)
+	{
 	case 'd':	/*- directory */
 		if (stat(name, &st)) {
 			queueError++;
@@ -195,6 +188,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 			return 0;
+		}
+		if ((st.st_mode & S_IFMT) != S_IFDIR) {
+			strerr_warn5(FATAL, name, ": not a directory. Can't autofix.\nRemove ", name, " and try again", 0);
+			return -1;
 		}
 		/*- check the values */
 		if (st.st_uid != uid || st.st_gid != gid) {
@@ -233,6 +230,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 		if (stat(name, &st)) {
 			if (errno != error_noent)
 				strerr_warn4(WARN, "stat: ", name, ":", 0);
+			return -1;
+		}
+		if ((st.st_mode & S_IFMT) != S_IFREG) {
+			strerr_warn5(FATAL, name, ": not a regular file. Can't autofix.\nRemove ", name, " and try again", 0);
 			return -1;
 		}
 		/*- check the values */
@@ -309,6 +310,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 			return 0;
 		}
+		if ((st.st_mode & S_IFMT) != S_IFREG) {
+			strerr_warn5(FATAL, name, ": not a regular file. Can't autofix.\nRemove ", name, " and try again", 0);
+			return -1;
+		}
 		/*- check the values */
 		if (st.st_uid != uid || (st.st_gid != gid && gid != -1)) {
 			queueError++;
@@ -376,6 +381,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 			if (flag_doit && chown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 			return 0;
+		}
+		if ((st.st_mode & S_IFMT) != S_IFIFO) {
+			strerr_warn5(FATAL, name, ": not a fifo/pipe. Can't autofix.\nRemove ", name, " and try again", 0);
+			return -1;
 		}
 		/*- check the values */
 		if (st.st_uid != uid || (st.st_gid != gid && gid != -1)) {
@@ -952,6 +961,10 @@ main(int argc, char **argv)
 	int             opt, fdorigdir;
 	char            strnum[FMT_ULONG];
 
+	if (getuid()) {
+		strerr_warn2(FATAL, "not running as root", 0);
+		_exit(111);
+	}
 	if ((fdorigdir = open_read(".")) == -1)
 		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	set_environment(WARN, FATAL, 1);
@@ -1028,13 +1041,12 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.30 2023-08-25 08:26:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.31 2024-01-31 19:33:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
- * $Log: queue-fix.c,v $
  * Revision 1.30  2023-08-25 08:26:03+05:30  Cprogrammer
  * updated usage
  *

@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.722 2024-01-17 09:22:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.723 2024-01-31 19:14:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.722 2024-01-17 09:22:43+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.723 2024-01-31 19:14:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2423,11 +2423,22 @@ if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
 	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
 	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
 fi
+if [ -d "$DESTDIR"$sysconfdir/ezmlm/global_vars ] ; then
+	mkdir -p "$DESTDIR"$sysconfdir/ezmlm/global_vars
+	$chown root:qmail "$DESTDIR"$sysconfdir/ezmlm/global_vars
+	/bin/chmod 755 "$DESTDIR"$sysconfdir/ezmlm/global_vars
+fi
 if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT ] ; then
 	echo QUEUESPLIT > "$DESTDIR"$sysconfdir/control/global_vars/CONFSPLIT
 fi
 if [ ! -f "$DESTDIR"$sysconfdir/control/global_vars/BIGTODO ] ; then
 	echo 0 > "$DESTDIR"$sysconfdir/control/global_vars/BIGTODO
+	ln -srf "$DESTDIR"$sysconfdir/control/global_vars/BIGTODO \
+		"$DESTDIR"$sysconfdir/ezmlm/global_vars/BIGTODO 2>/dev/null
+	if [ $? -ne 0 ] ; then
+		cd "$DESTDIR"$sysconfdir/ezmlm/global_vars
+		ln -s ../../control/global_vars/BIGTODO
+	fi
 fi
 if [ $usefsync -eq 1 -o $usefdatasync -eq 1 ] ; then
 	echo 1 > "$DESTDIR"$sysconfdir/control/global_vars/USE_FDATASYNC

@@ -2487,6 +2487,7 @@ compile queue-fix.c auto_split.h auto_uids.h tcpto.h
 
 queue-fix.8: queue-fix.9 conf-split
 	cat queue-fix.9 \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	| sed s}DIRSPLIT}"`head -1 conf-split`"}g \
 	> queue-fix.8
 
