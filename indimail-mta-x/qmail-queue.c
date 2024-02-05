@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.93 2024-01-23 01:23:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.94 2024-02-05 09:38:54+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -278,7 +278,7 @@ receivedfmt(char *s, int fastqueue)
 		if (s)
 			s += i;
 	}
-	i = fmt_str(s, ");\n  ");
+	i = fmt_str(s, "); ");
 	len += i;
 	if (s)
 		s += i;
@@ -1191,7 +1191,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.93 2024-01-23 01:23:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-queue.c,v 1.94 2024-02-05 09:38:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1199,6 +1199,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.94  2024-02-05 09:38:54+05:30  Cprogrammer
+ * fixed date field in Received header
+ *
  * Revision 1.93  2024-01-23 01:23:08+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

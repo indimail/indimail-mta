@@ -1,29 +1,5 @@
 /*
- * $Log: received.c,v $
- * Revision 1.10  2023-10-07 01:26:00+05:30  Cprogrammer
- * added parameter hide to hide IP, Host in received headers
- *
- * Revision 1.9  2023-01-16 23:13:08+05:30  Cprogrammer
- * folded received line to put date below
- *
- * Revision 1.8  2022-10-22 13:08:35+05:30  Cprogrammer
- * added program identifier to Received header
- *
- * Revision 1.7  2021-09-11 19:02:01+05:30  Cprogrammer
- * skip remotehost in received headers when value is unknown
- *
- * Revision 1.6  2020-07-08 09:15:22+05:30  Cprogrammer
- * added square brackets in the list of safe characters
- *
- * Revision 1.5  2004-10-22 20:29:55+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.4  2004-09-22 22:26:51+05:30  Cprogrammer
- * added underscore to list of safe characters
- *
- * Revision 1.3  2004-07-17 21:22:34+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: received.c,v 1.9 2024-02-05 09:32:58+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -63,8 +39,7 @@ safeput(struct qmail *qqt, char *s)
 
 /*
  * "Received: from relay1.uu.net (HELO uunet.uu.net) (7@192.48.96.5)\n"
- * "  by silverton.berkeley.edu with SMTP;"
- * "  26 Sep 1995 04:46:54 -0000\n"
+ * "  by silverton.berkeley.edu with SMTP; 26 Sep 1995 04:46:54 -0000\n"
  */
 
 void
@@ -103,7 +78,7 @@ received(struct qmail *qqt, char *program, char *protocol, char *local, char *re
 	}
 	qmail_puts(qqt, " with ");
 	qmail_puts(qqt, protocol);
-	qmail_puts(qqt, ";\n  ");
+	qmail_puts(qqt, "; ");
 	datetime_tai(&dt, now());
 	qmail_put(qqt, buf, date822fmt(buf, &dt));
 }
@@ -111,7 +86,32 @@ received(struct qmail *qqt, char *program, char *protocol, char *local, char *re
 void
 getversion_received_c()
 {
-	static char    *x = "$Id: received.c,v 1.10 2023-10-07 01:26:00+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: received.c,v 1.9 2024-02-05 09:32:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: received.c,v $
+ * Revision 1.9  2024-02-05 09:32:58+05:30  Cprogrammer
+ * added parameter hide to hide IP, Host in received headers
+ *
+ * Revision 1.8  2022-10-22 13:08:35+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
+ * Revision 1.7  2021-09-11 19:02:01+05:30  Cprogrammer
+ * skip remotehost in received headers when value is unknown
+ *
+ * Revision 1.6  2020-07-08 09:15:22+05:30  Cprogrammer
+ * added square brackets in the list of safe characters
+ *
+ * Revision 1.5  2004-10-22 20:29:55+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.4  2004-09-22 22:26:51+05:30  Cprogrammer
+ * added underscore to list of safe characters
+ *
+ * Revision 1.3  2004-07-17 21:22:34+05:30  Cprogrammer
+ * added RCS log
+ *
+ */
