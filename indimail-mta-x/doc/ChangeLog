@@ -54,10 +54,8 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
 23. queue-fix.c: exit if file type (regular, dir, fifo) is different from
     expected
 24. queue-fix.c: exit if not running as root
-25. svctool.in: link BIGTODO in ezmlm/global_vars to
-    control/global_vars/BIGTODO
 - 05/02/2025
-26. received.c, qmail-queue.c: fixed data field in Received header
+25. received.c, qmail-queue.c: fixed data field in Received header
 
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
