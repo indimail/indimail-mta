@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.31 2024-01-31 19:33:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue-fix.c,v 1.31 2024-02-07 00:36:32+05:30 Cprogrammer Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -148,7 +148,7 @@ confirm()
  * gid may be -1 on files for "unknown"
  */
 int
-check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm, char type, int size)
+check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t perm, char type, int size)
 {
 	struct stat     st;
 	int             fd;
@@ -424,7 +424,7 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, int perm,
 }
 
 int
-check_files(char *directory, char *owner, char *group, uid_t uid, gid_t gid, int perm)
+check_files(char *directory, char *owner, char *group, uid_t uid, gid_t gid, mode_t perm)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -479,7 +479,7 @@ warn_files(char *directory)
 
 int
 check_splits(char *directory, char *owner, char *group, char *fgroup,
-		uid_t dir_uid, gid_t dir_gid, int dir_perm, gid_t file_gid, int file_perm)
+		uid_t dir_uid, gid_t dir_gid, mode_t dir_perm, gid_t file_gid, mode_t file_perm)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -958,18 +958,14 @@ find_strays()
 int
 main(int argc, char **argv)
 {
-	int             opt, fdorigdir;
+	int             opt;
 	char            strnum[FMT_ULONG];
 
 	if (getuid()) {
 		strerr_warn2(FATAL, "not running as root", 0);
 		_exit(111);
 	}
-	if ((fdorigdir = open_read(".")) == -1)
-		strerr_die2sys(111, FATAL, "unable to open current directory: ");
 	set_environment(WARN, FATAL, 1);
-	if (fchdir(fdorigdir) == -1)
-		strerr_die1sys(111, "unable to switch to original directory: ");
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
@@ -1041,12 +1037,18 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.31 2024-01-31 19:33:44+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.31 2024-02-07 00:36:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
+ * $Log: queue-fix.c,v $
+ * Revision 1.31  2024-02-07 00:36:32+05:30  Cprogrammer
+ * exit if not running as root
+ * exit if file type (regular, dir, fifo) is different from expected
+ * removed redundant call to fchdir
+ *
  * Revision 1.30  2023-08-25 08:26:03+05:30  Cprogrammer
  * updated usage
  *

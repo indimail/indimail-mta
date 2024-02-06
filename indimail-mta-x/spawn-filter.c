@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.87 2024-01-23 01:23:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.88 2024-02-07 00:37:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -427,14 +427,14 @@ static char *setup_qargs(char t)
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *mailprog, *domain, *errStr = 0, *size = "0", *qqeh, *ext;
-	int             at, len;
+	char           *ptr, *mailprog, *domain, *errStr = 0, *size = "0", *qqeh,
+				   *ext, *spamfilterprog, *notifyaddress, *rejectspam, *spf_fn;
 	char            sizebuf[FMT_ULONG];
+	int             at, len, wstat, filt_exitcode, ret, i,
+					spamcode = 0, hamcode = 1, unsurecode = 2;
+	int             pipefd[2];
 	struct stat     statbuf;
-	int             wstat, filt_exitcode;
 	pid_t           filt_pid;
-	int             pipefd[2], ret;
-	char           *spamfilterprog, *notifyaddress, *rejectspam, *spf_fn;
 	char          **Argv;
 	stralloc        spamfilterargs = { 0 };
 	stralloc        spamfilterdefs = { 0 };
@@ -442,7 +442,6 @@ main(int argc, char **argv)
 	stralloc        addresslist = { 0 };
 	stralloc        defaultdomain = { 0 };
 	stralloc        line = { 0 };
-	int             spamcode = 0, hamcode = 1, unsurecode = 2;
 
 	len = str_len(argv[0]);
 	for (ptr = argv[0] + len;*ptr != '/' && ptr != argv[0];ptr--);
@@ -450,10 +449,22 @@ main(int argc, char **argv)
 		ptr++;
 	ptr += 6;
 	if (*ptr == 'l') { /*- qmail-local Filter */
+		/*
+		 * qmail-local [ -nN ] user homedir local dash ext domain sender defaultdelivery qqeh
+		 */
+		if (!str_diff(argv[1], "-n") || !str_diff(argv[1], "-N") || !str_diff(argv[1], "--")) {
+			i = 8; /* index for sender domain */
+			ext = argv[6];
+			qqeh = argv[10];
+		} else {
+			i = 7; /* index for sender domain */
+			ext = argv[5];
+			qqeh = argv[9];
+		}
 		if (env_get("MATCH_SENDER_DOMAIN")) {
-			at = str_rchr(argv[8], '@');
-			if (argv[8][at] && argv[8][at + 1])
-				domain = argv[8] + at + 1;
+			at = str_rchr(argv[i], '@');
+			if (argv[i][at] && argv[i][at + 1])
+				domain = argv[i] + at + 1;
 			else {
 				if (!(domain = env_get("DEFAULT_DOMAIN"))) {
 					if (control_readfile(&defaultdomain, "defaultdomain", 0) == -1)
@@ -462,9 +473,7 @@ main(int argc, char **argv)
 				}
 			}
 		} else /*- default for qmail-local is to match on recipient domain */
-			domain = argv[7]; /*- recipient domain */
-		ext = argv[6];
-		qqeh = argv[10];
+			domain = argv[i - 1]; /*- recipient domain */
 		delivery = local_delivery;
 		if (!env_unset("QMAILREMOTE"))
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
@@ -474,16 +483,16 @@ main(int argc, char **argv)
 		} else
 			size = "0";
 		/*- sender */
-		if (!stralloc_copys(&sender, argv[8]) || !stralloc_0(&sender))
+		if (!stralloc_copys(&sender, argv[i]) || !stralloc_0(&sender))
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 		/*- recipient */
 		if (*ext) { /*- EXT */
 			if (!stralloc_copys(&recipient, ext))
 				report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 		} else /*- user */
-		if (!stralloc_copys(&recipient, argv[2]) ||
+		if (!stralloc_copys(&recipient, argv[i - 6]) ||
 				!stralloc_cats(&recipient, "@") ||
-				!stralloc_cats(&recipient, argv[7]) ||
+				!stralloc_cats(&recipient, argv[i - 1]) ||
 				!stralloc_0(&recipient))
 			report(111, "spawn: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 	} else
@@ -675,7 +684,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.87 2024-01-23 01:23:36+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn-filter.c,v 1.88 2024-02-07 00:37:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -686,6 +695,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.88  2024-02-07 00:37:13+05:30  Cprogrammer
+ * fix for -n, -N, -- argument to qmail-local
+ *
  * Revision 1.87  2024-01-23 01:23:36+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

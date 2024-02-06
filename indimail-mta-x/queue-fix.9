@@ -6,10 +6,10 @@ queue-fix \- Create or Repair a qmail queue structure
 \fBqueue-fix\fR [-\fBi\fR -\fBN\fR -\fBr\fR -\fBb \fIbig\fR \fR -\fBv\fR] [-s \fIsplit\fR] \fIqueue_dir\fR
 
 .SH DESCRIPTION
-\fBqueue-fix\fR analyzes and reparis the qmail queue structure. It will fix
+\fBqueue-fix\fR analyzes and repairs the qmail queue structure. It will fix
 uid/gid settings and permissions. It will rename the message files to match
 their inodes. It will even create missing directories and files. You can
-even create a queue from scratch). It will also print warnings for any
+even create a queue from scratch. It will also print warnings for any
 files it finds that should not exist. However, queue-fix doesn't attempt to
 fix if it finds the wrong type of file present; e.g. regular file instead
 of directory, directory instead of a regular file, fifo instead of a

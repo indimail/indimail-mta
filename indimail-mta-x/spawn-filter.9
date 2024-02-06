@@ -4,29 +4,41 @@
 spawn-filter \- qmail-local / qmail-remote interceptor
 
 .SH SYNOPSIS
-.B spawn-filter args
+\fBspawn-filter\fR \fIargs\fR
 
 .SH DESCRIPTION
 \fBspawn-filter\fR is a \fBqmail-local\fR / \fBqmail-remote\fR interceptor
-to help qmail run custom filters on email being sent to \fBqmail-local\fR /
-\fBqmail-remote\fR. It can run any filter which reads messages on fd 0 and
-writes the output on fd 1.  Whatever is output on fd 1, will be the message
-that will be delivered to the destination.  The filter can be turned on
-individually for local and remote mails by defining, \fBQMAILLOCAL\fR and
-\fBQMAILREMOTE\fR environment variables, to the path of \fBspawn-filter\fR
-respectively in \fBqmail-send\fR's supervise or rc script. For spam
-filtering you can additionally, set the environment variable
-\fBSPAMFILTER\fR.  If \fBspawn-filter\fR is invoked as \fBqmail-local\fR,
-it executes the original \fBqmail-local\fR or \fBqmail-remote\fR after
-running the custom filter. \fBspawn-filter\fR unsets \fBQMAILREMOTE\fR
-when it runs as \fBqmail-local\fR. Similarly, it unsets \fBQMAILLOCAL\fR
-when it runs as \fBqmail-remote\fR. This is useful in scripts to figure out
-whether \fBspawn-filter\fR is running as \fBqmail-local\fR or
-\fBqmail-remote\fR. You can set \fBQLOCAL\fR, \fBQREMOTE\fR environment
-variable to make spawn-filter run an alternate \fBqmail-local\fR,
-\fBqmail-remote\fR programs. The alternate programs are expected to support
-the same interface as the original \fBqmail-local\fR and
+to help qmail run custom filters for email being sent by \fBqmail-local\fR
+or \fBqmail-remote\fR. It can run any script or program which reads
+messages on fd 0 and writes the output on fd 1. Whatever is output on fd 1,
+will be the input on descriptor 0 for \fBqmail-local\fR and
+\fBqmail-remote\fR. Thus the output of the filter program becomes the
+message that will be delivered to the destination. The filter can be turned
+on individually for local and remote mails by defining, \fBQMAILLOCAL\fR
+and \fBQMAILREMOTE\fR environment variables, to the path of
+\fBspawn-filter\fR respectively in \fBqmail-send\fR's supervise or rc
+script. If \fBspawn-filter\fR is invoked as \fBqmail-local\fR or
+\fBqmail-remote, it executes \fBqmail-local\fR or \fBqmail-remote\fR after
+running the custom filter. The filter script or program is run as a child
+of \fBspawn-filter\fR.
+
+\fBspawn-filter\fR is run by \fBqmail-lspawn\fR or \fBqmail-rspawn\fR with the
+same \fIargs\fR that is passed to \fBqmail-local\fR or \fBqmail-remote\fR.
+If \fBQMAILLOCAL\fR is set as \fIPREFIX/bin/spawn-filter\fR,
+\fBqmail-lspawn\fR runs \fBspawn-filter\fR with the same \fIargs\fR that is
+passed to \fBqmail-local\fR. If \fBQMAILREMOTE\fR is set as
+\fIPREFIX/bin/spawn-filter\fR, \fBqmail-rspawn\fR runs
+\fBspawn-filter\fR with the same \fIargs\fR that is passed to
 \fBqmail-remote\fR.
+
+\fBspawn-filter\fR unsets \fBQMAILREMOTE\fR when it runs as
+\fBqmail-local\fR. Similarly, it unsets \fBQMAILLOCAL\fR when it runs as
+\fBqmail-remote\fR. This is useful in scripts to figure out whether
+\fBspawn-filter\fR is running as \fBqmail-local\fR or \fBqmail-remote\fR.
+You can set \fBQLOCAL\fR, \fBQREMOTE\fR environment variable to make
+spawn-filter run an alternate \fBqmail-local\fR, \fBqmail-remote\fR
+programs. The alternate programs are expected to support the same interface
+as the original \fBqmail-local\fR and \fBqmail-remote\fR.
 
 Filters can be run by defining the environment variable \fBFILTERARGS\fR or
 by using the control file \fIfilterargs\fR (see below). \fBspawn-filter\fR
@@ -45,15 +57,15 @@ control file. See the section on \fBEnvironment Variables\fR below.
 
 \fBspawn-filter\fR unsets FILTERARGS, SPAMFILTER, QMAILLOCAL, QMAILREMOTE
 before running \fBqmail-local\fR or \fBqmail-remote\fR. \fBspawn-filter\fR
-unsets FILTERARGS, SPAMFILTER before running  filter.
+unsets FILTERARGS, SPAMFILTER before running filter.
 
 .SH Control Files
 
 .TP 5
 .I filterargs
 This control file can be used to setup additional filters after running the
-SPAM filters (See Section on Spam Filtering). This file has the following
-format.
+SPAM filters (See the section on SPAM Filtering). This file has the
+following format.
 
 .EX
 \fBdomain:args\fR
@@ -99,35 +111,10 @@ or removals. e.g.
 
 .EX
 QREGEX=1,DKIMSIGNOPTIONS=-z 4,HOME=
-.EX
+.EE
 
 sets QREGEX to 1, DKIMSIGNOPTIONS to "-z 4" and unsets HOME envrionment
 variable.
-
-The sequence in which the filter program is run is given below
-.nr step 1 1
-.IP \n[step] 3
-create two pipes and fork
-.IP \n+[step]
-dup write end of the first pipe to descriptor 1, dup write end of the
-second pipe to descriptor 2 in the child and exec the filter program
-.IP \n+[step]
-dup read end of the pipe to descriptor 0 in parent and exec qmail-local for
-local mails and qmail-remote for remote mails.
-.IP \n+[step]
-Wait for filter to exit and read read end of second pipe for any error
-messages.
-.IP \n+[step]
-Report success or failure
-
-This gives the ability for the any filter program to read the mail message
-from descriptor 0 before passing it to qmail-local/qmail-remote through the
-pipe.
-
-.PP
-The other control files that
-.B spawn-filter
-uses are
 
 .TP 5
 .I databytes
@@ -268,7 +255,7 @@ considered to be spam.
 If REJECTSPAM is 0, mail is accepted. If REJECTSPAM is set to 1, the mail
 will be bounced back to the sender. If REJECTSPAM is greater than 1, the
 mail is blackholed. If SPAMREDIRECT is set, mails will be redirected to the
-recipient specified by the SPAMREDIRECT environment variable.  If both
+recipient specified by the SPAMREDIRECT environment variable. If both
 REJECTSPAM and SPAMREDIRECT is set, spam mails will be bounced back to the
 sender with a copy redirected to the recipient specified in the
 SPAMREDIRECT environment variable
@@ -438,8 +425,8 @@ QMAILLOCAL           | set for local deliveries
 
 .SH "EXIT CODES"
 \fBspawn-filter\fR exits 111 for any error (non-zero exit status by called
-program) or if it is not able to exec QMAILHOME/bin/qmail-local (for local
-mails) or QMAILHOME/bin/qmail-remote (for remote mails). It exits 100 (i.e
+program) or if it is not able to exec PREFIX/bin/qmail-local (for local
+mails) or PREFIX/bin/qmail-remote (for remote mails). It exits 100 (i.e
 mail will be bounced) if the REJECTSPAM environment variable is set (or the
 control file has rejectspam set for the domain) and the mail is found to be
 SPAM. It also exits 100 if the program/script defined by \fBFILTERARGS\fR
