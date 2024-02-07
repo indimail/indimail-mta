@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.722 2024-01-17 09:22:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.723 2024-02-08 01:03:15+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.722 2024-01-17 09:22:43+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.723 2024-02-08 01:03:15+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2557,6 +2557,7 @@ $chown root:indimail $conf_dir
 /bin/chmod 550 $conf_dir
 link_with_global $conf_dir
 
+echo "" > $conf_dir/ENVHEADERS
 /bin/mkdir -p "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/log
 if [ $down_state -eq 1 ] ; then
 	$TOUCH "$DESTDIR"$SERVICEDIR/qmail-smtpd.$tag/down
