@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.63 2024-01-20 23:43:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.64 2024-02-07 22:55:53+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -9,6 +9,10 @@ outarchive=outarchive
 incarchive=incarchive
 myuid=$(id -u)
 mygid=$(id -g)
+local_domain1=local.indimail-local1.org
+local_domain2=local.indimail-local2.org
+remote_domain1=remote.indimail-remote1.org
+remote_domain2=remote.indimail-remote2.org
 real_domain=argos.indimail.org
 srs_domain=srs.indimail.org
 vdomain=virtual.indimail.org
@@ -127,6 +131,9 @@ do_cleanup_failed()
 		if [ -n "$smtp_pid" ] ; then
 			terminate_smtp_qmtp $smtp_pid
 		fi
+		if [ -n "$qmtp_pid" ] ; then
+			terminate_smtp_qmtp $qmtp_pid
+		fi
 		[ -z "$send_pid" ] && send_pid=$(get_send_pid qmail-send $testdir/queue)
 		terminate_send qmail-send "$send_pid"
 
@@ -152,7 +159,7 @@ do_cleanup_failed()
 		$qmaildir/autoturn/$vdomain/Maildir/cur/* $sysconfdir/users $testdir/variables
 	sudo /bin/rm -f  $cntrldir/mailarch $cntrldir/accesslist $cntrldir/from.envrules \
 		$cntrldir/badmailfrom.custom $cntrldir/dkimkeys $cntrldir/smtproutes $cntrldir/recipients \
-		$cntrldir/remote-auth $cntrldir/remote_auth.cdb
+		$cntrldir/remote-auth $cntrldir/remote_auth.cdb $cntrldir/filterargs
 }
 
 check_mail_count()
@@ -427,6 +434,8 @@ setup_config()
 	mkdir -p $testdir/setup
 	(
 	env CONTROLDIR=$cntrldir config-fast $HOSTNAME
+	env CONTROLDIR=$cntrldir config-fast $local_domain1
+	env CONTROLDIR=$cntrldir config-fast $local_domain2
 	mkdir -p $qmaildir/alias
 	sudo env QmailHOME=$qmaildir $svctool --cntrldir=$cntrldir --config=qmail \
 		--postmaster=$user@$HOSTNAME
@@ -504,6 +513,10 @@ setup_config()
 	(
 	echo @$ext_domain
 	echo @$HOSTNAME
+	echo @$local_domain1
+	echo @$local_domain2
+	echo @$remote_domain1
+	echo @$remote_domain2
 	echo @$srs_domain
 	echo @$vdomain
 	echo @etrn1.dom
@@ -699,10 +712,9 @@ run_qmail_send()
 {
 	create_qmail_getpw
 	if [ $# -eq 0 -o $# -gt 2 ] ; then
-		echo "run_qmail_send qmail-send|slowq-send-1|slowq-send-2|qmta-send-1|qmta-send-2 [silent]" 1>&2
+		echo "run_qmail_send qmail-send|slowq-send-1|slowq-send-2|qmta-send-1|qmta-send-2 [option]" 1>&2
 		return 1
 	fi
-	[ $# -eq 2 ] && silent=1 || silent=0
 	if [ "$1" = "qmail-send" ] ; then
 		start_pg=$qmail_start
 		pg1=qmail-send
@@ -754,7 +766,7 @@ run_qmail_send()
 		pcount=4
 		qmta_pid2=""
 	else
-		echo "run_qmail_send qmail-send|slowq-send-1|slowq-send-2|qmta-send-1|qmta-send-2 [silent]" 1>&2
+		echo "run_qmail_send qmail-send|slowq-send-1|slowq-send-2|qmta-send-1|qmta-send-2 [option]" 1>&2
 		return 1
 	fi
 	t1=$(date +"%s.%4N")
@@ -763,24 +775,40 @@ run_qmail_send()
 	exec 1>$logdir/$pg1/$logfn
 	exec 2>$logdir/$pg1/$logfn
 	exec 0<&2
-	exec sudo env - \
-		PATH=/bin:/usr/bin:/usr/sbin \
-		BIGTODO=0 \
-		USE_QPWGR=1 \
-		CONTROLDIR=$cntrldir \
-		CERTDIR=$certdir \
-		CONFSPLIT=23 \
-		QMAILGETPW=$testdir/bin/qmail-getpw \
-		QUEUEDIR=$queuedir \
-		ASSIGNDIR=$sysconfdir/users \
-		RELAYCLIENT="" \
-		TODO_PROCESSOR=$todo_proc \
-		PASSWD_FILE=$testdir/etc/passwd \
-		QMAILLOCAL=$sbindir/spawn-filter \
-		QMAILREMOTE=$sbindir/spawn-filter \
-		QREMOTE=$sbindir/rd-remote \
-		QREGEX=1 \
-		$start_pg $opt ./Maildir/
+	unset MATCH_RECIPIENT_DOMAIN MATCH_SENDER_DOMAIN QREGEX
+	if [ $# -eq 2 ] ; then
+		case "$2" in
+			1)
+			QREGEX=1
+			;;
+			2)
+			MATCH_RECIPIENT_DOMAIN=1
+			MATCH_SENDER_DOMAIN=1
+			;;
+		esac
+	fi
+	/bin/rm -rf $testdir/variables
+	mkdir -p $testdir/variables
+	echo "/bin:/usr/bin:/usr/sbin"  > $testdir/variables/PATH
+	echo "0"                        > $testdir/variables/BIGTODO
+	echo "1"                        > $testdir/variables/USE_QPWGR
+	echo "$cntrldir"                > $testdir/variables/CONTROLDIR
+	echo "$certdir"                 > $testdir/variables/CERTDIR
+	echo "23"                       > $testdir/variables/CONFSPLIT
+	echo "$testdir/bin/qmail-getpw" > $testdir/variables/QMAILGETPW
+	echo "$queuedir"                > $testdir/variables/QUEUEDIR
+	echo "$sysconfdir/users"        > $testdir/variables/ASSIGNDIR
+	echo ""                         > $testdir/variables/RELAYCLIENT
+	echo "$todo_proc"               > $testdir/variables/TODO_PROCESSOR
+	echo "$testdir/etc/passwd"      > $testdir/variables/PASSWD_FILE
+	echo "$sbindir/spawn-filter"    > $testdir/variables/QMAILLOCAL
+	echo "$sbindir/spawn-filter"    > $testdir/variables/QMAILREMOTE
+	echo "$sbindir/rd-remote"       > $testdir/variables/QREMOTE
+	echo "$QREGEX"                  > $testdir/variables/QREGEX
+	[ -n "$QREGEX" ] && echo 1 > $testdir/variables/QREGEX || > $testdir/variables/QREGEX
+	[ -n "$MATCH_RECIPIENT_DOMAIN" ] && echo 1 > $testdir/variables/MATCH_RECIPIENT_DOMAIN || > $testdir/variables/MATCH_RECIPIENT_DOMAIN
+	[ -n "$MATCH_SENDER_DOMAIN" ] && echo 1 > $testdir/variables/MATCH_SENDER_DOMAIN || > $testdir/variables/MATCH_SENDER_DOMAIN
+	exec sudo envdir -c $testdir/variables $start_pg $opt ./Maildir/
 	) &
 	tx1=$(date +"%s.%4N")
 	pid=$(get_send_pid $pg1 $queuedir)
@@ -808,6 +836,9 @@ run_qmail_send()
 		pid=0
 	fi
 	if [ -n "$pid" -a $pid -gt 0 -a -n "$count" -a $count -eq $pcount ] ; then
+		if [ -z "$silent" ] ; then
+			silent=0
+		fi
 		[ $silent -eq 1 ] && return 0
 		t2=$(date +"%s.%4N")
 		tcount=$(expr $tcount + 1)
@@ -1131,8 +1162,12 @@ start_tcpserver_smtp()
 	echo 1                 > $testdir/smtpd/variables/BADHELOCHECK
 	echo "$sbindir/qmail-dkim $sbindir/qmail-spamfilter" > $testdir/smtpd/variables/QMAILQUEUE
 	(
-	if [ $# -eq 1 -a $1 -eq 4 ] ; then
-		t="-4"
+	if [ $# -eq 1 ] ; then
+		if [ $1 -eq 4 ] ; then
+			t="-4"
+		else
+			t=""
+		fi
 	else
 		t=""
 	fi
@@ -4799,21 +4834,38 @@ test_alias()
 	done
 }
 
-test_spawn_filter()
+test_rspawn_spawn_filter()
 {
-	# test QMAILLOCAL
+	# test QMAILLOCAL through qmail-lspawn. Default is to match recipient domain in filterargs
 	(
 	echo "#!/bin/sh"
-	echo "sed -e 's/abcd/$HOSTNAME/' -e 's/Subject: .*/Subject: Testing spawn-filter/'"
+	echo "sed -e 's/abcd/$HOSTNAME/' -e 's/Subject: .*/Subject: Testing spawn-filter using filter1/'"
 	echo "exit 0"
 	) > $testdir/bin/filter1
-	chmod +x $testdir/bin/filter1
-	echo "$HOSTNAME:local:$testdir/bin/filter1" > $cntrldir/filterargs
+	(
+	echo "#!/bin/sh"
+	echo "sed -e 's/abcd/$HOSTNAME/' -e 's/Subject: .*/Subject: Testing spawn-filter using filter2/'"
+	echo "exit 0"
+	) > $testdir/bin/filter2
+	chmod +x $testdir/bin/filter1 $testdir/bin/filter2
+	sub1=$(echo $local_domain1 | cut -d. -f2-)
+	sub2=$(echo $local_domain2 | cut -d. -f2-)
+	if [ $1 -eq 1 ] ; then # regular exp for pattern match
+	(
+	echo ".*\.$sub1:local:$testdir/bin/filter1"
+	echo ".*\.$sub2:local:$testdir/bin/filter2"
+	) > $cntrldir/filterargs
+	else # wildmat for pattern match
+	(
+	echo "*.$sub1:local:$testdir/bin/filter1"
+	echo "*.$sub2:local:$testdir/bin/filter2"
+	) > $cntrldir/filterargs
+	fi
 
 	t1=$(date +"%s.%4N")
 	(
-	echo "From: $user@$HOSTNAME"
-	echo "To: $user@$HOSTNAME"
+	echo "From: $user@$local_domain1"
+	echo "To: $user@$local_domain2"
 	echo "Subject: Test message using qmail-inject"
 	echo "Date: $(date -R)"
 	echo
@@ -4824,9 +4876,8 @@ test_spawn_filter()
 		CONTROLDIR=$cntrldir \
 		BIGTODO=0 \
 		CONFSPLIT=23 \
-	$qmail_inject -f$user@$HOSTNAME $user@$HOSTNAME
+	$qmail_inject -f$user@$local_domain1 $user@$local_domain2
 	check_mail $maildir 1
-	/bin/rm -f $cntrldir/filterargs
 	if [ -n "$mail_file" ] ; then
 		body=$($e822body < $maildir/new/$mail_file)
 		subject=$($e822header -I Subject < $maildir/new/$mail_file)
@@ -4835,15 +4886,23 @@ test_spawn_filter()
 		body=""
 		subject=""
 	fi
-	if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter" ] ; then
+	if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter using filter2" ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing spawn-filter using QMAILLOCAL succeeded %54s [%.4f sec]\n" " " $secs
+		if [ $1 -eq 1 ] ; then
+		printf "\r  testing spawn-filter REGEXP  qmail-lspawn using QMAILLOCAL  (recipient-match) succeeded %14s [%.4f sec]\n" " " $secs
+		else
+		printf "\r  testing spawn-filter wildmat qmail-lspawn using QMAILLOCAL  (recipient-match) succeeded %14s [%.4f sec]\n" " " $secs
+		fi
 		print_pct
 	else
 		printf "\r%118s\n" " "
-		echo "testing spawn-filter using QMAILLOCAL failed"
+		if [ $1 -eq 1 ] ; then
+		echo "testing spawn-filter REGEXP qmail-lspawn using (recipient-match) QMAILLOCAL failed"
+		else
+		echo "testing spawn-filter wildmat qmail-lspawn using (recipient-match) QMAILLOCAL failed"
+		fi
 		(
 		echo "body=[$body], subject=[$subject]"
 		if [ $log_type -eq 1 ] ; then
@@ -4855,19 +4914,37 @@ test_spawn_filter()
 		fi
 		)|less
 		failed=1
+		/bin/rm -f $cntrldir/filterargs $cntrldir/smtproutes $testdir/bin/filter1 $testdir/bin/filter2
 		exit 1
 	fi
 
-	# test QMAILREMOTE
+	# test QMAILREMOTE through qmail-rspawn. Default is to match sender domain in filterargs
 	# during setup we re-routed all mails to for external domains to $domain
 	# using $sbindir/rd-remote and $cntrldir/smtproutes
 	#
 	t1=$(date +"%s.%4N")
-	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
-	echo "$HOSTNAME:remote:$testdir/bin/filter1" > $cntrldir/filterargs
 	(
-	echo "From: $user@$HOSTNAME"
-	echo "To: $user@$ext_domain"
+	echo "$remote_domain1:127.0.0.1:$smtp_port"
+	echo "$remote_domain2:127.0.0.1:$smtp_port"
+	echo "$HOSTNAME:127.0.0.1:$smtp_port"
+	) > $cntrldir/smtproutes
+	sub1=$(echo $remote_domain1 | cut -d. -f2-)
+	sub2=$(echo $remote_domain2 | cut -d. -f2-)
+	if [ $1 -eq 1 ] ; then # regular exp for pattern match
+	(
+	echo ".*\.$sub1:remote:$testdir/bin/filter1"
+	echo ".*\.$sub2:remote:$testdir/bin/filter2"
+	) > $cntrldir/filterargs
+	else # wildmat for pattern match
+	(
+	echo "*.$sub1:remote:$testdir/bin/filter1"
+	echo "*.$sub2:remote:$testdir/bin/filter2"
+	) > $cntrldir/filterargs
+	fi
+
+	(
+	echo "From: $user@$remote_domain1"
+	echo "To: $user@$remote_domain2"
 	echo "Subject: Test message using qmail-inject"
 	echo "Date: $(date -R)"
 	echo
@@ -4878,7 +4955,7 @@ test_spawn_filter()
 		CONTROLDIR=$cntrldir \
 		BIGTODO=0 \
 		CONFSPLIT=23 \
-	$qmail_inject -f$user@$HOSTNAME $user@$ext_domain
+	$qmail_inject -f$user@$remote_domain1 $user@$remote_domain2
 	check_mail_header $testdir/$testuser/Maildir Subject 0
 	if [ -z "$mail_file" ] ; then
 		check_mail_header $testdir/$testuser/Maildir/.Spam Subject 0
@@ -4894,15 +4971,23 @@ test_spawn_filter()
 		body=""
 		subject=""
 	fi
-	if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter" ] ; then
+	if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter using filter1" ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing spawn-filter using QMAILREMOTE succeeded %53s [%.4f sec]\n" " " $secs
+		if [ $1 -eq 1 ] ; then
+		printf "\r  testing spawn-filter REGEXP  qmail-rspawn using QMAILREMOTE (sender-match)    succeeded %14s [%.4f sec]\n" " " $secs
+		else
+		printf "\r  testing spawn-filter wildmat qmail-rspawn using QMAILREMOTE (sender-match)    succeeded %14s [%.4f sec]\n" " " $secs
+		fi
 		print_pct
 	else
 		printf "\r%118s\n" " "
-		echo "  testing spawn-filter using QMAILREMOTE failed"
+		if [ $1 -eq 1 ] ; then
+		echo "testing spawn-filter REGEXP qmail-rspawn using QMAILREMOTE (sender-match) failed"
+		else
+		echo "testing spawn-filter wildmat qmail-rspawn using QMAILREMOTE (sender-match) failed"
+		fi
 		(
 		echo "body=$body, subject=$subject"
 		if [ $log_type -eq 1 ] ; then
@@ -4918,14 +5003,187 @@ test_spawn_filter()
 		fi
 		)|less
 		failed=1
+		/bin/rm -f $cntrldir/filterargs $cntrldir/smtproutes $testdir/bin/filter1 $testdir/bin/filter2
 		exit 1
 	fi
-	/bin/rm -f $cntrldir/filterargs $cntrldir/smtproutes
+	/bin/rm -f $cntrldir/filterargs $cntrldir/smtproutes $testdir/bin/filter1 $testdir/bin/filter2
+}
+
+test_direct_spawn_filter()
+{
+	/bin/rm -rf $testdir/variables
+	mkdir -p $testdir/variables
+	echo "$testdir/bin/spawn-cat" > $testdir/variables/QLOCAL
+	echo "$testdir/bin/spawn-cat" > $testdir/variables/QREMOTE
+	echo "$cntrldir"              > $testdir/variables/CONTROLDIR
+	# test QMAILLOCAL through qmail-lspawn. Default is to match recipient domain in filterargs
+	(
+	echo "#!/bin/sh"
+	echo "sed -e 's/abcd/$HOSTNAME/' -e 's/Subject: .*/Subject: Testing spawn-filter using filter1/'"
+	echo "exit 0"
+	) > $testdir/bin/filter1
+	(
+	echo "#!/bin/sh"
+	echo "sed -e 's/abcd/$HOSTNAME/' -e 's/Subject: .*/Subject: Testing spawn-filter using filter2/'"
+	echo "exit 0"
+	) > $testdir/bin/filter2
+	(
+		echo "#!/bin/sh"
+		echo "cat"
+		echo "exit 0"
+	) > $testdir/bin/spawn-cat
+	chmod +x $testdir/bin/filter1 $testdir/bin/filter2 $testdir/bin/spawn-cat
+	sub1=$(echo $local_domain1 | cut -d. -f2-)
+	sub2=$(echo $local_domain2 | cut -d. -f2-)
+	for i in 1 2 3 4
+	do
+		if [ "$i" -eq 1 -o "$i" -eq 3 ] ; then # regular exp for pattern match
+			(
+				echo ".*\.$sub1:local:$testdir/bin/filter1"
+				echo ".*\.$sub2:local:$testdir/bin/filter2"
+			) > $cntrldir/filterargs
+			echo 1 > $testdir/variables/QREGEX
+		elif [ "$i" -eq 2 -o "$i" -eq 4 ] ; then # wildmat for pattern match
+			(
+				echo "*.$sub1:local:$testdir/bin/filter1"
+				echo "*.$sub2:local:$testdir/bin/filter2"
+			) > $cntrldir/filterargs
+			echo 0 > $testdir/variables/QREGEX
+		fi
+		if [ "$i" -eq 1 -o "$i" -eq 2 ] ; then
+			filter=filter2
+			> $testdir/variables/MATCH_SENDER_DOMAIN
+		elif [ "$i" -eq 3 -o "$i" -eq 4 ] ; then
+			filter=filter1
+			echo 1 > $testdir/variables/MATCH_SENDER_DOMAIN
+		fi
+
+		t1=$(date +"%s.%4N")
+		(
+			echo "From: $user@$local_domain1"
+			echo "To: $user@$local_domain2"
+			echo "Subject: Test message using qmail-inject"
+			echo "Date: $(date -R)"
+			echo
+			echo "Test message from abcd"
+		) > $tmpdir/mail.txt
+		# qmail-local [ -nN ] user homedir local dash ext domain sender defaultdelivery qqeh
+		envdir -c $testdir/variables sh -c \
+			"exec -a qmail-local $sbindir/spawn-filter -- $user $testdir/$user $user \"\" \"\" $local_domain2 $user@$local_domain1 ./Maildir/ \"\"" < $tmpdir/mail.txt > $tmpdir/mail.out
+		body=$($e822body < $tmpdir/mail.out)
+		subject=$($e822header -I Subject < $tmpdir/mail.out)
+		if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter using $filter" ] ; then
+			t2=$(date +"%s.%4N")
+			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+			tcount=$(expr $tcount + 1)
+			if [ $i -eq 1 ] ; then
+				printf "\r  testing spawn-filter REGEXP  qmail-local  (recipient-match) succeeded %32s [%.4f sec]\n" " " $secs
+			elif [ $i -eq 2 ] ; then
+				printf "\r  testing spawn-filter wildmat qmail-local  (recipient-match) succeeded %32s [%.4f sec]\n" " " $secs
+			elif [ $i -eq 3 ] ; then
+				printf "\r  testing spawn-filter REGEXP  qmail-local  (sender-match)    succeeded %32s [%.4f sec]\n" " " $secs
+			elif [ $i -eq 4 ] ; then
+				printf "\r  testing spawn-filter wildmat qmail-local  (sender-match)    succeeded %32s [%.4f sec]\n" " " $secs
+			fi
+			print_pct
+		else
+			printf "\r%118s\n" " "
+			if [ $i -eq 1 ] ; then
+				echo "testing spawn-filter qmail-local REGEXP (recipient-match) failed"
+			elif [ $i -eq 2 ] ; then
+				echo "testing spawn-filter qmail-local wildmat (recipient-match) failed"
+			elif [ $i -eq 3 ] ; then
+				echo "testing spawn-filter qmail-local REGEXP (sender-match) failed"
+			elif [ $i -eq 4 ] ; then
+				echo "testing spawn-filter qmail-local wildmat (sender-match) failed"
+			fi
+			echo body=$body, subject=$subject
+			/bin/rm -f $tmpdir/mail.out $tmpdir/mail.txt $cntrldir/filterargs \
+				$testdir/bin/filter1 $testdir/bin/filter2 $testdir/bin/spawn-cat
+		fi
+		/bin/rm -f $tmpdir/mail.out $tmpdir/mail.txt
+	done
+	sub1=$(echo $remote_domain1 | cut -d. -f2-)
+	sub2=$(echo $remote_domain2 | cut -d. -f2-)
+	for i in 1 2 3 4
+	do
+		if [ "$i" -eq 1 -o "$i" -eq 3 ] ; then # regular exp for pattern match
+			(
+				echo ".*\.$sub1:remote:$testdir/bin/filter1"
+				echo ".*\.$sub2:remote:$testdir/bin/filter2"
+			) > $cntrldir/filterargs
+			echo 1 > $testdir/variables/QREGEX
+		elif [ "$i" -eq 2 -o "$i" -eq 4 ] ; then # wildmat for pattern match
+			(
+				echo "*.$sub1:remote:$testdir/bin/filter1"
+				echo "*.$sub2:remote:$testdir/bin/filter2"
+			) > $cntrldir/filterargs
+			echo 0 > $testdir/variables/QREGEX
+		fi
+		if [ "$i" -eq 1 -o "$i" -eq 2 ] ; then
+			filter=filter1
+			> $testdir/variables/MATCH_RECIPIENT_DOMAIN
+		elif [ "$i" -eq 3 -o "$i" -eq 4 ] ; then
+			filter=filter2
+			echo 1 > $testdir/variables/MATCH_RECIPIENT_DOMAIN
+		fi
+
+		t1=$(date +"%s.%4N")
+		(
+			echo "From: $user@$remote_domain1"
+			echo "To: $user@$remote_domain2"
+			echo "Subject: Test message using qmail-inject"
+			echo "Date: $(date -R)"
+			echo
+			echo "Test message from abcd"
+		) > $tmpdir/mail.txt
+		# qmail-remote host sender qqeh size recip
+		#exec -a qmail-remote $sbindir/spawn-filter $1  postmaster@$1 postmaster@$1
+		size=$(ls -l $tmpdir/mail.txt|awk '{print $5}')
+		envdir -c $testdir/variables sh -c \
+			"exec -a qmail-remote $sbindir/spawn-filter $remote_domain2 $user@$remote_domain1 \"\" $size $user@$remote_domain2" < $tmpdir/mail.txt > $tmpdir/mail.out
+		body=$($e822body < $tmpdir/mail.out)
+		subject=$($e822header -I Subject < $tmpdir/mail.out)
+		if [ "$body" = "Test message from $HOSTNAME" -a "$subject" = "Subject: Testing spawn-filter using $filter" ] ; then
+			t2=$(date +"%s.%4N")
+			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+			tcount=$(expr $tcount + 1)
+			if [ $i -eq 1 ] ; then
+				printf "\r  testing spawn-filter REGEXP  qmail-remote (recipient-match) succeeded %32s [%.4f sec]\n" " " $secs
+			elif [ $i -eq 2 ] ; then
+				printf "\r  testing spawn-filter wildmat qmail-remote (recipient-match) succeeded %32s [%.4f sec]\n" " " $secs
+			elif [ $i -eq 3 ] ; then
+				printf "\r  testing spawn-filter REGEXP  qmail-remote (sender-match)    succeeded %32s [%.4f sec]\n" " " $secs
+			elif [ $i -eq 4 ] ; then
+				printf "\r  testing spawn-filter wildmat qmail-remote (sender-match)    succeeded %32s [%.4f sec]\n" " " $secs
+			fi
+			print_pct
+		else
+			printf "\r%118s\n" " "
+			if [ $i -eq 1 ] ; then
+				echo "testing spawn-filter qmail-remote REGEXP (recipient-match) failed"
+			elif [ $i -eq 2 ] ; then
+				echo "testing spawn-filter qmail-remote wildmat (recipient-match) failed"
+			elif [ $i -eq 3 ] ; then
+				echo "testing spawn-filter qmail-remote REGEXP (sender-match) failed"
+			elif [ $i -eq 4 ] ; then
+				echo "testing spawn-filter qmail-remote wildmat (sender-match) failed"
+			fi
+			echo body=$body, subject=$subject
+			/bin/rm -f $tmpdir/mail.out $tmpdir/mail.txt $cntrldir/filterargs \
+				$testdir/bin/filter1 $testdir/bin/filter2 $testdir/bin/spawn-cat
+			exit 1
+		fi
+		/bin/rm -f $tmpdir/mail.out $tmpdir/mail.txt
+	done
+	/bin/rm -f $tmpdir/mail.out $tmpdir/mail.txt $cntrldir/filterargs \
+		$testdir/bin/filter1 $testdir/bin/filter2 $testdir/bin/spawn-cat
 }
 
 test_qmail_multi()
 {
 	t1=$(date +"%s.%4N")
+	/bin/rm -rf $testdir/variables
 	mkdir -p $testdir/variables
 	echo $testdir/queue > $testdir/variables/QUEUEDIR
 	echo $cntrldir      > $testdir/variables/CONTROLDIR
@@ -5088,6 +5346,7 @@ test_etrn1()
 	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
 
 	# create env variables for qmail-inject
+	/bin/rm -rf $testdir/variables
 	mkdir -p $testdir/variables
 	echo $testdir/queue > $testdir/variables/QUEUEDIR
 	echo $cntrldir      > $testdir/variables/CONTROLDIR
@@ -5181,6 +5440,7 @@ test_etrn2()
 	echo "$HOSTNAME:127.0.0.1:$smtp_port" > $cntrldir/smtproutes
 
 	# create env variables for qmail-inject
+	/bin/rm -rf $testdir/variables
 	mkdir -p $testdir/variables
 	echo $testdir/queue > $testdir/variables/QUEUEDIR
 	echo $cntrldir      > $testdir/variables/CONTROLDIR
@@ -5275,6 +5535,7 @@ test_atrn()
 	echo "$HOSTNAME:127.0.0.1:$smtp_port"  > $cntrldir/smtproutes
 	echo "$user:atrn.dom"                  > $cntrldir/atrnaccess
 	# create env variables for qmail-inject
+	/bin/rm -rf $testdir/variables
 	mkdir -p $testdir/variables
 	echo $testdir/queue > $testdir/variables/QUEUEDIR
 	echo $cntrldir      > $testdir/variables/CONTROLDIR
@@ -5448,7 +5709,7 @@ do_without_svscan()
 	printf "\r%118s\n" " "
 	echo "Testing commands run without using svscan"
 	# use qmail-start, slowq-sart to start qmail-send, slowq-send
-	run_qmail_send qmail-send
+	run_qmail_send qmail-send 1
 	run_qmail_send slowq-send-1
 	run_qmail_send slowq-send-2
 	run_qmail_send qmta-send-1
@@ -5496,7 +5757,17 @@ do_without_svscan()
 	test_badhelo
 	test_spamfilter
 	test_smtp_spamfilter
-	test_spawn_filter
+	test_direct_spawn_filter
+	for i in 1 2
+	do
+		test_rspawn_spawn_filter $i
+		if [ $i -eq 1 ] ; then
+			terminate_send qmail-send "$send_pid"
+			silent=1 run_qmail_send qmail-send
+		fi
+	done
+	terminate_send qmail-send "$send_pid"
+	silent=1 run_qmail_send qmail-send 1
 	create_authsmtp
 	test_domainqueue
 	test_qhpsi
@@ -5577,7 +5848,7 @@ do_without_svscan2()
 	printf "\r%118s\n" " "
 	echo "Testing commands run without using svscan"
 	# use qmail-start, slowq-sart to start qmail-send, slowq-send
-	run_qmail_send qmail-send
+	run_qmail_send qmail-send 1
 	run_qmail_send slowq-send-1
 	run_qmail_send slowq-send-2
 	run_qmail_send qmta-send
@@ -6175,6 +6446,7 @@ test_qmail_queue()
 	else
 	echo "F:.*@$HOSTNAME$:$outarchive@$HOSTNAME" > $cntrldir/mailarchive
 	fi
+	/bin/rm -rf $testdir/variables
 	mkdir -p $testdir/variables
 	echo $testdir/queue > $testdir/variables/QUEUEDIR
 	echo $cntrldir      > $testdir/variables/CONTROLDIR
@@ -7665,6 +7937,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.64  2024-02-07 22:55:53+05:30  Cprogrammer
+# added additional spawn-filter tests
+#
 # Revision 1.63  2024-01-20 23:43:08+05:30  Cprogrammer
 # fixes for debian
 #
