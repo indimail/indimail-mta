@@ -1,5 +1,8 @@
 /*
  * $Log: report.c,v $
+ * Revision 1.7  2024-02-07 22:58:37+05:30  Cprogrammer
+ * modified error messages
+ *
  * Revision 1.6  2023-12-06 17:02:13+05:30  Cprogrammer
  * added comment on report format for qmail-rspawn
  *
@@ -98,21 +101,28 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 			_exit(111);
 		if (substdio_put(subfdoutsmall, "\0", 1) == -1)
 			_exit(111);
-		if (substdio_puts(subfdoutsmall,
-			errCode == 111 ?  "Zspawn said: Message deferred" : "Dspawn said: Giving up on filter\n") == -1)
-			_exit(111);
+		if (delivery == local_delivery) {
+			if (substdio_puts(subfdoutsmall,
+					errCode == 111 ?  "Zspawn-filter(local): filter execution deferred" : "Drefusing to run filter\n") == -1)
+				_exit(111);
+		} else
+		if (delivery == remote_delivery) {
+			if (substdio_puts(subfdoutsmall,
+					errCode == 111 ?  "Zspawn-filter(remote): filter execution deferred" : "Drefusing to run filter\n") == -1)
+				_exit(111);
+		}
 		if (substdio_put(subfdoutsmall, "\0", 1) == -1)
 			_exit(111);
 	}
 	substdio_flush(subfdoutsmall);
 	/*- For qmail-rspawn to stop complaining unable to run qmail-remote */
-	_exit(0);
+	_exit(delivery == remote_delivery ? 0 : errCode);
 }
 
 void
 getversion_report_c()
 {
-	static char    *x = "$Id: report.c,v 1.6 2023-12-06 17:02:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: report.c,v 1.7 2024-02-07 22:58:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;

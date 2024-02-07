@@ -58,6 +58,9 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
 25. queue-fix.c: exit if not running as root
 26. queue-fix.c: removed redundant call to fchdir
 27. spawn-filter.c: fixes for -n, -N usage
+28. spawn-filter.c: modified error messages
+29. spawn-filter.c: exit 100 on wrong usage
+30. report.c: modified error messages
 
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
