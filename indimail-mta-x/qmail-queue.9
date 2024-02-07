@@ -161,7 +161,8 @@ value is less than or equal to this value. This will prevent emails with
 extra long headers or malicious headers to exploit memory allocation on
 the system. The environment variable \fBENVHEADERS\fR can be set to use
 a different name for this control file. If \fBENVHEADERS\fR is set but
-empty, the control file will not be read.
+empty, the control file will not be read and hence disabled. It is a good
+idea to do this on your SMTP server that faces the internet.
 
 .TP
 \fBlogheaders\fR

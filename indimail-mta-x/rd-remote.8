@@ -33,7 +33,7 @@ optional. The control file format is discussed below.
 \fIaddr\fR is the sender address when \fItype\fR is the letter '\fBs\fR'.
 
 \fIdest\fR can be an email address or a Maildir. When \fIdest\fR is an
-email address, \fIdest\fR, the mail is delivered to the address using
+email address, the mail is delivered to the address using
 \fBqmail-remote\fR. When \fIdest\fR is a maildir, the mail is directly
 delivered to the Maildir \fIdest\fR using \fBmaildirdeliver\fR(1).
 
@@ -47,25 +47,26 @@ Here \fIaddr\fR is destination domain when \fItype\fR is the letter
 letter '\fBr\fR'. \fIaddr\fR is the sender address when \fItype\fR is the
 letter '\fBs\fR'.
 
-\fIaddr\fR can be an exact match, wildcard or a regular expression if
-\fBQREGEX\fR envrionment variable is defined and is non-zero. So if
+\fIaddr\fR can be an exact match, wildcard or a regular expression (if
+\fBQREGEX\fR environment variable is defined and is non-zero). So if
 \fIaddr\fR is .*@example.com, it will match all addresses belonging to
 examplecom (for type 'r' or 's'). When type is 'd', you can use the
 regex .*example.com for \fIaddr\fR to match all address with example.com as
 the domain name.
 
 You can set \fBQREMOTE=/usr/sbin/rd-remote\fR for \fBspawn-filter\fR(8) to
-make it use \fBrd-remote\fR for remote deliveries.
+make it use \fBrd-remote\fR for remote deliveries and deliver the mail
+locally.
 
 \fBrd-remote\fR is useful when you want to tempararily redirect mails for a
 busy/ratelimited remote mailserver to a Maildir and use \fBmaildirsmtp\fR(1) or
 \fBmaildirserial\fR(1) and \fBserialsmtp\fR(1) to do the remote delivery
-with a lesser concurrency.
+later with  low concurrency.
 
 .SH LIMITATIONS
 Unlike \fBqmail-remote\fR, \fBrd-remote\fR cannot handle more than one
 recipient. But that is OK when used with indimail-mta as \fBqmail-rspawn\fR
-never invokes \fBqmail-remote\fR more than one recipient. If used in
+never invokes \fBqmail-remote\fR with more than one recipient. If used in
 scripts to send an email to multiple recipients, you cannot use
 \fBrd-remopte\fR.
 
