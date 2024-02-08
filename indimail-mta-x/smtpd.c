@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.320 2024-01-23 01:23:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.321 2024-02-08 20:55:06+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -157,7 +157,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.320 $";
+static char    *revision = "$Revision: 1.321 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -240,11 +240,11 @@ static int      seenhelo = 0;
 static int      authenticated;
 static int      seenmail = 0;
 static int      setup_state = 0;
-static int      rcptcount;
+static my_uint  rcptcount;
 static int      dsn;
 static int      qregex = 0;
 static int      qregexok;
-static int      rcpt_errcount = 0;
+static my_uint  rcpt_errcount = 0;
 static int      max_rcpt_errcount = 1;
 
 struct qmail    qqt;
@@ -4097,8 +4097,11 @@ void
 smtp_rcpt(char *arg)
 {
 	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, at,
-					isLocal, do_srs;
+					isLocal;
 	char           *tmp;
+#ifdef HAVESRS
+	int             do_srs;
+#endif
 #if BATV
 	int             ws = -1 /*- was signed */, skip_batv;
 #endif
@@ -7360,6 +7363,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.321  2024-02-08 20:55:06+05:30  Cprogrammer
+ * fix compilation warnings when srs2 is missing
+ *
  * Revision 1.320  2024-01-23 01:23:31+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -7779,7 +7785,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.320 2024-01-23 01:23:31+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.321 2024-02-08 20:55:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

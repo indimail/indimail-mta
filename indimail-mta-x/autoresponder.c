@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.41 2024-01-23 01:20:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.42 2024-02-08 19:36:51+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -942,7 +942,10 @@ count_history(char *sender, unsigned max)
 int
 main(int argc, char *argv[])
 {
-	int             fdout, match, len, do_srs = 0, at;
+	int             fdout, match;
+#ifdef HAVESRS
+	int             len, do_srs = 0, at;
+#endif
 	char           *sender, *dtrecip, *host, *ptr;
 	char            dbuf[DATE822FMT];
 #ifdef MIME
@@ -1248,7 +1251,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.41 2024-01-23 01:20:28+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: autoresponder.c,v 1.42 2024-02-08 19:36:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmktempfileh;
@@ -1257,6 +1260,9 @@ getversion_qmail_autoresponder_c()
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.42  2024-02-08 19:36:51+05:30  Cprogrammer
+ * fixed compiler warnings if libsrs2 is missing
+ *
  * Revision 1.41  2024-01-23 01:20:28+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

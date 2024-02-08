@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.114 2023-12-30 09:21:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.115 2024-02-08 20:48:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1633,7 +1633,7 @@ squareroot(datetime_sec x) /* assuming: >= 0 */
 static datetime_sec
 nextretry(datetime_sec birth, int c)
 {
-	int             n;
+	datetime_sec    n;
 
 	if (birth > recent)
 		n = 0;
@@ -2717,7 +2717,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.114 2023-12-30 09:21:30+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-send.c,v 1.115 2024-02-08 20:48:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2727,6 +2727,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.115  2024-02-08 20:48:32+05:30  Cprogrammer
+ * fixed multiplication result converted to larger type (codeql)
+ *
  * Revision 1.114  2023-12-30 09:21:30+05:30  Cprogrammer
  * return from exit_todo if flagtodoalive is 0
  *

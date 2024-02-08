@@ -1683,7 +1683,7 @@ fmtqfn.h readsubdir.h variables.h auto_control.h auto_split.h hassrs.h \
 varargs.h conf-mime conf-sync conf-batv conf-loglock \
 conf-bounce conf-srs
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-loglock conf-bounce conf-srs` slowq-send.c
+	conf-loglock conf-bounce` slowq-send.c
 
 slowq-send.8: \
 slowq-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir conf-prefix
@@ -1738,10 +1738,10 @@ qmta-send.o: \
 compile qmta-send.c qsutil.h fmtqfn.h readsubdir.h trigger.h \
 variables.h prioq.h qmail.h newfield.h quote.h set_environment.h \
 auto_split.h auto_uids.h auto_prefix.h set_queuedir.h varargs.h \
-conf-mime conf-sync conf-batv conf-srs conf-loglock \
+hassrs.h conf-mime conf-sync conf-batv conf-srs conf-loglock \
 conf-bounce
 	./compile `grep -h -v "^#" conf-mime conf-sync conf-batv \
-	conf-loglock conf-bounce conf-srs` qmta-send.c
+	conf-loglock conf-bounce` qmta-send.c
 
 qmta-send.8: \
 qmta-send.9 conf-break conf-spawn conf-qmail conf-sysconfdir \
@@ -1822,7 +1822,7 @@ qmail-showctl.o: compile qmail-showctl.c control.h auto_sysconfdir.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
 hassrs.h auto_prefix.h conf-srs conf-spf conf-batv conf-dkim conf-tls
-	./compile `grep -h -v "^#" conf-spf conf-srs conf-batv conf-dkim conf-tls` \
+	./compile `grep -h -v "^#" conf-spf conf-batv conf-dkim conf-tls` \
 	qmail-showctl.c
 
 qmail-showctl.8: qmail-showctl.9 conf-split conf-sysconfdir conf-qmail
@@ -1916,8 +1916,9 @@ mysql_config conf-sql
 
 qmail-smtpd.o: \
 compile qmail-smtpd.c variables.h hassmtputf8.h hasmysql.h \
-haslibgsasl.h auto_control.h auto_sysconfdir.h
-	./compile `grep -h -v "^#" conf-tls conf-spf conf-srs \
+haslibgsasl.h auto_control.h auto_sysconfdir.h conf-tls conf-spf \
+conf-ip conf-batv conf-srs conf-plugin mysql_inc
+	./compile `grep -h -v "^#" conf-tls conf-spf \
 	conf-ip conf-batv conf-plugin mysql_inc` qmail-smtpd.c
 
 smtpd.o: \

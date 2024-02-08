@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.29 2023-12-25 09:31:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.31 2024-02-08 20:47:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -41,6 +41,7 @@
 #include "readsubdir.h"
 #include "trigger.h"
 #include "prot.h"
+#include "hassrs.h"
 #ifdef HAVESRS
 #include "srs.h"
 #endif
@@ -1457,7 +1458,7 @@ squareroot(datetime_sec x) /* assuming: >= 0 */
 static datetime_sec
 nextretry(datetime_sec birth, int c)
 {
-	int             n;
+	datetime_sec    n;
 
 	if (birth > recent)
 		n = 0;
@@ -2770,7 +2771,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.29 2023-12-25 09:31:23+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmta-send.c,v 1.31 2024-02-08 20:47:48+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2778,6 +2779,12 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.31  2024-02-08 20:47:48+05:30  Cprogrammer
+ * fixed multiplication result converted to larger type (codeql)
+ *
+ * Revision 1.30  2024-02-08 19:37:35+05:30  Cprogrammer
+ * include hassrs.h
+ *
  * Revision 1.29  2023-12-25 09:31:23+05:30  Cprogrammer
  * made OSSIFIED configurable
  *

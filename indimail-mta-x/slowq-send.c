@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.37 2023-12-30 09:23:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.38 2024-02-08 20:48:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2012,7 +2012,7 @@ squareroot(datetime_sec x) /* assuming: >= 0 */
 static datetime_sec
 nextretry(datetime_sec birth, int c)
 {
-	int             n;
+	datetime_sec    n;
 
 	if (birth > recent)
 		n = 0;
@@ -3810,7 +3810,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.37 2023-12-30 09:23:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: slowq-send.c,v 1.38 2024-02-08 20:48:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3820,6 +3820,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.38  2024-02-08 20:48:20+05:30  Cprogrammer
+ * fixed multiplication result converted to larger type (codeql)
+ *
  * Revision 1.37  2023-12-30 09:23:58+05:30  Cprogrammer
  * return from exit_todo if flagtodoalive is 0
  *

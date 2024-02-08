@@ -63,6 +63,11 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
 30. report.c: modified error messages
 - 08/02/2024
 31. svctool.in: disable envheaders control file for SMTP
+32. etrn.c, atrn.c: fixed arguments to die_control
+33. autoresponder.c, smtpd.c, qmta-send.c: fix compilation warning when srs2
+    lib/include is missing
+34. qmail-send.c, qmta-send.c, slowq-send.c: fixed multiplication result
+    converted to larger type (codeql)
 
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024

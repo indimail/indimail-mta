@@ -1,5 +1,5 @@
 /*
- * $Id: etrn.c,v 1.20 2023-12-09 11:43:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: etrn.c,v 1.21 2024-02-08 20:37:08+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <sys/types.h>
@@ -25,7 +25,7 @@
 
 extern int      err_child();
 extern void     die_nomem();
-extern void     die_control();
+extern void     die_control(char *);
 static stralloc etrn, etrndir, lockfile;
 
 static char    *binetrnargs[5] = { 0, 0, 0, 0, (char *) 0 };
@@ -44,7 +44,7 @@ etrn_queue(char *arg, char *remoteip)
 	if (flagrcpt)
 		flagrcpt = rcpthosts_init();
 	if ((flagetrn = control_readfile(&etrn, "etrnhosts", 0)) == -1)
-		die_control();
+		die_control("etrnhosts");
 	if (flagrcpt || !flagetrn)
 		return -2;
 	if (!constmap_init(&mapetrn, etrn.s, etrn.len, 0))
@@ -138,7 +138,7 @@ etrn_queue(char *arg, char *remoteip)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.20 2023-12-09 11:43:25+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: etrn.c,v 1.21 2024-02-08 20:37:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -146,6 +146,9 @@ getversion_etrn_c()
 
 /*
  * $Log: etrn.c,v $
+ * Revision 1.21  2024-02-08 20:37:08+05:30  Cprogrammer
+ * fixed arguments to die_control()
+ *
  * Revision 1.20  2023-12-09 11:43:25+05:30  Cprogrammer
  * use users/cdb to get autoturn directory
  * pass etrn/atrn argument, autoturn dir and domain dir as arguments arguments to libexec/etrn, libexec/atrn
