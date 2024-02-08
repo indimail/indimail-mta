@@ -1,115 +1,5 @@
 /*
- * $Log: qmail-greyd.c,v $
- * Revision 1.36  2023-07-07 10:40:56+05:30  Cprogrammer
- * use NULL instead of 0 for null pointer
- *
- * Revision 1.35  2023-01-15 23:14:40+05:30  Cprogrammer
- * logerr(), out() changed to have varargs
- *
- * Revision 1.34  2023-01-03 23:55:08+05:30  Cprogrammer
- * removed __USE_GNU
- *
- * Revision 1.33  2022-10-30 20:22:09+05:30  Cprogrammer
- * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
- *
- * Revision 1.32  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.31  2021-06-12 18:07:02+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.30  2020-09-16 19:04:22+05:30  Cprogrammer
- * FreeBSD fix
- *
- * Revision 1.29  2020-07-04 21:43:34+05:30  Cprogrammer
- * removed usage of INET6 define
- *
- * Revision 1.28  2018-05-30 23:26:12+05:30  Cprogrammer
- * moved noipv6 variable to variables.c
- *
- * Revision 1.27  2018-05-29 22:11:07+05:30  Cprogrammer
- * removed call to gethostbyname() in ipv6 code
- *
- * Revision 1.26  2018-04-26 00:31:09+05:30  Cprogrammer
- * fixed verbosity of log messages
- *
- * Revision 1.25  2018-04-25 22:48:58+05:30  Cprogrammer
- * fixed display of options and verbosity of messages
- *
- * Revision 1.24  2017-11-26 12:58:39+05:30  Cprogrammer
- * fixed expire logic
- *
- * Revision 1.23  2017-11-25 18:34:49+05:30  Cprogrammer
- * initialize h_allocated. Fixed signal handler for SIGUSR2, expire records when loading context file
- *
- * Revision 1.22  2017-11-24 02:58:37+05:30  Cprogrammer
- * added verbose variable to suppress few messages
- *
- * Revision 1.21  2017-11-22 22:38:13+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.20  2017-11-21 18:49:24+05:30  Cprogrammer
- * added documentation
- *
- * Revision 1.19  2017-10-28 11:39:46+05:30  Cprogrammer
- * fixed search record failure when linked list contained just 1 entry
- *
- * Revision 1.18  2017-04-16 19:52:13+05:30  Cprogrammer
- * fixed hsearch() logic
- *
- * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.16  2016-04-15 15:45:14+05:30  Cprogrammer
- * set noipv6 if LIBC_HAS_IP6 is not defined
- *
- * Revision 1.15  2016-04-10 22:20:14+05:30  Cprogrammer
- * fixed incorrect formatting of context filename
- *
- * Revision 1.14  2016-04-10 13:07:56+05:30  Cprogrammer
- * added missing flush() statement to flush logs
- *
- * Revision 1.13  2016-04-03 09:38:31+05:30  Cprogrammer
- * port was being used non-initialized for non-ipv6 code
- *
- * Revision 1.12  2015-12-31 08:35:41+05:30  Cprogrammer
- * added IPV6 code
- *
- * Revision 1.11  2015-08-24 19:07:18+05:30  Cprogrammer
- * replace ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
- *
- * Revision 1.10  2011-07-29 09:29:30+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.9  2010-07-21 09:13:47+05:30  Cprogrammer
- * use CONTROLDIR environment variable instead of a hardcoded control directory
- *
- * Revision 1.8  2009-10-28 13:34:51+05:30  Cprogrammer
- * fix segmentation fault due to free()
- *
- * Revision 1.7  2009-09-07 13:58:02+05:30  Cprogrammer
- * fix compilation if USE_HASH was not defined
- *
- * Revision 1.6  2009-09-07 10:20:26+05:30  Cprogrammer
- * use select to perform non-blocking recvfrom()
- *
- * Revision 1.5  2009-09-05 23:10:13+05:30  Cprogrammer
- * added option to use hash for faster search
- *
- * Revision 1.4  2009-09-03 20:53:16+05:30  Cprogrammer
- * fixed logic for expiring records
- *
- * Revision 1.3  2009-09-01 22:01:51+05:30  Cprogrammer
- * fixed problem with format of context file
- *
- * Revision 1.2  2009-08-31 12:59:46+05:30  Cprogrammer
- * changed member 'ip' in struct greylst to ip_addr
- * fix allocation bug (changed realloc to malloc in copy_grey)
- * speed improvements in search_record
- *
- * Revision 1.1  2009-08-29 20:42:59+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-greyd.c,v 1.37 2024-02-08 22:02:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdlib.h>
 #include <time.h>
@@ -608,15 +498,17 @@ create_hash(struct greylst *curr)
 void
 expire_records(time_t cur_time)
 {
-	struct greylst *ptr;
+	struct greylst *ptr, *x;
 	time_t          start;
 
 	logerr("expiring records\n", NULL);
 	/*- find all records that are expired where timestamp < start */
 	start = cur_time - timeout;
-	for (ptr = head; ptr; ptr = ptr->next) {
-		if (ptr->timestamp >= start)
+	for (ptr = head; ptr; ) {
+		if (ptr->timestamp >= start) {
+			ptr = ptr->next;
 			continue;
+		}
 		if (verbose > 1)
 			print_record(ptr->ip_str, ptr->rpath, ptr->rcpt, ptr->rcptlen, ptr->timestamp,
 				ptr->status, 1);
@@ -629,7 +521,9 @@ expire_records(time_t cur_time)
 		(ptr->next)->prev = ptr->prev;
 		free(ptr->rpath);
 		free(ptr->rcpt);
+		x = ptr->next;
 		free(ptr);
+		ptr = x;
 	}
 	logerr("expired  records\n", NULL);
 	logflush();
@@ -1538,7 +1432,124 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.36 2023-07-07 10:40:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-greyd.c,v 1.37 2024-02-08 22:02:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qmail-greyd.c,v $
+ * Revision 1.37  2024-02-08 22:02:15+05:30  Cprogrammer
+ * fix potential use after free()
+ *
+ * Revision 1.36  2023-07-07 10:40:56+05:30  Cprogrammer
+ * use NULL instead of 0 for null pointer
+ *
+ * Revision 1.35  2023-01-15 23:14:40+05:30  Cprogrammer
+ * logerr(), out() changed to have varargs
+ *
+ * Revision 1.34  2023-01-03 23:55:08+05:30  Cprogrammer
+ * removed __USE_GNU
+ *
+ * Revision 1.33  2022-10-30 20:22:09+05:30  Cprogrammer
+ * replaced cdb_match() with cdb_matchaddr() in cdb_match.c
+ *
+ * Revision 1.32  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.31  2021-06-12 18:07:02+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.30  2020-09-16 19:04:22+05:30  Cprogrammer
+ * FreeBSD fix
+ *
+ * Revision 1.29  2020-07-04 21:43:34+05:30  Cprogrammer
+ * removed usage of INET6 define
+ *
+ * Revision 1.28  2018-05-30 23:26:12+05:30  Cprogrammer
+ * moved noipv6 variable to variables.c
+ *
+ * Revision 1.27  2018-05-29 22:11:07+05:30  Cprogrammer
+ * removed call to gethostbyname() in ipv6 code
+ *
+ * Revision 1.26  2018-04-26 00:31:09+05:30  Cprogrammer
+ * fixed verbosity of log messages
+ *
+ * Revision 1.25  2018-04-25 22:48:58+05:30  Cprogrammer
+ * fixed display of options and verbosity of messages
+ *
+ * Revision 1.24  2017-11-26 12:58:39+05:30  Cprogrammer
+ * fixed expire logic
+ *
+ * Revision 1.23  2017-11-25 18:34:49+05:30  Cprogrammer
+ * initialize h_allocated. Fixed signal handler for SIGUSR2, expire records when loading context file
+ *
+ * Revision 1.22  2017-11-24 02:58:37+05:30  Cprogrammer
+ * added verbose variable to suppress few messages
+ *
+ * Revision 1.21  2017-11-22 22:38:13+05:30  Cprogrammer
+ * added comments
+ *
+ * Revision 1.20  2017-11-21 18:49:24+05:30  Cprogrammer
+ * added documentation
+ *
+ * Revision 1.19  2017-10-28 11:39:46+05:30  Cprogrammer
+ * fixed search record failure when linked list contained just 1 entry
+ *
+ * Revision 1.18  2017-04-16 19:52:13+05:30  Cprogrammer
+ * fixed hsearch() logic
+ *
+ * Revision 1.17  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.16  2016-04-15 15:45:14+05:30  Cprogrammer
+ * set noipv6 if LIBC_HAS_IP6 is not defined
+ *
+ * Revision 1.15  2016-04-10 22:20:14+05:30  Cprogrammer
+ * fixed incorrect formatting of context filename
+ *
+ * Revision 1.14  2016-04-10 13:07:56+05:30  Cprogrammer
+ * added missing flush() statement to flush logs
+ *
+ * Revision 1.13  2016-04-03 09:38:31+05:30  Cprogrammer
+ * port was being used non-initialized for non-ipv6 code
+ *
+ * Revision 1.12  2015-12-31 08:35:41+05:30  Cprogrammer
+ * added IPV6 code
+ *
+ * Revision 1.11  2015-08-24 19:07:18+05:30  Cprogrammer
+ * replace ip_scan() with ip4_scan(), replace ip_fmt() with ip4_fmt()
+ *
+ * Revision 1.10  2011-07-29 09:29:30+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
+ * Revision 1.9  2010-07-21 09:13:47+05:30  Cprogrammer
+ * use CONTROLDIR environment variable instead of a hardcoded control directory
+ *
+ * Revision 1.8  2009-10-28 13:34:51+05:30  Cprogrammer
+ * fix segmentation fault due to free()
+ *
+ * Revision 1.7  2009-09-07 13:58:02+05:30  Cprogrammer
+ * fix compilation if USE_HASH was not defined
+ *
+ * Revision 1.6  2009-09-07 10:20:26+05:30  Cprogrammer
+ * use select to perform non-blocking recvfrom()
+ *
+ * Revision 1.5  2009-09-05 23:10:13+05:30  Cprogrammer
+ * added option to use hash for faster search
+ *
+ * Revision 1.4  2009-09-03 20:53:16+05:30  Cprogrammer
+ * fixed logic for expiring records
+ *
+ * Revision 1.3  2009-09-01 22:01:51+05:30  Cprogrammer
+ * fixed problem with format of context file
+ *
+ * Revision 1.2  2009-08-31 12:59:46+05:30  Cprogrammer
+ * changed member 'ip' in struct greylst to ip_addr
+ * fix allocation bug (changed realloc to malloc in copy_grey)
+ * speed improvements in search_record
+ *
+ * Revision 1.1  2009-08-29 20:42:59+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
