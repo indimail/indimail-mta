@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-daned.c,v 1.33 2023-01-06 17:33:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.34 2024-02-08 22:05:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
@@ -325,15 +325,17 @@ create_hash(struct danerec *curr)
 void
 expire_records(time_t cur_time)
 {
-	struct danerec *ptr;
+	struct danerec *ptr, *x;
 	time_t          start;
 
 	logerr("expiring records\n");
 	/*- find all records that are expired where timestamp < start */
 	start = cur_time - timeout;
-	for (ptr = head; ptr; ptr = ptr->next) {
-		if (ptr->timestamp >= start)
+	for (ptr = head; ptr; ) {
+		if (ptr->timestamp >= start) {
+			ptr = ptr->next;
 			continue;
+		}
 		if (verbose > 1)
 			print_record(ptr->domain, ptr->timestamp, ptr->status, 1);
 		dane_count--;
@@ -347,7 +349,9 @@ expire_records(time_t cur_time)
 			free(ptr->domain);
 		if (ptr->data)
 			free(ptr->data);
+		x = ptr->next;
 		free(ptr);
+		ptr = x;
 	}
 	logerrf("expired  records\n");
 	/*- destroy and recreate the hash */
@@ -1252,7 +1256,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.33 2023-01-06 17:33:20+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-daned.c,v 1.34 2024-02-08 22:05:36+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1264,6 +1268,9 @@ getversion_qmail_dane_c()
 
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.34  2024-02-08 22:05:36+05:30  Cprogrammer
+ * fix potential use after free()
+ *
  * Revision 1.33  2023-01-06 17:33:20+05:30  Cprogrammer
  * added timeoutconn variable
  *

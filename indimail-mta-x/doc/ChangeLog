@@ -68,7 +68,7 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
     lib/include is missing
 34. qmail-send.c, qmta-send.c, slowq-send.c: fixed multiplication result
     converted to larger type (codeql)
-35. qmail-greyd.c: fix potential use after free()
+35. qmail-greyd.c, qmail-daned.c: fix potential use after free()
 
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024
