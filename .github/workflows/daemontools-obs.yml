@@ -9,9 +9,6 @@ on:
       - .github/workflows/daemontools-obs.yml
       - '!**/doc/*'
       - '!**.md'
-      - '!**/daemontools-codeql.yml'
-      - '!**/daemontools-c-cpp.yml'
-      - '!**/daemontools-freebsd.yml'
   workflow_dispatch:
 
 jobs:

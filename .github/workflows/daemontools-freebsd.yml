@@ -12,9 +12,6 @@ on:
       - '!**/daemontools-x/*.1'
       - '!**/doc/*'
       - '!**.md'
-      - '!**/daemontools-codeql.yml'
-      - '!**/daemontools-c-cpp.yml'
-      - '!**/daemontools-obs.yml'
   workflow_dispatch:
 
 jobs:
