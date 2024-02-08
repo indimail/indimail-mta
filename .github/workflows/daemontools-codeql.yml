@@ -41,8 +41,6 @@ jobs:
     steps:
     - name: checkout_daemontools
       uses: actions/checkout@v2
-      with:
-        path: indimail-mta
       
     - name: checkout_qmail
       uses: actions/checkout@v2
@@ -59,7 +57,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
     - run: |
-        cd indimail-mta/daemontools-x
+        cd daemontools-x
         ./default.configure
         make
 
