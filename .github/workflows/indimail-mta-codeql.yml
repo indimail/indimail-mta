@@ -1,0 +1,64 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+name: "CodeQL-indimail-mta"
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - '**/indimail-mta-x/**'
+      - .github/workflows/indimail-mta-codeql.yml
+      - '!**/doc/*'
+      - '!**.md'
+  pull_request:
+    branches: [ "master" ]
+  schedule:
+    - cron: '37 21 * * 2'
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ${{ 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'c-cpp' ]
+        host: [ubuntu-latest]
+
+    steps:
+    - name: checkout_indimail-mta
+      uses: actions/checkout@v2
+      
+    - name: checkout_qmail
+      uses: actions/checkout@v2
+      with:
+        repository: mbhangui/libqmail
+        path: libqmail
+
+    - name: install_qmail
+      run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+    - run: |
+        cd indimail-mta-x
+        ./default.configure
+        make
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
