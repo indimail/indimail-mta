@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.31 2024-02-07 00:36:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue-fix.c,v 1.32 2024-02-08 23:27:16+05:30 Cprogrammer Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -127,6 +127,36 @@ die_rerun()
 	_exit(111);
 }
 
+int
+qchown(char *name, uid_t uid, gid_t gid)
+{
+	int             fd;
+
+	if ((fd = open_read(name)) == -1)
+		return -1;
+	if (fchown(fd, uid, gid) == -1) {
+		close(fd);
+		return -1;
+	}
+	close(fd);
+	return 0;
+}
+
+int
+qchmod(char *name, mode_t mode)
+{
+	int             fd;
+
+	if ((fd = open_read(name)) == -1)
+		return -1;
+	if (fchmod(fd, mode) == -1) {
+		close(fd);
+		return -1;
+	}
+	close(fd);
+	return 0;
+}
+
 /*
  * returns 1==yes, 0==no
  */
@@ -151,7 +181,7 @@ int
 check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t perm, char type, int size)
 {
 	struct stat     st;
-	int             fd;
+	int             fd = -1, ffd;
 	char           *ptr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
@@ -159,10 +189,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 	switch (type)
 	{
 	case 'd':	/*- directory */
-		if (stat(name, &st)) {
+		if ((ffd = open_read(name)) == -1) {
 			queueError++;
 			if (errno != error_noent) {
-				strerr_warn4(WARN, "stat: ", name, ":", 0);
+				strerr_warn4(WARN, "open: ", name, ":", 0);
 				return -1;
 			}
 			if (!flag_dircreate && flag_interactive) {
@@ -176,20 +206,32 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 				strmsg_out3("Creating directory [", name, "]\n");
 			if (flag_doit && mkdir(name, perm))
 				strerr_die4sys(111, FATAL, "mkdir ", name, ": ");
+			if ((ffd = open_read(name)) == -1)
+				strerr_die4sys(111, FATAL, "open ", name, ": ");
 			strnum1[fmt_8long(strnum1, perm)] = 0;
 			if (flag_verbose)
 				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
-			if (flag_doit && chmod(name, perm))
-				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
+			if (flag_doit && fchmod(ffd, perm))
+				strerr_die6sys(111, FATAL, "fchmod ", strnum1, " ", name, ": ");
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
 			if (flag_verbose)
 				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
-			if (flag_doit && chown(name, uid, gid))
-				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
+			if (flag_doit && fchown(ffd, uid, gid))
+				strerr_die8sys(111, FATAL, "fchown ", strnum1, ":", strnum2, " ", name, ": ");
+			close(ffd);
 			return 0;
 		}
+		if (fstat(ffd, &st)) {
+			queueError++;
+			close(ffd);
+			if (errno != error_noent)
+				strerr_warn4(WARN, "stat: ", name, ":", 0);
+			return -1;
+		}
 		if ((st.st_mode & S_IFMT) != S_IFDIR) {
+			queueError++;
+			close(ffd);
 			strerr_warn5(FATAL, name, ": not a directory. Can't autofix.\nRemove ", name, " and try again", 0);
 			return -1;
 		}
@@ -198,8 +240,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
-				if (!confirm())
+				if (!confirm()) {
+					close(ffd);
 					return -1;
+				}
 				flag_permfix = 1;
 			}
 			/*- fix it */
@@ -207,32 +251,46 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			strnum2[fmt_int(strnum2, gid)] = 0;
 			if (flag_verbose)
 				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
-			if (flag_doit && chown(name, uid, gid))
-				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
+			if (flag_doit && fchown(ffd, uid, gid))
+				strerr_die8sys(111, FATAL, "fchown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
 		if ((st.st_mode & 07777) != perm) {
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
-				if (!confirm())
+				if (!confirm()) {
+					close(ffd);
 					return -1;
+				}
 				flag_permfix = 1;
 			}
 			/*- fix it */
 			strnum1[fmt_8long(strnum1, perm)] = 0;
 			if (flag_verbose)
 				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
-			if (flag_doit && chmod(name, perm))
-				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
+			if (flag_doit && fchmod(ffd, perm))
+				strerr_die6sys(111, FATAL, "fchmod ", strnum1, " ", name, ": ");
 		}
+		close(ffd);
 		return 0;
 	case 'f':	/*- regular file */
-		if (stat(name, &st)) {
+		if ((ffd = open_read(name)) == -1) {
+			queueError++;
+			if (errno != error_noent) {
+				strerr_warn4(WARN, "stat: ", name, ":", 0);
+				return -1;
+			}
+		}
+		if (fstat(ffd, &st)) {
+			queueError++;
+			close(ffd);
 			if (errno != error_noent)
 				strerr_warn4(WARN, "stat: ", name, ":", 0);
 			return -1;
 		}
 		if ((st.st_mode & S_IFMT) != S_IFREG) {
+			queueError++;
+			close(ffd);
 			strerr_warn5(FATAL, name, ": not a regular file. Can't autofix.\nRemove ", name, " and try again", 0);
 			return -1;
 		}
@@ -241,8 +299,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
-				if (!confirm())
+				if (!confirm()) {
+					close(ffd);
 					return -1;
+				}
 				flag_permfix = 1;
 			}
 			/*- fix it */
@@ -250,27 +310,30 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			strnum2[fmt_int(strnum2, gid)] = 0;
 			if (flag_verbose)
 				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
-			if (flag_doit && chown(name, uid, gid))
-				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
+			if (flag_doit && fchown(ffd, uid, gid))
+				strerr_die8sys(111, FATAL, "fchown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
 		if ((st.st_mode & 07777) != perm) {
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
-				if (!confirm())
+				if (!confirm()) {
+					close(ffd);
 					return -1;
+				}
 				flag_permfix = 1;
 			}
 			/*- fix it */
 			strnum1[fmt_8long(strnum1, perm)] = 0;
 			if (flag_verbose)
 				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
-			if (flag_doit && chmod(name, perm))
-				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
+			if (flag_doit && fchmod(ffd, perm))
+				strerr_die6sys(111, FATAL, "fchmod ", strnum1, " ", name, ": ");
 		}
+		close(ffd);
 		return 0;
 	case 'z':	/*- regular file with a size */
-		if (stat(name, &st)) {
+		if ((ffd = open_read(name)) == -1) {
 			queueError++;
 			if (errno != error_noent) {
 				strerr_warn4(WARN, "stat: ", name, ":", 0);
@@ -295,22 +358,31 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 				if (write(fd, ptr, size) != size)
 					strerr_die4sys(111, FATAL, "write: ", name, ": ");
 				alloc_free(ptr);
-				close(fd);
 			}
 			strnum1[fmt_8long(strnum1, perm)] = 0;
 			if (flag_verbose)
 				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
-			if (flag_doit && chmod(name, perm))
-				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
+			if (flag_doit && fchmod(fd, perm))
+				strerr_die6sys(111, FATAL, "fchmod ", strnum1, " ", name, ": ");
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
 			if (flag_verbose)
 				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
-			if (flag_doit && chown(name, uid, gid))
-				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
+			if (flag_doit && fchown(fd, uid, gid))
+				strerr_die8sys(111, FATAL, "fchown ", strnum1, ":", strnum2, " ", name, ": ");
+			if (flag_doit)
+				close(fd);
 			return 0;
 		}
+		if (fstat(ffd, &st)) {
+			queueError++;
+			close(ffd);
+			strerr_warn4(WARN, "stat: ", name, ":", 0);
+			return -1;
+		}
 		if ((st.st_mode & S_IFMT) != S_IFREG) {
+			queueError++;
+			close(ffd);
 			strerr_warn5(FATAL, name, ": not a regular file. Can't autofix.\nRemove ", name, " and try again", 0);
 			return -1;
 		}
@@ -319,8 +391,10 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
-				if (!confirm())
+				if (!confirm()) {
+					close(ffd);
 					return -1;
+				}
 				flag_permfix = 1;
 			}
 			/*- fix it */
@@ -328,28 +402,31 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			strnum2[fmt_int(strnum2, gid)] = 0;
 			if (flag_verbose)
 				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
-			if (flag_doit && chown(name, uid, gid))
-				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
+			if (flag_doit && fchown(ffd, uid, gid))
+				strerr_die8sys(111, FATAL, "fchown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
 		if ((st.st_mode & 07777) != perm) {
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
-				if (!confirm())
+				if (!confirm()) {
+					close(ffd);
 					return -1;
+				}
 				flag_permfix = 1;
 			}
 			/*- fix it */
 			strnum1[fmt_8long(strnum1, perm)] = 0;
 			if (flag_verbose)
 				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
-			if (flag_doit && chmod(name, perm))
-				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
+			if (flag_doit && fchmod(ffd, perm))
+				strerr_die6sys(111, FATAL, "fchmod ", strnum1, " ", name, ": ");
 		}
 		if (st.st_size != size) {
 			queueError++;
 			strerr_warn3(WARN, name, " is not the right size. I will not fix it, please investigate.", 0);
 		}
+		close(ffd);
 		return 0;
 	case 'p':	/*- a named pipe */
 		if (stat(name, &st)) {
@@ -372,17 +449,18 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			strnum1[fmt_8long(strnum1, perm)] = 0;
 			if (flag_verbose)
 				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
-			if (flag_doit && chmod(name, perm))
+			if (flag_doit && qchmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 			strnum1[fmt_int(strnum1, uid)] = 0;
 			strnum2[fmt_int(strnum2, gid)] = 0;
 			if (flag_verbose)
 				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
-			if (flag_doit && chown(name, uid, gid))
+			if (flag_doit && qchown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 			return 0;
 		}
 		if ((st.st_mode & S_IFMT) != S_IFIFO) {
+			queueError++;
 			strerr_warn5(FATAL, name, ": not a fifo/pipe. Can't autofix.\nRemove ", name, " and try again", 0);
 			return -1;
 		}
@@ -400,7 +478,7 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			strnum2[fmt_int(strnum2, gid)] = 0;
 			if (flag_verbose)
 				strmsg_out11("Changing ownership   of [", name, "] to uid ", strnum1, " (", owner, ") gid ", strnum2, " (", group, ")\n");
-			if (flag_doit && chown(name, uid, gid))
+			if (flag_doit && qchown(name, uid, gid))
 				strerr_die8sys(111, FATAL, "chown ", strnum1, ":", strnum2, " ", name, ": ");
 		}
 		if ((st.st_mode & 07777) != perm) {
@@ -415,7 +493,7 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 			strnum1[fmt_8long(strnum1, perm)] = 0;
 			if (flag_verbose)
 				strmsg_out5("Changing permissions of [", name, "] to mode [", strnum1, "]\n");
-			if (flag_doit && chmod(name, perm))
+			if (flag_doit && qchmod(name, perm))
 				strerr_die6sys(111, FATAL, "chmod ", strnum1, " ", name, ": ");
 		}
 		return 0;
@@ -1037,13 +1115,16 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.31 2024-02-07 00:36:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.32 2024-02-08 23:27:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.32  2024-02-08 23:27:16+05:30  Cprogrammer
+ * replace chown, chmod with fchown, fchmod
+ *
  * Revision 1.31  2024-02-07 00:36:32+05:30  Cprogrammer
  * exit if not running as root
  * exit if file type (regular, dir, fifo) is different from expected

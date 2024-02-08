@@ -1,5 +1,8 @@
 /*
  * $Log: installer.c,v $
+ * Revision 1.22  2024-02-08 23:26:45+05:30  Cprogrammer
+ * replace chown, chmod with fchown, fchmod
+ *
  * Revision 1.21  2022-06-20 00:47:40+05:30  Cprogrammer
  * fix directory creation on OSX
  *
@@ -186,6 +189,36 @@ myr_mkdir(char *home, mode_t mode)
 	return (mkdir(dirbuf.s, mode));
 }
 
+int
+qchown(char *name, uid_t uid, gid_t gid)
+{
+	int             fd;
+
+	if ((fd = open_read(name)) == -1)
+		return -1;
+	if (fchown(fd, uid, gid) == -1) {
+		close(fd);
+		return -1;
+	}
+	close(fd);
+	return 0;
+}
+
+int
+qchmod(char *name, mode_t mode)
+{
+	int             fd;
+
+	if ((fd = open_read(name)) == -1)
+		return -1;
+	if (fchmod(fd, mode) == -1) {
+		close(fd);
+		return -1;
+	}
+	close(fd);
+	return 0;
+}
+
 void
 set_perms(char *dest, char *uidstr, char *gidstr, char *modestr, uid_t uid,
 		gid_t gid, int mode, int check)
@@ -245,7 +278,7 @@ set_perms(char *dest, char *uidstr, char *gidstr, char *modestr, uid_t uid,
 			substdio_put(subfdout, "\n", 1);
 			strerr_warn7(WARN, dest, " has wrong group [", gr->gr_name, "], will change it to [", gidstr, "]", 0);
 		}
-		if (chown(dest, (uid_t) uid, (gid_t) gid) == -1)
+		if (qchown(dest, (uid_t) uid, (gid_t) gid) == -1)
 			strerr_die4sys(111, FATAL, "unable to chown ", dest, ": ");
 		if (modestr[1] == '2' || modestr[1] == '4' || modestr[1] == '6') {
 			if (lstat(dest, &st) == -1)
@@ -260,7 +293,7 @@ set_perms(char *dest, char *uidstr, char *gidstr, char *modestr, uid_t uid,
 		substdio_put(subfdout, " ", 1);
 		substdio_puts(subfdout, dest);
 		substdio_put(subfdout, "\n", 1);
-		if (chmod(dest, (mode_t) mode) == -1)
+		if (qchmod(dest, (mode_t) mode) == -1)
 			strerr_die4sys(111, FATAL, "unable to chmod ", dest, ": ");
 	}
 }
@@ -512,7 +545,7 @@ doit(stralloc *line, int uninstall, int check)
 				substdio_put(subfdout, " ", 1);
 				substdio_puts(subfdout, target.s);
 				substdio_put(subfdout, "\n", 1);
-				if (chmod(target.s, mode == -1 ? 0644 : mode) == -1)
+				if (qchmod(target.s, mode == -1 ? 0644 : mode) == -1)
 					strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 			}
 		} else
@@ -604,7 +637,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.21 2022-06-20 00:47:40+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.22 2024-02-08 23:26:45+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
