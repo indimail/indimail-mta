@@ -70,6 +70,9 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
     converted to larger type (codeql)
 35. qmail-greyd.c, qmail-daned.c: fix potential use after free()
 36. queue-fix.c, installer.c: replace chown, chmod with fchown, fchmod
+37. getDomainToken.c: fix match for entries without local/remote directive
+38. spawn.c: convert env variable name to upper case in set_env_variables
+39. spawn.c: convert '-' in env variable name to '_' in set_env_variables
 
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024

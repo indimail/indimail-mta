@@ -152,17 +152,18 @@ control will not be read.
 .TP
 \fBenvheaders\fR
 If this control file exists, \fBqmail-queue\fR passes all headers listed
-in the control file to the queue along with the value. \fBqmail-local\fR
-and \fBqmail-remote\fR will set environment variables corresponding to the
-headers with the values. An optional length, separated by a ':', can be
-appended to the name of the header. If length is specified, the
-environment variable will be set only if the actual length of the header
-value is less than or equal to this value. This will prevent emails with
-extra long headers or malicious headers to exploit memory allocation on
-the system. The environment variable \fBENVHEADERS\fR can be set to use
-a different name for this control file. If \fBENVHEADERS\fR is set but
-empty, the control file will not be read and hence disabled. It is a good
-idea to do this on your SMTP server that faces the internet.
+in the control file to the queue along with the value.
+\fBqmail-lspawn\fR(8) and \fBqmail-rspawn\fR(8) will set environment
+variables corresponding to the headers with their values. An optional
+length, separated by a ':', can be appended to the name of a header. If a
+length is specified, the environment variable will be set only if the
+actual length of the header value is less than or equal to this value. This
+will prevent emails with extra long headers or malicious headers to exploit
+memory allocation on the system. The environment variable \fBENVHEADERS\fR
+can be set to use a different name for this control file. If
+\fBENVHEADERS\fR is set but empty, the control file will not be read and
+hence disabled. It is a good idea to do this on your SMTP server that faces
+the internet.
 
 .TP
 \fBlogheaders\fR
@@ -633,6 +634,8 @@ qmail-qread(8),
 qmail-qmqpc(8),
 qmail-send(8),
 qmail-smtpd(8),
+qmail-lspawn(8),
+qmail-rspawn(8),
 qmail-internals(8),
 qmail-multi(8),
 qmail-spamfilter(8),

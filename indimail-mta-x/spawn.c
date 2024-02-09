@@ -1,5 +1,5 @@
 /*
- * $Id: spawn.c,v 1.34 2023-12-20 10:06:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn.c,v 1.35 2024-02-09 16:09:04+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,6 +16,7 @@
 #include <env.h>
 #include <error.h>
 #include <alloc.h>
+#include <ctype.h>
 #include <noreturn.h>
 #include "indimail_stub.h"
 #include "variables.h"
@@ -112,18 +113,18 @@ err(char *s)
 }
 
 static int
-variables_set()
+set_env_variables()
 {
 	char           *x, *y, *z, *c, *n;
 
-	for (y = z = envh.s;envh.len && *z;z++) {
+	for (y = z = envh.s; envh.len && *z; z++) {
 		if (*z == '\n') {
 			*(n = z) = 0;
-			for (x = y;*x;x++) {
+			for (x = y; *x; x++) {
 				if (*x == ':') {
 					c = x;
 					*x++ = 0;
-					for (;*x && *x == ' ';x++);
+					for (;*x && *x == ' '; x++);
 					if (!env_put2(y, x)) {
 						*n = '\n';
 						*c = ':';
@@ -132,6 +133,10 @@ variables_set()
 					*c = ':';
 					break;
 				}
+				if (*x == '-')
+					*x = '_';
+				else
+					*x = toupper(*x);
 			}
 			*n = '\n';
 			y = z + 1;
@@ -143,7 +148,7 @@ variables_set()
 }
 
 static int
-variables_unset()
+unset_env_variables()
 {
 	char           *x, *y, *z;
 
@@ -245,13 +250,14 @@ docmd()
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
 	}
-	if (variables_set()) {
+	envh.len--;
+	if (envh.len && set_env_variables()) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
-		variables_unset();
+		unset_env_variables();
 		return;
 	}
 	f = SPAWN(fdmess, pi[1], st.st_size, sender.s, qqeh.s, recip.s, j);
-	if (variables_unset()) {
+	if (envh.len && unset_env_variables()) {
 		err("Zqmail-spawn out of memory. (#4.3.0)\n");
 		return;
 	}
@@ -479,7 +485,7 @@ QSPAWN(int argc, char **argv)
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.34 2023-12-20 10:06:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: spawn.c,v 1.35 2024-02-09 16:09:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -494,6 +500,10 @@ main(int argc, char **argv)
 
 /*
  * $Log: spawn.c,v $
+ * Revision 1.35  2024-02-09 16:09:04+05:30  Cprogrammer
+ * convert env variable name to upper case in set_env_variables
+ * convert '-' in env variable name to '_' in set_env_variables
+ *
  * Revision 1.34  2023-12-20 10:06:56+05:30  Cprogrammer
  * added -4 for unable to fork error
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.7  2024-02-09 15:56:26+05:30  Cprogrammer
+ * fix match for entries without local/remote directive
+ *
  * Revision 1.6  2024-01-05 11:40:03+05:30  Cprogrammer
  * return correct domain when local or remote delivery is not set
  *
@@ -100,24 +103,31 @@ getDomainToken(char *domain, stralloc *sa)
 				if (delivery == remote_delivery) { /*- domain:remote:command - remote delivery */
 					if (!str_diffn(p1 + 1, "remote:", 7))
 						return (p1 + 8);
+					else
 					if (!str_diffn(p1 + 1, "local:", 6)) {
 						ptr = sa->s + len;
 						continue; /*- skip local directives for remote mails */
-					}
+					} else
+						return (p1 + 1); /*- domain:command */
 				} else
 				if (delivery == local_delivery) { /*- domain:local:command - local delivery */
 					if (!str_diffn(p1 + 1, "local:", 6))
 						return (p1 + 7);
+					else
 					if (!str_diffn(p1 + 1, "remote:", 7)) {
 						ptr = sa->s + len;
 						continue; /*- skip remote directives for local mails */
-					}
+					} else
+						return (p1 + 1); /*- domain:command */
 				} else
 				if (delivery == local_or_remote) { /*- local/remote delivery */
 					if (!str_diffn(p1 + 1, "local:", 6))
 						return (p1 + 7);
+					else
 					if (!str_diffn(p1 + 1, "remote:", 7))
 						return (p1 + 8);
+					else
+						return (p1 + 1); /*- domain:command */
 				} else
 				if (str_diffn(p1 + 1, "local:", 6) && str_diffn(p1 + 1, "remote:", 7))
 					return (p1 + 1); /*- domain:command */
@@ -133,7 +143,7 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.6 2024-01-05 11:40:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: getDomainToken.c,v 1.7 2024-02-09 15:56:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;
