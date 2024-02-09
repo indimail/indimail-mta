@@ -1,29 +1,5 @@
 /*
- * $Log: multilog.c,v $
- * Revision 1.8  2022-05-22 23:06:19+05:30  Cprogrammer
- * skip fsync() when writing log to disk if env variable NOFSYNC is set
- *
- * Revision 1.7  2008-07-15 19:56:40+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.6  2008-06-22 20:08:02+05:30  Cprogrammer
- * exit if mkdir returns something other than EXIST
- *
- * Revision 1.5  2008-06-07 13:51:26+05:30  Cprogrammer
- * send SIGALRM very NNN seconds
- *
- * Revision 1.4  2004-10-22 20:27:35+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-10-09 23:28:27+05:30  Cprogrammer
- * replaced buffer functions with substdio
- *
- * Revision 1.2  2003-12-31 18:36:29+05:30  Cprogrammer
- * fixed compilation warning
- *
- * Revision 1.1  2003-08-07 19:44:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: multilog.c,v 1.9 2024-02-09 16:49:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -175,6 +151,9 @@ void
 finish(struct cyclog *d, char *file, char *code)
 {
 	struct stat     st;
+#ifdef HASUNLINKAT
+	int             fd;
+#endif
 
 	for (;;) {
 		if (stat(file, &st) == 0)
@@ -194,8 +173,22 @@ finish(struct cyclog *d, char *file, char *code)
 			pause5("unable to link to ", d->dir, "/", fn, ", pausing: ");
 		}
 	}
-	while (unlink(file) == -1)
-		pause5("unable to remove ", d->dir, "/", file, ", pausing: ");
+#ifdef HASUNLINKAT
+	for (;;) {
+		if ((fd = open_read(d->dir)) != -1)
+			break;
+		pause5("unable to open ", d->dir, "/", file, ", pausing: ");
+	}
+	while (unlinkat(fd, file, 0) == -1)
+		pause5("unable to remove (unlinkat) ", d->dir, "/", file, ", pausing: ");
+	close(fd);
+#else
+	while (unlink(file) == -1) {
+		if (errno == error_noent) /*- don't let removal stuck up in this loop */
+			break;
+		pause5("unable to remove (unlink) ", d->dir, "/", file, ", pausing: ");
+	}
+#endif
 	for (;;) {
 		switch (filesfit(d))
 		{
@@ -695,7 +688,38 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	static char    *x = "$Id: multilog.c,v 1.8 2022-05-22 23:06:19+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: multilog.c,v 1.9 2024-02-09 16:49:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: multilog.c,v $
+ * Revision 1.9  2024-02-09 16:49:32+05:30  Cprogrammer
+ * use unlinkat() if available instead of unlink()
+ *
+ * Revision 1.8  2022-05-22 23:06:19+05:30  Cprogrammer
+ * skip fsync() when writing log to disk if env variable NOFSYNC is set
+ *
+ * Revision 1.7  2008-07-15 19:56:40+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.6  2008-06-22 20:08:02+05:30  Cprogrammer
+ * exit if mkdir returns something other than EXIST
+ *
+ * Revision 1.5  2008-06-07 13:51:26+05:30  Cprogrammer
+ * send SIGALRM very NNN seconds
+ *
+ * Revision 1.4  2004-10-22 20:27:35+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.3  2004-10-09 23:28:27+05:30  Cprogrammer
+ * replaced buffer functions with substdio
+ *
+ * Revision 1.2  2003-12-31 18:36:29+05:30  Cprogrammer
+ * fixed compilation warning
+ *
+ * Revision 1.1  2003-08-07 19:44:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.37 2023-06-05 18:17:16+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.38 2024-02-09 00:31:40+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -840,6 +840,21 @@ cleanup(char *d)
 	}
 }
 
+int
+qchown(char *name, uid_t uid, gid_t gid)
+{
+	int             fd;
+
+	if ((fd = open_read(name)) == -1)
+		return -1;
+	if (fchown(fd, uid, gid) == -1) {
+		close(fd);
+		return -1;
+	}
+	close(fd);
+	return 0;
+}
+
 void
 initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 {
@@ -902,7 +917,7 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		if (access(parent_dir, F_OK)) {
 			if (mkdir(parent_dir, 0755) == -1 && errno != error_exist)
 				strerr_die6sys(111, fatal.s, "unable to mkdir ", run_dir, "/svscan/", parent_dir, ": ");
-			if (chown(parent_dir, own, grp) == -1)
+			if (qchown(parent_dir, own, grp) == -1)
 				strerr_die6sys(111, fatal.s, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, ": ");
 		}
 		if (chdir(parent_dir) == -1)
@@ -910,14 +925,14 @@ initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
 		if (access("log", F_OK)) {
 			if (mkdir("log", mode) == -1 && errno != error_exist)
 				strerr_die6sys(111, fatal.s, "unable to mkdir ", run_dir, "/svscan/", parent_dir, "/log: ");
-			if (chown("log", own, grp) == -1)
+			if (qchown("log", own, grp) == -1)
 				strerr_die6sys(111, fatal.s, "unable to set permssions for ", run_dir, "/svscan/", parent_dir, "/log: ");
 		}
 	} else
 	if (access(service_dir, F_OK)) {
 		if (mkdir(service_dir, mode) == -1 && errno != error_exist)
 			strerr_die6sys(111, fatal.s, "unable to mkdir ", run_dir, "/svscan/", service_dir, ": ");
-		if (chown(service_dir, own, grp) == -1)
+		if (qchown(service_dir, own, grp) == -1)
 			strerr_die6sys(111, fatal.s, "unable to set permssions for ", run_dir, "/svscan/", service_dir, ": ");
 	}
 	if (chdir(service_dir) == -1) /*- e.g. qmail-smtpd.25 or log */
@@ -1096,13 +1111,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.37 2023-06-05 18:17:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.38 2024-02-09 00:31:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.38  2024-02-09 00:31:40+05:30  Cprogrammer
+ * replaced chown with fchown
+ *
  * Revision 1.37  2023-06-05 18:17:16+05:30  Cprogrammer
  * disable warning message if pid does not exist
  *

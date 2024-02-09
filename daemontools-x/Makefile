@@ -150,8 +150,16 @@ multilog: load multilog.o match.o deepsleep.o
 	./load multilog match.o deepsleep.o \
 	-lqmail
 
-multilog.o: compile deepsleep.h match.h multilog.c
+multilog.o: compile deepsleep.h match.h multilog.c \
+hasunlinkat.h
 	./compile multilog.c
+
+hasunlinkat.h: \
+tryunlinkat.c compile load
+	( ( ./compile tryunlinkat.c \
+	&& ./load tryunlinkat ) >/dev/null 2>&1 \
+	&& echo "#define HASUNLINKAT 1" || exit 0 ) > hasunlinkat.h
+	rm -f tryunlinkat.o tryunlinkat
 
 deepsleep.o: compile deepsleep.c deepsleep.h
 	./compile deepsleep.c
