@@ -1,5 +1,5 @@
 /*
- * $Id: $
+ * $Id: installer.c,v 1.23 2024-02-10 23:29:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -619,7 +619,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.22 2024-02-08 23:26:45+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.23 2024-02-10 23:29:15+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -627,6 +627,10 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.23  2024-02-10 23:29:15+05:30  Cprogrammer
+ * removed unused options
+ * fixed check option doing fix
+ *
  * Revision 1.22  2024-02-08 23:26:45+05:30  Cprogrammer
  * replace chown, chmod with fchown, fchmod
  *
