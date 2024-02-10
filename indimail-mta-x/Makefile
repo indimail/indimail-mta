@@ -2205,25 +2205,25 @@ conf-sysconfdir conf-shared
 
 BIN: BIN.in
 	([ -f BIN.$(SYSTEM) ] && \
-	cat BIN.in BIN.$(SYSTEM) || cat BIN.in) > BIN
+	$(edit) BIN.in BIN.$(SYSTEM) || $(edit) BIN.in) > BIN
 
 SBIN: SBIN.in SBIN.sql
 	([ -f SBIN.$(SYSTEM) ] && \
-	cat SBIN.in SBIN.$(SYSTEM) || cat SBIN.in; \
-	[ -n "$(USE_SQL)" ] && cat SBIN.sql) > SBIN
+	$(edit) SBIN.in SBIN.$(SYSTEM) || $(edit) SBIN.in; \
+	[ -n "$(USE_SQL)" ] && $(edit) SBIN.sql) > SBIN
 
 SHARED: SHARED.in doc/INSTALL-MINI
 	([ -f SHARED.$(SYSTEM) ] && \
-	cat SHARED.in SHARED.$(SYSTEM) || cat SHARED.in) > SHARED
+	$(edit) SHARED.in SHARED.$(SYSTEM) || $(edit) SHARED.in) > SHARED
 
 MAN: MAN.in MAN.sql
 	([ -f MAN.$(SYSTEM) ] && \
-	cat MAN.in MAN.$(SYSTEM) || cat MAN.in; \
+	$(edit) MAN.in MAN.$(SYSTEM) || $(edit) MAN.in; \
 	[ -n "$(USE_SQL)" ] && cat MAN.sql || true) > MAN
 
 
 install: \
-$(it) $(man) installer DIRS BIN SBIN SHARED MAN INPUT
+$(it) $(man) installer DIRS BIN SBIN SHARED MAN
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(prefix)                < SBIN
@@ -2235,14 +2235,18 @@ $(it) $(man) installer DIRS BIN SBIN SHARED MAN INPUT
 	[ -z $(DESTDIR) ] && ./instcheck indimail-mta || true
 
 uninstall: installer DIRS BIN SBIN SHARED MAN
-	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
-	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
-	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
-	sed -n '1!G;h;$$p' ETC     | ./installer -ui $(DESTDIR)$(qsysconfdir)
-	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$$p' SBIN    | ./installer -ui $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
+	# reverse the order with which we did install (LIFO). i.e.
+	# MAN, LIBEXEC, PLUGINS, ETC, SHARED, SBIN, BIN, DIRS
+	# reverse order of input files using sed so that
+	# we don't leave non-empty directories
+	sed -n '1!G;h;$$p' MAN     | ./installer -u $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' LIBEXEC | ./installer -u $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$$p' PLUGINS | ./installer -u $(DESTDIR)$(prefix)"/lib/indimail"
+	sed -n '1!G;h;$$p' ETC     | ./installer -u $(DESTDIR)$(qsysconfdir)
+	sed -n '1!G;h;$$p' SHARED  | ./installer -u $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$$p' SBIN    | ./installer -u $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' BIN     | ./installer -u $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' DIRS    | ./installer -u $(DESTDIR)
 
 slurpclose.o: compile slurpclose.c slurpclose.h
 	./compile slurpclose.c

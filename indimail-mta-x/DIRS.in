@@ -1,4 +1,5 @@
-# installer input files for Universal directories
+#
+# installer input files non-distro-specific directories
 #
 d::::::
 d::::/var::

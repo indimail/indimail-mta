@@ -1,4 +1,4 @@
-# compatibility links  in @indimaildir@ for Darwin
+# compatibility links in @indimaildir@ for Darwin
 #
 l::::@indimaildir@/bin:@prefix@/bin:
 l::::@indimaildir@/sbin:@prefix@/sbin:

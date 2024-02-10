@@ -1,5 +1,7 @@
-# installer input file for shared directories (universal)
-# @shareddir@
+#
+# installer input file for non-distro-specific files in
+# shared directory @shareddir@
+#
 d:::0755:::
 d:::0755:/boot::
 #

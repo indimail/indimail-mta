@@ -1,5 +1,6 @@
-# installer input files man pages for universal progams
-# @mandir@
+#
+# installer input files for non-distro-specific man pages in @mandir@
+#
 d:::0755:::
 d:::0755:/man1::
 d:::0755:/man3::
