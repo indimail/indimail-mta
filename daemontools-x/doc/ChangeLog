@@ -27,10 +27,13 @@ Release 1.1.3-1.1 Start 27/04/2023 End 01/01/2024
 12. minisvc.in: added missing definitions for usefsync, usefdatasync,
     usesyncdir 
 - 01/01/2024 - indimail-mta-3.0.6
-- 00/02/2024
+- 09/02/2024
 13. installer.c, supervise.c: replace chown, chmod with fchown, fchmod
 14. Makefile: test presence of unlinkat() for multilog
 15. multilog.c: use unlinkat() if available instead of unlink
+- 10/02/2024
+16. installer.c: removed unused options and fixed check option fixing
+    permissions
 
 * Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 20/02/2023 End 23/04/2023

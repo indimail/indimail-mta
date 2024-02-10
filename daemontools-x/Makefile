@@ -524,13 +524,13 @@ install: $(it) $(man) installer DIRS BIN SBIN MAN SHARED LIBEXEC INPUT
 	./installer $(DESTDIR)$(mandir)                < MAN
 
 uninstall: installer DIRS BIN SBIN SHARED MAN
-	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
-	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
-	sed -n '1!G;h;$$p' ETC     | ./installer -ui $(DESTDIR)$(qsysconfdir)
-	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$$p' SBIN    | ./installer -ui $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
+	sed -n '1!G;h;$$p' MAN     | ./installer -u $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' LIBEXEC | ./installer -u $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$$p' ETC     | ./installer -u $(DESTDIR)$(qsysconfdir)
+	sed -n '1!G;h;$$p' SHARED  | ./installer -u $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$$p' SBIN    | ./installer -u $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' BIN     | ./installer -u $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' DIRS    | ./installer -u $(DESTDIR)
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared

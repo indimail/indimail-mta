@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.42 2023-12-31 08:59:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.43 2024-02-10 23:18:24+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -288,6 +288,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %docdir %{shareddir}/doc
 %attr(0644,root,root)                    %{shareddir}/doc/ChangeLog-daemontools
 %attr(0644,root,root)                    %{shareddir}/doc/README.logselect
+%attr(0644,root,root)                    %{mandir}/man1/installer.1.*
 %attr(0644,root,root)                    %{mandir}/man1/spipe.1.*
 %attr(0644,root,root)                    %{mandir}/man1/qfilelog.1.*
 %attr(0644,root,root)                    %{mandir}/man1/multipipe.1.*

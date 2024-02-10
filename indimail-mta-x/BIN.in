@@ -1,8 +1,5 @@
-# installer input files for Universal programs in @prefix@/bin
-# @prefix@/bin
-#d:::0755:/bin::
-#
-# Files in @prefix@/bin
+# installer input files for non-distro-specific
+# binaries in @prefix@/bin
 #
 f:::0755:/bin/:qmail-inject:qmail-inject
 f:::0755:/bin/:qmail-showctl:qmail-showctl

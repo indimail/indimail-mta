@@ -1,7 +1,6 @@
-# installer input files for universal programs in @prefix@/sbin
-# @prefix@/sbin
 #
-# Files in @prefix@/sbin
+# installer input files for non-distro-specific system
+# binaries in @prefix@/sbin
 #
 f:::0755:/sbin/:qmail-popbull:qmail-popbull
 f:::0755:/sbin/:qmail-poppass:qmail-poppass

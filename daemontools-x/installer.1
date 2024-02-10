@@ -1,0 +1,90 @@
+.\" vim: tw=75
+.TH installer 1
+
+.SH NAME
+installer \- create directories, copy files, create FIFO, create devices
+
+.SH SYNOPSYS
+\fBinstaller\fR [-c -f -u -m] \fIdest\fR
+
+.SH DESCRIPTION
+\fBinstaller\fR program create directories, install files from source
+directories and create files like symbolic links, named pipes and devices
+in \fIdest\fR directory of your choice. \fBinstaller\fR takes input from
+descriptor 0. It expects the data on descriptor 0 to be of the followin
+form.
+
+.EX
+\fItype\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget\fR:\fIsource\fR:
+.EE
+
+Here \fItype\fR can be d, l, f, p, c where
+.TP 2
+d
+= directory
+.TP
+l
+= symbolic link
+.TP
+f
+= file
+.TP
+p
+= named pipe
+.TP
+c
+= device file
+
+.PP
+\fIowner\fR is the owner of the \fItarget\fR (user name or numeric user ID),
+\fIgroup\fR is the group membership of the \fItarget\fR (group name or numeric
+group ID) of the \fItarget\fR, \fImode\fR is the file mode bits of the
+\fItarget\fR. \fItarget\fR is the file name of the \fItarget\fR and
+\fIsource\fR is the source filename (for soft link or a regular file). The
+lines expected by \fBinstaller\fr can be of any of the following forms
+given below. Invalid data is silently ignored.
+
+.EX
+ Directory
+ \fBd\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIdir\fR::
+
+ Soft link
+ \fBl\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIlink\fR::\fIsource\fR:
+
+ File
+ \fBf\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIfilename\fR:\fIsource\fR:
+
+ Named Pipes
+ \fBp\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIfifo\fR::
+
+ Device files
+ \fBc\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:target:devnum:
+.EE
+
+\fBinstaller\fR silently ignores comments, blank lines or any line starting
+with any white space character.
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-c\fR
+This turns on check mode where installer checks the existence, owner, group
+and permission mode of the \fItarget\fR.
+
+.TP 3
+\fB\-f\fR
+This option turns on check mode as well as fix mode where owner, group or
+mode of the \fItarget\fR is fixed.
+
+.TP 3
+\fB\-u\fR
+Uninstall \fItarget\fR from \fIdest\fR.
+
+.TP 3
+\fB\-m\fR
+Continue if there is an error with reading source file. This option can be
+used when \fItype\fR is \fIf\fR. For other file types, this option has no
+effect.
+
+.SH SEE ALSO
+install(1)

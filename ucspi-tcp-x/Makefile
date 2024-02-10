@@ -696,13 +696,13 @@ install: it installer DIRS BIN SHARED PLUGINS MAN INPUT
 	./installer $(DESTDIR)$(mandir)                < MAN
 
 uninstall: installer DIRS BIN SHARED PLUGINS MAN
-	sed -n '1!G;h;$$p' MAN     | ./installer -ui $(DESTDIR)$(mandir)
-	sed -n '1!G;h;$$p' LIBEXEC | ./installer -ui $(DESTDIR)$(libexecdir)
-	sed -n '1!G;h;$$p' ETC   C | ./installer -ui $(DESTDIR)$(qsysconfdir)
-	sed -n '1!G;h;$$p' PLUGINS | ./installer -ui $(DESTDIR)$(prefix)"/lib/indimail"
-	sed -n '1!G;h;$$p' SHARED  | ./installer -ui $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$$p' BIN     | ./installer -ui $(DESTDIR)$(prefix)
-	sed -n '1!G;h;$$p' DIRS    | ./installer -u  $(DESTDIR)
+	sed -n '1!G;h;$$p' MAN     | ./installer -u $(DESTDIR)$(mandir)
+	sed -n '1!G;h;$$p' LIBEXEC | ./installer -u $(DESTDIR)$(libexecdir)
+	sed -n '1!G;h;$$p' ETC   C | ./installer -u $(DESTDIR)$(qsysconfdir)
+	sed -n '1!G;h;$$p' PLUGINS | ./installer -u $(DESTDIR)$(prefix)"/lib/indimail"
+	sed -n '1!G;h;$$p' SHARED  | ./installer -u $(DESTDIR)$(shareddir)
+	sed -n '1!G;h;$$p' BIN     | ./installer -u $(DESTDIR)$(prefix)
+	sed -n '1!G;h;$$p' DIRS    | ./installer -u $(DESTDIR)
 
 debian/Makefile: debian/Makefile.in conf-release conf-version \
 conf-prefix conf-sysconfdir conf-shared
