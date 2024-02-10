@@ -2223,7 +2223,7 @@ MAN: MAN.in MAN.sql
 
 
 install: \
-$(it) $(man) installer DIRS BIN SBIN SHARED MAN
+$(it) $(man) installer DIRS BIN SBIN SHARED MAN INPUT
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
 	./installer $(DESTDIR)$(prefix)                < SBIN
