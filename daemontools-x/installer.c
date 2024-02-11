@@ -1,5 +1,6 @@
 /*
- * $Id: installer.c,v 1.23 2024-02-10 23:29:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.24 2024-02-11 19:52:08+05:30 Cprogrammer Exp mbhangui $
+ * taken from ezmlm-0.54
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,9 +11,6 @@
 #include <substdio.h>
 #include <sgetopt.h>
 #include <subfd.h>
-#ifndef NETQMAIL
-#include <qprintf.h>
-#endif
 #include <stralloc.h>
 #include <getln.h>
 #include <open.h>
@@ -23,6 +21,9 @@
 #include <scan.h>
 #include <fmt.h>
 #include <noreturn.h>
+#ifndef NETQMAIL
+#include <qprintf.h>
+#endif
 
 static stralloc target = { 0 };
 
@@ -619,7 +620,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.23 2024-02-10 23:29:15+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.24 2024-02-11 19:52:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -627,6 +628,9 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.24  2024-02-11 19:52:08+05:30  Cprogrammer
+ * updated for netqmail, notqmail
+ *
  * Revision 1.23  2024-02-10 23:29:15+05:30  Cprogrammer
  * removed unused options
  * fixed check option doing fix

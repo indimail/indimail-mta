@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.25 2023-12-31 08:59:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.26 2024-02-11 19:53:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -249,6 +249,8 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0644,root,root)                     %{mandir}/man1/fixcrio.1.*
 %attr(0644,root,root)                     %{mandir}/man1/recordio.1.*
 %attr(0644,root,root)                     %{mandir}/man1/dotls.1.*
+%attr(0644,root,root)                     %{mandir}/man1/uinstaller.1.*
+%attr(0644,root,root)                     %{mandir}/man1/instcheck-ucspi-tcp.1.*
 
 %attr(0644,root,root)                     %{shareddir}/doc/ChangeLog-ucspi-tcp
 %attr(0644,root,root)                     %{shareddir}/doc/README.ucspi-tcp

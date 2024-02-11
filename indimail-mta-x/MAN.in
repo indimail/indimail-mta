@@ -56,6 +56,7 @@ f:::0644:/man1/:ifaddr.1:ifaddr.1
 f:::0644:/man1/:iftocc.1:iftocc.1
 f:::0644:/man1/:iftoccfrom.1:iftoccfrom.1
 f:::0644:/man1/:inewaliases.1:inewaliases.1
+f:::0644:/man1/:instcheck-indimail-mta.1:instcheck-indimail-mta.1
 f:::0644:/man1/:maildir2mbox.1:maildir2mbox.1
 f:::0644:/man1/:maildircmd.1:maildircmd.1
 f:::0644:/man1/:maildirdeliver.1:maildirdeliver.1

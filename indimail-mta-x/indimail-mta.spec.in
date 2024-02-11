@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.399 2024-01-23 22:59:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.400 2024-02-11 19:53:44+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -976,6 +976,7 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)              %{mandir}/man1/forward.1.*
 %attr(0644,root,root)              %{mandir}/man1/predate.1.*
 %attr(0644,root,root)              %{mandir}/man1/datemail.1.*
+%attr(0644,root,root)              %{mandir}/man1/instcheck-indimail-mta.1.*
 %attr(0644,root,root)              %{mandir}/man1/mailsubj.1.*
 %attr(0644,root,root)              %{mandir}/man8/qmail-showctl.8.*
 %attr(0644,root,root)              %{mandir}/man1/qmaildirmake.1.*

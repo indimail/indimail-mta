@@ -29,11 +29,11 @@ it = envdir envuidgid setlock setuidgid softlimit svc svok \
 	minisvc instcheck installer daemontools.perms daemontools.changes
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
-	tai64n2tai.1 envdir.8 envuidgid.8 fghack.8 multilog.8 pgrphack.8 \
-	readproctitle.8 setlock.8 setuidgid.8 softlimit.8 supervise.8 \
-	svc.8 svok.8 svscan.8 svstat.8 tai64n.8 tai64nlocal.8 \
-	tai64nunix.8 logselect.8 svscanboot.8 qmailctl.8  qlogselect.1 \
-	minisvc.8 docker-entrypoint.8 runpod.1
+	tai64n2tai.1 envdir.8 envuidgid.8 fghack.8 installer.1 \
+	multilog.8 pgrphack.8 readproctitle.8 setlock.8 setuidgid.8 \
+	softlimit.8 supervise.8 svc.8 svok.8 svscan.8 svstat.8 tai64n.8 \
+	tai64nlocal.8 tai64nunix.8 logselect.8 svscanboot.8 qmailctl.8 \
+	qlogselect.1 minisvc.8 docker-entrypoint.8 runpod.1
 
 include Makefile.$(SYSTEM)
 
@@ -483,6 +483,9 @@ load installer.o
 installer.o: \
 compile installer.c
 	./compile installer.c
+	
+installer.1: installer.9 conf-libexec conf-sysconfdir
+	$(edit) installer.9 > installer.1
 
 INPUT: INPUT.in \
 conf-prefix conf-libexec conf-qmail \

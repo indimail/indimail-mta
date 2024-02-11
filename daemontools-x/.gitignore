@@ -86,3 +86,4 @@ svscan_rc
 set-network-wait
 runpod
 unlinkat.h
+installer.1

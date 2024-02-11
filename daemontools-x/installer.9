@@ -1,0 +1,114 @@
+.\" vim: tw=75
+.TH installer 1
+
+.SH NAME
+installer \- create directories, copy files, create FIFO, create devices
+
+instcheck \- check installed files for existence, owner, group, permissions
+
+.SH SYNOPSYS
+\fB@libexecdir@/installer\fR [-cfum] \fIdest\fR
+
+\fB@libexecdir@/instcheck\fR [-cfm] \fI[package]\fR
+
+.SH DESCRIPTION
+\fBinstaller\fR program create directories, install files from source
+directories and create files, symbolic links, named pipes and devices files
+in directory \fIdest\fR of your choice. \fBinstaller\fR takes input from
+descriptor 0. It expects the data on descriptor 0 to be of the following
+form.
+
+.EX
+\fItype\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget\fR:\fIsource\fR:
+.EE
+
+Here \fItype\fR is either of d, l, f, p, c as following
+.TP 2
+d
+= directory
+.TP
+l
+= symbolic link
+.TP
+f
+= file
+.TP
+p
+= named pipe
+.TP
+c
+= device file
+
+.PP
+\fIowner\fR is the owner of the \fItarget\fR (user name or numeric user ID),
+\fIgroup\fR is the group membership of the \fItarget\fR (group name or numeric
+group ID) of the \fItarget\fR, \fImode\fR is the file mode bits of the
+\fItarget\fR. \fItarget\fR is a relative or absolute path of the filename
+in \fIdest\fR. \fIsource\fR is a relative or absolute path of the source
+filename. The lines expected by \fBinstaller\fr has to be any of the
+following forms given below. Invalid data is silently ignored.
+
+.EX
+ Directory
+ \fBd\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIdir\fR::
+
+ Soft link
+ \fBl\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIlink\fR::\fIsource\fR:
+
+ File
+ \fBf\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIfilename\fR:\fIsource\fR:
+
+ Named Pipes
+ \fBp\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIfifo\fR::
+
+ Device files
+ \fBc\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:target:devnum:
+.EE
+
+\fBinstaller\fR silently ignores comments, blank lines or any line starting
+with any white space character.
+
+\fBinstcheck\fR checks the existence of files and ower, group, mode of
+installed files. It needs the same input as \fBinstcheck\fR on descriptor
+0. \fBinstcheck\fR is just a frontend to \fBinstaller\fR, except that it
+uses input file started in \fI@sysconfdir@/perms.d/package\fR. A special
+file named \fIINPUT\fR is present in the director under
+\fIpackage/INPUT\fR. Here \fIpackage\fR refers to binary packages which use
+\fBinstaller\fR to do the installation - \fBdaemontools\fR,
+\fBucspi-tcp\fR, \fBindimail-mta\fR, \fBtinydnssec\fR. e.g., the following
+command will check and fix permissions for each and every file that is part
+of the \fBdaemontools\fR package.
+
+.EX
+  instcheck -cf daemontools < @sysconfdir@/perms.d/daemontools/INPUT
+.EE
+
+An alternate of using instcheck is to rename it to \fBinstcheck.package\fR.
+e.g., if \fBinstcheck\fR is renamed as \fBinstcheck.indimail-mta\fR,
+running the command \fBinstcheck.indimail-mta\fR will check and fix all
+file part of the indimail-mta package.
+
+.SH OPTIONS
+.PP
+.TP 3
+\fB\-c\fR
+This turns on check mode where installer checks the existence, owner, group
+and permission mode of the \fItarget\fR.
+
+.TP 3
+\fB\-f\fR
+This option turns on check mode as well as fix mode where owner, group or
+mode of the \fItarget\fR is fixed.
+
+.TP 3
+\fB\-u\fR
+Uninstall \fItarget\fR from \fIdest\fR.
+
+.TP 3
+\fB\-m\fR
+Continue if there is an error with reading source file. This option can be
+used when \fItype\fR is \fIf\fR. For other file types, this option has no
+effect.
+
+.SH SEE ALSO
+install(1)
