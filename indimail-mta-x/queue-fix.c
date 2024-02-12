@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.32 2024-02-08 23:27:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue-fix.c,v 1.33 2024-02-11 23:22:35+05:30 Cprogrammer Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -62,6 +62,7 @@ static int      flag_unlink = 0;
 static int      flag_verbose = 0;
 static int      flag_ratelimit = 0;
 static int      flag_qmta = 0;
+static int      flag_trash = 0;
 static uid_t    qmailq_uid;
 static uid_t    qmails_uid;
 static uid_t    qmailr_uid;
@@ -69,6 +70,7 @@ static gid_t    qmail_gid;
 static int      queueError = 0;
 static int      split;
 static int      bigtodo;
+static uint     tcpto_size = TCPTO_BUFSIZ;
 
 void
 out(char *str)
@@ -90,18 +92,23 @@ usage()
 {
 	char            strnum1[FMT_ULONG];
 	char            strnum2[FMT_ULONG];
+	char            strnum3[FMT_ULONG];
 
 	strnum1[fmt_int(strnum1, split)] = 0;
 	strnum2[fmt_int(strnum2, bigtodo)] = 0;
-	strerr_warn6(WARN,
+	strnum2[fmt_uint(strnum2, TCPTO_BUFSIZ)] = 0;
+	strerr_warn8(WARN,
 			"usage: queue-fix [-irmNv] [-s split] queue_dir\n"
 			"                 -s split - where split = queue split number (default ", strnum1,
 			")\n"
 			"                 -b 0|1   - 0 for no big todo, 1 for big todo (default ", strnum2,
 			")\n"
+			"                 -S size  - where size = tcpto buffer size (default ", strnum3,
+			")\n"
 			"                 -i       - Interactive Mode\n"
 			"                 -r       - create ratelimit directory\n"
 			"                 -m       - qmta mode\n"
+			"                 -t       - Create trash directory for qmail-rm\n"
 			"                 -v       - Verbose Mode\n"
 			"                 -N       - Test Mode", 0);
 	_exit(100);
@@ -424,7 +431,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 		}
 		if (st.st_size != size) {
 			queueError++;
-			strerr_warn3(WARN, name, " is not the right size. I will not fix it, please investigate.", 0);
+			strnum1[fmt_ulong(strnum1, size)] = 0;
+			strerr_warn5(WARN, name, " is not the right size (", strnum1, "). I will not fix it, please investigate.", 0);
 		}
 		close(ffd);
 		return 0;
@@ -857,12 +865,14 @@ check_dirs()
 	}
 
 	/*- check the others */
-	/*- trash Dir */
-	check_dir.len = s;
-	if (!stralloc_cats(&check_dir, "trash") || !stralloc_0(&check_dir))
-		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
-		return -1;
+	if (flag_trash) {
+		/*- trash Dir */
+		check_dir.len = s;
+		if (!stralloc_cats(&check_dir, "trash") || !stralloc_0(&check_dir))
+			strerr_die2x(111, FATAL, "out of memory");
+		if (check_item(check_dir.s, "qmailq", "qmail", qmailq_uid, qmail_gid, 0700, 'd', 0))
+			return -1;
+	}
 
 	/*- pid */
 	check_dir.len = s;
@@ -889,7 +899,7 @@ check_dirs()
 	check_dir.len = s;
 	if (!stralloc_cats(&check_dir, "lock/tcpto") || !stralloc_0(&check_dir))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (check_item(check_dir.s, "qmailr", "qmail", qmailr_uid, qmail_gid, 0644, 'z', TCPTO_BUFSIZ))
+	if (check_item(check_dir.s, "qmailr", "qmail", qmailr_uid, qmail_gid, 0644, 'z', tcpto_size))
 		return -1;
 
 	check_dir.len = s;
@@ -1048,7 +1058,7 @@ main(int argc, char **argv)
 	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
 		split = auto_split;
-	while ((opt = getopt(argc, argv, "b:imNvs:r")) != opteof) {
+	while ((opt = getopt(argc, argv, "b:imNvtS:s:r")) != opteof) {
 		switch (opt)
 		{
 		case 'b':
@@ -1063,11 +1073,17 @@ main(int argc, char **argv)
 		case 'v':
 			flag_verbose = 1;
 			break;
+		case 'S':
+			scan_uint(optarg, &tcpto_size);
+			break;
 		case 's':
 			scan_int(optarg, &split);
 			break;
 		case 'm':
 			flag_qmta = 1;
+			break;
+		case 't':
+			flag_trash = 1;
 			break;
 		case 'r':
 			flag_ratelimit = 1;
@@ -1115,13 +1131,17 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.32 2024-02-08 23:27:16+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: queue-fix.c,v 1.33 2024-02-11 23:22:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.33  2024-02-11 23:22:35+05:30  Cprogrammer
+ * added option -S to specify tcpto buffer size
+ * added option -t to create trash directory for qmail-rm
+ *
  * Revision 1.32  2024-02-08 23:27:16+05:30  Cprogrammer
  * replace chown, chmod with fchown, fchmod
  *

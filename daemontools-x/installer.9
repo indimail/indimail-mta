@@ -2,7 +2,7 @@
 .TH installer 1
 
 .SH NAME
-installer \- create directories, copy files, create FIFO, create devices
+installer \- create directories, create/copy files, named pipes and devices
 
 instcheck \- check installed files for existence, owner, group, permissions
 
@@ -13,16 +13,16 @@ instcheck \- check installed files for existence, owner, group, permissions
 
 .SH DESCRIPTION
 \fBinstaller\fR program create directories, install files from source
-directories and create files, symbolic links, named pipes and devices files
-in directory \fIdest\fR of your choice. \fBinstaller\fR takes input from
-descriptor 0. It expects the data on descriptor 0 to be of the following
-form.
+directories, create files with zeros, symbolic links, named pipes and
+devices files in directory \fIdest\fR of your choice. \fBinstaller\fR takes
+input from descriptor 0. It expects the data on descriptor 0 to be of the
+following form.
 
 .EX
 \fItype\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget\fR:\fIsource\fR:
 .EE
 
-Here \fItype\fR is either of d, l, f, p, c as following
+Here \fItype\fR is either of d, l, f, z, p, c as following
 .TP 2
 d
 = directory
@@ -32,6 +32,9 @@ l
 .TP
 f
 = file
+.TP
+z
+= file with fixed number of zeroes
 .TP
 p
 = named pipe
@@ -45,28 +48,36 @@ c
 group ID) of the \fItarget\fR, \fImode\fR is the file mode bits of the
 \fItarget\fR. \fItarget\fR is a relative or absolute path of the filename
 in \fIdest\fR. \fIsource\fR is a relative or absolute path of the source
-filename. The lines expected by \fBinstaller\fr has to be any of the
-following forms given below. Invalid data is silently ignored.
+filename. \fItarget\fR can be a directory, file, symbolic link, fifo or a
+device The lines expected by \fBinstaller\fr has to be any of the following
+forms given below. Invalid data is silently ignored.
 
 .EX
  Directory
- \fBd\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIdir\fR::
+ \fBd\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_dir\fR::
 
  Soft link
- \fBl\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIlink\fR::\fIsource\fR:
+ \fBl\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_link\fR::\fIsource\fR:
 
  File
- \fBf\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIfilename\fR:\fIsource\fR:
+ \fBf\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_file\fR:\fIsource\fR:
+
+ File with zeros
+ \fBz\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_file\fR:\fIsize\fR:
 
  Named Pipes
- \fBp\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIfifo\fR::
+ \fBp\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_fifo\fR::
 
  Device files
- \fBc\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:target:devnum:
+ \fBc\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:target_device:devnum:
 .EE
 
 \fBinstaller\fR silently ignores comments, blank lines or any line starting
 with any white space character.
+
+\fBinstaller\fR is not meant to be executed by end users. It is meant to be
+used to be used in Makefile and build scripts to install binaries, links,
+named pipes, devices and files with zeros to a destination directory.
 
 \fBinstcheck\fR checks the existence of files and ower, group, mode of
 installed files. It needs the same input as \fBinstcheck\fR on descriptor

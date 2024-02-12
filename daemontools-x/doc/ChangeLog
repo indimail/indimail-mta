@@ -34,6 +34,8 @@ Release 1.1.3-1.1 Start 27/04/2023 End 01/01/2024
 - 10/02/2024
 16. installer.c: removed unused options and fixed check option fixing
     permissions
+- 10/02/2024
+11. installer.c: added 'z' option to create files with fized number of zeros.
 
 * Sun Apr 23 2023 17:05:00 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.2-1.1%{?dist}
 Release 1.1.2-1.1 Start 20/02/2023 End 23/04/2023

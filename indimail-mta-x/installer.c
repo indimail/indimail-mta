@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.24 2024-02-11 19:52:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.25 2024-02-12 17:19:34+05:30 Cprogrammer Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -21,6 +21,7 @@
 #include <scan.h>
 #include <fmt.h>
 #include <noreturn.h>
+#include <alloc.h>
 #ifndef NETQMAIL
 #include <qprintf.h>
 #endif
@@ -63,7 +64,7 @@ get_octal(mode_t mode)
 }
 
 void
-print_info(const char *str, char *source, char *dest, mode_t mode, uid_t uid, gid_t gid)
+print_info(const char *str, char *source, char *dest, mode_t mode, uid_t uid, gid_t gid, unsigned long size)
 {
 	struct passwd  *pw;
 	struct group   *gr;
@@ -115,6 +116,16 @@ print_info(const char *str, char *source, char *dest, mode_t mode, uid_t uid, gi
 		subprintf(subfdout, " -mode %s", get_octal(mode));
 	if (source)
 		subprintf(subfdout, " -source %s", source);
+#endif
+#ifdef NETQMAIL
+	if (size != -1) {
+		substdio_puts(subfdout, " -size ");
+		strnum[fmt_ulong(strnum, size)] = 0;
+		substdio_puts(subfdout, strnum);
+	}
+#else
+	if (size != -1)
+		subprintf(subfdout, " -size %lu", size);
 #endif
 	substdio_puts(subfdout, "\n");
 	substdio_flush(subfdout);
@@ -272,14 +283,15 @@ set_perms(char *dest, char *uidstr, char *gidstr, char *modestr,
  * f:owner:group:mode:target_file:name:
  * p:owner:group:mode:target_fifo::
  * c:owner:group:mode:target_device:devnum:
+ * z:owner:group:mode:target_file:size:
  */
 void
 doit(stralloc *line, int uninstall, int check)
 {
 	char           *x;
-	char           *type, *uidstr, *gidstr, *modestr, *mid, *name;
+	char           *type, *uidstr, *gidstr, *modestr, *mid, *name, *zerobuf;
 	int             fdin, fdout, opt;
-	unsigned long   m;
+	unsigned long   m, size;
 	unsigned int    xlen, i;
 	uid_t           uid;
 	gid_t           gid;
@@ -340,7 +352,13 @@ doit(stralloc *line, int uninstall, int check)
 	x += i;
 	xlen -= i;
 
-	mid = x;
+	if (*type == 'z') {
+		name = x;
+		mid = NULL;
+	} else {
+		name = NULL;
+		mid = x;
+	}
 	i = byte_chr(x, xlen, ':');
 	if (i == xlen)
 		return;
@@ -348,10 +366,13 @@ doit(stralloc *line, int uninstall, int check)
 	x += i;
 	xlen -= i;
 
-	name = x;
+	if (*type != 'z')
+		name = x;
 	i = byte_chr(x, xlen, ':');
 	if (i == xlen)
 		return;
+	if (*type == 'z')
+		scan_ulong(x, &size);
 	x[i++] = 0;
 	x += i;
 	xlen -= i;
@@ -364,9 +385,13 @@ doit(stralloc *line, int uninstall, int check)
 			nomem();
 		if (!stralloc_cats(&target, mid))
 			nomem();
+		if (*type != 'l' && name && !stralloc_cats(&target, name))
+			nomem();
+	} else
+	if (*type == 'z') {
+		if (!stralloc_cats(&target, name))
+			nomem();
 	}
-	if (*type != 'l' && name && !stralloc_cats(&target, name))
-		nomem();
 	if (!stralloc_0(&target))
 		nomem();
 	target.len--;
@@ -379,7 +404,7 @@ doit(stralloc *line, int uninstall, int check)
 		switch (*type)
 		{
 		case 'l':
-			print_info("unlink", 0, target.s, -1, -1, -1);
+			print_info("unlink", 0, target.s, -1, -1, -1, -1);
 			if (lstat(target.s, &st) == -1) {
 				if (errno == error_noent)
 					return;
@@ -391,15 +416,16 @@ doit(stralloc *line, int uninstall, int check)
 				strerr_die4sys(111, FATAL, "unable to unlink ", target.s, ": ");
 			break;
 		case 'd':
-			print_info("rmdir", 0, target.s, -1, -1, -1);
+			print_info("rmdir", 0, target.s, -1, -1, -1, -1);
 			if (rmdir(target.s) == -1) {
 				if (errno == error_noent)
 					return;
 				strerr_warn4(WARN, "rmdir ", target.s, ": ", &strerr_sys);
 			}
 			break;
+		case 'z':
 		case 'f':
-			print_info("delete", 0, target.s, -1, -1, -1);
+			print_info("delete", 0, target.s, -1, -1, -1, -1);
 			if (lstat(target.s, &st) == -1) {
 				if (errno == error_noent)
 					return;
@@ -441,7 +467,7 @@ doit(stralloc *line, int uninstall, int check)
 	{
 	case 'c':
 		if (!check || access(target.s, F_OK)) {
-			print_info("mknod", 0, target.s, mode == -1 ? 0644 : mode, uid, gid);
+			print_info("mknod", 0, target.s, mode == -1 ? 0644 : mode, uid, gid, -1);
 			scan_ulong(name, (unsigned long *) &dev);
 			if (mknod(target.s, mode == -1 ? 0644 : mode, dev) == -1) {
 				if (errno != error_exist)
@@ -453,7 +479,7 @@ doit(stralloc *line, int uninstall, int check)
 		break;
 	case 'p':
 		if (!check || access(target.s, F_OK)) {
-			print_info("mkfifo", 0, target.s, mode == -1 ? 0644 : mode, uid, gid);
+			print_info("mkfifo", 0, target.s, mode == -1 ? 0644 : mode, uid, gid, -1);
 			if (fifo_make(target.s, mode == -1 ? 0644 : mode) == -1) {
 				if (errno != error_exist)
 					strerr_die4sys(111, FATAL, "fifo_make: ", target.s, ": ");
@@ -464,14 +490,14 @@ doit(stralloc *line, int uninstall, int check)
 		break;
 	case 'l':/*- here name is target */
 		if (!check || access(name, F_OK)) {
-			print_info("make link", name, target.s, -1, -1, -1);
+			print_info("make link", name, target.s, -1, -1, -1, -1);
 			if (symlink(name, target.s) == -1 && errno != error_exist)
 				strerr_die6sys(111, FATAL, "unable to symlink ", target.s, " to ", name, ": ");
 		}
 		break;
 	case 'd':
 		if (!check || access(target.s, F_OK)) {
-			print_info("mkdir", 0, target.s, (my_uid || mode == -1) ? 0755 : mode, uid, gid);
+			print_info("mkdir", 0, target.s, (my_uid || mode == -1) ? 0755 : mode, uid, gid, -1);
 			if (myr_mkdir(target.s, (my_uid || mode == -1) ? 0755 : mode) == -1) {
 				if (errno != error_exist)
 					strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
@@ -481,40 +507,53 @@ doit(stralloc *line, int uninstall, int check)
 			set_perms(target.s, uidstr, gidstr, modestr, uid, gid, mode, check);
 		break;
 
+	case 'z':
 	case 'f':
 		if (!check) {
-			if (access(name, F_OK)) {
-				if (errno == error_noent) {
-					if (!missing_ok)
-						strerr_die3sys(111, FATAL, target.s, ": ");
-					print_info("skipping file", name, target.s, mode == -1 ? 0644 : mode, uid, gid);
-					return;
-				} else
-					strerr_die3sys(111, FATAL, name, ": ");
+			if (*type == 'f') {
+				if (access(name, F_OK)) {
+					if (errno == error_noent) {
+						if (!missing_ok)
+							strerr_die3sys(111, FATAL, target.s, ": ");
+						print_info("skipping file", name, target.s, mode == -1 ? 0644 : mode, uid, gid, -1);
+						return;
+					} else
+						strerr_die3sys(111, FATAL, name, ": ");
+				}
+				if (mode == -1) {
+					if (lstat(name, &st) == -1)
+						strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
+					mode = st.st_mode;
+				}
 			}
-			if (mode == -1) {
-				if (lstat(name, &st) == -1)
-					strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
-				mode = st.st_mode;
-			}
-			print_info("install file", name, target.s, mode == -1 ? 0644 : mode, uid, gid);
-			if ((fdin = open_read(name)) == -1) {
+			print_info("install file", *type == 'f' ? name : "/dev/zero", target.s, mode == -1 ? 0644 : mode, uid, gid, size);
+			if ((fdin = open_read(*type == 'z' ? "/dev/zero" : name)) == -1) {
 				if (opt)
 					return;
 				else
 					strerr_die4sys(111, FATAL, "unable to read ", name, ": ");
 			}
+			if (!(zerobuf = (char *) alloc(sizeof(char) * size)))
+				nomem();
 			substdio_fdbuf(&ssin, read, fdin, inbuf, sizeof (inbuf));
 			if ((fdout = open_trunc(target.s)) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 			substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof (outbuf));
 
-			switch (substdio_copy(&ssout, &ssin))
-			{
-			case -2:
-				strerr_die4sys(111, FATAL, "unable to read ", name, ": ");
-			case -3:
-				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
+			if (*type == 'f') {
+				switch (substdio_copy(&ssout, &ssin))
+				{
+				case -2:
+					strerr_die4sys(111, FATAL, "unable to read ", name, ": ");
+				case -3:
+					strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
+				}
+			} else
+			if (*type == 'z') {
+				if (substdio_get(&ssin, zerobuf, size) == -1)
+					strerr_die2sys(111, FATAL, "unable to read /dev/zero: ");
+				if (substdio_put(&ssout, zerobuf, size) == -1)
+					strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 			}
 			close(fdin);
 			if (substdio_flush(&ssout) == -1)
@@ -522,6 +561,7 @@ doit(stralloc *line, int uninstall, int check)
 			if (fsync(fdout) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 			close(fdout);
+			alloc_free(zerobuf);
 			if (my_uid) {
 #ifdef NETQMAIL
 				substdio_puts(subfdout, "\tchmod ");
@@ -535,16 +575,25 @@ doit(stralloc *line, int uninstall, int check)
 				if (qchmod(target.s, mode == -1 ? 0644 : mode) == -1)
 					strerr_die4sys(111, FATAL, "unable to chmod ", target.s, ": ");
 			}
-		} else
-		if (access(target.s, F_OK)) {
-			if (errno == error_noent) {
-				if (missing_ok)
-					strerr_warn3(WARN, target.s, " is missing", 0);
-				else
+		} else {
+			if (access(target.s, F_OK)) {
+				if (errno == error_noent) {
+					if (missing_ok)
+						strerr_warn3(WARN, target.s, " is missing", 0);
+					else
+						strerr_die3sys(111, FATAL, target.s, ": ");
+					return;
+				} else
 					strerr_die3sys(111, FATAL, target.s, ": ");
-				return;
-			} else
-				strerr_die3sys(111, FATAL, target.s, ": ");
+			}
+			if (*type == 'z') {
+				if (lstat(target.s, &st) == -1)
+					strerr_die4sys(111, FATAL, "lstat: ", target.s, ": ");
+				if (size != st.st_size) {
+					strnum[fmt_ulong(strnum, size)] = 0;
+					strerr_warn5(WARN, target.s, " is not the right size (", strnum, ").", 0);
+				}
+			}
 		}
 		if (uid != -1 || gid != -1 || mode != -1)
 			set_perms(target.s, uidstr, gidstr, modestr, uid, gid, mode, check);
@@ -620,7 +669,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.24 2024-02-11 19:52:08+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.25 2024-02-12 17:19:34+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -628,6 +677,9 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.25  2024-02-12 17:19:34+05:30  Cprogrammer
+ * added 'z' option to create files with fixed number of zeros
+ *
  * Revision 1.24  2024-02-11 19:52:08+05:30  Cprogrammer
  * updated for netqmail, notqmail
  *
