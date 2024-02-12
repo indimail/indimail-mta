@@ -1,55 +1,19 @@
 /*
- * $Log: qscanq.c,v $
- * Revision 1.12  2023-02-14 09:17:24+05:30  Cprogrammer
- * renamed auto_uidc to auto_uidv
- *
- * Revision 1.11  2022-10-03 12:25:19+05:30  Cprogrammer
- * fixed return exit codes
- *
- * Revision 1.10  2021-06-27 10:38:40+05:30  Cprogrammer
- * uidnit new argument to disable/enable error on missing uids
- *
- * Revision 1.9  2021-06-12 19:24:08+05:30  Cprogrammer
- * minor optimization by removing call to extra env_get
- *
- * Revision 1.8  2020-09-16 19:06:34+05:30  Cprogrammer
- * fix compiler warning for FreeBSD
- *
- * Revision 1.7  2020-06-08 22:51:53+05:30  Cprogrammer
- * handle chdir error
- *
- * Revision 1.6  2017-05-04 20:20:40+05:30  Cprogrammer
- * close passwd, group database
- *
- * Revision 1.5  2014-07-27 15:16:57+05:30  Cprogrammer
- * change to qscand uid if run through non qscand user
- *
- * Revision 1.4  2005-04-25 22:53:49+05:30  Cprogrammer
- * added error check for setreuid()
- *
- * Revision 1.3  2004-10-22 20:29:47+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-09-28 22:22:33+05:30  Cprogrammer
- * use SCANDIR to select the virus scan directory
- *
- * Revision 1.1  2004-09-24 14:04:54+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qscanq.c,v 1.13 2024-02-12 19:51:30+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "substdio.h"
+#include <substdio.h>
+#include <wait.h>
+#include <sig.h>
+#include <strerr.h>
+#include <env.h>
 #include "auto_spool.h"
 #include "auto_uids.h"
 #include "auto_fnlen.h"
-#include "mkfn.h"
 #include "auto_retries.h"
-#include "wait.h"
-#include "sig.h"
-#include "strerr.h"
-#include "env.h"
+#include "mkfn.h"
 #include "exitcodes.h"
 
 #define FATAL "qscanq: fatal: "
@@ -199,7 +163,50 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.12 2023-02-14 09:17:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscanq.c,v 1.13 2024-02-12 19:51:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qscanq.c,v $
+ * Revision 1.13  2024-02-12 19:51:30+05:30  Cprogrammer
+ * rearranged header files and moved RCS log to bottom
+ *
+ * Revision 1.12  2023-02-14 09:17:24+05:30  Cprogrammer
+ * renamed auto_uidc to auto_uidv
+ *
+ * Revision 1.11  2022-10-03 12:25:19+05:30  Cprogrammer
+ * fixed return exit codes
+ *
+ * Revision 1.10  2021-06-27 10:38:40+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
+ * Revision 1.9  2021-06-12 19:24:08+05:30  Cprogrammer
+ * minor optimization by removing call to extra env_get
+ *
+ * Revision 1.8  2020-09-16 19:06:34+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
+ * Revision 1.7  2020-06-08 22:51:53+05:30  Cprogrammer
+ * handle chdir error
+ *
+ * Revision 1.6  2017-05-04 20:20:40+05:30  Cprogrammer
+ * close passwd, group database
+ *
+ * Revision 1.5  2014-07-27 15:16:57+05:30  Cprogrammer
+ * change to qscand uid if run through non qscand user
+ *
+ * Revision 1.4  2005-04-25 22:53:49+05:30  Cprogrammer
+ * added error check for setreuid()
+ *
+ * Revision 1.3  2004-10-22 20:29:47+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-09-28 22:22:33+05:30  Cprogrammer
+ * use SCANDIR to select the virus scan directory
+ *
+ * Revision 1.1  2004-09-24 14:04:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

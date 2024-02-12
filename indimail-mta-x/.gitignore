@@ -477,3 +477,5 @@ backup.conf
 rd-remote
 printass
 printass.1
+hasunlinkat.h
+hasrenameat.h

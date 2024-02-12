@@ -789,7 +789,7 @@ auto_cleaner.o auto_qstdin.o fmt_xpid.o
 	auto_cleaner.o auto_qstdin.o $(QMAILLIB)
 
 qscanq.o: compile qscanq.c auto_spool.h auto_fnlen.h mkfn.h \
-auto_uids.h auto_retries.h
+auto_uids.h auto_retries.h exitcodes.h
 	./compile qscanq.c
 
 fmt_xpid.o: compile fmt_xpid.c
@@ -854,8 +854,16 @@ auto-strarr.o: compile auto-strarr.c
 cleanq: load cleanq.o get_uid.o auto_uids.o
 	./load cleanq get_uid.o auto_uids.o $(QMAILLIB)
 
-cleanq.o: compile cleanq.c auto_ageout.h auto_uids.h
+cleanq.o: compile cleanq.c auto_ageout.h auto_uids.h \
+hasunlinkat.h
 	./compile cleanq.c
+
+hasunlinkat.h: \
+tryunlinkat.c compile load
+	( ( ./compile tryunlinkat.c \
+	&& ./load tryunlinkat ) >/dev/null 2>&1 \
+	&& echo "#define HASUNLINKAT 1" || exit 0 ) > hasunlinkat.h
+	rm -f tryunlinkat.o tryunlinkat
 
 auto_ageout.h: conf-ageout
 	echo "#define MAX_AGE" "`head -1 < conf-ageout`" > auto_ageout.h.tmp && \
@@ -2520,8 +2528,16 @@ control.o auto_control.o variables.o fts.lib
 	`cat fts.lib` $(QMAILLIB)
 
 qmail-rm.o: \
-compile qmail-rm.c auto_split.h auto_qmail.h control.h conf-queue
+compile qmail-rm.c auto_split.h auto_qmail.h control.h \
+hasrenameat.h hasunlinkat.h conf-queue
 	./compile `grep -h -v "^#" conf-queue` qmail-rm.c
+
+hasrenameat.h: \
+tryrenameat.c compile load
+	( ( ./compile tryrenameat.c \
+	&& ./load tryrenameat ) >/dev/null 2>&1 \
+	&& echo "#define HASRENAMEAT 1" || exit 0 ) > hasrenameat.h
+	rm -f tryrenameat.o tryrenameat
 
 qmail-rm.1: qmail-rm.9 conf-qmail conf-split
 	cat qmail-rm.9 \

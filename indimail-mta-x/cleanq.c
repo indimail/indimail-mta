@@ -1,44 +1,5 @@
 /*
- * $Log: cleanq.c,v $
- * Revision 1.13  2023-02-14 07:45:58+05:30  Cprogrammer
- * renamed auto_uidc, auto_gidc to auto_uidv, auto_gidv
- *
- * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.11  2021-06-27 10:35:07+05:30  Cprogrammer
- * uidnit new argument to disable/enable error on missing uids
- *
- * Revision 1.10  2021-06-13 00:32:05+05:30  Cprogrammer
- * do clean exit on shutdown
- *
- * Revision 1.9  2019-06-07 11:25:48+05:30  Cprogrammer
- * replaced getopt() with subgetopt()
- *
- * Revision 1.8  2017-05-04 20:19:42+05:30  Cprogrammer
- * make cleanq run continuously
- *
- * Revision 1.7  2017-05-03 09:33:07+05:30  Cprogrammer
- * refactored code. Added safety check to ensure cleanq starts in dir owned by qscand
- *
- * Revision 1.6  2014-07-27 15:16:18+05:30  Cprogrammer
- * change to qscand uid if run through non qscand user
- *
- * Revision 1.5  2014-01-29 13:59:37+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.4  2013-08-27 08:19:10+05:30  Cprogrammer
- * use sticky bit definition from header file
- *
- * Revision 1.3  2004-10-22 20:23:55+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-11 13:51:00+05:30  Cprogrammer
- * use getopt instead of sgetopt
- *
- * Revision 1.1  2004-09-22 22:24:14+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: cleanq.c,v 1.14 2024-02-12 20:55:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -56,6 +17,7 @@
 #include <scan.h>
 #include <sig.h>
 #include <noreturn.h>
+#include "hasunlinkat.h"
 #include "auto_ageout.h"
 #include "auto_uids.h"
 
@@ -98,7 +60,7 @@ warn_file(const char *d, const char *w)
 }
 
 void
-remove_files(const char *d)
+remove_files(int fd, const char *d)
 {
 	DIR            *dir = 0;
 	struct dirent  *f = 0;
@@ -131,7 +93,11 @@ remove_files(const char *d)
 			break;
 		if (!str_diff(f->d_name, ".") || !str_diff(f->d_name, ".."))
 			continue;
+#ifdef HASUNLINKAT
+		if (unlinkat(fd, f->d_name, 0) == -1)
+#else
 		if (unlink(f->d_name) == -1)
+#endif
 			strerr_warn6(WARNING, "unable to delete ", (char *) d, "/", f->d_name, ": ", &strerr_sys);
 	}
 	closedir(dir);
@@ -148,7 +114,7 @@ cdup:
 }
 
 void
-tryclean(const char *d)
+tryclean(int fd, const char *d)
 {
 	struct stat     st;
 	time_t          now;
@@ -171,7 +137,11 @@ tryclean(const char *d)
 	}
 	if ((st.st_mode & S_IFMT) != S_IFDIR) {
 		warn_file(d, "not a directory. Deleting...");
-		if (unlink(d)) /*- If it fails, oh well.  */
+#ifdef HASUNLINKAT
+		if (unlinkat(fd, d, 0) == -1)
+#else
+		if (unlink(d) == -1) /*- If it fails, oh well.  */
+#endif
 			strerr_warn4(WARNING, "unlink: ", (char *) d, ": ", &strerr_sys);
 		return;
 	}
@@ -183,7 +153,7 @@ tryclean(const char *d)
 	/*- 4 */
 	if (!(st.st_mode & S_ISVTX)) { /*- not sticky */
 		log_file("deleting: ", d, "not sticky");
-		remove_files(d);
+		remove_files(fd, d);
 		return;
 	}
 	/*- 5 */
@@ -194,7 +164,7 @@ tryclean(const char *d)
 	 * Delete it. Optionally, log the action.
 	 */
 	log_file("deleting: ", d, "too old");
-	remove_files(d);
+	remove_files(fd, d);
 }
 
 no_return void
@@ -210,7 +180,7 @@ main(int argc, char **argv)
 {
 	DIR            *dir;
 	direntry       *d;
-	int             opt, fdsourcedir = -1;
+	int             opt, fd, fdsourcedir = -1;
 	unsigned int    interval = 300;
 	uid_t           uid;
 	struct stat     st;
@@ -256,14 +226,23 @@ main(int argc, char **argv)
 		/*- Open the current directory */
 		if (!(dir = opendir("."))) {
 			strerr_warn2(FATAL, "unable to read directory '.': ", &strerr_sys);
-			_exit(1);
+			_exit(111);
 		}
+#ifdef HASUNLINKAT
+		if (!(fd = open(".", O_RDONLY))) {
+			strerr_warn2(FATAL, "unable to open directory 'work': ", &strerr_sys);
+			_exit(111);
+		}
+#endif
 		/*- Scan it */
 		for (;;) {
 			if (!(d = readdir(dir)))
 				break;
-			tryclean(d->d_name);
+			tryclean(fd, d->d_name);
 		}
+#ifdef HASUNLINKAT
+		close(fd);
+#endif
 		closedir(dir);
 		sleep(interval);
 		if (dir_flag && fchdir(fdsourcedir) == -1)
@@ -277,7 +256,53 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.13 2023-02-14 07:45:58+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: cleanq.c,v 1.14 2024-02-12 20:55:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: cleanq.c,v $
+ * Revision 1.14  2024-02-12 20:55:59+05:30  Cprogrammer
+ * use unlinkat() if available instead of unlink()
+ *
+ * Revision 1.13  2023-02-14 07:45:58+05:30  Cprogrammer
+ * renamed auto_uidc, auto_gidc to auto_uidv, auto_gidv
+ *
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.11  2021-06-27 10:35:07+05:30  Cprogrammer
+ * uidnit new argument to disable/enable error on missing uids
+ *
+ * Revision 1.10  2021-06-13 00:32:05+05:30  Cprogrammer
+ * do clean exit on shutdown
+ *
+ * Revision 1.9  2019-06-07 11:25:48+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
+ * Revision 1.8  2017-05-04 20:19:42+05:30  Cprogrammer
+ * make cleanq run continuously
+ *
+ * Revision 1.7  2017-05-03 09:33:07+05:30  Cprogrammer
+ * refactored code. Added safety check to ensure cleanq starts in dir owned by qscand
+ *
+ * Revision 1.6  2014-07-27 15:16:18+05:30  Cprogrammer
+ * change to qscand uid if run through non qscand user
+ *
+ * Revision 1.5  2014-01-29 13:59:37+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.4  2013-08-27 08:19:10+05:30  Cprogrammer
+ * use sticky bit definition from header file
+ *
+ * Revision 1.3  2004-10-22 20:23:55+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-11 13:51:00+05:30  Cprogrammer
+ * use getopt instead of sgetopt
+ *
+ * Revision 1.1  2004-09-22 22:24:14+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
