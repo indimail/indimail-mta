@@ -1,31 +1,32 @@
 /*
- * $Id: multilog.c,v 1.9 2024-02-09 16:49:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: multilog.c,v 1.9 2024-02-12 19:31:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include "direntry.h"
-#include "alloc.h"
-#include "subfd.h"
-#include "substdio.h"
-#include "strerr.h"
-#include "error.h"
-#include "open.h"
-#include "lock.h"
-#include "scan.h"
-#include "str.h"
-#include "byte.h"
-#include "seek.h"
-#include "timestamp.h"
-#include "wait.h"
-#include "coe.h"
-#include "env.h"
-#include "fd.h"
-#include "sig.h"
+#include <direntry.h>
+#include <alloc.h>
+#include <subfd.h>
+#include <substdio.h>
+#include <strerr.h>
+#include <error.h>
+#include <open.h>
+#include <lock.h>
+#include <scan.h>
+#include <str.h>
+#include <byte.h>
+#include <seek.h>
+#include <timestamp.h>
+#include <wait.h>
+#include <coe.h>
+#include <env.h>
+#include <fd.h>
+#include <sig.h>
 #include "match.h"
 #include "deepsleep.h"
+#include "hasunlinkat.h"
 
 #define FATAL "multilog: fatal: "
 #define WARNING "multilog: warning: "
@@ -688,14 +689,14 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	static char    *x = "$Id: multilog.c,v 1.9 2024-02-09 16:49:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: multilog.c,v 1.9 2024-02-12 19:31:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: multilog.c,v $
- * Revision 1.9  2024-02-09 16:49:32+05:30  Cprogrammer
+ * Revision 1.9  2024-02-12 19:31:18+05:30  Cprogrammer
  * use unlinkat() if available instead of unlink()
  *
  * Revision 1.8  2022-05-22 23:06:19+05:30  Cprogrammer
