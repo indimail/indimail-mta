@@ -8,6 +8,10 @@ on:
     branches: [ "master" ]
     paths:
       - '**/indimail-mta-x/**'
+      - '**/daemontools-x/**'
+      - '**/ucspi-tcp-x/**'
+      - '**/libsrs2-x/**'
+      - '**/libdkim2-x/**'
       - .github/workflows/indimail-mta-codeql.yml
       - '!**/doc/*'
       - '!**.md'
@@ -47,6 +51,10 @@ jobs:
 
     - name: install_qmail
       run: cd libqmail;env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
+    - name: install_libdkim2
+      run: cd libdkim2-x; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" ./default.configure; env CPPFLAGS="-I/usr/local/opt/openssl@1.1/include" LDFLAGS="-L/usr/local/opt/openssl@1.1/lib" make; sudo make install-strip
+    - name: install_libsrs2
+      run: cd libsrs2-x; ./default.configure; make; sudo make install-strip
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -54,7 +62,17 @@ jobs:
       with:
         languages: ${{ matrix.language }}
     - run: |
-        cd indimail-mta-x
+        cd libdkim2-x
+        make clean && make
+        cd ../libsrs2-x
+        make clean && make
+        cd ../daemontools-x
+        ./default.configure
+        make
+        cd ../ucspi-tcp-x
+        ./default.configure
+        make
+        cd ../indimail-mta-x
         ./default.configure
         make
 
