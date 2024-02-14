@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.66 2024-02-14 12:49:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.67 2024-02-14 20:45:48+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -6971,11 +6971,11 @@ test_ezmlm_idx()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing ezmlm-make succeeded %73s [%.4f sec]\n" " " $secs
+		printf "\r  testing ezmlm-make  succeeded %72s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		printf "\r%118s\n" " "
-		echo "  testing ezmlm-make failed"
+		echo "testing ezmlm-make failed"
 		failed=1
 		/bin/rm -rf $qmaildir/domains
 		exit 1
@@ -6989,11 +6989,11 @@ test_ezmlm_idx()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing ezmlm-sub  succeeded %73s [%.4f sec]\n" " " $secs
+		printf "\r  testing ezmlm-sub   succeeded %72s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		printf "\r%118s\n" " "
-		echo "  testing ezmlm-sub failed"
+		echo "testing ezmlm-sub failed"
 		failed=1
 		/bin/rm -rf $qmaildir/domains
 		exit 1
@@ -7017,12 +7017,12 @@ test_ezmlm_idx()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing ezmlm-list succeeded %73s [%.4f sec]\n" " " $secs
+		printf "\r  testing ezmlm-list  succeeded %72s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		printf "\r%118s\n" " "
 		echo "lines=$lines, ret1=$ret1, ret2=$ret2, list=$list"
-		echo "  testing ezmlm-list failed"
+		echo "testing ezmlm-list failed"
 		failed=1
 		/bin/rm -rf $qmaildir/domains
 		exit 1
@@ -7042,18 +7042,48 @@ test_ezmlm_idx()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing ezmlm-send succeeded %73s [%.4f sec]\n" " " $secs
+		printf "\r  testing ezmlm-send  succeeded %72s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		printf "\r%118s\n" " "
 		echo "header1=$header1, header2=$header2, ret1=$ret1, ret2=$ret2, list=$list"
-		echo "  testing ezmlm-send failed"
+		echo "testing ezmlm-send failed"
 		failed=1
 		/bin/rm -rf $qmaildir/domains
 		exit 1
 	fi
-	[ -z "$send_pid" ] && send_pid=$(get_send_pid qmail-send $testdir/queue)
-	terminate_send qmail-send "$send_pid"
+
+	t1=$(date +"%s.%4N")
+	envdir -c $testdir/variables ezmlm-unsub $qmaildir/domains/$vdomain/$ml $testuser@$HOSTNAME
+	ret1=$?
+	list=$(ezmlm-list $qmaildir/domains/$vdomain/$ml)
+	ret2=1
+	ret3=0
+	for i in $list
+	do
+		echo $i | grep $user@$HOSTNAME >/dev/null
+		if [ $? -eq 0 ] ; then
+			ret2=0
+		fi
+		echo $i | grep $testuser@$HOSTNAME >/dev/null
+		if [ $? -eq 0 ] ; then
+			ret3=1
+		fi
+	done
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing ezmlm-unsub succeeded %72s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "lines=$lines, ret1=$ret1, ret2=$ret2, list=$list"
+		echo "  testing ezmlm-unsub failed"
+		failed=1
+		/bin/rm -rf $qmaildir/domains
+		exit 1
+	fi
 }
 
 test_dkim()
@@ -8216,7 +8246,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=283
+	total_tests=284
 fi
 failed=0
 do_setup
@@ -8248,6 +8278,8 @@ printf "\r%118s\n" " "
 echo "Starting ezmlm-idx tests"
 test_ezmlm_idx
 printf "\r%118s\n" " "
+[ -z "$send_pid" ] && send_pid=$(get_send_pid qmail-send $testdir/queue)
+terminate_send qmail-send "$send_pid"
 non_dkim_tcount=$tcount
 if [ -f $dkim_key ] ; then
 	test_dkim
@@ -8284,6 +8316,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.67  2024-02-14 20:45:48+05:30  Cprogrammer
+# added test for ezmlm-unsub
+#
 # Revision 1.66  2024-02-14 12:49:02+05:30  Cprogrammer
 # added ezmlm-idx tests
 #
