@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.68 2024-02-14 22:09:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.69 2024-02-14 23:13:23+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1294,7 +1294,7 @@ start_tcpserver_smtp_unix()
 		DEBUG=1 \
 		DEBUG_LOGIN=1 \
 		QMAILQUEUE="$sbindir/qmail-dkim $sbindir/qmail-spamfilter" \
-		SPAMFILTER="$bogofilter -p -d /etc/indimail" \
+		SPAMFILTER="$bogofilter -p -d $sysconfdir" \
 		SPAMEXITCODE=0 \
 		REJECTSPAM=0 \
 		MAKE_SEEKABLE=1 \
@@ -1489,7 +1489,7 @@ test_smtp_dkimverify()
 test_smtp_spamfilter()
 {
 	t1=$(date +"%s.%4N")
-	echo "$bogofilter -p -d /etc/indimail" > $testdir/smtpd/variables/SPAMFILTER
+	echo "$bogofilter -p -d $sysconfdir" > $testdir/smtpd/variables/SPAMFILTER
 	terminate_smtp_qmtp $smtp_pid
 	s1=$sleep_secs
 	start_tcpserver_smtp 4
@@ -5340,6 +5340,44 @@ test_direct_spawn_filter()
 			exit 1
 		fi
 	done
+	/bin/rm -f $cntrldir/filterargs
+
+	t1=$(date +"%s.%4N")
+	echo "*:local:$bogofilter -p -d $sysconfdir -u:SPAMEXITCODE=0" > $cntrldir/spamfilter
+	envdir -c $testdir/variables sh -c \
+		"exec -a qmail-local $sbindir/spawn-filter -- $user \ $testdir/$user $user \"\" \"\" $local_domain2 $user@$local_domain1 ./Maildir/ \"\"" < $tmpdir/mail.txt > $tmpdir/mail.out
+	bogosity=$($e822header -I X-Bogosity < $tmpdir/mail.out)
+	echo $bogosity | grep "^X-Bogosity" > /dev/null
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing spawn-filter SPAM filtering using spamfilter control file succeeded %26s [%.4f sec]\n" " " $secs
+	else
+		echo "bogosity=[$bogosity]"
+		echo "testing spawn-filter spam filtering using spamfilter control file failed"
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	/bin/rm -f $cntrldir/spamfilter
+	echo "$bogofilter -p -d $sysconfdir" > $testdir/variables/SPAMFILTER
+	echo "0"                             > $testdir/variables/SPAMEXITCODE
+	envdir -c $testdir/variables sh -c \
+		"exec -a qmail-local $sbindir/spawn-filter -- $user \ $testdir/$user $user \"\" \"\" $local_domain2 $user@$local_domain1 ./Maildir/ \"\"" < $tmpdir/mail.txt > $tmpdir/mail.out
+	bogosity=$($e822header -I X-Bogosity < $tmpdir/mail.out)
+	echo $bogosity | grep "^X-Bogosity" > /dev/null
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing spawn-filter SPAM filtering using SPAMFILTER environment variable succeeded %18s [%.4f sec]\n" " " $secs
+	else
+		echo "bogosity=[$bogosity]"
+		echo "testing spawn-filter SPAM filtering using SPAMFILTER environment variable failed"
+		exit 1
+	fi
+
 	/bin/rm -f $tmpdir/mail.out $tmpdir/mail.txt $cntrldir/filterargs \
 		$testdir/bin/filter1 $testdir/bin/filter2 $testdir/bin/spawn-cat
 }
@@ -8215,7 +8253,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=284
+	total_tests=286
 fi
 failed=0
 do_setup
@@ -8285,6 +8323,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.69  2024-02-14 23:13:23+05:30  Cprogrammer
+# added tests for spam filtering by spawn-filter
+#
 # Revision 1.68  2024-02-14 22:09:31+05:30  Cprogrammer
 # removed unused code
 #
