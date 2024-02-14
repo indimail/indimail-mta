@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.65 2024-02-09 15:53:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.66 2024-02-14 12:49:02+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -95,21 +95,27 @@ terminate_send()
 	case $1 in
 		"qmail-send")
 		unset send_pid
+		/bin/rm -f $logdir/qmail-send/qmail-send.log $logdir/qmail-send/current
 		;;
 		"qmail-send-2")
 		unset send_pid2
+		/bin/rm -f $logdir/qmail-send/qmail-send2.log $logdir/qmail-send/current
 		;;
 		"slowq-send-1")
 		unset slowq_pid1
+		/bin/rm -f $logdir/slowq-send/slowq1-send.log $logdir/slowq-send/current
 		;;
 		"slowq-send"-2)
 		unset slowq_pid2
+		/bin/rm -f $logdir/slowq-send/slowq2-send.log $logdir/slowq-send/current
 		;;
 		"qmta-send-1")
 		unset qmta_pid1
+		/bin/rm -f $logdir/qmta-send/qmta1-send.log $logdir/qmta-send/current
 		;;
 		"qmta-send-2")
 		unset qmta_pid2
+		/bin/rm -f $logdir/qmta-send/qmta2-send.log $logdir/qmta-send/current
 		;;
 	esac
 }
@@ -749,7 +755,7 @@ run_qmail_send()
 		start_pg=$qmta_send
 		pg1=qmta-send
 		pg2=qmail-send
-		logfn=qmta-send.log
+		logfn=qmta1-send.log
 		queuedir=$testdir/qmta1
 		todo_proc=0
 		opt="-d"
@@ -759,7 +765,7 @@ run_qmail_send()
 		start_pg=$qmta_send
 		pg1=qmta-send
 		pg2=qmail-send
-		logfn=qmta-send.log
+		logfn=qmta2-send.log
 		queuedir=$testdir/qmta2
 		todo_proc=0
 		opt="-dlrc"
@@ -805,32 +811,49 @@ run_qmail_send()
 	echo "$sbindir/spawn-filter"    > $testdir/variables/QMAILREMOTE
 	echo "$sbindir/rd-remote"       > $testdir/variables/QREMOTE
 	echo "$QREGEX"                  > $testdir/variables/QREGEX
+
 	[ -n "$QREGEX" ] && echo 1 > $testdir/variables/QREGEX || > $testdir/variables/QREGEX
 	[ -n "$MATCH_RECIPIENT_DOMAIN" ] && echo 1 > $testdir/variables/MATCH_RECIPIENT_DOMAIN || > $testdir/variables/MATCH_RECIPIENT_DOMAIN
-	[ -n "$MATCH_SENDER_DOMAIN" ] && echo 1 > $testdir/variables/MATCH_SENDER_DOMAIN || > $testdir/variables/MATCH_SENDER_DOMAIN
+	[ -n "$MATCH_SENDER_DOMAIN" ]    && echo 1 > $testdir/variables/MATCH_SENDER_DOMAIN    || > $testdir/variables/MATCH_SENDER_DOMAIN
+	# for ezmlm
+	echo "$qmail_queue"      > $testdir/variables/EZMLMQUEUE
+	echo "$sysconfdir/ezmlm" > $testdir/variables/EZMLM_ETC
 	exec sudo envdir -c $testdir/variables $start_pg $opt ./Maildir/
 	) &
 	tx1=$(date +"%s.%4N")
-	pid=$(get_send_pid $pg1 $queuedir)
-	if [ "$1" = "qmail-send" ] ; then
-		send_pid=$pid
-	elif [ "$1" = "slowq-send-1" ] ; then
-		slowq_pid1=$pid
-	elif [ "$1" = "slowq-send-2" ] ; then
-		slowq_pid2=$pid
-	elif [ "$1" = "qmta-send-1" ] ; then
-		qmta_pid1=$pid
-	elif [ "$1" = "qmta-send-2" ] ; then
-		qmta_pid2=$pid
-	fi
-	sleep $sleep_int
-	if [ "$1" = "qmta-send-1" ] ; then
-		count=$(sudo pstree -ac $qmta_pid1 | wc -l)
-	elif [ "$1" = "qmta-send-2" ] ; then
-		count=$(sudo pstree -ac $qmta_pid2 | wc -l)
-	else
-		count=$(ps -ef | grep -E -v $pg2 | grep -E "$pg1|todo-proc|slowq-todo|qmail-lspawn|qmail-rspawn|qmail-clean" | grep $queuedir | wc -l)
-	fi
+	try_count=0
+	while true
+	do
+		pid=$(get_send_pid $pg1 $queuedir)
+		if [ "$1" = "qmail-send" ] ; then
+			send_pid=$pid
+		elif [ "$1" = "slowq-send-1" ] ; then
+			slowq_pid1=$pid
+		elif [ "$1" = "slowq-send-2" ] ; then
+			slowq_pid2=$pid
+		elif [ "$1" = "qmta-send-1" ] ; then
+			qmta_pid1=$pid
+		elif [ "$1" = "qmta-send-2" ] ; then
+			qmta_pid2=$pid
+		fi
+		sleep $sleep_int
+		if [ "$1" = "qmta-send-1" ] ; then
+			count=$(sudo pstree -ac $qmta_pid1 | wc -l)
+		elif [ "$1" = "qmta-send-2" ] ; then
+			count=$(sudo pstree -ac $qmta_pid2 | wc -l)
+		else
+			count=$(ps -ef | grep -E -v $pg2 | grep -E "$pg1|todo-proc|slowq-todo|qmail-lspawn|qmail-rspawn|qmail-clean" | grep $queuedir | wc -l)
+		fi
+		if [ -n "$pid" -a -n "$count" -a -n "$count" ] ; then
+			if [ $pid -gt 0 -a $count -eq $pcount ] ; then
+				break
+			fi
+		fi
+		try_count=$(expr $try_count + 1)
+		if [ $try_count -gt 10 ] ; then
+			break
+		fi
+	done
 	tx2=$(date +"%s.%4N")
 	sleep_secs=$(echo $tx1 $tx2 | awk '{printf("%0.4f\n", $2-$1)}')
 	if [ -z "$pid" ] ; then
@@ -885,7 +908,11 @@ get_send_pid()
 	elif [ "$1" = "slowq-send-2" ] ; then
 		logfn="slowq2-send.log"
 	elif [ "$1" = "qmta-send" ] ; then
-		logfn="qmta-send.log"
+		if [ "$2" = "$testdir/qmta1" ] ; then
+			logfn="qmta1-send.log"
+		elif [ "$2" = "$testdir/qmta2" ] ; then
+			logfn="qmta2-send.log"
+		fi
 		sudo fuser $2/lock/trigger 2>/dev/null|sed 's{ {{g'
 		return $?
 	fi
@@ -2450,7 +2477,7 @@ test_smtp_chk_sender()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 4)
-		printf "\r  testing MASQUERADE any option succeeded %62s [%.4f sec]\n" " " $secs
+		printf "\r  testing MASQUERADE any  option succeeded %61s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
@@ -5466,7 +5493,6 @@ test_dnsmx()
 		failed=1
 		/bin/rm -f $tmpdir/swaks.$$ $testdir/smtpd/variables/NODNSCHECK
 		terminate_smtp_qmtp $smtp_pid
-		start_tcpserver_smtp 4
 		exit 1
 	fi
 	terminate_smtp_qmtp $smtp_pid
@@ -6902,6 +6928,134 @@ test_qmail_queue()
 	/bin/rm -rf $testdir/variables $testdir/bin/envheaders.sh $cntrldir/filterargs
 }
 
+test_ezmlm_idx()
+{
+	echo "$vdomain:$vdomain" > $cntrldir/virtualdomains
+	echo "$vdomain" >> $cntrldir/rcpthosts
+	(
+	echo "=$user:$user:$myuid:$mygid:$testdir/$user:::"
+	echo "+$user-:$user:$myuid:$mygid:$testdir/$user:-::"
+	echo "=$testuser:$testuser:$myuid:$mygid:$testdir/$testuser:::"
+	echo "+$testuser-:$testuser:$myuid:$mygid:$testdir/$testuser:-::"
+	echo "+$vdomain-:$vdomain:$myuid:$mygid:$qmaildir/domains/$vdomain:-::"
+	echo "."
+	) > $sysconfdir/users/assign
+
+	if [ ! -d $sysconfdir/ezmlm ] ; then
+		cp -rp /etc/indimail/ezmlm $sysconfdir/ezmlm
+		/bin/rm -rf $sysconfdir/ezmlm/global_vars
+		mkdir -p $sysconfdir/ezmlm/global_vars
+		ln -srf $sysconfdir/control/global_vars $sysconfdir/ezmlm/global_vars/.envdir
+		echo 0              > $sysconfdir/ezmlm/global_vars/BIGTODO
+		echo 23             > $sysconfdir/ezmlm/global_vars/CONFSPLIT
+		echo $testdir/queue > $sysconfdir/ezmlm/global_vars/QUEUEDIR
+	fi
+	sudo chown -R $myuid:$mygid $logdir/qmail-send
+	/bin/rm -f $logdir/qmail-send/*
+	silent=1 run_qmail_send qmail-send 1
+
+	/bin/rm -rf $testdir/variables
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo $qmail_queue   > $testdir/variables/QMAILQUEUE
+	$qmail_newu $sysconfdir/users
+	ml=fun
+	mkdir -p $qmaildir/domains/$vdomain
+
+	t1=$(date +"%s.%4N")
+	envdir -c $testdir/variables ezmlm-make $qmaildir/domains/$vdomain/$ml $qmaildir/domains/$vdomain/.qmail-$ml $ml $vdomain
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing ezmlm-make succeeded %73s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "  testing ezmlm-make failed"
+		failed=1
+		/bin/rm -rf $qmaildir/domains
+		exit 1
+	fi
+	t1=$(date +"%s.%4N")
+	envdir -c $testdir/variables ezmlm-sub $qmaildir/domains/$vdomain/$ml $user@$HOSTNAME
+	ret1=$?
+	envdir -c $testdir/variables ezmlm-sub $qmaildir/domains/$vdomain/$ml $testuser@$HOSTNAME
+	ret2=$?
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing ezmlm-sub  succeeded %73s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "  testing ezmlm-sub failed"
+		failed=1
+		/bin/rm -rf $qmaildir/domains
+		exit 1
+	fi
+	t1=$(date +"%s.%4N")
+	list=$(ezmlm-list $qmaildir/domains/$vdomain/$ml)
+	ret1=1
+	ret2=1
+	for i in $list
+	do
+		echo $i | grep $user@$HOSTNAME >/dev/null
+		if [ $? -eq 0 ] ; then
+			ret1=0
+		fi
+		echo $i | grep $testuser@$HOSTNAME >/dev/null
+		if [ $? -eq 0 ] ; then
+			ret2=0
+		fi
+	done
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing ezmlm-list succeeded %73s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "lines=$lines, ret1=$ret1, ret2=$ret2, list=$list"
+		echo "  testing ezmlm-list failed"
+		failed=1
+		/bin/rm -rf $qmaildir/domains
+		exit 1
+	fi
+
+	/bin/rm -rf $maildir/new/* $testdir/$testuser/Maildir/new/*
+	echo "$testdir/$user/Maildir/" > $qmaildir/domains/$vdomain/.qmail-default
+	t1=$(date +"%s.%4N")
+	do_qmail_inject $user@$HOSTNAME "$ml@$vdomain" "Testing qmail-inject to mailing list" "Testing qmail-inject to mailing list"
+	check_mail_header $maildir "Subject" 1
+	ret1=$?
+	header1=$header
+	check_mail_header $testdir/$testuser/Maildir "Subject" 1
+	ret2=$?
+	header2=$header
+	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a "$header1" = "Subject: Testing qmail-inject to mailing list" -a "$header2" = "Subject: Testing qmail-inject to mailing list" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing ezmlm-send succeeded %73s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "header1=$header1, header2=$header2, ret1=$ret1, ret2=$ret2, list=$list"
+		echo "  testing ezmlm-send failed"
+		failed=1
+		/bin/rm -rf $qmaildir/domains
+		exit 1
+	fi
+	[ -z "$send_pid" ] && send_pid=$(get_send_pid qmail-send $testdir/queue)
+	terminate_send qmail-send "$send_pid"
+}
+
 test_dkim()
 {
 	t1=$(date +"%s.%4N")
@@ -8062,7 +8216,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=284
+	total_tests=283
 fi
 failed=0
 do_setup
@@ -8091,6 +8245,9 @@ do
 	print_pct
 done
 printf "\r%118s\n" " "
+echo "Starting ezmlm-idx tests"
+test_ezmlm_idx
+printf "\r%118s\n" " "
 non_dkim_tcount=$tcount
 if [ -f $dkim_key ] ; then
 	test_dkim
@@ -8103,6 +8260,7 @@ sudo /bin/rm -rf $testdir/queue
 sudo /bin/rm -rf $testdir/sleep.out
 sudo /bin/rm -rf $testdir/svscan.out
 sudo /bin/rm -rf $testdir/tcpclient.smtp
+sudo /bin/rm -rf $qmaildir/domains
 sudo /bin/rm -rf $sysconfdir/users
 if [ -d $maildir ] ; then
 	find $maildir -type f -exec /bin/rm -f {} \;
@@ -8126,6 +8284,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.66  2024-02-14 12:49:02+05:30  Cprogrammer
+# added ezmlm-idx tests
+#
 # Revision 1.65  2024-02-09 15:53:31+05:30  Cprogrammer
 # added tests for envheader, filterargs without local/remote directive
 #
