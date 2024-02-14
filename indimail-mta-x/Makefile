@@ -1358,10 +1358,7 @@ compile qmail-spamfilter.c qmulti.h qmail.h
 
 qmail-spamfilter.8: \
 qmail-spamfilter.9 conf-prefix conf-qmail
-	cat qmail-spamfilter.9 \
-	| sed s}QMAILHOME}"`head -1 conf-qmail`"}g \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> qmail-spamfilter.8
+	$(edit) qmail-spamfilter.9 > qmail-spamfilter.8
 
 qmulti.o: \
 compile qmulti.c auto_qmail.h control.h qmulti.h qmail.h \

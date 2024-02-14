@@ -19,8 +19,8 @@ QMAILQUEUE="@prefix@/sbin/qmail-dkim @prefix@/sbin/qmail-spamfilter"
 .EE
 
 \fBqmail-spamfilter\fR also calls \fBqscanq\fR(8) to perform virus scanning
-or bad attachment scan by setting \fBVIRUSCHECK\fR environment variable
-between 2 and 7.
+or bad attachment scan if \fBVIRUSCHECK\fR environment variable is set to a
+value between 2 and 7.
 
 \fBqmail-spamfilter\fR uses \fBSPAMFILTER\fR environment variable to
 execute the actual spam filter. The \fBSPAMFILTER\fR env variable can
@@ -54,7 +54,9 @@ filter program as below
  Exit Status     Interpretation
  -----------     --------------
  0,1,2           Program ran successfully. Interpretation depends
-                 on filter implementation. Mail will be accepted
+                 on filter implementation. HAMEXITCODE/SPAMEXITCODE
+                 can be set to decide what exit code should be treated
+                 as SPAM or HAM. For SPAM mails, mail will be accepted
                  unless REJECTSPAM is set. See description below.
  100             Mail will be bounced
  anything else   Mail will be rejected with a temporary error
