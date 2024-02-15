@@ -7,14 +7,17 @@ on:
   push:
     branches: [ "master" ]
     paths:
-      - '**/indimail-mta-x/**'
-      - '**/daemontools-x/**'
-      - '**/ucspi-tcp-x/**'
-      - '**/libsrs2-x/**'
-      - '**/libdkim2-x/**'
+      - '**/indimail-mta-x/**.c'
+      - '**/indimail-mta-x/**.h'
+      - '**/daemontools-x/**.c'
+      - '**/daemontools-x/**.h'
+      - '**/ucspi-tcp-x/**.c'
+      - '**/ucspi-tcp-x/**.h'
+      - '**/libsrs2-x/**.c'
+      - '**/libsrs2-x/**.h'
+      - '**/libdkim2-x/**.c'
+      - '**/libdkim2-x/**.h'
       - .github/workflows/indimail-mta-codeql.yml
-      - '!**/doc/*'
-      - '!**.md'
   pull_request:
     branches: [ "master" ]
   schedule:
