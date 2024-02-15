@@ -1,5 +1,5 @@
 .\" vim: tw=75
-.TH "dotls" "1" "06 Mar 2010" "Manvendra Bhangui" ""
+.TH "dotls" "1" "06 Mar 2021" "Manvendra Bhangui" ""
 
 .SH NAME
 dotls \- Generic TLS/SSL protocol wrapper for non-TLS programs
@@ -18,7 +18,7 @@ deal with the gory details of SSL/TLS.
 An application typically creates a network connection, then runs
 \fBdotls\fR with appropriate options to encrypt the network
 connection with SSL/TLS. \fBdotls\fR can also do opportunistic
-SSL/TLS (or delayed encryption) for smtp in server mode.
+SSL/TLS (or delayed encryption) for SMTP or POP3 in server mode.
 
 \fBdotls\fR can be run under \fBtcpserver\fR(1) to provide SSL/TLS or
 opportunistic TLS for qmail-smtpd, qmail-pop3d. This is known as
@@ -34,11 +34,12 @@ variable, on the network to the client, before starting a SSL/TLS session.
 
 \fBdotls\fR will directly execute \fIprog\fR if \fBNOTLS\fR environment
 variable is set. This can be set using the \fBtcpserver\fR(1) rules file to
-bypass SSL/TLS for hosts that don't work if STARTLS or TLS is enabled.
+bypass SSL/TLS for hosts that don't work if \fBSTARTTLS\fR or \fBTLS\fR is
+enabled.
 
 \fBdotls\fR is not needed by indimail-mta, as all features offered by
-\fBdotls\fR are built-in tcpserver(1) and tcpclient(1), provided by
-ucspi-tcp package from indimail-mta git repo at,
+\fBdotls\fR are built-in \fBtcpserver\fR(1) and \fBtcpclient\fR(1),
+provided by ucspi-tcp package from indimail-mta git repo at,
 https://github.com/indimail/indimail-mta/tree/master/ucspi-tcp-x
 
 \fBdotls\fR intercepts client commands for the \fBEHLO\fR, \fBCAPA\fR,
