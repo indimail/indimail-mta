@@ -479,3 +479,5 @@ printass
 printass.1
 hasunlinkat.h
 hasrenameat.h
+authcram
+authcram.o

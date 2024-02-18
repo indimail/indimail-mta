@@ -1,0 +1,29 @@
+.\" vim: tw=75
+.TH authcram 1
+
+.SH NAME
+authcram \- Generate Response to a CRAM method challenge
+
+.SH SYNOPSIS
+\fBauthcram\fR -\fBt\fR \fItype\fR \fIusername password challenge\fR
+
+.SH DESCRIPTION
+\fBauthcram\fR generates a response to CRAM method challenge for
+\fIusername\fR, \fIpassword\fR and \fIchallenge\fR. The CRAM methods
+supported by \fBauthcram\fR are \fBCRAM-MD5\fR, \fBCRAM-RIPEMD\fR,
+\fBCRAM-SHA1\fR, \fBCRAM-SHA224\fR, \fBCRAM-SHA256\fR, \fBCRAM-SHA384\fR,
+\fBCRAM-SHA512\fR.
+
+\fBauthcram\fR can be used in scripts to login to SMTP, IMAP, POP3 servers
+when using one of the above CRAM methods for authentication.
+
+.SH OPTIONS
+.TP 3
+\fB\-t\fR \fItype\fR
+Here \fItype\fR is one of \fBCRAM-MD5\fR, \fBCRAM-RIPEMD\fR,
+\fBCRAM-SHA1\fR, \fBCRAM-SHA224\fR, \fBCRAM-SHA256\fR, \fBCRAM-SHA384\fR,
+\fBCRAM-SHA512\fR.
+
+
+.SH SEE ALSO
+tcpclient(1)

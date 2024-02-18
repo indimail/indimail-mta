@@ -696,3 +696,5 @@ backup.conf
 do_match.o
 hasrenameat.h
 hasunlinkat.h
+authcram
+authcram.o

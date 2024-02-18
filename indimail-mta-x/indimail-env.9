@@ -8,17 +8,19 @@ indimail-environ \- indimail-mta environment variables
 
 .TP 4
 \fIACCESSLIST\fR
-Override @sysconfdir@/control/accesslist. Used by \fBqmail-smtpd\fR(8)
+Override \fI@sysconfdir@/control/accesslist\fR. Used by
+\fBqmail-smtpd\fR(8).
 
 .TP
 \fIASSIGNDIR\fR
-Override @sysconfdir@/users/assign. Used by \fBqmail-lspawn\fR(8),
-qmail-newu, \fBqmail-smtpd\fR
+Override \fI@sysconfdir@/users/assign\fR. Used by \fBqmail-lspawn\fR(8),
+\fBqmail-newu\fR(8), \fBqmail-smtpd\fR(8).
 
 .TP
 \fIAUTH_ALL\R, \fIREQUIREAUTH\fR
-AUTH_ALL enforce authenticated SMTP if relaying. REQUIREAUTH forces
-authenticated SMTP for all SMTP transactions before accepting MAIL FROM.
+\fBAUTH_ALL\fR enforce authenticated SMTP if relaying. \fBREQUIREAUTH\fR
+forces authenticated SMTP for all SMTP transactions before accepting
+\fBMAIL FROM\fR.
 
 .TP
 \fIAUTHENTICATED\fR
@@ -30,17 +32,17 @@ Set by \fBqmail-smtpd\fR(8) to the authenticated envelope sender address
 
 .TP
 \fIALLOW_BARELF\fR
-If set, \fBqmail-smtpd\fR converts bare LF into CRLF, even though such
+If set, \fBqmail-smtpd\fR(8) converts bare LF into CRLF, even though such
 messages violate the SMTP protocol.
 
 .TP
 \fIDISABLE_CNAME_LOOKUP\fR
-Used by \fBqmail-remote\fR to disable cname lookups when it fails to find
-MX record for a host.
+Used by \fBqmail-remote\fR(8) to disable cname lookups when it fails to
+find MX record for a host.
 
 .TP
 \fIDISABLE_EXTRA_GREET\fR
-Used by \fBqmail-smtpd\fR to skip additional lines in the
+Used by \fBqmail-smtpd\fR(8) to skip additional lines in the
 \fIsmtpgreeting\fR control file.
 
 .TP
@@ -56,12 +58,12 @@ host before starting delivery.
 
 .TP
 \fIBADEXT\fR
-Override @sysconfdir@/control/badext. List of extensions that are banned to
-be sent as attachments in emails. Used by \fBqmail-smtpd\fR(8)
+Override \fI@sysconfdir@/control/badext\fR. List of extensions that are
+banned to be sent as attachments in emails. Used by \fBqmail-smtpd\fR(8)
 
 .TP
 \fIBADEXTPATTERNS\fR
-Override @sysconfdir@/control/badextpatterns. List of patterns that
+Override \fI@sysconfdir@/control/badextpatterns\fR. List of patterns that
 match extensions that are banned to be send as attachments in emails. Used
 by \fBqmail-smtpd\fR(8)
 
@@ -71,29 +73,33 @@ If set, enfoces bad helo/ehlo check in \fBqmail-smtpd\fR(8).
 
 .TP
 \fIBADHOSTCHECK\fR
-Enforce badhost check which rejects connections with TCPREMOTEHOST matching
-entries in badhost control file. Used by \fBqmail-smtpd\fR(8)
+Enforce badhost check which rejects connections with \fBTCPREMOTEHOST\fR
+matching entries in \fI@sysconfdir@/control/badhost\fR. Used by
+\fBqmail-smtpd\fR(8)
 
 .TP
 \fIBADIPCHECK\fR
-Enforce badip check which rejects connections with TCPREMOTEIP matching
-entries in badip control file. Used by \fBqmail-smtpd\fR(8)
+Enforce badip check which rejects connections with \fBTCPREMOTEIP\fR
+matching entries in \fI@sysconfdir@/control/badip\fR. Used by
+\fBqmail-smtpd\fR(8).
 
 .TP
 \fIBIGTODO\fR
 This is a boolean which enables (1) or disables (0) bigtodo. Used by
-qmail-clean, qmail-qread, qmail-queue, qmail-send, qmta-send, qscheduler,
-queue-fix, slowq-send, todo-proc. If BIGTODO is non-zero, these programs
-will use \fICONFSPLIT\fR directories in the todo directory of each queue.
+\fBqmail-clean\fR(8), \fBqmail-qread\fR(8), \fBqmail-queue\fR(8),
+\fBqmail-send\fR(8), \fBqmta-send\fR(8), \fBqscheduler\fR(8),
+\fBqueue-fix\fR(8), \fBslowq-send\fR(8), \fBtodo-proc\fR(8). If
+\fBBIGTODO\fR is non-zero, these programs will use \fICONFSPLIT\fR
+directories in the todo directory of each queue.
 
 .TP
 \fIBODYCHECK\fR
-Override @sysconfdir@/control/bodycheck control file. Used by
+Override \fI@sysconfdir@/control/bodycheck\fR control file. Used by
 \fBqmail-smtpd\fR(8)
 
 .TP
 \fIBOUNCEMAIL\fR
-If set, \fBqmail-smtpd\fR(8) bounces mail with value of BOUNCEMAIL
+If set, \fBqmail-smtpd\fR(8) bounces mail with value of \fBBOUNCEMAIL\fR
 environment variable as the bounce message
 
 .TP
@@ -108,9 +114,9 @@ to queue a bounce mail
 
 .TP
 \fICACHELIFETIME\fR
-Overrides control file @sysconfdir@/control/cachelifetime. Allows you to
-override the 300 seconds default of surblfilter results in
-@sysconfdir@/control/cache directory.
+Overrides control file \fI@sysconfdir@/control/cachelifetime\fR. Allows you
+to override the 300 seconds default of \fBsurblfilter\fR(8) results in
+\fI@sysconfdir@/control/cache\fR directory.
 
 .TP
 \fICERTDIR\fR
@@ -130,12 +136,11 @@ user to relay mails.
 
 .TP
 \fICHECKSENDER\fR
-If set, \fBqmail-smtpd\fR(8) enforces user to authenticate when MAIL FROM
-domain is in \fIrcpthosts\fR control file. It also prevents user from
-forging the envelope sender address (MAIL FROM) by ensuring that the MAIL
-FROM is the same as the authenticated user unless the environment variable
-\fBMASQUERADE\fR is set.
-
+If set, \fBqmail-smtpd\fR(8) enforces user to authenticate when
+\fBMAIL FROM\fR domain is in \fIrcpthosts\fR control file. It also prevents
+user from forging the envelope sender address (\fBMAIL FROM\fR) by ensuring
+that the \fBMAIL FROM\fR is the same as the authenticated user unless the
+environment variable \fBMASQUERADE\fR is set.
 
 .TP
 \fIRELAY_CLEAR_MINUTES\fR
@@ -146,17 +151,18 @@ domain user has authenticated, relaying will be allowed.
 \fICLIENTCA\fR
 A list of Certifying Authority (CA) certificates that are used to verify
 the client-presented certificates during a TLS-encrypted session. The
-default is @sysconfdir@/certs/clientca.pem. Used by \fBqmail-smtpd\fR(8)
+default is \fI@sysconfdir@/certs/clientca.pem\fR. Used by
+\fBqmail-smtpd\fR(8).
 
 .TP
 \fICLIENTCERT\fR
 SSL certificate that is used to authenticate with the remote server during
-a TLS session. The default is @sysconfdir@/certs/clientcert.pem. Used by
-\fBqmail-remote\fR(8) as the certificate for negotiating a TLS session.
+a TLS session. The default is \fI@sysconfdir@/certs/clientcert.pem\fR. Used
+by \fBqmail-remote\fR(8) as the certificate for negotiating a TLS session.
 
 .TP
 \fICLIENTCRL\fR
-Override the default @sysconfdir@/certs/clientcrl.pem used by
+Override the default \fI@sysconfdir@/certs/clientcrl.pem\fR used by
 \fBqmail-smtpd\fR(8).
 
 .TP
@@ -164,14 +170,14 @@ Override the default @sysconfdir@/certs/clientcrl.pem used by
 Used by \fBqmail-clean\fR(8), \fBqmail-qread\fR(8), \fBqmail-queue\fR(8),
 \fBqmail-rm\fR(1), \fBqmail-send\fR(8), \fBqmail-showctl\fR(8),
 \fBtodo-proc\fR(8), \fBqmta-send\fR(8), \fBqueue-fix\fR(8),
-\fBslowq-send\fR(8) to set the directory split. Default is DIRSPLIT
+\fBslowq-send\fR(8) to set the directory split. Default is \fBDIRSPLIT\fR
 
 .TP
 \fICONTROLDIR\fR
 The directory to use for control files. The default is
-@sysconfdir@/control. This is used by all indimail-mta to locate various
-control files. This is a powerful variable and allows indimail-mta to be
-configured dynamically.
+\fI@sysconfdir@/control\fR. This is used by all indimail-mta to locate
+various control files. This is a powerful variable and allows indimail-mta
+to be configured dynamically.
 
 .TP
 \fISYSCONFDIR\fR
@@ -181,7 +187,8 @@ variable is not an absolute path
 .TP
 \fICUGMAIL\fR
 If set, \fBqmail-smtpd\fR(8) allows email transaction between hosts listed
-in @sysconfdir@/control/locals and @sysconfdir@/control/virtualdomains.
+in \fI@sysconfdir@/control/locals\fR and
+\fI@sysconfdir@/control/virtualdomains\fR.
 
 .TP
 \fIDANETIMEOUT\fR
@@ -197,7 +204,7 @@ Turn on DANE verifiation. Used by \fBqmail-remote\fR(8)
 Max size of mail allowed to be injected in the queue or accepted from
 remote clients. Used by \fBqmail-inject\fR(8), \fBqmail-smtpd\fR(8),
 \fBqmail-lspawn\fR(8), \fBqmail-rspawn\fR(8). Overrides the
-@sysconfdir@/control/databytes.
+\fI@sysconfdir@/control/databytes\fR.
 
 .TP
 \fIDATABYTES_NOTIFY\fR
@@ -212,20 +219,22 @@ Amount of time to wait in seconds for timing out select(2) call in
 
 .TP
 \fIDEATH\fR
-Amount of time in seconds to wait before dying. Used by qmail-nullqueue
+Amount of time in seconds to wait before dying. Used by
+\fBqmail-nullqueue\fR(8)
 
 .TP
 \fIDEBUG\fR
-Turns on debug in ldap-checkpwd, \fBqhpsi\fR(8), \fBqmail-remote\fR(8),
-authindi, authpgsql, \fBvchkpass\fR(8) and other checkpassword modules. This
-shouldn't be set on production.
+Turns on debug in \fBldap-checkpwd\fR(8), \fBqhpsi\fR(8),
+\fBqmail-remote\fR(8), \fBauthindi\fR(7), \fBauthpgsql\fR(7),
+\fBvchkpass\fR(8) and other checkpassword modules. This shouldn't be set on
+production.
 
 .TP
 \fIDEBUG_LOGIN\fR
-Logs logins and passwords for ldap-checkpwd, \fBqhpsi\fR(8),
-\fBqmail-remote\fR(8), authindi, authpgsql, vchkpass and other
-checkpassword modules. This shouldn't be set on production. This is
-dangerous too.
+Logs logins and passwords for \fBldap-checkpwd\fR(8), \fBqhpsi\fR(8),
+\fBqmail-remote\fR(8), \fBauthindi\fR(7), \fBauthpgsql\fR(7),
+\fBvchkpass\fR(8) and other checkpassword modules. This shouldn't be set on
+production. This is dangerous too.
 
 .TP
 \fIDEFAULT\fR
@@ -259,18 +268,19 @@ for sending notifications.
 .TP
 \fIDKIMEXPIRE\fR
 Used by \fBqmail-dkim\fR(8) to set the expire time in seconds for the signature.
-This overrides the x option in DKIMSIGNOPTIONS
+This overrides the x option in \fBDKIMSIGNOPTIONS\fR.
 
 .TP
 \fIDKIMIDENTITY\fR
 Used by \fBqmail-dkim\fR(8) to set the identity for the signature. This overrides
-the i option in DKIMSIGNOPTIONS
+the i option in \fBDKIMSIGNOPTIONS\fR.
 
 .TP
 \fIDKIMKEY\fR
-When both DKIMSIGN and DKIMVERIFY are not set, this turns on DKIM signing
-by \fBqmail-dkim\fR(8), only for authenticated users and overrides the default
-DKIM private key @sysconfdir@/control/domainkeys/default.
+When both \fBDKIMSIGN\fR and \fBDKIMVERIFY\fR are not set, this turns on
+DKIM signing by \fBqmail-dkim\fR(8), only for authenticated users and
+overrides the default DKIM private key
+\fI@sysconfdir@/control/domainkeys/default\fR.
 
 .TP
 \fIDKIMPRACTICE\fR
@@ -284,7 +294,7 @@ verification
 .TP
 \fIDKIMSIGN\fR
 Path to DKIM private key. By default \fBqmail-dkim\fR(8) uses
-@sysconfdir@/control/domainkeys/default
+\fI@sysconfdir@/control/domainkeys/default\fR.
 
 .TP
 \fIDKIMSIGNOPTIONS\fR
@@ -296,67 +306,73 @@ If set, \fBqmail-dkim\fR(8) performs DKIM verification for messages.
 
 .TP
 \fIBOUNCEDOMAIN\fR
-qmail-dkim uses the domain found in the Return-Path, Sender, From headers
-to set the domain tag. If not it uses the BOUNCEDOMAIN environment
-variable. BOUNCEDOMAIN can be set to an email address or a domain (without
-the at sign).
+\fBqmail-dkim\fR(8) uses the domain found in the Return-Path, Sender, From
+headers to set the domain tag. If not it uses the \fBBOUNCEDOMAIN\fR
+environment variable. \fBBOUNCEDOMAIN\fR can be set to an email address or
+a domain (without the at sign).
 
 .TP
 \fIDNSBLLIST\fR
-Override @sysconfdir@/control/dnsbllist. A list of dnsbl providers that
-\fBqmail-smtpd\fR(8) checks to identify blacklisted ip addresses.
+Override \fI@sysconfdir@/control/dnsbllist\fR. A list of dnsbl providers
+that \fBqmail-smtpd\fR(8) checks to identify blacklisted ip addresses.
 
 .TP
 \fIDNSCACHEIP\fR \fIDNSREWRITEFILE\fR \fILOCALDOMAIN\fR
-Set DNSCACHEIP to make \fBtcpserver\fR(1) set the DNS resolver's IP(s)
-dynamically irrespectively of settings in /etc/resolv.conf. The individual
-IPs are separated by blanks; If the environment variable $LOCALDOMAIN is
-populated, this name will be appended to unqualified host names. Additional
-rewriting of local to public names is facilitated in case the file
-/etc/dnsrewrite exists and is populated, or alternatively, the environment
-variable $DNSREWRITEFILE points to a different file. See djbdns(7),
-qualification(5) for more detailsk
+Set \fBDNSCACHEIP\fR to make \fBtcpserver\fR(1) set the DNS resolver's
+IP(s) dynamically irrespectively of settings in \fI/etc/resolv.conf\fR. The
+individual IPs are separated by blanks; If the environment variable
+\fBLOCALDOMAIN\fR is populated, this name will be appended to unqualified
+host names. Additional rewriting of local to public names is facilitated in
+case the file \fI/etc/dnsrewrite\fR exists and is populated, or
+alternatively, the environment variable \fBDNSREWRITEFILE\fR points to a
+different file. See \fBdjbdns\fR(7), \fBqualification\fR(5) for more
+details.
 
 .TP
 \fIDOMAINBINDINGS\fR
-Override control file sysconfdir/control/domainbindings which makes
+Override control file \fI@sysconfdir@/control/domainbindings\fR which makes
 \fBqmail-remote\fR(8) bind specific local ip addresses based on envelope
 sender address.
 
 .TP
 \fIDOMAIN_MASQUERADE\fR \fIPARANOID\fR
-If using hostaccess feature in \fBqmail-smtpd\fR(8), DOMAIN_MASQUERADE
-allows other mails from other domains to be accepted from an IP which has
-been listed for another domain in thoe @sysconfdir@/control/hostaccess
-control file.  settin PARANOID allows only specific domain-ip pairs listed
-in hostaccess control file to be accepted. Also look at the TCPPARANOID
-environment variable set by \fBtcpserver\fR(1).
+If using hostaccess feature in \fBqmail-smtpd\fR(8),
+\fBDOMAIN_MASQUERADE\fR allows other mails from other domains to be
+accepted from an IP which has been listed for another domain in the
+\fI@sysconfdir@/control/hostaccess\fR control file. Settin \fBPARANOID\fR
+allows only specific domain-ip pairs listed in hostaccess control file to
+be accepted. Also look at the \fBTCPPARANOID\fR environment variable set by
+\fBtcpserver\fR(1).
 
 .TP
 \fIHOSTACCESS\fR
-Override @sysconfdir@/control/hostaccess used by \fBqmail-smtpd\fR(8)
+Override \fI@sysconfdir@/control/hostaccess\fR used by
+\fBqmail-smtpd\fR(8).
 
 .TP
 \fIDOVECOT_VERSION\fR \fINATIVE_CHECKPASSWORD\fR
-If set, vchkpass checkpassword module Supports dovecot's native
-checkpassword authentication mechanism. i.e. vchkpass will run external
-prog on successful authentication and exit 1 if password is unacceptable.
-Totally opposite of what indimail's checkpassword programs do.
+If set, \fBvchkpass\fR(8) checkpassword module Supports dovecot's native
+checkpassword authentication mechanism. i.e. \fBvchkpass\fR(8) will run
+external prog on successful authentication and exit 1 if password is
+unacceptable. Totally opposite of what indimail's checkpassword programs do.
 
 .TP
 \fIENABLE_CRAM\fR
-If set, vchkpass checkpassword will support the encrypted password field to
-be used as the password for CRAM authentication
+If set, \fBvchkpass\fR(8) checkpassword will support the encrypted password
+field to be used as the password for CRAM authentication. This variable is
+not required if you have used -C, -m option to \fBvpasswd\fR(1),
+\fBvmoduser\fR(1), \fBvadddomain\fR(1), \fBvmoddomain\fR(1).
 
 .TP
 \fIALLOW_INACTIVE\fR
-If set, vchkpass will allow authentication for inactive users 
+If set, \fBvchkpass\fR(8) will allow authentication for inactive users 
 
 .TP
 \fIDTLINE\fR
-Used by \fBautoresponder\fR(1) \fBcondredirect\fR(1) condtomaildir
-\fBdot-forward\fR(1) \fBfastforward\fR(1) \fBfilterto\fR(1) forward
-maildirdeliver preline \fBrrforward\fR(1) to get the value of Delivered-To
+Used by \fBautoresponder\fR(1), \fBcondredirect\fR(1),
+\fBcondtomaildir\fR(1), \fBdot-forward\fR(1), \fBfastforward\fR(1),
+\fBfilterto\fR(1), \fBforward\fR(1), \fBmaildirdeliver\fR(1),
+\fBpreline\fR(1), \fBrrforward\fR(1) to get the value of \fBDelivered-To\fR
 header. Set by \fBqmail-local\fR(8) and \fBserialcmd\fR(1)
 
 .TP
@@ -366,8 +382,8 @@ domain name in helo/ehlo command.
 
 .TP
 \fIENVHEADERS\fR
-Override control file @sysconfdir@/control/envheaders. List of custom headers
-that \fBqmail-queue\fR(8) should pass to \fBqmail-local\fR(8),
+Override control file \fI@sysconfdir@/control/envheaders\fR. List of custom
+headers that \fBqmail-queue\fR(8) should pass to \fBqmail-local\fR(8),
 \fBqmail-remote\fR(8) in the queue.
 
 .TP
@@ -389,9 +405,9 @@ Used by checkpassword programs when using dovecot
 
 .TP
 \fIEXTRAQUEUE\fR
-Override @sysconfdir@/control/extraqueue. If this control file exists, each
-line in the content is added as a recipient to the recipient list by
-\fBqmail-queue\fR(8)
+Override \fI@sysconfdir@/control/extraqueue\fR. If this control file
+exists, each line in the content is added as a recipient to the recipient
+list by \fBqmail-queue\fR(8)
 
 .TP
 \fIFILTERARGS\fR
@@ -410,13 +426,13 @@ when passed -U option.
 
 .TP
 \fIGREETDELAY\fR
-Overrides the control file @sysconfdir@/control/greetdelay used by
+Overrides the control file \fI@sysconfdir@/control/greetdelay\fR used by
 \fBqmail-smtpd\fR(8)
 
 .TP
 \fIGREYIP\fR
-If set, \fBqmail-smtpd\fR(8) enables GREYLISTING against qmail-greyd
-running on the IP $GREYIP
+If set, \fBqmail-smtpd\fR(8) enables greylisting against
+\fBqmail-greyd\fR(8) running on the IP \fB$GREYIP\fR
 
 .TP
 \fISPAMFILTER\fR, \fIHAMEXITCODE\fR, \fISPAMEXITCODE\fR, \fISPAMIGNORE\fR,
@@ -425,32 +441,32 @@ running on the IP $GREYIP
 .TP
 \fIUNSUREEXITCODE\fR
 Used by \fBqmail-spamfilter\fR(8) when spam filtering is enabled by setting
-SPAMFILTER.
+\fBSPAMFILTER\fR.
 
 .TP
 \fIHELOHOSTBYIP\fR
-Override @sysconfdir@/control/helohostbyip contro file used by
-\fBqmail-remote\fR(8)
+Override \fI@sysconfdir@/control/helohostbyip\fR control file used by
+\fBqmail-remote\fR(8).
 
 .TP
 \fIHOME\fR
-Used by \fBcondredirect\fR(1) \fBdot-forward\fR(1) \fBfastforward\fR(1)
-\fBfilterto\fR(1) forward maildirserial \fBnew-inject\fR(8)
-process_queue \fBqmail-inject\fR(8) \fBqmail-qread\fR(8)
-\fBqmail-showctl\fR(8) \fBqmta-send\fR(8) \fBqnotify\fR(1)
-\fBqreceipt\fR(1) \fBqueue-fix\fR(8) \fBreplier\fR(1)
-\fBrrforward\fR(1) \fBrrt\fR(1) to load environment variables from
-$HOME/.defaultqueue directory
+Used by \fBcondredirect\fR(1), \fBdot-forward\fR(1), \fBfastforward\fR(1),
+\fBfilterto\fR(1), \fBforward\fR(1), \fBmaildirserial\fR(1),
+\fBnew-inject\fR(8), \fBprocess_queue\fR(3), \fBqmail-inject\fR(8),
+\fBqmail-qread\fR(8), \fBqmail-showctl\fR(8), \fBqmta-send\fR(8),
+\fBqnotify\fR(1), \fBqreceipt\fR(1), \fBqueue-fix\fR(8), \fBreplier\fR(1),
+\fBrrforward\fR(1), \fBrrt\fR(1), to load environment variables from
+\fI$HOME/.defaultqueue\fR directory
 
 .TP
 \fISKIP_LOCAL_ENVIRONMENT\fR
-Used by \fBcondredirect\fR(1) \fBdot-forward\fR(1) \fBfastforward\fR(1)
-\fBfilterto\fR(1) forward maildirserial \fBnew-inject\fR(8)
-process_queue \fBqmail-inject\fR(8) \fBqmail-qread\fR(8)
-\fBqmail-showctl\fR(8) \fBqmta-send\fR(8) \fBqnotify\fR(1)
-\fBqreceipt\fR(1) \fBqueue-fix\fR(8) \fBreplier\fR(1)
-\fBrrforward\fR(1) \fBrrt\fR(1) to skip $HOME/.defaultqueue directory for
-environment variables.
+Used by \fBcondredirect\fR(1), \fBdot-forward\fR(1), \fBfastforward\fR(1),
+\fBfilterto\fR(1), \fBforward\fR(1) \fBmaildirserial\fR(1),
+\fBnew-inject\fR(8), \fBprocess_queue\fR(3), \fBqmail-inject\fR(8),
+\fBqmail-qread\fR(8), \fBqmail-showctl\fR(8), \fBqmta-send\fR(8),
+\fBqnotify\fR(1), \fBqreceipt\fR(1), \fBqueue-fix\fR(8) \fBreplier\fR(1),
+\fBrrforward\fR(1), \fBrrt\fR(1) to skip \fI$HOME/.defaultqueue\fR
+directory for environment variables.
 
 .TP
 \fIHONOR_BODYLENGTHTAG\fR
@@ -460,7 +476,7 @@ If set, \fBqmail-dkim\fR(8) honors body length tag.
 \fIHOST\fR
 Set by \fBqmail-local\fR(8), \fBqmail-qfilter\fR(1), \fBserialcmd\fR(1).
 Used by \fBautoresponder\fR(1), \fBdot-forward\fR(1), \fBfastforward\fR(1),
- \fBqmail-inject\fR(8), \fBqnotify\fR(1), \fBsrsfilter\fR(1)
+\fBqmail-inject\fR(8), \fBqnotify\fR(1), \fBsrsfilter\fR(1)
 
 .TP
 \fIHOSTNAME\fR
@@ -469,15 +485,15 @@ Received headers.
 
 .TP
 \fIINCLUDE_TRASH\fR
-If set, maildirsize and \fBqmail-smtpd\fR(8) ETRN will include mails in
-trash as part of the user's quota (size, count or size+count).
+If set, \fBmaildirsize\fR(1) and \fBqmail-smtpd\fR(8) ETRN will include
+mails in trash as part of the user's quota (size, count or size+count).
 
 .TP
 \fIINITCMD\fR
 \fIWAIT_INITCMD\fR
-If set, svscan runs an initialization command defined by this variable
-before startup. If WAIT_INITCMD is set, svscan will wait for the command
-to exit.
+If set, \fBsvscan\fR(8) runs an initialization command defined by this variable
+before startup. If \fBWAIT_INITCMD\fR is set, \fBsvscan\fR(8) will wait for the
+command to exit.
 
 .TP
 \fILDAP_BASE\fR
@@ -487,12 +503,13 @@ to exit.
 \fILDAP_HOST\fR
 \fILDAP_PORT\fR
 \fILDAP_SCOPE\fR
-Used by ldap-checkpasswd checkpassword authentication module
+Used by \fBldap-checkpwd\fR(8) checkpassword authentication module
 
 .TP
 \fILEVEL2_TLD\fR
 \fILEVEL3_TLD\fR
-Set this to override surblfilter control files level2_tld, level3_tld.
+Set this to override \fBsurblfilter\fR(8) control files \fIlevel2_tld\fR,
+\fIlevel3_tld\fR.
 
 .TP
 \fILOCAL\fR
@@ -501,34 +518,34 @@ Set by \fBqmail-local\fR(8), \fBserialcmd\fR(1). Used by the
 
 .TP
 \fILOCALDOMAINS\fR
-If set, forces \fBqmail-local\fR(8) to treat only those domains in control file
-@sysconfdir@/cotrol/localdomains as local. This restrict local deliveries for
-users only from certain domains.
+If set, forces \fBqmail-local\fR(8) to treat only those domains in control
+file \fI@sysconfdir@/control/localdomains\fR as local. This restrict local
+deliveries for users only from certain domains.
 
 .TP
 \fILOGFILTER\fR
 \fILOGFD\fR
-LOGFILTER is used by \fBqmail-smtpd\fR(8) to log SMTP transactions marked
-as spam to a fifo created by qmail-logfilter. If this FIFO is pre-opened,
-it can be specified in LOGFD
+\fBLOGFILTER\fR is used by \fBqmail-smtpd\fR(8) to log SMTP transactions
+marked as spam to a fifo created by qmail-logfilter. If this FIFO is
+pre-opened, it can be specified in \fBLOGFD\fR.
 
 .TP
 \fILOGHEADERS\fR
 \fILOGHEADERFD\fR
-Override control file @sysconfdir@/control/logheaders used by
+Override control file \fI@sysconfdir@/control/logheaders\fR used by
 \fBqmail-queue\fR(8). If this is set or this control files exists,
 \fBqmail-queue\fR(8) will log headers matching lines in this control file
 with the value of the header. It will do this by writing to fd equal to
-LOGHEADERFD.
+\fBLOGHEADERFD\fR.
 
 .TP
 \fILOGLOCK\fR
 indimail-mta uses multiple queues with each queue being served by specific
 \fBtodo-proc\fR(8), \fBqmail-send\fR(8), \fBqmail-lspawn\fR(8),
 \fBqmail-rspawn\fR(8) and \fBqmail-clean\fR(8) processes. The standard
-output and errors all go to a single fd (usually setup by supervise).
-The output can get jumbled up. Setting this prevents log output to be
-written only with it is a complete line.
+output and errors all go to a single fd (usually setup by
+\fBsupervise\fR(8)). The output can get jumbled up. Setting this prevents
+log output to be written only with it is a complete line.
 
 .TP
 \fILOGNAME\fR
@@ -540,23 +557,25 @@ Used by maildir2mbox program
 
 .TP
 \fIMAILARCHIVE\fR
-Override @sysconfdir@/control/mailarchive control file used by
+Override \fI@sysconfdir@/control/mailarchive\fR control file used by
 \fBqmail-queue\fR(8).
 
 .TP
 \fIMAILDIR\fR
-Used by maildir2mbox, mbox2maildir and maildirwatch programs
+Used by \fBmaildir2mbox\fR(1), \fBmbox2maildir\fR(1) and
+\fBmaildirwatch\fR(1) programs
 
 .TP
 \fIMAILDIRSIZE_MAX_AGE\fR
-Used by vdelivermail to recalculate quota if the age for maildirsize exceeds
-this value
+Used by \fBvdelivermail\fR(8) to recalculate quota if the age for
+\fImaildirsize\fR(1) exceeds this value.
 
 .TP
 \fIMAILDIRSIZE_MAX_SIZE\fR
-Used by vdelivermail to recalcuate quota if the size for maildirsize exceeds
-this value. Multiple quota lines in maildirsize is collapsed to a single
-line containing the totals
+Used by \fBvdelivermail\fR(8) to recalcuate quota if the size for
+\fImaildirsize\fR exceeds this value. Multiple quota lines in
+\fImaildirsize\fR is collapsed to a single line containing the
+totals.
 
 .TP
 \fIMAILHOST\fR
@@ -571,7 +590,7 @@ Used by \fBnew-inject\fR(8), \fBqmail-inject\fR(8) and set by
 
 .TP
 \fIMAILTMP\fR
-Used by maildir2mbox
+Used by \fBmaildir2mbox\fR(1).
 
 .TP
 \fIMAILUSER\fR
@@ -609,11 +628,12 @@ temporary errors.
 
 .TP
 \fIMESSID\fR
-Set by qmail-lspawn, qmail-rspawn to the message file path in the queue
+Set by \fBqmail-lspawn\fR(1), \fBqmail-rspawn\fR(1) to the message file
+path in the queue.
 
 .TP
 \fIMORESMTPROUTESCDB\fR
-Override @sysconfdir@/control/moresmtproutes.cdb used by
+Override \fI@sysconfdir@/control/moresmtproutes.cdb\fR used by
 \fBqmail-remote\fR(8)
 
 .TP
@@ -623,14 +643,15 @@ qscheduler.
 
 .TP
 \fIMYSQL_LIB\fR
-Override @sysconfdir@/control/mysql_lib control file used by
-\fBqmail-smtpd\fR(8), \fBqmail-lspawn\fR(8), qmail-respawn,
-\fBqmail-showctl\fR(8), maildirsize, qmail-sql, sql-dataabase, ctrlenv
+Override \fI@sysconfdir@/control/mysql_lib\fR control file used by
+\fBqmail-smtpd\fR(8), \fBqmail-lspawn\fR(8), \fBqmail-respawn\fR(8),
+\fBqmail-showctl\fR(8), \fBmaildirsize\fR(1), \fBqmail-sql\fR(8),
+\fBsql-database\fR(8), \fBctrlenv\fR(8).
 
 .TP
 \fIMYSQL_TIMEOUT\fR
-Timeout for connecting to MySQL. Used by \fBqmail-smtpd\fR(8), qmail-sql,
-sql-database, ctrlenv
+Timeout for connecting to MySQL. Used by \fBqmail-smtpd\fR(8),
+\fBqmail-sql\fR(8), \fBsql-database\fR(8), \fBctrlenv\fR(1).
 
 .TP
 \fINEWSENDER\fR
@@ -643,17 +664,19 @@ in dns.
 
 .TP
 \fINOSIGNATUREDOMAINS\fR
-Override control file @sysconfdir@/nosignaturedomains used by
+Override control file \fI@sysconfdir@/nosignaturedomains\fR used by
 \fBqmail-dkim\fR(8)
 
 .TP
 \fINOTLSHOSTS\fR
-override @sysconfdir@/control/notlshosts used by \fBqmail-remote\fR(8)
+override \fI@sysconfdir@/control/notlshosts\fR used by
+\fBqmail-remote\fR(8).
 
 .TP
 \fINULLQUEUE\fR
-If set, qmail-nullqueue gets used to drain the message without putting it
-in the queue. This overrides QMAILQUEUE environment variable.
+If set, \fBqmail-nullqueue\fR(8) gets used to drain the message without
+putting it in the queue. This overrides \fBQMAILQUEUE\fR environment
+variable.
 
 .TP
 \fIONFAILURE_REMOTE\fR \fIONSUCCESS_REMOTE\fR \fIONTEMPORARY_REMOTE\fR
@@ -662,15 +685,17 @@ delivery or after a temporary failure.
 
 .TP
 \fIORIGINIPFIELD\fR
-Overrides @sysconfdir@/control/originipfield used by \fBqmail-remote\fR(8)
+Overrides \fI@sysconfdir@/control/originipfield\fR used by
+\fBqmail-remote\fR(8).
 
 .TP
 \fIOUTGOINGIP\fR
-Overrides @sysconfdir@/control/outgoingip used by \fBqmail-remote\fR(8)
+Overrides \fI@sysconfdir@/control/outgoingip\fR used by
+\fBqmail-remote\fR(8).
 
 .TP
 \fIPASSWORD_COMMAND\fR
-The password command to execute by the qmail-poppass daemon
+The password command to execute by the \fBqmail-poppass\fR(8) daemon.
 
 .TP
 \fISMTP_PLUGIN\fR \fISMTP_PLUGIN_SYMB\fR
@@ -686,30 +711,32 @@ Directory to look for plugins by \fBqhpsi\fR(8) and \fBqmail-smtpd\fR(8)
 
 .TP
 \fIPORT_QMQP\fR
-Override the default port 628 used by qmail-qmqpc
+Override the default port 628 used by \fBqmail-qmqpc\fR(8).
 
 .TP
 \fIPOSTAUTH\fR
-Program to execute after successful authentication by \fBsys-checkpwd\fR(8),
-vchkpass, ldap-checkpassword, pam-checkpwd, authindi, authpgsql
+Program to execute after successful authentication by
+\fBsys-checkpwd\fR(8), \fBvchkpass\fR(8), \fBldap-checkpwd\fR(8),
+\fBpam-checkpwd\fR(8), \fBauthindi\fR(7), \fBauthpgsql\fR(7)
 
 .TP
 \fIPROTO\fR
-Set by \fBtcpclient\fR(1), \fBtcpserver\fR(1), \fBsendmail\fR(8), \fBtcp-env\fR(1)
+Set by \fBtcpclient\fR(1), \fBtcpserver\fR(1), \fBsendmail\fR(8),
+\fBtcp-env\fR(1)
 
 .TP
 \fIPWD\fR
-Used by svscan to get the current working directory
+Used by \fBsvscan\fR(8) to get the current working directory.
 
 .TP
 \fIQIDENT\fR
-queue identifier set by qscheduler. Each invocation of qmail-send uses a
-queue with a unique identifier. e.g. QIDENT is 1 for queue1, 2 for queue2
-and so on.
+queue identifier set by \fBqscheduler\fR(8). Each invocation of
+\fBqmail-send\fR(8) uses a queue with a unique identifier. e.g.
+\fBQIDENT\fR is 1 for queue1, 2 for queue2 and so on.
 
 .TP
-\fIQHPSI\fR \fIQHPSIMAXSIZE\fR \fIQHPSIMINSIZE\fR \fIQHPSIRC\fR \fIQHPSIRN\fR
-Used by \fBqhpsi\fR(8)
+\fIQHPSI\fR \fIQHPSIMAXSIZE\fR \fIQHPSIMINSIZE\fR \fIQHPSIRC\fR
+\fIQHPSIRN\fR Used by \fBqhpsi\fR(8)
 
 .TP
 \fIQLOCAL\fR, \fIQREMOTE\R
@@ -719,7 +746,8 @@ Used by spawn-filter to execute alternet \fBqmail-local\fR(8),
 .TP
 \fIQMAILDEFAULTDOMAIN\fR
 \fIQMAILDEFAULTHOST\fR
-Used by ofmipd, \fBnew-inject\fR(8) \fBqmail-inject\fR(8), newinclude
+Used by \fBofmipd\fR(8), \fBnew-inject\fR(8) \fBqmail-inject\fR(8),
+\fBnewinclude\fR(1).
 
 .TP
 \fIQMAILGETPW\fR
@@ -732,7 +760,7 @@ Used by \fBautoresponder\fR(1), \fBqmail-qfilter\fR(1). Set by
 
 .TP
 \fIQMAILIDHOST\fR
-Used by ofmipd, \fBnew-inject\fR(8), \fBqmail-inject\fR(8)
+Used by \fBofmipd\fR(8), \fBnew-inject\fR(8), \fBqmail-inject\fR(8)
 
 .TP
 \fIQMAILINJECT\fR \fIQMAILINJECT_FORCE_SRS\fR \fIQMAILINJECT_SKIP_SRS\fR
@@ -774,7 +802,7 @@ Used by all \fBqmail-queue\fR(8) clients \fBcondredirect\fR(1),
 
 .TP
 \fIQMAILRCPTS\fR
-Used by \fBqmail-qfilter\fR(1), surblfilter
+Used by \fBqmail-qfilter\fR(1), \fBsurblfilter\fR(8).
 
 .TP
 \fIQMAILSHOST\fR \fIQMAILSUSER\fR
@@ -805,11 +833,11 @@ qmail-queue passes the value across the queue. Set by \fBqmail-local\fR(8),
 .TP
 \fIQREGEX\fR
 Used by \fBqmail-smtpd\fR(8), \fBqmail-inject\fR(8), \fBspawn-filter\fR(8),
-\fBqmail-send\fR(8), \fBslowq-send\fR(8), drate, uacl
+\fBqmail-send\fR(8), \fBslowq-send\fR(8), \fBdrate\fR(1), \fBuacl\fR(1).
 
 .TP
 \fIQUARANTINE\fR
-Override @sysconfdir@/control/quarantine control file Used by
+Override \fI@sysconfdir@/control/quarantine\fR control file Used by
 \fBqmail-queue\fR(8).
 
 .TP
@@ -875,15 +903,16 @@ Set by \fBqmail-local\fR(8), \fBserialcmd\fR(1)k
 .TP
 \fIREJECTVIRUS\fR \fIVIRUSFORWARD\fR
 Used by \fBqmail-queue\fR(8). Infected mails will be quarantined to the
-email defined by VIRUSFORWARD. This will work only if REJECTVIRUS is not
-equal to 1. Setting VIRUSFORWARD sets the X-Quarantine-ID containing the
-list of original recipient list is added.
+email defined by \fBVIRUSFORWARD\fR. This will work only if
+\fBREJECTVIRUS\fR is not equal to 1. Setting \fBVIRUSFORWARD\fR sets the
+\fBX-Quarantine-ID\fR containing the list of original recipient list is
+added.
 
 .TP
 \fIRELAYCLIENT\fR
-Used by dnsbl, ofmipd, \fBqmail-dkim\fR(8), qmail-qmtpd,
+Used by \fBofmipd\fR(8), \fBqmail-dkim\fR(8), \fBqmail-qmtpd\fR(8),
 \fBqmail-queue\fR(8), \fBqmail-spamfilter\fR(8), \fBqmail-smtpd\fR(8). Set
-by sendimail, \fBtcpserver\fR(1)
+by \fBsendimail\fR(1), \fBtcpserver\fR(1).
 
 .TP
 \fIRELAYCLIENT_NODKIMVERIFY\fR
@@ -891,19 +920,20 @@ used by \fBqmail-dkim\fR(8)
 
 .TP
 \fIREMOTEINFO\fR
-Used by ofmipd
+Used by \fBofmipd\fR(8).
 
 .TP
 \fIREMOVEHEADERS\fR
-override @sysconfdir@/control/removeheaders used by \fBqmail-queue\fR(8)
+override \fI@sysconfdir@/control/removeheaders\fR used by
+\fBqmail-queue\fR(8).
 
 .TP
 \fIREQPTR\fR
-If the environment variable REQPTR is set and TCPREMOTEHOST is absent,
-\fBqmail-smtpd\fR(8) rejects connections from unresolvable IP address
+If the environment variable \fBREQPTR\fR is set and \fBTCPREMOTEHOST\fR is
+absent, \fBqmail-smtpd\fR(8) rejects connections from unresolvable IP address
 (hosts without reverse DNS). \fBqmail-smtpd\fR(8) returns permanent error
-code 553 to the client. TCPREMOTEHOST environment variable is removed by
-\fBtcpserver\fR(1)(1) if remote host (TCPREMOTEIP) does not have a reverse
+code 553 to the client. \fBTCPREMOTEHOST\fR environment variable is removed by
+\fBtcpserver\fR(1) if remote host (\fBTCPREMOTEIP\fR) does not have a reverse
 DNS record.
 
 .TP
@@ -915,27 +945,28 @@ If set, \fBqmail-lspawn\fR(8) redirects double bounces to a mailbox
 Used by \fBqmail-remote\fR(8), set by \fBqmail-rspawn\fR(8)
 .TP
 \fISMTPROUTEFILE\fR \fIQMTPROUTEFILE\fR
-Override @sysconfdir@/control/[smtproutes,qmtproutes] control file used by
-\fBqmail-remote\fR(8)
+Override \fI@sysconfdir@/control/\fR[\fIsmtproutes\fR,\fIqmtproutes\fR]
+control file used by \fBqmail-remote\fR(8).
 .TP
 \fIROUTES\fR
 Used by \fBqmail-remote\fR(8)
-If set as "smtp", \fBqmail-rspawn\fR(8) sets the SMTPROUTE variable for a
-indimail-virtualdomain user. If set as "qmtp", \fBqmail-rspawn\fR(8) sets
-the QMTPROUTE variable for a indimail-virtualdomain user.
+If set as "smtp", \fBqmail-rspawn\fR(8) sets the \fBSMTPROUTE\fR variable
+for a indimail-virtualdomain user. If set as "qmtp", \fBqmail-rspawn\fR(8)
+sets the \fBQMTPROUTE\fR variable for a indimail-virtualdomain user.
 
 .TP
 \fIRPLINE\fR
-Used by condtomaildir, \fBdot-forward\fR(1), maildirdeliver, preline,
-\fBqnotify\fR(1) to get the Return-Path. Set by \fBqmail-local\fR(8) and
-\fBserialcmd\fR(1), \fBvacation\fR(8)
+Used by \fBcondtomaildir\fR(1), \fBdot-forward\fR(1),
+\fBmaildirdeliver\fR(1), \fBpreline\fR(1), \fBqnotify\fR(1) to get the
+\fBReturn-Path\fR. Set by \fBqmail-local\fR(8) and \fBserialcmd\fR(1),
+\fBvacation\fR(8).
 
 .TP
 \fISANITIZE_ENV\R
 Used by \fBqmail-local\fR(8) to clear all environment variables other than
-USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR. You can set additional environment
-variables to preserve by setting SANITIZE_ENV as a colon ':' separated list
-of environment variables to preserve.
+\fBUSE_FSYNC\fR, \fBUSE_FDATASYNC\fR, \fBUSE_SYNCDIR\fR. You can set
+additional environment variables to preserve by setting \fBSANITIZE_ENV\fR
+as a colon ':' separated list of environment variables to preserve.
 
 .TP
 \fISCANCMD\fR \fISCANDIR\fR
@@ -943,7 +974,7 @@ Used by \fBqscanq-stdin\fR(8), \fBqhpsi\fR(8)
 
 .TP
 \fISCANINTERVAL\fR \fISCANLOG\fR
-Used by svscan
+Used by \fBsvscan\fR(8)
 
 .TP
 \fISECURE_AUTH\fR
@@ -960,8 +991,8 @@ Used by \fBautoresponder\fR(1), \fBcondredirect\fR(1),
 
 .TP
 \fISERVERCERT\fR
-Overrides the default certificate @sysconfdir@/certs/servercert.pem used by
-\fBqmail-smtpd\fR(8).
+Overrides the default certificate \fI@sysconfdir@/certs/servercert.pem\fR
+used by \fBqmail-smtpd\fR(8).
 
 .TP
 \fISERVICE_RESPONDER\fR
@@ -969,46 +1000,48 @@ Used by \fBautoresponder\fR(1)
 
 .TP
 \fISETSID\fR
-Used by svscan. If set, svscan calls setsid(2) to make the child a session
-leader.
+Used by \fBsvscan\fR(8). If set, \fBsvscan\fR(8) calls setsid(2) to make
+the child a session leader.
 
 .TP
 \fISETPGID\fR
-Used by supervise. If set, supervise calls setpgid(2) to make the child run
-in its own process group.
+Used by \fBsupervise\fR(8). If set, \fBsupervise\fR(8) calls setpgid(2) to
+make the child run in its own process group.
 
 .TP
 \fITERMINATE_SESSION\fR
-Used by svscan. If set along with \fBSETSID\fR, svscan calls kill(0, 15)
-to terminate all supervise processes started by it.
+Used by \fBsvscan\fR(8). If set along with \fBSETSID\fR, \fBsvscan\fR(8)
+calls kill(0, 15) to terminate all \fBsupervise\fR(8) processes started by
+it.
 
 .TP
 \fISHUTDOWN\fR
-Path to a script / command used by svscan to execute on -d option to svc(1)
+Path to a script / command used by \fBsvscan\fR(8) to execute on -d option
+to \fBsvc\fR(1).
 
 .TP
 \fISIGNATUREDOMAINS\fR
-Override @sysconfdir@/control/signaturedomains control file used by
+Override \fI@sysconfdir@/control/signaturedomains\fR control file used by
 \fBqmail-dkim\fR(8)
 
 .TP
 \fIBATVKEY\fR
-Override @sysconfdir@/control/batvkey control file used by
+Override \fI@sysconfdir@/control/batvkey\fR control file used by
 \fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
 
 .TP
 \fIBATVKEYSTALE\fR
-Override @sysconfdir@/control/batvkeystale control file used by
+Override \fI@sysconfdir@/control/batvkeystale\fR control file used by
 \fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
 
 .TP
 \fIBATVNOSIGNLOCALS\fR
-Override @sysconfdir@/control/batvnosinlocals control file used by
+Override \fI@sysconfdir@/control/batvnosinlocals\fR control file used by
 \fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
 
 .TP
 \fIBATVNOSIGNREMOTE\fR
-Override @sysconfdir@/control/batvnosinremote control file used by
+Override \fI@sysconfdir@/control/batvnosinremote\fR control file used by
 \fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
 
 .TP
@@ -1049,18 +1082,18 @@ If enabled, \fBsys-checkpwd\fR(8) strips domain component from username
 
 .TP
 \fISURBLDOMAINWHITE\fR
-Overrides @sysconfdir@/control/surbldomainwhite control file used by
+Overrides \fI@sysconfdir@/control/surbldomainwhite\fR control file used by
 \fBsurblfilter\fR(8)
 
 .TP
 \fISURBLRCPT\fR
-Overrides @sysconfdir@/control/surblrcpt control file used by
+Overrides \fI@sysconfdir@/control/surblrcpt\fR control file used by
 \fBsurblfilter\fR(8)
 
 .TP
 \fISV_PWD\fR
-Set by svscan to set the current working dirctory and used by supervise to
-get the current working directory.
+Set by \fBsvscan\fR(8) to set the current working dirctory and used by
+\fBsupervise\fR(8) to get the current working directory.
 
 .TP
 \fITCP6LOCALIP\fR \fITCP6REMOTEIP\fR \fITCPLOCALHOST\fR \fITCPLOCALIP\fR
@@ -1076,15 +1109,15 @@ remoteip
 
 .TP
 \fITLSADOMAINS\fR
-Override @sysconfdir@/control/tlsadomains used by \fBqmail-remote\fR(8)
+Override \fI@sysconfdir@/control/tlsadomains\fR used by \fBqmail-remote\fR(8)
 
 .TP
 \fITLS_CERTFILE\fR
-Used by sslerator
+Used by \fBsslerator\fR(8).
 
 .TP
 \fITLS_CIPHER_LIST\fR \fITLS_CIPHER_SUITE\fR
-Used by sslerator, \fBqmail-smtpd\fR(8), qmail-remote
+Used by \fBsslerator\fR(8), \fBqmail-smtpd\fR(8), \fBqmail-remote\fR(8).
 
 .TP
 \fITMPDIR\fR
@@ -1129,7 +1162,7 @@ DKIM-Signature
 .TP
 \fIUSE_DLMOPEN\fR
 If set, \fBtcpserver\fR(1) uses dlmopen(3) instead of dlopen(3) to load
-\fBtcpserver\fR(1)(1) modules.
+\fBtcpserver\fR(1) modules.
 
 .TP
 \fIUSE_FNMATCH\fR
@@ -1182,7 +1215,8 @@ Used by \fBqmail-smtpd\fR(8), \fBqmail-spamfilter\fR(8) to execute
 
 .TP
 \fIADDUSERCMD\fR
-Used by proxyimap, proxypop3 if configured to add users automatically
+Used by \fBproxyimap\fR(8), \fBproxypop3\fR(8) if configured to add users
+automatically.
 
 .TP
 \fITIMEOUTCONN\fR
@@ -1195,7 +1229,7 @@ Timeout that \fBadminclient\fR(8) uses for data exchange between
 
 .TP
 \fIALLOWCHARS\fR
-List of allowed characters in the usernames. Used by vadduser
+List of allowed characters in the usernames. Used by \fBvadduser\fR(1)
 
 .TP
 \fIAVG_USER_QUOTA\fR
@@ -1208,7 +1242,7 @@ Used by \fBvadddomain\fR(1), \fBvadduser\fR(1), \fBvdominfo\fR(1)
 .TP
 \fIBULK_MAILDIR\fR
 The bulk mail directory. e.g. for indimail.org the bulk
-mail directory will be @qmaildir@/indimail.org/$BULK_MAILDIR
+mail directory will be \fI@qmaildir@/indimail.org/$BULK_MAILDIR\fR.
 
 .TP
 \fIBULK_HOST\fR
@@ -1241,18 +1275,19 @@ Used by \fBdbinfo\fR(8) for editing mcdinfo (when passed the -e option)
 
 .TP
 \fIELIMINATE_DUPS\fR
-used by vdelivermail, ismaildup to discard duplicate emails.
+used by \fBvdelivermail\fR(8), \fBismaildup\fR(1) to discard duplicate
+emails.
 
 .TP
 \fIELIMINATE_DUPS_ARGS\fR
-used by vdelivermail, ismaildup to run a program with the mail as input on
-stdin. The output of this command is used for md5sum calcuation to decide
-if an email is to be discarded or not. If this is not defined, 822header
-program is used.
+used by \fBvdelivermail\fR(8), \fBismaildup\fR(1) to run a program with the
+mail as input on stdin. The output of this command is used for md5sum
+calcuation to decide if an email is to be discarded or not. If this is not
+defined, \fB822header\fR(1) program is used.
 
 .TP
 \fIELIMINATE_DUPS_INT\fR
-used by vdelivermail, ismaildup as the interval within which same email
+used by \fBvdelivermail\fR(8), ismaildup as the interval within which same email
 will be discarded as duplicate
 
 .TP
@@ -1264,7 +1299,7 @@ adding users
 \fIHOLDOVERQUOTA\fR
 If set, \fBvdelivermail\fR(8) will defer mails when user runs out of quota.
 The command defined by \fIOVERQUOTA_CMD\fR environment variable will be
-run. However, BOUNCE_FLAG and lastdeliver table will not be updated
+run. However, \fBBOUNCE_FLAG\fR and lastdeliver table will not be updated
 
 .TP
 \fIOVERQUOTA_CMD\fR

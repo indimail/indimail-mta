@@ -22,11 +22,11 @@ edit = sed \
 	-e 's,@DATE\@,$(DATE),g'
 
 it = 822date 822field 822header 822print 822received addrlist analyzer \
-	atrn autoresponder backup.conf batv binm1 binm1+df binm2 binm2+df \
-	binm3 binm3+df bouncesaying cdb-database cdbdump cdbget cdbgetm \
-	cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr condredirect \
-	config-fast create_services indimail-mta.cron ctrlenv datemail \
-	dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr \
+	atrn authcram autoresponder backup.conf batv binm1 binm1+df binm2 \
+	binm2+df binm3 binm3+df bouncesaying cdb-database cdbdump cdbget \
+	cdbgetm cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
+	condredirect config-fast create_services indimail-mta.cron ctrlenv \
+	datemail dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr \
 	dnstlsarr dnstxt dot-forward drate etrn except fastforward \
 	favicon.base64 filterit forward generic.so greydaemon home home+df \
 	hostname iftocc indimail-mta.changes setqload qmonitor \
@@ -348,6 +348,13 @@ binm3+df.sh conf-prefix
 	cat binm3+df.sh \
 	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
 	> binm3+df
+
+authcram: load authcram.o
+	./load authcram $(QMAILLIB)
+
+authcram.o: \
+compile authcram.c
+	./compile authcram.c
 
 bouncesaying: load bouncesaying.o
 	./load bouncesaying $(QMAILLIB)

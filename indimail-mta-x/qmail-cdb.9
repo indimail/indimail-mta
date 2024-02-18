@@ -25,16 +25,16 @@ or
 .I filename
 
 .SH DESCRIPTION
-\fBqmail-cdb\fR does a chdir to \fI@sysconfdir@\fR directory with the
--\fIr\fR option and proceeds to read \fIusers/filename\fR. You can override
-\fI@sysconfdir@\fR directory by setting \fBSYSCONFDIR\fR environment
-variable.
+With the -\fIr\fR option, \fBqmail-cdb\fR does a chdir to
+\fI@sysconfdir@\fR directory option and proceeds to read
+\fIusers/filename\fR. You can override \fI@sysconfdir@\fR directory by
+setting \fBSYSCONFDIR\fR environment variable. \fIfilename\fR can be
+omitted to use a default of \fIuser/recipients\fR for the -\fIr\fR option.
 
-\fBqmail-cdb\fR does a chdir to \fI@controldir@\fR directory without the
--\fIr\fR option and proceeds to read \fIfilename\fR. You can override
-\fI@controldir@\fR directory by setting \fBCONTROLDIR\fR environment
-variable. \fIfilename\fR can be omitted to use a default of
-\fIuser/recipients\fR for the -\fIr\fR option.
+Without the -\fIr\fR option, \fBqmail-cdb\fR does a chdir to
+\fI@controldir@\fR directory and proceeds to read \fIfilename\fR. You can
+override \fI@controldir@\fR directory by setting \fBCONTROLDIR\fR
+environment variable.
 
 \fBqmail-cdb\fR then reads the addresses provided in \fIfilename\fR (or
 \fIusers/filename\fR for -r option), converts them into lowercase, and
