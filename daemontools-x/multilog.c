@@ -1,5 +1,5 @@
 /*
- * $Id: multilog.c,v 1.9 2024-02-12 19:31:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: multilog.c,v 1.9 2024-02-18 08:42:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -176,9 +176,9 @@ finish(struct cyclog *d, char *file, char *code)
 	}
 #ifdef HASUNLINKAT
 	for (;;) {
-		if ((fd = open_read(d->dir)) != -1)
+		if ((fd = open_read(".")) != -1)
 			break;
-		pause5("unable to open ", d->dir, "/", file, ", pausing: ");
+		pause3("unable to read ", d->dir, ", pausing: ");
 	}
 	while (unlinkat(fd, file, 0) == -1)
 		pause5("unable to remove (unlinkat) ", d->dir, "/", file, ", pausing: ");
@@ -689,14 +689,14 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	static char    *x = "$Id: multilog.c,v 1.9 2024-02-12 19:31:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: multilog.c,v 1.9 2024-02-18 08:42:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: multilog.c,v $
- * Revision 1.9  2024-02-12 19:31:18+05:30  Cprogrammer
+ * Revision 1.9  2024-02-18 08:42:01+05:30  Cprogrammer
  * use unlinkat() if available instead of unlink()
  *
  * Revision 1.8  2022-05-22 23:06:19+05:30  Cprogrammer
