@@ -53,19 +53,19 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	tokenize uacl udpclient udplogger update_tmprsadh viruscanner whois \
 	yearcal
 
-man = cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 cleanq.8 \
-	condredirect.1 ctrlenv.8 datemail.1 dknewkey.8 \
+man = authcram.1 cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 \
+	cleanq.8 condredirect.1 ctrlenv.8 datemail.1 dknewkey.8 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.7 filterit.1 forward.1 maildirserial.1 mlmatchup.8 \
 	multi-queue.7 new-inject.1 plugin_init.3 plugtest.1 predate.1 \
 	printass.1 qarf.1 qfrontend.1 qmail-cdb.8 qmail-clean.8 \
 	indimail-control.5 qmail-daned.8 qtop.1 qmail-direct.8 qmail-dkim.8 \
 	qmail-getpw.8 qmail-inject.8 qmail-limits.7 qmail-local.8 qmail-multi.8 \
-	qmonitor.8 indimail-mta.7 qmail-newu.8 qmail-poppass.8 qmail-pw2u.8 \
-	qmail-qread.8 sslerator.8 qmail-queue-clients.7 qmail-queue.8 \
-	qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 qmail-smtpd.8 \
-	qmail-spamfilter.8 indimail-srs.5 qmail-start.8 todo-proc.8 \
-	qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
+	qmail-qfilter.1 qmonitor.8 indimail-mta.7 qmail-newu.8 qmail-poppass.8 \
+	qmail-pw2u.8 qmail-qread.8 sslerator.8 qmail-queue-clients.7 \
+	qmail-queue.8 qmail-remote.8 qmail-rm.1 qmail-send.8 qmail-showctl.8 \
+	qmail-smtpd.8 qmail-spamfilter.8 indimail-srs.5 qmail-start.8 \
+	todo-proc.8 qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
 	queue-fix.8 replier.1 make-recipients.1 test-recipients.1 \
 	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 \
 	spawn-filter.8 surblfilter.8 svctool.8 dnstlsarr.1 indimail-services.7
@@ -355,6 +355,12 @@ authcram: load authcram.o
 authcram.o: \
 compile authcram.c
 	./compile authcram.c
+
+authcram.1: \
+authcram.9 conf-libexec
+	cat authcram.9 \
+	| sed s}LIBEXECDIR}"`head -1 conf-libexec`"}g \
+	> authcram.1
 
 bouncesaying: load bouncesaying.o
 	./load bouncesaying $(QMAILLIB)
@@ -3424,6 +3430,9 @@ variables.o rt.lib
 qmail-qfilter.o: \
 compile qmail-qfilter.c buffer_defs.h qmail.h qmulti.h custom_error.h
 	./compile qmail-qfilter.c
+
+qmail-qfilter.1: qmail-qfilter.9
+	$(edit) qmail-qfilter.9 > $@
 
 qfrontend.1: qfrontend.9 conf-libexec
 	$(edit) qfrontend.9 > $@

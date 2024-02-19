@@ -698,3 +698,5 @@ hasrenameat.h
 hasunlinkat.h
 authcram
 authcram.o
+authcram.1
+qmail-qfilter.1

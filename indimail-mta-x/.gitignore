@@ -481,3 +481,5 @@ hasunlinkat.h
 hasrenameat.h
 authcram
 authcram.o
+authcram.1
+qmail-qfilter.1

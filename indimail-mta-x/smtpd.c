@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.321 2024-02-08 20:55:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.322 2024-02-19 19:12:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -157,7 +157,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.321 $";
+static char    *revision = "$Revision: 1.322 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -941,7 +941,7 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	}
 	/*-
 	 * write the SMTP transaction line to LOGFILTER fifo. All lines written
-	 * to this fifo will be read by the qmail-cat spamlogger service
+	 * to this fifo will be read by the qmail-cat fifo logger service
 	 */
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	strnum2[fmt_ulong(strnum2, msg_size)] = 0;
@@ -1083,7 +1083,7 @@ err_queue(char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx
 	size[fmt_ulong(size, msg_size)] = 0;
 	for (ptr = recipients + 1, idx = 0; idx < rcpt_len; idx++) {
 		if (!recipients[idx]) {
-			/*- write data to spamlogger */
+			/*- write data to fifo logger */
 			log_fifo(mfrom, ptr, msg_size, &tmpLine);
 			logerr(1, qqx, NULL);
 			if (permanent)
@@ -4988,7 +4988,7 @@ smtp_data(char *arg)
 		return;
 	}
 	j = str_rchr(qqx, '\n');
-	if (qqx[j]) {
+	if (qqx[j] && qqx[j + 1]) {
 		/*-
 		 * handle multi line output due to custom error patch
 		 * use the last line for the error message
@@ -5012,6 +5012,8 @@ smtp_data(char *arg)
 		}
 		out(qqx, "\r\n", NULL);
 	} else {
+		if (qqx[j] == '\n')
+			qqx[j] = '\0';
 		if (*qqx == 'D') {
 			j = 1;
 			out("554 ", NULL);
@@ -7363,6 +7365,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.322  2024-02-19 19:12:40+05:30  Cprogrammer
+ * fix parsing permanent/temporary SMTP code for custom error
+ *
  * Revision 1.321  2024-02-08 20:55:06+05:30  Cprogrammer
  * fix compilation warnings when srs2 is missing
  *
@@ -7785,7 +7790,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.321 2024-02-08 20:55:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.322 2024-02-19 19:12:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

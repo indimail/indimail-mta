@@ -90,6 +90,11 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
 48. test-indimail-mta: added tests for spam filtering by spawn-filter
 - 18/02/2024
 49. added authcram utility
+- 19/02/2024
+50. qmail-qfilter.c: exit with exit code of filter for 
+51. qmail-smtpd.c: fix parsing permanent/temporary SMTP code for custom error
+52. mailfilter.c: return permanent rejection for both 100 and
+    QQ_PERM_MSG_REJECT codes
 
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024

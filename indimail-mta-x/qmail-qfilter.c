@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qfilter.c,v 1.22 2024-01-23 01:22:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qfilter.c,v 1.23 2024-02-19 22:48:22+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -345,13 +345,21 @@ run_filters(const command *first)
 			if (werr) {
 				strnum[fmt_ulong(strnum, werr)] = 0;
 				custom_error("qmail-qfilter", "Z", "killed by signal", strnum, "X.3.0");
-			} else
-			if (i == QQ_DROP_MSG)
+			}
+			switch (i)
+			{
+			case 0:
+				break;
+			case QQ_DROP_MSG:
 				_exit(0);
-			else
-			if (i) {
-				strnum[fmt_int(strnum, i)] = 0;
-				custom_error("qmail-qfilter", "Z", "non zero exit status", strnum, "X.3.0");
+			case QQ_PERM_MSG_REJECT:
+			case 100:
+				_exit(QQ_PERM_MSG_REJECT);
+			case QQ_TEMP_MSG_REJECT:
+			case 111:
+				_exit(QQ_TEMP_MSG_REJECT);
+			default:
+				_exit(i);
 			}
 		} /*- for (;;) */
 		move_unless_empty(MSGOUT, MSGIN, c->next, &msg_len);
@@ -386,7 +394,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.22 2024-01-23 01:22:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.23 2024-02-19 22:48:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -395,6 +403,9 @@ getversion_qmail_qfilter_c()
 
 /*
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.23  2024-02-19 22:48:22+05:30  Cprogrammer
+ * exit with exit code of filter
+ *
  * Revision 1.22  2024-01-23 01:22:51+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

@@ -17,7 +17,7 @@ will have the message pass through \fBqmail-dkim\fR and
 \fBqmail-qfilter\fR).
 
 .EX
-QMAILQUEUE="@prefix@/sbin/qmail-dkim @prefix@/sbin/qmail-qfilter"
+QMAILQUEUE="@prefix@/sbin/qmail-dkim @prefix@/sbin/qmail-qfilter filter ..."
 .EE
 
 \fBqmail-qfilter\fR sends the message text through each of the filter
@@ -48,9 +48,12 @@ data.
 \fBqmail-qfilter\fR returns exit code of filter, if the filter returns
 anything other than 0 or 99. If your filter exits 88, you can put your
 custom error string on standard error. This enables client like
-\fBqmail-smtpd\fR to report the error. If a filter returns 99,
-\fBqmail-qfilter\fR returns 0 immediately without running any other
-filters. Otherwise returns the exit code of \fBqmail-queue\fR.
+\fBqmail-smtpd\fR to report the error. The custom error string can be
+prefixed with \fBD\fR for permanent error and \fBZ\fR to indicate temporary
+error. If a filter returns 99, \fBqmail-qfilter\fR returns 0 immediately
+without running any other filters. If your filter returns 31, the mail will
+be permanently rejected. If your filter returns 71, the mail will be
+temporarily rejected.
 
 .SH ENVIRONMENT
 For compatibility with previous versions, \fBqmail-qfilter\fR sets

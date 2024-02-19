@@ -1,5 +1,8 @@
 #
 # $Log: qfrontend.sh,v $
+# Revision 1.4  2024-02-19 22:46:16+05:30  Cprogrammer
+# skip comments
+#
 # Revision 1.3  2023-09-08 00:55:40+05:30  Cprogrammer
 # make libexecdir, controldir configurable using env variables
 #
@@ -16,7 +19,7 @@ qf=""
 if [ ! -f $controldir/qfilters ] ; then
 	exec qmail-multi
 fi
-for i in $(cat $controldir/qfilters)
+for i in $(grep -v "^#" $controldir/qfilters)
 do
 	j=$libexecdir/qfilters/$i
 	if [ -n "$qf" ] ; then
