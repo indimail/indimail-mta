@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.69 2024-02-14 23:13:23+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.70 2024-02-20 01:39:50+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1140,7 +1140,9 @@ do_qmail_inject()
 	echo "$4"
 	) > $tmpdir/mail.txt
 	envdir -c $testdir/variables $qmail_inject -f$1 $2 <$tmpdir/mail.txt
+	ret=$?
 	/bin/rm -f $tmpdir/mail.txt
+	return $ret
 }
 
 create_authsmtp()
@@ -5415,7 +5417,6 @@ test_qmail_multi()
 	echo "sed -e 's{I am a{I am not a{'"
 	) > $testdir/bin/filter
 	chmod +x $testdir/bin/filter
-	echo $qmail_multi        > $testdir/variables/QMAILQUEUE
 	echo $testdir/bin/filter > $testdir/variables/FILTERARGS
 	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "I am a fool"
 	check_mail $maildir 1
@@ -5429,7 +5430,7 @@ test_qmail_multi()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing qmail-multi with FILTERARGS succeeded %56s [%.4f sec]\n" " " $secs
+		printf "\r  testing qmail-multi with FILTERARGS                         succeeded %32s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		printf "\r%118s\n" " "
@@ -5439,6 +5440,107 @@ test_qmail_multi()
 		failed=1
 		exit 1
 	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "exit 100"
+	) > $testdir/bin/filter
+	chmod +x $testdir/bin/filter
+	echo $testdir/bin/filter > $testdir/variables/FILTERARGS
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "Tesing exit 100" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	if [ $ret -eq 100 -a "$err" = "qmail-inject: fatal: qq mail server permanently rejected message (#5.3.0)" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with FILTERARGS        permanent reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		echo "  testing qmail-multi with FILTERARGS permanent reject failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "exit 111"
+	) > $testdir/bin/filter
+	chmod +x $testdir/bin/filter
+	echo $testdir/bin/filter > $testdir/variables/FILTERARGS
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "Tesing exit 111" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	if [ $ret -eq 111 -a "$err" = "qmail-inject: fatal: qq mail server temporarily rejected message (#4.3.0)" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with FILTERARGS        temporary reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		echo "  testing qmail-multi with FILTERARGS temporary reject failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "echo \"DThis mail is unacceptable\" 1>&2"
+	echo "exit 88"
+	) > $testdir/bin/filter
+	chmod +x $testdir/bin/filter
+	echo $testdir/bin/filter > $testdir/variables/FILTERARGS
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "Tesing exit 88" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	if [ $ret -eq 100 -a "$err" = "qmail-inject: fatal: This mail is unacceptable" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with FILTERARGS custom permanent reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		echo "  testing qmail-multi with FILTERARGS custom permanent reject failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "echo \"ZThis mail is unacceptable\" 1>&2"
+	echo "exit 88"
+	) > $testdir/bin/filter
+	chmod +x $testdir/bin/filter
+	echo $testdir/bin/filter > $testdir/variables/FILTERARGS
+	do_qmail_inject $user@$HOSTNAME $user@$HOSTNAME "Test qmail-multi" "Tesing exit 88" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	if [ $ret -eq 111 -a "$err" = "qmail-inject: fatal: This mail is unacceptable" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with FILTERARGS custom temporary reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		echo "  testing qmail-multi with FILTERARGS custom temporary reject failed [$secs sec]"
+		failed=1
+		exit 1
+	fi
+
 	/bin/rm -f $testdir/bin/filter
 	/bin/rm -rf $testdir/variables
 }
@@ -6351,7 +6453,6 @@ test_qmail_qfilter()
 
 	sudo svc -r $servicedir/smtpd
 	sleep $sleep_int
-	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE
 	chmod +x $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 	(
 	echo "Sending mail from abcd"
@@ -6372,6 +6473,120 @@ test_qmail_qfilter()
 		failed=1
 		exit 1
 	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "exec qmail-qfilter $testdir/bin/filter1"
+	) > $testdir/bin/qfrontend
+	(
+	echo "#!/bin/sh"
+	echo "exit 100"
+	) > $testdir/bin/filter1
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port >$tmpdir/swaks.$$ 2>&1
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
+	echo $l1 | grep ".*554 qq mail server permanently rejected message (#5.3.0)" > /dev/null
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter test        permanent reject succeeded %41s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		printf "\r%118s\n" " "
+		echo "l1=$l1"
+		echo "testing qmail-qfilter test permanent reject failed"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "exit 111"
+	) > $testdir/bin/filter1
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port >$tmpdir/swaks.$$ 2>&1
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
+	echo $l1 | grep ".*451 qq mail server temporarily rejected message (#4.3.0)" > /dev/null
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter test        temporary reject succeeded %41s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		printf "\r%118s\n" " "
+		echo "l1=$l1"
+		echo "testing qmail-qfilter test temporary reject failed"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "exec qmail-qfilter $testdir/bin/filter1"
+	) > $testdir/bin/qfrontend
+	(
+	echo "#!/bin/sh"
+	echo "echo \"DThis mail is permanently unacceptable\" 1>&2"
+	echo "exit 88"
+	) > $testdir/bin/filter1
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port >$tmpdir/swaks.$$ 2>&1
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
+	echo $l1 | grep ".*554 This mail is permanently unacceptable" >/dev/null
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter test custom permanent reject succeeded %41s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		printf "\r%118s\n" " "
+		echo "l1=$l1"
+		echo "testing qmail-qfilter test custom permanent reject failed"
+		failed=1
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	(
+	echo "#!/bin/sh"
+	echo "exec qmail-qfilter $testdir/bin/filter1"
+	) > $testdir/bin/qfrontend
+	(
+	echo "#!/bin/sh"
+	echo "echo \"ZThis mail is temporarily unacceptable\" 1>&2"
+	echo "exit 88"
+	) > $testdir/bin/filter1
+	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port >$tmpdir/swaks.$$ 2>&1
+	l1=$(sed -n 1p < $tmpdir/swaks.$$)
+	/bin/rm -f $tmpdir/swaks.$$
+	echo $l1 | grep ".*451 This mail is temporarily unacceptable" >/dev/null
+	if [ $? -eq 0 ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter test custom temporary reject succeeded %41s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		t2=$(date +"%s.%4N")
+		printf "\r%118s\n" " "
+		echo "l1=$l1"
+		echo "testing qmail-qfilter test custom permanent reject failed"
+		failed=1
+		exit 1
+	fi
+
+	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE
 	(
 	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 "
 	printf "$smtp_port $qmail_smtpd $HOSTNAME $testdir/bin/authsmtp "
@@ -8253,7 +8468,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=286
+	total_tests=294
 fi
 failed=0
 do_setup
@@ -8267,6 +8482,9 @@ shutdown_svscan
 
 wait
 
+printf "\r%118s\n" " "
+echo "Starting ezmlm-idx tests"
+test_ezmlm_idx
 if [ ! -f /etc/debian_version -a -f ./spfquery.txt ] ; then
 	printf "\r%118s\n" " "
 	test_spf
@@ -8281,9 +8499,6 @@ do
 	printf "\r  implicit test %20s succeeded %57s [%.4f sec]\n" $i " " $secs
 	print_pct
 done
-printf "\r%118s\n" " "
-echo "Starting ezmlm-idx tests"
-test_ezmlm_idx
 printf "\r%118s\n" " "
 [ -z "$send_pid" ] && send_pid=$(get_send_pid qmail-send $testdir/queue)
 terminate_send qmail-send "$send_pid"
@@ -8323,6 +8538,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.70  2024-02-20 01:39:50+05:30  Cprogrammer
+# added additional tests for FILTERARGS, qmail-qfilter
+#
 # Revision 1.69  2024-02-14 23:13:23+05:30  Cprogrammer
 # added tests for spam filtering by spawn-filter
 #
