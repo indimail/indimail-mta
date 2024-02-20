@@ -10,23 +10,24 @@ qmail-multi \- queue multiplexor and filter
 .SH DESCRIPTION
 \fBqmail-multi(8)\fR is a queue multiplexor and filter for
 \fBqmail-queue(8)\fR. The multiplexor can be turned on by defining
-environment variable \fBQMAILQUEUE\fR=@prefix@/sbin/qmail-multi. Following
-programs use \fBqmail-multi\fR to deposit the mail to the queue - 
-\fBqmail-dkim(8)\fR, \fBqmail-qfilter(1)\fR, \fBqmail-spamfilter(8)\fR,
-\fBqscanq-stdin(8)\fR.
+environment variable \fBQMAILQUEUE\fR=\fI@prefix@/sbin/qmail-multi\fR.
+Following programs use \fBqmail-multi\fR(8) to deposit the mail to the
+queue - \fBqmail-dkim\fR(8), \fBqmail-qfilter\fR(1),
+\fBqmail-spamfilter\fR(8), \fBqscanq-stdin\fR(8).
 
-\fBqmail-multi\fR invokes \fBqmail-queue\fR to deposit the mail. One can
-call any other program by passing command line arguments to
-\fBqmail-multi\fR in \fBQMAILQUEUE\fR. If passed arguments,
-\fBqmail-multi\fR will call \fIqqf\fR. Any arguments after \fIqqf\fR will
+\fBqmail-multi\fR(8) invokes \fBqmail-queue\fR(8) to deposit the mail. One
+can call any other program by passing command line arguments to
+\fBqmail-multi\fR(8) in \fBQMAILQUEUE\fR. If passed arguments,
+\fBqmail-multi\fR(8) will call \fIqqf\fR. Any arguments after \fIqqf\fR will
 be passed as arguments to \fIqqf\fR. You can change the program that
-\fBqmail-multi\fR calls, by setting the environment variable
+\fBqmail-multi\fR(8) calls, by setting the environment variable
 \fBQUEUEPROG\fR, to the path of any qmail-queue frontend. \fBQUEUEPROG\fR
 is typically used when you want to use write your own queue frontend, with
 the queue path available in \fBQUEUEDIR\fR environment variable. If
-\fBQUEUEDIR\fR is set \fBqmail-multi\fR execs \fBqmail-queue\fR (or program
+\fBQUEUEDIR\fR is set \fBqmail-multi\fR(8) execs \fBqmail-queue\fR (or program
 defined by \fBQUEUEPROG\fR without any processing or setting up any
-environment variables.
+environment variables. \fBQUEUEPROG\fR is ignored when \fBqmail-multi\fR(8)
+is passed command line arguments.
 
 The deposition and balancing of mail across multiple queues is controlled
 by the following environment variables.
@@ -44,7 +45,7 @@ e.g. QUEUE_START=1 implies the first queue to be @qmaildir@/queue/queue1
 
 .TP 5
 \fBQUEUE_COUNT\fR This defines the number of queues that should be used for
-load balancing. \fBqmail-multi\fR used a random number to select a queue in
+load balancing. \fBqmail-multi\fR(8) used a random number to select a queue in
 a multi-queue setup.
 
 e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues @qmaildir@/queue/queue1,
@@ -54,16 +55,16 @@ e.g. QUEUE_START=1, QUEUE_COUNT=5 implies 5 queues @qmaildir@/queue/queue1,
 .B MIN_FREE
 This is the minimum free disk space that should be available in the
 filesystem containing the queues. When free space goes below this value,
-qmail-multi will return a temporary disk full error "qq write error or disk
-full (#4.3.0)". This prevents \fBqmail-send\fR reaching a deadlock in the
-case when disk becomes full and there are bounce messages to be processed.
-\fBqmail-send\fR in this case keeps on retrying bounce message which does
-not succeeed because of insufficient disk space to write the bounce. This
-effectively stops processing of local and remote messages and thus disk
-space never gets freed up. \fBqmail-multi\fR prevents this from happening
-by accepting mails only when disk space greater than MIN_FREE is present.
-It uses \fBstatfs(2)\fR (\fBstatvfs\fR on solaris) to get the free space on
-the filesystem.
+\fBqmail-multi\fR(8) will return a temporary disk full error "qq write
+error or disk full (#4.3.0)". This prevents \fBqmail-send\fR reaching a
+deadlock in the case when disk becomes full and there are bounce messages
+to be processed.  \fBqmail-send\fR in this case keeps on retrying bounce
+message which does not succeeed because of insufficient disk space to write
+the bounce. This effectively stops processing of local and remote messages
+and thus disk space never gets freed up. \fBqmail-multi\fR(8) prevents this
+from happening by accepting mails only when disk space greater than
+MIN_FREE is present.  It uses \fBstatfs(2)\fR (\fBstatvfs\fR on solaris) to
+get the free space on the filesystem.
 
 .TP 5
 .B DYNAMIC_QUEUE
@@ -75,24 +76,24 @@ of queue \fIqcount\fR, written by \fBqscheduler\fR(8). The shared memory
 /\fBqueue\fR\fIN\fR has the current concurrency \fIC\fR, and the maximum
 concurrency \fIM\fR configured for the queue. The concurrency details are
 written to /\fBqueue\fR\fIN\fR shared memory by \fBqmail-send\fR(8)
-\fBqmail-queue\fR cycles through \fIqcount\fR queues and selects the queue
-with the lowest \fIC\fR / \fIM\fR ratio.
+\fBqmail-queue\fR(8) cycles through \fIqcount\fR queues and selects the
+queue with the lowest \fIC\fR / \fIM\fR ratio.
 
 .PP
-\fBqmail-multi\fR is actually a wrapper for \fBqmail-queue\fR to manage
-multiple queues. \fIN\fR queues can be set up in @qmaildir@ as queue\fI1\fR,
-queue\fI2\fR, ... queue\fIN\fR. \fBqmail-multi\fR does load balancing
-across these \fIN\fR queues by doing exec of \fB qmail-queue\fR with
-QUEUEDIR set to the path of one of these \fIN\fR queues. Each of these
-\fIN\fR queues should be created using \fBqueue-fix(1)\fR program. One
-also needs a program like \fBqscheduler(8)\fR which invokes multiple
-\fBqmail-send(8)\fR with the \fBQUEUEDIR\fR set individualy to path of
-these \fIN\fR queues.
+\fBqmail-multi\fR(8) is actually a wrapper for \fBqmail-queue\fR(8) to
+manage multiple queues. \fIN\fR queues can be set up in @qmaildir@ as
+queue\fI1\fR, queue\fI2\fR, ... queue\fIN\fR. \fBqmail-multi\fR(8) does
+load balancing across these \fIN\fR queues by doing exec of \fB
+qmail-queue\fR with QUEUEDIR set to the path of one of these \fIN\fR
+queues. Each of these \fIN\fR queues should be created using
+\fBqueue-fix\fR(1) program. One also needs a program like
+\fBqscheduler(8)\fR which invokes multiple \fBqmail-send\fR(8) with the
+\fBQUEUEDIR\fR set individualy to path of these \fIN\fR queues.
 
-\fBqmail-multi\fR has the ability to run any filter defined by setting the
-FILTERARGS environment variable. Any command defined by FILTERARGS will be
-run using /bin/sh. The input to this filter will be fd 0 and the output
-will be piped to \fBqmail-queue\fR. e.g.
+\fBqmail-multi\fR(8) has the ability to run any filter defined by setting
+the \fBFILTERARGS\fR environment variable. Any command defined by
+\fBFILTERARGS\fR will be run using /bin/sh. The input to this filter will
+be fd 0 and the output will be piped to \fBqmail-queue\fR(8). e.g.
 
 .EX
 FILTERARGS="/usr/bin/altermime --input=- --disclaimer=/etc/motd"
@@ -116,31 +117,33 @@ filter program
 
 .PP
 .fi
-This gives the ability for the FILTERARG program to read the mail message
-from descriptor 0 before passing it to \fBqmail-queue\fR through the pipe.
+This gives the ability for the \fBFILTERARG\fR program to read the mail
+message from descriptor 0 before passing it to \fBqmail-queue\fR through
+the pipe.
 
-\fBqmail-multi\fR will attempt to make the descriptor 0 seekable if the
-environment variable MAKE_SEEKABLE is defined. This may be necessary for
-certain filter programs which require descriptor to be seekable.
+\fBqmail-multi\fR(8) will attempt to make the descriptor 0 seekable if the
+environment variable \fBMAKE_SEEKABLE\fR is defined. This may be necessary
+for certain filter programs which require descriptor to be seekable.
 
-\fBqmail-multi(8)\fR will bounce the message if the return status from the
+\fBqmail-multi\fR(8) will bounce the message if the return status from the
 filter program is 100. The mail will be blackholed if the return status is
-2. If the return status is non-zero, qmail-multi will exit issuing a
-temporary error.
+2. If the return status is non-zero, \fBqmail-multi\fR(8) will exit issuing
+a temporary error.
 
-\fBqmail-multi\fR generates a random number and divides it by QUEUE_COUNT.
-This remainder is added to QUEUE_START to arrive at which queue to use. It
-then sets the QUEUEDIR=@prefix@/sbin/qmail-queue to queue the mail.
+\fBqmail-multi\fR(8) generates a random number and divides it by
+\fBQUEUE_COUNT\fR. This remainder is added to \fBQUEUE_START\fR to arrive
+at which queue to use. It then sets the
+\fIQUEUEDIR=@prefix@/sbin/qmail-queue\fR to queue the mail.
 
-\fBqmail-multi\fR sets an alarm of 86400 seconds to quit if it doesn't
+\fBqmail-multi\fR(8) sets an alarm of 86400 seconds to quit if it doesn't
 complete. This can be changed by setting \fBDEATH\fR environment variable.
-See the man pages for \fBqmail-queue\fR(8) and indimail-mta-internals(7)
-for more details.
+See the man pages for \fBqmail-queue\fR(8) and
+\fBindimail-mta-internals\fR(7) for more details.
 
 .SH "EXIT CODES"
-\fBqmail-multi\fR does not print diagnostics. It exits 120 if it is not
-able to exec \fBqmail-queue\fR. Apart from this it has the following exit
-codes.
+\fBqmail-multi\fR(8) does not print diagnostics. It exits 120 if it is not
+able to exec \fBqmail-queue\fR(8). Apart from this it has the following
+exit codes.
 
 .EX
 It exits 51 if it cannot allocate memory

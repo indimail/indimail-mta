@@ -1,5 +1,5 @@
 /*
- * $Id: mailfilter.c,v 1.4 2024-02-19 22:45:39+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailfilter.c,v 1.5 2024-02-20 22:18:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -63,6 +63,7 @@ mailfilter(int argc, char **argv, char *filterargs)
 	case 0:
 		return (qmulti(0, argc, argv));
 	case 2:
+	case 99: /*- compatability with qmail-qfilter */
 		return (0); /*- Blackhole */
 	case 88: /*- exit with custom error code with error code string from stderr */
 		_exit(QQ_CUSTOM_ERR);
@@ -81,7 +82,7 @@ mailfilter(int argc, char **argv, char *filterargs)
 void
 getversion_mailfilter_c()
 {
-	static char    *x = "$Id: mailfilter.c,v 1.4 2024-02-19 22:45:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: mailfilter.c,v 1.5 2024-02-20 22:18:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmailfilterh;
 	x = sccsidmktempfileh;
@@ -92,6 +93,9 @@ getversion_mailfilter_c()
 
 /*
  * $Log: mailfilter.c,v $
+ * Revision 1.5  2024-02-20 22:18:10+05:30  Cprogrammer
+ * added exit code 99 for compatibility with qmail-qfilter blackhole
+ *
  * Revision 1.4  2024-02-19 22:45:39+05:30  Cprogrammer
  * return permanent rejection for both 100 and QQ_PERM_MSG_REJECT codes
  *

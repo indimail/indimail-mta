@@ -68,25 +68,25 @@ SPAM filters (See the section on SPAM Filtering). This file has the
 following format.
 
 .EX
-\fBdomain:args\fR
+ \fBdomain:args\fR
   or
-\fBdomain:args:envstr\fR
+ \fBdomain:args:envstr\fR
 .EE
 
 for both local and remote deliveries
 
 .EX
-\fBdomain:remote:args\fR
+ \fBdomain:remote:args\fR
   or
-\fBdomain:remote:args:envstr\fR
+ \fBdomain:remote:args:envstr\fR
 .EE
 
 for remote deliveries and
 
 .EX
-\fBdomain:local:args\fR
+ \fBdomain:local:args\fR
   or
-\fBdomain:local:args:envstr\fR
+ \fBdomain:local:args:envstr\fR
 .EE
 
 for local deliveries.
@@ -102,19 +102,24 @@ For remote deliveries, \fIdomain\fR refers to the sender domain. You can
 have the match done on recipient domain by setting
 \fBMATCH_RECIPIENT_DOMAIN\fR.
 
-.EX
-indimail.org:remote:PREFIX/sbin/qmail-dkim:DKIMQUEUE=/bin/cat
-.EE
-
 \fIenvstr\fR mentioned above is a string of environment variable additions
 or removals. e.g.
 
 .EX
-QREGEX=1,DKIMSIGNOPTIONS=-z 4,HOME=
+ QREGEX=1,DKIMSIGNOPTIONS=-z 4,HOME=
 .EE
 
 sets QREGEX to 1, DKIMSIGNOPTIONS to "-z 4" and unsets HOME envrionment
 variable.
+
+Here are two examples that calls qmail-dkim for DKIM signing / verification
+for all domains that end with \fB.org\fR. The first one uses regular
+expression and the second example uses simple wildcard match.
+
+.EX
+ .*\.org:remote:PREFIX/sbin/qmail-dkim:DKIMQUEUE=/bin/cat,QREGEX=1
+ *.org:remote:PREFIX/sbin/qmail-dkim:DKIMQUEUE=/bin/cat,QREGEX=
+.EE
 
 .TP 5
 .I databytes

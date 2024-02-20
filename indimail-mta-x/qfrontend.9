@@ -4,12 +4,22 @@
 qfrontend \- frontend for executing qmail-qfilter filters
 
 .SH SYNOPSIS
-\fBqfrontend\fR(1) is a frontend for \fBqmail-qfilter\fR(1) that can be
-called as qmail-queue by setting \fBQMAILQUEUE\fR environment variable.
-It looks at control file @controldir@/qfilters for filters to be executed in
-@libexecdir@/qfilters. A filter is any file which is prefixed with
-\fBqf\fR-. If there are multiple scripts, they will be executed in
-alphabetical order.
+\fBqfrontend\fR(1) is a frontend for running multiple filters by
+\fBqmail-multi\fR(8) or \fBqmail-qfilter\fR(1). \fBqfrontent\fR(1) can be
+by setting \fBQMAILQUEUE\fR environment variable.
+
+\fBqfrontend\fR(8) uses \fBqmail-qfilter\fR(8) if \fBUSE_QMAILQFILTER\fR
+environment variable is set, else it uses \fBqmail-multi\fR(8). When
+calling \fBqmail-multi\fR(8), \fBqfrontend\fR(8) unsets \fBSPAMFILTER\fR
+and \fBFILTERARGS\fR environment variable to prevent recursive calls to
+\fBqmail-multi\fR(8).
+
+It first looks at @sysconfdir@/filters.d for user defined filter scripts.
+If \fIfilters.d\fR directory is missing, it looks at control file
+@controldir@/qfilters for filters to be executed in @libexecdir@/qfilters.
+If there are multiple scripts, they will be executed in alphabetical order.
 
 .SH SEE ALSO
-qmail-qfilter(1)
+qmail-multi(1),
+qmail-qfilter(1),
+qmail-queue(1)

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.17  2024-02-20 22:25:56+05:30  Cprogrammer
+ * added control/filters.d directory
+ *
  * Revision 1.16  2023-12-31 08:57:39+05:30  Cprogrammer
  * updated control file list
  *
@@ -546,9 +549,13 @@ show_internals(char *home)
 	substdio_puts(subfdout, auto_sysconfdir);
 	substdio_puts(subfdout, "/certs\n");
 
-	substdio_puts(subfdout, "control      irect dir: ");
+	substdio_puts(subfdout, "control            dir: ");
 	substdio_puts(subfdout, controldir);
 	substdio_puts(subfdout, "\n");
+
+	substdio_puts(subfdout, "filter             dir: ");
+	substdio_puts(subfdout, controldir);
+	substdio_puts(subfdout, "/filters.d\n");
 
 	substdio_puts(subfdout, "global environment dir: ");
 	substdio_puts(subfdout, controldir);
@@ -903,7 +910,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.16 2023-12-31 08:57:39+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.17 2024-02-20 22:25:56+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

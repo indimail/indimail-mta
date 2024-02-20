@@ -1,5 +1,8 @@
 #
 # $Log: qf-smtp-ratelimit.in,v $
+# Revision 1.4  2024-02-20 22:23:49+05:30  Cprogrammer
+# make script compatible with FILTERARGS as well as qmail-qfilter
+#
 # Revision 1.3  2021-08-03 15:54:52+05:30  Cprogrammer
 # replaced /bin/cat with exit 0 which does the same thing
 #
@@ -10,11 +13,13 @@
 # Initial revision
 #
 #
+
+[ -n "$ENVSIZE" -a -n "$MSGSIZE" ] && qmail_qfilter=1 || qmail_qfilter=0
 if [ ! -d HOME/domains/$QMAILHOST ] ; then
-	exit 0
+	[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
 fi
 if [ ! -d HOME/domains/$QMAILHOST/smtp_timestamps ] ; then
-	exit 0
+	[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
 fi
 [ -z "$SMTP_RATE" ] && SMTP_RATE=30
 cur_time=`date +%s`
@@ -30,14 +35,14 @@ if [ -f HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t ] ; 
 		diff=`expr $cur_time - $ftime`
 		if [ $diff -gt 1800 ] ; then
 			echo 1 > HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t
-			exit 0
+			[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
 		else
 			mcount=`expr $mcount + 1`
 			echo $mcount > HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t
-			exit 0
+			[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
 		fi
 	fi
 else
 	echo 1 > HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t
-	exit 0
+	[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
 fi

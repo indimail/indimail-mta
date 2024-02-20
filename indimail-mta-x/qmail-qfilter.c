@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qfilter.c,v 1.23 2024-02-19 22:48:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qfilter.c,v 1.24 2024-02-20 22:25:37+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -350,6 +350,7 @@ run_filters(const command *first)
 			{
 			case 0:
 				break;
+			case 2: /*- compatibility with qmail-multi */
 			case QQ_DROP_MSG:
 				_exit(0);
 			case QQ_PERM_MSG_REJECT:
@@ -394,7 +395,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.23 2024-02-19 22:48:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-qfilter.c,v 1.24 2024-02-20 22:25:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidqmultih;
 	x++;
@@ -403,6 +404,9 @@ getversion_qmail_qfilter_c()
 
 /*
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.24  2024-02-20 22:25:37+05:30  Cprogrammer
+ * added exit code 2 (blackhole) for compatibility with qmail-multi
+ *
  * Revision 1.23  2024-02-19 22:48:22+05:30  Cprogrammer
  * exit with exit code of filter
  *
