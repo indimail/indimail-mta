@@ -1,58 +1,5 @@
 /*
- * $Log: qmail-showctl.c,v $
- * Revision 1.17  2024-02-20 22:25:56+05:30  Cprogrammer
- * added control/filters.d directory
- *
- * Revision 1.16  2023-12-31 08:57:39+05:30  Cprogrammer
- * updated control file list
- *
- * Revision 1.15  2023-09-11 09:02:35+05:30  Cprogrammer
- * fixed descriptions fo localiphost, outgoingip
- *
- * Revision 1.14  2023-05-31 16:31:02+05:30  Cprogrammer
- * restore HOME env variable after env_clear
- *
- * Revision 1.13  2023-03-05 01:35:12+05:30  Cprogrammer
- * added missing control files
- *
- * Revision 1.12  2023-02-14 09:15:23+05:30  Cprogrammer
- * renamed auto_uidv to auto_uidi, auto_uidc to auto_uidv, auto_gidv to auto_gidi
- * added auto_uidc for qcerts id
- *
- * Revision 1.11  2023-01-22 13:17:57+05:30  Cprogrammer
- * fixed do_int
- *
- * Revision 1.10  2023-01-18 00:02:13+05:30  Cprogrammer
- * replaced qprintf with subprintf
- *
- * Revision 1.9  2022-11-23 15:07:55+05:30  Cprogrammer
- * rename mysql_lib to libmysql on upgrade
- *
- * Revision 1.8  2022-11-03 12:35:40+05:30  Cprogrammer
- * added remote_auth, recipients control file
- *
- * Revision 1.7  2022-10-13 21:51:48+05:30  Cprogrammer
- * renamed batv control files (use batv prefix)
- *
- * Revision 1.6  2022-08-17 02:05:41+05:30  Cprogrammer
- * added qregex, tlsclients to control file list
- *
- * Revision 1.5  2022-03-20 16:28:45+05:30  Cprogrammer
- * -E option for displaying client env variables
- *
- * Revision 1.4  2022-01-30 09:14:04+05:30  Cprogrammer
- * made big-todo configurable
- * replaced execvp with execv
- *
- * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.2  2021-07-05 21:28:04+05:30  Cprogrammer
- * allow processing $HOME/.defaultqueue for root
- *
- * Revision 1.1  2021-07-04 14:37:46+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-showctl.c,v 1.18 2024-02-20 23:23:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -402,6 +349,8 @@ display_control()
 	do_lst("tarpitcount", "No Tarpitcount defined.", "Actual Tarpitcount: ", "");
 	do_lst("maxrecipients", "No limit on number of Recipients defined.", "Actual Maxrecipients: ", "");
 	do_lst("tarpitdelay", "No Tarpitdelay defined.", "Actual Tarpitdelay: ", "");
+	do_lst("envheaders", "No envheaders defined.", "header: ", "");
+	do_lst("logheaders", "No logheaders defined.", "header: ", "");
 	if (load_indimail) {
 		do_str("host.master", 0, MASTER_HOST, "Master Host: ");
 		do_str("host.cntrl", 0, CNTRL_HOST, "Control Host: ");
@@ -413,6 +362,7 @@ display_control()
 	do_lst("bodycheck", "No Content-filters.", "Content-filters: ", "");
 	do_lst("from.envrules", "No Sender Envrules defined.", "Sender Envrules: ", "");
 	do_lst("rcpt.envrules", "No Recipient Envrules defined.", "Recipient Envrules: ", "");
+	do_lst("bounce.envrules", "No Bounce Envrules defined.", "Bounce Envrules: ", "");
 #ifdef USE_SPF
 	do_int("spfbehavior", "0", "The SPF behavior is ", "");
 	do_str("spfexp", 0, SPF_DEFEXP, "The SPF default explanation is: 550 ");
@@ -456,10 +406,10 @@ valid_control_files(char *fn)
 		"etrnhosts", "relayclients", "relaydomains", "tarpitcount", "tarpitdelay",
 		"maxrecipients", "maxcmdlen", "defaultdelivery", "blackholedpatterns",
 		"blackholedrcptpatterns", "goodrcptpatterns", "outgoingip", "domainbindings",
-		"bindroutes", "badextpatterns", "holdremote", "holdlocal",
+		"bindroutes", "badextpatterns", "holdremote", "holdlocal", "envheaders", "logheaders",
 		"msgqueuelen", "msgqueuesize", "global_vars", "qfilters", ".qmail_control",
-		"qregex", "recipients", "remote_auth", "remote_auth.cdb",
-		".indimail_control",
+		"qregex", "recipients", "remote_auth", "remote_auth.cdb", "filters.d",
+		".indimail_control", "bounce.envrules",
 #ifdef HAVESRS
 		"srs_domain", "srs_secrets", "srs_maxage", "srs_hashlength", "srs_hashmin",
 #endif
@@ -775,22 +725,60 @@ show_queues()
 	}
 }
 
+void
+show_version()
+{
+	DIR            *dir;
+	direntry       *d;
+	int             fd, match;
+	struct substdio ssin;
+	char            inbuf[2048];
+
+	if (chdir(auto_sysconfdir) == -1)
+		die_chdir(auto_sysconfdir);
+	if (!(dir = opendir(".")))
+		strerr_die4sys(111, FATAL, "unable to open directory ", auto_sysconfdir, ": ");
+	substdio_puts(subfdout, "---------------- software version information ----------------\n");
+	while ((d = readdir(dir))) {
+		if (str_equal(d->d_name, ".") || str_equal(d->d_name, ".."))
+			continue;
+		if (!str_end(d->d_name, "-release")) {
+			if ((fd = open_read(d->d_name)) == -1)
+				strerr_die4sys(111, FATAL, "unable to open ", d->d_name, ": ");
+			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			for (;;) {
+				if (getln(&ssin, &line, &match, '\n') == -1)
+					strerr_die4sys(111, FATAL, "unable to read ", d->d_name, ": ");
+				if (line.len == 0)
+					break;
+				substdio_put(subfdout, line.s, line.len);
+			}
+			subprintf(subfdout, "\n");
+			substdio_flush(subfdout);
+		}
+	}
+	closedir(dir);
+}
+
 int
 main(int argc, char **argv)
 {
 	DIR            *dir;
 	char           *ptr;
 	int             opt, do_control = 0, do_internals = 0, do_concurrency = 0,
-					do_queue = 0, do_errors = 0, do_env = 0, qstat;
+					do_queue = 0, do_errors = 0, do_env = 0, do_version = 0, qstat;
 	pid_t           pid;
 	char           *svctool[] = { "svctool", "--dumpconfig", 0};
 	stralloc        bin = {0};
 
-	while ((opt = getopt(argc, argv, "acCiqeEs")) != opteof) {
+	while ((opt = getopt(argc, argv, "acCiqeEsv")) != opteof) {
 		switch(opt)
 		{
+		case 'v':
+			do_version = 1;
+			break;
 		case 'a':
-			do_control = do_concurrency = do_internals = do_queue = do_errors = do_env = 1;
+			do_control = do_concurrency = do_internals = do_queue = do_errors = do_env = do_version = 1;
 			break;
 		case 'c':
 			do_control = 1;
@@ -822,6 +810,7 @@ main(int argc, char **argv)
 			strerr_die2x(100, FATAL,
 					"usage: qmail-showctl [-cCie]\n"
 					"      options:\n"
+					"        -v show version information for all entire indimail suite\n"
 					"        -c show control file information\n"
 					"        -C show concurrency limits for deliveries\n"
 					"        -i show internal information\n"
@@ -832,9 +821,11 @@ main(int argc, char **argv)
 					"        -a Do all of the above");
 		}
 	}
-	if (!do_control && !do_concurrency && !do_internals && !do_errors && !do_queue && !do_env)
+	if (!do_control && !do_concurrency && !do_internals && !do_errors && !do_queue && !do_env && !do_version)
 		do_queue = do_internals = 1;
 
+	if (do_version)
+		show_version();
 	ptr = env_get("HOME");
 	env_clear();
 	if (ptr && !env_put2("HOME", ptr))
@@ -910,8 +901,68 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.17 2024-02-20 22:25:56+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qmail-showctl.c,v 1.18 2024-02-20 23:23:18+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: qmail-showctl.c,v $
+ * Revision 1.18  2024-02-20 23:23:18+05:30  Cprogrammer
+ * added code to show version information
+ *
+ * Revision 1.17  2024-02-20 22:25:56+05:30  Cprogrammer
+ * added control/filters.d directory
+ *
+ * Revision 1.16  2023-12-31 08:57:39+05:30  Cprogrammer
+ * updated control file list
+ *
+ * Revision 1.15  2023-09-11 09:02:35+05:30  Cprogrammer
+ * fixed descriptions fo localiphost, outgoingip
+ *
+ * Revision 1.14  2023-05-31 16:31:02+05:30  Cprogrammer
+ * restore HOME env variable after env_clear
+ *
+ * Revision 1.13  2023-03-05 01:35:12+05:30  Cprogrammer
+ * added missing control files
+ *
+ * Revision 1.12  2023-02-14 09:15:23+05:30  Cprogrammer
+ * renamed auto_uidv to auto_uidi, auto_uidc to auto_uidv, auto_gidv to auto_gidi
+ * added auto_uidc for qcerts id
+ *
+ * Revision 1.11  2023-01-22 13:17:57+05:30  Cprogrammer
+ * fixed do_int
+ *
+ * Revision 1.10  2023-01-18 00:02:13+05:30  Cprogrammer
+ * replaced qprintf with subprintf
+ *
+ * Revision 1.9  2022-11-23 15:07:55+05:30  Cprogrammer
+ * rename mysql_lib to libmysql on upgrade
+ *
+ * Revision 1.8  2022-11-03 12:35:40+05:30  Cprogrammer
+ * added remote_auth, recipients control file
+ *
+ * Revision 1.7  2022-10-13 21:51:48+05:30  Cprogrammer
+ * renamed batv control files (use batv prefix)
+ *
+ * Revision 1.6  2022-08-17 02:05:41+05:30  Cprogrammer
+ * added qregex, tlsclients to control file list
+ *
+ * Revision 1.5  2022-03-20 16:28:45+05:30  Cprogrammer
+ * -E option for displaying client env variables
+ *
+ * Revision 1.4  2022-01-30 09:14:04+05:30  Cprogrammer
+ * made big-todo configurable
+ * replaced execvp with execv
+ *
+ * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.2  2021-07-05 21:28:04+05:30  Cprogrammer
+ * allow processing $HOME/.defaultqueue for root
+ *
+ * Revision 1.1  2021-07-04 14:37:46+05:30  Cprogrammer
+ * Initial revision
+ *
+ */
