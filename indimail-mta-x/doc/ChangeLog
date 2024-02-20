@@ -102,7 +102,7 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
 55. qmail-multi (mailfilter.c): added exit code 99 (blackhole) for
     compatibility with qmail-qfilter
 56. qfrontend, qf-log-subject, qf-smtp-ratelimit: make script compatible
-	with FILTERARGS as well as qmail-qfilter
+    with FILTERARGS as well as qmail-qfilter
 57. qfrontend: use control/filters.d directory for user defined scripts
 58. qmail-qfilter.c: added exit code 2 (blackhole) for compatibility with
     qmail-multi
