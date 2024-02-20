@@ -96,6 +96,17 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
 52. mailfilter.c: return permanent rejection for both 100 and
     QQ_PERM_MSG_REJECT codes
 53. test-indimail-mta: added additional tests for FILTERARGS, qmail-qfilter
+- 20/02/2024
+54. indimail-mta.spec, DIRS.in: added control/filters.d for user defined
+    filters
+55. qmail-multi (mailfilter.c): added exit code 99 (blackhole) for
+    compatibility with qmail-qfilter
+56. qfrontend, qf-log-subject, qf-smtp-ratelimit: make script compatible
+    with FILTERARGS as well as qmail-qfilter
+57. qfrontend: use control/filters.d directory for user defined scripts
+58. qmail-qfilter.c: added exit code 2 (blackhole) for compatibility with
+    qmail-multi
+59. qmail-showctl.c: added display of user filter directory control/filters.d
 
 * Mon Jan 01 2024 18:55:50 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.6-1.1%{?dist}
 Release 3.0.6-1.1 Start 25/10/2023 End 01/01/2024

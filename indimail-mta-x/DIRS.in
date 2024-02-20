@@ -42,3 +42,4 @@ d:root:qcerts:02775:@qsysconfdir@/certs::
 d:root:qmail:02775:@qsysconfdir@/tcp::
 d:root:root:0755:@qsysconfdir@/perms.d::
 d:root:root:0755:@qsysconfdir@/perms.d/indimail-mta::
+d:root:root:0755:@qsysconfdir@/filters.d::
