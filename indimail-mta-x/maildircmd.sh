@@ -1,5 +1,8 @@
 #
 # $Log: maildircmd.sh,v $
+# Revision 1.5  2024-02-22 01:04:38+05:30  Cprogrammer
+# replace cat with qmail-cat
+#
 # Revision 1.4  2017-03-09 16:38:36+05:30  Cprogrammer
 # FHS changes
 #
@@ -20,11 +23,8 @@ slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
 	cd SYSCONFDIR
 fi
-if [ -f "$CONTROLDIR"/queuelifetime ] ; then
-	LIFETIME=`cat "$CONTROLDIR"/queuelifetime`
-else
-	LIFETIME=1209600
-fi
+[ -f "$CONTROLDIR"/queuelifetime ] && LIFETIME=$(qmail-cat "$CONTROLDIR"/queuelifetime) || LIFETIME=1209600
+[ -z "$LIFETIME" ] && LIFETIME=1209600
 exec \
 PREFIX/bin/maildirserial -b -t $LIFETIME -- "$1" "$2" \
 PREFIX/bin/serialcmd "$1" "$3"

@@ -1,4 +1,7 @@
 # $Log: zsmtp.sh,v $
+# Revision 1.11  2024-02-22 01:05:24+05:30  Cprogrammer
+# replace cat with qmail-cat
+#
 # Revision 1.10  2017-04-13 13:08:57+05:30  Cprogrammer
 # fixed columnt path
 #
@@ -36,7 +39,7 @@
 # Initial revision
 #
 #
-cat > /tmp/smtp.$$
+qmail-cat > /tmp/smtp.$$
 exec 0</tmp/smtp.$$
 echo 'SMTP hosts sorted on sbytes
 

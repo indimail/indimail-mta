@@ -1,5 +1,8 @@
 #
 # $Log: qf-smtp-ratelimit.in,v $
+# Revision 1.5  2024-02-22 01:04:57+05:30  Cprogrammer
+# replace cat with qmail-cat
+#
 # Revision 1.4  2024-02-20 22:23:49+05:30  Cprogrammer
 # make script compatible with FILTERARGS as well as qmail-qfilter
 #
@@ -14,35 +17,36 @@
 #
 #
 
+set -e
 [ -n "$ENVSIZE" -a -n "$MSGSIZE" ] && qmail_qfilter=1 || qmail_qfilter=0
 if [ ! -d HOME/domains/$QMAILHOST ] ; then
-	[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
+	[ $qmail_qfilter -eq 1 ] && exit 0 || exec @prefix@/bin/qmail-cat
 fi
 if [ ! -d HOME/domains/$QMAILHOST/smtp_timestamps ] ; then
-	[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
+	[ $qmail_qfilter -eq 1 ] && exit 0 || exec @prefix@/bin/qmail-cat
 fi
 [ -z "$SMTP_RATE" ] && SMTP_RATE=30
-cur_time=`date +%s`
+cur_time=$(date +%s)
 if [ -f HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t ] ; then
-	ftime=`stat -c "%Y" HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t`
-	diff=`expr $cur_time - $ftime`
-	mcount=`cat HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t`
-	rate=`expr 3600 \* $mcount / $diff`
+	ftime=$(stat -c "%Y" HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t)
+	diff=$(expr $cur_time - $ftime)
+	mcount=$(qmail-cat HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t)
+	rate=$(expr 3600 \* $mcount / $diff)
 	if [ $rate -gt $SMTP_RATE ] ; then
 		echo "Zquota rate [$rate] > $SMTP_RATE exceeded for $QMAILUSER@$QMAILHOST" 1>&2
 		exit 88
 	else
-		diff=`expr $cur_time - $ftime`
+		diff=$(expr $cur_time - $ftime)
 		if [ $diff -gt 1800 ] ; then
 			echo 1 > HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t
-			[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
+			[ $qmail_qfilter -eq 1 ] && exit 0 || exec @prefix@/bin/qmail-cat
 		else
-			mcount=`expr $mcount + 1`
+			mcount=$(expr $mcount + 1)
 			echo $mcount > HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t
-			[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
+			[ $qmail_qfilter -eq 1 ] && exit 0 || exec @prefix@/bin/qmail-cat
 		fi
 	fi
 else
 	echo 1 > HOME/domains/$QMAILHOST/smtp_timestamps/"$QMAILUSER"@"$QMAILHOST".t
-	[ $qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat
+	[ $qmail_qfilter -eq 1 ] && exit 0 || exec @prefix@/bin/qmail-cat
 fi

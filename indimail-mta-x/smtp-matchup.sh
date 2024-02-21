@@ -1,4 +1,7 @@
 # $Log: smtp-matchup.sh,v $
+# Revision 1.3  2024-02-22 01:05:12+05:30  Cprogrammer
+# replace cat with qmail-cat
+#
 # Revision 1.2  2004-01-05 14:08:23+05:30  Cprogrammer
 # print all lines on stdout
 #
@@ -34,7 +37,7 @@ awk '
   END {
 	for (pid in start) {
 		if (finish[pid] == -1)
-			print line[pid] | "cat 1>&5"
+			print line[pid] | "qmail-cat 1>&5"
 	}
   }
 '

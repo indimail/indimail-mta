@@ -1,4 +1,7 @@
 # $Log: zspam.sh,v $
+# Revision 1.10  2024-02-22 01:05:27+05:30  Cprogrammer
+# replace cat with qmail-cat
+#
 # Revision 1.9  2017-04-13 13:09:02+05:30  Cprogrammer
 # fixed columnt path
 #
@@ -28,7 +31,7 @@
 #
 #
 #
-cat > /tmp/smtp.$$
+qmail-cat > /tmp/smtp.$$
 exec 0</tmp/smtp.$$
 echo 'Recipient domains SPAM filter messages sorted on spambytes and spam
 

@@ -1,5 +1,5 @@
 #
-# $Id: etrn.sh,v 1.13 2023-12-09 11:47:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: etrn.sh,v 1.14 2024-02-22 01:04:32+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
@@ -27,14 +27,18 @@ echo "$nm: $$: domain=$domain, autoturn=$2, domain_dir=$domain_dir" 1>&2
 t=$(basename $domain_dir)
 qfn=$(echo $t | sed -e 's{\.{:{g')
 if [ -f $autoturn_dir/.qmail-$qfn-default ] ; then
-	dir=$(cat $autoturn_dir/.qmail-$qfn-default)
+	dir=$(qmail-cat $autoturn_dir/.qmail-$qfn-default)
+	if [ $? -ne 0 ] ; then
+		echo "$nm: $autoturn_dir/.qmail-$qfn-default: read error"
+		exit 1
+	fi
 else
 	echo "$nm: $autoturn_dir/.qmail-$qfn-default: No such file or directory"
 	exit 1
 fi
 
 if [ -d $dir ] ; then
-	count=`for i in $dir/new $dir/cur ; do /bin/ls $i; done|wc -l`
+	count=`for i in $dir/new $dir/cur ; do /bin/ls $i; done | wc -l`
 	if [ $? -ne 0 ] ; then
 		echo "$nm: Trouble accessing files in dir $dir for $domain [$domain_dir], pid=$$" 1>&2
 		exit 1
@@ -83,7 +87,7 @@ fi
 
 # second check if $TCPREMOTEIP is in $domain/ipauth
 if [ -z "$IP" -a -d $domain_dir -a -f $domain_dir/ipauth ] ; then
-	for i in $(cat $domain_dir/ipauth)
+	for i in $(qmail-cat $domain_dir/ipauth)
 	do
 		for j in $TCPREMOTEIP $TCP6REMOTEIP
 		do
@@ -157,6 +161,9 @@ exit 0
 
 #
 # $Log: etrn.sh,v $
+# Revision 1.14  2024-02-22 01:04:32+05:30  Cprogrammer
+# replace cat with qmail-cat
+#
 # Revision 1.13  2023-12-09 11:47:51+05:30  Cprogrammer
 # read .qmail-domain-default to get Maildir directory
 #
