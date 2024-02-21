@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.70 2024-02-20 01:39:50+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.71 2024-02-21 13:16:34+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -5541,8 +5541,201 @@ test_qmail_multi()
 		exit 1
 	fi
 
-	/bin/rm -f $testdir/bin/filter
-	/bin/rm -rf $testdir/variables
+	t1=$(date +"%s.%4N")
+	mkdir -p $cntrldir/filters.d
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Dmail rejected by badfrom\" 1>&2"
+	echo "	exit 100"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	echo "$testuser@$HOSTNAME" > $cntrldir/badfrom
+
+	mkdir -p $testdir/variables
+	/bin/rm -f $testdir/variables/FILTERARGS
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo "$qmail_multi /usr/libexec/indimail/qfrontend" > $testdir/variables/QMAILQUEUE
+	touch $cntrldir/qfilters
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 100 -a "$err" = "qmail-inject: fatal: qq mail server permanently rejected message (#5.3.0)" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with qfrontend         permanent reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-multi with qfrontend permanent reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	mkdir -p $cntrldir/filters.d
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Dmail rejected by badfrom\" 1>&2"
+	echo "	exit 111"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	echo "$testuser@$HOSTNAME" > $cntrldir/badfrom
+
+	mkdir -p $testdir/variables
+	/bin/rm -f $testdir/variables/FILTERARGS
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo "$qmail_multi /usr/libexec/indimail/qfrontend" > $testdir/variables/QMAILQUEUE
+	touch $cntrldir/qfilters
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 111 -a "$err" = "qmail-inject: fatal: qq mail server temporarily rejected message (#4.3.0)" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with qfrontend         temporary reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-multi with qfrontend temporary reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	mkdir -p $cntrldir/filters.d
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Dmail rejected by badfrom\" 1>&2"
+	echo "	exit 88"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	echo "$testuser@$HOSTNAME" > $cntrldir/badfrom
+
+	mkdir -p $testdir/variables
+	/bin/rm -f $testdir/variables/FILTERARGS
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo "$qmail_multi /usr/libexec/indimail/qfrontend" > $testdir/variables/QMAILQUEUE
+	touch $cntrldir/qfilters
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 100 -a "$err" = "qmail-inject: fatal: mail rejected by badfrom" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with qfrontend  custom permanent reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-multi with qfrontend custom permanent reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Zmail rejected by badfrom\" 1>&2"
+	echo "	exit 88"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 111 -a "$err" = "qmail-inject: fatal: mail rejected by badfrom" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-multi with qfrontend  custom temporary reject succeeded %32s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-multi with qfrontend custom temporary reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	/bin/rm -f $testdir/bin/filter $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
+	/bin/rm -rf $testdir/variables $cntrldir/filters.d
 }
 
 test_badhelo()
@@ -6463,7 +6656,7 @@ test_qmail_qfilter()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing qmail-qfilter succeeded %70s [%.4f sec]\n" " " $secs
+		printf "\r  testing qmail-qfilter           succeeded %60s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
@@ -6471,6 +6664,7 @@ test_qmail_qfilter()
 		printf "\r%118s\n" " "
 		echo "  testing qmail-qfilter failed [$secs sec]"
 		failed=1
+		/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 		exit 1
 	fi
 
@@ -6491,7 +6685,7 @@ test_qmail_qfilter()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing qmail-qfilter test        permanent reject succeeded %41s [%.4f sec]\n" " " $secs
+		printf "\r  testing qmail-qfilter           test        permanent reject succeeded %31s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
@@ -6500,6 +6694,7 @@ test_qmail_qfilter()
 		echo "l1=$l1"
 		echo "testing qmail-qfilter test permanent reject failed"
 		failed=1
+		/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 		exit 1
 	fi
 
@@ -6516,7 +6711,7 @@ test_qmail_qfilter()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing qmail-qfilter test        temporary reject succeeded %41s [%.4f sec]\n" " " $secs
+		printf "\r  testing qmail-qfilter           test        temporary reject succeeded %31s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
@@ -6525,6 +6720,7 @@ test_qmail_qfilter()
 		echo "l1=$l1"
 		echo "testing qmail-qfilter test temporary reject failed"
 		failed=1
+		/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 		exit 1
 	fi
 
@@ -6546,7 +6742,7 @@ test_qmail_qfilter()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing qmail-qfilter test custom permanent reject succeeded %41s [%.4f sec]\n" " " $secs
+		printf "\r  testing qmail-qfilter           test custom permanent reject succeeded %31s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
@@ -6554,6 +6750,7 @@ test_qmail_qfilter()
 		echo "l1=$l1"
 		echo "testing qmail-qfilter test custom permanent reject failed"
 		failed=1
+		/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 		exit 1
 	fi
 
@@ -6575,7 +6772,7 @@ test_qmail_qfilter()
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
-		printf "\r  testing qmail-qfilter test custom temporary reject succeeded %41s [%.4f sec]\n" " " $secs
+		printf "\r  testing qmail-qfilter           test custom temporary reject succeeded %31s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
@@ -6583,10 +6780,216 @@ test_qmail_qfilter()
 		echo "l1=$l1"
 		echo "testing qmail-qfilter test custom permanent reject failed"
 		failed=1
+		/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 		exit 1
 	fi
 
-	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE
+	t1=$(date +"%s.%4N")
+	mkdir -p $cntrldir/filters.d
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Dmail rejected by badfrom\" 1>&2"
+	echo "	exit 100"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	echo "$testuser@$HOSTNAME" > $cntrldir/badfrom
+
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo "$qmail_multi /usr/libexec/indimail/qfrontend" > $testdir/variables/QMAILQUEUE
+	echo 1              > $testdir/variables/USE_QMAILQFILTER
+	touch $cntrldir/qfilters
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 100 -a "$err" = "qmail-inject: fatal: qq mail server permanently rejected message (#5.3.0)" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter qfrontend test        permanent reject succeeded %31s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-qfilter qfrontend test permanent reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	mkdir -p $cntrldir/filters.d
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Dmail rejected by badfrom\" 1>&2"
+	echo "	exit 111"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	echo "$testuser@$HOSTNAME" > $cntrldir/badfrom
+
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo "$qmail_multi /usr/libexec/indimail/qfrontend" > $testdir/variables/QMAILQUEUE
+	echo 1              > $testdir/variables/USE_QMAILQFILTER
+	touch $cntrldir/qfilters
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 111 -a "$err" = "qmail-inject: fatal: qq mail server temporarily rejected message (#4.3.0)" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter qfrontend test        temporary reject succeeded %31s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-qfilter qfrontend test temporary reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	mkdir -p $cntrldir/filters.d
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Dmail rejected by badfrom\" 1>&2"
+	echo "	exit 88"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	echo "$testuser@$HOSTNAME" > $cntrldir/badfrom
+
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo "$qmail_multi /usr/libexec/indimail/qfrontend" > $testdir/variables/QMAILQUEUE
+	echo 1              > $testdir/variables/USE_QMAILQFILTER
+	touch $cntrldir/qfilters
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 100 -a "$err" = "qmail-inject: fatal: mail rejected by badfrom" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter qfrontend test custom permanent reject succeeded %31s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-qfilter qfrontend test custom permanent reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	t1=$(date +"%s.%4N")
+	mkdir -p $cntrldir/filters.d
+	(
+	echo "#!/bin/sh"
+	echo ""
+	echo "[ -n \"\$ENVSIZE\" -a -n \"\$MSGSIZE\" ] && qmail_qfilter=1 || qmail_qfilter=0"
+	echo "[ -z \"\$CONTROLDIR\" ] && CONTROLDIR=/etc/indimail/control"
+	echo "# save the email"
+	echo "out=\$(mktemp -t badfromXXXXXXXX)"
+	echo "cat > \$out"
+	echo "from=\$(822addr From < \$out | tr [\"\0\"] [\" \"] | cut -d+ -f2)"
+	echo "grep -w \$from \$CONTROLDIR/badfrom >/dev/null"
+	echo "ret=\$?"
+	echo "exec 0<\$out"
+	echo "/bin/rm -f \$out"
+	echo "if [ \$ret -eq 0 ] ; then"
+	echo "	echo \"Zmail rejected by badfrom\" 1>&2"
+	echo "	exit 88"
+	echo "fi"
+	echo "[ \$qmail_qfilter -eq 1 ] && exit 0 || exec /bin/cat"
+	) > $cntrldir/filters.d/qf-bad-from
+	chmod +x $cntrldir/filters.d/qf-bad-from
+	echo "$testuser@$HOSTNAME" > $cntrldir/badfrom
+
+	mkdir -p $testdir/variables
+	echo $testdir/queue > $testdir/variables/QUEUEDIR
+	echo $cntrldir      > $testdir/variables/CONTROLDIR
+	echo 0              > $testdir/variables/BIGTODO
+	echo 23             > $testdir/variables/CONFSPLIT
+	echo "$qmail_multi /usr/libexec/indimail/qfrontend" > $testdir/variables/QMAILQUEUE
+	echo 1              > $testdir/variables/USE_QMAILQFILTER
+	touch $cntrldir/qfilters
+	do_qmail_inject $testuser@$HOSTNAME $user@$HOSTNAME "Test qfrontend" "Tesing qfrontend" 2>$tmpdir/inject.error
+	err=$(cat $tmpdir/inject.error)
+	/bin/rm -f $tmpdir/inject.error
+	if [ $ret -eq 111 -a "$err" = "qmail-inject: fatal: mail rejected by badfrom" ] ; then
+		t2=$(date +"%s.%4N")
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+		tcount=$(expr $tcount + 1)
+		printf "\r  testing qmail-qfilter qfrontend test custom temporary reject succeeded %31s [%.4f sec]\n" " " $secs
+		print_pct
+	else
+		printf "\r%118s\n" " "
+		echo "ret=$ret err=$err"
+		echo "testing qmail-qfilter qfrontend test custom temporary reject failed"
+		failed=1
+		/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+			$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
+		exit 1
+	fi
+
+	/bin/rm -rf $servicedir/smtpd/variables/QMAILQUEUE $testdir/variables/QMAILQUEUE \
+		$testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2 $cntrldir/filters.d
 	(
 	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -u qmaild -g qmail -v -HR 0 "
 	printf "$smtp_port $qmail_smtpd $HOSTNAME $testdir/bin/authsmtp "
@@ -8468,7 +8871,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=294
+	total_tests=302
 fi
 failed=0
 do_setup
@@ -8538,6 +8941,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.71  2024-02-21 13:16:34+05:30  Cprogrammer
+# added qfrontend tests
+#
 # Revision 1.70  2024-02-20 01:39:50+05:30  Cprogrammer
 # added additional tests for FILTERARGS, qmail-qfilter
 #
