@@ -146,7 +146,7 @@ is omitted, the environment variable is unset. \fBspawn-filter\fR uses
 \fIfromd\fR.\fIenvrules\fR to distinguish from \fIfrom\fR.\fIenvrules\fR used
 by \fBqmail-smtpd(8)\fR
 
-The name of the control file can be overriden by the environment variable
+The name of the control file can be overridden by the environment variable
 FROMRULES. Any environment variable used by \fBspawn-filter\fR,
 \fBqmail-remote\fR or \fBqmail-local\fR can be set sender specific by using
 fromd.envrules.
@@ -164,7 +164,7 @@ where pat is a regular expression which matches a sender. envar1, envar2
 are list of environment variables to be set. If \fIval\fR is omitted, the
 environment variable is unset.
 
-The name of the control file can be overriden by the environment variable
+The name of the control file can be overridden by the environment variable
 RCPTRULES. Any environment variable used by \fBspawn-filter\fR,
 \fBqmail-remote\fR or \fBqmail-local\fR can be set recpient specific by
 using rcpt.envrules.
@@ -388,7 +388,7 @@ envelope sender addresses which should bypass spam filter.
 directly exec \fBqmail-local\fR / \fBqmail-remote\fR, if the envelope
 sender address is listed in \fIspamignore\fR. A line in \fIspamignore\fR
 may be of the form \fB@\fIhost\fR\fR, meaning every address at \fIhost\fR.
-\fIspamignore\fR can be overriden by the environment variable
+\fIspamignore\fR can be overridden by the environment variable
 \fBSPAMIGNORE\fR. You can also create \fIspamignore.cdb\fR using
 \fBqmail-cdb\fR(8), in which case \fBspawn-filter\fR will use cdb function
 for fast lookup. You should create the cdb file in case you have large
@@ -397,7 +397,7 @@ number of entries.
 .TP 5
 .I spamignorepatterns
 REGEX patterns of envelope sender addresses which should bypass spam
-filter. \fIspamignorepatterns\fR can be overriden by the environment
+filter. \fIspamignorepatterns\fR can be overridden by the environment
 variable \fBSPAMIGNOREPATTERNS\fR \fIspamignorepatterns\fR gets disabled of
 you set \fBQREGEX\fR environment variable. \fIspamignorepatterns\fR uses
 simple shell-style pattern matching unlike regular expressions used by

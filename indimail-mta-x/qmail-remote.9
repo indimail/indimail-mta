@@ -731,12 +731,12 @@ remote SMTP server. Default: 1200.
 .TP 5
 .I batvkey
 Key for Bounce Address Tag Validation (BATV) signing. The filename can be
-overriden by the environment variable \fBBATVKEY\fR.
+overridden by the environment variable \fBBATVKEY\fR.
 
 .TP 5
 .I batvnosignremote
 Exclusions of remote hosts for Bounce Address Tag Validation (BATV) that do
-not work with signed addresses. The filename can be overriden by the
+not work with signed addresses. The filename can be overridden by the
 environment variable \fBBATVNOSIGNREMOTE\fR.
 
 Attention: If a host has more that one hostname, please list them all in
@@ -745,7 +745,7 @@ Attention: If a host has more that one hostname, please list them all in
 .TP 5
 .I batvnosignlocals
 Exclusions of domains you host for Bounce Address Tag Validation (BATV).
-The filename can be overriden by the environment variable
+The filename can be overridden by the environment variable
 \fBBATVNOSIGNLOCALS\fR.
 
 .TP 5
@@ -755,7 +755,7 @@ TLSv1_2 for OpenSSL Version < 1.0.1. Without this control file OpenSSL
 Version >= 1.0.1 uses TLS_client_method(3ossl) where the actual protocol
 version used will be negotiated to the highest version mutually supported
 by the client and the server. The supported protocols are TLSv1.2 and
-TLSv1.3. The default location of SYSCONF/control can be overriden by
+TLSv1.3. The default location of SYSCONF/control can be overridden by
 environment variable \fBCONTROLDIR\fR. You can specify the minimum and
 maximum protocol by using min:max format. e.g. TLSv1_2:TLSv1_3. It is best
 not to have this control file to let \fBqmail-remote\fR chose the highest
@@ -765,8 +765,8 @@ supported protocol.
 \fIclientcipherlist\fR | \fIclientciphersuite\fR
 A set of OpenSSL cipher strings. Multiple ciphers contained in a
 string should be separated by a colon. The default location of
-SYSCONF/control can be overriden by environment variable
-\fBCONTROLDIR\fR. The control file can be overriden by setting the cipher
+SYSCONF/control can be overridden by environment variable
+\fBCONTROLDIR\fR. The control file can be overridden by setting the cipher
 strings in the environment variable \fBTLS_CIPHER_LIST\fR for TLSv1.2 and
 below and \fBTLS_CIPHER_SUITE\fR for TLSv1.3 and above.
 \fIclientcipherlist\fR is used for TLSv1.2 and below.
@@ -791,7 +791,7 @@ defined by the \fBCERTDIR\fR environment variable.
 
 .PP
 For TLS sessions, the default location of SYSCONF/certs can be
-overriden by environment variable CERTDIR. This affects the location of
+overridden by environment variable CERTDIR. This affects the location of
 below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
 \fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
 \fInotlshosts/<FQDN>\fR, \fInotlshosts/host\fR.
@@ -801,8 +801,8 @@ below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
 SSL certificate that is used to authenticate with the remote server during
 a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR will
 not negotiate TLS. The default location of SYSCONF/certs can be
-overriden by environment variable CERTDIR. \fIclientcert.pem\fR can be
-overriden by environment variable \fBCLIENTCERT\fR.
+overridden by environment variable CERTDIR. \fIclientcert.pem\fR can be
+overridden by environment variable \fBCLIENTCERT\fR.
 
 .TP 5
 .I tlshosts/<FQDN>.pem
@@ -814,7 +814,7 @@ is the fully-qualified domain name of the remote SMTP server). One of the
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
-The default location of SYSCONF/certs can be overriden by
+The default location of SYSCONF/certs can be overridden by
 environment variable \fBCERTDIR\fR.
 
 .TP 5
@@ -822,7 +822,7 @@ environment variable \fBCERTDIR\fR.
 if this file exists no TLS will be tried on hosts other than those for
 which a file
 .B tlshosts/<FQDN>.pem
-exists. The default location of SYSCONF/certs can be overriden by
+exists. The default location of SYSCONF/certs can be overridden by
 environment variable \fBCERTDIR\fR.
 
 .B WARNING:
@@ -836,7 +836,7 @@ will not try TLS on servers for which this file exists
 is the fully-qualified domain name of the remote SMTP server).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/certs can be overridden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I notlshosts/host
@@ -846,7 +846,7 @@ will not try TLS on servers for which this file exists
 is the domain name of the recipient).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/certs can be overridden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I tlsadomains

@@ -517,7 +517,7 @@ in \fIbadhelo\fR may be of the form \fB@\fIhost\fR\fR, meaning every
 address at \fIhost\fR. \fIbadhelo\fR can also be in cdb format. if
 \fIbadhelo\fR.\fIcdb\fR file is present, it will be searched first,
 \fIbadhelo\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8). The
-filename can be overriden by the environment variable \fBBADHELO\fR. You
+filename can be overridden by the environment variable \fBBADHELO\fR. You
 can set \fBQREGEX\fR environment variable if you want to use regex patterns
 for addresses in \fIbadhelo\fR.
 
@@ -531,7 +531,7 @@ BADIPCHECK or set the environment variable \fBBADIP\fR to a control file
 containing unacceptable IP addresses. \fIbadip\fR can also be in cdb
 format. if \fIbadip\fR.\fIcdb\fR file is present, it will be searched
 first. \fIbadip\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).
-The filename can be overriden by the environment variable \fBBADIP\fR. You
+The filename can be overridden by the environment variable \fBBADIP\fR. You
 can set QREGEX environment variable if you want to use regex patterns for
 addresses in \fIbadip\fR.
 
@@ -584,9 +584,11 @@ recipient address for a message if the envelope sender address is listed in
 \fB@\fIhost\fR\fR, meaning every address at \fIhost\fR. \fIbadmailfrom\fR
 can also be in cdb format. if \fIbadmailfrom\fR.\fIcdb\fR file is present,
 it will be searched first. \fIbadmailfrom\fR.\fIcdb\fR can be built using
-\fBqmail\fR-\fBcdb\fR(8). The filename can be overriden by the environment
-variable \fBBADMAILFROM\fR. You can set QREGEX environment variable if you
-want to use regex patterns for envelope sender addresses.
+\fBqmail\fR-\fBcdb\fR(8). The filename can be overridden by the environment
+variable \fBBADMAILFROM\fR. You can have wildcard patterns too for sender
+addresses. You can set \fBQREGEX\fR environment variable if you want to use
+regex patterns for envelope sender addresses, else simple wildcard match is
+used.
 
 .TP 5
 .I badmailpatterns
@@ -608,12 +610,12 @@ file with this contents stops all mail from Earthlink except from
 fred@earthlink.net. It also stops all mail with addresses like:
 12345@123.com and answerme@savetrees.com. Further, any E-Mail with a sender
 address containing a percent sign (%) is rejected. The filename can be
-overriden by the environment variable \fBBADMAILPATTERNS\fR.
+overridden by the environment variable \fBBADMAILPATTERNS\fR.
 \fIbadmailpatterns\fR gets disabled of you set \fBQREGEX\fR environment
 variable. \fIbadmailpatterns\fR uses simple shell-style pattern matching
 unlike regular expressions used by setting \fBQREGEX\fR environment
-variable. You can set regex patterns in \fIbadmailfrom\fR itself if
-\fBQREGEX\fR environment variable is enabled.
+variable. You can set wildcard/regex patterns in \fIbadmailfrom\fR itself
+if \fBQREGEX\fR environment variable is set to 0 or 1.
 
 .TP 5
 .I tlsservermethod
@@ -630,8 +632,8 @@ TLSv1_2:TLSv1_3. It is best not to have this control file to let
 \fIservercipherlist\fR | \fIserverciphersuite\fR
 A set of OpenSSL cipher strings. Multiple ciphers contained in a
 string should be separated by a colon. The default location of
-SYSCONF/control can be overriden by environment variable
-\fBCONTROLDIR\fR. The control file can be overriden by setting the cipher
+SYSCONF/control can be overridden by environment variable
+\fBCONTROLDIR\fR. The control file can be overridden by setting the cipher
 strings in the environment variable \fBTLS_CIPHER_LIST\fR for TLSv1.2 and
 below and \fBTLS_CIPHER_SUITE\fR for TLSv1.3 and above.
 \fIservercipherlist\fR is used for TLSv1.2 and below.
@@ -658,43 +660,43 @@ and the certificate email address is in \fItlsclients\fR.
 SSL certificate to be presented to clients in TLS-encrypted sessions.
 Should contain both the certificate and the private key. Certifying
 Authority (CA) and intermediate certificates can be added at the end of the
-file. The filename can be overriden by the environment variable
+file. The filename can be overridden by the environment variable
 \fBSERVERCERT\fR. The default location of @sysconfdir@/certs can be
-overriden by environment variable CERTDIR.
+overridden by environment variable CERTDIR.
 
 .TP 5
 .I clientca.pem
 A list of Certifying Authority (CA) certificates that are used to verify
 the client-presented certificates during a TLS-encrypted session. The
-filename can be overriden by the environment variable \fBCLIENTCA\fR.
-The default location of @sysconfdir@/certs can be overriden by
+filename can be overridden by the environment variable \fBCLIENTCA\fR.
+The default location of @sysconfdir@/certs can be overridden by
 environment variable CERTDIR.
 
 .TP 5
 .I clientcrl.pem
 A list of Certificate Revocation Lists (CRLs). If present it
 should contain the CRLs of the CAs in \fIclientca.pem\fR and client certs
-that will be checked for revocation. The filename can be overriden by the
+that will be checked for revocation. The filename can be overridden by the
 environment variable \fBCLIENTCRL\fR. The default location of
-@sysconfdir@/certs can be overriden by environment variable CERTDIR.
+@sysconfdir@/certs can be overridden by environment variable CERTDIR.
 
 .TP 5
 .I rsa512.pem
 If this 512 bit RSA key is provided, \fBqmail-smtpd\fR will use it for TLS
 sessions instead of generating one on-the-fly. The default location of
-@sysconfdir@/certs can be overriden by environment variable CERTDIR.
+@sysconfdir@/certs can be overridden by environment variable CERTDIR.
 
 .TP 5
 .I dh1024.pem
 If these 1024 bit DH parameters are provided, \fBqmail-smtpd\fR will use
 them for TLS sessions instead of generating one on-the-fly (which is very
-timeconsuming). The default location of @sysconfdir@/certs can be overriden
-by environment variable CERTDIR.
+timeconsuming). The default location of @sysconfdir@/certs can be
+overridden by environment variable CERTDIR.
 
 .TP 5
 .I dh512.pem
 512 bit counterpart for \fBdh1024.pem\fR. The default location of
-@sysconfdir@/certs can be overriden by environment variable CERTDIR.
+@sysconfdir@/certs can be overridden by environment variable CERTDIR.
 
 .TP 5
 .I signatures
@@ -721,7 +723,7 @@ respectively and also blackhole the mail. i.e.
 TvqQAAMAA:An Executable from a Dirty OS:-body
 .EE
 
-The filename can be overriden by the environment variable \fBSIGNATURES\fR.
+The filename can be overridden by the environment variable \fBSIGNATURES\fR.
 
 .TP 5
 .I bodycheck
@@ -742,7 +744,7 @@ body respectively. The word blackhole can be appended to -header or -body
 to silently discard the email in case of a match. All attemts for emails
 which get rejected when they match a pattern get logged. The bodycheck
 control gets enabled if the environment variable \fBBODYCHECK\fR is set.
-The filename can be overriden by the environment variable \fBBODYCHECK\fR
+The filename can be overridden by the environment variable \fBBODYCHECK\fR
 provided that the value of \fBBODYCHECK\fR environment variable is
 non-empty. e.g. BODYCHECK=bodycheck.paranoid
 
@@ -755,7 +757,12 @@ line in \fIbadrcptto\fR may be of the form \fB@\fIhost\fR\fR, meaning every
 address at \fIhost\fR. \fBbadrcptto\fR can also be in cdb format. if
 \fIbadrcptto\fR.\fIcdb\fR file is present, it will be searched first.
 \fIbadrcptto\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8). The
-filename can be overriden by the environment variable \fBBADRCPTTO\fR. You
+filename can be overridden by the environment variable \fBBADRCPTTO\fR.
+You can have wildcard patterns too for recipient addresses. You can set
+\fBQREGEX\fR environment variable if you want to use regex patterns for
+envelope sender addresses, else simple wildcard match is used.
+
+You
 can set QREGEX environment variable if you want to use regex patterns for
 addresses in \fIBADRCPTTO\fR.
 
@@ -770,12 +777,12 @@ including the signature
 .EE 
 
 in the \fIbadrcptpatterns\fR file, where dd.dd.dd is the IP address in
-brackets. The filename can be overriden by the environment variable
+brackets. The filename can be overridden by the environment variable
 \fBBADRCPTPATTERNS\fR. \fIbadrcptpatterns\fR gets disabled of you set
 \fBQREGEX\fR environment variable. \fIbadrcptpatterns\fR uses simple
 shell-style pattern matching unlike regular expressions used by setting
-\fBQREGEX\fR environment variable. You can use regex patterns in
-\fIbadrcpt\fR itself if \fBQREGEX\fR is enabled.
+\fBQREGEX\fR environment variable. You can use wildcard or regex patterns
+in \fIbadrcpt\fR itself if \fBQREGEX\fR is set to 0 or 1.
 
 .TP 5
 .I goodrcptto
@@ -786,19 +793,20 @@ this file will additionally bypass \fIbadrcptto\fR, \fIbadrcptpatterns\fR,
 \fIgoodrcptto\fR may be of the form \fB@\fIhost\fR\fR, meaning every
 address at \fIhost\fR. \fIgoodrcptto\fR can also be in cdb format. If
 \fIgoodrcptto.cdb\fR is present, it will be searched first. The filename
-can be overriden by the environment variable \fBGOODRCPTTO\fR. You can set
-QREGEX environment variable if you want to use regex patterns for good
-envelope recipient addresses.
+can be overridden by the environment variable \fBGOODRCPTTO\fR. You can set
+\fBQREGEX\fR environment variable if you want to use regex patterns for
+good envelope recipient addresses. If \fBQREGEX\fR is set as 0, wildcard
+match is used instead.
 
 .TP 5
 .I goodrcptpatterns
 REGEX patterns of envelope recipient addresses which should bypass
-CHECKRECIPIENT checks. The filename can be overriden by the environment
+CHECKRECIPIENT checks. The filename can be overridden by the environment
 variable \fBGOODRCPTPATTERNS\fR. \fIgoodrcptpatterns\fR gets disabled of
 you set \fBQREGEX\fR environment variable. \fIgoodrcptpatterns\fR uses
 simple shell-style pattern matching unlike regular expressions used by
-setting \fBQREGEX\fR environment variable. You can use regex patterns in
-\fIgoodrcpt\fR itself if \fBQREGEX\fR is enabled.
+setting \fBQREGEX\fR environment variable. You can use wildcard or regex
+patterns in \fIgoodrcpt\fR itself if \fBQREGEX\fR is set to 0 or 1.
 
 .TP 5
 .I blackholedsender
@@ -810,9 +818,11 @@ called blackholing where the mail is forever lost. A line in
 \fIblackholedsender\fR may be of the form \fB\fI@host\fR\fR, meaning every
 address at \fIhost\fR. \fIblackholedsender\fR can also be in cdb format. If
 \fIblackholedsender.cdb\fR is present, it will be searched first. The
-filename can be overriden by the environment variable \fBBLACKHOLEDSENDER\fR
-You can set QREGEX environment variable if you want to use regex patterns
-for blackholed envelope sender addresses.
+filename can be overridden by the environment variable \fBBLACKHOLEDSENDER\fR
+You can set \fBQREGEX\fR environment variable if you want to use wildcard
+or regex patterns for blackholed envelope sender addresses. Setting
+\fBQREGEX\fR to 1 enables regex match while setting it to 0 enables
+wildcard match.
 
 .TP 5
 .I blackholedpatterns
@@ -834,12 +844,12 @@ file with this contents stops all mail from Earthlink except from
 fred@earthlink.net. It also stops all mail with addresses like:
 12345@123.com and answerme@savetrees.com. Further, any E-Mail with a sender
 address containing a percent sign (%) is rejected. The filename can be
-overriden by the environment variable \fIBLACKHOLEDPATTERNS\fR.
+overridden by the environment variable \fIBLACKHOLEDPATTERNS\fR.
 \fIblackholedpatterns\fR gets disabled of you set \fBQREGEX\fR environment
 variable. \fIblackholedpatterns\fR uses simple shell-style pattern matching
 unlike regular expressions used by setting \fBQREGEX\fR environment
-variable. You can use regex patterns in \fIblackholedsender\fR itself if
-\fBQREGEX\fR is enabled.
+variable. You can use wildcard or regex patterns in \fIblackholedsender\fR
+itself if \fBQREGEX\fR is set to 0 or 1.
 
 .TP 5
 .I blackholedrcpt
@@ -849,20 +859,20 @@ However the client will be notified of success. A line in
 \fIblackholedrcpt\fR may be of the form \fB@\fIhost\fR\fR, meaning every
 address at \fIhost\fR. \fIblackholedrcpt\fR can also be in cdb format. If
 \fIblackholedrcpt.cdb\fR is present, it will be searched first. The
-filename can be overriden by the environment variable \fBBLACKHOLEDRCPT\fR.
-You can set QREGEX environment variable if you want to use regex patterns
-for blackholed envelope recipient addresses.
+filename can be overridden by the environment variable \fBBLACKHOLEDRCPT\fR.
+You can set QREGEX environment variable to 0 or 1 if you want to use
+wildcard or regex patterns for blackholed envelope recipient addresses.
 
 .TP 5
 .I blackholedrcptpatterns
 Gives \fBqmail-smtpd\fR the ability to blackhole E-Mails by comparing the
 recipient address with a REGEX pattern in \fIblackholedrcptpatterns\fR. The
-filename can be overriden by the environment variable
+filename can be overridden by the environment variable
 \fBBLACKHOLEDRCPTPATTERN\fR. \fIblackholedrcptpatterns\fR gets disabled of
 you set \fBQREGEX\fR environment variable. \fIblackholedrcptpatterns\fR
 uses simple shell-style pattern matching unlike regular expressions used by
-setting \fBQREGEX\fR environment variable. You can use regex patterns in
-\fIblackholedrcpt\fR itself if \fBQREGEX\fR is enabled.
+setting \fBQREGEX\fR environment variable. You can use wildcard or regex
+patterns in \fIblackholedrcpt\fR itself if \fBQREGEX\fR is set to 0 or 1.
 
 .TP 5
 .I hostaccess
@@ -907,7 +917,7 @@ if the envelope sender address is listed in \fIspamignore\fR. A line in
 address at \fIhost\fR. If SPAMFILTER is not defined, \fBqmail-multi\fR does
 not apply spam filter on the message See \fBqmail-multi\fR(8) for more details.
 \fIspamignore\fR can also be in cdb format. If \fIspamignore.cdb\fR is
-present, it will be searched first. The filename can be overriden by the
+present, it will be searched first. The filename can be overridden by the
 environment variable \fBSPAMIGNORE\fR. You can set QREGEX environment
 variable if you want to use regex patterns for whitelised envelope sender
 addresses.
@@ -915,12 +925,12 @@ addresses.
 .TP 5
 .I spamignorepatterns
 REGEX patterns of envelope sender addresses which should bypass spam filter.
-The filename can be overriden by the environment variable
+The filename can be overridden by the environment variable
 \fBSPAMIGNOREPATTERNS\fR. \fIspamignorepatterns\fR gets disabled of you
 set \fBQREGEX\fR environment variable. \fIspamignorepatterns\fR uses simple
 shell-style pattern matching unlike regular expressions used by setting
-\fBQREGEX\fR environment variable. You can use regex patterns in
-\fIspamignore\fR itself if \fBQREGEX\fR is enabled.
+\fBQREGEX\fR environment variable. You can use wildcard or regex patterns
+in \fIspamignore\fR itself if \fBQREGEX\fR is set to 0 or 1.
 
 .TP 5
 .I QREGEX
@@ -928,10 +938,11 @@ shell-style pattern matching unlike regular expressions used by setting
 The files badhelo, badmailfrom, badrcptto, blackholedsender, spamignore,
 relaymailfrom, authdomains, chkrcptdomains, chksenderdomains, goodrcptto,
 blackholedrcpt can be used with regular expressions if the environment
-variable QREGEX is defined (in which case, the control files
+variable \fBQREGEX\fR is defined (in which case, the control files
 badhelopatterns, badmailfrompatterns, badrcpttopatterns,
 blackholedpatterns, blackholedrcptpatterns, goodrcptpatterns etc are not
-required and get disabled).
+required and get disabled). Setting \fBQREGEX\fR to 0 enables simple
+wildcard match. Setting it to 1 enables regex match.
 
 # drop everything containing the word spam
 
@@ -1007,7 +1018,7 @@ if any input is received before 30 seconds. If the environment variable
 .TP 5
 .I dnsbllist
 A list of dnsbl providers that \fBqmail-smtpd\fR checks to identify
-blacklisted ip addresses. The filename can be overriden by the environment
+blacklisted ip addresses. The filename can be overridden by the environment
 variable \fBDNSBLLIST\fR.
 
 If the environment variable \fBSKIPDNSBL\fR is set, \fBqmail-smtpd\fR
@@ -1151,7 +1162,7 @@ IP addresses of clients allowed to relay mail through this host.
 Each address should be followed by a colon and an (optional) string
 that should be appended to each incoming recipient address, just as
 with the \fBRELAYCLIENT\fR environment variable. Nearly always, the
-optional string should be null. The filename can be overriden by the
+optional string should be null. The filename can be overridden by the
 environment variable \fBRELAYCLIENTS\fR.
 
 Addresses in
@@ -1270,18 +1281,18 @@ extension (VERP). Unqualified envelope recipients are appended with
 .TP 5
 \fIbatvkey\fR
 Key for Bounce Address Tag Validation (BATV) signing. The filename can be
-overriden by the environment variable \fIBATVKEY\fR.
+overridden by the environment variable \fIBATVKEY\fR.
 
 .TP 5
 \fIbatvkeystale\fR
 Validity period in days of the BATV signing key after which the key will be
-considered Stale. The validity period can be overriden by setting the
+considered Stale. The validity period can be overridden by setting the
 environment variable \fBBATVKEYSTALE\fR.
 
 .TP 5
 \fIbatvnosignremote\fR
 Exclusions of remote hosts for Bounce Address Tag Validation (BATV) that do
-not work with signed addresses. The filename can be overriden by the
+not work with signed addresses. The filename can be overridden by the
 environment variable \fBBATVNOSIGNREMOTE\fR.
 
 .TP 5
@@ -1289,7 +1300,7 @@ environment variable \fBBATVNOSIGNREMOTE\fR.
 Exclusions of hosts for Bounce Address Tag Validation (BATV) that do not
 work with signed addresses. If you want to skip BATV validiation for any
 host in locals or rcpthosts, you need to put them here. The filename can be
-overriden by the environment variable \fBBATVNOSIGNLOCALS\fR.
+overridden by the environment variable \fBBATVNOSIGNLOCALS\fR.
 
 .TP 5
 \fIsmtpgreeting\fR
@@ -1424,8 +1435,8 @@ be carried out for addresses listed in this file. A line in
 address at \fIhost\fR. \fIchkrcptdomains\fR can also be in cdb format. if
 \fIchkrcptdomains\fR.\fIcdb\fR file is present, it will be searched first.
 \fIchkrcptdomains\fR.\fIcdb\fR can be built using \fBqmail\fR-\fBcdb\fR(8).
-You can set QREGEX environment variable if you want to use regex patterns
-for addresses in \fIchkrcptdomains\fR.
+You can set \fBQREGEX\fR environment variable to 0 or 1 if you want to use
+wildcard or regex patterns for addresses in \fIchkrcptdomains\fR.
 
 Default: All domains listed in rcpthosts are checked if CHECKRECIPIENT is
 defined and this control file is absent. If the CUGMAIL environment
@@ -1472,7 +1483,7 @@ where \fIpat\fR is a regular expression which matches a sender. envar1,
 envar2 are list of environment variables to be set. If \fIval\fR is
 omitted, the environment variable is unset.
 
-The name of the control file can be overriden by the environment
+The name of the control file can be overridden by the environment
 variable \fBFROMRULES\fR.
 
 Example:
@@ -1480,13 +1491,13 @@ Example:
   :BADRCPTTO=mybadrcptto
 
 first line sets databytes 2000000 bytes, max no of recipients in
-rcptto to two for the sender answerme@saveme.com and unsets QMAILQUEUE
-environment variable. If there are multiple lines for a pattern, all lines
-are applied. However if an environment variable is being set in multiple
-lines, the last rule takes precedence. The environment variable QREGEX can
-be set to use regular expressions for matching \fIpat\fR instead of the
-internal \fIwildmat\fR function. The second line gets applied for null
-senders
+rcptto to two for the sender answerme@saveme.com and unsets
+\fBQMAILQUEUE\fR environment variable. If there are multiple lines for a
+pattern, all lines are applied. However if an environment variable is being
+set in multiple lines, the last rule takes precedence. The environment
+variable \fBQREGEX\fR can be set to use wildcard or regular expressions for
+matching \fIpat\fR instead of the internal \fIwildmat\fR function. The
+second line gets applied for null senders.
 
 .TP 5
 \fIauth.envrules\fR
@@ -1501,7 +1512,7 @@ available for \fBqmail-queue(8)\fR. The format of this file is of the form
 envar1, envar2 are list of environment variables to be set. If \fIval\fR is
 omitted, the environment variable is unset.
 
-The name of the control file can be overriden by the environment variable
+The name of the control file can be overridden by the environment variable
 \fBAUTHRULES\fR.
 
 The following list of environment variables can be modified using envrules

@@ -35,7 +35,7 @@ to the spool directory and creates a working directory based on a
 timestamp, the PID, and a counter, with the sticky bit set. It then changes
 to that directory and invokes \fBqscanq-stdin\fR. The spool directory is
 defined during compile time by the file \fBconf-scandir\fR. This can be
-overriden at run time by the environment variable \fBSCANDIR\fR.
+overridden at run time by the environment variable \fBSCANDIR\fR.
 
 After \fBqscanq-stdin\fR returns, \fBqscanq\fR unsets the sticky bit on its
 working directory, invokes \fBrun-cleanq\fR and then returns the exit
@@ -56,7 +56,7 @@ occurs. This is for use in debugging a new configuration, and should never
 be used to capture "extra log information" during runtime.
 
 The default scanner to be called is set during compilation in conf-scancmd. This can
-be overriden at run time by the environment variable SCANCMD. See qscanq-stdin(8)
+be overridden at run time by the environment variable SCANCMD. See qscanq-stdin(8)
 
 .SH Return Codes
 

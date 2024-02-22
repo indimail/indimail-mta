@@ -277,7 +277,7 @@ domains which you know are sure to sign messages using DKIM. If a message
 comes from a domain listed in \fIRsignaturedomains\fR, and the signature
 fails verification (any of DKIM failure status), \fBqmail-dkim\fR will
 bypass ADSP/SSP checks and return DKIM_FAIL. The name of this control file
-can be overriden by the environment variable \fBSIGNATUREDOMAINS\fR.
+can be overridden by the environment variable \fBSIGNATUREDOMAINS\fR.
 
 You can have a control file \fInosignaturedomains\fR containing a list of
 domains which you know are sure not to sign messages using DKIM. If a
@@ -286,7 +286,7 @@ not have a DKIM-Signature header, \fBqmail-dkim\fR will bypass ADSP/SSP
 checks and return DKIM_NEUTRAL. The wildcard entry '*' in this file, will
 result in all mails which do not have a signature to pass DKIM test (unless
 the domain is listed in the control file \fBsignaturedomains\fR). The name
-of this control file can be overriden by the environment variable
+of this control file can be overridden by the environment variable
 \fBNOSIGNATUREDOMAINS\fR.
 
 \fBqmail-dkim\fR will use the environment variable \fBSELECTOR_DATA\fR

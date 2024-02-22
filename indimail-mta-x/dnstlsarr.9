@@ -141,14 +141,14 @@ Without this control file OpenSSL Version >= 1.0.1 uses
 TLS_client_method(3ossl) where the actual protocol version used will be
 negotiated to the highest version mutually supported by the client and the
 server. The supported protocols are SSLv3, TLSv1, TLSv1.1, TLSv1.2 and
-TLSv1.3. The default location of SYSCONF/control can be overriden by
+TLSv1.3. The default location of SYSCONF/control can be overridden by
 environment variable \fBCONTROLDIR\fR.
 
 .TP 5
 .I tlsclientciphers
 A set of OpenSSL client cipher strings. Multiple ciphers contained in a
 string should be separated by a colon. The default location of
-SYSCONF/control can be overriden by environment variable
+SYSCONF/control can be overridden by environment variable
 \fBCONTROLDIR\fR
 
 .TP 5
@@ -161,7 +161,7 @@ defined by the \fBCERTDIR\fR environment variable.
 
 .PP
 For TLS sessions, the default location of SYSCONF/certs can be
-overriden by environment variable CERTDIR. This affects the location of
+overridden by environment variable CERTDIR. This affects the location of
 below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
 \fItlshosts/<FQDN>.pem\fR, \fItlshosts/exhaustivelist\fR,
 \fInotlshosts/<FQDN>\fR, \fInotlshosts/host\fR.
@@ -171,8 +171,8 @@ below files/directories \fIclientcert.pem\fR, \fIservercert.pem\fR,
 SSL certificate that is used to authenticate with the remote server during
 a TLS session. If clientcert.pem does not exist, \fBqmail-remote\fR will
 not negotiate TLS. The default location of SYSCONF/certs can be
-overriden by environment variable CERTDIR. \fIclientcert.pem\fR can be
-overriden by environment variable \fBCLIENTCERT\fR.
+overridden by environment variable CERTDIR. \fIclientcert.pem\fR can be
+overridden by environment variable \fBCLIENTCERT\fR.
 
 .TP 5
 .I tlshosts/<FQDN>.pem
@@ -184,7 +184,7 @@ is the fully-qualified domain name of the remote SMTP server). One of the
 or the
 .I CommonName
 attributes have to match. The file contains the trusted CA certificates.
-The default location of SYSCONF/certs can be overriden by
+The default location of SYSCONF/certs can be overridden by
 environment variable \fBCERTDIR\fR.
 
 .TP 5
@@ -192,7 +192,7 @@ environment variable \fBCERTDIR\fR.
 if this file exists no TLS will be tried on hosts other than those for
 which a file
 .B tlshosts/<FQDN>.pem
-exists. The default location of SYSCONF/certs can be overriden by
+exists. The default location of SYSCONF/certs can be overridden by
 environment variable \fBCERTDIR\fR.
 
 .B WARNING:
@@ -206,7 +206,7 @@ will not try TLS on servers for which this file exists
 is the fully-qualified domain name of the remote SMTP server).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/certs can be overridden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I notlshosts/host
@@ -216,7 +216,7 @@ will not try TLS on servers for which this file exists
 is the domain name of the recipient).
 .IR (tlshosts/<FQDN>.pem
 takes precedence over this file however). The default location of
-SYSCONF/certs can be overriden by environment variable \fBCERTDIR\fR.
+SYSCONF/certs can be overridden by environment variable \fBCERTDIR\fR.
 
 .TP 5
 .I tlsadomains
