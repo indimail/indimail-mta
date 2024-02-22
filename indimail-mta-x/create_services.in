@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.130 2024-01-02 18:41:13+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.in,v 2.131 2024-02-22 01:04:24+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -663,7 +663,7 @@ if [ $clamav_os -eq 1 ] ; then
   fi
 fi
 
-cat <<EOF > "$dir_prefix"$sysconfdir/control/signatures
+qcat <<EOF > "$dir_prefix"$sysconfdir/control/signatures
 # Windows executables seen in active virii
 TVqQAAMAA:
 TVpQAAIAA
@@ -783,6 +783,9 @@ fi
 
 #
 # $Log: create_services.in,v $
+# Revision 2.131  2024-02-22 01:04:24+05:30  Cprogrammer
+# replace cat with qcat
+#
 # Revision 2.130  2024-01-02 18:41:13+05:30  Cprogrammer
 # renamed cronlist.q, cronlist.i to indimail-mta.cron, indimail.cron
 #

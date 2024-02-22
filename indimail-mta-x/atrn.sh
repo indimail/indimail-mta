@@ -1,5 +1,5 @@
 #
-# $Id: atrn.sh,v 1.13 2023-12-09 11:46:33+05:30 Cprogrammer Exp mbhangui $
+# $Id: atrn.sh,v 1.14 2024-02-22 01:04:03+05:30 Cprogrammer Exp mbhangui $
 #
 # 0 - queueing started
 # 1 - System Error
@@ -27,13 +27,14 @@ echo "$nm: $$: domain=$domain, autoturn=$2, domain_dir=$domain_dir" 1>&2
 [ -z "$CONTROLDIR" ] && CONTROLDIR=@controldir@
 slash=$(echo $CONTROLDIR | cut -c1)
 [ ! " $slash" = " /" ] && cd SYSCONFDIR
-[ -f "$CONTROLDIR"/queuelifetime ] && LIFETIME=$(cat "$CONTROLDIR"/queuelifetime) || LIFETIME=1209600
+[ -f "$CONTROLDIR"/queuelifetime ] && LIFETIME=$(qcat "$CONTROLDIR"/queuelifetime) || LIFETIME=1209600
+[ -z "$LIFETIME" ] && LIFETIME=1209600
 
 t=$(basename $domain_dir)
 qfn=$(echo $t | sed -e 's{\.{:{g')
 cd $autoturn_dir
 if [ -f $autoturn_dir/.qmail-$qfn-default ] ; then
-	dir=$(cat $autoturn_dir/.qmail-$qfn-default)
+	dir=$(qcat $autoturn_dir/.qmail-$qfn-default)
 else
 	echo "$nm: $autoturn_dir/.qmail-$qfn-default: No such file or directory"
 	exit 1
@@ -67,11 +68,7 @@ fi
 # script can identify the domain identified by looking up the .qvirtual file
 #
 echo "250 OK now reversing the connection"
-if [ -f $domain_dir/.qvirtual ] ; then
-	qvirtual=$(cat $domain_dir/.qvirtual)
-else
-	qvirtual=$domain
-fi
+[ -f $domain_dir/.qvirtual ] && qvirtual=$(qcat $domain_dir/.qvirtual) || qvirtual=$domain
 
 prefix="autoturn-""$qvirtual""-"
 echo "$nm: Executing maildirserial -b -t $LIFETIME $dir $prefix serialsmtp $prefix AutoTURN 1 qv=$qvirtual count=$count" 1>&2
@@ -84,6 +81,9 @@ fi
 exit 0
 #
 # $Log: atrn.sh,v $
+# Revision 1.14  2024-02-22 01:04:03+05:30  Cprogrammer
+# replace cat with qcat
+#
 # Revision 1.13  2023-12-09 11:46:33+05:30  Cprogrammer
 # read .qmail-domain-default to get Maildir directory
 #

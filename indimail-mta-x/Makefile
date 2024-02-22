@@ -37,7 +37,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	newinclude new-inject nowutc ofmipd ofmipname parsedate plugtest \
 	predate preline printass printforward printmaillist proc proc+df \
 	qaes qarf qbase64 qdane qfrontend qf-log-subject qf-smtp-ratelimit \
-	qmail-cat qmail-cdb qmail-clean qmailconfig qmail-daned qmail-direct \
+	qcat qmail-cdb qmail-clean qmailconfig qmail-daned qmail-direct \
 	qtop qmaildirmake qmaildirwatch qmail-dkim qmail-getpw qmail-greyd \
 	qmail-inject qmail-local qmail-lspawn qmail-multi qmail-newu \
 	qmail-nullqueue qmail-popbull qmail-poppass qmail-pw2u qmail-qfilter \
@@ -3026,11 +3026,11 @@ columnt.o: compile columnt.c slurpclose.h
 columnt.o: compile columnt.c slurpclose.h \
 	./compile columnt.c
 
-qmail-cat: load qmail-cat.o
-	./load qmail-cat $(QMAILLIB)
+qcat: load qcat.o
+	./load qcat $(QMAILLIB)
 
-qmail-cat.o: compile qmail-cat.c buffer_defs.h
-	./compile qmail-cat.c
+qcat.o: compile qcat.c buffer_defs.h
+	./compile qcat.c
 
 qaes: load qaes.o
 	./load qaes -lcrypto $(QMAILLIB)

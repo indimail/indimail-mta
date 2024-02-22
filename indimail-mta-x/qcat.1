@@ -1,0 +1,40 @@
+.\" vim: tw=75
+.TH qcat "1" "July 2004" "qmail" "User Commands"
+.SH NAME
+qcat \- concatenate files and print on the standard output
+
+.SH SYNOPSIS
+\fBqcat\fR [ -vet ] [ \fIFILE\fR... ]
+
+.SH DESCRIPTION
+.PP
+Concatenate FILE(s) to standard output. \fBqcat\fR reads files
+specified on command line and reliably writes to standard output. In case
+of any error writing to standard output, \fBqcat\fR exits with
+non-zero status printing an error message. Without any arguments, or when
+\fIFILE\fR is -, \fBqcat\fR(1) simpy copies standard input to
+standard output.
+
+.SH OPTIONS
+.TP
+\fB\-e\fR
+display $ at end of each line
+
+.TP
+\fB\-t\fR
+display TAB characters as ^I
+
+.TP
+\fB\-v\fR
+use ^ and M\- notation, except for line feed (LF) and TAB
+
+.SH AUTHOR
+Written by Manvendra Bhangui
+
+.SH "REPORTING BUGS"
+Report cat bugs to mbhangui@gmail.com
+.br
+IndiMail Home page: <http://www.indimail.org/>
+
+.SH "SEE ALSO"
+cat(1)

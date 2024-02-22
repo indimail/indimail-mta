@@ -23,7 +23,7 @@ f:::0755:/bin/:mailsubj:mailsubj
 f:::0755:/bin/:qmail-qfilter:qmail-qfilter
 f:::0755:/bin/:drate:drate
 f:::0755:/bin/:cidr:cidr
-f:::0755:/bin/:qmail-cat:qmail-cat
+f:::0755:/bin/:qcat:qcat
 f:::0755:/bin/:irmail:irmail
 f:::0755:/bin/:rrforward:rrforward
 f:::0755:/bin/:maildirdeliver:maildirdeliver

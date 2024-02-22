@@ -83,7 +83,7 @@
 %attr(0755,root,root)  @prefix@/bin/printforward
 %attr(0755,root,root)  @prefix@/bin/printmaillist
 %attr(0755,root,root)  @prefix@/bin/qarf
-%attr(0755,root,root)  @prefix@/bin/qmail-cat
+%attr(0755,root,root)  @prefix@/bin/qcat
 %attr(0755,root,root)  @prefix@/bin/qmaildirmake #qmta
 %attr(0755,root,root)  @prefix@/bin/qmail-inject #indimail-mini #qmta
 %attr(0755,root,root)  @prefix@/bin/qmail-qfilter
@@ -385,7 +385,7 @@
 %attr(0644,root,root) @mandir@/man1/printmaillist.1.gz
 %attr(0644,root,root) @mandir@/man1/qaes.1.gz
 %attr(0644,root,root) @mandir@/man1/qarf.1.gz
-%attr(0644,root,root) @mandir@/man1/qmail-cat.1.gz
+%attr(0644,root,root) @mandir@/man1/qcat.1.gz
 %attr(0644,root,root) @mandir@/man1/cidr.1.gz
 %attr(0644,root,root) @mandir@/man1/qmaildirmake.1.gz #qmta
 %attr(0644,root,root) @mandir@/man1/qmail-qfilter.1.gz

@@ -94,7 +94,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 	/*
 	 * Read X-Bogosity line from bogofilter
 	 * on fd 255. Write it to LOGFILTER
-	 * fifo for qmail-cat spamlogger
+	 * fifo for qcat fifo logger
 	 */
 	if (!fstat(255, &statbuf) && statbuf.st_size > 0 && !lseek(255, 0, SEEK_SET)) {
 		if (substdio_puts(&spamout, " ") == -1)
