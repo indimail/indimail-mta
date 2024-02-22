@@ -263,7 +263,7 @@ qfrontend.1
 qf-smtp-ratelimit
 qhpsi
 qlocal_upgrade
-qmail-cat
+qcat
 qmail-cdb
 qmail-cdb.8
 qmail-clean

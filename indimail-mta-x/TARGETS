@@ -363,8 +363,8 @@ qf-smtp-ratelimit
 qhpsi
 qhpsi.o
 qlocal_upgrade
-qmail-cat
-qmail-cat.o
+qcat
+qcat.o
 qmail-cdb
 qmail-cdb.8
 qmail-cdb.o

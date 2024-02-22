@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.723 2024-02-08 01:03:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.724 2024-02-22 01:05:21+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.723 2024-02-08 01:03:15+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.724 2024-02-22 01:05:21+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1498,7 +1498,7 @@ for i in $SVCDIRS; do
     continue
   fi
   echo $i
-  interp=`head -1 $servicedir/$i/run|/bin/cat -vet`
+  interp=$(head -1 $servicedir/$i/run|@prefix@/bin/qcat -vet)
   if [ ! -f $servicedir/$i/run ]; then
     echo "! $servicedir/$i/run file is missing" 1>&2
     OK=0
@@ -1800,7 +1800,7 @@ check_update_if_diff()
 		update=1
 	else
 		update=0
-		val=`cat $1 2>/dev/null`
+		val=$(@prefix@/bin/qcat $1 2>/dev/null)
 	fi
 	if [ $update -eq 1 -o ! " $val" = " $2" ] ; then
 		if [ $silent -eq 0 ] ; then
@@ -1837,7 +1837,7 @@ check_libmysqlclient_lib()
 		CONTROLDIR=$sysconfdir/control
 	fi
 	if [ -f "$DESTDIR"$CONTROLDIR/libmysql ] ; then
-		mysqllib=`cat "$DESTDIR"$CONTROLDIR/libmysql 2>/dev/null`
+		mysqllib=$(@prefix@/bin/qcat "$DESTDIR"$CONTROLDIR/libmysql 2>/dev/null)
 		if [ -f $mysqllib ] ; then
 			return 0
 		else
@@ -2129,7 +2129,7 @@ fi
 if [ -s $TMPDIR/hostip.$$ ] ; then
 	diff $TMPDIR/hostip.$$ $t/hostip >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
-		ip=$(cat $TMPDIR/hostip.$$)
+		ip=$(@prefix@/bin/qcat $TMPDIR/hostip.$$)
 		echo "hostip [$ip]"
 		/bin/mv $TMPDIR/hostip.$$ $t/hostip
 	else
@@ -2489,8 +2489,8 @@ echo  $fifo_path > $conf_dir/LOGFILTER
 (
 dump_run_header
 echo "exec 2>&1"
-echo "LOGFILTER=\`/bin/cat variables/LOGFILTER\`"
-echo "LOGFIFODIR=\`dirname \$LOGFILTER\`"
+echo "LOGFILTER=\$(@prefix@/bin/qcat variables/LOGFILTER)"
+echo "LOGFIFODIR=\$(dirname \$LOGFILTER)"
 echo "if [ ! -d \$LOGFIFODIR ] ; then"
 echo "  mkdir -p \$LOGFIFODIR"
 echo "fi"
@@ -2498,8 +2498,8 @@ echo "if [ ! -p \$LOGFILTER ] ; then"
 echo "  /bin/rm -f \$LOGFILTER"
 echo "  /usr/bin/mkfifo -m 666 \$LOGFILTER"
 echo "fi"
-echo "exec $QmailBinPrefix/bin/setuidgid indimail \\"
-echo "$QmailBinPrefix/bin/qmail-cat \$LOGFILTER"
+echo "exec @prefix@/bin/setuidgid indimail \\"
+echo "@prefix@/bin/qcat \$LOGFILTER"
 ) > "$DESTDIR"$SERVICEDIR/qmail-logfifo/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/qmail-logfifo/run
 
@@ -2629,7 +2629,7 @@ else
 fi
 if [ -n "$default_domain" ] ; then
 	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		t=$(@prefix@/bin/qcat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
 		if [ ! "$t" = "$default_domain" ] ; then
 			echo $default_domain > $conf_dir/DEFAULT_DOMAIN
 		fi
@@ -3185,7 +3185,7 @@ else
 		echo $death   > "$DESTDIR"$sysconfdir/control/global_vars/DEATH
 		echo $ossfied > "$DESTDIR"$sysconfdir/control/global_vars/OSSIFIED
 	else
-		t=$(cat "$DESTDIR"$sysconfdir/control/global_vars/DEATH)
+		t=$(@prefix@/bin/qcat "$DESTDIR"$sysconfdir/control/global_vars/DEATH)
 		if [ "$t" != "$death" ] ; then
 			ossified=$(echo $death | awk '{printf("%.0f\n", $1 + $1 * 0.5)}')
 			echo $death > "$DESTDIR"$sysconfdir/control/global_vars/DEATH
@@ -3896,7 +3896,7 @@ create_imap_config()
 echo "#--------- IndiMail ---------------------------"
 if [ -n "$default_domain" ] ; then
 	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		t=$(@prefix@/bin/qcat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
 		if [ ! "$t" = "$default_domain" ] ; then
 			echo "DEFAULT_DOMAIN=$default_domain"
 		fi
@@ -3904,7 +3904,7 @@ if [ -n "$default_domain" ] ; then
 		echo "DEFAULT_DOMAIN=$default_domain"
 	fi
 	if [ -f $sysconfdir/control/global_vars/QMAILDEFAULTHOST ] ; then
-		t=$(cat $sysconfdir/control/global_vars/QMAILDEFAULTHOST)
+		t=$(@prefix@/bin/qcat $sysconfdir/control/global_vars/QMAILDEFAULTHOST)
 		if [ ! "$t" = "$default_domain" ] ; then
 			echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
 		fi
@@ -4129,7 +4129,7 @@ create_pop3_config()
 echo "#--------- IndiMail ---------------------------"
 if [ -n "$default_domain" ] ; then
 	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		t=$(@prefix@/bin/qcat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
 		if [ ! "$t" = "$default_domain" ] ; then
 			echo "DEFAULT_DOMAIN=$default_domain"
 		fi
@@ -4137,7 +4137,7 @@ if [ -n "$default_domain" ] ; then
 		echo "DEFAULT_DOMAIN=$default_domain"
 	fi
 	if [ -f $sysconfdir/control/global_vars/QMAILDEFAULTHOST ] ; then
-		t=$(cat $sysconfdir/control/global_vars/QMAILDEFAULTHOST)
+		t=$(@prefix@/bin/qcat $sysconfdir/control/global_vars/QMAILDEFAULTHOST)
 		if [ ! "$t" = "$default_domain" ] ; then
 			echo "QMAILDEFAULTHOST=$default_domain" # Used if mail is stored in outbox
 		fi
@@ -4406,7 +4406,7 @@ mysql_opt_reconnect
 echo 300 > $conf_dir/DATA_TIMEOUT
 (
 dump_run_header
-echo "CERTFILE=\`cat variables/CERTFILE\`"
+echo "CERTFILE=\$(@prefix@/bin/qcat variables/CERTFILE)"
 echo "if [ ! -f \$CERTFILE ]; then"
 echo "    echo Certificate not present"
 echo "    sleep 5"
@@ -4717,7 +4717,7 @@ do
 	grep qhpsi "$DESTDIR"$SERVICEDIR/qmail-"$q"/variables/.options >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
 		qhpsi="$clamdPrefix/bin/clamdscan %s --fdpass --quiet --no-summary"
-		cur_options=`/bin/cat "$DESTDIR"$SERVICEDIR/qmail-"$q"/variables/.options`
+		cur_options=$(@prefix@/bin/qcat "$DESTDIR"$SERVICEDIR/qmail-"$q"/variables/.options)
 		if [ -n "$cur_options" ] ; then
 			cur_options="$cur_options --qhpsi=\"$qhpsi\""
 			echo "$cur_options" >  "$DESTDIR"$SERVICEDIR/qmail-"$q"/variables/.options
@@ -4729,7 +4729,7 @@ done
 grep qhpsi "$DESTDIR"$sysconfdir/control/defaultqueue/.options > /dev/null 2>&1
 if [ $? -ne 0 ] ; then
 	qhpsi="$clamdPrefix/bin/clamdscan %s --fdpass --quiet --no-summary"
-	cur_options=`/bin/cat "$DESTDIR"$sysconfdir/control/defaultqueue/.options`
+	cur_options=$(@prefix@/bin/qcat "$DESTDIR"$sysconfdir/control/defaultqueue/.options)
 	if [ -n "$cur_options" ] ; then
 		cur_options="$cur_options --qhpsi=\"$qhpsi\""
 		echo "$cur_options" >  "$DESTDIR"$sysconfdir/control/defaultqueue/.options
@@ -5015,7 +5015,7 @@ echo "  chmod 2770 $fifo_tmpdir"
 echo "  $chown qmaild:indimail $fifo_tmpdir"
 echo "fi"
 echo "if [ -f variables/THREAD_COUNT ] ; then"
-echo "  count=\$(cat variables/THREAD_COUNT)"
+echo "  count=\$(@prefix@/bin/qcat variables/THREAD_COUNT)"
 echo "else"
 echo "  count=5"
 echo "fi"
@@ -5534,7 +5534,7 @@ if [ ! -s "$DESTDIR"$databasedir/mysqld.pid ] ; then
 	echo "did not find running mysqld: "$DESTDIR"$databasedir/mysqld.pid not found" 1>&2
 	return 1
 fi
-pid=`/bin/cat "$DESTDIR"$databasedir/mysqld.pid`
+pid=$(@prefix@/bin/qcat "$DESTDIR"$databasedir/mysqld.pid)
 if [ -x $mysqlPrefix/bin/mariadb ] ; then
 	mysql=$mysqlPrefix/bin/mariadb
 else
@@ -6420,7 +6420,7 @@ if [ $mount_resolvconf -eq 1 -a \
 	echo "file=\$(realpath /etc/resolv.conf)"
 	echo "dir=\$(dirname \$file)"
 	echo "echo \"starting with resolv_conf_dir=\$dir\""
-	echo "/bin/cat /etc/resolv.conf"
+	echo "@prefix@/bin/qcat /etc/resolv.conf"
 	echo "exec 2>&1"
 	echo "("
 	echo "/usr/bin/inotify -n \$dir | while read line"
@@ -7020,7 +7020,7 @@ echo "startup.so" > $conf_dir/START_PLUGIN
 #
 if [ -n "$default_domain" ] ; then
 	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		t=$(@prefix@/bin/qcat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
 		if [ ! "$t" = "$default_domain" ] ; then
 			echo $default_domain > $conf_dir/DEFAULT_DOMAIN
 		fi
@@ -7036,7 +7036,7 @@ case "$dksign_option" in
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/sbin/qmail-dkim:DKIMQUEUE=/bin/cat" > "$DESTDIR"$CONTROLDIR/filterargs
+		echo "*:remote:$QmailBinPrefix/sbin/qmail-dkim:DKIMQUEUE=@prefix@/bin/qcat" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
 	none|*)
@@ -7052,12 +7052,12 @@ fi
 dump_run_header
 echo "exec 2>&1"
 echo "if [ -s variables/CONTROLDIR ] ; then"
-echo "  cntrl_dir=\`/bin/cat variables/CONTROLDIR\`"
+echo "  cntrl_dir=\$(@prefix@/bin/qcat variables/CONTROLDIR)"
 echo "else"
 echo "  cntrl_dir=/etc/indimail/control"
 echo "fi"
 echo "if [ -f \$cntrl_dir/defaultdelivery ] ; then"
-echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
+echo "  defaultdelivery=\$(@prefix@/bin/qcat \$cntrl_dir/defaultdelivery)"
 echo "else"
 echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
@@ -7293,7 +7293,7 @@ fi
 #
 if [ -n "$default_domain" ] ; then
 	if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-		t=$(cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
+		t=$(@prefix@/bin/qcat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
 		if [ ! "$t" = "$default_domain" ] ; then
 			echo $default_domain > $conf_dir/DEFAULT_DOMAIN
 		fi
@@ -7308,7 +7308,7 @@ case "$dksign_option" in
 	> $conf_dir/UNSIGNED_SUBJECT
 	> $conf_dir/UNSIGNED_FROM
 	if [ ! -f "$DESTDIR"$CONTROLDIR/filterargs ] ; then
-		echo "*:remote:$QmailBinPrefix/sbin/qmail-dkim:DKIMQUEUE=/bin/cat" > "$DESTDIR"$CONTROLDIR/filterargs
+		echo "*:remote:$QmailBinPrefix/sbin/qmail-dkim:DKIMQUEUE=@prefix@/bin/qcat" > "$DESTDIR"$CONTROLDIR/filterargs
 	fi
 	;;
 	none|*)
@@ -7319,12 +7319,12 @@ esac
 dump_run_header
 echo "exec 2>&1"
 echo "if [ -s variables/CONTROLDIR ] ; then"
-echo "  cntrl_dir=\`/bin/cat variables/CONTROLDIR\`"
+echo "  cntrl_dir=\$(@prefix@/bin/qcat variables/CONTROLDIR)"
 echo "else"
 echo "  cntrl_dir=/etc/indimail/control"
 echo "fi"
 echo "if [ -f \$cntrl_dir/defaultdelivery ] ; then"
-echo "  defaultdelivery=\`/bin/cat \$cntrl_dir/defaultdelivery\`"
+echo "  defaultdelivery=\$(@prefix@/bin/qcat \$cntrl_dir/defaultdelivery)"
 echo "else"
 echo "  defaultdelivery=\"./Maildir/\""
 echo "fi"
@@ -7865,7 +7865,7 @@ if [ " $1" = " all" ] ; then
 			fi
 		else
 			if [ $silent -eq 0 ] ; then
-				echo "Refreshing service $svcname command `/bin/cat $i/variables/.options`"
+				echo "Refreshing service $svcname command $(@prefix@/bin/qcat $i/variables/.options)"
 			fi
 			sh $i/variables/.options
 		fi
@@ -7876,7 +7876,7 @@ if [ " $1" = " all" ] ; then
 		fi
 	else
 		if [ $silent -eq 0 ] ; then
-			echo "Refreshing config defaultqueue command `/bin/cat "$DESTDIR"$sysconfdir/control/defaultqueue/.options`"
+			echo "Refreshing config defaultqueue command $(@prefix@/bin/qcat "$DESTDIR"$sysconfdir/control/defaultqueue/.options)"
 		fi
 		sh "$DESTDIR"$sysconfdir/control/defaultqueue/.options
 	fi
@@ -7902,12 +7902,12 @@ else
 		fi
 		if [ -f "$DESTDIR"$i/variables/.options ] ; then
 			if [ $silent -eq 0 ] ; then
-				echo "Refreshing service $svcname command `/bin/cat "$DESTDIR"$i/variables/.options`"
+				echo "Refreshing service $svcname command $(@prefix@/bin/qcat "$DESTDIR"$i/variables/.options)"
 			fi
 			sh "$DESTDIR"$i/variables/.options
 		elif [ -f "$DESTDIR"$i/.options ] ; then
 			if [ $silent -eq 0 ] ; then
-				echo "Refreshing config $svcname command `/bin/cat "$DESTDIR"$i/.options`"
+				echo "Refreshing config $svcname command $(@prefix@/bin/qcat "$DESTDIR"$i/.options)"
 			fi
 			sh "$DESTDIR"$i/.options
 		fi
@@ -8610,7 +8610,7 @@ create_users()
 	esac
 	) 2>$TMPDIR/svctool.user.$$
 	if [ -s $TMPDIR/svctool.user.$$ ] ; then
-		/bin/cat $TMPDIR/svctool.user.$$
+		@prefix@/bin/qcat $TMPDIR/svctool.user.$$
 		/bin/rm -f $TMPDIR/svctool.user.$$
 		return 1
 	else
@@ -8654,7 +8654,7 @@ delUsers()
 	esac
 	) 2>$TMPDIR/svctool.user.$$
 	if [ -s $TMPDIR/svctool.user.$$ ] ; then
-		/bin/cat $TMPDIR/svctool.user.$$
+		@prefix@/bin/qcat $TMPDIR/svctool.user.$$
 		/bin/rm -f $TMPDIR/svctool.user.$$
 		return 1
 	else
@@ -8856,7 +8856,7 @@ create_startup()
 				else
 				(
 					printf "service\t/System/Volumes/data@qsysconfdir@/sv\n"
-					cat /etc/synthetic.conf
+					@prefix@/bin/qcat /etc/synthetic.conf
 				) > "$DESTDIR"/etc/synthetic.conf
 				fi
 			else
@@ -9406,7 +9406,7 @@ if [ ! -f "$DESTDIR"$sysconfdir/bogofilter.cf.example ] ; then
 	echo ""$DESTDIR"$sysconfdir/bogofilter.cf.example: No such file or directory" 1>&2
 	return 1
 fi
-/bin/cat "$DESTDIR"$sysconfdir/bogofilter.cf.example | sed \
+@prefix@/bin/qcat "$DESTDIR"$sysconfdir/bogofilter.cf.example | sed \
 	-e 's,##bogofilter_dir=,bogofilter_dir=,g' \
 	-e 's,#spam_header_name=,spam_header_name=,g' \
 	-e 's,#spam_header_place=,spam_header_place=,g' \
@@ -9507,10 +9507,10 @@ report ()
 	fi
 	(
 	if [ -f $LOGDIR/reports/send_pend ] ; then
-		/bin/cat $LOGDIR/reports/send_pend
+		@prefix@/bin/qcat $LOGDIR/reports/send_pend
 		/bin/rm -f $LOGDIR/reports/send_pend
 	fi
-	/bin/cat $LOGDIR/deliver.25/current
+	@prefix@/bin/qcat $LOGDIR/deliver.25/current
 	) | "$DESTDIR"$libexecdir/matchup 5>$LOGDIR/reports/pend_tmp > $LOGDIR/reports/deliver25
 	if [ -s $LOGDIR/reports/pend_tmp ] ; then
 		/bin/mv $LOGDIR/reports/pend_tmp $LOGDIR/reports/send_pend
@@ -9520,10 +9520,10 @@ report ()
 
 	(
 	if [ -f $LOGDIR/reports/smtp25_pend ] ; then
-		/bin/cat $LOGDIR/reports/smtp25_pend
+		@prefix@/bin/qcat $LOGDIR/reports/smtp25_pend
 		/bin/rm -f $LOGDIR/reports/smtp25_pend
 	fi
-	/bin/cat $LOGDIR/smtpd.25/current
+	@prefix@/bin/qcat $LOGDIR/smtpd.25/current
 	) | "$DESTDIR"$libexecdir/smtp-matchup 5>$LOGDIR/reports/pend_tmp | \
 	"$DESTDIR"$QmailBinPrefix/bin/tai64nunix > $LOGDIR/reports/smtp25
 	if [ -s $LOGDIR/reports/pend_tmp ] ; then
@@ -9533,10 +9533,10 @@ report ()
 	fi
 	(
 	if [ -f $LOGDIR/reports/smtp587_pend ] ; then
-		/bin/cat $LOGDIR/reports/smtp587_pend
+		@prefix@/bin/qcat $LOGDIR/reports/smtp587_pend
 		/bin/rm -f $LOGDIR/reports/smtp587_pend
 	fi
-	/bin/cat $LOGDIR/smtpd.587/current
+	@prefix@/bin/qcat $LOGDIR/smtpd.587/current
 	) | "$DESTDIR"$libexecdir/smtp-matchup 5>$LOGDIR/reports/pend_tmp | \
 	"$DESTDIR"$QmailBinPrefix/bin/tai64nunix > $LOGDIR/reports/smtp587
 	if [ -s $LOGDIR/reports/pend_tmp ] ; then
@@ -9550,7 +9550,7 @@ report ()
 		> $LOGDIR/reports/spam
 	else
 		> $LOGDIR/reports/spam
-		/bin/cat $LOGDIR/logfifo/current | grep $spamheader_name| "$DESTDIR"$QmailBinPrefix/bin/tai64nunix \
+		@prefix@/bin/qcat $LOGDIR/logfifo/current | grep $spamheader_name| "$DESTDIR"$QmailBinPrefix/bin/tai64nunix \
 		> $LOGDIR/reports/spam
 	fi
 
@@ -9610,7 +9610,7 @@ report ()
 		fi
 		) > $TMPDIR/report.$$
 		if [ " $postmaster" = " " ] ; then
-			/bin/cat $TMPDIR/report.$$
+			@prefix@/bin/qcat $TMPDIR/report.$$
 			/bin/rm -f $TMPDIR/report.$$
 		else
 			subject="Mail Statistics for `/usr/bin/head -1 $CONTROLDIR/me` on $EXT"
@@ -9624,7 +9624,7 @@ report ()
 				echo
 				echo ATTENTION: Mail Administrators
 				echo
-				echo Mail Statistics for `/bin/cat $CONTROLDIR/me`
+				echo Mail Statistics for $(@prefix@/bin/qcat $CONTROLDIR/me)
 				echo on $date
 				echo from host `"$DESTDIR"$libexecdir/hostname`
 				echo
@@ -9635,7 +9635,7 @@ report ()
 				echo
 				echo "I am enclosing a copy of the Statistics below"
 				echo
-				/bin/cat $TMPDIR/report.$$
+				@prefix@/bin/qcat $TMPDIR/report.$$
 				/bin/rm -f $TMPDIR/report.$$
 				) | "$DESTDIR"$QmailBinPrefix/bin/sendmail -t
 			else
@@ -9657,7 +9657,7 @@ report ()
 				QMAILUSER=postmaster
 				if [ -z "$default_domain" ] ; then
 					if [ -f $sysconfdir/control/global_vars/DEFAULT_DOMAIN ] ; then
-						QMAILHOST=`cat $sysconfdir/control/global_vars/DEFAULT_DOMAIN`
+						QMAILHOST=$(qcat $sysconfdir/control/global_vars/DEFAULT_DOMAIN)
 					else
 						QMAILHOST=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
 					fi
@@ -9700,7 +9700,7 @@ do
 	scount=`expr $scount + 1`
 	if [ -f $j/run ] ; then
 		echo "Run File [$j/run]"
-		/bin/cat $j/run
+		@prefix@/bin/qcat $j/run
 		/bin/echo -n "- EOF -----------------"
 		printf "%-20s" "$j/run"
 		echo "-----------------------"
@@ -9708,7 +9708,7 @@ do
 	fi
 	if [ -f $j/log/run ] ; then
 		echo "Log Run File [$j/log/run]"
-		/bin/cat $j/log/run
+		@prefix@/bin/qcat $j/log/run
 		/bin/echo -n "- EOF -----------------"
 		printf "%-20s" "$j/log/run"
 		echo "-----------------------"
@@ -9716,7 +9716,7 @@ do
 	fi
 	if [ -f $j/shutdown ] ; then
 		echo "Shutdown File [$j/shutdown]"
-		/bin/cat $j/shutdown
+		@prefix@/bin/qcat $j/shutdown
 		/bin/echo -n "- EOF -----------------"
 		printf "%-20s" "$j/shutdown"
 		echo "-----------------------"
@@ -9731,7 +9731,7 @@ do
 			fi
 			if [ -s $j/variables/$k ] ; then
 				printf "%-3d %s\nValue:[" $count $k
-				val=`/bin/cat $j/variables/$k`
+				val=$(@prefix@/bin/qcat $j/variables/$k)
 				if [ " $val" = " " ] ; then
 					/bin/echo -n "SET"
 				else
@@ -9758,7 +9758,7 @@ echo
 
 echo
 echo "IndiMail Assign File:"
-/bin/cat "$DESTDIR"$sysconfdir/users/assign
+@prefix@/bin/qcat "$DESTDIR"$sysconfdir/users/assign
 echo
 }
 
@@ -9786,7 +9786,7 @@ elif [ -f /usr/lib/systemd/system/svscan.service ] ; then
 fi
 # who cuts the barber
 if [ -f $sysconfdir/backup.conf ] ; then
-	file="$file $sysconfdir/backup.conf `/bin/cat $sysconfdir/backup.conf`"
+	file="$file $sysconfdir/backup.conf $(@prefix@/bin/qcat $sysconfdir/backup.conf)"
 fi
 servicedir=$1
 (
@@ -9989,7 +9989,7 @@ if [ $restore_flag -eq 1 ] ; then
 		echo "unable to create temp dir" 1>&2
 		return 1
 	fi
-	cat $env_file | while read line
+	@prefix@/bin/qcat $env_file | while read line
 	do
 		file=`echo $line | cut -d= -f1`
 		$touch $out/$file
@@ -10032,7 +10032,7 @@ fi
 for i in `/bin/ls $dir`
 do
 	if [ -s $dir/$i ] ; then
-		value=`cat $dir/$i`
+		value=$(@prefix@/bin/qcat $dir/$i)
 		if [ -n "$value" ] ; then
 			echo $i="$value"
 		else
@@ -10121,7 +10121,7 @@ if [ -z "$defaultHost" -o -z "$defaultDomain" ] ; then
 	echo "host or domain cannot be null" 1>&2
 	exit 1
 fi
-orig=$(cat "$DESTDIR"$CONTROLDIR/me)
+orig=$(qcat "$DESTDIR"$CONTROLDIR/me)
 
 # config-fast - me, defaulthost, envnoathost, defaultdomain,
 # plusdomain, locals, rcpthosts, virtualdomains
@@ -10253,7 +10253,7 @@ create_cert()
 		echo "Fixing CERTDIR variable for services"
 		for i in @servicedir@/*/variables/CERTDIR
 		do
-			j=`/bin/cat $i 2>/dev/null`
+			j=$(@prefix@/bin/qcat $i 2>/dev/null)
 			if [ ! " $j" = " $CERTDIR" ] ; then
 				updated=1
 				echo "Fixed $i"
@@ -10283,7 +10283,7 @@ create_cert()
 					svc_list="$svc_list $x"
 				fi
 			fi
-			j=`/bin/cat $i`
+			j=$(@prefix@/bin/qcat $i)
 			if [ ! " $j" = " $CERTDIR/servercert.pem" ] ; then
 				echo "Fixed $i"
 				updated=1
@@ -10295,7 +10295,7 @@ create_cert()
 		echo "Updating TLS CACHE as $CERTDIR/couriersslcache"
 		for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
 		do
-			j=`/bin/cat $i`
+			j=$(@prefix@/bin/qcat $i)
 			if [ ! " $j" = " $CERTDIR/couriersslcache" ] ; then
 				echo "Fixed $i"
 				echo "$CERTDIR/couriersslcache" > $i
@@ -10345,12 +10345,12 @@ print_all_variables()
 					echo
 				elif [ -f $i/variables/.envdir ] ; then
 					echo "NOTE: additional variables were obtained from .envdir"
-					cat $i/variables/.envdir
+					@prefix@/bin/qcat $i/variables/.envdir
 					echo
 				fi
 				if [ -f $i/variables/.envfile ] ; then
 					echo "NOTE: additional variables were obtained from .envfile"
-					cat $i/variables/.envfile
+					@prefix@/bin/qcat $i/variables/.envfile
 					echo
 				fi
 			else
@@ -10375,12 +10375,12 @@ print_all_variables()
 					echo
 				elif [ -f $i/.envdir ] ; then
 					echo "NOTE: additional variables were obtained from .envdir"
-					cat $i/.envdir
+					@prefix@/bin/qcat $i/.envdir
 					echo
 				fi
 				if [ -f $i/.envfile ] ; then
 					echo "NOTE: additional variables were obtained from .envfile"
-					cat $i/.envfile
+					@prefix@/bin/qcat $i/.envfile
 					echo
 				fi
 				echo "------ environment variables for $i ------------"
@@ -10477,7 +10477,7 @@ fi
 CONTROLDIR=$cntrldir
 export CONTROLDIR
 if [ -f $cntrldir/servicedir.conf ] ; then
-	servicedir=`cat $cntrldir/servicedir.conf`
+	servicedir=$(@prefix@/bin/qcat $cntrldir/servicedir.conf)
 else
 	servicedir=@servicedir@
 fi
@@ -11904,7 +11904,7 @@ case $option in
 			f=""
 		fi
 		if [ -n "$f" ] ; then
-			cat $f | sed \
+			@prefix@/bin/qcat $f | sed \
 				-e 's,#LogClean,LogClean,g' \
 				-e 's,#LocalSocket,LocalSocket,g' \
 				-e 's,LogSyslog,#LogSyslog,g' \
@@ -11983,7 +11983,7 @@ case $option in
 			f=""
 		fi
 		if [ -n "$f" ] ; then
-			cat $f | sed \
+			@prefix@/bin/qcat $f | sed \
 				-e 's,#LogClean,LogClean,g' \
 				-e 's,LogSyslog,#LogSyslog,g' \
 				-e 's,#DatabaseDirectory.*,DatabaseDirectory /var/indimail/clamd,g' \
@@ -12767,12 +12767,12 @@ case $option in
 		echo
 	elif [ -f $i/.envdir ] ; then
 		echo "NOTE: additional variables were obtained from .envdir"
-		cat $i/.envdir
+		@prefix@/bin/qcat $i/.envdir
 		echo
 	fi
 	if [ -f $i/.envfile ] ; then
 		echo "NOTE: additional variables were obtained from .envfile"
-		cat $i/.envfile
+		@prefix@/bin/qcat $i/.envfile
 		echo
 	fi
 	;;

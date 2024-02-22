@@ -941,7 +941,7 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 	}
 	/*-
 	 * write the SMTP transaction line to LOGFILTER fifo. All lines written
-	 * to this fifo will be read by the qmail-cat fifo logger service
+	 * to this fifo will be read by the qcat fifo logger service
 	 */
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	strnum2[fmt_ulong(strnum2, msg_size)] = 0;

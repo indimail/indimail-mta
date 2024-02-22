@@ -146,7 +146,7 @@ this service is \fI@logdir@/pwdlookup\fR
 .TP 3
 \fBqmail-logfifo\fR
 This services provides a logger service by providing a writeable FIFO using
-the \fBqmail-cat\fR(1) program \fI/run/indimail/logfifo\fR. Anything
+the \fBqcat\fR(1) program \fI/run/indimail/logfifo\fR. Anything
 written to the FIFO goes to \fI@logdir@/logfifo\fR. This service is used by
 qmail-smtpd to write SMTP transaction details to the log when spam
 filtering is turned on.
@@ -277,5 +277,5 @@ qmail-qmqpc(8), qmail-send(8),  qmail-smtpd(8), qmail-multi(8), nssd(8),
 qmail-spamfilter(8), qmail-nullqueue(8), qmail-direct(8), multi-queue(7),
 qmail-queue-clients(7), dnscache(8), qmail-showctl(8), imapd(8), pop3d(8),
 qmail-qmqpd(8), qmail-qmtpd(8), proxyimap(8), proxypop3(8), indimail(7),
-qmail-poppass(8), qmail-cat(1), slowq-send(8), fetchmail(1), multilog(8),
+qmail-poppass(8), qcat(1), slowq-send(8), fetchmail(1), multilog(8),
 qmail-greyd(8), qmail-daned(8), udplogger(8), svscan(8), supervise(8)

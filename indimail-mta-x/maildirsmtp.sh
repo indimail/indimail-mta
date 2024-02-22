@@ -1,5 +1,8 @@
 #
 # $Log: maildirsmtp.sh,v $
+# Revision 1.5  2024-02-22 01:04:45+05:30  Cprogrammer
+# replace cat with qcat
+#
 # Revision 1.4  2023-12-08 12:56:22+05:30  Cprogrammer
 # use PORT env variable if set as the SMTP port
 #
@@ -18,12 +21,12 @@
 slash=`echo $CONTROLDIR | cut -c1`
 if [ ! " $slash" = " /" ] ; then
 	cd SYSCONFDIR
+	if [ $? -ne 0 ] ; then
+		exit 111
+	fi
 fi
-if [ -f "$CONTROLDIR"/queuelifetime ] ; then
-	LIFETIME=`cat "$CONTROLDIR"/queuelifetime`
-else
-	LIFETIME=1209600
-fi
+[ -f "$CONTROLDIR"/queuelifetime ] && LIFETIME=$(qcat "$CONTROLDIR"/queuelifetime) || LIFETIME=1209600
+[ -z "$LIFETIME" ] && LIFETIME=1209600
 [ -z "$PORT" ] && PORT=25
 exec \
 PREFIX/bin/maildirserial -b -t $LIFETIME -- "$1" "$2" \

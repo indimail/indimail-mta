@@ -1,5 +1,5 @@
 #
-# $Id: qupgrade.in,v 1.12 2022-04-06 09:21:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.in,v 1.13 2024-02-22 01:05:05+05:30 Cprogrammer Exp mbhangui $
 #
 
 do_upgrade()
@@ -14,11 +14,11 @@ do_pre()
 {
 	if [ -f @sysconfdir@/indimail-mta-release ] ; then
 		if [ -f /bin/rpm -o -f /usr/bin/rpm ] ; then
-			PKG_VER=`rpm -qf @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(rpm -qf @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/bin/dpkg ] ; then
-			PKG_VER=`dpkg -S @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(dpkg -S @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/sbin/pacman ] ; then
-			PKG_VER=`pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}'`
+			PKG_VER=$(pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}')
 		else
 			echo "Unknown binary package" 1>&2
 			return
@@ -41,11 +41,11 @@ do_post()
 {
 	if [ -f @sysconfdir@/indimail-mta-release ] ; then
 		if [ -f /bin/rpm -o -f /usr/bin/rpm ] ; then
-			PKG_VER=`rpm -qf @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(rpm -qf @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/bin/dpkg ] ; then
-			PKG_VER=`dpkg -S @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(dpkg -S @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/sbin/pacman ] ; then
-			PKG_VER=`pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}'`
+			PKG_VER=$(pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}')
 		else
 			echo "Unknown binary package" 1>&2
 			return
@@ -69,11 +69,11 @@ do_preun()
 {
 	if [ -f @sysconfdir@/indimail-mta-release ] ; then
 		if [ -f /bin/rpm -o -f /usr/bin/rpm ] ; then
-			PKG_VER=`rpm -qf @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(rpm -qf @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/bin/dpkg ] ; then
-			PKG_VER=`dpkg -S @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(dpkg -S @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/sbin/pacman ] ; then
-			PKG_VER=`pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}'`
+			PKG_VER=$(pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}')
 		else
 			echo "Unknown binary package" 1>&2
 			return
@@ -105,11 +105,11 @@ do_postun()
 {
 	if [ -f @sysconfdir@/indimail-mta-release ] ; then
 		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(rpm -qf @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/bin/dpkg ] ; then
-			PKG_VER=`dpkg -S @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(dpkg -S @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/sbin/pacman ] ; then
-			PKG_VER=`pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}'`
+			PKG_VER=$(pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}')
 		else
 			echo "Unknown binary package" 1>&2
 			return
@@ -135,11 +135,11 @@ do_prettrans()
 {
 	if [ -f @sysconfdir@/indimail-mta-release ] ; then
 		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(rpm -qf @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/bin/dpkg ] ; then
-			PKG_VER=`dpkg -S @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(dpkg -S @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/sbin/pacman ] ; then
-			PKG_VER=`pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}'`
+			PKG_VER=$(pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}')
 		else
 			echo "Unknown binary package" 1>&2
 			return
@@ -158,15 +158,15 @@ do_prettrans()
 do_posttrans()
 {
 	if [ -f /tmp/indimail-mta-pkg.old ] ; then
-		OLD_PKG_VER=`cat /tmp/indimail-mta-pkg.old`
+		OLD_PKG_VER=$(qcat /tmp/indimail-mta-pkg.old)
 	fi
 	if [ -f @sysconfdir@/indimail-mta-release ] ; then
 		if [ -f /usr/bin/rpm -o -f /bin/rpm ] ; then
-			PKG_VER=`rpm -qf @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(rpm -qf @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/bin/dpkg ] ; then
-			PKG_VER=`dpkg -S @sysconfdir@/indimail-mta-release`
+			PKG_VER=$(dpkg -S @sysconfdir@/indimail-mta-release)
 		elif [ -f /usr/sbin/pacman ] ; then
-			PKG_VER=`pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}'`
+			PKG_VER=$(pacman -Qo @sysconfdir@/indimail-mta-release|awk '{print $6}')
 		else
 			echo "Unknown binary package" 1>&2
 			return
@@ -205,6 +205,9 @@ case $1 in
 esac
 #
 # $Log: qupgrade.in,v $
+# Revision 1.13  2024-02-22 01:05:05+05:30  Cprogrammer
+# replace cat with qcat
+#
 # Revision 1.12  2022-04-06 09:21:45+05:30  Cprogrammer
 # use configure.ac variables
 #
