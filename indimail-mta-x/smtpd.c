@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.322 2024-02-19 19:12:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.323 2024-02-23 21:39:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -157,7 +157,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.322 $";
+static char    *revision = "$Revision: 1.323 $";
 static char    *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -252,137 +252,126 @@ struct qmail    qqt;
 static int      greetdelay = 0;
 static int      greetdelayok;
 static char    *errStr = 0;
+
 /*- badmailfrom */
 static int      bmfok = 0;
 static stralloc bmf = { 0 };
-
 static CONSTMAP mapbmf;
 static int      bmpok = 0;
 static stralloc bmp = { 0 };
-
 static char    *bmfFn = NULL;
 static char    *bmfFnp = NULL;
-/*- blackholedrcpt */
-static int      bhrcpok = 0;
-static stralloc bhrcp = { 0 };
 
-static CONSTMAP mapbhrcp;
-static int      bhbrpok = 0;
-static stralloc bhbrp = { 0 };
-
-static char    *bhrcpFn = NULL;
-static char    *bhrcpFnp = NULL;
-/*- BLACKHOLE Sender Check Variables */
-static int      bhfok = 0;
-static stralloc bhf = { 0 };
-
-static CONSTMAP mapbhf;
-static int      bhpok = 0;
-static stralloc bhp = { 0 };
-
-static char    *bhsndFn = NULL;
-static char    *bhsndFnp = NULL;
 /*- badrcptto */
 static int      rcpok = 0;
 static stralloc rcp = { 0 };
-
 static CONSTMAP maprcp;
 static int      brpok = 0;
 static stralloc brp = { 0 };
-
 static char    *rcpFn = NULL;
 static char    *rcpFnp = NULL;
+
+/*- goodrcptto */
+static int      gdrcptok = 0;
+static stralloc gdrcpt = { 0 };
+static CONSTMAP mapgdrcpt;
+static int      gdrcptpok = 0;
+static stralloc gdrcptp = { 0 };
+static char    *gdrcptFn = NULL;
+static char    *gdrcptFnp = NULL;
+
+/*- blackholedsender */
+static int      bhsndrok = 0;
+static stralloc bhsndr = { 0 };
+static CONSTMAP mapbhsndr;
+static char    *bhsndFn = NULL;
+
+/*- blackholedrcpt */
+static int      bhrcptok = 0;
+static stralloc bhrcpt = { 0 };
+static CONSTMAP mapbhrcpt;
+static char    *bhrcptFn = NULL;
+
+/*- spamignore */
+static int      spsndrok = 0;
+static stralloc spsndr = { 0 };
+static CONSTMAP mapspsndr;
+static char    *spsndrFn = NULL;
+
 /*- accesslist */
 static int      acclistok = 0;
 static stralloc acclist = { 0 };
-
 static char    *accFn = NULL;
+
 /*- RELAYCLIENT Check Variables */
 static int      relayclientsok = 0;
 static stralloc relayclients = { 0 };
-
 static CONSTMAP maprelayclients;
+
 /*- RELAYDOMAIN Check Variables */
 static int      relaydomainsok = 0;
 static stralloc relaydomains = { 0 };
-
 static CONSTMAP maprelaydomains;
+
 /*- RELAYMAILFROM Check Variables */
 static int      rmfok = 0;
 static stralloc rmf = { 0 };
-
 static CONSTMAP maprmf;
+
 /*- NODNSCHECK Check Variables */
 static int      nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
-
 static CONSTMAP mapnodnschecks;
 static char    *nodnsFn = NULL;
+
 /*- badip Check */
 static char    *dobadipcheck = NULL;
 static char    *badipFn = NULL;
 static int      briok = 0;
 static stralloc bri = { 0 };
-
-static char    *badhostFn = NULL;
 static stralloc ipaddr = { 0 };
-
 static CONSTMAP mapbri;
+
 /*- badhost Check */
+static char    *badhostFn = NULL;
 static char    *dobadhostcheck = NULL;
 static int      brhok = 0;
 static stralloc brh = { 0 };
-
 static CONSTMAP mapbrh;
+
 /*- Helo Check */
 static char    *dohelocheck = NULL;
 static char    *badheloFn = NULL;
 static int      badhelook = 0;
 static stralloc badhelo = { 0 };
-
 static CONSTMAP maphelo;
+
 /*- authdomains */
 static int      chkdomok;
 static stralloc chkdom = { 0 };
-
 static CONSTMAP mapchkdom;
-/*- goodrcptto */
-static int      chkgrcptok = 0;
-static stralloc grcpt = { 0 };
 
-static CONSTMAP mapgrcpt;
-static int      chkgrcptokp = 0;
-static stralloc grcptp = { 0 };
-
-static char    *grcptFn = NULL;
-static char    *grcptFnp = NULL;
-/*- SPAM Ingore Sender Check Variables */
-static int      spfok = 0;
-static stralloc spf = { 0 };
-
-static CONSTMAP mapspf;
-static int      sppok = 0;
-static stralloc spp = { 0 };
-
-static char    *spfFn = NULL;
-static char    *spfFnp = NULL;
 /*- check recipients using inquery chkrcptdomains */
 static int      chkrcptok = 0;
 static stralloc chkrcpt = { 0 };
 static CONSTMAP mapchkrcpt;
+
 /*- check senders using inquery chksndrdomains */
 static int      chksndrok = 0;
 static stralloc chksndr = { 0 };
 static CONSTMAP mapchksndr;
+
 /*- TARPIT Check Variables */
 static int      tarpitcount = 0;
 static int      tarpitdelay = 5;
 static int      tarpitcountok;
 static int      tarpitdelayok;
+
 /*- MAXRECIPIENTS Check Variable */
 static int      maxrcptcount = 0;
 static int      maxrcptcountok;
-/*- Russel Nelson's Virus Patch */
+
+/*- Russel Nelson's Virus signature */
 static int      sigsok = 0;
 static char    *sigsFn = 0;
 static int      sigsok_orig = 0;
@@ -1486,7 +1475,7 @@ err_wantrcpt()
 }
 
 void
-err_bhf(char *arg1)
+err_bhsndr(char *arg1)
 {
 	logerr(1, "Blackholed SENDER address: MAIL ", arg1, "\n", NULL);
 	logflush();
@@ -1495,7 +1484,7 @@ err_bhf(char *arg1)
 }
 
 void
-err_bhrcp(char *arg2, char *arg3)
+err_bhrcpt(char *arg2, char *arg3)
 {
 	logerr(1, "Blackholed RECIPIENT address: MAIL from <", arg2, "> RCPT ", arg3, "\n", NULL);
 	logflush();
@@ -2574,7 +2563,7 @@ open_control_files1()
 		if (relaydomainsok && !constmap_init(&maprelaydomains, relaydomains.s, relaydomains.len, 0))
 			die_nomem();
 	}
-	/*- RELAYMAILFROM Patch - include Control File */
+	/*- RELAYMAILFROM */
 	if ((rmfok = control_readfile(&rmf, "relaymailfrom", 0)) == -1)
 		die_control("relaymailfrom");
 	if (rmfok && !constmap_init(&maprmf, rmf.s, rmf.len, 0))
@@ -2619,24 +2608,21 @@ open_control_files2()
 	/*- BADMAILFROM */
 	open_control_once(&bmfok, &bmpok, &bmfFn, &bmfFnp,
 		"BADMAILFROM", "BADMAILPATTERNS", "badmailfrom", "badmailpatterns", &bmf, &mapbmf, &bmp);
-	/*- BLACKHOLE Sender Patch - include Control file */
-	open_control_once(&bhfok, &bhpok, &bhsndFn, &bhsndFnp,
-		"BLACKHOLEDSENDER", "BLACKHOLEDPATTERNS", "blackholedsender", "blackholedpatterns", &bhf, &mapbhf, &bhp);
-	/*- BLACKHOLE RECIPIENT Patch - include Control file */
-	open_control_once(&bhrcpok, &bhbrpok, &bhrcpFn, &bhrcpFnp,
-		"BLACKHOLEDRCPT", "BLACKHOLEDRCPTPATTERNS", "blackholedrcpt", "blackholedrcptpatterns", &bhrcp, &mapbhrcp, &bhbrp);
-	/*- BADRECIPIENT Patch - include Control file */
+	/*- BADRECIPIENT */
 	open_control_once(&rcpok, &brpok, &rcpFn, &rcpFnp,
 		"BADRCPTTO", "BADRCPTPATTERNS", "badrcptto", "badrcptpatterns", &rcp, &maprcp, &brp);
 	/*- goodrcptto */
-	open_control_once(&chkgrcptok, &chkgrcptokp, &grcptFn, &grcptFnp,
-		"GOODRCPTTO", "GOODRCPTPATTERNS", "goodrcptto", "goodrcptpatterns", &grcpt, &mapgrcpt, &grcptp);
-	/*- Spam Ignore Patch - include Control file */
+	open_control_once(&gdrcptok, &gdrcptpok, &gdrcptFn, &gdrcptFnp,
+		"GOODRCPTTO", "GOODRCPTPATTERNS", "goodrcptto", "goodrcptpatterns", &gdrcpt, &mapgdrcpt, &gdrcptp);
+	/*- BLACKHOLE Sender */
+	open_control_once(&bhsndrok, 0, &bhsndFn, 0, "BLACKHOLEDSENDER", 0, "blackholedsender", 0, &bhsndr, &mapbhsndr, 0);
+	/*- BLACKHOLE RECIPIENT */
+	open_control_once(&bhrcptok, 0, &bhrcptFn, 0, "BLACKHOLEDRCPT", 0, "blackholedrcpt", 0, &bhrcpt, &mapbhrcpt, 0);
+	/*- Spam Ignore */
 	if (env_get("SPAMFILTER"))
-		open_control_once(&spfok, &sppok, &spfFn, &spfFnp,
-			"SPAMIGNORE", "SPAMIGNOREPATTERNS", "spamignore", "spamignorepatterns", &spf, &mapspf, &spp);
+		open_control_once(&spsndrok, 0, &spsndrFn, 0, "SPAMIGNORE", 0, "spamignore", 0, &spsndr, &mapspsndr, 0);
 	/*-
-	 * DNSCHECK Patch - include Control file
+	 * DNSCHECK 
 	 * Look up "MAIL from:" addresses to skip for DNS check in control/nodnscheck.
 	 */
 	if (!(nodnscheck = env_get("NODNSCHECK")))
@@ -2723,10 +2709,10 @@ open_control_files2()
 	if (!stralloc_0(&spfexp))
 		die_nomem();
 #endif
-	/*- TARPIT Patch - include Control Files */
+	/*- TARPIT */
 	open_control_once_int(&tarpitcount, &tarpitcountok, "TARPITCOUNT", "tarpitcount", 0);
 	open_control_once_int(&tarpitdelay, &tarpitdelayok, "TARPITDELAY", "tarpitdelay", 0);
-	/*- MAXRECPIENTS - include Control Files */
+	/*- MAXRECPIENTS */
 	open_control_once_int(&maxrcptcount, &maxrcptcountok, "MAXRECIPIENTS", "maxrecipients", 0);
 	if ((x = env_get("VIRUSCHECK"))) {
 		unsigned long   u;
@@ -2814,13 +2800,13 @@ smtp_init(int force_flag)
 	if (!flag)
 		flag++;
 	/*- initialize all variables */
-	bmfok = bmpok = bhfok = bhpok = bhrcpok = bhbrpok = rcpok = brpok = 0;
-	chkgrcptok = chkgrcptokp = spfok = sppok = nodnschecksok = 0;
+	bmfok = bmpok = bhsndrok = bhrcptok = rcpok = brpok = 0;
+	gdrcptok = gdrcptpok = spsndrok = nodnschecksok = 0;
 	briok = brhok = badhelook = acclistok = bodyok = 0;
 	tarpitcount = tarpitdelay = maxrcptcount = sigsok = greetdelay = qregex = 0;
-	bmfFn = bmfFnp = bhrcpFn = bhrcpFnp = bhsndFn = bhsndFnp = rcpFn = NULL;
+	bmfFn = bmfFnp = bhrcptFn = bhsndFn = rcpFn = NULL;
 	rcpFnp = accFn = nodnsFn = badipFn = badhostFn = badheloFn = NULL;
-	grcptFn = grcptFnp = spfFn = spfFnp = sigsFn = bodyFn = NULL;
+	gdrcptFn = gdrcptFnp = spsndrFn = sigsFn = bodyFn = NULL;
 	tarpitcountok = tarpitdelayok = maxrcptcountok = greetdelayok = qregexok = 0;
 	proto.len = 0;
 #ifdef BATV
@@ -3573,7 +3559,7 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 		err_addressmatch(errStr, "chksenderdomains");
 		return -1;
 	}
-	if (chksndrok)
+	if (chksndrok) /* not in checksenderdomains */
 		return 0;
 	if ((at = byte_rchr(t_addr.s, t_addr.len - 1, '@')) < t_addr.len - 1)
 		isLocal = (constmap(&maplocals, t_addr.s + at + 1, t_addr.len - at - 2) ? 1 : 0);
@@ -3861,11 +3847,12 @@ smtp_mail(char *arg)
 		err_authrequired();
 		return;
 	}
-	/*- Terminate SMTP Session immediatly if BLACKHOLED Sender is seen */
-	switch (address_match(bhsndFn, &addr, bhfok ? &bhf : 0, bhfok ? &mapbhf : 0, bhpok ? &bhp : 0, &errStr))
+	/*- Terminate SMTP Session immediately if BLACKHOLED Sender is seen */
+	switch (address_match(bhsndFn, &addr, bhsndrok ? &bhsndr : 0, bhsndrok ? &mapbhsndr : 0, 0, &errStr))
 	{
-	case 1:/*- flow through */
-		err_bhf(addr.s); /*- This sets NULLQUEUE */
+	case 1:
+		err_bhsndr(addr.s); /*- This sets NULLQUEUE */
+		/*- flow through */
 	case 0:
 		break;
 	case -1:
@@ -3907,8 +3894,8 @@ smtp_mail(char *arg)
 		return;
 	}
 	if (env_get("SPAMFILTER")) {
-		/*- spamignore, spamignorepatterns */
-		switch (address_match(spfFn, &addr, spfok ? &spf : 0, spfok ? &mapspf : 0, sppok ? &spp : 0, &errStr))
+		/*- spamignore */
+		switch (address_match(spsndrFn, &addr, spsndrok ? &spsndr : 0, spsndrok ? &mapspsndr : 0, 0, &errStr))
 		{
 		case 1:
 			if (!env_unset("SPAMFILTER"))
@@ -3918,7 +3905,7 @@ smtp_mail(char *arg)
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr, spfFn);
+			err_addressmatch(errStr, spsndrFn);
 			return;
 		}
 	}
@@ -4052,7 +4039,7 @@ smtp_mail(char *arg)
 	if (chkdomok) {
 		switch (address_match("authdomains", &mailfrom, chkdomok ? &chkdom : 0, chkdomok ? &mapchkdom : 0, 0, &errStr))
 		{
-		case 0:
+		case 0: /*- not found in authdomains */
 			chkdomok = 0;
 		case 1:
 			break;
@@ -4234,7 +4221,7 @@ smtp_rcpt(char *arg)
 		return;
 	}
 	/*- goodrcptto, goodrcptpatterns */
-	switch (address_match(grcptFn, &addr, chkgrcptok ? &grcpt : 0, chkgrcptok ? &mapgrcpt : 0, chkgrcptokp ? &grcptp : 0, &errStr))
+	switch (address_match(gdrcptFn, &addr, gdrcptok ? &gdrcpt : 0, gdrcptok ? &mapgdrcpt : 0, gdrcptpok ? &gdrcptp : 0, &errStr))
 	{
 	case 1:
 		isgoodrcpt = 4;
@@ -4243,7 +4230,7 @@ smtp_rcpt(char *arg)
 	case -1:
 		die_nomem();
 	default:
-		err_addressmatch(errStr, grcptFn);
+		err_addressmatch(errStr, gdrcptFn);
 		return;
 	}
 	/*- RECIPIENT BAD check */
@@ -4254,7 +4241,7 @@ smtp_rcpt(char *arg)
 		case 1:
 			err_rcp(mailfrom.s, addr.s);
 			return;
-		case 0:
+		case 0: /*- not found in badrcptto, badrcptpatterns */
 			break;
 		case -1:
 			die_nomem();
@@ -4379,17 +4366,18 @@ smtp_rcpt(char *arg)
 	}
 	/*- RECIPIENT BLACKHOLE */
 	if (isgoodrcpt != 4) { /*- not in goodrcptto, goodrcptpatterns */
-		/*- blackholedrcpt, blackholedrcptpatterns */
-		switch (address_match(bhrcpFn, &addr, bhrcpok ? &bhrcp : 0, bhrcpok ? &mapbhrcp : 0, bhbrpok ? &bhbrp : 0, &errStr))
+		/*- blackholedrcpt */
+		switch (address_match(bhrcptFn, &addr, bhrcptok ? &bhrcpt : 0, bhrcptok ? &mapbhrcpt : 0, 0, &errStr))
 		{
 		case 1:
-			err_bhrcp(mailfrom.s, addr.s);
+			err_bhrcpt(mailfrom.s, addr.s); /*- This sets sets NULLQUEUE */
+			/*- flow through */
 		case 0:
 			break;
 		case -1:
 			die_nomem();
 		default:
-			err_addressmatch(errStr, "bhrcpFn");
+			err_addressmatch(errStr, "bhrcptFn");
 			return;
 		}
 	}
@@ -7365,6 +7353,10 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.323  2024-02-23 21:39:32+05:30  Cprogrammer
+ * sanitized variable names for badmailfrom, badrcptto, blackholedrcpt, blackholedsender, spamignore
+ * removed blachole*pattern, spamignorepattern
+ *
  * Revision 1.322  2024-02-19 19:12:40+05:30  Cprogrammer
  * fix parsing permanent/temporary SMTP code for custom error
  *
@@ -7790,7 +7782,7 @@ addrrelay()
 char           *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.322 2024-02-19 19:12:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: smtpd.c,v 1.323 2024-02-23 21:39:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

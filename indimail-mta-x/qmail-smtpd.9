@@ -789,14 +789,13 @@ in \fIbadrcpt\fR itself if \fBQREGEX\fR is set to 0 or 1.
 If CHECKRECIPIENT environment variable is defined, user status check will
 not be carried out for addresses listed in this file. Addresses listed in
 this file will additionally bypass \fIbadrcptto\fR, \fIbadrcptpatterns\fR,
-\fIblackholedrcpt\fR and \fIblackholedrcptpatterns\fR. A line in
-\fIgoodrcptto\fR may be of the form \fB@\fIhost\fR\fR, meaning every
-address at \fIhost\fR. \fIgoodrcptto\fR can also be in cdb format. If
-\fIgoodrcptto.cdb\fR is present, it will be searched first. The filename
-can be overridden by the environment variable \fBGOODRCPTTO\fR. You can set
-\fBQREGEX\fR environment variable if you want to use regex patterns for
-good envelope recipient addresses. If \fBQREGEX\fR is set as 0, wildcard
-match is used instead.
+and \fIblackholedrcpt\fR. A line in \fIgoodrcptto\fR may be of the form
+\fB@\fIhost\fR\fR, meaning every address at \fIhost\fR. \fIgoodrcptto\fR
+can also be in cdb format. If \fIgoodrcptto.cdb\fR is present, it will be
+searched first. The filename can be overridden by the environment variable
+\fBGOODRCPTTO\fR. You can set \fBQREGEX\fR environment variable if you want
+to use regex patterns for good envelope recipient addresses. If
+\fBQREGEX\fR is set as 0, wildcard match is used instead.
 
 .TP 5
 .I goodrcptpatterns
@@ -807,6 +806,8 @@ you set \fBQREGEX\fR environment variable. \fIgoodrcptpatterns\fR uses
 simple shell-style pattern matching unlike regular expressions used by
 setting \fBQREGEX\fR environment variable. You can use wildcard or regex
 patterns in \fIgoodrcpt\fR itself if \fBQREGEX\fR is set to 0 or 1.
+Addresses listed in this file will additionally bypass \fIbadrcptto\fR,
+\fIbadrcptpatterns\fR and \fIblackholdrcpt\fR.
 
 .TP 5
 .I blackholedsender
@@ -825,33 +826,6 @@ or regex patterns for blackholed envelope sender addresses. Setting
 wildcard match.
 
 .TP 5
-.I blackholedpatterns
-Gives \fBqmail-smtpd\fR the ability to blackhole E-Mails by comparing the
-sender address with a REGEX pattern in \fIblackholedpatterns\fR.
-
-.EX
-Example:
-
-  *@earthlink.net
-  !fred@earthlink.net
-  [0-9][0-9][0-9][0-9][0-9]@[0-9][0-9][0-9].com
-  answerme@save*
-  *%*
-.EE
-
-.I blackholedpatterns
-file with this contents stops all mail from Earthlink except from
-fred@earthlink.net. It also stops all mail with addresses like:
-12345@123.com and answerme@savetrees.com. Further, any E-Mail with a sender
-address containing a percent sign (%) is rejected. The filename can be
-overridden by the environment variable \fIBLACKHOLEDPATTERNS\fR.
-\fIblackholedpatterns\fR gets disabled of you set \fBQREGEX\fR environment
-variable. \fIblackholedpatterns\fR uses simple shell-style pattern matching
-unlike regular expressions used by setting \fBQREGEX\fR environment
-variable. You can use wildcard or regex patterns in \fIblackholedsender\fR
-itself if \fBQREGEX\fR is set to 0 or 1.
-
-.TP 5
 .I blackholedrcpt
 Envelope recipient address causing delivery of mail to a blackhole.
 \fBqmail-smtpd\fR will cause the mail not to be written to the queue.
@@ -862,17 +836,6 @@ address at \fIhost\fR. \fIblackholedrcpt\fR can also be in cdb format. If
 filename can be overridden by the environment variable \fBBLACKHOLEDRCPT\fR.
 You can set QREGEX environment variable to 0 or 1 if you want to use
 wildcard or regex patterns for blackholed envelope recipient addresses.
-
-.TP 5
-.I blackholedrcptpatterns
-Gives \fBqmail-smtpd\fR the ability to blackhole E-Mails by comparing the
-recipient address with a REGEX pattern in \fIblackholedrcptpatterns\fR. The
-filename can be overridden by the environment variable
-\fBBLACKHOLEDRCPTPATTERN\fR. \fIblackholedrcptpatterns\fR gets disabled of
-you set \fBQREGEX\fR environment variable. \fIblackholedrcptpatterns\fR
-uses simple shell-style pattern matching unlike regular expressions used by
-setting \fBQREGEX\fR environment variable. You can use wildcard or regex
-patterns in \fIblackholedrcpt\fR itself if \fBQREGEX\fR is set to 0 or 1.
 
 .TP 5
 .I hostaccess
@@ -923,26 +886,16 @@ variable if you want to use regex patterns for whitelised envelope sender
 addresses.
 
 .TP 5
-.I spamignorepatterns
-REGEX patterns of envelope sender addresses which should bypass spam filter.
-The filename can be overridden by the environment variable
-\fBSPAMIGNOREPATTERNS\fR. \fIspamignorepatterns\fR gets disabled of you
-set \fBQREGEX\fR environment variable. \fIspamignorepatterns\fR uses simple
-shell-style pattern matching unlike regular expressions used by setting
-\fBQREGEX\fR environment variable. You can use wildcard or regex patterns
-in \fIspamignore\fR itself if \fBQREGEX\fR is set to 0 or 1.
-
-.TP 5
 .I QREGEX
 
-The files badhelo, badmailfrom, badrcptto, blackholedsender, spamignore,
-relaymailfrom, authdomains, chkrcptdomains, chksenderdomains, goodrcptto,
-blackholedrcpt can be used with regular expressions if the environment
-variable \fBQREGEX\fR is defined (in which case, the control files
-badhelopatterns, badmailfrompatterns, badrcpttopatterns,
-blackholedpatterns, blackholedrcptpatterns, goodrcptpatterns etc are not
-required and get disabled). Setting \fBQREGEX\fR to 0 enables simple
-wildcard match. Setting it to 1 enables regex match.
+The files badhelo, badmailfrom, badrcptto, blackholedsender,
+blackholedrcpt, spamignore, relaymailfrom, authdomains, chkrcptdomains,
+chksenderdomains, goodrcptto, can be used with regular expressions if the
+environment variable \fBQREGEX\fR is defined (in which case, the control
+files badhelopatterns, badmailfrompatterns, badrcpttopatterns,
+goodrcptpatterns etc are not required and get disabled). Setting
+\fBQREGEX\fR to 0 enables simple wildcard match. Setting it to 1 enables
+regex match.
 
 # drop everything containing the word spam
 
