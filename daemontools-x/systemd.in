@@ -1,5 +1,27 @@
 #
+# $Id: systemd.in,v 1.10 2024-02-26 02:08:36+05:30 Cprogrammer Exp mbhangui $
+#
+[Unit]
+Description=SVscan Service
+After=local-fs.target network.target
+
+[Service]
+ExecStart=@libexecdir@/svscanboot @servicedir@
+ExecStop=@prefix@/bin/qmailctl stop
+Restart=on-failure
+RestartSec=10
+Type=simple
+PrivateTmp=no
+
+[Install]
+Alias=indimail.service
+Alias=indimail-mta.service
+WantedBy=multi-user.target
+#
 # $Log: systemd.in,v $
+# Revision 1.10  2024-02-26 02:08:36+05:30  Cprogrammer
+# replace /etc/init.d/svscan with /usr/bin/qmailctl for ExeStop
+#
 # Revision 1.9  2021-06-22 10:45:21+05:30  Cprogrammer
 # added RestartSec parameter and moved PrivateTmp to override.conf
 #
@@ -31,22 +53,3 @@
 # Start daemontools
 # to start - systemctl start svscan|indimail|indimail-mta
 # to stop  - systemctl stop  svscan|indimail|indimail-mta
-#
-# $Id: systemd.in,v 1.9 2021-06-22 10:45:21+05:30 Cprogrammer Exp mbhangui $
-#
-[Unit]
-Description=SVscan Service
-After=local-fs.target network.target
-
-[Service]
-ExecStart=@libexecdir@/svscanboot @servicedir@
-ExecStop=/etc/init.d/svscan stop
-Restart=on-failure
-RestartSec=10
-Type=simple
-PrivateTmp=no
-
-[Install]
-Alias=indimail.service
-Alias=indimail-mta.service
-WantedBy=multi-user.target
