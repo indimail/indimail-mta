@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.10  2024-02-28 18:03:16+05:30  Cprogrammer
+ * removed unreachable statement
+ *
  * Revision 1.9  2023-12-24 16:33:11+05:30  Cprogrammer
  * handle EINTR for mq_receive()
  *
@@ -222,7 +225,6 @@ die(int how)
 #endif
 	strnum1[fmt_ulong(strnum1, selfpid)] = 0;
 	strerr_die3x(flagexitasap == 2 ? 0 : 111, "info: qscheduler: pid ", strnum1, " exiting");
-	sig_unblock(sig_term);
 }
 
 static void
@@ -1246,7 +1248,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.9 2023-12-24 16:33:11+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: qscheduler.c,v 1.10 2024-02-28 18:03:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
