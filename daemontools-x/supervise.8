@@ -26,17 +26,26 @@ fork themselves into background, which some consider bad software design.
 If you want to monitor such a daemon, set the sticky bit on ./run. This
 makes \fBsupervise\fR go into \fBsubreaper\fR mode using \fBprctl\fR(2)
 \fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
-\fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper mode or If the
+\fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper mode or when the
 environment variable \fBSETPGID\fR is set, ./run will have it's process
 Group ID set to the value of it's PID. Setting the process Group ID is
 required to monitor ./run reliably when ./run has a command which double
 forks. It is also required in such cases to make \fBsvc\fR(8) command
-operate reliably for such double forked daemon/commands in ./run.
+operate and control \fBsupervise\fR reliably such double forked
+daemon/commands in ./run.
 
 If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run or to give other
 commands to \fBsupervise\fR(8). \fBsupervise\fR uses
 \fIs\fR/\fIsupervise\fR/\/\fIcontrol\fR fifo to read these commands.
+
+On receipt of \fBSIGTERM\fR, \fBsupervise\fR sends \fBSIGTERM\fR followed
+by \fBSIGCONT\fR to its child. It uses \fBkillpg\fR(3) to send the signal
+if runnning in supreaper mode or when \fBSETPGID\fR environment variable is
+set. It uses \fBkill\fR(2) to send signals when not running in subreaper
+mod and \fBSETPGID\fR environment variable is not set. \fBsupervise\fR
+requires to \fBSIGTERM\fR signals to get terminated when started by
+\fBsvscan\fR(8) running as PID 1.
 
 if the file \fIs\fR/shutdown exists \fBsupervise\fR(8) executes
 \fIshutdown\fR when asked to exit.
@@ -45,7 +54,7 @@ if the file \fIs\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
 whenever run exits. The pid of the process that exited is passed as the
 first argument to \fIalert\fR. The exit value or signal (if killed by
 signal) is passed as the second argument to \fIalert\fR. The third argument
-is either \fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
+is either of the strings \fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
 
 The last argument to ./run, ./shutdown and ./alert is full path of \fIs\fR.
 
@@ -62,15 +71,15 @@ maintains status information in a binary format in the directory
 files it needs in \fIs\fR or if another copy of \fBsupervise\fR(8) is already
 running in \fIs\fR. Once \fBsupervise\fR(8) is successfully running, it will
 not exit unless it is killed or specifically asked to exit. On a successful
-startup \fBsupervise\fR(8) it opens the fifo
-\fIs\fR/\fIsupervise\fR/\fIok\fR in O_RDONLY|O_NDELAY mode. You can use
-\fBsvok\fR(8) to check whether \fBsupervise\fR(8) is successfully running.
-You can use \fBsvscan\fR(8) to reliably start a collection of
-\fBsupervise\fR(8) processes. \fBsvscan\fR mirrors the service directory in
-/run or /var/run directory (whichever is found first). So /run/\fIs\fR will
-be analogous to /service/\fIs\fR. When started by \fBsvscan\fR, error
-messages printed by \fBsupervise\fR(8) will go the standard error output of
-\fBsvscan\fR(8) process.
+startup \fBsupervise\fR(8) opens the fifo \fIs\fR/\fIsupervise\fR/\fIok\fR
+in O_RDONLY|O_NDELAY mode. You can use \fBsvok\fR(8) to check whether
+\fBsupervise\fR(8) is successfully running. You can use \fBsvscan\fR(8) to
+reliably start a collection of \fBsupervise\fR(8) processes. \fBsvscan\fR
+mirrors the service directory in \fI/run\fR or \fI/var/run\fR directory
+(whichever is found first). So /run/\fIs\fR will be analogous to
+/service/\fIs\fR. When started by \fBsvscan\fR, error messages printed by
+\fBsupervise\fR(8) will go the standard error output of \fBsvscan\fR(8)
+process.
 
 \fBsupervise\fR(8) can wait for another service by having a file named
 \fIs\fR/\fIwait\fR. This file has two lines. The first line is time \fIt\fR
@@ -101,12 +110,15 @@ returns, it means \fBsupervise\fR(8) is running.
 \fIs\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode
 (O_WRONLY) to test if service \fIs\fR is up. Any client that opens this
 fifo will block until the service \fIs\fR is up. If write returns, it means
-service \fBs\fR(8) is running.
+service \fIs\fR is running.
 .PP
 \fBsupervise\fR logs informational, warning and error messages to
 descriptor 2. Informational messages can be turned on by setting the
 environment variable \fBVERBOSE\fR. Warning messages can be turned off by
-setting the environment variable \fBSILENT\fR.
+setting the environment variable \fBSILENT\fR. If you are using
+\fBsvscan\fR for service startup, as setup for indimail-mta, you can set
+environment variables for \fBsupervise\fR in
+\fI/service/.svscan/variables\fR directory.
 
 .SH SEE ALSO
 svc(8),

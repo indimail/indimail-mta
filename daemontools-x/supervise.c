@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.38 2024-02-09 00:31:40+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.39 2024-03-01 15:27:07+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -42,6 +42,7 @@ static int      flagwant = 1;
 static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
+static int      logger = 0;
 static int      verbose = 0, silent = 0;
 static char     flagfailed;
 static unsigned long scan_interval = 60;
@@ -125,10 +126,14 @@ do_kill(int prgrp, int *siglist, char **signame)
 
 	for (i = siglist, j = 0; *i != -1; i++, j++) {
 		if (grandchild || prgrp) {
-			if ((r = killpg(childpid, *i)) == -1 && errno != error_srch) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_ulong(strnum2, childpid)] = 0;
-				strerr_warn8(warn.s, "pid ", strnum1, " killpg ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
+			if ((r = killpg(childpid, *i)) == -1) {
+				if (errno == error_srch && kill(childpid, *i) == -1) {
+					if (errno == error_srch) {
+						strnum1[fmt_ulong(strnum1, getpid())] = 0;
+						strnum2[fmt_ulong(strnum2, childpid)] = 0;
+						strerr_warn8(warn.s, "pid ", strnum1, " killpg, kill ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
+					}
+				}
 			}
 			if (verbose && !r) {
 				strnum1[fmt_ulong(strnum1, getpid())] = 0;
@@ -154,9 +159,14 @@ static void
 sigterm()
 {
 	int             siglist[] = {-1, -1, -1};
-	char           *signame[] = {0, 0};
+	char           *signame[] = {0, 0}, *p;
+	static int      got_term;
 
+	flagexit = 1;
 	if (childpid) {
+		p = env_get("SV_PWD");
+		if (p && logger && getppid() == 1 && !got_term++)
+			return;
 		flagwant = 0;
 		flagwantup = 1;
 		siglist[0] = SIGTERM;
@@ -164,7 +174,6 @@ sigterm()
 		signame[0] = "SIGTERM";
 		do_kill(1, siglist, signame);
 	}
-	flagexit = 1;
 }
 
 void
@@ -1000,6 +1009,7 @@ main(int argc, char **argv)
 			strerr_die1x(111, "supervise: out of memory");
 	} else
 	if (argc == 3) {
+		logger = 1;
 		if (!stralloc_copys(&fatal, argv[2]) || !stralloc_catb(&fatal, "/log: supervise: fatal: ", 24))
 			strerr_die1x(111, "supervise: out of memory");
 		if (!stralloc_copys(&warn, argv[2]) || !stralloc_catb(&warn, "/log: supervise: warning: ", 26))
@@ -1111,13 +1121,17 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.38 2024-02-09 00:31:40+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.39 2024-03-01 15:27:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.39  2024-03-01 15:27:07+05:30  Cprogrammer
+ * die on two SIGTERM if PPID is 1 and supervise is a logger
+ * Fixed termination of processes with -G option when no processes found in a process group
+ *
  * Revision 1.38  2024-02-09 00:31:40+05:30  Cprogrammer
  * replaced chown with fchown
  *
