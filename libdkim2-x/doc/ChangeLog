@@ -55,6 +55,7 @@ Release 1.7-1.1 Start 01/02/2023 End 09/01/2024
 17. dkim.cpp, dkimsigin.cpp: Exclude Arc-Authentication-Results from DKIM
     signing
 - 01/01/2024 - indimail-mta-3.0.6
+- 06/01/2024
 18. dkim.h: Added error code DKIM_BAD_IDENTITY for invalid identity domain
 19. dkimverify.cpp, dkim.cpp: use new error code DKIM_BAD_IDENTITY for
     invalid identity domain (i= tag)

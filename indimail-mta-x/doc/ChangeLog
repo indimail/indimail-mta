@@ -118,7 +118,7 @@ Release @version@-@release@ Start 02/01/2024 End XX/XX/XXXX
 - 23/02/2024
 63. smtpd.c: sanitized variable names for badmailfrom, badrcptto,
     blackholedrcpt, blackholedsender, spamignore 
-64. removed blachole*pattern, spamignorepattern
+64. removed blackhole*pattern, spamignorepattern
 - 28/02/2024
 65. qscheduler.c: removed unreachable statement after _exit()
 
