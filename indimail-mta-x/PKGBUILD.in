@@ -1,6 +1,9 @@
 # Maintainer: @email@
 #
 # $Log: PKGBUILD.in,v $
+# Revision 1.22  2024-03-04 20:48:00+05:30  Cprogrammer
+# turn off static linking for archlinux builds
+#
 # Revision 1.21  2023-12-31 08:57:31+05:30  Cprogrammer
 # moved repository to indimail org
 #
@@ -66,7 +69,7 @@
 # Initial revision
 #
 #
-# $Id: PKGBUILD.in,v 1.21 2023-12-31 08:57:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: PKGBUILD.in,v 1.22 2024-03-04 20:48:00+05:30 Cprogrammer Exp mbhangui $
 #
 pkgname=('indimail-mta' 'indimail-mini' 'qmta')
 pkgver=@version@
@@ -150,6 +153,7 @@ build() {
   ) > /tmp/conf-groups
   diff /tmp/conf-groups conf-groups >/dev/null && rm -f /tmp/conf-groups || mv /tmp/conf-groups conf-groups
   ./catChangeLog doc/ChangeLog > ChangeLog-indimail-mta
+  sed -i -e 's{$(static_option) {{g' Makefile
   ./qmake -s
 }
 
