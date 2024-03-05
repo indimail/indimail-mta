@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.724 2024-02-22 01:05:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.725 2024-03-05 11:44:11+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.724 2024-02-22 01:05:21+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.725 2024-03-05 11:44:11+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6336,13 +6336,14 @@ if [ $mount_resolvconf -eq 1 ] ; then
 	dump_run_header
 	echo "echo svscan \$PPID initialization PID \$\$"
 	echo "exec 2>&1"
-	echo "if [ -f $sysconfdir/resolv.conf ] ; then"
+	echo "if [ -s $sysconfdir/variables/UNSHARE -a -f $sysconfdir/resolv.conf ] ; then"
 	echo "  /usr/bin/mount --bind $sysconfdir/resolv.conf /etc/resolv.conf"
 	echo "  /usr/bin/mount -l"
 	echo "fi"
 	echo ""
 	echo "echo \"Environment Variable List\""
 	echo "env"
+	echo "echo"
 	) > "$DESTDIR"$SERVICEDIR/.svscan/run
 	if [ ! -f "$DESTDIR"$sysconfdir/resolv.conf -o $force -eq 1 ] ; then
 		hostname=$([ -n "$HOSTNAME" ] && echo "$HOSTNAME" || uname -n)
@@ -10292,29 +10293,35 @@ create_cert()
 				echo "$i: OK"
 			fi
 		done
-		echo "Updating TLS CACHE as $CERTDIR/couriersslcache"
-		for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
-		do
-			j=$(@prefix@/bin/qcat $i)
-			if [ ! " $j" = " $CERTDIR/couriersslcache" ] ; then
-				echo "Fixed $i"
-				echo "$CERTDIR/couriersslcache" > $i
-				updated=1
-				x=$(echo $i | cut -d'/' -f1,2,3)
-				echo $svc_list | grep $x >/dev/null
-				if [ $? -ne 0 ] ; then
-					if [ -z "$svc_list" ] ; then
-						svc_list="$x"
-					else
-						svc_list="$svc_list $x"
+		if [ -f /usr/bin/imapd ] ; then
+			echo "Updating TLS CACHE as $CERTDIR/couriersslcache"
+			for i in `ls @servicedir@/*/variables/TLS_CACHEFILE 2>/dev/null`
+			do
+				j=$(@prefix@/bin/qcat $i)
+				if [ ! " $j" = " $CERTDIR/couriersslcache" ] ; then
+					echo "Fixed $i"
+					echo "$CERTDIR/couriersslcache" > $i
+					updated=1
+					x=$(echo $i | cut -d'/' -f1,2,3)
+					echo $svc_list | grep $x >/dev/null
+					if [ $? -ne 0 ] ; then
+						if [ -z "$svc_list" ] ; then
+							svc_list="$x"
+						else
+							svc_list="$svc_list $x"
+						fi
 					fi
+				else
+					echo "$i: OK"
 				fi
-			else
-				echo "$i: OK"
-			fi
-		done
+			done
+		fi
 	else
-		echo "--update-certs not given. Skipping updating Services for CERTDIR, CERTFILE and TLS_CACHE" 1>&2
+		if [ -f /usr/bin/imapd ] ; then
+			echo "--update-certs not given. Skipping updating Services for CERTDIR, CERTFILE and TLS_CACHE" 1>&2
+		else
+			echo "--update-certs not given. Skipping updating Services for CERTDIR, CERTFILE" 1>&2
+		fi
 	fi
 
 	echo "====== Certificate $CERTDIR/servercert.pem ========="
