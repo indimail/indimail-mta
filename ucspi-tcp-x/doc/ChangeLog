@@ -1,11 +1,14 @@
-* Sun Mar 03 2024 12:20:16 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.4-1.1%{?dist}
-Release 1.1.4-1.1 Start 08/02/2024 End 03/02/2024
+* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
+Release @version@-@release@ Start 08/02/2024 End XX/XX/XXXX
 - 08/02/2024
 01. installer.c: replace chown, chmod with fchown, fchmod
 - 10/02/2024
 02. installer.c: removed unused options and fixed check option fixing
     permissions
 - 03/02/2024 - indimail-mta-3.0.7
+- 11/03/2024
+03. installer.c: fixed displaying size variable, fixed allocation of zerobuf
+    variable
 
 * Mon Jan 01 2024 19:01:07 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.3-1.1${?dist}
 Release 1.1.3-1.1 Start 27/04/2023 End 01/01/2024
