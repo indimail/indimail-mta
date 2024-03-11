@@ -423,7 +423,7 @@ smtp_mail(char *arg)
 	mailfrom_parms(arg);
 	convertbarelf = env_get("ALLOW_BARELF") ? 1 : 0;
 	seenmail = 1;
-	if (!stralloc_copys(&rcptto, "") || 
+	if (!stralloc_copys(&rcptto, "") ||
 			!stralloc_copys(&mailfrom, addr.s) ||
 			!stralloc_0(&mailfrom))
 		die_nomem();

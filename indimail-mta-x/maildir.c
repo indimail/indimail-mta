@@ -81,7 +81,7 @@ append(prioq *pq, stralloc *filenames, char *subdir, datetime_sec my_time)
 				continue;
 			}
 			if (st.st_mtime < my_time) { /*- don't want to mix up the order */
-				/* 
+				/*
 				 * this also means that when maildirserial is called
 				 * it will skip all files having mtime >= start time of
 				 * maildirserial

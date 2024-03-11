@@ -1,22 +1,22 @@
 /*
  * qcat -- concatenate files and print on the standard output.
  * Copyright (C) 1988-2024 Free Software Foundation, Inc.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.  
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  *
  * convert() function code taken and adaptred from coreutils/src/cat.c
- * By tege@sics.se, Torbjörn Granlund, advised by rms, Richard Stallman.  
+ * By tege@sics.se, Torbjörn Granlund, advised by rms, Richard Stallman.
  *
  * $Id: qcat.c,v 1.11 2024-02-22 08:35:30+05:30 Cprogrammer Exp mbhangui $
  */
@@ -105,7 +105,7 @@ convert(char *inbuf, int len, int show_nonprinting, int show_tabs, int show_ends
 						if (ch < 128 + 127) {
 							inbuf[i] -= 128;
 							substdio_bput(&ssout, inbuf + i, 1);
-						} else 
+						} else
 							substdio_bput(&ssout, "^?", 2);
 					} else {
 						substdio_bput(&ssout, "^", 1);

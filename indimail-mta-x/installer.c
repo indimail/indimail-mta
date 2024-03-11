@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.25 2024-02-12 17:19:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.26 2024-03-11 17:54:44+05:30 Cprogrammer Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -291,7 +291,7 @@ doit(stralloc *line, int uninstall, int check)
 	char           *x;
 	char           *type, *uidstr, *gidstr, *modestr, *mid, *name, *zerobuf;
 	int             fdin, fdout, opt;
-	unsigned long   m, size;
+	unsigned long   m, size = 0;
 	unsigned int    xlen, i;
 	uid_t           uid;
 	gid_t           gid;
@@ -520,11 +520,11 @@ doit(stralloc *line, int uninstall, int check)
 					} else
 						strerr_die3sys(111, FATAL, name, ": ");
 				}
-				if (mode == -1) {
-					if (lstat(name, &st) == -1)
-						strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
+				if (lstat(name, &st) == -1)
+					strerr_die4sys(111, FATAL, "lstat: ", name, ": ");
+				if (mode == -1)
 					mode = st.st_mode;
-				}
+				size = st.st_size;
 			}
 			print_info("install file", *type == 'f' ? name : "/dev/zero", target.s, mode == -1 ? 0644 : mode, uid, gid, size);
 			if ((fdin = open_read(*type == 'z' ? "/dev/zero" : name)) == -1) {
@@ -533,8 +533,6 @@ doit(stralloc *line, int uninstall, int check)
 				else
 					strerr_die4sys(111, FATAL, "unable to read ", name, ": ");
 			}
-			if (!(zerobuf = (char *) alloc(sizeof(char) * size)))
-				nomem();
 			substdio_fdbuf(&ssin, read, fdin, inbuf, sizeof (inbuf));
 			if ((fdout = open_trunc(target.s)) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
@@ -550,10 +548,13 @@ doit(stralloc *line, int uninstall, int check)
 				}
 			} else
 			if (*type == 'z') {
+				if (!(zerobuf = (char *) alloc(sizeof(char) * size)))
+					nomem();
 				if (substdio_get(&ssin, zerobuf, size) == -1)
 					strerr_die2sys(111, FATAL, "unable to read /dev/zero: ");
 				if (substdio_put(&ssout, zerobuf, size) == -1)
 					strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
+				alloc_free(zerobuf);
 			}
 			close(fdin);
 			if (substdio_flush(&ssout) == -1)
@@ -561,7 +562,6 @@ doit(stralloc *line, int uninstall, int check)
 			if (fsync(fdout) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
 			close(fdout);
-			alloc_free(zerobuf);
 			if (my_uid) {
 #ifdef NETQMAIL
 				substdio_puts(subfdout, "\tchmod ");
@@ -669,7 +669,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.25 2024-02-12 17:19:34+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.26 2024-03-11 17:54:44+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -677,6 +677,10 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.26  2024-03-11 17:54:44+05:30  Cprogrammer
+ * fixed displaying size variable
+ * fixed allocation of zerobuf variable
+ *
  * Revision 1.25  2024-02-12 17:19:34+05:30  Cprogrammer
  * added 'z' option to create files with fixed number of zeros
  *

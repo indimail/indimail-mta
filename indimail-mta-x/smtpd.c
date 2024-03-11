@@ -2622,7 +2622,7 @@ open_control_files2()
 	if (env_get("SPAMFILTER"))
 		open_control_once(&spsndrok, 0, &spsndrFn, 0, "SPAMIGNORE", 0, "spamignore", 0, &spsndr, &mapspsndr, 0);
 	/*-
-	 * DNSCHECK 
+	 * DNSCHECK
 	 * Look up "MAIL from:" addresses to skip for DNS check in control/nodnscheck.
 	 */
 	if (!(nodnscheck = env_get("NODNSCHECK")))

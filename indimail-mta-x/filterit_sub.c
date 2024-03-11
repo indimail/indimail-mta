@@ -281,7 +281,7 @@ take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
 	char           *MailDirNames[] = { "cur", "new", "tmp", };
 	char           *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
 
-	if (!doit && 
+	if (!doit &&
 			subprintf(ssout, matched ? "Matched Header=[%s], " : "Unmatched Header=[%s], ", header) == -1)
 		strerr_die2sys(111, FATAL, "unable to write output: ");
 	switch (act_type)
@@ -403,7 +403,7 @@ filterit_sub1(int argc, char **argv)
 					};
 	char           *act[] = {"exit", "forward", "maildir", 0};
 	char            ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT];
-	int             opt, i, match, negate = 0, keep_continue = 0, 
+	int             opt, i, match, negate = 0, keep_continue = 0,
 					c_opt = 0, a_opt = 0, default_a_opt = 0, in_header;
 	substdio        ssin, ssout;
 

@@ -95,7 +95,7 @@ atrn_queue(char *arg, char *remoteip)
 	case 0:
 		sig_pipedefault();
 		/*- dup 0, 1 to 6,7 for serialsmtp */
-		dup2(1, 7); 
+		dup2(1, 7);
 		dup2(0, 6);
 		if (!stralloc_copys(&bin, auto_libexec) ||
 				!stralloc_catb(&bin, "/atrn", 5) ||
