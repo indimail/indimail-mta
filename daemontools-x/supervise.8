@@ -48,7 +48,8 @@ requires to \fBSIGTERM\fR signals to get terminated when started by
 \fBsvscan\fR(8) running as PID 1.
 
 if the file \fIs\fR/shutdown exists \fBsupervise\fR(8) executes
-\fIshutdown\fR when asked to exit.
+\fIshutdown\fR when asked to exit. The pid of the process that exited is
+passed as the first argument to \fIshutdown\fR.
 
 if the file \fIs\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
 whenever run exits. The pid of the process that exited is passed as the
@@ -56,7 +57,8 @@ first argument to \fIalert\fR. The exit value or signal (if killed by
 signal) is passed as the second argument to \fIalert\fR. The third argument
 is either of the strings \fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
 
-The last argument to ./run, ./shutdown and ./alert is full path of \fIs\fR.
+The last argument to ./run, ./shutdown and ./alert is the full path of
+\fIs\fR.
 
 If the directory \fIrun\fR/\fIsvscan\fR exists, \fBsupervise\fR(8) creates
 the directory \fIs\fR/\fIsupervise\fR in \fIrun\fR/\fIsvscan\fR where

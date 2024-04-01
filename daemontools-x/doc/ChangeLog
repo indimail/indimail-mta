@@ -7,6 +7,9 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 - 11/03/2024
 04. installer.c: fixed displaying size variable, fixed allocation of zerobuf
     variable
+- 01/04/2024
+05. supervise.c: set PPID env variable for child
+06. supervise.c: added comments, updated variable name for flagwant, spid arg
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.4-1.1%{?dist}
 Release 1.1.4-1.1 Start 09/02/2024 End 03/02/2024

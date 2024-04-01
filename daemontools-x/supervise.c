@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.39 2024-03-01 15:27:07+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.40 2024-04-01 18:21:40+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -38,7 +38,7 @@ static int      fdstatus;
 static int      fdok;
 static int      fdup;
 static int      flagexit = 0;
-static int      flagwant = 1;
+static int      flagwantxx = 1;
 static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
 static int      fddir;
@@ -93,7 +93,7 @@ announce(short sleep_interval)
 	short          *s;
 
 	status[16] = (childpid ? flagpaused : 0);
-	status[17] = (flagwant ? (flagwantup ? 'u' : 'd') : 0);
+	status[17] = (flagwantxx ? (flagwantup ? 'u' : 'd') : 0);
 	if (sleep_interval > 0) {
 		s = (short *) (status + 18);
 		*s = sleep_interval;
@@ -165,9 +165,13 @@ sigterm()
 	flagexit = 1;
 	if (childpid) {
 		p = env_get("SV_PWD");
+		/*-
+		 * die on the second SIGTERM if PPID is 1 and
+		 * supervised service is a logger
+		 */
 		if (p && logger && getppid() == 1 && !got_term++)
 			return;
-		flagwant = 0;
+		flagwantxx = 0;
 		flagwantup = 1;
 		siglist[0] = SIGTERM;
 		siglist[1] = -1;
@@ -380,6 +384,7 @@ trystart()
 	if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 		strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	switch (f = fork())
 	{
 	case -1:
@@ -398,6 +403,8 @@ trystart()
 #endif
 		if ((do_setpgid || is_subreaper) && setpgid(0, 0) == -1)
 			strerr_die2sys(111, fatal.s, "unable to set process group id: ");
+		if (!env_put2("PPID", strnum1))
+			strerr_die2x(111, fatal.s, "trystart: out of memory");
 		run[1] = dir;
 		execve(*run, run, environ);
 		strerr_die2sys(111, fatal.s, "unable to start run: ");
@@ -406,7 +413,6 @@ trystart()
 	flagpaused = 0;
 	if (verbose) {
 		pgid = getpgid(f);
-		strnum1[fmt_ulong(strnum1, getpid())] = 0;
 		strnum2[fmt_ulong(strnum2, f)] = 0;
 		strnum3[fmt_ulong(strnum3, pgid)] = 0;
 		strerr_warn8(info.s, "pid ", strnum1, " started child pid ", strnum2,
@@ -423,12 +429,13 @@ trystart()
 }
 
 void
-tryaction(char **action, pid_t spid, int wstat, int do_alert)
+tryaction(char **action, pid_t cpid, int wstat, int do_alert)
 {
 	pid_t           f;
 	int             t, i;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG + 1];
 
+	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	switch (f = fork())
 	{
 	case -1:
@@ -444,7 +451,9 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 		if (use_runfs && fchdir(fddir) == -1)
 			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
-		strnum1[fmt_ulong(strnum1, spid)] = 0;
+		if (!env_put2("PPID", strnum1))
+			strerr_die2x(111, fatal.s, "tryaction: out of memory");
+		strnum1[fmt_ulong(strnum1, cpid)] = 0;
 		action[1] = strnum1;
 		if (do_alert) {
 			action[4] = dir;
@@ -460,7 +469,8 @@ tryaction(char **action, pid_t spid, int wstat, int do_alert)
 					strnum2[i + 1] = 0;
 				} else
 					strnum2[fmt_uint(strnum2, t)] = 0;
-			}
+			} else
+				action[3] = "unknown";
 			action[2] = strnum2;
 		} else {
 			action[2] = dir;
@@ -619,7 +629,7 @@ doit()
 					}
 					return;
 				}
-				if (flagwant && flagwantup) {
+				if (flagwantxx && flagwantup) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
 						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
@@ -635,7 +645,7 @@ doit()
 				break;
 			} /*- if (r == childpid || (r != -1 && grandchild)) */
 		} /*- for (;;) */
-		if (flagfailed && flagwant && flagwantup) {
+		if (flagfailed && flagwantxx && flagwantup) {
 			flagfailed = 0;
 			trystart();
 		}
@@ -646,7 +656,7 @@ doit()
 				g = 1;
 				break;
 			case 'r': /*- restart */
-				flagwant = 1;
+				flagwantxx = 1;
 				flagwantup = 1;
 				if (childpid) {
 #ifdef USE_RUNFS
@@ -680,7 +690,7 @@ doit()
 					trystart();
 				break;
 			case 'd': /*- down */
-				flagwant = 1;
+				flagwantxx = 1;
 				flagwantup = 0;
 				if (childpid) {
 #ifdef USE_RUNFS
@@ -703,14 +713,14 @@ doit()
 				announce(0);
 				break;
 			case 'u': /*- up */
-				flagwant = 1;
+				flagwantxx = 1;
 				flagwantup = 1;
 				announce(0);
 				if (!childpid)
 					trystart();
 				break;
 			case 'o': /*- run once */
-				flagwant = 0;
+				flagwantxx = 0;
 				announce(0);
 				if (!childpid)
 					trystart();
@@ -958,7 +968,9 @@ int
 do_init()
 {
 	int             t, f;
+	char            strnum[FMT_ULONG];
 
+	strnum[fmt_ulong(strnum, getpid())] = 0;
 	switch (f = fork())
 	{
 	case -1:
@@ -971,6 +983,8 @@ do_init()
 	case 0:
 		sig_uncatch(sig_child);
 		sig_unblock(sig_child);
+		if (!env_put2("PPID", strnum))
+			strerr_die2x(111, fatal.s, "do_init: out of memory");
 		execve(*init, init, environ);
 		strerr_die4sys(111, fatal.s, "unable to start ", dir, "/init: ");
 	}
@@ -1009,7 +1023,7 @@ main(int argc, char **argv)
 			strerr_die1x(111, "supervise: out of memory");
 	} else
 	if (argc == 3) {
-		logger = 1;
+		logger = 1; /*- passed by svscan for the log supervise process */
 		if (!stralloc_copys(&fatal, argv[2]) || !stralloc_catb(&fatal, "/log: supervise: fatal: ", 24))
 			strerr_die1x(111, "supervise: out of memory");
 		if (!stralloc_copys(&warn, argv[2]) || !stralloc_catb(&warn, "/log: supervise: warning: ", 26))
@@ -1111,7 +1125,7 @@ main(int argc, char **argv)
 			break;
 	}
 
-	if (!flagwant || flagwantup)
+	if (!flagwantxx || flagwantup)
 		trystart();
 	doit();
 	announce(0);
@@ -1121,13 +1135,17 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.39 2024-03-01 15:27:07+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: supervise.c,v 1.40 2024-04-01 18:21:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.40  2024-04-01 18:21:40+05:30  Cprogrammer
+ * set PPID env variable for child
+ * added comments, updated variable name for flagwant, spid arg
+ *
  * Revision 1.39  2024-03-01 15:27:07+05:30  Cprogrammer
  * die on two SIGTERM if PPID is 1 and supervise is a logger
  * Fixed termination of processes with -G option when no processes found in a process group
