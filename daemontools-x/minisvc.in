@@ -283,7 +283,9 @@ if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 fi
 if [ ! -d "$DESTDIR"$sysconfdir/control/global_vars ] ; then
 	mkdir -p "$DESTDIR"$sysconfdir/control/global_vars
-	$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars
+	/usr/bin/getent group  qmail  > /dev/null && \
+		$chown root:qmail "$DESTDIR"$sysconfdir/control/global_vars || \
+		$chown root:0 "$DESTDIR"$sysconfdir/control/global_vars
 	/bin/chmod 755 "$DESTDIR"$sysconfdir/control/global_vars
 fi
 if [ ! -f $conf_dir/.envdir -a ! -d $conf_dir/.envdir -a ! -L $conf_dir/.envdir ] ; then

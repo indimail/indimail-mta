@@ -86,13 +86,8 @@ log_it() {
 upgrade=0
 case "$1" in
     configure)
-	if [ -f /tmp/daemontools/.install ] ; then
-		upgrade=0
-		/bin/rm -rf /tmp/daemontools
-	else
-		if [ -n "$2" ] ; then
-			upgrade=1
-		fi
+	if [ -n "$2" ] ; then
+		upgrade=1
 	fi
 	;;
 

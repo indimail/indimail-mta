@@ -83,13 +83,8 @@ fi
 upgrade=0
 case "$1" in
 	configure)
-	if [ -f /tmp/ucspi-tcp/.install ] ; then
-		upgrade=0
-		/bin/rm -rf /tmp/ucspi-tcp
-	else
-		if [ -n "$2" ] ; then
-			upgrade=1
-		fi
+	if [ -n "$2" ] ; then
+		upgrade=1
 	fi
 	;;
 

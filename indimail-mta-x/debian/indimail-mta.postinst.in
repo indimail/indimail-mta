@@ -95,13 +95,8 @@ fixperms()
 upgrade=0
 case "$1" in
 	configure)
-	if [ -f /tmp/indimail-mta/.install ] ; then
-		upgrade=0
-		/bin/rm -rf /tmp/indimail-mta
-	else
-		if [ -n "$2" ] ; then
-			upgrade=1
-		fi
+	if [ -n "$2" ] ; then
+		upgrade=1
 	fi
 	;;
 
@@ -146,8 +141,6 @@ if [ -f ${qsysconfdir}/indimail-mta.perms ] ; then
 	fi
 fi
 
-# indimail-mta.upgrade/indimail-mta.install are created
-# by the preinst script
 if [ $upgrade -eq 1 ] ; then # upgrade
 	(
 	# refresh indimail-mta services
