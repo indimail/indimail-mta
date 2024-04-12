@@ -10,6 +10,8 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 - 01/04/2024
 05. supervise.c: set PPID env variable for child
 06. supervise.c: added comments, updated variable name for flagwant, spid arg
+- 12/04/2024
+07. daemontools.spec.in, debian/preinst.in: fixed logdir permissions
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.4-1.1%{?dist}
 Release 1.1.4-1.1 Start 09/02/2024 End 03/02/2024

@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.45 2024-02-12 16:36:54+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.46 2024-04-12 11:45:16+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -105,7 +105,7 @@ Requires: /sbin/chkconfig
 
 %define log \
 log_it() { \
-  [ -x %{_prefix}/bin/tai64n -a -x %{_prefix}/bin/tai64nlocal ] && echo "$(echo  ""|tai64n|tai64nlocal)$*" || echo "$*" \
+  [ -x %{_prefix}/bin/tai64n -a -x %{_prefix}/bin/tai64nlocal ] && echo "$(echo  ""|tai64n|tai64nlocal)$*" || echo "$(date +\"%%Y-%%m-%%d %%H:%%M:%%S.%N\") $*" \
 }
 
 %description
@@ -328,7 +328,21 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %pretrans
 %log
 argv1=$1
-log_it "===== Start %{name} installation ====="
+if [ "$argv1" = "1" ] ; then
+%if %{undefined suse_version} && %{undefined sles_version}
+  %{__mkdir_p} %{logdir}
+  for i in svscan resolvconf
+  do
+    %{__mkdir_p} %{logdir}/$i
+  done
+%if %{defined _rundir}
+  %{__mkdir_p} %{buildroot}%{_prefix}/lib/tmpfiles.d
+  %{__mkdir_p} %{buildroot}%{_rundir}/svscan
+%endif
+%endif
+fi
+
+log_it "===== Start %{name} installation =====" > /var/log/%{name}-setup.log
 if [ -f %{_prefix}/sbin/initsvc ] ; then
   %{_prefix}/sbin/initsvc -status
 fi
@@ -339,7 +353,7 @@ fi
 %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
 if [ $? -eq 0 ] ; then
   touch %{servicedir}/.svscan.down
-  log_it "Giving svscan exactly 5 seconds to exit nicely"
+  log_it "Giving svscan exactly 5 seconds to exit nicely" >> /var/log/%{name}-setup.log
   if test -f %{_sysconfdir}/init/svscan.conf
   then
     /sbin/initctl emit qmailstop > /dev/null 2>&1
@@ -374,10 +388,18 @@ fi
 
 ### SCRIPTLET ###############################################################################
 %pre
-(
-/usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
-/usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{logdir} -s /sbin/nologin qmaill || true
-) >> /var/log/%{name}-setup.log 2>&1
+argv1=$1
+if [ "$argv1" = "1" ] ; then
+  (
+  /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
+  /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{logdir} -s /sbin/nologin qmaill || true
+  if [ ! -d %{logdir} ] ; then
+    chown qmaill:nofiles %{logdir}
+  else
+    chown -R qmaill:nofiles %{logdir}
+  fi
+  ) >> /var/log/%{name}-setup.log 2>&1
+fi
 
 ### SCRIPTLET ###############################################################################
 %post
@@ -388,6 +410,7 @@ if [ -z "$argv1" ] ; then
 fi
 if [ ! -d %{logdir} ] ; then
   %{__mkdir_p} %{logdir}
+  chown qmaill:noqfiles %{logdir}
 fi
 %if %{defined _rundir}
 if [ -d %{_prefix}/lib/tmpfiles.d -a -n "%{_rundir}" ] ; then
@@ -567,7 +590,7 @@ fi
 # Remove svscan being started on system boot
 log_it "removing svscan startup"
 %{_prefix}/sbin/minisvc --config=rm-boot
-) >> /var/log/daemontools-setup.log 2>&1
+) > /var/log/daemontools-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
 %postun
