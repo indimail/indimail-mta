@@ -4,6 +4,13 @@
  * Initial revision
  *
  */
+#ifndef _DEFAULT_SOURCE
+#define _DEFAULT_SOURCE
+#endif
+#include <unistd.h>
+
+int setgroups(size_t , const gid_t *);
+
 int
 main()
 {

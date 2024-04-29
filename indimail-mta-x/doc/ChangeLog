@@ -7,6 +7,8 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 - 11/03/2024
 02. installer.c: fixed displaying size variable, fixed allocation of zerobuf
     variable
+- 29/04/2024
+03. trynpbg1.c, tryspnam.c: Fix compiler warnings
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.7-1.1%{?dist}
 Release 3.0.7-1.1 Start 02/01/2024 End 03/02/2024

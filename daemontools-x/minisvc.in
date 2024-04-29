@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.38 2024-03-11 17:42:15+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.39 2024-04-29 16:29:47+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.38 2024-03-11 17:42:15+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.39 2024-04-29 16:29:47+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -2875,6 +2875,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.39  2024-04-29 16:29:47+05:30  Cprogrammer
+# fix for missing qmail group
+#
 # Revision 1.38  2024-03-11 17:42:15+05:30  Cprogrammer
 # updated RCS log
 #

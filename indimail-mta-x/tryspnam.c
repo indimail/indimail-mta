@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <shadow.h>
 
 void main()
