@@ -9,6 +9,10 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
     variable
 - 29/04/2024
 03. trynpbg1.c, tryspnam.c: Fix compiler warnings
+- 30/04/2024
+04. sys-checkpwd.c: display in logs if userpw, shadow is enabled for encrypted
+    password lookup
+05. test-indimail-mta: updated test script
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.7-1.1%{?dist}
 Release 3.0.7-1.1 Start 02/01/2024 End 03/02/2024

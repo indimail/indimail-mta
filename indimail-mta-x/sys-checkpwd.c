@@ -1,5 +1,5 @@
 /*
- * $Id: sys-checkpwd.c,v 1.20 2023-07-13 02:43:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.21 2024-04-30 08:28:37+05:30 Cprogrammer Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
@@ -264,18 +264,40 @@ main(int argc, char **argv)
 		i = str_rchr(argv[0], '/');
 		ptr = get_authmethod(auth_method);
 		subprintf(subfderr,
-				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s\n",
+				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s",
 				argv[0][i] ? argv[0] + i + 1 : argv[0],
 				getuid(), login, challenge, response, stored ? stored : "null",
 				enable_cram ? "Yes" : "No", ptr);
+#ifdef HASUSERPW
+		subprintf(subfderr, ", USERPW=YES");
+#else
+		subprintf(subfderr, ", USERPW=NO");
+#endif
+#ifdef HASGETSPNAM
+		subprintf(subfderr, ", SHADOW=YES");
+#else
+		subprintf(subfderr, ", SHADOW=NO");
+#endif
+		subprintf(subfderr, "\n");
 		substdio_flush(subfderr);
 	} else
 	if (debug) {
 		i = str_rchr(argv[0], '/');
 		ptr = get_authmethod(auth_method);
-		subprintf(subfderr, "%s: uid=%u, login=%s, CRAM=%s AUTH=%s\n",
+		subprintf(subfderr, "%s: uid=%u, login=%s, CRAM=%s AUTH=%s",
 				argv[0][i] ? argv[0] + i + 1 : argv[0],
 				getuid(), login, enable_cram ? "Yes" : "No", ptr);
+#ifdef HASUSERPW
+		subprintf(subfderr, ", USERPW=YES");
+#else
+		subprintf(subfderr, ", USERPW=NO");
+#endif
+#ifdef HASGETSPNAM
+		subprintf(subfderr, ", SHADOW=YES");
+#else
+		subprintf(subfderr, ", SHADOW=NO");
+#endif
+		subprintf(subfderr, "\n");
 		substdio_flush(subfderr);
 	}
 	if (!stored)
@@ -304,7 +326,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.20 2023-07-13 02:43:57+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = "$Id: sys-checkpwd.c,v 1.21 2024-04-30 08:28:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -313,6 +335,9 @@ getversion_sys_checkpwd_c()
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.21  2024-04-30 08:28:37+05:30  Cprogrammer
+ * display in logs if userpw, shadow is enabled for encrypted password lookup
+ *
  * Revision 1.20  2023-07-13 02:43:57+05:30  Cprogrammer
  * replaced out() with subprintf()
  *
