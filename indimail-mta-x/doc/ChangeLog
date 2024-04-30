@@ -13,6 +13,8 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 04. sys-checkpwd.c: display in logs if userpw, shadow is enabled for encrypted
     password lookup
 05. test-indimail-mta: updated test script
+06. svctool: fixed setting of mysqld options and variables
+07. svctool: removed log-error and mysql-native-password
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.7-1.1%{?dist}
 Release 3.0.7-1.1 Start 02/01/2024 End 03/02/2024

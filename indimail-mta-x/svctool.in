@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.725 2024-03-05 11:44:11+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.726 2024-04-30 23:24:28+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.725 2024-03-05 11:44:11+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.726 2024-04-30 23:24:28+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5572,10 +5572,21 @@ else
 	echo "mysqld: No such File or directory" 1>&2
 	return 1
 fi
-name=`echo $1 | cut -d= -f1`
+name=$(echo $1 | cut -d= -f1)
+tmp=$(echo $1 | cut -d= -f2)
+if [ "$name" = "$tmp" ] ; then
+	tmp=""
+fi
 should_print=$2
-$mysqlPrefix/$mysqld --no-defaults --verbose --help 2>/dev/null |grep -w -- "$name" >/dev/null 2>&1
-if [ $? -eq 0 ] ; then
+if [ -n "$tmp" ] ; then
+	$mysqlPrefix/$mysqld --no-defaults --verbose --help 2>/dev/null | grep -- "$name=" >/dev/null 2>&1 || \
+		$mysqlPrefix/$mysqld --no-defaults --verbose --help 2>/dev/null | grep -- "$name\[=" >/dev/null 2>&1
+	ret=$?
+else
+	$mysqlPrefix/$mysqld --no-defaults --verbose --help 2>/dev/null | grep -- "$name " >/dev/null 2>&1
+	ret=$?
+fi
+if [ $ret -eq 0 ] ; then
 	if [ $should_print -ne 0 ] ; then
 		echo "$1 \\"
 	fi
@@ -5605,7 +5616,7 @@ else
 fi
 name=`echo $1 | cut -d= -f1`
 should_print=$2
-$mysqlPrefix/$mysqld --no-defaults --verbose --help 2>/dev/null |grep -w "^$name" > /dev/null 2>&1
+$mysqlPrefix/$mysqld --no-defaults --verbose --help 2>/dev/null | grep -w "^$name " > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
 	if [ $should_print -ne 0 ] ; then
 		echo "$1"
@@ -5958,9 +5969,10 @@ echo "exec $QmailBinPrefix/bin/softlimit -o 1024 -p 1024 \\"
 echo "$QmailBinPrefix/bin/setuidgid mysql \$MYSQL_BASE/$mysqld --defaults-file=$conf_file \\"
 echo "--port=$port --basedir=\$MYSQL_BASE \\"
 echo "--datadir=\$DATABASE/data \\"
-check_mysqld_variable --skip-mysqlx 1
+#check_mysqld_variable --mysql-native-password=ON 1 # this is deprecated
+check_mysqld_variable --mysqlx=OFF 1
 check_mysqld_variable --memlock 1
-#check_mysqld_variable --ssl 1
+check_mysqld_variable --ssl 1
 check_mysqld_variable --require-secure-transport 1
 # skip external locking is not shown in the list of variables
 echo "--skip-external-locking \\"
@@ -5972,22 +5984,30 @@ if [ $? -ne 0 ] ; then
 	check_mysqld_variable --explicit-defaults-for-timestamp 1
 fi
 check_mysqld_variable --binlog-expire-logs-auto-purge=ON 1
-check_mysqld_variable --binlog-expire-logs-seconds=864000 1
+if [ $? -ne 0 ] ; then
+	check_mysqld_variable --binlog-expire-logs-auto-purge 1
+	if [ $? -eq 0 ] ; then
+		check_mysqld_variable --binlog-expire-logs-seconds=864000 1
+	fi
+else
+	check_mysqld_variable --binlog-expire-logs-seconds=864000 1
+fi
+check_mysqld_variable --local-infile 1
 #
 # On Unix systems, if the --log-error option is not used,
 # the errors are written to stderr (usually, the command line).
 # Few mysql-community servers have a bug where if you don't have --log-error, you get
 # Error-log destination "stderr" is not a file. Can not restore error log messages from previous run.
-
-check_mysqld_variable --log-error=\$DATABASE/logs/mysql-error.log 1
+#
+# check_mysqld_variable --log-error=\$DATABASE/logs/mysql-error.log 1
 check_mysqld_variable --log-error-verbosity=2 1
 if [ $mariadb -eq 1 ] ; then
-check_mysqld_variable --log-warnings=2 1
+	check_mysqld_variable --log-warnings=2 1
 fi
 check_mysqld_variable --log-output=NONE 1
-check_mysqld_variable --general-log=1 1
+check_mysqld_variable --general-log 1
 check_mysqld_variable --general-log-file=\$DATABASE/logs/general.log 1
-check_mysqld_variable --slow-query-log=1 1
+check_mysqld_variable --slow-query-log 1
 check_mysqld_variable --slow-query-log-file=\$DATABASE/logs/slowquery.log 1
 check_mysqld_variable --log-queries-not-using-indexes 1
 echo "--pid-file=\$PIDFILE 2>&1"
@@ -6212,7 +6232,7 @@ else
 	check_mysqld_ini_variable "ssl" 1
 fi
 check_mysqld_ini_variable "require_secure_transport = ON" 1
-check_mysqld_ini_variable "mysqlx = 0" 1
+check_mysqld_ini_variable "mysqlx = OFF" 1
 check_mysqld_ini_variable "explicit_defaults_for_timestamp=TRUE" 1
 echo "user     = mysql"
 echo "socket   = $mysqlSocket"
@@ -6226,7 +6246,7 @@ echo
 echo "#Description: If set to 1, LOCAL is supported for LOAD DATA INFILE statements."
 echo "#If set to 0 (default), usually for security reasons, attempts to perform a"
 echo "#LOAD DATA LOCAL will fail with an error message."
-check_mysqld_ini_variable "local_infile = 1" 2
+check_mysqld_ini_variable "local_infile = TRUE" 1
 echo
 echo "[inlookup]"
 echo "#The number of seconds the server waits for activity on an"
