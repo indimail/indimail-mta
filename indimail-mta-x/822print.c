@@ -1,5 +1,8 @@
 /*
  * $Log: 822print.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2023-01-03 16:27:35+05:30  Cprogrammer
  * removed auto_sysconfdir.h dependency
  *
@@ -429,7 +432,7 @@ main()
 void
 getversion_822print_c()
 {
-	const char     *x = "$Id: 822print.c,v 1.9 2023-01-03 16:27:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822print.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

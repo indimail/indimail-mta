@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.46 2023-02-08 15:10:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -600,7 +600,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	const char     *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 15:10:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qread.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -608,6 +608,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.47  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.46  2023-02-08 15:10:42+05:30  Cprogrammer
  * auto determine dynamic queue using /dev/shm/qscheduler
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-01-04 00:15:14+05:30  Cprogrammer
  * removed __USE_GNU
  *
@@ -396,7 +399,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	const char     *x = "$Id: udplogger.c,v 1.7 2023-01-04 00:15:14+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: udplogger.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

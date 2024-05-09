@@ -1,5 +1,5 @@
 /*
- * $Id: queue_load.c,v 1.3 2022-04-23 00:14:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue_load.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "haslibrt.h"
 
@@ -104,7 +104,7 @@ queue_load(const char *argv0, int *qcount, int *qconf, double total_load[2], QDE
 void
 getversion_queue_load_c()
 {
-	const char     *x = "$Id: queue_load.c,v 1.3 2022-04-23 00:14:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: queue_load.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
@@ -112,6 +112,9 @@ getversion_queue_load_c()
 
 /*-
  * $Log: queue_load.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-04-23 00:14:18+05:30  Cprogrammer
  * initialize QDEF
  *

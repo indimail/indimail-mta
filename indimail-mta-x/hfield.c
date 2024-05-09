@@ -1,5 +1,8 @@
 /*
  * $Log: hfield.c,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2004-10-22 20:25:43+05:30  Cprogrammer
  * added RCS id
  *
@@ -138,7 +141,7 @@ hfield_skipname(const char *s, int len)
 void
 getversion_hfield_c()
 {
-	const char     *x = "$Id: hfield.c,v 1.4 2004-10-22 20:25:43+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: hfield.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

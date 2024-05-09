@@ -1,5 +1,8 @@
 /*
  * $Log: headerbody.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2004-10-22 20:25:42+05:30  Cprogrammer
  * added RCS id
  *
@@ -107,7 +110,7 @@ headerbody(substdio *ss, void (*dohf) (), void (*hdone) (), void (*dobl) ())
 void
 getversion_headerbody_c()
 {
-	const char     *x = "$Id: headerbody.c,v 1.3 2004-10-22 20:25:42+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: headerbody.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

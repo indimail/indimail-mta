@@ -1,5 +1,8 @@
 /*
  * $Log: run-cleanq.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2020-10-09 17:31:18+05:30  Cprogrammer
  * use SERVICEDIR define for qscanq path
  *
@@ -39,7 +42,7 @@ main()
 void
 getversion_run_cleanq_c()
 {
-	const char     *x = "$Id: run-cleanq.c,v 1.6 2020-10-09 17:31:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: run-cleanq.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: tablematch.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2023-01-03 17:45:14+05:30  Cprogrammer
  * Set hints.ai_socktype to SOCK_STREAM
  *
@@ -255,7 +258,7 @@ tablematch(const char *filename, const char *ip, const char *domain)
 void
 getversion_tablematch_c()
 {
-	const char     *x = "$Id: tablematch.c,v 1.10 2023-01-03 17:45:14+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tablematch.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

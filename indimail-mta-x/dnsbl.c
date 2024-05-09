@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2022-06-01 13:00:54+05:30  Cprogrammer
  * skip loopback address from dnsbl check
  *
@@ -185,6 +188,6 @@ plugin_init()
 void
 getversion_dnsbl_c()
 {
-	const char     *x = "$Id: dnsbl.c,v 1.7 2022-06-01 13:00:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsbl.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	x++;
 }

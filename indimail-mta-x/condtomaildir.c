@@ -1,5 +1,5 @@
 /*-
- * $Id: condtomaildir.c,v 1.8 2023-07-11 12:57:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: condtomaildir.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/stat.h>
@@ -102,13 +102,16 @@ main(int argc, char **argv)
 void
 getversion_condtomaildir_c()
 {
-	const char     *x = "$Id: condtomaildir.c,v 1.8 2023-07-11 12:57:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: condtomaildir.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: condtomaildir.c,v $
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-07-11 12:57:16+05:30  Cprogrammer
  * added -r reverse option to write to maildir when program fails instead of when program succeeds.
  *

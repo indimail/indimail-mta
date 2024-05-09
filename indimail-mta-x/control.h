@@ -1,5 +1,8 @@
 /*
  * $Log: control.h,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2022-04-20 23:11:13+05:30  Cprogrammer
  * added control_writefile(), control_readint() functions
  *

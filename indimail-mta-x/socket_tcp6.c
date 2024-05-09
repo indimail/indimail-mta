@@ -1,5 +1,8 @@
 /*
  * $Log: socket_tcp6.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2018-05-30 23:26:21+05:30  Cprogrammer
  * moved noipv6 variable to variables.c
  *
@@ -55,7 +58,7 @@ compat:
 void
 getversion_socket_tcp6_c()
 {
-	const char     *x = "$Id: socket_tcp6.c,v 1.3 2018-05-30 23:26:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: socket_tcp6.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

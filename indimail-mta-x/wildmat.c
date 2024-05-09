@@ -1,5 +1,5 @@
 /*-** wildmat.c.orig	Wed Dec  3 11:46:31 1997
- * $Revision: 1.7 $
+ * $Revision: 1.8 $
  * Do shell-style pattern matching for ?, \, [], and * characters.
  * Might not be robust in face of malformed patterns; e.g., "foo[a-"
  * could cause a segmentation violation. It is 8bit clean.
@@ -146,7 +146,7 @@ main()
 void
 getversion_wildmat_internal_c()
 {
-	const char     *x = "$Id: wildmat.c,v 1.7 2021-05-23 06:36:19+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: wildmat.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

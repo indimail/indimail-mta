@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.17  2022-11-24 08:49:54+05:30  Cprogrammer
  * converted function declaration to ansic
  *
@@ -379,7 +382,7 @@ timeoutconn4(int s, ip_addr *ipr, union v46addr *ipl, unsigned int port, int tim
 void
 getversion_timeoutconn_c()
 {
-	const char     *x = "$Id: timeoutconn.c,v 1.17 2022-11-24 08:49:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: timeoutconn.c,v 1.18 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

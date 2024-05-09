@@ -18,7 +18,7 @@
  * convert() function code taken and adaptred from coreutils/src/cat.c
  * By tege@sics.se, Torbjörn Granlund, advised by rms, Richard Stallman.
  *
- * $Id: qcat.c,v 1.11 2024-02-22 08:35:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qcat.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -236,13 +236,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	const char     *x = "$Id: qcat.c,v 1.11 2024-02-22 08:35:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qcat.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qcat.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2024-02-22 08:35:30+05:30  Cprogrammer
  * added options -v, -e, -t with code from coreutils/src/cat.c
  *

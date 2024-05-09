@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-showctl.c,v 1.18 2024-02-20 23:23:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-showctl.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -901,7 +901,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	const char     *x = "$Id: qmail-showctl.c,v 1.18 2024-02-20 23:23:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-showctl.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -909,6 +909,9 @@ getversion_qmail_showctl_c()
 
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2024-02-20 23:23:18+05:30  Cprogrammer
  * added code to show version information
  *

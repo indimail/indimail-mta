@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.h,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2024-01-23 01:23:45+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -18,7 +21,7 @@
 #include "buffer_defs.h"
 
 #ifndef	lint
-static const char sccsidstarttlsh[] = "$Id: starttls.h,v 1.3 2024-01-23 01:23:45+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsidstarttlsh[] = "$Id: starttls.h,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 #endif
 
 void            die_control(const char *, const char *);

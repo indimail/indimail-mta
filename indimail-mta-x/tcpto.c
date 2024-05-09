@@ -1,5 +1,8 @@
 /*
  * $Log: tcpto.c,v $
+ * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.16  2022-10-18 09:24:42+05:30  Cprogrammer
  * converted function proto to ansic
  *
@@ -265,7 +268,7 @@ tcpto_err(struct ip_mx *ix, int flagerr, int max_tolerance)
 void
 getversion_tcpto_c()
 {
-	const char     *x = "$Id: tcpto.c,v 1.16 2022-10-18 09:24:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tcpto.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;

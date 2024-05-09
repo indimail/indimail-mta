@@ -1,5 +1,8 @@
 /*
  * $Log: sortedtest.c,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2008-06-03 23:24:09+05:30  Cprogrammer
  * Initial revision
  *
@@ -41,7 +44,7 @@ main(int argc, char **argv)
 void
 getversion_sortedtest_c()
 {
-	const char     *x = "$Id: sortedtest.c,v 1.1 2008-06-03 23:24:09+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: sortedtest.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

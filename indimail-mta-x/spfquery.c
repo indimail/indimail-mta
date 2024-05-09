@@ -1,5 +1,5 @@
 /*
- * $Id: spfquery.c,v 1.10 2023-09-24 19:38:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spfquery.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -146,13 +146,16 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	const char     *x = "$Id: spfquery.c,v 1.10 2023-09-24 19:38:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spfquery.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: spfquery.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2023-09-24 19:38:38+05:30  Cprogrammer
  * exit with return value of spfcheck()
  *

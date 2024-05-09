@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.66 2023-10-28 07:29:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.67 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -240,7 +240,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	const char     *x = "$Id: qmulti.c,v 1.66 2023-10-28 07:29:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmulti.c,v 1.67 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
@@ -248,6 +248,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.67  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.66  2023-10-28 07:29:59+05:30  Cprogrammer
  * unset env variables queue_env, QUEUEPROG to prevent recursion
  * refactored code to handle qmail-queue consistently

@@ -1,5 +1,5 @@
 /*
- * $Id: sqlmatch.c,v 1.14 2022-10-09 23:02:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sqlmatch.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifdef USE_SQL
 #include "hasmysql.h"
@@ -393,13 +393,16 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	const char     *x = "$Id: sqlmatch.c,v 1.14 2022-10-09 23:02:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sqlmatch.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2022-10-09 23:02:04+05:30  Cprogrammer
  * renamed check_db() to query_db()
  * moved RCS log to bottom

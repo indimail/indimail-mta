@@ -1,5 +1,8 @@
 /*
  * $Log: iftocc.c,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -105,7 +108,7 @@ main(int argc, char **argv)
 void
 getversion_iftocc_c()
 {
-	const char     *x = "$Id: iftocc.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: iftocc.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

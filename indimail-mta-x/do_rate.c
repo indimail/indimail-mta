@@ -1,5 +1,8 @@
 /*
  * $Log: do_rate.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-04-13 07:48:09+05:30  Cprogrammer
  * return 2 if rate definition is missing or is invalid
  *
@@ -221,7 +224,7 @@ is_rate_ok(const char *_file, const char *_rate_exp, unsigned long *e, double *c
 void
 getversion_do_rate_c()
 {
-	const char     *x = "$Id: do_rate.c,v 1.3 2022-04-13 07:48:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: do_rate.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;

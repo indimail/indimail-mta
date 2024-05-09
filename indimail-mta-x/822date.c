@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2023-01-03 16:27:08+05:30  Cprogrammer
  * removed auto_sysconfdir.h dependency
  *
@@ -129,7 +132,7 @@ main(int argc, char **argv)
 void
 getversion_822date_c()
 {
-	const char     *x = "$Id: 822date.c,v 1.12 2023-01-03 16:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822date.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

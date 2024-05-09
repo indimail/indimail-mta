@@ -1,5 +1,8 @@
 /*
  * $Log: quote.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2022-10-30 18:01:15+05:30  Cprogrammer
  * converted to ansic prototype
  *
@@ -120,7 +123,7 @@ quote2(stralloc *sa, const char *s)
 void
 getversion_quote_c()
 {
-	const char     *x = "$Id: quote.c,v 1.5 2022-10-30 18:01:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: quote.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

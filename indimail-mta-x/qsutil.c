@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.25  2023-06-25 20:11:21+05:30  Cprogrammer
  * removed extra / from path
  *
@@ -327,7 +330,7 @@ logsafe(const char *s, const char *argv0)
 void
 getversion_qsutil_c()
 {
-	const char     *x = "$Id: qsutil.c,v 1.25 2023-06-25 20:11:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qsutil.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

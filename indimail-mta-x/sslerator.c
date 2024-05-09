@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.12 2023-08-20 18:50:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sslerator.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -434,13 +434,16 @@ main(int argc, char **argv)
 void
 getversion_sslerator_c()
 {
-	const char     *x = "$Id: sslerator.c,v 1.12 2023-08-20 18:50:17+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sslerator.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2023-08-20 18:50:17+05:30  Cprogrammer
  * let default ciphers be set by tls_init()
  * use TLS_CIPHER_LIST for tlsv1_2 and below, TLS_CIPHER_SUITE for tlsv1_3 and above

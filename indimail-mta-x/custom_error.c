@@ -1,5 +1,8 @@
 /*
  * $Log: custom_error.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-04-25 22:41:34+05:30  Cprogrammer
  * removed use of static variables as function is noreturn
  *

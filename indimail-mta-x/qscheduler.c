@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2024-02-28 18:03:16+05:30  Cprogrammer
  * removed unreachable statement
  *
@@ -1249,7 +1252,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	const char     *x = "$Id: qscheduler.c,v 1.10 2024-02-28 18:03:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscheduler.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

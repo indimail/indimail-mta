@@ -1,5 +1,5 @@
 /*
- * $Id: serialsmtp.c,v 1.10 2023-12-09 11:55:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: serialsmtp.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -382,13 +382,16 @@ main(int argc, char **argv)
 void
 getversion_serialsmtp_c()
 {
-	const char     *x = "$Id: serialsmtp.c,v 1.10 2023-12-09 11:55:44+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: serialsmtp.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2023-12-09 11:55:44+05:30  Cprogrammer
  * fix skip SMTP QUIT when three args are provided
  *

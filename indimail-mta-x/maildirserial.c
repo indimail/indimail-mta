@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2023-12-08 13:16:37+05:30  Cprogrammer
  * removed use of my_puts(), put() functions
  *
@@ -546,13 +549,16 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	const char     *x = "$Id: maildirserial.c,v 1.21 2023-12-08 13:16:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirserial.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2023-12-08 13:16:37+05:30  Cprogrammer
  * removed use of my_puts(), put() functions
  *

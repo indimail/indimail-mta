@@ -1,5 +1,8 @@
 /*
  * $Log: ipmeprint.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2021-06-12 17:58:05+05:30  Cprogrammer
  * removed chdir(auto_qmail)
  *
@@ -80,7 +83,7 @@ main()
 void
 getversion_ipmeprint_c()
 {
-	const char     *x = "$Id: ipmeprint.c,v 1.13 2021-06-12 17:58:05+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ipmeprint.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

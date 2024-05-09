@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.7 2024-01-23 01:20:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -659,6 +659,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2024-01-23 01:20:57+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

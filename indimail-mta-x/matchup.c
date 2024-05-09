@@ -1,5 +1,8 @@
 /*
  * $Log: matchup.c,v $
+ * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.16  2022-04-24 19:10:11+05:30  Cprogrammer
  * fixed field position of 'exiting' for slowq-send, qmta-send logs
  *
@@ -722,7 +725,7 @@ main()
 void
 getversion_matchup_c()
 {
-	const char     *x = "$Id: matchup.c,v 1.16 2022-04-24 19:10:11+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: matchup.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

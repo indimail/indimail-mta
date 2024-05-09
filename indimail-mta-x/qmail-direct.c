@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-direct.c,v 1.13 2023-12-25 09:40:23+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-direct.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -537,13 +537,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	const char     *x = "$Id: qmail-direct.c,v 1.13 2023-12-25 09:40:23+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-direct.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2023-12-25 09:40:23+05:30  Cprogrammer
  * made DEATH configurable
  *

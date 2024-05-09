@@ -1,5 +1,8 @@
 /*
  * $Log: custom_error.h,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2022-03-27 20:07:33+05:30  Cprogrammer
  * include extended error from errno if EXTENDED_ERROR env variable is defined
  *

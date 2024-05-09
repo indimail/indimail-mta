@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.82 2024-01-23 01:22:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.83 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -1300,7 +1300,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.82 2024-01-23 01:22:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.83 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1312,6 +1312,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.83  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.82  2024-01-23 01:22:34+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2022-10-31 09:09:26+05:30  Cprogrammer
  * look at last colon when parsing data from plain text files
  *
@@ -307,7 +310,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	const char     *x = "$Id: ctrlenv.c,v 1.5 2022-10-31 09:09:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ctrlenv.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

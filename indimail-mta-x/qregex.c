@@ -1,10 +1,10 @@
 /*
- * $Id: qregex.c,v 1.37 2023-11-03 05:21:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * qregex (v2)
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2024-05-07 12:51:49+05:30 $
+ * Modified: $Date: 2024-05-09 22:03:17+05:30 $
  * Revision: $Revision: 1.38 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
@@ -239,7 +239,7 @@ regex_match(stralloc *addr, stralloc *map, const char *errStr[])
 void
 getversion_qregex_c()
 {
-	const char     *x = "$Id: qregex.c,v 1.37 2023-11-03 05:21:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qregex.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
@@ -247,6 +247,9 @@ getversion_qregex_c()
 
 /*
  * $Log: qregex.c,v $
+ * Revision 1.38  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.37  2023-11-03 05:21:55+05:30  Cprogrammer
  * fix wildmat when pattern file is missing
  *

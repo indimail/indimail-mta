@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-01-03 16:36:02+05:30  Cprogrammer
  * removed auto_sysconfdir.h dependency
  *
@@ -627,7 +630,7 @@ main(int argc, char **argv)
 void
 getversion_new_inject_c()
 {
-	const char     *x = "$Id: new-inject.c,v 1.18 2023-01-03 16:36:02+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: new-inject.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

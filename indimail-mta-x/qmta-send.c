@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.31 2024-02-08 20:47:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.32 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -2773,7 +2773,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	const char     *x = "$Id: qmta-send.c,v 1.31 2024-02-08 20:47:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmta-send.c,v 1.32 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2781,6 +2781,9 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.32  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.31  2024-02-08 20:47:48+05:30  Cprogrammer
  * fixed multiplication result converted to larger type (codeql)
  *

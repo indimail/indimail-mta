@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.h,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2021-08-28 23:03:41+05:30  Cprogrammer
  * added dtype enum from variables.h
  *
@@ -12,7 +15,7 @@
 #include <stralloc.h>
 
 #ifndef	lint
-static const char sccsidgetdomainth[] = "$Id: getDomainToken.h,v 1.2 2021-08-28 23:03:41+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsidgetdomainth[] = "$Id: getDomainToken.h,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 #endif
 
 typedef enum {

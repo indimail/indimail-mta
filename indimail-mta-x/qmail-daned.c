@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-daned.c,v 1.34 2024-02-08 22:05:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.35 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
@@ -1257,7 +1257,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	const char     *x = "$Id: qmail-daned.c,v 1.34 2024-02-08 22:05:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-daned.c,v 1.35 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1269,6 +1269,9 @@ getversion_qmail_dane_c()
 
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.35  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.34  2024-02-08 22:05:36+05:30  Cprogrammer
  * fix potential use after free()
  *

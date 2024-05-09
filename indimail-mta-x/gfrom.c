@@ -1,5 +1,8 @@
 /*
  * $Log: gfrom.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2004-10-22 20:25:40+05:30  Cprogrammer
  * added RCS id
  *
@@ -26,7 +29,7 @@ gfrom(s, len)
 void
 getversion_gfrom_c()
 {
-	const char     *x = "$Id: gfrom.c,v 1.3 2004-10-22 20:25:40+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: gfrom.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

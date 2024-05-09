@@ -1,5 +1,5 @@
 /*
- * $Id: rd-remote.c,v 1.3 2023-12-06 17:01:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rd-remote.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -380,6 +380,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: rd-remote.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2023-12-06 17:01:44+05:30  Cprogrammer
  * added comment on report format for qmail-rspawn
  *

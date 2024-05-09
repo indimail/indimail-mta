@@ -1,5 +1,8 @@
 /*
  * $Log: indimail_stub.c,v $
+ * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.17  2023-04-01 19:26:44+05:30  Cprogrammer
  * refactored getlibObject function
  *
@@ -279,7 +282,7 @@ parse_email(const char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	const char     *x = "$Id: indimail_stub.c,v 1.17 2023-04-01 19:26:44+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: indimail_stub.c,v 1.18 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	if (x)
 		x++;
 }

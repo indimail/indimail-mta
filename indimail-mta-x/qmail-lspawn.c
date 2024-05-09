@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-lspawn.c,v 1.46 2023-12-20 11:13:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-lspawn.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -566,7 +566,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	const char     *x = "$Id: qmail-lspawn.c,v 1.46 2023-12-20 11:13:33+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-lspawn.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -574,6 +574,9 @@ getversion_qmail_lspawn_c()
 
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.47  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.46  2023-12-20 11:13:33+05:30  Cprogrammer
  * refactored code for setting PWSTRUCT environment variable
  *

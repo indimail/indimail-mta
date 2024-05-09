@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qfilter.c,v 1.24 2024-02-20 22:25:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qfilter.c,v 1.25 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -395,7 +395,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	const char     *x = "$Id: qmail-qfilter.c,v 1.24 2024-02-20 22:25:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qfilter.c,v 1.25 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
@@ -403,6 +403,9 @@ getversion_qmail_qfilter_c()
 
 /*
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.25  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.24  2024-02-20 22:25:37+05:30  Cprogrammer
  * added exit code 2 (blackhole) for compatibility with qmail-multi
  *

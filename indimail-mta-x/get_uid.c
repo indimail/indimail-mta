@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-02-14 07:49:06+05:30  Cprogrammer
  * added qcerts group ID for certificate group permission
  * renamed auto_uidc, auto_gidc to auto_uidv, auto_gidv
@@ -240,7 +243,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	const char     *x = "$Id: get_uid.c,v 1.5 2023-02-14 07:49:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: get_uid.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

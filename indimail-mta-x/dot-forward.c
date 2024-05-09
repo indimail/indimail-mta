@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.17  2024-01-23 01:24:06+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -519,7 +522,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	const char     *x = "$Id: dot-forward.c,v 1.17 2024-01-23 01:24:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dot-forward.c,v 1.18 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

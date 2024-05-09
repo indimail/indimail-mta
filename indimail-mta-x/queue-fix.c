@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.33 2024-02-11 23:22:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue-fix.c,v 1.34 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -1135,13 +1135,16 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	const char     *x = "$Id: queue-fix.c,v 1.33 2024-02-11 23:22:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: queue-fix.c,v 1.34 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.34  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.33  2024-02-11 23:22:35+05:30  Cprogrammer
  * added option -S to specify tcpto buffer size
  * added option -t to create trash directory for qmail-rm

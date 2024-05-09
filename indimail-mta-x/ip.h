@@ -1,5 +1,8 @@
 /*
  * $Log: ip.h,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2015-08-27 00:29:09+05:30  Cprogrammer
  * added ip6_fmt_flat(), ip6_fmt_exp() functions
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: whois.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-07-13 02:49:30+05:30  Cprogrammer
  * replaced logerr(), logerrf() with subprintf()
  *
@@ -239,7 +242,7 @@ whois_query(const char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	const char     *x = "$Id: whois.c,v 1.6 2023-07-13 02:49:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: whois.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

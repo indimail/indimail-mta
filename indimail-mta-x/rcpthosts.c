@@ -1,5 +1,8 @@
 /*
  * $Log: rcpthosts.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2022-12-24 22:33:27+05:30  Cprogrammer
  * converted function prototypes to ansic
  *
@@ -129,7 +132,7 @@ rcpthosts(const char *buf, int len, int nolocal)
 void
 getversion_rcpthosts_c()
 {
-	const char     *x = "$Id: rcpthosts.c,v 1.11 2022-12-24 22:33:27+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rcpthosts.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

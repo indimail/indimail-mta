@@ -1,5 +1,8 @@
 /*
  * $Log: leapsecs.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2016-01-28 15:06:55+05:30  Cprogrammer
  * removed dependency on home directory
  *
@@ -62,7 +65,7 @@ main()
 void
 getversion_leapsecs_c()
 {
-	const char     *x = "$Id: leapsecs.c,v 1.3 2016-01-28 15:06:55+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: leapsecs.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

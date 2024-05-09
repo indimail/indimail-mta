@@ -1,5 +1,8 @@
 /*
  * $Log: do_cleanq.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2004-10-22 20:24:35+05:30  Cprogrammer
  * added RCS id
  *
@@ -41,7 +44,7 @@ do_cleanq()
 void
 getversion_do_cleanq_c()
 {
-	const char     *x = "$Id: do_cleanq.c,v 1.2 2004-10-22 20:24:35+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: do_cleanq.c,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

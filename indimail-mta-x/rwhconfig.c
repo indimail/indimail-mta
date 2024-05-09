@@ -1,5 +1,8 @@
 /*
  * $Log: rwhconfig.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2021-06-12 19:30:49+05:30  Cprogrammer
  * removed #include "auto_qmail.h"
  *
@@ -129,7 +132,7 @@ nomem:
 void
 getversion_rwhconfig_c()
 {
-	const char     *x = "$Id: rwhconfig.c,v 1.6 2021-06-12 19:30:49+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rwhconfig.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

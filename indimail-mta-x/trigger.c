@@ -1,5 +1,8 @@
 /*
  * $Log: trigger.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-01-30 09:44:59+05:30  Cprogrammer
  * added trigger_clear() function to remove lock/trigger from watched fds for select()
  *
@@ -65,7 +68,7 @@ trigger_clear(int *nfds, fd_set *rfds)
 void
 getversion_trigger_c()
 {
-	const char     *x = "$Id: trigger.c,v 1.3 2022-01-30 09:44:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: trigger.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

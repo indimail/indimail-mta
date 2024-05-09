@@ -1,5 +1,5 @@
 /*
- * $Id: mailfilter.c,v 1.5 2024-02-20 22:18:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mailfilter.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -82,7 +82,7 @@ mailfilter(int argc, char **argv, char *filterargs)
 void
 getversion_mailfilter_c()
 {
-	const char     *x = "$Id: mailfilter.c,v 1.5 2024-02-20 22:18:10+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mailfilter.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmktempfileh;
 	x++;
@@ -91,6 +91,9 @@ getversion_mailfilter_c()
 
 /*
  * $Log: mailfilter.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2024-02-20 22:18:10+05:30  Cprogrammer
  * added exit code 99 for compatibility with qmail-qfilter blackhole
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: etrn.c,v 1.21 2024-02-08 20:37:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: etrn.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <ctype.h>
 #include <sys/types.h>
@@ -142,7 +142,7 @@ etrn_queue(const char *arg, const char *remoteip)
 void
 getversion_etrn_c()
 {
-	const char     *x = "$Id: etrn.c,v 1.21 2024-02-08 20:37:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: etrn.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -150,6 +150,9 @@ getversion_etrn_c()
 
 /*
  * $Log: etrn.c,v $
+ * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2024-02-08 20:37:08+05:30  Cprogrammer
  * fixed arguments to die_control()
  *

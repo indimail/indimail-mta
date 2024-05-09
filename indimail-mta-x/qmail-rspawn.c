@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rspawn.c,v 1.44 2022-03-05 13:34:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-rspawn.c,v 1.45 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fd.h>
@@ -251,7 +251,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	const char     *x = "$Id: qmail-rspawn.c,v 1.44 2022-03-05 13:34:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-rspawn.c,v 1.45 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -259,6 +259,9 @@ getversion_qmail_rspawn_c()
 
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.45  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.44  2022-03-05 13:34:54+05:30  Cprogrammer
  * use auto_prefix/sbin for qmail-remote path
  *

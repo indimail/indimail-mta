@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2023-10-11 14:51:10+05:30  Cprogrammer
  * added HIDE_HOST environment variable
  *
@@ -275,7 +278,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	const char     *x = "$Id: qmail-smtpd.c,v 1.14 2023-10-11 14:51:10+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-smtpd.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.h,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2014-01-29 14:06:10+05:30  Cprogrammer
  * made domainqueue file configurable through env variable DOMAINQUEUE
  *

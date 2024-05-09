@@ -1,5 +1,8 @@
 /*
  * $Log: rpmattr.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2021-06-27 11:36:54+05:30  Cprogrammer
  * removed call to uidinit
  *
@@ -122,6 +125,6 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	const char     *x = "$Id: rpmattr.c,v 1.7 2021-06-27 11:36:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rpmattr.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	x++;
 }

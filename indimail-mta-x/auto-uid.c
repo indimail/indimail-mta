@@ -1,5 +1,8 @@
 /*
  * $Log: auto-uid.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-07-13 02:41:56+05:30  Cprogrammer
  * replaced outs() with subprintf
  *
@@ -69,6 +72,6 @@ main(int argc, char **argv)
 void
 getversion_auto_uid_c()
 {
-	const char     *x = "$Id: auto-uid.c,v 1.11 2023-07-13 02:41:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: auto-uid.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	x++;
 }

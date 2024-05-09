@@ -1,5 +1,8 @@
 /*
  * $Log: remoteinfo.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2008-07-15 19:53:22+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -189,7 +192,7 @@ remoteinfo_get(saremote, salocal, timeout)
 void
 getversion_remoteinfo_c()
 {
-	const char     *x = "$Id: remoteinfo.c,v 1.7 2008-07-15 19:53:22+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: remoteinfo.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

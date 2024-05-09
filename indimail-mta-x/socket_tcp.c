@@ -1,5 +1,8 @@
 /*
  * $Log: socket_tcp.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2005-06-15 22:35:58+05:30  Cprogrammer
  * added RCS version information
  *
@@ -24,7 +27,7 @@ socket_tcp4(void)
 void
 getversion_socket_tcp4_c()
 {
-	const char     *x = "$Id: socket_tcp.c,v 1.2 2005-06-15 22:35:58+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: socket_tcp.c,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

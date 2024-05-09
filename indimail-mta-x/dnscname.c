@@ -1,5 +1,8 @@
 /*
  * $Log: dnscname.c,v $
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-09-23 21:21:03+05:30  Cprogrammer
  * use ansic proto for functions
  *
@@ -45,7 +48,7 @@ main(int argc, char **argv)
 void
 getversion_dnscname_c()
 {
-	const char     *x = "$Id: dnscname.c,v 1.8 2023-09-23 21:21:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnscname.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

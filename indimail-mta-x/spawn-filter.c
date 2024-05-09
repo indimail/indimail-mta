@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.89 2024-02-07 23:21:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.90 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -689,7 +689,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	const char     *x = "$Id: spawn-filter.c,v 1.89 2024-02-07 23:21:22+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spawn-filter.c,v 1.90 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -700,6 +700,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.90  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.89  2024-02-07 23:21:22+05:30  Cprogrammer
  * updated error messages
  * exit 100 on wrong usage

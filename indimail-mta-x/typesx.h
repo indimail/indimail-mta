@@ -1,5 +1,8 @@
 /*
  * $Log: typesx.h,v $
+ * Revision 2.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 2.2  2011-12-05 15:10:27+05:30  Cprogrammer
  * added RCS id
  *
@@ -8,7 +11,7 @@
 #define MISC_TYPES_H
 
 #ifndef	lint
-static const char sccsidtypesxh[] = "$Id: typesx.h,v 2.2 2011-12-05 15:10:27+05:30 Cprogrammer Stab mbhangui $";
+static const char sccsidtypesxh[] = "$Id: typesx.h,v 2.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #include <inttypes.h>

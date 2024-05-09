@@ -1,5 +1,8 @@
 /*
  * $Log: inewaliases.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -380,7 +383,7 @@ main()
 void
 getversion_newaliases_c()
 {
-	const char     *x = "$Id: inewaliases.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: inewaliases.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

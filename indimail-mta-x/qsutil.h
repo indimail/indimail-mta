@@ -1,5 +1,8 @@
 /*
  * $Log: qsutil.h,v $
+ * Revision 1.24  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.23  2023-01-15 12:38:42+05:30  Cprogrammer
  * use slog() function with varargs to replace all log functions
  *

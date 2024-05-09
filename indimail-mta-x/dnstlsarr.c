@@ -1,5 +1,5 @@
 /*
- * $Id: dnstlsarr.c,v 1.18 2023-07-13 02:39:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dnstlsarr.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "substdio.h"
 #include "subfd.h"
@@ -228,7 +228,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	const char     *x = "$Id: dnstlsarr.c,v 1.18 2023-07-13 02:39:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnstlsarr.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -238,6 +238,9 @@ getversion_dnstlsarr_c()
 
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-07-13 02:39:46+05:30  Cprogrammer
  * refactored code to reduce loc
  *

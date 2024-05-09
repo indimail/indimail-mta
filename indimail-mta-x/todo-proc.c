@@ -1,5 +1,5 @@
 /*
- * $Id: todo-proc.c,v 1.67 2023-12-23 23:56:26+05:30 Cprogrammer Exp mbhangui $
+ * $Id: todo-proc.c,v 1.68 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -1431,7 +1431,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	const char     *x = "$Id: todo-proc.c,v 1.67 2023-12-23 23:56:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: todo-proc.c,v 1.68 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1439,6 +1439,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
+ * Revision 1.68  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.67  2023-12-23 23:56:26+05:30  Cprogrammer
  * handle qmail-clean termination
  *

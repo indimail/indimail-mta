@@ -1,5 +1,8 @@
 /*
  * $Log: dnsblcheck.c,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2022-06-01 13:02:09+05:30  Cprogrammer
  * Initial revision
  *
@@ -144,7 +147,7 @@ main(int argc, char **argv)
 void
 getversion_dnsblcheck_c()
 {
-	const char     *x = "$Id: dnsblcheck.c,v 1.1 2022-06-01 13:02:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsblcheck.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

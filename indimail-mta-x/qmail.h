@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.h,v 1.12 2024-01-23 01:22:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.h,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifndef QMAIL_H
 #define QMAIL_H
@@ -101,6 +101,9 @@ unsigned long   qmail_qp(struct qmail *);
 
 /*
  * $Log: qmail.h,v $
+ * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2024-01-23 01:22:42+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

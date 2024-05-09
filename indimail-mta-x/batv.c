@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2022-10-13 23:58:43+05:30  Cprogrammer
  * added link to batv draft used by indimail-mta
  *
@@ -348,7 +351,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	const char     *x = "$Id: batv.c,v 1.10 2022-10-13 23:58:43+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: batv.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-newu.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2023-02-12 13:28:28+05:30  Cprogrammer
  * refactored code
  *
@@ -197,7 +200,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	const char     *x = "$Id: qmail-newu.c,v 1.13 2023-02-12 13:28:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-newu.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

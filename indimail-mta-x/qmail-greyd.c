@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-greyd.c,v 1.37 2024-02-08 22:02:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-greyd.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <stdlib.h>
 #include <time.h>
@@ -1433,13 +1433,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	const char     *x = "$Id: qmail-greyd.c,v 1.37 2024-02-08 22:02:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-greyd.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.38  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.37  2024-02-08 22:02:15+05:30  Cprogrammer
  * fix potential use after free()
  *

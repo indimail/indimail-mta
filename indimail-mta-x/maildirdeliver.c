@@ -1,5 +1,8 @@
 /*
  * $Log: maildirdeliver.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2023-09-13 19:36:53+05:30  Cprogrammer
  * BUG. Remove NULL character appended to rpline, dtline
  *
@@ -79,7 +82,7 @@ main(int argc, char **argv)
 void
 getversion_maildirdeliver_c()
 {
-	const char     *x = "$Id: maildirdeliver.c,v 1.3 2023-09-13 19:36:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirdeliver.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

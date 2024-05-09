@@ -1,5 +1,8 @@
 /*
  * $Log: report.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2024-02-07 22:58:37+05:30  Cprogrammer
  * modified error messages
  *
@@ -122,7 +125,7 @@ report(int errCode, const char *s1, const char *s2, const char *s3, const char *
 void
 getversion_report_c()
 {
-	const char     *x = "$Id: report.c,v 1.7 2024-02-07 22:58:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: report.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;

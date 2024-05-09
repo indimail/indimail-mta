@@ -1,5 +1,8 @@
 /*
  * $Log: qbase64.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2024-01-23 01:22:20+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -106,7 +109,7 @@ main(int argc, char **argv)
 void
 getversion_qbase64_c()
 {
-	const char     *x = "$Id: qbase64.c,v 1.9 2024-01-23 01:22:20+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qbase64.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

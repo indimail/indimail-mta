@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.24  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.23  2024-02-12 19:37:46+05:30  Cprogrammer
  * replace chown with fchown
  *
@@ -636,7 +639,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	const char     *x = "$Id: drate.c,v 1.23 2024-02-12 19:37:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: drate.c,v 1.24 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;

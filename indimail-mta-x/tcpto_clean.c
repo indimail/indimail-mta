@@ -1,5 +1,8 @@
 /*
  * $Log: tcpto_clean.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2005-06-29 20:54:53+05:30  Cprogrammer
  * size of buffer changed to TCPTO_BUFSIZ
  *
@@ -42,7 +45,7 @@ tcpto_clean()					/*- running from queue/mess */
 void
 getversion_tcpto_clean_c()
 {
-	const char     *x = "$Id: tcpto_clean.c,v 1.7 2005-06-29 20:54:53+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: tcpto_clean.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

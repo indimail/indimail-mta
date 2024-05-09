@@ -1,5 +1,8 @@
 /*
  * $Log: set_environment.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2023-05-31 12:06:05+05:30  Cprogrammer
  * skip local env variable processing of .defaultqueue if SKIP_LOCAL_ENVIRONMENT is set
  *
@@ -91,7 +94,7 @@ set_environment(const char *warn, const char *fatal, int root_rc)
 void
 getversion_set_environment_c()
 {
-	const char     *x = "$Id: set_environment.c,v 1.9 2023-05-31 12:06:05+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: set_environment.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

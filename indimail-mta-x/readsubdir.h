@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.h,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2022-01-30 09:38:08+05:30  Cprogrammer
  * allow configurable big/small todo/intd
  *

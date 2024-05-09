@@ -1,5 +1,8 @@
 /*
  * $Log: setqload.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-08-14 21:58:24+05:30  Cprogrammer
  * fix compilation warning if HASLIBRT is undefined
  *
@@ -166,7 +169,7 @@ main(argc, argv)
 void
 getversion_setqload_c()
 {
-	const char     *x = "$Id: setqload.c,v 1.3 2022-08-14 21:58:24+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setqload.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 #ifdef HASLIBRT
 	x = sccsidevalh;

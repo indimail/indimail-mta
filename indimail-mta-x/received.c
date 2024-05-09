@@ -1,5 +1,5 @@
 /*
- * $Id: received.c,v 1.9 2024-02-05 09:32:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: received.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -87,13 +87,16 @@ received(struct qmail *qqt, const char *program, const char *protocol,
 void
 getversion_received_c()
 {
-	const char     *x = "$Id: received.c,v 1.9 2024-02-05 09:32:58+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: received.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: received.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2024-02-05 09:32:58+05:30  Cprogrammer
  * added parameter hide to hide IP, Host in received headers
  *

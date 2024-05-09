@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2024-01-23 01:22:15+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -420,7 +423,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.14 $\n");
+			"X-Mailer: qarf $Revision: 1.15 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -464,7 +467,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.14 2024-01-23 01:22:15+05:30 Cprogrammer Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -524,7 +527,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	const char     *x = "$Id: qarf.c,v 1.14 2024-01-23 01:22:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qarf.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

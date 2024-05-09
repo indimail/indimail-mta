@@ -1,5 +1,8 @@
 /*
  * $Log: variables.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2018-05-30 23:26:40+05:30  Cprogrammer
  * moved noipv6 variable to variables.c
  *
@@ -27,7 +30,7 @@ int             noipv6 = 1;
 void
 getversion_variables_c()
 {
-	const char     *x = "$Id: variables.c,v 1.5 2018-05-30 23:26:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: variables.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: dnsptr.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2023-09-23 21:21:55+05:30  Cprogrammer
  * use ansic proto for functions
  *
@@ -67,7 +70,7 @@ main(int argc, char **argv)
 void
 getversion_dnsptr_c()
 {
-	const char     *x = "$Id: dnsptr.c,v 1.10 2023-09-23 21:21:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsptr.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

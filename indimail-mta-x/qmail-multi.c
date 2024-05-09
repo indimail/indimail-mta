@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-multi.c,v 1.4 2023-12-25 09:30:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-multi.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -43,7 +43,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_multi_c()
 {
-	const char     *x = "$Id: qmail-multi.c,v 1.4 2023-12-25 09:30:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-multi.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
@@ -51,6 +51,9 @@ getversion_qmail_multi_c()
 
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-12-25 09:30:34+05:30  Cprogrammer
  * made DEATH configurable
  *

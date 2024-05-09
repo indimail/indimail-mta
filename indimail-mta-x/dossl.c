@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.5 2023-08-28 22:24:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -730,13 +730,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	const char     *x = "$Id: dossl.c,v 1.5 2023-08-28 22:24:25+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dossl.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-08-28 22:24:25+05:30  Cprogrammer
  * return 2 for tls connection failure
  *

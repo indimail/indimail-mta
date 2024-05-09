@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2023-02-08 11:19:07+05:30  Cprogrammer
  * fixed format string for subprintf
  *
@@ -73,7 +76,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	const char     *z = "$Id: nowutc.c,v 1.10 2023-02-08 11:19:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *z = "$Id: nowutc.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	z++;
 }

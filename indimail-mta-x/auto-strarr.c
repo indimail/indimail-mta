@@ -1,5 +1,8 @@
 /*
  * $Log: auto-strarr.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-11-24 13:43:59+05:30  Cprogrammer
  * removed exit.h
  *

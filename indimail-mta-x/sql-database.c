@@ -1,5 +1,8 @@
 /*
  * $Log: sql-database.c,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-02-14 09:19:46+05:30  Cprogrammer
  * renamed auto_uidv to auto_uidi, auto_gidv to auto_gidi
  *
@@ -331,7 +334,7 @@ main(int argc, char **argv)
 void
 getversion_sql_database_c()
 {
-	const char     *x = "$Id: sql-database.c,v 1.4 2023-02-14 09:19:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sql-database.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

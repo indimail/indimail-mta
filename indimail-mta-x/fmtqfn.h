@@ -1,5 +1,8 @@
 /*
  * $Log: fmtqfn.h,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2021-06-27 10:44:51+05:30  Cprogrammer
  * moved conf_split variable to fmtqfn.c
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.h,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-09-05 20:59:42+05:30  Cprogrammer
  * moved matchregex error codes to libqmail/base/matchregex.h
  *

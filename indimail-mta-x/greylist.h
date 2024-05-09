@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.h,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2009-08-22 19:00:29+05:30  Cprogrammer
  * Initial revision based on code by Richard Andrews
  *

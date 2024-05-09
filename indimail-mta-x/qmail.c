@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.37 2023-11-05 05:13:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -312,7 +312,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	const char     *x = "$Id: qmail.c,v 1.37 2023-11-05 05:13:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -320,6 +320,9 @@ getversion_qmail_c()
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.38  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.37  2023-11-05 05:13:56+05:30  Cprogrammer
  * fixed NULLQEUEUE
  *

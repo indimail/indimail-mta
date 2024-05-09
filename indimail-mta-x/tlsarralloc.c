@@ -1,5 +1,8 @@
 /*
  * $Log: tlsarralloc.c,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2020-11-22 23:12:18+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -23,7 +26,7 @@ GEN_ALLOC_append(tlsarralloc,struct tlsa_rdata,rr,len,a,10,tlsarralloc_readyplus
 void
 getversion_tlsarralloc_c()
 {
-	const char     *x = "$Id: tlsarralloc.c,v 1.4 2020-11-22 23:12:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tlsarralloc.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

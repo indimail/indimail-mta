@@ -1,5 +1,8 @@
 /*
  * $Log: tlsacheck.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2018-05-27 22:14:32+05:30  mbhangui
  * added defintions for qmail-daned modes
  *
@@ -262,7 +265,7 @@ tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
 void
 getversion_tlsacheck_c()
 {
-	const char     *x = "$Id: tlsacheck.c,v 1.3 2018-05-27 22:14:32+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tlsacheck.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

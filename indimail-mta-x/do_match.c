@@ -1,5 +1,5 @@
 /*
- * $Id: do_match.c,v 1.1 2024-02-19 20:27:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: do_match.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 
 #include <matchregex.h>
@@ -41,7 +41,7 @@ do_match(int use_regex, const char *text, const char *regex, const char *errStr[
 void
 getversion_do_match_c()
 {
-	const char     *x = "$Id: do_match.c,v 1.1 2024-02-19 20:27:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: do_match.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	x = sccsidwildmath;
 	x++;
 }

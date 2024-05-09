@@ -1,5 +1,8 @@
 /*
  * $Log: strsalloc.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2020-11-22 23:12:15+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -27,7 +30,7 @@ GEN_ALLOC_append(strsalloc, stralloc, sa, len, a, 10, strsalloc_readyplus, strsa
 void
 getversion_strsalloc_c()
 {
-	const char     *x = "$Id: strsalloc.c,v 1.5 2020-11-22 23:12:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: strsalloc.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.16  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.15  2023-12-20 11:14:46+05:30  Cprogrammer
  * added -r option to set mailx return path
  *
@@ -278,7 +281,7 @@ main(int argc, char **argv)
 void
 getversion_sendmail_c()
 {
-	const char     *x = "$Id: sendmail.c,v 1.15 2023-12-20 11:14:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sendmail.c,v 1.16 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

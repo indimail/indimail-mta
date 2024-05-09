@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.323 2024-02-23 21:39:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.324 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -158,7 +158,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static c_char  *revision = "$Revision: 1.323 $";
+static c_char  *revision = "$Revision: 1.324 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -7366,6 +7366,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.324  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.323  2024-02-23 21:39:32+05:30  Cprogrammer
  * sanitized variable names for badmailfrom, badrcptto, blackholedrcpt, blackholedsender, spamignore
  * removed blachole*pattern, spamignorepattern
@@ -7795,7 +7798,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.323 2024-02-23 21:39:32+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.324 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 	return revision + 11;

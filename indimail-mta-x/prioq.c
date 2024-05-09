@@ -1,5 +1,8 @@
 /*
  * $Log: prioq.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2021-06-03 18:03:39+05:30  Cprogrammer
  * allow prioq to be ordered from max to min
  *
@@ -127,7 +130,7 @@ prioq_del(prioq *pq)
 void
 getversion_prioq_c()
 {
-	const char     *x = "$Id: prioq.c,v 1.7 2021-06-03 18:03:39+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: prioq.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

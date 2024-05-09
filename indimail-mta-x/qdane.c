@@ -1,5 +1,8 @@
 /*
  * $Log: qdane.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2018-05-27 22:15:49+05:30  mbhangui
  * added defintions for qmail-daned modes
  *
@@ -165,7 +168,7 @@ main(int argc, char **argv)
 void
 getversion_qdane_c()
 {
-	const char     *x = "$Id: qdane.c,v 1.3 2018-05-27 22:15:49+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qdane.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

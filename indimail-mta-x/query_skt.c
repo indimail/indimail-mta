@@ -1,5 +1,8 @@
 /*
  * $Log: query_skt.c,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2018-04-25 22:49:59+05:30  Cprogrammer
  * Initial revision
  *
@@ -32,7 +35,7 @@ query_skt(int fd, const char *ipaddr, stralloc *queryp, char *responsep,
 void
 getversion_query_skt_c()
 {
-	const char     *x = "$Id: query_skt.c,v 1.1 2018-04-25 22:49:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: query_skt.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

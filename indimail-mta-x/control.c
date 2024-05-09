@@ -1,5 +1,5 @@
 /*
- * $Id: control.c,v 1.23 2022-10-12 16:44:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: control.c,v 1.24 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <open.h>
@@ -545,7 +545,7 @@ control_readcmd(stralloc *sa, const char *fn)
 void
 getversion_control_c()
 {
-	const char     *x = "$Id: control.c,v 1.23 2022-10-12 16:44:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: control.c,v 1.24 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;
@@ -555,6 +555,9 @@ getversion_control_c()
 
 /*
  * $Log: control.c,v $
+ * Revision 1.24  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.23  2022-10-12 16:44:09+05:30  Cprogrammer
  * enabled control_readcmd() which translates output of command as a control file
  *

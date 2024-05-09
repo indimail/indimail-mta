@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.94 2024-02-05 09:38:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.95 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1193,7 +1193,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	const char     *x = "$Id: qmail-queue.c,v 1.94 2024-02-05 09:38:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-queue.c,v 1.95 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1201,6 +1201,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.95  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.94  2024-02-05 09:38:54+05:30  Cprogrammer
  * fixed date field in Received header
  *

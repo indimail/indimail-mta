@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.172 2024-01-24 00:54:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.173 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -3741,13 +3741,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.172 2024-01-24 00:54:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.173 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.173  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.172  2024-01-24 00:54:08+05:30  Cprogrammer
  * added comment on avoiding buffer to buffer copy
  *

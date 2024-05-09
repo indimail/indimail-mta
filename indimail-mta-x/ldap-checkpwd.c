@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2023-07-13 02:43:28+05:30  Cprogrammer
  * replaced out() with subprintf()
  *
@@ -565,7 +568,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	const char     *x = "$Id: ldap-checkpwd.c,v 1.13 2023-07-13 02:43:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ldap-checkpwd.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

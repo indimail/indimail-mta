@@ -1,5 +1,8 @@
 /*
  * $Log: fmtqfn.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2021-07-09 13:21:18+05:30  Cprogrammer
  * initialize conf_split variable
  *
@@ -58,7 +61,7 @@ fmtqfn(char *s, const char *dirslash, unsigned long id, int flagsplit)
 void
 getversion_fmtqfn_c()
 {
-	const char     *x = "$Id: fmtqfn.c,v 1.6 2021-07-09 13:21:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: fmtqfn.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

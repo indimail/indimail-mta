@@ -1,5 +1,5 @@
 /*
- * $Id: maildir.c,v 1.8 2023-12-23 09:13:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: maildir.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -120,13 +120,16 @@ maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 void
 getversion_maildir_c()
 {
-	const char     *x = "$Id: maildir.c,v 1.8 2023-12-23 09:13:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildir.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: maildir.c,v $
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-12-23 09:13:28+05:30  Cprogrammer
  * skip non-regular to prevent breaking maildirserial
  *

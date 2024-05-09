@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rm.c,v 1.26 2024-02-12 20:57:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-rm.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * COPYRIGHT INFORMATION - DO NOT REMOVE
  *
@@ -1026,13 +1026,16 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	const char     *x = "$Id: qmail-rm.c,v 1.26 2024-02-12 20:57:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-rm.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.27  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.26  2024-02-12 20:57:47+05:30  Cprogrammer
  * use unlinkat() if available instead of unlink()
  * use renameat() if available instead of rename()

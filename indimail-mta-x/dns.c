@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.39 2022-12-21 12:21:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns.c,v 1.40 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -1067,13 +1067,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	const char     *x = "$Id: dns.c,v 1.39 2022-12-21 12:21:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns.c,v 1.40 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.40  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.39  2022-12-21 12:21:46+05:30  Cprogrammer
  * renamed dns_txtplus(), dns_ptrplus() as dns_txt(), dns_ptr()
  *

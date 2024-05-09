@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-sql.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-02-14 09:16:35+05:30  Cprogrammer
  * renamed auto_uidv, auto_gidv to auto_uidi, auto_gidi
  *
@@ -276,7 +279,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	const char     *x = "$Id: qmail-sql.c,v 1.11 2023-02-14 09:16:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-sql.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

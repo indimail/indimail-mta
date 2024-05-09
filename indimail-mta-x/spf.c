@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.25 2023-09-24 19:35:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spf.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
@@ -1378,13 +1378,16 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	const char     *x = "$Id: spf.c,v 1.25 2023-09-24 19:35:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spf.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: spf.c,v $
+ * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.25  2023-09-24 19:35:55+05:30  Cprogrammer
  * fix for empty spf explanation
  *

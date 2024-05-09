@@ -1,5 +1,8 @@
 /*
  * $Log: cdb-database.c,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2023-09-11 09:04:29+05:30  Cprogrammer
  * allow comments in input file
  *
@@ -123,7 +126,7 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	const char     *x = "$Id: cdb-database.c,v 1.4 2023-09-11 09:04:29+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdb-database.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

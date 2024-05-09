@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-inject.c,v 1.51 2023-12-23 00:17:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-inject.c,v 1.52 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1076,13 +1076,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	const char     *x = "$Id: qmail-inject.c,v 1.51 2023-12-23 00:17:13+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-inject.c,v 1.52 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.52  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.51  2023-12-23 00:17:13+05:30  Cprogrammer
  * prevent SIGSEGV in do_domainqueue if recip is null
  *

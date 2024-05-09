@@ -1,5 +1,8 @@
 /*
  * $Log: strset.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-05-11 10:58:31+05:30  Cprogrammer
  * fixed shadowing of global variables by local variables
  *
@@ -154,7 +157,7 @@ strset_add(strset *set, const char *s)
 void
 getversion_strset_c()
 {
-	const char     *x = "$Id: strset.c,v 1.3 2020-05-11 10:58:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: strset.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

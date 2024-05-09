@@ -1,5 +1,8 @@
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2020-09-16 19:00:57+05:30  Cprogrammer
  * freeBSD fix
  *
@@ -159,7 +162,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	const char     *x = "$Id: maildirsize.c,v 1.12 2020-09-16 19:00:57+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirsize.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

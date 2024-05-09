@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.42 2024-02-08 19:36:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.43 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -1250,7 +1250,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	const char     *x = "$Id: autoresponder.c,v 1.42 2024-02-08 19:36:51+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: autoresponder.c,v 1.43 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 	x = sccsidmktempfileh;
@@ -1259,6 +1259,9 @@ getversion_qmail_autoresponder_c()
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.43  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.42  2024-02-08 19:36:51+05:30  Cprogrammer
  * fixed compiler warnings if libsrs2 is missing
  *

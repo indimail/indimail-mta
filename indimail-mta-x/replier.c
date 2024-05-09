@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2022-10-17 19:45:16+05:30  Cprogrammer
  * collapsed multiple stralloc lines
  *
@@ -283,7 +286,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	const char     *x = "$Id: replier.c,v 1.13 2022-10-17 19:45:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: replier.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

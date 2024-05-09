@@ -1,5 +1,8 @@
 /*
  * $Log: getqueue.h,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2022-03-30 21:08:56+05:30  Cprogrammer
  * removed time argument
  *

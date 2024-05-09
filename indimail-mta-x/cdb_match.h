@@ -1,10 +1,13 @@
 /*
  * $Log: cdb_match.h,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2022-10-30 20:17:42+05:30  Cprogrammer
  * Initial revision
  *
  *
- * $Id: cdb_match.h,v 1.1 2022-10-30 20:17:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cdb_match.h,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifndef _CDB_MATCHADDR_H
 #define _CDB_MATCHADDR_H

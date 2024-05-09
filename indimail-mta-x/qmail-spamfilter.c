@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-spamfilter.c,v 1.10 2024-01-07 01:44:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-spamfilter.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -235,7 +235,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	const char     *x = "$Id: qmail-spamfilter.c,v 1.10 2024-01-07 01:44:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-spamfilter.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x = sccsidmktempfileh;
@@ -245,6 +245,9 @@ getversion_qmail_spamfilter_c()
 
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2024-01-07 01:44:35+05:30  Cprogrammer
  * bypass antispam filter when RELAYCLIENT and RELAYCLIENT_NOSPAMFILTER is set
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mini-smtpd.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -716,13 +716,16 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	const char     *x = "$Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mini-smtpd.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2024-01-23 01:21:56+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

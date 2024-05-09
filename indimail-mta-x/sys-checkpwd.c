@@ -1,5 +1,5 @@
 /*
- * $Id: sys-checkpwd.c,v 1.21 2024-04-30 08:28:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
@@ -325,7 +325,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	const char     *x = "$Id: sys-checkpwd.c,v 1.21 2024-04-30 08:28:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sys-checkpwd.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -334,6 +334,9 @@ getversion_sys_checkpwd_c()
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2024-04-30 08:28:37+05:30  Cprogrammer
  * display in logs if userpw, shadow is enabled for encrypted password lookup
  *

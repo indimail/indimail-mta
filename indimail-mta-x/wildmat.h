@@ -1,5 +1,8 @@
 /*
  * $Log: wildmat.h,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2021-05-23 06:35:07+05:30  Cprogrammer
  * Initial revision
  *
@@ -8,7 +11,7 @@
 #define _WILDMAT_H
 
 #ifndef	lint
-static const char sccsidwildmath[] = "$Id: wildmat.h,v 1.1 2021-05-23 06:35:07+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsidwildmath[] = "$Id: wildmat.h,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 #endif
 
 #ifndef TRUE

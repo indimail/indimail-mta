@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2018-05-30 23:25:31+05:30  Cprogrammer
  * moved noipv6 variable to variables.c
  *
@@ -280,7 +283,7 @@ greylist(const char *gip, const char *connectingip, const char *from,
 void
 getversion_greylist_c()
 {
-	const char     *x = "$Id: greylist.c,v 1.13 2018-05-30 23:25:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: greylist.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

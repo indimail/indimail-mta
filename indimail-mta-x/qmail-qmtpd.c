@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmtpd.c,v 1.19 2024-01-23 01:23:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qmtpd.c,v 1.20 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -308,13 +308,16 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	const char     *x = "$Id: qmail-qmtpd.c,v 1.19 2024-01-23 01:23:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmtpd.c,v 1.20 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.20  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2024-01-23 01:23:04+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

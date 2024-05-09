@@ -1,5 +1,8 @@
 /*
  * $Log: rewind.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2004-10-22 20:29:59+05:30  Cprogrammer
  * added RCS id
  *
@@ -21,7 +24,7 @@ main(void)
 void
 getversion_rewind_c()
 {
-	const char     *x = "$Id: rewind.c,v 1.3 2004-10-22 20:29:59+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: rewind.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

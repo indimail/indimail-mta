@@ -1,5 +1,8 @@
 /*
  * $Log: predate.c,v $
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2020-11-24 13:46:28+05:30  Cprogrammer
  * removed exit.h
  *
@@ -133,7 +136,7 @@ main(int argc, char **argv)
 void
 getversion_predate_c()
 {
-	const char     *x = "$Id: predate.c,v 1.8 2020-11-24 13:46:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: predate.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
