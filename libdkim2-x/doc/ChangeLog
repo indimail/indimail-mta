@@ -63,6 +63,8 @@ Release 1.7-1.1 Start 01/02/2023 End 09/01/2024
 - 09/01/2024
 21. dkim.h: re-arranged DKIM error codes.
 - 03/02/2024 - indimail-mta-3.0.7
+- 09/05/2024
+22. fix discarded-qualifier compiler warnings
 
 * Mon Jan 30 2023 13:14:56 +0000 Manvendra Bhangui <libdkim@indimail.org> 1.6-1.1%{?dist}
 Release 1.6 Start 27/11/2022 End 30/11/2023
