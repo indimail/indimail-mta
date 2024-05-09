@@ -40,10 +40,6 @@
 #define FATAL         "dotls: fatal: "
 #define HUGECAPATEXT  5000
 
-#ifndef	lint
-const char      sccsid[] = "$Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 int             do_data();
 int             do_retr();
 int             smtp_ehlo(char *, char *, int);
@@ -1070,14 +1066,13 @@ main(int argc, char **argv)
 	_exit(0);
 }
 
-#ifndef	lint
 void
-getversion_sslclient_c()
+getversion_dotls_c()
 {
-	if (write(1, sccsid, 0) == -1)
-		;
+	const char     *x = "$Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
 }
-#endif
 #else
 #warning "not compiled with -DTLS"
 #include "substdio.h"

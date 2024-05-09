@@ -50,10 +50,6 @@
  *
  */
 
-#ifndef	lint
-const char      sccsid[] = "$Id: tcpserver_plugin.c,v 1.16 2021-07-03 14:05:14+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 #define FATAL "tcpserver: fatal: "
 
 #ifdef LOAD_SHARED_OBJECTS
@@ -204,6 +200,6 @@ tcpserver_plugin(char **envp)
 void
 getversion_tcpserver_plugin_c()
 {
-	if (write(1, sccsid, 0) == -1)
-		;
+	const char    *x = "$Id: tcpserver_plugin.c,v 1.16 2021-07-03 14:05:14+05:30 Cprogrammer Exp mbhangui $";
+	x++;
 }

@@ -66,10 +66,6 @@
 #include "control.h"
 #include "auto_home.h"
 
-#ifndef	lint
-const char      sccsid[] = "$Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 typedef const char c_char;
 #ifdef IPV6
 static int      forcev6;
@@ -2012,8 +2008,9 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	if (write(1, sccsid, 0) == -1)
-		;
+	const char    *x = "$Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
 }
 
 /*

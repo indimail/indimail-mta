@@ -102,10 +102,6 @@
 
 typedef const char c_char;
 
-#ifndef	lint
-const char      sccsid[] = "$Id: rblsmtpd.c,v 1.24 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 no_return void
 nomem(void)
 {
@@ -679,6 +675,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	if (write(1, sccsid, 0) == -1)
-		;
+	const char     *x = "$Id: rblsmtpd.c,v 1.24 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
 }

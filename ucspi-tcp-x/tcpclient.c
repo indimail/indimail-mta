@@ -50,10 +50,6 @@
 
 #define FATAL "tcpclient: fatal: "
 
-#ifndef	lint
-const char      sccsid[] = "$Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 extern int      socket_tcpnodelay(int);
 
 no_return void
@@ -824,14 +820,13 @@ do_data:
 	return (0);
 }
 
-#ifndef lint
 void
 getversion_tcpclient_c()
 {
-	if (write(1, sccsid, 0) == -1)
-		;
+	const char    *x = "$Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
 }
-#endif
 
 /*
  * $Log: tcpclient.c,v $
