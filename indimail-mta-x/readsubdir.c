@@ -23,7 +23,7 @@
 #include "str.h"
 
 void
-readsubdir_init(readsubdir *rs, char *name, int flagsplit, void (*pause)())
+readsubdir_init(readsubdir *rs, const char *name, int flagsplit, void (*pause)())
 {
 	rs->name = name;
 	rs->pause = pause;
@@ -93,7 +93,7 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	static char    *x = "$Id: readsubdir.c,v 1.6 2022-01-30 09:38:02+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: readsubdir.c,v 1.6 2022-01-30 09:38:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

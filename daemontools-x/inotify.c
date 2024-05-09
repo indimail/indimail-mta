@@ -56,7 +56,7 @@
 #define FATAL             "inotify: fatal: "
 #define SELECTTIMEOUT     5
 
-char           *usage = "usage: inotify [-n] path1..path2";
+const char     *usage = "usage: inotify [-n] path1..path2";
 int             ifd, _soptind, _sargc;
 
 typedef struct inotify_dir {
@@ -66,7 +66,7 @@ typedef struct inotify_dir {
 INOTIFY_DIR    *wd;
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -103,7 +103,7 @@ main(int argc, char **argv)
 	struct timeval *tptr;
 	time_t          last_timeout;
 	char            buffer[EVENT_BUF_LEN], strnum[FMT_ULONG];
-	char           *ptr;
+	const char     *ptr;
 	fd_set          rfds;	/*- File descriptor mask for select -*/
 
 	if (argc < 2)
@@ -285,7 +285,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	static char    *x = "$Id: inotify.c,v 1.11 2022-01-30 09:53:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: inotify.c,v 1.11 2022-01-30 09:53:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

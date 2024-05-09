@@ -87,7 +87,7 @@ getcomma()
 unsigned int    databytes = 0, bytestooverflow = 0;
 struct qmail    qq;
 char            buf[1000], buf2[100];
-char           *remotehost, *remoteinfo, *remoteip, *local, *relayclient;
+const char     *remotehost, *remoteinfo, *remoteip, *local, *relayclient;
 stralloc        failure = { 0 };
 int             relayclientlen;
 
@@ -97,7 +97,7 @@ main()
 	char            ch;
 	unsigned long   biglen, len, qp, u;
 	int             i, flagdos = 0, flagsenderok, flagbother, hide_host;
-	char           *result, *x;
+	const char     *result, *x;
 
 	sig_pipeignore();
 	sig_alarmcatch(resources);
@@ -308,7 +308,7 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	static char    *x = "$Id: qmail-qmtpd.c,v 1.19 2024-01-23 01:23:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmtpd.c,v 1.19 2024-01-23 01:23:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -28,7 +28,7 @@
  */
 
 unsigned int
-ip6_expandaddr(char *src, stralloc *destination)
+ip6_expandaddr(const char *src, stralloc *destination)
 {
 	stralloc        addresstemp = { 0 };
 	char            ip6[16] = { 0 };

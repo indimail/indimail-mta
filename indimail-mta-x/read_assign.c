@@ -29,7 +29,7 @@ static stralloc cdbfilename, in_dir;
  * but this doesn't cache the result in static variables
  */
 char *
-read_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
+read_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 {
 	int             fd;
 	uint32_t        dlen, i;
@@ -110,7 +110,7 @@ read_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 void
 getversion_read_assign_c()
 {
-	static char    *x = "$Id: read_assign.c,v 1.1 2023-12-08 12:31:19+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: read_assign.c,v 1.1 2023-12-08 12:31:19+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

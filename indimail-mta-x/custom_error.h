@@ -11,7 +11,7 @@
 #define _CUSTOM_ERROR_H
 #include <noreturn.h>
 
-no_return void  custom_error(char *, char *, char *, char *, char *);
-char           *extended_err(char *, char *);
+no_return void  custom_error(const char *, const char *, const char *, const char *, const char *);
+char           *extended_err(const char *, const char *);
 
 #endif

@@ -295,7 +295,7 @@ main(int argc, char **argv)
 void
 getversion_serialqmtp_c()
 {
-	static char    *x = "$Id: serialqmtp.c,v 1.9 2023-10-05 22:29:58+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: serialqmtp.c,v 1.9 2023-10-05 22:29:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

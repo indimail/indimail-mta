@@ -61,7 +61,7 @@
 #define FATAL "qmail-sql: fatal: "
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -79,7 +79,7 @@ flush()
 }
 
 int
-insert_db(MYSQL *conn, char *fn, char *table_name, int replace, char **errStr)
+insert_db(MYSQL *conn, const char *fn, const char *table_name, int replace, const char *errStr[])
 {
 
 	int             num = 0, m_error;
@@ -140,7 +140,7 @@ again:
 	return (num);
 }
 
-char           *usage =
+const char     *usage =
 	"usage: qmail-sql [-Sr] [-s mysql_host -u user -p password -d database -t table_name] filename\n"
 	"        -S (skip)\n"
 	"        -r (replace table)";
@@ -149,7 +149,8 @@ int
 main(int argc, char **argv)
 {
 	int             fd, opt, skip_load = 0, replace = 0;
-	char           *dbserver, *user, *pass, *dbname, *table_name, *tname, *errStr;
+	char           *tname;
+	const char     *dbserver, *user, *pass, *dbname, *table_name, *errStr;
 	stralloc        fn = {0}, str = {0};
 	struct stat     statbuf;
 	MYSQL          *conn;
@@ -275,7 +276,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_sql_c()
 {
-	static char    *x = "$Id: qmail-sql.c,v 1.11 2023-02-14 09:16:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-sql.c,v 1.11 2023-02-14 09:16:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -76,14 +76,14 @@ static stralloc new_pass = { 0 };
 static substdio ssup;
 
 void
-errlog(char *s)
+errlog(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(111);
 }
 
 void
-errlogf(char *s)
+errlogf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(111);
@@ -92,7 +92,7 @@ errlogf(char *s)
 }
 
 void
-out(char *s)
+out(const char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
 		_exit(111);
@@ -106,7 +106,7 @@ flush()
 }
 
 no_return void
-my_error(char *s1, int exit_val)
+my_error(const char *s1, int exit_val)
 {
 	if (substdio_puts(&sserr, s1))
 		_exit(111);
@@ -366,7 +366,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	static char    *x = "$Id: qmail-poppass.c,v 1.8 2024-01-23 01:22:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-poppass.c,v 1.8 2024-01-23 01:22:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

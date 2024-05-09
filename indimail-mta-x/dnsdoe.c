@@ -39,7 +39,7 @@ dnsdoe(int r)
 void
 getversion_dnsdoe_c()
 {
-	static char    *x = "$Id: dnsdoe.c,v 1.5 2023-09-23 21:21:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsdoe.c,v 1.5 2023-09-23 21:21:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

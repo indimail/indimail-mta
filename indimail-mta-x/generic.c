@@ -56,7 +56,7 @@ virusscan(char *messfn)
 void
 getversion_generic_c()
 {
-	static char    *x = "$Id: generic.c,v 1.7 2023-10-27 16:11:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: generic.c,v 1.7 2023-10-27 16:11:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

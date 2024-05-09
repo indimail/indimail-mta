@@ -10,6 +10,6 @@
 #ifndef ETRN_H
 #define ETRN_H
 
-int             etrn_queue(char *, char *);
+int             etrn_queue(const char *, const char *);
 
 #endif

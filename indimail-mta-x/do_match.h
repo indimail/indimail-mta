@@ -4,5 +4,5 @@
 #ifndef _DO_MATCH_H
 #define _DO_MATCH_H
 
-int             do_match(int, char *, char *, char **);
+int             do_match(int, const char *, const char *, const char *err[]);
 #endif

@@ -23,7 +23,7 @@ char           *pidfn;
 int             messfd;
 
 unsigned int
-pidfmt(char *s, unsigned long seq, datetime_sec _starttime, char *tmpdir)
+pidfmt(char *s, unsigned long seq, datetime_sec _starttime, const char *tmpdir)
 {
 	unsigned int    i, len;
 	pid_t           mypid;
@@ -66,7 +66,7 @@ pidfmt(char *s, unsigned long seq, datetime_sec _starttime, char *tmpdir)
 }
 
 int
-pidopen(datetime_sec _starttime, char *tmpdir)
+pidopen(datetime_sec _starttime, const char *tmpdir)
 {
 	unsigned int    len;
 	unsigned long   seq;
@@ -89,9 +89,8 @@ pidopen(datetime_sec _starttime, char *tmpdir)
 void
 getversion_pidopen_c()
 {
-	static char    *x = "$Id: pidopen.c,v 1.3 2022-04-03 18:14:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: pidopen.c,v 1.3 2022-04-03 18:14:07+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidpidopenh;
 	x++;
 }
 #endif

@@ -55,21 +55,21 @@
 static char     ssinbuf[BUFSIZE_IN];
 static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
-static char    *usage = "usage: qaes -k key [ -i -d -e -s salt ]\n";
+const char     *usage = "usage: qaes -k key [ -i -d -e -s salt ]\n";
 static char     strnum[FMT_ULONG];
 static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -78,7 +78,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
@@ -92,7 +92,7 @@ my_error(char *s1, char *s2, int exit_val)
 }
 
 void
-my_puts(char *s)
+my_puts(const char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
 		my_error("qaes: write", 0, WRITE_ERR);
@@ -347,7 +347,7 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	static char    *x = "$Id: qaes.c,v 1.7 2024-01-23 01:24:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qaes.c,v 1.7 2024-01-23 01:24:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

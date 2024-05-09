@@ -110,7 +110,7 @@ main(int argc, char **argv)
 void
 getversion_822fields_c()
 {
-	static char    *x = "$Id: 822fields.c,v 1.5 2024-01-23 01:20:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822fields.c,v 1.5 2024-01-23 01:20:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

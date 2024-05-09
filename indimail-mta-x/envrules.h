@@ -24,8 +24,8 @@
  */
 #ifndef _ENVRULES_H
 #define _ENVRULES_H
-int             envrules(char *, char *, char *, char **);
-int             domainqueue(char *, char *, char *, char **);
+int             envrules(const char *, const char *, const char *, const char *err[]);
+int             domainqueue(const char *, const char *, const char *, const char *err[]);
 
 #ifndef AM_MEMORY_ERR
 #define  AM_MEMORY_ERR -1

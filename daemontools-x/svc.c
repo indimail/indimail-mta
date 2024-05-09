@@ -144,7 +144,7 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	static char    *x = "$Id: svc.c,v 1.10 2023-03-04 14:42:52+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svc.c,v 1.10 2023-03-04 14:42:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

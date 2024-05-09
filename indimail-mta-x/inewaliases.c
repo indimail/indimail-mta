@@ -380,7 +380,7 @@ main()
 void
 getversion_newaliases_c()
 {
-	static char    *x = "$Id: inewaliases.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: inewaliases.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

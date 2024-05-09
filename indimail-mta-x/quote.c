@@ -65,7 +65,7 @@ doit(stralloc *saout, stralloc *sain)
 }
 
 int
-quote_need(char *s, unsigned int n)
+quote_need(const char *s, unsigned int n)
 {
 	unsigned char   uch;
 	int             i;
@@ -100,7 +100,7 @@ quote(stralloc *saout, stralloc *sain)
 static stralloc foo = { 0 };
 
 int
-quote2(stralloc *sa, char *s)
+quote2(stralloc *sa, const char *s)
 {
 	int             j;
 
@@ -120,7 +120,7 @@ quote2(stralloc *sa, char *s)
 void
 getversion_quote_c()
 {
-	static char    *x = "$Id: quote.c,v 1.5 2022-10-30 18:01:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: quote.c,v 1.5 2022-10-30 18:01:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

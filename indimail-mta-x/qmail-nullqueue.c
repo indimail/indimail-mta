@@ -53,7 +53,7 @@ main()
 void
 getversion_qmail_nullqueue_c()
 {
-	static char    *x = "$Id: qmail-nullqueue.c,v 1.6 2023-12-25 09:30:39+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-nullqueue.c,v 1.6 2023-12-25 09:30:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

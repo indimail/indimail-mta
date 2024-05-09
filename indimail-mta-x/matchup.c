@@ -122,28 +122,28 @@ die_write5()
 }
 
 void
-out(char *buf, int len)
+out(const char *buf, int len)
 {
 	if (substdio_put(subfdout, buf, len) == -1)
 		die_write();
 }
 
 void
-outs(char *buf)
+outs(const char *buf)
 {
 	if (substdio_puts(subfdout, buf) == -1)
 		die_write();
 }
 
 void
-out5(char *buf, int len)
+out5(const char *buf, int len)
 {
 	if (substdio_put(&ss5, buf, len) == -1)
 		die_write5();
 }
 
 void
-outs5(char *buf)
+outs5(const char *buf)
 {
 	if (substdio_puts(&ss5, buf) == -1)
 		die_write5();
@@ -297,8 +297,8 @@ garbage()
  * dates without @ are left alone
  */
 
-char           *
-tai64nunix(char *s)
+const char     *
+tai64nunix(const char *s)
 {
 	int             c;
 	int             len;
@@ -375,7 +375,7 @@ delivery()
 {
 	unsigned long   d, m, _qid;
 	int             dpos, mpos, i;
-	char           *result = "?", *reason = "";
+	const char     *result = "?", *reason = "";
 
 	/* ts delivery 1.5: success: did_1+0+1/ queue5 */
 	i = scan_ulong(line.s + field[2], &d);
@@ -722,7 +722,7 @@ main()
 void
 getversion_matchup_c()
 {
-	static char    *x = "$Id: matchup.c,v 1.16 2022-04-24 19:10:11+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: matchup.c,v 1.16 2022-04-24 19:10:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

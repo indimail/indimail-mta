@@ -36,7 +36,7 @@ GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, 10, ipalloc_readyplus, ipall
 void
 getversion_ipalloc_c()
 {
-	static char    *x = "$Id: ipalloc.c,v 1.9 2020-11-22 23:11:05+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ipalloc.c,v 1.9 2020-11-22 23:11:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

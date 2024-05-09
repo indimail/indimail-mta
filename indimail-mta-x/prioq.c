@@ -127,7 +127,7 @@ prioq_del(prioq *pq)
 void
 getversion_prioq_c()
 {
-	static char    *x = "$Id: prioq.c,v 1.7 2021-06-03 18:03:39+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: prioq.c,v 1.7 2021-06-03 18:03:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

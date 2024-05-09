@@ -72,7 +72,7 @@ main()
 void
 getversion_printmaillist_c()
 {
-	static char    *x = "$Id: printmaillist.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: printmaillist.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

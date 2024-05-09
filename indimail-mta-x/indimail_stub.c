@@ -100,7 +100,7 @@ static char     ctlerr[] = "unable to read controls";
 static stralloc errbuf = { 0 };
 
 void *
-loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
+loadLibrary(void **handle, const char *libenv, int *errflag, const char *errstr[])
 {
 	char           *ptr;
 	int             i;
@@ -204,7 +204,7 @@ closeLibrary(void **handle)
 }
 
 void *
-getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
+getlibObject(const char *libenv, void **handle, const char *plugin_symb, const char *errstr[])
 {
 	void           *i;
 	char           *ptr;
@@ -230,7 +230,7 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 }
 
 static void
-getEnvConfigStr(char **source, char *envname, char *defaultValue)
+getEnvConfigStr(const char **source, const char *envname, const char *defaultValue)
 {
 	if (!(*source = env_get(envname)))
 		*source = defaultValue;
@@ -247,9 +247,9 @@ getEnvConfigStr(char **source, char *envname, char *defaultValue)
  *         -1 if either user or domain was truncated due to buff_size being reached
  */
 int
-parse_email(char *email, stralloc *user, stralloc *domain)
+parse_email(const char *email, stralloc *user, stralloc *domain)
 {
-	char           *ptr;
+	const char     *ptr;
 	int             i, len;
 
 	for (len = 0, ptr = email; *ptr; ptr++, len++) {
@@ -279,7 +279,7 @@ parse_email(char *email, stralloc *user, stralloc *domain)
 void
 getversion_indimail_stub_c()
 {
-	static char    *x = "$Id: indimail_stub.c,v 1.17 2023-04-01 19:26:44+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: indimail_stub.c,v 1.17 2023-04-01 19:26:44+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

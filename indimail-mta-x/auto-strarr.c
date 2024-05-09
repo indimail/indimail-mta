@@ -54,7 +54,7 @@ main(int argc, char **argv)
 	if (!value)
 		_exit(100);
 
-	my_puts("char *const ");
+	my_puts("const char *");
 	my_puts(name);
 	my_puts("[] = {\n");
 

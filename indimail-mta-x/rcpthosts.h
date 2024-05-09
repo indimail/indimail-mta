@@ -11,6 +11,6 @@
 #define RCPTHOSTS_H
 
 int             rcpthosts_init(void);
-int             rcpthosts(char *, int, int);
+int             rcpthosts(const char *, int, int);
 
 #endif

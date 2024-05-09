@@ -70,7 +70,7 @@
 #include <sys/types.h>
 #include "varargs.h"
 
-void            loglock_open(char *, int);
+void            loglock_open(const char *, int);
 void            lockerr(void);
 #ifdef HAVE_STDARG_H
 void            slog(int, ...);
@@ -80,12 +80,12 @@ void            slog();
 void            logsa(stralloc *);
 void            logsa_noflush(stralloc *);
 void            log_stat(stralloc *, stralloc *, unsigned long, size_t);
-void            nomem(char *);
-void            pausedir(char *);
-void            logsafe(char *, char *);
-void            logsafe_noflush(char *, char *);
+void            nomem(const char *);
+void            pausedir(const char *);
+void            logsafe(const char *, const char *);
+void            logsafe_noflush(const char *, const char *);
 void            flush();
-int             fix_split(char *s, char *path, char *client_split, unsigned long id);
+int             fix_split(char *s, const char *path, const char *client_split, unsigned long id);
 
 extern int      loglock_fd;
 

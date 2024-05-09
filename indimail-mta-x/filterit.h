@@ -8,7 +8,7 @@
 #define WARN  "filterit: warn: "
 
 int             filterit_sub1(int, char **);
-int             filterit_sub2(char *);
+int             filterit_sub2(const char *);
 #endif
 
 /*

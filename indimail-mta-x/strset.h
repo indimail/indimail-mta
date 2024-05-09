@@ -28,9 +28,9 @@ typedef struct
 	char          **x;			/*- x[i] is entry i */
 } strset;
 
-uint32          strset_hash(char *);
+uint32          strset_hash(const char *);
 int             strset_init(strset *);
-char           *strset_in(strset *, char *);
-int             strset_add(strset *, char *);
+char           *strset_in(strset *, const char *);
+int             strset_add(strset *, const char *);
 
 #endif

@@ -10,8 +10,8 @@
 #include "auto_qmail.h"
 #include "control.h"
 
-char           *
-set_queuedir(char *argv0, char *queue)
+const char     *
+set_queuedir(const char *argv0, const char *queue)
 {
 	char           *qbase;
 	static stralloc QueueDir = { 0 };
@@ -48,7 +48,7 @@ set_queuedir(char *argv0, char *queue)
 void
 getversion_set_queuedir_c()
 {
-	static char    *x = "$Id: set_queuedir.c,v 1.1 2022-04-04 00:10:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: set_queuedir.c,v 1.1 2022-04-04 00:10:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

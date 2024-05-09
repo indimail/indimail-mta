@@ -37,7 +37,7 @@ get(char *ch)
 }
 
 void
-out(char *buf, int len)
+out(const char *buf, int len)
 {
 	if (substdio_put(subfdout, buf, len) == -1)
 		_exit(111);
@@ -107,7 +107,7 @@ main()
 void
 getversion_tai64nlocal_c()
 {
-	static char    *x = "$Id: tai64nlocal.c,v 1.4 2014-03-18 17:37:46+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: tai64nlocal.c,v 1.4 2014-03-18 17:37:46+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

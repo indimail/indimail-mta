@@ -33,7 +33,7 @@ die_usage(void)
 }
 
 void
-my_puts(char *s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
+my_puts(const char *s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
 {
 	if (substdio_puts(subfdout, s) == -1)
 		_exit(111);
@@ -256,7 +256,7 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.14 2024-02-12 20:55:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cleanq.c,v 1.14 2024-02-12 20:55:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

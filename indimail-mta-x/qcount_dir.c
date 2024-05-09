@@ -24,9 +24,9 @@
 #include "substdio.h"
 
 static int
-skip_system_files(char *filename)
+skip_system_files(const char *filename)
 {
-	char           *system_files[] = {
+	const char     *system_files[] = {
 		".Trash",
 		".current_size",
 		"domain",
@@ -47,7 +47,7 @@ skip_system_files(char *filename)
 		"shared-folders",
 		0,
 	};
-	char          **ptr;
+	const char    **ptr;
 	int             len;
 
 	for (ptr = system_files; ptr && *ptr; ptr++) {
@@ -58,7 +58,7 @@ skip_system_files(char *filename)
 	return (0);
 }
 
-ssize_t qcount_dir(char *dir_name, size_t *mailcount)
+ssize_t qcount_dir(const char *dir_name, size_t *mailcount)
 {
 	DIR            *entry;
 	struct dirent  *dp;
@@ -138,7 +138,7 @@ ssize_t qcount_dir(char *dir_name, size_t *mailcount)
 void
 getversion_qcount_dir_c()
 {
-	static char    *x = "$Id: qcount_dir.c,v 1.3 2020-10-18 12:59:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qcount_dir.c,v 1.3 2020-10-18 12:59:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -70,21 +70,22 @@
 #include <str.h>
 #include <fmt.h>
 #include <env.h>
+#include <alloc.h>
 #include "upathexec.h"
 
 #define FATAL "tcpserver: fatal: "
 
 #ifdef HASDLMOPEN
-extern void    *tcdlmopen(Lmid_t, char *, int);
+extern void    *tcdlmopen(Lmid_t, const char *, int);
 #endif
 
 void
-load_shared(char *file, char **argv, char **envp)
+load_shared(const char *file, char **argv, char **envp)
 {
-	int             argc, split;
+	int             argc, split, len;
 	int             (*func) (int, char **, char **);
 	void           *handle;
-	char           *error, *fptr;
+	char           *error, *fptr, *file_t;
 	char          **ptr;
 #ifdef HASDLMOPEN
 	char            strnum[FMT_ULONG];
@@ -150,10 +151,13 @@ load_shared(char *file, char **argv, char **envp)
 #endif /*- ifdef HASDLMOPEN */
 		dlerror(); /*- clear existing error */
 		/*- use the basename of the shared object as the function to execute */
-		split = str_rchr(file, '.');
+		if (!(file_t = (char *) alloc((len = str_len(file)) + 1)))
+			strerr_die2x(111, FATAL, "dlopen: out of memory");
+		str_copyb(file_t, file, len + 1);
+		split = str_rchr(file_t, '.');
 		if (split)
-			file[split--] = 0;
-		for (fptr = file + split;*fptr && *fptr != '/';fptr--);
+			file_t[split--] = 0;
+		for (fptr = file_t + split; *fptr && *fptr != '/'; fptr--);
 		if (*fptr == '/')
 			fptr++;
 #ifdef HASDLMOPEN
@@ -163,10 +167,9 @@ load_shared(char *file, char **argv, char **envp)
 		}
 #endif
 		func = dlsym(handle, fptr);
+		alloc_free(file_t);
 		if ((error = dlerror()))
 			strerr_die5x(111, FATAL, "dlsym: ", fptr, ": ", error);
-		if (split)
-			file[split + 1] = '.';
 		for (argc = 0,ptr = argv; *ptr; ptr++)
 			argc++;
 		pathexec_dl(argc, argv, envp, func);
@@ -188,7 +191,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	static char    *x = "$Id: load_shared.c,v 1.19 2021-07-03 14:04:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: load_shared.c,v 1.19 2021-07-03 14:04:38+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

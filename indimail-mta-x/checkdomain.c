@@ -86,7 +86,7 @@ main(int argc, char **argv)
 void
 getversion_checkdomain_c()
 {
-	static char    *x = "$Id: checkdomain.c,v 1.5 2024-01-23 01:20:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: checkdomain.c,v 1.5 2024-01-23 01:20:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

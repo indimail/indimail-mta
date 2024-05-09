@@ -111,7 +111,7 @@ main()
 void
 getversion_addrlist_c()
 {
-	static char    *x = "$Id: addrlist.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: addrlist.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

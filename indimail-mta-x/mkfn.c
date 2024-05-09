@@ -30,7 +30,7 @@ mkfn(char *const buf, const unsigned short count)
 void
 getversion_mkfn_c()
 {
-	static char    *x = "$Id: mkfn.c,v 1.2 2004-10-22 20:27:33+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: mkfn.c,v 1.2 2004-10-22 20:27:33+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

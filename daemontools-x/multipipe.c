@@ -401,7 +401,7 @@ main(int argc, char **argv)
 void
 getversion_multipipe_c()
 {
-	static char    *x = "$Id: multipipe.c,v 1.4 2020-10-08 12:07:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: multipipe.c,v 1.4 2020-10-08 12:07:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

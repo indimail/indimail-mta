@@ -82,7 +82,7 @@ qqtwrite(int fd, char *buf, size_t len)
 no_return void
 rr_forward(char *rrto, char *sender, char *dtline, char *rrnum)
 {
-	char           *qqx;
+	const char     *qqx;
 	char            num[FMT_ULONG];
 
 	sig_pipeignore();
@@ -160,7 +160,7 @@ main(int argc, char **argv)
 void
 getversion_rrforward_c()
 {
-	static char    *x = "$Id: rrforward.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rrforward.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

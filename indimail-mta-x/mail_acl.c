@@ -8,20 +8,21 @@
 #include "do_match.h"
 #include "varargs.h"
 
-extern void     die_regex(char *);
+extern void     die_regex(const char *);
 #ifdef HAVE_STDARG_H
-extern void     out(char *s1, ...);
+extern void     out(const char *s1, ...);
 #else
-extern void     out(char *);
+extern void     out(const char *);
 #endif
 extern void     flush();
 
 int
-mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb)
+mail_acl(stralloc *acclist, int qregex, const char *sender, const char *recipient, char verb)
 {
 	int             err, len, count, from_reject, rcpt_reject, rcpt_found,
 					from_found;
-	char           *ptr, *cptr, *rcpt_match, *from_match, *err_str;
+	char           *ptr, *cptr, *rcpt_match, *from_match;
+	const char     *err_str;
 	char            count_buf[FMT_ULONG];
 
 	/*- Cannot reject bounces */
@@ -207,7 +208,7 @@ mail_acl(stralloc *acclist, int qregex, char *sender, char *recipient, char verb
 void
 getversion_mail_acl_c()
 {
-	static char    *x = "$Id: mail_acl.c,v 1.9 2023-12-05 22:07:19+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mail_acl.c,v 1.9 2023-12-05 22:07:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

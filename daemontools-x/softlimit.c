@@ -164,7 +164,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_softlimit_c()
 {
-	static char    *x = "$Id: softlimit.c,v 1.4 2022-02-25 09:51:51+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: softlimit.c,v 1.4 2022-02-25 09:51:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

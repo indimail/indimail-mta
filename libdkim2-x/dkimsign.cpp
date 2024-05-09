@@ -585,7 +585,7 @@ void CDKIMSign::AddFoldedValueToSig(const string &sValue, char cbrk)
 /*
  * GetSig - compute hash and return signature header in szSignature
  */
-int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength)
+int CDKIMSign::GetSig(const char *szPrivKey, char *szSignature, unsigned int nSigLength)
 {
 	if (szPrivKey == NULL)
 		return DKIM_BAD_PRIVATE_KEY;
@@ -605,7 +605,7 @@ int CDKIMSign::GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLengt
 /*
  * GetSig - compute hash and return signature header in szSignature
  */
-int CDKIMSign::GetSig2(char *szPrivKey, char **pszSignature)
+int CDKIMSign::GetSig2(const char *szPrivKey, char **pszSignature)
 {
 	if (szPrivKey == NULL)
 		return DKIM_BAD_PRIVATE_KEY;
@@ -644,7 +644,7 @@ bool CDKIMSign::IsRequiredHeader(const string &sTag)
 }
 
 int
-CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
+CDKIMSign::ConstructSignature(const char *szPrivKey, int nSigAlg)
 {
 	string          sSignedSig, sTemp;
 	unsigned char  *sig = NULL;
@@ -790,7 +790,8 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 			BIO_free_all(b64);
 			return DKIM_OUT_OF_MEMORY;
 		}
-		BIO_flush(b64);
+		if (BIO_flush(b64) <= 0)
+			return DKIM_OUT_OF_MEMORY;
 		len = nHashLen * 2;
 		if (!(buf = new char[len])) {
 			BIO_free_all(b64);
@@ -839,7 +840,7 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 #endif
 	}
 
-	if (!(bio = BIO_new_mem_buf(szPrivKey, -1)))
+	if (!(bio = BIO_new_mem_buf((char *) szPrivKey, -1)))
 		return DKIM_OUT_OF_MEMORY;
 	if (!(pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL))) {
 		BIO_free(bio);
@@ -905,7 +906,8 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 		BIO_free_all(b64);
 		return DKIM_OUT_OF_MEMORY;
 	}
-	BIO_flush(b64);
+	if (BIO_flush(b64) <= 0)
+		return DKIM_OUT_OF_MEMORY;
 	OPENSSL_free(sig);
 	len = siglen * 2;
 	if (!(buf = new char[len])) {
@@ -926,7 +928,7 @@ CDKIMSign::ConstructSignature(char *szPrivKey, int nSigAlg)
 }
 
 int
-CDKIMSign::AssembleReturnedSig(char *szPrivKey)
+CDKIMSign::AssembleReturnedSig(const char *szPrivKey)
 {
 	int             nRet;
 
@@ -990,13 +992,19 @@ CDKIMSign::AssembleReturnedSig(char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.27 2023-11-20 10:09:06+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.29 2024-05-07 15:23:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.29  2024-05-07 15:23:33+05:30  Cprogrammer
+ * fix for rhel7, sles12
+ *
+ * Revision 1.28  2024-05-07 12:56:03+05:30  Cprogrammer
+ * use const char * instead of char *
+ *
  * Revision 1.27  2023-11-20 10:09:06+05:30  Cprogrammer
  * exclude Arc-Authentication-Results header from signing
  *

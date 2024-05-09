@@ -78,7 +78,7 @@ main(int argc, char **argv)
 void
 getversion_checkaddr_c()
 {
-	static char    *x = "$Id: checkaddr.c,v 1.5 2024-01-23 01:24:00+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: checkaddr.c,v 1.5 2024-01-23 01:24:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

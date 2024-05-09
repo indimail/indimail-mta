@@ -57,7 +57,7 @@ cleanuppid()
 }
 
 void
-respond(char *s)
+respond(const char *s)
 {
 	if (substdio_putflush(subfdoutsmall, s, 1) == -1)
 		_exit(100);
@@ -140,7 +140,7 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	static char    *x = "$Id: qmail-clean.c,v 1.15 2023-12-25 10:03:23+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-clean.c,v 1.15 2023-12-25 10:03:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

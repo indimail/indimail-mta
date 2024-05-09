@@ -16,8 +16,7 @@
 #include "alloc.h"
 
 uint32
-strset_hash(s)
-	char           *s;
+strset_hash(const char *s)
 {
 	unsigned char   ch;
 	uint32          h;
@@ -31,8 +30,7 @@ strset_hash(s)
 }
 
 int
-strset_init(set)
-	strset         *set;
+strset_init(strset *set)
 {
 	int             h;
 	set->mask = 15;
@@ -61,9 +59,7 @@ strset_init(set)
 }
 
 char           *
-strset_in(set, s)
-	strset         *set;
-	char           *s;
+strset_in(strset *set, const char *s)
 {
 	uint32          h;
 	strset_list    *sl;
@@ -85,9 +81,7 @@ strset_in(set, s)
 }
 
 int
-strset_add(set, s)
-	strset         *set;
-	char           *s;
+strset_add(strset *set, const char *s)
 {
 	uint32          h;
 	int             n;
@@ -152,7 +146,7 @@ strset_add(set, s)
 	h &= set->mask;
 	sl->next = set->first[h];
 	set->first[h] = n;
-	set->x[n] = s;
+	set->x[n] = (char *) s;
 	set->n = n + 1;
 	return 1;
 }
@@ -160,7 +154,7 @@ strset_add(set, s)
 void
 getversion_strset_c()
 {
-	static char    *x = "$Id: strset.c,v 1.3 2020-05-11 10:58:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: strset.c,v 1.3 2020-05-11 10:58:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -16,7 +16,7 @@ static char     hextab[] = "0123456789abcdef";
 char *
 qr_digest_md5(char *user, int ulen, char *realm, int rlen, char *pass, int plen,
 	char *authzid, char *nonce, int nlen, char *digesturi, int dlen,
-	char *cnonce, char *nc, char *qop)
+	char *cnonce, const char *nc, const char *qop)
 {
 	unsigned char   digest[20], ea1[33], ea2[33];
 	static char     encrypted[41];
@@ -106,7 +106,7 @@ qr_digest_md5(char *user, int ulen, char *realm, int rlen, char *pass, int plen,
 void
 getversion_qr_digest_md5_c()
 {
-	static char    *x = "$Id: qr_digest_md5.c,v 1.2 2011-12-05 15:07:24+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: qr_digest_md5.c,v 1.2 2011-12-05 15:07:24+05:30 Cprogrammer Stab mbhangui $";
 	x=sccsidmd5h;
 	x=sccsidglobalh;
 	x++;

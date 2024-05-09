@@ -40,8 +40,8 @@
 #define H_MAILFOLLOWUPTO 28
 #define H_NUM 29
 
-unsigned int    hfield_skipname(char *, int);
-int             hfield_known(char *, int);
-int             hfield_valid(char *, int);
+unsigned int    hfield_skipname(const char *, int);
+int             hfield_known(const char *, int);
+int             hfield_valid(const char *, int);
 
 #endif

@@ -24,7 +24,7 @@ socket_tcp4(void)
 void
 getversion_socket_tcp4_c()
 {
-	static char    *x = "$Id: socket_tcp.c,v 1.2 2005-06-15 22:35:58+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: socket_tcp.c,v 1.2 2005-06-15 22:35:58+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

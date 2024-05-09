@@ -144,7 +144,7 @@ main(int argc, char **argv)
 void
 getversion_dnsblcheck_c()
 {
-	static char    *x = "$Id: dnsblcheck.c,v 1.1 2022-06-01 13:02:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsblcheck.c,v 1.1 2022-06-01 13:02:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

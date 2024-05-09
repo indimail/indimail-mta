@@ -11,7 +11,7 @@
 #ifdef USE_SPF
 #include "spf.h"
 
-char           *localhost = "localhost";
+const char     *localhost = "localhost";
 stralloc        addr = { 0 };
 stralloc        helohost = { 0 };
 stralloc        spflocal = { 0 };
@@ -19,7 +19,7 @@ stralloc        spfguess = { 0 };
 stralloc        spfexp = { 0 };
 
 no_return void
-die(int e, char *s)
+die(int e, const char *s)
 {
 	substdio_putsflush(subfderr, s);
 	_exit(e);
@@ -146,7 +146,7 @@ main(argc, argv)
 void
 getversion_spfquery_c()
 {
-	static char    *x = "$Id: spfquery.c,v 1.10 2023-09-24 19:38:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spfquery.c,v 1.10 2023-09-24 19:38:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

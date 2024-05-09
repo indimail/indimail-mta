@@ -16,7 +16,7 @@
 #define CDB_NOMATCH    0
 #define CDB_FOUND      1
 
-int             cdb_match(char *, char *, int, char **);
-int             cdb_matchaddr(char *, char *, int);
+int             cdb_match(const char *, const char *, int, char **);
+int             cdb_matchaddr(const char *, const char *, int);
 
 #endif

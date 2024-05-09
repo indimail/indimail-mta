@@ -92,7 +92,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822bodyfilter_c()
 {
-	static char    *x = "$Id: 822bodyfilter.c,v 1.4 2024-01-23 01:19:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822bodyfilter.c,v 1.4 2024-01-23 01:19:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

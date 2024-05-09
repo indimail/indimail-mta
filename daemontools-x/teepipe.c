@@ -103,7 +103,7 @@ main(int argc, char **argv)
 void
 getversion_teepipe_c()
 {
-	static char    *x = "$Id: teepipe.c,v 1.6 2022-09-03 22:24:33+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: teepipe.c,v 1.6 2022-09-03 22:24:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -29,7 +29,7 @@
 #include "dns.h"
 
 static int
-serverwantstcp(char *buf, unsigned int len)
+serverwantstcp(const char *buf, unsigned int len)
 {
 	char            out[12];
 
@@ -41,7 +41,7 @@ serverwantstcp(char *buf, unsigned int len)
 }
 
 static int
-serverfailed(char *buf, unsigned int len)
+serverfailed(const char *buf, unsigned int len)
 {
 	char            out[12];
 	unsigned int    rcode;
@@ -58,7 +58,7 @@ serverfailed(char *buf, unsigned int len)
 }
 
 static int
-irrelevant(struct dns_transmit *d, char *buf, unsigned int len)
+irrelevant(struct dns_transmit *d, const char *buf, unsigned int len)
 {
 	char            out[12];
 	char           *dn;
@@ -293,10 +293,10 @@ nexttcp(struct dns_transmit *d)
 int
 #ifdef IPV6
 dns_transmit_start(struct dns_transmit *d, char servers[256], int flagrecursive,
-	char *q, char qtype[2], unsigned char localip[16])
+	const char *q, const char qtype[2], unsigned char localip[16])
 #else
 dns_transmit_start(struct dns_transmit *d, char servers[64], int flagrecursive,
-	char *q, char qtype[2], unsigned char localip[4])
+	const char *q, const char qtype[2], unsigned char localip[4])
 #endif
 {
 	unsigned int    len;

@@ -14,7 +14,7 @@
 extern stralloc srs_result;
 extern stralloc srs_error;
 extern int      srs_setup(int);
-extern int      srsforward(char *);
-extern int      srsreverse(char *);
+extern int      srsforward(const char *);
+extern int      srsreverse(const char *);
 
 #endif

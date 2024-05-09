@@ -13,9 +13,9 @@
  * added RCS log
  *
  */
-char           *queuedir;
-char           *controldir;
-char           *certdir;
+const char     *queuedir;
+const char     *controldir;
+const char     *certdir;
 
 #include "haveip6.h"
 #ifdef LIBC_HAS_IP6
@@ -27,7 +27,7 @@ int             noipv6 = 1;
 void
 getversion_variables_c()
 {
-	static char    *x = "$Id: variables.c,v 1.5 2018-05-30 23:26:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: variables.c,v 1.5 2018-05-30 23:26:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

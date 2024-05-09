@@ -68,7 +68,7 @@ my_strchr(char *str, char ch)
 -*/
 
 int
-matchinet(char *ip, char *token, char flag)
+matchinet(const char *ip, const char *token, char flag)
 {
 	char            field1[8];
 	char            field2[8];
@@ -93,7 +93,7 @@ matchinet(char *ip, char *token, char flag)
 	if (inet_addr(token) != INADDR_NONE)
 		return (0);
 	else
-	for (match = idx1 = 0, ptr1 = token, ptr2 = ip; idx1 < 4 && match == idx1; idx1++) {
+	for (match = idx1 = 0, ptr1 = (char *) token, ptr2 = (char *) ip; idx1 < 4 && match == idx1; idx1++) {
 		/*- IP Address in control file */
 		for (cptr = field1; *ptr1 && *ptr1 != '.'; *cptr++ = *ptr1++);
 		*cptr = 0;
@@ -194,15 +194,16 @@ matchinet(char *ip, char *token, char flag)
  * - indimail.org is allowed from any ip address (no IP restriction for indimail.org)
  */
 int
-tablematch(char *filename, char *ip, char *domain)
+tablematch(const char *filename, const char *ip, const char *domain)
 {
 	int             len, count, nullflag, dmatch, imatch, exact_domain_match, exact_ip_match;
+	const char     *x;
 	char           *ptr, *cptr;
 	static stralloc hostacc = { 0 };
 
-	if (!(ptr = env_get("HOSTACCESS")))
-		ptr = filename;
-	if ((count = control_readfile(&hostacc, ptr, 0)) == -1)
+	if (!(x = env_get("HOSTACCESS")))
+		x = filename;
+	if ((count = control_readfile(&hostacc, x, 0)) == -1)
 		return (-1);
 	if (!count) /*- allow access if control file is absent */
 		return (1);
@@ -254,7 +255,7 @@ tablematch(char *filename, char *ip, char *domain)
 void
 getversion_tablematch_c()
 {
-	static char    *x = "$Id: tablematch.c,v 1.10 2023-01-03 17:45:14+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tablematch.c,v 1.10 2023-01-03 17:45:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

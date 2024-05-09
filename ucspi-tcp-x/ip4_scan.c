@@ -14,7 +14,7 @@
 #include "ip4.h"
 
 unsigned int
-rblip4_scan(char *s, char ip[4])
+rblip4_scan(const char *s, char ip[4])
 {
 	unsigned int    i;
 	unsigned int    len;

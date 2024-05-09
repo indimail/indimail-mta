@@ -9,7 +9,7 @@
  */
 #include "hfield.h"
 
-static char    *(hname[]) =
+const char     *(hname[]) =
 {
 	"unknown-header",
 	"sender",
@@ -44,28 +44,22 @@ static char    *(hname[]) =
 };
 
 static int
-hmatch(s, len, t)
-	char           *s;
-	int             len;
-	char           *t;
+hmatch(const char *s, int len, const char *t)
 {
 	int             i;
 	char            ch;
 
-	for (i = 0; (ch = t[i]); ++i)
-	{
+	for (i = 0; (ch = t[i]); ++i) {
 		if (i >= len)
 			return 0;
-		if (ch != s[i])
-		{
+		if (ch != s[i]) {
 			if (ch == '-')
 				return 0;
 			if (ch - 32 != s[i])
 				return 0;
 		}
 	}
-	for (;;)
-	{
+	for (;;) {
 		if (i >= len)
 			return 0;
 		ch = s[i];
@@ -78,12 +72,10 @@ hmatch(s, len, t)
 }
 
 int
-hfield_known(s, len)
-	char           *s;
-	int             len;
+hfield_known(const char *s, int len)
 {
 	int             i;
-	char           *t;
+	const char     *t;
 
 	for (i = 1; (t = hname[i]); ++i)
 		if (hmatch(s, len, t))
@@ -92,12 +84,9 @@ hfield_known(s, len)
 }
 
 int
-hfield_valid(s, len)
-	char           *s;
-	int             len;
+hfield_valid(const char *s, int len)
 {
-	int             i;
-	int             j;
+	int             i, j;
 	char            ch;
 
 	for (j = 0; j < len; ++j)
@@ -126,9 +115,7 @@ hfield_valid(s, len)
 }
 
 unsigned int
-hfield_skipname(s, len)
-	char           *s;
-	int             len;
+hfield_skipname(const char *s, int len)
 {
 	int             i;
 	char            ch;
@@ -151,7 +138,7 @@ hfield_skipname(s, len)
 void
 getversion_hfield_c()
 {
-	static char    *x = "$Id: hfield.c,v 1.4 2004-10-22 20:25:43+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: hfield.c,v 1.4 2004-10-22 20:25:43+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

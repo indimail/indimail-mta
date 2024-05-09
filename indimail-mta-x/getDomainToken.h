@@ -12,7 +12,7 @@
 #include <stralloc.h>
 
 #ifndef	lint
-static char     sccsidgetdomainth[] = "$Id: getDomainToken.h,v 1.2 2021-08-28 23:03:41+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsidgetdomainth[] = "$Id: getDomainToken.h,v 1.2 2021-08-28 23:03:41+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 typedef enum {
@@ -22,6 +22,6 @@ typedef enum {
 	local_or_remote,
 } dtype;
 
-char           *getDomainToken(char *, stralloc *);
+char           *getDomainToken(const char *, stralloc *);
 
 #endif

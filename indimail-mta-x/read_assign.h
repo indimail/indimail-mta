@@ -4,6 +4,6 @@
 #ifndef _READ_ASSIGN_H
 #define _READ_ASSIGN_H
 
-char           *read_assign(char *domain, stralloc *dir, uid_t *uid, gid_t *gid);
+char           *read_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid);
 
 #endif

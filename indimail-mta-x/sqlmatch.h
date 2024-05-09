@@ -48,9 +48,9 @@
 #endif
 
 #ifdef HAS_MYSQL
-extern int      create_sqltable(MYSQL *, char *, char **);
-extern int      connect_sqldb(char *, MYSQL **, char **, char **);
+extern int      create_sqltable(MYSQL *, const char *, const char *error[]);
+extern int      connect_sqldb(const char *, MYSQL **, char **, const char *error[]);
 #endif
-extern int      sqlmatch(char *, char *, int, char **);
+extern int      sqlmatch(const char *, const char *, int, const char *errstr[]);
 extern void     sqlmatch_close_db(void);
 #endif

@@ -40,7 +40,7 @@
 static int      debug;
 
 void
-print_error(char *str)
+print_error(const char *str)
 {
 	subprintf(subfdout, "454-%s: %s (#4.3.0)\r\n", str, error_str(errno));
 	if (substdio_flush(subfdout) == -1)
@@ -48,7 +48,7 @@ print_error(char *str)
 }
 
 static int
-runcmmd(char *cmmd)
+runcmmd(const char *cmmd)
 {
 	char          **argv;
 	int             status, i, werr, retval;
@@ -145,7 +145,6 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 	execv(argv[1], argv + 1);
 	strerr_die3sys(111, FATAL, "exec: ", argv[1]);
 }
-
 
 int
 main(int argc, char **argv)
@@ -262,7 +261,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "setuid: uid(", strnum, "):");
 	if (env_get("DEBUG_LOGIN")) {
 		i = str_rchr(argv[0], '/');
-		ptr = get_authmethod(auth_method);
+		ptr = (char *) get_authmethod(auth_method);
 		subprintf(subfderr,
 				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s",
 				argv[0][i] ? argv[0] + i + 1 : argv[0],
@@ -283,7 +282,7 @@ main(int argc, char **argv)
 	} else
 	if (debug) {
 		i = str_rchr(argv[0], '/');
-		ptr = get_authmethod(auth_method);
+		ptr = (char *) get_authmethod(auth_method);
 		subprintf(subfderr, "%s: uid=%u, login=%s, CRAM=%s AUTH=%s",
 				argv[0][i] ? argv[0] + i + 1 : argv[0],
 				getuid(), login, enable_cram ? "Yes" : "No", ptr);
@@ -326,7 +325,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	static char    *x = "$Id: sys-checkpwd.c,v 1.21 2024-04-30 08:28:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sys-checkpwd.c,v 1.21 2024-04-30 08:28:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

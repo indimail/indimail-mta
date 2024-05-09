@@ -170,7 +170,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fixcrio_c()
 {
-	static char    *x = "$Id: fixcrio.c,v 1.4 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: fixcrio.c,v 1.4 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -63,7 +63,7 @@ static stralloc namespace = {0};
  * -1 - ENOMEM failure
  */
 int
-dlnamespace(char *fn, char **envp, Lmid_t *id)
+dlnamespace(const char *fn, char **envp, Lmid_t *id)
 {
 	char           *ptr, *cptr, *s;
 	int             i, j;
@@ -154,7 +154,7 @@ dlnamespace(char *fn, char **envp, Lmid_t *id)
 }
 #else
 int
-dlnamespace(char *fn, unsigned long *id)
+dlnamespace(const char *fn, unsigned long *id)
 {
 	if (!id) {
 		errno = EINVAL;
@@ -170,7 +170,7 @@ dlnamespace(char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	static char    *x = "$Id: dlnamespace.c,v 1.12 2021-07-03 14:03:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dlnamespace.c,v 1.12 2021-07-03 14:03:56+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

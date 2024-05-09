@@ -11,7 +11,7 @@
 #include "timeoutconn.h"
 
 int
-timeoutconn_un(int s, char *socket, unsigned int timeout)
+timeoutconn_un(int s, const char *socket, unsigned int timeout)
 {
 	struct taia     now;
 	struct taia     deadline;

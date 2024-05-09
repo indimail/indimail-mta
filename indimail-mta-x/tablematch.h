@@ -9,6 +9,6 @@
  */
 #ifndef _TABLEMAT_H
 #define _TABLEMAT_H
-int             tablematch(char *, char *, char *);
-int             matchinet(char *, char *, char);
+int             tablematch(const char *, const char *, const char *);
+int             matchinet(const char *, const char *, char);
 #endif

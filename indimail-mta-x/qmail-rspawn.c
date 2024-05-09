@@ -149,7 +149,7 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *s, char *qqeh, char *r
 #endif
 
 	size_buf[fmt_ulong(size_buf, msgsize)] = 0;
-	args[0] = "qmail-remote";
+	args[0] = (char *) "qmail-remote";
 	args[1] = r + at + 1;		/*- domain */
 	args[2] = s;				/*- sender */
 	args[3] = qqeh;				/*- qqeh */
@@ -251,7 +251,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	static char    *x = "$Id: qmail-rspawn.c,v 1.44 2022-03-05 13:34:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-rspawn.c,v 1.44 2022-03-05 13:34:54+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

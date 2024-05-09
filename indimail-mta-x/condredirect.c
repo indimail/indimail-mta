@@ -39,7 +39,7 @@ main(int argc, char **argv)
 {
 	char           *sender, *dtline, *qqeh;
 	int             pid, wstat, i, reverse = 0;
-	char           *qqx;
+	const char     *qqx;
 
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] == '-') {
@@ -133,7 +133,7 @@ main(int argc, char **argv)
 void
 getversion_condredirect_c()
 {
-	static char    *x = "$Id: condredirect.c,v 1.18 2023-07-11 11:29:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: condredirect.c,v 1.18 2023-07-11 11:29:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

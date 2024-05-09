@@ -1,5 +1,8 @@
 /*
  * $Log: dkimfuncs.cpp,v $
+ * Revision 1.7  2024-05-07 12:55:50+05:30  Cprogrammer
+ * use const char * instead of char *
+ *
  * Revision 1.6  2023-02-01 18:02:03+05:30  Cprogrammer
  * new function DKIMSignReplaceHash to alter current Hash method
  *
@@ -19,21 +22,21 @@
  * Initial revision
  *
  *
- *  Copyright 2005 Alt-N Technologies, Ltd. 
+ *  Copyright 2005 Alt-N Technologies, Ltd.
  *
- *  Licensed under the Apache License, Version 2.0 (the "License"); 
- *  you may not use this file except in compliance with the License. 
- *  You may obtain a copy of the License at 
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0 
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
- *  This code incorporates intellectual property owned by Yahoo! and licensed 
+ *  This code incorporates intellectual property owned by Yahoo! and licensed
  *  pursuant to the Yahoo! DomainKeys Patent License Agreement.
  *
- *  Unless required by applicable law or agreed to in writing, software 
- *  distributed under the License is distributed on an "AS IS" BASIS, 
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- *  See the License for the specific language governing permissions and 
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
  *  limitations under the License.
  *
  */
@@ -111,7 +114,7 @@ DKIMSignProcess(DKIMContext *pSignContext, char *szBuffer, int nBufLength)
 }
 
 int             DKIM_CALL
-DKIMSignGetSig(DKIMContext *pSignContext, char *szPrivKey, char *szSignature, int nSigLength)
+DKIMSignGetSig(DKIMContext *pSignContext, const char *szPrivKey, char *szSignature, int nSigLength)
 {
 	CDKIMSign      *pSign = (CDKIMSign *) ValidateContext(pSignContext, true);
 	if (pSign)
@@ -120,7 +123,7 @@ DKIMSignGetSig(DKIMContext *pSignContext, char *szPrivKey, char *szSignature, in
 }
 
 int             DKIM_CALL
-DKIMSignGetSig2(DKIMContext *pSignContext, char *szPrivKey, char **pszSignature)
+DKIMSignGetSig2(DKIMContext *pSignContext, const char *szPrivKey, char **pszSignature)
 {
 	CDKIMSign      *pSign = (CDKIMSign *) ValidateContext(pSignContext, true);
 	if (pSign)
@@ -128,7 +131,7 @@ DKIMSignGetSig2(DKIMContext *pSignContext, char *szPrivKey, char **pszSignature)
 	return DKIM_INVALID_CONTEXT;
 }
 
-char           *DKIM_CALL
+const char     *DKIM_CALL
 DKIMSignGetDomain(DKIMContext *pSignContext)
 {
 	CDKIMSign      *pSign = (CDKIMSign *) ValidateContext(pSignContext, true);
@@ -243,7 +246,7 @@ static char    *DKIMErrorStrings[-1 - DKIM_MAX_ERROR] = {
 	(char *) "DKIM_BUFFER_TOO_SMALL"
 };
 
-char           *DKIM_CALL
+const char     *DKIM_CALL
 DKIMGetErrorString(int ErrorCode)
 {
 	if (ErrorCode >= 0 || ErrorCode <= DKIM_MAX_ERROR)
@@ -256,7 +259,7 @@ DKIMGetErrorString(int ErrorCode)
 void
 getversion_dkimfuncs_cpp()
 {
-	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.6 2023-02-01 18:02:03+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.7 2024-05-07 12:55:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

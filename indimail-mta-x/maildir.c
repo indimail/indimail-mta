@@ -55,7 +55,7 @@ maildir_clean(stralloc *tmpname)
 }
 
 static int
-append(prioq *pq, stralloc *filenames, char *subdir, datetime_sec my_time)
+append(prioq *pq, stralloc *filenames, const char *subdir, datetime_sec my_time)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -120,7 +120,7 @@ maildir_scan(prioq *pq, stralloc *filenames, int flagnew, int flagcur)
 void
 getversion_maildir_c()
 {
-	static char    *x = "$Id: maildir.c,v 1.8 2023-12-23 09:13:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildir.c,v 1.8 2023-12-23 09:13:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

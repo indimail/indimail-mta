@@ -8,6 +8,6 @@
 #define MAILDIR_CHILD_H
 #include <stralloc.h>
 
-int             maildir_deliver(char *, stralloc *, stralloc *, char *);
+int             maildir_deliver(const char *, stralloc *, stralloc *, const char *);
 
 #endif

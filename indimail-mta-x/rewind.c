@@ -21,7 +21,7 @@ main(void)
 void
 getversion_rewind_c()
 {
-	static char    *x = "$Id: rewind.c,v 1.3 2004-10-22 20:29:59+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: rewind.c,v 1.3 2004-10-22 20:29:59+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

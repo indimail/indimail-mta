@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.14  2024-05-07 12:56:24+05:30  Cprogrammer
+ * use const char * instead of char *
+ *
  * Revision 1.13  2021-07-20 23:20:18+05:30  Cprogrammer
  * removed use of register
  *
@@ -71,7 +74,7 @@ static int      numanswers;
 static char     name[MAXDNAME];
 
 static int
-resolve(char *domain, int type)
+resolve(const char *domain, int type)
 {
 	int             n, i;
 	unsigned char  *ptr;
@@ -213,7 +216,7 @@ findtxt(int wanttype, int *txt_strlen)
 }
 
 static int
-dns_txtplus(char *domain)
+dns_txtplus(const char *domain)
 {
 	int             r, len, total;
 	char           *ptr;
@@ -277,10 +280,10 @@ dns_txtplus(char *domain)
  * Note that it never returns NULL.
  */
 char           *
-dns_text(char *dn)
+dns_text(const char *dn)
 {
 	int             r;
-	
+
 	switch (r = dns_txtplus(dn))
 	{
 	case DNS_MEM:
@@ -337,7 +340,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.13 2021-07-20 23:20:18+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.14 2024-05-07 12:56:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

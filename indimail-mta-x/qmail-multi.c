@@ -43,10 +43,8 @@ main(int argc, char **argv)
 void
 getversion_qmail_multi_c()
 {
-	static char    *x = "$Id: qmail-multi.c,v 1.4 2023-12-25 09:30:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-multi.c,v 1.4 2023-12-25 09:30:34+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidqmultih;
-	x = sccsidmailfilterh;
 	x++;
 }
 #endif

@@ -169,7 +169,7 @@ rwnotice(token822_alloc *addr)
 void
 finishheader()
 {
-	char           *qqx;
+	const char     *qqx;
 	struct qmail    qqt;
 
 	if (!flagreceipt)
@@ -254,7 +254,7 @@ main(int argc, char **argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.15 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qreceipt.c,v 1.15 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

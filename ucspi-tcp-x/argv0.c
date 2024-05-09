@@ -24,7 +24,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_argv0_c()
 {
-	static char    *x = "$Id: argv0.c,v 1.2 2021-05-12 20:58:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: argv0.c,v 1.2 2021-05-12 20:58:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

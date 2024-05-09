@@ -42,14 +42,14 @@ static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -58,7 +58,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
@@ -236,7 +236,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	static char    *x = "$Id: qcat.c,v 1.11 2024-02-22 08:35:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qcat.c,v 1.11 2024-02-22 08:35:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

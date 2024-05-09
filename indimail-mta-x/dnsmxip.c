@@ -88,7 +88,7 @@ main(int argc, char **argv)
 void
 getversion_dnsmxip_c()
 {
-	static char    *x = "$Id: dnsmxip.c,v 1.11 2023-09-23 21:21:52+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsmxip.c,v 1.11 2023-09-23 21:21:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

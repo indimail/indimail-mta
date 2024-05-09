@@ -141,7 +141,8 @@ do_control()
 int
 main(int argc, char **argv)
 {
-	char           *ext2, *host, *sender, *qqx;
+	char           *ext2, *host, *sender;
+	const char     *qqx;
 	char            inbuf[SUBSTDIO_INSIZE], outbuf[1], num[FMT_ULONG];
 	substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
 	substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
@@ -221,7 +222,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.5 2023-03-08 20:06:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: srsfilter.c,v 1.5 2023-03-08 20:06:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

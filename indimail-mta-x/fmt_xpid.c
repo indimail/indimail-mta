@@ -43,7 +43,7 @@ fmt_xpid(register char *s, register pid_t u, const int n)
 void
 getversion_fmt_xpid_c()
 {
-	static char    *x = "$Id: fmt_xpid.c,v 1.2 2004-10-22 20:25:26+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: fmt_xpid.c,v 1.2 2004-10-22 20:25:26+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

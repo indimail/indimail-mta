@@ -31,7 +31,7 @@ die_nomem()
 	_exit(111);
 }
 
-char           *usage =
+const char     *usage =
 		"usage: cramresp -t AUTH_TYPE user password challenge\n"
 		"    AUTH_TYPE    One of CRAM-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA224,\n"
 		"                 CRAM-SHA384, CRAM-SHA512\n"

@@ -62,7 +62,7 @@ main(argc, argv)
 void
 getversion_maildirmake_c()
 {
-	static char    *x = "$Id: qmaildirmake.c,v 1.7 2020-11-24 13:46:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmaildirmake.c,v 1.7 2020-11-24 13:46:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

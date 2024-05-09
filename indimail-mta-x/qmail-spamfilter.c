@@ -43,7 +43,7 @@ main(int argc, char **argv)
 	struct substdio ssin, ssout;
 	stralloc        spamfilterargs = { 0 }, q = { 0 };
 	char            inbuf[2048], outbuf[2048];
-	char           *ptr, *spamf;
+	const char     *ptr, *spamf;
 	char          **Argv;
 
 	if (chdir("/") == -1)
@@ -235,9 +235,8 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	static char    *x = "$Id: qmail-spamfilter.c,v 1.10 2024-01-07 01:44:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-spamfilter.c,v 1.10 2024-01-07 01:44:35+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidqmultih;
 	x = sccsidmakeargsh;
 	x = sccsidmktempfileh;
 	x++;

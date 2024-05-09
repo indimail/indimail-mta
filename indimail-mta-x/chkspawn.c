@@ -66,7 +66,7 @@ limit in conf-spawn be at most ");
 void
 getversion_chkspawn_c()
 {
-	static char    *x = "$Id: chkspawn.c,v 1.6 2020-11-24 13:44:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: chkspawn.c,v 1.6 2020-11-24 13:44:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

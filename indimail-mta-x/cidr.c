@@ -190,7 +190,7 @@ error:
 void
 getversion_cidr_c()
 {
-	static char    *x = "$Id: cidr.c,v 1.2 2018-05-07 17:06:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cidr.c,v 1.2 2018-05-07 17:06:36+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

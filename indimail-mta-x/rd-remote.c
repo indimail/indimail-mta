@@ -22,7 +22,7 @@
 static stralloc rdomain;
 
 void
-out(char *s)
+out(const char *s)
 {
 	if (substdio_puts(subfdoutsmall, s) == -1)
 		_exit(0);
@@ -110,7 +110,7 @@ temp_write()
  * "Dexample.org does not like recipient\0\n"
  */
 void
-print_report(char *s1, char *msg, int msglen)
+print_report(const char *s1, const char *msg, int msglen)
 {
 	out(s1);
 	if (substdio_put(subfdoutsmall, msg, msglen) == -1)
@@ -129,7 +129,7 @@ static stralloc canonhost = { 0 };
 static stralloc canonbox = { 0 };
 
 void	 /*- host has to be canonical, box has to be quoted */
-addrmangle(stralloc *saout, char *sender)
+addrmangle(stralloc *saout, const char *sender)
 {
 	int             j;
 
@@ -165,11 +165,12 @@ main(int argc, char **argv)
 					match;
 	int             pipefd[2], errpipe[2];
 	unsigned long   size;
-	char           *ptr, *cptr, *addr, *errStr, *dest_addr, *dest_domain,
+	const char     *errStr;
+	char           *ptr, *cptr, *addr, *dest_addr, *dest_domain,
 				   *prefix;
 	char            ssibuf[512], ssobuf[512], ssebuf[512], strnum[FMT_ULONG];
-	char           *(qrargs[]) = { "queue-remote", 0, 0, 0, 0, 0, (char *) 0};
-	char           *(mdargs[]) = { "maildirdeliver", 0, (char *) 0};
+	const char     *(qrargs[]) = { "queue-remote", 0, 0, 0, 0, 0, (char *) 0};
+	const char     *(mdargs[]) = { "maildirdeliver", 0, (char *) 0};
 	pid_t           pid;
 	substdio        ssi, sso, sse;
 	stralloc        q = {0}, sender = {0}, recip = {0}, dto = {0}, line = {0};
@@ -306,7 +307,7 @@ main(int argc, char **argv)
 				temp_nomem();
 			mdargs[0] = q.s;
 			mdargs[1] = dest_addr;
-			execv(q.s, mdargs); /*- run maildirdeliver */
+			execv(q.s, (char **) mdargs); /*- run maildirdeliver */
 		} else {
 			if (!stralloc_copys(&q, auto_prefix) ||
 					!stralloc_catb(&q, "/sbin/qmail-remote", 18) ||
@@ -320,7 +321,7 @@ main(int argc, char **argv)
 			strnum[fmt_ulong(strnum, size + dto.len)] = 0;
 			qrargs[4] = strnum;
 			qrargs[5] = dest_addr;
-			execv(q.s, qrargs); /*- run qmail-remote */
+			execv(q.s, (char **) qrargs); /*- run qmail-remote */
 		}
 		_exit(111);
 	default:

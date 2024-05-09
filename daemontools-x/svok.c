@@ -77,7 +77,7 @@ main(int argc, char **argv)
 void
 getversion_svok_c()
 {
-	static char    *x = "$Id: svok.c,v 1.6 2023-03-04 14:40:57+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svok.c,v 1.6 2023-03-04 14:40:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

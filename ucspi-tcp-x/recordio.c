@@ -40,7 +40,7 @@ static int      rightlen;
 static int      rightpos;
 
 void
-record(char *buf, int len, char *direction)	/*- 1 <= len <= 256 */
+record(const char *buf, int len, const char *direction)	/*- 1 <= len <= 256 */
 {
 	int             i;
 
@@ -210,7 +210,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_recordio_c()
 {
-	static char    *x = "$Id: recordio.c,v 1.4 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: recordio.c,v 1.4 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -26,12 +26,12 @@ struct qmail
 };
 
 int             qmail_open(struct qmail *);
-void            qmail_put(struct qmail *, char *, unsigned int);
-void            qmail_puts(struct qmail *, char *);
-void            qmail_from(struct qmail *, char *);
-void            qmail_to(struct qmail *, char *);
+void            qmail_put(struct qmail *, const char *, unsigned int);
+void            qmail_puts(struct qmail *, const char *);
+void            qmail_from(struct qmail *, const char *);
+void            qmail_to(struct qmail *, const char *);
 void            qmail_fail(struct qmail *);
-char           *qmail_close(struct qmail *);
+const char     *qmail_close(struct qmail *);
 unsigned long   qmail_qp(struct qmail *);
 
 #define QQ_OK                  0

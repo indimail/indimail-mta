@@ -163,7 +163,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.13 2024-02-12 19:51:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscanq.c,v 1.13 2024-02-12 19:51:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

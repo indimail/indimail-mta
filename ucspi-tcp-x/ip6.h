@@ -28,12 +28,12 @@
 #include <byte.h>
 #include <stralloc.h>
 
-unsigned int    rblip6_scan(char *, char ip[16]);
+unsigned int    rblip6_scan(const char *, char ip[16]);
 unsigned int    ip6_fmt(char *, char ip[16]);
 unsigned int    ip6_fmt_exp(char *, char ip[16]);
 unsigned int    ip6_fmt_flat(char *, char ip[16]);
 int             ip6tobitstring(char *, stralloc *, unsigned int);
-unsigned int    ip6_expandaddr(char *src, stralloc *destination);
+unsigned int    ip6_expandaddr(const char *src, stralloc *destination);
 unsigned int    ip6_compactaddr(char *s, char ip[16]);
 
 /*

@@ -8,6 +8,6 @@
 #define QCOUNT_DIR_H
 #include <sys/types.h>
 
-ssize_t         qcount_dir(char *, size_t *);
+ssize_t         qcount_dir(const char *, size_t *);
 
 #endif

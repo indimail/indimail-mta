@@ -31,7 +31,7 @@
 static stralloc fline = { 0 }, _rate_expr = { 0 };
 
 int
-get_rate(char *expression, double *rate)
+get_rate(const char *expression, double *rate)
 {
 	struct val      result;
 	struct vartable *vt;
@@ -72,7 +72,7 @@ get_rate(char *expression, double *rate)
  * 2 if no rate control definition exists
  */
 int
-is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
+is_rate_ok(const char *_file, const char *_rate_exp, unsigned long *e, double *c,
 		double *r, datetime_sec *time_needed)
 {
 	int             at, wfd, rfd, match, line_no = -1, rate_int,
@@ -81,7 +81,7 @@ is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
 	char            stime[FMT_ULONG], etime[FMT_ULONG], ecount[FMT_ULONG];
 	double          conf_rate, cur_rate = 0.0;
 	char            inbuf[2048], outbuf[1024];
-	char           *ptr, *rate_exp, *file;
+	const char     *ptr, *rate_exp, *file;
 	struct substdio ssin, ssout;
 	datetime_sec    starttime, endtime;
 	struct stat     statbuf;
@@ -221,7 +221,7 @@ is_rate_ok(char *_file, char *_rate_exp, unsigned long *e, double *c,
 void
 getversion_do_rate_c()
 {
-	static char    *x = "$Id: do_rate.c,v 1.3 2022-04-13 07:48:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: do_rate.c,v 1.3 2022-04-13 07:48:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;

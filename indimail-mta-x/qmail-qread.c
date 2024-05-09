@@ -242,7 +242,7 @@ get_arguments(int argc, char **argv)
 }
 
 void
-putcounts(char *pre_str, int lCount, int rCount, int bCount, int tCount)
+putcounts(const char *pre_str, int lCount, int rCount, int bCount, int tCount)
 {
 	char            foo[FMT_ULONG];
 
@@ -600,7 +600,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	static char    *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 15:10:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qread.c,v 1.46 2023-02-08 15:10:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

@@ -104,7 +104,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822headerfilter_c()
 {
-	static char    *x = "$Id: 822headerfilter.c,v 1.5 2024-01-23 01:20:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822headerfilter.c,v 1.5 2024-01-23 01:20:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -14,7 +14,7 @@
 #define CONTROL_H
 #include "stralloc.h"
 
-int             control_readint(int *, char *);
-int             control_readline(stralloc *, char *);
+int             control_readint(int *, const char *);
+int             control_readline(stralloc *, const char *);
 void            striptrailingwhitespace(stralloc *);
 #endif

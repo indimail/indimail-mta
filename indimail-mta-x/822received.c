@@ -220,7 +220,7 @@ main(int argc, char **argv)
 void
 getversion_822received_c()
 {
-	static char    *x = "$Id: 822received.c,v 1.11 2023-01-03 16:27:51+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822received.c,v 1.11 2023-01-03 16:27:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

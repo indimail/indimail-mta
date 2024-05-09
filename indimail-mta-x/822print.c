@@ -59,7 +59,7 @@ putspaces(int len)
 }
 
 void
-putformat(char *buf, unsigned int len)
+putformat(const char *buf, unsigned int len)
 {
 	while (len > 1) {
 		switch (*buf++)
@@ -78,7 +78,7 @@ putformat(char *buf, unsigned int len)
 }
 
 void
-format(stralloc *out, char *buf, int len, char *pre, char *style1, char *style2)
+format(stralloc *out, const char *buf, int len, const char *pre, const char *style1, const char *style2)
 {
 	char            ch;
 	char            ch2;
@@ -186,7 +186,7 @@ doleftright()
 }
 
 void
-putvalue(stralloc *a, char *pre)
+putvalue(stralloc *a, const char *pre)
 {
 	int             j;
 
@@ -214,7 +214,7 @@ putfields(stralloc *a)
 }
 
 void
-putaddr(stralloc *a, char *pre, char *post, char *style)
+putaddr(stralloc *a, const char *pre, const char *post, const char *style)
 {
 	int             i;
 	int             j;
@@ -429,7 +429,7 @@ main()
 void
 getversion_822print_c()
 {
-	static char    *x = "$Id: 822print.c,v 1.9 2023-01-03 16:27:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822print.c,v 1.9 2023-01-03 16:27:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

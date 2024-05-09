@@ -14,7 +14,7 @@
 #include "dns.h"
 
 unsigned int
-dns_packet_copy(char *buf, unsigned int len, unsigned int pos, char *out, unsigned int outlen)
+dns_packet_copy(const char *buf, unsigned int len, unsigned int pos, char *out, unsigned int outlen)
 {
 	while (outlen)
 	{
@@ -31,7 +31,7 @@ dns_packet_copy(char *buf, unsigned int len, unsigned int pos, char *out, unsign
 }
 
 unsigned int
-dns_packet_skipname(char *buf, unsigned int len, unsigned int pos)
+dns_packet_skipname(const char *buf, unsigned int len, unsigned int pos)
 {
 	unsigned char   ch;
 
@@ -54,7 +54,7 @@ dns_packet_skipname(char *buf, unsigned int len, unsigned int pos)
 }
 
 unsigned int
-dns_packet_getname(char *buf, unsigned int len, unsigned int pos, char **d)
+dns_packet_getname(const char *buf, unsigned int len, unsigned int pos, char **d)
 {
 	unsigned int    loop = 0;
 	unsigned int    state = 0;

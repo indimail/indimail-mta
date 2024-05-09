@@ -55,7 +55,7 @@ compat:
 void
 getversion_socket_tcp6_c()
 {
-	static char    *x = "$Id: socket_tcp6.c,v 1.3 2018-05-30 23:26:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: socket_tcp6.c,v 1.3 2018-05-30 23:26:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

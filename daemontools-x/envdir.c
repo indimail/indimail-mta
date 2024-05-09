@@ -38,7 +38,7 @@
 static char   **orig_env;
 
 no_return void
-die_usage(char *str)
+die_usage(const char *str)
 {
 	if (str)
 		strerr_die3x(100, FATAL, str, "\nusage: envdir [-cwi] dir child");
@@ -49,7 +49,7 @@ die_usage(char *str)
 int
 main(int argc, char **argv)
 {
-	char           *fn, *err = (char *) 0;
+	const char     *fn, *err = (char *) 0;
 	char          **e;
 	int             i, opt, warn_on_error = 0, ignore_unreadable = 0,
 					unreadable_count = 0;
@@ -100,7 +100,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_main_c()
 {
-	static char    *x = "$Id: envdir.c,v 1.7 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: envdir.c,v 1.7 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

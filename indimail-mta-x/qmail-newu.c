@@ -197,7 +197,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	static char    *x = "$Id: qmail-newu.c,v 1.13 2023-02-12 13:28:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-newu.c,v 1.13 2023-02-12 13:28:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -73,7 +73,7 @@ static int      bigtodo;
 static uint     tcpto_size = TCPTO_BUFSIZ;
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (substdio_puts(subfdout, str) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
@@ -115,7 +115,7 @@ usage()
 }
 
 no_return void
-die_check(char *arg)
+die_check(const char *arg)
 {
 	substdio_put(subfderr, "\n", 1);
 	strerr_warn3(FATAL, arg, " failed checking qmail queue structure.\n"
@@ -135,7 +135,7 @@ die_rerun()
 }
 
 int
-qchown(char *name, uid_t uid, gid_t gid)
+qchown(const char *name, uid_t uid, gid_t gid)
 {
 	int             fd;
 
@@ -150,7 +150,7 @@ qchown(char *name, uid_t uid, gid_t gid)
 }
 
 int
-qchmod(char *name, mode_t mode)
+qchmod(const char *name, mode_t mode)
 {
 	int             fd;
 
@@ -185,7 +185,8 @@ confirm()
  * gid may be -1 on files for "unknown"
  */
 int
-check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t perm, char type, int size)
+check_item(const char *name, const char *owner, const char *group,
+		uid_t uid, gid_t gid, mode_t perm, char type, int size)
 {
 	struct stat     st;
 	int             fd = -1, ffd;
@@ -510,7 +511,8 @@ check_item(char *name, char *owner, char *group, uid_t uid, gid_t gid, mode_t pe
 }
 
 int
-check_files(char *directory, char *owner, char *group, uid_t uid, gid_t gid, mode_t perm)
+check_files(const char *directory, const char *owner, const char *group,
+		uid_t uid, gid_t gid, mode_t perm)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -539,7 +541,7 @@ check_files(char *directory, char *owner, char *group, uid_t uid, gid_t gid, mod
 }
 
 void
-warn_files(char *directory)
+warn_files(const char *directory)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -564,8 +566,9 @@ warn_files(char *directory)
 }
 
 int
-check_splits(char *directory, char *owner, char *group, char *fgroup,
-		uid_t dir_uid, gid_t dir_gid, mode_t dir_perm, gid_t file_gid, mode_t file_perm)
+check_splits(const char *directory, const char *owner, const char *group,
+		const char *fgroup, uid_t dir_uid, gid_t dir_gid, mode_t dir_perm,
+		gid_t file_gid, mode_t file_perm)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -604,7 +607,8 @@ check_splits(char *directory, char *owner, char *group, char *fgroup,
 }
 
 int
-rename_mess(char *dir, char *part, char *new_part, char *old_filename, char *new_filename)
+rename_mess(const char *dir, const char *part, const char *new_part,
+		const char *old_filename, const char *new_filename)
 {
 	int             s;
 
@@ -741,7 +745,7 @@ fix_part(char *part, int part_num)
 }
 
 int
-clean_tmp(char *directory, char *part)
+clean_tmp(const char *directory, const char *part)
 {
 	DIR            *dir;
 	direntry       *d;
@@ -812,9 +816,9 @@ fix_names()
 
 typedef struct queue_t
 {
-	char *name;
-	char *user;
-	char *group;
+	const char *name;
+	const char *user;
+	const char *group;
 	uid_t uid;
 	gid_t gid;
 	mode_t perm_d;
@@ -1002,10 +1006,10 @@ check_stray_parts()
 int
 find_strays()
 {
-	char           *dir_s1[] = {"info", "local", "remote", 0};
-	char           *dir_s2[] = {"todo", "intd", 0};
-	char           *dir_s3[] = {"bounce", 0};
-	char          **ptr;
+	const char     *dir_s1[] = {"info", "local", "remote", 0};
+	const char     *dir_s2[] = {"todo", "intd", 0};
+	const char     *dir_s3[] = {"bounce", 0};
+	const char    **ptr;
 	int             save;
 
 	if (!stralloc_copy(&check_dir, &queue_dir))
@@ -1131,7 +1135,7 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	static char    *x = "$Id: queue-fix.c,v 1.33 2024-02-11 23:22:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: queue-fix.c,v 1.33 2024-02-11 23:22:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

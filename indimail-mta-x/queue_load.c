@@ -17,7 +17,7 @@
 #include "queue_load.h"
 
 void
-queue_load(char *argv0, int *qcount, int *qconf, double total_load[2], QDEF **queue)
+queue_load(const char *argv0, int *qcount, int *qconf, double total_load[2], QDEF **queue)
 {
 	int             shm, i, j, queue_count, queue_conf, len, x, min = -1, lcur = 0, rcur = 0;
 	double          load_l, load_r;
@@ -104,7 +104,7 @@ queue_load(char *argv0, int *qcount, int *qconf, double total_load[2], QDEF **qu
 void
 getversion_queue_load_c()
 {
-	static char    *x = "$Id: queue_load.c,v 1.3 2022-04-23 00:14:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: queue_load.c,v 1.3 2022-04-23 00:14:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -16,6 +16,6 @@
 #define _GNU_SOURCE
 #include <dlfcn.h>
 
-int             dlnamespace(char *, char **, Lmid_t *);
+int             dlnamespace(const char *, char **, Lmid_t *);
 
 #endif

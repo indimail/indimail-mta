@@ -49,7 +49,7 @@ main(int argc, char **argv)
 void
 getversion_readproctitle_c()
 {
-	static char    *x = "$Id: readproctitle.c,v 1.2 2004-10-22 20:29:53+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: readproctitle.c,v 1.2 2004-10-22 20:29:53+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

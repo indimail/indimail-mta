@@ -395,9 +395,8 @@ main(int argc, char *argv[])
 void
 getversion_qmail_qfilter_c()
 {
-	static char    *x = "$Id: qmail-qfilter.c,v 1.24 2024-02-20 22:25:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qfilter.c,v 1.24 2024-02-20 22:25:37+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidqmultih;
 	x++;
 }
 #endif

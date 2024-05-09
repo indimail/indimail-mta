@@ -14,10 +14,7 @@
 #include "headerbody.h"
 
 static int
-getsa(ss, sa, match)
-	substdio       *ss;
-	stralloc       *sa;
-	int            *match;
+getsa(substdio *ss, stralloc *sa, int *match)
 {
 	if (!*match)
 		return 0;
@@ -36,14 +33,9 @@ static stralloc line = { 0 };
 static stralloc nextline = { 0 };
 
 int
-headerbody(ss, dohf, hdone, dobl)
-	substdio       *ss;
-	void            (*dohf) ();
-	void            (*hdone) ();
-	void            (*dobl) ();
+headerbody(substdio *ss, void (*dohf) (), void (*hdone) (), void (*dobl) ())
 {
-	int             match;
-	int             flaglineok;
+	int             match, flaglineok;
 
 	match = 1;
 	flaglineok = 0;
@@ -115,7 +107,7 @@ headerbody(ss, dohf, hdone, dobl)
 void
 getversion_headerbody_c()
 {
-	static char    *x = "$Id: headerbody.c,v 1.3 2004-10-22 20:25:42+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: headerbody.c,v 1.3 2004-10-22 20:25:42+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

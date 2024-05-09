@@ -29,7 +29,7 @@ getaddressasbit(char *ip, int prefix, stralloc *ip4string)
 	int             count, i, sufcount = 0, pos = 0, len, posl;
 	unsigned long   num;
 #ifdef BITSUBSTITUTION
-	char           *letterarray = "abcdefghijklmnopqrstuvwxyz123456";
+	const char     *letterarray = "abcdefghijklmnopqrstuvwxyz123456";
 #endif
 
 	len = byte_chr(ip, str_len(ip), '/');

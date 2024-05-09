@@ -17,12 +17,12 @@
 #define _DELIVERY_RATE_H
 
 #ifndef	lint
-static char     sccsiddelivery_rateh[] = "$Id: delivery_rate.h,v 1.4 2022-01-30 08:31:17+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsiddelivery_rateh[] = "$Id: delivery_rate.h,v 1.4 2022-01-30 08:31:17+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #include <datetime.h>
 
-int             delivery_rate(char *domain, unsigned long id, datetime_sec *, int *, char *);
+int             delivery_rate(char *domain, unsigned long id, datetime_sec *, int *, const char *);
 
 #endif
 

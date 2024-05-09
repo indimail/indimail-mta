@@ -424,9 +424,7 @@ main(int argc, char **argv)
 #include <strerr.h>
 #define FATAL           "sslerator: fatal: "
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	strerr_warn2(FATAL, "SSL support not detected. HAVE_SSL not defined", 0);
 	return (1);
@@ -436,7 +434,7 @@ main(argc, argv)
 void
 getversion_sslerator_c()
 {
-	static char    *x = "$Id: sslerator.c,v 1.12 2023-08-20 18:50:17+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sslerator.c,v 1.12 2023-08-20 18:50:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

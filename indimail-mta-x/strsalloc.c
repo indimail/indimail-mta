@@ -27,7 +27,7 @@ GEN_ALLOC_append(strsalloc, stralloc, sa, len, a, 10, strsalloc_readyplus, strsa
 void
 getversion_strsalloc_c()
 {
-	static char    *x = "$Id: strsalloc.c,v 1.5 2020-11-22 23:12:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: strsalloc.c,v 1.5 2020-11-22 23:12:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

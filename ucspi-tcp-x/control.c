@@ -20,13 +20,12 @@
 #include <unistd.h>
 #include "control.h"
 
+typedef const char c_char;
 static char     inbuf[64];
 static stralloc line = { 0 };
 
 int
-control_readint(i, fn)
-	int            *i;
-	char           *fn;
+control_readint(int *i, const char *fn)
 {
 	unsigned long   u;
 
@@ -46,13 +45,11 @@ control_readint(i, fn)
 }
 
 int
-control_readline(sa, fn)
-	stralloc       *sa;
-	char           *fn;
+control_readline(stralloc *sa, const char *fn)
 {
 	substdio        ss;
 	int             fd, match;
-	static char    *controldir;
+	static c_char  *controldir;
 	static stralloc controlfile = {0};
 
 	if (*fn != '/' && *fn != '.') {
@@ -87,8 +84,7 @@ control_readline(sa, fn)
 }
 
 void
-striptrailingwhitespace(sa)
-	stralloc       *sa;
+striptrailingwhitespace(stralloc *sa)
 {
 	while (sa->len > 0) {
 		switch (sa->s[sa->len - 1])

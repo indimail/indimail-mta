@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h,v $
+ * Revision 1.5  2024-05-07 12:56:28+05:30  Cprogrammer
+ * use const char * instead of char *
+ *
  * Revision 1.4  2017-05-16 12:40:39+05:30  Cprogrammer
  * define DNS_SOFT, DNS_HARD and DNS_MEM
  *
@@ -51,4 +54,4 @@
 
 // Pass in the FQDN to get the TXT record
 int             DNSGetTXT(const char *szFQDN, char *Buffer, int nBufLen);
-char           *dns_text(char *szFQDN);
+char           *dns_text(const char *szFQDN);

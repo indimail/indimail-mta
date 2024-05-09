@@ -104,7 +104,7 @@ static stralloc tmpsa = { 0 };
 
 static int      (*lookup) () = res_query;
 #ifdef IPV6
-static int      iaafmt6(char *, ip6_addr *, char *);
+static int      iaafmt6(char *, ip6_addr *, const char *);
 #endif
 #ifdef HASTLSA
 static tlsarr   tlsaRR;
@@ -533,7 +533,7 @@ dns_ptr(stralloc *sa, ip_addr *ip4)
 
 #ifdef IPV6
 static int
-iaafmt6(char *s, ip6_addr *i6, char *dom)
+iaafmt6(char *s, ip6_addr *i6, const char *dom)
 {
 	int             j;
 	static char     data[] = "0123456789abcdef";
@@ -1024,7 +1024,7 @@ dns_tlsarrplus(tlsarralloc *ta, stralloc *sa)
 {
 	int             r, i = 0;
 	uint32_t        ttl;
-	char           *cp;
+	const char     *cp;
 
 	switch (resolve(sa, T_TLSA)) {
 	case DNS_MEM:
@@ -1067,7 +1067,7 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	static char    *x = "$Id: dns.c,v 1.39 2022-12-21 12:21:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns.c,v 1.39 2022-12-21 12:21:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

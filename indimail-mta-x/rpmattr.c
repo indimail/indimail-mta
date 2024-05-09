@@ -122,6 +122,6 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	static char    *x = "$Id: rpmattr.c,v 1.7 2021-06-27 11:36:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rpmattr.c,v 1.7 2021-06-27 11:36:54+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

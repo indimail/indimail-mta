@@ -52,7 +52,7 @@ main(int argc, char **argv)
 void
 getversion_822headerok_c()
 {
-	static char    *x = "$Id: 822headerok.c,v 1.5 2024-01-23 01:20:14+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822headerok.c,v 1.5 2024-01-23 01:20:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

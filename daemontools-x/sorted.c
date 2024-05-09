@@ -56,7 +56,7 @@ sorted_insert(sl, sa)
 void
 getversion_sorted_c()
 {
-	static char    *x = "$Id: sorted.c,v 1.3 2020-11-23 00:17:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sorted.c,v 1.3 2020-11-23 00:17:54+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

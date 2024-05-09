@@ -17,9 +17,9 @@
 #define _REPORT_H
 
 #ifndef	lint
-static char     sccsidreporth[] = "$Id: report.h,v 1.4 2022-01-30 09:38:19+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsidreporth[] = "$Id: report.h,v 1.4 2022-01-30 09:38:19+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-no_return void  report(int, char *, char *, char *, char *, char *, char *);
+no_return void  report(int, const char *, const char *, const char *, const char *, const char *, const char *);
 
 #endif

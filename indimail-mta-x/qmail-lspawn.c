@@ -304,7 +304,7 @@ copy_pwstruct(struct passwd *pw, char *recip, int at, int is_inactive)
 
 #ifdef ENABLE_VIRTUAL_PKG
 int
-set_pwstruct(char *recip, int at, char *libptr, void *phandle, int (*isvirtualdomain) (char *))
+set_pwstruct(char *recip, int at, const char *libptr, void *phandle, int (*isvirtualdomain) (const char *))
 {
 	int             f;
 	struct passwd  *pw;
@@ -376,10 +376,10 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 	int             f, at = at_t;
 	char           *ptr, *recip = recip_t;
 #ifdef ENABLE_VIRTUAL_PKG /*- for indimail */
-	char           *libptr, *tptr;
+	const char     *libptr, *tptr;
 	int             len;
 	extern void    *phandle;
-	int             (*isvirtualdomain) (char *);
+	int             (*isvirtualdomain) (const char *);
 #endif
 
 	if (!env_unset("QMAILREMOTE"))
@@ -491,7 +491,7 @@ noauthself: /*- deliver to local user in control/locals */
 				!stralloc_0(&q))
 			_exit (QLX_NOMEM);
 		args[0] = q.s;
-		args[1] = "--";
+		args[1] = (char *) "--";
 		args[2] = x; /*- n = user */
 		n = byte_chr(x, xlen, 0);
 		if (n++ == xlen)
@@ -566,7 +566,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	static char    *x = "$Id: qmail-lspawn.c,v 1.46 2023-12-20 11:13:33+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-lspawn.c,v 1.46 2023-12-20 11:13:33+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

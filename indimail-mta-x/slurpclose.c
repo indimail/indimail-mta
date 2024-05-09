@@ -45,7 +45,7 @@ slurpclose(fd, sa, bufsize)
 void
 getversion_slurpclose_c()
 {
-	static char    *x = "$Id: slurpclose.c,v 1.5 2004-10-22 20:30:28+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: slurpclose.c,v 1.5 2004-10-22 20:30:28+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

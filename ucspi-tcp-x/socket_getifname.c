@@ -19,7 +19,7 @@
 
 static char     ifname[IFNAMSIZ];
 
-char     *
+char *
 socket_getifname(uint32 interface)
 {
 	char           *tmp = if_indextoname(interface, ifname);
@@ -27,5 +27,5 @@ socket_getifname(uint32 interface)
 	if (tmp)
 		return tmp;
 	else
-		return "[unknown]";
+		return (char *) "[unknown]";
 }

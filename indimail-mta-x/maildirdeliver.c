@@ -79,7 +79,7 @@ main(int argc, char **argv)
 void
 getversion_maildirdeliver_c()
 {
-	static char    *x = "$Id: maildirdeliver.c,v 1.3 2023-09-13 19:36:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirdeliver.c,v 1.3 2023-09-13 19:36:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

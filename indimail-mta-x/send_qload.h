@@ -9,7 +9,7 @@
 #include "haslibrt.h"
 
 #ifdef HASLIBRT
-int             send_qload(char *, unsigned int, long, unsigned int);
+int             send_qload(const char *, unsigned int, long, unsigned int);
 #endif
 
 #endif

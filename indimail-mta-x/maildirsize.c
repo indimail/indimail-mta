@@ -159,7 +159,7 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	static char    *x = "$Id: maildirsize.c,v 1.12 2020-09-16 19:00:57+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirsize.c,v 1.12 2020-09-16 19:00:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

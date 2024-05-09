@@ -165,7 +165,7 @@ main(int argc, char **argv)
 void
 getversion_spipe_c()
 {
-	static char    *x = "$Id: spipe.c,v 1.5 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spipe.c,v 1.5 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

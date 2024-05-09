@@ -7,8 +7,10 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include "byte.h"
+#include "socket.h"
+
 int
-socket_acceptun(int s, struct sockaddr_un *un, char *socket_path)
+socket_acceptun(int s, struct sockaddr_un *un)
 {
 	unsigned int   dummy = sizeof(struct sockaddr_un);
 

@@ -155,7 +155,7 @@ main(int argc, char **argv)
 void
 getversion_ifaddr_c()
 {
-	static char    *x = "$Id: ifaddr.c,v 1.5 2024-01-23 01:21:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ifaddr.c,v 1.5 2024-01-23 01:21:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

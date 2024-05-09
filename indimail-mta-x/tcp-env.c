@@ -333,7 +333,7 @@ main(int argc, char **argv)
 void
 getversion_tcp_env_c()
 {
-	static char    *x = "$Id: tcp-env.c,v 1.14 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tcp-env.c,v 1.14 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

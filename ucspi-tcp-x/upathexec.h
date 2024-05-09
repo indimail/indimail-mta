@@ -19,11 +19,11 @@
 #ifndef PATHEXEC_H
 #define PATHEXEC_H
 
-void            upathexec_run(char *, char **, char **);
-int             upathexec_env(char *, char *);
+int             upathexec_env(const char *, const char *);
+void            upathexec_run(const char *, char **, char **);
 void            upathexec(char **);
 #ifdef LOAD_SHARED_OBJECTS
-void            load_shared(char *, char **, char **);
+void            load_shared(const char *, char **, char **);
 void            pathexec_dl(int, char **, char **, int (*) (int, char **, char **));
 #endif
 

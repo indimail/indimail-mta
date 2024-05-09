@@ -102,7 +102,7 @@ main()
 void
 getversion_tokenize_c()
 {
-	static char    *x = "$Id: tokenize.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tokenize.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

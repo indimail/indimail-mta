@@ -37,7 +37,7 @@
 #define SPF_DEFEXP   ""
 #endif
 
-int             spfcheck(char *);
+int             spfcheck(const char *);
 int             spfexplanation(stralloc *);
 int             spfinfo(stralloc *);
 

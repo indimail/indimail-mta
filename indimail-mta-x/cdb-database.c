@@ -123,7 +123,7 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	static char    *x = "$Id: cdb-database.c,v 1.4 2023-09-11 09:04:29+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdb-database.c,v 1.4 2023-09-11 09:04:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

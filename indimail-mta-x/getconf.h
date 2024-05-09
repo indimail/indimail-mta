@@ -10,7 +10,7 @@
 #ifndef GETCONF_H
 #define GETCONF_H
 
-int             getconf(stralloc *, char *, int, char *, char *);
-int             getconf_line(stralloc *, char *, int, char *, char *);
+int             getconf(stralloc *, const char *, int, const char *, const char *);
+int             getconf_line(stralloc *, const char *, int, const char *, const char *);
 
 #endif

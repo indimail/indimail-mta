@@ -39,10 +39,10 @@ extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
 extern void     (*in_mysql_free_result) (MYSQL_RES *);
 
-extern void    *loadLibrary(void **, char *, int *, char **);
-extern void    *getlibObject(char *, void **, char *, char **);
+extern void    *loadLibrary(void **, const char *, int *, const char *[]);
+extern void    *getlibObject(const char *, void **, const char *, const char *[]);
 extern void     closeLibrary(void **);
-extern int      initMySQLlibrary(char **);
+extern int      initMySQLlibrary(const char *[]);
 #endif
 
 #endif

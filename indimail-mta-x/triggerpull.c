@@ -34,7 +34,7 @@ triggerpull()
 void
 getversion_triggerpull_c()
 {
-	static char    *x = "$Id: triggerpull.c,v 1.6 2020-09-16 19:08:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: triggerpull.c,v 1.6 2020-09-16 19:08:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

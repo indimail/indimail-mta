@@ -11,9 +11,9 @@
 #define SMTP_PLUGIN_H
 typedef struct
 {
-	int             (*mail_func) (char *, char *, char **);
-	int             (*rcpt_func) (char *, char *, char *, char **);
-	int             (*data_func) (char *, char *, char *, char *, char **);
+	int             (*mail_func) (const char *, const char *, char **);
+	int             (*rcpt_func) (const char *, const char *, const char *, char **);
+	int             (*data_func) (const char *, const char *, const char *, const char *, char **);
 } PLUGIN;
 
 #endif

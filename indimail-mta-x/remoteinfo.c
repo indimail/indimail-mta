@@ -189,7 +189,7 @@ remoteinfo_get(saremote, salocal, timeout)
 void
 getversion_remoteinfo_c()
 {
-	static char    *x = "$Id: remoteinfo.c,v 1.7 2008-07-15 19:53:22+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: remoteinfo.c,v 1.7 2008-07-15 19:53:22+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

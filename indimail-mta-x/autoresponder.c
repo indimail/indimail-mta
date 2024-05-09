@@ -69,8 +69,8 @@ static int      opt_quiet, opt_copyinput, opt_nosend, opt_nolinks, msgfilefd, fi
 static int      liphostok, dtline_len, opt_laxmode;
 unsigned long   opt_maxmsgs = 1;
 time_t          when, opt_timelimit = 86400 * 7; /*- RFC 3834 */
-static char    *opt_subject_prefix = "Autoreply: Re: ";
-static char    *argv0, *dtline, *recipient, *from_addr = 0;
+static const char *opt_subject_prefix = "Autoreply: Re: ";
+static const char *argv0, *dtline, *recipient, *from_addr = 0;
 static char     ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT];
 static char     strnum[FMT_ULONG];
 substdio        ssin, ssout;
@@ -86,12 +86,12 @@ struct header
 	stralloc        resent_to;
 	stralloc        resent_cc;
 	stralloc        resent_bcc;
-	char           *date;
-	char           *bogosity;
-	char           *mailer;
-	char           *subject;
-	char           *messageid;
-	char           *importance;
+	const char     *date;
+	const char     *bogosity;
+	const char     *mailer;
+	const char     *subject;
+	const char     *messageid;
+	const char     *importance;
 };
 
 struct header header = {
@@ -110,11 +110,11 @@ struct header header = {
 	0,
 	0
 };
-char           *daytab[7] = {
+const char     *daytab[7] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
-char           *usage_str =
+const char     *usage_str =
 	" [OPTIONS] MSGFILE DIR\n"
 	"\n"
 	"OPTIONS\n"
@@ -142,7 +142,7 @@ char           *usage_str =
 
 /*- Ignore message and do not respond */
 no_return void
-ignore(char *msg)
+ignore(const char *msg)
 {
 	if (opt_quiet)
 		_exit(0);
@@ -157,12 +157,12 @@ ignore(char *msg)
 }
 
 void
-store_addr(stralloc *addrlist, char *line)
+store_addr(stralloc *addrlist, const char *line)
 {
 	char           *start, *ptr;
 
-	for(start = line;*start && isspace((int) *start);start++);
-	for (ptr = start;*ptr;ptr++) {
+	for(start = (char *) line;*start && isspace((int) *start);start++);
+	for (ptr = start; *ptr; ptr++) {
 		if (*ptr == ',' || *ptr == ';') {
 			*ptr = 0;
 			if (!stralloc_cats(addrlist, start) ||
@@ -184,8 +184,7 @@ stralloc        addr = { 0 }; /*- will be 0-terminated, if addrparse returns 1 *
  * modified
  */
 int
-addrparse(arg)
-	char           *arg;
+addrparse(const char *arg)
 {
 	int             i, flagesc, flagquoted;
 	ip_addr         ip;
@@ -266,7 +265,7 @@ addrparse(arg)
 }
 
 int
-match_addr(stralloc *addrlist, char *email_addr)
+match_addr(stralloc *addrlist, const char *email_addr)
 {
 	char           *ptr;
 	int             len;
@@ -294,7 +293,7 @@ match_addr(stralloc *addrlist, char *email_addr)
 }
 
 no_return void
-usage(char *msg)
+usage(const char *msg)
 {
 	if (msg) {
 		substdio_puts(subfderr, argv0);
@@ -457,7 +456,7 @@ void
 check_sender(stralloc *sender)
 {
 	int             i;
-	char           *errStr = 0;
+	const char     *errStr = 0;
 
 	/*- Ignore messages with an empty SENDER (sent from system) */
 	if (str_equal(sender->s, "mailer-daemon"))
@@ -501,11 +500,11 @@ check_sender(stralloc *sender)
 }
 
 void
-parse_header(char *str, unsigned length)
+parse_header(const char *str, unsigned length)
 {
 	int             pos, len;
-	char          **ptr;
-	char           *headertab[] = {
+	const char    **ptr;
+	const char     *headertab[] = {
 		"Return-Path:", /*-  0 */
 		"From:",        /*-  1 */
 		"To:",          /*-  2 */
@@ -540,8 +539,8 @@ parse_header(char *str, unsigned length)
 		ignore("Message already has my Delivered-To line");
 	else
 	if (!strncasecmp(str, "Auto-Submitted:", 15)) /*- RFC 3834 */ {
-		char           *start = str + 15;
-		char           *end;
+		const char     *start = str + 15;
+		const char     *end;
 
 		while (start < str + length && isspace((int) *start))
 			++start;
@@ -555,8 +554,8 @@ parse_header(char *str, unsigned length)
 			ignore("Message does not haveAuto-Submitted header as \"no\"");
 	} else
 	if (!strncasecmp(str, "Precedence:", 11)) {
-		char           *start = str + 11;
-		char           *end;
+		const char     *start = str + 11;
+		const char     *end;
 
 		while (start < str + length && isspace((int) *start))
 			++start;
@@ -567,11 +566,11 @@ parse_header(char *str, unsigned length)
 			!strncasecmp(start, "list", end - start))
 			ignore("Message has a junk, bulk, or list precedence header");
 	} else
-	for(pos = 0, ptr = headertab;*ptr;ptr++,pos++) {
+	for(pos = 0, ptr = headertab; *ptr; ptr++, pos++) {
 		len = str_len(*ptr);
 		if (!strncasecmp(str, *ptr, len)) {
-			char           *start = str + len;
-			char           *end = str + length - 1;
+			const char     *start = str + len;
+			const char     *end = str + length - 1;
 			char           *cptr1, *cptr2;
 			int             i = 0;
 
@@ -583,7 +582,7 @@ parse_header(char *str, unsigned length)
 			}
 			if (!(cptr1 = alloc(length - (start - str) - i + 1)))
 				strerr_die2x(111, FATAL, "out of memory");
-			for(cptr2 = cptr1;start != end + 1;start++)
+			for(cptr2 = cptr1; start != end + 1; start++)
 				*cptr2++ = *start;
 			*cptr2 = 0;
 			switch (pos)
@@ -640,7 +639,7 @@ parse_header(char *str, unsigned length)
 }
 
 int
-popen_inject(char *sender)
+popen_inject(const char *sender)
 {
 	char           *(args[6]);
 	stralloc        bin = {0};
@@ -662,10 +661,10 @@ popen_inject(char *sender)
 				!stralloc_0(&bin))
 			strerr_die2x(111, FATAL, "out of memory");
 		args[0] = bin.s;
-		args[1] = "-a";
-		args[2] = "-f";
-		args[3] = "";
-		args[4] = sender;
+		args[1] = (char *) "-a";
+		args[2] = (char *) "-f";
+		args[3] = (char *) "";
+		args[4] = (char *) sender;
 		args[5] = 0;
 		close(fds[1]);
 		if (!env_unset("QMAILNAME"))
@@ -726,7 +725,7 @@ pclose_inject(int fdout)
 }
 
 void
-parseMessage_file(stralloc *line, struct datetime *dt, char *ldbuf)
+parseMessage_file(stralloc *line, struct datetime *dt, const char *ldbuf)
 {
 	static int      saw_percent = 0;
 	ssize_t         todo, incr;
@@ -859,7 +858,7 @@ parseMessage_file(stralloc *line, struct datetime *dt, char *ldbuf)
 }
 
 int
-count_history(char *sender, unsigned max)
+count_history(const char *sender, unsigned max)
 {
 	DIR            *dir = opendir(".");
 	struct dirent  *entry;
@@ -946,7 +945,7 @@ main(int argc, char *argv[])
 #ifdef HAVESRS
 	int             len, do_srs = 0, at;
 #endif
-	char           *sender, *dtrecip, *host, *ptr;
+	const char     *sender, *dtrecip, *host, *ptr;
 	char            dbuf[DATE822FMT];
 #ifdef MIME
 	char            num[FMT_ULONG];
@@ -1251,7 +1250,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	static char    *x = "$Id: autoresponder.c,v 1.42 2024-02-08 19:36:51+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: autoresponder.c,v 1.42 2024-02-08 19:36:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmktempfileh;

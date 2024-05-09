@@ -27,8 +27,8 @@ main(int argc, char **argv)
 {
 	int             childrc = -1, i, u, flaglog = 0;
 	void           *handle;
-	int             (*func) (char *);
-	char           *messfn, *error, *queue_plugin_symbol, *plugindir;
+	int             (*func) (const char *);
+	const char     *messfn, *error, *queue_plugin_symbol, *plugindir;
 	stralloc        plugin = { 0 };
 
 	if (uidinit(1, 1) == -1)
@@ -106,7 +106,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	static char    *x = "$Id: qhpsi.c,v 1.12 2023-10-27 16:11:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qhpsi.c,v 1.12 2023-10-27 16:11:40+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
 

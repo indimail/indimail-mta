@@ -36,7 +36,7 @@ static stralloc Desc = { 0 };
 void            die_nomem(void); /*- defined in qmail-smtpd.c */
 
 int
-bodycheck(stralloc *body, stralloc *line, char **desc, int in_header)
+bodycheck(stralloc *body, stralloc *line, const char **desc, int in_header)
 {
 	char            errbuf[512];
 	int             len, tmp_len, count, retval, header_check, body_check;
@@ -210,7 +210,7 @@ bodycheck_free()
 void
 getversion_bodycheck_c()
 {
-	static char    *x = "$Id: bodycheck.c,v 1.5 2009-01-06 20:43:56+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: bodycheck.c,v 1.5 2009-01-06 20:43:56+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -47,6 +47,6 @@ extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
 extern void     (*in_mysql_free_result) (MYSQL_RES *);
 
-extern int      initMySQLlibrary(char **);
+extern int      initMySQLlibrary(const char *errstr[]);
 
 #endif

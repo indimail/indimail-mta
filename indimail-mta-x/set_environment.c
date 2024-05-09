@@ -41,9 +41,9 @@
 static stralloc tmp = { 0 };
 
 void
-set_environment(char *warn, char *fatal, int root_rc)
+set_environment(const char *warn, const char *fatal, int root_rc)
 {
-	char           *qbase, *home, *err;
+	const char     *qbase, *home, *err;
 	char           **e;
 	int             i, unreadable = 0;
 
@@ -91,7 +91,7 @@ set_environment(char *warn, char *fatal, int root_rc)
 void
 getversion_set_environment_c()
 {
-	static char    *x = "$Id: set_environment.c,v 1.9 2023-05-31 12:06:05+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: set_environment.c,v 1.9 2023-05-31 12:06:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

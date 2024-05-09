@@ -9,9 +9,10 @@
 #include <sys/un.h>
 #include "str.h"
 #include "byte.h"
+#include "socket.h"
 
 int
-socket_bindun(int s, char *socket_path)
+socket_bindun(int s, const char *socket_path)
 {
 	struct sockaddr_un localunaddr;
 

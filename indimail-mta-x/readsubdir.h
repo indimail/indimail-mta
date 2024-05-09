@@ -25,11 +25,11 @@ typedef struct readsubdir
 	DIR            *dir;
 	int             pos;
 	int             split;
-	char           *name;
+	const char     *name;
 	void            (*pause) ();
 } readsubdir;
 
-void            readsubdir_init(readsubdir *, char *, int, void (*pause) ());
+void            readsubdir_init(readsubdir *, const char *, int, void (*pause) ());
 int             readsubdir_next(readsubdir *, unsigned long *);
 char           *readsubdir_name(readsubdir *);
 

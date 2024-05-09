@@ -7,6 +7,6 @@
 #ifndef _SET_QUEUEDIR_H
 #define _SET_QUEUEDIR_H
 
-char           *set_queuedir(char *, char *);
+const char     *set_queuedir(const char *, const char *);
 
 #endif

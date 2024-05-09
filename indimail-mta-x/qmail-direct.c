@@ -63,7 +63,7 @@ cleanup()
 }
 
 no_return void
-die(int e, char *str)
+die(int e, const char *str)
 {
 	cleanup();
 	if (qm_custom_err)
@@ -135,7 +135,7 @@ received_setup()
 }
 
 unsigned int
-fmtqfn(char *s, char *dirslash, unsigned long id, char *suffix)
+fmtqfn(char *s, const char *dirslash, unsigned long id, const char *suffix)
 {
 	unsigned int    len;
 	unsigned int    i;
@@ -160,7 +160,7 @@ fmtqfn(char *s, char *dirslash, unsigned long id, char *suffix)
 }
 
 char           *
-fnnum(char *dirslash, char *suffix)
+fnnum(const char *dirslash, const char *suffix)
 {
 	char           *s;
 
@@ -537,11 +537,9 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	static char    *x = "$Id: qmail-direct.c,v 1.13 2023-12-25 09:40:23+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-direct.c,v 1.13 2023-12-25 09:40:23+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidpidopenh;
-	if (x)
-		x++;
+	x++;
 }
 
 /*

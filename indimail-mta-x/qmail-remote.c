@@ -141,7 +141,7 @@ static char    *msgsize, *use_auth_smtp;
 static char   **my_argv;
 static int      my_argc;
 #ifdef TLS
-static char    *ssl_err_str = NULL;
+static const char *ssl_err_str = NULL;
 static SSL     *ssl;
 static int      notls = 0;
 static stralloc notlshosts = { 0 } ;
@@ -177,7 +177,8 @@ static CONSTMAP mapnosignlocals;
 #endif
 
 #if defined(TLS) && defined(HASTLSA)
-static char    *do_tlsa = NULL, *tlsadomainsfn = NULL;
+static char    *do_tlsa = NULL;
+static c_char  *tlsadomainsfn = NULL;
 static int      use_daned = 0;
 static tlsarralloc ta = { 0 };
 static stralloc hexstring = { 0 };
@@ -204,14 +205,14 @@ typedef enum {
 void            temp_nomem();
 
 void
-out(char *s)
+out(const char *s)
 {
 	if (substdio_puts(subfdoutsmall, s) == -1)
 		_exit(0);
 }
 
 void
-my_error(char *s1, char *s2, char *s3)
+my_error(const char *s1, const char *s2, const char *s3)
 {
 	if (substdio_puts(subfderr, s1) == -1)
 		_exit(0);
@@ -241,7 +242,7 @@ my_error(char *s1, char *s2, char *s3)
 int
 run_script(char code, int succ)
 {
-	char           *prog, *str;
+	const char     *prog, *str;
 	char            remote_code[2] = "\0\0";
 	char          **args;
 	int             child, wstat, i;
@@ -360,7 +361,7 @@ extern void _exit (int __status) __attribute__ ((__noreturn__));
  * execute user definded script/executable using run_script()
  */
 no_return void
-zerodie(char *s1, int succ)
+zerodie(const char *s1, int succ)
 {
 #ifdef TLS
 	if (ssl) {
@@ -524,7 +525,7 @@ temp_chdir()
 }
 
 no_return void
-temp_control(char *arg1, char *arg2)
+temp_control(const char *arg1, const char *arg2)
 {
 	out("Z");
 	out(arg1);
@@ -545,7 +546,7 @@ temp_control(char *arg1, char *arg2)
 }
 
 no_return void
-temp_cdb(char *arg)
+temp_cdb(const char *arg)
 {
 	out("Z");
 	out(arg);
@@ -562,7 +563,7 @@ temp_cdb(char *arg)
 no_return void
 perm_partialline()
 {
-	char           *r = "DSMTP cannot transfer messages with partial final lines. (#5.6.2)\n";
+	const char     *r = "DSMTP cannot transfer messages with partial final lines. (#5.6.2)\n";
 
 	out(r);
 	if (!stralloc_copys(&smtptext, r + 1))
@@ -576,7 +577,7 @@ perm_partialline()
 no_return void
 perm_usage()
 {
-	char           *r = "DI (qmail-remote) was invoked improperly. (#5.3.5)\n";
+	const char     *r = "DI (qmail-remote) was invoked improperly. (#5.3.5)\n";
 
 	out(r);
 	if (!stralloc_copys(&smtptext, r + 3))
@@ -590,7 +591,7 @@ perm_usage()
 no_return void
 perm_dns()
 {
-	char           *r = "DSorry, I couldn't find any host named ";
+	const char     *r = "DSorry, I couldn't find any host named ";
 
 	out(r);
 	outsafe(&host);
@@ -607,7 +608,7 @@ perm_dns()
 no_return void
 perm_nomx()
 {
-	char           *r = "DSorry, I couldn't find a mail exchanger or IP address. (#5.4.4)\n";
+	const char     *r = "DSorry, I couldn't find a mail exchanger or IP address. (#5.4.4)\n";
 
 	out(r);
 	if (!stralloc_copys(&smtptext, r + 1))
@@ -621,7 +622,7 @@ perm_nomx()
 no_return void
 perm_ambigmx()
 {
-	char           *r = "DSorry. Although I'm listed as a best-preference MX or A for that host,\nit isn't in my ";
+	const char     *r = "DSorry. Although I'm listed as a best-preference MX or A for that host,\nit isn't in my ";
 
 	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
@@ -721,7 +722,7 @@ dropped()
 }
 
 void
-temp_noconn_out(char *s)
+temp_noconn_out(const char *s)
 {
 	out(s);
 	if (!stralloc_cats(&smtptext, smtptext.len ? s : s + 1))
@@ -1010,17 +1011,17 @@ outsmtptext()
 
 no_return void
 #ifdef  HAVE_STDARG_H
-quit(int code, int die, char *prepend, ...)
+quit(int code, int die, const char *prepend, ...)
 #else
 quit(va_alist)
 va_dcl
 #endif
 {
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
 	int             code, die;
-	char           *prepend;
+	const char     *prepend;
 #endif
 
 #ifdef HAVE_STDARG_H
@@ -1029,7 +1030,7 @@ va_dcl
 	va_start(ap);
 	code = va_arg(ap, int);
 	die = va_arg(ap, int);
-	prepend = va_arg(ap, char *);
+	prepend = va_arg(ap, const char *);
 #endif
 	if (substdio_putflush(&smtpto, "QUIT\r\n", 6) == -1)
 		temp_write();
@@ -1037,7 +1038,7 @@ va_dcl
 	outhost();
 
 	while (1) {
-		str = va_arg(ap, char *);
+		str = va_arg(ap, const char *);
 		if (!str)
 			break;
 		out(str);
@@ -1228,7 +1229,7 @@ char           *partner_fqdn = NULL;
 #define SSL_ST_BEFORE 0x4000
 #endif
 no_return void
-tls_quit(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *saptr)
+tls_quit(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *saptr)
 {
 	char            ch;
 	int             i, state;
@@ -1465,7 +1466,7 @@ scan_response(stralloc *dst, stralloc *src, const char *search)
  * reference: https://www.rfc-editor.org/rfc/rfc4954
  */
 no_return static void
-decode_smtpauth_err(int code, char *s1, char *s2)
+decode_smtpauth_err(int code, const char *s1, const char *s2)
 {
 	switch(code)
 	{
@@ -1803,7 +1804,7 @@ remove_newline()
 }
 
 static void
-gsasl_authenticate(Gsasl_session *session, char *mech)
+gsasl_authenticate(Gsasl_session *session, const char *mech)
 {
 	char           *p;
 	int             rc, code;
@@ -2060,7 +2061,7 @@ smtp_auth(char *type, int use_size)
 	int             i = 0, login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0,
 					cram_sha224_supp, cram_sha256_supp = 0, cram_sha384_supp, cram_sha512_supp = 0,
 					cram_rmd_supp = 0, digest_md5_supp = 0;
-	char           *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224,
+	const char     *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224,
 				   *no_cram_sha256, *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
 #ifdef TLS
 	int             secure_auth;
@@ -2786,7 +2787,7 @@ prep_reciplist(saa *list,char **recips,int flagcname,int flagquote)
 
 #if defined(TLS) && defined(HASTLSA)
 static int
-dmatch(char *fn, stralloc *domain, stralloc *content,
+dmatch(const char *fn, stralloc *domain, stralloc *content,
 	CONSTMAP *ptrmap)
 {
 	int             x, len;
@@ -2847,7 +2848,8 @@ void
 getcontrols()
 {
 	int             r;
-	char           *senderdomain, *ip, *x;
+	char           *senderdomain;
+	const char     *ip, *x;
 	static stralloc outgoingipfn;
 
 	if (control_init() == -1)
@@ -3041,7 +3043,7 @@ getcontrols()
 static stralloc newsender = { 0 };
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 no_return void
-temp_batv(char *arg)
+temp_batv(const char *arg)
 {
 	out("Zerror creating batv signature. (#4.3.0)\n");
 	if (!stralloc_copys(&smtptext, arg) ||
@@ -3062,7 +3064,7 @@ sign_batv()
 	static char     hex[] = "0123456789abcdef";
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	EVP_MD_CTX     *mdctx;
-	const EVP_MD   *md = NULL;
+	EVP_MD         *md = NULL;
 	unsigned char   md5digest[EVP_MAX_MD_SIZE];
 	unsigned int    md_len;
 #else
@@ -3127,7 +3129,7 @@ sign_batv()
  * http://www.apecity.com/qmail/moresmtproutes.txt
  */
 char           *
-moresmtproutes_lookup(char *hst, int len)
+moresmtproutes_lookup(const char *hst, int len)
 {
 	static stralloc morerelayhost = { 0 };
 	static stralloc h = { 0 };
@@ -3183,7 +3185,7 @@ timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port_num, int tmo
 }
 
 void
-password_lookup(char *addr, int addr_len)
+password_lookup(const char *addr, int addr_len)
 {
 	int             i, j;
 	char           *result, *ptr;
@@ -3233,7 +3235,8 @@ char           *
 get_relayhost(char **recips)
 {
 	int             i, j, k, cntrl_stat1, cntrl_stat2;
-	char           *relayhost, *x, *routes, *smtproutefile,
+	char           *relayhost;
+	const char     *x, *routes, *smtproutefile,
 				   *moresmtproutefile, *qmtproutefile;
 	static stralloc controlfile;
 
@@ -3307,11 +3310,11 @@ get_relayhost(char **recips)
 	if (smtp_sender.len == 0) { /*- bounce routes */
 		if (!stralloc_copys(&bounce, "!@"))
 			temp_nomem();
-		if ((relayhost = constmap(&mapqmtproutes, bounce.s, bounce.len))) {
+		if ((relayhost = (char *) constmap(&mapqmtproutes, bounce.s, bounce.len))) {
 			protocol_t = 'q';
 			port = PORT_QMTP;
 		} else {
-			if (!(relayhost = constmap(&mapsmtproutes, bounce.s, bounce.len)))
+			if (!(relayhost = (char *) constmap(&mapsmtproutes, bounce.s, bounce.len)))
 				relayhost = moresmtproutes_lookup("!@", 2);
 			if (relayhost) {
 				protocol_t = 's';
@@ -3326,21 +3329,21 @@ get_relayhost(char **recips)
 		for (i = 0; !relayhost && i <= host.len; ++i) {
 			if ((i == 0) || (i == host.len) || (host.s[i] == '.')) {
 				/*- default qmtproutes */
-				if (cntrl_stat2 == 2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+				if (cntrl_stat2 == 2 && (relayhost = (char *) constmap(&mapqmtproutes, host.s + i, host.len - i))) {
 					protocol_t = 'q';
 					port = PORT_QMTP;
 					break;
 				} else
-				if (cntrl_stat1 == 2 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
+				if (cntrl_stat1 == 2 && (relayhost = (char *) constmap(&mapsmtproutes, host.s + i, host.len - i))) {
 					port = PORT_SMTP;
 					break;
 				} else
-				if (cntrl_stat2 && (relayhost = constmap(&mapqmtproutes, host.s + i, host.len - i))) {
+				if (cntrl_stat2 && (relayhost = (char *) constmap(&mapqmtproutes, host.s + i, host.len - i))) {
 					protocol_t = 'q';
 					port = PORT_QMTP;
 					break;
 				} else
-				if (cntrl_stat1 && (relayhost = constmap(&mapsmtproutes, host.s + i, host.len - i))) {
+				if (cntrl_stat1 && (relayhost = (char *) constmap(&mapsmtproutes, host.s + i, host.len - i))) {
 					port = PORT_SMTP;
 					break;
 				} else
@@ -3738,7 +3741,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	static char    *x = "$Id: qmail-remote.c,v 1.172 2024-01-24 00:54:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.172 2024-01-24 00:54:08+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }

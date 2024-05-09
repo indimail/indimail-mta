@@ -35,13 +35,13 @@ usage()
 }
 
 no_return void
-writeerr(char *s)
+writeerr(const char *s)
 {
 	strerr_die4sys(111, FATAL, "unable to write to ", s, ": ");
 }
 
 void
-out(substdio *ss, char *s, int len, char *fntmp)
+out(substdio *ss, const char *s, int len, char *fntmp)
 {
 	if (substdio_put(ss, s, len) == -1)
 		writeerr(fntmp);
@@ -106,7 +106,7 @@ main(int argc, char **argv)
 void
 getversion_setmaillist_c()
 {
-	static char    *x = "$Id: setmaillist.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setmaillist.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

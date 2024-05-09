@@ -17,6 +17,6 @@
 #define RECEIVED_H
 #include "qmail.h"
 
-void            received(struct qmail *, char *, char *, char *, char *, char *, char *, char *, int);
+void            received(struct qmail *, const char *, const char *, const char *, const char *, const char *, const char *, const char *, int);
 
 #endif

@@ -36,7 +36,7 @@
 #include <noreturn.h>
 
 no_return void
-die(int e, char *s)
+die(int e, const char *s)
 {
 	substdio_putsflush(subfderr, s);
 	_exit(e);
@@ -206,7 +206,7 @@ main(int argc, char **argv)
 void
 getversion_qsmhook_c()
 {
-	static char    *x = "$Id: qsmhook.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qsmhook.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -235,7 +235,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.27 2021-06-28 17:07:25+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-tcpto.c,v 1.27 2021-06-28 17:07:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

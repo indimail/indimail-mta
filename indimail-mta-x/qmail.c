@@ -137,7 +137,7 @@ qmail_fail(struct qmail *qq)
 }
 
 void
-qmail_put(struct qmail *qq, char *s, unsigned int len)
+qmail_put(struct qmail *qq, const char *s, unsigned int len)
 {
 	if (!qq->flagerr) {
 		if (substdio_put(&qq->ss, s, len) == -1)
@@ -146,7 +146,7 @@ qmail_put(struct qmail *qq, char *s, unsigned int len)
 }
 
 void
-qmail_puts(struct qmail *qq, char *s)
+qmail_puts(struct qmail *qq, const char *s)
 {
 	if (!qq->flagerr) {
 		if (substdio_puts(&qq->ss, s) == -1)
@@ -155,7 +155,7 @@ qmail_puts(struct qmail *qq, char *s)
 }
 
 void
-qmail_from(struct qmail *qq, char *s)
+qmail_from(struct qmail *qq, const char *s)
 {
 	if (substdio_flush(&qq->ss) == -1)
 		qq->flagerr = 1;
@@ -167,14 +167,14 @@ qmail_from(struct qmail *qq, char *s)
 }
 
 void
-qmail_to(struct qmail *qq, char *s)
+qmail_to(struct qmail *qq, const char *s)
 {
 	qmail_put(qq, "T", 1);
 	qmail_puts(qq, s);
 	qmail_put(qq, "", 1);
 }
 
-char           *
+const char     *
 qmail_close(struct qmail *qq)
 {
 	int             wstat, exitcode, len = 0;
@@ -312,7 +312,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	static char    *x = "$Id: qmail.c,v 1.37 2023-11-05 05:13:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail.c,v 1.37 2023-11-05 05:13:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

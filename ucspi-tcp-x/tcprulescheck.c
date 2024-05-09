@@ -67,16 +67,14 @@ main(int argc, char **argv)
 	char           *fnrules;
 	int             fd;
 	char           *ip;
-	char           *info;
-	char           *host;
+	const char     *info, *host;
 
 	fnrules = argv[1];
 	if (!fnrules)
 		strerr_die1x(100, "tcprulescheck: usage: tcprulescheck rules.cdb");
 
-	ip = env_get("TCPREMOTEIP");
-	if (!ip)
-		ip = "0.0.0.0";
+	if (!(ip = env_get("TCPREMOTEIP")))
+		ip = (char *) "0.0.0.0";
 	info = env_get("TCPREMOTEINFO");
 	host = env_get("TCPREMOTEHOST");
 

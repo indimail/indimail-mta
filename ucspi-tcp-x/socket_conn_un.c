@@ -13,7 +13,7 @@
 #include "str.h"
 
 int
-socket_connect_un(int s, char *socket)
+socket_connect_un(int s, const char *socket)
 {
 	struct sockaddr_un sa;
 

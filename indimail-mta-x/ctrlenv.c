@@ -98,7 +98,7 @@ parse_env(char *envStrings)
 
 #ifdef HAS_MYSQL
 int
-match_in_db(MYSQL *conn, char *table_name, char *addr, char **envStr, char **errStr)
+match_in_db(MYSQL *conn, const char *table_name, const char *addr, char **envStr, const char *errStr[])
 {
 
 	MYSQL_RES      *res;
@@ -174,12 +174,13 @@ again:
 }
 
 int
-sql_match(char *fn, char *addr, int len, char **result)
+sql_match(const char *fn, const char *addr, int len, char **result)
 {
 	static stralloc controlfile = { 0 };
 	int             cntrl_ok;
 	MYSQL          *conn;
-	char           *errStr = (char *) 0, *table_name = (char *) 0;
+	const char     *errStr = (char *) 0;
+	char           *table_name = (char *) 0;
 
 	if (!len || !*addr || !fn)
 		return (0);
@@ -306,7 +307,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	static char    *x = "$Id: ctrlenv.c,v 1.5 2022-10-31 09:09:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ctrlenv.c,v 1.5 2022-10-31 09:09:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

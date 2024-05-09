@@ -20,7 +20,7 @@
 #define IP4_H
 
 extern char     ip4loopback[4]; /* = {127,0,0,1}; */
-unsigned int    rblip4_scan(char *, char ip[4]);
+unsigned int    rblip4_scan(const char *, char ip[4]);
 unsigned int    ip4_fmt(char *, char ip[4]);
 
 #define IP4_FMT 20

@@ -28,7 +28,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_pgrphack_c()
 {
-	static char    *x = "$Id: pgrphack.c,v 1.2 2004-10-22 20:27:56+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: pgrphack.c,v 1.2 2004-10-22 20:27:56+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -9,6 +9,6 @@
  */
 #ifndef _BODY_CHECK_H
 #define _BODY_CHECK_H
-int             bodycheck(stralloc *, stralloc *, char **, int);
+int             bodycheck(stralloc *, stralloc *, const char **, int);
 void            bodycheck_free(void);
 #endif

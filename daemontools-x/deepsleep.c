@@ -33,7 +33,7 @@ deepsleep(unsigned int s)
 void
 getversion_deepsleep_c()
 {
-	static char    *x = "$Id: deepsleep.c,v 1.2 2004-10-22 20:24:17+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: deepsleep.c,v 1.2 2004-10-22 20:24:17+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

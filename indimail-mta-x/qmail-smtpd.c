@@ -63,23 +63,23 @@
 void            qmail_smtpd(int, char **, char **);
 void            out(char *);
 void            flush();
-char           *getversion_smtpd_c();
+const char     *getversion_smtpd_c();
 
 no_return void
 print_details()
 {
-	char           *ptr;
-	char          **p;
+	const char     *ptr;
+	const char    **p;
 	char            revision[28];
 	int             i;
-	char           *auth_methods[] = {
+	const char     *auth_methods[] = {
 		"login", "plain", "cram-md5", "cram-sha1", "cram-sha224", "cram-sha256",
 		"cram-sha384", "cram-sha512", "cram-ripemd", "digest-md5", "scram-sha-1",
 #ifdef HASLIBGSASL
 		"scram-sha-256", "scram-sha-1-plus", "scram-sha-256-plus",
 #endif
 		0};
-	char           *control_files[] = {
+	const char     *control_files[] = {
 		"badhost", "badmailpatterns", "badrcptpatterns", "spamignore", "spamignorepatterns",
 		"tlsclients", "tlsservermethod", "domainqueue", "from.envrules", "rcpt.envrules",
 		"databytes", "maxhops", "dnsbllist", "envnoathost", "helohost", "greetdelay",
@@ -100,11 +100,11 @@ print_details()
 		"srs_alwaysrewrite", "srs_separator",
 #endif
 		"servercert.pem", "tlsserverciphers", "libmysql", 0};
-	char          *cdb_sql_files[] = {
+	const char    *cdb_sql_files[] = {
 		"authdomains",  "badhelo",  "badext",  "badmailfrom", "badrcptto", "blackholedsender",
 		"blackholedrcpt", "chkrcptdomains", "goodrcptto", "relaymailfrom", "spamignore",
 		"greylist.white", "tlsa.white", "tlsadomains", "badip", 0};
-	char          *read_env_vars[] = {
+	const char    *read_env_vars[] = {
 		"ANTISPOOFING", "AUTH_ALL", "AUTHRULES", "BADHELO", "BADHELOCHECK",
 		"BADHOST", "BADHOSTCHECK", "BADIP", "BADIPCHECK",
 #ifdef USE_SPF
@@ -132,7 +132,7 @@ print_details()
 #endif
 		"STARTTLS", "TARPITCOUNT", "TARPITDELAY", "GREETDELAY",
 		"TLS_CIPHER_LIST", "TLS_CIPHER_SUITE", "TMPDIR", "VIRTUAL_PKG_LIB", "VIRUSCHECK", 0};
-	char          *write_env_vars[] = {
+	const char    *write_env_vars[] = {
 		"AUTHENTICATED", "AUTHINFO", "NULLQUEUE",
 #ifdef USE_SPF
 		"SPFRESULT",
@@ -275,7 +275,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	static char    *x = "$Id: qmail-smtpd.c,v 1.14 2023-10-11 14:51:10+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-smtpd.c,v 1.14 2023-10-11 14:51:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

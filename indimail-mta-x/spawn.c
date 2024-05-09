@@ -100,7 +100,7 @@ okwrite(int fd, char *buf, ssize_t n)
 }
 
 static void
-err(char *s)
+err(const char *s)
 {
 	char            ch;
 
@@ -371,7 +371,7 @@ QSPAWN(int argc, char **argv)
 {
 	char            ch;
 #ifdef ENABLE_VIRTUAL_PKG
-	char           *ptr;
+	const char     *ptr;
 #endif
 	int             i, r, nfds;
 	fd_set          rfds;
@@ -471,7 +471,7 @@ QSPAWN(int argc, char **argv)
 					byte_copy(d[i].output.s + d[i].output.len, r, inbuf);
 					d[i].output.len += r;
 					if (truncreport_SPAWN > 100 && d[i].output.len > truncreport_SPAWN) {
-						char           *truncmess = "\nError report too long, sorry.\n";
+						const char     *truncmess = "\nError report too long, sorry.\n";
 						d[i].output.len = truncreport_SPAWN - str_len(truncmess) - 3;
 						stralloc_cats(&d[i].output, truncmess);
 					}
@@ -485,7 +485,7 @@ QSPAWN(int argc, char **argv)
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	static char    *x = "$Id: spawn.c,v 1.35 2024-02-09 16:09:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spawn.c,v 1.35 2024-02-09 16:09:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -153,7 +153,7 @@ main(int argc, char **argv)
 void
 getversion_cdbmake_c()
 {
-	static char    *x = "$Id: cdbmake.c,v 1.2 2008-09-16 08:25:00+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: cdbmake.c,v 1.2 2008-09-16 08:25:00+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

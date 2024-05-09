@@ -145,7 +145,7 @@ main(int argc, char **argv)
 
 	if (chdir(maildirname) == -1)
 		die_nocdmaildir();
-	argv[3] = ".";
+	argv[3] = (char *) ".";
 	if (stat(".timestamp", &st) == -1)
 		ts_date = 0;
 	else
@@ -196,7 +196,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_popbull_c()
 {
-	static char    *x = "$Id: qmail-popbull.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-popbull.c,v 1.11 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

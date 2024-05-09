@@ -8,7 +8,7 @@
 #define _WILDMAT_H
 
 #ifndef	lint
-static char     sccsidwildmath[] = "$Id: wildmat.h,v 1.1 2021-05-23 06:35:07+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsidwildmath[] = "$Id: wildmat.h,v 1.1 2021-05-23 06:35:07+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #ifndef TRUE
@@ -28,6 +28,6 @@ static char     sccsidwildmath[] = "$Id: wildmat.h,v 1.1 2021-05-23 06:35:07+05:
 /*- Do tar(1) matching rules, which ignore a trailing slash?  */
 #undef MATCH_TAR_PATTERN
 
-int             wildmat_internal(char *, char *);
+int             wildmat_internal(const char *, const char *);
 
 #endif

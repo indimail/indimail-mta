@@ -51,7 +51,7 @@
  */
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver_plugin.c,v 1.16 2021-07-03 14:05:14+05:30 Cprogrammer Exp mbhangui $";
+const char      sccsid[] = "$Id: tcpserver_plugin.c,v 1.16 2021-07-03 14:05:14+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 #define FATAL "tcpserver: fatal: "

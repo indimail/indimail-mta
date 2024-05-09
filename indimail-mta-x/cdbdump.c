@@ -26,7 +26,7 @@ die_write(void)
 }
 
 void
-put(char *buf, unsigned int len)
+put(const char *buf, unsigned int len)
 {
 	if (substdio_put(subfdout, buf, len) == -1)
 		die_write();
@@ -116,7 +116,7 @@ main()
 void
 getversion_cdbdump_c()
 {
-	static char    *x = "$Id: cdbdump.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdbdump.c,v 1.3 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

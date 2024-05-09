@@ -41,11 +41,11 @@ static stralloc addr = { 0 }; /* will be 0-terminated, if addrparse returns 1 */
 static stralloc mailfrom = { 0 };
 static stralloc rcptto = { 0 };
 static stralloc mfparms = { 0 };
-static char    *remoteip;
-static char    *remotehost;
-static char    *remoteinfo;
-static char    *local;
-static char    *relayclient;
+const char     *remoteip;
+const char     *remotehost;
+const char     *remoteinfo;
+const char     *local;
+const char     *relayclient;
 static char    *fakehelo; /* pointer into helohost, or 0 */
 static char     ssinbuf[BUFSIZE_IN];
 static char     ssoutbuf[BUFSIZE_OUT];
@@ -164,15 +164,13 @@ err_wantrcpt()
 }
 
 void
-err_noop(arg)
-	char           *arg;
+err_noop(char *arg)
 {
 	out("250 ok\r\n");
 }
 
 void
-err_vrfy(arg)
-	char           *arg;
+err_vrfy(char *arg)
 {
 	out("252 send some mail, i'll try my best\r\n");
 }
@@ -184,7 +182,7 @@ err_qqt()
 }
 
 void
-smtp_greet(char *code)
+smtp_greet(const char *code)
 {
 	substdio_puts(&ssout, code);
 	substdio_put(&ssout, greeting.s, greeting.len);
@@ -206,7 +204,7 @@ smtp_quit(char *arg)
 }
 
 void
-dohelo(char *arg)
+dohelo(const char *arg)
 {
 	if (!stralloc_copys(&helohost, arg) ||
 			!stralloc_0(&helohost))
@@ -474,7 +472,7 @@ saferead(int fd, char *buf, size_t len)
 }
 
 void
-put(char *ch)
+put(const char *ch)
 {
 	if (bytestooverflow && !--bytestooverflow)
 		qmail_fail(&qqt);
@@ -620,7 +618,7 @@ smtp_data(char *arg)
 {
 	int             hops;
 	unsigned long   qp;
-	char           *qqx;
+	const char     *qqx;
 
 	if (!seenmail) {
 		err_wantmail();
@@ -718,7 +716,7 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	static char    *x = "$Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mini-smtpd.c,v 1.9 2024-01-23 01:21:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

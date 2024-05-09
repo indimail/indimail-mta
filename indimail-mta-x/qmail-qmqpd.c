@@ -120,10 +120,7 @@ struct qmail    qq;
 void
 identify()
 {
-	char           *remotehost;
-	char           *remoteinfo;
-	char           *remoteip;
-	char           *local;
+	const char     *remotehost, *remoteinfo, *remoteip, *local;
 
 	if (!(remotehost = env_get("TCPREMOTEHOST")))
 		remotehost = "unknown";
@@ -168,7 +165,7 @@ int             flagok = 1;
 int
 main()
 {
-	char           *result;
+	const char     *result;
 	unsigned long   qp;
 	unsigned long   len;
 	char            ch;
@@ -231,7 +228,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.14 2024-01-23 01:22:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmqpd.c,v 1.14 2024-01-23 01:22:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -26,7 +26,7 @@ gfrom(s, len)
 void
 getversion_gfrom_c()
 {
-	static char    *x = "$Id: gfrom.c,v 1.3 2004-10-22 20:25:40+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: gfrom.c,v 1.3 2004-10-22 20:25:40+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

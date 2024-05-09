@@ -37,7 +37,7 @@
 #define FATAL "preline: fatal: "
 
 no_return void
-die_usage(char *arg)
+die_usage(const char *arg)
 {
 	if (arg)
 		strerr_die4x(111, FATAL, "No ", arg, " environment variable");
@@ -132,7 +132,7 @@ main(int argc, char **argv)
 void
 getversion_preline_c()
 {
-	static char    *x = "$Id: preline.c,v 1.11 2023-09-15 21:15:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: preline.c,v 1.11 2023-09-15 21:15:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

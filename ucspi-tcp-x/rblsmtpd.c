@@ -100,8 +100,10 @@
 
 #define FATAL "rblsmtpd: fatal: "
 
+typedef const char c_char;
+
 #ifndef	lint
-static char     sccsid[] = "$Id: rblsmtpd.c,v 1.24 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
+const char      sccsid[] = "$Id: rblsmtpd.c,v 1.24 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
 no_return void
@@ -116,7 +118,7 @@ usage(void)
 	strerr_die1x(100, "usage: rblsmtpd -r base [ -b ] [ -R ] [ -t timeout ] [ -a base ] [-W] [-w delay] smtpd [ arg ... ]");
 }
 
-static char    *ip_env, *rbl_greeting, *rbl_ehlo;
+static c_char  *ip_env, *rbl_greeting, *rbl_ehlo;
 static char     pid_str[FMT_ULONG] = "?PID?";
 static stralloc addr = { 0 };
 static stralloc ip_reverse;
@@ -125,7 +127,7 @@ static stralloc ip_reverse;
  * Idea from Andrew Richards http://free.acrconsulting.co.uk
  */
 void
-rbl_out(int should_flush, char *arg)
+rbl_out(int should_flush, const char *arg)
 {
 	substdio_puts(subfderr, "rblsmtpd: ");
 	substdio_puts(subfderr, " pid ");
@@ -143,14 +145,13 @@ rbl_out(int should_flush, char *arg)
 }
 
 #ifdef IPV6
-char           *tcp_proto;
+const char     *tcp_proto;
 #endif
 
 void
 ip_init(void)
 {
-	unsigned int    i;
-	unsigned int    j;
+	unsigned int    i, j;
 	int             flagip6 = 0;
 #ifdef IPV6
 	unsigned char   remoteip[16];

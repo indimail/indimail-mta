@@ -118,7 +118,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.6 2023-02-12 13:29:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdbget.c,v 1.6 2023-02-12 13:29:59+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

@@ -93,7 +93,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fghack_c()
 {
-	static char    *x = "$Id: fghack.c,v 1.6 2022-12-18 12:54:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: fghack.c,v 1.6 2022-12-18 12:54:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

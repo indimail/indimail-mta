@@ -64,7 +64,7 @@ get_octal(mode_t mode)
 }
 
 void
-print_info(const char *str, char *source, char *dest, mode_t mode, uid_t uid, gid_t gid, unsigned long size)
+print_info(const char *str, const char *source, const char *dest, mode_t mode, uid_t uid, gid_t gid, unsigned long size)
 {
 	struct passwd  *pw;
 	struct group   *gr;

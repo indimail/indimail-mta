@@ -57,7 +57,7 @@ main(argc, argv)
 void
 getversion_except_c()
 {
-	static char    *x = "$Id: except.c,v 1.7 2020-11-24 13:45:11+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: except.c,v 1.7 2020-11-24 13:45:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

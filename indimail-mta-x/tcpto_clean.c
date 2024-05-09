@@ -42,7 +42,7 @@ tcpto_clean()					/*- running from queue/mess */
 void
 getversion_tcpto_clean_c()
 {
-	static char    *x = "$Id: tcpto_clean.c,v 1.7 2005-06-29 20:54:53+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: tcpto_clean.c,v 1.7 2005-06-29 20:54:53+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

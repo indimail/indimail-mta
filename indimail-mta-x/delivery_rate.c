@@ -56,7 +56,7 @@ extern char    *queuedesc;
  */
 int
 delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
-		int *do_ratelimit, char *argv0)
+		int *do_ratelimit, const char *argv0)
 {
 	char           *rate_dir, *rate_exp, *domain;
 	int             i, s, at;
@@ -207,7 +207,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.9 2023-01-15 12:20:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: delivery_rate.c,v 1.9 2023-01-15 12:20:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

@@ -6,11 +6,7 @@
  */
 
 int
-fn_handler(errfn, timeoutfn, option, arg)
-	void              (*errfn)();
-	void              (*timeoutfn)();
-	int               option;
-	char             *arg;
+fn_handler(void (*errfn)(), void (*timeoutfn)(), int option, const char *arg)
 {
 	if (!option)
 		(*errfn)(arg);
@@ -22,7 +18,7 @@ fn_handler(errfn, timeoutfn, option, arg)
 void
 getversion_fn_handler_c()
 {
-	static char    *x = "$Id: fn_handler.c,v 1.1 2018-04-25 21:36:33+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: fn_handler.c,v 1.1 2018-04-25 21:36:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

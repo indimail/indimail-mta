@@ -39,7 +39,7 @@ main()
 void
 getversion_run_cleanq_c()
 {
-	static char    *x = "$Id: run-cleanq.c,v 1.6 2020-10-09 17:31:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: run-cleanq.c,v 1.6 2020-10-09 17:31:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

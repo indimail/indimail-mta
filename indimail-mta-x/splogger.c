@@ -105,7 +105,7 @@ main(argc, argv)
 void
 getversion_splogger_c()
 {
-	static char    *x = "$Id: splogger.c,v 1.5 2020-11-24 13:48:27+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: splogger.c,v 1.5 2020-11-24 13:48:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

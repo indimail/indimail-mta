@@ -99,7 +99,7 @@ main()
 void
 getversion_parsedate_c()
 {
-	static char    *x = "$Id: parsedate.c,v 1.7 2023-01-03 16:39:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: parsedate.c,v 1.7 2023-01-03 16:39:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

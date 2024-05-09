@@ -35,7 +35,8 @@
 
 #define GETPW_USERLEN 32
 
-static char    *local, *dash, *extension;
+typedef const char c_char;
+static c_char  *local, *dash, *extension;
 static int      use_pwgr;
 static struct passwd  *pw;
 
@@ -116,7 +117,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_getpw_c()
 {
-	static char    *x = "$Id: qmail-getpw.c,v 1.8 2021-07-05 21:24:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-getpw.c,v 1.8 2021-07-05 21:24:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -64,7 +64,7 @@ main(int argc, char **argv)
 void
 getversion_envuidgid_c()
 {
-	static char    *x = "$Id: envuidgid.c,v 1.4 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: envuidgid.c,v 1.4 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

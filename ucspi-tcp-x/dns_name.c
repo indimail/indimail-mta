@@ -27,7 +27,7 @@
 static char    *q = 0;
 
 int
-dns_name_packet(stralloc *out, char *buf, unsigned int len)
+dns_name_packet(stralloc *out, const char *buf, unsigned int len)
 {
 	unsigned int    pos;
 	char            header[12];

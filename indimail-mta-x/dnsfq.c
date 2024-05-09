@@ -85,7 +85,7 @@ main(int argc, char **argv)
 void
 getversion_dnsfq_c()
 {
-	static char    *x = "$Id: dnsfq.c,v 1.10 2023-09-23 21:21:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsfq.c,v 1.10 2023-09-23 21:21:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

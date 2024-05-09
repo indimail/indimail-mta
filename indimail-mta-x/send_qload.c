@@ -11,7 +11,7 @@
 #include "qscheduler.h"
 
 int
-send_qload(char *queue_ident, unsigned int queue_no,
+send_qload(const char *queue_ident, unsigned int queue_no,
 		long load, unsigned int priority)
 {
 	mqd_t           mqd;
@@ -38,7 +38,7 @@ send_qload(char *queue_ident, unsigned int queue_no,
 void
 getversion_send_qload_c()
 {
-	static char    *x = "$Id: send_qload.c,v 1.1 2022-04-24 08:48:22+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: send_qload.c,v 1.1 2022-04-24 08:48:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

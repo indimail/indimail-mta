@@ -265,7 +265,7 @@ tcpto_err(struct ip_mx *ix, int flagerr, int max_tolerance)
 void
 getversion_tcpto_c()
 {
-	static char    *x = "$Id: tcpto.c,v 1.16 2022-10-18 09:24:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tcpto.c,v 1.16 2022-10-18 09:24:42+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

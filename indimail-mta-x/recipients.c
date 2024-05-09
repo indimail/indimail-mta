@@ -251,7 +251,7 @@ recipients(char *buf, int len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.11 2023-08-14 00:56:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: recipients.c,v 1.11 2023-08-14 00:56:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;

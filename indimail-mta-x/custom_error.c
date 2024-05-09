@@ -16,9 +16,9 @@
 #include "qmail.h"
 
 no_return void
-custom_error(char *program, char *type, char *message, char *extra, char *code)
+custom_error(const char *program, const char *type, const char *message, const char *extra, const char *code)
 {
-	char           *c;
+	const char     *c;
 	char            errbuf[256];
 	int             errfd;
 	struct substdio sserr;

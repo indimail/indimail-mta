@@ -129,7 +129,7 @@ stop_supervise(const char *dir, pid_t svcpid)
 void
 getversion_svcfns_c()
 {
-	static char    *x = "$Id: svcfns.c,v 1.4 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svcfns.c,v 1.4 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

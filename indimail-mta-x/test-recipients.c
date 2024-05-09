@@ -33,10 +33,10 @@ safewrite(int fd, char *buf, int len)
 	return r;
 }
 
-char           *
+const char     *
 load_virtual()
 {
-	char           *ptr, *errstr;
+	const char     *ptr, *errstr;
 	int             i;
 
 	/*- load virtual package library */
@@ -63,7 +63,7 @@ load_virtual()
 int
 check_recipient_sql(char *addr, int len)
 {
-	char           *ptr, *errstr;
+	const char     *ptr, *errstr;
 	void           *(*inquery) (char, char *, char *);
 
 	if (!(ptr = load_virtual()))

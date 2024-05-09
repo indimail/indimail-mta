@@ -47,8 +47,9 @@
 #include "auto_patrn.h"
 #include "filterit.h"
 
-static char    *user, *homedir, *local, *dash, *ext, *host, *sender, *aliasempty, *qqeh;
-static char    *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
+typedef const char c_char;
+static c_char  *user, *homedir, *local, *dash, *ext, *host, *sender, *aliasempty, *qqeh;
+static c_char  *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
 static char     buf[1024], outbuf[1024];
 static int      flagdoit, flag99;
 static stralloc safeext, ufline, rpline, envrecip, dtline, qme, ueo, cmds,
@@ -73,7 +74,7 @@ temp_rewind()
 }
 
 no_return void
-temp_childcrashed(char *p)
+temp_childcrashed(const char *p)
 {
 	if (p)
 		strerr_die3x(111, "Aack, child [", p, "] crashed. (#4.3.0)");
@@ -100,8 +101,7 @@ temp_slowlock()
 }
 
 no_return void
-temp_qmail(fn)
-	char           *fn;
+temp_qmail(const char *fn)
 {
 	strerr_die5x(111, "Unable to open ", fn, ": ", error_str(errno), ". (#4.3.0)");
 }
@@ -125,7 +125,7 @@ die_srs()
 #endif
 
 void
-maildir(char *fn)
+maildir(const char *fn)
 {
 	pid_t           child;
 	int             wstat;
@@ -161,9 +161,9 @@ maildir(char *fn)
 }
 
 void
-filterit(char *cmd)
+filterit(const char *cmd)
 {
-	char           *x;
+	const char     *x;
 
 	if (!env_put2("QQEH", qqeh))
 		temp_nomem();
@@ -184,14 +184,11 @@ filterit(char *cmd)
 }
 
 void
-mailfile(char *fn)
+mailfile(const char *fn)
 {
-	int             fd;
-	substdio        ss;
-	substdio        ssout;
-	int             match;
+	int             fd, match, flaglocked;
+	substdio        ss, ssout;
 	seek_pos        pos;
-	int             flaglocked;
 
 	if (seek_begin(0) == -1)
 		temp_rewind();
@@ -259,7 +256,7 @@ writeerrs:
 }
 
 void
-mailprogram(char *prog)
+mailprogram(const char *prog)
 {
 	pid_t           child;
 	char           *(args[4]);
@@ -275,9 +272,9 @@ mailprogram(char *prog)
 	case 0:
 		if (!env_put2("QQEH", qqeh))
 			temp_nomem();
-		args[0] = "/bin/sh";
-		args[1] = "-c";
-		args[2] = prog;
+		args[0] = (char *) "/bin/sh";
+		args[1] = (char *) "-c";
+		args[2] = (char *) prog;
 		args[3] = 0;
 		sig_pipedefault();
 		pathexec(args);
@@ -314,7 +311,7 @@ void
 mailforward(char **recips)
 {
 	struct qmail    qqt;
-	char           *qqx;
+	const char     *qqx;
 	char          **a;
 	substdio        ss;
 	int             match, x;
@@ -408,7 +405,7 @@ bouncexf()
 }
 
 void
-checkhome(char *home_dir)
+checkhome(const char *home_dir)
 {
 	struct stat     st;
 	int             ldmok;
@@ -449,7 +446,7 @@ checkhome(char *home_dir)
 }
 
 int
-qmeox(char *dashowner)
+qmeox(const char *dashowner)
 {
 	struct stat     st;
 
@@ -571,7 +568,7 @@ count_print()
 }
 
 void
-sayit(char *type, char *cmd, unsigned int len)
+sayit(const char *type, const char *cmd, unsigned int len)
 {
 	substdio_puts(subfdoutsmall, type);
 	substdio_put(subfdoutsmall, cmd, len);
@@ -581,10 +578,10 @@ sayit(char *type, char *cmd, unsigned int len)
 void
 sanitize_env(char *x)
 {
-	char           *e;
+	const char     *e;
 	int             i, j;
 	struct env_tab {
-		char           *env_name;
+		const char     *env_name;
 		char           *env_val;
 	} etable[] = {
 		{ "USE_FSYNC", 0 },
@@ -636,7 +633,7 @@ sanitize_env(char *x)
 int
 main(int argc, char **argv)
 {
-	char           *x, *e;
+	const char     *x, *e;
 	char          **recips;
 	int             opt, fd, flagforwardonly, r;
 	unsigned int    i, j, numforward;
@@ -649,7 +646,7 @@ main(int argc, char **argv)
 	if (!stralloc_ready(&cmds, 0))
 		temp_nomem();
 	if ((x = env_get("SANITIZE_ENV")))
-		sanitize_env(x);
+		sanitize_env((char *) x);
 	flagdoit = 1;
 	while ((opt = getopt(argc, argv, "nN")) != opteof) {
 		switch (opt)
@@ -746,7 +743,7 @@ main(int argc, char **argv)
 		temp_nomem();
 	if (!env_put2("UFLINE", foo.s))
 		temp_nomem();
-	x = ext;
+	x = (char *) ext;
 	if (!env_put2("EXT", x))
 		temp_nomem();
 	x += str_chr(x, '-');
@@ -986,7 +983,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	static char    *x = "$Id: qmail-local.c,v 1.50 2023-10-02 22:50:22+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-local.c,v 1.50 2023-10-02 22:50:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;

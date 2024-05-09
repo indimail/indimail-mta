@@ -31,7 +31,7 @@
 #include "ip6.h"
 
 static int
-dns_ip6_packet_add(stralloc *out, char *buf, unsigned int len)
+dns_ip6_packet_add(stralloc *out, const char *buf, unsigned int len)
 {
 	unsigned int    pos;
 	char            header[16];
@@ -72,7 +72,7 @@ dns_ip6_packet_add(stralloc *out, char *buf, unsigned int len)
 }
 
 int
-dns_ip6_packet(stralloc *out, char *buf, unsigned int len)
+dns_ip6_packet(stralloc *out, const char *buf, unsigned int len)
 {
 	if (!stralloc_copys(out, ""))
 		return -1;
@@ -144,7 +144,7 @@ dns_ip6(stralloc *out, stralloc *fqdn)
 }
 #else
 int
-dns_ip4_packet(stralloc * out, char *buf, unsigned int len)
+dns_ip4_packet(stralloc *out, const char *buf, unsigned int len)
 {
 	unsigned int    pos;
 	char            header[12];

@@ -60,7 +60,7 @@ struct datetime dt;
 unsigned long   uid;
 int             readfd;
 DKIMContext     ctxt;
-char           *dkimsignoptions;
+const char     *dkimsignoptions;
 
 no_return void
 die(int e, int what)
@@ -144,10 +144,10 @@ maybe_die_dkim(int e)
 		return;
 	}
 }
-
-static char    *dkimsign = 0;
-static char    *dkimverify = 0;
-static char    *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
+typedef const char c_char;
+static c_char  *dkimsign = 0;
+static c_char  *dkimverify = 0;
+static c_char  *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
 static stralloc dkimoutput = { 0 };  /*- DKIM-Signature */
 static stralloc dksignature = { 0 }; /*- content of private signature */
 static stralloc sigdomains = { 0 };  /*- domains which must have signatures */
@@ -163,10 +163,11 @@ restore_gid()
 		custom_error("qmail-dkim", "Z", "unable to restore gid.", 0, "X.3.0");
 }
 
-char           *
-replace_pct(char *keyfn, char *domain, int pos, int *replace)
+const char     *
+replace_pct(const char *keyfn, const char *domain, int pos, int *replace)
 {
-	char           *p, *t, *s;
+	const char     *p;
+	char           *t, *s;
 	int             i, d, r, len;
 	static stralloc tmp = {0};
 
@@ -213,7 +214,7 @@ replace_pct(char *keyfn, char *domain, int pos, int *replace)
 }
 
 int
-dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
+dkim_setoptions(DKIMSignOptions *opts, const char *signOptions)
 {
 	int             ch, argc;
 	char          **argv;
@@ -321,9 +322,10 @@ dkim_setoptions(DKIMSignOptions *opts, char *signOptions)
 }
 
 static void
-write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
+write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 {
-	char           *pSig, *keyfn, *ptr, *selector;
+	char           *pSig;
+	const char     *keyfn, *ptr, *selector;
 	int             i, r_selector, pct_found;
 	static stralloc tmp = { 0 };
 
@@ -435,7 +437,7 @@ write_signature(char *domain, DKIMSignOptions *opts, size_t selector_size)
 }
 
 int
-ParseTagValues(char *list, char *letters[], char *values[])
+ParseTagValues(char *list, const char *letters[], char *values[])
 {
 	char           *t, *ptr, *key;
 	int             i;
@@ -487,7 +489,7 @@ int
 checkSSP(char *domain, int *bTesting)
 {
 	char           *query, *results;
-	char           *tags[] = { "dkim", "t", 0};
+	const char     *tags[] = { "dkim", "t", 0};
 	char           *values[2];
 	int             bIsParentSSP = 0, iSSP = DKIM_SSP_UNKNOWN;
 
@@ -562,7 +564,7 @@ int
 checkADSP(char *domain)
 {
 	char           *query, *results;
-	char           *tags[] = { "dkim", 0};
+	const char     *tags[] = { "dkim", 0};
 	char           *values[1];
 
 	results = dns_text(domain);
@@ -612,7 +614,7 @@ checkADSP(char *domain)
 }
 
 void
-dkimverify_exit(int dkimRet, char *status, char *code)
+dkimverify_exit(int dkimRet, const char *status, const char *code)
 {
 	if (dkimRet < 0) {
 		if (dkimverify[str_chr(dkimverify, 'F' - dkimRet)])
@@ -630,7 +632,7 @@ dkimverify_exit(int dkimRet, char *status, char *code)
 void
 writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useSSP, int useADSP)
 {
-	char           *dkimStatus = 0, *sspStatus = 0, *adspStatus = 0, *code = 0, *orig = 0;
+	const char     *dkimStatus = 0, *sspStatus = 0, *adspStatus = 0, *code = 0, *orig = 0;
 	char            strnum[FMT_ULONG];
 
 	switch (ret)
@@ -961,7 +963,7 @@ main(int argc, char *argv[])
 	int             sCount = 0, sSize = 0, verbose = 0;
 	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
 	unsigned long   pid, death;
-	char           *selector = NULL, *ptr;
+	const char     *selector = NULL, *ptr;
 	stralloc        dkimfn = {0};
 	DKIMVerifyDetails *pDetails;
 	DKIMSignOptions   sopts = { 0 };
@@ -1018,7 +1020,7 @@ main(int argc, char *argv[])
 		if (DKIMSignInit(&ctxt, &sopts) != DKIM_SUCCESS) /*- failed to initialize signature */
 			custom_error("qmail-dkim", "Z", "dkim initialization failed", 0, "X.3.0");
 	} else {
-		char           *x;
+		const char     *x;
 
 		restore_gid();
 		if (!dkimverify)
@@ -1103,7 +1105,7 @@ main(int argc, char *argv[])
 	}
 	if (dkimsign || dkimverify) {
 		if (dkimsign) {
-			char           *t;
+			const char     *t;
 
 			if (!(t = DKIMSignGetDomain(&ctxt))) {
 				DKIMSignFree(&ctxt);
@@ -1298,12 +1300,10 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	static char    *x = "$Id: qmail-dkim.c,v 1.82 2024-01-23 01:22:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.82 2024-01-23 01:22:34+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
-	x = sccsidqmultih;
-	x = sccsidpidopenh;
 	x = sccsidgetdomainth;
 #endif
 	x++;

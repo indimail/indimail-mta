@@ -185,7 +185,7 @@ main(int argc, char **argv)
 void
 getversion_relaytest_c()
 {
-	static char    *x = "$Id: relaytest.c,v 1.7 2023-10-07 08:42:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: relaytest.c,v 1.7 2023-10-07 08:42:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

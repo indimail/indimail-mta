@@ -49,7 +49,7 @@ die(int e)
 }
 
 int
-scan_badattachments(char *dir_name)
+scan_badattachments(const char *dir_name)
 {
 	DIR            *dir;
 	struct dirent  *dp;
@@ -146,7 +146,7 @@ do_scan()
 					_exit(QQ_OUT_OF_MEMORY);
 				for (i = 1;scancmd[i];i++) {
 					if (!str_diffn(scancmd[i], "%s", 2))
-						scancmd[i] = ".";
+						scancmd[i] = (char *) ".";
 				}
 			} else
 				scancmd = auto_scancmd;
@@ -179,7 +179,7 @@ do_scan()
 void
 getversion_do_scan_c()
 {
-	static char    *x = "$Id: do_scan.c,v 1.20 2023-10-27 16:10:57+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: do_scan.c,v 1.20 2023-10-27 16:10:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;

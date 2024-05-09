@@ -85,7 +85,7 @@ main(int argc, char **argv, char **envp)
 {
 	char           *sender, *dtline;
 	int             pid, wstat;
-	char           *qqx;
+	const char     *qqx;
 	int             pf[2];
 
 	if (!argv[1] || !argv[2])
@@ -146,7 +146,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	static char    *x = "$Id: filterto.c,v 1.13 2024-01-23 01:21:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: filterto.c,v 1.13 2024-01-23 01:21:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

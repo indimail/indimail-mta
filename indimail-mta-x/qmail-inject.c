@@ -47,15 +47,16 @@
 
 datetime_sec    starttime;
 
+typedef const char c_char;
 static unsigned long   databytes = 0;
 static unsigned long   size = 0;
 static token822_alloc  envs = { 0 };
 static struct qmail    qqt;
-static char    *qmopts;
-static char    *mailhost;
-static char    *mailuser;
-static char    *mailrhost;
-static char    *mailruser;
+static c_char  *qmopts;
+static c_char  *mailhost;
+static c_char  *mailuser;
+static c_char  *mailrhost;
+static c_char  *mailruser;
 static int      flagdeletesender = 0;
 static int      flagdeletefrom = 0;
 static int      flagdeletemessid = 0;
@@ -104,7 +105,7 @@ static token822_alloc  df = { 0 };
 static token822_alloc  drp = { 0 };
 
 void
-put(char *s, int len)
+put(const char *s, int len)
 {
 	if (flagqueue) {
 		qmail_put(&qqt, s, len);
@@ -118,7 +119,7 @@ put(char *s, int len)
 }
 
 void
-my_puts(char *s)
+my_puts(const char *s)
 {
 	put(s, str_len(s));
 }
@@ -167,7 +168,7 @@ die_regex()
 }
 
 no_return void
-die_control(char *arg)
+die_control(const char *arg)
 {
 	substdio_puts(subfderr, "qmail-inject: fatal: unable to read control file ");
 	substdio_puts(subfderr, arg);
@@ -256,7 +257,7 @@ do_domainqueue(char *recip)
 no_return void
 exitnicely()
 {
-	char           *qqx;
+	const char     *qqx;
 
 	if (!flagqueue)
 		substdio_flush(subfdout);
@@ -658,7 +659,7 @@ defaultfrommake()
 		die_nomem();
 	df.len = 0;
 	df.t[df.len].type = TOKEN822_ATOM;
-	df.t[df.len].s = "From";
+	df.t[df.len].s = (char *) "From";
 	df.t[df.len].slen = 4;
 	++df.len;
 	df.t[df.len].type = TOKEN822_COLON;
@@ -672,14 +673,14 @@ defaultfrommake()
 		++df.len;
 	}
 	df.t[df.len].type = mailusertokentype;
-	df.t[df.len].s = mailuser;
+	df.t[df.len].s = (char *) mailuser;
 	df.t[df.len].slen = str_len(mailuser);
 	++df.len;
 	if (mailhost) {
 		df.t[df.len].type = TOKEN822_AT;
 		++df.len;
 		df.t[df.len].type = TOKEN822_ATOM;
-		df.t[df.len].s = mailhost;
+		df.t[df.len].s = (char *) mailhost;
 		df.t[df.len].slen = str_len(mailhost);
 		++df.len;
 	}
@@ -689,7 +690,7 @@ defaultfrommake()
 	}
 	if (fullname && flagnamecomment) {
 		df.t[df.len].type = TOKEN822_COMMENT;
-		df.t[df.len].s = fullname;
+		df.t[df.len].s = (char *) fullname;
 		df.t[df.len].slen = str_len(fullname);
 		++df.len;
 	}
@@ -720,7 +721,7 @@ dodefaultreturnpath()
 		die_nomem();
 	drp.len = 0;
 	drp.t[drp.len].type = TOKEN822_ATOM;
-	drp.t[drp.len].s = "Return-Path";
+	drp.t[drp.len].s = (char *) "Return-Path";
 	drp.t[drp.len].slen = 11;
 	++drp.len;
 	drp.t[drp.len].type = TOKEN822_COLON;
@@ -733,7 +734,7 @@ dodefaultreturnpath()
 		drp.t[drp.len].type = TOKEN822_AT;
 		++drp.len;
 		drp.t[drp.len].type = TOKEN822_ATOM;
-		drp.t[drp.len].s = mailrhost;
+		drp.t[drp.len].s = (char *) mailrhost;
 		drp.t[drp.len].slen = str_len(mailrhost);
 		++drp.len;
 	}
@@ -1075,7 +1076,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	static char    *x = "$Id: qmail-inject.c,v 1.51 2023-12-23 00:17:13+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-inject.c,v 1.51 2023-12-23 00:17:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -7,6 +7,6 @@
 #ifndef _PROCESS_QUEUE_H
 #define _PROCESS_QUEUE_H
 
-void            process_queue(char *, char *, int (*)(), int *w, int *x, int *y, int *z);
+void            process_queue(const char *, const char *, int (*)(), int *w, int *x, int *y, int *z);
 
 #endif

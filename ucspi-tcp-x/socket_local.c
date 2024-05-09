@@ -38,7 +38,7 @@ socket_local4(int s, char ip[4], uint16 * port)
 void
 getversion_socket_local4_c()
 {
-	static char    *x = "$Id: socket_local.c,v 1.4 2020-08-03 17:26:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: socket_local.c,v 1.4 2020-08-03 17:26:47+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 	return;
 }

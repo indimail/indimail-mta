@@ -12,13 +12,8 @@
 #include "stralloc.h"
 
 int
-query_skt(fd, ipaddr, queryp, responsep, maxresponsesize, timeout, timeoutfn, errfn)
-	int             fd;
-	char           *ipaddr;
-	stralloc       *queryp;
-	char           *responsep;
-	int             maxresponsesize, timeout;
-	void            (*errfn) (), (*timeoutfn) ();
+query_skt(int fd, const char *ipaddr, stralloc *queryp, char *responsep,
+		int maxresponsesize, int timeout, void (*errfn) (), void (*timeoutfn) ())
 {
 	int             r = 0;
 
@@ -37,7 +32,7 @@ query_skt(fd, ipaddr, queryp, responsep, maxresponsesize, timeout, timeoutfn, er
 void
 getversion_query_skt_c()
 {
-	static char    *x = "$Id: query_skt.c,v 1.1 2018-04-25 22:49:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: query_skt.c,v 1.1 2018-04-25 22:49:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

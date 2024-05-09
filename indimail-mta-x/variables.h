@@ -25,9 +25,10 @@
 #ifndef VARIABLES_H
 #define VARIABLES_H
 
-extern char    *queuedir;
-extern char    *controldir;
-extern char    *certdir;
+typedef const char c_char;
+extern c_char  *queuedir;
+extern c_char  *controldir;
+extern c_char  *certdir;
 extern int      use_fsync, use_fdatasync, use_syncdir;
 extern int      noipv6;
 

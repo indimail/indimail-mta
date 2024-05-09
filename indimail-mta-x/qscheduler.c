@@ -67,6 +67,7 @@
 
 #define ERROR_INTERVAL 5
 
+typedef const char c_char;
 static int      qstart, qcount;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
@@ -91,21 +92,21 @@ static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
 int             conf_split;
 static qtab    *queue_table;
-static char    *(qsargs[]) = { "qmail-start", "-s", "./Mailbox", 0};
-char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
+static c_char  *(qsargs[]) = { "qmail-start", "-s", "./Mailbox", 0};
+static c_char  *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
 
 void            start_send(int queueNum, pid_t pid);
 static void     nomem();
 
 void
-log_out(char *s)
+log_out(const char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
 		_exit(1);
 }
 
 void
-log_outf(char *s)
+log_outf(const char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
 		_exit(1);
@@ -114,7 +115,7 @@ log_outf(char *s)
 }
 
 void
-log_announce(int pid, char *qdir, unsigned long load, int died)
+log_announce(int pid, const char *qdir, unsigned long load, int died)
 {
 	log_out("info: qscheduler: pid ");
 	strnum1[fmt_ulong(strnum1, pid)] = 0;
@@ -235,14 +236,14 @@ nomem()
 }
 
 static void
-die_opendir(char *fn)
+die_opendir(const char *fn)
 {
 	strerr_warn3("alert: qscheduler: unable to opendir ", fn, ": ", &strerr_sys);
 	die(1);
 }
 
 static void
-die_chdir(char *s)
+die_chdir(const char *s)
 {
 	strerr_warn3("alert: qscheduler: unable to switch to ", s, ": ", &strerr_sys);
 	die(1);
@@ -444,13 +445,13 @@ check_send(int queue_no)
 }
 
 int
-is_queue_empty(char *qptr)
+is_queue_empty(const char *qptr)
 {
 	readsubdir      qsubdir;
 	int             x, split_flag = bigtodo;
 	unsigned long   id;
-	char           *dir_s1[] = {"todo", "local", "remote", 0};
-	char          **ptr;
+	const char     *dir_s1[] = {"todo", "local", "remote", 0};
+	const char    **ptr;
 
 	if (chdir(qptr) == -1)
 		die_chdir(qptr);
@@ -519,7 +520,7 @@ start_send(int queueNum, pid_t pid)
 		strnum1[fmt_ulong(strnum1, queue_no)] = 0;
 		if (!env_put(envQueue.s) || !env_put2("QIDENT", strnum1))
 			strerr_die1x(111, "alert: qscheduler: out of memory");
-		execvp(*qsargs, qsargs);
+		execvp(*qsargs, (char **) qsargs);
 		strerr_die3sys(111, "alert: qscheduler: execv ", *qsargs, ": ");
 	default:
 		queue_table[queue_no].pid = qspid;
@@ -668,7 +669,7 @@ queue_fix(char *queuedir)
 		strnum1[fmt_int(strnum1, conf_split)] = 0;
 		qfargs[2] = strnum1;
 		qfargs[3] = queuedir;
-		execvp(*qfargs, qfargs); /*- queue-fix */
+		execvp(*qfargs, (char **) qfargs); /*- queue-fix */
 		strerr_die3sys(111, "alert: qscheduler: execv ", *qfargs, ": ");
 	}
 	sig_unblock(sig_int);
@@ -1248,7 +1249,7 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	static char    *x = "$Id: qscheduler.c,v 1.10 2024-02-28 18:03:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscheduler.c,v 1.10 2024-02-28 18:03:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

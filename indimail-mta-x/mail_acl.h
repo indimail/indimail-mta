@@ -7,6 +7,6 @@
 #ifndef _MAIL_ACL_H_
 #define _MAIL_ACL_H_
 
-int             mail_acl(stralloc *, int, char *, char *, char);
+int             mail_acl(stralloc *, int, const char *, const char *, char);
 
 #endif

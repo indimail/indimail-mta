@@ -106,7 +106,7 @@ die_nomem()
 }
 
 no_return void
-die_control(char *arg)
+die_control(const char *arg)
 {
 	substdio_flush(subfdout);
 	substdio_puts(subfderr, FATAL);
@@ -119,29 +119,29 @@ die_control(char *arg)
 
 void
 #ifdef  HAVE_STDARG_H
-out(char *s1, ...)
+out(const char *s1, ...)
 #else
 out(va_alist)
 va_dcl
 #endif
 {
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
-	char           *s1;
+	const char     *s1;
 #endif
 
 #ifdef HAVE_STDARG_H
 	va_start(ap, s1);
 #else
 	va_start(ap);
-	s1 = va_arg(ap, char *);
+	s1 = va_arg(ap, const char *);
 #endif
 
 	if (substdio_puts(subfdout, s1) == -1)
 		_exit(1);
 	while (1) {
-		str = va_arg(ap, char *);
+		str = va_arg(ap, const char *);
 		if (!str)
 			break;
 		if (substdio_puts(subfdout, str) == -1)
@@ -160,29 +160,29 @@ flush()
 
 void
 #ifdef  HAVE_STDARG_H
-logerr(char *s1, ...)
+logerr(const char *s1, ...)
 #else
 logerr(va_alist)
 va_dcl
 #endif
 {
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
-	char           *s1;
+	const char     *s1;
 #endif
 
 #ifdef HAVE_STDARG_H
 	va_start(ap, s1);
 #else
 	va_start(ap);
-	s1 = va_arg(ap, char *);
+	s1 = va_arg(ap, const char *);
 #endif
 
 	if (substdio_puts(subfderr, s1) == -1)
 		_exit(1);
 	while (1) {
-		str = va_arg(ap, char *);
+		str = va_arg(ap, const char *);
 		if (!str)
 			break;
 		if (substdio_puts(subfderr, str) == -1)
@@ -204,7 +204,7 @@ logflush()
  * Range can filled in struct netspec
  */
 int
-cidr2IPrange(char *ipaddr, int mask, struct netspec *spec)
+cidr2IPrange(const char *ipaddr, int mask, struct netspec *spec)
 {
 	ip_addr         ip;
 
@@ -223,7 +223,7 @@ stralloc        whitelist = { 0 };
 struct constmap mapwhite;
 
 void
-whitelist_init(char *arg)
+whitelist_init(const char *arg)
 {
 	if (verbose > 2) {
 		logerr("initializing whitelist\n", NULL);
@@ -242,7 +242,7 @@ whitelist_init(char *arg)
 
 int
 ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
-	char **errStr)
+	const char *errStr[])
 {
 	int             x, len, mask;
 	struct netspec  netspec;
@@ -251,7 +251,7 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 	char           *ptr;
 
 	if (errStr)
-		*errStr = 0;
+		*errStr = NULL;
 	if (whitefn) {
 		switch ((x = cdb_matchaddr(whitefn, ipaddr->s, ipaddr->len - 1)))
 		{
@@ -303,9 +303,9 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 }
 
 int
-is_white(char *ip)
+is_white(const char *ip)
 {
-	char           *errStr = 0;
+	const char     *errStr = NULL;
 	static stralloc ipaddr = { 0 };
 
 	if (!stralloc_copys(&ipaddr, ip) ||
@@ -329,7 +329,7 @@ is_white(char *ip)
 }
 
 int
-copy_grey(struct greylst *ptr, char *ipaddr, char *rpath, char *rcpt, int rcptlen)
+copy_grey(struct greylst *ptr, const char *ipaddr, const char *rpath, const char *rcpt, int rcptlen)
 {
 	int             len;
 
@@ -370,11 +370,11 @@ grey_compare(int *key, struct greylst *ptr)
 }
 
 void
-print_record(char *ip, char *rpath, char *rcpt, int rcptlen, time_t timestamp,
+print_record(const char *ip, const char *rpath, const char *rcpt, int rcptlen, time_t timestamp,
 	char status, int operation)
 {
 	char            strnum[FMT_ULONG];
-	char           *ptr;
+	const char     *ptr;
 
 	strnum[fmt_ulong(strnum, (unsigned long) timestamp)] = 0;
 	out(strnum, " IP: ", ip, " FROM: ", rpath, " RCPT: [", NULL);
@@ -418,7 +418,7 @@ print_record(char *ip, char *rpath, char *rcpt, int rcptlen, time_t timestamp,
 }
 
 int
-compare_ip(unsigned char *ip1, unsigned char *ip2)
+compare_ip(const unsigned char *ip1, const unsigned char *ip2)
 {
 	register int    i;
 
@@ -574,7 +574,7 @@ struct greylst *grey_index;
  */
 
 int
-search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_resend,
+search_record(const char *remoteip, const char *rpath, const char *rcpt, int rcptlen, int min_resend,
 	int resend_win, int fr_int, struct greylst **store)
 {
 	struct greylst *ptr;
@@ -617,7 +617,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
 		logflush();
 		return (0);
 	}
-	e.key = remoteip;
+	e.key = (char *) remoteip;
 	if (!(ep = hsearch(e, FIND)))
 		return (RECORD_NEW);
 	for (found = 0, ptr = (struct greylst *) ep->data;ptr;ptr = ptr->ip_next) {
@@ -667,7 +667,7 @@ search_record(char *remoteip, char *rpath, char *rcpt, int rcptlen, int min_rese
  * added to hash list if not found in hash list
  */
 struct greylst *
-add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey)
+add_record(const char *ip, const char *rpath, const char *rcpt, int rcptlen, struct greylst **grey)
 {
 	struct greylst *ptr;
 
@@ -698,11 +698,11 @@ add_record(char *ip, char *rpath, char *rcpt, int rcptlen, struct greylst **grey
 }
 
 int
-send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
-	char *rcpt, int rcptlen, int min_resend, int resend_win, int fr_int,
+send_response(int s, union sockunion *from, int fromlen, const char *ip, const char *rpath,
+	const char *rcpt, int rcptlen, int min_resend, int resend_win, int fr_int,
 	struct greylst **grey, int *record_added)
 {
-	char           *resp;
+	const char     *resp;
 	int             i, n = 0;
 #ifndef IPV6
 	unsigned char   ibuf[sizeof(struct in6_addr)];
@@ -766,7 +766,7 @@ send_response(int s, union sockunion *from, int fromlen, char *ip, char *rpath,
 }
 
 int
-write_file(int fd, char *arg, int len)
+write_file(int fd, const char *arg, int len)
 {
 	int             i;
 
@@ -1009,7 +1009,7 @@ sigterm()
 	_exit(0);
 }
 
-char           *
+const char     *
 print_status(char status)
 {
 	switch (status)
@@ -1039,7 +1039,7 @@ print_status(char status)
  * greydaemon [-w whitelist] [-t timeout_days] [-g resend_window_hours]
  *     [-m min_resend_minutes] ipaddr savefile
  */
-char           *usage =
+const char     *usage =
 				"usage: qmail-greyd [options] ipaddr context_file\n"
 				"Options [ vhtgmfspw ]\n"
 				"        [ -v 0, 1 or 2]\n"
@@ -1063,7 +1063,8 @@ main(int argc, char **argv)
 #endif
 	struct greylst *grey;
 	unsigned long   resend_window, min_resend, save_interval, free_interval;
-	char           *ptr, *ipaddr = 0, *client_ip = 0, *rpath = 0, *rcpt_head = 0, *a_port = "1999";
+	char           *ptr, *client_ip = 0, *rpath = 0, *rcpt_head = 0;
+	const char     *ipaddr, *a_port = "1999";
 #ifdef DYNAMIC_BUF
 	char           *rdata = 0, *buf = 0;
 	int             bufsize = MAXGREYDATASIZE;
@@ -1432,7 +1433,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	static char    *x = "$Id: qmail-greyd.c,v 1.37 2024-02-08 22:02:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-greyd.c,v 1.37 2024-02-08 22:02:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

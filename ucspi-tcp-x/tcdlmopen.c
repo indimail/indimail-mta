@@ -42,7 +42,7 @@ extern void write(int, char *, int);
 void
 getversion_tcdlmopen_c()
 {
-	static char    *x = "$Id: tcdlmopen.c,v 1.3 2020-09-16 20:50:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tcdlmopen.c,v 1.3 2020-09-16 20:50:12+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

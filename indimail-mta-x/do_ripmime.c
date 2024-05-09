@@ -56,7 +56,7 @@ do_ripmime()
 void
 getversion_do_ripmime_c()
 {
-	static char    *x = "$Id: do_ripmime.c,v 1.2 2021-08-30 01:07:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: do_ripmime.c,v 1.2 2021-08-30 01:07:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

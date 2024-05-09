@@ -13,7 +13,7 @@
 #include "haslibrt.h"
 
 #ifdef HASLIBRT
-int             queueNo_from_shm(char *);
+int             queueNo_from_shm(const char *);
 #endif
 int             queueNo_from_env();
 

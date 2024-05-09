@@ -78,7 +78,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setlock_c()
 {
-	static char    *x = "$Id: setlock.c,v 1.3 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setlock.c,v 1.3 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

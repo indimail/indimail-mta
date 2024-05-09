@@ -15,7 +15,7 @@
 
 #define FMTQFN 40	/*- maximum space needed, if len(dirslash) <= 10 */
 
-unsigned int    fmtqfn(char *, char *, unsigned long, int);
+unsigned int    fmtqfn(char *, const char *, unsigned long, int);
 
 extern int      conf_split;
 

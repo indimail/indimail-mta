@@ -13,6 +13,6 @@
 #include "stralloc.h"
 
 extern stralloc rules_name;
-int             rules(void (*)(char *, unsigned int), int, char *, char *, char *);
+int             rules(void (*)(char *, unsigned int), int, char *, const char *, const char *);
 
 #endif

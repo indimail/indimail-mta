@@ -175,7 +175,7 @@ main()
 void
 getversion_columnt_c()
 {
-	static char    *x = "$Id: columnt.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: columnt.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

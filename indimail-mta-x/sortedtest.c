@@ -41,7 +41,7 @@ main(int argc, char **argv)
 void
 getversion_sortedtest_c()
 {
-	static char    *x = "$Id: sortedtest.c,v 1.1 2008-06-03 23:24:09+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: sortedtest.c,v 1.1 2008-06-03 23:24:09+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

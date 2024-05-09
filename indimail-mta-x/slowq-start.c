@@ -51,7 +51,7 @@ die()
  *   return 0 if user is not present in the list
  */
 int
-check_user(char *userlist, char *user)
+check_user(char *userlist, const char *user)
 {
 	char           *ptr1, *ptr2;
 
@@ -113,13 +113,14 @@ closepipes()
 int
 main(int argc, char **argv)
 {
-	char           *set_supplementary_groups, *ptr;
+	char           *set_supplementary_groups;
+	const char     *ptr;
 	gid_t          *gidset;
 	int             ngroups;
-	char           *(qsargs[]) = { "slowq-send", 0, 0};
-	char           *(qcargs[]) = { "qmail-clean", 0, 0, 0};
-	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
-	char           *(qrargs[]) = { "qmail-rspawn", 0, 0};
+	const char     *(qsargs[]) = { "slowq-send", 0, 0};
+	const char     *(qcargs[]) = { "qmail-clean", 0, 0, 0};
+	const char     *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
+	const char     *(qrargs[]) = { "qmail-rspawn", 0, 0};
 
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
@@ -211,7 +212,7 @@ main(int argc, char **argv)
 			die();
 		close23456();
 		closepipes();
-		execvp(*qlargs, qlargs); /*- qmail-lspawn */
+		execvp(*qlargs, (char **) qlargs); /*- qmail-lspawn */
 		die();
 	}
 	switch (fork())
@@ -235,7 +236,7 @@ main(int argc, char **argv)
 			die();
 		close23456();
 		closepipes();
-		execvp(*qrargs, qrargs); /*- qmail-rspawn */
+		execvp(*qrargs, (char **) qrargs); /*- qmail-rspawn */
 		die();
 	}
 	switch (fork())
@@ -260,7 +261,7 @@ main(int argc, char **argv)
 		close23456();
 		closepipes();
 		qcargs[2] = "slowq-send"; /*- pass qmail-send as argument for the ps command */
-		execvp(*qcargs, qcargs); /*- qmail-clean */
+		execvp(*qcargs, (char **) qcargs); /*- qmail-clean */
 		die();
 	}
 	if (check_user(set_supplementary_groups, "qmails")) {
@@ -288,7 +289,7 @@ main(int argc, char **argv)
 	if (fd_copy(6, pi6[0]) == -1)
 		die();
 	closepipes();
-	execvp(*qsargs, qsargs); /*- slowq-send */
+	execvp(*qsargs, (char **) qsargs); /*- slowq-send */
 	die();
 	/*- Not reached */
 	return(0);
@@ -297,7 +298,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_start_c()
 {
-	static char    *x = "$Id: slowq-start.c,v 1.7 2022-04-04 00:52:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: slowq-start.c,v 1.7 2022-04-04 00:52:04+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

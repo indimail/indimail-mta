@@ -37,11 +37,12 @@
 
 #define FATAL "replier-config: fatal: "
 
+typedef const char c_char;
 static int      fd;
 static substdio ss;
 static stralloc dirplus = { 0 };
 static stralloc dotplus = { 0 };
-static char    *fn, *dir, *dot, *local, *host, *outlocal, *outhost;
+static c_char  *fn, *dir, *dot, *local, *host, *outlocal, *outhost;
 static char     buf[1024];
 
 no_return void
@@ -63,7 +64,7 @@ fail(void)
 }
 
 void
-makedir(char *s)
+makedir(const char *s)
 {
 	fn = s;
 	if (mkdir(fn, 0700) == -1)
@@ -71,7 +72,7 @@ makedir(char *s)
 }
 
 void
-start(char *s)
+start(const char *s)
 {
 	fn = s;
 	if ((fd = open_trunc(fn)) == -1)
@@ -80,7 +81,7 @@ start(char *s)
 }
 
 void
-outs(char *s)
+outs(const char *s)
 {
 	if (substdio_puts(&ss, s) == -1)
 		fail();
@@ -104,7 +105,7 @@ perm(int mode)
 }
 
 void
-dirplusmake(char *slash)
+dirplusmake(const char *slash)
 {
 	if (!stralloc_copys(&dirplus, dir) ||
 			!stralloc_cats(&dirplus, slash) ||
@@ -113,7 +114,7 @@ dirplusmake(char *slash)
 }
 
 void
-linkdotdir(char *dash, char *slash)
+linkdotdir(const char *dash, const char *slash)
 {
 	if (!stralloc_copys(&dotplus, dot) ||
 			!stralloc_cats(&dotplus, dash) ||
@@ -301,7 +302,7 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	static char    *x = "$Id: replier-config.c,v 1.7 2022-03-05 13:37:29+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: replier-config.c,v 1.7 2022-03-05 13:37:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

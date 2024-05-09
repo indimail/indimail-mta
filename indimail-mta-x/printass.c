@@ -176,7 +176,7 @@ main(int argc, char **argv)
 void
 getversion_printass_c()
 {
-	static char    *x = "$Id: printass.c,v 1.1 2023-12-10 10:18:52+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: printass.c,v 1.1 2023-12-10 10:18:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

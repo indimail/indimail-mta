@@ -44,7 +44,8 @@ static stralloc forwarded_for, forwarded_to;
 int
 main(int argc, char **argv)
 {
-	char           *sender, *dtline, *qqeh, *qqx;
+	char           *sender, *dtline, *qqeh;
+	const char     *qqx;
 	char          **a;
 	int             x;
 
@@ -113,7 +114,7 @@ main(int argc, char **argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.16 2023-09-19 22:29:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: forward.c,v 1.16 2023-09-19 22:29:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

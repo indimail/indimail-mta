@@ -65,7 +65,7 @@ trigger_clear(int *nfds, fd_set *rfds)
 void
 getversion_trigger_c()
 {
-	static char    *x = "$Id: trigger.c,v 1.3 2022-01-30 09:44:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: trigger.c,v 1.3 2022-01-30 09:44:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

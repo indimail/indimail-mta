@@ -25,13 +25,13 @@
 
 extern int      err_child();
 extern void     die_nomem();
-extern void     die_control(char *);
-static stralloc etrn, etrndir, lockfile;
+extern void     die_control(const char *);
+static stralloc etrn, etrndir, lockfile, t;
 
 static char    *binetrnargs[5] = { 0, 0, 0, 0, (char *) 0 };
 
 int
-etrn_queue(char *arg, char *remoteip)
+etrn_queue(const char *arg, const char *remoteip)
 {
 	int             child, flagetrn, len, exitcode, wstat, fd;
 	size_t          mailcount;
@@ -49,16 +49,20 @@ etrn_queue(char *arg, char *remoteip)
 		return -2;
 	if (!constmap_init(&mapetrn, etrn.s, etrn.len, 0))
 		die_nomem();
-	case_lowerb(arg, len = str_len(arg)); /*- convert into lower case */
-	if (!constmap(&mapetrn, arg, len))
+	if (!stralloc_copys(&t, arg) ||
+			!stralloc_0(&t))
+		die_nomem();
+	t.len--;
+	case_lowerb(t.s, len = t.len); /*- convert into lower case */
+	if (!constmap(&mapetrn, t.s, t.len))
 		return -2;
-	if (rcpthosts(arg, len, 1) != 1)
+	if (rcpthosts(t.s, t.len, 1) != 1)
 		return -2;
 	if (!(dir = read_assign("autoturn", NULL, NULL, NULL)))
 		return -2;
 	if (!stralloc_copys(&etrndir, dir) ||
 			!stralloc_append(&etrndir, "/") ||
-			!stralloc_cats(&etrndir, arg) ||
+			!stralloc_catb(&etrndir, t.s, t.len) ||
 			!stralloc_0(&etrndir))
 		die_nomem();
 	mailcount = 0;
@@ -114,7 +118,7 @@ etrn_queue(char *arg, char *remoteip)
 				!stralloc_0(&bin))
 			strerr_die1x(111, "etrn: fatal: out of memory");
 		binetrnargs[0] = bin.s;
-		binetrnargs[1] = arg;
+		binetrnargs[1] = t.s;
 		binetrnargs[2] = dir;
 		binetrnargs[3] = etrndir.s;
 		execv(*binetrnargs, binetrnargs);
@@ -138,7 +142,7 @@ etrn_queue(char *arg, char *remoteip)
 void
 getversion_etrn_c()
 {
-	static char    *x = "$Id: etrn.c,v 1.21 2024-02-08 20:37:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: etrn.c,v 1.21 2024-02-08 20:37:08+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

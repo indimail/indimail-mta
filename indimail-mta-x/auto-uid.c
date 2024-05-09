@@ -69,6 +69,6 @@ main(int argc, char **argv)
 void
 getversion_auto_uid_c()
 {
-	static char    *x = "$Id: auto-uid.c,v 1.11 2023-07-13 02:41:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: auto-uid.c,v 1.11 2023-07-13 02:41:56+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

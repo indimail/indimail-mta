@@ -81,7 +81,7 @@ static int      numanswers;
 static char     name[MAXDNAME];
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -91,7 +91,7 @@ out(char *str)
 }
 
 void
-print_debug(char *arg1, char *arg2, char *arg3)
+print_debug(const char *arg1, const char *arg2, const char *arg3)
 {
 	if (!debug)
 		return;
@@ -122,14 +122,14 @@ flush()
 }
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -138,7 +138,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	if (s2) {
@@ -345,7 +345,7 @@ char           *
 dns_text(char *dn)
 {
 	int             r;
-	
+
 	switch (r = dns_txtplus(dn))
 	{
 	case DNS_MEM:
@@ -362,7 +362,7 @@ uri_decode(char *str, size_t str_len, char **strend)
 {
 	size_t          i = 0, j = 0, found;
 	int             pasthostname = 0;
-	char           *str_bits = "\r\n\t \'\"<>()";
+	const char     *str_bits = "\r\n\t \'\"<>()";
 
 	for (i = 0; i < str_len; i++, j++) {
 		if (str[i] == '%' || (!pasthostname && str[i] == '=')) {
@@ -767,7 +767,7 @@ checkuri(char **ouri, char **text, size_t textlen)
 			print_debug(uri, ": not blacklisted", 0);
 			break;
 		case 1:
-			*text = "No reason given";
+			*text = (char *) "No reason given";
 			blacklisted = 1;
 			print_debug(uri, ": blacklisted. reason - ", *text);
 			break;
@@ -971,7 +971,7 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	static char    *x = "$Id: surblfilter.c,v 1.19 2024-01-23 01:23:51+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: surblfilter.c,v 1.19 2024-01-23 01:23:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

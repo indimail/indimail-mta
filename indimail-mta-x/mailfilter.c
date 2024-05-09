@@ -82,11 +82,9 @@ mailfilter(int argc, char **argv, char *filterargs)
 void
 getversion_mailfilter_c()
 {
-	static char    *x = "$Id: mailfilter.c,v 1.5 2024-02-20 22:18:10+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mailfilter.c,v 1.5 2024-02-20 22:18:10+05:30 Cprogrammer Exp mbhangui $";
 
-	x = sccsidmailfilterh;
 	x = sccsidmktempfileh;
-	x = sccsidqmultih;
 	x++;
 }
 #endif

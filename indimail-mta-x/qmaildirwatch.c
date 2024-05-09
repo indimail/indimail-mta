@@ -166,7 +166,7 @@ main()
 void
 getversion_qmaildirwatch_c()
 {
-	static char    *x = "$Id: qmaildirwatch.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmaildirwatch.c,v 1.9 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

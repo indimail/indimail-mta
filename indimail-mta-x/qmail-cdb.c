@@ -71,7 +71,8 @@ int
 main(int argc, char **argv)
 {
 	char            inbuf[1024];
-	char           *arg, *ptr, *workdir;
+	const char     *arg, *workdir;
+	char           *ptr;
 	int             fd, fdtemp, match, i, recipient_cdb = 0,
 					do_move = 0, dlen;
 	struct cdbmss   cdbmss;
@@ -182,7 +183,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	static char    *x = "$Id: qmail-cdb.c,v 1.15 2023-03-12 19:03:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-cdb.c,v 1.15 2023-03-12 19:03:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -67,6 +67,7 @@
 #define SLEEP_CLEANUP  76431 /*- time between cleanups */
 #define SLEEP_SYSFAIL    123
 
+typedef const char c_char;
 static int      lifetime = 604800;
 static int      bouncemaxbytes = 50000;
 #ifdef BOUNCELIFETIME
@@ -98,23 +99,23 @@ static char     strnum2[FMT_ULONG];
 static char    *qident;
 
 #define CHANNELS 2
-static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
-static char    *chanstatusmsg[CHANNELS] = { " local ", " remote " };
-static char    *chanjobsheldmsg[CHANNELS] = { /* NJL 1998/05/03 */
+static c_char  *chanaddr[CHANNELS] = { "local/", "remote/" };
+static c_char  *chanstatusmsg[CHANNELS] = { " local ", " remote " };
+static c_char  *chanjobsheldmsg[CHANNELS] = { /* NJL 1998/05/03 */
 	"local deliveries temporarily held\n",
 	"remote deliveries temporarily held\n"
 };
-static char    *chanjobsunheldmsg[CHANNELS] = {	/* NJL 1998/05/03 */
+static c_char  *chanjobsunheldmsg[CHANNELS] = {	/* NJL 1998/05/03 */
 	"local deliveries resumed\n",
 	"remote deliveries resumed\n"
 };
-static char    *tochan[CHANNELS] = { " to local ", " to remote " };
+static c_char  *tochan[CHANNELS] = { " to local ", " to remote " };
 static int      chanfdout[CHANNELS] = { 1, 3 };
 static int      chanfdin[CHANNELS] = { 2, 4 };
 static int      chanskip[CHANNELS] = { 10, 20 };
 
-char           *queuedesc;
-static char    *argv0 = "qmail-send";
+const char     *queuedesc;
+static c_char  *argv0 = "qmail-send";
 
 extern dtype    delivery;
 static int      do_ratelimit;
@@ -809,11 +810,11 @@ job_close(int j)
 /*- this file is too long ------------------------------------------- BOUNCES */
 
 /*- strip the virtual domain which is prepended to addresses e.g. xxx.com-user01@xxx.com */
-static char    *
+static const char *
 stripvdomprepend(char *recip)
 {
 	unsigned int    i, domainlen;
-	char           *domain, *prepend;
+	const char     *domain, *prepend;
 
 	i = str_rchr(recip, '@');
 	if (!recip[i])
@@ -894,8 +895,9 @@ addbounce(unsigned long id, char *recip, char *report)
 }
 
 static int
-bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_report, char *origrecip, char *sender,
-				 char *recipient)
+bounce_processor(struct qmail *qq, const char *messfn, const char *bouncefn,
+		const char *bounce_report, const char *origrecip, const char *sender,
+		const char *recipient)
 {
 	char           *prog, *(args[8]);
 	int             i, child, wstat;
@@ -911,12 +913,12 @@ bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_re
 		return (111);
 	case 0:
 		args[0] = prog;
-		args[1] = messfn; /*- message filename */
-		args[2] = bouncefn;	/*- bounce message filename */
-		args[3] = bounce_report; /*- bounce report */
-		args[4] = sender; /*- bounce sender */
-		args[5] = origrecip; /*- original recipient */
-		args[6] = recipient; /*- original sender */
+		args[1] = (char *) messfn; /*- message filename */
+		args[2] = (char *) bouncefn;	/*- bounce message filename */
+		args[3] = (char *) bounce_report; /*- bounce report */
+		args[4] = (char *) sender; /*- bounce sender */
+		args[5] = (char *) origrecip; /*- original recipient */
+		args[6] = (char *) recipient; /*- original sender */
 		args[7] = 0;
 		execv(*args, args);
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": Unable to run: ", prog, ": ", error_str(errno), "\n", NULL);
@@ -947,7 +949,8 @@ injectbounce(unsigned long id)
 	datetime_sec    birth;
 	substdio        ssread;
 	char            buf[128], inbuf[128];
-	char           *bouncesender, *bouncerecip = "", *brep = "?", *p;
+	const char     *bouncesender, *bouncerecip = "";
+	char           *brep = (char *) "?", *p;
 	int             r = -1, fd, ret;
 	unsigned long   qp;
 #ifdef MIME
@@ -2317,7 +2320,8 @@ run_plugin()
 	void           *handle;
 	int             i, status = 0, len;
 	int             (*func) (void);
-	char           *error, *start_plugin, *plugin_symb, *plugindir, *ptr, *plugin_ptr, *end;
+	char           *ptr, *plugin_ptr;
+	const char     *error, *start_plugin, *plugin_symb, *plugindir, *end;
 
 	if (!(plugindir = env_get("PLUGINDIR")))
 		plugindir = "plugins";
@@ -2394,7 +2398,7 @@ run_plugin()
 
 #ifdef HASLIBRT
 void
-shm_init(char *shm_name)
+shm_init(const char *shm_name)
 {
 	int             q[5];
 
@@ -2717,7 +2721,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	static char    *x = "$Id: qmail-send.c,v 1.115 2024-02-08 20:48:32+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-send.c,v 1.115 2024-02-08 20:48:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;

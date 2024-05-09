@@ -62,7 +62,7 @@ main()
 void
 getversion_leapsecs_c()
 {
-	static char    *x = "$Id: leapsecs.c,v 1.3 2016-01-28 15:06:55+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: leapsecs.c,v 1.3 2016-01-28 15:06:55+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

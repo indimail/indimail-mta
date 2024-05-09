@@ -80,7 +80,7 @@ main()
 void
 getversion_ipmeprint_c()
 {
-	static char    *x = "$Id: ipmeprint.c,v 1.13 2021-06-12 17:58:05+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ipmeprint.c,v 1.13 2021-06-12 17:58:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

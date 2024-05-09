@@ -40,7 +40,7 @@ char            qp[FMT_ULONG], qqbuf[1], messbuf[BUFSIZE_REMOTE];
 substdio        ssqq = SUBSTDIO_FDBUF(qqwrite, -1, qqbuf, sizeof qqbuf);
 substdio        ssmess = SUBSTDIO_FDBUF(read, 0, messbuf, sizeof messbuf);
 int             flagdeliver = 1, flagpassthrough = 0, fdcdb, flagdefault = 0;
-char           *dtline, *fncdb;
+const char     *dtline, *fncdb;
 stralloc        sender, programs, forward, todo, mailinglist, key, data, recipient;
 strset          done;
 uint32          dlen;
@@ -58,7 +58,7 @@ nomem()
 }
 
 void
-print(char *s)
+print(const char *s)
 {
 	char            ch;
 
@@ -67,7 +67,7 @@ print(char *s)
 }
 
 void
-printsafe(char *s)
+printsafe(const char *s)
 {
 	char            ch;
 
@@ -86,7 +86,7 @@ qqwrite(int fd, char *buf, int len)
 }
 
 void
-dofile(char *fn)
+dofile(const char *fn)
 {
 	int             fd, i, j;
 	struct stat     st;
@@ -125,7 +125,7 @@ cdbreaderror()
 }
 
 int
-findtarget(int flagwild, char *prepend, char *addr)
+findtarget(int flagwild, const char *prepend, const char *addr)
 {
 	int             r, at;
 
@@ -162,7 +162,7 @@ findtarget(int flagwild, char *prepend, char *addr)
 }
 
 int
-gettarget(int flagwild, char *prepend, char *addr)
+gettarget(int flagwild, const char *prepend, const char *addr)
 {
 	if (!findtarget(flagwild, prepend, addr))
 		return 0;
@@ -175,7 +175,7 @@ gettarget(int flagwild, char *prepend, char *addr)
 }
 
 void
-doprogram(char *arg)
+doprogram(const char *arg)
 {
 	char           *args[5];
 	int             child, wstat;
@@ -188,15 +188,15 @@ doprogram(char *arg)
 		return;
 	}
 	if (*arg == '!') {
-		args[0] = "preline";
-		args[1] = "sh";
-		args[2] = "-c";
-		args[3] = arg + 1;
+		args[0] = (char *) "preline";
+		args[1] = (char *) "sh";
+		args[2] = (char *) "-c";
+		args[3] = (char *) (arg + 1);
 		args[4] = 0;
 	} else {
-		args[0] = "sh";
-		args[1] = "-c";
-		args[2] = arg + 1;
+		args[0] = (char *) "sh";
+		args[1] = (char *) "-c";
+		args[2] = (char *) (arg + 1);
 		args[3] = 0;
 	}
 	switch (child = vfork())
@@ -258,7 +258,7 @@ dodata()
 }
 
 void
-dorecip(char *addr)
+dorecip(const char *addr)
 {
 
 	if (!findtarget(0, "?", addr) && gettarget(0, ":", addr)) {
@@ -271,7 +271,7 @@ dorecip(char *addr)
 }
 
 void
-doorigrecip(char *addr)
+doorigrecip(const char *addr)
 {
 	if (sender.len) {
 		if ((sender.len != 4) || byte_diff(sender.s, 4, "#@[]")) {
@@ -293,12 +293,13 @@ main(int argc, char **argv)
 {
 	int             opt, i;
 	char           *x;
+	const char     *qqx;
 
 	sig_pipeignore();
 	if (!(dtline = env_get("DTLINE")))
 		dtline = "";
 	if (!(x = env_get("SENDER")))
-		x = "original envelope sender";
+		x = (char *) "original envelope sender";
 	if (!stralloc_copys(&sender, x) ||
 			!stralloc_copys(&forward, "") ||
 			!strset_init(&done))
@@ -416,9 +417,9 @@ main(int argc, char **argv)
 		forward.len = i;
 		qmail_to(&qq, forward.s + i);
 	}
-	x = qmail_close(&qq);
-	if (*x)
-		strerr_die2x(*x == 'D' ? 100 : 111, FATAL, x + 1);
+	qqx = qmail_close(&qq);
+	if (*qqx)
+		strerr_die2x(*qqx == 'D' ? 100 : 111, FATAL, qqx + 1);
 	strerr_die2x(flagpassthrough ? 99 : 0, "fastforward: qp ", qp);
 	/*- Not reached */
 	return(0);
@@ -427,7 +428,7 @@ main(int argc, char **argv)
 void
 getversion_fastforward_c()
 {
-	static char    *x = "$Id: fastforward.c,v 1.14 2024-01-23 01:26:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: fastforward.c,v 1.14 2024-01-23 01:26:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

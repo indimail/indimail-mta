@@ -66,7 +66,7 @@ doit(char *dir, int *retval)
 	struct stat     st;
 	int             r, fd = -1;
 	short          *s;
-	char           *x;
+	const char     *x;
 	struct tai      when, now;
 
 	*retval = 111;
@@ -243,7 +243,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.11 2023-03-04 14:43:01+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svstat.c,v 1.11 2023-03-04 14:43:01+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

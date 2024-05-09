@@ -387,8 +387,8 @@ delivery()
 	unsigned long   m;
 	int             dpos;
 	int             mpos;
-	char           *result = "?";
-	char           *reason = "";
+	const char     *result = "?";
+	const char     *reason = "";
 
 	scan_ulong(line.s + field[2], &d);
 
@@ -732,7 +732,7 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	static char    *x = "$Id: mlmatchup.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mlmatchup.c,v 1.5 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

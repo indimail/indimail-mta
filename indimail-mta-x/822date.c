@@ -129,7 +129,7 @@ main(int argc, char **argv)
 void
 getversion_822date_c()
 {
-	static char    *x = "$Id: 822date.c,v 1.12 2023-01-03 16:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822date.c,v 1.12 2023-01-03 16:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

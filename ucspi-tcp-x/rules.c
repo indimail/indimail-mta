@@ -62,7 +62,7 @@ dorule(void     (*callback) (char *, unsigned int))
 }
 
 static int
-doit(void       (*callback) (char *, unsigned int), char *ip, char *host, char *info)
+doit(void       (*callback) (char *, unsigned int), char *ip, const char *host, const char *info)
 {
 	int             r, p;
 	int             ipv6 = str_len(ip) - byte_chr(ip, str_len(ip), ':');
@@ -195,7 +195,7 @@ doit(void       (*callback) (char *, unsigned int), char *ip, char *host, char *
 }
 
 int
-rules(void      (*callback) (char *, unsigned int), int fd, char *ip, char *host, char *info)
+rules(void      (*callback) (char *, unsigned int), int fd, char *ip, const char *host, const char *info)
 {
 	int             r;
 	cdb_init(&c, fd);

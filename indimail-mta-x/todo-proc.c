@@ -53,8 +53,9 @@
 #define SLEEP_SYSFAIL   123
 #define CHUNK_SIZE      1
 
-static stralloc percenthack = { 0 };
+typedef const char c_char;
 typedef struct  constmap cmap;
+static stralloc percenthack = { 0 };
 
 static cmap     mappercenthack;
 static cmap     maplocals;
@@ -69,12 +70,12 @@ static char     mypid[FMT_ULONG];
 
 /*- if qmail-send.c changes this has to be updated */
 #define CHANNELS 2
-static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
+static c_char  *chanaddr[CHANNELS] = { "local/", "remote/" };
 
 static int      flagexittodo = 0;
 static int      flagdetached = 0; /*- allow todo-proc to stop sending new jobs to qmail-send */
-static char    *queuedesc;
-static char    *argv0 = "todo-proc";
+static c_char  *queuedesc;
+static c_char  *argv0 = "todo-proc";
 static datetime_sec recent, nexttodorun;
 
 static stralloc fn = { 0 };
@@ -124,7 +125,7 @@ clockid_t       clock_id;
 
 void
 #ifdef  HAVE_STDARG_H
-todo_log(char *s1, ...)
+todo_log(const char *s1, ...)
 #else
 todo_log(va_alist)
 va_dcl
@@ -132,16 +133,16 @@ va_dcl
 {
 	int             pos;
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
-	char           *s1;
+	const char     *s1;
 #endif
 
 #ifdef HAVE_STDARG_H
 	va_start(ap, s1);
 #else
 	va_start(ap);
-	s1 = va_arg(ap, char *);
+	s1 = va_arg(ap, const char *);
 #endif
 
 	pos = comm_buf.len;
@@ -150,7 +151,7 @@ va_dcl
 		goto fail;
 
 	while (1) {
-		str = va_arg(ap, char *);
+		str = va_arg(ap, const char *);
 		if (!str)
 			break;
 		if (!stralloc_cats(&comm_buf, str))
@@ -191,7 +192,7 @@ nomem()
 }
 
 void
-pausedir(char *dir)
+pausedir(const char *dir)
 {
 	todo_log("alert: ", argv0, ": ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", NULL);
 	sleep(10);
@@ -238,13 +239,11 @@ fnmake_chanaddr(unsigned long id, int c)
  * taken from qmail-send.c
  */
 int
-rewrite(char *recip)
+rewrite(const char *recip)
 {
-	int             i;
-	int             j;
-	char           *x;
+	int             i, j, at;
+	const char     *x;
 	static stralloc addr = { 0 };
-	int             at;
 
 	if (!stralloc_copys(&rwline, "T") ||
 			!stralloc_copys(&addr, recip))
@@ -340,7 +339,7 @@ void
 comm_write(unsigned long id, int local, int remote)
 {
 	int             pos;
-	char           *s;
+	const char     *s;
 
 	if (flagdetached)
 		return;
@@ -735,7 +734,7 @@ void
 log_stat(unsigned long id, size_t bytes)
 {
 	char           *ptr;
-	char           *mode;
+	const char     *mode;
 
 	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
 	strnum2[fmt_ulong(strnum2 + 1, bytes) + 1] = 0;
@@ -1432,7 +1431,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	static char    *x = "$Id: todo-proc.c,v 1.67 2023-12-23 23:56:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: todo-proc.c,v 1.67 2023-12-23 23:56:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;

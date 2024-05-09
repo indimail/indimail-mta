@@ -237,7 +237,7 @@ main(int argc, char **argv)
 void
 getversion_logselect_c()
 {
-	static char    *x = "$Id: logselect.c,v 1.2 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: logselect.c,v 1.2 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -21,7 +21,7 @@
 
 extern int      err_child();
 extern void     die_nomem();
-extern void     die_control(char *);
+extern void     die_control(const char *);
 
 static char    *binatrnargs[5] = { 0, 0, 0, 0, (char *) 0 };
 static stralloc atrn, atrndir, lockfile;
@@ -124,7 +124,7 @@ atrn_queue(char *arg, char *remoteip)
 void
 getversion_atrn_c()
 {
-	static char    *x = "$Id: atrn.c,v 1.11 2024-02-08 21:41:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: atrn.c,v 1.11 2024-02-08 21:41:06+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

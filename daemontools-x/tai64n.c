@@ -73,7 +73,7 @@ main()
 void
 getversion_tai64n_c()
 {
-	static char    *x = "$Id: tai64n.c,v 1.4 2008-07-15 19:54:22+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: tai64n.c,v 1.4 2008-07-15 19:54:22+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

@@ -102,7 +102,7 @@ main(int argc, char **argv)
 void
 getversion_condtomaildir_c()
 {
-	static char    *x = "$Id: condtomaildir.c,v 1.8 2023-07-11 12:57:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: condtomaildir.c,v 1.8 2023-07-11 12:57:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

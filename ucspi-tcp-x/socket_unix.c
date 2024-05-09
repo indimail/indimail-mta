@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <ndelay.h>
+#include "socket.h"
 
 int
 socket_unix(void)

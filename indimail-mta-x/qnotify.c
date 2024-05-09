@@ -105,10 +105,11 @@
  *
  */
 
+typedef const char c_char;
 static char     strnum[FMT_ULONG];
 static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
-static char    *usage = "usage: qnotify [-n][-h]\n";
+static c_char  *usage = "usage: qnotify [-n][-h]\n";
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 static int      flagqueue = 1;
@@ -136,14 +137,14 @@ die_qqtemp()
 }
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit (WRITE_ERR);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit (WRITE_ERR);
@@ -152,7 +153,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
@@ -171,7 +172,7 @@ my_error(char *s1, char *s2, int exit_val)
 }
 
 void
-my_puts(char *s)
+my_puts(const char *s)
 {
 	if (flagqueue)
 		qmail_puts(&qqt, s);
@@ -181,7 +182,7 @@ my_puts(char *s)
 }
 
 void
-my_putb(char *s, int len)
+my_putb(const char *s, int len)
 {
 	if (flagqueue)
 		qmail_put(&qqt, s, len);
@@ -194,7 +195,7 @@ static int
 mkTempFile(int seekfd)
 {
 	char            inbuf[2048], outbuf[2048];
-	char           *tmpdir;
+	const char     *tmpdir;
 	static stralloc tmpFile = {0};
 	struct substdio ssin;
 	struct substdio sstmp;
@@ -328,7 +329,7 @@ parse_email(int get_subj, int get_rpath)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	int             match;
-	char           *disposition_hdr;
+	const char     *disposition_hdr;
 
 	/*- original mail on stdin */
 	got_disposition = got_msgid = got_from = got_date = 0;
@@ -429,7 +430,8 @@ main(int argc, char **argv)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT];
-	char           *rpline, *qqx, *recipient, *host;
+	char           *rpline, *recipient, *host;
+	const char     *qqx;
 
 	while ((ch = getopt(argc, argv, "nh")) != sgoptdone) {
 		switch (ch)
@@ -584,7 +586,7 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	static char    *x = "$Id: qnotify.c,v 1.13 2024-01-23 01:23:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qnotify.c,v 1.13 2024-01-23 01:23:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

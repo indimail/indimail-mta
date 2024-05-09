@@ -67,9 +67,10 @@
 #include "auto_home.h"
 
 #ifndef	lint
-static char     sccsid[] = "$Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $";
+const char      sccsid[] = "$Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
+typedef const char c_char;
 #ifdef IPV6
 static int      forcev6;
 static uint32   netif;
@@ -78,7 +79,7 @@ typedef unsigned long my_ulong;
 static int      verbosity = 1;
 static int      flagkillopts = 1;
 static int      flagdelay = 1;
-static char    *banner = "";
+static c_char  *banner = "";
 static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
 static int      flagparanoid;
@@ -147,7 +148,7 @@ struct iptable
 };
 typedef struct iptable IPTABLE;
 static IPTABLE **IpTable;
-static char        *af_unix, *pidfile;
+static c_char      *af_unix, *pidfile;
 
 void            add_ip(pid_t);
 void            print_ip();
@@ -174,21 +175,21 @@ drop_nomem(void)
 }
 
 void
-cats(char *s)
+cats(const char *s)
 {
 	if (!stralloc_cats(&tmp, s))
 		drop_nomem();
 }
 
 void
-append(char *ch)
+append(const char *ch)
 {
 	if (!stralloc_append(&tmp, ch))
 		drop_nomem();
 }
 
 void
-safecats(char *s)
+safecats(const char *s)
 {
 	char            ch;
 	int             i;
@@ -212,7 +213,7 @@ safecats(char *s)
 }
 
 void
-env(char *s, char *t)
+env(const char *s, const char *t)
 {
 	if (str_equal(s, "MAXPERIP"))
 		scan_ulong(t, &maxperip);
@@ -255,7 +256,7 @@ found(char *data, unsigned int datalen)
 }
 
 void
-doit_unix(int t, char *hostname)
+doit_unix(int t, const char *hostname)
 {
 	str_copyb(remoteipstr, "0.0.0.0", 8);
 	if (verbosity >= 2) {
@@ -283,7 +284,7 @@ doit_unix(int t, char *hostname)
 }
 
 void
-doit_tcp(int t, char *hostname)
+doit_tcp(int t, const char *hostname)
 {
 	int             j;
 #ifdef IPV6
@@ -512,8 +513,8 @@ doit_tcp(int t, char *hostname)
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-static char    *
-my_strchr(char *str, char ch)
+static const char *
+my_strchr(const char *str, char ch)
 {
 	int             i;
 
@@ -524,7 +525,7 @@ my_strchr(char *str, char ch)
 }
 
 int
-matchinet(char *ip, char *token)
+matchinet(const char *ip, const char *token)
 {
 	char            field1[8], field2[8];
 	char           *ptr, *ptr1, *ptr2, *cptr;
@@ -550,7 +551,7 @@ matchinet(char *ip, char *token)
 	if (inet_addr(token) != INADDR_NONE)
 		return (0);
 	else
-	for (match = idx1 = 0, ptr1 = token, ptr2 = ip; idx1 < 4 && match == idx1; idx1++) {
+	for (match = idx1 = 0, ptr1 = (char *) token, ptr2 = (char *) ip; idx1 < 4 && match == idx1; idx1++) {
 		/*- IP Address in control file */
 		for (cptr = field1; *ptr1 && *ptr1 != '.'; *cptr++ = *ptr1++);
 		*cptr = 0;
@@ -571,7 +572,7 @@ matchinet(char *ip, char *token)
 		 * Network address wildcard match (i.e.
 		 * "192.86.2?.12?")
 		 */
-		for (; (ptr = my_strchr(field1, '?'));) {
+		for (; (ptr = (char *) my_strchr(field1, '?'));) {
 			lnum = ptr - field1;
 			*ptr = field2[lnum];
 		}
@@ -582,7 +583,7 @@ matchinet(char *ip, char *token)
 		/*
 		 * Range match (i.e. "190-193.86.22.11")
 		 */
-		if ((ptr = my_strchr(field1, '-'))) {
+		if ((ptr = (char *) my_strchr(field1, '-'))) {
 			*ptr = 0;
 			ptr++;
 			scan_ulong(field1, &lnum);
@@ -689,7 +690,7 @@ create_table(MYSQL *mysql)
 }
 
 void
-connect_db(char *dbfile)
+connect_db(const char *dbfile)
 {
 	char           *x = 0, *m_timeout;
 	int             fd, i = 0;
@@ -977,7 +978,7 @@ usage(void)
 }
 
 void
-printstatus(char *str, pid_t pid, pid_t childpid)
+printstatus(const char *str, pid_t pid, pid_t childpid)
 {
 	int             i;
 #ifdef IPV6
@@ -1325,7 +1326,7 @@ read_provider_data(stralloc *t, int readfd, int writefd)
 #endif
 
 int
-check_pid(char *fn)
+check_pid(const char *fn)
 {
 	int             i, j;
 
@@ -1357,9 +1358,9 @@ check_pid(char *fn)
 int
 main(int argc, char **argv, char **envp)
 {
-	char           *x, *hostname, *groups = NULL;
+	const char     *x, *hostname, *groups = NULL;
 #if defined(HAS_MYSQL)
-	char           *dbfile = NULL;
+	const char     *dbfile = NULL;
 #endif
 	struct servent *se;
 	unsigned long   port, ipcount = -1;
@@ -1374,8 +1375,8 @@ main(int argc, char **argv, char **envp)
 #endif
 #ifdef TLS
 	SSL_CTX        *ctx = NULL;
-	char           *certdir = NULL, *ciphers = NULL,
-				   *cipherfile = NULL, *tls_method = NULL;
+	const char     *certdir = NULL, *cipherfile = NULL;
+	char           *ciphers = NULL, *tls_method = NULL;
 	int             pi2c[2], pi4c[2], method;
 	int             provide_data = 0;
 	pid_t           child_pid;
@@ -1853,7 +1854,7 @@ do_socket:
 			sig_pause();
 		sig_unblock(sig_child);
 		if (af_unix)
-			asd = socket_acceptun(sfd, &un, hostname);
+			asd = socket_acceptun(sfd, &un);
 		else {
 #if defined(IPV6) && defined(FREEBSD)
 			while (1) {

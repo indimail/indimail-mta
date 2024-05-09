@@ -234,7 +234,7 @@ rename(const char *oldpath, const char *newpath)
 void
 getversion_syncdir_c()
 {
-	static char    *x = "$Id: syncdir.c,v 1.12 2022-04-06 09:19:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: syncdir.c,v 1.12 2022-04-06 09:19:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

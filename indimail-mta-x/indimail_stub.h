@@ -48,6 +48,6 @@
 #define MASTER_HOST    "localhost"
 #define MYSQL_HOST     "localhost"
 
-void           *loadLibrary(void **, char *, int *, char **);
-void           *getlibObject(char *, void **, char *, char **);
+void           *loadLibrary(void **, const char *, int *, const char *err[]);
+void           *getlibObject(const char *, void **, const char *, const char *err[]);
 void            closeLibrary(void **);

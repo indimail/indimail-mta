@@ -23,7 +23,7 @@
 int             conf_split;
 
 unsigned int
-fmtqfn(char *s, char *dirslash, unsigned long id, int flagsplit)
+fmtqfn(char *s, const char *dirslash, unsigned long id, int flagsplit)
 {
 	unsigned int    len;
 	unsigned int    i;
@@ -58,7 +58,7 @@ fmtqfn(char *s, char *dirslash, unsigned long id, int flagsplit)
 void
 getversion_fmtqfn_c()
 {
-	static char    *x = "$Id: fmtqfn.c,v 1.6 2021-07-09 13:21:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: fmtqfn.c,v 1.6 2021-07-09 13:21:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

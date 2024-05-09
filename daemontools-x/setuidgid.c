@@ -25,8 +25,8 @@ main(int argc, char **argv, char **envp)
 	struct passwd  *pw;
 	struct group   *gr;
 	gid_t          *gidset = (gid_t *) NULL, g;
-	char           *ptr, *cptr, *account, *groups = 0,
-				   *usage = "usage: setuidgid [-s] [-g gid_list] account child";
+	char           *ptr, *cptr, *account, *groups = 0;
+	const char     *usage = "usage: setuidgid [-s] [-g gid_list] account child";
 	char          **child;
 	int             i, ngroups = 0, opt, old;
 
@@ -102,7 +102,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setuidgid_c()
 {
-	static char    *x = "$Id: setuidgid.c,v 1.8 2023-02-21 01:06:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setuidgid.c,v 1.8 2023-02-21 01:06:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

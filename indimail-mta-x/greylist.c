@@ -80,7 +80,8 @@ scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 	int             n;
 	unsigned long   port;	/* long because of scan_ulong */
 #ifdef IPV6
-	char           *ptr, *ip_a;
+	char           *ptr;
+	const char     *ip_a;
 #endif
 
 #ifdef IPV6
@@ -93,7 +94,7 @@ scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 			port = defaultport;
 	} else {
 		ip_a = (*gip == '@' && !*(gip + 1)) ? defaultip : gip;
-		for (ptr = ip_a;*ptr;ptr++) {
+		for (ptr = (char *) ip_a; *ptr; ptr++) {
 			if (*ptr == '@' && scan_ulong(ptr + 1, &port)) {
 				*portp = port;
 				break;
@@ -201,10 +202,8 @@ stralloc        chkpacket = {0};
 stralloc        ipbuf = {0};
 
 int
-greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
-	char           *gip, *connectingip, *from, *tolist;
-	int             tolen;
-	void            (*timeoutfn) (), (*errfn) (); /*- errfn must _exit */
+greylist(const char *gip, const char *connectingip, const char *from,
+		const char *tolist, int tolen, void (*timeoutfn) (), void (*errfn) ()) /*- errfn must _exit */
 {
 	int             r, len = 0;
 	char            strnum[FMT_ULONG];
@@ -281,7 +280,7 @@ greylist(gip, connectingip, from, tolist, tolen, timeoutfn, errfn)
 void
 getversion_greylist_c()
 {
-	static char    *x = "$Id: greylist.c,v 1.13 2018-05-30 23:25:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: greylist.c,v 1.13 2018-05-30 23:25:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

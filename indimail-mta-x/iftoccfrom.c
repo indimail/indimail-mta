@@ -101,7 +101,7 @@ main(int argc, char **argv)
 void
 getversion_iftoccfrom_c()
 {
-	static char    *x = "$Id: iftoccfrom.c,v 1.5 2024-01-23 01:24:13+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: iftoccfrom.c,v 1.5 2024-01-23 01:24:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

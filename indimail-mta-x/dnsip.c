@@ -73,7 +73,7 @@ main(int argc, char **argv)
 void
 getversion_dnsip_c()
 {
-	static char    *x = "$Id: dnsip.c,v 1.9 2023-09-23 21:21:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsip.c,v 1.9 2023-09-23 21:21:46+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

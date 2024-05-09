@@ -10,6 +10,6 @@
 #ifndef SET_ENVIRONMENT_H
 #define SET_ENVIRONMENT_H
 
-void            set_environment(char *, char *, int);
+void            set_environment(const char *, const char *, int);
 
 #endif

@@ -67,7 +67,7 @@ main(int argc, char **argv)
 void
 getversion_dnsptr_c()
 {
-	static char    *x = "$Id: dnsptr.c,v 1.10 2023-09-23 21:21:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsptr.c,v 1.10 2023-09-23 21:21:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

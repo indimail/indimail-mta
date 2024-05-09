@@ -51,7 +51,7 @@
 #define  AM_MYSQL_ERR  (MAX_AM_ERR -1)
 #endif
 
-int             address_match(char *, stralloc *, stralloc *, struct constmap *, stralloc *, char **);
+int             address_match(const char *, stralloc *, stralloc *, struct constmap *, stralloc *, const char *err[]);
 void            setdotChar(char);
-int             cdbmatch(char *, char *, int, struct constmap *, char **);
+int             cdbmatch(const char *, const char *, int, struct constmap *, const char *err[]);
 #endif

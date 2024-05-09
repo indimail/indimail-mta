@@ -112,7 +112,7 @@ lockerr()
 }
 
 void
-loglock_open(char *ident, int preopen)
+loglock_open(const char *ident, int preopen)
 {
 	char           *ptr;
 	int             lock_status;
@@ -143,7 +143,7 @@ loglock_open(char *ident, int preopen)
 #endif
 
 int
-fix_split(char *s, char *path, char *client_split, unsigned long id)
+fix_split(char *s, const char *path, const char *client_split, unsigned long id)
 {
 	int             i, len;
 	
@@ -267,7 +267,7 @@ log_stat(stralloc *mailfrom, stralloc *mailto, unsigned long id, size_t bytes)
 }
 
 void
-nomem(char *argv0)
+nomem(const char *argv0)
 {
 	if (queuedesc)
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": out of memory, sleeping...\n", NULL);
@@ -277,7 +277,7 @@ nomem(char *argv0)
 }
 
 void
-pausedir(char *dir)
+pausedir(const char *dir)
 {
 	if (queuedesc)
 		slog(1, "alert: ", queuedesc, ": unable to opendir ", dir, ", sleeping...\n", NULL);
@@ -293,7 +293,7 @@ issafe(char ch)
 }
 
 void
-logsafe_noflush(char *s, char *argv0)
+logsafe_noflush(const char *s, const char *argv0)
 {
 	int             i;
 
@@ -309,7 +309,7 @@ logsafe_noflush(char *s, char *argv0)
 }
 
 void
-logsafe(char *s, char *argv0)
+logsafe(const char *s, const char *argv0)
 {
 	int             i;
 
@@ -327,7 +327,7 @@ logsafe(char *s, char *argv0)
 void
 getversion_qsutil_c()
 {
-	static char    *x = "$Id: qsutil.c,v 1.25 2023-06-25 20:11:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qsutil.c,v 1.25 2023-06-25 20:11:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

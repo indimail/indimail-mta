@@ -36,7 +36,7 @@ static stralloc plus;
 static stralloc tmp;
 
 int
-upathexec_env(char *s, char *t)
+upathexec_env(const char *s, const char *t)
 {
 	if (!s)
 		return 1;

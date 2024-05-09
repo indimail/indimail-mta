@@ -34,7 +34,7 @@ main()
 void
 getversion_hostname_c()
 {
-	static char    *x = "$Id: hostname.c,v 1.7 2020-11-24 13:45:23+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: hostname.c,v 1.7 2020-11-24 13:45:23+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

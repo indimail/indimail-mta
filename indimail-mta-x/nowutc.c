@@ -73,7 +73,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	static char    *z = "$Id: nowutc.c,v 1.10 2023-02-08 11:19:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *z = "$Id: nowutc.c,v 1.10 2023-02-08 11:19:07+05:30 Cprogrammer Exp mbhangui $";
 
 	z++;
 }

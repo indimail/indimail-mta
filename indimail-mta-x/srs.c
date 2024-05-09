@@ -123,7 +123,7 @@ srs_error_str(int code)
 
 
 int
-srsforward(char *address)
+srsforward(const char *address)
 {
 	int             x = 0;
 	char            srsaddress[1000];
@@ -174,7 +174,7 @@ srsforward(char *address)
 }
 
 int
-srsreverse(char *srsaddress)
+srsreverse(const char *srsaddress)
 {
 	int             x = 0;
 	char            address[1000];
@@ -221,7 +221,7 @@ srsreverse(char *srsaddress)
 void
 getversion_srs_c()
 {
-	static char    *x = "$Id: srs.c,v 1.5 2023-10-02 21:25:29+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: srs.c,v 1.5 2023-10-02 21:25:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

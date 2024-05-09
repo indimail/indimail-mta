@@ -66,7 +66,7 @@ main()
 void
 getversion_delcr_c()
 {
-	static char    *x = "$Id: delcr.c,v 1.2 2020-11-27 17:32:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: delcr.c,v 1.2 2020-11-27 17:32:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -71,7 +71,7 @@ main(int argc, char **argv)
 void
 getversion_822body_c()
 {
-	static char    *x = "$Id: 822body.c,v 1.5 2024-01-23 01:19:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822body.c,v 1.5 2024-01-23 01:19:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

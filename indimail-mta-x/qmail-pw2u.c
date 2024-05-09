@@ -49,7 +49,8 @@
 #include "auto_assign.h"
 #include "auto_usera.h"
 
-static char    *dashcolon = "-:";
+typedef const char c_char;
+static c_char  *dashcolon = "-:";
 static int      flagalias = 0;
 static int      flagnoupper = 1;
 static int      okincl;
@@ -145,7 +146,7 @@ doaccount()
 {
 	struct stat     st;
 	int             i;
-	char           *mailnames;
+	const char     *mailnames;
 	char           *x;
 	unsigned int    xlen;
 
@@ -329,7 +330,7 @@ dosubuser()
 	int             i;
 	char           *x;
 	unsigned int    xlen;
-	char           *u;
+	const char     *u;
 
 	x = line.s;
 	xlen = line.len;
@@ -511,7 +512,7 @@ main(argc, argv)
 void
 getversion_qmail_pw2u_c()
 {
-	static char    *x = "$Id: qmail-pw2u.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-pw2u.c,v 1.10 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

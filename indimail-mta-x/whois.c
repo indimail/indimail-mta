@@ -40,14 +40,14 @@
 #define FATAL "whois: fatal: "
 
 int		get_whois_data(char *);
-int		whois_query(char *, char *, stralloc *);
+int		whois_query(const char *, char *, stralloc *);
 
 static int      verbose;
 static stralloc whois_server = {0}, response_1 = {0},
 				response_2 = {0}, message = {0};
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -207,12 +207,12 @@ get_whois_data(char *domain)
  * Perform a whois query to a server and record the response
  */
 int
-whois_query(char *server, char *query, stralloc *response)
+whois_query(const char *server, char *query, stralloc *response)
 {
 	char            buffer[1500];
 	int	            sock, read_size;
 
-	if ((sock = tcpopen(server, "nicname", 0)) == -1)
+	if ((sock = tcpopen(server, (char *) "nicname", 0)) == -1)
 		strerr_die4sys(111, FATAL, "tcpopen: ", server, ": ");
 	if (verbose) {
 		subprintf(subfderr, "querying %s for %s\n", server, query);
@@ -239,7 +239,7 @@ whois_query(char *server, char *query, stralloc *response)
 void
 getversion_whois_c()
 {
-	static char    *x = "$Id: whois.c,v 1.6 2023-07-13 02:49:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: whois.c,v 1.6 2023-07-13 02:49:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

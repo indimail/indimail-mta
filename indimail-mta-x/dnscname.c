@@ -45,7 +45,7 @@ main(int argc, char **argv)
 void
 getversion_dnscname_c()
 {
-	static char    *x = "$Id: dnscname.c,v 1.8 2023-09-23 21:21:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnscname.c,v 1.8 2023-09-23 21:21:03+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

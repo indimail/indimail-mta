@@ -27,7 +27,7 @@
 
 #define FATAL "predate: fatal: "
 
-static char    *montab[12] = {
+const char     *montab[12] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
@@ -35,9 +35,7 @@ char            num[FMT_ULONG];
 char            outbuf[1024];
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	time_t          now;
 	struct tm      *tm;
@@ -135,7 +133,7 @@ main(argc, argv)
 void
 getversion_predate_c()
 {
-	static char    *x = "$Id: predate.c,v 1.8 2020-11-24 13:46:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: predate.c,v 1.8 2020-11-24 13:46:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

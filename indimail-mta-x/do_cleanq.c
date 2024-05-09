@@ -41,7 +41,7 @@ do_cleanq()
 void
 getversion_do_cleanq_c()
 {
-	static char    *x = "$Id: do_cleanq.c,v 1.2 2004-10-22 20:24:35+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: do_cleanq.c,v 1.2 2004-10-22 20:24:35+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

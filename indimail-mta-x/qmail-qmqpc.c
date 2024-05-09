@@ -331,7 +331,7 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	static char    *x = "$Id: qmail-qmqpc.c,v 1.27 2024-01-23 01:22:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmqpc.c,v 1.27 2024-01-23 01:22:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -24,10 +24,8 @@ static int
 init(stralloc * rules)
 {
 	char            host[256];
-	char           *x;
-	int             i;
-	int             j;
-	int             k;
+	const char     *x;
+	int             i, j, k;
 
 	if (!stralloc_copys(rules, ""))
 		return -1;
@@ -144,7 +142,7 @@ static struct taia deadline;
 static stralloc rules = { 0 };	/*- defined if ok */
 
 int
-dns_resolvconfrewrite(stralloc * out)
+dns_resolvconfrewrite(stralloc *out)
 {
 	struct taia     now;
 

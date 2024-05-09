@@ -14,7 +14,7 @@
 #include "cdb_match.h"
 
 int
-cdb_matchaddr(char *fn, char *addr, int len)
+cdb_matchaddr(const char *fn, const char *addr, int len)
 {
 	static stralloc controlfile = {0};
 	static stralloc temp = { 0 };
@@ -50,7 +50,7 @@ cdb_matchaddr(char *fn, char *addr, int len)
 }
 
 int
-cdb_match(char *fn, char *addr, int len, char **result)
+cdb_match(const char *fn, const char *addr, int len, char **result)
 {
 	static stralloc controlfile = {0}, wildchars = {0}, lower = {0},
 					tmpbuf = {0};
@@ -129,7 +129,7 @@ cdb_match(char *fn, char *addr, int len, char **result)
 void
 getversion_cdb_match_c()
 {
-	static char    *x = "$Id: cdb_match.c,v 1.1 2022-10-30 22:14:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdb_match.c,v 1.1 2022-10-30 22:14:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

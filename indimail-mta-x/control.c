@@ -66,7 +66,7 @@ control_init()
  */
 
 int
-control_rldef(stralloc *sa, char *fn, int flagme, char *def)
+control_rldef(stralloc *sa, const char *fn, int flagme, const char *def)
 {
 	int             r;
 
@@ -85,7 +85,7 @@ control_rldef(stralloc *sa, char *fn, int flagme, char *def)
  * WARNING!!! sa is not null terminalted
  */
 int
-control_readline(stralloc *sa, char *fn)
+control_readline(stralloc *sa, const char *fn)
 {
 	substdio        ss;
 	int             fd, match;
@@ -126,7 +126,7 @@ control_readline(stralloc *sa, char *fn)
  */
 
 int
-control_readint(int *i, char *fn)
+control_readint(int *i, const char *fn)
 {
 	int             u;
 
@@ -151,7 +151,7 @@ control_readint(int *i, char *fn)
  */
 
 int
-control_readulong(unsigned long *i, char *fn)
+control_readulong(unsigned long *i, const char *fn)
 {
 	unsigned long   u;
 
@@ -178,7 +178,7 @@ control_readulong(unsigned long *i, char *fn)
  * skip
  */
 int
-control_readnativefile(stralloc *sa, char *fn, int mode)
+control_readnativefile(stralloc *sa, const char *fn, int mode)
 {
 	substdio        ss;
 	int             fd, match;
@@ -241,7 +241,7 @@ control_readnativefile(stralloc *sa, char *fn, int mode)
  * -1 - system error
  */
 int
-control_readfile(stralloc *sa, char *fn, int flagme)
+control_readfile(stralloc *sa, const char *fn, int flagme)
 {
 	substdio        ss;
 	int             fd, match;
@@ -300,7 +300,7 @@ control_readfile(stralloc *sa, char *fn, int flagme)
  * pick a random line from fn and copy it to sa
  */
 int
-control_readrandom(stralloc *sa, char *fn)
+control_readrandom(stralloc *sa, const char *fn)
 {
 	substdio        ss;
 	char           *ptr;
@@ -365,7 +365,7 @@ extern int rename (const char *, const char *);
  * newlines
  */
 int
-control_writefile(stralloc *sa, char *fn)
+control_writefile(stralloc *sa, const char *fn)
 {
 	int             i, wfd;
 	static stralloc controlfileold = {0}, controlfilenew = {0};
@@ -415,7 +415,7 @@ control_writefile(stralloc *sa, char *fn)
  * write an int value to control file fn
  */
 int
-control_writeint(int val, char *fn)
+control_writeint(int val, const char *fn)
 {
 	int             i, wfd;
 	static stralloc controlfileold = {0}, controlfilenew = {0};
@@ -473,7 +473,7 @@ control_writeint(int val, char *fn)
  * 3. Store the output in sa
  */
 int
-control_readcmd(stralloc *sa, char *fn)
+control_readcmd(stralloc *sa, const char *fn)
 {
 	substdio        ss, ssin;
 	int             fd, match, child, wstat;
@@ -545,7 +545,7 @@ control_readcmd(stralloc *sa, char *fn)
 void
 getversion_control_c()
 {
-	static char    *x = "$Id: control.c,v 1.23 2022-10-12 16:44:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: control.c,v 1.23 2022-10-12 16:44:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;

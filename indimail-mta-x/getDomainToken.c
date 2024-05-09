@@ -53,7 +53,7 @@ dtype           delivery;
  * QREGEX environment variable is defined
  */
 char           *
-getDomainToken(char *domain, stralloc *sa)
+getDomainToken(const char *domain, stralloc *sa)
 {
 	regex_t         qreg;
 	int             len, n, retval, use_regex;
@@ -143,7 +143,7 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.7 2024-02-09 15:56:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: getDomainToken.c,v 1.7 2024-02-09 15:56:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;

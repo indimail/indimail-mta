@@ -141,7 +141,7 @@ newfield_msgidmake(idhost, idhostlen, when)
 void
 getversion_newfield_c()
 {
-	static char    *x = "$Id: newfield.c,v 1.6 2011-02-11 23:44:27+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: newfield.c,v 1.6 2011-02-11 23:44:27+05:30 Cprogrammer Stab mbhangui $";
 
 	x++;
 }

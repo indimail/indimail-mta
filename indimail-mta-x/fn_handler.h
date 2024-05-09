@@ -7,6 +7,6 @@
 #ifndef FN_HANDLER_H
 #define FN_HANDLER_H
 
-int             fn_handler(void (*)(), void (*)(), int, char *);
+int             fn_handler(void (*)(), void (*)(), int, const char *);
 
 #endif

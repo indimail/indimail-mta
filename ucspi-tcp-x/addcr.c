@@ -42,7 +42,7 @@ main()
 void
 getversion_addcr_c()
 {
-	static char    *x = "$Id: addcr.c,v 1.2 2020-11-27 17:32:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: addcr.c,v 1.2 2020-11-27 17:32:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

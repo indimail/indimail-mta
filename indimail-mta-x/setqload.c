@@ -30,9 +30,9 @@
 #define FATAL "setqload: fatal: "
 #define WARN  "setqload: warn: "
 
-char           *usage1 = "-q queue_number total";
-char           *usage2 = "-q queue_number lcur/lmax rcur/rmax";
-char           *desc =
+const char     *usage1 = "-q queue_number total";
+const char     *usage2 = "-q queue_number lcur/lmax rcur/rmax";
+const char     *desc =
 	"\n\nwhere\n"
 	"   total = lcur/lmax + rcur/rmax\n"
 	"   lcur  = cur local   concurrency\n"
@@ -53,7 +53,7 @@ get_queue_details(int *q)
 }
 
 int
-compute_expression(struct vartable *vt, char *s, double *x)
+compute_expression(struct vartable *vt, const char *s, double *x)
 {
 	struct val      result;
 
@@ -166,7 +166,7 @@ main(argc, argv)
 void
 getversion_setqload_c()
 {
-	static char    *x = "$Id: setqload.c,v 1.3 2022-08-14 21:58:24+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setqload.c,v 1.3 2022-08-14 21:58:24+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASLIBRT
 	x = sccsidevalh;

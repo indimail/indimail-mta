@@ -382,7 +382,7 @@ main(int argc, char **argv)
 void
 getversion_serialsmtp_c()
 {
-	static char    *x = "$Id: serialsmtp.c,v 1.10 2023-12-09 11:55:44+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: serialsmtp.c,v 1.10 2023-12-09 11:55:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

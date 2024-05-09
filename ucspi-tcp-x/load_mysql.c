@@ -50,6 +50,7 @@
 #include <env.h>
 #include "control.h"
 
+typedef const char c_char;
 MYSQL          *(*in_mysql_init) (MYSQL *);
 MYSQL          *(*in_mysql_real_connect) (MYSQL *, const char *, const char *, const char *, const char *, unsigned int, const char *, unsigned long);
 const char     *(*in_mysql_error) (MYSQL *);
@@ -63,14 +64,14 @@ my_ulonglong    (*in_mysql_num_rows) (MYSQL_RES *);
 my_ulonglong    (*in_mysql_affected_rows) (MYSQL *);
 void            (*in_mysql_free_result) (MYSQL_RES *);
 
-static char     memerr[] = "out of memory";
-static char     ctlerr[] = "unable to read controls";
+static c_char   memerr[] = "out of memory";
+static c_char   ctlerr[] = "unable to read controls";
 int             use_sql = 0;
 static stralloc errbuf = { 0 };
 static stralloc mysql_libfn = { 0 };
 
 void *
-loadLibrary(void **handle, char *libenv, int *errflag, char **errstr)
+loadLibrary(void **handle, const char *libenv, int *errflag, const char *errstr[])
 {
 	char           *ptr;
 	int             i;
@@ -166,7 +167,7 @@ closeLibrary(void **handle)
 }
 
 void *
-getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
+getlibObject(const char *libenv, void **handle, const char *plugin_symb, const char *errstr[])
 {
 	void           *i;
 	char           *ptr;
@@ -192,10 +193,10 @@ getlibObject(char *libenv, void **handle, char *plugin_symb, char **errstr)
 }
 
 int
-initMySQLlibrary(char **errstr)
+initMySQLlibrary(const char *errstr[])
 {
 	static void    *phandle = (void *) 0;
-	char           *ptr;
+	const char     *ptr;
 	int             i;
 
 	if (phandle)
@@ -260,7 +261,7 @@ initMySQLlibrary(char **errstr)
 void
 getversion_load_mysql_c()
 {
-	static char    *x = "$Id: load_mysql.c,v 1.12 2023-04-01 19:27:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: load_mysql.c,v 1.12 2023-04-01 19:27:18+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

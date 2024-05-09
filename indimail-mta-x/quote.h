@@ -10,8 +10,8 @@
 #ifndef QUOTE_H
 #define QUOTE_H
 
-int             quote_need(char *, unsigned int);
+int             quote_need(const char *, unsigned int);
 int             quote(stralloc *, stralloc *);
-int             quote2(stralloc *, char *);
+int             quote2(stralloc *, const char *);
 
 #endif
