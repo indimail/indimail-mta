@@ -1,7 +1,10 @@
 #!/bin/sh
-# $Log: $
+# $Log: create_rpm,v $
+# Revision 1.1  2024-05-09 22:58:41+05:30  Cprogrammer
+# Initial revision
 #
-# $Id: $
+#
+# $Id: create_rpm,v 1.1 2024-05-09 22:58:41+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 ucspitcp_version=$(cat ../ucspi-tcp-x/conf-version)

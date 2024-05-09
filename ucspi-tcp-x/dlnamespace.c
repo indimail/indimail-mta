@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.13  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2021-07-03 14:03:56+05:30  Cprogrammer
  * use Lmid_t data type for id instead of unsigned long
  *
@@ -170,7 +173,7 @@ dlnamespace(const char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	const char     *x = "$Id: dlnamespace.c,v 1.12 2021-07-03 14:03:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dlnamespace.c,v 1.13 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 	if (x)
 		x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2021-03-12 13:53:54+05:30  Cprogrammer
  * use MYSQL_CONFIG for conditional compilation of mysql code
  *

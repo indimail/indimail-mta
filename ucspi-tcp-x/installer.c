@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.26 2024-03-11 17:54:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -669,7 +669,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.26 2024-03-11 17:54:44+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -677,6 +677,9 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.27  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.26  2024-03-11 17:54:44+05:30  Cprogrammer
  * fixed displaying size variable
  * fixed allocation of zerobuf variable

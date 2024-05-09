@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_expandaddr.c,v $
+ * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2020-08-03 17:24:27+05:30  Cprogrammer
  * use qmail library
  *

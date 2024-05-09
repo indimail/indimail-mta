@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -1069,7 +1069,7 @@ main(int argc, char **argv)
 void
 getversion_dotls_c()
 {
-	const char     *x = "$Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dotls.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
@@ -1093,6 +1093,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.25  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.24  2023-08-20 15:16:12+05:30  Cprogrammer
  * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
  *

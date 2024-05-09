@@ -1,5 +1,8 @@
 /*
  * $Log: argv0.c,v $
+ * Revision 1.3  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2021-05-12 20:58:03+05:30  Cprogrammer
  * use upathexec_run()
  *
@@ -24,7 +27,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_argv0_c()
 {
-	const char     *x = "$Id: argv0.c,v 1.2 2021-05-12 20:58:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: argv0.c,v 1.3 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

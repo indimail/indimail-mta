@@ -1,5 +1,8 @@
 /*
  * $Log: ip6.h,v $
+ * Revision 1.8  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2021-05-12 21:02:30+05:30  Cprogrammer
  * define arguments as array subscripts to fix gcc 11 warnings
  *

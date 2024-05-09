@@ -1,5 +1,8 @@
 /*
  * $Log: dns_ip.c,v $
+ * Revision 1.8  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2020-08-03 17:22:20+05:30  Cprogrammer
  * use qmail library
  *

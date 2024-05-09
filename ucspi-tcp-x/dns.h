@@ -1,5 +1,8 @@
 /*
  * $Log: dns.h,v $
+ * Revision 1.10  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2021-05-12 20:59:50+05:30  Cprogrammer
  * define arguments as array subscripts to fix gcc 11 warnings
  *

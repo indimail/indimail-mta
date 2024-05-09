@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.93 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -2008,13 +2008,16 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.92 2023-11-26 18:28:05+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.93 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.93  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.92  2023-11-26 18:28:05+05:30  Cprogrammer
  * fixed TCPLOCALPORT not getting set
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.34 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -823,13 +823,16 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.34 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.34  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.33  2023-08-20 15:17:12+05:30  Cprogrammer
  * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
  *

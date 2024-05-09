@@ -1,5 +1,8 @@
 /*
  * $Log: socket.h,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-06-18 13:22:33+05:30  Cprogrammer
  * added unix domain socket functions
  *

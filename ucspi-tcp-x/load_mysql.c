@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.13  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2023-04-01 19:27:18+05:30  Cprogrammer
  * refactored getlibObject function
  *
@@ -261,7 +264,7 @@ initMySQLlibrary(const char *errstr[])
 void
 getversion_load_mysql_c()
 {
-	const char     *x = "$Id: load_mysql.c,v 1.12 2023-04-01 19:27:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: load_mysql.c,v 1.13 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 	if (x)
 		x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: socket_bindun.c,v $
+ * Revision 1.2  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2023-06-16 23:47:59+05:30  Cprogrammer
  * Initial revision
  *

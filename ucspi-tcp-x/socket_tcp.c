@@ -1,5 +1,8 @@
 /*
  * $Log: socket_tcp.c,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-06-18 13:23:59+05:30  Cprogrammer
  * removed not needed include
  *

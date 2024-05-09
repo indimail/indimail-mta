@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.20  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.19  2021-07-03 14:04:38+05:30  Cprogrammer
  * use Lmid_t data type for id instead of unsigned long
  *
@@ -191,7 +194,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	const char     *x = "$Id: load_shared.c,v 1.19 2021-07-03 14:04:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: load_shared.c,v 1.20 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 	if (x)
 		x++;
 }

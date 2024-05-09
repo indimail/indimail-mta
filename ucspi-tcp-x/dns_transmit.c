@@ -1,5 +1,8 @@
 /*
  * $Log: dns_transmit.c,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2020-08-03 17:23:27+05:30  Cprogrammer
  * use qmail library
  *

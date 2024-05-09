@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.25  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.24  2021-08-30 12:47:59+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -675,7 +678,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	const char     *x = "$Id: rblsmtpd.c,v 1.24 2021-08-30 12:47:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rblsmtpd.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

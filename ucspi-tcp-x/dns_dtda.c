@@ -1,5 +1,8 @@
 /*
  * $Log: dns_dtda.c,v $
+ * Revision 1.3  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-08-03 17:28:50+05:30  Cprogrammer
  * use qmail library
  *

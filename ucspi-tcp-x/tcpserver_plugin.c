@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.17  2024-05-09 22:55:54+05:30  mbhangui
+ *  fix discarded-qualifier compiler warnings
+ *
  *  Revision 1.16  2021-07-03 14:05:14+05:30  Cprogrammer
  *  use Lmid_t data type for id instead of unsigned long
  *
@@ -200,6 +203,6 @@ tcpserver_plugin(char **envp)
 void
 getversion_tcpserver_plugin_c()
 {
-	const char    *x = "$Id: tcpserver_plugin.c,v 1.16 2021-07-03 14:05:14+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpserver_plugin.c,v 1.17 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 	x++;
 }
