@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.6  2024-05-09 23:04:25+05:30  Cprogrammer
+# use x.y for release
+#
 # Revision 1.5  2022-10-04 23:47:04+05:30  Cprogrammer
 # use rpmlintrc from .config directory
 #
@@ -16,7 +19,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.5 2022-10-04 23:47:04+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.6 2024-05-09 23:04:25+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
