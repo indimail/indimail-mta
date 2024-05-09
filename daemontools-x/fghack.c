@@ -1,5 +1,5 @@
 /*
- * $Id: fghack.c,v 1.6 2022-12-18 12:54:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: fghack.c,v 1.7 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -93,13 +93,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fghack_c()
 {
-	const char     *x = "$Id: fghack.c,v 1.6 2022-12-18 12:54:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: fghack.c,v 1.7 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: fghack.c,v $
+ * Revision 1.7  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2022-12-18 12:54:03+05:30  Cprogrammer
  * handle wait status with details
  *

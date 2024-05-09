@@ -113,7 +113,7 @@ main(int argc, char **argv)
 void
 getversion_tai64n2tai_c()
 {
-	const char     *x = "$Id: tai64n2tai.c,v 1.3 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tai64n2tai.c,v 1.4 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

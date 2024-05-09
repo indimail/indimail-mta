@@ -1,5 +1,8 @@
 /*
  * $Log: spipe.c,v $
+ * Revision 1.6  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2021-08-30 12:04:53+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -165,7 +168,7 @@ main(int argc, char **argv)
 void
 getversion_spipe_c()
 {
-	const char     *x = "$Id: spipe.c,v 1.5 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spipe.c,v 1.6 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

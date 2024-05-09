@@ -1,5 +1,8 @@
 /*
  * $Log: inotify.c,v $
+ * Revision 1.12  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2022-01-30 09:53:48+05:30  Cprogrammer
  * added missing '/' in display
  *
@@ -285,7 +288,7 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	const char     *x = "$Id: inotify.c,v 1.11 2022-01-30 09:53:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: inotify.c,v 1.12 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

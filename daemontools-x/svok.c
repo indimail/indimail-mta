@@ -1,5 +1,8 @@
 /*
  * $Log: svok.c,v $
+ * Revision 1.7  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-03-04 14:40:57+05:30  Cprogrammer
  * check for supervise/ok in original service dir before run filesystem
  *
@@ -77,7 +80,7 @@ main(int argc, char **argv)
 void
 getversion_svok_c()
 {
-	const char     *x = "$Id: svok.c,v 1.6 2023-03-04 14:40:57+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svok.c,v 1.7 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

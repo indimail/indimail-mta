@@ -1,5 +1,8 @@
 /*
  * $Log: pgrphack.c,v $
+ * Revision 1.3  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2004-10-22 20:27:56+05:30  Cprogrammer
  * added RCS id
  *
@@ -28,7 +31,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_pgrphack_c()
 {
-	const char     *x = "$Id: pgrphack.c,v 1.2 2004-10-22 20:27:56+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: pgrphack.c,v 1.3 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

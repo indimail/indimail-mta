@@ -1,5 +1,8 @@
 /*
  * $Log: readproctitle.c,v $
+ * Revision 1.3  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2004-10-22 20:29:53+05:30  Cprogrammer
  * added RCS id
  *
@@ -49,7 +52,7 @@ main(int argc, char **argv)
 void
 getversion_readproctitle_c()
 {
-	const char     *x = "$Id: readproctitle.c,v 1.2 2004-10-22 20:29:53+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: readproctitle.c,v 1.3 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

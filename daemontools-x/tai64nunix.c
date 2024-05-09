@@ -1,5 +1,8 @@
 /*
  * $Log: tai64nunix.c,v $
+ * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2014-03-18 17:37:56+05:30  Cprogrammer
  * fixed issue with tai timestamp with non-whitespace after 25 characters
  *
@@ -94,7 +97,7 @@ main()
 void
 getversion_tai64nunix_c()
 {
-	const char     *x = "$Id: tai64nunix.c,v 1.4 2014-03-18 17:37:56+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: tai64nunix.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

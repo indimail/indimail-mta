@@ -1,5 +1,8 @@
 /*
  * $Log: svc.c,v $
+ * Revision 1.11  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2023-03-04 14:42:52+05:30  Cprogrammer
  * check for supervise/ok in original service dir before run filesystem
  *
@@ -144,7 +147,7 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	const char     *x = "$Id: svc.c,v 1.10 2023-03-04 14:42:52+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svc.c,v 1.11 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.40 2024-04-01 18:21:40+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.41 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1135,13 +1135,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.40 2024-04-01 18:21:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.41 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.41  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.40  2024-04-01 18:21:40+05:30  Cprogrammer
  * set PPID env variable for child
  * added comments, updated variable name for flagwant, spid arg

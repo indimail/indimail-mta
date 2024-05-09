@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.34 2024-03-01 15:45:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -958,13 +958,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.34 2024-03-01 15:45:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.35  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.34  2024-03-01 15:45:09+05:30  Cprogrammer
  * send SIGTERM twice followed by SIGKILL to terminate logging and then all remaining processes
  *

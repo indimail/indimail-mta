@@ -1,5 +1,5 @@
 /*
- * $Id: multilog.c,v 1.9 2024-02-18 08:42:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -689,13 +689,16 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	const char     *x = "$Id: multilog.c,v 1.9 2024-02-18 08:42:01+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: multilog.c,v $
+ * Revision 1.10  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2024-02-18 08:42:01+05:30  Cprogrammer
  * use unlinkat() if available instead of unlink()
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: svcfns.c,v $
+ * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2021-08-30 12:04:53+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -129,7 +132,7 @@ stop_supervise(const char *dir, pid_t svcpid)
 void
 getversion_svcfns_c()
 {
-	const char     *x = "$Id: svcfns.c,v 1.4 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svcfns.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

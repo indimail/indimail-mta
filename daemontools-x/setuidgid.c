@@ -1,5 +1,5 @@
 /*
- * $Id: setuidgid.c,v 1.8 2023-02-21 01:06:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: setuidgid.c,v 1.9 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -102,13 +102,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_setuidgid_c()
 {
-	const char     *x = "$Id: setuidgid.c,v 1.8 2023-02-21 01:06:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setuidgid.c,v 1.9 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: setuidgid.c,v $
+ * Revision 1.9  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-02-21 01:06:12+05:30  Cprogrammer
  * re-allocate gidset to actual size
  *
