@@ -1,11 +1,11 @@
 /*
- * $Id: qregex.c,v 1.37 2023-11-03 05:21:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * qregex (v2)
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2023-11-03 05:21:55+05:30 $
- * Revision: $Revision: 1.37 $
+ * Modified: $Date: 2024-05-09 22:03:17+05:30 $
+ * Revision: $Revision: 1.38 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -24,7 +24,7 @@
  *	www.arda.homeunix.net/store/qmail/
  *
  * Contributers to qregex:
- *	Jeremy Kitchen	
+ *	Jeremy Kitchen
  *	kitchen at scriptkitchen dot com
  *	http://www.scriptkitchen.com/qmail
 
@@ -60,12 +60,12 @@
 #include "wildmat.h"
 
 static int      wildmat_match(stralloc *, struct constmap *, stralloc *);
-static int      regex_match(stralloc *, stralloc *, char **);
+static int      regex_match(stralloc *, stralloc *, const char *[]);
 
 static char     dotChar = '@';
 
 int
-cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
+cdbmatch(const char *fn, const char *addr, int len, struct constmap *maprh, const char *errStr[])
 {
 	static stralloc controlfile = {0};
 	static stralloc temp = { 0 };
@@ -79,7 +79,7 @@ cdbmatch(char *fn, char *addr, int len, struct constmap *maprh, char **errStr)
 			controldir = auto_control;
 	}
 	if (errStr)
-		*errStr = 0;
+		*errStr = NULL;
 	if (!stralloc_copys(&controlfile, controldir) || !stralloc_cats(&controlfile, "/")
 			|| !stralloc_cats(&controlfile, fn) || !stralloc_cats(&controlfile, ".cdb")
 			|| !stralloc_0(&controlfile)) {
@@ -137,15 +137,15 @@ setdotChar(char c)
 }
 
 int
-address_match(char *fn, stralloc *addr, stralloc *bhf, struct constmap *mapbhf,
-	stralloc *wildcard, char **errStr)
+address_match(const char *fn, stralloc *addr, stralloc *bhf, struct constmap *mapbhf,
+	stralloc *wildcard, const char *errStr[])
 {
 	char           *ptr;
 	int             x = 0;
 
 	case_lowerb(addr->s, addr->len); /*- convert into lower case */
 	if (errStr)
-		*errStr = 0;
+		*errStr = NULL;
 	if (fn && (x = cdbmatch(fn, addr->s, addr->len - 1, 0, errStr)))
 		return (x);
 #if defined(USE_SQL)
@@ -165,9 +165,7 @@ address_match(char *fn, stralloc *addr, stralloc *bhf, struct constmap *mapbhf,
 static int
 wildmat_match(stralloc *addr, struct constmap *ptrmap, stralloc *wildcard)
 {
-	int             i = 0;
-	int             j = 0;
-	int             k = 0;
+	int             i = 0, j = 0, k = 0;
 	char            subvalue;
 
 	if (ptrmap) {
@@ -197,7 +195,7 @@ wildmat_match(stralloc *addr, struct constmap *ptrmap, stralloc *wildcard)
 }
 
 static int
-regex_match(stralloc *addr, stralloc *map, char **errStr)
+regex_match(stralloc *addr, stralloc *map, const char *errStr[])
 {
 	int             i = 0;
 	int             j = 0;
@@ -207,7 +205,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 
 	match = 0;
 	if (errStr)
-		*errStr = 0;
+		*errStr = NULL;
 	if (map) {
 		while (j < map->len) {
 			i = j;
@@ -241,7 +239,7 @@ regex_match(stralloc *addr, stralloc *map, char **errStr)
 void
 getversion_qregex_c()
 {
-	static char    *x = "$Id: qregex.c,v 1.37 2023-11-03 05:21:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qregex.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
@@ -249,6 +247,9 @@ getversion_qregex_c()
 
 /*
  * $Log: qregex.c,v $
+ * Revision 1.38  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.37  2023-11-03 05:21:55+05:30  Cprogrammer
  * fix wildmat when pattern file is missing
  *

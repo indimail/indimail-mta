@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.94 2024-02-05 09:38:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.95 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -58,7 +58,8 @@
 #define INET_ADDRSTRLEN 16
 #endif
 
-static char    *tcpremoteip;
+typedef const char c_char;
+static c_char  *tcpremoteip;
 static char    *received;
 static char    *pidfn, *messfn, *todofn, *intdfn;
 static char    *origin; /* "X-Originating-IP: 10.0.0.1\n" */
@@ -112,7 +113,7 @@ cleanup()
 }
 
 no_return void
-die(int e, int do_cleanup, char *str)
+die(int e, int do_cleanup, const char *str)
 {
 	if (do_cleanup)
 		cleanup();
@@ -368,7 +369,7 @@ pidfmt(char *s, unsigned long seq)
 }
 
 char           *
-fnnum(char *dirslash, int flagsplit)
+fnnum(const char *dirslash, int flagsplit)
 {
 	char           *s;
 
@@ -399,7 +400,7 @@ pidopen()
 }
 
 #if defined(QHPSI)
-char           *qhpsi;
+const char     *qhpsi;
 
 /*-
  * Following added in addition to QHPSI
@@ -408,7 +409,7 @@ char           *qhpsi;
  * X-Quarantine-ID:
  */
 void
-qhpsiprog(char *program)
+qhpsiprog(const char *program)
 {
 	int             wstat, child, rejectvirus = 0, childrc = -1,
 	                qhpsirc = 1, qhpsirn = 0;
@@ -538,9 +539,10 @@ qhpsiprog(char *program)
  * *:abc@xyz.com:abc_13@example.com
  */
 int
-set_archive(char *eaddr)
+set_archive(const char *eaddr)
 {
-	char           *rule_ptr, *dest, *ptr, *errStr = 0, *addr, *addr_ptr;
+	char           *rule_ptr, *dest, *ptr, *addr_ptr;
+	const char     *addr, *errStr = NULL;
 	int             len, at, type, found, negate = 0, use_regex = 0;
 	static stralloc tmpe = {0};
 
@@ -650,7 +652,7 @@ set_archive(char *eaddr)
 
 #ifdef HASLIBRT
 int
-mq_todo(char *queue_ident, unsigned int priority)
+mq_todo(const char *queue_ident, unsigned int priority)
 {
 	mqd_t           mqd;
 	q_msg           qmsg;
@@ -685,7 +687,7 @@ mq_todo(char *queue_ident, unsigned int priority)
  *    use value of env as the value in s.
  */
 void
-read_control(stralloc *s, char *env, char *f, int flag)
+read_control(stralloc *s, const char *env, const char *f, int flag)
 {
 	char           *ptr;
 
@@ -1191,7 +1193,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	static char    *x = "$Id: qmail-queue.c,v 1.94 2024-02-05 09:38:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-queue.c,v 1.95 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1199,6 +1201,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.95  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.94  2024-02-05 09:38:54+05:30  Cprogrammer
  * fixed date field in Received header
  *

@@ -259,8 +259,8 @@ auto_uids.h: conf-users conf-groups
 	echo "extern int auto_gidc; /* certs access user */" ;\
 	echo ""; \
 	echo "int             uidinit(int, int);"; \
-	echo "char           *get_user(uid_t);"; \
-	echo "char           *get_group(gid_t);"; \
+	echo "const char     *get_user(uid_t);"; \
+	echo "const char     *get_group(gid_t);"; \
 	echo ""; \
 	echo "#endif"; \
 	) > auto_uids.h
@@ -3105,7 +3105,7 @@ iftocc.o: compile iftocc.c
 	./compile iftocc.c
 
 ofmipd: load ofmipd.o rwhconfig.o qmail.o \
-auto_prefix.o control.o auto_control.o variables.o 
+auto_prefix.o control.o auto_control.o variables.o
 	./load ofmipd rwhconfig.o qmail.o \
 	auto_prefix.o auto_control.o variables.o control.o \
 	$(static_option) $(QMAILLIB) $(dynamic_option)

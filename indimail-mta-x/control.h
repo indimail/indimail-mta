@@ -1,5 +1,8 @@
 /*
  * $Log: control.h,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2022-04-20 23:11:13+05:30  Cprogrammer
  * added control_writefile(), control_readint() functions
  *
@@ -31,14 +34,15 @@
 #include "stralloc.h"
 
 int             control_init(void);
-int             control_readline(stralloc *, char *);
-int             control_rldef(stralloc *, char *, int, char *);
-int             control_readint(int *, char *);
-int             control_writeint(int, char *);
-int             control_readulong(unsigned long *, char *);
-int             control_readnativefile(stralloc *, char *, int);
-int             control_readfile(stralloc *, char *, int);
-int             control_writefile(stralloc *, char *);
-int             control_readrandom(stralloc *, char *);
+int             control_readline(stralloc *, const char *);
+int             control_rldef(stralloc *, const char *, int, const char *);
+int             control_readint(int *, const char *);
+int             control_writeint(int, const char *);
+int             control_readulong(unsigned long *, const char *);
+int             control_readnativefile(stralloc *, const char *, int);
+int             control_readfile(stralloc *, const char *, int);
+int             control_writefile(stralloc *, const char *);
+int             control_readrandom(stralloc *, const char *);
+int             control_readcmd(stralloc *, const char *);
 void            striptrailingwhitespace(stralloc *);
 #endif

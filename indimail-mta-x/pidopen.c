@@ -1,5 +1,8 @@
 /*
  * $Log: pidopen.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2022-04-03 18:14:07+05:30  Cprogrammer
  * use 70 as return code for pidopen failure
  *
@@ -23,7 +26,7 @@ char           *pidfn;
 int             messfd;
 
 unsigned int
-pidfmt(char *s, unsigned long seq, datetime_sec _starttime, char *tmpdir)
+pidfmt(char *s, unsigned long seq, datetime_sec _starttime, const char *tmpdir)
 {
 	unsigned int    i, len;
 	pid_t           mypid;
@@ -66,7 +69,7 @@ pidfmt(char *s, unsigned long seq, datetime_sec _starttime, char *tmpdir)
 }
 
 int
-pidopen(datetime_sec _starttime, char *tmpdir)
+pidopen(datetime_sec _starttime, const char *tmpdir)
 {
 	unsigned int    len;
 	unsigned long   seq;
@@ -89,9 +92,8 @@ pidopen(datetime_sec _starttime, char *tmpdir)
 void
 getversion_pidopen_c()
 {
-	static char    *x = "$Id: pidopen.c,v 1.3 2022-04-03 18:14:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: pidopen.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
-	x = sccsidpidopenh;
 	x++;
 }
 #endif

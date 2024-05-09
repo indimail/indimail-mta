@@ -1,5 +1,8 @@
 /*
  * $Log: replier.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2022-10-17 19:45:16+05:30  Cprogrammer
  * collapsed multiple stralloc lines
  *
@@ -102,13 +105,13 @@ mywrite(int fd, char *buf, unsigned int len)
 }
 
 void
-put(char *buf, int len)
+put(const char *buf, int len)
 {
 	qmail_put(&qq, buf, len);
 }
 
 void
-myputs(char *buf)
+myputs(const char *buf)
 {
 	qmail_puts(&qq, buf);
 }
@@ -128,7 +131,8 @@ main(int argc, char **argv)
 	struct constmap headerremovemap;
 	char            inbuf[1024], outbuf[512], strnum[FMT_ULONG];
 	substdio        ssin, ssout;
-	char           *dir, *addr, *sender, *local, *action, *qqx;
+	char           *dir, *addr, *sender, *local, *action;
+	const char     *qqx;
 	char          **e;
 	int             flagmlwasthere, match, i, flaginheader, flagbadfield, pid, wstat,
 					tmperrno;
@@ -282,7 +286,7 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	static char    *x = "$Id: replier.c,v 1.13 2022-10-17 19:45:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: replier.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

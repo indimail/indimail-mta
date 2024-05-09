@@ -1,5 +1,5 @@
 /*
- * $Id: serialcmd.c,v 1.8 2023-03-26 08:23:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: serialcmd.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * serialcmd -- apply a command to a mail message.
  * Copyright 1999,  Len Budney
@@ -397,8 +397,8 @@ doit(int fd, char **argv, stralloc *fnam)
 	/*
 	 * Run the command now.
 	 */
-	argv[0] = "/bin/sh";
-	argv[1] = "-c";
+	argv[0] = (char *) "/bin/sh";
+	argv[1] = (char *) "-c";
 	runcmd(argv, fd, fnam);
 }
 
@@ -427,6 +427,9 @@ main(int argc, char *argv[])
 
 /*
  * $Log: serialcmd.c,v $
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2023-03-26 08:23:01+05:30  Cprogrammer
  * fixed code for wait_handler
  *
@@ -456,7 +459,7 @@ main(int argc, char *argv[])
 void
 getversion_serialcmd_c()
 {
-	static char    *x = "$Id: serialcmd.c,v 1.8 2023-03-26 08:23:01+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: serialcmd.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

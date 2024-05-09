@@ -1,5 +1,8 @@
 /*
  * $Log: smtp_plugin.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2011-07-08 13:49:10+05:30  Cprogrammer
  * define stubs as static
  *
@@ -20,21 +23,21 @@
  */
 
 static int
-from_plug_1(char *remoteip, char *from, char **mesg)
+from_plug_1(const char *remoteip, const char *from, char **mesg)
 {
 	*mesg = "530 denied by plugin (#5.7.1)\r\n";
 	return (0);
 }
 
 static int
-rcpt_plug_1(char *remoteip, char *from, char *rcpt, char **mesg)
+rcpt_plug_1(const char *remoteip, const char *from, const char *rcpt, char **mesg)
 {
 	*mesg = "530 denied by plugin (#5.7.1)\r\n";
 	return (0);
 }
 
 static int
-data_plug_1(char *local, char *remoteip, char *remotehost, char *remoteinfo, char **mesg)
+data_plug_1(const char *local, const char *remoteip, const char *remotehost, const char *remoteinfo, char **mesg)
 {
 	*mesg = "530 denied by plugin (#5.7.1)\r\n";
 	return (0);

@@ -1,5 +1,8 @@
 /*
  * $Log: tai64n.c,v $
+ * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2008-07-15 19:54:22+05:30  Cprogrammer
  * porting for Mac OS X
  *
@@ -73,7 +76,7 @@ main()
 void
 getversion_tai64n_c()
 {
-	static char    *x = "$Id: tai64n.c,v 1.4 2008-07-15 19:54:22+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: tai64n.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

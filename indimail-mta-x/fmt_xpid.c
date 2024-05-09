@@ -1,5 +1,8 @@
 /*
  * $Log: fmt_xpid.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2004-10-22 20:25:26+05:30  Cprogrammer
  * added RCS id
  *
@@ -43,7 +46,7 @@ fmt_xpid(register char *s, register pid_t u, const int n)
 void
 getversion_fmt_xpid_c()
 {
-	static char    *x = "$Id: fmt_xpid.c,v 1.2 2004-10-22 20:25:26+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: fmt_xpid.c,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.h,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2021-06-16 13:59:40+05:30  Cprogrammer
  * use MYSQL_RES for non-libmariadb setup
  *
@@ -47,6 +50,6 @@ extern my_ulonglong (*in_mysql_num_rows)(MYSQL_RES *);
 extern my_ulonglong (*in_mysql_affected_rows) (MYSQL *);
 extern void     (*in_mysql_free_result) (MYSQL_RES *);
 
-extern int      initMySQLlibrary(char **);
+extern int      initMySQLlibrary(const char *errstr[]);
 
 #endif

@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-02-14 07:49:06+05:30  Cprogrammer
  * added qcerts group ID for certificate group permission
  * renamed auto_uidc, auto_gidc to auto_uidv, auto_gidv
@@ -66,7 +69,7 @@ GIDARRAY        gid_a[] = {{QMAILG,-1,-1}, {NOFILESG,-1,-1},
 					{INDIGROUP,-1,-1}, {QSCANDG,-1,-1}, {QCERTSG, -1, -1}, {0}};
 
 static int
-get_uid(char *user, int exit_on_error)
+get_uid(const char *user, int exit_on_error)
 {
 	struct passwd  *pw;
 	int             i, len;
@@ -107,7 +110,7 @@ get_uid(char *user, int exit_on_error)
 }
 
 static int
-get_gid(char *group, int exit_on_error)
+get_gid(const char *group, int exit_on_error)
 {
 	struct group   *gr;
 	int             i, len;
@@ -193,7 +196,7 @@ uidinit(int closeflag, int exit_on_error)
 	return (0);
 }
 
-char *
+const char *
 get_user(uid_t uid)
 {
 	struct passwd  *pw;
@@ -217,7 +220,7 @@ get_user(uid_t uid)
 	return(pw->pw_name);
 }
 
-char *
+const char *
 get_group(gid_t gid)
 {
 	struct group   *gr;
@@ -240,7 +243,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	static char    *x = "$Id: get_uid.c,v 1.5 2023-02-14 07:49:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: get_uid.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

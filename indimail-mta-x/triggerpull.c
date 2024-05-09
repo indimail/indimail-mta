@@ -1,5 +1,8 @@
 /*
  * $Log: triggerpull.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2020-09-16 19:08:30+05:30  Cprogrammer
  * fix compiler warning for FreeBSD
  *
@@ -34,7 +37,7 @@ triggerpull()
 void
 getversion_triggerpull_c()
 {
-	static char    *x = "$Id: triggerpull.c,v 1.6 2020-09-16 19:08:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: triggerpull.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

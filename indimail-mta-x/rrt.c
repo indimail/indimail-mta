@@ -1,5 +1,8 @@
 /*
  * $Log: rrt.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2024-01-23 01:23:26+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -78,10 +81,11 @@
 #define USAGE_ERR 7
 #define PARSE_ERR 8
 
+typedef const char c_char;
 static char     ssoutbuf[BUFSIZE_OUT], sserrbuf[BUFSIZE_OUT], strnum[FMT_ULONG];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
-static char    *usage = "usage: rrt [-n][-b]\n";
+static c_char  *usage = "usage: rrt [-n][-b]\n";
 static struct qmail    qqt;
 static int      flagqueue = 1;
 static stralloc line = { 0 };
@@ -108,14 +112,14 @@ die_qqtemp()
 }
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit (WRITE_ERR);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit (WRITE_ERR);
@@ -124,7 +128,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
@@ -138,7 +142,7 @@ my_error(char *s1, char *s2, int exit_val)
 }
 
 void
-my_puts(char *s)
+my_puts(const char *s)
 {
 	if (flagqueue)
 		qmail_puts(&qqt, s);
@@ -148,7 +152,7 @@ my_puts(char *s)
 }
 
 void
-my_putb(char *s, int len)
+my_putb(const char *s, int len)
 {
 	if (flagqueue)
 		qmail_put(&qqt, s, len);
@@ -160,7 +164,7 @@ my_putb(char *s, int len)
 stralloc        addr = { 0 }, rpath = {0};
 
 int
-addrparse(char *arg)
+addrparse(const char *arg)
 {
 	int             i, flagesc, flagquoted;
 	char            ch, terminator;
@@ -291,8 +295,9 @@ main(int argc, char **argv)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT];
-	char           *rpline, *recipient, *qqx, *ptr,
+	char           *rpline, *recipient, *ptr,
 				   *smtptext = 0, *qmtptext = 0;
+	const char     *qqx;
 
 	while ((ch = getopt(argc, argv, "nb")) != opteof) {
 		switch (ch)
@@ -500,7 +505,7 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	static char    *x = "$Id: rrt.c,v 1.13 2024-01-23 01:23:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rrt.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

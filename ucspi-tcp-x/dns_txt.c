@@ -1,5 +1,8 @@
 /*
  * $Log: dns_txt.c,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2020-08-03 17:23:31+05:30  Cprogrammer
  * use qmail library
  *
@@ -22,7 +25,7 @@
 #include "dns.h"
 
 int
-dns_txt_packet(stralloc * out, char *buf, unsigned int len)
+dns_txt_packet(stralloc *out, const char *buf, unsigned int len)
 {
 	unsigned int    pos;
 	char            header[12];

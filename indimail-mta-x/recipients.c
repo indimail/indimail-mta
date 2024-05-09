@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: recipients.c,v 1.11 2023-08-14 00:56:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: recipients.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <cdb.h>
@@ -251,7 +251,7 @@ recipients(char *buf, int len)
 void
 getversion_recipients_c()
 {
-	static char    *x = "$Id: recipients.c,v 1.11 2023-08-14 00:56:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: recipients.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;
@@ -260,6 +260,9 @@ getversion_recipients_c()
 
 /*
  * $Log: recipients.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-08-14 00:56:38+05:30  Cprogrammer
  * allow any number of arguments for pavm
  *

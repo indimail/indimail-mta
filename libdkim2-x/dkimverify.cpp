@@ -471,7 +471,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				}
 			}
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-			else 
+			else
 			if (EVP_PKEY_base_id(i->m_pSelector->PublicKey) == EVP_PKEY_ED25519) {
 				res = EVP_DigestVerifyInit(i->m_Msg_ctx, NULL, NULL, NULL,
 						i->m_pSelector->PublicKey);  /* late initialization */
@@ -779,7 +779,7 @@ ParseUnsigned(const char *s, unsigned long *result)
 
 
 /*-
- * ParseDKIMSignature - Parse a DKIM-Signature header field 
+ * ParseDKIMSignature - Parse a DKIM-Signature header field
  * The received DKIM header includes two cryptographic relevant informations:
  *
  * a) The 'body hash' => bh=[sha1|sha256]                     - values[12]
@@ -977,7 +977,7 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 	bool            HasFrom = false, HasSubject = false;
 	RemoveSWSP(values[4]);		/*- header names shouldn't have spaces in them so this should be ok... */
 	char           *s = strtok_r(values[4], ":", &saveptr);
-	
+
 	while (s != NULL) {
 		if (_stricmp(s, "From") == 0)
 			HasFrom = true;
@@ -1301,13 +1301,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.34 2024-01-06 21:27:45+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.35 2024-05-07 12:56:13+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.35  2024-05-07 12:56:13+05:30  Cprogrammer
+ * removed extra wsp
+ *
  * Revision 1.34  2024-01-06 21:27:45+05:30  Cprogrammer
  * use DKIM_BAD_IDENTITY code for invalid identity (i= tag)
  *

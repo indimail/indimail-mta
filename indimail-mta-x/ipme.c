@@ -1,5 +1,8 @@
 /*
  * $Log: ipme.c,v $
+ * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.25  2021-06-14 00:47:17+05:30  Cprogrammer
  * converted to ansic prototypes
  *
@@ -149,7 +152,7 @@ static stralloc buf = { 0 };
 
 #ifdef MOREIPME
 int
-ipme_readipfile(ipalloc *ipa, char *fn)
+ipme_readipfile(ipalloc *ipa, const char *fn)
 {
 	int             ret = 1;
 	int             fd, match;
@@ -475,7 +478,7 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	static char    *x = "$Id: ipme.c,v 1.25 2021-06-14 00:47:17+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ipme.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

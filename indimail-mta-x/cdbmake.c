@@ -1,5 +1,8 @@
 /*
  * $Log: cdbmake.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2008-09-16 08:25:00+05:30  Cprogrammer
  * prototype for rename added
  *
@@ -153,7 +156,7 @@ main(int argc, char **argv)
 void
 getversion_cdbmake_c()
 {
-	static char    *x = "$Id: cdbmake.c,v 1.2 2008-09-16 08:25:00+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: cdbmake.c,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

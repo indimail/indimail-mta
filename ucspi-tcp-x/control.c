@@ -1,5 +1,8 @@
 /*
  * $Log: control.c,v $
+ * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-08-03 17:21:35+05:30  Cprogrammer
  * replaced buffer with substdio
  *
@@ -20,13 +23,12 @@
 #include <unistd.h>
 #include "control.h"
 
+typedef const char c_char;
 static char     inbuf[64];
 static stralloc line = { 0 };
 
 int
-control_readint(i, fn)
-	int            *i;
-	char           *fn;
+control_readint(int *i, const char *fn)
 {
 	unsigned long   u;
 
@@ -46,13 +48,11 @@ control_readint(i, fn)
 }
 
 int
-control_readline(sa, fn)
-	stralloc       *sa;
-	char           *fn;
+control_readline(stralloc *sa, const char *fn)
 {
 	substdio        ss;
 	int             fd, match;
-	static char    *controldir;
+	static c_char  *controldir;
 	static stralloc controlfile = {0};
 
 	if (*fn != '/' && *fn != '.') {
@@ -87,8 +87,7 @@ control_readline(sa, fn)
 }
 
 void
-striptrailingwhitespace(sa)
-	stralloc       *sa;
+striptrailingwhitespace(stralloc *sa)
 {
 	while (sa->len > 0) {
 		switch (sa->s[sa->len - 1])

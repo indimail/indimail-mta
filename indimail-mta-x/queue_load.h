@@ -11,6 +11,6 @@ typedef struct {
 	char flag;
 } QDEF;
 
-void            queue_load(char *, int *, int *, double qload[2], QDEF **);
+void            queue_load(const char *, int *, int *, double qload[2], QDEF **);
 
 #endif

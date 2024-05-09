@@ -1,5 +1,8 @@
 /*
  * $Log: custom_error.c,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2023-04-25 22:41:34+05:30  Cprogrammer
  * removed use of static variables as function is noreturn
  *
@@ -16,9 +19,9 @@
 #include "qmail.h"
 
 no_return void
-custom_error(char *program, char *type, char *message, char *extra, char *code)
+custom_error(const char *program, const char *type, const char *message, const char *extra, const char *code)
 {
-	char           *c;
+	const char     *c;
 	char            errbuf[256];
 	int             errfd;
 	struct substdio sserr;

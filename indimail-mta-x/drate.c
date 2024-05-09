@@ -1,5 +1,8 @@
 /*
  * $Log: drate.c,v $
+ * Revision 1.24  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.23  2024-02-12 19:37:46+05:30  Cprogrammer
  * replace chown with fchown
  *
@@ -112,23 +115,23 @@ static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 static stralloc qdir = { 0 };
-static char    *usage = "usage: drate [-sulcR] [-t -C count] -d domain -r deliveryRate [-D ratelimit_dir]\n";
-static char    *daytab[7] = {
+const char     *usage = "usage: drate [-sulcR] [-t -C count] -d domain -r deliveryRate [-D ratelimit_dir]\n";
+const char     *daytab[7] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
-static char    *montab[12] = {
+const char     *montab[12] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -137,7 +140,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, int exit_val)
+my_error(const char *s1, int exit_val)
 {
 	logerr(s1);
 	logerrf("\n");
@@ -145,7 +148,7 @@ my_error(char *s1, int exit_val)
 }
 
 no_return void
-cleanup(char *file, char *str, int e)
+cleanup(const char *file, const char *str, int e)
 {
 	if (e == error_noent)
 		(void) unlink(file);
@@ -185,7 +188,7 @@ qtime_mess822(datetime_sec t)
 stralloc        line = { 0 }, rexpr = { 0 };
 
 void
-do_display(char *domain)
+do_display(const char *domain)
 {
 	int             rfd, match, line_no;
 	unsigned long   email_count = 0;
@@ -321,7 +324,7 @@ do_list(int display)
 }
 
 void
-update_mode(char *domain, char *rate_expr, int reset_mode, int consolidate, int incr)
+update_mode(const char *domain, const char *rate_expr, int reset_mode, int consolidate, int incr)
 {
 	int             rfd, wfd, match, line_no, t;
 	unsigned long   email_count;
@@ -445,7 +448,7 @@ new:
 }
 
 void
-do_test(char *domain, int force)
+do_test(const char *domain, int force)
 {
 	int             i = -1;
 	char           *rate_expr = 0;
@@ -516,7 +519,7 @@ main(int argc, char **argv)
 	int             i, ch, display = 0, listing = 0, incr = 0, count = 1,
 					consolidate = 0, reset_mode = 0, test_mode = 0,
 					force = 0;
-	char           *qbase, *domain = 0, *rate_expr = 0,
+	const char     *qbase, *domain = 0, *rate_expr = 0,
 				   *ptr, *ratelimit_dir = "ratelimit";
 
 	while ((ch = getopt(argc, argv, "flutscRd:r:D:C:")) != sgoptdone) {
@@ -636,7 +639,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	static char    *x = "$Id: drate.c,v 1.23 2024-02-12 19:37:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: drate.c,v 1.24 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;

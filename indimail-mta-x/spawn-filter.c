@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.89 2024-02-07 23:21:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.90 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -32,12 +32,12 @@
 #include "buffer_defs.h"
 
 static int      mkTempFile(int);
-static int      run_mailfilter(char *, char *, char *, char *, char **);
-static void     log_spam(char *, char *, char *, stralloc *);
-static int      redirect_mail(char *, char *, char *, char *);
+static int      run_mailfilter(const char *, const char *, const char *, const char *, char **);
+static void     log_spam(const char *, const char *, const char *, stralloc *);
+static int      redirect_mail(const char *, const char *, const char *, const char *);
 static void     create_logfilter();
-static int      check_size(char *);
-static void     set_environ(char *, char *, char *, char *, char *);
+static int      check_size(const char *);
+static void     set_environ(const char *, const char *, const char *, const char *, const char *);
 
 extern dtype    delivery;
 static int      spfok = 0;
@@ -51,7 +51,7 @@ static stralloc QueueBase = { 0 };
 static stralloc q = { 0 };
 
 static void
-log_spam(char *arg1, char *arg2, char *size, stralloc *line)
+log_spam(const char *arg1, const char *arg2, const char *size, stralloc *line)
 {
 	int             logfifo, match;
 	char           *fifo_name;
@@ -119,7 +119,7 @@ log_spam(char *arg1, char *arg2, char *size, stralloc *line)
 }
 
 static void
-set_environ(char *host, char *ext, char *qqeh, char *sender_p, char *recipient_p)
+set_environ(const char *host, const char *ext, const char *qqeh, const char *sender_p, const char *recipient_p)
 {
 	if (!env_put2("DOMAIN", host) || !env_put2("_EXT", ext) ||
 			!env_put2("_QQEH", qqeh) || !env_put2("_SENDER", sender_p) ||
@@ -129,7 +129,7 @@ set_environ(char *host, char *ext, char *qqeh, char *sender_p, char *recipient_p
 }
 
 static int
-run_mailfilter(char *domain, char *ext, char *qqeh, char *mailprog, char **argv)
+run_mailfilter(const char *domain, const char *ext, const char *qqeh, const char *mailprog, char **argv)
 {
 	char            strnum[FMT_ULONG];
 	pid_t           filt_pid;
@@ -249,7 +249,7 @@ static int
 mkTempFile(int seekfd)
 {
 	char            inbuf[2048], outbuf[2048], strnum[FMT_ULONG];
-	char           *tmpdir;
+	const char     *tmpdir;
 	static stralloc tmpFile = {0};
 	struct substdio _ssin;
 	struct substdio _ssout;
@@ -293,7 +293,7 @@ static void
 create_logfilter()
 {
 	int             fd;
-	char           *tmpdir;
+	const char     *tmpdir;
 	char            strnum[FMT_ULONG];
 	static stralloc tmpFile = { 0 };
 
@@ -318,7 +318,7 @@ create_logfilter()
 }
 
 static int
-redirect_mail(char *notifyaddress, char *domain, char *ext, char *qqeh)
+redirect_mail(const char *notifyaddress, const char *domain, const char *ext, const char *qqeh)
 {
 	char           *(args[7]);
 	char           *qbase;
@@ -366,11 +366,11 @@ redirect_mail(char *notifyaddress, char *domain, char *ext, char *qqeh)
 			report(111, "spawn-filter: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
 		if (!env_put(Queuedir.s))
 			report(111, "spawn-filter: out of memory. (#4.3.0)", 0, 0, 0, 0, 0);
-		args[1] = "-a";
-		args[2] = "-s";
-		args[3] = "-f";
-		args[4] = "\"\"";
-		args[5] = notifyaddress;
+		args[1] = (char *) "-a";
+		args[2] = (char *) "-s";
+		args[3] = (char *) "-f";
+		args[4] = (char *) "\"\"";
+		args[5] = (char *) notifyaddress;
 		args[6] = 0;
 		if (!stralloc_copys(&q, auto_prefix) ||
 				!stralloc_catb(&q, "/bin/qmail-inject", 17) ||
@@ -389,7 +389,7 @@ redirect_mail(char *notifyaddress, char *domain, char *ext, char *qqeh)
 }
 
 static int
-check_size(char *size)
+check_size(const char *size)
 {
 	char           *x;
 	unsigned long   databytes = -1, msgsize;
@@ -427,7 +427,7 @@ static char *setup_qargs(char t)
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *mailprog, *domain, *errStr = 0, *size = "0", *qqeh,
+	const char     *ptr, *mailprog, *domain, *errStr = 0, *size = "0", *qqeh,
 				   *ext, *spamfilterprog, *notifyaddress, *rejectspam, *spf_fn;
 	char            sizebuf[FMT_ULONG];
 	int             at, len, wstat, filt_exitcode, ret, i,
@@ -689,7 +689,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	static char    *x = "$Id: spawn-filter.c,v 1.89 2024-02-07 23:21:22+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spawn-filter.c,v 1.90 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -700,6 +700,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.90  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.89  2024-02-07 23:21:22+05:30  Cprogrammer
  * updated error messages
  * exit 100 on wrong usage

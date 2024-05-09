@@ -700,3 +700,8 @@ authcram
 authcram.o
 authcram.1
 qmail-qfilter.1
+printass.o
+rd-remote.o
+read_assign.o
+recipient-cdb.o
+valid_hname.o

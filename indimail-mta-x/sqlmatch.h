@@ -1,5 +1,8 @@
 /*
  * $Log: sqlmatch.h,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2022-10-09 23:02:35+05:30  Cprogrammer
  * removed function check_db()
  *
@@ -48,9 +51,9 @@
 #endif
 
 #ifdef HAS_MYSQL
-extern int      create_sqltable(MYSQL *, char *, char **);
-extern int      connect_sqldb(char *, MYSQL **, char **, char **);
+extern int      create_sqltable(MYSQL *, const char *, const char *error[]);
+extern int      connect_sqldb(const char *, MYSQL **, char **, const char *error[]);
 #endif
-extern int      sqlmatch(char *, char *, int, char **);
+extern int      sqlmatch(const char *, const char *, int, const char *errstr[]);
 extern void     sqlmatch_close_db(void);
 #endif

@@ -1,5 +1,8 @@
 /*
  * $Log: socket_getifidx.c,v $
+ * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-08-03 17:26:33+05:30  Cprogrammer
  * use qmail library
  *
@@ -17,7 +20,7 @@
 #include "socket.h"
 
 uint32
-socket_getifidx(char *ifname)
+socket_getifidx(const char *ifname)
 {
 	return if_nametoindex(ifname);
 }

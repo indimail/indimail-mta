@@ -1,5 +1,8 @@
 /*
  * $Log: socket_getifname.c,v $
+ * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-08-03 17:26:38+05:30  Cprogrammer
  * use qmail library
  *
@@ -19,7 +22,7 @@
 
 static char     ifname[IFNAMSIZ];
 
-char     *
+char *
 socket_getifname(uint32 interface)
 {
 	char           *tmp = if_indextoname(interface, ifname);
@@ -27,5 +30,5 @@ socket_getifname(uint32 interface)
 	if (tmp)
 		return tmp;
 	else
-		return "[unknown]";
+		return (char *) "[unknown]";
 }

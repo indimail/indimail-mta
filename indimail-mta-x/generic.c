@@ -1,5 +1,5 @@
 /*
- * $Id: generic.c,v 1.7 2023-10-27 16:11:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: generic.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <str.h>
@@ -56,7 +56,7 @@ virusscan(char *messfn)
 void
 getversion_generic_c()
 {
-	static char    *x = "$Id: generic.c,v 1.7 2023-10-27 16:11:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: generic.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -65,6 +65,9 @@ getversion_generic_c()
 
 /*
  * $Log: generic.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-10-27 16:11:04+05:30  Cprogrammer
  * replace hard-coded exit values with constants from qmail.h
  *

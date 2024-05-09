@@ -1,5 +1,5 @@
 /*
- * $Id: condredirect.c,v 1.18 2023-07-11 11:29:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: condredirect.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include "sig.h"
@@ -39,7 +39,7 @@ main(int argc, char **argv)
 {
 	char           *sender, *dtline, *qqeh;
 	int             pid, wstat, i, reverse = 0;
-	char           *qqx;
+	const char     *qqx;
 
 	for (i = 1; i < argc; i++) {
 		if (argv[i][0] == '-') {
@@ -133,13 +133,16 @@ main(int argc, char **argv)
 void
 getversion_condredirect_c()
 {
-	static char    *x = "$Id: condredirect.c,v 1.18 2023-07-11 11:29:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: condredirect.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: condredirect.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-07-11 11:29:46+05:30  Cprogrammer
  * added -r reverse option to forward when program fails instead of when program succeeds.
  *

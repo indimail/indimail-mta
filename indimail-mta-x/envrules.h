@@ -1,5 +1,8 @@
 /*
  * $Log: envrules.h,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2014-01-29 14:06:10+05:30  Cprogrammer
  * made domainqueue file configurable through env variable DOMAINQUEUE
  *
@@ -24,8 +27,8 @@
  */
 #ifndef _ENVRULES_H
 #define _ENVRULES_H
-int             envrules(char *, char *, char *, char **);
-int             domainqueue(char *, char *, char *, char **);
+int             envrules(const char *, const char *, const char *, const char *err[]);
+int             domainqueue(const char *, const char *, const char *, const char *err[]);
 
 #ifndef AM_MEMORY_ERR
 #define  AM_MEMORY_ERR -1

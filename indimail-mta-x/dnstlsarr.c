@@ -1,5 +1,5 @@
 /*
- * $Id: dnstlsarr.c,v 1.18 2023-07-13 02:39:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dnstlsarr.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "substdio.h"
 #include "subfd.h"
@@ -25,7 +25,7 @@ int             timeoutdata = 300;
 int             timeoutconn = 60;
 int             verbose;
 stralloc        helohost = { 0 };
-static char    *usage_str =
+static const char *usage_str =
 	"usage: dnstlsarr [-p port] [-c timeoutc] [-t timeoutd] [host\n"
 	"         -p port       - port to connect to\n"
 	"         -c timoutconn - Timeout for connection to remote\n"
@@ -37,7 +37,7 @@ int
 main(int argc, char **argv)
 {
 	int             opt, k, j, i, query_mx = 0, verify = 0;
-	char           *port = "25", *host = (char *) 0;
+	const char     *port = "25", *host = (char *) 0;
 	char            hex[2];
 	unsigned long   r;
 
@@ -228,7 +228,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	static char    *x = "$Id: dnstlsarr.c,v 1.18 2023-07-13 02:39:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnstlsarr.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -238,6 +238,9 @@ getversion_dnstlsarr_c()
 
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-07-13 02:39:46+05:30  Cprogrammer
  * refactored code to reduce loc
  *

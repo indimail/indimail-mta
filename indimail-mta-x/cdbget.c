@@ -1,5 +1,8 @@
 /*
  * $Log: cdbget.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2023-02-12 13:29:59+05:30  Cprogrammer
  * added -n option for searching cdb created by cdb-database
  *
@@ -118,7 +121,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	static char    *x = "$Id: cdbget.c,v 1.6 2023-02-12 13:29:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdbget.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	if (x)
 		x++;
 }

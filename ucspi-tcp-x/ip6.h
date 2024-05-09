@@ -1,5 +1,8 @@
 /*
  * $Log: ip6.h,v $
+ * Revision 1.8  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2021-05-12 21:02:30+05:30  Cprogrammer
  * define arguments as array subscripts to fix gcc 11 warnings
  *
@@ -28,12 +31,12 @@
 #include <byte.h>
 #include <stralloc.h>
 
-unsigned int    rblip6_scan(char *, char ip[16]);
+unsigned int    rblip6_scan(const char *, char ip[16]);
 unsigned int    ip6_fmt(char *, char ip[16]);
 unsigned int    ip6_fmt_exp(char *, char ip[16]);
 unsigned int    ip6_fmt_flat(char *, char ip[16]);
 int             ip6tobitstring(char *, stralloc *, unsigned int);
-unsigned int    ip6_expandaddr(char *src, stralloc *destination);
+unsigned int    ip6_expandaddr(const char *src, stralloc *destination);
 unsigned int    ip6_compactaddr(char *s, char ip[16]);
 
 /*

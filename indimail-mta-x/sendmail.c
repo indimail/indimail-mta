@@ -1,5 +1,8 @@
 /*
  * $Log: sendmail.c,v $
+ * Revision 1.16  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.15  2023-12-20 11:14:46+05:30  Cprogrammer
  * added -r option to set mailx return path
  *
@@ -138,7 +141,7 @@ main(int argc, char **argv)
 {
 	int             opt, i, flagh;
 	char          **qiargv, **arg;
-	char           *sender;
+	const char     *sender;
 
 	if (chdir("/") == -1) {
 		substdio_putsflush(subfderr, "sendmail: fatal: unable to switch to root directory\n");
@@ -258,13 +261,13 @@ main(int argc, char **argv)
 	if (!stralloc_catb(&q, "/bin/qmail-inject", 17) || !stralloc_0(&q))
 		nomem();
 	*arg++ = q.s;
-	*arg++ = (flagh ? "-H" : "-a");
+	*arg++ = (char *) (flagh ? "-H" : "-a");
 	if (sender) {
-		*arg++ = "-f";
-		*arg++ = sender;
+		*arg++ = (char *) "-f";
+		*arg++ = (char *) sender;
     	do_sender(sender);
 	}
-	*arg++ = "--";
+	*arg++ = (char *) "--";
 	for (i = 0; i < argc; ++i)
 		*arg++ = argv[i];
 	*arg = 0;
@@ -278,7 +281,7 @@ main(int argc, char **argv)
 void
 getversion_sendmail_c()
 {
-	static char    *x = "$Id: sendmail.c,v 1.15 2023-12-20 11:14:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sendmail.c,v 1.16 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

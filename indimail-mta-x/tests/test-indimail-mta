@@ -3548,7 +3548,7 @@ test_restart_service_using_svc()
 test_multilog()
 {
 	t1=$(date +"%s.%4N")
-	grep "HELO <$HOSTNAME> MAIL from <$user@$HOSTNAME> RCPT <$user@$HOSTNAME> AUTH <local-rcpt> Size: .* TLS=TLSv1.3" $logdir/smtpd/current >/dev/null
+	grep "HELO <.*> MAIL from <$user@$HOSTNAME> RCPT <$user@$HOSTNAME> AUTH <local-rcpt> Size: .* TLS=TLSv1.3" $logdir/smtpd/current >/dev/null
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
 		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')

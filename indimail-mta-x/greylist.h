@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.h,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2009-08-22 19:00:29+05:30  Cprogrammer
  * Initial revision based on code by Richard Andrews
  *
@@ -12,6 +15,6 @@
 #define DEFAULTGREYIP   "127.0.0.1"
 #define GREYTIMEOUT     3
 
-int             greylist(char *, char *, char *, char *, int, void (*)(), void (*)());
+int             greylist(const char *, const char *, const char *, const char *, int, void (*)(), void (*)());
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Id: cleanq.c,v 1.14 2024-02-12 20:55:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cleanq.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,7 +33,7 @@ die_usage(void)
 }
 
 void
-my_puts(char *s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
+my_puts(const char *s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
 {
 	if (substdio_puts(subfdout, s) == -1)
 		_exit(111);
@@ -256,13 +256,16 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	static char    *x = "$Id: cleanq.c,v 1.14 2024-02-12 20:55:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cleanq.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2024-02-12 20:55:59+05:30  Cprogrammer
  * use unlinkat() if available instead of unlink()
  *

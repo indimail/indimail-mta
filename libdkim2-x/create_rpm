@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.7  2024-05-09 23:24:51+05:30  Cprogrammer
+# use x.y for release
+#
 # Revision 1.6  2023-07-07 20:59:31+05:30  Cprogrammer
 # renamed libdkim to libdkim2
 #
@@ -19,7 +22,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.6 2023-07-07 20:59:31+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.7 2024-05-09 23:24:51+05:30 Cprogrammer Exp mbhangui $
 #
 curdir=`pwd`
 version=$(cat conf-version)
@@ -107,23 +110,19 @@ if [ $copy_src -eq 1 ] ; then
     --exclude="$name-$version/RCS" \
     -cf - $name-"$version" \
       | gzip -c > $rpmbuild/SOURCES/$name-"$version".tar.gz
-  dist=`uname -r |cut -d . -f4`
   if [ -z "$release" ] ; then
     if [ -d /usr/include/dkim ] ; then
-      qdist=$(rpm -qf /usr/include/dkim|cut -d- -f4|cut -d. -f3)
-      if [ " $dist" = " $qdist" ] ; then
         qversion=$(rpm -qf /usr/include/dkim|cut -d- -f3)
         if [ "$qversion" = "$version" ] ; then
-          release=$(rpm -qf /usr/include/dkim | cut -d- -f4 | cut -d. -f2)
-          release=$(expr $release + 1)
+          t1=$(rpm -qf /usr/include/dkim | cut -d- -f4 | cut -d. -f1)
+          t2=$(rpm -qf /usr/include/dkim | cut -d- -f4 | cut -d. -f2)
+          t2=$(expr $t2 + 1)
+          release="$t1.$t2"
         else
-          release=1
+          release=0.1
         fi
-      else
-        release=1
-      fi
     else
-      release=1
+		release=0.1
     fi
   fi
   cd ..
@@ -131,16 +130,16 @@ if [ $copy_src -eq 1 ] ; then
 else
   cd ..
 fi
-echo -n "Build RPM for $name-"$version"-1."$release" (Y/N) - "
+echo -n "Build RPM for $name-"$version"-"$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
   cp stage/$name-"$version"/$name.spec /tmp
-  sed -i -e "s|^Release: .*|Release: 1.$release%{?dist}|g" /tmp/$name.spec
+  sed -i -e "s|^Release: .*|Release: $release%{?dist}|g" /tmp/$name.spec
   cd $curdir
   if [ $? -eq 0 ] ; then
     tmprel=`cat conf-release 2>/dev/null`
-    if [ ! " $tmprel" = " 1.$release" ] ; then
-      echo 1.$release > conf-release
+    if [ ! " $tmprel" = " $release" ] ; then
+      echo $release > conf-release
       make -s $name.spec
       cp $name.spec /tmp
       cd debian
@@ -148,6 +147,7 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
       cd ..
     fi
   fi
+  dist=`uname -r |cut -d . -f4`
   if [ $verbose -eq 0 ] ; then
     echo "rpmbuild -ba $clean --quiet /tmp/$name.spec"
     rpmbuild -ba $clean --quiet /tmp/$name.spec
@@ -158,22 +158,22 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
   if [ $? -eq 0 ] ; then
     /bin/rm /tmp/$name.spec
     build_arch=`rpmbuild --showrc|grep "^build arch" | awk '{print $4}'`
-    rpm --addsign $rpmbuild/RPMS/$build_arch/$name-"$version"-"1.$release".$dist.$build_arch.rpm >/dev/null
-    rpm --addsign $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"1.$release".$dist.$build_arch.rpm >/dev/null
-    echo $rpmbuild/RPMS/$build_arch/$name-"$version"-"1.$release".$dist.$build_arch.rpm
-    echo $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"1.$release".$dist.$build_arch.rpm
-    echo -n "RPM lint for $name-"$version"-1."$release" (Y/N) - "
+    rpm --addsign $rpmbuild/RPMS/$build_arch/$name-"$version"-"$release".$dist.$build_arch.rpm >/dev/null
+    rpm --addsign $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"$release".$dist.$build_arch.rpm >/dev/null
+    echo $rpmbuild/RPMS/$build_arch/$name-"$version"-"$release".$dist.$build_arch.rpm
+    echo $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"$release".$dist.$build_arch.rpm
+    echo -n "RPM lint for $name-"$version"-"$release" (Y/N) - "
     read key
     if [ " $key" = " Y" -o " $key" = " y" ] ; then
       (
       echo $name
-      rpmlint $rpmbuild/RPMS/$build_arch/$name-"$version"-"1.$release".$dist.$build_arch.rpm
+      rpmlint $rpmbuild/RPMS/$build_arch/$name-"$version"-"$release".$dist.$build_arch.rpm
       echo ------------------------
       echo $name-devel
-      rpmlint $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"1.$release".$dist.$build_arch.rpm
+      rpmlint $rpmbuild/RPMS/$build_arch/$name-devel-"$version"-"$release".$dist.$build_arch.rpm
       echo ------------------------
-      echo $name-"$version"-"1.$release".$dist.src.rpm
-      rpmlint $rpmbuild/SRPMS/$name-"$version"-"1.$release".$dist.src.rpm
+      echo $name-"$version"-"$release".$dist.src.rpm
+      rpmlint $rpmbuild/SRPMS/$name-"$version"-"$release".$dist.src.rpm
       echo ------------------------
       ) 2>&1 | less
     fi

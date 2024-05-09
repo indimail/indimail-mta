@@ -1,5 +1,8 @@
 /*
  * $Log: upathexec_env.c,v $
+ * Revision 1.9  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2021-05-12 21:03:20+05:30  Cprogrammer
  * replaced pathexec with upathexec
  *
@@ -36,7 +39,7 @@ static stralloc plus;
 static stralloc tmp;
 
 int
-upathexec_env(char *s, char *t)
+upathexec_env(const char *s, const char *t)
 {
 	if (!s)
 		return 1;

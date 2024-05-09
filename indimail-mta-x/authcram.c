@@ -1,5 +1,5 @@
 /*
- * $Id: authcram.c,v 1.1 2024-02-18 17:03:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: authcram.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -31,7 +31,7 @@ die_nomem()
 	_exit(111);
 }
 
-char           *usage =
+const char     *usage =
 		"usage: cramresp -t AUTH_TYPE user password challenge\n"
 		"    AUTH_TYPE    One of CRAM-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA224,\n"
 		"                 CRAM-SHA384, CRAM-SHA512\n"
@@ -142,6 +142,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: authcram.c,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2024-02-18 17:03:00+05:30  Cprogrammer
  * Initial revision
  *

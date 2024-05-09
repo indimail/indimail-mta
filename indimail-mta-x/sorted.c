@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-11-22 23:12:09+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -56,7 +59,7 @@ sorted_insert(sl, sa)
 void
 getversion_sorted_c()
 {
-	static char    *x = "$Id: sorted.c,v 1.3 2020-11-22 23:12:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sorted.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

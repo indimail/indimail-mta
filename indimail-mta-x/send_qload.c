@@ -1,5 +1,5 @@
 /*
- * $Id: send_qload.c,v 1.1 2022-04-24 08:48:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: send_qload.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -11,7 +11,7 @@
 #include "qscheduler.h"
 
 int
-send_qload(char *queue_ident, unsigned int queue_no,
+send_qload(const char *queue_ident, unsigned int queue_no,
 		long load, unsigned int priority)
 {
 	mqd_t           mqd;
@@ -38,13 +38,16 @@ send_qload(char *queue_ident, unsigned int queue_no,
 void
 getversion_send_qload_c()
 {
-	static char    *x = "$Id: send_qload.c,v 1.1 2022-04-24 08:48:22+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: send_qload.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: send_qload.c,v $
+ * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2022-04-24 08:48:22+05:30  Cprogrammer
  * Initial revision
  *

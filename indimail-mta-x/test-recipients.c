@@ -1,5 +1,5 @@
 /*
- * $Id: test-recipients.c,v 1.3 2023-08-14 08:38:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: test-recipients.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -33,10 +33,10 @@ safewrite(int fd, char *buf, int len)
 	return r;
 }
 
-char           *
+const char     *
 load_virtual()
 {
-	char           *ptr, *errstr;
+	const char     *ptr, *errstr;
 	int             i;
 
 	/*- load virtual package library */
@@ -63,7 +63,7 @@ load_virtual()
 int
 check_recipient_sql(char *addr, int len)
 {
-	char           *ptr, *errstr;
+	const char     *ptr, *errstr;
 	void           *(*inquery) (char, char *, char *);
 
 	if (!(ptr = load_virtual()))

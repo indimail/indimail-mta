@@ -1,5 +1,8 @@
 /*
  * $Log: upathexec.h,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2021-06-15 08:24:29+05:30  Cprogrammer
  * renamed pathexec.. functions to upathexec to avoid clash with libqmail
  *
@@ -19,11 +22,11 @@
 #ifndef PATHEXEC_H
 #define PATHEXEC_H
 
-void            upathexec_run(char *, char **, char **);
-int             upathexec_env(char *, char *);
+int             upathexec_env(const char *, const char *);
+void            upathexec_run(const char *, char **, char **);
 void            upathexec(char **);
 #ifdef LOAD_SHARED_OBJECTS
-void            load_shared(char *, char **, char **);
+void            load_shared(const char *, char **, char **);
 void            pathexec_dl(int, char **, char **, int (*) (int, char **, char **));
 #endif
 

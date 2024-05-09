@@ -31,8 +31,8 @@ public:
 	int             Init(DKIMSignOptions *pOptions);
 	void            ReplaceSelector(DKIMSignOptions *pOptions);
 	void            ReplaceHash(DKIMSignOptions *pOptions);
-	int             GetSig(char *szPrivKey, char *szSignature, unsigned int nSigLength);
-	int             GetSig2(char *szPrivKey, char **pszSignature);
+	int             GetSig(const char *szPrivKey, char *szSignature, unsigned int nSigLength);
+	int             GetSig2(const char *szPrivKey, char **pszSignature);
 	virtual int     ProcessHeaders(void);
 	virtual int     ProcessBody(char *szBuffer, int nBufLength, bool bEOF);
 	enum CKDKIMConstants { OptimalHeaderLineLength = 65 };
@@ -50,8 +50,8 @@ protected:
 	void            AddInterTagSpace(int nSizeOfNextTag);
 	void            AddFoldedValueToSig(const string &sValue, char cbrk);
 	bool            IsRequiredHeader(const string &sTag);
-	int             ConstructSignature(char *szPrivKey, int nSigAlg);
-	int             AssembleReturnedSig(char *szPrivKey);
+	int             ConstructSignature(const char *szPrivKey, int nSigAlg);
+	int             AssembleReturnedSig(const char *szPrivKey);
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
 	EVP_MD_CTX     *m_Hdr_ietf_sha1ctx = NULL;	/* the header hash for ietf sha1  */
 	EVP_MD_CTX     *m_Bdy_ietf_sha1ctx = NULL;	/* the body hash for ietf sha1  */
@@ -100,6 +100,9 @@ protected:
 
 /*
  * $Log: dkimsign.h,v $
+ * Revision 1.12  2024-05-07 12:56:06+05:30  Cprogrammer
+ * use const char * instead of char *
+ *
  * Revision 1.11  2023-02-04 18:06:15+05:30  Cprogrammer
  * fixed formatting
  *

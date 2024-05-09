@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.7 2024-01-23 01:20:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -73,9 +73,9 @@ usage()
 }
 
 static int
-logical_exp(char *data, char *expression)
+logical_exp(const char *data, const char *expression)
 {
-	char           *ptr;
+	const char     *ptr;
 	int             i;
 	static stralloc buf = {0};
 	struct val      result;
@@ -203,9 +203,10 @@ mywrite(int fd, char *buf, int len)
 }
 
 no_return static int
-forward(substdio *ssin, char *faddr, int matched, int argc, char **argv)
+forward(substdio *ssin, const char *faddr, int matched, int argc, char **argv)
 {
-	char           *sender, *dt, *ptr, *qqx;
+	char           *sender, *dt, *ptr;
+	const char     *qqx;
 	char            outbuf[512], num[FMT_ULONG];
 	substdio        qsout;
 
@@ -270,16 +271,16 @@ forward(substdio *ssin, char *faddr, int matched, int argc, char **argv)
 }
 
 static int
-take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
-		char *act_val, int matched, char *bounce_message, int argc, char **argv)
+take_action(substdio *ssin, substdio *ssout, const char *header, int act_type,
+		const char *act_val, int matched, const char *bounce_message, int argc, char **argv)
 {
 	int             i, wstat;
 	pid_t           child;
 	uid_t           uid;
 	gid_t           gid;
 	char           *home, *ptr;
-	char           *MailDirNames[] = { "cur", "new", "tmp", };
-	char           *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
+	const char     *MailDirNames[] = { "cur", "new", "tmp", };
+	const char     *overquota = "Recipient's mailbox is full, message returned to sender. (#5.2.2)";
 
 	if (!doit &&
 			subprintf(ssout, matched ? "Matched Header=[%s], " : "Unmatched Header=[%s], ", header) == -1)
@@ -393,15 +394,15 @@ take_action(substdio *ssin, substdio *ssout, char *header, int act_type,
 int
 filterit_sub1(int argc, char **argv)
 {
-	char           *local, *domain, *header, *keyword,
+	const char     *local, *domain, *header, *keyword,
 				   *action, *action_val, *d_action,
 				   *d_action_val, *comparision, *bounce_message, *ptr;
-	char           *comp[] = {
+	const char     *comp[] = {
 						"Equals", "Contains",
 						"Starts with", "Ends with",
 						"Numerical Logical Expression", "RegExp", 0
 					};
-	char           *act[] = {"exit", "forward", "maildir", 0};
+	const char     *act[] = {"exit", "forward", "maildir", 0};
 	char            ssinbuf[BUFSIZE_IN], ssoutbuf[BUFSIZE_OUT];
 	int             opt, i, match, negate = 0, keep_continue = 0,
 					c_opt = 0, a_opt = 0, default_a_opt = 0, in_header;
@@ -574,10 +575,13 @@ filterit_sub1(int argc, char **argv)
 					1, bounce_message, argc, argv);
 		break;
 	case 1: /*- Contains */
-		i = str_len(keyword);
+		if (!stralloc_copys(&tmp, keyword) ||
+				!stralloc_0(&tmp))
+			strerr_die2x(111, FATAL, "out of memory");
+		tmp.len--;
 		case_lowers(matched_header.s);
-		case_lowers(keyword);
-		match = str_str(matched_header.s + i, keyword) ? 1 : 0;
+		case_lowers(tmp.s);
+		match = str_str(matched_header.s + tmp.len, tmp.s) ? 1 : 0;
 		if (negate)
 			match = !match;
 		if (match)
@@ -631,7 +635,7 @@ filterit_sub1(int argc, char **argv)
 }
 
 int
-filterit_sub2(char *cmd)
+filterit_sub2(const char *cmd)
 {
 	char          **argv;
 	int             i;
@@ -647,7 +651,7 @@ filterit_sub2(char *cmd)
 void
 getversion_filterit_c()
 {
-	char *x = sccsidevalh;
+	const char *x = sccsidevalh;
 	x++;
 	x = sccsidmakeargsh;
 	x++;
@@ -655,6 +659,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2024-01-23 01:20:57+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

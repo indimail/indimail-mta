@@ -1,5 +1,5 @@
 /*
- * $Id: envrules.c,v 1.24 2023-12-05 22:06:08+05:30 Cprogrammer Exp mbhangui $
+ * $Id: envrules.c,v 1.25 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <error.h>
 #include <stralloc.h>
@@ -12,10 +12,11 @@
 #include "do_match.h"
 
 int
-envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
+envrules(const char *email, const char *envrules_f, const char *rulesfile, const char *errStr[])
 {
 	int             len, count, lcount, nullflag, use_regex = 0;
-	char           *ptr, *cptr;
+	const char     *ptr;
+	char           *cptr;
 	static stralloc rules = { 0 };
 
 	if (errStr)
@@ -33,7 +34,7 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 		scan_int(ptr, &use_regex);
 	for (count = lcount = len = 0, ptr = rules.s; len < rules.len;) {
 		len += (str_len(ptr) + 1);
-		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
+		for (cptr = (char *) ptr; *cptr && *cptr != ':'; cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
 		else {
@@ -56,10 +57,11 @@ envrules(char *email, char *envrules_f, char *rulesfile, char **errStr)
 }
 
 int
-domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
+domainqueue(const char *email, const char *domainqueue_f, const char *domainqueue, const char *errStr[])
 {
 	int             len, lcount, count;
-	char           *ptr, *cptr, *domain;
+	const char     *ptr, *domain;
+	char           *cptr;
 	static stralloc rules = { 0 };
 
 	if (errStr)
@@ -80,7 +82,7 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 		domain++;
 	for (count = lcount = len = 0, ptr = rules.s; len < rules.len;) {
 		len += (str_len(ptr) + 1);
-		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
+		for (cptr = (char *) ptr; *cptr && *cptr != ':'; cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
 		else {
@@ -101,13 +103,16 @@ domainqueue(char *email, char *domainqueue_f, char *domainqueue, char **errStr)
 void
 getversion_envrules_c()
 {
-	static char    *x = "$Id: envrules.c,v 1.24 2023-12-05 22:06:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: envrules.c,v 1.25 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: envrules.c,v $
+ * Revision 1.25  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.24  2023-12-05 22:06:08+05:30  Cprogrammer
  * fix for invalid rules
  *

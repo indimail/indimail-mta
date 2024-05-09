@@ -1,5 +1,8 @@
 /*
  * $Log: qdane.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2018-05-27 22:15:49+05:30  mbhangui
  * added defintions for qmail-daned modes
  *
@@ -25,7 +28,7 @@ int             noipv6 = 1;
 #endif
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -51,7 +54,7 @@ timeoutfn()
 }
 
 void
-err_tmpfail(char *arg)
+err_tmpfail(const char *arg)
 {
 	out("temporary failure: ");
 	out(arg);
@@ -90,7 +93,7 @@ print_status(char status)
 	return;
 }
 
-char           *usage =
+const char     *usage =
 				"usage: qdane [qsf] -d mxhost ipaddr\n"
 				"        -q (query mode  - DANE VERIFICATION)\n"
 				"        -S (update mode - success)\n"
@@ -165,7 +168,7 @@ main(int argc, char **argv)
 void
 getversion_qdane_c()
 {
-	static char    *x = "$Id: qdane.c,v 1.3 2018-05-27 22:15:49+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qdane.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

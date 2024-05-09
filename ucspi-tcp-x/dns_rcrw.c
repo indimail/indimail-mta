@@ -1,5 +1,8 @@
 /*
  * $Log: dns_rcrw.c,v $
+ * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-08-03 17:23:10+05:30  Cprogrammer
  * use qmail library
  *
@@ -24,10 +27,8 @@ static int
 init(stralloc * rules)
 {
 	char            host[256];
-	char           *x;
-	int             i;
-	int             j;
-	int             k;
+	const char     *x;
+	int             i, j, k;
 
 	if (!stralloc_copys(rules, ""))
 		return -1;
@@ -144,7 +145,7 @@ static struct taia deadline;
 static stralloc rules = { 0 };	/*- defined if ok */
 
 int
-dns_resolvconfrewrite(stralloc * out)
+dns_resolvconfrewrite(stralloc *out)
 {
 	struct taia     now;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-showctl.c,v 1.18 2024-02-20 23:23:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-showctl.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -75,7 +75,7 @@ safeput(char *buf, unsigned int len)
 }
 
 void
-do_int(char *fn, char *def, char *pre, char *post)
+do_int(const char *fn, const char *def, const char *pre, const char *post)
 {
 	int             i;
 
@@ -96,7 +96,7 @@ do_int(char *fn, char *def, char *pre, char *post)
 }
 
 void
-do_str(char *fn, int flagme, char *def, char *pre)
+do_str(const char *fn, int flagme, const char *def, const char *pre)
 {
 	int             i = 0;
 
@@ -123,7 +123,7 @@ do_str(char *fn, int flagme, char *def, char *pre)
 }
 
 int
-do_lst(char *fn, char *def, char *pre, char *post)
+do_lst(const char *fn, const char *def, const char *pre, const char *post)
 {
 	int             i, j;
 
@@ -164,7 +164,7 @@ print_concurrency()
 }
 
 no_return void
-die_chdir(char *dir)
+die_chdir(const char *dir)
 {
 	substdio_puts(subfdout, "Oops! Unable to chdir to ");
 	substdio_puts(subfdout, dir);
@@ -176,7 +176,7 @@ die_chdir(char *dir)
 void
 display_control()
 {
-	char           *ptr, *local_ip, *qbase, *local_id, *errstr;
+	const char     *ptr, *local_ip, *qbase, *local_id, *errstr;
 	void           *handle = (void *) 0;
 	struct stat     stmrh, stmrhcdb;
 	int             i, load_indimail = 0;
@@ -383,14 +383,14 @@ display_control()
 }
 
 int
-valid_control_files(char *fn)
+valid_control_files(const char *fn)
 {
 	int             len, fd, match;
 	struct substdio ssin;
 	char            inbuf[2048];
-	char          **ptr;
-	char           *control_fn_list[] = {"controlfiles.q", "controlfiles.i", 0};
-	char           *control_files[] = {
+	const char    **ptr;
+	const char     *control_fn_list[] = {"controlfiles.q", "controlfiles.i", 0};
+	const char     *control_files[] = {
 		"bouncefrom", "bouncehost", "bouncesubject", "bouncemaxbytes", "bouncemessage",
 		"doublebouncesubject", "doublebouncemessage", "badhost", "badmailpatterns",
 		"badrcptpatterns", "spamignorepatterns", "filterargs", "spamfilter", "bouncefrom",
@@ -428,7 +428,7 @@ valid_control_files(char *fn)
 #endif
 		"conf-syncdir", "conf-fsync", "conf-fdatasync", "servicedir.conf",
 		"level2-tlds", "level3-tlds", "libmysql", 0};
-	char          *cdb_sql_files[] = {
+	const char    *cdb_sql_files[] = {
 		"authdomains",  "badhelo",  "badext",  "badmailfrom", "badrcptto", "blackholedsender",
 		"blackholedrcpt", "chkrcptdomains", "goodrcptto", "relaymailfrom", "spamignore",
 		"greylist.white", "tlsa.white", "tlsadomains", "badip", 0};
@@ -481,7 +481,7 @@ valid_control_files(char *fn)
 }
 
 void
-show_internals(char *home)
+show_internals(const char *home)
 {
 	substdio_puts(subfdout, "indimail-mta  home dir: ");
 	substdio_puts(subfdout, auto_qmail);
@@ -637,11 +637,11 @@ stralloc        qdir = { 0 };
 void
 show_queues()
 {
-	char           *qbase;
+	const char     *qbase;
 	int             save, i, j, k, l, bigtodo;
 	char            strnum[FMT_ULONG];
-	char         **ptr;
-	char           *extra_queue[] = {"slowq", "nqueue", "qmta", 0};
+	const char   **ptr;
+	const char     *extra_queue[] = {"slowq", "nqueue", "qmta", 0};
 
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
@@ -764,11 +764,11 @@ int
 main(int argc, char **argv)
 {
 	DIR            *dir;
-	char           *ptr;
+	const char     *ptr;
 	int             opt, do_control = 0, do_internals = 0, do_concurrency = 0,
 					do_queue = 0, do_errors = 0, do_env = 0, do_version = 0, qstat;
 	pid_t           pid;
-	char           *svctool[] = { "svctool", "--dumpconfig", 0};
+	const char     *svctool[] = { "svctool", "--dumpconfig", 0};
 	stralloc        bin = {0};
 
 	while ((opt = getopt(argc, argv, "acCiqeEsv")) != opteof) {
@@ -803,7 +803,7 @@ main(int argc, char **argv)
 					!stralloc_catb(&bin, "/sbin/svctool", 13) ||
 					!stralloc_0(&bin))
 				strerr_die2x(111, FATAL, "out of memory");
-			execv(bin.s, svctool); /*- run svctool */
+			execv(bin.s, (char **) svctool); /*- run svctool */
 			strerr_die4sys(111, FATAL, "execv: ", *svctool, ": ");
 			break;
 		default:
@@ -901,7 +901,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	static char    *x = "$Id: qmail-showctl.c,v 1.18 2024-02-20 23:23:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-showctl.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -909,6 +909,9 @@ getversion_qmail_showctl_c()
 
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2024-02-20 23:23:18+05:30  Cprogrammer
  * added code to show version information
  *

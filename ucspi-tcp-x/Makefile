@@ -499,7 +499,7 @@ makelib upathexec_env.o socket_accept.o socket_bind.o socket_unix.o \
 socket_conn.o socket_delay.o socket_listen.o socket_local.o \
 socket_bindun.o socket_opts.o socket_opts6.o socket_remote.o \
 socket_tcp.o socket_udp.o socket_conn6.o socket_bind6.o \
-socket_accept6.o socket_recv6.o socket_send6.o socket_local6.o \
+socket_accept6.o socket_local6.o \
 socket_tcp6.o ip4_fmt.o ip6_fmt.o ip4_bit.o ip6_bit.o ip4_scan.o \
 ip6_scan.o socket_getifname.o socket_getifidx.o socket_acceptun.o \
 socket_v4mappedprefix.o socket_ip4loopback.o socket_v6any.o \
@@ -509,7 +509,7 @@ socket_conn_un.o timeoutconn_un.o
 	socket_bind.o socket_bindun.o socket_conn.o socket_delay.o \
 	socket_listen.o socket_local.o socket_opts.o socket_opts6.o \
 	socket_remote.o socket_tcp.o socket_udp.o socket_conn6.o \
-	socket_bind6.o socket_accept6.o socket_recv6.o socket_send6.o \
+	socket_bind6.o socket_accept6.o \
 	socket_local6.o socket_tcp6.o ip4_fmt.o ip6_fmt.o ip4_bit.o \
 	ip6_bit.o ip4_scan.o ip6_scan.o socket_getifname.o socket_acceptun.o \
 	socket_getifidx.o socket_v4mappedprefix.o socket_ip4loopback.o \
@@ -535,14 +535,6 @@ compile socket_bind6.c socket.h ip6.h haveip6.h conf-ip
 socket_accept6.o: \
 compile socket_accept6.c socket.h ip6.h haveip6.h conf-ip
 	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_accept6.c
-
-socket_recv6.o: \
-compile socket_recv6.c socket.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_recv6.c
-
-socket_send6.o: \
-compile socket_send6.c socket.h ip4.h ip6.h haveip6.h conf-ip
-	./compile `grep -h -v "^#" conf-ip 2>/dev/null` socket_send6.c
 
 socket_local6.o: \
 compile socket_local6.c socket.h haveip6.h ip6.h haveip6.h conf-ip

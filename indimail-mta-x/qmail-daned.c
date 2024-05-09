@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-daned.c,v 1.34 2024-02-08 22:05:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.35 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
@@ -73,7 +73,7 @@ static int      dane_count, hcount;
 static int      hash_size, h_allocated = 0;
 static int      whitelistok = 0;
 static int      tlsadomainsok = 0;
-static char    *whitefn = 0, *tlsadomainsfn = 0;
+static char    *whitefn = 0, *tlsadomainsfn = NULL;
 static stralloc context_file = { 0 };
 static stralloc line = { 0 };
 static stralloc whitelist = { 0 };
@@ -113,13 +113,13 @@ whitelist_init(char *arg)
 
 int
 domain_match(char *fn, stralloc *domain, stralloc *content,
-	struct constmap *ptrmap, char **errStr)
+	struct constmap *ptrmap, const char *errStr[])
 {
 	int             x, len;
 	char           *ptr;
 
 	if (errStr)
-		*errStr = 0;
+		*errStr = NULL;
 	if (fn) {
 		switch ((x = cdb_matchaddr(fn, domain->s, domain->len - 1)))
 		{
@@ -148,9 +148,9 @@ domain_match(char *fn, stralloc *domain, stralloc *content,
 }
 
 int
-is_tlsadomain(char *domain)
+is_tlsadomain(const char *domain)
 {
-	char           *errStr = 0;
+	const char     *errStr = NULL;
 	static stralloc _domain = { 0 };
 
 	if (!stralloc_copys(&_domain, domain) ||
@@ -174,9 +174,9 @@ is_tlsadomain(char *domain)
 }
 
 int
-is_white(char *domain)
+is_white(const char *domain)
 {
-	char           *errStr = 0;
+	const char     *errStr = NULL;
 	static stralloc _domain = { 0 };
 
 	if (!stralloc_copys(&_domain, domain) ||
@@ -200,7 +200,7 @@ is_white(char *domain)
 }
 
 int
-copy_dane(struct danerec *ptr, char *domain, char status)
+copy_dane(struct danerec *ptr, const char *domain, char status)
 {
 	int             len;
 
@@ -285,7 +285,7 @@ create_hash(struct danerec *curr)
 			 */
 			hdestroy();
 			hcount = 0;
-			curr = 0;
+			curr = NULL;
 			logerr("WARNING!! recreating hash table, size=");
 			strnum[fmt_ulong(strnum, (unsigned long) ((125 * hash_size * h_allocated)/100))] = 0;
 			logerr(strnum);
@@ -341,7 +341,7 @@ expire_records(time_t cur_time)
 		dane_count--;
 		if (ptr == head) {
 			head = ptr->next;
-			head->prev = 0;
+			head->prev = NULL;
 		}
 		(ptr->prev)->next = ptr->next;
 		(ptr->next)->prev = ptr->prev;
@@ -361,7 +361,7 @@ expire_records(time_t cur_time)
 }
 
 int
-search_record(char *domain, int fr_int, struct danerec **store)
+search_record(const char *domain, int fr_int, struct danerec **store)
 {
 	struct danerec *ptr;
 	time_t          cur_time, start;
@@ -390,7 +390,7 @@ search_record(char *domain, int fr_int, struct danerec **store)
 		}
 	} else
 		ptr = head; /*- latest unexpired entry */
-	e.key = domain;
+	e.key = (char *) domain;
 	if (!(ep = hsearch(e, FIND)))
 		return (RECORD_NEW);
 	ptr = (struct danerec *) ep->data;
@@ -408,14 +408,14 @@ search_record(char *domain, int fr_int, struct danerec **store)
  * added to hash list if not found in hash list
  */
 struct danerec *
-add_record(char *domain, char status, struct danerec **dnrec)
+add_record(const char *domain, char status, struct danerec **dnrec)
 {
 	struct danerec *ptr;
 
 	if (!head) {
 		if (!(ptr = (struct danerec *) malloc(sizeof(struct danerec))))
 			die_nomem();
-		ptr->prev = ptr->next = 0;
+		ptr->prev = ptr->next = NULL;
 		head = tail = ptr;
 	} else {
 		if (!(ptr = (struct danerec *) malloc(sizeof(struct danerec))))
@@ -439,7 +439,7 @@ add_record(char *domain, char status, struct danerec **dnrec)
 }
 
 int
-write_file(int fd, char *arg, int len)
+write_file(int fd, const char *arg, int len)
 {
 	int             i;
 
@@ -556,8 +556,8 @@ load_context()
 		if (!head) {
 			if (!(ptr = (struct danerec *) malloc(sizeof(struct danerec))))
 				die_nomem();
-			ptr->prev = 0;
-			ptr->next = 0;
+			ptr->prev = NULL;
+			ptr->next = NULL;
 			head = tail = ptr;
 		} else {
 			if (!(ptr = (struct danerec *) malloc(sizeof(struct danerec))))
@@ -669,8 +669,8 @@ sigterm()
 	_exit (0);
 }
 
-char           *
-print_status(char status)
+const char     *
+print_status(const char status)
 {
 	switch (status)
 	{
@@ -702,11 +702,11 @@ print_status(char status)
  * record ok      \1\2
  */
 int
-send_response(int s, union sockunion *from, int fromlen, char *domain,
+send_response(int s, union sockunion *from, int fromlen, const char *domain,
 	int fr_int, struct danerec **dnrecord, int *record_added, int *org_state, int qmr)
 {
-	char           *resp;
-	struct danerec *ptr = 0;
+	const char     *resp;
+	struct danerec *ptr = NULL;
 	char            dane_state, rbuf[2];
 	int             i, n = 0;
 
@@ -877,7 +877,7 @@ send_response(int s, union sockunion *from, int fromlen, char *domain,
 	return (0);
 }
 
-char           *pusage =
+const char     *pusage =
 				"usage: qmail-daned [options] ipaddr context_file\n"
 				"Options [ vhtfswi ]\n"
 				"        [ -v 0, 1 or 2]\n"
@@ -894,15 +894,16 @@ main(int argc, char **argv)
 					fromlen, rec_added, o_s, qmr;
 	union sockunion sin, from;
 #if defined(LIBC_HAS_IP6)
-	struct addrinfo hints = {0}, *res = 0, *res0 = 0;
+	struct addrinfo hints = {0}, *res = NULL, *res0 = NULL;
 #else
 	struct hostent *hp;
 #endif
 	struct danerec *dnrec;
 	unsigned long   save_interval, free_interval;
-	char           *ptr, *ipaddr = 0, *domain, *a_port = "1998";
+	char           *ptr, *domain;
+	const char     *ipaddr = NULL, *a_port = "1998";
 #ifdef DYNAMIC_BUF
-	char           *rdata = 0, *buf = 0;
+	char           *rdata = NULL, *buf = NULL;
 	int             bufsize = MAXDANEDATASIZE, buf_len, rdata_len;
 #else
 	char            rdata[MAXDANEDATASIZE];
@@ -1162,7 +1163,7 @@ main(int argc, char **argv)
 		 * danerec(3) protocol packet structure -
 		 * Dgmail.com\0
 		 */
-		domain = 0;
+		domain = NULL;
 		switch (rdata[0])
 		{
 		case 'E': /*- same as 'D' but send back TLSA RR data */
@@ -1256,7 +1257,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	static char    *x = "$Id: qmail-daned.c,v 1.34 2024-02-08 22:05:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-daned.c,v 1.35 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1268,6 +1269,9 @@ getversion_qmail_dane_c()
 
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.35  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.34  2024-02-08 22:05:36+05:30  Cprogrammer
  * fix potential use after free()
  *

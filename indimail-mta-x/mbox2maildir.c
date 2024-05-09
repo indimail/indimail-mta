@@ -1,5 +1,8 @@
 /*
  * $Log: mbox2maildir.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -59,20 +62,20 @@ die_clean()
 }
 
 void
-w2(char *s)
+w2(const char *s)
 {
 	substdio_put(&buf_1, s, strlen(s));
 }
 
 void
-w2nl(char *s)
+w2nl(const char *s)
 {
 	w2(s);
 	w2("\n");
 }
 
 void
-put(char *s, int i)
+put(const char *s, int i)
 {
 	substdio_put(&buf_f, s, i);
 }
@@ -125,8 +128,8 @@ void
 blast(char *ch, int r)
 {
 	int             i;
-	char           *prefix = ">From ";
-	char           *from = prefix + 1;
+	const char     *prefix = ">From ";
+	const char     *from = prefix + 1;
 
 	for (i = 0; i < r; i++, ch++) {
 		switch (state)
@@ -356,7 +359,7 @@ usage:
 void
 getversion_mbox2maildir_c()
 {
-	static char    *x = "$Id: mbox2maildir.c,v 1.6 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mbox2maildir.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

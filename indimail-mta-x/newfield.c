@@ -1,5 +1,8 @@
 /*
  * $Log: newfield.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2011-02-11 23:44:27+05:30  Cprogrammer
  * added blank lines for code readability
  *
@@ -141,7 +144,7 @@ newfield_msgidmake(idhost, idhostlen, when)
 void
 getversion_newfield_c()
 {
-	static char    *x = "$Id: newfield.c,v 1.6 2011-02-11 23:44:27+05:30 Cprogrammer Stab mbhangui $";
+	const char     *x = "$Id: newfield.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

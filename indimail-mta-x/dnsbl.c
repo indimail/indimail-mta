@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2022-06-01 13:00:54+05:30  Cprogrammer
  * skip loopback address from dnsbl check
  *
@@ -32,12 +35,12 @@
 
 int             dnsblok, skipdnsbl = 0;
 stralloc        dnsblhost = { 0 }, dnsbl_mesg = { 0 }, dnsbllist = { 0 };
-char           *dnsblFn;
+const char     *dnsblFn;
 
 void
 out_of_mem(char **mesg)
 {
-	*mesg = "451 Requested action aborted: out of memory (#4.3.0)\r\n";
+	*mesg = (char *) "451 Requested action aborted: out of memory (#4.3.0)\r\n";
 	return;
 }
 
@@ -65,9 +68,9 @@ die_dnsbl(char **mesg)
  */
 
 int
-dnsblcheck(char **mesg, char *remoteip)
+dnsblcheck(char **mesg, const char *remoteip)
 {
-	char           *ch;
+	const char     *ch;
 	static stralloc dnsblbyte = { 0 }, dnsblrev = { 0 };
 	static ipalloc  dnsblip = { 0 };
 	char            x[IPFMT];
@@ -135,7 +138,7 @@ dnsblcheck(char **mesg, char *remoteip)
 }
 
 static int
-mailfrom_hook(char *remoteip, char *from, char **mesg)
+mailfrom_hook(const char *remoteip, const char *from, char **mesg)
 {
 	char           *x, *_relayclient;
 	int             _authenticated;
@@ -150,7 +153,7 @@ mailfrom_hook(char *remoteip, char *from, char **mesg)
 		return (0);
 	if ((dnsblok = control_readfile(&dnsbllist,
 			dnsblFn = ((x = env_get("DNSBLLIST")) && *x ? x : "dnsbllist"), 0)) == -1) {
-		*mesg = "451 Requested action aborted: unable to read controls (#4.3.0)\r\n";
+		*mesg = (char *) "451 Requested action aborted: unable to read controls (#4.3.0)\r\n";
 		return (1);
 	}
 	_relayclient = env_get("RELAYCLIENT");
@@ -185,6 +188,6 @@ plugin_init()
 void
 getversion_dnsbl_c()
 {
-	static char    *x = "$Id: dnsbl.c,v 1.7 2022-06-01 13:00:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dnsbl.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 	x++;
 }

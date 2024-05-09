@@ -1,5 +1,8 @@
 /*
  * $Log: upathexec_run.c,v $
+ * Revision 1.7  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2021-05-12 21:03:30+05:30  Cprogrammer
  * replace pathexec with upathexec
  *
@@ -29,9 +32,9 @@
 static stralloc tmp;
 
 void
-upathexec_run(char *file, char **argv, char **envp)
+upathexec_run(const char *file, char **argv, char **envp)
 {
-	char           *path;
+	const char     *path;
 	unsigned int    split;
 	int             savederrno;
 

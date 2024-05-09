@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.h,v 1.2 2023-01-15 12:27:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.h,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifndef _DOSSL_H_
 #define _DOSSL_H_
@@ -12,19 +12,19 @@
 
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
 #ifdef TLS
-void            do_pkix(SSL *, char *, char *,
-                    void (*tlsquit)(const char *, char *, char *, char *, char *, stralloc *),
+void            do_pkix(SSL *, const char *, const char *,
+                    void (*tlsquit)(const char *, const char *, const char *, const char *, const char *, stralloc *),
 					void (*mem_err)(),
 					stralloc *);
 #ifdef HAVE_STDARG_H
-int             do_tls(SSL **, int, int, int, int *, char **, char *, char *, int,
-                    void (*tlsquit)(const char *, char *, char *, char *, char *, stralloc *),
+int             do_tls(SSL **, int, int, int, int *, char **, const char *, const char *, int,
+                    void (*tlsquit)(const char *, const char *, const char *, const char *, const char *, stralloc *),
                     void (*mem_err)(), void (*ctrl_err)(), void (*write_err)(),
-                    void (*quit)(int, int, char *, ...),
+                    void (*quit)(int, int, const char *, ...),
 					stralloc *, saa * _ehlokw, int);
 #else
 int             do_tls(SSL **, int, int, int, int *, char **, char *, char *, int,
-                    void (*tlsquit)(const char *, char *, char *, char *, char *, stralloc *),
+                    void (*tlsquit)(const char *, const char *, const char *, const char *, const char *, stralloc *),
                     void (*mem_err)(), void (*ctrl_err)(), void (*write_err)(),
                     void (*quit)(),
 					stralloc *, saa * _ehlokw, int);
@@ -32,8 +32,8 @@ int             do_tls(SSL **, int, int, int, int *, char **, char *, char *, in
 #endif
 #ifdef HASTLSA
 int
-                tlsa_vrfy_records(SSL *, char *, int, int, int, char *,
-                    void (*tlsquit)(const char *, char *, char *, char *, char *, stralloc *),
+                tlsa_vrfy_records(SSL *, char *, int, int, int, const char *,
+                    void (*tlsquit)(const char *, const char *, const char *, const char *, const char *, stralloc *),
                     void(*mem_err)(), stralloc *, void(*out)(), void(*flush)(), char **, int);
 #endif
 #endif /*- _DOSSL_H_ */

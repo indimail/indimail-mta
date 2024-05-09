@@ -1,5 +1,8 @@
 /*
  * $Log: uacl.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2023-10-24 20:10:30+05:30  Cprogrammer
  * use matchregex.h from /usr/include/qmail
  *
@@ -111,7 +114,7 @@ die_usage()
 }
 
 no_return void
-die_regex(char *str)
+die_regex(const char *str)
 {
 	substdio_puts(subfderr, "uacl: regex failed: ");
 	substdio_puts(subfderr, str);
@@ -147,7 +150,7 @@ main(int argc, char **argv)
 void
 getversion_uacl_c()
 {
-	static char    *x = "$Id: uacl.c,v 1.9 2023-10-24 20:10:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: uacl.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

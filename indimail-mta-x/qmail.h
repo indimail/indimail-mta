@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.h,v 1.12 2024-01-23 01:22:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.h,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifndef QMAIL_H
 #define QMAIL_H
@@ -26,12 +26,12 @@ struct qmail
 };
 
 int             qmail_open(struct qmail *);
-void            qmail_put(struct qmail *, char *, unsigned int);
-void            qmail_puts(struct qmail *, char *);
-void            qmail_from(struct qmail *, char *);
-void            qmail_to(struct qmail *, char *);
+void            qmail_put(struct qmail *, const char *, unsigned int);
+void            qmail_puts(struct qmail *, const char *);
+void            qmail_from(struct qmail *, const char *);
+void            qmail_to(struct qmail *, const char *);
 void            qmail_fail(struct qmail *);
-char           *qmail_close(struct qmail *);
+const char     *qmail_close(struct qmail *);
 unsigned long   qmail_qp(struct qmail *);
 
 #define QQ_OK                  0
@@ -101,6 +101,9 @@ unsigned long   qmail_qp(struct qmail *);
 
 /*
  * $Log: qmail.h,v $
+ * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2024-01-23 01:22:42+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

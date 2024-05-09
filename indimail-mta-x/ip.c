@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2020-07-04 16:51:06+05:30  Cprogrammer
  * removed extra inclusion of fmt.h
  *
@@ -78,9 +81,7 @@ ip4_fmt(s, ip)
 }
 
 unsigned int
-ip4_scan(s, ip)
-	char           *s;
-	ip_addr       *ip;
+ip4_scan(const char *s, ip_addr *ip)
 {
 	unsigned int    i;
 	unsigned int    len;
@@ -131,9 +132,7 @@ ip4_scan(s, ip)
 }
 
 unsigned int
-ip4_scanbracket(s, ip)
-	char           *s;
-	ip_addr       *ip;
+ip4_scanbracket(const char *s, ip_addr *ip)
 {
 	unsigned int    len;
 
@@ -250,9 +249,7 @@ ip6_fmt(s, ip6)
 }
 
 unsigned int
-ip6_scan(s, ip6)
-	char           *s;
-	ip6_addr       *ip6;
+ip6_scan(const char *s, ip6_addr *ip6)
 {
 	char            suffix[16];
 	unsigned int    i, x, len = 0;
@@ -344,9 +341,7 @@ ip6_scan(s, ip6)
 }
 
 unsigned int
-ip6_scanbracket(s, ip6)
-	char           *s;
-	ip6_addr       *ip6;
+ip6_scanbracket(const char *s, ip6_addr *ip6)
 {
 	unsigned int    len;
 
@@ -364,7 +359,7 @@ ip6_scanbracket(s, ip6)
 void
 getversion_ip_c()
 {
-	static char    *x = "$Id: ip.c,v 1.11 2020-07-04 16:51:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ip.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2022-10-13 23:58:43+05:30  Cprogrammer
  * added link to batv draft used by indimail-mta
  *
@@ -114,7 +117,7 @@ checkbatv(char *sender, int *days)
 	char            kdate[] = "0000";
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	EVP_MD_CTX     *mdctx;
-	const EVP_MD   *md = 0;
+	EVP_MD         *md = 0;
 	unsigned char   md5digest[EVP_MAX_MD_SIZE];
 	unsigned int    md_len;
 #else
@@ -208,7 +211,7 @@ signbatv(char *sender)
 	static char     hex[] = "0123456789abcdef";
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	EVP_MD_CTX     *mdctx;
-	const EVP_MD   *md = 0;
+	EVP_MD         *md = 0;
 	unsigned char   md5digest[EVP_MAX_MD_SIZE];
 	unsigned int    md_len;
 #else
@@ -265,7 +268,7 @@ signbatv(char *sender)
 	return newsender.s;
 }
 
-char           *usage =
+const char     *usage =
 				"usage: batv -k key [-t stale ] -s sender | -v recipient\n"
 				"        -k key       (signing key)\n"
 				"        -t stale     (key validity period in days default 7)\n"
@@ -348,7 +351,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	static char    *x = "$Id: batv.c,v 1.10 2022-10-13 23:58:43+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: batv.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

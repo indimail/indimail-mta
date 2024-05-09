@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2022-01-30 09:38:02+05:30  Cprogrammer
  * allow configurable big/small todo/intd
  *
@@ -23,7 +26,7 @@
 #include "str.h"
 
 void
-readsubdir_init(readsubdir *rs, char *name, int flagsplit, void (*pause)())
+readsubdir_init(readsubdir *rs, const char *name, int flagsplit, void (*pause)())
 {
 	rs->name = name;
 	rs->pause = pause;
@@ -93,7 +96,7 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	static char    *x = "$Id: readsubdir.c,v 1.6 2022-01-30 09:38:02+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: readsubdir.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

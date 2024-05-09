@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -40,10 +40,6 @@
 #define FATAL         "dotls: fatal: "
 #define HUGECAPATEXT  5000
 
-#ifndef	lint
-static char     sccsid[] = "$Id: dotls.c,v 1.24 2023-08-20 15:16:12+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 int             do_data();
 int             do_retr();
 int             smtp_ehlo(char *, char *, int);
@@ -57,11 +53,12 @@ void            flush();
 
 struct scommd
 {
-	char           *text;
+	const char     *text;
 	int             (*fun) (char *, char *, int);
 	void            (*flush) (void);
 };
 static substdio ssin, ssto, smtpin, smtpto;
+typedef const char c_char;
 typedef unsigned long my_ulong;
 static my_ulong dtimeout = 300; /*- timeoutdata -D */
 static my_ulong ctimeout = 60;  /*- timeoutconn -t */
@@ -74,8 +71,8 @@ static stralloc line;
 static stralloc saciphers;
 static stralloc tls_server_version, tls_client_version;
 static char     strnum1[FMT_ULONG], strnum2[FMT_ULONG];
-static char    *remoteip, *remoteip4;
-static char    *certdir;
+static c_char  *remoteip, *remoteip4;
+static c_char  *certdir;
 static int      linemode = 1, verbosity = 1;
 
 no_return void
@@ -742,8 +739,8 @@ main(int argc, char **argv)
 	int             client_renegotiation = 0;
 #endif
 	pid_t           pid;
-	char           *host = NULL, *ciphers = NULL,
-				   *ptr, *cipherfile = NULL, *tls_method = NULL;
+	const char     *host = NULL, *ciphers = NULL, *cipherfile = NULL, *tls_method = NULL;
+	char           *ptr;
 	SSL            *ssl;
 	SSL_CTX        *ctx = NULL;
 	enum starttls   stls = unknown;
@@ -847,7 +844,7 @@ main(int argc, char **argv)
 	set_certdir(certdir);
 	if (!certfile.len) {
 		if (!(ptr = env_get("TLS_CERTFILE")))
-			ptr = client_mode ? "clientcert.pem" : "servercert.pem";
+			ptr = client_mode ? (char *) "clientcert.pem" : (char *) "servercert.pem";
 		if (*ptr != '.' && *ptr != '/') {
 			if (!stralloc_copys(&certfile, certdir) ||
 					!stralloc_append(&certfile, "/"))
@@ -859,7 +856,7 @@ main(int argc, char **argv)
 	}
 	if (!cafile.len) {
 		if (!(ptr = env_get("CLIENTCA")))
-			ptr = "clientca.pem";
+			ptr = (char *) "clientca.pem";
 		if (*ptr != '.' && *ptr != '/') {
 			if (!stralloc_copys(&cafile, certdir) ||
 					!stralloc_append(&cafile, "/"))
@@ -873,7 +870,7 @@ main(int argc, char **argv)
 	}
 	if (!crlfile.len) {
 		if (!(ptr = env_get("CLIENTCRL")))
-			ptr = "clientca.pem";
+			ptr = (char *) "clientca.pem";
 		if (*ptr != '.' && *ptr != '/') {
 			if (!stralloc_copys(&crlfile, certdir) ||
 					!stralloc_append(&crlfile, "/"))
@@ -1069,14 +1066,13 @@ main(int argc, char **argv)
 	_exit(0);
 }
 
-#ifndef	lint
 void
-getversion_sslclient_c()
+getversion_dotls_c()
 {
-	if (write(1, sccsid, 0) == -1)
-		;
+	const char     *x = "$Id: dotls.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+
+	x++;
 }
-#endif
 #else
 #warning "not compiled with -DTLS"
 #include "substdio.h"
@@ -1097,6 +1093,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.25  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.24  2023-08-20 15:16:12+05:30  Cprogrammer
  * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
  *

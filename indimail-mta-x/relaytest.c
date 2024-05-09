@@ -1,5 +1,8 @@
 /*
  * $Log: relaytest.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-10-07 08:42:37+05:30  Cprogrammer
  * updated with original author
  *
@@ -185,13 +188,16 @@ main(int argc, char **argv)
 void
 getversion_relaytest_c()
 {
-	static char    *x = "$Id: relaytest.c,v 1.7 2023-10-07 08:42:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: relaytest.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: relaytest.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-10-07 08:42:37+05:30  Cprogrammer
  * updated with original author
  *

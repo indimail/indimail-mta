@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2023-09-23 21:22:02+05:30  Cprogrammer
  * use ansic proto for functions
  *
@@ -229,7 +232,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	static char    *x = "$Id: dns_text.c,v 1.12 2023-09-23 21:22:02+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns_text.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-qmqpd.c,v $
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2024-01-23 01:22:59+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -120,10 +123,7 @@ struct qmail    qq;
 void
 identify()
 {
-	char           *remotehost;
-	char           *remoteinfo;
-	char           *remoteip;
-	char           *local;
+	const char     *remotehost, *remoteinfo, *remoteip, *local;
 
 	if (!(remotehost = env_get("TCPREMOTEHOST")))
 		remotehost = "unknown";
@@ -168,7 +168,7 @@ int             flagok = 1;
 int
 main()
 {
-	char           *result;
+	const char     *result;
 	unsigned long   qp;
 	unsigned long   len;
 	char            ch;
@@ -231,7 +231,7 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	static char    *x = "$Id: qmail-qmqpd.c,v 1.14 2024-01-23 01:22:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmqpd.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

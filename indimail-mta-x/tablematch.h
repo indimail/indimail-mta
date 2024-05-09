@@ -1,5 +1,8 @@
 /*
  * $Log: tablematch.h,v $
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2009-08-29 15:27:05+05:30  Cprogrammer
  * added flag argument to tablematch()
  *
@@ -9,6 +12,6 @@
  */
 #ifndef _TABLEMAT_H
 #define _TABLEMAT_H
-int             tablematch(char *, char *, char *);
-int             matchinet(char *, char *, char);
+int             tablematch(const char *, const char *, const char *);
+int             matchinet(const char *, const char *, char);
 #endif

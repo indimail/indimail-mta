@@ -1,5 +1,5 @@
 /*
- * $Id: sqlmatch.c,v 1.14 2022-10-09 23:02:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sqlmatch.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifdef USE_SQL
 #include "hasmysql.h"
@@ -32,9 +32,10 @@ stralloc        dbtable = { 0 };
 MYSQL          *db_mysql = (MYSQL *) 0;
 
 int
-connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
+connect_sqldb(const char *fn, MYSQL **conn, char **table_name, const char *error[])
 {
-	char           *x, *m_timeout;
+	char           *x;
+	const char     *m_timeout;
 	int             fd, i = 0;
 	unsigned int    next, xlen, mysql_timeout;
 	struct stat     st;
@@ -231,7 +232,7 @@ connect_sqldb(char *fn, MYSQL **conn, char **table_name, char **error)
 }
 
 int
-create_sqltable(MYSQL *conn, char *table_name, char **error)
+create_sqltable(MYSQL *conn, const char *table_name, const char *error[])
 {
 	static stralloc sql = { 0 };
 
@@ -256,7 +257,7 @@ create_sqltable(MYSQL *conn, char *table_name, char **error)
 }
 
 static int
-query_db(MYSQL *conn, char *addr, unsigned long *row_count, unsigned long *tmval, char **errStr)
+query_db(MYSQL *conn, const char *addr, unsigned long *row_count, unsigned long *tmval, const char *errStr[])
 {
 
 	MYSQL_RES      *res;
@@ -328,7 +329,7 @@ again:
 }
 
 int
-sqlmatch(char *fn, char *addr, int len, char **errStr)
+sqlmatch(const char *fn, const char *addr, int len, const char *errStr[])
 {
 	static stralloc controlfile = { 0 };
 	int             cntrl_ok;
@@ -369,7 +370,7 @@ sqlmatch_close_db(void)
 #else
 #warning "MySQL libs required for -DUSE_SQL. sqlmatch will always return false"
 int
-sqlmatch(char *fn, char *addr, int len, char **errStr)
+sqlmatch(const char *fn, const char *addr, int len, const char *errStr[])
 {
 	return (0);
 }
@@ -377,7 +378,7 @@ sqlmatch(char *fn, char *addr, int len, char **errStr)
 #else  /*- #ifdef USE_SQL */
 #warning "not compiled with -DUSE_SQL"
 int
-sqlmatch(char *fn, char *addr, int len, char **errStr)
+sqlmatch(const char *fn, const char *addr, int len, const char *errStr[])
 {
 	return (0);
 }
@@ -392,13 +393,16 @@ sqlmatch_close_db(void)
 void
 getversion_sqlmatch_c()
 {
-	static char    *x = "$Id: sqlmatch.c,v 1.14 2022-10-09 23:02:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sqlmatch.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sqlmatch.c,v $
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2022-10-09 23:02:04+05:30  Cprogrammer
  * renamed check_db() to query_db()
  * moved RCS log to bottom

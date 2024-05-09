@@ -1,5 +1,8 @@
 /*
  * $Log: dns_dfd.c,v $
+ * Revision 1.3  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-08-03 17:22:02+05:30  Cprogrammer
  * use qmail library
  *
@@ -13,7 +16,7 @@
 #include "dns.h"
 
 int
-dns_domain_fromdot(char **out, char *buf, unsigned int n)
+dns_domain_fromdot(char **out, const char *buf, unsigned int n)
 {
 	char            label[63];
 	unsigned int    labellen = 0;	/*- <= sizeof label */

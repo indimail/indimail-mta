@@ -1,5 +1,8 @@
 /*
  * $Log: 822header.c,v $
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2022-10-30 17:54:57+05:30  Cprogrammer
  * converted to ansic prototype
  *
@@ -134,7 +137,7 @@ main(int argc, char **argv)
 void
 getversion_822header_c()
 {
-	static char    *x = "$Id: 822header.c,v 1.8 2022-10-30 17:54:57+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: 822header.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

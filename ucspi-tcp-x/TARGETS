@@ -153,3 +153,8 @@ dotls.1
 upathexec_env.o
 upathexec_rundl.o
 upathexec_run.o
+socket_acceptun.o
+socket_bindun.o
+socket_conn_un.o
+socket_unix.o
+timeoutconn_un.o

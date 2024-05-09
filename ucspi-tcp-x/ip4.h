@@ -1,5 +1,8 @@
 /*
  * $Log: ip4.h,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2021-05-12 21:02:24+05:30  Cprogrammer
  * define arguments as array subscripts to fix gcc 11 warnings
  *
@@ -20,7 +23,7 @@
 #define IP4_H
 
 extern char     ip4loopback[4]; /* = {127,0,0,1}; */
-unsigned int    rblip4_scan(char *, char ip[4]);
+unsigned int    rblip4_scan(const char *, char ip[4]);
 unsigned int    ip4_fmt(char *, char ip[4]);
 
 #define IP4_FMT 20

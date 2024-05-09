@@ -1,5 +1,8 @@
 /*
  * $Log: bouncesaying.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2020-11-24 13:44:08+05:30  Cprogrammer
  * removed exit.h
  *
@@ -62,7 +65,7 @@ main(argc, argv)
 void
 getversion_bouncesaying_c()
 {
-	static char    *x = "$Id: bouncesaying.c,v 1.7 2020-11-24 13:44:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: bouncesaying.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

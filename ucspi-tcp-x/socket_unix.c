@@ -1,5 +1,8 @@
 /*
  * $Log: socket_unix.c,v $
+ * Revision 1.2  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2023-06-16 23:46:39+05:30  Cprogrammer
  * Initial revision
  *
@@ -8,6 +11,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <ndelay.h>
+#include "socket.h"
 
 int
 socket_unix(void)

@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.31 2024-02-08 20:47:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.32 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -65,8 +65,9 @@
 int             qmail_lspawn(int, char **);
 int             qmail_rspawn(int, char **);
 
-char           *queuedesc = "qmta";
-static char    *argv0 = "qmta-send";
+typedef const char c_char;
+const char     *queuedesc = "qmta";
+static c_char  *argv0 = "qmta-send";
 static int      lifetime = 604800;
 static int      flagexitasap = 0, flagrunasap = 1, flagreadasap = 0;
 static int      _qmail_clean, _qmail_lspawn, _qmail_rspawn;;
@@ -96,17 +97,17 @@ datetime_sec    recent;
 static int      chanfdout[CHANNELS];
 static int      chanfdin[CHANNELS];
 static int      chanskip[CHANNELS] = { 10, 20 };
-static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
-static char    *chanstatusmsg[CHANNELS] = { " local ", " remote " };
-static char    *chanjobsheldmsg[CHANNELS] = { /* NJL 1998/05/03 */
+static c_char  *chanaddr[CHANNELS] = { "local/", "remote/" };
+static c_char  *chanstatusmsg[CHANNELS] = { " local ", " remote " };
+static c_char  *chanjobsheldmsg[CHANNELS] = { /* NJL 1998/05/03 */
 	"local deliveries temporarily held\n",
 	"remote deliveries temporarily held\n"
 };
-static char    *chanjobsunheldmsg[CHANNELS] = {	/* NJL 1998/05/03 */
+static c_char  *chanjobsunheldmsg[CHANNELS] = {	/* NJL 1998/05/03 */
 	"local deliveries resumed\n",
 	"remote deliveries resumed\n"
 };
-static char    *tochan[CHANNELS] = { " to local ", " to remote " };
+static c_char  *tochan[CHANNELS] = { " to local ", " to remote " };
 static prioq    pqdone = { 0 };						/*- -todo +info; HOPEFULLY -local -remote */
 static prioq    pqchan[CHANNELS] = { {0} , {0} };	/*- pqchan 0: -todo +info +local ?remote */
 													/*- pqchan 1: -todo +info ?local +remote */
@@ -131,10 +132,10 @@ static stralloc bouncefrom = { 0 };
 static stralloc bouncehost = { 0 };
 static stralloc doublebounceto = { 0 };
 static stralloc doublebouncehost = { 0 };
-char           *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0, (char *) 0};
-char           *(qrargs[]) = { "qmail-rspawn", 0, (char *) 0};
-char           *(qcargs[]) = { "qmail-clean", "qmta", (char *) 0};
-char           *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0, (char *) 0};
+const char     *(qlargs[]) = { "qmail-lspawn", "./Maildir/", 0, (char *) 0};
+const char     *(qrargs[]) = { "qmail-rspawn", 0, (char *) 0};
+const char     *(qcargs[]) = { "qmail-clean", "qmta", (char *) 0};
+const char     *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0, (char *) 0};
 static int      flagspawnalive[CHANNELS];
 static int      flagcleanup;	/*- if 1, cleanupdir is initialized and ready */
 static readsubdir cleanupdir;
@@ -479,7 +480,7 @@ static int
 rewrite(char *recip)
 {
 	unsigned int    i, j, at;
-	char           *x;
+	const char     *x;
 	static stralloc addr = { 0 };
 
 	if (!stralloc_copys(&rwline, "T")
@@ -796,7 +797,7 @@ todo_do(fd_set *rfds)
 	unsigned long   id;
 	char           *ptr;
 	char            oldfn[FMTQFN];
-	char           *fix_dirs[] = {"todo/", "intd/", "mess/", 0};
+	const char     *fix_dirs[] = {"todo/", "intd/", "mess/", 0};
 	int             i, split;
 
 	if (flagexitasap)
@@ -1195,11 +1196,11 @@ markdone(int c, unsigned long id, seek_pos pos)
 }
 
 /*- strip the virtual domain which is prepended to addresses e.g. xxx.com-user01@xxx.com */
-static char    *
-stripvdomprepend(char *recip)
+static const char *
+stripvdomprepend(const char *recip)
 {
 	unsigned int    i, domainlen;
-	char           *domain, *prepend;
+	const char     *domain, *prepend;
 
 	i = str_rchr(recip, '@');
 	if (!recip[i])
@@ -1618,7 +1619,8 @@ injectbounce(unsigned long id)
 	datetime_sec    birth;
 	substdio        ssread;
 	char            buf[128], inbuf[128];
-	char           *bouncesender, *bouncerecip = "", *brep = "?", *p;
+	const char     *bouncesender, *bouncerecip = "";
+	char           *brep = (char *) "?", *p;
 	int             r = -1, fd;
 	unsigned long   qp;
 #ifdef MIME
@@ -2003,7 +2005,7 @@ queue_fix()
 				!stralloc_0(&q))
 			nomem(argv0);
 		qfargs[0] = q.s;
-		execv(*qfargs, qfargs); /*- queue-fix */
+		execv(*qfargs, (char **) qfargs); /*- queue-fix */
 		_exit(111);
 	}
 	sig_unblock(sig_int);
@@ -2076,7 +2078,7 @@ run_daemons(char **oargv, char **argv)
 					!stralloc_0(&q))
 				nomem(argv0);
 			qlargs[0] = q.s;
-			execv(*qlargs, qlargs); /*- qmail-lspawn */
+			execv(*qlargs, (char **) qlargs); /*- qmail-lspawn */
 		} else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
@@ -2084,7 +2086,7 @@ run_daemons(char **oargv, char **argv)
 				str_copy(oargv[0] + i + 1, "MTAlspawn");
 			else
 				str_copy(oargv[0], "MTAlspawn");
-			qmail_lspawn(2, qlargs);
+			qmail_lspawn(2, (char **) qlargs);
 		}
 		_exit(111);
 	}
@@ -2124,7 +2126,7 @@ run_daemons(char **oargv, char **argv)
 					!stralloc_0(&q))
 				nomem(argv0);
 			qrargs[0] = q.s;
-			execv(*qrargs, qrargs); /*- qmail-rspawn */
+			execv(*qrargs, (char **) qrargs); /*- qmail-rspawn */
 		} else {
 			sig_block(sig_int);
 			i = str_rchr(oargv[0], '/');
@@ -2132,7 +2134,7 @@ run_daemons(char **oargv, char **argv)
 				str_copy(oargv[0] + i + 1, "MTArspawn");
 			else
 				str_copy(oargv[0], "MTArspawn");
-			qmail_rspawn(1, qrargs);
+			qmail_rspawn(1, (char **) qrargs);
 		}
 		_exit(111);
 	}
@@ -2173,7 +2175,7 @@ run_daemons(char **oargv, char **argv)
 					!stralloc_0(&q))
 				nomem(argv0);
 			qcargs[0] = q.s;
-			execv(*qcargs, qcargs); /*- qmail-clean */
+			execv(*qcargs, (char **) qcargs); /*- qmail-clean */
 			_exit(111);
 		}
 		close(pi5[0]);
@@ -2479,20 +2481,20 @@ void
 check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 {
 	int             i, j, opt;
-	char          *bin_programs[] = {"sbin/qmail-lspawn", "sbin/qmail-rspawn", "sbin/qmail-clean", 0};
+	const char    *bin_programs[] = {"sbin/qmail-lspawn", "sbin/qmail-rspawn", "sbin/qmail-clean", 0};
 	char           opt_str[9];
-	char           *usage_str =
+	const char     *usage_str =
 		"USAGE: qmta-send [options] [ defaultdelivery [logger arg...] ]\n"
 		"OPTIONS\n"
 		"       -d Run as a daemon\n"
 		"       -f fix queue\n"
 		"       -b use Big Todo\n"
 		"       -s queue_split";
-	char           *u_str1 =
+	const char     *u_str1 =
 		"       -l Use qmail-lspawn for spawning local  deliveries";
-	char           *u_str2 =
+	const char     *u_str2 =
 		"       -r Use qmail-rspawn for spawning remote deliveries";
-	char           *u_str3 =
+	const char     *u_str3 =
 		"       -c Use qmail-clean  for cleanup";
 
 	*daemon_mode = *flagqfix = 0;
@@ -2771,7 +2773,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	static char    *x = "$Id: qmta-send.c,v 1.31 2024-02-08 20:47:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmta-send.c,v 1.32 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2779,6 +2781,9 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.32  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.31  2024-02-08 20:47:48+05:30  Cprogrammer
  * fixed multiplication result converted to larger type (codeql)
  *

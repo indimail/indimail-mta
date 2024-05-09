@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.5 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmonitor.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -19,7 +19,7 @@
 #define FATAL "qmonitor: fatal: "
 #define WARN  "qmonitor: warn: "
 
-char           *usage =
+const char     *usage =
 	"usage: qmonitor [-t threshold ] [-i interval] [-n]\n"
 	"        -t threshold (load threshold)\n"
 	"        -i interval";
@@ -91,13 +91,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	static char    *x = "$Id: qmonitor.c,v 1.5 2023-01-18 00:02:13+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmonitor.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-01-18 00:02:13+05:30  Cprogrammer
  * replaced qprintf with subprintf
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rm.c,v 1.26 2024-02-12 20:57:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-rm.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  *
  * COPYRIGHT INFORMATION - DO NOT REMOVE
  *
@@ -156,8 +156,8 @@ char           *read_file(const char *);
 int             find_files(char *, char *[], const char *);
 unsigned long   digits(unsigned long);
 char           *mk_nohashpath(char *, int);
-char           *mk_hashpath(char *, int);
-char           *mk_newpath(char *, int);
+char           *mk_hashpath(const char *, int);
+char           *mk_newpath(const char *, int);
 #ifdef HASRENAMEAT
 int             renameat(int, const char *, int, const char *);
 #else
@@ -165,12 +165,13 @@ int             rename(const char *, const char *);
 #endif
 char           *strptime(const char *s, const char *format, struct tm *tm);
 
+typedef const char c_char;
 /*- globals */
 extern const char *__progname;
 static const char     *default_pattern = ".*";
 static unsigned long   read_bytes = 0;
 static int      regex_flags = 0, verbosity = 0, conf_split, remove_files = 0, delete_files = 0;
-static char    *yank_dir = "trash";
+static c_char  *yank_dir = "trash";
 
 /*- if the eXpire option is specified on the command line, this will reflect that */
 static int      expire_files = 0;
@@ -842,7 +843,7 @@ mk_nohashpath(char *queue, int inode_name)
 }
 
 char           *
-mk_hashpath(char *queue, int inode_name)
+mk_hashpath(const char *queue, int inode_name)
 {
 	int             len = 0, hash_num = 0;
 	char           *old_name = NULL;
@@ -871,7 +872,7 @@ mk_hashpath(char *queue, int inode_name)
 }
 
 char           *
-mk_newpath(char *subdir, int inode_name)
+mk_newpath(const char *subdir, int inode_name)
 {
 	int             len = 0;
 	char           *new_name = NULL;
@@ -1025,13 +1026,16 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	static char    *x = "$Id: qmail-rm.c,v 1.26 2024-02-12 20:57:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-rm.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.27  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.26  2024-02-12 20:57:47+05:30  Cprogrammer
  * use unlinkat() if available instead of unlink()
  * use renameat() if available instead of rename()

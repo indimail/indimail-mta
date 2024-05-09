@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2022-05-10 20:56:17+05:30  Cprogrammer
  * use headers from standard include path
  *
@@ -32,12 +35,12 @@
 #include <scan.h>
 #include <timeoutread.h>
 
-char           *usage = "usage: udpclient [-h host] [-p port] [-r responsesize] [-t timeout] message message ...";
+const char     *usage = "usage: udpclient [-h host] [-p port] [-r responsesize] [-t timeout] message message ...";
 
 #define FATAL "udpclient: fatal: "
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -114,7 +117,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	static char    *x = "$Id: udpclient.c,v 1.7 2022-05-10 20:56:17+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: udpclient.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: report.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2024-02-07 22:58:37+05:30  Cprogrammer
  * modified error messages
  *
@@ -69,7 +72,7 @@ extern dtype    delivery;
  * 100 - Permanent failure
  */
 no_return void
-report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
+report(int errCode, const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, const char *s6)
 {
 	if (delivery == local_delivery) /*- strerr_die does not return */
 		strerr_die6x(errCode, s1, s2, s3, s4, s5, s6);
@@ -122,7 +125,7 @@ report(int errCode, char *s1, char *s2, char *s3, char *s4, char *s5, char *s6)
 void
 getversion_report_c()
 {
-	static char    *x = "$Id: report.c,v 1.7 2024-02-07 22:58:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: report.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;

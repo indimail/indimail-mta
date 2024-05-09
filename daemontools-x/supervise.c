@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.40 2024-04-01 18:21:40+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.41 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -118,7 +118,7 @@ announce(short sleep_interval)
 }
 
 static void
-do_kill(int prgrp, int *siglist, char **signame)
+do_kill(int prgrp, int *siglist, const char **signame)
 {
 	int            *i;
 	int             j, r;
@@ -159,7 +159,7 @@ static void
 sigterm()
 {
 	int             siglist[] = {-1, -1, -1};
-	char           *signame[] = {0, 0}, *p;
+	const char     *signame[] = {0, 0}, *p;
 	static int      got_term;
 
 	flagexit = 1;
@@ -243,9 +243,9 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	return 0;
 }
 
-char           *run[3] = { "./run", 0 , 0};
-char           *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
-char           *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
+const char     *run[3] = { "./run", 0 , 0};
+const char     *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
+const char     *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
 
 void
 do_wait()
@@ -406,7 +406,7 @@ trystart()
 		if (!env_put2("PPID", strnum1))
 			strerr_die2x(111, fatal.s, "trystart: out of memory");
 		run[1] = dir;
-		execve(*run, run, environ);
+		execve(*run, (char **) run, environ);
 		strerr_die2sys(111, fatal.s, "unable to start run: ");
 	}
 	grandchild = 0;
@@ -429,7 +429,7 @@ trystart()
 }
 
 void
-tryaction(char **action, pid_t cpid, int wstat, int do_alert)
+tryaction(const char **action, pid_t cpid, int wstat, int do_alert)
 {
 	pid_t           f;
 	int             t, i;
@@ -476,7 +476,7 @@ tryaction(char **action, pid_t cpid, int wstat, int do_alert)
 			action[2] = dir;
 			action[3] = NULL;
 		}
-		execve(*action, action, environ);
+		execve(*action, (char **) action, environ);
 		strerr_die4sys(111, fatal.s, "unable to exec ", *action, ": ");
 	default:
 		wait_pid(&t, f);
@@ -515,7 +515,7 @@ doit()
 {
 	iopause_fd      x[2];
 	int             siglist[] = {-1, -1, -1};
-	char           *signame[] = {0, 0};
+	const char     *signame[] = {0, 0};
 	struct taia     deadline;
 	struct taia     stamp;
 	static int      double_fork_flag;
@@ -831,11 +831,11 @@ doit()
 
 #ifdef USE_RUNFS
 void
-cleanup(char *d)
+cleanup(const char *d)
 {
-	char           *sv_files[] = { "control", "lock", "ok", "status", "up", 0};
-	char           *sv_dirs[] = {"supervise", "log/supervise", 0};
-	char          **p, **q;
+	const char     *sv_files[] = { "control", "lock", "ok", "status", "up", 0};
+	const char     *sv_dirs[] = {"supervise", "log/supervise", 0};
+	const char    **p, **q;
 	int             l;
 	stralloc        tmp = {0};
 
@@ -860,7 +860,7 @@ cleanup(char *d)
 }
 
 int
-qchown(char *name, uid_t uid, gid_t gid)
+qchown(const char *name, uid_t uid, gid_t gid)
 {
 	int             fd;
 
@@ -875,9 +875,9 @@ qchown(char *name, uid_t uid, gid_t gid)
 }
 
 void
-initialize_run(char *service_dir, mode_t mode, uid_t own, gid_t grp)
+initialize_run(const char *service_dir, mode_t mode, uid_t own, gid_t grp)
 {
-	char           *run_dir, *parent_dir = (char *) 0;
+	const char     *run_dir, *parent_dir = (char *) 0;
 	int             i;
 
 	if (env_get("DISABLE_RUN")) {
@@ -1135,13 +1135,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	static char    *x = "$Id: supervise.c,v 1.40 2024-04-01 18:21:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.41 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.41  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.40  2024-04-01 18:21:40+05:30  Cprogrammer
  * set PPID env variable for child
  * added comments, updated variable name for flagwant, spid arg

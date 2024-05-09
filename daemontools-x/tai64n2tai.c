@@ -37,14 +37,14 @@ static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -53,7 +53,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
@@ -67,7 +67,7 @@ my_error(char *s1, char *s2, int exit_val)
 }
 
 void
-my_puts(char *s, int len)
+my_puts(const char *s, int len)
 {
 	if (len) {
 		if (substdio_put(&ssout, s, len) == -1)
@@ -113,7 +113,7 @@ main(int argc, char **argv)
 void
 getversion_tai64n2tai_c()
 {
-	static char    *x = "$Id: tai64n2tai.c,v 1.3 2021-08-30 12:04:53+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tai64n2tai.c,v 1.4 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

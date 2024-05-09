@@ -1,5 +1,8 @@
 /*
  * $Log: preline.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-09-15 21:15:16+05:30  Cprogrammer
  * moved check for env variables after getopt
  *
@@ -37,7 +40,7 @@
 #define FATAL "preline: fatal: "
 
 no_return void
-die_usage(char *arg)
+die_usage(const char *arg)
 {
 	if (arg)
 		strerr_die4x(111, FATAL, "No ", arg, " environment variable");
@@ -132,7 +135,7 @@ main(int argc, char **argv)
 void
 getversion_preline_c()
 {
-	static char    *x = "$Id: preline.c,v 1.11 2023-09-15 21:15:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: preline.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

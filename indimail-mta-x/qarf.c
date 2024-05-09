@@ -1,5 +1,8 @@
 /*
  * $Log: qarf.c,v $
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.14  2024-01-23 01:22:15+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -72,19 +75,19 @@
 static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
 static char     strnum[FMT_ULONG];
-static char    *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
+const char     *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s) == -1)
 		_exit(1);
@@ -93,7 +96,7 @@ logerrf(char *s)
 }
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	logerr(": ");
@@ -107,14 +110,14 @@ my_error(char *s1, char *s2, int exit_val)
 }
 
 void
-my_puts(char *s)
+my_puts(const char *s)
 {
 	if (substdio_puts(&ssout, s) == -1)
 		my_error("qarf: write", 0, WRITE_ERR);
 }
 
 void
-my_putb(char *s, int len)
+my_putb(const char *s, int len)
 {
 	if (substdio_bput(&ssout, s, len) == -1)
 		my_error("qarf: write", 0, WRITE_ERR);
@@ -124,7 +127,7 @@ static int
 mkTempFile(int seekfd)
 {
 	char            inbuf[2048], outbuf[2048];
-	char           *tmpdir;
+	const char     *tmpdir;
 	static stralloc tmpFile = {0};
 	struct substdio ssin;
 	struct substdio sstmp;
@@ -179,7 +182,7 @@ mkTempFile(int seekfd)
 stralloc        addr = { 0 };
 
 int
-addrparse(char *arg)
+addrparse(const char *arg)
 {
 	int             i, flagesc, flagquoted;
 	char            ch, terminator;
@@ -336,7 +339,7 @@ main(int argc, char **argv)
 	struct substdio ssin;
 	static char     ssinbuf[1024];
 	char            buf[DATE822FMT], inbuf[128];
-	char           *to, *from, *subject, *text, *ip, *reported_ip;
+	const char     *to, *from, *subject, *text, *ip, *reported_ip;
 
 	to = from = subject = text = 0;
 	reported_ip = 0;
@@ -420,7 +423,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.14 $\n");
+			"X-Mailer: qarf $Revision: 1.15 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -464,7 +467,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.14 2024-01-23 01:22:15+05:30 Cprogrammer Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -524,7 +527,7 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	static char    *x = "$Id: qarf.c,v 1.14 2024-01-23 01:22:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qarf.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

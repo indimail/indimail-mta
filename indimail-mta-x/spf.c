@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.25 2023-09-24 19:35:55+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spf.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
@@ -69,8 +69,9 @@ extern char    *localhost;
 
 extern stralloc spflocal, spfguess, spfexp;
 
+typedef const char c_char;
 static stralloc sender_fqdn, explanation, expdomain, errormsg;
-static char    *received;
+static c_char  *received;
 static int      recursion;
 static ip_addr  ip;
 #ifdef IPV6
@@ -78,7 +79,7 @@ static ip6_addr ip6;
 static int      ipv6use;
 #endif
 
-static int      spf_ptr(char *spec, char *mask);
+static int      spf_ptr(const char *spec, const char *mask);
 static int      spflookup(stralloc * domain);
 
 static void
@@ -118,7 +119,7 @@ hdr_none()
 }
 
 static void
-hdr_unknown_msg(char *e)
+hdr_unknown_msg(const char *e)
 {
 	if (!stralloc_copys(&errormsg, e))
 		return;
@@ -126,7 +127,7 @@ hdr_unknown_msg(char *e)
 }
 
 static void
-hdr_ext(char *e)
+hdr_ext(const char *e)
 {
 	if (!stralloc_copys(&errormsg, e))
 		return;
@@ -140,7 +141,7 @@ hdr_syntax()
 }
 
 static void
-hdr_error(char *e)
+hdr_error(const char *e)
 {
 	if (!stralloc_copys(&errormsg, e))
 		return;
@@ -182,7 +183,7 @@ matchip6(ip6_addr *net, int mask, ip6_addr *i6)
 }
 
 static int
-getipmask(char *mask, int *ip4mask, int *ip6mask)
+getipmask(const char *mask, int *ip4mask, int *ip6mask)
 {
 	unsigned long   r;
 	int             pos;
@@ -210,7 +211,7 @@ getipmask(char *mask, int *ip4mask, int *ip6mask)
 }
 
 static int
-getip4mask(char *mask)
+getip4mask(const char *mask)
 {
 	unsigned long   r;
 	int             pos;
@@ -225,7 +226,7 @@ getip4mask(char *mask)
 }
 
 static int
-getip6mask(char *mask)
+getip6mask(const char *mask)
 {
 	unsigned long   r;
 	int             pos;
@@ -240,7 +241,7 @@ getip6mask(char *mask)
 }
 #else
 static int
-getipmask(char *mask, int ipv6)
+getipmask(const char *mask, int ipv6)
 {
 	unsigned long   r;
 	int             pos;
@@ -347,12 +348,12 @@ spfget(stralloc *spf, stralloc *domain_v)
 }
 
 int
-spfsubst(stralloc *expand, char *spec, char *domain_p)
+spfsubst(stralloc *expand, const char *spec, const char *domain_p)
 {
-	static char     hexdigits[] = "0123456789abcdef";
+	static c_char   hexdigits[] = "0123456789abcdef";
 	static stralloc sa = { 0 };
 	char            ch;
-	char           *split = ".";
+	const char     *split = ".";
 	int             digits = -1, urlencode = 0, reverse = 0,
 					start = expand->len, i, pos;
 
@@ -534,7 +535,7 @@ spfsubst(stralloc *expand, char *spec, char *domain_p)
 }
 
 int
-spfexpand(stralloc *sa_p, char *spec, char *domain_p)
+spfexpand(stralloc *sa_p, const char *spec, const char *domain_p)
 {
 	char           *p;
 	char            append;
@@ -545,7 +546,7 @@ spfexpand(stralloc *sa_p, char *spec, char *domain_p)
 	if (!stralloc_readyplus(sa_p, 0))
 		return 0;
 	sa_p->len = 0;
-	for (p = spec; *p; p++) {
+	for (p = (char *) spec; *p; p++) {
 		append = *p;
 		if (*p == '%') {
 			p++;
@@ -582,7 +583,7 @@ spfexpand(stralloc *sa_p, char *spec, char *domain_p)
 }
 
 static int
-spf_include(char *spec, char *mask)
+spf_include(const char *spec, const char *mask)
 {
 	int             r;
 	static stralloc sa = { 0 };
@@ -608,7 +609,7 @@ spf_include(char *spec, char *mask)
 }
 
 static int
-spf_a(char *spec, char *mask)
+spf_a(const char *spec, const char *mask)
 {
 	static ipalloc  ia = { 0 };
 	static stralloc sa = { 0 };
@@ -671,7 +672,7 @@ spf_a(char *spec, char *mask)
 }
 
 static int
-spf_mx(char *spec, char *mask)
+spf_mx(const char *spec, const char *mask)
 {
 	static stralloc sa = { 0 };
 	static ipalloc  ia = { 0 };
@@ -731,7 +732,7 @@ spf_mx(char *spec, char *mask)
 }
 
 static int
-spf_ptr(char *spec, char *mask)
+spf_ptr(const char *spec, const char *mask)
 {
 	int             len = str_len(spec), r, j, k, pos;
 	static ipalloc  ia = { 0 };
@@ -852,7 +853,7 @@ spf_ptr(char *spec, char *mask)
 
 #ifdef IPV6
 static int
-spf_ip6(char *spec, char *mask)
+spf_ip6(const char *spec, const char *mask)
 {
 	ip6_addr        net;
 	int             ipmask;
@@ -867,7 +868,7 @@ spf_ip6(char *spec, char *mask)
 }
 
 static int
-spf_ip(char *spec, char *mask)
+spf_ip(const char *spec, const char *mask)
 {
 	ip_addr         net;
 	int             ipmask;
@@ -881,7 +882,7 @@ spf_ip(char *spec, char *mask)
 }
 #else
 static int
-spf_ip(char *spec, char *mask)
+spf_ip(const char *spec, const char *mask)
 {
 	ip_addr         net;
 	int             ipmask = getipmask(mask, 0);
@@ -896,7 +897,7 @@ spf_ip(char *spec, char *mask)
 #endif
 
 static int
-spf_exists(char *spec, char *mask)
+spf_exists(const char *spec, const char *mask)
 {
 	static stralloc sa = { 0 };
 	static ipalloc  ia = { 0 };
@@ -924,8 +925,8 @@ spf_exists(char *spec, char *mask)
 
 static struct mechanisms
 {
-	char           *mechanism;
-	int             (*func) (char *spec, char *mask);
+	const char     *mechanism;
+	int             (*func) (const char *spec, const char *mask);
 	unsigned int    takes_spec:1;
 	unsigned int    takes_mask:1;
 	unsigned int    expands:1;
@@ -949,7 +950,7 @@ static struct mechanisms
 };
 
 static int
-spfmech(char *mechanism, char *spec, char *mask, char *domain_p)
+spfmech(const char *mechanism, const char *spec, const char *mask, const char *domain_p)
 {
 	struct mechanisms *mech;
 	int             r, pos;
@@ -988,7 +989,7 @@ spfmech(char *mechanism, char *spec, char *mask, char *domain_p)
 
 static struct default_aliases
 {
-	char           *alias;
+	const char     *alias;
 	int             defret;
 } default_aliases[] = {
 	{"allow", SPF_OK},
@@ -1275,7 +1276,7 @@ redirect:
 }
 
 int
-spfcheck(char *remoteip)
+spfcheck(const char *remoteip)
 {
 	int             pos, r;
 	static stralloc domain = {0};
@@ -1377,13 +1378,16 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	static char    *x = "$Id: spf.c,v 1.25 2023-09-24 19:35:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spf.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: spf.c,v $
+ * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.25  2023-09-24 19:35:55+05:30  Cprogrammer
  * fix for empty spf explanation
  *

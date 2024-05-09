@@ -1,5 +1,8 @@
 /*
  * $Log: svstat.c,v $
+ * Revision 1.12  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-03-04 14:43:01+05:30  Cprogrammer
  * check for supervise/ok in original service dir before run filesystem
  *
@@ -66,7 +69,7 @@ doit(char *dir, int *retval)
 	struct stat     st;
 	int             r, fd = -1;
 	short          *s;
-	char           *x;
+	const char     *x;
 	struct tai      when, now;
 
 	*retval = 111;
@@ -243,7 +246,7 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	static char    *x = "$Id: svstat.c,v 1.11 2023-03-04 14:43:01+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svstat.c,v 1.12 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

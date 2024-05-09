@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.13  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.12  2021-07-03 14:03:56+05:30  Cprogrammer
  * use Lmid_t data type for id instead of unsigned long
  *
@@ -63,7 +66,7 @@ static stralloc namespace = {0};
  * -1 - ENOMEM failure
  */
 int
-dlnamespace(char *fn, char **envp, Lmid_t *id)
+dlnamespace(const char *fn, char **envp, Lmid_t *id)
 {
 	char           *ptr, *cptr, *s;
 	int             i, j;
@@ -154,7 +157,7 @@ dlnamespace(char *fn, char **envp, Lmid_t *id)
 }
 #else
 int
-dlnamespace(char *fn, unsigned long *id)
+dlnamespace(const char *fn, unsigned long *id)
 {
 	if (!id) {
 		errno = EINVAL;
@@ -170,7 +173,7 @@ dlnamespace(char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	static char    *x = "$Id: dlnamespace.c,v 1.12 2021-07-03 14:03:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dlnamespace.c,v 1.13 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 	if (x)
 		x++;
 }

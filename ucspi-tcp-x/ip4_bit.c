@@ -1,5 +1,8 @@
 /*
  * $Log: ip4_bit.c,v $
+ * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2020-08-03 17:23:58+05:30  Cprogrammer
  * use qmail library
  *
@@ -29,7 +32,7 @@ getaddressasbit(char *ip, int prefix, stralloc *ip4string)
 	int             count, i, sufcount = 0, pos = 0, len, posl;
 	unsigned long   num;
 #ifdef BITSUBSTITUTION
-	char           *letterarray = "abcdefghijklmnopqrstuvwxyz123456";
+	const char     *letterarray = "abcdefghijklmnopqrstuvwxyz123456";
 #endif
 
 	len = byte_chr(ip, str_len(ip), '/');

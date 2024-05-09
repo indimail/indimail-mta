@@ -1,5 +1,5 @@
 /*
- * $Id: received.c,v 1.9 2024-02-05 09:32:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: received.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -26,7 +26,7 @@ issafe(char ch)
 }
 
 void
-safeput(struct qmail *qqt, char *s)
+safeput(struct qmail *qqt, const char *s)
 {
 	char            ch;
 
@@ -43,8 +43,9 @@ safeput(struct qmail *qqt, char *s)
  */
 
 void
-received(struct qmail *qqt, char *program, char *protocol, char *local, char *remoteip,
-		char *remotehost, char *remoteinfo, char *helo, int hide)
+received(struct qmail *qqt, const char *program, const char *protocol,
+		const char *local, const char *remoteip, const char *remotehost,
+		const char *remoteinfo, const char *helo, int hide)
 {
 	struct datetime dt;
 	char            strnum[FMT_ULONG], buf[DATE822FMT];
@@ -86,13 +87,16 @@ received(struct qmail *qqt, char *program, char *protocol, char *local, char *re
 void
 getversion_received_c()
 {
-	static char    *x = "$Id: received.c,v 1.9 2024-02-05 09:32:58+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: received.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: received.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2024-02-05 09:32:58+05:30  Cprogrammer
  * added parameter hide to hide IP, Host in received headers
  *

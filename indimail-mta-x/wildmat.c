@@ -39,7 +39,7 @@
 
 /*- Match text and p, return TRUE, FALSE, or ABORT.  */
 static int
-DoMatch(register char *text, register char *p)
+DoMatch(register const char *text, register const char *p)
 {
 	register int    last;
 	register int    matched;
@@ -100,7 +100,7 @@ DoMatch(register char *text, register char *p)
 
 /*- User-level routine.  Returns TRUE or FALSE.  */
 int
-wildmat_internal(char *text, char *p)
+wildmat_internal(const char *text, const char *p)
 {
 #ifdef	OPTIMIZE_JUST_STAR
 	if (p[0] == '*' && p[1] == '\0')
@@ -146,7 +146,7 @@ main()
 void
 getversion_wildmat_internal_c()
 {
-	static char    *x = "$Id: wildmat.c,v 1.8 2022-10-09 23:04:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: wildmat.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;

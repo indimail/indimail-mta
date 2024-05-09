@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.17  2024-01-23 01:24:06+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -87,13 +90,8 @@ stralloc        line = { 0 };
 int             flagdoit = 1;
 int             flagacted;
 int             flagdirect;
-char           *ufline;
-char           *rpline;
-char           *dtline;
-char           *sender;
-char           *user;
+const char     *ufline, *rpline, *dtline, *sender, *user, *host;
 int             userlen;
-char           *host;
 int             hostlen;
 char            messbuf[1024];
 substdio        ssmess;
@@ -110,7 +108,7 @@ token822_alloc  tokaddr = { 0 };
 stralloc        address = { 0 };
 struct qmail    qq;
 unsigned long   qp;
-char           *qqx;
+const char     *qqx;
 char            strnum[FMT_ULONG];
 char            qqbuf[BUFSIZE_OUT];
 substdio        ssqq = SUBSTDIO_FDBUF(mywrite, -1, qqbuf, sizeof qqbuf);
@@ -160,8 +158,7 @@ blindwrite(fd, buf, len)
 }
 
 void
-run(cmd)
-	char           *cmd;
+run(char *cmd)
 {
 	int             child;
 	int             pi[2];
@@ -183,8 +180,8 @@ run(cmd)
 		close(pi[1]);
 		if (fd_move(0, pi[0]) == -1)
 			strerr_die2sys(111, FATAL, "unable to set fd: ");
-		args[0] = "/bin/sh";
-		args[1] = "-c";
+		args[0] = (char *) "/bin/sh";
+		args[1] = (char *) "-c";
 		args[2] = cmd;
 		args[3] = 0;
 		sig_pipedefault();
@@ -525,7 +522,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	static char    *x = "$Id: dot-forward.c,v 1.17 2024-01-23 01:24:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dot-forward.c,v 1.18 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: tcprulescheck.c,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2021-08-30 12:47:59+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -67,16 +70,14 @@ main(int argc, char **argv)
 	char           *fnrules;
 	int             fd;
 	char           *ip;
-	char           *info;
-	char           *host;
+	const char     *info, *host;
 
 	fnrules = argv[1];
 	if (!fnrules)
 		strerr_die1x(100, "tcprulescheck: usage: tcprulescheck rules.cdb");
 
-	ip = env_get("TCPREMOTEIP");
-	if (!ip)
-		ip = "0.0.0.0";
+	if (!(ip = env_get("TCPREMOTEIP")))
+		ip = (char *) "0.0.0.0";
 	info = env_get("TCPREMOTEINFO");
 	host = env_get("TCPREMOTEHOST");
 

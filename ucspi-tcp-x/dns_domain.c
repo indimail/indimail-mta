@@ -1,5 +1,8 @@
 /*
  * $Log: dns_domain.c,v $
+ * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2020-08-03 17:22:06+05:30  Cprogrammer
  * use qmail library
  *
@@ -17,9 +20,9 @@
 #include "dns.h"
 
 unsigned int
-dns_domain_length(char *dn)
+dns_domain_length(const char *dn)
 {
-	char           *x;
+	const char     *x;
 	unsigned char   c;
 
 	x = dn;
@@ -39,7 +42,7 @@ dns_domain_free(char **out)
 }
 
 int
-dns_domain_copy(char **out, char *in)
+dns_domain_copy(char **out, const char *in)
 {
 	unsigned int    len;
 	char           *x;
@@ -56,7 +59,7 @@ dns_domain_copy(char **out, char *in)
 }
 
 int
-dns_domain_equal(char *dn1, char *dn2)
+dns_domain_equal(const char *dn1, const char *dn2)
 {
 	unsigned int    len;
 
@@ -69,13 +72,12 @@ dns_domain_equal(char *dn1, char *dn2)
 }
 
 int
-dns_domain_suffix(char *big, char *little)
+dns_domain_suffix(const char *big, const char *little)
 {
 	unsigned char   c;
 
-	for (;;)
-	{
-		if (dns_domain_equal(big,little))
+	for (;;) {
+		if (dns_domain_equal(big, little))
 			return 1;
 		if (!(c = *big++))
 			return 0;
@@ -84,9 +86,9 @@ dns_domain_suffix(char *big, char *little)
 }
 
 unsigned int
-dns_domain_suffixpos(char *big, char *little)
+dns_domain_suffixpos(const char *big, const char *little)
 {
-	char           *orig = big;
+	const char     *orig = big;
 	unsigned char   c;
 
 	for (;;)

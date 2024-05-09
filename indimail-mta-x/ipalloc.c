@@ -1,5 +1,8 @@
 /*
  * $Log: ipalloc.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2020-11-22 23:11:05+05:30  Cprogrammer
  * removed supression of ANSI C proto
  *
@@ -36,7 +39,7 @@ GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, 10, ipalloc_readyplus, ipall
 void
 getversion_ipalloc_c()
 {
-	static char    *x = "$Id: ipalloc.c,v 1.9 2020-11-22 23:11:05+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ipalloc.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

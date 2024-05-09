@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.h,v $
+ * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2021-07-03 14:04:26+05:30  Cprogrammer
  * use Lmid_t data type for id instead of unsigned long
  *
@@ -16,6 +19,6 @@
 #define _GNU_SOURCE
 #include <dlfcn.h>
 
-int             dlnamespace(char *, char **, Lmid_t *);
+int             dlnamespace(const char *, char **, Lmid_t *);
 
 #endif

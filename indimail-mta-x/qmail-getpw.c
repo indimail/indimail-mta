@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-getpw.c,v $
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.8  2021-07-05 21:24:03+05:30  Cprogrammer
  * use qgetpw interface from libqmail if USE_QPWGR is set
  *
@@ -35,7 +38,8 @@
 
 #define GETPW_USERLEN 32
 
-static char    *local, *dash, *extension;
+typedef const char c_char;
+static c_char  *local, *dash, *extension;
 static int      use_pwgr;
 static struct passwd  *pw;
 
@@ -116,7 +120,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_getpw_c()
 {
-	static char    *x = "$Id: qmail-getpw.c,v 1.8 2021-07-05 21:24:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-getpw.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -156,6 +156,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: qmail-tcpto.c,v $
+ * Revision 1.28  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.27  2021-06-28 17:07:25+05:30  Cprogrammer
  * use process_queue to process all queues
  *
@@ -235,7 +238,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpto_c()
 {
-	static char    *x = "$Id: qmail-tcpto.c,v 1.27 2021-06-28 17:07:25+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-tcpto.c,v 1.28 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

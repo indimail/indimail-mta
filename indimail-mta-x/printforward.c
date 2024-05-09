@@ -1,5 +1,8 @@
 /*
  * $Log: printforward.c,v $
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -47,21 +50,21 @@ getch(char *ch)
 }
 
 void
-putch(char *ch)
+putch(const char *ch)
 {
 	if (substdio_put(subfdoutsmall, ch, 1) == -1)
 		strerr_die2x(111, FATAL, "unable to write output: ");
 }
 
 void
-print(char *buf)
+print(const char *buf)
 {
 	while (*buf)
 		putch(buf++);
 }
 
 void
-printsafe(char *buf, int len)
+printsafe(const char *buf, int len)
 {
 	char            ch;
 
@@ -175,7 +178,7 @@ main()
 void
 getversion_printforward_c()
 {
-	static char    *x = "$Id: printforward.c,v 1.4 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: printforward.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: starttls.c,v 1.18 2024-01-23 01:23:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: starttls.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -55,7 +55,7 @@ GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
 static int      smtpfd;
 static const char *ssl_err_str = NULL;
 static struct ip_mx partner;
-static char    *partner_fqdn = NULL;
+static const char *partner_fqdn = NULL;
 static SSL     *ssl;
 static stralloc rhost = { 0 }; /*- host ip to which qmail-remote ultimately connects */
 static stralloc smtptext = { 0 };
@@ -88,7 +88,7 @@ ssl_exit(int status)
 }
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -117,7 +117,7 @@ die(int e)
 }
 
 void
-logerr(char *str)
+logerr(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -129,7 +129,7 @@ logerr(char *str)
 }
 
 void
-logerrf(char *str)
+logerrf(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -286,7 +286,7 @@ outsmtptext()
  */
 no_return void
 #ifdef  HAVE_STDARG_H
-quit(int code, int e, char *prepend, ...)
+quit(int code, int e, const char *prepend, ...)
 #else
 #include <varargs.h>
 quit(va_alist)
@@ -294,10 +294,10 @@ va_dcl
 #endif
 {
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
 	int             code, e;
-	char           *prepend;
+	const char     *prepend;
 #endif
 
 #ifdef HAVE_STDARG_H
@@ -306,7 +306,7 @@ va_dcl
 	va_start(ap);
 	code = va_arg(ap, int);
 	e = va_arg(ap, int);
-	prepend = va_arg(ap, char *);
+	prepend = va_arg(ap, const char *);
 #endif
 	substdio_putflush(&smtpto, "QUIT\r\n", 6);
 	if (verbose == 2)
@@ -315,7 +315,7 @@ va_dcl
 	outhost();
 
 	while (1) {
-		str = va_arg(ap, char *);
+		str = va_arg(ap, const char *);
 		if (!str)
 			break;
 		logerr(str);
@@ -327,7 +327,7 @@ va_dcl
 }
 
 no_return void
-tls_quit(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *peer_sa)
+tls_quit(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *peer_sa)
 {
 	char            ch;
 	int             i, state;
@@ -493,7 +493,7 @@ temp_oserr()
 
 stralloc        sa = { 0 };
 int
-get_tlsa_rr(char *domain, int mxhost, int port)
+get_tlsa_rr(const char *domain, int mxhost, int port)
 {
 	int             j;
 	unsigned long   r;
@@ -633,7 +633,7 @@ ehlo()
 }
 
 int
-do_dane_validation(char *host, int port)
+do_dane_validation(const char *host, int port)
 {
 	static ipalloc  ip = { 0 };
     char           *err_str = NULL, *servercert = NULL;
@@ -929,13 +929,16 @@ unsigned long smtpcode() { return(550);}
 void
 getversion_starttls_c()
 {
-	static char    *x = "$Id: starttls.c,v 1.18 2024-01-23 01:23:41+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: starttls.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: starttls.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2024-01-23 01:23:41+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *

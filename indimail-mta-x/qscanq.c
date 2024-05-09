@@ -1,5 +1,5 @@
 /*
- * $Id: qscanq.c,v 1.13 2024-02-12 19:51:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qscanq.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -163,13 +163,16 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	static char    *x = "$Id: qscanq.c,v 1.13 2024-02-12 19:51:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscanq.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2024-02-12 19:51:30+05:30  Cprogrammer
  * rearranged header files and moved RCS log to bottom
  *

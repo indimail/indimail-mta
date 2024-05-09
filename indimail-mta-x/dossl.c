@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.5 2023-08-28 22:24:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -31,7 +31,6 @@ extern unsigned long smtpcode();
 static SSL_CTX *ctx;
 static stralloc saciphers, tlsFilename, clientcert, certdir_s;
 
-extern char    *certdir;
 extern int      timeoutconn;
 extern int      timeoutdata;
 extern substdio smtpto;
@@ -46,7 +45,7 @@ verify_cb(int preverify_ok, X509_STORE_CTX *ctx_dummy)
 }
 
 int
-match_partner(char *s, int len, char *fqdn)
+match_partner(char *s, int len, const char *fqdn)
 {
 	if (!case_diffb(fqdn, len, (char *) s) && !fqdn[len])
 		return 1;
@@ -60,8 +59,8 @@ match_partner(char *s, int len, char *fqdn)
 }
 
 void
-do_pkix(SSL *ssl, char *servercert, char *fqdn,
-		void(*tlsquit)(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *s),
+do_pkix(SSL *ssl, const char *servercert, const char *fqdn,
+		void(*tlsquit)(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *s),
 		void(*mem_err)(),
 		stralloc *stext)
 {
@@ -158,13 +157,13 @@ do_pkix(SSL *ssl, char *servercert, char *fqdn,
  */
 int
 do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
-		char **scert, char *fqdn, char *_host, int hostlen,
-		void(*tlsquit)(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *s),
+		char **scert, const char *fqdn, const char *_host, int hostlen,
+		void(*tlsquit)(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *s),
 		void(*mem_err)(),
 		void(*ctrl_err)(),
 		void(*write_err)(),
 #ifdef HAVE_STDARG_H
-		void(*quit)(int code, int e, char *p, ...),
+		void(*quit)(int code, int e, const char *p, ...),
 #else
 		void(*quit)(),
 #endif
@@ -175,7 +174,7 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 	int             code, i = 0, _needtlsauth = 0, method;
 	static char     ssl_initialized;
 	const char     *ciphers = NULL;
-	char           *t, *servercert = NULL, *certfile;
+	const char     *t, *servercert = NULL, *certfile;
 	static SSL     *myssl;
 	stralloc        ssl_option = { 0 };
 	int             method_fail;
@@ -501,8 +500,8 @@ stralloc        certData = { 0 };
 stralloc        hextmp = { 0 };
 int
 tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
-		int match_type, char *fqdn,
-		void(*tlsquit)(const char *s1, char *s2, char *s3, char *s4, char *s5, stralloc *s),
+		int match_type, const char *fqdn,
+		void(*tlsquit)(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *s),
 		void(*mem_err)(),
 		stralloc *stext,
 		void(*out)(),
@@ -731,13 +730,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	static char    *x = "$Id: dossl.c,v 1.5 2023-08-28 22:24:25+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dossl.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-08-28 22:24:25+05:30  Cprogrammer
  * return 2 for tls connection failure
  *

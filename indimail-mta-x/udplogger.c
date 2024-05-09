@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-01-04 00:15:14+05:30  Cprogrammer
  * removed __USE_GNU
  *
@@ -92,7 +95,7 @@ die_write()
 }
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -110,7 +113,7 @@ flush()
 }
 
 void
-logerr(char *str)
+logerr(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -120,7 +123,7 @@ logerr(char *str)
 }
 
 void
-logerrf(char *str)
+logerrf(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -164,7 +167,7 @@ main(int argc, char **argv)
 	char            strnum[FMT_ULONG];
 	unsigned long   timeout;
 	char           *ipaddr = 0;
-	char           *usage = "usage: udplogger [-t timeout] [-p port] ipaddr:port";
+	const char     *usage = "usage: udplogger [-t timeout] [-p port] ipaddr:port";
 	char            serv[FMT_ULONG];
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	int             noipv6 = 0;
@@ -396,7 +399,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	static char    *x = "$Id: udplogger.c,v 1.7 2023-01-04 00:15:14+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: udplogger.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

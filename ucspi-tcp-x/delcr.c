@@ -1,5 +1,8 @@
 /*
  * $Log: delcr.c,v $
+ * Revision 1.3  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-11-27 17:32:15+05:30  Cprogrammer
  * removed exit.h
  *
@@ -66,7 +69,7 @@ main()
 void
 getversion_delcr_c()
 {
-	static char    *x = "$Id: delcr.c,v 1.2 2020-11-27 17:32:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: delcr.c,v 1.3 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

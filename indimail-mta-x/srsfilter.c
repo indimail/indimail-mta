@@ -1,5 +1,8 @@
 /*
  * $Log: srsfilter.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-03-08 20:06:55+05:30  Cprogrammer
  * discard double, triple bounces
  *
@@ -141,7 +144,8 @@ do_control()
 int
 main(int argc, char **argv)
 {
-	char           *ext2, *host, *sender, *qqx;
+	char           *ext2, *host, *sender;
+	const char     *qqx;
 	char            inbuf[SUBSTDIO_INSIZE], outbuf[1], num[FMT_ULONG];
 	substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
 	substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
@@ -221,7 +225,7 @@ main(argc, argv)
 void
 getversion_srsfilter_c()
 {
-	static char    *x = "$Id: srsfilter.c,v 1.5 2023-03-08 20:06:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: srsfilter.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

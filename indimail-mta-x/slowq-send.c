@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.38 2024-02-08 20:48:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.39 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -68,6 +68,7 @@
 #endif
 #define CHUNK_SIZE      1
 
+typedef const char c_char;
 static int      lifetime = 604800;
 static int      bouncemaxbytes = 50000;
 #ifdef BOUNCELIFETIME
@@ -98,23 +99,23 @@ static char     strnum1[FMT_ULONG];
 static char     strnum2[FMT_ULONG];
 
 #define CHANNELS 2
-static char    *chanaddr[CHANNELS] = { "local/", "remote/" };
-static char    *chanstatusmsg[CHANNELS] = { " local ", " remote " };
-static char    *chanjobsheldmsg[CHANNELS] = { /* NJL 1998/05/03 */
+static c_char  *chanaddr[CHANNELS] = { "local/", "remote/" };
+static c_char  *chanstatusmsg[CHANNELS] = { " local ", " remote " };
+static c_char  *chanjobsheldmsg[CHANNELS] = { /* NJL 1998/05/03 */
 	"local deliveries temporarily held\n",
 	"remote deliveries temporarily held\n"
 };
-static char    *chanjobsunheldmsg[CHANNELS] = {	/* NJL 1998/05/03 */
+static c_char  *chanjobsunheldmsg[CHANNELS] = {	/* NJL 1998/05/03 */
 	"local deliveries resumed\n",
 	"remote deliveries resumed\n"
 };
-static char    *tochan[CHANNELS] = { " to local ", " to remote " };
+static c_char  *tochan[CHANNELS] = { " to local ", " to remote " };
 static int      chanfdout[CHANNELS] = { 1, 3 };
 static int      chanfdin[CHANNELS] = { 2, 4 };
 static int      chanskip[CHANNELS] = { 10, 20 };
 
-char           *queuedesc;
-static char    *argv0 = "slowq-send";
+const char     *queuedesc;
+static char    *argv0 = (char *) "slowq-send";
 
 static int      flagexitsend; /*- slowq-send: exit when set */
 static int      flagexittodo; /*- todo-processor: exit when set */
@@ -155,7 +156,7 @@ static void     sigusr2();
 
 void
 #ifdef  HAVE_STDARG_H
-todo_log(char *s1, ...)
+todo_log(const char *s1, ...)
 #else
 todo_log(va_alist)
 va_dcl
@@ -163,16 +164,16 @@ va_dcl
 {
 	int             pos;
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
-	char           *s1;
+	const char     *s1;
 #endif
 
 #ifdef HAVE_STDARG_H
 	va_start(ap, s1);
 #else
 	va_start(ap);
-	s1 = va_arg(ap, char *);
+	s1 = va_arg(ap, const char *);
 #endif
 
 	pos = comm_buf_todo.len;
@@ -181,7 +182,7 @@ va_dcl
 		goto fail;
 
 	while (1) {
-		str = va_arg(ap, char *);
+		str = va_arg(ap, const char *);
 		if (!str)
 			break;
 		if (!stralloc_cats(&comm_buf_todo, str))
@@ -561,7 +562,7 @@ void
 comm_write_todo(unsigned long id, int local, int remote)
 {
 	int             pos;
-	char           *s;
+	const char     *s;
 
 	if (flagdetached)
 		return;
@@ -1175,11 +1176,11 @@ job_close(int j)
 /*- this file is too long ------------------------------------------- BOUNCES */
 
 /*- strip the virtual domain which is prepended to addresses e.g. xxx.com-user01@xxx.com */
-static char    *
-stripvdomprepend(char *recip)
+static const char *
+stripvdomprepend(const char *recip)
 {
 	unsigned int    i, domainlen;
-	char           *domain, *prepend;
+	const char     *domain, *prepend;
 
 	i = str_rchr(recip, '@');
 	if (!recip[i])
@@ -1260,8 +1261,9 @@ addbounce(unsigned long id, char *recip, char *report)
 }
 
 static int
-bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_report, char *origrecip, char *sender,
-				 char *recipient)
+bounce_processor(struct qmail *qq, const char *messfn, const char *bouncefn,
+		const char *bounce_report, const char *origrecip, const char *sender,
+		const char *recipient)
 {
 	char           *prog, *(args[8]);
 	int             i, child, wstat;
@@ -1277,12 +1279,12 @@ bounce_processor(struct qmail *qq, char *messfn, char *bouncefn, char *bounce_re
 		return (111);
 	case 0:
 		args[0] = prog;
-		args[1] = messfn; /*- message filename */
-		args[2] = bouncefn;	/*- bounce message filename */
-		args[3] = bounce_report; /*- bounce report */
-		args[4] = sender; /*- bounce sender */
-		args[5] = origrecip; /*- original recipient */
-		args[6] = recipient; /*- original sender */
+		args[1] = (char *) messfn; /*- message filename */
+		args[2] = (char *) bouncefn;	/*- bounce message filename */
+		args[3] = (char *) bounce_report; /*- bounce report */
+		args[4] = (char *) sender; /*- bounce sender */
+		args[5] = (char *) origrecip; /*- original recipient */
+		args[6] = (char *) recipient; /*- original sender */
 		args[7] = 0;
 		execv(*args, args);
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": Unable to run: ", prog, ": ",
@@ -1315,7 +1317,8 @@ injectbounce(unsigned long id)
 	datetime_sec    birth;
 	substdio        ssread;
 	char            buf[128], inbuf[128];
-	char           *bouncesender, *bouncerecip = "", *brep = "?", *p;
+	const char     *bouncesender, *bouncerecip = "";
+	char           *brep = (char *) "?", *p;
 	int             r = -1, fd, ret;
 	unsigned long   qp;
 #ifdef MIME
@@ -2238,7 +2241,7 @@ static int
 rewrite(char *recip)
 {
 	unsigned int    i, j, at;
-	char           *x;
+	const char     *x;
 	static stralloc addr = { 0 };
 
 	if (!stralloc_copys(&rwline, "T")
@@ -2921,8 +2924,7 @@ todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 void
 log_stat_todo(unsigned long id, size_t bytes)
 {
-	char           *ptr;
-	char           *mode;
+	const char     *ptr, *mode;
 
 	strnum1[fmt_ulong(strnum1 + 1, id) + 1] = 0;
 	strnum2[fmt_ulong(strnum2 + 1, bytes) + 1] = 0;
@@ -3810,7 +3812,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	static char    *x = "$Id: slowq-send.c,v 1.38 2024-02-08 20:48:20+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: slowq-send.c,v 1.39 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3820,6 +3822,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.39  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.38  2024-02-08 20:48:20+05:30  Cprogrammer
  * fixed multiplication result converted to larger type (codeql)
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: qregex.h,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2023-09-05 20:59:42+05:30  Cprogrammer
  * moved matchregex error codes to libqmail/base/matchregex.h
  *
@@ -51,7 +54,7 @@
 #define  AM_MYSQL_ERR  (MAX_AM_ERR -1)
 #endif
 
-int             address_match(char *, stralloc *, stralloc *, struct constmap *, stralloc *, char **);
+int             address_match(const char *, stralloc *, stralloc *, struct constmap *, stralloc *, const char *err[]);
 void            setdotChar(char);
-int             cdbmatch(char *, char *, int, struct constmap *, char **);
+int             cdbmatch(const char *, const char *, int, struct constmap *, const char *err[]);
 #endif

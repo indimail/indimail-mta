@@ -1,5 +1,8 @@
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.13  2023-07-13 02:43:28+05:30  Cprogrammer
  * replaced out() with subprintf()
  *
@@ -116,14 +119,14 @@ flush()
 }
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(subfderr, s) == -1)
 		_exit(111);
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(subfderr, s) == -1)
 		_exit(111);
@@ -134,7 +137,7 @@ logerrf(char *s)
 static int      debug;
 
 no_return void
-my_error(char *s1, char *s2, int exit_val)
+my_error(const char *s1, const char *s2, int exit_val)
 {
 	logerr(s1);
 	if (s2) {
@@ -156,12 +159,13 @@ static stralloc homedir = {0};
 #endif
 
 extern int      snprintf(char *, size_t, const char *, /*args*/ ...);
-int             ldap_lookup(char *, char *, char **, uid_t *, gid_t *);
+int             ldap_lookup(const char *, const char *, const char *error[], uid_t *, gid_t *);
 
 int
 main(int argc, char *argv[])
 {
-	char           *login, *password, *ptr, *error = 0;
+	char           *login, *password, *ptr;
+	const char     *error = NULL;
 	int             uplen, i, r, native_checkpassword;
 	uid_t           uid;
 	gid_t           gid;
@@ -248,14 +252,14 @@ main(int argc, char *argv[])
 }
 
 int
-ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *groupId)
+ldap_lookup(const char *login, const char *password, const char *error[], uid_t *userId, gid_t *groupId)
 {
 	char           *attrs[] = { NULL };
-	char           *host, *dn, *port, *ptr;
-	char           *ldap_host, *ldap_bind_dn, *ldap_bind_passwd = 0, *ldap_filter,
+	const char     *host, *dn, *port, *ptr;
+	const char     *ldap_host, *ldap_bind_dn, *ldap_bind_passwd = 0, *ldap_filter,
 				   *ldap_base, *ldap_scope;
 #ifdef EXTENDED_ATTRIBUTES
-	char           *ldap_field;
+	const char     *ldap_field;
 	char          **values;
 #endif
 	static stralloc filter = {0}, errbuf = {0};
@@ -490,7 +494,7 @@ ldap_lookup(char *login, char *password, char **error, uid_t *userId, gid_t *gro
 			*error = errbuf.s;
 		return -1;
 	}
-	ldap_memfree(dn);
+	ldap_memfree((char *) dn);
 #ifdef EXTENDED_ATTRIBUTES
 	for (i = 0; environ[i]; ++i) {
 		if (str_diffn(environ[i], "LDAP_FIELD_", 11))
@@ -564,7 +568,7 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	static char    *x = "$Id: ldap-checkpwd.c,v 1.13 2023-07-13 02:43:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ldap-checkpwd.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

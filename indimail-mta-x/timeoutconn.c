@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.17  2022-11-24 08:49:54+05:30  Cprogrammer
  * converted function declaration to ansic
  *
@@ -74,7 +77,7 @@ socket_bind4(int s, char *bound, ip_addr *ipr)
 	int             iplen;
 	stralloc        routes = { 0 };
 	struct constmap bindroutes;
-	char           *bindroute = (char *) 0;
+	const char     *bindroute = (char *) 0;
 
 	*bound = 0;
 	/*- Right, do we actually have any bind routes?  */
@@ -122,7 +125,7 @@ socket_bind6(int s, char *bound, ip6_addr *ipr)
 	int             iplen;
 	stralloc        routes = { 0 };
 	struct constmap bindroutes;
-	char           *bindroute = (char *) 0;
+	const char     *bindroute = (char *) 0;
 
 	*bound = 0;
 	/*- Right, do we actually have any bind routes?  */
@@ -379,7 +382,7 @@ timeoutconn4(int s, ip_addr *ipr, union v46addr *ipl, unsigned int port, int tim
 void
 getversion_timeoutconn_c()
 {
-	static char    *x = "$Id: timeoutconn.c,v 1.17 2022-11-24 08:49:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: timeoutconn.c,v 1.18 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

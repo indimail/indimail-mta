@@ -1,5 +1,8 @@
 /*
  * $Log: dns_ip.c,v $
+ * Revision 1.8  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2020-08-03 17:22:20+05:30  Cprogrammer
  * use qmail library
  *
@@ -31,7 +34,7 @@
 #include "ip6.h"
 
 static int
-dns_ip6_packet_add(stralloc *out, char *buf, unsigned int len)
+dns_ip6_packet_add(stralloc *out, const char *buf, unsigned int len)
 {
 	unsigned int    pos;
 	char            header[16];
@@ -72,7 +75,7 @@ dns_ip6_packet_add(stralloc *out, char *buf, unsigned int len)
 }
 
 int
-dns_ip6_packet(stralloc *out, char *buf, unsigned int len)
+dns_ip6_packet(stralloc *out, const char *buf, unsigned int len)
 {
 	if (!stralloc_copys(out, ""))
 		return -1;
@@ -144,7 +147,7 @@ dns_ip6(stralloc *out, stralloc *fqdn)
 }
 #else
 int
-dns_ip4_packet(stralloc * out, char *buf, unsigned int len)
+dns_ip4_packet(stralloc *out, const char *buf, unsigned int len)
 {
 	unsigned int    pos;
 	char            header[12];

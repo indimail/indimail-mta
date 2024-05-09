@@ -1,5 +1,5 @@
 /*
- * $Id: multilog.c,v 1.9 2024-02-18 08:42:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -37,14 +37,14 @@ mode_t          old_umask;
 static int      f_sync;
 
 void
-pause3(char *s1, char *s2, char *s3)
+pause3(const char *s1, const char *s2, const char *s3)
 {
 	strerr_warn4(WARNING, s1, s2, s3, &strerr_sys);
 	deepsleep(5);
 }
 
 void
-pause5(char *s1, char *s2, char *s3, char *s4, char *s5)
+pause5(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5)
 {
 	strerr_warn6(WARNING, s1, s2, s3, s4, s5, &strerr_sys);
 	deepsleep(5);
@@ -149,7 +149,7 @@ filesfit(struct cyclog *d)
 }
 
 void
-finish(struct cyclog *d, char *file, char *code)
+finish(struct cyclog *d, const char *file, const char *code)
 {
 	struct stat     st;
 #ifdef HASUNLINKAT
@@ -227,8 +227,8 @@ startprocessor(struct cyclog *d)
 		return;
 	if (fd_move(5, fd) == -1)
 		return;
-	args[0] = "sh";
-	args[1] = "-c";
+	args[0] = (char *) "sh";
+	args[1] = (char *) "-c";
 	args[2] = d->processor;
 	args[3] = 0;
 	execve("/bin/sh", args, environ);
@@ -689,13 +689,16 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	static char    *x = "$Id: multilog.c,v 1.9 2024-02-18 08:42:01+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: multilog.c,v $
+ * Revision 1.10  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2024-02-18 08:42:01+05:30  Cprogrammer
  * use unlinkat() if available instead of unlink()
  *

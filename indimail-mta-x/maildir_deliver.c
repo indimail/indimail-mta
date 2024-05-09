@@ -1,5 +1,8 @@
 /*
  * $Log: maildir_deliver.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2022-09-18 23:01:36+05:30  Cprogrammer
  * added comments
  *
@@ -86,7 +89,7 @@ sigalrm()
  */
 
 int
-maildir_deliver(char *dir, stralloc *rpline, stralloc *dtline, char *qqeh)
+maildir_deliver(const char *dir, stralloc *rpline, stralloc *dtline, const char *qqeh)
 {
 	char            strnum[FMT_ULONG], host_a[64];
 	char            inbuf[1024], outbuf[1024];
@@ -248,7 +251,7 @@ fail:
 void
 getversion_maildir_deliver_c()
 {
-	static char    *x = "$Id: maildir_deliver.c,v 1.5 2022-09-18 23:01:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildir_deliver.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

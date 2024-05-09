@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.h,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2024-01-23 01:23:45+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -18,17 +21,18 @@
 #include "buffer_defs.h"
 
 #ifndef	lint
-static char     sccsidstarttlsh[] = "$Id: starttls.h,v 1.3 2024-01-23 01:23:45+05:30 Cprogrammer Exp mbhangui $";
+static const char sccsidstarttlsh[] = "$Id: starttls.h,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 #endif
 
-void            die_control(char *, char *);
-void            out(char *);
+void            die_control(const char *, const char *);
+void            out(const char *);
 void            die_nomem();
-void            logerr(char *);
-void            logerrf(char *);
+void            logerr(const char *);
+void            logerrf(const char *);
 void            flush();
-int             do_dane_validation(char *, int);
-int             get_dane_records(char *);
+int             do_dane_validation(const char *, int);
+int             get_dane_records(const char *);
+int             get_tlsa_rr(const char *, int, int);
 
 extern stralloc sa;
 extern stralloc save;

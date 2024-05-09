@@ -1,7 +1,10 @@
 #!/bin/sh
-# $Log: $
+# $Log: create_rpm,v $
+# Revision 1.1  2024-05-09 22:58:41+05:30  Cprogrammer
+# Initial revision
 #
-# $Id: $
+#
+# $Id: create_rpm,v 1.1 2024-05-09 22:58:41+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 ucspitcp_version=$(cat ../ucspi-tcp-x/conf-version)
@@ -151,28 +154,25 @@ fi
 dist=`uname -r |cut -d . -f4`
 if [ -z "$release" ] ; then
 	if [ -f /usr/bin/tcpserver ] ; then
-		idist=$(rpm -qf /usr/bin/tcpserver|cut -d- -f4|cut -d. -f3)
-		if [ " $dist" = " $idist" ] ; then
-			iversion=$(rpm -qf /usr/bin/tcpserver|cut -d- -f3)
-			if [ "$iversion" = "$version" ] ; then
-				release=$(rpm -qf /usr/bin/tcpserver | cut -d- -f4 | cut -d. -f2)
-				release=$(expr $release + 1)
-			else
-				release=1
-			fi
+		uversion=$(rpm -qf /usr/bin/tcpserver|cut -d- -f3)
+		if [ "$uversion" = "$version" ] ; then
+			t1=$(rpm -qf /usr/bin/tcpserver | cut -d- -f4 | cut -d. -f1)
+			t2=$(rpm -qf /usr/bin/tcpserver | cut -d- -f4 | cut -d. -f2)
+			t2=$(expr $t2 + 1)
+			release="$t1.$t2"
 		else
-			release=1
+			release=0.1
 		fi
 	else
-		release=1
+		release=0.1
 	fi
 fi
-echo -n "Build RPM for ucspi-tcp-"$version"-1."$release" (Y/N) - "
+echo -n "Build RPM for ucspi-tcp-"$version"-"$release" (Y/N) - "
 read key
 if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	tmprel=`cat ucspi-tcp-x/conf-release 2>/dev/null`
-	if [ ! " $tmprel" = " 1.$release" ] ; then
-		echo 1.$release > ucspi-tcp-x/conf-release
+	if [ ! " $tmprel" = " $release" ] ; then
+		echo $release > ucspi-tcp-x/conf-release
 		cd ucspi-tcp-x
 		make SYSTEM=$SYSTEM ucspi-tcp.spec
 		cp ucspi-tcp.spec /tmp
@@ -192,17 +192,17 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 	fi
 	if [ $? -eq 0 ] ; then
 		/bin/rm -f /tmp/ucspi-tcp.spec
-		rpm --addsign $rpmbuild/RPMS/$build_arch/ucspi-tcp-"$version"-"1.$release".$dist.$build_arch.rpm
-		rpm --addsign $rpmbuild/SRPMS/ucspi-tcp-"$version"-"1.$release".$dist.src.rpm
-		echo -n "RPM lint for ucspi-tcp-"$version"-1."$release" (Y/N) - "
+		rpm --addsign $rpmbuild/RPMS/$build_arch/ucspi-tcp-"$version"-"$release".$dist.$build_arch.rpm
+		rpm --addsign $rpmbuild/SRPMS/ucspi-tcp-"$version"-"$release".$dist.src.rpm
+		echo -n "RPM lint for ucspi-tcp-"$version"-"$release" (Y/N) - "
 		read key
 		if [ " $key" = " Y" -o " $key" = " y" ] ; then
 			(
-			echo ucspi-tcp-"$version"-"1.$release".$dist.rpm
-			rpmlint $rpmbuild/RPMS/$build_arch/ucspi-tcp-"$version"-"1.$release".$dist.$build_arch.rpm
+			echo ucspi-tcp-"$version"-"$release".$dist.rpm
+			rpmlint $rpmbuild/RPMS/$build_arch/ucspi-tcp-"$version"-"$release".$dist.$build_arch.rpm
 			echo ------------------------
-			echo ucspi-tcp-"$version"-"1.$release".$dist.src.rpm
-			rpmlint $rpmbuild/SRPMS/ucspi-tcp-"$version"-"1.$release".$dist.src.rpm
+			echo ucspi-tcp-"$version"-"$release".$dist.src.rpm
+			rpmlint $rpmbuild/SRPMS/ucspi-tcp-"$version"-"$release".$dist.src.rpm
 			echo ------------------------
 			) 2>&1 | less
 		fi

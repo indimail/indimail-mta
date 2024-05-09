@@ -1,5 +1,8 @@
 /*
  * $Log: delivery_rate.c,v $
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.9  2023-01-15 12:20:12+05:30  Cprogrammer
  * use slog() with varargs for logging errors
  *
@@ -56,7 +59,7 @@ extern char    *queuedesc;
  */
 int
 delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
-		int *do_ratelimit, char *argv0)
+		int *do_ratelimit, const char *argv0)
 {
 	char           *rate_dir, *rate_exp, *domain;
 	int             i, s, at;
@@ -207,7 +210,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	static char    *x = "$Id: delivery_rate.c,v 1.9 2023-01-15 12:20:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: delivery_rate.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

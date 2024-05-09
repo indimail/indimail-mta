@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.34 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -50,10 +50,6 @@
 
 #define FATAL "tcpclient: fatal: "
 
-#ifndef	lint
-static char     sccsid[] = "$Id: tcpclient.c,v 1.33 2023-08-20 15:17:12+05:30 Cprogrammer Exp mbhangui $";
-#endif
-
 extern int      socket_tcpnodelay(int);
 
 no_return void
@@ -93,6 +89,7 @@ usage(void)
 	 " host port [program]");
 }
 
+typedef const char c_char;
 static int      verbosity = 1;
 static int      flagdelay = 1;
 static int      flagremoteinfo = 1;
@@ -115,7 +112,7 @@ static char     ipstr[IP4_FMT];
 static uint16   portlocal;
 static uint16   portremote;
 static char    *forcelocal;
-static char    *hostname, *cn_host;
+static c_char  *hostname, *cn_host;
 static stralloc addresses;
 static stralloc moreaddresses;
 static stralloc tmp;
@@ -130,7 +127,7 @@ static char     seed[128];
 static struct stralloc certfile, cafile, crlfile;
 struct stralloc saciphers;
 #endif
-static char    *af_unix;
+static c_char  *af_unix;
 
 no_return void
 sigterm()
@@ -303,7 +300,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 		if (code != 220)
 			strerr_die2x(111, FATAL, "connected but greeting failed");
 		/*- issue STARTTLS command and check response */
-		if (tlswrite(sfd, "STARTTLS\r\n", 10, dtimeout) == -1)
+		if (tlswrite(sfd, (char *) "STARTTLS\r\n", 10, dtimeout) == -1)
 			strerr_die2(111, FATAL, "unable to write to network: ", &strerr_tls);
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2(111, FATAL, "getln: read-smtpd: ", &strerr_tls);
@@ -320,7 +317,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 	case pop3:
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2(111, FATAL, "getln: read-pop3d: ", &strerr_tls);
-		if (tlswrite(sfd, "STLS\r\n", 6, dtimeout) == -1)
+		if (tlswrite(sfd, (char *) "STLS\r\n", 6, dtimeout) == -1)
 			strerr_die2(111, FATAL, "unable to write to network: ", &strerr_tls);
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2(111, FATAL, "getln: read-pop3d: ", &strerr_tls);
@@ -340,7 +337,7 @@ int
 main(int argc, char **argv)
 {
 	unsigned long   u;
-	char           *x;
+	const char     *x;
 	struct stralloc options = {0};
 #ifdef IPV6
 	int             fakev4 = 0;
@@ -349,8 +346,8 @@ main(int argc, char **argv)
 #ifdef TLS
 	SSL_CTX        *ctx = NULL;
 	SSL            *ssl = NULL;
-	char           *certdir, *ciphers = NULL,
-				   *cipherfile = NULL, *tls_method = NULL;
+	const char     *certdir, *cipherfile = NULL, *tls_method = NULL;
+	char           *ciphers = NULL;
 	enum starttls   stls = unknown;
 	int             match_cn = 0, method;
 	struct stat     st;
@@ -823,17 +820,19 @@ do_data:
 	return (0);
 }
 
-#ifndef lint
 void
 getversion_tcpclient_c()
 {
-	if (write(1, sccsid, 0) == -1)
-		;
+	const char    *x = "$Id: tcpclient.c,v 1.34 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+
+	x++;
 }
-#endif
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.34  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.33  2023-08-20 15:17:12+05:30  Cprogrammer
  * use TLS_CIPHER_LIST, TLS_CIPHER_SUITE to set ciphers
  *

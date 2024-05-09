@@ -1,5 +1,8 @@
 /*
  * $Log: iftoccfrom.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2024-01-23 01:24:13+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -101,7 +104,7 @@ main(int argc, char **argv)
 void
 getversion_iftoccfrom_c()
 {
-	static char    *x = "$Id: iftoccfrom.c,v 1.5 2024-01-23 01:24:13+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: iftoccfrom.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

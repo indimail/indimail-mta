@@ -1,5 +1,8 @@
 /*
  * $Log: process_queue.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2022-04-13 16:58:06+05:30  Cprogrammer
  * flush subfdout to fix out of band err messages
  *
@@ -39,10 +42,10 @@
 #endif
 
 void
-process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, int *z)
+process_queue(const char *warn, const char *fatal, int (*func)(), int *w, int *x, int *y, int *z)
 {
 	char           *ptr, *qbase;
-	char           *extra_queue[] = {"nqueue", "slowq", "qmta", 0};
+	const char     *extra_queue[] = {"nqueue", "slowq", "qmta", 0};
 	char            strnum[FMT_ULONG];
 	int             idx, count, qcount, qstart;
 	static stralloc Queuedir = { 0 }, QueueBase = { 0 };
@@ -126,7 +129,7 @@ process_queue(char *warn, char *fatal, int (*func)(), int *w, int *x, int *y, in
 void
 getversion_process_queue_c()
 {
-	static char    *x = "$Id: process_queue.c,v 1.6 2022-04-13 16:58:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: process_queue.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

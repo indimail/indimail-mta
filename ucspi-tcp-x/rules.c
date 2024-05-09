@@ -1,5 +1,8 @@
 /*
  * $Log: rules.c,v $
+ * Revision 1.7  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2020-08-03 17:25:50+05:30  Cprogrammer
  * use qmail library
  *
@@ -62,7 +65,7 @@ dorule(void     (*callback) (char *, unsigned int))
 }
 
 static int
-doit(void       (*callback) (char *, unsigned int), char *ip, char *host, char *info)
+doit(void       (*callback) (char *, unsigned int), char *ip, const char *host, const char *info)
 {
 	int             r, p;
 	int             ipv6 = str_len(ip) - byte_chr(ip, str_len(ip), ':');
@@ -195,7 +198,7 @@ doit(void       (*callback) (char *, unsigned int), char *ip, char *host, char *
 }
 
 int
-rules(void      (*callback) (char *, unsigned int), int fd, char *ip, char *host, char *info)
+rules(void      (*callback) (char *, unsigned int), int fd, char *ip, const char *host, const char *info)
 {
 	int             r;
 	cdb_init(&c, fd);

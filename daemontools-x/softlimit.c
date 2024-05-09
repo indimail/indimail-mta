@@ -1,5 +1,8 @@
 /*
  * $Log: softlimit.c,v $
+ * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.4  2022-02-25 09:51:51+05:30  Cprogrammer
  * added option to set message queue limit
  * use -1 to set resource limit as unlimited
@@ -164,7 +167,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_softlimit_c()
 {
-	static char    *x = "$Id: softlimit.c,v 1.4 2022-02-25 09:51:51+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: softlimit.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

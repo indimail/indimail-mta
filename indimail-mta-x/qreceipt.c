@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.16  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.15  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -169,7 +172,7 @@ rwnotice(token822_alloc *addr)
 void
 finishheader()
 {
-	char           *qqx;
+	const char     *qqx;
 	struct qmail    qqt;
 
 	if (!flagreceipt)
@@ -254,7 +257,7 @@ main(int argc, char **argv)
 void
 getversion_qreceipt_c()
 {
-	static char    *x = "$Id: qreceipt.c,v 1.15 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qreceipt.c,v 1.16 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

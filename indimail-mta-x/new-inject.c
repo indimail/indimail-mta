@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.18  2023-01-03 16:36:02+05:30  Cprogrammer
  * removed auto_sysconfdir.h dependency
  *
@@ -218,7 +221,7 @@ sender_get(stralloc *list)
 }
 
 void
-myput(char *buf, int len)
+myput(const char *buf, int len)
 {
 	if (flagqueue)
 		qmail_put(&qq, buf, len);
@@ -227,13 +230,13 @@ myput(char *buf, int len)
 }
 
 void
-myputs(char *buf)
+myputs(const char *buf)
 {
 	myput(buf, str_len(buf));
 }
 
 void
-putlist(char *name_t, stralloc *list)
+putlist(const char *name_t, stralloc *list)
 {
 	if (!list->len)
 		return;
@@ -417,9 +420,8 @@ finishheader()
 no_return void
 finishmessage()
 {
-	char           *qqx;
-	int             i;
-	int             j;
+	const char     *qqx;
+	int             i, j;
 
 	if (!flagqueue)
 		substdio_flush(subfdoutsmall);
@@ -628,7 +630,7 @@ main(int argc, char **argv)
 void
 getversion_new_inject_c()
 {
-	static char    *x = "$Id: new-inject.c,v 1.18 2023-01-03 16:36:02+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: new-inject.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

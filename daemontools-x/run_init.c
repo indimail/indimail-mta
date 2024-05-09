@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.8  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2023-03-04 13:35:55+05:30  Cprogrammer
  * return -1 for name too long
  *
@@ -41,7 +44,8 @@
 int
 run_init(char *service_dir)
 {
-	char           *run_dir, *p, *s;
+	const char     *run_dir;
+	char           *p, *s;
 	char            buf[256], dirbuf[256];
 	int             i;
 
@@ -141,7 +145,7 @@ run_init(char *service_dir)
 void
 getversion_svrun_c()
 {
-	static char    *x = "$Id: run_init.c,v 1.7 2023-03-04 13:35:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: run_init.c,v 1.8 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

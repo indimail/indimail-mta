@@ -1,5 +1,8 @@
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2023-12-08 13:16:37+05:30  Cprogrammer
  * removed use of my_puts(), put() functions
  *
@@ -45,7 +48,6 @@
 #define INFO "maildirserial: info: "
 
 static char    *prefix;
-static char    *qqx;
 static char   **client;
 static char     messbuf[256];
 static char     buf[1024];
@@ -67,6 +69,7 @@ static stralloc datestr = { 0 };
 static stralloc sender = { 0 };
 static stralloc quoted = { 0 };
 static stralloc filenames = { 0 };
+const char     *qqx;
 static stralloc err = { 0 };
 #ifdef MIME
 static stralloc boundary = { 0 };
@@ -112,7 +115,7 @@ die_qq()
  */
 
 static void
-my_config_readline(config_str *c, char *fname)
+my_config_readline(config_str *c, const char *fname)
 {
 	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
@@ -156,7 +159,7 @@ int
 bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must not contain \n\n */
 {
 	int             match, n;
-	char           *bouncesender, *bouncerecip, *x;
+	const char     *bouncesender, *bouncerecip, *x;
 
 	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
 
@@ -313,7 +316,7 @@ hasprefix(int fd)
 }
 
 int
-usable(char *filename)
+usable(const char *filename)
 {
 	int             i;
 	int             fd;
@@ -388,7 +391,7 @@ scanner()
 /* PARENT */
 
 void
-info(char *result)
+info(const char *result)
 {
 	substdio_puts(subfderr, INFO);
 	substdio_puts(subfderr, fn.s);
@@ -401,7 +404,7 @@ int
 main(int argc, char **argv)
 {
 	int             opt, r, progress, match;
-	char           *dir;
+	const char     *dir;
 	char            status;
 	struct stat     st;
 
@@ -546,13 +549,16 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	static char    *x = "$Id: maildirserial.c,v 1.21 2023-12-08 13:16:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirserial.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.21  2023-12-08 13:16:37+05:30  Cprogrammer
  * removed use of my_puts(), put() functions
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: ip.h,v $
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.10  2015-08-27 00:29:09+05:30  Cprogrammer
  * added ip6_fmt_flat(), ip6_fmt_exp() functions
  *
@@ -77,11 +80,11 @@ union v46addr
 unsigned int    ip6_fmt(char *, ip6_addr *);
 unsigned int    ip6_fmt_exp(char *, ip6_addr *);
 unsigned int    ip6_fmt_flat(char *, ip6_addr *);
-unsigned int    ip6_scan(char *, ip6_addr *);
-unsigned int    ip6_scanbracket(char *, ip6_addr *);
+unsigned int    ip6_scan(const char *, ip6_addr *);
+unsigned int    ip6_scanbracket(const char *, ip6_addr *);
 #endif
 unsigned int    ip4_fmt(char *, ip_addr *);
-unsigned int    ip4_scan(char *, ip_addr *);
-unsigned int    ip4_scanbracket(char *, ip_addr *);
+unsigned int    ip4_scan(const char *, ip_addr *);
+unsigned int    ip4_scanbracket(const char *, ip_addr *);
 
 #endif

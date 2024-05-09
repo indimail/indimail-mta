@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_scan.c,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2020-08-03 17:24:44+05:30  Cprogrammer
  * use qmail library
  *
@@ -30,7 +33,7 @@
  */
 
 unsigned int
-rblip6_scan(char *s, char ip[16])
+rblip6_scan(const char *s, char ip[16])
 {
 	unsigned int    i;
 	unsigned int    len = 0;
@@ -40,7 +43,7 @@ rblip6_scan(char *s, char ip[16])
 	int             prefixlen = 0;
 	int             suffixlen = 0;
 
-	if ((i = rblip4_scan((char *) s, ip + 12))) {
+	if ((i = rblip4_scan(s, ip + 12))) {
 		unsigned char *c = V4mappedprefix;
 		if (byte_equal((char *) ip + 12, 4, (char *) V6any))
 			c = V6any;
@@ -63,7 +66,7 @@ rblip6_scan(char *s, char ip[16])
 		if (!(i = scan_xlong((char *) s, &u)))
 			return 0;
 		if (prefixlen == 12 && s[i] == '.') { /*- the last 4 bytes may be written as IPv4 address */
-			if ((i = rblip4_scan((char *) s, ip + 12)))
+			if ((i = rblip4_scan(s, ip + 12)))
 				return i + len;
 			else
 				return 0;
@@ -90,7 +93,7 @@ rblip6_scan(char *s, char ip[16])
 			break;
 		}
 		if (suffixlen + prefixlen <= 12 && s[i] == '.') {
-			int             j = rblip4_scan((char *) s, suffix + suffixlen);
+			int             j = rblip4_scan(s, suffix + suffixlen);
 			if (j) {
 				suffixlen += 4;
 				len += j;

@@ -1,5 +1,5 @@
 /*
- * $Id: forward.c,v 1.16 2023-09-19 22:29:56+05:30 Cprogrammer Exp mbhangui $
+ * $Id: forward.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <envdir.h>
@@ -44,7 +44,8 @@ static stralloc forwarded_for, forwarded_to;
 int
 main(int argc, char **argv)
 {
-	char           *sender, *dtline, *qqeh, *qqx;
+	char           *sender, *dtline, *qqeh;
+	const char     *qqx;
 	char          **a;
 	int             x;
 
@@ -113,13 +114,16 @@ main(int argc, char **argv)
 void
 getversion_forward_c()
 {
-	static char    *x = "$Id: forward.c,v 1.16 2023-09-19 22:29:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: forward.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: forward.c,v $
+ * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.16  2023-09-19 22:29:56+05:30  Cprogrammer
  * added X-Forwarded-To, X-Forwarded-For headers
  * include hassrs.h to enable SRS

@@ -1,5 +1,8 @@
 /*
  * $Log: splogger.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2020-11-24 13:48:27+05:30  Cprogrammer
  * removed exit.h
  *
@@ -105,7 +108,7 @@ main(argc, argv)
 void
 getversion_splogger_c()
 {
-	static char    *x = "$Id: splogger.c,v 1.5 2020-11-24 13:48:27+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: splogger.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

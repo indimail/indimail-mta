@@ -1,5 +1,5 @@
 /*
- * $Id: getqueue.c,v 1.5 2023-10-27 16:22:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: getqueue.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -21,7 +21,7 @@
 
 #ifdef HASLIBRT
 int
-queueNo_from_shm(char *ident)
+queueNo_from_shm(const char *ident)
 {
 	int             shm, i, j, x, y, min, n = 1, qcount;
 	int             q[5];
@@ -127,7 +127,7 @@ queueNo_from_env()
 void
 getversion_getqueue_c()
 {
-	static char    *x = "$Id: getqueue.c,v 1.5 2023-10-27 16:22:13+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: getqueue.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
@@ -135,6 +135,9 @@ getversion_getqueue_c()
 
 /*
  * $Log: getqueue.c,v $
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-10-27 16:22:13+05:30  Cprogrammer
  * replace hard-coded exit values with constants from qmail.h
  *

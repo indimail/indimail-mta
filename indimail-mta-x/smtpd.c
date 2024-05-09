@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.323 2024-02-23 21:39:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.324 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -140,16 +140,17 @@ static int      err_noauth();
 static int      err_noauthallowed();
 #endif
 static int      addrrelay();
-int             atrn_queue(char *, char *);
+int             atrn_queue(const char *, const char *);
 no_return void _exit(int status);
 
 typedef struct passwd  PASSWD;
 typedef unsigned int my_uint;
 typedef unsigned long my_ulong;
 typedef struct constmap CONSTMAP;
+typedef const char c_char;
 #ifdef TLS
 static int      secure_auth = 0;
-static char    *servercert, *clientca, *clientcrl;
+static c_char  *servercert, *clientca, *clientcrl;
 static stralloc ssl_option = {0}, certfile = {0}, cafile = {0}, crlfile = {0}, saciphers = {0};
 static char   *ciphers;
 static int     smtps = 0;
@@ -157,8 +158,8 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static char    *revision = "$Revision: 1.323 $";
-static char    *protocol = "SMTP";
+static c_char  *revision = "$Revision: 1.324 $";
+static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
 static stralloc greeting = { 0 };
@@ -195,7 +196,7 @@ static stralloc libfn = { 0 };
 
 #ifdef BATV
 static stralloc batvkey = { 0 };
-static char    *batvFn = NULL;
+static c_char  *batvFn = NULL;
 static int      batvok;
 static int      batvkeystale = 7; /*- accept batvkey for a week */
 static int      batvkeystaleok;
@@ -210,11 +211,11 @@ static char     isbounce;
 static char     strnum[FMT_ULONG];
 static char     accept_buf[FMT_ULONG];
 
-char           *localhost;
-static char    *remoteip, *remotehost, *remoteinfo, *relayclient, *nodnscheck, *fakehelo;
-static char    *hostname, *bouncemail, *requireauth, *localip, *greyip;
+const char     *localhost;
+static c_char  *remoteip, *remotehost, *remoteinfo, *relayclient, *nodnscheck, *fakehelo;
+static c_char  *hostname, *bouncemail, *requireauth, *localip, *greyip;
 #ifdef IPV6
-static char    *remoteip4;
+static c_char  *remoteip4;
 #endif
 static char    **childargs;
 
@@ -251,7 +252,7 @@ struct qmail    qqt;
 
 static int      greetdelay = 0;
 static int      greetdelayok;
-static char    *errStr = 0;
+static c_char  *errStr = 0;
 
 /*- badmailfrom */
 static int      bmfok = 0;
@@ -259,8 +260,8 @@ static stralloc bmf = { 0 };
 static CONSTMAP mapbmf;
 static int      bmpok = 0;
 static stralloc bmp = { 0 };
-static char    *bmfFn = NULL;
-static char    *bmfFnp = NULL;
+static c_char  *bmfFn = NULL;
+static c_char  *bmfFnp = NULL;
 
 /*- badrcptto */
 static int      rcpok = 0;
@@ -268,8 +269,8 @@ static stralloc rcp = { 0 };
 static CONSTMAP maprcp;
 static int      brpok = 0;
 static stralloc brp = { 0 };
-static char    *rcpFn = NULL;
-static char    *rcpFnp = NULL;
+static c_char  *rcpFn = NULL;
+static c_char  *rcpFnp = NULL;
 
 /*- goodrcptto */
 static int      gdrcptok = 0;
@@ -277,31 +278,31 @@ static stralloc gdrcpt = { 0 };
 static CONSTMAP mapgdrcpt;
 static int      gdrcptpok = 0;
 static stralloc gdrcptp = { 0 };
-static char    *gdrcptFn = NULL;
-static char    *gdrcptFnp = NULL;
+static c_char  *gdrcptFn = NULL;
+static c_char  *gdrcptFnp = NULL;
 
 /*- blackholedsender */
 static int      bhsndrok = 0;
 static stralloc bhsndr = { 0 };
 static CONSTMAP mapbhsndr;
-static char    *bhsndFn = NULL;
+static c_char  *bhsndFn = NULL;
 
 /*- blackholedrcpt */
 static int      bhrcptok = 0;
 static stralloc bhrcpt = { 0 };
 static CONSTMAP mapbhrcpt;
-static char    *bhrcptFn = NULL;
+static c_char  *bhrcptFn = NULL;
 
 /*- spamignore */
 static int      spsndrok = 0;
 static stralloc spsndr = { 0 };
 static CONSTMAP mapspsndr;
-static char    *spsndrFn = NULL;
+static c_char  *spsndrFn = NULL;
 
 /*- accesslist */
 static int      acclistok = 0;
 static stralloc acclist = { 0 };
-static char    *accFn = NULL;
+static c_char  *accFn = NULL;
 
 /*- RELAYCLIENT Check Variables */
 static int      relayclientsok = 0;
@@ -322,26 +323,26 @@ static CONSTMAP maprmf;
 static int      nodnschecksok = 0;
 static stralloc nodnschecks = { 0 };
 static CONSTMAP mapnodnschecks;
-static char    *nodnsFn = NULL;
+static c_char  *nodnsFn = NULL;
 
 /*- badip Check */
-static char    *dobadipcheck = NULL;
-static char    *badipFn = NULL;
+static c_char  *dobadipcheck = NULL;
+static c_char  *badipFn = NULL;
 static int      briok = 0;
 static stralloc bri = { 0 };
 static stralloc ipaddr = { 0 };
 static CONSTMAP mapbri;
 
 /*- badhost Check */
-static char    *badhostFn = NULL;
-static char    *dobadhostcheck = NULL;
+static c_char  *badhostFn = NULL;
+static c_char  *dobadhostcheck = NULL;
 static int      brhok = 0;
 static stralloc brh = { 0 };
 static CONSTMAP mapbrh;
 
 /*- Helo Check */
-static char    *dohelocheck = NULL;
-static char    *badheloFn = NULL;
+static c_char  *dohelocheck = NULL;
+static c_char  *badheloFn = NULL;
 static int      badhelook = 0;
 static stralloc badhelo = { 0 };
 static CONSTMAP maphelo;
@@ -373,7 +374,7 @@ static int      maxrcptcountok;
 
 /*- Russel Nelson's Virus signature */
 static int      sigsok = 0;
-static char    *sigsFn = 0;
+static c_char  *sigsFn = 0;
 static int      sigsok_orig = 0;
 static stralloc sigs = { 0 };
 
@@ -381,13 +382,13 @@ static stralloc sigs = { 0 };
 static int      atrnaccok = 0;
 static stralloc atrnaccess = { 0 };
 
-static char    *virus_desc;
+static c_char  *virus_desc;
 static int      bodyok = 0;
 static int      bodyok_orig = 0;
 static stralloc body = { 0 };
 
-static char    *bodyFn = NULL;
-static char    *content_desc;
+static c_char  *bodyFn = NULL;
+static c_char  *content_desc;
 #ifdef SMTP_PLUGIN
 PLUGIN        **plug = (PLUGIN **) 0;
 void          **plughandle;
@@ -398,7 +399,7 @@ static int      old_client_bug = 0;
 static int      convertbarelf;
 
 struct authcmd {
-	char           *text;
+	const char     *text;
 	int             (*fun) ();
 } authcmds[] = {
 	{"login", auth_login},
@@ -426,7 +427,7 @@ struct authcmd {
 
 /*- misc */
 static stralloc sa = { 0 };
-static stralloc domBuf = { 0 };
+static stralloc tmpBuf = { 0 };
 #ifdef SMTPUTF8
 static int      smtputf8 = 0, smtputf8_enable = 0;
 #endif
@@ -456,7 +457,7 @@ va_dcl
 {
 	int             i;
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
 	int             what;
 #endif
@@ -488,7 +489,7 @@ va_dcl
 		break;
 	}
 	while (1) {
-		str = va_arg(ap, char *);
+		str = va_arg(ap, const char *);
 		if (!str)
 			break;
 		if (substdio_puts(&sserr, str) == -1)
@@ -506,15 +507,15 @@ logflush()
 
 void
 #ifdef  HAVE_STDARG_H
-out(char *s1, ...)
+out(const char *s1, ...)
 #else
 out(va_alist)
 #endif
 {
 	va_list         ap;
-	char           *str;
+	const char     *str;
 #ifndef HAVE_STDARG_H
-	char           *s1;
+	const char     *s1;
 #endif
 
 #ifdef HAVE_STDARG_H
@@ -552,7 +553,7 @@ flush_io()
 }
 
 no_return void
-die_read(char *str, int flag)
+die_read(const char *str, int flag)
 {
 	logerr(1, tr_success ? "read error after mail queue" : "read error", NULL);
 	if (str)
@@ -590,7 +591,7 @@ die_read(char *str, int flag)
 }
 
 no_return void
-die_write(char *str, int flag)
+die_write(const char *str, int flag)
 {
 	static int      i;
 
@@ -702,7 +703,7 @@ safewrite(int fd, char *buf, int len)
 }
 
 no_return void
-die_nohelofqdn(char *arg)
+die_nohelofqdn(const char *arg)
 {
 	logerr(1, "non-FQDN HELO: ", arg, "\n", NULL);
 	logflush();
@@ -712,7 +713,7 @@ die_nohelofqdn(char *arg)
 }
 
 void
-err_localhelo(char *l, char *lip, char *arg)
+err_localhelo(const char *l, const char *lip, const char *arg)
 {
 	logerr(1, "invalid HELO greeting: HELO <", arg, "> for local ", l, ", ", lip, "\n", NULL);
 	out("451 invalid HELO greeting for local (#4.3.0)\r\n", NULL);
@@ -721,7 +722,7 @@ err_localhelo(char *l, char *lip, char *arg)
 }
 
 void
-err_badhelo(char *arg1, char *arg2)
+err_badhelo(const char *arg1, const char *arg2)
 {
 	logerr(1, "Invalid HELO greeting: HELO <", arg1, "> FQDN <", arg2, ">\n", NULL);
 	logflush();
@@ -785,7 +786,7 @@ die_nomem()
 }
 
 no_return void
-die_custom(char *arg)
+die_custom(const char *arg)
 {
 	logerr(1, arg, "\n", NULL);
 	logflush();
@@ -796,7 +797,7 @@ die_custom(char *arg)
 
 #ifdef BATV
 void
-err_batv(char *arg1, char *arg2, char *arg3)
+err_batv(const char *arg1, const char *arg2, const char *arg3)
 {
 	logerr(1, arg1, NULL);
 	if (arg2)
@@ -810,7 +811,7 @@ err_batv(char *arg1, char *arg2, char *arg3)
 #endif
 
 no_return void
-die_control(char *fn)
+die_control(const char *fn)
 {
 	logerr(1, "unable to read controls", NULL);
 	if (fn)
@@ -832,7 +833,7 @@ die_ipme()
 }
 
 no_return void
-die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
+die_plugin(const char *arg1, const char *arg2, const char *arg3, const char *arg4)
 {
 	logerr(1, ": ", NULL);
 	out("451 ", NULL);
@@ -870,7 +871,7 @@ die_logfilter()
 }
 
 void
-err_addressmatch(char *errstr, char *fn)
+err_addressmatch(const char *errstr, const char *fn)
 {
 	logerr(1, "address_match: ", fn, ": ", errstr, "\n", NULL);
 	logflush();
@@ -889,7 +890,7 @@ straynewline()
 }
 
 int
-addrallowed(char *rcpt)
+addrallowed(const char *rcpt)
 {
 	int             r;
 
@@ -903,7 +904,7 @@ addrallowed(char *rcpt)
 }
 
 void
-log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
+log_fifo(const char *arg1, const char *arg2, unsigned long size, stralloc *line)
 {
 	int             logfifo, match;
 	char           *fifo_name;
@@ -987,9 +988,10 @@ log_fifo(char *arg1, char *arg2, unsigned long size, stralloc *line)
 }
 
 void
-log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notify)
+log_trans(const char *mfrom, const char *recipients, int rcpt_len, const char *authuser, int notify)
 {
-	char           *ptr, *p;
+	const char     *ptr;
+	char           *p;
 	int             idx, i;
 	static stralloc tmpLine = { 0 };
 
@@ -1030,8 +1032,8 @@ log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notif
 				if (!(p = env_get("TLS_PROVIDER")))
 					logerr(0, "No", NULL);
 				else {
-					i = str_chr(p, ',');
-					if (p[i]) {
+ 					i = str_chr(p, ',');
+ 					if (p[i]) {
 						p[i] = 0;
 						logerr(0, p, NULL);
 						p[i] = ',';
@@ -1042,8 +1044,8 @@ log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notif
 			if (!(p = env_get("TLS_PROVIDER")))
 				logerr(0, "No", NULL);
 			else {
-				i = str_chr(p, ',');
-				if (p[i]) {
+ 				i = str_chr(p, ',');
+ 				if (p[i]) {
 					p[i] = 0;
 					logerr(0, p, NULL);
 					p[i] = ',';
@@ -1060,9 +1062,11 @@ log_trans(char *mfrom, char *recipients, int rcpt_len, char *authuser, int notif
 }
 
 void
-err_queue(char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx, int permanent, unsigned long qp)
+err_queue(const char *mfrom, const char *recipients, int rcpt_len,
+		const char *authuser, const char *qqx, int permanent, unsigned long qp)
 {
-	char           *ptr, *p;
+	const char     *ptr;
+	char           *p;
 	int             idx, i;
 	char            size[FMT_ULONG];
 	static stralloc tmpLine = { 0 };
@@ -1100,8 +1104,8 @@ err_queue(char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx
 				if (!(p = env_get("TLS_PROVIDER")))
 					logerr(0, "No", NULL);
 				else {
-					i = str_chr(p, ',');
-					if (p[i]) {
+ 					i = str_chr(p, ',');
+ 					if (p[i]) {
 						p[i] = 0;
 						logerr(0, p, NULL);
 						p[i] = ',';
@@ -1112,8 +1116,8 @@ err_queue(char *mfrom, char *recipients, int rcpt_len, char *authuser, char *qqx
 			if (!(p = env_get("TLS_PROVIDER")))
 				logerr(0, "No", NULL);
 			else {
-				i = str_chr(p, ',');
-				if (p[i]) {
+ 				i = str_chr(p, ',');
+ 				if (p[i]) {
 					p[i] = 0;
 					logerr(0, p, NULL);
 					p[i] = ',';
@@ -1131,7 +1135,7 @@ void
 msg_notify()
 {
 	unsigned long   qp;
-	char           *qqx;
+	const char     *qqx;
 	char            buf[DATE822FMT];
 	struct datetime dt;
 
@@ -1209,7 +1213,7 @@ err_hops()
 }
 
 void
-err_hmf(char *arg1, int arg2)
+err_hmf(const char *arg1, int arg2)
 {
 	if (arg2)
 		logerr(1, "Non-existing DNS_MX: MAIL ", NULL);
@@ -1302,7 +1306,7 @@ err_spf()
 #endif
 
 void
-err_hostaccess(char *arg)
+err_hostaccess(const char *arg)
 {
 	logerr(1, "Invalid SENDER host IP address: MAIL from <", arg, ">\n", NULL);
 	logflush();
@@ -1311,10 +1315,10 @@ err_hostaccess(char *arg)
 }
 
 void
-log_virus(char *arg1, char *arg2, char *arg3, int len, int blackhole)
+log_virus(const char *arg1, const char *arg2, const char *arg3, int len, int blackhole)
 {
 	int             idx;
-	char           *ptr;
+	const char     *ptr;
 
 	for (ptr = arg3 + 1, idx = 0; idx < len; idx++) {
 		if (!arg3[idx]) {
@@ -1363,7 +1367,7 @@ smtp_badip()
 }
 
 void
-smtp_badhost(char *arg)
+smtp_badhost(const char *arg)
 {
 	logerr(1, "BAD HOST ", remotehost, "\n", NULL);
 	logflush();
@@ -1423,7 +1427,7 @@ smtp_ptr()
 }
 
 void
-log_rules(char *arg1, char *arg2, int arg3, int arg4)
+log_rules(const char *arg1, const char *arg2, int arg3, int arg4)
 {
 	strnum[fmt_ulong(strnum, arg3)] = 0;
 	logerr(1, arg4 == 0 ? "Setting EnvRule No " : "Setting DomainQueue Rule No ", strnum, ": MAIL from <", arg1, NULL);
@@ -1441,7 +1445,7 @@ err_relay()
 }
 
 void
-err_unimpl(char *arg)
+err_unimpl(const char *arg)
 {
 	if (!case_diffs(arg, "unimplemented"))
 		out("502 unimplemented (#5.5.1)\r\n", NULL);
@@ -1475,7 +1479,7 @@ err_wantrcpt()
 }
 
 void
-err_bhsndr(char *arg1)
+err_bhsndr(const char *arg1)
 {
 	logerr(1, "Blackholed SENDER address: MAIL ", arg1, "\n", NULL);
 	logflush();
@@ -1484,7 +1488,7 @@ err_bhsndr(char *arg1)
 }
 
 void
-err_bhrcpt(char *arg2, char *arg3)
+err_bhrcpt(const char *arg2, const char *arg3)
 {
 	logerr(1, "Blackholed RECIPIENT address: MAIL from <", arg2, "> RCPT ", arg3, "\n", NULL);
 	logflush();
@@ -1493,7 +1497,7 @@ err_bhrcpt(char *arg2, char *arg3)
 }
 
 no_return void
-err_maps(char *from, char *reason)
+err_maps(const char *from, const char *reason)
 {
 	logerr(1, "Blackholed SENDER address: MAIL from <", from, "> Reason ", reason, "\n", NULL);
 	logflush();
@@ -1503,7 +1507,7 @@ err_maps(char *from, char *reason)
 }
 
 void
-err_mrc(char *arg1, char *arg2)
+err_mrc(const char *arg1, const char *arg2)
 {
 	logerr(1, "Too many RECIPIENTS: MAIL from <", arg1, "> Last RCPT <", arg2, ">\n", NULL);
 	logflush();
@@ -1512,7 +1516,7 @@ err_mrc(char *arg1, char *arg2)
 }
 
 void
-smtp_noop(char *arg)
+smtp_noop(const char *arg)
 {
 	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
@@ -1549,7 +1553,7 @@ smtp_noop(char *arg)
 }
 
 void
-smtp_vrfy(char *arg)
+smtp_vrfy(const char *arg)
 {
 	if (no_vrfy) {
 		err_unimpl("unimplimented");
@@ -1603,7 +1607,7 @@ err_child()
 }
 
 void
-err_library(char *arg)
+err_library(const char *arg)
 {
 	if (arg) {
 		logerr(1, arg, "\n", NULL);
@@ -1760,7 +1764,7 @@ err_authrequired()
 }
 
 void
-err_transaction(char *arg)
+err_transaction(const char *arg)
 {
 	out("503 no ", arg, " during mail transaction (#5.5.0)\r\n", NULL);
 	flush();
@@ -1801,7 +1805,7 @@ err_input()
 }
 
 void
-err_mailbox(char *arg1, char *arg2, char *arg3)
+err_mailbox(const char *arg1, const char *arg2, const char *arg3)
 {
 	logerr(1, "Invalid RECIPIENT address: MAIL from <", arg1, "> RCPT <",
 			arg2, "> state <", arg3, ">\n", NULL);
@@ -1812,7 +1816,7 @@ err_mailbox(char *arg1, char *arg2, char *arg3)
 }
 
 void
-err_rcpt_errcount(char *arg1, int count)
+err_rcpt_errcount(const char *arg1, int count)
 {
 	strnum[fmt_ulong(strnum, count)] = 0;
 	logerr(1, "Too many Invalid RECIPIENTS (", strnum, "): MAIL from <",
@@ -1834,7 +1838,7 @@ err_greytimeout()
 }
 
 no_return void
-err_grey_tmpfail(char *arg)
+err_grey_tmpfail(const char *arg)
 {
 	logerr(1, "greylisting temporary failure: ", NULL);
 	if (arg)
@@ -1873,7 +1877,7 @@ int             flagblackhole;
 stralloc        Desc = { 0 };
 
 int
-sigscheck(stralloc *line, char **desc, int in_header)
+sigscheck(stralloc *line, const char **desc, int in_header)
 {
 	int             i, j, k, len, pos1, pos2, header_check, body_check;
 	char           *ptr;
@@ -2056,8 +2060,9 @@ load_virtual()
 int
 check_user_sql(char *rcpt, int len)
 {
-	char           *ptr, *errstr;
-	void           *(*inquery) (char, char *, char *);
+	char           *ptr;
+	const char     *errstr;
+	void           *(*inquery) (char, const char *, const char *);
 
 	if (!(ptr = load_virtual()))
 		return -1;
@@ -2122,7 +2127,7 @@ dnscheck(char *address, int len, int noat)
 }
 
 void
-log_etrn(char *arg1, char *arg2)
+log_etrn(const char *arg1, const char *arg2)
 {
 	logerr(1, "ETRN ", arg1, NULL);
 	if (arg2)
@@ -2132,7 +2137,7 @@ log_etrn(char *arg1, char *arg2)
 }
 
 void
-log_atrn(char *arg1, char *arg2, char *arg3)
+log_atrn(const char *arg1, const char *arg2, const char *arg3)
 {
 	logerr(1, "ATRN ", arg1, NULL);
 	if (arg2)
@@ -2146,7 +2151,7 @@ log_atrn(char *arg1, char *arg2, char *arg3)
 void
 greet_extra()
 {
-	char           *ptr;
+	const char     *ptr;
 	char            buf[DATE822FMT];
 	int             i;
 	struct datetime dt;
@@ -2172,7 +2177,7 @@ greet_extra()
 }
 
 void
-smtp_respond(char *code)
+smtp_respond(const char *code)
 {
 	int             i, j, do_greet;
 	static int      d = -1;
@@ -2220,7 +2225,7 @@ sigterm()
 void
 smtp_help(char *arg)
 {
-	char           *ptr;
+	const char     *ptr;
 
 	if (no_help) {
 		err_unimpl("help");
@@ -2296,7 +2301,7 @@ smtp_quit(char *arg)
 }
 
 int
-badipcheck(char *arg)
+badipcheck(const char *arg)
 {
 	/*- badip */
 	if (!stralloc_copys(&ipaddr, arg) ||
@@ -2355,7 +2360,7 @@ badhostcheck()
 }
 
 void
-dohelo(char *arg)
+dohelo(const char *arg)
 {
 	int             i;
 
@@ -2450,8 +2455,8 @@ greetdelay_check(int delay)
 }
 
 void
-open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p,
-	char *envstr, char *envstr_p, char *cfn, char *cfn_p,
+open_control_once(int *open_flag, int *open_flagp, const char **fn, const char **fn_p,
+	const char *envstr, const char *envstr_p, const char *cfn, const char *cfn_p,
 	stralloc *sfn, struct constmap *mapvar, stralloc *sfn_p)
 {
 	char           *x;
@@ -2487,7 +2492,7 @@ open_control_once(int *open_flag, int *open_flagp, char **fn, char **fn_p,
 }
 
 void
-open_control_once_int(int *val, int *openok, char *envstr, char *cfn, int neg_allowed)
+open_control_once_int(int *val, int *openok, const char *envstr, const char *cfn, int neg_allowed)
 {
 	char           *x;
 
@@ -2600,7 +2605,7 @@ open_control_files1()
 void
 open_control_files2()
 {
-	char           *x;
+	const char     *x;
 #ifdef HAVESRS
 	int             r;
 #endif
@@ -3031,7 +3036,7 @@ smtp_ehlo(char *arg)
 		out(" [", remoteip, "]", NULL);
 	out("\r\n", NULL);
 	if (hostname && *hostname && childargs && *childargs) {
-		char           *no_auth_login, *no_auth_plain, *no_cram_md5,
+		const char     *no_auth_login, *no_auth_plain, *no_cram_md5,
 					   *no_cram_sha1, *no_cram_sha224, *no_cram_sha256,
 					   *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd,
 					   *no_digest_md5;
@@ -3275,7 +3280,7 @@ check_batv_sig()
 	char            kdate[] = "0000";
 #if OPENSSL_VERSION_NUMBER >= 0x30000000L
 	EVP_MD_CTX     *mdctx;
-	const EVP_MD   *md = 0;
+	EVP_MD         *md = 0;
 	unsigned char   md5digest[EVP_MAX_MD_SIZE];
 	unsigned int    md_len;
 #else
@@ -3357,8 +3362,8 @@ check_batv_sig()
 int
 pop_bef_smtp(char *mfrom)
 {
-	char           *ptr, *errstr;
-	void           *(*inquery) (char, char *, char *);
+	const char     *ptr, *errstr;
+	void           *(*inquery) (char, const char *, const char *);
 
 	if (!(ptr = load_virtual()))
 		return 1;
@@ -3387,10 +3392,10 @@ pop_bef_smtp(char *mfrom)
  * domain in the mailfrom or the authenticated username.
  */
 int
-domain_compare(char *dom1, char *dom2)
+domain_compare(const char *dom1, const char *dom2)
 {
-	char           *ptr, *tmpdom1, *tmpdom2, *errstr;
-	void           *(*inquery) (char, char *, char *);
+	const char     *ptr, *tmpdom1, *tmpdom2, *errstr;
+	void           *(*inquery) (char, const char *, const char *);
 
 	if (!hasvirtual) {
 		if (str_diff(dom1, dom2)) {
@@ -3526,10 +3531,10 @@ mailfrom_parms(char *arg)
 static int      f_envret = 0, d_envret = 0, a_envret = 0;
 
 int
-check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
+check_sender(void *(*inquery) (char, const char *, const char *), const char *lib_fn,
 		int in_rcpt1, int in_rcpt2)
 {
-	char           *x;
+	const char     *x;
 	PASSWD         *pw;
 	int             at, isLocal;
 	int            *u_not_found, *i_inactive;
@@ -3643,7 +3648,8 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 	x = env_get("MASQUERADE");
 	if ((!x || (x && *x)) && authd) {
 		int             at1, at2, iter_pass, flag;
-		char           *dom1, *dom2, *allowed;
+		const char     *dom1, *dom2;
+		char           *allowed;
 
 		if (mailfrom.s[at1 = str_rchr(mailfrom.s, '@')]) {
 			dom1 = mailfrom.s + at1 + 1;
@@ -3655,9 +3661,9 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 			/*- this loop will do two passes */
 			for (flag = 0, iter_pass = 0;; iter_pass++) {
 				if (x && *x) /*- allow x first and if it does not match, allow remoteinfo */
-					allowed = iter_pass ? remoteinfo : x;
+					allowed = iter_pass ? (char *) remoteinfo : (char *) x;
 				else {
-					allowed = remoteinfo;
+					allowed = (char *) remoteinfo;
 					iter_pass++;
 				}
 				/*-
@@ -3714,7 +3720,7 @@ check_sender(void *(*inquery) (char, char *, char *), char *lib_fn,
 void
 smtp_mail(char *arg)
 {
-	char           *x, *ptr;
+	const char     *x, *ptr;
 	int             ret, i, in_rcpt1 = -1, in_rcpt2 = -1;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
@@ -3722,7 +3728,7 @@ smtp_mail(char *arg)
 #ifdef USE_SPF
 	int             r;
 #endif
-	void           *(*inquery) (char, char *, char *);
+	void           *(*inquery) (char, const char *, const char *);
 
 	/*-
 	 * If this is the second session restore original environment.
@@ -4459,7 +4465,7 @@ stralloc        boundary = { 0 };
  */
 
 void
-put(char *ch)
+put(const char *ch)
 {
 	char           *cp, *cpstart, *cpafter;
 	unsigned int    len;
@@ -4778,7 +4784,7 @@ static void
 create_logfilter()
 {
 	int             fd;
-	char           *tmpdir, *x;
+	const char     *tmpdir, *x;
 	static stralloc tmpFile = { 0 };
 
 	if (env_get("LOGFILTER")) {
@@ -4806,7 +4812,7 @@ smtp_data(char *arg)
 {
 	int             hops, j;
 	unsigned long   qp;
-	char           *qqx, *x;
+	const char     *qqx, *x;
 #ifdef SMTP_PLUGIN
 	int             i;
 	char           *mesg;
@@ -4975,44 +4981,48 @@ smtp_data(char *arg)
 		err_size(mailfrom.s, rcptto.s, rcptto.len);
 		return;
 	}
-	j = str_rchr(qqx, '\n');
-	if (qqx[j] && qqx[j + 1]) {
+	if (!stralloc_copys(&tmpBuf, qqx) ||
+			!stralloc_0(&tmpBuf))
+		die_nomem();
+	tmpBuf.len--;
+	j = str_rchr(tmpBuf.s, '\n');
+	if (tmpBuf.s[j] && tmpBuf.s[j + 1]) {
 		/*-
 		 * handle multi line output due to custom error patch
 		 * use the last line for the error message
 		 */
-		if (*(qqx + j + 1) == 'D') {
+		if (*(tmpBuf.s + j + 1) == 'D') {
 			out("554 ", NULL);
-			out(qqx + j + 2, "\r\n", NULL);
-			qqx[j] = '\0';
+			out(tmpBuf.s + j + 2, "\r\n", NULL);
+			tmpBuf.s[j] = '\0';
 			j = 1;
 		} else
-		if (*(qqx + j + 1) == 'Z') {
+		if (*(tmpBuf.s + j + 1) == 'Z') {
 			out("451 ", NULL);
-			out(qqx + j + 2, "\r\n", NULL);
-			qqx[j] = '\0';
+			out(tmpBuf.s + j + 2, "\r\n", NULL);
+			tmpBuf.s[j] = '\0';
 			j = 0;
 		} else {
 			out("451 ", NULL);
-			out(qqx + j + 1, "\r\n", NULL);
-			qqx[j] = '\0';
+			out(tmpBuf.s + j + 1, "\r\n", NULL);
+			tmpBuf.s[j] = '\0';
 			j = 0;
 		}
-		out(qqx, "\r\n", NULL);
+		out(tmpBuf.s, "\r\n", NULL);
 	} else {
-		if (qqx[j] == '\n')
-			qqx[j] = '\0';
-		if (*qqx == 'D') {
+		if (tmpBuf.s[j] == '\n')
+			tmpBuf.s[j] = '\0';
+		if (*tmpBuf.s == 'D') {
 			j = 1;
 			out("554 ", NULL);
 		} else {
 			j = 0;
 			out("451 ", NULL);
 		}
-		out(qqx + 1, "\r\n", NULL);
+		out(tmpBuf.s + 1, "\r\n", NULL);
 	}
 	flush();
-	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, qqx + 1, j, qp);
+	err_queue(mailfrom.s, rcptto.s, rcptto.len, authd ? remoteinfo : 0, tmpBuf.s + 1, j, qp);
 	return;
 }
 
@@ -5325,13 +5335,13 @@ static stralloc scram_method;
 static int      gs_callback_err;
 
 PASSWD         *
-get_scram_record(char *u, int *mech, int *iter, char **salt, char **stored_key,
+get_scram_record(const char *u, int *mech, int *iter, char **salt, char **stored_key,
 		char **server_key, char **hexsaltpw, char **cleartxt, char **saltedpw)
 {
 	int             i;
-	char           *ptr, *err;
+	const char     *ptr, *err;
 	int            *u_not_found, *i_inactive;
-	void           *(*inquery) (char, char *, char *);
+	void           *(*inquery) (char, const char *, const char *);
 
 	gsasl_pw = (PASSWD *) NULL;
 	if (!hasvirtual)
@@ -5428,7 +5438,7 @@ is_scram_method(int mech)
 }
 
 static int
-get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
+get_user_details(Gsasl_session *sctx, const char **u, int *mech, int *iter,
 		char **salt, char **stored_key, char **server_key,
 		char **hexsaltpw, char **cleartxt, char **saltedpw)
 {
@@ -5463,7 +5473,7 @@ get_user_details(Gsasl_session *sctx, char **u, int *mech, int *iter,
 }
 
 void
-err_scram(char *err_code1, char *err_code2, char *mesg, char *str)
+err_scram(const char *err_code1, const char *err_code2, const char *mesg, const char *str)
 {
 	logerr(1, mesg, NULL);
 	if (str)
@@ -5544,7 +5554,8 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 {
 	int             rc = GSASL_NO_CALLBACK;
 	static int      mech, iter = 4096;
-	static char    *u, *salt, *stored_key, *server_key, *hexsaltpw,
+	static const char *u;
+	static char    *salt, *stored_key, *server_key, *hexsaltpw,
 				   *cleartxt, *saltedpw;
 	static int      i = -1;
 #ifdef TLS
@@ -6508,7 +6519,8 @@ void
 mta_access(char *atrnaddr, int *reject, int *temp)
 {
 	int             r, atpos, lcount, wildcard, len;
-	char           *ptr, *cptr, *errstr;
+	const char     *ptr, *errstr;
+	char           *cptr;
 
 	*reject = *temp = 1;
 	a_user.len = domain.len = 0;
@@ -6532,7 +6544,7 @@ mta_access(char *atrnaddr, int *reject, int *temp)
 	a_user.len--;
 	for (lcount = len = 0, ptr = atrnaccess.s; len < atrnaccess.len;) {
 		len += (str_len(ptr) + 1);
-		for (cptr = ptr;*cptr && *cptr != ':';cptr++);
+		for (cptr = (char *) ptr; *cptr && *cptr != ':'; cptr++);
 		if (*cptr == ':')
 			*cptr = 0;
 		else {
@@ -6568,12 +6580,13 @@ mta_access(char *atrnaddr, int *reject, int *temp)
 void
 indimail_virt_access(char *arg, char **dptr, int *reject, int *temp)
 {
-	char           *ptr, *errstr, *user_tmp, *domain_tmp;
+	const char     *ptr, *errstr;
+	char           *user_tmp, *domain_tmp;
 	int             r, end_flag;
 	void            (*iclose) (void);
 	char           *(*show_atrn_map) (char **, char **);
-	int             (*atrn_access) (char *, char *);
-	int             (*parse_email) (char *, stralloc *, stralloc *);
+	int             (*atrn_access) (const char *, const char *);
+	int             (*parse_email) (const char *, stralloc *, stralloc *);
 
 	*reject = *temp = 1;
 	if (!(ptr = load_virtual()))
@@ -6590,7 +6603,7 @@ indimail_virt_access(char *arg, char **dptr, int *reject, int *temp)
 		err_library(errstr);
 		return;
 	}
-	domBuf.len = 0;
+	tmpBuf.len = 0;
 	for (; *arg && !isalnum((int) *arg); arg++);
 	if (*arg)
 		*dptr = arg;
@@ -6604,22 +6617,22 @@ indimail_virt_access(char *arg, char **dptr, int *reject, int *temp)
 			if (!(ptr = (*show_atrn_map) (&user_tmp, &domain_tmp)))
 				break;
 			if (end_flag) {
-				if (!stralloc_cats(&domBuf, " ")) {
+				if (!stralloc_cats(&tmpBuf, " ")) {
 					(*iclose) ();
 					die_nomem();
 				}
 			}
-			if (!stralloc_cats(&domBuf, ptr)) {
+			if (!stralloc_cats(&tmpBuf, ptr)) {
 				(*iclose) ();
 				die_nomem();
 			}
 			end_flag = 1;
 		} /*- for (user_tmp = a_user.s, domain_tmp = domain.s, end_flag = 0;;) */
-		if (!stralloc_0(&domBuf)) {
+		if (!stralloc_0(&tmpBuf)) {
 			(*iclose) ();
 			die_nomem();
 		}
-		*dptr = domBuf.s;
+		*dptr = tmpBuf.s;
 	}
 	if (!valid_hname(*dptr)) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
@@ -7053,7 +7066,7 @@ struct commands submcommands[] = {
 
 #ifdef SMTP_PLUGIN
 void
-load_plugin(char *library, char *plugin_symb, int j)
+load_plugin(const char *library, const char *plugin_symb, int j)
 {
 	PLUGIN         *(*func) (void);
 	char           *error;
@@ -7078,12 +7091,12 @@ load_plugin(char *library, char *plugin_symb, int j)
 void
 qmail_smtpd(int argc, char **argv, char **envp)
 {
-	char           *ptr, *errstr;
+	const char     *ptr, *errstr;
 	struct commands *cmdptr;
 	int             i, port;
 #ifdef SMTP_PLUGIN
 	int             j, len;
-	char           *start_plugin, *plugin_symb, *plugindir;
+	const char     *start_plugin, *plugin_symb, *plugindir;
 	static stralloc plugin = { 0 };
 #endif
 
@@ -7353,6 +7366,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.324  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.323  2024-02-23 21:39:32+05:30  Cprogrammer
  * sanitized variable names for badmailfrom, badrcptto, blackholedrcpt, blackholedsender, spamignore
  * removed blachole*pattern, spamignorepattern
@@ -7779,10 +7795,10 @@ addrrelay()
  *
  */
 
-char           *
+const char     *
 getversion_smtpd_c()
 {
-	static char    *x = "$Id: smtpd.c,v 1.323 2024-02-23 21:39:32+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.324 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 	return revision + 11;

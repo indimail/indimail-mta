@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.34 2024-03-01 15:45:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -38,8 +38,9 @@
 #define SVSCANINFO ".svscan"  /* must begin with dot ('.') */
 #endif
 
-int             rename(char *, const char *);
+int             rename(const char *, const char *);
 
+typedef const char c_char;
 struct
 {
 	unsigned long   dev;
@@ -55,7 +56,7 @@ static int      numx = 0, scannow = 0, auto_scan = 0, use_run = 1,
 				verbose = 0, silent = 0, sess_leader = 0;
 static char     fnlog[260];
 static char     fntmp[260];
-static char    *pidfile, *p_exe_name, *run_dir;
+static c_char  *pidfile, *p_exe_name, *run_dir;
 static stralloc tmp = {0};
 
 #ifdef USE_RUNFS
@@ -122,12 +123,13 @@ terminate(char *pidstr, time_t starttime, unsigned int w1,
 }
 
 void
-init_cmd(char *cmmd, int shutdown)
+init_cmd(const char *cmmd, int shutdown)
 {
 	int             child, r, wstat, did_kill = 0, do_wait, i;
 	unsigned int    w1, w2;
 	pid_t           pid;
-	char           *cpath, *p, *terminate_session, *args[4];
+	const char     *cpath;
+	char           *p, *terminate_session, *args[4];
 	char            strnum[FMT_ULONG];
 	time_t          starttime;
 
@@ -146,9 +148,9 @@ init_cmd(char *cmmd, int shutdown)
 	case 0:
 		if (shutdown)
 			sig_block(sig_term);
-		args[0] = "/bin/sh";
-		args[1] = "-c";
-		args[2] = cpath;
+		args[0] = (char *) "/bin/sh";
+		args[1] = (char *) "-c";
+		args[2] = (char *) cpath;
 		args[3] = 0;
 		if (!env_put2("PPID", strnum))
 			strerr_die3x(111, WARN, cpath, "init_cmd: out of memory");
@@ -221,7 +223,7 @@ init_cmd(char *cmmd, int shutdown)
 }
 
 int
-sv_control(char *service_name, char *fn, char *command)
+sv_control(const char *service_name, const char *fn, const char *command)
 {
 	int             fd;
 	char            bspace[1];
@@ -262,7 +264,7 @@ sv_control(char *service_name, char *fn, char *command)
 }
 
 void
-start(char *fn, char *sdir)
+start(const char *fn, const char *sdir)
 {
 	unsigned int    fnlen, t1, t2;
 	struct stat     st;
@@ -411,8 +413,8 @@ start(char *fn, char *sdir)
 			if (x[i].flaglog)
 				if (fd_move(1, x[i].pi[1]) == -1)
 					strerr_die4sys(111, WARN, "unable to set up descriptors for ", fn, ": ");
-			args[0] = "supervise";
-			args[1] = fn;
+			args[0] = (char *) "supervise";
+			args[1] = (char *) fn;
 			args[2] = 0;
 			strnum[fmt_ulong(strnum, pid)] = 0;
 			if (!env_put2("PPID", strnum))
@@ -519,9 +521,9 @@ start(char *fn, char *sdir)
 				strerr_die4sys(111, WARN, "unable to switch to ", fn, ": ");
 			if (!env_put2("SV_PWD", fn))
 				strerr_die4x(111, WARN, "out of memory for ", fn, "/log");
-			args[0] = "supervise";
-			args[1] = "log";
-			args[2] = fn;
+			args[0] = (char *) "supervise";
+			args[1] = (char *) "log";
+			args[2] = (char *) fn;
 			args[3] = 0;
 			strnum[fmt_ulong(strnum, pid)] = 0;
 			if (!env_put2("PPID", strnum))
@@ -956,13 +958,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	static char    *y = "$Id: svscan.c,v 1.34 2024-03-01 15:45:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.35  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.34  2024-03-01 15:45:09+05:30  Cprogrammer
  * send SIGTERM twice followed by SIGKILL to terminate logging and then all remaining processes
  *

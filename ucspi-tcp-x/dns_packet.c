@@ -1,5 +1,8 @@
 /*
  * $Log: dns_packet.c,v $
+ * Revision 1.3  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.2  2020-08-03 17:22:53+05:30  Cprogrammer
  * use qmail library
  *
@@ -14,7 +17,7 @@
 #include "dns.h"
 
 unsigned int
-dns_packet_copy(char *buf, unsigned int len, unsigned int pos, char *out, unsigned int outlen)
+dns_packet_copy(const char *buf, unsigned int len, unsigned int pos, char *out, unsigned int outlen)
 {
 	while (outlen)
 	{
@@ -31,7 +34,7 @@ dns_packet_copy(char *buf, unsigned int len, unsigned int pos, char *out, unsign
 }
 
 unsigned int
-dns_packet_skipname(char *buf, unsigned int len, unsigned int pos)
+dns_packet_skipname(const char *buf, unsigned int len, unsigned int pos)
 {
 	unsigned char   ch;
 
@@ -54,7 +57,7 @@ dns_packet_skipname(char *buf, unsigned int len, unsigned int pos)
 }
 
 unsigned int
-dns_packet_getname(char *buf, unsigned int len, unsigned int pos, char **d)
+dns_packet_getname(const char *buf, unsigned int len, unsigned int pos, char **d)
 {
 	unsigned int    loop = 0;
 	unsigned int    state = 0;

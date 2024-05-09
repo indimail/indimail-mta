@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-start.c,v 1.28 2023-12-23 23:29:04+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-start.c,v 1.29 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  * RCS log at bottom
  */
 #include <sys/types.h>
@@ -20,7 +20,7 @@
 #include "setuserid.h"
 
 no_return void
-die(char *arg)
+die(const char *arg)
 {
 	strerr_die3sys(111, "fatal: qmail-start: ", arg, ": ");
 	_exit(111);
@@ -34,7 +34,7 @@ die(char *arg)
  *   return 0 if user is not present in the list
  */
 int
-check_user(char *userlist, char *user)
+check_user(char *userlist, const char *user)
 {
 	char           *ptr1, *ptr2;
 
@@ -113,11 +113,11 @@ int
 main(int argc, char **argv)
 {
 	char           *set_supplementary_groups, *ptr;
-	char           *(qsargs[]) = { "qmail-send", 0, (char *) NULL, (char *) NULL};
-	char           *(qcargs[]) = { "qmail-clean", 0, 0, (char *) NULL};
-	char           *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, (char *) NULL};
-	char           *(qrargs[]) = { "qmail-rspawn", 0, (char *) NULL};
-	char           *(qtargs[]) = { "todo-proc", 0, 0, 0, (char *) NULL};
+	const char     *(qsargs[]) = { "qmail-send", 0, (char *) NULL, (char *) NULL};
+	const char     *(qcargs[]) = { "qmail-clean", 0, 0, (char *) NULL};
+	const char     *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, (char *) NULL};
+	const char     *(qrargs[]) = { "qmail-rspawn", 0, (char *) NULL};
+	const char     *(qtargs[]) = { "todo-proc", 0, 0, 0, (char *) NULL};
 	gid_t          *gidset;
 	int             ngroups, i = 1, j = 1;
 	int             opt;
@@ -239,7 +239,7 @@ main(int argc, char **argv)
 			die("unable to copy fd1 to pipe2");
 		close2345678();
 		closepipes();
-		execvp(*qlargs, qlargs); /*- qmail-lspawn */
+		execvp(*qlargs, (char **) qlargs); /*- qmail-lspawn */
 		die("unable to exec qmail-lspawn");
 	}
 	switch (fork()) /*- qmail-rspawn */
@@ -264,7 +264,7 @@ main(int argc, char **argv)
 			die("unable to copy fd1 to pipe4");
 		close2345678();
 		closepipes();
-		execvp(*qrargs, qrargs); /*- qmail-rspawn */
+		execvp(*qrargs, (char **) qrargs); /*- qmail-rspawn */
 		die("unable to exec qmail-rspawn");
 	}
 	switch (fork()) /*- qmail-clean for qmail-send */
@@ -290,7 +290,7 @@ main(int argc, char **argv)
 		close2345678();
 		closepipes();
 		qcargs[2] = "qmail-send"; /*- pass qmail-send as argument for the ps command */
-		execvp(*qcargs, qcargs); /*- qmail-clean */
+		execvp(*qcargs, (char **) qcargs); /*- qmail-clean */
 		die("unable to exec qmail-clean (qmail-send)");
 	}
 	switch (fork()) /*- todo-proc */
@@ -310,7 +310,7 @@ main(int argc, char **argv)
 		if (fd_copy(3, pi10[0]) == -1)
 			die("unable to copy fd3 to pipe10");
 		closepipes();
-		execvp(*qtargs, qtargs); /*- todo-proc */
+		execvp(*qtargs, (char **) qtargs); /*- todo-proc */
 		die("unable to exec todo-proc");
 	}
 
@@ -337,7 +337,7 @@ main(int argc, char **argv)
 		close2345678();
 		closepipes();
 		qcargs[2] = "todo-proc"; /*- pass todo-proc as argument for the ps command */
-		execvp(*qcargs, qcargs); /*- qmail-clean */
+		execvp(*qcargs, (char **) qcargs); /*- qmail-clean */
 		die("unable to exec qmail-clean (todo-proc)");
 	}
 	if (check_user(set_supplementary_groups, "qmails")) {
@@ -370,7 +370,7 @@ main(int argc, char **argv)
 	if (fd_copy(8, pi8[0]) == -1)
 		die("unable to copy fd8 to pipe8");
 	closepipes();
-	execvp(*qsargs, qsargs); /*- qmail-send */
+	execvp(*qsargs, (char **) qsargs); /*- qmail-send */
 	die("unable to exec qmail-send");
 	/*- Not reached */
 	return(0);
@@ -379,13 +379,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_start_c()
 {
-	static char    *x = "$Id: qmail-start.c,v 1.28 2023-12-23 23:29:04+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-start.c,v 1.29 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.29  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.28  2023-12-23 23:29:04+05:30  Cprogrammer
  * updated comments
  *

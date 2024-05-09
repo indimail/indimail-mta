@@ -1,5 +1,8 @@
 /*
  * $Log: rwhconfig.c,v $
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2021-06-12 19:30:49+05:30  Cprogrammer
  * removed #include "auto_qmail.h"
  *
@@ -38,7 +41,7 @@ static config_str plusdomain = CONFIG_STR;
 static config_str idhost = CONFIG_STR;
 
 static int
-my_config_read(config_str *c, char *fname, int line)
+my_config_read(config_str *c, const char *fname, int line)
 {
 	if (!controldir) {
 		if (!(controldir = env_get("CONTROLDIR")))
@@ -129,7 +132,7 @@ nomem:
 void
 getversion_rwhconfig_c()
 {
-	static char    *x = "$Id: rwhconfig.c,v 1.6 2021-06-12 19:30:49+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rwhconfig.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

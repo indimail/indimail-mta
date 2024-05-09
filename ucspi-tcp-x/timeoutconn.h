@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.h,v $
+ * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.5  2023-06-18 13:24:44+05:30  Cprogrammer
  * added timeoutconn_un function
  *
@@ -29,6 +32,6 @@ int             timeoutconn(int, char ip[4], uint16, unsigned int);
 #ifdef LIBC_HAS_IP6
 int             timeoutconn6(int, char ip[16], uint16, unsigned int, uint32);
 #endif
-int             timeoutconn_un(int, char *, unsigned int);
+int             timeoutconn_un(int, const char *, unsigned int);
 
 #endif

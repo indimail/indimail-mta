@@ -1,5 +1,8 @@
 /*
  * $Log: tlsacheck.c,v $
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.3  2018-05-27 22:14:32+05:30  mbhangui
  * added defintions for qmail-daned modes
  *
@@ -50,7 +53,8 @@ scan_ip_port(daneip, defaultip, defaultport, ipp, portp)
 	int             n;
 	unsigned long   port;	/* long because of scan_ulong */
 #ifdef IPV6
-	char           *ptr, *ip_a;
+	char           *ptr;
+	const char     *ip_a;
 #endif
 
 #ifdef IPV6
@@ -63,7 +67,7 @@ scan_ip_port(daneip, defaultip, defaultport, ipp, portp)
 			port = defaultport;
 	} else {
 		ip_a = (*daneip == '@' && !*(daneip + 1)) ? defaultip : daneip;
-		for (ptr = ip_a;*ptr;ptr++) {
+		for (ptr = (char *) ip_a; *ptr; ptr++) {
 			if (*ptr == '@' && scan_ulong(ptr + 1, &port)) {
 				*portp = port;
 				break;
@@ -178,7 +182,7 @@ tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
 	void            (*timeoutfn) (), (*errfn) (); /*- errfn must _exit */
 {
 	int             r, len = 0, timeout = DANETIMEOUT;
-	char           *ptr;
+	const char     *ptr;
 	char            strnum[FMT_ULONG], z[IPFMT];
 	unsigned long   port;
 	union v46addr   ip;
@@ -261,7 +265,7 @@ tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
 void
 getversion_tlsacheck_c()
 {
-	static char    *x = "$Id: tlsacheck.c,v 1.3 2018-05-27 22:14:32+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tlsacheck.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

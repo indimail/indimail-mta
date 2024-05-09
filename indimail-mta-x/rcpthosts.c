@@ -1,5 +1,8 @@
 /*
  * $Log: rcpthosts.c,v $
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.11  2022-12-24 22:33:27+05:30  Cprogrammer
  * converted function prototypes to ansic
  *
@@ -76,9 +79,10 @@ rcpthosts_init()
 static stralloc host = { 0 };
 
 int
-rcpthosts(char *buf, int len, int nolocal)
+rcpthosts(const char *buf, int len, int nolocal)
 {
 	int             j;
+	char           *b;
 
 	if (nolocal == 0) {
 		if (flagrh != 1)
@@ -98,10 +102,10 @@ rcpthosts(char *buf, int len, int nolocal)
 	len -= j;
 	if (!stralloc_copyb(&host, buf, len))
 		return -1;
-	buf = host.s;
-	case_lowerb(buf, len);
+	b = host.s;
+	case_lowerb(b, len);
 	for (j = 0; j < len; ++j) {
-		if ((!j || (buf[j] == '.')) && constmap(&maprh, buf + j, len - j))
+		if ((!j || (b[j] == '.')) && constmap(&maprh, b + j, len - j))
 			return 1;
 	}
 	if (fdmrh != -1) {
@@ -109,12 +113,12 @@ rcpthosts(char *buf, int len, int nolocal)
 		int             r;
 
 		for (j = 0; j < len; ++j) {
-			if (!j || (buf[j] == '.')) {
-				if ((r = cdb_seek(fdmrh, buf + j, len - j, &dlen))) {
+			if (!j || (b[j] == '.')) {
+				if ((r = cdb_seek(fdmrh, b + j, len - j, &dlen))) {
 					if (errno == error_ebadf) { /*- oops fdmrh got closed */
 						if ((fdmrh = open_read(morercpthosts.s)) == -1)
 							return r;
-						if ((r = cdb_seek(fdmrh, buf + j, len - j, &dlen)))
+						if ((r = cdb_seek(fdmrh, b + j, len - j, &dlen)))
 							return r;
 					} else
 						return r;
@@ -128,7 +132,7 @@ rcpthosts(char *buf, int len, int nolocal)
 void
 getversion_rcpthosts_c()
 {
-	static char    *x = "$Id: rcpthosts.c,v 1.11 2022-12-24 22:33:27+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rcpthosts.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

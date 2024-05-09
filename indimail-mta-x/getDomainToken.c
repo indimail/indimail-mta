@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2024-02-09 15:56:26+05:30  Cprogrammer
  * fix match for entries without local/remote directive
  *
@@ -53,7 +56,7 @@ dtype           delivery;
  * QREGEX environment variable is defined
  */
 char           *
-getDomainToken(char *domain, stralloc *sa)
+getDomainToken(const char *domain, stralloc *sa)
 {
 	regex_t         qreg;
 	int             len, n, retval, use_regex;
@@ -143,7 +146,7 @@ getDomainToken(char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	static char    *x = "$Id: getDomainToken.c,v 1.7 2024-02-09 15:56:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: getDomainToken.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;

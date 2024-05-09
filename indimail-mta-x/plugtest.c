@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
  * define functions as noreturn
  *
@@ -41,12 +44,12 @@
 #define FATAL "plugtest: fatal: "
 
 static int       authenticated;
-static char     *relayclient;
+const char      *relayclient;
 static PLUGIN  **plug = (PLUGIN **) 0;
 static void    **handle;
 
 void
-out(char *str)
+out(const char *str)
 {
 	if (!str || !*str)
 		return;
@@ -73,7 +76,7 @@ die_nomem()
 }
 
 no_return void
-die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
+die_plugin(const char *arg1, const char *arg2, const char *arg3, const char *arg4)
 {
 	substdio_flush(subfdout);
 	if (arg1)
@@ -90,7 +93,7 @@ die_plugin(char *arg1, char *arg2, char *arg3, char *arg4)
 }
 
 void
-load_plugin(char *library, char *plugin_symb, int j)
+load_plugin(const char *library, const char *plugin_symb, int j)
 {
 	PLUGIN         *(*func) (void);
 	char           *error;
@@ -115,7 +118,7 @@ load_plugin(char *library, char *plugin_symb, int j)
 	return;
 }
 
-char           *usage =
+const char     *usage =
 				"usage: plugtest -MTD -l localip -r remoteip  -R remotehost -m mailfrom recipient ...]\n"
 				"        -M test mail plugin\n"
 				"        -T test rcpt plugin\n"
@@ -124,8 +127,9 @@ char           *usage =
 int
 main(int argc, char **argv)
 {
-	char           *localip, *remoteip, *remotehost, *mailfrom,
-				   *plugindir, *start_plugin, *plugin_symb, *mesg;
+	const char      *localip, *remoteip, *remotehost, *mailfrom,
+					*plugindir, *start_plugin, *plugin_symb;
+	char           *mesg;
 	char          **argv_ptr;
 	char            strnum[FMT_ULONG];
 	int             opt, i, j, len, mail_opt, rcpt_opt, data_opt, plugin_count, status;
@@ -385,7 +389,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	static char    *x = "$Id: plugtest.c,v 1.7 2021-08-29 23:27:08+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: plugtest.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

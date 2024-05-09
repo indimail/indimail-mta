@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn_un.c,v $
+ * Revision 1.2  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.1  2023-06-16 23:47:29+05:30  Cprogrammer
  * Initial revision
  *
@@ -11,7 +14,7 @@
 #include "timeoutconn.h"
 
 int
-timeoutconn_un(int s, char *socket, unsigned int timeout)
+timeoutconn_un(int s, const char *socket, unsigned int timeout)
 {
 	struct taia     now;
 	struct taia     deadline;

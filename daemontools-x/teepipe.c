@@ -1,5 +1,8 @@
 /*
  * $Log: teepipe.c,v $
+ * Revision 1.7  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.6  2022-09-03 22:24:33+05:30  Cprogrammer
  * refactored teepipe
  *
@@ -103,7 +106,7 @@ main(int argc, char **argv)
 void
 getversion_teepipe_c()
 {
-	static char    *x = "$Id: teepipe.c,v 1.6 2022-09-03 22:24:33+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: teepipe.c,v 1.7 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

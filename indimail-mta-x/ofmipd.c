@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
  * Revision 1.25  2024-01-23 01:22:02+05:30  Cprogrammer
  * include buffer_defs.h for buffer size definitions
  *
@@ -110,12 +113,12 @@
 #include "qmail.h"
 #include "control.h"
 
-int             auth_login(char *);
-int             auth_plain(char *);
+int             auth_login(const char *);
+int             auth_plain(const char *);
 int             auth_cram();
 int             err_noauth();
-void            logerr(char *);
-void            logerrf(char *);
+void            logerr(const char *);
+void            logerrf(const char *);
 void            logerr_start();
 ssize_t         saferead(int fd, char *buf, size_t len);
 ssize_t         safewrite(int fd, char *buf, size_t len);
@@ -125,12 +128,12 @@ static int      authd = 0;
 static int      rcptcount = 0;
 static int      match;
 static char     strnum[FMT_ULONG], pid_str[FMT_ULONG], accept_buf[FMT_ULONG];
-static char    *protocol = "SMTP";
-static char    *hostname, *remoteip, *relayclient, *remoteinfo;
+const char     *protocol = "SMTP";
+const char     *hostname, *remoteip, *relayclient, *remoteinfo;
 static char   **childargs;
 static struct authcmd
 {
-	char           *text;
+	const char     *text;
 	int             (*fun) ();
 } authcmds[] = {
 	{"login", auth_login},
@@ -170,13 +173,13 @@ flush()
 }
 
 void
-out(char *s)
+out(const char *s)
 {
 	substdio_puts(&ssout, s);
 }
 
 void
-logerr(char *s)
+logerr(const char *s)
 {
 	if (substdio_puts(&sserr, s))
 		_exit (1);
@@ -196,7 +199,7 @@ logerr_start()
 }
 
 void
-logerrf(char *s)
+logerrf(const char *s)
 {
 	if (substdio_puts(&sserr, s))
 		_exit (1);
@@ -205,9 +208,9 @@ logerrf(char *s)
 }
 
 void
-log_trans(char *arg1, char *arg2, int rcptlen, char *arg3)
+log_trans(const char *arg1, const char *arg2, int rcptlen, const char *arg3)
 {
-	char           *ptr;
+	const char     *ptr;
 	int             idx;
 
 	for (ptr = arg2 + 1, idx = 0; idx < rcptlen; idx++) {
@@ -250,10 +253,10 @@ log_trans(char *arg1, char *arg2, int rcptlen, char *arg3)
 }
 
 void
-err_queue(char *arg1, char *arg2, int len, char *arg3, char *qqx,
+err_queue(const char *arg1, const char *arg2, int len, const char *arg3, const char *qqx,
 	int permanent, unsigned long qp)
 {
-	char           *ptr;
+	const char     *ptr;
 	int             idx;
 
 	accept_buf[fmt_ulong(accept_buf, qp)] = 0;
@@ -304,7 +307,7 @@ err_queue(char *arg1, char *arg2, int len, char *arg3, char *qqx,
 }
 
 no_return void
-die_control(char *arg)
+die_control(const char *arg)
 {
 	logerr_start();
 	logerr("451 unable to read control file ");
@@ -647,14 +650,14 @@ smtp_rcpt(char *arg)
 struct qmail    qqt;
 
 void
-put(char *buf, unsigned int len)
+put(const char *buf, unsigned int len)
 {
 	qmail_put(&qqt, buf, len);
 	databytes += len;
 }
 
 void
-myputs(char *buf)
+myputs(const char *buf)
 {
 	unsigned int    len;
 
@@ -674,7 +677,7 @@ rewritelist(stralloc *list)
 }
 
 void
-putlist(char *name_t, stralloc *list)
+putlist(const char *name_t, stralloc *list)
 {
 	if (!list->len)
 		return;
@@ -703,33 +706,33 @@ stralloc        bottom = { 0 };
 
 mess822_header  h = MESS822_HEADER;
 mess822_action  a[] = {
-	{"date", 0, 0, 0, 0, &date}
-	, {"to", 0, 0, 0, &to, 0}
-	, {"cc", 0, 0, 0, &cc, 0}
-	, {"notice-requested-upon-delivery-to", 0, 0, 0, &nrudt, 0}
-	, {"from", 0, 0, 0, &from, 0}
-	, {"sender", 0, 0, 0, &headersender, 0}
-	, {"reply-to", 0, 0, 0, &replyto, 0}
-	, {"mail-reply-to", 0, 0, 0, &mailreplyto, 0}
-	, {"mail-followup-to", 0, 0, 0, &followupto, 0}
-	, {"message-id", 0, &msgid, 0, 0, 0}
-	, {"received", 0, &top, 0, 0, 0}
-	, {"delivered-to", 0, &top, 0, 0, 0}
-	, {"errors-to", 0, &top, 0, 0, 0}
-	, {"return-receipt-to", 0, &top, 0, 0, 0}
-	, {"resent-sender", 0, &top, 0, 0, 0}
-	, {"resent-from", 0, &top, 0, 0, 0}
-	, {"resent-reply-to", 0, &top, 0, 0, 0}
-	, {"resent-to", 0, &top, 0, 0, 0}
-	, {"resent-cc", 0, &top, 0, 0, 0}
-	, {"resent-bcc", 0, &top, 0, 0, 0}
-	, {"resent-date", 0, &top, 0, 0, 0}
-	, {"resent-message-id", 0, &top, 0, 0, 0}
-	, {"bcc", 0, 0, 0, 0, 0}
-	, {"return-path", 0, 0, 0, 0, 0}
-	, {"apparently-to", 0, 0, 0, 0, 0}
-	, {"content-length", 0, 0, 0, 0, 0}
-	, {0, 0, &bottom, 0, 0, 0}
+	{"date", 0, 0, 0, 0, &date},
+	{"to", 0, 0, 0, &to, 0},
+	{"cc", 0, 0, 0, &cc, 0},
+	{"notice-requested-upon-delivery-to", 0, 0, 0, &nrudt, 0},
+	{"from", 0, 0, 0, &from, 0},
+	{"sender", 0, 0, 0, &headersender, 0},
+	{"reply-to", 0, 0, 0, &replyto, 0},
+	{"mail-reply-to", 0, 0, 0, &mailreplyto, 0},
+	{"mail-followup-to", 0, 0, 0, &followupto, 0},
+	{"message-id", 0, &msgid, 0, 0, 0},
+	{"received", 0, &top, 0, 0, 0},
+	{"delivered-to", 0, &top, 0, 0, 0},
+	{"errors-to", 0, &top, 0, 0, 0},
+	{"return-receipt-to", 0, &top, 0, 0, 0},
+	{"resent-sender", 0, &top, 0, 0, 0},
+	{"resent-from", 0, &top, 0, 0, 0},
+	{"resent-reply-to", 0, &top, 0, 0, 0},
+	{"resent-to", 0, &top, 0, 0, 0},
+	{"resent-cc", 0, &top, 0, 0, 0},
+	{"resent-bcc", 0, &top, 0, 0, 0},
+	{"resent-date", 0, &top, 0, 0, 0},
+	{"resent-message-id", 0, &top, 0, 0, 0},
+	{"bcc", 0, 0, 0, 0, 0},
+	{"return-path", 0, 0, 0, 0, 0},
+	{"apparently-to", 0, 0, 0, 0, 0},
+	{"content-length", 0, 0, 0, 0, 0},
+	{0, 0, &bottom, 0, 0, 0}
 };
 
 void
@@ -859,7 +862,7 @@ void
 smtp_data()
 {
 	struct tai      n;
-	char           *qqx;
+	const char     *qqx;
 	unsigned long   qp;
 
 	tai_now(&n);
@@ -907,7 +910,7 @@ smtp_data()
 }
 
 void
-safecats(stralloc *out, char *in)
+safecats(stralloc *out, const char *in)
 {
 	char            ch;
 	while ((ch = *in++)) {
@@ -931,7 +934,7 @@ safecats(stralloc *out, char *in)
 void
 received_init()
 {
-	char           *x;
+	const char     *x;
 
 	if (!stralloc_copys(&received, "Received: (ofmipd "))
 		nomem();
@@ -1020,7 +1023,7 @@ authenticate(void)
 }
 
 int
-auth_login(char *arg)
+auth_login(const char *arg)
 {
 	int             r;
 
@@ -1054,7 +1057,7 @@ auth_login(char *arg)
 }
 
 int
-auth_plain(char *arg)
+auth_plain(const char *arg)
 {
 	int             r, id = 0;
 
@@ -1246,7 +1249,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	static char    *x = "$Id: ofmipd.c,v 1.25 2024-01-23 01:22:02+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ofmipd.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
