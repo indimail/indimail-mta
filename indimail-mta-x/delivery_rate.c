@@ -1,6 +1,6 @@
 /*
  * $Log: delivery_rate.c,v $
- * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * Revision 1.10  2024-05-11 08:07:18+05:30  Cprogrammer
  * fix discarded-qualifier compiler warnings
  *
  * Revision 1.9  2023-01-15 12:20:12+05:30  Cprogrammer
@@ -45,9 +45,10 @@
 #include "control.h"
 #include "delivery_rate.h"
 
+typedef const char c_char;
 static stralloc ratedefs = { 0 };
 static stralloc ratelimit_file = { 0 };
-extern char    *queuedesc;
+extern c_char  *queuedesc;
 
 /*-
  * returns
@@ -210,7 +211,7 @@ delivery_rate(char *_domain, unsigned long id, datetime_sec *time_needed,
 void
 getversion_delivery_rate_c()
 {
-	const char     *x = "$Id: delivery_rate.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: delivery_rate.c,v 1.10 2024-05-11 08:07:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidgetrateh;

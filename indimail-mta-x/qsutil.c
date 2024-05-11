@@ -1,6 +1,6 @@
 /*
  * $Log: qsutil.c,v $
- * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * Revision 1.26  2024-05-11 08:08:12+05:30  Cprogrammer
  * fix discarded-qualifier compiler warnings
  *
  * Revision 1.25  2023-06-25 20:11:21+05:30  Cprogrammer
@@ -95,9 +95,10 @@
 
 static stralloc foo = { 0 };
 
+typedef const char c_char;
 static char     errbuf[1024];
 static struct substdio sserr = SUBSTDIO_FDBUF(write, 0, errbuf, sizeof(errbuf));
-extern char    *queuedesc; /*- defined in qmail-send.c */
+extern c_char  *queuedesc; /*- defined in qmail-send.c */
 #ifdef LOGLOCK
 static stralloc lockfn = { 0 };
 int             loglock_fd = -1;
@@ -330,7 +331,7 @@ logsafe(const char *s, const char *argv0)
 void
 getversion_qsutil_c()
 {
-	const char     *x = "$Id: qsutil.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qsutil.c,v 1.26 2024-05-11 08:08:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
