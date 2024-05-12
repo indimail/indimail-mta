@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.76 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
+# $Id: test-indimail-mta,v 1.77 2024-05-12 21:22:10+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1216,6 +1216,7 @@ start_tcpserver_smtp()
 	echo 1                 > $testdir/smtpd/variables/MAKE_SEEKABLE
 	echo ""                > $testdir/smtpd/variables/DKIMVERIFY
 	echo 1                 > $testdir/smtpd/variables/BADHELOCHECK
+	echo 0                 > $testdir/smtpd/variables/PENALTY
 	echo "$sbindir/qmail-dkim $sbindir/qmail-spamfilter" > $testdir/smtpd/variables/QMAILQUEUE
 	(
 	if [ $# -eq 1 ] ; then
@@ -3352,6 +3353,7 @@ setup_svscan_basic()
 	echo $cntrldir      > $servicedir/smtpd/variables/CONTROLDIR
 	echo $testdir/queue > $servicedir/smtpd/variables/QUEUEDIR
 	echo $certdir       > $servicedir/smtpd/variables/CERTDIR
+	echo 0              > $servicedir/smtpd/variables/PENALTY
 	(
 	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -u qmaild -g qmail -v -l $HOSTNAME -HR 0 "
 	printf "$smtp_port $qmail_smtpd $HOSTNAME $testdir/bin/authsmtp "
@@ -9085,6 +9087,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.77  2024-05-12 21:22:10+05:30  Cprogrammer
+# create env variable PENALTY
+#
 # Revision 1.76  2024-05-12 00:20:03+05:30  mbhangui
 # fix function prototypes
 #

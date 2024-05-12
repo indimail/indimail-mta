@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.325 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
+ * $Id: smtpd.c,v 1.326 2024-05-12 21:20:45+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -157,8 +157,8 @@ static int     smtps = 0;
 static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
-static int      tr_success = 0;
-static c_char  *revision = "$Revision: 1.325 $";
+static int      tr_success = 0, penalty = 5;
+static c_char  *revision = "$Revision: 1.326 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1360,7 +1360,8 @@ smtp_badip()
 {
 	logerr(1, "BAD IP client\n", NULL);
 	logflush();
-	sleep(5);
+	if (penalty > 0)
+		sleep(penalty);
 	out("421 sorry, your IP (", remoteip, ") is temporarily denied (#4.7.1)\r\n", NULL);
 	flush();
 	return;
@@ -1371,7 +1372,8 @@ smtp_badhost(const char *arg)
 {
 	logerr(1, "BAD HOST ", remotehost, "\n", NULL);
 	logflush();
-	sleep(5);
+	if (penalty > 0)
+		sleep(penalty);
 	out("553 sorry, your host (", remotehost, ") has been denied (#5.7.1)\r\n", NULL);
 	flush();
 	return;
@@ -1382,7 +1384,8 @@ smtp_relayreject()
 {
 	logerr(1, "OPEN RELAY client\n", NULL);
 	logflush();
-	sleep(5);
+	if (penalty > 0)
+		sleep(penalty);
 	out("553 No mail accepted from an open relay (", remoteip,
 			"); check your server configs (#5.7.1)\r\n", NULL);
 	flush();
@@ -1396,7 +1399,8 @@ smtp_paranoid()
 
 	logerr(1, "PTR (reverse DNS) record points to wrong hostname\n", NULL);
 	logflush();
-	sleep(5);
+	if (penalty > 0)
+		sleep(penalty);
 	ptr = env_get("TCPPARANOID");
 	out("553 sorry, your IP address (", remoteip, NULL);
 	out(") PTR (reverse DNS) record points to wrong hostname", NULL);
@@ -1414,7 +1418,8 @@ smtp_ptr()
 
 	logerr(1, "unable to obtain PTR (reverse DNS) record\n", NULL);
 	logflush();
-	sleep(5);
+	if (penalty > 0)
+		sleep(penalty);
 	ptr = env_get("REQPTR");
 	out("553 ", NULL);
 	if (*ptr)
@@ -3574,7 +3579,8 @@ check_sender(void *(*inquery) (char, const char *, const char *), const char *li
 		if (check_user_pwd(t_addr.s, at)) {
 			logerr(1, "CHECKSENDER: SMTP Access denied to <", t_addr.s, ">: user does not exist\n", NULL);
 			logflush();
-			sleep(5); /*- Prevent DOS */
+			if (penalty > 0) /*- Prevent DOS */
+				sleep(penalty);
 			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
 			return 1;
@@ -3593,7 +3599,8 @@ check_sender(void *(*inquery) (char, const char *, const char *), const char *li
 				 */
 				logerr(1, "CHECKSENDER: SMTP Access denied to <", t_addr.s, ">: user does not exist\n", NULL);
 				logflush();
-				sleep(5); /*- Prevent DOS */
+				if (penalty > 0) /*- Prevent DOS */
+					sleep(penalty);
 				out("553 authorization failure (#5.7.1)\r\n", NULL);
 				flush();
 				return 1;
@@ -3621,7 +3628,8 @@ check_sender(void *(*inquery) (char, const char *, const char *), const char *li
 	} else { /* if (in_rcpthosts) */
 			logerr(1, "CHECKSENDER: SMTP Access denied to <", t_addr.s, ">: user not local\n", NULL);
 			logflush();
-			sleep(5); /*- Prevent DOS */
+			if (penalty > 0) /*- Prevent DOS */
+				sleep(penalty);
 			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
 			return 1;
@@ -4350,7 +4358,8 @@ smtp_rcpt(const char *arg)
 			}
 			if (result > 0) {
 				rcpt_errcount++;
-				sleep(5); /*- Prevent DOS */
+				if (penalty > 0) /*- Prevent DOS */
+					sleep(penalty);
 			}
 			switch (result)
 			{
@@ -5368,7 +5377,8 @@ get_scram_record(const char *u, int *mech, int *iter, char **salt, char **stored
 			 */
 			logerr(1, "mail from invalid user <", u, ">\n", NULL);
 			logflush();
-			sleep(5); /*- Prevent DOS */
+			if (penalty > 0) /*- Prevent DOS */
+				sleep(penalty);
 			out("553 authorization failure (#5.7.1)\r\n", NULL);
 			flush();
 			return ((PASSWD *) NULL);
@@ -6339,7 +6349,8 @@ smtp_auth(const char *arg)
 	case 1:/*- auth fail */
 	case 2:/*- misuse */
 		err_authfailure(user.len ? user.s : 0, j);
-		sleep(5);
+		if (penalty > 0)
+			sleep(penalty);
 		out("535 authorization failure (#5.7.8)\r\n", NULL);
 		flush();
 		break;
@@ -7119,6 +7130,8 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	else
 		smtp_port = -1;
 	port = smtp_port;
+	if ((ptr = env_get("PENALTY")))
+		scan_int(ptr, &penalty);
 	if ((ptr = env_get("ODMR"))) {/*- support ODMR on port 25 */
 		if (smtp_port != SUBM_PORT)
 			smtp_port = ODMR_PORT;
@@ -7368,6 +7381,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.326  2024-05-12 21:20:45+05:30  Cprogrammer
+ * made penalty configurable
+ *
  * Revision 1.325  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -7803,7 +7819,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.325 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.326 2024-05-12 21:20:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

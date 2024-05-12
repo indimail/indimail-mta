@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.16  2024-05-12 21:20:28+05:30  Cprogrammer
+ * added env variable penalty
+ *
  * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -126,7 +129,7 @@ print_details()
 		"DISABLE_SCRAM_SHA512", "DISABLE_SCRAM_SHA512_PLUS", "DISABLE_VRFY",
 		"DOMAINQUEUE", "ENFORCE_FQDN_HELO", "FORCE_TLS", "FROMRULES", "GREYIP",
 		"HIDE_HOST", "LOGFD", "LOGFILTER", "MASQUERADE", "MAX_RCPT_ERRCOUNT", "NODNSCHECK",
-		"OPENRELAY", "PLUGINDIR", "RELAYCLIENT", "REQPTR", "REQUIREAUTH", "SECURE_AUTH",
+		"OPENRELAY", "PENALTY", "PLUGINDIR", "RELAYCLIENT", "REQPTR", "REQUIREAUTH", "SECURE_AUTH",
 		"SERVERCERT", "SHUTDOWN", "SIGNATURES", "SMTP_PLUGIN", "SMTP_PLUGIN_SYMB",
 		"SMTPS", "SMTPUTF8", "SPAMFILTER",
 #ifdef HAVESRS
@@ -278,7 +281,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	const char     *x = "$Id: qmail-smtpd.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-smtpd.c,v 1.16 2024-05-12 21:20:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
