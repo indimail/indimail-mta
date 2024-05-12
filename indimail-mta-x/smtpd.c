@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.324 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: smtpd.c,v 1.325 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -115,8 +115,8 @@ static void     ssl_proto();
 #endif
 ssize_t         safewrite(int, char *, int);
 ssize_t         saferead(int, char *, int);
-static int      auth_login(char *);
-static int      auth_plain(char *);
+static int      auth_login(const char *);
+static int      auth_plain(const char *);
 static int      auth_cram_md5();
 static int      auth_cram_sha1();
 static int      auth_cram_sha224();
@@ -158,7 +158,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0;
-static c_char  *revision = "$Revision: 1.324 $";
+static c_char  *revision = "$Revision: 1.325 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -400,7 +400,7 @@ static int      convertbarelf;
 
 struct authcmd {
 	const char     *text;
-	int             (*fun) ();
+	int             (*fun) (const char *);
 } authcmds[] = {
 	{"login", auth_login},
 	{"plain", auth_plain},
@@ -2223,7 +2223,7 @@ sigterm()
 }
 
 void
-smtp_help(char *arg)
+smtp_help(const char *arg)
 {
 	const char     *ptr;
 
@@ -2274,7 +2274,7 @@ smtp_help(char *arg)
 }
 
 no_return void
-smtp_quit(char *arg)
+smtp_quit(const char *arg)
 {
 #ifdef SMTP_PLUGIN
 	int             i;
@@ -2880,7 +2880,7 @@ setup()
 }
 
 int
-addrparse(char *arg)
+addrparse(const char *arg)
 {
 	int             i, flagesc, flagquoted;
 	char            ch, terminator;
@@ -2962,7 +2962,7 @@ addrparse(char *arg)
 }
 
 void
-smtp_helo(char *arg)
+smtp_helo(const char *arg)
 {
 	seenmail = 0;
 	switch (setup_state)
@@ -3002,7 +3002,7 @@ smtp_helo(char *arg)
 }
 
 void
-smtp_ehlo(char *arg)
+smtp_ehlo(const char *arg)
 {
 	char            size_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 
@@ -3251,7 +3251,7 @@ smtp_ehlo(char *arg)
 }
 
 void
-smtp_rset(char *arg)
+smtp_rset(const char *arg)
 {
 	if (arg && *arg) {
 		out("501 invalid parameter syntax (#5.3.2)\r\n", NULL);
@@ -3491,7 +3491,7 @@ mailfrom_auth(char *arg, int len)
 }
 
 void
-mailfrom_parms(char *arg)
+mailfrom_parms(const char *arg)
 {
 	int             i;
 	int             len;
@@ -3718,7 +3718,7 @@ check_sender(void *(*inquery) (char, const char *, const char *), const char *li
 }
 
 void
-smtp_mail(char *arg)
+smtp_mail(const char *arg)
 {
 	const char     *x, *ptr;
 	int             ret, i, in_rcpt1 = -1, in_rcpt2 = -1;
@@ -4087,7 +4087,7 @@ smtp_mail(char *arg)
 }
 
 void
-smtp_rcpt(char *arg)
+smtp_rcpt(const char *arg)
 {
 	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, at,
 					isLocal;
@@ -4808,7 +4808,7 @@ create_logfilter()
 }
 
 void
-smtp_data(char *arg)
+smtp_data(const char *arg)
 {
 	int             hops, j;
 	unsigned long   qp;
@@ -5206,7 +5206,7 @@ authenticate(int method)
 }
 
 static int
-auth_login(char *arg)
+auth_login(const char *arg)
 {
 	int             r;
 
@@ -5244,7 +5244,7 @@ auth_login(char *arg)
 }
 
 static int
-auth_plain(char *arg)
+auth_plain(const char *arg)
 {
 	int             r, id = 0;
 
@@ -6262,10 +6262,10 @@ auth_digest_md5()
 }
 
 void
-smtp_auth(char *arg)
+smtp_auth(const char *arg)
 {
 	int             i, j;
-	char           *cmd = arg;
+	char           *cmd;
 
 	switch (setup_state)
 	{
@@ -6309,6 +6309,9 @@ smtp_auth(char *arg)
 			!stralloc_copys(&pass, "") ||
 			!stralloc_copys(&resp, ""))
 		die_nomem();
+	if (!stralloc_copys(&tmpBuf, arg) || !stralloc_0(&tmpBuf))
+		die_nomem();
+	cmd = tmpBuf.s;
 	i = str_chr(cmd, ' ');
 	arg = cmd + i;
 	while (*arg == ' ')
@@ -6359,7 +6362,7 @@ smtp_auth(char *arg)
 }
 
 void
-smtp_etrn(char *arg)
+smtp_etrn(const char *arg)
 {
 	int             status, i;
 	char            tmpbuf[1024], err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
@@ -6469,7 +6472,7 @@ static stralloc a_user = {0}, domain = {0};
  * leading and trailing white spaces are handled
  */
 int
-check_atrn_acc(char *atrnaddr, char *domain_list)
+check_atrn_acc(const char *atrnaddr, char *domain_list)
 {
 	char           *ptr1, *ptr2, *x;
 	int             i, c;
@@ -6516,9 +6519,9 @@ check_atrn_acc(char *atrnaddr, char *domain_list)
 }
 
 void
-mta_access(char *atrnaddr, int *reject, int *temp)
+mta_access(const char *atrnaddr, int *reject, int *temp)
 {
-	int             r, atpos, lcount, wildcard, len;
+	int             r, atpos, wildcard, len;
 	const char     *ptr, *errstr;
 	char           *cptr;
 
@@ -6542,7 +6545,7 @@ mta_access(char *atrnaddr, int *reject, int *temp)
 			!stralloc_0(&a_user))
 		die_nomem();
 	a_user.len--;
-	for (lcount = len = 0, ptr = atrnaccess.s; len < atrnaccess.len;) {
+	for (len = 0, ptr = atrnaccess.s; len < atrnaccess.len;) {
 		len += (str_len(ptr) + 1);
 		for (cptr = (char *) ptr; *cptr && *cptr != ':'; cptr++);
 		if (*cptr == ':')
@@ -6570,7 +6573,6 @@ mta_access(char *atrnaddr, int *reject, int *temp)
 			return;
 		}
 		ptr = atrnaccess.s + len;
-		lcount++;
 	}
 	*reject = 1;
 	*temp = 0;
@@ -6578,7 +6580,7 @@ mta_access(char *atrnaddr, int *reject, int *temp)
 }
 
 void
-indimail_virt_access(char *arg, char **dptr, int *reject, int *temp)
+indimail_virt_access(const char *arg, const char **dptr, int *reject, int *temp)
 {
 	const char     *ptr, *errstr;
 	char           *user_tmp, *domain_tmp;
@@ -6650,9 +6652,9 @@ indimail_virt_access(char *arg, char **dptr, int *reject, int *temp)
 }
 
 void
-smtp_atrn(char *arg)
+smtp_atrn(const char *arg)
 {
-	char           *domain_ptr;
+	const char     *domain_ptr;
 	int             i, status, reject = 0, temp = 0;
 	char            err_buff[1024], status_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 
@@ -6738,7 +6740,7 @@ int             ssl_verified = 0;
 const char     *ssl_verify_err = 0;
 
 void
-smtp_tls(char *arg)
+smtp_tls(const char *arg)
 {
 	if (ssl)
 		err_unimpl("unimplimented");
@@ -7366,6 +7368,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.325  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.324  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -7798,7 +7803,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.324 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.325 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 	return revision + 11;

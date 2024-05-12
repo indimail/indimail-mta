@@ -24,7 +24,7 @@
 
 #ifdef MULTI_QUEUE
 int
-main_function()
+main_function(int *lcount, int *rcount, int *bcount, int *tcount)
 #else
 int
 main()
@@ -93,6 +93,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.30  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.29  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -176,7 +179,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	const char     *x = "$Id: qmail-tcpok.c,v 1.29 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-tcpok.c,v 1.30 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: tlsacheck.h,v $
+ * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.4  2018-05-27 22:12:47+05:30  Cprogrammer
  * added defintions for qmail-daned modes
  *
@@ -33,6 +36,6 @@
 #define UPDATE_SUCCESS  2
 #define UPDATE_FAILURE  3
 
-int             tlsacheck(char *, char *, int, char [], void (*)(), void (*)());
+int             tlsacheck(const char *, const char *, int, char [], void (*)(), void (*)());
 
 #endif

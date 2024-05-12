@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.75 2024-04-30 08:19:52+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.76 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -126,28 +126,6 @@ do_cleanup_failed()
 	if [ $failed -eq 0 ] ; then
 		return 0
 	fi
-	sudo /bin/rm -rf $servicedir $logdir \
-		$testdir/queue $testdir/slowq1 $testdir/slowq2 $testdir/qmta $testdir/qmta1 $testdir/qmta2 \
-		$testdir/domainqueue $testdir/bin $tmpdir $testdir/run $testdir/sleep.out $testdir/svscan.out \
-		$testdir/tcpclient.smtp $testdir/.vacation.dir/* $testdir/.vacation.msg \
-		$testdir/$user/Maildir/new/* $testdir/$testuser/Maildir/new/* \
-		$testdir/$testuser/Maildir/.Quarantine $testdir/$testuser/Maildir/.Spam \
-		$testdir/$blockeduser/Maildir $qmaildir/domains \
-		$qmaildir/alias/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/new/* \
-		$qmaildir/autoturn/$vdomain/Maildir/cur/* $sysconfdir/users $testdir/variables
-	sudo /bin/rm -f  $cntrldir/mailarch $cntrldir/accesslist $cntrldir/from.envrules \
-		$cntrldir/badmailfrom.custom $cntrldir/dkimkeys $cntrldir/smtproutes $cntrldir/recipients \
-		$cntrldir/remote-auth $cntrldir/remote_auth.cdb $cntrldir/filterargs
-
-	if [ -d $maildir ] ; then
-		find $maildir -type f -exec /bin/rm -f {} \;
-	fi
-	if [ -d $testdir/$testuser/Maildir ] ; then
-		find $testdir/$testuser/Maildir -type f -exec /bin/rm -f {} \;
-	fi
-	if [ -d $qmaildir/alias/Maildir ] ; then
-		sudo find $qmaildir/alias/Maildir -type f -exec /bin/rm -f {} \;
-	fi
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid 2>/dev/null)
 	if [ -n "$svpid" ] ; then
 		shutdown_svscan
@@ -179,6 +157,28 @@ do_cleanup_failed()
 
 		[ -z "$qmta_pid2" ] && qmta_pid2=$(get_send_pid qmta-send $testdir/qmta2)
 		terminate_send qmta-send "$qmta_pid2" && qmta_pid2=""
+	fi
+	sudo /bin/rm -rf $servicedir $logdir \
+		$testdir/queue $testdir/slowq1 $testdir/slowq2 $testdir/qmta $testdir/qmta1 $testdir/qmta2 \
+		$testdir/domainqueue $testdir/bin $tmpdir $testdir/run $testdir/sleep.out $testdir/svscan.out \
+		$testdir/tcpclient.smtp $testdir/.vacation.dir/* $testdir/.vacation.msg \
+		$testdir/$user/Maildir/new/* $testdir/$testuser/Maildir/new/* \
+		$testdir/$testuser/Maildir/.Quarantine $testdir/$testuser/Maildir/.Spam \
+		$testdir/$blockeduser/Maildir $qmaildir/domains \
+		$qmaildir/alias/Maildir/new/* $qmaildir/autoturn/$vdomain/Maildir/new/* \
+		$qmaildir/autoturn/$vdomain/Maildir/cur/* $sysconfdir/users $testdir/variables
+	sudo /bin/rm -f  $cntrldir/mailarch $cntrldir/accesslist $cntrldir/from.envrules \
+		$cntrldir/badmailfrom.custom $cntrldir/dkimkeys $cntrldir/smtproutes $cntrldir/recipients \
+		$cntrldir/remote-auth $cntrldir/remote_auth.cdb $cntrldir/filterargs
+
+	if [ -d $maildir ] ; then
+		find $maildir -type f -exec /bin/rm -f {} \;
+	fi
+	if [ -d $testdir/$testuser/Maildir ] ; then
+		find $testdir/$testuser/Maildir -type f -exec /bin/rm -f {} \;
+	fi
+	if [ -d $qmaildir/alias/Maildir ] ; then
+		sudo find $qmaildir/alias/Maildir -type f -exec /bin/rm -f {} \;
 	fi
 }
 
@@ -9085,6 +9085,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.76  2024-05-12 00:20:03+05:30  mbhangui
+# fix function prototypes
+#
 # Revision 1.75  2024-04-30 08:19:52+05:30  Cprogrammer
 # updated cleanup
 #

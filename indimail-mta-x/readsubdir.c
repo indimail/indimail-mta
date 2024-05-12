@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.c,v $
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -26,7 +29,7 @@
 #include "str.h"
 
 void
-readsubdir_init(readsubdir *rs, const char *name, int flagsplit, void (*pause)())
+readsubdir_init(readsubdir *rs, const char *name, int flagsplit, void (*pause)(char *))
 {
 	rs->name = name;
 	rs->pause = pause;
@@ -96,7 +99,7 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	const char     *x = "$Id: readsubdir.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: readsubdir.c,v 1.8 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

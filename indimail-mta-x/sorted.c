@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -22,9 +25,7 @@
 GEN_ALLOC_readyplus(sorted,stralloc,p,len,a,100,sorted_readyplus)
 
 int
-sorted_insert(sl, sa)
-	sorted         *sl;
-	stralloc       *sa;
+sorted_insert(sorted *sl, stralloc *sa)
 {
 	int             i;
 	int             j;
@@ -59,7 +60,7 @@ sorted_insert(sl, sa)
 void
 getversion_sorted_c()
 {
-	const char     *x = "$Id: sorted.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sorted.c,v 1.5 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

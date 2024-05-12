@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.13  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -41,9 +44,7 @@
 #include "fmt.h"
 
 unsigned int
-ip4_fmt(s, ip)
-	char           *s;
-	ip_addr       *ip;
+ip4_fmt(char *s, ip_addr *ip)
 {
 	unsigned int    len;
 	unsigned int    i;
@@ -147,9 +148,7 @@ ip4_scanbracket(const char *s, ip_addr *ip)
 
 #ifdef IPV6
 unsigned int
-ip6_fmt_flat(s, ip6)
-	char           *s;
-	ip6_addr       *ip6;
+ip6_fmt_flat(char *s, ip6_addr *ip6)
 {
 	unsigned int    len;
 	unsigned int    i, j, k;
@@ -169,9 +168,7 @@ ip6_fmt_flat(s, ip6)
 }
 
 unsigned int
-ip6_fmt_exp(s, ip6)
-	char           *s;
-	ip6_addr       *ip6;
+ip6_fmt_exp(char *s, ip6_addr *ip6)
 {
 	unsigned int    len;
 	unsigned int    i, j, k;
@@ -195,9 +192,7 @@ ip6_fmt_exp(s, ip6)
 }
 
 unsigned int
-ip6_fmt(s, ip6)
-	char           *s;
-	ip6_addr       *ip6;
+ip6_fmt(char *s, ip6_addr *ip6)
 {
 	unsigned int    len, i, temp, compressing, compressed;
 	int             j;
@@ -359,7 +354,7 @@ ip6_scanbracket(const char *s, ip6_addr *ip6)
 void
 getversion_ip_c()
 {
-	const char     *x = "$Id: ip.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ip.c,v 1.13 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

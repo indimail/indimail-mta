@@ -1,5 +1,8 @@
 /*
  * $Log: auto-str.c,v $
+ * Revision 1.9  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.8  2020-11-24 13:44:02+05:30  Cprogrammer
  * removed exit.h
  *
@@ -36,17 +39,14 @@ is_legible(unsigned char ch)
 }
 
 void
-my_puts(s)
-	char           *s;
+my_puts(const char *s)
 {
 	if (substdio_puts(&ss1, s) == -1)
 		_exit(111);
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *name;
 	char           *value;

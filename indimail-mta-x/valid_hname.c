@@ -1,5 +1,5 @@
 /*
- * $Id: valid_hname.c,v 1.1 2023-12-03 12:17:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: valid_hname.c,v 1.2 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include <ctype.h>
 #include <str.h>
@@ -20,7 +20,7 @@
  *      Yorktown Heights, NY 10598, USA
  */
 int
-valid_hname(char *name)
+valid_hname(const char *name)
 {
 	const char     *cp;
 	int             label_length = 0, ch, non_numeric = 0;
@@ -61,6 +61,9 @@ valid_hname(char *name)
 
 /*
  * $Log: valid_hname.c,v $
+ * Revision 1.2  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.1  2023-12-03 12:17:05+05:30  Cprogrammer
  * Initial revision
  *

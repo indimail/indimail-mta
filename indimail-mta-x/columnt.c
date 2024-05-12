@@ -1,5 +1,8 @@
 /*
  * $Log: columnt.c,v $
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -71,20 +74,14 @@ printline()
 }
 
 void
-maxfield_check(fieldnum, buf, len)
-	int             fieldnum;
-	char           *buf;
-	int             len;
+maxfield_check(int fieldnum, char *buf, int len)
 {
 	if (fieldnum > maxfield)
 		maxfield = fieldnum;
 }
 
 void
-width_check(fieldnum, buf, len)
-	int             fieldnum;
-	char           *buf;
-	int             len;
+width_check(int fieldnum, char *buf, int len)
 {
 	if (len > width[fieldnum])
 		width[fieldnum] = len;
@@ -95,18 +92,14 @@ width_init()
 {
 	int             i;
 
-	width = (int *) alloc((maxfield + 1) * sizeof(int));
-	if (!width)
+	if (!(width = (int *) alloc((maxfield + 1) * sizeof(int))))
 		nomem();
 	for (i = 0; i <= maxfield; ++i)
 		width[i] = 0;
 }
 
 void
-printfield(fieldnum, buf, len)
-	int             fieldnum;
-	char           *buf;
-	int             len;
+printfield(int fieldnum, char *buf, int len)
 {
 	int             i;
 
@@ -124,14 +117,9 @@ printfield(fieldnum, buf, len)
 }
 
 void
-split(dofield, doline)
-	void            (*dofield) ();
-	void            (*doline) ();
+split(void (*dofield) (int, char *, int), void (*doline) (void))
 {
-	int             i;
-	int             j;
-	int             fieldpos;
-	int             fieldnum;
+	int             i, j, fieldpos, fieldnum;
 
 	for (j = i = 0; j < file.len; ++j)
 		if (file.s[j] == '\n')
@@ -178,7 +166,7 @@ main()
 void
 getversion_columnt_c()
 {
-	const char     *x = "$Id: columnt.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: columnt.c,v 1.8 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

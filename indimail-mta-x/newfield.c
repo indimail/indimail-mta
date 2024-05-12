@@ -1,5 +1,8 @@
 /*
  * $Log: newfield.c,v $
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -33,9 +36,7 @@ stralloc        newfield_date = { 0 };
 stralloc        newfield_msgid = { 0 };
 
 static unsigned int
-datefmt(s, when)
-	char           *s;
-	datetime_sec    when;
+datefmt(char *s, datetime_sec when)
 {
 	unsigned int    i;
 	unsigned int    len;
@@ -55,11 +56,7 @@ datefmt(s, when)
 }
 
 static unsigned int
-msgidfmt(s, idhost, idhostlen, when)
-	char           *s;
-	char           *idhost;
-	int             idhostlen;
-	datetime_sec    when;
+msgidfmt(char *s, char *idhost, int idhostlen, datetime_sec when)
 {
 	unsigned int    i;
 	unsigned int    len;
@@ -120,8 +117,7 @@ msgidfmt(s, idhost, idhostlen, when)
 }
 
 int
-newfield_datemake(when)
-	datetime_sec    when;
+newfield_datemake(datetime_sec when)
 {
 	if (!stralloc_ready(&newfield_date, datefmt(FMT_LEN, when)))
 		return 0;
@@ -130,10 +126,7 @@ newfield_datemake(when)
 }
 
 int
-newfield_msgidmake(idhost, idhostlen, when)
-	char           *idhost;
-	int             idhostlen;
-	datetime_sec    when;
+newfield_msgidmake(char *idhost, int idhostlen, datetime_sec when)
 {
 	if (!stralloc_ready(&newfield_msgid, msgidfmt(FMT_LEN, idhost, idhostlen, when)))
 		return 0;
@@ -144,7 +137,7 @@ newfield_msgidmake(idhost, idhostlen, when)
 void
 getversion_newfield_c()
 {
-	const char     *x = "$Id: newfield.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: newfield.c,v 1.8 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

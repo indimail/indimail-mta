@@ -1,5 +1,5 @@
 /*
- * $Id: mini-smtpd.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: mini-smtpd.c,v 1.11 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -74,8 +74,7 @@ flush()
 }
 
 void
-out(s)
-	char           *s;
+out(const char *s)
 {
 	substdio_puts(&ssout, s);
 }
@@ -139,8 +138,7 @@ err_size()
 }
 
 void
-err_unimpl(arg)
-	char           *arg;
+err_unimpl(const char *arg)
 {
 	out("502 unimplemented (#5.5.1)\r\n");
 }
@@ -164,13 +162,13 @@ err_wantrcpt()
 }
 
 void
-err_noop(char *arg)
+err_noop(const char *arg)
 {
 	out("250 ok\r\n");
 }
 
 void
-err_vrfy(char *arg)
+err_vrfy(const char *arg)
 {
 	out("252 send some mail, i'll try my best\r\n");
 }
@@ -189,13 +187,13 @@ smtp_greet(const char *code)
 }
 
 void
-smtp_help(char *arg)
+smtp_help(const char *arg)
 {
 	out("214 netqmail home page: http://qmail.org/netqmail\r\n");
 }
 
 no_return void
-smtp_quit(char *arg)
+smtp_quit(const char *arg)
 {
 	smtp_greet("221 ");
 	out("\r\n");
@@ -248,7 +246,7 @@ setup()
 }
 
 int
-addrparse(char *arg)
+addrparse(const char *arg)
 {
 	int             i;
 	char            ch;
@@ -335,7 +333,7 @@ addrallowed()
 }
 
 void
-smtp_helo(char *arg)
+smtp_helo(const char *arg)
 {
 	smtp_greet("250 ");
 	out("\r\n");
@@ -344,7 +342,7 @@ smtp_helo(char *arg)
 }
 
 void
-smtp_ehlo(char *arg)
+smtp_ehlo(const char *arg)
 {
 	char            size_buf[FMT_ULONG]; /*- needed for SIZE CMD */
 
@@ -362,14 +360,14 @@ smtp_ehlo(char *arg)
 }
 
 void
-smtp_rset(char *arg)
+smtp_rset(const char *arg)
 {
 	seenmail = 0;
 	out("250 flushed\r\n");
 }
 
 int
-mailfrom_size(char *arg)
+mailfrom_size(const char *arg)
 {
 	long            r;
 	unsigned long   sizebytes = 0;
@@ -382,7 +380,7 @@ mailfrom_size(char *arg)
 }
 
 void
-mailfrom_parms(char *arg)
+mailfrom_parms(const char *arg)
 {
 	int             i;
 	int             len;
@@ -411,7 +409,7 @@ mailfrom_parms(char *arg)
 }
 
 void
-smtp_mail(char *arg)
+smtp_mail(const char *arg)
 {
 	if (!addrparse(arg)) {
 		err_syntax();
@@ -429,7 +427,7 @@ smtp_mail(char *arg)
 }
 
 void
-smtp_rcpt(char *arg)
+smtp_rcpt(const char *arg)
 {
 	if (!seenmail) {
 		err_wantmail();
@@ -614,7 +612,7 @@ acceptmessage(unsigned long qp)
 }
 
 void
-smtp_data(char *arg)
+smtp_data(const char *arg)
 {
 	int             hops;
 	unsigned long   qp;
@@ -716,13 +714,16 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	const char     *x = "$Id: mini-smtpd.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mini-smtpd.c,v 1.11 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.11  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

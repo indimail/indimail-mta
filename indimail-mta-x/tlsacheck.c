@@ -1,5 +1,8 @@
 /*
  * $Log: tlsacheck.c,v $
+ * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -44,11 +47,8 @@ typedef struct sockaddr_in6 sockaddr_in6;
  * address and/or port are missing, supplied defaults are used.
  */
 int
-scan_ip_port(daneip, defaultip, defaultport, ipp, portp)
-	char           *daneip, *defaultip;
-	unsigned int    defaultport;
-	union v46addr  *ipp;
-	unsigned long  *portp;
+scan_ip_port(const char *daneip, const char *defaultip,
+		unsigned int defaultport, union v46addr *ipp, unsigned long *portp)
 {
 	int             n;
 	unsigned long   port;	/* long because of scan_ulong */
@@ -106,10 +106,7 @@ scan_ip_port(daneip, defaultip, defaultport, ipp, portp)
 }
 
 int
-connect_udp(ip, port, errfn)
-	union   v46addr  *ip;
-	unsigned int      port;
-	void              (*errfn)();
+connect_udp(union v46addr *ip, unsigned int port, void (*errfn)())
 {
 	int               fd;
 #ifdef IPV6
@@ -175,11 +172,8 @@ stralloc        chkpacket = {0};
 stralloc        ipbuf = {0};
 
 int
-tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
-	char           *daneip, *domain;
-	int             qOru;
-	char            rbuf[];
-	void            (*timeoutfn) (), (*errfn) (); /*- errfn must _exit */
+tlsacheck(const char *daneip, const char *domain, int qOru, char rbuf[],
+		void (*timeoutfn) (), void (*errfn) ()) /*- errfn must _exit */
 {
 	int             r, len = 0, timeout = DANETIMEOUT;
 	const char     *ptr;
@@ -265,7 +259,7 @@ tlsacheck(daneip, domain, qOru, rbuf, timeoutfn, errfn)
 void
 getversion_tlsacheck_c()
 {
-	const char     *x = "$Id: tlsacheck.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tlsacheck.c,v 1.5 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

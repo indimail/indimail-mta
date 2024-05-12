@@ -1,5 +1,8 @@
 /*
  * $Log: greylist.c,v $
+ * Revision 1.15  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -74,11 +77,8 @@ typedef struct sockaddr_in6 sockaddr_in6;
  * address and/or port are missing, supplied defaults are used.
  */
 int
-scan_ip_port(gip, defaultip, defaultport, ipp, portp)
-	char           *gip, *defaultip;
-	unsigned int    defaultport;
-	union v46addr  *ipp;
-	unsigned long  *portp;
+scan_ip_port(const char *gip, const char *defaultip, unsigned int defaultport,
+		union v46addr *ipp, unsigned long *portp)
 {
 	int             n;
 	unsigned long   port;	/* long because of scan_ulong */
@@ -136,10 +136,7 @@ scan_ip_port(gip, defaultip, defaultport, ipp, portp)
 }
 
 int
-connect_udp(ip, port, errfn)
-	union   v46addr  *ip;
-	unsigned int      port;
-	void              (*errfn)();
+connect_udp(union v46addr *ip, unsigned int port, void (*errfn)())
 {
 	int               fd;
 #ifdef IPV6
@@ -283,7 +280,7 @@ greylist(const char *gip, const char *connectingip, const char *from,
 void
 getversion_greylist_c()
 {
-	const char     *x = "$Id: greylist.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: greylist.c,v 1.15 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

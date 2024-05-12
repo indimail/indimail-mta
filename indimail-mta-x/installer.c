@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: installer.c,v 1.28 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -64,7 +64,7 @@ get_octal(mode_t mode)
 }
 
 void
-print_info(const char *str, const char *source, const char *dest, mode_t mode, uid_t uid, gid_t gid, unsigned long size)
+print_info(const char *str, const char *source, const char *dest, int mode, uid_t uid, gid_t gid, unsigned long size)
 {
 	struct passwd  *pw;
 	struct group   *gr;
@@ -290,12 +290,11 @@ doit(stralloc *line, int uninstall, int check)
 {
 	char           *x;
 	char           *type, *uidstr, *gidstr, *modestr, *mid, *name, *zerobuf;
-	int             fdin, fdout, opt;
+	int             fdin, fdout, opt, mode;
 	unsigned long   m, size = 0;
 	unsigned int    xlen, i;
 	uid_t           uid;
 	gid_t           gid;
-	mode_t          mode;
 	dev_t           dev;
 	struct stat     st;
 	struct passwd  *pw;
@@ -455,7 +454,7 @@ doit(stralloc *line, int uninstall, int check)
 	} else
 		gid = -1;
 	if (*modestr) {
-		scan_uint(modestr, &mode);
+		scan_int(modestr, &mode);
 		if (mode != -1) {
 			scan_8long(modestr, &m);
 			mode = (int) m;
@@ -669,7 +668,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.28 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -677,6 +676,9 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.28  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.27  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

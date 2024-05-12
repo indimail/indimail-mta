@@ -1,5 +1,8 @@
 /*
  * $Log: mlmatchup.c,v $
+ * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -61,17 +64,14 @@ die_write5()
 }
 
 void
-out(buf, len)
-	char           *buf;
-	int             len;
+out(const char *buf, int len)
 {
 	if (substdio_put(subfdout, buf, len) == -1)
 		die_write();
 }
 
 void
-outs(buf)
-	char           *buf;
+outs(const char *buf)
 {
 	if (substdio_puts(subfdout, buf) == -1)
 		die_write();
@@ -81,17 +81,14 @@ char            buf5[512];
 substdio        ss5 = SUBSTDIO_FDBUF(write, 5, buf5, sizeof buf5);
 
 void
-out5(buf, len)
-	char           *buf;
-	int             len;
+out5(const char *buf, int len)
 {
 	if (substdio_put(&ss5, buf, len) == -1)
 		die_write5();
 }
 
 void
-outs5(buf)
-	char           *buf;
+outs5(const char *buf)
 {
 	if (substdio_puts(&ss5, buf) == -1)
 		die_write5();
@@ -117,8 +114,7 @@ ulongalloc      sender = { 0 };
 ulongalloc      birth = { 0 };
 
 int
-msg_find(m)
-	unsigned long   m;
+msg_find(unsigned long m)
 {
 	int             i;
 	for (i = 0; i < nummsg; ++i)
@@ -128,8 +124,7 @@ msg_find(m)
 }
 
 int
-msg_add(m)
-	unsigned long   m;
+msg_add(unsigned long m)
 {
 	int             i;
 	for (i = 0; i < nummsg; ++i)
@@ -159,8 +154,7 @@ msg_add(m)
 }
 
 void
-msg_kill(i)
-	int             i;
+msg_kill(int i)
 {
 	poolbytes -= str_len(pool.s + sender.u[i]) + 1;
 	poolbytes -= str_len(pool.s + birth.u[i]) + 1;
@@ -185,8 +179,7 @@ ulongalloc      drecip = { 0 };
 ulongalloc      dstart = { 0 };
 
 int
-del_find(d)
-	unsigned long   d;
+del_find(unsigned long d)
 {
 	int             i;
 	for (i = 0; i < numdel; ++i)
@@ -196,8 +189,7 @@ del_find(d)
 }
 
 int
-del_add(d)
-	unsigned long   d;
+del_add(unsigned long d)
 {
 	int             i;
 	for (i = 0; i < numdel; ++i)
@@ -219,8 +211,7 @@ del_add(d)
 }
 
 void
-del_kill(i)
-	int             i;
+del_kill(int i)
 {
 	poolbytes -= str_len(pool.s + dchan.u[i]) + 1;
 	poolbytes -= str_len(pool.s + drecip.u[i]) + 1;
@@ -298,9 +289,8 @@ garbage()
 
 static char     datebuf[FMT_ULONG + FMT_ULONG + 2];	/*- ssssssssss.ffffffffff\n */
 
-char           *
-datize(s)
-	char           *s;
+const char     *
+datize(const char *s)
 {
 	int             c;
 	int             len;
@@ -315,8 +305,7 @@ datize(s)
 	while ((c = *s++))
 	{
 		u = c - '0';
-		if (u >= 10)
-		{
+		if (u >= 10) {
 			u = c - 'a';
 			if (u >= 6)
 				break;
@@ -735,7 +724,7 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	const char     *x = "$Id: mlmatchup.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mlmatchup.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

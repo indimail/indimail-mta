@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-inject.c,v 1.52 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-inject.c,v 1.53 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -554,7 +554,7 @@ void
 doheaderfield(stralloc *h)
 {
 	int             htype;
-	int             (*rw) () = 0;
+	int             (*rw) (token822_alloc *) = 0;
 
 	htype = hfield_known(h->s, h->len);
 	if (flagdeletefrom && htype == H_FROM)
@@ -1076,13 +1076,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	const char     *x = "$Id: qmail-inject.c,v 1.52 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-inject.c,v 1.53 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.53  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.52  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

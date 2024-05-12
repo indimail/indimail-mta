@@ -1,5 +1,8 @@
 /*
  * $Log: auto-int8.c,v $
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.7  2020-11-24 13:43:51+05:30  Cprogrammer
  * removed exit.h
  *
@@ -19,17 +22,14 @@ char            buf1[256];
 substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
 
 void
-my_puts(s)
-	char           *s;
+my_puts(const char *s)
 {
 	if (substdio_puts(&ss1, s) == -1)
 		_exit(111);
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *name;
 	char           *value;

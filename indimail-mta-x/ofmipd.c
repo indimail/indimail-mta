@@ -1,5 +1,8 @@
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.27  2024-05-12 08:21:41+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -134,7 +137,7 @@ static char   **childargs;
 static struct authcmd
 {
 	const char     *text;
-	int             (*fun) ();
+	int             (*fun) (const char *);
 } authcmds[] = {
 	{"login", auth_login},
 	{"plain", auth_plain},
@@ -485,7 +488,7 @@ stralloc        addr = { 0 };	/*- will be 0-terminated, if addrparse returns 1 *
 stralloc        rwaddr = { 0 };
 
 int
-addrparse(char *arg)
+addrparse(const char *arg)
 {
 	int             i, flagesc, flagquoted;
 	char            ch, terminator;
@@ -551,14 +554,14 @@ stralloc        mailfrom = { 0 };
 stralloc        rcptto = { 0 };
 
 void
-smtp_helo(char *arg)
+smtp_helo(const char *arg)
 {
 	seenmail = 0;
 	out("250 ofmipd.local\r\n");
 }
 
 void
-smtp_ehlo(char *arg)
+smtp_ehlo(const char *arg)
 {
 	seenmail = 0;
 	out("250-ofmipd.local\r\n");
@@ -577,7 +580,7 @@ smtp_rset()
 }
 
 void
-smtp_mail(char *arg)
+smtp_mail(const char *arg)
 {
 	if (env_get("REQUIREAUTH") && !authd) {
 		err_authrequired();
@@ -626,7 +629,7 @@ smtp_mail(char *arg)
 }
 
 void
-smtp_rcpt(char *arg)
+smtp_rcpt(const char *arg)
 {
 	if (!seenmail) {
 		err_wantmail();
@@ -1137,10 +1140,11 @@ auth_cram()
 }
 
 void
-smtp_auth(char *arg)
+smtp_auth(const char *arg)
 {
 	int             i;
-	char           *cmd = arg;
+	char           *cmd;
+	static stralloc tmpBuf = { 0 };
 
 	if (env_get("SHUTDOWN")) {
 		out("503 bad sequence of commands (#5.3.2)\r\n");
@@ -1162,6 +1166,9 @@ smtp_auth(char *arg)
 			!stralloc_copys(&pass, "") ||
 			!stralloc_copys(&resp, ""))
 		nomem();
+	if (!stralloc_copys(&tmpBuf, arg) || !stralloc_0(&tmpBuf))
+		nomem();
+	cmd = tmpBuf.s;
 	i = str_chr(cmd, ' ');
 	arg = cmd + i;
 	while (*arg == ' ')
@@ -1249,7 +1256,7 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	const char     *x = "$Id: ofmipd.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ofmipd.c,v 1.27 2024-05-12 08:21:41+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

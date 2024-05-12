@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: dossl.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -159,9 +159,9 @@ int
 do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		char **scert, const char *fqdn, const char *_host, int hostlen,
 		void(*tlsquit)(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *s),
-		void(*mem_err)(),
-		void(*ctrl_err)(),
-		void(*write_err)(),
+		void(*mem_err)(void),
+		void(*ctrl_err)(const char *, const char *),
+		void(*write_err)(void),
 #ifdef HAVE_STDARG_H
 		void(*quit)(int code, int e, const char *p, ...),
 #else
@@ -502,10 +502,10 @@ int
 tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 		int match_type, const char *fqdn,
 		void(*tlsquit)(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *s),
-		void(*mem_err)(),
+		void(*mem_err)(void),
 		stralloc *stext,
-		void(*out)(),
-		void(*flush)(),
+		void(*out)(const char *),
+		void(*flush)(void),
 		char **err_str, int verbose)
 {
 #if OPENSSL_VERSION_NUMBER >= 0x10100000L
@@ -730,13 +730,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	const char     *x = "$Id: dossl.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dossl.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

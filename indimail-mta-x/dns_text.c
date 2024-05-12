@@ -1,5 +1,8 @@
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.14  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -70,7 +73,7 @@ static int      responselen;
 static unsigned char *responseend;
 static unsigned char *responsepos;
 static u_long   saveresoptions;
-static int      (*lookup) () = res_query;
+static int      (*lookup) (const char *, int, int, unsigned char *, int) = res_query;
 static int      numanswers;
 static char     name[MAXDNAME];
 
@@ -232,7 +235,7 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	const char     *x = "$Id: dns_text.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dns_text.c,v 1.14 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

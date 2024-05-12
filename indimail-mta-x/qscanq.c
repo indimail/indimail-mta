@@ -1,5 +1,5 @@
 /*
- * $Id: qscanq.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qscanq.c,v 1.15 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -27,8 +27,7 @@ static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
-err(s)
-	char           *s;
+err(const char *s)
 {
 	if (!flaglog)
 		return;
@@ -163,13 +162,16 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	const char     *x = "$Id: qscanq.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qscanq.c,v 1.15 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.15  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.19  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -84,7 +87,7 @@
 #define WARN  "dot-forward: warn: "
 #define INFO "dot-forward: info: "
 
-ssize_t         mywrite(int, char *, int);
+ssize_t         mywrite(int, char *, size_t);
 
 stralloc        line = { 0 };
 int             flagdoit = 1;
@@ -147,10 +150,7 @@ die_parse()
 }
 
 ssize_t
-blindwrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+blindwrite(int fd, char *buf, size_t len)
 {
 	if (write(fd, buf, len) == -1)
 		;
@@ -400,18 +400,14 @@ parseline()
 }
 
 ssize_t
-mywrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+mywrite(int fd, char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 	return len;
 }
 
 void
-try(fn)
-	char           *fn;
+try(char *fn)
 {
 	int             fd;
 	int             match;
@@ -474,9 +470,7 @@ try(fn)
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             opt;
 
@@ -522,7 +516,7 @@ main(argc, argv)
 void
 getversion_dot_forward_c()
 {
-	const char     *x = "$Id: dot-forward.c,v 1.18 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dot-forward.c,v 1.19 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

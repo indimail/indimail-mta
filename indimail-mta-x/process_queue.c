@@ -1,5 +1,8 @@
 /*
  * $Log: process_queue.c,v $
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -42,7 +45,7 @@
 #endif
 
 void
-process_queue(const char *warn, const char *fatal, int (*func)(), int *w, int *x, int *y, int *z)
+process_queue(const char *warn, const char *fatal, int (*func)(int *, int *, int *, int *), int *w, int *x, int *y, int *z)
 {
 	char           *ptr, *qbase;
 	const char     *extra_queue[] = {"nqueue", "slowq", "qmta", 0};
@@ -93,10 +96,7 @@ process_queue(const char *warn, const char *fatal, int (*func)(), int *w, int *x
 		substdio_puts(subfdout, "\n");
 		substdio_flush(subfdout);
 		queuedir = Queuedir.s;
-		if (w && x && y && z)
-			(*func) (w, x, y, z);
-		else
-			(*func) ();
+		(*func) (w, x, y, z);
 		substdio_puts(subfdout, "\n");
 		substdio_flush(subfdout);
 	}
@@ -113,10 +113,7 @@ process_queue(const char *warn, const char *fatal, int (*func)(), int *w, int *x
 			substdio_puts(subfdout, "\n");
 			substdio_flush(subfdout);
 			queuedir = Queuedir.s;
-			if (w && x && y && z)
-				(*func) (w, x, y, z);
-			else
-				(*func) ();
+			(*func) (w, x, y, z);
 			substdio_puts(subfdout, "\n");
 			substdio_flush(subfdout);
 		} else
@@ -129,7 +126,7 @@ process_queue(const char *warn, const char *fatal, int (*func)(), int *w, int *x
 void
 getversion_process_queue_c()
 {
-	const char     *x = "$Id: process_queue.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: process_queue.c,v 1.8 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

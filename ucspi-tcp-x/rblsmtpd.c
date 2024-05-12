@@ -1,5 +1,8 @@
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.26  2024-05-12 00:20:27+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.25  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -301,7 +304,7 @@ rbl(char *base)
 }
 
 void
-antirbl(char *base)
+antirbl(const char *base)
 {
 	if (decision)
 		return;
@@ -392,7 +395,7 @@ verify()
 }
 
 static int
-addrparse(char *arg)
+addrparse(const char *arg)
 {
 	int             i;
 	char            ch;
@@ -463,7 +466,7 @@ addrparse(char *arg)
 }
 
 void
-rblsmtp_mail(char *arg)
+rblsmtp_mail(const char *arg)
 {
 	rbl_out(1, 0);
 	if (!addrparse(arg))
@@ -478,7 +481,7 @@ rblsmtp_mail(char *arg)
 }
 
 void
-rblsmtp_rcpt(char *arg)
+rblsmtp_rcpt(const char *arg)
 {
 	rbl_out(1, 0);
 	if (!addrparse(arg))
@@ -678,7 +681,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	const char     *x = "$Id: rblsmtpd.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: rblsmtpd.c,v 1.26 2024-05-12 00:20:27+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

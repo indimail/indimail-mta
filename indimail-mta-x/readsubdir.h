@@ -1,5 +1,8 @@
 /*
  * $Log: readsubdir.h,v $
+ * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -29,7 +32,7 @@ typedef struct readsubdir
 	int             pos;
 	int             split;
 	const char     *name;
-	void            (*pause) ();
+	void            (*pause) (char *);
 } readsubdir;
 
 void            readsubdir_init(readsubdir *, const char *, int, void (*pause) ());

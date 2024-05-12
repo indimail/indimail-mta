@@ -1,5 +1,8 @@
 /*
  * $Log: qmaildirmake.c,v $
+ * Revision 1.9  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -27,9 +30,7 @@
 #define FATAL "maildirmake: fatal: "
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	umask(077);
 	if (!argv[1])
@@ -65,7 +66,7 @@ main(argc, argv)
 void
 getversion_maildirmake_c()
 {
-	const char     *x = "$Id: qmaildirmake.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmaildirmake.c,v 1.9 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

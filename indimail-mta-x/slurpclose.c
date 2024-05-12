@@ -1,5 +1,8 @@
 /*
  * $Log: slurpclose.c,v $
+ * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -19,10 +22,7 @@
 #include "error.h"
 
 int
-slurpclose(fd, sa, bufsize)
-	int             fd;
-	stralloc       *sa;
-	int             bufsize;
+slurpclose(int fd, stralloc *sa, int bufsize)
 {
 	int             r;
 	for (;;)
@@ -48,7 +48,7 @@ slurpclose(fd, sa, bufsize)
 void
 getversion_slurpclose_c()
 {
-	const char     *x = "$Id: slurpclose.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: slurpclose.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

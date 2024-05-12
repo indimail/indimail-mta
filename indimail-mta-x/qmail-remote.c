@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.173 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.174 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -1106,7 +1106,7 @@ blast()
 
 #ifdef SMTPUTF8
 int
-containsutf8(char *p, int l)
+containsutf8(const char *p, int l)
 {
 	int             i = 0;
 
@@ -1234,14 +1234,14 @@ tls_quit(const char *s1, const char *s2, const char *s3, const char *s4, const c
 	char            ch;
 	int             i, state;
 
-	out((char *) s1);
-	out((char *) s2);
+	out(s1);
+	out(s2);
 	if (s3)
-		out((char *) s3);
+		out(s3);
 	if (s4)
-		out((char *) s4);
+		out(s4);
 	if (s5)
-		out((char *) s5);
+		out(s5);
 	if (saptr && saptr->len) {
 		for (i = 0; i < saptr->len; ++i) {
 			ch = saptr->s[i];
@@ -1278,9 +1278,9 @@ tls_quit(const char *s1, const char *s2, const char *s3, const char *s4, const c
 		X509           *peercert;
 
 		out("STARTTLS proto=");
-		out((char *) SSL_get_version(ssl));
+		out(SSL_get_version(ssl));
 		out("; cipher=");
-		out((char *) SSL_get_cipher(ssl));
+		out(SSL_get_cipher(ssl));
 
 		/*- we want certificate details */
 		if ((peercert = SSL_get_peer_certificate(ssl))) {
@@ -1300,12 +1300,12 @@ tls_quit(const char *s1, const char *s2, const char *s3, const char *s4, const c
 		}
 		out(";\n");
 	}
-	zerodie((char *) s1, -1);
+	zerodie(s1, -1);
 }
 
 #ifdef HASTLSA
 no_return void
-tlsa_error(char *str)
+tlsa_error(const char *str)
 {
 	out("Z");
 	out(str);
@@ -1321,7 +1321,7 @@ tlsa_error(char *str)
 static stralloc temphost = { 0 };
 static stralloc sa = { 0 };
 int
-get_tlsa_rr(char *mxhost, int port_num)
+get_tlsa_rr(const char *mxhost, int port_num)
 {
 	char            strnum[FMT_ULONG];
 	int             r;
@@ -1433,12 +1433,12 @@ scan_response(stralloc *dst, stralloc *src, const char *search)
 	int             i, len;
 	unsigned int    slen;
 
-	slen = str_len((char *) search);
+	slen = str_len(search);
 	if (!stralloc_copys(dst, ""))
 		temp_nomem();
 	for (i = 0; src->len > i + slen; i += str_chr(x + i, ',') + 1) {
 		char           *s = x + i;
-		if (case_diffb(s, slen, (char *) search) == 0) {
+		if (case_diffb(s, slen, search) == 0) {
 			s += slen;			/*- skip name */
 			if (*s++ != '=')
 				return 0;		/*- has to be here! */
@@ -2056,7 +2056,7 @@ auth_scram(int method, int use_size)
 #endif /*- #ifdef TLS */
 
 void
-smtp_auth(char *type, int use_size)
+smtp_auth(const char *type, int use_size)
 {
 	int             i = 0, login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0,
 					cram_sha224_supp, cram_sha256_supp = 0, cram_sha384_supp, cram_sha512_supp = 0,
@@ -2433,7 +2433,7 @@ timeoutfn()
 }
 
 no_return void
-err_tmpfail(char *arg)
+err_tmpfail(const char *arg)
 {
 	out("ZTemporory failure with DANE verification service [");
 	out(arg);
@@ -2455,7 +2455,7 @@ err_tmpfail(char *arg)
  * when TLS session fails (sets notls = 2)
  */
 void
-do_smtp(char *fqdn)
+do_smtp(const char *fqdn)
 {
 	unsigned long   code;
 	int             flagbother;
@@ -2821,7 +2821,7 @@ dmatch(const char *fn, stralloc *domain, stralloc *content,
 }
 
 int
-is_in_tlsadomains(char *domain)
+is_in_tlsadomains(const char *domain)
 {
 	static stralloc _domain = { 0 };
 
@@ -3741,13 +3741,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.173 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.174 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.174  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.173  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

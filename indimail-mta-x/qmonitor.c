@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmonitor.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -78,9 +78,7 @@ main(int argc, char **argv)
 #include <unistd.h>
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	substdio_puts(subfderr, "not compiled with -DLIBRT\n");
 	substdio_flush(subfderr);
@@ -91,13 +89,16 @@ main(argc, argv)
 void
 getversion_qmonitor_c()
 {
-	const char     *x = "$Id: qmonitor.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmonitor.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

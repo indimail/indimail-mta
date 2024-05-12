@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.40 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: dns.c,v 1.41 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -101,8 +101,7 @@ unsigned short  pref;
 
 static stralloc glue = { 0 };
 static stralloc tmpsa = { 0 };
-
-static int      (*lookup) () = res_query;
+static int      (*lookup) (const char *, int, int, unsigned char *, int) = res_query;
 #ifdef IPV6
 static int      iaafmt6(char *, ip6_addr *, const char *);
 #endif
@@ -1067,13 +1066,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	const char     *x = "$Id: dns.c,v 1.40 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dns.c,v 1.41 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.41  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.40  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

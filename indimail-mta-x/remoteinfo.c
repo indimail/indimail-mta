@@ -1,5 +1,8 @@
 /*
  * $Log: remoteinfo.c,v $
+ * Revision 1.9  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -39,26 +42,19 @@ static char     line[999];
 static int      t;
 
 static ssize_t
-mywrite(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+mywrite(int fd, char *buf, size_t len)
 {
 	return timeoutwrite(t, fd, buf, len);
 }
+
 static ssize_t
-myread(fd, buf, len)
-	int             fd;
-	char           *buf;
-	int             len;
+myread(int fd, char *buf, size_t len)
 {
 	return timeoutread(t, fd, buf, len);
 }
 
 char           *
-remoteinfo_get(saremote, salocal, timeout)
-	union sockunion *saremote, *salocal;
-	int             timeout;
+remoteinfo_get(union sockunion *saremote, union sockunion *salocal, int timeout)
 {
 	char           *x;
 	int             s;
@@ -192,7 +188,7 @@ remoteinfo_get(saremote, salocal, timeout)
 void
 getversion_remoteinfo_c()
 {
-	const char     *x = "$Id: remoteinfo.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: remoteinfo.c,v 1.9 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

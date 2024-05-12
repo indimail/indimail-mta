@@ -1,5 +1,8 @@
 /*
  * $Log: gfrom.c,v $
+ * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -14,9 +17,7 @@
 #include "gfrom.h"
 
 int
-gfrom(s, len)
-	char           *s;
-	int             len;
+gfrom(char *s, int len)
 {
 	while ((len > 0) && (*s == '>'))
 	{
@@ -29,7 +30,7 @@ gfrom(s, len)
 void
 getversion_gfrom_c()
 {
-	const char     *x = "$Id: gfrom.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: gfrom.c,v 1.5 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

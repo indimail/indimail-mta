@@ -1,5 +1,8 @@
 /*
  * $Log: newinclude.c,v $
+ * Revision 1.8  2024-05-12 08:21:41+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -85,16 +88,14 @@ writeerr()
 }
 
 void
-out(s, len)
-	char           *s;
-	int             len;
+out(const char *s, int len)
 {
 	if (substdio_put(&sstmp, s, len) == -1)
 		writeerr();
 }
 
 void
-doincl(char *buf, int len)
+doincl(const char *buf, int len)
 {
 	if (!len)
 		strerr_die2x(111, FATAL, "empty :include: filenames not permitted");
@@ -365,7 +366,7 @@ main(int argc, char **argv)
 void
 getversion_newinclude_c()
 {
-	const char     *x = "$Id: newinclude.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: newinclude.c,v 1.8 2024-05-12 08:21:41+05:30 mbhangui Exp mbhangui $";
 
 	x++;
 }

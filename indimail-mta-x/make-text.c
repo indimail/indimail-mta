@@ -1,5 +1,8 @@
 /*
  * $Log: make-text.c,v $
+ * Revision 1.3  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
  * Revision 1.2  2020-11-24 13:46:08+05:30  Cprogrammer
  * removed exit.h
  *
@@ -18,31 +21,26 @@ stralloc        line = { 0 };
 int             match;
 
 void
-outs(s)
-	char           *s;
+outs(const char *s)
 {
-	if (substdio_puts(subfdoutsmall, s) == -1)
-	{
+	if (substdio_puts(subfdoutsmall, s) == -1) {
 		_exit(-1);
 	}
 }
 
 void
-outqs(s)
-	char           *s;
+outqs(char *s)
 {
 	unsigned int    u;
-	while (*s)
-	{
+
+	while (*s) {
 		u = str_chr(s, '"');
-		if (s[u])
-		{
+		if (s[u]) {
 			s[u] = '\0';
 			outs(s);
 			outs("\\\"");
 			s += u + 1;
-		} else
-		{
+		} else {
 			outs(s);
 			s += u;
 		}
