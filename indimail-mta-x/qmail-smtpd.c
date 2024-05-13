@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.17  2024-05-13 22:10:56+05:30  Cprogrammer
+ * added HOSTACCESS to list of env variables used
+ *
  * Revision 1.16  2024-05-12 21:20:28+05:30  Cprogrammer
  * added env variable penalty
  *
@@ -112,7 +115,7 @@ print_details()
 		"greylist.white", "tlsa.white", "tlsadomains", "badip", 0};
 	const char    *read_env_vars[] = {
 		"ANTISPOOFING", "AUTH_ALL", "AUTHRULES", "BADHELO", "BADHELOCHECK",
-		"BADHOST", "BADHOSTCHECK", "BADIP", "BADIPCHECK",
+		"BADHOST", "BADHOSTCHECK", "BADIP", "BADIPCHECK", "HOSTACCESS",
 #ifdef USE_SPF
 		"SPFBEHAVIOR", "SPFIPV6",
 #endif
@@ -281,7 +284,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	const char     *x = "$Id: qmail-smtpd.c,v 1.16 2024-05-12 21:20:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-smtpd.c,v 1.17 2024-05-13 22:10:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

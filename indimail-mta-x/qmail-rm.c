@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rm.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-rm.c,v 1.28 2024-05-13 22:10:17+05:30 Cprogrammer Exp mbhangui $
  *
  * COPYRIGHT INFORMATION - DO NOT REMOVE
  *
@@ -111,13 +111,14 @@
  */
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/time.h>
 #include <fcntl.h>
 #include <limits.h>
 #include <regex.h>
 #include <stdlib.h>
 #include <string.h>
+#define _XOPEN_SOURCE
 #include <time.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <fts.h>
 #include <stralloc.h>
@@ -163,7 +164,7 @@ int             renameat(int, const char *, int, const char *);
 #else
 int             rename(const char *, const char *);
 #endif
-char           *strptime(const char *s, const char *format, struct tm *tm);
+char           *strptime(const char *, const char *, struct tm *);
 
 typedef const char c_char;
 /*- globals */
@@ -272,6 +273,7 @@ main(int argc, char **argv)
 	int             fd = -1, ch, matches, tmp = 0;
 	int             idx, count, qcount, qstart;
 	char           *ptr, *pattern = NULL, *qbase = 0, *queuedir = 0;
+	const char     *format = "%a %b %d %H:%M:%S %Z %Y", *datearg = NULL;
 	struct tm       stime;
 
 	if (argc < 2)
@@ -279,7 +281,7 @@ main(int argc, char **argv)
 	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
-	while ((ch = getopt(argc, argv, "deirvh?n:p:q:s:y:X:x:")) != opteof) {
+	while ((ch = getopt(argc, argv, "deirvh?f:n:p:q:s:y:X:x:")) != opteof) {
 		switch (ch)
 		{
 		case 'e':
@@ -330,38 +332,23 @@ main(int argc, char **argv)
 			conf_split = tmp;
 			break;
 		case 'X': /*- Added: 12/23/2003 Clint Martin ( c.martin*earthlink.net ) */
+			if (expire_files == 2) {
+				subprintf(&sserr, "you cannot specify both -x and -X\n");
+				usage();
+			}
+			datearg = optarg;
 			expire_files = 1;
-			expire_date = -1;	/*- make sure we only use the offset */
-			/*- lets see if they specified a parameter for seconds */
-			tmp = strtoul(optarg, &ptr, 10);
-			if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == optarg)) {
-				subprintf(&sserr, "%s: %s\n", optarg, error_str(errno));
-				errflush();
-				_exit(111);
-			}
-			if (*ptr) {
-				subprintf(&sserr, "invalid char [%s] in %s\n", ptr, optarg);
-				errflush();
-				_exit(111);
-			}
-			expire_offset = (tmp == 0 ? expire_offset : tmp);
-			subprintf(&ssout, "Offsetting timestamps by %ld seconds\n", expire_offset);
-			flush();
+			break;
+		case 'f':
+			format = optarg;
 			break;
 		case 'x':
-			expire_files = 1;
-			expire_offset = 0;	/*- make sure we only use the time stamp passed */
-			/*- lets test our parsing function to see what it can do */
-			ptr = strptime(optarg, "%+", &stime);
-			expire_date = mktime(&stime);
-			if (expire_date >= 0) {
-				subprintf(&ssout, "time in seconds: %ld [%s]\n", expire_date, optarg);
-				flush();
-			} else {
-				subprintf(&ssout, "Error parsing the date specified at: [%s] col %ld [%s]\n", ptr, ptr - optarg, optarg);
-				flush();
-				_exit(111);
+			if (expire_files == 1) {
+				subprintf(&sserr, "you cannot specify both -x and -X\n");
+				usage();
 			}
+			datearg = optarg;
+			expire_files = 2;
 			break;
 			/*- End Section Added: 12/23/2003 Clint Martin ( c.martin*earthlink.net ) ***/
 		case 'y':
@@ -372,6 +359,39 @@ main(int argc, char **argv)
 		default:
 			usage();
 			break;
+		}
+	}
+	if (expire_files == 1) {
+		expire_date = -1;	/*- make sure we only use the offset */
+		/*- lets see if they specified a parameter for seconds */
+		tmp = strtoul(datearg, &ptr, 10);
+		if ((tmp == ULONG_MAX && errno == ERANGE) || (!tmp && ptr == datearg)) {
+			subprintf(&sserr, "%s: %s\n", datearg, error_str(errno));
+			errflush();
+			_exit(111);
+		}
+		if (*ptr) {
+			subprintf(&sserr, "invalid char [%s] in %s\n", ptr, datearg);
+			errflush();
+			_exit(111);
+		}
+		expire_offset = (tmp == 0 ? expire_offset : tmp);
+		subprintf(&ssout, "Offsetting timestamps by %ld seconds\n", expire_offset);
+		flush();
+	}
+	if (expire_files == 2) {
+		expire_files = 1;
+		expire_offset = 0;	/*- make sure we only use the time stamp passed */
+		/*- lets test our parsing function to see what it can do */
+		ptr = (char *) strptime(datearg, format, &stime);
+		expire_date = mktime(&stime);
+		if (expire_date >= 0) {
+			subprintf(&ssout, "time in seconds: %ld [%s]\n", expire_date, datearg);
+			flush();
+		} else {
+			subprintf(&ssout, "Error parsing the date specified at: [%s] col %ld [%s]\n", ptr, ptr - datearg, datearg);
+			flush();
+			_exit(111);
 		}
 	}
 	if (chdir(auto_qmail))
@@ -456,14 +476,14 @@ usage(void)
 			"  -v            increase verbosity (can be used more than once)\n"
 			"  -y <trash>    directory to put files removed from the queue [default: <queuedir>/trash]\n"
 	/*- Begin CLM 12/23/2003 */
-			"  -X <secs>     modify timestamp on matching files, to make qmail expire mail\n"
+			"  -X <secs>     modify timestamp on matching files, to make qmail-send expire mail\n"
 			"                <secs> is the number of seconds we want to move the file into the past.\n");
 	subprintf(&sserr,
 			"                specifying a value of 0 causes this to default to [%ld]\n", expire_offset);
 	subprintf(&sserr,
-			"  -x <timespec> modify timestamp on matching files, to make qmail expire mail\n"
-			"                <timespec> is a date/time string in the format of output of the \"date\" program.\n"
-			"                see manpage for strptime(2) for details of this format\n");
+			"  -x <timespec> modify timestamp on matching files, to make qmail-send expire mail\n"
+			"                <timespec> is a date/time string in the format \"%%a %%b %%d %%H:%%M:%%S %%Z %%Y\"\n"
+			"                You can change the format using -f option\n");
 	errflush();
 	/*- End CLM 12/23/2003 */
 	_exit(111);
@@ -1026,13 +1046,16 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	const char     *x = "$Id: qmail-rm.c,v 1.27 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-rm.c,v 1.28 2024-05-13 22:10:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.28  2024-05-13 22:10:17+05:30  Cprogrammer
+ * added -f option to specify strptime format
+ *
  * Revision 1.27  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

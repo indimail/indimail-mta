@@ -21,6 +21,9 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 09. fix function prototypes
 10. qmail-smtpd.c, smtpd.c: added env variable PENALTY to make penalty for
     incorrect passwords configurable
+- 13/05/2024
+11. qmail-rm.c: added -f option to specify strptime format
+12. qmail-smtpd.c: added HOSTACCESS to list of env variables used
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.7-1.1%{?dist}
 Release 3.0.7-1.1 Start 02/01/2024 End 03/02/2024

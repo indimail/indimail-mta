@@ -1,29 +1,30 @@
+.\" vim: tw=75
 .TH qmail-rm 1
 .SH NAME
 qmail-rm \- Remove mails from Queue
 .SH SYNOPSIS
 .B qmail-rm
 [-eidrvh]
-[-n NUM]
-[-p ]
-[-q qbase]
-[-s STR]
-[-y yankdir]
-[-t TIME]
+[-n \fINUM\fR]
+[-p \fIpattern\fR]
+[-q \fIqbase\fR]
+[-s \fIsplit\fR]
+[-y \fIyankdir\fR]
+[-X \fIsecs\fR]
+[-f \fIdate_format\fR]
+[-x \fItimespec\fR]
 
 .SH DESCRIPTION
 
 .B qmail-rm
 will remove messages containing a particular string from your qmail queue.
 
-.B
-qmail-rm
-is useful for removing mails from queue if hit by sudden SPAM.  For 
-instance, if you are hit with a spamming attack, you can temporarily
-instate a second qmail installation (once the spam run is finished),
-allow it to take over mail receipt, and then use this tool to clean
-the offending mails out of the queue before switching over to the main
-qmail installation once again.
+\fBqmail-rm\fR is useful for removing mails from queue if hit by sudden
+SPAM. For instance, if you are hit with a spamming attack, you can
+temporarily instate a second qmail installation (once the spam run is
+finished), allow it to take over mail receipt, and then use this tool to
+clean the offending mails out of the queue before switching over to the
+main qmail installation once again.
 
 Occasionally, viruses will get past scanners before the signatures
 get updated; if they exist in large numbers, it is often practical to
@@ -38,65 +39,86 @@ in qbase/queue/trash/, where you can view them individually and
 restore them back to the queue manually.  There is currently no support
 for restoring them automatically.
 
-By default, 
-.B qmail-rm
-assumes that your qmail queue is stored in
+By default, \fBqmail-rm\fR assumes that your qmail queue is stored in
 QMAILHOME/queue, but this can be changed with a command line option.
-Similarly,
-.B qmail-rm
-assumes that your queue "split" is DIRSPLIT by default, among other things.
-You can change this by setting CONFSPLIT environment variable to a max of
-DIRSPLIT. \fBqmail-rm\fR can process a queue created with \fItodo\fR,
-\fIintd\fR with subdirectory split instead of without any split. This
-can be done by setting the \fBBIGTODO\fR environment variable.
+Similarly, \fBqmail-rm\fR assumes that your queue "split" is DIRSPLIT by
+default, among other things. You can change this by setting CONFSPLIT
+environment variable to a max of DIRSPLIT. \fBqmail-rm\fR can process a
+queue created with \fItodo\fR, \fIintd\fR with subdirectory split instead
+of without any split. This can be done by setting the \fBBIGTODO\fR
+environment variable.
 
 See qmail-rm -h for more commandline options.
 
-WARNING: YOU MUST STOP IndiMail BEFORE USING THIS PROGRAM.
+WARNING: YOU MUST STOP qmail-send BEFORE USING THIS PROGRAM.
 
 .SH OPTIONS
 
 .TP
 -e 
 use extended POSIX regular expressions
+
 .TP
 -i
 search case insensitively [default: case sensitive]
+
 .TP
 -n \fIbytes\fR
 limit our search to the first \fIbytes\fR bytes of each file
+
 .TP
 -p \fIpattern\fR
 specify the \fIpattern\fR to search for
+
 .TP
 -q \fIqbase\fR
 specify the base qmail queue dir [default: QMAILHOME/queue]. This directory
 has indimail's multiple qmail queues.
+
 .TP
 -d
 actually remove files not yank them, no -p will delete all the messages!
+
 .TP
 -r
 actually remove files, without this we'll only print them
+
 .TP
 -s \fIsplit\fR
 specify your conf-split value if non-standard [default: SPLIT]
+
 .TP
 -y \fIyankdir\fR
 directory to put files trash from the queue [default: qbase/queue/trash]
+
 .TP
 -X \fIsecs\fR
-modify timestamp on matching files, to make qmail expire mail. \fIsecs\fR is the number of
-seconds we want to move the file into the past. specifying a value of 0 causes this to default
-to [604800]
+modify timestamp on matching files, to make qmail expire mail. \fIsecs\fR
+is the number of seconds we want to move the file into the past. specifying
+a value of 0 causes this to default to [604800] which is 7 x 86400.
+
+.TP
+-f \fIdate_format\fR
+Specify date/time format for \fBstrptime\fR(3). Default format is
+"%a %b %d %H:%M:%S %Z %Y".
+
 .TP
 -x \fItimespec\fR
-modify timestamp on matching files, to make qmail expire mail. \fItimespec\fR is a date/time
-string in the format of output of the "date" program. see manpage for \fBstrptime(2)\fR for
-details of this format
+modify timestamp on matching files, to make qmail expire mail.
+\fItimespec\fR is a date/time format. The default format is
+"%a %b %d %H:%M:%S %Z %Y". See manpage for \fBstrptime(3)\fR for details of
+this format.
+
+.EX
+  Restamp mails to May 11 22:04:54 IST 2024
+  qmail-rm -x "Sat May 11 22:04:54 IST 2024"
+  qmail-rm -x "11-05-2024 22:04:54" -f "%d-%m-%Y %H:%M:%S"
+.EE
+
 .TP
 -v
 increase verbosity (can be used more than once)
+
 .TP
 -h, -?
 this help message
@@ -105,4 +127,5 @@ this help message
 queue-fix(8)
 
 .SH Author
-qmail-rm has been adapted from qmail-remove at https://www.linuxmagic.com/opensource/qmail/qmail-remove
+qmail-rm has been adapted from qmail-remove at
+https://www.linuxmagic.com/opensource/qmail/qmail-remove
