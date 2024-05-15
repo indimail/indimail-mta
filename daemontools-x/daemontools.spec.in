@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.46 2024-04-12 11:45:16+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.47 2024-05-15 10:51:30+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -328,8 +328,10 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %pretrans
 %log
 argv1=$1
+if [ -z "$argv1" ] ; then
+  argv1=0
+fi
 if [ "$argv1" = "1" ] ; then
-%if %{undefined suse_version} && %{undefined sles_version}
   %{__mkdir_p} %{logdir}
   for i in svscan resolvconf
   do
@@ -338,7 +340,6 @@ if [ "$argv1" = "1" ] ; then
 %if %{defined _rundir}
   %{__mkdir_p} %{buildroot}%{_prefix}/lib/tmpfiles.d
   %{__mkdir_p} %{buildroot}%{_rundir}/svscan
-%endif
 %endif
 fi
 
@@ -351,7 +352,10 @@ fi
 # create .svscan.down so that we
 # can restore state after upgrade in postinst
 %{_prefix}/bin/svok %{servicedir}/.svscan/log 2>/dev/null
-if [ $? -eq 0 ] ; then
+if [ $? -ne 0 ] ; then
+	log_it "svscan not running"
+	exit 0
+else
   touch %{servicedir}/.svscan.down
   log_it "Giving svscan exactly 5 seconds to exit nicely" >> /var/log/%{name}-setup.log
   if test -f %{_sysconfdir}/init/svscan.conf
@@ -394,11 +398,13 @@ if [ "$argv1" = "1" ] ; then
   /usr/bin/getent group  nofiles  > /dev/null || /usr/sbin/groupadd nofiles  || true
   /usr/bin/getent passwd qmaill   > /dev/null || /usr/sbin/useradd -M -g nofiles  -d %{logdir} -s /sbin/nologin qmaill || true
   if [ ! -d %{logdir} ] ; then
+    %{__mkdir_p} %{buildroot}%{logdir}
     chown qmaill:nofiles %{logdir}
   else
     chown -R qmaill:nofiles %{logdir}
   fi
   ) >> /var/log/%{name}-setup.log 2>&1
+  exit 0
 fi
 
 ### SCRIPTLET ###############################################################################
