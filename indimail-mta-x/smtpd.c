@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.326 2024-05-12 21:20:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.327 2024-05-16 18:31:07+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -158,7 +158,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.326 $";
+static c_char  *revision = "$Revision: 1.327 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1261,12 +1261,12 @@ err_nogateway(char *arg1, char *arg2, int flag)
 	else
 		out("553 sorry, that domain isn't allowed to be relayed thru this MTA without authentication", NULL);
 	if (authd)
-		out(", auth <", remoteinfo, "> ", NULL);
+		out(", auth <", remoteinfo, ">", NULL);
 #ifdef TLS
 	if (ssl)
 		tls_nogateway();
 #endif
-	out("#5.7.1\r\n", NULL);
+	out(" #5.7.1\r\n", NULL);
 	flush();
 }
 
@@ -7381,6 +7381,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.327  2024-05-16 18:31:07+05:30  Cprogrammer
+ * fixed missing wsp
+ *
  * Revision 1.326  2024-05-12 21:20:45+05:30  Cprogrammer
  * made penalty configurable
  *
@@ -7819,7 +7822,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.326 2024-05-12 21:20:45+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.327 2024-05-16 18:31:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
