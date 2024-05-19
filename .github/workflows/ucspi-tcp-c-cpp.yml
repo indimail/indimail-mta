@@ -24,7 +24,9 @@ jobs:
 
     steps:
     - name: extra_packages
-      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
+      run: |
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install libmysqlclient-dev libssl-dev; fi
+        if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig mysql openssl; fi
       env:
         OS: ${{ matrix.host }}
 
