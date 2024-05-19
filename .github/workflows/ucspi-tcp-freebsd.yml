@@ -33,7 +33,7 @@ jobs:
       with:
         envs: 'MYTOKEN'
         usesh: true
-        prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2
+        prepare: pkg install -y curl automake autoconf libtool pkgconf libidn2 mysql80-client openldap26-client
         run: |
           cd libqmail; ./default.configure; make; make install-strip
           cd ../main/ucspi-tcp-x; ./default.configure; ./qmake
