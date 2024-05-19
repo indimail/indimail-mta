@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.93 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
+ * $Id: tcpserver.c,v 1.94 2024-05-19 08:57:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -59,7 +59,7 @@
 #include "tcpremoteinfo.h"
 #include "rules.h"
 #include "dns.h"
-#ifdef MYSQL_CONNFIG
+#ifdef MYSQL_CONFIG
 #include "hasmysql.h"
 #include "load_mysql.h"
 #endif
@@ -688,7 +688,8 @@ create_table(MYSQL *mysql)
 void
 connect_db(const char *dbfile)
 {
-	char           *x = 0, *m_timeout;
+	char           *x = NULL;
+	const char     *m_timeout;
 	int             fd, i = 0;
 	unsigned int    next, xlen, mysql_timeout;
 	struct stat     st;
@@ -2008,13 +2009,16 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.93 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.94 2024-05-19 08:57:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.94  2024-05-19 08:57:35+05:30  Cprogrammer
+ * fixed typo
+ *
  * Revision 1.93  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
