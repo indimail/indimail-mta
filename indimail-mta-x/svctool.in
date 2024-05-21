@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.726 2024-04-30 23:24:28+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.727 2024-05-21 21:20:29+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.726 2024-04-30 23:24:28+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.727 2024-05-21 21:20:29+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -12219,18 +12219,33 @@ case $option in
 	tar cf - `sort_backup $servicedir` | gzip -c > $backupdir/indimail-backup.$EXT.tar.gz
 	/bin/rm -f /root/indimail_config.txt
 	if [ -x $mysqlPrefix/bin/mariadb-dump ] ; then
+		mariadb=1
 		mysqldump=$mysqlPrefix/bin/mariadb-dump
 	else
+		mariadb=0
 		mysqldump=$mysqlPrefix/bin/mysqldump
 	fi
+	major=$(mysqld --version |awk '{print $3}'|cut -d. -f1)
 	if [ -f $HOME/.mylogin.cnf ] ; then
-		$mysqldump --login-path=admin --extended-insert \
-			--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
-			--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		if [ $mariadb -eq 1 ] ; then
+			$mysqldump --login-path=admin --compress --flush-logs \
+				--add-drop-table --extended-insert --lock-tables \
+				--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		else
+			$mysqldump --login-path=admin --compression-algorithms=zlib \
+				--add-drop-table --extended-insert --lock-tables \
+				--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		fi
 	else
-		$mysqldump -u mysql -p$PRIV_PASS --extended-insert \
-			--compress --add-drop-table --extended-insert --flush-logs --lock-tables \
-			--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		if [ $mariadb -eq 1 ] ; then
+			$mysqldump -u mysql -p$PRIV_PASS --compress --flush-logs \
+				--add-drop-table --extended-insert --lock-tables \
+				--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		else
+			$mysqldump -u mysql -p$PRIV_PASS --compression-algorithms=zlib \
+				--add-drop-table --extended-insert --lock-tables \
+				--verbose -A | gzip -c > $backupdir/dbexport.$EXT.gz
+		fi
 	fi
 	;;
 
