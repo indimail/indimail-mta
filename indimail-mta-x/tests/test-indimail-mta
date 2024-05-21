@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.77 2024-05-12 21:22:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.78 2024-05-21 08:51:26+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -70,6 +70,7 @@ qmqp_port=2628
 qmtp_port=2209
 smtp_socket=$testdir/run/smtpd
 sleep_int=0.5
+sleep_restart=1
 HOSTNAME=$(uname -n)
 domainkey_dir=$cntrldir/domainkeys
 real_domain_rsa2048=/etc/indimail/control/domainkeys/argos.indimail.org/argos
@@ -2192,7 +2193,7 @@ test_smtp_secure_auth()
 	echo 1 > $servicedir/smtpd/variables/STARTTLS
 	echo 1 > $servicedir/smtpd/variables/SECURE_AUTH
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 
 	t1=$(date +"%s.%4N")
 	# this should fail without using SMTPS or STARTTLS
@@ -2236,7 +2237,7 @@ test_smtp_secure_auth()
 	echo 1 > $servicedir/smtpd/variables/SMTPS
 	echo 1 > $servicedir/smtpd/variables/REQUIREAUTH
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 
 	# Test REQUIREAUTH
 	t1=$(date +"%s.%4N")
@@ -2277,7 +2278,7 @@ test_smtp_secure_auth()
 
 	/bin/rm -f $servicedir/smtpd/variables/REQUIREAUTH
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 
 	# Test authdomains
 	t1=$(date +"%s.%4N")
@@ -2317,7 +2318,7 @@ test_smtp_secure_auth()
 	# Test AUTH_ALL
 	echo 1 > $servicedir/smtpd/variables/AUTH_ALL
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port \
 		--tls-on-connect > $tmpdir/swaks.$$ 2>&1
@@ -2352,13 +2353,13 @@ test_smtp_secure_auth()
 
 test_smtp_cugmail()
 {
-	t1=$(date +"%s.%4N")
 	echo 1 > $servicedir/smtpd/variables/CUGMAIL
 	       > $servicedir/smtpd/variables/QUERY_CACHE
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	> $servicedir/smtpd/variables/CUGMAIL
 
+	t1=$(date +"%s.%4N")
 	# Test1: This should fail
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server 127.0.0.1 \
 		--port $smtp_port >$tmpdir/swaks.$$
@@ -2392,19 +2393,20 @@ test_smtp_cugmail()
 	check_mail
 	if [ $? -eq 0 -a $ret1 -ne 0 -a $ret2 -ne 0 -a $ret3 -ne 0 -a $ret4 -eq 0 -a $ret5 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs 3 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 4)
 		printf "\r  testing mail using SMTP with CUGMAIL     succeeded %51s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs 3 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		printf "\r%118s\n" " "
 		echo "  testing mail using SMTP with CUGMAIL failed [$secs sec]"
 		(
-		echo l1=$l1
-		echo l2=$l2
-		echo l3=$l3
+		echo "l1=[$l1]"
+		echo "l2=[$l2]"
+		echo "l3=[$l3]"
+		echo "ret1=$ret1, ret2=$ret3, ret3=$ret3, ret4=$ret4, ret5=$ret5"
 		echo "$logdir/smtpd/current"
 		cat $logdir/smtpd/current
 		)|less
@@ -2415,10 +2417,10 @@ test_smtp_cugmail()
 
 test_smtp_chk_sender()
 {
-	t1=$(date +"%s.%4N")
 	echo 0 > $servicedir/smtpd/variables/CHECKSENDER
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
+	t1=$(date +"%s.%4N")
 
 	# First: This should work
 	# because remote mail will be redirected
@@ -2470,13 +2472,13 @@ test_smtp_chk_sender()
 
 	if [ $ret1 -eq 0 -a $ret2 -eq 0 -a $ret3 -ne 0 -a $ret4 -eq 0 -a $ret5 -eq 0 -a $ret6 -ne 0 -a $ret7 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
+		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		tcount=$(expr $tcount + 4)
 		printf "\r  testing mail using SMTP with CHECKSENDER succeeded %51s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
+		secs=$(echo $t1 $t2 $s1 $s2 | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		> $servicedir/smtpd/variables/CHECKSENDER
 		printf "\r%118s\n" " "
 		echo "  testing mail using SMTP with CHECKSENDER failed [$secs sec]"
@@ -2496,7 +2498,7 @@ test_smtp_chk_sender()
 	# fifth: This should be allowed with MASQUERADE
 	echo "" > $servicedir/smtpd/variables/MASQUERADE
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server 127.0.0.1 \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" > $tmpdir/swaks.$$
@@ -2526,7 +2528,7 @@ test_smtp_chk_sender()
 	# sixth: This should be denied with MASQUERADE
 	echo $testuser@$HOSTNAME > $servicedir/smtpd/variables/MASQUERADE
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 \
@@ -2542,7 +2544,7 @@ test_smtp_chk_sender()
 	# seventh: This should be allowed with MASQUERADE
 	echo $user@$HOSTNAME > $servicedir/smtpd/variables/MASQUERADE
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 \
 		--port $smtp_port --a LOGIN -au $testuser@$HOSTNAME -ap "abcd87654321"
 	ret3=$?
@@ -2553,13 +2555,13 @@ test_smtp_chk_sender()
 
 	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 -a $ret4 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $s1 2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $s1 $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 4)
 		printf "\r  testing MASQUERADE user option succeeded %61s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $s1 $s2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
+		secs=$(echo $t1 $t2 $s1 $s2 $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3-$4-$5)}')
 		printf "\r%118s\n" " "
 		echo "  testing MASQUERADE user option failed %61s [$secs sec]"
 		(
@@ -2586,20 +2588,20 @@ test_smtp_chk_sender()
 	echo "@$HOSTNAME" > $cntrldir/chksenderdomains
 	/bin/rm -f $servicedir/smtpd/variables/MASQUERADE
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	# second: This should be denied
 	swaks -S --to $user@$HOSTNAME --from $user@$ext_domain --server 127.0.0.1 \
 		--port $smtp_port --a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >$tmpdir/swaks.$$
 	ret2=$?
 	if [ $ret1 -eq 0 -a $ret2 -ne 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 4)
 		printf "\r  testing chksender control file succeeded %61s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		printf "\r%118s\n" " "
 		echo "  testing chksender control file failed [$secs sec]"
 		(
@@ -2622,7 +2624,7 @@ test_smtp_surbl()
 {
 	echo $surblqueue > $servicedir/smtpd/variables/QMAILQUEUE
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 	t1=$(date +"%s.%4N")
 	(
 	echo This is a test message for surbl
@@ -2649,16 +2651,16 @@ test_smtp_surbl()
 
 	/bin/rm -f $servicedir/smtpd/variables/QMAILQUEUE $tmpdir/swaks.$$
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 	if [ $ret1 -ne 0 -a $ret2 -eq 0 -a $ret3 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs 2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		tcount=$(expr $tcount + 2)
 		printf "\r  testing mail using SMTP for SURBL succeeded %58s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs 2 | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
 		printf "\r%118s\n" " "
 		echo "  testing mail using SMTP for SURBL failed [$secs sec]"
 		(
@@ -2681,7 +2683,7 @@ test_envrules()
 		echo 1 > $servicedir/smtpd/variables/QREGEX
 	fi
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 	t1=$(date +"%s.%4N")
 	swaks -S --to $testuser@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 \
 		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
@@ -2733,7 +2735,7 @@ test_smtp_accesslist()
 		echo 1 > $servicedir/smtpd/variables/QREGEX
 	fi
 	sudo svc -r $servicedir/smtpd
-	sleep 2
+	sleep $sleep_restart
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $testuser@$vdomain --server 127.0.0.1 \
 		--port $smtp_port --tls-on-connect > $tmpdir/swaks.$$
@@ -3524,18 +3526,18 @@ test_restart_service_using_svc()
 	t1=$(date +"%s.%4N")
 	tcpserver_pid1=$(sudo svstat $servicedir/smtpd|awk '{print $6}')
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	tcpserver_pid2=$(sudo svstat $servicedir/smtpd|awk '{print $6}')
 
 	if [ $tcpserver_pid2 -ne $tcpserver_pid1 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing restarting of supervise using svc succeeded %50s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 $sleep_restart | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
 		echo "  testing restarting of supervise using svc failed [$secs sec]"
 		(
@@ -4147,7 +4149,6 @@ create_tcpclient_smtp()
 
 test_recipients()
 {
-	t1=$(date +"%s.%4N")
 	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	(
 	echo "apollo.indimail.org"
@@ -4161,7 +4162,8 @@ test_recipients()
 	echo           3 > $servicedir/smtpd/variables/CHECKRECIPIENT
 	echo $sysconfdir > $servicedir/smtpd/variables/SYSCONFDIR
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
+	t1=$(date +"%s.%4N")
 
 	(
 	echo "!nocheck.com"
@@ -4186,13 +4188,13 @@ test_recipients()
 	r3=$?
 	if [ $r1 -eq 0 -a $r2 -eq 0 -a $r3 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing qmail-cdb succeeded %74s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		printf "\r%118s\n" " "
 		echo "  testing qmail-cdb failed [$secs sec]"
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
@@ -4201,9 +4203,9 @@ test_recipients()
 	fi
 
 	# Pass1: This should succeed
-	t1=$(date +"%s.%4N")
 	create_tcpclient_smtp user1@nocheck.com user1@$HOSTNAME user1@apollo.indimail.org \
 		user2@mediacenter.indimail.org user3@apollo.indimail.org
+	t1=$(date +"%s.%4N")
 	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	ret1=$?
 	if [ $ret1 -eq 0 ] ; then
@@ -4227,10 +4229,10 @@ test_recipients()
 	fi
 
 	# Pass2: This should fail
-	t1=$(date +"%s.%4N")
 	create_tcpclient_smtp user3@$HOSTNAME
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
+	t1=$(date +"%s.%4N")
 	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	ret2=$?
 	l1=$(tail -2 $logdir/tcpclient/tcpclient.log|sed -n 1p)
@@ -4242,13 +4244,13 @@ test_recipients()
 	fi
 	if [ $ret2 -eq 1 -a $ret3 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-5)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing recipient extension (negative match) succeeded %47s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-5)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		printf "\r%118s\n" " "
 		echo "  testing recipient extension (negative match) failed [$secs sec]"
 		(
@@ -4263,22 +4265,22 @@ test_recipients()
 	fi
 
 	# Pass3: This should succeed
-	t1=$(date +"%s.%4N")
 	echo "!*" >> $cntrldir/recipients
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
+	t1=$(date +"%s.%4N")
 	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	ret4=$?
 
 	if [ $ret4 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing recipient extension (wildcard match) succeeded %47s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
 		printf "\r%118s\n" " "
 		echo "  testing recipient extension (wildcard match) failed [$secs sec]"
@@ -4291,12 +4293,12 @@ test_recipients()
 	fi
 
 	sed -i '$d' $cntrldir/recipients
-	t1=$(date +"%s.%4N")
 	create_tcpclient_smtp user3@$HOSTNAME
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 
 	# This should fail
+	t1=$(date +"%s.%4N")
 	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	ret1=$?
 	l1=$(tail -2 $logdir/tcpclient/tcpclient.log|sed -n 1p)
@@ -4308,7 +4310,7 @@ test_recipients()
 	fi
 	if [ $ret1 -ne 1 -o $ret2 -ne 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-5)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
 		printf "\r%118s\n" " "
 		echo "  testing recipient extension (chkrcptdomains control file) failed [$secs sec]"
@@ -4322,15 +4324,15 @@ test_recipients()
 		exit 1
 	fi
 
-	t1=$(date +"%s.%4N")
 	# now test checkrcptdomains
 	touch $cntrldir/chkrcptdomains
 	# This should work
+	t1=$(date +"%s.%4N")
 	tcpclient -vDHR 0 $smtp_port $testdir/tcpclient.smtp > $logdir/tcpclient/tcpclient.log 2>&1
 	ret1=$?
 	if [ $ret1 -ne 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		> $servicedir/smtpd/variables/CHECKRECIPIENT
 		/bin/rm -f $cntrldir/chkrcptdomains
 		printf "\r%118s\n" " "
@@ -4359,13 +4361,13 @@ test_recipients()
 	> $servicedir/smtpd/variables/CHECKRECIPIENT
 	if [ $ret1 -eq 1 -a $ret2 -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1-5)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing recipient extension (chkrcptdomains control file) succeeded %34s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1-5)}')
+		secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 		printf "\r%118s\n" " "
 		echo "  testing recipient extension (chkrcptdomains control file) failed [$secs sec]"
 		(
@@ -6579,7 +6581,7 @@ test_hide_host_ip()
 	echo 1 > $servicedir/smtpd/variables/HIDE_HOST
 	/bin/rm -f $servicedir/smtpd/variables/SMTPS
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	t1=$(date +"%s.%4N")
 	swaks -S --to $user@$HOSTNAME --from $user@$HOSTNAME --server 127.0.0.1 --port $smtp_port \
 		--a LOGIN -au $user@$HOSTNAME -ap "abcd12345678" >/dev/null
@@ -6626,7 +6628,7 @@ test_hide_host_ip()
 	fi
 	/bin/rm -f $servicedir/smtpd/variables/HIDE_HOST
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 }
 
 do_svscan_without_svscanlog()
@@ -6679,13 +6681,13 @@ do_svscan_without_svscanlog()
 	echo 1 > $servicedir/smtpd/variables/QREGEX
 	echo block.*@$HOSTNAME > $cntrldir/goodrcptto
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	test_blocked 10 #goodrcptto regex match
 
 	echo 0 > $servicedir/smtpd/variables/QREGEX
 	echo block*@$HOSTNAME > $cntrldir/goodrcptto
 	sudo svc -r $servicedir/smtpd
-	sleep 1
+	sleep $sleep_restart
 	test_blocked 11 #goodrcptto wildmat
 
 	echo block*@$HOSTNAME > $cntrldir/goodrcptpatterns
@@ -6703,7 +6705,7 @@ do_svscan_without_svscanlog()
 	echo block*@$HOSTNAME > $cntrldir/badmailfrom
 	echo block*@$HOSTNAME > $cntrldir/badrcptto
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	test_blocked 3 #badrcptto   wildmat
 	test_blocked 4 #badmailfrom wildmat
 
@@ -6711,7 +6713,7 @@ do_svscan_without_svscanlog()
 	echo block.*@$HOSTNAME > $cntrldir/badmailfrom
 	echo block.*@$HOSTNAME > $cntrldir/badrcptto
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	test_blocked 5 #badrcptto   wildmat
 	test_blocked 6 #badmailfrom wildmat
 	/bin/rm -f $servicedir/smtpd/variables/QREGEX
@@ -6752,7 +6754,6 @@ do_svscan_with_svscanlog()
 
 test_qmail_qfilter()
 {
-	t1=$(date +"%s.%4N")
 	echo $testdir/bin/qfrontend > $servicedir/smtpd/variables/QMAILQUEUE
 	printf "#!/bin/sh\nexec $envdir ./variables $tcpserver -u qmaild -g qmail -HR 0 $smtp_port $qmail_smtpd 2>&1\n" \
 		> $servicedir/smtpd/run
@@ -6777,7 +6778,8 @@ test_qmail_qfilter()
 	) > $testdir/bin/filter2
 
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
+	t1=$(date +"%s.%4N")
 	chmod +x $testdir/bin/qfrontend $testdir/bin/filter1 $testdir/bin/filter2
 	(
 	echo "Sending mail from abcd"
@@ -6786,13 +6788,13 @@ test_qmail_qfilter()
 	check_mail_header $maildir Subject 1
 	if [ $? -eq 0 ] ; then
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		tcount=$(expr $tcount + 1)
 		printf "\r  testing qmail-qfilter           succeeded %60s [%.4f sec]\n" " " $secs
 		print_pct
 	else
 		t2=$(date +"%s.%4N")
-		secs=$(echo $t1 $t2 $sleep_secs $sleep_int | awk '{printf("%0.4f\n", $2-$1-$3-$4)}')
+		secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 		printf "\r%118s\n" " "
 		echo "  testing qmail-qfilter failed [$secs sec]"
 		failed=1
@@ -7128,7 +7130,7 @@ test_qmail_qfilter()
 	printf "/bin/false 2>&1\n"
 	) > $servicedir/smtpd/run
 	sudo svc -r $servicedir/smtpd
-	sleep $sleep_int
+	sleep $sleep_restart
 	return 0
 }
 
@@ -9087,6 +9089,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.78  2024-05-21 08:51:26+05:30  Cprogrammer
+# use sleep_start when restarting service
+#
 # Revision 1.77  2024-05-12 21:22:10+05:30  Cprogrammer
 # create env variable PENALTY
 #
