@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.727 2024-05-21 21:20:29+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.728 2024-05-22 09:26:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.727 2024-05-21 21:20:29+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.728 2024-05-22 09:26:43+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -1165,7 +1165,7 @@ else
     echo ""$DESTDIR"$QmailHOME exists"
   fi
   echo "Checking Critical IndiMail directories"
-  if [ -f "$DESTDIR"$QmailBinPrefix/vadddomain ] ; then
+  if [ -f "$DESTDIR"$QmailBinPrefix/bin/vadddomain ] ; then
     indimail_installed=1
     LIST1="alias autoturn bin qscanq sbin" # qmaildir/indimaildir
     LIST2="boot doc" # shareddir
@@ -5247,14 +5247,14 @@ wait_for_mysqld()
 	die=$1
 	count=0
 	if [ " $die" = " 1" ] ; then
-		/bin/echo -n "Waiting for MySQL Server to stop ."
+		/bin/echo -n "Waiting for MySQL Server to stop ." 1>&2
 	else
-		/bin/echo -n "Waiting for MySQL Server to start ."
+		/bin/echo -n "Waiting for MySQL Server to start ." 1>&2
 	fi
 	while true
 	do
 		if [ $count -eq 5 ] ; then
-			echo "giving up"
+			echo "giving up" 1>&2
 			break
 		fi
 		if [ " $die" = " 1" ] ; then
@@ -5334,8 +5334,10 @@ else
 	echo "mysqld: No such File or directory" 1>&2
 	return 1
 fi
-mysql_version=`$mysqlPrefix/$mysqld --version |awk '{print $3}' 2>&1`
-echo $mysql_version |grep MariaDB > /dev/null 2>&1
+tmysql_version=`$mysqlPrefix/$mysqld --version`
+echo $tmysql_version 1>&2
+mysql_version=`echo $tmysql_version | awk '{print $3}' 2>&1`
+echo $mysql_version | grep MariaDB > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
 	mysql_version=`echo $mysql_version|cut -d- -f1`
 	mariadb=1
@@ -5377,6 +5379,8 @@ else
 	install_db=""
 fi
 
+echo "mysql_version=$mysql_version, mariadb=$mariadb, mysql_community_server=$mysql_community_server, mysql_version_8=$mysql_version_8, mariadb_version_10=$mariadb_version_10" 1>&2
+echo "install_db=$install_db" 1>&2
 if [ -d "$DESTDIR"$databasedir/data/mysql -a "$force" -eq 0 ] ; then
 	echo "MySQL database exists!!!" 1>&2
 	return 0
@@ -5421,8 +5425,12 @@ elif [ $mariadb -eq 1 ] ; then
 fi
 echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
 if [ $mariadb -eq 1 ] ; then
-	echo "$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp" 1>&2
-	$install_db --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp
+	minor=$(echo $tmysql_version | awk '{print $3}'|cut -d. -f2)
+	if [ $minor -gt 3 ] ; then
+		t="--auth-root-authentication-method=normal"
+	fi
+	echo "$install_db $t --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp" 1>&2
+	$install_db $t --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp
 	if [ $? -eq 0 ] ; then
 		if [ ! -d "$DESTDIR"$databasedir/data ] ; then
 			/bin/mv "$DESTDIR"$databasedir/dbtmp "$DESTDIR"$databasedir/data
@@ -11771,12 +11779,12 @@ case $option in
 			usage 1
 			exit 1
 		fi
-		if [ -z "$mysql_user" -a -x "$DESTDIR"$QmailBinPrefix/vadddomain ] ; then
-			echo "MySQL user not specified. Using default user" 1>&2
+		if [ -z "$mysql_user" -a -x "$DESTDIR"$QmailBinPrefix/bin/vadddomain ] ; then
+			echo "MySQL user not specified. Using default user $MYSQL_USER" 1>&2
 			mysql_user=$MYSQL_USER
 		fi
-		if [ -z "$mysql_pass" -a -x "$DESTDIR"$QmailBinPrefix/vadddomain ] ; then
-			echo "MySQL password not specified. Using default password" 1>&2
+		if [ -z "$mysql_pass" -a -x "$DESTDIR"$QmailBinPrefix/bin/vadddomain ] ; then
+			echo "MySQL password not specified. Using default password $MYSQL_PASS" 1>&2
 			mysql_pass=$MYSQL_PASS
 		fi
 		if [ -z "$mysqlSocket" ]; then
