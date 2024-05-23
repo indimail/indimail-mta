@@ -1,5 +1,5 @@
 /*
- * $Id: do_match.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: do_match.c,v 1.3 2024-05-23 17:15:20+05:30 Cprogrammer Exp mbhangui $
  */
 
 #include <matchregex.h>
@@ -35,13 +35,13 @@ do_match(int use_regex, const char *text, const char *regex, const char *errStr[
 			return (AM_REGEX_ERR);
 		}
 	} else
-		return (wildmat_internal(text, regex));
+		return (wildmat(text, regex));
 }
 
 void
 getversion_do_match_c()
 {
-	const char     *x = "$Id: do_match.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: do_match.c,v 1.3 2024-05-23 17:15:20+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidwildmath;
 	x++;
 }

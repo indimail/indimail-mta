@@ -1,11 +1,11 @@
 /*
- * $Id: qregex.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qregex.c,v 1.39 2024-05-23 17:16:52+05:30 Cprogrammer Exp mbhangui $
  *
  * qregex (v2)
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2024-05-09 22:03:17+05:30 $
- * Revision: $Revision: 1.38 $
+ * Modified: $Date: 2024-05-23 17:16:52+05:30 $
+ * Revision: $Revision: 1.39 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -184,7 +184,7 @@ wildmat_match(stralloc *addr, struct constmap *ptrmap, stralloc *wildcard)
 				subvalue = wildcard->s[i] != '!';
 				if (!subvalue)
 					i++;
-				if ((k != subvalue) && wildmat_internal(addr->s, wildcard->s + i))
+				if ((k != subvalue) && wildmat(addr->s, wildcard->s + i))
 					k = subvalue;
 				i = j + 1;
 			}
@@ -239,7 +239,7 @@ regex_match(stralloc *addr, stralloc *map, const char *errStr[])
 void
 getversion_qregex_c()
 {
-	const char     *x = "$Id: qregex.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qregex.c,v 1.39 2024-05-23 17:16:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x++;
@@ -247,6 +247,9 @@ getversion_qregex_c()
 
 /*
  * $Log: qregex.c,v $
+ * Revision 1.39  2024-05-23 17:16:52+05:30  Cprogrammer
+ * renamed wildmat_internal to wildmat
+ *
  * Revision 1.38  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

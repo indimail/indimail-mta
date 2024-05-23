@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.728 2024-05-22 09:26:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.729 2024-05-23 17:17:14+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.728 2024-05-22 09:26:43+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.729 2024-05-23 17:17:14+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -4532,17 +4532,12 @@ fi
 
 create_clamd()
 {
-if [ $# -lt 2 ] ; then
-	echo "USAGE: create_clamd clamdPrefix supervise_dir [sysconfdir]"
+if [ $# -ne 2 ] ; then
+	echo "USAGE: create_clamd clamdPrefix supervise_dir"
 	return 1
 fi
 clamdPrefix=$1
 SERVICEDIR=$2
-if [ $# -gt 2 ] ; then
-	mysysconfdir=$3
-else
-	mysysconfdir=$sysconfdir
-fi
 conf_dir="$DESTDIR"$SERVICEDIR/clamd/variables
 if [ $nooverwrite -eq 1 -a -d $conf_dir ] ; then
 	return 0
@@ -4563,9 +4558,9 @@ fi
 (
 dump_run_header
 echo "exec 2>&1"
-echo "CLAMD_SOCK=\`grep -w ^LocalSocket $mysysconfdir/scan.conf | awk '{print \$2}'\`"
+echo "CLAMD_SOCK=\`grep -w ^LocalSocket $sysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$CLAMD_SOCK\" ] ; then"
-echo "  echo \"LocalSocket not defined in $mysysconfdir/scan.conf\" 1>&2"
+echo "  echo \"LocalSocket not defined in $sysconfdir/scan.conf\" 1>&2"
 echo "  sleep 60"
 echo "  exit 1"
 echo "fi"
@@ -4591,9 +4586,9 @@ echo "    /bin/rm -f \$CLAMD_SOCK"
 echo "  fi"
 echo "fi"
 echo ""
-echo "dbd=\`grep -w \"^DatabaseDirectory\" $mysysconfdir/scan.conf | awk '{print \$2}'\`"
+echo "dbd=\`grep -w \"^DatabaseDirectory\" $sysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$dbd\" ] ; then"
-echo "  echo \"DatabaseDirectory not defined in $mysysconfdir/scan.conf\" 1>&2"
+echo "  echo \"DatabaseDirectory not defined in $sysconfdir/scan.conf\" 1>&2"
 echo "  sleep 10"
 echo "  exit 1"
 echo "fi"
@@ -4602,16 +4597,16 @@ echo "  echo \"run: FATAL: no signatures found...\""
 echo "  sleep 300"
 echo "  exit 1"
 echo "fi"
-echo "fgd=\`grep -w \"^Foreground\" $mysysconfdir/scan.conf | awk '{print \$2}'\`"
+echo "fgd=\`grep -w \"^Foreground\" $sysconfdir/scan.conf | awk '{print \$2}'\`"
 echo "if [ -z \"\$fgd\" ] ; then"
-echo "  echo \"Foreground not defined in $mysysconfdir/scan.conf\" 1>&2"
+echo "  echo \"Foreground not defined in $sysconfdir/scan.conf\" 1>&2"
 echo "  sleep 10"
 echo "  exit 1"
 echo "fi"
 echo ""
 echo "# Run the scanner daemon."
 echo "exec $clamdPrefix/sbin/clamd \\"
-echo "  --config-file=$mysysconfdir/scan.conf"
+echo "  --config-file=$sysconfdir/scan.conf"
 ) > "$DESTDIR"$SERVICEDIR/clamd/run
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/clamd/run
 
@@ -11572,6 +11567,9 @@ case $option in
 			usage 1
 		fi
 	fi
+	if [ -n "$mysysconfdir" ] ; then
+		sysconfdir=$mysysconfdir
+	fi
 	echo "Creating IndiMail Admin Service Port $bind_port, Service $servicedir, Base Path $base_path"
 	create_indisrvr "$bind_port" "$mysql_host" "$mysql_user" "$mysql_pass" "$avg_user_quota" "$hard_quota" \
 		"$base_path" "$servicedir" "$use_ssl"
@@ -11895,6 +11893,9 @@ case $option in
 		;;
 
 		clamd)
+		if [ -n "$mysysconfdir" ] ; then
+			sysconfdir=$mysysconfdir
+		fi
 		if [ ! -d $sysconfdir ] ; then
 			/bin/mkdir -p $sysconfdir
 		fi
@@ -12285,12 +12286,12 @@ case $option in
 	elif [ " $clamdPrefix" = " " ] ; then
 		echo "clamd Installation Prefix directory not specified" 1>&2
 		usage 1
-	elif [ " $mysysconfdir" = " " ] ; then
-		echo "sysconfdir not specified" 1>&2
-		usage 1
+	fi
+	if [ -n "$mysysconfdir" ] ; then
+		sysconfdir=$mysysconfdir
 	fi
 	echo "Creating Virus Scanner Service ClamdPrefix $clamdPrefix, Service $servicedir, Sysconf $sysconfdir"
-	create_clamd $clamdPrefix $servicedir $mysysconfdir
+	create_clamd $clamdPrefix $servicedir
 	;;
 
 	18) # create_poppass

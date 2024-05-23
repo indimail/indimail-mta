@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.9  2024-05-23 17:16:18+05:30  Cprogrammer
+ * renamed wildmat_internal to wildmat
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -98,7 +101,7 @@ getDomainToken(const char *domain, stralloc *sa)
 						retval = (REGEXEC(qreg, domain) == REG_NOMATCH ? 1 : REG_NOERROR);
 					regfree(&qreg);
 				} else
-					retval = !wildmat_internal(domain, ptr);
+					retval = !wildmat(domain, ptr);
 			}
 			*p1 = ':';
 			if (!retval) { /*- match occurred for domain or wildcard */
@@ -146,7 +149,7 @@ getDomainToken(const char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	const char     *x = "$Id: getDomainToken.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: getDomainToken.c,v 1.9 2024-05-23 17:16:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;
