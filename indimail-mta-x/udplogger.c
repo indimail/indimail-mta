@@ -1,5 +1,8 @@
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.9  2024-06-16 21:28:19+05:30  Cprogrammer
+ * set n=MAXLOGDATASIZE as default
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -349,6 +352,8 @@ main(int argc, char **argv)
 			else
 				break;
 		}
+		if (!n)
+			n = MAXLOGDATASIZE;
 		if ((rdata_len < n || rdata_len/n > 2) && !(rdata = (char *) realloc(rdata, (rdata_len = n))))
 			die_nomem();
 #else
@@ -399,7 +404,7 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	const char     *x = "$Id: udplogger.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: udplogger.c,v 1.9 2024-06-16 21:28:19+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
