@@ -1110,7 +1110,7 @@ main(int argc, char **argv)
 
 	/*-
 	 * By now we have finished initialization of /run. We
-	 * can now run scripts that will not fail due to absense of
+	 * can now run scripts that will not fail due to absence of
 	 * directories/files in /run
 	 */
 	while (1) {

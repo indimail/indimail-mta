@@ -327,7 +327,7 @@ main(int argc, char **argv)
 		 * Keep on incrementing bufsize till it is
 		 * possible to fetch the entire message
 		 * in one operation. This will allow the
-		 * client to send the enter rcpt list in
+		 * client to send the entire rcpt list in
 		 * one operation.
 		 *
 		 * buf_len < bufsize - increase buffer size if packet cannot be read in

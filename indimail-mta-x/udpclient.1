@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH udpclient 1
 .SH NAME
 udpclient \- log messages via UDP
@@ -12,10 +13,13 @@ udpclient \- log messages via UDP
 
 .SH DESCRIPTION
 .PP
-\fBudpclient\fR communicates with udplogger(8) using UDP. It simply sends \fImessage1\fR, \fImessage2\fR separated
-by white space in a single line. If no message arguments are given, udpclient read file descriptor 0 to send messages.
-\fBudpclient\fR can also read messages from servers if \fB-r\fR option is provided.  \fBudpclient\fR is a generic udp
-client and can be used with other servers which use datagram sockets. See example below for a generic usage.
+\fBudpclient\fR communicates with udplogger(8) using UDP. It simply sends
+\fImessage1\fR, \fImessage2\fR separated by white space in a single line.
+If no message arguments are given, udpclient read file descriptor 0 to send
+messages.  \fBudpclient\fR can also read messages from servers if \fB-r\fR
+option is provided.  \fBudpclient\fR is a generic udp client and can be
+used with other servers which use datagram sockets. See example below for a
+generic usage.
 
 .SH OPTIONS
 .PP
@@ -30,26 +34,30 @@ Connect to port \fIport\fR
 
 .TP
 \fB\-r\fR \fIresponsesize\fR
-With this option, \fBudpclient\fR will read \fIresponsesize\fR bytes of data from remote server. The data will be
-printed on file descriptor 2. You can use shell redirection to redirect the output to a file.
+With this option, \fBudpclient\fR will read \fIresponsesize\fR bytes of
+data from remote server. The data will be printed on file descriptor 2. You
+can use shell redirection to redirect the output to a file.
 
 .TP
 \fB\-t\fR \fItimeout\fR
-With this option, \fBudpclient\fR will timeout after \fItimeout\fR seconds when \fB-r\fR is given.
+With this option, \fBudpclient\fR will timeout after \fItimeout\fR seconds
+when \fB-r\fR is given. default is 5 seconds
 
 .SH Example
+
 .EX
 This example uses udpclient to send a packet to greylisting server on localhost, port 1999
+
 printf "I127.0.0.1\\0Ftestuser01@example.com\\0Ttestuser01@example.com\\0Ttestuser02@example.com\\0\\0" > /tmp/in
 udpclient -h 127.0.0.1 -p 1999 2>/tmp/out < /tmp/in
 .EE
 
 .SH RETURN VALUE
-0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
-message is printed.
+0 if all steps were successful, non-zero otherwise. If any of the steps
+fail, a diagnostic message is printed.
 
 .SH HISTORY
-\fBudpclient(1)\fR was written by Manvendra Bhangui, originally for \fBTagrem Technologies Pvt. Ltd.\fR. - https://www.tagrem.com.
+Manvendra Bhangui
 
 .SH "SEE ALSO"
 udplogger(8), multilog(8)

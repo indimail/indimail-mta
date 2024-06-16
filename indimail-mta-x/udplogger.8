@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH udplogger 8
 .SH NAME
 udplogger \- receive log message from UDP clients and print on stdout
@@ -10,8 +11,9 @@ ipadd[:port]
 
 .SH DESCRIPTION
 .PP
-\fBudplogger\fR binds on datagram socket port 3000 and receives messages to be printed on stdout. udplogger(8) is
-typically configured under supervise(8) with use of multilog(8) to log the messages on disk.
+\fBudplogger\fR binds on datagram socket port 3000 and receives messages to
+be printed on stdout. udplogger(8) is typically configured under
+supervise(8) with use of multilog(8) to log the messages on disk.
 
 .SH OPTIONS
 .PP
@@ -21,19 +23,19 @@ Timeout out read after \fItimeout\fR seconds
 
 .TP
 \fB\-p\fR \fIport\fR
-Connect to port \fIport\fR
+bind on port \fIport\fR
 
 .TP
 \fIipaddr\fR[:\fIport\fR]
-Connect to host \fIhost\fR on port \fIport\fR. If port is omitted, it binds on port 3000. This overrides the value
-specified by -p option.
+Listen on host \fIhost\fR on port \fIport\fR. If port is omitted, it binds
+on port 3000. This overrides the value specified by -p option.
 
 .SH RETURN VALUE
-0 if all steps were successful, non-zero otherwise. If any of the steps fail, a diagnostic
-message is printed.
+0 if all steps were successful, non-zero otherwise. If any of the steps
+fail, a diagnostic message is printed.
 
 .SH AUTHORS
-\fBudplogger(8)\fR has been written by Manvendra Bhangui for \fBTagrem Technologies Pvt. Ltd.\fR. - https://www.tagrem.com
+Manvendra Bhangui
 
 .SH "SEE ALSO"
 udpclient(1), supervise(8), multilog(8)

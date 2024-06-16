@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-getpw 8
 
 .SH NAME
@@ -11,11 +12,13 @@ In \fBqmail\fR, each user controls a vast array of local addresses.
 \fBqmail-getpw\fR finds the user that controls a particular address,
 \fIlocal\fR.  It prints six pieces of information, each terminated by NULL:
 \fIuser\fR; \fIuid\fR; \fIgid\fR; \fIhomedir\fR; \fIdash\fR; and \fIext\fR.
-The user's account name is \fIuser\fR; the user's uid and gid in decimal are
-\fIuid\fR and \fIgid\fR; the user's home directory is \fIhomedir\fR;
-and messages to \fIlocal\fR will be handled by \fIhomedir\fR\fB/.qmail\fIdashext\fR.
+The user's account name is \fIuser\fR; the user's uid and gid in decimal
+are \fIuid\fR and \fIgid\fR; the user's home directory is \fIhomedir\fR;
+and messages to \fIlocal\fR will be handled by
+\fIhomedir\fR\fB/.qmail\fIdashext\fR.
 
-In case of trouble,\fBqmail-getpw\fR exits nonzero without printing anything.
+In case of trouble, \fBqmail-getpw\fR exits nonzero without printing
+anything.
 
 \fBWARNING\fR:
 The operating system's \fBgetpwnam\fR function, which is at the heart of
@@ -34,8 +37,8 @@ if
 .PP
 .EX
 (1) the account has a nonzero uid,
-(2) the account's home directory exists (and is visible to \fBqmail-getpw\fR), and
-(3) the account owns its home directory.
+(2) the account's home directory exists (and is visible to
+    \fBqmail-getpw\fR), and (3) the account owns its home directory.
 .EE
 
 \fBqmail-getpw\fR ignores account names containing uppercase letters.
@@ -46,8 +49,8 @@ characters.
 and all addresses of the form \fIuser\fR\fBBREAK\fR\fIanything\fR. When
 \fIlocal\fR is \fIuser\fR, \fIdash\fR and \fIext\fR are both empty. When
 \fIlocal\fR is \fIuser\fR\fBBREAK\fR\fIanything\fR, \fIdash\fR is a hyphen
-and \fIext\fR is \fIanything\fR. \fIuser\fR may appear in any combination of
-uppercase and lowercase letters at the front of \fIlocal\fR.
+and \fIext\fR is \fIanything\fR. \fIuser\fR may appear in any combination
+of uppercase and lowercase letters at the front of \fIlocal\fR.
 
 A catch-all user, \fBalias\fR, controls all other addresses. In this case
 \fIext\fR is \fIlocal\fR and \fIdash\fR is a hyphen.

@@ -45,17 +45,19 @@ the the environment variable \fBPWD\fR to \fIdir\fR. It then writes its pid
 to the file \fB.svscan.pid\fR in /\fIrun\fR/\fIsvscan\fR,
 /\fIvar\fR/\fIrun\fR/\fIsvscan\fR (whichever is found first) or the
 directory \fIdir\fR if the system doesn't have a \fBrun\fR tmpfs
-filesystem. The pid file is created exclusively and involves switching
-directories between the \fBrun\fR filesystem and the \fIdir\fR directory.
-\fBsvscan\fR(8) uses the pid file to prevent multiple copies of
-\fBsvscan\fR(8) to run for the same directory. If \fBDISABLE_RUN\fR is set,
-\fBsvscan\fR(8) will use \fIdir\fR instead of /\fIrun\fR or
-/\fI/var\fR/\fIrun\fR. \fBsvscan\fR(8) uses the /\fIproc\fR filesystem to
-verify if the pid belongs to a process named \fBsvscan\fR, by opening the
-file /\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR(8) will start if the
-file does not exist, or if any process with pid \fIpid\fR does not exist,
-or if the pid belongs to a non-svscan process. The file \fB.svscan.pid\fR
-is deleted on \fBSIGTERM\fR.
+filesystem. The pid file is created exclusively. If the \fIrun\fR directory
+is used, writing the pid file involves switching directories between the
+\fBrun\fR filesystem and the \fIdir\fR directory. \fBsvscan\fR(8) uses the
+pid file to prevent multiple copies of \fBsvscan\fR(8) to run for the same
+directory. If \fBDISABLE_RUN\fR is set, \fBsvscan\fR(8) will use \fIdir\fR
+instead of /\fIrun\fR or /\fI/var\fR/\fIrun\fR. If \fBDISABLE_RUN\fR is
+set, you can a individual invocation of \fBsvscan\fR(8) run for each
+\fIdir\fR passed on the command line. \fBsvscan\fR(8) uses the /\fIproc\fR
+filesystem to verify if the pid belongs to a process named \fBsvscan\fR, by
+opening the file /\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR(8) will
+start if the file does not exist, or if any process with pid \fIpid\fR does
+not exist, or if the pid belongs to a non-svscan process. The file
+\fB.svscan.pid\fR is deleted on \fBSIGTERM\fR.
 
 After creating the pid file, \fBsvscan\fR is designed to run forever. If it
 has trouble creating a pipe or running \fBsupervise\fR(8), it prints a
