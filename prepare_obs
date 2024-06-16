@@ -50,7 +50,7 @@ if [ -f $name.packages ] ; then
         echo cleaning $pkg_name-$ver
         set +e
         make clean && make distclean >/dev/null 2>&1
-        find . -type d name autom4te.cache -exec /bin/rm -rf '{}' '+'
+        find . -type d -name autom4te.cache -exec /bin/rm -rf '{}' '+'
         set -e
       fi
       # remove debian directory from archive
@@ -158,7 +158,7 @@ if [ -f Makefile ] ; then
   echo cleaning $name-$version
   set +e
   make clean && make distclean >/dev/null 2>&1
-  find . -type d name autom4te.cache -exec /bin/rm -rf '{}' '+'
+  find . -type d -name autom4te.cache -exec /bin/rm -rf '{}' '+'
   set -e
 fi
 
