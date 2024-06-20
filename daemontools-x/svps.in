@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.18 2023-08-13 09:31:08+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.19 2024-06-20 11:07:51+05:30 Cprogrammer Exp mbhangui $
 #
 
 do_days()
@@ -12,133 +12,139 @@ do_days()
 	fi
 }
 
+do_svscan()
+{
+	now=$(date +%s)
+	diff=$(expr $now - $mod)
+	words=$(ps ax|head -1|wc -w)
+	words=$(expr $words - 1)
+
+	t=$(expr $max - $svscan_length)
+	printf "============ %-"$t"s     state uptime ===== pid/spid ==\n" "svscan"
+	#echo "------------ svscan ---------------"
+	do_days $diff
+	ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
+	do
+		set $line
+		pid=$1
+		shift $words
+		printf "%-"$max"s up   %s  pid %7d\n" "$*" "$tstr" $pid
+	done
+}
+
 doit()
 {
-svpid=$1
-option=$2
-max=$3
-mod=$4
+	svpid=$1
+	svdir=$2
+	option=$3
+	mod=$4
 
-now=$(date +%s)
-diff=$(expr $now - $mod)
-words=$(ps ax|head -1|wc -w)
-words=$(expr $words - 1)
+	t=$(expr $max - $svscan_length)
+	case "$option" in
+		all|main)
+		echo
+		printf "============ %-"$t"s     state uptime ===== pid/spid ==\n" $svdir
 
-echo "------------ svscan ---------------"
-do_days $diff
-ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
-do
-	set $line
-	pid=$1
-	shift $words
-	printf "%-"$max"s up   %s  pid %7d\n" "$*" "$tstr" $pid
-done
+		grep -w down /tmp/svps.$$ | grep -v "normally down" | sort -n -k3 | grep -v "/log" | while read line
+		do
+			set $line
+			name=`echo $1|cut -d: -f1`
+			secs=$3
+			do_days $secs
+			if [ "$5" = "normally" ] ; then
+				printf "%-"$max"s down %s spid %7d\n" $name "$tstr" $8
+			else
+				printf "%-"$max"s down %s spid %7d\n" $name "$tstr" $6
+			fi
+			if [ $? -ne 0 ] ; then
+				break
+			fi
+		done
 
-case "$option" in
-	all|main)
-	echo
-	echo "------------ main -----------------"
+		grep -Ew wait /tmp/svps.$$ | sort -n -k3 | grep -v "/log" | while read line
+		do
+			set $line
+			name=`echo $1|cut -d: -f1`
+			secs=$3
+			do_days $secs
+			if [ $# -eq 9 ] ; then
+				printf "%-"$max"s wait %s  pid %7d remaining %7d seconds\n" $name "$tstr" $6 $8
+			else
+				printf "%-"$max"s wait %s  pid %7d\n" $name "$tstr" $6
+			fi
+			if [ $? -ne 0 ] ; then
+				break
+			fi
+		done
 
-	grep -w down /tmp/svps.$$ | grep -v "normally down" | sort -n -k3 | grep -v "/log" | while read line
-	do
-		set $line
-		name=`echo $1|cut -d: -f1`
-		secs=$3
-		do_days $secs
-		if [ "$5" = "normally" ] ; then
-			printf "%-"$max"s down %s spid %7d\n" $name "$tstr" $8
-		else
-			printf "%-"$max"s down %s spid %7d\n" $name "$tstr" $6
-		fi
-		if [ $? -ne 0 ] ; then
-			break
-		fi
-	done
+		grep -Ew "up" /tmp/svps.$$ | grep -v "normally up" | sort -n -k3 | grep -v "/log" | while read line
+		do
+			set $line
+			name=`echo $1|cut -d: -f1`
+			secs=$3
+			do_days $secs
+			if [ "$5" = "normally" ] ; then
+				printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $8
+			else
+				printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $6
+			fi
+			if [ $? -ne 0 ] ; then
+				break
+			fi
+		done
+		;;
+	esac
 
-	grep -Ew wait /tmp/svps.$$ | sort -n -k3 | grep -v "/log" | while read line
-	do
-		set $line
-		name=`echo $1|cut -d: -f1`
-		secs=$3
-		do_days $secs
-		if [ $# -eq 9 ] ; then
-			printf "%-"$max"s wait %s  pid %7d remaining %7d seconds\n" $name "$tstr" $6 $8
-		else
-			printf "%-"$max"s wait %s  pid %7d\n" $name "$tstr" $6
-		fi
-		if [ $? -ne 0 ] ; then
-			break
-		fi
-	done
-
-	grep -Ew "up" /tmp/svps.$$ | grep -v "normally up" | sort -n -k3 | grep -v "/log" | while read line
-	do
-		set $line
-		name=`echo $1|cut -d: -f1`
-		secs=$3
-		do_days $secs
-		if [ "$5" = "normally" ] ; then
-			printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $8
-		else
-			printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $6
-		fi
-		if [ $? -ne 0 ] ; then
-			break
-		fi
-	done
-	;;
-esac
-
-case "$option" in
-	all|logs)
-	echo
-	echo "------------ .svscan/log ----------"
-	set $(grep "@servicedir@/\.svscan/log" /tmp/svps.$$)
-	name=`echo $1|cut -d: -f1`
-	secs=$3
-	do_days $secs
-	printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $6
-	echo
-	echo "------------ logs -----------------"
-	grep -E "@servicedir@/.*/log" /tmp/svps.$$ | sort -n -k3 | grep -v "\.svscan" | while read line
-	do
-		set $line
+	case "$option" in
+		all|logs)
+		echo
+		printf "============ %-"$t"s     state uptime ===== pid/spid ==\n" ".svscan/log"
+		set $(grep "@servicedir@/\.svscan/log" /tmp/svps.$$)
 		name=`echo $1|cut -d: -f1`
 		secs=$3
 		do_days $secs
 		printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $6
-		if [ $? -ne 0 ] ; then
-			break
+		echo
+		printf "==== logs == %-"$t"s     state uptime ===== pid/spid ==\n" $svdir
+		grep -E "@servicedir@/.*/log" /tmp/svps.$$ | sort -n -k3 | grep -v "\.svscan" | while read line
+		do
+			set $line
+			name=`echo $1|cut -d: -f1`
+			secs=$3
+			do_days $secs
+			printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $6
+			if [ $? -ne 0 ] ; then
+				break
+			fi
+		done
+		;;
+	esac
+	case "$option" in
+		hup)
+		if [ ! -f $pidfile ] ; then
+			echo "$pidfile: No such file or directory" 1>&2
+			exit 1
+		else
+			echo "Sending HUP to svscan with PID $svpid"
+			kill -1 $svpid
+			if [ $? -ne 0 ] ; then
+				echo "Failed to send HUP signal to pid $svpid" 1>&2
+			fi
 		fi
-	done
-	;;
-esac
-case "$option" in
-	hup)
-	if [ ! -f $pidfile ] ; then
-		echo "$pidfile: No such file or directory" 1>&2
-		exit 1
-	else
-		echo "Sending HUP to svscan with PID $svpid"
-		kill -1 $svpid
-		if [ $? -ne 0 ] ; then
-			echo "Failed to send HUP signal to pid $svpid" 1>&2
+		;;
+		term)
+		if [ ! -f $pidfile ] ; then
+			echo "$pidfile: No such file or directory" 1>&2
+			exit 1
+		else
+			echo "Sending TERM to svscan with PID $svpid"
+			kill -TERM $svpid
+			if [ $? -ne 0 ] ; then
+				echo "Failed to send HUP signal to pid $svpid" 1>&2
+			fi
 		fi
-	fi
-	;;
-	term)
-	if [ ! -f $pidfile ] ; then
-		echo "$pidfile: No such file or directory" 1>&2
-		exit 1
-	else
-		echo "Sending TERM to svscan with PID $svpid"
-		kill -TERM $svpid
-		if [ $? -ne 0 ] ; then
-			echo "Failed to send HUP signal to pid $svpid" 1>&2
-		fi
-	fi
-	;;
-esac
+		;;
+	esac
 }
 
 if [ -z "$PAGER" ] ; then
@@ -223,8 +229,29 @@ case "$SYSTEM" in
 	fi
 esac
 
-@prefix@/bin/svstat @servicedir@/* @servicedir@/*/log \
-	@servicedir@/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
+ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" > /tmp/svps.$$
+max=0
+while read line
+do
+	set $line
+	len=$(echo $5 $6 | wc -c)
+	if [ $len -gt $max ] ; then
+		max=$len
+	fi
+	svscan_length=$(echo $5 | wc -c)
+	if [ -z "$sv_dirs" ] ; then
+		sv_dirs=$6
+	else
+		sv_dirs="$sv_dirs $6"
+	fi
+done < /tmp/svps.$$
+
+(
+for i in $sv_dirs
+do
+	@prefix@/bin/svstat $i/* $i/*/log $i/.svscan/log
+done
+) > /tmp/svps_tmp.$$ 2>/tmp/svpserr.$$
 status=$?
 if [ $status -ne 0 ] ; then
 	if [ -s /tmp/svpserr.$$ ] ; then
@@ -236,14 +263,14 @@ else
 	grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
 	/bin/rm -f /tmp/svpserr.$$ /tmp/svps_tmp.$$
 fi
-max=0
+
 while read line
 do
 	if [ -z "$line" ] ; then
 		continue
 	fi
 	set $line
-	len=`echo $1 | cut -d: -f1|wc -c`
+	len=`echo $1 | cut -d: -f1| wc -c`
 	if [ $len -gt $max ] ; then
 		max=$len
 	fi
@@ -253,14 +280,37 @@ if [ "$option" = "hup" -o "$option" = "term" ] ; then
 	PAGER=""
 fi
 if [ -n "$PAGER" ] ; then
-	doit $svpid $option $max $mod | $PAGER
+	(
+	do_svscan
+	ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
+	do
+		set $line
+		@prefix@/bin/svstat $6/* $6/*/log \
+			$6/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
+		grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
+		/bin/rm -f /tmp/svps_tmp.$$
+		doit $1 $6 $option $mod
+	done
+	) | $PAGER
 else
-	doit $svpid $option $max $mod
+	do_svscan
+	ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
+	do
+		set $line
+		@prefix@/bin/svstat $6/* $6/*/log \
+			$6/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
+		grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
+		/bin/rm -f /tmp/svps_tmp.$$
+		doit $1 $6 $option $mod
+	done
 fi
 
 /bin/rm -f /tmp/svps.$$
 #
 # $Log: svps.in,v $
+# Revision 1.19  2024-06-20 11:07:51+05:30  Cprogrammer
+# display services for all svscan instances
+#
 # Revision 1.18  2023-08-13 09:31:08+05:30  Cprogrammer
 # added option to display up/down time in days, hours, mins, secs
 #

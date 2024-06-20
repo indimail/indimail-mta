@@ -17,6 +17,8 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 09. fix discarded-qualifier compiler warnings
 - 15/05/2024
 10. daemontools.spec: fixed syntax error for opensuse
+- 20/06/2024
+11. svps.in: display services for all svscan instances
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.4-1.1%{?dist}
 Release 1.1.4-1.1 Start 09/02/2024 End 03/02/2024
