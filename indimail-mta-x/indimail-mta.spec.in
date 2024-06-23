@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.403 2024-05-31 10:50:26+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.404 2024-06-23 23:53:42+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -184,8 +184,8 @@ dotforward,
 fastforward,
 mess822
 
-The package provides most features required in a modern MTA
-missing in qmail.
+The indimail-mta package provides most features required in a modern MTA
+missing in qmail and other qmail based distributions.
 
 %{see_base}
 
