@@ -1,6 +1,6 @@
 #
 #
-# $Id: indimail-mta.spec.in,v 1.404 2024-06-23 23:53:42+05:30 Cprogrammer Exp mbhangui $
+# $Id: indimail-mta.spec.in,v 1.405 2024-06-27 21:33:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -1617,11 +1617,11 @@ for i in qmail-send.25 qmail-smtpd.25 qmail-smtpd.366 \
 do
   if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
     touch %{servicedir}/$i/down
-    svc -dx %{servicedir}/$i
+    %{_prefix}/bin/svc -dx %{servicedir}/$i
   fi
   if [ -d %{servicedir}/$i/log -o -L %{servicedir}/$i/log ] ; then
     touch %{servicedir}/$i/log/down
-    svc -dx %{servicedir}/$i/log
+    %{_prefix}/bin/svc -dx %{servicedir}/$i/log
   fi
   if [ -d %{servicedir}/$i -o -L %{servicedir}/$i ] ; then
     %{__rm} -rf %{servicedir}/$i || true
@@ -1696,6 +1696,7 @@ log_it "removing svscan supervised startup services"
 if [ -f /usr/sbin/clamd -a -f /usr/bin/clamdscan ] ; then
   for i in clamd freshclam
   do
+    %{_prefix}/bin/svc -dx %{servicedir}/$i %{servicedir}/$i/log
     if [ -d %{servicedir}/$i ] ; then
       %{__rm} -rf %{servicedir}/$i || true
     elif [ -L %{servicedir}/$i ] ; then
