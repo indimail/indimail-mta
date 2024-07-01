@@ -203,6 +203,7 @@ if [ $upgrade -eq 1 ] ; then # upgrade
         fi
       fi
     fi
+	${prefix}/bin/svps -r
   fi
   ) >> /var/log/daemontools-setup.log 2>&1
   exit 0

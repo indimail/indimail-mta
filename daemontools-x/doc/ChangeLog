@@ -19,6 +19,11 @@ Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 10. daemontools.spec: fixed syntax error for opensuse
 - 20/06/2024
 11. svps.in: display services for all svscan instances
+- 01/07/2024
+12. svps.in: added stop/start all services functions
+13. daemntools.spec: stop/start all services during upgrade
+14. debian/postinst.in, debian/prerm.in: stop/start all services during
+    upgrade
 
 * Sun Mar 03 2024 12:20:15 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.4-1.1%{?dist}
 Release 1.1.4-1.1 Start 09/02/2024 End 03/02/2024

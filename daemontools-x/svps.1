@@ -90,37 +90,45 @@ The process id can be of the service (pid) or the supervise process (spid)
 
 .SH OPTIONS
 .TP
-\-\-\fIall\fR or -a
+\-\-\fIall\fR or \-a
 
 Print status for both main and log processes
 
 .TP
-.B \-\-main or -m
+.B \-\-main or \-m
 
 Print status for main processes
 
 .TP
-\-\-\fIhup\fR or -h
+\-\-\fIhup\fR or \-h
 
 Send HUP signal to svscan
 
 .TP
-\-\-\fIterm\fR or -t
+\-\-\fIterm\fR or \-t
 
 Send TERM signal to svscan
 
 .TP
-.B \-\-logs or -l
+.B \-\-logs or \-l
 
 Print status for log processes
 
 .TP
-.B \-\-days or -d
+.B \-\-days or \-d
 
 Print uptime/downtime in days, hours, minutes and seconds.
 
 .TP
-.B \-\-no-pager or -n
+.B \-\-stop or \-s
+Stop all currently running services
+
+.TP
+.B \-\-resume or \-r
+Resume all services that were stopped earlier using -s option.
+
+.TP
+.B \-\-no-pager or \-n
 
 Do not use print output through a pager
 

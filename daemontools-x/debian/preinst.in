@@ -83,6 +83,7 @@ case "$1" in
           fi
         fi
       fi
+	  ${prefix}/bin/svps -s
       set -e
       sleep 5
     else

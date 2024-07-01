@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.19 2024-06-20 11:07:51+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.20 2024-07-01 09:34:06+05:30 Cprogrammer Exp mbhangui $
 #
 
 do_days()
@@ -45,13 +45,15 @@ doit()
 		echo
 		printf "============ %-"$t"s     state uptime ===== pid/spid ==\n" $svdir
 
-		grep -w down /tmp/svps.$$ | grep -v "normally down" | sort -n -k3 | grep -v "/log" | while read line
+		grep -w down /tmp/svps.$$ | grep -E -v "normally down|want down" | sort -n -k3 | grep -v "/log" | while read line
 		do
 			set $line
 			name=`echo $1|cut -d: -f1`
 			secs=$3
 			do_days $secs
 			if [ "$5" = "normally" ] ; then
+				printf "%-"$max"s down %s spid %7d\n" $name "$tstr" $8
+			elif [ "$5" = "want" ] ; then
 				printf "%-"$max"s down %s spid %7d\n" $name "$tstr" $8
 			else
 				printf "%-"$max"s down %s spid %7d\n" $name "$tstr" $6
@@ -77,13 +79,15 @@ doit()
 			fi
 		done
 
-		grep -Ew "up" /tmp/svps.$$ | grep -v "normally up" | sort -n -k3 | grep -v "/log" | while read line
+		grep -Ew "up" /tmp/svps.$$ | grep -E -v "normally up|want up" | sort -n -k3 | grep -v "/log" | while read line
 		do
 			set $line
 			name=`echo $1|cut -d: -f1`
 			secs=$3
 			do_days $secs
 			if [ "$5" = "normally" ] ; then
+				printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $8
+			elif [ "$5" = "want" ] ; then
 				printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $8
 			else
 				printf "%-"$max"s up   %s  pid %7d\n" $name "$tstr" $6
@@ -119,32 +123,51 @@ doit()
 		done
 		;;
 	esac
-	case "$option" in
-		hup)
-		if [ ! -f $pidfile ] ; then
-			echo "$pidfile: No such file or directory" 1>&2
-			exit 1
-		else
-			echo "Sending HUP to svscan with PID $svpid"
-			kill -1 $svpid
-			if [ $? -ne 0 ] ; then
-				echo "Failed to send HUP signal to pid $svpid" 1>&2
+}
+
+stop_all()
+{
+	flag=0
+	for i in $sv_dirs
+	do
+		for j in $i/*
+		do
+			if [ -d $j ] ; then
+  				@prefix@/bin/svstat $j >/dev/null
+				if [ $? -eq 0 ] ; then
+					mkdir -p /var/tmp/$j
+					if [ $? -ne 0 ] ; then
+						continue
+					fi
+					[ $flag -eq 0 ] && echo "Stopping all running services"
+					flag=1
+					@prefix@/bin/svc -d $j
+					if [ $? -eq 0 ] ; then
+						touch /var/tmp/$j/down
+					fi
+				fi
 			fi
-		fi
-		;;
-		term)
-		if [ ! -f $pidfile ] ; then
-			echo "$pidfile: No such file or directory" 1>&2
-			exit 1
-		else
-			echo "Sending TERM to svscan with PID $svpid"
-			kill -TERM $svpid
-			if [ $? -ne 0 ] ; then
-				echo "Failed to send HUP signal to pid $svpid" 1>&2
+		done
+	done
+	[ $flag -eq 0 ] && echo "No running services found" 1>&2
+}
+
+resume_all()
+{
+	flag=0
+	for i in $sv_dirs
+	do
+		for j in $i/*
+		do
+			if [ -f /var/tmp/$j/down ] ; then
+				[ $flag -eq 0 ] && echo "Starting all stopped services"
+				flag=1
+				@prefix@/bin/svc -u $j
+				/bin/rm -rf /var/tmp/$j
 			fi
-		fi
-		;;
-	esac
+		done
+	done
+	[ $flag -eq 0 ] && echo "No stopped services found" 1>&2
 }
 
 if [ -z "$PAGER" ] ; then
@@ -186,9 +209,16 @@ while test $# -gt 0; do
 	-d|--days)
 	mday=1
 	;;
+	-s|--stop)
+	option=stop
+	;;
+	-r|--resume)
+	option=resume
+	;;
     *)
     echo "invalid option [$1]" 1>&2
-	echo "usage: svps [-a|--all | -m|--main | -h|--hup | -t|--term | -n|--no-pager | -d|--days | -l|--logs]" 1>&2
+	echo "usage: svps [-a|--all | -m|--main | -h|--hup | -t|--term | -n|--no-pager] |"
+	echo "  [-d|--days -s|--stop | -r|--resume | -l|--logs]" 1>&2
     read key
 	exit 1
     ;;
@@ -205,10 +235,13 @@ if [ $ID -ne 0 ] ; then
 fi
 if [ -d /run/svscan ] ; then
 	pidfile=/run/svscan/.svscan.pid
+	rundir=/run
 elif [ -d /var/run/svscan ] ; then
 	pidfile=/var/run/svscan/.svscan.pid
+	rundir=/var/run
 else
 	pidfile=@servicedir@/.svscan.pid
+	rundir=@servicedir@
 fi
 if [ -f $pidfile ] ; then
 	svpid=$(sed -n '$p' $pidfile)
@@ -216,18 +249,6 @@ else
 	echo "svscan not running: $pdfile: No such file or directory" 1>&2
 	exit 1
 fi
-SYSTEM=$(uname -s)
-case "$SYSTEM" in
-	Darwin|FreeBSD)
-	mod=$(stat -f "%m" $pidfile)
-	;;
-	*)
-	if [ -f /etc/alpine-release ] ; then
-		mod=$(stat -c "%Y" $pidfile)
-	else
-		mod=$(stat --printf="%Y\n" $pidfile)
-	fi
-esac
 
 ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" > /tmp/svps.$$
 max=0
@@ -245,6 +266,43 @@ do
 		sv_dirs="$sv_dirs $6"
 	fi
 done < /tmp/svps.$$
+
+case "$option" in
+	stop)
+	stop_all
+	exit 0
+	;;
+	resume)
+	resume_all
+	exit 0
+	;;
+	hup)
+	if [ ! -f $pidfile ] ; then
+		echo "$pidfile: No such file or directory" 1>&2
+		exit 1
+	else
+		echo "Sending HUP to svscan with PID $svpid"
+		kill -1 $svpid
+		if [ $? -ne 0 ] ; then
+			echo "Failed to send HUP signal to pid $svpid" 1>&2
+		fi
+	fi
+	exit 0
+	;;
+	term)
+	if [ ! -f $pidfile ] ; then
+		echo "$pidfile: No such file or directory" 1>&2
+		exit 1
+	else
+		echo "Sending TERM to svscan with PID $svpid"
+		kill -TERM $svpid
+		if [ $? -ne 0 ] ; then
+			echo "Failed to send HUP signal to pid $svpid" 1>&2
+		fi
+	fi
+	exit 0
+	;;
+esac
 
 (
 for i in $sv_dirs
@@ -279,6 +337,19 @@ done < /tmp/svps.$$
 if [ "$option" = "hup" -o "$option" = "term" ] ; then
 	PAGER=""
 fi
+
+SYSTEM=$(uname -s)
+case "$SYSTEM" in
+	Darwin|FreeBSD)
+	mod=$(stat -f "%m" $pidfile)
+	;;
+	*)
+	if [ -f /etc/alpine-release ] ; then
+		mod=$(stat -c "%Y" $pidfile)
+	else
+		mod=$(stat --printf="%Y\n" $pidfile)
+	fi
+esac
 if [ -n "$PAGER" ] ; then
 	(
 	do_svscan
@@ -308,6 +379,9 @@ fi
 /bin/rm -f /tmp/svps.$$
 #
 # $Log: svps.in,v $
+# Revision 1.20  2024-07-01 09:34:06+05:30  Cprogrammer
+# added stopall, startall functions
+#
 # Revision 1.19  2024-06-20 11:07:51+05:30  Cprogrammer
 # display services for all svscan instances
 #

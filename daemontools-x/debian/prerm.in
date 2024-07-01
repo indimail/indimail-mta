@@ -46,8 +46,9 @@ case "$1" in
 	set +e
 	${prefix}/bin/svok /service/.svscan/log
 	if [ $? -eq 0 ] ; then
-		touch ${servicedir}/.svscan.down
 		log_it "prerm: Giving svscan exactly 5 seconds to exit nicely"
+		touch ${servicedir}/.svscan.down
+		${prefix}/bin/svps -s
 		if test -f /etc/init/svscan.conf
 		then
 			/sbin/initctl emit qmailstop
@@ -77,6 +78,7 @@ case "$1" in
 				fi
 			fi
 		fi
+		${prefix}/bin/svps -s
 		set -e
 		sleep 5
 	else
