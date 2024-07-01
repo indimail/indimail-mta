@@ -38,9 +38,8 @@ fi
 
 case "$1" in
     remove|upgrade|deconfigure)
-	if [ -f ${libexecdir}/upgrade.sh ] ; then
-		log_it "Running Custom Upgrade Script for pre $1"
-		/bin/sh ${libexecdir}/upgrade.sh prerm $1 2.2 $* || true
+	if [ "$1" != "upgrade" ] ; then
+		/bin/rm -f /var/log/daemontools-setup.log
 	fi
 	(
 	set +e
@@ -84,7 +83,7 @@ case "$1" in
 	else
 		echo "prerm: svscan not running" 1>&2
 	fi
-	) > /var/log/daemontools-setup.log 2>&1
+	) >> /var/log/daemontools-setup.log 2>&1
     ;;
 
     failed-upgrade)
@@ -106,6 +105,7 @@ if [ " $1" = " upgrade" -o " $1" = " deconfigure" ] ; then
 	exit 0
 fi
 
+(
 if [ -s ${qsysconfdir}/daemontools-stat.override -a -f /usr/sbin/dpkg-statoverride ] ; then
 	log_it "reverting permissions"
 	/bin/cat ${qsysconfdir}/daemontools-stat.override | while read line
@@ -134,4 +134,5 @@ SERVICE_LIST="."
 export SERVICE_LIST
 $prefix/sbin/minisvc --config=rm-boot >/dev/null || true
 ${rm} -f ${qsysconfdir}/resolv.conf
+) >> /var/log/daemontools-setup.log 2>&1
 exit 0
