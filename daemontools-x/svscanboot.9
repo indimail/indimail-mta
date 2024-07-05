@@ -1,6 +1,8 @@
+.\" vim: tw=75
 .TH svscanboot 8
 .SH NAME
-\fBsvscanboot\fR \- start svscan in service directories, with output/error logged through multilog.
+\fBsvscanboot\fR \- start svscan in service directories, with output/error
+logged through multilog.
 
 .SH SYNOPSIS
 \fBsvscanboot\fR [ \fIservicedir\fR ]
@@ -11,32 +13,44 @@
 
 svscan @servicedir@ 2>&1 
 
-If \fBsvscanboot\fR is given a command-line argument, it startups up svscan for the directory
-\fIservicedir\fR given on the command line (instead of just svscan @servicedir@).
+If \fBsvscanboot\fR is given a command-line argument, it starts up svscan
+for the directory \fIservicedir\fR given on the command line (instead of
+just svscan @servicedir@).
 
-\fBsvscanboot\fR uses envdir(8) on \fIservicedir\fR/.svscan/variables to set environment variables
-and clear all other environment variables.
+\fBsvscanboot\fR uses \fBenvdir\fR(8) on \fIservicedir\fR/.svscan/variables
+to set environment variables and clear all other environment variables.
 
-You can use the following variables
+You can set the following typical variables in
+\fIservicedir\fR/.svscan/variables directory
 
 .EX
  PATH
- SCANINTERVAL  - If set, svscan(8) uses this to look for new services every SCANINTERVAL seconds.
+ SCANINTERVAL  - If set, svscan(8) uses this to look for new services every
+                 SCANINTERVAL seconds.
  STATUSFILE    - Used by svscan(8)
- INITCMD       - If set, svscan(8) runs this command using /bin/sh, before running supervise(8).
- WAIT_INITCMD  - If set, svscan(8) waits for this INIT_CMD to finish before starting supervise(8)
- SCANLOG       - If set, svscan(8) logs all messages and errors using multilog with instructions
-                 in \fIservicedir\fR/.svscan/log/run. If not set, svscanboot(8) pipes stdout, stderr
-	             of svscan(8) to readproctitle(8)
- UNSHARE       - If set, svscanboot(8) uses unshare --mount command to run svscan(8)
+ INITCMD       - If set, svscan(8) runs this command using /bin/sh, before
+                 running supervise(8).
+ WAIT_INITCMD  - If set, svscan(8) waits for this INIT_CMD to finish before
+                 starting supervise(8)
+ SCANLOG       - If set, svscan(8) logs all messages and errors using
+                 multilog with instructions in
+                 \fIservicedir\fR/.svscan/log/run. If not set,
+                 svscanboot(8) pipes stdout, stderr of svscan(8) to
+                 readproctitle(8)
+ UNSHARE       - If set, svscanboot(8) uses unshare --mount command to run
+                 svscan(8)
 .EE
 
-The recommended old way was to put the following entry in /etc/inittab to invoke svscanboot.
+The recommended old way was to put the following entry in /etc/inittab to
+invoke svscanboot.
 
+.EX
 SV:345:respawn:@libexecdir@/svscanboot <>/dev/console 2<>/dev/console
+.EE
 
-The current operating systems use systemd(1) replacement for init(1). \fBsvcanboot(8)\fR should be
-invoked by your boot scripts - systemd(1), upstart(1), init(1) or boot rc scripts.
+Many of the current operating systems use systemd(1) replacement for
+init(1). \fBsvcanboot(8)\fR should be invoked by your boot scripts -
+systemd(1), upstart(1), init(1) or boot rc scripts.
 
 .SH SEE ALSO
 init(1),
@@ -60,6 +74,7 @@ softlimit(8),
 setlock(8),
 unshare(1),
 unshare(2),
+svps(1),
 ps(1)
 
  http://cr.yp.to/daemontools.html

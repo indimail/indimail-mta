@@ -14,12 +14,12 @@ override using current directory by passing \fIdir\fR as an argument. If
 that directory when it starts.
 
 \fBsvscan\fR(8) skips subdirectory names starting with dots.
-\fBsupervise\fR(8) must be in \fBsvscan\fR's path. \fBsvscan\fR(8) calls
-\fBsetsid(2)\fR to become a session leader if the environment variable
-\fBSETSID\fR is set. When running as a session leader, svscan will
-terminate process group if the environment vairable \fBTERMINATE_SESSION\fR
-is set. This will terminate all supervise proceses started by \fBsvscan\fR
-by calling kill(0, 15).
+\fBsupervise\fR(8) must be in \fBsvscan\fR's path. If the environment
+variable \fBSETSID\fR is set, \fBsvscan\fR(8) calls \fBsetsid(2)\fR to
+become a session leader. When running as a session leader, \fBsvscan\fR
+will terminate process group if the environment vairable
+\fBTERMINATE_SESSION\fR is set. This will terminate all supervise proceses
+started by \fBsvscan\fR by calling kill(0, 15).
 
 \fBsvscan\fR(8) optionally starts a pair of \fRsupervise\fR(8) processes,
 one for a subdirectory \fIs\fR, one for \fIs\fR/\fIlog\fR, with a pipe
@@ -39,19 +39,20 @@ For every \fBsupervise\fR log process it runs, \fBsvscan\fR also sets
 supervise proceses and any initialization command it runs.
 
 \fBsvscan\fR sets environment variable \fBSERVICEDIR\fR=\fIdir\fR on
-startup. If \fIdir\fR is omitted than it uses current working directory for
-the value of \fBSERVICEDIR\fR environment variable. \fBsvscan\fR also sets
-the the environment variable \fBPWD\fR to \fIdir\fR. It then writes its pid
-to the file \fB.svscan.pid\fR in /\fIrun\fR/\fIsvscan\fR,
-/\fIvar\fR/\fIrun\fR/\fIsvscan\fR (whichever is found first) or the
-directory \fIdir\fR if the system doesn't have a \fBrun\fR tmpfs
-filesystem. The pid file is created exclusively. If the \fIrun\fR directory
-is used, writing the pid file involves switching directories between the
-\fBrun\fR filesystem and the \fIdir\fR directory. \fBsvscan\fR(8) uses the
+startup. If \fIdir\fR argument to \fBsvscan\fR is omitted than it uses
+current working directory for the value of \fBSERVICEDIR\fR environment
+variable. \fBsvscan\fR also sets the the environment variable \fBPWD\fR to
+\fIdir\fR. It then writes its pid to the file \fB.svscan.pid\fR in
+/\fIrun\fR/\fIsvscan\fR, /\fIvar\fR/\fIrun\fR/\fIsvscan\fR (whichever is
+found first) or the directory \fIdir\fR if the system doesn't have a
+\fBrun\fR tmpfs filesystem or if the environment variable \fBDISABLE_RUN\fR
+is set. The pid file is created exclusively. If the \fIrun\fR directory is
+used, writing the pid file involves switching directories between the
+\fBrun\fR filesystem and the \fIdir\fR directory.  \fBsvscan\fR(8) uses the
 pid file to prevent multiple copies of \fBsvscan\fR(8) to run for the same
 directory. If \fBDISABLE_RUN\fR is set, \fBsvscan\fR(8) will use \fIdir\fR
 instead of /\fIrun\fR or /\fI/var\fR/\fIrun\fR. If \fBDISABLE_RUN\fR is
-set, you can a individual invocation of \fBsvscan\fR(8) run for each
+set, you can have an individual invocation of \fBsvscan\fR(8) run for each
 \fIdir\fR passed on the command line. \fBsvscan\fR(8) uses the /\fIproc\fR
 filesystem to verify if the pid belongs to a process named \fBsvscan\fR, by
 opening the file /\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR(8) will
@@ -69,28 +70,29 @@ process. If it sees an old subdirectory where a \fBsupervise\fR(8) process
 has exited, it restarts the \fBsupervise\fR(8) process. In the \fBlog\fR
 case it reuses the same pipe so that no data is lost. The default scan
 interval of 60 secs can be changed by setting \fBSCANINTERVAL\fR
-environment variable. You can also send a \fBHUP\fR signal to svscan to
-force a directory scan. If running as PID 1, \fBsvscan\fR will
+environment variable. You can also send a \fBHUP\fR signal to \fBsvscan\fR
+to force a directory scan. If running as PID 1, \fBsvscan\fR will
 automatically scan for new subdirectories when any of it's children or any
 orphaned process die.
 
 \fBsvscan\fR can auto-start or auto-stop a service based on the presence or
 absence of \fIs\fR/down file. During each scan, \fBsvscan\fR will
 automatically stop a running service if it finds \fIs\fR/down and the
-earlier status of the service was up. Similarly, svscan will automatically
-start a stopped service if it finds the file \fIs\fR/down missing and the
-earlier status of the service was down.
+earlier status of the service was up. Similarly, \fBsvscan\fR will
+automatically start a stopped service if it finds the file \fIs\fR/down
+missing and the earlier status of the service was down.
 
 \fBsvscan\fR output can be driven through \fBmultilog\fR. If a directory
 (or symlink to a directory) named \fB@servicedir@/.svscan\fR exists and the
-environment variable \fBSCANLOG\fR is defined. \fBsvscan\fR(8) will direct
-its stdout and stderr to the supervised service run from the
+environment variable \fBSCANLOG\fR is defined in
+\fI@servicedir@/.svscan/variables\fR, \fBsvscan\fR(8) will redirect
+its output on descriptors 1 and 2 to the supervised service run from the
 \fB@servicedir@/.svscan/log\fR directory. This simplifies \fBsvscan\fR
 startup scripts and eliminates the use of \fBreadproctitle\fR, which does
-not work on some platforms, e.g. FreeBSD 5.1. Redirecting \fBsvscan\fR
-output through \fBmultilog\fR also provides a much better solution than
-other \fBsvscan\fR startup scripts which direct output exclusively to
-console, causing problems to go undetected for a long time. The other big
+not work on some platforms, e.g. FreeBSD. Redirecting \fBsvscan\fR output
+through \fBmultilog\fR also provides a much better solution than other
+\fBsvscan\fR startup scripts which redirect output exclusively to console,
+which may cause problems to go undetected for a long time. The other big
 advantage of setting \fBSCANLOG\fR is that all \fBsupervise\fR processes
 started by \fBsvscan\fR (and also the children of supervise) inherit the
 descriptors 0, 1 and 2. Any output of these processes not redirected to a
@@ -104,23 +106,23 @@ simplicity.  Unlike systemd(1), it is not complex and tied with multiple
 pieces of software to make it work. You can also use openrc from Gentoo to
 create a decent, simple service manager to start only the processes that
 you require. If running as PID 1, \fBsvscan\fR will immediately restart a
-\fBsupervise\fR process if it dies, rather waiting for 60 (or SCANINTERVAL)
-seconds. This behaviour can be enabled as default by setting \fBSCANNOW\fR
-environment variable. Setting this variable enables a signal handler for
-\fBSIGCHILD\fR. If running as PID 1, \fBsvscan\fR will relay \fBSIGTERM\fR
-to all children when it gets \fBSIGTERM\fR. By default, it will send
-\fBSIGTERM\fR twice - first immediately and second one after 30 secs
-followed by \fBSIGKILL\fR after another 30 secs. The default of 30 seconds
-can be changed by setting \fBKILLWAIT1\fR and \fBKILLWAIT2\fR environment
-variables. Instead of \fBKILLWAIT1\fR, \fBKILLWAIT2\fR you can set
-\fBKILLWAIT\fR environment variable to have second \fBSIGTERM\fR after
+\fBsupervise\fR process if it dies, rather waiting for 60 (or
+\fBSCANINTERVAL\fR) seconds. This behaviour can be enabled as default by
+setting \fBSCANNOW\fR environment variable. Setting this variable enables a
+signal handler for \fBSIGCHILD\fR. If running as PID 1, \fBsvscan\fR will
+relay \fBSIGTERM\fR to all children when it gets \fBSIGTERM\fR. By default,
+it will send \fBSIGTERM\fR twice - first immediately and second one after
+30 seconds followed by \fBSIGKILL\fR after another 30 secs. The default of
+30 seconds can be changed by setting \fBKILLWAIT1\fR and \fBKILLWAIT2\fR
+environment variables. Instead of \fBKILLWAIT1\fR, \fBKILLWAIT2\fR you can
+set \fBKILLWAIT\fR environment variable to have second \fBSIGTERM\fR after
 \fBKILLWAIT\fR/2 secs and \fBSIGKILL\fR after \fBKILLWAIT\fR secs. Setting
 \fBKILLWAIT\fR overrides \fBKILLWAIT1\fR and \fBKILLWAIT2\fR.
 
 If \fBINITCMD\fR environment variable is defined and set to an empty string
 and if \fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR exists and has the
-executable bit set, \fIrun\fR is executed. \fBINITCMD\fR can be set to full
-path of an executable or script to override
+executable bit set, \fIrun\fR is executed once during startup.
+\fBINITCMD\fR can be set to full path of an executable / script to override
 \fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR. If \fBWAIT_INITCMD\fR
 environment variable is set, it will additionally wait for \fIrun\fR to
 exit, before starting the scan of \fIdir\fR. Typical use of \fBINITCMD\fR
@@ -152,13 +154,16 @@ exec /usr/bin/svc -Gdx /service/* /service/*/log /service/.svscan/log
 The above can also be achieved by setting \fBSETSID\fR and
 \fBTERMINATE_SESSION\fR environment variables as explained earlier.
 
-On most Linux distros, svscan is started using a systemd(1) unit file
+On most Linux distros, \fBsvscan\fR is started using a systemd(1) unit file
 /usr/lib/systemd/system/svscan.service. On FreeBSD, it is started using rc
 script in /usr/local/etc/rc.d/svscan. On Darwin, it is started by
 launchd(8) using /Library/LaunchDaemons/org.indimail.svscan.plist. On
-alpine linux, it is started by openrc using /etc/init.d/svscan when using
-the \fBservice\fR(8) command. Few examples of starting and stopping svscan
-are given below.
+alpine linux, it is started by openrc using /etc/init.d/\fBsvscan\fR when
+using the \fBservice\fR(8) command. All of these use a wrapper named
+\fBsvscanboot\fR(8) to start \fBsvscan\fR. \fBsvscanboot\fR uses
+\fBenvdir\fR(8) to set environment variables from
+\fI/service/.svscan/variables\fR directory. Few examples of starting and
+stopping \fBsvscan\fR are given below.
 
 .EX
 Linux
@@ -205,7 +210,7 @@ You can toggle this by sending \fBsvscan\fR \fBUSR2\fR signal. Setting this
 also sets \fBSILENT\fR environment variable, which gets inherited by all
 processes started by svscan. Warning messages can also be suppressed by
 setting \fBSILENT\fR environment variable. Note that \fBsupervise\fR(8)
-uses \fBSILENT\fR environment variable.
+also uses the \fBSILENT\fR environment variable.
 
 .SH SEE ALSO
 proc(5),
