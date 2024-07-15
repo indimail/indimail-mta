@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.79 2024-05-21 20:59:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.80 2024-07-16 00:19:03+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -1185,6 +1185,7 @@ create_authsmtp()
 	echo "pass=\`echo \$var | cut -d ' ' -f2\`"
 	echo "exec 4>$tmpdir/authsmtp.\$\$ 3<$tmpdir/authsmtp.\$\$"
 	echo "/bin/rm -f $tmpdir/authsmtp.\$\$"
+	echo "echo \"authsmtp: user=\$user, pass=\$pass\" 1>&2"
 	/bin/echo "echo \$var | tr [\" \"] [\"\\0\"] 1>&4"
 	echo "if [ \"\$user\" = \"$user@$HOSTNAME\" -a \"\$pass\" = \"abcd12345678\" ] ; then"
 	echo "	exit 0"
@@ -1328,7 +1329,7 @@ start_tcpserver_smtp_unix()
 		MAKE_SEEKABLE=1 \
 		DKIMVERIFY="" \
 		$tcpserver $smtp_socket $qmail_smtpd $HOSTNAME \
-			$testdir/bin/authsmtp $sbindir/sys-checkpwd /bin/false
+			$sys_pwd $testdir/bin/authsmtp /bin/false
 	) > $logdir/smtpd/smtpd.log 2>&1 &
 
 	smtp_pid=$(/bin/ps -ef|grep $smtp_socket|grep qmail-smtpd|awk '{print $2}')
@@ -2804,7 +2805,7 @@ test_qmail_remote_auth()
 {
 	t1=$(date +"%s.%4N")
 	case $1 in
-		"CRAM-MD5")
+		"CRAM-MD5"|"CRAM-SHA1"|"CRAM-SHA224"|"CRAM-SHA256"|"CRAM-SHA384"|"CRAM-SHA512"|"CRAM-RIPEMD"|"DIGEST-MD5")
 		u=$user
 		pass=$(sudo grep $user /etc/shadow|cut -d: -f2)
 		;;
@@ -2837,7 +2838,7 @@ test_qmail_remote_auth()
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
 			tcount=$(expr $tcount + 1)
-			printf "\r  testing qmail-remote AUTH %-8s qmail-remote send+receive succeeded %31s [%.4f sec]\n" "$1" " " $secs
+			printf "\r  testing qmail-remote AUTH %-11s qmail-remote send+receive succeeded %28s [%.4f sec]\n" "$1" " " $secs
 			print_pct
 			/bin/rm -f $testdir/tmpdir.$$ $tmpdir/mail.txt
 		else
@@ -2882,7 +2883,7 @@ test_qmail_remote_auth()
 		failed=1
 		exit 1
 	fi
-	if [ " $1" = " CRAM-MD5" ] ; then
+	if [ " $1" = " DIGEST-MD5" ] ; then
 		if [ $batv_status -eq 0 -a "$addr" = "$user@$HOSTNAME" ] ; then
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 $sleep_secs | awk '{printf("%0.4f\n", $2-$1-$3)}')
@@ -6373,7 +6374,22 @@ do_without_svscan()
 
 	test_qmail_remote_auth "PLAIN"
 	test_qmail_remote_auth "LOGIN"
+	test_qmail_remote_auth "XOAUTH2"
+	(
+	printf "#!/bin/sh\n"
+	echo "exec $sys_pwd \$*"
+	) > $testdir/bin/authsmtp
+	chmod +x $testdir/bin/authsmtp
 	test_qmail_remote_auth "CRAM-MD5"
+	test_qmail_remote_auth "CRAM-SHA1"
+	test_qmail_remote_auth "CRAM-SHA224"
+	test_qmail_remote_auth "CRAM-SHA256"
+	test_qmail_remote_auth "CRAM-SHA384"
+	test_qmail_remote_auth "CRAM-SHA512"
+	test_qmail_remote_auth "CRAM-RIPEMD"
+	test_qmail_remote_auth "DIGEST-MD5"
+	/bin/rm -f $testdir/bin/authsmtp
+	create_authsmtp
 	test_qmail_remote_routing
 	test_qmail_remote_auth_cdb
 	test_qmail_remote_starttls
@@ -9034,7 +9050,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=314
+	total_tests=322
 fi
 failed=0
 do_setup
@@ -9089,6 +9105,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.80  2024-07-16 00:19:03+05:30  Cprogrammer
+# added test for CRAM, XOAUTH2 auth methods
+#
 # Revision 1.79  2024-05-21 20:59:25+05:30  Cprogrammer
 # fixed display of time taken
 #

@@ -1,8 +1,10 @@
 /*
- * $Id: sys-checkpwd.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.23 2024-07-16 00:18:31+05:30 Cprogrammer Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
+ * or
+ * printf "login\0challenge\0response\0\x01\0" >/tmp/input
  * as root run
  * env DEBUG=1 DEBUG_LOGIN=1 sys-checkpwd /bin/false < /tmp/input 3<&0
  */
@@ -120,7 +122,7 @@ runcmmd(const char *cmmd)
 }
 
 static void
-pipe_exec(char **argv, char *tmpbuf, int len, int restore)
+pipe_exec(char **argv, char *buffer, int len, int restore)
 {
 	int             pipe_fd[2];
 	char            strnum[FMT_ULONG];
@@ -138,8 +140,8 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 	if (pipe_fd[1] != 3 && pipe_fd[1] != 4)
 		close(pipe_fd[1]);
 	if (restore > 0)
-		tmpbuf[restore] = '@';
-	if (write(4, tmpbuf, len) != len)
+		buffer[restore] = '@';
+	if (write(4, buffer, len) != len)
 		strerr_die2sys(111, FATAL, "write: ");
 	close(4);
 	execv(argv[1], argv + 1);
@@ -149,7 +151,7 @@ pipe_exec(char **argv, char *tmpbuf, int len, int restore)
 int
 main(int argc, char **argv)
 {
-	char           *ptr, *tmpbuf, *login, *response, *challenge, *stored;
+	char           *ptr, *authstr, *login, *response, *challenge, *stored;
 	char            strnum[FMT_ULONG];
 	static stralloc buf = {0};
 	int             i, count, offset, status, save = -1, use_pwgr, authlen = 512,
@@ -166,7 +168,7 @@ main(int argc, char **argv)
 		_exit(2);
 	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
 	debug = env_get("DEBUG") ? 1 : 0;
-	if (!(tmpbuf = alloc((authlen + 1) * sizeof(char)))) {
+	if (!(authstr = alloc((authlen + 1) * sizeof(char)))) {
 		print_error("out of memory");
 		strnum[fmt_uint(strnum, (unsigned int) authlen + 1)] = 0;
 		strerr_warn3("alloc-", strnum, ": ", &strerr_sys);
@@ -175,7 +177,7 @@ main(int argc, char **argv)
 	enable_cram = env_get("ENABLE_CRAM") ? 1 : 0;
 	for (offset = 0;;) {
 		do {
-			count = read(3, tmpbuf + offset, authlen + 1 - offset);
+			count = read(3, authstr + offset, authlen + 1 - offset);
 #ifdef ERESTART
 		} while(count == -1 && (errno == EINTR || errno == ERESTART));
 #else
@@ -192,22 +194,22 @@ main(int argc, char **argv)
 			_exit(2);
 	}
 	count = 0;
-	login = tmpbuf + count; /*- username */
-	for (;tmpbuf[count] && count < offset;count++);
+	login = authstr + count; /*- username */
+	for (; authstr[count] && count < offset; count++);
+	if (count == offset || (count + 1) == offset) /*- early termination */
+		_exit(2);
+
+	count++;
+	challenge = authstr + count; /*- challenge for CRAM methods (or plain text password for LOGIN/PLAIN/XOAUTH2) */
+	for (; authstr[count] && count < offset; count++);
 	if (count == offset || (count + 1) == offset)
 		_exit(2);
+
 	count++;
-	challenge = tmpbuf + count; /*- challenge for CRAM methods (or plain text password for LOGIN/PLAIN) */
-	for (;tmpbuf[count] && count < offset;count++);
-	if (count == offset || (count + 1) == offset)
-		_exit(2);
-	count++;
-	response = tmpbuf + count; /*- response (CRAM methods, etc) */
-	for (; tmpbuf[count] && count < offset; count++);
-	if (count == offset || (count + 1) == offset)
-		auth_method = 0;
-	else
-		auth_method = tmpbuf[count + 1];
+	response = authstr + count; /*- response (CRAM methods, etc) */
+	for (; authstr[count] && count < offset; count++);
+
+	auth_method = authstr[offset - 2];
 
 	if (env_get("STRIP_DOMAIN")) { /*- set this for roundcubemail */
 		i = str_chr(login, '@');
@@ -218,7 +220,7 @@ main(int argc, char **argv)
 	}
 	if (!(pw = (use_pwgr ? qgetpwnam : getpwnam) (login))) {
 		if (errno != ETXTBSY)
-			pipe_exec(argv, tmpbuf, offset, save);
+			pipe_exec(argv, authstr, offset, save);
 		else {
 			print_error("getpwnam");
 			strerr_die2sys(111, FATAL, "getpwnam: ");
@@ -232,7 +234,7 @@ main(int argc, char **argv)
 #ifdef HASUSERPW
 	if (!(upw = getuserpw(login))) {
 		if (errno != ETXTBSY)
-			pipe_exec(argv, tmpbuf, offset, save);
+			pipe_exec(argv, authstr, offset, save);
 		else {
 			print_error("getuserpw");
 			strerr_die2sys(111, FATAL, "getuserpw: ");
@@ -246,7 +248,7 @@ main(int argc, char **argv)
 #ifdef HASGETSPNAM
 	if (!(spw = getspnam(login))) {
 		if (errno != ETXTBSY)
-			pipe_exec(argv, tmpbuf, offset, save);
+			pipe_exec(argv, authstr, offset, save);
 		else {
 			print_error("getspnam");
 			strerr_die2sys(111, FATAL, "getspnam: ");
@@ -263,10 +265,10 @@ main(int argc, char **argv)
 		i = str_rchr(argv[0], '/');
 		ptr = (char *) get_authmethod(auth_method);
 		subprintf(subfderr,
-				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s",
+				"%s: uid=%u, login=%s, challenge=%s, response=%s, encrypted=%s, CRAM=%s AUTH=%s-%d",
 				argv[0][i] ? argv[0] + i + 1 : argv[0],
 				getuid(), login, challenge, response, stored ? stored : "null",
-				enable_cram ? "Yes" : "No", ptr);
+				enable_cram ? "Yes" : "No", ptr, auth_method);
 #ifdef HASUSERPW
 		subprintf(subfderr, ", USERPW=YES");
 #else
@@ -300,11 +302,11 @@ main(int argc, char **argv)
 		substdio_flush(subfderr);
 	}
 	if (!stored)
-		pipe_exec(argv, tmpbuf, offset, save);
+		pipe_exec(argv, authstr, offset, save);
 	if (pw_comp((unsigned char *) login, (unsigned char *) stored,
 			(unsigned char *) (*response ? challenge : 0),
 			(unsigned char *) (*response ? response : challenge), auth_method))
-		pipe_exec(argv, tmpbuf, offset, save); /*- never returns */
+		pipe_exec(argv, authstr, offset, save); /*- never returns */
 	status = 0;
 	if ((ptr = (char *) env_get("POSTAUTH"))) {
 		if (!access(ptr, X_OK)) {
@@ -325,7 +327,7 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	const char     *x = "$Id: sys-checkpwd.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sys-checkpwd.c,v 1.23 2024-07-16 00:18:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -334,6 +336,9 @@ getversion_sys_checkpwd_c()
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.23  2024-07-16 00:18:31+05:30  Cprogrammer
+ * changed variable name tmpbuf to authstr
+ *
  * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

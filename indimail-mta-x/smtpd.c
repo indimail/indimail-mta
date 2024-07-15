@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.327 2024-05-16 18:31:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.328 2024-07-16 00:17:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -125,6 +125,9 @@ static int      auth_cram_sha384();
 static int      auth_cram_sha512();
 static int      auth_cram_ripemd();
 static int      auth_digest_md5();
+#ifdef AUTH_XOAUTH2
+static int      auth_xoauth2(const char *);
+#endif
 #ifdef HASLIBGSASL
 static int      auth_scram_sha1();
 static int      auth_scram_sha1_plus();
@@ -158,7 +161,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.327 $";
+static c_char  *revision = "$Revision: 1.328 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -412,6 +415,9 @@ struct authcmd {
 	{"cram-sha512", auth_cram_sha512},
 	{"cram-ripemd", auth_cram_ripemd},
 	{"digest-md5", auth_digest_md5},
+#ifdef AUTH_XOAUTH2
+	{"xoauth2", auth_xoauth2},
+#endif
 #ifdef HASLIBGSASL
 	{"scram-sha-1", auth_scram_sha1},
 	{"scram-sha-1-plus", auth_scram_sha1_plus},
@@ -3045,6 +3051,9 @@ smtp_ehlo(const char *arg)
 					   *no_cram_sha1, *no_cram_sha224, *no_cram_sha256,
 					   *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd,
 					   *no_digest_md5;
+#ifdef AUTH_XOAUTH2
+		const char     *no_auth_xoauth2;
+#endif
 #ifdef HASLIBGSASL
 		char           *no_scram_sha1, *no_scram_sha256, *no_scram_sha512;
 #endif
@@ -3052,9 +3061,15 @@ smtp_ehlo(const char *arg)
 #ifdef TLS
 		no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
+#ifdef AUTH_XOAUTH2
+		no_auth_xoauth2 = secure_auth && !ssl ? "" : env_get("DISABLE_OAUTH2");
+#endif
 #else
 		no_auth_login = env_get("DISABLE_AUTH_LOGIN");
 		no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
+#ifdef AUTH_XOAUTH2
+		no_auth_xoauth2 = env_get("DISABLE_AUTH_OAUTH2");
+#endif
 #endif
 		no_cram_md5 = env_get("DISABLE_CRAM_MD5");
 		no_cram_sha1 = env_get("DISABLE_CRAM_SHA1");
@@ -3072,29 +3087,33 @@ smtp_ehlo(const char *arg)
 		no_scram_sha256_plus = env_get("DISABLE_SCRAM_SHA256_PLUS");
 		no_scram_sha512_plus = env_get("DISABLE_SCRAM_SHA512_PLUS");
 #endif
-#ifdef HASLIBGSASL
-		flags1 = !no_auth_login && !no_auth_plain && !no_cram_md5 &&
-			!no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512 &&
-			!no_cram_ripemd && !no_digest_md5 && !no_scram_sha1 &&
-			!no_scram_sha256 && !no_scram_sha512 && !no_scram_sha1_plus &&
-			!no_scram_sha256_plus && !no_scram_sha512_plus;
-		flags2 = !no_auth_login || !no_auth_plain || !no_cram_md5 ||
-			!no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd
-			|| !no_scram_sha1 || !no_scram_sha256 || !no_scram_sha512 ||
-			!no_scram_sha1_plus || !no_scram_sha256_plus || !no_scram_sha512_plus;
-#else
 		flags1 = !no_auth_login && !no_auth_plain && !no_cram_md5 &&
 			!no_cram_sha1 && !no_cram_sha256 && !no_cram_sha512 &&
 			!no_cram_ripemd && !no_digest_md5;
 		flags2 = !no_auth_login || !no_auth_plain || !no_cram_md5 ||
 			!no_cram_sha1 || !no_cram_sha256 || !no_cram_sha512 || !no_cram_ripemd;
+#ifdef HASLIBGSASL
+		flags1 = flags1 && !no_scram_sha1 && !no_scram_sha256 && 
+			!no_scram_sha512 && !no_scram_sha1_plus && !no_scram_sha256_plus &&
+			!no_scram_sha512_plus;
+		flags2 = flags2 || !no_scram_sha1 || !no_scram_sha256 || !no_scram_sha512 ||
+			!no_scram_sha1_plus || !no_scram_sha256_plus || !no_scram_sha512_plus;
+#endif
+#ifdef AUTH_XOAUTH2
+		flags1 = flags1 && !no_auth_xoauth2;
+		flags2 = flags2 || !no_auth_xoauth2;
 #endif
 		if (flags1) { /*- all auth methods enabled */
+			out("250-AUTH LOGIN PLAIN", NULL);
+#ifdef AUTH_XOAUTH2
+			out(" XOAUTH2", NULL);
+#endif
+			out(" CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5", NULL);
 #ifdef HASLIBGSASL
 #if 0
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", NULL);
+			out(" SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", NULL);
 #else
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", NULL);
+			out(" SCRAM-SHA-1 SCRAM-SHA-256", NULL);
 #endif
 #ifdef TLS
 			if (ssl)
@@ -3106,10 +3125,14 @@ smtp_ehlo(const char *arg)
 #endif
 			out("\r\n", NULL);
 			if (old_client_bug) {
+				out("250-AUTH=LOGIN PLAIN", NULL);
+#ifdef AUTH_XOAUTH2
+				out(" XOAUTH2", NULL);
+#endif
 #if 0
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", NULL);
+				out(" CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256 SCRAM-SHA-512", NULL);
 #else
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", NULL);
+				out(" CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5 SCRAM-SHA-1 SCRAM-SHA-256", NULL);
 #endif
 #ifdef TLS
 				if (ssl)
@@ -3121,10 +3144,19 @@ smtp_ehlo(const char *arg)
 #endif
 				out("\r\n", NULL);
 			}
-#else
-			out("250-AUTH LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", NULL);
-			if (old_client_bug)
-				out("250-AUTH=LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", NULL);
+#else /*- non GSASL */
+			out("250-AUTH LOGIN PLAIN", NULL);
+#ifdef AUTH_XOAUTH2
+			out(" XOAUTH2", NULL);
+#endif
+			out(" CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", NULL);
+			if (old_client_bug) {
+				out("250-AUTH=LOGIN PLAIN", NULL);
+#ifdef AUTH_XOAUTH2
+				out(" XOAUTH2", NULL);
+#endif
+				out(" CRAM-MD5 CRAM-SHA1 CRAM-SHA224 CRAM-SHA256 CRAM-SHA384 CRAM-SHA512 CRAM-RIPEMD DIGEST-MD5\r\n", NULL);
+			}
 #endif /*- #ifdef HAVELIBGSASL */
 		} else /*- few auth methods disabled */
 		if (flags2) {
@@ -3135,6 +3167,10 @@ smtp_ehlo(const char *arg)
 				out(" LOGIN", NULL);
 			if (!no_auth_plain)
 				out(" PLAIN", NULL);
+#ifdef AUTH_XOAUTH2
+			if (!no_auth_xoauth2)
+				out(" XOAUTH2", NULL);
+#endif
 			if (!no_cram_md5)
 				out(" CRAM-MD5", NULL);
 			if (!no_cram_sha1)
@@ -3173,6 +3209,10 @@ smtp_ehlo(const char *arg)
 					out(flag++ == 0 ? "250-AUTH=" : " ", "LOGIN", NULL);
 				if (!no_auth_plain)
 					out(flag++ == 0 ? "250-AUTH=" : " ", "PLAIN", NULL);
+#ifdef AUTH_XOAUTH2
+				if (!no_auth_xoauth2)
+					out(flag++ == 0 ? "250-AUTH=" : " ", "XOAUTH2", NULL);
+#endif
 				if (!no_cram_md5) {
 					out(flag++ == 0 ? "250-AUTH=" : " ", "CRAM-MD5", NULL);
 				}
@@ -5146,15 +5186,14 @@ authenticate(int method)
 		close(pe[1]);
 #endif
 	substdio_fdbuf(&ssup, safewrite, pi[1], upbuf, sizeof upbuf);
+	strnum[0] = method;
+	if (!stralloc_copyb(&authmethod, strnum, 1) ||
+			!stralloc_0(&authmethod))
+		die_nomem();
 	if (substdio_put(&ssup, user.s, user.len) == -1 ||
 			substdio_put(&ssup, pass.s, pass.len) == -1 ||
-			substdio_put(&ssup, resp.s, resp.len) == -1)
-		return err_write();
-	strnum[0] = method;
-	strnum[1] = 0;
-	if (!stralloc_copyb(&authmethod, strnum, 2))
-		die_nomem();
-	if (substdio_put(&ssup, authmethod.s, authmethod.len) == -1 ||
+			substdio_put(&ssup, resp.s, resp.len) == -1 ||
+			substdio_put(&ssup, authmethod.s, authmethod.len) == -1 ||
 			substdio_flush(&ssup) == -1)
 		return err_write();
 	close(pi[1]);
@@ -6271,11 +6310,62 @@ auth_digest_md5()
 	return (r);
 }
 
+#ifdef AUTH_XOAUTH2
+static int
+auth_xoauth2(const char *arg)
+{
+	int             r, i;
+	char           *p1, *p2;
+
+	/*
+	 * printf("user=%s\001auth=Bearer %s\001\001", user, token);
+	 */
+#ifdef TLS
+	if (secure_auth && !ssl)
+		return err_noauthallowed();
+#endif
+	if (*arg) {
+		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
+			return err_input();
+	} else {
+		out("334 \r\n", NULL);
+		flush();
+		if (authgetl() < 0)
+			return -1;
+		if ((r = b64decode((const unsigned char *) authin.s, authin.len, &slop)) == 1)
+			return err_input();
+	}
+	if (r == -1 || !stralloc_0(&slop))
+		die_nomem();
+	if (str_diffn(slop.s, "user=", 5))
+		return err_input();
+	if (!(p1 = str_str(slop.s, "\001auth=Bearer ")))
+		return err_input();
+	if (!(p2 = str_str(p1 + 13, "\001\001")))
+		return err_input();
+	for (i = 0, p2 = slop.s + 5;*p2 && *p2 != '\01'; p2++, i++);
+	if (!stralloc_copyb(&user, slop.s + 5, i) ||
+			!stralloc_0(&user))
+		die_nomem();
+	for (i = 0, p2 = p1 + 13;*p2 && *p2 != '\01'; p2++, i++);
+	if (!stralloc_copyb(&pass, p1 + 13, i) ||
+			!stralloc_0(&pass))
+		die_nomem();
+	if (!user.len || !pass.len)
+		return err_input();
+	r = authenticate(AUTH_XOAUTH2);
+	if (!r || r == 3)
+		authd = AUTH_XOAUTH2;
+	return (r);
+}
+#endif
+
 void
 smtp_auth(const char *arg)
 {
 	int             i, j;
-	char           *cmd;
+	char           *cmd, *scope;
+	char            ch[2];
 
 	switch (setup_state)
 	{
@@ -6351,6 +6441,19 @@ smtp_auth(const char *arg)
 		err_authfailure(user.len ? user.s : 0, j);
 		if (penalty > 0)
 			sleep(penalty);
+#ifdef AUTH_XOAUTH2
+		if (case_equals(authcmds[i].text, "xoauth2")) {
+			scope = env_get("XOAUTH2_SCOPE");
+			if (!stralloc_copyb(&slop, "{\"status\":\"401\",\"schemes\":bearer mac\",\"scope\":\"", 47) ||
+					!stralloc_cats(&slop, scope ? scope : "https://github.com/indimail/indimail-mta/") ||
+					!stralloc_catb(&slop, "\"}", 2))
+				die_nomem();
+			if (b64encode(&slop, &resp) < 0 || !stralloc_0(&resp))
+				die_nomem();
+			out("334 ", resp.s, "\r\n", NULL);
+			substdio_get(&ssin, ch, 2);
+		}
+#endif
 		out("535 authorization failure (#5.7.8)\r\n", NULL);
 		flush();
 		break;
@@ -7381,6 +7484,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.328  2024-07-16 00:17:49+05:30  Cprogrammer
+ * added XOAUTH2 auth method
+ *
  * Revision 1.327  2024-05-16 18:31:07+05:30  Cprogrammer
  * fixed missing wsp
  *
@@ -7822,7 +7928,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.327 2024-05-16 18:31:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.328 2024-07-16 00:17:49+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

@@ -54,7 +54,10 @@ bouncing the mail after discovring that the account doesn't exist
 .TP
 \fIAUTH_SMTP\fR
 If set, \fBqmail-remote\fR(8) will use authenticated SMTP with the remote
-host before starting delivery.
+host before starting delivery. Supported values are LOGIN, PLAIN, XOAUTH2,
+CRAM-MD5, CRAM-RIPEMD, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+CRAM-SHA512, DIGEST-MD5, SCRAM-SHA1, SCRAM-SHA-1-PLUS, SCRAM-SHA256,
+SCRAM-SHA-256-PLUS
 
 .TP
 \fIBADEXT\fR
@@ -247,7 +250,9 @@ Used by various indimail-virtual programs and \fBqmail-smtpd\fR(8) when domain
 component is missing in addresses.
 
 .TP
-\fIDISABLE_AUTH_LOGIN\fR, \fIDISABLE_AUTH_PLAIN\fR, \fIDISABLE_CRAM_MD5\fR, \fIDISABLE_CRAM_RIPEMD\fR,
+\fIDISABLE_AUTH_LOGIN\fR, \fIDISABLE_AUTH_PLAIN\fR, \fIDISABLE_AUTH_OAUTH2\fR,
+.TP
+\fIDISABLE_CRAM_MD5\fR, \fIDISABLE_CRAM_RIPEMD\fR,
 .TP
 \fIDISABLE_CRAM_SHA1\fR, \fIDISABLE_CRAM_SHA224\fR, \fIDISABLE_CRAM_SHA256\fR, \fIDSABLE_CRAM_SHA384\fR,
 .TP

@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH sys-checkpwd 8
 .SH NAME
 sys-checkpwd \- indimail-mta checkpassword program for authentication
@@ -7,9 +8,9 @@ sys-checkpwd \- indimail-mta checkpassword program for authentication
 
 .SH DESCRIPTION
 \fBsys-checkpwd\fR supports authentication for ESMTP AUTH option in
-\fBqmail-smtpd(8)\fR, allowing the LOGIN, PLAIN, and CRAM-MD5, CRAM-SHA1,
-CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD, DIGEST-MD5
-AUTH types. \fBsys-checkpwd\fR looks up userids in the systems
+\fBqmail-smtpd(8)\fR, allowing the LOGIN, PLAIN, XOAUTH2, and CRAM-MD5,
+CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD,
+DIGEST-MD5 AUTH types. \fBsys-checkpwd\fR looks up userids in the systems
 authentication database (/etc/passwd or /etc/shadow). \fBsys-checkpwd\fR
 needs to be setuid root to function. \fBsys-checkpwd\fR drops all root
 privileges after reading the shadow(5) file, switches to the real uid of
@@ -29,9 +30,9 @@ to descriptor 4 and the data which was earlier read on descriptor 3 is
 written back on descriptor 4.  The alternate program is invoked when
 sys-checkpwd doesn't support authentication for the supplied login name.
 .PP
-For LOGIN, PLAIN AUTH types, the information supplied on descriptor 3 is a
-login name terminated by \\0 and password terminated by \\0.
-\fBsys-checkpwd\fR encrypts the password using cyrpt(3) routine and
+For LOGIN, PLAIN, XOAUTH2 AUTH types, the information supplied on
+descriptor 3 is a login name terminated by \\0 and password terminated
+by \\0. \fBsys-checkpwd\fR encrypts the password using crypt(3) routine and
 compares it against the value present in the passwd database. The
 encrypted password can be in DES, MD5, SHA-256 or SHA-512 hash.
 .PP
@@ -51,9 +52,9 @@ temporary problem checking the password, \fBsys-checkpwd\fR exits 111.
 hostname is simply used to form the CRAM-MD5, CRAM-SHA1, CRAM-SHA224,
 CRAM-SHA256, CRAM-SHA384, CRAM-RIPEMD, DIGEST-MD5 challenge.
 \fBqmail-smtpd\fR invokes \fBsys-checkpwd\fR, feeding it the username and
-password, in the case of LOGIN or PLAIN, or the username, challenge, and
-response, in the case of CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5.  If
-the user checks out, \fBsys-checkpwd\fR exits with a status of 0 for the
+password, in the case of LOGIN, PLAIN, XOAUTH2 or the username, challenge,
+and response, in the case of CRAM-MD5, CRAM-SHA1, CRAM-RIPEMD, DIGEST-MD5.
+If the user checks out, \fBsys-checkpwd\fR exits with a status of 0 for the
 user to be authenticated. Otherwise, subprogram should exit with a non-zero
 status, or call an alternate checkpassword program. The last subprogram can
 usually be /usr/bin/false (or /bin/false, depending on your flavor of OS).
