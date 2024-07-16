@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.328 2024-07-16 00:17:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.328 2024-07-16 08:16:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -228,7 +228,7 @@ static char     ssoutbuf[BUFSIZE_OUT];
 static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[BUFSIZE_OUT];
 static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof (sserrbuf));
-static char     upbuf[BUFSIZE_SMALL];
+static char     upbuf[BUFSIZE_MEDIUM];
 static substdio ssup;
 
 static my_ulong databytes = 0;
@@ -5187,13 +5187,11 @@ authenticate(int method)
 #endif
 	substdio_fdbuf(&ssup, safewrite, pi[1], upbuf, sizeof upbuf);
 	strnum[0] = method;
-	if (!stralloc_copyb(&authmethod, strnum, 1) ||
-			!stralloc_0(&authmethod))
-		die_nomem();
+	strnum[1] = '\0';
 	if (substdio_put(&ssup, user.s, user.len) == -1 ||
 			substdio_put(&ssup, pass.s, pass.len) == -1 ||
 			substdio_put(&ssup, resp.s, resp.len) == -1 ||
-			substdio_put(&ssup, authmethod.s, authmethod.len) == -1 ||
+			substdio_put(&ssup, strnum, 2) == -1 ||
 			substdio_flush(&ssup) == -1)
 		return err_write();
 	close(pi[1]);
@@ -6443,9 +6441,14 @@ smtp_auth(const char *arg)
 			sleep(penalty);
 #ifdef AUTH_XOAUTH2
 		if (case_equals(authcmds[i].text, "xoauth2")) {
+			if (!stralloc_copyb(&tmpBuf, "https://", 8) ||
+					!stralloc_cats(&tmpBuf, hostname) ||
+					!stralloc_append(&tmpBuf, "/") ||
+					!stralloc_0(&tmpBuf))
+				die_nomem();
 			scope = env_get("XOAUTH2_SCOPE");
 			if (!stralloc_copyb(&slop, "{\"status\":\"401\",\"schemes\":bearer mac\",\"scope\":\"", 47) ||
-					!stralloc_cats(&slop, scope ? scope : "https://github.com/indimail/indimail-mta/") ||
+					!stralloc_cats(&slop, scope ? scope : tmpBuf.s) ||
 					!stralloc_catb(&slop, "\"}", 2))
 				die_nomem();
 			if (b64encode(&slop, &resp) < 0 || !stralloc_0(&resp))
@@ -7484,7 +7487,7 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
- * Revision 1.328  2024-07-16 00:17:49+05:30  Cprogrammer
+ * Revision 1.328  2024-07-16 08:16:35+05:30  Cprogrammer
  * added XOAUTH2 auth method
  *
  * Revision 1.327  2024-05-16 18:31:07+05:30  Cprogrammer
@@ -7928,7 +7931,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.328 2024-07-16 00:17:49+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.328 2024-07-16 08:16:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
