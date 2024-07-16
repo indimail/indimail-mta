@@ -96,7 +96,7 @@ or \fISYSCONF/control/smtproutes\fR control file. This is described in
 detail in the section \fBCONTROL FILES\fR. \fBqmail-remote\fR uses libgsasl
 to use GNU Simple Authentication and Security Layer detailed here
 https://www.gnu.org/software/gsasl. \fBqmail-remote\fR supports LOGIN,
-PLAIN, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
+PLAIN, XOAUTH2, CRAM-MD5, CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384,
 CRAM-RIPEMD, DIGEST-MD5 authentication using built-in functions and
 SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS, SCRAM-SHA-256-PLUS
 authentication provided by libgsasl. Note that DIGEST-MD5 has been moved to
@@ -176,31 +176,43 @@ no supported AUTH method found, continuing without authentication.
 Z
 Connected to
 .I host
-but authentication was rejected (AUTH PLAIN).
-
-.TP 5
-Z
-Connected to
-.I host
 but unable to base64encode (plain).
 
 .TP 5
 Z
 Connected to
 .I host
-but authentication was rejected (plain)."
+but unable to base64encode (challenge).
 
 .TP 5
 Z
 Connected to
 .I host
-but authentication was rejected (AUTH LOGIN).
+but unable to base64encode (username+digest).
+
+.TP 5
+Z
+Connected to
+.I host
+but unable to base64encode (oauth2).
+
+.TP 5
+Z
+Connected to
+.I host
+but unable to base64encode (oauth2 error).
 
 .TP 5
 Z
 Connected to
 .I host
 but unable to base64encode user.
+
+.TP 5
+Z
+Connected to
+.I host
+but unable to base64encode password.
 
 .TP 5
 Z
@@ -224,8 +236,8 @@ but authentication was rejected (password).
 Z
 Connected to
 .I host
-but authentication was rejected (AUTH LOGIN, PLAIN, CRAM-MD5, CRAM-SHA1,
-CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD,
+but authentication was rejected (AUTH LOGIN, PLAIN, XOAUTH2, CRAM-MD5,
+CRAM-SHA1, CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD,
 DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256, SCRAM-SHA-1-PLUS,
 SCRAM-SHA-256-PLUS)
 
@@ -577,7 +589,7 @@ Here \fIaddr\fR is an address;
 \fBqmail-remote\fR will use for authenticated SMTP.
 
 If there are several assignments for the same \fIaddr\fR address,
-\fBqmail-remote\R will use the first one.
+\fBqmail-remote\fR will use the first one.
 
 \fIaddr\fR is interpreted without regard to case.
 
@@ -614,11 +626,11 @@ You can create \fISYSCONF/control/remote_auth.cdb\fR from
 
 \fBAUTH_SMTP\fR can have the values SCRAM-SHA-256-PLUS, SCRAM-SHA-256,
 SCRAM-SHA-1-PLUS, SCRAM-SHA-1, DIGEST-MD5, CRAM-RIPEMD, CRAM-SHA512,
-CRAM-SHA384, CRAM-SHA256, CRAM-SHA224, CRAM-SHA1, CRAM-MD5, LOGIN or PLAIN
-to use the desired authentication method. AUTH_SMTP can also be an empty
-string to let qmail-remote choose an authentication method in the order
-listed above. If no method from the above list is found supported by the
-remote server, qmail-remote will continue without using authentication.
+CRAM-SHA384, CRAM-SHA256, CRAM-SHA224, CRAM-SHA1, CRAM-MD5, LOGIN, PLAIN,
+XOAUTH2 to use the desired authentication method. AUTH_SMTP can also be an
+empty string to let qmail-remote choose an authentication method in the
+order listed above. If no method from the above list is found supported by
+the remote server, qmail-remote will continue without using authentication.
 Remember that authenticated smtp gets disabled if username and password
 have not been configured in \fBsmtproutes\fR control file or the
 \fBSMTPROUTE\fR / \fBX-SMTPROUTES\fR environment variable.
@@ -629,7 +641,7 @@ characters for SCRAM-SHA-1 and 64 characters for SCRAM-SHA-256) with the
 user’s PBKDF2-prepared password. The salted password value can be derived
 by using the --mkpasswd parameter for the gsasl(1) utility. indimail has
 vpasswd(1) / vmoduser(1), which use gsasl_scram_secrets_from_password(3)
-API to set passwords for AUTH PLAIN, LOGIN, CRAM-MD5, CRAM-SHA1,
+API to set passwords for AUTH PLAIN, LOGIN, XOAUTH2, CRAM-MD5, CRAM-SHA1,
 CRAM-SHA224, CRAM-SHA256, CRAM-SHA384, CRAM-SHA512, CRAM-RIPEMD,
 DIGEST-MD5, SCRAM-SHA-1, SCRAM-SHA-256 methods. The hex-encoded salted
 password can be used to avoid storing a clear-text credential in the
@@ -644,6 +656,7 @@ following environment variables.
 .EX
 	DISABLE_AUTH_LOGIN
 	DISABLE_AUTH_PLAIN
+	DISABLE_AUTH_OAUTH2
 	DISABLE_CRAM_MD5
 	DISABLE_CRAM_SHA1
 	DISABLE_CRAM_SHA224
@@ -658,9 +671,9 @@ following environment variables.
 	DISABLE_SCRAM_SHA256_PLUS
 .EE
 
-If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN and
-AUTH PLAIN gets disabled, unless qmail-remote has opened a TLS session wth
-the remote host. See the control file \fIclientcert.pem\fR.
+If you set the environment variable \fBSECURE_AUTH\fR, AUTH LOGIN, AUTH
+PLAIN and AUTH XOUTH2 gets disabled, unless qmail-remote has opened a TLS
+session with the remote host. See the control file \fIclientcert.pem\fR.
 
 If all connections to the \fIrelay\fR server fail for a \fImax_tolerance\fR
 seconds, further connections to the same server are avoided for a period of

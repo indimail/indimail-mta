@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.174 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.175 2024-07-16 00:17:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -1471,22 +1471,25 @@ decode_smtpauth_err(int code, const char *s1, const char *s2)
 	switch(code)
 	{
 	case 432:
-		quit(code, 1, "ZConnected to ", " but a password transition is needed ", "(", s1, s2, ") (#4.7.12).", NULL);
+		quit(code, 1, "ZConnected to ", " but a password transition is needed (", s1, s2, ") (#4.7.12).", NULL);
 		break;
 	case 454:
-		quit(code, 1, "ZConnected to ", " but got temporary authentication failure ", s1, s2, ") (#4.7.0).", NULL);
-		break;
-	case 534:
-		quit(code, 1, "DConnected to ", " but authentication mechanism is too weak ", s1, s2, ") (#5.7.9).", NULL);
-		break;
-	case 535:
-		quit(code, 1, "DConnected to ", " but authentication credentials invalid ", s1, s2, ") (#5.7.8).", NULL);
+		quit(code, 1, "ZConnected to ", " but got temporary authentication failure (", s1, s2, ") (#4.7.0).", NULL);
 		break;
 	case 500:
-		quit(code, 1, "DConnected to ", " but authentication Exchange line is too long ", s1, s2, ") (#5.5.6).", NULL);
+		quit(code, 1, "DConnected to ", " but authentication Exchange line is too long (", s1, s2, ") (#5.5.6).", NULL);
 		break;
 	case 530:
-		quit(code, 1, "DConnected to ", " but authentication required ", s1, s2, ") (#5.7.0).", NULL);
+		quit(code, 1, "DConnected to ", " but authentication required (", s1, s2, ") (#5.7.0).", NULL);
+		break;
+	case 534:
+		quit(code, 1, "DConnected to ", " but authentication mechanism is too weak (", s1, s2, ") (#5.7.9).", NULL);
+		break;
+	case 535:
+		if (slop.len)
+			quit(code, 1, "DConnected to ", " but authentication credentials invalid (", s1, s2, ") oauth2 error [", slop.s, "]", ") (#5.7.8).", NULL);
+		else
+			quit(code, 1, "DConnected to ", " but authentication credentials invalid (", s1, s2, ") (#5.7.8).", NULL);
 		break;
 	case 538:
 		quit(code, 1, "DConnected to ", " but encryption required for requested authentication mechanism ", s1, s2, ") (#5.7.11).", NULL);
@@ -1593,8 +1596,10 @@ auth_digest_md5(int use_size)
 	if (substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
 		temp_write();
-	if ((code = smtpcode()) != 235)
+	if ((code = smtpcode()) != 235) {
+		slop.len = 0;
 		decode_smtpauth_err(code, "AUTH ", "DIGEST-MD5");
+	}
 	mailfrom_xtext(use_size);
 }
 
@@ -1714,11 +1719,13 @@ auth_cram(int type, int use_size)
 	if (b64encode(&slop, &auth))
 		quit(-1, -1, "ZConnected to ", " but unable to base64encode username+digest", NULL);
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
-			substdio_put(&smtpto, "\r\n", 2) == -1)
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
 		temp_write();
-	substdio_flush(&smtpto);
-	if ((code = smtpcode()) != 235)
+	if ((code = smtpcode()) != 235) {
+		slop.len = 0;
 		decode_smtpauth_err(code, "AUTH ", get_authmethod(type));
+	}
 	mailfrom_xtext(use_size);
 }
 
@@ -1743,9 +1750,11 @@ auth_plain(int use_size)
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
-		temp_nomem();
-	if ((code = smtpcode()) != 235)
+		temp_write();
+	if ((code = smtpcode()) != 235) {
+		slop.len = 0;
 		decode_smtpauth_err(code, "AUTH ", "PLAIN");
+	}
 	mailfrom_xtext(use_size);
 }
 
@@ -1767,22 +1776,57 @@ auth_login(int use_size)
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
-		temp_nomem();
+		temp_write();
 	if ((code = smtpcode()) != 334)
 		quit(code, 1, "ZConnected to ", " but authentication was rejected (username)", NULL);
 
 	if (!stralloc_copys(&auth, ""))
 		temp_nomem();
 	if (b64encode(&pass, &auth))
-		quit(-1, -1, "ZConnected to ", " but unable to base64encode pass", NULL);
+		quit(-1, -1, "ZConnected to ", " but unable to base64encode password", NULL);
 	if (substdio_put(&smtpto, auth.s, auth.len) == -1 ||
 			substdio_put(&smtpto, "\r\n", 2) == -1 ||
 			substdio_flush(&smtpto) == -1)
-		temp_nomem();
-	if ((code = smtpcode()) != 235)
+		temp_write();
+	if ((code = smtpcode()) != 235) {
+		slop.len = 0;
 		decode_smtpauth_err(code, "AUTH ", "LOGIN");
+	}
 	mailfrom_xtext(use_size);
 }
+
+#ifdef AUTH_XOAUTH2
+void
+auth_xoauth2(int use_size)
+{
+	int             code;
+
+	if (!stralloc_copyb(&plain, "user=", 5) ||
+			!stralloc_cat(&plain, &user) ||
+			!stralloc_catb(&plain, "\001auth=Bearer ", 13) ||
+			!stralloc_cat(&plain, &pass) || 
+			!stralloc_catb(&plain, "\001\001", 2))
+		temp_nomem();
+	if (b64encode(&plain, &auth))
+		quit(-1, -1, "ZConnected to ", " but unable to base64encode (oauth2)", NULL);
+	if (substdio_put(&smtpto, "AUTH XOAUTH2 ", 13) == -1 ||
+			substdio_put(&smtpto, auth.s, auth.len) == -1 ||
+			substdio_put(&smtpto, "\r\n", 2) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		temp_write();
+	if ((code = smtpcode()) != 235) {
+		if (substdio_put(&smtpto, "\r\n", 2) == -1 ||
+				substdio_flush(&smtpto) == -1)
+			temp_write();
+		if (b64decode((unsigned char *) smtptext.s + 4, smtptext.len - 5, &slop))
+			quit(-1, -1, "ZConnected to ", " but unable to base64decode oauth2 error", NULL);
+		slop.len--;
+		code = smtpcode();
+		decode_smtpauth_err(code, "AUTH ", "XOAUTH2");
+	}
+	mailfrom_xtext(use_size);
+}
+#endif
 
 #if defined(HASLIBGSASL) && defined(TLS)
 static void
@@ -2061,8 +2105,14 @@ smtp_auth(const char *type, int use_size)
 	int             i = 0, login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0,
 					cram_sha224_supp, cram_sha256_supp = 0, cram_sha384_supp, cram_sha512_supp = 0,
 					cram_rmd_supp = 0, digest_md5_supp = 0;
+#ifdef AUTH_XOAUTH2
+	int             xoauth2_supp = 0;
+#endif
 	const char     *ptr, *no_auth_login, *no_auth_plain, *no_cram_md5, *no_cram_sha1, *no_cram_sha224,
 				   *no_cram_sha256, *no_cram_sha384, *no_cram_sha512, *no_cram_ripemd, *no_digest_md5;
+#ifdef AUTH_XOAUTH2
+	const char     *no_auth_xoauth2;
+#endif
 #ifdef TLS
 	int             secure_auth;
 #endif
@@ -2127,14 +2177,27 @@ smtp_auth(const char *type, int use_size)
 			if (case_starts(ptr, "PLAIN"))
 				plain_supp = 1;
 		}
+#ifdef AUTH_XOAUTH2
+		else
+		if (*ptr == 'X') {
+			if (case_starts(ptr, "XOAUTH2"))
+				xoauth2_supp = 1;
+		}
+#endif
 	}
 #ifdef TLS
 	secure_auth = env_get("SECURE_AUTH") ? 1 : 0;
 	no_auth_login = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_LOGIN");
 	no_auth_plain = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_PLAIN");
+#ifdef AUTH_XOAUTH2
+	no_auth_xoauth2 = secure_auth && !ssl ? "" : env_get("DISABLE_AUTH_OAUTH2");
+#endif
 #else
 	no_auth_login = env_get("DISABLE_AUTH_LOGIN");
 	no_auth_plain = env_get("DISABLE_AUTH_PLAIN");
+#ifdef AUTH_XOAUTH2
+	no_auth_xoauth2 = env_get("DISABLE_AUTH_OAUTH2");
+#endif
 #endif
 	no_cram_md5 = env_get("DISABLE_CRAM_MD5");
 	no_cram_sha1 = env_get("DISABLE_CRAM_SHA1");
@@ -2209,6 +2272,12 @@ smtp_auth(const char *type, int use_size)
 			auth_login(use_size);
 			return;
 		}
+#ifdef AUTH_XOAUTH2
+		if (!no_auth_xoauth2 && xoauth2_supp) {
+			auth_xoauth2(use_size);
+			return;
+		}
+#endif
 	} else
 #if defined(HASLIBGSASL) && defined(TLS)
 	if (scram_sha256_plus_supp && !case_diffs(type, "SCRAM-SHA-256-PLUS")) {
@@ -2236,6 +2305,12 @@ smtp_auth(const char *type, int use_size)
 		auth_plain(use_size);
 		return;
 	} else
+#ifdef AUTH_XOAUTH2
+	if (xoauth2_supp && !case_diffs(type, "XOAUTH2")) {
+		auth_xoauth2(use_size);
+		return;
+	} else
+#endif
 	if (cram_md5_supp && !case_diffs(type, "CRAM-MD5")) {
 		auth_cram(AUTH_CRAM_MD5, use_size);
 		return;
@@ -3741,13 +3816,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.174 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.175 2024-07-16 00:17:36+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.175  2024-07-16 00:17:36+05:30  Cprogrammer
+ * added XOAUTH2 auth method
+ *
  * Revision 1.174  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *

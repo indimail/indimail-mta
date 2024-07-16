@@ -1,5 +1,5 @@
 /*
- * $Id: buffer_defs.h,v 1.1 2024-02-19 19:31:13+05:30 Cprogrammer Exp mbhangui $
+ * $Id: buffer_defs.h,v 1.2 2024-07-16 08:16:15+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef BUFFER_DEFS_H
 #define BUFFER_DEFS_H
@@ -18,6 +18,10 @@
 
 #ifndef BUFSIZE_SMALL
 #define BUFSIZE_SMALL  128
+#endif
+
+#ifndef BUFSIZE_MEDIUM
+#define BUFSIZE_MEDIUM 256
 #endif
 
 #ifndef BUFSIZE_OUT
