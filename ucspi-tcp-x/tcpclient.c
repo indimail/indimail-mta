@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.34 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
+ * $Id: tcpclient.c,v 1.35 2024-07-17 19:52:53+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -573,7 +573,7 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "unable to create AF_UNIX socket: ");
 		ctimeout[0] += ctimeout[1];
 		if (timeoutconn_un(s, hostname, ctimeout[0]) == -1)
-			strerr_warn3("tcpclient: unable to connect to socket ", hostname, ": ", &strerr_sys);
+			strerr_die4sys(111, FATAL, "unable to connect to socket ", hostname, ": ");
 		goto CONNECTED;
 	} else {
 		if (!stralloc_copys(&tmp, hostname))
@@ -823,13 +823,16 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.34 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.35 2024-07-17 19:52:53+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.35  2024-07-17 19:52:53+05:30  Cprogrammer
+ * fixed incorrect use of strerr_warn instead of strerr_die
+ *
  * Revision 1.34  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
