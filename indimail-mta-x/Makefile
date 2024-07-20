@@ -2272,25 +2272,25 @@ slurpclose.o: compile slurpclose.c slurpclose.h
 socket.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o trysocket.o && ./load trysocket -lsocket -lnsl ) >/dev/null 2>&1 \
-	&& echo -lsocket -lnsl || echo "WARNING!!! Not linked with libsocket" 1>&2 ) > socket.lib
+	&& echo "-lsocket -lnsl" || /bin/echo ) > socket.lib
 	rm -f trysocket.o trysocket
 
 fts.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o tryfts.o && ./load tryfts -lfts ) >/dev/null 2>&1 \
-	&& echo -lfts || echo "WARNING!!! Not linked with libfts" 1>&2 ) > fts.lib
+	&& echo -lfts || /bin/echo ) > fts.lib
 	rm -f trytfs.o trytfs
 
 rt.lib: \
 trylib.c compile load
 	( ( ./compile trylib.c -o tryrt1.o && ./load tryrt1 -lrt ) >/dev/null 2>&1 \
-	&& echo -lrt || echo "WARNING!!! Not linked with librt" 1>&2 ) > rt.lib
+	&& echo -lrt > rt.lib || /bin/echo ) > rt.lib
 	rm -f tryrt1.o tryrt1
 
 haslibrt.h: \
 trylib.c compile load
 	( ( ./compile trylib.c -o tryrt2.o && ./load tryrt2 -lrt ) >/dev/null 2>&1 \
-	&& echo "#define HASLIBRT 1" || echo "WARNING!!! Not compiled -with -DHASLIBRT" 1>&2 ) > haslibrt.h
+	&& echo "#define HASLIBRT 1" || /bin/echo ) > haslibrt.h
 	rm -f tryrt2.o tryrt2
 
 crypt.lib: \
