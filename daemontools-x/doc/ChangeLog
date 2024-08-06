@@ -1,5 +1,5 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
-Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
+* Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
+Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024
 - 05/03/2024
 01. minisvc: mount /etc/indimail/resolv.conf when UNSHARE is set
 02. minisvc: updated create_cert function - synced with svctool

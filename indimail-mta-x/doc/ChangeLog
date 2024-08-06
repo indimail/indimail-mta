@@ -1,6 +1,9 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
+* Tue Aug 06 2024 12:51:02 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.8-1.1%{?dist}
 Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 ======= Release Highlights ================================================
+- Fixed discarded-qualifier compiler warings
+- Fixed warnings for gcc14
+- Added XOAUTH2 authentication
 ===========================================================================
 - 05/03/2024
 01. svctool: mount /etc/indimail/resolv.conf when UNSHARE is set
