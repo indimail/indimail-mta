@@ -1,3 +1,8 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
+Release @version@-@release@ Start 08/08/2024 End XX/XX/XXXX
+- 08/08/2024
+1. svctool: fixed mariadb db creation for mariadb 11.x on archlinux
+
 * Tue Aug 06 2024 12:51:02 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.8-1.1%{?dist}
 Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
 ======= Release Highlights ================================================

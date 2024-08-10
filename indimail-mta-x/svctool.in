@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.729 2024-05-23 17:17:14+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.730 2024-08-10 11:02:41+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.729 2024-05-23 17:17:14+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.730 2024-08-10 11:02:41+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -5128,23 +5128,23 @@ if [ ! -f $ca_path/ca.pem -o ! -f $ca_path/ca-key.pem ] ; then
 	fi
 	echo "basicConstraints=CA:TRUE"  > cav3.ext
 	# Create CA
-	/usr/bin/openssl req -newkey rsa:2048 -days 3650 -nodes -keyout $ca_path/ca-key.pem \
+	/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout $ca_path/ca-key.pem \
 		-subj /CN=MariaDB_Auto_Generated_CA_Certificate -out $ca_path/ca-req.pem
 	if [ $? -ne 0 ] ; then
-		echo "failed to create ca-req.pem" 1>&2
+		echo "failed to create $ca_path/ca-req.pem" 1>&2
 		/bin/rm -f $ca_path/cav3.ext
 		return 1
 	fi
 	/usr/bin/openssl rsa -in $ca_path/ca-key.pem -out $ca_path/ca-key.pem
 	if [ $? -ne 0 ] ; then
-		echo "failed to create ca-key.pem" 1>&2
+		echo "failed to create $ca_path/ca-key.pem" 1>&2
 		/bin/rm -f $ca_path/cav3.ext
 		return 1
 	fi
 	/usr/bin/openssl x509 -sha256 -days 3650 -extfile $ca_path/cav3.ext -set_serial 1 \
 		-req -in $ca_path/ca-req.pem -signkey $ca_path/ca-key.pem -out $ca_path/ca.pem
 	if [ $? -ne 0 ] ; then
-		echo "failed to create ca.pem" 1>&2
+		echo "failed to create $ca_path/ca.pem" 1>&2
 		/bin/rm -f $ca_path/cav3.ext
 		return 1
 	fi
@@ -5160,45 +5160,45 @@ fi
 # create certificats with x509 v3 extension
 echo "basicConstraints=CA:FALSE" > certv3.ext
 # Create Server Cert
-/usr/bin/openssl req -newkey rsa:2048 -days 3650 -nodes -keyout server-key.pem \
+/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout server-key.pem \
 	-subj /CN=MariaDB_Auto_Generated_Server_Certificate -out server-req.pem
 if [ $? -ne 0 ] ; then
-	echo "failed to create server-req.pem" 1>&2
+	echo "failed to create $certdir/server-req.pem" 1>&2
 	/bin/rm -f certv3.ext
 	return 1
 fi
 /usr/bin/openssl rsa -in server-key.pem -out server-key.pem
 if [ $? -ne 0 ] ; then
-	echo "failed to create server-key.pem" 1>&2
+	echo "failed to create $certdir/server-key.pem" 1>&2
 	/bin/rm -f certv3.ext
 	return 1
 fi
 /usr/bin/openssl x509 -sha256 -days 3650 -extfile certv3.ext -set_serial 2 -req \
 	-in server-req.pem -CA $ca_path/ca.pem -CAkey $ca_path/ca-key.pem -out server-cert.pem
 if [ $? -ne 0 ] ; then
-	echo "failed to create server-cert.pem" 1>&2
+	echo "failed to create $certdir/server-cert.pem" 1>&2
 	/bin/rm -f certv3.ext
 	return 1
 fi
 
 # Create Client Cert
-/usr/bin/openssl req -newkey rsa:2048 -days 3650 -nodes -keyout client-key.pem \
+/usr/bin/openssl req -newkey rsa:2048 -nodes -keyout client-key.pem \
 	-subj /CN=MariaDB_Auto_Generated_Client_Certificate -out client-req.pem
 if [ $? -ne 0 ] ; then
-	echo "failed to create client-req.pem" 1>&2
+	echo "failed to create $certdir/client-req.pem" 1>&2
 	/bin/rm -f certv3.ext
 	return 1
 fi
 /usr/bin/openssl rsa -in client-key.pem -out client-key.pem
 if [ $? -ne 0 ] ; then
-	echo "failed to create client-key.pem" 1>&2
+	echo "failed to create $certdir/client-key.pem" 1>&2
 	/bin/rm -f certv3.ext
 	return 1
 fi
 /usr/bin/openssl x509 -sha256 -days 3650 -extfile certv3.ext -set_serial 3 -req \
 	-in client-req.pem -CA $ca_path/ca.pem -CAkey $ca_path/ca-key.pem -out client-cert.pem
 if [ $? -ne 0 ] ; then
-	echo "failed to create client-cert.pem" 1>&2
+	echo "failed to create $certdir/client-cert.pem" 1>&2
 	/bin/rm -f certv3.ext
 	return 1
 fi
@@ -5419,9 +5419,21 @@ elif [ $mariadb -eq 1 ] ; then
 	fi
 fi
 echo "Creating MySQL Database in "$DESTDIR"$databasedir/data" 1>&2
+mysqld_server_opt=""
+mysql_client_opt=""
 if [ $mariadb -eq 1 ] ; then
-	minor=$(echo $tmysql_version | awk '{print $3}'|cut -d. -f2)
-	if [ $minor -gt 3 ] ; then
+	major=$(echo $tmysql_version|awk '{print $3}'|cut -d. -f1)
+	minor=$(echo $tmysql_version|awk '{print $3}'|cut -d. -f2)
+	t=""
+	if [ $major -eq 10 ] ; then
+		if [ $minor -ge 4 ] ; then
+			t="--auth-root-authentication-method=normal"
+		fi
+	elif [ $major -ge 11 ] ; then # mariadb ssl fails when using self-signed cert
+		t="--auth-root-authentication-method=normal"
+		mysqld_server_opt="--skip-ssl"
+		mysql_client_opt="--skip-ssl-verify-server-cert"
+	elif [ $major -gt 10 ] ; then
 		t="--auth-root-authentication-method=normal"
 	fi
 	echo "$install_db $t --user=mysql --basedir=$mysqlPrefix --datadir="$DESTDIR"$databasedir/dbtmp" 1>&2
@@ -5525,11 +5537,11 @@ fi
 # Start MySQL daemon
 #
 /bin/echo -n "$mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid" 1>&2
-/bin/echo -n " --skip-networking --datadir="$DESTDIR"$databasedir/data" 1>&2
+/bin/echo -n " --skip-networking $mysqld_server_opt --datadir="$DESTDIR"$databasedir/data" 1>&2
 /bin/echo -n " --log-error="$DESTDIR"$databasedir/logs/mysqld.log" 1>&2
 /bin/echo    " $opt_str --socket=$mysqlSocket" 1>&2
 $mysqlPrefix/$mysqld --no-defaults --pid-file="$DESTDIR"$databasedir/mysqld.pid \
-	--skip-networking --datadir="$DESTDIR"$databasedir/data \
+	--skip-networking $mysqld_server_opt --datadir="$DESTDIR"$databasedir/data \
 	--log-error="$DESTDIR"$databasedir/logs/mysqld.log \
 	$opt_str --socket=$mysqlSocket &
 wait_for_mysqld
@@ -5549,7 +5561,7 @@ echo "Creating MySQL admin User 'mysql' for Database in "$DESTDIR"$databasedir/d
 create_mysql_rootuser $mysql_version $mariadb $mysql_community_server $pass_str $auth_str $plugin_str
 echo "Creating MySQL indimail User '$user' for Database in "$DESTDIR"$databasedir/data" 1>&2
 create_mysql_user "$user" "$pass" "$mysql_version"
-) | eval $mysql -u root --skip-password -S $mysqlSocket
+) | eval $mysql -u root --skip-password $mysql_client_opt -S $mysqlSocket
 kill $pid
 wait_for_mysqld 1
 $chown mysql:mysql "$DESTDIR"$databasedir
@@ -5914,9 +5926,13 @@ case "$mysql_version" in
 		mysql_version_8=0
 		;;
 esac
+mysql_client_opt=""
 echo $mysql_version |grep MariaDB > /dev/null 2>&1
 if [ $? -eq 0 ] ; then
-	mysql_version=`echo $mysql_version|cut -d- -f1`
+	major=$(echo $mysql_version|cut -d. -f1)
+	if [ $major -ge 11 ] ; then # mariadb ssl fails when using self-signed cert
+		mysql_client_opt="--skip-ssl-verify-server-cert"
+	fi
 	mariadb=1
 else
 	mariadb=0
@@ -6028,7 +6044,7 @@ echo "  mysqladmin=\$MYSQL_BASE/bin/mysqladmin"
 echo "fi"
 echo "exec 2>&1"
 echo "exec \$mysqladmin --defaults-file=$conf_file \\"
-echo "  -u admin -p$ADMIN_PASS shutdown"
+echo "  -u admin -p$ADMIN_PASS $mysql_client_opt shutdown"
 ) > "$DESTDIR"$SERVICEDIR/mysql.$port/shutdown
 /bin/chmod 500 "$DESTDIR"$SERVICEDIR/mysql.$port/shutdown
 
@@ -11809,6 +11825,10 @@ case $option in
 		ssl_rsa)
 		if [ " $certdir" = " " ] ; then
 			echo "Certificate directory not specified" 1>&2
+			usage 1
+			exit 1
+		elif [ " $ca_path" = " " ] ; then
+			echo "CA certificate path not specified" 1>&2
 			usage 1
 			exit 1
 		fi
