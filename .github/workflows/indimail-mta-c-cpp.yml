@@ -35,8 +35,8 @@ jobs:
     steps:
     - name: extra_packages
       run: |
-        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get install libmysqlclient-dev libc6 libc6-dev libgsasl7-dev; fi
-        if [ "${OS}" = "ubuntu-22.04" ] ; then sudo apt-get install libmysqlclient-dev libc6 libc6-dev libgsasl-dev; fi
+        if [ "${OS}" = "ubuntu-latest" ] ; then sudo apt-get update && sudo apt-get install libmysqlclient-dev libc6 libc6-dev libgsasl7-dev; fi
+        if [ "${OS}" = "ubuntu-22.04" ] ; then sudo apt-get update && sudo apt-get install libmysqlclient-dev libc6 libc6-dev libgsasl-dev; fi
         if [ "${OS}" = "macos-latest" ] ; then brew install automake autoconf libtool pkgconfig openssl mysql gsasl; fi
       env:
         OS: ${{ matrix.host }}
