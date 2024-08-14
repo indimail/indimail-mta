@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.20 2024-07-01 09:34:06+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.21 2024-08-14 11:23:27+05:30 Cprogrammer Exp mbhangui $
 #
 
 do_days()
@@ -246,8 +246,11 @@ fi
 if [ -f $pidfile ] ; then
 	svpid=$(sed -n '$p' $pidfile)
 else
-	echo "svscan not running: $pdfile: No such file or directory" 1>&2
-	exit 1
+	svpid=$(pgrep -fn @prefix@/sbin/svscan)
+	if [ -z "$svpid" ] ; then
+		echo "svscan not running: $pidfile: No such file or directory" 1>&2
+		exit 1
+	fi
 fi
 
 ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" > /tmp/svps.$$
@@ -379,6 +382,9 @@ fi
 /bin/rm -f /tmp/svps.$$
 #
 # $Log: svps.in,v $
+# Revision 1.21  2024-08-14 11:23:27+05:30  Cprogrammer
+# fix for pid file not found if svscan is not configured for /service
+#
 # Revision 1.20  2024-07-01 09:34:06+05:30  Cprogrammer
 # added stopall, startall functions
 #

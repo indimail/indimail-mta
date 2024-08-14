@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.41 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.42 2024-08-14 11:22:05+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -243,7 +243,7 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	return 0;
 }
 
-const char     *run[3] = { "./run", 0 , 0};
+const char     *run[4] = { "./run", 0 , 0, 0};
 const char     *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
 const char     *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
 
@@ -363,7 +363,7 @@ do_wait()
 }
 
 void
-trystart()
+trystart(const char *how)
 {
 	pid_t           f, pgid;
 	struct stat     st;
@@ -406,6 +406,7 @@ trystart()
 		if (!env_put2("PPID", strnum1))
 			strerr_die2x(111, fatal.s, "trystart: out of memory");
 		run[1] = dir;
+		run[2] = how;
 		execve(*run, (char **) run, environ);
 		strerr_die2sys(111, fatal.s, "unable to start run: ");
 	}
@@ -640,14 +641,14 @@ doit()
 					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
-					trystart();
+					trystart("abnormal startup"); /* restart because of abnormal exit */
 				}
 				break;
 			} /*- if (r == childpid || (r != -1 && grandchild)) */
 		} /*- for (;;) */
 		if (flagfailed && flagwantxx && flagwantup) {
 			flagfailed = 0;
-			trystart();
+			trystart("system failure"); /*- fork failed */
 		}
 		if (read(fdcontrol, &ch, 1) == 1) {
 			switch (ch)
@@ -687,7 +688,7 @@ doit()
 				}
 				announce(0);
 				if (!t)
-					trystart();
+					trystart("manual restart"); /* normal startup */
 				break;
 			case 'd': /*- down */
 				flagwantxx = 1;
@@ -717,13 +718,13 @@ doit()
 				flagwantup = 1;
 				announce(0);
 				if (!childpid)
-					trystart();
+					trystart("manual startup"); /* normal startup */
 				break;
 			case 'o': /*- run once */
 				flagwantxx = 0;
 				announce(0);
 				if (!childpid)
-					trystart();
+					trystart("one-time startup"); /* normal startup */
 				break;
 			case 'a': /*- send ALRM */
 				if (childpid) {
@@ -975,7 +976,7 @@ do_init()
 	{
 	case -1:
 		if (!silent)
-			strerr_warn4(warn.s, "unable to fork for ", dir, ", sleeping 60 seconds: ", &strerr_sys);
+			strerr_warn4(warn.s, "unable to fork to run ", *init, ", sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
 		trigger();
 		flagfailed = 1;
@@ -986,7 +987,7 @@ do_init()
 		if (!env_put2("PPID", strnum))
 			strerr_die2x(111, fatal.s, "do_init: out of memory");
 		execve(*init, init, environ);
-		strerr_die4sys(111, fatal.s, "unable to start ", dir, "/init: ");
+		strerr_die4sys(111, fatal.s, "unable to start ", *init, ": ");
 	}
 	if (wait_pid(&t, f) == -1) {
 		if (!silent)
@@ -1126,7 +1127,7 @@ main(int argc, char **argv)
 	}
 
 	if (!flagwantxx || flagwantup)
-		trystart();
+		trystart("auto startup"); /*- normal startup */
 	doit();
 	announce(0);
 	_exit(0);
@@ -1135,13 +1136,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.41 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.42 2024-08-14 11:22:05+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.42  2024-08-14 11:22:05+05:30  Cprogrammer
+ * pass additional "startup type" argument to ./run
+ *
  * Revision 1.41  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

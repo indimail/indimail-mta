@@ -11,28 +11,41 @@ supervise \- starts and monitors a service.
 \fBsupervise\fR(8) switches to the directory named \fIs\fR and starts ./init
 if it exists. It restarts ./init if ./init exits with non-zero status. It
 pauses for 60 seconds after starting ./init, so that it does not loop too
-quickly in case ./init exits immediately. \fIs\fR has to be relative to the
-current working directory and cannot start with the dot (\fB.\fR) or the
-slash (\fB/\fR) character. \fIparent_ident\fR is passed as a command line
-argument by \fBsvscan\fR(8) when starting supervise log process when
-\fIs\fR/\fIlog\fR exists. This is useful when listing supervised log
-processes using the \fBps\fR(1) command.
+quickly in case ./init exits immediately with non-zero status. \fIs\fR has
+to be relative to the current working directory and cannot start with the
+dot (\fB.\fR) or the slash (\fB/\fR) character. \fIparent_ident\fR is
+passed as a command line argument by \fBsvscan\fR(8) when starting
+supervise log process when \fIs\fR/\fIlog\fR exists. This is useful when
+listing supervised log processes using the \fBps\fR(1) command.
 
 After ./init exits with zero exit status, \fBsupervise\fR starts ./run. It
 restarts ./run if ./run exits. It pauses for a second after starting ./run,
-so that it does not loop too quickly in case ./run exits immediately.
-\fBsupervise\fR expects ./run to run in the foreground. Sometimes daemon
-fork themselves into background, which some consider bad software design.
-If you want to monitor such a daemon, set the sticky bit on ./run. This
-makes \fBsupervise\fR go into \fBsubreaper\fR mode using \fBprctl\fR(2)
-\fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
+so that it does not loop too quickly in case ./run exits immediately with
+non-zero status. \fBsupervise\fR expects ./run to run in the foreground.
+Sometimes daemon fork themselves into background, which some consider bad
+software design.  If you want to monitor such a daemon, set the sticky bit
+on ./run. This makes \fBsupervise\fR go into \fBsubreaper\fR mode using
+\fBprctl\fR(2) \fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
 \fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper mode or when the
 environment variable \fBSETPGID\fR is set, ./run will have it's process
 Group ID set to the value of it's PID. Setting the process Group ID is
 required to monitor ./run reliably when ./run has a command which double
 forks. It is also required in such cases to make \fBsvc\fR(8) command
 operate and control \fBsupervise\fR reliably such double forked
-daemon/commands in ./run.
+daemon/commands in ./run. The script \fI./run\fR is passed two command line
+arguments \fIs\fR and \fIstr\fR where \fIstr\fR is argv[2].
+
+.TS
+l l.
+argv[2]          Description
+_
+abnormal startup When ./run exits on its own
+system failure   When supervise is unable to fork to execute ./run
+manual restart   When svc -u or -r is used to start the service
+one-time startup When svc -o is used to start the service
+auto startup     Normal startup after supervise is run by svscan or
+                 manually
+.TE
 
 If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run or to give other
