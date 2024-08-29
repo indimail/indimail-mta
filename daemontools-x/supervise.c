@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.42 2024-08-14 11:22:05+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.43 2024-08-29 18:51:11+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -455,24 +455,27 @@ tryaction(const char **action, pid_t cpid, int wstat, int do_alert)
 		if (!env_put2("PPID", strnum1))
 			strerr_die2x(111, fatal.s, "tryaction: out of memory");
 		strnum1[fmt_ulong(strnum1, cpid)] = 0;
-		action[1] = strnum1;
+		action[1] = dir;
+		action[2] = strnum1;
 		if (do_alert) {
-			action[4] = dir;
 			if (WIFSTOPPED(wstat) || WIFSIGNALED(wstat)) {
-				action[3] = "stopped/signalled";
 				strnum2[fmt_uint(strnum2, WIFSTOPPED(wstat) ? WSTOPSIG(wstat) : WTERMSIG(wstat))] = 0;
+				action[3] = strnum2;
+				action[4] = "stopped/signalled";
 			} else
 			if (WIFEXITED(wstat)) {
-				action[3] = "exited";
 				if ((t = WEXITSTATUS(wstat)) < 0) {
 					i = fmt_uint(strnum2 + 1, 0 - t);
 					*strnum2 = '-';
 					strnum2[i + 1] = 0;
 				} else
 					strnum2[fmt_uint(strnum2, t)] = 0;
-			} else
-				action[3] = "unknown";
-			action[2] = strnum2;
+				action[3] = strnum2;
+				action[4] = "exited";
+			} else {
+				action[3] = "-1";
+				action[4] = "unknown";
+			}
 		} else {
 			action[2] = dir;
 			action[3] = NULL;
@@ -1136,13 +1139,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.42 2024-08-14 11:22:05+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.43 2024-08-29 18:51:11+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.43  2024-08-29 18:51:11+05:30  Cprogrammer
+ * use servicedir as first argument for exec of ./run, ./alert and ./shutdown
+ *
  * Revision 1.42  2024-08-14 11:22:05+05:30  Cprogrammer
  * pass additional "startup type" argument to ./run
  *

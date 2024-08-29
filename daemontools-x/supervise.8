@@ -9,35 +9,35 @@ supervise \- starts and monitors a service.
 
 .SH DESCRIPTION
 \fBsupervise\fR(8) switches to the directory named \fIs\fR and starts ./init
-if it exists. It restarts ./init if ./init exits with non-zero status. It
-pauses for 60 seconds after starting ./init, so that it does not loop too
-quickly in case ./init exits immediately with non-zero status. \fIs\fR has
-to be relative to the current working directory and cannot start with the
-dot (\fB.\fR) or the slash (\fB/\fR) character. \fIparent_ident\fR is
-passed as a command line argument by \fBsvscan\fR(8) when starting
-supervise log process when \fIs\fR/\fIlog\fR exists. This is useful when
-listing supervised log processes using the \fBps\fR(1) command.
+if it exists. In case ./init exits with non-zero status, it pauses for 60
+seconds before restarting ./init. The pause is required so that supervise
+doesn't loop too quickly consuming high usage of the CPU. \fIs\fR has to be
+relative to the current working directory and cannot start with the dot
+(\fB.\fR) or the slash (\fB/\fR) character. \fIparent_ident\fR is passed as
+a command line argument by \fBsvscan\fR(8) when starting supervise log
+process when \fIs\fR/\fIlog\fR exists. This is useful when listing
+supervised log processes using the \fBps\fR(1) command.
 
 After ./init exits with zero exit status, \fBsupervise\fR starts ./run. It
-restarts ./run if ./run exits. It pauses for a second after starting ./run,
-so that it does not loop too quickly in case ./run exits immediately with
-non-zero status. \fBsupervise\fR expects ./run to run in the foreground.
-Sometimes daemon fork themselves into background, which some consider bad
-software design.  If you want to monitor such a daemon, set the sticky bit
-on ./run. This makes \fBsupervise\fR go into \fBsubreaper\fR mode using
-\fBprctl\fR(2) \fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
-\fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper mode or when the
-environment variable \fBSETPGID\fR is set, ./run will have it's process
-Group ID set to the value of it's PID. Setting the process Group ID is
-required to monitor ./run reliably when ./run has a command which double
-forks. It is also required in such cases to make \fBsvc\fR(8) command
-operate and control \fBsupervise\fR reliably such double forked
+restarts ./run if ./run exits. In cae ./run exits with non-zero status, it
+pauses for a second after restarting ./run. The sleep avoids supervise from
+looping quickly when ./run has a problem. \fBsupervise\fR expects ./run to
+remain in the foreground. Sometimes daemon fork themselves into background,
+which some consider bad software design. If you want to monitor such a
+daemon, set the sticky bit on ./run. This makes \fBsupervise\fR go into
+\fBsubreaper\fR mode using \fBprctl\fR(2) \fBPR_SET_CHILD_SUBREAPER\fR on
+Linux or \fBprocctl\fR(2) \fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper
+mode or when the environment variable \fBSETPGID\fR is set, ./run will have
+it's process Group ID set to the value of it's PID. Setting the process
+Group ID is required to monitor ./run reliably when ./run has a command
+which double forks. It is also required in such cases to make \fBsvc\fR(8)
+command operate and control \fBsupervise\fR reliably for such double forked
 daemon/commands in ./run. The script \fI./run\fR is passed two command line
-arguments \fIs\fR and \fIstr\fR where \fIstr\fR is argv[2].
+arguments with \fIs\fR as argv[1] and \fIhow\fR as argv[2]
 
 .TS
 l l.
-argv[2]          Description
+how              Description
 _
 abnormal startup When ./run exits on its own
 system failure   When supervise is unable to fork to execute ./run
@@ -61,17 +61,16 @@ requires to \fBSIGTERM\fR signals to get terminated when started by
 \fBsvscan\fR(8) running as PID 1.
 
 if the file \fIs\fR/shutdown exists \fBsupervise\fR(8) executes
-\fIshutdown\fR when asked to exit. The pid of the process that exited is
-passed as the first argument to \fIshutdown\fR.
+\fIshutdown\fR when asked to exit. \fIs\fR is passed as the first argument
+and the pid of the process that exited is passed as the second argument to
+\fIshutdown\fR.
 
 if the file \fIs\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
-whenever run exits. The pid of the process that exited is passed as the
-first argument to \fIalert\fR. The exit value or signal (if killed by
-signal) is passed as the second argument to \fIalert\fR. The third argument
-is either of the strings \fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
-
-The last argument to ./run, ./shutdown and ./alert is the full path of
-\fIs\fR.
+whenever run exits. \fIs\fR is passed as the first argument, the pid of the
+process that exited is passed as the second argument, the exit value or
+signal (if killed by signal) is passed as the third argument to
+\fIalert\fR. The fourth argument is either of the strings \fIexited\fR or
+\fIstopped\fR / \fIsignalled\fR.
 
 If the directory \fIrun\fR/\fIsvscan\fR exists, \fBsupervise\fR(8) creates
 the directory \fIs\fR/\fIsupervise\fR in \fIrun\fR/\fIsvscan\fR where

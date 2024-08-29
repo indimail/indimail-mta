@@ -2,6 +2,9 @@
 - 13/08/2024
 01. svps: fix for pid file not found if svscan is not configured for /service
 02. supervise.c: pass additional "startup type" argument to ./run
+- 29/08/2024
+03. supervise.c: use service dir as first argument for ./run, ./alert and
+   ./shutdown
 
 * Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
 Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024
