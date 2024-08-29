@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.21 2024-08-14 11:23:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.22 2024-08-29 21:42:46+05:30 Cprogrammer Exp mbhangui $
 #
 
 do_days()
@@ -12,21 +12,42 @@ do_days()
 	fi
 }
 
+get_mod()
+{
+	SYSTEM=$(uname -s)
+	case "$SYSTEM" in
+		Darwin|FreeBSD)
+		mod=$(stat -f "%m" $1)
+		;;
+		*)
+		if [ -f /etc/alpine-release ] ; then
+			mod=$(stat -c "%Y" $1)
+		else
+			mod=$(stat --printf="%Y\n" $1)
+		fi
+	esac
+}
+
 do_svscan()
 {
 	now=$(date +%s)
-	diff=$(expr $now - $mod)
 	words=$(ps ax|head -1|wc -w)
 	words=$(expr $words - 1)
 
 	t=$(expr $max - $svscan_length)
 	printf "============ %-"$t"s     state uptime ===== pid/spid ==\n" "svscan"
-	#echo "------------ svscan ---------------"
-	do_days $diff
 	ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
 	do
 		set $line
 		pid=$1
+		if [ -s $6/.svscan/variables/DISABLE_RUN ] ; then
+			t=$(cat /proc/$pid/cmdline |tr '\0' '\n'|tail -n +2)
+			get_mod $t/.svscan.pid
+		else
+			get_mod $pidfile
+		fi
+		diff=$(expr $now - $mod)
+		do_days $diff
 		shift $words
 		printf "%-"$max"s up   %s  pid %7d\n" "$*" "$tstr" $pid
 	done
@@ -37,7 +58,6 @@ doit()
 	svpid=$1
 	svdir=$2
 	option=$3
-	mod=$4
 
 	t=$(expr $max - $svscan_length)
 	case "$option" in
@@ -251,6 +271,8 @@ else
 		echo "svscan not running: $pidfile: No such file or directory" 1>&2
 		exit 1
 	fi
+	t=$(cat /proc/$svpid/cmdline |tr '\0' '\n'|tail -n +2)
+	pidfile=$t/.svscan.pid
 fi
 
 ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" > /tmp/svps.$$
@@ -341,18 +363,6 @@ if [ "$option" = "hup" -o "$option" = "term" ] ; then
 	PAGER=""
 fi
 
-SYSTEM=$(uname -s)
-case "$SYSTEM" in
-	Darwin|FreeBSD)
-	mod=$(stat -f "%m" $pidfile)
-	;;
-	*)
-	if [ -f /etc/alpine-release ] ; then
-		mod=$(stat -c "%Y" $pidfile)
-	else
-		mod=$(stat --printf="%Y\n" $pidfile)
-	fi
-esac
 if [ -n "$PAGER" ] ; then
 	(
 	do_svscan
@@ -363,7 +373,7 @@ if [ -n "$PAGER" ] ; then
 			$6/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
 		grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
 		/bin/rm -f /tmp/svps_tmp.$$
-		doit $1 $6 $option $mod
+		doit $1 $6 $option
 	done
 	) | $PAGER
 else
@@ -375,13 +385,16 @@ else
 			$6/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
 		grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
 		/bin/rm -f /tmp/svps_tmp.$$
-		doit $1 $6 $option $mod
+		doit $1 $6 $option
 	done
 fi
 
 /bin/rm -f /tmp/svps.$$
 #
 # $Log: svps.in,v $
+# Revision 1.22  2024-08-29 21:42:46+05:30  Cprogrammer
+# use .svscan.pid from service directory of each svscan instance
+#
 # Revision 1.21  2024-08-14 11:23:27+05:30  Cprogrammer
 # fix for pid file not found if svscan is not configured for /service
 #

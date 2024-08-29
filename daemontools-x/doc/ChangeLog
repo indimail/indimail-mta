@@ -5,6 +5,7 @@
 - 29/08/2024
 03. supervise.c: use service dir as first argument for ./run, ./alert and
    ./shutdown
+04. svps: use .svscan.pid from service directory of each svscan instance
 
 * Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
 Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024
