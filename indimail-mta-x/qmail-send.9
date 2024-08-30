@@ -22,7 +22,7 @@ environment, qmail-send will append the queue identifier to the delivery
 number. It uses the value of \fBQIDENT\fR environment variable set by
 \fBqscheduler\fR. This allows the \fBmatchup\fR(1) program to process the
 logs in a multi-queue environment. The \fBmatchup\fR(1) program is used by
-report generation qmailanalog scripts.
+qmailanalog scripts for generation of various reports.
 
 \fBqmail-send\fR can load startup plugins from PREFIX/lib/indimail/plugins
 directory. This directory can be changed by defining the \fBPLUGINDIR\fR
@@ -41,11 +41,12 @@ process the \fItodo\fR subdir of the incoming queue. \fBqmail-send\fR(8)
 sends a single byte 'C' on desciptor 7 to \fBtodo-proc\fR(8) to indicate
 that it has started. \fBqmail-send\fR reads instructions from
 \fBtodo-proc\fR on descriptor 8. Other instructions that \fBqmail-send\fR
-understands are instruction to log a message, instruction to quit. All
+understands are instruction to log a message and instruction to quit. All
 instructions start with a single byte character followed by zero or more
 bytes and terminated by the NULL \\0 byte. All communcation between
-\fBqmail-send\fR and \fBtodo-processor\fR happens on descriptors 7 and 8
-which are actually two pipes setup by \fBqmail-start\fR(8).
+\fBqmail-send\fR and \fBtodo-processor\fR happens on descriptors 7 and 8,
+which are actually two pipes, setup by \fBqmail-start\fR(8). Below are the
+three instructions that \fBqmail-send\fR understands.
 
 .TS
 l l.
@@ -84,7 +85,7 @@ message but doesn't send the jobs to qmail-send until \fBSIGUSR1\fR is sent
 to \fBqmail-send\fR. With indimail-mta's multi-queue architecture, this
 feature will most probably never be required. But the feature is there in
 case you are running with a single queue and you experience high injection
-causing sluggish delivery.
+resulting in sluggish delivery rate.
 
 \fBqmail-send\fR uses \fBqmail-lspawn\fR to deliver messages to local
 recipients and \fBqmail-rspawn\fR to deliver messages to remote recipients.
@@ -120,7 +121,7 @@ using \fBSRS\fR. See \fBindimail-srs\fR(5) to know how to do this.
 \fBqmail-send\fR adds the \fBX-Bounced-Address\fR header when creating a
 bounce. It assigns the address that caused the bounce to this header. This
 is useful for programs that generate DKIM signature to use the domain in
-the \fBX-Bounced-Address\fR for the d= DKIM-Signature tag.
+the \fBX-Bounced-Address\fR for the d= \fBDKIM-Signature\fR tag.
 
 If \fBqmail-send\fR receives a TERM signal, it will exit cleanly, after
 waiting (possibly more than a minute) for current delivery attempts to
@@ -147,22 +148,22 @@ If the environment variable \fBUSE_SYNCDIR\fR is enabled, \fBqmail-send\fR
 forces BSD style directory syncing. This can also be set by using
 \fIconf-syncdir\fR control file.
 
-if the value of the environment variables USE_FSYNC, USE_FDATASYNC,
-USE_SYNCDIR is zero, the corresponding variables is unset. This allows
-setting of these variables for \fBqmail-local\fR(8).
+if the value of the environment variables \fBUSE_FSYNC\fR,
+\fBUSE_FDATASYNC\fR, \fBUSE_SYNCDIR\fR is zero, the corresponding variables
+is unset. This allows setting of these variables for \fBqmail-local\fR(8).
 
 \fBqmail-send\fR can be configured to use a queue with a different split
-subdirectory value than compile time value of DIRSPLIT. This can be done by
-setting the \fBCONFSPLIT\fR envrionment variable. Additionally, it can
-process a queue created with \fItodo\fR, \fIintd\fR with subdirectory split
-instead of without any split. This can be done by setting the \fBBIGTODO\fR
-environment variable.
+subdirectory value than compile time value of \fBDIRSPLIT\fR. This can be
+done by setting the \fBCONFSPLIT\fR envrionment variable. Additionally, it
+can process a queue created with \fItodo\fR, \fIintd\fR with subdirectory
+split instead of without any split. This can be done by setting the
+\fBBIGTODO\fR environment variable.
 
-\fBqmail-send\fr runs as \fIqmails\fR user, \fIqmail\fR group and with
+\fBqmail-send\fR runs as \fIqmails\fR user, \fIqmail\fR group and with
 supplementary groups defined for \fIqmails\fR user, if the environment
 variable \fBUSE_SETGROUPS\fR is set for \fBqmail-start\fR(8).  If you are
-using signing your messages using DKIM, \fIqcerts\fR group should be added
-as a supplementary group for \fIqmailr\fR user.
+using signing your messages using \fBDKIM\fR, \fIqcerts\fR group should be
+added as a supplementary group for \fIqmailr\fR user.
 
 .SH OPTIONS
 .PP
