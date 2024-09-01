@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.34 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: queue-fix.c,v 1.35 2024-09-01 08:19:59+05:30 Cprogrammer Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -96,14 +96,14 @@ usage()
 
 	strnum1[fmt_int(strnum1, split)] = 0;
 	strnum2[fmt_int(strnum2, bigtodo)] = 0;
-	strnum2[fmt_uint(strnum2, TCPTO_BUFSIZ)] = 0;
+	strnum3[fmt_uint(strnum3, TCPTO_BUFSIZ)] = 0;
 	strerr_warn8(WARN,
 			"usage: queue-fix [-irmNv] [-s split] queue_dir\n"
-			"                 -s split - where split = queue split number (default ", strnum1,
+			"                 -s split - where split = queue split number  (default ", strnum1,
 			")\n"
 			"                 -b 0|1   - 0 for no big todo, 1 for big todo (default ", strnum2,
 			")\n"
-			"                 -S size  - where size = tcpto buffer size (default ", strnum3,
+			"                 -S size  - where size = tcpto buffer size    (default ", strnum3,
 			")\n"
 			"                 -i       - Interactive Mode\n"
 			"                 -r       - create ratelimit directory\n"
@@ -1135,13 +1135,16 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	const char     *x = "$Id: queue-fix.c,v 1.34 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: queue-fix.c,v 1.35 2024-09-01 08:19:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.35  2024-09-01 08:19:59+05:30  Cprogrammer
+ * bug - tcpto buffer size was unitialized
+ *
  * Revision 1.34  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
