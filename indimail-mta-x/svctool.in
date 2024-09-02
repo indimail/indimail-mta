@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.730 2024-08-10 11:02:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.731 2024-09-02 19:33:27+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.730 2024-08-10 11:02:41+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.731 2024-09-02 19:33:27+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -3844,7 +3844,7 @@ if [ " $imap_ssl" = " 1" ] ; then
 	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u indimail -g indimail,qmail,qcerts \\\$SSLADDRESS \\\$SSLPORT \\"
 	echo "\$prefix/bin/couriertls -server -tcpd \\"
 else
-	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u indimail -g indimail,qmail \\\$LOCALIP \\\$PORT \\"
+	echo "-o -b \\\$MAXDAEMONS -H -l \$HOSTNAME -R -u indimail -g indimail,qmail,qcerts \\\$LOCALIP \\\$PORT \\"
 fi
 if [ " $proxy_port" = " " ] ;then
 	echo "\$prefix/sbin/"$cdb_f"login \\\$IMAPAUTHMODULES \$bindir/$stype Maildir\""
@@ -4044,8 +4044,8 @@ if [ " $ipaddress" = " " ] ; then
 else
 	echo "SSLADDRESS=$ipaddress"
 fi
-echo "TLS_PROTOCOL=SSL23"
-echo "TLS_STARTTLS_PROTOCOL=TLS1"
+echo "TLS_PROTOCOL=TLSv1.2"
+echo "TLS_STARTTLS_PROTOCOL=TLSv1.2"
 echo "# TLS_CIPHER_LIST=\"TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH\""
 echo "##NAME: TLS_TIMEOUT:0"
 echo "# TLS_TIMEOUT is currently not implemented, and reserved for future use."
@@ -4256,8 +4256,8 @@ else
 	echo "SSLADDRESS=$ipaddress"
 fi
 echo "POP3AUTH_TLS=\"$POP3AUTH\""
-echo "TLS_PROTOCOL=SSL23"
-echo "TLS_STARTTLS_PROTOCOL=TLS1"
+echo "TLS_PROTOCOL=TLSv1.2"
+echo "TLS_STARTTLS_PROTOCOL=TLSv1.2"
 echo "# TLS_CIPHER_LIST=\"TLSv1:HIGH:!LOW:!MEDIUM:!EXP:!NULL:!aNULL@STRENGTH\""
 echo "##NAME: TLS_TIMEOUT:0"
 echo "# TLS_TIMEOUT is currently not implemented, and reserved for future use."
@@ -6779,7 +6779,7 @@ fi
 dump_run_header
 echo "exec 2>&1"
 echo "MYUID=\`/usr/bin/id -u qmaild\`"
-echo "MYGID=\`/usr/bin/id -g qmaild\`"
+echo "MYGID=\`/usr/bin/id -g indimail\`"
 echo "HOSTNAME=\`uname -n\`"
 echo ""
 echo "if [ -z \"\$MYUID\" -o -z \"\$MYGID\" ]; then"

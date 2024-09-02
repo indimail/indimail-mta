@@ -3068,8 +3068,8 @@ variables.h set_environment.h
 	./compile rrt.c
 
 qmail-poppass: \
-load qmail-poppass.o auto_uids.o
-	./load qmail-poppass auto_uids.o $(QMAILLIB)
+load qmail-poppass.o auto_uids.o get_uid.o
+	./load qmail-poppass auto_uids.o get_uid.o $(QMAILLIB)
 
 qmail-poppass.o: \
 compile qmail-poppass.c auto_uids.h buffer_defs.h

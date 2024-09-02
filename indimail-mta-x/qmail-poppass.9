@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-poppass 8 "03 Aug 2009" IndiMail "Authentication"
 .SH "NAME"
 qmail-poppass \- change passwords from across the network using
@@ -28,10 +29,10 @@ interface for authencation and uses the
 interface for setting the password.
 .B checkpassword
 interface provides a simple, uniform password-checking interface to all root
-applications. It is suitable for use by applications such as login, ftpd, and pop3d.
+applications. It is suitable for use by applications such as login, ftpd.
 .B setpassword
-interface provides a simple, uniform password-setting interface to all root applications. It is suitable for use by
-applications such as pop3d, imapd.
+interface provides a simple, uniform password-setting interface to all root
+applications. It is suitable for use by applications such as pop3d, imapd.
 
 .PP
 .IR checkprogram ,
@@ -47,8 +48,9 @@ another 0 byte, and a final two 0 bytes.
 .I checkprogram
 invokes
 .I subprogram
-upon unsuccessful authentication, passing the same data (read earlier on descriptor 3) on a pipe with file descriptor 4
-as the write end and file descriptor 3 as the read end.
+upon unsuccessful authentication, passing the same data (read earlier on
+descriptor 3) on a pipe with file descriptor 4 as the write end and file
+descriptor 3 as the read end.
 .I subprogram
 should read file descriptor 3 and should in turn return 0 to
 .BR qmail-poppass
@@ -63,7 +65,8 @@ There can be multiple
 .I subprograms
 for a particular type of authentication. The last
 .I subprogram
-should typically be /bin/false or /usr/bin/false depending on your Operating System.
+should typically be /bin/false or /usr/bin/false depending on your
+Operating System.
 
 .PP
 .B qmail-poppass
@@ -91,39 +94,30 @@ logs all password change attempts whether they are successful or not.
 
 .SH "EXAMPLE CLIENT-SERVER CONVERSATION"
 All messages passed between server and client are text based allowing
-a client session to be easily mimicked with telnet. Using telnet, 
-changing a user's password would look like this:
+a client session to be easily mimicked with telnet on an unencrypted
+channel. On an encrypted channel you can use \fBtcpclient\fR(1),  using
+which changing a user's password would look like this:
 
-	Connected to localhost.localdomain (127.0.0.1).
-.br
-	Escape character is '^]'.
-.br
-	200 indimail.org hello, who are you?\\r\\n
-.br
-	user <username>\\r\\n
-.br
-	200 Your password please.\\r\\n
-.br
-	pass <current password>
-.br
-	200 Your new password please.\\r\\n
-.br
-	newpass <new password>\\r\\n
-.br
-	200 Password changed, thank-you.\\r\\n
-.br
-	quit\\r\\n
-.br
-	200 Bye.\\r\\n
-.br
-	Connection closed by foreign host.
+.EX
+$ tcpclient -n /etc/indimail/certs/clientcert.pem 0 106
+200 indimail.org hello, who are you?\\r\\n
+user <username>\\r\\n
+200 Your password please.\\r\\n
+pass <current password>
+200 Your new password please.\\r\\n
+newpass <new password>\\r\\n
+200 Password changed, thank-you.\\r\\n
+quit\\r\\n
+200 Bye.\\r\\n
+Connection closed by foreign host.
+.EE
 
 .SH "BUGS"
 .PP
 If you've found a bug in
 .BR qmail-poppass ,
 please report it to
-mbhangui@gmail\&.com
+manvendra@indimail\&.org
 
 .SH "SEE ALSO"
 qmail-smtpd(8), vsetpass(8)
@@ -131,8 +125,9 @@ qmail-smtpd(8), vsetpass(8)
 .SH "AUTHOR"
 .PP
 .B qmail-poppass
-was written by Manvendra Bhangui <mbhangui@gmail\&.com>
+is based on poppassd and was written by Manvendra Bhangui
+<mbhangui@gmail\&.com>
 .PP
 .B poppassd
-was written by Pawel Krawczyk based on an ealier
-version written by John Norstad, Roy Smith and Daniel L. Leavitt
+was written by Pawel Krawczyk based on an ealier version written by John
+Norstad, Roy Smith and Daniel L. Leavitt

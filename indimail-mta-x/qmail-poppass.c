@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.10  2024-09-02 19:32:26+05:30  Cprogrammer
+ * ensure qmail-poppass runs with qmaild:indimail privileges
+ *
  * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -111,15 +114,11 @@ flush()
 no_return void
 my_error(const char *s1, int exit_val)
 {
-	if (substdio_puts(&sserr, s1))
-		_exit(111);
-	if (substdio_puts(&sserr, ": "))
-		_exit(111);
-	if (substdio_puts(&sserr, error_str(errno)))
-		_exit(111);
-	if (substdio_puts(&sserr, "\n"))
-		_exit(111);
-	if (substdio_flush(&sserr) == -1)
+	if (substdio_puts(&sserr, s1) == -1 ||
+			substdio_puts(&sserr, ": ") == -1 ||
+			substdio_puts(&sserr, error_str(errno)) == -1 ||
+			substdio_puts(&sserr, "\n") ||
+			substdio_flush(&sserr) == -1)
 		_exit(111);
 	out(exit_val ? "500 " : " 400");
 	out(s1);
@@ -144,8 +143,7 @@ authenticate()
 		my_error("Requested action aborted: child won't start and I can't auth (#4.3.0)", 0);
 	case 0:
 		close(pi[1]);
-		if (pi[0] != 3)
-		{
+		if (pi[0] != 3) {
 			dup2(pi[0], 3);
 			close(pi[0]);
 		}
@@ -155,20 +153,16 @@ authenticate()
 	}
 	close(pi[0]);
 	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
-	if (substdio_put(&ssup, user.s, user.len) == -1)
-		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
-	if (substdio_put(&ssup, old_pass.s, old_pass.len) == -1)
-		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
-	if (substdio_put(&ssup, "\0\0", 2) == -1)
-		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
-	if (substdio_flush(&ssup) == -1)
+	if (substdio_put(&ssup, user.s, user.len) == -1 ||
+			substdio_put(&ssup, old_pass.s, old_pass.len) == -1 ||
+			substdio_put(&ssup, "\0\0", 2) == -1 ||
+			substdio_flush(&ssup) == -1)
 		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
 	/* byte_zero(old_pass.s, old_pass.len); */
 	byte_zero(upbuf, sizeof upbuf);
 	close(pi[1]);
-	if (wait_pid(&wstat, child) == -1)
-		my_error("Requested action aborted: problem with child and I can't auth (#4.3.0)", 0);
-	if (wait_crashed(wstat))
+	if (wait_pid(&wstat, child) == -1 ||
+			wait_crashed(wstat))
 		my_error("Requested action aborted: problem with child and I can't auth (#4.3.0)", 0);
 	return (wait_exitcode(wstat));
 }
@@ -199,23 +193,18 @@ change_pass()
 	}
 	close(pi[0]);
 	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
-	if (substdio_put(&ssup, user.s, user.len) == -1)
-		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
-	if (substdio_put(&ssup, old_pass.s, old_pass.len) == -1)
-		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
-	if (substdio_put(&ssup, "\0", 1) == -1)
-		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
-	if (substdio_put(&ssup, new_pass.s, new_pass.len) == -1)
-		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
-	if (substdio_flush(&ssup) == -1)
+	if (substdio_put(&ssup, user.s, user.len) == -1 ||
+			substdio_put(&ssup, old_pass.s, old_pass.len) == -1 ||
+			substdio_put(&ssup, "\0", 1) == -1 ||
+			substdio_put(&ssup, new_pass.s, new_pass.len) == -1 ||
+			substdio_flush(&ssup) == -1)
 		my_error("Requested action aborted: unable to write pipe and I can't auth (#4.3.0)", 0);
 	byte_zero(old_pass.s, old_pass.len);
 	byte_zero(new_pass.s, new_pass.len);
 	byte_zero(upbuf, sizeof upbuf);
 	close(pi[1]);
-	if (wait_pid(&wstat, child) == -1)
-		my_error("Requested action aborted: problem with child and I can't auth (#4.3.0)", 0);
-	if (wait_crashed(wstat))
+	if (wait_pid(&wstat, child) == -1 ||
+			wait_crashed(wstat))
 		my_error("Requested action aborted: problem with child and I can't auth (#4.3.0)", 0);
 	return (wait_exitcode(wstat));
 }
@@ -227,10 +216,10 @@ main(int argc, char **argv)
 	int             match, item;
 	char           *host, *ptr;
 	uid_t           uid;
+	gid_t           gid;
 	char            strnum[FMT_ULONG];
 
-	if (argc < 2)
-	{
+	if (argc < 2) {
 		out("500 usage: ");
 		out(argv[0]);
 		out(" hostname checkprogram [subprogram subprogram]\r\n");
@@ -238,8 +227,7 @@ main(int argc, char **argv)
 		sleep(1);
 		return (1);
 	}
-	if (!(ptr = env_get("PASSWORD_COMMAND")))
-	{
+	if (!(ptr = env_get("PASSWORD_COMMAND"))) {
 		out("500 PASSWORD_COMMAND not set\r\n");
 		flush();
 		sleep(1);
@@ -250,26 +238,28 @@ main(int argc, char **argv)
 	host = argv[1];
 	authargs = argv + 2;
 	uid = getuid();
-	if (uid != auto_uidi && uid != 0)
-	{
+	gid = getgid();
+	if (uidinit(1, 1) == -1)
+		my_error("unable to get uid/gid: ", 0);
+	if (uid != auto_uidi && uid != 0 && gid != auto_gidi) {
 		out("500 you should run this program with uid 0 or uid ");
 		strnum[fmt_ulong(strnum, auto_uidi)] = 0;
+		out(strnum);
+		out(" or gid ");
+		strnum[fmt_ulong(strnum, auto_gidi)] = 0;
 		out(strnum);
 		out("\r\n");
 		flush();
 		sleep(1);
 		return (1);
 	}
-	for (item = 1;;)
-	{
+	for (item = 1;;) {
 		switch (item)
 		{
 		case 1:
-			if (!stralloc_copys(&user, ""))
-				my_error("out of memory", 0);
-			if (!stralloc_copys(&old_pass, ""))
-				my_error("out of memory", 0);
-			if (!stralloc_copys(&new_pass, ""))
+			if (!stralloc_copys(&user, "") ||
+					!stralloc_copys(&old_pass, "") ||
+					!stralloc_copys(&new_pass, ""))
 				my_error("out of memory", 0);
 
 			out("200 ");
@@ -291,8 +281,7 @@ main(int argc, char **argv)
 		--line.len;
 		if (line.len && (line.s[line.len - 1] == '\r'))
 			--line.len;
-		if (!str_diffn(line.s, "quit", 4))
-		{
+		if (!str_diffn(line.s, "quit", 4)) {
  			out("200 Bye-bye\r\n");
 			flush();
 			_exit (0);
@@ -300,29 +289,24 @@ main(int argc, char **argv)
 		switch (item)
 		{
 		case 1:
-			if (str_diffn(line.s, "user ", 5))
-			{
+			if (str_diffn(line.s, "user ", 5)) {
 				out("500 Username required.\r\n");
 				continue;
 			}
-			if (!stralloc_catb(&user, line.s + 5, line.len - 5))
-				my_error("out of memory", 0);
-			if (!stralloc_0(&user))
+			if (!stralloc_catb(&user, line.s + 5, line.len - 5) ||
+					!stralloc_0(&user))
 				my_error("out of memory", 0);
 			break;
 		case 2:
-			if (str_diffn(line.s, "pass ", 5))
-			{
+			if (str_diffn(line.s, "pass ", 5)) {
 				out("500 Password required.\r\n");
 				item = 1;
 				continue;
 			}
-			if (!stralloc_catb(&old_pass, line.s + 5, line.len - 5))
+			if (!stralloc_catb(&old_pass, line.s + 5, line.len - 5) ||
+					!stralloc_0(&old_pass))
 				my_error("out of memory", 0);
-			if (!stralloc_0(&old_pass))
-				my_error("out of memory", 0);
-			if (authenticate())
-			{
+			if (authenticate()) {
 				out("500 Old password is incorrect or user not found.\r\n");
 				item = 1;
 				sleep (5);
@@ -330,26 +314,22 @@ main(int argc, char **argv)
 			}
 			break;
 		case 3:
-			if (str_diffn(line.s, "newpass ", 8))
-			{
+			if (str_diffn(line.s, "newpass ", 8)) {
 				out("500 New Password required.\r\n");
 				item = 1;
 				continue;
 			}
-			if (!stralloc_catb(&new_pass, line.s + 8, line.len - 8))
+			if (!stralloc_catb(&new_pass, line.s + 8, line.len - 8) ||
+					!stralloc_0(&new_pass))
 				my_error("out of memory", 0);
-			if (!stralloc_0(&new_pass))
-				my_error("out of memory", 0);
-			if (change_pass())
-			{
+			if (change_pass()) {
 				errlog("Password change for ");
 				errlog(user.s);
 				errlogf(" failed\n");
 				out("500 Password change failed.\r\n");
 				item = 1;
 				continue;
-			} else
-			{
+			} else {
 				errlog("Password change for ");
 				errlog(user.s);
 				errlogf(" succeeded\n");
@@ -369,7 +349,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	const char     *x = "$Id: qmail-poppass.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-poppass.c,v 1.10 2024-09-02 19:32:26+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
