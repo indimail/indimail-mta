@@ -15,23 +15,24 @@ one argument. If \fIsocket\fR is provided as a path, \fBtcpclient\fR uses
 UNIX domain socket to connect (See unix(7)). In this case \fIport\fR is
 not provided. If \fIhost\fR is not a filesystem path, \fIhost\fR is used as
 a TCP/IP address and TCP port is used where \fIport\fR is one argument.
-\fIprog\fR consists of one or more arguments. If \fIprog\fR is omitted,
-tcpclient enters client mode where it passes data from descriptor 0 to the
-network and data from the network to descriptor 1. client mode is similar
-to how you would use programs like telnet(1), ssh(1), etc.
+\fIprog\fR consists of one or more arguments. \fBtcpclient\fR attempts to
+connect to a TCP server or a UNIX socket. Depending on whether \fIprog\fR
+is provided or omitted, \fBtcpclient\fR does one of the two things below.
 
-\fBtcpclient\fR attempts to connect to a TCP server or a UNIX socket. If it
-is successful, it runs \fIprog\fR, with descriptor 6 reading from the
-network/socket and descriptor 7 writing to the network/socket. It also sets
-up several environment variables (see .BR tcp-environ (5)). In client mode,
-when \fIprog\fR is not run, \fBtcpclient\fR will pass data from descriptor
-0 to the network/socket and from the network/socket to descriptor 1.
+if \fIprog\fR is provided, it runs \fIprog\fR, with descriptor 6 reading
+from the network/socket and descriptor 7 writing to the network/socket. It
+also sets up several environment variables (see .BR tcp-environ (5)).
+
+If \fIprog\fR is omitted, \fBtcpclient\fR enters client mode where it
+passes data from descriptor 0 to the network and data from the network to
+descriptor 1. client mode is similar to how you would use programs like
+telnet(1), ssh(1), etc.
 
 \fBtcpclient\fR can also initiate a SSL/TLS session with a remote host (-n
-option). This requires a \fIclientcert\fR to be provided. One can also do
-opportunistic TLS by using \fB\-s\fR \fIstarttls\fR option. The
-currently supported option for \fIstarttls\fR is \fBsmtp\fR and \fBpop3\fR.
-\fBimap\fR will be added later.
+option). This requires a \fIclientcert\fR to be provided. In client mode,
+one can also do opportunistic TLS by using \fB\-s\fR \fIstarttls\fR option.
+The currently supported option for \fIstarttls\fR are \fBsmtp\fR,
+\fBpop3\fR and \fBimap\fR.
 
 For TLS/SSL sessions, \fBtcpclient\fR sets the environment variable
 \fBTLS_PROVIDER\fR with details of the TLS connnection if passed the -z
@@ -123,7 +124,6 @@ UNIX domain sockets.
 Directory having certificates.
 Default is @qsysconfdir@/certs.
 
-
 .TP
 .B \-n \fIclientcert
 Use \fIcertfile\fR as the TLS/SSL certificate. If the -n option is not
@@ -169,22 +169,14 @@ Without this option, the actual protocol version used will be negotiated to
 the highest version mutually supported by the client and the server. The
 supported protocols at this moment are TLSv1.2 and TLSv1.3. Older protocols
 have been deprecated and removed. It is best not to use this option to let
-\fBtcpclient\fR chose the highest protocol supported.
+\fBtcpclient\fR choose the highest protocol supported.
 
 .TP
 \fB\-s\fR \fIstartlsType\fR
-Specify smtp, pop3 or imap for \fIstarttlsType\fR. This works
-differently for \fBserver mode\fR and \fBclient mode\fR
-
-\fBclient mode - \fB
-In this mode, \fBtcpclient\fR will initiate SSL/TLS negotation only after
-issuing \fBSTARTTLS\fR command to the remote server. Currently, only
-\fBsmtp\fR is supported.
-
-\fBserver mode - \fB
-In this mode, \fBtcpclient\fR will start unencrypted and automatically
-add \fBSTARTTLS\fR capability for clients. It will initiate a TLS session
-only when it receives \fBSTARTTLS\fR command from client.
+Specify smtp, pop3 or imap for \fIstarttlsType\fR. This works only when
+running in \fBclient mode\fR (when \fIprog\fR is omitted). In client mode,
+\fBtcpclient\fR will initiate SSL/TLS negotation after issuing
+\fBSTARTTLS\fR command itself to the remote server.
 
 .TP
 .B \-m \fIhost
@@ -255,44 +247,59 @@ should be separated by a colon. This can be overriden by the -f option.
 
 .TP
 .B CERTDIR
-Sub-directory relative to @qsysconfdir@, having servercert.pem.
+Sub-directory relative to @qsysconfdir@, having clientcert.pem.
 Default is @qsysconfdir@/certs.
 
 .SH EXAMPLES
 .EX
 1. Connect to port 25 and issue the starttls command
    read from descriptor 0 & write to network, read from network & write to
-   descriptor 1.
-   tcpclient -s smtp 0 25
+   descriptor 1. Use default certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
+
+   $ tcpclient -n "" -s smtp 0 25
 
 2. Connect to port 110 and issue the STLS command
    read from descriptor 0 & write to network, read from network & write to
-   descriptor 1.
-   tcpclient -s pop3 0 110
+   descriptor 1. Use default certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
 
-3. Connect to port 25 on 127.0.0.1 like telnet
+   $ tcpclient -n "" -s pop3 0 110
+
+3. Connect to port 143 and issue the STARTTLS command
+   read from descriptor 0 & write to network, read from network & write to
+   descriptor 1. Use default certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
+
+   $ tcpclient -n "" -s imap 0 143
+
+4. Connect to port 25 on 127.0.0.1 like telnet
    read from descriptor 0 & write to network, read from network & write to
    descriptor 1.
-   tcpclient 127.0.0.1 25
 
-4. Connect to port 465 on 127.0.0.1 like openssl s_client
+   $ tcpclient 127.0.0.1 25
+
+5. Connect to port 465 on 127.0.0.1 like openssl s_client
    read from descriptor 0 & write to network, read from network & write to
    descriptor 1.
-   tcpclient -n /etc/indimail/certs/clientcert.pem 127.0.0.1 25
 
-5. Run a script under tcpclient that connects to a SSL server on port 5555
+   $ tcpclient -n @qsysconfdir@/certs/clientcert.pem 127.0.0.1 465
+
+6. Run a script under tcpclient that connects to a SSL server on port 5555
    read from descriptor 6 reads from network, write to descriptor 7 writes
    to network. Certificate used is the value of TLS_CERTFILE env variable.
-   tcpclient -n "" 0 5555 /usr/bin/my_script
 
-6. Connect to qmail-smtpd on UNIX socket /run/indimail/smtpd like telnet
+   $ tcpclient -n "" 0 5555 /usr/bin/my_script
+
+7. Connect to qmail-smtpd on UNIX socket /run/indimail/smtpd like telnet
    read from descriptor 0 & write to socket, read from socket & write to
    descriptor 1.
+
    a) run tcpserver
-   tcpserver -vn /etc/indimail/certs/servercert.pem \\
+
+   $ tcpserver -vn @qsysconfdir@/certs/servercert.pem \\
      /run/indimail/smtpd /usr/sbin/qmail-smtpd
+
    b) run tcpclient
-   tcpclient -n /etc/indimail/certs/servercert.pem /run/indimail/smtpd
+
+   $ tcpclient -n @qsysconfdir@/certs/clientcert.pem /run/indimail/smtpd
 .EE
 
 .SH SEE ALSO

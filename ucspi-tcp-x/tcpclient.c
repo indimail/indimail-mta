@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.35 2024-07-17 19:52:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.36 2024-09-05 17:57:58+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -82,7 +82,7 @@ usage(void)
 	 " [ -C certdir ] \n"
 	 " [ -c cafile ] \n"
 	 " [ -L crlfile ] \n"
-	 " [ -s starttlsType (smtp|pop3) ]\n"
+	 " [ -s starttlsType (smtp|pop3|imap) ]\n"
 	 " [ -f cipherlist ]\n"
 	 " [ -M TLS method ] \n"
 #endif
@@ -218,6 +218,9 @@ do_select(char **argv, int flag_tcpclient, int s)
 	pid_t           pid;
 
 	if (flag_tcpclient) {
+		fdin = 0;
+		fdout = 1;
+	} else {
 		sig_catch(sig_child, sigchld);
 		sig_catch(sig_term, sigterm);
 		if (pipe(pi1) != 0 || pipe(pi2) != 0)
@@ -262,10 +265,10 @@ do_select(char **argv, int flag_tcpclient, int s)
 		close(pi2[1]);
 		fdin = pi2[0];
 		fdout = pi1[1];
-	} else {
-		fdin = 0;
-		fdout = 1;
-	}
+	} /*- if (flag_tcpclient == 0) */
+	/* translate(int rfd, int wfd, int clearout, int clearin, unsigned int iotimeout) */
+	if (flagssl)
+		set_essential_fd(fdin);
 	if ((r = translate(s, s, fdout, fdin, dtimeout)))
 		strerr_warn1("tcpclient: translate returned non-zero: ", &strerr_sys);
 #ifdef TLS
@@ -295,7 +298,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 			strerr_die2x(111, FATAL, "failed to get greeting");
 		if (verbose && write(1, line.s, line.len) == -1)
 			strerr_die2sys(111, FATAL, "unable to write to network: ");
-		line.s[line.len - 1] = 0;
+		line.s[line.len - 1] = '\0'; /*- remove newline */
 		scan_ulong(line.s, &code);
 		if (code != 220)
 			strerr_die2x(111, FATAL, "connected but greeting failed");
@@ -305,7 +308,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2(111, FATAL, "getln: read-smtpd: ", &strerr_tls);
 		if (!line.len || !match)
-			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
+			strerr_die4x(111, FATAL, "NO TLS achieved while ", clientcert, " exists");
 		line.s[line.len - 1] = 0;
 		scan_ulong(line.s, &code);
 		if (code != 220)
@@ -322,9 +325,33 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2(111, FATAL, "getln: read-pop3d: ", &strerr_tls);
 		if (!line.len || !match)
-			strerr_die4x(111, FATAL, "NO TLS achived while ", clientcert, " exists");
+			strerr_die4x(111, FATAL, "NO TLS achieved while ", clientcert, " exists");
+		if (verbose && write(1, line.s, line.len) == -1)
+			strerr_die2sys(111, FATAL, "unable to write to network: ");
 		if (!case_startb(line.s, 3, "+OK"))
 			strerr_die4x(111, FATAL, "STLS rejected while ", clientcert, " exists");
+		ssin.p = 0;
+		if (substdio_flush(&ssin) == -1)
+			strerr_die2(111, FATAL, "substdio_flush: ", &strerr_tls);
+		break;
+	case imap:
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2(111, FATAL, "getln: read-imapd: ", &strerr_tls);
+		if (tlswrite(sfd, (char *) "STARTTLS\r\n", 10, dtimeout) == -1)
+			strerr_die2(111, FATAL, "unable to write to network: ", &strerr_tls);
+		if (getln(&ssin, &line, &match, '\n') == -1)
+			strerr_die2(111, FATAL, "getln: read-imapd: ", &strerr_tls);
+		if (!line.len || !match)
+			strerr_die4x(111, FATAL, "NO TLS achieved while ", clientcert, " exists");
+		if (verbose && write(1, line.s, line.len) == -1)
+			strerr_die2sys(111, FATAL, "unable to write to network: ");
+		if (!case_startb(line.s, 11, "STARTTLS OK")) {
+			line.s[line.len - 1] = '\0'; /*- remove newline */
+			strerr_die6x(111, FATAL, "STARTTLS rejected while ", clientcert, " exists: [", line.s, "]");
+		}
+		ssin.p = 0;
+		if (substdio_flush(&ssin) == -1)
+			strerr_die2(111, FATAL, "substdio_flush: ", &strerr_tls);
 		break;
 	default:
 		break;
@@ -342,7 +369,7 @@ main(int argc, char **argv)
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
-	int             opt, j, s, cloop, flag_tcpclient = 0, flagssl = 0;
+	int             opt, j, s, cloop, flag_tcpclient = 1, flagssl = 0;
 #ifdef TLS
 	SSL_CTX        *ctx = NULL;
 	SSL            *ssl = NULL;
@@ -410,13 +437,16 @@ main(int argc, char **argv)
 			certdir = optarg;
 			break;
 		case 's':
-			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3"))
+			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3") && case_diffs(optarg, "imap"))
 				usage();
 			if (!case_diffs(optarg, "smtp"))
 				stls = smtp;
 			else
 			if (!case_diffs(optarg, "pop3"))
 				stls = pop3;
+			else
+			if (!case_diffs(optarg, "imap"))
+				stls = imap;
 			break;
 		case 'm':
 			match_cn = 1;
@@ -511,7 +541,7 @@ main(int argc, char **argv)
 		}
 	}
 	if (*++argv)
-		flag_tcpclient = 1;
+		flag_tcpclient = 0;
 #ifdef TLS
 	if (!(certdir = env_get("CERTDIR")))
 		certdir = "/etc/indimail/certs";
@@ -781,7 +811,7 @@ do_data:
 		SSL_CTX_free(ctx);
 		ctx = NULL;
 		if (stls != unknown)
-			do_starttls(s, stls, certfile.s, !flag_tcpclient);
+			do_starttls(s, stls, certfile.s, 1);
 		if (!stralloc_copys(&tls_server_version, SSL_get_version(ssl)) ||
 				!stralloc_0(&tls_server_version))
 			strerr_die2x(111, FATAL, "out of memory");
@@ -792,12 +822,11 @@ do_data:
 				!stralloc_0(&tls_client_version))
 			strerr_die2x(111, FATAL, "out of memory");
 		tls_client_version.len--;
-	}
+	} /* if (flagssl) */
 #endif
-	if (!flag_tcpclient || flagssl) {
+	if (flag_tcpclient || flagssl) {
 #ifdef TLS
 		if (stls != unknown) {
-			set_essential_fd(0);
 			if (ndelay_on(s) == -1)
 				strerr_die2sys(111, FATAL, "unable to set up non-blocking mode for socket: ");
 		}
@@ -823,13 +852,16 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.35 2024-07-17 19:52:53+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.36 2024-09-05 17:57:58+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.36  2024-09-05 17:57:58+05:30  Cprogrammer
+ * added starttls capability for imap
+ *
  * Revision 1.35  2024-07-17 19:52:53+05:30  Cprogrammer
  * fixed incorrect use of strerr_warn instead of strerr_die
  *

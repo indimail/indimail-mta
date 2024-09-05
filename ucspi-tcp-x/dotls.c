@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $
+ * $Id: dotls.c,v 1.26 2024-09-05 17:59:45+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -46,7 +46,9 @@ int             smtp_ehlo(char *, char *, int);
 int             func_unimpl(char *, char *, int);
 int             do_tls();
 int             do_quit();
+int             do_logout();
 int             pop3_capa(char *, char *, int);
+int             imap_capa(char *, char *, int);
 void            flush_data();
 void            flush_io();
 void            flush();
@@ -93,7 +95,7 @@ usage(void)
 		 " [ -M TLS methods ]\n"
 		 " [ -c cafile ] \n"
 		 " [ -L crlfile ] \n"
-		 " [ -s starttlsType (smtp|pop3) ]\n"
+		 " [ -s starttlsType (smtp|pop3|imap) ]\n"
 		 " program");
 }
 
@@ -110,6 +112,12 @@ struct scommd   pop3commands[] = {
 	{ "capa", pop3_capa, flush },
 	{ "stls", do_tls, flush_io },
 	{ "quit", do_quit, flush},
+	{ 0, func_unimpl, flush }
+};
+
+struct scommd   imapcommands[] = {
+	{ "capability", imap_capa, flush },
+	{ "logout", do_logout, flush},
 	{ 0, func_unimpl, flush }
 };
 
@@ -169,7 +177,7 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 	char           *arg, *ptr;
 	char            ch;
 	struct scommd  *c;
-	static stralloc cmd = { 0 };
+	static stralloc cmd = { 0 }, imapcmd = {0};
 
 	if (!stralloc_copys(&cmd, ""))
 		strerr_die2x(111, FATAL, "out of memory");
@@ -180,6 +188,9 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 		break;
 	case pop3:
 		c = pop3commands;
+		break;
+	case imap:
+		c = imapcommands;
 		break;
 	default:
 		strerr_die2x(111, FATAL, "invalid STARTTLS handler. Current known methods are SMTP, POP3");
@@ -203,20 +214,60 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 	if (!stralloc_0(&cmd))
 		strerr_die2x(111, FATAL, "out of memory");
 	cmd.len--;
-	i = str_chr(cmd.s, ' ');
-	arg = cmd.s + i;
-	found = 0;
-	while (*arg == ' ') {
-		found = 1;
-		++arg;
+	if (stls == imap) {
+		found = 0;
+		imapcmd.len = 0;
+		i = str_chr(cmd.s, ' ');
+		if (cmd.s[i]) {
+			arg = cmd.s + i;
+			while (*arg && *arg == ' ') {
+				++arg;
+				++i;
+			}
+			if (!stralloc_copys(&imapcmd, cmd.s + i) ||
+					!stralloc_0(&imapcmd))
+				strerr_die2x(111, FATAL, "out of memory");
+			i = str_chr(imapcmd.s, ' ');
+			if (imapcmd.s[i]) {
+				arg = cmd.s + i;
+				while (*arg && *arg == ' ') {
+					found = 1;
+					++arg;
+				}
+				if (found)
+					imapcmd.s[i] = 0;
+			}
+		} else
+			arg = (char *) "unknown";
+		for (j = 0; c[j].text; ++j) {
+			if (case_equals(c[j].text, imapcmd.s))
+				break;
+		}
+	} else {
+		imapcmd.len = 0;
+		found = 0;
+		i = str_chr(cmd.s, ' ');
+		if (cmd.s[i]) {
+			arg = cmd.s + i;
+			while (*arg && *arg == ' ') {
+				found = 1;
+				++arg;
+			}
+		} else
+			arg = (char *) "unknown";
+		if (found)
+			cmd.s[i] = 0;
+		for (j = 0; c[j].text; ++j) {
+			if (case_equals(c[j].text, cmd.s))
+				break;
+		}
 	}
-	cmd.s[i] = 0;
-	for (j = 0; c[j].text; ++j) {
-		if (case_equals(c[j].text, cmd.s))
-			break;
+	if (found) { /*- if we had replaced space, put it back */
+		if (stls == imap)
+			imapcmd.s[i] = ' ';
+		else
+			cmd.s[i] = ' ';
 	}
-	if (found) /*- if we had replaced space, put it back */
-		cmd.s[i] = ' ';
 	i = c[j].fun(arg, cmd.s, cmd.len);
 	if (c[j].flush)
 		c[j].flush();
@@ -233,10 +284,15 @@ do_commands(enum starttls stls, SSL *ssl, substdio *ss, int clearin, int clearou
 					substdio_flush(&ssto) == -1)
 				strerr_die2(111, FATAL, "write: ", &strerr_tls);
 			break;
+		case imap:
+			if (substdio_put(&ssto, "STARTTLS OK Begin SSL/TLS negotiation now.\r\n", 44) == -1 ||
+					substdio_flush(&ssto) == -1)
+				strerr_die2(111, FATAL, "write: ", &strerr_tls);
+			break;
 		default:
 			if ((ptr = env_get("BANNER"))) {
 				if (substdio_puts(&ssto, ptr) == -1 ||
-						substdio_put(&ssto, "\n", 1) == -1 ||
+						substdio_put(&ssto, "\r\n", 2) == -1 ||
 					substdio_flush(&ssto) == -1)
 				strerr_die2(111, FATAL, "write: ", &strerr_tls);
 			}
@@ -356,12 +412,12 @@ flush_io()
 
 GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
 GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
-saa             capakw = { 0 };	/*- list of EHLO keywords and parameters */
+saa             capakw = { 0 };	/*- list of EHLO/pop3/imap keywords and parameters */
 
 int             maxcapakwlen = 0;
 
 void
-extract_kw(enum starttls stls)
+extract_kw_smtp_pop3(enum starttls stls)
 {
 	stralloc       *saptr;
 	char           *s, *e, *p;
@@ -429,7 +485,7 @@ ehlo(char *host, int len, unsigned int *ilen)
 		strerr_die2sys(111, FATAL, "write: ");
 	if ((code = smtpcode(ilen)) != 250)
 		return code;
-	extract_kw(smtp);
+	extract_kw_smtp_pop3(smtp);
 	return 250;
 }
 
@@ -539,7 +595,18 @@ do_quit()
 }
 
 int
-func_unimpl(char *arg1, char *cmd, int cmdlen)
+do_logout()
+{
+	if (substdio_put(&smtpto, "a logout\r\n",  10) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	ssl_free();
+	return 0;
+}
+
+/* pass on unknown commands to remote */
+int
+func_unimpl(char *arg, char *cmd, int cmdlen)
 {
 	if (!*cmd)
 		return 0;
@@ -553,11 +620,10 @@ func_unimpl(char *arg1, char *cmd, int cmdlen)
 int
 pop3_capa(char *arg, char *cmmd, int cmmdlen)
 {
-	int             i, match, len;
+	int             match, len;
 	stralloc       *saptr;
 
-	if (!stralloc_copys(&capatext, ""))
-		strerr_die2x(111, FATAL, "out of memory");
+	capatext.len = 0;
 	if (substdio_put(&smtpto, "CAPA\n", 5) == -1 ||
 			substdio_flush(&smtpto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
@@ -565,6 +631,7 @@ pop3_capa(char *arg, char *cmmd, int cmmdlen)
 		strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
 	if (!line.len || !match)
 		strerr_die2x(100, FATAL, "CAPA command failed");
+	line.s[line.len - 2] = 0;
 	if (!case_startb(line.s, 3, "+OK")) {
 		if (!stralloc_catb(&capatext, "STLS\n", 5))
 			strerr_die2x(111, FATAL, "out of memory");
@@ -574,27 +641,115 @@ pop3_capa(char *arg, char *cmmd, int cmmdlen)
 			strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
 		if (!line.len || !match)
 			break;
-		i = str_chr(line.s, '\n');
-		if (line.s[i]) {
-			line.s[i] = 0;
-			line.len--;
-		}
 		if (line.s[0] == '.')
 			break;
-		if (!stralloc_cat(&capatext, &line))
-			strerr_die2x(111, FATAL, "out of memory");
+		/*
+		 * SASL LOGIN PLAIN CRAM-MD5 CRAM-SHA1 CRAM-SHA256
+		 * STLS
+		 * TOP
+		 * USER
+		 * LOGIN-DELAY 10
+		 * PIPELINING
+		 * UIDL
+		 * LANG
+		 */
+		if (case_startb(line.s, 4, "USER") || case_startb(line.s, 4, "PASS") ||
+				case_startb(line.s, 4, "QUIT") || case_startb(line.s, 4, "STAT") ||
+				case_startb(line.s, 4, "LIST") || case_startb(line.s, 4, "RETR") ||
+				case_startb(line.s, 4, "DELE") || case_startb(line.s, 4, "UIDL") ||
+				case_startb(line.s, 3, "TOP") || case_startb(line.s, 4, "NOOP") ||
+				case_startb(line.s, 4, "RSET") || case_startb(line.s, 4, "SASL") ||
+				case_startb(line.s, 5, "LOGIN") || case_startb(line.s, 5, "PLAIN") ||
+				case_startb(line.s, 8, "CRAM-MD5") || case_startb(line.s, 9, "CRAM-SHA1") ||
+				case_startb(line.s, 11, "CRAM-SHA256") || case_startb(line.s, 4, "STLS") ||
+				case_startb(line.s, 11, "LOGIN-DELAY") || case_startb(line.s, 10, "PIPELINING")) {
+			if (!stralloc_cat(&capatext, &line))
+				strerr_die2x(111, FATAL, "out of memory");
+		}
 	}
-	extract_kw(pop3);
+	if (!stralloc_0(&capatext))
+		strerr_die2x(111, FATAL, "out of memory");
+	capatext.len--;
+	extract_kw_smtp_pop3(pop3);
 	len = capakw.len;
 	saptr = capakw.sa;
-	for (;len && case_diffs(saptr->s, "STLS");++saptr, --len) ;
-	if (!len) {
-		if (!stralloc_catb(&capatext, "STLS\n", 5))
+	for (; len && case_diffs(saptr->s, "STLS"); ++saptr, --len) ;
+	if (!len) { /*- remote doesn't have STLS */
+		if (!case_startb(capatext.s, 4, "STLS") &&
+				(!stralloc_catb(&capatext, "STLS\n", 5) || !stralloc_0(&capatext)))
 			strerr_die2x(111, FATAL, "out of memory");
+		capatext.len--;
 	}
 	if (substdio_put(&ssto, "+OK Here's what I can do:\n", 26) == -1 ||
 			substdio_put(&ssto, capatext.s, capatext.len) == -1 ||
 			substdio_put(&ssto, ".\n", 2) == -1 ||
+			substdio_flush(&ssto) == -1)
+		strerr_die2(111, FATAL, "write: ", &strerr_tls);
+	return 0;
+}
+
+int
+imap_capa(char *arg, char *cmmd, int cmmdlen)
+{
+	int             match, i;
+
+	case_uppers(arg);
+	capatext.len = 0;
+	if (substdio_put(&smtpto, "A CAPABILITY\r\n", 14) == -1 ||
+			substdio_flush(&smtpto) == -1)
+		strerr_die2sys(111, FATAL, "write: ");
+	if (getln(&smtpin, &line, &match, '\n') == -1)
+		strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+	if (!line.len || !match)
+		strerr_die2x(100, FATAL, "CAPABILITY command failed");
+	line.s[line.len - 2] = '\0';
+	line.len -= 2;
+	if (!case_startb(line.s, 13, "* CAPABILITY ")) {
+		if (!stralloc_catb(&capatext, "STARTTLS", 8))
+			strerr_die2x(111, FATAL, "out of memory");
+		capatext.len--;
+	} else {
+		if (!stralloc_catb(&capatext, line.s + 13, line.len - 13))
+			strerr_die2x(111, FATAL, "out of memory");
+		for (;;) {
+			if (getln(&smtpin, &line, &match, '\n') == -1)
+				strerr_die2sys(111, FATAL, "getln: read-smtpd: ");
+			if (!line.len || !match)
+				break;
+			line.s[line.len - 2] = '\0';
+			line.len -= 2;
+			if (case_startb(line.s, 25, "A OK CAPABILITY completed"))
+				break;
+			if (!stralloc_catb(&capatext, line.s + 13, line.len - 13))
+				strerr_die2x(111, FATAL, "out of memory");
+			capatext.len--;
+		}
+		if (!stralloc_copy(&sauninit, &capatext))
+			strerr_die2x(111, FATAL, "out of memory");
+		case_lowers(sauninit.s);
+		if (!str_str(sauninit.s, " starttls") && !case_startb(sauninit.s, 8, "STARTTLS")) {
+			if (!stralloc_catb(&capatext, " STARTTLS", 9) ||
+					!stralloc_0(&capatext))
+				strerr_die2x(111, FATAL, "out of memory");
+			capatext.len--;
+		}
+	}
+	/*
+	 * a capability
+	 * * CAPABILITY IMAP4rev1 UIDPLUS CHILDREN NAMESPACE THREAD=ORDEREDSUBJECT THREAD=REFERENCES SORT QUOTA IDLE AUTH=PLAIN AUTH=LOGIN AUTH
+	 * =CRAM-MD5 AUTH=CRAM-SHA1 AUTH=CRAM-SHA256 ACL ACL2=UNION STARTTLS XCOURIEROUTBOX=INBOX.Outbox
+	 * a OK CAPABILITY completed
+	 */
+	i = str_chr(cmmd, ' ');
+	if (cmmd[i])
+		cmmd[i] = '\0';
+	if (substdio_put(&ssto, "* CAPABILITY ", 13) == -1 ||
+			substdio_put(&ssto, capatext.s, capatext.len) == -1 ||
+			substdio_put(&ssto, "\r\n", 2) == -1 ||
+			substdio_puts(&ssto, cmmd) == -1 ||
+			substdio_put(&ssto, " OK ", 4) == -1 ||
+			substdio_puts(&ssto, arg) == -1 ||
+			substdio_put(&ssto, " completed\r\n", 12) == -1 ||
 			substdio_flush(&ssto) == -1)
 		strerr_die2(111, FATAL, "write: ", &strerr_tls);
 	return 0;
@@ -652,16 +807,44 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 		}
 		if (fd0_flag && FD_ISSET(0, &rfds)) { /*- data from client */
 			if (!linemode) { /*- data/retr command was issued without initiating TLS */
-				if ((n = tlsread(0, buf, sizeof(buf), dtimeout)) < 0)
-					strerr_die3sys(111, FATAL, "unable to read from ", stls == smtp ? "smtp client: " : "pop3 client: ");
-				else
+				if ((n = tlsread(0, buf, sizeof(buf), dtimeout)) < 0) {
+					switch (stls)
+					{
+					case smtp:
+						strerr_die2sys(111, FATAL, "unable to read from smtp client: ");
+						break;
+					case pop3:
+						strerr_die2sys(111, FATAL, "unable to read from pop3 client: ");
+						break;
+					case imap:
+						strerr_die2sys(111, FATAL, "unable to read from imap client: ");
+						break;
+					default:
+						strerr_die2sys(111, FATAL, "unable to read from client: ");
+						break;
+					}
+				} else
 				if (!n) { /*- client closed connection */
 					FD_CLR(0, &rfds);
 					fd0_flag = 0;
 					close(clearout); /*- make the child get EOF on read */
 				} else {
-					if ((n = timeoutwrite(dtimeout, clearout, buf, n)) == -1)
-						strerr_die3sys(111, FATAL, "unable to write to ", stls == smtp ? "smtpd: " : "pop3d: ");
+					if ((n = timeoutwrite(dtimeout, clearout, buf, n)) == -1) {
+						switch (stls)
+						{
+						case smtp:
+							strerr_die2sys(111, FATAL, "unable to write to smtpd: ");
+							break;
+						case pop3:
+							strerr_die2sys(111, FATAL, "unable to write to pop3d: ");
+							break;
+						case imap:
+							strerr_die2sys(111, FATAL, "unable to write to imapd: ");
+							break;
+						default:
+							strerr_die2sys(111, FATAL, "unable to write to remote: ");
+						}
+					}
 					if ((n == 3 && buf[0] == '.' && buf[1] == '\r' && buf[2] == '\n') ||
 							(buf[n - 1] == '\n' && buf[n - 2] == '\r' && buf[n - 3] == '.'))
 						linemode = 1;
@@ -687,15 +870,43 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 			}
 		}
 		if (FD_ISSET(clearin, &rfds)) { /*- data from program (smtpd, pop3d) */
-			if ((n = tlsread(clearin, buf, sizeof(buf), dtimeout)) < 0)
-				strerr_die3sys(111, FATAL, "unable to read from ", stls == smtp ? "smtpd: " : "pop3d: ");
-			else
+			if ((n = tlsread(clearin, buf, sizeof(buf), dtimeout)) < 0) {
+				switch (stls)
+				{
+				case smtp:
+					strerr_die2sys(111, FATAL, "unable to read from smtp client: ");
+					break;
+				case pop3:
+					strerr_die2sys(111, FATAL, "unable to read from pop3 client: ");
+					break;
+				case imap:
+					strerr_die2sys(111, FATAL, "unable to read from imap client: ");
+					break;
+				default:
+					strerr_die2sys(111, FATAL, "unable to read from client: ");
+					break;
+				}
+			} else
 			if (!n) { /*- child (smtp/pop3 binary) exited */
 				flagexitasap = 1;
 				close(1); /*- tell client no more data can be read */
 			} else
-			if ((n = timeoutwrite(dtimeout, 1, buf, n)) == -1)
-				strerr_die3sys(111, FATAL, "unable to write to ", stls == smtp ? "smtp client: " : "pop3 client: ");
+			if ((n = timeoutwrite(dtimeout, 1, buf, n)) == -1) {
+				switch (stls)
+				{
+				case smtp:
+					strerr_die2sys(111, FATAL, "unable to write to smtpd: ");
+					break;
+				case pop3:
+					strerr_die2sys(111, FATAL, "unable to write to pop3d: ");
+					break;
+				case imap:
+					strerr_die2sys(111, FATAL, "unable to write to imapd: ");
+					break;
+				default:
+					strerr_die2sys(111, FATAL, "unable to write to remote: ");
+				}
+			}
 		}
 	} /*- while (!flagexitasap) */
 	return 0;
@@ -805,13 +1016,16 @@ main(int argc, char **argv)
 			provide_data = 1;
 			break;
 		case 's':
-			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3"))
+			if (case_diffs(optarg, "smtp") && case_diffs(optarg, "pop3") && case_diffs(optarg, "imap"))
 				usage();
 			if (!case_diffs(optarg, "smtp"))
 				stls = smtp;
 			else
 			if (!case_diffs(optarg, "pop3"))
 				stls = pop3;
+			else
+			if (!case_diffs(optarg, "imap"))
+				stls = imap;
 			break;
 		case 'v':
 			verbosity = 2;
@@ -934,7 +1148,7 @@ main(int argc, char **argv)
 		sig_uncatch(sig_pipe);
 		sig_uncatch(sig_child);
 		sig_uncatch(sig_term);
-		if (stls != smtp && stls != pop3) {
+		if (stls != smtp && stls != pop3 && stls != imap) {
 			if (!stralloc_copyb(&line, "dotls, ", 7))
 				strerr_die2x(111, FATAL, "out of memory");
 			if (provide_data)
@@ -1003,6 +1217,7 @@ main(int argc, char **argv)
 		{
 		case smtp:
 		case pop3:
+		case imap:
 			close(pi1[0]); /*- pi1[1] be used for writing cleartext */
 			close(pi2[1]); /*- pi2[0] be used for reading cleartext */
 			do_starttls(stls, ssl, pi2[0], pi1[1]);
@@ -1010,7 +1225,7 @@ main(int argc, char **argv)
 		default:
 			if ((ptr = env_get("BANNER"))) {
 				char            outbuf[1024];
-				substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf)); /*- to child (smtpd, pop3d */
+				substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf)); /*- to child (smtpd, pop3d, imapd */
 				if (substdio_puts(&ssto, ptr) == -1 ||
 						substdio_put(&ssto, "\n", 1) == -1 ||
 					substdio_flush(&ssto) == -1)
@@ -1069,7 +1284,7 @@ main(int argc, char **argv)
 void
 getversion_dotls_c()
 {
-	const char     *x = "$Id: dotls.c,v 1.25 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dotls.c,v 1.26 2024-09-05 17:59:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -1093,6 +1308,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.26  2024-09-05 17:59:45+05:30  Cprogrammer
+ * added starttls handler for imap
+ *
  * Revision 1.25  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
