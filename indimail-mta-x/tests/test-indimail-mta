@@ -8992,7 +8992,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=324
+	total_tests=325
 fi
 failed=0
 do_setup
@@ -9015,7 +9015,7 @@ if [ ! -f /etc/debian_version -a -f ./spfquery.txt ] ; then
 fi
 secs=0.0
 printf "\r%118s\n" " "
-for i in QMAILQUEUE envdir tcpclient-tcp tcpclient-ssl tcpclient-unix \
+for i in QMAILQUEUE envdir tcpclient-tcp tcpclient-ssl tcpclient-unix tcpserver-ssl \
 	maildirdeliver bounce 822header 822body qmail-getpw nodnscheck rd-remote \
 	maildirsmtp fetchmail
 do
