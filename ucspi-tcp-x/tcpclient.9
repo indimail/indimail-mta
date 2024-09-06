@@ -252,45 +252,45 @@ Default is @qsysconfdir@/certs.
 
 .SH EXAMPLES
 .EX
-1. Connect to port 25 and issue the starttls command
-   read from descriptor 0 & write to network, read from network & write to
-   descriptor 1. Use default certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
+1. Connect to port 25 and issue the starttls command. Use default
+   certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
 
    $ tcpclient -n "" -s smtp 0 25
 
-2. Connect to port 110 and issue the STLS command
-   read from descriptor 0 & write to network, read from network & write to
-   descriptor 1. Use default certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
+2. Connect to port 110 and issue the STLS command. Use default certificate
+   \fI@qsysconfdir@/certs/clientcert.pem\fR.
 
    $ tcpclient -n "" -s pop3 0 110
 
-3. Connect to port 143 and issue the STARTTLS command
-   read from descriptor 0 & write to network, read from network & write to
-   descriptor 1. Use default certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
+3. Connect to port 143, issue the STARTTLS  command and then run a script.
+   read from descriptor 6 reads from network, write to descriptor 1 writes
+   to network. Use default certificate \fI@qsysconfdir@/certs/clientcert.pem\fR.
+
+   $ tcpclient -n "" -s imap 0 143 /usr/bin/my_script
+
+4. Connect to port 143 and issue the STARTTLS command, like openssl
+   s_client -starttls. Use default certificate
+   \fI@qsysconfdir@/certs/clientcert.pem\fR.
 
    $ tcpclient -n "" -s imap 0 143
 
-4. Connect to port 25 on 127.0.0.1 like telnet
-   read from descriptor 0 & write to network, read from network & write to
-   descriptor 1.
+5. Connect to port 25 on 127.0.0.1.
 
    $ tcpclient 127.0.0.1 25
 
-5. Connect to port 465 on 127.0.0.1 like openssl s_client
-   read from descriptor 0 & write to network, read from network & write to
-   descriptor 1.
+6. Connect to port 465 on 127.0.0.1 like openssl s_client
 
    $ tcpclient -n @qsysconfdir@/certs/clientcert.pem 127.0.0.1 465
 
-6. Run a script under tcpclient that connects to a SSL server on port 5555
+7. Run a script under tcpclient that connects to a SSL server on port 5555
    read from descriptor 6 reads from network, write to descriptor 7 writes
    to network. Certificate used is the value of TLS_CERTFILE env variable.
 
    $ tcpclient -n "" 0 5555 /usr/bin/my_script
 
-7. Connect to qmail-smtpd on UNIX socket /run/indimail/smtpd like telnet
-   read from descriptor 0 & write to socket, read from socket & write to
-   descriptor 1.
+8. Connect to qmail-smtpd on UNIX socket /run/indimail/smtpd like telnet
+   read from descriptor 0 reads from socket, write to descriptor 1 writes
+   to socket.
 
    a) run tcpserver
 
