@@ -19,7 +19,7 @@ process when \fIs\fR/\fIlog\fR exists. This is useful when listing
 supervised log processes using the \fBps\fR(1) command.
 
 After ./init exits with zero exit status, \fBsupervise\fR starts ./run. It
-restarts ./run if ./run exits. In cae ./run exits with non-zero status, it
+restarts ./run if ./run exits. In case ./run exits with non-zero status, it
 pauses for a second after restarting ./run. The sleep avoids supervise from
 looping quickly when ./run has a problem. \fBsupervise\fR expects ./run to
 remain in the foreground. Sometimes daemon fork themselves into background,
