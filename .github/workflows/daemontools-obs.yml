@@ -29,7 +29,7 @@ jobs:
         cd libqmail; ./default.configure; make; sudo make install-strip
     - name: prepare obs
       run: cd daemontools-x; ./prepare_obs daemontools
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: daemontools
         path: ~/stage

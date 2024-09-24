@@ -20,7 +20,7 @@ jobs:
 
     - name: prepare obs
       run: cd libdkim2-x; ./prepare_obs libdkim2
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: libdkim2
         path: ~/stage
