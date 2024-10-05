@@ -17,7 +17,7 @@
 #include "dns.h"
 
 static int
-doit(stralloc * work, char *rule)
+doit(stralloc *work, char *rule)
 {
 	char            ch;
 	unsigned int    colon;
@@ -56,9 +56,9 @@ doit(stralloc * work, char *rule)
 
 int
 #ifdef IPV6
-dns_ip6_qualify_rules(stralloc * out, stralloc * fqdn, stralloc *in, stralloc *rules)
+dns_ip6_qualify_rules(stralloc *out, stralloc *fqdn, stralloc *in, stralloc *rules)
 #else
-dns_ip4_qualify_rules(stralloc * out, stralloc * fqdn, stralloc * in, stralloc * rules)
+dns_ip4_qualify_rules(stralloc *out, stralloc *fqdn, stralloc *in, stralloc *rules)
 #endif
 {
 	unsigned int    i;
@@ -105,9 +105,9 @@ dns_ip4_qualify_rules(stralloc * out, stralloc * fqdn, stralloc * in, stralloc *
 
 int
 #ifdef IPV6
-dns_ip6_qualify(stralloc * out, stralloc * fqdn, stralloc *in)
+dns_ip6_qualify(stralloc *out, stralloc *fqdn, stralloc *in)
 #else
-dns_ip4_qualify(stralloc * out, stralloc * fqdn, stralloc * in)
+dns_ip4_qualify(stralloc *out, stralloc *fqdn, stralloc *in)
 #endif
 {
 	static stralloc rules;

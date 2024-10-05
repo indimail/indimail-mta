@@ -40,12 +40,13 @@ option.
 
 The server's address is given by a \fIsocket\fR path or \fIhost\fR and
 \fIport\fR. \fIport\fR may be a name from /etc/services or a number.
-\fIhost\fR may be 0, referring to the local machine, or a dotted-decimal IP
-address or IPv6 address, or a host name; it is fed through qualification
-using dns_ip4_qualify.
+\fIhost\fR may be 0, referring to the local machine, or a dotted-decimal
+IPv4/IPv6 address or a host name. If the address is not an IPv4/IPv6
+address or if the '-e' option is specified, the address is fed through
+qualification using dns_ip6_qualify/dns_ip4_qualify.
 
 If the server has several IP addresses, \fBtcpclient\fR tries each address
-in turn.
+in turn until it gets connected.
 
 .SH OPTIONS
 \fBGeneral options\fR:
@@ -199,6 +200,12 @@ variable $TCPREMOTEHOST. This option is not used for UNIX domain sockets.
 .B \-H
 Do not look up the remote host name in DNS; remove the environment
 variable $TCPREMOTEHOST. This option is not used for UNIX domain sockets.
+
+.TP
+.B \-e
+Lookup remote host name in \fI/etc/hosts\fR. This option also bypasses
+feeding remote address for qualification using
+dns_ip6_qualify/dns_ip4_qualify.
 
 .TP
 .B \-l \fIlocalname

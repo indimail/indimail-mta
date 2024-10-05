@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.36 2024-09-05 17:57:58+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.37 2024-10-05 22:55:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -46,6 +46,7 @@
 #include "socket.h"
 #include "upathexec.h"
 #include "tcpremoteinfo.h"
+#include "getip.h"
 #include "dns.h"
 
 #define FATAL "tcpclient: fatal: "
@@ -94,6 +95,7 @@ static int      verbosity = 1;
 static int      flagdelay = 1;
 static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
+static int      flagetchosts = 0;
 typedef unsigned long my_ulong;
 static my_ulong itimeout = 26;           /* timeoutinfo -t option */
 static my_ulong ctimeout[2] = { 2, 58 }; /* timeoutconn -T option */
@@ -379,12 +381,13 @@ main(int argc, char **argv)
 	int             match_cn = 0, method;
 	struct stat     st;
 #endif
+	char            iptemp[16] = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
 
 	dns_random_init(seed);
 	close(6);
 	close(7);
 	sig_ignore(sig_pipe);
-	if (!stralloc_copys(&options, "dDvqQhHrRi:p:t:T:l:a:"))
+	if (!stralloc_copys(&options, "dDvqQhHrRi:p:t:T:l:a:e"))
 		strerr_die2x(111, FATAL, "out of memory");
 #ifdef IPV6
 	if (!stralloc_cats(&options, "46I:"))
@@ -479,6 +482,9 @@ main(int argc, char **argv)
 			break;
 		case 'l':
 			forcelocal = optarg;
+			break;
+		case 'e':
+			flagetchosts = 1;
 			break;
 		case 'H':
 			flagremotehost = 0;
@@ -605,79 +611,130 @@ main(int argc, char **argv)
 		if (timeoutconn_un(s, hostname, ctimeout[0]) == -1)
 			strerr_die4sys(111, FATAL, "unable to connect to socket ", hostname, ": ");
 		goto CONNECTED;
+		_exit(111);
+	}
+	fqdn.len = 0;
+	if (flagetchosts) {
+		if (getip(hostname, &addresses) == -1)
+			strerr_die4sys(111, FATAL, "temporarily unable to figure out IP address for ", hostname, ": ");
+	} else
+#ifdef IPV6
+	if (isip(hostname)) {
+		if (rblip6_scan(hostname, iptemp) && !stralloc_copyb(&addresses, iptemp, 16))
+			nomem();
 	} else {
 		if (!stralloc_copys(&tmp, hostname))
 			nomem();
-#ifdef IPV6
 		if (dns_ip6_qualify(&addresses, &fqdn, &tmp) == -1)
 			strerr_die4sys(111, FATAL, "temporarily unable to figure out IP address for ", hostname, ": ");
-		if (addresses.len < 16)
-			strerr_die3x(111, FATAL, "no IP address for ", hostname);
-		if (addresses.len == 16)
+	}
+	if (addresses.len < 16)
+		strerr_die3x(111, FATAL, "no IP address for ", hostname);
+	if (addresses.len == 16) {
+		ctimeout[0] += ctimeout[1];
+		ctimeout[1] = 0;
+	}
+	strnum[fmt_ulong(strnum, portremote)] = 0;
+	for (cloop = 0; cloop < 2; ++cloop) {
+		if (!stralloc_copys(&moreaddresses, ""))
+			nomem();
+		for (j = 0; j + 16 <= addresses.len; j += 16) {
+			if ((s = socket_tcp6()) == -1)
+				strerr_die2sys(111, FATAL, "unable to create AF_INET socket: ");
+			if (socket_bind6(s, iplocal, portlocal, netif) == -1)
+				strerr_die2sys(111, FATAL, "unable to bind socket: ");
+			if (ip6_isv4mapped(addresses.s + j))
+				ipstr[ip4_fmt(ipstr, addresses.s + j + 12)] = 0;
+			else
+				ipstr[ip6_fmt(ipstr, addresses.s + j)] = 0;
+			if (verbosity >= 2) {
+				if (fqdn.len)
+					strerr_warn6("tcpclient: trying  host ", fqdn.s, " ip ", ipstr, " port ", strnum, 0);
+				else
+					strerr_warn4("tcpclient: trying  ip ", ipstr, " port ", strnum, 0);
+			}
+			if (timeoutconn6(s, addresses.s + j, portremote, ctimeout[cloop], netif) == 0)
+				goto CONNECTED;
+			close(s);
+			if (!cloop && ctimeout[1] && (errno == error_timeout)) {
+				if (!stralloc_catb(&moreaddresses, addresses.s + j, 16))
+					nomem();
+				if (fqdn.len)
+					strerr_warn7("tcpclient: unable to connect to host ", fqdn.s, " ip " ,
+							ipstr, " port ", strnum, ": ", &strerr_sys);
+				else
+					strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ",
+							strnum, ": ", &strerr_sys);
+			} else {
+				if (fqdn.len)
+					strerr_warn7("tcpclient: unable to connect to host ", fqdn.s, " ip " ,
+							ipstr, " port ", strnum, ": ", &strerr_sys);
+				else
+					strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ",
+							strnum, ": ", &strerr_sys);
+			}
+		} /* for (j = 0; j + 16 <= addresses.len; j += 16) */
+		if (!stralloc_copy(&addresses, &moreaddresses))
+			nomem();
+	} /* for (cloop = 0; cloop < 2; ++cloop) */
 #else
+	if (isip(hostname)) {
+		if (rblip4_scan(hostname, iptemp) && !stralloc_copyb(&addresses, iptemp, 4))
+			nomem();
+	} else {
+		if (!stralloc_copys(&tmp, hostname))
+			nomem();
 		if (dns_ip4_qualify(&addresses, &fqdn, &tmp) == -1)
 			strerr_die4sys(111, FATAL, "temporarily unable to figure out IP address for ", hostname, ": ");
-		if (addresses.len < 4)
-			strerr_die3x(111, FATAL, "no IP address for ", hostname);
-		if (addresses.len == 4)
-#endif
-		{
-			ctimeout[0] += ctimeout[1];
-			ctimeout[1] = 0;
-		}
-		for (cloop = 0; cloop < 2; ++cloop) {
-			if (!stralloc_copys(&moreaddresses, ""))
-				nomem();
-#ifdef IPV6
-			for (j = 0; j + 16 <= addresses.len; j += 4)
-#else
-			for (j = 0; j + 4 <= addresses.len; j += 4)
-#endif
-			{
-#ifdef IPV6
-				if ((s = socket_tcp6()) == -1)
-#else
-				if ((s = socket_tcp()) == -1)
-#endif
-					strerr_die2sys(111, FATAL, "unable to create AF_INET socket: ");
-#ifdef IPV6
-				if (socket_bind6(s, iplocal, portlocal, netif) == -1)
-#else
-				if (socket_bind4(s, iplocal, portlocal) == -1)
-#endif
-					strerr_die2sys(111, FATAL, "unable to bind socket: ");
-#ifdef IPV6
-				if (timeoutconn6(s, addresses.s + j, portremote, ctimeout[cloop], netif) == 0)
-#else
-				if (timeoutconn(s, addresses.s + j, portremote, ctimeout[cloop]) == 0)
-#endif
-					goto CONNECTED;
-				close(s);
-				if (!cloop && ctimeout[1] && (errno == error_timeout)) {
-#ifdef IPV6
-					if (!stralloc_catb(&moreaddresses, addresses.s + j, 16))
-#else
-					if (!stralloc_catb(&moreaddresses, addresses.s + j, 4))
-#endif
-						nomem();
-				} else {
-					strnum[fmt_ulong(strnum, portremote)] = 0;
-#ifdef IPV6
-					if (ip6_isv4mapped(addresses.s + j))
-						ipstr[ip4_fmt(ipstr, addresses.s + j + 12)] = 0;
-					else
-						ipstr[ip6_fmt(ipstr, addresses.s + j)] = 0;
-#else
-					ipstr[ip4_fmt(ipstr, addresses.s + j)] = 0;
-#endif
-					strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ", strnum, ": ", &strerr_sys);
-				}
-			}
-			if (!stralloc_copy(&addresses, &moreaddresses))
-				nomem();
-		}
-		_exit(111);
 	}
+	if (addresses.len < 4)
+		strerr_die3x(111, FATAL, "no IP address for ", hostname);
+	if (addresses.len == 4) {
+		ctimeout[0] += ctimeout[1];
+		ctimeout[1] = 0;
+	}
+	strnum[fmt_ulong(strnum, portremote)] = 0;
+	for (cloop = 0; cloop < 2; ++cloop) {
+		if (!stralloc_copys(&moreaddresses, ""))
+			nomem();
+		for (j = 0; j + 4 <= addresses.len; j += 4) {
+			if ((s = socket_tcp()) == -1)
+				strerr_die2sys(111, FATAL, "unable to create AF_INET socket: ");
+			if (socket_bind4(s, iplocal, portlocal) == -1)
+				strerr_die2sys(111, FATAL, "unable to bind socket: ");
+			ipstr[ip4_fmt(ipstr, addresses.s + j)] = 0;
+			if (verbosity >= 2) {
+				if (fqdn.len)
+					strerr_warn6("tcpclient: trying  host ", fqdn.s, " ip ", ipstr, " port ", strnum, 0);
+				else
+					strerr_warn4("tcpclient: trying  ip ", ipstr, " port ", strnum, 0);
+			}
+			if (timeoutconn(s, addresses.s + j, portremote, ctimeout[cloop]) == 0)
+				goto CONNECTED;
+			close(s);
+			if (!cloop && ctimeout[1] && (errno == error_timeout)) {
+				if (!stralloc_catb(&moreaddresses, addresses.s + j, 4))
+					nomem();
+				if (fqdn.len)
+					strerr_warn7("tcpclient: unable to connect to host ", fqdn.s, " ip " ,
+							ipstr, " port ", strnum, ": ", &strerr_sys);
+				else
+					strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ",
+							strnum, ": ", &strerr_sys);
+			} else {
+				if (fqdn.len)
+					strerr_warn7("tcpclient: unable to connect to host ", fqdn.s, " ip " ,
+							ipstr, " port ", strnum, ": ", &strerr_sys);
+				else
+					strerr_warn5("tcpclient: unable to connect to ", ipstr, " port ",
+							strnum, ": ", &strerr_sys);
+			}
+		} /*- for (j = 0; j + 4 <= addresses.len; j += 4) */
+		if (!stralloc_copy(&addresses, &moreaddresses))
+			nomem();
+	} /* for (cloop = 0; cloop < 2; ++cloop) */
+#endif
+	_exit(111);
 
 CONNECTED:
 	if (af_unix) {
@@ -747,7 +804,7 @@ CONNECTED:
 		nomem();
 	if (verbosity >= 2)
 		strerr_warn4("tcpclient: connected to ", ipstr, " port ", strnum, 0);
-	x = 0;
+	x = NULL;
 #ifdef IPV6
 	if (flagremotehost && dns_name6(&tmp, ipremote) == 0)
 #else
@@ -852,13 +909,16 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.36 2024-09-05 17:57:58+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.37 2024-10-05 22:55:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.37  2024-10-05 22:55:41+05:30  Cprogrammer
+ * added -e option to get remote host address from /etc/hosts
+ *
  * Revision 1.36  2024-09-05 17:57:58+05:30  Cprogrammer
  * added starttls capability for imap
  *

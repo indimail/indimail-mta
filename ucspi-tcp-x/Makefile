@@ -394,9 +394,9 @@ warn-auto.sh tcpcat.sh conf-prefix
 
 tcpclient: \
 load tcpclient.o tcpremoteinfo.o timeoutconn.o \
-upathexec_run.o dns.a unix.a socket.lib
+upathexec_run.o getip.o dns.a unix.a socket.lib
 	./load tcpclient tcpremoteinfo.o timeoutconn.o \
-	upathexec_run.o dns.a unix.a \
+	upathexec_run.o  getip.o dns.a unix.a \
 	$(SSLLIBS) `cat socket.lib` -lqmail
 
 tcpclient.o: \
@@ -405,6 +405,11 @@ timeoutconn.h tcpremoteinfo.h dns.h \
 haveip6.h ip6.h conf-ip conf-tls
 	./compile \
 	`grep -h -v "^#" conf-ip conf-tls 2>/dev/null` tcpclient.c
+
+getip.o: \
+compile getip.c getip.h haveip6.h conf-ip
+	./compile \
+	`grep -h -v "^#" conf-ip 2>/dev/null` getip.c
 
 dotls: \
 load dotls.o upathexec_run.o upathexec_env.o

@@ -33,7 +33,7 @@ static char     strnum[FMT_ULONG];
  */
 
 int
-ip6tobitstring(char *ip6address, stralloc * ip6string, unsigned int prefix)
+ip6tobitstring(char *ip6address, stralloc *ip6string, unsigned int prefix)
 {
 	char            ip6[16];
 	int             bit, octettbitpos, number, shiftedvalue;
@@ -97,7 +97,7 @@ ip6tobitstring(char *ip6address, stralloc * ip6string, unsigned int prefix)
  */
 
 int
-bitstringtoip6(stralloc * ip6string, stralloc * ip6addr)
+bitstringtoip6(stralloc *ip6string, stralloc *ip6addr)
 {
 	int             j = 0;
 	int             i = 0;

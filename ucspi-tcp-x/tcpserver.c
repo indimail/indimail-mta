@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.94 2024-05-19 08:57:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.95 2024-10-05 22:56:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -624,7 +624,7 @@ matchinet(const char *ip, const char *token)
 			} else
 			if (sa.sa_family == AF_INET6) {
 				in6 = (struct sockaddr_in6 *) &sa;
-				if (!inet_ntop(AF_INET6, (void *) &in6->sin6_addr, addrBuf, INET_ADDRSTRLEN))
+				if (!inet_ntop(AF_INET6, (void *) &in6->sin6_addr, addrBuf, INET6_ADDRSTRLEN))
 					return (-1);
 			} else
 				continue;
@@ -2009,13 +2009,16 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.94 2024-05-19 08:57:35+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.95 2024-10-05 22:56:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.95  2024-10-05 22:56:00+05:30  Cprogrammer
+ * use INET6_ADDRSTRLEN for AF_INET6
+ *
  * Revision 1.94  2024-05-19 08:57:35+05:30  Cprogrammer
  * fixed typo
  *
