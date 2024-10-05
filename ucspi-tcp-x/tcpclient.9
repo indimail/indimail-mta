@@ -43,10 +43,11 @@ The server's address is given by a \fIsocket\fR path or \fIhost\fR and
 \fIhost\fR may be 0, referring to the local machine, or a dotted-decimal
 IPv4/IPv6 address or a host name. If the address is not an IPv4/IPv6
 address or if the '-e' option is specified, the address is fed through
-qualification using dns_ip6_qualify/dns_ip4_qualify.
-
-If the server has several IP addresses, \fBtcpclient\fR tries each address
-in turn until it gets connected.
+qualification using dns_ip6_qualify(3)/dns_ip4_qualify(3). If '-e' option
+is used, getaddrinfo(3) is used to get all addresses instead of
+dns_ip6_qualify(3)/dns_ip4_qualify(3). If the server has several IP
+addresses, \fBtcpclient\fR tries each address in turn until it gets
+connected.
 
 .SH OPTIONS
 \fBGeneral options\fR:
