@@ -6,6 +6,8 @@
 03. supervise.c: use service dir as first argument for ./run, ./alert and
    ./shutdown
 04. svps: use .svscan.pid from service directory of each svscan instance
+- 10/10/2024
+05. runpod.sh: set systemd only if not set
 
 * Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
 Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024

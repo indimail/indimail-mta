@@ -1,5 +1,5 @@
 #
-# $Id: runpod.sh,v 1.10 2022-12-08 09:40:09+05:30 Cprogrammer Exp mbhangui $
+# $Id: runpod.sh,v 1.11 2024-10-10 21:15:18+05:30 Cprogrammer Exp mbhangui $
 #
 usage()
 {
@@ -95,7 +95,7 @@ set_defaults()
         vol_args="$vol_args-v /home/$command/mail:/home/mail "
       fi
       if [ " $name" = " devel" -a  -d /usr/local/src ] ; then
-        vol_args="$vol_args-v /usr/local/src:/usr/local/src"
+        vol_args="$vol_args-v /usr/local/src:/usr/local/src "
       fi
     fi
     if [ " $name" = " devel" -o " $name" = " test" ] ; then
@@ -211,18 +211,24 @@ if [ $# -gt 0 -a "$1" = "auto" ] ; then
   tag=`$command images | grep  $imageid | awk '{print $2}'`
   case $tag in
     xenial*|debian*|focal*|bionic*|archlinux*|ubi*)
-    systemd=/lib/systemd/systemd
+    if [ -z "$systemd" ] ; then
+        systemd=/lib/systemd/systemd
+    fi
     ;;
     alpine*|gentoo*)
-    systemd="/sbin/init"
+    if [ -z "$systemd" ] ; then
+        systemd="/sbin/init"
+    fi
     ;;
     *)
-    systemd=/usr/lib/systemd/systemd
+    if [ -z "$systemd" ] ; then
+        systemd=/usr/lib/systemd/systemd
+    fi
     ;;
   esac
-  if [ -n "$systemd" ] ; then
-    set "$systemd $*"
-  fi
+fi
+if [ -n "$systemd" ] ; then
+  set "$systemd $*"
 fi
 echo "$command run $cgroup $extra_args"
 echo "  --publish-all --name $name"
@@ -267,6 +273,9 @@ fi
 
 #
 # $Log: runpod.sh,v $
+# Revision 1.11  2024-10-10 21:15:18+05:30  Cprogrammer
+# set systemd if not set
+#
 # Revision 1.10  2022-12-08 09:40:09+05:30  Cprogrammer
 # fixed setting of systemd
 #
