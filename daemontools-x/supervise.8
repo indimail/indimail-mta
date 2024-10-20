@@ -130,6 +130,9 @@ returns, it means \fBsupervise\fR(8) is running.
 (O_WRONLY) to test if service \fIs\fR is up. Any client that opens this
 fifo in O_WRONLY mode, will block until the service \fIs\fR is up. If write
 returns, it means service \fIs\fR has executed \fIs\fR/\fIrun\fR.
+\fBsvc\fR(8) is one such client (-w option) that can be used to check if a
+service is up.
+
 .PP
 \fBsupervise\fR logs informational, warning and error messages to
 descriptor 2. Informational messages can be turned on by setting the
