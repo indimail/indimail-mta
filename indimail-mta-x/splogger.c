@@ -1,5 +1,8 @@
 /*
  * $Log: splogger.c,v $
+ * Revision 1.7  2024-10-19 23:15:17+05:30  Cprogrammer
+ * converted main to ansic
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -35,6 +38,7 @@ stamp_make()
 {
 	struct timeval  tv;
 	char           *s;
+
 	gettimeofday(&tv, (struct timezone *) 0);
 	s = stamp;
 	s += fmt_ulong(s, (unsigned long) tv.tv_sec);
@@ -46,13 +50,11 @@ stamp_make()
 void
 flush()
 {
-	if (bufpos)
-	{
+	if (bufpos) {
 		buf[bufpos] = 0;
 		if (flagcont)
 			syslog(priority, "%s+%s", stamp, buf);	/*- logger folds invisibly; GPACIC */
-		else
-		{
+		else {
 			stamp_make();
 			priority = LOG_INFO;
 			if (str_start(buf, "warning:"))
@@ -67,30 +69,23 @@ flush()
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char            ch;
 
-	if (argv[1])
-	{
-		if (argv[2])
-		{
+	if (argv[1]) {
+		if (argv[2]) {
 			unsigned long   facility;
 			scan_ulong(argv[2], &facility);
 			openlog(argv[1], 0, facility << 3);
 		} else
 			openlog(argv[1], 0, LOG_MAIL);
-	}
-	else
+	} else
 		openlog("splogger", 0, LOG_MAIL);
-	for (;;)
-	{
+	for (;;) {
 		if (substdio_get(subfdin, &ch, 1) < 1)
 			_exit(0);
-		if (ch == '\n')
-		{
+		if (ch == '\n') {
 			flush();
 			flagcont = 0;
 			continue;
@@ -108,7 +103,7 @@ main(argc, argv)
 void
 getversion_splogger_c()
 {
-	const char     *x = "$Id: splogger.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: splogger.c,v 1.7 2024-10-19 23:15:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

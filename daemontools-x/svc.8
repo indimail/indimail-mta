@@ -1,25 +1,19 @@
+.\" vim: tw=75
 .TH svc 8
 .SH NAME
 svc \- controls services monitored by
 .BR supervise(8).
 .SH SYNOPSIS
-.B svc
-[
-.B \-udopchaitkx
-]
-.I services
-.SH DESCRIPTION
-.I services
-consists of any number of arguments, each argument naming a directory used by
-.BR supervise (8).
+\fBsvc\fR [ \fB\-udopchaitkx\fR ] \fIservices\fR
 
-.B svc
-applies all the options to each
-.I service
-in turn.
+.SH DESCRIPTION
+\fIservices\fR consists of any number of arguments, each argument naming a
+directory used by \fBsupervise\fR(8).
+
+\fBsvc\fR applies all the options to each \fIservice\fR in turn.
 
 .SH OPTIONS
-.TP
+.TP 4
 .B \-u
 Up. If the
 .I service
@@ -90,7 +84,7 @@ Quit. Send the
 a QUIT signal. 
 
 .TP
-.B \-1
+.B \-1 | \-U
 SIGUSR1. Send the
 .I service
 a SIGUSR1 signal. 
@@ -111,6 +105,16 @@ a KILL signal.
 .B \-G
 For all options above, the signal will be sent to the entire process group instead of just the pid of
 the \fIservice\fR.
+
+.TP
+.B \-w
+Wait. \fBsvc\fR(8) will wait for \fIservice\fR to be up.
+\fBsupervise\fR(8) opens the named pipe \fIservice\fR/\fIup\fR after
+executing \fIservice\fR/\fIrun\fR. \fBsvc\fR opens this named pipe in
+O_WRONLY mode in blocking mode, thus making \fBsvc\fR wait till the named
+pipe is opened by \fBsupervise\fR. This option can be used by any program
+to wait for a supervised service. This can also be used by \fBsupervise\fR
+to setup inter-dependencies between services.
 
 .TP
 .B \-x

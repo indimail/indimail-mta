@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
+ * $Id: svscan.c,v 1.36 2024-10-19 23:14:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -877,7 +877,6 @@ main(int argc, char **argv)
 	}
 	sig_catch(sig_usr1, siguser1);
 	sig_catch(sig_usr2, siguser2);
-	/*- save the current dir */
 #ifdef USE_RUNFS
 	use_run = env_get("DISABLE_RUN") ? 0 : 1;
 	if (use_run)
@@ -887,6 +886,7 @@ main(int argc, char **argv)
 #else
 	pidfile = PIDFILE;
 #endif
+	/*- save the current dir */
 	if (argc - optind >= 1 && argv[optind]) {
 		if (chdir(argv[optind]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[optind], ": ");
@@ -958,13 +958,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.36 2024-10-19 23:14:36+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.36  2024-10-19 23:14:36+05:30  Cprogrammer
+ * updated location of comment
+ *
  * Revision 1.35  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

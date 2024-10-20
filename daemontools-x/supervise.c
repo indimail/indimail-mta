@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.43 2024-08-29 18:51:11+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.44 2024-10-20 20:44:45+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1064,7 +1064,7 @@ main(int argc, char **argv)
 
 	if ((ptr = env_get("SCANINTERVAL")))
 		scan_ulong(ptr, &scan_interval);
-	if (chdir(dir) == -1) /*- chdir to /service */
+	if (chdir(dir) == -1) /*- chdir to /service/service_name */
 		strerr_die4sys(111, fatal.s, "unable to chdir to ", dir, ": ");
 	if (stat("down", &st) != -1)
 		flagwantup = 0;
@@ -1139,13 +1139,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.43 2024-08-29 18:51:11+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.44 2024-10-20 20:44:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.44  2024-10-20 20:44:45+05:30  Cprogrammer
+ * fixed comment
+ *
  * Revision 1.43  2024-08-29 18:51:11+05:30  Cprogrammer
  * use servicedir as first argument for exec of ./run, ./alert and ./shutdown
  *
