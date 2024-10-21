@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.44 2024-10-20 20:44:45+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.45 2024-10-21 17:47:39+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1086,10 +1086,6 @@ main(int argc, char **argv)
 	if (mkdir("supervise", 0700) && errno != error_exist)
 		strerr_die2sys(111, fatal.s, "unable to create supervise directory: ");
 
-	if ((fdstatus = open_trunc("supervise/status")) == -1)
-		strerr_die4sys(111, fatal.s, "unable to create ", dir, "/supervise/status: ");
-	coe(fdstatus);
-
 	fdlock = open_append("supervise/lock");
 	if ((fdlock == -1) || (lock_exnb(fdlock) == -1))
 		strerr_die4sys(111, fatal.s, "unable to acquire ", dir, "/supervise/lock: ");
@@ -1105,6 +1101,9 @@ main(int argc, char **argv)
 	coe(fdcontrolwrite);
 
 	pidchange((svpid = getpid()), 0);
+	if ((fdstatus = open_trunc("supervise/status")) == -1)
+		strerr_die4sys(111, fatal.s, "unable to create ", dir, "/supervise/status: ");
+	coe(fdstatus);
 	announce(0);
 
 	fifo_make("supervise/ok", 0600);
@@ -1139,13 +1138,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.44 2024-10-20 20:44:45+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.45 2024-10-21 17:47:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.45  2024-10-21 17:47:39+05:30  Cprogrammer
+ * BUG: status file truncated before announce
+ *
  * Revision 1.44  2024-10-20 20:44:45+05:30  Cprogrammer
  * fixed comment
  *
