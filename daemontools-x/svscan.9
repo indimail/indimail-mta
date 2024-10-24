@@ -4,33 +4,53 @@
 svscan \- starts and monitors a collection of services
 
 .SH SYNOPSIS
-.B svscan [ -vs ] [ \fIdir\fR ]
+.B svscan [ -vs ] [ \fIscandir\fR ]
 
 .SH DESCRIPTION
 \fBsvscan\fR(8) starts one \fBsupervise\fR(8) process for each subdirectory
 of the current directory, up to a limit of 1000 subdirectories. You can
-override using current directory by passing \fIdir\fR as an argument. If
-\fBsvscan\fR(8) is given a command-line argument \fIdir\fR, it switches to
+override using current directory by passing \fIscandir\fR as an argument.
+If \fBsvscan\fR is given a command-line argument \fIdir\fR, it switches to
 that directory when it starts.
 
-\fBsvscan\fR(8) skips subdirectory names starting with dots.
-\fBsupervise\fR(8) must be in \fBsvscan\fR's path. If the environment
-variable \fBSETSID\fR is set, \fBsvscan\fR(8) calls \fBsetsid(2)\fR to
-become a session leader. When running as a session leader, \fBsvscan\fR
-will terminate process group if the environment vairable
-\fBTERMINATE_SESSION\fR is set. This will terminate all supervise proceses
-started by \fBsvscan\fR by calling kill(0, 15).
+\fBsvscan\fR skips subdirectory names starting with dots. \fBsupervise\fR
+must be in \fBsvscan\fR's path. If the environment variable \fBSETSID\fR is
+set, \fBsvscan\fR calls \fBsetsid(2)\fR to become a session leader. When
+running as a session leader, \fBsvscan\fR will terminate process group if
+the environment vairable \fBTERMINATE_SESSION\fR is set. This will
+terminate all supervise proceses started by \fBsvscan\fR by calling
+kill(0, 15).
 
-\fBsvscan\fR(8) optionally starts a pair of \fRsupervise\fR(8) processes,
-one for a subdirectory \fIs\fR, one for \fIs\fR/\fIlog\fR, with a pipe
-between them. It does this if the name \fIs\fR is at most 255 bytes long
-and \fIs\fR\fR/\fIlog\fR exists. \fBsvscan\fR(8) needs two free descriptors
-for each pipe. The \fIlog\fR supervise process additionally sets argv2 as
-\fIs\fR to easily locate the process in \fBps\fR(1) output like below
+\fBsvscan\fR optionally starts a pair of \fBsupervise\fR processes, one for
+a subdirectory \fIs\fR, one for \fIs\fR/\fIlog\fR, with a pipe between
+them. It does this if the name \fIs\fR is at most 255 bytes long and
+\fIs\fR\fR/\fIlog\fR exists. This makes any output on descriptor 1 of the
+supervised process \fIs\fR to be sent through the pipe to the supervise log
+process \fIs\fR/\fIlog\fR. In this case the \fBsupervise\fR process
+inherits only descriptor 2 from \fBsvscan\fR. For every pipe it creates,
+\fBsvscan\fR needs two free descriptors. Hence for \fIn\fR services with
+log subdir, \fBsvscan\fR will require (\fB2 * \fIn\fR + 3\fR) descriptors.
+Make sure \fBsvscan\fR has enough open file limit \fBRLIMIT_NOFILE\fR (see
+\fBsetrlimit\fR(3), \fBulimit\fR(1), \fBsoftlimit\fR(8), \fBsysctl\fR(8)).
+Without the \fIlog\fR subdirectory, \fBsupervise\fR inherits both
+descriptors 1 and 2 from \fBsvscan\fR and hence standard open file limit
+will suffice for supervising large number of processes. The \fIlog\fR
+supervise process additionally sets \fBargv[2]\fR=\fIs\fR to easily locate
+the process in \fBps\fR(1) output like below
 
 .EX
-root    1588    1528  0 May05 ?      00:00:00 supervise qmail-smtpd.25
-root    1589    1528  0 May05 ?      00:00:00 supervise log qmail-smtpd.25
+$ ps -ef | grep -E "svscan|supervise|COMMAND" \
+| grep -E "svscan|qmail-smtpd|COMMAND"
+    PID    PPID TT       USER     GROUP    COMMAND
+ 980727       1 ?        root     root     /usr/sbin/svscan /service
+ 980735  980727 ?        root     root     supervise qmail-smtpd.465
+ 980736  980727 ?        root     root     supervise log qmail-smtpd.465
+ 980741  980727 ?        root     root     supervise qmail-smtpd.25
+ 980742  980727 ?        root     root     supervise log qmail-smtpd.25
+ 980743  980727 ?        root     root     supervise qmail-smtpd.587
+ 980744  980727 ?        root     root     supervise log qmail-smtpd.587
+ 980747  980727 ?        root     root     supervise qmail-smtpd.366
+ 980749  980727 ?        root     root     supervise log qmail-smtpd.366
 .EE
 
 For every \fBsupervise\fR log process it runs, \fBsvscan\fR also sets
@@ -38,42 +58,41 @@ For every \fBsupervise\fR log process it runs, \fBsvscan\fR also sets
 \fBPPID\fR environment variable as the process id of the parent for
 supervise proceses and any initialization command it runs.
 
-\fBsvscan\fR sets environment variable \fBSERVICEDIR\fR=\fIdir\fR on
-startup. If \fIdir\fR argument to \fBsvscan\fR is omitted than it uses
-current working directory for the value of \fBSERVICEDIR\fR environment
+\fBsvscan\fR sets environment variable \fBSCANDIR\fR=\fIscandir\fR on
+startup. If \fIscandir\fR argument to \fBsvscan\fR is omitted than it uses
+current working directory for the value of \fBSCANDIR\fR environment
 variable. \fBsvscan\fR also sets the the environment variable \fBPWD\fR to
-\fIdir\fR. It then writes its pid to the file \fB.svscan.pid\fR in
+\fIscandir\fR. It then writes its pid to the file \fB.svscan.pid\fR in
 /\fIrun\fR/\fIsvscan\fR, /\fIvar\fR/\fIrun\fR/\fIsvscan\fR (whichever is
-found first) or the directory \fIdir\fR if the system doesn't have a
+found first) or the directory \fIscandir\fR if the system doesn't have a
 \fBrun\fR tmpfs filesystem or if the environment variable \fBDISABLE_RUN\fR
 is set. The pid file is created exclusively. If the \fIrun\fR directory is
 used, writing the pid file involves switching directories between the
-\fBrun\fR filesystem and the \fIdir\fR directory.  \fBsvscan\fR(8) uses the
-pid file to prevent multiple copies of \fBsvscan\fR(8) to run for the same
-directory. If \fBDISABLE_RUN\fR is set, \fBsvscan\fR(8) will use \fIdir\fR
+\fBrun\fR filesystem and the \fIscandir\fR directory. \fBsvscan\fR uses the
+pid file to prevent multiple copies of \fBsvscan\fR to run for the same
+directory. If \fBDISABLE_RUN\fR is set, \fBsvscan\fR will use \fIscandir\fR
 instead of /\fIrun\fR or /\fI/var\fR/\fIrun\fR. If \fBDISABLE_RUN\fR is
-set, you can have an individual invocation of \fBsvscan\fR(8) run for each
-\fIdir\fR passed on the command line. \fBsvscan\fR(8) uses the /\fIproc\fR
+set, you can have an multiple invocation of \fBsvscan\fR run for different
+\fIscandir\fR passed on the command line. \fBsvscan\fR uses the /\fIproc\fR
 filesystem to verify if the pid belongs to a process named \fBsvscan\fR, by
-opening the file /\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR(8) will
-start if the file does not exist, or if any process with pid \fIpid\fR does
-not exist, or if the pid belongs to a non-svscan process. The file
+opening the file /\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR will start
+if the file does not exist, or if any process with pid \fIpid\fR does not
+exist, or if the pid belongs to a non-svscan process. The file
 \fB.svscan.pid\fR is deleted on \fBSIGTERM\fR.
 
 After creating the pid file, \fBsvscan\fR is designed to run forever. If it
-has trouble creating a pipe or running \fBsupervise\fR(8), it prints a
-message to stderr; it will try again 60 seconds (or \fBSCANINTERVAL\fR
-environment variable if set) later. If the environment variable
-\fBAUTOSCAN\fR is set \fBsvscan\fR checks for subdirectories again every 60
-seconds. If it sees a new subdirectory, it starts a new \fBsupervise\fR(8)
-process. If it sees an old subdirectory where a \fBsupervise\fR(8) process
-has exited, it restarts the \fBsupervise\fR(8) process. In the \fBlog\fR
-case it reuses the same pipe so that no data is lost. The default scan
-interval of 60 secs can be changed by setting \fBSCANINTERVAL\fR
-environment variable. You can also send a \fBHUP\fR signal to \fBsvscan\fR
-to force a directory scan. If running as PID 1, \fBsvscan\fR will
-automatically scan for new subdirectories when any of it's children or any
-orphaned process die.
+has trouble creating a pipe or running \fBsupervise\fR, it prints a message
+to stderr; it will try again 60 seconds (or \fBSCANINTERVAL\fR environment
+variable if set) later. If the environment variable \fBAUTOSCAN\fR is set
+\fBsvscan\fR checks for subdirectories again every 60 seconds. If it sees a
+new subdirectory, it starts a new \fBsupervise\fR process. If it sees an
+old subdirectory where a \fBsupervise\fR process has exited, it restarts
+the \fBsupervise\fR process. In the \fBlog\fR case it reuses the same pipe
+so that no data is lost. The default scan interval of 60 secs can be
+changed by setting \fBSCANINTERVAL\fR environment variable. You can also
+send a \fBHUP\fR signal to \fBsvscan\fR to force a directory scan. If
+running as PID 1, \fBsvscan\fR will automatically scan for new
+subdirectories when any of it's children or any orphaned process die.
 
 \fBsvscan\fR can auto-start or auto-stop a service based on the presence or
 absence of \fIs\fR/down file. During each scan, \fBsvscan\fR will
@@ -85,8 +104,8 @@ missing and the earlier status of the service was down.
 \fBsvscan\fR output can be driven through \fBmultilog\fR. If a directory
 (or symlink to a directory) named \fB@servicedir@/.svscan\fR exists and the
 environment variable \fBSCANLOG\fR is defined in
-\fI@servicedir@/.svscan/variables\fR, \fBsvscan\fR(8) will redirect
-its output on descriptors 1 and 2 to the supervised service run from the
+\fI@servicedir@/.svscan/variables\fR, \fBsvscan\fR will redirect its output
+on descriptors 1 and 2 to the supervised service run from the
 \fB@servicedir@/.svscan/log\fR directory. This simplifies \fBsvscan\fR
 startup scripts and eliminates the use of \fBreadproctitle\fR, which does
 not work on some platforms, e.g. FreeBSD. Redirecting \fBsvscan\fR output
@@ -102,7 +121,7 @@ log file will get logged along with \fBsvscan\fR log.
 processes. This feature is exploited in docker/podman/kubernates
 environment. The \fBINITCMD\fR environment variable can be used to do
 service management. The biggest advantage of \fBsvscan\fR is its
-simplicity.  Unlike systemd(1), it is not complex and tied with multiple
+simplicity. Unlike systemd(1), it is not complex and tied with multiple
 pieces of software to make it work. You can also use openrc from Gentoo to
 create a decent, simple service manager to start only the processes that
 you require. If running as PID 1, \fBsvscan\fR will immediately restart a
@@ -125,10 +144,11 @@ executable bit set, \fIrun\fR is executed once during startup.
 \fBINITCMD\fR can be set to full path of an executable / script to override
 \fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR. If \fBWAIT_INITCMD\fR
 environment variable is set, it will additionally wait for \fIrun\fR to
-exit, before starting the scan of \fIdir\fR. Typical use of \fBINITCMD\fR
-is to mount --bind @sysconfdir@/resolv.conf as /etc/resolv.conf, to
-redirect all dns resolver requests, to locally running \fBdnscache\fR(8). A
-typical \fIrun\fR script to exploit \fBINITCMD\fR is as below
+exit, before starting the scan of \fIscandir\fR. Typical use of
+\fBINITCMD\fR is to mount --bind @sysconfdir@/resolv.conf as
+/etc/resolv.conf, to redirect all dns resolver requests, to locally running
+\fBdnscache\fR(8). A typical \fIrun\fR script to exploit \fBINITCMD\fR is
+as below
 
 .EX
 #!/bin/sh
@@ -138,6 +158,7 @@ if [ $PPID -eq 1 ] ; then
 	openrc indimail
 fi
 .EE
+
 If \fI@servicedir@\fR/.\fIsvscan\fR/\fIshutdown\fR exists, it will be
 executed when \fBsvscan\fR receives a TERM signal. This can be used to
 terminate all supervise processes started by \fBsvscan\fR. A typical
@@ -189,7 +210,7 @@ Universal
 sudo qmailctl start/stop
 .EE
 
-In a container environment, \fBsvscan\fR(8) is started through an
+In a container environment, \fBsvscan\fR is started through an
 entrypoint for docker/podman and starts as PID 1. This entrypoint is
 implemented using the \fBdocker-entrypoint\fR(8) script.
 
@@ -200,7 +221,7 @@ Display informational messages. Normally this is suppressed. You can toggle
 this by sending \fBsvscan\fR \fBUSR1\fR signal. Setting this also sets
 \fBVERBOSE\fR environment variable, which gets inherited by all processes
 started by svscan. Informational messages can also be turned on by setting
-\fBVERBOSE\fR environment variable. Note that \fBsupervise\fR(8) uses
+\fBVERBOSE\fR environment variable. Note that \fBsupervise\fR uses
 \fBVERBOSE\fR environment variable.
 
 .TP
@@ -209,7 +230,7 @@ Suppress warning message. Normally this is printed on the standard error.
 You can toggle this by sending \fBsvscan\fR \fBUSR2\fR signal. Setting this
 also sets \fBSILENT\fR environment variable, which gets inherited by all
 processes started by svscan. Warning messages can also be suppressed by
-setting \fBSILENT\fR environment variable. Note that \fBsupervise\fR(8)
+setting \fBSILENT\fR environment variable. Note that \fBsupervise\fR
 also uses the \fBSILENT\fR environment variable.
 
 .SH SEE ALSO
@@ -226,7 +247,7 @@ svctool(8),
 minisvc(8),
 svscanboot(8),
 readproctitle(8),
-fghack(8),  
+fghack(8), 
 pgrphack(8),
 multilog(8),
 tai64n(8),

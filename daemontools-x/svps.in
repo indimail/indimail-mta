@@ -1,5 +1,5 @@
 # 
-# $Id: svps.in,v 1.22 2024-08-29 21:42:46+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.23 2024-10-24 18:06:23+05:30 Cprogrammer Exp mbhangui $
 #
 
 do_days()
@@ -31,16 +31,16 @@ get_mod()
 do_svscan()
 {
 	now=$(date +%s)
-	words=$(ps ax|head -1|wc -w)
+	words=$(ps axu|head -1|wc -w)
 	words=$(expr $words - 1)
 
 	t=$(expr $max - $svscan_length)
 	printf "============ %-"$t"s     state uptime ===== pid/spid ==\n" "svscan"
-	ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
+	ps axu|grep root|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
 	do
 		set $line
-		pid=$1
-		if [ -s $6/.svscan/variables/DISABLE_RUN ] ; then
+		pid=$2
+		if [ -s ${12}/.svscan/variables/DISABLE_RUN ] ; then
 			t=$(cat /proc/$pid/cmdline |tr '\0' '\n'|tail -n +2)
 			get_mod $t/.svscan.pid
 		else
@@ -275,20 +275,20 @@ else
 	pidfile=$t/.svscan.pid
 fi
 
-ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" > /tmp/svps.$$
+ps axu|grep root|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" > /tmp/svps.$$
 max=0
 while read line
 do
 	set $line
-	len=$(echo $5 $6 | wc -c)
+	len=$(echo ${11} ${12} | wc -c)
 	if [ $len -gt $max ] ; then
 		max=$len
 	fi
-	svscan_length=$(echo $5 | wc -c)
+	svscan_length=$(echo ${11} | wc -c)
 	if [ -z "$sv_dirs" ] ; then
-		sv_dirs=$6
+		sv_dirs=${12}
 	else
-		sv_dirs="$sv_dirs $6"
+		sv_dirs="$sv_dirs ${12}"
 	fi
 done < /tmp/svps.$$
 
@@ -366,32 +366,35 @@ fi
 if [ -n "$PAGER" ] ; then
 	(
 	do_svscan
-	ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
+	ps axu|grep root|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
 	do
 		set $line
-		@prefix@/bin/svstat $6/* $6/*/log \
-			$6/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
+		@prefix@/bin/svstat ${12}/* ${12}/*/log \
+			${12}/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
 		grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
 		/bin/rm -f /tmp/svps_tmp.$$
-		doit $1 $6 $option
+		doit $2 ${12} $option
 	done
 	) | $PAGER
 else
 	do_svscan
-	ps ax|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
+	ps axu|grep root|grep "sbin/svscan"|grep -Ev "grep|multilog|supervise" | while read line
 	do
 		set $line
-		@prefix@/bin/svstat $6/* $6/*/log \
-			$6/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
+		@prefix@/bin/svstat ${12}/* ${12}/*/log \
+			${12}/.svscan/log 2>/tmp/svpserr.$$ > /tmp/svps_tmp.$$
 		grep -Ev "\.\.|^wait until" /tmp/svps_tmp.$$ > /tmp/svps.$$
 		/bin/rm -f /tmp/svps_tmp.$$
-		doit $1 $6 $option
+		doit $2 ${12} $option
 	done
 fi
 
-/bin/rm -f /tmp/svps.$$
+/bin/rm -f /tmp/svps.$$ /tmp/svpserr.$$
 #
 # $Log: svps.in,v $
+# Revision 1.23  2024-10-24 18:06:23+05:30  Cprogrammer
+# hide container processes
+#
 # Revision 1.22  2024-08-29 21:42:46+05:30  Cprogrammer
 # use .svscan.pid from service directory of each svscan instance
 #

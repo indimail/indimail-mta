@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH fghack 8
 .SH NAME
 fghack \- is an anti-backgrounding tool.
@@ -7,7 +8,7 @@ fghack \- is an anti-backgrounding tool.
 .SH DESCRIPTION
 \fBfghack\fR runs \fIchild\fR with many extra descriptors writing to a
 pipe. \fBfghack\fR reads and discards any data written to the pipe. After
-\fIchild\fR has exited and the pipe has been closed, \fBfghack\fR exits. 
+\fIchild\fR has exited and the pipe has been closed, \fBfghack\fR exits.
 
 Beware that \fBsupervise\fR(8) cannot send signals to daemons under fghack.
 fghack creates a pipe from the daemon and reads data until the pipe is
@@ -26,8 +27,8 @@ exec fghack baddaemon <&-
 might work.
 
 Instead of using \fBfghack\fR to handle daemons that puts themselves in
-background, you can set the sticky bit for the run file for the service.
-See \fBsupervise\fR(8).
+background, you can set the sticky bit for the run file for the service to
+make supervise go into subreaper mode. See \fBsupervise\fR(8).
 
 .SH SEE ALSO
 supervise(8),

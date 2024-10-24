@@ -1,10 +1,11 @@
-/*- $Id: supervise.c,v 1.43 2024-08-29 18:51:11+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.47 2024-10-24 18:09:48+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <time.h>
 #include "sig.h"
 #include "strerr.h"
 #include "error.h"
@@ -31,17 +32,18 @@
 
 static char    *dir;
 static int      selfpipe[2];
-static int      fdlock;
-static int      fdcontrolwrite;
-static int      fdcontrol;
-static int      fdstatus;
-static int      fdok;
-static int      fdup;
+static int      fdlock = -1;
+static int      fdcontrolwrite = -1;
+static int      fdcontrol = -1;
+static int      fdstatus = -1;
+static int      fdok = -1;
+static int      fdup = -1;
+static int      fddn = -1;
 static int      flagexit = 0;
 static int      flagwantxx = 1;
 static int      flagwantup = 1;
 static int      flagpaused;		/*- defined if (pid) */
-static int      fddir;
+static int      fddir = -1;
 static int      logger = 0;
 static int      verbose = 0, silent = 0;
 static char     flagfailed;
@@ -56,6 +58,7 @@ static char     is_subreaper = 0, do_setpgid = 0;
  */
 static char     status[21];
 static char     pwdbuf[256];
+static char     pidstr[FMT_ULONG];
 static stralloc fatal, warn, info;
 static stralloc wait_sv_status;
 #ifdef USE_RUNFS
@@ -122,34 +125,30 @@ do_kill(int prgrp, int *siglist, const char **signame)
 {
 	int            *i;
 	int             j, r;
-	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+	char            strnum[FMT_ULONG];
 
 	for (i = siglist, j = 0; *i != -1; i++, j++) {
 		if (grandchild || prgrp) {
 			if ((r = killpg(childpid, *i)) == -1) {
 				if (errno == error_srch && kill(childpid, *i) == -1) {
 					if (errno == error_srch) {
-						strnum1[fmt_ulong(strnum1, getpid())] = 0;
-						strnum2[fmt_ulong(strnum2, childpid)] = 0;
-						strerr_warn8(warn.s, "pid ", strnum1, " killpg, kill ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
+						strnum[fmt_ulong(strnum, childpid)] = 0;
+						strerr_warn8(warn.s, "pid ", pidstr, " killpg, kill ", strnum, " signal ", signame[j], ": ", &strerr_sys);
 					}
 				}
 			}
 			if (verbose && !r) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_long(strnum2, childpid)] = 0;
-				strerr_warn7(info.s, "pid ", strnum1, " killed pgid ", strnum2, " with signal ", signame[j], 0);
+				strnum[fmt_long(strnum, childpid)] = 0;
+				strerr_warn7(info.s, "pid ", pidstr, " killed pgid ", strnum, " with signal ", signame[j], 0);
 			}
 		} else {
 			if ((r = kill(childpid, *i)) == -1 && errno != error_srch) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_ulong(strnum2, childpid)] = 0;
-				strerr_warn8(warn.s, "pid ", strnum1, " kill ", strnum2, " signal ", signame[j], ": ", &strerr_sys);
+				strnum[fmt_ulong(strnum, childpid)] = 0;
+				strerr_warn8(warn.s, "pid ", pidstr, " kill ", strnum, " signal ", signame[j], ": ", &strerr_sys);
 			}
 			if (verbose && !r) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strnum2[fmt_ulong(strnum2, childpid)] = 0;
-				strerr_warn7(info.s, "pid ", strnum1, " killed pid ", strnum2, " with signal ", signame[j], 0);
+				strnum[fmt_ulong(strnum, childpid)] = 0;
+				strerr_warn7(info.s, "pid ", pidstr, " killed pid ", strnum, " with signal ", signame[j], 0);
 			}
 		}
 	} /*- for (i = siglist, j = 0; *i != -1; i++, j++) */
@@ -210,21 +209,27 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	if ((fd = open_read("wait")) == -1) {
 		if (errno == error_noent)
 			return 2;
-		strerr_die2sys(111, fatal.s, "unable to open wait: ");
+		strerr_warn2(warn.s, "unable to open wait: ", &strerr_sys);
 		return -1;
 	}
 	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof (inbuf));
 	for (i = 0;i < 2; i++) {
-		if (getln(&ssin, &tline, &match, '\n') == -1)
-			strerr_die2sys(111, fatal.s, "unable to read input");
+		if (getln(&ssin, &tline, &match, '\n') == -1) {
+			strerr_warn2(warn.s, "unable to read input", &strerr_sys);
+			close(fd);
+			return -1;
+		}
 		if (!tline.len)
 			break;
 		if (match) {
 			tline.len--;
 			tline.s[tline.len] = 0;
 		} else {
-			if (!stralloc_0(&tline))
-				strerr_die2x(111, fatal.s, "out of memory");
+			if (!stralloc_0(&tline)) {
+				strerr_warn2(warn.s, "out of memory", 0);
+				close(fd);
+				return -1;
+			}
 			tline.len--;
 		}
 		if (!i) {/*- max value 32767 */
@@ -253,6 +258,7 @@ do_wait()
 	int             fd, fd_depend, i, r, len;
 	unsigned short  sleep_interval = 60;
 	unsigned long   wpid;
+	time_t          t1, t2;
 	char            wstatus[20], strnum[FMT_ULONG];
 	char           *service_name;
 
@@ -264,8 +270,14 @@ do_wait()
 	if (!(i = get_wait_params(&sleep_interval, &service_name))) {
 		if (!stralloc_copyb(&wait_sv_status, "../", 3) ||
 				!stralloc_cats(&wait_sv_status, service_name) ||
-				!stralloc_0(&wait_sv_status))
-			strerr_die2x(111, fatal.s, "out of memory");
+				!stralloc_0(&wait_sv_status)) {
+			strerr_warn2(warn.s, "out of memory", 0);
+#ifdef USE_RUNFS
+			if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+				strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
+#endif
+			return;
+		}
 		wait_sv_status.len--;
 		/*-
 		 * if the service for which we are supposed to
@@ -281,11 +293,15 @@ do_wait()
 	if (i)
 		return;
 	pidchange(svpid, 0);
-	if (!stralloc_catb(&wait_sv_status, "/supervise/", 11))
-		strerr_die2x(111, fatal.s, "out of memory");
+	if (!stralloc_catb(&wait_sv_status, "/supervise/", 11)) {
+		strerr_warn2(warn.s, "out of memory", 0);
+		return;
+	}
 	len = wait_sv_status.len;
-	if (!stralloc_catb(&wait_sv_status, "up", 2) || !stralloc_0(&wait_sv_status))
-		strerr_die2x(111, fatal.s, "out of memory");
+	if (!stralloc_catb(&wait_sv_status, "up", 2) || !stralloc_0(&wait_sv_status)) {
+		strerr_warn2(warn.s, "out of memory", 0);
+		return;
+	}
 
 	/*-
 	 * supervise/up is a FIFO
@@ -293,7 +309,14 @@ do_wait()
 	 *   opening supervise/up with O_WRONLY should return
 	 * if the service service_name is down
 	 *   opening supervise/up with O_WRONLY should block
+	 *
+	 * supervise/dn is a FIFO
+	 * if the service service_name is running
+	 *   opening supervise/dn with O_WRONLY should block
+	 * if the service service_name is down
+	 *   opening supervise/dn with O_WRONLY should return
 	 */
+	t1 = time(0);
 	for (i = 0;;) {
 		if ((fd_depend = open(wait_sv_status.s, O_WRONLY)) == -1) {
 			if (errno == error_noent) {/*- supervise for service_name is not running */
@@ -311,20 +334,25 @@ do_wait()
 			break;
 		}
 	}
+	t2 = time(0);
 	if (!silent && i) {
-		strnum[fmt_int(strnum, i)] = 0;
+		strnum[fmt_int(strnum, t2 - t1)] = 0;
 		strerr_warn6(warn.s, "service ", service_name, " up after ~", strnum, " seconds", 0);
 	}
 
 	/*- now open the status file of service_name */
 	wait_sv_status.len = len;
-	if (!stralloc_catb(&wait_sv_status, "status", 6) || !stralloc_0(&wait_sv_status))
-		strerr_die2x(111, fatal.s, "out of memory");
+	if (!stralloc_catb(&wait_sv_status, "status", 6) || !stralloc_0(&wait_sv_status)) {
+		strerr_warn2(warn.s, "out of memory", 0);
+		return;
+	}
 	announce(-1);
 	for (;;) {
 		if ((fd = open_read(wait_sv_status.s)) == -1) {
-			if (errno != error_noent)
-				strerr_die4sys(111, fatal.s, "unable to open ", wait_sv_status.s, ": ");
+			if (errno != error_noent) {
+				strerr_warn4(warn.s, "unable to open ", wait_sv_status.s, ": ", &strerr_sys);
+				return;
+			}
 			sleep(1);
 			continue;
 		}
@@ -367,7 +395,7 @@ trystart(const char *how)
 {
 	pid_t           f, pgid;
 	struct stat     st;
-	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG], strnum3[FMT_ULONG];
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
 	do_wait();
 #ifdef USE_RUNFS
@@ -384,7 +412,6 @@ trystart(const char *how)
 	if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 		strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	switch (f = fork())
 	{
 	case -1:
@@ -403,8 +430,6 @@ trystart(const char *how)
 #endif
 		if ((do_setpgid || is_subreaper) && setpgid(0, 0) == -1)
 			strerr_die2sys(111, fatal.s, "unable to set process group id: ");
-		if (!env_put2("PPID", strnum1))
-			strerr_die2x(111, fatal.s, "trystart: out of memory");
 		run[1] = dir;
 		run[2] = how;
 		execve(*run, (char **) run, environ);
@@ -414,18 +439,21 @@ trystart(const char *how)
 	flagpaused = 0;
 	if (verbose) {
 		pgid = getpgid(f);
-		strnum2[fmt_ulong(strnum2, f)] = 0;
-		strnum3[fmt_ulong(strnum3, pgid)] = 0;
-		strerr_warn8(info.s, "pid ", strnum1, " started child pid ", strnum2,
-				" pgid ", strnum3,
+		strnum1[fmt_ulong(strnum1, f)] = 0;
+		strnum2[fmt_ulong(strnum2, pgid)] = 0;
+		strerr_warn8(info.s, "pid ", pidstr, " started child pid ", strnum1,
+				" pgid ", strnum2,
 				is_subreaper ? " in subreaper mode" : " in non-subreaper mode", 0);
 	}
 	pidchange((childpid = f), 1);
 	announce(0);
-	fifo_make("supervise/up", 0600);
 	if ((fdup = open_read("supervise/up")) == -1) /*- open O_RDONLY|O_NDELAY */
 		strerr_die2sys(111, fatal.s, "read: supervise/up: ");
 	coe(fdup);
+	if (fddn != -1) {
+		close(fddn);
+		fddn = -1;
+	}
 	deepsleep(1);
 }
 
@@ -436,7 +464,6 @@ tryaction(const char **action, pid_t cpid, int wstat, int do_alert)
 	int             t, i;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG + 1];
 
-	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	switch (f = fork())
 	{
 	case -1:
@@ -452,8 +479,6 @@ tryaction(const char **action, pid_t cpid, int wstat, int do_alert)
 		if (use_runfs && fchdir(fddir) == -1)
 			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
-		if (!env_put2("PPID", strnum1))
-			strerr_die2x(111, fatal.s, "tryaction: out of memory");
 		strnum1[fmt_ulong(strnum1, cpid)] = 0;
 		action[1] = dir;
 		action[2] = strnum1;
@@ -532,10 +557,8 @@ doit()
 
 	for (;;) {
 		if (flagexit && !childpid) {
-			if (verbose) {
-				strnum1[fmt_ulong(strnum1, getpid())] = 0;
-				strerr_warn4(info.s, "supervise pid ", strnum1, " exiting...", 0);
-			}
+			if (verbose)
+				strerr_warn4(info.s, "supervise pid ", pidstr, " exiting...", 0);
 			return;
 		}
 
@@ -627,10 +650,8 @@ doit()
 				close(fdup);
 				announce(0);
 				if (flagexit) {
-					if (verbose) {
-						strnum1[fmt_ulong(strnum1, getpid())] = 0;
-						strerr_warn4(info.s, "supervise pid ", strnum1, " exiting...", 0);
-					}
+					if (verbose)
+						strerr_warn4(info.s, "supervise pid ", pidstr, " exiting...", 0);
 					return;
 				}
 				if (flagwantxx && flagwantup) {
@@ -703,16 +724,19 @@ doit()
 #endif
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
-#ifdef USE_RUNFS
-					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
-						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
-#endif
 					siglist[0] = SIGTERM;
 					siglist[1] = SIGCONT;
 					signame[0] = "SIGTERM";
 					signame[1] = "SIGCONT";
 					do_kill(g, siglist, signame);
 					g = flagpaused = 0;
+#ifdef USE_RUNFS
+					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
+#endif
+					if ((fddn = open_read("supervise/dn")) == -1)
+						strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/dn: ");
+					coe(fddn);
 				}
 				announce(0);
 				break;
@@ -972,9 +996,7 @@ int
 do_init()
 {
 	int             t, f;
-	char            strnum[FMT_ULONG];
 
-	strnum[fmt_ulong(strnum, getpid())] = 0;
 	switch (f = fork())
 	{
 	case -1:
@@ -987,8 +1009,6 @@ do_init()
 	case 0:
 		sig_uncatch(sig_child);
 		sig_unblock(sig_child);
-		if (!env_put2("PPID", strnum))
-			strerr_die2x(111, fatal.s, "do_init: out of memory");
 		execve(*init, init, environ);
 		strerr_die4sys(111, fatal.s, "unable to start ", *init, ": ");
 	}
@@ -1048,11 +1068,21 @@ main(int argc, char **argv)
 	sig_block(sig_child);
 	sig_catch(sig_child, trigger);
 
-	if (!(ptr = env_get("SERVICEDIR"))) {
+	svpid = getpid();
+	pidstr[fmt_ulong(pidstr, svpid)] = 0;
+	if (!env_put2("PPID", pidstr))
+		strerr_die2x(111, fatal.s, "out of memory");
+	if (!(ptr = env_get("SCANDIR"))) {
 		if (!getcwd(pwdbuf, 255))
 			strerr_die2sys(111, fatal.s, "unable to get current working directory: ");
 		ptr = pwdbuf;
 	}
+	/*-
+	 * allocate now so that we don't fail later
+	 * ../ + str_len(ptr) + /supervise/status\0
+	 */
+	if (!stralloc_ready(&wait_sv_status, str_len(ptr) + 21))
+		strerr_die2x(111, fatal.s, "out of memory");
 	if (!stralloc_copys(&init_sv_path, ptr) ||
 			!stralloc_append(&init_sv_path, "/") ||
 			!stralloc_cats(&init_sv_path, dir) ||
@@ -1062,9 +1092,10 @@ main(int argc, char **argv)
 		strerr_die2x(111, fatal.s, "out of memory");
 	init[0] = init_sv_path.s;
 
+
 	if ((ptr = env_get("SCANINTERVAL")))
 		scan_ulong(ptr, &scan_interval);
-	if (chdir(dir) == -1) /*- chdir to /service */
+	if (chdir(dir) == -1) /*- chdir to /service/service_name */
 		strerr_die4sys(111, fatal.s, "unable to chdir to ", dir, ": ");
 	if (stat("down", &st) != -1)
 		flagwantup = 0;
@@ -1086,13 +1117,9 @@ main(int argc, char **argv)
 	if (mkdir("supervise", 0700) && errno != error_exist)
 		strerr_die2sys(111, fatal.s, "unable to create supervise directory: ");
 
-	if ((fdstatus = open_trunc("supervise/status")) == -1)
-		strerr_die4sys(111, fatal.s, "unable to create ", dir, "/supervise/status: ");
-	coe(fdstatus);
-
 	fdlock = open_append("supervise/lock");
 	if ((fdlock == -1) || (lock_exnb(fdlock) == -1))
-		strerr_die4sys(111, fatal.s, "unable to acquire ", dir, "/supervise/lock: ");
+		strerr_die4sys(100, fatal.s, "unable to acquire ", dir, "/supervise/lock: ");
 	coe(fdlock);
 
 	fifo_make("supervise/control", 0600);
@@ -1104,13 +1131,23 @@ main(int argc, char **argv)
 		strerr_die4sys(111, fatal.s, "unable to write ", dir, "/supervise/control: ");
 	coe(fdcontrolwrite);
 
-	pidchange((svpid = getpid()), 0);
+	pidchange(svpid, 0);
+	if ((fdstatus = open_trunc("supervise/status")) == -1)
+		strerr_die4sys(111, fatal.s, "unable to create ", dir, "/supervise/status: ");
+	coe(fdstatus);
 	announce(0);
 
 	fifo_make("supervise/ok", 0600);
 	if ((fdok = open_read("supervise/ok")) == -1)
 		strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/ok: ");
 	coe(fdok);
+	fifo_make("supervise/up", 0600);
+	fifo_make("supervise/dn", 0600);
+	if (!flagwantup) {
+		if ((fddn = open_read("supervise/dn")) == -1)
+			strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/dn: ");
+		coe(fddn);
+	}
 
 	/*-
 	 * By now we have finished initialization of /run. We
@@ -1139,13 +1176,30 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.43 2024-08-29 18:51:11+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.47 2024-10-24 18:09:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.47  2024-10-24 18:09:48+05:30  Cprogrammer
+ * fix status file getting truncated before announce()
+ * open supervise/dn fifo in read mode after service goes down
+ * renamed SERVICEDIR to SCANDIR
+ * do not exit in do_wait()
+ * do not exit in get_wait_params()
+ *
+ * Revision 1.46  2024-10-22 23:02:31+05:30  Cprogrammer
+ * renamed SERVICEDIR to SCANDIR for svscan
+ * open supervise/dn after service is brought down
+ *
+ * Revision 1.45  2024-10-21 17:47:39+05:30  Cprogrammer
+ * BUG: status file truncated before announce
+ *
+ * Revision 1.44  2024-10-20 20:44:45+05:30  Cprogrammer
+ * fixed comment
+ *
  * Revision 1.43  2024-08-29 18:51:11+05:30  Cprogrammer
  * use servicedir as first argument for exec of ./run, ./alert and ./shutdown
  *

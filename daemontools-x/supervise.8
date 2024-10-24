@@ -5,35 +5,55 @@
 supervise \- starts and monitors a service.
 
 .SH SYNOPSIS
-\fBsupervise\fR \fIs\fR [\fIparent_ident\fR]
+\fBsupervise\fR \fIdir\fR [\fIparent_ident\fR]
 
 .SH DESCRIPTION
-\fBsupervise\fR(8) switches to the directory named \fIs\fR and starts ./init
-if it exists. In case ./init exits with non-zero status, it pauses for 60
-seconds before restarting ./init. The pause is required so that supervise
-doesn't loop too quickly consuming high usage of the CPU. \fIs\fR has to be
-relative to the current working directory and cannot start with the dot
-(\fB.\fR) or the slash (\fB/\fR) character. \fIparent_ident\fR is passed as
-a command line argument by \fBsvscan\fR(8) when starting supervise log
-process when \fIs\fR/\fIlog\fR exists. This is useful when listing
-supervised log processes using the \fBps\fR(1) command.
+\fBsupervise\fR(8) switches to the directory named \fIdir\fR. It checks for
+the file \fIdown\fR. If this file exists, \fBsupervise\fR doesn't start the
+service. If the directory \fIrun/svscan\fR exists, \fBsupervise\fR creates
+the directory \fIdir/supervise\fR in \fIrun/svscan\fR where \fIrun\fR is
+either \fI/run\fR or \fI/var/run\fR tmpfs filesystem (depending on your
+operating system). The directory \fIrun\fR/\fIsvscan\fR is created by
+\fBsvscan\fR(8) when \fBDISABLE_RUN\fR isn't set. It also opens
+\fIdir/supervise/lock\fR in exclusive mode to prevent multiple copies of
+supervise run for the same service. It exits 100 if it cannot open
+\fIdir/supervise/lock\fR. The directory \fIdir\fR must be writable to
+\fBsupervise\fR. This directory is used to maintain status information in
+binary format and also create few named pipes. The status information can
+be read by \fBsvstat\fR(8). If \fBDISABLE_RUN\fR is set, or if your system
+doesn't have the \fI/run\fR or \fI/var/run\fR filesystem,
+\fIdir/supervise\fR will be created in \fIorig/dir\fR directory where
+\fIorig\fR is the directory in which \fIdir\fR is present. \fIorig\fR is
+usually \fI/service\fR on most systems.
 
-After ./init exits with zero exit status, \fBsupervise\fR starts ./run. It
-restarts ./run if ./run exits. In case ./run exits with non-zero status, it
-pauses for a second after restarting ./run. The sleep avoids supervise from
-looping quickly when ./run has a problem. \fBsupervise\fR expects ./run to
-remain in the foreground. Sometimes daemon fork themselves into background,
-which some consider bad software design. If you want to monitor such a
-daemon, set the sticky bit on ./run. This makes \fBsupervise\fR go into
-\fBsubreaper\fR mode using \fBprctl\fR(2) \fBPR_SET_CHILD_SUBREAPER\fR on
-Linux or \fBprocctl\fR(2) \fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper
-mode or when the environment variable \fBSETPGID\fR is set, ./run will have
+\fBsupervise\fR then executes \fI./init\fR if it exists. In case ./init
+exits with non-zero status, it pauses for 60 seconds before restarting
+\fI./init\fR. The pause is requiree so that \fBsupervise\fR doesn't loop
+too quickly consuming high usage of the CPU. \fIdir\fR has to be relative
+to the current working directory and cannot start with the dot (\fB.\fR) or
+the slash (\fB/\fR) character. \fIparent_ident\fR is passed as a command
+line argument by \fBsvscan\fR(8) when starting supervise log process when
+\fIdir/log\fR exists. This is useful when listing supervised log processes
+using the \fBps\fR(1) command.
+
+After \fI./init\fR exits with zero exit status, \fBsupervise\fR starts
+\fI./run\fR. It restarts \fI./run\fR if \fI./run\fR exits. In case ./run
+exits with non-zero status, it pauses for a second after restarting ./run.
+The sleep avoids supervise from looping quickly when \fI./run\fR has a
+problem. \fBsupervise\fR expects \fI./run\fR to remain in the foreground.
+Sometimes daemon fork themselves into background, which some consider bad
+software design. If you want to monitor such a daemon, set the sticky bit
+on \fI./run\fR. This makes \fBsupervise\fR go into \fBsubreaper\fR mode
+using \fBprctl\fR(2) \fBPR_SET_CHILD_SUBREAPER\fR on Linux or
+\fBprocctl\fR(2) \fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper mode or
+when the environment variable \fBSETPGID\fR is set, \fI./run\fR will have
 it's process Group ID set to the value of it's PID. Setting the process
-Group ID is required to monitor ./run reliably when ./run has a command
-which double forks. It is also required in such cases to make \fBsvc\fR(8)
-command operate and control \fBsupervise\fR reliably for such double forked
-daemon/commands in ./run. The script \fI./run\fR is passed two command line
-arguments with \fIs\fR as argv[1] and \fIhow\fR as argv[2]
+Group ID is required to monitor \fI./run\fR reliably when \fI./run\fR has a
+command which double forks (forks in the background). It is also required
+in such cases to make \fBsvc\fR(8) command operate and control
+\fBsupervise\fR reliably for such double forked daemon/commands in
+\fI./run\fR. \fI./run\fR is passed two command line arguments with
+\fIdir\fR as argv[1] and \fIhow\fR as argv[2].
 
 .TS
 l l.
@@ -47,84 +67,94 @@ auto startup     Normal startup after supervise is run by svscan or
                  manually
 .TE
 
-If the file \fIs\fR/down exists, \fBsupervise\fR(8) does not start ./run
+If the file \fIdir\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run or to give other
 commands to \fBsupervise\fR(8). \fBsupervise\fR uses
-\fIs\fR/\fIsupervise\fR/\/\fIcontrol\fR fifo to read these commands.
+\fIdir\fR/\fIsupervise\fR/\/\fIcontrol\fR fifo to read these commands.
 
 On receipt of \fBSIGTERM\fR, \fBsupervise\fR sends \fBSIGTERM\fR followed
 by \fBSIGCONT\fR to its child. It uses \fBkillpg\fR(3) to send the signal
 if runnning in supreaper mode or when \fBSETPGID\fR environment variable is
 set. It uses \fBkill\fR(2) to send signals when not running in subreaper
-mod and \fBSETPGID\fR environment variable is not set. \fBsupervise\fR
-requires to \fBSIGTERM\fR signals to get terminated when started by
-\fBsvscan\fR(8) running as PID 1.
+mod and when \fBSETPGID\fR environment variable is not set. \fBsupervise\fR
+requires two \fBSIGTERM\fR signals to get terminated when running as a
+logger and when started by \fBsvscan\fR(8) running as PID 1.
 
-if the file \fIs\fR/shutdown exists \fBsupervise\fR(8) executes
-\fIshutdown\fR when asked to exit. \fIs\fR is passed as the first argument
-and the pid of the process that exited is passed as the second argument to
-\fIshutdown\fR.
+if the file \fIdir\fR/shutdown exists \fBsupervise\fR(8) executes
+\fIshutdown\fR when asked to exit. \fIdir\fR is passed as the first
+argument and the pid of the process that exited is passed as the second
+argument to \fIshutdown\fR.
 
-if the file \fIs\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
-whenever run exits. \fIs\fR is passed as the first argument, the pid of the
-process that exited is passed as the second argument, the exit value or
+if the file \fIdir\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
+whenever run exits. \fIdir\fR is passed as the first argument, the pid of
+the process that exited is passed as the second argument, the exit value or
 signal (if killed by signal) is passed as the third argument to
 \fIalert\fR. The fourth argument is either of the strings \fIexited\fR or
 \fIstopped\fR / \fIsignalled\fR.
 
-If the directory \fIrun\fR/\fIsvscan\fR exists, \fBsupervise\fR(8) creates
-the directory \fIs\fR/\fIsupervise\fR in \fIrun\fR/\fIsvscan\fR where
-\fIrun\fR is either /run or /var/run tmpfs filesystem (depending on your
-operating system). The directory \fIrun\fR/\fIsvscan\fR is created by
-\fBsvscan\fR(8) when \fBDISABLE_RUN\fR isn't set. \fBsupervise\fR(8)
-maintains status information in a binary format in the directory
-\fIs\fR/\fIsupervise\fR. The directory \fIs\fR must be writable to
-\fBsupervise\fR(8). The status information can be read by \fBsvstat\fR(8).
-
 \fBsupervise\fR(8) may exit immediately after startup if it cannot find the
-files it needs in \fIs\fR or if another copy of \fBsupervise\fR(8) is already
-running in \fIs\fR. Once \fBsupervise\fR(8) is successfully running, it will
-not exit unless it is killed or specifically asked to exit. On a successful
-startup \fBsupervise\fR(8) opens the fifo \fIs\fR/\fIsupervise\fR/\fIok\fR
-in O_RDONLY|O_NDELAY mode. You can use \fBsvok\fR(8) to check whether
-\fBsupervise\fR(8) is successfully running. You can use \fBsvscan\fR(8) to
-reliably start a collection of \fBsupervise\fR(8) processes. \fBsvscan\fR
-mirrors the service directory in \fI/run\fR or \fI/var/run\fR directory
-(whichever is found first). So /run/\fIs\fR will be analogous to
-/service/\fIs\fR. When started by \fBsvscan\fR, error messages printed by
-\fBsupervise\fR(8) will go the standard error output of \fBsvscan\fR(8)
-process.
+files it needs in \fIdir\fR or if another copy of \fBsupervise\fR(8) is
+already running in \fIdir\fR. Once \fBsupervise\fR(8) is successfully
+running, it will not exit unless it is killed or specifically asked to
+exit. On a successful startup \fBsupervise\fR(8) opens the fifo
+\fIdir\fR/\fIsupervise\fR/\fIok\fR in O_RDONLY|O_NDELAY mode. You can use
+\fBsvok\fR(8) to check whether \fBsupervise\fR(8) is successfully running.
+You can use \fBsvscan\fR(8) to reliably start a collection of
+\fBsupervise\fR(8) processes. \fBsvscan\fR mirrors the service directory in
+\fI/run\fR or \fI/var/run\fR directory (whichever is found first). So
+/run/\fIdir\fR will be analogous to /service/\fIdir\fR. When started by
+\fBsvscan\fR, error messages printed by \fBsupervise\fR(8) will go the
+standard error output of \fBsvscan\fR(8) process.
 
 \fBsupervise\fR(8) can wait for another service by having a file named
-\fIs\fR/\fIwait\fR. This file has two lines. The first line is time \fIt\fR
-in seconds and the second line is service name \fIw\fR. \fIw\fR refers to
-the service which service \fIs\fR should wait \fIt\fR secs after service
-\fIw\fR starts up. The amount of time \fIt\fR is limited to a max of 32767
-secs. Any value above this value will be limited to 60 secs.
-\fIsupervise\fR(8) opens \fIw\fR/\fIsupervise\fR/\fIup\fR in write mode. If
-service \fIw\fR is up, the write returns immediately. If service \fIw\fR is
-down, write will block till \fIw\fR is up and running. If service \fIw\fR
-doesn't have \fBsupervise\fR running, \fPsupervise\fR will wait for 60
-seconds before opening for write the file \fIw\fR/\fIsupervise\fR/\fIup\fR
-again. The default value of 60 seconds gets overriden by the
+\fIdir\fR/\fIwait\fR. This file has two lines. The first line is time
+\fIt\fR in seconds and the second line is service name \fIw\fR. \fIw\fR
+refers to the service which service \fIdir\fR should wait \fIt\fR secs
+after service \fIw\fR starts up. The amount of time \fIt\fR is limited to a
+max of 32767 secs. Any value above this value will be limited to 60 secs.
+The wait for another service is implemented by opening
+\fIdir\fR/\fIsupervise\fR/\fIup\fR in write mode.
+
+\fIsupervise\fR(8) opens \fIdir\fR/\fIsupervise\fR/\fIup\fR in read mode
+just after it executes ./run. Hence, if service \fIw\fR is up, write on
+\fIw\fR/\fIsupervise\fR/\fIup\fR returns immediately. If service \fIw\fR is
+down, the write will block until \fIw\fR is up and running. If service
+\fIw\fR doesn't have \fBsupervise\fR running, \fPsupervise\fR will wait for
+60 seconds before opening the file \fIw\fR/\fIsupervise\fR/\fIup\fR again
+in read mode. The default value of 60 seconds gets overriden by the
 \fBSCANINTERVAL\fR environment variable used by \fBsvscan\fR(8). If service
-\fIw\fR doesn't exist, \fIs\fR/\fIwait\fR will be ignored.
+\fIw\fR doesn't exist, \fIdir\fR/\fIwait\fR will be ignored.
+
+\fIsupervise\fR(8) opens \fIdir\fR/\fIsupervise\fR/\fIdn\fR in read mode
+when asked to bring down a service using \fBsvc\fR (-d or -r option). It
+opens this named pipe after issuing the TERM, CONT signal to the service.
+Hence, if service\fIw\fR is down, write on \fIw\fR/\fIsupervise\fR/\fIdn\fR
+returns immediately. if service \fIw\fR is up, the write will block until
+\fIw\fR is down.
 
 \fBsupervise\fR(8) creates the following FIFOs for with O_RDONLY|O_NDELAY
 mode. See open(2) for description of O_RDONLY, O_NDELAY
 
 .IP \[bu] 2
-\fIs\fR/\fIsupervise\fR/\fIcontrol\fR - for reading commands from clients
+\fIdir\fR/\fIsupervise\fR/\fIcontrol\fR - for reading commands from clients
 like \fBsvc\fR(8).
 .IP \[bu] 2
-\fIs\fR/\fIsupervise\fR/\fIok\fR - clients can open this in write mode
-(O_WRONLY) to test if \fBsupervise\fR(8) is running in \fIs\fR. If write
+\fIdir\fR/\fIsupervise\fR/\fIok\fR - clients can open this in write mode
+(O_WRONLY) to test if \fBsupervise\fR(8) is running in \fIdir\fR. If write
 returns, it means \fBsupervise\fR(8) is running.
 .IP \[bu] 2
-\fIs\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode
-(O_WRONLY) to test if service \fIs\fR is up. Any client that opens this
-fifo will block until the service \fIs\fR is up. If write returns, it means
-service \fIs\fR is running.
+\fIdir\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode
+(O_WRONLY) to test if service \fIdir\fR is up. Any client that opens this
+fifo in O_WRONLY mode, will block until the service \fIdir\fR is up. If
+write returns, it means service \fIdir\fR has executed \fIdir\fR/\fIrun\fR.
+\fBsvc\fR(8) is one such client (-w option) that can be used to check if a
+service is up.
+.IP \[bu] 2
+\fIdir\fR/\fIsupervise\fR/\fIdn\fR - clients can open this in write mode to
+test if service \fIdir\fR is down. This works like exactly like
+\fIdir\fR/\fIsupervise\fR/\fIup\fR. \fBsvc\fR(8) (-W option) can be used to
+check if a service is down.
+
 .PP
 \fBsupervise\fR logs informational, warning and error messages to
 descriptor 2. Informational messages can be turned on by setting the
@@ -133,6 +163,11 @@ setting the environment variable \fBSILENT\fR. If you are using
 \fBsvscan\fR for service startup (as setup for indimail-mta), you can set
 environment variables for \fBsupervise\fR in
 \fI/service/.svscan/variables\fR directory.
+
+.SH EXIT VALUE
+\fBsupervise\fR is designed to run forever, however it can exit 100 during
+startup if it fails to open \fIdir/supervise/lock\fR, or exit 111 if it
+encounters system erros.
 
 .SH SEE ALSO
 svc(8),

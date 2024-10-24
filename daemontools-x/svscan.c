@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
+ * $Id: svscan.c,v 1.36 2024-10-24 18:17:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -53,9 +53,10 @@ struct
 	int             pi[2];		/*- defined if flaglog */
 } x[SERVICES];
 static int      numx = 0, scannow = 0, auto_scan = 0, use_run = 1,
-				verbose = 0, silent = 0, sess_leader = 0;
+				verbose = 0, silent = 0, sess_leader = 0, svpid;
 static char     fnlog[260];
 static char     fntmp[260];
+static char     pidstr[FMT_ULONG];
 static c_char  *pidfile, *p_exe_name, *run_dir;
 static stralloc tmp = {0};
 
@@ -83,8 +84,7 @@ initialize_run()
 #endif
 
 int
-terminate(char *pidstr, time_t starttime, unsigned int w1,
-		unsigned int w2, int *did_kill)
+terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 {
 	time_t          t;
 
@@ -127,19 +127,15 @@ init_cmd(const char *cmmd, int shutdown)
 {
 	int             child, r, wstat, did_kill = 0, do_wait, i;
 	unsigned int    w1, w2;
-	pid_t           pid;
 	const char     *cpath;
 	char           *p, *terminate_session, *args[4];
-	char            strnum[FMT_ULONG];
-	time_t          starttime;
+	time_t          starttime = 0;
 
 	if (shutdown)
 		sig_block(sig_child);
 	cpath = shutdown ? SVSCANINFO"/shutdown" : cmmd && *cmmd ? cmmd : SVSCANINFO"/run";
 	if (access(cpath, X_OK))
 		return;
-	pid = getpid();
-	strnum[fmt_ulong(strnum, pid)] = 0;
 	switch (child = fork())
 	{
 	case -1:
@@ -152,8 +148,6 @@ init_cmd(const char *cmmd, int shutdown)
 		args[1] = (char *) "-c";
 		args[2] = (char *) cpath;
 		args[3] = 0;
-		if (!env_put2("PPID", strnum))
-			strerr_die3x(111, WARN, cpath, "init_cmd: out of memory");
 		execv(*args, args);
 		strerr_die4sys(111, WARN, "unable to run", cpath, ": ");
 	default:
@@ -161,7 +155,7 @@ init_cmd(const char *cmmd, int shutdown)
 	}
 	do_wait = env_get("WAIT_INITCMD") ? 1 : 0;
 	terminate_session = shutdown ? env_get("TERMINATE_SESSION") : 0;
-	if (pid == 1) {
+	if (svpid == 1) {
 		if (!do_wait && !shutdown)
 			return;
 		starttime = time((time_t *) NULL);
@@ -188,7 +182,7 @@ init_cmd(const char *cmmd, int shutdown)
 	if (!do_wait) {
 		if (shutdown && terminate_session)
 			if (kill(0, sig_term) == -1)
-				strerr_warn4(WARN, "pid ", strnum, " kill -0 SIGKILL: ", &strerr_sys);
+				strerr_warn4(WARN, "pid ", pidstr, " kill -0 SIGKILL: ", &strerr_sys);
 		return;
 	}
 	/*
@@ -197,20 +191,20 @@ init_cmd(const char *cmmd, int shutdown)
 	 * PID is > 1 and do_wait  is 1
 	 */
 	for (;;) {
-		r = (pid == 1 && shutdown) ? wait_nohang(&wstat) : wait_pid(&wstat, child);
+		r = (svpid == 1 && shutdown) ? wait_nohang(&wstat) : wait_pid(&wstat, child);
 		if (r == -1) {
 			if (errno == error_intr)
 				continue; /*- impossible for wait_nohang */
 			if (errno == error_child)
-				strerr_warn4(INFO, "pid: ", strnum, ": no processes left...", 0);
+				strerr_warn4(INFO, "pid: ", pidstr, ": no processes left...", 0);
 			break;
 		}
 		if (r)
 			continue;
 		if (!r) {
-			if (pid == 1 && shutdown) {
-				if (!(i = terminate(strnum, starttime, w1, w2, &did_kill))) {
-					strerr_warn4(INFO, "pid: ", strnum, ": waiting for processes to shutdown...", 0);
+			if (svpid == 1 && shutdown) {
+				if (!(i = terminate(starttime, w1, w2, &did_kill))) {
+					strerr_warn4(INFO, "pid: ", pidstr, ": waiting for processes to shutdown...", 0);
 					sleep(1);
 				}
 				if (i == 3)
@@ -269,16 +263,13 @@ start(const char *fn, const char *sdir)
 	unsigned int    fnlen, t1, t2;
 	struct stat     st;
 	int             child, i, fdsource;
-	pid_t           pid;
 	char           *s;
 	char           *args[4];
-	char            strnum[FMT_ULONG];
 
 #ifdef USE_RUNFS
 	/*-
-	 * look for disabled service
-	 * a disabled service is
-	 * .service_name
+	 * look for disabled service. A disabled service
+	 * is .service_name (except SVSCANINFO)
 	 */
 	if (use_run && fn[0] == '.' && str_diff(fn, SVSCANINFO)) {
 		if (!fn[1] || fn[1] == '.') /*- dir is . or .. */
@@ -305,7 +296,7 @@ start(const char *fn, const char *sdir)
 			close(fdsource);
 			return;
 		}
-		/*
+		/*-
 		 * if we rename a directory in orignal /service, we should rename
 		 * it here.
 		 * e.g. if /service/qmail-smtpd.25 is renamed to /service/.qmail-smtpd.25
@@ -384,7 +375,6 @@ start(const char *fn, const char *sdir)
 	}
 	/*- active service */
 	x[i].flagactive = 1;
-	pid = getpid();
 	if (!x[i].pid) { /*- exec supervise fn only if it is not .svscan/log */
 		/*-
 		 * we don't have supervise running
@@ -416,9 +406,6 @@ start(const char *fn, const char *sdir)
 			args[0] = (char *) "supervise";
 			args[1] = (char *) fn;
 			args[2] = 0;
-			strnum[fmt_ulong(strnum, pid)] = 0;
-			if (!env_put2("PPID", strnum))
-				strerr_die3x(111, WARN, fn, ": out of memory");
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, WARN, "unable to start supervise ", fn, ": ");
 		default:
@@ -525,9 +512,6 @@ start(const char *fn, const char *sdir)
 			args[1] = (char *) "log";
 			args[2] = (char *) fn;
 			args[3] = 0;
-			strnum[fmt_ulong(strnum, pid)] = 0;
-			if (!env_put2("PPID", strnum))
-				strerr_die3x(111, WARN, fn, ": out of memory");
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, FATAL, "unable to start supervise ", fn, "/log: ");
 		default:
@@ -842,7 +826,6 @@ main(int argc, char **argv)
 	char           *s, *sdir;
 	char            dirbuf[256];
 	struct sigaction sa;
-	pid_t           pid;
 	int             i;
 
 	while ((i = getopt(argc, argv, "vs")) != opteof) {
@@ -867,8 +850,12 @@ main(int argc, char **argv)
 		verbose = 1;
 	if (!silent && env_get("SILENT"))
 		silent = 1;
+	svpid = getpid();
+	pidstr[fmt_ulong(pidstr, svpid)] = 0;
+	if (!env_put2("PPID", pidstr))
+		strerr_die2x(111, FATAL, "out of memory");
 	/*- setup handler for sigchild if running as pid 1 or SCANNOW is set */
-	if (env_get("SCANNOW") || 1 == (pid = getpid())) {
+	if (env_get("SCANNOW") || 1 == svpid) {
 		byte_zero((char *) &sa, sizeof(struct sigaction));
 		sa.sa_flags = SA_SIGINFO;
 		sa.sa_sigaction = sigchld;
@@ -877,7 +864,6 @@ main(int argc, char **argv)
 	}
 	sig_catch(sig_usr1, siguser1);
 	sig_catch(sig_usr2, siguser2);
-	/*- save the current dir */
 #ifdef USE_RUNFS
 	use_run = env_get("DISABLE_RUN") ? 0 : 1;
 	if (use_run)
@@ -887,6 +873,7 @@ main(int argc, char **argv)
 #else
 	pidfile = PIDFILE;
 #endif
+	/*- save the current dir */
 	if (argc - optind >= 1 && argv[optind]) {
 		if (chdir(argv[optind]) == -1)
 			strerr_die4sys(111, FATAL, "unable to chdir to ", argv[optind], ": ");
@@ -898,7 +885,7 @@ main(int argc, char **argv)
 			strerr_die2sys(111, FATAL, "unable to get current working directory: ");
 		while (get_lock(sdir)) ;
 	}
-	if (!env_put2("SERVICEDIR", sdir))
+	if (!env_put2("SCANDIR", sdir))
 		strerr_die2x(111, FATAL, "out of memory");
 	else
 	if (!env_put2("PWD", sdir))
@@ -920,7 +907,7 @@ main(int argc, char **argv)
 	for (i = 0; i < numx; ++i)
 		x[i].flagwantup = -1;
 	for (scannow = 1;;) {
-		doit(sdir, pid);
+		doit(sdir, svpid);
 		/*-
 		 * we do not scan service directory unless we get a sighup,
 		 * sigchld, auto_scan is set or we failed to start supervise
@@ -958,13 +945,17 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.35 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.36 2024-10-24 18:17:10+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.36  2024-10-24 18:17:10+05:30  Cprogrammer
+ * renamed SERVICEDIR to SCANDIR
+ * set PPID in main() to eliminate memory allocation failure in child
+ *
  * Revision 1.35  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

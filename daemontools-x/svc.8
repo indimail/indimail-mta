@@ -1,127 +1,120 @@
+.\" vim: tw=75
 .TH svc 8
 .SH NAME
-svc \- controls services monitored by
-.BR supervise(8).
-.SH SYNOPSIS
-.B svc
-[
-.B \-udopchaitkx
-]
-.I services
-.SH DESCRIPTION
-.I services
-consists of any number of arguments, each argument naming a directory used by
-.BR supervise (8).
+svc \- controls services monitored by \fBsupervise\fR(8).
 
-.B svc
-applies all the options to each
-.I service
-in turn.
+.SH SYNOPSIS
+\fBsvc\fR [ \fB\-udopchaitkx\fR ] \fIservices\fR
+
+.SH DESCRIPTION
+\fIservices\fR consists of any number of arguments, each argument naming a
+directory used by \fBsupervise\fR.
+
+\fBsvc\fR applies all the options to each \fIservice\fR in turn.
 
 .SH OPTIONS
-.TP
+.TP 3
 .B \-u
-Up. If the
-.I service
-is not running, start it. If the
-.I service
-stops, restart it. 
+Up. If the \fIservice\fR is not running, start it. If the \fIservice\fR
+stops, restart it.
 
 .TP
 .B \-d
-Down. If the
-.I service
-is running, send it a TERM signal and then a CONT signal. After it stops, do
-not restart it. If the script shutdown exists, run shutdown to terminate the service
+Down. If the \fIservice\fR is running, send it a TERM signal and then a
+CONT signal. After it stops, do not restart it. If the script shutdown
+exists, run shutdown to terminate the service
 
 .TP
 .B \-r
-Restart. If the
-.I service
-is running, send it a term signal, then a CONT signal. After it stops,
-start it.
+Restart. If the \fIservice\fR is running, send it a term signal, then a
+CONT signal. After it stops, start it.
 
 .TP
 .B \-o
-Once. If the
-.I service
-is not running, start it. Do not restart it if it stops. 
+Once. If the \fIservice\fR is not running, start it. Do not restart it if
+it stops.
 
 .TP
 .B \-p
-Pause. Send the
-.I service
-a STOP signal. 
+Pause. Send the \fIservice\fR a STOP signal. 
 
 .TP
 .B \-c
-Continue. Send the
-.I service
-a CONT signal. 
+Continue. Send the \fIservice\fR a CONT signal. 
 
 .TP
 .B \-h
-Hangup. Send the
-.I service
-a HUP signal. 
+Hangup. Send the \fIservice\fR a HUP signal. 
 
 .TP
 .B \-a
-Alarm. Send the
-.I service
-an ALRM signal. 
+Alarm. Send the \fIservice\fR an ALRM signal. 
 
 .TP
 .B \-i
-Interrupt. Send the
-.I service
-an INT signal. 
+Interrupt. Send the \fIservice\fR an INT signal. 
 
 .TP
 .B \-t
-Terminate. Send the
-.I service
-a TERM signal. 
+Terminate. Send the \fIservice\fR a TERM signal. 
 
 .TP
 .B \-q
-Quit. Send the
-.I service
-a QUIT signal. 
+Quit. Send the \fIservice\fR a QUIT signal. 
 
 .TP
-.B \-1
-SIGUSR1. Send the
-.I service
-a SIGUSR1 signal. 
+.B \-1 | \-U
+SIGUSR1. Send the \fIservice\fR a SIGUSR1 signal. 
 
 .TP
 .B \-2
-SIGUSR2. Send the
-.I service
-a SIGUSR2 signal. 
+SIGUSR2. Send the \fIservice\fR a SIGUSR2 signal. 
 
 .TP
 .B \-k
-Kill. Send the
-.I service
-a KILL signal. 
+Kill. Send the \fIservice\fR a KILL signal. 
 
 .TP
 .B \-G
-For all options above, the signal will be sent to the entire process group instead of just the pid of
-the \fIservice\fR.
+For all options above, the signal will be sent to the entire process group
+instead of just the pid of the \fIservice\fR.
+
+.TP
+.B \-w
+Wait. \fBsvc\fR(8) will wait for \fIservice\fR to be up.
+\fBsupervise\fR(8) opens the named pipe \fIservice\fR/\fIup\fR after
+executing \fIservice\fR/\fIrun\fR. \fBsvc\fR opens this named pipe in
+O_WRONLY mode in blocking mode, thus making \fBsvc\fR wait till the named
+pipe is opened by \fBsupervise\fR. This option can be used by any program
+to wait for a supervised service. This can also be used by \fBsupervise\fR
+to setup inter-dependencies between services.
+
+.TP
+.B \-W
+Wait. \fBsvc\fR(8) will wait for \fIservice\fR to be down.
+\fBsupervise\fR(8) opens the named pipe \fIservice\fR/\fIdn\fR after
+sending TERM folowed by CONT signal to \fIservice\fR, when svc -d option is
+used. \fBsvc\fR opens this named pipe in O_WRONLY mode in blocking mode,
+thus making \fBsvc\fR wait till the named pipe is opened by
+\fBsupervise\fR. This option can be used by any program to wait for a
+supervised service.
+
+.TP
+.B \-T  \fItimeout
+Use \fItimeout\fR as timeout when waiting for service to be up or down (-w
+or -W options)
 
 .TP
 .B \-x
-Exit.
-.BR supervise (8)
-will exit as soon as the
-.I service
-is down. If you use this option on a stable system, you're doing something
-wrong;
-.BR supervise (8)
-is designed to run forever.
+Exit. \fBsupervise\fR(8) will exit as soon as the \fIservice\fR is down. If
+you use this option on a stable system, you're doing something wrong;
+\fBsupervise\fR is designed to run forever.
+
+.SH RETURN VALUE
+\fBsvc\fR returns 0 if all operations succeeded, 1 if it was not able to
+open \fIservice\fR/\fIsupervise\fR/\fIcontrol\fR, 2 if \fBsupervise\fR for
+service \fIservice\fR is not running and 3 for timeout. The return value
+cannot be used reliably when \fBsvc\fR is passed multiple arguments.
 
 .SH SEE ALSO
 supervise(8),

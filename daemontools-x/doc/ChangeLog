@@ -8,6 +8,15 @@
 04. svps: use .svscan.pid from service directory of each svscan instance
 - 10/10/2024
 05. runpod.sh: set systemd only if not set
+- 24/10/2024
+06. svc.c: added -w option to wait for service to be up
+07. supervise.c: BUG: status file truncated before announce
+08. svc.c: added -W option to wait for service to be down
+09. svc.c: added -T timeout option for -w, -W options
+10. supervise.c: open supervise/dn fifo in read mode after service goes down
+11. svscan.c, supervise.c: renamed SERVICEDIR to SCANDIR
+12. svscan.c: set PPID in main() to eliminate memory allocation failure in
+    child
 
 * Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
 Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024

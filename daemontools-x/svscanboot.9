@@ -2,26 +2,55 @@
 .TH svscanboot 8
 .SH NAME
 \fBsvscanboot\fR \- start svscan in service directories, with output/error
-logged through multilog.
+logged through multilog / journalctl
 
 .SH SYNOPSIS
-\fBsvscanboot\fR [ \fIservicedir\fR ]
+\fBsvscanboot\fR [ \fIscandir\fR ]
 
 .SH DESCRIPTION
 
-\fBsvscanboot\fR (without any command-line arguments) runs \fBsvscan\fR command
+\fBsvscanboot\fR (without any command-line arguments) runs \fBsvscan\fR
+command with descriptor 0, 1 and 2 redirected to \fI/dev/null\fR.
 
-svscan @servicedir@ 2>&1 
+svscan @servicedir@
+
+You can configure the default \fIscandir\fR to be used when
+\fBsvscanboot\fR is invoked, without any arguments, in
+\fI@sysconfdir@\fR/\fIcontrol\fR/\fIservicedir.conf\fR.
 
 If \fBsvscanboot\fR is given a command-line argument, it starts up svscan
-for the directory \fIservicedir\fR given on the command line (instead of
-just svscan @servicedir@).
+for the directory \fIscandir\fR given on the command line (instead of
+@servicedir@ or scandir configured in \fIservicedir.conf\fR).
 
-\fBsvscanboot\fR uses \fBenvdir\fR(8) on \fIservicedir\fR/.svscan/variables
-to set environment variables and clear all other environment variables.
+\fBsvscanboot\fR uses \fBenvdir\fR(8) on
+\fI@servicedir@\fR/.\fIsvscan\fR/\fIvariables\fR to set environment
+variables and clear all other environment variables.
+
+If you pass \fIscandir\fR argument to \fBsvscan\fR, \fI@servicedir@\fR gets
+replaced by \fIscandir\fR.
+
+All output of \fBsvscan\fR on descriptors 1 and 2 gets logged to
+\fI@logdir@\fR/\fIsvc\fR/\fIsvscan\fR/\fIcurrent\fR using \fBmultilog\fR(8)
+with following script in \fI@servicedir@\fR/.\fIsvscan\fR/\fIlog\fR/\fIrun\fR.
+
+.EX
+#!/bin/sh
+exec /usr/bin/setuidgid qmaill \
+/usr/sbin/multilog t /var/log/svc/svscan
+.EE
+
+You can log the svscan output to systemd journal by calling
+\fBsplogger\fR(8) in \fI@servicedir@\fR/.\fIsvcan\fR/\fIlog\fR/\fIrun\fR.
+If \fBsplogger\fR is used, you can use \fBjournalctl\fR(1) to view
+\fBsvscan\fR logs.
+
+.EX
+#!/bin/sh
+exec /usr/bin/setuidgid qmaill splogger svscan
+.EE
 
 You can set the following typical variables in
-\fIservicedir\fR/.svscan/variables directory
+\fI@servicedir@\fR/.\fIsvscan\fR/\fIvariables\fR directory.
 
 .EX
  PATH
@@ -34,11 +63,13 @@ You can set the following typical variables in
                  starting supervise(8)
  SCANLOG       - If set, svscan(8) logs all messages and errors using
                  multilog with instructions in
-                 \fIservicedir\fR/.svscan/log/run. If not set,
-                 svscanboot(8) pipes stdout, stderr of svscan(8) to
+                 \fIservicedir\fR/.\fIsvscan\fR/\fIlog\fR/\fIrun\fR. If not
+                 set, svscanboot(8) pipes stdout, stderr of svscan(8) to
                  readproctitle(8)
  UNSHARE       - If set, svscanboot(8) uses unshare --mount command to run
                  svscan(8)
+ VERBOSE       - Display informational messages.
+ SILENT        - Supress warning messages
 .EE
 
 The recommended old way was to put the following entry in /etc/inittab to
@@ -50,7 +81,27 @@ SV:345:respawn:@libexecdir@/svscanboot <>/dev/console 2<>/dev/console
 
 Many of the current operating systems use systemd(1) replacement for
 init(1). \fBsvcanboot(8)\fR should be invoked by your boot scripts -
-systemd(1), upstart(1), init(1) or boot rc scripts.
+systemd(1), upstart(1), init(1) or boot rc scripts. Then standard
+\fBsystemd\fR service script setup by indimail-mta is
+
+.EX
+[Unit]
+Description=SVscan Service
+After=local-fs.target network.target
+
+[Service]
+ExecStart=/usr/libexec/indimail/svscanboot /service
+ExecStop=/usr/bin/qmailctl stop
+Restart=on-failure
+RestartSec=10
+Type=simple
+PrivateTmp=no
+
+[Install]
+Alias=indimail.service
+Alias=indimail-mta.service
+WantedBy=multi-user.target
+.EE
 
 .SH SEE ALSO
 init(1),
@@ -75,6 +126,8 @@ setlock(8),
 unshare(1),
 unshare(2),
 svps(1),
+systemd(1),
+journalctl(1),
 ps(1)
 
  http://cr.yp.to/daemontools.html
