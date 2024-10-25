@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.47 2024-10-24 18:09:48+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.48 2024-10-25 11:04:10+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -575,9 +575,15 @@ doit()
 		 * handle events on
 		 * 1. selfpipe -> when child dies
 		 * 2. supervise/control
+		 *
 		 * This is where supervise will be, waiting
 		 * for sigchild to happen or waiting for
 		 * something written to supervise/control
+		 *
+		 * We use the self pipe trick by djb to handle all SIGCHLD events
+		 * 1. Before call to select
+		 * 2. select gets interrupted while running (this is what will happen most of the time)
+		 * 3. select returns because of timeout or EINTR from signal
 		 */
 		iopause(x, 2, &deadline, &stamp);
 
@@ -1176,13 +1182,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.47 2024-10-24 18:09:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.48 2024-10-25 11:04:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.48  2024-10-25 11:04:10+05:30  Cprogrammer
+ * updated comments
+ *
  * Revision 1.47  2024-10-24 18:09:48+05:30  Cprogrammer
  * fix status file getting truncated before announce()
  * open supervise/dn fifo in read mode after service goes down

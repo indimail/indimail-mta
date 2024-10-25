@@ -53,7 +53,9 @@ command which double forks (forks in the background). It is also required
 in such cases to make \fBsvc\fR(8) command operate and control
 \fBsupervise\fR reliably for such double forked daemon/commands in
 \fI./run\fR. \fI./run\fR is passed two command line arguments with
-\fIdir\fR as argv[1] and \fIhow\fR as argv[2].
+\fIdir\fR as argv[1] and \fIhow\fR as argv[2]. \fBsupervise\fR uses the
+self pipe trick to handle all SIGCHLD events reliably. This requires the
+use of two file descriptors for the selfpipe.
 
 .TS
 l l.
