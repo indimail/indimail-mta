@@ -17,6 +17,8 @@
 11. svscan.c, supervise.c: renamed SERVICEDIR to SCANDIR
 12. svscan.c: set PPID in main() to eliminate memory allocation failure in
     child
+- 26/10/2024
+13. svscan.c: make max number of services configurable
 
 * Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
 Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024

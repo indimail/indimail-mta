@@ -4,14 +4,16 @@
 svscan \- starts and monitors a collection of services
 
 .SH SYNOPSIS
-.B svscan [ -vs ] [ \fIscandir\fR ]
+.B svscan [ -vs ] [-n count] [ \fIscandir\fR ]
 
 .SH DESCRIPTION
 \fBsvscan\fR(8) starts one \fBsupervise\fR(8) process for each subdirectory
-of the current directory, up to a limit of 1000 subdirectories. You can
-override using current directory by passing \fIscandir\fR as an argument.
-If \fBsvscan\fR is given a command-line argument \fIdir\fR, it switches to
-that directory when it starts.
+of the current directory, up to a limit of subdirectories as default. You
+can change the default by passing -n option, in which case \fBsvscan\fR
+will allocate memory for \fIcount\fR service slots. You can override using
+current directory by passing \fIscandir\fR as an argument.  If \fBsvscan\fR
+is given a command-line argument \fIdir\fR, it switches to that directory
+when it starts.
 
 \fBsvscan\fR skips subdirectory names starting with dots. \fBsupervise\fR
 must be in \fBsvscan\fR's path. If the environment variable \fBSETSID\fR is
@@ -215,6 +217,11 @@ entrypoint for docker/podman and starts as PID 1. This entrypoint is
 implemented using the \fBdocker-entrypoint\fR(8) script.
 
 .SH OPTIONS
+.TP 3
+.B \-n \fIcount\fR
+Allocate memory for \fIcount\fR service slots. Without this option
+\fBsvscan\fR will scan upto 1000 subdirectories in \fIscandir\fR.
+
 .TP
 .B \-v
 Display informational messages. Normally this is suppressed. You can toggle
