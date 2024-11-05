@@ -1,38 +1,5 @@
 /*
- * $Log: qscheduler.c,v $
- * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.10  2024-02-28 18:03:16+05:30  Cprogrammer
- * removed unreachable statement
- *
- * Revision 1.9  2023-12-24 16:33:11+05:30  Cprogrammer
- * handle EINTR for mq_receive()
- *
- * Revision 1.8  2023-02-08 09:40:36+05:30  Cprogrammer
- * merged sigterm(), die() functions
- *
- * Revision 1.7  2022-09-26 00:02:05+05:30  Cprogrammer
- * handle SIGUSR1, SIGUSR2
- *
- * Revision 1.6  2022-04-24 19:07:12+05:30  Cprogrammer
- * display local+remote load on receipt of message queue by send_qload()
- *
- * Revision 1.5  2022-04-24 17:15:36+05:30  Cprogrammer
- * added function to update queue counts in shared memory
- *
- * Revision 1.4  2022-04-23 22:52:44+05:30  Cprogrammer
- * do not restart qmail-send when terminated due to empty queue
- *
- * Revision 1.3  2022-04-23 09:45:09+05:30  Cprogrammer
- * compare qload average with threshold in log
- *
- * Revision 1.2  2022-04-21 22:37:10+05:30  Cprogrammer
- * added -n option to keep qcount static
- *
- * Revision 1.1  2022-04-21 21:25:55+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qscheduler.c,v 1.12 2024-11-05 22:19:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -75,7 +42,7 @@ static int      qstart, qcount;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
-static int      selfpid, killed;
+static int      selfpid;
 static char  **prog_argv;
 static char     strnum1[FMT_ULONG];
 static int      bigtodo;
@@ -89,7 +56,8 @@ static int      shm_conf = -1;
 static int     *shm_queue;
 static int      compat_mode;
 static int      keep_qcount = 0;
-static char     strnum2[FMT_ULONG];
+static int      killed;
+static char     strnum2[FMT_ULONG], strnum3[FMT_ULONG];
 #endif
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
@@ -180,7 +148,14 @@ die(int how)
 
 	flagexitasap = how ? 1 : 2;
 	sig_block(sig_term);
-	sig_block(sig_child);
+	/*- prevent restarting qmail-send when dying */
+	sig_ignore(sig_child);
+	/*-
+	 * prevent havoc from child
+	 * inheriting signal handler
+	 * during race condition before
+	 * signal are reset after fork
+	 */
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
 	strnum1[fmt_ulong(strnum1, pid)] = 0;
@@ -255,6 +230,9 @@ die_chdir(const char *s)
 void
 sigterm()
 {
+	flagexitasap = 2;
+	sig_ignore(sig_child);
+	sig_block(sig_term);
 	die(0);
 }
 
@@ -292,7 +270,7 @@ sighup()
 	pid_t           pid;
 	char           *qptr;
 
-	sig_block(sig_child);
+	sig_block(sig_hangup);
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
 	strnum1[fmt_ulong(strnum1, pid)] = 0;
@@ -309,7 +287,7 @@ sighup()
 		log_outf("\n");
 		kill(queue_table[i].pid, sig_hangup);
 	}
-	sig_unblock(sig_child);
+	sig_unblock(sig_hangup);
 }
 
 void
@@ -339,10 +317,12 @@ sigint()
 	sig_unblock(sig_int);
 }
 
+#ifdef HASLIBRT
 void
 sigchld()
 {
-	int             child, wstat;
+	int             child, wstat, i;
+	char           *qptr;
 	pid_t           pid;
 
 	sig_block(sig_child);
@@ -358,15 +338,45 @@ sigchld()
 		}
 		if (!child)
 			break;
+		for (i = 0; i <= qcount; i++) {
+			if (queue_table[i].pid == child)
+				break;
+		}
+		strnum3[fmt_ulong(strnum3, child)] = 0;
+		if (i > qcount) {
+			strerr_warn2("alert: qscheduler: could not locate pid ", strnum3, 0);
+			die(1);
+		}
+		qptr = queuenum_to_dir(i);
 		if (child == killed) /*- we killed this as queue was empty */
 			killed = 0;
 		else {
-			start_send(-1, child);
-			sleep(1);
+			if (flagexitasap)
+				break;
+			if (!WIFSTOPPED(wstat)) {
+				if (WIFSIGNALED(wstat)) {
+					strnum2[fmt_ulong(strnum2, WTERMSIG(wstat))] = 0;
+					strerr_warn6("alert: qscheduler: restart qmail-send pid ", strnum3, ", queue ", qptr, " killed by signal ", strnum2, 0);
+					start_send(-1, child);
+					sleep(1);
+					continue;
+				} else
+				if (WIFEXITED(wstat) && WEXITSTATUS(wstat)) {
+					strnum2[fmt_ulong(strnum2, WEXITSTATUS(wstat))] = 0;
+					strerr_warn6("alert: qscheduler: restart qmail-send pid ", strnum3, ", queue ", qptr, " exited with status ", strnum2, 0);
+					start_send(-1, child);
+					sleep(1);
+					continue;
+				}
+			} else {
+				strnum2[fmt_ulong(strnum2, WSTOPSIG(wstat))] = 0;
+				strerr_warn6("info: qscheduler: not restarting qmail-send pid ", strnum3, ", queue ", qptr, " stopped by signal ", strnum2, 0);
+			}
 		}
 	} /*- for (child = 0;;) */
 	sig_unblock(sig_child);
 }
+#endif
 
 void
 sigusr1()
@@ -1193,7 +1203,6 @@ main(int argc, char **argv)
 	sig_catch(sig_alarm, sigalrm);
 	sig_catch(sig_hangup, sighup);
 	sig_catch(sig_int, sigint);
-	sig_catch(sig_child, sigchld);
 	sig_catch(sig_usr1, sigusr1);
 	sig_catch(sig_usr2, sigusr2);
 	if (chdir(auto_qmail) == -1)
@@ -1239,9 +1248,10 @@ main(int argc, char **argv)
 		qsargs[2] = argv[0]; /*- argument to qmail-start (./Mailbox or ./Maildir) */
 	set_queue_variables();
 #ifdef HASLIBRT
-	if (qtype == dynamic)
+	if (qtype == dynamic) {
+		sig_catch(sig_child, sigchld);
 		dynamic_queue();
-	else
+	} else
 		static_queue();
 #else
 	static_queue();
@@ -1252,7 +1262,47 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	const char     *x = "$Id: qscheduler.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qscheduler.c,v 1.12 2024-11-05 22:19:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: qscheduler.c,v $
+ * Revision 1.12  2024-11-05 22:19:43+05:30  Cprogrammer
+ * prevent restart of qmail-send on receipt of SIGTERM
+ *
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.10  2024-02-28 18:03:16+05:30  Cprogrammer
+ * removed unreachable statement
+ *
+ * Revision 1.9  2023-12-24 16:33:11+05:30  Cprogrammer
+ * handle EINTR for mq_receive()
+ *
+ * Revision 1.8  2023-02-08 09:40:36+05:30  Cprogrammer
+ * merged sigterm(), die() functions
+ *
+ * Revision 1.7  2022-09-26 00:02:05+05:30  Cprogrammer
+ * handle SIGUSR1, SIGUSR2
+ *
+ * Revision 1.6  2022-04-24 19:07:12+05:30  Cprogrammer
+ * display local+remote load on receipt of message queue by send_qload()
+ *
+ * Revision 1.5  2022-04-24 17:15:36+05:30  Cprogrammer
+ * added function to update queue counts in shared memory
+ *
+ * Revision 1.4  2022-04-23 22:52:44+05:30  Cprogrammer
+ * do not restart qmail-send when terminated due to empty queue
+ *
+ * Revision 1.3  2022-04-23 09:45:09+05:30  Cprogrammer
+ * compare qload average with threshold in log
+ *
+ * Revision 1.2  2022-04-21 22:37:10+05:30  Cprogrammer
+ * added -n option to keep qcount static
+ *
+ * Revision 1.1  2022-04-21 21:25:55+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

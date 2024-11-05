@@ -9,6 +9,10 @@ Release @version@-@release@ Start 08/08/2024 End XX/XX/XXXX
 4. svctool: fix STARTTLS issue for imap port 143, pop3 port 110 permission
    reading servercert.pem. Run with qcerts gid
 5. qmail-poppass.c: ensure qmail-poppass runs with qmaild:indimail privileges
+- 05/09/2024
+6. qscheduler: prevent restart of qmail-send on receipt of SIGTERM
+7. svctool: umount resolv.conf only when UNSHARE variable is set and
+   /etc/indimail/resolv.conf exists
 
 * Tue Aug 06 2024 12:51:02 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.8-1.1%{?dist}
 Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX

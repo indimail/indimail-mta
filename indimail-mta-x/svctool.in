@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.731 2024-09-02 19:33:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.in,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.731 2024-09-02 19:33:27+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.in,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6404,9 +6404,11 @@ fi
 dump_run_header
 echo "exec 2>&1"
 if [ $mount_resolvconf -eq 1 ] ; then
-	echo "/usr/bin/umount /etc/resolv.conf"
+	echo "if [ -s $SERVICEDIR/variables/UNSHARE -a -f $sysconfdir/resolv.conf ] ; then"
+	echo "  /usr/bin/umount /etc/resolv.conf"
+	echo "fi"
 fi
-echo "exec $QmailBinPrefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
+echo "$prefix/bin/svc -dx $SERVICEDIR/*"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 
