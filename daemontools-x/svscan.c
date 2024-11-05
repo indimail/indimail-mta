@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.37 2024-10-26 22:40:24+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.38 2024-11-05 22:59:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -55,11 +55,13 @@ typedef struct
 } svcs;
 static svcs    *x;
 static int      numx, scannow, auto_scan, use_run = 1,
-				verbose, silent, sess_leader, pidlen;
+				verbose, silent, pidlen,
+				shutdown_in_progress, svscan_logpid,
+				svscan_logidx = -1;
 static unsigned long svcount = SERVICES;
 static pid_t    svpid;
 static char     fnlog[260], fntmp[260], pidstr[FMT_ULONG];
-static c_char  *pidfile, *p_exe_name, *run_dir;
+static c_char  *pidfile, *p_cmd_line, *run_dir;
 static stralloc tmp = {0};
 
 #ifdef USE_RUNFS
@@ -85,6 +87,41 @@ initialize_run()
 }
 #endif
 
+void
+kill_svc(int what)
+{
+	int             i;
+	char            strnum[FMT_ULONG];
+
+	for (i = 0; i < numx; ++i) {
+		if (!what) {
+			if (x[i].pid != -1 && x[i].pid && !kill(x[i].pid, 0)) {
+				if (verbose) {
+					strnum[fmt_int(strnum, x[i].pid)] = 0;
+					strerr_warn5(INFO, "pid: ", pidstr, ": terminating svc pid ", strnum, 0);
+				}
+				if (kill(x[i].pid, SIGTERM) == -1) {
+					strnum[fmt_int(strnum, x[i].pid)] = 0;
+					strerr_warn6(WARN, "pid ", pidstr, " kill -SIGTERM ", strnum, ": ", &strerr_sys);
+				}
+			}
+		} else {
+			if (x[i].pidlog && x[i].pidlog != svscan_logpid)
+				close(x[i].pi[1]);
+			if (x[i].pidlog && x[i].pidlog != svscan_logpid && !kill(x[i].pidlog, 0)) {
+				if (verbose) {
+					strnum[fmt_ulong(strnum, x[i].pidlog)] = 0;
+					strerr_warn5(INFO, "pid: ", pidstr, ": terminating log pid ", strnum, 0);
+				}
+				if (kill(x[i].pidlog, SIGTERM) == -1) {
+					strnum[fmt_int(strnum, x[i].pidlog)] = 0;
+					strerr_warn6(WARN, "pid ", pidstr, " kill -SIGTERM ", strnum, ": ", &strerr_sys);
+				}
+			}
+		}
+	}
+}
+
 int
 terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 {
@@ -93,9 +130,8 @@ terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 	if (!*did_kill) {
 		*did_kill = 1;
 		if (verbose)
-			strerr_warn4(INFO, "pid: ", pidstr, ": terminating session with TERM 1/3...", 0);
-		if (kill(0, sig_term) == -1)
-			strerr_warn4(WARN, "pid ", pidstr, " kill -0 SIGTERM: ", &strerr_sys);
+			strerr_warn4(INFO, "pid: ", pidstr, ": terminating svc sessions with TERM...", 0);
+		kill_svc(0);
 		return 1;
 	} else
 	if (*did_kill == 1) {
@@ -103,13 +139,8 @@ terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 		if (t > w1) {
 			*did_kill = 2;
 			if (verbose)
-				strerr_warn4(INFO, "pid: ", pidstr, ": terminating session with TERM 2/3...", 0);
-			if (env_get("SCANLOG")) {
-				close(2);
-				dup2(0, 2);
-			}
-			if (kill(0, sig_term) == -1)
-				strerr_warn4(WARN, "pid ", pidstr, " kill -0 SIGTERM: ", &strerr_sys);
+				strerr_warn4(INFO, "pid: ", pidstr, ": terminating log sessions with TERM...", 0);
+			kill_svc(1);
 			return 2;
 		}
 	} else
@@ -119,8 +150,6 @@ terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 			*did_kill = 3;
 			if (verbose)
 				strerr_warn4(INFO, "pid: ", pidstr, ": terminating session with KILL 3/3...", 0);
-			if (kill(0, SIGKILL) == -1)
-				strerr_warn4(WARN, "pid ", pidstr, " kill -0 SIGKILL: ", &strerr_sys);
 			return 3;
 		}
 	}
@@ -130,7 +159,7 @@ terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 void
 init_cmd(const char *cmmd, int shutdown)
 {
-	int             child, r, wstat, did_kill = 0, do_wait, i;
+	int             child, r, wstat, did_kill = 0, do_wait, i, j;
 	unsigned int    w1, w2;
 	const char     *cpath;
 	char           *p, *terminate_session, *args[4];
@@ -138,9 +167,17 @@ init_cmd(const char *cmmd, int shutdown)
 
 	if (shutdown)
 		sig_block(sig_child);
+	do_wait = env_get("WAIT_INITCMD") ? 1 : 0;
+	terminate_session = shutdown ? env_get("TERMINATE_SESSION") : 0;
 	cpath = shutdown ? SVSCANLOG"/shutdown" : cmmd && *cmmd ? cmmd : SVSCANLOG"/run";
-	if (access(cpath, X_OK))
+	if (access(cpath, X_OK)) {
+		if (shutdown && terminate_session) {
+			kill_svc(0);
+			usleep(500);
+			kill_svc(1);
+		}
 		return;
+	}
 	switch (child = fork())
 	{
 	case -1:
@@ -158,65 +195,62 @@ init_cmd(const char *cmmd, int shutdown)
 	default:
 		break;
 	}
-	do_wait = env_get("WAIT_INITCMD") ? 1 : 0;
-	terminate_session = shutdown ? env_get("TERMINATE_SESSION") : 0;
-	if (svpid == 1) {
-		if (!do_wait && !shutdown)
-			return;
-		starttime = time((time_t *) NULL);
-		if (!(p = env_get("KILLWAIT"))) {
-			if (!(p = env_get("KILLWAIT1"))) {
-				i = -1;
-				w1 = 30;
+	starttime = time((time_t *) NULL);
+	if (shutdown) {
+		if (svpid == 1 || terminate_session) {
+			if (!(p = env_get("KILLWAIT"))) {
+				if (!(p = env_get("KILLWAIT1"))) {
+					i = -1;
+					w1 = 2;
+				} else {
+					scan_uint(p, &w1);
+					i = 1;
+				}
+				if (!(p = env_get("KILLWAIT2")))
+					w2 = 4;
+				else {
+					scan_uint(p, &w2);
+					if (i == -1)
+						w1 = w2 / 2;
+				}
 			} else {
-				scan_uint(p, &w1);
-				i = 1;
-			}
-			if (!(p = env_get("KILLWAIT2")))
-				w2 = 60;
-			else {
 				scan_uint(p, &w2);
-				if (i == -1)
-					w1 = w2 / 2;
+				w1 = w2 / 2;
 			}
-		} else {
-			scan_uint(p, &w2);
-			w1 = w2 / 2;
 		}
 	} else
-	if (!do_wait) {
-		if (shutdown && terminate_session)
-			if (kill(0, sig_term) == -1)
-				strerr_warn4(WARN, "pid ", pidstr, " kill -0 SIGKILL: ", &strerr_sys);
+	if (!do_wait)
+		return;
+	if (shutdown && svpid > 1 && !do_wait && terminate_session) {
+		kill_svc(0);
+		usleep(500);
+		kill_svc(1);
 		return;
 	}
-	/*
-	 * we come here when
-	 * PID is   1 and shutdown is 1
-	 * PID is > 1 and do_wait  is 1
-	 */
-	for (;;) {
-		r = (svpid == 1 && shutdown) ? wait_nohang(&wstat) : wait_pid(&wstat, child);
+
+	for (i = j = 0;;) {
+		r = (shutdown && (svpid == 1 || terminate_session)) ? wait_nohang(&wstat) : wait_pid(&wstat, child);
 		if (r == -1) {
 			if (errno == error_intr)
 				continue; /*- impossible for wait_nohang */
 			if (errno == error_child)
 				strerr_warn4(INFO, "pid: ", pidstr, ": no processes left...", 0);
+			strerr_warn4(WARN, "pid: ", pidstr, ": wait: ", &strerr_sys);
+			return;
+		}
+		if (r) {
+			if (shutdown && (svpid == 1 || terminate_session))
+				continue;
 			break;
 		}
-		if (r)
-			continue;
-		if (!r) {
-			if (svpid == 1 && shutdown) {
-				if (!(i = terminate(starttime, w1, w2, &did_kill))) {
-					if (verbose)
-						strerr_warn4(INFO, "pid: ", pidstr, ": waiting for processes to shutdown...", 0);
-					sleep(1);
-				}
-				if (i == 3)
-					return;
-			} else
-				break;
+		if (shutdown && (svpid == 1 || terminate_session) && i != 3) {
+			if (!(i = terminate(starttime, w1, w2, &did_kill))) {
+				if (verbose && !j++)
+					strerr_warn4(INFO, "pid: ", pidstr, ": waiting for processes to shutdown...", 0);
+				usleep(500);
+			}
+			if (i == 3)
+				return;
 		}
 	} /*- for (;;) */
 	return;
@@ -322,6 +356,7 @@ start(const char *fn, const char *sdir)
 		return;
 	}
 #endif
+	/*- ignore directories starting with . except SVSCANLOG */
 	if (fn[0] == '.' && str_diff(fn, SVSCANLOG))
 		return;
 	if (stat(fn, &st) == -1) {
@@ -522,6 +557,10 @@ start(const char *fn, const char *sdir)
 			strerr_die4sys(111, FATAL, "unable to start supervise ", fn, "/log: ");
 		default:
 			x[i].pidlog = child;
+			if (fn[0] == '.' && !str_diff(fn, SVSCANLOG)) {
+				svscan_logpid = child;
+				svscan_logidx = i;
+			}
 		}
 	}
 }
@@ -568,8 +607,8 @@ doit(char *sdir, pid_t mypid)
 			t = wait_stopped(wstat) ? wait_stopsig(wstat) : sig_cont;
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (verbose) {
-				if (p_exe_name)
-					strerr_warn7(INFO, "pid: ", strnum1, " exe ", p_exe_name,
+				if (p_cmd_line)
+					strerr_warn7(INFO, "pid: ", strnum1, " cmd ", p_cmd_line,
 							wait_stopped(wstat) ? ", stopped by signal " : ", continued by signal ", strnum2, 0);
 				else
 					strerr_warn5(INFO, "pid: ", strnum1,
@@ -580,8 +619,8 @@ doit(char *sdir, pid_t mypid)
 			t = wait_termsig(wstat);
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (verbose) {
-				if (p_exe_name)
-					strerr_warn7(INFO, "pid: ", strnum1, " exe ", p_exe_name, ", killed by signal ", strnum2, 0);
+				if (p_cmd_line)
+					strerr_warn7(INFO, "pid: ", strnum1, " cmd ", p_cmd_line, ", killed by signal ", strnum2, 0);
 				else
 					strerr_warn5(INFO, "pid: ", strnum1, ", killed by signal ", strnum2, 0);
 			}
@@ -589,8 +628,8 @@ doit(char *sdir, pid_t mypid)
 			t = wait_exitcode(wstat);
 			strnum2[fmt_ulong(strnum2, t)] = 0;
 			if (verbose) {
-				if (p_exe_name)
-					strerr_warn7(INFO, "pid: ", strnum1, " exe ", p_exe_name, ", exited with status=", strnum2, 0);
+				if (p_cmd_line)
+					strerr_warn7(INFO, "pid: ", strnum1, " exe ", p_cmd_line, ", exited with status=", strnum2, 0);
 				else
 					strerr_warn5(INFO, "pid: ", strnum1, ", exited with status=", strnum2, 0);
 			}
@@ -657,15 +696,32 @@ sighup(int i)
 static void
 sigterm(int i)
 {
+	char            strnum[FMT_ULONG];
+	int             wstat;
 
 	scannow = 0;
+	shutdown_in_progress = 1;
+	sig_ignore(sig_term);
 	unlink(pidfile);
-	signal(SIGTERM, SIG_IGN);
-	if (verbose)
-		strerr_warn4(INFO, "pid: ", pidstr, ": shutdown...", 0);
+	strerr_warn4(INFO, "pid: ", pidstr, ": shutdown...", 0);
 	init_cmd(0, 1); /*- run .svscan/shutdown */
-	if (verbose)
-		strerr_warn4(INFO, "pid: ", pidstr, ": exiting...", 0);
+	if (svscan_logpid) {
+		strnum[fmt_ulong(strnum, svscan_logpid)] = 0;
+		if (verbose)
+			strerr_warn5(INFO, "pid: ", pidstr, ": terminating log pid ", strnum, 0);
+	}
+	strerr_warn4(INFO, "pid: ", pidstr, ": exiting...", 0);
+	sleep(1);
+	if (svscan_logidx != -1) {
+		dup2(0, 1);
+		dup2(0, 2);
+		close(x[svscan_logidx].pi[1]);
+	}
+	if (svscan_logpid) {
+		if (kill(svscan_logpid, SIGTERM) == -1)
+			strerr_warn6(WARN, "pid ", pidstr, " kill -SIGTERM ", strnum, ": ", &strerr_sys);
+		wait_pid(&wstat, svscan_logpid);
+	}
 	_exit(0);
 }
 
@@ -771,8 +827,7 @@ get_lock(char *sdir)
 	close(fd);
 	if (!str_diff(buf, "svscan\n")) { /*- indeed pid is svscan process */
 		buf[6] = 0;
-		strerr_warn5(FATAL, "[", buf, "] ", "already running", 0);
-		_exit (111);
+		strerr_die5x(111, FATAL, "[", buf, "] ", "already running");
 	}
 	/*
 	if (buf[0] == 's' && buf[1] == 'v' && buf[2] == 's' &&
@@ -792,17 +847,18 @@ get_lock(char *sdir)
 }
 
 char *
-get_proc_exename(pid_t pid)
+get_proc_cmdline(pid_t pid)
 {
 	char            strnum[FMT_ULONG];
+	char           *s;
 	static char     buf[128];
 	int             n, fd;
 
 	strnum[n = fmt_ulong(strnum, pid)] = 0;
-	/*- use the /proc filesystem to figure out command name */
+	/*- use the /proc filesystem to figure out command line */
 	if (!stralloc_copyb(&tmp, "/proc/", 6) ||
 			!stralloc_catb(&tmp, strnum, n) ||
-			!stralloc_catb(&tmp, "/comm", 5) ||
+			!stralloc_catb(&tmp, "/cmdline", 8) ||
 			!stralloc_0(&tmp))
 		strerr_die2x(111, FATAL, "out of memory");
 	if ((fd = open(tmp.s, O_RDONLY, 0)) == -1) /*- process is now dead */
@@ -812,14 +868,19 @@ get_proc_exename(pid_t pid)
 		return ((char *) NULL);
 	}
 	close(fd);
-	buf[n - 1] = 0; /*- remove newline */
+	for (s = buf;  s < buf + n; s++) {
+		if (!*s)
+			*s = ' ';
+	}
 	return buf;
 }
 
 static void
 sigchld(int signum, siginfo_t *si, void *data)
 {
-	p_exe_name = get_proc_exename(si->si_pid);
+	p_cmd_line = get_proc_cmdline(si->si_pid);
+	if (shutdown_in_progress)
+		return;
 	scannow = 2;
 }
 
@@ -908,11 +969,8 @@ main(int argc, char **argv)
 	else
 	if (!env_put2("PWD", sdir))
 		strerr_die2x(111, FATAL, "out of memory");
-	if (env_get("SETSID")) {
-		if (setsid() == (pid_t) -1)
-			strerr_die2sys(111, FATAL, "unable to become session leader: ");
-		sess_leader = 1;
-	}
+	if (env_get("SETSID") && setsid() == (pid_t) -1)
+		strerr_die2sys(111, FATAL, "unable to become session leader: ");
 	sig_catch(sig_hangup, sighup);
 	sig_catch(sig_term, sigterm);
 	sig_catch(sig_usr1, siguser1);
@@ -965,13 +1023,17 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.37 2024-10-26 22:40:24+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.38 2024-11-05 22:59:32+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.38  2024-11-05 22:59:32+05:30  Cprogrammer
+ * added killsvc function to shutdown non-log and log services
+ * refactored shutdown handling
+ *
  * Revision 1.37  2024-10-26 22:40:24+05:30  Cprogrammer
  * make max number of services configurable
  *

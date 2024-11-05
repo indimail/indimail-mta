@@ -19,6 +19,14 @@
     child
 - 26/10/2024
 13. svscan.c: make max number of services configurable
+- 05/09/2024
+14. minisvc: umount resolv.conf only when UNSHARE variable is set and
+   /etc/indimail/resolv.conf exists
+15. supervise.c: execute shutdown script on SIGTERM
+16. supervise.c: terminate on single SIGTERM instead of the earlier two for logger
+17. supervise.c: prevent restart of service on SIGTERM
+18. svscan.c: added killsvc function to shutdown non-log and log services
+19. svscan.c: refactored shutdown handling
 
 * Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
 Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024

@@ -17,11 +17,7 @@ when it starts.
 
 \fBsvscan\fR skips subdirectory names starting with dots. \fBsupervise\fR
 must be in \fBsvscan\fR's path. If the environment variable \fBSETSID\fR is
-set, \fBsvscan\fR calls \fBsetsid(2)\fR to become a session leader. When
-running as a session leader, \fBsvscan\fR will terminate process group if
-the environment vairable \fBTERMINATE_SESSION\fR is set. This will
-terminate all supervise proceses started by \fBsvscan\fR by calling
-kill(0, 15).
+set, \fBsvscan\fR calls \fBsetsid(2)\fR to become a session leader.
 
 \fBsvscan\fR optionally starts a pair of \fBsupervise\fR processes, one for
 a subdirectory \fIs\fR, one for \fIs\fR/\fIlog\fR, with a pipe between
@@ -73,8 +69,8 @@ used, writing the pid file involves switching directories between the
 \fBrun\fR filesystem and the \fIscandir\fR directory. \fBsvscan\fR uses the
 pid file to prevent multiple copies of \fBsvscan\fR to run for the same
 directory. If \fBDISABLE_RUN\fR is set, \fBsvscan\fR will use \fIscandir\fR
-instead of /\fIrun\fR or /\fI/var\fR/\fIrun\fR. If \fBDISABLE_RUN\fR is
-set, you can have an multiple invocation of \fBsvscan\fR run for different
+instead of /\fIrun\fR or \fI/var\fR/\fIrun\fR. If \fBDISABLE_RUN\fR is set,
+you can have an multiple invocation of \fBsvscan\fR run for different
 \fIscandir\fR passed on the command line. \fBsvscan\fR uses the /\fIproc\fR
 filesystem to verify if the pid belongs to a process named \fBsvscan\fR, by
 opening the file /\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR will start
@@ -92,9 +88,35 @@ old subdirectory where a \fBsupervise\fR process has exited, it restarts
 the \fBsupervise\fR process. In the \fBlog\fR case it reuses the same pipe
 so that no data is lost. The default scan interval of 60 secs can be
 changed by setting \fBSCANINTERVAL\fR environment variable. You can also
-send a \fBHUP\fR signal to \fBsvscan\fR to force a directory scan. If
-running as PID 1, \fBsvscan\fR will automatically scan for new
+send a \fBHUP\fR signal to \fBsvscan\fR to force a directory scan.
+
+\fBsvscan\fR can be run with a PID of 1 (init replacement) and reap child
+processes. This feature is exploited in docker/podman/kubernates
+environment. The \fBINITCMD\fR environment variable can be used to do
+service management. The biggest advantage of \fBsvscan\fR is its
+simplicity. Unlike systemd(1), it is not complex and tied with multiple
+pieces of software to make it work. You can also use openrc from Gentoo to
+create a decent, simple service manager to start only the processes that
+you require.
+
+If running as PID 1, \fBsvscan\fR will automatically scan for new
 subdirectories when any of it's children or any orphaned process die.
+Hence, if running as PID 1, \fBsvscan\fR will immediately restart a
+\fBsupervise\fR process if it dies, rather waiting for 60 (or
+\fBSCANINTERVAL\fR) seconds. This behaviour can be enabled as default
+regardless of the PID of \fBsvscan\fR by setting \fBSCANNOW\fR environment
+variable. Setting this variable enables a signal handler for
+\fBSIGCHILD\fR. If running as PID 1 or when \fBTERMINATE_SESSION\fR
+environment variable is set, \fBsvscan\fR will relay \fBSIGTERM\fR to all
+children when it gets \fBSIGTERM\fR. It first sends SIGTERM to all non-log
+processes than waits for w1=2 seconds , followed by SIGTERM to all log
+processes and then wait for another w2=2 seconds. The default of 2 seconds
+for w1 and w2 can be changed by setting \fBKILLWAIT1\fR and \fBKILLWAIT2\fR
+environment variables. Instead of \fBKILLWAIT1\fR, \fBKILLWAIT2\fR you can
+set \fBKILLWAIT\fR environment variable to have second \fBSIGTERM\fR after
+\fBKILLWAIT\fR/2 secs. You can also set \fBKILLWAIT\fR environment variable
+where w1 will be 0.5 * \fBKILLWAIT\fR seconds and w2 will be \fBKILLWAIT\fR
+seconds.
 
 \fBsvscan\fR can auto-start or auto-stop a service based on the presence or
 absence of \fIs\fR/down file. During each scan, \fBsvscan\fR will
@@ -119,27 +141,6 @@ started by \fBsvscan\fR (and also the children of supervise) inherit the
 descriptors 0, 1 and 2. Any output of these processes not redirected to a
 log file will get logged along with \fBsvscan\fR log.
 
-\fBsvscan\fR can be run with a PID of 1 (init replacement) and reap child
-processes. This feature is exploited in docker/podman/kubernates
-environment. The \fBINITCMD\fR environment variable can be used to do
-service management. The biggest advantage of \fBsvscan\fR is its
-simplicity. Unlike systemd(1), it is not complex and tied with multiple
-pieces of software to make it work. You can also use openrc from Gentoo to
-create a decent, simple service manager to start only the processes that
-you require. If running as PID 1, \fBsvscan\fR will immediately restart a
-\fBsupervise\fR process if it dies, rather waiting for 60 (or
-\fBSCANINTERVAL\fR) seconds. This behaviour can be enabled as default by
-setting \fBSCANNOW\fR environment variable. Setting this variable enables a
-signal handler for \fBSIGCHILD\fR. If running as PID 1, \fBsvscan\fR will
-relay \fBSIGTERM\fR to all children when it gets \fBSIGTERM\fR. By default,
-it will send \fBSIGTERM\fR twice - first immediately and second one after
-30 seconds followed by \fBSIGKILL\fR after another 30 secs. The default of
-30 seconds can be changed by setting \fBKILLWAIT1\fR and \fBKILLWAIT2\fR
-environment variables. Instead of \fBKILLWAIT1\fR, \fBKILLWAIT2\fR you can
-set \fBKILLWAIT\fR environment variable to have second \fBSIGTERM\fR after
-\fBKILLWAIT\fR/2 secs and \fBSIGKILL\fR after \fBKILLWAIT\fR secs. Setting
-\fBKILLWAIT\fR overrides \fBKILLWAIT1\fR and \fBKILLWAIT2\fR.
-
 If \fBINITCMD\fR environment variable is defined and set to an empty string
 and if \fI@servicedir@\fR/.\fIsvscan\fR/\fIrun\fR exists and has the
 executable bit set, \fIrun\fR is executed once during startup.
@@ -161,21 +162,30 @@ if [ $PPID -eq 1 ] ; then
 fi
 .EE
 
-If \fI@servicedir@\fR/.\fIsvscan\fR/\fIshutdown\fR exists, it will be
-executed when \fBsvscan\fR receives a TERM signal. This can be used to
-terminate all supervise processes started by \fBsvscan\fR. A typical
-example of a \fIshutdown\fR script looks like this. The -G argument to
-\fBsvc\fR(8) sends signal to the entire process group of \fBsvscan\fR.
+As stated earlier, \fBsvscan\fR can be made to terminate all
+\fBsupervise\fR processes on SIGTERM when \fBTERMINATE_SESSION\fR
+environment variable is set.  If
+\fI@servicedir@\fR/.\fIsvscan\fR/\fIshutdown\fR exists, it will be executed
+when \fBsvscan\fR receives a TERM signal. This can be used to terminate all
+supervise processes started by \fBsvscan\fR without setting
+\fBTERMINATE_SESION\fR. A typical example of a \fIshutdown\fR script looks
+like below.
 
 .EX
 #!/bin/sh
 exec 2>&1
 /usr/bin/umount /etc/resolv.conf
-exec /usr/bin/svc -Gdx /service/* /service/*/log /service/.svscan/log
+/usr/bin/svc -dWx /service/*
+/usr/bin/svc -dWx /service/*/log
+/usr/bin/svc -dW /service/.svscan/log
+/usr/bin/svc -dx /service/.svscan/log
 .EE
 
-The above can also be achieved by setting \fBSETSID\fR and
-\fBTERMINATE_SESSION\fR environment variables as explained earlier.
+You can pass -G argument to \fBsvc\fR(8) to send signal to the entire
+process group of \fBsvscan\fR.
+
+The above can also be achieved by \fBTERMINATE_SESSION\fR environment
+variables as explained earlier.
 
 On most Linux distros, \fBsvscan\fR is started using a systemd(1) unit file
 /usr/lib/systemd/system/svscan.service. On FreeBSD, it is started using rc
@@ -214,7 +224,7 @@ sudo qmailctl start/stop
 
 In a container environment, \fBsvscan\fR is started through an
 entrypoint for docker/podman and starts as PID 1. This entrypoint is
-implemented using the \fBdocker-entrypoint\fR(8) script.
+implemented using the \fBdocker-entrypoint\fR(8) script in \fI/usr/sbin\fR.
 
 .SH OPTIONS
 .TP 3

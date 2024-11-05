@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.48 2024-10-25 11:04:10+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.49 2024-11-05 22:55:30+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -29,6 +29,10 @@
 #include "scan.h"
 #include "seek.h"
 #include "subreaper.h"
+
+#ifndef SVSCANLOG
+#define SVSCANLOG ".svscan"  /* must begin with dot ('.') */
+#endif
 
 static char    *dir;
 static int      selfpipe[2];
@@ -68,6 +72,9 @@ int             use_runfs;
 static pid_t    childpid = 0;	/*- 0 means down */
 static int      grandchild = 0;
 static pid_t    svpid;
+const char     *run[4] = { "./run", 0 , 0, 0};
+const char     *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
+const char     *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
 
 void
 pidchange(pid_t pid, char up)
@@ -154,36 +161,98 @@ do_kill(int prgrp, int *siglist, const char **signame)
 	} /*- for (i = siglist, j = 0; *i != -1; i++, j++) */
 }
 
-static void
-sigterm()
-{
-	int             siglist[] = {-1, -1, -1};
-	const char     *signame[] = {0, 0}, *p;
-	static int      got_term;
-
-	flagexit = 1;
-	if (childpid) {
-		p = env_get("SV_PWD");
-		/*-
-		 * die on the second SIGTERM if PPID is 1 and
-		 * supervised service is a logger
-		 */
-		if (p && logger && getppid() == 1 && !got_term++)
-			return;
-		flagwantxx = 0;
-		flagwantup = 1;
-		siglist[0] = SIGTERM;
-		siglist[1] = -1;
-		signame[0] = "SIGTERM";
-		do_kill(1, siglist, signame);
-	}
-}
-
 void
 trigger(void)
 {
 	if (write(selfpipe[1], "", 1) == -1)
 		;
+}
+
+void
+tryaction(const char **action, pid_t cpid, int wstat)
+{
+	pid_t           f;
+	int             t, i;
+	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG + 1];
+
+	switch (f = fork())
+	{
+	case -1:
+		if (!silent)
+			strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
+		deepsleep(60);
+		trigger();
+		return;
+	case 0:
+		sig_uncatch(sig_child);
+		sig_unblock(sig_child);
+#ifdef USE_RUNFS
+		if (use_runfs && fchdir(fddir) == -1)
+			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
+#endif
+		strnum1[fmt_ulong(strnum1, cpid)] = 0;
+		action[1] = dir;
+		action[2] = strnum1;
+		if (wstat) {
+			if (WIFSTOPPED(wstat) || WIFSIGNALED(wstat)) {
+				strnum2[fmt_uint(strnum2, WIFSTOPPED(wstat) ? WSTOPSIG(wstat) : WTERMSIG(wstat))] = 0;
+				action[3] = strnum2;
+				action[4] = "stopped/signalled";
+			} else
+			if (WIFEXITED(wstat)) {
+				if ((t = WEXITSTATUS(wstat)) < 0) {
+					i = fmt_uint(strnum2 + 1, 0 - t);
+					*strnum2 = '-';
+					strnum2[i + 1] = 0;
+				} else
+					strnum2[fmt_uint(strnum2, t)] = 0;
+				action[3] = strnum2;
+				action[4] = "exited";
+			} else {
+				action[3] = "-1";
+				action[4] = "unknown";
+			}
+		} else {
+			action[2] = dir;
+			action[3] = NULL;
+		}
+		execve(*action, (char **) action, environ);
+		strerr_die4sys(111, fatal.s, "unable to exec ", *action, ": ");
+	default:
+		wait_pid(&t, f);
+	}
+}
+
+static void
+sigterm()
+{
+	int             siglist[] = {-1, -1, -1};
+	const char     *signame[] = {0, 0};
+
+	if (childpid) {
+		sig_block(sig_term);
+#ifdef USE_RUNFS
+		if (use_runfs && fchdir(fddir) == -1)
+			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
+#endif
+		if (!access(*shutdown, F_OK))
+			tryaction(shutdown, childpid, 0); /*- run the shutdown command */
+#ifdef USE_RUNFS
+		if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+			strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
+#endif
+		flagexit = 1;
+		flagwantxx = 1;
+		flagwantup = 0;
+		flagpaused = 0;
+		siglist[0] = SIGTERM;
+		siglist[1] = SIGCONT;
+		signame[0] = "SIGTERM";
+		signame[1] = "SIGCONT";
+		do_kill(1, siglist, signame);
+		sig_unblock(sig_term);
+	} else
+		flagexit = 1;
 }
 
 int
@@ -247,10 +316,6 @@ get_wait_params(unsigned short *interval, char **sv_name)
 		strerr_warn5(info.s, "wait ", strnum, " seconds for service ", *sv_name, 0);
 	return 0;
 }
-
-const char     *run[4] = { "./run", 0 , 0, 0};
-const char     *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
-const char     *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
 
 void
 do_wait()
@@ -457,61 +522,6 @@ trystart(const char *how)
 	deepsleep(1);
 }
 
-void
-tryaction(const char **action, pid_t cpid, int wstat, int do_alert)
-{
-	pid_t           f;
-	int             t, i;
-	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG + 1];
-
-	switch (f = fork())
-	{
-	case -1:
-		if (!silent)
-			strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
-		deepsleep(60);
-		trigger();
-		return;
-	case 0:
-		sig_uncatch(sig_child);
-		sig_unblock(sig_child);
-#ifdef USE_RUNFS
-		if (use_runfs && fchdir(fddir) == -1)
-			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
-#endif
-		strnum1[fmt_ulong(strnum1, cpid)] = 0;
-		action[1] = dir;
-		action[2] = strnum1;
-		if (do_alert) {
-			if (WIFSTOPPED(wstat) || WIFSIGNALED(wstat)) {
-				strnum2[fmt_uint(strnum2, WIFSTOPPED(wstat) ? WSTOPSIG(wstat) : WTERMSIG(wstat))] = 0;
-				action[3] = strnum2;
-				action[4] = "stopped/signalled";
-			} else
-			if (WIFEXITED(wstat)) {
-				if ((t = WEXITSTATUS(wstat)) < 0) {
-					i = fmt_uint(strnum2 + 1, 0 - t);
-					*strnum2 = '-';
-					strnum2[i + 1] = 0;
-				} else
-					strnum2[fmt_uint(strnum2, t)] = 0;
-				action[3] = strnum2;
-				action[4] = "exited";
-			} else {
-				action[3] = "-1";
-				action[4] = "unknown";
-			}
-		} else {
-			action[2] = dir;
-			action[3] = NULL;
-		}
-		execve(*action, (char **) action, environ);
-		strerr_die4sys(111, fatal.s, "unable to exec ", *action, ": ");
-	default:
-		wait_pid(&t, f);
-	}
-}
-
 static void
 postmortem(pid_t pid, int wstat)
 {
@@ -573,7 +583,7 @@ doit()
 		taia_add(&deadline, &stamp, &deadline); /*- current timestamp + 1 hour */
 		/*-
 		 * handle events on
-		 * 1. selfpipe -> when child dies
+		 * 1. selfpipe -> when child dies / fork fails
 		 * 2. supervise/control
 		 *
 		 * This is where supervise will be, waiting
@@ -666,7 +676,7 @@ doit()
 						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*alert, F_OK))
-						tryaction(alert, r, wstat, 1);
+						tryaction(alert, r, wstat);
 #ifdef USE_RUNFS
 					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
@@ -695,7 +705,7 @@ doit()
 						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
+						tryaction(shutdown, childpid, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
@@ -729,7 +739,7 @@ doit()
 						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
+						tryaction(shutdown, childpid, 0); /*- run the shutdown command */
 					siglist[0] = SIGTERM;
 					siglist[1] = SIGCONT;
 					signame[0] = "SIGTERM";
@@ -1052,8 +1062,8 @@ main(int argc, char **argv)
 		if (!stralloc_copys(&info, dir) || !stralloc_catb(&info, ": supervise: info: ", 19))
 			strerr_die1x(111, "supervise: out of memory");
 	} else
-	if (argc == 3) {
-		logger = 1; /*- passed by svscan for the log supervise process */
+	if (argc == 3) { /*- 3 args passed by svscan for the log supervise process */
+		logger = str_diff(argv[2], SVSCANLOG) ? 1 : 2;
 		if (!stralloc_copys(&fatal, argv[2]) || !stralloc_catb(&fatal, "/log: supervise: fatal: ", 24))
 			strerr_die1x(111, "supervise: out of memory");
 		if (!stralloc_copys(&warn, argv[2]) || !stralloc_catb(&warn, "/log: supervise: warning: ", 26))
@@ -1182,13 +1192,18 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.48 2024-10-25 11:04:10+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.49 2024-11-05 22:55:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.49  2024-11-05 22:55:30+05:30  Cprogrammer
+ * execute shutdown script on SIGTERM
+ * terminate on single SIGTERM instead of the earlier two for logger
+ * prevent restart of service on SIGTERM
+ *
  * Revision 1.48  2024-10-25 11:04:10+05:30  Cprogrammer
  * updated comments
  *

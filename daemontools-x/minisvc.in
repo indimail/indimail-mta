@@ -1,5 +1,5 @@
 #
-# $Id: minisvc.in,v 1.39 2024-04-29 16:29:47+05:30 Cprogrammer Exp mbhangui $
+# $Id: minisvc.in,v 1.40 2024-11-05 22:32:40+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -11,7 +11,7 @@ shareddir=@shareddir@
 LOGDIR=@logdir@
 libexecdir=@libexecdir@
 host=@HOST@
-RCSID="# \$Id: minisvc.in,v 1.39 2024-04-29 16:29:47+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: minisvc.in,v 1.40 2024-11-05 22:32:40+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -426,9 +426,11 @@ fi
 dump_run_header
 echo "exec 2>&1"
 if [ $mount_resolvconf -eq 1 ] ; then
-	echo "/usr/bin/umount /etc/resolv.conf"
+	echo "if [ -s $SERVICEDIR/variables/UNSHARE -a -f $sysconfdir/resolv.conf ] ; then"
+	echo "  /usr/bin/umount /etc/resolv.conf"
+	echo "fi"
 fi
-echo "exec $prefix/bin/svc -Gdx $SERVICEDIR/* $SERVICEDIR/*/log $SERVICEDIR/.svscan/log"
+echo "$prefix/bin/svc -dx $SERVICEDIR/*"
 ) > "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 /bin/chmod +x "$DESTDIR"$SERVICEDIR/.svscan/shutdown
 
@@ -2875,6 +2877,9 @@ fi
 exit 0
 #
 # $Log: minisvc.in,v $
+# Revision 1.40  2024-11-05 22:32:40+05:30  Cprogrammer
+# svscan shutdown to umount only when UNSHARE variable is set and /etc/indimail/resolv.conf exists
+#
 # Revision 1.39  2024-04-29 16:29:47+05:30  Cprogrammer
 # fix for missing qmail group
 #

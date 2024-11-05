@@ -78,9 +78,7 @@ On receipt of \fBSIGTERM\fR, \fBsupervise\fR sends \fBSIGTERM\fR followed
 by \fBSIGCONT\fR to its child. It uses \fBkillpg\fR(3) to send the signal
 if runnning in supreaper mode or when \fBSETPGID\fR environment variable is
 set. It uses \fBkill\fR(2) to send signals when not running in subreaper
-mod and when \fBSETPGID\fR environment variable is not set. \fBsupervise\fR
-requires two \fBSIGTERM\fR signals to get terminated when running as a
-logger and when started by \fBsvscan\fR(8) running as PID 1.
+mode and \fBSETPGID\fR environment variable is not set.
 
 if the file \fIdir\fR/shutdown exists \fBsupervise\fR(8) executes
 \fIshutdown\fR when asked to exit. \fIdir\fR is passed as the first
@@ -169,7 +167,7 @@ environment variables for \fBsupervise\fR in
 .SH EXIT VALUE
 \fBsupervise\fR is designed to run forever, however it can exit 100 during
 startup if it fails to open \fIdir/supervise/lock\fR, or exit 111 if it
-encounters system erros.
+encounters system errors.
 
 .SH SEE ALSO
 svc(8),
