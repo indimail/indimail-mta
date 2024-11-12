@@ -1,19 +1,19 @@
 .\" vim: tw=75
 .TH svscan 8
 .SH NAME
-svscan \- starts and monitors a collection of services
+svscan \- start and monitor a collection of services
 
 .SH SYNOPSIS
 .B svscan [ -vs ] [-n count] [ \fIscandir\fR ]
 
 .SH DESCRIPTION
 \fBsvscan\fR(8) starts one \fBsupervise\fR(8) process for each subdirectory
-of the current directory, up to a limit of subdirectories as default. You
-can change the default by passing -n option, in which case \fBsvscan\fR
-will allocate memory for \fIcount\fR service slots. You can override using
-current directory by passing \fIscandir\fR as an argument.  If \fBsvscan\fR
-is given a command-line argument \fIdir\fR, it switches to that directory
-when it starts.
+of the current directory, up to a limit of 1000 subdirectories as default.
+You can change the default by using -n \fIcount\fR, in which case
+\fBsvscan\fR will allocate memory for \fIcount\fR service slots. You can
+override using current directory by passing \fIscandir\fR as an argument.
+If \fBsvscan\fR is given a command-line argument \fIdir\fR, it switches to
+that directory when it starts.
 
 \fBsvscan\fR skips subdirectory names starting with dots. \fBsupervise\fR
 must be in \fBsvscan\fR's path. If the environment variable \fBSETSID\fR is

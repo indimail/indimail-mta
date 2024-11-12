@@ -27,6 +27,10 @@
 17. supervise.c: prevent restart of service on SIGTERM
 18. svscan.c: added killsvc function to shutdown non-log and log services
 19. svscan.c: refactored shutdown handling
+- 12/11/2024
+20. daemontools.spec, debian/control: use libqmail-devel > 1.3 for
+    pathexec_env_plus() function in libqmail
+21. envdir.c: added -p option to set PATH variable before the call to execve
 
 * Tue Aug 06 2024 12:48:42 +0000 Manvendra Bhangui <daemontools@indimail.org> 1.1.5-1.1%{?dist}
 Release 1.1.5-1.1 Start 05/02/2024 End 06/08/2024

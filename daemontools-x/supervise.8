@@ -14,10 +14,10 @@ service. If the directory \fIrun/svscan\fR exists, \fBsupervise\fR creates
 the directory \fIdir/supervise\fR in \fIrun/svscan\fR where \fIrun\fR is
 either \fI/run\fR or \fI/var/run\fR tmpfs filesystem (depending on your
 operating system). The directory \fIrun\fR/\fIsvscan\fR is created by
-\fBsvscan\fR(8) when \fBDISABLE_RUN\fR isn't set. It also opens
-\fIdir/supervise/lock\fR in exclusive mode to prevent multiple copies of
-supervise run for the same service. It exits 100 if it cannot open
-\fIdir/supervise/lock\fR. The directory \fIdir\fR must be writable to
+\fBsvscan\fR(8) when \fBDISABLE_RUN\fR environment variable isn't set. It
+also opens \fIdir/supervise/lock\fR in exclusive mode to prevent multiple
+copies of supervise run for the same service. It exits 100 if it cannot
+open \fIdir/supervise/lock\fR. The directory \fIdir\fR must be writable to
 \fBsupervise\fR. This directory is used to maintain status information in
 binary format and also create few named pipes. The status information can
 be read by \fBsvstat\fR(8). If \fBDISABLE_RUN\fR is set, or if your system

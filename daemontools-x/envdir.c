@@ -1,5 +1,8 @@
 /*
  * $Log: envdir.c,v $
+ * Revision 1.9  2024-11-12 16:03:28+05:30  Cprogrammer
+ * added -p option to set PATH variable before the call to execve
+ *
  * Revision 1.8  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -55,10 +58,10 @@ main(int argc, char **argv)
 	const char     *fn, *err = (char *) 0;
 	char          **e;
 	int             i, opt, warn_on_error = 0, ignore_unreadable = 0,
-					unreadable_count = 0;
+					unreadable_count = 0, set_path = 0, j = 0;
 
 	orig_env = environ;
-	while ((opt = getopt(argc, argv, "cwi")) != opteof) {
+	while ((opt = getopt(argc, argv, "cwip")) != opteof) {
 		switch (opt)
 		{
 		case 'c':
@@ -69,6 +72,9 @@ main(int argc, char **argv)
 			break;
 		case 'i':
 			ignore_unreadable = 1;
+			break;
+		case 'p':
+			set_path = 1;
 			break;
 		default:
 			die_usage(0);
@@ -87,7 +93,9 @@ main(int argc, char **argv)
 			strerr_die5sys(111, FATAL, envdir_str(i), ": ", err, ": ");
 		strerr_warn5(WARN, envdir_str(i), ": ", err, ": ", &strerr_sys);
 	}
-	if (i || (!ignore_unreadable && unreadable_count)) { /*- original envdir behaviour */
+	if (set_path)
+		j = pathexec_env_plus("PATH=", 5);
+	if (i || j || (!ignore_unreadable && unreadable_count)) { /*- original envdir behaviour */
 		pathexec_clear(); /*- clear environment variables picked by pathexec */
 		environ = orig_env;
 	}
@@ -103,7 +111,7 @@ main(int argc, char **argv)
 void
 getversion_envdir_main_c()
 {
-	const char     *x = "$Id: envdir.c,v 1.8 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: envdir.c,v 1.9 2024-11-12 16:03:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

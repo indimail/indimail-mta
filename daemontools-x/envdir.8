@@ -5,14 +5,24 @@ envdir \- runs another program with environment modified according to files
 in a specified directory.
 
 .SH SYNOPSIS
-\fBenvdir\fR [ -cwi ] \fId\fR \fIchild\fR
+\fBenvdir\fR [ -cwip ] \fId\fR \fIchild\fR
 
 .SH DESCRIPTION
 \fId\fR is a single argument. \fIchild\fR consists of one or more
 arguments.
 
 \fBenvdir\fR sets various environment variables as specified by files in
-the directory named \fId\fR. It then runs \fIchild\R.
+the directory named \fId\fR. It then runs \fIchild\fR with the environment
+variables passed to \fBexecve\fR(2). These environment variables are not
+set before the call to \fBexecve\fR(2). You can however set these
+environment variables before the call to \fBexecve\fR(2) like this
+
+.EX
+  envdir \fId\fR envdir \fId\fR \fIchild\fR
+.EE
+
+For the \fBPATH\fR variable to be set before the call to \fBexecve\fR(2),
+you can use the \fB\-p\fR option.
 
 If \fId\fR contains a file named \fIs\fR whose first line is \fIt\fR,
 \fBenvdir\fR removes an environment variable named \fIs\fR if one exists,
@@ -79,6 +89,13 @@ of quitting before executing \fIchild\fR.
 This option ignores if it cannot read a file in \fId\fR. This allows the
 system administrator to specify different access to different users for
 any environment variable
+
+.TP
+.B \-p
+This options sets the PATH environment variable if defined in \fId\fR
+before the call to \fBexecve\fR(2). This may be useful for \fBexecve\fR(2)
+to be able to execute \fIchild\fR passed to \fBenvdir\fR without the full
+path.
 
 .SH EXIT CODES
 \fBenvdir\fR exits 111 if it has trouble reading \fId\fR, if it runs out of

@@ -3,7 +3,7 @@ Section: admin
 Priority: extra
 Maintainer: @email@
 Standards-Version: 3.9.1
-Build-Depends: cdbs, debhelper (>= 9), gcc, automake, libqmail-dev, m4, gawk
+Build-Depends: cdbs, debhelper (>= 9), gcc, automake, libqmail-dev (>= 1.4), m4, gawk
 Homepage: https://github.com/indimail/indimail-mta
 
 Package: daemontools
