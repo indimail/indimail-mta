@@ -30,12 +30,12 @@ jobs:
         OS: ${{ matrix.host }}
 
     - name: checkout_daemontools
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         path: main
 
     - name: checkout_qmail
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: mbhangui/libqmail
         path: libqmail

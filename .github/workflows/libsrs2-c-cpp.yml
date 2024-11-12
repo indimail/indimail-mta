@@ -27,7 +27,7 @@ jobs:
         OS: ${{ matrix.host }}
 
     - name: checkout_libsrs2
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: build_libsrs2
       run: cd libsrs2-x; ./default.configure; make

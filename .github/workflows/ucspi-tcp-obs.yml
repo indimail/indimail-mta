@@ -16,9 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout_ucspi-tcp
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: checkout_qmail
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         repository: mbhangui/libqmail
         path: libqmail
