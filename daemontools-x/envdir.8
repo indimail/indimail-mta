@@ -1,11 +1,11 @@
 .\" vim: tw=75
 .TH envdir 8
 .SH NAME
-envdir \- runs another program with environment modified according to files
-in a specified directory.
+envdir \- run a program with environment modified according to files in a
+specified directory.
 
 .SH SYNOPSIS
-\fBenvdir\fR [ -cwip ] \fId\fR \fIchild\fR
+\fBenvdir\fR [ -cipw ] \fId\fR \fIchild\fR
 
 .SH DESCRIPTION
 \fId\fR is a single argument. \fIchild\fR consists of one or more
@@ -80,11 +80,6 @@ This option clears all existing environment variables before modifying any
 environment variables.
 
 .TP
-.B \-w
-This option causes envdir to issue warnings on encountering errors instead
-of quitting before executing \fIchild\fR.
-
-.TP
 .B \-i
 This option ignores if it cannot read a file in \fId\fR. This allows the
 system administrator to specify different access to different users for
@@ -96,6 +91,11 @@ This options sets the PATH environment variable if defined in \fId\fR
 before the call to \fBexecve\fR(2). This may be useful for \fBexecve\fR(2)
 to be able to execute \fIchild\fR passed to \fBenvdir\fR without the full
 path.
+
+.TP
+.B \-w
+This option causes envdir to issue warnings on encountering errors instead
+of quitting before executing \fIchild\fR.
 
 .SH EXIT CODES
 \fBenvdir\fR exits 111 if it has trouble reading \fId\fR, if it runs out of

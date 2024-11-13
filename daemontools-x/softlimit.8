@@ -1,12 +1,14 @@
+.\" vim: tw=75
 .TH softlimit 8
 .SH NAME
-softlimit \- runs another program with new resource limits.
+softlimit \- run a program with new resource limits.
 .SH SYNOPSIS
 .B softlimit
 [
 .I opts
 ]
 .I child
+
 .SH DESCRIPTION
 .I opts
 is a series of getopt-style options.
@@ -107,6 +109,7 @@ seconds. This limit is not enforced except that the process receives a
 SIGXCPU signal after
 .I n
 seconds. 
+
 .SH SEE ALSO
 supervise(8),
 svc(8),

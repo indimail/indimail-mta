@@ -1,10 +1,10 @@
+.\" vim: tw=75
 .TH readproctitle 8
 .SH NAME
 readproctitle \- maintains an automatically rotated log in memory for
 inspection by
 .BR ps (1).
 
-readproctitle is available in daemontools 0.75 and above.
 .SH SYNOPSIS
 .B readproctitle
 .I L
@@ -29,19 +29,25 @@ always leaves three dots at the left of
 
 For example, if
 
- readproctitle io errors: ....................
+.EX
+  readproctitle io errors: ....................
+.EE
 
 reads the data
 
- fatal error xyz
- warning abc
+.EX
+  fatal error xyz
+  warning abc
+.EE
 
 then its command-line arguments change to
 
+.EX
  readproctitle io errors: ... xyz!warning abc!
+.EE
 
-with a newline character in place of each !. Process-listing tools typically
-show the newline character as ? or \\n.
+with a newline character in place of each !. Process-listing tools
+typically show the newline character as ? or \\n.
 
 .B readproctitle
 exits when it reaches the end of input.
@@ -54,6 +60,7 @@ of
 .I L
 .IR D .
 I have not seen a system with a limit below 512 bytes.
+
 .SH SEE ALSO
 supervise(8),
 svc(8),

@@ -1,11 +1,14 @@
+.\" vim: tw=75
 .TH svok 8
 .SH NAME
-svok \- checks whether
+svok \- check whether
 .BR supervise(8)
 is running.
+
 .SH SYNOPSIS
 .B svok
 .I service
+
 .SH DESCRIPTION
 .B svok
 checks whether
@@ -18,6 +21,7 @@ It silently exits 0 if
 is successfully running. It silently exits 100 if
 .BR supervise (8)
 is not successfully running.
+
 .SH SEE ALSO
 supervise(8),
 svc(8),

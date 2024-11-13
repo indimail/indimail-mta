@@ -1,14 +1,18 @@
+.\" vim: tw=75
 .TH tai64nunix 8
 .SH NAME
-tai64nunix \- Convert external TAI64N timestamps to fractional seconds since epoch.
+tai64nunix \- Convert external TAI64N timestamps to fractional seconds
+since epoch.
+
 .SH SYNOPSIS
 .B tai64nunix
+
 .SH DESCRIPTION
 .B tai64nunix
-reads lines from stdin. Expects the input stream to be a sequence of lines beginning with @, a
-timestamp in external TAI64N format, and a space.  Replaces the @ and the
-timestamp with fractional seconds since epoch (1970-01-01 00:00:00 UTC).
-The input time format is the format written by 
+reads lines from stdin. Expects the input stream to be a sequence of lines
+beginning with @, a timestamp in external TAI64N format, and a space.
+Replaces the @ and the timestamp with fractional seconds since epoch
+(1970-01-01 00:00:00 UTC).  The input time format is the format written by
 .B
 tai64n
 and 
@@ -27,8 +31,9 @@ The output time format is expected by qmailanalog.
 
 .SH EXIT CODES
 .B tai64nunix
-exits 0 when it sees end of input. It exits 111 without an error message if it
-has trouble reading stdin or writing stdout. 
+exits 0 when it sees end of input. It exits 111 without an error message if
+it has trouble reading stdin or writing stdout.
+
 .SH SEE ALSO
 supervise(8),
 svc(8),

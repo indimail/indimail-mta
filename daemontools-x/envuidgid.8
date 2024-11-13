@@ -1,7 +1,9 @@
+.\" vim: tw=75
 .TH envuidgid 8
 .SH NAME
-envuidgid \- runs another program with environment variables indicating a
+envuidgid \- run a program with environment variables indicating a
 specified account's uid and gid.
+
 .SH SYNOPSIS
 .B envuidgid
 .I account
@@ -19,6 +21,7 @@ uid and $GID to
 .IR account 's
 gid. It then runs
 .IR child .
+
 .SH EXIT CODES
 .B envuidgid
 exits 111 if it cannot find a UNIX account named
@@ -27,6 +30,7 @@ if it runs out of memory for environment variables, or if it cannot run
 .IR child .
 Otherwise its exit code is the same as that of
 .IR child .
+
 .SH SEE ALSO
 supervise(8),
 svc(8),

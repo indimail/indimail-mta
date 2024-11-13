@@ -1,7 +1,7 @@
+.\" vim: tw=75
 .TH svstat 8
 .SH NAME
-svstat \- prints the status of services monitored by
-.BR supervise (8).
+svstat \- print status of services monitored by \fBsupervise\fR(8).
 
 .SH SYNOPSIS
 .B svstat
@@ -14,11 +14,12 @@ consists of any number of arguments, each argument naming a directory.
 prints one human-readable line for each directory, saying whether
 .BR supervise (8)
 is successfully running in that directory, and reporting the status and
-process information maintained by \fBsupervise\fR(8). The information printed
-is the \fBstatus\fR and \fBpid\fR. The \fBstatus\fR is one of \fIup\fR,
-\fIdown\fR or \fIwait\fR. In case the service status is \fIup\fR, \fBpid\fR
-is the process id of the service. In case the status is either \fIdown\fR
-or \fIwait\fR, \fBpid\fR will be the process id of the supervise process.
+process information maintained by \fBsupervise\fR(8). The information
+printed is the \fBstatus\fR and \fBpid\fR. The \fBstatus\fR is one of
+\fIup\fR, \fIdown\fR or \fIwait\fR. In case the service status is \fIup\fR,
+\fBpid\fR is the process id of the service. In case the status is either
+\fIdown\fR or \fIwait\fR, \fBpid\fR will be the process id of the supervise
+process.
 
 .EX
 # this service is up. here the pid of qmail-qmtpd is 153985
@@ -42,8 +43,8 @@ $ svstat /service/inlookup.infifo
 /service/inlookup.infifo: wait 4 seconds spid 153976 remaining 26 seconds
 .EE
 
-If the argument to \fBsvscan\fR names just one directory, then the return value will
-reflect various status of a service as below
+If the argument to \fBsvscan\fR names just one directory, then the return
+value will reflect various status of a service as below
 
 .EX
 	 111 - system error
