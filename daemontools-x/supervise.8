@@ -57,6 +57,13 @@ in such cases to make \fBsvc\fR(8) command operate and control
 self pipe trick to handle all SIGCHLD events reliably. This requires the
 use of two file descriptors for the selfpipe.
 
+\fBsupervise\fR can set environment variables for \fI./run\fR using
+\fIenvdir\fR(8) if the directory \fI./variables\fR exists. Files in
+\fI./variables\fR directory must be compatible as environment variables for
+\fBenvdir\fR(8). If the directory \fI./variables\fR doesn't have execute
+permissions for \fBothers\fR group, all existing environment variables will
+be cleared before setting environment variables for \fI./run\fR.
+
 .TS
 l l.
 how              Description

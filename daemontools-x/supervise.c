@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.49 2024-11-05 22:55:30+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.50 2024-11-14 16:14:40+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -19,6 +19,7 @@
 #include "iopause.h"
 #include "taia.h"
 #include "deepsleep.h"
+#include <pathexec.h>
 #ifdef USE_RUNFS
 #include "stralloc.h"
 #include "str.h"
@@ -73,6 +74,8 @@ static pid_t    childpid = 0;	/*- 0 means down */
 static int      grandchild = 0;
 static pid_t    svpid;
 const char     *run[4] = { "./run", 0 , 0, 0};
+const char     *envdir1[6] = { "envdir", "./variables", "./run", 0, 0, 0};
+const char     *envdir2[7] = { "envdir", "-c" , "./variables", "./run", 0, 0, 0};
 const char     *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
 const char     *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
 
@@ -459,6 +462,7 @@ void
 trystart(const char *how)
 {
 	pid_t           f, pgid;
+	static int      run_type = -1;
 	struct stat     st;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
@@ -467,6 +471,30 @@ trystart(const char *how)
 	if (use_runfs && fchdir(fddir) == -1)
 		strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
+	if (run_type == -1) {
+		if (lstat("./variables", &st)) {
+			if (errno != error_noent)
+				strerr_die2sys(111, fatal.s, "unable to stat ./variables:");
+			run_type = 0;
+		} else
+		if ((st.st_mode & S_IFMT) == S_IFDIR) {
+			/*-
+			 * run-type
+			 * 0 - start ./run
+			 * 1 - start ./run with environment in ./variables
+			 *     without clearing existing env variables. This
+			 *     requires ./variables to have execute permissions for
+			 *     others
+			 * 2 - start ./run with environment in ./variables
+			 *     after clearing existing env variables. This requires
+			 *     no execute permission on ./variables for others
+			 */
+			if (st.st_mode & S_IXOTH)
+				run_type = 1;
+			else
+				run_type = 2;
+		}
+	}
 	if (!is_subreaper) {
 		if (stat(*run, &st) == -1)
 			strerr_die4sys(111, fatal.s, "unable to stat ", *run, ": ");
@@ -495,10 +523,27 @@ trystart(const char *how)
 #endif
 		if ((do_setpgid || is_subreaper) && setpgid(0, 0) == -1)
 			strerr_die2sys(111, fatal.s, "unable to set process group id: ");
-		run[1] = dir;
-		run[2] = how;
-		execve(*run, (char **) run, environ);
-		strerr_die2sys(111, fatal.s, "unable to start run: ");
+		switch (run_type)
+		{
+		case 0:
+			run[1] = dir;
+			run[2] = how;
+			execve(*run, (char **) run, environ);
+			strerr_die4sys(111, fatal.s, "unable to start ", *run, ": ");
+			break;
+		case 1:
+			envdir1[3] = dir;
+			envdir1[4] = how;
+			pathexec_run(*envdir1, (char **) envdir1, environ);
+			strerr_die4sys(111, fatal.s, "unable to start ", *envdir1, ": ");
+			break;
+		case 2:
+			envdir2[4] = dir;
+			envdir2[5] = how;
+			pathexec_run(*envdir2, (char **) envdir2, environ);
+			strerr_die4sys(111, fatal.s, "unable to start ", *envdir2, ": ");
+			break;
+		}
 	}
 	grandchild = 0;
 	flagpaused = 0;
@@ -1192,13 +1237,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.49 2024-11-05 22:55:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.50 2024-11-14 16:14:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.50  2024-11-14 16:14:40+05:30  Cprogrammer
+ * use envdir to set environment variables if variable directory exists
+ *
  * Revision 1.49  2024-11-05 22:55:30+05:30  Cprogrammer
  * execute shutdown script on SIGTERM
  * terminate on single SIGTERM instead of the earlier two for logger
