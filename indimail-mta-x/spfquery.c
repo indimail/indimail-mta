@@ -53,7 +53,7 @@ main(int argc, char **argv)
 			!stralloc_0(&helohost))
 		die_nomem();
 
-	/*- from addrss */
+	/*- from address */
 	if (!stralloc_copys(&addr, argv[3]) ||
 			!stralloc_0(&addr))
 		die_nomem();

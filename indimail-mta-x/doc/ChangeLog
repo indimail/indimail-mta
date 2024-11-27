@@ -13,6 +13,8 @@ Release @version@-@release@ Start 08/08/2024 End XX/XX/XXXX
 6. qscheduler: prevent restart of qmail-send on receipt of SIGTERM
 7. svctool: umount resolv.conf only when UNSHARE variable is set and
    /etc/indimail/resolv.conf exists
+- 27/11/2024
+8. smtpd.c: fixed spf error message display in err_spf()
 
 * Tue Aug 06 2024 12:51:02 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.8-1.1%{?dist}
 Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX

@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.328 2024-07-16 08:16:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.329 2024-11-27 19:25:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -161,7 +161,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.328 $";
+static c_char  *revision = "$Revision: 1.329 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1298,14 +1298,46 @@ err_spf()
 {
 	int             i, j;
 
+	if (!spfinfo(&sa))
+		die_nomem();
+	if (sa.len) {
+		if (!stralloc_0(&sa))
+			die_nomem();
+		sa.len--;
+	}
+	if (sa.len) {
+		j = str_chr(sa.s, ':');
+		if (sa.s[j])
+			logerr(1, "MAIL from <", mailfrom.s, "> (", sa.s + j + 2, NULL);
+		else
+			logerr(1, "MAIL from <", mailfrom.s, "> ", sa.s, NULL);
+		if (spfbarfmsg.len > 1)
+			logerr(0, " [", spfbarfmsg.s, "]\n", NULL);
+		else
+			logerr(0, "\n", NULL);
+	} else
+	if (spfbarfmsg.len > 1)
+		logerr(1, "MAIL from <", mailfrom.s, "> ", spfbarfmsg.s, "\n", NULL);
+	logflush();
 	for (i = 0; i < spfbarfmsg.len; i = j + 1) {
 		j = byte_chr(spfbarfmsg.s + i, spfbarfmsg.len - i, '\n') + i;
 		if (j < spfbarfmsg.len) {
 			spfbarfmsg.s[j] = 0;
 			out("550-", spfbarfmsg.s, "\r\n", NULL);
 			spfbarfmsg.s[j] = '\n';
-		} else
-			out("550 ", spfbarfmsg.s, " (#5.7.1)\r\n", NULL);
+		} else {
+			out("550 ", NULL);
+			if (sa.len) {
+				j = str_chr(sa.s, ':');
+				if (sa.s[j])
+					out("(", sa.s + j + 2, " ", NULL);
+				else
+					out(sa.s, " ", NULL);
+			}
+			if (spfbarfmsg.len > 1)
+				out("[", spfbarfmsg.s, "] ", NULL);
+			out("#(5.7.1)\r\n", NULL);
+		}
 	}
 	flush();
 }
@@ -2722,7 +2754,7 @@ open_control_files2()
 		die_nomem();
 	if (control_rldef(&spfexp, (x = env_get("SPFEXP")) && *x ? x : "spfexp", 0, SPF_DEFEXP) == -1)
 		die_control(x);
-	if (!stralloc_0(&spfexp))
+	if (spfexp.len && !stralloc_0(&spfexp))
 		die_nomem();
 #endif
 	/*- TARPIT */
@@ -4078,7 +4110,7 @@ smtp_mail(const char *arg)
 				break;
 			if (!spfexplanation(&spfbarfmsg))
 				die_nomem();
-			if (!stralloc_0(&spfbarfmsg))
+			if (spfbarfmsg.len > 1 && !stralloc_0(&spfbarfmsg))
 				die_nomem();
 			flagbarfspf = 1;
 		}
@@ -7487,6 +7519,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.329  2024-11-27 19:25:20+05:30  Cprogrammer
+ * fixed spf error message display in err_spf()
+ *
  * Revision 1.328  2024-07-16 08:16:35+05:30  Cprogrammer
  * added XOAUTH2 auth method
  *
@@ -7931,7 +7966,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.328 2024-07-16 08:16:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.329 2024-11-27 19:25:20+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

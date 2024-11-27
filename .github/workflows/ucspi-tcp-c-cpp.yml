@@ -42,6 +42,6 @@ jobs:
         path: libqmail
 
     - name: install_qmail
-      run: cd libqmail;env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.3.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.3.2/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.3.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.3.2/lib" make; sudo make install-strip
+      run: cd libqmail;env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" make; sudo make install-strip
     - name: build_ucspi-tcp
-      run: cd main/ucspi-tcp-x;env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.3.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.3.2/lib" ./default.configure;env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.3.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.3.2/lib" ./qmake
+      run: cd main/ucspi-tcp-x;env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" ./default.configure;env CFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" ./qmake
