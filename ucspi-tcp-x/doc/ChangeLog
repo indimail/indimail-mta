@@ -1,3 +1,15 @@
+* XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> @version@-@release@%{?dist}
+Release @version@-@release@ Start 05/09/2024 End XX/XX/XXXX
+- 05/09/2024
+08. tcpclient.c: added starttls capability for imap
+09. dotls.c: added starttls handler for imap
+- 04/10/2024
+10. tcpclient.c: added -e option to get remote host address from /etc/hosts
+11. getip.c: new function getip() which uses getaddrinfo() to get remote host
+    address
+- 05/10/2024
+12. tcpserver.c: use INET6_ADDRLENSTRLEN for AF_INET6
+
 * Tue Aug 06 2024 12:44:32 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.4-1.1%{?dist}
 Release 1.1.4-1.1 Start 08/02/2024 End 06/08/2024
 - 08/02/2024
@@ -17,15 +29,6 @@ Release 1.1.4-1.1 Start 08/02/2024 End 06/08/2024
 06. fix function prototypes
 - 17/07/2024
 07. tcpclient.c: fixed incorrect use of strerr_warn instead of strerr_die
-- 05/09/2024
-08. tcpclient.c: added starttls capability for imap
-09. dotls.c: added starttls handler for imap
-- 04/10/2024
-10. tcpclient.c: added -e option to get remote host address from /etc/hosts
-11. getip.c: new function getip() which uses getaddrinfo() to get remote host
-    address
-- 05/10/2024
-12. tcpserver.c: use INET6_ADDRLENSTRLEN for AF_INET6
 
 * Mon Jan 01 2024 19:01:07 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.3-1.1${?dist}
 Release 1.1.3-1.1 Start 27/04/2023 End 01/01/2024

@@ -17,7 +17,7 @@ Release @version@-@release@ Start 08/08/2024 End XX/XX/XXXX
 8. smtpd.c: fixed spf error message display in err_spf()
 
 * Tue Aug 06 2024 12:51:02 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.0.8-1.1%{?dist}
-Release @version@-@release@ Start 05/02/2024 End XX/XX/XXXX
+Release 3.0.8-1.1 Start 05/02/2024 End XX/XX/XXXX
 ======= Release Highlights ================================================
 - Fixed discarded-qualifier compiler warings
 - Fixed warnings for gcc14
