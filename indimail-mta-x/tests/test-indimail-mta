@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.81 2024-07-17 19:55:27+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.82 2024-12-12 21:24:18+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -97,27 +97,27 @@ terminate_send()
 	case $1 in
 		"qmail-send")
 		unset send_pid
-		/bin/rm -f $logdir/qmail-send/qmail-send.log $logdir/qmail-send/current
+		sudo /bin/rm -f $logdir/qmail-send/qmail-send.log $logdir/qmail-send/current
 		;;
 		"qmail-send-2")
 		unset send_pid2
-		/bin/rm -f $logdir/qmail-send/qmail-send2.log $logdir/qmail-send/current
+		sudo /bin/rm -f $logdir/qmail-send/qmail-send2.log $logdir/qmail-send/current
 		;;
 		"slowq-send-1")
 		unset slowq_pid1
-		/bin/rm -f $logdir/slowq-send/slowq1-send.log $logdir/slowq-send/current
+		sudo /bin/rm -f $logdir/slowq-send/slowq1-send.log $logdir/slowq-send/current
 		;;
 		"slowq-send"-2)
 		unset slowq_pid2
-		/bin/rm -f $logdir/slowq-send/slowq2-send.log $logdir/slowq-send/current
+		sudo /bin/rm -f $logdir/slowq-send/slowq2-send.log $logdir/slowq-send/current
 		;;
 		"qmta-send-1")
 		unset qmta_pid1
-		/bin/rm -f $logdir/qmta-send/qmta1-send.log $logdir/qmta-send/current
+		sudo /bin/rm -f $logdir/qmta-send/qmta1-send.log $logdir/qmta-send/current
 		;;
 		"qmta-send-2")
 		unset qmta_pid2
-		/bin/rm -f $logdir/qmta-send/qmta2-send.log $logdir/qmta-send/current
+		sudo /bin/rm -f $logdir/qmta-send/qmta2-send.log $logdir/qmta-send/current
 		;;
 	esac
 }
@@ -3715,7 +3715,7 @@ start_svscan_with_svscanlog()
 	(
 	cd $servicedir/.svscan
 	exec sudo $envdir -c variables $svscan $servicedir
-	) &
+	) 2>$logdir/svscan/svscan_startup.log &
 	sleep $sleep_int
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	sudo kill -0 $svpid
@@ -6683,7 +6683,6 @@ do_svscan_with_svscanlog()
 	t1=$(date +"%s.%4N")
 	# start svscan with svscanlog
 	printf "\r%118s\n" " "
-	echo "Starting svscan services with svscanlog"
 	setup_svscan_basic
 	setup_svscan_with_svscanlog
 	(
@@ -6692,15 +6691,19 @@ do_svscan_with_svscanlog()
 	printf "/bin/false 2>&1\n"
 	) > $servicedir/smtpd/run
 	/bin/rm -f $servicedir/smtpd/variables/SMTPS
+	echo 1 > $servicedir/.svscan/variables/VERBOSE
+	echo "Starting svscan services with svscanlog"
 	start_svscan_with_svscanlog
 	svpid=$(sed -n '$p' $servicedir/.svscan.pid)
 	test_svscan_log
+	sudo kill -USR1 $svpid
 	test_svscan_run
 	sleep $sleep_int
 	test_smtps "mail using SMTPS by tcpserver"
 	test_svscan_shutdown
 
 	# start svscan with svscanlog and AUTOSCAN
+	/bin/rm -f $servicedir/.svscan/variables/VERBOSE
 	echo 1 > $servicedir/.svscan/variables/AUTOSCAN
 	echo 5 > $servicedir/.svscan/variables/SCANINTERVAL
 	start_svscan_with_svscanlog
@@ -9047,6 +9050,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.82  2024-12-12 21:24:18+05:30  Cprogrammer
+# updated test script for svscan log
+#
 # Revision 1.81  2024-07-17 19:55:27+05:30  Cprogrammer
 # added test for CRAM-SHA1, DIGEST-MD5 using swaks
 #
