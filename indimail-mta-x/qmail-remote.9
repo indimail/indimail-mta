@@ -716,7 +716,7 @@ Additional QMTP routes which have precedence over \fIsmtproutes\fR. QMTP
 routes should obey the form \fIdomain\fR:\fIrelay\fR:\fIport\fR, without
 any extra spaces. \fIqmtproutes\fR follows the same syntax as
 \fIsmtproutes\fR. By default, \fBqmail-remote\fR connects to QMTP service
-port 209. However you can chose a dedicated high-port for QMTP
+port 209. However you can choose a dedicated high-port for QMTP
 communication as defined in \fIqmtproutes\fR. If the recipient domain is
 listed neither in \fIqmtproutes\fR nor in \fIsmtproutes\fR,
 \fBqmail-remote\fR will choose the protocol according to MX priority. The
@@ -763,16 +763,16 @@ The filename can be overridden by the environment variable
 
 .TP 5
 .I tlsclientmethod
-The TLS protocol list. Accepted values are TLSv1_2, TLSv1_3. The default is
-TLSv1_2 for OpenSSL Version < 1.0.1. Without this control file OpenSSL
-Version >= 1.0.1 uses TLS_client_method(3ossl) where the actual protocol
-version used will be negotiated to the highest version mutually supported
-by the client and the server. The supported protocols are TLSv1.2 and
-TLSv1.3. The default location of SYSCONF/control can be overridden by
-environment variable \fBCONTROLDIR\fR. You can specify the minimum and
-maximum protocol by using min:max format. e.g. TLSv1_2:TLSv1_3. It is best
-not to have this control file to let \fBqmail-remote\fR chose the highest
-supported protocol.
+The TLS protocol list. Accepted values are TLSv1_2 to use TLSv1.2, TLSv1_3
+to use TLSv1.3. The default is TLSv1.2 for OpenSSL Version < 1.0.1. Without
+this control file, OpenSSL Version >= 1.0.1 uses TLS_client_method(3ossl)
+where the actual protocol version used will be negotiated to the highest
+version mutually supported by the client and the server. The supported
+protocols currently are TLSv1.2 and TLSv1.3. The default location of
+SYSCONF/control can be overridden by environment variable \fBCONTROLDIR\fR.
+You can specify the minimum and maximum protocol by using min:max format.
+e.g. TLSv1_2:TLSv1_3. It is best not to have this control file to let
+\fBqmail-remote\fR choose the highest supported protocol.
 
 .TP 5
 \fIclientcipherlist\fR | \fIclientciphersuite\fR

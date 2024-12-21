@@ -633,14 +633,14 @@ if \fBQREGEX\fR environment variable is set to 0 or 1.
 
 .TP 5
 .I tlsservermethod
-The TLS protocol list. Accepted values are TLSv1_2, TLSv1_3. The default is
-TLSv1.2 for OpenSSL Version < 1.0.1. OpenSSL Version >= 1.0.1 uses
-TLS_server_method() where the actual protocol version used will be
-negotiated to the highest version mutually supported by the client and the
-server. The supported protocols are TLSv1.2 and TLSv1.3. You can specify
-the minimum and maximum protocol by using min:max format. e.g.
-TLSv1_2:TLSv1_3. It is best not to have this control file to let
-\fBqmail-smtpd\fR chose the highest supported protocol.
+The TLS protocol list. Accepted values are TLSv1_2 to use TLSv1.2,
+TLSv1_3 to use TLSv1.3. The default is TLSv1.2 for OpenSSL Version < 1.0.1.
+OpenSSL Version >= 1.0.1 uses TLS_server_method() where the actual protocol
+version used will be negotiated to the highest version mutually supported
+by the client and the server. The supported protocols currently are TLSv1.2
+and TLSv1.3. You can specify the minimum and maximum protocol by using
+min:max format. e.g.  TLSv1_2:TLSv1_3. It is best not to have this control
+file to let \fBqmail-smtpd\fR choose the highest supported protocol.
 
 .TP 5
 \fIservercipherlist\fR | \fIserverciphersuite\fR

@@ -1,6 +1,6 @@
 /*
  * RCS log at bottom
- * $Id: smtpd.c,v 1.329 2024-11-27 19:25:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.330 2024-12-21 10:47:07+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -161,7 +161,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.329 $";
+static c_char  *revision = "$Revision: 1.330 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1490,13 +1490,20 @@ err_relay()
 void
 err_unimpl(const char *arg)
 {
+	const char     *ptr;
+
+	ptr = cmd_name();
 	if (!case_diffs(arg, "unimplemented"))
-		out("502 unimplemented (#5.5.1)\r\n", NULL);
+		out("502 command ", ptr, " not implemented (#5.5.1)\r\n", NULL);
 	else
 	if (!case_diffs(arg, "help"))
 		out("502 disabled by the lord in her infinite wisdom (#5.5.1)\r\n", NULL);
-	else
-		out("502 command ", arg, " not recognized (#5.5.2)\r\n", NULL);
+	else {
+		if (*arg)
+			out("502 command ", ptr, " ", arg, " not recognized (#5.5.2)\r\n", NULL);
+		else
+			out("502 command ", ptr, " not recognized (#5.5.2)\r\n", NULL);
+	}
 	flush();
 }
 
@@ -7519,6 +7526,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.330  2024-12-21 10:47:07+05:30  Cprogrammer
+ * display command name in err_unimpl()
+ *
  * Revision 1.329  2024-11-27 19:25:20+05:30  Cprogrammer
  * fixed spf error message display in err_spf()
  *
@@ -7966,7 +7976,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.329 2024-11-27 19:25:20+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.330 2024-12-21 10:47:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
