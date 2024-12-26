@@ -110,6 +110,7 @@ f:::0644:/man1/:xsender.1:xsender.1
 f:::0644:/man1/:qtop.1:qtop.1
 f:::0644:/man1/:test-recipients.1:test-recipients.1
 f:::0644:/man1/:make-recipients.1:make-recipients.1
+f:::0644:/man1/:uenv.1:uenv.1
 f:::0644:/man3/:greylist.3:greylist.3
 f:::0644:/man3/:plugin_init.3:plugin_init.3
 f:::0644:/man3/:tlsacheck.3:tlsacheck.3

@@ -23,7 +23,7 @@ cp=$(which cp)
 # End USER Configuration OPTIONS
 #
 
-# $Id: create_services.in,v 2.131 2024-02-22 01:04:24+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_services.sh,v 2.131 2024-02-22 01:04:24+05:30 Cprogrammer Exp mbhangui $
 
 usage()
 {
@@ -782,7 +782,7 @@ if [ $check_install -eq 1 ] ; then
 fi
 
 #
-# $Log: create_services.in,v $
+# $Log: create_services.sh,v $
 # Revision 2.131  2024-02-22 01:04:24+05:30  Cprogrammer
 # replace cat with qcat
 #

@@ -1,5 +1,5 @@
 #
-# $Log: instcheck.in,v $
+# $Log: instcheck.sh,v $
 # Revision 1.3  2022-09-18 23:01:10+05:30  Cprogrammer
 # use uinstaller only for ucspi-tcp
 #
@@ -10,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: instcheck.in,v 1.3 2022-09-18 23:01:10+05:30 Cprogrammer Exp mbhangui $
+# $Id: instcheck.sh,v 1.3 2022-09-18 23:01:10+05:30 Cprogrammer Exp mbhangui $
 #
 if [ $# -eq 0 ] ; then
 	name=$(basename $0)

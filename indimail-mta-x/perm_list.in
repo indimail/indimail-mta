@@ -117,6 +117,7 @@
 %attr(0755,root,root)  @prefix@/bin/udpclient
 %attr(0755,root,root)  @prefix@/bin/qdane
 %attr(0755,root,root)  @prefix@/bin/sslerator
+%attr(0755,root,root)  @prefix@/bin/uenv
 #
 # sbin
 #

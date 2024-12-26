@@ -705,3 +705,5 @@ rd-remote.o
 read_assign.o
 recipient-cdb.o
 valid_hname.o
+uenv
+uenv.1

@@ -1,0 +1,42 @@
+.\" vim: tw=75
+.TH uenv 1
+.SH NAME
+uenv \- run a program with environment modified according to files in $HOME/.defaultqueue
+
+.SH SYNOPSIS
+\fBuenv\fR [\fB\-c\fR] \fIchild\fR
+
+.SH DESCRIPTION
+\fBuenv\fR sets various environment variables as specified by files in the
+directory \fI$HOME/.defaultqueue\fR and then runs child with the modified
+environment variables. Specifying -c option clears all existing environment
+variables except $HOME. It works exactly like \fBenvdir\fR(8), except that
+it uses the fixed directory \fI$HOME/.defaultqueue for setting new
+environment variables.
+
+\fIchild\fR consists of one or more arguments.
+
+You can skip $HOME/.defaultqueue by setting \fBSKIP_LOCAL_ENVIRONMENT\fR
+environment variable. It then sets environment variable specified by files
+in \fI@controldir@/defaultqueue\fR. if \fBQUEUE_BASE\fR environment
+variable is set, setting of environment variables from
+\fI@controldir@/defaultqueue\fR is skipped.
+
+.SH EXAMPLES
+
+Run uenv as root to display local environment variables set for the user
+\fIuser\fR with home directory \fI/home/user\fR.
+
+.EX
+# setuidgid \fIuser\fR env HOME=/home/user uenv -c env
+.EE
+
+Run uenv to display local environment variables for current user.
+
+.EX
+$ uenv env
+.EE
+
+
+.SH SEE ALSO
+envdir(8)

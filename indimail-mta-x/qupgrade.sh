@@ -1,5 +1,5 @@
 #
-# $Id: qupgrade.in,v 1.13 2024-02-22 01:05:05+05:30 Cprogrammer Exp mbhangui $
+# $Id: qupgrade.sh,v 1.13 2024-02-22 01:05:05+05:30 Cprogrammer Exp mbhangui $
 #
 
 do_upgrade()
@@ -204,7 +204,7 @@ case $1 in
 	;;
 esac
 #
-# $Log: qupgrade.in,v $
+# $Log: qupgrade.sh,v $
 # Revision 1.13  2024-02-22 01:05:05+05:30  Cprogrammer
 # replace cat with qcat
 #

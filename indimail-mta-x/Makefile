@@ -50,7 +50,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	setforward setmaillist slowq-send slowq-start smtpd-plugin.so \
 	sortedtest spawn-filter spfquery splogger srsfilter sslerator \
 	surblfilter surblqueue svctool swaks sys-checkpwd tcp-env testzero \
-	tokenize uacl udpclient udplogger update_tmprsadh viruscanner whois \
+	tokenize uacl udpclient udplogger uenv update_tmprsadh viruscanner whois \
 	yearcal
 
 man = authcram.1 cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 \
@@ -67,7 +67,7 @@ man = authcram.1 cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 \
 	qmail-smtpd.8 qmail-spamfilter.8 indimail-srs.5 qmail-start.8 \
 	todo-proc.8 qmail-users.5 qmta-send.8 qnotify.1 qreceipt.1 qscanq.8 \
 	queue-fix.8 replier.1 make-recipients.1 test-recipients.1 \
-	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 \
+	rrforward.1 rrt.1 run-cleanq.8 slowq-send.8 slowq-start.8 uenv.1 \
 	spawn-filter.8 surblfilter.8 svctool.8 dnstlsarr.1 indimail-services.7
 
 include Makefile.$(SYSTEM)
@@ -431,16 +431,16 @@ warn-auto.sh qfrontend.sh conf-libexec conf-sysconfdir
 	chmod 755 qfrontend
 
 qf-smtp-ratelimit: \
-warn-auto.sh qf-smtp-ratelimit.in conf-libexec
-	cat warn-auto.sh qf-smtp-ratelimit.in \
+warn-auto.sh qf-smtp-ratelimit.sh conf-libexec
+	cat warn-auto.sh qf-smtp-ratelimit.sh \
 	| sed s}HOME}"`head -1 conf-qmail`"}g \
 	| sed s}LIBEXEC}"`head -1 conf-libexec`"}g \
 	> qf-smtp-ratelimit
 	chmod 755 qf-smtp-ratelimit
 
 qf-log-subject: \
-warn-auto.sh qf-log-subject.in conf-prefix
-	cat warn-auto.sh qf-log-subject.in | \
+warn-auto.sh qf-log-subject.sh conf-prefix
+	cat warn-auto.sh qf-log-subject.sh | \
 	$(edit) > qf-log-subject
 	chmod 755 qf-log-subject
 
@@ -2198,8 +2198,8 @@ distclean: clean
 	/bin/rm -f Makefile. Makevars.
 
 instcheck: \
-warn-auto.sh instcheck.in conf-libexec conf-sysconfdir
-	cat warn-auto.sh instcheck.in | $(edit) > $@
+warn-auto.sh instcheck.sh conf-libexec conf-sysconfdir
+	cat warn-auto.sh instcheck.sh | $(edit) > $@
 	chmod +x $@
 
 installer: \
@@ -3880,10 +3880,10 @@ indimail-mta.perms: perm_list.in mysql_config \
 conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared
 	$(edit) perm_list.in > $@
 
-svctool: svctool.in mysql_config conf-prefix conf-libexec conf-qmail \
+svctool: svctool.sh mysql_config conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared conf-servicedir warn-auto.sh
 	( cat warn-auto.sh; \
-	$(edit) $@.in \
+	$(edit) $@.sh \
 	| sed s}QUEUESPLIT}"`head -1 conf-split`"}g \
 	) > $@
 	chmod +x $@
@@ -3893,29 +3893,29 @@ conf-prefix conf-libexec conf-qmail conf-sysconfdir conf-shared \
 conf-servicedir
 	$(edit) svctool.9 > $@
 
-create_services: create_services.in \
+create_services: create_services.sh \
 conf-prefix conf-libexec conf-qmail \
 conf-sysconfdir conf-shared conf-servicedir
-	$(edit) $@.in > $@; chmod 755 $@
+	$(edit) $@.sh > $@; chmod 755 $@
 
 favicon.base64: favicon.png
 	base64 < favicon.png > favicon.base64
 
 qlocal_upgrade: \
-warn-auto.sh qlocal_upgrade.in conf-prefix conf-libexec \
+warn-auto.sh qlocal_upgrade.sh conf-prefix conf-libexec \
 conf-sysconfdir conf-servicedir
-	cat warn-auto.sh qlocal_upgrade.in \
+	cat warn-auto.sh qlocal_upgrade.sh \
 	| $(edit) > $@
 
 qupgrade: \
-warn-auto.sh qupgrade.in conf-prefix conf-libexec \
+warn-auto.sh qupgrade.sh conf-prefix conf-libexec \
 conf-sysconfdir conf-servicedir
-	cat warn-auto.sh qupgrade.in \
+	cat warn-auto.sh qupgrade.sh \
 	| $(edit) > $@
 
 qtop: \
-warn-auto.sh qtop.in
-	cat warn-auto.sh $@.in | $(edit) > $@
+warn-auto.sh qtop.sh
+	cat warn-auto.sh $@.sh | $(edit) > $@
 	chmod 755 $@
 
 qtop.1: qtop.9 conf-logdir
@@ -3958,6 +3958,14 @@ load printass.o read_assign.o auto_assign.o
 printass.1: \
 printass.9 conf-sysconfdir
 	$(edit) printass.9 >$@
+
+uenv: uenv.sh conf-prefix warn-auto.sh
+	( cat warn-auto.sh; \
+	$(edit) $@.sh \
+	) > $@
+	chmod +x $@
+uenv.1: uenv.9 conf-prefix conf-sysconfdir
+	$(edit) uenv.9 > $@
 
 #################################################################
 indimail-mta-permissions.easy: indimail-mta-permissions.easy.in \

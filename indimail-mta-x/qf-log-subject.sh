@@ -1,5 +1,5 @@
 #
-# $Log: qf-log-subject.in,v $
+# $Log: qf-log-subject.sh,v $
 # Revision 1.3  2024-02-22 01:04:53+05:30  Cprogrammer
 # replace cat with qcat
 #
@@ -10,7 +10,7 @@
 # Initial revision
 #
 #
-# $Id: qf-log-subject.in,v 1.3 2024-02-22 01:04:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: qf-log-subject.sh,v 1.3 2024-02-22 01:04:53+05:30 Cprogrammer Exp mbhangui $
 #
 
 [ -n "$ENVSIZE" -a -n "$MSGSIZE" ] && qmail_qfilter=1 || qmail_qfilter=0

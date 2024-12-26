@@ -1,5 +1,10 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
-Release @version@-@release@ Start 08/08/2024 End XX/XX/XXXX
+Release 3.1-1.1 Start 26/12/2024 End XX/XX/XXXX
+- 26/12/2024
+1. Renamed scripts with .in extension to .sh
+
+* Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <indimail-mta@indimail.org 3.0.9-1.1%{?dist}
+Release 3.0.9-1.1 Start 08/08/2024 End 24/12/2024
 - 08/08/2024
 1. svctool: fixed mariadb db creation for mariadb 11.x on archlinux
 - 01/09/2024

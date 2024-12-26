@@ -1,5 +1,5 @@
 #
-# $Log: qf-smtp-ratelimit.in,v $
+# $Log: qf-smtp-ratelimit.sh,v $
 # Revision 1.5  2024-02-22 01:04:57+05:30  Cprogrammer
 # replace cat with qcat
 #

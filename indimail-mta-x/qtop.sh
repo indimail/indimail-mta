@@ -1,5 +1,5 @@
 #
-# $Log: qtop.in,v $
+# $Log: qtop.sh,v $
 # Revision 1.1  2022-04-16 13:02:52+05:30  Cprogrammer
 # Initial revision
 #

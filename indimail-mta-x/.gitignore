@@ -482,3 +482,5 @@ authcram
 authcram.o
 authcram.1
 qmail-qfilter.1
+uenv
+uenv.1

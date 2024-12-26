@@ -1,5 +1,5 @@
 #
-# $Id: svctool.in,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.sh,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.in,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.sh,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration

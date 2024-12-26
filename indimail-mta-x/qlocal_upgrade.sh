@@ -1,5 +1,5 @@
 #
-# $Id: qlocal_upgrade.in,v 1.64 2024-02-22 09:10:41+05:30 Cprogrammer Exp mbhangui $
+# $Id: qlocal_upgrade.sh,v 1.64 2024-02-22 09:10:41+05:30 Cprogrammer Exp mbhangui $
 #
 PATH=/bin:/usr/bin:/usr/sbin:/sbin
 chown=$(which chown)
@@ -26,7 +26,7 @@ check_update_if_diff()
 
 do_install()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.64 2024-02-22 09:10:41+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.64 2024-02-22 09:10:41+05:30 Cprogrammer Exp mbhangui $"
 # upgrade libindimail (VIRTUAL_PKG_LIB) for dynamic loading of libindimail
 # upgrade libmysqlclient path in /etc/indimail/control/libmysql
 /usr/sbin/svctool --fixsharedlibs
@@ -34,7 +34,7 @@ echo "Running $1 $Id: qlocal_upgrade.in,v 1.64 2024-02-22 09:10:41+05:30 Cprogra
 
 do_post_upgrade()
 {
-echo "Running $1 $Id: qlocal_upgrade.in,v 1.64 2024-02-22 09:10:41+05:30 Cprogrammer Exp mbhangui $"
+echo "Running $1 $Id: qlocal_upgrade.sh,v 1.64 2024-02-22 09:10:41+05:30 Cprogrammer Exp mbhangui $"
 if [ -x /bin/systemctl -o -x /usr/bin/systemctl ] ; then
 	systemctl is-enabled svscan >/dev/null 2>&1
 	if [ $? -ne 0 ] ; then
@@ -437,7 +437,7 @@ case $1 in
 	;;
 esac
 #
-# $Log: qlocal_upgrade.in,v $
+# $Log: qlocal_upgrade.sh,v $
 # Revision 1.64  2024-02-22 09:10:41+05:30  Cprogrammer
 # replace qmail-cat with qcat for qmail-logfifo service and filterargs control file
 #
