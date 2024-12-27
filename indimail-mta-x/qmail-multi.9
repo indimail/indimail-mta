@@ -155,8 +155,8 @@ It exits 68 if it cannot create temporary files to make the input seekable.
 It exits 121 if fork fails
 It exits 31 if the program/script defined by \fBFILTERARGS\fR returns 100
 (i.e. mail gets bounced).
-If the program/script defined by \fBFILTERARGS\fR returns 2, then the mail
-gets blackholed.
+If the program/script defined by \fBFILTERARGS\fR returns 2 or 99, then the
+mail gets blackholed.
 If the program/script defined by \fBFILTERARGS\fR exits non-zero status,
 it exits 71 and a temporary error is issued.
 It exits 88 when the filter program exits with return value of 88 and also

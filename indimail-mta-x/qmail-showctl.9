@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH qmail-showctl 8
 
 .SH NAME
@@ -74,11 +75,13 @@ information. This option runs \fBsvctool\fR(8) and requires root privilegs.
 
 .TP
 \fB\-e\fR
-error check mode. Show file in the control directory which shouldn't be there
+error check mode. Show file in the control directory which shouldn't be
+there.
 
 .TP
 \fB\-E\fR
-Show environment variables inherited from $HOME/.defaultqueue
+Show environment variables inherited from $HOME/.defaultqueue. You can also
+use \fBuenv\fR(1) to show these environment variables.
 
 .TP
 \fB\-a\fR
@@ -86,4 +89,6 @@ all. Do all of the above
 
 .SH "SEE ALSO"
 svctool(8),
+envdir(8),
+uenv(1),
 indimail-control(8)

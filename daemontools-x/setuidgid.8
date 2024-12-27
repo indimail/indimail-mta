@@ -23,7 +23,9 @@ Set additional supplementary groups from a comma separated list of groups.
 removing all supplementary groups. It then runs \fIchild\fR. If \-s option
 is specified, \fBsetuidgid\fR adds all supplementary groups for
 \fIaccount\fR in group(5). Additional groups can be supplied using \-g
-option.
+option. \fBsetuidgid\fR(8) sets the environment variables \fBUSER\fR and
+\fBLOGNAME\fR to \fIaccount\fR and the environment variable \fBHOME\fR to
+the home directory of \fIaccount\fR in the \fBpasswd\fB(5) database.
 
 \fBsetuidgid\fR(8) cannot be run by anyone other than root.
 

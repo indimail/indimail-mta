@@ -25,7 +25,8 @@ variable is set, setting of environment variables from
 .SH EXAMPLES
 
 Run uenv as root to display local environment variables set for the user
-\fIuser\fR with home directory \fI/home/user\fR.
+\fIuser\fR with home directory \fI/home/user\fR. The same output can be
+obtained by using 'qmail-showctl -E' command.
 
 .EX
 # setuidgid \fIuser\fR env HOME=/home/user uenv -c env
@@ -39,4 +40,5 @@ $ uenv env
 
 
 .SH SEE ALSO
-envdir(8)
+envdir(8),
+qmail-showctl(8)
