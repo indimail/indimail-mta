@@ -3,37 +3,45 @@
 .SH NAME
 setuidgid \- run a program under a specified account's uid and gid.
 .SH SYNOPSIS
-\fBsetuidgid\fR [ \fB\-s\fR ] [ \fB\-g\fR \fIgroups\fR] \fIaccount\fR \fIchild\fR
+\fBsetuidgid\fR [ \fB\-e\fR ] [ \fB\-s\fR ] [ \fB\-g\fR \fIgroups\fR]
+\fIaccount\fR \fIchild\fR
 
 .SH DESCRIPTION
 \fIaccount\fR is a single argument. \fIchild\fR consists of one or more
 arguments.
 
 .TP 3
-\fB-s\fR
+\fB\-e\fR
+Set the environment variables \fBHOME\fR, \fBUSER\fR and \fBLOGNAME\fR.
+
+.TP
+\fB\-s\fR
 Set supplementary group ids
 
 .TP
-\fB-g\fR \fIgroups\fR
+\fB\-g\fR \fIgroups\fR
 Set additional supplementary groups from a comma separated list of groups.
-\fIgroups\fR can be numeric group IDs or group IDs from /etc/groups.
+\fIgroups\fR can be numeric group IDs or group IDs from \fI/etc/groups\fR.
 
 .PP
 \fBsetuidgid\fR(8) sets its uid and gid to \fIaccount\fR's uid and gid,
-removing all supplementary groups. It then runs \fIchild\fR. If \-s option
-is specified, \fBsetuidgid\fR adds all supplementary groups for
-\fIaccount\fR in group(5). Additional groups can be supplied using \-g
-option. \fBsetuidgid\fR(8) sets the environment variables \fBUSER\fR and
-\fBLOGNAME\fR to \fIaccount\fR and the environment variable \fBHOME\fR to
-the home directory of \fIaccount\fR in the \fBpasswd\fB(5) database.
+removing all supplementary groups. It then runs \fIchild\fR. If \fB\-s\fR
+option is specified, \fBsetuidgid\fR adds all supplementary groups for
+\fIaccount\fR in \fBgroup\fR(5) database. Additional groups can be supplied
+using \fB\-g\fR option.
+
+If \fB\-e\fR option is passed, \fBsetuidgid\fR(8) sets the environment
+variables \fBUSER\fR and \fBLOGNAME\fR to \fIaccount\fR and the environment
+variable \fBHOME\fR to the home directory of \fIaccount\fR in the
+\fBpasswd\fR(5) database.
 
 \fBsetuidgid\fR(8) cannot be run by anyone other than root.
 
 .SH EXIT CODES
 \fBsetuidgid\fR(8) exits 111 if it cannot find a UNIX account named
 \fIaccount\fR, if it cannot setgid, if it cannot setgroups, if it cannot
-setuid, or if it cannot run \fIchild\fR. Otherwise its exit code is the
-same as that of \fIchild\fR.
+setuid, if it cannot allocate memory or if it cannot run \fIchild\fR.
+Otherwise its exit code is the same as that of \fIchild\fR.
 
 .SH SEE ALSO
 supervise(8),

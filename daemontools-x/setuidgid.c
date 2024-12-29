@@ -1,5 +1,5 @@
 /*
- * $Id: setuidgid.c,v 1.10 2024-12-27 01:02:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: setuidgid.c,v 1.11 2024-12-29 09:07:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -25,14 +25,17 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 	struct group   *gr;
 	gid_t          *gidset = (gid_t *) NULL, g;
-	char           *ptr, *cptr, *account, *groups = 0;
+	char           *ptr, *cptr, *account, *groups = NULL;
 	const char     *usage = "usage: setuidgid [-s] [-g gid_list] account child";
 	char          **child;
-	int             i, ngroups = 0, opt, old;
+	int             i, ngroups = 0, opt, old, do_env = 0;
 
-	while ((opt = getopt(argc, argv, "sg:")) != opteof) {
+	while ((opt = getopt(argc, argv, "esg:")) != opteof) {
 		switch (opt)
 		{
+		case 'e':
+			do_env = 1;
+			break;
 		case 's':
 			ngroups = 1;
 			break;
@@ -93,8 +96,8 @@ main(int argc, char **argv)
 	}
 	if (prot_uid(pw->pw_uid) == -1)
 		strerr_die2sys(111, FATAL, "unable to set user id: ");
-	if (!pathexec_env("HOME", pw->pw_dir) || !pathexec_env("USER", account) ||
-			!pathexec_env("LOGNAME", account))
+	if (do_env && (!pathexec_env("HOME", pw->pw_dir) || !pathexec_env("USER", account) ||
+			!pathexec_env("LOGNAME", account)))
 		strerr_die2x(111, FATAL, "out of memory");
 	pathexec(child);
 	strerr_die4sys(111, FATAL, "unable to run ", *child, ": ");
@@ -103,13 +106,16 @@ main(int argc, char **argv)
 void
 getversion_setuidgid_c()
 {
-	const char     *x = "$Id: setuidgid.c,v 1.10 2024-12-27 01:02:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setuidgid.c,v 1.11 2024-12-29 09:07:32+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: setuidgid.c,v $
+ * Revision 1.11  2024-12-29 09:07:32+05:30  Cprogrammer
+ * added -e option for setting USER, LOGNAME and HOME env variables
+ *
  * Revision 1.10  2024-12-27 01:02:09+05:30  Cprogrammer
  * Set HOME, USER, LOGNAME env variable
  *
