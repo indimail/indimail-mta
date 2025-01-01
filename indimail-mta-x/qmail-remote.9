@@ -521,11 +521,32 @@ without any extra spaces. If the environment variable \fBAUTH_SMTP\fR is
 set, \fBqmail-remote\fR will use \fIusername\fR and \fIpassword\fR (or
 \fIsecret\fR for SCRAM authentication methods) to relay out mails through
 server \fIrelay\fR using authenticated SMTP. <sp> is a single space
-character.
-
-route may also have the forms
+character. The entry
 
 .EX
+\fIdomain\fR:\fIrelay\fR:\fIport\fR
+.EE
+
+is equivalent to
+
+.EX
+\fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIMIN_PENALTY\fR:\fIMAX_TOLERANCE\fR
+.EE
+
+where default values for \fIMIN_PENALTY\fR is 1 hour and
+\fIMAX_TOLERANCE\fR is 120 seconds. These defaults can be changed by
+setting the environment variables \fBMIN_PENALTY\fR and
+\fBMAX_TOLERANCE\fR, explained later in this document. Having
+\fIMIN_PENALTY\fR, \fIMAX_TOLERANCE\fR explicitly in smtproutes file takes
+precedence over the value of the environement variables \fBMIN_PENALTY\fR,
+\fBMAX_TOLERANCE\fR.
+
+SMTP routes may also have the forms
+
+.EX
+\fIdomain\fR:\fIrelay\fR:\fIport\fR<sp>/\fIs\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR<sp>/\fIr\fR
+\fIdomain\fR:\fIrelay\fR:\fIport\fR<sp>/\fItoken\fR
 \fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIs\fR
 \fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fIr\fR
 \fIdomain\fR:\fIrelay\fR:\fIport\fR:\fIpenalty\fR:\fImax_tolerance\fR<sp>/\fItoken\fR
@@ -541,6 +562,9 @@ the address \fIrecip\fR in remote_auth.cdb
 
 /\fItoken\fR means the user and password will be fetched if there is match for
 the entry \fItoken\fR in remote_auth.cdb
+
+\fIpenalty\fR and \fImax_tolerance\fR have the same meaning as mentioned
+earlier.
 
 Lines in \fISYSCONF/control/remote_auth.cdb\fR consists of \fIaddress\fR
 separated by user password pairs
@@ -679,12 +703,12 @@ If all connections to the \fIrelay\fR server fail for a \fImax_tolerance\fR
 seconds, further connections to the same server are avoided for a period of
 at least \fIpenalty\fR seconds. The default maximum period of failures that
 will be tolerated - \fImax_tolerance\fR is 120 seconds and the minimum
-penalty - \fIpenalty\fR is 1 hour. By setting the \fIpenalty\fR to 0,
-connections to the server will be attempted inspite of failures. The
-default values of 1 hour for minimum penalty, can be changed by setting the
-environment variable \fBMIN_PENALTY\fR. The default value of 120 seconds
-for max_tolerance can be changed by setting the environment variable
-\fBMAX_TOLERANCE\fR.
+penalty - \fIpenalty\fR is 3600 seconds (1 hour). By setting the
+\fIpenalty\fR to 0, connections to the server will be attempted inspite of
+failures. The default values of 3600 for minimum penalty, can be changed by
+setting the environment variable \fBMIN_PENALTY\fR. The default value of
+120 seconds for max_tolerance can be changed by setting the environment
+variable \fBMAX_TOLERANCE\fR.
 
 .TP 5
 .I moresmtproutes.cdb

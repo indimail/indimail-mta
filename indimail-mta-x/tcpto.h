@@ -1,5 +1,8 @@
 /*
  * $Log: tcpto.h,v $
+ * Revision 1.7  2025-01-01 21:35:49+05:30  Cprogrammer
+ * added tcpto timeout definitions
+ *
  * Revision 1.6  2005-08-23 17:39:51+05:30  Cprogrammer
  * added penalty argument to tcpto() and interval argument to tcpto_err()
  *
@@ -21,7 +24,9 @@
 #include "ip.h"
 #include "ipalloc.h"
 
-#define TCPTO_BUFSIZ 2048
+#define TCPTO_BUFSIZ  2048
+#define MIN_PENALTY   3600
+#define MAX_TOLERANCE 120
 
 int             tcpto(struct ip_mx *, int);
 void            tcpto_err(struct ip_mx *, int, int);

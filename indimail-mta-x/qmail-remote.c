@@ -1,6 +1,6 @@
 /*-
  * RCS log at bottom
- * $Id: qmail-remote.c,v 1.175 2024-07-16 00:17:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.176 2025-01-01 21:34:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -88,8 +88,6 @@
 
 #define EHLO 1
 #define HUGESMTPTEXT  5000
-#define MIN_PENALTY   3600
-#define MAX_TOLERANCE 120
 
 #define PORT_SMTP     25 /*- silly rabbit, /etc/services is for users */
 #define PORT_QMTP     209
@@ -3816,13 +3814,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.175 2024-07-16 00:17:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.176 2025-01-01 21:34:48+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.176  2025-01-01 21:34:48+05:30  Cprogrammer
+ * moved tcpto timeout definitions to tcpto.h
+ *
  * Revision 1.175  2024-07-16 00:17:36+05:30  Cprogrammer
  * added XOAUTH2 auth method
  *

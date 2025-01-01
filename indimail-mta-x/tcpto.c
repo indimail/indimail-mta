@@ -1,44 +1,5 @@
-/*
- * $Log: tcpto.c,v $
- * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.16  2022-10-18 09:24:42+05:30  Cprogrammer
- * converted function proto to ansic
- *
- * Revision 1.15  2021-05-08 12:23:35+05:30  Cprogrammer
- * use /var/indimail/queue if QUEUEDIR is not defined
- *
- * Revision 1.14  2018-01-09 12:37:11+05:30  Cprogrammer
- * removed header hasindimail.h
- *
- * Revision 1.13  2011-07-29 09:30:09+05:30  Cprogrammer
- * fixed gcc 4.6 warnings
- *
- * Revision 1.12  2007-12-20 13:53:15+05:30  Cprogrammer
- * removed compiler warning
- *
- * Revision 1.11  2005-09-05 08:38:52+05:30  Cprogrammer
- * set penalty to min_backoff if min_backoff is negative
- *
- * Revision 1.10  2005-08-23 17:39:34+05:30  Cprogrammer
- * made min_backoff and max_tolerance configurable
- *
- * Revision 1.9  2005-06-29 20:55:02+05:30  Cprogrammer
- * size of buffer changed to TCPTO_BUFSIZ
- *
- * Revision 1.8  2005-06-17 21:51:33+05:30  Cprogrammer
- * ipv6 support
- *
- * Revision 1.7  2004-10-22 20:31:38+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.6  2004-10-22 15:39:55+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.5  2004-07-17 21:24:46+05:30  Cprogrammer
- * added RCS log
- *
+/*-
+ * $Id: tcpto.c,v 1.18 2025-01-01 21:35:30+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/socket.h>
@@ -143,7 +104,7 @@ tcpto(struct ip_mx *ix, int min_backoff)
 				 * Timeout in seconds: 64 - 97 minutes, depending on pid
 				 */
 				if (min_backoff > 0)
-					min_penalty = ((60 + (getpid() & 31)) << 6) - 3600;
+					min_penalty = ((60 + (getpid() & 31)) << 6) - MIN_PENALTY;
 				else {
 					min_penalty = 0;
 					min_backoff = -min_backoff;
@@ -268,8 +229,54 @@ tcpto_err(struct ip_mx *ix, int flagerr, int max_tolerance)
 void
 getversion_tcpto_c()
 {
-	const char     *x = "$Id: tcpto.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tcpto.c,v 1.18 2025-01-01 21:35:30+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
 }
+
+/*
+ * $Log: tcpto.c,v $
+ * Revision 1.18  2025-01-01 21:35:30+05:30  Cprogrammer
+ * use tcpto definitions from tcpto.h
+ *
+ * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.16  2022-10-18 09:24:42+05:30  Cprogrammer
+ * converted function proto to ansic
+ *
+ * Revision 1.15  2021-05-08 12:23:35+05:30  Cprogrammer
+ * use /var/indimail/queue if QUEUEDIR is not defined
+ *
+ * Revision 1.14  2018-01-09 12:37:11+05:30  Cprogrammer
+ * removed header hasindimail.h
+ *
+ * Revision 1.13  2011-07-29 09:30:09+05:30  Cprogrammer
+ * fixed gcc 4.6 warnings
+ *
+ * Revision 1.12  2007-12-20 13:53:15+05:30  Cprogrammer
+ * removed compiler warning
+ *
+ * Revision 1.11  2005-09-05 08:38:52+05:30  Cprogrammer
+ * set penalty to min_backoff if min_backoff is negative
+ *
+ * Revision 1.10  2005-08-23 17:39:34+05:30  Cprogrammer
+ * made min_backoff and max_tolerance configurable
+ *
+ * Revision 1.9  2005-06-29 20:55:02+05:30  Cprogrammer
+ * size of buffer changed to TCPTO_BUFSIZ
+ *
+ * Revision 1.8  2005-06-17 21:51:33+05:30  Cprogrammer
+ * ipv6 support
+ *
+ * Revision 1.7  2004-10-22 20:31:38+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.6  2004-10-22 15:39:55+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.5  2004-07-17 21:24:46+05:30  Cprogrammer
+ * added RCS log
+ *
+ */
