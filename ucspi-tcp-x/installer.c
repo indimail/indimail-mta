@@ -3,7 +3,9 @@
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
+#if defined(linux)
 #include <sys/sysmacros.h>
+#endif
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fifo.h>
