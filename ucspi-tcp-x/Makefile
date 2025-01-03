@@ -650,8 +650,8 @@ install-strip: install
 distclean: clean
 
 instcheck: \
-warn-auto.sh instcheck.in conf-libexec conf-sysconfdir
-	cat warn-auto.sh instcheck.in | $(edit) > $@
+warn-auto.sh instcheck.sh conf-libexec conf-sysconfdir
+	cat warn-auto.sh instcheck.sh | $(edit) > $@
 	chmod +x $@
 
 installer: \

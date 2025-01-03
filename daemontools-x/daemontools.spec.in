@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.50 2024-11-12 16:02:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.51 2025-01-03 08:36:20+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -273,7 +273,8 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 
 %attr(0755,root,root)                    %{libexecdir}/svscanboot
 %attr(0755,root,root)                    %{libexecdir}/installer
-%attr(0755,root,root)                    %{libexecdir}/instcheck.daemontools
+%attr(0755,root,root)                    %{libexecdir}/instcheck
+                                         %{libexecdir}/instcheck.daemontools
 %attr(0755,root,root)                    %{libexecdir}/set-network-wait
 %attr(444,root,root)                     %{qsysconfdir}/%{name}-release
 %attr(444,root,root)                     %{qsysconfdir}/%{name}-rpm.info

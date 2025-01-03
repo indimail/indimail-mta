@@ -3,5 +3,6 @@
 #
 # scripts/programs
 f:::0755:/:svscanboot:svscanboot
-f:::0755:/:instcheck.daemontools:instcheck
+f:::0755:/:instcheck:instcheck
+l:::0755:/:instcheck.daemontools:instcheck
 f:::0755:/:installer:installer

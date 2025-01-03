@@ -761,7 +761,7 @@ echo ../resolv.conf 1>&3
 %endif
 %attr(755,root,root)                    %{libexecdir}/qsmhook
 %attr(755,root,root)                    %{libexecdir}/update_tmprsadh
-%attr(755,root,root)                    %{libexecdir}/instcheck.indimail-mta
+                                        %{libexecdir}/instcheck.indimail-mta
 %attr(755,root,root)                    %{libexecdir}/whois
 %attr(755,root,root)                    %{libexecdir}/testzero
 %attr(755,root,root)                    %{libexecdir}/ipmeprint

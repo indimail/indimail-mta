@@ -9,7 +9,7 @@ instcheck \- check installed files for existence, owner, group, permissions
 .SH SYNOPSYS
 \fB@libexecdir@/installer\fR [-cfum] \fIdest\fR
 
-\fB@libexecdir@/instcheck\fR [-cfm] \fI[package]\fR
+\fB@libexecdir@/instcheck\fR \fI[package]\fR [-cfm]
 
 .SH DESCRIPTION
 \fBinstaller\fR program create directories, install files from source
@@ -19,7 +19,7 @@ input from descriptor 0. It expects the data on descriptor 0 to be of the
 following form.
 
 .EX
-\fItype\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget\fR:\fIsource\fR:
+\fItype\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget\fR:\fIsource\fR:
 .EE
 
 Here \fItype\fR is either of d, l, f, z, p, c as following
@@ -54,22 +54,24 @@ forms given below. Invalid data is silently ignored.
 
 .EX
  Directory
- \fBd\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_dir\fR::
+ \fBd\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget_dir\fR:
 
  Soft link
- \fBl\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_link\fR::\fIsource\fR:
+ \fBl\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget_link\fR:\fIsource\fR:
 
  File
- \fBf\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_file\fR:\fIsource\fR:
+ \fBf\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget_file\fR:\fIsource\fR:
 
  File with zeros
- \fBz\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_file\fR:\fIsize\fR:
+ \fBz\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget_file\fR:\fIsize\fR:
 
  Named Pipes
- \fBp\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fItarget_fifo\fR::
+ \fBp\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget_fifo\fR:
 
- Device files
- \fBc\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:target_device:devnum:
+ Char device
+ \fBc\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget_device\fR:\fIdevnum\fR:
+ Block device
+ \fBb\fR:\fIowner\fR:\fIgroup\fR:\fImode\fR:\fIsuffix\fR:\fItarget_device\fR:\fIdevnum\fR:
 .EE
 
 \fBinstaller\fR silently ignores comments, blank lines or any line starting
@@ -91,7 +93,7 @@ command will check and fix permissions for each and every file that is part
 of the \fBdaemontools\fR package.
 
 .EX
-  instcheck -cf daemontools < @sysconfdir@/perms.d/daemontools/INPUT
+  instcheck daemontools -cf
 .EE
 
 An alternate of using instcheck is to rename it to \fBinstcheck.package\fR.
@@ -109,7 +111,7 @@ and permission mode of the \fItarget\fR.
 .TP 3
 \fB\-f\fR
 This option turns on check mode as well as fix mode where owner, group or
-mode of the \fItarget\fR is fixed.
+mode of the \fItarget\fR are fixed.
 
 .TP 3
 \fB\-u\fR

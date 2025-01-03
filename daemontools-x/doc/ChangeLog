@@ -5,6 +5,8 @@
 - 29/12/2024
 03. setuidgid.c: added -e option for setting USER, LOGNAME and HOME env
 variables
+- 03/01/2025
+04. installer.c: fixed link, char/block device creation.
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.6-1.1%{?dist}
 Release 1.1.6-1.1 Start 13/08/2024 End 24/12/2024
