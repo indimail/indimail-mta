@@ -1,7 +1,7 @@
 # compatibility links for Linux in @indimaildir@
 #
-l::::@indimaildir@/bin:../..@prefix@/bin:
-l::::@indimaildir@/sbin:../..@prefix@/sbin:
-l::::@indimaildir@/libexec:../..@libexecdir@:
-l::::@indimaildir@/users:../..@qsysconfdir@/users:
-l::::@indimaildir@/control:../..@qsysconfdir@/control:
+l::::/:@indimaildir@/bin:../..@prefix@/bin:
+l::::/:@indimaildir@/sbin:../..@prefix@/sbin:
+l::::/:@indimaildir@/libexec:../..@libexecdir@:
+l::::/:@indimaildir@/users:../..@qsysconfdir@/users:
+l::::/:@indimaildir@/control:../..@qsysconfdir@/control:
