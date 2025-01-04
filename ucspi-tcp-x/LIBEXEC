@@ -3,5 +3,5 @@
 #
 
 # scripts/programs
-l:::0755:/:instcheck.ucspi-tcp:instcheck
+f:::0755:/:instcheck.ucspi-tcp:instcheck
 f:::0755:/:uinstaller:installer
