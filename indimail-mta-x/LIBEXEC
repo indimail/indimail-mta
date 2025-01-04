@@ -26,7 +26,7 @@ f:::0755:/:dnstxt:dnstxt
 f:::0755:/:etrn:etrn
 f:::0755:/:failures:failures
 f:::0755:/:hostname:hostname
-l:::0755:/:instcheck.indimail-mta:instcheck
+f:::0755:/:instcheck.indimail-mta:instcheck
 f:::0755:/:ipmeprint:ipmeprint
 f:::0755:/:leapsecs:leapsecs
 f:::0755:/:make-recipients:make-recipients
