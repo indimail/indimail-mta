@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.51 2025-01-03 08:36:20+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.52 2025-01-04 08:45:53+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -64,6 +64,8 @@ AutoReq: Yes
 Conflicts: indimail-mta < 2.12
 Provides: user(qmaill)      > 999
 Provides: group(nofiles)    > 999
+Provides: %{libexecdir}/instcheck
+Provides: %{libexecdir}/installer
 %if %build_on_obs == 0
 Requires(pre): shadow-utils
 Requires(postun): shadow-utils
