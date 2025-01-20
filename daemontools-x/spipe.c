@@ -68,7 +68,7 @@ die(const char *msg)
 	exit(1);
 }
 
-bool
+mybool
 is_pipe(const char *p)
 {
 	return p[0] == '|' && p[1] == 0;
