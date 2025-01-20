@@ -11,14 +11,14 @@
 #include "qmail.h"
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	/*- thou shalt not clean up here */
 	_exit(QQ_TIMEOUT);
 }
 
 no_return void
-sigbug()
+sigbug(int x)
 {
 	_exit(QQ_INTERNAL_BUG);
 }

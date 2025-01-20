@@ -74,8 +74,8 @@
 #define FATAL "replier: fatal: "
 #define WARN  "replier: warn: "
 
-void (*sig_defaulthandler)() = SIG_DFL;
-void (*sig_ignorehandler)() = SIG_IGN;
+void (*sig_defaulthandler)(int) = SIG_DFL;
+void (*sig_ignorehandler)(int) = SIG_IGN;
 
 no_return void
 usage()
@@ -98,14 +98,14 @@ badaddr()
 static struct qmail qq;
 
 ssize_t
-mywrite(int fd, char *buf, unsigned int len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 	return len;
 }
 
 void
-put(const char *buf, int len)
+put(const char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 }
@@ -117,7 +117,7 @@ myputs(const char *buf)
 }
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	strerr_die1x(111, "Timeout on maildir delivery. (#4.3.0)");
 }
@@ -224,7 +224,7 @@ main(int argc, char **argv)
 	flagmlwasthere = 0;
 	flaginheader = 1;
 	flagbadfield = 0;
-	substdio_fdbuf(&ssin, read, pf[0], inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, pf[0], inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
@@ -254,7 +254,7 @@ main(int argc, char **argv)
 			!stralloc_0(&line))
 		nomem();
 	qmail_from(&qq, line.s);
-	substdio_fdbuf(&ssout, mywrite, -1, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) mywrite, -1, outbuf, sizeof(outbuf));
 	if (substdio_copy(&ssout, &ssin) != 0)
 		strerr_die2sys(111, FATAL, "unable to read input: ");
 	if (substdio_flush(&ssout) == -1)

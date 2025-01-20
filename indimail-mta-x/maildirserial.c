@@ -161,7 +161,7 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 	int             match, n;
 	const char     *bouncesender, *bouncerecip, *x;
 
-	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*)(int,  char *, size_t)) read, fd, messbuf, sizeof messbuf);
 
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
@@ -299,7 +299,7 @@ hasprefix(int fd)
 {
 	int             match;
 
-	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*)(int,  char *, size_t)) read, fd, messbuf, sizeof messbuf);
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
 	if (!match)
@@ -349,7 +349,7 @@ scanner()
 
 	if (pipe(pis2c) == -1)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
-	substdio_fdbuf(&ss, write, pis2c[1], buf, sizeof buf);
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, pis2c[1], buf, sizeof buf);
 	maildir_clean(&filenames);
 	/*- this gets all files older than current time */
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
@@ -449,7 +449,7 @@ main(int argc, char **argv)
 			scanner();
 		}
 		close(pic2p[1]);
-		substdio_fdbuf(&ss, read, pic2p[0], buf, sizeof buf);
+		substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, pic2p[0], buf, sizeof buf);
 		--progress;
 		for (;;) {
 			if (getln(&ss, &fn, &match, '\0') == -1)

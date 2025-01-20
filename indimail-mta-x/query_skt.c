@@ -16,7 +16,7 @@
 
 int
 query_skt(int fd, const char *ipaddr, stralloc *queryp, char *responsep,
-		int maxresponsesize, int timeout, void (*errfn) (), void (*timeoutfn) ())
+		int maxresponsesize, int timeout, void (*timeoutfn) (void), void (*errfn) (const char *))
 {
 	int             r = 0;
 

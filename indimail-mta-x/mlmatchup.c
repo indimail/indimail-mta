@@ -78,7 +78,7 @@ outs(const char *buf)
 }
 
 char            buf5[512];
-substdio        ss5 = SUBSTDIO_FDBUF(write, 5, buf5, sizeof buf5);
+substdio        ss5 = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 5, buf5, sizeof buf5);
 
 void
 out5(const char *buf, int len)
@@ -686,7 +686,7 @@ matchup(substdio * ssin)
 }
 
 char            subfd4_input[SUBSTDIO_INSIZE];
-static substdio i4t = SUBSTDIO_FDBUF(subfd_read, 4, subfd4_input, sizeof subfd4_input);
+static substdio i4t = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) subfd_read, 4, subfd4_input, sizeof subfd4_input);
 substdio       *subfd4in = &i4t;
 
 int

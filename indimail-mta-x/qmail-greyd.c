@@ -863,7 +863,7 @@ load_context()
 			return;
 		die_control(context_file.s);
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	cur_time = time(0);
 	for (;;) {
 		if (getln(&ss, &line, &match, '\n') == -1)
@@ -930,7 +930,7 @@ load_context()
  * Reload whitelist on sighup
  */
 void
-sighup()
+sighup(int x)
 {
 	sig_block(SIGHUP);
 	if (whitelistok) {
@@ -944,7 +944,7 @@ sighup()
  * save context file on SIGUSR1
  */
 void
-sigusr1()
+sigusr1(int x)
 {
 	sig_block(SIGUSR1);
 	save_context();
@@ -971,7 +971,7 @@ ready()
  * expire records on SIGUSR2
  */
 void
-sigusr2()
+sigusr2(int x)
 {
 	struct greylst *ptr, *ip_ptr;
 	int             i, j;
@@ -999,7 +999,7 @@ sigusr2()
 }
 
 no_return void
-sigterm()
+sigterm(int x)
 {
 	sig_block(SIGTERM);
 	logerr("ARGH!! Committing suicide on SIGTERM\n", NULL);

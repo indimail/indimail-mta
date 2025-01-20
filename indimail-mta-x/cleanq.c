@@ -168,7 +168,7 @@ tryclean(int fd, const char *d)
 }
 
 no_return void
-sigterm()
+sigterm(int x)
 {
 	if (flaglog)
 		strerr_warn2(WARNING, "going down on SIGTERM", 0);

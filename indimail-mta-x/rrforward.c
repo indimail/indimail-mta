@@ -62,12 +62,12 @@
 #define QRR_SEPARATOR(S) (*((S)+QRR_LEN))
 #define QRR_EXTENSION(S) ((S)+QRR_LEN+1)
 
-ssize_t         qqtwrite(int fd, char *buf, size_t len);
+ssize_t         qqtwrite(int fd, const char *buf, size_t len);
 
 static struct qmail    qqt;
 static char     inbuf[SUBSTDIO_INSIZE], outbuf[1];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-static substdio ssout = SUBSTDIO_FDBUF(qqtwrite, -1, outbuf, sizeof outbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) qqtwrite, -1, outbuf, sizeof outbuf);
 
 no_return void
 die_nomem()
@@ -76,7 +76,7 @@ die_nomem()
 }
 
 ssize_t
-qqtwrite(int fd, char *buf, size_t len)
+qqtwrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;

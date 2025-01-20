@@ -158,10 +158,10 @@ do_pkix(SSL *ssl, const char *servercert, const char *fqdn,
 int
 do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		char **scert, const char *fqdn, const char *_host, int hostlen,
-		void(*tlsquit)(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *s),
-		void(*mem_err)(void),
-		void(*ctrl_err)(const char *, const char *),
-		void(*write_err)(void),
+		void (*tlsquit) (const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *s),
+		void (*mem_err) (void),
+		void (*ctrl_err) (const char *, const char *),
+		void (*write_err) (void),
 #ifdef HAVE_STDARG_H
 		void(*quit)(int code, int e, const char *p, ...),
 #else

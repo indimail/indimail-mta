@@ -554,11 +554,9 @@ static char     sserrbuf[512];
 struct substdio sserr;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
+	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 	substdio_puts(&sserr, "not compiled with -DHASDKIM or ldap libraries absent\n");
 	substdio_flush(&sserr);
 	_exit(111);

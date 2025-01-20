@@ -59,7 +59,7 @@ static unsigned long   size;
 static stralloc stats = { 0 };
 
 static void
-die_opendir(char *fn)
+die_opendir(const char *fn)
 {
 	strerr_die4sys(111, FATAL, "unable to opendir ", fn, ": ");
 }
@@ -401,7 +401,7 @@ main(int argc, char **argv)
 				err(id);
 				continue;
 			}
-			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ss, &sender, &match, 0) == -1)
 				strerr_die2x(111, FATAL, "out of memory");
 			if (fstat(fd, &st) == -1) {
@@ -468,7 +468,7 @@ main(int argc, char **argv)
 				err(id);
 				continue;
 			}
-			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for (;;) {
 				if (getln(&ss, &sender, &match, 0) == -1)
 					strerr_die2x(111, FATAL, "out of memory");

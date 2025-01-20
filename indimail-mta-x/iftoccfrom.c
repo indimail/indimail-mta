@@ -62,7 +62,7 @@ main(int argc, char **argv)
 	int             i, j, match;
 	stralloc        addrlist = { 0 }, line = { 0 };
 	char            ssinbuf[BUFSIZE_IN];
-	substdio        ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 	mess822_header  h = MESS822_HEADER;
 	mess822_action  a[] = {
 		{ "to", 0, 0, 0, &addrlist, 0 },

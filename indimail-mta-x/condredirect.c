@@ -22,7 +22,7 @@
 struct qmail    qqt;
 
 ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
@@ -30,7 +30,7 @@ mywrite(int fd, char *buf, int len)
 
 char            inbuf[SUBSTDIO_INSIZE];
 char            outbuf[1];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
 substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
 char            num[FMT_ULONG];
 

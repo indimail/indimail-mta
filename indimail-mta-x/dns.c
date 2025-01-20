@@ -134,7 +134,7 @@ resolve(stralloc *domain, int type)
 #endif
 	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
 		if (responsebuflen < MAX_EDNS_RESPONSE_SIZE) {
-			if (alloc_re((char *) &response.buf, responsebuflen, MAX_EDNS_RESPONSE_SIZE))
+			if (alloc_re((void *) &response.buf, responsebuflen, MAX_EDNS_RESPONSE_SIZE))
 				responsebuflen = MAX_EDNS_RESPONSE_SIZE;
 			else
 				return DNS_MEM;

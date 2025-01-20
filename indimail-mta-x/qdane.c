@@ -46,7 +46,7 @@ flush()
 }
 
 void
-timeoutfn()
+timeoutfn(void)
 {
 	out("timedout querying qmail-dane\n");
 	flush();

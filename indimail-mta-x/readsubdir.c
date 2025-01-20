@@ -29,7 +29,7 @@
 #include "str.h"
 
 void
-readsubdir_init(readsubdir *rs, const char *name, int flagsplit, void (*pause)(char *))
+readsubdir_init(readsubdir *rs, const char *name, int flagsplit, void (*pause)(const char *))
 {
 	rs->name = name;
 	rs->pause = pause;

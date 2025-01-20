@@ -141,12 +141,12 @@ static int      shm_queue = -1;
 static int      bigtodo;
 
 static void     reread(int);
-static void     sigusr1();
-static void     sigusr2();
+static void     sigusr1(int x);
+static void     sigusr2(int x);
 static void     exit_todo();
 
 static void
-sigterm()
+sigterm(int x)
 {
 	flagexitsend = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
@@ -154,14 +154,14 @@ sigterm()
 }
 
 static void
-sigalrm()
+sigalrm(int x)
 {
 	flagrunasap = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got ALRM: ", queuedesc, "\n", NULL);
 }
 
 static void
-sighup()
+sighup(int x)
 {
 	flagreadasap = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got HUP: ", queuedesc, "\n", NULL);
@@ -182,7 +182,7 @@ chdir_toqueue()
 
 #ifdef LOGLOCK
 static void
-sigint()
+sigint(int x)
 {
 	if (loglock_fd == -1) {
 		if (chdir(auto_qmail) == -1) {
@@ -352,7 +352,7 @@ getinfo(stralloc *sa, stralloc *qh, stralloc *eh, datetime_sec *dt, unsigned lon
 		close(fdinfo);
 		return 0;
 	}
-	substdio_fdbuf(&ss, read, fdinfo, buf, sizeof (buf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fdinfo, buf, sizeof (buf));
 	sa->len = qh->len = eh->len = 0;
 	for (;;) {
 		if (getln(&ss, &line, &match, '\0') == -1) {
@@ -397,8 +397,8 @@ comm_init()
 	int             c;
 
 	/* fd 5 is pi5[1] - write, fd 6 is pi6[0] - read*/
-	substdio_fdbuf(&sstoqc, write, 5, sstoqcbuf, sizeof (sstoqcbuf));
-	substdio_fdbuf(&ssfromqc, read, 6, ssfromqcbuf, sizeof (ssfromqcbuf));
+	substdio_fdbuf(&sstoqc, (ssize_t (*)(int,  char *, size_t)) write, 5, sstoqcbuf, sizeof (sstoqcbuf));
+	substdio_fdbuf(&ssfromqc, (ssize_t (*)(int,  char *, size_t)) read, 6, ssfromqcbuf, sizeof (ssfromqcbuf));
 	for (c = 0; c < CHANNELS; ++c) {
 		/*- this is so stupid: NDELAY semantics should be default on write */
 		if (ndelay_on(chanfdout[c]) == -1)
@@ -1176,7 +1176,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		else {
 			while (!stralloc_copys(&orig_recip, ""))
 				nomem(argv0);
-			substdio_fdbuf(&ssread, read, fd, inbuf, sizeof (inbuf));
+			substdio_fdbuf(&ssread, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 			while ((r = substdio_get(&ssread, buf, sizeof (buf))) > 0) {
 				while (!stralloc_catb(&orig_recip, buf, r))
 					nomem(argv0);
@@ -1217,7 +1217,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		else {
 			int             bytestogo = bouncemaxbytes;
 			int             bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
-			substdio_fdbuf(&ssread, read, fd, inbuf, sizeof (inbuf));
+			substdio_fdbuf(&ssread, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 			while (bytestoget > 0 && (r = substdio_get(&ssread, buf, bytestoget)) > 0) {
 				qmail_put(&qqt, buf, r);
 				bytestogo -= bytestoget;
@@ -1680,7 +1680,7 @@ pass_dochan(int c)
 		}
 		pass[c].id = pe.id;
 		pass[c].j = j;
-		substdio_fdbuf(&pass[c].ss, read, pass[c].fd, pass[c].buf, sizeof (pass[c].buf));
+		substdio_fdbuf(&pass[c].ss, (ssize_t (*)(int,  char *, size_t)) read, pass[c].fd, pass[c].buf, sizeof (pass[c].buf));
 		job_open(pe.id, c, j);
 		jo[j].retry = nextretry(birth, c);
 		jo[j].flagdying = (recent > birth + lifetime);
@@ -1851,7 +1851,7 @@ pass_do()
 /*- this file is too long ---------------------------------------------- TODO */
 
 static void
-sigusr1()
+sigusr1(int x)
 {
 	if (flagdetached)
 		return;
@@ -1886,7 +1886,7 @@ sigusr1()
 }
 
 static void
-sigusr2()
+sigusr2(int x)
 {
 	if (flagdetached == 0)
 		return;

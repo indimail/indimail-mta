@@ -87,7 +87,7 @@
 #define WARN  "dot-forward: warn: "
 #define INFO "dot-forward: info: "
 
-ssize_t         mywrite(int, char *, size_t);
+ssize_t         mywrite(int, const char *, size_t);
 
 stralloc        line = { 0 };
 int             flagdoit = 1;
@@ -114,7 +114,7 @@ unsigned long   qp;
 const char     *qqx;
 char            strnum[FMT_ULONG];
 char            qqbuf[BUFSIZE_OUT];
-substdio        ssqq = SUBSTDIO_FDBUF(mywrite, -1, qqbuf, sizeof qqbuf);
+substdio        ssqq = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, -1, qqbuf, sizeof qqbuf);
 char            inbuf[BUFSIZE_IN];
 
 no_return void
@@ -189,8 +189,8 @@ run(char *cmd)
 		strerr_die2sys(111, FATAL, "unable to run /bin/sh: ");
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssmess, read, 0, messbuf, sizeof messbuf);
-	substdio_fdbuf(&sschild, blindwrite, pi[1], childbuf, sizeof childbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*) (int,  char *, size_t)) read, 0, messbuf, sizeof messbuf);
+	substdio_fdbuf(&sschild, (ssize_t (*) (int,  char *, size_t)) blindwrite, pi[1], childbuf, sizeof childbuf);
 	substdio_puts(&sschild, ufline);
 	substdio_puts(&sschild, rpline);
 	substdio_puts(&sschild, dtline);
@@ -400,7 +400,7 @@ parseline()
 }
 
 ssize_t
-mywrite(int fd, char *buf, size_t len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 	return len;
@@ -422,7 +422,7 @@ try(char *fn)
 		die_nomem();
 	flagacted = 0;
 	flagdirect = 0;
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ss, (ssize_t (*) (int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 	for (;;) {
 		if (getln(&ss, &line, &match, '\n') == -1)
 			strerr_die4sys(111, FATAL, "unable to read ", fn, ": ");
@@ -441,7 +441,7 @@ try(char *fn)
 				strerr_die2sys(111, FATAL, "unable to run qmail-queue: ");
 			qp = qmail_qp(&qq);
 			qmail_puts(&qq, dtline);
-			substdio_fdbuf(&ssmess, read, 0, messbuf, sizeof messbuf);
+			substdio_fdbuf(&ssmess, (ssize_t (*) (int,  char *, size_t)) read, 0, messbuf, sizeof messbuf);
 			if (substdio_copy(&ssqq, &ssmess) != 0)
 				die_readmess();
 			substdio_flush(&ssqq);

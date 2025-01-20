@@ -33,12 +33,12 @@
 #define FATAL "fastforward: fatal: "
 #define WARN  "fastforward: warn: "
 
-ssize_t         qqwrite(int, char *, int);
+ssize_t         qqwrite(int, const char *, size_t);
 
 struct qmail    qq;
 char            qp[FMT_ULONG], qqbuf[1], messbuf[BUFSIZE_REMOTE];
-substdio        ssqq = SUBSTDIO_FDBUF(qqwrite, -1, qqbuf, sizeof qqbuf);
-substdio        ssmess = SUBSTDIO_FDBUF(read, 0, messbuf, sizeof messbuf);
+substdio        ssqq = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) qqwrite, -1, qqbuf, sizeof qqbuf);
+substdio        ssmess = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, messbuf, sizeof messbuf);
 int             flagdeliver = 1, flagpassthrough = 0, fdcdb, flagdefault = 0;
 const char     *dtline, *fncdb;
 stralloc        sender, programs, forward, todo, mailinglist, key, data, recipient;
@@ -79,7 +79,7 @@ printsafe(const char *s)
 }
 
 ssize_t
-qqwrite(int fd, char *buf, int len)
+qqwrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 	return len;

@@ -95,7 +95,7 @@ temp_read()
 }
 
 no_return void
-temp_slowlock()
+temp_slowlock(int x)
 {
 	strerr_die1x(111, "File has been locked for 30 seconds straight. (#4.3.0)");
 }
@@ -201,8 +201,8 @@ mailfile(const char *fn)
 	sig_alarmdefault();
 	seek_end(fd);
 	pos = seek_cur(fd);
-	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, 0, buf, sizeof(buf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (substdio_put(&ssout, ufline.s, ufline.len)
 			|| substdio_put(&ssout, rpline.s, rpline.len)
 			|| substdio_put(&ssout, dtline.s, dtline.len)
@@ -320,7 +320,7 @@ mailforward(char **recips)
 		temp_rewind();
 	if (!env_put2("QQEH", qqeh))
 		temp_nomem();
-	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, 0, buf, sizeof(buf));
 	if (qmail_open(&qqt) == -1)
 		temp_fork();
 	mailforward_qp = qmail_qp(&qqt);
@@ -389,7 +389,7 @@ bouncexf()
 		temp_rewind();
 	if (control_readint(&maxdeliveredto, "maxdeliveredto") == -1)
 		strerr_die1x(111, "Unable to read control file maxdeliveredto. (#4.3.0)");
-	substdio_fdbuf(&ss, read, 0, buf, sizeof(buf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, 0, buf, sizeof(buf));
 	for (;;) {
 		if (getln(&ss, &messline, &match, '\n') != 0)
 			temp_read();

@@ -63,13 +63,13 @@
 #define FATAL "filterto: fatal: "
 #define WARN  "filterto: warn: "
 
-void        (*sig_defaulthandler)() = SIG_DFL;
-void        (*sig_ignorehandler)() = SIG_IGN;
+void        (*sig_defaulthandler)(int) = SIG_DFL;
+void        (*sig_ignorehandler)(int) = SIG_IGN;
 
 struct qmail    qqt;
 
 ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
@@ -79,7 +79,7 @@ char            inbuf[SUBSTDIO_INSIZE];
 char            outbuf[1];
 substdio        ssin;
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(mywrite, -1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, -1, ssoutbuf, sizeof ssoutbuf);
 
 char            num[FMT_ULONG];
 
@@ -116,7 +116,7 @@ main(int argc, char **argv, char **envp)
 	if (qmail_open(&qqt) == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");
 	qmail_puts(&qqt, dtline);
-	substdio_fdbuf(&ssin, read, pf[0], inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, pf[0], inbuf, sizeof inbuf);
 	if (substdio_copy(&ssout, &ssin) != 0)
 		strerr_die2sys(111, FATAL, "unable to read message: ");
 	if (substdio_flush(&ssout) == -1)

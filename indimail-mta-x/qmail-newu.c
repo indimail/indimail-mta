@@ -131,7 +131,7 @@ main(int argc, char **argv)
 		die_chdir(argc == 1 ? assigndir : argv[1]);
 	if ((fd = open_read("assign")) == -1)
 		die_opena();
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if ((fdtemp = open_trunc("cdb.tmp")) == -1)
 		die_opent();
 	if (cdbmss_start(&cdbmss, fdtemp) == -1)

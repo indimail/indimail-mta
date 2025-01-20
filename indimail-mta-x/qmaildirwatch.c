@@ -122,7 +122,7 @@ main()
 			fd = open_read(filenames.s + pe.id);
 			if (fd == -1)
 				continue;
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (!stralloc_copys(&sender, "?"))
 				die_nomem();
 			if (!stralloc_copys(&recipient, "?"))

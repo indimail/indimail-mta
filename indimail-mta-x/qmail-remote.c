@@ -805,7 +805,7 @@ int             timeoutconn = 60;
 int             timeoutdata = 1200;
 
 ssize_t
-saferead(int fd, char *buf, int len)
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
 
@@ -846,9 +846,9 @@ safewrite(int fd, char *buf, int len)
 static char     inbuf[BUFSIZE_REMOTE];
 static char     smtpfrombuf[BUFSIZE_SMALL];
 static char     smtptobuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-static substdio smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
-substdio        smtpto = SUBSTDIO_FDBUF(safewrite, -1, smtptobuf, sizeof smtptobuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
+static substdio smtpfrom = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
+substdio        smtpto = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, -1, smtptobuf, sizeof smtptobuf);
 
 void
 get1(char *ch)
@@ -1064,7 +1064,7 @@ blast()
 		/*
 		 * use the same buffer used for ssin substdio, as below
 		 *
-		 * static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+		 * static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
 		 *
 		 * This prevents buffer to buffer copy.
 		 * CAUTION: substdio_get third argument cannot
@@ -3705,7 +3705,7 @@ main(int argc, char **argv)
 			if (!(x = alloc(IPFMT + 1)))
 				temp_nomem();
 		} else
-		if (!alloc_re((char *) &x, j, j + IPFMT + 1))
+		if (!alloc_re((void *) &x, j, j + IPFMT + 1))
 			temp_nomem();
 		j += ip4_fmt(x + j, &ip.ix[i].addr.ip);
 		x[j++] = ',';

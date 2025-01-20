@@ -37,9 +37,9 @@ int             match;
 
 char            pipbuf[BUFSIZE_IN];
 static char     ssinbuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[BUFSIZE_OUT];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
 static substdio sspip;
 
 int
@@ -54,7 +54,7 @@ main(int argc, char **argv, char **envp)
 	if (pipe(pfi) == -1)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
 
-	substdio_fdbuf(&sspip, write, pfi[1], pipbuf, sizeof pipbuf);
+	substdio_fdbuf(&sspip, (ssize_t (*)(int,  char *, size_t)) write, pfi[1], pipbuf, sizeof pipbuf);
 	pid = fork();
 	if (pid == -1)
 		strerr_die2sys(111, FATAL, "unable to fork: ");

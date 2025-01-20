@@ -43,10 +43,10 @@ static int      fdrcps;
 /*- return  4: Pass-thru */
 /*- return 10: none existing control file; pass-thru */
 
-extern ssize_t  safewrite(int, char *, int);
+extern ssize_t  safewrite(int, const char *, size_t);
 
 char            ssrcptbuf[512];
-substdio        ssrcpt = SUBSTDIO_FDBUF(safewrite, FDAUTH, ssrcptbuf, sizeof (ssrcptbuf));
+substdio        ssrcpt = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, FDAUTH, ssrcptbuf, sizeof (ssrcptbuf));
 
 /*- pluggable address verification module */
 int
@@ -82,7 +82,7 @@ pavm(char *pavm, char *addr)
 			!stralloc_catb(&mailaddress, "\0\0\0", 3))
 		return -2;
 
-	substdio_fdbuf(&ssrcpt, write, pi[1], ssrcptbuf, sizeof ssrcptbuf);
+	substdio_fdbuf(&ssrcpt, (ssize_t (*)(int,  char *, size_t)) write, pi[1], ssrcptbuf, sizeof ssrcptbuf);
 	if (substdio_put(&ssrcpt, mailaddress.s, mailaddress.len) == -1 ||
 			substdio_flush(&ssrcpt) == -1)
 		return -3;

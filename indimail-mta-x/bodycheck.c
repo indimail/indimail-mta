@@ -32,7 +32,7 @@
 
 static regex_t **qreg;
 static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static int      allocated;
 static stralloc Desc = { 0 };
 

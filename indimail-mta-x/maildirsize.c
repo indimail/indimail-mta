@@ -80,7 +80,7 @@ update_maildirsize(char *maildirsize_fn, ssize_t avail, ssize_t mailsize, size_t
 	else
 	if (fchmod(fd, 0644))
 		strerr_die4sys(111, FATAL, "chmod: ", maildirsize_fn, ": ");
-	substdio_fdbuf(&ssout, write, fd, ssoutbuf, sizeof(ssoutbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, ssoutbuf, sizeof(ssoutbuf));
 	strnum[len = fmt_ulong(strnum, avail)] = 0;
 	if (substdio_put(&ssout, strnum, len) || substdio_put(subfdout, strnum, len))
 		strerr_die2sys(111, FATAL, "write: ");

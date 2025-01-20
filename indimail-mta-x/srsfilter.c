@@ -78,7 +78,7 @@ printheader()
 }
 
 ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	int             i;
 
@@ -147,8 +147,8 @@ main(int argc, char **argv)
 	char           *ext2, *host, *sender;
 	const char     *qqx;
 	char            inbuf[SUBSTDIO_INSIZE], outbuf[1], num[FMT_ULONG];
-	substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-	substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
+	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
+	substdio        ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, -1, outbuf, sizeof outbuf);
 
 	sig_pipeignore();
 	if (!(sender = env_get("SENDER")))
@@ -211,11 +211,9 @@ static char     sserrbuf[512];
 struct substdio sserr;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
+	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 	substdio_puts(&sserr, "not compiled with -DHAVESRS\n");
 	substdio_flush(&sserr);
 	_exit(111);

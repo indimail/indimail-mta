@@ -20,14 +20,14 @@
 #include "qmail.h"
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	/*- thou shalt not clean up here */
 	_exit(QQ_TIMEOUT);
 }
 
 no_return void
-sigbug()
+sigbug(int x)
 {
 	_exit(QQ_INTERNAL_BUG);
 }
@@ -203,9 +203,9 @@ main(int argc, char **argv)
 	}
 
 	/*- Write envelope to qmail-queue */
-	substdio_fdbuf(&ssout, write, recpfd[1], outbuf, sizeof (outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, recpfd[1], outbuf, sizeof (outbuf));
 	/*- Read envelope from qmail-smtpd */
-	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof (inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 1, inbuf, sizeof (inbuf));
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2: /*- read error */

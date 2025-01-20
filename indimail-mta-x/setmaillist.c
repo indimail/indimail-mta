@@ -66,7 +66,7 @@ main(int argc, char **argv)
 		usage();
 	if ((fd = open_trunc(fntmp)) == -1)
 		strerr_die4sys(111, FATAL, "unable to create ", fntmp, ": ");
-	substdio_fdbuf(&ss, write, fd, buf, sizeof buf);
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, fd, buf, sizeof buf);
 	do {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");

@@ -54,22 +54,22 @@
 #include "received.h"
 
 ssize_t         saferead(int fd, char *_buf, size_t len);
-ssize_t         safewrite(int fd, char *_buf, size_t len);
+ssize_t         safewrite(int fd, const char *_buf, size_t len);
 
 static char     ssinbuf[BUFSIZE_IN];
 static char     ssoutbuf[BUFSIZE_OUT];
-static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
-static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) saferead, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static unsigned long   bytesleft = 100;
 
 no_return void
-resources()
+resources(int x)
 {
 	_exit(111);
 }
 
 ssize_t
-safewrite(int fd, char *buf, size_t len)
+safewrite(int fd, const char *buf, size_t len)
 {
 	int             r;
 
@@ -106,7 +106,7 @@ getlen()
 		if (ch == ':')
 			return len;
 		if (len > 200000000)
-			resources();
+			resources(0);
 		len = 10 * len + (ch - '0');
 	}
 }
@@ -184,7 +184,7 @@ main()
 	len = getlen();
 
 	if (qmail_open(&qq) == -1)
-		resources();
+		resources(0);
 	qp = qmail_qp(&qq);
 	identify();
 

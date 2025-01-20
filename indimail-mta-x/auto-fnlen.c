@@ -22,11 +22,10 @@ static unsigned long fnbytes = TIMESTAMP + PID_BYTES * 2 + sizeof(unsigned short
 
 
 char            buf1[256];
-substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+substdio        ss1 = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, buf1, sizeof(buf1));
 
 void
-my_puts(s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
-	char           *s;
+my_puts(char *s) /*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
 {
 	if (substdio_puts(&ss1, s) == -1)
 		_exit(111);

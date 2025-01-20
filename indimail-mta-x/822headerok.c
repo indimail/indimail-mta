@@ -29,7 +29,7 @@
 stralloc        line = { 0 };
 int             match;
 static char     ssinbuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 
 int
 main(int argc, char **argv)

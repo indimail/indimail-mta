@@ -103,7 +103,7 @@ safe_close(int fd)
 }
 
 ssize_t
-safe_write(int fd, char *s, int len)
+safe_write(int fd, const char *s, size_t len)
 {
 	if (len == write(fd, s, len))
 		return (len);
@@ -121,7 +121,7 @@ safe_open()
 	}
 	w2(filename + 4);
 	w2(": ");
-	substdio_fdbuf(&buf_f, safe_write, tmpfd, buf_f_space, sizeof(buf_f_space));
+	substdio_fdbuf(&buf_f, (ssize_t (*)(int,  char *, size_t)) safe_write, tmpfd, buf_f_space, sizeof(buf_f_space));
 }
 
 void
@@ -263,7 +263,7 @@ main(int argc, char **argv)
 	int             fd, ds, r, flagkeep = 0;
 	char            buf[8192];
 
-	substdio_fdbuf(&buf_1, write, 1, buf_1_space, sizeof(buf_1_space));
+	substdio_fdbuf(&buf_1, (ssize_t (*)(int,  char *, size_t)) write, 1, buf_1_space, sizeof(buf_1_space));
 	while (argv[1] && argv[1][0] == '-') {
 		char           *p = argv[1] + 1;
 		for (; *p; p++) {

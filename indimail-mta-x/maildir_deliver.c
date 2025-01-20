@@ -47,7 +47,7 @@ tryunlinktmp()
 }
 
 static void
-sigalrm()
+sigalrm(int i)
 {
 	tryunlinktmp();
 	_exit (3);
@@ -157,8 +157,8 @@ maildir_deliver(const char *dir, stralloc *rpline, stralloc *dtline, const char 
 		}
 	} /*- for (loop = 0;; ++loop) */
 	alarm(86400);
-	substdio_fdbuf(&ss, read, 0, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssout, write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
 	if (rpline->len && substdio_put(&ssout, rpline->s, rpline->len) == -1)
 		goto fail;
 	if (dtline->len && substdio_put(&ssout, dtline->s, dtline->len) == -1)

@@ -83,8 +83,8 @@
 
 typedef const char c_char;
 static char     ssoutbuf[BUFSIZE_OUT], sserrbuf[BUFSIZE_OUT], strnum[FMT_ULONG];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static c_char  *usage = "usage: rrt [-n][-b]\n";
 static struct qmail    qqt;
 static int      flagqueue = 1;
@@ -242,7 +242,7 @@ parse_email()
 
 	if (lseek(0, 0, SEEK_SET) == -1)
 		my_error("lseek error", 0, LSEEK_ERR);
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	got_rr = got_subj = got_msgid = got_from = 0;
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
@@ -472,7 +472,7 @@ main(int argc, char **argv)
 		my_putb("Content-Type: message/rfc822\n\n", 30);
 
 	/* You wanted an MDN and you shall get one - the entire lot back to you */
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("read error", 0, READ_ERR);

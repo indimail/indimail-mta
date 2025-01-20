@@ -337,7 +337,7 @@ main()
 	readcontrols();
 	if ((fd = open_read("/etc/aliases")) == -1)
 		readerr();
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 	if ((fd = open_trunc("/etc/aliases.tmp")) == -1)
 		strerr_die2sys(111, FATAL, "unable to create /etc/aliases.tmp: ");
 	if (cdbmss_start(&cdbmss, fd) == -1)

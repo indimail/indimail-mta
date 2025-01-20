@@ -70,7 +70,7 @@ main()
 		strerr_die4sys(111, FATAL, "unable to open ", queuedir, "/lock/tcpto: ");
 	if (lock_ex(fd) == -1)
 		strerr_die4sys(111, FATAL, "unable to lock ", queuedir, "/lock/tcpto: ");
-	substdio_fdbuf(&ss, write, fd, tcpto_buf, sizeof tcpto_buf);
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, fd, tcpto_buf, sizeof tcpto_buf);
 	for (i = 0; i < sizeof(tcpto_buf); ++i)
 		substdio_put(&ss, "", 1);
 	if (substdio_flush(&ss) == -1)

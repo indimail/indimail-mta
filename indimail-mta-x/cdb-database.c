@@ -55,7 +55,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "chdir: ", controldir, ": ");
 	if ((fd = open_read(argv[1])) == -1)
 		strerr_die3sys(111, FATAL, argv[1], ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (!stralloc_copys(&fntmp, argv[1]) || !stralloc_catb(&fntmp, ".tmp", 4) || !stralloc_0(&fntmp))
 		strerr_die2sys(111, FATAL, "out of memory");
 	if (!stralloc_copys(&fncdb, argv[1]) || !stralloc_catb(&fncdb, ".cdb", 4) || !stralloc_0(&fncdb))

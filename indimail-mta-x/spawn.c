@@ -63,7 +63,7 @@ static char     inbuf[128];
 static char     cmdbuf[1024];
 
 static void
-sigchld()
+sigchld(int x)
 {
 	int             wstat;
 	int             pid;
@@ -84,7 +84,7 @@ sigchld()
 }
 
 static ssize_t
-okwrite(int fd, char *buf, ssize_t n)
+okwrite(int fd, const char *buf, ssize_t n)
 {
 	ssize_t         w;
 
@@ -390,7 +390,7 @@ QSPAWN(int argc, char **argv)
 		_exit(111);
 	if (!(d = (struct delivery *) alloc((auto_spawn + 10) * sizeof(struct delivery))))
 		_exit(111);
-	substdio_fdbuf(&ssout, okwrite, 1, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) okwrite, 1, outbuf, sizeof(outbuf));
 	sig_pipeignore();
 	sig_childcatch(sigchld);
 	initialize_SPAWN(argc, argv);

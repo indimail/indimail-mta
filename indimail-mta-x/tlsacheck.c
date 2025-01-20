@@ -106,7 +106,7 @@ scan_ip_port(const char *daneip, const char *defaultip,
 }
 
 int
-connect_udp(union v46addr *ip, unsigned int port, void (*errfn)())
+connect_udp(union v46addr *ip, unsigned int port, void (*errfn)(const char *))
 {
 	int               fd;
 #ifdef IPV6
@@ -173,7 +173,7 @@ stralloc        ipbuf = {0};
 
 int
 tlsacheck(const char *daneip, const char *domain, int qOru, char rbuf[],
-		void (*timeoutfn) (), void (*errfn) ()) /*- errfn must _exit */
+		void (*timeoutfn) (void), void (*errfn) (const char *)) /*- errfn must _exit */
 {
 	int             r, len = 0, timeout = DANETIMEOUT;
 	const char     *ptr;
@@ -242,7 +242,7 @@ tlsacheck(const char *daneip, const char *domain, int qOru, char rbuf[],
 		return (-2);
 	else
 	if ((r = query_skt(sockfd, ipbuf.s, &chkpacket, rbuf, 2, timeout, timeoutfn, errfn)) == -1)
-		return -1;	/*- Permit connection (soft fail) - probably timeout */
+		return -1; /*- Permit connection (soft fail) - probably timeout */
 	else {
 		if (rbuf[0] == 0) { /* failure */
 			if (*ptr == 'S' || *ptr == 'F')

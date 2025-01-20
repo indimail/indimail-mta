@@ -15,6 +15,6 @@
 #define DEFAULTGREYIP   "127.0.0.1"
 #define GREYTIMEOUT     3
 
-int             greylist(const char *, const char *, const char *, const char *, int, void (*)(), void (*)());
+int             greylist(const char *, const char *, const char *, const char *, int, void (*)(void), void (*)(const char *));
 
 #endif

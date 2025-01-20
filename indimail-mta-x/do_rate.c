@@ -134,7 +134,7 @@ is_rate_ok(const char *_file, const char *_rate_exp, unsigned long *e, double *c
 	if (!access_flag) { /*- only if rate definition exists */
 		if ((rfd = open_read(file)) == -1)
 			return -1;
-		substdio_fdbuf(&ssin, read, rfd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
 		for (line_no = 1;;line_no++) { /*- Line Processing */
 			if (getln(&ssin, &fline, &match, DELIMITER[0]) == -1)
 				return -1;
@@ -198,7 +198,7 @@ is_rate_ok(const char *_file, const char *_rate_exp, unsigned long *e, double *c
 	ecount[fmt_ulong(ecount, ++email_count)] = 0;
 	if (e)
 		*e = email_count;
-	substdio_fdbuf(&ssout, write, wfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, wfd, outbuf, sizeof(outbuf));
 	if (substdio_bput(&ssout, _rate_expr.s, _rate_expr.len) == -1 ||
 			substdio_bput(&ssout, DELIMITER, 1) == -1)
 		return -1;

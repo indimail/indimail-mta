@@ -71,7 +71,7 @@
 char            buf5[512];
 char            datebuf[FMT_ULONG + FMT_ULONG + 2]; /*- ssssssssss.ffffffffff\n */
 char            strnum[FMT_ULONG];
-substdio        ss5 = SUBSTDIO_FDBUF(write, 5, buf5, sizeof buf5);
+substdio        ss5 = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 5, buf5, sizeof buf5);
 GEN_ALLOC_typedef(ulongalloc, unsigned long, u, len, a)
 GEN_ALLOC_readyplus(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_readyplus)
 GEN_ALLOC_ready(ulongalloc, unsigned long, u, len, a, 30, ulongalloc_ready)

@@ -128,7 +128,7 @@ main(int argc, char **argv)
 		strerr_die2x(111, FATAL, "out of memory");
 	if ((fd = open_read(arg)) == -1)
 		strerr_die6sys(111, FATAL, "unable to read ", workdir, "/", arg, ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 
 	str_copyb(fn.s - 4, "tmp", 3);
 	if ((fdtemp = open_trunc(fn.s + i)) == -1)

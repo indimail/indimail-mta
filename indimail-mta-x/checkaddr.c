@@ -60,7 +60,7 @@ main(int argc, char **argv)
 	stralloc        addrlist = { 0 };
 	int             match;
 	char            ssinbuf[BUFSIZE_IN];
-	substdio        ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 
 	recipient = env_get("RECIPIENT");
 	recips = argv + 1;

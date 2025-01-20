@@ -9,7 +9,7 @@
  */
 
 int
-fn_handler(void (*errfn)(), void (*timeoutfn)(), int option, const char *arg)
+fn_handler(void (*errfn)(const char *arg), void (*timeoutfn)(void), int option, const char *arg)
 {
 	if (!option)
 		(*errfn)(arg);

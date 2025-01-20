@@ -21,7 +21,7 @@
 #include "substdio.h"
 
 char            buf1[256];
-substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+substdio        ss1 = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, buf1, sizeof(buf1));
 
 /*
  * check if a given character can be printed unquoted in a C string

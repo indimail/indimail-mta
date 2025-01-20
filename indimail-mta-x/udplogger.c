@@ -137,7 +137,7 @@ logerrf(const char *str)
 }
 
 void
-sighup()
+sighup(int x)
 {
 	sig_block(SIGHUP);
 	logerrf("Received SIGHUP\n");
@@ -146,7 +146,7 @@ sighup()
 }
 
 void
-sigusr1()
+sigusr1(int x)
 {
 	sig_block(SIGUSR1);
 	logerrf("Received SIGUSR1\n");
@@ -155,7 +155,7 @@ sigusr1()
 }
 
 no_return void
-sigterm()
+sigterm(int x)
 {
 	sig_block(SIGTERM);
 	logerrf("ARGH!! Committing suicide on SIGTERM\n");

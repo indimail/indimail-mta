@@ -36,7 +36,7 @@
 #define FATAL "columnt: fatal: "
 
 char            outbuf[4096];
-substdio        ssout = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
+substdio        ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, outbuf, sizeof outbuf);
 
 no_return void
 nomem()

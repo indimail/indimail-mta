@@ -235,7 +235,7 @@ doit(int fd)
 	int             match;
 	unsigned long   code;
 
-	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*)(int,  char *, size_t)) read, fd, messbuf, sizeof messbuf);
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		die_readmess();
 	if (!match ||

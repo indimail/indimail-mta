@@ -224,7 +224,7 @@ rewrite_envelope(int outfd)
 		return (0);
 	if ((n = discard_envelope()))
 		return (n);
-	substdio_fdbuf(&ssout, write, outfd, buffer, sizeof (buffer));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, outfd, buffer, sizeof (buffer));
 	if (substdio_bput(&ssout, "F", 1) == -1 ||
 			substdio_bput(&ssout, "\0", 1) == -1 ||
 			substdio_bput(&ssout, "T", 1) == -1 ||

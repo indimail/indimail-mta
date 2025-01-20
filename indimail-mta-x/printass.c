@@ -40,7 +40,7 @@ printall(int fd, char p_dir, char p_uid, char p_gid)
 	char           *ptr, *user, *dirp, *uidp, *gidp;
 	int             i, match;
 
-	substdio_fdbuf(&ssass, read, fd, assbuf, sizeof assbuf);
+	substdio_fdbuf(&ssass, (ssize_t (*)(int,  char *, size_t)) read, fd, assbuf, sizeof assbuf);
 	for (;;) {
 		if (getln(&ssass, &line, &match, '\n') == -1)
 			die_readass();

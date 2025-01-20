@@ -57,8 +57,8 @@ main(int argc, char **argv)
 					flagqqeh = 1, opt, pid, wstat;
 	char           *ufline, *rpline, *dtline, *qqeh;
 	char            outbuf[SUBSTDIO_OUTSIZE], inbuf[SUBSTDIO_INSIZE];
-	substdio        ssout = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
-	substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+	substdio        ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, outbuf, sizeof outbuf);
+	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
 
 	sig_pipeignore();
 

@@ -55,7 +55,7 @@ int             do_scan();
 int             do_cleanq();
 
 static char     buf1[256];
-static substdio ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+static substdio ss1 = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, buf1, sizeof(buf1));
 static int      alarm_flag;
 int             flaglog = 0;
 pid_t           cmd_pid;
@@ -75,8 +75,7 @@ die_read()
 }
 
 void
-err(s)	/*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
-	char           *s;
+err(const char *s) /*- was named puts, but Solaris pwd.h includes stdio.h. dorks.  */
 {
 	if (!flaglog)
 		return;
@@ -130,8 +129,8 @@ main(int argc, char *argv[])
 		}
 		if (n == 1)
 			unlink(fn);
-		substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof(outbuf));
-		substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdout, outbuf, sizeof(outbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof(inbuf));
 		switch (substdio_copy(&ssout, &ssin))
 		{
 		case -2:

@@ -111,9 +111,9 @@ extern dtype    delivery;
 static int      local_time = 1;
 static char     strnum1[FMT_ULONG], strnum2[FMT_LONG];
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static stralloc qdir = { 0 };
 const char     *usage = "usage: drate [-sulcR] [-t -C count] -d domain -r deliveryRate [-D ratelimit_dir]\n";
 const char     *daytab[7] = {
@@ -200,7 +200,7 @@ do_display(const char *domain)
 
 	if ((rfd = open_read(domain)) == -1)
 		strerr_die3sys(111, "unable to read: ", domain, ": ");
-	substdio_fdbuf(&ssfin, read, rfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssfin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
 	for (line_no = 1;;line_no++) { /*- Line Processing */
 		if (getln(&ssfin, &line, &match, DELIMITER[0]) == -1)
 			strerr_die3sys(111, "unable to read: ", domain, ": ");
@@ -356,7 +356,7 @@ update_mode(const char *domain, const char *rate_expr, int reset_mode, int conso
 			stime[fmt_ulong(etime, endtime)] = 0;
 			goto new;
 		}
-		substdio_fdbuf(&ssfin, read, rfd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssfin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
 		for (line_no = 1;;line_no++) { /*- Line Processing */
 			if (getln(&ssfin, &line, &match, DELIMITER[0]) == -1)
 				strerr_die3sys(111, "unable to read: ", domain, ": ");
@@ -414,7 +414,7 @@ new:
 		cleanup(domain, "unable to chown", t);
 	if (ftruncate(wfd, 0) == -1)
 		cleanup(domain, "unable to truncate", t);
-	substdio_fdbuf(&ssfout, write, wfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssfout, (ssize_t (*)(int,  char *, size_t)) write, wfd, outbuf, sizeof(outbuf));
 	if (consolidate) {
 		if (!stralloc_0(&rexpr))
 			cleanup(0, "out of mem", t);

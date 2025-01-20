@@ -172,7 +172,7 @@ ipme_readipfile(ipalloc *ipa, const char *fn)
 			!stralloc_0(&controlfile))
 		return(-1);
 	if ((fd = open_read(controlfile.s)) != -1) {
-		substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		while ((getln(&ss, &l, &match, '\n') != -1) && (match || l.len)) {
 			l.len--;
 			if (!stralloc_0(&l)) {

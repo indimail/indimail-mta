@@ -118,8 +118,8 @@
 
 int             auth_login(const char *);
 int             auth_plain(const char *);
-int             auth_cram();
-int             err_noauth();
+int             auth_cram(const char *);
+int             err_noauth(const char *);
 void            logerr(const char *);
 void            logerrf(const char *);
 void            logerr_start();
@@ -354,7 +354,7 @@ err_authrequired()
 }
 
 int
-err_noauth()
+err_noauth(const char *x)
 {
 	out("504 auth type unimplemented (#5.5.1)\r\n");
 	return -1;
@@ -416,7 +416,7 @@ die_config()
 }
 
 no_return void
-smtp_quit()
+smtp_quit(const char *x)
 {
 	out("221 ofmipd.local\r\n");
 	flush();
@@ -424,25 +424,25 @@ smtp_quit()
 }
 
 void
-smtp_help()
+smtp_help(const char *x)
 {
 	out("214 qmail home page: http://pobox.com/~djb/qmail.html\r\n");
 }
 
 void
-smtp_noop()
+smtp_noop(const char *x)
 {
 	out("250 ok\r\n");
 }
 
 void
-smtp_vrfy()
+smtp_vrfy(const char *x)
 {
 	out("252 send some mail, i'll try my best\r\n");
 }
 
 void
-smtp_unimpl()
+smtp_unimpl(const char *x)
 {
 	out("502 unimplemented (#5.5.1)\r\n");
 }
@@ -573,7 +573,7 @@ smtp_ehlo(const char *arg)
 }
 
 void
-smtp_rset()
+smtp_rset(const char *x)
 {
 	seenmail = 0;
 	out("250 flushed\r\n");
@@ -862,7 +862,7 @@ blast()
 stralloc        received = { 0 };
 
 void
-smtp_data()
+smtp_data(const char *x)
 {
 	struct tai      n;
 	const char     *qqx;
@@ -1008,7 +1008,7 @@ authenticate(void)
 		_exit(1);
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
+	substdio_fdbuf(&ssup, (ssize_t (*)(int,  char *, size_t)) write, pi[1], upbuf, sizeof upbuf);
 	if (substdio_put(&ssup, user.s, user.len) == -1 ||
 			substdio_put(&ssup, pass.s, pass.len) == -1 ||
 			substdio_put(&ssup, resp.s, resp.len) == -1)
@@ -1094,7 +1094,7 @@ auth_plain(const char *arg)
 }
 
 int
-auth_cram()
+auth_cram(const char *x)
 {
 	int             i, r;
 	char           *s;

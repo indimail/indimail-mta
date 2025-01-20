@@ -36,6 +36,6 @@
 #define UPDATE_SUCCESS  2
 #define UPDATE_FAILURE  3
 
-int             tlsacheck(const char *, const char *, int, char [], void (*)(), void (*)());
+int             tlsacheck(const char *, const char *, int, char [], void (*)(void), void (*)(const char *));
 
 #endif

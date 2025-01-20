@@ -72,7 +72,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "unable to run ", argv[1], ": ");
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ss, write, pi[1], outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, pi[1], outbuf, sizeof(outbuf));
 	time(&now);
 	tm = gmtime(&now);
 	dt.year = tm->tm_year;

@@ -30,15 +30,15 @@ die_nomem()
 struct qmail    qqt;
 
 ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
 }
 
 char            inbuf[SUBSTDIO_INSIZE], outbuf[1], num[FMT_ULONG];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
+substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
+substdio        ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, -1, outbuf, sizeof outbuf);
 static stralloc forwarded_for, forwarded_to;
 
 int

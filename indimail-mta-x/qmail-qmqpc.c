@@ -32,7 +32,7 @@
 
 #define PORT_QMQP 628
 ssize_t         saferead(int fd, char *_buf, size_t len);
-ssize_t         safewrite(int fd, char *_buf, size_t len);
+ssize_t         safewrite(int fd, const char *_buf, size_t len);
 
 static int      lasterror = 55;
 static int      timeoutremote = 60;
@@ -40,9 +40,9 @@ static int      timeoutconnect = 10;
 static int      qmqpfd;
 static char     buf[BUFSIZE_IN];
 static char     strnum[FMT_ULONG];
-static substdio to = SUBSTDIO_FDBUF(safewrite, -1, buf, sizeof buf);
-static substdio from = SUBSTDIO_FDBUF(saferead, -1, buf, sizeof buf);
-static substdio envelope = SUBSTDIO_FDBUF(read, 1, buf, sizeof buf);
+static substdio to = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, -1, buf, sizeof buf);
+static substdio from = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) saferead, -1, buf, sizeof buf);
+static substdio envelope = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 1, buf, sizeof buf);
 /*- WARNING: can use only one of these at a time!  */
 static stralloc beforemessage = { 0 };
 static stralloc message = { 0 };
@@ -116,7 +116,7 @@ saferead(int fd, char *_buf, size_t len)
 }
 
 ssize_t
-safewrite(int fd, char *_buf, size_t len)
+safewrite(int fd, const char *_buf, size_t len)
 {
 	int             r;
 

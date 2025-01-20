@@ -7,6 +7,6 @@
 #ifndef QUERY_SKT_H
 #define QUERY_SKT_H
 
-int             query_skt(int, char *, stralloc *, char *, int, int, void (*)(), void (*)());
+int             query_skt(int, char *, stralloc *, char *, int, int, void(*)(void), void (*)(const char *));
 
 #endif

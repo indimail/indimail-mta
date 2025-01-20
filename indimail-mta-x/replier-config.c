@@ -80,7 +80,7 @@ start(const char *s)
 	fn = s;
 	if ((fd = open_trunc(fn)) == -1)
 		fail();
-	substdio_fdbuf(&ss, write, fd, buf, sizeof buf);
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, fd, buf, sizeof buf);
 }
 
 void

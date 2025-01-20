@@ -30,8 +30,7 @@ nomem()
 }
 
 void
-myput(buf)
-	char           *buf;
+myput(char *buf)
 {
 	char            ch;
 

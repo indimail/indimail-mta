@@ -10,14 +10,14 @@
 #include "qmail.h"
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	/*- thou shalt not clean up here */
 	_exit(52);
 }
 
 no_return void
-sigbug()
+sigbug(int x)
 {
 	_exit(81);
 }

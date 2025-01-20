@@ -149,7 +149,7 @@ die_nomem_child()
 }
 
 void
-die_nomem()
+die_nomem(void)
 {
 	substdio_flush(subfdout);
 	substdio_puts(subfderr, "fatal: out of memory\n");
@@ -158,7 +158,7 @@ die_nomem()
 }
 
 void
-die_control(char *arg1, char *arg2)
+die_control(const char *arg1, const char *arg2)
 {
 	substdio_flush(subfdout);
 	substdio_puts(subfderr, "fatal: ");
@@ -253,9 +253,9 @@ safewrite(int fd, char *buf, int len)
 static char     inbuf[BUFSIZE_MESS];
 static char     smtpfrombuf[BUFSIZE_SMALL];
 static char     smtptobuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-static substdio smtpfrom = SUBSTDIO_FDBUF(saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
-substdio        smtpto = SUBSTDIO_FDBUF(safewrite, -1, smtptobuf, sizeof smtptobuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
+static substdio smtpfrom = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
+substdio        smtpto = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, -1, smtptobuf, sizeof smtptobuf);
 
 void
 outsmtptext()
@@ -815,7 +815,7 @@ get_dane_records(char *host)
 		strerr_warn1("fatal: unable to create pipe: ", &strerr_sys);
 		die(111);
 	}
-	substdio_fdbuf(&ssin, read, pipefd[0], inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, pipefd[0], inbuf, sizeof(inbuf));
 	switch ((dane_pid = fork()))
 	{
 	case -1:
@@ -922,7 +922,7 @@ get_dane_records(char *host)
 #include <substdio.h>
 #include <subfd.h>
 char            smtptobuf[1024];
-substdio        smtpto = SUBSTDIO_FDBUF(write, 2, smtptobuf, sizeof smtptobuf);
+substdio        smtpto = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, smtptobuf, sizeof smtptobuf);
 unsigned long smtpcode() { return(550);}
 #endif /*- #if defined(HASTLSA) && defined(TLS) */
 

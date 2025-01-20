@@ -196,7 +196,7 @@ write_xfilter_header(char **ptr, int matched, int argc, char **argv)
 }
 
 static ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
@@ -256,7 +256,7 @@ forward(substdio *ssin, const char *faddr, int matched, int argc, char **argv)
 		ptr = env_get("QQEH");
 	if (ptr)
 		qmail_puts(&qqt, ptr);
-	substdio_fdbuf(&qsout, mywrite, -1, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&qsout, (ssize_t (*)(int,  char *, size_t)) mywrite, -1, outbuf, sizeof(outbuf));
 	if (substdio_copy(&qsout, ssin) != 0)
 		strerr_die2sys(111, FATAL, "unable to read message: ");
 	substdio_flush(&qsout);
@@ -521,8 +521,8 @@ filterit_sub1(int argc, char **argv)
 
 	if (lseek(0, 0, SEEK_SET) == -1)
 		strerr_die2sys(111, FATAL, "unable to seek: ");
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
-	substdio_fdbuf(&ssout, write, 1, ssoutbuf, sizeof(ssoutbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof(ssoutbuf));
 	if (!stralloc_copys(&tmp, header) ||
 			!stralloc_append(&tmp, ":"))
 		strerr_die2x(111, FATAL, "out of memory");

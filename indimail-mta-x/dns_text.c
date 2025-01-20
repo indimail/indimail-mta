@@ -93,7 +93,7 @@ resolve(char *domain, int type)
 	responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
 	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
 		if (responsebuflen < 65536) {
-			if (alloc_re((char *) &response.buf, responsebuflen, 65536))
+			if (alloc_re((void *) &response.buf, responsebuflen, 65536))
 				responsebuflen = 65536;
 			else
 				return DNS_MEM;

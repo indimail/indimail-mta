@@ -1065,7 +1065,7 @@ main(int argc, char *argv[])
 			ignore("SENDER has sent too many messages");
 		fdout = popen_inject(sender);
 	}
-	substdio_fdbuf(&ssout, write, fdout, ssoutbuf, sizeof(ssoutbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdout, ssoutbuf, sizeof(ssoutbuf));
 
 	/*- Auto-Submitted Field - RFC 3834 */
 	if (substdio_put(&ssout, "Auto-Submitted: auto-replied\n", 29))
@@ -1199,7 +1199,7 @@ main(int argc, char *argv[])
 		strerr_die2sys(111, FATAL, "unable to write: ");
 #endif
 	/*- Copy the autoresponse text */
-	substdio_fdbuf(&ssin, read, msgfilefd, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, msgfilefd, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read autoresponse text: ");
@@ -1223,7 +1223,7 @@ main(int argc, char *argv[])
 		/*- Insert the original message */
 		if (lseek(0, 0, SEEK_SET) == -1)
 			strerr_die2sys(111, FATAL, "unable to lseek: ");
-		substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 		switch (substdio_copy(&ssout, &ssin))
 		{
 		case -2: /*- read error */

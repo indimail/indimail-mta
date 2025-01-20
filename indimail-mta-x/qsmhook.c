@@ -185,8 +185,8 @@ main(int argc, char **argv)
 		die_badcmd();
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssout, write, pi[1], outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, pi[1], outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof(inbuf));
 	if (flagufline)
 		substdio_bputs(&ssout, ufline);
 	if (flagrpline)

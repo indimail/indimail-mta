@@ -24,7 +24,7 @@ extern char    *const auto_qstdin[];
 int             flaglog = 0;
 char            fn[FN_BYTES];
 static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
 err(const char *s)

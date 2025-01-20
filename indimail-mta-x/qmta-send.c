@@ -179,19 +179,19 @@ chdir_toqueue()
 }
 
 static void
-sigterm()
+sigterm(int x)
 {
 	flagexitasap = 1;
 	slog(1, "info: ", argv0, ": ", mypid, ": got TERM\n", NULL);
 }
 
-void sigalrm()
+void sigalrm(int x)
 {
 	flagrunasap = 1;
 	slog(1, "info: ", argv0, ": ", mypid, ": got ALRM\n", NULL);
 }
 
-void sighup()
+void sighup(int x)
 {
 	flagreadasap = 1;
 	slog(1, "info: ", argv0, ": ", mypid, ": got HUP\n", NULL);
@@ -578,8 +578,8 @@ process_todo(unsigned long id)
 	 */
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
-	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf));
-	substdio_fdbuf(&ssinfo, write, fdinfo, todobufinfo, sizeof (todobufinfo));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, todobuf, sizeof (todobuf));
+	substdio_fdbuf(&ssinfo, (ssize_t (*)(int,  char *, size_t)) write, fdinfo, todobufinfo, sizeof (todobufinfo));
 	uid = 0;
 	pid = 0;
 	for (;;) {
@@ -653,7 +653,7 @@ process_todo(unsigned long id)
 					slog(1, "warn: ", argv0, ": unable to create ", fn1.s, "\n", NULL);
 					goto fail;
 				}
-				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
+				substdio_fdbuf(&sschan[c], (ssize_t (*)(int,  char *, size_t)) write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
 				flagchan[c] = 1;
 			}
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
@@ -1485,7 +1485,7 @@ getinfo(stralloc *sa, stralloc *qh, stralloc *eh, datetime_sec *dt, unsigned lon
 		close(fdinfo);
 		return 0;
 	}
-	substdio_fdbuf(&ss, read, fdinfo, buf, sizeof (buf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fdinfo, buf, sizeof (buf));
 	sa->len = qh->len = eh->len = 0;
 	for (;;) {
 		if (getln(&ss, &line, &match, '\0') == -1) {
@@ -1548,7 +1548,7 @@ pass_dochan(int c)
 		}
 		pass[c].id = pe.id;
 		pass[c].j = j;
-		substdio_fdbuf(&pass[c].ss, read, pass[c].fd, pass[c].buf, sizeof (pass[c].buf));
+		substdio_fdbuf(&pass[c].ss, (ssize_t (*)(int,  char *, size_t)) read, pass[c].fd, pass[c].buf, sizeof (pass[c].buf));
 		job_open(pe.id, c, j);
 		jo[j].retry = nextretry(birth, c);
 		jo[j].flagdying = (recent > birth + lifetime);
@@ -1790,7 +1790,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		else {
 			while (!stralloc_copys(&orig_recip, ""))
 				nomem(argv0);
-			substdio_fdbuf(&ssread, read, fd, inbuf, sizeof (inbuf));
+			substdio_fdbuf(&ssread, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 			while ((r = substdio_get(&ssread, buf, sizeof (buf))) > 0) {
 				while (!stralloc_catb(&orig_recip, buf, r))
 					nomem(argv0);
@@ -1831,7 +1831,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		else {
 			int             bytestogo = bouncemaxbytes;
 			int             bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
-			substdio_fdbuf(&ssread, read, fd, inbuf, sizeof (inbuf));
+			substdio_fdbuf(&ssread, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 			while (bytestoget > 0 && (r = substdio_get(&ssread, buf, bytestoget)) > 0) {
 				qmail_put(&qqt, buf, r);
 				bytestogo -= bytestoget;
@@ -2180,8 +2180,8 @@ run_daemons(char **oargv, char **argv)
 		}
 		close(pi5[0]);
 		close(pi6[1]);
-		substdio_fdbuf(&sstoqc, write, pi5[1], sstoqcbuf, sizeof (sstoqcbuf));
-		substdio_fdbuf(&ssfromqc, read, pi6[0], ssfromqcbuf, sizeof (ssfromqcbuf));
+		substdio_fdbuf(&sstoqc, (ssize_t (*)(int,  char *, size_t)) write, pi5[1], sstoqcbuf, sizeof (sstoqcbuf));
+		substdio_fdbuf(&ssfromqc, (ssize_t (*)(int,  char *, size_t)) read, pi6[0], ssfromqcbuf, sizeof (ssfromqcbuf));
 		/*-
 		 * if using qmail-clean, run as qmails
 		 * we are using the same permission for queue as regular indimail
@@ -2456,7 +2456,7 @@ regetcontrols()
 }
 
 static void
-sigchld()
+sigchld(int x)
 {
 	int             wstat;
 	pid_t           pid;

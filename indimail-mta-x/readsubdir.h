@@ -32,10 +32,10 @@ typedef struct readsubdir
 	int             pos;
 	int             split;
 	const char     *name;
-	void            (*pause) (char *);
+	void            (*pause) (const char *);
 } readsubdir;
 
-void            readsubdir_init(readsubdir *, const char *, int, void (*pause) ());
+void            readsubdir_init(readsubdir *, const char *, int, void (*pause) (const char *));
 int             readsubdir_next(readsubdir *, unsigned long *);
 char           *readsubdir_name(readsubdir *);
 

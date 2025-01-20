@@ -463,7 +463,7 @@ valid_control_files(const char *fn)
 				continue;
 			strerr_die4sys(111, FATAL, "unable to open ", *ptr, ": ");
 		}
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		for (;;) {
 			if (getln(&ssin, &line, &match, '\n') == -1)
 				strerr_die4sys(111, FATAL, "unable to read ", *ptr, ": ");
@@ -745,7 +745,7 @@ show_version()
 		if (!str_end(d->d_name, "-release")) {
 			if ((fd = open_read(d->d_name)) == -1)
 				strerr_die4sys(111, FATAL, "unable to open ", d->d_name, ": ");
-			substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for (;;) {
 				if (getln(&ssin, &line, &match, '\n') == -1)
 					strerr_die4sys(111, FATAL, "unable to read ", d->d_name, ": ");

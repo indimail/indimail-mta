@@ -35,7 +35,7 @@ tcpto_clean()					/*- running from queue/mess */
 
 	if ((fd = open_write("../lock/tcpto")) == -1)
 		return;
-	substdio_fdbuf(&ss, write, fd, tcpto_cleanbuf, sizeof(tcpto_cleanbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, fd, tcpto_cleanbuf, sizeof(tcpto_cleanbuf));
 	for (i = 0; i < sizeof(tcpto_cleanbuf); ++i)
 		substdio_put(&ss, "", 1);
 	substdio_flush(&ss);/*- if it fails, bummer */

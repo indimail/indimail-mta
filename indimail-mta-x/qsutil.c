@@ -97,7 +97,7 @@ static stralloc foo = { 0 };
 
 typedef const char c_char;
 static char     errbuf[1024];
-static struct substdio sserr = SUBSTDIO_FDBUF(write, 0, errbuf, sizeof(errbuf));
+static struct substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 0, errbuf, sizeof(errbuf));
 extern c_char  *queuedesc; /*- defined in qmail-send.c */
 #ifdef LOGLOCK
 static stralloc lockfn = { 0 };

@@ -110,7 +110,7 @@ control_readline(stralloc *sa, const char *fn)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ss, sa, &match, '\n') == -1) {
 		close(fd);
 		return -1;
@@ -205,7 +205,7 @@ control_readnativefile(stralloc *sa, const char *fn, int mode)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ss, &line, &match, '\n') == -1)
 			break;
@@ -275,7 +275,7 @@ control_readfile(stralloc *sa, const char *fn, int flagme)
 		}
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ss, &line, &match, '\n') == -1)
 			break;
@@ -329,7 +329,7 @@ control_readrandom(stralloc *sa, const char *fn)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	for (count = 0;;count++) {
 		if (getln(&ss, &line, &match, '\n') == -1)
 			goto error;
@@ -500,7 +500,7 @@ control_readcmd(stralloc *sa, const char *fn)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ss, sa, &match, '\n') == -1) {
 		close(fd);
 		return -1;
@@ -525,7 +525,7 @@ control_readcmd(stralloc *sa, const char *fn)
 			_exit (1);
 		}
 		close(pi[1]); /*- close write end */
-		substdio_fdbuf(&ssin, read, pi[0], inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, pi[0], inbuf, sizeof(inbuf));
 		if (getln(&ssin, sa, &match, '\n') == -1) {
 			close(fd);
 			close(pi[0]);

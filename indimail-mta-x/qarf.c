@@ -76,8 +76,8 @@ static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
 static char     strnum[FMT_ULONG];
 const char     *usage = "usage: qarf [-i] -t recipient -s subject -f sender [-m filename]\n";
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
 logerr(const char *s)
@@ -150,8 +150,8 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		my_error("qarf: open", tmpFile.s, OPEN_ERR);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&sstmp, write, fd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&sstmp, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, seekfd, inbuf, sizeof(inbuf));
 	switch (substdio_copy(&sstmp, &ssin))
 	{
 	case -2: /*- read error */
@@ -267,7 +267,7 @@ parse_email(int get_subj, int get_rpath)
 	got_subj = !get_subj;
 	got_rpath = !get_rpath;
 	mkTempFile(0);
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("qarf: read", 0, READ_ERR);
@@ -438,7 +438,7 @@ main(int argc, char **argv)
 	{
 		if ((fd = open(text, O_RDONLY)) == -1)
 			my_error("qarf: open", text, OPEN_ERR);
-		substdio_fdbuf(&ssin, read, fd, ssinbuf, sizeof(ssinbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, ssinbuf, sizeof(ssinbuf));
 		while ((r = substdio_get(&ssin, inbuf, sizeof(inbuf))) > 0)
 			my_putb(inbuf, r);
 		close(fd);
@@ -507,7 +507,7 @@ main(int argc, char **argv)
 			"Content-Transfer-Encoding: 8bit\n"
 			"Content-Type: message/rfc822\n\n");
 
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("qarf: read", 0, READ_ERR);

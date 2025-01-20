@@ -565,10 +565,10 @@ doit(stralloc *line, int uninstall, int check)
 				else
 					strerr_die4sys(111, FATAL, "unable to read ", name, ": ");
 			}
-			substdio_fdbuf(&ssin, read, fdin, inbuf, sizeof (inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fdin, inbuf, sizeof (inbuf));
 			if ((fdout = open_trunc(target.s)) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
-			substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof (outbuf));
+			substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdout, outbuf, sizeof (outbuf));
 
 			if (*type == 'f') {
 				switch (substdio_copy(&ssout, &ssin))
@@ -651,7 +651,7 @@ die_usage()
 }
 
 char            buf[256];
-substdio        in = SUBSTDIO_FDBUF(read, 0, buf, sizeof (buf));
+substdio        in = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, buf, sizeof (buf));
 stralloc        line = { 0 };
 
 int

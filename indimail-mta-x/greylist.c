@@ -136,7 +136,7 @@ scan_ip_port(const char *gip, const char *defaultip, unsigned int defaultport,
 }
 
 int
-connect_udp(union v46addr *ip, unsigned int port, void (*errfn)())
+connect_udp(union v46addr *ip, unsigned int port, void (*errfn)(const char *))
 {
 	int               fd;
 #ifdef IPV6
@@ -203,7 +203,7 @@ stralloc        ipbuf = {0};
 
 int
 greylist(const char *gip, const char *connectingip, const char *from,
-		const char *tolist, int tolen, void (*timeoutfn) (), void (*errfn) ()) /*- errfn must _exit */
+		const char *tolist, int tolen, void (*timeoutfn) (void), void (*errfn) (const char *)) /*- errfn must _exit */
 {
 	int             r, len = 0;
 	char            strnum[FMT_ULONG];

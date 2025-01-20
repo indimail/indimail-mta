@@ -73,9 +73,9 @@ static char     ssoutbuf[BUFSIZE_IN];
 static char     sserrbuf[BUFSIZE_IN];
 static char     upbuf[128];
 static char   **authargs, **passargs;
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static stralloc user = { 0 };
 static stralloc old_pass = { 0 };
 static stralloc new_pass = { 0 };
@@ -152,7 +152,7 @@ authenticate()
 		_exit(1);
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
+	substdio_fdbuf(&ssup, (ssize_t (*)(int,  char *, size_t)) write, pi[1], upbuf, sizeof upbuf);
 	if (substdio_put(&ssup, user.s, user.len) == -1 ||
 			substdio_put(&ssup, old_pass.s, old_pass.len) == -1 ||
 			substdio_put(&ssup, "\0\0", 2) == -1 ||
@@ -192,7 +192,7 @@ change_pass()
 		_exit(1);
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
+	substdio_fdbuf(&ssup, (ssize_t (*)(int,  char *, size_t)) write, pi[1], upbuf, sizeof upbuf);
 	if (substdio_put(&ssup, user.s, user.len) == -1 ||
 			substdio_put(&ssup, old_pass.s, old_pass.len) == -1 ||
 			substdio_put(&ssup, "\0", 1) == -1 ||

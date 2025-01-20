@@ -113,8 +113,8 @@ static char     strnum[FMT_ULONG];
 static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
 static c_char  *usage = "usage: qnotify [-n][-h]\n";
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static int      flagqueue = 1;
 static struct qmail    qqt;
 
@@ -221,8 +221,8 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		my_error("open error", tmpFile.s, OPEN_ERR);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&sstmp, write, fd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&sstmp, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, seekfd, inbuf, sizeof(inbuf));
 	switch (substdio_copy(&sstmp, &ssin))
 	{
 	case -2: /*- read error */
@@ -347,7 +347,7 @@ parse_email(int get_subj, int get_rpath)
 	if (!stralloc_catb(&disp_hdr, ": ", 2))
 		my_error("out of memory", 0, MEM_ERR);
 	mkTempFile(0);
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("read error", 0, READ_ERR);
@@ -557,7 +557,7 @@ main(int argc, char **argv)
 		my_putb("Content-Type: message/rfc822\n\n", 30);
 
 	/* You wanted an MDN and you shall get one - the entire lot back to you */
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("read error", 0, READ_ERR);

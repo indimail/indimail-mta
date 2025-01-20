@@ -37,7 +37,7 @@ static int      match;
  */
 
 ssize_t
-safewrite(int fd, char *buf, size_t len)
+safewrite(int fd, const char *buf, size_t len)
 {
 	int             w;
 
@@ -59,7 +59,7 @@ doit(int fd)
 	if (fstat(fd, &st) == -1)
 		_exit(35);
 	len = 0;
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 	if (getln(&ssin, &line, &match, '\n') == -1)
 		_exit(32);
 	len += line.len;
@@ -126,7 +126,7 @@ child()	/*- reading from original stdin, writing to parent */
 {
 	int             fd;
 
-	substdio_fdbuf(&ssnet, safewrite, 7, netbuf, sizeof netbuf);
+	substdio_fdbuf(&ssnet, (ssize_t (*)(int,  char *, size_t)) safewrite, 7, netbuf, sizeof netbuf);
 	for (;;) {
 		if (getln(subfdinsmall, &fn, &match, '\0') == -1)
 			_exit(34);
@@ -179,7 +179,7 @@ parent()	/*- reading from child, writing to original stdout */
 	unsigned int    len;
 	unsigned char   ch;
 
-	substdio_fdbuf(&ssnet, saferead, 6, netbuf, sizeof netbuf);
+	substdio_fdbuf(&ssnet, (ssize_t (*)(int,  char *, size_t)) saferead, 6, netbuf, sizeof netbuf);
 	for (;;) {
 		if (getln(subfdinsmall, &fn, &match, '\0') == -1)
 			strerr_die2sys(111, FATAL, "unable to read from child: ");

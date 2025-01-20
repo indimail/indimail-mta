@@ -338,10 +338,10 @@ main(int argc, char **argv)
 		nomem();
 	if ((fd = open_read(fnlist)) == -1)
 		readerr();
-	substdio_fdbuf(&sslist, read, fd, listbuf, sizeof listbuf);
+	substdio_fdbuf(&sslist, (ssize_t (*)(int,  char *, size_t)) read, fd, listbuf, sizeof listbuf);
 	if ((fd = open_trunc(fntmp)) == -1)
 		writeerr();
-	substdio_fdbuf(&sstmp, write, fd, tmpbuf, sizeof tmpbuf);
+	substdio_fdbuf(&sstmp, (ssize_t (*)(int,  char *, size_t)) write, fd, tmpbuf, sizeof tmpbuf);
 	for (;;) {
 		if (getln(&sslist, &line, &match, '\n') == -1)
 			readerr();
