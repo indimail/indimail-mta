@@ -31,7 +31,7 @@ char            inbuf[512];
 substdio        bin;
 
 ssize_t
-myread(int fd, char *buf, int len)
+myread(int fd, char *buf, size_t len)
 {
 	substdio_flush(&bout);
 	return read(fd, buf, len);
@@ -51,8 +51,8 @@ main()
 		strerr_die2sys(111, "mconnect-io: fatal: ", "unable to fork: ");
 
 	if (!pid) {
-		substdio_fdbuf(&bin, myread, 0, inbuf, sizeof inbuf);
-		substdio_fdbuf(&bout, write, 7, outbuf, sizeof outbuf);
+		substdio_fdbuf(&bin, (ssize_t (*)(int,  char *, size_t)) myread, 0, inbuf, sizeof inbuf);
+		substdio_fdbuf(&bout, (ssize_t (*)(int,  char *, size_t)) write, 7, outbuf, sizeof outbuf);
 
 		while (substdio_get(&bin, &ch, 1) == 1) {
 			if (ch == '\n')
@@ -62,8 +62,8 @@ main()
 		_exit(0);
 	}
 
-	substdio_fdbuf(&bin, myread, 6, inbuf, sizeof inbuf);
-	substdio_fdbuf(&bout, write, 1, outbuf, sizeof outbuf);
+	substdio_fdbuf(&bin, (ssize_t (*)(int,  char *, size_t)) myread, 6, inbuf, sizeof inbuf);
+	substdio_fdbuf(&bout, (ssize_t (*)(int,  char *, size_t)) write, 1, outbuf, sizeof outbuf);
 
 	while (substdio_get(&bin, &ch, 1) == 1)
 		substdio_put(&bout, &ch, 1);

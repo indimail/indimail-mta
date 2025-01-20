@@ -260,7 +260,7 @@ doit_unix(int t, const char *hostname)
 		strerr_warn4("tcpserver: pid ", strnum1, " from ", hostname, 0);
 	}
 	if (*banner) {
-		substdio_fdbuf(&b, write, t, bspace, sizeof bspace);
+		substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) write, t, bspace, sizeof bspace);
 		if (substdio_puts(&b, banner) == -1)
 			strerr_die2sys(111, DROP, "unable to print banner: ");
 	}
@@ -312,7 +312,7 @@ doit_tcp(int t, const char *hostname)
 	if (!flagdelay)
 		socket_tcpnodelay(t);
 	if (*banner) {
-		substdio_fdbuf(&b, write, t, bspace, sizeof bspace);
+		substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) write, t, bspace, sizeof bspace);
 		if (substdio_puts(&b, banner) == -1)
 			strerr_die2sys(111, DROP, "unable to print banner: ");
 	}
@@ -1187,7 +1187,7 @@ print_ip()
 }
 
 no_return void
-sigterm()
+sigterm(int i)
 {
 	if (verbosity >= 2)
 		printstatus("shutdown", getpid(), -1);
@@ -1197,13 +1197,13 @@ sigterm()
 }
 
 void
-siguser1()
+siguser1(int i)
 {
 	print_ip();
 }
 
 void
-sighangup()
+sighangup(int x)
 {
 	int             i, tmpLimit;
 	IPTABLE       **iptable1, **iptable2, **tmpTable;
@@ -1242,7 +1242,7 @@ sighangup()
 }
 
 void
-sigchld()
+sigchld(int x)
 {
 	int             i, wstat, pid;
 	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
@@ -1838,7 +1838,7 @@ do_socket:
 	if (!af_unix)
 		localportstr[fmt_ulong(localportstr, localport)] = 0;
 	if (flag1 && !af_unix) {
-		substdio_fdbuf(&b, write, 1, bspace, sizeof bspace);
+		substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) write, 1, bspace, sizeof bspace);
 		substdio_puts(&b, localportstr);
 		substdio_puts(&b, "\n");
 		substdio_flush(&b);

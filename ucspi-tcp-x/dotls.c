@@ -40,13 +40,13 @@
 #define FATAL         "dotls: fatal: "
 #define HUGECAPATEXT  5000
 
-int             do_data();
-int             do_retr();
+int             do_data(char *, char *, int);
+int             do_retr(char *, char *, int);
 int             smtp_ehlo(char *, char *, int);
 int             func_unimpl(char *, char *, int);
-int             do_tls();
-int             do_quit();
-int             do_logout();
+int             do_tls(char *, char *, int);
+int             do_quit(char *, char *, int);
+int             do_logout(char *, char *, int);
 int             pop3_capa(char *, char *, int);
 int             imap_capa(char *, char *, int);
 void            flush_data();
@@ -490,7 +490,7 @@ ehlo(char *host, int len, unsigned int *ilen)
 }
 
 int
-do_data()
+do_data(char *x1, char *x2, int i)
 {
 	linemode = 0;
 	if (substdio_put(&smtpto, "DATA\r\n", 6) == -1 ||
@@ -579,13 +579,13 @@ smtp_ehlo(char *arg, char *cmmd, int cmmdlen)
 }
 
 int
-do_tls()
+do_tls(char *x1, char *x2, int i)
 {
 	return 1;
 }
 
 int
-do_quit()
+do_quit(char *x1, char *x2, int i)
 {
 	if (substdio_put(&smtpto, "quit\r\n",  6) == -1 ||
 			substdio_flush(&smtpto) == -1)
@@ -595,7 +595,7 @@ do_quit()
 }
 
 int
-do_logout()
+do_logout(char *x1, char *x2, int i)
 {
 	if (substdio_put(&smtpto, "a logout\r\n",  10) == -1 ||
 			substdio_flush(&smtpto) == -1)
@@ -778,9 +778,9 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 	struct timeval  timeout;
 
 	substdio_fdbuf(&ssin, do_read, 0, inbuf, sizeof(inbuf));                    /*- from client */
-	substdio_fdbuf(&ssto, do_write, 1, outbuf, sizeof(outbuf));                 /*- to   client */
-	substdio_fdbuf(&smtpin, read, clearin, smtp_inbuf, sizeof(smtp_inbuf));     /*- cleartxt in  from (smtpd, pop3d, etc) */
-	substdio_fdbuf(&smtpto, write, clearout, smtp_outbuf, sizeof(smtp_outbuf)); /*- cleartxt out from (smtpd, pop3d, etc) */
+	substdio_fdbuf(&ssto, (ssize_t (*)(int,  char *, size_t)) do_write, 1, outbuf, sizeof(outbuf));                 /*- to   client */
+	substdio_fdbuf(&smtpin, (ssize_t (*)(int,  char *, size_t)) read, clearin, smtp_inbuf, sizeof(smtp_inbuf));     /*- cleartxt in  from (smtpd, pop3d, etc) */
+	substdio_fdbuf(&smtpto, (ssize_t (*)(int,  char *, size_t)) write, clearout, smtp_outbuf, sizeof(smtp_outbuf)); /*- cleartxt out from (smtpd, pop3d, etc) */
 	while (!flagexitasap) {
 		timeout.tv_sec = dtimeout;
 		timeout.tv_usec = 0;
@@ -913,7 +913,7 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 }
 
 void
-sigchld()
+sigchld(int x)
 {
 	int             i, wstat, pid;
 	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];

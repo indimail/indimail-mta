@@ -18,7 +18,7 @@
 #include <substdio.h>
 
 char            buf1[256];
-substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+substdio        ss1 = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, buf1, sizeof(buf1));
 
 /*
  * check if a given character can be printed unquoted in a C string
@@ -36,17 +36,14 @@ is_legible(unsigned char ch)
 }
 
 void
-my_puts(s)
-	char           *s;
+my_puts(char *s)
 {
 	if (substdio_puts(&ss1, s) == -1)
 		_exit(111);
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *name;
 	char           *value;

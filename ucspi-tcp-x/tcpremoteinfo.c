@@ -26,7 +26,7 @@ static struct taia now;
 static struct taia deadline;
 
 static ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, char *buf, size_t len)
 {
 	iopause_fd      x;
 
@@ -46,7 +46,7 @@ mywrite(int fd, char *buf, int len)
 }
 
 static ssize_t
-myread(int fd, char *buf, int len)
+myread(int fd, char *buf, size_t len)
 {
 	iopause_fd      x;
 
@@ -93,14 +93,14 @@ doit(stralloc *out, int s, char ipremote[4], uint16 portremote, char iplocal[4],
 	if (timeoutconn(s, ipremote, 113, timeout) == -1)
 #endif
 		return -1;
-	substdio_fdbuf(&b, mywrite, s, bspace, sizeof bspace);
+	substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) mywrite, s, bspace, sizeof bspace);
 	substdio_put(&b, strnum, fmt_ulong(strnum, portremote));
 	substdio_put(&b, " , ", 3);
 	substdio_put(&b, strnum, fmt_ulong(strnum, portlocal));
 	substdio_put(&b, "\r\n", 2);
 	if (substdio_flush(&b) == -1)
 		return -1;
-	substdio_fdbuf(&b, myread, s, bspace, sizeof bspace);
+	substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) myread, s, bspace, sizeof bspace);
 	numcolons = 0;
 	for (;;) {
 		if (substdio_get(&b, &ch, 1) != 1)

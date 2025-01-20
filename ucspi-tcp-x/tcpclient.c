@@ -132,13 +132,13 @@ struct stralloc saciphers;
 static c_char  *af_unix;
 
 no_return void
-sigterm()
+sigterm(int i)
 {
 	_exit(0);
 }
 
 void
-sigchld()
+sigchld(int x)
 {
 	int             i, wstat;
 	pid_t           pid;
@@ -289,7 +289,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 	static stralloc line = { 0 };
 	struct substdio ssin;
 
-	substdio_fdbuf(&ssin, read, sfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, sfd, inbuf, sizeof(inbuf));
 	switch (stls)
 	{
 	case smtp:

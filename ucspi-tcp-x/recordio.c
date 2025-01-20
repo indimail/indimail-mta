@@ -34,7 +34,7 @@ static char     pid[FMT_ULONG];
 static char     recordbuf[512];
 static char     leftbuf[256];
 static char     rightbuf[256];
-static substdio ssrecord = SUBSTDIO_FDBUF(write, 2, recordbuf, sizeof recordbuf);
+static substdio ssrecord = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, recordbuf, sizeof recordbuf);
 static int      leftstatus = 0;
 static int      leftlen;
 static int      leftpos;

@@ -331,9 +331,9 @@ char            strnum[FMT_ULONG];
 static stralloc message;
 
 char            inspace[64];
-substdio        in = SUBSTDIO_FDBUF(read, 0, inspace, sizeof inspace);
+substdio        in = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inspace, sizeof inspace);
 char            outspace[1];
-substdio        out = SUBSTDIO_FDBUF(write, 1, outspace, sizeof outspace);
+substdio        out = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, outspace, sizeof outspace);
 
 void
 delay(unsigned long delay)
@@ -361,13 +361,13 @@ delay(unsigned long delay)
 }
 
 void
-reject()
+reject(const char *x)
 {
 	substdio_putflush(&out, message.s, message.len);
 }
 
 void
-accept()
+accept(const char *x)
 {
   substdio_put(&out, "250 ", 4);
   substdio_puts(&out, rbl_greeting);
@@ -375,7 +375,7 @@ accept()
 }
 
 void
-smtp_ehlo()
+smtp_ehlo(const char *x)
 {
   if (rbl_ehlo) {
   substdio_put(&out, "250-", 4);
@@ -383,11 +383,11 @@ smtp_ehlo()
   substdio_putsflush(&out,
     "\r\n250-PIPELINING\r\n250-8BITMIME\r\n250-STARTTLS\r\n250 HELP\r\n");
   } else
-    accept();
+    accept((char *) 0);
 }
 
 void
-verify()
+verify(const char *x)
 {
   substdio_put(&out, "252 ", 4);
   substdio_puts(&out, rbl_greeting);
@@ -477,7 +477,7 @@ rblsmtp_mail(const char *arg)
 		substdio_puts(subfderr, ">\n");
 	}
 	substdio_flush(subfderr);
-	accept();
+	accept((char *) 0);
 }
 
 void
@@ -492,7 +492,7 @@ rblsmtp_rcpt(const char *arg)
 		substdio_puts(subfderr, ">\n");
 	}
 	substdio_flush(subfderr);
-	reject();
+	reject((char *) 0);
 }
 
 void
@@ -504,7 +504,7 @@ greet()
 }
 
 void
-no_return quit()
+no_return quit(const char *x)
 {
   substdio_put(&out, "221 ", 4);
   substdio_puts(&out, rbl_greeting);
@@ -513,7 +513,7 @@ no_return quit()
 }
 
 no_return void
-drop()
+drop(int i)
 {
 	_exit(0);
 }
@@ -556,7 +556,7 @@ rblsmtpd_f(void)
 	if (!stralloc_cats(&message, "\r\n"))
 		nomem();
 	if (!timeout)
-		reject();
+		reject((const char *) 0);
 	else {
 		sig_catch(sig_alarm, drop);
 		alarm(timeout);

@@ -76,7 +76,7 @@ control_readline(stralloc *sa, const char *fn)
 			return 0;
 		return -1;
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (getln(&ss, sa, &match, '\n') == -1) {
 		close(fd);
 		return -1;
