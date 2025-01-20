@@ -81,7 +81,7 @@ set_ndelay(int fd)
 static char     buffer[BUFSIZE];
 static unsigned buf_start = 0;
 static unsigned buf_end = 0;
-static bool     buf_eof = false;
+static mybool   buf_eof = false;
 #define buf_wrapped (buf_end < buf_start)
 #define buf_left (buf_start-buf_end + (buf_wrapped ? -1 : BUFSIZE-1))
 #define buf_len (buf_end-buf_start + (buf_wrapped ? BUFSIZE : 0))
@@ -93,7 +93,7 @@ struct reader
 	pid_t           pid;
 	int             fd;
 	unsigned        buf_pos;
-	bool            marked;
+	mybool          marked;
 	struct reader  *next;
 };
 
@@ -103,7 +103,7 @@ void
 reset_buf_start(void)
 {
 	struct reader  *reader;
-	bool            wrapped = (buf_end < buf_start);
+	mybool          wrapped = (buf_end < buf_start);
 
 	buf_start = buf_end;
 	for (reader = readers; reader; reader = reader->next) {
@@ -155,7 +155,7 @@ add_reader(const char *name, ino_t inode)
 	readers = r;
 }
 
-bool
+mybool
 del_reader(pid_t pid)
 {
 	struct reader  *curr = readers;

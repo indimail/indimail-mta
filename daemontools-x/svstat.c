@@ -54,7 +54,7 @@
 #define WARN  "svstat: warning: "
 
 char            outbuf[256], errbuf[256];
-substdio        o = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
+substdio        o = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, outbuf, sizeof outbuf);
 
 char            status[21];
 char            strnum[FMT_ULONG];

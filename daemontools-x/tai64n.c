@@ -21,7 +21,7 @@
 #include "substdio.h"
 
 ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, char *buf, size_t len)
 {
 	int             w;
 	w = write(fd, buf, len);
@@ -31,10 +31,10 @@ mywrite(int fd, char *buf, int len)
 }
 
 char            outbuf[2048];
-substdio        out = SUBSTDIO_FDBUF(mywrite, 1, outbuf, sizeof outbuf);
+substdio        out = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, 1, outbuf, sizeof outbuf);
 
 ssize_t
-myread(int fd, char *buf, int len)
+myread(int fd, char *buf, size_t len)
 {
 	int             r;
 	substdio_flush(&out);

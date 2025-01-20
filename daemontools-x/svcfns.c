@@ -76,7 +76,7 @@ start_supervise(const char *dir, int fdin, int fdout)
 	}
 }
 
-bool
+mybool
 stop_supervise(const char *dir, pid_t svcpid)
 {
 	int             status;

@@ -7,7 +7,7 @@
 #ifndef QLOGTOOLS__BOOL__H__
 #define QLOGTOOLS__BOOL__H__
 
-typedef int bool;
+typedef int mybool;
 #define false 0
 #define true (0==0)
 

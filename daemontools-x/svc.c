@@ -28,7 +28,7 @@ char            data[20], bspace[1];
 substdio        b;
 
 void
-sigalrm()
+sigalrm(int i)
 {
 	return;
 }
@@ -97,7 +97,7 @@ doit(char **ptr, int *ret, int dlen, int opt)
 				}
 			} else {
 				ndelay_off(fd);
-				substdio_fdbuf(&b, write, fd, bspace, sizeof bspace);
+				substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) write, fd, bspace, sizeof bspace);
 				if (substdio_putflush(&b, data, dlen) == -1)
 					strerr_warn4(WARN, "error writing commands to ", dir, ": ", &strerr_sys);
 				close(fd);

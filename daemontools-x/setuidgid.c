@@ -65,7 +65,7 @@ main(int argc, char **argv)
 				ngroups++;
 		}
 		ngroups++;
-		if (!alloc_re((char *) &gidset, old * sizeof(gid_t), ngroups * sizeof(gid_t)))
+		if (!alloc_re((void **) &gidset, old * sizeof(gid_t), ngroups * sizeof(gid_t)))
 			return -1;
 		for (i = old, ptr = cptr = groups; *ptr; ptr++) {
 			if (*ptr == ',') {

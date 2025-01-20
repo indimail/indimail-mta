@@ -79,7 +79,7 @@ out(const char *str)
 }
 
 no_return void
-sigterm()
+sigterm(int i)
 {
 	substdio_flush(subfdout);
 	substdio_flush(subfderr);

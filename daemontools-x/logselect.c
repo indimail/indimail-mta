@@ -91,7 +91,7 @@ do_file(char *dirname, char *fn)
 
 	if ((fd = open_read(fn)) == -1)
 		strerr_die6sys(111, FATAL, "unable to read ", dirname, "/", fn, ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 	for (;;) {
 		if (!(r = get(&ch)))
 			break;
