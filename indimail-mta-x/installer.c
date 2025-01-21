@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.28 2025-01-04 08:46:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.29 2025-01-21 23:35:04+05:30 Cprogrammer Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -565,10 +565,10 @@ doit(stralloc *line, int uninstall, int check)
 				else
 					strerr_die4sys(111, FATAL, "unable to read ", name, ": ");
 			}
-			substdio_fdbuf(&ssin, read, fdin, inbuf, sizeof (inbuf));
+			substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fdin, inbuf, sizeof (inbuf));
 			if ((fdout = open_trunc(target.s)) == -1)
 				strerr_die4sys(111, FATAL, "unable to write ", target.s, ": ");
-			substdio_fdbuf(&ssout, write, fdout, outbuf, sizeof (outbuf));
+			substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdout, outbuf, sizeof (outbuf));
 
 			if (*type == 'f') {
 				switch (substdio_copy(&ssout, &ssin))
@@ -651,7 +651,7 @@ die_usage()
 }
 
 char            buf[256];
-substdio        in = SUBSTDIO_FDBUF(read, 0, buf, sizeof (buf));
+substdio        in = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, buf, sizeof (buf));
 stralloc        line = { 0 };
 
 int
@@ -701,7 +701,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.28 2025-01-04 08:46:05+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.29 2025-01-21 23:35:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -709,6 +709,9 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.29  2025-01-21 23:35:04+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.28  2025-01-04 08:46:05+05:30  Cprogrammer
  * fix for FreeBSD, MacOS missing sysmacros.h
  *

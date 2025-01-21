@@ -11,6 +11,8 @@ Release @version@-@release@ Start 05/09/2024 End XX/XX/XXXX
 12. tcpserver.c: use INET6_ADDRLENSTRLEN for AF_INET6
 - 04/01/2025
 13. Fixes for installer from daemontools package
+- 22/01/2025
+14. Fix errors when using GCC14
 
 * Tue Aug 06 2024 12:44:32 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.4-1.1%{?dist}
 Release 1.1.4-1.1 Start 08/02/2024 End 06/08/2024

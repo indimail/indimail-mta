@@ -1,79 +1,5 @@
 /*
- * $Log: drate.c,v $
- * Revision 1.24  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.23  2024-02-12 19:37:46+05:30  Cprogrammer
- * replace chown with fchown
- *
- * Revision 1.22  2023-08-04 21:16:57+05:30  Cprogrammer
- * added missing call to uidinit
- *
- * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.20  2021-08-28 23:02:52+05:30  Cprogrammer
- * moved delivery variable to getDomainToken.c
- *
- * Revision 1.19  2021-08-24 11:29:33+05:30  Cprogrammer
- * moved check_domain function to libqmail
- *
- * Revision 1.18  2021-08-22 00:12:29+05:30  Cprogrammer
- * fixed display variable setting
- *
- * Revision 1.17  2021-08-21 21:32:01+05:30  Cprogrammer
- * added list option
- * added option to display times in UTC
- * added domain name validation
- *
- * Revision 1.16  2021-06-10 10:52:41+05:30  Cprogrammer
- * fixed uninitialized variables in do_test()
- *
- * Revision 1.15  2021-06-05 12:48:27+05:30  Cprogrammer
- * display time_needed to reach configured rates
- *
- * Revision 1.14  2021-06-03 18:38:22+05:30  Cprogrammer
- * display email count if delivery had succeeded
- *
- * Revision 1.13  2021-06-01 10:42:03+05:30  Cprogrammer
- * display local date/time
- *
- * Revision 1.12  2021-06-01 01:51:44+05:30  Cprogrammer
- * removed report()
- *
- * Revision 1.11  2021-05-30 20:29:44+05:30  Cprogrammer
- * fixed owner and permission of rate definition files
- *
- * Revision 1.10  2021-05-29 23:37:12+05:30  Cprogrammer
- * refactored for slowq-send
- *
- * Revision 1.9  2021-05-26 16:30:44+05:30  Cprogrammer
- * added option to force update
- *
- * Revision 1.8  2021-05-26 10:34:22+05:30  Cprogrammer
- * refactored code and added test mode
- *
- * Revision 1.7  2021-05-23 07:07:23+05:30  Cprogrammer
- * use /etc/indimail/control/ratelimit as default ratelimit directory
- *
- * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.5  2015-08-20 18:34:42+05:30  Cprogrammer
- * exit 100 for invalid option
- *
- * Revision 1.4  2013-12-09 13:08:38+05:30  Cprogrammer
- * make the domain name as the file for storing delivery rate information
- *
- * Revision 1.3  2013-09-06 20:08:20+05:30  Cprogrammer
- * use the current time for calculating rate
- *
- * Revision 1.2  2013-09-05 09:25:36+05:30  Cprogrammer
- * added consolidate and reset option
- *
- * Revision 1.1  2013-08-29 18:27:32+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: drate.c,v 1.25 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -111,9 +37,9 @@ extern dtype    delivery;
 static int      local_time = 1;
 static char     strnum1[FMT_ULONG], strnum2[FMT_LONG];
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static stralloc qdir = { 0 };
 const char     *usage = "usage: drate [-sulcR] [-t -C count] -d domain -r deliveryRate [-D ratelimit_dir]\n";
 const char     *daytab[7] = {
@@ -200,7 +126,7 @@ do_display(const char *domain)
 
 	if ((rfd = open_read(domain)) == -1)
 		strerr_die3sys(111, "unable to read: ", domain, ": ");
-	substdio_fdbuf(&ssfin, read, rfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssfin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
 	for (line_no = 1;;line_no++) { /*- Line Processing */
 		if (getln(&ssfin, &line, &match, DELIMITER[0]) == -1)
 			strerr_die3sys(111, "unable to read: ", domain, ": ");
@@ -356,7 +282,7 @@ update_mode(const char *domain, const char *rate_expr, int reset_mode, int conso
 			stime[fmt_ulong(etime, endtime)] = 0;
 			goto new;
 		}
-		substdio_fdbuf(&ssfin, read, rfd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssfin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
 		for (line_no = 1;;line_no++) { /*- Line Processing */
 			if (getln(&ssfin, &line, &match, DELIMITER[0]) == -1)
 				strerr_die3sys(111, "unable to read: ", domain, ": ");
@@ -414,7 +340,7 @@ new:
 		cleanup(domain, "unable to chown", t);
 	if (ftruncate(wfd, 0) == -1)
 		cleanup(domain, "unable to truncate", t);
-	substdio_fdbuf(&ssfout, write, wfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssfout, (ssize_t (*)(int,  char *, size_t)) write, wfd, outbuf, sizeof(outbuf));
 	if (consolidate) {
 		if (!stralloc_0(&rexpr))
 			cleanup(0, "out of mem", t);
@@ -639,10 +565,90 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	const char     *x = "$Id: drate.c,v 1.24 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: drate.c,v 1.25 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
 	x = sccsidgetrateh;
 	x++;
 }
+/*
+ * $Log: drate.c,v $
+ * Revision 1.25  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.24  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.23  2024-02-12 19:37:46+05:30  Cprogrammer
+ * replace chown with fchown
+ *
+ * Revision 1.22  2023-08-04 21:16:57+05:30  Cprogrammer
+ * added missing call to uidinit
+ *
+ * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.20  2021-08-28 23:02:52+05:30  Cprogrammer
+ * moved delivery variable to getDomainToken.c
+ *
+ * Revision 1.19  2021-08-24 11:29:33+05:30  Cprogrammer
+ * moved check_domain function to libqmail
+ *
+ * Revision 1.18  2021-08-22 00:12:29+05:30  Cprogrammer
+ * fixed display variable setting
+ *
+ * Revision 1.17  2021-08-21 21:32:01+05:30  Cprogrammer
+ * added list option
+ * added option to display times in UTC
+ * added domain name validation
+ *
+ * Revision 1.16  2021-06-10 10:52:41+05:30  Cprogrammer
+ * fixed uninitialized variables in do_test()
+ *
+ * Revision 1.15  2021-06-05 12:48:27+05:30  Cprogrammer
+ * display time_needed to reach configured rates
+ *
+ * Revision 1.14  2021-06-03 18:38:22+05:30  Cprogrammer
+ * display email count if delivery had succeeded
+ *
+ * Revision 1.13  2021-06-01 10:42:03+05:30  Cprogrammer
+ * display local date/time
+ *
+ * Revision 1.12  2021-06-01 01:51:44+05:30  Cprogrammer
+ * removed report()
+ *
+ * Revision 1.11  2021-05-30 20:29:44+05:30  Cprogrammer
+ * fixed owner and permission of rate definition files
+ *
+ * Revision 1.10  2021-05-29 23:37:12+05:30  Cprogrammer
+ * refactored for slowq-send
+ *
+ * Revision 1.9  2021-05-26 16:30:44+05:30  Cprogrammer
+ * added option to force update
+ *
+ * Revision 1.8  2021-05-26 10:34:22+05:30  Cprogrammer
+ * refactored code and added test mode
+ *
+ * Revision 1.7  2021-05-23 07:07:23+05:30  Cprogrammer
+ * use /etc/indimail/control/ratelimit as default ratelimit directory
+ *
+ * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.5  2015-08-20 18:34:42+05:30  Cprogrammer
+ * exit 100 for invalid option
+ *
+ * Revision 1.4  2013-12-09 13:08:38+05:30  Cprogrammer
+ * make the domain name as the file for storing delivery rate information
+ *
+ * Revision 1.3  2013-09-06 20:08:20+05:30  Cprogrammer
+ * use the current time for calculating rate
+ *
+ * Revision 1.2  2013-09-05 09:25:36+05:30  Cprogrammer
+ * added consolidate and reset option
+ *
+ * Revision 1.1  2013-08-29 18:27:32+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

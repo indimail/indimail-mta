@@ -1,47 +1,5 @@
 /*
- * $Log: qnotify.c,v $
- * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.13  2024-01-23 01:23:21+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.11  2021-07-05 21:11:27+05:30  Cprogrammer
- * skip $HOME/.defaultqueue for root
- *
- * Revision 1.10  2021-05-13 14:44:21+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.9  2020-05-11 11:00:10+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.8  2020-04-04 12:43:17+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.6  2013-06-09 17:03:36+05:30  Cprogrammer
- * shortened variable declartion in addrparse() function
- *
- * Revision 1.5  2012-11-24 08:01:36+05:30  Cprogrammer
- * fixed display of usage
- *
- * Revision 1.4  2011-12-05 19:44:24+05:30  Cprogrammer
- * skip host prefix in the RECIPIENT address
- *
- * Revision 1.3  2011-12-05 17:43:25+05:30  Cprogrammer
- * added option to enclose headers only instead of full email
- *
- * Revision 1.2  2011-11-27 13:43:47+05:30  Cprogrammer
- * process headers only
- *
- * Revision 1.1  2011-11-27 11:58:30+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qnotify.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -113,8 +71,8 @@ static char     strnum[FMT_ULONG];
 static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
 static c_char  *usage = "usage: qnotify [-n][-h]\n";
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static int      flagqueue = 1;
 static struct qmail    qqt;
 
@@ -221,8 +179,8 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		my_error("open error", tmpFile.s, OPEN_ERR);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&sstmp, write, fd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, seekfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&sstmp, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, seekfd, inbuf, sizeof(inbuf));
 	switch (substdio_copy(&sstmp, &ssin))
 	{
 	case -2: /*- read error */
@@ -347,7 +305,7 @@ parse_email(int get_subj, int get_rpath)
 	if (!stralloc_catb(&disp_hdr, ": ", 2))
 		my_error("out of memory", 0, MEM_ERR);
 	mkTempFile(0);
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("read error", 0, READ_ERR);
@@ -557,7 +515,7 @@ main(int argc, char **argv)
 		my_putb("Content-Type: message/rfc822\n\n", 30);
 
 	/* You wanted an MDN and you shall get one - the entire lot back to you */
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			my_error("read error", 0, READ_ERR);
@@ -589,7 +547,55 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	const char     *x = "$Id: qnotify.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qnotify.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qnotify.c,v $
+ * Revision 1.15  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.13  2024-01-23 01:23:21+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.11  2021-07-05 21:11:27+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
+ * Revision 1.10  2021-05-13 14:44:21+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.9  2020-05-11 11:00:10+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.8  2020-04-04 12:43:17+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.6  2013-06-09 17:03:36+05:30  Cprogrammer
+ * shortened variable declartion in addrparse() function
+ *
+ * Revision 1.5  2012-11-24 08:01:36+05:30  Cprogrammer
+ * fixed display of usage
+ *
+ * Revision 1.4  2011-12-05 19:44:24+05:30  Cprogrammer
+ * skip host prefix in the RECIPIENT address
+ *
+ * Revision 1.3  2011-12-05 17:43:25+05:30  Cprogrammer
+ * added option to enclose headers only instead of full email
+ *
+ * Revision 1.2  2011-11-27 13:43:47+05:30  Cprogrammer
+ * process headers only
+ *
+ * Revision 1.1  2011-11-27 11:58:30+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

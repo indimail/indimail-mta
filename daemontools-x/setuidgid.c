@@ -1,5 +1,5 @@
 /*
- * $Id: setuidgid.c,v 1.11 2024-12-29 09:07:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: setuidgid.c,v 1.12 2025-01-21 23:35:24+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -65,7 +65,7 @@ main(int argc, char **argv)
 				ngroups++;
 		}
 		ngroups++;
-		if (!alloc_re((char *) &gidset, old * sizeof(gid_t), ngroups * sizeof(gid_t)))
+		if (!alloc_re((void **) &gidset, old * sizeof(gid_t), ngroups * sizeof(gid_t)))
 			return -1;
 		for (i = old, ptr = cptr = groups; *ptr; ptr++) {
 			if (*ptr == ',') {
@@ -106,13 +106,16 @@ main(int argc, char **argv)
 void
 getversion_setuidgid_c()
 {
-	const char     *x = "$Id: setuidgid.c,v 1.11 2024-12-29 09:07:32+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setuidgid.c,v 1.12 2025-01-21 23:35:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: setuidgid.c,v $
+ * Revision 1.12  2025-01-21 23:35:24+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.11  2024-12-29 09:07:32+05:30  Cprogrammer
  * added -e option for setting USER, LOGNAME and HOME env variables
  *

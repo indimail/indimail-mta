@@ -1,30 +1,5 @@
 /*
- * $Log: preline.c,v $
- * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.11  2023-09-15 21:15:16+05:30  Cprogrammer
- * moved check for env variables after getopt
- *
- * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.9  2020-11-24 13:46:31+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.8  2010-04-07 16:05:53+05:30  Cprogrammer
- * fixed SIGSEGV when QQEH env variable was absent
- *
- * Revision 1.7  2004-10-22 20:27:59+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.6  2004-10-22 15:36:23+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.5  2004-07-17 21:20:19+05:30  Cprogrammer
- * added qqeh code
- * added RCS log
- *
+ * $Id: preline.c,v 1.13 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fd.h>
@@ -57,8 +32,8 @@ main(int argc, char **argv)
 					flagqqeh = 1, opt, pid, wstat;
 	char           *ufline, *rpline, *dtline, *qqeh;
 	char            outbuf[SUBSTDIO_OUTSIZE], inbuf[SUBSTDIO_INSIZE];
-	substdio        ssout = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
-	substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
+	substdio        ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, outbuf, sizeof outbuf);
+	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
 
 	sig_pipeignore();
 
@@ -135,7 +110,38 @@ main(int argc, char **argv)
 void
 getversion_preline_c()
 {
-	const char     *x = "$Id: preline.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: preline.c,v 1.13 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: preline.c,v $
+ * Revision 1.13  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.11  2023-09-15 21:15:16+05:30  Cprogrammer
+ * moved check for env variables after getopt
+ *
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.9  2020-11-24 13:46:31+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.8  2010-04-07 16:05:53+05:30  Cprogrammer
+ * fixed SIGSEGV when QQEH env variable was absent
+ *
+ * Revision 1.7  2004-10-22 20:27:59+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.6  2004-10-22 15:36:23+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.5  2004-07-17 21:20:19+05:30  Cprogrammer
+ * added qqeh code
+ * added RCS log
+ *
+ */

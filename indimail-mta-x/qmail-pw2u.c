@@ -1,35 +1,5 @@
 /*
- * $Log: qmail-pw2u.c,v $
- * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.9  2020-05-11 11:09:34+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.8  2016-05-18 15:31:28+05:30  Cprogrammer
- * use auto_assign dir for files include, exclude, mailnames, subusers, append
- *
- * Revision 1.7  2004-10-22 20:28:39+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.6  2004-10-22 15:37:18+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.5  2004-07-15 23:32:53+05:30  Cprogrammer
- * fixed compilation warning
- *
- * Revision 1.4  2003-10-23 01:24:39+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.3  2003-10-01 19:05:27+05:30  Cprogrammer
- * changed return type to int
- *
- * Revision 1.2  2003-10-01 01:06:10+05:30  Cprogrammer
- * corrected path i.e. control/../users
- *
+ * $Id: qmail-pw2u.c,v 1.12 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -395,9 +365,7 @@ substdio        ss;
 char            ssbuf[SUBSTDIO_INSIZE];
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             opt;
 	int             match;
@@ -473,7 +441,7 @@ main(argc, argv)
 		if (errno != error_noent)
 			die_control();
 	} else {
-		substdio_fdbuf(&ss, read, fd, ssbuf, sizeof(ssbuf));
+		substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, ssbuf, sizeof(ssbuf));
 
 		if (!constmap_init(&mapuser, allusers.s, allusers.len, 1))
 			die_nomem();
@@ -493,7 +461,7 @@ main(argc, argv)
 		if (errno != error_noent)
 			die_control();
 	} else {
-		substdio_fdbuf(&ss, read, fd, ssbuf, sizeof(ssbuf));
+		substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, ssbuf, sizeof(ssbuf));
 		for (;;) {
 			if (getln(&ss, &line, &match, '\n') == -1)
 				die_read();
@@ -515,7 +483,43 @@ main(argc, argv)
 void
 getversion_qmail_pw2u_c()
 {
-	const char     *x = "$Id: qmail-pw2u.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-pw2u.c,v 1.12 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qmail-pw2u.c,v $
+ * Revision 1.12  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.9  2020-05-11 11:09:34+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.8  2016-05-18 15:31:28+05:30  Cprogrammer
+ * use auto_assign dir for files include, exclude, mailnames, subusers, append
+ *
+ * Revision 1.7  2004-10-22 20:28:39+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.6  2004-10-22 15:37:18+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.5  2004-07-15 23:32:53+05:30  Cprogrammer
+ * fixed compilation warning
+ *
+ * Revision 1.4  2003-10-23 01:24:39+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.3  2003-10-01 19:05:27+05:30  Cprogrammer
+ * changed return type to int
+ *
+ * Revision 1.2  2003-10-01 01:06:10+05:30  Cprogrammer
+ * corrected path i.e. control/../users
+ *
+ */

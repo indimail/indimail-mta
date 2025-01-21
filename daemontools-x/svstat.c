@@ -1,41 +1,5 @@
 /*
- * $Log: svstat.c,v $
- * Revision 1.12  2024-05-09 22:39:36+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.11  2023-03-04 14:43:01+05:30  Cprogrammer
- * check for supervise/ok in original service dir before run filesystem
- *
- * Revision 1.10  2020-11-30 23:20:31+05:30  Cprogrammer
- * change warning text message for missing directory in /run
- *
- * Revision 1.9  2020-11-30 22:56:02+05:30  Cprogrammer
- * continue instead of exit on run_init() failure
- *
- * Revision 1.8  2020-11-10 19:13:45+05:30  Cprogrammer
- * use byte 20 from status to indicate if service is up
- *
- * Revision 1.7  2020-11-09 09:31:09+05:30  Cprogrammer
- * display wait status. print errors to stderr instead of stdout
- *
- * Revision 1.6  2020-11-07 14:23:49+05:30  Cprogrammer
- * print pid after displaying uptime
- *
- * Revision 1.5  2020-10-08 18:34:17+05:30  Cprogrammer
- * use /run, /var/run if system supports it
- *
- * Revision 1.4  2020-09-27 14:16:09+05:30  Cprogrammer
- * display status written by svwait command
- *
- * Revision 1.3  2004-10-22 20:31:20+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-09 23:35:02+05:30  Cprogrammer
- * replaced buffer functions with substdio
- *
- * Revision 1.1  2003-12-31 18:36:54+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: svstat.c,v 1.13 2025-01-21 23:35:45+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -54,7 +18,7 @@
 #define WARN  "svstat: warning: "
 
 char            outbuf[256], errbuf[256];
-substdio        o = SUBSTDIO_FDBUF(write, 1, outbuf, sizeof outbuf);
+substdio        o = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, outbuf, sizeof outbuf);
 
 char            status[21];
 char            strnum[FMT_ULONG];
@@ -246,7 +210,50 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	const char     *x = "$Id: svstat.c,v 1.12 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: svstat.c,v 1.13 2025-01-21 23:35:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: svstat.c,v $
+ * Revision 1.13  2025-01-21 23:35:45+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.12  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.11  2023-03-04 14:43:01+05:30  Cprogrammer
+ * check for supervise/ok in original service dir before run filesystem
+ *
+ * Revision 1.10  2020-11-30 23:20:31+05:30  Cprogrammer
+ * change warning text message for missing directory in /run
+ *
+ * Revision 1.9  2020-11-30 22:56:02+05:30  Cprogrammer
+ * continue instead of exit on run_init() failure
+ *
+ * Revision 1.8  2020-11-10 19:13:45+05:30  Cprogrammer
+ * use byte 20 from status to indicate if service is up
+ *
+ * Revision 1.7  2020-11-09 09:31:09+05:30  Cprogrammer
+ * display wait status. print errors to stderr instead of stdout
+ *
+ * Revision 1.6  2020-11-07 14:23:49+05:30  Cprogrammer
+ * print pid after displaying uptime
+ *
+ * Revision 1.5  2020-10-08 18:34:17+05:30  Cprogrammer
+ * use /run, /var/run if system supports it
+ *
+ * Revision 1.4  2020-09-27 14:16:09+05:30  Cprogrammer
+ * display status written by svwait command
+ *
+ * Revision 1.3  2004-10-22 20:31:20+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-09 23:35:02+05:30  Cprogrammer
+ * replaced buffer functions with substdio
+ *
+ * Revision 1.1  2003-12-31 18:36:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

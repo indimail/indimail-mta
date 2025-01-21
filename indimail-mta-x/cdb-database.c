@@ -1,20 +1,5 @@
 /*
- * $Log: cdb-database.c,v $
- * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2023-09-11 09:04:29+05:30  Cprogrammer
- * allow comments in input file
- *
- * Revision 1.3  2023-02-12 13:29:01+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.2  2022-10-31 09:07:47+05:30  Cprogrammer
- * look at last colon when parsing data
- *
- * Revision 1.1  2021-06-15 11:30:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: cdb-database.c,v 1.6 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -55,7 +40,7 @@ main(int argc, char **argv)
 		strerr_die4sys(111, FATAL, "chdir: ", controldir, ": ");
 	if ((fd = open_read(argv[1])) == -1)
 		strerr_die3sys(111, FATAL, argv[1], ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	if (!stralloc_copys(&fntmp, argv[1]) || !stralloc_catb(&fntmp, ".tmp", 4) || !stralloc_0(&fntmp))
 		strerr_die2sys(111, FATAL, "out of memory");
 	if (!stralloc_copys(&fncdb, argv[1]) || !stralloc_catb(&fncdb, ".cdb", 4) || !stralloc_0(&fncdb))
@@ -126,7 +111,28 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	const char     *x = "$Id: cdb-database.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cdb-database.c,v 1.6 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: cdb-database.c,v $
+ * Revision 1.6  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2023-09-11 09:04:29+05:30  Cprogrammer
+ * allow comments in input file
+ *
+ * Revision 1.3  2023-02-12 13:29:01+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.2  2022-10-31 09:07:47+05:30  Cprogrammer
+ * look at last colon when parsing data
+ *
+ * Revision 1.1  2021-06-15 11:30:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,62 +1,5 @@
 /*
- * $Log: dot-forward.c,v $
- * Revision 1.19  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.17  2024-01-23 01:24:06+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.15  2021-07-05 21:10:12+05:30  Cprogrammer
- * skip $HOME/.defaultqueue for root
- *
- * Revision 1.14  2021-06-15 11:34:34+05:30  Cprogrammer
- * moved token822.h to libqmail
- *
- * Revision 1.13  2021-05-13 14:45:41+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.12  2020-11-24 13:45:08+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.11  2020-09-16 18:58:48+05:30  Cprogrammer
- * fix compiler warning
- *
- * Revision 1.10  2020-06-08 22:51:15+05:30  Cprogrammer
- * quench compiler warning
- *
- * Revision 1.9  2020-04-04 11:37:41+05:30  Cprogrammer
- * use auto_sysconfdir instead of auto_qmail
- *
- * Revision 1.8  2020-04-04 11:14:45+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.7  2019-06-07 11:26:04+05:30  Cprogrammer
- * replaced getopt() with subgetopt()
- *
- * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.5  2010-06-08 21:57:35+05:30  Cprogrammer
- * use envdir_set() on queuedefault to set default queue parameters
- *
- * Revision 1.4  2008-07-15 19:50:45+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.3  2004-10-22 20:24:43+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:34:58+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-10-21 22:46:30+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: dot-forward.c,v 1.20 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -87,7 +30,7 @@
 #define WARN  "dot-forward: warn: "
 #define INFO "dot-forward: info: "
 
-ssize_t         mywrite(int, char *, size_t);
+ssize_t         mywrite(int, const char *, size_t);
 
 stralloc        line = { 0 };
 int             flagdoit = 1;
@@ -114,7 +57,7 @@ unsigned long   qp;
 const char     *qqx;
 char            strnum[FMT_ULONG];
 char            qqbuf[BUFSIZE_OUT];
-substdio        ssqq = SUBSTDIO_FDBUF(mywrite, -1, qqbuf, sizeof qqbuf);
+substdio        ssqq = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, -1, qqbuf, sizeof qqbuf);
 char            inbuf[BUFSIZE_IN];
 
 no_return void
@@ -189,8 +132,8 @@ run(char *cmd)
 		strerr_die2sys(111, FATAL, "unable to run /bin/sh: ");
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssmess, read, 0, messbuf, sizeof messbuf);
-	substdio_fdbuf(&sschild, blindwrite, pi[1], childbuf, sizeof childbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*) (int,  char *, size_t)) read, 0, messbuf, sizeof messbuf);
+	substdio_fdbuf(&sschild, (ssize_t (*) (int,  char *, size_t)) blindwrite, pi[1], childbuf, sizeof childbuf);
 	substdio_puts(&sschild, ufline);
 	substdio_puts(&sschild, rpline);
 	substdio_puts(&sschild, dtline);
@@ -400,7 +343,7 @@ parseline()
 }
 
 ssize_t
-mywrite(int fd, char *buf, size_t len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 	return len;
@@ -422,7 +365,7 @@ try(char *fn)
 		die_nomem();
 	flagacted = 0;
 	flagdirect = 0;
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ss, (ssize_t (*) (int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 	for (;;) {
 		if (getln(&ss, &line, &match, '\n') == -1)
 			strerr_die4sys(111, FATAL, "unable to read ", fn, ": ");
@@ -441,7 +384,7 @@ try(char *fn)
 				strerr_die2sys(111, FATAL, "unable to run qmail-queue: ");
 			qp = qmail_qp(&qq);
 			qmail_puts(&qq, dtline);
-			substdio_fdbuf(&ssmess, read, 0, messbuf, sizeof messbuf);
+			substdio_fdbuf(&ssmess, (ssize_t (*) (int,  char *, size_t)) read, 0, messbuf, sizeof messbuf);
 			if (substdio_copy(&ssqq, &ssmess) != 0)
 				die_readmess();
 			substdio_flush(&ssqq);
@@ -516,7 +459,70 @@ main(int argc, char **argv)
 void
 getversion_dot_forward_c()
 {
-	const char     *x = "$Id: dot-forward.c,v 1.19 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dot-forward.c,v 1.20 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: dot-forward.c,v $
+ * Revision 1.20  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.19  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.18  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.17  2024-01-23 01:24:06+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.16  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.15  2021-07-05 21:10:12+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
+ * Revision 1.14  2021-06-15 11:34:34+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
+ * Revision 1.13  2021-05-13 14:45:41+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.12  2020-11-24 13:45:08+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.11  2020-09-16 18:58:48+05:30  Cprogrammer
+ * fix compiler warning
+ *
+ * Revision 1.10  2020-06-08 22:51:15+05:30  Cprogrammer
+ * quench compiler warning
+ *
+ * Revision 1.9  2020-04-04 11:37:41+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
+ * Revision 1.8  2020-04-04 11:14:45+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.7  2019-06-07 11:26:04+05:30  Cprogrammer
+ * replaced getopt() with subgetopt()
+ *
+ * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.5  2010-06-08 21:57:35+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
+ * Revision 1.4  2008-07-15 19:50:45+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.3  2004-10-22 20:24:43+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:34:58+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-10-21 22:46:30+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

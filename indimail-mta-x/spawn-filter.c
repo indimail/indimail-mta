@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.90 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.91 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -71,7 +71,7 @@ log_spam(const char *arg1, const char *arg2, const char *size, stralloc *line)
 			return;
 		report(111, "spawn-filter: open: ", fifo_name, ": ", error_str(errno), ". (#4.3.0)", 0);
 	}
-	substdio_fdbuf(&spamout, write, logfifo, spambuf, sizeof(spambuf));
+	substdio_fdbuf(&spamout, (ssize_t (*)(int,  char *, size_t)) write, logfifo, spambuf, sizeof(spambuf));
 	if (substdio_puts(&spamout, delivery == remote_delivery ? "qmail-remote: ": "qmail-local: ") == -1)
 		report(111, "spawn-filter: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	if (substdio_puts(&spamout, "pid ") == -1)
@@ -99,7 +99,7 @@ log_spam(const char *arg1, const char *arg2, const char *size, stralloc *line)
 	if (!fstat(255, &statbuf) && statbuf.st_size > 0 && !lseek(255, 0, SEEK_SET)) {
 		if (substdio_puts(&spamout, " ") == -1)
 			report(111, "spawn-filter: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
-		substdio_fdbuf(&spamin, read, 255, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&spamin, (ssize_t (*)(int,  char *, size_t)) read, 255, inbuf, sizeof(inbuf));
 		if (getln(&spamin, line, &match, '\n') == -1)
 			report(111, "spawn-filter: read: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		close(255);
@@ -233,7 +233,7 @@ run_mailfilter(const char *domain, const char *ext, const char *qqeh, const char
 		report(100, "Mail Rejected by ", filterargs, " (#5.7.1)", 0, 0, 0);
 	default:
 		e = errno;
-		substdio_fdbuf(&errbuf, read, pipefe[0], inbuf, sizeof(inbuf));
+		substdio_fdbuf(&errbuf, (ssize_t (*)(int,  char *, size_t)) read, pipefe[0], inbuf, sizeof(inbuf));
 		for (len = 0; substdio_bget(&errbuf, &ch, 1) && len < (sizeof(errstr) - 1); len++)
 			errstr[len] = ch;
 		errstr[len] = 0;
@@ -271,8 +271,8 @@ mkTempFile(int seekfd)
 	if ((fd = open(tmpFile.s, O_RDWR | O_EXCL | O_CREAT, 0600)) == -1)
 		report(111, "spawn-filter: ", tmpFile.s, ": ", error_str(errno), ". (#4.3.0)", 0);
 	unlink(tmpFile.s);
-	substdio_fdbuf(&_ssout, write, fd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&_ssin, read, seekfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&_ssout, (ssize_t (*)(int,  char *, size_t)) write, fd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&_ssin, (ssize_t (*)(int,  char *, size_t)) read, seekfd, inbuf, sizeof(inbuf));
 	switch (substdio_copy(&_ssout, &_ssin))
 	{
 	case -2: /*- read error */
@@ -689,7 +689,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	const char     *x = "$Id: spawn-filter.c,v 1.90 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: spawn-filter.c,v 1.91 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -700,6 +700,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.91  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.90  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

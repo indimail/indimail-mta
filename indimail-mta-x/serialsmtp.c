@@ -1,5 +1,5 @@
 /*
- * $Id: serialsmtp.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: serialsmtp.c,v 1.12 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -235,7 +235,7 @@ doit(int fd)
 	int             match;
 	unsigned long   code;
 
-	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*)(int,  char *, size_t)) read, fd, messbuf, sizeof messbuf);
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		die_readmess();
 	if (!match ||
@@ -382,13 +382,16 @@ main(int argc, char **argv)
 void
 getversion_serialsmtp_c()
 {
-	const char     *x = "$Id: serialsmtp.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: serialsmtp.c,v 1.12 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.12  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

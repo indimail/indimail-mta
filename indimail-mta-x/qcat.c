@@ -1,4 +1,6 @@
 /*
+ * $Id: qcat.c,v 1.13 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ *
  * qcat -- concatenate files and print on the standard output.
  * Copyright (C) 1988-2024 Free Software Foundation, Inc.
  *
@@ -18,7 +20,6 @@
  * convert() function code taken and adaptred from coreutils/src/cat.c
  * By tege@sics.se, Torbjörn Granlund, advised by rms, Richard Stallman.
  *
- * $Id: qcat.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -37,9 +38,9 @@
 static char     ssinbuf[BUFSIZE_IN];
 static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
 logerr(const char *s)
@@ -73,7 +74,7 @@ my_error(const char *s1, const char *s2, int exit_val)
 }
 
 static void
-sigterm()
+sigterm(int x)
 {
 	substdio_flush(&ssout);
 	substdio_flush(&sserr);
@@ -236,13 +237,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	const char     *x = "$Id: qcat.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qcat.c,v 1.13 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qcat.c,v $
+ * Revision 1.13  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

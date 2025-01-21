@@ -1,69 +1,5 @@
 /*
- * $Log: ipme.c,v $
- * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.25  2021-06-14 00:47:17+05:30  Cprogrammer
- * converted to ansic prototypes
- *
- * Revision 1.24  2018-07-03 02:02:11+05:30  Cprogrammer
- * set allocated to zero for stralloc variable buf
- *
- * Revision 1.23  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.22  2016-05-16 21:15:24+05:30  Cprogrammer
- * removed stdio.h
- *
- * Revision 1.21  2015-08-24 21:48:48+05:30  Cprogrammer
- * added :: and 0.0.0.0 as valid ip addresses for me
- *
- * Revision 1.20  2015-08-24 21:30:20+05:30  Cprogrammer
- * use getifaddrs() to get interface addresses
- *
- * Revision 1.19  2015-08-24 19:06:46+05:30  Cprogrammer
- * replaced ip_scan() with ip4_scan()
- *
- * Revision 1.18  2008-09-16 20:12:54+05:30  Cprogrammer
- * represent ipv4 addresses as ipv4 and not as IPV4 mapped addresses
- *
- * Revision 1.17  2008-09-16 11:28:34+05:30  Cprogrammer
- * replaced inet_pton with ip6_scan
- * use outgoing ip in v6 for IPV6
- *
- * Revision 1.16  2008-09-16 09:56:09+05:30  Cprogrammer
- * fallback to AF_INET if ipv6 fails
- *
- * Revision 1.15  2008-06-17 18:59:27+05:30  Cprogrammer
- * use inet_pton() to convert addresses
- *
- * Revision 1.14  2008-06-17 18:00:13+05:30  Cprogrammer
- * ix.af was not initialized
- *
- * Revision 1.13  2005-06-17 21:49:00+05:30  Cprogrammer
- * replaced struct ip_address and struct ip6_address with shorter typedefs
- *
- * Revision 1.12  2005-06-15 22:34:15+05:30  Cprogrammer
- * ipv6 support
- *
- * Revision 1.11  2005-06-11 21:30:57+05:30  Cprogrammer
- * added ipv6 support
- *
- * Revision 1.10  2004-10-22 20:26:00+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.9  2004-10-22 15:35:31+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.8  2004-10-09 00:57:10+05:30  Cprogrammer
- * removed param.h
- *
- * Revision 1.7  2004-08-15 00:26:22+05:30  Cprogrammer
- * ipalias fix for 4.3 BSD systems
- *
- * Revision 1.6  2004-07-17 20:55:33+05:30  Cprogrammer
- * increased buffer length to get all interface in one read
- *
+ * $Id: ipme.c,v 1.27 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <errno.h>
 #include <sys/types.h>
@@ -172,7 +108,7 @@ ipme_readipfile(ipalloc *ipa, const char *fn)
 			!stralloc_0(&controlfile))
 		return(-1);
 	if ((fd = open_read(controlfile.s)) != -1) {
-		substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		while ((getln(&ss, &l, &match, '\n') != -1) && (match || l.len)) {
 			l.len--;
 			if (!stralloc_0(&l)) {
@@ -478,7 +414,77 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	const char     *x = "$Id: ipme.c,v 1.26 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ipme.c,v 1.27 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: ipme.c,v $
+ * Revision 1.27  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.25  2021-06-14 00:47:17+05:30  Cprogrammer
+ * converted to ansic prototypes
+ *
+ * Revision 1.24  2018-07-03 02:02:11+05:30  Cprogrammer
+ * set allocated to zero for stralloc variable buf
+ *
+ * Revision 1.23  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.22  2016-05-16 21:15:24+05:30  Cprogrammer
+ * removed stdio.h
+ *
+ * Revision 1.21  2015-08-24 21:48:48+05:30  Cprogrammer
+ * added :: and 0.0.0.0 as valid ip addresses for me
+ *
+ * Revision 1.20  2015-08-24 21:30:20+05:30  Cprogrammer
+ * use getifaddrs() to get interface addresses
+ *
+ * Revision 1.19  2015-08-24 19:06:46+05:30  Cprogrammer
+ * replaced ip_scan() with ip4_scan()
+ *
+ * Revision 1.18  2008-09-16 20:12:54+05:30  Cprogrammer
+ * represent ipv4 addresses as ipv4 and not as IPV4 mapped addresses
+ *
+ * Revision 1.17  2008-09-16 11:28:34+05:30  Cprogrammer
+ * replaced inet_pton with ip6_scan
+ * use outgoing ip in v6 for IPV6
+ *
+ * Revision 1.16  2008-09-16 09:56:09+05:30  Cprogrammer
+ * fallback to AF_INET if ipv6 fails
+ *
+ * Revision 1.15  2008-06-17 18:59:27+05:30  Cprogrammer
+ * use inet_pton() to convert addresses
+ *
+ * Revision 1.14  2008-06-17 18:00:13+05:30  Cprogrammer
+ * ix.af was not initialized
+ *
+ * Revision 1.13  2005-06-17 21:49:00+05:30  Cprogrammer
+ * replaced struct ip_address and struct ip6_address with shorter typedefs
+ *
+ * Revision 1.12  2005-06-15 22:34:15+05:30  Cprogrammer
+ * ipv6 support
+ *
+ * Revision 1.11  2005-06-11 21:30:57+05:30  Cprogrammer
+ * added ipv6 support
+ *
+ * Revision 1.10  2004-10-22 20:26:00+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.9  2004-10-22 15:35:31+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.8  2004-10-09 00:57:10+05:30  Cprogrammer
+ * removed param.h
+ *
+ * Revision 1.7  2004-08-15 00:26:22+05:30  Cprogrammer
+ * ipalias fix for 4.3 BSD systems
+ *
+ * Revision 1.6  2004-07-17 20:55:33+05:30  Cprogrammer
+ * increased buffer length to get all interface in one read
+ *
+ */

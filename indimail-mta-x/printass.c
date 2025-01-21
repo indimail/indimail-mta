@@ -1,5 +1,5 @@
 /*
- * $Id: printass.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: printass.c,v 1.3 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -40,7 +40,7 @@ printall(int fd, char p_dir, char p_uid, char p_gid)
 	char           *ptr, *user, *dirp, *uidp, *gidp;
 	int             i, match;
 
-	substdio_fdbuf(&ssass, read, fd, assbuf, sizeof assbuf);
+	substdio_fdbuf(&ssass, (ssize_t (*)(int,  char *, size_t)) read, fd, assbuf, sizeof assbuf);
 	for (;;) {
 		if (getln(&ssass, &line, &match, '\n') == -1)
 			die_readass();
@@ -176,7 +176,7 @@ main(int argc, char **argv)
 void
 getversion_printass_c()
 {
-	const char     *x = "$Id: printass.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: printass.c,v 1.3 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -184,6 +184,9 @@ getversion_printass_c()
 
 /*
  * $Log: printass.c,v $
+ * Revision 1.3  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

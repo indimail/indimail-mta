@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-greyd.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-greyd.c,v 1.39 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdlib.h>
 #include <time.h>
@@ -863,7 +863,7 @@ load_context()
 			return;
 		die_control(context_file.s);
 	}
-	substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 	cur_time = time(0);
 	for (;;) {
 		if (getln(&ss, &line, &match, '\n') == -1)
@@ -930,7 +930,7 @@ load_context()
  * Reload whitelist on sighup
  */
 void
-sighup()
+sighup(int x)
 {
 	sig_block(SIGHUP);
 	if (whitelistok) {
@@ -944,7 +944,7 @@ sighup()
  * save context file on SIGUSR1
  */
 void
-sigusr1()
+sigusr1(int x)
 {
 	sig_block(SIGUSR1);
 	save_context();
@@ -971,7 +971,7 @@ ready()
  * expire records on SIGUSR2
  */
 void
-sigusr2()
+sigusr2(int x)
 {
 	struct greylst *ptr, *ip_ptr;
 	int             i, j;
@@ -999,7 +999,7 @@ sigusr2()
 }
 
 no_return void
-sigterm()
+sigterm(int x)
 {
 	sig_block(SIGTERM);
 	logerr("ARGH!! Committing suicide on SIGTERM\n", NULL);
@@ -1433,13 +1433,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	const char     *x = "$Id: qmail-greyd.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-greyd.c,v 1.39 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.39  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.38  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

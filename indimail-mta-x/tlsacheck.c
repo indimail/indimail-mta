@@ -1,20 +1,5 @@
 /*
- * $Log: tlsacheck.c,v $
- * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2018-05-27 22:14:32+05:30  mbhangui
- * added defintions for qmail-daned modes
- *
- * Revision 1.2  2018-05-27 17:47:05+05:30  Cprogrammer
- * added option for qmail-remote to query/update records
- *
- * Revision 1.1  2018-04-26 01:30:59+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: tlsacheck.c,v 1.6 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -106,7 +91,7 @@ scan_ip_port(const char *daneip, const char *defaultip,
 }
 
 int
-connect_udp(union v46addr *ip, unsigned int port, void (*errfn)())
+connect_udp(union v46addr *ip, unsigned int port, void (*errfn)(const char *))
 {
 	int               fd;
 #ifdef IPV6
@@ -173,7 +158,7 @@ stralloc        ipbuf = {0};
 
 int
 tlsacheck(const char *daneip, const char *domain, int qOru, char rbuf[],
-		void (*timeoutfn) (), void (*errfn) ()) /*- errfn must _exit */
+		void (*timeoutfn) (void), void (*errfn) (const char *)) /*- errfn must _exit */
 {
 	int             r, len = 0, timeout = DANETIMEOUT;
 	const char     *ptr;
@@ -242,7 +227,7 @@ tlsacheck(const char *daneip, const char *domain, int qOru, char rbuf[],
 		return (-2);
 	else
 	if ((r = query_skt(sockfd, ipbuf.s, &chkpacket, rbuf, 2, timeout, timeoutfn, errfn)) == -1)
-		return -1;	/*- Permit connection (soft fail) - probably timeout */
+		return -1; /*- Permit connection (soft fail) - probably timeout */
 	else {
 		if (rbuf[0] == 0) { /* failure */
 			if (*ptr == 'S' || *ptr == 'F')
@@ -259,7 +244,28 @@ tlsacheck(const char *daneip, const char *domain, int qOru, char rbuf[],
 void
 getversion_tlsacheck_c()
 {
-	const char     *x = "$Id: tlsacheck.c,v 1.5 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tlsacheck.c,v 1.6 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: tlsacheck.c,v $
+ * Revision 1.6  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2018-05-27 22:14:32+05:30  mbhangui
+ * added defintions for qmail-daned modes
+ *
+ * Revision 1.2  2018-05-27 17:47:05+05:30  Cprogrammer
+ * added option for qmail-remote to query/update records
+ *
+ * Revision 1.1  2018-04-26 01:30:59+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

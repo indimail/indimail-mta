@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.83 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.84 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hasdkim.h"
 #ifdef HASDKIM
@@ -84,14 +84,14 @@ die_read()
 }
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	/*- thou shalt not clean up here */
 	die(QQ_TIMEOUT, 0);
 }
 
 no_return void
-sigbug()
+sigbug(int x)
 {
 	die(QQ_INTERNAL_BUG, 0);
 }
@@ -1075,8 +1075,8 @@ main(int argc, char *argv[])
 		die(QQ_PID_FILE, dkimsign ? 1 : 2);
 	if (unlink(pidfn) == -1)
 		die(QQ_PID_FILE, dkimsign ? 1 : 2);
-	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf)); /*- message content */
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, messfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof(inbuf)); /*- message content */
 	for (ret = 0;;) {
 		register int    n;
 		register char  *x;
@@ -1258,8 +1258,8 @@ main(int argc, char *argv[])
 		}
 	}
 	close(pim[0]);
-	substdio_fdbuf(&ssin, read, readfd, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssout, write, pim[1], outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, readfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, pim[1], outbuf, sizeof(outbuf));
 	if (substdio_bput(&ssout, dkimoutput.s, dkimoutput.len) == -1) /*- write DKIM signature */
 		die_write();
 	switch (substdio_copy(&ssout, &ssin))
@@ -1289,7 +1289,7 @@ struct substdio sserr;
 int
 main(int argc, char **argv)
 {
-	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
+	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 	substdio_puts(&sserr, "not compiled with -DHASDKIM\n");
 	substdio_flush(&sserr);
 	_exit(111);
@@ -1300,7 +1300,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.83 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.84 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 #ifdef HASDKIM
 	x = sccsidmakeargsh;
@@ -1312,6 +1312,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.84  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.83  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

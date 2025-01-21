@@ -1,51 +1,5 @@
 /*
- * $Log: greylist.c,v $
- * Revision 1.15  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.13  2018-05-30 23:25:31+05:30  Cprogrammer
- * moved noipv6 variable to variables.c
- *
- * Revision 1.12  2018-04-25 22:48:02+05:30  Cprogrammer
- * fixed error message length
- *
- * Revision 1.11  2018-04-25 21:39:39+05:30  Cprogrammer
- * moved query_skt(), fn_handler() to its own source file
- *
- * Revision 1.10  2016-04-19 10:33:35+05:30  Cprogrammer
- * added additional diagnostics when logging errors
- *
- * Revision 1.9  2016-04-15 15:44:11+05:30  Cprogrammer
- * create ipv4 socket if ipv6 stack is disabled
- *
- * Revision 1.8  2016-04-10 22:17:32+05:30  Cprogrammer
- * null terminate packet
- *
- * Revision 1.7  2016-04-10 13:27:12+05:30  Cprogrammer
- * fixed ip6/ip4 address to connect
- *
- * Revision 1.6  2015-12-31 00:44:18+05:30  Cprogrammer
- * added IPV6 code
- *
- * Revision 1.5  2015-08-24 19:06:05+05:30  Cprogrammer
- * replace ip_scan() with ip4_scan()
- *
- * Revision 1.4  2014-01-29 14:00:42+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.3  2009-10-28 13:34:29+05:30  Cprogrammer
- * fix scan_ip_port()
- * remove newline as delimiter
- *
- * Revision 1.2  2009-08-29 15:28:45+05:30  Cprogrammer
- * send the entire RCPT list in one packet
- *
- * Revision 1.1  2009-08-25 16:31:56+05:30  Cprogrammer
- * Initial revision based on code by Richard Andrews
- *
+ * $Id: greylist.c,v 1.16 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include "haveip6.h"
 #include "stralloc.h"
@@ -136,7 +90,7 @@ scan_ip_port(const char *gip, const char *defaultip, unsigned int defaultport,
 }
 
 int
-connect_udp(union v46addr *ip, unsigned int port, void (*errfn)())
+connect_udp(union v46addr *ip, unsigned int port, void (*errfn)(const char *))
 {
 	int               fd;
 #ifdef IPV6
@@ -203,7 +157,7 @@ stralloc        ipbuf = {0};
 
 int
 greylist(const char *gip, const char *connectingip, const char *from,
-		const char *tolist, int tolen, void (*timeoutfn) (), void (*errfn) ()) /*- errfn must _exit */
+		const char *tolist, int tolen, void (*timeoutfn) (void), void (*errfn) (const char *)) /*- errfn must _exit */
 {
 	int             r, len = 0;
 	char            strnum[FMT_ULONG];
@@ -280,7 +234,59 @@ greylist(const char *gip, const char *connectingip, const char *from,
 void
 getversion_greylist_c()
 {
-	const char     *x = "$Id: greylist.c,v 1.15 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: greylist.c,v 1.16 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: greylist.c,v $
+ * Revision 1.16  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.15  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.13  2018-05-30 23:25:31+05:30  Cprogrammer
+ * moved noipv6 variable to variables.c
+ *
+ * Revision 1.12  2018-04-25 22:48:02+05:30  Cprogrammer
+ * fixed error message length
+ *
+ * Revision 1.11  2018-04-25 21:39:39+05:30  Cprogrammer
+ * moved query_skt(), fn_handler() to its own source file
+ *
+ * Revision 1.10  2016-04-19 10:33:35+05:30  Cprogrammer
+ * added additional diagnostics when logging errors
+ *
+ * Revision 1.9  2016-04-15 15:44:11+05:30  Cprogrammer
+ * create ipv4 socket if ipv6 stack is disabled
+ *
+ * Revision 1.8  2016-04-10 22:17:32+05:30  Cprogrammer
+ * null terminate packet
+ *
+ * Revision 1.7  2016-04-10 13:27:12+05:30  Cprogrammer
+ * fixed ip6/ip4 address to connect
+ *
+ * Revision 1.6  2015-12-31 00:44:18+05:30  Cprogrammer
+ * added IPV6 code
+ *
+ * Revision 1.5  2015-08-24 19:06:05+05:30  Cprogrammer
+ * replace ip_scan() with ip4_scan()
+ *
+ * Revision 1.4  2014-01-29 14:00:42+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.3  2009-10-28 13:34:29+05:30  Cprogrammer
+ * fix scan_ip_port()
+ * remove newline as delimiter
+ *
+ * Revision 1.2  2009-08-29 15:28:45+05:30  Cprogrammer
+ * send the entire RCPT list in one packet
+ *
+ * Revision 1.1  2009-08-25 16:31:56+05:30  Cprogrammer
+ * Initial revision based on code by Richard Andrews
+ *
+ */

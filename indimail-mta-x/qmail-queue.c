@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.95 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.96 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -124,7 +124,7 @@ die(int e, int do_cleanup, const char *str)
 }
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	/*- thou shalt not clean up here */
 	errno = 0;
@@ -132,7 +132,7 @@ sigalrm()
 }
 
 no_return void
-sigbug()
+sigbug(int x)
 {
 	errno = 0;
 	die(QQ_INTERNAL_BUG, 0, "internal bug");
@@ -856,14 +856,14 @@ main()
 		die(QQ_REMOVE_PID_ERR, 0, "trouble unlinking pid file");
 	}
 	flagmademess = 1;
-	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, messfd, outbuf, sizeof(outbuf));
 	/*- read the message body */
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof(inbuf));
 	if (logh.len) {
 		if ((ptr = env_get("LOGHEADERFD"))) {
 			scan_int(ptr, &logfd);
 			if (!fstat(logfd, &st))
-				substdio_fdbuf(&sslog, write, logfd, logbuf, sizeof(logbuf));
+				substdio_fdbuf(&sslog, (ssize_t (*)(int,  char *, size_t)) write, logfd, logbuf, sizeof(logbuf));
 			else
 				logfd = -1;
 		}
@@ -977,7 +977,7 @@ main()
 	if ((intdfd = open_excl(intdfn)) == -1)
 		die(QQ_INTD_FILE, 1, "trouble creating files in intd");
 	flagmadeintd = 1;
-	substdio_fdbuf(&ssout, write, intdfd, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, intdfd, outbuf, sizeof(outbuf));
 	if (substdio_bput(&ssout, "u", 1) == -1 ||
 			substdio_bput(&ssout, tmp, fmt_ulong(tmp, uid)) == -1 ||
 			substdio_bput(&ssout, "", 1) == -1 ||
@@ -986,7 +986,7 @@ main()
 			substdio_bput(&ssout, "", 1) == -1)
 		die(QQ_WRITE_ERR, 1, "trouble writing envelope");
 	/*- read the message envelope */
-	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 1, inbuf, sizeof(inbuf));
 	if (substdio_get(&ssin, &ch, 1) < 1)
 		die(QQ_READ_ERR, 1, "trouble reading envelope");
 	/*- Get the Sender */
@@ -1193,7 +1193,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	const char     *x = "$Id: qmail-queue.c,v 1.95 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-queue.c,v 1.96 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -1201,6 +1201,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.96  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.95  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

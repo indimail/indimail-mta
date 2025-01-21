@@ -1,6 +1,5 @@
 /*
- * RCS log at bottom
- * $Id: smtpd.c,v 1.330 2024-12-21 10:47:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.331 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -113,34 +112,34 @@ static int      tls_verify();
 static void     tls_nogateway();
 static void     ssl_proto();
 #endif
-ssize_t         safewrite(int, char *, int);
-ssize_t         saferead(int, char *, int);
+ssize_t         safewrite(int, const char *, size_t);
+ssize_t         saferead(int, char *, size_t);
 static int      auth_login(const char *);
 static int      auth_plain(const char *);
-static int      auth_cram_md5();
-static int      auth_cram_sha1();
-static int      auth_cram_sha224();
-static int      auth_cram_sha256();
-static int      auth_cram_sha384();
-static int      auth_cram_sha512();
-static int      auth_cram_ripemd();
-static int      auth_digest_md5();
+static int      auth_cram_md5(const char *);
+static int      auth_cram_sha1(const char *);
+static int      auth_cram_sha224(const char *);
+static int      auth_cram_sha256(const char *);
+static int      auth_cram_sha384(const char *);
+static int      auth_cram_sha512(const char *);
+static int      auth_cram_ripemd(const char *);
+static int      auth_digest_md5(const char *);
 #ifdef AUTH_XOAUTH2
 static int      auth_xoauth2(const char *);
 #endif
 #ifdef HASLIBGSASL
-static int      auth_scram_sha1();
-static int      auth_scram_sha1_plus();
-static int      auth_scram_sha256();
-static int      auth_scram_sha256_plus();
+static int      auth_scram_sha1(const char *);
+static int      auth_scram_sha1_plus(const char *);
+static int      auth_scram_sha256(const char *);
+static int      auth_scram_sha256_plus(const char *);
 #if 0
-static int      auth_scram_sha512();
-static int      auth_scram_sha512_plus();
+static int      auth_scram_sha512(const char *);
+static int      auth_scram_sha512_plus(const char *);
 #endif
 #endif /*- #ifdef HASLIBGSASL */
-static int      err_noauth();
+static int      err_noauth(const char *);
 #ifdef TLS
-static int      err_noauthallowed();
+static int      err_noauthallowed(const char *);
 #endif
 static int      addrrelay();
 int             atrn_queue(const char *, const char *);
@@ -161,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.330 $";
+static c_char  *revision = "$Revision: 1.331 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -223,11 +222,11 @@ static c_char  *remoteip4;
 static char    **childargs;
 
 static char     ssinbuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF(saferead, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) saferead, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[BUFSIZE_OUT];
-static substdio ssout = SUBSTDIO_FDBUF(safewrite, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[BUFSIZE_OUT];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof (sserrbuf));
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof (sserrbuf));
 static char     upbuf[BUFSIZE_MEDIUM];
 static substdio ssup;
 
@@ -649,13 +648,13 @@ die_alarm()
 }
 
 ssize_t
-plaintxtread(int fd, char *buf, int len)
+plaintxtread(int fd, char *buf, size_t len)
 {
 	return timeoutread(timeout, fd, buf, len);
 }
 
 ssize_t
-saferead(int fd, char *buf, int len)
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
 
@@ -684,7 +683,7 @@ saferead(int fd, char *buf, int len)
 }
 
 ssize_t
-safewrite(int fd, char *buf, int len)
+safewrite(int fd, const char *buf, size_t len)
 {
 	int             r;
 
@@ -941,7 +940,7 @@ log_fifo(const char *arg1, const char *arg2, unsigned long size, stralloc *line)
 	 */
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
 	strnum2[fmt_ulong(strnum2, msg_size)] = 0;
-	substdio_fdbuf(&logfifo_out, write, logfifo, fifobuf, sizeof (fifobuf));
+	substdio_fdbuf(&logfifo_out, (ssize_t (*)(int,  char *, size_t)) write, logfifo, fifobuf, sizeof (fifobuf));
 	if (substdio_puts(&logfifo_out, "qmail-smtpd: ") == -1 ||
 			substdio_puts(&logfifo_out, "pid ") == -1 ||
 			substdio_puts(&logfifo_out, strnum1) == -1 ||
@@ -964,7 +963,7 @@ log_fifo(const char *arg1, const char *arg2, unsigned long size, stralloc *line)
 			close(logfd);
 			return;
 		}
-		substdio_fdbuf(&logfifo_in, read, logfd, inbuf, sizeof (inbuf));
+		substdio_fdbuf(&logfifo_in, (ssize_t (*)(int,  char *, size_t)) read, logfd, inbuf, sizeof (inbuf));
 		if (getln(&logfifo_in, line, &match, '\n') == -1) {
 			logerr(1, "read error: ", error_str(errno), "\n", NULL);
 			logflush();
@@ -1821,7 +1820,7 @@ err_transaction(const char *arg)
 }
 
 int
-err_noauth()
+err_noauth(const char *x)
 {
 	out("504 auth type unimplemented (#5.5.1)\r\n", NULL);
 	flush();
@@ -1830,7 +1829,7 @@ err_noauth()
 
 #ifdef TLS
 int
-err_noauthallowed()
+err_noauthallowed(const char *x)
 {
 	out("538 Encryption required for requested authentication mechanism (#5.7.11)\r\n", NULL);
 	flush();
@@ -1878,7 +1877,7 @@ err_rcpt_errcount(const char *arg1, int count)
 }
 
 no_return void
-err_greytimeout()
+err_greytimeout(void)
 {
 	logerr(1, "Timeout (no response from greylisting server)\n", NULL);
 	logflush();
@@ -2048,7 +2047,7 @@ check_user_pwd(char *rcpt, int len)
 		flush();
 		_exit(1);
 	}
-	substdio_fdbuf(&pwss, read, fd, inbuf, sizeof (inbuf));
+	substdio_fdbuf(&pwss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 	for (;;) {
 		if (getln(&pwss, &line, &match, '\n') == -1) {
 			close(fd);
@@ -2262,7 +2261,7 @@ smtp_respond(const char *code)
 }
 
 no_return void
-sigterm()
+sigterm(int x)
 {
 	smtp_respond("421 ");
 	logerr(1, "going down on SIGTERM\n", NULL);
@@ -5224,7 +5223,7 @@ authenticate(int method)
 	if (ssl)
 		close(pe[1]);
 #endif
-	substdio_fdbuf(&ssup, safewrite, pi[1], upbuf, sizeof upbuf);
+	substdio_fdbuf(&ssup, (ssize_t (*)(int,  char *, size_t)) safewrite, pi[1], upbuf, sizeof upbuf);
 	strnum[0] = method;
 	strnum[1] = '\0';
 	if (substdio_put(&ssup, user.s, user.len) == -1 ||
@@ -5248,7 +5247,7 @@ authenticate(int method)
 	if ((i = wait_exitcode(wstat))) {
 #ifdef TLS
 		if (ssl) { /*- don't let plain text from exec'd programs to interfere with ssl */
-			substdio_fdbuf(&pwd_in, plaintxtread, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
+			substdio_fdbuf(&pwd_in, (ssize_t (*)(int,  char *, size_t)) plaintxtread, pe[0], pwd_in_buf, sizeof(pwd_in_buf));
 			if (substdio_copy(&ssout, &pwd_in) == -2)
 				die_read("error reading diget-md5 pipe", 0);
 		}
@@ -5297,7 +5296,7 @@ auth_login(const char *arg)
 
 #ifdef TLS
 	if (secure_auth && !ssl)
-		return err_noauthallowed();
+		return err_noauthallowed(NULL);
 #endif
 	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &user)) == 1)
@@ -5335,7 +5334,7 @@ auth_plain(const char *arg)
 
 #ifdef TLS
 	if (secure_auth && !ssl)
-		return err_noauthallowed();
+		return err_noauthallowed(NULL);
 #endif
 	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
@@ -6080,81 +6079,81 @@ auth_scram(int method)
 #endif
 
 static int
-auth_cram_md5()
+auth_cram_md5(const char *x)
 {
 	return (auth_cram(AUTH_CRAM_MD5));
 }
 
 static int
-auth_cram_sha1()
+auth_cram_sha1(const char *x)
 {
 	return (auth_cram(AUTH_CRAM_SHA1));
 }
 
 static int
-auth_cram_sha224()
+auth_cram_sha224(const char *x)
 {
 	return (auth_cram(AUTH_CRAM_SHA224));
 }
 
 static int
-auth_cram_sha256()
+auth_cram_sha256(const char *x)
 {
 	return (auth_cram(AUTH_CRAM_SHA256));
 }
 
 static int
-auth_cram_sha384()
+auth_cram_sha384(const char *x)
 {
 	return (auth_cram(AUTH_CRAM_SHA384));
 }
 
 static int
-auth_cram_sha512()
+auth_cram_sha512(const char *x)
 {
 	return (auth_cram(AUTH_CRAM_SHA512));
 }
 
 static int
-auth_cram_ripemd()
+auth_cram_ripemd(const char *x)
 {
 	return (auth_cram(AUTH_CRAM_RIPEMD));
 }
 
 #ifdef HASLIBGSASL
 static int
-auth_scram_sha1()
+auth_scram_sha1(const char *x)
 {
 	return (auth_scram(AUTH_SCRAM_SHA1));
 }
 
 static int
-auth_scram_sha1_plus()
+auth_scram_sha1_plus(const char *x)
 {
 	return (auth_scram(AUTH_SCRAM_SHA1_PLUS));
 }
 
 static int
-auth_scram_sha256()
+auth_scram_sha256(const char *x)
 {
 	return (auth_scram(AUTH_SCRAM_SHA256));
 }
 
 static int
-auth_scram_sha256_plus()
+auth_scram_sha256_plus(const char *x)
 {
 	return (auth_scram(AUTH_SCRAM_SHA256_PLUS));
 }
 
 #if 0
 static int
-auth_scram_sha512()
+auth_scram_sha512(const char *x)
 {
 	return (auth_scram(AUTH_SCRAM_SHA512));
 }
 
 static int
-auth_scram_sha512_plus()
+auth_scram_sha512_plus(const char *x)
 {
 	return (auth_scram(AUTH_SCRAM_SHA512_PLUS));
 }
@@ -6206,7 +6205,7 @@ scan_response(stralloc *dst, stralloc *src, const char *search)
 char            hextab[] = "0123456789abcdef";
 
 static int
-auth_digest_md5()
+auth_digest_md5(const char *y)
 {
 	unsigned char   unique[FMT_ULONG + FMT_ULONG + 3];
 	unsigned char   digest[20], encrypted[41];
@@ -6359,7 +6358,7 @@ auth_xoauth2(const char *arg)
 	 */
 #ifdef TLS
 	if (secure_auth && !ssl)
-		return err_noauthallowed();
+		return err_noauthallowed(NULL);
 #endif
 	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
@@ -7526,6 +7525,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.331  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.330  2024-12-21 10:47:07+05:30  Cprogrammer
  * display command name in err_unimpl()
  *
@@ -7976,7 +7978,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.330 2024-12-21 10:47:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.331 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

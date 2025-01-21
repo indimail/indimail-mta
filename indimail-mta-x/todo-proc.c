@@ -1,5 +1,5 @@
 /*
- * $Id: todo-proc.c,v 1.68 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: todo-proc.c,v 1.69 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -311,8 +311,8 @@ void
 comm_init(void)
 {
 	/* fd 2 is pi9[1] - write to qmail-clean, fd 3 is pi10[0] - read from qmail-clean */
-	substdio_fdbuf(&sstoqc, write, 2, sstoqcbuf, sizeof (sstoqcbuf));
-	substdio_fdbuf(&ssfromqc, read, 3, ssfromqcbuf, sizeof (ssfromqcbuf));
+	substdio_fdbuf(&sstoqc, (ssize_t (*)(int,  char *, size_t)) write, 2, sstoqcbuf, sizeof (sstoqcbuf));
+	substdio_fdbuf(&ssfromqc, (ssize_t (*)(int,  char *, size_t)) read, 3, ssfromqcbuf, sizeof (ssfromqcbuf));
 
 	sendfdo = 1;	/*- stdout pi8[1] to qmail-send */
 	sendfdi = 0;	/*- stdin  pi7[0] from qmail-send */
@@ -421,7 +421,7 @@ comm_exit(void)
 }
 
 void
-sigterm(void)
+sigterm(int x)
 {
 	sig_block(sig_term);
 	todo_log("alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
@@ -631,7 +631,7 @@ mqueue_scan(fd_set *rfds, unsigned long *id)
 		}
 	} else
 	if (msgbuflen < attr.mq_msgsize) {
-		if (!alloc_re((char *) &msgbuf, msgbuflen, attr.mq_msgsize)) {
+		if (!alloc_re((void *) &msgbuf, msgbuflen, attr.mq_msgsize)) {
 			todo_log("warn: ", argv0, ": ", queuedesc, ": out of memory\n", NULL);
 			return -1;
 		}
@@ -924,8 +924,8 @@ todo_do(int *nfds, fd_set *rfds)
 	todo_log("new msg ", strnum1, " ", queuedesc, "\n", NULL);
 	for (c = 0; c < CHANNELS; ++c)
 		flagchan[c] = 0;
-	substdio_fdbuf(&ss, read, fd, todobuf, sizeof (todobuf)); /*- read envelope */
-	substdio_fdbuf(&ssinfo, write, fdinfo, todobufinfo, sizeof (todobufinfo)); /*- write to info/split/id */
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, todobuf, sizeof (todobuf)); /*- read envelope */
+	substdio_fdbuf(&ssinfo, (ssize_t (*)(int,  char *, size_t)) write, fdinfo, todobufinfo, sizeof (todobufinfo)); /*- write to info/split/id */
 	uid = 0;
 	pid = 0;
 	for (;;) {
@@ -1000,7 +1000,7 @@ todo_do(int *nfds, fd_set *rfds)
 						error_str(errno), "\n", NULL);
 					goto fail;
 				}
-				substdio_fdbuf(&sschan[c], write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
+				substdio_fdbuf(&sschan[c], (ssize_t (*)(int,  char *, size_t)) write, fdchan[c], todobufchan[c], sizeof (todobufchan[c]));
 				flagchan[c] = 1;
 			}
 			if (substdio_bput(&sschan[c], rwline.s, rwline.len) == -1) {
@@ -1431,7 +1431,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	const char     *x = "$Id: todo-proc.c,v 1.68 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: todo-proc.c,v 1.69 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1439,6 +1439,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
+ * Revision 1.69  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.68  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,32 @@
 /*
+ * $Id: readsubdir.h,v 1.8 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ */
+#ifndef READSUBDIR_H
+#define READSUBDIR_H
+
+#include "direntry.h"
+
+#define READSUBDIR_NAMELEN 10
+
+typedef struct readsubdir
+{
+	DIR            *dir;
+	int             pos;
+	int             split;
+	const char     *name;
+	void            (*pause) (const char *);
+} readsubdir;
+
+void            readsubdir_init(readsubdir *, const char *, int, void (*pause) (const char *));
+int             readsubdir_next(readsubdir *, unsigned long *);
+char           *readsubdir_name(readsubdir *);
+
+#endif
+/*
  * $Log: readsubdir.h,v $
+ * Revision 1.8  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -19,24 +46,3 @@
  * added RCS log
  *
  */
-#ifndef READSUBDIR_H
-#define READSUBDIR_H
-
-#include "direntry.h"
-
-#define READSUBDIR_NAMELEN 10
-
-typedef struct readsubdir
-{
-	DIR            *dir;
-	int             pos;
-	int             split;
-	const char     *name;
-	void            (*pause) (char *);
-} readsubdir;
-
-void            readsubdir_init(readsubdir *, const char *, int, void (*pause) ());
-int             readsubdir_next(readsubdir *, unsigned long *);
-char           *readsubdir_name(readsubdir *);
-
-#endif

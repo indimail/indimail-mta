@@ -1,26 +1,5 @@
 /*
- * $Log: qbase64.c,v $
- * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.9  2024-01-23 01:22:20+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.7  2010-03-03 11:00:41+05:30  Cprogrammer
- * remove newline
- *
- * Revision 1.6  2010-03-03 09:34:09+05:30  Cprogrammer
- * renamed b64encode to base64, combining encoding and decoding
- *
- * Revision 1.5  2004-10-22 20:18:29+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.4  2004-07-17 21:16:25+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qbase64.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -34,9 +13,9 @@
 static char     ssinbuf[BUFSIZE_IN];
 static char     ssoutbuf[BUFSIZE_OUT];
 static char     sserrbuf[BUFSIZE_OUT];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof(sserrbuf));
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 
 void
 logerr(const char *s)
@@ -109,7 +88,34 @@ main(int argc, char **argv)
 void
 getversion_qbase64_c()
 {
-	const char     *x = "$Id: qbase64.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qbase64.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qbase64.c,v $
+ * Revision 1.11  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.9  2024-01-23 01:22:20+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.7  2010-03-03 11:00:41+05:30  Cprogrammer
+ * remove newline
+ *
+ * Revision 1.6  2010-03-03 09:34:09+05:30  Cprogrammer
+ * renamed b64encode to base64, combining encoding and decoding
+ *
+ * Revision 1.5  2004-10-22 20:18:29+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.4  2004-07-17 21:16:25+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

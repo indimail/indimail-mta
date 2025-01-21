@@ -1,14 +1,5 @@
 /*
- * $Log: custom_error.c,v $
- * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.2  2023-04-25 22:41:34+05:30  Cprogrammer
- * removed use of static variables as function is noreturn
- *
- * Revision 1.1  2022-03-08 22:56:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: custom_error.c,v 1.4 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -30,7 +21,7 @@ custom_error(const char *program, const char *type, const char *message, const c
 		errfd = CUSTOM_ERR_FD;
 	else
 		scan_int(c, &errfd);
-	substdio_fdbuf(&sserr, write, errfd, errbuf, sizeof(errbuf));
+	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, errfd, errbuf, sizeof(errbuf));
 	if (substdio_put(&sserr, type, 1) == -1 ||
 			substdio_puts(&sserr, program) == -1 ||
 			substdio_put(&sserr, ": ", 2) ||
@@ -52,3 +43,18 @@ custom_error(const char *program, const char *type, const char *message, const c
 	_exit(88);
 }
 
+/*
+ * $Log: custom_error.c,v $
+ * Revision 1.4  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.2  2023-04-25 22:41:34+05:30  Cprogrammer
+ * removed use of static variables as function is noreturn
+ *
+ * Revision 1.1  2022-03-08 22:56:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

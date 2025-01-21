@@ -1,29 +1,5 @@
 /*
- * $Log: inewaliases.c,v $
- * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.6  2021-06-15 11:38:13+05:30  Cprogrammer
- * moved token822 to libqmail
- *
- * Revision 1.5  2021-06-14 00:44:02+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.4  2005-08-23 17:33:17+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.3  2004-10-22 20:27:41+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:36:04+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-10-21 22:46:48+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: inewaliases.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/stat.h>
@@ -337,7 +313,7 @@ main()
 	readcontrols();
 	if ((fd = open_read("/etc/aliases")) == -1)
 		readerr();
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 	if ((fd = open_trunc("/etc/aliases.tmp")) == -1)
 		strerr_die2sys(111, FATAL, "unable to create /etc/aliases.tmp: ");
 	if (cdbmss_start(&cdbmss, fd) == -1)
@@ -383,7 +359,37 @@ main()
 void
 getversion_newaliases_c()
 {
-	const char     *x = "$Id: inewaliases.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: inewaliases.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: inewaliases.c,v $
+ * Revision 1.9  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.7  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.6  2021-06-15 11:38:13+05:30  Cprogrammer
+ * moved token822 to libqmail
+ *
+ * Revision 1.5  2021-06-14 00:44:02+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.4  2005-08-23 17:33:17+05:30  Cprogrammer
+ * gcc 4 compliance
+ *
+ * Revision 1.3  2004-10-22 20:27:41+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:36:04+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-10-21 22:46:48+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

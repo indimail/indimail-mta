@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.20 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: surblfilter.c,v 1.21 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -76,7 +76,7 @@ static int      responselen;
 static unsigned char *responseend;
 static unsigned char *responsepos;
 static u_long   saveresoptions;
-static int      (*lookup) () = res_query;
+static int      (*lookup) (const char *, int,  int,  unsigned char *, int) = res_query;
 static int      numanswers;
 static char     name[MAXDNAME];
 
@@ -211,7 +211,7 @@ resolve(char *domain, int type)
 	responselen = lookup(domain, C_IN, type, response.buf, responsebuflen);
 	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
 		if (responsebuflen < 65536) {
-			if (alloc_re((char *) &response.buf, responsebuflen, 65536))
+			if (alloc_re((void *) &response.buf, responsebuflen, 65536))
 				responsebuflen = 65536;
 			else
 				return DNS_MEM;
@@ -485,7 +485,7 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 		}
 		if ((fd = open(cachefile.s, O_RDONLY)) == -1)
 			my_error(cachefile.s, 0, 2);
-		substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ss, &reason, &match, '\n') == -1) {
 			close(fd);
 			return -1;
@@ -853,10 +853,10 @@ main(int argc, char **argv)
 		errfd = CUSTOM_ERR_FD;
 	else
 		scan_int(x, &errfd);
-	substdio_fdbuf(&ssdbg, write, 5, ssdbgbuf, sizeof(ssdbgbuf));
-	substdio_fdbuf(&sserr, write, errfd, sserrbuf, sizeof(sserrbuf));
-	substdio_fdbuf(&ssout, write, 1, ssoutbuf, sizeof(ssoutbuf));
-	substdio_fdbuf(&ssin, read, 0, ssinbuf, sizeof(ssinbuf));
+	substdio_fdbuf(&ssdbg, (ssize_t (*)(int,  char *, size_t)) write, 5, ssdbgbuf, sizeof(ssdbgbuf));
+	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, errfd, sserrbuf, sizeof(sserrbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof(ssoutbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof(ssinbuf));
 	while ((opt = getopt(argc, argv, "vtc")) != opteof) {
 		switch (opt) {
 		case 'c':
@@ -971,13 +971,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	const char     *x = "$Id: surblfilter.c,v 1.20 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: surblfilter.c,v 1.21 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.21  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.20  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

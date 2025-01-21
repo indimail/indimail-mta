@@ -1,17 +1,8 @@
-/*-
+/*
+ * $Id: tai2tai64n.c,v 1.4 2025-01-21 23:35:48+05:30 Cprogrammer Exp mbhangui $
+ *
  * tai2tai64n -- Convert older TAI format timestamps to TAI64N
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
- *
- * $Log: tai2tai64n.c,v $
- * Revision 1.3  2024-05-09 22:39:36+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.2  2021-08-30 12:04:53+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.1  2016-01-02 19:21:03+05:30  Cprogrammer
- * Initial revision
- *
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,11 +32,11 @@
 #define USAGE_ERR 4
 
 static char     ssinbuf[1024];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
 static char     sserrbuf[512];
-static substdio sserr = SUBSTDIO_FDBUF(write, 2, sserrbuf, sizeof (sserrbuf));
+static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof (sserrbuf));
 
 void
 logerr(const char *s)
@@ -126,7 +117,23 @@ main(int argc, char **argv)
 void
 getversion_tai2tai64n_c()
 {
-	const char     *x = "$Id: tai2tai64n.c,v 1.3 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tai2tai64n.c,v 1.4 2025-01-21 23:35:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*-
+ * $Log: tai2tai64n.c,v $
+ * Revision 1.4  2025-01-21 23:35:48+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.3  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.2  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.1  2016-01-02 19:21:03+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

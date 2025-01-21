@@ -1,26 +1,5 @@
 /*
- * $Log: mbox2maildir.c,v $
- * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2020-05-11 11:00:57+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.4  2019-07-18 10:50:25+05:30  Cprogrammer
- * removed unecessary header hasflock.h
- *
- * Revision 1.3  2016-06-20 08:32:40+05:30  Cprogrammer
- * minor indentation change
- *
- * Revision 1.2  2008-07-15 19:57:19+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.1  2008-06-06 14:30:51+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: mbox2maildir.c,v 1.8 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  *
  * mbox2maildir.c
  * Author: Nikola Vladov
@@ -103,7 +82,7 @@ safe_close(int fd)
 }
 
 ssize_t
-safe_write(int fd, char *s, int len)
+safe_write(int fd, const char *s, size_t len)
 {
 	if (len == write(fd, s, len))
 		return (len);
@@ -121,7 +100,7 @@ safe_open()
 	}
 	w2(filename + 4);
 	w2(": ");
-	substdio_fdbuf(&buf_f, safe_write, tmpfd, buf_f_space, sizeof(buf_f_space));
+	substdio_fdbuf(&buf_f, (ssize_t (*)(int,  char *, size_t)) safe_write, tmpfd, buf_f_space, sizeof(buf_f_space));
 }
 
 void
@@ -263,7 +242,7 @@ main(int argc, char **argv)
 	int             fd, ds, r, flagkeep = 0;
 	char            buf[8192];
 
-	substdio_fdbuf(&buf_1, write, 1, buf_1_space, sizeof(buf_1_space));
+	substdio_fdbuf(&buf_1, (ssize_t (*)(int,  char *, size_t)) write, 1, buf_1_space, sizeof(buf_1_space));
 	while (argv[1] && argv[1][0] == '-') {
 		char           *p = argv[1] + 1;
 		for (; *p; p++) {
@@ -359,7 +338,34 @@ usage:
 void
 getversion_mbox2maildir_c()
 {
-	const char     *x = "$Id: mbox2maildir.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mbox2maildir.c,v 1.8 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: mbox2maildir.c,v $
+ * Revision 1.8  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2020-05-11 11:00:57+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.4  2019-07-18 10:50:25+05:30  Cprogrammer
+ * removed unecessary header hasflock.h
+ *
+ * Revision 1.3  2016-06-20 08:32:40+05:30  Cprogrammer
+ * minor indentation change
+ *
+ * Revision 1.2  2008-07-15 19:57:19+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.1  2008-06-06 14:30:51+05:30  Cprogrammer
+ * Initial revision
+ */

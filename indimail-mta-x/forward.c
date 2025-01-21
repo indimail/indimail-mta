@@ -1,5 +1,5 @@
 /*
- * $Id: forward.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: forward.c,v 1.18 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <envdir.h>
@@ -30,15 +30,15 @@ die_nomem()
 struct qmail    qqt;
 
 ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
 }
 
 char            inbuf[SUBSTDIO_INSIZE], outbuf[1], num[FMT_ULONG];
-substdio        ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-substdio        ssout = SUBSTDIO_FDBUF(mywrite, -1, outbuf, sizeof outbuf);
+substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
+substdio        ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, -1, outbuf, sizeof outbuf);
 static stralloc forwarded_for, forwarded_to;
 
 int
@@ -114,13 +114,16 @@ main(int argc, char **argv)
 void
 getversion_forward_c()
 {
-	const char     *x = "$Id: forward.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: forward.c,v 1.18 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: forward.c,v $
+ * Revision 1.18  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,20 +1,5 @@
 /*
- * $Log: svcfns.c,v $
- * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2021-08-30 12:04:53+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.3  2005-08-23 17:39:17+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.2  2004-10-22 20:31:17+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-27 22:56:25+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: svcfns.c,v 1.6 2025-01-21 23:35:39+05:30 Cprogrammer Exp mbhangui $
  *
  * spipe -- supervise a pipeline of programs
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -76,7 +61,7 @@ start_supervise(const char *dir, int fdin, int fdout)
 	}
 }
 
-bool
+mybool
 stop_supervise(const char *dir, pid_t svcpid)
 {
 	int             status;
@@ -132,7 +117,29 @@ stop_supervise(const char *dir, pid_t svcpid)
 void
 getversion_svcfns_c()
 {
-	const char     *x = "$Id: svcfns.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: svcfns.c,v 1.6 2025-01-21 23:35:39+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: svcfns.c,v $
+ * Revision 1.6  2025-01-21 23:35:39+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.3  2005-08-23 17:39:17+05:30  Cprogrammer
+ * gcc 4 compliance
+ *
+ * Revision 1.2  2004-10-22 20:31:17+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-27 22:56:25+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

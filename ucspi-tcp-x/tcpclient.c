@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.37 2024-10-05 22:55:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.38 2025-01-21 23:53:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -132,13 +132,13 @@ struct stralloc saciphers;
 static c_char  *af_unix;
 
 no_return void
-sigterm()
+sigterm(int i)
 {
 	_exit(0);
 }
 
 void
-sigchld()
+sigchld(int x)
 {
 	int             i, wstat;
 	pid_t           pid;
@@ -289,7 +289,7 @@ do_starttls(int sfd, enum starttls stls, char *clientcert, int verbose)
 	static stralloc line = { 0 };
 	struct substdio ssin;
 
-	substdio_fdbuf(&ssin, read, sfd, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, sfd, inbuf, sizeof(inbuf));
 	switch (stls)
 	{
 	case smtp:
@@ -909,13 +909,16 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.37 2024-10-05 22:55:41+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.38 2025-01-21 23:53:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.38  2025-01-21 23:53:37+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
  * Revision 1.37  2024-10-05 22:55:41+05:30  Cprogrammer
  * added -e option to get remote host address from /etc/hosts
  *

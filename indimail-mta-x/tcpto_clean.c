@@ -1,5 +1,41 @@
 /*
+ * $Id: tcpto_clean.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ */
+#include <unistd.h>
+#include "tcpto.h"
+#include "open.h"
+#include "substdio.h"
+
+char            tcpto_cleanbuf[TCPTO_BUFSIZ];
+
+void
+tcpto_clean()					/*- running from queue/mess */
+{
+	int             fd;
+	int             i;
+	substdio        ss;
+
+	if ((fd = open_write("../lock/tcpto")) == -1)
+		return;
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, fd, tcpto_cleanbuf, sizeof(tcpto_cleanbuf));
+	for (i = 0; i < sizeof(tcpto_cleanbuf); ++i)
+		substdio_put(&ss, "", 1);
+	substdio_flush(&ss);/*- if it fails, bummer */
+	close(fd);
+}
+
+void
+getversion_tcpto_clean_c()
+{
+	const char     *x = "$Id: tcpto_clean.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+
+	x++;
+}
+/*
  * $Log: tcpto_clean.c,v $
+ * Revision 1.9  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -19,33 +55,3 @@
  * added RCS log
  *
  */
-#include <unistd.h>
-#include "tcpto.h"
-#include "open.h"
-#include "substdio.h"
-
-char            tcpto_cleanbuf[TCPTO_BUFSIZ];
-
-void
-tcpto_clean()					/*- running from queue/mess */
-{
-	int             fd;
-	int             i;
-	substdio        ss;
-
-	if ((fd = open_write("../lock/tcpto")) == -1)
-		return;
-	substdio_fdbuf(&ss, write, fd, tcpto_cleanbuf, sizeof(tcpto_cleanbuf));
-	for (i = 0; i < sizeof(tcpto_cleanbuf); ++i)
-		substdio_put(&ss, "", 1);
-	substdio_flush(&ss);/*- if it fails, bummer */
-	close(fd);
-}
-
-void
-getversion_tcpto_clean_c()
-{
-	const char     *x = "$Id: tcpto_clean.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
-
-	x++;
-}

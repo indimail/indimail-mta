@@ -1,82 +1,5 @@
 /*
- * $Log: qsutil.c,v $
- * Revision 1.26  2024-05-11 08:08:12+05:30  Cprogrammer
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.25  2023-06-25 20:11:21+05:30  Cprogrammer
- * removed extra / from path
- *
- * Revision 1.24  2023-01-15 23:22:49+05:30  Cprogrammer
- * use slog() function with varargs to replace all log functions
- *
- * Revision 1.23  2022-03-16 20:01:53+05:30  Cprogrammer
- * added log5_noflush() function
- *
- * Revision 1.22  2022-01-30 09:28:08+05:30  Cprogrammer
- * print program name in logs
- *
- * Revision 1.21  2021-10-22 14:00:10+05:30  Cprogrammer
- * added ident argument to loglock_open() for identification in logs
- *
- * Revision 1.20  2021-07-17 14:40:06+05:30  Cprogrammer
- * add fix_split function to generate file name for any split value
- *
- * Revision 1.19  2021-06-29 09:30:25+05:30  Cprogrammer
- * fixed handling of closed lock descriptor
- *
- * Revision 1.18  2021-06-27 11:33:38+05:30  Cprogrammer
- * added loglock_open function
- *
- * Revision 1.17  2021-06-23 10:03:55+05:30  Cprogrammer
- * added log_stat function
- *
- * Revision 1.16  2021-06-05 22:35:05+05:30  Cprogrammer
- * added log4_noflush() function
- *
- * Revision 1.15  2021-06-04 09:22:44+05:30  Cprogrammer
- * added log15() function
- *
- * Revision 1.14  2021-05-30 00:14:16+05:30  Cprogrammer
- * added log11() function
- *
- * Revision 1.13  2016-03-31 17:37:11+05:30  Cprogrammer
- * flush logs only when line gets completed
- * added log lock code to ensure log lines done get jumbled when running as a multi process delivery
- *
- * Revision 1.12  2016-01-29 18:27:48+05:30  Cprogrammer
- * removed log11() and added log13()
- *
- * Revision 1.11  2014-03-07 19:15:24+05:30  Cprogrammer
- * added log9(), log11()
- *
- * Revision 1.10  2013-09-23 22:14:42+05:30  Cprogrammer
- * added noflush log functions
- *
- * Revision 1.9  2010-06-27 09:04:38+05:30  Cprogrammer
- * added log7() function
- *
- * Revision 1.8  2009-05-03 22:46:46+05:30  Cprogrammer
- * added log5() function
- *
- * Revision 1.7  2004-12-20 22:57:46+05:30  Cprogrammer
- * changed log2() to my_log2() to avoid conflicts in fedora3
- *
- * Revision 1.6  2004-10-22 20:29:49+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.5  2004-10-22 15:38:32+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.4  2004-09-21 23:51:12+05:30  Cprogrammer
- * improved faster logic for issafe()
- *
- * Revision 1.3  2003-10-23 01:27:12+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.2  2003-10-17 21:05:42+05:30  Cprogrammer
- * added log4() function
- * optimized logging
- *
+ * $Id: qsutil.c,v 1.27 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -97,7 +20,7 @@ static stralloc foo = { 0 };
 
 typedef const char c_char;
 static char     errbuf[1024];
-static struct substdio sserr = SUBSTDIO_FDBUF(write, 0, errbuf, sizeof(errbuf));
+static struct substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 0, errbuf, sizeof(errbuf));
 extern c_char  *queuedesc; /*- defined in qmail-send.c */
 #ifdef LOGLOCK
 static stralloc lockfn = { 0 };
@@ -331,7 +254,90 @@ logsafe(const char *s, const char *argv0)
 void
 getversion_qsutil_c()
 {
-	const char     *x = "$Id: qsutil.c,v 1.26 2024-05-11 08:08:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qsutil.c,v 1.27 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qsutil.c,v $
+ * Revision 1.27  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.26  2024-05-11 08:08:12+05:30  Cprogrammer
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.25  2023-06-25 20:11:21+05:30  Cprogrammer
+ * removed extra / from path
+ *
+ * Revision 1.24  2023-01-15 23:22:49+05:30  Cprogrammer
+ * use slog() function with varargs to replace all log functions
+ *
+ * Revision 1.23  2022-03-16 20:01:53+05:30  Cprogrammer
+ * added log5_noflush() function
+ *
+ * Revision 1.22  2022-01-30 09:28:08+05:30  Cprogrammer
+ * print program name in logs
+ *
+ * Revision 1.21  2021-10-22 14:00:10+05:30  Cprogrammer
+ * added ident argument to loglock_open() for identification in logs
+ *
+ * Revision 1.20  2021-07-17 14:40:06+05:30  Cprogrammer
+ * add fix_split function to generate file name for any split value
+ *
+ * Revision 1.19  2021-06-29 09:30:25+05:30  Cprogrammer
+ * fixed handling of closed lock descriptor
+ *
+ * Revision 1.18  2021-06-27 11:33:38+05:30  Cprogrammer
+ * added loglock_open function
+ *
+ * Revision 1.17  2021-06-23 10:03:55+05:30  Cprogrammer
+ * added log_stat function
+ *
+ * Revision 1.16  2021-06-05 22:35:05+05:30  Cprogrammer
+ * added log4_noflush() function
+ *
+ * Revision 1.15  2021-06-04 09:22:44+05:30  Cprogrammer
+ * added log15() function
+ *
+ * Revision 1.14  2021-05-30 00:14:16+05:30  Cprogrammer
+ * added log11() function
+ *
+ * Revision 1.13  2016-03-31 17:37:11+05:30  Cprogrammer
+ * flush logs only when line gets completed
+ * added log lock code to ensure log lines done get jumbled when running as a multi process delivery
+ *
+ * Revision 1.12  2016-01-29 18:27:48+05:30  Cprogrammer
+ * removed log11() and added log13()
+ *
+ * Revision 1.11  2014-03-07 19:15:24+05:30  Cprogrammer
+ * added log9(), log11()
+ *
+ * Revision 1.10  2013-09-23 22:14:42+05:30  Cprogrammer
+ * added noflush log functions
+ *
+ * Revision 1.9  2010-06-27 09:04:38+05:30  Cprogrammer
+ * added log7() function
+ *
+ * Revision 1.8  2009-05-03 22:46:46+05:30  Cprogrammer
+ * added log5() function
+ *
+ * Revision 1.7  2004-12-20 22:57:46+05:30  Cprogrammer
+ * changed log2() to my_log2() to avoid conflicts in fedora3
+ *
+ * Revision 1.6  2004-10-22 20:29:49+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.5  2004-10-22 15:38:32+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.4  2004-09-21 23:51:12+05:30  Cprogrammer
+ * improved faster logic for issafe()
+ *
+ * Revision 1.3  2003-10-23 01:27:12+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.2  2003-10-17 21:05:42+05:30  Cprogrammer
+ * added log4() function
+ * optimized logging
+ *
+ */

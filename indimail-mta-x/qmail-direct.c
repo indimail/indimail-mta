@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-direct.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-direct.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -73,13 +73,13 @@ die(int e, const char *str)
 }
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {	/* thou shalt not clean up here */
 	die(52, "timer expired");
 }
 
 no_return void
-sigbug()
+sigbug(int x)
 {
 	die(81, "internal bug");
 }
@@ -400,9 +400,9 @@ main(int argc, char **argv)
 			die(51, "out of memory");
 		die(70, err_str.s);
 	}
-	substdio_fdbuf(&ssout, write, messfd, outbuf, sizeof (outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, messfd, outbuf, sizeof (outbuf));
 	/*- read the message body */
-	substdio_fdbuf(&ssin, read, 0, inbuf, sizeof (inbuf)); /*- message is read from fd 0 */
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof (inbuf)); /*- message is read from fd 0 */
 	if (substdio_bput(&ssout, received, receivedlen) == -1)
 		die(53, "trouble writing message");
 	switch (substdio_copy(&ssout, &ssin)) /*- copy message body to messfn */
@@ -420,8 +420,8 @@ main(int argc, char **argv)
 	flagmadeintd = 1;
 	if (unlink(intdfn) == -1)
 		die(80, "trouble removing intdfn");
-	substdio_fdbuf(&ssout, write, intdfd, outbuf, sizeof (outbuf));
-	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof (inbuf)); /*- envelope is read from fd 1 */
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, intdfd, outbuf, sizeof (outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 1, inbuf, sizeof (inbuf)); /*- envelope is read from fd 1 */
 
 	/*- Return-Path */
 	if (substdio_get(&ssin, &ch, 1) < 1)
@@ -483,8 +483,8 @@ main(int argc, char **argv)
 		die(61, "trouble doing cd to Maildir");
 	/*- write the mail */
 	mailopen(uid, gid);
-	substdio_fdbuf(&ssout, write, mailfd, outbuf, sizeof (outbuf));
-	substdio_fdbuf(&ssin, read, intdfd, inbuf, sizeof (inbuf)); /*- envelope read earlier from fd 1 */
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, mailfd, outbuf, sizeof (outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, intdfd, inbuf, sizeof (inbuf)); /*- envelope read earlier from fd 1 */
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
@@ -494,7 +494,7 @@ main(int argc, char **argv)
 	}
 	if (substdio_flush(&ssout) == -1)
 		die(53, "trouble writing message");
-	substdio_fdbuf(&ssin, read, messfd, inbuf, sizeof (inbuf)); /*- body read earlier from fd 0 */
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, messfd, inbuf, sizeof (inbuf)); /*- body read earlier from fd 0 */
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
@@ -537,13 +537,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	const char     *x = "$Id: qmail-direct.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-direct.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.15  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,23 +1,5 @@
 /*
- * $Log: 822headerok.c,v $
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2024-01-23 01:20:14+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.4  2022-10-30 17:55:00+05:30  Cprogrammer
- * converted to ansic prototype
- *
- * Revision 1.3  2020-11-24 13:43:38+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.2  2004-10-22 20:14:12+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-17 20:46:53+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: 822headerok.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "substdio.h"
@@ -29,7 +11,7 @@
 stralloc        line = { 0 };
 int             match;
 static char     ssinbuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 
 int
 main(int argc, char **argv)
@@ -55,7 +37,31 @@ main(int argc, char **argv)
 void
 getversion_822headerok_c()
 {
-	const char     *x = "$Id: 822headerok.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822headerok.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: 822headerok.c,v $
+ * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2024-01-23 01:20:14+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.4  2022-10-30 17:55:00+05:30  Cprogrammer
+ * converted to ansic prototype
+ *
+ * Revision 1.3  2020-11-24 13:43:38+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.2  2004-10-22 20:14:12+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-17 20:46:53+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,47 +1,5 @@
-/*-
- * $Log: ldap-checkpwd.c,v $
- * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.13  2023-07-13 02:43:28+05:30  Cprogrammer
- * replaced out() with subprintf()
- *
- * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.11  2021-05-29 23:44:46+05:30  Cprogrammer
- * replace str_chr with str_rchr to get domain correctly from email address
- *
- * Revision 1.10  2021-01-27 18:56:32+05:30  Cprogrammer
- * use env variable NATIVE_CHECKPASSWORD to comply with checkpassword protocol
- *
- * Revision 1.9  2021-01-27 16:54:02+05:30  Cprogrammer
- * added dovecot support
- *
- * Revision 1.8  2019-12-24 07:19:24+05:30  Cprogrammer
- * use LDAP_FIELD_xxx environment variables to get value of any ldap field
- *
- * Revision 1.7  2019-12-21 00:53:51+05:30  Cprogrammer
- * fixed multiple bugs
- *
- * Revision 1.6  2014-01-29 14:00:56+05:30  Cprogrammer
- * BUG - removed extra semicolon
- *
- * Revision 1.5  2011-01-18 21:16:33+05:30  Cprogrammer
- * conditional compilation of ldap code in ldap-checkpwd.c
- *
- * Revision 1.4  2010-06-02 15:20:37+05:30  Cprogrammer
- * fix for users without '@' sign
- *
- * Revision 1.3  2010-06-02 14:55:05+05:30  Cprogrammer
- * added anon bind
- *
- * Revision 1.2  2010-05-05 11:48:11+05:30  Cprogrammer
- * fixed calls to my_error()
- *
- * Revision 1.1  2010-04-22 14:27:09+05:30  Cprogrammer
- * Initial revision
- *
+/*
+ * $Id: ldap-checkpwd.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  *
  * ldap-checkpwd.c
  *
@@ -554,11 +512,9 @@ static char     sserrbuf[512];
 struct substdio sserr;
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
-	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
+	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 	substdio_puts(&sserr, "not compiled with -DHASDKIM or ldap libraries absent\n");
 	substdio_flush(&sserr);
 	_exit(111);
@@ -568,7 +524,55 @@ main(argc, argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	const char     *x = "$Id: ldap-checkpwd.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ldap-checkpwd.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*-
+ * $Log: ldap-checkpwd.c,v $
+ * Revision 1.15  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.13  2023-07-13 02:43:28+05:30  Cprogrammer
+ * replaced out() with subprintf()
+ *
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.11  2021-05-29 23:44:46+05:30  Cprogrammer
+ * replace str_chr with str_rchr to get domain correctly from email address
+ *
+ * Revision 1.10  2021-01-27 18:56:32+05:30  Cprogrammer
+ * use env variable NATIVE_CHECKPASSWORD to comply with checkpassword protocol
+ *
+ * Revision 1.9  2021-01-27 16:54:02+05:30  Cprogrammer
+ * added dovecot support
+ *
+ * Revision 1.8  2019-12-24 07:19:24+05:30  Cprogrammer
+ * use LDAP_FIELD_xxx environment variables to get value of any ldap field
+ *
+ * Revision 1.7  2019-12-21 00:53:51+05:30  Cprogrammer
+ * fixed multiple bugs
+ *
+ * Revision 1.6  2014-01-29 14:00:56+05:30  Cprogrammer
+ * BUG - removed extra semicolon
+ *
+ * Revision 1.5  2011-01-18 21:16:33+05:30  Cprogrammer
+ * conditional compilation of ldap code in ldap-checkpwd.c
+ *
+ * Revision 1.4  2010-06-02 15:20:37+05:30  Cprogrammer
+ * fix for users without '@' sign
+ *
+ * Revision 1.3  2010-06-02 14:55:05+05:30  Cprogrammer
+ * added anon bind
+ *
+ * Revision 1.2  2010-05-05 11:48:11+05:30  Cprogrammer
+ * fixed calls to my_error()
+ *
+ * Revision 1.1  2010-04-22 14:27:09+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

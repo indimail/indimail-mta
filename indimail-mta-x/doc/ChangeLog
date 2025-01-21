@@ -8,6 +8,8 @@ Release 3.1-1.1 Start 26/12/2024 End XX/XX/XXXX
 - 04/01/2025
 03. indimail-mta.spec: updated version number for daemontools, ucspi in
     Requires
+- 22/01/2025
+04. Fix errors when using GCC14
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <indimail-mta@indimail.org 3.0.9-1.1%{?dist}
 Release 3.0.9-1.1 Start 08/08/2024 End 24/12/2024

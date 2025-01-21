@@ -1,3 +1,6 @@
+/*
+ * $Id: qmail-tcpok.c,v 1.31 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ */
 #include <unistd.h>
 #include <strerr.h>
 #include <scan.h>
@@ -70,7 +73,7 @@ main()
 		strerr_die4sys(111, FATAL, "unable to open ", queuedir, "/lock/tcpto: ");
 	if (lock_ex(fd) == -1)
 		strerr_die4sys(111, FATAL, "unable to lock ", queuedir, "/lock/tcpto: ");
-	substdio_fdbuf(&ss, write, fd, tcpto_buf, sizeof tcpto_buf);
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, fd, tcpto_buf, sizeof tcpto_buf);
 	for (i = 0; i < sizeof(tcpto_buf); ++i)
 		substdio_put(&ss, "", 1);
 	if (substdio_flush(&ss) == -1)
@@ -93,6 +96,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.31  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.30  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -179,7 +185,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	const char     *x = "$Id: qmail-tcpok.c,v 1.30 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-tcpok.c,v 1.31 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

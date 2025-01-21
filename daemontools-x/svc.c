@@ -1,5 +1,5 @@
 /*
- * $Id: svc.c,v 1.12 2024-10-24 18:08:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svc.c,v 1.13 2025-01-21 23:35:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -28,7 +28,7 @@ char            data[20], bspace[1];
 substdio        b;
 
 void
-sigalrm()
+sigalrm(int i)
 {
 	return;
 }
@@ -97,7 +97,7 @@ doit(char **ptr, int *ret, int dlen, int opt)
 				}
 			} else {
 				ndelay_off(fd);
-				substdio_fdbuf(&b, write, fd, bspace, sizeof bspace);
+				substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) write, fd, bspace, sizeof bspace);
 				if (substdio_putflush(&b, data, dlen) == -1)
 					strerr_warn4(WARN, "error writing commands to ", dir, ": ", &strerr_sys);
 				close(fd);
@@ -177,13 +177,16 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	const char     *x = "$Id: svc.c,v 1.12 2024-10-24 18:08:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svc.c,v 1.13 2025-01-21 23:35:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: svc.c,v $
+ * Revision 1.13  2025-01-21 23:35:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.12  2024-10-24 18:08:54+05:30  Cprogrammer
  * added -w option to wait for service to be up
  * added -W option to wait for service to be down

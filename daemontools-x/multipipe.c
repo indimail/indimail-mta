@@ -1,20 +1,5 @@
 /*
- * $Log: multipipe.c,v $
- * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2020-10-08 12:07:42+05:30  Cprogrammer
- * formatted code
- *
- * Revision 1.3  2011-05-07 15:57:11+05:30  Cprogrammer
- * added error checks
- *
- * Revision 1.2  2004-10-22 20:27:36+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-27 22:56:10+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: multipipe.c,v 1.6 2025-01-21 23:35:21+05:30 Cprogrammer Exp mbhangui $
  *
  * multipipe -- pipe output to multiple programs
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -81,7 +66,7 @@ set_ndelay(int fd)
 static char     buffer[BUFSIZE];
 static unsigned buf_start = 0;
 static unsigned buf_end = 0;
-static bool     buf_eof = false;
+static mybool   buf_eof = false;
 #define buf_wrapped (buf_end < buf_start)
 #define buf_left (buf_start-buf_end + (buf_wrapped ? -1 : BUFSIZE-1))
 #define buf_len (buf_end-buf_start + (buf_wrapped ? BUFSIZE : 0))
@@ -93,7 +78,7 @@ struct reader
 	pid_t           pid;
 	int             fd;
 	unsigned        buf_pos;
-	bool            marked;
+	mybool          marked;
 	struct reader  *next;
 };
 
@@ -103,7 +88,7 @@ void
 reset_buf_start(void)
 {
 	struct reader  *reader;
-	bool            wrapped = (buf_end < buf_start);
+	mybool          wrapped = (buf_end < buf_start);
 
 	buf_start = buf_end;
 	for (reader = readers; reader; reader = reader->next) {
@@ -155,7 +140,7 @@ add_reader(const char *name, ino_t inode)
 	readers = r;
 }
 
-bool
+mybool
 del_reader(pid_t pid)
 {
 	struct reader  *curr = readers;
@@ -404,7 +389,29 @@ main(int argc, char **argv)
 void
 getversion_multipipe_c()
 {
-	const char     *x = "$Id: multipipe.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: multipipe.c,v 1.6 2025-01-21 23:35:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: multipipe.c,v $
+ * Revision 1.6  2025-01-21 23:35:21+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2020-10-08 12:07:42+05:30  Cprogrammer
+ * formatted code
+ *
+ * Revision 1.3  2011-05-07 15:57:11+05:30  Cprogrammer
+ * added error checks
+ *
+ * Revision 1.2  2004-10-22 20:27:36+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-27 22:56:10+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

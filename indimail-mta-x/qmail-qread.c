@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.48 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -59,7 +59,7 @@ static unsigned long   size;
 static stralloc stats = { 0 };
 
 static void
-die_opendir(char *fn)
+die_opendir(const char *fn)
 {
 	strerr_die4sys(111, FATAL, "unable to opendir ", fn, ": ");
 }
@@ -401,7 +401,7 @@ main(int argc, char **argv)
 				err(id);
 				continue;
 			}
-			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			if (getln(&ss, &sender, &match, 0) == -1)
 				strerr_die2x(111, FATAL, "out of memory");
 			if (fstat(fd, &st) == -1) {
@@ -468,7 +468,7 @@ main(int argc, char **argv)
 				err(id);
 				continue;
 			}
-			substdio_fdbuf(&ss, read, fd, inbuf, sizeof(inbuf));
+			substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 			for (;;) {
 				if (getln(&ss, &sender, &match, 0) == -1)
 					strerr_die2x(111, FATAL, "out of memory");
@@ -600,7 +600,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	const char     *x = "$Id: qmail-qread.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-qread.c,v 1.48 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -608,6 +608,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.48  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.47  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

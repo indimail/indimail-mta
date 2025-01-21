@@ -1,41 +1,5 @@
 /*
- * $Log: rrforward.c,v $
- * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.10  2021-07-05 21:11:44+05:30  Cprogrammer
- * skip $HOME/.defaultqueue for root
- *
- * Revision 1.9  2021-05-13 14:44:37+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.8  2020-11-24 13:48:01+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.7  2020-04-04 12:56:49+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.5  2010-06-08 22:00:46+05:30  Cprogrammer
- * use envdir_set() on queuedefault to set default queue parameters
- *
- * Revision 1.4  2008-07-15 19:53:39+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.3  2004-10-22 20:30:01+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:38:47+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-01-04 23:18:31+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: rrforward.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -62,12 +26,12 @@
 #define QRR_SEPARATOR(S) (*((S)+QRR_LEN))
 #define QRR_EXTENSION(S) ((S)+QRR_LEN+1)
 
-ssize_t         qqtwrite(int fd, char *buf, size_t len);
+ssize_t         qqtwrite(int fd, const char *buf, size_t len);
 
 static struct qmail    qqt;
 static char     inbuf[SUBSTDIO_INSIZE], outbuf[1];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, inbuf, sizeof inbuf);
-static substdio ssout = SUBSTDIO_FDBUF(qqtwrite, -1, outbuf, sizeof outbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) qqtwrite, -1, outbuf, sizeof outbuf);
 
 no_return void
 die_nomem()
@@ -76,7 +40,7 @@ die_nomem()
 }
 
 ssize_t
-qqtwrite(int fd, char *buf, size_t len)
+qqtwrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qqt, buf, len);
 	return len;
@@ -163,7 +127,50 @@ main(int argc, char **argv)
 void
 getversion_rrforward_c()
 {
-	const char     *x = "$Id: rrforward.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: rrforward.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: rrforward.c,v $
+ * Revision 1.13  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.10  2021-07-05 21:11:44+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
+ * Revision 1.9  2021-05-13 14:44:37+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.8  2020-11-24 13:48:01+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.7  2020-04-04 12:56:49+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.6  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.5  2010-06-08 22:00:46+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
+ * Revision 1.4  2008-07-15 19:53:39+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.3  2004-10-22 20:30:01+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:38:47+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-01-04 23:18:31+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

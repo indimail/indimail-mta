@@ -1,5 +1,5 @@
 /*
- * $Id: rd-remote.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: rd-remote.c,v 1.5 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -270,14 +270,14 @@ main(int argc, char **argv)
 		out("ZTrouble creating pipe. (#4.3.0)\n");
 		zerodie();
 	}
-	substdio_fdbuf(&ssi, read, 0, ssibuf, sizeof(ssibuf));
-	substdio_fdbuf(&sso, write, pipefd[1], ssobuf, sizeof(ssobuf));
+	substdio_fdbuf(&ssi, (ssize_t (*)(int,  char *, size_t)) read, 0, ssibuf, sizeof(ssibuf));
+	substdio_fdbuf(&sso, (ssize_t (*)(int,  char *, size_t)) write, pipefd[1], ssobuf, sizeof(ssobuf));
 	if (*dest_addr == '/') {
 		if (pipe(errpipe) == -1) {
 			out("ZTrouble creating pipe. (#4.3.0)\n");
 			zerodie();
 		}
-		substdio_fdbuf(&sse, read, errpipe[0], ssebuf, sizeof(ssebuf));
+		substdio_fdbuf(&sse, (ssize_t (*)(int,  char *, size_t)) read, errpipe[0], ssebuf, sizeof(ssebuf));
 	}
 	switch ((pid = fork()))
 	{
@@ -380,6 +380,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: rd-remote.c,v $
+ * Revision 1.5  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

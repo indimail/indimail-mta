@@ -1,17 +1,5 @@
 /*
- * $Log: tcpremoteinfo.c,v $
- * Revision 1.4  2020-08-03 17:27:53+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.3  2008-07-25 16:50:15+05:30  Cprogrammer
- * fix for darwin
- *
- * Revision 1.2  2005-06-10 12:19:39+05:30  Cprogrammer
- * added ipv6 support
- *
- * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: tcpremoteinfo.c,v 1.5 2025-01-21 23:53:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -26,7 +14,7 @@ static struct taia now;
 static struct taia deadline;
 
 static ssize_t
-mywrite(int fd, char *buf, int len)
+mywrite(int fd, char *buf, size_t len)
 {
 	iopause_fd      x;
 
@@ -46,7 +34,7 @@ mywrite(int fd, char *buf, int len)
 }
 
 static ssize_t
-myread(int fd, char *buf, int len)
+myread(int fd, char *buf, size_t len)
 {
 	iopause_fd      x;
 
@@ -93,14 +81,14 @@ doit(stralloc *out, int s, char ipremote[4], uint16 portremote, char iplocal[4],
 	if (timeoutconn(s, ipremote, 113, timeout) == -1)
 #endif
 		return -1;
-	substdio_fdbuf(&b, mywrite, s, bspace, sizeof bspace);
+	substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) mywrite, s, bspace, sizeof bspace);
 	substdio_put(&b, strnum, fmt_ulong(strnum, portremote));
 	substdio_put(&b, " , ", 3);
 	substdio_put(&b, strnum, fmt_ulong(strnum, portlocal));
 	substdio_put(&b, "\r\n", 2);
 	if (substdio_flush(&b) == -1)
 		return -1;
-	substdio_fdbuf(&b, myread, s, bspace, sizeof bspace);
+	substdio_fdbuf(&b, (ssize_t (*)(int,  char *, size_t)) myread, s, bspace, sizeof bspace);
 	numcolons = 0;
 	for (;;) {
 		if (substdio_get(&b, &ch, 1) != 1)
@@ -151,3 +139,22 @@ remoteinfo(stralloc *out, char ipremote[4], uint16 portremote, char iplocal[4],
 	close(s);
 	return r;
 }
+
+/*
+ * $Log: tcpremoteinfo.c,v $
+ * Revision 1.5  2025-01-21 23:53:40+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
+ * Revision 1.4  2020-08-03 17:27:53+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.3  2008-07-25 16:50:15+05:30  Cprogrammer
+ * fix for darwin
+ *
+ * Revision 1.2  2005-06-10 12:19:39+05:30  Cprogrammer
+ * added ipv6 support
+ *
+ * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

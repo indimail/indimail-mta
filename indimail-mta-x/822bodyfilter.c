@@ -1,21 +1,5 @@
 /*
- * $Log: 822bodyfilter.c,v $
- * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2024-01-23 01:19:54+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.3  2020-11-24 13:42:08+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.2  2004-10-22 20:13:44+05:30  Cprogrammer
- * removed readwrite.h
- * added RCS id
- *
- * Revision 1.1  2004-07-17 21:04:47+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: 822bodyfilter.c,v 1.6 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "error.h"
@@ -33,9 +17,9 @@
 stralloc        line = { 0 };
 int             match;
 static char     ssinbuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 static char     ssoutbuf[BUFSIZE_OUT];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof ssoutbuf);
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof ssoutbuf);
 
 int
 main(int argc, char **argv, char **envp)
@@ -95,7 +79,29 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822bodyfilter_c()
 {
-	const char     *x = "$Id: 822bodyfilter.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822bodyfilter.c,v 1.6 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: 822bodyfilter.c,v $
+ * Revision 1.6  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2024-01-23 01:19:54+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.3  2020-11-24 13:42:08+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.2  2004-10-22 20:13:44+05:30  Cprogrammer
+ * removed readwrite.h
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-17 21:04:47+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

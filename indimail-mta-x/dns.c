@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.41 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
+ * $Id: dns.c,v 1.42 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -134,7 +134,7 @@ resolve(stralloc *domain, int type)
 #endif
 	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
 		if (responsebuflen < MAX_EDNS_RESPONSE_SIZE) {
-			if (alloc_re((char *) &response.buf, responsebuflen, MAX_EDNS_RESPONSE_SIZE))
+			if (alloc_re((void *) &response.buf, responsebuflen, MAX_EDNS_RESPONSE_SIZE))
 				responsebuflen = MAX_EDNS_RESPONSE_SIZE;
 			else
 				return DNS_MEM;
@@ -1066,13 +1066,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	const char     *x = "$Id: dns.c,v 1.41 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dns.c,v 1.42 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.42  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.41  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *

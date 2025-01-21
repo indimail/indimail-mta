@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-spamfilter.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-spamfilter.c,v 1.12 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -20,14 +20,14 @@
 #include "qmail.h"
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	/*- thou shalt not clean up here */
 	_exit(QQ_TIMEOUT);
 }
 
 no_return void
-sigbug()
+sigbug(int x)
 {
 	_exit(QQ_INTERNAL_BUG);
 }
@@ -203,9 +203,9 @@ main(int argc, char **argv)
 	}
 
 	/*- Write envelope to qmail-queue */
-	substdio_fdbuf(&ssout, write, recpfd[1], outbuf, sizeof (outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, recpfd[1], outbuf, sizeof (outbuf));
 	/*- Read envelope from qmail-smtpd */
-	substdio_fdbuf(&ssin, read, 1, inbuf, sizeof (inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, 1, inbuf, sizeof (inbuf));
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2: /*- read error */
@@ -235,7 +235,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	const char     *x = "$Id: qmail-spamfilter.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-spamfilter.c,v 1.12 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x = sccsidmktempfileh;
@@ -245,6 +245,9 @@ getversion_qmail_spamfilter_c()
 
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.12  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

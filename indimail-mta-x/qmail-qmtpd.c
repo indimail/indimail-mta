@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmtpd.c,v 1.20 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-qmtpd.c,v 1.21 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -23,7 +23,7 @@ badproto()
 }
 
 void
-resources()
+resources(int x)
 {
 	_exit(111);
 }
@@ -70,7 +70,7 @@ getlen()
 			badproto();
 		len = 10 * len + (ch - '0');
 		if (len > 200000000 || ch < '0' || ch > '9')
-			resources();
+			resources(0);
 	}
 }
 
@@ -105,15 +105,15 @@ main()
 
 	hide_host = env_get("HIDE_HOST") ? 1 : 0;
 	if (control_init() == -1)
-		resources();
+		resources(0);
 	if (rcpthosts_init() == -1)
-		resources();
+		resources(0);
 	relayclient = env_get("RELAYCLIENT");
 	relayclientlen = relayclient ? str_len(relayclient) : 0;
 
 	if(!(x = env_get("DATABYTES"))) {
 		if (control_readint((int *) &databytes, "databytes") == -1)
-			resources();
+			resources(0);
 	} else {
 		scan_ulong(x, &u);
 		databytes = u;
@@ -131,14 +131,14 @@ main()
 		local = "unknown";
 	for (;;) {
 		if (!stralloc_copys(&failure, ""))
-			resources();
+			resources(0);
 		flagsenderok = 1;
 		if (!(len = getlen()))
 			badproto();
 		if (databytes)
 			bytestooverflow = databytes + 1;
 		if (qmail_open(&qq) == -1)
-			resources();
+			resources(0);
 		qp = qmail_qp(&qq);
 		substdio_get(&ssin, &ch, 1);
 		--len;
@@ -210,7 +210,7 @@ main()
 		biglen = getlen();
 		while (biglen > 0) {
 			if (!stralloc_append(&failure, ""))
-				resources();
+				resources(0);
 			len = 0;
 			for (;;) {
 				if (!biglen)
@@ -224,7 +224,7 @@ main()
 					badproto();
 				len = 10 * len + (ch - '0');
 				if (len > 200000000 || ch < '0' || ch > '9')
-					resources();
+					resources(0);
 			}
 			if (len >= biglen)
 				badproto();
@@ -246,7 +246,7 @@ main()
 					switch (rcpthosts(buf, len, 0))
 					{
 					case -1:
-						resources();
+						resources(0);
 					case 0:
 						failure.s[failure.len - 1] = 'D';
 					}
@@ -308,13 +308,16 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	const char     *x = "$Id: qmail-qmtpd.c,v 1.20 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmtpd.c,v 1.21 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.21  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.20  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

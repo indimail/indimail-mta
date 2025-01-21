@@ -1,53 +1,5 @@
 /*
- * $Log: qmail-cdb.c,v $
- * Revision 1.16  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.15  2023-03-12 19:03:59+05:30  Cprogrammer
- * allow workdir to be overriden by SYSCONFDIR, CONTROLDIR env variables
- *
- * Revision 1.14  2022-10-31 23:52:38+05:30  Cprogrammer
- * ignore filename with -r option
- *
- * Revision 1.13  2022-10-31 19:14:29+05:30  Cprogrammer
- * add feature to create recipient.cdb for qmail-smtpd
- *
- * Revision 1.12  2021-06-15 11:46:25+05:30  Cprogrammer
- * moved cdbmss.h to libqmail
- *
- * Revision 1.11  2021-06-14 09:19:24+05:30  Cprogrammer
- * do chdir(controldir) instead of chdir(auto_qmail)
- *
- * Revision 1.10  2021-05-26 10:43:46+05:30  Cprogrammer
- * handle access() error other than ENOENT
- *
- * Revision 1.9  2020-11-24 13:46:34+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.8  2017-10-05 08:46:33+05:30  Cprogrammer
- * fixed wrong control filename display in error message
- *
- * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.6  2005-08-23 17:35:32+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.5  2004-10-22 20:29:38+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.4  2004-10-22 15:38:07+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.3  2003-12-24 17:27:51+05:30  Cprogrammer
- * configurable filename on command line
- *
- * Revision 1.2  2003-12-21 15:32:39+05:30  Cprogrammer
- * changed global variables to automatic
- *
- * Revision 1.1  2003-12-20 02:25:06+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-cdb.c,v 1.17 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -128,7 +80,7 @@ main(int argc, char **argv)
 		strerr_die2x(111, FATAL, "out of memory");
 	if ((fd = open_read(arg)) == -1)
 		strerr_die6sys(111, FATAL, "unable to read ", workdir, "/", arg, ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 
 	str_copyb(fn.s - 4, "tmp", 3);
 	if ((fdtemp = open_trunc(fn.s + i)) == -1)
@@ -186,7 +138,61 @@ main(int argc, char **argv)
 void
 getversion_qmail_cdb_c()
 {
-	const char     *x = "$Id: qmail-cdb.c,v 1.16 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-cdb.c,v 1.17 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qmail-cdb.c,v $
+ * Revision 1.17  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.16  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.15  2023-03-12 19:03:59+05:30  Cprogrammer
+ * allow workdir to be overriden by SYSCONFDIR, CONTROLDIR env variables
+ *
+ * Revision 1.14  2022-10-31 23:52:38+05:30  Cprogrammer
+ * ignore filename with -r option
+ *
+ * Revision 1.13  2022-10-31 19:14:29+05:30  Cprogrammer
+ * add feature to create recipient.cdb for qmail-smtpd
+ *
+ * Revision 1.12  2021-06-15 11:46:25+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
+ * Revision 1.11  2021-06-14 09:19:24+05:30  Cprogrammer
+ * do chdir(controldir) instead of chdir(auto_qmail)
+ *
+ * Revision 1.10  2021-05-26 10:43:46+05:30  Cprogrammer
+ * handle access() error other than ENOENT
+ *
+ * Revision 1.9  2020-11-24 13:46:34+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.8  2017-10-05 08:46:33+05:30  Cprogrammer
+ * fixed wrong control filename display in error message
+ *
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.6  2005-08-23 17:35:32+05:30  Cprogrammer
+ * gcc 4 compliance
+ *
+ * Revision 1.5  2004-10-22 20:29:38+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.4  2004-10-22 15:38:07+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.3  2003-12-24 17:27:51+05:30  Cprogrammer
+ * configurable filename on command line
+ *
+ * Revision 1.2  2003-12-21 15:32:39+05:30  Cprogrammer
+ * changed global variables to automatic
+ *
+ * Revision 1.1  2003-12-20 02:25:06+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

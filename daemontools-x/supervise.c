@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.50 2024-11-14 16:14:40+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.51 2025-01-21 23:35:31+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -165,7 +165,7 @@ do_kill(int prgrp, int *siglist, const char **signame)
 }
 
 void
-trigger(void)
+trigger(int i)
 {
 	if (write(selfpipe[1], "", 1) == -1)
 		;
@@ -184,7 +184,7 @@ tryaction(const char **action, pid_t cpid, int wstat)
 		if (!silent)
 			strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
-		trigger();
+		trigger(0);
 		return;
 	case 0:
 		sig_uncatch(sig_child);
@@ -227,7 +227,7 @@ tryaction(const char **action, pid_t cpid, int wstat)
 }
 
 static void
-sigterm()
+sigterm(int i)
 {
 	int             siglist[] = {-1, -1, -1};
 	const char     *signame[] = {0, 0};
@@ -284,7 +284,7 @@ get_wait_params(unsigned short *interval, char **sv_name)
 		strerr_warn2(warn.s, "unable to open wait: ", &strerr_sys);
 		return -1;
 	}
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof (inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 	for (i = 0;i < 2; i++) {
 		if (getln(&ssin, &tline, &match, '\n') == -1) {
 			strerr_warn2(warn.s, "unable to read input", &strerr_sys);
@@ -511,7 +511,7 @@ trystart(const char *how)
 		if (!silent)
 			strerr_warn2(warn.s, "unable to fork, sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
-		trigger();
+		trigger(0);
 		flagfailed = 1;
 		return;
 	case 0:
@@ -1064,7 +1064,7 @@ do_init()
 		if (!silent)
 			strerr_warn4(warn.s, "unable to fork to run ", *init, ", sleeping 60 seconds: ", &strerr_sys);
 		deepsleep(60);
-		trigger();
+		trigger(0);
 		flagfailed = 1;
 		return -1;
 	case 0:
@@ -1237,13 +1237,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.50 2024-11-14 16:14:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.51 2025-01-21 23:35:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.51  2025-01-21 23:35:31+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.50  2024-11-14 16:14:40+05:30  Cprogrammer
  * use envdir to set environment variables if variable directory exists
  *

@@ -1,23 +1,5 @@
 /*
- * $Log: checkaddr.c,v $
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2024-01-23 01:24:00+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.3  2020-11-24 13:44:22+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.2  2004-10-22 20:23:50+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-17 21:25:33+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: checkaddr.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -60,7 +42,7 @@ main(int argc, char **argv)
 	stralloc        addrlist = { 0 };
 	int             match;
 	char            ssinbuf[BUFSIZE_IN];
-	substdio        ssin = SUBSTDIO_FDBUF(read, 0, ssinbuf, sizeof ssinbuf);
+	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 
 	recipient = env_get("RECIPIENT");
 	recips = argv + 1;
@@ -81,7 +63,32 @@ main(int argc, char **argv)
 void
 getversion_checkaddr_c()
 {
-	const char     *x = "$Id: checkaddr.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: checkaddr.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: checkaddr.c,v $
+ * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2024-01-23 01:24:00+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.3  2020-11-24 13:44:22+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.2  2004-10-22 20:23:50+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-17 21:25:33+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

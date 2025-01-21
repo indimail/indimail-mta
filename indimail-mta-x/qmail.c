@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail.c,v 1.39 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -119,7 +119,7 @@ qmail_open(struct qmail *qq)
 		close(pic[1]); /*- we want to read error message */
 	} else
 		qq->fdc = -1;
-	substdio_fdbuf(&qq->ss, write, qq->fdm, qq->buf, sizeof(qq->buf));
+	substdio_fdbuf(&qq->ss, (ssize_t (*)(int,  char *, size_t)) write, qq->fdm, qq->buf, sizeof(qq->buf));
 	qq->flagerr = 0;
 	return 0;
 }
@@ -160,7 +160,7 @@ qmail_from(struct qmail *qq, const char *s)
 	if (substdio_flush(&qq->ss) == -1)
 		qq->flagerr = 1;
 	close(qq->fdm);
-	substdio_fdbuf(&qq->ss, write, qq->fde, qq->buf, sizeof(qq->buf));
+	substdio_fdbuf(&qq->ss, (ssize_t (*)(int,  char *, size_t)) write, qq->fde, qq->buf, sizeof(qq->buf));
 	qmail_put(qq, "F", 1);
 	qmail_puts(qq, s);
 	qmail_put(qq, "", 1);
@@ -188,7 +188,7 @@ qmail_close(struct qmail *qq)
 
 	/* read custom error */
 	if (qq->fdc != -1) {
-		substdio_fdbuf(&qq->ss, read, qq->fdc, qq->buf, sizeof(qq->buf));
+		substdio_fdbuf(&qq->ss, (ssize_t (*)(int,  char *, size_t)) read, qq->fdc, qq->buf, sizeof(qq->buf));
 		while (substdio_bget(&qq->ss, &ch, 1) && len < (sizeof(errstr) - 1)) {
 			errstr[len] = ch;
 			len++;
@@ -312,7 +312,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	const char     *x = "$Id: qmail.c,v 1.38 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail.c,v 1.39 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
@@ -320,6 +320,9 @@ getversion_qmail_c()
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.39  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.38  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

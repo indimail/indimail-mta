@@ -1,20 +1,5 @@
 /*
- * $Log: setmaillist.c,v $
- * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.3  2004-10-22 20:30:17+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:39:14+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-10-21 22:47:18+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: setmaillist.c,v 1.6 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/stat.h>
@@ -66,7 +51,7 @@ main(int argc, char **argv)
 		usage();
 	if ((fd = open_trunc(fntmp)) == -1)
 		strerr_die4sys(111, FATAL, "unable to create ", fntmp, ": ");
-	substdio_fdbuf(&ss, write, fd, buf, sizeof buf);
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, fd, buf, sizeof buf);
 	do {
 		if (getln(subfdinsmall, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
@@ -109,7 +94,29 @@ main(int argc, char **argv)
 void
 getversion_setmaillist_c()
 {
-	const char     *x = "$Id: setmaillist.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: setmaillist.c,v 1.6 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: setmaillist.c,v $
+ * Revision 1.6  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.3  2004-10-22 20:30:17+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:39:14+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-10-21 22:47:18+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

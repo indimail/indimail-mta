@@ -1,26 +1,5 @@
 /*
- * $Log: maildir2mbox.c,v $
- * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.8  2021-06-03 18:12:04+05:30  Cprogrammer
- * use new prioq functions
- *
- * Revision 1.7  2021-06-01 10:05:09+05:30  Cprogrammer
- * replaced myctime() with libqmail qtime()
- *
- * Revision 1.6  2020-11-24 13:45:41+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.5  2004-10-22 20:26:09+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.4  2004-10-22 14:58:53+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: maildir2mbox.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -95,8 +74,8 @@ main()
 		strerr_die4sys(111, FATAL, "unable to read ", mbox, ": ");
 	if ((fdnewmbox = open_trunc(mboxtmp)) == -1)
 		strerr_die4sys(111, FATAL, "unable to create ", mboxtmp, ": ");
-	substdio_fdbuf(&ssin, read, fdoldmbox, inbuf, sizeof(inbuf));
-	substdio_fdbuf(&ssout, write, fdnewmbox, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fdoldmbox, inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) write, fdnewmbox, outbuf, sizeof(outbuf));
 	switch (substdio_copy(&ssout, &ssin))
 	{
 	case -2:
@@ -110,7 +89,7 @@ main()
 			die_nomem();
 		if ((fd = open_read(filenames.s + pe.id)) == -1)
 			strerr_die4sys(111, FATAL, "unable to read $MAILDIR/", filenames.s + pe.id, ": ");
-		substdio_fdbuf(&ssin, read, fd, inbuf, sizeof(inbuf));
+		substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof(inbuf));
 		if (getln(&ssin, &line, &match, '\n') != 0)
 			strerr_die4sys(111, FATAL, "unable to read $MAILDIR/", filenames.s + pe.id, ": ");
 		if (!stralloc_copys(&ufline, "From XXX "))
@@ -177,8 +156,35 @@ main()
 void
 getversion_maildir2mbox_c()
 {
-	const char     *x = "$Id: maildir2mbox.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: maildir2mbox.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	x++;
 }
+/*
+ * $Log: maildir2mbox.c,v $
+ * Revision 1.11  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.8  2021-06-03 18:12:04+05:30  Cprogrammer
+ * use new prioq functions
+ *
+ * Revision 1.7  2021-06-01 10:05:09+05:30  Cprogrammer
+ * replaced myctime() with libqmail qtime()
+ *
+ * Revision 1.6  2020-11-24 13:45:41+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.5  2004-10-22 20:26:09+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.4  2004-10-22 14:58:53+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

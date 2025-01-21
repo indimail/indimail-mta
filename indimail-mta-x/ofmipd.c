@@ -1,88 +1,5 @@
 /*
- * $Log: ofmipd.c,v $
- * Revision 1.27  2024-05-12 08:21:41+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.25  2024-01-23 01:22:02+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.24  2023-01-03 16:38:44+05:30  Cprogrammer
- * removed auto_sysconfdir.h dependency
- *
- * Revision 1.23  2022-10-19 12:54:35+05:30  Cprogrammer
- * authorize mail using RELAYCLIENT
- *
- * Revision 1.22  2022-01-30 08:36:54+05:30  Cprogrammer
- * replaced execvp with execv
- *
- * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.20  2021-06-14 00:59:59+05:30  Cprogrammer
- * removed chdir(auto_sysconfdir)
- *
- * Revision 1.19  2021-03-04 23:02:29+05:30  Cprogrammer
- * ansic c prototype for safewrite()
- *
- * Revision 1.18  2020-11-24 13:46:21+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.17  2020-09-15 09:40:18+05:30  Cprogrammer
- * ctl_maxcmdlen moved to libqmail
- *
- * Revision 1.16  2020-05-19 21:21:55+05:30  Cprogrammer
- * fixed shadowing of now by a global declaration
- *
- * Revision 1.15  2020-05-12 12:38:19+05:30  Cprogrammer
- * fixed signedness error (CVE-2005-1515)
- * c89 function prototypes
- * added maxcmdlen control file to limit command length
- *
- * Revision 1.14  2020-05-11 11:03:26+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.13  2016-05-21 14:48:20+05:30  Cprogrammer
- * use auto_sysconfdir for leapsecs_init()
- *
- * Revision 1.12  2016-01-28 09:01:21+05:30  Cprogrammer
- * chdir to qmail_home before leapsecs_init()
- *
- * Revision 1.11  2013-06-09 17:02:22+05:30  Cprogrammer
- * fixed addrparse function
- *
- * Revision 1.10  2010-07-27 09:50:46+05:30  Cprogrammer
- * added logging of senders and recipients
- *
- * Revision 1.9  2008-07-15 19:52:10+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.8  2005-08-23 17:33:25+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.7  2005-05-31 15:44:39+05:30  Cprogrammer
- * added authenticated SMTP
- *
- * Revision 1.6  2004-10-22 20:27:45+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.5  2004-10-22 15:36:12+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.4  2004-10-11 14:21:02+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.3  2004-07-13 22:44:41+05:30  Cprogrammer
- * control on max length a smtp command may have
- *
- * Revision 1.2  2004-06-17 22:20:05+05:30  Cprogrammer
- * included rwhconfig.h
- *
- * Revision 1.1  2004-06-16 01:19:56+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: ofmipd.c,v 1.28 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -118,8 +35,8 @@
 
 int             auth_login(const char *);
 int             auth_plain(const char *);
-int             auth_cram();
-int             err_noauth();
+int             auth_cram(const char *);
+int             err_noauth(const char *);
 void            logerr(const char *);
 void            logerrf(const char *);
 void            logerr_start();
@@ -354,7 +271,7 @@ err_authrequired()
 }
 
 int
-err_noauth()
+err_noauth(const char *x)
 {
 	out("504 auth type unimplemented (#5.5.1)\r\n");
 	return -1;
@@ -416,7 +333,7 @@ die_config()
 }
 
 no_return void
-smtp_quit()
+smtp_quit(const char *x)
 {
 	out("221 ofmipd.local\r\n");
 	flush();
@@ -424,25 +341,25 @@ smtp_quit()
 }
 
 void
-smtp_help()
+smtp_help(const char *x)
 {
 	out("214 qmail home page: http://pobox.com/~djb/qmail.html\r\n");
 }
 
 void
-smtp_noop()
+smtp_noop(const char *x)
 {
 	out("250 ok\r\n");
 }
 
 void
-smtp_vrfy()
+smtp_vrfy(const char *x)
 {
 	out("252 send some mail, i'll try my best\r\n");
 }
 
 void
-smtp_unimpl()
+smtp_unimpl(const char *x)
 {
 	out("502 unimplemented (#5.5.1)\r\n");
 }
@@ -573,7 +490,7 @@ smtp_ehlo(const char *arg)
 }
 
 void
-smtp_rset()
+smtp_rset(const char *x)
 {
 	seenmail = 0;
 	out("250 flushed\r\n");
@@ -862,7 +779,7 @@ blast()
 stralloc        received = { 0 };
 
 void
-smtp_data()
+smtp_data(const char *x)
 {
 	struct tai      n;
 	const char     *qqx;
@@ -1008,7 +925,7 @@ authenticate(void)
 		_exit(1);
 	}
 	close(pi[0]);
-	substdio_fdbuf(&ssup, write, pi[1], upbuf, sizeof upbuf);
+	substdio_fdbuf(&ssup, (ssize_t (*)(int,  char *, size_t)) write, pi[1], upbuf, sizeof upbuf);
 	if (substdio_put(&ssup, user.s, user.len) == -1 ||
 			substdio_put(&ssup, pass.s, pass.len) == -1 ||
 			substdio_put(&ssup, resp.s, resp.len) == -1)
@@ -1094,7 +1011,7 @@ auth_plain(const char *arg)
 }
 
 int
-auth_cram()
+auth_cram(const char *x)
 {
 	int             i, r;
 	char           *s;
@@ -1256,7 +1173,96 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	const char     *x = "$Id: ofmipd.c,v 1.27 2024-05-12 08:21:41+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ofmipd.c,v 1.28 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: ofmipd.c,v $
+ * Revision 1.28  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.27  2024-05-12 08:21:41+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.26  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.25  2024-01-23 01:22:02+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.24  2023-01-03 16:38:44+05:30  Cprogrammer
+ * removed auto_sysconfdir.h dependency
+ *
+ * Revision 1.23  2022-10-19 12:54:35+05:30  Cprogrammer
+ * authorize mail using RELAYCLIENT
+ *
+ * Revision 1.22  2022-01-30 08:36:54+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
+ * Revision 1.21  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.20  2021-06-14 00:59:59+05:30  Cprogrammer
+ * removed chdir(auto_sysconfdir)
+ *
+ * Revision 1.19  2021-03-04 23:02:29+05:30  Cprogrammer
+ * ansic c prototype for safewrite()
+ *
+ * Revision 1.18  2020-11-24 13:46:21+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.17  2020-09-15 09:40:18+05:30  Cprogrammer
+ * ctl_maxcmdlen moved to libqmail
+ *
+ * Revision 1.16  2020-05-19 21:21:55+05:30  Cprogrammer
+ * fixed shadowing of now by a global declaration
+ *
+ * Revision 1.15  2020-05-12 12:38:19+05:30  Cprogrammer
+ * fixed signedness error (CVE-2005-1515)
+ * c89 function prototypes
+ * added maxcmdlen control file to limit command length
+ *
+ * Revision 1.14  2020-05-11 11:03:26+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.13  2016-05-21 14:48:20+05:30  Cprogrammer
+ * use auto_sysconfdir for leapsecs_init()
+ *
+ * Revision 1.12  2016-01-28 09:01:21+05:30  Cprogrammer
+ * chdir to qmail_home before leapsecs_init()
+ *
+ * Revision 1.11  2013-06-09 17:02:22+05:30  Cprogrammer
+ * fixed addrparse function
+ *
+ * Revision 1.10  2010-07-27 09:50:46+05:30  Cprogrammer
+ * added logging of senders and recipients
+ *
+ * Revision 1.9  2008-07-15 19:52:10+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.8  2005-08-23 17:33:25+05:30  Cprogrammer
+ * gcc 4 compliance
+ *
+ * Revision 1.7  2005-05-31 15:44:39+05:30  Cprogrammer
+ * added authenticated SMTP
+ *
+ * Revision 1.6  2004-10-22 20:27:45+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.5  2004-10-22 15:36:12+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.4  2004-10-11 14:21:02+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.3  2004-07-13 22:44:41+05:30  Cprogrammer
+ * control on max length a smtp command may have
+ *
+ * Revision 1.2  2004-06-17 22:20:05+05:30  Cprogrammer
+ * included rwhconfig.h
+ *
+ * Revision 1.1  2004-06-16 01:19:56+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,47 +1,5 @@
 /*
- * $Log: replier.c,v $
- * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.13  2022-10-17 19:45:16+05:30  Cprogrammer
- * collapsed multiple stralloc lines
- *
- * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.11  2021-07-05 21:11:41+05:30  Cprogrammer
- * skip $HOME/.defaultqueue for root
- *
- * Revision 1.10  2021-05-13 14:44:33+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.9  2020-11-24 13:47:58+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.8  2020-04-04 12:48:43+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.6  2010-06-08 22:00:41+05:30  Cprogrammer
- * use envdir_set() on queuedefault to set default queue parameters
- *
- * Revision 1.5  2008-07-15 20:04:44+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.4  2004-10-22 20:29:58+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-10-22 15:38:42+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.2  2004-10-09 19:21:47+05:30  Cprogrammer
- * moved sig_ignore() and sig_uncatch() to sig.h
- *
- * Revision 1.1  2004-07-17 21:00:25+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: replier.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -74,8 +32,8 @@
 #define FATAL "replier: fatal: "
 #define WARN  "replier: warn: "
 
-void (*sig_defaulthandler)() = SIG_DFL;
-void (*sig_ignorehandler)() = SIG_IGN;
+void (*sig_defaulthandler)(int) = SIG_DFL;
+void (*sig_ignorehandler)(int) = SIG_IGN;
 
 no_return void
 usage()
@@ -98,14 +56,14 @@ badaddr()
 static struct qmail qq;
 
 ssize_t
-mywrite(int fd, char *buf, unsigned int len)
+mywrite(int fd, const char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 	return len;
 }
 
 void
-put(const char *buf, int len)
+put(const char *buf, size_t len)
 {
 	qmail_put(&qq, buf, len);
 }
@@ -117,7 +75,7 @@ myputs(const char *buf)
 }
 
 no_return void
-sigalrm()
+sigalrm(int x)
 {
 	strerr_die1x(111, "Timeout on maildir delivery. (#4.3.0)");
 }
@@ -224,7 +182,7 @@ main(int argc, char **argv)
 	flagmlwasthere = 0;
 	flaginheader = 1;
 	flagbadfield = 0;
-	substdio_fdbuf(&ssin, read, pf[0], inbuf, sizeof(inbuf));
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, pf[0], inbuf, sizeof(inbuf));
 	for (;;) {
 		if (getln(&ssin, &line, &match, '\n') == -1)
 			strerr_die2sys(111, FATAL, "unable to read input: ");
@@ -254,7 +212,7 @@ main(int argc, char **argv)
 			!stralloc_0(&line))
 		nomem();
 	qmail_from(&qq, line.s);
-	substdio_fdbuf(&ssout, mywrite, -1, outbuf, sizeof(outbuf));
+	substdio_fdbuf(&ssout, (ssize_t (*)(int,  char *, size_t)) mywrite, -1, outbuf, sizeof(outbuf));
 	if (substdio_copy(&ssout, &ssin) != 0)
 		strerr_die2sys(111, FATAL, "unable to read input: ");
 	if (substdio_flush(&ssout) == -1)
@@ -286,7 +244,56 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	const char     *x = "$Id: replier.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: replier.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: replier.c,v $
+ * Revision 1.15  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.13  2022-10-17 19:45:16+05:30  Cprogrammer
+ * collapsed multiple stralloc lines
+ *
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.11  2021-07-05 21:11:41+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
+ * Revision 1.10  2021-05-13 14:44:33+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.9  2020-11-24 13:47:58+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.8  2020-04-04 12:48:43+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.6  2010-06-08 22:00:41+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
+ * Revision 1.5  2008-07-15 20:04:44+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.4  2004-10-22 20:29:58+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.3  2004-10-22 15:38:42+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.2  2004-10-09 19:21:47+05:30  Cprogrammer
+ * moved sig_ignore() and sig_uncatch() to sig.h
+ *
+ * Revision 1.1  2004-07-17 21:00:25+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

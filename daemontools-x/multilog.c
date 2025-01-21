@@ -1,5 +1,5 @@
 /*
- * $Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
+ * $Id: multilog.c,v 1.11 2025-01-21 23:37:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -451,7 +451,7 @@ c_init(char **script)
 			d->size = size;
 			d->processor = processor;
 			d->dir = script[i];
-			substdio_fdbuf(&d->ss, c_write, d - c, d->buf, sizeof d->buf);
+			substdio_fdbuf(&d->ss, (ssize_t (*)(int,  char *, size_t)) c_write, d - c, d->buf, sizeof d->buf);
 			restart(d);
 			++d;
 		}
@@ -479,25 +479,25 @@ int             flagnewline = 1;
 int             flaglog = 1;
 
 void
-exitasap(void)
+exitasap(int i)
 {
 	flagexitasap = 1;
 }
 
 void
-forcerotate(void)
+forcerotate(int i)
 {
 	flagforcerotate = 1;
 }
 
 void
-logging(void)
+logging(int i)
 {
 	flaglog = 1;
 }
 
 void
-nologging(void)
+nologging(int i)
 {
 	flaglog = 0;
 }
@@ -543,7 +543,7 @@ flushread(int fd, char *buf, int len)
 }
 
 char            inbuf[1024];
-substdio        ssin = SUBSTDIO_FDBUF(flushread, 0, inbuf, sizeof inbuf);
+substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) flushread, 0, inbuf, sizeof inbuf);
 
 char            line[1001];
 int             linelen;		/*- 0 <= linelen <= 1000 */
@@ -689,13 +689,16 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	const char     *x = "$Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: multilog.c,v 1.11 2025-01-21 23:37:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: multilog.c,v $
+ * Revision 1.11  2025-01-21 23:37:02+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.10  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,24 +1,12 @@
 /*
- * $Log: auto-str.c,v $
- * Revision 1.4  2020-08-03 17:20:27+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.7  2020-06-17 16:58:35+05:30  Cprogrammer
- * make output readable
- *
- * Revision 1.6  2004-10-22 15:34:20+05:30  Cprogrammer
- * replaced readwrite.h with unistd.h
- *
- * Revision 1.5  2004-07-17 21:15:59+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: auto-str.c,v 1.5 2025-01-21 23:53:01+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
 #include <substdio.h>
 
 char            buf1[256];
-substdio        ss1 = SUBSTDIO_FDBUF(write, 1, buf1, sizeof(buf1));
+substdio        ss1 = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, buf1, sizeof(buf1));
 
 /*
  * check if a given character can be printed unquoted in a C string
@@ -36,17 +24,14 @@ is_legible(unsigned char ch)
 }
 
 void
-my_puts(s)
-	char           *s;
+my_puts(char *s)
 {
 	if (substdio_puts(&ss1, s) == -1)
 		_exit(111);
 }
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	char           *name;
 	char           *value;
@@ -82,3 +67,22 @@ main(argc, argv)
 	/*- Not reached */
 	return(0);
 }
+
+/*
+ * $Log: auto-str.c,v $
+ * Revision 1.5  2025-01-21 23:53:01+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
+ * Revision 1.4  2020-08-03 17:20:27+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.7  2020-06-17 16:58:35+05:30  Cprogrammer
+ * make output readable
+ *
+ * Revision 1.6  2004-10-22 15:34:20+05:30  Cprogrammer
+ * replaced readwrite.h with unistd.h
+ *
+ * Revision 1.5  2004-07-17 21:15:59+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

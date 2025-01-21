@@ -1,5 +1,5 @@
 /*
- * $Id: serialcmd.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: serialcmd.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  *
  * serialcmd -- apply a command to a mail message.
  * Copyright 1999,  Len Budney
@@ -335,7 +335,7 @@ doit(int fd, char **argv, stralloc *fnam)
 	/*
 	 * Initialize a substdio buffer.
 	 */
-	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*)(int,  char *, size_t)) read, fd, messbuf, sizeof messbuf);
 
 	/*
 	 * Look up the envelope sender.
@@ -412,7 +412,7 @@ main(int argc, char *argv[])
 	int             fd;
 
 	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
-	substdio_fdbuf(&ssfname, read, 0, fnamebuf, sizeof fnamebuf);
+	substdio_fdbuf(&ssfname, (ssize_t (*)(int,  char *, size_t)) read, 0, fnamebuf, sizeof fnamebuf);
 	if (getln(&ssfname, &fname, &match, '\0') == -1)
 		die_readstdin();
 	if (!match)
@@ -427,6 +427,9 @@ main(int argc, char *argv[])
 
 /*
  * $Log: serialcmd.c,v $
+ * Revision 1.10  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -459,7 +462,7 @@ main(int argc, char *argv[])
 void
 getversion_serialcmd_c()
 {
-	const char     *x = "$Id: serialcmd.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: serialcmd.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

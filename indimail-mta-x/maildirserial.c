@@ -1,14 +1,5 @@
 /*
- * $Log: maildirserial.c,v $
- * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.21  2023-12-08 13:16:37+05:30  Cprogrammer
- * removed use of my_puts(), put() functions
- *
- * Revision 1.20  2023-10-05 22:29:04+05:30  Cprogrammer
- * updated coding style
- *
+ * $Id: maildirserial.c,v 1.23 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -161,7 +152,7 @@ bounce(int fd, stralloc *why, int _flagtimeout) /*- why must end with \n; must n
 	int             match, n;
 	const char     *bouncesender, *bouncerecip, *x;
 
-	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*)(int,  char *, size_t)) read, fd, messbuf, sizeof messbuf);
 
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
@@ -299,7 +290,7 @@ hasprefix(int fd)
 {
 	int             match;
 
-	substdio_fdbuf(&ssmess, read, fd, messbuf, sizeof messbuf);
+	substdio_fdbuf(&ssmess, (ssize_t (*)(int,  char *, size_t)) read, fd, messbuf, sizeof messbuf);
 	if (getln(&ssmess, &line, &match, '\n') == -1)
 		return -1;
 	if (!match)
@@ -349,7 +340,7 @@ scanner()
 
 	if (pipe(pis2c) == -1)
 		strerr_die2sys(111, FATAL, "unable to create pipe: ");
-	substdio_fdbuf(&ss, write, pis2c[1], buf, sizeof buf);
+	substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) write, pis2c[1], buf, sizeof buf);
 	maildir_clean(&filenames);
 	/*- this gets all files older than current time */
 	if (maildir_scan(&pq, &filenames, 1, 1) == -1)
@@ -449,7 +440,7 @@ main(int argc, char **argv)
 			scanner();
 		}
 		close(pic2p[1]);
-		substdio_fdbuf(&ss, read, pic2p[0], buf, sizeof buf);
+		substdio_fdbuf(&ss, (ssize_t (*)(int,  char *, size_t)) read, pic2p[0], buf, sizeof buf);
 		--progress;
 		for (;;) {
 			if (getln(&ss, &fn, &match, '\0') == -1)
@@ -549,13 +540,16 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	const char     *x = "$Id: maildirserial.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: maildirserial.c,v 1.23 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.23  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qscheduler.c,v 1.12 2024-11-05 22:19:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qscheduler.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -60,7 +60,7 @@ static int      killed;
 static char     strnum2[FMT_ULONG], strnum3[FMT_ULONG];
 #endif
 static char     ssoutbuf[512];
-static substdio ssout = SUBSTDIO_FDBUF(write, 1, ssoutbuf, sizeof(ssoutbuf));
+static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof(ssoutbuf));
 int             conf_split;
 static qtab    *queue_table;
 static c_char  *(qsargs[]) = { "qmail-start", "-s", "./Mailbox", 0};
@@ -228,7 +228,7 @@ die_chdir(const char *s)
 }
 
 void
-sigterm()
+sigterm(int x)
 {
 	flagexitasap = 2;
 	sig_ignore(sig_child);
@@ -237,7 +237,7 @@ sigterm()
 }
 
 void
-sigalrm()
+sigalrm(int x)
 {
 	int             i;
 	pid_t           pid;
@@ -264,7 +264,7 @@ sigalrm()
 }
 
 void
-sighup()
+sighup(int x)
 {
 	int             i;
 	pid_t           pid;
@@ -291,7 +291,7 @@ sighup()
 }
 
 void
-sigint()
+sigint(int x)
 {
 	int             i;
 	pid_t           pid;
@@ -319,7 +319,7 @@ sigint()
 
 #ifdef HASLIBRT
 void
-sigchld()
+sigchld(int x)
 {
 	int             child, wstat, i;
 	char           *qptr;
@@ -379,7 +379,7 @@ sigchld()
 #endif
 
 void
-sigusr1()
+sigusr1(int x)
 {
 	int             i;
 	pid_t           pid;
@@ -406,7 +406,7 @@ sigusr1()
 }
 
 void
-sigusr2()
+sigusr2(int x)
 {
 	int             i;
 	pid_t           pid;
@@ -1061,7 +1061,7 @@ dynamic_queue()
 			}
 		} else
 		if (msgbuflen < attr.mq_msgsize) {
-			if (!alloc_re((char *) &msgbuf, msgbuflen, attr.mq_msgsize)) {
+			if (!alloc_re((void *) &msgbuf, msgbuflen, attr.mq_msgsize)) {
 				strerr_warn1("alert: qscheduler: out of memory", 0);
 				sleep(error_interval);
 				continue;
@@ -1116,7 +1116,7 @@ dynamic_queue()
 				}
 			}
 			if (!r) {
-				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
+				if (!alloc_re((void *) &queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
 					strerr_warn1("alert: qscheduler: out of memory", 0);
 					continue;
 				}
@@ -1157,7 +1157,7 @@ dynamic_queue()
 				strnum2[fmt_int(strnum2, qcount - 1)] = 0;
 				qcount--;
 				strerr_warn6("alert: qscheduler: queue ", qptr, " empty. Terminating pid ", strnum1, ". New qcount=", strnum2, 0);
-				if (!alloc_re(&queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
+				if (!alloc_re((void *) &queue_table, sizeof(qtab) * (qcount + 1), sizeof(qtab) * (qcount + 2))) {
 					strerr_warn1("alert: qscheduler: out of memory", 0);
 					qcount++;
 					queue_table[i].pid = r;
@@ -1262,13 +1262,16 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	const char     *x = "$Id: qscheduler.c,v 1.12 2024-11-05 22:19:43+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscheduler.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.13  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.12  2024-11-05 22:19:43+05:30  Cprogrammer
  * prevent restart of qmail-send on receipt of SIGTERM
  *

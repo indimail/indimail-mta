@@ -1,14 +1,5 @@
 /*
- * $Log: logselect.c,v $
- * Revision 1.3  2024-05-09 22:40:04+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.2  2021-08-30 12:04:53+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.1  2008-06-03 23:23:48+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: logselect.c,v 1.4 2025-01-21 23:35:10+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -91,7 +82,7 @@ do_file(char *dirname, char *fn)
 
 	if ((fd = open_read(fn)) == -1)
 		strerr_die6sys(111, FATAL, "unable to read ", dirname, "/", fn, ": ");
-	substdio_fdbuf(&ssin, read, fd, inbuf, sizeof inbuf);
+	substdio_fdbuf(&ssin, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof inbuf);
 	for (;;) {
 		if (!(r = get(&ch)))
 			break;
@@ -240,7 +231,23 @@ main(int argc, char **argv)
 void
 getversion_logselect_c()
 {
-	const char     *x = "$Id: logselect.c,v 1.3 2024-05-09 22:40:04+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: logselect.c,v 1.4 2025-01-21 23:35:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: logselect.c,v $
+ * Revision 1.4  2025-01-21 23:35:10+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.3  2024-05-09 22:40:04+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.2  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.1  2008-06-03 23:23:48+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -10,6 +10,8 @@ variables
 - 04/01/2025
 05. daemontools.spec: added provides for installer, instcheck
 06. installer.c: fix for missing sys/sysmacros.h for FreeBSD, MacOS
+- 22/01/2025
+07. Fix errors when using GCC14
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.6-1.1%{?dist}
 Release 1.1.6-1.1 Start 13/08/2024 End 24/12/2024

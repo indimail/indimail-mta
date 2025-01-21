@@ -1,6 +1,5 @@
 /*
- * RCS log at bottom
- * $Id: recipients.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: recipients.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <cdb.h>
@@ -43,10 +42,10 @@ static int      fdrcps;
 /*- return  4: Pass-thru */
 /*- return 10: none existing control file; pass-thru */
 
-extern ssize_t  safewrite(int, char *, int);
+extern ssize_t  safewrite(int, const char *, size_t);
 
 char            ssrcptbuf[512];
-substdio        ssrcpt = SUBSTDIO_FDBUF(safewrite, FDAUTH, ssrcptbuf, sizeof (ssrcptbuf));
+substdio        ssrcpt = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, FDAUTH, ssrcptbuf, sizeof (ssrcptbuf));
 
 /*- pluggable address verification module */
 int
@@ -82,7 +81,7 @@ pavm(char *pavm, char *addr)
 			!stralloc_catb(&mailaddress, "\0\0\0", 3))
 		return -2;
 
-	substdio_fdbuf(&ssrcpt, write, pi[1], ssrcptbuf, sizeof ssrcptbuf);
+	substdio_fdbuf(&ssrcpt, (ssize_t (*)(int,  char *, size_t)) write, pi[1], ssrcptbuf, sizeof ssrcptbuf);
 	if (substdio_put(&ssrcpt, mailaddress.s, mailaddress.len) == -1 ||
 			substdio_flush(&ssrcpt) == -1)
 		return -3;
@@ -251,7 +250,7 @@ recipients(char *buf, int len)
 void
 getversion_recipients_c()
 {
-	const char     *x = "$Id: recipients.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: recipients.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;
@@ -260,6 +259,9 @@ getversion_recipients_c()
 
 /*
  * $Log: recipients.c,v $
+ * Revision 1.13  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
