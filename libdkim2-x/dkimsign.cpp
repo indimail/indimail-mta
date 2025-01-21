@@ -735,7 +735,8 @@ CDKIMSign::ConstructSignature(const char *szPrivKey, int nSigAlg)
 			} else
 				*cptr++ = *sptr;
 		}
-		*cptr = 0;
+		if (len)
+			*cptr = 0;
 		sSelector.assign(buf);
 		delete[]buf;
 	}
@@ -992,13 +993,16 @@ CDKIMSign::AssembleReturnedSig(const char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.29 2024-05-07 15:23:33+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.30 2025-01-21 21:50:27+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.30  2025-01-21 21:50:27+05:30  Cprogrammer
+ * initialize only when len is non-zero
+ *
  * Revision 1.29  2024-05-07 15:23:33+05:30  Cprogrammer
  * fix for rhel7, sles12
  *
