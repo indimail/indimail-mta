@@ -1,5 +1,5 @@
 /*
- * $Id: spawn.c,v 1.36 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: spawn.c,v 1.37 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -485,7 +485,7 @@ QSPAWN(int argc, char **argv)
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	const char     *x = "$Id: spawn.c,v 1.36 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: spawn.c,v 1.37 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -500,6 +500,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: spawn.c,v $
+ * Revision 1.37  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.36  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

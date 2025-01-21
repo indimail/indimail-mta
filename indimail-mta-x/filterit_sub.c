@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.9 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -659,6 +659,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.9  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

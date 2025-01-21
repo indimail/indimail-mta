@@ -1,38 +1,5 @@
 /*
- * $Log: inotify.c,v $
- * Revision 1.12  2024-05-09 22:39:36+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.11  2022-01-30 09:53:48+05:30  Cprogrammer
- * added missing '/' in display
- *
- * Revision 1.10  2021-08-30 12:04:53+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.9  2021-05-16 01:42:32+05:30  Cprogrammer
- * display full path of directory
- *
- * Revision 1.8  2021-05-12 13:57:28+05:30  Cprogrammer
- * added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
- *
- * Revision 1.7  2020-05-11 08:11:47+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.6  2019-06-24 23:29:35+05:30  Cprogrammer
- * added notifications for open and delete
- *
- * Revision 1.5  2017-05-12 19:01:46+05:30  Cprogrammer
- * use compile time inotify(7) api
- *
- * Revision 1.4  2017-05-12 17:58:09+05:30  Cprogrammer
- * inotify indimail-mta version
- *
- * Revision 1.3  2015-04-16 17:49:28+05:30  Cprogrammer
- * new logic for handling timeouts
- *
- * Revision 1.2  2015-04-10 19:32:01+05:30  Cprogrammer
- * use select() to read events on fd 0 and event fd
- *
+ * $Id: inotify.c,v 1.13 2025-01-21 23:35:00+05:30 Cprogrammer Exp mbhangui $
  *
  * This is the sample program to notify us for the file creation and file deletion takes place in “/tmp” directory
  */
@@ -288,7 +255,47 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	const char     *x = "$Id: inotify.c,v 1.12 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: inotify.c,v 1.13 2025-01-21 23:35:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: inotify.c,v $
+ * Revision 1.13  2025-01-21 23:35:00+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.12  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.11  2022-01-30 09:53:48+05:30  Cprogrammer
+ * added missing '/' in display
+ *
+ * Revision 1.10  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.9  2021-05-16 01:42:32+05:30  Cprogrammer
+ * display full path of directory
+ *
+ * Revision 1.8  2021-05-12 13:57:28+05:30  Cprogrammer
+ * added IN_MOVE_SELF, IN_MOVED_FROm, IN_MOVED_TO events
+ *
+ * Revision 1.7  2020-05-11 08:11:47+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.6  2019-06-24 23:29:35+05:30  Cprogrammer
+ * added notifications for open and delete
+ *
+ * Revision 1.5  2017-05-12 19:01:46+05:30  Cprogrammer
+ * use compile time inotify(7) api
+ *
+ * Revision 1.4  2017-05-12 17:58:09+05:30  Cprogrammer
+ * inotify indimail-mta version
+ *
+ * Revision 1.3  2015-04-16 17:49:28+05:30  Cprogrammer
+ * new logic for handling timeouts
+ *
+ * Revision 1.2  2015-04-10 19:32:01+05:30  Cprogrammer
+ * use select() to read events on fd 0 and event fd
+ *
+ */

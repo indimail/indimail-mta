@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.28 2025-01-04 08:46:05+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.29 2025-01-21 23:35:04+05:30 Cprogrammer Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -701,7 +701,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.28 2025-01-04 08:46:05+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.29 2025-01-21 23:35:04+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -709,6 +709,9 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.29  2025-01-21 23:35:04+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.28  2025-01-04 08:46:05+05:30  Cprogrammer
  * fix for FreeBSD, MacOS missing sysmacros.h
  *

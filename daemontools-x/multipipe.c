@@ -1,20 +1,5 @@
 /*
- * $Log: multipipe.c,v $
- * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2020-10-08 12:07:42+05:30  Cprogrammer
- * formatted code
- *
- * Revision 1.3  2011-05-07 15:57:11+05:30  Cprogrammer
- * added error checks
- *
- * Revision 1.2  2004-10-22 20:27:36+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-27 22:56:10+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: multipipe.c,v 1.6 2025-01-21 23:35:21+05:30 Cprogrammer Exp mbhangui $
  *
  * multipipe -- pipe output to multiple programs
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -404,7 +389,29 @@ main(int argc, char **argv)
 void
 getversion_multipipe_c()
 {
-	const char     *x = "$Id: multipipe.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: multipipe.c,v 1.6 2025-01-21 23:35:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: multipipe.c,v $
+ * Revision 1.6  2025-01-21 23:35:21+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2020-10-08 12:07:42+05:30  Cprogrammer
+ * formatted code
+ *
+ * Revision 1.3  2011-05-07 15:57:11+05:30  Cprogrammer
+ * added error checks
+ *
+ * Revision 1.2  2004-10-22 20:27:36+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-27 22:56:10+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

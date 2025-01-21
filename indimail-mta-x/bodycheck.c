@@ -1,24 +1,5 @@
 /*
- * $Log: bodycheck.c,v $
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2009-01-06 20:43:56+05:30  Cprogrammer
- * added bodycheck_free()
- * corrected logic for -header and -body
- *
- * Revision 1.4  2008-08-03 18:24:03+05:30  Cprogrammer
- * added proper proto for die_nomem()
- *
- * Revision 1.3  2004-10-22 20:19:59+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-05-26 09:32:38+05:30  Cprogrammer
- * ability to run bodycheck selectively on header/body/both
- *
- * Revision 1.1  2004-02-05 00:07:42+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: bodycheck.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include "substdio.h"
 #include "alloc.h"
@@ -213,7 +194,32 @@ bodycheck_free()
 void
 getversion_bodycheck_c()
 {
-	const char     *x = "$Id: bodycheck.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: bodycheck.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: bodycheck.c,v $
+ * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2009-01-06 20:43:56+05:30  Cprogrammer
+ * added bodycheck_free()
+ * corrected logic for -header and -body
+ *
+ * Revision 1.4  2008-08-03 18:24:03+05:30  Cprogrammer
+ * added proper proto for die_nomem()
+ *
+ * Revision 1.3  2004-10-22 20:19:59+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-05-26 09:32:38+05:30  Cprogrammer
+ * ability to run bodycheck selectively on header/body/both
+ *
+ * Revision 1.1  2004-02-05 00:07:42+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

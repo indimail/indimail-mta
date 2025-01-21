@@ -1,38 +1,5 @@
 /*
- * $Log: qmail-newu.c,v $
- * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.13  2023-02-12 13:28:28+05:30  Cprogrammer
- * refactored code
- *
- * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.11  2021-06-15 11:57:21+05:30  Cprogrammer
- * moved cdbmss.h to libqmail
- *
- * Revision 1.10  2020-11-24 13:47:04+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.9  2016-05-18 15:20:59+05:30  Cprogrammer
- * use env variable ASSIGNDIR or auto_assign for users/cdb and user/assign file
- *
- * Revision 1.8  2008-06-20 16:00:34+05:30  Cprogrammer
- * added argument to process different directory for assign file
- *
- * Revision 1.7  2005-08-23 17:35:01+05:30  Cprogrammer
- * gcc 4 compliance
- *
- * Revision 1.6  2004-10-22 20:28:34+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.5  2004-10-22 15:37:04+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.4  2004-07-17 21:20:57+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail-newu.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -200,7 +167,46 @@ main(int argc, char **argv)
 void
 getversion_qmail_newu_c()
 {
-	const char     *x = "$Id: qmail-newu.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-newu.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qmail-newu.c,v $
+ * Revision 1.15  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.13  2023-02-12 13:28:28+05:30  Cprogrammer
+ * refactored code
+ *
+ * Revision 1.12  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.11  2021-06-15 11:57:21+05:30  Cprogrammer
+ * moved cdbmss.h to libqmail
+ *
+ * Revision 1.10  2020-11-24 13:47:04+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.9  2016-05-18 15:20:59+05:30  Cprogrammer
+ * use env variable ASSIGNDIR or auto_assign for users/cdb and user/assign file
+ *
+ * Revision 1.8  2008-06-20 16:00:34+05:30  Cprogrammer
+ * added argument to process different directory for assign file
+ *
+ * Revision 1.7  2005-08-23 17:35:01+05:30  Cprogrammer
+ * gcc 4 compliance
+ *
+ * Revision 1.6  2004-10-22 20:28:34+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.5  2004-10-22 15:37:04+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.4  2004-07-17 21:20:57+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

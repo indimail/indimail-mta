@@ -1,17 +1,5 @@
 /*
- * $Log: control.c,v $
- * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2020-08-03 17:21:35+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.2  2017-03-30 22:42:20+05:30  Cprogrammer
- * made control_readline() exactly duplicate of qmail-1.03 control_readline()
- *
- * Revision 1.1  2003-12-27 17:15:20+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: control.c,v 1.5 2025-01-21 23:53:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <substdio.h>
 #include <stralloc.h>
@@ -102,3 +90,22 @@ striptrailingwhitespace(stralloc *sa)
 		}
 	}
 }
+
+/*
+ * $Log: control.c,v $
+ * Revision 1.5  2025-01-21 23:53:18+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
+ * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2020-08-03 17:21:35+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.2  2017-03-30 22:42:20+05:30  Cprogrammer
+ * made control_readline() exactly duplicate of qmail-1.03 control_readline()
+ *
+ * Revision 1.1  2003-12-27 17:15:20+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

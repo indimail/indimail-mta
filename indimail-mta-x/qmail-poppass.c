@@ -1,38 +1,8 @@
 /*
- * $Log: qmail-poppass.c,v $
- * Revision 1.10  2024-09-02 19:32:26+05:30  Cprogrammer
- * ensure qmail-poppass runs with qmaild:indimail privileges
- *
- * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.8  2024-01-23 01:22:46+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.7  2023-02-14 09:13:01+05:30  Cprogrammer
- * renamed auto_uidv to auto_uidi
- *
- * Revision 1.6  2022-01-30 08:40:59+05:30  Cprogrammer
- * replaced execvp with execv
- *
- * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.4  2021-06-15 12:14:05+05:30  Cprogrammer
- * use makeargs from libqmail
- *
- * Revision 1.3  2009-08-06 22:53:21+05:30  Cprogrammer
- * remove '\r' from input stream
- *
- * Revision 1.2  2009-08-06 09:33:22+05:30  Cprogrammer
- * log password change to descriptor 2
- *
- * Revision 1.1  2009-08-05 14:34:21+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qmail-poppass.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  *
  * See http://ietfreport.isoc.org/all-ids/draft-gellens-password-00.txt
-
+ *
  * Steve Dorner's description of the simple protocol:
  *
  * The server's responses should be like an FTP server's responses;
@@ -349,9 +319,45 @@ main(int argc, char **argv)
 void
 getversion_qmail_poppass_c()
 {
-	const char     *x = "$Id: qmail-poppass.c,v 1.10 2024-09-02 19:32:26+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-poppass.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x++;
 }
 #endif
+/*
+ * $Log: qmail-poppass.c,v $
+ * Revision 1.11  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.10  2024-09-02 19:32:26+05:30  Cprogrammer
+ * ensure qmail-poppass runs with qmaild:indimail privileges
+ *
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.8  2024-01-23 01:22:46+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.7  2023-02-14 09:13:01+05:30  Cprogrammer
+ * renamed auto_uidv to auto_uidi
+ *
+ * Revision 1.6  2022-01-30 08:40:59+05:30  Cprogrammer
+ * replaced execvp with execv
+ *
+ * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.4  2021-06-15 12:14:05+05:30  Cprogrammer
+ * use makeargs from libqmail
+ *
+ * Revision 1.3  2009-08-06 22:53:21+05:30  Cprogrammer
+ * remove '\r' from input stream
+ *
+ * Revision 1.2  2009-08-06 09:33:22+05:30  Cprogrammer
+ * log password change to descriptor 2
+ *
+ * Revision 1.1  2009-08-05 14:34:21+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

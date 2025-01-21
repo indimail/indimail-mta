@@ -1,6 +1,5 @@
 /*-
- * RCS log at bottom
- * $Id: qmail-remote.c,v 1.176 2025-01-01 21:34:48+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.177 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -3814,13 +3813,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.176 2025-01-01 21:34:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.177 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.177  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.176  2025-01-01 21:34:48+05:30  Cprogrammer
  * moved tcpto timeout definitions to tcpto.h
  *

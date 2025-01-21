@@ -1,17 +1,5 @@
 /*
- * $Log: tcpremoteinfo.c,v $
- * Revision 1.4  2020-08-03 17:27:53+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.3  2008-07-25 16:50:15+05:30  Cprogrammer
- * fix for darwin
- *
- * Revision 1.2  2005-06-10 12:19:39+05:30  Cprogrammer
- * added ipv6 support
- *
- * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: tcpremoteinfo.c,v 1.5 2025-01-21 23:53:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -151,3 +139,22 @@ remoteinfo(stralloc *out, char ipremote[4], uint16 portremote, char iplocal[4],
 	close(s);
 	return r;
 }
+
+/*
+ * $Log: tcpremoteinfo.c,v $
+ * Revision 1.5  2025-01-21 23:53:40+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
+ * Revision 1.4  2020-08-03 17:27:53+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.3  2008-07-25 16:50:15+05:30  Cprogrammer
+ * fix for darwin
+ *
+ * Revision 1.2  2005-06-10 12:19:39+05:30  Cprogrammer
+ * added ipv6 support
+ *
+ * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

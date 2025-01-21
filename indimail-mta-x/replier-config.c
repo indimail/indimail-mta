@@ -1,29 +1,5 @@
 /*
- * $Log: replier-config.c,v $
- * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.7  2022-03-05 13:37:29+05:30  Cprogrammer
- * use auto_prefix/bin for binary paths
- *
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2021-06-14 01:08:57+05:30  Cprogrammer
- * removed dependency on auto_qmail.h
- *
- * Revision 1.4  2020-11-24 13:47:56+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.3  2004-10-22 20:29:58+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:38:38+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-07-17 21:00:37+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: replier-config.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -305,7 +281,38 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	const char     *x = "$Id: replier-config.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: replier-config.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: replier-config.c,v $
+ * Revision 1.9  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.7  2022-03-05 13:37:29+05:30  Cprogrammer
+ * use auto_prefix/bin for binary paths
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2021-06-14 01:08:57+05:30  Cprogrammer
+ * removed dependency on auto_qmail.h
+ *
+ * Revision 1.4  2020-11-24 13:47:56+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.3  2004-10-22 20:29:58+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:38:38+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-07-17 21:00:37+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

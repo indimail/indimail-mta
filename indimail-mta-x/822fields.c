@@ -1,23 +1,5 @@
 /*
- * $Log: 822fields.c,v $
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2024-01-23 01:20:03+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.4  2020-11-28 12:43:14+05:30  Cprogrammer
- * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
- *
- * Revision 1.3  2020-11-24 13:42:24+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.2  2004-10-22 20:14:02+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-17 20:46:15+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: 822fields.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "substdio.h"
@@ -113,7 +95,32 @@ main(int argc, char **argv)
 void
 getversion_822fields_c()
 {
-	const char     *x = "$Id: 822fields.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822fields.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: 822fields.c,v $
+ * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2024-01-23 01:20:03+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.4  2020-11-28 12:43:14+05:30  Cprogrammer
+ * +HeaderName feature by Erwin Hoffman: display all headers which have HeaderName as the initial text
+ *
+ * Revision 1.3  2020-11-24 13:42:24+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.2  2004-10-22 20:14:02+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-17 20:46:15+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

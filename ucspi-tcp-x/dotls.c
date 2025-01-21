@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.26 2024-09-05 17:59:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.27 2025-01-21 23:53:22+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -1284,7 +1284,7 @@ main(int argc, char **argv)
 void
 getversion_dotls_c()
 {
-	const char     *x = "$Id: dotls.c,v 1.26 2024-09-05 17:59:45+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dotls.c,v 1.27 2025-01-21 23:53:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -1308,6 +1308,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.27  2025-01-21 23:53:22+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
  * Revision 1.26  2024-09-05 17:59:45+05:30  Cprogrammer
  * added starttls handler for imap
  *

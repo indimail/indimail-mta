@@ -1,17 +1,5 @@
 /*
- * $Log: auto-int.c,v $
- * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.7  2020-11-24 13:43:54+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.6  2004-10-22 15:34:12+05:30  Cprogrammer
- * replaced readwrite.h with unistd.h
- *
- * Revision 1.5  2004-07-17 21:15:56+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: auto-int.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "substdio.h"
@@ -53,3 +41,21 @@ main(int argc, char **argv)
 		_exit(111);
 	return(0);
 }
+/*
+ * $Log: auto-int.c,v $
+ * Revision 1.9  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.7  2020-11-24 13:43:54+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.6  2004-10-22 15:34:12+05:30  Cprogrammer
+ * replaced readwrite.h with unistd.h
+ *
+ * Revision 1.5  2004-07-17 21:15:56+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

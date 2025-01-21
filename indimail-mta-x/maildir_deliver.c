@@ -1,23 +1,5 @@
 /*
- * $Log: maildir_deliver.c,v $
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2022-09-18 23:01:36+05:30  Cprogrammer
- * added comments
- *
- * Revision 1.4  2022-04-04 14:22:01+05:30  Cprogrammer
- * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
- *
- * Revision 1.3  2022-03-31 00:08:07+05:30  Cprogrammer
- * replaced fsync() with fdatasync()
- *
- * Revision 1.2  2022-03-08 22:57:00+05:30  Cprogrammer
- * syncdir: do not treat error_noent as an error
- *
- * Revision 1.1  2021-05-16 22:53:41+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: maildir_deliver.c,v 1.7 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/time.h>
@@ -251,7 +233,31 @@ fail:
 void
 getversion_maildir_deliver_c()
 {
-	const char     *x = "$Id: maildir_deliver.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: maildir_deliver.c,v 1.7 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: maildir_deliver.c,v $
+ * Revision 1.7  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2022-09-18 23:01:36+05:30  Cprogrammer
+ * added comments
+ *
+ * Revision 1.4  2022-04-04 14:22:01+05:30  Cprogrammer
+ * use USE_FSYNC, USE_FDATASYNC, USE_SYNCDIR to set sync to disk feature
+ *
+ * Revision 1.3  2022-03-31 00:08:07+05:30  Cprogrammer
+ * replaced fsync() with fdatasync()
+ *
+ * Revision 1.2  2022-03-08 22:57:00+05:30  Cprogrammer
+ * syncdir: do not treat error_noent as an error
+ *
+ * Revision 1.1  2021-05-16 22:53:41+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

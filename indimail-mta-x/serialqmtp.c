@@ -1,5 +1,5 @@
 /*
- * $Id: serialqmtp.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: serialqmtp.c,v 1.11 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -295,13 +295,16 @@ main(int argc, char **argv)
 void
 getversion_serialqmtp_c()
 {
-	const char     *x = "$Id: serialqmtp.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: serialqmtp.c,v 1.11 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: serialqmtp.c,v $
+ * Revision 1.11  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

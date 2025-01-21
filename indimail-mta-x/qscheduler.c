@@ -1,5 +1,5 @@
 /*
- * $Id: qscheduler.c,v 1.12 2024-11-05 22:19:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qscheduler.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -1262,13 +1262,16 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	const char     *x = "$Id: qscheduler.c,v 1.12 2024-11-05 22:19:43+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscheduler.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.13  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.12  2024-11-05 22:19:43+05:30  Cprogrammer
  * prevent restart of qmail-send on receipt of SIGTERM
  *

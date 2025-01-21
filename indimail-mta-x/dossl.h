@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.h,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: dossl.h,v 1.4 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef _DOSSL_H_
 #define _DOSSL_H_

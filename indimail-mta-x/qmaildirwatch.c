@@ -1,26 +1,5 @@
 /*
- * $Log: qmaildirwatch.c,v $
- * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.8  2021-06-03 18:15:46+05:30  Cprogrammer
- * use new prioq functions
- *
- * Revision 1.7  2020-11-24 13:45:47+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.6  2004-10-22 20:26:30+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.5  2004-10-22 15:35:46+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.4  2004-07-17 21:19:46+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmaildirwatch.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <getln.h>
@@ -169,7 +148,34 @@ main()
 void
 getversion_qmaildirwatch_c()
 {
-	const char     *x = "$Id: qmaildirwatch.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmaildirwatch.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qmaildirwatch.c,v $
+ * Revision 1.11  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.9  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.8  2021-06-03 18:15:46+05:30  Cprogrammer
+ * use new prioq functions
+ *
+ * Revision 1.7  2020-11-24 13:45:47+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.6  2004-10-22 20:26:30+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.5  2004-10-22 15:35:46+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.4  2004-07-17 21:19:46+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

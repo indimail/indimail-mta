@@ -1,17 +1,5 @@
 /*
- * $Log: addrlist.c,v $
- * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.2  2004-10-22 20:16:53+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-06-16 01:19:49+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: addrlist.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -113,7 +101,25 @@ main()
 void
 getversion_addrlist_c()
 {
-	const char     *x = "$Id: addrlist.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: addrlist.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: addrlist.c,v $
+ * Revision 1.5  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.2  2004-10-22 20:16:53+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-06-16 01:19:49+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

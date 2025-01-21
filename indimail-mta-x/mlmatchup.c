@@ -1,26 +1,5 @@
 /*
- * $Log: mlmatchup.c,v $
- * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.4  2020-11-24 13:46:14+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.3  2020-11-22 23:11:57+05:30  Cprogrammer
- * removed supression of ANSI C proto
- *
- * Revision 1.2  2020-05-10 17:46:51+05:30  Cprogrammer
- * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
- *
- * Revision 1.1  2008-01-31 15:44:15+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: mlmatchup.c,v 1.8 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -724,7 +703,34 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	const char     *x = "$Id: mlmatchup.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mlmatchup.c,v 1.8 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: mlmatchup.c,v $
+ * Revision 1.8  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.4  2020-11-24 13:46:14+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.3  2020-11-22 23:11:57+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
+ * Revision 1.2  2020-05-10 17:46:51+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
+ * Revision 1.1  2008-01-31 15:44:15+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

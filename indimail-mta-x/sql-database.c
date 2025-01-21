@@ -1,20 +1,5 @@
 /*
- * $Log: sql-database.c,v $
- * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2023-02-14 09:19:46+05:30  Cprogrammer
- * renamed auto_uidv to auto_uidi, auto_gidv to auto_gidi
- *
- * Revision 1.3  2021-06-13 17:23:25+05:30  Cprogrammer
- * do chdir(controldir) instead of chdir(auto_sysconfdir)
- *
- * Revision 1.2  2021-02-27 20:59:43+05:30  Cprogrammer
- * changed error to warning for missing MySQL libs
- *
- * Revision 1.1  2020-04-09 16:34:39+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: sql-database.c,v 1.6 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "subfd.h"
@@ -334,7 +319,29 @@ main(int argc, char **argv)
 void
 getversion_sql_database_c()
 {
-	const char     *x = "$Id: sql-database.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sql-database.c,v 1.6 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: sql-database.c,v $
+ * Revision 1.6  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2023-02-14 09:19:46+05:30  Cprogrammer
+ * renamed auto_uidv to auto_uidi, auto_gidv to auto_gidi
+ *
+ * Revision 1.3  2021-06-13 17:23:25+05:30  Cprogrammer
+ * do chdir(controldir) instead of chdir(auto_sysconfdir)
+ *
+ * Revision 1.2  2021-02-27 20:59:43+05:30  Cprogrammer
+ * changed error to warning for missing MySQL libs
+ *
+ * Revision 1.1  2020-04-09 16:34:39+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,47 +1,5 @@
 /*
- * $Log: dns_text.c,v $
- * Revision 1.14  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.12  2023-09-23 21:22:02+05:30  Cprogrammer
- * use ansic proto for functions
- *
- * Revision 1.11  2022-10-03 12:27:48+05:30  Cprogrammer
- * added dependency on stralloc.h
- *
- * Revision 1.10  2020-09-16 18:58:02+05:30  Cprogrammer
- * fix for FreeBSD
- *
- * Revision 1.9  2017-05-16 12:34:12+05:30  Cprogrammer
- * refactored dns_text() function
- *
- * Revision 1.8  2017-05-10 14:59:59+05:30  Cprogrammer
- * increase responselen to 1024 for long text records
- *
- * Revision 1.7  2014-01-29 14:00:24+05:30  Cprogrammer
- * fix for OS x
- *
- * Revision 1.6  2013-08-12 11:55:52+05:30  Cprogrammer
- * made dk_strdup() visible for both dk and dkim
- *
- * Revision 1.5  2009-06-11 15:20:57+05:30  Cprogrammer
- * port for DARWIN
- *
- * Revision 1.4  2009-04-05 12:51:41+05:30  Cprogrammer
- * made dns_text portable for dk, domainkeys
- *
- * Revision 1.3  2009-04-04 22:49:37+05:30  Cprogrammer
- * changed DKIM_MALLOC definition
- *
- * Revision 1.2  2009-04-04 00:33:27+05:30  Cprogrammer
- * added dk_strdup()
- *
- * Revision 1.1  2009-03-27 16:49:34+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: dns_text.c,v 1.15 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <netdb.h>
 #include <sys/types.h>
@@ -235,8 +193,56 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	const char     *x = "$Id: dns_text.c,v 1.14 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dns_text.c,v 1.15 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 // vim: shiftwidth=2:tabstop=4:softtabstop=4
+/*
+ * $Log: dns_text.c,v $
+ * Revision 1.15  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.14  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.12  2023-09-23 21:22:02+05:30  Cprogrammer
+ * use ansic proto for functions
+ *
+ * Revision 1.11  2022-10-03 12:27:48+05:30  Cprogrammer
+ * added dependency on stralloc.h
+ *
+ * Revision 1.10  2020-09-16 18:58:02+05:30  Cprogrammer
+ * fix for FreeBSD
+ *
+ * Revision 1.9  2017-05-16 12:34:12+05:30  Cprogrammer
+ * refactored dns_text() function
+ *
+ * Revision 1.8  2017-05-10 14:59:59+05:30  Cprogrammer
+ * increase responselen to 1024 for long text records
+ *
+ * Revision 1.7  2014-01-29 14:00:24+05:30  Cprogrammer
+ * fix for OS x
+ *
+ * Revision 1.6  2013-08-12 11:55:52+05:30  Cprogrammer
+ * made dk_strdup() visible for both dk and dkim
+ *
+ * Revision 1.5  2009-06-11 15:20:57+05:30  Cprogrammer
+ * port for DARWIN
+ *
+ * Revision 1.4  2009-04-05 12:51:41+05:30  Cprogrammer
+ * made dns_text portable for dk, domainkeys
+ *
+ * Revision 1.3  2009-04-04 22:49:37+05:30  Cprogrammer
+ * changed DKIM_MALLOC definition
+ *
+ * Revision 1.2  2009-04-04 00:33:27+05:30  Cprogrammer
+ * added dk_strdup()
+ *
+ * Revision 1.1  2009-03-27 16:49:34+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

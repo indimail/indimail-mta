@@ -1,5 +1,5 @@
 /*
- * $Id: serialcmd.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: serialcmd.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  *
  * serialcmd -- apply a command to a mail message.
  * Copyright 1999,  Len Budney
@@ -427,6 +427,9 @@ main(int argc, char *argv[])
 
 /*
  * $Log: serialcmd.c,v $
+ * Revision 1.10  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -459,7 +462,7 @@ main(int argc, char *argv[])
 void
 getversion_serialcmd_c()
 {
-	const char     *x = "$Id: serialcmd.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: serialcmd.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

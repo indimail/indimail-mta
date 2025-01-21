@@ -1,56 +1,5 @@
 /*
- * $Log: matchup.c,v $
- * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.16  2022-04-24 19:10:11+05:30  Cprogrammer
- * fixed field position of 'exiting' for slowq-send, qmta-send logs
- *
- * Revision 1.15  2022-04-13 19:37:58+05:30  Cprogrammer
- * skip qscheduler load information in logs
- *
- * Revision 1.14  2022-04-12 08:36:36+05:30  Cprogrammer
- * updated for new qmail-send, todo-proc, qscheduler logs
- *
- * Revision 1.13  2022-03-16 19:56:21+05:30  Cprogrammer
- * handle multi-queue format
- *
- * Revision 1.12  2022-03-10 20:22:06+05:30  Cprogrammer
- * update for qmail-send, todo-proc, slowq-send, qmta-send, qscheduler logs
- *
- * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.10  2020-11-24 13:46:11+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.9  2020-11-22 23:11:54+05:30  Cprogrammer
- * removed supression of ANSI C proto
- *
- * Revision 1.8  2020-05-10 17:46:47+05:30  Cprogrammer
- * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
- *
- * Revision 1.7  2017-01-04 12:56:35+05:30  Cprogrammer
- * ignore qmail-daemon and local/remote debug lines
- *
- * Revision 1.6  2008-02-05 15:31:03+05:30  Cprogrammer
- * added ability to process both microsecond and tai64n format timestamp
- *
- * Revision 1.5  2004-10-22 20:27:24+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.4  2004-10-22 15:36:00+05:30  Cprogrammer
- * replaced readwrite.h with unistd.h
- *
- * Revision 1.3  2004-10-11 13:55:40+05:30  Cprogrammer
- * prevent inclusion of alloc.h with prototypes
- *
- * Revision 1.2  2004-01-03 00:32:09+05:30  Cprogrammer
- * changed return type to void
- *
- * Revision 1.1  2004-01-02 23:51:30+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: matchup.c,v 1.18 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -725,7 +674,64 @@ main()
 void
 getversion_matchup_c()
 {
-	const char     *x = "$Id: matchup.c,v 1.17 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: matchup.c,v 1.18 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: matchup.c,v $
+ * Revision 1.18  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.17  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.16  2022-04-24 19:10:11+05:30  Cprogrammer
+ * fixed field position of 'exiting' for slowq-send, qmta-send logs
+ *
+ * Revision 1.15  2022-04-13 19:37:58+05:30  Cprogrammer
+ * skip qscheduler load information in logs
+ *
+ * Revision 1.14  2022-04-12 08:36:36+05:30  Cprogrammer
+ * updated for new qmail-send, todo-proc, qscheduler logs
+ *
+ * Revision 1.13  2022-03-16 19:56:21+05:30  Cprogrammer
+ * handle multi-queue format
+ *
+ * Revision 1.12  2022-03-10 20:22:06+05:30  Cprogrammer
+ * update for qmail-send, todo-proc, slowq-send, qmta-send, qscheduler logs
+ *
+ * Revision 1.11  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.10  2020-11-24 13:46:11+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.9  2020-11-22 23:11:54+05:30  Cprogrammer
+ * removed supression of ANSI C proto
+ *
+ * Revision 1.8  2020-05-10 17:46:47+05:30  Cprogrammer
+ * GEN_ALLOC refactoring (by Rolf Eike Beer) to fix memory overflow reported by Qualys Security Advisory
+ *
+ * Revision 1.7  2017-01-04 12:56:35+05:30  Cprogrammer
+ * ignore qmail-daemon and local/remote debug lines
+ *
+ * Revision 1.6  2008-02-05 15:31:03+05:30  Cprogrammer
+ * added ability to process both microsecond and tai64n format timestamp
+ *
+ * Revision 1.5  2004-10-22 20:27:24+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.4  2004-10-22 15:36:00+05:30  Cprogrammer
+ * replaced readwrite.h with unistd.h
+ *
+ * Revision 1.3  2004-10-11 13:55:40+05:30  Cprogrammer
+ * prevent inclusion of alloc.h with prototypes
+ *
+ * Revision 1.2  2004-01-03 00:32:09+05:30  Cprogrammer
+ * changed return type to void
+ *
+ * Revision 1.1  2004-01-02 23:51:30+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

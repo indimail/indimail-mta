@@ -1,33 +1,5 @@
 /*
- * $Log: udplogger.c,v $
- * Revision 1.9  2024-06-16 21:28:19+05:30  Cprogrammer
- * set n=MAXLOGDATASIZE as default
- *
- * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.7  2023-01-04 00:15:14+05:30  Cprogrammer
- * removed __USE_GNU
- *
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2020-09-16 19:09:07+05:30  Cprogrammer
- * FreeBSD fix
- *
- * Revision 1.4  2020-07-04 21:43:46+05:30  Cprogrammer
- * removed usage of INET6 define
- *
- * Revision 1.3  2018-05-29 22:12:09+05:30  Cprogrammer
- * removed call to gethostbyname() in ipv6 code
- *
- * Revision 1.2  2016-04-15 15:42:09+05:30  Cprogrammer
- * ipv6 version
- *
- * Revision 1.1  2015-04-10 19:37:08+05:30  Cprogrammer
- * Initial revision
- *
- *
+ * $Id: udplogger.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdlib.h>
 #include <strings.h>
@@ -404,7 +376,41 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	const char     *x = "$Id: udplogger.c,v 1.9 2024-06-16 21:28:19+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: udplogger.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: udplogger.c,v $
+ * Revision 1.10  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.9  2024-06-16 21:28:19+05:30  Cprogrammer
+ * set n=MAXLOGDATASIZE as default
+ *
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.7  2023-01-04 00:15:14+05:30  Cprogrammer
+ * removed __USE_GNU
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2020-09-16 19:09:07+05:30  Cprogrammer
+ * FreeBSD fix
+ *
+ * Revision 1.4  2020-07-04 21:43:46+05:30  Cprogrammer
+ * removed usage of INET6 define
+ *
+ * Revision 1.3  2018-05-29 22:12:09+05:30  Cprogrammer
+ * removed call to gethostbyname() in ipv6 code
+ *
+ * Revision 1.2  2016-04-15 15:42:09+05:30  Cprogrammer
+ * ipv6 version
+ *
+ * Revision 1.1  2015-04-10 19:37:08+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

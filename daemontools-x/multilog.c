@@ -1,5 +1,5 @@
 /*
- * $Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
+ * $Id: multilog.c,v 1.11 2025-01-21 23:37:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -689,13 +689,16 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	const char     *x = "$Id: multilog.c,v 1.10 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: multilog.c,v 1.11 2025-01-21 23:37:02+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: multilog.c,v $
+ * Revision 1.11  2025-01-21 23:37:02+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.10  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

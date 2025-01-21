@@ -1,24 +1,5 @@
 /*
- * $Log: 822body.c,v $
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2024-01-23 01:19:48+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.4  2022-10-30 17:54:31+05:30  Cprogrammer
- * converted to ansic prototype
- *
- * Revision 1.3  2004-10-22 19:41:53+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-06-16 09:12:57+05:30  Cprogrammer
- * added error checks
- *
- * Revision 1.1  2004-06-09 23:14:12+05:30  Cprogrammer
- * Initial revision
- *
- * From qtools-0.56
+ * $Id: 822body.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "substdio.h"
@@ -74,7 +55,32 @@ main(int argc, char **argv)
 void
 getversion_822body_c()
 {
-	const char     *x = "$Id: 822body.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822body.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: 822body.c,v $
+ * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2024-01-23 01:19:48+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.4  2022-10-30 17:54:31+05:30  Cprogrammer
+ * converted to ansic prototype
+ *
+ * Revision 1.3  2004-10-22 19:41:53+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-06-16 09:12:57+05:30  Cprogrammer
+ * added error checks
+ *
+ * Revision 1.1  2004-06-09 23:14:12+05:30  Cprogrammer
+ * Initial revision
+ *
+ * From qtools-0.56
+ */

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-spamfilter.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-spamfilter.c,v 1.12 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -235,7 +235,7 @@ finish:
 void
 getversion_qmail_spamfilter_c()
 {
-	const char     *x = "$Id: qmail-spamfilter.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-spamfilter.c,v 1.12 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x = sccsidmktempfileh;
@@ -245,6 +245,9 @@ getversion_qmail_spamfilter_c()
 
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.12  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

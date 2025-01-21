@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.95 2024-10-05 22:56:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.96 2025-01-21 23:53:43+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -2009,13 +2009,16 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.95 2024-10-05 22:56:00+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.96 2025-01-21 23:53:43+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.96  2025-01-21 23:53:43+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
  * Revision 1.95  2024-10-05 22:56:00+05:30  Cprogrammer
  * use INET6_ADDRSTRLEN for AF_INET6
  *

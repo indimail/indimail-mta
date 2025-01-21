@@ -1,29 +1,5 @@
 /*
- * $Log: rpmattr.c,v $
- * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.7  2021-06-27 11:36:54+05:30  Cprogrammer
- * removed call to uidinit
- *
- * Revision 1.6  2021-06-24 12:17:06+05:30  Cprogrammer
- * use uidinit function proto from auto_uids.h
- *
- * Revision 1.5  2011-05-13 10:57:00+05:30  Cprogrammer
- * make rpmattr work for non-indimail installations
- *
- * Revision 1.4  2009-12-09 23:57:46+05:30  Cprogrammer
- * additional closeflag argument to uidinit()
- *
- * Revision 1.3  2009-06-25 12:40:28+05:30  Cprogrammer
- * display 4 digits perms
- *
- * Revision 1.2  2009-02-03 13:02:40+05:30  Cprogrammer
- * display the actual user/group when get_user() or get_group() returns nobody
- *
- * Revision 1.1  2009-02-02 20:09:38+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: rpmattr.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include "str.h"
 #include "strerr.h"
@@ -125,6 +101,37 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	const char     *x = "$Id: rpmattr.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: rpmattr.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }
+
+/*
+ * $Log: rpmattr.c,v $
+ * Revision 1.9  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.7  2021-06-27 11:36:54+05:30  Cprogrammer
+ * removed call to uidinit
+ *
+ * Revision 1.6  2021-06-24 12:17:06+05:30  Cprogrammer
+ * use uidinit function proto from auto_uids.h
+ *
+ * Revision 1.5  2011-05-13 10:57:00+05:30  Cprogrammer
+ * make rpmattr work for non-indimail installations
+ *
+ * Revision 1.4  2009-12-09 23:57:46+05:30  Cprogrammer
+ * additional closeflag argument to uidinit()
+ *
+ * Revision 1.3  2009-06-25 12:40:28+05:30  Cprogrammer
+ * display 4 digits perms
+ *
+ * Revision 1.2  2009-02-03 13:02:40+05:30  Cprogrammer
+ * display the actual user/group when get_user() or get_group() returns nobody
+ *
+ * Revision 1.1  2009-02-02 20:09:38+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

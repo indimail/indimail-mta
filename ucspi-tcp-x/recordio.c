@@ -1,20 +1,5 @@
 /*
- * $Log: recordio.c,v $
- * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.4  2021-08-30 12:47:59+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.3  2021-05-12 21:03:45+05:30  Cprogrammer
- * replace pathexec with upathexec
- *
- * Revision 1.2  2020-11-27 17:34:08+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.1  2005-01-22 01:01:37+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: recordio.c,v 1.6 2025-01-21 23:53:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -213,7 +198,29 @@ main(int argc, char **argv, char **envp)
 void
 getversion_recordio_c()
 {
-	const char     *x = "$Id: recordio.c,v 1.5 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: recordio.c,v 1.6 2025-01-21 23:53:33+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: recordio.c,v $
+ * Revision 1.6  2025-01-21 23:53:33+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
+ * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.4  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.3  2021-05-12 21:03:45+05:30  Cprogrammer
+ * replace pathexec with upathexec
+ *
+ * Revision 1.2  2020-11-27 17:34:08+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.1  2005-01-22 01:01:37+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

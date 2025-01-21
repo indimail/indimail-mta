@@ -1,20 +1,5 @@
 /*
- * $Log: mconnect-io.c,v $
- * Revision 1.5  2020-08-03 17:25:11+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.4  2008-07-25 16:49:26+05:30  Cprogrammer
- * fix for darwin
- *
- * Revision 1.3  2008-07-17 23:03:52+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.2  2005-06-10 09:12:57+05:30  Cprogrammer
- * removed fork.h
- *
- * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: mconnect-io.c,v 1.6 2025-01-21 23:53:27+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sig.h>
 #include <wait.h>
@@ -74,3 +59,25 @@ main()
 	_exit(0);
 	/*- Not reached */
 }
+
+/*
+ * $Log: mconnect-io.c,v $
+ * Revision 1.6  2025-01-21 23:53:27+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
+ * Revision 1.5  2020-08-03 17:25:11+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.4  2008-07-25 16:49:26+05:30  Cprogrammer
+ * fix for darwin
+ *
+ * Revision 1.3  2008-07-17 23:03:52+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.2  2005-06-10 09:12:57+05:30  Cprogrammer
+ * removed fork.h
+ *
+ * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,20 +1,5 @@
 /*
- * $Log: predate.c,v $
- * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.8  2020-11-24 13:46:28+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.7  2004-10-22 20:27:58+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.6  2004-10-22 15:36:17+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.5  2004-07-17 21:20:15+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: predate.c,v 1.10 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -136,7 +121,28 @@ main(int argc, char **argv)
 void
 getversion_predate_c()
 {
-	const char     *x = "$Id: predate.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: predate.c,v 1.10 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: predate.c,v $
+ * Revision 1.10  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.8  2020-11-24 13:46:28+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.7  2004-10-22 20:27:58+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.6  2004-10-22 15:36:17+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.5  2004-07-17 21:20:15+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

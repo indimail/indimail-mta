@@ -1,84 +1,5 @@
 /*
- * $Log: rblsmtpd.c,v $
- * Revision 1.26  2024-05-12 00:20:27+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.25  2024-05-09 22:55:54+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.24  2021-08-30 12:47:59+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.23  2021-05-12 21:03:37+05:30  Cprogrammer
- * replace pathexec with upathexec
- *
- * Revision 1.22  2021-03-06 23:13:31+05:30  Cprogrammer
- * use commands from libqmail
- *
- * Revision 1.21  2021-01-28 18:22:39+05:30  Cprogrammer
- * added ehlo() function
- * change greeting using RBLGREETING env variable
- *
- * Revision 1.20  2020-09-16 20:49:57+05:30  Cprogrammer
- * fixed compiler warnings
- *
- * Revision 1.19  2020-08-03 17:25:31+05:30  Cprogrammer
- * replaced buffer with substdio
- *
- * Revision 1.18  2020-06-08 22:48:38+05:30  Cprogrammer
- * quench compiler warning
- *
- * Revision 1.17  2018-06-30 16:34:04+05:30  Cprogrammer
- * replace environ with envp to pass full environment variable list in tcpserver to rbl()
- *
- * Revision 1.16  2017-03-30 22:59:08+05:30  Cprogrammer
- * prefix ip6_scan(), dns_txt(), smtp_mail(), smtp_rcpt(), smtpcommands with rbl - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
- *
- * Revision 1.15  2017-03-01 22:52:13+05:30  Cprogrammer
- * reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as shared object
- *
- * Revision 1.14  2016-05-15 22:41:42+05:30  Cprogrammer
- * rblsmtpd() function for use as shared object
- *
- * Revision 1.13  2015-08-27 00:25:28+05:30  Cprogrammer
- * removed tohex() function
- *
- * Revision 1.12  2014-01-10 00:06:57+05:30  Cprogrammer
- * BUG - flagip6 was not initialized
- *
- * Revision 1.11  2013-08-06 11:02:30+05:30  Cprogrammer
- * support for IPv4-mapped IPv6 addresses and supports the inverse IPv6 nibble format for rblsmtpd RBL and anti-RBL lookups.
- *
- * Revision 1.10  2010-02-22 20:48:16+05:30  Cprogrammer
- * fixed SIGSEGV when RBLSMTPD was set and empty
- *
- * Revision 1.9  2010-02-22 15:21:54+05:30  Cprogrammer
- * log sender, recipients
- *
- * Revision 1.8  2009-08-12 10:09:55+05:30  Cprogrammer
- * IPV6 Modifications
- *
- * Revision 1.7  2009-01-03 13:05:40+05:30  Cprogrammer
- * added greetdelay functionality, %IP% substitution
- *
- * Revision 1.6  2008-07-25 16:49:33+05:30  Cprogrammer
- * fix for darwin
- *
- * Revision 1.5  2008-07-17 23:04:02+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.4  2007-06-10 10:16:03+05:30  Cprogrammer
- * fixed usage description
- *
- * Revision 1.3  2005-06-10 12:11:22+05:30  Cprogrammer
- * conditional ipv6 compilation
- *
- * Revision 1.2  2005-06-03 09:07:55+05:30  Cprogrammer
- * removed default base rbl.maps.vix.com
- *
- * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: rblsmtpd.c,v 1.27 2025-01-21 23:53:30+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <byte.h>
@@ -681,7 +602,93 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	const char     *x = "$Id: rblsmtpd.c,v 1.26 2024-05-12 00:20:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: rblsmtpd.c,v 1.27 2025-01-21 23:53:30+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: rblsmtpd.c,v $
+ * Revision 1.27  2025-01-21 23:53:30+05:30  Cprogrammer
+ * Fixes for gcc14 errors
+ *
+ * Revision 1.26  2024-05-12 00:20:27+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.25  2024-05-09 22:55:54+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.24  2021-08-30 12:47:59+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.23  2021-05-12 21:03:37+05:30  Cprogrammer
+ * replace pathexec with upathexec
+ *
+ * Revision 1.22  2021-03-06 23:13:31+05:30  Cprogrammer
+ * use commands from libqmail
+ *
+ * Revision 1.21  2021-01-28 18:22:39+05:30  Cprogrammer
+ * added ehlo() function
+ * change greeting using RBLGREETING env variable
+ *
+ * Revision 1.20  2020-09-16 20:49:57+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
+ * Revision 1.19  2020-08-03 17:25:31+05:30  Cprogrammer
+ * replaced buffer with substdio
+ *
+ * Revision 1.18  2020-06-08 22:48:38+05:30  Cprogrammer
+ * quench compiler warning
+ *
+ * Revision 1.17  2018-06-30 16:34:04+05:30  Cprogrammer
+ * replace environ with envp to pass full environment variable list in tcpserver to rbl()
+ *
+ * Revision 1.16  2017-03-30 22:59:08+05:30  Cprogrammer
+ * prefix ip6_scan(), dns_txt(), smtp_mail(), smtp_rcpt(), smtpcommands with rbl - avoid duplicate symb in rblsmtpd.so with qmail_smtpd.so
+ *
+ * Revision 1.15  2017-03-01 22:52:13+05:30  Cprogrammer
+ * reset optind as it gets called in tcpserver and rblsmtpd.so might be loaded as shared object
+ *
+ * Revision 1.14  2016-05-15 22:41:42+05:30  Cprogrammer
+ * rblsmtpd() function for use as shared object
+ *
+ * Revision 1.13  2015-08-27 00:25:28+05:30  Cprogrammer
+ * removed tohex() function
+ *
+ * Revision 1.12  2014-01-10 00:06:57+05:30  Cprogrammer
+ * BUG - flagip6 was not initialized
+ *
+ * Revision 1.11  2013-08-06 11:02:30+05:30  Cprogrammer
+ * support for IPv4-mapped IPv6 addresses and supports the inverse IPv6 nibble format for rblsmtpd RBL and anti-RBL lookups.
+ *
+ * Revision 1.10  2010-02-22 20:48:16+05:30  Cprogrammer
+ * fixed SIGSEGV when RBLSMTPD was set and empty
+ *
+ * Revision 1.9  2010-02-22 15:21:54+05:30  Cprogrammer
+ * log sender, recipients
+ *
+ * Revision 1.8  2009-08-12 10:09:55+05:30  Cprogrammer
+ * IPV6 Modifications
+ *
+ * Revision 1.7  2009-01-03 13:05:40+05:30  Cprogrammer
+ * added greetdelay functionality, %IP% substitution
+ *
+ * Revision 1.6  2008-07-25 16:49:33+05:30  Cprogrammer
+ * fix for darwin
+ *
+ * Revision 1.5  2008-07-17 23:04:02+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.4  2007-06-10 10:16:03+05:30  Cprogrammer
+ * fixed usage description
+ *
+ * Revision 1.3  2005-06-10 12:11:22+05:30  Cprogrammer
+ * conditional ipv6 compilation
+ *
+ * Revision 1.2  2005-06-03 09:07:55+05:30  Cprogrammer
+ * removed default base rbl.maps.vix.com
+ *
+ * Revision 1.1  2003-12-31 19:46:55+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

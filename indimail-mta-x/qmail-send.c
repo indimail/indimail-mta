@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.116 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-send.c,v 1.117 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2721,7 +2721,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	const char     *x = "$Id: qmail-send.c,v 1.116 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-send.c,v 1.117 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2731,6 +2731,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.117  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.116  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

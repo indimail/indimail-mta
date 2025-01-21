@@ -1,47 +1,5 @@
 /*
- * $Log: filterto.c,v $
- * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.13  2024-01-23 01:21:12+05:30  Cprogrammer
- * convert mywrite to ansic prototype
- *
- * Revision 1.12  2021-07-05 21:10:21+05:30  Cprogrammer
- * skip $HOME/.defaultqueue for root
- *
- * Revision 1.11  2021-05-13 14:43:13+05:30  Cprogrammer
- * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
- *
- * Revision 1.10  2020-11-24 13:45:17+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.9  2020-04-04 11:45:05+05:30  Cprogrammer
- * use auto_sysconfdir instead of auto_qmail
- *
- * Revision 1.8  2020-04-04 11:19:55+05:30  Cprogrammer
- * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
- *
- * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
- * use auto_control, set by conf-control to set control directory
- *
- * Revision 1.6  2010-06-08 21:59:20+05:30  Cprogrammer
- * use envdir_set() on queuedefault to set default queue parameters
- *
- * Revision 1.5  2008-07-15 19:51:11+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.4  2004-10-22 20:25:06+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-10-22 15:35:09+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.2  2004-10-09 19:20:38+05:30  Cprogrammer
- * moved sig_ignore() and sig_uncatch() to sig.h
- *
- * Revision 1.1  2004-07-17 20:52:28+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: filterto.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -149,7 +107,56 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	const char     *x = "$Id: filterto.c,v 1.14 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: filterto.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: filterto.c,v $
+ * Revision 1.15  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.14  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.13  2024-01-23 01:21:12+05:30  Cprogrammer
+ * convert mywrite to ansic prototype
+ *
+ * Revision 1.12  2021-07-05 21:10:21+05:30  Cprogrammer
+ * skip $HOME/.defaultqueue for root
+ *
+ * Revision 1.11  2021-05-13 14:43:13+05:30  Cprogrammer
+ * use set_environment() to set env from ~/.defaultqueue or control/defaultqueue
+ *
+ * Revision 1.10  2020-11-24 13:45:17+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.9  2020-04-04 11:45:05+05:30  Cprogrammer
+ * use auto_sysconfdir instead of auto_qmail
+ *
+ * Revision 1.8  2020-04-04 11:19:55+05:30  Cprogrammer
+ * use environment variables $HOME/.defaultqueue before /etc/indimail/control/defaultqueue
+ *
+ * Revision 1.7  2016-05-17 19:44:58+05:30  Cprogrammer
+ * use auto_control, set by conf-control to set control directory
+ *
+ * Revision 1.6  2010-06-08 21:59:20+05:30  Cprogrammer
+ * use envdir_set() on queuedefault to set default queue parameters
+ *
+ * Revision 1.5  2008-07-15 19:51:11+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.4  2004-10-22 20:25:06+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.3  2004-10-22 15:35:09+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.2  2004-10-09 19:20:38+05:30  Cprogrammer
+ * moved sig_ignore() and sig_uncatch() to sig.h
+ *
+ * Revision 1.1  2004-07-17 20:52:28+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

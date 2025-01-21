@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
+ * $Id: dossl.c,v 1.8 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -730,13 +730,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 void
 getversion_dossl_c()
 {
-	const char     *x = "$Id: dossl.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dossl.c,v 1.8 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.8  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *

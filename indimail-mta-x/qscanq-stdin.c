@@ -1,32 +1,5 @@
 /*
- * $Log: qscanq-stdin.c,v $
- * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.7  2021-06-12 19:25:48+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.6  2021-06-09 19:36:55+05:30  Cprogrammer
- * use qmulti() instead of exec of qmail-multi
- *
- * Revision 1.5  2020-11-24 13:47:46+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.4  2016-06-03 09:58:33+05:30  Cprogrammer
- * moved qmail-multi to sbin
- *
- * Revision 1.3  2005-02-14 23:06:19+05:30  Cprogrammer
- * unset VIRUSCHECK to prevent recursive calls to qscanq
- *
- * Revision 1.2  2004-10-22 20:29:47+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-09-22 23:26:46+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qscanq-stdin.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -201,8 +174,42 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_stdin_c()
 {
-	const char     *x = "$Id: qscanq-stdin.c,v 1.9 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qscanq-stdin.c,v 1.10 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 #endif
+
+/*
+ * $Log: qscanq-stdin.c,v $
+ * Revision 1.10  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.9  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.8  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.7  2021-06-12 19:25:48+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.6  2021-06-09 19:36:55+05:30  Cprogrammer
+ * use qmulti() instead of exec of qmail-multi
+ *
+ * Revision 1.5  2020-11-24 13:47:46+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.4  2016-06-03 09:58:33+05:30  Cprogrammer
+ * moved qmail-multi to sbin
+ *
+ * Revision 1.3  2005-02-14 23:06:19+05:30  Cprogrammer
+ * unset VIRUSCHECK to prevent recursive calls to qscanq
+ *
+ * Revision 1.2  2004-10-22 20:29:47+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-09-22 23:26:46+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

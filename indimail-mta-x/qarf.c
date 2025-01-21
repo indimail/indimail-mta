@@ -1,50 +1,5 @@
 /*
- * $Log: qarf.c,v $
- * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.14  2024-01-23 01:22:15+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.12  2021-05-29 23:47:37+05:30  Cprogrammer
- * replace str_chr with str_rchr to get domain correctly from email address
- *
- * Revision 1.11  2020-05-11 11:03:42+05:30  Cprogrammer
- * fixed shadowing of global variables by local variables
- *
- * Revision 1.10  2016-01-02 17:45:20+05:30  Cprogrammer
- * reformatted error strings
- *
- * Revision 1.9  2013-06-09 17:02:52+05:30  Cprogrammer
- * shortened variable declartion in addrparse() function
- *
- * Revision 1.8  2012-11-24 08:01:22+05:30  Cprogrammer
- * fixed display of usage
- *
- * Revision 1.7  2011-11-27 13:43:25+05:30  Cprogrammer
- * process headers only
- *
- * Revision 1.6  2011-11-27 11:56:53+05:30  Cprogrammer
- * exit on address parsing error
- *
- * Revision 1.5  2011-11-26 15:35:32+05:30  Cprogrammer
- * removed useless statements
- *
- * Revision 1.4  2011-02-12 12:36:10+05:30  Cprogrammer
- * set copy_subj, copy_rpath automatically
- *
- * Revision 1.3  2011-02-12 10:40:15+05:30  Cprogrammer
- * added more fields as per http://www.mipassoc.org/arf
- *
- * Revision 1.2  2011-02-11 23:45:32+05:30  Cprogrammer
- * added usage
- *
- * Revision 1.1  2011-02-11 23:28:08+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qarf.c,v 1.16 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -423,7 +378,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.15 $\n");
+			"X-Mailer: qarf $Revision: 1.16 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -467,7 +422,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.16 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -527,7 +482,58 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	const char     *x = "$Id: qarf.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qarf.c,v 1.16 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qarf.c,v $
+ * Revision 1.16  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.14  2024-01-23 01:22:15+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.13  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.12  2021-05-29 23:47:37+05:30  Cprogrammer
+ * replace str_chr with str_rchr to get domain correctly from email address
+ *
+ * Revision 1.11  2020-05-11 11:03:42+05:30  Cprogrammer
+ * fixed shadowing of global variables by local variables
+ *
+ * Revision 1.10  2016-01-02 17:45:20+05:30  Cprogrammer
+ * reformatted error strings
+ *
+ * Revision 1.9  2013-06-09 17:02:52+05:30  Cprogrammer
+ * shortened variable declartion in addrparse() function
+ *
+ * Revision 1.8  2012-11-24 08:01:22+05:30  Cprogrammer
+ * fixed display of usage
+ *
+ * Revision 1.7  2011-11-27 13:43:25+05:30  Cprogrammer
+ * process headers only
+ *
+ * Revision 1.6  2011-11-27 11:56:53+05:30  Cprogrammer
+ * exit on address parsing error
+ *
+ * Revision 1.5  2011-11-26 15:35:32+05:30  Cprogrammer
+ * removed useless statements
+ *
+ * Revision 1.4  2011-02-12 12:36:10+05:30  Cprogrammer
+ * set copy_subj, copy_rpath automatically
+ *
+ * Revision 1.3  2011-02-12 10:40:15+05:30  Cprogrammer
+ * added more fields as per http://www.mipassoc.org/arf
+ *
+ * Revision 1.2  2011-02-11 23:45:32+05:30  Cprogrammer
+ * added usage
+ *
+ * Revision 1.1  2011-02-11 23:28:08+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

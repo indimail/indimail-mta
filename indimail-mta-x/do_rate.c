@@ -1,17 +1,5 @@
 /*
- * $Log: do_rate.c,v $
- * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2022-04-13 07:48:09+05:30  Cprogrammer
- * return 2 if rate definition is missing or is invalid
- *
- * Revision 1.2  2021-06-05 12:44:50+05:30  Cprogrammer
- * return time_needed in seconds to reach configured rate
- *
- * Revision 1.1  2021-05-29 23:35:17+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: do_rate.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -224,9 +212,27 @@ is_rate_ok(const char *_file, const char *_rate_exp, unsigned long *e, double *c
 void
 getversion_do_rate_c()
 {
-	const char     *x = "$Id: do_rate.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: do_rate.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;
 	x++;
 }
+/*
+ * $Log: do_rate.c,v $
+ * Revision 1.5  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2022-04-13 07:48:09+05:30  Cprogrammer
+ * return 2 if rate definition is missing or is invalid
+ *
+ * Revision 1.2  2021-06-05 12:44:50+05:30  Cprogrammer
+ * return time_needed in seconds to reach configured rate
+ *
+ * Revision 1.1  2021-05-29 23:35:17+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

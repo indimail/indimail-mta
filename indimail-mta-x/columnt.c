@@ -1,29 +1,5 @@
 /*
- * $Log: columnt.c,v $
- * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2020-11-24 13:44:34+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.4  2004-10-22 20:23:59+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.3  2004-10-22 15:34:31+05:30  Cprogrammer
- * replaced readwrite.h with unistd.h
- *
- * Revision 1.2  2004-01-03 13:42:59+05:30  Cprogrammer
- * merged two if statements
- *
- * Revision 1.1  2004-01-02 23:51:30+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: columnt.c,v 1.9 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -166,7 +142,37 @@ main()
 void
 getversion_columnt_c()
 {
-	const char     *x = "$Id: columnt.c,v 1.8 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: columnt.c,v 1.9 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: columnt.c,v $
+ * Revision 1.9  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2020-11-24 13:44:34+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.4  2004-10-22 20:23:59+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.3  2004-10-22 15:34:31+05:30  Cprogrammer
+ * replaced readwrite.h with unistd.h
+ *
+ * Revision 1.2  2004-01-03 13:42:59+05:30  Cprogrammer
+ * merged two if statements
+ *
+ * Revision 1.1  2004-01-02 23:51:30+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.50 2024-11-14 16:14:40+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.51 2025-01-21 23:35:31+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1237,13 +1237,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.50 2024-11-14 16:14:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.51 2025-01-21 23:35:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.51  2025-01-21 23:35:31+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.50  2024-11-14 16:14:40+05:30  Cprogrammer
  * use envdir to set environment variables if variable directory exists
  *

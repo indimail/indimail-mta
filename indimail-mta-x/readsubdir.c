@@ -1,26 +1,5 @@
 /*
- * $Log: readsubdir.c,v $
- * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2022-01-30 09:38:02+05:30  Cprogrammer
- * allow configurable big/small todo/intd
- *
- * Revision 1.5  2021-05-12 17:50:21+05:30  Cprogrammer
- * added readsubdir_name()
- *
- * Revision 1.4  2021-05-12 15:43:18+05:30  Cprogrammer
- * reduce calls required to get next entry
- *
- * Revision 1.3  2004-10-22 20:29:54+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-07-17 21:22:30+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: readsubdir.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stddef.h>
 #include "readsubdir.h"
@@ -99,7 +78,34 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	const char     *x = "$Id: readsubdir.c,v 1.8 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: readsubdir.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: readsubdir.c,v $
+ * Revision 1.9  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2022-01-30 09:38:02+05:30  Cprogrammer
+ * allow configurable big/small todo/intd
+ *
+ * Revision 1.5  2021-05-12 17:50:21+05:30  Cprogrammer
+ * added readsubdir_name()
+ *
+ * Revision 1.4  2021-05-12 15:43:18+05:30  Cprogrammer
+ * reduce calls required to get next entry
+ *
+ * Revision 1.3  2004-10-22 20:29:54+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-07-17 21:22:30+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

@@ -1,23 +1,5 @@
 /*
- * $Log: tcpto_clean.c,v $
- * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.7  2005-06-29 20:54:53+05:30  Cprogrammer
- * size of buffer changed to TCPTO_BUFSIZ
- *
- * Revision 1.6  2005-06-17 21:51:23+05:30  Cprogrammer
- * increased size of tcpto buffer
- *
- * Revision 1.5  2004-10-22 20:31:37+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.4  2004-10-22 15:39:50+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.3  2004-07-17 21:24:44+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: tcpto_clean.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "tcpto.h"
@@ -45,7 +27,31 @@ tcpto_clean()					/*- running from queue/mess */
 void
 getversion_tcpto_clean_c()
 {
-	const char     *x = "$Id: tcpto_clean.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tcpto_clean.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: tcpto_clean.c,v $
+ * Revision 1.9  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.7  2005-06-29 20:54:53+05:30  Cprogrammer
+ * size of buffer changed to TCPTO_BUFSIZ
+ *
+ * Revision 1.6  2005-06-17 21:51:23+05:30  Cprogrammer
+ * increased size of tcpto buffer
+ *
+ * Revision 1.5  2004-10-22 20:31:37+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.4  2004-10-22 15:39:50+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.3  2004-07-17 21:24:44+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

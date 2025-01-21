@@ -1,44 +1,5 @@
 /*
- * $Log: qmail-qmqpd.c,v $
- * Revision 1.16  2024-05-12 00:20:03+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.14  2024-01-23 01:22:59+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.13  2023-10-07 01:34:18+05:30  Cprogrammer
- * added parameter hide for received
- *
- * Revision 1.12  2022-10-22 13:07:41+05:30  Cprogrammer
- * added program identifier to Received header
- *
- * Revision 1.11  2021-09-11 19:01:18+05:30  Cprogrammer
- * pass null remotehost to received when remotehost is unknown
- *
- * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.9  2021-06-12 18:26:58+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.8  2020-11-24 13:47:12+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.7  2008-07-15 19:52:41+05:30  Cprogrammer
- * porting for Mac OS X
- *
- * Revision 1.6  2004-10-22 20:28:42+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.5  2004-10-22 15:37:31+05:30  Cprogrammer
- * removed readwrite.h.
- *
- * Revision 1.4  2004-07-17 21:21:10+05:30  Cprogrammer
- * added RCS log
- *
+ * $Id: qmail-qmqpd.c,v 1.17 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -233,7 +194,52 @@ main()
 void
 getversion_qmail_qmqpd_c()
 {
-	const char     *x = "$Id: qmail-qmqpd.c,v 1.16 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmqpd.c,v 1.17 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qmail-qmqpd.c,v $
+ * Revision 1.17  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.16  2024-05-12 00:20:03+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.14  2024-01-23 01:22:59+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.13  2023-10-07 01:34:18+05:30  Cprogrammer
+ * added parameter hide for received
+ *
+ * Revision 1.12  2022-10-22 13:07:41+05:30  Cprogrammer
+ * added program identifier to Received header
+ *
+ * Revision 1.11  2021-09-11 19:01:18+05:30  Cprogrammer
+ * pass null remotehost to received when remotehost is unknown
+ *
+ * Revision 1.10  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.9  2021-06-12 18:26:58+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.8  2020-11-24 13:47:12+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.7  2008-07-15 19:52:41+05:30  Cprogrammer
+ * porting for Mac OS X
+ *
+ * Revision 1.6  2004-10-22 20:28:42+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.5  2004-10-22 15:37:31+05:30  Cprogrammer
+ * removed readwrite.h.
+ *
+ * Revision 1.4  2004-07-17 21:21:10+05:30  Cprogrammer
+ * added RCS log
+ *
+ */

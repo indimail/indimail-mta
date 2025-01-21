@@ -1,17 +1,5 @@
 /*
- * $Log: qdane.c,v $
- * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.3  2018-05-27 22:15:49+05:30  mbhangui
- * added defintions for qmail-daned modes
- *
- * Revision 1.2  2018-05-27 17:47:16+05:30  Cprogrammer
- * added option for qmail-remote to query/update records
- *
- * Revision 1.1  2018-04-26 11:37:56+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: qdane.c,v 1.5 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include "subfd.h"
 #include "sgetopt.h"
@@ -168,7 +156,25 @@ main(int argc, char **argv)
 void
 getversion_qdane_c()
 {
-	const char     *x = "$Id: qdane.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qdane.c,v 1.5 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qdane.c,v $
+ * Revision 1.5  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.3  2018-05-27 22:15:49+05:30  mbhangui
+ * added defintions for qmail-daned modes
+ *
+ * Revision 1.2  2018-05-27 17:47:16+05:30  Cprogrammer
+ * added option for qmail-remote to query/update records
+ *
+ * Revision 1.1  2018-04-26 11:37:56+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

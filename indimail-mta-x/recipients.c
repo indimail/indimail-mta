@@ -1,6 +1,5 @@
 /*
- * RCS log at bottom
- * $Id: recipients.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: recipients.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <cdb.h>
@@ -251,7 +250,7 @@ recipients(char *buf, int len)
 void
 getversion_recipients_c()
 {
-	const char     *x = "$Id: recipients.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: recipients.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;
@@ -260,6 +259,9 @@ getversion_recipients_c()
 
 /*
  * $Log: recipients.c,v $
+ * Revision 1.13  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

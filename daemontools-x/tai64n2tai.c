@@ -1,4 +1,7 @@
 /*-
+ *
+ * $Id: tai64n2tai.c,v 1.5 2025-01-21 23:35:50+05:30 Cprogrammer Exp mbhangui $
+ *
  * tai64n2tai -- Convert TAI64N timestamps to older TAI format
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
  *
@@ -113,7 +116,14 @@ main(int argc, char **argv)
 void
 getversion_tai64n2tai_c()
 {
-	const char     *x = "$Id: tai64n2tai.c,v 1.4 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tai64n2tai.c,v 1.5 2025-01-21 23:35:50+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: tai64n2tai.c,v $
+ * Revision 1.5  2025-01-21 23:35:50+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ */

@@ -1,23 +1,5 @@
 /*
- * $Log: spipe.c,v $
- * Revision 1.6  2024-05-09 22:39:36+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2021-08-30 12:04:53+05:30  Cprogrammer
- * define funtions as noreturn
- *
- * Revision 1.4  2020-09-16 19:07:34+05:30  Cprogrammer
- * fix compiler warning for FreeBSD
- *
- * Revision 1.3  2020-06-08 22:52:12+05:30  Cprogrammer
- * quench compiler warning
- *
- * Revision 1.2  2004-10-22 20:30:42+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-27 22:56:30+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: spipe.c,v 1.7 2025-01-21 23:35:28+05:30 Cprogrammer Exp mbhangui $
  *
  * spipe -- supervise a pipeline of programs
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -168,7 +150,32 @@ main(int argc, char **argv)
 void
 getversion_spipe_c()
 {
-	const char     *x = "$Id: spipe.c,v 1.6 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: spipe.c,v 1.7 2025-01-21 23:35:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: spipe.c,v $
+ * Revision 1.7  2025-01-21 23:35:28+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:39:36+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2021-08-30 12:04:53+05:30  Cprogrammer
+ * define funtions as noreturn
+ *
+ * Revision 1.4  2020-09-16 19:07:34+05:30  Cprogrammer
+ * fix compiler warning for FreeBSD
+ *
+ * Revision 1.3  2020-06-08 22:52:12+05:30  Cprogrammer
+ * quench compiler warning
+ *
+ * Revision 1.2  2004-10-22 20:30:42+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-27 22:56:30+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

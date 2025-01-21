@@ -1,6 +1,5 @@
 /*
- * RCS log at bottom
- * $Id: smtpd.c,v 1.330 2024-12-21 10:47:07+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.331 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -161,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.330 $";
+static c_char  *revision = "$Revision: 1.331 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -7526,6 +7525,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.331  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.330  2024-12-21 10:47:07+05:30  Cprogrammer
  * display command name in err_unimpl()
  *
@@ -7976,7 +7978,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.330 2024-12-21 10:47:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.331 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;

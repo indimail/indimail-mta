@@ -1,5 +1,5 @@
 /*
- * $Id: svc.c,v 1.12 2024-10-24 18:08:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svc.c,v 1.13 2025-01-21 23:35:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -177,13 +177,16 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	const char     *x = "$Id: svc.c,v 1.12 2024-10-24 18:08:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svc.c,v 1.13 2025-01-21 23:35:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: svc.c,v $
+ * Revision 1.13  2025-01-21 23:35:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.12  2024-10-24 18:08:54+05:30  Cprogrammer
  * added -w option to wait for service to be up
  * added -W option to wait for service to be down

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rm.c,v 1.28 2024-05-13 22:10:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-rm.c,v 1.29 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  *
  * COPYRIGHT INFORMATION - DO NOT REMOVE
  *
@@ -1046,13 +1046,16 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	const char     *x = "$Id: qmail-rm.c,v 1.28 2024-05-13 22:10:17+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-rm.c,v 1.29 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.29  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.28  2024-05-13 22:10:17+05:30  Cprogrammer
  * added -f option to specify strptime format
  *

@@ -1,23 +1,5 @@
 /*
- * $Log: ifaddr.c,v $
- * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.5  2024-01-23 01:21:26+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.3  2020-11-24 13:45:27+05:30  Cprogrammer
- * removed exit.h
- *
- * Revision 1.2  2004-10-22 20:25:48+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.1  2004-07-17 20:54:43+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: ifaddr.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -158,7 +140,32 @@ main(int argc, char **argv)
 void
 getversion_ifaddr_c()
 {
-	const char     *x = "$Id: ifaddr.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ifaddr.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+
+/*
+ * $Log: ifaddr.c,v $
+ * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.5  2024-01-23 01:21:26+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.4  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.3  2020-11-24 13:45:27+05:30  Cprogrammer
+ * removed exit.h
+ *
+ * Revision 1.2  2004-10-22 20:25:48+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.1  2004-07-17 20:54:43+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

@@ -1,5 +1,5 @@
 /*
- * $Id: cleanq.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: cleanq.c,v 1.16 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -256,13 +256,16 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	const char     *x = "$Id: cleanq.c,v 1.15 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cleanq.c,v 1.16 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.16  2025-01-22 00:30:34+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.15  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

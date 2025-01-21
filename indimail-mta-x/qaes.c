@@ -1,36 +1,12 @@
 /*
+ * $Id: qaes.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ *
  * AES encryption/decryption demo program using OpenSSL EVP apis
  * gcc -Wall openssl_aes.c -lcrypto
  *
  * this is public domain code.
  *
  * Saju Pillai (saju.pillai@gmail.com)
- *
- * $Log: qaes.c,v $
- * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.7  2024-01-23 01:24:18+05:30  Cprogrammer
- * include buffer_defs.h for buffer size definitions
- *
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2017-08-08 23:56:21+05:30  Cprogrammer
- * openssl 1.1.0 port
- *
- * Revision 1.4  2016-01-02 17:45:51+05:30  Cprogrammer
- * fixed usage and reformatted error strings
- *
- * Revision 1.3  2014-01-29 14:01:58+05:30  Cprogrammer
- * fixed compilation warnings
- *
- * Revision 1.2  2013-12-05 18:07:36+05:30  Cprogrammer
- * salt can now be specified on command line
- *
- * Revision 1.1  2013-12-05 17:41:46+05:30  Cprogrammer
- * Initial revision
- *
  */
 
 #include <unistd.h>
@@ -350,7 +326,37 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	const char     *x = "$Id: qaes.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qaes.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: qaes.c,v $
+ * Revision 1.9  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.7  2024-01-23 01:24:18+05:30  Cprogrammer
+ * include buffer_defs.h for buffer size definitions
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2017-08-08 23:56:21+05:30  Cprogrammer
+ * openssl 1.1.0 port
+ *
+ * Revision 1.4  2016-01-02 17:45:51+05:30  Cprogrammer
+ * fixed usage and reformatted error strings
+ *
+ * Revision 1.3  2014-01-29 14:01:58+05:30  Cprogrammer
+ * fixed compilation warnings
+ *
+ * Revision 1.2  2013-12-05 18:07:36+05:30  Cprogrammer
+ * salt can now be specified on command line
+ *
+ * Revision 1.1  2013-12-05 17:41:46+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

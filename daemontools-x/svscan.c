@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.38 2024-11-05 22:59:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.39 2025-01-21 23:35:42+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -1023,13 +1023,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.38 2024-11-05 22:59:32+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.39 2025-01-21 23:35:42+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.39  2025-01-21 23:35:42+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.38  2024-11-05 22:59:32+05:30  Cprogrammer
  * added killsvc function to shutdown non-log and log services
  * refactored shutdown handling

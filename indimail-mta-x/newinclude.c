@@ -1,29 +1,5 @@
 /*
- * $Log: newinclude.c,v $
- * Revision 1.8  2024-05-12 08:21:41+05:30  mbhangui
- * fix function prototypes
- *
- * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
- * fix discarded-qualifier compiler warnings
- *
- * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
- * define functions as noreturn
- *
- * Revision 1.5  2021-06-15 11:42:10+05:30  Cprogrammer
- * moved token822.h to libqmail
- *
- * Revision 1.4  2021-06-12 18:01:34+05:30  Cprogrammer
- * removed chdir(auto_qmail)
- *
- * Revision 1.3  2004-10-22 20:27:43+05:30  Cprogrammer
- * added RCS id
- *
- * Revision 1.2  2004-10-22 15:36:08+05:30  Cprogrammer
- * removed readwrite.h
- *
- * Revision 1.1  2004-10-21 22:46:54+05:30  Cprogrammer
- * Initial revision
- *
+ * $Id: newinclude.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/stat.h>
@@ -366,7 +342,37 @@ main(int argc, char **argv)
 void
 getversion_newinclude_c()
 {
-	const char     *x = "$Id: newinclude.c,v 1.8 2024-05-12 08:21:41+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: newinclude.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
+/*
+ * $Log: newinclude.c,v $
+ * Revision 1.9  2025-01-22 00:30:36+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
+ * Revision 1.8  2024-05-12 08:21:41+05:30  mbhangui
+ * fix function prototypes
+ *
+ * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
+ * fix discarded-qualifier compiler warnings
+ *
+ * Revision 1.6  2021-08-29 23:27:08+05:30  Cprogrammer
+ * define functions as noreturn
+ *
+ * Revision 1.5  2021-06-15 11:42:10+05:30  Cprogrammer
+ * moved token822.h to libqmail
+ *
+ * Revision 1.4  2021-06-12 18:01:34+05:30  Cprogrammer
+ * removed chdir(auto_qmail)
+ *
+ * Revision 1.3  2004-10-22 20:27:43+05:30  Cprogrammer
+ * added RCS id
+ *
+ * Revision 1.2  2004-10-22 15:36:08+05:30  Cprogrammer
+ * removed readwrite.h
+ *
+ * Revision 1.1  2004-10-21 22:46:54+05:30  Cprogrammer
+ * Initial revision
+ *
+ */

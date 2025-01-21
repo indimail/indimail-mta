@@ -1,5 +1,5 @@
 /*
- * $Id: condredirect.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: condredirect.c,v 1.20 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "sig.h"
@@ -133,13 +133,16 @@ main(int argc, char **argv)
 void
 getversion_condredirect_c()
 {
-	const char     *x = "$Id: condredirect.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: condredirect.c,v 1.20 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: condredirect.c,v $
+ * Revision 1.20  2025-01-22 00:30:37+05:30  Cprogrammer
+ * Fixes for gcc14
+ *
  * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
