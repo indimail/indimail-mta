@@ -1,5 +1,5 @@
 /*
- * $Id: test-recipients.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: test-recipients.c,v 1.5 2025-02-02 11:51:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -24,7 +24,7 @@ void           *phandle;
 int             timeout = 60;
 
 ssize_t
-safewrite(int fd, char *buf, int len)
+safewrite(int fd, const char *buf, size_t len)
 {
 	int             r;
 
