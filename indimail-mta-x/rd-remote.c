@@ -1,5 +1,5 @@
 /*
- * $Id: rd-remote.c,v 1.5 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rd-remote.c,v 1.6 2025-02-02 11:50:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -161,7 +161,7 @@ addrmangle(stralloc *saout, const char *sender)
 int
 main(int argc, char **argv)
 {
-	int             r, use_regex, lcount, len, nullflag, count, wstat,
+	int             r, use_regex = 0, lcount, len, nullflag, count, wstat,
 					match;
 	int             pipefd[2], errpipe[2];
 	unsigned long   size;
@@ -380,6 +380,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: rd-remote.c,v $
+ * Revision 1.6  2025-02-02 11:50:57+05:30  Cprogrammer
+ * initialize use_regex
+ *
  * Revision 1.5  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

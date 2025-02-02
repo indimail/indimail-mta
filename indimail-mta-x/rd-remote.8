@@ -27,32 +27,27 @@ optional. The control file format is discussed below.
 
 .EX
 \fIaddr\fR:\fItype\fR:\fIdest\fR[:\fIprefix\fR]
+.EE
 
-\fIaddr\fR is destination domain when \fItype\fR is the letter '\fBd\fR'.
-\fIaddr\fR is the recipient address when \fItype\fR is the letter '\fBr\fR'.
-\fIaddr\fR is the sender address when \fItype\fR is the letter '\fBs\fR'.
+Here \fIaddr\fR is destination domain when \fItype\fR is the
+letter '\fBd\fR'. \fIaddr\fR is the recipient address when \fItype\fR is
+the letter '\fBr\fR'. \fIaddr\fR is the sender address when \fItype\fR is
+the -letter '\fBs\fR'.
 
 \fIdest\fR can be an email address or a Maildir. When \fIdest\fR is an
 email address, the mail is delivered to the address using
 \fBqmail-remote\fR. When \fIdest\fR is a maildir, the mail is directly
 delivered to the Maildir \fIdest\fR using \fBmaildirdeliver\fR(1).
-
-\fIprefix\fR is optional. If given \fBrd-remote\fR uses prefix-recip as the
-value for the \fBDelivered-To\fR header. If not given, sender-recip is used
-as the value for the \fBDelivered-To\fR header.
-.EE
-
-Here \fIaddr\fR is destination domain when \fItype\fR is the letter
-'\fBd\fR'. \fIaddr\fR is the recipient address when \fItype\fR is the
-letter '\fBr\fR'. \fIaddr\fR is the sender address when \fItype\fR is the
-letter '\fBs\fR'.
-
 \fIaddr\fR can be an exact match, wildcard or a regular expression (if
 \fBQREGEX\fR environment variable is defined and is non-zero). So if
 \fIaddr\fR is .*@example.com, it will match all addresses belonging to
 examplecom (for type 'r' or 's'). When type is 'd', you can use the
 regex .*example.com for \fIaddr\fR to match all address with example.com as
 the domain name.
+
+\fIprefix\fR is optional. If given \fBrd-remote\fR uses prefix-recip as the
+value for the \fBDelivered-To\fR header. If not given, sender-recip is used
+as the value for the \fBDelivered-To\fR header.
 
 You can set \fBQREMOTE=/usr/sbin/rd-remote\fR for \fBspawn-filter\fR(8) to
 make it use \fBrd-remote\fR for remote deliveries and deliver the mail
