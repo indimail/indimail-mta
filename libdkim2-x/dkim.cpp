@@ -100,11 +100,17 @@ SignThisHeader(const char *szHeader)
 	/*
 	 * GHBH-Arc:Arc-Authentication-Results:ABCD-EFGH
 	 */
+	if ((ptr = getenv("DKIMSIGN_HEADER")) && *ptr)
+		i = strlen(ptr);
+	else {
+		ptr = (char *) "DKIM-Signature:";
+		i = 15;
+	}
 	if ((!strncasecmp(szHeader, "X-", 2) && strncasecmp(szHeader, "X-Mailer:", 9))
 			|| !strncasecmp(szHeader, "Received:", 9)
 			|| !strncasecmp(szHeader, "Authentication-Results:", 23)
 			|| !strncasecmp(szHeader, "Arc-Authentication-Results:", 27)
-			|| !strncasecmp(szHeader, "DKIM-Signature:", 15)
+			|| !strncasecmp(szHeader, ptr, i)
 			|| !strncasecmp(szHeader, "DomainKey-Signature:", 20)
 			|| !strncasecmp(szHeader, "Return-Path:", 12))
 		return 0;
@@ -175,7 +181,7 @@ const char *dkim_error_str(int ret, int flag)
 	case DKIM_3PS_SIGNATURE:
 		break;
 	case DKIM_BAD_SYNTAX:		/*- -2 */ /*- G */
-		return "signature error: DKIM-Signature could not parse or has bad tags/values";
+		return "signature error: Signature could not be parsed or has bad tags/values";
 	case DKIM_SIGNATURE_BAD:	/*- -3 */
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 		return "signature error: RSA/ED25519 verify failed";
@@ -909,13 +915,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.37 2024-05-07 12:55:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.38 2025-02-08 23:23:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.38  2025-02-08 23:23:12+05:30  Cprogrammer
+ * make DKIM-Signature header name configurable
+ *
  * Revision 1.37  2024-05-07 12:55:27+05:30  Cprogrammer
  * use const char * instead of char *
  *

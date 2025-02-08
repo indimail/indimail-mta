@@ -64,7 +64,7 @@ extern          "C" {
  * modify dkim_error_str() in dkim.cpp
  */
 #define DKIM_FAIL                            -1 /* verify error: message is suspicious */
-#define DKIM_BAD_SYNTAX                      -2 /* signature error: DKIM-Signature could not parse or has bad tags/values */
+#define DKIM_BAD_SYNTAX                      -2 /* signature error: Signature could not be parsed or has bad tags/values */
 #define DKIM_SIGNATURE_BAD                   -3 /* signature error: RSA/ED25519 verify failed */
 #define DKIM_SIGNATURE_BAD_BUT_TESTING       -4 /* signature error: RSA/ED25519 verify failed but testing */
 #define DKIM_SIGNATURE_EXPIRED               -5 /* signature error: x= is old */
@@ -179,6 +179,9 @@ int  DKIM_CALL  DKIMSignReplaceHash(DKIMContext *pSignContext, DKIMSignOptions *
 
 /*
  * $Log: dkim.h,v $
+ * Revision 1.17  2025-02-08 23:24:01+05:30  Cprogrammer
+ * make DKIM-Signature header name configurable
+ *
  * Revision 1.16  2024-05-07 12:55:54+05:30  Cprogrammer
  * use const char * instead of char *
  *

@@ -190,11 +190,14 @@ CDKIMSign::Hash(const char *szBuffer, int nBufLength, bool bHdr)
 bool CDKIMSign::SignThisHeader(const string &sTag)
 {
 	bool            bRet = true;
+	char           *ptr;
 
+	if (!(ptr = getenv("DKIMSIGN_HEADER")) && *ptr)
+		ptr = (char *) "DKIM-Signature:";
 	if (_strnicmp(sTag.c_str(), "X-", 2) == 0
 		|| _stricmp(sTag.c_str(), "Authentication-Results:") == 0
 		|| _stricmp(sTag.c_str(), "Arc-Authentication-Results:") == 0
-		|| _stricmp(sTag.c_str(), "DKIM-Signature:") == 0
+		|| _stricmp(sTag.c_str(), ptr) == 0
 		|| _stricmp(sTag.c_str(), "Domainkey-Signature:") == 0
 		|| _stricmp(sTag.c_str(), "Received:") == 0
 		|| _stricmp(sTag.c_str(), "Return-Path:") == 0)
@@ -480,8 +483,13 @@ bool CDKIMSign::ParseFromAddress(void)
 void
 CDKIMSign::InitSig(void)
 {
+	char           *p;
+
 	m_sSig.reserve(1024);
-	m_sSig.assign("DKIM-Signature:");
+	if (!(p = getenv("DKIMSIGN_HEADER")))
+		m_sSig.assign("DKIM-Signature:");
+	else
+		m_sSig.assign(p);
 	m_nSigPos = m_sSig.size();
 }
 
@@ -993,13 +1001,16 @@ CDKIMSign::AssembleReturnedSig(const char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.30 2025-01-21 21:50:27+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.31 2025-02-08 23:23:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.31  2025-02-08 23:23:42+05:30  Cprogrammer
+ * make DKIM-Signature header name configurable
+ *
  * Revision 1.30  2025-01-21 21:50:27+05:30  Cprogrammer
  * initialize only when len is non-zero
  *

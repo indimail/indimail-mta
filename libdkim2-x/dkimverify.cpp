@@ -411,6 +411,7 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 	int             TestingFailures = 0;
 	int             RealFailures = 0;
 	int             r;
+	char           *p, *q;
 	list <string>   SuccessfulDomains;	/* can contain duplicates */
 	string          sFromDomain; /*- get the From address's domain if we might need it -*/
 
@@ -442,18 +443,39 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			string          sSigValue = sSignedSig.substr(sSignedSig.find(':') + 1);
 			static const char *tags[] = { "b", NULL };
 			int             res = -1;
+			int             siglen = 15;
 			char           *values[sizeof (tags) / sizeof (tags[0])] = { NULL };
 			char           *pSigValue = (char *) sSigValue.c_str();
 
-			if (ParseTagValueList(pSigValue, tags, values) && values[0] != NULL)
-				sSignedSig.erase(15 + values[0] - pSigValue, strlen(values[0])); /*- erase b= value */
+			if ((p = getenv("DKIMSIGN_HEADER")) && *p)
+				siglen = strlen(p);
+			if (ParseTagValueList(pSigValue, tags, values) && values[0] != NULL) {
+				sSignedSig.erase(siglen + values[0] - pSigValue, strlen(values[0])); /*- erase b= value */
+			}
 			if (i->HeaderCanonicalization == DKIM_CANON_RELAXED)
 				sSignedSig = RelaxHeader(sSignedSig);
 			else
 			if (i->HeaderCanonicalization == DKIM_CANON_NOWSP) {
 				RemoveSWSP(sSignedSig);
 				/* convert "DKIM-Signature" to lower case */
-				sSignedSig.replace(0, 14, "dkim-signature", 14);
+				if ((p = getenv("DKIMSIGN_HEADER")) && *p) {
+					if (!(q = strdup(p))) {
+						if (verbose == true)
+							fprintf(stderr, "strdup: out of memory\n");
+						if (i->m_pSelector->Testing)
+							TestingFailures++;
+						else
+							RealFailures++;
+						continue;
+					}
+					q[siglen - 2] = '\0';
+					for (char *s = q; *s != '\0' && *s != ':'; s++) {
+						if (*s >= 'A' && *s <= 'Z')
+							*s += 'a' - 'A';
+					}
+					sSignedSig.replace(0, siglen - 1, q, siglen - 1);
+				} else
+					sSignedSig.replace(0, 14, "dkim-signature", 14);
 			}
 			i->Hash(sSignedSig.c_str(), sSignedSig.length());
 			assert(i->m_pSelector != NULL);
@@ -606,12 +628,17 @@ int
 CDKIMVerify::ProcessHeaders(void)
 {
 	/*- look for DKIM-Signature header(s) -*/
-	int sigStatus = 0;
+	int sigStatus = 0, len = 14;
+	char *p;
 
 	for (list < string >::iterator i = HeaderList.begin(); i != HeaderList.end(); ++i) {
-		if (_strnicmp(i->c_str(), "DKIM-Signature", 14) == 0) {
+		if ((p = getenv("DKIMSIGN_HEADER")) && *p)
+			len = strlen(p) - 1;
+		else
+			p = (char *) "DKIM-Signature";
+		if (_strnicmp(i->c_str(), p, len) == 0) {
 			/*- skip over whitespace between the header name and : -*/
-			const char     *s = i->c_str() + 14;
+			const char     *s = i->c_str() + len;
 			while (*s == ' ' || *s == '\t')
 				s++;
 			if (*s == ':') {
@@ -1301,13 +1328,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.35 2024-05-07 12:56:13+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.36 2025-02-08 23:23:51+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.36  2025-02-08 23:23:51+05:30  Cprogrammer
+ * make DKIM-Signature header name configurable
+ *
  * Revision 1.35  2024-05-07 12:56:13+05:30  Cprogrammer
  * removed extra wsp
  *
