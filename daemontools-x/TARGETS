@@ -73,3 +73,6 @@ hasinotify.h
 openrc
 INPUT
 set-network-wait
+svalert
+svalert.8
+supervise.8

@@ -1,0 +1,43 @@
+.\" vim: tw=75
+.TH svalert "8" "Feb 2025" "daemontools" "System Administration Commands"
+
+.SH NAME
+svalert \- handle service alerts
+
+.SH SYNOPSYS
+.PP
+\fBsvalert\fR \fIsv\fR \fIarg2\fR [ \fIarg3\fR ] [ \fIarg4\fR ]
+
+.SH DESCRIPTION
+\fBsvalert\fR(8) is a script that can be used to send alerts for services
+supervised by \fBsupervise\fR(8). It can be called in \fIsv\fR/\fI/run\fR,
+\fIsv\fR/\fIalert\fR, \fIsv\fR/shutdown, where \fIsv\fR is the service
+name (usually a service in \fI/service/sv\fR. If you don't have an
+\fIalert\fR script or a \fIshutdown\fR script, you can link these scripts
+to svalert. e.g.
+
+.EX
+  ln -s @libexecdir@/svalert /service/sv/alert
+  ln -s @libexecdir@/svalert /service/sv/shutdown
+.EE
+
+You can have a line like below in your \fIrun\fR, \fIalert\fR,
+\fIshutdown\fR script to send alerts.
+
+.EX
+  [ -x @libexecdir@/svalert ] && @libexecdir@/svalert "$@"
+.EE
+
+\fBsupervise\fR passes arguments to the \fBrun\fR, \fBalert\fR and the
+\fBshutdown\fR scripts. You can call \fBsvalert\fR in these scripts by
+executing as \fIsvalert\fR "$@". See \fBsupervise\fR(8) for the full
+explanation of the arguments passed to \fBrun\fR, \fBalert\fR and the
+\fBshutdown\fR scripts. \fBsvalert\fR will then use these arguments to send
+alerts on port \fB3001\fR as default using \fBudpclient\fR(1). You can send
+\fBSV_ALERT_PORT\fR to use a custom port. You can also set \fBUSE_SYSLOG\fR
+environment variable to send messages to system journal using the
+\fBlogger\fR(1) command.
+
+
+.SH SEE ALSO
+supervise(8), svscan(8), udpclient(1)

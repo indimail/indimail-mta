@@ -525,19 +525,19 @@ trystart(const char *how)
 			strerr_die2sys(111, fatal.s, "unable to set process group id: ");
 		switch (run_type)
 		{
-		case 0:
+		case 0: /* do not load env variables from ./variables and keep existing env variables intact */
 			run[1] = dir;
 			run[2] = how;
 			execve(*run, (char **) run, environ);
 			strerr_die4sys(111, fatal.s, "unable to start ", *run, ": ");
 			break;
-		case 1:
+		case 1: /*- load env variables from .variables but keep existing env variables */
 			envdir1[3] = dir;
 			envdir1[4] = how;
 			pathexec_run(*envdir1, (char **) envdir1, environ);
 			strerr_die4sys(111, fatal.s, "unable to start ", *envdir1, ": ");
 			break;
-		case 2:
+		case 2: /*- load env variables from .variables and clear existing env variables */
 			envdir2[4] = dir;
 			envdir2[5] = how;
 			pathexec_run(*envdir2, (char **) envdir2, environ);

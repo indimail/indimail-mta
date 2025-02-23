@@ -11,8 +11,8 @@ To use \fBlogselect\fR you can create a service whose run file looks like this:
  QMAILDUID=`id -u qmaill`
  NOFILESGID=`id -g qmaill`
  exec softlimit -m 2000000 \
- tcpserver -p -x cdb -u QMAILDUID -g $NOFILESGID 0 642 \
- /usr/bin/xargs -e EOF PREFIX/bin/logselect
+ tcpserver -p -x cdb -u QMAILDUID -g $NOFILESGID 0 642 \\
+   /usr/bin/xargs -e EOF @prefix@/bin/logselect
 .PP
 In addition, the service directory should have symlinks pointing to
 the log files you wish to make accessible.

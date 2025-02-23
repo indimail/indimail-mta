@@ -57,24 +57,12 @@ in such cases to make \fBsvc\fR(8) command operate and control
 self pipe trick to handle all SIGCHLD events reliably. This requires the
 use of two file descriptors for the selfpipe.
 
-\fBsupervise\fR can set environment variables for \fI./run\fR using
-\fIenvdir\fR(8) if the directory \fI./variables\fR exists. Files in
+If the directory \fI./variables\fR exists, \fBsupervise\fR can set
+environment variables for \fI./run\fR using \fIenvdir\fR(8). Files in
 \fI./variables\fR directory must be compatible as environment variables for
 \fBenvdir\fR(8). If the directory \fI./variables\fR doesn't have execute
 permissions for \fBothers\fR group, all existing environment variables will
 be cleared before setting environment variables for \fI./run\fR.
-
-.TS
-l l.
-how              Description
-_
-abnormal startup When ./run exits on its own
-system failure   When supervise is unable to fork to execute ./run
-manual restart   When svc -u or -r is used to start the service
-one-time startup When svc -o is used to start the service
-auto startup     Normal startup after supervise is run by svscan or
-                 manually
-.TE
 
 If the file \fIdir\fR/down exists, \fBsupervise\fR(8) does not start ./run
 immediately. You can use \fBsvc\fR(8) to start ./run or to give other
@@ -171,29 +159,79 @@ setting the environment variable \fBSILENT\fR. If you are using
 environment variables for \fBsupervise\fR in
 \fI/service/.svscan/variables\fR directory.
 
+\fBsupervise\fR passes arguments to the \fIrun\fR, \fIalert\fR and the
+\fIshutdown\fR scripts. This allows you to handle various events in the
+three scripts. The table below shows the arguments passed. The script
+\fI@libexecdir@/svalert\fR uses these arguments to send alerts on port
+3001. See \fBsvalert\fR(8).
+
+To call svalert in your \fIrun\fR, \fIalert\fR, \fIshutdown\fR scripts just
+include this line as the first call.
+
+.EX
+  [ -x @libexecdir@/svalert ] && @libexecdir@/svalert $@
+.EE
+
+If you don't have your own \fIalert\fR or \fIshutdown\fR scripts, you can
+link those scripts to \fI@libexecdir@/svalert\fR.
+
+.EX
+  ln -s @libexecdir@/svalert \fIdir\fR/alert
+  ln -s @libexecdir@/svalert \fIdir\fR/shutdown
+.EE
+
+where \fIdir\fR is your service directory.
+
+When called in \fIrun\fR, \fBsvalert\fR is passed two command line
+arguments with \fIdir\fR as argv[1] and \fIhow\fR as argv[2]. The value of
+\fIhow\fR is as below in the table
+
+.TS
+l l.
+how              Description
+_
+abnormal startup When ./run exits on its own
+system failure   When supervise is unable to fork to execute ./run
+manual restart   When svc -u or -r is used to start the service
+one-time startup When svc -o is used to start the service
+auto startup     Normal startup after supervise is run by svscan or
+                 manually
+.TE
+
+When called in \fIalert\fR or as \fBalert\fR, \fBsvalert\fR is passed four
+command line arguments with \fIdir\fR as argv[1], \fIpid\fR as argv[2]. The
+exit value or signal (if killed by signal) is passed as the third argument.
+The fourth argument is either of the strings \fIexited\fR, \fIstopped\fR or
+\fIsignalled\fR.
+
+When called in \fIshutdown\fR or as \fBshutdown\fR, \fBsvalert\fR is passed
+two arguments. \fIdir\fR is passed as the first argument and the pid of the
+process that exited is passed as the second argument.
+
 .SH EXIT VALUE
 \fBsupervise\fR is designed to run forever, however it can exit 100 during
 startup if it fails to open \fIdir/supervise/lock\fR, or exit 111 if it
 encounters system errors.
 
 .SH SEE ALSO
-svc(8),
-svok(8),
-svstat(8),
-svps(1),
-svscanboot(8),
-svscan(8),
-svctool(8),
-minisvc(8),
-readproctitle(8),
-fghack(8),
-pgrphack(8),
-multilog(8),
-tai64n(8),
-tai64nlocal(8),
-setuidgid(8),
-envuidgid(8),
 envdir(8),
-softlimit(8),
+envuidgid(8),
+fghack(8),
+minisvc(8),
+multilog(8),
+open(2),
+pgrphack(8),
+readproctitle(8),
 setlock(8),
-open(2)
+setuidgid(8),
+softlimit(8),
+svalert(8),
+svc(8),
+svctool(8),
+svok(8),
+svps(1),
+svscan(8),
+svscanboot(8),
+svstat(8),
+tai64n(8),
+tai64nlocal(8)

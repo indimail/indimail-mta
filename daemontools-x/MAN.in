@@ -27,6 +27,7 @@ f:::0644:/man8/:setlock.8:setlock.8
 f:::0644:/man8/:setuidgid.8:setuidgid.8
 f:::0644:/man8/:softlimit.8:softlimit.8
 f:::0644:/man8/:supervise.8:supervise.8
+f:::0644:/man8/:svalert.8:svalert.8
 f:::0644:/man8/:svc.8:svc.8
 f:::0644:/man8/:svok.8:svok.8
 f:::0644:/man8/:svscan.8:svscan.8

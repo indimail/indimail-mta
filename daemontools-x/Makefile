@@ -25,15 +25,15 @@ it = envdir envuidgid setlock setuidgid softlimit svc svok \
 	svstat tai64n tai64nlocal tai64nunix tai2tai64n tai64n2tai \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
-	pgrphack svps svscanboot upstart systemd qmailctl openrc \
+	pgrphack svalert svps svscanboot upstart systemd qmailctl openrc \
 	minisvc instcheck installer daemontools.perms daemontools.changes
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
 	tai64n2tai.1 envdir.8 envuidgid.8 fghack.8 installer.1 \
 	multilog.8 pgrphack.8 readproctitle.8 setlock.8 setuidgid.8 \
-	softlimit.8 supervise.8 svc.8 svok.8 svscan.8 svstat.8 tai64n.8 \
-	tai64nlocal.8 tai64nunix.8 logselect.8 svscanboot.8 qmailctl.8 \
-	qlogselect.1 minisvc.8 docker-entrypoint.8 runpod.1
+	softlimit.8 supervise.8 svalert.8 svc.8 svok.8 svscan.8 svstat.8 \
+	tai64n.8 tai64nlocal.8 tai64nunix.8 logselect.8 svscanboot.8 \
+	qmailctl.8 qlogselect.1 minisvc.8 docker-entrypoint.8 runpod.1
 
 include Makefile.$(SYSTEM)
 
@@ -204,6 +204,16 @@ supervise.o: compile supervise.c deepsleep.h \
 subreaper.h conf-runfs
 	./compile `grep -v "^#" conf-runfs` supervise.c
 
+svalert: svalert.in conf-libexec
+	cat warn-auto.sh $@.in  | $(edit) > $@
+	chmod +x $@
+
+supervise.8: supervise.9 conf-libexec
+	$(edit) supervise.9 > $@
+
+svalert.8: svalert.9 conf-libexec
+	$(edit) svalert.9 > $@
+
 subreaper.o: compile subreaper.c subreaper.h
 	./compile subreaper.c
 
@@ -229,7 +239,7 @@ svscan.o: compile svscan.c auto_sysconfdir.h conf-runfs
 	./compile `grep -v "^#" conf-runfs` svscan.c
 
 svscan.8: svscan.9 conf-sysconfdir conf-servicedir
-	$(edit) svscan.9 > svscan.8
+	$(edit) svscan.9 > $@
 
 svstat: load svstat.o run_init.o
 	./load svstat run_init.o -lqmail
@@ -323,9 +333,10 @@ logselect: load logselect.o sorted.o
 	./load logselect sorted.o -lqmail
 
 logselect.8: logselect.9 conf-prefix
-	cat logselect.9 \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> logselect.8
+	$(edit) logselect.9 > $@
+#	cat logselect.9 \
+#	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+#	> $@
 
 sorted.o: compile sorted.c sorted.h
 	./compile sorted.c
@@ -337,10 +348,12 @@ sortedtest.o: compile sortedtest.c sorted.h
 	./compile sortedtest.c
 
 qlogselect: qlogselect.pl conf-prefix
-	cat qlogselect.pl \
-	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
-	> qlogselect
-	chmod 755 qlogselect
+	$(edit) qlogselect.pl > $@
+	chmod 755 $@
+#	cat qlogselect.pl \
+#	| sed s}PREFIX}"`head -1 conf-prefix`"}g \
+#	> qlogselect
+#	chmod 755 qlogselect
 
 hasinotify.h: \
 tryinotify.c compile load
@@ -400,7 +413,7 @@ conf-libexec conf-servicedir
 	) > svscanboot
 
 svscanboot.8: svscanboot.9 conf-libexec conf-servicedir
-	$(edit) svscanboot.9 > svscanboot.8
+	$(edit) svscanboot.9 > $@
 
 svscan_rc: \
 warn-auto.sh conf-prefix svscan_rc.in \
@@ -424,7 +437,7 @@ conf-servicedir conf-sysconfdir
 	chmod +x qmailctl
 
 qmailctl.8: qmailctl.9 conf-servicedir
-	$(edit) qmailctl.9 > qmailctl.8
+	$(edit) qmailctl.9 > $@
 
 docker-entrypoint: \
 warn-auto.sh docker-entrypoint.sh conf-prefix conf-servicedir \
@@ -436,7 +449,7 @@ conf-sysconfdir
 	chmod 755 docker-entrypoint
 
 docker-entrypoint.8: docker-entrypoint.9 conf-servicedir
-	$(edit) docker-entrypoint.9 > docker-entrypoint.8
+	$(edit) docker-entrypoint.9 > $@
 
 runpod: warn-auto.sh runpod.sh
 	(cat warn-auto.sh runpod.sh) > runpod
@@ -485,7 +498,7 @@ compile installer.c
 	./compile installer.c
 	
 installer.1: installer.9 conf-libexec conf-sysconfdir
-	$(edit) installer.9 > installer.1
+	$(edit) installer.9 > $@
 
 INPUT: INPUT.in \
 conf-prefix conf-libexec conf-qmail \

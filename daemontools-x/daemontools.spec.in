@@ -1,6 +1,6 @@
 #
 #
-# $Id: daemontools.spec.in,v 1.52 2025-01-04 08:45:53+05:30 Cprogrammer Exp mbhangui $
+# $Id: daemontools.spec.in,v 1.53 2025-02-23 13:18:18+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -278,6 +278,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %attr(0755,root,root)                    %{libexecdir}/instcheck
                                          %{libexecdir}/instcheck.daemontools
 %attr(0755,root,root)                    %{libexecdir}/set-network-wait
+%attr(0755,root,root)                    %{libexecdir}/svalert
 %attr(444,root,root)                     %{qsysconfdir}/%{name}-release
 %attr(444,root,root)                     %{qsysconfdir}/%{name}-rpm.info
 %attr(644,root,root)  %config(noreplace) %{qsysconfdir}/perms.d/%{name}/*
@@ -314,6 +315,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %attr(0644,root,root)                    %{mandir}/man8/setuidgid.8.*
 %attr(0644,root,root)                    %{mandir}/man8/softlimit.8.*
 %attr(0644,root,root)                    %{mandir}/man8/supervise.8.*
+%attr(0644,root,root)                    %{mandir}/man8/svalert.8.*
 %attr(0644,root,root)                    %{mandir}/man8/svc.8.*
 %attr(0644,root,root)                    %{mandir}/man8/svok.8.*
 %attr(0644,root,root)                    %{mandir}/man8/svscan.8.*
