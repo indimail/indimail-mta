@@ -53,9 +53,9 @@ jobs:
         path: libqmail
 
     - name: install_qmail
-      run: cd libqmail;env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" make; sudo make install-strip
+      run: cd libqmail;env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" make; sudo make install-strip
     - name: install_libdkim2
-      run: cd libdkim2-x; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.0/lib" make; sudo make install-strip
+      run: cd libdkim2-x; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.4.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.4.1/lib" make; sudo make install-strip
     - name: install_libsrs2
       run: cd libsrs2-x; ./default.configure; make; sudo make install-strip
 
