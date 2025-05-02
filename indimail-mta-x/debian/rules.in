@@ -131,6 +131,8 @@ binary-indep: build install
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mta.install
 	sed -i -e 's,@libd\@,$(libd),g' debian/indimail-mini.install
 	sed -i -e 's,@libd\@,$(libd),g' debian/qmta.install
+	chmod 755 $(DESTDIR)${prefix}/sbin/qhpsi $(DESTDIR)${prefix}/sbin/run-cleanq $(DESTDIR)${prefix}/sbin/qmail-queue \
+		$(DESTDIR)${prefix}/sbin/qscanq $(DESTDIR)${prefix}/sbin/sys-checkpwd $(DESTDIR)${prefix}/sbin/qmail-dkim
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mta
 	dh_install --sourcedir=$(DESTDIR) -pindimail-mini
 	dh_install --sourcedir=$(DESTDIR) -pqmta

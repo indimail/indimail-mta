@@ -15,6 +15,8 @@ Release 3.1-1.1 Start 26/12/2024 End XX/XX/XXXX
 06. rd-remote.c: initialize use_regex variable before use
 - 23/02/2025
 07. installer.c: Fix SEGSEGV
+- 02/05/2025
+08. debian/rules: Fix dh_strip failure for setuid binaries
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <indimail-mta@indimail.org 3.0.9-1.1%{?dist}
 Release 3.0.9-1.1 Start 08/08/2024 End 24/12/2024
