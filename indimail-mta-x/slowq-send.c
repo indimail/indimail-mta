@@ -1,11 +1,12 @@
 /*
- * $Id: slowq-send.c,v 1.41 2025-05-03 11:04:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.42 2025-05-03 16:32:42+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <sys/time.h>
 #include <dlfcn.h>
+#include <signal.h>
 #include <sys/stat.h>
 #include "sig.h"
 #include "direntry.h"
@@ -3811,7 +3812,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	const char     *x = "$Id: slowq-send.c,v 1.41 2025-05-03 11:04:00+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: slowq-send.c,v 1.42 2025-05-03 16:32:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3821,6 +3822,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.42  2025-05-03 16:32:42+05:30  Cprogrammer
+ * added signal.h for kill(2)
+ *
  * Revision 1.41  2025-05-03 11:04:00+05:30  Cprogrammer
  * reorganized code
  *
