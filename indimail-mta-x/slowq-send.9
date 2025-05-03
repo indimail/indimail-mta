@@ -24,7 +24,7 @@ The control file takes precedence over the environment variable. If
 TODO_INTERVAL=0, TODO_INTERVAL="" or a value less than zero,
 \fBslowq-send\fR silently uses 10 seconds as the value for
 \fBTODO_INTERVAL\fR. If the environment variable \fBTODO_PROCESSOR\fR is
-set to non-zero value, \fBslow-send\fR forks and runs a parallel
+set to non-zero value, \fBslow-send\fR forks and runs an internal parallel
 todo-processor named \fBslowq-todo\fR. This addresses a problem known as
 the silly qmail (queue) problem sometimes found only on system with high
 injection rates and an inefficient filesystem.

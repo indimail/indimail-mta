@@ -1,8 +1,9 @@
 /*
- * $Id: drate.c,v 1.25 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: drate.c,v 1.26 2025-05-03 11:02:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <dirent.h>
 #include <regex.h>
@@ -19,6 +20,7 @@
 #include <now.h>
 #include <scan.h>
 #include <str.h>
+#include <qprintf.h>
 #include <check_domain.h>
 #include <date822fmt.h>
 #include <no_of_days.h>
@@ -41,7 +43,7 @@ static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write
 static char     sserrbuf[512];
 static substdio sserr = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 static stralloc qdir = { 0 };
-const char     *usage = "usage: drate [-sulcR] [-t -C count] -d domain -r deliveryRate [-D ratelimit_dir]\n";
+const char     *usage = "usage: drate [-sulcR] [-t -C count] -d domain [-a alias_domain] -r deliveryRate [-D ratelimit_dir]\n";
 const char     *daytab[7] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
@@ -119,7 +121,7 @@ do_display(const char *domain)
 	int             rfd, match, line_no;
 	unsigned long   email_count = 0;
 	struct substdio ssfin;
-	char            inbuf[2048], strdouble[FMT_DOUBLE], buf[DATE822FMT];
+	char            inbuf[2048], buf[DATE822FMT];
 	double          conf_rate, rate;
 	datetime_sec    starttime = 0, endtime = 0, time_needed;
 	struct datetime dt;
@@ -127,6 +129,7 @@ do_display(const char *domain)
 	if ((rfd = open_read(domain)) == -1)
 		strerr_die3sys(111, "unable to read: ", domain, ": ");
 	substdio_fdbuf(&ssfin, (ssize_t (*)(int,  char *, size_t)) read, rfd, inbuf, sizeof(inbuf));
+	/*- 1/10NULL0NULL1691162985NULL691162985NULL */
 	for (line_no = 1;;line_no++) { /*- Line Processing */
 		if (getln(&ssfin, &line, &match, DELIMITER[0]) == -1)
 			strerr_die3sys(111, "unable to read: ", domain, ": ");
@@ -140,87 +143,146 @@ do_display(const char *domain)
 		}
 		switch (line_no)
 		{
-		case 1:
-			if (substdio_put(&ssout, "Conf   Rate: ", 13) == -1 ||
-					substdio_put(&ssout, line.s, line.len) == -1)
-				strerr_die1sys(111, "unable to write: ");
+		case 1: /*- rate expression */
 			get_rate(line.s, &conf_rate);
-			strdouble[fmt_double(strdouble, conf_rate, 10)] = 0;
-			if (substdio_put(&ssout, " (", 2) == -1 ||
-					substdio_puts(&ssout, strdouble) == -1 ||
-					substdio_put(&ssout, ")\n", 2) == -1)
-				strerr_die1sys(111, "unable to write: ");
+			if (subprintf(&ssout, "Conf   Rate: %s (%.4f)\n", line.s, conf_rate) == -1)
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
 			break;
-		case 2:
+		case 2: /*- email count */
 			scan_ulong(line.s, (unsigned long *) &email_count);
-			if (substdio_put(&ssout, "Email Count: ", 13) == -1 ||
-					substdio_put(&ssout, line.s, line.len) == -1 ||
-					substdio_put(&ssout, "\n", 2) == -1)
-				strerr_die1sys(111, "unable to write: ");
+			if (subprintf(&ssout, "Email Count: %s\n", line.s))
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
 			break;
-		case 3:
+		case 3: /*- start time */
 			scan_ulong(line.s, (unsigned long *) &starttime);
 			if (substdio_put(&ssout, "Start  Time: ", 13) == -1)
-				strerr_die1sys(111, "unable to write: ");
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
 			if (local_time) {
 				datetime_tai(&dt, starttime);
 				if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
-					strerr_die1sys(111, "unable to write: ");
+					strerr_die1sys(111, "unable to write to descriptor 1: ");
 			} else {
 				if (substdio_puts(&ssout, qtime_mess822(starttime)))
-					strerr_die1sys(111, "unable to write: ");
+					strerr_die1sys(111, "unable to write to descriptor 1: ");
 			}
 			break;
-		case 4:
+		case 4: /*- end time */
 			scan_ulong(line.s, (unsigned long *) &endtime);
 			if (substdio_put(&ssout, "LastUpdated: ", 13) == -1)
-				strerr_die1sys(111, "unable to write: ");
-			if (local_time) {
-			datetime_tai(&dt, endtime);
-			if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
-				strerr_die1sys(111, "unable to write: ");
-			} else {
-				if (substdio_puts(&ssout, qtime_mess822(endtime)))
-					strerr_die1sys(111, "unable to write: ");
-			}
-			endtime = now();
-			if (substdio_put(&ssout, "CurrentTime: ", 13) == -1)
-				strerr_die1sys(111, "unable to write: ");
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
 			if (local_time) {
 				datetime_tai(&dt, endtime);
 				if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
-					strerr_die1sys(111, "unable to write: ");
+					strerr_die1sys(111, "unable to write to descriptor 1: ");
 			} else {
 				if (substdio_puts(&ssout, qtime_mess822(endtime)))
-					strerr_die1sys(111, "unable to write: ");
+					strerr_die1sys(111, "unable to write to descriptor 1: ");
+			}
+			endtime = now();
+			if (substdio_put(&ssout, "CurrentTime: ", 13) == -1)
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
+			if (local_time) {
+				datetime_tai(&dt, endtime);
+				if (substdio_put(&ssout, buf, date822fmt(buf, &dt)) == -1)
+					strerr_die1sys(111, "unable to write to descriptor 1: ");
+			} else {
+				if (substdio_puts(&ssout, qtime_mess822(endtime)))
+					strerr_die1sys(111, "unable to write to descriptor 1: ");
 			}
 			rate = (double) email_count / (double) (endtime - starttime);
 			time_needed = (long int) email_count/conf_rate - endtime + starttime;
-			strdouble[fmt_double(strdouble, rate, 10)] = 0;
-			if (substdio_put(&ssout, "CurrentRate: ", 13) == -1 ||
-					substdio_puts(&ssout, strdouble) == -1 ||
-					substdio_put(&ssout, "\n", 1) == -1)
-				strerr_die1sys(111, "unable to write: ");
-			strnum1[fmt_int(strnum1, time_needed)] = 0;
+			if (subprintf(&ssout, "CurrentRate: %.2f\n", rate) == -1)
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
 			if (rate > conf_rate) {
-				if (substdio_put(&ssout, "High; need ", 11) == -1 ||
-						substdio_puts(&ssout, strnum1) == -1 ||
-						substdio_put(&ssout, " secs", 5) == -1)
-					strerr_die1sys(111, "unable to write: ");
+				if (subprintf(&ssout, "High; need %ld secs\n", time_needed) == -1)
+					strerr_die1sys(111, "unable to write to descriptor 1: ");
 			} else {
-				if (substdio_put(&ssout, "OK since ", 9) == -1 ||
-						substdio_puts(&ssout, (0 - time_needed) > 86400 ? no_of_days(0 - time_needed) : strnum1 + 1) == -1)
-					strerr_die1sys(111, "unable to write: ");
-				if ((0 - time_needed) <= 86400 && substdio_put(&ssout, " secs", 5) == -1)
-					strerr_die1sys(111, "unable to write: ");
+				if ((0 - time_needed) >= 86400) {
+					if (subprintf(&ssout, "OK since %s\n", no_of_days(0 - time_needed)) == -1)
+						strerr_die1sys(111, "unable to write to descriptor 1: ");
+				} else {
+					if (subprintf(&ssout, "OK since %ld secs", time_needed) == -1)
+						strerr_die1sys(111, "unable to write to descriptor 1: ");
+				}
 			}
-			if (substdio_put(&ssout, "\n", 1) == -1)
-				strerr_die1sys(111, "unable to write: ");
 			break;
 		}
 	}
 	if (substdio_flush(&ssout) == -1)
-		strerr_die1sys(111, "unable to write: ");
+		strerr_die1sys(111, "unable to write to descriptor 1: ");
+}
+
+int
+delete_domain(const char *domain, int force)
+{
+	DIR            *dir;
+	struct dirent  *dp;
+	struct stat     statbuf;
+	char            buf[128], strnum[FMT_ULONG];
+	int             len, found;
+
+	if (lstat(domain, &statbuf) == -1)
+		strerr_die4sys(111, FATAL, "lstat: ", domain, ": ");
+	if (S_ISLNK(statbuf.st_mode)) {
+		if ((len = readlink(domain, buf, sizeof(buf))) == -1)
+			strerr_die4sys(111, FATAL, "readlink: ", domain, ": ");
+		if (len < sizeof(buf))
+			buf[len] = '\0';
+		else {
+			errno = ENAMETOOLONG;
+			strerr_die4sys(111, FATAL, "readlink: ", domain, ": ");
+		}
+		if (unlink(domain) == -1)
+			strerr_die6sys(111, FATAL, "Unable to remove rate control definition for domain ", domain, "linked to domain ", buf, ": ");
+		strerr_die4x(0, "Removed rate control definition for domain ", domain, " linked to domain ", buf);
+	}
+
+	/* check for linked domains */
+	if (!(dir = opendir(".")))
+		strerr_die1sys(111, "opendir: ");
+	for (found = 0;;) {
+		if(!(dp = readdir(dir)))
+			break;
+		if (!str_diff(dp->d_name, ".") || !str_diff(dp->d_name, ".."))
+			continue;
+		if (lstat(dp->d_name, &statbuf) == -1)
+			strerr_die4sys(111, FATAL, "lstat: ", dp->d_name, ": ");
+		if (S_ISLNK(statbuf.st_mode)) {
+			if ((len = readlink(dp->d_name, buf, sizeof(buf))) == -1)
+				strerr_die4sys(111, FATAL, "readlink: ", dp->d_name, ": ");
+			if (len < sizeof(buf))
+				buf[len] = '\0';
+			else {
+				errno = ENAMETOOLONG;
+				strerr_die4sys(111, FATAL, "readlink: ", dp->d_name, ": ");
+			}
+			if (!str_diffn(buf, domain, len + 1)) {
+				if (!force) {
+					strerr_warn5(FATAL, "found domain ", dp->d_name, " linked to ", domain, 0);
+					found++;
+				} else {
+					strerr_warn4("Removing domain ", dp->d_name, " linked to ", domain, 0);
+					if (unlink(dp->d_name) == -1)
+						strerr_die6sys(111, FATAL, "Unable to remove rate control definition for domain ", dp->d_name, "linked to domain ", domain, ": ");
+					else {
+						if (subprintf(&ssout, "Removed rate control definition for domain %s linked to domain %s\n", dp->d_name, domain) == -1)
+							strerr_die1sys(111, "unable to write to descriptor 1: ");
+						if (substdio_flush(&ssout) == -1)
+							strerr_die1sys(111, "unable to write to descriptor 1: ");
+					}
+				}
+			}
+		}
+	}
+	if (!found) {
+		if (unlink(domain) == -1)
+			strerr_die4sys(111, FATAL, "Unable to remove rate control definition for domain ", domain, ": ");
+		strerr_die2x(0, "Removed rate control definition for domain ", domain);
+	} else {
+		strnum[fmt_ulong(strnum, found)] = 0;
+		strerr_die5x(0, "Not removing domain ", domain, " as it has ", strnum, " linked domains");
+	}
+	return (found ? 100 : 0);
 }
 
 void
@@ -228,6 +290,9 @@ do_list(int display)
 {
 	DIR            *dir;
 	struct dirent  *dp;
+	struct stat     statbuf;
+	char            buf[128];
+	int             len;
 
 	if (!(dir = opendir(".")))
 		strerr_die1sys(111, "opendir: ");
@@ -236,17 +301,36 @@ do_list(int display)
 			break;
 		if (!str_diff(dp->d_name, ".") || !str_diff(dp->d_name, ".."))
 			continue;
+		if (lstat(dp->d_name, &statbuf) == -1)
+			strerr_die4sys(111, FATAL, "lstat: ", dp->d_name, ": ");
+		if (S_ISLNK(statbuf.st_mode)) {
+			if ((len = readlink(dp->d_name, buf, sizeof(buf))) == -1)
+				strerr_die4sys(111, FATAL, "readlink: ", dp->d_name, ": ");
+			if (len < sizeof(buf))
+				buf[len] = '\0';
+			else {
+				errno = ENAMETOOLONG;
+				strerr_die4sys(111, FATAL, "readlink: ", dp->d_name, ": ");
+			}
+			if (subprintf(&ssout, "domain     : %s linked to %s\n", dp->d_name, buf))
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
+		} else {
+			if (subprintf(&ssout, "domain     : %s\n", dp->d_name))
+				strerr_die1sys(111, "unable to write to descriptor 1: ");
+		}
+#if 0
 		if (substdio_put(&ssout, "domain     : ", 13) == -1 ||
 				substdio_puts(&ssout, dp->d_name) == -1 ||
 				substdio_put(&ssout, "\n", 1) == -1)
-			strerr_die1sys(111, "unable to write: ");
+			strerr_die1sys(111, "unable to write to descriptor 1: ");
+#endif
 		if (display)
 			do_display(dp->d_name);
 		if (substdio_put(&ssout, "--------------------------------------------\n", 45) == -1)
-			strerr_die1sys(111, "unable to write: ");
+			strerr_die1sys(111, "unable to write to descriptor 1: ");
 	}
 	if (substdio_flush(&ssout) == -1)
-		strerr_die1sys(111, "unable to write: ");
+		strerr_die1sys(111, "unable to write to descriptor 1: ");
 }
 
 void
@@ -331,7 +415,7 @@ update_mode(const char *domain, const char *rate_expr, int reset_mode, int conso
 new:
 	t = errno;
 	if ((wfd = open(domain, O_WRONLY|O_CREAT, 0640)) == -1)
-		strerr_die4sys(111, FATAL, "unable to write: ", domain, ": ");
+		strerr_die4sys(111, FATAL, "unable to write to file ", domain, ": ");
 	if (lock_ex(wfd) == -1)
 		cleanup(domain, "unable to lock", t);
 	if (uidinit(1, 0) == -1 || auto_uids == -1 || auto_gidq == -1)
@@ -444,11 +528,11 @@ main(int argc, char **argv)
 {
 	int             i, ch, display = 0, listing = 0, incr = 0, count = 1,
 					consolidate = 0, reset_mode = 0, test_mode = 0,
-					force = 0;
-	const char     *qbase, *domain = 0, *rate_expr = 0,
+					force = 0, do_unlink = 0;
+	const char     *qbase, *domain = 0, *rate_expr = 0, *alias_domain = NULL,
 				   *ptr, *ratelimit_dir = "ratelimit";
 
-	while ((ch = getopt(argc, argv, "flutscRd:r:D:C:")) != sgoptdone) {
+	while ((ch = getopt(argc, argv, "a:fluUtscRd:r:D:C:")) != sgoptdone) {
 		switch (ch)
 		{
 		case 'u':
@@ -461,8 +545,14 @@ main(int argc, char **argv)
 		case 'f':
 			force = 1;
 			break;
+		case 'a':
+			alias_domain = optarg;
+			break;
 		case 'l':
 			listing = 1;
+			break;
+		case 'U':
+			do_unlink = 1;
 			break;
 		case 's':
 			display = 1;
@@ -536,12 +626,33 @@ main(int argc, char **argv)
 	if (chdir(ratelimit_dir))
 		strerr_die4sys(111, FATAL, "unable to switch to ", ratelimit_dir, ": ");
 
+	if (do_unlink)
+		return (delete_domain(domain, force));
 	if (!listing && !domain) {
 		logerrf("domain not specified\n");
 		logerrf(usage);
 		_exit (111);
 	}
 
+	if (alias_domain) {
+		if (!domain)
+			strerr_die2x(100, FATAL, "Domain name not specified");
+		if (access(alias_domain, W_OK)) {
+			if (errno == error_noent) {
+				if (symlink(domain, alias_domain) == -1)
+					strerr_die6sys(111, FATAL, "unable to link ", alias_domain, " to ", domain, ": ");
+				else {
+					if (subprintf(&ssout, "Linked %s to %s\n", alias_domain, domain) == -1)
+						strerr_die1sys(111, "unable to write to descriptor 1: ");
+					if (substdio_flush(&ssout) == -1)
+						strerr_die1sys(111, "unable to write to descriptor 1: ");
+					return 0;
+				}
+			} else
+				strerr_die3sys(111, FATAL, alias_domain, ": ");
+		} else
+			strerr_die4x(100, FATAL, "Domain ", alias_domain, " exists");
+	}
 	if (listing)
 		do_list(display);
 	else
@@ -565,7 +676,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	const char     *x = "$Id: drate.c,v 1.25 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: drate.c,v 1.26 2025-05-03 11:02:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
@@ -574,6 +685,10 @@ getversion_drate_c()
 }
 /*
  * $Log: drate.c,v $
+ * Revision 1.26  2025-05-03 11:02:59+05:30  Cprogrammer
+ * added -U option to delete domain rate control definitions
+ * added -a option to alias rate control definition to an existing domain
+ *
  * Revision 1.25  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

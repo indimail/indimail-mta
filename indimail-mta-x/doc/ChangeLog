@@ -17,6 +17,11 @@ Release 3.1-1.1 Start 26/12/2024 End XX/XX/XXXX
 07. installer.c: Fix SEGSEGV
 - 02/05/2025
 08. debian/rules: Fix dh_strip failure for setuid binaries
+- 03/05/2025
+09. drate.c: added -a option to alias domains to existing domain definition,
+    -U option to delete rate control definitions.
+10. slowq-send.c, qmail-send.c: reorganized code
+11. Updated indimail-mta permissions files for SLES
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <indimail-mta@indimail.org 3.0.9-1.1%{?dist}
 Release 3.0.9-1.1 Start 08/08/2024 End 24/12/2024

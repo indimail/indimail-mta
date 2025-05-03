@@ -1,3 +1,4 @@
+.\" vim: tw=75
 .TH drate 1
 .SH NAME
 drate \- rate control email delivery for domains
@@ -18,13 +19,21 @@ drate \- rate control email delivery for domains
 or
 
 .B drate
+.B \-s
 .B \-d \fIdomain\fR
 [
 .B \-D \fIratelimit_dir\fR
 ]
+
+or
+
+.B drate
 [
 .B \-s
 .B \-l
+]
+[
+.B \-D \fIratelimit_dir\fR
 ]
 
 or
@@ -37,11 +46,30 @@ or
 .B \-f
 ]
 
+or
+
+.B drate
+.B \-d \fIdomain\fR
+.B \-a \fIalias_domain\fR
+[
+.B \-D \fIratelimit_dir\fR
+]
+
+or
+
+.B drate
+.B \-U
+.B \-d \fIdomain\fR
+[
+.B \-D \fIratelimit_dir\fR
+]
+
 .SH DESCRIPTION
 \fBdrate\fR(1) displays or sets delivery rate for \fBqmail-remote\fR(8). The
 actual rate limiting happens in \fBslowq-send\fR(8), which uses the special
-\fIslowq\fR indimail queue. \fBdrate\fR(1) locks the file \fIdomain\fR in
-\fIratelimit_dir\fR before writing the following four lines.
+\fIslowq\fR indimail queue. \fBdrate\fR(1) locks the rate definition file
+\fIdomain\fR in \fIratelimit_dir\fR before writing the following four
+lines.
 
 .EX
  line 1 - Rate Expression
@@ -54,6 +82,11 @@ By default, \fBslowq-send\fR(8) resets statistics one day after the first
 sample. You can change the default by setting \fBRATELIMIT_INTERVAL\fR
 environment variable to the desired number of seconds. You can manually
 reset the interval using \fB-R\fR option of \fBdrate\fR(1).
+
+\fBdrate\fR(1) creates the rate definition files with owner as \fIqmails\fR
+and group as \fIqmail\fR. When you link an alias domain to a domain using
+the -a option, the rate definition file is actually a symbolic link the the
+rate definition file for the main domain.
 
 .SH OPTIONS
 .PP
@@ -77,7 +110,9 @@ Run the test \fIcount\fR times
 
 .TP
 \fB-f\fR
-Force update email counts and end time.
+Force update of email counts and end time when running in test mode. When
+specified with -U option, this option deletes a domain and all associated
+linked domains.
 
 .TP
 \fB-s\fR
@@ -116,6 +151,20 @@ Reset all statistics in \fIratelimit_dir/domain\fR. This will cause
 .TP
 \fB-u\fR
 Display time in UTC instead of local time zone.
+
+.TP
+\fB-a\fR
+Link an alias domain to the domain specified by the -d option. The rate
+defintion file will actually be a symbolic link to the rate definition file
+for the main domain.
+
+.TP
+\fB-U\fR
+Delete rate control definition for domain or an alias domain. If a domain
+has alias domains linked to it you can delete the domain only after first
+deleting all alias domains linked to it. The -f option can recursively
+delete all alias doamains before removing rate control definition for the
+main domain.
 
 .SH "SEE ALSO"
 slowq-send(8), qmail-remote(8)

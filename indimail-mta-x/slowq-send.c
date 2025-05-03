@@ -1,16 +1,14 @@
 /*
- * $Id: slowq-send.c,v 1.40 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.41 2025-05-03 11:04:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
-#include <signal.h>
 #include <ctype.h>
 #include <sys/time.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
 #include "sig.h"
 #include "direntry.h"
-#include "control.h"
 #include "select.h"
 #include "open.h"
 #include "seek.h"
@@ -18,6 +16,8 @@
 #include "ndelay.h"
 #include "now.h"
 #include "getln.h"
+#include "getEnvConfig.h"
+#include "wait.h"
 #include "substdio.h"
 #include "alloc.h"
 #include "error.h"
@@ -27,27 +27,26 @@
 #include "fmt.h"
 #include "scan.h"
 #include "case.h"
+#include "constmap.h"
+#include "env.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
+#include "auto_split.h"
+#include "control.h"
 #include "trigger.h"
 #include "newfield.h"
 #include "quote.h"
 #include "qmail.h"
 #include "qsutil.h"
 #include "prioq.h"
-#include "constmap.h"
 #include "fmtqfn.h"
-#include "env.h"
 #include "envrules.h"
 #include "variables.h"
 #include "readsubdir.h"
 #include "hassrs.h"
-#include "getEnvConfig.h"
-#include "auto_split.h"
 #ifdef HAVESRS
 #include "srs.h"
 #endif
-#include "wait.h"
 #ifdef USE_FSYNC
 #include "syncdir.h"
 #endif
@@ -3812,7 +3811,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	const char     *x = "$Id: slowq-send.c,v 1.40 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: slowq-send.c,v 1.41 2025-05-03 11:04:00+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3822,6 +3821,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.41  2025-05-03 11:04:00+05:30  Cprogrammer
+ * reorganized code
+ *
  * Revision 1.40  2025-01-22 00:30:34+05:30  Cprogrammer
  * Fixes for gcc14
  *

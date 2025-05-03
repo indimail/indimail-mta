@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.117 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.118 2025-05-03 11:03:47+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -7,34 +7,34 @@
 #include <sys/time.h>
 #include <dlfcn.h>
 #include <sys/stat.h>
+#include "sig.h"
+#include "direntry.h"
+#include "select.h"
+#include "open.h"
+#include "seek.h"
+#include "lock.h"
+#include "ndelay.h"
+#include "now.h"
+#include "getln.h"
+#include "getEnvConfig.h"
+#include "wait.h"
+#include "substdio.h"
+#include "alloc.h"
+#include "error.h"
+#include "stralloc.h"
+#include "str.h"
+#include "byte.h"
+#include "fmt.h"
+#include "scan.h"
+#include "case.h"
+#include "constmap.h"
+#include "env.h"
 #include "haslibrt.h"
 #ifdef HASLIBRT
 #include <sys/mman.h>
 #include <fcntl.h> /* For O_* constants */
 #endif
-#include <sig.h>
-#include <direntry.h>
-#include <select.h>
-#include <open.h>
-#include <seek.h>
-#include <lock.h>
-#include <ndelay.h>
-#include <now.h>
-#include <getln.h>
-#include <substdio.h>
-#include <alloc.h>
-#include <error.h>
-#include <stralloc.h>
-#include <str.h>
-#include <byte.h>
-#include <fmt.h>
-#include <scan.h>
-#include <case.h>
-#include <constmap.h>
-#include <env.h>
-#include <getEnvConfig.h>
-#include <sgetopt.h>
-#include <wait.h>
+#include "sgetopt.h"
 #include "auto_qmail.h"
 #include "auto_control.h"
 #include "auto_split.h"
@@ -2721,7 +2721,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	const char     *x = "$Id: qmail-send.c,v 1.117 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-send.c,v 1.118 2025-05-03 11:03:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2731,6 +2731,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.118  2025-05-03 11:03:47+05:30  Cprogrammer
+ * reorganized code
+ *
  * Revision 1.117  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *
