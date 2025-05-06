@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.118 2025-05-03 11:03:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.119 2025-05-06 22:39:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -2658,8 +2658,11 @@ main(int argc, char **argv)
 			if (errno == error_intr) {
 				if (flagexitsend)
 					break;
-			} else
+			} else {
+				if (errno == error_invalid)
+					tv.tv_sec = 0;
 				slog(1, "warn: ", argv0, ": ", queuedesc, ": trouble in select\n", NULL);
+			}
 		} else {
 			time_needed = 0;
 			recent = now();
@@ -2721,7 +2724,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	const char     *x = "$Id: qmail-send.c,v 1.118 2025-05-03 11:03:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-send.c,v 1.119 2025-05-06 22:39:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2731,6 +2734,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.119  2025-05-06 22:39:16+05:30  Cprogrammer
+ * reset tv.tv_sec on EINVAL
+ *
  * Revision 1.118  2025-05-03 11:03:47+05:30  Cprogrammer
  * reorganized code
  *

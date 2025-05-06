@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.42 2025-05-03 16:32:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.43 2025-05-06 22:39:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -3284,7 +3284,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 			if (wakeup <= recent)
 				tv.tv_sec = time_needed ? time_needed : 0;
 			else
-				if (time_needed && time_needed < (wakeup - recent))
+			if (time_needed && time_needed < (wakeup - recent))
 				tv.tv_sec = time_needed + SLEEP_FUZZ;
 			else
 				tv.tv_sec = wakeup - recent + SLEEP_FUZZ;
@@ -3293,8 +3293,11 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 				if (errno == error_intr) {
 					if (flagexitsend)
 						break;
-				} else
+				} else {
+					if (errno == error_invalid)
+						tv.tv_sec = 0;
 					todo_log("warn: ", argv0, ": ", queuedesc, ": trouble in select\n", NULL);
+				}
 			} else {
 				recent = now();
 				while (todo_do_todo(&nfds, &rfds) == 2);
@@ -3812,7 +3815,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	const char     *x = "$Id: slowq-send.c,v 1.42 2025-05-03 16:32:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: slowq-send.c,v 1.43 2025-05-06 22:39:44+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3822,6 +3825,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.43  2025-05-06 22:39:44+05:30  Cprogrammer
+ * reset tv.tv_sec on EINVAL
+ *
  * Revision 1.42  2025-05-03 16:32:42+05:30  Cprogrammer
  * added signal.h for kill(2)
  *

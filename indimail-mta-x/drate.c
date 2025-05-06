@@ -1,5 +1,5 @@
 /*
- * $Id: drate.c,v 1.26 2025-05-03 11:02:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: drate.c,v 1.27 2025-05-06 22:44:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -201,7 +201,7 @@ do_display(const char *domain)
 					if (subprintf(&ssout, "OK since %s\n", no_of_days(0 - time_needed)) == -1)
 						strerr_die1sys(111, "unable to write to descriptor 1: ");
 				} else {
-					if (subprintf(&ssout, "OK since %ld secs", time_needed) == -1)
+					if (subprintf(&ssout, "OK since %ld secs\n", 0 - time_needed) == -1)
 						strerr_die1sys(111, "unable to write to descriptor 1: ");
 				}
 			}
@@ -358,7 +358,7 @@ update_mode(const char *domain, const char *rate_expr, int reset_mode, int conso
 				strerr_die3sys(111, "unable to read: ", domain, ": ");
 			if (!stralloc_cats(&rexpr, rate_expr))
 				strerr_die1sys(111, "out of memory: ");
-			if (!check_domain(domain))
+			if (str_diff(domain, ".global") && !check_domain(domain))
 				strerr_die3(111, FATAL, "invalid domain: ", domain, &check_domain_err);
 			starttime = endtime = now();
 			ecount[fmt_ulong(ecount, 0)] = 0;
@@ -676,7 +676,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	const char     *x = "$Id: drate.c,v 1.26 2025-05-03 11:02:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: drate.c,v 1.27 2025-05-06 22:44:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
@@ -685,6 +685,9 @@ getversion_drate_c()
 }
 /*
  * $Log: drate.c,v $
+ * Revision 1.27  2025-05-06 22:44:28+05:30  Cprogrammer
+ * remove domain name check for special domain .global
+ *
  * Revision 1.26  2025-05-03 11:02:59+05:30  Cprogrammer
  * added -U option to delete domain rate control definitions
  * added -a option to alias rate control definition to an existing domain
