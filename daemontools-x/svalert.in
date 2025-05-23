@@ -7,17 +7,18 @@ log_syslog()
 	case "$1" in
 		"abnormal startup" | "system failure" | "abnormal shutdown")
 		shift
-		logger -p daemon.warning --server probe-server -t svalert $*
+		logger -p daemon.warning --server $probe_server -t svalert $*
 		;;
 		*)
 		shift
-		logger -p daemon.info --server probe-server -t svalert $*
+		logger -p daemon.info --server $probe_server -t svalert $*
 		;;
 	esac
 }
 
 tmval=$(date +%s)
 [ -n "SV_ALERT_PORT" ] && port=$SV_ALERT_PORT || port=3001
+[ -n "PROBE_SERVER" ] && probe_server=$PROBE_SERVER || probe_server="probe-server"
 
 case "$#" in
 	2) # run/shutdown script arguments
@@ -37,8 +38,10 @@ case "$#" in
 	# two arguments are passed
 	# $1 - service directory
 	# $2 - pid of process that was shutdown
+	#
 	if [ -f @sysconfdir@/svalerts.filter ] ; then
-		echo $2 | /usr/bin/grep -q -w -f @sysconfdir@/svalerts.filter
+		t=$(echo $2 | sed -e 's/ /-/g')
+		echo $t | /usr/bin/grep -q -w -f @sysconfdir@/svalerts.filter
 		if [ $? -eq 0 ] ; then
 			exit 0
 		fi
@@ -47,38 +50,39 @@ case "$#" in
 	if [ $word_count -eq 2 ] ; then # we are being called in ./run
 		t=$(echo $2 | sed -e 's/ /-/g')
 		if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
-			log_syslog "$2" $hostname $PWD $1 "$2" $tmval
+			log_syslog "$2" $hostname $PWD $1 "$t" - - $tmval
 		elif [ -x /usr/bin/udpclient ] ; then
-			exec /usr/bin/udpclient -h probe-server -p $port svalert $hostname $PWD $1 "$2" $tmval
+			exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "$t" - - $tmval
 		else
-			echo svalert $hostname $PWD $1 $t $tmval | nc probe-server -u $port
+			echo svalert $hostname $PWD $1 $t - - $tmval | nc $probe_server -u $port
 		fi
-	else # we are being called in ./shutdown
+	else # we are being called in ./shutdown and $2 is PID
 		if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
-			log_syslog "normal shutdown" $1 PID $2 "normal shutdown"
+			log_syslog "normal shutdown" $1 "normal shutdown" PID "$t" $tmval
 		elif [ -x /usr/bin/udpclient ] ; then
-			exec /usr/bin/udpclient -h probe-server -p $port svalert $hostname $PWD $1 PID $2 "normal-shutdown" $tmval
+			exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "normal-shutdown" PID $2 $tmval
 		else
-			echo svalert $hostname $PWD $1 "normal shutdown" $tmval | nc probe-server -u $port
+			echo svalert $hostname $PWD $1 "normal-shutdown" PID $2 $tmval | nc $probe_server -u $port
 		fi
 	fi
 	;;
 
 	3) # run script arguments when svalert gets called as svalert $* instead of svalert "$@"
 	# $1 - service directory
-	# #2 - startup type
+	# #2 - startup type (1st word)
+	# #3 - startup type (2nd word)
 	if [ -f @prefix@/etc/svalerts.filter ] ; then
-		echo $2 | /usr/bin/grep -q -w -f @prefix@/etc/svalerts.filter
+		echo "$2"-"$3" | /usr/bin/grep -q -w -f @prefix@/etc/svalerts.filter
 		if [ $? -eq 0 ] ; then
 			exit 0
 		fi
 	fi
 	if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
-		log_syslog "$2 $3" $hostname $PWD $1 "$2 $3" $tmval
+		log_syslog "$2 $3" $hostname $PWD $1 "$2-$3" - - $tmval
 	elif [ -x /usr/bin/udpclient ] ; then
-		exec /usr/bin/udpclient -h probe-server -p $port svalert $hostname $PWD $1 "$2 $3" $tmval
+		exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "$2-$3" - - $tmval
 	else
-		echo svalert $hostname $PWD $1 "$2 $3" $tmval | nc probe-server -u $port
+		echo svalert $hostname $PWD $1 "$2-$3" - - $tmval | nc $probe_server -u $port
 	fi
 	;;
 
@@ -94,11 +98,11 @@ case "$#" in
 		fi
 	fi
 	if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
-		log_syslog "abnormal shutdown" $hostname $PWD $1 "$4-$3" $tmval
+		log_syslog "abnormal shutdown" $hostname $PWD $1 "abnormal-shutdown" $4 $3 $tmval
 	elif [ -x /usr/bin/udpclient ] ; then
-		exec /usr/bin/udpclient -h probe-server -p $port svalert $hostname $PWD $1 "abormal shutdown" "$4-$3" $tmval
+		exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "abormal-shutdown" $4 $3 $tmval
 	else
-		echo svalert $hostname $PWD $1 "abormal shutdown" "$4-$3" $tmval | nc probe-server -u $port
+		echo svalert $hostname $PWD $1 "abormal-shutdown" $4 $3 $tmval | nc $probe_server -u $port
 	fi
 	;;
 esac

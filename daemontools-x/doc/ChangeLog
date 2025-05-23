@@ -15,6 +15,8 @@ variables
 - 23/02/2025
 08. added svalert script to libexecdir
 09. installer.c: Fix SEGSEGV
+- 23/05/2025
+10. svalert.in: use fixed number of arguments in alerts
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.6-1.1%{?dist}
 Release 1.1.6-1.1 Start 13/08/2024 End 24/12/2024
