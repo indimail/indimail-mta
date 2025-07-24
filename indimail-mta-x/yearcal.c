@@ -1,5 +1,8 @@
 /*
  * $Log: yearcal.c,v $
+ * Revision 1.3  2025-07-24 10:30:10+05:30  Cprogrammer
+ * convert function prototype to ansic
+ *
  * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -16,9 +19,7 @@ const char     *montab[] = {
 };
 
 int
-main(argc, argv)
-	int             argc;
-	char          **argv;
+main(int argc, char **argv)
 {
 	int             year;
 	long            daystart;
@@ -69,7 +70,7 @@ main(argc, argv)
 void
 getversion_yearcal_c()
 {
-	const char     *x = "$Id: yearcal.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: yearcal.c,v 1.3 2025-07-24 10:30:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
