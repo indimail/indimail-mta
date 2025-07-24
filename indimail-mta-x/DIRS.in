@@ -6,7 +6,6 @@ d::::/var::
 d::::/var/log::
 d::::@prefix@::
 d::::@prefix@/bin::
-d::::@prefix@/sbin::
 d::::@prefix@/lib::
 d::::@prefix@/libexec::
 d::::@prefix@/share::

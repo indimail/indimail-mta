@@ -35,7 +35,6 @@ f:root:qmail:0644:/:backup.conf:backup.conf
 f:root:root:0644:/perms.d/indimail-mta/:INPUT:INPUT
 f:root:root:0644:/perms.d/indimail-mta/:DIRS:DIRS
 f:root:root:0644:/perms.d/indimail-mta/:BIN:BIN
-f:root:root:0644:/perms.d/indimail-mta/:SBIN:SBIN
 f:root:root:0644:/perms.d/indimail-mta/:SHARED:SHARED
 f:root:root:0644:/perms.d/indimail-mta/:ETC:ETC
 f:root:root:0644:/perms.d/indimail-mta/:PLUGINS:PLUGINS

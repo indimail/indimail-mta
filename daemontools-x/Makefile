@@ -516,10 +516,6 @@ LIBEXEC: LIBEXEC.in
 	([ -f LIBEXEC.$(SYSTEM) ] && \
 	cat LIBEXEC.in LIBEXEC.$(SYSTEM) || cat LIBEXEC.in) > LIBEXEC
 
-SBIN: SBIN.in
-	([ -f SBIN.$(SYSTEM) ] && \
-	cat SBIN.in SBIN.$(SYSTEM) || cat SBIN.in) > SBIN
-
 SHARED: SHARED.in
 	([ -f SHARED.$(SYSTEM) ] && \
 	cat SHARED.in SHARED.$(SYSTEM) || cat SHARED.in) > SHARED
@@ -530,21 +526,19 @@ MAN: MAN.in
 
 install-strip: install
 
-install: $(it) $(man) installer DIRS BIN SBIN MAN SHARED LIBEXEC INPUT
+install: $(it) $(man) installer DIRS BIN MAN SHARED LIBEXEC INPUT
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
-	./installer $(DESTDIR)$(prefix)                < SBIN
 	./installer $(DESTDIR)$(shareddir)             < SHARED
 	./installer $(DESTDIR)$(qsysconfdir)           < ETC
 	./installer $(DESTDIR)$(libexecdir)            < LIBEXEC
 	./installer $(DESTDIR)$(mandir)                < MAN
 
-uninstall: installer DIRS BIN SBIN SHARED MAN
+uninstall: installer DIRS BIN SHARED MAN
 	sed -n '1!G;h;$$p' MAN     | ./installer -u $(DESTDIR)$(mandir)
 	sed -n '1!G;h;$$p' LIBEXEC | ./installer -u $(DESTDIR)$(libexecdir)
 	sed -n '1!G;h;$$p' ETC     | ./installer -u $(DESTDIR)$(qsysconfdir)
 	sed -n '1!G;h;$$p' SHARED  | ./installer -u $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$$p' SBIN    | ./installer -u $(DESTDIR)$(prefix)
 	sed -n '1!G;h;$$p' BIN     | ./installer -u $(DESTDIR)$(prefix)
 	sed -n '1!G;h;$$p' DIRS    | ./installer -u $(DESTDIR)
 

@@ -24,14 +24,14 @@
 %attr(0755,root,root) @prefix@/bin/envuidgid
 %attr(0755,root,root) @prefix@/bin/envdir
 
-%attr(0755,root,root) @prefix@/sbin/docker-entrypoint
-%attr(0755,root,root) @prefix@/sbin/minisvc
-%attr(0755,root,root) @prefix@/sbin/pgrphack
-%attr(0755,root,root) @prefix@/sbin/fghack
-%attr(0755,root,root) @prefix@/sbin/multilog
-%attr(0755,root,root) @prefix@/sbin/readproctitle
-%attr(0755,root,root) @prefix@/sbin/supervise
-%attr(0751,root,root) @prefix@/sbin/svscan
+%attr(0755,root,root) @prefix@/bin/docker-entrypoint
+%attr(0755,root,root) @prefix@/bin/minisvc
+%attr(0755,root,root) @prefix@/bin/pgrphack
+%attr(0755,root,root) @prefix@/bin/fghack
+%attr(0755,root,root) @prefix@/bin/multilog
+%attr(0755,root,root) @prefix@/bin/readproctitle
+%attr(0755,root,root) @prefix@/bin/supervise
+%attr(0751,root,root) @prefix@/bin/svscan
 
 %attr(0755,root,root) @libexecdir@/svscanboot
 

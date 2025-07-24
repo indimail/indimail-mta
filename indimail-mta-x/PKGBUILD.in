@@ -166,13 +166,10 @@ package_indimail-mta() {
   install=archpkg1.install
   provides=('indimail-mta')
   cd $srcdir/$pkgname-${pkgver}
-  sed -i 's|/sbin/|/bin/|g' SBIN.in
-  sed -i 's|/sbin/|/bin/|g' SBIN.sql
   sed -i '/\/sbin/d' DIRS.in
   ./qmake DESTDIR=${pkgdir} install
   ./installer -fc ${pkgdir}                          < DIRS
   ./installer -fc ${pkgdir}${_prefix}                < BIN
-  ./installer -fc ${pkgdir}${_prefix}                < SBIN
   ./installer -fc ${pkgdir}${_shareddir}             < SHARED
   ./installer -fc ${pkgdir}${_sysconfdir}            < ETC
   ./installer -fc ${pkgdir}${_prefix}"/lib/indimail" < PLUGINS

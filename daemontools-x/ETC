@@ -6,7 +6,6 @@
 f:root:root:0644:/perms.d/daemontools/:INPUT:INPUT
 f:root:root:0644:/perms.d/daemontools/:DIRS:DIRS
 f:root:root:0644:/perms.d/daemontools/:BIN:BIN
-f:root:root:0644:/perms.d/daemontools/:SBIN:SBIN
 f:root:root:0644:/perms.d/daemontools/:SHARED:SHARED
 f:root:root:0644:/perms.d/daemontools/:ETC:ETC
 f:root:root:0644:/perms.d/daemontools/:LIBEXEC:LIBEXEC

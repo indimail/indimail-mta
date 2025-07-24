@@ -845,14 +845,14 @@ auto_retries.h: conf-retries
 	auto_retries.h.tmp && mv auto_retries.h.tmp auto_retries.h
 
 auto_cleaner.c: auto-str conf-qmail
-	./auto-str auto_runcleaner "`head -1 conf-prefix`"/sbin/run-cleanq >> \
+	./auto-str auto_runcleaner "`head -1 conf-prefix`"/bin/run-cleanq >> \
 	auto_cleaner.c.tmp && mv auto_cleaner.c.tmp auto_cleaner.c
 
 auto_cleaner.o: compile auto_cleaner.c
 	./compile auto_cleaner.c
 
 auto_qstdin.c: auto-strarr conf-qmail
-	./auto-strarr auto_qstdin "`head -1 conf-prefix`"/sbin/qscanq-stdin > \
+	./auto-strarr auto_qstdin "`head -1 conf-prefix`"/bin/qscanq-stdin > \
 	auto_qstdin.c.tmp && mv auto_qstdin.c.tmp auto_qstdin.c
 
 auto_qstdin.o: compile auto_qstdin.c
@@ -2221,14 +2221,10 @@ conf-sysconfdir conf-shared
 	([ -f DIRS.$(SYSTEM) ] && \
 	$(edit) DIRS.in DIRS.$(SYSTEM) || $(edit) DIRS.in) > DIRS
 
-BIN: BIN.in
+BIN: BIN.in BIN.sql
 	([ -f BIN.$(SYSTEM) ] && \
-	$(edit) BIN.in BIN.$(SYSTEM) || $(edit) BIN.in) > BIN
-
-SBIN: SBIN.in SBIN.sql
-	([ -f SBIN.$(SYSTEM) ] && \
-	$(edit) SBIN.in SBIN.$(SYSTEM) || $(edit) SBIN.in; \
-	[ -n "$(USE_SQL)" ] && $(edit) SBIN.sql) > SBIN
+	$(edit) BIN.in BIN.$(SYSTEM) || $(edit) BIN.in; \
+	[ -n "$(USE_SQL)" ] && $(edit) BIN.sql) > BIN
 
 SHARED: SHARED.in doc/INSTALL-MINI
 	([ -f SHARED.$(SYSTEM) ] && \
@@ -2241,10 +2237,9 @@ MAN: MAN.in MAN.sql
 
 
 install: \
-$(it) $(man) installer DIRS BIN SBIN SHARED MAN INPUT
+$(it) $(man) installer DIRS BIN SHARED MAN INPUT
 	./installer $(DESTDIR)                         < DIRS
 	./installer $(DESTDIR)$(prefix)                < BIN
-	./installer $(DESTDIR)$(prefix)                < SBIN
 	./installer $(DESTDIR)$(shareddir)             < SHARED
 	./installer $(DESTDIR)$(qsysconfdir)           < ETC
 	./installer $(DESTDIR)$(prefix)"/lib/indimail" < PLUGINS
@@ -2252,9 +2247,9 @@ $(it) $(man) installer DIRS BIN SBIN SHARED MAN INPUT
 	./installer $(DESTDIR)$(mandir)                < MAN
 	[ -z $(DESTDIR) ] && ./instcheck indimail-mta || true
 
-uninstall: installer DIRS BIN SBIN SHARED MAN
+uninstall: installer DIRS BIN SHARED MAN
 	# reverse the order with which we did install (LIFO). i.e.
-	# MAN, LIBEXEC, PLUGINS, ETC, SHARED, SBIN, BIN, DIRS
+	# MAN, LIBEXEC, PLUGINS, ETC, SHARED, BIN, DIRS
 	# reverse order of input files using sed so that
 	# we don't leave non-empty directories
 	sed -n '1!G;h;$$p' MAN     | ./installer -u $(DESTDIR)$(mandir)
@@ -2262,7 +2257,6 @@ uninstall: installer DIRS BIN SBIN SHARED MAN
 	sed -n '1!G;h;$$p' PLUGINS | ./installer -u $(DESTDIR)$(prefix)"/lib/indimail"
 	sed -n '1!G;h;$$p' ETC     | ./installer -u $(DESTDIR)$(qsysconfdir)
 	sed -n '1!G;h;$$p' SHARED  | ./installer -u $(DESTDIR)$(shareddir)
-	sed -n '1!G;h;$$p' SBIN    | ./installer -u $(DESTDIR)$(prefix)
 	sed -n '1!G;h;$$p' BIN     | ./installer -u $(DESTDIR)$(prefix)
 	sed -n '1!G;h;$$p' DIRS    | ./installer -u $(DESTDIR)
 
