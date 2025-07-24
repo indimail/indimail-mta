@@ -1,5 +1,5 @@
 /*
- * $Id: smtpd.c,v 1.331 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.332 2025-07-24 10:29:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -160,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.331 $";
+static c_char  *revision = "$Revision: 1.332 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -771,9 +771,12 @@ die_lcmd(int i)
 }
 
 no_return void
-die_regex()
+die_regex(const char *arg)
 {
-	logerr(1, "regex compilation failed\n", NULL);
+	if (arg)
+		logerr(1, "regex compilation failed [", arg, "]\n", NULL);
+	else
+		logerr(1, "regex compilation failed\n", NULL);
 	logflush();
 	out("451 Sorry, regex compilation failed (#4.3.0)\r\n", NULL);
 	flush();
@@ -2397,7 +2400,7 @@ badhostcheck()
 				!stralloc_0(&curregex))
 			die_nomem();
 		if ((x = do_match(qregex, remotehost, curregex.s, NULL)) == -1)
-			die_regex();
+			die_regex("do_match failed");
 		if (negate)
 			x = !x;
 		if (x)
@@ -7525,6 +7528,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.332  2025-07-24 10:29:14+05:30  Cprogrammer
+ * fixed function prototype for die_regex() used in mail_acl.c
+ *
  * Revision 1.331  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *
@@ -7978,7 +7984,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.331 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.332 2025-07-24 10:29:14+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
